@@ -41,8 +41,6 @@ char *StringUpper(const char *name);
 char *StringPrintf(const char *str, ...); // GCCATTR((format (printf, 1, 2)));
 void StringFree(const char *str);
 
-bool FileExists(const char *filename);
-
 void check_types ();
 
 unsigned int TimeGetMillies();

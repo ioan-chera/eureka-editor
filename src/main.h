@@ -84,6 +84,7 @@ typedef int  SelPtr;   // TEMPORARY FIXME
 #include "m_select.h"
 
 #include "lib_util.h"
+#include "lib_file.h"
 #include "ymemory.h"
 
 

@@ -237,23 +237,6 @@ void StringFree(const char *str)
 }
 
 
-/*
- *  Check whether a file exists and is readable.
- *  Returns true if it is, false if it isn't.
- */
-bool FileExists(const char *filename)
-{
-	FILE *test = fopen(filename, "rb");
-
-	if (! test)
-		return false;
-	
-	fclose(test);
-
-	return true;
-}
-
-
 unsigned int TimeGetMillies()
 {
 	// Note: you *MUST* handle overflow (it *WILL* happen)
