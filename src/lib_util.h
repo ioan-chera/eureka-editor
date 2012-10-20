@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2012 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -24,8 +24,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_YUTIL_H__
-#define __EUREKA_YUTIL_H__
+#ifndef __EUREKA_LIB_UTIL_H__
+#define __EUREKA_LIB_UTIL_H__
 
 
 int is_absolute (const char *filename);
@@ -34,6 +34,12 @@ int y_strnicmp (const char *s1, const char *s2, size_t len);
 int y_snprintf (char *buf, size_t size, const char *fmt, ...);
 int y_vsnprintf (char *buf, size_t size, const char *fmt, va_list args);
 void y_strupr (char *string);
+
+char *StringNew(int length);
+char *StringDup(const char *orig, int limit = -1);
+char *StringUpper(const char *name);
+char *StringPrintf(const char *str, ...); // GCCATTR((format (printf, 1, 2)));
+void StringFree(const char *str);
 
 bool FileExists(const char *filename);
 

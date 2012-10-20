@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2012 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -154,6 +154,87 @@ void y_strupr (char *string)
 	}
 }
 
+
+char *StringNew(int length)
+{
+  // length does not include the trailing NUL.
+  
+  char *s = (char *) calloc(length + 1, 1);
+
+  if (! s)
+    FatalError("Out of memory (%d bytes for string)\n", length);
+
+  return s;
+}
+
+char *StringDup(const char *orig, int limit)
+{
+  if (limit < 0)
+  {
+    char *s = strdup(orig);
+
+    if (! s)
+      FatalError("Out of memory (copy string)\n");
+
+    return s;
+  }
+
+  char * s = StringNew(limit+1);
+  strncpy(s, orig, limit);
+  s[limit] = 0;
+
+  return s;
+}
+
+char *StringUpper(const char *name)
+{
+  char *copy = StringDup(name);
+
+  for (char *p = copy; *p; p++)
+    *p = toupper(*p);
+
+  return copy;
+}
+
+char *StringPrintf(const char *str, ...)
+{
+  /* Algorithm: keep doubling the allocated buffer size
+   * until the output fits. Based on code by Darren Salt.
+   */
+  char *buf = NULL;
+  int buf_size = 128;
+  
+  for (;;)
+  {
+    va_list args;
+    int out_len;
+
+    buf_size *= 2;
+
+    buf = (char*)realloc(buf, buf_size);
+    if (!buf)
+      FatalError("Out of memory (formatting string)");
+
+    va_start(args, str);
+    out_len = vsnprintf(buf, buf_size, str, args);
+    va_end(args);
+
+    // old versions of vsnprintf() simply return -1 when
+    // the output doesn't fit.
+    if (out_len < 0 || out_len >= buf_size)
+      continue;
+
+    return buf;
+  }
+}
+
+void StringFree(const char *str)
+{
+  if (str)
+  {
+    free((void*) str);
+  }
+}
 
 
 /*
