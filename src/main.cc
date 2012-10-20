@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
 	if (config_file != NULL)
 		r = parse_config_file_user (config_file);
 	else
-		r = parse_config_file_default ();
+		r = 0; //???  parse_config_file_default ();
 
 	if (r == 0)
 	{
@@ -438,8 +438,10 @@ int main(int argc, char *argv[])
 			r = parse_command_line_options (argc - 1, argv + 1, 2);
 		}
 	}
+
 	if (r != 0)
 	{
+		fprintf (stderr, "Error parsing config or cmd-line options.\n");
 		exit (1);
 	}
 
