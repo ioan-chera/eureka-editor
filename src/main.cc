@@ -184,66 +184,79 @@ void BugError(const char *fmt, ...)
 
 static void Determine_HomeDir(const char *argv0)
 {
-// TODO: --home xxx
+	// TODO: --home xxx
 
 #ifdef WIN32
-  home_dir = GetExecutablePath(argv0);
+	home_dir = GetExecutablePath(argv0);
 
 #else
-  char *path = StringNew(FL_PATH_MAX + 4);
+	char * path = StringNew(FL_PATH_MAX + 4);
 
-  if (fl_filename_expand(path, "$HOME/.eureka") == 0)
-    FatalError("Unable to find home directory!\n");
+	if (fl_filename_expand(path, "$HOME/.eureka") == 0)
+		FatalError("Unable to find home directory!\n");
 
-  home_dir = path;
+	home_dir = path;
 
-  // try to create it (doesn't matter if it already exists)
-  FileMakeDir(home_dir);
+	// try to create it (doesn't matter if it already exists)
+	FileMakeDir(home_dir);
 #endif
 
-///---  if (! home_dir)
-///---    home_dir = StringDup(".");
+	///---  if (! home_dir)
+	///---    home_dir = StringDup(".");
+
+#if 1  // DEBUG
+    fprintf(stderr, "Home dir: [%s]\n", home_dir ? home_dir : "NOT SET");
+#endif
 }
 
 
 static void Determine_InstallPath(const char *argv0)
 {
-// TODO: --install xxx
+	// TODO: --install xxx
 
 #ifdef WIN32
-  install_dir = StringDup(home_dir);
+	// FIXME : home_dir can be NULL
+
+	install_dir = StringDup(home_dir);
 
 #else
-  static const char *prefixes[] =
-  {
-    "/usr/local", "/usr", "/opt", NULL
-  };
+	static const char *prefixes[] =
+	{
+		"/usr/local",
+		"/usr",
+		"/opt",
+		NULL
+	};
 
-  for (int i = 0 ; prefixes[i] ; i++)
-  {
-    install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
+	for (int i = 0 ; prefixes[i] ; i++)
+	{
+		install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
 
-    const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir);
+		const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir);
+
+#if 0  // DEBUG
+		fprintf(stderr, "Trying install path: [%s]\n", install_dir);
+		fprintf(stderr, "   looking for file: [%s]\n\n", filename);
+#endif
+
+		bool exists = FileExists(filename);
+
+		StringFree(filename);
+
+		if (exists)
+			break;
+
+		StringFree(install_dir);
+		install_dir = NULL;
+	}
+#endif
+
+	if (! install_dir)
+		FatalError("Unable to find install directory!\n");
 
 #if 1  // DEBUG
-    fprintf(stderr, "Trying install path: [%s]\n", install_dir);
-    fprintf(stderr, "  using file: [%s]\n\n", filename);
+	fprintf(stderr, "Install dir: [%s]\n", install_dir);
 #endif
-
-    bool exists = FileExists(filename);
-
-    StringFree(filename);
-
-    if (exists)
-      return;
-
-    StringFree(install_dir);
-    install_dir = NULL;
-  }
-#endif
-
-  if (! install_dir)
-    FatalError("Unable to find install directory!\n");
 }
 
 
