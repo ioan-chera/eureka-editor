@@ -7,8 +7,6 @@ PROGRAM=eureka
 # prefix choices: /usr  /usr/local  /opt
 INSTALL_PREFIX=/usr/local
 
-FLTK_PREFIX=/opt
-
 OBJ_DIR=obj_linux
 
 OPTIMISE=-O0 -g3
@@ -22,11 +20,9 @@ OS=UNIX
 INSTALL_DIR=$(INSTALL_PREFIX)/share/eureka
 
 CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
-         -I$(FLTK_PREFIX)/include  \
          -D_THREAD_SAFE -D_REENTRANT
 
-LDFLAGS=-L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib  \
-        -L/usr/X11R6/lib
+LDFLAGS=-L/usr/X11R6/lib
 
 LIBS=-lm -lz  \
      -lfltk_images -lfltk_gl -lfltk  \
