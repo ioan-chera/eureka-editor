@@ -1,0 +1,256 @@
+#------------------------------------------------------------------------
+#  DOOM 1/2 line and sector specials
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+#
+#	Definition of linedef groups
+#	Format is : linegroup <letter> <description>
+#
+#	<description> should not exceed 24 characters
+#
+
+linegroup a "Animated"
+linegroup c "Ceiling"
+linegroup d "Door"
+linegroup e "Exit level"
+linegroup f "Floor (lower)"
+linegroup h "Crusher"
+linegroup k "Keyed Door"
+linegroup l "Light"
+linegroup m "Moving floor"
+linegroup p "Lift"
+linegroup r "Floor (raise)"
+linegroup s "Stairs"
+linegroup t "Teleport"
+linegroup v "Elevator"
+linegroup - "OTHER"
+
+#
+#	Definition of linedef types
+#	Format is : line <number> <group> <description>
+#
+#	<desc> should not exceed 24 characters.
+#
+
+line   0 - "-- NOTHING"
+line   9 - "S1 Donut (raise outer, lower inner)"
+line  78 - "SR Floor Transfer /NXP"
+line  48 a "-- Scroll Wall Left"
+
+line   6 h "W1 Crusher /fast"
+line  25 h "W1 Crusher /slow"
+line  57 h "W1& Stop crusher"
+line  73 h "WR& Crusher /slow"
+line  77 h "WR& Crusher"
+line  74 h "WR& Stop crusher"
+line 141 h "W1& Crusher /silent"
+
+line  24 r "G1 Floor up LIC"
+line  47 r "G1 Floor up nhEF /TX"
+line 101 r "S1 Floor up LIC"
+line  55 r "S1 Floor up LIC-8 /cr"
+line  18 r "S1 Floor up nhEF"
+line  15 r "S1& Floor up 24 /TX"
+line  14 r "S1& Floor up 32 /TX"
+line  20 r "S1& Floor up nhEF /TX"
+line  64 r "SR Floor up LIC"
+line  65 r "SR Floor up LIC-8 /cr"
+line  69 r "SR Floor up nhEF"
+line  66 r "SR& Floor up 24 /TX"
+line  67 r "SR& Floor up 32 /TX"
+line  59 r "W1 Floor up 24 /TXP"
+line  58 r "W1 Floor up 24"
+line   5 r "W1 Floor up LIC"
+line  30 r "W1 Floor up lowest tex"
+line  56 r "W1& Floor up LIC-8 /cr"
+line  22 r "W1& Floor up nhEF /TX"
+line  93 r "WR Floor up 24 /TXP"
+line  92 r "WR Floor up 24"
+line  91 r "WR Floor up LIC"
+line  94 r "WR Floor up LIC-8 /cr"
+line  96 r "WR Floor up lowest tex"
+line  95 r "WR Floor up nhEF /TX"
+line 119 r "W1 Floor up nhEF"
+line 128 r "WR Floor up nhEF"
+line 129 r "WR Floor UP nhEF /fast"
+line 130 r "W1 Floor UP nhEF /fast"
+line 131 r "S1 Floor UP nhEF /fast"
+line 132 r "SR Floor UP nhEF /fast"
+line 140 r "S1 Floor up 512"
+
+line  13 l "W1 Light to 255"
+line  35 l "W1 Light to 35"
+line  12 l "W1 Light to highest nb"
+line 104 l "W1 Light to lowest nb"
+line  17 l "W1 Start Blinking"
+line  81 l "WR Light to 255"
+line  79 l "WR Light to 35"
+line  80 l "WR Light to highest nb"
+line 138 l "SR Light to 255"
+line 139 l "SR Light to 0"
+
+line  49 c "S1 Ceiling close flr+8"
+line  41 c "S1 Ceiling close"
+line  43 c "SR Ceiling close"
+line  44 c "W1 Ceiling close flr+8"
+line  40 c "W1 Ceiling up HEC"
+line  72 c "WR Ceiling close flr+8"
+
+line  31 d "D1 Open and stay open"
+line   1 d "DR Open door"
+line  46 d "GR Open and stay"
+line  50 d "S1 Close door"
+line 103 d "S1 Open and stay"
+line  29 d "S1 Open door"
+line  42 d "SR Close door"
+line  61 d "SR Open and stay"
+line  63 d "SR Open door"
+line   3 d "W1 Close door"
+line  16 d "W1 Close for 30s"
+line   2 d "W1 Open and stay open"
+line   4 d "W1 Open door"
+line  75 d "WR Close door"
+line  76 d "WR Close for 30s"
+line  86 d "WR Open and stay"
+line  90 d "WR Open door"
+
+line 105 d "WR Open door /fast"
+line 106 d "WR Open and stay /fast"
+line 107 d "WR Close door /fast"
+line 108 d "W1 Open door /fast"
+line 109 d "W1 Open and stay /fast"
+line 110 d "W1 Close door /fast"
+line 111 d "S1 Open door /fast"
+line 112 d "S1 Open and stay /fast"
+line 113 d "S1 Close door /fast"
+line 114 d "SR Open door /fast"
+line 115 d "SR Open and stay /fast"
+line 116 d "SR Close door /fast"
+line 117 d "DR Open door /fast"
+line 118 d "D1 Open and stay /fast"
+
+line  26 k "DR Open blue door"
+line  27 k "DR Open yellow door"
+line  28 k "DR Open red door"
+line  32 k "D1 Open blue door (stay)"
+line  33 k "D1 Open red door (stay)"
+line  34 k "D1 Open yellow door (stay)"
+line  99 k "SR Open blue door /fast"
+line 133 k "S1 Open blue door /fast"
+line 134 k "SR Open red door /fast"
+line 135 k "S1 Open red door /fast"
+line 136 k "SR Open yellow door /fast"
+line 137 k "S1 Open yellow door /fast"
+
+line  11 e "S1 Exit level"
+line  51 e "S1 Secret exit"
+line  52 e "W1 Exit level"
+
+line 102 f "S1 Floor down HEF"
+line  71 f "S1 Floor down HEF+8 /fast"
+line  23 f "S1 Floor down LEF"
+line  45 f "SR Floor down HEF"
+line  70 f "SR Floor down HEF+8 /fast"
+line  60 f "SR Floor down LEF"
+line  68 f "SR& Floor up nhEF /TX"
+line  19 f "W1 Floor down HEF"
+line  36 f "W1 Floor down HEF+8"
+line  37 f "W1 Floor down LEF /NXP"
+line  38 f "W1 Floor down LEF"
+line  98 f "WR Floor dn HEF+8 /fast"
+line  83 f "WR Floor down HEF"
+line  84 f "WR Floor down LEF /NXP"
+line  82 f "WR Floor down LEF"
+
+line  21 p "S1 Lower Lift"
+line  62 p "SR Lower Lift"
+line  10 p "W1 Lower Lift"
+line  88 p "WR Lower Lift"
+line 120 p "WR Lower Lift /fast"
+line 121 p "W1 Lower Lift /fast"
+line 122 p "S1 Lower Lift /fast"
+line 123 p "SR Lower Lift /fast"
+
+line  53 m "W1 Start moving floor"
+line  54 m "W1 Stop moving floor"
+line  87 m "WR& Start moving floor"
+line  89 m "WR& Stop moving floor"
+
+line   7 s "S1 Stair Raise 8"
+line 100 s "W1 Stair Raise 16"
+line   8 s "W1 Stair Raise 8"
+
+line  39 t "W1 Teleport"
+line  97 t "WR Teleport"
+
+line 124 e "W1 Secret Exit"
+line 125 t "W1 Teleport /mon"
+line 126 t "WR Teleport /mon"
+line 127 s "S1 Stair Raise 16"
+
+
+# TODO: ports/xdoom.ugh
+#
+#line 300 d "SR Sliding door"  "SR  Sliding door [XDoom]"
+#line 320 - "-- Laser barrier" "--  Laser barrier [XDoom]"
+#line 321 - "SR Laser off mom" "SR  Switch laser barrier off momentarily [XDoom]"
+#line 322 - "G1 Laser off per" "G1  Switch laser barrier off permanently [XDoom]"
+#line 330 - "WR Trigger messg" "WR  Trigger communication device message [XDoom]"
+#line 331 - "W1 Trigger messg" "W1  Trigger communication device message [XDoom]"
+#line 332 - "S1 Activate tele" "S1  Activate teleporter with message [XDoom]"
+#line 333 - "S1 Deact. laser"  "S1  Deactivate laser with message [XDoom]"
+#line 334 - "M1 Trigger messg" "M1  Trigger communication device message [XDoom]"
+#line 350 d "W1 Silent door O" "W1  Open silent door by player (stays open) [XDoom]"
+#line 351 d "S1 Silent door O" "S1  Open silent door by player (stays open) [XDoom]"
+#line 352 d "M1 Silent door O" "M1  Open silent door by monster (stays open) [XDoom]"
+
+
+#------------------------------------------------------------------------
+
+
+#
+#	Definition of sector types
+#	Format is : sector <number> <description>
+#
+#	<description> should not exceed 24 characters.
+#
+
+sector  0 "NOTHING"
+sector  1 "Light Blinks Randomly"
+sector  2 "Light Flashes 2 Hz"
+sector  3 "Light Flashes 1 Hz"
+sector  4 "Flashes / 20% Damage"
+sector  5 "Damage 10%"
+sector  7 "Damage 5%"
+sector  8 "Light Oscillates"
+sector  9 "Secret Area"
+sector 10 "Close after 30 sec"
+sector 11 "End level / damage"
+sector 12 "Flashes 1 Hz sync"
+sector 13 "Flashes 2 Hz sync"
+sector 14 "Open after 5 minute"
+sector 16 "Damage 20%"
+sector 17 "Light Flickering"
+

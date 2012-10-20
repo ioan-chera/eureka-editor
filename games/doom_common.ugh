@@ -1,0 +1,546 @@
+#------------------------------------------------------------------------
+#  DOOM 1/2 common definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+sky_flat  F_SKY1
+sky_color   207
+
+default_textures  STARTAN3  FLOOR4_8  CEIL3_5
+
+# 2001 = health bonus
+default_thing  2001
+
+
+#
+#	Definition of thing groups
+#	Format is : thinggroup <letter> <colour> <description>
+#
+
+thinggroup p 4F4 "Player"
+thinggroup m F00 "Monster"
+thinggroup w FA0 "Weapon"
+thinggroup a 850 "Ammunition"
+thinggroup h 280 "Health, Armor"
+thinggroup b 280 "Bonus"
+thinggroup k F0F "Key"
+thinggroup d 66C "Decoration"
+thinggroup l 66C "Light Source"
+thinggroup g 66C "Gore"
+thinggroup - 0BD "OTHER"
+
+#
+#	Definition of things
+#	Format is : thing <number> <group> <flags> <radius> <sprite> <desc>
+#
+#	<desc> should not exceed 24 characters.
+#	<sprite> should be NULL for things without any sprite
+#
+# <flags> can contain these letters:
+#    i  :  invisible
+#    c  :  on ceiling
+#    l  :  lit up
+#
+
+thing    1 p -  16 PLAY   "Player 1 start"
+thing    2 p -  16 PLAY   "Player 2 start"
+thing    3 p -  16 PLAY   "Player 3 start"
+thing    4 p -  16 PLAY   "Player 4 start"
+thing  888 p -  12 DOGS   "Dog (MBF)"
+thing   11 p -  16 PLAYF1 "Deathmatch start"
+thing   14 p -  16 TFOG   "Teleport exit"
+
+thing 2005 w -  20 CSAW   "Chainsaw"
+thing 2001 w -  20 SHOT   "Shotgun"
+thing 2002 w -  20 MGUN   "Chaingun"
+thing 2003 w -  20 LAUN   "Rocket launcher"
+thing 2004 w -  20 PLAS   "Plasma gun"
+thing 2006 w -  20 BFUG   "BFG9000"
+
+thing 2007 a -  20 CLIP   "Clip"
+thing 2048 a -  20 AMMO   "Box of bullets"
+thing 2008 a -  20 SHEL   "Shells"
+thing 2049 a -  20 SBOX   "Box of shells"
+thing 2010 a -  20 ROCK   "Rocket"
+thing 2046 a -  20 BROK   "Box of rockets"
+thing 2047 a -  20 CELL   "Energy cell"
+thing   17 a -  20 CELP   "Box of energy cells"
+
+thing    8 b -  20 BPAK   "Backpack of ammo"
+thing 2022 b l  20 PINV   "Invulnerability"
+thing 2023 b l  20 PSTR   "Berserk"
+thing 2024 b l  20 PINS   "Partial invisibility"
+thing 2025 b l  20 SUIT   "Radiation suit"
+thing 2026 b -  20 PMAP   "Computer map"
+thing 2045 b l  20 PVIS   "Light amp. goggles"
+
+thing 2011 h -  20 STIM   "Stimpack"
+thing 2012 h -  20 MEDI   "Medikit"
+thing 2013 h l  20 SOUL   "Supercharge"
+thing 2014 h -  20 BON1   "Health bonus"
+thing 2015 h -  20 BON2   "Armor bonus"
+thing 2018 h l  20 ARM1   "Green Armor"
+thing 2019 h l  20 ARM2   "Blue Armor"
+
+thing    5 k l  20 BKEY   "Blue keycard"
+thing    6 k l  20 YKEY   "Yellow keycard"
+thing   13 k l  20 RKEY   "Red keycard"
+thing   40 k l  20 BSKU   "Blue skull key"
+thing   39 k l  20 YSKU   "Yellow skull key"
+thing   38 k l  20 RSKU   "Red skull key"
+
+thing   15 g -  16 PLAYN  "Dead player (green)"
+thing   18 g -  20 POSSL  "Dead trooper"
+thing   19 g -  20 SPOSL  "Dead sergeant"
+thing   20 g -  20 TROOM  "Dead imp"
+thing   21 g -  16 SARGN  "Dead demon"
+thing   22 g -  16 HEADL  "Dead cacodemon"
+thing   23 g -  16 SKULK  "Dead lost soul"
+
+thing 2035 d -  10 BAR1   "Barrel"
+thing   72 d c  16 KEEN   "Commander Keen"
+thing   48 d -  16 ELEC   "Technical column"
+thing   30 d -  16 COL1   "Tall green pillar"
+thing   32 d -  16 COL3   "Tall red pillar"
+thing   31 d -  16 COL2   "Short green pillar"
+thing   33 d -  16 COL4   "Short red pillar"
+thing   36 d -  16 COL5   "Pillar w/heart"
+thing   37 d -  16 COL6   "Red pillar w/skull"
+thing   41 d l  16 CEYE   "Evil eye"
+thing   42 g l  16 FSKU   "Floating skulls"
+thing   47 d -  16 SMIT   "Brown stub"
+thing   54 d -  32 TRE2   "Brown tree"
+thing   43 d -  16 TRE1   "Grey tree"
+
+thing   10 g -  16 PLAYW  "Mushed player"
+thing   12 g -  16 PLAYW  "Mushed player 2"
+thing   24 g -  16 POL5   "Pool of blood"
+thing   27 g -  16 POL4   "Pole with skull"
+thing   28 g -  16 POL2   "Skewer with heads"
+thing   29 g l  16 POL3   "Pile of skulls"
+thing   25 g -  16 POL1   "Impaled body"
+thing   26 g -  16 POL6   "Impaled twitching"
+
+thing   49 g c  16 GOR1   "Swaying body O"
+thing   63 g c  16 GOR1   "Swaying body"
+thing   50 g c  16 GOR2   "Hanging arms out O"
+thing   59 g c  16 GOR2   "Hanging arms out"
+thing   53 g c  16 GOR5   "Hanging leg O"
+thing   62 g c  16 GOR5   "Hanging leg"
+thing   51 g c  16 GOR3   "Hanging one-legged O"
+thing   61 g c  16 GOR3   "Hanging one-legged"
+thing   52 g c  16 GOR4   "Hanging torso O"
+thing   60 g c  16 GOR4   "Hanging torso"
+
+thing 2028 l l  16 COLU   "Lamp"
+thing   34 l l  16 CAND   "Candle"
+thing   35 l l  16 CBRA   "Candelabra"
+thing   44 l l  16 TBLU   "Tall blue torch"
+thing   45 l l  16 TGRN   "Tall green torch"
+thing   46 l l  16 TRED   "Tall red torch"
+thing   55 l l  16 SMBT   "Short blue torch"
+thing   56 l l  16 SMGT   "Short green torch"
+thing   57 l l  16 SMRT   "Short red torch"
+thing   70 l l  16 FCAN   "Burning barrel"
+
+thing 3004 m -  20 POSS   "Trooper"
+thing    9 m -  20 SPOS   "Sergeant"
+thing 3001 m -  20 TROO   "Imp"
+thing 3002 m -  30 SARG   "Demon"
+thing 3003 m -  24 BOSS   "Baron of Hell"
+thing   58 m i  30 SARG   "Spectre"
+thing 3006 m l  16 SKUL   "Lost soul"
+thing 3005 m -  31 HEAD   "Cacodemon"
+thing    7 m - 128 SPID   "Spider Mastermind"
+thing   16 m -  40 CYBR   "Cyberdemon"
+
+
+#---- COMMON TEXTURES ----------------
+
+## FIXME: separate out the DOOM 2 specific ones
+
+texturegroup h "Hell"
+texturegroup n "Natural"
+texturegroup t "Tech"
+texturegroup u "Urban"
+texturegroup - "OTHER"
+
+texture u STONE2
+texture u STONE3
+texture u SW1BRIK
+texture u SW1STON1
+texture u CEMENT1
+texture u CEMENT2
+texture u CEMENT3
+texture u CEMENT4
+texture u CEMENT5
+texture u CEMENT6
+texture u SW1CMT
+
+texture h BLODRIP1
+texture h BLODRIP2
+texture h BLODRIP3
+texture h BLODRIP4
+texture h DOORBLU2
+texture h DOORRED2
+texture h DOORYEL2
+texture h FIREBLU1
+texture h FIREBLU2
+texture h FIRELAV2
+texture h FIRELAV3
+texture h FIRELAVA
+texture h FIREMAG1
+texture h FIREMAG2
+texture h FIREMAG3
+texture h FIREWALA
+texture h FIREWALB
+texture h FIREWALL
+texture h PIPE1
+texture h REDWALL
+texture h SK_LEFT
+texture h SK_RIGHT
+texture h SKIN2
+texture h SKINCUT
+texture h SKINEDGE
+texture h SKINFACE
+texture h SKINLOW
+texture h SKINMET1
+texture h SKINMET2
+texture h SKINSCAB
+texture h SKINSYMB
+texture h SKSNAKE1
+texture h SKSNAKE2
+texture h SKSPINE1
+texture h SKSPINE2
+texture h SLOPPY1
+texture h SLOPPY2
+texture h SP_FACE1
+texture h SP_FACE2
+texture h SP_HOT1
+texture h SW1HOT
+texture h SW1SKIN
+texture h SW1SKULL
+texture h ZZZFACE1
+texture h ZZZFACE2
+texture h ZZZFACE3
+texture h ZZZFACE4
+texture h ZZZFACE5
+texture h ZZZFACE6
+texture h ZZZFACE7
+texture h ZZZFACE8
+texture h ZZZFACE9
+
+texture h GSTFONT1
+texture h GSTFONT2
+texture h GSTFONT3
+texture h GSTGARG
+texture h GSTLION
+texture h GSTONE1
+texture h GSTONE2
+texture h GSTSATYR
+texture h GSTVINE1
+texture h GSTVINE2
+texture h MARBFAC2
+texture h MARBFAC3
+texture h MARBFACE
+texture h MARBLE1
+texture h MARBLE2
+texture h MARBLE3
+texture h MARBLOD1
+texture h SP_DUDE1
+texture h SP_DUDE2
+texture h SP_DUDE4
+texture h SP_DUDE5
+texture h SW1GSTON
+texture h SW1MARB
+
+texture t BIGDOOR2
+texture t BIGDOOR3
+texture t BIGDOOR4
+texture t BRNPOIS
+texture t BRNSMAL1
+texture t BRNSMAL2
+texture t BRNSMALC
+texture t BRNSMALL
+texture t BRNSMALR
+texture t BROVINE2
+texture t BROWN1
+texture t BROWN144
+texture t BROWN96
+texture t BROWNGRN
+texture t BROWNHUG
+texture t BROWNPIP
+texture t CRATE1
+texture t CRATE2
+texture t CRATELIT
+texture t CRATINY
+texture t CRATWIDE
+texture t DOORBLU
+texture t DOORRED
+texture t DOORSTOP
+texture t DOORTRAK
+texture t DOORYEL
+texture t EXITDOOR
+texture t EXITSIGN
+texture t EXITSTON
+texture t GRAY1
+texture t GRAY2
+texture t GRAY4
+texture t GRAY5
+texture t GRAY7
+texture t GRAYBIG
+texture t GRAYPOIS
+texture t GRAYTALL
+texture t GRAYVINE
+texture t ICKWALL1
+texture t ICKWALL2
+texture t ICKWALL3
+texture t ICKWALL4
+texture t ICKWALL5
+texture t ICKWALL7
+texture t NUKE24
+texture t NUKEDGE1
+texture t NUKEPOIS
+texture t PIPE2
+texture t PIPE4
+texture t PIPE6
+texture t PLAT1
+texture t SLADPOIS
+texture t SLADSKUL
+texture t SLADWALL
+texture t STEP2
+texture t STEP3
+texture t STEP4
+texture t STEPTOP
+texture t SUPPORT3
+texture t SW1BRCOM
+texture t SW1BRN1
+texture t SW1BRN2
+texture t SW1BRNGN
+texture t SW1BROWN
+texture t SW1DIRT
+texture t SW1EXIT
+texture t SW1GRAY
+texture t SW1GRAY1
+texture t SW1PIPE
+texture t SW1SLAD
+texture t SW1STARG
+texture t SW1STON2
+texture t SW1STONE
+texture t SW1VINE
+
+texture t METAL
+texture t METAL1
+texture t MIDBRN1
+texture t MIDGRATE
+texture t SW1GARG
+texture t SW1LION
+texture t SW1MET2
+texture t SW1METAL
+texture t SW1SATYR
+
+texture n ROCKRED1
+texture n ROCKRED2
+texture n ROCKRED3
+texture n SP_ROCK1
+texture n STONE
+texture n SW1ROCK
+texture n SW1STON6
+
+texture t BIGDOOR1
+texture t BLAKWAL1
+texture t BLAKWAL2
+texture t COMPBLUE
+texture t COMPSPAN
+texture t COMPSTA1
+texture t COMPSTA2
+texture t COMPTALL
+texture t COMPWERD
+texture t DOOR1
+texture t DOOR3
+texture t LITE3
+texture t LITE5
+texture t LITEBLU1
+texture t LITEBLU4
+texture t SHAWN1
+texture t SHAWN2
+texture t SHAWN3
+texture t STARBR2
+texture t STARG1
+texture t STARG2
+texture t STARG3
+texture t STARGR1
+texture t STARGR2
+texture t STARTAN2
+texture t STARTAN3
+texture t STEP1
+texture t STEP5
+texture t STEP6
+texture t STEPLAD1
+texture t SUPPORT2
+texture t SW1BLUE
+texture t SW1COMM
+texture t SW1COMP
+texture t SW1MOD1
+texture t SW1STRTN
+texture t SW1TEK
+texture t TEKBRON1
+texture t TEKBRON2
+texture t TEKGREN1
+texture t TEKGREN2
+texture t TEKGREN3
+texture t TEKGREN4
+texture t TEKGREN5
+texture t TEKLITE
+texture t TEKLITE2
+texture t TEKWALL1
+texture t TEKWALL4
+texture t TEKWALL6
+
+texture u BIGDOOR5
+texture u BIGDOOR6
+texture u BIGDOOR7
+texture u SW1WOOD
+texture u WOOD1
+texture u WOOD3
+texture u WOOD4
+texture u WOOD5
+texture u WOODGARG
+
+flat h BLOOD1
+flat h BLOOD2
+flat h BLOOD3
+
+flat u CEIL1_1
+flat t CEIL1_2
+flat t CEIL1_3
+flat t CEIL3_1
+flat t CEIL3_2
+flat t CEIL3_3
+flat t CEIL3_4
+flat t CEIL3_5
+flat t CEIL3_6
+flat t CEIL4_1
+flat t CEIL4_2
+flat t CEIL4_3
+flat t CEIL5_1
+flat t CEIL5_2
+flat t COMP01
+flat t CONS1_1
+flat t CONS1_5
+flat t CONS1_7
+flat t CRATOP1
+flat t CRATOP2
+flat h DEM1_1
+flat h DEM1_2
+flat h DEM1_3
+flat h DEM1_4
+flat h DEM1_5
+flat h DEM1_6
+
+flat t FLAT1
+flat n FLAT10
+flat u FLAT1_1
+flat u FLAT1_2
+flat u FLAT1_3
+flat t FLAT14
+flat t FLAT17
+flat t FLAT18
+flat t FLAT19
+flat t FLAT2
+flat t FLAT20
+flat t FLAT22
+flat t FLAT23
+flat t FLAT3
+flat t FLAT4
+flat t FLAT5
+flat u FLAT5_1
+flat u FLAT5_2
+flat h FLAT5_3
+flat u FLAT5_4
+flat u FLAT5_5
+flat h FLAT5_6
+flat n FLAT5_7
+flat n FLAT5_8
+flat u FLAT8
+flat t FLAT9
+
+flat t FLOOR0_1
+flat t FLOOR0_2
+flat t FLOOR0_3
+flat t FLOOR0_5
+flat t FLOOR0_6
+flat t FLOOR0_7
+flat t FLOOR1_1
+flat t FLOOR1_6
+flat t FLOOR1_7
+flat t FLOOR3_3
+flat t FLOOR4_1
+flat t FLOOR4_5
+flat t FLOOR4_6
+flat t FLOOR4_8
+flat t FLOOR5_1
+flat t FLOOR5_2
+flat t FLOOR5_3
+flat u FLOOR5_4
+flat h FLOOR6_1
+flat n FLOOR6_2
+flat t FLOOR7_1
+flat h FLOOR7_2
+
+flat n FWATER1
+flat n FWATER2
+flat n FWATER3
+flat n FWATER4
+flat t GATE1
+flat t GATE2
+flat t GATE3
+flat t GATE4
+flat h LAVA1
+flat h LAVA2
+flat h LAVA3
+flat h LAVA4
+flat u MFLR8_1
+flat n MFLR8_2
+flat n MFLR8_3
+flat n MFLR8_4
+
+flat t NUKAGE1
+flat t NUKAGE2
+flat t NUKAGE3
+
+
+flat h SFLR6_1
+flat h SFLR6_4
+flat h SFLR7_1
+flat h SFLR7_4
+
+
+flat t STEP1
+flat t STEP2
+flat t TLITE6_1
+flat t TLITE6_4
+flat t TLITE6_5
+flat t TLITE6_6
+

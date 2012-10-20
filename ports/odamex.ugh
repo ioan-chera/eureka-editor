@@ -1,0 +1,77 @@
+#------------------------------------------------------------------------
+#  ODAMEX definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+include "boom"
+
+
+#---- ODAMEX THINGS ----------
+
+thing 5080 p -  16 PLAYF1  "ODAMEX: Blue start"
+thing 5081 p -  16 PLAYF1  "ODAMEX: Red start"
+
+thing 5130 k -  16 BFLG   "ODAMEX: Blue flag"
+thing 5131 k -  16 RFLG   "ODAMEX: Red flag"
+
+thing 9046 - -  16 NULL   "ODAMEX: Secret"
+thing 9045 - -  16 NULL   "ODAMEX: Water zone"
+
+thing 9026 d -  16 NULL   "ODAMEX: Sparks"
+thing 9027 d -  16 NULL   "ODAMEX: Fountain 1"
+thing 9028 d -  16 NULL   "ODAMEX: Fountain 2"
+thing 9029 d -  16 NULL   "ODAMEX: Fountain 3"
+thing 9030 d -  16 NULL   "ODAMEX: Fountain 4"
+thing 9031 d -  16 NULL   "ODAMEX: Fountain 5"
+thing 9032 d -  16 NULL   "ODAMEX: Fountain 6"
+thing 9033 d -  16 NULL   "ODAMEX: Fountain 7"
+
+# not here (require Hexen format) :
+#   MT_CAMERA
+#   MT_PATHNODE
+#   MT_NODE
+#   MT_ZDOOMBRIDGE
+#   MT_BRIDGE8/16/32
+
+
+#---- ODAMEX LINE TYPES ----------
+
+line 333 - "-- ODAMEX: Init Gravity"
+line 334 - "-- ODAMEX: Init Color"
+line 335 - "-- ODAMEX: Init Damage"
+
+line 340 s "-- ODAMEX: Slope F1"
+line 341 s "-- ODAMEX: Slope C1"
+line 342 s "-- ODAMEX: Slope F1 + C1"
+line 343 s "-- ODAMEX: Slope F2"
+line 344 s "-- ODAMEX: Slope C2"
+line 345 s "-- ODAMEX: Slope C2 + F2"
+line 346 s "-- ODAMEX: Slope C1 + F2"
+line 347 s "-- ODAMEX: Slope C2 + F1"
+
+
+#---- ODAMEX SECTOR TYPES ----------
+
+sector 21 "ODAMEX: Light Phased"
+
+sector 22 "ODAMEX: LightSeq Start"
+sector 23 "ODAMEX: LightSeq Spec 1"
+sector 24 "ODAMEX: LightSeq Spec 2"
+
+# hmmm, can Sky2 and Scroll types be used too ???
+

@@ -1,0 +1,341 @@
+
+EUREKA WISH-LIST
+================
+
+
+General
+-------
+
+++  Help system (especially: what keys do what)
+
+>>  support DOOM 1
+
+>>  support Heretic
+
+-  support TNT / Plutonia / FreeDOOM (new textures)
+
+-  support HacX
+-  support Harmony
+
+-  browser: map viewer (for selecting what map to edit)
+
+-  configurable keys
+
+!!  CHECK screen
+    -  can remove unused SideDefs and Sectors
+
+
+!!!  redo the config file parsing (probably as console vars)
+     and command-line argument parsing (c.f. OBLIGE's system)
+
+!!  decent dialogs: printf-style parameter, make message fit,
+    provide words for the buttons (like "Quit Without Saving").
+
++  proper widget for File/Open to select map, with button to load
+   a new WAD file.
+
+-  widget to show list of map names (option for custom name)
+
+-  uppercase the level lump name (Level_name global var)
+
+-  don't save a map at the _END_ of wad file
+   (prefer existing location, or prefer before existing level where
+    the name is <, otherwise at beginning).
+
+-  make sure Load/Export wad filename not already in master_dir
+
+-  grid drawing too slow when small step and zoomed out
+
+-  File/Change Port
+
+
+
+Coding
+------
+
+rename: edit.highlighted --> edit.Highlighted
+
+-  set proper linesize() in browser, use it in Scroll()
+
+
+
+Editing
+-------
+
+++  when dragging a shape next to existing geometry, highlight
+    vertices and linedefs which would get merged, and implement
+    that merging.
+
+++  have a special mode for the Thing/Sector/LineDef panels where
+    the user can set the default values.  Mode is indicated by the
+    title background being blue and title says "Default Properties".
+    Perhaps activated by right clicking the title (and/or a key).
+
+-  figure out how 'n' next / 'p' prev functions should work
+
+-  ability to move and/or zoom map to show selected object(s)
+   [can zoom OUT, but only zoom IN if multiple and very small]
+
+-  when highlighting a sector, draw the things in the same color as
+   the sector is highlighted, but not as bright.  Because many sector
+   functions will affect things too -- make it obvious to the user.
+
+!!  handle self-referencing linedefs in auto create/split sector
+
++  texture alignment feature
+
++  fix ClosestLine_CastXXX() and OppositeLineDef() to handle
+   the case where the casted ray hits a vertex.
+
+   Example: MAP01 back of line #13 hits line #189
+            (should hit either #104 or #360)
+
++  fix PointOutsideOfMap() code to handle places where the point
+   cannot "see" the surrounding void space.
+   
+   TraceLineLoop on the linedef to the right, if faces_outward
+   then test upto 32 lines (OppositeLineDef) to see if any can
+   see the void.
+
+   if geometry is broken : special result.
+
+-  SHIFT + SPACE = no auto create/split sectors
+
+-  for the "Edit -> Paste" menu, turn the cursor into crosshairs
+   and wait until the user selects a spot to paste to.
+
+-  implement Edit/Move (Scale, Rotate) operations which pop up a
+   dialog asking for the offset (scale, angle) to apply.
+
+-  disallow insert of new linedef if it would overlap or cross
+   an existing linedef (or touch an existing vertex).
+   [overridden when SHIFT is pressed, but no auto sectoring then]
+
+   PERHAPS: if new linedef would cross an existing one, then just
+            create a new vertex at the intersection point.
+
+            AND: similarly if a new linedef passes through an
+                 existing vertex -- create two instead.
+
+   __IDEA__ the 'c' key in linedef mode to fix crossing / overlaps
+
++  quantization function: prevent linedefs from overlapping / crossing
+
+IDEA: for quantizing a group of objects, try about 9 delta
+      positions (x+0, x+step/4, x-step/4 etc...) and choose the
+      "best" quantization.
+
++  when one vertex of a linedef is moved (and not the other)
+   update the X offset on the appropriate side (right side for start,
+   left side for end vertex).
+
+-  when moving a sector and the camera is inside it, move camera too
+
+?  show a red '*' next to map name (info_bar AND window title)
+   when MadeChanges = 1
+   [perhaps make map name DARK_RED when Replacer is true]
+
+-  a selected linedef can show tagged sector (and vice versa)
+   however this stops working when the linedef goes out of view.
+
+-  when copy-n-paste and a real sector is removed (or pasting into
+   a different map or wad) : we get linedefs with "-" as middle texture.
+   Handle this better.
+
+??  SPACE in sector mode:
+    if another sector was selected, then the properties of that
+    sector (floor and ceiling heights and textures, etc) are copied
+    to the new sector.
+
+IDEA: a config item to make the "simple" grid occur when grid-snapping
+      and the "normal" grid occur in FREE mode.
+
+
+
+CONSOLE IDEA
+------------
+   toggle on/off with the F4 key
+   exists where map/render is (maybe half, above it)
+      (maybe translucent background)
+   turns off browser (and vice versa)
+   have cvars for config items, changeable in console
+   quake-like binding, e.g. "bind w swap-flats"
+   arguments beginning with '+' get executed as console commands
+
+
+
+Renderer
+--------
+
+!!  strafe left/right with mouse + ALT key
+
++  fix the slime-trails
+
++  problem with mid-masked textures (cage in E1M9)
+
++  being able to select stuff to modify:
+   - things
+   - floors
+   - ceilings
+   - sidedef uppers and lowers
+
+-  able to drag things around
+   - raise floors?
+   - move vertices?
+   + shift textures?
+
+-  ability to drag the camera
+
+-  make it into a proper widget (occupy same space as Canvas)
+
+?  an info bar:  X  Y  Z  ANG
+
+-  rotated sprites
+
+
+
+Browser
+-------
+
+-  search box: ',' for AND, '/' for OR
+
+-  no-pic mode for textures and flats
+
+
+
+Game / Port Definitions
+-----------------------
+
+-  a new category for BOOM's "property transfer" linetypes
+
+
+
+WAD SEMANTICS
+=============
+
+(a) there is always an IWAD (given by -iwad or found somewhere).
+    maps are never saved into an IWAD (special command line option to do it)
+
+    ---> global: 'base_wad'
+
+(b) there is _usually_ a PWAD (given by -file).
+    it must be modifiable (e.g. not in /usr), CTRL-S saves into it.
+
+    when absent, user cannot File/Save, the File/Export function
+    is done instead.
+
+    ---> global: 'edit_wad'
+
+(c) when File/Export is successful, that becomes the new PWAD.
+    the existing PWAD goes away (or becomes a resource wad).
+
+(c) user can File/Load another map, but if it's in an uneditable
+    wad (especially the IWAD) then the previous PWAD goes away
+    (or becomes a resource wad).
+
+(d) File/New Map needs to ask for a map name.
+    If there is current PWAD and map already exists, warn user
+
+(e) WISH: File/Manage Wads...
+
+    - shows the IWAD, PWAD, resource wads (full path)
+    - can close current PWAD
+    - can create a new WAD
+
+(f) BIG WISH: File/Change IWAD
+    BIG WISH: File/Change Port
+
+
+GAME SEMANTICS
+==============
+
+Remove the path and extension from the IWAD, and make the result
+lowercase, and that is the name of the "game".  There must be a
+config file called 'games/xxx.ugh' which defines everything for
+that game.
+
+
+
+PointCanSeeVoid Algorithm
+-------------------------
+
+  Basically use an angular occlusion buffer.  Process each linedef
+  in the level and update the angle range in the buffer.  When
+  finished, any gaps in the buffer means that the point can "see"
+  to infinity.
+
+
+Quantization Function
+---------------------
+
+The selection contains the vertices to move (require vertex mode).
+
+Process each vertex in turn, if quantization works then unselect that
+vertex, otherwise keep it selected.  After all processed, BEEP if any
+vertices remain selected.
+
+Have a selection_c variable for ones already processed, and ones
+which moved successfully.
+
+A vertex that is already on the grid trivially succeeds.
+Otherwise try the FOUR nearby corners (TWO when the vertex is
+sitting on a grid line), checking nearest first.
+
+THE NEW POSITION MUST BE VACANT for the move to succeed.
+
+Also must prevent linedefs from crossing or overlapping.
+
+There may be a need for additional logic to keep the original
+orientation of linedefs (horizontal lines stay horizontal,
+vertical lines stay vertical, diagonal lines stay diagonal).
+
+However this is difficult to do in practice : perhaps do it by
+checking all lines in an initial pass, and mark vertices which
+are not allowed to "round up" to a nearby grid spot (vertices on a
+horizontal line are not allowed to round up vertically, and vice
+versa).
+
+
+
+USER CONFIG NEEDED
+-------------------
+
+snap_to_grid
+
+default_floor_height
+default_ceiling_height
+default_lighting
+
+gamma
+
+floor_bump_small   (2)
+floor_bump_medium  (16)
+floor_bump_large   (64)
+
+render_forward_speed  (16)
+render_turn_speed     (16)
+render_updown_speed   (16)
+
+map_mousescroll_speed  (16)
+
+paste_reselects  (true)
+
+render_textures  (true)
+render_sprites   (true)
+render_lighting  (false)
+
+map_highlight_color
+map_selection_color
+map_high_sel_color
+
+midmask_back_color
+
+
+GAME CONFIG NEEDED
+------------------
+
+untex_wall_colors   <low>  <high>
+untex_floor_colors  <low>  <high>
+
+error_color  <pixel>
+

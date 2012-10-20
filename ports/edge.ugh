@@ -1,0 +1,337 @@
+#------------------------------------------------------------------------
+#  EDGE 1.35 definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+include "boom"
+
+
+#---- EDGE THINGS ----------
+
+thing 7000 b -  20 NVSC   "EDGE: Night vision"
+thing 7020 b -  20 JPCK   "EDGE: Jetpack"
+
+thing 7015 k l  20 YKEY   "EDGE: Green keycard"
+thing 7017 k l  20 YSKU   "EDGE: Green skull key"
+
+thing 7031 h l  20 ARM2   "EDGE: Purple armor"
+thing 7032 h l  20 ARM1   "EDGE: Yellow armor"
+thing 7033 h l  20 ARM1   "EDGE: Red armor"
+
+thing 7010 d -  16 SMT2   "EDGE: Grey stub"
+thing 7011 d -  10 BEXP   "EDGE: Unstable barrel"
+
+thing 7041 - -  16 NULL   "EDGE: Green glow"
+thing 7042 - -  16 NULL   "EDGE: Red glow"
+thing 7043 - -  16 NULL   "EDGE: Blue glow"
+
+
+thing  888 m -  16 SARGA3A7  "EDGE: Dog"
+
+thing 4050 m i  64 BSPI   "EDGE: Stealth Arachnotron"
+thing 4051 m i  20 VILE   "EDGE: Stealth Archvile"
+thing 4052 m i  24 BOSS   "EDGE: Stealth Baron"
+thing 4053 m i  31 HEAD   "EDGE: Stealth Cacodemon"
+thing 4054 m i  20 CPOS   "EDGE: Stealth Chaingunner"
+thing 4055 m i  30 SARG   "EDGE: Stealth Demon"
+thing 4056 m i  24 BOS2A1C1  "EDGE: Stealth Hell Knight"
+thing 4057 m i  20 TROO   "EDGE: Stealth Imp"
+thing 4058 m i  48 FATT   "EDGE: Stealth Mancubus"
+thing 4059 m i  20 SKEL   "EDGE: Stealth Revenant"
+thing 4060 m i  20 SPOS   "EDGE: Stealth Sargeant"
+thing 4061 m i  20 POSS   "EDGE: Stealth Trooper"
+
+thing 7100 m -  20 SKELJ  "EDGE: Revenant mkII"
+thing 7101 m -  64 TFOGB  "EDGE: Imp spawner"
+thing 7102 m -  64 BSPIH  "EDGE: Arachnotron mkII"
+thing 7103 m -  48 FATTH  "EDGE: Mancubus mkII"
+
+
+#---- EDGE LINE TYPES ----------
+
+linegroup b "EDGE: Hubs"
+linegroup w "EDGE: Sliding Door"
+linegroup x "EDGE: Extrafloor"
+linegroup z "EDGE: RTS Script"
+
+line 400 x "-- EDGE: 3D Floor"
+line 401 x "-- EDGE: 3D Floor /upper"
+line 402 x "-- EDGE: 3D Floor /lower"
+
+line 403 x "-- EDGE: Liquid"
+line 404 x "-- EDGE: Liquid 80%"
+line 405 x "-- EDGE: Liquid 60%"
+line 406 x "-- EDGE: Liquid 40%"
+line 407 x "-- EDGE: Liquid 20%"
+line 408 x "-- EDGE: Liquid  0%"
+
+line 422 a "-- EDGE: Scroll right"
+line 423 a "-- EDGE: Scroll up"
+line 424 a "-- EDGE: Scroll down"
+line 425 a "-- EDGE: Scroll left/up"
+line 426 a "-- EDGE: Scroll left/down"
+line 427 a "-- EDGE: Scroll right/up"
+line 428 a "-- EDGE: Scroll right/down"
+
+line 567 s "-- EDGE: Slope Floor"
+line 568 s "-- EDGE: Slope Ceiling"
+line 569 s "-- EDGE: Slope F + C"
+
+
+line 409 a "-- EDGE: Translucency 80%"
+line 410 a "-- EDGE: Translucency 60%"
+line 411 a "-- EDGE: Translucency 40%"
+line 412 a "-- EDGE: Translucency 20%"
+
+line 413 x "-- EDGE: Thin 3D floor"
+line 414 x "-- EDGE: Thin 3D floor 80%"
+line 415 x "-- EDGE: Thin 3D floor 60%"
+line 416 x "-- EDGE: Thin 3D floor 40%"
+line 417 x "-- EDGE: Thin 3D floor 20%"
+
+
+line 442 w "DR Sliding door LEFT /mon"
+line 443 w "DR Sliding door LEFT"
+line 444 w "DR Sliding door LEFT /fast"
+line 445 w "D1 Sliding door LEFT"
+
+line 446 w "DR Sliding door RIGHT /mon"
+line 447 w "DR Sliding door RIGHT"
+line 448 w "DR Sliding door RIGHT /fast"
+line 449 w "D1 Sliding door RIGHT"
+
+line 450 w "DR Sliding door CENTER /mon"
+line 451 w "DR Sliding door CENTER"
+line 452 w "DR Sliding door CENTER /fast"
+line 453 w "D1 Sliding door CENTER"
+
+
+line 418 z "S1 EDGE: Enable RTS"
+line 419 z "SR EDGE: Enable RTS"
+line 420 z "W1 EDGE: Enable RTS"
+line 421 z "WR EDGE: Enable RTS"
+line 440 z "G1 EDGE: Enable RTS"
+line 441 z "GR EDGE: Enable RTS"
+line 454 z "W1 EDGE: Enable RTS /mon"
+line 455 z "WR EDGE: Enable RTS /mon"
+line 456 z "GR EDGE: Enable RTS /mon"
+
+line 457 z "SR EDGE: DISABLE RTS"
+line 458 z "WR EDGE: DISABLE RTS"
+line 459 z "GR EDGE: DISABLE RTS"
+line 460 z "WR EDGE: DISABLE RTS /mon"
+line 461 z "GR EDGE: DISABLE RTS /mon"
+
+
+line 470 s "-- EDGE: Ladder,  48 high"
+line 471 s "-- EDGE: Ladder,  80 high"
+line 472 s "-- EDGE: Ladder, 120 high"
+line 473 s "-- EDGE: Ladder, 160 high"
+line 474 s "-- EDGE: Ladder, 192 high"
+line 475 s "-- EDGE: Ladder, 256 high"
+line 476 s "-- EDGE: Ladder, 384 high"
+line 477 s "-- EDGE: Ladder, 512 high"
+line 478 s "-- EDGE: Ladder, 768 high"
+line 479 s "-- EDGE: Ladder, no limit"
+
+
+line 462 a "-- EDGE: Mirror"
+line 463 a "-- EDGE: Mirror /white"
+line 464 a "-- EDGE: Mirror /blue"
+line 465 a "-- EDGE: Mirror /red"
+line 466 a "-- EDGE: Mirror /green"
+
+line 480 a "-- EDGE: Portal /dark"
+line 481 a "-- EDGE: Portal /light"
+line 482 a "-- EDGE: Portal /light2"
+line 483 a "-- EDGE: Portal /blue"
+line 484 a "-- EDGE: Portal /green"
+
+line 485 a "-- EDGE: Camera Portal"
+line 486 a "-- EDGE: Camera Portal /white"
+line 487 a "-- EDGE: Camera Portal /cyan"
+line 488 a "-- EDGE: Camera Portal /rusty"
+line 489 a "-- EDGE: Camera Portal /green"
+
+
+line 501 b "WR Hub Exit to MAP01 / E1M1"
+line 502 b "WR Hub Exit to MAP02 / E1M2"
+line 503 b "WR Hub Exit to MAP03 / E1M3"
+line 504 b "WR Hub Exit to MAP04 / E1M4"
+line 505 b "WR Hub Exit to MAP05 / E1M5"
+line 506 b "WR Hub Exit to MAP06 / E1M6"
+line 507 b "WR Hub Exit to MAP07 / E1M7"
+line 508 b "WR Hub Exit to MAP08 / E1M8"
+line 509 b "WR Hub Exit to MAP09 / E1M9"
+
+line 510 b "WR Hub Exit to MAP10"
+line 511 b "WR Hub Exit to MAP11 / E2M1"
+line 512 b "WR Hub Exit to MAP12 / E2M2"
+line 513 b "WR Hub Exit to MAP13 / E2M3"
+line 514 b "WR Hub Exit to MAP14 / E2M4"
+line 515 b "WR Hub Exit to MAP15 / E2M5"
+line 516 b "WR Hub Exit to MAP16 / E2M6"
+line 517 b "WR Hub Exit to MAP17 / E2M7"
+line 518 b "WR Hub Exit to MAP18 / E2M8"
+line 519 b "WR Hub Exit to MAP19 / E2M9"
+
+line 520 b "WR Hub Exit to MAP20"
+line 521 b "WR Hub Exit to MAP21 / E3M1"
+line 522 b "WR Hub Exit to MAP22 / E3M2"
+line 523 b "WR Hub Exit to MAP23 / E3M3"
+line 524 b "WR Hub Exit to MAP24 / E3M4"
+line 525 b "WR Hub Exit to MAP25 / E3M5"
+line 526 b "WR Hub Exit to MAP26 / E3M6"
+line 527 b "WR Hub Exit to MAP27 / E3M7"
+line 528 b "WR Hub Exit to MAP28 / E3M8"
+line 529 b "WR Hub Exit to MAP29 / E3M9"
+
+line 530 b "WR Hub Exit to MAP30"
+line 531 b "WR Hub Exit to MAP31 / E4M1"
+line 532 b "WR Hub Exit to MAP32 / E4M2"
+line 533 b "WR Hub Exit to MAP33 / E4M3"
+line 534 b "WR Hub Exit to MAP34 / E4M4"
+line 535 b "WR Hub Exit to MAP35 / E4M5"
+line 536 b "WR Hub Exit to MAP36 / E4M6"
+line 537 b "WR Hub Exit to MAP37 / E4M7"
+line 538 b "WR Hub Exit to MAP38 / E4M8"
+line 539 b "WR Hub Exit to MAP39 / E4M9"
+
+
+line 490 d "DR EDGE: Green key door"
+line 491 d "D1 EDGE: Green key door"
+line 492 d "SR EDGE: Green key door"
+line 493 d "S1 EDGE: Green key door"
+line 494 d "D1 EDGE: Green key door /fast"
+
+line 580 d "DR EDGE: Gold key door"
+line 581 d "D1 EDGE: Gold key door"
+line 582 d "SR EDGE: Gold key door"
+line 583 d "S1 EDGE: Gold key door"
+
+line 584 d "DR EDGE: Silver key door"
+line 585 d "D1 EDGE: Silver key door"
+line 586 d "SR EDGE: Silver key door"
+line 587 d "S1 EDGE: Silver key door"
+
+line 588 d "DR EDGE: Brass key door"
+line 589 d "D1 EDGE: Brass key door"
+line 590 d "DR EDGE: Copper key door"
+line 591 d "D1 EDGE: Copper key door"
+line 592 d "DR EDGE: Steel key door"
+line 593 d "D1 EDGE: Steel key door"
+
+line 594 d "DR EDGE: Wooden key door"
+line 595 d "D1 EDGE: Wooden key door"
+line 596 d "DR EDGE: Fire key door"
+line 597 d "D1 EDGE: Fire key door"
+line 598 d "DR EDGE: Water key door"
+line 599 d "D1 EDGE: Water key door"
+
+
+line 800 a "-- EDGE: Align F1"
+line 801 a "-- EDGE: Align F2"
+line 802 a "-- EDGE: Align C1"
+line 803 a "-- EDGE: Align C2"
+line 804 a "-- EDGE: Align F1 + C1"
+line 805 a "-- EDGE: Align F2 + C2"
+
+line 810 a "-- EDGE: Align, scale F1"
+line 811 a "-- EDGE: Align, scale F2"
+line 812 a "-- EDGE: Align, scale C1"
+line 813 a "-- EDGE: Align, scale C2"
+line 814 a "-- EDGE: Align, scale F1 + C1"
+line 815 a "-- EDGE: Align, scale C2 + C2"
+
+line 820 a "-- EDGE: Scale F1"
+line 821 a "-- EDGE: Scale F2"
+line 822 a "-- EDGE: Scale C1"
+line 823 a "-- EDGE: Scale C2"
+line 824 a "-- EDGE: Scale F1 + C1"
+line 825 a "-- EDGE: Scale F2 + C2"
+
+
+#---- EDGE SECTOR TYPES ----------
+
+sector 29 "EDGE: Hub entry area"
+
+sector 4466 "EDGE Water"
+sector 4418 "EDGE Water + Current N"
+sector 4419 "EDGE Water + Current NE"
+sector 4420 "EDGE Water + Current E"
+sector 4421 "EDGE Water + Current SE"
+sector 4422 "EDGE Water + Current S"
+sector 4423 "EDGE Water + Current SW"
+sector 4424 "EDGE Water + Current W"
+sector 4425 "EDGE Water + Current NW"
+
+sector 4467 "EDGE Slime (no damage)"
+sector 4468 "EDGE Slime"
+sector 4426 "EDGE Slime + Current N"
+sector 4427 "EDGE Slime + Current NE"
+sector 4428 "EDGE Slime + Current E"
+sector 4429 "EDGE Slime + Current SE"
+sector 4430 "EDGE Slime + Current S"
+sector 4431 "EDGE Slime + Current SW"
+sector 4432 "EDGE Slime + Current W"
+sector 4433 "EDGE Slime + Current NW"
+
+sector 4469 "EDGE Lava (no damage)"
+sector 4470 "EDGE Lava"
+sector 4434 "EDGE Lava + Current N"
+sector 4435 "EDGE Lava + Current NE"
+sector 4436 "EDGE Lava + Current E"
+sector 4437 "EDGE Lava + Current SE"
+sector 4438 "EDGE Lava + Current S"
+sector 4439 "EDGE Lava + Current SW"
+sector 4440 "EDGE Lava + Current W"
+sector 4441 "EDGE Lava + Current NW"
+
+sector 4442 "EDGE Push N"
+sector 4443 "EDGE Push NE"
+sector 4444 "EDGE Push E"
+sector 4445 "EDGE Push SE"
+sector 4446 "EDGE Push S"
+sector 4447 "EDGE Push SW"
+sector 4448 "EDGE Push W"
+sector 4449 "EDGE Push NW"
+
+sector 4450 "EDGE Scroll Floor N"
+sector 4451 "EDGE Scroll Floor NE"
+sector 4452 "EDGE Scroll Floor E"
+sector 4453 "EDGE Scroll Floor SE"
+sector 4454 "EDGE Scroll Floor S"
+sector 4455 "EDGE Scroll Floor SW"
+sector 4456 "EDGE Scroll Floor W"
+sector 4457 "EDGE Scroll Floor NW"
+
+sector 4458 "EDGE Scroll + Push N"
+sector 4459 "EDGE Scroll + Push NE"
+sector 4460 "EDGE Scroll + Push E"
+sector 4461 "EDGE Scroll + Push SE"
+sector 4462 "EDGE Scroll + Push S"
+sector 4463 "EDGE Scroll + Push SW"
+sector 4464 "EDGE Scroll + Push W"
+sector 4465 "EDGE Scroll + Push NW"
+

@@ -1,0 +1,272 @@
+#------------------------------------------------------------------------
+#  DOOM 2 definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+level_name  map01
+
+include "doom_common"
+include "doom_specials"
+
+#---- DOOM 2 THINGS ----------------
+
+thing   82 w -  20 SGN2   "Super shotgun"
+thing   83 h l  20 MEGA   "Megasphere"
+
+thing   84 m -  20 SSWV   "Wolf-SS"
+thing   65 m -  20 CPOS   "Chaingunner"
+thing   69 m -  24 BOS2A1C1 "Hell knight"
+thing   68 m -  64 BSPI   "Arachnotron"
+thing   71 m -  31 PAIN   "Pain elemental"
+thing   66 m -  20 SKEL   "Revenant"
+thing   67 m -  48 FATT   "Mancubus"
+thing   64 m -  20 VILE   "Archvile"
+
+thing   73 g c  16 HDB1   "Hanging no guts"
+thing   74 g c  16 HDB2   "Hanging no brain"
+thing   75 g c  16 HDB3   "Hang torso looking down"
+thing   76 g c  16 HDB4   "Hang torso open skull"
+thing   77 g c  16 HDB5   "Hang torso looking up"
+thing   78 g c  16 HDB6   "Hang torso w/o brain"
+thing   79 g -  16 POB1   "Pool of blood 2"
+thing   80 g -  16 POB2   "Pool of blood 3"
+thing   81 g -  16 BRS1   "Pool of brains"
+
+thing   85 l l  16 TLMP   "Tall mercury lamp"
+thing   86 l l  16 TLP2   "Short mercury lamp"
+
+thing   87 m l  16 FIREF  "Spawn spot"
+thing   88 m -  16 BBRN   "Boss brain"
+thing   89 m -  16 BOSFB  "Boss shooter"
+
+
+#---- DOOM 2 TEXTURES ----------------
+
+texturegroup w "Wolfenstein"
+
+texture w ZDOORB1
+texture w ZDOORF1
+texture w ZELDOOR
+texture w ZZWOLF1
+texture w ZZWOLF10
+texture w ZZWOLF11
+texture w ZZWOLF12
+texture w ZZWOLF13
+texture w ZZWOLF2
+texture w ZZWOLF3
+texture w ZZWOLF4
+texture w ZZWOLF5
+texture w ZZWOLF6
+texture w ZZWOLF7
+texture w ZZWOLF9
+
+texture u BIGBRIK1
+texture u BIGBRIK2
+texture u BIGBRIK3
+texture u BRICK1
+texture u BRICK10
+texture u BRICK11
+texture u BRICK12
+texture u BRICK2
+texture u BRICK3
+texture u BRICK4
+texture u BRICK5
+texture u BRICK6
+texture u BRICK7
+texture u BRICK8
+texture u BRICK9
+texture u BRICKLIT
+texture u BRWINDOW
+texture u BSTONE1
+texture u BSTONE2
+texture u BSTONE3
+texture u CEMENT7
+texture u CEMENT8
+texture u CEMENT9
+
+texture h BFALL1
+texture h BFALL2
+texture h BFALL3
+texture h BFALL4
+texture h CRACKLE2
+texture h CRACKLE4
+texture h DBRAIN1
+texture h DBRAIN2
+texture h DBRAIN3
+texture h DBRAIN4
+texture h MARBFAC4
+texture h MARBGRAY
+
+texture t BRONZE1
+texture t BRONZE2
+texture t BRONZE3
+texture t BRONZE4
+texture t CRATE3
+texture t MIDBARS1
+texture t MIDBARS3
+texture t MIDBRONZ
+texture t MIDSPACE
+texture t SFALL1
+texture t SFALL2
+texture t SFALL3
+texture t SFALL4
+texture t METAL2
+texture t METAL3
+texture t METAL4
+texture t METAL5
+texture t METAL6
+texture t METAL7
+
+texture n ASHWALL2
+texture n ASHWALL3
+texture n ASHWALL4
+texture n ASHWALL6
+texture n ASHWALL7
+texture n ROCK1
+texture n ROCK2
+texture n ROCK3
+texture n ROCK4
+texture n ROCK5
+texture n STONE4
+texture n STONE5
+texture n STONE6
+texture n STONE7
+texture n SW1ZIM
+texture n TANROCK2
+texture n TANROCK3
+texture n TANROCK4
+texture n TANROCK5
+texture n TANROCK7
+texture n TANROCK8
+texture n ZIMMER1
+texture n ZIMMER2
+texture n ZIMMER3
+texture n ZIMMER4
+texture n ZIMMER5
+texture n ZIMMER7
+texture n ZIMMER8
+
+texture t MODWALL1
+texture t MODWALL2
+texture t MODWALL3
+texture t MODWALL4
+texture t PIPES
+texture t PIPEWAL1
+texture t PIPEWAL2
+texture t SILVER1
+texture t SILVER2
+texture t SILVER3
+texture t SPACEW2
+texture t SPACEW3
+texture t SPACEW4
+texture t SPCDOOR1
+texture t SPCDOOR2
+texture t SPCDOOR3
+texture t SPCDOOR4
+
+texture u PANBLACK
+texture u PANBLUE
+texture u PANBOOK
+texture u PANBORD1
+texture u PANBORD2
+texture u PANCASE1
+texture u PANCASE2
+texture u PANEL1
+texture u PANEL2
+texture u PANEL3
+texture u PANEL4
+texture u PANEL5
+texture u PANEL6
+texture u PANEL7
+texture u PANEL8
+texture u PANEL9
+texture u PANRED
+
+texture u SP_DUDE7
+texture u SP_DUDE8
+texture u STUCCO
+texture u STUCCO1
+texture u STUCCO2
+texture u STUCCO3
+
+texture u SW1PANEL
+texture u SW1WDMET
+texture u WOOD10
+texture u WOOD12
+texture u WOOD6
+texture u WOOD7
+texture u WOOD8
+texture u WOOD9
+texture u WOODMET1
+texture u WOODMET2
+texture u WOODMET3
+texture u WOODMET4
+texture u WOODVERT
+
+
+#---- DOOM 2 FLATS ----------------
+
+flat n GRASS1
+flat n GRASS2
+flat t GRNLITE1
+
+flat n GRNROCK
+flat n RROCK01
+flat n RROCK02
+flat n RROCK03
+flat n RROCK04
+flat n RROCK05
+flat n RROCK06
+flat n RROCK07
+flat n RROCK08
+flat n RROCK09
+flat n RROCK10
+flat n RROCK11
+flat n RROCK12
+flat n RROCK13
+flat n RROCK14
+flat n RROCK15
+flat n RROCK16
+flat n RROCK17
+flat n RROCK18
+flat n RROCK19
+flat n RROCK20
+
+flat u SLIME01
+flat u SLIME02
+flat u SLIME03
+flat u SLIME04
+flat u SLIME05
+flat u SLIME06
+flat u SLIME07
+flat u SLIME08
+flat h SLIME09
+flat h SLIME10
+flat h SLIME11
+flat h SLIME12
+flat u SLIME13
+flat t SLIME14
+flat t SLIME15
+flat t SLIME16
+

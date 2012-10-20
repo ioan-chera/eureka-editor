@@ -1,0 +1,348 @@
+#------------------------------------------------------------------------
+#  HERETIC definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C)      2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  This game definition is derived partially from the Unofficial
+#  Heretic Specs by John "DrSleep" Anderson, partially from the
+#  Heretic source code, and partially from YADEX (which probably
+#  used the other two sources anyway).
+#
+#------------------------------------------------------------------------
+
+level_name  e1m1
+
+sky_flat  F_SKY1
+sky_color   197
+
+default_textures  SANDSQ2  FLOOR01  FLAT508
+
+# 10 = wand crystal
+default_thing  10
+
+
+#---- THING TYPES ---------------
+
+thinggroup p 4F4 "Player"
+thinggroup m F00 "Monster"
+thinggroup w FA0 "Weapon"
+thinggroup a 850 "Ammunition"
+thinggroup h 280 "Health, Armor"
+thinggroup b 280 "Bonus"
+thinggroup k F0F "Key"
+thinggroup d 66C "Decoration"
+thinggroup l 66C "Light Source"
+thinggroup s DAD "Sounds"
+thinggroup - 0BD "OTHER"
+
+thing  1 p - 16 PLAY "Player 1"
+thing  2 p - 16 PLAY "Player 2"
+thing  3 p - 16 PLAY "Player 3"
+thing  4 p - 16 PLAY "Player 4"
+thing 11 p - 16 PLAYF1 "Deathmatch start"
+thing 14 p - 20 TELE "Teleport Spot"
+
+thing 2005 w - 20 WGNT "Gauntlets"
+thing 2001 w - 20 WBOW "Ethereal Crossbow"
+thing   53 w - 20 WBLS "Dragon Claw"
+thing 2004 w - 20 WSKL "Hellstaff"
+thing 2003 w - 20 WPHX "Phoenix Rod"
+thing 2002 w - 20 WMCE "Mace"
+
+thing 10 a - 20 AMG1 "Wand Crystal"
+thing 12 a - 20 AMG2 "Wand Geode"
+thing 18 a - 20 AMC1 "Ethereal Arrows"
+thing 19 a - 20 AMC2 "Ethereal Quiver"
+thing 54 a - 20 AMB1 "Claw Orb"
+thing 55 a - 20 AMB2 "Energy Orb"
+thing 20 a - 20 AMS1 "Lesser Runes"
+thing 21 a - 20 AMS2 "Greater Runes"
+thing 22 a - 20 AMP1 "Flame Orb"
+thing 23 a - 20 AMP2 "Inferno Orb"
+thing 13 a - 20 AMM1 "Mace Spheres"
+thing 16 a - 20 AMM2 "Pile of Mace Spheres"
+
+thing 81 h - 20 PTN1 "Crystal Vial"
+thing 82 h - 20 PTN2 "Quartz Flask"
+thing 32 h - 20 SPHL "Mystic Urn"
+thing 85 h - 20 SHLD "Shield (Silver)"
+thing 31 h - 20 SHD2 "Shield (Enchanted)"
+
+thing  8 b - 20 BAGH "Bag of Holding"
+thing 30 b - 20 EGGC "Morph Ovum"
+thing 34 b - 20 FBMB "Time Bomb"
+thing 83 b - 20 SOAR "Wings of Wrath"
+thing 75 b - 20 INVS "Shadowsphere"
+thing 84 b - 20 INVU "Ring of Invulnerability"
+thing 35 b - 20 SPMP "Map Scroll"
+thing 36 b - 20 ATLP "Chaos Device"
+thing 86 b - 20 PWBK "Tome of Power"
+thing 33 b - 20 TRCH "Torch"
+
+thing 73 k - 20 AKYY "Green Key"
+thing 79 k - 20 BKYY "Blue Key"
+thing 80 k - 20 CKYY "Yellow Key"
+thing 94 k - 16 KGZB "Blue Key Statue"
+thing 95 k - 16 KGZG "Green Key Statue"
+thing 96 k - 16 KGZY "Yellow Key Statue"
+
+thing 44 d - 12 BARL "Barrel"
+thing 47 d - 14 BRPL "Brown Pillar"
+thing 48 d - 20 MOS1 "Moss 1"
+thing 49 d - 20 MOS2 "Moss 2"
+thing 51 d -  8 HCOR "Hanging Corpse"
+thing 26 d - 20 SKH4 "Hanging Skull 35"
+thing 25 d - 20 SKH3 "Hanging Skull 45"
+thing 24 d - 20 SKH2 "Hanging Skull 60"
+thing 17 d - 20 SKH1 "Hanging Skull 70"
+thing 29 d - 16 SMPL "Small Pillar"
+thing 37 d -  8 STGS "Stalagmite (small)"
+thing 38 d - 12 STGL "Stalagmite (large)"
+thing 39 d -  8 STCS "Stalactite (small)"
+thing 40 d - 12 STCL "Stalactite (large)"
+thing 87 d - 12 VLCO "Volcano"
+thing 74 d l 20 TGLT "Teleport Glitter"
+thing 52 d l 20 TGLTF0 "Teleport Glitter (exit)"
+
+thing 28 l - 20 CHDL "Chandelier"
+thing 76 l - 20 KFR1 "Fire Brazier"
+thing 27 l - 20 SRTC "Serpent Torch"
+thing 50 l - 20 WRTH "Wall Torch"
+
+thing 2035 - - 16 PPOD "Pod"
+thing 43   - - 20 NULL "Pod Generator"
+
+thing 66 m - 20 IMPX "Gargoyle"
+thing  5 m - 20 IMPX "Gargoyle Leader"
+thing 68 m - 20 MUMM "Golem"
+thing 69 m i 20 MUMM "Golem Ghost"
+thing 45 m - 20 MUMMY1 "Golem Leader"
+thing 46 m i 20 MUMMY1 "Golem Leader Ghost"
+thing 64 m - 20 KNIG "Undead Warrior"
+thing 65 m i 20 KNIG "Undead Warrior Ghost"
+thing 15 m - 20 WZRD "Disciple"
+thing 70 m - 20 BEAS "Weredragon"
+thing 90 m - 20 CLNK "Sabreclaw"
+thing  6 m - 20 HEAD "Ironlich"
+thing  9 m - 20 MNTR "Maulotaur"
+thing 92 m - 20 SNKE "Ophidian"
+thing  7 m - 20 SRCR "D'Sparil"
+thing 56 m - 20 SOR2H0 "D'Sparil Spot"
+
+thing 1202 s - 16 NULL "Sound: Waterdrip"
+thing 1203 s - 16 NULL "Sound: Slow Footsteps"
+thing 1204 s - 16 NULL "Sound: Heartbeat"
+thing 1205 s - 16 NULL "Sound: Bells"
+thing 1208 s - 16 NULL "Sound: Laughter"
+thing 1209 s - 16 NULL "Sound: Fast Footsteps"
+thing 1200 s - 16 NULL "Sound: Scream"
+thing 1201 s - 16 NULL "Sound: Squish"
+thing 1206 s - 16 NULL "Sound: Growl"
+thing 1207 s - 16 NULL "Sound: Magic"
+
+thing 42 s - 20 NULL "Env: Wind"
+thing 41 s - 20 NULL "Env: Waterfall"
+
+
+#---- LINE TYPES ----------------
+
+linegroup d "Door"
+linegroup k "Keyed Door"
+linegroup p "Lift"
+linegroup f "Floor (lower)"
+linegroup r "Floor (raise)"
+linegroup c "Ceiling"
+linegroup h "Crusher"
+linegroup l "Light"
+linegroup e "Exit level"
+linegroup m "Moving floor"
+linegroup u "Stairs"
+linegroup s "Sounds"
+linegroup - "OTHER"
+
+line 0 - "-- NOTHING"
+
+line 48 - "-- Scroll Left"
+line 99 - "-- Scroll Right"
+
+line  31 d "D1 Open door (stays open)"
+line   1 d "DR Open door"
+line  46 d "GR Open door (stays open)"
+line  50 d "S1 Close door"
+line 103 d "S1 Open door (stays open)"
+line  29 d "S1 Open door"
+line  42 d "SR Close door"
+line  61 d "SR Open door (stays open)"
+line  63 d "SR Open door"
+line   3 d "W1 Close door"
+line  16 d "W1 Close door for 30 seconds"
+line   2 d "W1 Open door (stays open)"
+line   4 d "W1 Open door"
+line  75 d "WR Close door"
+line  76 d "WR Close door for 30 seconds"
+line  86 d "WR Open door (stays open)"
+line  90 d "WR Open door"
+line 100 d "WR Open door (turbo)"
+
+line  32 k "D1 Open blue door (stays open)"
+line  26 k "DR Open blue door"
+line  34 k "D1 Open yellow door (stays open)"
+line  27 k "DR Open yellow door"
+line  33 k "D1 Open green door (stays open)"
+line  28 k "DR Open green door"
+
+line  11 e "S1 Exit level"
+line  51 e "S1 Secret exit"
+line  52 e "W1 Exit level"
+line 105 e "W1 Secret exit"
+
+line  71 f "S1 Lower turbo floor to HEF + 8"
+line 102 f "S1 Lower floor to HEF"
+line  23 f "S1 Lower floor to LEF"
+line  70 f "SR Lower turbo floor to HEF + 8"
+line  45 f "SR Lower floor to HEF"
+line  60 f "SR Lower floor to LEF"
+line  68 f "SR& Raise floor to nhEF (TX)"
+line  36 f "W1 Lower turbo floor to HEF + 8"
+line  37 f "W1 Lower floor to LEF (NXP)"
+line  19 f "W1 Lower floor to HEF"
+line  38 f "W1 Lower floor to LEF"
+line  98 f "WR Lower turbo floor to HEF + 8"
+line  84 f "WR Lower floor to LEF (NXP)"
+line  83 f "WR Lower floor to HEF"
+line  82 f "WR Lower floor to LEF"
+
+line  21 p "S1 Lower lift"
+line  62 p "SR Lower lift"
+line  10 p "W1 Lower lift"
+line  88 p "WR Lower lift"
+
+line  53 m "W1 Start moving floor"
+line  54 m "W1 Stop  moving floor"
+line  87 m "WR& Start moving floor"
+line  89 m "WR& Stop  moving floor"
+
+line   7 u "S1 Raise stairs by 8"
+line 107 u "S1 Raise stairs by 16"
+line   8 u "W1 Raise stairs by 8"
+line 106 u "W1 Raise stairs by 16"
+
+line  39 - "W1 Teleport"
+line  97 - "WR Teleport"
+
+line   6 h "W1 Start fast crushing, fast hurt"
+line  25 h "W1 Start fast crushing, slow hurt"
+line  57 h "W1& Stop  crushing"
+line  77 h "WR& Start fast crushing, fast hurt"
+line  73 h "WR& Start slow crushing, slow hurt"
+line  74 h "WR& Stop  crushing"
+
+line  47 r "G1 Raise floor to nhEF (TX)"
+line  24 r "G1 Raise floor to LIC"
+line  55 r "S1 Raise floor to LIC - 8, crush"
+line 101 r "S1 Raise floor to LIC"
+line  18 r "S1 Raise floor to nhEF"
+line  20 r "S1& Raise floor to nhEF (TX)"
+line  15 r "S1& Raise floor by 24 (TX)"
+line  14 r "S1& Raise floor by 32 (TX)"
+line  65 r "SR Raise floor to LIC - 8, crush"
+line  69 r "SR Raise floor to nhEF"
+line  64 r "SR Raise floor to LIC"
+line  66 r "SR& Raise floor by 24 (TX)"
+line  67 r "SR& Raise floor by 32 (TX)"
+line  59 r "W1 Raise floor by 24 (TXP)"
+line  58 r "W1 Raise floor by 24"
+line   5 r "W1 Raise floor to LIC"
+line  30 r "W1 Raise floor by ShortestLowerTexture"
+line  22 r "W1& Raise floor to nhEF (TX)"
+line  56 r "W1& Raise floor to LIC - 8, crush"
+line  93 r "WR Raise floor by 24 (TXP)"
+line  94 r "WR Raise floor to LIC - 8, crush"
+line  95 r "WR Raise floor to nhEF (TX)"
+line  92 r "WR Raise floor by 24"
+line  91 r "WR Raise floor to LIC"
+line  96 r "WR Raise floor by ShortestLowerTexture"
+
+line  13 l "W1 Light level goes to 255"
+line  35 l "W1 Light level goes to 35"
+line  12 l "W1 Light level goes to HE"
+line 104 l "W1 Light level goes to LE"
+line  17 l "W1 Start blinking lights"
+line  81 l "WR Light level goes to 255"
+line  79 l "WR Light level goes to 35"
+line  80 l "WR Light level goes to HE"
+
+line  49 c "S1 Lower ceiling to floor + 8"
+line  41 c "S1 Lower ceiling to floor"
+line  43 c "SR Lower ceiling to floor"
+line  44 c "W1 Lower ceiling to floor + 8"
+line  40 c "W1 Raise ceiling to HEC, floor to LEF"
+line  72 c "WR Lower ceiling to floor + 8"
+
+line   9 - "S1 Donut (lower outer, raise inner)"
+
+
+#---- SECTOR TYPES -----------
+
+sector  0 "NOTHING"
+
+sector  1 "Light: Flickering"
+sector  2 "Light: Fast Strobe"
+sector  3 "Light: Slow Strobe"
+sector  8 "Light: Glowing"
+sector 12 "Light: Synch (Slow)"
+sector 13 "Light: Synch (Fast)"
+
+sector  6 "Ceiling Crush & Raise"
+sector 14 "Door: Raise in 5 min"
+sector 10 "Door: Close in 30 sec"
+sector 15 "Low Friction"
+sector  9 "Secret Area"
+
+sector  7 "Damage: Sludge"
+sector  4 "Damage: Lava Flow"
+sector  5 "Damage: Lava (Light)"
+sector 16 "Damage: Lava (Heavy)"
+
+sector 21 "Scroll: East (slow)"
+sector 22 "Scroll: East (normal)"
+sector 23 "Scroll: East (fast)"
+sector 26 "Scroll: North (slow)"
+sector 27 "Scroll: North (normal)"
+sector 28 "Scroll: North (fast)"
+sector 31 "Scroll: South (slow)"
+sector 32 "Scroll: South (normal)"
+sector 33 "Scroll: South (fast)"
+sector 36 "Scroll: West (slow)"
+sector 37 "Scroll: West (normal)"
+sector 38 "Scroll: West (fast)"
+
+sector 40 "Wind: East (weak)"
+sector 41 "Wind: East (normal)"
+sector 42 "Wind: East (strong)"
+sector 43 "Wind: North (weak)"
+sector 44 "Wind: North (normal)"
+sector 45 "Wind: North (strong)"
+sector 46 "Wind: South (weak)"
+sector 47 "Wind: South (normal)"
+sector 48 "Wind: South (strong)"
+sector 49 "Wind: West (weak)"
+sector 50 "Wind: West (normal)"
+sector 51 "Wind: West (strong)"
+

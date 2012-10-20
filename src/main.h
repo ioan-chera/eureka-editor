@@ -1,0 +1,246 @@
+//------------------------------------------------------------------------
+//  MAIN DEFINITIONS
+//------------------------------------------------------------------------
+//
+//  Eureka DOOM Editor
+//
+//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 1997-2003 André Majorel et al
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//------------------------------------------------------------------------
+//
+//  Based on Yadex which incorporated code from DEU 5.21 that was put
+//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//
+//------------------------------------------------------------------------
+
+#ifndef __EUREKA_MAIN_H__
+#define __EUREKA_MAIN_H__
+
+
+#define EUREKA_TITLE  "Eureka DOOM Editor"
+
+#define EUREKA_VERSION  "0.74"
+
+
+#define Y_UNIX
+#define Y_SNPRINTF
+
+
+/*
+ *  Standard headers
+ */
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <limits.h>
+#include <errno.h>
+#include <math.h>
+
+#if defined Y_UNIX
+#include <unistd.h>
+#endif
+
+#include <vector>
+
+
+/*
+ *  Additional libraries
+ */
+
+#include "hdr_fltk.h"
+
+
+/*
+ *  Platform-independant types and formats.
+ */
+void FatalError(const char *fmt, ...);
+void BugError(const char *fmt, ...);
+
+#include "sys_type.h"
+#include "sys_macro.h"
+#include "sys_endian.h"
+#include "sys_debug.h"
+
+
+typedef int  SelPtr;   // TEMPORARY FIXME
+
+
+#include "objid.h"
+#include "m_bitvec.h"  /* bv_set, bv_clear, bv_toggle */
+#include "m_select.h"
+
+#include "yutil.h"
+#include "ymemory.h"
+
+
+typedef enum
+{
+	SIDE_RIGHT = +1,
+	SIDE_LEFT  = -1
+}
+side_ref_e;
+
+
+/*
+ *  Platform definitions
+ */
+#if defined Y_UNIX
+const int Y_PATH      = 255;
+const int Y_FILE_NAME = 255;
+#endif
+typedef char y_file_name_t[Y_FILE_NAME + 1];
+
+
+#include "e_basis.h"
+
+
+// key modifier (does not allow two at once, e.g. CTRL+SHIFT)
+typedef enum
+{
+	KM_none = 0,
+
+	KM_SHIFT = 1,
+	KM_CTRL  = 2,
+	KM_ALT   = 3,
+}
+keymod_e;
+
+
+/*
+ *  Doom definitions
+ *  Things about the Doom engine
+ *  FIXME should move as much of this as possible to the ygd file...
+ *  FIXME Hexen has a different value for MIN_DEATHMATH_STARTS
+ */
+const int DOOM_PLAYER_HEIGHT         = 56;
+const int DOOM_FLAT_WIDTH            = 64;
+const int DOOM_FLAT_HEIGHT           = 64;
+const size_t DOOM_MIN_DEATHMATCH_STARTS = 4;
+const size_t DOOM_MAX_DEATHMATCH_STARTS = 10;
+
+
+/*
+ *  More stuff
+ */
+
+
+// Operations on the selection :
+
+#include "objects.h"
+
+
+// Confirmation options are stored internally this way :
+typedef enum
+{
+   YC_YES      = 'y',
+   YC_NO       = 'n',
+   YC_ASK      = 'a',
+   YC_ASK_ONCE = 'o'
+}
+confirm_t;
+
+
+/*
+ *  Even more stuff ("the macros and constants")
+ */
+
+extern const char *const msg_unexpected;  // "unexpected error"
+extern const char *const msg_nomem;       // "Not enough memory"
+
+// AYM 19980213: InputIntegerValue() uses this to mean that Esc was pressed
+#define IIV_CANCEL  INT_MIN
+
+
+/*
+ *  Not real variables -- just a way for functions
+ *  that return pointers to report errors in a better
+ *  fashion than by just returning NULL and setting
+ *  a global variable.
+ */
+extern char error_non_unique[1];  // Found more than one
+extern char error_none[1];        // Found none
+extern char error_invalid[1];     // Invalid parameter
+
+
+/*
+ *  Interfile global variables
+ */
+
+extern bool want_quit;
+
+extern int remind_to_build_nodes; // Remind the user to build nodes
+
+extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
+extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
+extern const char *Level_name;  // Name of map lump we are editing
+
+extern bool Replacer;     // the new map will destroy an existing one if saved
+
+// Set from command line and/or config file
+
+extern const char *config_file; // Name of the configuration file
+extern int   copy_linedef_reuse_sidedefs;
+
+extern int   default_ceiling_height;      // For new sectors
+extern char  default_ceiling_texture[8 + 1];// For new sectors
+extern int   default_floor_height;      // For new sectors
+extern char  default_floor_texture[8 + 1];  // For new sectors
+extern int   default_light_level;     // For new sectors
+extern char  default_lower_texture[8 + 1]; // For new linedefs
+extern char  default_middle_texture[8 + 1];  // For new linedefs
+extern char  default_upper_texture[8 + 1]; // For new linedefs
+
+extern const char *Iwad; // Name of the iwad
+extern const char *Pwad;
+
+extern bool  Quiet;   // Don't beep when an object is selected
+extern bool  Quieter;   // Don't beep, even on error
+extern unsigned long scroll_less;// %s of screenful to scroll by
+extern unsigned long scroll_more;// %s of screenful to scroll by
+extern int   show_help;   // Print usage message and exit.
+extern int   sprite_scale;  // Relative scale used to display sprites
+
+
+extern int KF;  // Kromulent Factor
+extern int KF_fonth;  // default font size
+
+
+
+// l_unlink.cc
+void unlink_sidedef (SelPtr linedefs, int side1, int side2);
+
+
+int entryname_cmp (const char *entry1, const char *entry2);
+
+
+bool Main_ConfirmQuit(const char *action);
+
+
+void Beep (void);
+
+
+int vertex_radius (double scale);
+
+
+#define warn     LogPrintf
+#define err      LogPrintf
+
+
+#endif  /* __EUREKA_MAIN_H__ */
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

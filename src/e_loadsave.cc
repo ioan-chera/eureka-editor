@@ -1,0 +1,944 @@
+//------------------------------------------------------------------------
+//  LEVEL LOAD / SAVE / NEW
+//------------------------------------------------------------------------
+//
+//  Eureka DOOM Editor
+//
+//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 1997-2003 André Majorel et al
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//------------------------------------------------------------------------
+//
+//  Based on Yadex which incorporated code from DEU 5.21 that was put
+//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//
+//------------------------------------------------------------------------
+
+#include "main.h"
+
+#include "e_basis.h"
+#include "e_loadsave.h"
+#include "levels.h"  // CalculateLevelBounds()
+#include "lib_adler.h"
+#include "m_config.h"
+#include "m_dialog.h"
+#include "w_rawdef.h"
+#include "w_wad.h"
+
+#include "ui_window.h"
+
+
+static crc32_c adler_crc;
+
+
+static void FreshLevel()
+{
+	BA_ClearAll();
+
+	Sector *sec = new Sector;
+	Sectors.push_back(sec);
+
+	sec->SetDefaults();
+
+	Thing *th = new Thing;
+	Things.push_back(th);
+
+	th->x = 512;
+	th->y = 512;
+	th->type = 1;
+
+	for (int i = 0 ; i < 4 ; i++)
+	{
+		Vertex *v = new Vertex;
+		Vertices.push_back(v);
+
+		v->x = (i >= 2) ? 768 : 256;
+		v->y = (i==1 || i==2) ? 768 : 256;
+
+		SideDef *sd = new SideDef;
+		SideDefs.push_back(sd);
+
+		sd->SetDefaults(false);
+
+		LineDef *ld = new LineDef;
+		LineDefs.push_back(ld);
+
+		ld->start = i;
+		ld->end   = (i+1) % 4;
+		ld->flags = MLF_Blocking;
+		ld->right = i;
+	}
+
+	CalculateLevelBounds();
+
+	if (main_win)
+		main_win->SetTitle(NULL);
+}
+
+
+extern void CMD_ZoomWholeMap();
+
+
+void CMD_NewMap()
+{
+	if (! Main_ConfirmQuit("begin a new map"))
+		return;
+
+	// if there is a current PWAD, the new map will go there
+	// (and need to determine where).  Otherwise no need to ask.
+
+	Replacer = false;
+
+	if (edit_wad)
+	{
+		const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
+		
+		// cancelled?
+		if (! map_name)
+			return;
+
+		map_name = strdup(map_name);
+
+		// would this replace an existing map?
+		if (edit_wad && edit_wad->FindLevel(map_name) >= 0)
+		{
+			Replacer = true;
+		}
+
+		Level_name = strdup(map_name);
+	}
+
+	LogPrintf("Created NEW map : %s\n", Level_name);
+
+	FreshLevel();
+
+	CMD_ZoomWholeMap();
+
+	MadeChanges = 0;
+}
+
+
+//------------------------------------------------------------------------
+//  LOADING CODE
+//------------------------------------------------------------------------
+
+static Wad_file * load_wad;
+
+static short loading_level;
+
+
+static void UpperCaseShortStr(char *buf, int max_len)
+{
+	for (int i = 0 ; (i < max_len) && buf[i] ; i++)
+	{
+		buf[i] = toupper(buf[i]);
+	}
+}
+
+
+static void LoadVertices()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("VERTEXES", loading_level);
+	if (! lump)
+		FatalError("No vertex lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to vertex lump!\n");
+
+	int count = lump->Length() / sizeof(raw_vertex_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetVertices: num = %d\n", count);
+# endif
+
+	if (count == 0)
+		FatalError("Couldn't find any Vertices\n");
+
+	Vertices.reserve(count);
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_vertex_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading vertices.\n");
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+
+		Vertex *vert = new Vertex;
+
+		vert->x = LE_S16(raw.x);
+		vert->y = LE_S16(raw.y);
+
+		Vertices.push_back(vert);
+	}
+}
+
+
+static void LoadSectors()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("SECTORS", loading_level);
+	if (! lump)
+		FatalError("No sector lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to sector lump!\n");
+
+	int count = lump->Length() / sizeof(raw_sector_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetSectors: num = %d\n", count);
+# endif
+
+	if (count == 0)
+		FatalError("Couldn't find any Sectors\n");
+
+	Sectors.reserve(count);
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_sector_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading sectors.\n");
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+
+		Sector *sec = new Sector;
+
+		sec->floorh = LE_S16(raw.floorh);
+		sec->ceilh  = LE_S16(raw.ceilh);
+
+		UpperCaseShortStr(raw.floor_tex, 8);
+		UpperCaseShortStr(raw. ceil_tex, 8);
+
+		sec->floor_tex = BA_InternaliseShortStr(raw.floor_tex, 8);
+		sec->ceil_tex  = BA_InternaliseShortStr(raw.ceil_tex,  8);
+
+		sec->light = LE_U16(raw.light);
+		sec->type  = LE_U16(raw.type);
+		sec->tag   = LE_S16(raw.tag);
+
+		Sectors.push_back(sec);
+	}
+}
+
+
+static void LoadThings()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
+	if (! lump)
+		FatalError("No things lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to things lump!\n");
+
+	int count = lump->Length() / sizeof(raw_thing_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetThings: num = %d\n", count);
+# endif
+
+	if (count == 0)
+	{
+		// Note: no error if no things exist, even though technically a map
+		// will be unplayable without the player starts.
+//!!!!		PrintWarn("Couldn't find any Things!\n");
+		return;
+	}
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_thing_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading things.\n");
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+
+		Thing *th = new Thing;
+
+		th->x = LE_S16(raw.x);
+		th->y = LE_S16(raw.y);
+
+		th->angle   = LE_U16(raw.angle);
+		th->type    = LE_U16(raw.type);
+		th->options = LE_U16(raw.options);
+
+		Things.push_back(th);
+	}
+}
+
+
+static void LoadSideDefs()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("SIDEDEFS", loading_level);
+	if (! lump)
+		FatalError("No sidedefs lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to sidedefs lump!\n");
+
+	int count = lump->Length() / sizeof(raw_sidedef_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetSidedefs: num = %d\n", count);
+# endif
+
+	if (count == 0)
+		FatalError("Couldn't find any Sidedefs\n");
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_sidedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading sidedefs.\n");
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+
+		SideDef *sd = new SideDef;
+
+		sd->x_offset = LE_S16(raw.x_offset);
+		sd->y_offset = LE_S16(raw.y_offset);
+
+		UpperCaseShortStr(raw.upper_tex, 8);
+		UpperCaseShortStr(raw.lower_tex, 8);
+		UpperCaseShortStr(raw.  mid_tex, 8);
+
+		sd->upper_tex = BA_InternaliseShortStr(raw.upper_tex, 8);
+		sd->lower_tex = BA_InternaliseShortStr(raw.lower_tex, 8);
+		sd->  mid_tex = BA_InternaliseShortStr(raw.  mid_tex, 8);
+
+		sd->sector = LE_U16(raw.sector);
+
+//!!!!!!		if (sd->sector >= NumSectors)  // FIXME warning
+//!!!!!!			sd->sector = 0;
+
+		SideDefs.push_back(sd);
+	}
+}
+
+
+static void LoadLineDefs()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("LINEDEFS", loading_level);
+	if (! lump)
+		FatalError("No linedefs lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to linedefs lump!\n");
+
+	int count = lump->Length() / sizeof(raw_linedef_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetLinedefs: num = %d\n", count);
+# endif
+
+	if (count == 0)
+		FatalError("Couldn't find any Linedefs");
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_linedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading linedefs.\n");
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+
+		LineDef *ld = new LineDef;
+
+		ld->start = LE_U16(raw.start);
+		ld->end   = LE_U16(raw.end);
+
+		ld->flags = LE_U16(raw.flags);
+		ld->type  = LE_U16(raw.type);
+		ld->tag   = LE_S16(raw.tag);
+
+		ld->right = LE_U16(raw.right);
+		ld->left  = LE_U16(raw.left);
+
+		// FIXME vertex check
+
+		if (ld->right == 0xFFFF)
+			ld->right = -1;
+//!!!!!!		else if (ld->right >= NumSideDefs)
+//!!!!!!			ld->right = 0;  // FIXME warning
+
+		if (ld->left == 0xFFFF)
+			ld->left = -1;
+//!!!!!!		else if (ld->left >= NumSideDefs)
+//!!!!!!			ld->left = -1;  // FIXME warning
+
+		LineDefs.push_back(ld);
+	}
+}
+
+
+static void RemoveUnusedVertices()
+{
+	if (NumVertices == 0)
+		return;
+
+	bitvec_c *used_verts = new bitvec_c(NumVertices);
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		used_verts->set(LineDefs[i]->start);
+		used_verts->set(LineDefs[i]->end);
+	}
+
+	int new_count = NumVertices;
+
+	while (new_count > 2 && !used_verts->get(new_count-1))
+		new_count--;
+
+	// we directly modify the vertex array here (which is not
+	// normally kosher, but level loading is a special case).
+	if (new_count < NumVertices)
+	{
+		LogPrintf("Removing %d unused vertices at end\n", new_count);
+
+		for (int i = new_count ; i < NumVertices ; i++)
+			delete Vertices[i];
+
+		Vertices.resize(new_count);
+	}
+
+	delete used_verts;
+}
+
+
+/*
+   read in the level data
+*/
+
+void LoadLevel(Wad_file *wad, const char *level)
+{
+	load_wad = wad;
+
+	loading_level = load_wad->FindLevel(level);
+	if (loading_level < 0)
+		FatalError("No such map: %s\n", level);
+
+	adler_crc.Reset();
+
+	BA_ClearAll();
+
+	// this order must match the order in SaveLevel(), so that we
+	// compute the same CRC values.
+	LoadThings  ();
+	LoadLineDefs();
+	LoadSideDefs();
+	LoadVertices();
+
+	LoadSectors ();
+
+
+	// FIXME !!!!  check all references 
+
+
+	// Node builders create a lot of new vertices for segs.
+	// However they just get in the way for editing, so remove them.
+	RemoveUnusedVertices();
+
+	CalculateLevelBounds();
+
+	Level_name = strdup(level);
+
+	if (main_win)
+	{
+		main_win->SetTitle(wad);
+
+		// load the user state associated with this map
+		if (! M_LoadUserState(&adler_crc))
+		{
+			M_DefaultUserState();
+		}
+	}
+
+    edit.RedrawMap = 1;
+}
+
+
+void CMD_OpenMap()
+{
+	if (! Main_ConfirmQuit("open another map"))
+		return;
+
+	// TODO: show a menu of available levels
+	//       (with a choice for IWAD / PWAD)
+	//       AND A BUTTON TO LOAD A WAD --> sets 'edit_wad'
+
+	Wad_file *new_wad = NULL;
+
+	if (Confirm(-1, -1, "Is the map located in another WAD file?", NULL))
+	{
+		do {
+			Fl_Native_File_Chooser chooser;
+
+			chooser.title("Pick file to open");
+			chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+			chooser.filter("Wads\t*.wad");
+
+			//??  chooser.directory("xxx");
+
+			// Show native chooser
+			switch (chooser.show())
+			{
+				case -1:
+					LogPrintf("Open Map: error choosing file:\n");
+					LogPrintf("   %s\n", chooser.errmsg());
+
+					Notify(-1, -1, "Unable to open the map:",
+							chooser.errmsg());
+					return;
+
+				case 1:
+					LogPrintf("Open Map: cancelled by user\n");
+					return;
+
+				default:
+					break;  // OK
+			}
+
+			new_wad = Wad_file::Open(chooser.filename(), 'a');
+
+			if (! new_wad)
+			{
+				// FIXME: get an error message, add it here
+
+				Notify(-1, -1, "Unable to open the chosen WAD file.\n"
+						"\n"
+						"Please try again.", NULL);
+			}
+
+		} while (! new_wad);
+
+		// Note: master directory is updated later (on success)
+	}
+
+
+	const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
+
+	// cancelled?
+	if (! map_name)
+		return;
+
+	map_name = strdup(map_name);
+
+
+	Wad_file *wad = new_wad ? new_wad : edit_wad ? edit_wad : base_wad;
+
+	if (wad && wad->FindLevel(map_name) < 0)
+	{
+		if (wad != edit_wad)
+		{
+			delete new_wad;
+
+			Notify(-1, -1, "No such map: ", map_name);
+			return;
+		}
+
+		if (! Confirm(-1, -1,	"The map does not exist in the current PWAD.\n"
+								"Do you want to try the other wads?\n", NULL))
+		{
+			return;
+		}
+
+		// FIXME: TRY ALL OTHER WADS (not just iwad)
+
+		wad = base_wad;
+
+		if (wad->FindLevel(map_name) < 0)
+		{
+			Notify(-1, -1, "No such map: ", map_name);
+			return;
+		}
+	}
+
+
+	// a new wad replaces the current PWAD
+	if (new_wad)
+	{
+		if (edit_wad)
+		{
+			MasterDir_Remove(edit_wad);
+
+			delete edit_wad;
+		}
+
+		edit_wad = new_wad;
+
+		MasterDir_Add(edit_wad);
+	}
+
+
+	LogPrintf("Loading Map : %s %s\n", wad->PathName(), map_name);
+
+	LoadLevel(wad, map_name);
+
+	Replacer = false;
+	MadeChanges = 0;
+
+	CMD_ZoomWholeMap();
+}
+
+
+//------------------------------------------------------------------------
+//  SAVING CODE
+//------------------------------------------------------------------------
+
+static Wad_file *save_wad;
+
+
+static void SaveVertices()
+{
+	int size = NumVertices * (int)sizeof(raw_vertex_t);
+
+	Lump_c *lump = save_wad->AddLump("VERTEXES", size);
+
+	for (int i = 0 ; i < NumVertices ; i++)
+	{
+		Vertex *vert = Vertices[i];
+
+		raw_vertex_t raw;
+
+		raw.x = LE_S16(vert->x);
+		raw.y = LE_S16(vert->y);
+
+		lump->Write(&raw, sizeof(raw));
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
+static void SaveSectors()
+{
+	int size = NumSectors * (int)sizeof(raw_sector_t);
+
+	Lump_c *lump = save_wad->AddLump("SECTORS", size);
+
+	for (int i = 0 ; i < NumSectors ; i++)
+	{
+		Sector *sec = Sectors[i];
+
+		raw_sector_t raw;
+		
+		raw.floorh = LE_S16(sec->floorh);
+		raw.ceilh  = LE_S16(sec->ceilh);
+
+		strncpy(raw.floor_tex, sec->FloorTex(), sizeof(raw.floor_tex));
+		strncpy(raw.ceil_tex,  sec->CeilTex(),  sizeof(raw.ceil_tex));
+
+		raw.light = LE_U16(sec->light);
+		raw.type  = LE_U16(sec->type);
+		raw.tag   = LE_U16(sec->tag);
+
+		lump->Write(&raw, sizeof(raw));
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
+static void SaveThings()
+{
+	int size = NumThings * (int)sizeof(raw_thing_t);
+
+	Lump_c *lump = save_wad->AddLump("THINGS", size);
+
+	for (int i = 0 ; i < NumThings ; i++)
+	{
+		Thing *th = Things[i];
+
+		raw_thing_t raw;
+		
+		raw.x = LE_S16(th->x);
+		raw.y = LE_S16(th->y);
+
+		raw.angle   = LE_U16(th->angle);
+		raw.type    = LE_U16(th->type);
+		raw.options = LE_U16(th->options);
+
+		lump->Write(&raw, sizeof(raw));
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
+static void SaveSideDefs()
+{
+	int size = NumSideDefs * (int)sizeof(raw_sidedef_t);
+
+	Lump_c *lump = save_wad->AddLump("SIDEDEFS", size);
+
+	for (int i = 0 ; i < NumSideDefs ; i++)
+	{
+		SideDef *side = SideDefs[i];
+
+		raw_sidedef_t raw;
+		
+		raw.x_offset = LE_S16(side->x_offset);
+		raw.y_offset = LE_S16(side->y_offset);
+
+		strncpy(raw.upper_tex, side->UpperTex(), sizeof(raw.upper_tex));
+		strncpy(raw.lower_tex, side->LowerTex(), sizeof(raw.lower_tex));
+		strncpy(raw.mid_tex,   side->MidTex(),   sizeof(raw.mid_tex));
+
+		raw.sector = LE_U16(side->sector);
+
+		lump->Write(&raw, sizeof(raw));
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
+static void SaveLineDefs()
+{
+	int size = NumLineDefs * (int)sizeof(raw_linedef_t);
+
+	Lump_c *lump = save_wad->AddLump("LINEDEFS", size);
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		LineDef *ld = LineDefs[i];
+
+		raw_linedef_t raw;
+		
+		raw.start = LE_U16(ld->start);
+		raw.end   = LE_U16(ld->end);
+
+		raw.flags = LE_U16(ld->flags);
+		raw.type  = LE_U16(ld->type);
+		raw.tag   = LE_S16(ld->tag);
+
+		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
+		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
+
+		lump->Write(&raw, sizeof(raw));
+
+		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
+static void EmptyLump(const char *name)
+{
+	save_wad->AddLump(name)->Finish();
+}
+
+
+static void SaveLevel(Wad_file *wad, const char *level)
+{
+	save_wad = wad;
+
+	save_wad->BeginWrite();
+
+	// remove previous version of level (if it exists)
+	int level_lump = save_wad->FindLevel(level);
+	if (level_lump >= 0)
+		save_wad->RemoveLevel(level_lump);
+
+	save_wad->AddLevel(level, 0)->Finish();
+
+	adler_crc.Reset();
+
+	SaveThings  ();
+	SaveLineDefs();
+	SaveSideDefs();
+	SaveVertices();
+
+	EmptyLump("SEGS");
+	EmptyLump("SSECTORS");
+	EmptyLump("NODES");
+
+	SaveSectors();
+
+	EmptyLump("REJECT");
+	EmptyLump("BLOCKMAP");
+
+	// write out the new directory
+	save_wad->EndWrite();
+
+	Level_name = strdup(level);
+
+	if (main_win)
+	{
+		main_win->SetTitle(wad);
+
+		// save the user state, associated with this map
+		M_SaveUserState(&adler_crc);
+	}
+}
+
+
+void CMD_SaveMap()
+{
+	// we require a wad file to save into.
+	// if there is none, then need to create one via Export function.
+
+	if (! edit_wad)
+	{
+		CMD_ExportMap();
+		return;
+	}
+
+	// warn user if a fresh map would destroy an existing one
+
+	if (Replacer)
+	{
+		// TODO: ideally have "Export" as an option
+
+		if (! Confirm(-1, -1, "The current PWAD already contains this map.\n"
+		                      "This operation will destroy that map (overwrite it).\n"
+							  "\n"
+		                      "Are you sure you want to continue?", NULL))
+		{
+			return;
+		}
+	}
+
+	LogPrintf("Saving Map : %s %s\n", edit_wad->PathName(), Level_name);
+
+	SaveLevel(edit_wad, Level_name);
+
+	Replacer = false;
+	MadeChanges = 0;
+}
+
+
+void CMD_ExportMap()
+{
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to export to");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	// Show native chooser
+	switch (chooser.show())
+	{
+		case -1:
+			LogPrintf("Export Map: error choosing file:\n");
+			LogPrintf("   %s\n", chooser.errmsg());
+
+			Notify(-1, -1, "Unable to export the map:",
+			       chooser.errmsg());
+			return;
+
+		case 1:
+			LogPrintf("Export Map: cancelled by user\n");
+			return;
+
+		default:
+			break;  // OK
+	}
+
+	/// if extension is missing then add ".wad"
+	char filename[FL_PATH_MAX];
+
+	strcpy(filename, chooser.filename());
+
+	char *pos = (char *)fl_filename_ext(filename);
+	if (! *pos)
+		strcat(filename, ".wad");
+
+
+	const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
+	
+	// cancelled?
+	if (! map_name)
+		return;
+
+	map_name = strdup(map_name);
+
+
+	// does the file already exist?
+	bool exists = FileExists(filename);
+
+	Wad_file *wad;
+
+	if (exists)
+	{
+		wad = Wad_file::Open(filename, 'a');
+	}
+	else
+	{
+		wad = Wad_file::Open(filename, 'w');
+	}
+
+	if (! wad)
+	{
+		Notify(-1, -1, "Unable to export the map:", "Error creating output file");
+		return;
+	}
+
+	// we will write into the chosen wad.
+	// however if the level already exists, get confirmation first
+
+	if (exists && wad->FindLevel(map_name) >= 0)
+	{
+		if (! Confirm(-1, -1, "The selected WAD already contains this map.\n"
+		                      "This operation will destroy that map (overwrite it).\n"
+							  "\n"
+		                      "Are you sure you want to continue?", NULL))
+		{
+			delete wad;
+
+			return;
+		}
+	}
+
+
+	LogPrintf("Exporting Map : %s %s\n", wad->PathName(), map_name);
+
+	SaveLevel(wad, map_name);
+
+
+	// the new wad replaces the current PWAD
+
+	if (edit_wad)
+	{
+		MasterDir_Remove(edit_wad);
+
+		delete edit_wad;
+	}
+
+	edit_wad = wad;
+
+	MasterDir_Add(edit_wad);
+
+	Replacer = false;
+	MadeChanges = 0;
+}
+
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

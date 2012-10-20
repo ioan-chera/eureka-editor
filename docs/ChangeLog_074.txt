@@ -1,0 +1,52 @@
+
+CHANGES IN Eureka 0.74 (r1421)
+==============================
+
+(Main changes since 0.72 version)
+
+
++  show the current WAD and map in the window title bar.
+
++  clipboard persists when changing maps, so you can copy-n-paste
+   from one map/wad to another map/wad.
+
++  various user state (grid settings, camera, editing mode, etc..)
+   persists when a map is saved, and is restored when the same map
+   is loaded again.
+
++  improved SECTOR insertion:
+   (a) copy properties from a selected sector, or try a neighboring
+       sector if no selection.  Use default value as last resort.
+   (b) if CTRL is pressed, then new area BECOMES the same sector as
+       the one selected.
+
++  new 'Sort' setting in Thing/Line/Sector type browsers.
+
++  new 'ADD' and 'DEL' sidedef buttons in the LineDef panel.
+
++  new -port option to select the source port.  Defaults to boom.
+   Other values currently supported are: vanilla, edge.
+
+-  fixed problem where you could seemingly close a line loop, but due to
+   grid snapping the vertex was merely placed on top of the existing one
+   and it did not actually close the loop.
+
+-  fixed bug where closing a line-loop around an existing shape did
+   not apply the new sector to the outside of that shape.
+
+-  new outside-of-map sectors now occupy a single grid square.
+
+-  File/New does not ask for map slot unless there's a current PWAD,
+   since that will be asked on the File/Save (== File/Export).
+
+-  File/Export asks for the map slot _after_ the filename.
+
+-  dynamic rotating (CTRL + middle button) no longer scales.
+
+-  dragging/scaling/rotating vertices will draw the lines too.
+
+-  fixed display of a certain flat (CEIL4_1 IIRC) which was showing
+   bright cyan in parts that should be black (palette color #247).
+
+-  better looking About box.
+

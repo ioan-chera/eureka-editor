@@ -1,0 +1,45 @@
+
+CHANGES IN Eureka 0.72 (r1330)
+==============================
+
+(Main changes since 0.64 version, r824)
+
+
+++  the File menu is fully operational (albeit a bit clunky)
+
+++  browser for textures, flats, thing types (etc)
+
+++  can scale/rotate stuff with middle mouse button
+
+
++  grid snapping works again ('f' key to toggle)
+
++  quantization function ('q' key) which grid-snaps objects
+
++  disconnect function ('d' key) in vertex and linedef modes
+
++  automatic sector insertion when closing a line loop
++  automatic sector splitting when a line crosses a sector
+
++  the -iwad option works again
+
+
+-  split linedefs by just inserting a vertex on a highlighted line
+-  merge two linedefs by just deleting the vertex in-between
+
+-  select linedef path function ('e' key)
+-  correct sector function ('c' key)
+-  new sectors get default flats/textures/etc
+
+-  invert selection function (CTRL-I or Edit menu)
+-  draw the camera on the map (a pink arrow)
+-  move camera function (' key) and goto camera (END key)
+
+-  can find an IWAD (doom2.wad only) in $DOOMWADDIR
+-  the IWAD is opened in read-only mode
+
+-  partial support for DOOM 1 and HERETIC (need -warp E1M1)
+
+-  games/ directory for game definitions
+-  ports/ directory for source port definitions
+ 

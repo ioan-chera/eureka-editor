@@ -1,0 +1,58 @@
+
+EUREKA SHORT-TERM TODO
+======================
+
+
+General
+-------
+
+!!!  need eureka.cfg ??
+
+DONE: make sure that './eureka foo.wad' works (i.e. without -file)
+
+!!  proper Unixy install (executable in /usr/bin, etc).
+
+   + need to find the install dir (e.g. /opt/share/eureka)
+     and find config files there.
+
+   + check for $(HOME)/.eureka  [create if no exist] and
+     find config files there.
+
+!!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
+    also: File/Add Resource
+
+-  a check/fix pass for LoadLevel()
+
+??  easier compiling (use system lib for FLTK)
+
+
+
+Coding
+------
+
+!!  rework / tidy up parsing code in m_config and m_game
+
+
+
+Editing
+-------
+
+
+
+Browser
+-------
+
++  a "wide" mode
+
+-  picture mode for things
+
+
+
+Renderer
+--------
+
+
+Game / Port Definitions
+-----------------------
+
+

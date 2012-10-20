@@ -1,0 +1,1886 @@
+//------------------------------------------------------------------------
+//  OBJECT OPERATIONS
+//------------------------------------------------------------------------
+//
+//  Eureka DOOM Editor
+//
+//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 1997-2003 André Majorel et al
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//------------------------------------------------------------------------
+//
+//  Based on Yadex which incorporated code from DEU 5.21 that was put
+//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//
+//------------------------------------------------------------------------
+
+#include "main.h"
+
+#include <algorithm>
+
+#include "r_misc.h"
+#include "e_linedef.h"
+#include "e_sector.h"
+#include "e_things.h"
+#include "e_vertex.h"
+#include "editloop.h"
+#include "levels.h"
+#include "objects.h"
+#include "m_game.h"  // g_default_thing
+#include "r_grid.h"
+#include "selectn.h"
+#include "s_misc.h"
+#include "w_rawdef.h"
+#include "x_hover.h"
+#include "x_loop.h"
+
+#include "ui_window.h"
+
+
+static bool invalidated_totals;
+static bool invalidated_panel_obj;
+static bool changed_panel_obj;
+
+
+
+void ObjectBox_NotifyBegin()
+{
+	invalidated_totals = false;
+	invalidated_panel_obj = false;
+	changed_panel_obj = false;
+}
+
+
+void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
+{
+	invalidated_totals = true;
+
+	if (type != edit.obj_type)
+		return;
+
+	if (objnum > main_win->GetPanelObjNum())
+		return;
+	
+	invalidated_panel_obj = true;
+}
+
+
+void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
+{
+	invalidated_totals = true;
+
+	if (type != edit.obj_type)
+		return;
+
+	if (objnum > main_win->GetPanelObjNum())
+		return;
+	
+	invalidated_panel_obj = true;
+}
+
+
+void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field)
+{
+	if (type != edit.obj_type)
+		return;
+
+	if (objnum != main_win->GetPanelObjNum())
+		return;
+
+	changed_panel_obj = true;
+}
+
+
+void ObjectBox_NotifyEnd()
+{
+	if (invalidated_totals)
+		main_win->UpdateTotals();
+
+	if (invalidated_panel_obj)
+	{
+		main_win->InvalidatePanelObj();
+	}
+	else if (changed_panel_obj)
+	{
+		main_win->UpdatePanelObj();
+	}
+}
+
+
+/*
+   get the number of objects of a given type minus one
+*/
+obj_no_t GetMaxObjectNum (int objtype)
+{
+	switch (objtype)
+	{
+		case OBJ_THINGS:
+			return NumThings - 1;
+		case OBJ_LINEDEFS:
+			return NumLineDefs - 1;
+		case OBJ_SIDEDEFS:
+			return NumSideDefs - 1;
+		case OBJ_VERTICES:
+			return NumVertices - 1;
+		case OBJ_SECTORS:
+			return NumSectors - 1;
+	}
+	return -1;
+}
+
+
+
+/*
+   delete a group of objects.
+   The selection is no longer valid after this!
+*/
+void DeleteObjects(selection_c *list)
+{
+	// we need to process the object numbers from highest to lowest,
+	// because each deletion invalidates all higher-numbered refs
+	// in the selection.  Our selection iterator cannot give us
+	// what we need, hence put them into a vector for sorting.
+
+	std::vector<int> objnums;
+
+	selection_iterator_c it;
+	for (list->begin(&it) ; !it.at_end() ; ++it)
+		objnums.push_back(*it);
+
+	std::sort(objnums.begin(), objnums.end());
+
+	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
+	{
+		BA_Delete(list->what_type(), objnums[i]);
+	}
+}
+
+
+
+/*
+ *  DoInsertObject
+ *
+ *  Insert a new object of type <objtype> at map coordinates
+ *  (<xpos>, <ypos>).
+ *
+ *  If <copyfrom> is a valid object number, the other properties
+ *  of the new object are set from the properties of that object,
+ *  with the exception of sidedef numbers, which are forced
+ *  to OBJ_NO_NONE.
+ *
+ *  The object is inserted at the exact coordinates given.
+ *  No snapping to grid is done.
+ */
+int DoInsertObject(obj_type_e objtype, obj_no_t copyfrom, int xpos, int ypos)
+{
+#if 0  // FIXME
+	MarkChanges();
+
+	switch (objtype)
+	{
+		case OBJ_THINGS:
+		{
+			int objnum = RawCreateThing();
+
+			Thing *T = &Things[objnum];
+
+			T->x = xpos;
+			T->y = ypos;
+
+			if (is_obj(copyfrom))
+			{
+				T->type    = Things[copyfrom]->type;
+				T->angle   = Things[copyfrom]->angle;
+				T->options = Things[copyfrom]->options;
+			}
+			else
+			{
+				T->type = default_thing;
+				T->angle = 0;
+				T->options = 0x07;
+			}
+
+			return objnum;
+		}
+
+		case OBJ_VERTICES:
+		{
+			int objnum = RawCreateVertex();
+
+			Vertex *V = &Vertices[objnum];
+
+			V->x = xpos;
+			V->y = ypos;
+
+			if (xpos < MapBound_lx) MapBound_lx = xpos;
+			if (ypos < MapBound_ly) MapBound_ly = ypos;
+			if (xpos > MapBound_hx) MapBound_hx = xpos;
+			if (ypos > MapBound_hy) MapBound_hy = ypos;
+
+			MarkChanges(2);
+
+			return objnum;
+		}
+
+		case OBJ_LINEDEFS:
+		{
+			int objnum = RawCreateLineDef();
+
+			LineDef *L = &LineDefs[objnum];
+
+			if (is_obj (copyfrom))
+			{
+				L->start = LineDefs[copyfrom]->start;
+				L->end   = LineDefs[copyfrom]->end;
+				L->flags = LineDefs[copyfrom]->flags;
+				L->type  = LineDefs[copyfrom]->type;
+				L->tag   = LineDefs[copyfrom]->tag;
+			}
+			else
+			{
+				L->start = 0;
+				L->end   = NumVertices - 1;
+				L->flags = 1;
+			}
+
+			L->right = OBJ_NO_NONE;
+			L->left = OBJ_NO_NONE;
+
+			return objnum;
+		}
+
+		case OBJ_SIDEDEFS:
+		{
+			int objnum = RawCreateSideDef();
+
+			SideDef *S = &SideDefs[objnum];
+
+			if (is_obj(copyfrom))
+			{
+				S->x_offset = SideDefs[copyfrom]->x_offset;
+				S->y_offset = SideDefs[copyfrom]->y_offset;
+				S->sector   = SideDefs[copyfrom]->sector;
+
+				strncpy(S->upper_tex, SideDefs[copyfrom]->upper_tex, WAD_TEX_NAME);
+				strncpy(S->lower_tex, SideDefs[copyfrom]->lower_tex, WAD_TEX_NAME);
+				strncpy(S->mid_tex,   SideDefs[copyfrom]->mid_tex,   WAD_TEX_NAME);
+			}
+			else
+			{
+				S->sector = NumSectors - 1;
+
+				strcpy(S->upper_tex, "-");
+				strcpy(S->lower_tex, "-");
+				strcpy(S->mid_tex, default_middle_texture);
+			}
+			
+			MarkChanges();
+
+			return objnum;
+		}
+
+		case OBJ_SECTORS:
+		{
+			int objnum = RawCreateSector();
+
+			Sector *S = &Sectors[objnum];
+
+			if (is_obj(copyfrom))
+			{
+				S->floorh = Sectors[copyfrom]->floorh;
+				S->ceilh  = Sectors[copyfrom]->ceilh;
+				S->light  = Sectors[copyfrom]->light;
+				S->type   = Sectors[copyfrom]->type;
+				S->tag    = Sectors[copyfrom]->tag;
+
+				strncpy(S->floor_tex, Sectors[copyfrom]->floor_tex, WAD_FLAT_NAME);
+				strncpy(S->ceil_tex,  Sectors[copyfrom]->ceil_tex, WAD_FLAT_NAME);
+			}
+			else
+			{
+				S->floorh = default_floor_height;
+				S->ceilh  = default_ceiling_height;
+				S->light  = default_light_level;
+
+				strncpy(S->floor_tex, default_floor_texture, WAD_FLAT_NAME);
+				strncpy(S->ceil_tex,  default_ceiling_texture, WAD_FLAT_NAME);
+			}
+
+			return objnum;
+		}
+
+		default:
+			BugError("InsertObject: bad objtype %d", (int) objtype);
+	}
+
+#endif
+	return OBJ_NO_NONE;  /* NOT REACHED */
+}
+
+
+static bool LineDefAlreadyExists(int v1, int v2)
+{
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		LineDef *L = LineDefs[n];
+
+		if (L->start == v1 && L->end == v2) return true;
+		if (L->start == v2 && L->end == v1) return true;
+	}
+
+	return false;
+}
+
+
+static void CreateSquare(const Sector * model)
+{
+	int new_sec = BA_New(OBJ_SECTORS);
+
+	Sectors[new_sec]->SetDefaults();
+
+	// make the new sector occupy a single grid square
+
+	int x1 = grid.QuantSnapX(edit.map_x, false);
+	int y1 = grid.QuantSnapX(edit.map_y, false);
+
+	int x2 = grid.QuantSnapX(edit.map_x, true);
+	int y2 = grid.QuantSnapX(edit.map_y, true);
+
+	if (x1 == x2)
+		x2 += grid.step;
+	else if (x1 > x2)
+		std::swap(x1, x2);
+
+	if (y1 == y2)
+		y2 += grid.step;
+	else if (y1 > y2)
+		std::swap(y1, y2);
+
+	for (int i = 0 ; i < 4 ; i++)
+	{
+		int new_v = BA_New(OBJ_VERTICES);
+
+		Vertices[new_v]->x = (i >= 2) ? x2 : x1;
+		Vertices[new_v]->y = (i==1 || i==2) ? y2 : y1;
+
+		int new_sd = BA_New(OBJ_SIDEDEFS);
+
+		SideDefs[new_sd]->SetDefaults(false);
+		SideDefs[new_sd]->sector = new_sec;
+
+		int new_ld = BA_New(OBJ_LINEDEFS);
+
+		LineDef * L = LineDefs[new_ld];
+
+		L->start = new_v;
+		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
+		L->flags = MLF_Blocking;
+		L->right = new_sd;
+	}
+
+	// select it
+	edit.Selected->clear_all();
+	edit.Selected->set(new_sec);
+}
+
+
+static void Insert_Thing()
+{
+	BA_Begin();
+
+	int new_t = BA_New(OBJ_THINGS);
+
+	Thing *T = Things[new_t];
+
+	T->x = grid.SnapX(edit.map_x);
+	T->y = grid.SnapY(edit.map_y);
+
+	T->type = atoi(g_default_thing.c_str());
+
+	BA_End();
+
+	// select it
+	edit.Selected->clear_all();
+	edit.Selected->set(new_t);
+}
+
+
+static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
+{
+	lineloop_c right_loop;
+	lineloop_c  left_loop;
+
+	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
+	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
+
+	// require all lines to be "new" (no sidedefs)
+	right_ok = right_ok && right_loop.AllNew();
+	 left_ok =  left_ok &&  left_loop.AllNew();
+
+	// check if one of the loops is OK and faces outward.
+	// in that case, we just make the island part of the surrounding
+	// sector (i.e. we DON'T put a new sector in the inside area).
+	// [[ Except when new island contains an island ! ]]
+
+	bool did_outer = false;
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		lineloop_c& loop = (pass == 0) ? right_loop : left_loop;
+
+		bool ok = (pass == 0) ? right_ok : left_ok;
+
+		if (ok && loop.faces_outward)
+		{
+			int sec_num = loop.FacesSector();
+
+			if (sec_num >= 0)
+			{
+				AssignSectorToLoop(loop, sec_num, flip);
+				did_outer = true;
+			}
+		}
+	}
+
+	// otherwise try to create new sector in the inside area
+
+	// TODO: CONFIG ITEM 'auto_insert_sector'
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		lineloop_c& loop = (pass == 0) ? right_loop : left_loop;
+
+		bool ok = (pass == 0) ? right_ok : left_ok;
+		
+		if (ok && ! loop.faces_outward)
+		{
+			loop.FindIslands();
+
+			// if the loop is inside a sector, only create the inner
+			// sector if we surrounded something.
+			// TODO: CONFIG ITEM ?
+
+			if (did_outer && loop.islands.empty())
+				return;
+
+			int new_sec = BA_New(OBJ_SECTORS);
+
+			Sectors[new_sec]->SetDefaults();
+
+			AssignSectorToLoop(loop, new_sec, flip);
+		}
+	}
+}
+
+
+static bool TwoNeighboringLineDefs(int new_ld, int v1, int v2,
+                                   int *ld1, int *side1,
+							       int *ld2, int *side2)
+{
+	// find the two linedefs that are neighbors to the new line at
+	// the second vertex (v2).  The first one (ld1) is on new_ld's
+	// right side, and the second one (ld2) is on new_ld's left side.
+
+	*ld1 = -1;
+	*ld2 = -1;
+
+	double best_angle1 =  9999;
+	double best_angle2 = -9999;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (n == new_ld)
+			continue;
+
+		const LineDef *L = LineDefs[n];
+
+		int other_v;
+
+		if (L->start == v2)
+			other_v = L->end;
+		else if (L->end == v2)
+			other_v = L->start;
+		else
+			continue;
+
+		double angle = AngleBetweenLines(v1, v2, other_v);
+
+		// overlapping lines
+		if (fabs(angle) < 0.0001)
+			return false;
+
+		if (angle < best_angle1)
+		{
+			*ld1 = n;
+			*side1 = (other_v == L->start) ? SIDE_LEFT : SIDE_RIGHT;
+			best_angle1 = angle;
+		}
+
+		if (angle > best_angle2)
+		{
+			*ld2 = n;
+			*side2 = (other_v == L->start) ? SIDE_RIGHT : SIDE_LEFT;
+			best_angle2 = angle;
+		}
+	}
+
+#if 0
+	fprintf(stderr, "best right: line:#%d side:%d angle:%1.2f\n",
+	        *ld1, *side1, best_angle1);
+	fprintf(stderr, "best left: line:#%d side:%d angle:%1.2f\n",
+	        *ld2, *side2, best_angle2);
+#endif
+
+	if (*ld1 < 0 || *ld2 < 0 || *ld1 == *ld2)
+		return false;
+
+	return true;
+}
+
+
+#if 0
+static void SplitSector(int new_ld, int v1, int v2,
+{
+	lineloop_c right_loop;
+	lineloop_c  left_loop;
+
+	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
+	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
+}
+#endif
+
+
+static void ClosedLoop_Complex(int new_ld, int v1, int v2, selection_c& flip)
+{
+fprintf(stderr, "COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
+
+	// find the two linedefs which are nearest to the new line
+
+	int left_ld,   right_ld;
+	int left_side, right_side;
+
+	if (! TwoNeighboringLineDefs(new_ld, v1, v2, &right_ld, &right_side, &left_ld, &left_side))
+	{
+		// Beep();
+		return;
+	}
+
+	int right_front = LineDefs[right_ld]->WhatSector(right_side);
+	int  left_front = LineDefs[ left_ld]->WhatSector( left_side);
+
+	int right_back = LineDefs[right_ld]->WhatSector(- right_side);
+	int  left_back = LineDefs[ left_ld]->WhatSector(-  left_side);
+
+	bool right_new = (right_front < 0) && (right_back < 0);
+	bool  left_new = ( left_front < 0) && ( left_back < 0);
+
+fprintf(stderr, "RIGHT LINE #%d : front=%d back=%d\n", right_ld, right_front, right_back); 
+fprintf(stderr, " LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_back); 
+
+	if (right_new || left_new)
+	{
+		// OK
+	}
+	else if (right_front != left_front)
+	{
+		// geometry is broken : disable auto-split or auto-sectoring.
+
+		// Beep();
+		return;
+	}
+
+	// do nothing if touching a "self-referencing linedef"
+	// TODO: REVIEW THIS
+	if ((right_front >= 0 && right_back == right_front) ||
+	    ( left_front >= 0 &&  left_back ==  left_front))
+	{
+		// Beep();
+		return;
+	}
+
+	// AT HERE : either splitting a sector or extending one
+
+	lineloop_c right_loop;
+	lineloop_c  left_loop;
+
+	// trace the loops on either side of the new line
+
+	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
+	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
+
+fprintf(stderr, "right_ok : %s\n", right_ok ? "yes" : "NO!");
+fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
+
+	if (right_front >= 0 &&
+	    right_front == left_front &&
+	    (right_ok && !right_loop.faces_outward) &&
+	    ( left_ok && ! left_loop.faces_outward))
+	{
+		// the SPLITTING case....
+		fprintf(stderr, "SPLITTING sector #%d\n", right_front);
+
+		// TODO: CONFIG ITEM 'auto_split'
+
+		// ensure original sector is OK
+		lineloop_c orig_loop;
+
+		if (! TraceLineLoop(right_ld, right_side, orig_loop, true /* ignore_new */))
+		{
+			fprintf(stderr, "Traced original : failed\n");
+			return;
+		}
+
+		if (! orig_loop.SameSector())
+		{
+			fprintf(stderr, "Original not all same\n");
+			return;
+		}
+
+		// OK WE ARE SPLITTING IT : pick which side will stay the same
+
+		double right_total = right_loop.TotalLength();
+		double  left_total =  left_loop.TotalLength();
+
+		lineloop_c&  mod_loop = (left_total < right_total) ? left_loop : right_loop;
+		lineloop_c& keep_loop = (left_total < right_total) ? right_loop : left_loop;
+
+		// we'll need the islands too
+		mod_loop.FindIslands();
+
+		int new_sec = BA_New(OBJ_SECTORS);
+
+		Sectors[new_sec]->RawCopy(Sectors[right_front]);
+
+		AssignSectorToLoop( mod_loop, new_sec,     flip);
+		AssignSectorToLoop(keep_loop, right_front, flip);
+		return;
+	}
+
+
+	// the EXTENDING case....
+	fprintf(stderr, "EXTENDING....\n");
+
+	// TODO: CONFIG ITEM 'auto_extend'
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		lineloop_c& loop = (pass == 0) ? right_loop : left_loop;
+
+		int front = (pass == 0) ? right_front : left_front;
+
+		bool ok = (pass == 0) ? right_ok : left_ok;
+
+		// bad geometry?
+		if (! ok)
+			continue;
+
+		if (! loop.faces_outward)
+		{
+			loop.FindIslands();
+fprintf(stderr, "ISLANDS = %u\n", loop.islands.size());
+
+			int model = loop.NeighboringSector();
+
+			int new_sec = BA_New(OBJ_SECTORS);
+
+			if (model < 0)
+				Sectors[new_sec]->SetDefaults();
+			else
+				Sectors[new_sec]->RawCopy(Sectors[model]);
+
+			AssignSectorToLoop(loop, new_sec, flip);
+		}
+		else
+		{
+			// when front >= 0, we can be certain we are extending an
+			// island within an existing sector.  When < 0, we check
+			// whether the loop can see an outer sector.
+
+			int sec_num = (front >= 0) ? front : loop.FacesSector();
+
+			if (sec_num >= 0)
+			{
+				AssignSectorToLoop(loop, sec_num, flip);
+			}
+		}
+	}
+}
+
+
+static void Insert_LineDef(int v1, int v2)
+{
+	int new_ld = BA_New(OBJ_LINEDEFS);
+
+	LineDef * L = LineDefs[new_ld];
+
+	L->start = v1;
+	L->end   = v2;
+	L->flags = MLF_Blocking;
+
+	selection_c flip(OBJ_LINEDEFS);
+
+	switch (VertexHowManyLineDefs(v2))
+	{
+		case 0:
+			// this should not happen!
+
+		case 1:
+			// joined onto an isolated vertex : nothing to do
+			return;
+
+		case 2:
+			ClosedLoop_Simple(new_ld, v2, flip);
+			break;
+
+		default:  // 3 or more
+			ClosedLoop_Complex(new_ld, v1, v2, flip);
+			break;
+	}
+
+	FlipLineDefGroup(flip);
+}
+
+
+static void Insert_Vertex()
+{
+	int reselect = true;
+
+	if (edit.Selected->count_obj() > 2)
+	{
+		Beep();
+		return;
+	}
+
+	int first_sel  = edit.Selected->find_first();
+	int second_sel = edit.Selected->find_second();
+
+	// if a vertex is highlighted but none are selected, then merely
+	// select that vertex.  This is better than adding a new vertex at
+	// the same location as an existing one.
+	if (first_sel < 0 && edit.Selected->empty() && edit.highlighted())
+	{
+		edit.Selected->set(edit.highlighted.num);
+		return;
+	}
+
+	if (second_sel < 0 && edit.highlighted() &&
+	    edit.highlighted.num != first_sel)
+	{
+		second_sel = edit.highlighted.num;
+	}
+
+	// merely insert a new linedef between two vertices
+	if (first_sel >= 0 && second_sel >= 0)
+	{
+		if (LineDefAlreadyExists(first_sel, second_sel))
+		{
+			Beep();
+			return;
+		}
+
+	    // perhaps a CONFIG ITEM to always reselect second
+		if (VertexHowManyLineDefs(second_sel) > 0)
+			reselect = false;
+
+		BA_Begin();
+
+		Insert_LineDef(first_sel, second_sel);
+
+		BA_End();
+
+		edit.Selected->clear_all();
+
+		if (reselect)
+			edit.Selected->set(second_sel);
+
+		return;
+	}
+
+	// make sure we never create zero-length linedefs
+	int new_x = grid.SnapX(edit.map_x);
+	int new_y = grid.SnapY(edit.map_y);
+
+	if (first_sel >= 0)
+	{
+		Vertex *V = Vertices[first_sel];
+
+		if (V->x == new_x && V->y == new_y)
+		{
+			Beep();
+			return;
+		}
+	}
+
+
+	BA_Begin();
+
+	int new_v = BA_New(OBJ_VERTICES);
+
+	Vertex *V = Vertices[new_v];
+
+	V->x = new_x;
+	V->y = new_y;
+
+	// split an existing linedef?
+	if (edit.split_line())
+	{
+		// in FREE mode, ensure the new vertex is directly on the linedef
+		if (! grid.snap)
+		{
+			MoveCoordOntoLineDef(edit.split_line.num, &new_x, &new_y);
+
+			V->x = new_x;
+			V->y = new_y;
+		}
+
+		SplitLineDefAtVertex(edit.split_line.num, new_v);
+
+		if (first_sel >= 0)
+			reselect = false;
+	}
+
+	// add a new linedef?
+	if (first_sel >= 0)
+	{
+		Insert_LineDef(first_sel, new_v);
+	}
+
+	BA_End();
+
+	// select it
+	edit.Selected->clear_all();
+
+	if (reselect)
+		edit.Selected->set(new_v);
+}
+
+
+static void Insert_Sector(keymod_e mod)
+{
+	int reselect = -1;
+
+	// create a square if outside of the map
+	if (PointOutsideOfMap(edit.map_x, edit.map_y))
+	{
+		BA_Begin();
+
+		CreateSquare(NULL);
+
+		BA_End();
+
+		reselect = (NumSectors - 1);
+	}
+	else
+	{
+		// this means : create new sector, look for neighbor to copy
+		int new_sec = -1;
+
+		BA_Begin();
+
+		// when a sector is selected, copy its properties to new area
+		if (edit.Selected->notempty())
+		{
+			int model = edit.Selected->find_first();
+
+			if (mod == KM_CTRL)
+			{
+				new_sec = model;
+			}
+			else
+			{
+				new_sec = BA_New(OBJ_SECTORS);
+
+				Sectors[new_sec]->RawCopy(Sectors[model]);
+			}
+		}
+
+		AssignSectorToSpace(edit.map_x, edit.map_y, new_sec);
+
+		BA_End();
+
+		reselect = (new_sec >= 0) ? new_sec : (NumSectors-1);
+	}
+
+	if (edit.obj_type == OBJ_SECTORS)
+	{
+		edit.Selected->clear_all();
+
+		if (reselect >= 0)
+			edit.Selected->set(reselect);
+	}
+}
+
+
+void CMD_InsertNewObject(keymod_e mod)
+{
+	switch (edit.obj_type)
+	{
+		case OBJ_THINGS:
+			Insert_Thing();
+			break;
+
+		case OBJ_VERTICES:
+			Insert_Vertex();
+			break;
+
+		case OBJ_SECTORS:
+			Insert_Sector(mod);
+			break;
+
+		default:
+			Beep();
+			break;
+	}
+}
+
+
+/*
+   check if a (part of a) LineDef is inside a given block
+*/
+bool IsLineDefInside (int ldnum, int x0, int y0, int x1, int y1) /* SWAP - needs Vertices & LineDefs */
+{
+	int lx0 = LineDefs[ldnum]->Start()->x;
+	int ly0 = LineDefs[ldnum]->Start()->y;
+	int lx1 = LineDefs[ldnum]->End()->x;
+	int ly1 = LineDefs[ldnum]->End()->y;
+	int i;
+
+	/* do you like mathematics? */
+	if (lx0 >= x0 && lx0 <= x1 && ly0 >= y0 && ly0 <= y1)
+		return 1; /* the linedef start is entirely inside the square */
+	if (lx1 >= x0 && lx1 <= x1 && ly1 >= y0 && ly1 <= y1)
+		return 1; /* the linedef end is entirely inside the square */
+	if ((ly0 > y0) != (ly1 > y0))
+	{
+		i = lx0 + (int) ((long) (y0 - ly0) * (long) (lx1 - lx0) / (long) (ly1 - ly0));
+		if (i >= x0 && i <= x1)
+			return true; /* the linedef crosses the y0 side (left) */
+	}
+	if ((ly0 > y1) != (ly1 > y1))
+	{
+		i = lx0 + (int) ((long) (y1 - ly0) * (long) (lx1 - lx0) / (long) (ly1 - ly0));
+		if (i >= x0 && i <= x1)
+			return true; /* the linedef crosses the y1 side (right) */
+	}
+	if ((lx0 > x0) != (lx1 > x0))
+	{
+		i = ly0 + (int) ((long) (x0 - lx0) * (long) (ly1 - ly0) / (long) (lx1 - lx0));
+		if (i >= y0 && i <= y1)
+			return true; /* the linedef crosses the x0 side (down) */
+	}
+	if ((lx0 > x1) != (lx1 > x1))
+	{
+		i = ly0 + (int) ((long) (x1 - lx0) * (long) (ly1 - ly0) / (long) (lx1 - lx0));
+		if (i >= y0 && i <= y1)
+			return true; /* the linedef crosses the x1 side (up) */
+	}
+	return false;
+}
+
+
+
+/*
+   get the sector number of the sidedef opposite to this sidedef
+   (returns -1 if it cannot be found)
+   */
+int GetOppositeSector (int ld1, bool firstside)
+{
+	int x0, y0, dx0, dy0;
+	int x1, y1, dx1, dy1;
+	int x2, y2, dx2, dy2;
+	int ld2, dist;
+	int bestld, bestdist, bestmdist;
+
+	/* get the coords for this LineDef */
+
+	x0  = LineDefs[ld1]->Start()->x;
+	y0  = LineDefs[ld1]->Start()->y;
+	dx0 = LineDefs[ld1]->End()->x - x0;
+	dy0 = LineDefs[ld1]->End()->y - y0;
+
+	/* find the normal vector for this LineDef */
+	x1  = (dx0 + x0 + x0) / 2;
+	y1  = (dy0 + y0 + y0) / 2;
+	if (firstside)
+	{
+		dx1 = dy0;
+		dy1 = -dx0;
+	}
+	else
+	{
+		dx1 = -dy0;
+		dy1 = dx0;
+	}
+
+	bestld = -1;
+	/* use a parallel to an axis instead of the normal vector (faster method) */
+	if (abs (dy1) > abs (dx1))
+	{
+		if (dy1 > 0)
+		{
+			/* get the nearest LineDef in that direction (increasing Y's: North) */
+			bestdist = 32767;
+			bestmdist = 32767;
+			for (ld2 = 0 ; ld2 < NumLineDefs ; ld2++)
+				if (ld2 != ld1 && ((LineDefs[ld2]->Start()->x > x1)
+							!= (LineDefs[ld2]->End()->x > x1)))
+				{
+					x2  = LineDefs[ld2]->Start()->x;
+					y2  = LineDefs[ld2]->Start()->y;
+					dx2 = LineDefs[ld2]->End()->x - x2;
+					dy2 = LineDefs[ld2]->End()->y - y2;
+
+					dist = y2 + (int) ((long) (x1 - x2) * (long) dy2 / (long) dx2);
+					if (dist > y1 && (dist < bestdist
+								|| (dist == bestdist && (y2 + dy2 / 2) < bestmdist)))
+					{
+						bestld = ld2;
+						bestdist = dist;
+						bestmdist = y2 + dy2 / 2;
+					}
+				}
+		}
+		else
+		{
+			/* get the nearest LineDef in that direction (decreasing Y's: South) */
+			bestdist = -32767;
+			bestmdist = -32767;
+			for (ld2 = 0 ; ld2 < NumLineDefs ; ld2++)
+				if (ld2 != ld1 && ((LineDefs[ld2]->Start()->x > x1)
+							!= (LineDefs[ld2]->End()->x > x1)))
+				{
+					x2  = LineDefs[ld2]->Start()->x;
+					y2  = LineDefs[ld2]->Start()->y;
+					dx2 = LineDefs[ld2]->End()->x - x2;
+					dy2 = LineDefs[ld2]->End()->y - y2;
+
+					dist = y2 + (int) ((long) (x1 - x2) * (long) dy2 / (long) dx2);
+					if (dist < y1 && (dist > bestdist
+								|| (dist == bestdist && (y2 + dy2 / 2) > bestmdist)))
+					{
+						bestld = ld2;
+						bestdist = dist;
+						bestmdist = y2 + dy2 / 2;
+					}
+				}
+		}
+	}
+	else
+	{
+		if (dx1 > 0)
+		{
+			/* get the nearest LineDef in that direction (increasing X's: East) */
+			bestdist = 32767;
+			bestmdist = 32767;
+			for (ld2 = 0 ; ld2 < NumLineDefs ; ld2++)
+				if (ld2 != ld1 && ((LineDefs[ld2]->Start()->y > y1)
+							!= (LineDefs[ld2]->End()->y > y1)))
+				{
+					x2  = LineDefs[ld2]->Start()->x;
+					y2  = LineDefs[ld2]->Start()->y;
+					dx2 = LineDefs[ld2]->End()->x - x2;
+					dy2 = LineDefs[ld2]->End()->y - y2;
+
+					dist = x2 + (int) ((long) (y1 - y2) * (long) dx2 / (long) dy2);
+					if (dist > x1 && (dist < bestdist
+								|| (dist == bestdist && (x2 + dx2 / 2) < bestmdist)))
+					{
+						bestld = ld2;
+						bestdist = dist;
+						bestmdist = x2 + dx2 / 2;
+					}
+				}
+		}
+		else
+		{
+			/* get the nearest LineDef in that direction (decreasing X's: West) */
+			bestdist = -32767;
+			bestmdist = -32767;
+			for (ld2 = 0 ; ld2 < NumLineDefs ; ld2++)
+				if (ld2 != ld1 && ((LineDefs[ld2]->Start()->y > y1)
+							!= (LineDefs[ld2]->End()->y > y1)))
+				{
+					x2  = LineDefs[ld2]->Start()->x;
+					y2  = LineDefs[ld2]->Start()->y;
+					dx2 = LineDefs[ld2]->End()->x - x2;
+					dy2 = LineDefs[ld2]->End()->y - y2;
+
+					dist = x2 + (int) ((long) (y1 - y2) * (long) dx2 / (long) dy2);
+					if (dist < x1 && (dist > bestdist
+								|| (dist == bestdist && (x2 + dx2 / 2) > bestmdist)))
+					{
+						bestld = ld2;
+						bestdist = dist;
+						bestmdist = x2 + dx2 / 2;
+					}
+				}
+		}
+	}
+
+	/* no intersection: the LineDef was pointing outwards! */
+	if (bestld < 0)
+		return -1;
+
+	/* now look if this LineDef has a SideDef bound to one sector */
+	if (abs (dy1) > abs (dx1))
+	{
+		if ((LineDefs[bestld]->Start()->x
+					< LineDefs[bestld]->End()->x) == (dy1 > 0))
+			x0 = LineDefs[bestld]->right;
+		else
+			x0 = LineDefs[bestld]->left;
+	}
+	else
+	{
+		if ((LineDefs[bestld]->Start()->y
+					< LineDefs[bestld]->End()->y) != (dx1 > 0))
+			x0 = LineDefs[bestld]->right;
+		else
+			x0 = LineDefs[bestld]->left;
+	}
+
+	/* there is no SideDef on this side of the LineDef! */
+	if (x0 < 0)
+		return -1;
+
+	/* OK, we got it -- return the Sector number */
+
+	return SideDefs[x0]->sector;
+}
+
+
+
+/*
+   copy a group of objects to a new position
+*/
+void CopyObjects(selection_c *list)
+{
+#if 0  // FIXME !!!!! CopyObjects
+	int        n, m;
+	SelPtr     cur;
+	SelPtr     list1, list2;
+	SelPtr     ref1, ref2;
+
+	if (list->empty())
+		return;
+
+	/* copy the object(s) */
+	switch (objtype)
+	{
+		case OBJ_THINGS:
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				DoInsertObject (OBJ_THINGS, cur->objnum, Things[cur->objnum]->x,
+						Things[cur->objnum]->y);
+				cur->objnum = NumThings - 1;
+			}
+			MarkChanges();
+			break;
+
+		case OBJ_VERTICES:
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				DoInsertObject (OBJ_VERTICES, cur->objnum, Vertices[cur->objnum]->x,
+						Vertices[cur->objnum]->y);
+				cur->objnum = NumVertices - 1;
+			}
+			MarkChanges(2);
+			break;
+
+		case OBJ_LINEDEFS:
+			list1 = 0;
+			list2 = 0;
+
+			// Create the linedefs and maybe the sidedefs
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				int old = cur->objnum; // No. of original linedef
+				int New;   // No. of duplicate linedef
+
+				DoInsertObject (OBJ_LINEDEFS, old, 0, 0);
+				New = NumLineDefs - 1;
+
+				if (false) ///!!! copy_linedef_reuse_sidedefs)
+				{
+		/* AYM 1997-07-25: not very orthodox (the New linedef and 
+		   the old one use the same sidedefs). but, in the case where
+		   you're copying into the same sector, it's much better than
+		   having to create the New sidedefs manually. plus it saves
+		   space in the .wad and also it makes editing easier (editing
+		   one sidedef impacts all linedefs that use it). */
+					LineDefs[New]->right = LineDefs[old]->right; 
+					LineDefs[New]->left = LineDefs[old]->left; 
+				}
+				else
+				{
+					/* AYM 1998-11-08: duplicate sidedefs too.
+					   DEU 5.21 just left the sidedef references to -1. */
+					if (is_sidedef (LineDefs[old]->right))
+					{
+						DoInsertObject (OBJ_SIDEDEFS, LineDefs[old]->right, 0, 0);
+						LineDefs[New]->right = NumSideDefs - 1;
+					}
+					if (is_sidedef (LineDefs[old]->left))
+					{
+						DoInsertObject (OBJ_SIDEDEFS, LineDefs[old]->left, 0, 0);
+						LineDefs[New]->left = NumSideDefs - 1; 
+					}
+				}
+				cur->objnum = New;
+				if (!IsSelected (list1, LineDefs[New]->start))
+				{
+					SelectObject (&list1, LineDefs[New]->start);
+					SelectObject (&list2, LineDefs[New]->start);
+				}
+				if (!IsSelected (list1, LineDefs[New]->end))
+				{
+					SelectObject (&list1, LineDefs[New]->end);
+					SelectObject (&list2, LineDefs[New]->end);
+				}
+			}
+
+			// Create the vertices
+			CopyObjects (OBJ_VERTICES, list2);
+
+
+			// Update the references to the vertices
+			for (ref1 = list1, ref2 = list2 ;
+					ref1 && ref2 ;
+					ref1 = ref1->next, ref2 = ref2->next)
+			{
+				for (cur = obj ; cur ; cur = cur->next)
+				{
+					if (ref1->objnum == LineDefs[cur->objnum]->start)
+						LineDefs[cur->objnum]->start = ref2->objnum;
+					if (ref1->objnum == LineDefs[cur->objnum]->end)
+						LineDefs[cur->objnum]->end = ref2->objnum;
+				}
+			}
+			ForgetSelection (&list1);
+			ForgetSelection (&list2);
+			break;
+
+		case OBJ_SECTORS:
+
+			list1 = 0;
+			list2 = 0;
+			// Create the linedefs (and vertices)
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				for (n = 0 ; n < NumLineDefs ; n++)
+					if  ((((m = LineDefs[n]->right) >= 0
+									&& SideDefs[m]->sector == cur->objnum)
+								|| ((m = LineDefs[n]->left) >= 0
+									&& SideDefs[m]->sector == cur->objnum))
+							&& ! IsSelected (list1, n))
+					{
+						SelectObject (&list1, n);
+						SelectObject (&list2, n);
+					}
+			}
+			CopyObjects (OBJ_LINEDEFS, list2);
+			/* create the sidedefs */
+
+			for (ref1 = list1, ref2 = list2 ;
+					ref1 && ref2 ;
+					ref1 = ref1->next, ref2 = ref2->next)
+			{
+				if ((n = LineDefs[ref1->objnum]->right) >= 0)
+				{
+					DoInsertObject (OBJ_SIDEDEFS, n, 0, 0);
+					n = NumSideDefs - 1;
+
+					LineDefs[ref2->objnum]->right = n;
+				}
+				if ((m = LineDefs[ref1->objnum]->left) >= 0)
+				{
+					DoInsertObject (OBJ_SIDEDEFS, m, 0, 0);
+					m = NumSideDefs - 1;
+
+					LineDefs[ref2->objnum]->left = m;
+				}
+				ref1->objnum = n;
+				ref2->objnum = m;
+			}
+			/* create the Sectors */
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				DoInsertObject (OBJ_SECTORS, cur->objnum, 0, 0);
+
+				for (ref1 = list1, ref2 = list2 ;
+						ref1 && ref2 ;
+						ref1 = ref1->next, ref2 = ref2->next)
+				{
+					if (ref1->objnum >= 0
+							&& SideDefs[ref1->objnum]->sector == cur->objnum)
+						SideDefs[ref1->objnum]->sector = NumSectors - 1;
+					if (ref2->objnum >= 0
+							&& SideDefs[ref2->objnum]->sector == cur->objnum)
+						SideDefs[ref2->objnum]->sector = NumSectors - 1;
+				}
+				cur->objnum = NumSectors - 1;
+			}
+			ForgetSelection (&list1);
+			ForgetSelection (&list2);
+			break;
+	}
+#endif
+}
+
+
+static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
+{
+	selection_iterator_c it;
+
+	switch (list->what_type())
+	{
+		case OBJ_THINGS:
+			for (list->begin(&it) ; !it.at_end() ; ++it)
+			{
+				Thing * T = Things[*it];
+
+				BA_ChangeTH(*it, Thing::F_X, T->x + delta_x);
+				BA_ChangeTH(*it, Thing::F_Y, T->y + delta_y);
+			}
+			break;
+
+		case OBJ_RADTRIGS:
+			for (list->begin(&it) ; !it.at_end() ; ++it)
+			{
+				RadTrig * R = RadTrigs[*it];
+
+				BA_ChangeRAD(*it, RadTrig::F_MX, R->mx + delta_x);
+				BA_ChangeRAD(*it, RadTrig::F_MY, R->my + delta_y);
+			}
+			break;
+	
+		case OBJ_VERTICES:
+			for (list->begin(&it) ; !it.at_end() ; ++it)
+			{
+				Vertex * V = Vertices[*it];
+
+				BA_ChangeVT(*it, Vertex::F_X, V->x + delta_x);
+				BA_ChangeVT(*it, Vertex::F_Y, V->y + delta_y);
+			}
+			break;
+
+		// everything else just moves the vertices
+		case OBJ_LINEDEFS:
+		case OBJ_SECTORS:
+			{
+				selection_c verts(OBJ_VERTICES);
+
+				ConvertSelection(list, &verts);
+
+				DoMoveObjects(&verts, delta_x, delta_y);
+			}
+			break;
+
+		default:
+			break;
+	}
+}
+
+
+void CMD_MoveObjects(int delta_x, int delta_y)
+{
+	if (edit.Selected->empty())
+		return;
+
+	BA_Begin();
+
+	// handle a single vertex merging onto an existing one
+	if (edit.obj_type == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
+	    edit.highlighted())
+	{
+		MergeVertex(edit.drag_single_vertex, edit.highlighted.num);
+
+		goto success;
+	}
+
+	// handle a single vertex splitting a linedef
+	if (edit.obj_type == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
+		edit.split_line())
+	{
+		SplitLineDefAtVertex(edit.split_line.num, edit.drag_single_vertex);
+
+		// now move the vertex!
+	}
+
+	// move things in sectors too (must do it _before_ moving the
+	// sectors, otherwise we fail trying to determine which sectors
+	// each thing is in).
+	if (edit.obj_type == OBJ_SECTORS)
+	{
+		selection_c thing_sel(OBJ_THINGS);
+
+		ConvertSelection(edit.Selected, &thing_sel);
+
+		DoMoveObjects(&thing_sel, delta_x, delta_y);
+	}
+
+	DoMoveObjects(edit.Selected, delta_x, delta_y);
+
+success:
+	BA_End();
+}
+
+
+
+/*
+ *  MoveObjectsToCoords
+ *
+ *  Move a group of objects to a new position
+ *
+ *  You must first call it with obj == NULL and newx and newy
+ *  set to the coordinates of the reference point (E.G. the
+ *  object being dragged).
+ *  Then, every time the object being dragged has changed its
+ *  coordinates, call the it again with newx and newy set to
+ *  the new position and obj set to the selection.
+ *
+ *  Returns <>0 iff an object was moved.
+ */
+bool MoveObjectsToCoords (int objtype, SelPtr obj, int newx, int newy, int grid)
+{
+#if 0  // FIXME !!!!!
+	int        dx, dy;
+	SelPtr     cur, vertices;
+	static int refx, refy; /* previous position */
+
+	if (grid > 0)
+	{
+		newx = (newx + grid / 2) & ~(grid - 1);
+		newy = (newy + grid / 2) & ~(grid - 1);
+	}
+
+	// Only update the reference point ?
+	if (! obj)
+	{
+		refx = newx;
+		refy = newy;
+		return true;
+	}
+
+	/* compute the displacement */
+	dx = newx - refx;
+	dy = newy - refy;
+	/* nothing to do? */
+	if (dx == 0 && dy == 0)
+		return false;
+
+	/* move the object(s) */
+	switch (objtype)
+	{
+		case OBJ_THINGS:
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				Things[cur->objnum]->x += dx;
+				Things[cur->objnum]->y += dy;
+			}
+			refx = newx;
+			refy = newy;
+			MarkChanges();
+			break;
+
+		case OBJ_VERTICES:
+			for (cur = obj ; cur ; cur = cur->next)
+			{
+				Vertices[cur->objnum]->x += dx;
+				Vertices[cur->objnum]->y += dy;
+			}
+			refx = newx;
+			refy = newy;
+			MarkChanges(2);
+			break;
+
+		case OBJ_LINEDEFS:
+			vertices = list_vertices_of_linedefs (obj);
+			MoveObjectsToCoords (OBJ_VERTICES, vertices, newx, newy, grid);
+			ForgetSelection (&vertices);
+			break;
+
+		case OBJ_SECTORS:
+
+			vertices = list_vertices_of_sectors (obj);
+			MoveObjectsToCoords (OBJ_VERTICES, vertices, newx, newy, grid);
+			ForgetSelection (&vertices);
+			break;
+	}
+	return true;
+#endif
+
+	return false;
+}
+
+
+
+/*
+   get the coordinates (approx.) of an object
+*/
+void GetObjectCoords (int objtype, int objnum, int *xpos, int *ypos)
+{
+	int  n, v1, v2, sd1, sd2;
+	long accx, accy, num;
+
+	switch (objtype)
+	{
+		case OBJ_THINGS:
+			SYS_ASSERT(is_thing(objnum));
+
+			*xpos = Things[objnum]->x;
+			*ypos = Things[objnum]->y;
+			break;
+
+		case OBJ_VERTICES:
+			SYS_ASSERT(is_vertex(objnum));
+
+			*xpos = Vertices[objnum]->x;
+			*ypos = Vertices[objnum]->y;
+			break;
+
+		case OBJ_LINEDEFS:
+			SYS_ASSERT(is_linedef(objnum));
+
+			v1 = LineDefs[objnum]->start;
+			v2 = LineDefs[objnum]->end;
+
+			*xpos = (Vertices[v1]->x + Vertices[v2]->x) / 2;
+			*ypos = (Vertices[v1]->y + Vertices[v2]->y) / 2;
+			break;
+
+		case OBJ_SIDEDEFS:
+			SYS_ASSERT(is_sidedef(objnum));
+
+			for (n = 0 ; n < NumLineDefs ; n++)
+				if (LineDefs[n]->right == objnum || LineDefs[n]->left == objnum)
+				{
+					v1 = LineDefs[n]->start;
+					v2 = LineDefs[n]->end;
+
+					*xpos = (Vertices[v1]->x + Vertices[v2]->x) / 2;
+					*ypos = (Vertices[v1]->y + Vertices[v2]->y) / 2;
+					return;
+				}
+			*xpos = (MapBound_lx + MapBound_hx) / 2;
+			*ypos = (MapBound_ly + MapBound_hy) / 2;
+			break;
+
+		case OBJ_SECTORS:
+			SYS_ASSERT(is_sector(objnum));
+
+			accx = 0L;
+			accy = 0L;
+			num = 0L;
+			for (n = 0 ; n < NumLineDefs ; n++)
+			{
+
+				sd1 = LineDefs[n]->right;
+				sd2 = LineDefs[n]->left;
+				v1 = LineDefs[n]->start;
+				v2 = LineDefs[n]->end;
+
+				if ((sd1 >= 0 && SideDefs[sd1]->sector == objnum)
+						|| (sd2 >= 0 && SideDefs[sd2]->sector == objnum))
+				{
+
+					/* if the Sector is closed, all Vertices will be counted twice */
+					accx += (long) Vertices[v1]->x;
+					accy += (long) Vertices[v1]->y;
+					num++;
+					accx += (long) Vertices[v2]->x;
+					accy += (long) Vertices[v2]->y;
+					num++;
+				}
+			}
+			if (num > 0)
+			{
+				*xpos = (int) ((accx + num / 2L) / num);
+				*ypos = (int) ((accy + num / 2L) / num);
+			}
+			else
+			{
+				*xpos = (MapBound_lx + MapBound_hx) / 2;
+				*ypos = (MapBound_ly + MapBound_hy) / 2;
+			}
+			break;
+
+		default:
+			BugError("GetObjectCoords: bad objtype %d", objtype);  // Can't happen
+	}
+}
+
+
+
+/*
+   find a free tag number
+   */
+int FindFreeTag ()
+{
+	int  tag, n;
+	bool ok;
+
+	tag = 1;
+	ok = false;
+	while (! ok)
+	{
+		ok = true;
+		for (n = 0 ; n < NumLineDefs ; n++)
+			if (LineDefs[n]->tag == tag)
+			{
+				ok = false;
+				break;
+			}
+		if (ok)
+			for (n = 0 ; n < NumSectors ; n++)
+				if (Sectors[n]->tag == tag)
+				{
+					ok = false;
+					break;
+				}
+		tag++;
+	}
+	return tag - 1;
+}
+
+
+
+/*
+ *  focus_on_map_coords
+ *  Change the view so that the map coordinates (xpos, ypos)
+ *  appear under the pointer
+ */
+void focus_on_map_coords (int x, int y)
+{
+	grid.orig_x = x - ((edit.map_x) - grid.orig_x);
+	grid.orig_y = y - ((edit.map_y) - grid.orig_y);
+}
+
+
+/*
+ *  sector_under_pointer
+ *  Convenience function
+ */
+inline int sector_under_pointer ()
+{
+	Objid o;
+	GetCurObject (o, OBJ_SECTORS, edit.map_x, edit.map_y);
+	return o.num;
+}
+
+
+/*
+  centre the map around the object and zoom in if necessary
+*/
+
+void GoToObject (const Objid& objid)
+{
+	int   xpos, ypos;
+	int   xpos2, ypos2;
+	int   sd1, sd2;
+
+	GetObjectCoords (objid.type, objid.num, &xpos, &ypos);
+	focus_on_map_coords (xpos, ypos);
+
+	/* Special case for sectors: if a sector contains other sectors,
+	   or if its shape is such that it does not contain its own
+	   geometric centre, zooming in on the centre won't help. So I
+	   choose a linedef that borders the sector and focus on a point
+	   between the centre of the linedef and the centre of the
+	   sector. If that doesn't help, I try another linedef.
+
+	   This algorithm is not perfect but it works rather well with
+	   most well-constituted sectors. It does not work so well for
+	   unclosed sectors, though (but it's partly GetCurObject()'s
+	   fault). */
+	if (objid.type == OBJ_SECTORS && sector_under_pointer () != objid.num)
+	{
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+
+			sd1 = LineDefs[n]->right;
+			sd2 = LineDefs[n]->left;
+
+			if ((sd1 >= 0 && SideDefs[sd1]->sector == objid.num) ||
+				(sd2 >= 0 && SideDefs[sd2]->sector == objid.num))
+			{
+				GetObjectCoords (OBJ_LINEDEFS, n, &xpos2, &ypos2);
+				int d = ComputeDist (abs (xpos - xpos2), abs (ypos - ypos2)) / 7;
+				if (d <= 1)
+					d = 2;
+				xpos = xpos2 + (xpos - xpos2) / d;
+				ypos = ypos2 + (ypos - ypos2) / d;
+				focus_on_map_coords (xpos, ypos);
+				if (sector_under_pointer () == objid.num)
+					break;
+			}
+		}
+	}
+}
+
+
+static void Drag_CountOnGrid_Worker(int obj_type, int objnum, int *count, int *total)
+{
+	switch (obj_type)
+	{
+		case OBJ_THINGS:
+			*total += 1;
+			if (grid.OnGrid(Things[objnum]->x, Things[objnum]->y))
+				*count += 1;
+			break;
+
+		case OBJ_VERTICES:
+			*total += 1;
+			if (grid.OnGrid(Vertices[objnum]->x, Vertices[objnum]->y))
+				*count += 1;
+			break;
+
+		case OBJ_LINEDEFS:
+			Drag_CountOnGrid_Worker(OBJ_VERTICES, LineDefs[objnum]->start, count, total);
+			Drag_CountOnGrid_Worker(OBJ_VERTICES, LineDefs[objnum]->end,   count, total);
+			break;
+
+		case OBJ_SECTORS:
+			for (int n = 0 ; n < NumLineDefs ; n++)
+			{
+				LineDef *L = LineDefs[n];
+
+				if (! L->TouchesSector(objnum))
+					continue;
+
+				Drag_CountOnGrid_Worker(OBJ_LINEDEFS, n, count, total);
+			}
+			break;
+
+		default:
+			break;
+	}
+}
+
+
+static void Drag_CountOnGrid(int *count, int *total)
+{
+	// Note: the results are approximate, vertices can be counted two
+	//       or more times.
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		Drag_CountOnGrid_Worker(edit.obj_type, *it, count, total);
+	}
+}
+
+
+static void Drag_UpdateObjectDist(int obj_type, int objnum, int *x, int *y,
+                                  int *best_dist, int map_x, int map_y,
+								  bool only_grid)
+{
+	int x2, y2;
+
+	switch (obj_type)
+	{
+		case OBJ_THINGS:
+			x2 = Things[objnum]->x;
+			y2 = Things[objnum]->y;
+			break;
+
+		case OBJ_VERTICES:
+			x2 = Vertices[objnum]->x;
+			y2 = Vertices[objnum]->y;
+			break;
+
+		case OBJ_LINEDEFS:
+			{
+				LineDef *L = LineDefs[objnum];
+
+				Drag_UpdateObjectDist(OBJ_VERTICES, L->start, x, y, best_dist,
+									  map_x, map_y, only_grid);
+
+				Drag_UpdateObjectDist(OBJ_VERTICES, L->end,   x, y, best_dist,
+				                      map_x, map_y, only_grid);
+			}
+			return;
+
+		case OBJ_SECTORS:
+			// recursively handle all vertices belonging to the sector
+			// (some vertices can be processed two or more times, that
+			// won't matter though).
+
+			for (int n = 0 ; n < NumLineDefs ; n++)
+			{
+				LineDef *L = LineDefs[n];
+
+				if (! L->TouchesSector(objnum))
+					continue;
+
+				Drag_UpdateObjectDist(OBJ_LINEDEFS, n, x, y, best_dist,
+				                      map_x, map_y, only_grid);
+			}
+			return;
+
+		default:
+			return;
+	}
+
+	// handle OBJ_THINGS and OBJ_VERTICES
+
+	if (only_grid && ! grid.OnGrid(x2, y2))
+		return;
+
+	int dist = ComputeDist(x2 - map_x, y2 - map_y);
+
+	if (dist < *best_dist)
+	{
+		*x = x2;
+		*y = y2;
+
+		*best_dist = dist;
+	}
+}
+
+
+void GetDragFocus(int *x, int *y, int map_x, int map_y)
+{
+	*x = 0;
+	*y = 0;
+
+	// determine whether a majority of the object(s) are already on
+	// the grid.  If they are, then pick a coordinate that also lies
+	// on the grid.
+	bool only_grid = false;
+
+	int count = 0;
+	int total = 0;
+
+	if (grid.snap)
+	{
+		Drag_CountOnGrid(&count, &total);
+
+		if (total > 0 && count > total / 2)
+			only_grid = true;
+	}
+
+	int best_dist = 99999;
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		Drag_UpdateObjectDist(edit.obj_type, *it, x, y, &best_dist,
+		                      map_x, map_y, only_grid);
+	}
+}
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab
