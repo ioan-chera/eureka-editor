@@ -83,6 +83,9 @@ char      default_lower_texture[WAD_TEX_NAME + 1] = "STARTAN3";
 char      default_middle_texture[WAD_TEX_NAME + 1]  = "STARTAN3";
 char      default_upper_texture[WAD_TEX_NAME + 1] = "STARTAN3";
 
+const char *install_dir;
+const char *home_dir;
+
 const char *Game_name;
 const char *Port_name;
 const char *Level_name;
@@ -103,9 +106,6 @@ int       sprite_scale  = 100;
 /*
  *  Prototypes of private functions
  */
-static int  parse_environment_vars ();
-static void print_error_message (const char *fmt, va_list args);
-
 static void TermFLTK();
 
 
@@ -139,6 +139,20 @@ void Beep ()
 
 
 /*
+ *  print_error_message
+ *  Print an error message to stderr.
+ */
+static void print_error_message (const char *fmt, va_list args)
+{
+	fflush (stdout);
+	fputs ("Error: ", stderr);
+	vfprintf (stderr, fmt, args);
+	fputc ('\n', stderr);
+	fflush (stderr);
+}
+
+
+/*
  *  fatal_error
  *  Print an error message and terminate the program with code 2.
  */
@@ -168,17 +182,68 @@ void BugError(const char *fmt, ...)
 }
 
 
-/*
- *  print_error_message
- *  Print an error message to stderr.
- */
-static void print_error_message (const char *fmt, va_list args)
+static void Determine_HomeDir(const char *argv0)
 {
-	fflush (stdout);
-	fputs ("Error: ", stderr);
-	vfprintf (stderr, fmt, args);
-	fputc ('\n', stderr);
-	fflush (stderr);
+// TODO: --home xxx
+
+#ifdef WIN32
+  home_dir = GetExecutablePath(argv0);
+
+#else
+  char *path = StringNew(FL_PATH_MAX + 4);
+
+  if (fl_filename_expand(path, "$HOME/.eureka") == 0)
+    FatalError("Unable to find home directory!\n");
+
+  home_dir = path;
+
+  // try to create it (doesn't matter if it already exists)
+  FileMakeDir(home_dir);
+#endif
+
+///---  if (! home_dir)
+///---    home_dir = StringDup(".");
+}
+
+
+static void Determine_InstallPath(const char *argv0)
+{
+// TODO: --install xxx
+
+#ifdef WIN32
+  install_dir = StringDup(home_dir);
+
+#else
+  static const char *prefixes[] =
+  {
+    "/usr/local", "/usr", "/opt", NULL
+  };
+
+  for (int i = 0 ; prefixes[i] ; i++)
+  {
+    install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
+
+    const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir);
+
+#if 1  // DEBUG
+    fprintf(stderr, "Trying install path: [%s]\n", install_dir);
+    fprintf(stderr, "  using file: [%s]\n\n", filename);
+#endif
+
+    bool exists = FileExists(filename);
+
+    StringFree(filename);
+
+    if (exists)
+      return;
+
+    StringFree(install_dir);
+    install_dir = NULL;
+  }
+#endif
+
+  if (! install_dir)
+    FatalError("Unable to find install directory!\n");
 }
 
 
@@ -450,6 +515,10 @@ int main(int argc, char *argv[])
 
 	// Sanity checks (useful when porting).
 	check_types();
+
+
+	Determine_HomeDir(argv[0]);
+	Determine_InstallPath(argv[0]);
 
 
 	// determine IWAD and GAME name

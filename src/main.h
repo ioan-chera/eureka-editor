@@ -184,6 +184,9 @@ extern bool want_quit;
 
 extern int remind_to_build_nodes; // Remind the user to build nodes
 
+extern const char *install_dir;  // install dir (e.g. /usr/share/eureka) 
+extern const char *home_dir;     // home dir (e.g. $HOME/.eureka) or NULL
+
 extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
