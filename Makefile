@@ -48,6 +48,7 @@ OBJS = \
 	$(OBJ_DIR)/im_img.o   \
 	$(OBJ_DIR)/levels.o  \
 	$(OBJ_DIR)/lib_adler.o  \
+	$(OBJ_DIR)/lib_util.o  \
 	$(OBJ_DIR)/main.o  \
 	$(OBJ_DIR)/m_bitvec.o  \
 	$(OBJ_DIR)/m_config.o  \
@@ -85,8 +86,7 @@ OBJS = \
 	$(OBJ_DIR)/x_hover.o  \
 	$(OBJ_DIR)/x_loop.o  \
 	$(OBJ_DIR)/x_mirror.o  \
-	$(OBJ_DIR)/ymemory.o  \
-	$(OBJ_DIR)/yutil.o
+	$(OBJ_DIR)/ymemory.o
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<

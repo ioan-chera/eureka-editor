@@ -83,7 +83,7 @@ typedef int  SelPtr;   // TEMPORARY FIXME
 #include "m_bitvec.h"  /* bv_set, bv_clear, bv_toggle */
 #include "m_select.h"
 
-#include "yutil.h"
+#include "lib_util.h"
 #include "ymemory.h"
 
 
