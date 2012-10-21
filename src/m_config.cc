@@ -679,6 +679,8 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		// Which option is this ?
 		if (! (**argv == '-' || **argv == '+'))
 		{
+			// FIXME: this is a loose file, handle it now
+
 			o = options;
 			argc++;
 			argv--;
@@ -692,8 +694,8 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					err ("invalid option: \"%s\"", argv[0]);
 					return 1;
 				}
-				if ( (o->short_name && ! strcmp (argv[0]+1, o->short_name))
-						|| (o->long_name  && ! strcmp (argv[0]+1, o->long_name)))
+				if ( (o->short_name && argv[0][2] == 0          && strcmp (argv[0]+1, o->short_name) == 0) ||
+					 (o->long_name  && argv[0][1] == argv[0][0] && strcmp (argv[0]+2, o->long_name ) == 0) )
 					break;
 			}
 		}
