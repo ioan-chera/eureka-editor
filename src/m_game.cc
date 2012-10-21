@@ -110,6 +110,28 @@ static byte ParseThingdefFlags(const char *s)
 }
 
 
+static const char * FindDefinitionFile(
+	const char *base_dir, const char *folder, const char *name)
+{
+	static char filename[FL_PATH_MAX];
+
+	if (! base_dir)
+		return NULL;
+
+	if (folder)
+		sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
+	else
+		sprintf(filename, "%s/%s.ugh", base_dir, name);
+
+DebugPrintf("  trying: %s\n", filename);
+
+	if (FileExists(filename))
+		return filename;
+	
+	return NULL;
+}
+
+
 /*
  *  Loads a definition file.  The ".ugh" extension is added.
  *  The 'folder' parameter can be NULL.
@@ -120,7 +142,26 @@ static byte ParseThingdefFlags(const char *s)
  */
 void LoadDefinitions(const char *folder, const char *name, int include_level)
 {
-	LogPrintf("Loading Definitions : %s/%s\n", folder, name);
+	// this is for error messages & debugging
+	char basename[256];
+
+	sprintf(basename, "%s/%s.ugh", folder ? folder : ".", name);
+
+	LogPrintf("Loading Definitions : %s\n", basename);
+
+
+	const char * filename;
+
+	filename = FindDefinitionFile(home_dir, folder, name);
+
+	if (! filename)
+		filename = FindDefinitionFile(install_dir, folder, name);
+
+	if (! filename)
+		FatalError("Cannot find definition file: %s", basename);
+
+
+	DebugPrintf("  found at: %s\n", filename);
 
 
 #define YGD_BUF 200   /* max. line length + 2 */
@@ -132,26 +173,9 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 #define MAX_INCLUDE_LEVEL  10
 
 
-	char basename[256];
-
-	if (folder)
-		sprintf(basename, "%s/%s.ugh", folder, name);
-	else
-		sprintf(basename, "%s.ugh", name);
-
-
-	// TODO: logic to find file in various directories
-	//       For example: /usr/share/eureka/xxx  $(HOME)/.eureka/xxx
-
-	char filename[1024];
-
-	sprintf(filename, "%s", basename);
-
-
-
 	FILE *fp = fopen(filename, "r");
 	if (! fp)
-		FatalError("%s: %s", basename, strerror(errno));
+		FatalError("Cannot open %s: %s", filename, strerror(errno));
 
 	/* Read the game definition file, line by line. */
 
