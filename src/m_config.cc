@@ -129,7 +129,7 @@ static const opt_desc_t options[] =
 	//
 
 	{	"help",
-		"?",
+		"h",
 		OPT_BOOLEAN,
 		"1",
 		"Show usage summary",
@@ -161,8 +161,75 @@ static const opt_desc_t options[] =
 	},
 
 	//
-	// Normal options from here on in....
+	// Normal options from here on....
 	//
+
+	{	"file",
+		"f",
+		OPT_STRINGPTR,
+		0,
+		"Patch wad file",
+		&Pwad
+	},
+
+	{	"iwad",
+		"i",
+		OPT_STRINGPTR,
+		0,
+		"The name of the IWAD",
+		&Iwad
+	},
+
+	{	"port",
+		"p",
+		OPT_STRINGPTR,
+		0,
+		"Port (engine) name",
+		&Port_name
+	},
+
+	{	"warp",
+		"w",
+		OPT_STRINGPTR,
+		0,
+		"Warp map",
+		&Level_name
+	},
+
+	{	"quiet",
+		"q",
+		OPT_BOOLEAN,
+		0,
+		"Quiet mode",
+		&Quiet
+	},
+
+// TODO
+#if 0
+	{	"merge",
+		0,
+		OPT_STRINGPTRACC,
+		0,
+		"Resource file to load",
+		&PatchWads
+	},
+
+	{	"mod",
+		0,
+		OPT_STRINGPTR,
+		0,
+		"Mod name",
+		&Mod_name
+	},
+#endif
+
+	{	"quieter",
+		"qq",
+		OPT_BOOLEAN,
+		0,
+		"Quieter mode",
+		&Quieter
+	},
 
 	{	"copy_linedef_reuse_sidedefs",
 		0,
@@ -236,67 +303,6 @@ static const opt_desc_t options[] =
 		default_upper_texture
 	},
 
-	{	"file",
-		0,
-		OPT_STRINGPTR,
-		0,
-		"Patch wad file",
-		&Pwad
-	},
-
-#if 0
-	{	"game",
-		"g",
-		OPT_STRINGPTR,
-		0,
-		"Game",
-		&Game
-	},
-#endif
-
-	{	"iwad",
-		0,
-		OPT_STRINGPTR,
-		0,
-		"The name of the IWAD",
-		&Iwad
-	},
-
-// TODO
-#if 0
-	{	"merge",
-		0,
-		OPT_STRINGPTRACC,
-		0,
-		"Resource file to load",
-		&PatchWads
-	},
-#endif
-
-	{	"port",
-		0,
-		OPT_STRINGPTR,
-		0,
-		"Port / engine",
-		&Port_name
-	},
-
-	{	"quiet",
-		"q",
-		OPT_BOOLEAN,
-		0,
-		"Quiet mode",
-		&Quiet
-	},
-
-	{	"quieter",
-		"qq",
-		OPT_BOOLEAN,
-		0,
-		"Quieter mode",
-		&Quieter
-	},
-
 	{	"scroll_less",
 		0,
 		OPT_UNSIGNED,
@@ -334,13 +340,9 @@ static const opt_desc_t options[] =
 	},
 #endif
 
-	{	"warp",
-		"w",
-		OPT_STRINGPTR,
-		0,
-		"Warp map",
-		&Level_name
-	},
+	//
+	// That's all folks!
+	//
 
 	{	0,
 		0,
@@ -677,7 +679,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		int ignore;
 
 		// Which option is this ?
-		if (! (**argv == '-' || **argv == '+'))
+		if (argv[0][0] != '-')
 		{
 			// FIXME: this is a loose file, handle it now
 
@@ -694,8 +696,9 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					err ("invalid option: \"%s\"", argv[0]);
 					return 1;
 				}
-				if ( (o->short_name && argv[0][2] == 0          && strcmp (argv[0]+1, o->short_name) == 0) ||
-					 (o->long_name  && argv[0][1] == argv[0][0] && strcmp (argv[0]+2, o->long_name ) == 0) )
+				if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
+					 (o->long_name  && strcmp (argv[0]+1, o->long_name ) == 0) ||
+					 (o->long_name  && argv[0][1] == '-' && strcmp (argv[0]+2, o->long_name ) == 0) )
 					break;
 			}
 		}

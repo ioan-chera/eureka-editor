@@ -471,33 +471,22 @@ int main(int argc, char *argv[])
 
 	int r;
 
-	// handle some special options: --help and --version
-	// because parse_command_line_options() cannot.
-	if (argc == 2 && strcmp (argv[1], "--help") == 0)
+	// handle special options
+	if (argc >= 2 && strcmp(argv[1], "--version") == 0)
 	{
-		//   print_usage (stdout);
-		if (fflush (stdout) != 0)
-			FatalError("stdout: %s", strerror (errno));
-		exit (0);
-	}
-	if (argc == 2 && strcmp (argv[1], "--version") == 0)
-	{
-		//   puts (what ());
-		puts ("# Eureka fluff\n");
-		if (fflush (stdout) != 0)
-			FatalError("stdout: %s", strerror (errno));
-		exit (0);
+		puts ("# Eureka version \n");  // FIXME
+		return 0;
 	}
 
 	// a quick pass through the command line arguments
 	// to detect --home, --install, --config
 	r = parse_command_line_options (argc - 1, argv + 1, 1);
 	if (r)
-		exit(1);
+		exit(3);
 
 	if (show_help)
 	{
-		// FIXME
+		puts ("# Eureka help... \n");  // FIXME
 		return 0;
 	}
 
