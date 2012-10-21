@@ -184,8 +184,9 @@ void BugError(const char *fmt, ...)
 
 static void Determine_HomeDir(const char *argv0)
 {
-	// TODO: --home xxx
-
+	// already set by cmd-line option?
+	if (! home_dir)
+	{
 #ifdef WIN32
 	home_dir = GetExecutablePath(argv0);
 
@@ -200,6 +201,7 @@ static void Determine_HomeDir(const char *argv0)
 	// try to create it (doesn't matter if it already exists)
 	FileMakeDir(home_dir);
 #endif
+	}
 
 	///---  if (! home_dir)
 	///---    home_dir = StringDup(".");
@@ -212,8 +214,9 @@ static void Determine_HomeDir(const char *argv0)
 
 static void Determine_InstallPath(const char *argv0)
 {
-	// TODO: --install xxx
-
+	// already set by cmd-line option?
+	if (! install_dir)
+	{
 #ifdef WIN32
 	// FIXME : home_dir can be NULL
 
@@ -250,6 +253,7 @@ static void Determine_InstallPath(const char *argv0)
 		install_dir = NULL;
 	}
 #endif
+	}
 
 	if (! install_dir)
 		FatalError("Unable to find install directory!\n");
@@ -467,7 +471,7 @@ int main(int argc, char *argv[])
 
 	int r;
 
-	// First detect manually --help and --version
+	// handle some special options: --help and --version
 	// because parse_command_line_options() cannot.
 	if (argc == 2 && strcmp (argv[1], "--help") == 0)
 	{
@@ -485,8 +489,8 @@ int main(int argc, char *argv[])
 		exit (0);
 	}
 
-	// Second a quick pass through the command line
-	// arguments to detect -?, -f and -help.
+	// a quick pass through the command line arguments
+	// to detect --home, --install, --config
 	r = parse_command_line_options (argc - 1, argv + 1, 1);
 	if (r)
 		exit(1);
@@ -500,21 +504,26 @@ int main(int argc, char *argv[])
 	//printf ("%s\n", what ());
 
 
+	Determine_HomeDir(argv[0]);
+	Determine_InstallPath(argv[0]);
+
+
 	// The config file provides some values.
 	if (config_file != NULL)
 		r = parse_config_file_user (config_file);
 	else
-		r = 0; //???  parse_config_file_default ();
+		r = 0; //??? parse_config_file_default ();
 
 	if (r == 0)
 	{
 		// Environment variables can override them.
 		r = parse_environment_vars ();
-		if (r == 0)
-		{
-			// And the command line argument can override both.
-			r = parse_command_line_options (argc - 1, argv + 1, 2);
-		}
+	}
+
+	if (r == 0)
+	{
+		// And the command line argument can override both.
+		r = parse_command_line_options (argc - 1, argv + 1, 2);
 	}
 
 	if (r != 0)
@@ -528,10 +537,6 @@ int main(int argc, char *argv[])
 
 	// Sanity checks (useful when porting).
 	check_types();
-
-
-	Determine_HomeDir(argv[0]);
-	Determine_InstallPath(argv[0]);
 
 
 	// determine IWAD and GAME name

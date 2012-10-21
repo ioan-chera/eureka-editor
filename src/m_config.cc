@@ -90,6 +90,7 @@ typedef enum
 }
 opt_type_t;
 
+
 typedef struct
 {
 	const char *long_name;  // Command line arg. or keyword
@@ -103,10 +104,14 @@ typedef struct
 }
 opt_desc_t;
 
-/* The first option has neither long name nor short name.
-   It is used for "lonely" arguments (i.e. file names). */
-opt_desc_t options[] =    // Description of the command line options
+
+static const opt_desc_t options[] =
 {
+	//
+	// The first option has neither long name nor short name.
+	// It is used for "lonely" arguments (i.e. file names).
+	//
+
 	{	0,
 		0,
 //--		OPT_STRINGPTRACC,
@@ -119,13 +124,45 @@ opt_desc_t options[] =    // Description of the command line options
 		&Pwad
 	},
 
-	{	"config_file",
-		"f",
+	//
+	// A few options must be handled in an early pass
+	//
+
+	{	"help",
+		"?",
+		OPT_BOOLEAN,
+		"1",
+		"Show usage summary",
+		&show_help
+	},
+
+	{	"config",
+		0,
 		OPT_STRINGPTR,
 		"1",
 		"Config file",
 		&config_file
 	},
+
+	{	"home",
+		0,
+		OPT_STRINGPTR,
+		"1",
+		"Home directory",
+		&home_dir
+	},
+
+	{	"install",
+		0,
+		OPT_STRINGPTR,
+		"1",
+		"Installation directory",
+		&install_dir
+	},
+
+	//
+	// Normal options from here on in....
+	//
 
 	{	"copy_linedef_reuse_sidedefs",
 		0,
@@ -216,14 +253,6 @@ opt_desc_t options[] =    // Description of the command line options
 		&Game
 	},
 #endif
-
-	{	"help",
-		"?",
-		OPT_BOOLEAN,
-		"1",
-		"Show usage summary",
-		&show_help
-	},
 
 	{	"iwad",
 		0,
@@ -655,6 +684,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 			argv--;
 		}
 		else
+		{
 			for (o = options + 1; ; o++)
 			{
 				if (o->opt_type == OPT_END)
@@ -666,6 +696,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 						|| (o->long_name  && ! strcmp (argv[0]+1, o->long_name)))
 					break;
 			}
+		}
 
 		// If this option has the "1" flag but pass is not 1
 		// or it doesn't but pass is 1, ignore it.
