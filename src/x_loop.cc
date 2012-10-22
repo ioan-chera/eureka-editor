@@ -276,7 +276,7 @@ double AngleBetweenLines(int A, int B, int C)
 		result += 360.0;
 
 #if 0  // DEBUGGING
-	fprintf(stderr, "ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
+	DebugPrintf("ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
 			Vertices[A].x, Vertices[A].y,
 			Vertices[B].x, Vertices[B].y,
 			Vertices[C].x, Vertices[C].y);
@@ -337,7 +337,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
 	int final_vert = prev_vert;
 
 #ifdef DEBUG_PATH
-	fprintf(stderr, "TRACE PATH: line:%d  side:%d  cur:%d  final:%d\n",
+	DebugPrintf("TRACE PATH: line:%d  side:%d  cur:%d  final:%d\n",
 			ld, side, cur_vert, final_vert);
 #endif
 
@@ -403,7 +403,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
 		}
 
 #ifdef DEBUG_PATH
-		fprintf(stderr, "PATH NEXT: line:%d  side:%d  vert:%d  angle:%1.6f\n",
+		DebugPrintf("PATH NEXT: line:%d  side:%d  vert:%d  angle:%1.6f\n",
 				next_line, next_side, next_vert, best_angle);
 #endif
 
@@ -438,7 +438,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
 	loop.faces_outward = (average_angle >= 180.0);
 
 #ifdef DEBUG_PATH
-	fprintf(stderr, "PATH CLOSED!  average_angle:%1.2f\n", average_angle);
+	DebugPrintf("PATH CLOSED!  average_angle:%1.2f\n", average_angle);
 #endif
 
 	return true;
@@ -502,7 +502,7 @@ bool lineloop_c::LookForIsland()
 				continue;
 
 #ifdef DEBUG_PATH
-fprintf(stderr, "Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
+DebugPrintf("Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
 ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 #endif
 
@@ -654,7 +654,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
  */
 static void DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
 {
-// fprintf(stderr, "DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
+// DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
 
 	int sd_num   = (side > 0) ? L->right : L->left;
@@ -736,7 +736,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec)
 	if (ld < 0)
 	{
 		Beep();
-		fprintf(stderr, "Area is not closed (can see infinity)\n");
+		DebugPrintf("Area is not closed (can see infinity)\n");
 		return;
 	}
 
@@ -745,7 +745,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec)
 	if (! TraceLineLoop(ld, side, loop))
 	{
 		Beep();
-		fprintf(stderr, "Area is not closed (tracing a loop failed)\n");
+		DebugPrintf("Area is not closed (tracing a loop failed)\n");
 		return;
 	}
 
@@ -754,7 +754,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec)
 	if (loop.faces_outward)
 	{
 		Beep();
-		fprintf(stderr, "Line loop faces outward\n");
+		DebugPrintf("Line loop faces outward\n");
 		return;
 	}
 

@@ -535,9 +535,9 @@ static bool TwoNeighboringLineDefs(int new_ld, int v1, int v2,
 	}
 
 #if 0
-	fprintf(stderr, "best right: line:#%d side:%d angle:%1.2f\n",
+	DebugPrintf("best right: line:#%d side:%d angle:%1.2f\n",
 	        *ld1, *side1, best_angle1);
-	fprintf(stderr, "best left: line:#%d side:%d angle:%1.2f\n",
+	DebugPrintf("best left: line:#%d side:%d angle:%1.2f\n",
 	        *ld2, *side2, best_angle2);
 #endif
 
@@ -562,7 +562,7 @@ static void SplitSector(int new_ld, int v1, int v2,
 
 static void ClosedLoop_Complex(int new_ld, int v1, int v2, selection_c& flip)
 {
-fprintf(stderr, "COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
+DebugPrintf("COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
 
 	// find the two linedefs which are nearest to the new line
 
@@ -584,8 +584,8 @@ fprintf(stderr, "COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
 	bool right_new = (right_front < 0) && (right_back < 0);
 	bool  left_new = ( left_front < 0) && ( left_back < 0);
 
-fprintf(stderr, "RIGHT LINE #%d : front=%d back=%d\n", right_ld, right_front, right_back); 
-fprintf(stderr, " LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_back); 
+DebugPrintf("RIGHT LINE #%d : front=%d back=%d\n", right_ld, right_front, right_back); 
+DebugPrintf(" LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_back); 
 
 	if (right_new || left_new)
 	{
@@ -618,8 +618,8 @@ fprintf(stderr, " LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  l
 	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
 	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
 
-fprintf(stderr, "right_ok : %s\n", right_ok ? "yes" : "NO!");
-fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
+DebugPrintf("right_ok : %s\n", right_ok ? "yes" : "NO!");
+DebugPrintf(" left_ok : %s\n",  left_ok ? "yes" : "NO!");
 
 	if (right_front >= 0 &&
 	    right_front == left_front &&
@@ -627,7 +627,7 @@ fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
 	    ( left_ok && ! left_loop.faces_outward))
 	{
 		// the SPLITTING case....
-		fprintf(stderr, "SPLITTING sector #%d\n", right_front);
+		DebugPrintf("SPLITTING sector #%d\n", right_front);
 
 		// TODO: CONFIG ITEM 'auto_split'
 
@@ -636,13 +636,13 @@ fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
 
 		if (! TraceLineLoop(right_ld, right_side, orig_loop, true /* ignore_new */))
 		{
-			fprintf(stderr, "Traced original : failed\n");
+			DebugPrintf("Traced original : failed\n");
 			return;
 		}
 
 		if (! orig_loop.SameSector())
 		{
-			fprintf(stderr, "Original not all same\n");
+			DebugPrintf("Original not all same\n");
 			return;
 		}
 
@@ -668,7 +668,7 @@ fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
 
 
 	// the EXTENDING case....
-	fprintf(stderr, "EXTENDING....\n");
+	DebugPrintf("EXTENDING....\n");
 
 	// TODO: CONFIG ITEM 'auto_extend'
 
@@ -687,7 +687,7 @@ fprintf(stderr, " left_ok : %s\n",  left_ok ? "yes" : "NO!");
 		if (! loop.faces_outward)
 		{
 			loop.FindIslands();
-fprintf(stderr, "ISLANDS = %u\n", loop.islands.size());
+DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 
 			int model = loop.NeighboringSector();
 

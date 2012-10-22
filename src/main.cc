@@ -217,9 +217,7 @@ static void Determine_HomeDir(const char *argv0)
 	///---  if (! home_dir)
 	///---    home_dir = StringDup(".");
 
-#if 1  // DEBUG
-    fprintf(stderr, "Home dir: [%s]\n", home_dir ? home_dir : "NOT SET");
-#endif
+    LogPrintf("Home dir: %s\n", home_dir ? home_dir : "NOT SET");
 }
 
 
@@ -248,10 +246,8 @@ static void Determine_InstallPath(const char *argv0)
 
 		const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir);
 
-#if 0  // DEBUG
-		fprintf(stderr, "Trying install path: [%s]\n", install_dir);
-		fprintf(stderr, "   looking for file: [%s]\n\n", filename);
-#endif
+		DebugPrintf("Trying install path: %s\n", install_dir);
+		DebugPrintf("   looking for file: %s\n", filename);
 
 		bool exists = FileExists(filename);
 
@@ -269,9 +265,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (! install_dir)
 		FatalError("Unable to find install directory!\n");
 
-#if 1  // DEBUG
-	fprintf(stderr, "Install dir: [%s]\n", install_dir);
-#endif
+	LogPrintf("Install dir: %s\n", install_dir);
 }
 
 
@@ -324,7 +318,7 @@ static bool InitFLTK()
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
 
-	fprintf(stderr, "-- SCREEN SIZE %dx%d\n", screen_w, screen_h);
+	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
 
 	KF = 1;
 #if 0  // TODO
@@ -537,6 +531,7 @@ int main(int argc, char *argv[])
 
 	if (r != 0)
 	{
+		// FIXME
 		fprintf(stderr, "Error parsing config or cmd-line options.\n");
 		exit(1);
 	}
