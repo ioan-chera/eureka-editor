@@ -170,7 +170,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-		OPT_BOOLEAN,
+		OPT_STRINGPTR,
 		"1",
 		"Log messages to file (instead of stdout)",
 		&log_file
