@@ -1,0 +1,4840 @@
+========================================================================
+  DEVELOPMENT IN AWWPORTS REPOSITORY
+========================================================================
+
+------------------------------------------------------------------------
+r3135 | ajapted | 2012-10-17
+
+Makefile.unix: implemented 'install' and 'uninstall' targets.
+
+------------------------------------------------------------------------
+r3134 | ajapted | 2012-10-17
+
+TODO update.
+
+------------------------------------------------------------------------
+r3133 | ajapted | 2012-10-17
+
+Eureka: created a Makefile.unix -- will be used to build and install
+a normal unixy binary.  Main difference so far is that it links
+against a system-wide version of FLTK.
+
+------------------------------------------------------------------------
+r3132 | ajapted | 2012-10-16
+
+Eureka: handle a pwad filename given without -file.
+For example: ./eureka foo.wad
+
+------------------------------------------------------------------------
+r3131 | ajapted | 2012-10-16
+
+tweak
+
+------------------------------------------------------------------------
+r2744 | ajapted | 2012-07-16
+
+Eureka: TODO item.
+
+------------------------------------------------------------------------
+r1468 | ajapted | 2012-05-15
+
+try to unfuck this BZR repository.....
+
+------------------------------------------------------------------------
+r1467 | ajapted | 2012-05-15
+
+Eureka / EDGE: various fixes and improvement to new linetypes.
+
+------------------------------------------------------------------------
+r1466 | ajapted | 2012-05-15
+
+Eureka / EDGE: fixed remaining linetypes, e.g. rts scripting, sliding doors,
+aligners, etc..
+
+------------------------------------------------------------------------
+r1465 | ajapted | 2012-05-15
+
+Eureka / EDGE: worked on linetypes, e.g. new keyed doors, hub exits, etc..
+
+------------------------------------------------------------------------
+r1462 | ajapted | 2012-05-14
+
+Eureka / EDGE: added all the sector types.
+
+------------------------------------------------------------------------
+r1461 | ajapted | 2012-05-14
+
+Eureka / EDGE: added remaining missing things: dog, glows, stealth monsters.
+
+------------------------------------------------------------------------
+r1460 | ajapted | 2012-05-14
+
+Eureka / EDGE: fixed category for slopes, and added some missing things
+(Jetpack, green keys, new armors).
+
+------------------------------------------------------------------------
+r1459 | ajapted | 2012-05-14
+
+Eureka / Odamex: added Blue/Red player starts and Static_Init things (333 to 335).
+
+------------------------------------------------------------------------
+r1458 | ajapted | 2012-05-14
+
+Eureka: more work to ODAMEX definitions (sector types, etc etc...)
+
+------------------------------------------------------------------------
+r1457 | ajapted | 2012-05-14
+
+Eureka: added slope linetypes to EDGE definition.
+
+------------------------------------------------------------------------
+r1456 | ajapted | 2012-05-14
+
+Eureka: partial work on ODAMEX support : ports/odamex.ugh
+
+------------------------------------------------------------------------
+r1455 | ajapted | 2012-05-14
+
+Eureka: added bare-bone game definitions for Absolution (Doom64 TC),
+Blasphemer and HacX.
+
+------------------------------------------------------------------------
+r1453 | ajapted | 2012-04-24
+
+Eureka / DOOM defs: fixed linetypes 33 and 34 (red and yellow locked doors)
+which had swapped descriptions.
+
+------------------------------------------------------------------------
+r1452 | ajapted | 2012-04-18
+
+Eureka: fixed W_FindPatchLump() fallback method to try _any_ lump with
+the matching name (instead of just sprites).  This fixes the missing
+textures with the Doom64 TC.
+
+------------------------------------------------------------------------
+r1451 | ajapted | 2012-04-18
+
+Eureka: added a LoadTexture_SinglePatch() function to texture loading code
+which turned out not to be necessary -- but kept for possible future use.
+
+------------------------------------------------------------------------
+r1450 | ajapted | 2012-03-23
+
+Eureka / DOOM: somehow the 'Computer map' pickup disappeared from the
+definition files -- added it back in.
+
+------------------------------------------------------------------------
+r1425 | ajapted | 2012-02-17
+
+Eureka: moved 0.74 changelog --> docs/ directory.
+
+------------------------------------------------------------------------
+r1424 | ajapted | 2012-02-17
+
+makefile tweak.
+
+------------------------------------------------------------------------
+r1423 | ajapted | 2012-02-17
+
+Eureka: Changelog tweakage.
+
+------------------------------------------------------------------------
+r1422 | ajapted | 2012-02-17
+
+Eureka: add revision numbers to changelogs.
+
+------------------------------------------------------------------------
+r1421 | ajapted | 2012-02-17
+
+Eureka: CHANGELOG update.
+
+------------------------------------------------------------------------
+r1420 | ajapted | 2012-02-17
+
+Eureka: improved the ABOUT box.
+
+------------------------------------------------------------------------
+r1419 | ajapted | 2012-02-17
+
+tweakage.
+
+------------------------------------------------------------------------
+r1418 | ajapted | 2012-02-17
+
+Eureka: experimented with an 'alternate_look' setting.
+
+------------------------------------------------------------------------
+r1417 | ajapted | 2012-02-17
+
+Eureka: tweaked widget positions on the Info bar.
+
+------------------------------------------------------------------------
+r1416 | ajapted | 2012-02-17
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1415 | ajapted | 2012-02-17
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1414 | ajapted | 2012-02-17
+
+Eureka: persistence tweak.
+
+------------------------------------------------------------------------
+r1413 | ajapted | 2012-02-17
+
+Eureka: persist the rendering On/Off state.
+
+------------------------------------------------------------------------
+r1412 | ajapted | 2012-02-17
+
+Eureka: improved layout of sidedefs in LineDef panel (they were a bit cramped).
+
+------------------------------------------------------------------------
+r1411 | ajapted | 2012-02-17
+
+Eureka: fixed LineDef panel not updating after "ADD"/"DEL" buttons.
+
+------------------------------------------------------------------------
+r1410 | ajapted | 2012-02-17
+
+Eureka: CHANGELOG update (sidedef "ADD" and "DEL" buttons).
+
+------------------------------------------------------------------------
+r1409 | ajapted | 2012-02-17
+
+Eureka: e_cutpaste::UnlinkSideFromLine() --> x_loop::LD_RemoveSideDef().
+The sidedef "DEL" button uses this to handle sidedef deletion better.
+
+------------------------------------------------------------------------
+r1408 | ajapted | 2012-02-17
+
+Eureka: improved "ADD" sidedef button, try GetOppositeSector() to get
+the new sector for the sidedef, and if that fails then use NumSec - 1.
+
+------------------------------------------------------------------------
+r1407 | ajapted | 2012-02-17
+
+Eureka: changelog (etc) update.
+
+------------------------------------------------------------------------
+r1406 | ajapted | 2012-02-17
+
+Eureka: implemented the -port option.
+
+------------------------------------------------------------------------
+r1405 | ajapted | 2012-02-17
+
+Eureka: version bump to 0.74
+
+------------------------------------------------------------------------
+r1404 | ajapted | 2012-02-17
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1403 | ajapted | 2012-02-17
+
+Eureka: basic implementation of "ADD" button for sidedefs.
+
+------------------------------------------------------------------------
+r1402 | ajapted | 2012-02-17
+
+Eureka: implemented the "DEL" button for sidedefs.
+
+------------------------------------------------------------------------
+r1401 | ajapted | 2012-02-16
+
+Eureka: in LINEDEF panel, added "ADD" and "DEL" buttons to sidedefs
+(with only one visible at a time).  Currently they do nothing.
+
+------------------------------------------------------------------------
+r1400 | ajapted | 2012-02-16
+
+Eureka / Browser: parsing code for persistence (cat, search, etc).
+
+------------------------------------------------------------------------
+r1399 | ajapted | 2012-02-16
+
+Eureka: persist which Browser panel is open (if any).
+
+------------------------------------------------------------------------
+r1398 | ajapted | 2012-02-16
+
+tweak.
+
+------------------------------------------------------------------------
+r1397 | ajapted | 2012-02-16
+
+Eureka: docco update (sector insertion improvements).
+
+------------------------------------------------------------------------
+r1396 | ajapted | 2012-02-16
+
+Eureka: improved SECTOR insertion : (a) copy properties from a selected
+sector, or if none then a neighbor sector.  (b) if CTRL is pressed, then
+the new area BECOMES the same sector as the one selected.
+
+------------------------------------------------------------------------
+r1395 | ajapted | 2012-02-16
+
+minor comment.
+
+------------------------------------------------------------------------
+r1394 | ajapted | 2012-02-16
+
+Eureka: fixed UI_Pic handling of a certain flat (CEIL4_1 IIRC) which
+was showing bright cyan in parts that were black (palette color #247).
+
+------------------------------------------------------------------------
+r1393 | ajapted | 2012-02-16
+
+docco update.
+
+------------------------------------------------------------------------
+r1392 | ajapted | 2012-02-16
+
+Eureka: big rework on CloseLoop_Complex() to fix some failure cases,
+especially when extending an island within a sector.
+
+Also fixed a failure case in CloseLoop_Simple() when surrounding an
+existing shape WHILE new shape is inside a sector -- we need to
+assign a sector to both loops for that.
+
+------------------------------------------------------------------------
+r1391 | ajapted | 2012-02-15
+
+Eureka: fixed bug where closing a line-loop around an existing shape
+did not apply the new sector to the outside of that shape.
+
+------------------------------------------------------------------------
+r1390 | ajapted | 2012-02-15
+
+Eureka: code tidying, and removed 'e' pointer from UI_Canvas class.
+
+------------------------------------------------------------------------
+r1389 | ajapted | 2012-02-15
+
+Eureka / TODO: update.
+
+------------------------------------------------------------------------
+r1388 | ajapted | 2012-02-15
+
+Eureka / CHANGELOG: update.
+
+------------------------------------------------------------------------
+r1387 | ajapted | 2012-02-15
+
+Eureka: tweakage (e.g. persistent messages).
+
+------------------------------------------------------------------------
+r1386 | ajapted | 2012-02-15
+
+Eureka / DOOM config: rearranged linegroups.
+
+------------------------------------------------------------------------
+r1385 | ajapted | 2012-02-15
+
+Eureka / Browser: skip the trigger (W1, SR, etc).when sorting line
+specials alphabetically. 
+
+------------------------------------------------------------------------
+r1384 | ajapted | 2012-02-15
+
+Eureka / Browser: implemented different SORT methods, and a callback
+so that changing the Sort setting will update the list.
+
+------------------------------------------------------------------------
+r1383 | ajapted | 2012-02-15
+
+Eureka / Browser: fixed display of '&' in linetype descriptions.
+Added padding to numbers for Thing/Line/Sector types.
+
+------------------------------------------------------------------------
+r1382 | ajapted | 2012-02-15
+
+Eureka / Browser: added code to SORT the items (currently the only method
+is alphabetically).
+
+------------------------------------------------------------------------
+r1381 | ajapted | 2012-02-15
+
+Eureka / Browser: updated WriteUser() to write the search string and
+values for the Sort and Pics widgets.
+
+------------------------------------------------------------------------
+r1380 | ajapted | 2012-02-15
+
+Eureka / Browser: added a 'Sort' choice and 'Pics' toggle button to
+certain browser panels.  They currently do NOTHING.
+
+------------------------------------------------------------------------
+r1379 | ajapted | 2012-02-15
+
+Eureka: worked on persisting the state of the Browser panels.
+
+------------------------------------------------------------------------
+r1378 | ajapted | 2012-02-14
+
+Eureka: fixed bug persisting the 3D preview (view.Sin and view.Cos were
+not being updated properly).
+
+------------------------------------------------------------------------
+r1377 | ajapted | 2012-02-14
+
+Eureka: updated CHANGELOG.
+
+------------------------------------------------------------------------
+r1376 | ajapted | 2012-02-14
+
+Eureka: persist the current edit mode.
+
+------------------------------------------------------------------------
+r1375 | ajapted | 2012-02-14
+
+Eureka: persist more Render3D state: gamma, texturing, lighting, etc...
+
+------------------------------------------------------------------------
+r1374 | ajapted | 2012-02-13
+
+Eureka: properly handle no persistent user state for a map, via new
+M_DefaultUserState() function which zooms out to show whole map,
+sets the camera to the player thing, etc....
+
+------------------------------------------------------------------------
+r1373 | ajapted | 2012-02-13
+
+tweak.
+
+------------------------------------------------------------------------
+r1372 | ajapted | 2012-02-13
+
+Eureka: make sure the -file pwad exists.
+
+------------------------------------------------------------------------
+r1371 | ajapted | 2012-02-13
+
+Eureka: fixed Grid_ParseUser() to update the UI widgets (info bar, etc).
+
+------------------------------------------------------------------------
+r1370 | ajapted | 2012-02-12
+
+Eureka: tweaked filename for user state persistence.
+
+------------------------------------------------------------------------
+r1369 | ajapted | 2012-02-12
+
+Eureka: separated out some code to Editor_Init() function, and call it
+earlier than Editor_Loop() so that the user state from LoadLevel() can
+work properly.
+
+------------------------------------------------------------------------
+r1368 | ajapted | 2012-02-12
+
+Eureka: implemented M_LoadUserState().
+
+------------------------------------------------------------------------
+r1367 | ajapted | 2012-02-12
+
+Eureka: implemented a M_ParseLine() function as the general way to
+break a line into tokens.  The strings must be freed with M_FreeLine().
+
+------------------------------------------------------------------------
+r1366 | ajapted | 2012-02-12
+
+Eureka: more work on persisting "user state" when saving and loading maps
+The parsing and writing logic for the GRID and RENDER systems is now in
+place, but not yet complete.
+
+------------------------------------------------------------------------
+r1365 | ajapted | 2012-02-12
+
+Eureka: more work on persisting "user state" when saving and loading maps
+The parsing and writing logic for the GRID and RENDER systems is now in
+place, but not yet complete.
+
+------------------------------------------------------------------------
+r1364 | ajapted | 2012-02-12
+
+Eureka: for File/Export function, ask for the map slot _AFTER_ asking
+for the destination filename.
+
+------------------------------------------------------------------------
+r1363 | ajapted | 2012-02-12
+
+Eureka: began work on mechanism to persist user state for a map, stuff
+like the camera position and angle, grid position and scale and step,
+browser categories, etc etc.....
+
+------------------------------------------------------------------------
+r1362 | ajapted | 2012-02-12
+
+Eureka: added 'cache' directory.
+
+------------------------------------------------------------------------
+r1361 | ajapted | 2012-02-12
+
+Eureka: code to compute the adler CRC when loading and saving a map.
+
+This required changing the lump processing order in LoadLevel() so that
+it matches SaveLevel() -- however it cannot do certain checks as it did
+before (e.g. check for invalid sector numbers in sidedefs), these must
+be done in a separate pass which hasn't been implemented yet.
+
+------------------------------------------------------------------------
+r1360 | ajapted | 2012-02-12
+
+Eureka / Adler-32: tweaks.
+
+------------------------------------------------------------------------
+r1359 | ajapted | 2012-02-12
+
+Eureka / Adler-32: added an 'extra' field which is the 32-bit sum of
+the 16-bit S2 field, modulo a large prime number (0xFFFEFFF9).  This
+should make collisions a lot less likely, but definitely not as good
+as a proper CRC-64 implementation.
+
+------------------------------------------------------------------------
+r1358 | ajapted | 2012-02-12
+
+Eureka: fixed #includes from renamed file: lib_crc --> lib_adler
+
+------------------------------------------------------------------------
+r1357 | ajapted | 2012-02-12
+
+Eureka: renamed code file: lib_crc --> lib_adler
+
+------------------------------------------------------------------------
+r1356 | ajapted | 2012-02-09
+
+Eureka: TODO (etc) update.
+
+------------------------------------------------------------------------
+r1355 | ajapted | 2012-02-09
+
+Eureka: when dragging/scaling/rotating vertices, draw the linedefs too.
+
+Changed dynamic rotate (CTRL + Mouse2) to not scale, just rotate.
+
+------------------------------------------------------------------------
+r1354 | ajapted | 2012-02-08
+
+Eureka: renamed typedef: obj_type_t --> obj_type_e
+
+------------------------------------------------------------------------
+r1353 | ajapted | 2012-02-08
+
+Eureka / DOOM: renamed some Ammunition things.
+
+------------------------------------------------------------------------
+r1352 | ajapted | 2012-02-08
+
+Eureka / DOOM: removed "PU:" prefix from pickup items, moved backpack
+into the Bonus category, and some minor renaming.
+
+------------------------------------------------------------------------
+r1351 | ajapted | 2012-02-08
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1350 | ajapted | 2012-02-08
+
+Eureka: implemented MasterDir_Remove().  This should fix the crash issue
+(and a quick test did not reproduce the crash).
+
+------------------------------------------------------------------------
+r1349 | ajapted | 2012-02-08
+
+Eureka: removed obsolete file: w_structs.h
+
+------------------------------------------------------------------------
+r1348 | ajapted | 2012-02-08
+
+Eureka: removed most stuff from w_structs.h (obsolete), and moved the
+two actually used definitions --> w_rawdef.h
+
+------------------------------------------------------------------------
+r1347 | ajapted | 2012-02-08
+
+Eureka: updated all header files to have consistent guards (i.e. the
+#ifndef XXX #define XXX ... #endif paradigm). 
+
+------------------------------------------------------------------------
+r1346 | ajapted | 2012-02-08
+
+Eureka: replaced 'img_dim_t' typedef with good old 'int'.
+
+------------------------------------------------------------------------
+r1345 | ajapted | 2012-02-07
+
+tweak
+
+------------------------------------------------------------------------
+r1344 | ajapted | 2012-02-07
+
+Eureka: ChangeLog / TODO update.
+
+------------------------------------------------------------------------
+r1343 | ajapted | 2012-02-07
+
+Eureka: for File/New, no need to ask for a map slot when there's no
+current PWAD, as the File/Save function will do File/Export which
+always asks for the map slot.
+
+------------------------------------------------------------------------
+r1342 | ajapted | 2012-02-07
+
+Eureka: show the current WAD and map name in the window title bar.
+
+------------------------------------------------------------------------
+r1341 | ajapted | 2012-02-07
+
+Eureka: TODO twiddling.
+
+------------------------------------------------------------------------
+r1340 | ajapted | 2012-02-07
+
+Eureka: committed current change-log.
+
+------------------------------------------------------------------------
+r1339 | ajapted | 2012-02-07
+
+Eureka: the clipboard persists when changing maps, allowing copy-n-paste
+from one map/wad to another map/wad.
+
+------------------------------------------------------------------------
+r1338 | ajapted | 2012-02-07
+
+Eureka: renamed variables: Warp --> Level_name, also Game --> Game_name
+and Port --> Port_name.
+
+------------------------------------------------------------------------
+r1337 | ajapted | 2012-02-07
+
+Eureka: snap_to_grid is now the default.
+
+------------------------------------------------------------------------
+r1336 | ajapted | 2012-02-07
+
+tweak.
+
+------------------------------------------------------------------------
+r1335 | ajapted | 2012-02-05
+
+Eureka: when highlighting the nearest vertex, handle grid-snap mode so
+that the bbox we check has the same size as the grid step.  This ensures
+we can close a line loop properly, instead of placing a vertex on top of
+an existing vertex.
+
+Bug reported by Lance MDR Rocket.
+
+------------------------------------------------------------------------
+r1334 | ajapted | 2012-02-05
+
+Eureka: when creating a square sector (outside of map), make it occupy a
+single grid square.
+
+------------------------------------------------------------------------
+r1333 | ajapted | 2012-02-02
+
+Eureka: moved some documents into new docs/ folder. 
+
+------------------------------------------------------------------------
+r1332 | ajapted | 2012-02-02
+
+Eureka: WISHLIST update.
+
+------------------------------------------------------------------------
+r1331 | ajapted | 2012-02-02
+
+Eureka: added docs/ folder.
+
+------------------------------------------------------------------------
+r1330 | ajapted | 2012-02-01
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1329 | ajapted | 2012-02-01
+
+Eureka: disable debugging messages in LOG file.
+
+------------------------------------------------------------------------
+r1328 | ajapted | 2012-02-01
+
+Eureka: fixed year in About box text.
+
+------------------------------------------------------------------------
+r1327 | ajapted | 2012-02-01
+
+Eureka: disabled some debugging stderr messages.
+
+------------------------------------------------------------------------
+r1326 | ajapted | 2012-02-01
+
+tweak.
+
+------------------------------------------------------------------------
+r1325 | ajapted | 2012-02-01
+
+Eureka: added changelog for v0.72
+
+------------------------------------------------------------------------
+r1324 | ajapted | 2012-02-01
+
+tweak
+
+------------------------------------------------------------------------
+r1323 | ajapted | 2012-02-01
+
+Eureka: updated NEW_WORKFLOW document, various other doc tweaks.
+
+------------------------------------------------------------------------
+r1322 | ajapted | 2012-02-01
+
+tweak
+
+------------------------------------------------------------------------
+r1321 | ajapted | 2012-02-01
+
+tweak.
+
+------------------------------------------------------------------------
+r1320 | ajapted | 2012-02-01
+
+Eureka: fixed FreshLevel() to apply the default textures (etc).
+
+------------------------------------------------------------------------
+r1319 | ajapted | 2012-02-01
+
+Eureka: fixed bug in recent commit (Export code).
+
+------------------------------------------------------------------------
+r1318 | ajapted | 2012-02-01
+
+Eureka: silenced a few compiler warnings.
+
+------------------------------------------------------------------------
+r1317 | ajapted | 2012-02-01
+
+Eureka: tweaked messages when loading/saving/exporting a map.
+
+------------------------------------------------------------------------
+r1316 | ajapted | 2012-02-01
+
+Eureka: disabled some unimplemented Menu commands.
+
+------------------------------------------------------------------------
+r1315 | ajapted | 2012-02-01
+
+Eureka / DOOM: changed default ceiling texture to CEIL3_5.
+
+------------------------------------------------------------------------
+r1314 | ajapted | 2012-02-01
+
+Eureka: more stuff for WISHLIST....
+
+------------------------------------------------------------------------
+r1313 | ajapted | 2012-01-31
+
+Eureka: added MasterDir_Add() and MasterDir_Remove() functions
+(note the latter is not implemented yet).
+
+------------------------------------------------------------------------
+r1312 | ajapted | 2012-01-31
+
+Eureka: improved logic in File/Open function when the user selects a
+new WAD file -- in particular we only change 'edit_wad' and update the
+master directory if the operation is successful.
+
+Improved File/Export code with the MasterDir_Add/Remove calls.
+
+------------------------------------------------------------------------
+r1311 | ajapted | 2012-01-31
+
+Eureka: tidying up...
+
+------------------------------------------------------------------------
+r1310 | ajapted | 2012-01-31
+
+Eureka: small fix.
+
+------------------------------------------------------------------------
+r1309 | ajapted | 2012-01-31
+
+Eureka: yet another TODO / WISHLIST update.
+
+------------------------------------------------------------------------
+r1308 | ajapted | 2012-01-31
+
+Eureka: improved logic for DetermineIWAD(), handle $DOOMWADDIR and
+when -iwad merely specifies a directory.
+
+------------------------------------------------------------------------
+r1307 | ajapted | 2012-01-31
+
+Eureka / Wad_file: fixed ::Open() with mode 'a' to only create the
+file when it doesn't exist (errno == ENOENT).  Before it would try
+to create the file on other errors (such as no permission to R/W).
+
+------------------------------------------------------------------------
+r1306 | ajapted | 2012-01-31
+
+Eureka: changed -file option to only accept a single PWAD.  Later on
+there will be a -merge option for adding resource wads.
+
+------------------------------------------------------------------------
+r1305 | ajapted | 2012-01-31
+
+Eureka: ensure new lumps have uppercase names.
+
+------------------------------------------------------------------------
+r1304 | ajapted | 2012-01-31
+
+Eureka: TODO and WISHLIST update.
+
+------------------------------------------------------------------------
+r1303 | ajapted | 2012-01-31
+
+Eureka: updated README for upcoming test package.
+
+------------------------------------------------------------------------
+r1302 | ajapted | 2012-01-31
+
+Eureka: tweaked FEATURES.txt
+
+------------------------------------------------------------------------
+r1301 | ajapted | 2012-01-31
+
+Eureka: when creating new sectors, give them proper default values,
+especially the default floor and ceiling textures.  Similarly for
+new sidedefs.
+
+------------------------------------------------------------------------
+r1300 | ajapted | 2012-01-31
+
+Eureka: TODO / WISHLIST update.
+
+------------------------------------------------------------------------
+r1299 | ajapted | 2012-01-31
+
+Eureka: use the new 'g_default_thing' global when inserting things,
+and removed the other one.
+
+------------------------------------------------------------------------
+r1298 | ajapted | 2012-01-30
+
+Eureka: added 'default_thing' value to DOOM and HERETIC game defs.
+
+------------------------------------------------------------------------
+r1297 | ajapted | 2012-01-30
+
+Eureka: code to parse a 'default_thing' line in game definitions.
+
+------------------------------------------------------------------------
+r1296 | ajapted | 2012-01-30
+
+Eureka: added 'default_textures' line to DOOM and HERETIC game defs.
+
+------------------------------------------------------------------------
+r1295 | ajapted | 2012-01-30
+
+Eureka: code to parse 'default_textures' line in game definitions.
+
+------------------------------------------------------------------------
+r1294 | ajapted | 2012-01-30
+
+Eureka: support for a 'sky_color' field in game definition files.
+
+------------------------------------------------------------------------
+r1293 | ajapted | 2012-01-30
+
+Eureka: removed a couple of unused globals.
+
+------------------------------------------------------------------------
+r1292 | ajapted | 2012-01-30
+
+tweak
+
+------------------------------------------------------------------------
+r1291 | ajapted | 2012-01-30
+
+Eureka: more tidying of obsolete config options...
+
+------------------------------------------------------------------------
+r1290 | ajapted | 2012-01-30
+
+Eureka: removed most of the obsolete config settings.
+
+------------------------------------------------------------------------
+r1289 | ajapted | 2012-01-30
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r1288 | ajapted | 2012-01-30
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r1287 | ajapted | 2012-01-30
+
+Eureka: removed 'Expert' global variable.
+
+------------------------------------------------------------------------
+r1286 | ajapted | 2012-01-30
+
+Eureka / Port defs: consistently have 'BOOM:' or 'EDGE:' in the names
+of the Boom and Edge specific linetypes, things, etc...
+
+------------------------------------------------------------------------
+r1285 | ajapted | 2012-01-30
+
+Eureka: added a DeterminePort() function.
+
+------------------------------------------------------------------------
+r1284 | ajapted | 2012-01-30
+
+Eureka: added 'ports/vanilla.ugh' definition, which is empty except for
+comments (and doesn't need anything).
+
+------------------------------------------------------------------------
+r1283 | ajapted | 2012-01-29
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1282 | ajapted | 2012-01-29
+
+Eureka: properly flip linedefs when inserting a sector and the line(s)
+would have ended up with no right side (only a left side).
+
+------------------------------------------------------------------------
+r1281 | ajapted | 2012-01-29
+
+Eureka: when auto-splitting a sector, ensure neither line loop faces outward.
+
+------------------------------------------------------------------------
+r1280 | ajapted | 2012-01-29
+
+Eureka: noted a bug with rendering mid-masked textures.
+
+------------------------------------------------------------------------
+r1279 | ajapted | 2012-01-29
+
+tweak
+
+------------------------------------------------------------------------
+r1278 | ajapted | 2012-01-29
+
+Eureka.cfg : removed the obsolete iwad stuff.
+
+------------------------------------------------------------------------
+r1277 | ajapted | 2012-01-29
+
+Eureka: have a single -iwad parameter (instead of -iwad1, -iwad2 etc....)
+
+------------------------------------------------------------------------
+r1276 | ajapted | 2012-01-29
+
+tweakage.
+
+------------------------------------------------------------------------
+r1275 | ajapted | 2012-01-29
+
+Eureka: WISHLIST update.
+
+------------------------------------------------------------------------
+r1274 | ajapted | 2012-01-29
+
+Eureka: determine the 'Game' value from the IWAD filename.
+
+------------------------------------------------------------------------
+r1273 | ajapted | 2012-01-29
+
+Eureka: for File/Export function, add ".wad" if filename has no extension.
+
+------------------------------------------------------------------------
+r1272 | ajapted | 2012-01-29
+
+Eureka: code tweak (use FileExists utility function).
+
+------------------------------------------------------------------------
+r1271 | ajapted | 2012-01-29
+
+Eureka / yutils: removed a few unused functions (fncmp, spec_path) and
+renamed a few functions (e.g. TimeGetMillies).
+
+------------------------------------------------------------------------
+r1270 | ajapted | 2012-01-28
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1269 | ajapted | 2012-01-28
+
+Eureka / Wad_file: added PathName() and IsReadOnly() methods.
+
+------------------------------------------------------------------------
+r1268 | ajapted | 2012-01-28
+
+Eureka: made the Wad_file::Open() method mimic the fopen() semantics,
+it now has a 'mode' parameter which can be 'r', 'w' or 'a'.
+
+Hence removed the ::Create() method from the public API.
+
+------------------------------------------------------------------------
+r1267 | ajapted | 2012-01-28
+
+Eureka: some work to set 'Game' value differently, it will be based on
+the IWAD filename instead of being in the CFG file.
+
+------------------------------------------------------------------------
+r1266 | ajapted | 2012-01-28
+
+Eureka: for File/Open function, implemented choosing a WAD file to load
+and improved the wording on the question.
+
+------------------------------------------------------------------------
+r1265 | ajapted | 2012-01-28
+
+Eureka: for File/Open command, clear the MadeChanges flag and pan/zoom
+the canvas to show the whole level.
+
+------------------------------------------------------------------------
+r1264 | ajapted | 2012-01-28
+
+Eureka: partial work on File/Open (CTRL-O) functionality.  It really
+needs is a new widget, HOWEVER for now I will make do with fl_input and
+Confirm/Notify dialogs.
+
+------------------------------------------------------------------------
+r1263 | ajapted | 2012-01-28
+
+dead code removal.
+
+------------------------------------------------------------------------
+r1262 | ajapted | 2012-01-27
+
+tweakage.
+
+------------------------------------------------------------------------
+r1261 | ajapted | 2012-01-27
+
+Eureka: for EXPORT function, if selected wad already exists then we just
+save the map into that wad, but if the MAP already exists in that wad
+then get confirmation from the user to overwrite it.
+
+------------------------------------------------------------------------
+r1260 | ajapted | 2012-01-27
+
+Eureka: more Wishes.... sigh...
+
+------------------------------------------------------------------------
+r1259 | ajapted | 2012-01-27
+
+Eureka: for EXPORT function, ask user for map-slot name and use it,
+and also make the exported WAD the current PWAD (set 'edit_wad' global).
+
+------------------------------------------------------------------------
+r1258 | ajapted | 2012-01-27
+
+Eureka: new global 'Replacer' remembers when the user created a new map
+(via File/New or CTRL-N) __AND__ it would replace an existing level in
+the current PWAD.
+
+When doing File/Save (CTRL-S), check for Replacer and confirm whether
+the user really wants to replace the existing map.
+
+Improved File/New operation to ask for a map name.
+
+------------------------------------------------------------------------
+r1257 | ajapted | 2012-01-27
+
+Eureka: bit of work on wad handling, the 'base_wad' and 'edit_wad' global
+variables have the current IWAD (required) and current PWAD (optional).
+
+------------------------------------------------------------------------
+r1256 | ajapted | 2012-01-27
+
+Eureka / Games: renamed 'doom1.ugh' --> 'doom.ugh', to match the IWAD
+filename (DOOM.WAD)
+
+------------------------------------------------------------------------
+r1255 | ajapted | 2012-01-27
+
+Eureka / Games: added game definitions for FINAL DOOM (tnt.ugh and
+plutonia.ugh).  They merely include the DOOM 2 definitions, although
+eventually they will need stuff for their new textures.
+
+------------------------------------------------------------------------
+r1254 | ajapted | 2012-01-27
+
+Eureka: tweaked color of camera arrow.
+
+------------------------------------------------------------------------
+r1253 | ajapted | 2012-01-27
+
+Eureka: implemented 'Go To Camera' function (bound to END key).
+
+------------------------------------------------------------------------
+r1252 | ajapted | 2012-01-27
+
+Eureka: version bump to 0.72
+
+------------------------------------------------------------------------
+r1251 | ajapted | 2012-01-27
+
+Eureka / README: document middle click functions (scale etc).
+
+------------------------------------------------------------------------
+r1250 | ajapted | 2012-01-27
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1249 | ajapted | 2012-01-27
+
+Eureka: show proper location and angle of camera.
+
+------------------------------------------------------------------------
+r1248 | ajapted | 2012-01-27
+
+Eureka: size of the camera arrow now depends on current map scale.
+
+------------------------------------------------------------------------
+r1247 | ajapted | 2012-01-27
+
+Eureka: partial work on drawing the camera (a pink arrow)...
+
+------------------------------------------------------------------------
+r1246 | ajapted | 2012-01-27
+
+Eureka: worked on semantics for wad handling (the File/ menu) and how
+the current "game" is defined.
+
+------------------------------------------------------------------------
+r1245 | ajapted | 2012-01-26
+
+Eureka / Scaling: fixed bug where a rotation remains in-effect after
+releasing the CTRL key.
+
+------------------------------------------------------------------------
+r1244 | ajapted | 2012-01-26
+
+Eureka / Scaling: properly handle modifiers: none = keep_aspect,
+SHIFT = any aspect, CTRL = rotate.
+
+------------------------------------------------------------------------
+r1243 | ajapted | 2012-01-26
+
+Eureka / Scaling: various fixes...
+
+------------------------------------------------------------------------
+r1242 | ajapted | 2012-01-26
+
+Eureka: use new scale_param_t stuff in UI_Canvas class.
+
+------------------------------------------------------------------------
+r1241 | ajapted | 2012-01-26
+
+Eureka: added a scale_param_t structure with an Apply() method to
+transform a coordinate value.  Updated all CMD_ScaleObjects2() code to
+use this structure and method (rather than mid_x etc... parameters).
+
+------------------------------------------------------------------------
+r1240 | ajapted | 2012-01-26
+
+TODO bits...
+
+------------------------------------------------------------------------
+r1239 | ajapted | 2012-01-26
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1238 | ajapted | 2012-01-26
+
+Eureka: moved next/prev/jump code into CMD_NextObject(), CMD_PrevObject()
+and CMD_JumpToObject() functions in e_path.cc/h file, and updated menu
+to call them.
+
+------------------------------------------------------------------------
+r1237 | ajapted | 2012-01-26
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r1236 | ajapted | 2012-01-26
+
+Eureka: use 'V' key for the mirror vertically function (not 'I').
+
+------------------------------------------------------------------------
+r1235 | ajapted | 2012-01-26
+
+Eureka: Implemented 'Invert Selection' function (CTRL + I).
+
+------------------------------------------------------------------------
+r1234 | ajapted | 2012-01-26
+
+Eureka: moved sel_op_e enum from main.h --> m_bitvec.h
+
+------------------------------------------------------------------------
+r1233 | ajapted | 2012-01-26
+
+minor fix.
+
+------------------------------------------------------------------------
+r1232 | ajapted | 2012-01-26
+
+WISH-LIST: console idea.
+
+------------------------------------------------------------------------
+r1231 | ajapted | 2012-01-25
+
+tweaks.
+
+------------------------------------------------------------------------
+r1230 | ajapted | 2012-01-25
+
+Eureka: for 'Export Map' function, properly handle CANCEL and ERROR
+returns from the file chooser (notify user), and actually use the
+filename selected, and notify user if creating the file failed.
+
+------------------------------------------------------------------------
+r1229 | ajapted | 2012-01-25
+
+Eureka: factored out a Main_ConfirmQuit() function, and use it for the
+'New Level' function too (so the user does not lose their changes).
+
+------------------------------------------------------------------------
+r1228 | ajapted | 2012-01-25
+
+Eureka: TODO update (scaling stuff).
+
+------------------------------------------------------------------------
+r1227 | ajapted | 2012-01-25
+
+Eureka / Scaling: experimental code for dynamic Rotation....
+
+------------------------------------------------------------------------
+r1226 | ajapted | 2012-01-25
+
+Eureka / Scaling: fixed the scaling calculations in Scaled_Coord() and
+UI_Canvas::ScaleUpdate().
+
+------------------------------------------------------------------------
+r1225 | ajapted | 2012-01-25
+
+Eureka / Scaler: factored out some common mirror logic so it can be
+used for the dynamic scaling code too (when scale_x or y is negative).
+
+Implemented the actual scaling in new CMD_ScaleObjects2() function.
+
+For some functions in x_mirror, pass 'selection_c' by reference
+instead of as a pointer.
+
+------------------------------------------------------------------------
+r1224 | ajapted | 2012-01-25
+
+Eureka / Scaling: properly compute middle point of objects.
+
+------------------------------------------------------------------------
+r1223 | ajapted | 2012-01-25
+
+Eureka: renamed some stuff, e.g. centre_of_objs() --> Objs_CalcMiddle()
+bbox_of_objects() --> Objs_CalcBBox(), and a few other things.
+
+------------------------------------------------------------------------
+r1222 | ajapted | 2012-01-25
+
+Eureka / Scaling: added code to draw scaled LineDefs and Sectors.
+
+------------------------------------------------------------------------
+r1221 | ajapted | 2012-01-25
+
+Eureka / Scaling: proper logic to draw the scaled selection, and added
+support for a 'keep_aspect' mode (hold down SHIFT key).
+
+------------------------------------------------------------------------
+r1220 | ajapted | 2012-01-25
+
+Eureka: initial work on ability to Scale objects via middle mouse button,
+working very similarly to dragging objects...
+
+------------------------------------------------------------------------
+r1219 | ajapted | 2012-01-25
+
+Eureka: WISHLIST bits...
+
+------------------------------------------------------------------------
+r1218 | ajapted | 2012-01-25
+
+Eureka: improved Quantization algorithm, for vertices we analyse the
+linedefs and remember the orientations (V_HORIZ, V_VERT etc), and have
+better QuantSnapX/Y() grid methods.
+
+------------------------------------------------------------------------
+r1217 | ajapted | 2012-01-25
+
+Eureka: for Quantization of vertices, added logic to keep horizontal
+lines horizontal and vertical lines vertical.
+
+------------------------------------------------------------------------
+r1216 | ajapted | 2012-01-25
+
+dead code removal.
+
+------------------------------------------------------------------------
+r1215 | ajapted | 2012-01-25
+
+Eureka: preliminary code for Quantize_Vertices().
+
+------------------------------------------------------------------------
+r1214 | ajapted | 2012-01-24
+
+Eureka: worked on Quantization function, for now only for Things.
+
+The significant aspects are:
+(1) leave the unsuccessfully moved things selected (and beep)
+(2) never move a thing directly on top of another one
+(3) if the nearest corner is unavailable, try the other corners
+
+[these rules will apply to vertex quantization too, and then some]
+
+------------------------------------------------------------------------
+r1213 | ajapted | 2012-01-22
+
+Eureka: TODO item.
+
+------------------------------------------------------------------------
+r1212 | ajapted | 2012-01-22
+
+Eureka: notes for a better (feasible) quantization algorithm.
+
+------------------------------------------------------------------------
+r1211 | ajapted | 2012-01-22
+
+Eureka: experimental code for the 'File/New' menu command, and tweaked
+some other menu bits.
+
+------------------------------------------------------------------------
+r1210 | ajapted | 2012-01-22
+
+Eureka / TODO: moved numerous items to the WISH-LIST, keeping the TODO
+for stuff which I intend to implemented before the next test package.
+
+------------------------------------------------------------------------
+r1209 | ajapted | 2012-01-18
+
+tweak.
+
+------------------------------------------------------------------------
+r1208 | ajapted | 2012-01-18
+
+Eureka: call the FLTK load_system_icons() function in InitFLTK().
+Doesn't seem to have done anything though (no icons in the file chooser).
+
+------------------------------------------------------------------------
+r1207 | ajapted | 2012-01-18
+
+Eureka: better logic for menu 'Zoom In/Out' functions via CMD_Zoom()
+and CMD_ZoomWholeLevel() functions.  Tweaked some other menu bits.
+
+------------------------------------------------------------------------
+r1206 | ajapted | 2012-01-18
+
+Eureka: test code for using FL_Native_File_Chooser....
+
+------------------------------------------------------------------------
+r1205 | ajapted | 2012-01-18
+
+Eureka: partial work on the "Export Map" function, i.e. saving the level
+into a brand spanking new wad file.  No file selection dialog yet!
+
+------------------------------------------------------------------------
+r1204 | ajapted | 2012-01-18
+
+Eureka: removed 'action' field from UI_MainWin class, have a 'want_quit'
+global variable instead.
+
+------------------------------------------------------------------------
+r1203 | ajapted | 2012-01-17
+
+Eureka: fixed (restored?) deleting things in a sector when deleting
+that very sector.  The things are kept (with the linedefs) in the
+"keep unused" mode, i.e. when the SHIFT key is held down.
+
+------------------------------------------------------------------------
+r1202 | ajapted | 2012-01-17
+
+Eureka: various updates to README, TODO, WISHLIST.
+
+------------------------------------------------------------------------
+r1201 | ajapted | 2012-01-17
+
+Eureka: fixed bug when saving a map more than once, the wrong lumps
+could get removed and hence end up with multiple versions of the map
+in the output wad file.
+
+------------------------------------------------------------------------
+r1200 | ajapted | 2012-01-17
+
+minor code reformatting.
+
+------------------------------------------------------------------------
+r1199 | ajapted | 2012-01-17
+
+Eureka: began work on texture alignment functions....
+
+------------------------------------------------------------------------
+r1198 | ajapted | 2012-01-17
+
+Eureka / selection_c class: added a 'first_obj' field which remembers
+the very first object added to the selection.  It is -1 for an empty
+selection or when that object gets cleared.  The find_first() method
+will return that object if valid, and the find_second() method had been
+updated to handle it properly too.
+
+Reduced MAX_STORE_SEL from 32 --> 24, as I think this will speed up
+certain operations that make heavy use of selection queries.
+
+Did some code formatting (like semicolons in for loops).
+
+------------------------------------------------------------------------
+r1197 | ajapted | 2012-01-17
+
+Eureka: changed "rotate 90^ clockwise" key to 'R', leaving 'X' free for
+texture alignment function.
+
+------------------------------------------------------------------------
+r1196 | ajapted | 2012-01-17
+
+Eureka: made grid size button a bit wider.
+
+------------------------------------------------------------------------
+r1195 | ajapted | 2012-01-16
+
+Eureka: kicked the "Auto" grid choice code to the curb.
+
+------------------------------------------------------------------------
+r1194 | ajapted | 2012-01-16
+
+Eureka: mostly finished grid "AUTO" mode, but it sucks since you cannot
+see what the current grid step is, so it's gonna get the boot.
+
+------------------------------------------------------------------------
+r1193 | ajapted | 2012-01-16
+
+Eureka: fixed wrong initial color of Free/Snap button.
+
+------------------------------------------------------------------------
+r1192 | ajapted | 2012-01-16
+
+Eureka: partial work on an "AUTO" mode for the grid, where the grid step
+automatically follows the current scale.  It replaces the "locked" flag,
+and is now a choice in the Grid setting, so removed the "Locked" choice
+in the Snap widget.
+
+------------------------------------------------------------------------
+r1191 | ajapted | 2012-01-16
+
+Eureka: added ToggleSnap() and ToggleAuto() methods to Grid_State_c.
+
+------------------------------------------------------------------------
+r1190 | ajapted | 2012-01-16
+
+TODO update.
+
+------------------------------------------------------------------------
+r1189 | ajapted | 2012-01-16
+
+Eureka: made the 'h' key toggle through the alternate grid mode too
+(i.e. normal --> simple --> none).  This replaces the 'P' key function.
+
+------------------------------------------------------------------------
+r1188 | ajapted | 2012-01-16
+
+Eureka: don't highlight a split_line if one of its vertices is selected.
+
+------------------------------------------------------------------------
+r1187 | ajapted | 2012-01-13
+
+Eureka: in "simple" grid mode, make the X and Y axis lines (at X=0 and
+at Y=0) a brighter blue than the rest.  Can help to orientate yourself.
+
+------------------------------------------------------------------------
+r1186 | ajapted | 2012-01-12
+
+Eureka: default for grid snapping is now "FREE".
+
+------------------------------------------------------------------------
+r1185 | ajapted | 2012-01-11
+
+Eureka: the digits '1' to '9' now set the GRID step, usually 2^n
+(i.e. 2, 4, 8, etc) but '8' is 192 units and '9' is 256 units.
+
+------------------------------------------------------------------------
+r1184 | ajapted | 2012-01-09
+
+Eureka: notes in TODO.txt and tidying up.
+
+------------------------------------------------------------------------
+r1183 | ajapted | 2012-01-09
+
+Eureka: TODO update (iwad stuff, grid keys).
+
+------------------------------------------------------------------------
+r1182 | ajapted | 2012-01-08
+
+Eureka: implemented auto-sectoring when EXTENDING off an existing
+structure.
+
+------------------------------------------------------------------------
+r1181 | ajapted | 2012-01-08
+
+Eureka: got automatic splitting of sectors working! :-)
+
+------------------------------------------------------------------------
+r1180 | ajapted | 2012-01-08
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1179 | ajapted | 2012-01-08
+
+Eureka / basis: replaced LD_WhatSec() function with LineDef::WhatSector().
+
+------------------------------------------------------------------------
+r1178 | ajapted | 2012-01-08
+
+Eureka / basis: changed TouchesSector() method to take a sector number
+instead of a Sector pointer.
+
+------------------------------------------------------------------------
+r1177 | ajapted | 2012-01-08
+
+Eureka: bit more work on ClosedLoop_Complex() logic....
+
+------------------------------------------------------------------------
+r1176 | ajapted | 2012-01-08
+
+Eureka: began work on logic when adding a new linedef to a vertex with
+two or more existing linedefs (auto-split OR auto-sectoring).
+Wrote the TwoNeighboringLinedefs() code and tested it.
+
+------------------------------------------------------------------------
+r1175 | ajapted | 2012-01-08
+
+Eureka / basis: added LineDef::TouchesVertex() method.
+
+------------------------------------------------------------------------
+r1174 | ajapted | 2012-01-08
+
+Eureka / lineloop: fixed a logic error in LookForIsland() code.
+
+------------------------------------------------------------------------
+r1173 | ajapted | 2012-01-08
+
+Eureka / lineloop: removed obsolete super_find_sector_model() code.
+
+------------------------------------------------------------------------
+r1172 | ajapted | 2012-01-08
+
+Eureka / lineloop: implemented FacesSector() method for islands.
+
+------------------------------------------------------------------------
+r1171 | ajapted | 2012-01-08
+
+Eureka: new Insert_LineDef() function factors out the linedef creation
+bits from the Insert_Vertex() code.
+
+Began work on logic to auto-insert and auto-split sectors when adding
+new linedefs.  New ClosedSimpleLoop() function handles the case of
+closing a simple loop (last vertex ends up with only two linedefs).
+
+------------------------------------------------------------------------
+r1170 | ajapted | 2012-01-08
+
+Eureka / lineloop: made AssignSectorToLoop() part of public API.
+
+------------------------------------------------------------------------
+r1169 | ajapted | 2012-01-08
+
+Eureka / lineloop: added clear() method, use it at start of TraceLineLoop().
+
+------------------------------------------------------------------------
+r1168 | ajapted | 2012-01-08
+
+Eureka / lineloop: added AllNew() and NeighboringSector() methods.
+
+------------------------------------------------------------------------
+r1167 | ajapted | 2012-01-08
+
+Eureka: added 'ignore_new' flag to TraceLineLoop() function, this will
+cause "new" linedefs (ones without any sidedefs) to be ignored.
+
+------------------------------------------------------------------------
+r1166 | ajapted | 2012-01-06
+
+Eureka / lineloop: added SameSector() method.
+
+------------------------------------------------------------------------
+r1165 | ajapted | 2012-01-06
+
+Eureka / lineloop: added TotalLength() method.
+
+------------------------------------------------------------------------
+r1164 | ajapted | 2012-01-06
+
+Eureka: updated README.txt
+
+------------------------------------------------------------------------
+r1163 | ajapted | 2012-01-06
+
+Eureka / lineloop: determine the 'faces_outward' flag by computing the
+average angle between lines in the loop (done in TraceLineLoop).
+
+Fixed get() and get_just_line() methods to check the islands too,
+which is vital to make FindIslands() work properly.
+
+Fixed AssignSectorToSpace() to handle islands too.
+
+------------------------------------------------------------------------
+r1162 | ajapted | 2012-01-06
+
+Eureka / lineloop: reworked TraceLineLoop() code for new class.
+
+------------------------------------------------------------------------
+r1161 | ajapted | 2012-01-06
+
+Eureka / lineloop: reworked the FindIslands() logic for new class.
+
+------------------------------------------------------------------------
+r1160 | ajapted | 2012-01-06
+
+Eureka / lineloop: destructor now frees the islands.  Moved code around.
+
+------------------------------------------------------------------------
+r1159 | ajapted | 2012-01-06
+
+Eureka / lineloop: rewrote the CalcBounds() method, which was previously
+a function called BoundsOfLinePath().
+
+------------------------------------------------------------------------
+r1158 | ajapted | 2012-01-06
+
+Eureka: more work on lineloop_c code, e.g. get() and push_back() methods.
+
+------------------------------------------------------------------------
+r1157 | ajapted | 2012-01-06
+
+Eureka: added #include "x_loop.h" where needed.
+
+------------------------------------------------------------------------
+r1156 | ajapted | 2012-01-06
+
+Eureka: began work on a lineloop_c class for representing a line-loop
+(an ordered list of linedef/side pairs).
+
+------------------------------------------------------------------------
+r1155 | ajapted | 2012-01-06
+
+Eureka / Makefiles: added 'x_loop' code file to the build.
+
+------------------------------------------------------------------------
+r1154 | ajapted | 2012-01-06
+
+Eureka: fixed #includes in x_loop.cc (restored needed, removed uneeded).
+
+------------------------------------------------------------------------
+r1153 | ajapted | 2012-01-06
+
+Eureka: moved AssignSectorToSpace() function and related code from
+s_misc.cc/h --> x_loop.cc/h (new files).
+
+------------------------------------------------------------------------
+r1152 | ajapted | 2012-01-05
+
+Eureka / TODO: some notes about line-loop modalities....
+
+------------------------------------------------------------------------
+r1151 | ajapted | 2012-01-05
+
+Eureka: fixed bug with dragging a vertex and splitting a line, the
+dragged vertex was not moving to the new position.
+
+------------------------------------------------------------------------
+r1150 | ajapted | 2012-01-05
+
+tweak.
+
+------------------------------------------------------------------------
+r1149 | ajapted | 2012-01-05
+
+Eureka: (tentative commit) : for LoadDefinitions() allow a line or
+thing or texture/flat to have an unknown group -- print a warning to
+the log file instead of FatalError.
+
+This was prompted by the issue where port-specific stuff (e.g. Boom)
+was referencing groups that don't exist in a game (e.g. Heretic).
+I will look for a cleaner way to handle that kind of incompatibility.
+
+------------------------------------------------------------------------
+r1148 | ajapted | 2012-01-05
+
+Eureka / HERETIC: added missing 'sky_flat' value.
+
+------------------------------------------------------------------------
+r1147 | ajapted | 2012-01-05
+
+Eureka: WISHLIST update.
+
+------------------------------------------------------------------------
+r1146 | ajapted | 2012-01-05
+
+Eureka / Browser: implemented '!' in search box for negation.
+
+------------------------------------------------------------------------
+r1145 | ajapted | 2012-01-05
+
+Eureka: minor TODO stuff.
+
+------------------------------------------------------------------------
+r1144 | ajapted | 2012-01-05
+
+Eureka / DOOM: renamed category letters:
+   l --> p (lifts)
+   L --> l (light related)
+   F --> r (raising floors)
+   C --> h (crusher)
+   E --> x (extrafloor)
+
+------------------------------------------------------------------------
+r1143 | ajapted | 2012-01-05
+
+Eureka / HERETIC: changed stairs group letter to 'u' ("up"), and added a
+new group 's' for 'Sounds' (which the ambient sounds were already using).
+
+------------------------------------------------------------------------
+r1142 | ajapted | 2012-01-05
+
+Eureka / DOOM: sorted linetypes into groups, removed the 'D' group
+(use 'd' for normal and fast doors), and have a single group 'k' for
+keyed doors.  Moved linetype 85 (scroll wall right) into Boom defs.
+
+------------------------------------------------------------------------
+r1141 | ajapted | 2012-01-05
+
+Eureka / HERETIC: finished adjusting the line types, using different
+letters than Yadex did (e.g. 'h' for crushers, 'p' for lifts, 'r' for
+raising floors -- avoiding upper case letters).
+
+------------------------------------------------------------------------
+r1140 | ajapted | 2012-01-05
+
+Eureka / HERETIC: worked on linetypes, pasted line info from YADEX's
+game definition and sorted them into groups.
+
+------------------------------------------------------------------------
+r1139 | ajapted | 2012-01-05
+
+Eureka / HERETIC: finished thing sprites and added the correct sizes.
+(It would've been a lot easier to copy/paste from YADEX, duh!).
+
+------------------------------------------------------------------------
+r1138 | ajapted | 2012-01-05
+
+Eureka / HERETIC: a few more sprites....
+
+------------------------------------------------------------------------
+r1137 | ajapted | 2012-01-05
+
+Eureka / HERETIC: worked on sprite names for things, and fixed the id
+number for the 'Wings of Wrath' (was 23, should be 83).
+
+------------------------------------------------------------------------
+r1136 | ajapted | 2012-01-05
+
+Eureka: worked on thing info for HERETIC game definition....
+
+------------------------------------------------------------------------
+r1135 | ajapted | 2012-01-05
+
+Eureka: began work on a HERETIC game definition file....
+
+------------------------------------------------------------------------
+r1134 | ajapted | 2012-01-04
+
+Eureka: fixed grid-toggle key ('h') not updating the infobar widget.
+
+------------------------------------------------------------------------
+r1133 | ajapted | 2012-01-04
+
+Eureka: fixed the Grid menu's "OFF" choice.
+
+------------------------------------------------------------------------
+r1132 | ajapted | 2012-01-04
+
+Eureka: WISHLIST update.
+
+------------------------------------------------------------------------
+r1131 | ajapted | 2012-01-04
+
+Eureka: added new document 'NEW_WORKFLOW.txt', describing some of the
+significant differences between Eureka and its precedessor Yadex.
+
+------------------------------------------------------------------------
+r1130 | ajapted | 2012-01-04
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1129 | ajapted | 2012-01-04
+
+Eureka: updated MergeVertex() to handle a linedef which exists between
+the two vertices -- the new logic ensures it gets deleted.
+
+------------------------------------------------------------------------
+r1128 | ajapted | 2012-01-04
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1127 | ajapted | 2012-01-04
+
+Eureka: never highlight the same vertex as the one we are dragging,
+preventing an fatal error when trying to merge a vertex onto itself.
+
+------------------------------------------------------------------------
+r1126 | ajapted | 2012-01-04
+
+Eureka: implemented merging vertices when dragging a single vertex onto
+an existing vertex.
+
+------------------------------------------------------------------------
+r1125 | ajapted | 2012-01-04
+
+Eureka: fixed the UI_Canvas widget to draw both a a highlight and a
+dragged selection at the same time.  The logic in UpdateHighlight() is
+what's responsible for keeping it sane.
+
+------------------------------------------------------------------------
+r1124 | ajapted | 2012-01-04
+
+tweaks.
+
+------------------------------------------------------------------------
+r1123 | ajapted | 2012-01-04
+
+Eureka: improved the UpdateHighlight() code, with a check for dragging
+and splitting off the panel stuff into a new UpdatePanel() function.
+
+------------------------------------------------------------------------
+r1122 | ajapted | 2012-01-04
+
+Eureka: added Editor_State_c field 'drag_single_vertex', normally -1 but
+contains a vertex number when dragging just a single vertex.
+
+------------------------------------------------------------------------
+r1121 | ajapted | 2012-01-04
+
+Eureka: more DOOM definition tweaks....
+
+------------------------------------------------------------------------
+r1120 | ajapted | 2012-01-04
+
+Eureka: moved most DOOM 2 specific textures and flats into doom2.ugh
+
+------------------------------------------------------------------------
+r1119 | ajapted | 2012-01-04
+
+tidying up.
+
+------------------------------------------------------------------------
+r1118 | ajapted | 2012-01-04
+
+Eureka: moved rest of BOOM stuff from doom_specials.ugh --> boom.ugh
+
+------------------------------------------------------------------------
+r1117 | ajapted | 2012-01-04
+
+Eureka: moved all the EDGE-specific stuff and some BOOM-specific stuff
+out of the DOOM game definitions and into their own port definitions.
+
+------------------------------------------------------------------------
+r1116 | ajapted | 2012-01-04
+
+Eureka: moved DOOM 2 specific things from doom_common.ugh --> doom2.ugh,
+which includes the Super Shotgun, Megasphere, Boss-brain stuff, extra
+gore decorations, and the DOOM 2 specific monsters like the Archvile,
+Mancubus etc....
+
+------------------------------------------------------------------------
+r1115 | ajapted | 2012-01-03
+
+Eureka: merged 'doom_tex.ugh' back into 'doom_common.ugh'.
+
+All these shenanigans is to allow some DOOM engine games (such as
+Chex Quest, HacX, and Harmony) to use the common engine stuff but
+specify their own thing types and flats/textures.
+
+------------------------------------------------------------------------
+r1114 | ajapted | 2012-01-03
+
+Eureka: moved some stuff from doom_tex.ugh --> doom1/2.ugh
+
+------------------------------------------------------------------------
+r1113 | ajapted | 2012-01-03
+
+Eureka: separated out the line/sector specials from doom_common.ugh
+into a new file: 'doom_specials.ugh'.
+
+------------------------------------------------------------------------
+r1112 | ajapted | 2012-01-03
+
+Eureka: moved the flat/texture definitions out of doom_common.ugh and
+into a new file 'doom_tex.ugh'.
+
+------------------------------------------------------------------------
+r1111 | ajapted | 2012-01-03
+
+Eureka: added 'doom1.ugh' and 'doom2.ugh' game definitions, which so
+far do little more than simply include the common file.  Work still
+needs to be done to properly separate everything....
+
+------------------------------------------------------------------------
+r1110 | ajapted | 2012-01-03
+
+Eureka: renamed game config file: doom2.ugh --> doom_common.ugh
+(as the bulk of that file will be stuff in common to both games).
+
+------------------------------------------------------------------------
+r1109 | ajapted | 2012-01-03
+
+Eureka: implemented 'include' directive for ".ugh" definition files.
+
+This will be handy for:
+   (a) common stuff between DOOM 1 and DOOM 2
+   (b) ports which are boom compatible
+
+------------------------------------------------------------------------
+r1108 | ajapted | 2012-01-03
+
+Eureka: worked on "ugh" definition file loading, supply a folder name
+as well as the filename to the LoadDefinitions() function, with some
+test code which loads the "ports/boom" definition file.
+
+------------------------------------------------------------------------
+r1107 | ajapted | 2012-01-03
+
+Eureka: added a mods/ directory.
+
+------------------------------------------------------------------------
+r1106 | ajapted | 2012-01-03
+
+WISHLIST tweak.
+
+------------------------------------------------------------------------
+r1105 | ajapted | 2012-01-03
+
+Eureka: renamed configs/ folder --> games/
+
+------------------------------------------------------------------------
+r1104 | ajapted | 2012-01-03
+
+Eureka: moved BOOM and EDGE definition files --> ports/
+
+------------------------------------------------------------------------
+r1103 | ajapted | 2012-01-03
+
+Eureka: added 'ports' directory, a place for source-port definitions.
+
+------------------------------------------------------------------------
+r1102 | ajapted | 2012-01-03
+
+Eureka: added '192' as a grid size.
+
+------------------------------------------------------------------------
+r1101 | ajapted | 2012-01-03
+
+Eureka: draw vertices in proper colors when selected and/or highlighted
+(previously they remained green, only the box around them has the proper
+color).  Also made vertices more visible (solid area at centre).
+
+------------------------------------------------------------------------
+r1100 | ajapted | 2012-01-03
+
+TODO update.
+
+------------------------------------------------------------------------
+r1099 | ajapted | 2012-01-03
+
+Eureka: reworked colors of linedefs (UI_Canvas), white is used for
+single-sided lines (instead of lines with the blocking flag), and
+white is used in VERTEX mode too now.
+
+In LINEDEF mode, cyan is used for double-sided lines which have
+the blocking flag.
+
+------------------------------------------------------------------------
+r1098 | ajapted | 2012-01-03
+
+Eureka: implemented CMD_CorrectSector().
+
+------------------------------------------------------------------------
+r1097 | ajapted | 2012-01-03
+
+Eureka: when splitting a linedef with a new vertex, ensure the vertex
+lies directly on the linedef (i.e. not slightly off the side).  This
+only applies when grid snapping is OFF.
+
+------------------------------------------------------------------------
+r1096 | ajapted | 2012-01-03
+
+Eureka: began work to make 'c' key be a "correct sector" function.
+
+------------------------------------------------------------------------
+r1095 | ajapted | 2012-01-03
+
+Eureka / Utilities: added PerpDist() and AlongDist(), and removed some
+unused stuff.
+
+------------------------------------------------------------------------
+r1094 | ajapted | 2012-01-03
+
+Eureka: implemented MoveCoordOntoLineDef() function.
+
+------------------------------------------------------------------------
+r1093 | ajapted | 2012-01-03
+
+Eureka: experimented with an alternate grid (simple squares), which
+can be toggled via 'P' key (need a better key or mechanism though).
+
+------------------------------------------------------------------------
+r1092 | ajapted | 2012-01-03
+
+Eureka: made the single-quote key (') move the 3D camera to the cursor
+position.
+
+------------------------------------------------------------------------
+r1091 | ajapted | 2012-01-03
+
+Eureka: changed LighterColor() to be less bright.
+
+------------------------------------------------------------------------
+r1090 | ajapted | 2012-01-03
+
+Eureka: added code to create a 'bright_map' table, which maps palette
+colors to a brighter (closer to white) color in the palette.  This
+could potentially be used in the 3D preview to highlight stuff.
+
+------------------------------------------------------------------------
+r1089 | ajapted | 2012-01-03
+
+Eureka: deleting a single vertex attached to TWO linedefs (no more, no less)
+is now a special case which merges the linedefs together.
+
+------------------------------------------------------------------------
+r1088 | ajapted | 2012-01-03
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1087 | ajapted | 2012-01-03
+
+Eureka: changed DisconnectLineDefs logic so that the selected linedefs
+get any new vertices (existing geometry keeps the existing vertices). 
+
+------------------------------------------------------------------------
+r1086 | ajapted | 2012-01-03
+
+Eureka: implemented the logic for 'DisconnectLineDefs', which works
+somewhat different than disconnecting vertices since we want to keep
+all linedefs in the selection connected and only disconnect from
+linedefs NOT in the selection.
+
+------------------------------------------------------------------------
+r1085 | ajapted | 2012-01-03
+
+tidy up.
+
+------------------------------------------------------------------------
+r1084 | ajapted | 2012-01-03
+
+Eureka: added 'd' command to README.txt
+
+------------------------------------------------------------------------
+r1083 | ajapted | 2012-01-03
+
+Eureka: fixed problems in the DisconnectVertex code, and improved the
+logic in CalcDisconnectCoord().  Also assigned to 'd' key (was 'D').
+
+------------------------------------------------------------------------
+r1082 | ajapted | 2012-01-02
+
+Eureka: implemented a 'D' command to Disconnect linedefs.  Untested.
+
+------------------------------------------------------------------------
+r1081 | ajapted | 2012-01-02
+
+Eureka: version bump to 0.70 -- good progress with vertex stuff.
+
+------------------------------------------------------------------------
+r1080 | ajapted | 2012-01-02
+
+Eureka: just some algorithm notes...
+
+------------------------------------------------------------------------
+r1079 | ajapted | 2012-01-02
+
+Eureka: yet another TODO update.
+
+------------------------------------------------------------------------
+r1078 | ajapted | 2012-01-02
+
+Eureka: when adding a linedef between two existing vertices, reselect
+the second one IFF it was isolated (not connected to any linedefs).
+
+------------------------------------------------------------------------
+r1077 | ajapted | 2012-01-02
+
+Eureka: minor renaming, CastVerty --> CastVert.
+
+------------------------------------------------------------------------
+r1076 | ajapted | 2012-01-02
+
+Eureka: use RGB_RED() etc macros instead of directly manipulating color values.
+
+------------------------------------------------------------------------
+r1075 | ajapted | 2012-01-02
+
+Eureka: added DarkerColor() function.
+
+------------------------------------------------------------------------
+r1074 | ajapted | 2012-01-02
+
+Eureka: renamed pcolour_t --> rgb_color_t
+
+------------------------------------------------------------------------
+r1073 | ajapted | 2012-01-02
+
+Eureka: made DARKGREY and LIGHTGREY a bit brighter, and DARKGREY is
+used for things now (removed THING_REM constant).
+
+------------------------------------------------------------------------
+r1072 | ajapted | 2012-01-02
+
+Eureka: implemented dragging a vertex onto a linedef to split it.
+
+------------------------------------------------------------------------
+r1071 | ajapted | 2012-01-02
+
+Eureka: use "highlighted()" instead of "! highlighted.is_nil()"
+
+------------------------------------------------------------------------
+r1070 | ajapted | 2012-01-02
+
+Eureka / Browser: added a 'X' close button at top right.
+
+------------------------------------------------------------------------
+r1069 | ajapted | 2012-01-02
+
+Eureka: for user interface use 'Linedef' instead of 'LineDef'.
+
+------------------------------------------------------------------------
+r1068 | ajapted | 2012-01-02
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1067 | ajapted | 2012-01-02
+
+Eureka: made ^U be the main key to unselect everything, instead of END.
+The back-quota key (`) remains an alternative to ^U, as well as just
+clicking in an empty spot.
+
+Made the '0' key be an alternative for HOME key (centre map, zoom out).
+
+------------------------------------------------------------------------
+r1066 | ajapted | 2012-01-02
+
+Eureka: when dragging, require the pointer to move at least 6 pixels
+before the drag is considered valid.  This prevents accidentally moving
+an object when all you wanted to do was select it.
+
+------------------------------------------------------------------------
+r1065 | ajapted | 2012-01-02
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1064 | ajapted | 2012-01-02
+
+Eureka: never highlight a 'split_line' when a vertex is highlighted.
+
+Fixed updating the split_line while dragging a single vertex (however
+the ability to split the line after the drag is not implemented yet).
+
+------------------------------------------------------------------------
+r1063 | ajapted | 2012-01-02
+
+Eureka: code reformatting of 'for' loops, have a space before the ';' separators.
+
+------------------------------------------------------------------------
+r1062 | ajapted | 2012-01-02
+
+Eureka: added SIDE_RIGHT and SIDE_LEFT constants.
+
+------------------------------------------------------------------------
+r1061 | ajapted | 2012-01-02
+
+Eureka: removed unused constant 'Y_NULL'.
+
+------------------------------------------------------------------------
+r1060 | ajapted | 2012-01-02
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1059 | ajapted | 2012-01-02
+
+Eureka: when adding vertices, prevent creating zero-length linedefs,
+and when a vertex is highlighted and nothing is selected then merely
+select that vertex -- this allows using the SPACE key to begin the
+process of adding linedefs, which is quite convenient.
+
+------------------------------------------------------------------------
+r1058 | ajapted | 2012-01-02
+
+Eureka: when using 'x' key to split linedefs, don't selected the new
+linedefs if they were not selected before.
+
+------------------------------------------------------------------------
+r1057 | ajapted | 2012-01-01
+
+tweak.
+
+------------------------------------------------------------------------
+r1056 | ajapted | 2012-01-01
+
+Eureka: pass size to CreateSquare().
+
+------------------------------------------------------------------------
+r1055 | ajapted | 2012-01-01
+
+tweak.
+
+------------------------------------------------------------------------
+r1054 | ajapted | 2012-01-01
+
+Eureka: got the 'Choose' buttons in the Line/Sector/Thing panels working
+[they open up the browser on the appropriate list of types].
+
+------------------------------------------------------------------------
+r1053 | ajapted | 2012-01-01
+
+tweak.
+
+------------------------------------------------------------------------
+r1052 | ajapted | 2012-01-01
+
+Eureka / 3D View: removed "walking" mode, the 'w' key now just moves
+the camera Z to the ground + viewheight.
+
+------------------------------------------------------------------------
+r1051 | ajapted | 2012-01-01
+
+Eureka: changed the sector height +/- buttons step from 16 to 8.
+(It needs to be configurable though).
+
+------------------------------------------------------------------------
+r1050 | ajapted | 2011-12-31
+
+Eureka: fixed silly bug in Drag_UpdateObjectDist().
+
+------------------------------------------------------------------------
+r1049 | ajapted | 2011-12-31
+
+Eureka: fixed dragging of objects to honor snapping, and use a focus
+object as returned by GetDrawFocus().
+
+------------------------------------------------------------------------
+r1048 | ajapted | 2011-12-31
+
+Eureka: fixed bug in GetDragFocus() -- uninitialized variables.
+
+------------------------------------------------------------------------
+r1047 | ajapted | 2011-12-31
+
+Eureka: minor renaming: mapx --> map_x, mapy --> map_y
+
+------------------------------------------------------------------------
+r1046 | ajapted | 2011-12-31
+
+Eureka: improved GetDragFocus() code in two major ways:
+  (1) check ALL the objects in the selection
+
+  (2) when snapping is active, check if the majority of the objects
+      are on the grid -- if so then only pick a coordinate which is
+      also on the grid.
+
+------------------------------------------------------------------------
+r1045 | ajapted | 2011-12-31
+
+Eureka: added OnGrid() method to test if a point is on the grid.
+
+------------------------------------------------------------------------
+r1044 | ajapted | 2011-12-31
+
+Eureka: implemented GetDragFocus() which returns the coordinate of
+the selected object which will be used as the focus for dragging
+(especially when grid-snapping, that coordinate will snap to the grid).
+
+------------------------------------------------------------------------
+r1043 | ajapted | 2011-12-30
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r1042 | ajapted | 2011-12-30
+
+Makefile: lowercased program name: Eureka --> eureka
+
+------------------------------------------------------------------------
+r972 | ajapted | 2011-12-11
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r960 | ajapted | 2011-12-09
+
+Eureka / Browser: ability to scroll browser with PGUP and PGDN keys.
+
+------------------------------------------------------------------------
+r959 | ajapted | 2011-12-09
+
+Eureka: minor reformatting.
+
+------------------------------------------------------------------------
+r958 | ajapted | 2011-12-09
+
+Eureka / Browser: fixed scrolling anomalies.
+
+------------------------------------------------------------------------
+r957 | ajapted | 2011-12-08
+
+Eureka: mucho tweakage of 'About' window appearance.
+
+------------------------------------------------------------------------
+r956 | ajapted | 2011-12-08
+
+Eureka: implemented a basic 'About' window.
+
+New code files: ui_about.cc/h and ui_hyper.cc/h
+
+------------------------------------------------------------------------
+r955 | ajapted | 2011-12-07
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r954 | ajapted | 2011-12-07
+
+Eureka: when adding a vertex which BOTH splits a line and adds a line,
+don't reselect the new vertex.
+
+------------------------------------------------------------------------
+r953 | ajapted | 2011-12-07
+
+color tweak.
+
+------------------------------------------------------------------------
+r952 | ajapted | 2011-12-07
+
+Eureka: implemented being able to split a linedef in Vertex mode by
+simply hovering over a linedef and pressing INSERT.
+
+------------------------------------------------------------------------
+r951 | ajapted | 2011-12-07
+
+Eureka: fixed the logic to highlight a to-be-split linedef.
+
+------------------------------------------------------------------------
+r950 | ajapted | 2011-12-07
+
+Eureka: worked on logic to find the linedef which would be split by a new
+vertex.
+
+------------------------------------------------------------------------
+r949 | ajapted | 2011-12-07
+
+Eureka: worked on logic to highlight a linedef which would be split
+by a newly inserted vertex.
+
+------------------------------------------------------------------------
+r948 | ajapted | 2011-12-07
+
+Eureka: when adding linedefs in Vertex mode, don't select the second
+vertex when it wasn't a new vertex (i.e. after closing off an area).
+
+------------------------------------------------------------------------
+r947 | ajapted | 2011-12-07
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r946 | ajapted | 2011-12-07
+
+Eureka / README: describe 'e' / 'E' keys for SECTOR mode.
+
+------------------------------------------------------------------------
+r945 | ajapted | 2011-12-07
+
+Eureka: when selecting contiguous sectors, never go through closed doors.
+
+------------------------------------------------------------------------
+r944 | ajapted | 2011-12-07
+
+Eureka: implemented new command 'e' / 'E' in SECTORS mode which selects
+contiguous sectors with the same floor height / texture.
+
+------------------------------------------------------------------------
+r943 | ajapted | 2011-12-07
+
+Eureka: implemented 'E' key which selects lines in a path which all
+share the same texture.
+
+------------------------------------------------------------------------
+r942 | ajapted | 2011-12-07
+
+Eureka: made 'e' key (Select-lines-in-path) use additive mode.
+
+The CTRL-E key is also the same function (compatibility with Yadex),
+though it still could be nabbed for a better use in the future.
+
+------------------------------------------------------------------------
+r941 | ajapted | 2011-12-07
+
+Eureka: TODO + WISHLIST update.
+
+------------------------------------------------------------------------
+r940 | ajapted | 2011-12-07
+
+Eureka: have a Browser_Key() and Grid_Key() function.
+
+------------------------------------------------------------------------
+r939 | ajapted | 2011-12-06
+
+Eureka: worked on having a Global_Key() function which handles all
+global stuff (such as 'b' to toggle the Browser panel).  Editor_Key()
+will be reserved for commands that modify the map or grid.
+
+------------------------------------------------------------------------
+r938 | ajapted | 2011-12-06
+
+Eureka: fixed sidedef info (in LineDef panel) not being updated when
+picking new textures on selected linedefs.
+
+------------------------------------------------------------------------
+r937 | ajapted | 2011-12-06
+
+Eureka: honor grid snapping when pasting + pointer is outside window.
+
+------------------------------------------------------------------------
+r936 | ajapted | 2011-12-06
+
+Eureka: fixed Paste (^V) and Copy (o) commands to honor grid snapping,
+and improved method to find the "centre" vertex or thing (return the
+coordinate of an actual vertex or thing in the group) -- hence if the
+copied group was all aligned to the grid, the pasted one will be too.
+
+------------------------------------------------------------------------
+r935 | ajapted | 2011-12-06
+
+Eureka: provide a function to check if clipboard contains stuff.
+
+------------------------------------------------------------------------
+r934 | ajapted | 2011-12-06
+
+Eureka: when inserting sectors, don't clone the currently selected one
+unless the SHIFT key is pressed.  When inserting linedef, check whether
+a linedef between the two vertices exists already.
+
+Removed the crufty old InsertNewObject() code.
+
+------------------------------------------------------------------------
+r933 | ajapted | 2011-12-06
+
+Eureka: implemented key (CTRL-U or CTRL-K) to clear the search box.
+
+------------------------------------------------------------------------
+r932 | ajapted | 2011-12-06
+
+Eureka / Browser: implemented 'c' key to cycle through categories,
+and the 'C' key to reset category to "ALL".
+
+------------------------------------------------------------------------
+r931 | ajapted | 2011-12-06
+
+Eureka: yet another TODO / WISHLIST update.
+
+------------------------------------------------------------------------
+r930 | ajapted | 2011-12-06
+
+Eureka / Browser: support categories for Thing Types and Line Types.
+
+------------------------------------------------------------------------
+r929 | ajapted | 2011-12-06
+
+Eureka / Browser: support categories for Textures and Flats.
+
+------------------------------------------------------------------------
+r928 | ajapted | 2011-12-06
+
+Eureka / Browser: worked on getting the Category / Search working, and
+removed various old crud.
+
+------------------------------------------------------------------------
+r927 | ajapted | 2011-12-06
+
+Eureka: version bump, really good progress with the Browser.
+
+------------------------------------------------------------------------
+r926 | ajapted | 2011-12-06
+
+Eureka: show mid-masked textures with a bright CYAN background.
+
+------------------------------------------------------------------------
+r925 | ajapted | 2011-12-06
+
+Eureka: added panel_W, browser_W fields to UI_Window class.
+
+------------------------------------------------------------------------
+r924 | ajapted | 2011-12-06
+
+tweaks.
+
+------------------------------------------------------------------------
+r923 | ajapted | 2011-12-06
+
+Eureka: force the Kromulent Factor (KF) = 1 for time being.
+
+------------------------------------------------------------------------
+r922 | ajapted | 2011-12-06
+
+Eureka: TODO / WISHLIST update.
+
+------------------------------------------------------------------------
+r921 | ajapted | 2011-12-06
+
+Eureka / Browser: make it wider, enough for 4 flats or two 128-wide textures.
+
+------------------------------------------------------------------------
+r920 | ajapted | 2011-12-06
+
+Eureka: when loading textures, skip the very first entry (#0) since it's
+not really usable -- in the DOOM engine the #0 texture is never drawn.
+
+------------------------------------------------------------------------
+r919 | ajapted | 2011-12-06
+
+Eureka / Browser: have two constructors for Browser_Item: simple one
+for text buttons (e.g. Thing Types) and second one for picture buttons
+(Textures and Flats).  The textual buttons are now working again.
+
+------------------------------------------------------------------------
+r918 | ajapted | 2011-12-06
+
+Eureka / Browser: show flat and texture names underneath the pic.
+
+------------------------------------------------------------------------
+r917 | ajapted | 2011-12-05
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r916 | ajapted | 2011-12-05
+
+Eureka / Browser: fixed bug with funny gaps at the top (the Filter method
+was visited the scrollbar widgets since they were not the last ones).
+
+Made the background of scrolling part be BLACK for textures and flats.
+Various tweaks and tidying of the code.
+
+------------------------------------------------------------------------
+r915 | ajapted | 2011-12-05
+
+Eureka / Browser: fixed the side-by-side packing logic in Filter().
+
+------------------------------------------------------------------------
+r914 | ajapted | 2011-12-05
+
+Eureka / Menu: added FL_MENU_INACTIVE to the divider lines, and tidied
+up some junk in there.
+
+------------------------------------------------------------------------
+r913 | ajapted | 2011-12-05
+
+Eureka: TODO / WISHLIST stuff.
+
+------------------------------------------------------------------------
+r912 | ajapted | 2011-12-05
+
+Eureka / Browser: worked on Filter() logic and side-by-side packing...
+
+------------------------------------------------------------------------
+r911 | ajapted | 2011-12-05
+
+Eureka / Browser: partial work on handling the Category setting....
+
+------------------------------------------------------------------------
+r910 | ajapted | 2011-12-04
+
+Eureka / Browser: code to setup the Category choices for each browser box.
+(the choice is not used yet however).
+
+------------------------------------------------------------------------
+r909 | ajapted | 2011-12-04
+
+Eureka / README: a couple more fixes.
+
+------------------------------------------------------------------------
+r908 | ajapted | 2011-12-04
+
+Eureka / README: small fix.
+
+------------------------------------------------------------------------
+r907 | ajapted | 2011-12-04
+
+Eureka / Browser: fixed the Texture/Flat browser not showing anything,
+we need to Populate() the browser boxes _after_ loading all the flats
+and textures from the wad(s).
+
+------------------------------------------------------------------------
+r906 | ajapted | 2011-12-04
+
+Eureka / Browser: various fixes, the new structure is now working OK.
+
+------------------------------------------------------------------------
+r905 | ajapted | 2011-12-04
+
+Eureka / Browser: worked on new structure, where UI_Browser is a container
+widget which contains (and controls) a bunch of UI_Browser_Box widgets.
+
+------------------------------------------------------------------------
+r904 | ajapted | 2011-12-04
+
+Eureka: created empty "boom.ugh" and "edge.ugh" engine config files
+(in preparation to move the specific pieces out of doom2.ugh).
+
+------------------------------------------------------------------------
+r903 | ajapted | 2011-12-04
+
+Eureka: moved DOOM2 game configuration file --> configs/ folder.
+
+------------------------------------------------------------------------
+r902 | ajapted | 2011-12-04
+
+Eureka: addid configs/ folder.
+
+------------------------------------------------------------------------
+r901 | ajapted | 2011-12-04
+
+Eureka: fixes for the new Browser menu...
+
+------------------------------------------------------------------------
+r900 | ajapted | 2011-12-04
+
+Eureka: added a "Browser" menu on the main menu bar, worked on code to
+support it.
+
+------------------------------------------------------------------------
+r899 | ajapted | 2011-12-04
+
+Eureka / Canvas: tweaked size of Knobby lines.
+
+------------------------------------------------------------------------
+r898 | ajapted | 2011-12-04
+
+Eureka / Browser: worked on a UI_Browser_Menu class.
+
+------------------------------------------------------------------------
+r897 | ajapted | 2011-12-04
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r896 | ajapted | 2011-12-04
+
+tweak.
+
+------------------------------------------------------------------------
+r895 | ajapted | 2011-12-03
+
+Eureka: when making category menu strings, also return the group letters
+so they can be used to filter the browser items.
+
+------------------------------------------------------------------------
+r894 | ajapted | 2011-12-03
+
+tweak.
+
+------------------------------------------------------------------------
+r893 | ajapted | 2011-12-03
+
+Eureka: capitalize 'OTHER' in browser categories.
+
+------------------------------------------------------------------------
+r892 | ajapted | 2011-12-03
+
+Eureka: fixed missing '|' in category string conversion.
+
+------------------------------------------------------------------------
+r891 | ajapted | 2011-12-03
+
+Eureka: added code to convert the descriptions in linegroups (etc)
+into a menu string which can be used in an Fl_Choice widget.
+
+------------------------------------------------------------------------
+r890 | ajapted | 2011-12-03
+
+Eureka: updated game config loader to handle 'texturegroup', 'texture'
+and 'flat' definitions.
+
+------------------------------------------------------------------------
+r889 | ajapted | 2011-12-03
+
+Eureka / DOOM2 config: use '-' (not 'x') as letter for "Other" category,
+and added the '-' as a thinggroup and a texturegroup too.
+
+------------------------------------------------------------------------
+r888 | ajapted | 2011-12-03
+
+Eureka / DOOM2 config: finished texture/flat section, tweaked things section.
+
+------------------------------------------------------------------------
+r887 | ajapted | 2011-12-02
+
+Eureka / DOOM2 config: worked on texture categories.
+
+------------------------------------------------------------------------
+r886 | ajapted | 2011-11-30
+
+Eureka / 3D view: experimental code to draw a highlight border around
+a solid surface (lower, upper, floor, ceiling).
+
+------------------------------------------------------------------------
+r885 | ajapted | 2011-11-30
+
+Eureka: moved some color #defines --> im_color.h
+
+------------------------------------------------------------------------
+r884 | ajapted | 2011-11-30
+
+Eureka / DOOM2 config: tweaked descriptions of some linetypes.
+
+------------------------------------------------------------------------
+r883 | ajapted | 2011-11-30
+
+Eureka / DOOM2 config: gave some things prefixes, e.g. "MON:" for monsters,
+"PU:" for pickups and "WP:" for weapons.
+
+------------------------------------------------------------------------
+r882 | ajapted | 2011-11-30
+
+Eureka / Browser: tweaked layout.
+
+------------------------------------------------------------------------
+r881 | ajapted | 2011-11-30
+
+Eureka: made the Browser a bit wider (to make things fit more comfortably).
+
+------------------------------------------------------------------------
+r880 | ajapted | 2011-11-30
+
+Version bump to 0.666 in honor of Texture/Flat browser working.
+
+------------------------------------------------------------------------
+r879 | ajapted | 2011-11-30
+
+Eureka / Browser: only allow Right click to change sector ceilings
+(not SHIFT or middle click) -- for consistency with linedef handling.
+
+------------------------------------------------------------------------
+r878 | ajapted | 2011-11-30
+
+Eureka / Browser: imlemented logic for setting textures on two-sided
+lines.  Left click adjusts lowers and Right click adjusts uppers, and
+Middle click sets mid-masked textures (on both sides).  For lowers
+and uppers we pick the side that faces out, but SHIFT key picks the
+opposite side.  Also some logic for handling windows nicely (change
+BOTH lower and upper, but only with Left click).
+
+------------------------------------------------------------------------
+r877 | ajapted | 2011-11-30
+
+Eureka: the normal select-lines-in-path (on 'e' key) now doesn't unmerge
+if the original line was selected, since the whole selection gets cleared
+anyway.  New way is more useful when lots of lines are selected and you
+only want the new path to be selected.
+
+------------------------------------------------------------------------
+r876 | ajapted | 2011-11-30
+
+Eureka / Browser: got texture setting on one-sided linedefs working.
+
+------------------------------------------------------------------------
+r875 | ajapted | 2011-11-30
+
+Eureka: tweaked UI_Sector:SetTexture() code (check if count > 0).
+
+------------------------------------------------------------------------
+r874 | ajapted | 2011-11-30
+
+Eureka / Browser: got texture setting for floors and ceilings working,
+where a left click sets the floor and a right click sets the ceilings.
+
+------------------------------------------------------------------------
+r873 | ajapted | 2011-11-30
+
+Eureka / Browser: partial worked on ability to set flat and textures on
+sectors and linedefs via the browser.  Changed button to Fl_Repeat_Button
+since that widget lets us check what buttons / modifiers were used.
+(The standard Fl_Button callback gets done on RELEASE --> no buttons).
+
+------------------------------------------------------------------------
+r872 | ajapted | 2011-11-30
+
+Eureka: renamed code file: selpath --> e_path
+
+------------------------------------------------------------------------
+r871 | ajapted | 2011-11-30
+
+Eureka: renamed code file: selpath --> e_path
+
+------------------------------------------------------------------------
+r870 | ajapted | 2011-11-30
+
+Eureka: added keys for CMD_SelectLinesInPath : 'e' for normal mode,
+CTRL-E for the additive mode.
+
+------------------------------------------------------------------------
+r869 | ajapted | 2011-11-30
+
+Eureka: for selecting lines in a path, have 'additive' parameter which
+does not forget the current selection.  The 'one_sided' mode proved to
+be fairly useless, hence removed that logic.
+
+------------------------------------------------------------------------
+r868 | ajapted | 2011-11-30
+
+Eureka: finished CMD_SelectLinesInPath() : logic to get starting line.
+
+------------------------------------------------------------------------
+r867 | ajapted | 2011-11-30
+
+Eureka: added TwoSided() method to LineDef class.
+
+------------------------------------------------------------------------
+r866 | ajapted | 2011-11-30
+
+Eureka: implemented 'one_sided' mode for CMD_SelectLinesInPath().
+
+------------------------------------------------------------------------
+r865 | ajapted | 2011-11-30
+
+Eureka: wrote new logic for selecting linedefs in a path.
+
+------------------------------------------------------------------------
+r864 | ajapted | 2011-11-29
+
+Eureka: changed INSERT alternate key from 'a' --> SPACE, and changed
+the Clear Selection key from SPACE --> END or backquote.
+
+------------------------------------------------------------------------
+r863 | ajapted | 2011-11-29
+
+Eureka / Browser: worked on positioning the Flat and Texture pics.
+
+------------------------------------------------------------------------
+r862 | ajapted | 2011-11-29
+
+Eureka: made the browser panel a bit wider.
+
+------------------------------------------------------------------------
+r861 | ajapted | 2011-11-29
+
+Eureka: upgrade to FLTK 1.3.0 (this is required since the texture browser
+was overflowing the 16-bit widget coordinates of FLTK 1.1.x).
+
+------------------------------------------------------------------------
+r860 | ajapted | 2011-11-29
+
+Eureka / Browser: fixed searching to handle '^' and '$' properly
+(they are not handled by fl_filename_match).
+
+------------------------------------------------------------------------
+r859 | ajapted | 2011-11-29
+
+Eureka: version bump, in honor of progress with the Browser.
+
+------------------------------------------------------------------------
+r858 | ajapted | 2011-11-29
+
+Eureka: implemented setting Thing and Sector types via the browser.
+
+------------------------------------------------------------------------
+r857 | ajapted | 2011-11-29
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r856 | ajapted | 2011-11-29
+
+Eureka / 3D Preview: allow 'b' key to toggle the browser.
+
+------------------------------------------------------------------------
+r855 | ajapted | 2011-11-29
+
+Eureka: saving the map now clears MadeChanges, preventing the wrong
+message about the map having unsaved changes when going to quit.
+
+------------------------------------------------------------------------
+r854 | ajapted | 2011-11-29
+
+Eureka: re-implemented a swap-flats command for sectors, bound to 'w' key.
+
+------------------------------------------------------------------------
+r853 | ajapted | 2011-11-28
+
+Eureka: TODO updated.
+
+------------------------------------------------------------------------
+r852 | ajapted | 2011-11-28
+
+Eureka / Browser: can now change Linedef types via the browser!
+
+------------------------------------------------------------------------
+r851 | ajapted | 2011-11-28
+
+Eureka: ensure a new object (added with 'a' / INS) gets selected.
+
+------------------------------------------------------------------------
+r850 | ajapted | 2011-11-28
+
+Eureka / Browser: clear search string when mode changes due to a new edit mode.
+
+------------------------------------------------------------------------
+r849 | ajapted | 2011-11-28
+
+Eureka / Browser: make each browser item into a button.
+
+------------------------------------------------------------------------
+r848 | ajapted | 2011-11-28
+
+Eureka: renamed methods: SetMode() --> NewEditMode()
+
+------------------------------------------------------------------------
+r847 | ajapted | 2011-11-28
+
+Eureka / Browser: change the browser mode (Textures / Flats / Things)
+when the edit mode changes to LineDefs / Sectors / Things bzw.
+
+------------------------------------------------------------------------
+r846 | ajapted | 2011-11-28
+
+Eureka / Browser: worked on support for Textures and Flats.  Only the
+names are being shown so far....
+
+------------------------------------------------------------------------
+r845 | ajapted | 2011-11-28
+
+Eureka / Browser: clear search box when changing Mode.
+
+------------------------------------------------------------------------
+r844 | ajapted | 2011-11-28
+
+Eureka / Browser: implemented the search function.
+
+------------------------------------------------------------------------
+r843 | ajapted | 2011-11-28
+
+Eureka / Doom2 config: tweaked some descriptions, especially the zero
+linedef type and sector type.
+
+------------------------------------------------------------------------
+r842 | ajapted | 2011-11-28
+
+Eureka / Browser: fixed missing end() from Browser_Item constructor,
+and for search box update the list whenever it changes.
+
+------------------------------------------------------------------------
+r841 | ajapted | 2011-11-28
+
+Eureka / Browser: use to callback to update the list when the mode,
+category or search box changes.
+
+------------------------------------------------------------------------
+r840 | ajapted | 2011-11-28
+
+Eureka / Browser: code to populate the list with ThingTypes, LineTypes
+and SectorTypes.
+
+------------------------------------------------------------------------
+r839 | ajapted | 2011-11-28
+
+Eureka / Browser: began work to populate the browser with useful stuff
+like line_types and thing_types.
+
+------------------------------------------------------------------------
+r838 | ajapted | 2011-11-28
+
+Eureka: comment tweak.
+
+------------------------------------------------------------------------
+r837 | ajapted | 2011-11-28
+
+Eureka: tweaked gap at bottom of side panel + right end of menu bar.
+
+------------------------------------------------------------------------
+r836 | ajapted | 2011-11-28
+
+Eureka / Browser: dead code removal.
+
+------------------------------------------------------------------------
+r835 | ajapted | 2011-11-28
+
+Eureka: worked on Browser widget, use Fl_Scroll for the scrolling list.
+
+------------------------------------------------------------------------
+r834 | ajapted | 2011-11-28
+
+Eureka: more work to fix Browser size when resizing.
+
+------------------------------------------------------------------------
+r833 | ajapted | 2011-11-27
+
+Eureka: needed to call init_sizes() in window's ShowBrowser() method
+since the widgets got rearranged.
+
+------------------------------------------------------------------------
+r832 | ajapted | 2011-11-27
+
+Eureka / README: minor fix.
+
+------------------------------------------------------------------------
+r831 | ajapted | 2011-11-27
+
+Eureka / Makefile: fixed 'make clean' target.
+
+------------------------------------------------------------------------
+r830 | ajapted | 2011-11-27
+
+Eureka: document tweaks.
+
+------------------------------------------------------------------------
+r829 | ajapted | 2011-11-27
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r828 | ajapted | 2011-11-27
+
+Eureka: make sure all quit methods (ESCAPE key, File menu, window close
+button) work the same way, and ask for confirmation if the map has been
+modified.
+
+------------------------------------------------------------------------
+r827 | ajapted | 2011-11-27
+
+Eureka: fixed the current map name (right side of infobar).
+
+------------------------------------------------------------------------
+r826 | ajapted | 2011-11-27
+
+Eureka: fixed the infobar "lock" widget to update the editor state
+(i.e. grid.snap and grid.locked) when changed.
+
+------------------------------------------------------------------------
+r825 | ajapted | 2011-11-27
+
+Eureka / README: note requirement of doom2.wad, various tweaks.
+
+------------------------------------------------------------------------
+r824 | ajapted | 2011-11-27
+
+Eureka / README: added copyright / license section.
+
+------------------------------------------------------------------------
+r823 | ajapted | 2011-11-27
+
+Eureka / README: more work, new "RUNNING" section etc...
+
+------------------------------------------------------------------------
+r822 | ajapted | 2011-11-27
+
+Eureka: moved keyboard command list from FEATURES.txt --> README.txt
+and added some extra ones (especially for 3D preview).
+
+------------------------------------------------------------------------
+r821 | ajapted | 2011-11-27
+
+Eureka: began work on a basic README.txt document.
+
+------------------------------------------------------------------------
+r820 | ajapted | 2011-11-27
+
+Eureka: added basic INSTALL.txt document.
+
+------------------------------------------------------------------------
+r819 | ajapted | 2011-11-27
+
+Eureka: code formatting tweak.
+
+------------------------------------------------------------------------
+r818 | ajapted | 2011-11-27
+
+Eureka: minor tweak
+
+------------------------------------------------------------------------
+r817 | ajapted | 2011-11-27
+
+Eureka: version bump.
+
+------------------------------------------------------------------------
+r816 | ajapted | 2011-11-27
+
+TODO / WISHLIST twiddling....
+
+------------------------------------------------------------------------
+r815 | ajapted | 2011-11-27
+
+Eureka: fixed wrong values with light "-" button (in Sector panel).
+
+------------------------------------------------------------------------
+r814 | ajapted | 2011-11-27
+
+Eureka / Render3D: implemented low-detail mode (toggle via F5 key).
+
+------------------------------------------------------------------------
+r813 | ajapted | 2011-11-27
+
+Eureka / Render3D: implemented a "lo-res" mode.
+
+------------------------------------------------------------------------
+r812 | ajapted | 2011-11-27
+
+Eureka: added 'lib_linux' folder.
+
+------------------------------------------------------------------------
+r811 | ajapted | 2011-11-27
+
+Eureka: moved MEMORY.txt document --> attic/
+
+------------------------------------------------------------------------
+r810 | ajapted | 2011-11-27
+
+Eureka: added 'attic' folder.
+
+------------------------------------------------------------------------
+r809 | ajapted | 2011-11-27
+
+Eureka / Makefile: fixed location of exe.
+
+------------------------------------------------------------------------
+r808 | ajapted | 2011-11-27
+
+Eureka / Makefile: updated for top-level and obj_linux folder.
+
+------------------------------------------------------------------------
+r807 | ajapted | 2011-11-27
+
+Eureka: added 'obj_linux' folder for the build process.
+
+------------------------------------------------------------------------
+r806 | ajapted | 2011-11-27
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r805 | ajapted | 2011-11-27
+
+Eureka: moved Makefile to top level.
+
+------------------------------------------------------------------------
+r804 | ajapted | 2011-11-27
+
+Eureka / Render3D: enable 'lighting' by default.
+
+------------------------------------------------------------------------
+r803 | ajapted | 2011-11-27
+
+Eureka / Render3D: support for aspect-ratio correction.
+
+------------------------------------------------------------------------
+r802 | ajapted | 2011-11-27
+
+Eureka / Render3D: tweaked mouse scrolling (future option to allow both
+angular and Z movement at same time).
+
+------------------------------------------------------------------------
+r801 | ajapted | 2011-11-27
+
+Eureka: fixed 3D preview to handle resizing the main window.
+
+------------------------------------------------------------------------
+r800 | ajapted | 2011-11-27
+
+Eureka: draw "knobby" linedefs (only in LineDef and Vertex mode).
+
+------------------------------------------------------------------------
+r799 | ajapted | 2011-11-26
+
+Eureka: fixed vertical stretching of info panels (Things etc) when
+resizing the main window.
+
+------------------------------------------------------------------------
+r543 | ajapted | 2010-09-24
+
+MEMORY doc: changed COPY_GROUP to a more general 'GROUP' object, and
+renamed EDIT_GROUP --> EDIT_SET.
+
+------------------------------------------------------------------------
+r542 | ajapted | 2010-09-24
+
+MEMORY doc: described the edit operations, added STRING objects.
+
+------------------------------------------------------------------------
+r541 | ajapted | 2010-09-24
+
+MEMORY document: added lots more detail.
+
+------------------------------------------------------------------------
+r540 | ajapted | 2010-09-24
+
+Added MEMORY.txt : document the memory model for map objects.
+
+------------------------------------------------------------------------
+r539 | ajapted | 2010-09-24
+
+Makefile: library folder is now 'lib_linux'
+
+------------------------------------------------------------------------
+r538 | ajapted | 2010-09-24
+
+FIXED (thank dog!) the ESCAPE key quitting unconditionally.
+
+------------------------------------------------------------------------
+r528 | ajapted | 2010-05-16
+
+tweak
+
+------------------------------------------------------------------------
+r449 | ajapted | 2009-12-02
+
+Eureka: temporary hack (level loading stuff).
+
+------------------------------------------------------------------------
+r448 | ajapted | 2009-12-02
+
+Use FLTK 1.1.10
+
+------------------------------------------------------------------------
+r445 | ajapted | 2009-11-09
+
+Eureka: implemented showing and hiding the Browser panel (via 'b' key).
+
+------------------------------------------------------------------------
+r444 | ajapted | 2009-11-09
+
+Eureka: bit more work on Browser stuff.
+
+------------------------------------------------------------------------
+r443 | ajapted | 2009-11-09
+
+Eureka: worked on the UI_Browser widget, the top section now has a choice
+button for the current type (Textures, Flats, etc), plus a choice button
+for the current group (useful for things), plus a search field, and lastly
+a check button on whether to show images or not.  [PROTOTYPE ONLY]
+
+------------------------------------------------------------------------
+r442 | ajapted | 2009-11-08
+
+Eureka: renamed UI_FlatTexList --> UI_Browser (et cetera).
+
+------------------------------------------------------------------------
+r441 | ajapted | 2009-11-08
+
+Eureka: renamed code files: ui_flattex --> ui_browser
+
+------------------------------------------------------------------------
+r440 | ajapted | 2009-11-08
+
+TODO update.
+
+------------------------------------------------------------------------
+r439 | ajapted | 2009-11-08
+
+Eureka: draw an selected AND highlighted object in a different color, and
+changed the selection color to a sky-blue.
+
+------------------------------------------------------------------------
+r438 | ajapted | 2009-11-08
+
+Eureka: implemented mirror commands for the Edit menu.
+
+------------------------------------------------------------------------
+r437 | ajapted | 2009-11-08
+
+Eureka: fixed Paste from the menu to place new items at centre of canvas.
+
+------------------------------------------------------------------------
+r436 | ajapted | 2009-11-08
+
+noted a bug.
+
+------------------------------------------------------------------------
+r435 | ajapted | 2009-11-08
+
+Eureka: implemented key to Flip linedefs.
+
+------------------------------------------------------------------------
+r434 | ajapted | 2009-11-08
+
+todo tweakage.
+
+------------------------------------------------------------------------
+r433 | ajapted | 2009-11-08
+
+Eureka: improved FindIslands() code to handle when the initial path is
+itself an island, whereby it reaches out to the outer area.
+
+------------------------------------------------------------------------
+r432 | ajapted | 2009-11-08
+
+Eureka: finding islands: fixed a bug (erroneous check on sidedefs).
+
+------------------------------------------------------------------------
+r431 | ajapted | 2009-11-08
+
+Eureka: FindIslands() : recompute bbox on each call (it can change when
+islands reach out to other geometry).
+
+------------------------------------------------------------------------
+r430 | ajapted | 2009-11-08
+
+Eureka: further work on finding islands...
+
+------------------------------------------------------------------------
+r429 | ajapted | 2009-11-08
+
+Eureka: fixed logic in OppositeLineDef() : result_side was wrong.
+
+------------------------------------------------------------------------
+r428 | ajapted | 2009-11-07
+
+Eureka: preliminary work on Island-finding algorithm (for sector insertion).
+
+------------------------------------------------------------------------
+r427 | ajapted | 2009-11-07
+
+Eureka: decreases the mapslack for highlighting a vertex, making it less
+likely to accidentally join the wrong vertex while inserting lines (etc).
+
+------------------------------------------------------------------------
+r426 | ajapted | 2009-11-07
+
+Eureka: fixed problem with "ugly" 45-degree lines, caused by width = 1
+parameter in fl_line_style().  Using width = 0 produces nicer results.
+
+------------------------------------------------------------------------
+r425 | ajapted | 2009-11-07
+
+Eureka: fixed bug with wrong initial grid step in the InfoBar.
+
+------------------------------------------------------------------------
+r424 | ajapted | 2009-11-07
+
+Eureka: properly update the side panel after map changes.
+
+------------------------------------------------------------------------
+r423 | ajapted | 2009-11-07
+
+Eureka: made sure linedefs inserted in vertex mode have Impassible flag.
+
+------------------------------------------------------------------------
+r422 | ajapted | 2009-11-07
+
+Eureka: fixed re-selection after inserting a sector (into a space).
+
+------------------------------------------------------------------------
+r421 | ajapted | 2009-11-07
+
+reformatted code.
+
+------------------------------------------------------------------------
+r420 | ajapted | 2009-11-07
+
+Eureka: when inserting a sector, fixup linedefs which become 2-sided
+(add 2S flag, clear impassible flag, make middle texture "-").
+
+------------------------------------------------------------------------
+r419 | ajapted | 2009-11-07
+
+Eureka: version bumped to 0.61
+
+------------------------------------------------------------------------
+r418 | ajapted | 2009-11-07
+
+Eureka: try harder to find a usable texture when linedef becomes
+one-sided (check the to-be-removed sidedef too).
+
+------------------------------------------------------------------------
+r417 | ajapted | 2009-11-07
+
+Eureka: for sector deletions, make sure to fix-up any linedefs which
+become one-sided (update 2S and impassible flag, middle texture, and
+flip if needed).
+
+------------------------------------------------------------------------
+r416 | ajapted | 2009-11-07
+
+Eureka: e_cutpaste.cc : added new DoRemoveSideFromLine() function, and
+moved all the CMD_Delete() code to the bottom of the file.
+
+------------------------------------------------------------------------
+r415 | ajapted | 2009-11-07
+
+Eureka: made SHIFT + DELETE keep any unused bits (vertices etc).
+
+------------------------------------------------------------------------
+r414 | ajapted | 2009-11-07
+
+Eureka: pass keymod_e to EditorKey() and similar functions.
+
+------------------------------------------------------------------------
+r413 | ajapted | 2009-11-07
+
+Eureka: when deleting sectors, find and delete Linedefs which would be
+unused afterwards -- and in turn unused vertices and sidedefs.
+
+------------------------------------------------------------------------
+r412 | ajapted | 2009-11-07
+
+Eureka: remove unused sidedefs when deleting linedefs (same logic as
+for vertices).
+
+------------------------------------------------------------------------
+r411 | ajapted | 2009-11-07
+
+Eureka: reworked code to delete unused vertices when deleting linedefs.
+
+------------------------------------------------------------------------
+r410 | ajapted | 2009-11-07
+
+Eureka: BASIS: no longer delete a linedef when it ends up with no sides,
+that was too heavy handed (such linedefs are not valid for DOOM engines
+but is allowed inside the editor).
+
+------------------------------------------------------------------------
+r409 | ajapted | 2009-11-07
+
+Eureka: worked on making deletion of linedefs and sectors also remove
+any vertices and/or sidedefs which would end up unused after deletion.
+Also merged CMD_Delete() and CMD_FullDelete() into one function.
+
+------------------------------------------------------------------------
+r408 | ajapted | 2009-11-07
+
+Eureka: ConvertSelection() now handles LINES->SIDES and SECTORS->SIDES.
+
+------------------------------------------------------------------------
+r407 | ajapted | 2009-11-07
+
+Eureka: added new selection_c::unmerge() and intersect() methods.
+
+------------------------------------------------------------------------
+r406 | ajapted | 2009-11-06
+
+TODO twiddling.
+
+------------------------------------------------------------------------
+r405 | ajapted | 2009-11-06
+
+tweaks
+
+------------------------------------------------------------------------
+r404 | ajapted | 2009-11-06
+
+Eureka: improved vertex insertion to merely add a linedef when two
+vertices are selected (or one selected and one highlighted).
+
+------------------------------------------------------------------------
+r403 | ajapted | 2009-11-06
+
+Eureka: added 'find_first' and 'find_second' methods to selection_c class.
+
+------------------------------------------------------------------------
+r402 | ajapted | 2009-11-06
+
+Eureka: made the HOME key centre-and-zoom-out the map (instead of '0').
+
+------------------------------------------------------------------------
+r401 | ajapted | 2009-11-06
+
+Eureka: the 'a' key is now equivalent to INSERT key (was 'i' before).
+
+------------------------------------------------------------------------
+r400 | ajapted | 2009-11-06
+
+Eureka: bit more work on Sector insertions.
+
+------------------------------------------------------------------------
+r399 | ajapted | 2009-11-05
+
+todo update.
+
+------------------------------------------------------------------------
+r398 | ajapted | 2009-11-05
+
+Eureka: tweaked the key-binding list (FEATURES.txt)
+
+------------------------------------------------------------------------
+r397 | ajapted | 2009-11-05
+
+Eureka: fixed some bugs in the AssignSectorToSpace() code.
+
+------------------------------------------------------------------------
+r396 | ajapted | 2009-11-05
+
+Eureka: implemented DoAssignSector() function, for sector insertion code.
+
+------------------------------------------------------------------------
+r395 | ajapted | 2009-11-05
+
+Eureka: worked on fixing the code which traces a closed path of linedefs
+to determine where to place a new (or existing) sector reference.
+
+------------------------------------------------------------------------
+r394 | ajapted | 2009-11-05
+
+tweaks.
+
+------------------------------------------------------------------------
+r393 | ajapted | 2009-11-05
+
+Eureka: initial code for new OppositeLineDef() function.
+
+------------------------------------------------------------------------
+r392 | ajapted | 2009-11-05
+
+Eureka: use new PointOutsideOfMap() check for creating a square when
+inserting in Sector mode.
+
+------------------------------------------------------------------------
+r391 | ajapted | 2009-11-05
+
+dead code removal.
+
+------------------------------------------------------------------------
+r390 | ajapted | 2009-11-05
+
+Eureka: x_hover: added PointOutsideOfMap() utility function, and updated
+the header file with the other new functions.
+
+------------------------------------------------------------------------
+r389 | ajapted | 2009-11-05
+
+Eureka: improved get_cur_sector() logic by casting both vertical and
+horizontal rays to find the closest linedef.
+
+------------------------------------------------------------------------
+r388 | ajapted | 2009-11-05
+
+Eureka: fixed bugs in ClosestLine_CastingVerty() function.
+
+------------------------------------------------------------------------
+r387 | ajapted | 2009-11-05
+
+Eureka: improved the ClosestLine_CastingXXX functions to (a) check both
+casting directions, e.g. right AND left, and (b) return which side the
+test point is on (1, 0, -1).
+
+------------------------------------------------------------------------
+r386 | ajapted | 2009-11-05
+
+Eureka: x_hover.cc: separated code into new ClosestLineDef_CastingRight()
+function, and added new ClosestLineDef_CastingUp() function.
+
+------------------------------------------------------------------------
+r385 | ajapted | 2009-11-05
+
+Eureka: renamed map bounds global vars again: MapBound_[lh][xy]
+
+------------------------------------------------------------------------
+r384 | ajapted | 2009-11-05
+
+code tidying.
+
+------------------------------------------------------------------------
+r383 | ajapted | 2009-11-05
+
+Eureka: no need to invalidate the Selection when the inserted or deleted
+object is above the max_obj().
+
+------------------------------------------------------------------------
+r382 | ajapted | 2009-11-05
+
+Eureka: added fast max_obj() method to selection_c class, and renamed
+the slow_count() method --> count_obj().
+
+------------------------------------------------------------------------
+r381 | ajapted | 2009-11-05
+
+Eureka: further work on adjusting move/scroll speeds based on whether
+SHIFT or CTRL keys are pressed.
+
+------------------------------------------------------------------------
+r380 | ajapted | 2009-11-04
+
+Eureka render mode: more control over speed of forward/back/strafe keys
+(CTRL faster, SHIFT slower).  Changed fly up/down keys to PGUP and PGDN.
+
+Renamed key_mod_e --> keymod_e
+
+------------------------------------------------------------------------
+r379 | ajapted | 2009-11-04
+
+Eureka: for 3D preview, made SHIFT and CTRL control the speed of moving
+forward/backwards when using the mousewheel.
+
+------------------------------------------------------------------------
+r378 | ajapted | 2009-11-04
+
+Eureka: added key_mod_e enumeration (KM_SHIFT, KM_CTRL etc).
+
+------------------------------------------------------------------------
+r377 | ajapted | 2009-11-04
+
+Eureka: created new WISHLIST.txt document.
+
+------------------------------------------------------------------------
+r376 | ajapted | 2009-11-04
+
+TODO update.
+
+------------------------------------------------------------------------
+r375 | ajapted | 2009-11-04
+
+Eureka: made sane the usage of h1 and h2 fields of DrawSurf.
+
+------------------------------------------------------------------------
+r374 | ajapted | 2009-11-04
+
+Eureka renderer: fixed y_offset for Mid-Masked textures, YAY!
+
+------------------------------------------------------------------------
+r373 | ajapted | 2009-11-04
+
+Eureka: ignore self-referenced lines in 3D renderer.
+
+------------------------------------------------------------------------
+r372 | ajapted | 2009-11-04
+
+Eureka: much better mid-masked textures in 3D preview.
+
+------------------------------------------------------------------------
+r371 | ajapted | 2009-11-04
+
+reformatted some code.
+
+------------------------------------------------------------------------
+r370 | ajapted | 2009-11-04
+
+Eureka: preliminary work on rendering mid-masked textures...
+
+------------------------------------------------------------------------
+r369 | ajapted | 2009-11-04
+
+Eureka: worked on improving the x_hover.cc code.
+
+------------------------------------------------------------------------
+r368 | ajapted | 2009-11-04
+
+Eureka: disabled experimental new 'get_cur_sector', which did not work
+properly in several situations (cf MAP02 of TNT).
+
+------------------------------------------------------------------------
+r367 | ajapted | 2009-11-04
+
+Eureka: renamed DistanceToLineDef() --> ApproxDistToLineDef().
+
+------------------------------------------------------------------------
+r366 | ajapted | 2009-11-04
+
+Eureka: experimental new way to determine current sector at a point.
+
+------------------------------------------------------------------------
+r365 | ajapted | 2009-11-04
+
+Eureka: removed unused utility function.
+
+------------------------------------------------------------------------
+r364 | ajapted | 2009-11-04
+
+dead code removal.
+
+------------------------------------------------------------------------
+r363 | ajapted | 2009-11-04
+
+Eureka: implemented a DistanceToLineDef() function.
+
+Did some tidying in x_hover.cc
+
+------------------------------------------------------------------------
+r362 | ajapted | 2009-11-04
+
+Eureka: moved some code in x_hover.cc
+
+------------------------------------------------------------------------
+r361 | ajapted | 2009-11-04
+
+Eureka: make sure the Total value in each side panel is kept up-to-date.
+
+------------------------------------------------------------------------
+r360 | ajapted | 2009-11-04
+
+Eureka: fixed input widgets on the side panels so that the ENTER key does
+not jump to another widget, instead staying in that input widget.
+
+------------------------------------------------------------------------
+r359 | ajapted | 2009-11-04
+
+Eureka: added list of needed Config items to the TODO.
+
+------------------------------------------------------------------------
+r358 | ajapted | 2009-11-04
+
+Eureka: prevent ENTER key doing the 'Unselect All' command.
+
+------------------------------------------------------------------------
+r357 | ajapted | 2009-11-04
+
+Eureka: tweaked speed of mouse-wheel forward/back in 3D preview.
+
+------------------------------------------------------------------------
+r356 | ajapted | 2009-11-04
+
+Eureka: fixed (Un)select-All commands to update the side panel.
+
+------------------------------------------------------------------------
+r355 | ajapted | 2009-11-03
+
+Eureka: show more info (strerror) in LOG.txt when a pwad cannot be opened.
+
+------------------------------------------------------------------------
+r354 | ajapted | 2009-11-03
+
+tweak.
+
+------------------------------------------------------------------------
+r353 | ajapted | 2009-11-03
+
+Eureka: fixed loading maps with lowercase texture or flat names in the
+sidedefs or sectors -- they are silently converted to uppercase.
+
+------------------------------------------------------------------------
+r352 | ajapted | 2009-11-03
+
+Eureka: support ON_CEILING things in the 3D preview.
+
+------------------------------------------------------------------------
+r351 | ajapted | 2009-11-03
+
+Eureka: doom2 game config: lit up the keys and armor vests (added 'l' flag).
+
+------------------------------------------------------------------------
+r350 | ajapted | 2009-11-03
+
+Eureka: draw Invis and Lit things properly in the 3D preview.
+
+------------------------------------------------------------------------
+r349 | ajapted | 2009-11-03
+
+Eureka: game config: parse new 'l' and 'c' flags for things ('l' for Lit
+things, 'c' for Ceiling things), and changed 's' --> 'i' (Invis).
+
+------------------------------------------------------------------------
+r348 | ajapted | 2009-11-03
+
+Eureka: updated game file (doom2.ugh), giving lit objects the 'l' flags
+and on-ceiling objects the 'c' flag, and changed 's' flag --> 'i'.
+
+Also separated out the EDGE specific things.
+
+------------------------------------------------------------------------
+r347 | ajapted | 2009-11-03
+
+Eureka: handle mouse motion/clicks better when the 3D preview is shown.
+
+------------------------------------------------------------------------
+r346 | ajapted | 2009-11-03
+
+todo stuff
+
+------------------------------------------------------------------------
+r345 | ajapted | 2009-11-03
+
+Eureka: renderer: better code to keep track of what sectors each thing
+is in, recalculating when the number of things or sectors change, or
+by the user pressing CTRL-L.
+
+------------------------------------------------------------------------
+r344 | ajapted | 2009-11-03
+
+Eureka: can now bump gamma with F11 key (in 3D render view).
+
+------------------------------------------------------------------------
+r343 | ajapted | 2009-11-03
+
+minor code reformatting.
+
+------------------------------------------------------------------------
+r342 | ajapted | 2009-11-03
+
+Eureka: implemented renderer effect where N/S walls are brighter and
+E/W walls are darker than normal.
+
+------------------------------------------------------------------------
+r341 | ajapted | 2009-11-03
+
+Eureka: r_render.cc: misc tidying, replaced fucking 0 with NULL, etc..
+
+------------------------------------------------------------------------
+r340 | ajapted | 2009-11-02
+
+todo tweak
+
+------------------------------------------------------------------------
+r339 | ajapted | 2009-11-02
+
+Eureka: support for Lighting in the 3D preview.
+
+------------------------------------------------------------------------
+r338 | ajapted | 2009-11-02
+
+Eureka: added code to load the COLORMAP lump.
+
+------------------------------------------------------------------------
+r337 | ajapted | 2009-11-02
+
+Eureka: more reformatting in r_render.cc
+
+------------------------------------------------------------------------
+r336 | ajapted | 2009-11-02
+
+Eureka: reformatted the code in r_render.cc
+
+------------------------------------------------------------------------
+r335 | ajapted | 2009-11-02
+
+Eureka: added useful mode for Vertex/LineDef inserting: if _one_ vertex
+is selected, then insert a new one, add a joining linedef, and re-select
+the new vertex.  Also split thing, sector creation into separate funcs.
+
+------------------------------------------------------------------------
+r334 | ajapted | 2009-11-02
+
+Eureka: added bare-bones code to create a new square-shape sector.
+
+------------------------------------------------------------------------
+r333 | ajapted | 2009-11-02
+
+Eureka: renamed variables: MapMinX/Y, MapMaxX/Y --> Map_lx/y, Map_hx/y.
+
+------------------------------------------------------------------------
+r332 | ajapted | 2009-11-02
+
+Eureka: debugging code to draw the level's Bounding box.
+
+------------------------------------------------------------------------
+r331 | ajapted | 2009-11-02
+
+Eureka: implemented code (via MapStuff_NotifyXXX functions) to keep the
+level bounds (MapMinX/Y and MapMaxX/Y globals) up-to-date.
+
+------------------------------------------------------------------------
+r330 | ajapted | 2009-11-02
+
+Eureka: fixed Pasted objects to be selected (this broke due to recent
+work on basis notifications).
+
+------------------------------------------------------------------------
+r329 | ajapted | 2009-11-02
+
+Eureka: free textures at exit.
+
+------------------------------------------------------------------------
+r328 | ajapted | 2009-11-02
+
+Eureka: fixed finding player for renderer when level has Voodoo dolls.
+
+------------------------------------------------------------------------
+r327 | ajapted | 2009-11-02
+
+Eureka: fixed bugs in bitvec_c and selection_c classes.
+
+------------------------------------------------------------------------
+r326 | ajapted | 2009-11-02
+
+Eureka: fixed memory leak in bitvec_c::resize() code.
+
+------------------------------------------------------------------------
+r325 | ajapted | 2009-11-02
+
+Eureka: updated CMD_SelectAll() for recent selection_c changes.
+
+------------------------------------------------------------------------
+r324 | ajapted | 2009-11-02
+
+Eureka: implemented new bitvec_c::resize() method.
+
+------------------------------------------------------------------------
+r323 | ajapted | 2009-11-02
+
+Eureka: selection_c class: make the bitvector grow as needed, instead of
+relying on NumObjects() which changes all the time.
+
+------------------------------------------------------------------------
+r322 | ajapted | 2009-11-01
+
+TODO update.
+
+------------------------------------------------------------------------
+r321 | ajapted | 2009-11-01
+
+Eureka: beginnings of the code for ObjectBox_NotifyXXX() functions.
+
+------------------------------------------------------------------------
+r320 | ajapted | 2009-11-01
+
+Eureka: fixed assertion error due to recent changes.
+
+------------------------------------------------------------------------
+r319 | ajapted | 2009-11-01
+
+Eureka: dead code removal (all the 'changed_a_xxxx' variables etc).
+
+------------------------------------------------------------------------
+r318 | ajapted | 2009-11-01
+
+Eureka: implemented XXX_Notify() functions for the current Selection.
+
+------------------------------------------------------------------------
+r317 | ajapted | 2009-11-01
+
+Eureka: call XXX_NotifyBegin() and XXX_NotifyEnd() functions from the Basis.
+
+------------------------------------------------------------------------
+r316 | ajapted | 2009-11-01
+
+Eureka: more work on new BASIS notification framework (Clipboard bits).
+
+------------------------------------------------------------------------
+r315 | ajapted | 2009-11-01
+
+Eureka: BASIS: partial work on new way of notifying other code about
+changes/insertions/deletions of map structures.
+
+------------------------------------------------------------------------
+r314 | ajapted | 2009-11-01
+
+Eureka: tweaked turning rate when using RMB.
+
+------------------------------------------------------------------------
+r313 | ajapted | 2009-11-01
+
+Eureka: added NumObjects() utility function to the Basis.
+
+------------------------------------------------------------------------
+r312 | ajapted | 2009-11-01
+
+Eureka: implemented the 'Select All' command (in edit menu).
+
+------------------------------------------------------------------------
+r311 | ajapted | 2009-11-01
+
+Eureka: fixed a bug in selection_c::ConvertToBitvec().
+
+------------------------------------------------------------------------
+r310 | ajapted | 2009-11-01
+
+Eureka: fixed bug using wrong NumXXX values in UI_ThingBox and UI_VertexBox.
+
+------------------------------------------------------------------------
+r309 | ajapted | 2009-11-01
+
+todo tweak
+
+------------------------------------------------------------------------
+r308 | ajapted | 2009-11-01
+
+Eureka: bit more work on having map changes updated all the widgets (etc).
+
+------------------------------------------------------------------------
+r307 | ajapted | 2009-11-01
+
+Eureka: BASIS: new 'appended_an_object' variable.
+
+------------------------------------------------------------------------
+r306 | ajapted | 2009-10-31
+
+Eureka: worked on a system (in the Basis) of remembering various types of
+changes, so that various widgets (e.g. the canvas) can be updated with new
+information automatically.
+
+------------------------------------------------------------------------
+r305 | ajapted | 2009-10-31
+
+Eureka: can now turn and move up/down in the 3D preview with the mouse (RMB).
+
+------------------------------------------------------------------------
+r304 | ajapted | 2009-10-31
+
+Eureka: UI_Nombre: improved the format (e.g. use '#' before the number).
+
+------------------------------------------------------------------------
+r303 | ajapted | 2009-10-31
+
+Eureka: disabled the thing 'ExFloor' widget for now (punted feature).
+
+------------------------------------------------------------------------
+r302 | ajapted | 2009-10-31
+
+Eureka: made '0' key be centre-and-zoom-out function, and disabled the
+plain centre-map feature (on '`' key) as it seems not very useful.
+
+------------------------------------------------------------------------
+r301 | ajapted | 2009-10-31
+
+Eureka: implemented ability to scroll the map with the mouse (RMB).
+
+------------------------------------------------------------------------
+r300 | ajapted | 2009-10-30
+
+Eureka: fixed X-Offsets when splitting linedefs.
+
+------------------------------------------------------------------------
+r299 | ajapted | 2009-10-30
+
+Eureka: re-implemented 'x' command to Split linedefs.
+
+------------------------------------------------------------------------
+r298 | ajapted | 2009-10-30
+
+todo / docco update.
+
+------------------------------------------------------------------------
+r297 | ajapted | 2009-10-30
+
+Eureka: the code trying to "fix" bad quantization didn't work and was very
+inadequate.  Disabled for now, until better algorithms can be employed.
+
+------------------------------------------------------------------------
+r296 | ajapted | 2009-10-30
+
+Eureka: worked on command to Quantize objects to the grid.
+
+------------------------------------------------------------------------
+r295 | ajapted | 2009-10-30
+
+Eureka: added grid::ForceSnapX/Y methods.
+
+------------------------------------------------------------------------
+r294 | ajapted | 2009-10-30
+
+Eureka: for 2x scaling, use the bottom left corner of the bbox as the
+scaling origin, which is better at preserving grid snappage.
+
+------------------------------------------------------------------------
+r293 | ajapted | 2009-10-30
+
+Eureka: implemented CMD_ScaleObjects() for 2x and 1/2 scaling.
+
+------------------------------------------------------------------------
+r292 | ajapted | 2009-10-30
+
+Eureka: dead code removal (old flip_mirror stuff).
+
+------------------------------------------------------------------------
+r291 | ajapted | 2009-10-30
+
+Eureka: implemented the Rotate-by-90-degrees commands.
+
+------------------------------------------------------------------------
+r290 | ajapted | 2009-10-30
+
+Eureka: changed mirror keys to 'H' and 'I'.
+
+------------------------------------------------------------------------
+r289 | ajapted | 2009-10-30
+
+Eureka: implemented Mirror command (horizontal and vertical).
+
+------------------------------------------------------------------------
+r288 | ajapted | 2009-10-30
+
+Eureka: began work on commands to Mirror and Rotate90 objects.
+
+------------------------------------------------------------------------
+r287 | ajapted | 2009-10-30
+
+Eureka: improved bbox_of_objects() to use the known radius of things.
+
+------------------------------------------------------------------------
+r286 | ajapted | 2009-10-30
+
+Eureka: implemented new bbox_of_objects() function.
+
+------------------------------------------------------------------------
+r285 | ajapted | 2009-10-30
+
+Eureka: re-implemented the centre_of_objects() function.
+
+------------------------------------------------------------------------
+r284 | ajapted | 2009-10-30
+
+todo stuff.
+
+------------------------------------------------------------------------
+r283 | ajapted | 2009-10-30
+
+commenting.
+
+------------------------------------------------------------------------
+r282 | ajapted | 2009-10-30
+
+Eureka: implemented re-selected new objects after a Paste.
+
+------------------------------------------------------------------------
+r281 | ajapted | 2009-10-30
+
+Eureka: added frob_range() method to selection_c class.
+
+------------------------------------------------------------------------
+r280 | ajapted | 2009-10-29
+
+todo twiddle.
+
+------------------------------------------------------------------------
+r279 | ajapted | 2009-10-29
+
+Eureka: began creating a list of keyboard commands.
+
+------------------------------------------------------------------------
+r278 | ajapted | 2009-10-29
+
+todo twiddle.
+
+------------------------------------------------------------------------
+r277 | ajapted | 2009-10-29
+
+debugging tidying.
+
+------------------------------------------------------------------------
+r276 | ajapted | 2009-10-29
+
+Eureka: when dragging Sectors, drag their containing Things too.
+
+------------------------------------------------------------------------
+r275 | ajapted | 2009-10-29
+
+Eureka: Dragging: actually move the objects after the drag.
+
+------------------------------------------------------------------------
+r274 | ajapted | 2009-10-29
+
+Eureka: disable texture listbox for time being.
+
+------------------------------------------------------------------------
+r273 | ajapted | 2009-10-29
+
+Eureka: worked on Dragging objects to new places.
+
+------------------------------------------------------------------------
+r272 | ajapted | 2009-10-29
+
+Eureka: use 'obj_type_t' instead of 'int' for GetCurObject() parameter.
+
+------------------------------------------------------------------------
+r271 | ajapted | 2009-10-29
+
+Eureka: use '0' key instead of '`' for zoom-and-centre-map function.
+
+------------------------------------------------------------------------
+r270 | ajapted | 2009-10-29
+
+Eureka: removed unused variable: rulers.
+
+------------------------------------------------------------------------
+r269 | ajapted | 2009-10-29
+
+Eureka: restored spin-thing keys to 'w' and 'x'.
+
+------------------------------------------------------------------------
+r268 | ajapted | 2009-10-29
+
+Eureka: made clipboard handle sector Insertions like it handles deletions,
+allowing the copied objects to survive longer (e.g. after undo).
+
+------------------------------------------------------------------------
+r267 | ajapted | 2009-10-29
+
+Eureka: improved the way the clipboard reacts to Sector insertions and
+deletions.  In particular, the clipboard can be preserved after a sector
+is deleted (by adjusting the references).
+
+------------------------------------------------------------------------
+r266 | ajapted | 2009-10-29
+
+Eureka: fixed thing positions when Pasting a copied sector.
+
+------------------------------------------------------------------------
+r265 | ajapted | 2009-10-29
+
+debugging tweak.
+
+------------------------------------------------------------------------
+r264 | ajapted | 2009-10-29
+
+Eureka: implemented Paste for linedefs and sectors (which involves creating
+associated objects like vertices and sidedefs, and updating the references).
+
+------------------------------------------------------------------------
+r263 | ajapted | 2009-10-29
+
+Eureka: further work on Cut'n'Paste code...
+
+------------------------------------------------------------------------
+r262 | ajapted | 2009-10-29
+
+Eureka: implemented logic for Copying a group of linedefs or sectors
+(and all associated objects) into the clipboard.
+
+------------------------------------------------------------------------
+r261 | ajapted | 2009-10-29
+
+Eureka: Basis: no need to invalidate the clipboard when inserting new
+Sectors at the very end of the array.
+
+------------------------------------------------------------------------
+r260 | ajapted | 2009-10-29
+
+Eureka: support for Cut/Paste of vertices and RTS triggers.
+
+------------------------------------------------------------------------
+r259 | ajapted | 2009-10-29
+
+Eureka: fixed pasting Things to move them to their new position (and
+when multiple things are in the clipboard, find their centre).
+
+------------------------------------------------------------------------
+r258 | ajapted | 2009-10-29
+
+Eureka: better handling of CTRL + letter keys.
+
+------------------------------------------------------------------------
+r257 | ajapted | 2009-10-29
+
+Eureka: rewrote 'o' key command to use CMD_Copy + CMD_Paste.
+
+------------------------------------------------------------------------
+r256 | ajapted | 2009-10-29
+
+Eureka: Basis: added RawCopy() methods to each class (Thing, Vertex etc).
+
+------------------------------------------------------------------------
+r255 | ajapted | 2009-10-29
+
+Eureka: implemented CMD_Copy and CMD_Paste for THINGS.
+
+------------------------------------------------------------------------
+r254 | ajapted | 2009-10-29
+
+Eureka: Basis: notify clipboard when sectors are deleted or inserted.
+
+------------------------------------------------------------------------
+r253 | ajapted | 2009-10-29
+
+Eureka: fixed bugs in CMD_FullDelete().
+
+------------------------------------------------------------------------
+r252 | ajapted | 2009-10-29
+
+Eureka: mainly commenting (new Cut'n'Paste code).
+
+------------------------------------------------------------------------
+r251 | ajapted | 2009-10-29
+
+Eureka: moved CMD_Delete() code into e_cutpaste.cc file, and implemented
+the CMD_FullDelete() which deletes things in sector mode.
+
+------------------------------------------------------------------------
+r250 | ajapted | 2009-10-28
+
+Eureka: made ConvertSelection() into a general purpose function which
+converts from one selection_c to another.
+
+------------------------------------------------------------------------
+r249 | ajapted | 2009-10-28
+
+Eureka: BA_ClearAll() now clears the Clipboard too.
+
+------------------------------------------------------------------------
+r248 | ajapted | 2009-10-28
+
+Eureka: preliminary clipboard_data_c class.
+
+------------------------------------------------------------------------
+r247 | ajapted | 2009-10-28
+
+Eureka: updated menu code to use new Cut'n'Paste API.
+
+------------------------------------------------------------------------
+r246 | ajapted | 2009-10-28
+
+update
+
+------------------------------------------------------------------------
+r245 | ajapted | 2009-10-28
+
+Eureka: began work on Cut 'n' Paste functionality.
+
+------------------------------------------------------------------------
+r244 | ajapted | 2009-10-28
+
+Eureka: properly handle mouse leaving the canvas area (e.g. unset the
+currently highlighted object).
+
+------------------------------------------------------------------------
+r243 | ajapted | 2009-10-28
+
+Eureka: force custom FLTK color scheme (default with Xfce looked pretty bad).
+
+------------------------------------------------------------------------
+r242 | ajapted | 2009-10-28
+
+Eureka: fixed some warnings from GCC 4.3
+
+------------------------------------------------------------------------
+r241 | ajapted | 2009-10-26
+
+Eureka: bit of work on SuperSectorSelector() code.
+
+------------------------------------------------------------------------
+r240 | ajapted | 2009-10-25
+
+Eureka: changed default thing type to 2014 (from 3004).
+
+------------------------------------------------------------------------
+r239 | ajapted | 2009-10-25
+
+Eureka: ability to Insert new things.
+
+------------------------------------------------------------------------
+r238 | ajapted | 2009-10-25
+
+Eureka: for selection_c::clear() method, added unused but potentially
+useful "slow" version which maintains the order of selections.
+
+------------------------------------------------------------------------
+r237 | ajapted | 2009-10-25
+
+Eureka: ability to insert new vertices.
+
+------------------------------------------------------------------------
+r236 | ajapted | 2009-10-25
+
+Eureka: don't push empty undo_group_cs onto the undo stack.
+
+------------------------------------------------------------------------
+r235 | ajapted | 2009-10-25
+
+Eureka: began work on ability to insert new objects.
+
+------------------------------------------------------------------------
+r234 | ajapted | 2009-10-25
+
+Eureka: small fix.
+
+------------------------------------------------------------------------
+r233 | ajapted | 2009-10-25
+
+Eureka: implemented trickiest selection conversions: L->S and V->S.
+
+------------------------------------------------------------------------
+r232 | ajapted | 2009-10-25
+
+Eureka: implemented V->L selection conversion.
+
+------------------------------------------------------------------------
+r231 | ajapted | 2009-10-25
+
+Eureka: implemented S->L, S->V and L->V selection conversions.
+
+------------------------------------------------------------------------
+r230 | ajapted | 2009-10-25
+
+Eureka: moved ConvertSelection() from editloop.cc --> selectn.cc
+
+------------------------------------------------------------------------
+r229 | ajapted | 2009-10-25
+
+TODO update
+
+------------------------------------------------------------------------
+r228 | ajapted | 2009-10-25
+
+Eureka: implemented selection conversion when going from sector mode to
+things mode.  Made the SPACE key unselect everything.
+
+------------------------------------------------------------------------
+r227 | ajapted | 2009-10-25
+
+Eureka: fixed BA_Delete() handling of bound objects, it was sufficient to
+simply delete them before the main object.  Also changed sidedef deletion
+behavior to delete the _linedef_ if it would end up with no sides at all.
+
+------------------------------------------------------------------------
+r226 | ajapted | 2009-10-25
+
+Eureka: changed color of "error" linedefs to bright red (from pink).
+
+------------------------------------------------------------------------
+r225 | ajapted | 2009-10-25
+
+Eureka: fixed bug in RawInsertLineDef() -- assertion checked wrong value.
+
+------------------------------------------------------------------------
+r224 | ajapted | 2009-10-25
+
+Eureka: fixed BA_Delete() which was trying to delete the wrong bound
+objects (they needed to be collected before applying the deletion).
+
+------------------------------------------------------------------------
+r223 | ajapted | 2009-10-25
+
+Eureka: fix highlighted (Panel'd) object after deletion.
+
+------------------------------------------------------------------------
+r222 | ajapted | 2009-10-25
+
+Eureka: move the DeleteFinally() stuff out of the edit_op_c destructor
+and into a 'Destroy' method which gets called explicitly by the undo_group
+destructor.  This fixes serious problems caused by the destructor being
+called on temporaries of edit_op_c objects.
+
+------------------------------------------------------------------------
+r221 | ajapted | 2009-10-25
+
+Eureka: reimplemented deletion of objects.
+
+------------------------------------------------------------------------
+r220 | ajapted | 2009-10-25
+
+TODO tweak
+
+------------------------------------------------------------------------
+r219 | ajapted | 2009-10-25
+
+Eureka: disable optimisations for time being (as a debugging aide).
+
+------------------------------------------------------------------------
+r218 | ajapted | 2009-10-25
+
+Eureka: fixed problem in Undo/Redo code (clearing the history/future
+arrays) that lead to assertion failures in subsequent operations.
+
+------------------------------------------------------------------------
+r217 | ajapted | 2009-10-25
+
+Eureka: disabled some uncompilable code.
+
+------------------------------------------------------------------------
+r216 | ajapted | 2009-10-25
+
+Eureka: TODO twiddles.
+
+------------------------------------------------------------------------
+r213 | ajapted | 2009-10-25
+
+Moved 'eureka' folder to top level (out of tools/)
+
+------------------------------------------------------------------------
+r212 | ajapted | 2009-10-13
+
+Eureka: version bump.
+
+------------------------------------------------------------------------
+r211 | ajapted | 2009-10-13
+
+TODO update.
+
+------------------------------------------------------------------------
+r210 | ajapted | 2009-10-13
+
+Eureka: fixed changing mode via the button on the Info Bar.
+
+------------------------------------------------------------------------
+r209 | ajapted | 2009-10-13
+
+Eureka: fixed issues with initial editing mode.
+
+------------------------------------------------------------------------
+r208 | ajapted | 2009-10-13
+
+Eureka: tweaked deltas for raising/lowering floors and ceilings.
+
+------------------------------------------------------------------------
+r207 | ajapted | 2009-10-13
+
+Eureka: implemented typing in texture names in the SideDef panels.
+
+------------------------------------------------------------------------
+r206 | ajapted | 2009-10-13
+
+Eureka: implemented x_offset/y_offset input boxes in SideDef panel.
+
+------------------------------------------------------------------------
+r205 | ajapted | 2009-10-13
+
+updated TODO
+
+------------------------------------------------------------------------
+r204 | ajapted | 2009-10-13
+
+Eureka: implemented sector input box for the SideDef Panel.
+
+------------------------------------------------------------------------
+r203 | ajapted | 2009-10-13
+
+Eureka: updated UI_SideBox::TexFromWidget() to internalise the string.
+
+------------------------------------------------------------------------
+r202 | ajapted | 2009-10-13
+
+Eureka: got the automap flags in the LineDef panel working.
+
+------------------------------------------------------------------------
+r201 | ajapted | 2009-10-13
+
+Eureka: implemented ability in LineDef Panel to change type, tag and
+most of the flags -- supporting multiple linedefs too.
+
+------------------------------------------------------------------------
+r200 | ajapted | 2009-10-13
+
+Eureka: ui_thing.cc: renamed opt_callback_data_c --> thing_opt_CB_data_c
+
+------------------------------------------------------------------------
+r199 | ajapted | 2009-10-13
+
+Dead code removal.
+
+------------------------------------------------------------------------
+r198 | ajapted | 2009-10-13
+
+tweaks
+
+------------------------------------------------------------------------
+r197 | ajapted | 2009-10-13
+
+Eureka: small fixes: made FlatFromWidget() uppercase the name, and fixed
+GetCurrentObjects() to set the correct object type on the selection_c.
+
+------------------------------------------------------------------------
+r196 | ajapted | 2009-10-13
+
+Eureka: implemented typing in texture names in the Sector panel.
+
+------------------------------------------------------------------------
+r195 | ajapted | 2009-10-13
+
+Eureka: implemented the 'Type' and 'Tag' input boxes in the Sector panel.
+
+------------------------------------------------------------------------
+r194 | ajapted | 2009-10-13
+
+minor fix
+
+------------------------------------------------------------------------
+r193 | ajapted | 2009-10-13
+
+Eureka: implemented typing a value into light input box in Sector panel.
+
+------------------------------------------------------------------------
+r192 | ajapted | 2009-10-13
+
+Eureka: implemented the light up/down buttons in the Sector panel,
+via new CMD_AdjustLight() function in e_sector.cc
+
+------------------------------------------------------------------------
+r191 | ajapted | 2009-10-13
+
+Eureka: moved CMD_MoveFloors() and CMD_MoveCeilings() into e_sector.cc
+
+------------------------------------------------------------------------
+r190 | ajapted | 2009-10-13
+
+Eureka: renamed 'spin_things' function --> 'CMD_SpinThings', and moved
+some of the logic there (GetCurrentObjects etc), simplifying other code.
+
+------------------------------------------------------------------------
+r189 | ajapted | 2009-10-13
+
+Eureka: worked on keys and buttons to move sector floors/ceilings, via
+new CMD_MoveFloors() and CMD_MoveCeilings() functions.
+
+------------------------------------------------------------------------
+r188 | ajapted | 2009-10-13
+
+Eureka: reimplemented the floor_h, ceil_h and headroom input boxes in
+the Sector Panel (support multiple selected sectors).
+
+------------------------------------------------------------------------
+r187 | ajapted | 2009-10-13
+
+fixed small bug
+
+------------------------------------------------------------------------
+r186 | ajapted | 2009-10-13
+
+Eureka: fixed CLAMP() macro.
+
+------------------------------------------------------------------------
+r185 | ajapted | 2009-10-13
+
+Eureka: reimplemented editing X and Y values in Vertex Panel.
+
+------------------------------------------------------------------------
+r184 | ajapted | 2009-10-13
+
+Eureka: Thing Panel: fixed the 'type' input callback (handle multiple things).
+
+------------------------------------------------------------------------
+r183 | ajapted | 2009-10-13
+
+Eureka: Thing Panel: separated 'pos_callback' into X and Y versions, so
+that multiple selected things can work properly.
+
+------------------------------------------------------------------------
+r182 | ajapted | 2009-10-13
+
+Eureka: Think Panel: reimplemented option_callback, pass a new structure
+as the 'data' parameter which contains the needed UI_ThingBox pointer.
+Also fixed a bug (used F_ANGLE instead of F_OPTIONS).
+
+------------------------------------------------------------------------
+r181 | ajapted | 2009-10-13
+
+Eureka: Thing Panel: implemented value propagation for X and Y edits.
+Changed option_callback() method making the 'data' field a mask value,
+allowing multiple things to be handled but only the apropos bits are
+actually changed.
+
+------------------------------------------------------------------------
+r180 | ajapted | 2009-10-13
+
+tweak.
+
+------------------------------------------------------------------------
+r179 | ajapted | 2009-10-13
+
+Eureka: for angle input in Thing panel, implemented propagating the new
+value to every thing in the current selection.  Simplified handling of
+the < and > rotation buttons.
+
+------------------------------------------------------------------------
+r178 | ajapted | 2009-10-13
+
+Eureka: implemented UI_LineBox::UpdateField() method.
+
+------------------------------------------------------------------------
+r177 | ajapted | 2009-10-13
+
+Eureka: implemented UpdateField() method for UI_VertexBox and UI_SectorBox.
+
+------------------------------------------------------------------------
+r176 | ajapted | 2009-10-13
+
+Eureka: disabled the KF auto-upsizing stuff for now.
+
+------------------------------------------------------------------------
+r175 | ajapted | 2009-10-13
+
+Eureka: update Thing UI panel after spin_things.
+
+------------------------------------------------------------------------
+r174 | ajapted | 2009-10-13
+
+Eureka: Thing info widget: added UpdateField() method for when a field
+is changed externally.  Removed some dead code.
+
+------------------------------------------------------------------------
+r173 | ajapted | 2009-10-13
+
+Eureka: restored keys for spin_things.
+
+------------------------------------------------------------------------
+r172 | ajapted | 2009-10-13
+
+Fixed a few warnings.
+
+------------------------------------------------------------------------
+r171 | ajapted | 2009-10-13
+
+Eureka: changed keys to spin things to '[' and ']'.  Added a function
+GetCurrentObjects(), and simplified some code using it.
+
+------------------------------------------------------------------------
+r170 | ajapted | 2009-10-13
+
+Eureka: improved handling of the current highlighted object and the
+current selection (for the UI panel).
+
+------------------------------------------------------------------------
+r169 | ajapted | 2009-10-13
+
+Eureka: UI_Canvas: renamed some confusing method names:
+   HighlightObject() --> DrawHighlight()
+   HighlightSelection() --> DrawSelection()
+
+------------------------------------------------------------------------
+r168 | ajapted | 2009-10-13
+
+Eureka: fixed UI_Nombre::Update() logic.
+
+------------------------------------------------------------------------
+r167 | ajapted | 2009-10-13
+
+Eureka: the UI panel should now show how many objects are selected,
+with a red background to warn that multiple objects may get changed
+when editing the values in the panel.
+
+------------------------------------------------------------------------
+r166 | ajapted | 2009-10-13
+
+Eureka: added 'slow_count' method to selection_c class.
+
+------------------------------------------------------------------------
+r165 | ajapted | 2009-10-13
+
+Eureka: updated UI_Nombre widget to support selections.
+
+------------------------------------------------------------------------
+r164 | ajapted | 2009-10-12
+
+Eureka: allow 3D renderer to receive mousewheel events.
+
+------------------------------------------------------------------------
+r163 | ajapted | 2009-10-12
+
+Eureka: version bump.
+
+------------------------------------------------------------------------
+r162 | ajapted | 2009-10-12
+
+Eureka: TODO update.
+
+------------------------------------------------------------------------
+r161 | ajapted | 2009-10-12
+
+Eureka: implemented SelectObjectsInBox() for SECTORS.
+
+------------------------------------------------------------------------
+r160 | ajapted | 2009-10-12
+
+Eureka: fixed SelectObjectsInBox() for THINGS, LINEDEFS and VERTICES.
+
+------------------------------------------------------------------------
+r159 | ajapted | 2009-10-12
+
+Eureka: fixed key handling so that Ctrl-Z (and other menu shortcuts) work.
+
+------------------------------------------------------------------------
+r158 | ajapted | 2009-10-12
+
+Eureka: updated TODO, removed old crud.
+
+------------------------------------------------------------------------
+r157 | ajapted | 2009-10-12
+
+Eureka: fixed editing of Thing angles in the UI panel.
+
+------------------------------------------------------------------------
+r156 | ajapted | 2009-10-12
+
+Eureka: fixed Undo/Redo to redraw map.
+
+------------------------------------------------------------------------
+r155 | ajapted | 2009-10-12
+
+tweak
+
+------------------------------------------------------------------------
+r154 | ajapted | 2009-10-12
+
+Eureka: replaced 'MadeChanges = 1' with call to MarkChanges(), and
+replaced 'MadeMapChanges = 1' with MarkChanges(2) function call.
+This new function remembers to redraw the map too.
+
+------------------------------------------------------------------------
+r153 | ajapted | 2009-10-12
+
+Renamed file: AJA_TODO.txt --> TODO.txt
+
+------------------------------------------------------------------------
+r152 | ajapted | 2009-10-12
+
+Eureka: implemented 'spin_things' functionality using the BASIS system.
+
+------------------------------------------------------------------------
+r151 | ajapted | 2009-10-12
+
+Eureka: implemented menu commands: 'Save', 'Undo' and 'Redo'.
+
+------------------------------------------------------------------------
+r150 | ajapted | 2009-10-12
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r149 | ajapted | 2009-10-12
+
+Eureka: fixed bug in saving code (wrong number of linedefs).
+
+------------------------------------------------------------------------
+r148 | ajapted | 2009-10-12
+
+Eureka: fixed Wad_file::RemoveLevel() for GL-Nodes, it should remove
+the "GL_XXX" lumps after the normal level lumps too.
+
+------------------------------------------------------------------------
+r147 | ajapted | 2009-10-12
+
+Eureka: load the specified PWADs.
+
+------------------------------------------------------------------------
+r4 | ajapted | 2009-09-07
+
+Checked in sources to my 'Eureka DOOM Editor' program.
+
+For a while this was developed in EDGE's SVN repository on SourceForge.
+Before that is was just developed on my hard drive.  Eureka is a fork
+of the Yadex editor (version 1.7.0).
+

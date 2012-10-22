@@ -1,0 +1,1146 @@
+========================================================================
+  DEVELOPMENT IN EDGE REPOSITORY
+========================================================================
+
+------------------------------------------------------------------------
+r5940 | ajapted | 2009-09-27 14:53:16
+
+Removed eureka code from EDGE's SVN repository.  The code has moved to
+AwwPort's BZR repository.
+
+------------------------------------------------------------------------
+r5919 | ajapted | 2009-08-10 16:23:40
+
+Eureka: temporary disable spin_things().
+
+------------------------------------------------------------------------
+r5811 | ajapted | 2009-08-04 14:33:57
+
+Eureka: tweaked Scale choices on the infobar.
+
+------------------------------------------------------------------------
+r5810 | ajapted | 2009-08-04 14:28:40
+
+Eureka: fixed privacy of fields in Lump_c and Wad_file classes.
+
+------------------------------------------------------------------------
+r5809 | ajapted | 2009-08-03 23:07:55
+
+Tweak.
+
+------------------------------------------------------------------------
+r5808 | ajapted | 2009-08-03 22:58:48
+
+Eureka: removed Wad_name class (w_name.h)
+
+------------------------------------------------------------------------
+r5807 | ajapted | 2009-08-03 22:39:28
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5806 | ajapted | 2009-08-03 22:19:51
+
+Eureka: removed the old wad handling code files:
+    w_wads.cc/h
+    w_io.cc/h
+    w_file.cc/h
+
+------------------------------------------------------------------------
+r5805 | ajapted | 2009-08-03 22:01:41
+
+Eureka: yet more dead code removed.
+
+------------------------------------------------------------------------
+r5804 | ajapted | 2009-08-03 21:20:37
+
+Eureka: removed old patch_dir code.
+
+------------------------------------------------------------------------
+r5803 | ajapted | 2009-08-03 20:38:32
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5802 | ajapted | 2009-08-03 20:25:44
+
+Tweaks.
+
+------------------------------------------------------------------------
+r5801 | ajapted | 2009-08-03 20:24:44
+
+Eureka: enabled new texture loading code.
+
+------------------------------------------------------------------------
+r5800 | ajapted | 2009-08-03 19:19:13
+
+Eureka: further work on texture loader...
+
+------------------------------------------------------------------------
+r5799 | ajapted | 2009-08-03 19:04:15
+
+Eureka: initial work on new texture loading code...
+
+------------------------------------------------------------------------
+r5798 | ajapted | 2009-08-03 17:34:03
+
+Eureka: sprite loader updated to use new LoadPicture() code.
+
+------------------------------------------------------------------------
+r5797 | ajapted | 2009-08-03 17:17:40
+
+Eureka: new Wad_file function W_FindSpriteLump() which only checks
+the valid sprites (S_START..S_END), and similarly W_FindPatchLump()
+for patches.
+
+------------------------------------------------------------------------
+r5796 | ajapted | 2009-08-03 16:44:28
+
+Eureka: worked on new LoadPicture() implementation.
+
+------------------------------------------------------------------------
+r5795 | ajapted | 2009-08-03 16:26:06
+
+Eureka: added WAD utility function to load a lump into memory.
+
+------------------------------------------------------------------------
+r5794 | ajapted | 2009-08-03 14:44:47
+
+Eureka: began work on a new LoadPicture() implementation.
+
+------------------------------------------------------------------------
+r5793 | ajapted | 2009-08-03 14:31:38
+
+Eureka: renamed IMG_TRANSP --> TRANS_PIXEL.
+
+------------------------------------------------------------------------
+r5792 | ajapted | 2009-08-03 11:22:03
+
+Eureka: updated W_LoadPalette() to use new Wad_file code.
+
+------------------------------------------------------------------------
+r5791 | ajapted | 2009-08-03 11:13:20
+
+Eureka: new flat loading code (W_LoadFlats), replaces old stuff.
+
+------------------------------------------------------------------------
+r5790 | ajapted | 2009-08-03 10:18:21
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5789 | ajapted | 2009-08-03 10:09:34
+
+Eureka: replaced calls to 'get_thing_xxx' with new M_GetThingType().
+
+------------------------------------------------------------------------
+r5788 | ajapted | 2009-08-03 09:55:21
+
+Eureka: added 'color' field to thingtype_t (copied from thinggroup).
+
+------------------------------------------------------------------------
+r5787 | ajapted | 2009-08-03 09:46:35
+
+Eureka: worked on using std::map for the game def containters
+(sector_types, line_types, thing_types etc).
+
+------------------------------------------------------------------------
+r5786 | ajapted | 2009-08-02 23:47:30
+
+Tweaks.
+
+------------------------------------------------------------------------
+r5785 | ajapted | 2009-08-02 23:35:40
+
+Eureka: reworked code which loads the game palette.
+
+------------------------------------------------------------------------
+r5784 | ajapted | 2009-08-02 22:52:11
+
+Tweak.
+
+------------------------------------------------------------------------
+r5783 | ajapted | 2009-08-02 22:30:52
+
+Eureka: finished new line descriptions for doom2 game def.
+
+------------------------------------------------------------------------
+r5782 | ajapted | 2009-08-02 22:11:55
+
+Eureka: yet more line description improvements (doom2 game def).
+
+------------------------------------------------------------------------
+r5781 | ajapted | 2009-08-02 21:24:08
+
+Eureka: further work on line descriptions in doom2 game def.
+
+------------------------------------------------------------------------
+r5780 | ajapted | 2009-08-02 20:44:25
+
+Eureka: more work on line descriptions in doom2 game definition.
+
+------------------------------------------------------------------------
+r5779 | ajapted | 2009-08-02 20:12:16
+
+Eureka: game definition file: for 'thing' commands, moved the sprite
+name to occur before the description (instead of after it).
+
+More work on updating 'line' commands for a single description.
+
+------------------------------------------------------------------------
+r5778 | ajapted | 2009-08-02 19:38:05
+
+Eureka: game definitions: began work to make linetype commands only
+have a single description (instead of short and long).
+
+------------------------------------------------------------------------
+r5777 | ajapted | 2009-08-02 19:20:11
+
+Eureka: game definitions: made 'sector' command only have a single
+description (instead of short and long).
+
+------------------------------------------------------------------------
+r5776 | ajapted | 2009-08-02 19:16:40
+
+Eureka: removed acolour_t.
+
+------------------------------------------------------------------------
+r5775 | ajapted | 2009-08-02 18:56:31
+
+Eureka: worked on game definition (.ugh) code, renamed some of the
+commands e.g. ldt --> line and st --> sector, and moved a couple
+functions into m_game.cc.
+
+------------------------------------------------------------------------
+r5774 | ajapted | 2009-08-02 18:12:54
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5773 | ajapted | 2009-08-02 17:17:33
+
+Eureka: small fixes.
+
+------------------------------------------------------------------------
+r5772 | ajapted | 2009-08-02 17:13:35
+
+Eureka: prelim rework of w_texture code (split now complete).
+
+------------------------------------------------------------------------
+r5771 | ajapted | 2009-08-02 17:06:13
+
+Eureka: prelim rework of w_sprite.cc code.
+
+------------------------------------------------------------------------
+r5770 | ajapted | 2009-08-02 16:59:19
+
+Eureka: preliminary rework of w_flats code.
+
+------------------------------------------------------------------------
+r5769 | ajapted | 2009-08-02 16:49:38
+
+Eureka: continued splitting r_images.cc into three files.
+
+------------------------------------------------------------------------
+r5768 | ajapted | 2009-08-02 16:48:15
+
+Eureka: began splitting r_image.cc into three (Textures, Flats and Sprites).
+
+------------------------------------------------------------------------
+r5767 | ajapted | 2009-08-02 16:45:33
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5766 | ajapted | 2009-08-02 15:09:30
+
+Eureka: merged w_sprites.cc code into r_images.cc
+
+------------------------------------------------------------------------
+r5765 | ajapted | 2009-08-02 14:42:40
+
+Eureka: misc tidying.
+
+------------------------------------------------------------------------
+r5764 | ajapted | 2009-08-02 14:27:02
+
+Small fix.
+
+------------------------------------------------------------------------
+r5763 | ajapted | 2009-08-02 14:14:06
+
+Eureka: improved canvas drawing, keep the map bbox in member fields
+(instead of computing it at multiple places), and use a Vis() method
+for checking if an item would be visible.
+
+------------------------------------------------------------------------
+r5762 | ajapted | 2009-08-02 13:28:49
+
+Eureka: reformatted r_grid.h and removed two unused fields.
+
+------------------------------------------------------------------------
+r5761 | ajapted | 2009-08-02 13:21:31
+
+Eureka: small fixes.
+
+------------------------------------------------------------------------
+r5760 | ajapted | 2009-08-02 12:50:07
+
+Eureka: added constructors to the basis structures (Thing, LineDef etc).
+
+------------------------------------------------------------------------
+r5759 | ajapted | 2009-08-02 12:42:56
+
+Eureka: new FreshLevel() function to create a very basic level.
+
+------------------------------------------------------------------------
+r5758 | ajapted | 2009-08-02 12:27:37
+
+Eureka: new level load/save code is mostly done.
+
+------------------------------------------------------------------------
+r5757 | ajapted | 2009-08-01 15:50:29
+
+Eureka: Wad_file: changed FindLevel() to return a lump index (instead
+of a level number), which affects the parameter to FindLumpInLevel()
+and RemoveLevel() as well.   Various code tidying.
+
+------------------------------------------------------------------------
+r5756 | ajapted | 2009-08-01 11:56:59
+
+Eureka: implemented remaining functionality of Wad_file class.
+
+------------------------------------------------------------------------
+r5755 | ajapted | 2009-07-31 22:46:50
+
+Eureka: more Wad_file goodness...
+
+------------------------------------------------------------------------
+r5754 | ajapted | 2009-07-31 22:18:34
+
+Eureka: further work on WAD Writing implementation.  Fixed the fopen
+mode string in Open() to "r+b", and in Create() to "w+b".
+
+------------------------------------------------------------------------
+r5753 | ajapted | 2009-07-31 19:25:14
+
+Eureka: tweaked the menu.
+
+------------------------------------------------------------------------
+r5752 | ajapted | 2009-07-31 19:17:59
+
+Eureka: partial work on fleshing out the Wad_file "Write interface".
+
+------------------------------------------------------------------------
+r5751 | ajapted | 2009-07-31 15:48:29
+
+Eureka: created the "Write interface" for new Wad_file class.
+
+------------------------------------------------------------------------
+r5750 | ajapted | 2009-07-31 15:37:00
+
+Eureka: fleshed out most of the new SaveLevel() code.
+
+------------------------------------------------------------------------
+r5749 | ajapted | 2009-07-30 23:06:51
+
+Eureka: added skeletal SaveLevel() code.
+
+------------------------------------------------------------------------
+r5748 | ajapted | 2009-07-30 22:10:50
+
+Eureka: wrote Wad_file::WasExternallyModified() method.
+
+------------------------------------------------------------------------
+r5747 | ajapted | 2009-07-30 21:45:53
+
+Eureka: fixed Wad_file::Create() to set 'total_size' field.
+
+------------------------------------------------------------------------
+r5746 | ajapted | 2009-07-30 21:44:28
+
+Eureka: determine total size of WAD when opening it.
+
+------------------------------------------------------------------------
+r5745 | ajapted | 2009-07-30 20:48:13
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5744 | ajapted | 2009-07-30 20:47:25
+
+Eureka: implemented Wad_file::ProcessNamespaces(), which handles the
+S_START/S_END, P_START/P_END, F_START/F_END groups.
+
+------------------------------------------------------------------------
+r5743 | ajapted | 2009-07-30 19:53:38
+
+Eureka: version bump, in honor of new WAD reading code.
+
+------------------------------------------------------------------------
+r5742 | ajapted | 2009-07-30 19:51:23
+
+Eureka: implemented Wad_file::DetectLevels().
+
+------------------------------------------------------------------------
+r5741 | ajapted | 2009-07-30 19:25:37
+
+Tweak.
+
+------------------------------------------------------------------------
+r5740 | ajapted | 2009-07-30 17:41:35
+
+Eureka: preliminary implementation of Wad_file::ReadDirectory().
+
+------------------------------------------------------------------------
+r5739 | ajapted | 2009-07-30 16:51:59
+
+Eureka: reworked LoadLevel() to use new Wad_file class.
+
+------------------------------------------------------------------------
+r5738 | ajapted | 2009-07-30 16:51:02
+
+Eureka: mere reformatting.
+
+------------------------------------------------------------------------
+r5737 | ajapted | 2009-07-30 16:43:47
+
+Eureka: added w_wad.o to the build, with minor fixes.
+
+------------------------------------------------------------------------
+r5736 | ajapted | 2009-07-30 16:42:37
+
+Eureka: temp workaround for old Wad_file class clashing with new one.
+
+------------------------------------------------------------------------
+r5735 | ajapted | 2009-07-30 16:25:09
+
+Eureka: new Wad_file class is coming along.
+
+------------------------------------------------------------------------
+r5734 | ajapted | 2009-07-30 15:57:08
+
+Eureka: further work on new Wad_file class.
+
+------------------------------------------------------------------------
+r5732 | ajapted | 2009-07-30 14:52:33
+
+Eureka: implemented RemoveUnusedVertices() for level loading.
+
+------------------------------------------------------------------------
+r5731 | ajapted | 2009-07-30 14:09:29
+
+Eureka: #include math.h by default (via main.h).
+
+------------------------------------------------------------------------
+r5730 | ajapted | 2009-07-30 13:57:38
+
+Eureka: bit more work on new Wad_file class.
+
+------------------------------------------------------------------------
+r5729 | ajapted | 2009-07-30 13:41:47
+
+Eureka: added Adler-32 CRC code.
+
+------------------------------------------------------------------------
+r5728 | ajapted | 2009-07-30 13:36:27
+
+Eureka: check-in of skeletal new Wad_file class.
+
+------------------------------------------------------------------------
+r5727 | ajapted | 2009-07-30 12:26:35
+
+Eureka: more miscellaneous tidying.
+
+------------------------------------------------------------------------
+r5726 | ajapted | 2009-07-30 12:02:11
+
+Eureka: replaced nf_bug() with BugError().
+
+------------------------------------------------------------------------
+r5725 | ajapted | 2009-07-30 11:55:25
+
+Eureka: removed sys_assert.cc/h.  Began tidying the error/log stuff.
+
+------------------------------------------------------------------------
+r5724 | ajapted | 2009-07-29 23:35:22
+
+Eureka: removed xref stuff (pretty useless).
+
+------------------------------------------------------------------------
+r5723 | ajapted | 2009-07-29 23:33:26
+
+Eureka: moved some prototypes out of main.h
+
+------------------------------------------------------------------------
+r5722 | ajapted | 2009-07-29 23:17:29
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5721 | ajapted | 2009-07-29 22:55:54
+
+Eureka: more tidying / dead code removal.
+
+------------------------------------------------------------------------
+r5720 | ajapted | 2009-07-29 22:19:58
+
+Eureka: fixed clashing definitions between w_rawdef.h and w_structs.h
+and removed some typedefs.
+
+------------------------------------------------------------------------
+r5719 | ajapted | 2009-07-29 22:17:17
+
+Eureka: Dead code removal.
+
+------------------------------------------------------------------------
+r5718 | ajapted | 2009-07-29 21:56:54
+
+Eureka: fixed side-panel display of sector flats, sidedef textures.
+
+------------------------------------------------------------------------
+r5716 | ajapted | 2009-07-29 18:04:00
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5715 | ajapted | 2009-07-29 16:33:54
+
+Eureka: renamed file: e_load.cc --> e_loadsave.cc
+
+------------------------------------------------------------------------
+r5714 | ajapted | 2009-07-29 16:24:15
+
+Eureka: renamed QF --> KF and QF_F --> KF_fonth.
+
+------------------------------------------------------------------------
+r5713 | ajapted | 2009-07-29 16:22:59
+
+Eureka: fiddled with menu.
+
+------------------------------------------------------------------------
+r5712 | ajapted | 2009-07-29 15:13:17
+
+Eureka: few more fixes to get compiling and running again.
+
+------------------------------------------------------------------------
+r5711 | ajapted | 2009-07-29 15:04:25
+
+Eureka: fleshed out new LoadLevel() function, and removed the old crud.
+
+------------------------------------------------------------------------
+r5710 | ajapted | 2009-07-29 14:55:38
+
+Eureka: fleshed out LoadThings(), LoadSideDefs() and LoadLineDefs().
+
+------------------------------------------------------------------------
+r5709 | ajapted | 2009-07-29 14:38:05
+
+Eureka: yet more sticky-tape and bubble-gum workarounds...
+
+------------------------------------------------------------------------
+r5708 | ajapted | 2009-07-29 13:17:25
+
+Eureka: added LineDef::TouchesSector() method.
+
+------------------------------------------------------------------------
+r5707 | ajapted | 2009-07-29 01:10:51
+
+Eureka: more bubble gum patching just to get something to compile.
+
+------------------------------------------------------------------------
+r5706 | ajapted | 2009-07-29 00:51:38
+
+Eureka: fleshed out sector loading: LoadSectors().
+
+------------------------------------------------------------------------
+r5705 | ajapted | 2009-07-29 00:48:09
+
+Eureka: added convenience func: BA_InternaliseShortStr().
+
+------------------------------------------------------------------------
+r5704 | ajapted | 2009-07-29 00:09:27
+
+Eureka: began work on new level loading code : e_load.cc
+
+------------------------------------------------------------------------
+r5703 | ajapted | 2009-07-29 00:08:32
+
+Eureka: sticky-tape for editloop.cc
+
+------------------------------------------------------------------------
+r5702 | ajapted | 2009-07-28 23:04:51
+
+Eureka: wrote a little Features / Requirements doc.
+
+------------------------------------------------------------------------
+r5701 | ajapted | 2009-07-28 22:58:06
+
+Eureka: more sticky-tape and bubble-gum to get it compiling again.
+
+------------------------------------------------------------------------
+r5700 | ajapted | 2009-07-28 22:51:33
+
+Eureka: fixes for r_images.cc
+
+------------------------------------------------------------------------
+r5699 | ajapted | 2009-07-28 22:47:36
+
+Eureka: updated 3D render code for the Basis.
+
+------------------------------------------------------------------------
+r5698 | ajapted | 2009-07-28 22:45:19
+
+Eureka: added e_basis.o to the build.
+
+------------------------------------------------------------------------
+r5697 | ajapted | 2009-07-28 22:29:31
+
+Eureka: prelim work updating UI widgets for the Basis.
+
+------------------------------------------------------------------------
+r5696 | ajapted | 2009-07-28 22:16:50
+
+Eureka: fixed ui_canvas.cc for new basic structs.
+
+------------------------------------------------------------------------
+r5695 | ajapted | 2009-07-28 21:53:58
+
+Eureka: remove old defintions of LineDef, Sector (etc) structs.
+
+------------------------------------------------------------------------
+r5694 | ajapted | 2009-07-28 21:46:06
+
+Eureka: fixed some things in e_basis.cc
+
+------------------------------------------------------------------------
+r5693 | ajapted | 2009-07-28 21:19:02
+
+Eureka: reformatted top-of-file comments, added the word 'Copyright'
+because the presence of mere '(C)' has no legal significance.
+
+------------------------------------------------------------------------
+r5692 | ajapted | 2009-07-28 21:12:18
+
+Eureka: twiddled TODO
+
+------------------------------------------------------------------------
+r5525 | ajapted | 2009-07-17 15:27:57
+
+Eureka: completed the BASIS implementation (Undo, Redo, etc).
+
+------------------------------------------------------------------------
+r5524 | ajapted | 2009-07-17 14:56:04
+
+Eureka: fleshed out more of the BASIS implementation.
+
+------------------------------------------------------------------------
+r5523 | ajapted | 2009-07-17 14:29:00
+
+Eureka: more work on BASIS implementation, moved or removed the
+irrelevant code out of e_basis.cc.
+
+------------------------------------------------------------------------
+r5522 | ajapted | 2009-07-17 14:21:44
+
+Eureka: fleshed out the BASIS API (BA_Begin, BA_Change, etc).
+
+------------------------------------------------------------------------
+r5521 | ajapted | 2009-07-17 00:48:52
+
+Eureka: basis stuff yay.
+
+------------------------------------------------------------------------
+r5520 | ajapted | 2009-07-16 23:59:32
+
+Eureka: further work on the basis (RawInsert and RawDelete).
+
+------------------------------------------------------------------------
+r5519 | ajapted | 2009-07-16 21:27:16
+
+Eureka: removed unused OBJ_XXX constants, added rad-trig bits.
+
+------------------------------------------------------------------------
+r5518 | ajapted | 2009-07-16 21:24:38
+
+Eureka: basis code: implemented the helper methods (FloorTex etc),
+and removed more code that doesn't belong here.
+
+------------------------------------------------------------------------
+r5517 | ajapted | 2009-07-16 21:05:32
+
+Eureka: fleshed out all basis InsertXXX() and DeleteXXX() functions.
+
+------------------------------------------------------------------------
+r5516 | ajapted | 2009-07-16 20:05:31
+
+Eureka: updated the DeleteObject() code for new basis design.
+
+------------------------------------------------------------------------
+r5515 | ajapted | 2009-07-16 19:25:42
+
+Eureka: bit more work on object basis.
+
+------------------------------------------------------------------------
+r5514 | ajapted | 2009-07-16 19:22:59
+
+Eureka: updated basis header with design notes and some helper
+methods in each structure (e.g. Sector::FloorTex).
+
+------------------------------------------------------------------------
+r5513 | ajapted | 2009-07-16 18:47:12
+
+Eureka: updated makefile.
+
+------------------------------------------------------------------------
+r5512 | ajapted | 2009-07-16 17:28:42
+
+Eureka: improved string table class to support "huge" strings.
+
+------------------------------------------------------------------------
+r5511 | ajapted | 2009-07-16 15:49:28
+
+Eureka: fixed string table to find existing strings in add().
+
+------------------------------------------------------------------------
+r5510 | ajapted | 2009-07-16 15:30:11
+
+Eureka: finished implementation of string table.
+
+------------------------------------------------------------------------
+r5509 | ajapted | 2009-07-16 15:11:15
+
+Eureka: preliminary work on a string table.
+
+------------------------------------------------------------------------
+r5508 | ajapted | 2009-07-16 14:58:40
+
+Eureka: added field enums (F_X, F_FLOOR_TEX, etc) to basis classes.
+
+------------------------------------------------------------------------
+r5507 | ajapted | 2009-07-16 14:45:10
+
+Eureka: fleshed out new basis classes (class Thing etc).
+
+------------------------------------------------------------------------
+r5506 | ajapted | 2009-07-16 14:20:23
+
+Eureka: began work on new 'e_basis' file for basic object handling.
+
+------------------------------------------------------------------------
+r5505 | ajapted | 2009-07-16 14:17:14
+
+Eureka: removed 'ld - LineDefs' and 'sec - Sectors' pointer math.
+
+------------------------------------------------------------------------
+r5504 | ajapted | 2009-07-16 00:56:49
+
+Eureka: removed unused 'things_angles' and 'things_types' vars.
+
+------------------------------------------------------------------------
+r5503 | ajapted | 2009-07-16 00:55:48
+
+Eureka: fixed 'spin_things' code.
+
+------------------------------------------------------------------------
+r5494 | ajapted | 2009-07-14 23:52:22
+
+Eureka: got the code compiling again (after SelPtr change).
+
+------------------------------------------------------------------------
+r5493 | ajapted | 2009-07-14 23:14:22
+
+Eureka: partial work, updating all code to use new selection_c
+class instead of old SelPtr stuff.
+
+------------------------------------------------------------------------
+r5492 | ajapted | 2009-07-14 22:56:36
+
+Eureka: optional 'initial' value for selection_c constructor.
+
+------------------------------------------------------------------------
+r5491 | ajapted | 2009-07-14 22:48:07
+
+Eureka: reworked InsertObject() code.
+
+------------------------------------------------------------------------
+r5490 | ajapted | 2009-07-14 22:23:14
+
+Eureka: new and improved DeleteObjects() code is done.
+
+------------------------------------------------------------------------
+r5489 | ajapted | 2009-07-14 21:14:17
+
+Eureka: preliminary rework of DeleteObjects() code.
+
+------------------------------------------------------------------------
+r5488 | ajapted | 2009-07-14 21:13:41
+
+Eureka: reinstated objid.h (finished split from objects.h).
+
+------------------------------------------------------------------------
+r5487 | ajapted | 2009-07-14 20:33:38
+
+Eureka: reinstated header file: objid.h
+
+------------------------------------------------------------------------
+r5486 | ajapted | 2009-07-14 19:43:32
+
+Eureka: improved selection_c class, new change_type() and empty() methods.
+
+------------------------------------------------------------------------
+r5485 | ajapted | 2009-07-14 18:42:54
+
+Eureka: new MAX_RADIUS constant.
+
+------------------------------------------------------------------------
+r5484 | ajapted | 2009-07-14 18:41:40
+
+Eureka: code reformatting.
+
+------------------------------------------------------------------------
+r5483 | ajapted | 2009-07-14 16:54:15
+
+Eureka: yet more reformatting, yay.
+
+------------------------------------------------------------------------
+r5482 | ajapted | 2009-07-14 16:28:55
+
+Eureka: more reformatting.
+
+------------------------------------------------------------------------
+r5481 | ajapted | 2009-07-14 15:30:07
+
+Eureka: code reformatting.
+
+------------------------------------------------------------------------
+r5480 | ajapted | 2009-07-14 15:16:39
+
+Eureka: reformatted code.
+
+------------------------------------------------------------------------
+r5479 | ajapted | 2009-07-13 23:30:46
+
+Eureka: implemented iterators for the new selection_c class,
+with an API similar to (but not the same as) the STL.
+
+------------------------------------------------------------------------
+r5478 | ajapted | 2009-07-13 23:01:07
+
+Eureka: fleshed out remaining selection_c methods.
+
+------------------------------------------------------------------------
+r5477 | ajapted | 2009-07-13 22:49:17
+
+Eureka: preliminary new class for handling selections.
+
+------------------------------------------------------------------------
+r5476 | ajapted | 2009-07-13 22:34:39
+
+Eureka: extended bitvec_c class with set_all(), clear_all(),
+toggle_all() and merge() methods.
+
+------------------------------------------------------------------------
+r5475 | ajapted | 2009-07-13 22:12:38
+
+Eureka: reworked bitvec_c implementation.
+
+------------------------------------------------------------------------
+r5474 | ajapted | 2009-07-13 21:47:01
+
+Eureka: incorporated highlight code into UI_Canvas widget.
+
+------------------------------------------------------------------------
+r5473 | ajapted | 2009-07-13 20:03:23
+
+Eureka: updated TODO
+
+------------------------------------------------------------------------
+r5472 | ajapted | 2009-07-13 19:57:18
+
+Eureka: incorporated selection box functionality into UI_Canvas widget.
+
+------------------------------------------------------------------------
+r5471 | ajapted | 2009-07-13 19:20:22
+
+Eureka: updated #includes for recent renamings.
+
+------------------------------------------------------------------------
+r5470 | ajapted | 2009-07-13 18:58:35
+
+Eureka: moved levelname2levelno(), levelname2rank() from yutil --> levels.cc
+
+------------------------------------------------------------------------
+r5469 | ajapted | 2009-07-13 18:51:00
+
+Eureka: renamed various files, now: e_checks, e_linedef, e_things,
+e_sector, e_vertex, m_config, m_dialog and m_game.
+
+------------------------------------------------------------------------
+r5468 | ajapted | 2009-07-13 18:47:34
+
+Eureka: make side panels wider on higher resolutions.
+
+------------------------------------------------------------------------
+r5467 | ajapted | 2009-07-13 18:38:32
+
+Eureka: renamed Makefile.linux --> Makefile.unx
+
+------------------------------------------------------------------------
+r5466 | ajapted | 2009-07-13 18:36:07
+
+Eureka: updated #includes for recent file renamings.
+
+------------------------------------------------------------------------
+r5465 | ajapted | 2009-07-13 17:46:42
+
+Eureka: renamed files: gfx --> r_misc
+
+------------------------------------------------------------------------
+r5464 | ajapted | 2009-07-13 17:45:00
+
+Eureka: dead code removal.
+
+------------------------------------------------------------------------
+r5463 | ajapted | 2009-07-13 17:36:33
+
+Eureka: renamed files: grid2 --> r_grid
+
+------------------------------------------------------------------------
+r5462 | ajapted | 2009-07-13 17:30:26
+
+Eureka: moved InitFLTK and TermFLTK from gfx.cc --> main.cc, and
+removed some unused stuff.
+
+------------------------------------------------------------------------
+r5461 | ajapted | 2009-07-13 17:00:43
+
+Eureka: merged l_super.h file --> linedefs.cc
+
+------------------------------------------------------------------------
+r5460 | ajapted | 2009-07-13 14:51:08
+
+Eureka: merged e_names.cc file --> editobj.cc
+
+------------------------------------------------------------------------
+r5459 | ajapted | 2009-07-13 14:47:29
+
+Eureka: merged edit2.h file --> editloop.h
+
+------------------------------------------------------------------------
+r5458 | ajapted | 2009-07-13 14:41:43
+
+Eureka: merged gotoobj files --> objects.cc/h
+
+------------------------------------------------------------------------
+r5450 | ajapted | 2009-07-12 16:02:58
+
+Eureka: code tidying, removed DRAWING_MAP hack.
+
+------------------------------------------------------------------------
+r5449 | ajapted | 2009-07-12 00:40:42
+
+Eureka: renamed various fields of map structures:
+   xoff, yoff    --> x_offset, y_offset
+   ceilt, floort --> ceil_tex, floor_tex
+   upper, lower  --> upper_tex, lower_tex
+   middle        --> mid_tex
+   sidedef1 / 2  --> side_R, side_L
+   when, special --> options, type
+
+------------------------------------------------------------------------
+r5448 | ajapted | 2009-07-11 23:46:56
+
+Eureka: Removed unused headers: spot.h and edwidget.h
+
+------------------------------------------------------------------------
+r5447 | ajapted | 2009-07-11 23:34:04
+
+Eureka: more file merging, various reformatting and renaming.
+
+------------------------------------------------------------------------
+r5446 | ajapted | 2009-07-11 22:46:35
+
+Eureka: reformatting...
+
+------------------------------------------------------------------------
+r5445 | ajapted | 2009-07-11 22:32:11
+
+Eureka: more file shenanigans.
+
+------------------------------------------------------------------------
+r5444 | ajapted | 2009-07-11 22:22:36
+
+Eureka: merged input.h and y_time.cc/h into other files.
+
+------------------------------------------------------------------------
+r5443 | ajapted | 2009-07-11 22:10:29
+
+Eureka: scrollbar tweak.
+
+------------------------------------------------------------------------
+r5442 | ajapted | 2009-07-11 21:59:25
+
+Eureka: new top-of-file comments (header files).
+
+------------------------------------------------------------------------
+r5441 | ajapted | 2009-07-11 21:44:52
+
+Eureka: new top-of-file comment block.
+
+------------------------------------------------------------------------
+r5440 | ajapted | 2009-07-11 18:07:17
+
+Eureka: more work on the Texture list widget.
+
+------------------------------------------------------------------------
+r5439 | ajapted | 2009-07-11 15:04:50
+
+Eureka: bit more work on texture selector.
+
+------------------------------------------------------------------------
+r5438 | ajapted | 2009-07-11 14:42:58
+
+Eureka: preliminary work on a flat/texture selection panel.
+
+------------------------------------------------------------------------
+r5437 | ajapted | 2009-07-11 14:10:45
+
+Eureka: renamed more stuff.
+
+------------------------------------------------------------------------
+r5436 | ajapted | 2009-07-11 14:09:23
+
+Eureka: renamed more stuff.
+
+------------------------------------------------------------------------
+r5435 | ajapted | 2009-07-11 00:32:21
+
+Eureka: various tidying...
+
+------------------------------------------------------------------------
+r5434 | ajapted | 2009-07-11 00:06:45
+
+Eureka: began work on using larger fonts (etc) on higher screen resolutions.
+
+------------------------------------------------------------------------
+r5433 | ajapted | 2009-07-10 23:35:44
+
+Eureka: reformatting.
+
+------------------------------------------------------------------------
+r5432 | ajapted | 2009-07-10 22:44:04
+
+Eureka: added vim editor settings to each file.
+
+------------------------------------------------------------------------
+r5431 | ajapted | 2009-07-10 22:15:48
+
+Eureka: renamed files yadex --> main, merged objid.h into objects.h
+
+------------------------------------------------------------------------
+r5430 | ajapted | 2009-07-10 21:59:48
+
+Eureka: tweaks.
+
+------------------------------------------------------------------------
+r5429 | ajapted | 2009-07-10 21:54:07
+
+Eureka: yep more twiddling...
+
+------------------------------------------------------------------------
+r5428 | ajapted | 2009-07-10 21:38:01
+
+Eureka: more tidying...
+
+------------------------------------------------------------------------
+r5427 | ajapted | 2009-07-10 19:31:40
+
+Eureka: more file stuff....
+
+------------------------------------------------------------------------
+r5426 | ajapted | 2009-07-10 19:21:00
+
+Eureka: merged files: im_appcol, im_gamecol, im_rgb --> im_color.
+
+------------------------------------------------------------------------
+r5425 | ajapted | 2009-07-10 19:08:03
+
+Eureka: merged files: x_rotate, x_centre, x_exchg --> x_mirror.
+
+------------------------------------------------------------------------
+r5424 | ajapted | 2009-07-10 14:56:36
+
+Eureka: finished merging v_* files.
+
+------------------------------------------------------------------------
+r5423 | ajapted | 2009-07-10 14:52:39
+
+Eureka: began merging v_* files --> vertices.cc/h
+
+------------------------------------------------------------------------
+r5422 | ajapted | 2009-07-10 14:49:52
+
+Eureka: merged s_* files into sectors.cc/h and s_misc.cc/h
+
+------------------------------------------------------------------------
+r5421 | ajapted | 2009-07-10 14:38:39
+
+Eureka: merged s_split.cc, s_slice.cc into --> s_misc.cc
+
+------------------------------------------------------------------------
+r5420 | ajapted | 2009-07-10 14:33:32
+
+Eureka: renamed files: s_centre --> sectors
+
+------------------------------------------------------------------------
+r5419 | ajapted | 2009-07-10 14:32:20
+
+Eureka: renamed file --> s_misc.h
+
+------------------------------------------------------------------------
+r5418 | ajapted | 2009-07-10 14:29:40
+
+Eureka: finished merging linedef stuff.
+
+------------------------------------------------------------------------
+r5417 | ajapted | 2009-07-10 14:23:12
+
+Eureka: began merging linedef stuff into less files.
+
+------------------------------------------------------------------------
+r5416 | ajapted | 2009-07-10 00:38:58
+
+Eureka: renamed file: memory --> ymemory
+
+------------------------------------------------------------------------
+r5415 | ajapted | 2009-07-10 00:34:54
+
+Eureka: merged t_spin, t_flags, t_centre files --> things.cc/h
+
+------------------------------------------------------------------------
+r5414 | ajapted | 2009-07-10 00:25:51
+
+Eureka: renamed GetFarMemory --> GetMemory (et al).
+
+------------------------------------------------------------------------
+r5413 | ajapted | 2009-07-10 00:17:55
+
+Eureka: removed files: locate.cc/h and macro.cc/h
+
+------------------------------------------------------------------------
+r5390 | ajapted | 2009-07-09 01:36:07
+
+Eureka: fixed the cpu hogging (use Fl::wait in main loop).
+
+------------------------------------------------------------------------
+r5389 | ajapted | 2009-07-09 01:16:45
+
+Eureka: removed dummy atclib.h
+
+------------------------------------------------------------------------
+r5388 | ajapted | 2009-07-09 00:52:30
+
+Checked in a map editor based on Yadex 1.7.0 but completely hacked
+to pieces to work with the FLTK toolkit and removal of the atclib.
+
