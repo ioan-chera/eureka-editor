@@ -113,7 +113,7 @@ Img * W_GetSprite(int type)
 		Lump_c *lump = Sprite_loc_by_root(info->sprite);
 		if (! lump)
 		{
-			warn ("Sprite not found: '%s'\n", info->sprite);
+			LogPrintf("Sprite not found: '%s'\n", info->sprite);
 		}
 		else
 		{

@@ -118,7 +118,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 			if (pname_idx >= pname_size)
 			{
-				warn("Invalid pname in texture \'%.8s\'\n", raw->name);
+				LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
 				continue;
 			}
 
@@ -131,8 +131,10 @@ DebugPrintf("-- %d patch [%s]\n", j, picname);
 
 			if (! lump ||
 				! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
-				warn ("texture \"%.8s\": patch \"%.8s\" not found.\n",
+			{
+				LogPrintf("texture '%.8s': patch '%.8s' not found.\n",
 						raw->name, picname);
+			}
 		}
 
 		// store the new texture

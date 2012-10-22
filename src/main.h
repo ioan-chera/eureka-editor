@@ -241,7 +241,6 @@ void Beep (void);
 int vertex_radius (double scale);
 
 
-#define warn     LogPrintf
 #define err      LogPrintf
 
 

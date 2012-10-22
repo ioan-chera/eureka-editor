@@ -77,7 +77,7 @@ void W_LoadPalette()
 	if (! lump->Seek() ||
 		! lump->Read(raw_palette, sizeof(raw_palette)))
 	{
-		warn("PLAYPAL: read error\n");
+		LogPrintf("PLAYPAL: read error\n");
 		return;
 	}
 
@@ -107,7 +107,7 @@ void W_LoadColormap()
 	if (! lump->Seek() ||
 		! lump->Read(raw_colormap, sizeof(raw_colormap)))
 	{
-		warn("COLORMAP: read error\n");
+		LogPrintf("COLORMAP: read error\n");
 		return;
 	}
 }

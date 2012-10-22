@@ -399,7 +399,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			p++;
 		if (*p == '\0')
 		{
-			warn ("%s(%u): expected an \"=\", skipping\n", filename, lnum);
+			LogPrintf("%s(%u): expected an \"=\", skipping\n", filename, lnum);
 			goto next_line;
 		}
 		if (*p == '=')
@@ -417,8 +417,8 @@ static int parse_config_file(FILE *fp, const char *filename)
 				p++;
 			if (*p != '=')
 			{
-				warn ("%s(%u,%d): expected an \"=\", skipping\n",
-						filename, lnum, 1 + (int) (p - line));
+				LogPrintf("%s(%u): expected an \"=\", skipping\n",
+						filename, lnum);
 				goto next_line;
 			}
 		}
@@ -451,8 +451,8 @@ static int parse_config_file(FILE *fp, const char *filename)
 		{
 			if (o->opt_type == OPT_END)
 			{
-				warn ("%s(%u): invalid variable \"%s\", skipping\n",
-						filename, lnum, name);
+				LogPrintf("%s(%u): invalid variable '%s', skipping\n",
+						  filename, lnum, name);
 				goto next_line;
 			}
 			if (! o->long_name || strcmp (name, o->long_name) != 0)
