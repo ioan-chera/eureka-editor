@@ -82,7 +82,7 @@ const char *UI_About::Logo = EUREKA_TITLE "\n v" EUREKA_VERSION;
 
 const char *UI_About::Text1 =
   "EUREKA is a map editor for DOOM 1 and 2\n"
-  "EUREKA is based on the Yadex editor.";
+  "EUREKA uses code from the Yadex editor.";
 
 
 const char *UI_About::Text2 =
