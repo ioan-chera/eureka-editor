@@ -167,7 +167,7 @@ void FatalError(const char *fmt, ...)
 {
 	va_list args;
 	va_start (args, fmt);
-	print_error_message (fmt, args);
+	print_error_message (fmt, args);  // FUCKEN FIXME QUICK
 
 	TermFLTK();
 
@@ -175,21 +175,6 @@ void FatalError(const char *fmt, ...)
 	LogClose();
 
 	exit(2);
-}
-
-
-void BugError(const char *fmt, ...)
-{
-	va_list args;
-	va_start (args, fmt);
-	print_error_message (fmt, args);  // FUCKEN FIXME QUICK
-
-	TermFLTK();
-
-	LogClose();
-
-// TODO	CloseWadFiles ();
-	exit(9);
 }
 
 

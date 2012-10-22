@@ -68,7 +68,9 @@
  *  Platform-independant types and formats.
  */
 void FatalError(const char *fmt, ...);
-void BugError(const char *fmt, ...);
+
+#define BugError  FatalError
+
 
 #include "sys_type.h"
 #include "sys_macro.h"
