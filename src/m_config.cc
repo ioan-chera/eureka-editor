@@ -641,6 +641,14 @@ int parse_config_file_default()
 }
 
 
+static void parse_loose_file(const char *filename)
+{
+	// too simplistic??
+
+	Pwad = StringDup(filename);
+}
+
+
 /*
  *  parse_command_line_options
  *  If <pass> is set to 1, ignores all options except those
@@ -655,32 +663,32 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 
 	while (argc > 0)
 	{
-		int ignore;
+		bool ignore;
 
-		// Which option is this ?
+		// is it actually an option?
 		if (argv[0][0] != '-')
 		{
 			// this is a loose file, handle it now
-			Pwad = StringDup(argv[0]);
+			parse_loose_file(argv[0]);
 
 			argc++;
 			argv--;
 			continue;
 		}
 
+		// Which option is this?
+		for (o = options; ; o++)
 		{
-			for (o = options; ; o++)
+			if (o->opt_type == OPT_END)
 			{
-				if (o->opt_type == OPT_END)
-				{
-					err ("invalid option: \"%s\"", argv[0]);
-					return 1;
-				}
-				if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
-					 (o->long_name  && strcmp (argv[0]+1, o->long_name ) == 0) ||
-					 (o->long_name  && argv[0][1] == '-' && strcmp (argv[0]+2, o->long_name ) == 0) )
-					break;
+				err ("invalid option: \"%s\"", argv[0]);
+				return 1;
 			}
+
+			if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
+				 (o->long_name  && strcmp (argv[0]+1, o->long_name ) == 0) ||
+				 (o->long_name  && argv[0][1] == '-' && strcmp (argv[0]+2, o->long_name ) == 0) )
+				break;
 		}
 
 		// If this option has the "1" flag but pass is not 1
