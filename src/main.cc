@@ -65,13 +65,18 @@ char error_invalid[1];     // Invalid parameter
  *  Global variables
  */
 
+// progress during initialisation:
+//   0 = nothing yet
+//   1 = read early options, set up logging
+//   2 = read all options, and possibly a config file
+//   3 = inited FLTK, opened main window
+int  init_progress;
+
 bool want_quit = false;
 
-int  remind_to_build_nodes = 0;  // Remind user to build nodes
+const char *config_file = NULL;
+const char *log_file = NULL;
 
-// Set from command line and/or config file
-
-const char *config_file                 = NULL;
 int       copy_linedef_reuse_sidedefs = 0;
 
 int       default_ceiling_height  = 128;
@@ -90,12 +95,13 @@ const char *Game_name;
 const char *Port_name;
 const char *Level_name;
 
+int  remind_to_build_nodes = 0;  // Remind user to build nodes
+
 bool Replacer = false;
 
 const char *Iwad = NULL;
 const char *Pwad = NULL;
 
-bool      Quiet       = false;
 unsigned long scroll_less   = 10;
 unsigned long scroll_more   = 90;
 int       sprite_scale  = 100;
@@ -163,9 +169,11 @@ void FatalError(const char *fmt, ...)
 	va_start (args, fmt);
 	print_error_message (fmt, args);
 
-	TermFLTK ();
+	TermFLTK();
 
 // TODO	CloseWadFiles ();
+	LogClose();
+
 	exit(2);
 }
 
@@ -176,7 +184,9 @@ void BugError(const char *fmt, ...)
 	va_start (args, fmt);
 	print_error_message (fmt, args);  // FUCKEN FIXME QUICK
 
-	TermFLTK ();
+	TermFLTK();
+
+	LogClose();
 
 // TODO	CloseWadFiles ();
 	exit(9);
@@ -466,9 +476,7 @@ bool Main_ConfirmQuit(const char *action)
 */
 int main(int argc, char *argv[])
 {
-	LogInit("LOG.txt");
-	LogPrintf(EUREKA_TITLE " v" EUREKA_VERSION "\n");
-//	LogEnableDebug();
+	init_progress = 0;
 
 	int r;
 
@@ -490,6 +498,17 @@ int main(int argc, char *argv[])
 	}
 
 	//printf ("%s\n", what ());
+
+
+	LogOpen(log_file);
+
+	init_progress = 1;
+
+
+	LogPrintf(EUREKA_TITLE " v" EUREKA_VERSION "\n");
+
+	// Sanity checks (useful when porting).
+	check_types();
 
 
 	Determine_HomeDir(argv[0]);
@@ -521,8 +540,7 @@ int main(int argc, char *argv[])
 	}
 
 
-	// Sanity checks (useful when porting).
-	check_types();
+	init_progress = 2;
 
 
 	// determine IWAD and GAME name
@@ -573,6 +591,8 @@ int main(int argc, char *argv[])
 
     if (! InitFLTK())
         exit(9);
+
+	init_progress = 3;
 
 
 	W_LoadFlats();

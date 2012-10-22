@@ -168,6 +168,30 @@ static const opt_desc_t options[] =
 		&install_dir
 	},
 
+	{	"log",
+		0,
+		OPT_BOOLEAN,
+		"1",
+		"Log messages to file (instead of stdout)",
+		&log_file
+	},
+
+	{	"quiet",
+		"q",
+		OPT_BOOLEAN,
+		"1",
+		"Quiet mode (no messages on stdout)",
+		&Quiet
+	},
+
+	{	"debug",
+		"d",
+		OPT_BOOLEAN,
+		"1",
+		"Enable debugging messages",
+		&Debugging
+	},
+
 	//
 	// Normal options from here on....
 	//
@@ -202,14 +226,6 @@ static const opt_desc_t options[] =
 		0,
 		"Warp map",
 		&Level_name
-	},
-
-	{	"quiet",
-		"q",
-		OPT_BOOLEAN,
-		0,
-		"Quiet mode",
-		&Quiet
 	},
 
 // TODO

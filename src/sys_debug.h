@@ -23,15 +23,16 @@
 
 #define MSG_BUF_LEN  1024
 
-void LogInit(const char *filename);  // NULL for none
-void LogClose(void);
+extern bool Quiet;
+extern bool Debugging;
 
-void LogEnableDebug(void);
-void LogEnableTerminal(void);
+void LogOpen(const char *filename);  // NULL for none
+void LogClose(void);
 
 void LogPrintf(const char *str, ...);
 
 void DebugPrintf(const char *str, ...);
+
 
 // -------- assertion macros --------
 

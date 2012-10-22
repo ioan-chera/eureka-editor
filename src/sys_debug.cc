@@ -21,33 +21,20 @@
 #include "main.h"
 
 
-static FILE *log_file = NULL;
+bool Quiet = false;
+bool Debugging = false;
 
-static bool debugging = false;
-static bool terminal  = false;
+static FILE * log_fp;
 
 
-void LogInit(const char *filename)
+void LogOpen(const char *filename)
 {
 	if (filename)
 	{
-		log_file = fopen(filename, "w");
+		log_fp = fopen(filename, "w");
 	}
 
 	LogPrintf("========= START OF LOGS =========\n\n");
-}
-
-
-void LogEnableDebug(void)
-{
-	debugging = true;
-
-	LogPrintf("DEBUGGING ENABLED.\n\n");
-}
-
-void LogEnableTerminal(void)
-{
-	terminal = true;
 }
 
 
@@ -55,43 +42,43 @@ void LogClose(void)
 {
 	LogPrintf("\n========= END OF LOGS =========\n");
 
-	if (log_file)
+	if (log_fp)
 	{
-		fclose(log_file);
+		fclose(log_fp);
 
-		log_file = NULL;
+		log_fp = NULL;
 	}
 }
 
 
 void LogPrintf(const char *str, ...)
 {
-	if (log_file)
+	if (log_fp)
 	{
 		va_list args;
 
 		va_start(args, str);
-		vfprintf(log_file, str, args);
+		vfprintf(log_fp, str, args);
 		va_end(args);
 
-		fflush(log_file);
+		fflush(log_fp);
 	}
-
-	// show on the Linux terminal too
-	if (terminal)
+	else if (! Quiet)
 	{
 		va_list args;
 
 		va_start(args, str);
-		vfprintf(stderr, str, args);
+		vfprintf(stdout, str, args);
 		va_end(args);
+
+		fflush(stdout);
 	}
 }
 
 
 void DebugPrintf(const char *str, ...)
 {
-	if (log_file && debugging)
+	if (Debugging)
 	{
 		static char buffer[MSG_BUF_LEN];
 
@@ -114,7 +101,13 @@ void DebugPrintf(const char *str, ...)
 
 			if (next) *next++ = 0;
 
-			LogPrintf("# %s\n", pos);
+			if (log_fp)
+			{
+				fprintf(log_fp, "# %s\n", pos);
+				fflush(log_fp);
+			}
+			else
+				fprintf(stderr, "# %s\n", pos);
 
 			pos = next;
 		}

@@ -181,9 +181,8 @@ extern char error_invalid[1];     // Invalid parameter
  *  Interfile global variables
  */
 
+extern int  init_progress;
 extern bool want_quit;
-
-extern int remind_to_build_nodes; // Remind the user to build nodes
 
 extern const char *install_dir;  // install dir (e.g. /usr/share/eureka) 
 extern const char *home_dir;     // home dir (e.g. $HOME/.eureka) or NULL
@@ -192,11 +191,13 @@ extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
 
+extern const char *config_file; // Name of the configuration file, or NULL
+extern const char *log_file;    // Name of log file, or NULL
+
+extern int remind_to_build_nodes; // Remind the user to build nodes
+
 extern bool Replacer;     // the new map will destroy an existing one if saved
 
-// Set from command line and/or config file
-
-extern const char *config_file; // Name of the configuration file
 extern int   copy_linedef_reuse_sidedefs;
 
 extern int   default_ceiling_height;      // For new sectors
@@ -214,7 +215,6 @@ extern const char *Pwad;
 extern int   show_help;     // Print usage message and exit.
 extern int   show_version;  // Print version info and exit.
 
-extern bool  Quiet;   // ???
 extern unsigned long scroll_less;// %s of screenful to scroll by
 extern unsigned long scroll_more;// %s of screenful to scroll by
 extern int   sprite_scale;  // Relative scale used to display sprites
