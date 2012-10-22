@@ -671,8 +671,8 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 			// this is a loose file, handle it now
 			parse_loose_file(argv[0]);
 
-			argc++;
-			argv--;
+			argv++;
+			argc--;
 			continue;
 		}
 
