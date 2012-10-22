@@ -505,7 +505,9 @@ int main(int argc, char *argv[])
 	init_progress = 1;
 
 
-	LogPrintf(EUREKA_TITLE " v" EUREKA_VERSION "\n");
+	LogPrintf("\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " ***\n");
+	LogPrintf("\n");
 
 	// Sanity checks (useful when porting).
 	check_types();

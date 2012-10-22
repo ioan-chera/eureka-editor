@@ -32,18 +32,18 @@ void LogOpen(const char *filename)
 	if (filename)
 	{
 		log_fp = fopen(filename, "w");
-	}
 
-	LogPrintf("========= START OF LOGS =========\n\n");
+		LogPrintf("========= START OF LOGS =========\n\n");
+	}
 }
 
 
 void LogClose(void)
 {
-	LogPrintf("\n========= END OF LOGS =========\n");
-
 	if (log_fp)
 	{
+		LogPrintf("\n========= END OF LOGS =========\n");
+
 		fclose(log_fp);
 
 		log_fp = NULL;
