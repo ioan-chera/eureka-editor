@@ -108,23 +108,6 @@ opt_desc_t;
 static const opt_desc_t options[] =
 {
 	//
-	// The first option has neither long name nor short name.
-	// It is used for "lonely" arguments (i.e. file names).
-	//
-
-	{	0,
-		0,
-//--		OPT_STRINGPTRACC,
-//--		0,
-//--		"Patch wad file",
-//--		&LooseWads
-		OPT_STRINGPTR,
-		0,
-		"Patch wad file",
-		&Pwad
-	},
-
-	//
 	// A few options must be handled in an early pass
 	//
 
@@ -464,7 +447,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			*p2 = '\0';
 		}
 
-		for (const opt_desc_t *o = options + 1; ; o++)
+		for (const opt_desc_t *o = options; ; o++)
 		{
 			if (o->opt_type == OPT_END)
 			{
@@ -677,15 +660,16 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		// Which option is this ?
 		if (argv[0][0] != '-')
 		{
-			// FIXME: this is a loose file, handle it now
+			// this is a loose file, handle it now
+			Pwad = StringDup(argv[0]);
 
-			o = options;
 			argc++;
 			argv--;
+			continue;
 		}
-		else
+
 		{
-			for (o = options + 1; ; o++)
+			for (o = options; ; o++)
 			{
 				if (o->opt_type == OPT_END)
 				{
@@ -851,6 +835,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					return 1;
 				}
 		}
+
 		argv++;
 		argc--;
 	}
@@ -868,7 +853,7 @@ void dump_parameters(FILE *fp)
 	int desc_maxlen = 0;
 	int name_maxlen = 0;
 
-	for (o = options + 1; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OPT_END; o++)
 	{
 		int len = strlen (o->desc);
 		desc_maxlen = MAX(desc_maxlen, len);
@@ -879,7 +864,7 @@ void dump_parameters(FILE *fp)
 		}
 	}
 
-	for (o = options + 1; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OPT_END; o++)
 	{
 		if (! o->long_name)
 			continue;
@@ -930,7 +915,7 @@ void dump_command_line_options(FILE *fp)
 	int desc_maxlen = 0;
 	int name_maxlen = 0;
 
-	for (o = options + 1; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OPT_END; o++)
 	{
 		int len;
 		if (! o->short_name)
