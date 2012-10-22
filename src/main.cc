@@ -229,7 +229,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (! install_dir)
 	{
 #ifdef WIN32
-	// FIXME : home_dir can be NULL
+	SYS_ASSERT(home_dir);
 
 	install_dir = StringDup(home_dir);
 
@@ -515,21 +515,21 @@ int main(int argc, char *argv[])
 	Determine_InstallPath(argv[0]);
 
 
-	// The config file provides some values.
-	if (config_file != NULL)
+	// A config file can provides some values
+	if (config_file)
 		r = parse_config_file_user(config_file);
 	else
 		r = parse_config_file_default();
 
 	if (r == 0)
 	{
-		// Environment variables can override them.
+		// Environment variables can override them
 		r = parse_environment_vars();
 	}
 
 	if (r == 0)
 	{
-		// And the command line argument can override both.
+		// And command line arguments can override both
 		r = parse_command_line_options(argc - 1, argv + 1, 2);
 	}
 

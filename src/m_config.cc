@@ -371,7 +371,6 @@ static const opt_desc_t options[] =
 
 
 static void append_item_to_list (const char ***list, const char *item);
-static int parse_config_file (const char *filename);
 static confirm_t confirm_e2i (const char *external);
 static const char *confirm_i2e (confirm_t internal);
 
@@ -379,27 +378,14 @@ static const char *confirm_i2e (confirm_t internal);
 /*
  *  parse_config_file - try to parse a config file by pathname.
  *
- *  Return 0 on success, <>0 on failure.
+ *  Return 0 on success, negative value on failure.
  */
-#define RETURN_FAILURE do { rc = 1; goto byebye; } while (0)
-
-static int parse_config_file (const char *filename)
+static int parse_config_file(FILE *fp, const char *filename)
 {
-	int   rc = 0;
-	FILE *cfgfile;
-	char  line[1024];
-
-	LogPrintf ("Reading config file: %s\n", filename);
-
-	cfgfile = fopen (filename, "r");
-	if (cfgfile == NULL)
-	{
-		err ("Cannot open config file \"%s\" (%s)", filename, strerror (errno));
-		RETURN_FAILURE;
-	}
+	char line[1024];
 
 	// Execute one line on each iteration
-	for (unsigned lnum = 1; fgets (line, sizeof line, cfgfile) != NULL; lnum++)
+	for (unsigned lnum = 1; fgets (line, sizeof line, fp) != NULL; lnum++)
 	{
 		char *name  = 0;
 		char *value = 0;
@@ -472,7 +458,7 @@ static int parse_config_file (const char *filename)
 					{
 						err ("%s(%u,%d): extraneous argument",
 								filename, lnum, 1 + (int) ((char *) p3 - line));
-						RETURN_FAILURE;
+						return -1;
 					}
 			}
 			*p2 = '\0';
@@ -510,7 +496,7 @@ static int parse_config_file (const char *filename)
 					{
 						err ("%s(%u): invalid value for option %s: \"%s\"",
 								filename, lnum, name, value);
-						RETURN_FAILURE;
+						return -1;
 					}
 					break;
 
@@ -531,7 +517,7 @@ static int parse_config_file (const char *filename)
 						{
 							err ("%s(%u,%d): missing argument",
 									filename, lnum, 1 + (int) (value - line));
-							RETURN_FAILURE;
+							return -1;
 						}
 						bool neg = false;
 						if (value[0] == '-')
@@ -543,7 +529,7 @@ static int parse_config_file (const char *filename)
 						{
 							err ("%s(%u,%d): illegal character in unsigned integer",
 									filename, lnum, 1 + (int) (endptr - line));
-							RETURN_FAILURE;
+							return -1;
 						}
 						/* strtoul() sets errno to ERANGE if overflow. In
 						   addition, we don't want any non-zero negative
@@ -563,7 +549,7 @@ static int parse_config_file (const char *filename)
 							{
 								err ("%s(%u,%d): unsigned integer out of range",
 										filename, lnum, 1 + (int) (value - line));
-								RETURN_FAILURE;
+								return -1;
 							}
 					}
 					break;
@@ -613,7 +599,7 @@ static int parse_config_file (const char *filename)
 					{
 						BugError("%s(%u): unknown option type %d",
 								filename, lnum, (int) o->opt_type);
-						RETURN_FAILURE;
+						return -1;
 					}
 			}
 			break;
@@ -621,9 +607,31 @@ static int parse_config_file (const char *filename)
 next_line:;
 	}
 
-byebye:
-	if (cfgfile != 0)
-		fclose (cfgfile);
+	return 0;  // OK
+}
+
+
+/*
+ *  parse_config_file_user - parse a user-specified config file
+ *
+ *  Return 0 on success, negative value on error.
+ */
+int parse_config_file_user(const char *filename)
+{
+	FILE * fp = fopen(filename, "r");
+
+	if (fp == NULL)
+	{
+		err ("Cannot open config file \"%s\" (%s)", filename, strerror(errno));
+		return -1;
+	}
+
+	LogPrintf("Reading config file: %s\n", filename);
+
+	int rc = parse_config_file(fp, filename);
+
+	fclose(fp);
+
 	return rc;
 }
 
@@ -631,52 +639,22 @@ byebye:
 /*
  *  parse_config_file_default - parse the default config file(s)
  *
- *  Return non-zero if parse error occurred (i.e. at least
- *  one call to parse_config_file() returned non-zero), zero
- *  otherwise.
+ *  Return 0 on success, negative value on failure.
+ *  It is OK if this file does not exist.
  */
-int parse_config_file_default ()
+int parse_config_file_default()
 {
-	int rc = 0;
-	int matches;
-	const char *pathname = "eureka.cfg";
+	char filename[FL_PATH_MAX];
 
-	//--   const char *name = "./eureka.cfg";
-	//--   Locate locate (yadex_etc_path, name, true);
+	if (! home_dir)
+		return 0;
 
-	//--   for (matches = 0; (pathname = locate.get_next ()) != NULL; matches++)
-	{
-		LogPrintf ("Reading config file \"%s\".\n", pathname);
+	sprintf(filename, "%s/config.cfg", home_dir);
 
-		int r = parse_config_file (pathname);
-		if (r != 0)
-			rc = 1;
-	}
-	//--  if (matches == 0)
-	//--    warn ("%s: not found\n", name);
-	return rc;
-}
+	if (! FileExists(filename))
+		return 0;
 
-
-/*
- *  parse_config_file_user - parse a user-specified config file
- *
- *  Return non-zero if the file couldn't be found or if
- *  parse error occurred (i.e. parse_config_file() returned
- *  non-zero), zero otherwise.
- */
-int parse_config_file_user (const char *name)
-{
-	//--  const char *pathname;
-	//--  Locate locate (yadex_etc_path, name, false);
-	//--  
-	//--  pathname = locate.get_next ();
-	//--  if (pathname == NULL)
-	//--  {
-	//--    err ("%s: not found", name);
-	return 1;
-	//--  }
-	//--  return parse_config_file (pathname);
+	return parse_config_file_user(filename);
 }
 
 
@@ -884,7 +862,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
  *  dump_parameters
  *  Print a list of the parameters with their current value.
  */
-void dump_parameters (FILE *fp)
+void dump_parameters(FILE *fp)
 {
 	const opt_desc_t *o;
 	int desc_maxlen = 0;
@@ -946,7 +924,7 @@ void dump_parameters (FILE *fp)
  *  dump_command_line_options
  *  Print a list of all command line options (usage message).
  */
-void dump_command_line_options (FILE *fd)
+void dump_command_line_options(FILE *fp)
 {
 	const opt_desc_t *o;
 	int desc_maxlen = 0;
@@ -971,26 +949,26 @@ void dump_command_line_options (FILE *fd)
 		if (! o->short_name)
 			continue;
 		if (o->short_name)
-			fprintf (fd, " -%-3s ", o->short_name);
+			fprintf (fp, " -%-3s ", o->short_name);
 		else
-			fprintf (fd, "      ");
+			fprintf (fp, "      ");
 		if (o->long_name)
-			fprintf (fd, "-%-*s ", name_maxlen, o->long_name);
+			fprintf (fp, "-%-*s ", name_maxlen, o->long_name);
 		else
-			fprintf (fd, "%*s", name_maxlen + 2, "");
+			fprintf (fp, "%*s", name_maxlen + 2, "");
 		switch (o->opt_type)
 		{
-			case OPT_BOOLEAN:       fprintf (fd, "            "); break;
-			case OPT_CONFIRM:       fprintf (fd, "yes|no|ask  "); break;
+			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
+			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_STRINGBUF8:
 			case OPT_STRINGPTR:
-			case OPT_STRINGPTRACC:  fprintf (fd, "<string>    "); break;
-			case OPT_INTEGER:       fprintf (fd, "<integer>   "); break;
-			case OPT_UNSIGNED:      fprintf (fd, "<unsigned>  "); break;
-			case OPT_STRINGPTRLIST: fprintf (fd, "<string> ..."); break;
+			case OPT_STRINGPTRACC:  fprintf (fp, "<string>    "); break;
+			case OPT_INTEGER:       fprintf (fp, "<integer>   "); break;
+			case OPT_UNSIGNED:      fprintf (fp, "<unsigned>  "); break;
+			case OPT_STRINGPTRLIST: fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
-		fprintf (fd, " %s\n", o->desc);
+		fprintf (fp, " %s\n", o->desc);
 	}
 }
 

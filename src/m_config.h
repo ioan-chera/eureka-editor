@@ -27,11 +27,13 @@
 #ifndef __EUREKA_M_CONFIG_H__
 #define __EUREKA_M_CONFIG_H__
 
-int parse_config_file_default ();
-int parse_config_file_user (const char *name);
-int  parse_command_line_options (int argc, const char *const *argv, int pass);
-void dump_parameters (FILE *fd);
-void dump_command_line_options (FILE *fd);
+int parse_config_file_user(const char *filename);
+int parse_config_file_default();
+
+int parse_command_line_options (int argc, const char *const *argv, int pass);
+
+void dump_parameters (FILE *fp);
+void dump_command_line_options (FILE *fp);
 
 
 // returns number of tokens, zero for comment, negative on error
