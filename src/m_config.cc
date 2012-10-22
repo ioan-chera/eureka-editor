@@ -136,6 +136,14 @@ static const opt_desc_t options[] =
 		&show_help
 	},
 
+	{	"version",
+		0,
+		OPT_BOOLEAN,
+		"1",
+		"Show version info",
+		&show_version
+	},
+
 	{	"config",
 		0,
 		OPT_STRINGPTR,

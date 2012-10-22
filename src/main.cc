@@ -98,8 +98,10 @@ const char *Pwad = NULL;
 bool      Quiet       = false;
 unsigned long scroll_less   = 10;
 unsigned long scroll_more   = 90;
-int       show_help     = 0;
 int       sprite_scale  = 100;
+
+int       show_help     = 0;
+int       show_version  = 0;
 
 
 /*
@@ -470,15 +472,8 @@ int main(int argc, char *argv[])
 
 	int r;
 
-	// handle special options
-	if (argc >= 2 && strcmp(argv[1], "--version") == 0)
-	{
-		puts ("# Eureka version \n");  // FIXME
-		return 0;
-	}
-
 	// a quick pass through the command line arguments
-	// to detect --home, --install, --config
+	// to handle special options, like --help, --install, --config
 	r = parse_command_line_options (argc - 1, argv + 1, 1);
 	if (r)
 		exit(3);
@@ -486,6 +481,11 @@ int main(int argc, char *argv[])
 	if (show_help)
 	{
 		puts ("# Eureka help... \n");  // FIXME
+		return 0;
+	}
+	else if (show_version)
+	{
+		puts ("# Eureka version \n");  // FIXME
 		return 0;
 	}
 
