@@ -212,7 +212,6 @@ extern const char *Iwad; // Name of the iwad
 extern const char *Pwad;
 
 extern bool  Quiet;   // Don't beep when an object is selected
-extern bool  Quieter;   // Don't beep, even on error
 extern unsigned long scroll_less;// %s of screenful to scroll by
 extern unsigned long scroll_more;// %s of screenful to scroll by
 extern int   show_help;   // Print usage message and exit.

@@ -223,14 +223,6 @@ static const opt_desc_t options[] =
 	},
 #endif
 
-	{	"quieter",
-		"qq",
-		OPT_BOOLEAN,
-		0,
-		"Quieter mode",
-		&Quieter
-	},
-
 	{	"copy_linedef_reuse_sidedefs",
 		0,
 		OPT_BOOLEAN,

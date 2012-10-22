@@ -96,7 +96,6 @@ const char *Iwad = NULL;
 const char *Pwad = NULL;
 
 bool      Quiet       = false;
-bool      Quieter     = false;
 unsigned long scroll_less   = 10;
 unsigned long scroll_more   = 90;
 int       show_help     = 0;
@@ -521,8 +520,6 @@ int main(int argc, char *argv[])
 		exit (1);
 	}
 
-	if (Quieter)
-		Quiet = true;
 
 	// Sanity checks (useful when porting).
 	check_types();
