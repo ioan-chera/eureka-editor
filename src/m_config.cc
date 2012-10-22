@@ -357,7 +357,7 @@ static const opt_desc_t options[] =
 #endif
 
 	//
-	// That's all folks!
+	// That's all there is
 	//
 
 	{	0,
@@ -377,58 +377,6 @@ static const char *confirm_i2e (confirm_t internal);
 
 
 /*
- *  parse_config_file_default - parse the default config file(s)
- *
- *  Return non-zero if parse error occurred (i.e. at least
- *  one call to parse_config_file() returned non-zero), zero
- *  otherwise.
- */
-int parse_config_file_default ()
-{
-	int rc = 0;
-	int matches;
-	const char *pathname = "eureka.cfg";
-
-	//--   const char *name = "./eureka.cfg";
-	//--   Locate locate (yadex_etc_path, name, true);
-
-	//--   for (matches = 0; (pathname = locate.get_next ()) != NULL; matches++)
-	{
-		printf ("Reading config file \"%s\".\n", pathname);
-		int r = parse_config_file (pathname);
-		if (r != 0)
-			rc = 1;
-	}
-	//--  if (matches == 0)
-	//--    warn ("%s: not found\n", name);
-	return rc;
-}
-
-
-/*
- *  parse_config_file_user - parse a user-specified config file
- *
- *  Return non-zero if the file couldn't be found or if
- *  parse error occurred (i.e. parse_config_file() returned
- *  non-zero), zero otherwise.
- */
-int parse_config_file_user (const char *name)
-{
-	//--  const char *pathname;
-	//--  Locate locate (yadex_etc_path, name, false);
-	//--  
-	//--  pathname = locate.get_next ();
-	//--  if (pathname == NULL)
-	//--  {
-	//--    err ("%s: not found", name);
-	return 1;
-	//--  }
-	//--  printf ("Reading config file \"%s\".\n", pathname);
-	//--  return parse_config_file (pathname);
-}
-
-
-/*
  *  parse_config_file - try to parse a config file by pathname.
  *
  *  Return 0 on success, <>0 on failure.
@@ -441,10 +389,12 @@ static int parse_config_file (const char *filename)
 	FILE *cfgfile;
 	char  line[1024];
 
+	LogPrintf ("Reading config file: %s\n", filename);
+
 	cfgfile = fopen (filename, "r");
 	if (cfgfile == NULL)
 	{
-		err ("Can't open config file \"%s\" (%s)", filename, strerror (errno));
+		err ("Cannot open config file \"%s\" (%s)", filename, strerror (errno));
 		RETURN_FAILURE;
 	}
 
@@ -675,6 +625,58 @@ byebye:
 	if (cfgfile != 0)
 		fclose (cfgfile);
 	return rc;
+}
+
+
+/*
+ *  parse_config_file_default - parse the default config file(s)
+ *
+ *  Return non-zero if parse error occurred (i.e. at least
+ *  one call to parse_config_file() returned non-zero), zero
+ *  otherwise.
+ */
+int parse_config_file_default ()
+{
+	int rc = 0;
+	int matches;
+	const char *pathname = "eureka.cfg";
+
+	//--   const char *name = "./eureka.cfg";
+	//--   Locate locate (yadex_etc_path, name, true);
+
+	//--   for (matches = 0; (pathname = locate.get_next ()) != NULL; matches++)
+	{
+		LogPrintf ("Reading config file \"%s\".\n", pathname);
+
+		int r = parse_config_file (pathname);
+		if (r != 0)
+			rc = 1;
+	}
+	//--  if (matches == 0)
+	//--    warn ("%s: not found\n", name);
+	return rc;
+}
+
+
+/*
+ *  parse_config_file_user - parse a user-specified config file
+ *
+ *  Return non-zero if the file couldn't be found or if
+ *  parse error occurred (i.e. parse_config_file() returned
+ *  non-zero), zero otherwise.
+ */
+int parse_config_file_user (const char *name)
+{
+	//--  const char *pathname;
+	//--  Locate locate (yadex_etc_path, name, false);
+	//--  
+	//--  pathname = locate.get_next ();
+	//--  if (pathname == NULL)
+	//--  {
+	//--    err ("%s: not found", name);
+	return 1;
+	//--  }
+	//--  return parse_config_file (pathname);
 }
 
 

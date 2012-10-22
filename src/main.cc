@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
 
 	// a quick pass through the command line arguments
 	// to handle special options, like --help, --install, --config
-	r = parse_command_line_options (argc - 1, argv + 1, 1);
+	r = parse_command_line_options(argc - 1, argv + 1, 1);
 	if (r)
 		exit(3);
 
@@ -517,26 +517,26 @@ int main(int argc, char *argv[])
 
 	// The config file provides some values.
 	if (config_file != NULL)
-		r = parse_config_file_user (config_file);
+		r = parse_config_file_user(config_file);
 	else
-		r = 0; //??? parse_config_file_default ();
+		r = parse_config_file_default();
 
 	if (r == 0)
 	{
 		// Environment variables can override them.
-		r = parse_environment_vars ();
+		r = parse_environment_vars();
 	}
 
 	if (r == 0)
 	{
 		// And the command line argument can override both.
-		r = parse_command_line_options (argc - 1, argv + 1, 2);
+		r = parse_command_line_options(argc - 1, argv + 1, 2);
 	}
 
 	if (r != 0)
 	{
-		fprintf (stderr, "Error parsing config or cmd-line options.\n");
-		exit (1);
+		fprintf(stderr, "Error parsing config or cmd-line options.\n");
+		exit(1);
 	}
 
 
@@ -612,6 +612,14 @@ int main(int argc, char *argv[])
 	Editor_Loop();
 
 
+// FIXME: use dialog box instead
+	if (remind_to_build_nodes)
+		printf ("\n"
+				"** You have made changes to one or more wads. Don't forget to pass\n"
+				"** them through a nodes builder (E.G. BSP) before running them.\n"
+				"** Like this: \"ybsp foo.wad -o tmp.wad; doom -file tmp.wad\"\n\n");
+
+
 	LogPrintf("Quit!\n");
 
     TermFLTK();
@@ -623,12 +631,6 @@ int main(int argc, char *argv[])
 	/* that's all, folks! */
 // TODO	CloseWadFiles();
 	FreeDefinitions();
-
-	if (remind_to_build_nodes)
-		printf ("\n"
-				"** You have made changes to one or more wads. Don't forget to pass\n"
-				"** them through a nodes builder (E.G. BSP) before running them.\n"
-				"** Like this: \"ybsp foo.wad -o tmp.wad; doom -file tmp.wad\"\n\n");
 
 	LogClose();
 
