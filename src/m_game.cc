@@ -466,17 +466,9 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 	fclose(fp);
 
 	/* Verify that all the mandatory directives are present. */
-	{
-		bool abort = false;
-		if (yg_level_name == YGLN__)
-		{
-			err ("%s: Missing \"level_name\" directive.", basename);
-			abort = true;
-		}
 
-		if (abort)
-			exit(2);
-	}
+	if (yg_level_name == YGLN__)
+		yg_level_name = YGLN_MAP01;
 }
 
 

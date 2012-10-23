@@ -243,9 +243,6 @@ void Beep (void);
 int vertex_radius (double scale);
 
 
-#define err      LogPrintf
-
-
 #endif  /* __EUREKA_MAIN_H__ */
 
 //--- editor settings ---
