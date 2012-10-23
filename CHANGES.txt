@@ -1,0 +1,26 @@
+
+CHANGES since 0.74
+==================
+
++ support a proper unix-style installation
+
++ made a proper web-site (using PmWiki)
+
+- log file is only created when --log is used
+- the --quiet option (-q) suppresses output to stdout
+- new --debug option (-d) enables debug messages
+- allow long options to begin with '-' or '--'
+
+- handle a pwad filename given without -file
+- more lax finding of patch lumps for textures
+
+- initial support for Odamex
+
+- DOOM: fixed line types 33 and 34 (red and yellow locked doors)
+- DOOM: restored the 'Computer Map' pickup
+
+- EDGE: added slope line types
+- EDGE: added some missing things (jetpack, green keys, dog, stealth mons)
+- EDGE: fleshed out sector types
+- EDGE: fleshed out line types (hub exits, sliding doors, RTS)
+
