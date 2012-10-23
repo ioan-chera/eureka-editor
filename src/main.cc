@@ -136,9 +136,8 @@ static int parse_environment_vars ()
 
 
 /*
-   play a fascinating tune
-*/
-
+ *  play a fascinating tune
+ */
 void Beep ()
 {
 	fl_beep();
@@ -146,32 +145,39 @@ void Beep ()
 
 
 /*
- *  print_error_message
- *  Print an error message to stderr.
- */
-static void print_error_message (const char *fmt, va_list args)
-{
-	fflush (stdout);
-	fputs ("Error: ", stderr);
-	vfprintf (stderr, fmt, args);
-	fputc ('\n', stderr);
-	fflush (stderr);
-}
-
-
-/*
- *  fatal_error
- *  Print an error message and terminate the program with code 2.
+ *  Show an error message and terminate the program
  */
 void FatalError(const char *fmt, ...)
 {
-	va_list args;
-	va_start (args, fmt);
-	print_error_message (fmt, args);  // FUCKEN FIXME QUICK
+	va_list arg_ptr;
 
-	TermFLTK();
+	if (init_progress >= 1)
+	{
+		// FIXME !!!  LogPrintf (buffer)
+	}
 
-// TODO	CloseWadFiles ();
+	if (init_progress < 1 || Quiet || log_file)
+	{
+		fprintf(stderr, "\nERROR: ");
+
+		va_start(arg_ptr, fmt);
+		vfprintf(stderr, fmt, arg_ptr);
+		va_end(arg_ptr);
+	}
+
+	if (init_progress >= 3)
+	{
+		// FIXME:  DIALOG !!!
+
+		init_progress = 2;
+
+		TermFLTK();
+	}
+
+// FIXME	CloseWadFiles ();
+
+	init_progress = 0;
+
 	LogClose();
 
 	exit(2);
@@ -276,7 +282,7 @@ int Main_key_handler(int event)
 }
 
 
-static bool InitFLTK()
+static void InitFLTK()
 {
 	/*
 	 *  Create the window
@@ -340,8 +346,6 @@ static bool InitFLTK()
     Fl::add_handler(Main_key_handler);
 
 	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
-
-	return true;
 }
 
 
@@ -451,8 +455,8 @@ bool Main_ConfirmQuit(const char *action)
 
 
 /*
-   the driving program
-*/
+ *  the driving program
+ */
 int main(int argc, char *argv[])
 {
 	init_progress = 0;
@@ -571,8 +575,7 @@ int main(int argc, char *argv[])
 	Editor_Init();
 
 
-    if (! InitFLTK())
-        exit(9);
+    InitFLTK();
 
 	init_progress = 3;
 
@@ -602,7 +605,12 @@ int main(int argc, char *argv[])
 				"** Like this: \"ybsp foo.wad -o tmp.wad; doom -file tmp.wad\"\n\n");
 
 
+	/* that's all folks! */
+
 	LogPrintf("Quit!\n");
+
+
+	init_progress = 2;
 
     TermFLTK();
 
@@ -610,9 +618,12 @@ int main(int argc, char *argv[])
 
 	W_ClearTextures();
 
-	/* that's all, folks! */
-// TODO	CloseWadFiles();
 	FreeDefinitions();
+
+// FIXME	CloseWadFiles();
+
+
+	init_progress = 0;
 
 	LogClose();
 
