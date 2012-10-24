@@ -431,9 +431,9 @@ static int parse_config_file(FILE *fp, const char *filename)
 				for (unsigned char *p3 = p2; *p3 != 0; p3++)
 					if (! isspace (*p3))
 					{
-						LogPrintf("%s(%u): extraneous argument\n",
+						LogPrintf("WARNING: %s(%u): extraneous argument\n",
 								  basename, lnum);
-						return -1;
+						break;
 					}
 			}
 			*p2 = 0;
@@ -447,7 +447,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 						  basename, lnum, name);
 				goto next_line;
 			}
-			if (! o->long_name || strcmp (name, o->long_name) != 0)
+			if (! o->long_name || strcmp(name, o->long_name) != 0)
 				continue;
 
 			if (o->flags != NULL && strchr (o->flags, '1'))
@@ -521,7 +521,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			}
 			break;
 		}
-next_line:;
+next_line: ;
 	}
 
 	return 0;  // OK
