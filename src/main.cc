@@ -151,10 +151,7 @@ void FatalError(const char *fmt, ...)
 {
 	va_list arg_ptr;
 
-	if (init_progress >= 1)
-	{
-		// FIXME !!!  LogPrintf (buffer)
-	}
+	static char buffer[MSG_BUF_LEN];
 
 	if (init_progress < 1 || Quiet || log_file)
 	{
@@ -165,19 +162,25 @@ void FatalError(const char *fmt, ...)
 		va_end(arg_ptr);
 	}
 
+	if (init_progress >= 1)
+	{
+		vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+
+		LogPrintf("\nERROR: %s", buffer);
+	}
+
 	if (init_progress >= 3)
 	{
-		// FIXME:  DIALOG !!!
+		DLG_ShowError("%s", buffer);
 
 		init_progress = 2;
 
 		TermFLTK();
 	}
 
-// FIXME	CloseWadFiles ();
-
 	init_progress = 0;
 
+	MasterDir_CloseAll();
 	LogClose();
 
 	exit(2);
@@ -614,18 +617,15 @@ int main(int argc, char *argv[])
 
     TermFLTK();
 
-	BA_ClearAll();
-
-	W_ClearTextures();
-
-	FreeDefinitions();
-
-// FIXME	CloseWadFiles();
-
 
 	init_progress = 0;
 
+	MasterDir_CloseAll();
 	LogClose();
+
+	BA_ClearAll();
+	W_ClearTextures();
+	FreeDefinitions();
 
 	return 0;
 }
