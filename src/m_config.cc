@@ -87,8 +87,10 @@ typedef struct
 	const char *short_name; // Abbreviated command line argument
 	opt_type_t opt_type;    // Type of this option
 	const char *flags;    // Flags for this option :
-	// "1" = process only on pass 1 of
-	//       parse_command_line_options()
+	// "1" : process only on pass 1 of parse_command_line_options()
+	// "h" : show in help, i.e. in dump_command_line_options()
+	// "f" : string is a filename
+	// "<" : print extra newline after this option (when dumping)
 	const char *desc;   // Description of the option
 	void *data_ptr;   // Pointer to the data
 }
@@ -104,7 +106,7 @@ static const opt_desc_t options[] =
 	{	"help",
 		"h",
 		OPT_BOOLEAN,
-		"1",
+		"1h",
 		"Show usage summary",
 		&show_help
 	},
@@ -112,23 +114,15 @@ static const opt_desc_t options[] =
 	{	"version",
 		0,
 		OPT_BOOLEAN,
-		"1",
+		"1h",
 		"Show version info",
 		&show_version
-	},
-
-	{	"config",
-		0,
-		OPT_STRING,
-		"1",
-		"Config file",
-		&config_file
 	},
 
 	{	"home",
 		0,
 		OPT_STRING,
-		"1",
+		"1h",
 		"Home directory",
 		&home_dir
 	},
@@ -136,7 +130,7 @@ static const opt_desc_t options[] =
 	{	"install",
 		0,
 		OPT_STRING,
-		"1",
+		"1h",
 		"Installation directory",
 		&install_dir
 	},
@@ -144,61 +138,37 @@ static const opt_desc_t options[] =
 	{	"log",
 		0,
 		OPT_STRING,
-		"1",
+		"1hf",
 		"Log messages to file (instead of stdout)",
 		&log_file
 	},
 
-	{	"quiet",
-		"q",
-		OPT_BOOLEAN,
-		"1",
-		"Quiet mode (no messages on stdout)",
-		&Quiet
-	},
-
-	{	"debug",
-		"d",
-		OPT_BOOLEAN,
-		"1",
-		"Enable debugging messages",
-		&Debugging
+	{	"config",
+		0,
+		OPT_STRING,
+		"1hf<",
+		"Config file to load",
+		&config_file
 	},
 
 	//
 	// Normal options from here on....
 	//
 
-	{	"file",
-		"f",
-		OPT_STRING,
-		0,
-		"Patch wad file",
-		&Pwad
-	},
-
 	{	"iwad",
 		"i",
 		OPT_STRING,
-		0,
+		"hf",
 		"The name of the IWAD",
 		&Iwad
 	},
 
-	{	"port",
-		"p",
+	{	"file",
+		"f",
 		OPT_STRING,
-		0,
-		"Port (engine) name",
-		&Port_name
-	},
-
-	{	"warp",
-		"w",
-		OPT_STRING,
-		0,
-		"Warp map",
-		&Level_name
+		"hf",
+		"Patch wad file to edit",
+		&Pwad
 	},
 
 // TODO
@@ -206,24 +176,60 @@ static const opt_desc_t options[] =
 	{	"merge",
 		0,
 		OPT_STRING_LIST,
-		0,
+		"h",
 		"Resource file to load",
 		&PatchWads
 	},
+#endif
 
+	{	"port",
+		"p",
+		OPT_STRING,
+		"h",
+		"Port (engine) name",
+		&Port_name
+	},
+
+// TODO
+#if 0
 	{	"mod",
 		0,
 		OPT_STRING,
-		0,
+		"h",
 		"Mod name",
 		&Mod_name
 	},
 #endif
 
+	{	"warp",
+		"w",
+		OPT_STRING,
+		"h",
+		"Warp to this map",
+		&Level_name
+	},
+
+	{	"quiet",
+		"q",
+		OPT_BOOLEAN,
+		"1h",
+		"Quiet mode (no messages on stdout)",
+		&Quiet
+	},
+
+	{	"debug",
+		"d",
+		OPT_BOOLEAN,
+		"1h",
+		"Enable debugging messages",
+		&Debugging
+	},
+
+
 	{	"copy_linedef_reuse_sidedefs",
 		0,
 		OPT_BOOLEAN,
-		0,
+		"",
 		"Use same sidedefs as original linedef",
 		&copy_linedef_reuse_sidedefs
 	},
@@ -231,7 +237,7 @@ static const opt_desc_t options[] =
 	{	"default_ceiling_height",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Default ceiling height",
 		&default_ceiling_height
 	},
@@ -239,7 +245,7 @@ static const opt_desc_t options[] =
 	{	"default_ceiling_texture",
 		0,
 		OPT_STRINGBUF8,
-		0,
+		"",
 		"Default ceiling texture",
 		default_ceiling_texture
 	},
@@ -247,7 +253,7 @@ static const opt_desc_t options[] =
 	{	"default_floor_height",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Default floor height",
 		&default_floor_height
 	},
@@ -255,7 +261,7 @@ static const opt_desc_t options[] =
 	{	"default_floor_texture",
 		0,
 		OPT_STRINGBUF8,
-		0,
+		"",
 		"Default floor texture",
 		default_floor_texture
 	},
@@ -263,7 +269,7 @@ static const opt_desc_t options[] =
 	{	"default_light_level",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Default light level",
 		&default_light_level
 	},
@@ -271,7 +277,7 @@ static const opt_desc_t options[] =
 	{	"default_lower_texture",
 		0,
 		OPT_STRINGBUF8,
-		0,
+		"",
 		"Default lower texture",
 		default_lower_texture
 	},
@@ -279,7 +285,7 @@ static const opt_desc_t options[] =
 	{	"default_middle_texture",
 		0,
 		OPT_STRINGBUF8,
-		0,
+		"",
 		"Default middle texture",
 		default_middle_texture
 	},
@@ -287,7 +293,7 @@ static const opt_desc_t options[] =
 	{	"default_upper_texture",
 		0,
 		OPT_STRINGBUF8,
-		0,
+		"",
 		"Default upper texture",
 		default_upper_texture
 	},
@@ -295,7 +301,7 @@ static const opt_desc_t options[] =
 	{	"scroll_less",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Amp. of scrolling (% of screen size)",
 		&scroll_less
 	},
@@ -303,7 +309,7 @@ static const opt_desc_t options[] =
 	{	"scroll_more",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Amp. of scrolling (% of screen size)",
 		&scroll_more
 	},
@@ -311,19 +317,19 @@ static const opt_desc_t options[] =
 	{	"sprite_scale",
 		0,
 		OPT_INTEGER,
-		0,
+		"",
 		"Relative scale of sprites",
 		&sprite_scale
 	},
 
-// -AJA- this may be better as a 'mouse_button_order' string,
+// -AJA- this may be better done with a 'mouse_button_order' string,
 //       where the default is "123", and user could have "321"
 //       or "132" or any other combination.
 #if 0
 	{	"swap_buttons",
 		0,
 		OPT_BOOLEAN,
-		0,
+		"",
 		"Swap mouse buttons",
 		&swap_buttons
 	},
@@ -349,7 +355,7 @@ static const char *confirm_i2e (confirm_t internal);
 
 
 /*
- *  parse_config_file - try to parse a config file by pathname.
+ *  try to parse a config file by pathname.
  *
  *  Return 0 on success, negative value on failure.
  */
@@ -450,7 +456,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			if (! o->long_name || strcmp(name, o->long_name) != 0)
 				continue;
 
-			if (o->flags != NULL && strchr (o->flags, '1'))
+			if (strchr(o->flags, '1'))
 				break;
 
 			switch (o->opt_type)
@@ -529,7 +535,7 @@ next_line: ;
 
 
 /*
- *  parse_config_file_user - parse a user-specified config file
+ *  parses a user-specified config file
  *
  *  Return 0 on success, negative value on error.
  */
@@ -554,7 +560,7 @@ int parse_config_file_user(const char *filename)
 
 
 /*
- *  parse_config_file_default - parse the default config file(s)
+ *  parse the default config file (if any)
  *
  *  Return 0 on success, negative value on failure.
  *  It is OK if this file does not exist.
@@ -584,7 +590,7 @@ static void parse_loose_file(const char *filename)
 
 
 /*
- *  parse_command_line_options
+ *  parses the command line options
  *
  *  If <pass> is set to 1, ignores all options except those
  *  that have the "1" flag.
@@ -628,7 +634,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 
 		// If this option has the "1" flag but pass is not 1
 		// or it doesn't but pass is 1, ignore it.
-		ignore = (o->flags != NULL && strchr (o->flags, '1')) != (pass == 1);
+		ignore = (strchr(o->flags, '1') != NULL) != (pass == 1);
 
 		switch (o->opt_type)
 		{
@@ -725,7 +731,6 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 
 
 /*
- *  dump_parameters
  *  Print a list of the parameters with their current value.
  */
 void dump_parameters(FILE *fp)
@@ -784,22 +789,20 @@ void dump_parameters(FILE *fp)
 
 
 /*
- *  dump_command_line_options
  *  Print a list of all command line options (usage message).
  */
 void dump_command_line_options(FILE *fp)
 {
 	const opt_desc_t *o;
-	int desc_maxlen = 0;
 	int name_maxlen = 0;
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
 		int len;
-		if (! o->short_name)
+
+		if (! strchr(o->flags, 'h'))
 			continue;
-		len = strlen (o->desc);
-		desc_maxlen = MAX(desc_maxlen, len);
+
 		if (o->long_name)
 		{
 			len = strlen (o->long_name);
@@ -809,30 +812,37 @@ void dump_command_line_options(FILE *fp)
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		if (! o->short_name)
+		bool is_file = (strchr(o->flags, 'f') != NULL);
+
+		if (! strchr(o->flags, 'h'))
 			continue;
 
 		if (o->short_name)
-			fprintf (fp, " -%-3s ", o->short_name);
+			fprintf (fp, "  -%-3s ", o->short_name);
 		else
-			fprintf (fp, "      ");
+			fprintf (fp, "       ");
 
 		if (o->long_name)
-			fprintf (fp, "-%-*s ", name_maxlen, o->long_name);
+			fprintf (fp, "-%-*s   ", name_maxlen, o->long_name);
 		else
-			fprintf (fp, "%*s", name_maxlen + 2, "");
+			fprintf (fp, "%*s  ", name_maxlen + 2, "");
 
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
+			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
+
 			case OPT_STRINGBUF8:
-			case OPT_STRING:        fprintf (fp, "<string>    "); break;
-			case OPT_INTEGER:       fprintf (fp, "<integer>   "); break;
-			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
+			case OPT_STRING:        fprintf (fp, "<name>      "); break;
+			case OPT_STRING_LIST:   fprintf (fp, "<name> ...  "); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
+
 		fprintf (fp, " %s\n", o->desc);
+
+		if (strchr(o->flags, '<'))
+			fprintf (fp, "\n");
 	}
 }
 
