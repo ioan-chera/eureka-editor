@@ -12,29 +12,19 @@ General
 
 >>  support Heretic
 
--  support TNT / Plutonia / FreeDOOM (new textures)
-
 -  support HacX
 -  support Harmony
 
 -  browser: map viewer (for selecting what map to edit)
 
--  configurable keys
-
-!!  CHECK screen
-    -  can remove unused SideDefs and Sectors
++  configurable keys
 
 
-!!!  redo the config file parsing (probably as console vars)
-     and command-line argument parsing (c.f. OBLIGE's system)
+!!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
+    also: File/Add Resource
 
 !!  decent dialogs: printf-style parameter, make message fit,
     provide words for the buttons (like "Quit Without Saving").
-
-+  proper widget for File/Open to select map, with button to load
-   a new WAD file.
-
--  widget to show list of map names (option for custom name)
 
 -  uppercase the level lump name (Level_name global var)
 
@@ -48,6 +38,15 @@ General
 
 -  File/Change Port
 
+-  get rid of OPT_STRINGBUF8
+
+-  OPT_BOOLEAN options on command line: support a following value
+
++  on error, ability to save/export current map
+   [unless error was in save code]
+
+++  CHECK screen
+    -  can remove unused SideDefs and Sectors
 
 
 Coding
@@ -107,11 +106,11 @@ Editing
 -  implement Edit/Move (Scale, Rotate) operations which pop up a
    dialog asking for the offset (scale, angle) to apply.
 
--  disallow insert of new linedef if it would overlap or cross
++  disallow insert of new linedef if it would overlap or cross
    an existing linedef (or touch an existing vertex).
    [overridden when SHIFT is pressed, but no auto sectoring then]
 
-   PERHAPS: if new linedef would cross an existing one, then just
+   THIS --> if new linedef would cross an existing one, then just
             create a new vertex at the intersection point.
 
             AND: similarly if a new linedef passes through an
@@ -167,8 +166,6 @@ CONSOLE IDEA
 Renderer
 --------
 
-!!  strafe left/right with mouse + ALT key
-
 +  fix the slime-trails
 
 +  problem with mid-masked textures (cage in E1M9)
@@ -197,6 +194,8 @@ Renderer
 Browser
 -------
 
+++  picture mode for things
+
 -  search box: ',' for AND, '/' for OR
 
 -  no-pic mode for textures and flats
@@ -207,6 +206,18 @@ Game / Port Definitions
 -----------------------
 
 -  a new category for BOOM's "property transfer" linetypes
+
+
+Documentation
+-------------
+
+   --log : specify a log file to store messages
+           without this, messages are sent to stdout
+
+   -d --debug : enable debugging messages
+                they go to log file if used, otherwise stderr
+
+   -q --quiet : don't send messages to stdout
 
 
 

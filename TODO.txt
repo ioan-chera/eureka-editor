@@ -6,31 +6,42 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
-!!!  need eureka.cfg ??
+Consider: 'common/' folder for non-iwad common stuff
+      or: use '.inc' extension ?
+      or: subdirectories: doom/specials.ugh ?
 
-DONE: make sure that './eureka foo.wad' works (i.e. without -file)
 
-!!  proper Unixy install (executable in /usr/bin, etc).
+>>>  dump_command_line_options
 
-   + need to find the install dir (e.g. /opt/share/eureka)
-     and find config files there.
+   -  new option_t field 'arg_desc', use instead of <string> etc
+ no:  prefix '--' for long_name
 
-   + check for $(HOME)/.eureka  [create if no exist] and
-     find config files there.
 
-!!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
-    also: File/Add Resource
+DONE:  proper --help message
+
+DONE:  proper --version message
+
+DONE:  proper Unixy install (executable in /usr/bin, etc)
+
 
 -  a check/fix pass for LoadLevel()
 
-??  easier compiling (use system lib for FLTK)
 
++  proper widget for File/Open to select map, with button to load
+   a new WAD file.
+
+-  widget to show list of map names (option for custom name)
+
+
+
+Documentation
+-------------
+
++  write all basic pages (About, Install etc)
 
 
 Coding
 ------
-
-!!  rework / tidy up parsing code in m_config and m_game
 
 
 
@@ -44,15 +55,16 @@ Browser
 
 +  a "wide" mode
 
--  picture mode for things
-
 
 
 Renderer
 --------
 
+!!  strafe left/right with mouse + ALT key
+
 
 Game / Port Definitions
 -----------------------
 
++  support TNT / Plutonia / FreeDOOM (new textures)
 
