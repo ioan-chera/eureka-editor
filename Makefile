@@ -111,9 +111,11 @@ bin: $(PROGRAM)
 install: bin
 	install -o root -m 755 $(PROGRAM) $(INSTALL_PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
+	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
 	install -d $(INSTALL_DIR)/mods
 	install -o root -m 755 games/*.* $(INSTALL_DIR)/games
+	install -o root -m 755 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 755 ports/*.* $(INSTALL_DIR)/ports
 #	install -o root -m 755 mods/*.*  $(INSTALL_DIR)/mods
 
