@@ -457,6 +457,37 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
+/* ----- user information ----------------------------- */
+
+static void ShowHelp()
+{
+	printf(	"\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2012 Andrew Apted ***\n"
+			"\n");
+
+	printf(	"Eureka is free software, under the terms of the GNU General\n"
+			"Public License (GPL), and comes with ABSOLUTELY NO WARRANTY.\n"
+			"Home page: http://eureka-editor.sf.net/\n"
+			"\n");
+
+	printf( "USAGE: eureka [options...] [FILE]\n"
+			"\n"
+			"Available options are:\n");
+
+	dump_command_line_options(stdout);
+
+	fflush(stdout);
+}
+
+
+static void ShowVersion()
+{
+	printf("Eureka version " EUREKA_VERSION " (" __DATE__ ")\n");
+
+	fflush(stdout);
+}
+
+
 /*
  *  the driving program
  */
@@ -474,12 +505,12 @@ int main(int argc, char *argv[])
 
 	if (show_help)
 	{
-		puts ("# Eureka help... \n");  // FIXME
+		ShowHelp();
 		return 0;
 	}
 	else if (show_version)
 	{
-		puts ("# Eureka version \n");  // FIXME
+		ShowVersion();
 		return 0;
 	}
 
@@ -492,7 +523,7 @@ int main(int argc, char *argv[])
 
 
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2012 Andrew Apted ***\n");
 	LogPrintf("\n");
 
 	// Sanity checks (useful when porting).
