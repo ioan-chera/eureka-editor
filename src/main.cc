@@ -102,12 +102,12 @@ bool Replacer = false;
 const char *Iwad = NULL;
 const char *Pwad = NULL;
 
-unsigned long scroll_less   = 10;
-unsigned long scroll_more   = 90;
-int       sprite_scale  = 100;
+int scroll_less   = 10;
+int scroll_more   = 90;
+int sprite_scale  = 100;
 
-int       show_help     = 0;
-int       show_version  = 0;
+int show_help     = 0;
+int show_version  = 0;
 
 
 /*

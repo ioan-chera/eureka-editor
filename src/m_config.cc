@@ -60,11 +60,6 @@ typedef enum
 	// data_ptr is of type (int *)
 	OPT_INTEGER,
 
-	// Unsigned long integer
-	// Receptacle is of type unsigned
-	// data_ptr is of type (unsigned long *)
-	OPT_UNSIGNED,
-
 	// String
 	// Receptacle is of type (char[9])
 	// data_ptr is of type (char *)
@@ -74,11 +69,6 @@ typedef enum
 	// Receptacle is of type (const char *)
 	// data_ptr is of type (const char **)
 	OPT_STRINGPTR,
-
-	// String, but store in a list
-	// Receptacle is of type ??
-	// data_ptr is of type ??
-	OPT_STRINGPTRACC,
 
 	// List of strings
 	// Receptacle is of type (const char *[])
@@ -215,7 +205,7 @@ static const opt_desc_t options[] =
 #if 0
 	{	"merge",
 		0,
-		OPT_STRINGPTRACC,
+		OPT_STRINGPTRLIST,
 		0,
 		"Resource file to load",
 		&PatchWads
@@ -304,7 +294,7 @@ static const opt_desc_t options[] =
 
 	{	"scroll_less",
 		0,
-		OPT_UNSIGNED,
+		OPT_INTEGER,
 		0,
 		"Amp. of scrolling (% of screen size)",
 		&scroll_less
@@ -312,7 +302,7 @@ static const opt_desc_t options[] =
 
 	{	"scroll_more",
 		0,
-		OPT_UNSIGNED,
+		OPT_INTEGER,
 		0,
 		"Amp. of scrolling (% of screen size)",
 		&scroll_more
@@ -367,6 +357,8 @@ static int parse_config_file(FILE *fp, const char *filename)
 {
 	char line[1024];
 
+	const char *basename = FindBaseName(filename);
+
 	// Execute one line on each iteration
 	for (unsigned lnum = 1; fgets (line, sizeof line, fp) != NULL; lnum++)
 	{
@@ -399,7 +391,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			p++;
 		if (*p == '\0')
 		{
-			LogPrintf("%s(%u): expected an \"=\", skipping\n", filename, lnum);
+			LogPrintf("%s(%u): expected an '=', skipping\n", basename, lnum);
 			goto next_line;
 		}
 		if (*p == '=')
@@ -417,8 +409,8 @@ static int parse_config_file(FILE *fp, const char *filename)
 				p++;
 			if (*p != '=')
 			{
-				LogPrintf("%s(%u): expected an \"=\", skipping\n",
-						filename, lnum);
+				LogPrintf("%s(%u): expected an '=', skipping\n",
+						  basename, lnum);
 				goto next_line;
 			}
 		}
@@ -440,7 +432,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 					if (! isspace (*p3))
 					{
 						LogPrintf("%s(%u): extraneous argument\n",
-								  filename, lnum);
+								  basename, lnum);
 						return -1;
 					}
 			}
@@ -452,7 +444,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 			if (o->opt_type == OPT_END)
 			{
 				LogPrintf("%s(%u): invalid variable '%s', skipping\n",
-						  filename, lnum, name);
+						  basename, lnum, name);
 				goto next_line;
 			}
 			if (! o->long_name || strcmp (name, o->long_name) != 0)
@@ -478,7 +470,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 					else
 					{
 						LogPrintf("%s(%u): invalid value for option %s: '%s'\n",
-								  filename, lnum, name, value);
+								  basename, lnum, name, value);
 						return -1;
 					}
 					break;
@@ -493,47 +485,6 @@ static int parse_config_file(FILE *fp, const char *filename)
 						*((int *) (o->data_ptr)) = atoi (value);
 					break;
 
-				case OPT_UNSIGNED:
-					if (o->data_ptr)
-					{
-						if (*value == '\0')
-						{
-							LogPrintf("%s(%u): missing argument\n", filename, lnum);
-							return -1;
-						}
-						bool neg = false;
-						if (value[0] == '-')
-							neg = true;
-						char *endptr;
-						errno = 0;
-						*((unsigned long *) (o->data_ptr)) = strtoul (value, &endptr, 0);
-						if (*endptr != '\0' && ! isspace (*endptr))
-						{
-							LogPrintf("%s(%u): illegal character in unsigned integer\n",
-									filename, lnum);
-							return -1;
-						}
-						/* strtoul() sets errno to ERANGE if overflow. In
-						   addition, we don't want any non-zero negative
-						   numbers. In terms of regexp, /^(0x)?0*$/i. */
-						if (
-							 errno != 0
-							 || (neg && !
-							 (
-							  strspn (value + 1, "0") == strlen (value + 1)
-							  || (value[1] == '0'
-							      && tolower (value[2]) == 'x'
-							      && strspn (value + 3, "0") == strlen (value + 3))
-							 ))
-							)
-							{
-								LogPrintf("%s(%u): unsigned integer out of range\n",
-										filename, lnum);
-								return -1;
-							}
-					}
-					break;
-
 				case OPT_STRINGBUF8:
 					if (o->data_ptr)
 						strncpy ((char *) o->data_ptr, value, 8);
@@ -546,15 +497,6 @@ static int parse_config_file(FILE *fp, const char *filename)
 						strcpy (dup, value);
 						if (o->data_ptr)
 							*((char **) (o->data_ptr)) = dup;
-						break;
-					}
-
-				case OPT_STRINGPTRACC:
-					{
-						char *dup = (char *) GetMemory (strlen (value) + 1);
-						strcpy (dup, value);
-						if (o->data_ptr)
-							append_item_to_list ((const char ***) o->data_ptr, dup);
 						break;
 					}
 
@@ -678,7 +620,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		{
 			if (o->opt_type == OPT_END)
 			{
-				LogPrintf("invalid option: '%s'\n", argv[0]);
+				FatalError("unknown option: '%s'\n", argv[0]);
 				return 1;
 			}
 
@@ -700,7 +642,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					if (o->data_ptr && ! ignore)
 						*((bool *) (o->data_ptr)) = true;
 				}
-				else
+				else  // FIXME!!!!  cannot set OPT_BOOLEAN to false
 				{
 					if (o->data_ptr && ! ignore)
 						*((bool *) (o->data_ptr)) = false;
@@ -710,7 +652,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 			case OPT_CONFIRM:
 				if (argc <= 1)
 				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
+					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
 				argv++;
@@ -722,7 +664,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 			case OPT_INTEGER:
 				if (argc <= 1)
 				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
+					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
 				argv++;
@@ -731,59 +673,10 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					*((int *) (o->data_ptr)) = atoi (argv[0]);
 				break;
 
-			case OPT_UNSIGNED:
-				if (argc <= 1)
-				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
-					return 1;
-				}
-				argv++;
-				argc--;
-				if (o->data_ptr && ! ignore)
-				{
-					const char *value = argv[0];
-					if (*value == '\0')
-					{
-						LogPrintf("not an unsigned integer '%s'\n", value);
-						return 1;
-					}
-					bool neg = false;
-					if (*value == '-')
-						neg = true;
-					char *endptr;
-					errno = 0;
-					*((unsigned long *) (o->data_ptr)) = strtoul (value, &endptr, 0);
-					while (*endptr != '\0' && isspace (*endptr))
-						endptr++;
-					if (*endptr != '\0')
-					{
-						LogPrintf("illegal characters in unsigned int '%s'\n", endptr);
-						return 1;
-					}
-					/* strtoul() sets errno to ERANGE if overflow. In
-					   addition, we don't want any non-zero negative
-					   numbers. In terms of regexp, /^(0x)?0*$/i. */
-					if (
-						 errno != 0
-						 || (neg && !
-						 (
-						  strspn (value + 1, "0") == strlen (value + 1)
-						  || (value[1] == '0'
-						      && tolower (value[2]) == 'x'
-						      && strspn (value + 3, "0") == strlen (value + 3))
-						 ))
-						)
-						{
-							LogPrintf("unsigned integer out of range '%s'\n", value);
-							return 1;
-						}
-				}
-				break;
-
 			case OPT_STRINGBUF8:
 				if (argc <= 1)
 				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
+					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
 				argv++;
@@ -796,7 +689,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 			case OPT_STRINGPTR:
 				if (argc <= 1)
 				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
+					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
 				argv++;
@@ -805,22 +698,10 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					*((const char **) (o->data_ptr)) = argv[0];
 				break;
 
-			case OPT_STRINGPTRACC:
-				if (argc <= 1)
-				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
-					return 1;
-				}
-				argv++;
-				argc--;
-				if (o->data_ptr && ! ignore)
-					append_item_to_list ((const char ***) o->data_ptr, argv[0]);
-				break;
-
 			case OPT_STRINGPTRLIST:
 				if (argc <= 1)
 				{
-					LogPrintf("missing argument after '%s'\n", argv[0]);
+					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
 				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
@@ -887,10 +768,7 @@ void dump_parameters(FILE *fp)
 		}
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
-		else if (o->opt_type == OPT_UNSIGNED)
-			fprintf (fp, "%lu", *((unsigned long *) o->data_ptr));
-		else if (o->opt_type == OPT_STRINGPTRACC
-				|| o->opt_type == OPT_STRINGPTRLIST)
+		else if (o->opt_type == OPT_STRINGPTRLIST)
 		{
 			if (o->data_ptr)
 			{
@@ -950,9 +828,7 @@ void dump_command_line_options(FILE *fp)
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_STRINGBUF8:
 			case OPT_STRINGPTR:
-			case OPT_STRINGPTRACC:  fprintf (fp, "<string>    "); break;
 			case OPT_INTEGER:       fprintf (fp, "<integer>   "); break;
-			case OPT_UNSIGNED:      fprintf (fp, "<unsigned>  "); break;
 			case OPT_STRINGPTRLIST: fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}

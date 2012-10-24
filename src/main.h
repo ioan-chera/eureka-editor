@@ -217,8 +217,8 @@ extern const char *Pwad;
 extern int   show_help;     // Print usage message and exit.
 extern int   show_version;  // Print version info and exit.
 
-extern unsigned long scroll_less;// %s of screenful to scroll by
-extern unsigned long scroll_more;// %s of screenful to scroll by
+extern int   scroll_less;// %s of screenful to scroll by
+extern int   scroll_more;// %s of screenful to scroll by
 extern int   sprite_scale;  // Relative scale used to display sprites
 
 
