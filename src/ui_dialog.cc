@@ -190,7 +190,7 @@ void DLG_ShowError(const char *msg, ...)
 	// handle error messages with a hyperlink at the end
 	ParseHyperLink(buffer, sizeof(buffer), &link_title, &link_url);
 
-	DialogShowAndRun(buffer, "Eureka - Error Message", link_title, link_url);
+	DialogShowAndRun(buffer, "Eureka - Fatal Error", link_title, link_url);
 }
 
 //--- editor settings ---
