@@ -222,6 +222,8 @@ void W_FreeLumpData(byte ** buf_ptr);
 void MasterDir_Add   (Wad_file *wad);
 void MasterDir_Remove(Wad_file *wad);
 
+void MasterDir_CloseAll();
+
 
 #endif  /* __EUREKA_W_WAD_H__ */
 

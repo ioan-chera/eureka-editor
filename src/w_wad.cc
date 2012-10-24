@@ -966,5 +966,18 @@ void MasterDir_Remove(Wad_file *wad)
 }
 
 
+void MasterDir_CloseAll()
+{
+	while (master_dir.size() > 0)
+	{
+		Wad_file *wad = master_dir.back();
+
+		master_dir.pop_back();
+
+		delete wad;
+	}
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
