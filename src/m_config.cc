@@ -68,12 +68,12 @@ typedef enum
 	// String
 	// Receptacle is of type (const char *)
 	// data_ptr is of type (const char **)
-	OPT_STRINGPTR,
+	OPT_STRING,
 
 	// List of strings
 	// Receptacle is of type (const char *[])
 	// data_ptr is of type (const char ***)
-	OPT_STRINGPTRLIST,
+	OPT_STRING_LIST,
 
 	// End of the options description
 	OPT_END
@@ -119,7 +119,7 @@ static const opt_desc_t options[] =
 
 	{	"config",
 		0,
-		OPT_STRINGPTR,
+		OPT_STRING,
 		"1",
 		"Config file",
 		&config_file
@@ -127,7 +127,7 @@ static const opt_desc_t options[] =
 
 	{	"home",
 		0,
-		OPT_STRINGPTR,
+		OPT_STRING,
 		"1",
 		"Home directory",
 		&home_dir
@@ -135,7 +135,7 @@ static const opt_desc_t options[] =
 
 	{	"install",
 		0,
-		OPT_STRINGPTR,
+		OPT_STRING,
 		"1",
 		"Installation directory",
 		&install_dir
@@ -143,7 +143,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-		OPT_STRINGPTR,
+		OPT_STRING,
 		"1",
 		"Log messages to file (instead of stdout)",
 		&log_file
@@ -171,7 +171,7 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-		OPT_STRINGPTR,
+		OPT_STRING,
 		0,
 		"Patch wad file",
 		&Pwad
@@ -179,7 +179,7 @@ static const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-		OPT_STRINGPTR,
+		OPT_STRING,
 		0,
 		"The name of the IWAD",
 		&Iwad
@@ -187,7 +187,7 @@ static const opt_desc_t options[] =
 
 	{	"port",
 		"p",
-		OPT_STRINGPTR,
+		OPT_STRING,
 		0,
 		"Port (engine) name",
 		&Port_name
@@ -195,7 +195,7 @@ static const opt_desc_t options[] =
 
 	{	"warp",
 		"w",
-		OPT_STRINGPTR,
+		OPT_STRING,
 		0,
 		"Warp map",
 		&Level_name
@@ -205,7 +205,7 @@ static const opt_desc_t options[] =
 #if 0
 	{	"merge",
 		0,
-		OPT_STRINGPTRLIST,
+		OPT_STRING_LIST,
 		0,
 		"Resource file to load",
 		&PatchWads
@@ -213,7 +213,7 @@ static const opt_desc_t options[] =
 
 	{	"mod",
 		0,
-		OPT_STRINGPTR,
+		OPT_STRING,
 		0,
 		"Mod name",
 		&Mod_name
@@ -378,57 +378,57 @@ static int parse_config_file(FILE *fp, const char *filename)
 		{
 			size_t len = strlen (p);
 			if (len >= 1 && p[len - 1] == '\n')
-				p[len - 1] = '\0';
+				p[len - 1] = 0;
 		}
 
 		// Skip empty lines
-		if (*p == '\0')
+		if (*p == 0)
 			continue;
 
 		// Make <name> point on the <name> field
 		name = p;
 		while (y_isident (*p))
 			p++;
-		if (*p == '\0')
+		if (*p == 0)
 		{
-			LogPrintf("%s(%u): expected an '=', skipping\n", basename, lnum);
+			LogPrintf("WARNING: %s(%u): missing '=', skipping\n", basename, lnum);
 			goto next_line;
 		}
 		if (*p == '=')
 		{
 			// Mark the end of the option name
-			*p = '\0';
+			*p = 0;
 		}
 		else
 		{
 			// Mark the end of the option name
-			*p = '\0';
+			*p = 0;
 			p++;
 			// Skip blanks after the option name
 			while (isspace ((unsigned char) *p))
 				p++;
 			if (*p != '=')
 			{
-				LogPrintf("%s(%u): expected an '=', skipping\n",
+				LogPrintf("WARNING: %s(%u): missing '=', skipping\n",
 						  basename, lnum);
 				goto next_line;
 			}
 		}
 		p++;
 
-		/* First parameter : <value> points on the first character.
-		   Put a NUL at the end. If there is a second parameter,
-		   holler. */
+		// First parameter : <value> points on the first character.
+		// Put a NUL at the end. If there is a second parameter, holler.
 		while (isspace ((unsigned char) *p))
 			p++;
 		value = p;
+
 		{
 			unsigned char *p2 = (unsigned char *) value;
-			while (*p2 != '\0' && ! isspace (*p2))
+			while (*p2 != 0 && ! isspace (*p2))
 				p2++;
-			if (*p2 != '\0')  // There's trailing whitespace after 1st parameter
+			if (*p2 != 0)  // There's trailing whitespace after 1st parameter
 			{
-				for (unsigned char *p3 = p2; *p3 != '\0'; p3++)
+				for (unsigned char *p3 = p2; *p3 != 0; p3++)
 					if (! isspace (*p3))
 					{
 						LogPrintf("%s(%u): extraneous argument\n",
@@ -436,14 +436,14 @@ static int parse_config_file(FILE *fp, const char *filename)
 						return -1;
 					}
 			}
-			*p2 = '\0';
+			*p2 = 0;
 		}
 
 		for (const opt_desc_t *o = options; ; o++)
 		{
 			if (o->opt_type == OPT_END)
 			{
-				LogPrintf("%s(%u): invalid variable '%s', skipping\n",
+				LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
 						  basename, lnum, name);
 				goto next_line;
 			}
@@ -452,26 +452,22 @@ static int parse_config_file(FILE *fp, const char *filename)
 
 			if (o->flags != NULL && strchr (o->flags, '1'))
 				break;
+
 			switch (o->opt_type)
 			{
 				case OPT_BOOLEAN:
-					if (! strcmp (value, "yes") || ! strcmp (value, "true")
-							|| ! strcmp (value, "on") || ! strcmp (value, "1"))
-					{
-						if (o->data_ptr)
-							*((bool *) (o->data_ptr)) = true;
-					}
-					else if (! strcmp (value, "no") || ! strcmp (value, "false")
-							|| ! strcmp (value, "off") || ! strcmp (value, "0"))
+					if (strcmp(value, "no")    == 0 ||
+					    strcmp(value, "false") == 0 ||
+						strcmp(value, "off")   == 0 ||
+						strcmp(value, "0")     == 0)
 					{
 						if (o->data_ptr)
 							*((bool *) (o->data_ptr)) = false;
 					}
-					else
+					else  // anything else is TRUE
 					{
-						LogPrintf("%s(%u): invalid value for option %s: '%s'\n",
-								  basename, lnum, name, value);
-						return -1;
+						if (o->data_ptr)
+							*((bool *) (o->data_ptr)) = true;
 					}
 					break;
 
@@ -491,7 +487,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 					((char *) o->data_ptr)[8] = 0;
 					break;
 
-				case OPT_STRINGPTR:
+				case OPT_STRING:
 					{
 						char *dup = (char *) GetMemory (strlen (value) + 1);
 						strcpy (dup, value);
@@ -500,15 +496,15 @@ static int parse_config_file(FILE *fp, const char *filename)
 						break;
 					}
 
-				case OPT_STRINGPTRLIST:
-					while (*value != '\0')
+				case OPT_STRING_LIST:
+					while (*value != 0)
 					{
 						char *v = value;
-						while (*v != '\0' && ! isspace ((unsigned char) *v))
+						while (*v != 0 && ! isspace ((unsigned char) *v))
 							v++;
 						char *dup = (char *) GetMemory (v - value + 1);
 						memcpy (dup, value, v - value);
-						dup[v - value] = '\0';
+						dup[v - value] = 0;
 						if (o->data_ptr)
 							append_item_to_list ((const char ***) o->data_ptr, dup);
 						while (isspace (*v))
@@ -519,8 +515,7 @@ static int parse_config_file(FILE *fp, const char *filename)
 
 				default:
 					{
-						BugError("%s(%u): unknown option type %d",
-								filename, lnum, (int) o->opt_type);
+						BugError("INTERNAL ERROR: unknown option type %d", (int) o->opt_type);
 						return -1;
 					}
 			}
@@ -590,6 +585,7 @@ static void parse_loose_file(const char *filename)
 
 /*
  *  parse_command_line_options
+ *
  *  If <pass> is set to 1, ignores all options except those
  *  that have the "1" flag.
  *  Else, ignores all options that have the "1" flag.
@@ -637,12 +633,13 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:
+				// TODO: permit a following value (see OPT_BOOLEAN in config parser)
 				if (argv[0][0] == '-')
 				{
 					if (o->data_ptr && ! ignore)
 						*((bool *) (o->data_ptr)) = true;
 				}
-				else  // FIXME!!!!  cannot set OPT_BOOLEAN to false
+				else  // this code is never reached
 				{
 					if (o->data_ptr && ! ignore)
 						*((bool *) (o->data_ptr)) = false;
@@ -686,7 +683,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				((char *) o->data_ptr)[8] = 0;
 				break;
 
-			case OPT_STRINGPTR:
+			case OPT_STRING:
 				if (argc <= 1)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
@@ -698,7 +695,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					*((const char **) (o->data_ptr)) = argv[0];
 				break;
 
-			case OPT_STRINGPTRLIST:
+			case OPT_STRING_LIST:
 				if (argc <= 1)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
@@ -715,7 +712,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 
 			default:
 				{
-					BugError("unknown option type (%d)", (int) o->opt_type);
+					BugError("INTERNAL ERROR: unknown option type (%d)", (int) o->opt_type);
 					return 1;
 				}
 		}
@@ -759,7 +756,7 @@ void dump_parameters(FILE *fp)
 			fputs (confirm_i2e (*((confirm_t *) o->data_ptr)), fp);
 		else if (o->opt_type == OPT_STRINGBUF8)
 			fprintf (fp, "'%s'", (char *) o->data_ptr);
-		else if (o->opt_type == OPT_STRINGPTR)
+		else if (o->opt_type == OPT_STRING)
 		{
 			if (o->data_ptr)
 				fprintf (fp, "'%s'", *((char **) o->data_ptr));
@@ -768,7 +765,7 @@ void dump_parameters(FILE *fp)
 		}
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
-		else if (o->opt_type == OPT_STRINGPTRLIST)
+		else if (o->opt_type == OPT_STRING_LIST)
 		{
 			if (o->data_ptr)
 			{
@@ -814,22 +811,25 @@ void dump_command_line_options(FILE *fp)
 	{
 		if (! o->short_name)
 			continue;
+
 		if (o->short_name)
 			fprintf (fp, " -%-3s ", o->short_name);
 		else
 			fprintf (fp, "      ");
+
 		if (o->long_name)
 			fprintf (fp, "-%-*s ", name_maxlen, o->long_name);
 		else
 			fprintf (fp, "%*s", name_maxlen + 2, "");
+
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_STRINGBUF8:
-			case OPT_STRINGPTR:
+			case OPT_STRING:        fprintf (fp, "<string>    "); break;
 			case OPT_INTEGER:       fprintf (fp, "<integer>   "); break;
-			case OPT_STRINGPTRLIST: fprintf (fp, "<string> ..."); break;
+			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
 		fprintf (fp, " %s\n", o->desc);
@@ -842,7 +842,7 @@ void dump_command_line_options(FILE *fp)
  *  Convert the external representation of a confirmation
  *  flag ("yes", "no", "ask", "ask_once") to the internal
  *  representation (YC_YES, YC_NO, YC_ASK, YC_ASK_ONCE or
- *  '\0' if none).
+ *  0 if none).
  */
 static confirm_t confirm_e2i (const char *external)
 {
@@ -929,7 +929,7 @@ int word_splitting (std::vector<std::string>& tokens, const char *string)
 	   whitespace can be enclosed in double quotes. */
 	for (; ; iptr++)
 	{
-		if (*iptr == '\n' || *iptr == '\0')
+		if (*iptr == '\n' || *iptr == 0)
 			break;
 
 		else if (*iptr == '"')
