@@ -153,20 +153,20 @@ void FatalError(const char *fmt, ...)
 
 	static char buffer[MSG_BUF_LEN];
 
+	va_start(arg_ptr, fmt);
+	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	va_end(arg_ptr);
+
+	buffer[MSG_BUF_LEN-1] = 0;
+
 	if (init_progress < 1 || Quiet || log_file)
 	{
-		fprintf(stderr, "\nERROR: ");
-
-		va_start(arg_ptr, fmt);
-		vfprintf(stderr, fmt, arg_ptr);
-		va_end(arg_ptr);
+		fprintf(stderr, "\nFATAL ERROR: %s", buffer);
 	}
 
 	if (init_progress >= 1)
 	{
-		vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
-
-		LogPrintf("\nERROR: %s", buffer);
+		LogPrintf("\nFATAL ERROR: %s", buffer);
 	}
 
 	if (init_progress >= 3)

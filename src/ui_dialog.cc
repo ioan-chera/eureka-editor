@@ -179,12 +179,10 @@ void DLG_ShowError(const char *msg, ...)
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
-	vsnprintf (buffer, MSG_BUF_LEN-1, msg, arg_pt);
+	vsnprintf (buffer, MSG_BUF_LEN, msg, arg_pt);
 	va_end (arg_pt);
 
-	buffer[MSG_BUF_LEN-2] = 0;
-
-	LogPrintf("\n%s\n\n", buffer);
+	buffer[MSG_BUF_LEN-1] = 0;
 
 	const char *link_title = NULL;
 	const char *link_url   = NULL;
