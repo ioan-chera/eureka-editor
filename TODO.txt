@@ -6,24 +6,6 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
-Consider: 'common/' folder for non-iwad common stuff
-      or: use '.inc' extension ?
-      or: subdirectories: doom/specials.ugh ?
-
-
->>>  dump_command_line_options
-
-   -  new option_t field 'arg_desc', use instead of <string> etc
- no:  prefix '--' for long_name
-
-
-DONE:  proper --help message
-
-DONE:  proper --version message
-
-DONE:  proper Unixy install (executable in /usr/bin, etc)
-
-
 -  a check/fix pass for LoadLevel()
 
 
