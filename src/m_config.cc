@@ -92,6 +92,7 @@ typedef struct
 	// "f" : string is a filename
 	// "<" : print extra newline after this option (when dumping)
 	const char *desc;   // Description of the option
+	const char *arg_desc;  // Description of the argument (NULL --> none or default)
 	void *data_ptr;   // Pointer to the data
 }
 opt_desc_t;
@@ -108,6 +109,7 @@ static const opt_desc_t options[] =
 		OPT_BOOLEAN,
 		"1h",
 		"Show usage summary",
+		NULL,
 		&show_help
 	},
 
@@ -116,14 +118,35 @@ static const opt_desc_t options[] =
 		OPT_BOOLEAN,
 		"1h",
 		"Show version info",
+		NULL,
 		&show_version
 	},
+
+	{	"debug",
+		"d",
+		OPT_BOOLEAN,
+		"1h",
+		"Enable debugging messages",
+		NULL,
+		&Debugging
+	},
+
+	{	"quiet",
+		"q",
+		OPT_BOOLEAN,
+		"1h<",
+		"Quiet mode (no messages on stdout)",
+		NULL,
+		&Quiet
+	},
+
 
 	{	"home",
 		0,
 		OPT_STRING,
 		"1h",
 		"Home directory",
+		"<dir>",
 		&home_dir
 	},
 
@@ -132,22 +155,25 @@ static const opt_desc_t options[] =
 		OPT_STRING,
 		"1h",
 		"Installation directory",
+		"<dir>",
 		&install_dir
 	},
 
 	{	"log",
 		0,
 		OPT_STRING,
-		"1hf",
+		"1h",
 		"Log messages to file (instead of stdout)",
+		"<file>",
 		&log_file
 	},
 
 	{	"config",
 		0,
 		OPT_STRING,
-		"1hf<",
+		"1h<",
 		"Config file to load",
+		"<file>",
 		&config_file
 	},
 
@@ -158,16 +184,18 @@ static const opt_desc_t options[] =
 	{	"iwad",
 		"i",
 		OPT_STRING,
-		"hf",
+		"h",
 		"The name of the IWAD",
+		"<file>",
 		&Iwad
 	},
 
 	{	"file",
 		"f",
 		OPT_STRING,
-		"hf",
+		"h",
 		"Patch wad file to edit",
+		"<file>",
 		&Pwad
 	},
 
@@ -178,6 +206,7 @@ static const opt_desc_t options[] =
 		OPT_STRING_LIST,
 		"h",
 		"Resource file to load",
+		"<file>",
 		&PatchWads
 	},
 #endif
@@ -187,6 +216,7 @@ static const opt_desc_t options[] =
 		OPT_STRING,
 		"h",
 		"Port (engine) name",
+		"<name>",
 		&Port_name
 	},
 
@@ -197,6 +227,7 @@ static const opt_desc_t options[] =
 		OPT_STRING,
 		"h",
 		"Mod name",
+		"<name>",
 		&Mod_name
 	},
 #endif
@@ -205,24 +236,9 @@ static const opt_desc_t options[] =
 		"w",
 		OPT_STRING,
 		"h",
-		"Warp to this map",
+		"Select level to edit",
+		"<map>",
 		&Level_name
-	},
-
-	{	"quiet",
-		"q",
-		OPT_BOOLEAN,
-		"1h",
-		"Quiet mode (no messages on stdout)",
-		&Quiet
-	},
-
-	{	"debug",
-		"d",
-		OPT_BOOLEAN,
-		"1h",
-		"Enable debugging messages",
-		&Debugging
 	},
 
 
@@ -231,6 +247,7 @@ static const opt_desc_t options[] =
 		OPT_BOOLEAN,
 		"",
 		"Use same sidedefs as original linedef",
+		NULL,
 		&copy_linedef_reuse_sidedefs
 	},
 
@@ -239,6 +256,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Default ceiling height",
+		NULL,
 		&default_ceiling_height
 	},
 
@@ -247,6 +265,7 @@ static const opt_desc_t options[] =
 		OPT_STRINGBUF8,
 		"",
 		"Default ceiling texture",
+		NULL,
 		default_ceiling_texture
 	},
 
@@ -255,6 +274,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Default floor height",
+		NULL,
 		&default_floor_height
 	},
 
@@ -263,6 +283,7 @@ static const opt_desc_t options[] =
 		OPT_STRINGBUF8,
 		"",
 		"Default floor texture",
+		NULL,
 		default_floor_texture
 	},
 
@@ -271,6 +292,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Default light level",
+		NULL,
 		&default_light_level
 	},
 
@@ -279,6 +301,7 @@ static const opt_desc_t options[] =
 		OPT_STRINGBUF8,
 		"",
 		"Default lower texture",
+		NULL,
 		default_lower_texture
 	},
 
@@ -287,6 +310,7 @@ static const opt_desc_t options[] =
 		OPT_STRINGBUF8,
 		"",
 		"Default middle texture",
+		NULL,
 		default_middle_texture
 	},
 
@@ -295,6 +319,7 @@ static const opt_desc_t options[] =
 		OPT_STRINGBUF8,
 		"",
 		"Default upper texture",
+		NULL,
 		default_upper_texture
 	},
 
@@ -303,6 +328,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Amp. of scrolling (% of screen size)",
+		NULL,
 		&scroll_less
 	},
 
@@ -311,6 +337,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Amp. of scrolling (% of screen size)",
+		NULL,
 		&scroll_more
 	},
 
@@ -319,6 +346,7 @@ static const opt_desc_t options[] =
 		OPT_INTEGER,
 		"",
 		"Relative scale of sprites",
+		NULL,
 		&sprite_scale
 	},
 
@@ -331,6 +359,7 @@ static const opt_desc_t options[] =
 		OPT_BOOLEAN,
 		"",
 		"Swap mouse buttons",
+		NULL,
 		&swap_buttons
 	},
 #endif
@@ -342,6 +371,7 @@ static const opt_desc_t options[] =
 	{	0,
 		0,
 		OPT_END,
+		0,
 		0,
 		0,
 		0
@@ -795,6 +825,7 @@ void dump_command_line_options(FILE *fp)
 {
 	const opt_desc_t *o;
 	int name_maxlen = 0;
+	int  arg_maxlen = 0;
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
@@ -808,12 +839,16 @@ void dump_command_line_options(FILE *fp)
 			len = strlen (o->long_name);
 			name_maxlen = MAX(name_maxlen, len);
 		}
+
+		if (o->arg_desc)
+		{
+			len = strlen (o->arg_desc);
+			arg_maxlen = MAX(arg_maxlen, len);
+		}
 	}
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		bool is_file = (strchr(o->flags, 'f') != NULL);
-
 		if (! strchr(o->flags, 'h'))
 			continue;
 
@@ -827,15 +862,17 @@ void dump_command_line_options(FILE *fp)
 		else
 			fprintf (fp, "%*s  ", name_maxlen + 2, "");
 
-		switch (o->opt_type)
+		if (o->arg_desc)
+			fprintf (fp, "%-12s", o->arg_desc);
+		else switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
 
 			case OPT_STRINGBUF8:
-			case OPT_STRING:        fprintf (fp, "<name>      "); break;
-			case OPT_STRING_LIST:   fprintf (fp, "<name> ...  "); break;
+			case OPT_STRING:        fprintf (fp, "<string>    "); break;
+			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
 
