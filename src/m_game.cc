@@ -118,10 +118,7 @@ static const char * FindDefinitionFile(
 	if (! base_dir)
 		return NULL;
 
-	if (folder)
-		sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
-	else
-		sprintf(filename, "%s/%s.ugh", base_dir, name);
+	sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
 
 DebugPrintf("  trying: %s\n", filename);
 
@@ -134,8 +131,8 @@ DebugPrintf("  trying: %s\n", filename);
 
 /*
  *  Loads a definition file.  The ".ugh" extension is added.
- *  The 'folder' parameter can be NULL.
- *  
+ *  Will try the "common" folder if not found in the given one.
+ *
  *  Examples: "games" + "doom2"
  *            "ports" + "edge"
  *            "mods"  + "qdoom"
@@ -145,7 +142,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 	// this is for error messages & debugging
 	char basename[256];
 
-	sprintf(basename, "%s/%s.ugh", folder ? folder : ".", name);
+	sprintf(basename, "%s/%s.ugh", folder, name);
 
 	LogPrintf("Loading Definitions : %s\n", basename);
 
@@ -156,6 +153,17 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 	if (! filename)
 		filename = FindDefinitionFile(install_dir, folder, name);
+
+	// look in common/ folder as last resort
+	if (! filename && strcmp(folder, "common") != 0)
+	{
+		folder = "common";
+
+		filename = FindDefinitionFile(home_dir, folder, name);
+
+		if (! filename)
+			filename = FindDefinitionFile(install_dir, folder, name);
+	}
 
 	if (! filename)
 		FatalError("Cannot find definition file: %s", basename);
