@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Eureka DOOM Editor
+GenericName=DOOM Editor
+Comment=Edit maps for the game DOOM
+Exec=eureka
+Icon=eureka
+Terminal=false
+Type=Application
+Categories=Application;Game;X-DoomEditor;
