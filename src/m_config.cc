@@ -1116,10 +1116,7 @@ char * PersistFilename(const crc32_c *crc)
 {
 	static char filename[FL_PATH_MAX];
 
-	// FIXME !!! proper base directory
-	const char *base_dir = ".";
-
-	sprintf(filename, "%s/cache/%08X%08X.dat", base_dir,
+	sprintf(filename, "%s/cache/%08X%08X.dat", home_dir,
 	        crc->extra, crc->raw);
 
 	return filename;
