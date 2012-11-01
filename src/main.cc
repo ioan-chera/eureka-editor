@@ -212,6 +212,17 @@ static void Determine_HomeDir(const char *argv0)
 	///---    home_dir = StringDup(".");
 
     LogPrintf("Home dir: %s\n", home_dir ? home_dir : "NOT SET");
+
+	// create cache directory too
+	if (home_dir)
+	{
+		static char cache_dir[FL_PATH_MAX];
+
+		snprintf(cache_dir, FL_PATH_MAX, "%s/cache", home_dir);
+		cache_dir[FL_PATH_MAX-1] = 0;
+
+		FileMakeDir(cache_dir);
+	}
 }
 
 
@@ -641,7 +652,7 @@ int main(int argc, char *argv[])
 
 	/* that's all folks! */
 
-	LogPrintf("Quit!\n");
+	LogPrintf("Quit\n");
 
 
 	init_progress = 2;
