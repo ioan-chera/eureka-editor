@@ -1150,6 +1150,9 @@ bool M_LoadUserState(const crc32_c *crc)
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS);
 
+		if (num_tok == 0)
+			continue;
+
 		if (num_tok < 0)
 		{
 			LogPrintf("Error in persistent data: %s\n", line);
