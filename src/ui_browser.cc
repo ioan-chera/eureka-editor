@@ -164,14 +164,14 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	strcpy(cat_letters, "*");
 
 
-	int cx = X + 84 + KF * 8;
+	int cx = X + 80 + KF * 8;
 	int cy = Y + 4;
 
-	Fl_Box *title = new Fl_Box(X, cy, W - 32, 22+KF*4, label);
+	Fl_Box *title = new Fl_Box(X + 40, cy, W - 62, 22+KF*4, label);
 	title->labelsize(20+KF*4);
 	add(title);
 
-	Fl_Button *hide_button = new Fl_Button(X + W - 30, cy+2, 22, 22, "X"); // "@>>"
+	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X"); // "@>>"
 	hide_button->callback(hide_callback, this);
 	hide_button->labelsize(14);
 //	hide_button->labelcolor(FL_DARK3);
@@ -180,7 +180,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	cy += title->h() + 6;
 
 
-	category = new Fl_Choice(cx, cy, 190, 22, "Category:");
+	category = new Fl_Choice(cx, cy, 160, 22, "Category:");
 	category->align(FL_ALIGN_LEFT);
 	category->add("ALL");
 	category->value(0);
@@ -197,7 +197,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	if (strchr("OSL", kind))
 	{
-		sortm = new Fl_Choice(cx, cy, 190, 22, "Sort:");
+		sortm = new Fl_Choice(cx, cy, 160, 22, "Sort:");
 		sortm->align(FL_ALIGN_LEFT);
 		sortm->add("Alphabetical|Numeric");
 		sortm->value((kind == 'O') ? 0 : 1);
@@ -211,7 +211,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	}
 
 
-	search = new Fl_Input(cx, cy, 120, 22, "Match:");
+	search = new Fl_Input(cx, cy, 100, 22, "Match:");
 	search->align(FL_ALIGN_LEFT);
 	search->callback(filter_callback, this);
 	search->when(FL_WHEN_CHANGED);
@@ -223,7 +223,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	if (strchr("FTO", kind))
 	{
-		pics = new Fl_Check_Button(X+W-74, cy, 20, 22, "Pics");
+		pics = new Fl_Check_Button(X+W-78, cy, 20, 22, "Pics");
 		pics->align(FL_ALIGN_RIGHT);
 		pics->value(1);
 ///???		pics->callback(filter_callback, this);
@@ -249,7 +249,15 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	add(pack);
 
-	resizable(pack);
+
+	// resize box
+
+	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, X + W - 18, Y, 16, H, NULL);
+	rs_box->clear_visible();
+
+	add(rs_box);
+
+	resizable(rs_box);
 }
 
 

@@ -43,7 +43,7 @@
 
 #define BUILD_BG   fl_gray_ramp(9)
 
-#define MIN_BROWSER_W  260
+#define MIN_BROWSER_W  280
 
 
 class Wad_file;
@@ -61,7 +61,6 @@ public:
 #endif
 
 	int panel_W;
-	int browser_W;
 
 	UI_Tile * tile;
 
