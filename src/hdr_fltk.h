@@ -54,6 +54,7 @@
 #include <FL/Fl_Sys_Menu_Bar.H>
 #endif
 #include <FL/Fl_Tabs.H>
+#include <FL/Fl_Tile.H>
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_Window.H>

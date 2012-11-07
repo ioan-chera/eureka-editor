@@ -78,6 +78,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_sector.o  \
 	$(OBJ_DIR)/ui_sidedef.o  \
 	$(OBJ_DIR)/ui_thing.o  \
+	$(OBJ_DIR)/ui_tile.o   \
 	$(OBJ_DIR)/ui_vertex.o  \
 	$(OBJ_DIR)/ui_window.o  \
 	$(OBJ_DIR)/w_loadpic.o  \
