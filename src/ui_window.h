@@ -28,6 +28,7 @@
 #include "ui_hyper.h"
 #include "ui_nombre.h"
 #include "ui_pic.h"
+#include "ui_tile.h"
 #include "ui_browser.h"
 
 #include "ui_thing.h"
@@ -60,9 +61,11 @@ public:
 	int panel_W;
 	int browser_W;
 
-	UI_Canvas  *canvas;
+	UI_Tile * tile;
 
+	UI_Canvas  *canvas;
 	UI_Browser *browser;
+
 	UI_InfoBar *info_bar;
 
 	UI_ThingBox  *thing_box;
@@ -70,6 +73,7 @@ public:
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
 	UI_RadiusBox *rad_box;
+
 
 private:
 	Fl_Cursor cursor_shape;

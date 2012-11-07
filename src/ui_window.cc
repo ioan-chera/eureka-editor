@@ -71,7 +71,8 @@ UI_MainWin::UI_MainWin() :
 	int ey = h();
 
 	panel_W   = 260 + KF * 32;
-	browser_W = (KF == 0) ? 240 : 308;  // extra wide: + 288;
+	browser_W = 260; /// (KF == 0) ? 240 : 308;  // extra wide: + 288;
+// browser_W += 300;
 
 	/* ---- Menu bar ---- */
 	{
@@ -90,17 +91,14 @@ UI_MainWin::UI_MainWin() :
 	ey = ey - info_bar->h();
 
 
+	canvas = new UI_Canvas(0, cy, w() - panel_W - browser_W, ey - cy);
 
 	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
-	add(browser);
 
-  	browser->hide();
+	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, canvas, browser);
+	add(tile);
 
-
-	canvas = new UI_Canvas(0, cy, w() - panel_W, ey - cy);
-	add(canvas);
-
-	resizable(canvas);
+	resizable(tile);
 
 
 	int BY = 0;     // cy+2
