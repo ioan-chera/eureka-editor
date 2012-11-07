@@ -35,8 +35,15 @@ UI_Tile::UI_Tile(int X, int Y, int W, int H, const char *what,
 	add(left);
 	add(right);
 
-	// FIXME: limiter
+	// assume right widget is as narrow as possible
+
+	limiter = new Fl_Box(X + 32, Y, W - right->w() - 32, H);  // FL_NO_BOX
+
+	add(limiter);
+
+	resizable(limiter);
 }
+
 
 //
 // UI_Tile Destructor
@@ -46,19 +53,60 @@ UI_Tile::~UI_Tile()
 }
 
 
-void UI_Tile::resize(int X,int Y,int W,int H)
+void UI_Tile::resize(int X, int Y, int W, int H)
 {
 	// FIXME !!!!
+
+	// resize ourself (skip the Fl_Group resize)
+	Fl_Widget::resize(X,Y,W,H);
+
+	// update limiter
+fprintf(stderr, "limiter x=%d w=%d\n", limiter->x(), limiter->w());
+
+	if (find(right) >= children())
+	{
+		left->resize(X, Y, W, H);
+		return;
+	}
+
+	// FIXME
 }
 
 
 void UI_Tile::ShowRight()
 {
+	if (find(right) < children())
+		return;
+
+	int right_W = 300; //!!!!
+
+	add(right);
+
+	right->resize(x() + w() - right_W, y(), right_W, h());
+	right->show();
+	right->redraw();
+
+	left->resize(x(), y(), w() - right_W, h());
+	left->redraw();
+
+	init_sizes();
 }
 
 
 void UI_Tile::HideRight()
 {
+	if (find(right) >= children())
+		return;
+
+	right->hide();
+
+	remove(right);
+
+	left->size(w(), h());
+	left->redraw();
+
+	// widgets in our group (the window) got rearranged, tell FLTK
+	init_sizes();
 }
 
 

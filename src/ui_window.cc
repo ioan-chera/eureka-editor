@@ -180,26 +180,10 @@ void UI_MainWin::ShowBrowser(char kind)
 
 	if (is_visible != want_visible)
 	{
-		if (browser->visible())
-		{
-			browser->hide();
-
-			canvas->size(w() - panel_W, canvas->h());
-		}
+		if (want_visible)
+			tile->ShowRight();
 		else
-		{
-			canvas->size(w() - browser_W - panel_W, canvas->h());
-
-			browser->resize(w() - browser_W - panel_W, browser->y(),
-			                browser_W, browser->h());
-			browser->show();
-			browser->redraw();
-		}
-
-		canvas->redraw();
-
-		// widgets in our group (the window) got rearranged, tell FLTK
-		init_sizes();
+			tile->HideRight();
 	}
 
 	if (kind != 0 && kind != '/')
