@@ -30,6 +30,13 @@ private:
 
 	Fl_Box * limiter;
 
+	// when the right widget (the browser) is hidden, this remembers
+	// how much of the available width it was using, so can restore it
+	// where the user expects.
+	//
+	// NOTE: not set or used while right widget is visible.
+	int right_W;
+
 public:
 	UI_Tile(int X, int Y, int W, int H, const char *what,
 	        Fl_Widget *_left, Fl_Widget *_right);

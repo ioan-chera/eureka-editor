@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "ui_tile.h"
+#include "ui_window.h"
 
 
 //
@@ -35,9 +36,10 @@ UI_Tile::UI_Tile(int X, int Y, int W, int H, const char *what,
 	add(left);
 	add(right);
 
-	// assume right widget is as narrow as possible
+	right_W = right->w();
 
-	limiter = new Fl_Box(X + 32, Y, W - right->w() - 32, H);  // FL_NO_BOX
+	// FL_NO_BOX
+	limiter = new Fl_Box(X + 32, Y, W - 32 - MIN_BROWSER_W, H);
 
 	add(limiter);
 
@@ -55,13 +57,11 @@ UI_Tile::~UI_Tile()
 
 void UI_Tile::resize(int X, int Y, int W, int H)
 {
-	// FIXME !!!!
-
 	// resize ourself (skip the Fl_Group resize)
-	Fl_Widget::resize(X,Y,W,H);
+	Fl_Widget::resize(X, Y, W, H);
 
 	// update limiter
-fprintf(stderr, "limiter x=%d w=%d\n", limiter->x(), limiter->w());
+	limiter->resize(X+32, Y, W - 32 - MIN_BROWSER_W, H);
 
 	if (find(right) >= children())
 	{
@@ -69,7 +69,17 @@ fprintf(stderr, "limiter x=%d w=%d\n", limiter->x(), limiter->w());
 		return;
 	}
 
-	// FIXME
+	// determine the width of the browser
+	right_W = right->w();
+
+	if (right_W > w() - 32)
+		right_W = w() - 32;
+
+	if (right_W < MIN_BROWSER_W)
+		right_W = MIN_BROWSER_W;
+
+	 left->resize(X, Y, W - right_W, H);
+	right->resize(X + W - right_W, Y, right_W, H);
 }
 
 
@@ -78,7 +88,12 @@ void UI_Tile::ShowRight()
 	if (find(right) < children())
 		return;
 
-	int right_W = 300; //!!!!
+	// determine the width of the browser
+	if (right_W > w() - 32)
+		right_W = w() - 32;
+
+	if (right_W < MIN_BROWSER_W)
+		right_W = MIN_BROWSER_W;
 
 	add(right);
 
@@ -97,6 +112,9 @@ void UI_Tile::HideRight()
 {
 	if (find(right) >= children())
 		return;
+
+	// remember old width
+	right_W = right->w();
 
 	right->hide();
 
