@@ -38,8 +38,9 @@ UI_Tile::UI_Tile(int X, int Y, int W, int H, const char *what,
 
 	right_W = right->w();
 
-	// FL_NO_BOX
-	limiter = new Fl_Box(X + 32, Y, W - 32 - MIN_BROWSER_W, H);
+	limiter = new Fl_Box(FL_NO_BOX, X + 32, Y, W - 32 - MIN_BROWSER_W, H, NULL);
+
+	limiter->clear_visible();  // prevent this fucker from stealing events
 
 	add(limiter);
 
