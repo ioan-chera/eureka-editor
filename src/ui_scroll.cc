@@ -57,6 +57,7 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 
 void UI_Scroll::draw()
 {
+	draw_box();
 	draw_child(scrollbar);
 	draw_child(pack);
 }

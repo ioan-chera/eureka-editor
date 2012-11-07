@@ -236,6 +236,8 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	scroll = new UI_Scroll(X, cy, W, H-3 - (cy - Y));
 
+	scroll->box(FL_FLAT_BOX);
+
 	if (kind == 'T' || kind == 'F')
 		scroll->color(FL_BLACK, FL_BLACK);
 	else
