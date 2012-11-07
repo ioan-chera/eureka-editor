@@ -80,6 +80,9 @@ public:
 	UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind);
 	virtual ~UI_Browser_Box();
 
+	/* FLTK method */
+	void resize(int X, int Y, int W, int H);
+
 public:
 	void Populate();
 
@@ -109,6 +112,8 @@ private:
 	void Populate_SectorTypes();
 
 	bool CategoryByLetter(char letter);
+
+	void resize_buttons();
 
 	void fix_scrollbar_order();
 

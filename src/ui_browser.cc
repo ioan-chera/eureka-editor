@@ -266,6 +266,45 @@ UI_Browser_Box::~UI_Browser_Box()
 }
 
 
+void UI_Browser_Box::resize_buttons()
+{
+	fix_scrollbar_order();
+
+	// subtract 2 to ignore the scrollbars
+	int total = pack->children() - 2;
+
+	int W = pack->w() - 24;
+
+	for (int i = 0 ; i < total ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)pack->child(i);
+
+		Fl_Repeat_Button * button = item->button;
+
+		if (button)
+		{
+			button->size(W, button->h());
+		}
+	}
+}
+
+
+void UI_Browser_Box::resize(int X, int Y, int W, int H)
+{
+	Fl_Group::resize(X, Y, W, H);
+
+	// rearrange images
+	if (kind == 'T' || kind == 'F')
+	{
+		Filter();
+	}
+	else  // change button sizes
+	{
+		resize_buttons();
+	}
+}
+
+
 void UI_Browser_Box::filter_callback(Fl_Widget *w, void *data)
 {
 	UI_Browser_Box *that = (UI_Browser_Box *)data;
