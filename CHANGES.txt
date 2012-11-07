@@ -6,6 +6,8 @@ CHANGES since 0.74
 
 + made a proper web-site (using PmWiki)
 
++ texture browser can be resized by dragging the edge
+
 - log file is only created when --log is used
 - the --quiet option (-q) suppresses output to stdout
 - new --debug option (-d) enables debug messages
