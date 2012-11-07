@@ -25,7 +25,7 @@
 class UI_Scroll : public Fl_Widget
 {
 private:
-	Fl_Scrollbar * sbar;
+	Fl_Scrollbar * scrollbar;
 
 	Fl_Group * pack;
 
@@ -35,9 +35,22 @@ public:
 	virtual ~UI_Scroll();
 
 	/* FLTK methods */
-	void resize(int, int, int, int);
+	void resize(int X, int Y, int W, int H);
+	int  handle(int event);
+	void draw();
 
 public:
+	void add(Fl_Widget *w);
+	void remove(Fl_Widget *w);
+	void remove_first();
+	void clear();
+
+	int children() const;
+	Fl_Widget * child(int i) const;
+	void init_sizes();
+
+private:
+	void draw_child(Fl_Widget *w);
 };
 
 
