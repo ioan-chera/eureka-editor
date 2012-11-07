@@ -6,8 +6,23 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
--  a check/fix pass for LoadLevel()
+!!!!  if -file and no -warp, use first map found in wad
 
+!!  support a plain number with -warp
+    (look for MAP## or E#M# lumps)
+
++  default iwad dir = ~/.eureka/iwads
+   (mkdir it)
+   search it _IN_ADDITION_ to $DOOMWADDIR
+
+
+!! don't create new linedef overlapping existing one
+
+-  SPACE on selected vertex : deselect
+
++  T, F, O, L, S : keys to open browser at 
+
+-  a check/fix pass for LoadLevel()
 
 +  proper widget for File/Open to select map, with button to load
    a new WAD file.
@@ -35,7 +50,7 @@ Editing
 Browser
 -------
 
-+  a "wide" mode
+-  fix to support current MIN_W
 
 
 

@@ -170,6 +170,8 @@ Renderer
 
 +  problem with mid-masked textures (cage in E1M9)
 
+-  handle very tall/thin window : letter box with black
+
 +  being able to select stuff to modify:
    - things
    - floors
