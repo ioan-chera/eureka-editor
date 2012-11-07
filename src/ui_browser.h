@@ -72,7 +72,7 @@ private:
 	Fl_Input  *search;
 	Fl_Check_Button *pics;
 
-	Fl_Scroll *pack;
+	UI_Scroll *scroll;
 
 	char cat_letters[64];
 
@@ -112,10 +112,6 @@ private:
 	void Populate_SectorTypes();
 
 	bool CategoryByLetter(char letter);
-
-	void resize_buttons();
-
-	void fix_scrollbar_order();
 
 	// ensure the search string is printable and contains no " quotes
 	char *TidySearch() const;

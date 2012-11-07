@@ -28,6 +28,7 @@
 #include "ui_hyper.h"
 #include "ui_nombre.h"
 #include "ui_pic.h"
+#include "ui_scroll.h"
 #include "ui_tile.h"
 #include "ui_browser.h"
 

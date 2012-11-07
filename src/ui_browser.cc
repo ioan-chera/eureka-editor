@@ -234,20 +234,14 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	cy += search->h() + 12;
 
 
-	pack = new Fl_Scroll(X, cy, W, H-3 - (cy - Y));
-	pack->end();
-	pack->type(Fl_Scroll::VERTICAL_ALWAYS);
+	scroll = new UI_Scroll(X, cy, W, H-3 - (cy - Y));
 
 	if (kind == 'T' || kind == 'F')
-		pack->color(FL_BLACK, FL_BLACK);
+		scroll->color(FL_BLACK, FL_BLACK);
 	else
-		pack->color(FL_DARK3, FL_DARK3);
+		scroll->color(FL_DARK3, FL_DARK3);
 
-	pack->scrollbar.align(FL_ALIGN_LEFT);
-	pack->scrollbar.color(FL_DARK2, FL_DARK2);
-	pack->scrollbar.selection_color(FL_GRAY0);
-
-	add(pack);
+	add(scroll);
 
 
 	// resize box
@@ -266,29 +260,6 @@ UI_Browser_Box::~UI_Browser_Box()
 }
 
 
-void UI_Browser_Box::resize_buttons()
-{
-	fix_scrollbar_order();
-
-	// subtract 2 to ignore the scrollbars
-	int total = pack->children() - 2;
-
-	int W = pack->w() - 24;
-
-	for (int i = 0 ; i < total ; i++)
-	{
-		Browser_Item *item = (Browser_Item *)pack->child(i);
-
-		Fl_Repeat_Button * button = item->button;
-
-		if (button)
-		{
-			button->size(W, button->h());
-		}
-	}
-}
-
-
 void UI_Browser_Box::resize(int X, int Y, int W, int H)
 {
 	Fl_Group::resize(X, Y, W, H);
@@ -297,10 +268,6 @@ void UI_Browser_Box::resize(int X, int Y, int W, int H)
 	if (kind == 'T' || kind == 'F')
 	{
 		Filter();
-	}
-	else  // change button sizes
-	{
-		resize_buttons();
 	}
 }
 
@@ -329,30 +296,25 @@ void UI_Browser_Box::sort_callback(Fl_Widget *w, void *data)
 
 bool UI_Browser_Box::Filter(bool force_update)
 {
-	pack->scroll_to(0, 0);
-
-	fix_scrollbar_order();
-
-	// subtract 2 to ignore the scrollbars
-	int total = pack->children() - 2;
+//!!!!	pack->scroll_to(0, 0);
 
 	bool side_by_side = (kind == 'F' || kind == 'T');
 
 	bool changes = false;
 
-	int left_X  = pack->x() + 20;
-	int right_X = left_X + pack->w() - 20;
+	int left_X  = scroll->x() + 20;
+	int right_X = left_X + scroll->w() - 20;
 
 	// current position
 	int cx = left_X;
-	int cy = pack->y();
+	int cy = scroll->y();
 
 	// the highest visible widget on the current line
 	int highest = 0;
 
-	for (int i = 0 ; i < total ; i++)
+	for (int i = 0 ; i < scroll->children() ; i++)
 	{
-		Browser_Item *item = (Browser_Item *)pack->child(i);
+		Browser_Item *item = (Browser_Item *)scroll->child(i);
 
 		item->redraw();
 
@@ -397,8 +359,8 @@ bool UI_Browser_Box::Filter(bool force_update)
 		highest = MAX(highest, item->h());
 	}
 
-	pack->init_sizes();
-	pack->redraw();
+	scroll->init_sizes();
+	scroll->redraw();
 
 	return changes;
 }
@@ -496,19 +458,17 @@ static void SortPass(std::vector< Browser_Item * >& ARR, int gap, int total, int
 
 void UI_Browser_Box::Sort()
 {
-	fix_scrollbar_order();
-
 	// subtract 2 to ignore the scrollbars
-	int total = pack->children() - 2;
+	int total = scroll->children();
 
 	// transfer widgets to a local vector
 	std::vector< Browser_Item * > ARR;
 
 	for (int i = 0 ; i < total ; i++)
 	{
-		ARR.push_back( (Browser_Item *) pack->child(0));
+		ARR.push_back( (Browser_Item *) scroll->child(0));
 
-		pack->remove(0);
+		scroll->remove_first();
 	}
 
 	int method = sortm ? sortm->value() : 0;
@@ -521,24 +481,12 @@ void UI_Browser_Box::Sort()
 	SortPass(ARR, 4, total, method);
 	SortPass(ARR, 1, total, method);
 
-	// transfer them back to the pack widget
+	// transfer them back to the scroll widget
 	for (int i = 0 ; i < total ; i++)
-		pack->add(ARR[i]);
-
-	fix_scrollbar_order();
+		scroll->add(ARR[i]);
 
 	// reposition them all
 	Filter(true);
-}
-
-
-void UI_Browser_Box::fix_scrollbar_order()
-{
-	// make sure the scrollbars are the last two children.
-	// (ideally we'd call fix_scrollbar_order() method, but it is private)
-	pack->resize(pack->x(), pack->y(), pack->w(), pack->h());
-
-	pack->redraw();
 }
 
 
@@ -593,8 +541,8 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 
 	std::map<std::string, Img *>::iterator TI;
 
-	int cx = pack->x() + 20;
-	int cy = pack->y();
+	int cx = scroll->x() + 20;
+	int cy = scroll->y();
 
 	char full_desc[256];
 
@@ -641,7 +589,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
 		                                      full_desc, category,
 		                                      pic_w, pic_h, pic);
-		pack->add(item);
+		scroll->add(item);
 
 		cy += item->h();
 	}
@@ -652,10 +600,10 @@ void UI_Browser_Box::Populate_ThingTypes()
 {
 	std::map<int, thingtype_t *>::iterator TI;
 
-	int y = pack->y();
+	int y = scroll->y();
 
-	int mx = pack->x() + 20;
-	int mw = pack->w() - 24;
+	int mx = scroll->x() + 20;
+	int mw = scroll->w() - 24;
 
 	char full_desc[256];
 
@@ -670,7 +618,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 		item->button->callback(Browser_Item::thing_callback, NULL);
 		item->button->argument(TI->first);
 
-		pack->add(item);
+		scroll->add(item);
 
 		y += item->h() + 3;
 	}
@@ -681,10 +629,10 @@ void UI_Browser_Box::Populate_LineTypes()
 {
 	std::map<int, linetype_t *>::iterator TI;
 
-	int y = pack->y();
+	int y = scroll->y();
 
-	int mx = pack->x() + 20;
-	int mw = pack->w() - 24;
+	int mx = scroll->x() + 20;
+	int mw = scroll->w() - 24;
 
 	char full_desc[256];
 
@@ -700,7 +648,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		item->button->callback(Browser_Item::line_callback, NULL);
 		item->button->argument(TI->first);
 
-		pack->add(item);
+		scroll->add(item);
 
 		y += item->h() + 3;
 	}
@@ -711,10 +659,10 @@ void UI_Browser_Box::Populate_SectorTypes()
 {
 	std::map<int, sectortype_t *>::iterator TI;
 
-	int y = pack->y();
+	int y = scroll->y();
 
-	int mx = pack->x() + 20;
-	int mw = pack->w() - 24;
+	int mx = scroll->x() + 20;
+	int mw = scroll->w() - 24;
 
 	char full_desc[256];
 
@@ -729,7 +677,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 		item->button->callback(Browser_Item::sector_callback, NULL);
 		item->button->argument(TI->first);
 
-		pack->add(item);
+		scroll->add(item);
 
 		y += item->h() + 3;
 	}
@@ -739,7 +687,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 void UI_Browser_Box::Populate()
 {
 	// delete existing ones
-	pack->clear();
+	scroll->clear();
 
 	switch (kind)
 	{
@@ -843,8 +791,11 @@ void UI_Browser_Box::ClearSearchBox()
 
 void UI_Browser_Box::Scroll(int delta)
 {
+       //!!!!! FIXME move this into UI_Scroll widget
+#if 0
+
 	// get the scrollbar (OMG this is hacky shit)
-	int index = pack->children() - 1;
+	int index = scroll->children() - 1;
 
 	Fl_Scrollbar *bar = (Fl_Scrollbar *)pack->child(index);
 
@@ -880,6 +831,7 @@ void UI_Browser_Box::Scroll(int delta)
 	bar->damage(FL_DAMAGE_ALL);
 	bar->set_changed();
 	bar->do_callback();
+#endif
 }
 
 
