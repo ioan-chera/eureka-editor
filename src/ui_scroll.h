@@ -29,7 +29,7 @@ private:
 
 	Fl_Group * pack;
 
-	int total_h;
+	int top_y, bottom_y;
 
 public:
 	UI_Scroll(int X, int Y, int W, int H);
@@ -58,8 +58,9 @@ private:
 
 	void draw_child(Fl_Widget *w);
 
-	void calc_bottom();
-	void reposition_all(int top_y);
+	void do_scroll();
+	void calc_extents();
+	void reposition_all(int start_y);
 
 	static void bar_callback(Fl_Widget *, void *);
 };

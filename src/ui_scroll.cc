@@ -30,7 +30,7 @@
 //
 UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 		Fl_Widget(X, Y, W, H, NULL),
-		total_h(0)
+		top_y(0), bottom_y(0)
 {
 	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
 
@@ -116,36 +116,60 @@ void UI_Scroll::bar_callback(Fl_Widget *w, void *data)
 {
 	UI_Scroll * that = (UI_Scroll *)data;
 
-	that->reposition_all(that->y() - that->scrollbar->value());
-	that->redraw();
+	that->do_scroll();
 }
 
 
-void UI_Scroll::calc_bottom()
+void UI_Scroll::do_scroll()
 {
-	total_h = 0;
+	int pos = scrollbar->value();
+
+	int total_h = bottom_y - top_y;
+
+	scrollbar->value(pos, h(), 0, MAX(h(), total_h));
+
+	reposition_all(y() - pos);
+
+	redraw();
+}
+
+
+void UI_Scroll::calc_extents()
+{
+	if (children() == 0)
+	{
+		top_y = bottom_y = 0;
+		return;
+	}
+
+	   top_y =  999999;
+	bottom_y = -999999;
 
 	for (int i = 0 ; i < children() ; i++)
 	{
 		Fl_Widget * w = child(i);
 
-		if (w->visible())
-			total_h += w->h();
+		if (! w->visible())
+			continue;
+
+		   top_y = MIN(top_y, w->y());
+		bottom_y = MAX(bottom_y, w->y() + w->h());
 	}
 }
 
 
-void UI_Scroll::reposition_all(int top_y)
+void UI_Scroll::reposition_all(int start_y)
 {
 	for (int i = 0 ; i < children() ; i++)
 	{
 		Fl_Widget * w = child(i);
 
-		w->position(w->x(), top_y);
+		int y = start_y + (w->y() - top_y);
 
-		if (w->visible())
-			top_y += w->h();
+		w->position(w->x(), y);
 	}
+
+	calc_extents();
 }
 
 
@@ -191,7 +215,9 @@ void UI_Scroll::init_sizes()
 {
 	pack->init_sizes();
 
-	calc_bottom();
+	calc_extents();
+
+	int total_h = bottom_y - top_y;
 
 	scrollbar->value(0, h(), 0, MAX(h(), total_h));
 }
