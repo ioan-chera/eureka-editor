@@ -68,7 +68,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	add(button);
 
 
-	resizable(NULL);
+//	resizable(NULL);
 }
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
@@ -234,7 +234,9 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	cy += search->h() + 12;
 
 
-	scroll = new UI_Scroll(X, cy, W, H-3 - (cy - Y));
+	int top_H = cy - Y;
+
+	scroll = new UI_Scroll(X, cy, W, H-3 - top_H);
 
 	scroll->box(FL_FLAT_BOX);
 
@@ -248,10 +250,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	// resize box
 
-	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, X + W - 18, Y, 16, H, NULL);
-	rs_box->clear_visible();
-
-	add(rs_box);
+	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, X + W - 10, Y + top_H, 8, H - top_H, NULL);
 
 	resizable(rs_box);
 }
@@ -265,6 +264,10 @@ UI_Browser_Box::~UI_Browser_Box()
 void UI_Browser_Box::resize(int X, int Y, int W, int H)
 {
 	Fl_Group::resize(X, Y, W, H);
+
+	Fl_Widget * rs_box = resizable();
+
+	rs_box->resize(X + W - 10, Y + rs_box->h(), 8, H - rs_box->h());
 
 	// rearrange images
 	if (kind == 'T' || kind == 'F')
