@@ -30,7 +30,7 @@
 //
 UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 		Fl_Widget(X, Y, W, H, NULL),
-		bottom_h(0)
+		total_h(0)
 {
 	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
 
@@ -116,26 +116,35 @@ void UI_Scroll::bar_callback(Fl_Widget *w, void *data)
 {
 	UI_Scroll * that = (UI_Scroll *)data;
 
-fprintf(stderr, "bar_callback\n");
-
-	/* FIXME */
+	that->reposition_all(that->y() - that->scrollbar->value());
 	that->redraw();
 }
 
 
 void UI_Scroll::calc_bottom()
 {
-	int i;
+	total_h = 0;
 
-	bottom_h = 0;
-
-	for (i = children() - 1 ; i >= 0 ; i--)
+	for (int i = 0 ; i < children() ; i++)
 	{
 		Fl_Widget * w = child(i);
 
-		int h = w->y() + w->h();
+		if (w->visible())
+			total_h += w->h();
+	}
+}
 
-		bottom_h = MAX(bottom_h, h);
+
+void UI_Scroll::reposition_all(int top_y)
+{
+	for (int i = 0 ; i < children() ; i++)
+	{
+		Fl_Widget * w = child(i);
+
+		w->position(w->x(), top_y);
+
+		if (w->visible())
+			top_y += w->h();
 	}
 }
 
@@ -184,7 +193,7 @@ void UI_Scroll::init_sizes()
 
 	calc_bottom();
 
-	scrollbar->value(0, h(), 0, MAX(h(), bottom_h));
+	scrollbar->value(0, h(), 0, MAX(h(), total_h));
 }
 
 
