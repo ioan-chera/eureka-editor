@@ -29,6 +29,8 @@ private:
 
 	Fl_Group * pack;
 
+	int bottom_h;
+
 public:
 	UI_Scroll(int X, int Y, int W, int H);
 
@@ -47,10 +49,18 @@ public:
 
 	int children() const;
 	Fl_Widget * child(int i) const;
+
 	void init_sizes();
 
 private:
+	void resize_horiz(int X, int W);
+	void resize_vert (int Y, int H);
+
 	void draw_child(Fl_Widget *w);
+
+	void calc_bottom();
+
+	static void bar_callback(Fl_Widget *, void *);
 };
 
 

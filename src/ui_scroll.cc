@@ -22,20 +22,27 @@
 #include "ui_scroll.h"
 
 
+#define SBAR_W  16
+
+
 //
 // UI_Scroll Constructor
 //
 UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
-		Fl_Widget(X, Y, W, H, NULL)
+		Fl_Widget(X, Y, W, H, NULL),
+		bottom_h(0)
 {
-	scrollbar = new Fl_Scrollbar(X, Y, 16, H, NULL);
+	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
 
 	scrollbar->align(FL_ALIGN_LEFT);
 	scrollbar->color(FL_DARK2, FL_DARK2);
 	scrollbar->selection_color(FL_GRAY0);
+	scrollbar->callback(bar_callback, this);
 
-	pack = new Fl_Group(X + scrollbar->w(), Y, W - scrollbar->w(), H);
+	pack = new Fl_Group(X + SBAR_W, Y, W - SBAR_W, H);
 	pack->end();
+
+	pack->resizable(NULL);
 }
 
 
@@ -49,9 +56,37 @@ UI_Scroll::~UI_Scroll()
 
 void UI_Scroll::resize(int X, int Y, int W, int H)
 {
-	// resize ourself 
+	int ox = x();
+	int oy = y();
+	int ow = w();
+	int oh = h();
+
+	// resize ourself first
 	Fl_Widget::resize(X, Y, W, H);
 
+	scrollbar->resize(X, Y, SBAR_W, H);
+
+	pack->resize(X + SBAR_W, Y, W - SBAR_W, H);
+
+/*
+	// horizontal change?
+	if (W != ow)
+	{
+		pack->resize(ox, Y, ow, H);
+	}
+
+	// vertical change?
+	if (H != oh)
+		resize_vert(H);
+	
+	if (Y != oy)
+	{
+	}
+	if (! (Y == oy && H == oh))
+	{
+		resize_vert(
+	}
+*/
 }
 
 
@@ -74,6 +109,34 @@ void UI_Scroll::draw_child(Fl_Widget *w)
 int UI_Scroll::handle(int event)
 {
 	return scrollbar->handle(event) || pack->handle(event);
+}
+
+
+void UI_Scroll::bar_callback(Fl_Widget *w, void *data)
+{
+	UI_Scroll * that = (UI_Scroll *)data;
+
+fprintf(stderr, "bar_callback\n");
+
+	/* FIXME */
+	that->redraw();
+}
+
+
+void UI_Scroll::calc_bottom()
+{
+	int i;
+
+	bottom_h = 0;
+
+	for (i = children() - 1 ; i >= 0 ; i--)
+	{
+		Fl_Widget * w = child(i);
+
+		int h = w->y() + w->h();
+
+		bottom_h = MAX(bottom_h, h);
+	}
 }
 
 
@@ -100,6 +163,7 @@ void UI_Scroll::remove_first()
 void UI_Scroll::clear()
 {
 	pack->clear();
+	pack->resizable(NULL);
 }
 
 
@@ -117,6 +181,10 @@ Fl_Widget * UI_Scroll::child(int i) const
 void UI_Scroll::init_sizes()
 {
 	pack->init_sizes();
+
+	calc_bottom();
+
+	scrollbar->value(0, h(), 0, MAX(h(), bottom_h));
 }
 
 
