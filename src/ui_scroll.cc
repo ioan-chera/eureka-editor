@@ -41,6 +41,8 @@ UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 
 	add(scrollbar);
 
+	clip_children(1);
+
 	resizable(NULL);
 }
 
