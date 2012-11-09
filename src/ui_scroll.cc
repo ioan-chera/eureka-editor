@@ -62,12 +62,16 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 
 	Fl_Group::resize(X, Y, W, H);
 
+	scrollbar->resize(X, Y, SBAR_W, H);
+
+
+	int total_h = bottom_y - top_y;
+
+	scrollbar->value(0, h(), 0, MAX(h(), total_h));
 /*
 
 	// resize ourself first
 	Fl_Widget::resize(X, Y, W, H);
-
-	scrollbar->resize(X, Y, SBAR_W, H);
 
 	pack->resize(X + SBAR_W, Y, W - SBAR_W, H);
 
