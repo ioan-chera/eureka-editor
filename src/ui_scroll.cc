@@ -27,6 +27,7 @@
 //
 UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 		Fl_Group(X, Y, W, H, NULL),
+		resize_horiz_(false),
 		top_y(0), bottom_y(0)
 {
 	end();
@@ -68,34 +69,17 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 	int total_h = bottom_y - top_y;
 
 	scrollbar->value(0, h(), 0, MAX(h(), total_h));
-/*
 
-	// resize ourself first
-	Fl_Widget::resize(X, Y, W, H);
 
-	pack->resize(X + SBAR_W, Y, W - SBAR_W, H);
-
-*/
-
-/*
-	// horizontal change?
-	if (W != ow)
+	if (ow != W && resize_horiz_)
 	{
-		pack->resize(ox, Y, ow, H);
-	}
+		for (int i = 0 ; i < Children() ; i++)
+		{
+			Fl_Widget * w = Child(i);
 
-	// vertical change?
-	if (H != oh)
-		resize_vert(H);
-	
-	if (Y != oy)
-	{
+			w->resize(X + SBAR_W, w->y(), W - SBAR_W, w->h());
+		}
 	}
-	if (! (Y == oy && H == oh))
-	{
-		resize_vert(
-	}
-*/
 }
 
 

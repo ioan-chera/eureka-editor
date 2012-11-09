@@ -47,6 +47,8 @@ extern std::map<int, sectortype_t *> sector_types;
 extern std::map<int, thingtype_t *>  thing_types;
 
 
+/* text item */
+
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	                       const char *_desc, char _category) :
 	Fl_Group(X, Y, W, H, ""),
@@ -55,10 +57,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 {
 	end();
 
-	int button_W = W;
-	int button_H = H - 4;
-
-	button = new Fl_Repeat_Button(X, Y + 2, button_W, button_H, desc.c_str());
+	button = new Fl_Repeat_Button(X + 4, Y + 2, W - 8, H - 4, desc.c_str());
 
 	button->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   	button->labelfont(FL_COURIER);
@@ -66,10 +65,10 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	button->when(FL_WHEN_CHANGED);
 
 	add(button);
-
-
-//	resizable(NULL);
 }
+
+
+/* image item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
 						   const char * _desc, char _category,
@@ -80,9 +79,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 {
 	end();
 
-
 	add(pic);
-
 
 	Fl_Box *box = new Fl_Box(FL_NO_BOX, X, Y + H - 32, W, 24, desc.c_str());
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
@@ -91,9 +88,9 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 
 	add(box);
 
-
 	resizable(NULL);
 }
+
 
 Browser_Item::~Browser_Item()
 {
@@ -243,7 +240,10 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	if (kind == 'T' || kind == 'F')
 		scroll->color(FL_BLACK, FL_BLACK);
 	else
+	{
 		scroll->color(FL_DARK3, FL_DARK3);
+		scroll->resize_horiz(true);
+	}
 
 	add(scroll);
 
@@ -307,8 +307,8 @@ bool UI_Browser_Box::Filter(bool force_update)
 
 	bool changes = false;
 
-	int left_X  = scroll->x() + 20;
-	int right_X = left_X + scroll->w() - 20;
+	int left_X  = scroll->x() + SBAR_W;
+	int right_X = left_X + scroll->w() - SBAR_W;
 
 	// current position
 	int cx = left_X;
@@ -606,8 +606,8 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 	int y = scroll->y();
 
-	int mx = scroll->x() + 20;
-	int mw = scroll->w() - 24;
+	int mx = scroll->x() + SBAR_W;
+	int mw = scroll->w() - SBAR_W;
 
 	char full_desc[256];
 
@@ -635,8 +635,8 @@ void UI_Browser_Box::Populate_LineTypes()
 
 	int y = scroll->y();
 
-	int mx = scroll->x() + 20;
-	int mw = scroll->w() - 24;
+	int mx = scroll->x() + SBAR_W;
+	int mw = scroll->w() - SBAR_W;
 
 	char full_desc[256];
 
@@ -665,8 +665,8 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 	int y = scroll->y();
 
-	int mx = scroll->x() + 20;
-	int mw = scroll->w() - 24;
+	int mx = scroll->x() + SBAR_W;
+	int mw = scroll->w() - SBAR_W;
 
 	char full_desc[256];
 

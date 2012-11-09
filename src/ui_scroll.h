@@ -30,6 +30,8 @@ class UI_Scroll : public Fl_Group
 private:
 	Fl_Scrollbar * scrollbar;
 
+	bool resize_horiz_;
+
 	int top_y, bottom_y;
 
 public:
@@ -42,6 +44,8 @@ public:
 	int  handle(int event);
 
 public:
+	void resize_horiz(bool r) { resize_horiz_ = r; }
+
 	void Add(Fl_Widget *w);
 	void Remove(Fl_Widget *w);
 	void Remove_first();
@@ -53,9 +57,6 @@ public:
 	void Init_sizes();
 
 private:
-	void resize_horiz(int X, int W);
-	void resize_vert (int Y, int H);
-
 	void do_scroll();
 	void calc_extents();
 	void reposition_all(int start_y);
