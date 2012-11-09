@@ -317,9 +317,9 @@ bool UI_Browser_Box::Filter(bool force_update)
 	// the highest visible widget on the current line
 	int highest = 0;
 
-	for (int i = 0 ; i < scroll->children() ; i++)
+	for (int i = 0 ; i < scroll->Children() ; i++)
 	{
-		Browser_Item *item = (Browser_Item *)scroll->child(i);
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
 
 		item->redraw();
 
@@ -364,7 +364,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 		highest = MAX(highest, item->h());
 	}
 
-	scroll->init_sizes();
+	scroll->Init_sizes();
 	scroll->redraw();
 
 	return changes;
@@ -463,17 +463,16 @@ static void SortPass(std::vector< Browser_Item * >& ARR, int gap, int total, int
 
 void UI_Browser_Box::Sort()
 {
-	// subtract 2 to ignore the scrollbars
-	int total = scroll->children();
+	int total = scroll->Children();
 
 	// transfer widgets to a local vector
 	std::vector< Browser_Item * > ARR;
 
 	for (int i = 0 ; i < total ; i++)
 	{
-		ARR.push_back( (Browser_Item *) scroll->child(0));
+		ARR.push_back( (Browser_Item *) scroll->Child(0));
 
-		scroll->remove_first();
+		scroll->Remove_first();
 	}
 
 	int method = sortm ? sortm->value() : 0;
@@ -488,7 +487,7 @@ void UI_Browser_Box::Sort()
 
 	// transfer them back to the scroll widget
 	for (int i = 0 ; i < total ; i++)
-		scroll->add(ARR[i]);
+		scroll->Add(ARR[i]);
 
 	// reposition them all
 	Filter(true);
@@ -594,7 +593,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
 		                                      full_desc, category,
 		                                      pic_w, pic_h, pic);
-		scroll->add(item);
+		scroll->Add(item);
 
 		cy += item->h();
 	}
@@ -623,7 +622,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 		item->button->callback(Browser_Item::thing_callback, NULL);
 		item->button->argument(TI->first);
 
-		scroll->add(item);
+		scroll->Add(item);
 
 		y += item->h() + 3;
 	}
@@ -653,7 +652,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		item->button->callback(Browser_Item::line_callback, NULL);
 		item->button->argument(TI->first);
 
-		scroll->add(item);
+		scroll->Add(item);
 
 		y += item->h() + 3;
 	}
@@ -682,7 +681,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 		item->button->callback(Browser_Item::sector_callback, NULL);
 		item->button->argument(TI->first);
 
-		scroll->add(item);
+		scroll->Add(item);
 
 		y += item->h() + 3;
 	}
@@ -692,7 +691,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 void UI_Browser_Box::Populate()
 {
 	// delete existing ones
-	scroll->clear();
+	scroll->Remove_all();
 
 	switch (kind)
 	{

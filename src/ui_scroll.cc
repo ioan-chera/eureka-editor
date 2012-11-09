@@ -22,16 +22,15 @@
 #include "ui_scroll.h"
 
 
-#define SBAR_W  16
-
-
 //
 // UI_Scroll Constructor
 //
 UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
-		Fl_Widget(X, Y, W, H, NULL),
+		Fl_Group(X, Y, W, H, NULL),
 		top_y(0), bottom_y(0)
 {
+	end();
+
 	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
 
 	scrollbar->align(FL_ALIGN_LEFT);
@@ -39,10 +38,9 @@ UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 	scrollbar->selection_color(FL_GRAY0);
 	scrollbar->callback(bar_callback, this);
 
-	pack = new Fl_Group(X + SBAR_W, Y, W - SBAR_W, H);
-	pack->end();
+	add(scrollbar);
 
-	pack->resizable(NULL);
+	resizable(NULL);
 }
 
 
@@ -61,12 +59,19 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 	int ow = w();
 	int oh = h();
 
+
+	Fl_Group::resize(X, Y, W, H);
+
+/*
+
 	// resize ourself first
 	Fl_Widget::resize(X, Y, W, H);
 
 	scrollbar->resize(X, Y, SBAR_W, H);
 
 	pack->resize(X + SBAR_W, Y, W - SBAR_W, H);
+
+*/
 
 /*
 	// horizontal change?
@@ -90,25 +95,9 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 }
 
 
-void UI_Scroll::draw()
-{
-	draw_box();
-	draw_child(scrollbar);
-	draw_child(pack);
-}
-
-
-void UI_Scroll::draw_child(Fl_Widget *w)
-{
-	w->clear_damage(FL_DAMAGE_ALL);
-	w->draw();
-	w->clear_damage();
-}
-
-
 int UI_Scroll::handle(int event)
 {
-	return scrollbar->handle(event) || pack->handle(event);
+	return Fl_Group::handle(event);
 }
 
 
@@ -136,7 +125,7 @@ void UI_Scroll::do_scroll()
 
 void UI_Scroll::calc_extents()
 {
-	if (children() == 0)
+	if (Children() == 0)
 	{
 		top_y = bottom_y = 0;
 		return;
@@ -145,9 +134,9 @@ void UI_Scroll::calc_extents()
 	   top_y =  999999;
 	bottom_y = -999999;
 
-	for (int i = 0 ; i < children() ; i++)
+	for (int i = 0 ; i < Children() ; i++)
 	{
-		Fl_Widget * w = child(i);
+		Fl_Widget * w = Child(i);
 
 		if (! w->visible())
 			continue;
@@ -160,9 +149,9 @@ void UI_Scroll::calc_extents()
 
 void UI_Scroll::reposition_all(int start_y)
 {
-	for (int i = 0 ; i < children() ; i++)
+	for (int i = 0 ; i < Children() ; i++)
 	{
-		Fl_Widget * w = child(i);
+		Fl_Widget * w = Child(i);
 
 		int y = start_y + (w->y() - top_y);
 
@@ -170,6 +159,8 @@ void UI_Scroll::reposition_all(int start_y)
 	}
 
 	calc_extents();
+
+	init_sizes();
 }
 
 
@@ -178,44 +169,52 @@ void UI_Scroll::reposition_all(int start_y)
 //  PASS-THROUGHS
 //
 
-void UI_Scroll::add(Fl_Widget *w)
+void UI_Scroll::Add(Fl_Widget *w)
 {
-	pack->add(w);
+	add(w);
 }
 
-void UI_Scroll::remove(Fl_Widget *w)
+void UI_Scroll::Remove(Fl_Widget *w)
 {
-	pack->remove(w);
+	remove(w);
 }
 
-void UI_Scroll::remove_first()
+void UI_Scroll::Remove_first()
 {
-	pack->remove(0);
+	remove(0);
 }
 
-void UI_Scroll::clear()
+void UI_Scroll::Remove_all()
 {
-	pack->clear();
-	pack->resizable(NULL);
-}
+	remove(scrollbar);
 
+	clear();
+	resizable(NULL);
 
-int UI_Scroll::children() const
-{
-	return pack->children();
-}
-
-Fl_Widget * UI_Scroll::child(int i) const
-{
-	return pack->child(i);
+	add(scrollbar);
 }
 
 
-void UI_Scroll::init_sizes()
+int UI_Scroll::Children() const
 {
-	pack->init_sizes();
+	// ignore scrollbar
+	return children() - 1;
+}
 
+Fl_Widget * UI_Scroll::Child(int i) const
+{
+	SYS_ASSERT(child(0) == scrollbar);
+
+	// skip scrollbar
+	return child(1 + i);
+}
+
+
+void UI_Scroll::Init_sizes()
+{
 	calc_extents();
+
+	init_sizes();
 
 	int total_h = bottom_y - top_y;
 

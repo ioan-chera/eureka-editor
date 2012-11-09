@@ -22,12 +22,13 @@
 #define __EUREKA_UI_SCROLL_H__
 
 
-class UI_Scroll : public Fl_Widget
+#define SBAR_W  16
+
+
+class UI_Scroll : public Fl_Group
 {
 private:
 	Fl_Scrollbar * scrollbar;
-
-	Fl_Group * pack;
 
 	int top_y, bottom_y;
 
@@ -39,24 +40,21 @@ public:
 	/* FLTK methods */
 	void resize(int X, int Y, int W, int H);
 	int  handle(int event);
-	void draw();
 
 public:
-	void add(Fl_Widget *w);
-	void remove(Fl_Widget *w);
-	void remove_first();
-	void clear();
+	void Add(Fl_Widget *w);
+	void Remove(Fl_Widget *w);
+	void Remove_first();
+	void Remove_all();
 
-	int children() const;
-	Fl_Widget * child(int i) const;
+	int Children() const;
+	Fl_Widget * Child(int i) const;
 
-	void init_sizes();
+	void Init_sizes();
 
 private:
 	void resize_horiz(int X, int W);
 	void resize_vert (int Y, int H);
-
-	void draw_child(Fl_Widget *w);
 
 	void do_scroll();
 	void calc_extents();
