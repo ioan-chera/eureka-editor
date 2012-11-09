@@ -181,7 +181,8 @@ void UI_Scroll::Remove(Fl_Widget *w)
 
 void UI_Scroll::Remove_first()
 {
-	remove(0);
+	// skip scrollbar
+	remove(1);
 }
 
 void UI_Scroll::Remove_all()
