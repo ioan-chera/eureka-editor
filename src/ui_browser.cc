@@ -81,7 +81,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 
 	add(pic);
 
-	Fl_Box *box = new Fl_Box(FL_NO_BOX, X, Y + H - 32, W, 24, desc.c_str());
+	Fl_Box *box = new Fl_Box(FL_NO_BOX, X + 4, Y + H - 28, W - 4, 24, desc.c_str());
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
 	box->labelcolor(FL_WHITE);
 	box->labelsize(12);
@@ -545,7 +545,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 
 	std::map<std::string, Img *>::iterator TI;
 
-	int cx = scroll->x() + 20;
+	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
 
 	char full_desc[256];
@@ -568,12 +568,12 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		if (image->width() >= 256 && image->height() == 128)
 			pic_h = 64;
 
-		int item_w = MAX(pic_w, 64) + 8;
-		int item_h = MAX(pic_h, 16) + 6 + 28;
+		int item_w = 8 + MAX(pic_w, 64) + 2;
+		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
 
 		char category = 0;
 
-		UI_Pic *pic = new UI_Pic(cx, cy, pic_w, pic_h);
+		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
 
 		if (kind == 'F')
 		{
