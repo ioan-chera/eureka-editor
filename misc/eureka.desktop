@@ -7,3 +7,4 @@ Icon=eureka
 Terminal=false
 Type=Application
 Categories=Application;Game;X-DoomEditor;
+StartupNotify=false
