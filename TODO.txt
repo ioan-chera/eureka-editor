@@ -6,14 +6,11 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
-!!!!  if -file and no -warp, use first map found in wad
+DONE:  default iwad dir = ~/.eureka/iwads
+       (mkdir it)
+       search it _IN_ADDITION_ to $DOOMWADDIR
 
-!!  support a plain number with -warp
-    (look for MAP## or E#M# lumps)
-
-+  default iwad dir = ~/.eureka/iwads
-   (mkdir it)
-   search it _IN_ADDITION_ to $DOOMWADDIR
+++  CTRL-B aka File/Build Nodes: build GL nodes for current wad
 
 
 !! don't create new linedef overlapping existing one
@@ -50,14 +47,10 @@ Editing
 Browser
 -------
 
--  fix to support current MIN_W
-
 
 
 Renderer
 --------
-
-!!  strafe left/right with mouse + ALT key
 
 
 Game / Port Definitions

@@ -48,6 +48,8 @@ General
 ++  CHECK screen
     -  can remove unused SideDefs and Sectors
 
+-  support DOOMWADPATH for finding iwads (see Chocolate Doom)
+
 
 Coding
 ------

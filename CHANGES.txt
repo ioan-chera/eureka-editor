@@ -15,6 +15,15 @@ CHANGES since 0.74
 
 - handle a pwad filename given without -file
 - more lax finding of patch lumps for textures
+- when no level is given, find first one in PWAD or IWAD
+- support plain numbers with -warp
+
+- look for iwads in the ~/.eureka/iwads directory
+- when searching for iwads, look for more names (e.g. "doom.wad")
+- if -iwad parameter is a bare name, look in iwad search path
+- if -iwad parameter has no extension, add ".wad"
+
+- render view: support strafing with ALT (or META) key
 
 - initial support for Odamex
 
