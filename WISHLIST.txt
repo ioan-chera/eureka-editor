@@ -209,6 +209,8 @@ Browser
 Game / Port Definitions
 -----------------------
 
+-  FreeDOOM: categorize the new textures
+
 -  a new category for BOOM's "property transfer" linetypes
 
 

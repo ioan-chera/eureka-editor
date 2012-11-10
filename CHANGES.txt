@@ -29,9 +29,13 @@ CHANGES since 0.74
   
 -  DOOM: fixed line types 33 and 34 (red and yellow locked doors)
 -  DOOM: restored the 'Computer Map' pickup
+-  DOOM: fixed "SW2xxx" textures not having the right category
   
 -  EDGE: added slope line types
 -  EDGE: added some missing things (jetpack, green keys, dog, stealth mons)
 -  EDGE: fleshed out sector types
 -  EDGE: fleshed out line types (hub exits, sliding doors, RTS)
+
+-  TNT: assigned the new textures into categories (e.g. "Crates")
+-  PLUTONIA: assigned the new textures into categories
 

@@ -6,6 +6,7 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
+
 DONE:  default iwad dir = ~/.eureka/iwads
        (mkdir it)
        search it _IN_ADDITION_ to $DOOMWADDIR
@@ -25,6 +26,10 @@ DONE:  default iwad dir = ~/.eureka/iwads
    a new WAD file.
 
 -  widget to show list of map names (option for custom name)
+
+?  by default, write logs to ~/.eureka/LOGS.txt
+ 
+   +  save early logs in memory
 
 
 
@@ -55,6 +60,4 @@ Renderer
 
 Game / Port Definitions
 -----------------------
-
-+  support TNT / Plutonia / FreeDOOM (new textures)
 
