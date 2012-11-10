@@ -134,6 +134,7 @@ public:
 
 	short FindLumpNum(const char *name);
 	short FindLevel(const char *name);
+	short FindFirstLevel();
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
@@ -148,13 +149,16 @@ public:
 	void EndWrite();
 
 	// remove the given lump(s)
+	// this will change index numbers on existing lumps
+	// (previous results of FindLumpNum are invalidated).
 	void RemoveLumps(short index, short count = 1);
 
 	// this removes the level marker PLUS all associated level
 	// lumps which follow it.
 	void RemoveLevel(short index);
 
-	// insert a new lump.  The second form is for a level marker.
+	// insert a new lump.
+	// The second form is for a level marker.
 	// The 'max_size' parameter (if >= 0) specifies the most data
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.

@@ -320,6 +320,16 @@ short Wad_file::FindLevel(const char *name)
 }
 
 
+short Wad_file::FindFirstLevel()
+{
+	if (levels.size() > 0)
+		return levels[0];
+	
+	else
+		return -1;  // none
+}
+
+
 Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 {
 	short k;
