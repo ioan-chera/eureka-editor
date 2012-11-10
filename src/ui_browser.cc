@@ -220,7 +220,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	if (strchr("FTO", kind))
 	{
-		pics = new Fl_Check_Button(X+W-78, cy, 20, 22, "Pics");
+		pics = new Fl_Check_Button(X+202, cy, 20, 22, "Pics");
 		pics->align(FL_ALIGN_RIGHT);
 		pics->value(1);
 ///???		pics->callback(filter_callback, this);
