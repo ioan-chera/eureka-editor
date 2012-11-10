@@ -373,9 +373,9 @@ static void InitFLTK()
 
     Fl::add_handler(Main_key_handler);
 
-	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
-
 	main_win->ShowBrowser(0);
+
+	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
 }
 
 
