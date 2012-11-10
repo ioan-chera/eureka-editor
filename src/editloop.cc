@@ -80,16 +80,14 @@ static int zoom_fit()
 	if (NumVertices == 0)
 		return 0;
 
-	double xzoom;
-	if (MapBound_hx - MapBound_lx)
-		xzoom = .95 * ScrMaxX / (MapBound_hx - MapBound_lx);
-	else
-		xzoom = 1;
-	double yzoom;
-	if (MapBound_hy - MapBound_ly)
-		yzoom = .9 * ScrMaxY / (MapBound_hy - MapBound_ly);
-	else
-		yzoom = 1;
+	double xzoom = 1;
+	double yzoom = 1;
+
+	if (MapBound_lx < MapBound_hx)
+		xzoom = ScrMaxX / (double)(MapBound_hx - MapBound_lx);
+
+	if (MapBound_ly < MapBound_hy)
+		yzoom = ScrMaxY / (double)(MapBound_hy - MapBound_ly);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
