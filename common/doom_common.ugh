@@ -189,7 +189,9 @@ texturegroup - "OTHER"
 texture u STONE2
 texture u STONE3
 texture u SW1BRIK
+texture u SW2BRIK
 texture u SW1STON1
+texture u SW2STON1
 texture u CEMENT1
 texture u CEMENT2
 texture u CEMENT3
@@ -197,6 +199,7 @@ texture u CEMENT4
 texture u CEMENT5
 texture u CEMENT6
 texture u SW1CMT
+texture u SW2CMT
 
 texture h BLODRIP1
 texture h BLODRIP2
@@ -239,8 +242,11 @@ texture h SP_FACE1
 texture h SP_FACE2
 texture h SP_HOT1
 texture h SW1HOT
+texture h SW2HOT
 texture h SW1SKIN
+texture h SW2SKIN
 texture h SW1SKULL
+texture h SW2SKULL
 texture h ZZZFACE1
 texture h ZZZFACE2
 texture h ZZZFACE3
@@ -273,7 +279,9 @@ texture h SP_DUDE2
 texture h SP_DUDE4
 texture h SP_DUDE5
 texture h SW1GSTON
+texture h SW2GSTON
 texture h SW1MARB
+texture h SW2MARB
 
 texture t BIGDOOR2
 texture t BIGDOOR3
@@ -335,30 +343,50 @@ texture t STEP4
 texture t STEPTOP
 texture t SUPPORT3
 texture t SW1BRCOM
+texture t SW2BRCOM
 texture t SW1BRN1
+texture t SW2BRN1
 texture t SW1BRN2
+texture t SW2BRN2
 texture t SW1BRNGN
+texture t SW2BRNGN
 texture t SW1BROWN
+texture t SW2BROWN
 texture t SW1DIRT
+texture t SW2DIRT
 texture t SW1EXIT
+texture t SW2EXIT
 texture t SW1GRAY
+texture t SW2GRAY
 texture t SW1GRAY1
+texture t SW2GRAY1
 texture t SW1PIPE
+texture t SW2PIPE
 texture t SW1SLAD
+texture t SW2SLAD
 texture t SW1STARG
+texture t SW2STARG
 texture t SW1STON2
+texture t SW2STON2
 texture t SW1STONE
+texture t SW2STONE
 texture t SW1VINE
+texture t SW2VINE
 
 texture t METAL
 texture t METAL1
 texture t MIDBRN1
 texture t MIDGRATE
 texture t SW1GARG
+texture t SW2GARG
 texture t SW1LION
+texture t SW2LION
 texture t SW1MET2
+texture t SW2MET2
 texture t SW1METAL
+texture t SW2METAL
 texture t SW1SATYR
+texture t SW2SATYR
 
 texture n ROCKRED1
 texture n ROCKRED2
@@ -366,7 +394,9 @@ texture n ROCKRED3
 texture n SP_ROCK1
 texture n STONE
 texture n SW1ROCK
+texture n SW2ROCK
 texture n SW1STON6
+texture n SW2STON6
 
 texture t BIGDOOR1
 texture t BLAKWAL1
@@ -400,11 +430,17 @@ texture t STEP6
 texture t STEPLAD1
 texture t SUPPORT2
 texture t SW1BLUE
+texture t SW2BLUE
 texture t SW1COMM
+texture t SW2COMM
 texture t SW1COMP
+texture t SW2COMP
 texture t SW1MOD1
+texture t SW2MOD1
 texture t SW1STRTN
+texture t SW2STRTN
 texture t SW1TEK
+texture t SW2TEK
 texture t TEKBRON1
 texture t TEKBRON2
 texture t TEKGREN1
@@ -422,6 +458,7 @@ texture u BIGDOOR5
 texture u BIGDOOR6
 texture u BIGDOOR7
 texture u SW1WOOD
+texture u SW2WOOD
 texture u WOOD1
 texture u WOOD3
 texture u WOOD4

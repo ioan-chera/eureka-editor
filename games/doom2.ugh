@@ -153,6 +153,7 @@ texture n STONE5
 texture n STONE6
 texture n STONE7
 texture n SW1ZIM
+texture n SW2ZIM
 texture n TANROCK2
 texture n TANROCK3
 texture n TANROCK4
@@ -211,7 +212,9 @@ texture u STUCCO2
 texture u STUCCO3
 
 texture u SW1PANEL
+texture u SW2PANEL
 texture u SW1WDMET
+texture u SW2WDMET
 texture u WOOD10
 texture u WOOD12
 texture u WOOD6
