@@ -126,7 +126,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 			memcpy(picname, pnames + 8*pname_idx, 8);
 			picname[8] = 0;
 
-DebugPrintf("-- %d patch [%s]\n", j, picname);
+//DebugPrintf("-- %d patch [%s]\n", j, picname);
 			Lump_c *lump = W_FindPatchLump(picname);
 
 			if (! lump ||

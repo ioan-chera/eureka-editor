@@ -414,6 +414,17 @@ const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
 
 	sprintf(name_buf, "%s/%s", dir_name, iwad_name);
 
+	DebugPrintf("  trying: %s\n", name_buf);
+
+	if (FileExists(name_buf))
+		return StringDup(name_buf);
+	
+	// try uppercasing the name, to find e.g. DOOM2.WAD
+
+	y_strupr(name_buf + strlen(dir_name) + 1);
+
+	DebugPrintf("  trying: %s\n", name_buf);
+
 	if (FileExists(name_buf))
 		return StringDup(name_buf);
 
@@ -495,6 +506,8 @@ static const char * DetermineGame(const char *iwad_name)
 	strcpy(game_name, fl_filename_name(iwad_name));
 
 	fl_filename_setext(game_name, "");
+
+	y_strlowr(game_name);
 
 	LogPrintf("IWAD name: '%s'\n", iwad_name);
 	LogPrintf("Game name: '%s'\n", game_name);
