@@ -387,7 +387,7 @@ const char *SearchDirForIWAD(const char *dir_name)
 }
 
 
-const char *DetermineIWAD()
+static const char * DetermineIWAD()
 {
 	const char *path;
 
@@ -435,7 +435,7 @@ const char *DetermineIWAD()
 }
 
 
-const char *DetermineGame(const char *iwad_name)
+static const char * DetermineGame(const char *iwad_name)
 {
 	// FIXME: allow override via -game parameter
 
@@ -449,6 +449,52 @@ const char *DetermineGame(const char *iwad_name)
 	LogPrintf("Game name: '%s'\n", game_name);
 
 	return strdup(game_name);
+}
+
+
+static const char * DetermineLevel()
+{
+	int level_number = 0;
+
+	// handle a numeric level number, e.g. -warp 15
+	if (Level_name && Level_name[0])
+	{
+		if (! isdigit(Level_name[0]))
+			return Level_name;
+
+		level_number = atoi(Level_name);
+	}
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		Wad_file *wad = (pass == 0) ? edit_wad : base_wad;
+
+		if (! wad)
+			continue;
+
+		short lev_idx;
+
+		if (level_number > 0)
+		{
+			lev_idx = wad->FindLevelByNumber(level_number);
+			if (lev_idx < 0)
+				FatalError("Level '%d' not found (no matches)\n", level_number);
+		}
+		else
+		{
+			lev_idx = wad->FindFirstLevel();
+			if (lev_idx < 0)
+				FatalError("No levels found in %s!\n", (pass == 0) ? "PWAD" : "IWAD");
+		}
+
+		Lump_c *lump = wad->GetLump(lev_idx);
+		SYS_ASSERT(lump);
+
+		return StringDup(lump->Name());
+	}
+
+	// cannot get here
+	return "XXX";
 }
 
 
@@ -640,37 +686,12 @@ int main(int argc, char *argv[])
 	}
 
 	
-	if ((! Level_name || ! Level_name[0]) && edit_wad)
-	{
-		short lev = edit_wad->FindFirstLevel();
-
-		if (lev < 0)
-			FatalError("No levels found in PWAD!\n");
-		else
-		{
-			Lump_c * lump = edit_wad->GetLump(lev);
-			Level_name = StringDup(lump->Name());
-		}
-	}
-
-	if (! Level_name || ! Level_name[0])
-	{
-		short lev = base_wad->FindFirstLevel();
-
-		if (lev < 0)
-			FatalError("No levels found in IWAD!\n");
-		else
-		{
-			Lump_c * lump = base_wad->GetLump(lev);
-			Level_name = StringDup(lump->Name());
-		}
-	}
+	Level_name = DetermineLevel();
 
 
 	W_LoadPalette();
 
 	Editor_Init();
-
 
     InitFLTK();
 
