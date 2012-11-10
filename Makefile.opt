@@ -124,6 +124,8 @@ install: bin
 	install -o root -m 755 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 755 ports/*.* $(INSTALL_DIR)/ports
 #	install -o root -m 755 mods/*.*  $(INSTALL_DIR)/mods
+	xdg-desktop-menu  install --novendor misc/eureka.desktop
+	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 
 uninstall:
 	rm -v $(INSTALL_PREFIX)/bin/$(PROGRAM)
