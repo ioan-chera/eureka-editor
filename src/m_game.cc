@@ -438,7 +438,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
 
-			if (texture_groups.find(group) == texture_groups.end())
+			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
 				LogPrintf("%s(%d): unknown texture group '%c'.\n",
 						  basename, lineno, group);
@@ -455,7 +455,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
 
-			if (texture_groups.find(group) == texture_groups.end())
+			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
 				LogPrintf("%s(%d): unknown texture group '%c'.\n",
 						basename, lineno, group);

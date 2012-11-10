@@ -377,7 +377,8 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 	{
 		char cat = cat_letters[category->value()];
 
-		if (cat != item->category)
+		if (! (cat == tolower(item->category) ||
+		       (cat == 'X' && isupper(item->category))))
 			return false;
 	}
 
