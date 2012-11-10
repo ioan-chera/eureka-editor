@@ -356,7 +356,7 @@ static void InitFLTK()
 		int   argc = 1;
 		char *argv[2];
 
-		argv[0] = strdup("Eureka.exe");
+		argv[0] = StringDup("Eureka.exe");
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
@@ -384,18 +384,38 @@ static void TermFLTK()
 }
 
 
-const char *SearchDirForIWAD(const char *dir_name)
+const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
 {
-	LogPrintf("Looking for IWAD in dir: %s\n", dir_name);
+	if (! iwad_name)
+	{
+		LogPrintf("Searching for IWAD in dir: %s\n", dir_name);
 
-	// TODO: have an iwad list in EUREKA.CFG, try each in list
+		const char *result;
+
+		// TODO: have an iwad list in EUREKA.CFG, try each in list
+
+		static const char * iwad_names[] =
+		{
+			"doom2.wad", "doom.wad",
+			"tnt.wad", "plutonia.wad", "freedoom.wad", NULL
+		};
+
+		for (int i = 0 ; iwad_names[i] ; i++)
+		{
+			result = SearchDirForIWAD(dir_name, iwad_names[i]);
+			if (result) return result;
+		}
+
+		return NULL;
+	}
+
 
 	char name_buf[FL_PATH_MAX];
 
-	sprintf(name_buf, "%s/%s", dir_name, "doom2.wad");
+	sprintf(name_buf, "%s/%s", dir_name, iwad_name);
 
 	if (FileExists(name_buf))
-		return strdup(name_buf);
+		return StringDup(name_buf);
 
 	return NULL;
 }
@@ -406,8 +426,6 @@ static const char * DetermineIWAD()
 	const char *path;
 
 	// handle -iwad parameter
-	// TODO: if has no path _and_ not exist _and_ $DOOMWADDIR exists
-	//       THEN try prepending $DOOMWADDIR
 	if (Iwad)
 	{
 		// handle a directory name
@@ -419,33 +437,52 @@ static const char * DetermineIWAD()
 
 			FatalError("Unable to find any IWAD in directory: %s\n", Iwad);
 		}
-		else
-		{
-			// FIXME: if extension is missing, add ".wad"
 
-			return Iwad;
+		// if extension is missing, add ".wad"
+		if (! HasExtension(Iwad))
+		{
+			Iwad = ReplaceExtension(Iwad, "wad");
 		}
+
+		// handle a full path
+		if (FindBaseName(Iwad) != Iwad)
+			return Iwad;
+
+		// FALL THROUGH to below code
+		// (since Iwad contains a bare name)
 	}
 
-	// FIXME: "standard" locations....
+	static char dir_name[FL_PATH_MAX];
+
+	// 1. look in ~/.eureka/iwads first
+
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir);
+	dir_name[FL_PATH_MAX-1] = 0;
+
+	path = SearchDirForIWAD(dir_name, Iwad);
+	if (path)
+		return path;
+
+	// 2. look in $DOOMWADDIR
+
+	/* WISH: support $DOOMWADPATH */
 
 	const char *doomwaddir = getenv("DOOMWADDIR");
-
 	if (doomwaddir)
 	{
-		doomwaddir = strdup(doomwaddir);
-
-		path = SearchDirForIWAD(doomwaddir);
+		path = SearchDirForIWAD(StringDup(doomwaddir), Iwad);
 		if (path)
 			return path;
 	}
 
-	path = SearchDirForIWAD(".");
+	// 3. look in current directory
+
+	path = SearchDirForIWAD(".", Iwad);
 	if (path)
 		return path;
 
 	FatalError("Unable to find any IWAD\n");
-	return "";
+	return ""; /* NOT REACHED */
 }
 
 
@@ -462,7 +499,7 @@ static const char * DetermineGame(const char *iwad_name)
 	LogPrintf("IWAD name: '%s'\n", iwad_name);
 	LogPrintf("Game name: '%s'\n", game_name);
 
-	return strdup(game_name);
+	return StringDup(game_name);
 }
 
 
