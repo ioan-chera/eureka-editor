@@ -1313,30 +1313,5 @@ void Editor_WriteUser(FILE *fp)
 }
 
 
-void Editor_Loop()
-{
-	UpdateHighlight();
-
-    for (;;)
-    {
-        Fl::wait(0.2);
-
-        if (edit.RedrawMap)
-        {
-            main_win->canvas->redraw();
-
-            edit.RedrawMap = 0;
-        }
-
-		if (want_quit)
-		{
-			if (Main_ConfirmQuit("quit"))
-				break;
-
-			want_quit = false;
-		}
-    }
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

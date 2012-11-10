@@ -71,7 +71,6 @@ extern Editor_State_c edit;
 
 
 void Editor_Init();
-void Editor_Loop();
 
 
 extern int InputSectorType(int x0, int y0, int *number);

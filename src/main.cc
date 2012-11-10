@@ -360,6 +360,8 @@ static void InitFLTK()
     Fl::add_handler(Main_key_handler);
 
 	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
+
+	main_win->ShowBrowser(0);
 }
 
 
@@ -465,6 +467,32 @@ bool Main_ConfirmQuit(const char *action)
 		return true;
 
 	return false;
+}
+
+
+void Main_Loop()
+{
+	UpdateHighlight();
+
+    for (;;)
+    {
+        Fl::wait(0.2);
+
+        if (edit.RedrawMap)
+        {
+            main_win->canvas->redraw();
+
+            edit.RedrawMap = 0;
+        }
+
+		if (want_quit)
+		{
+			if (Main_ConfirmQuit("quit"))
+				break;
+
+			want_quit = false;
+		}
+    }
 }
 
 
@@ -639,7 +667,7 @@ int main(int argc, char *argv[])
 	main_win->UpdateTotals();
 
 
-	Editor_Loop();
+	Main_Loop();
 
 
 // FIXME: use dialog box instead
