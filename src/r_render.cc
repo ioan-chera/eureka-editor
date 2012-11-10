@@ -1729,6 +1729,28 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 			dx = 0;
 	}
 
+	if (mod == KM_ALT)
+	{
+		if (dx)
+		{
+			view.x += view.Sin * dx * 2;
+			view.y -= view.Cos * dx * 2;
+
+			dx = 0;
+		}
+/*
+		dy = -dy;  // CONFIG OPT
+
+		if (dy)
+		{
+			view.x += view.Cos * dy * 2;
+			view.y += view.Sin * dy * 2;
+
+			dy = 0;
+		}
+*/
+	}
+
 	if (dx)
 	{
 		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
