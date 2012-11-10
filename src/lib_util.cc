@@ -145,12 +145,24 @@ int y_vsnprintf (char *buf, size_t size, const char *fmt, va_list args)
  *  y_strupr
  *  Upper-case a string
  */
-void y_strupr (char *string)
+void y_strupr (char *str)
 {
-	while (*string)
+	for (; *str; str++)
 	{
-		*string = toupper (*string);
-		string++;
+		*str = toupper(*str);
+	}
+}
+
+
+/*
+ *  y_strlowr
+ *  Lower-case a string
+ */
+void y_strlowr (char *str)
+{
+	for (; *str; str++)
+	{
+		*str = tolower(*str);
 	}
 }
 
