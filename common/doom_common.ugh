@@ -397,6 +397,9 @@ texture n SW1ROCK
 texture n SW2ROCK
 texture n SW1STON6
 texture n SW2STON6
+texture n SKY1
+texture n SKY2
+texture n SKY3
 
 texture t BIGDOOR1
 texture t BLAKWAL1
@@ -546,6 +549,8 @@ flat n FLOOR6_2
 flat t FLOOR7_1
 flat h FLOOR7_2
 
+flat n F_SKY1
+
 flat n FWATER1
 flat n FWATER2
 flat n FWATER3
@@ -567,12 +572,10 @@ flat t NUKAGE1
 flat t NUKAGE2
 flat t NUKAGE3
 
-
 flat h SFLR6_1
 flat h SFLR6_4
 flat h SFLR7_1
 flat h SFLR7_4
-
 
 flat t STEP1
 flat t STEP2
