@@ -76,6 +76,9 @@ private:
 };
 
 
+//------------------------------------------------------------------------
+
+
 class Wad_file
 {
 friend class Lump_c;
@@ -138,6 +141,10 @@ public:
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
+	short NumLevels() const { return (short)levels.size(); }
+
+	short GetLevel(short index);
+
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change
 	// in directory size or location, and directory contents (CRC).
@@ -150,7 +157,7 @@ public:
 
 	// remove the given lump(s)
 	// this will change index numbers on existing lumps
-	// (previous results of FindLumpNum are invalidated).
+	// (previous results of FindLumpNum or GetLevel are invalidated).
 	void RemoveLumps(short index, short count = 1);
 
 	// this removes the level marker PLUS all associated level

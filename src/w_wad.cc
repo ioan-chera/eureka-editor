@@ -330,6 +330,14 @@ short Wad_file::FindFirstLevel()
 }
 
 
+short Wad_file::GetLevel(short index)
+{
+	SYS_ASSERT(0 <= index && index < NumLevels());
+
+	return levels[index];
+}
+
+
 Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 {
 	short k;
