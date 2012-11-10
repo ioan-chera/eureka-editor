@@ -324,7 +324,6 @@ short Wad_file::FindFirstLevel()
 {
 	if (levels.size() > 0)
 		return levels[0];
-	
 	else
 		return -1;  // none
 }

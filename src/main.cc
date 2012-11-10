@@ -639,8 +639,32 @@ int main(int argc, char *argv[])
 		MasterDir_Add(edit_wad);
 	}
 
+	
+	if ((! Level_name || ! Level_name[0]) && edit_wad)
+	{
+		short lev = edit_wad->FindFirstLevel();
+
+		if (lev < 0)
+			FatalError("No levels found in PWAD!\n");
+		else
+		{
+			Lump_c * lump = edit_wad->GetLump(lev);
+			Level_name = StringDup(lump->Name());
+		}
+	}
+
 	if (! Level_name || ! Level_name[0])
-		Level_name = "MAP01";  // FIXME
+	{
+		short lev = base_wad->FindFirstLevel();
+
+		if (lev < 0)
+			FatalError("No levels found in IWAD!\n");
+		else
+		{
+			Lump_c * lump = base_wad->GetLump(lev);
+			Level_name = StringDup(lump->Name());
+		}
+	}
 
 
 	W_LoadPalette();
