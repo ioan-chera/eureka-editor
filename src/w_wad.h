@@ -137,6 +137,7 @@ public:
 
 	short FindLumpNum(const char *name);
 	short FindLevel(const char *name);
+	short FindLevelByNumber(int number);
 	short FindFirstLevel();
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);

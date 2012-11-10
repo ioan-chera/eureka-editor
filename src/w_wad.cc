@@ -320,6 +320,33 @@ short Wad_file::FindLevel(const char *name)
 }
 
 
+short Wad_file::FindLevelByNumber(int number)
+{
+	// sanity check
+	if (number <= 0 || number > 99)
+		return -1;
+
+	char buffer[10];
+	short index;
+
+	 // try MAP## first
+	sprintf(buffer, "MAP%02d", number);
+
+	index = FindLevel(buffer);
+	if (index >= 0)
+		return index;
+
+	// otherwise try E#M#
+	sprintf(buffer, "E%dM%d", MAX(1, number / 10), number % 10);
+
+	index = FindLevel(buffer);
+	if (index >= 0)
+		return index;
+
+	return -1;  // not found
+}
+
+
 short Wad_file::FindFirstLevel()
 {
 	if (levels.size() > 0)
