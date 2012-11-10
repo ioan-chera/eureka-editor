@@ -365,6 +365,12 @@ static bool Browser_Key(int key, keymod_e mod)
 		CMD_ToggleBrowser();
 	}
 
+	// [T], [F] etc : open browser at specific kind
+	else if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
+	{
+		CMD_SetBrowser(key);
+	}
+
 	// [C]: cycle through categories in the Browser
 	else if (key == 'C')
 	{
@@ -902,11 +908,11 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 
 
+#if 0
 	// [T] Transfer properties to selected objects (AJA)
 	else if (key == 'T' && edit.Selected 
 			&& edit.highlighted.num >= 0)
 	{
-#if 0
 		switch (edit.obj_type)
 		{
 			case OBJ_SECTORS:
@@ -925,8 +931,8 @@ bool Editor_Key(int key, keymod_e mod)
 				Beep ();
 				break;
 		}
-#endif
 	}
+#endif
 
 
 	// [&] Show object numbers

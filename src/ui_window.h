@@ -44,7 +44,7 @@
 
 #define BUILD_BG   fl_gray_ramp(9)
 
-#define MIN_BROWSER_W  280
+#define MIN_BROWSER_W  260
 
 
 class Wad_file;
@@ -96,8 +96,8 @@ public:
 	void SetCursor(Fl_Cursor shape);
 
 	// show or hide the Browser panel.
-	// kind is 0 to hide, '/' to toggle, 't' for textures, 'f' flats,
-	//         'o' for thing types, 'l' line types, 's' sector types.
+	// kind is 0 to hide, '/' to toggle, 'T' for textures, 'F' flats,
+	//         'O' for thing types, 'L' line types, 'S' sector types.
 	void ShowBrowser(char kind);
 
 	void UpdateTotals();
