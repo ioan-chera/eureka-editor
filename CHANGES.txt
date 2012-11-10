@@ -2,36 +2,36 @@
 CHANGES since 0.74
 ==================
 
-+ support a proper unix-style installation
-
-+ made a proper web-site (using PmWiki)
-
-+ texture browser can be resized by dragging the edge
-
-- log file is only created when --log is used
-- the --quiet option (-q) suppresses output to stdout
-- new --debug option (-d) enables debug messages
-- allow long options to begin with '-' or '--'
-
-- handle a pwad filename given without -file
-- more lax finding of patch lumps for textures
-- when no level is given, find first one in PWAD or IWAD
-- support plain numbers with -warp
-
-- look for iwads in the ~/.eureka/iwads directory
-- when searching for iwads, look for more names (e.g. "doom.wad")
-- if -iwad parameter is a bare name, look in iwad search path
-- if -iwad parameter has no extension, add ".wad"
-
-- render view: support strafing with ALT (or META) key
-
-- initial support for Odamex
-
-- DOOM: fixed line types 33 and 34 (red and yellow locked doors)
-- DOOM: restored the 'Computer Map' pickup
-
-- EDGE: added slope line types
-- EDGE: added some missing things (jetpack, green keys, dog, stealth mons)
-- EDGE: fleshed out sector types
-- EDGE: fleshed out line types (hub exits, sliding doors, RTS)
++  support a proper unix-style installation
+  
++  made a proper web-site (using PmWiki)
+  
++  texture browser can be resized by dragging the edge
+  
+-  log file is only created when --log is used
+-  the --quiet option (-q) suppresses output to stdout
+-  new --debug option (-d) enables debug messages
+-  allow long options to begin with '-' or '--'
+  
+-  handle a pwad filename given without -file
+-  more lax finding of patch lumps for textures
+-  when no level is given, find first one in PWAD or IWAD
+-  support plain numbers with -warp
+  
+-  look for iwads in the ~/.eureka/iwads directory
+-  when searching for iwads, look for more names (e.g. "doom.wad")
+-  if -iwad parameter is a bare name, look in iwad search path
+-  if -iwad parameter has no extension, add ".wad"
+  
+-  render view: support strafing with ALT (or META) key
+  
+-  initial support for Odamex
+  
+-  DOOM: fixed line types 33 and 34 (red and yellow locked doors)
+-  DOOM: restored the 'Computer Map' pickup
+  
+-  EDGE: added slope line types
+-  EDGE: added some missing things (jetpack, green keys, dog, stealth mons)
+-  EDGE: fleshed out sector types
+-  EDGE: fleshed out line types (hub exits, sliding doors, RTS)
 
