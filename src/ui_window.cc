@@ -89,9 +89,11 @@ UI_MainWin::UI_MainWin() :
 	ey = ey - info_bar->h();
 
 
-	canvas = new UI_Canvas(0, cy, w() - panel_W - MIN_BROWSER_W, ey - cy);
+	int browser_W = MIN_BROWSER_W + 36;
 
-	browser = new UI_Browser(w() - panel_W - MIN_BROWSER_W, cy, MIN_BROWSER_W, ey - cy);
+	canvas = new UI_Canvas(0, cy, w() - panel_W - browser_W, ey - cy);
+
+	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
 
 	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, canvas, browser);
 	add(tile);
