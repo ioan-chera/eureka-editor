@@ -187,7 +187,7 @@ extern int  init_progress;
 extern bool want_quit;
 
 extern const char *install_dir;  // install dir (e.g. /usr/share/eureka) 
-extern const char *home_dir;     // home dir (e.g. $HOME/.eureka) or NULL
+extern const char *home_dir;     // home dir (e.g. $HOME/.eureka)
 
 extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...

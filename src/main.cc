@@ -187,6 +187,30 @@ void FatalError(const char *fmt, ...)
 }
 
 
+static void CreateHomeDirs()
+{
+	SYS_ASSERT(home_dir);
+
+	// try to create home_dir (doesn't matter if it already exists)
+	FileMakeDir(home_dir);
+
+	static char dir_name[FL_PATH_MAX];
+
+	static const char *const subdirs[] =
+	{
+		"cache", "iwads", "games", "ports", "mods", NULL
+	};
+
+	for (int i = 0 ; subdirs[i] ; i++)
+	{
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", home_dir, subdirs[i]);
+		dir_name[FL_PATH_MAX-1] = 0;
+
+		FileMakeDir(dir_name);
+	}
+}
+
+
 static void Determine_HomeDir(const char *argv0)
 {
 	// already set by cmd-line option?
@@ -203,26 +227,16 @@ static void Determine_HomeDir(const char *argv0)
 
 	home_dir = path;
 
-	// try to create it (doesn't matter if it already exists)
-	FileMakeDir(home_dir);
 #endif
 	}
 
-	///---  if (! home_dir)
-	///---    home_dir = StringDup(".");
+	if (! home_dir)
+		FatalError("Unable to find home directory!\n");
 
-    LogPrintf("Home dir: %s\n", home_dir ? home_dir : "NOT SET");
+    LogPrintf("Home dir: %s\n", home_dir);
 
-	// create cache directory too
-	if (home_dir)
-	{
-		static char cache_dir[FL_PATH_MAX];
-
-		snprintf(cache_dir, FL_PATH_MAX, "%s/cache", home_dir);
-		cache_dir[FL_PATH_MAX-1] = 0;
-
-		FileMakeDir(cache_dir);
-	}
+	// create cache directory (etc)
+	CreateHomeDirs();
 }
 
 
