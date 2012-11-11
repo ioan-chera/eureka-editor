@@ -22,6 +22,10 @@
 #include "levels.h"
 #include "w_wad.h"
 
+#include "ui_window.h"
+#include "ui_nodes.h"
+
+
 #include "glbsp.h"
 
 
@@ -32,6 +36,8 @@ static int display_mode = glbsp::DIS_INVALID;
 static int progress_limit;
 
 static char message_buf[MSG_BUF_LEN];
+
+static UI_NodeDialog * dialog;
 
 
 static const char *glbsp_ErrorString(glbsp::glbsp_ret_e ret)
@@ -70,6 +76,8 @@ static void GB_PrintMsg(const char *str, ...)
 	va_end(args);
 
 	message_buf[MSG_BUF_LEN-1] = 0;
+
+	dialog->Print(message_buf);
 
 	LogPrintf("GLBSP: %s", message_buf);
 }
@@ -199,9 +207,9 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.output_file = glbsp::GlbspStrDup(out_name);
 
 	nb_info.quiet = TRUE;
-	nb_info.pack_sides = FALSE;
+	nb_info.pack_sides = FALSE;  // CONFIG ITEM
 	nb_info.force_normal = TRUE;
-	nb_info.fast = TRUE;
+	nb_info.fast = FALSE;   // CONFIG ITEM
 
 	glbsp::glbsp_ret_e  ret;
 
@@ -255,6 +263,12 @@ void CMD_BuildNodes()
 		Beep();
 		return;
 	}
+
+	dialog = new UI_NodeDialog();
+
+	dialog->set_modal();
+	dialog->show();
+
 
 	DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
 

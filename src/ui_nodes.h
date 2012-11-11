@@ -29,7 +29,7 @@ public:
 
 	Fl_Progress *progress;
 
-	Fl_Browser *messages;
+	Fl_Browser *browser;
 
 	Fl_Button * but_OK;
 	Fl_Button * but_Cancel;
@@ -48,9 +48,9 @@ public:
 	void Print(const char *str);
 
 private:
-	static void node_dialog_Close (Fl_Widget *, void *);
-	static void node_dialog_Cancel(Fl_Widget *, void *);
-	static void node_dialog_OK    (Fl_Widget *, void *);
+	static void  close_callback(Fl_Widget *, void *);
+	static void cancel_callback(Fl_Widget *, void *);
+	static void     ok_callback(Fl_Widget *, void *);
 };
 
 

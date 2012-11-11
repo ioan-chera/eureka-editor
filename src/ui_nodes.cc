@@ -20,17 +20,18 @@
 
 #include "main.h"
 #include "ui_window.h"
+#include "ui_nodes.h"
 
 
-static void node_dialog_Close(Fl_Widget *w, void *data)
+void UI_NodeDialog::close_callback(Fl_Widget *w, void *data)
 {
 }
 
-static void node_dialog_Cancel(Fl_Widget *w, void *data)
+void UI_NodeDialog::cancel_callback(Fl_Widget *w, void *data)
 {
 }
 
-static void node_dialog_OK(Fl_Widget *w, void *data)
+void UI_NodeDialog::ok_callback(Fl_Widget *w, void *data)
 {
 }
 
@@ -39,20 +40,28 @@ static void node_dialog_OK(Fl_Widget *w, void *data)
 //  Constructor
 //
 UI_NodeDialog::UI_NodeDialog() :
-	    Fl_Double_Window(500, 300, EUREKA_TITLE)
+	    Fl_Double_Window(400, 400, "Building Nodes")
 {
 	end(); // cancel begin() in Fl_Group constructor
 
 	size_range(w(), h());
 
-	callback((Fl_Callback *) node_dialog_Close);
+	callback((Fl_Callback *) close_callback, this);
 
 	color(FL_DARK3, FL_DARK3);
-//  color(WINDOW_BG, WINDOW_BG);
+
 
 	int cy = 0;
 
 	// FIXME !!!
+
+
+	browser = new Fl_Browser(0, 0, w(), h() - 100);
+
+	add(browser);
+
+
+	resizable(browser);
 }
 
 
@@ -77,7 +86,9 @@ void UI_NodeDialog::SetProg(int perc)
 
 void UI_NodeDialog::Print(const char *str)
 {
-	// FIXME
+	// FIXME : split lines
+
+	browser->add(str);
 }
 
 
