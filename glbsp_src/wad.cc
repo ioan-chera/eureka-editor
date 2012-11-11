@@ -40,6 +40,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 static FILE *in_file = NULL;
 static FILE *out_file = NULL;
 
@@ -1739,3 +1742,5 @@ void ReportFailedLevels(void)
   PrintMsg("\nEnd of problem report.\n");
 }
 
+
+}  // namespace glbsp

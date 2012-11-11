@@ -23,6 +23,9 @@
 
 #include "structs.h"
 
+namespace glbsp
+{
+
 // check the relationship between the given box and the partition
 // line.  Returns -1 if box is on left side, +1 if box is on right
 // size, or 0 if the line intersects the box.
@@ -81,5 +84,6 @@ void RoundOffBspTree(node_t *root);
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);
 
+}  // namespace glbsp
 
 #endif /* __GLBSP_NODE_H__ */

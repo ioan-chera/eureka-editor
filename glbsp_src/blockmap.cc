@@ -38,6 +38,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_BLOCKMAP  0
 
 
@@ -615,3 +618,5 @@ void PutBlockmap(void)
   FreeBlockmap();
 }
 
+
+}  // namespace glbsp

@@ -25,6 +25,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 struct node_s;
 struct sector_s;
 struct superblock_s;
@@ -411,5 +414,7 @@ void FreeLevel(void);
 
 // save the newly computed NODE info etc..
 void SaveLevel(node_t *root_node);
+
+}  // namespace glbsp
 
 #endif /* __GLBSP_LEVEL_H__ */

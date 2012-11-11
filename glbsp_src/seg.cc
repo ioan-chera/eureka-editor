@@ -56,6 +56,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define PRECIOUS_MULTIPLY  100
 
 #define SEG_FAST_THRESHHOLD  200
@@ -1241,3 +1244,5 @@ void AddMinisegs(seg_t *part,
   }
 }
 
+
+}  // namespace glbsp

@@ -38,6 +38,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 const nodebuildinfo_t *cur_info = NULL;
 const nodebuildfuncs_t *cur_funcs = NULL;
 volatile nodebuildcomms_t *cur_comms = NULL;
@@ -134,7 +137,7 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
     HANDLE_BOOLEAN(abbrev, field)  \
     HANDLE_BOOLEAN(name, field)
 
-glbsp_ret_e GlbspParseArgs(nodebuildinfo_t *info, 
+glbsp_ret_e ParseArgs(nodebuildinfo_t *info, 
     volatile nodebuildcomms_t *comms,
     const char ** argv, int argc)
 {
@@ -309,7 +312,7 @@ glbsp_ret_e GlbspParseArgs(nodebuildinfo_t *info,
   return GLBSP_E_OK;
 }
 
-glbsp_ret_e GlbspCheckInfo(nodebuildinfo_t *info,
+glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms)
 {
   cur_comms = comms;
@@ -480,7 +483,7 @@ static glbsp_ret_e HandleLevel(void)
 
 /* ----- main routine -------------------------------------- */
 
-glbsp_ret_e GlbspBuildNodes(const nodebuildinfo_t *info,
+glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
     const nodebuildfuncs_t *funcs, volatile nodebuildcomms_t *comms)
 {
   char *file_msg;
@@ -590,3 +593,5 @@ glbsp_ret_e GlbspBuildNodes(const nodebuildinfo_t *info,
   return ret;
 }
 
+
+}  // namespace glbsp

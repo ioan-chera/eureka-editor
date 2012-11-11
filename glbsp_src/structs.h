@@ -24,6 +24,9 @@
 #include "system.h"
 
 
+namespace glbsp
+{
+
 /* ----- The wad structures ---------------------- */
 
 // wad header
@@ -249,5 +252,7 @@ typedef struct raw_v5_node_s
 }
 raw_v5_node_t;
 
+
+}  // namespace glbsp
 
 #endif /* __GLBSP_STRUCTS_H__ */

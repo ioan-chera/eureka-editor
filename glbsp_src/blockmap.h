@@ -24,6 +24,9 @@
 #include "structs.h"
 #include "level.h"
 
+namespace glbsp
+{
+
 #define DEFAULT_BLOCK_LIMIT  16000
 
 // compute blockmap origin & size (the block_x/y/w/h variables)
@@ -40,5 +43,6 @@ void GetBlockmapBounds(int *x, int *y, int *w, int *h);
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     int x1, int y1, int x2, int y2);
 
+}  // namespace glbsp
 
 #endif /* __GLBSP_BLOCKMAP_H__ */

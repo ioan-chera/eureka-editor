@@ -30,6 +30,9 @@
 #include <assert.h>
 
 
+namespace glbsp
+{
+
 #define DEBUG_ENABLED   0
 
 #define DEBUGGING_FILE  "gb_debug.txt"
@@ -308,3 +311,5 @@ uint32_g Endian_U32(uint32_g x)
     return x;
 }
 
+
+}  // namespace glbsp

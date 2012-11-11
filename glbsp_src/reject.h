@@ -24,7 +24,12 @@
 #include "structs.h"
 #include "level.h"
 
+namespace glbsp
+{
+
 // build the reject table and write it into the REJECT lump
 void PutReject(void);
+
+}  // namespace glbsp
 
 #endif /* __GLBSP_REJECT_H__ */

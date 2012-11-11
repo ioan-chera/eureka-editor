@@ -38,6 +38,9 @@
 #endif
 
 
+namespace glbsp
+{
+
 //
 // UtilCalloc
 //
@@ -292,3 +295,5 @@ void Adler32_Finish(uint32_g *crc)
   /* nothing to do */
 }
 
+
+}  // namespace glbsp

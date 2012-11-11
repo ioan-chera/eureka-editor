@@ -44,6 +44,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_LOAD      0
 #define DEBUG_BSP       0
 
@@ -1731,3 +1734,5 @@ void SaveLevel(node_t *root_node)
   PutGLChecksum();
 }
 
+
+}  // namespace glbsp

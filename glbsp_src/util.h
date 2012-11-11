@@ -21,6 +21,9 @@
 #ifndef __GLBSP_UTIL_H__
 #define __GLBSP_UTIL_H__
 
+namespace glbsp
+{
+
 /* ----- useful macros ---------------------------- */
 
 #ifndef M_PI
@@ -94,5 +97,7 @@ int UtilFileExists(const char *filename);
 void Adler32_Begin(uint32_g *crc);
 void Adler32_AddBlock(uint32_g *crc, const uint8_g *data, int length);
 void Adler32_Finish(uint32_g *crc);
+
+}  // namespace glbsp
 
 #endif /* __GLBSP_UTIL_H__ */

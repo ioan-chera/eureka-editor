@@ -24,6 +24,9 @@
 #include "structs.h"
 
 
+namespace glbsp
+{
+
 #define DEFAULT_FACTOR  11
 
 #define IFFY_LEN  4.0
@@ -110,5 +113,6 @@ void AddMinisegs(seg_t *part,
 // free the quick allocation cut list
 void FreeQuickAllocCuts(void);
 
+}  // namespace glbsp
 
 #endif /* __GLBSP_SEG_H__ */

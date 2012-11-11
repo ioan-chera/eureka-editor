@@ -54,6 +54,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_BUILDER  0
 #define DEBUG_SORTER   0
 #define DEBUG_SUBSEC   0
@@ -1291,3 +1294,6 @@ void RoundOffBspTree(node_t *root)
 // When there is no more Seg in CreateNodes' list, then they are all in the
 // global list and ready to be saved to disk.
 //
+
+
+}  // namespace glbsp

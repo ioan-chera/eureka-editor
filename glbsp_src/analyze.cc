@@ -40,6 +40,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_WALLTIPS   0
 #define DEBUG_POLYOBJ    0
 #define DEBUG_WINDOW_FX  0
@@ -1128,3 +1131,5 @@ sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy)
   return FALSE;
 }
 
+
+}  // namespace glbsp

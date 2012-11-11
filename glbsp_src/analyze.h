@@ -24,6 +24,9 @@
 #include "structs.h"
 #include "level.h"
 
+namespace glbsp
+{
+
 // detection routines
 void DetectDuplicateVertices(void);
 void DetectDuplicateSidedefs(void);
@@ -57,5 +60,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 // or NULL if closed (void space or directly along a linedef).
 //
 sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy);
+
+}  // namespace glbsp
 
 #endif /* __GLBSP_ANALYZE_H__ */

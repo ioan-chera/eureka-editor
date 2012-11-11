@@ -25,6 +25,9 @@
 #include "system.h"
 
 
+namespace glbsp
+{
+
 struct lump_s;
 
 
@@ -240,7 +243,6 @@ void ReportFailedLevels(void);
 
 /* ----- conversion macros ----------------------- */
 
-
 #define UINT8(x)   ((uint8_g) (x))
 #define SINT8(x)   ((sint8_g) (x))
 
@@ -250,5 +252,6 @@ void ReportFailedLevels(void);
 #define SINT16(x)  ((sint16_g) Endian_U16((uint16_g) (x)))
 #define SINT32(x)  ((sint32_g) Endian_U32((uint32_g) (x)))
 
+}  // namespace glbsp
 
 #endif /* __GLBSP_WAD_H__ */

@@ -38,6 +38,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_REJECT  0
 
 
@@ -219,3 +222,5 @@ void PutReject(void)
   UtilFree(matrix);
 }
 
+
+}  // namespace glbsp

@@ -22,6 +22,11 @@
 #define __GLBSP_GLBSP_H__
 
 
+/** Eureka change: namespacing */
+
+namespace glbsp
+{
+
 #define GLBSP_VER  "2.27"
 #define GLBSP_VER_HEX  0x227
 
@@ -40,7 +45,6 @@
 // #ifdef __cplusplus
 // extern "C" {
 // #endif // __cplusplus
-
 
 
 /* ----- basic types --------------------------- */
@@ -242,7 +246,7 @@ glbsp_ret_e;
 // values.  Calling this routine is not compulsory.  Note that the set
 // of arguments does not include the program's name.
 //
-glbsp_ret_e GlbspParseArgs(nodebuildinfo_t *info,
+glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms,
     const char ** argv, int argc);
 
@@ -263,7 +267,7 @@ glbsp_ret_e GlbspParseArgs(nodebuildinfo_t *info,
 // routine should be called once for each input file, setting the
 // 'output_file' field to NULL each time.
 //
-glbsp_ret_e GlbspCheckInfo(nodebuildinfo_t *info,
+glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms);
 
 // main routine, this will build the nodes (GL and/or normal) for the
@@ -274,7 +278,7 @@ glbsp_ret_e GlbspCheckInfo(nodebuildinfo_t *info,
 // (esp. the GUI) using the comms->cancelled flag.  Upon errors, the
 // comms->message field usually contains a string describing it.
 //
-glbsp_ret_e GlbspBuildNodes(const nodebuildinfo_t *info,
+glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
     const nodebuildfuncs_t *funcs, 
     volatile nodebuildcomms_t *comms);
 
@@ -286,8 +290,6 @@ const char *GlbspStrDup(const char *str);
 void GlbspFree(const char *str);
 
 
-// #ifdef __cplusplus
-// }
-// #endif // __cplusplus
+}  // namespace glbsp
 
 #endif /* __GLBSP_GLBSP_H__ */

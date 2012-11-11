@@ -24,6 +24,9 @@
 #include "glbsp.h"
 
 
+namespace glbsp
+{
+
 // use this for inlining.  Usually defined in the makefile.
 #ifndef INLINE_G
 #define INLINE_G  /* nothing */
@@ -72,5 +75,6 @@ void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 #define DisplayTicker      (* cur_funcs->ticker)
 
+}  // namespace glbsp
 
 #endif /* __GLBSP_SYSTEM_H__ */
