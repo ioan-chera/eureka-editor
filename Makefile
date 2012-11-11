@@ -40,6 +40,7 @@ OBJS = \
 	$(OBJ_DIR)/e_cutpaste.o  \
 	$(OBJ_DIR)/e_linedef.o  \
 	$(OBJ_DIR)/e_loadsave.o  \
+	$(OBJ_DIR)/e_nodes.o  \
 	$(OBJ_DIR)/e_path.o  \
 	$(OBJ_DIR)/e_sector.o  \
 	$(OBJ_DIR)/e_things.o  \

@@ -24,6 +24,7 @@
 #include "editloop.h"
 #include "e_basis.h"
 #include "e_loadsave.h"
+#include "e_nodes.h"
 #include "e_cutpaste.h"
 #include "e_path.h"
 #include "levels.h"
@@ -57,6 +58,11 @@ static void file_do_save(Fl_Widget *w, void * data)
 static void file_do_export(Fl_Widget *w, void * data)
 {
 	CMD_ExportMap();
+}
+
+static void file_do_build_nodes(Fl_Widget *w, void * data)
+{
+	CMD_BuildNodes();
 }
 
 
@@ -311,6 +317,8 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Save RTS File",   0, FCAL view_do_zoom_out },
 		{ 0 },
 #endif
+
+		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
