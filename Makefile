@@ -80,6 +80,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_linedef.o  \
 	$(OBJ_DIR)/ui_menu.o  \
 	$(OBJ_DIR)/ui_nombre.o  \
+	$(OBJ_DIR)/ui_nodes.o  \
 	$(OBJ_DIR)/ui_pic.o  \
 	$(OBJ_DIR)/ui_radius.o  \
 	$(OBJ_DIR)/ui_sector.o  \
