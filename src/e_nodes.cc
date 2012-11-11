@@ -115,7 +115,17 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 {
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
-fprintf(stderr, "%s\n", str);
+		// extract map name
+
+		const char * map_name = str + strlen(str);
+
+		if (map_name > str)
+			map_name--;
+
+		while (map_name > str && !isspace(*map_name))
+			map_name--;
+
+fprintf(stderr, "map name: '%s'\n", map_name);
 	}
 }
 
@@ -137,7 +147,7 @@ static void GB_DisplaySetBar(int barnum, int count)
 {
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
-fprintf(stderr, "progress --> %d\n", count);
+// fprintf(stderr, "progress --> %d\n", count);
 /*
 		main_win->build_box->Prog_Nodes(count, progress_limit);
 */
@@ -233,6 +243,8 @@ void CMD_BuildNodes()
 		Beep();
 		return;
 	}
+
+	DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
 
 	// TODO
 }
