@@ -80,6 +80,8 @@ static void GB_PrintMsg(const char *str, ...)
 	dialog->Print(message_buf);
 
 	LogPrintf("GLBSP: %s", message_buf);
+
+	Fl::check();
 }
 
 static void GB_FatalError(const char *str, ...)
@@ -206,10 +208,11 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.input_file  = glbsp::GlbspStrDup(in_name);
 	nb_info.output_file = glbsp::GlbspStrDup(out_name);
 
-	nb_info.quiet = TRUE;
+	nb_info.quiet = TRUE;  // CONFIG ITEM
 	nb_info.pack_sides = FALSE;  // CONFIG ITEM
-	nb_info.force_normal = TRUE;
 	nb_info.fast = FALSE;   // CONFIG ITEM
+
+	nb_info.force_normal = TRUE;
 
 	glbsp::glbsp_ret_e  ret;
 
@@ -268,6 +271,8 @@ void CMD_BuildNodes()
 
 	dialog->set_modal();
 	dialog->show();
+
+	Fl::check();
 
 
 	DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
