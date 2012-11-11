@@ -122,6 +122,18 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 		if (map_name > str)
 			map_name--;
 
+		// handle the (Hexen) suffix
+		if (*map_name == ')')
+		{
+			while (map_name > str && map_name[1] != '(')
+				map_name--;
+
+			while (map_name > str && isspace(*map_name))
+				map_name--;
+
+			//  map_name[1] = 0;
+		}
+
 		while (map_name > str && !isspace(*map_name))
 			map_name--;
 
