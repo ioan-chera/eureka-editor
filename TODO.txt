@@ -6,37 +6,23 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
-
-DONE:  default iwad dir = ~/.eureka/iwads
-       (mkdir it)
-       search it _IN_ADDITION_ to $DOOMWADDIR
-
-++  CTRL-B aka File/Build Nodes: build GL nodes for current wad
+>>>  CMD_BuildNodes
 
 
 !! don't create new linedef overlapping existing one
+   -  partial overlap : split line / create new vertex
+   -  full overlap : ignore
 
 -  SPACE on selected vertex : deselect
-
-+  T, F, O, L, S : keys to open browser at 
-
--  a check/fix pass for LoadLevel()
-
-+  proper widget for File/Open to select map, with button to load
-   a new WAD file.
-
--  widget to show list of map names (option for custom name)
-
-?  by default, write logs to ~/.eureka/LOGS.txt
- 
-   +  save early logs in memory
 
 
 
 Documentation
 -------------
 
-+  write all basic pages (About, Install etc)
+!!  write INSTALL.txt
+
++  write all basic pages on wiki (About, etc)
 
 
 Coding

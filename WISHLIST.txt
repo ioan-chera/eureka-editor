@@ -6,18 +6,25 @@ EUREKA WISH-LIST
 General
 -------
 
-++  Help system (especially: what keys do what)
+-  idea: SPACE in LINEDEF mode = add vertex to split line(s)
 
->>  support DOOM 1
+-  idea: merge SPACE and 'c'orrect in SECTOR mode ??
 
->>  support Heretic
+??  Help system (especially: what keys do what)
+
+??  by default, write logs to ~/.eureka/LOGS.txt
+ 
+   +  save early logs in memory
 
 -  support HacX
 -  support Harmony
 
 -  browser: map viewer (for selecting what map to edit)
 
-+  configurable keys
++  proper widget for File/Open to select map, with button to load
+   a new WAD file.
+
+-  widget to show list of map names (option for custom name)
 
 
 !!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
@@ -34,13 +41,15 @@ General
 
 -  make sure Load/Export wad filename not already in master_dir
 
++  configurable keys
+
 -  grid drawing too slow when small step and zoomed out
 
 -  File/Change Port
 
--  get rid of OPT_STRINGBUF8
-
 -  OPT_BOOLEAN options on command line: support a following value
+
+-  a check/fix pass for LoadLevel()
 
 +  on error, ability to save/export current map
    [unless error was in save code]
@@ -48,7 +57,10 @@ General
 ++  CHECK screen
     -  can remove unused SideDefs and Sectors
 
++  can set iwads to look for in the/a config file.
+
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
+
 
 
 Coding
@@ -57,6 +69,8 @@ Coding
 rename: edit.highlighted --> edit.Highlighted
 
 -  set proper linesize() in browser, use it in Scroll()
+
+-  get rid of OPT_STRINGBUF8
 
 
 
@@ -168,7 +182,7 @@ CONSOLE IDEA
 Renderer
 --------
 
-+  fix the slime-trails
+++  fix the slime-trails
 
 +  problem with mid-masked textures (cage in E1M9)
 
