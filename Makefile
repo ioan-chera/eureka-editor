@@ -20,6 +20,7 @@ OS=UNIX
 INSTALL_DIR=$(INSTALL_PREFIX)/share/eureka
 
 CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
+         -Iglbsp_src  \
          -D_THREAD_SAFE -D_REENTRANT
 
 LDFLAGS=-L/usr/X11R6/lib
@@ -29,6 +30,11 @@ LIBS=-lm -lz  \
      -lX11 -lXext -lXft -lfontconfig -lXinerama  \
      -lpng -ljpeg -lGL
 
+# support for a non-standard install of FLTK
+ifneq ($(FLTK_PREFIX),)
+CXXFLAGS += -I$(FLTK_PREFIX)/include
+LDFLAGS += -L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib
+endif
 
 #----- Object files ----------------------------------------------
 
@@ -97,16 +103,37 @@ $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 
+#----- glBSP Objects ------------------------------------------------
+
+GLBSP_OBJS= \
+	$(OBJ_DIR)/glbsp/analyze.o  \
+	$(OBJ_DIR)/glbsp/blockmap.o \
+	$(OBJ_DIR)/glbsp/glbsp.o    \
+	$(OBJ_DIR)/glbsp/level.o    \
+	$(OBJ_DIR)/glbsp/node.o     \
+	$(OBJ_DIR)/glbsp/reject.o   \
+	$(OBJ_DIR)/glbsp/seg.o      \
+	$(OBJ_DIR)/glbsp/system.o   \
+	$(OBJ_DIR)/glbsp/util.o     \
+	$(OBJ_DIR)/glbsp/wad.o
+
+GLBSP_CXXFLAGS=$(OPTIMISE) -Wall -DINLINE_G=inline
+
+$(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
+	$(CXX) $(GLBSP_CXXFLAGS) -o $@ -c $< 
+
+
 #----- Targets -----------------------------------------------
 
 all: $(PROGRAM)
 
 clean:
 	rm -f $(PROGRAM) $(OBJ_DIR)/*.* core core.*
+	rm -f $(OBJ_DIR)/glbsp/*.*
 	rm -f ERRS LOG.txt update.log
 
-$(PROGRAM): $(OBJS)
-	$(CXX) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
+$(PROGRAM): $(OBJS) $(GLBSP_OBJS)
+	$(CXX) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 bin: $(PROGRAM)
 	strip --strip-unneeded $(PROGRAM)
