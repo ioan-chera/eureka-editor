@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "levels.h"
+#include "w_wad.h"
 
 
 void CMD_BuildNodes()
@@ -27,6 +28,13 @@ void CMD_BuildNodes()
 	if (MadeChanges)
 	{
 		// FIXME: dialog "your changes are not saved"
+		Beep();
+		return;
+	}
+
+	if (! edit_wad)
+	{
+		// FIXME: dialog "require a PWAD to build nodes for"
 		Beep();
 		return;
 	}
