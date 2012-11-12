@@ -149,9 +149,26 @@ void UI_NodeDialog::SetProg(int perc)
 
 void UI_NodeDialog::Print(const char *str)
 {
-	// FIXME : split lines
+	// split lines
 
-	browser->add(str);
+	static char buffer[256];
+
+	snprintf(buffer, sizeof(buffer), "%s", str);
+	buffer[sizeof(buffer) - 1] = 0;
+
+	char * pos = buffer;
+	char * next;
+
+	while (pos && *pos)
+	{
+		next = strchr(pos, '\n');
+
+		if (next) *next++ = 0;
+
+		browser->add(pos);
+
+		pos = next;
+	}
 
 	browser->bottomline(browser->size());
 }

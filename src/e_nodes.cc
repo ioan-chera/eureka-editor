@@ -211,6 +211,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	if (ret != glbsp::GLBSP_E_OK)
 	{
 		// check info failure (unlikely to happen)
+		GB_PrintMsg("\n");
 		GB_PrintMsg("Param Check FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
 		return false;
@@ -220,6 +221,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 	if (ret == glbsp::GLBSP_E_Cancelled)
 	{
+		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
 		return false;
 	}
@@ -227,6 +229,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	if (ret != glbsp::GLBSP_E_OK)
 	{
 		// build nodes failed
+		GB_PrintMsg("\n");
 		GB_PrintMsg("Building FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
 		return false;
