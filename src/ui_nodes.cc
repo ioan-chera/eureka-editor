@@ -25,14 +25,12 @@
 
 void UI_NodeDialog::close_callback(Fl_Widget *w, void *data)
 {
+	// FIXME
 }
 
-void UI_NodeDialog::cancel_callback(Fl_Widget *w, void *data)
+void UI_NodeDialog::button_callback(Fl_Widget *w, void *data)
 {
-}
-
-void UI_NodeDialog::ok_callback(Fl_Widget *w, void *data)
-{
+	// FIXME
 }
 
 
@@ -40,7 +38,8 @@ void UI_NodeDialog::ok_callback(Fl_Widget *w, void *data)
 //  Constructor
 //
 UI_NodeDialog::UI_NodeDialog() :
-	    Fl_Double_Window(400, 400, "Building Nodes")
+	    Fl_Double_Window(400, 400, "Building Nodes"),
+		cur_prog(-1)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -51,14 +50,32 @@ UI_NodeDialog::UI_NodeDialog() :
 	color(FL_DARK3, FL_DARK3);
 
 
-	int cy = 0;
-
-	// FIXME !!!
-
-
 	browser = new Fl_Browser(0, 0, w(), h() - 100);
 
 	add(browser);
+
+
+	Fl_Box * ptext = new Fl_Box(FL_NO_BOX, 10, h() - 80, 80, 20, "Progress:");
+
+	add(ptext);
+
+
+	progress = new Fl_Progress(100, h() - 80, w() - 120, 20);
+	progress->align(FL_ALIGN_INSIDE);
+	progress->box(FL_FLAT_BOX);
+	progress->color(FL_LIGHT2, FL_RED);
+
+	progress->minimum(0.0);
+	progress->maximum(100.0);
+	progress->value(0.0);
+
+	add(progress);
+
+
+	button = new Fl_Button(w() - 100, h() - 46, 80, 30, "Cancel");
+	button->callback(button_callback, this);
+
+	add(button);
 
 
 	resizable(browser);
@@ -74,13 +91,23 @@ UI_NodeDialog::~UI_NodeDialog()
 
 void UI_NodeDialog::SetStatus(const char *str)
 {
-	// FIXME
+	/* not used */
 }
 
 
 void UI_NodeDialog::SetProg(int perc)
 {
-	// FIXME
+	if (perc == cur_prog)
+		return;
+
+	cur_prog = perc;
+
+	sprintf(prog_label, "%d%%", perc);
+
+	progress->value(perc);
+	progress->label(prog_label);
+
+	Fl::check();
 }
 
 
@@ -89,6 +116,8 @@ void UI_NodeDialog::Print(const char *str)
 	// FIXME : split lines
 
 	browser->add(str);
+
+	browser->bottomline(browser->size());
 }
 
 

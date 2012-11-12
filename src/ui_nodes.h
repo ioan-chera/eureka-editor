@@ -25,16 +25,15 @@
 class UI_NodeDialog : public Fl_Double_Window
 {
 public:
-	Fl_Box *status;
+	Fl_Browser *browser;
 
 	Fl_Progress *progress;
 
-	Fl_Browser *browser;
-
-	Fl_Button * but_OK;
-	Fl_Button * but_Cancel;
+	Fl_Button * button;
 
 	int cur_prog;
+
+	char prog_label[64];
 
 public:
 	UI_NodeDialog();
@@ -49,8 +48,7 @@ public:
 
 private:
 	static void  close_callback(Fl_Widget *, void *);
-	static void cancel_callback(Fl_Widget *, void *);
-	static void     ok_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
 };
 
 

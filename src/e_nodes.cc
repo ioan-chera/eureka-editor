@@ -100,14 +100,7 @@ static void GB_FatalError(const char *str, ...)
 
 static void GB_Ticker(void)
 {
-/*
-	Main_Ticker();
-
-	if (main_action >= MAIN_CANCEL)
-	{
-		nb_comms.cancelled = TRUE;
-	}
-*/
+	/* not used */
 }
 
 static glbsp::boolean_g GB_DisplayOpen(glbsp::displaytype_e type)
@@ -125,8 +118,10 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 {
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
-		// extract map name
+		dialog->SetStatus(str);
 
+/* UNUSED:
+		// extract map name
 		const char * map_name = str + strlen(str);
 
 		if (map_name > str)
@@ -146,8 +141,7 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 
 		while (map_name > str && !isspace(*map_name))
 			map_name--;
-
-fprintf(stderr, "map name: '%s'\n", map_name);
+*/
 	}
 }
 
@@ -155,13 +149,7 @@ static void GB_DisplaySetBarLimit(int barnum, int limit)
 {
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
-fprintf(stderr, "limit --> %d\n", limit);
-/*
-		progress_limit = limit;
-
-		main_win->build_box->SetStatus("Building nodes");
-		main_win->build_box->Prog_Nodes(0, limit);
-*/
+		progress_limit = MAX(1, limit);
 	}
 }
 
@@ -169,10 +157,9 @@ static void GB_DisplaySetBar(int barnum, int count)
 {
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
-// fprintf(stderr, "progress --> %d\n", count);
-/*
-		main_win->build_box->Prog_Nodes(count, progress_limit);
-*/
+		int perc = count * 100.0 / progress_limit;
+
+		dialog->SetProg(perc);
 	}
 }
 
@@ -223,8 +210,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		// check info failure (unlikely to happen)
 		GB_PrintMsg("Param Check FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
-
-//??		Main_ProgStatus("glBSP Error");
 		return false;
 	}
 
@@ -233,7 +218,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	if (ret == glbsp::GLBSP_E_Cancelled)
 	{
 		GB_PrintMsg("Building CANCELLED.\n\n");
-//??		Main_ProgStatus("Cancelled");
 		return false;
 	}
 
@@ -242,8 +226,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		// build nodes failed
 		GB_PrintMsg("Building FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
-
-//??		Main_ProgStatus("glBSP Error");
 		return false;
 	}
 
@@ -275,7 +257,7 @@ void CMD_BuildNodes()
 	Fl::check();
 
 
-	DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
+	bool was_ok = DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
 
 	// TODO
 }
