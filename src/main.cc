@@ -290,23 +290,23 @@ static void Determine_InstallPath(const char *argv0)
 
 int Main_key_handler(int event)
 {
-  if (event != FL_SHORTCUT)
-    return 0;
+	if (event != FL_SHORTCUT)
+		return 0;
 
-  switch (Fl::event_key())
-  {
-    case FL_Escape:
-	  fl_beep();  // FIXME
-	  return 1;
+	switch (Fl::event_key())
+	{
+		case FL_Escape:
+			fl_beep();  // FIXME
+			return 1;
 
-    case FL_F+1:   // F1 = HELP
-      // TODO
-      return 1;
+		case FL_F+1:   // F1 = HELP
+			// TODO
+			return 1;
 
-    default: break;
-  }
+		default: break;
+	}
 
-  return 0;
+	return 0;
 }
 
 
