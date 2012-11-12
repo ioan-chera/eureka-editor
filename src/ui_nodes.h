@@ -43,6 +43,9 @@ public:
 	UI_NodeDialog();
 	virtual ~UI_NodeDialog();
 
+	/* FLTK method */
+	int handle(int event);
+
 public:
 	void SetStatus(const char *str);
 

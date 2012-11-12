@@ -26,6 +26,10 @@
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
+//
+//  Callbacks
+//
+
 void UI_NodeDialog::close_callback(Fl_Widget *w, void *data)
 {
 	UI_NodeDialog * that = (UI_NodeDialog *)data;
@@ -104,6 +108,21 @@ UI_NodeDialog::UI_NodeDialog() :
 //
 UI_NodeDialog::~UI_NodeDialog()
 { }
+
+
+int UI_NodeDialog::handle(int event)
+{
+	if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
+	{
+		if (finished)
+			want_close = true;
+		else
+			want_cancel = true;
+		return 1;
+	}
+
+	return Fl_Double_Window::handle(event);
+}
 
 
 void UI_NodeDialog::SetStatus(const char *str)
