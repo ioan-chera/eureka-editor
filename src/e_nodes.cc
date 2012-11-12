@@ -255,16 +255,23 @@ void CMD_BuildNodes()
 		return;
 	}
 
+
+	const char *old_name = StringDup(edit_wad->PathName());
+	const char *new_name = ReplaceExtension(old_name, "new");
+
+	if (MatchExtension(old_name, "new"))
+	{
+		Notify(-1, -1, "Cannot build nodes on a pwad with .NEW extension.", NULL);
+		return;
+	}
+
+
 	dialog = new UI_NodeDialog();
 
 	dialog->set_modal();
 	dialog->show();
 
 	Fl::check();
-
-
-	const char *old_name = StringDup(edit_wad->PathName());
-	const char *new_name = ReplaceExtension(old_name, "new");
 
 
 	bool was_ok = DM_BuildNodes(old_name, new_name);
