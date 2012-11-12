@@ -81,8 +81,6 @@ static void GB_PrintMsg(const char *str, ...)
 	dialog->Print(message_buf);
 
 	LogPrintf("GLBSP: %s", message_buf);
-
-	Fl::check();
 }
 
 static void GB_FatalError(const char *str, ...)
@@ -265,12 +263,48 @@ void CMD_BuildNodes()
 	Fl::check();
 
 
-	bool was_ok = DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
+	const char *old_name = edit_wad->PathName();
+	const char *new_name = ReplaceExtension(old_name, "new");
+
+
+	bool was_ok = DM_BuildNodes(old_name, new_name);
+
+	if (was_ok)
+	{
+		MasterDir_Remove(edit_wad);
+
+		delete edit_wad;
+		edit_wad = NULL;
+
+		// delete the old file, rename the new file
+		if (! FileDelete(old_name))
+		{
+			FatalError("Unable to replace the pwad with the new version\n"
+			           "containing the freshly build nodes, as the original\n"
+					   "could not be deleted.\n");
+		}
+
+		if (! FileRename(new_name, old_name))
+		{
+			FatalError("Unable to replace the pwad with the new version\n"
+			           "containing the freshly build nodes, as a problem\n"
+					   "occurred trying to rename the new file.\n"
+					   "\n"
+					   "Your wad has been left with the .NEW extension.\n");
+		}
+
+		GB_PrintMsg("\n");
+		GB_PrintMsg("Replaced the old file with the new file.\n");
+	}
+	else
+	{
+		FileDelete(new_name);
+	}
+
 
 	if (was_ok)
 	{
 		dialog->Finish_OK();
-
 	}
 	else if (nb_comms.cancelled)
 	{
@@ -287,9 +321,13 @@ void CMD_BuildNodes()
 	}
 
 	delete dialog;
+	dialog = NULL;
 
 	if (was_ok)
 	{
+		// need to quit Eureka now, since edit_wad has been closed
+		// TODO: remember filename, re-open it
+
 		CMD_Quit();
 	}
 }
