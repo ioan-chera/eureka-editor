@@ -23,14 +23,28 @@
 #include "ui_nodes.h"
 
 
+#define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
+
+
 void UI_NodeDialog::close_callback(Fl_Widget *w, void *data)
 {
-	// FIXME
+	UI_NodeDialog * that = (UI_NodeDialog *)data;
+
+	that->want_close = true;
+
+	if (! that->finished)
+		that->want_cancel = true;
 }
+
 
 void UI_NodeDialog::button_callback(Fl_Widget *w, void *data)
 {
-	// FIXME
+	UI_NodeDialog * that = (UI_NodeDialog *)data;
+
+	if (that->finished)
+		that->want_close = true;
+	else
+		that->want_cancel = true;
 }
 
 
@@ -39,7 +53,10 @@ void UI_NodeDialog::button_callback(Fl_Widget *w, void *data)
 //
 UI_NodeDialog::UI_NodeDialog() :
 	    Fl_Double_Window(400, 400, "Building Nodes"),
-		cur_prog(-1)
+		cur_prog(-1),
+		finished(false),
+		want_cancel(false),
+		want_close(false)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -63,7 +80,7 @@ UI_NodeDialog::UI_NodeDialog() :
 	progress = new Fl_Progress(100, h() - 80, w() - 120, 20);
 	progress->align(FL_ALIGN_INSIDE);
 	progress->box(FL_FLAT_BOX);
-	progress->color(FL_LIGHT2, FL_RED);
+	progress->color(FL_LIGHT2, NODE_PROGRESS_COLOR);
 
 	progress->minimum(0.0);
 	progress->maximum(100.0);
@@ -118,6 +135,40 @@ void UI_NodeDialog::Print(const char *str)
 	browser->add(str);
 
 	browser->bottomline(browser->size());
+}
+
+
+void UI_NodeDialog::Finish_OK()
+{
+	finished = true;
+
+	progress->value(100);
+	progress->label("Success");
+	progress->color(FL_BLUE, FL_BLUE);
+
+	button->label("Exit");
+}
+
+void UI_NodeDialog::Finish_Cancel()
+{
+	finished = true;
+
+	progress->value(0);
+	progress->label("Cancelled");
+	progress->color(FL_RED, FL_RED);
+
+	button->label("Close");
+}
+
+void UI_NodeDialog::Finish_Error()
+{
+	finished = true;
+
+	progress->value(100);
+	progress->label("ERROR");
+	progress->color(FL_RED, FL_RED);
+
+	button->label("Close");
 }
 
 

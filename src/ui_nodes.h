@@ -32,8 +32,12 @@ public:
 	Fl_Button * button;
 
 	int cur_prog;
-
 	char prog_label[64];
+
+	bool finished;
+
+	bool want_cancel;
+	bool want_close;
 
 public:
 	UI_NodeDialog();
@@ -45,6 +49,13 @@ public:
 	void SetProg(int perc);
 
 	void Print(const char *str);
+
+	void Finish_OK();
+	void Finish_Cancel();
+	void Finish_Error();
+
+	bool WantCancel() const { return want_cancel; }
+	bool WantClose()  const { return want_close;  }
 
 private:
 	static void  close_callback(Fl_Widget *, void *);

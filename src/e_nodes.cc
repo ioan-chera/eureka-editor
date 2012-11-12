@@ -100,7 +100,10 @@ static void GB_FatalError(const char *str, ...)
 
 static void GB_Ticker(void)
 {
-	/* not used */
+	if (dialog->WantCancel())
+	{
+		nb_comms.cancelled = TRUE;
+	}
 }
 
 static glbsp::boolean_g GB_DisplayOpen(glbsp::displaytype_e type)
@@ -259,7 +262,31 @@ void CMD_BuildNodes()
 
 	bool was_ok = DM_BuildNodes(edit_wad->PathName(), "./foobie.wad");
 
-	// TODO
+	if (was_ok)
+	{
+		dialog->Finish_OK();
+
+	}
+	else if (nb_comms.cancelled)
+	{
+		dialog->Finish_Cancel();
+	}
+	else
+	{
+		dialog->Finish_Error();
+	}
+
+	while (! dialog->WantClose())
+	{
+		Fl::wait(0.2);
+	}
+
+	delete dialog;
+
+	if (was_ok)
+	{
+		CMD_Quit();
+	}
 }
 
 
