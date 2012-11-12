@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "levels.h"
+#include "m_dialog.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -241,17 +242,18 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 void CMD_BuildNodes()
 {
-	if (MadeChanges)
+	if (! edit_wad)
 	{
-		// FIXME: dialog "your changes are not saved"
-		Beep();
+		Notify(-1, -1, "Cannot build nodes unless you are editing a PWAD.", NULL);
 		return;
 	}
 
-	if (! edit_wad)
+	if (MadeChanges)
 	{
-		// FIXME: dialog "require a PWAD to build nodes for"
-		Beep();
+		// TODO: ideally ask the question "save changes now?"
+		//       HOWEVER we need to know if that was successful (ouch)
+
+		Notify(-1, -1, "You have unsaved changes, please save them first.", NULL);
 		return;
 	}
 
