@@ -263,7 +263,7 @@ void CMD_BuildNodes()
 	Fl::check();
 
 
-	const char *old_name = edit_wad->PathName();
+	const char *old_name = StringDup(edit_wad->PathName());
 	const char *new_name = ReplaceExtension(old_name, "new");
 
 
@@ -279,15 +279,24 @@ void CMD_BuildNodes()
 		// delete the old file, rename the new file
 		if (! FileDelete(old_name))
 		{
+#if 0
+fprintf(stderr, "DELETE ERROR: %s\n", strerror(errno));
+fprintf(stderr, "old_name : %s\n", old_name);
+#endif
 			FatalError("Unable to replace the pwad with the new version\n"
-			           "containing the freshly build nodes, as the original\n"
+			           "containing the freshly built nodes, as the original\n"
 					   "could not be deleted.\n");
 		}
 
 		if (! FileRename(new_name, old_name))
 		{
+#if 0
+fprintf(stderr, "RENAME ERROR: %s\n", strerror(errno));
+fprintf(stderr, "old_name : %s\n", old_name);
+fprintf(stderr, "new_name : %s\n", new_name);
+#endif
 			FatalError("Unable to replace the pwad with the new version\n"
-			           "containing the freshly build nodes, as a problem\n"
+			           "containing the freshly built nodes, as a problem\n"
 					   "occurred trying to rename the new file.\n"
 					   "\n"
 					   "Your wad has been left with the .NEW extension.\n");
