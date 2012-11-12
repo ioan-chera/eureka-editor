@@ -2,8 +2,70 @@
 COMPILING Eureka
 ================
 
+Dependencies:
+
+1. C++ compiler (GNU's G++) and associated tools
+   packages: g++ binutils
+
+2. GNU make
+   package: make
+
+3. FLTK 1.3.0 
+   website: http://www.fltk.org/
+   package: libfltk1.3-dev
+
+4. zlib
+   website: http://www.zlib.net/
+   package: zlib1g-dev
+
+5. XDG Utils
+   (only needed for installing the desktop and icon files)
+   package: xdg-utils
+
+
+Assuming all those dependencies are met, then the following shell
+command will build the Eureka binary. (The '>' is just the prompt)
+
+   > make
+
 
 
 INSTALLING Eureka
 =================
+
+First make sure the Eureka binary was compiled successfully.
+
+Then become root (via the 'sudo' or 'su' command) and enter the
+following shell command:
+
+   > make install
+
+That will install the eureka binary, definition files for various
+games and source ports, and the desktop and icon files.
+
+
+
+SETTING UP Eureka
+=================
+
+Eureka requires an IWAD file from one of the supported games, fpr
+example "doom2.wad".  There are several ways which Eureka can
+locate the IWAD file:
+
+  1. The most reliable way is to copy the IWAD(s) into the
+     ~/.eureka/iwads directory.  This directory will be created
+     the first time Eureka is run (though there is no harm in
+     creating it yourself).
+
+  2. If you run Eureka from the command line and have the DOOMWADDIR
+     environment variable set, then Eureka should find it in that
+     directory.
+
+  3. If running from the command line, Eureka will look in the current
+     directory for the IWAD.
+
+  4. You can specify the IWAD file directly with the --iwad option.
+     The value given can also be a directory to search.  This is
+     currently the only way to select an IWAD (and game) different
+     than the one normally used.
 
