@@ -171,6 +171,8 @@ void UI_NodeDialog::Print(const char *str)
 	}
 
 	browser->bottomline(browser->size());
+
+	Fl::check();
 }
 
 
