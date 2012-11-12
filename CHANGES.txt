@@ -1,13 +1,17 @@
 
-CHANGES since 0.74
-==================
+CHANGES IN Eureka 0.81
+======================
+
+(Changes since 0.74 version)
 
 +  support a proper unix-style installation
   
 +  made a proper web-site (using PmWiki)
   
++  command to build nodes (via glBSP) and quit
+
 +  texture browser can be resized by dragging the edge
-  
+
 -  log file is only created when --log is used
 -  the --quiet option (-q) suppresses output to stdout
 -  new --debug option (-d) enables debug messages
@@ -23,8 +27,8 @@ CHANGES since 0.74
 -  if -iwad parameter is a bare name, look in iwad search path
 -  if -iwad parameter has no extension, add ".wad"
   
--  render view: support strafing with ALT (or META) key
-  
+-  render view: support strafing with ALT or META key
+ 
 -  initial support for Odamex
   
 -  DOOM: fixed line types 33 and 34 (red and yellow locked doors)
