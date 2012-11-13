@@ -27,9 +27,11 @@
 #ifndef __EUREKA_EDITOBJ_H__
 #define __EUREKA_EDITOBJ_H__
 
+#if 0
 void TransferLinedefProperties (int src_linedef, SelPtr linedefs);
 void TransferSectorProperties (int src_sector, SelPtr sectors);
 void TransferThingProperties (int src_thing, SelPtr things);
+#endif
 
 #endif  /* __EUREKA_EDITOBJ_H__ */
 

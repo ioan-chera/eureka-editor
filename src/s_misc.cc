@@ -48,9 +48,10 @@
    Distribute sector floor heights
 */
 
+#if 0  // FIXME: DistributeSectorFloors
+
 void DistributeSectorFloors (SelPtr obj)
 {
-#if 0  // FIXME: DistributeSectorFloors
 	SelPtr cur;
 	int    n, num, floor1h, floor2h;
 
@@ -68,8 +69,8 @@ void DistributeSectorFloors (SelPtr obj)
 		n++;
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 
@@ -77,9 +78,10 @@ void DistributeSectorFloors (SelPtr obj)
    Distribute sector ceiling heights
 */
 
+#if 0 // FIXME DistributeSectorCeilings
+
 void DistributeSectorCeilings (SelPtr obj)
 {
-#if 0 // FIXME DistributeSectorCeilings
 	SelPtr cur;
 	int    n, num, ceil1h, ceil2h;
 
@@ -97,17 +99,18 @@ void DistributeSectorCeilings (SelPtr obj)
 		n++;
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 /*
    Raise or lower sectors
 */
 
+#if 0 // TODO: RaiseOrLowerSectors
+
 void RaiseOrLowerSectors (SelPtr obj)
 {
-#if 0 // TODO: RaiseOrLowerSectors
 	SelPtr cur;
 	int  x0;          // left hand (x) window start
 	int  y0;          // top (y) window start
@@ -138,17 +141,18 @@ void RaiseOrLowerSectors (SelPtr obj)
 		Sectors[cur->objnum].floorh += delta;
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 /*
    Brighten or darken sectors
-   */
+*/
+
+#if 0  // TODO: BrightenOrDarkenSectors
 
 void BrightenOrDarkenSectors (SelPtr obj)
 {
-#if 0  // TODO: BrightenOrDarkenSectors
 	SelPtr cur;
 	int  x0;          // left hand (x) window start
 	int  y0;          // top (y) window start
@@ -182,8 +186,8 @@ void BrightenOrDarkenSectors (SelPtr obj)
 		Sectors[cur->objnum].light = light;
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 static int find_linedef_for_area (int x, int y, int& side)

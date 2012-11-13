@@ -873,6 +873,7 @@ void CMD_QuantizeObjects()
 }
 
 
+#if 0  // FIXME exchange_objects_numbers
 /*
  *  exchange_objects_numbers
  *  Exchange the numbers of two objects
@@ -881,7 +882,6 @@ void CMD_QuantizeObjects()
  */
 int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust)
 {
-#if 0  // FIXME exchange_objects_numbers
 	int n1, n2;
 
 	// Must have exactly two objects in the selection
@@ -945,9 +945,9 @@ int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust)
 			}
 		}
 	}
-#endif
 	return 0;
 }
+#endif
 
 
 //--- editor settings ---

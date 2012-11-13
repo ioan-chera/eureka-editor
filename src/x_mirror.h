@@ -51,7 +51,9 @@ void CMD_ScaleObjects2(scale_param_t& param);
 void CMD_QuantizeObjects();
 
 
+#if 0
 int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust);
+#endif
 
 
 #endif  /* __EUREKA_X_MIRROR_H__ */

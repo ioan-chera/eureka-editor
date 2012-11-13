@@ -29,10 +29,12 @@
 
 void sector_slice (obj_no_t linedef1, obj_no_t linedef2);
 
+#if 0
 void DistributeSectorFloors (SelPtr);
 void DistributeSectorCeilings (SelPtr);
 void RaiseOrLowerSectors (SelPtr obj);
 void BrightenOrDarkenSectors (SelPtr obj);
+#endif
 
 void SplitSector (int, int);
 void SplitLineDefsAndSector (int, int);

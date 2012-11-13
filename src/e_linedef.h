@@ -50,8 +50,10 @@ bitvec_c *bv_vertices_of_linedefs (bitvec_c *linedefs);
 void frob_linedefs_flags (selection_c * list, int op, int operand);
 
 
+#if 0
 void MakeRectangularNook (SelPtr obj, int width, int depth, int convex);
 void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex);
+#endif
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 

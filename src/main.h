@@ -78,9 +78,6 @@ void FatalError(const char *fmt, ...);
 #include "sys_debug.h"
 
 
-typedef int  SelPtr;   // TEMPORARY FIXME
-
-
 #include "objid.h"
 #include "m_bitvec.h"  /* bv_set, bv_clear, bv_toggle */
 #include "m_select.h"

@@ -40,7 +40,6 @@ void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field);
 void ObjectBox_NotifyEnd();
 
 
-void  HighlightSelection (int, SelPtr);
 obj_no_t GetMaxObjectNum (int);
 void  SelectObjectsInBox (selection_c *list, int, int, int, int, int);
 void  HighlightObject (int, int, int);
