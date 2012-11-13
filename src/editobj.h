@@ -27,23 +27,9 @@
 #ifndef __EUREKA_EDITOBJ_H__
 #define __EUREKA_EDITOBJ_H__
 
-void DisplayObjectInfo (const Editor_State_c *e, int);
-void input_objid (Objid& objid, const Objid& init, int x0, int y0);
-
-int InputObjectNumber (int, int, int, int);
-int InputObjectXRef (int, int, int, bool, int);
-bool Input2VertexNumbers (int, int, const char *, int *, int *);
-void EditObjectsInfo (int, int, int, SelPtr);
-void InsertStandardObject (int, int, int choice);
-
 void TransferLinedefProperties (int src_linedef, SelPtr linedefs);
 void TransferSectorProperties (int src_sector, SelPtr sectors);
 void TransferThingProperties (int src_thing, SelPtr things);
-
-const char *GetObjectTypeName (int);
-const char *GetEditModeName (int);
-const char *GetLineDefFlagsName (int);
-const char *GetLineDefFlagsLongName (int);
 
 #endif  /* __EUREKA_EDITOBJ_H__ */
 
