@@ -176,6 +176,7 @@ bool CMD_SpinThings(int degrees)
 }
 
 
+#if 0  // FIXME  frob_things_flags
 /*
  *  frob_things_flags - set/reset/toggle things flags
  *
@@ -184,7 +185,6 @@ bool CMD_SpinThings(int degrees)
  */
 void frob_things_flags (SelPtr list, int op, int operand)
 {
-#if 0  // FIXME  frob_things_flags
 	SelPtr cur;
 	s16_t mask;
 
@@ -208,8 +208,8 @@ void frob_things_flags (SelPtr list, int op, int operand)
 		}
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 //--- editor settings ---

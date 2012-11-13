@@ -416,6 +416,7 @@ void CMD_AlignTexturesY()
 }
 
 
+#if 0  // FIXME frob_linedefs_flags
 /*
  *  frob_linedefs_flags
  *  For all the linedefs in <list>, apply the operator <op>
@@ -423,7 +424,6 @@ void CMD_AlignTexturesY()
  */
 void frob_linedefs_flags (SelPtr list, int op, int operand)
 {
-#if 0  // FIXME frob_linedefs_flags
 	SelPtr cur;
 	s16_t mask;
 
@@ -447,8 +447,8 @@ void frob_linedefs_flags (SelPtr list, int op, int operand)
 		}
 	}
 	MarkChanges();
-#endif
 }
+#endif
 
 
 
@@ -757,13 +757,13 @@ static void SliceLinedef (int linedefno, int times)
 }
 
 
+#if 0  // FIXME  SetLinedefLength
 /*
  *  SetLinedefLength
  *  Move either vertex to set length of linedef to desired value
  */
 void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex)
 {
-#if 0  // FIXME  SetLinedefLength
 	SelPtr cur;
 
 	for (cur = obj ; cur ; cur = cur->next)
@@ -787,8 +787,8 @@ void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex)
 
 		MarkChanges(2);
 	}
-#endif
 }
+#endif
 
 
 /*
