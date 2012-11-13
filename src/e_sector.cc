@@ -739,29 +739,5 @@ bitvec_c *bv_vertices_of_sectors (SelPtr list)
 }
 
 
-/*
- *  list_vertices_of_sectors
- *  Return a list of all vertices used by the sectors.
- *  It's up to the caller to delete the list after use.
- */
-#if 0  // FIXME
-SelPtr list_vertices_of_sectors (SelPtr list)
-{
-	SelPtr vertices_list = 0;
-
-	bitvec_c *vertices = bv_vertices_of_sectors (list);
-
-	for (int n = 0 ; n < vertices->size() ; n++)
-	{
-		if (vertices->get (n))
-			SelectObject(&vertices_list, n);
-	}
-	delete vertices;
-
-	return vertices_list;
-}
-#endif
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

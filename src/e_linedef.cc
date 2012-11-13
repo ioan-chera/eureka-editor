@@ -886,53 +886,6 @@ bitvec_c *bv_vertices_of_linedefs (bitvec_c *linedefs)
 }
 
 
-/*
- *  bv_vertices_of_linedefs
- *  Return a bit vector of all vertices used by the linedefs.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *bv_vertices_of_linedefs (SelPtr list)
-{
-	bitvec_c * vertices = new bitvec_c (NumVertices);
-
-	// FIXME !!!!!! bv_vertices_of_linedefs
-#if 0
-	SelPtr cur;
-
-	for (cur = list ; cur ; cur = cur->next)
-	{
-		vertices->set (LineDefs[cur->objnum]->start);
-		vertices->set (LineDefs[cur->objnum]->end);
-	}
-#endif
-	return vertices;
-}
-
-
-/*
- *  list_vertices_of_linedefs
- *  Return a list of all vertices used by the linedefs
- *  It's up to the caller to delete the list after use.
- */
-#if 0  // FIXME
-SelPtr list_vertices_of_linedefs (SelPtr list)
-{
-	bitvec_c * bv = bv_vertices_of_linedefs (list);
-
-	SelPtr vertices_list = 0;
-
-	for (int n = 0 ; n < bv->size() ; n++)
-	{
-		if (bv->get (n))
-			SelectObject (&vertices_list, n);
-	}
-	delete bv;
-
-	return vertices_list;
-}
-#endif
-
-
 /* The Superimposed_ld class is used to find all the linedefs that are
    superimposed with a particular reference linedef. Call the set()
    method to specify the reference linedef. Each call to the get()

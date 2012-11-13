@@ -46,8 +46,6 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y);
 
 
 bitvec_c *bv_vertices_of_linedefs (bitvec_c *linedefs);
-bitvec_c *bv_vertices_of_linedefs (SelPtr list);
-SelPtr list_vertices_of_linedefs (SelPtr list);
 
 void frob_linedefs_flags (selection_c * list, int op, int operand);
 
