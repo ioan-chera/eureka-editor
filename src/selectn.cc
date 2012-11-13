@@ -262,7 +262,7 @@ void Selection_NotifyEnd()
 
 /*
    select all objects inside a given box
-   */
+*/
 
 void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, int y2)
 {
@@ -357,42 +357,6 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 	}
 }
 
-
-
-/*
- *  list_to_bitvec - make a bit vector from a list
- *
- *  The bit vector has <bitvec_size> elements. It's up to
- *  the caller to delete the new bit vector after use.
- */
-bitvec_c *list_to_bitvec (SelPtr list, size_t bitvec_size)
-{
-	bitvec_c *bitvec = new bitvec_c (bitvec_size);
-
-//!!!!!!	for (cur = list; cur; cur = cur->next)
-//!!!!!!		bitvec->set (cur->objnum);
-
-	return bitvec;
-}
-
-
-/*
- *  bitvec_to_list - make a list from a bitvec object
- *
- *  The items are inserted in the list from first to last
- *  (i.e. item N in the bitvec is inserted before item N+1).
- *  It's up to the caller to delete the new list after use.
- */
-#if 0
-SelPtr bitvec_to_list(const bitvec_c &bv)
-{
-	SelPtr list = 0;
-	for (int n = 0; n < bv.size(); n++)
-		if (bv.get(n))
-			SelectObject(&list, n);
-	return list;
-}
-#endif
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -46,9 +46,6 @@ void Selection_NotifyDelete(obj_type_e type, int objnum);
 void Selection_NotifyChange(obj_type_e type, int objnum, int field);
 void Selection_NotifyEnd();
 
-bitvec_c *list_to_bitvec (SelPtr list, size_t bitvec_size);
-SelPtr bitvec_to_list (const bitvec_c &b);
-
 #endif  /* __EUREKA_SELECTN_H__ */
 
 //--- editor settings ---
