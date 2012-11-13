@@ -6,12 +6,11 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
->>>  CMD_BuildNodes
-
-
 !! don't create new linedef overlapping existing one
    -  partial overlap : split line / create new vertex
    -  full overlap : ignore
+
+++  SPACE in sectors mode : correct sector
 
 -  SPACE on selected vertex : deselect
 
@@ -20,9 +19,21 @@ General
 Documentation
 -------------
 
-!!  write INSTALL.txt
+-  update README
 
 +  write all basic pages on wiki (About, etc)
+
+-  small tutorial
+
+-  Credits page (on web site espec.)
+
+   - link to Yadex: http://www.teaser.fr/~amajorel/yadex/
+
+-  Copyright / License
+
+   Eureka is copyright (c) Andrew Apted and others 1997-2012.
+
+-  arrow keys in KEYS page
 
 
 Coding

@@ -61,12 +61,14 @@ General
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
 
+-  look for iwads in /usr/share/games/doom  (and /usr/local equiv)
+
 
 
 Coding
 ------
 
-rename: edit.highlighted --> edit.Highlighted
+?  rename: edit.highlighted --> edit.Highlighted
 
 -  set proper linesize() in browser, use it in Scroll()
 
@@ -157,6 +159,8 @@ IDEA: for quantizing a group of objects, try about 9 delta
    a different map or wad) : we get linedefs with "-" as middle texture.
    Handle this better.
 
+-  CTRL-X : exchange object numbers
+
 ??  SPACE in sector mode:
     if another sector was selected, then the properties of that
     sector (floor and ceiling heights and textures, etc) are copied
@@ -213,6 +217,8 @@ Browser
 -------
 
 ++  picture mode for things
+
++  persist current width (in .dat cache file)
 
 -  search box: ',' for AND, '/' for OR
 
