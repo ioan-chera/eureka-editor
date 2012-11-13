@@ -227,10 +227,6 @@ extern int KF_fonth;  // default font size
 
 
 
-// l_unlink.cc
-void unlink_sidedef (SelPtr linedefs, int side1, int side2);
-
-
 int entryname_cmp (const char *entry1, const char *entry2);
 
 

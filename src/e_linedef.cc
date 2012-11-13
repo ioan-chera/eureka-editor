@@ -643,6 +643,8 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 }
 
 
+#if 0  // FIXME: MakeRectangularNook
+
 /*
  *  MakeRectangularNook - Make a nook or boss in a wall
  *  
@@ -658,7 +660,6 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
  */
 void MakeRectangularNook (SelPtr obj, int width, int depth, int convex)
 {
-#if 0  // FIXME: MakeRectangularNook
 	SelPtr cur;
 
 	for (cur = obj ; cur ; cur = cur->next)
@@ -710,8 +711,8 @@ void MakeRectangularNook (SelPtr obj, int width, int depth, int convex)
 
 		MarkChanges(2);
 	}
-#endif
 }
+#endif
 
 
 /*
@@ -788,83 +789,6 @@ void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex)
 	}
 #endif
 }
-
-
-
-/*
- *  unlink_sidedef
- *
- *  For all linedefs in the <linedefs>, see whether the sidedefs
- *  are used by any other linedef _not_in_<linedefs>_. If they
- *  are, duplicate the sidedefs and assign the new duplicate to
- *  the linedef.
- *  If <side1> is set, take care of the first sidedef.
- *  If <side2> is set, take care of the second sidedef.
- *  Both can be set, of course.
- *
- *  This function is intended to "unlink" duplicated linedefs.
- */
-void unlink_sidedef (SelPtr linedefs, int side1, int side2)
-{
-#if 0  // FIXME unlink_sidedef
-
-	// Array of NumSideDefs bits that tell whether the
-	// sidedef is used by the linedefs in <linedefs>.
-	bitvec_c sd_used_in (NumSideDefs);
-
-	// Array of NumSideDefs bits that tell whether the
-	// sidedef is used by the linedefs _not_ in <linedefs>.
-	bitvec_c sd_used_out (NumSideDefs);
-
-	SelPtr cur;
-	int n;
-
-	// Put in sd_used_in a list of all sidedefs
-	// that are used by linedefs in <linedefs>.
-	// and in sd_used_out a list of all sidedefs
-	// that are used by linedefs not in <linedefs>
-
-	for (n = 0 ; n < NumLineDefs ; n++)
-	{
-		if (IsSelected (linedefs, n))
-		{
-			if (side1 && is_sidedef (LineDefs[n]->right))
-				sd_used_in.set (LineDefs[n]->right);
-			if (side2 && is_sidedef (LineDefs[n]->left))
-				sd_used_in.set (LineDefs[n]->left);
-		}
-		else
-		{
-			if (is_sidedef (LineDefs[n]->right))
-				sd_used_out.set (LineDefs[n]->right);
-			if (is_sidedef (LineDefs[n]->left))
-				sd_used_out.set (LineDefs[n]->left);
-		}
-	}
-
-	// For all sidedefs that are used both by a linedef
-	// in <linedefs> and a linedef _not_ in <linedefs>,
-	// duplicate the sidedef and make all the linedefs
-	// in <linedefs> use the copy instead.
-
-	for (n = 0 ; n < NumSideDefs ; n++)
-	{
-		if (sd_used_in.get (n) && sd_used_out.get (n))
-		{
-			InsertObject (OBJ_SIDEDEFS, n, 0, 0);
-			for (cur = linedefs ; cur ; cur = cur->next)
-			{
-				if (side1 && LineDefs[cur->objnum]->right == n)
-					LineDefs[cur->objnum]->right = NumSideDefs - 1;
-
-				if (side2 && LineDefs[cur->objnum]->left == n)
-					LineDefs[cur->objnum]->left = NumSideDefs - 1;
-			}
-		}
-	}
-#endif
-}
-
 
 
 /*
