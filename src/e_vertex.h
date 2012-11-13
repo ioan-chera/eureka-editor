@@ -27,12 +27,9 @@
 #ifndef __EUREKA_E_VERTEX_H__
 #define __EUREKA_E_VERTEX_H__
 
-void centre_of_vertices (selection_c * list, int *x, int *y);
-void centre_of_vertices (const bitvec_c &bv, int &x, int &y);
+void MergeVertex(int v1, int v2);
 
 void InsertPolygonVertices (int, int, int, int);
-
-void MergeVertex(int v1, int v2);
 
 int VertexHowManyLineDefs(int v_num);
 

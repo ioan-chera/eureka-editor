@@ -178,43 +178,6 @@ void centre_of_sector (obj_no_t s, int *x, int *y)
 }
 
 
-/*
- *  centre_of_sectors
- *  Return the coordinates of the centre of a group of sectors.
- */
-void centre_of_sectors (selection_c * list, int *x, int *y)
-{
-	bitvec_c *vertices;
-
-	int nitems;
-	long x_sum;
-	long y_sum;
-	int n;
-
-//!!!!!!	vertices = bv_vertices_of_sectors (list);
-	x_sum = 0;
-	y_sum = 0;
-	nitems = 0;
-	for (n = 0 ; n < NumVertices ; n++)
-		if (vertices->get (n))
-		{
-			x_sum += Vertices[n]->x;
-			y_sum += Vertices[n]->y;
-			nitems++;
-		}
-	if (nitems == 0)
-	{
-		*x = 0;
-		*y = 0;
-	}
-	else
-	{
-		*x = (int) (x_sum / nitems);
-		*y = (int) (y_sum / nitems);
-	}
-	delete vertices;
-}
-
 
 /*
    merge two or more Sectors into one

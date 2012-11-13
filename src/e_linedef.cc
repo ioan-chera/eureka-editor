@@ -417,43 +417,6 @@ void CMD_AlignTexturesY()
 
 
 /*
- *  centre_of_linedefs
- *  Return the coordinates of the centre of a group of linedefs.
- */
-void centre_of_linedefs (selection_c * list, int *x, int *y)
-{
-	int nitems;
-	long x_sum;
-	long y_sum;
-	int n;
-
-	x_sum = 0;
-	y_sum = 0;
-	nitems = 0;
-
-	for (n = 0 ; n < NumVertices ; n++)
-		if (list->get(n))
-		{
-			x_sum += Vertices[n]->x;
-			y_sum += Vertices[n]->y;
-			nitems++;
-		}
-
-	if (nitems == 0)
-	{
-		*x = 0;
-		*y = 0;
-	}
-	else
-	{
-		*x = (int) (x_sum / nitems);
-		*y = (int) (y_sum / nitems);
-	}
-}
-
-
-
-/*
  *  frob_linedefs_flags
  *  For all the linedefs in <list>, apply the operator <op>
  *  with the operand <operand> on the flags field.

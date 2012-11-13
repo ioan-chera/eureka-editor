@@ -58,8 +58,6 @@ inline int angle_to_direction (int angle)
 
 bool CMD_SpinThings(int degrees);
 
-void centre_of_things (selection_c * list, int *x, int *y);
-
 void frob_things_flags (selection_c * list, int op, int operand);
 
 int calc_new_angle(int angle, int diff);

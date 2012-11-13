@@ -212,35 +212,5 @@ void frob_things_flags (SelPtr list, int op, int operand)
 }
 
 
-
-/*
- *  centre_of_things
- *  Return the coordinates of the centre of a group of things.
- */
-void centre_of_things (SelPtr list, int *x, int *y)
-{
-	int nitems;
-	long x_sum;
-	long y_sum;
-
-	x_sum = 0;
-	y_sum = 0;
-//!!!!!!	for (nitems = 0, cur = list; cur; cur = cur->next, nitems++)
-//!!!!!!	{
-//!!!!!!		x_sum += Things[cur->objnum]->x;
-//!!!!!!		y_sum += Things[cur->objnum]->y;
-//!!!!!!	}
-	if (nitems == 0)
-	{
-		*x = 0;
-		*y = 0;
-	}
-	else
-	{
-		*x = (int) (x_sum / nitems);
-		*y = (int) (y_sum / nitems);
-	}
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

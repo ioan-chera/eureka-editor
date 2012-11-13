@@ -36,69 +36,6 @@
 #include "e_vertex.h"
 
 
-/*
- *  centre_of_vertices
- *  Return the coordinates of the centre of a group of vertices.
- */
-void centre_of_vertices (SelPtr list, int *x, int *y)
-{
-	SelPtr cur;
-	int nitems = 0;
-	long x_sum;
-	long y_sum;
-
-	x_sum = 0;
-	y_sum = 0;
-//!!!!!!	for (nitems = 0, cur = list ; cur ; cur = cur->next, nitems++)
-//!!!!!!	{
-//!!!!!!		x_sum += Vertices[cur->objnum]->x;
-//!!!!!!		y_sum += Vertices[cur->objnum]->y;
-//!!!!!!	}
-	if (nitems == 0)
-	{
-		*x = 0;
-		*y = 0;
-	}
-	else
-	{
-		*x = (int) (x_sum / nitems);
-		*y = (int) (y_sum / nitems);
-	}
-}
-
-
-/*
- *  centre_of_vertices
- *  Return the coordinates of the centre of a group of vertices.
- */
-void centre_of_vertices (const bitvec_c &bv, int &x, int &y)
-{
-	long x_sum = 0;
-	long y_sum = 0;
-
-	int nvertices = 0;
-	for (int n = 0 ; n < bv.size() ; n++)
-	{
-		if (bv.get (n))
-		{
-			x_sum += Vertices[n]->x;
-			y_sum += Vertices[n]->y;
-			nvertices++;
-		}
-	}
-	if (nvertices == 0)
-	{
-		x = 0;
-		y = 0;
-	}
-	else
-	{
-		x = (int) (x_sum / nvertices);
-		y = (int) (y_sum / nvertices);
-	}
-}
-
-
 
 /*
    insert the vertices of a new polygon

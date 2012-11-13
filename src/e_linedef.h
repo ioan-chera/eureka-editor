@@ -49,8 +49,6 @@ bitvec_c *bv_vertices_of_linedefs (bitvec_c *linedefs);
 bitvec_c *bv_vertices_of_linedefs (SelPtr list);
 SelPtr list_vertices_of_linedefs (SelPtr list);
 
-void centre_of_linedefs (selection_c * list, int *x, int *y);
-
 void frob_linedefs_flags (selection_c * list, int op, int operand);
 
 
