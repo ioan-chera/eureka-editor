@@ -47,6 +47,10 @@
 #include "ui_window.h"
 
 
+// config items [TODO !!]
+bool islands_get_new_sector = true;
+
+
 static bool invalidated_totals;
 static bool invalidated_panel_obj;
 static bool changed_panel_obj;
@@ -304,11 +308,11 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 		{
 			loop.FindIslands();
 
-			// if the loop is inside a sector, only create the inner
-			// sector if we surrounded something.
-			// TODO: CONFIG ITEM ?
+			// if the loop is inside a sector, only _have_ to create
+			// the inner sector if we surrounded something.
+			// TODO: CONFIG ITEM
 
-			if (did_outer && loop.islands.empty())
+			if (!islands_get_new_sector && did_outer && loop.islands.empty())
 				return;
 
 			int new_sec = BA_New(OBJ_SECTORS);
