@@ -47,8 +47,6 @@ void  HighlightObject (int, int, int);
 void  DeleteObjects (selection_c * list);
 
 
-void  CopyObjects (selection_c * list);
-
 bool  IsLineDefInside (int, int, int, int, int);
 int GetOppositeSector (int, bool);
 void  GetObjectCoords (int, int, int *, int *);
