@@ -27,6 +27,10 @@
 #ifndef __EUREKA_M_CONFIG_H__
 #define __EUREKA_M_CONFIG_H__
 
+
+typedef std::vector< const char * > string_list_t;
+
+
 int parse_config_file_user(const char *filename);
 int parse_config_file_default();
 

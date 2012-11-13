@@ -46,33 +46,27 @@
 typedef enum
 {
 	// Boolean (toggle)
-	// Receptacle is of type bool
-	// data_ptr is of type (bool *)
+	// Receptacle is of type: bool
 	OPT_BOOLEAN,
 
 	// "yes", "no", "ask"
-	// Receptacle is of type confirm_t
-	// data_ptr is of type confirm_t
+	// Receptacle is of type: confirm_t
 	OPT_CONFIRM,
 
 	// Integer number,
-	// Receptacle is of type int
-	// data_ptr is of type (int *)
+	// Receptacle is of type: int
 	OPT_INTEGER,
 
 	// String
-	// Receptacle is of type (char[9])
-	// data_ptr is of type (char *)
+	// Receptacle is of type: char[9]
 	OPT_STRINGBUF8,
 
 	// String
-	// Receptacle is of type (const char *)
-	// data_ptr is of type (const char **)
+	// Receptacle is of type: const char *
 	OPT_STRING,
 
 	// List of strings
-	// Receptacle is of type (const char *[])
-	// data_ptr is of type (const char ***)
+	// Receptacle is of type: std::vector< const char * >
 	OPT_STRING_LIST,
 
 	// End of the options description
@@ -379,7 +373,6 @@ static const opt_desc_t options[] =
 };
 
 
-static void append_item_to_list (const char ***list, const char *item);
 static confirm_t confirm_e2i (const char *external);
 static const char *confirm_i2e (confirm_t internal);
 
@@ -509,28 +502,32 @@ static int parse_config_file(FILE *fp, const char *filename)
 
 				case OPT_CONFIRM:
 					if (o->data_ptr)
+					{
 						*((confirm_t *) o->data_ptr) = confirm_e2i (value);
+					}
 					break;
 
 				case OPT_INTEGER:
 					if (o->data_ptr)
+					{
 						*((int *) (o->data_ptr)) = atoi (value);
+					}
 					break;
 
 				case OPT_STRINGBUF8:
 					if (o->data_ptr)
+					{
 						strncpy ((char *) o->data_ptr, value, 8);
-					((char *) o->data_ptr)[8] = 0;
+						((char *) o->data_ptr)[8] = 0;
+					}
 					break;
 
 				case OPT_STRING:
+					if (o->data_ptr)
 					{
-						char *dup = (char *) GetMemory (strlen (value) + 1);
-						strcpy (dup, value);
-						if (o->data_ptr)
-							*((char **) (o->data_ptr)) = dup;
-						break;
+						*((char **) o->data_ptr) = StringDup(value);
 					}
+					break;
 
 				case OPT_STRING_LIST:
 					while (*value != 0)
@@ -538,11 +535,12 @@ static int parse_config_file(FILE *fp, const char *filename)
 						char *v = value;
 						while (*v != 0 && ! isspace ((unsigned char) *v))
 							v++;
-						char *dup = (char *) GetMemory (v - value + 1);
-						memcpy (dup, value, v - value);
-						dup[v - value] = 0;
+
 						if (o->data_ptr)
-							append_item_to_list ((const char ***) o->data_ptr, dup);
+						{
+							string_list_t * list = (string_list_t *)o->data_ptr;
+							list->push_back(StringDup(value, v - value));
+						}
 						while (isspace (*v))
 							v++;
 						value = v;
@@ -673,12 +671,12 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				if (argv[0][0] == '-')
 				{
 					if (o->data_ptr && ! ignore)
-						*((bool *) (o->data_ptr)) = true;
+						*((bool *) o->data_ptr) = true;
 				}
 				else  // this code is never reached
 				{
 					if (o->data_ptr && ! ignore)
-						*((bool *) (o->data_ptr)) = false;
+						*((bool *) o->data_ptr) = false;
 				}
 				break;
 
@@ -688,8 +686,10 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
+
 				argv++;
 				argc--;
+
 				if (o->data_ptr && ! ignore)
 					*((confirm_t *) o->data_ptr) = confirm_e2i (argv[0]);
 				break;
@@ -700,10 +700,14 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
+
 				argv++;
 				argc--;
+
 				if (o->data_ptr && ! ignore)
-					*((int *) (o->data_ptr)) = atoi (argv[0]);
+				{
+					*((int *) o->data_ptr) = atoi (argv[0]);
+				}
 				break;
 
 			case OPT_STRINGBUF8:
@@ -712,11 +716,15 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
+
 				argv++;
 				argc--;
+
 				if (o->data_ptr && ! ignore)
+				{
 					strncpy ((char *) o->data_ptr, argv[0], 8);
-				((char *) o->data_ptr)[8] = 0;
+					((char *) o->data_ptr)[8] = 0;
+				}
 				break;
 
 			case OPT_STRING:
@@ -725,10 +733,14 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
 				}
+
 				argv++;
 				argc--;
+
 				if (o->data_ptr && ! ignore)
-					*((const char **) (o->data_ptr)) = argv[0];
+				{
+					*((const char **) o->data_ptr) = StringDup(argv[0]);
+				}
 				break;
 
 			case OPT_STRING_LIST:
@@ -741,8 +753,12 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				{
 					argv++;
 					argc--;
+
 					if (o->data_ptr && ! ignore)
-						append_item_to_list ((const char ***) o->data_ptr, argv[0]);
+					{
+						string_list_t * list = (string_list_t *) o->data_ptr;
+						list->push_back(StringDup(argv[0]));
+					}
 				}
 				break;
 
@@ -784,7 +800,9 @@ void dump_parameters(FILE *fp)
 	{
 		if (! o->long_name)
 			continue;
+		
 		fprintf (fp, "%-*s  %-*s  ",name_maxlen, o->long_name, desc_maxlen, o->desc);
+
 		if (o->opt_type == OPT_BOOLEAN)
 			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "enabled" : "disabled");
 		else if (o->opt_type == OPT_CONFIRM)
@@ -804,11 +822,12 @@ void dump_parameters(FILE *fp)
 		{
 			if (o->data_ptr)
 			{
-				char **list;
-				for (list = *((char ***) o->data_ptr); list && *list; list++)
-					fprintf (fp, "'%s' ", *list);
-				if (list == *((char ***) o->data_ptr))
-					fprintf (fp, "--none--");
+				string_list_t *list = (string_list_t *)o->data_ptr;
+
+				if (list->empty())
+					fprintf(fp, "--none--");
+				else for (unsigned int i = 0 ; i < list->size() ; i++)
+					fprintf(fp, "'%s' ", list->at(i));
 			}
 			else
 				fprintf (fp, "--none--");
@@ -925,34 +944,6 @@ static const char *confirm_i2e (confirm_t internal)
 	if (internal == YC_ASK_ONCE)
 		return "ask_once";
 	return "?";
-}
-
-
-/*
- *  append_item_to_list
- *  Append a string to a null-terminated string list
- */
-static void append_item_to_list (const char ***list, const char *item)
-{
-	int i;
-
-	i = 0;
-	if (*list != 0)
-	{
-		// Count the number of elements in the list (last = null)
-		while ((*list)[i] != 0)
-			i++;
-		// Expand the list
-		*list = (const char **) ResizeMemory (*list, (i + 2) * sizeof **list);
-	}
-	else
-	{
-		// Create a new list
-		*list = (const char **) GetMemory (2 * sizeof **list);
-	}
-	// Append the new element
-	(*list)[i] = item;
-	(*list)[i + 1] = 0;
 }
 
 
