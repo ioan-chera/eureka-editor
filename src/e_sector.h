@@ -56,7 +56,6 @@ bitvec_c *linedefs_of_sectors (selection_c * list);
 int linedefs_of_sector (obj_no_t s, obj_no_t *&array);
 
 bitvec_c *bv_vertices_of_sector (obj_no_t s);
-bitvec_c *bv_vertices_of_sectors (selection_c * list);
 
 #endif  /* __EUREKA_E_SECTOR_H__ */
 

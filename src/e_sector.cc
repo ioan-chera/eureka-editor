@@ -699,21 +699,5 @@ bitvec_c *bv_vertices_of_sector (obj_no_t s)
 }
 
 
-/*
- *  bv_vertices_of_sectors
- *  Return a bit vector of all vertices used by the sectors.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *bv_vertices_of_sectors (SelPtr list)
-{
-	bitvec_c * linedefs = linedefs_of_sectors(list);
-
-	bitvec_c * vertices = bv_vertices_of_linedefs(linedefs);
-	delete linedefs;
-
-	return vertices;
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
