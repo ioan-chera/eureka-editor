@@ -744,6 +744,7 @@ bool Editor_Key(int key, keymod_e mod)
 		CMD_MirrorObjects(true);
 	}
 
+/*
 	else if (key == 'm')
 	{
 		CMD_ScaleObjects(true);
@@ -752,6 +753,7 @@ bool Editor_Key(int key, keymod_e mod)
 	{
 		CMD_ScaleObjects(false);
 	}
+*/
 
 	// 'w': spin things 1/8 turn counter-clockwise
 	else if (key == 'w' && edit.obj_type == OBJ_THINGS
@@ -871,12 +873,14 @@ bool Editor_Key(int key, keymod_e mod)
 		edit.RedrawMap = 1;
 	}
 
+/*
 	// [c]: correct sector at mouse pointer
 	else if (key == 'c' && edit.obj_type == OBJ_SECTORS &&
 	         edit.pointer_in_window)
 	{
 		CMD_CorrectSector();
 	}
+*/
 
 	// [d]: disconnect linedefs
 	else if (key == 'd' && edit.obj_type == OBJ_VERTICES)
