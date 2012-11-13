@@ -37,10 +37,12 @@
 
 
 
+// FIXME: InsertPolygonVertices
+#if 0
+
 /*
    insert the vertices of a new polygon
-   */
-
+*/
 void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
 {
 	for (int n = 0 ; n < sides ; n++)
@@ -50,6 +52,7 @@ void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
 				centery + (int) ((double)radius * sin (2*M_PI * (double)n / (double)sides)));
 	}
 }
+#endif
 
 
 void MergeVertex(int v1, int v2)

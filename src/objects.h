@@ -47,7 +47,6 @@ void  HighlightObject (int, int, int);
 void  DeleteObjects (selection_c * list);
 
 
-int   DoInsertObject (obj_type_e, obj_no_t, int, int);
 void  CopyObjects (selection_c * list);
 
 bool  IsLineDefInside (int, int, int, int, int);
