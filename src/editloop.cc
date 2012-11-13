@@ -1022,17 +1022,6 @@ void EditorMousePress(keymod_e mod)
 		edit.Selected->clear_all();
 		SelectObject (edit.Selected, object.num);
 
-//????		/* I don't like having to do that */
-//????		if (object.type == OBJ_THINGS && object ())
-//????			MoveObjectsToCoords (object.type, 0,
-//????					Things[object.num]->x, Things[object.num]->y, 0);
-//????		else if (object.type == OBJ_VERTICES && object ())
-//????			MoveObjectsToCoords (object.type, 0,
-//????					Vertices[object.num]->x, Vertices[object.num]->y, 0);
-//????		else
-//????			MoveObjectsToCoords (object.type, 0,
-//????					edit.map_x, edit.map_y, grid.snap ? grid.step : 0);
-
 		edit.RedrawMap = 1;
 
 		main_win->canvas->redraw();
@@ -1047,17 +1036,6 @@ void EditorMousePress(keymod_e mod)
 		edit.clicked        = object;
 		edit.click_ctrl     = 0;
 		edit.click_time     = 0; /// is.time;
-
-///????		/* I don't like having to do that */
-///????		if (object.type == OBJ_THINGS && object ())
-///????			MoveObjectsToCoords (object.type, 0,
-///????					Things[object.num]->x, Things[object.num]->y, 0);
-///????		else if (object.type == OBJ_VERTICES && object ())
-///????			MoveObjectsToCoords (object.type, 0,
-///????					Vertices[object.num]->x, Vertices[object.num]->y, 0);
-///????		else
-///????			MoveObjectsToCoords (object.type, 0,
-///????					edit.map_x, edit.map_y, grid.snap ? grid.step : 0);
 
 		edit.RedrawMap = 1;
 		return;
