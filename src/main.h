@@ -84,7 +84,6 @@ void FatalError(const char *fmt, ...);
 
 #include "lib_util.h"
 #include "lib_file.h"
-#include "ymemory.h"
 
 
 typedef enum

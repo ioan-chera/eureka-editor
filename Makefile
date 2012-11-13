@@ -97,8 +97,7 @@ OBJS = \
 	$(OBJ_DIR)/w_wad.o   \
 	$(OBJ_DIR)/x_hover.o  \
 	$(OBJ_DIR)/x_loop.o  \
-	$(OBJ_DIR)/x_mirror.o  \
-	$(OBJ_DIR)/ymemory.o
+	$(OBJ_DIR)/x_mirror.o
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
