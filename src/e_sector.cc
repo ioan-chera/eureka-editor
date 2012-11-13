@@ -183,10 +183,10 @@ void centre_of_sector (obj_no_t s, int *x, int *y)
    merge two or more Sectors into one
 */
 
-void MergeSectors (SelPtr *slist)
-{
 #if 0  // FIXME !!!!!
 
+void MergeSectors (SelPtr *slist)
+{
 	SelPtr cur;
 	int    n, olds, news;
 
@@ -210,18 +210,18 @@ void MergeSectors (SelPtr *slist)
 
 	/* the returned list contains only the first Sector */
 	SelectObject (slist, news);
-#endif
 }
+#endif
 
 
 
 /*
    delete one or several two-sided LineDefs and join the two Sectors
 */
+#if 0  // FIXME !!!
 
 void DeleteLineDefsJoinSectors(SelPtr *ldlist)
 {
-#if 0  // FIXME !!!
 
 	SelPtr cur, slist;
 	char   msg[80];
@@ -269,8 +269,8 @@ void DeleteLineDefsJoinSectors(SelPtr *ldlist)
 	}
 
 	DeleteObjects(OBJ_LINEDEFS, ldlist);
-#endif
 }
+#endif
 
 
 
@@ -586,30 +586,6 @@ bitvec_c *linedefs_of_sector (obj_no_t s)
 		if (LineDefs[n]->TouchesSector(s))
 			linedefs->set (n);
 
-	return linedefs;
-}
-
-
-/*
- *  linedefs_of_sectors
- *  Return a bit vector of all linedefs used by the sectors.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *linedefs_of_sectors (SelPtr list)
-{
-	bitvec_c *linedefs = new bitvec_c (NumLineDefs);
-	
-#if 0 // FIXME linedefs_of_sectors
-	bitvec_c *sectors  = list_to_bitvec (list, NumSectors);
-	
-	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (   is_sidedef (LineDefs[n]->right)
-				&& sectors->get (SideDefs[LineDefs[n]->right].sector)
-				|| is_sidedef (LineDefs[n]->left)
-				&& sectors->get (SideDefs[LineDefs[n]->left].sector))
-			linedefs->set (n);
-	delete sectors;
-#endif
 	return linedefs;
 }
 
