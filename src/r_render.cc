@@ -1601,6 +1601,10 @@ bool Render3D_Key(int key, keymod_e mod)
 	else if (mod == KM_CTRL)
 		mv_speed *= 4;
 
+	// strafing?
+	if (key == FL_Left  && mod == KM_ALT) key = '<';
+	if (key == FL_Right && mod == KM_ALT) key = '>';
+
 	if (key == FL_Left)
 	{
 		view.SetAngle(view.angle + M_PI / ((key & FL_SHIFT) ? 4 : 8));
@@ -1729,7 +1733,7 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 			dx = 0;
 	}
 
-	if (mod == KM_ALT)
+	if (mod == KM_ALT)  // strafing
 	{
 		if (dx)
 		{
