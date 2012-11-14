@@ -40,6 +40,13 @@
 #include "ui_window.h"  // meh!
 
 
+// config item variables
+
+extern bool same_mode_clears_selection;
+
+
+//------------------------------------------------------------------------
+
 /*
  *  Description of the command line arguments and config file keywords
  */
@@ -315,6 +322,15 @@ static const opt_desc_t options[] =
 		"Default upper texture",
 		NULL,
 		default_upper_texture
+	},
+
+	{	"same_mode_clears_selection",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Clear the selection when entering the same mode",
+		NULL,
+		&same_mode_clears_selection
 	},
 
 	{	"scroll_less",

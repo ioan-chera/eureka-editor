@@ -60,6 +60,10 @@ Editor_State_c edit;
 static const Objid CANVAS (OBJ_NONE, OBJ_NO_CANVAS);
 
 
+// config items
+bool same_mode_clears_selection = false; 
+
+
 Editor_State_c::Editor_State_c()
     // FIXME !!!!
 {
@@ -253,9 +257,6 @@ void CMD_ChangeEditMode(char mode)
 	edit.highlighted.nil();
 	edit.split_line.nil();
 
-	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
-	//       change.  TODO: consider an option to emulate that behavior.
-
 	if (prev_type != edit.obj_type)
 	{
 		main_win->NewEditMode(mode);
@@ -266,6 +267,12 @@ void CMD_ChangeEditMode(char mode)
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
+	}
+	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
+	//       change.  We optionally emulate that behavior here.
+	else if (same_mode_clears_selection)
+	{
+		edit.Selected->clear_all();
 	}
 
 	UpdateHighlight();
