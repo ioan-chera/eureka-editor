@@ -615,22 +615,32 @@ static void Insert_Vertex()
 		return;
 	}
 
+	// if highlighted vertex same as selected one, merely deselect it
 	if (second_sel < 0 && edit.highlighted() &&
-	    edit.highlighted.num != first_sel)
+	    edit.highlighted.num == first_sel)
+	{
+		edit.Selected->clear(first_sel);
+		return;
+	}
+
+	// if only one is selected, but another is highlighted, use the
+	// highlighted one as the second vertex
+	if (second_sel < 0 && edit.highlighted())
 	{
 		second_sel = edit.highlighted.num;
 	}
 
-	// merely insert a new linedef between two vertices
+	// insert a new linedef between two existing vertices
 	if (first_sel >= 0 && second_sel >= 0)
 	{
 		if (LineDefAlreadyExists(first_sel, second_sel))
 		{
-			Beep();
+			edit.Selected->clear(first_sel);
+			edit.Selected->set  (second_sel);
 			return;
 		}
 
-	    // perhaps a CONFIG ITEM to always reselect second
+	    // TODO: CONFIG ITEM to always reselect second
 		if (VertexHowManyLineDefs(second_sel) > 0)
 			reselect = false;
 
@@ -641,7 +651,6 @@ static void Insert_Vertex()
 		BA_End();
 
 		edit.Selected->clear_all();
-
 		if (reselect)
 			edit.Selected->set(second_sel);
 
@@ -658,7 +667,7 @@ static void Insert_Vertex()
 
 		if (V->x == new_x && V->y == new_y)
 		{
-			Beep();
+			edit.Selected->clear();
 			return;
 		}
 	}
@@ -699,9 +708,8 @@ static void Insert_Vertex()
 
 	BA_End();
 
-	// select it
+	// select new vertex
 	edit.Selected->clear_all();
-
 	if (reselect)
 		edit.Selected->set(new_v);
 }
