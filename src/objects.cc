@@ -188,13 +188,10 @@ static bool LineDefAlreadyExists(int v1, int v2)
    existing line.  By "overlap" I mean parallel and sitting on top
    (this does NOT test for lines crossing each other).
 */
-static bool LineDefWouldOverlap(int v1, int v2)
+static bool LineDefWouldOverlap(int v1, int x2, int y2)
 {
 	int x1 = Vertices[v1]->x;
 	int y1 = Vertices[v1]->y;
-
-	int x2 = Vertices[v2]->x;
-	int y2 = Vertices[v2]->y;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -682,10 +679,10 @@ static void Insert_Vertex()
 			return;
 		}
 
-		if (LineDefWouldOverlap(first_sel, second_sel))
+		// FIXME: if blah.... then SPLIT an existing linedef
+
+		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y))
 		{
-			// FIXME: be a bit smarter: if only 1 linedef, and it shares
-			//        a vertex, and new vertex is in middle THEN split line
 			Beep();
 			return;
 		}
@@ -723,6 +720,14 @@ static void Insert_Vertex()
 	}
 
 
+	// prevent adding a linedef that would overlap an existing one
+	if (first_sel >= 0 && LineDefWouldOverlap(first_sel, new_x, new_y))
+	{
+		Beep();
+		return;
+	}
+
+
 	BA_Begin();
 
 	int new_v = BA_New(OBJ_VERTICES);
@@ -753,15 +758,7 @@ static void Insert_Vertex()
 	// add a new linedef?
 	if (first_sel >= 0)
 	{
-		if (LineDefWouldOverlap(first_sel, new_v))
-		{
-			// FIXME: should just refuse the operation.
-			// HOWEVER we have already BA_Begin'd and created the vertex...
-			reselect = true;
-			Beep();
-		}
-		else
-			Insert_LineDef(first_sel, new_v);
+		Insert_LineDef(first_sel, new_v);
 	}
 
 	BA_End();
