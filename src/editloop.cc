@@ -115,14 +115,8 @@ static void UpdateSplitLine(int drag_vert = -1)
 
 		GetSplitLineDef(edit.split_line, new_x, new_y, edit.drag_single_vertex);
 
-		// don't highlight the split line if one of its vertices is selected
-		if (edit.split_line() && edit.Selected->notempty())
-		{
-			const LineDef *L = LineDefs[edit.split_line.num];
-
-			if (edit.Selected->get(L->start) || edit.Selected->get(L->end))
-				edit.split_line.nil();
-		}
+		// NOTE: OK if the split line has one of its vertices selected
+		//       (that case is handled by Insert_Vertex)
 	}
 
 	if (edit.split_line())

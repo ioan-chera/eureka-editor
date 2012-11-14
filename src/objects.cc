@@ -679,8 +679,6 @@ static void Insert_Vertex()
 			return;
 		}
 
-		// FIXME: if blah.... then SPLIT an existing linedef
-
 		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y))
 		{
 			Beep();
@@ -717,6 +715,17 @@ static void Insert_Vertex()
 			edit.Selected->clear_all();
 			return;
 		}
+	}
+
+
+	// handle case of splitting a line where the first selected vertex
+	// matches an endpoint of that line -- we just want to split the
+	// line then (NOT insert a new linedef)
+	if (first_sel >= 0 && edit.split_line() &&
+	    (first_sel == LineDefs[edit.split_line.num]->start ||
+		 first_sel == LineDefs[edit.split_line.num]->end))
+	{
+		first_sel = -1;
 	}
 
 
