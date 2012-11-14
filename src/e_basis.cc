@@ -225,6 +225,15 @@ int LineDef::WhatSector(int side) const
 }
 
 
+double LineDef::CalcLength() const
+{
+	int dx = Start()->x - End()->x;
+	int dy = Start()->y - End()->y;
+
+	return sqrt(dx * dx + dy * dy);
+}
+
+
 //------------------------------------------------------------------------
 
 

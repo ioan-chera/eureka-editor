@@ -526,10 +526,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	int dx = LineDefs[n]->Start()->x - LineDefs[n]->End()->x;
-	int dy = LineDefs[n]->Start()->y - LineDefs[n]->End()->y;
-
-	float len_f = sqrt(dx*dx + dy*dy);
+	float len_f = LineDefs[n]->CalcLength();
 
 	char buffer[300];
 

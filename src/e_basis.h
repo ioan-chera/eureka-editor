@@ -240,6 +240,8 @@ public:
 
 	// side is either SIDE_LEFT or SIDE_RIGHT
 	int WhatSector(int side) const;
+
+	double CalcLength() const;
 };
 
 
