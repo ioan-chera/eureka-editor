@@ -656,6 +656,24 @@ bool CMD_SwapFlats()
 
 
 
+static void LineDefsBetweenSectors(selection_c *list, int sec1, int sec2)
+{
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		const LineDef * L = LineDefs[i];
+
+		if (! (L->Left() && L->Right()))
+			continue;
+
+		if ((L->Left()->sector == sec1 && L->Right()->sector == sec2) ||
+		    (L->Left()->sector == sec2 && L->Right()->sector == sec1))
+		{
+			list->set(i);
+		}
+	}
+}
+
+
 static void ReplaceSectorRefs(int old_sec, int new_sec)
 {
 	for (int i = 0 ; i < NumSideDefs ; i++)
@@ -665,22 +683,6 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 		if (sd->sector == old_sec)
 		{
 			BA_ChangeSD(i, SideDef::F_SECTOR, new_sec);
-		}
-	}
-}
-
-
-static void DeleteCommonLineDefs(int sec)
-{
-	// MUST iterate backwards
-	for (int i = NumLineDefs - 1 ; i >= 0 ; i--)
-	{
-		LineDef * L = LineDefs[i];
-
-		if (L->Left()  && L->Left() ->sector == sec &&
-		    L->Right() && L->Right()->sector == sec)
-		{
-			BA_Delete(OBJ_LINEDEFS, i);
 		}
 	}
 }
@@ -697,9 +699,11 @@ void CMD_MergeSectors(bool keep_common_lines)
 
 	int source = edit.Selected->find_first();
 
+	selection_c common_lines(OBJ_LINEDEFS);
+	selection_iterator_c it;
+
 	BA_Begin();
 
-	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		int target = *it;
@@ -707,12 +711,15 @@ void CMD_MergeSectors(bool keep_common_lines)
 		if (target == source)
 			continue;
 
+		LineDefsBetweenSectors(&common_lines, target, source);
+
 		ReplaceSectorRefs(target, source);
 	}
 
 	if (! keep_common_lines)
 	{
-		DeleteCommonLineDefs(source);
+		// FIXME: detect and delete unused vertices
+		DeleteObjects(&common_lines);
 	}
 
 	BA_End();
