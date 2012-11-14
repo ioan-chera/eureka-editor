@@ -779,59 +779,83 @@ static void Insert_Vertex()
 }
 
 
+static void Correct_Sector(int sec_num)
+{
+	BA_Begin();
+
+	AssignSectorToSpace(edit.map_x, edit.map_y, sec_num);
+
+	BA_End();
+}
+
+
 static void Insert_Sector(keymod_e mod)
 {
-	int reselect = -1;
+	int sel_count = edit.Selected->count_obj();
+	if (sel_count > 1)
+	{
+		Beep();
+		return;
+	}
 
-	// create a square if outside of the map
+	// if outside of the map, create a square 
 	if (PointOutsideOfMap(edit.map_x, edit.map_y))
 	{
 		BA_Begin();
 
+		// FIXME: model
 		CreateSquare(NULL);
 
 		BA_End();
 
-		reselect = (NumSectors - 1);
+		edit.Selected->clear_all();
+		edit.Selected->set(NumSectors - 1);
+		return;
 	}
-	else
+
+	// if a sector is highlighted, merely correct it (unless CTRL is pressed)
+	if (edit.highlighted() && mod != KM_CTRL)
 	{
-		// this means : create new sector, look for neighbor to copy
-		int new_sec = -1;
-
-		BA_Begin();
-
-		// when a sector is selected, copy its properties to new area
-		if (edit.Selected->notempty())
+		// must not be any selection
+		if (sel_count > 0)
 		{
-			int model = edit.Selected->find_first();
-
-			if (mod == KM_CTRL)
-			{
-				new_sec = model;
-			}
-			else
-			{
-				new_sec = BA_New(OBJ_SECTORS);
-
-				Sectors[new_sec]->RawCopy(Sectors[model]);
-			}
+			Beep();
+			return;
 		}
 
-		AssignSectorToSpace(edit.map_x, edit.map_y, new_sec);
-
-		BA_End();
-
-		reselect = (new_sec >= 0) ? new_sec : (NumSectors-1);
+		Correct_Sector(edit.highlighted.num);
+		return;
 	}
 
-	if (edit.obj_type == OBJ_SECTORS)
+	// --- adding a NEW sector to the area ---
+
+	// determine a model sector to copy properties from
+	int model;
+
+	if (sel_count > 0)
+		model = edit.Selected->find_first();
+	else if (edit.highlighted())
+		model = edit.highlighted.num;
+	else
+		model = -1;  // FIXME: look for a neighbor to copy
+
+
+	BA_Begin();
+
+	int new_sec = BA_New(OBJ_SECTORS);
+
+	if (model >= 0)
 	{
-		edit.Selected->clear_all();
-
-		if (reselect >= 0)
-			edit.Selected->set(reselect);
+		Sectors[new_sec]->RawCopy(Sectors[model]);
 	}
+
+	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec);
+
+	BA_End();
+
+
+	edit.Selected->clear_all();
+	edit.Selected->set(new_sec);
 }
 
 
