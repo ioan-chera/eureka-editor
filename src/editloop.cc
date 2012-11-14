@@ -876,11 +876,11 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 */
 	// [m]: merge sectors  (with SHIFT : keep common linedefs)
-	else if (key == 'm')
+	else if (key == 'm' && edit.obj_type == OBJ_SECTORS)
 	{
 		CMD_MergeSectors(false);
 	}
-	else if (key == 'M')
+	else if (key == 'M' && edit.obj_type == OBJ_SECTORS)
 	{
 		CMD_MergeSectors(true);
 	}
@@ -916,9 +916,9 @@ bool Editor_Key(int key, keymod_e mod)
 
 
 #if 0
-	// [T] Transfer properties to selected objects (AJA)
-	else if (key == 'T' && edit.Selected 
-			&& edit.highlighted.num >= 0)
+	// [c] Copy properties to the highlighted object
+	else if (key == 'c' && edit.Selected->notempty() &&
+			 edit.highlighted())
 	{
 		switch (edit.obj_type)
 		{
