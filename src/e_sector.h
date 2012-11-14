@@ -35,7 +35,7 @@ bool CMD_AdjustLight(int delta);
 
 bool CMD_SwapFlats();
 
-void CMD_CorrectSector();
+void CMD_MergeSectors(bool keep_common_lines);
 
 
 void centre_of_sector (obj_no_t s, int *x, int *y);

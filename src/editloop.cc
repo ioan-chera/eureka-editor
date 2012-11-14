@@ -739,11 +739,11 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 
 /*
-	else if (key == 'm')
+	else if (key == 'p')
 	{
 		CMD_ScaleObjects(true);
 	}
-	else if (key == 'M')
+	else if (key == 'P')
 	{
 		CMD_ScaleObjects(false);
 	}
@@ -875,6 +875,15 @@ bool Editor_Key(int key, keymod_e mod)
 		CMD_CorrectSector();
 	}
 */
+	// [m]: merge sectors  (with SHIFT : keep common linedefs)
+	else if (key == 'm')
+	{
+		CMD_MergeSectors(false);
+	}
+	else if (key == 'M')
+	{
+		CMD_MergeSectors(true);
+	}
 
 	// [d]: disconnect linedefs
 	else if (key == 'd' && edit.obj_type == OBJ_VERTICES)

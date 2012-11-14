@@ -655,31 +655,69 @@ bool CMD_SwapFlats()
 }
 
 
-void CMD_CorrectSector()
+
+static void ReplaceSectorRefs(int old_sec, int new_sec)
 {
-	// must not be any selection (mouse pointer is significant here)
-	if (edit.Selected->notempty())
+	for (int i = 0 ; i < NumSideDefs ; i++)
+	{
+		SideDef * sd = SideDefs[i];
+
+		if (sd->sector == old_sec)
+		{
+			BA_ChangeSD(i, SideDef::F_SECTOR, new_sec);
+		}
+	}
+}
+
+
+static void DeleteCommonLineDefs(int sec)
+{
+	// MUST iterate backwards
+	for (int i = NumLineDefs - 1 ; i >= 0 ; i--)
+	{
+		LineDef * L = LineDefs[i];
+
+		if (L->Left()  && L->Left() ->sector == sec &&
+		    L->Right() && L->Right()->sector == sec)
+		{
+			BA_Delete(OBJ_LINEDEFS, i);
+		}
+	}
+}
+
+
+void CMD_MergeSectors(bool keep_common_lines)
+{
+	// need a selection
+	if (edit.Selected->empty())
 	{
 		Beep();
 		return;
 	}
 
-	// require a highlighted sector
-	// FIXME: look all four directions to find a facing sidedef
-
-	if (edit.highlighted.is_nil())
-	{
-		Beep();
-		return;
-	}
-
-	int sec_num = edit.highlighted.num;
+	int source = edit.Selected->find_first();
 
 	BA_Begin();
 
-	AssignSectorToSpace(edit.map_x, edit.map_y, sec_num);
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		int target = *it;
+
+		if (target == source)
+			continue;
+
+		ReplaceSectorRefs(target, source);
+	}
+
+	if (! keep_common_lines)
+	{
+		DeleteCommonLineDefs(source);
+	}
 
 	BA_End();
+
+	MarkChanges();
 }
 
 
