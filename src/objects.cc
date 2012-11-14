@@ -184,6 +184,48 @@ static bool LineDefAlreadyExists(int v1, int v2)
 }
 
 
+/* return true if adding a line between v1 and v2 would overlap an
+   existing line.  By "overlap" I mean parallel and sitting on top
+   (this does NOT test for lines crossing each other).
+*/
+static bool LineDefWouldOverlap(int v1, int v2)
+{
+	int x1 = Vertices[v1]->x;
+	int y1 = Vertices[v1]->y;
+
+	int x2 = Vertices[v2]->x;
+	int y2 = Vertices[v2]->y;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		LineDef *L = LineDefs[n];
+
+		double a, b;
+		
+		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		b = PerpDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+
+		if (fabs(a) >= 2.0 || fabs(b) >= 2.0)
+			continue;
+
+		a = AlongDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		b = AlongDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+
+		double len = L->CalcLength();
+
+		if (a > b)
+			std::swap(a, b);
+
+		if (b < 0.5 || a > len - 0.5)
+			continue;
+
+		return true;
+	}
+
+	return false;
+}
+
+
 static void CreateSquare(const Sector * model)
 {
 	int new_sec = BA_New(OBJ_SECTORS);
@@ -640,6 +682,14 @@ static void Insert_Vertex()
 			return;
 		}
 
+		if (LineDefWouldOverlap(first_sel, second_sel))
+		{
+			// FIXME: be a bit smarter: if only 1 linedef, and it shares
+			//        a vertex, and new vertex is in middle THEN split line
+			Beep();
+			return;
+		}
+
 	    // TODO: CONFIG ITEM to always reselect second
 		if (VertexHowManyLineDefs(second_sel) > 0)
 			reselect = false;
@@ -667,7 +717,7 @@ static void Insert_Vertex()
 
 		if (V->x == new_x && V->y == new_y)
 		{
-			edit.Selected->clear();
+			edit.Selected->clear_all();
 			return;
 		}
 	}
@@ -703,7 +753,15 @@ static void Insert_Vertex()
 	// add a new linedef?
 	if (first_sel >= 0)
 	{
-		Insert_LineDef(first_sel, new_v);
+		if (LineDefWouldOverlap(first_sel, new_v))
+		{
+			// FIXME: should just refuse the operation.
+			// HOWEVER we have already BA_Begin'd and created the vertex...
+			reselect = true;
+			Beep();
+		}
+		else
+			Insert_LineDef(first_sel, new_v);
 	}
 
 	BA_End();
