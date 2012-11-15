@@ -47,7 +47,7 @@
 #include "ui_window.h"
 
 
-// config items [TODO !!]
+// config items [TODO !!]  [rename too]
 bool islands_get_new_sector = true;
 
 
@@ -223,11 +223,14 @@ static bool LineDefWouldOverlap(int v1, int x2, int y2)
 }
 
 
-static void CreateSquare(const Sector * model)
+static void CreateSquare(int model)
 {
 	int new_sec = BA_New(OBJ_SECTORS);
 
-	Sectors[new_sec]->SetDefaults();
+	if (model >= 0)
+		Sectors[new_sec]->RawCopy(Sectors[model]);
+	else
+		Sectors[new_sec]->SetDefaults();
 
 	// make the new sector occupy a single grid square
 
@@ -803,8 +806,11 @@ static void Insert_Sector(keymod_e mod)
 	{
 		BA_Begin();
 
-		// FIXME: model
-		CreateSquare(NULL);
+		int model = -1;
+		if (sel_count > 0)
+			model = edit.Selected->find_first();
+
+		CreateSquare(model);
 
 		BA_End();
 
