@@ -778,16 +778,16 @@ bool CMD_Paste()
 
 //------------------------------------------------------------------------
 
-static void UnusedVertices(selection_c *list, selection_c *result)
+void UnusedVertices(selection_c *lines, selection_c *result)
 {
-	SYS_ASSERT(list->what_type() == OBJ_LINEDEFS);
+	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
 
-	ConvertSelection(list, result);
+	ConvertSelection(lines, result);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		// we are interested in the lines we are NOT deleting
-		if (list->get(n))
+		if (lines->get(n))
 			continue;
 	
 		const LineDef *L = LineDefs[n];
@@ -797,16 +797,16 @@ static void UnusedVertices(selection_c *list, selection_c *result)
 	}
 }
 
-static void UnusedSideDefs(selection_c *list, selection_c *result)
+void UnusedSideDefs(selection_c *lines, selection_c *result)
 {
-	SYS_ASSERT(list->what_type() == OBJ_LINEDEFS);
+	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
 
-	ConvertSelection(list, result);
+	ConvertSelection(lines, result);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		// we are interested in the lines we are NOT deleting
-		if (list->get(n))
+		if (lines->get(n))
 			continue;
 	
 		const LineDef *L = LineDefs[n];
@@ -816,9 +816,9 @@ static void UnusedSideDefs(selection_c *list, selection_c *result)
 	}
 }
 
-static void UnusedLineDefs(selection_c *list, selection_c *result)
+void UnusedLineDefs(selection_c *sectors, selection_c *result)
 {
-	SYS_ASSERT(list->what_type() == OBJ_SECTORS);
+	SYS_ASSERT(sectors->what_type() == OBJ_SECTORS);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -828,8 +828,8 @@ static void UnusedLineDefs(selection_c *list, selection_c *result)
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : list->get(L->Right()->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : list->get(L->Left() ->sector) ? 0 : 1;
+		int right_m = (L->right < 0) ? -1 : sectors->get(L->Right()->sector) ? 0 : 1;
+		int  left_m = (L->left  < 0) ? -1 : sectors->get(L->Left() ->sector) ? 0 : 1;
 
 		if (MAX(right_m, left_m) == 0)
 		{
@@ -839,11 +839,11 @@ static void UnusedLineDefs(selection_c *list, selection_c *result)
 }
 
 
-static void FixupLineDefs(selection_c *list, selection_c *sectors)
+static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 {
 	selection_iterator_c it;
 
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (lines->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const LineDef *L = LineDefs[*it];
 
