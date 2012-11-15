@@ -718,8 +718,8 @@ void CMD_MergeSectors(bool keep_common_lines)
 
 	if (! keep_common_lines)
 	{
-		// FIXME: detect and delete unused vertices
-		DeleteObjects(&common_lines);
+		// this deletes any unused vertices/sidedefs too
+		DeleteLineDefs(&common_lines);
 	}
 
 	BA_End();
