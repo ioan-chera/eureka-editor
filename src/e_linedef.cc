@@ -26,6 +26,7 @@
 
 #include "main.h"
 
+#include "e_cutpaste.h"
 #include "e_linedef.h"
 #include "editloop.h"
 #include "levels.h"
@@ -37,6 +38,23 @@
 
 
 static void SliceLinedef (int linedefno, int times);
+
+
+/*
+  deletes all the linedefs AND unused vertices AND unused sidedefs
+*/
+void DeleteLineDefs(selection_c *lines)
+{
+	selection_c  verts(OBJ_VERTICES);
+	selection_c  sides(OBJ_SIDEDEFS);
+
+	UnusedVertices(lines, &verts);
+	UnusedSideDefs(lines, &sides);
+
+	DeleteObjects(lines);
+	DeleteObjects(&verts);
+	DeleteObjects(&sides);
+}
 
 
 /*

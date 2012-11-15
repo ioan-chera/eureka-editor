@@ -40,6 +40,8 @@ void CMD_AlignTexturesX();
 void CMD_AlignTexturesY();
 
 
+void DeleteLineDefs(selection_c *lines);
+
 int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
