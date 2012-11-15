@@ -183,7 +183,7 @@ void centre_of_sector (obj_no_t s, int *x, int *y)
    merge two or more Sectors into one
 */
 
-#if 0  // FIXME !!!!!
+#if 0  // FIXME !!!
 
 void MergeSectors (SelPtr *slist)
 {
