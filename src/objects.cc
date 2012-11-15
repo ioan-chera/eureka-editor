@@ -1155,8 +1155,8 @@ void TransferThingProperties(int src_thing, int dest_thing)
 	BA_Begin();
 
 	BA_ChangeTH(dest_thing, Thing::F_TYPE,    T->type);
-	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 	BA_ChangeTH(dest_thing, Thing::F_OPTIONS, T->options);
+//	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
 	BA_End();
 }
@@ -1198,15 +1198,14 @@ void TransferLinedefProperties(int src_line, int dest_line)
 {
 	const LineDef * L = LineDefs[src_line];
 
-	BA_Begin();
-
-	BA_ChangeLD(dest_line, LineDef::F_TYPE, L->type);
-	BA_ChangeLD(dest_line, LineDef::F_TAG,  L->tag);
-
 	// don't transfer certain flags
 	int flags = LineDefs[dest_line]->flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L->flags & ~LINEDEF_FLAG_KEEP);
 
+	BA_Begin();
+
+	BA_ChangeLD(dest_line, LineDef::F_TYPE, L->type);
+	BA_ChangeLD(dest_line, LineDef::F_TAG,  L->tag);
 	BA_ChangeLD(dest_line, LineDef::F_FLAGS, flags);
 
 	BA_End();
