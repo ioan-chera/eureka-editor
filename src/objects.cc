@@ -170,59 +170,6 @@ void DeleteObjects(selection_c *list)
 }
 
 
-static bool LineDefAlreadyExists(int v1, int v2)
-{
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = LineDefs[n];
-
-		if (L->start == v1 && L->end == v2) return true;
-		if (L->start == v2 && L->end == v1) return true;
-	}
-
-	return false;
-}
-
-
-/* return true if adding a line between v1 and v2 would overlap an
-   existing line.  By "overlap" I mean parallel and sitting on top
-   (this does NOT test for lines crossing each other).
-*/
-static bool LineDefWouldOverlap(int v1, int x2, int y2)
-{
-	int x1 = Vertices[v1]->x;
-	int y1 = Vertices[v1]->y;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = LineDefs[n];
-
-		double a, b;
-		
-		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		b = PerpDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-
-		if (fabs(a) >= 2.0 || fabs(b) >= 2.0)
-			continue;
-
-		a = AlongDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		b = AlongDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-
-		double len = L->CalcLength();
-
-		if (a > b)
-			std::swap(a, b);
-
-		if (b < 0.5 || a > len - 0.5)
-			continue;
-
-		return true;
-	}
-
-	return false;
-}
-
-
 static void CreateSquare(int model)
 {
 	int new_sec = BA_New(OBJ_SECTORS);

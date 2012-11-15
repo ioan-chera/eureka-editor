@@ -40,6 +40,9 @@ void CMD_AlignTexturesX();
 void CMD_AlignTexturesY();
 
 
+bool LineDefAlreadyExists(int v1, int v2);
+bool LineDefWouldOverlap(int v1, int x2, int y2);
+
 void DeleteLineDefs(selection_c *lines);
 
 int SplitLineDefAtVertex(int ld, int v_idx);
