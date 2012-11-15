@@ -790,7 +790,7 @@ static void Insert_Sector(keymod_e mod)
 	else if (edit.highlighted())
 		model = edit.highlighted.num;
 	else
-		model = -1;  // FIXME: look for a neighbor to copy
+		model = -1;  // look for a neighbor to copy
 
 
 	BA_Begin();
@@ -802,7 +802,7 @@ static void Insert_Sector(keymod_e mod)
 		Sectors[new_sec]->RawCopy(Sectors[model]);
 	}
 
-	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec);
+	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec, model < 0);
 
 	BA_End();
 

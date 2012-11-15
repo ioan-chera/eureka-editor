@@ -727,7 +727,8 @@ void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip)
 // sidedefs are changed to it), or it is the negated number of a
 // model sector and a new sector with the same properties is created.
 //
-void AssignSectorToSpace(int map_x, int map_y, int new_sec)
+void AssignSectorToSpace(int map_x, int map_y, int new_sec,
+                         bool model_from_neighbor)
 {
 	int ld, side;
 
@@ -760,16 +761,14 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec)
 
 	loop.FindIslands();
 
-	if (new_sec < 0)
+	if (model_from_neighbor)
 	{
 		int model = loop.NeighboringSector();
 
-		new_sec = BA_New(OBJ_SECTORS);
-
-		if (model < 0)
-			Sectors[new_sec]->SetDefaults();
-		else
+		if (model >= 0)
 			Sectors[new_sec]->RawCopy(Sectors[model]);
+		else
+			Sectors[new_sec]->SetDefaults();
 	}
 
 	selection_c flip(OBJ_LINEDEFS);

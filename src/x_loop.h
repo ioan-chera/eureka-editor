@@ -92,7 +92,7 @@ public:
 
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new = false);
 
-void AssignSectorToSpace(int map_x, int map_y, int new_sec);
+void AssignSectorToSpace(int map_x, int map_y, int new_sec, bool model_from_neighbor = false);
 void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip);
 
 double AngleBetweenLines(int A, int B, int C);
