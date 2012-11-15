@@ -29,7 +29,6 @@
 #include "e_checks.h"
 #include "m_dialog.h"
 #include "editloop.h"
-#include "editobj.h"
 #include "e_cutpaste.h"
 #include "r_misc.h"
 #include "r_grid.h"
@@ -921,33 +920,13 @@ bool Editor_Key(int key, keymod_e mod)
 		edit.RedrawMap = 1;
 	}
 
-
-#if 0
 	// [c] Copy properties to the highlighted object
 	else if (key == 'c' && edit.Selected->notempty() &&
 			 edit.highlighted())
 	{
-		switch (edit.obj_type)
-		{
-			case OBJ_SECTORS:
-				TransferSectorProperties (edit.highlighted.num, edit.Selected);
-				edit.RedrawMap = 1;
-				break;
-			case OBJ_THINGS:
-				TransferThingProperties (edit.highlighted.num, edit.Selected);
-				edit.RedrawMap = 1;
-				break;
-			case OBJ_LINEDEFS:
-				TransferLinedefProperties (edit.highlighted.num, edit.Selected);
-				edit.RedrawMap = 1;
-				break;
-			default:
-				Beep ();
-				break;
-		}
-	}
-#endif
+		CMD_CopyProperties();
 
+	}
 
 	// [&] Show object numbers
 	else if (key == '&')

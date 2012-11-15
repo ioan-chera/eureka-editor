@@ -1148,6 +1148,110 @@ success:
 }
 
 
+void TransferThingProperties(int src_thing, int dest_thing)
+{
+	const Thing * T = Things[src_thing];
+
+	BA_Begin();
+
+	BA_ChangeTH(dest_thing, Thing::F_TYPE,    T->type);
+	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
+	BA_ChangeTH(dest_thing, Thing::F_OPTIONS, T->options);
+
+	BA_End();
+}
+
+
+void TransferSectorProperties(int src_sec, int dest_sec)
+{
+	const Sector * SEC = Sectors[src_sec];
+
+	BA_Begin();
+
+	BA_ChangeSEC(dest_sec, Sector::F_FLOORH,    SEC->floorh);
+	BA_ChangeSEC(dest_sec, Sector::F_FLOOR_TEX, SEC->floor_tex);
+	BA_ChangeSEC(dest_sec, Sector::F_CEILH,     SEC->ceilh);
+	BA_ChangeSEC(dest_sec, Sector::F_CEIL_TEX,  SEC->ceil_tex);
+
+	BA_ChangeSEC(dest_sec, Sector::F_LIGHT,  SEC->light);
+	BA_ChangeSEC(dest_sec, Sector::F_TYPE,   SEC->type);
+	BA_ChangeSEC(dest_sec, Sector::F_TAG,    SEC->tag);
+
+	BA_End();
+}
+
+
+/*
+ *   TransferLinedefProperties
+ *
+ *   Note: right now nothing is done about sidedefs.  Being able to
+ *   (intelligently) transfer sidedef properties from source line to
+ *   destination linedefs could be a useful feature -- though it is
+ *   unclear the best way to do it.  OTOH not touching sidedefs might
+ *   be useful too.
+ *
+ *   -AJA- 2001-05-27
+ */
+#define LINEDEF_FLAG_KEEP  (1 + 4)
+
+void TransferLinedefProperties(int src_line, int dest_line)
+{
+	const LineDef * L = LineDefs[src_line];
+
+	BA_Begin();
+
+	BA_ChangeLD(dest_line, LineDef::F_TYPE, L->type);
+	BA_ChangeLD(dest_line, LineDef::F_TAG,  L->tag);
+
+	// don't transfer certain flags
+	int flags = LineDefs[dest_line]->flags;
+	flags = (flags & LINEDEF_FLAG_KEEP) | (L->flags & ~LINEDEF_FLAG_KEEP);
+
+	BA_ChangeLD(dest_line, LineDef::F_FLAGS, flags);
+
+	BA_End();
+}
+
+
+void CMD_CopyProperties()
+{
+	if (! edit.highlighted() || edit.Selected->count_obj() != 1)
+	{
+		Beep();
+		return;
+	}
+
+	int source = edit.Selected->find_first();
+	int target = edit.highlighted.num;
+
+	if (source == target)
+		return;
+
+
+	switch (edit.obj_type)
+	{
+		case OBJ_SECTORS:
+			TransferSectorProperties(source, target);
+			break;
+
+		case OBJ_THINGS:
+			TransferThingProperties(source, target);
+			break;
+
+		case OBJ_LINEDEFS:
+			TransferLinedefProperties(source, target);
+			break;
+
+		default:
+			Beep();
+			return;
+	}
+
+	MarkChanges();
+
+	edit.RedrawMap = 1;
+}
+
 
 /*
    get the coordinates (approx.) of an object

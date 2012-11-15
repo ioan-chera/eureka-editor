@@ -28,9 +28,11 @@
 #define __EUREKA_OBJECTS_H__
 
 
+void CMD_InsertNewObject(keymod_e mod);
+
 void CMD_MoveObjects(int delta_x, int delta_y);
 
-void CMD_InsertNewObject(keymod_e mod);
+void CMD_CopyProperties();
 
 
 void ObjectBox_NotifyBegin();
