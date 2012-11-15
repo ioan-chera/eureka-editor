@@ -40,7 +40,6 @@ endif
 
 OBJS = \
 	$(OBJ_DIR)/editloop.o  \
-	$(OBJ_DIR)/editobj.o  \
 	$(OBJ_DIR)/e_basis.o   \
 	$(OBJ_DIR)/e_checks.o   \
 	$(OBJ_DIR)/e_cutpaste.o  \

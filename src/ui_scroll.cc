@@ -57,10 +57,10 @@ UI_Scroll::~UI_Scroll()
 
 void UI_Scroll::resize(int X, int Y, int W, int H)
 {
-	int ox = x();
-	int oy = y();
+//	int ox = x();
+//	int oy = y();
+//	int oh = h();
 	int ow = w();
-	int oh = h();
 
 
 	Fl_Group::resize(X, Y, W, H);
