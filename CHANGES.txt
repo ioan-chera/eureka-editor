@@ -31,7 +31,11 @@ CHANGES IN Eureka 0.81
 -  closing a simple vertex loop always makes a new sector inside it
 -  can now split a line when one of its vertices is selected
 
--  render view: support strafing with ALT or META key
++  new 'm' command for merging sectors
+
+-  added 'same_mode_clears_selection' config var (emulates Yadex behavior)
+
+-  3D view: support strafing with ALT or META key
  
 -  initial support for Odamex
   
