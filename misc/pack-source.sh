@@ -47,12 +47,6 @@ cp -av $src/ports/*.* $dest/ports || true
 mkdir $dest/mods
 cp -av $src/mods/*.* $dest/mods || true
 
-mkdir $dest/data/doom1_boss
-mkdir $dest/data/doom2_boss
-
-cp -av $src/data/doom1_boss/*.* $dest/data/doom1_boss
-cp -av $src/data/doom2_boss/*.* $dest/data/doom2_boss
-
 #
 #  Documentation
 #
