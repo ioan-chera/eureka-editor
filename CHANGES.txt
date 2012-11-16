@@ -1,6 +1,6 @@
 
-CHANGES IN Eureka 0.81
-======================
+CHANGES IN Eureka 0.81 (r186)
+=============================
 
 (Changes since 0.74 version)
 
@@ -32,6 +32,7 @@ CHANGES IN Eureka 0.81
 -  can now split a line when one of its vertices is selected
 
 +  new 'm' command for merging sectors
++  new 'c' command to copy sector/thing/line properties
 
 -  added 'same_mode_clears_selection' config var (emulates Yadex behavior)
 
