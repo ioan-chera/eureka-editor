@@ -6,39 +6,11 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
--  merge sectors: remove vertices remaining from deleted lines
-
--  CreateSquare: determine model from selection
-
-++  Sector creation / correction / copying:
-
-    (d) copy properties from an existing sector (selected) to
-        the highlighted one.  Beep if invalid selection.
-        --> 'c' copy command
-
-        Hmmm, does it make more sense to select the TARGETs and
-        copy from the Highlight ??? ---- CONFIG ITEM!
-
 
 
 Documentation
 -------------
 
--  update README
-
-+  write all basic pages on wiki (About, etc)
-
--  small tutorial
-
--  Credits page (on web site espec.)
-
-   - link to Yadex: http://www.teaser.fr/~amajorel/yadex/
-
--  Copyright / License
-
-   Eureka is copyright (c) Andrew Apted and others 1997-2012.
-
--  arrow keys in KEYS page
 
 
 Coding

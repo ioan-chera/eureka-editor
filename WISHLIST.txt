@@ -10,10 +10,10 @@ General
 
 -  fix: [ ] keys not working when 3D preview is on
 
+-  fix: SHIFT + move mouse = keep current highlight
+
 
 -  idea: SPACE in LINEDEF mode = add vertex to split line(s)
-
--  idea: merge SPACE and 'c'orrect in SECTOR mode ??
 
 ??  Help system (especially: what keys do what)
 
@@ -70,8 +70,29 @@ General
 
 
 
+Documentation
+-------------
+
+!!  a tutorial for the basics
+
++  command line arguments page
+
+   --log : specify a log file to store messages
+           without this, messages are sent to stdout
+
+   -d --debug : enable debugging messages
+                they go to log file if used, otherwise stderr
+
+   -q --quiet : don't send messages to stdout
+
+-  config file page
+
+
+
 Coding
 ------
+
+-  prefix linedef utilities with 'LD_', sector utilities with 'SEC_' etc...
 
 ?  rename: edit.highlighted --> edit.Highlighted
 
@@ -121,7 +142,7 @@ Editing
 
    if geometry is broken : special result.
 
--  SHIFT + SPACE = no auto create/split sectors
+?  SHIFT + SPACE = no auto create/split sectors
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
@@ -169,11 +190,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
 -  'm' for vertices : merge into one
    'm' for linedefs? (especially a connected sequence of lines)
 
-??  SPACE in sector mode:
-    if another sector was selected, then the properties of that
-    sector (floor and ceiling heights and textures, etc) are copied
-    to the new sector.
-
 IDEA: a config item to make the "simple" grid occur when grid-snapping
       and the "normal" grid occur in FREE mode.
 
@@ -211,7 +227,7 @@ Renderer
    - move vertices?
    + shift textures?
 
--  ability to drag the camera
+-  ability to drag the camera (on 2D viewport)
 
 -  make it into a proper widget (occupy same space as Canvas)
 
@@ -240,18 +256,6 @@ Game / Port Definitions
 -  FreeDOOM: categorize the new textures
 
 -  a new category for BOOM's "property transfer" linetypes
-
-
-Documentation
--------------
-
-   --log : specify a log file to store messages
-           without this, messages are sent to stdout
-
-   -d --debug : enable debugging messages
-                they go to log file if used, otherwise stderr
-
-   -q --quiet : don't send messages to stdout
 
 
 
