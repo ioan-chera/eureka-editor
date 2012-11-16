@@ -1,183 +1,188 @@
 
-Eureka 0.74 README
+Eureka 0.81 README
 ==================
 
-by Andrew Apted    February 2012
+by Andrew Apted    November 2012
 
 
 INTRODUCTION
 
-Eureka is a map editor for the game DOOM, and the main target is
-Linux operating systems.  It started with me trying to port YADEX
-to use a proper GUI toolkit, namely FLTK, but ended up becoming a
-full rewrite, and this rewrite is only partially complete.
+Eureka is a map editor for the classic DOOM games, and the main
+target is Linux operating systems (although a version of Windows
+may come later).
 
-This editor is still "alpha" quality and not ready for serious use.
-Lots of command and menu items are not implemented and will just
-beep at you or do nothing at all -- not very user friendly! :-)
+It started when I made a fork of the Yadex editor and attempted
+to make it use a proper GUI toolkit, namely FLTK.  I also wanted
+to implemented multiple Undo / Redo, which is something you greatly
+miss when it's not there.  These changes required rewriting large
+portions of the code, and the more I work on Eureka the more I
+replace (or at least rework) the existing code.
+
+While Eureka began as a fork of Yadex, it is NOT intended to be a
+continuation of it, nor to be compatible with its file formats,
+keyboard shortcuts, configuration items (etc).  Eureka is an
+indepedent program now, and it has a different workflow than
+Yadex or DEU.
 
 
-COMPILING
+COMPILING / SETTING UP
 
-See the INSTALL.txt document for more information
+See the INSTALL.txt document
 
 
 RUNNING
 
-This program expects to be run from the directory where it was
-unpacked (where the compiled executable ends up, in the top level).
-A proper "Unixy" installation is not supported yet.
+You can run Eureka from the command line, or it can be run from
+the desktop menu (if your OS handles .desktop files the same way
+as Debian does).  Eureka will need to be able to find an IWAD to
+run, and the easiest way is to copy one to this directory:
 
-You will need to either:
-   (a) copy the DOOM 2 IWAD into the same directory
-   (b) use the -iwad option with the full pathname of the IWAD
-       for example: -iwad /usr/share/games/doom/doom2.wad
+   ~/.eureka/iwads
 
-The IWAD filename must be lowercase, e.g. "doom2.wad"
+You can open a PWAD file using the File/Open menu (the interface
+is very clunky at the moment) -- or create a new map with File/New.
 
-To edit a PWAD at a particular map, use the following options
-(which mimic the parameters used to run DOOM) :
+You can also specify the PWAD to edit on the command line, either
+on its own or with the -file option:
 
-   ./Eureka -file blah.wad -warp MAP03
+   eureka -file masterpiece.wad
 
-Without the -file option, eureka will load a map from the IWAD.
-The File/Save function (CTRL-S) will then be equivalent to the
-File/Export function and prompt for a new output wad.
+If that PWAD contains multiple maps, you may need to specify which
+one to edit using the -warp option:
 
-Without the -warp option, MAP01 is assumed.
+   eureka -file masterpiece.wad -warp 14
 
+For a summary of useful command line options, type:
 
-
-MOUSE USAGE
-
-right click : select an object, drag to move selected objects
-              click in empty spot to clear selection
-              click in empty spot and drag to select a group of objects
-
-left click : scroll map around (by dragging)
-             in 3D preview: turn camera left/right or move up/down
-
-middle click : drag to scale the selected objects
-               with SHIFT key: scale each axis independently
-               with CTRL key: rotate and scale objects
-
-mouse wheel : zoom in / out
-              in 3D preview: move camera forward/back
+   eureka --help
 
 
 
-KEYBOARD USAGE
+KEYBOARD AND MOUSE
 
-1-9  : various grid sizes
+All Modes
+---------
 
-HOME or 0: zoom out and centre map
-END:       jump to camera location
+LMB
+* select an object, drag to move the object(s)
+* click in an empty area to clear the selection
+* click in an empty area and drag to select a group of objects
 
-t : enter Thing mode
-l : enter Linedef mode
-s : enter Sector mode
-v : enter Vertex mode
+RMB
+* scroll the map around (by dragging)
+
+MMB
+* drag to scale the selected objects
+* with SHIFT key: scale each axis independently
+* with CTRL key: rotate objects
+
+wheel : zoom in or out
+
+1..9 : select the grid size (smallest to largest)
+
+TAB : toggle the 3D preview on or off
+
+t : enter Thing mode 
+l : enter Linedef mode 
+s : enter Sector mode 
+v : enter Vertex mode 
 r : enter RTS mode
 
-TAB : toggle 3D preview
+b : toggle the Browser on or off
 
-b : toggle browser 
+CTRL-Z : undo (can be used multiple times) 
+CTRL-Y : redo (i.e. undo the previous undo)
 
-CTRL-A     : select all
-CTRL-U or `: clear the selection
-CTRL-I     : invert the selection
+CTRL-A : select all 
+CTRL-I : invert the selection 
+CTRL-U : clear the selection 
+` (backquote) : clear the selection
 
-CTRL-Z : undo
-CTRL-Y : redo
+HOME : move/zoom 2D viewport to show the whole map 
+END  : move 2D viewport to camera location 
+' (quote) : move 3D camera to position of mouse pointer
 
-g : grid step smaller
-G : grid step larger
-
-h : toggle grid on/simple/off
-
-f : grid snapping (free mode) on/off
-
-j : jump to specified object
+g : grid size adjustment : smaller 
+G : grid size adjustment : larger 
+h : grid mode toggle : on, simple, off 
+f : toggle grid snapping on or off
 
 o : copy and paste the selected objects
 
-H : mirror objects horizontally
+H : mirror objects horizontally 
 V : mirror objects vertically
+R : rotate objects 90 degrees clockwise 
+W : rotate objects 90 degrees anti-clockwise
 
-m : scale objects by half
-M : scale objects 2x
-
-R : rotate objects 90^ clockwise
-W : rotate objects 90^ anti-clockwise
-
-' : move 3D camera to position at cursor
+c : copy properties from the selection to the highlighted object
 
 
-THINGS MODE:
+Things Mode
+-----------
 
-SPACE : add new thing
+SPACE : add a new thing
 
-w : rotate things 45^ anti-clockwise
-x : rotate things 45^ clockwise
-
-
-SECTORS MODE:
-
-SPACE : add new sector to area around the mouse pointer
-        if a sector is selected, copy that sector instead of default
-        with CTRL key: set area to same sector as selected one
-
-c : correct sector at mouse pointer
-
-e : select sectors with same floor height
-E : select sectors with same floor texture
-
-w : swap floor and ceiling textures
-
-[ { : lower floor heights
-] } : raise floor heights
-
-, < : lower ceiling heights
-. > : raise ceiling heights
+w : rotate things 45 degrees anti-clockwise 
+x : rotate things 45 degrees clockwise
 
 
-LINEDEFS MODE:
+Vertex Mode
+-----------
 
-e : select a chain of linedefs
-E : select a chain of linedefs with same textures
-
-w : flip linedefs
-x : split linedefs in two
-
-d : disconnect selected linedefs from the rest
-
-
-VERTEX MODE:
-
-SPACE : add new vertex
-        if a vertex is already selected, adds a new linedef
+SPACE
+* add a new vertex
+* if a vertex is already selected, adds a new linedef too
 
 d : disconnect all linedefs at the selected vertices
 
 
-BROWSER:
+Linedef Mode
+------------
 
-C : cycle category
+e : select a chain of linedefs 
+E : select a chain of linedefs with same textures
+w : flip linedefs 
+x : split linedefs in two
+d : disconnect selected linedefs from the rest
 
-CTRL-K : clear the search box
+
+Sector Mode
+-----------
+
+SPACE
+* add a new sector to area around the mouse pointer
+* fix broken sectoring in an area (use CTRL key to force a new sector)
+* if a sector is selected, copy that sector instead of using defaults
+
+m : merge all selected sectors into a single one
+w : swap floor and ceiling textures
+
+e : select sectors with same floor height 
+E : select sectors with same floor texture
+
+[ and { : lower floor heights 
+] and } : raise floor heights
+, and < : lower ceiling heights 
+. and > : raise ceiling heights
 
 
-3D PREVIEW:
+3D Preview
+----------
 
-l  : toggle lighting  on / off
-t  : toggle texturing on / off
-s  : toggle sprites   on / off
+(Cursor keys will move forward and back, turn left and right)
 
-w  : walk, drop camera to ground + player's view height
+LMB : does not do anything yet 
+RMB : turn or move the camera (by dragging the mouse)
+wheel : move camera forwards or backwards
 
-F5 : toggle low detail / high detail
+w : walk, i.e. drop camera to ground + player's view height
 
-F11: increase gamma
+l : toggle lighting on or off 
+t : toggle texturing on or off 
+s : toggle sprites on or off
+
+F5  : toggle low detail / high detail
+F11 : increase brightness (gamma)
 
 
 
