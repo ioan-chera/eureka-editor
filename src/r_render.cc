@@ -90,6 +90,8 @@ public:
    bool lighting;
    bool low_detail;
 
+   bool gravity;  // when true, walk on ground
+
    std::vector<int> thing_sectors;
    int thsec_sector_num;
    bool thsec_invalidated;
@@ -97,7 +99,7 @@ public:
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
-			   low_detail(false),
+			   low_detail(false), gravity(true),
 	           thing_sectors(),
 			   thsec_sector_num(0), thsec_invalidated(false)
 	{ }
@@ -1574,6 +1576,9 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 		view.CalcAspect();
 	}
 
+	if (view.gravity)
+		view.CalcViewZ();
+
 	RendInfo rend;
 
 	rend.DoRender3D();
@@ -1601,39 +1606,46 @@ bool Render3D_Key(int key, keymod_e mod)
 	else if (mod == KM_CTRL)
 		mv_speed *= 4;
 
+	if ('A' <= key && key <= 'Z' && mod != KM_ALT)
+	{
+		key = tolower(key);
+		mod = KM_SHIFT;
+		mv_speed = mv_speed / 4;
+	}
+
 	// strafing?
 	if (key == FL_Left  && mod == KM_ALT) key = '<';
 	if (key == FL_Right && mod == KM_ALT) key = '>';
 
 	if (key == FL_Left)
 	{
-		view.SetAngle(view.angle + M_PI / ((key & FL_SHIFT) ? 4 : 8));
+		view.SetAngle(view.angle + M_PI / 8);
 		Redraw = true;
 	}
 	else if (key == FL_Right)
 	{
-		view.SetAngle(view.angle -M_PI / ((key & FL_SHIFT) ? 4 : 8));
+		view.SetAngle(view.angle - M_PI / 8);
 		Redraw = true;
 	}
-	else if (key == FL_Up)
+	else if (key == FL_Up || key == 'w')
 	{
 		view.x += view.Cos * mv_speed * 3;
 		view.y += view.Sin * mv_speed * 3;
 		Redraw = true;
 	}
-	else if (key == FL_Down)
+	else if (key == FL_Down || key == 's')
 	{
 		view.x -= view.Cos * mv_speed * 3;
 		view.y -= view.Sin * mv_speed * 3;
 		Redraw = true;
 	}
-	else if (key == ',' || key == '<')
+	else if (key == ',' || key == '<' || key == 'a')
 	{
 		view.x -= view.Sin * mv_speed * 2;
 		view.y += view.Cos * mv_speed * 2;
 		Redraw = true;
 	}
-	else if (key == '.' || key == '>')
+	else if (key == '.' || key == '>' || key == 'd')
 	{
 		view.x += view.Sin * mv_speed * 2;
 		view.y -= view.Cos * mv_speed * 2;
@@ -1642,11 +1654,13 @@ bool Render3D_Key(int key, keymod_e mod)
 	else if (key == FL_Page_Up)
 	{
 		view.z += mv_speed * 1;
+		view.gravity = false;
 		Redraw = true;
 	}
 	else if (key == FL_Page_Down)
 	{
 		view.z -= mv_speed * 1;
+		view.gravity = false;
 		Redraw = true;
 	}
 	else if (key == 't')
@@ -1654,9 +1668,10 @@ bool Render3D_Key(int key, keymod_e mod)
 		view.texturing = ! view.texturing;
 		Redraw = true;
 	}
-	else if (key == 's')
+	else if (key == 'o')
 	{
 		view.sprites = ! view.sprites;
+		view.thsec_invalidated = true;
 		Redraw = true;
 	}
 	else if (key == 'l')
@@ -1664,14 +1679,14 @@ bool Render3D_Key(int key, keymod_e mod)
 		view.lighting = ! view.lighting;
 		Redraw = true;
 	}
-	else if (key == 'w')
+	else if (key == 'g')
 	{
-		view.CalcViewZ();
+		view.gravity = ! view.gravity;
 		Redraw = true;
 	}
-	else if (key == 12)  // ^L
+	else if (key == 'v')
 	{
-		view.thsec_invalidated = true;
+		view.CalcViewZ();
 		Redraw = true;
 	}
 	else if (key == FL_F+5)
@@ -1779,6 +1794,8 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 			speed *= 3;
 
 		view.z -= dy * speed / 16;
+
+		view.gravity = false;
 	}
 
 	edit.RedrawMap = 1;
