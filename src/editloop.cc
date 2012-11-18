@@ -1098,6 +1098,13 @@ void EditorMiddlePress(keymod_e mod)
 	if (is_butl)
 		return;
 
+	// ability to insert stuff via the mouse
+	if (mod == KM_none)
+	{
+		Editor_Key(' ', mod);
+		return;
+	}
+
 	if (edit.Selected->empty())
 	{
 		Beep();
