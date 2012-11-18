@@ -6,7 +6,7 @@ EUREKA WISH-LIST
 General
 -------
 
--  fix: building nodes == new vertices == new checksum
+++  fix: building nodes == new vertices == new checksum
 
 -  fix: [ ] keys not working when 3D preview is on
 
@@ -49,6 +49,9 @@ General
 +  configurable keys
 
 -  grid drawing too slow when small step and zoomed out
+
++  configurable grid colors, 
+   IDEA: grid has separate color for 64x64 flat alignment
 
 -  File/Change Port
 
@@ -113,6 +116,8 @@ Editing
     the user can set the default values.  Mode is indicated by the
     title background being blue and title says "Default Properties".
     Perhaps activated by right clicking the title (and/or a key).
+
+-  IDEA: merge vertex and linedef modes
 
 -  figure out how 'n' next / 'p' prev functions should work
 

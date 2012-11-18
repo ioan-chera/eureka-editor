@@ -11,6 +11,16 @@ General
 Documentation
 -------------
 
++  MAIN PAGE: put a screenshot there (half size)
+
+-  somewhere: at least 800x600 resolution
+
+-  KEY CHANGES
+   3d mode : 's' --> 'o' (objects)
+             'w' --> 'v'
+             added WASD for movement (fine with SHIFT)
+             'g' --> toggle gravity
+             PGUP / PGDN can move up (merely document)
 
 
 Coding
@@ -20,6 +30,14 @@ Coding
 
 Editing
 -------
+
++  the inside of a simple loop : DEFAULT??  (was not match neighbor)
+
+-  option to disable automatic texture alignment
+
+-  IDEA: multi-select is the default
+
+-  IDEA: mouse click to insert vertices/lines and things
 
 
 
