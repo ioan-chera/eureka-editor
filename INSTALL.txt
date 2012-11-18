@@ -14,6 +14,10 @@ Dependencies:
    website: http://www.fltk.org/
    package: libfltk1.3-dev
 
+   You may also need: libxft-dev
+                      libxinerama-dev
+                      libjpeg-dev
+
 4. zlib
    website: http://www.zlib.net/
    package: zlib1g-dev
