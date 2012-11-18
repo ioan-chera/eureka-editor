@@ -4,3 +4,8 @@ CHANGES IN Eureka 0.xx
 
 -  reload the wad/map after building the nodes (no longer exit)
 
+-  3D view: can use WASD keys in 3D mode to move around
+-  3D view: the 'g' key toggles gravity (walking on the ground)
+-  3D view: toggle sprites changed key to 'o' (objects)
+-  3D view: removed CTRL-L function, resync objects with 'o' key
+
