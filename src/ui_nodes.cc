@@ -180,33 +180,33 @@ void UI_NodeDialog::Finish_OK()
 {
 	finished = true;
 
+	button->label("Close");
+
 	progress->value(100);
 	progress->label("Success");
 	progress->color(FL_BLUE, FL_BLUE);
-
-	button->label("Exit");
 }
 
 void UI_NodeDialog::Finish_Cancel()
 {
 	finished = true;
 
+	button->label("Close");
+
 	progress->value(0);
 	progress->label("Cancelled");
 	progress->color(FL_RED, FL_RED);
-
-	button->label("Close");
 }
 
 void UI_NodeDialog::Finish_Error()
 {
 	finished = true;
 
+	button->label("Close");
+
 	progress->value(100);
 	progress->label("ERROR");
 	progress->color(FL_RED, FL_RED);
-
-	button->label("Close");
 }
 
 

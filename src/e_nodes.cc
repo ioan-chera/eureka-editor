@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "levels.h"
+#include "e_loadsave.h"
 #include "m_dialog.h"
 #include "w_wad.h"
 
@@ -341,10 +342,23 @@ fprintf(stderr, "new_name : %s\n", new_name);
 
 	if (was_ok)
 	{
-		// need to quit Eureka now, since edit_wad has been closed
-		// TODO: remember filename, re-open it
+		// re-open the PWAD
 
-		CMD_Quit();
+		LogPrintf("Re-opening the PWAD...\n");
+
+		edit_wad = Wad_file::Open(old_name, 'a');
+
+		if (! edit_wad)
+			FatalError("Unable to re-open the PWAD.\n");
+
+		MasterDir_Add(edit_wad);
+
+		LogPrintf("Re-opening the map (%s)\n", Level_name);
+
+		LoadLevel(edit_wad, Level_name);
+
+		Replacer = false;
+		MadeChanges = 0;
 	}
 }
 
