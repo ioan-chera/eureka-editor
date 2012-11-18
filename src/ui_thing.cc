@@ -44,6 +44,24 @@ public:
 };
 
 
+extern const char * arrow_0_xpm[];
+extern const char * arrow_45_xpm[];
+extern const char * arrow_90_xpm[];
+extern const char * arrow_135_xpm[];
+extern const char * arrow_180_xpm[];
+extern const char * arrow_225_xpm[];
+extern const char * arrow_270_xpm[];
+extern const char * arrow_315_xpm[];
+
+static const char ** arrow_pixmaps[8] =
+{
+	arrow_0_xpm,   arrow_45_xpm,
+	arrow_90_xpm,  arrow_135_xpm,
+	arrow_180_xpm, arrow_225_xpm,
+	arrow_270_xpm, arrow_315_xpm
+};
+
+
 //
 // UI_ThingBox Constructor
 //
@@ -94,6 +112,24 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y += desc->h() + 3;
 
 
+	pos_x = new Fl_Int_Input(X +70, Y, 60, 24, "x: ");
+	pos_y = new Fl_Int_Input(MX+28, Y, 60, 24, "y: ");
+
+	pos_x->align(FL_ALIGN_LEFT);
+	pos_y->align(FL_ALIGN_LEFT);
+
+	pos_x->callback(x_callback, this);
+	pos_y->callback(y_callback, this);
+
+	pos_x->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	add(pos_x); add(pos_y);
+
+	Y += pos_x->h() + 4;
+
+
+
 	angle = new Fl_Int_Input(X+70, Y, 64, 24, "Angle: ");
 	angle->align(FL_ALIGN_LEFT);
 	angle->callback(angle_callback, this);
@@ -101,20 +137,27 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	add(angle);
 
-	ang_left  = new Fl_Button(X+W-100, Y+1, 30, 22, "@<");
-	ang_right = new Fl_Button(X+W- 60, Y+1, 30, 22, "@>");
 
-	//  ang_left ->labelfont(FL_HELVETICA_BOLD);
-	//  ang_right->labelfont(FL_HELVETICA_BOLD);
-	//  ang_left ->labelsize(16);
-	//  ang_right->labelsize(16);
+	int ang_mx = X + W - 80;
+	int ang_my = Y + 30;
 
-	ang_left ->callback(button_callback, this);
-	ang_right->callback(button_callback, this);
+	for (int i = 0 ; i < 8 ; i++)
+	{
+		int x = ang_mx + 30 * cos(i * 45 * M_PI / 180.0);
+		int y = ang_my - 30 * sin(i * 45 * M_PI / 180.0);
 
-	add(ang_left); add(ang_right);
+		ang_buts[i] = new Fl_Button(x - 9, y - 9, 20, 20, 0);
 
-	Y += angle->h() + 3;
+		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
+		ang_buts[i]->align(FL_ALIGN_CENTER);
+		ang_buts[i]->clear_visible_focus();
+//   	ang_buts[i]->callback(angle_callback, this);
+
+		add(ang_buts[i]);
+	}
+
+
+	Y += 60; // angle->h() + 3;
 
 
 	exfloor = new Fl_Int_Input(X+70, Y, 64, 24, "ExFloor: ");
@@ -144,23 +187,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	efl_down->hide();
 	efl_up->hide();
 #endif
-
-	pos_x = new Fl_Int_Input(X +28, Y, 80, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX+28, Y, 80, 24, "y: ");
-
-	pos_x->align(FL_ALIGN_LEFT);
-	pos_y->align(FL_ALIGN_LEFT);
-
-	pos_x->callback(x_callback, this);
-	pos_y->callback(y_callback, this);
-
-	pos_x->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	add(pos_x); add(pos_y);
-
-	Y += pos_x->h() + 4;
-
 
 	Fl_Box *opt_lab = new Fl_Box(X, Y, W, 22, "Options:");
 	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
@@ -404,12 +430,13 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
+/*
 	if (w == box->ang_left)
 		CMD_SpinThings(+45);
 
 	if (w == box->ang_right)
 		CMD_SpinThings(-45);
-
+*/
 	if (w == box->efl_down)
 		box->AdjustExtraFloor(-1);
 

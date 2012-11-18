@@ -38,8 +38,7 @@ private:
 	Fl_Button    *choose;
 
 	Fl_Int_Input *angle;
-	Fl_Button    *ang_left;
-	Fl_Button    *ang_right;
+	Fl_Button    *ang_buts[8];
 
 	Fl_Int_Input *exfloor;
 	Fl_Button    *efl_down;
