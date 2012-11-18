@@ -112,8 +112,8 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y += desc->h() + 3;
 
 
-	pos_x = new Fl_Int_Input(X +70, Y, 60, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX+28, Y, 60, 24, "y: ");
+	pos_x = new Fl_Int_Input(X +70, Y, 70, 24, "x: ");
+	pos_y = new Fl_Int_Input(MX+38, Y, 70, 24, "y: ");
 
 	pos_x->align(FL_ALIGN_LEFT);
 	pos_y->align(FL_ALIGN_LEFT);
@@ -138,8 +138,8 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	add(angle);
 
 
-	int ang_mx = X + W - 80;
-	int ang_my = Y + 30;
+	int ang_mx = X + W - 70;
+	int ang_my = Y + 40;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
@@ -151,14 +151,13 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
 		ang_buts[i]->align(FL_ALIGN_CENTER);
 		ang_buts[i]->clear_visible_focus();
-//   	ang_buts[i]->callback(angle_callback, this);
+     	ang_buts[i]->callback(button_callback, this);
 
 		add(ang_buts[i]);
 	}
 
 
-	Y += 60; // angle->h() + 3;
-
+	Y += 30;
 
 	exfloor = new Fl_Int_Input(X+70, Y, 64, 24, "ExFloor: ");
 	exfloor->align(FL_ALIGN_LEFT);
@@ -187,6 +186,9 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	efl_down->hide();
 	efl_up->hide();
 #endif
+
+
+	Y += 40;
 
 	Fl_Box *opt_lab = new Fl_Box(X, Y, W, 22, "Options:");
 	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
@@ -430,13 +432,6 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-/*
-	if (w == box->ang_left)
-		CMD_SpinThings(+45);
-
-	if (w == box->ang_right)
-		CMD_SpinThings(-45);
-*/
 	if (w == box->efl_down)
 		box->AdjustExtraFloor(-1);
 
@@ -445,6 +440,21 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose || w == box->sprite)
 		CMD_SetBrowser('O');
+
+	// check for the angle buttons
+	for (int i = 0 ; i < 8 ; i++)
+	{
+		if (w == box->ang_buts[i])
+		{
+			char buffer[20];
+
+			sprintf(buffer, "%d", i * 45);
+
+			box->angle->value(buffer);
+
+			angle_callback(box->angle, box);
+		}
+	}
 }
 
 
