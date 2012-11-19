@@ -715,23 +715,29 @@ int main(int argc, char *argv[])
 	// determine IWAD and GAME name
 	const char *iwad_name = DetermineIWAD();
 
-	Game_name = DetermineGame(iwad_name);
-
-	if (! Port_name)
-		Port_name = "boom";
-
 
 	// Load game definitions (*.ygd).
 	InitDefinitions();
 
+	Game_name = DetermineGame(iwad_name);
+
 	LoadDefinitions("games", Game_name);
+
+
+	if (! Port_name)
+		Port_name = "vanilla";
+
+	LogPrintf("Port name: '%s'\n", Port_name);
+
 	LoadDefinitions("ports", Port_name);
 
-	base_wad = Wad_file::Open(iwad_name, 'r');  // FIXME: read_only
+
+	base_wad = Wad_file::Open(iwad_name, 'r');
 	if (! base_wad)
 		FatalError("Failed to open IWAD: %s\n", iwad_name);
 	
 	MasterDir_Add(base_wad);
+
 
 
 	// TODO!!!  open resource wads (-merge option)

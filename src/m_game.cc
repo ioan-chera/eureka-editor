@@ -300,6 +300,15 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			g_sky_flat = token[1];
 		}
 
+		else if (y_stricmp(token[0], "default_port") == 0)
+		{
+			if (ntoks != 2)
+				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+
+			if (! Port_name)
+				Port_name = token[1];
+		}
+
 		else if (y_stricmp(token[0], "default_textures") == 0)
 		{
 			if (ntoks != 4)
