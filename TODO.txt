@@ -11,6 +11,8 @@ General
 Documentation
 -------------
 
++  document texture browser (RIGHT click etc)
+
 +  MAIN PAGE: put a screenshot there (half size)
 
 -  somewhere: at least 800x600 resolution
@@ -39,11 +41,19 @@ Editing
 
 -  IDEA: mouse click to insert vertices/lines and things
 
+I think the snap size for insert vertices should be a bit larger.
+Right now it's hard to get them on an angled line, even at the
+smaller grid sizes (16x16, 8x8 - smallest I commonly work with).
+
+-  sort out MMB for rotate/scale
 
 
 Browser
 -------
 
+-  mouse wheel too slow on textures
+   (a) default is bigger
+   (b) configurable
 
 
 Renderer

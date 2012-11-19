@@ -6,6 +6,17 @@ EUREKA WISH-LIST
 General
 -------
 
+!!  good method for opening wads and maps, and selecting the IWAD
+    and PORT and MOD.  Perhaps _EUREKA_ lump stores these details.
+
++  proper widget for File/Open to select map, with button to load
+   a new WAD file.
+
+-  browser: map viewer (for selecting what map to edit)
+
+-  widget to show list of maps (option for custom name)
+
+
 ++  fix: building nodes == new vertices == new checksum
 
 -  fix: [ ] keys not working when 3D preview is on
@@ -23,13 +34,6 @@ General
 
 -  support HacX
 -  support Harmony
-
--  browser: map viewer (for selecting what map to edit)
-
-+  proper widget for File/Open to select map, with button to load
-   a new WAD file.
-
--  widget to show list of map names (option for custom name)
 
 
 !!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
@@ -107,6 +111,10 @@ Coding
 
 Editing
 -------
+
+!!  click on a sidedef pic (or flat pic) and it gets "highlighted"
+    and the texture browser is opened and clicking on a texture sets
+    it.  Various operations will clear that highlight.
 
 ++  when dragging a shape next to existing geometry, highlight
     vertices and linedefs which would get merged, and implement
@@ -212,12 +220,12 @@ CONSOLE IDEA
 
 
 
-Renderer
---------
+3D View
+-------
 
 ++  fix the slime-trails
 
-+  problem with mid-masked textures (cage in E1M9)
++  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
 -  handle very tall/thin window : letter box with black
 
@@ -226,6 +234,8 @@ Renderer
    - floors
    - ceilings
    - sidedef uppers and lowers
+
+-  IDEA: a key (or mouse button) to toggle "grab mouse" mode
 
 -  able to drag things around
    - raise floors?
@@ -253,6 +263,7 @@ Browser
 
 -  no-pic mode for textures and flats
 
+-  can change the [max] size of the texture/flat previews
 
 
 Game / Port Definitions
