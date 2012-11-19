@@ -89,7 +89,7 @@ UI_MainWin::UI_MainWin() :
 	ey = ey - info_bar->h();
 
 
-	int browser_W = MIN_BROWSER_W + 36;
+	int browser_W = MIN_BROWSER_W + 56;
 
 	canvas = new UI_Canvas(0, cy, w() - panel_W - browser_W, ey - cy);
 
