@@ -200,18 +200,12 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 		const char *const bad_arg_count =
 			"%s(%d): directive \"%s\" takes %d parameters";
 
-		/* duplicate the buffer */
-
-		// AJA: WHAT THE FUCK!
-
-		buf = (char *) malloc(strlen(readbuf) + 1);
-		if (! buf)
-			FatalError("not enough memory");
+		// create a buffer to contain the tokens [Note: never freed]
+		buf = StringNew(strlen(readbuf) + 1);
 
 		/* break the line into whitespace-separated tokens.
 		   whitespace can be enclosed in double quotes. */
-		for (in_token = 0, quoted = 0, iptr = readbuf, optr = buf, ntoks = 0;
-				; iptr++)
+		for (in_token = 0, quoted = 0, iptr = readbuf, optr = buf, ntoks = 0 ; ; iptr++)
 		{
 			if (*iptr == '\n' || *iptr == '\0')
 			{
@@ -258,7 +252,6 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 		if (ntoks == 0)
 		{
-			free(buf);
 			continue;
 		}
 
@@ -288,8 +281,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 				yg_level_name = YGLN_MAP01;
 			else
 				FatalError("%s(%d): invalid argument \"%.32s\" (e1m1|e1m10|map01)",
-						basename, lineno, token[1]);
-			free(buf);
+						   basename, lineno, token[1]);
 		}
 
 		else if (y_stricmp(token[0], "sky_color") == 0)
@@ -331,34 +323,33 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
-			linegroup_t *buf = new linegroup_t;
+			linegroup_t * lg = new linegroup_t;
 
-			buf->group = token[1][0];
-			buf->desc  = token[2];
+			lg->group = token[1][0];
+			lg->desc  = token[2];
 
-			line_groups[buf->group] = buf;
+			line_groups[lg->group] = lg;
 		}
 
 		else if (y_stricmp(token[0], "line") == 0)
 		{
-			linetype_t *buf = new linetype_t;
+			linetype_t * info = new linetype_t;
 
 			if (ntoks != 4)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
 			int number = atoi(token[1]);
 
-			buf->group = token[2][0];
-			buf->desc  = token[3];
+			 info->group = token[2][0];
+			 info->desc  = token[3];
 
-			if (line_groups.find(buf->group) == line_groups.end())
+			if (line_groups.find( info->group) == line_groups.end())
 			{
 				LogPrintf("%s(%d): unknown line group '%c'.\n",
-						basename, lineno, buf->group);
-				delete buf;
+						basename, lineno,  info->group);
 			}
 			else
-				line_types[number] = buf;
+				line_types[number] = info;
 		}
 
 		else if (y_stricmp(token[0], "sector") == 0)
@@ -368,10 +359,11 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			int number = atoi(token[1]);
 
-			sectortype_t *buf = new sectortype_t;
-			buf->desc = token[2];
+			sectortype_t *info = new sectortype_t;
 
-			sector_types[number] = buf;
+			info->desc = token[2];
+
+			sector_types[number] = info;
 		}
 
 		else if (y_stricmp(token[0], "thinggroup") == 0)
@@ -379,13 +371,13 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 4)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
-			thinggroup_t *buf = new thinggroup_t;
+			thinggroup_t * tg = new thinggroup_t;
 
-			buf->group = token[1][0];
-			buf->color = ParseHexColor(token[2]);
-			buf->desc  = token[3];
+			tg->group = token[1][0];
+			tg->color = ParseHexColor(token[2]);
+			tg->desc  = token[3];
 
-			thing_groups[buf->group] = buf;
+			thing_groups[tg->group] = tg;
 		}
 
 		else if (y_stricmp(token[0], "thing") == 0)
@@ -393,27 +385,26 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 7)
 				FatalError(bad_arg_count, basename, lineno, token[0], 7);
 
-			thingtype_t *buf = new thingtype_t;
+			thingtype_t * info = new thingtype_t;
 
 			int number = atoi(token[1]);
 
-			buf->group  = token[2][0];
-			buf->flags  = ParseThingdefFlags(token[3]);
-			buf->radius = atoi(token[4]);
-			buf->sprite = token[5];
-			buf->desc   = token[6];
+			info->group  = token[2][0];
+			info->flags  = ParseThingdefFlags(token[3]);
+			info->radius = atoi(token[4]);
+			info->sprite = token[5];
+			info->desc   = token[6];
 
-			if (thing_groups.find(buf->group) == thing_groups.end())
+			if (thing_groups.find(info->group) == thing_groups.end())
 			{
 				LogPrintf("%s(%d): unknown thing group '%c'.\n",
-						basename, lineno, buf->group);
-				delete buf;
+						basename, lineno, info->group);
 			}
 			else
 			{	
-				buf->color = thing_groups[buf->group]->color;
+				info->color = thing_groups[info->group]->color;
 
-				thing_types[number] = buf;
+				thing_types[number] = info;
 			}
 		}
 
@@ -422,12 +413,12 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
-			texturegroup_t *buf = new texturegroup_t;
+			texturegroup_t * tg = new texturegroup_t;
 
-			buf->group = token[1][0];
-			buf->desc  = token[2];
+			tg->group = token[1][0];
+			tg->desc  = token[2];
 
-			texture_groups[buf->group] = buf;
+			texture_groups[tg->group] = tg;
 		}
 
 		else if (y_stricmp(token[0], "texture") == 0)
