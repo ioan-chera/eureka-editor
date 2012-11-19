@@ -238,11 +238,15 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	scroll->box(FL_FLAT_BOX);
 
 	if (kind == 'T' || kind == 'F')
+	{
 		scroll->color(FL_BLACK, FL_BLACK);
+		scroll->Line_size(98);
+	}
 	else
 	{
 		scroll->color(FL_DARK3, FL_DARK3);
 		scroll->resize_horiz(true);
+		scroll->Line_size(28 * 2);
 	}
 
 	add(scroll);

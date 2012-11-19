@@ -213,5 +213,11 @@ void UI_Scroll::Init_sizes()
 }
 
 
+void UI_Scroll::Line_size(int pixels)
+{
+	scrollbar->linesize(pixels);
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

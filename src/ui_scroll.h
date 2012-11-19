@@ -56,6 +56,8 @@ public:
 
 	void Init_sizes();
 
+	void Line_size(int pixels);
+
 private:
 	void do_scroll();
 	void calc_extents();
