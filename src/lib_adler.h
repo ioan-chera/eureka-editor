@@ -40,7 +40,7 @@ private:
 
 public:
 	crc32_c() : raw(INIT_VALUE), extra(0) { }
-	crc32_c(const crc32_c &rhs) { raw = rhs.raw; extra = 0; }
+	crc32_c(const crc32_c &rhs) { raw = rhs.raw; extra = rhs.extra; }
 	~crc32_c() { }
 
 	void Reset(void) { raw = INIT_VALUE; extra = 0; }
