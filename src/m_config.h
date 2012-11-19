@@ -44,10 +44,8 @@ void dump_command_line_options (FILE *fp);
 int M_ParseLine(const char *line, const char ** tokens, int max_tok);
 
 // user state persistence (stuff like camera pos, grid settings, ...)
-class crc32_c;
-
-bool M_LoadUserState(const crc32_c *crc);
-bool M_SaveUserState(const crc32_c *crc);
+bool M_LoadUserState();
+bool M_SaveUserState();
 
 void M_DefaultUserState();
 

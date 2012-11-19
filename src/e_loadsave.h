@@ -36,6 +36,9 @@ void CMD_OpenMap();
 void CMD_SaveMap();
 void CMD_ExportMap();
 
+class crc32_c;
+void BA_LevelChecksum(crc32_c& crc);
+
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
 //--- editor settings ---

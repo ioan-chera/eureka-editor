@@ -249,8 +249,6 @@ static void LoadVertices()
 		if (! lump->Read(&raw, sizeof(raw)))
 			FatalError("Error reading vertices.\n");
 
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
-
 		Vertex *vert = new Vertex;
 
 		vert->x = LE_S16(raw.x);
@@ -287,8 +285,6 @@ static void LoadSectors()
 
 		if (! lump->Read(&raw, sizeof(raw)))
 			FatalError("Error reading sectors.\n");
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 
 		Sector *sec = new Sector;
 
@@ -340,8 +336,6 @@ static void LoadThings()
 		if (! lump->Read(&raw, sizeof(raw)))
 			FatalError("Error reading things.\n");
 
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
-
 		Thing *th = new Thing;
 
 		th->x = LE_S16(raw.x);
@@ -380,8 +374,6 @@ static void LoadSideDefs()
 
 		if (! lump->Read(&raw, sizeof(raw)))
 			FatalError("Error reading sidedefs.\n");
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 
 		SideDef *sd = new SideDef;
 
@@ -430,8 +422,6 @@ static void LoadLineDefs()
 
 		if (! lump->Read(&raw, sizeof(raw)))
 			FatalError("Error reading linedefs.\n");
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 
 		LineDef *ld = new LineDef;
 
@@ -508,21 +498,16 @@ void LoadLevel(Wad_file *wad, const char *level)
 	if (loading_level < 0)
 		FatalError("No such map: %s\n", level);
 
-	adler_crc.Reset();
-
 	BA_ClearAll();
 
-	// this order must match the order in SaveLevel(), so that we
-	// compute the same CRC values.
 	LoadThings  ();
-	LoadLineDefs();
-	LoadSideDefs();
 	LoadVertices();
-
 	LoadSectors ();
-
+	LoadSideDefs();
+	LoadLineDefs();
 
 	// FIXME !!!!  check all references 
+
 
 
 	// Node builders create a lot of new vertices for segs.
@@ -538,7 +523,11 @@ void LoadLevel(Wad_file *wad, const char *level)
 		main_win->SetTitle(wad);
 
 		// load the user state associated with this map
-		if (! M_LoadUserState(&adler_crc))
+		crc32_c adler_crc;
+
+		BA_LevelChecksum(adler_crc);
+
+		if (! M_LoadUserState())
 		{
 			M_DefaultUserState();
 		}
@@ -695,8 +684,6 @@ static void SaveVertices()
 		raw.y = LE_S16(vert->y);
 
 		lump->Write(&raw, sizeof(raw));
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 	}
 
 	lump->Finish();
@@ -726,8 +713,6 @@ static void SaveSectors()
 		raw.tag   = LE_U16(sec->tag);
 
 		lump->Write(&raw, sizeof(raw));
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 	}
 
 	lump->Finish();
@@ -754,8 +739,6 @@ static void SaveThings()
 		raw.options = LE_U16(th->options);
 
 		lump->Write(&raw, sizeof(raw));
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 	}
 
 	lump->Finish();
@@ -784,8 +767,6 @@ static void SaveSideDefs()
 		raw.sector = LE_U16(side->sector);
 
 		lump->Write(&raw, sizeof(raw));
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 	}
 
 	lump->Finish();
@@ -815,8 +796,6 @@ static void SaveLineDefs()
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
 
 		lump->Write(&raw, sizeof(raw));
-
-		adler_crc.AddBlock((byte *) &raw, sizeof(raw));
 	}
 
 	lump->Finish();
@@ -842,8 +821,6 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	save_wad->AddLevel(level, 0)->Finish();
 
-	adler_crc.Reset();
-
 	SaveThings  ();
 	SaveLineDefs();
 	SaveSideDefs();
@@ -868,7 +845,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 		main_win->SetTitle(wad);
 
 		// save the user state, associated with this map
-		M_SaveUserState(&adler_crc);
+
+		M_SaveUserState();
 	}
 }
 

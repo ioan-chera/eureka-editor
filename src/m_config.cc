@@ -31,6 +31,7 @@
 
 #include "lib_adler.h"
 #include "editloop.h"
+#include "e_loadsave.h"
 #include "m_config.h"
 #include "r_misc.h"
 #include "r_grid.h"
@@ -1119,19 +1120,24 @@ void M_FreeLine(const char ** tokens, int num_tok)
 
 
 
-char * PersistFilename(const crc32_c *crc)
+char * PersistFilename(const crc32_c& crc)
 {
 	static char filename[FL_PATH_MAX];
 
 	sprintf(filename, "%s/cache/%08X%08X.dat", home_dir,
-	        crc->extra, crc->raw);
+	        crc.extra, crc.raw);
 
 	return filename;
 }
 
 
-bool M_LoadUserState(const crc32_c *crc)
+bool M_LoadUserState()
 {
+	crc32_c crc;
+
+	BA_LevelChecksum(crc);
+
+
 	char *filename = PersistFilename(crc);
 
 	LogPrintf("Load user state from: %s\n", filename);
@@ -1185,8 +1191,13 @@ bool M_LoadUserState(const crc32_c *crc)
 }
 
 
-bool M_SaveUserState(const crc32_c *crc)
+bool M_SaveUserState()
 {
+	crc32_c crc;
+
+	BA_LevelChecksum(crc);
+
+
 	char *filename = PersistFilename(crc);
 
 	LogPrintf("Save user state to: %s\n", filename);
