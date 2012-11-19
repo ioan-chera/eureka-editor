@@ -6,6 +6,8 @@ CHANGES IN Eureka 0.xx
 
 -  thing panel: radial arrow buttons for setting the angle
 
+-  Heretic: fixed the default port (i.e. not BOOM)
+
 -  3D view: can use WASD keys in 3D mode to move around
 -  3D view: the 'g' key toggles gravity (walking on the ground)
 -  3D view: toggle sprites changed key to 'o' (objects)
