@@ -48,6 +48,9 @@ void FileFree(u8_t *mem);
 
 const char * FileFindInPath(const char *paths, const char *base_name);
 
+// miscellanous
+const char *GetExecutablePath(const char *argv0);
+
 //------------------------------------------------------------------------
 
 // directory functions
