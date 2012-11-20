@@ -834,6 +834,14 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 
 		case OBJ_LINEDEFS:
 		{
+			// handle tagged linedefs : show matching sector(s)
+			if (col != LIGHTRED && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
+			{
+				for (int m = 0 ; m < NumSectors ; m++)
+					if (Sectors[m]->tag == LineDefs[objnum]->tag)
+						DrawHighlight(OBJ_SECTORS, m, LIGHTRED);
+			}
+
 			int x1 = dx + LineDefs[objnum]->Start()->x;
 			int y1 = dy + LineDefs[objnum]->Start()->y;
 			int x2 = dx + LineDefs[objnum]->End  ()->x;
@@ -850,13 +858,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 			fl_line_style(FL_SOLID, 2);
 
 			DrawMapVector(x1, y1, x2, y2);
-
-			if (col != LIGHTRED && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumSectors ; m++)
-					if (Sectors[m]->tag == LineDefs[objnum]->tag)
-						DrawHighlight(OBJ_SECTORS, m, LIGHTRED);
-			}
 
 			fl_line_style(FL_SOLID);
 		}
@@ -888,6 +889,14 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 
 		case OBJ_SECTORS:
 		{
+			// handle tagged sectors : show matching line(s)
+			if (col != LIGHTRED && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
+			{
+				for (int m = 0 ; m < NumLineDefs ; m++)
+					if (LineDefs[m]->tag == Sectors[objnum]->tag)
+						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED);
+			}
+
 			fl_line_style(FL_SOLID, 2);
 
 			for (int n = 0 ; n < NumLineDefs ; n++)
@@ -907,13 +916,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 			}
 
 			fl_line_style(FL_SOLID);
-
-			if (col != LIGHTRED && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumLineDefs ; m++)
-					if (LineDefs[m]->tag == Sectors[objnum]->tag)
-						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED);
-			}
 		}
 		break;
 	}
