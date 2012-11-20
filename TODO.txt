@@ -3,6 +3,9 @@ EUREKA SHORT-TERM TODO
 ======================
 
 
+>>  hexen experiment in LineDef panel
+
+
 General
 -------
 
@@ -33,27 +36,23 @@ Coding
 Editing
 -------
 
-+  the inside of a simple loop : DEFAULT??  (was not match neighbor)
++  sort out MMB for insert/rotate/scale
+
+!!  click on a sidedef pic (or flat pic) and it gets "highlighted"
+    and the texture browser is opened and clicking on a texture sets
+    it.  Various operations will clear that highlight.
 
 -  option to disable automatic texture alignment
-
--  IDEA: multi-select is the default
-
--  IDEA: mouse click to insert vertices/lines and things
 
 I think the snap size for insert vertices should be a bit larger.
 Right now it's hard to get them on an angled line, even at the
 smaller grid sizes (16x16, 8x8 - smallest I commonly work with).
 
--  sort out MMB for rotate/scale
 
 
 Browser
 -------
 
--  mouse wheel too slow on textures
-   (a) default is bigger
-   (b) configurable
 
 
 Renderer

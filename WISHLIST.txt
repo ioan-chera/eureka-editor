@@ -69,6 +69,8 @@ General
 ++  CHECK screen
     -  can remove unused SideDefs and Sectors
 
+-  LineDef panel: show "lower" etc in unset pics (low contrast)
+
 +  can set iwads to look for in the/a config file.
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
@@ -111,10 +113,6 @@ Coding
 
 Editing
 -------
-
-!!  click on a sidedef pic (or flat pic) and it gets "highlighted"
-    and the texture browser is opened and clicking on a texture sets
-    it.  Various operations will clear that highlight.
 
 ++  when dragging a shape next to existing geometry, highlight
     vertices and linedefs which would get merged, and implement
@@ -185,14 +183,13 @@ IDEA: for quantizing a group of objects, try about 9 delta
    update the X offset on the appropriate side (right side for start,
    left side for end vertex).
 
+-  Multi-select : if CTRL is pressed, don't clear selection after drag
+
 -  when moving a sector and the camera is inside it, move camera too
 
 ?  show a red '*' next to map name (info_bar AND window title)
    when MadeChanges = 1
    [perhaps make map name DARK_RED when Replacer is true]
-
--  a selected linedef can show tagged sector (and vice versa)
-   however this stops working when the linedef goes out of view.
 
 -  when copy-n-paste and a real sector is removed (or pasting into
    a different map or wad) : we get linedefs with "-" as middle texture.
@@ -235,6 +232,9 @@ CONSOLE IDEA
    - ceilings
    - sidedef uppers and lowers
 
+-  moving up/down with RMB should not disable gravity when change
+   is small
+
 -  IDEA: a key (or mouse button) to toggle "grab mouse" mode
 
 -  able to drag things around
@@ -261,9 +261,12 @@ Browser
 
 -  search box: ',' for AND, '/' for OR
 
+-  can change the [max] size of the texture/flat previews
+
+-  scroll speed (i.e. linesize) is configurable
+
 -  no-pic mode for textures and flats
 
--  can change the [max] size of the texture/flat previews
 
 
 Game / Port Definitions
