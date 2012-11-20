@@ -1245,10 +1245,20 @@ void UI_Canvas::SelboxFinish(int *x1, int *y1, int *x2, int *y2)
 	selbox_active = false;
 
 	*x1 = MIN(selbox_x1, selbox_x2);
-	*x2 = MAX(selbox_x1, selbox_x2);
-
 	*y1 = MIN(selbox_y1, selbox_y2);
+
+	*x2 = MAX(selbox_x1, selbox_x2);
 	*y2 = MAX(selbox_y1, selbox_y2);
+
+	int scr_dx = SCREENX(*x2) - SCREENX(*x1);
+	int scr_dy = SCREENY(*y1) - SCREENY(*y2);
+
+	// small boxes should be treated as a click/release
+	if (scr_dx < 10 && scr_dy < 10)  // TODO: CONFIG ITEM
+	{
+		*x2 = *x1;
+		*y2 = *y1;
+	}
 }
 
 void UI_Canvas::SelboxDraw()
