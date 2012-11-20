@@ -37,6 +37,7 @@ public:
 
 	Fl_Output    *length;
 	Fl_Int_Input *tag;
+	Fl_Int_Input *args[5];
 
 	UI_SideBox *front;
 	UI_SideBox *back;
