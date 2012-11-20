@@ -227,18 +227,28 @@ static void CreateSquare(int model)
 
 static void Insert_Thing()
 {
+	int model = -1;
+
+	if (edit.Selected->notempty())
+		model = edit.Selected->find_first();
+
+
 	BA_Begin();
 
 	int new_t = BA_New(OBJ_THINGS);
 
 	Thing *T = Things[new_t];
 
+	T->type = atoi(g_default_thing.c_str());
+
+	if (model >= 0)
+		T->RawCopy(Things[model]);
+
 	T->x = grid.SnapX(edit.map_x);
 	T->y = grid.SnapY(edit.map_y);
 
-	T->type = atoi(g_default_thing.c_str());
-
 	BA_End();
+
 
 	// select it
 	edit.Selected->clear_all();
