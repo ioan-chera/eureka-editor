@@ -34,7 +34,6 @@
 typedef s16_t  obj_no_t;
 
 #define OBJ_NO_NONE    -1
-#define OBJ_NO_CANVAS  -2
 
 #define is_obj(n)      ((n) >= 0)
 

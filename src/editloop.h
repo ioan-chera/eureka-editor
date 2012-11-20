@@ -32,32 +32,32 @@
 class Editor_State_c
 {
 public:
-    obj_type_e obj_type;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+	obj_type_e obj_type;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
-    int move_speed;   // Movement speed.
-    int extra_zoom;   // Act like the zoom was 4 times what it is
+	int move_speed;   // Movement speed.
+	int extra_zoom;   // Act like the zoom was 4 times what it is
 
-    bool show_object_numbers; // Whether the object numbers are shown
-    bool show_things_squares; // Whether the things squares are shown
-    bool show_things_sprites; // Whether the things sprites are shown
+	bool show_object_numbers; // Whether the object numbers are shown
+	bool show_things_squares; // Whether the things squares are shown
+	bool show_things_sprites; // Whether the things sprites are shown
 
-    int map_x;    // Map coordinates of pointer
-    int map_y;
-    int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
+	int map_x;    // Map coordinates of pointer
+	int map_y;
+	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
 
-    Objid clicked;		// The object that was under the pointer when
+	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred. If clicked on
 						// empty space, == CANVAS.
-    int click_ctrl;   // Was Ctrl pressed at the moment of the click?
-    unsigned long click_time; // time of last left click in ms
-    
-    selection_c *Selected;    // all selected objects (usually empty)
+	int click_ctrl;   // Was Ctrl pressed at the moment of the click?
+	bool did_a_move;   // just moved stuff, clear the next selection
+
+	selection_c *Selected;    // all selected objects (usually empty)
 
 	Objid highlighted;   // The highlighted object
 
 	Objid split_line;  // linedef which would be split by a new vertex
 
-    int RedrawMap;   // set to 1 to force the map to be redrawn
+	int RedrawMap;   // set to 1 to force the map to be redrawn
 
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 

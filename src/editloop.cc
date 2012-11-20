@@ -56,9 +56,6 @@ static bool is_middle = false;
 Editor_State_c edit;
 
 
-static const Objid CANVAS (OBJ_NONE, OBJ_NO_CANVAS);
-
-
 // config items
 bool same_mode_clears_selection = false; 
 
@@ -255,6 +252,7 @@ void CMD_ChangeEditMode(char mode)
 
 	edit.highlighted.nil();
 	edit.split_line.nil();
+	edit.did_a_move = false;
 
 	if (prev_type != edit.obj_type)
 	{
@@ -976,32 +974,34 @@ void EditorMousePress(keymod_e mod)
 
 	GetCurObject(object, edit.obj_type, edit.map_x, edit.map_y, grid.snap);
 
+	edit.clicked = object;
+
 	/* Clicking on an empty space starts a new selection box.
-	   Unless [Ctrl] is pressed, it also clears the current selection. */
-	if (true
-			&& object.is_nil())  //!!!!!!! FIXME
+	   Unless [Ctrl] is pressed, it also clears the current selection.
+	 */
+	if (object.is_nil())
 	{
-		edit.clicked    = CANVAS;
+///---	edit.clicked = CANVAS;
 		edit.click_ctrl = is_ctrl;
 
-		if (! is_ctrl)
-		{
-			edit.Selected->clear_all();
-			edit.RedrawMap = 1;
-		}
+///---		if (! is_ctrl)
+///---		{
+///---			edit.Selected->clear_all();
+///---			edit.RedrawMap = 1;
+///---		}
 
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
-
-		///---    edit.selbox->set_1st_corner ;
-		///---    edit.selbox->set_2nd_corner (edit.map_x, edit.map_y);
-		///---  main_win->canvas->redraw();
 		return;
 	}
+
+
+#if 0  // OLD STUFF, TO BE REMOVED
 
 	/* Clicking on an unselected object unselects
 	   everything but that object. Additionally,
 	   we write the number of the object in case
 	   the user is about to drag it. */
+
 	if (! is_ctrl
 			&& ! IsSelected (edit.Selected, object.num))
 	{
@@ -1023,6 +1023,7 @@ void EditorMousePress(keymod_e mod)
 
 	/* Clicking on a selected object does nothing ;
 	   the user might want to drag the selection. */
+
 	if (! is_ctrl
 			&& IsSelected (edit.Selected, object.num))
 	{
@@ -1033,45 +1034,19 @@ void EditorMousePress(keymod_e mod)
 		edit.RedrawMap = 1;
 		return;
 	}
-
-	/* Clicking on selected object with [Ctrl] pressed unselects it.
-	   Clicking on unselected object with [Ctrl] pressed selects it. */
-	if (is_ctrl
-			&& object ())
-	{
-		edit.clicked        = object;
-		edit.click_ctrl     = 1;
-
-		if (IsSelected (edit.Selected, object.num))
-			UnSelectObject (edit.Selected, object.num);
-		else
-			SelectObject (edit.Selected, object.num);
-
-		edit.RedrawMap = 1;
-
-		return;
-	}
-
+#endif
 }
+
 
 void EditorMouseRelease()
 {
 	is_butl = false;
 
-	/* Releasing the button while there was a selection box
-	   causes all the objects within the box to be selected. */
-	if (main_win->canvas->isSelboxActive())
-	{
-		int x1, y1, x2, y2;
-		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+	Objid click_obj(edit.clicked);
+	edit.clicked.nil();
 
-		SelectObjectsInBox(edit.Selected, edit.obj_type, x1, y1, x2, y2);
-
-		UpdateHighlight();
-
-		edit.RedrawMap = 1;
-		return;
-	}
+	bool was_did_move = edit.did_a_move;
+	edit.did_a_move = false;
 
 	/* Releasing the button while dragging : drop the selection. */
 	// FIXME : should call this automatically when switching tool
@@ -1083,6 +1058,9 @@ void EditorMouseRelease()
 		if (! (dx==0 && dy==0))
 		{
 			CMD_MoveObjects(dx, dy);
+
+			// next select action will clear the selection
+			edit.did_a_move = true;
 		}
 
 		edit.drag_single_vertex = -1;
@@ -1090,6 +1068,48 @@ void EditorMouseRelease()
 		return;
 	}
 
+	if (click_obj() && was_did_move)
+	{
+		edit.Selected->clear_all();
+	}
+
+	/* Releasing the button while there was a selection box
+	   causes all the objects within the box to be selected.
+	 */
+	if (main_win->canvas->isSelboxActive())
+	{
+		int x1, y1, x2, y2;
+		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+
+		// a mere click and release will unselect everything
+		if (x1 == x2 && y1 == y2)
+			edit.Selected->clear_all();
+		else
+			SelectObjectsInBox(edit.Selected, edit.obj_type, x1, y1, x2, y2);
+
+		UpdateHighlight();
+
+		edit.RedrawMap = 1;
+		return;
+	}
+
+
+	if (! click_obj())
+		return;
+
+	Objid object;      // object under the pointer
+
+	GetCurObject(object, edit.obj_type, edit.map_x, edit.map_y, grid.snap);
+
+	/* select the object if unselected, and vice versa.
+	 */
+	if (object() && object.num == click_obj.num)
+	{
+		edit.Selected->toggle(object.num);
+
+		edit.RedrawMap = 1;
+		return;
+	}
 }
 
 
@@ -1168,12 +1188,13 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 	{
 		UpdateHighlight();
 	}
+
 	/* Moving the pointer with the left button pressed
 	   and a selection box exists : move the second
-	   corner of the selection box. */
-	else if (true
-			&& is_butl  /* FIXME: edit.selecting */
-			&& edit.clicked == CANVAS)
+	   corner of the selection box.
+	*/
+	else if (main_win->canvas->isSelboxActive())
+	         ///---  if (is_butl && edit.clicked == CANVAS)
 	{
 		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
 		return;
@@ -1182,25 +1203,32 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 	/* Moving the pointer with the left button pressed
 	   but no selection box exists and [Ctrl] was not
 	   pressed when the button was pressed :
-	   drag the selection. */
+	   drag the selection.
+	*/
 	if (main_win->canvas->isDragActive())
 	{
 		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
 
 		// if dragging a single vertex, update the possible split_line
 		UpdateHighlight();
-
-///---		if (edit.drag_single_vertex >= 0)
-///---		{
-///---			UpdateSplitLine(edit.drag_single_vertex);
-///---		}
+		return;
 	}
-	else if (true
-		&& is_butl  /* FIXME: edit.dragging */
-		&& edit.clicked ()
-		&& ! edit.click_ctrl
-		&& edit.Selected->notempty())
+
+	/*
+	   begin dragging?
+	   TODO: require pixel dist from click point to be >= THRESHHOLD
+	 */
+	if (is_butl && edit.clicked())
 	{
+		if (! edit.Selected->get(edit.clicked.num))
+		{
+			if (edit.did_a_move)
+				edit.Selected->clear_all();
+
+			edit.Selected->set(edit.clicked.num);
+			edit.did_a_move = false;
+		}
+
 		int focus_x, focus_y;
 
 		GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
@@ -1248,6 +1276,7 @@ void Editor_Init()
 
     edit.clicked.nil();
     edit.click_ctrl          = 0;
+    edit.did_a_move          = false;
     edit.highlighted.nil();
 	edit.split_line.nil();
 	edit.drag_single_vertex = -1;
