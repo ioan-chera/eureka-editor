@@ -6,6 +6,11 @@ CHANGES IN Eureka 0.xx
 
 -  thing panel: radial arrow buttons for setting the angle
 
+-  fixed state persistence to ignore unused vertices (etc)
+-  fixed inner sector getting defaults when closing simple loop
+
+-  Browser: faster scrolling with the mouse wheel
+
 -  Heretic: fixed the default port (i.e. not BOOM)
 
 -  3D view: can use WASD keys in 3D mode to move around
