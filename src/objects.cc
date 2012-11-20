@@ -306,7 +306,12 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 
 			int new_sec = BA_New(OBJ_SECTORS);
 
-			Sectors[new_sec]->SetDefaults();
+			int model = loop.NeighboringSector();
+
+			if (model >= 0)
+				Sectors[new_sec]->RawCopy(Sectors[model]);
+			else
+				Sectors[new_sec]->SetDefaults();
 
 			AssignSectorToLoop(loop, new_sec, flip);
 		}
