@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2012 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@
 //
 UI_Pic::UI_Pic(int X, int Y, int W, int H) :
     Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-    rgb(NULL), unknown(false)
+    rgb(NULL), unknown(false), selected(false)
 {
 	color(FL_DARK2);
 	labelcolor(FL_LIGHT2);
@@ -251,8 +251,8 @@ void UI_Pic::draw()
 	else
 		Fl_Box::draw();
 
-if (rand() & 0x80)
-	draw_selected();
+	if (selected)
+		draw_selected();
 }
 
 

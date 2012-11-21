@@ -148,7 +148,13 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	    w == box->m_pic ||
 		w == box->u_pic)
 	{
-		// TODO: texture selection via list-box
+		UI_Pic * pic = (UI_Pic *)w;
+
+		pic->Selected(! pic->Selected());
+		pic->redraw();
+
+		if (pic->Selected())
+			CMD_SetBrowser('T');
 		return;
 	}
 

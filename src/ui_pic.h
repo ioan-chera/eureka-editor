@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2012 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -32,9 +32,14 @@ private:
 
 	bool unknown;
 
+	bool selected;
+
 public:
 	UI_Pic(int X, int Y, int W, int H);
 	virtual ~UI_Pic();
+
+	// FLTK virtual method for drawing.
+	int handle(int event);
 
 public:
 	void Nil();
@@ -43,8 +48,8 @@ public:
 	void GetTex (const char * tname);
 	void GetSprite(int type);
 
-	// FLTK virtual method for drawing.
-	int handle(int event);
+	bool Selected() { return selected; }
+	void Selected(bool _val) { selected = _val; }
 
 private:
 	// FLTK virtual method for drawing.

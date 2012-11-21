@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2012 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -116,8 +116,8 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
 	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);
 
-	c_pic->callback(button_callback, this);
-	f_pic->callback(button_callback, this);
+	c_pic->callback(tex_callback, this);
+	f_pic->callback(tex_callback, this);
 
 	add(f_pic);
 	add(c_pic);
@@ -291,6 +291,18 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
+	if (w == box->f_pic || w == box->c_pic)
+	{
+		UI_Pic * pic = (UI_Pic *) w;
+
+		pic->Selected(! pic->Selected());
+		pic->redraw();
+
+		if (pic->Selected())
+			CMD_SetBrowser('F');
+		return;
+	}
+
 	int new_tex;
 	if (w == box->f_tex)
 		new_tex = box->FlatFromWidget(box->f_tex);
@@ -445,17 +457,6 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 	if (w == box->choose)
 	{
 		CMD_SetBrowser('S');
-		return;
-	}
-
-	if (w == box->f_pic)
-	{
-		printf("SELECT FLOOR PIC .........\n");
-		return;
-	}
-	else if (w == box->c_pic)
-	{
-		printf("SELECT CEIL PIC .........\n");
 		return;
 	}
 
