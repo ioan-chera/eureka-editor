@@ -15,7 +15,7 @@ Documentation
 
 +  MAIN PAGE: put a screenshot there (half size)
 
--  somewhere: at least 800x600 resolution
+-  somewhere: require at least 800x600 resolution, two button mouse
 
 -  KEY CHANGES
    3d mode : 's' --> 'o' (objects)
@@ -34,10 +34,6 @@ Editing
 -------
 
 +  sort out MMB for insert/rotate/scale
-
-!!  click on a sidedef pic (or flat pic) and it gets "highlighted"
-    and the texture browser is opened and clicking on a texture sets
-    it.  Various operations will clear that highlight.
 
 I think the snap size for insert vertices should be a bit larger.
 Right now it's hard to get them on an angled line, even at the

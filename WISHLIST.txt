@@ -77,6 +77,8 @@ General
 
 -  look for iwads in /usr/share/games/doom  (and /usr/local equiv)
 
+-  ability to use an external node builder
+
 
 
 Documentation
@@ -243,6 +245,9 @@ CONSOLE IDEA
    + shift textures?
 
 -  ability to drag the camera (on 2D viewport)
+
+-  IDEA: animation mode, render continuously and show any lighting
+         effects and animated / scrolling textures and sprites
 
 -  make it into a proper widget (occupy same space as Canvas)
 
