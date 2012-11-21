@@ -33,6 +33,14 @@ command will build the Eureka binary. (The '>' is just the prompt)
    > make
 
 
+Some systems may need additional CFLAGS and/or LDFLAGS in order
+to find the required libraries (especially FLTK).  For example,
+the following is reported to work for Gentoo Linux:
+
+   CFLAGS  += -I/usr/include/fltk-1
+   LDFLAGS += -L/usr/lib64/fltk-1/
+
+
 
 INSTALLING Eureka
 =================
