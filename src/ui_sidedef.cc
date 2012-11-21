@@ -144,6 +144,9 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = (UI_SideBox *)data;
 
+	if (box->obj < 0)
+		return;
+
 	if (w == box->l_pic ||
 	    w == box->m_pic ||
 		w == box->u_pic)

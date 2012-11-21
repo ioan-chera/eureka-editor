@@ -291,6 +291,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
+	if (box->obj < 0)
+		return;
+
 	if (w == box->f_pic || w == box->c_pic)
 	{
 		UI_Pic * pic = (UI_Pic *) w;
