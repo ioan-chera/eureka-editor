@@ -47,8 +47,8 @@
 #include "ui_window.h"
 
 
-// config items [TODO !!]  [rename too]
-bool islands_get_new_sector = true;
+// config items
+bool new_islands_are_void = false;
 
 
 static bool invalidated_totals;
@@ -309,9 +309,8 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 
 			// if the loop is inside a sector, only _have_ to create
 			// the inner sector if we surrounded something.
-			// TODO: CONFIG ITEM
 
-			if (!islands_get_new_sector && did_outer && loop.islands.empty())
+			if (new_islands_are_void && did_outer && loop.islands.empty())
 				return;
 
 			int new_sec = BA_New(OBJ_SECTORS);

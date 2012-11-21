@@ -19,6 +19,7 @@ CHANGES IN Eureka 0.xx
 -  fixed pink-highlighted tagged sectors when line was off-screen
 
 -  added 'leave_offsets_alone' config var
+-  added 'new_islands_are_void' config var
 
 -  Browser: faster scrolling with the mouse wheel
 

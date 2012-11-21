@@ -44,6 +44,7 @@
 // config item variables
 
 extern bool leave_offsets_alone;
+extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
 
@@ -333,6 +334,15 @@ static const opt_desc_t options[] =
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
 		&leave_offsets_alone
+	},
+
+	{	"new_islands_are_void",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Islands created inside a sector will get a void interior",
+		NULL,
+		&new_islands_are_void
 	},
 
 	{	"same_mode_clears_selection",
