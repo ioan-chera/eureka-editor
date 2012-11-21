@@ -3,6 +3,47 @@ EUREKA WISH-LIST
 ================
 
 
+______________________________________________________________________
+
+  HIGH PRIORITY
+______________________________________________________________________
+
+
+General
+-------
+
++  configurable keys
+
+
+
+Documentation
+-------------
+
+
+Editing
+-------
+
+
+3D View
+-------
+
++  fix the slime-trails
+
++  problem with mid-masked textures (secret in E1M1, cage in E1M9)
+
+
+Browser
+-------
+
++  picture mode for things
+
+
+______________________________________________________________________
+
+  LOWER PRIORITY
+______________________________________________________________________
+
+
 General
 -------
 
@@ -16,8 +57,6 @@ General
 
 -  widget to show list of maps (option for custom name)
 
-
-++  fix: building nodes == new vertices == new checksum
 
 -  fix: [ ] keys not working when 3D preview is on
 
@@ -49,8 +88,6 @@ General
     the name is <, otherwise at beginning).
 
 -  make sure Load/Export wad filename not already in master_dir
-
-+  configurable keys
 
 -  grid drawing too slow when small step and zoomed out
 
@@ -207,24 +244,8 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 
 
 
-CONSOLE IDEA
-------------
-   toggle on/off with the F4 key
-   exists where map/render is (maybe half, above it)
-      (maybe translucent background)
-   turns off browser (and vice versa)
-   have cvars for config items, changeable in console
-   quake-like binding, e.g. "bind w swap-flats"
-   arguments beginning with '+' get executed as console commands
-
-
-
 3D View
 -------
-
-++  fix the slime-trails
-
-+  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
 -  handle very tall/thin window : letter box with black
 
@@ -260,17 +281,15 @@ CONSOLE IDEA
 Browser
 -------
 
-++  picture mode for things
-
 +  persist current width (in .dat cache file)
-
--  search box: ',' for AND, '/' for OR
 
 -  can change the [max] size of the texture/flat previews
 
 -  scroll speed (i.e. linesize) is configurable
 
 -  no-pic mode for textures and flats
+
+?  search box: ',' for AND, '/' for OR
 
 
 
@@ -281,6 +300,22 @@ Game / Port Definitions
 
 -  a new category for BOOM's "property transfer" linetypes
 
+
+______________________________________________________________________
+
+  MISCELLANEOUS / IDEAS
+______________________________________________________________________
+
+
+CONSOLE IDEA
+------------
+   toggle on/off with the F4 key
+   exists where map/render is (maybe half, above it)
+      (maybe translucent background)
+   turns off browser (and vice versa)
+   have cvars for config items, changeable in console
+   quake-like binding, e.g. "bind w swap-flats"
+   arguments beginning with '+' get executed as console commands
 
 
 WAD SEMANTICS
