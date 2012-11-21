@@ -10,7 +10,9 @@ CHANGES IN Eureka 0.xx
 
 +  reload the wad/map after building the nodes (no longer exit)
 
--  thing panel: radial arrow buttons for setting the angle
+-  allow running locally (without a 'make install')
+
+-  thing panel has radial arrow buttons for setting the angle
 
 -  insert thing: if one already selected, copy its properties
 
@@ -18,8 +20,9 @@ CHANGES IN Eureka 0.xx
 -  fixed inner sector getting defaults when closing simple loop
 -  fixed pink-highlighted tagged sectors when line was off-screen
 
--  added 'leave_offsets_alone' config var
--  added 'new_islands_are_void' config var
+-  config: can specify a boolean value on the command-line
+-  config: added 'leave_offsets_alone' var
+-  config: added 'new_islands_are_void' var
 
 -  Browser: faster scrolling with the mouse wheel
 
