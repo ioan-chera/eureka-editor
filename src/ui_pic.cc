@@ -246,13 +246,26 @@ int UI_Pic::handle(int event)
 
 void UI_Pic::draw()
 {
-	if (! rgb)
-	{
+	if (rgb)
+		rgb->draw(x(), y());
+	else
 		Fl_Box::draw();
-		return;
-	}
 
-	rgb->draw(x(), y());
+if (rand() & 0x80)
+	draw_selected();
+}
+
+
+void UI_Pic::draw_selected()
+{
+	int X = x();
+	int Y = y();
+	int W = w();
+	int H = h();
+
+	fl_rect(X+0, Y+0, W-0, H-0, FL_RED);
+	fl_rect(X+1, Y+1, W-2, H-2, FL_RED);
+	fl_rect(X+2, Y+2, W-4, H-4, FL_BLACK);
 }
 
 

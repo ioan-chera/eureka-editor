@@ -50,6 +50,8 @@ private:
 	// FLTK virtual method for drawing.
 	void draw();
 
+	void draw_selected();
+
 	void UploadRGB(const byte *buf, int depth);
 
 	void TiledImg(Img *img, bool has_trans);
