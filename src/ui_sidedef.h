@@ -61,6 +61,9 @@ public:
 
 	void UpdateField();
 
+	// returns a bitmask: 1 for lower, 2 for middle, 4 for upper
+	int GetSelectedPics() const;
+
 	void UnselectPics();
 
 private:

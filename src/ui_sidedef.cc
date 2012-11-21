@@ -545,6 +545,14 @@ void UI_SideBox::UpdateHiding(bool hide)
 }
 
 
+int UI_SideBox::GetSelectedPics() const
+{
+	return	(l_pic->Selected() ? 1 : 0) |
+			(m_pic->Selected() ? 2 : 0) |
+			(u_pic->Selected() ? 4 : 0);
+}
+
+
 void UI_SideBox::UnselectPics()
 {
 	l_pic->Selected(false);

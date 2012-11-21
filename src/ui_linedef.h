@@ -82,7 +82,8 @@ private:
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
 
-	void SetTexOnLine(int ld, int new_tex, int e_state);
+	void SetTexOnLine(int ld, int new_tex, int e_state,
+	                  int front_pics, int back_pics);
 
 	static void   type_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);

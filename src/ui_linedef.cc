@@ -254,11 +254,32 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state)
+void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state,
+                              int front_pics, int back_pics)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
 	LineDef *L = LineDefs[ld];
+
+	// handle the selected texture boxes
+	if (front_pics || back_pics)
+	{
+		if (L->Right())
+		{
+			if (front_pics & 1) BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
+			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (front_pics & 4) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+		}
+
+		if (L->Left())
+		{
+			if (back_pics & 1) BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
+			if (back_pics & 2) BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
+			if (back_pics & 4) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+		}
+
+		return;
+	}
 
 	// middle click : set mid-masked texture on both sides
 	if (e_state & FL_BUTTON2)
@@ -336,6 +357,9 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 {
 	int new_tex = BA_InternaliseString(tex_name);
 
+	int front_pics = front->GetSelectedPics();
+	int  back_pics =  back->GetSelectedPics();
+
 	// this works a bit differently than other ways, we don't modify a
 	// widget and let it update the map, instead we update the map and
 	// let the widget(s) get updated.  That's because we do different
@@ -350,7 +374,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
-			SetTexOnLine(*it, new_tex, e_state);
+			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
 		}
 
 		BA_End();
