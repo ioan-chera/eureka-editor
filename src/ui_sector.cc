@@ -340,17 +340,26 @@ void UI_SectorBox::SetTexture(const char *tex_name, int e_state)
 	if (count <= 0)
 		return;
 
-	bool use_ceil = (e_state & FL_BUTTON3) ? true : false;
+	int sel_pics = GetSelectedPics();
 
-	if (use_ceil)
+	if (sel_pics == 0)
 	{
-		c_tex->value(tex_name);
-		c_tex->do_callback();
+		if (e_state & FL_BUTTON3)
+			sel_pics = 2;
+		else
+			sel_pics = 1;
 	}
-	else
+
+	if (sel_pics & 1)
 	{
 		f_tex->value(tex_name);
 		f_tex->do_callback();
+	}
+
+	if (sel_pics & 2)
+	{
+		c_tex->value(tex_name);
+		c_tex->do_callback();
 	}
 }
 
@@ -600,6 +609,13 @@ void UI_SectorBox::UpdateField(int field)
 			tag->value("");
 		}
 	}
+}
+
+
+int UI_SectorBox::GetSelectedPics() const
+{
+	return	(f_pic->Selected() ? 1 : 0) |
+			(c_pic->Selected() ? 2 : 0);
 }
 
 

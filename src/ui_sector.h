@@ -71,6 +71,9 @@ public:
 	void SetTexture(const char *tex_name, int e_state);
 	void SetSectorType(int new_type);
 
+	// returns a bitmask: 1 for floor, 2 for ceiling
+	int GetSelectedPics() const;
+
 	void UnselectPics();
 
 private:
