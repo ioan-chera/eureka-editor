@@ -689,7 +689,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		{
 			case OPT_BOOLEAN:
 				// -AJA- permit a following value
-				if (argc >= 1 && argv[1][0] != '-')
+				if (argc >= 2 && argv[1][0] != '-')
 				{
 					argv++;
 					argc--;
@@ -716,7 +716,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				break;
 
 			case OPT_CONFIRM:
-				if (argc <= 1)
+				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
@@ -732,7 +732,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				break;
 
 			case OPT_INTEGER:
-				if (argc <= 1)
+				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
@@ -748,7 +748,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				break;
 
 			case OPT_STRINGBUF8:
-				if (argc <= 1)
+				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
@@ -765,7 +765,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				break;
 
 			case OPT_STRING:
-				if (argc <= 1)
+				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
@@ -781,7 +781,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				break;
 
 			case OPT_STRING_LIST:
-				if (argc <= 1)
+				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
 					return 1;
