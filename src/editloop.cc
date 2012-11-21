@@ -1083,7 +1083,7 @@ void EditorMouseRelease()
 
 		// a mere click and release will unselect everything
 		if (x1 == x2 && y1 == y2)
-			edit.Selected->clear_all();
+			CMD_UnselectAll();
 		else
 			SelectObjectsInBox(edit.Selected, edit.obj_type, x1, y1, x2, y2);
 
