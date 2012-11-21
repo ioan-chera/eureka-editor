@@ -12,12 +12,34 @@ ______________________________________________________________________
 General
 -------
 
++  support resource wads
+   (a) -merge option for command line
+   (b) open them in R/O mode (like the IWAD)
+   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
+       [probably port and mod too] and ability to change them
+   (d) persist in a lump, e.g. "__EUREKA"
+
 +  configurable keys
+   (a) will need at least two contexts: "editor" and "render"
+       and possibly "browser".
+
++  nicer way to select map, render a small 2D version of each map
+   and present them in a scrolling list.  Perhaps abuse the browser
+   for this.
+
++  decent dialogs: printf-style parameter, make message fit,
+   provide words for the buttons (like "Quit Without Saving").
+
++  CHECK screen
+   -  can remove unused Vertices, SideDefs and Sectors
 
 
 
 Documentation
 -------------
+
++  a tutorial for the basics
+
 
 
 Editing
@@ -27,9 +49,9 @@ Editing
 3D View
 -------
 
-+  fix the slime-trails
-
 +  problem with mid-masked textures (secret in E1M1, cage in E1M9)
+
++  fix the slime-trails
 
 
 Browser
@@ -47,39 +69,14 @@ ______________________________________________________________________
 General
 -------
 
-!!  good method for opening wads and maps, and selecting the IWAD
-    and PORT and MOD.  Perhaps _EUREKA_ lump stores these details.
-
-+  proper widget for File/Open to select map, with button to load
-   a new WAD file.
-
--  browser: map viewer (for selecting what map to edit)
-
--  widget to show list of maps (option for custom name)
-
-
 -  fix: [ ] keys not working when 3D preview is on
 
--  fix: SHIFT + move mouse = keep current highlight
+?  fix: SHIFT + move mouse = keep current highlight
 
+-  by default, write logs to ~/.eureka/LOGS.txt
+   save early logs in memory
 
--  idea: SPACE in LINEDEF mode = add vertex to split line(s)
-
-??  Help system (especially: what keys do what)
-
-??  by default, write logs to ~/.eureka/LOGS.txt
- 
-   +  save early logs in memory
-
--  support HacX
--  support Harmony
-
-
-!!  a -merge option for resource wads.  Like IWAD, open in R/O mode.
-    also: File/Add Resource
-
-!!  decent dialogs: printf-style parameter, make message fit,
-    provide words for the buttons (like "Quit Without Saving").
+-  IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
 
 -  uppercase the level lump name (Level_name global var)
 
@@ -94,25 +91,16 @@ General
 +  configurable grid colors, 
    IDEA: grid has separate color for 64x64 flat alignment
 
--  File/Change Port
-
--  OPT_BOOLEAN options on command line: support a following value
-
 -  a check/fix pass for LoadLevel()
 
 +  on error, ability to save/export current map
    [unless error was in save code]
 
-++  CHECK screen
-    -  can remove unused SideDefs and Sectors
++  can set iwad names to look for in the/a config file.
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
 
-+  can set iwads to look for in the/a config file.
-
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
-
--  look for iwads in /usr/share/games/doom  (and /usr/local equiv)
 
 -  ability to use an external node builder
 
@@ -120,8 +108,6 @@ General
 
 Documentation
 -------------
-
-!!  a tutorial for the basics
 
 +  command line arguments page
 
@@ -134,6 +120,8 @@ Documentation
    -q --quiet : don't send messages to stdout
 
 -  config file page
+
+-  built-in cheat sheet for mouse buttons and common keys
 
 
 
@@ -295,6 +283,12 @@ Browser
 
 Game / Port Definitions
 -----------------------
+
++  support HacX
+
++  support Harmony
+
+-  support Chex Quest 1 and 2
 
 -  FreeDOOM: categorize the new textures
 
