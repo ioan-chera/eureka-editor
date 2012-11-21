@@ -217,6 +217,8 @@ static void Determine_HomeDir(const char *argv0)
 	if (! home_dir)
 	{
 #ifdef WIN32
+	// FIXME: check for %appdata% ??
+
 	home_dir = GetExecutablePath(argv0);
 
 #else
@@ -246,9 +248,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (! install_dir)
 	{
 #ifdef WIN32
-	SYS_ASSERT(home_dir);
-
-	install_dir = StringDup(home_dir);
+	install_dir = GetExecutablePath(argv0);
 
 #else
 	static const char *prefixes[] =
@@ -279,6 +279,13 @@ static void Determine_InstallPath(const char *argv0)
 		install_dir = NULL;
 	}
 #endif
+	}
+
+	// fallback : look in current directory
+	if (! install_dir)
+	{
+		if (FileExists("./games/doom2.ugh"))
+			install_dir = ".";
 	}
 
 	if (! install_dir)
