@@ -236,15 +236,30 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	add(o_sp);   add(o_coop);   add(o_dm);
 
 
-	o_ambush = new Fl_Check_Button(BX+12,  Y, FW, 22, "ambush");
-	o_friend = new Fl_Check_Button(BX+12, AY, FW, 22, "friend");
+	// Hexen class flags
+	o_fighter = new Fl_Check_Button(BX+12,  Y, FW, 22, "fighter");
+	o_cleric  = new Fl_Check_Button(BX+12, AY, FW, 22, "cleric");
+	o_mage    = new Fl_Check_Button(BX+12, BY, FW, 22, "mage");
+
+	add(o_fighter); add(o_cleric); add(o_mage);
+
+	o_fighter->hide();
+	o_cleric->hide();
+	o_mage->hide();
+
+
+	Y = BY + 35;
+
+
+	o_ambush = new Fl_Check_Button( X+12, Y, FW, 22, "ambush");
+	o_friend = new Fl_Check_Button(AX+12, Y, FW, 22, "friend");
 
 	o_ambush->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Ambush));
 	o_friend->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Friend));
 
 	add(o_ambush); add(o_friend);
 
-	Y = BY + 40;
+	Y += 40;
 
 
 	sprite = new UI_Pic(X + (W-100)/2, Y, 100,100);

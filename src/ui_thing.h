@@ -59,6 +59,10 @@ private:
 	Fl_Check_Button *o_ambush;
 	Fl_Check_Button *o_friend;
 
+	Fl_Check_Button *o_fighter;  // Hexen
+	Fl_Check_Button *o_cleric;
+	Fl_Check_Button *o_mage;
+
 	UI_Pic *sprite;
 
 public:

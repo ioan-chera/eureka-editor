@@ -112,13 +112,10 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	add(length);
 
 
-// FIXME
-tag->hide();
-length->hide();
-
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new Fl_Int_Input(X+58+43*a, Y, 38, 24);
+		args[a] = new Fl_Int_Input(X+58+43*a, Y, 39, 24);
+		args[a]->hide();
 
 		add(args[a]);
 	}
