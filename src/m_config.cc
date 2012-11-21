@@ -43,6 +43,7 @@
 
 // config item variables
 
+extern bool leave_offsets_alone;
 extern bool same_mode_clears_selection;
 
 
@@ -323,6 +324,15 @@ static const opt_desc_t options[] =
 		"Default upper texture",
 		NULL,
 		default_upper_texture
+	},
+
+	{	"leave_offsets_alone",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Do not adjust offsets when splitting lines (etc)",
+		NULL,
+		&leave_offsets_alone
 	},
 
 	{	"same_mode_clears_selection",

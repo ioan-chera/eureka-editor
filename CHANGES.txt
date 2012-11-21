@@ -14,6 +14,8 @@ CHANGES IN Eureka 0.xx
 -  fixed inner sector getting defaults when closing simple loop
 -  fixed pink-highlighted tagged sectors when line was off-screen
 
+-  added 'leave_offsets_alone' config var
+
 -  Browser: faster scrolling with the mouse wheel
 
 -  Heretic: fixed the default port (i.e. not BOOM)

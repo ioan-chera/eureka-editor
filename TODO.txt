@@ -3,9 +3,6 @@ EUREKA SHORT-TERM TODO
 ======================
 
 
->>  hexen experiment in LineDef panel
-
-
 General
 -------
 
@@ -41,8 +38,6 @@ Editing
 !!  click on a sidedef pic (or flat pic) and it gets "highlighted"
     and the texture browser is opened and clicking on a texture sets
     it.  Various operations will clear that highlight.
-
--  option to disable automatic texture alignment
 
 I think the snap size for insert vertices should be a bit larger.
 Right now it's hard to get them on an angled line, even at the

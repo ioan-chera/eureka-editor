@@ -37,6 +37,10 @@
 #include "w_rawdef.h"
 
 
+// config items
+bool leave_offsets_alone = false;
+
+
 static void SliceLinedef (int linedefno, int times);
 
 
@@ -606,7 +610,8 @@ int SplitLineDefAtVertex(int ld, int new_v)
 		L2->right = BA_New(OBJ_SIDEDEFS);
 		L2->Right()->RawCopy(L->Right());
 
-		L2->Right()->x_offset += new_length;
+		if (! leave_offsets_alone)
+			L2->Right()->x_offset += new_length;
 	}
 
 	if (L->Left())
@@ -614,9 +619,12 @@ int SplitLineDefAtVertex(int ld, int new_v)
 		L2->left = BA_New(OBJ_SIDEDEFS);
 		L2->Left()->RawCopy(L->Left());
 
-		int new_x_ofs = L->Left()->x_offset + orig_length - new_length;
+		if (! leave_offsets_alone)
+		{
+			int new_x_ofs = L->Left()->x_offset + orig_length - new_length;
 
-		BA_ChangeSD(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+			BA_ChangeSD(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+		}
 	}
 
 	return new_l;
