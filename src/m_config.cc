@@ -54,6 +54,9 @@ extern bool same_mode_clears_selection;
  */
 typedef enum
 {
+	// End of the options description
+	OPT_END = 0,
+
 	// Boolean (toggle)
 	// Receptacle is of type: bool
 	OPT_BOOLEAN,
@@ -77,9 +80,6 @@ typedef enum
 	// List of strings
 	// Receptacle is of type: std::vector< const char * >
 	OPT_STRING_LIST,
-
-	// End of the options description
-	OPT_END
 }
 opt_type_t;
 
@@ -512,48 +512,34 @@ static int parse_config_file(FILE *fp, const char *filename)
 			switch (o->opt_type)
 			{
 				case OPT_BOOLEAN:
-					if (strcmp(value, "no")    == 0 ||
-					    strcmp(value, "false") == 0 ||
-						strcmp(value, "off")   == 0 ||
-						strcmp(value, "0")     == 0)
+					if (y_stricmp(value, "no")    == 0 ||
+					    y_stricmp(value, "false") == 0 ||
+						y_stricmp(value, "off")   == 0 ||
+						y_stricmp(value, "0")     == 0)
 					{
-						if (o->data_ptr)
-							*((bool *) (o->data_ptr)) = false;
+						*((bool *) (o->data_ptr)) = false;
 					}
 					else  // anything else is TRUE
 					{
-						if (o->data_ptr)
-							*((bool *) (o->data_ptr)) = true;
+						*((bool *) (o->data_ptr)) = true;
 					}
 					break;
 
 				case OPT_CONFIRM:
-					if (o->data_ptr)
-					{
-						*((confirm_t *) o->data_ptr) = confirm_e2i (value);
-					}
+					*((confirm_t *) o->data_ptr) = confirm_e2i (value);
 					break;
 
 				case OPT_INTEGER:
-					if (o->data_ptr)
-					{
-						*((int *) (o->data_ptr)) = atoi (value);
-					}
+					*((int *) (o->data_ptr)) = atoi (value);
 					break;
 
 				case OPT_STRINGBUF8:
-					if (o->data_ptr)
-					{
-						strncpy ((char *) o->data_ptr, value, 8);
-						((char *) o->data_ptr)[8] = 0;
-					}
+					strncpy ((char *) o->data_ptr, value, 8);
+					((char *) o->data_ptr)[8] = 0;
 					break;
 
 				case OPT_STRING:
-					if (o->data_ptr)
-					{
-						*((char **) o->data_ptr) = StringDup(value);
-					}
+					*((char **) o->data_ptr) = StringDup(value);
 					break;
 
 				case OPT_STRING_LIST:
@@ -563,11 +549,9 @@ static int parse_config_file(FILE *fp, const char *filename)
 						while (*v != 0 && ! isspace ((unsigned char) *v))
 							v++;
 
-						if (o->data_ptr)
-						{
-							string_list_t * list = (string_list_t *)o->data_ptr;
-							list->push_back(StringDup(value, v - value));
-						}
+						string_list_t * list = (string_list_t *)o->data_ptr;
+						list->push_back(StringDup(value, v - value));
+
 						while (isspace (*v))
 							v++;
 						value = v;
@@ -694,16 +678,30 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:
-				// TODO: permit a following value (see OPT_BOOLEAN in config parser)
-				if (argv[0][0] == '-')
+				// -AJA- permit a following value
+				if (argc >= 1 && argv[1][0] != '-')
 				{
-					if (o->data_ptr && ! ignore)
-						*((bool *) o->data_ptr) = true;
+					argv++;
+					argc--;
+
+					if (ignore)
+						break;
+
+					if (y_stricmp(argv[0], "no")    == 0 ||
+					    y_stricmp(argv[0], "false") == 0 ||
+						y_stricmp(argv[0], "off")   == 0 ||
+						y_stricmp(argv[0], "0")     == 0)
+					{
+						*((bool *) (o->data_ptr)) = false;
+					}
+					else  // anything else is TRUE
+					{
+						*((bool *) (o->data_ptr)) = true;
+					}
 				}
-				else  // this code is never reached
+				else if (! ignore)
 				{
-					if (o->data_ptr && ! ignore)
-						*((bool *) o->data_ptr) = false;
+					*((bool *) o->data_ptr) = true;
 				}
 				break;
 
@@ -717,8 +715,10 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				argv++;
 				argc--;
 
-				if (o->data_ptr && ! ignore)
+				if (! ignore)
+				{
 					*((confirm_t *) o->data_ptr) = confirm_e2i (argv[0]);
+				}
 				break;
 
 			case OPT_INTEGER:
@@ -731,7 +731,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				argv++;
 				argc--;
 
-				if (o->data_ptr && ! ignore)
+				if (! ignore)
 				{
 					*((int *) o->data_ptr) = atoi (argv[0]);
 				}
@@ -747,7 +747,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				argv++;
 				argc--;
 
-				if (o->data_ptr && ! ignore)
+				if (! ignore)
 				{
 					strncpy ((char *) o->data_ptr, argv[0], 8);
 					((char *) o->data_ptr)[8] = 0;
@@ -764,7 +764,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				argv++;
 				argc--;
 
-				if (o->data_ptr && ! ignore)
+				if (! ignore)
 				{
 					*((const char **) o->data_ptr) = StringDup(argv[0]);
 				}
@@ -781,7 +781,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 					argv++;
 					argc--;
 
-					if (o->data_ptr && ! ignore)
+					if (! ignore)
 					{
 						string_list_t * list = (string_list_t *) o->data_ptr;
 						list->push_back(StringDup(argv[0]));
@@ -828,7 +828,7 @@ void dump_parameters(FILE *fp)
 		if (! o->long_name)
 			continue;
 		
-		fprintf (fp, "%-*s  %-*s  ",name_maxlen, o->long_name, desc_maxlen, o->desc);
+		fprintf (fp, "%-*s  %-*s  ", name_maxlen, o->long_name, desc_maxlen, o->desc);
 
 		if (o->opt_type == OPT_BOOLEAN)
 			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "enabled" : "disabled");
@@ -837,27 +837,17 @@ void dump_parameters(FILE *fp)
 		else if (o->opt_type == OPT_STRINGBUF8)
 			fprintf (fp, "'%s'", (char *) o->data_ptr);
 		else if (o->opt_type == OPT_STRING)
-		{
-			if (o->data_ptr)
-				fprintf (fp, "'%s'", *((char **) o->data_ptr));
-			else
-				fprintf (fp, "--none--");
-		}
+			fprintf (fp, "'%s'", *((char **) o->data_ptr));
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
 		else if (o->opt_type == OPT_STRING_LIST)
 		{
-			if (o->data_ptr)
-			{
-				string_list_t *list = (string_list_t *)o->data_ptr;
+			string_list_t *list = (string_list_t *)o->data_ptr;
 
-				if (list->empty())
-					fprintf(fp, "--none--");
-				else for (unsigned int i = 0 ; i < list->size() ; i++)
-					fprintf(fp, "'%s' ", list->at(i));
-			}
-			else
-				fprintf (fp, "--none--");
+			if (list->empty())
+				fprintf(fp, "--none--");
+			else for (unsigned int i = 0 ; i < list->size() ; i++)
+				fprintf(fp, "'%s' ", list->at(i));
 		}
 		fputc ('\n', fp);
 	}
@@ -941,13 +931,13 @@ static confirm_t confirm_e2i (const char *external)
 {
 	if (external != NULL)
 	{
-		if (! strcmp (external, "yes"))
+		if (! y_stricmp (external, "yes"))
 			return YC_YES;
-		if (! strcmp (external, "no"))
+		if (! y_stricmp (external, "no"))
 			return YC_NO;
-		if (! strcmp (external, "ask"))
+		if (! y_stricmp (external, "ask"))
 			return YC_ASK;
-		if (! strcmp (external, "ask_once"))
+		if (! y_stricmp (external, "ask_once"))
 			return YC_ASK_ONCE;
 	}
 	return YC_ASK;
