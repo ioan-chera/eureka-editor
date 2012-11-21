@@ -218,6 +218,7 @@ static void Determine_HomeDir(const char *argv0)
 	{
 #ifdef WIN32
 	// FIXME: check for %appdata% ??
+	//        also, fallback should be EXE path + "/local"
 
 	home_dir = GetExecutablePath(argv0);
 
