@@ -106,6 +106,8 @@ public:
 
 	void InvalidatePanelObj();
 	void UpdatePanelObj();
+
+	void UnselectPics();
 };
 
 

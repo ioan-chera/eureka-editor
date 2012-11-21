@@ -134,6 +134,8 @@ UI_MainWin::~UI_MainWin()
 
 void UI_MainWin::NewEditMode(char mode)
 {
+	UnselectPics();
+
 	thing_box->hide();
 	 line_box->hide();
 	  sec_box->hide();
@@ -264,6 +266,13 @@ void UI_MainWin::UpdatePanelObj()
 
 ///!!	if (rad_box->visible())
 ///!!		rad_box->UpdateField();
+}
+
+
+void UI_MainWin::UnselectPics()
+{
+	line_box->UnselectPics();
+	 sec_box->UnselectPics();
 }
 
 

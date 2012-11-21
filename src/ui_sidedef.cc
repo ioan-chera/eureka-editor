@@ -432,6 +432,9 @@ void UI_SideBox::SetObj(int index)
 	UpdateAddDel();
 	UpdateField();
 
+	if (obj < 0)
+		UnselectPics();
+
 	redraw();
 }
 
@@ -536,6 +539,14 @@ void UI_SideBox::UpdateHiding(bool hide)
 		m_pic->show();
 		u_pic->show();
 	}
+}
+
+
+void UI_SideBox::UnselectPics()
+{
+	l_pic->Selected(false);
+	m_pic->Selected(false);
+	u_pic->Selected(false);
 }
 
 

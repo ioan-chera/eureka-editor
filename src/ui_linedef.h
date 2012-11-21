@@ -74,6 +74,8 @@ public:
 	void SetTexture(const char *tex_name, int e_state);
 	void SetLineType(int new_type);
 
+	void UnselectPics();
+
 private:
 	void CalcLength();
 

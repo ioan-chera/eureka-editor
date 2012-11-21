@@ -461,6 +461,9 @@ void UI_LineBox::SetObj(int _index, int _count)
 
 	UpdateField();
 
+	if (obj < 0)
+		UnselectPics();
+
 	redraw();
 }
 
@@ -529,6 +532,13 @@ void UI_LineBox::UpdateSides()
 {
 	front->UpdateField();
 	 back->UpdateField();
+}
+
+
+void UI_LineBox::UnselectPics()
+{
+	front->UnselectPics();
+	 back->UnselectPics();
 }
 
 

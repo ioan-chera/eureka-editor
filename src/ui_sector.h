@@ -71,6 +71,8 @@ public:
 	void SetTexture(const char *tex_name, int e_state);
 	void SetSectorType(int new_type);
 
+	void UnselectPics();
+
 private:
 	void AdjustHeight(s16_t *h, int delta);
 	void AdjustLight (s16_t *L, int delta);

@@ -524,6 +524,9 @@ void UI_SectorBox::SetObj(int _index, int _count)
 
 	UpdateField();
 
+	if (obj < 0)
+		UnselectPics();
+
 	redraw();
 }
 
@@ -594,6 +597,13 @@ void UI_SectorBox::UpdateField(int field)
 			tag->value("");
 		}
 	}
+}
+
+
+void UI_SectorBox::UnselectPics()
+{
+	f_pic->Selected(false);
+	c_pic->Selected(false);
 }
 
 

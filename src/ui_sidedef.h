@@ -61,6 +61,8 @@ public:
 
 	void UpdateField();
 
+	void UnselectPics();
+
 private:
 	void UpdateLabel();
 	void UpdateHiding(bool hide);
