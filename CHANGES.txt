@@ -2,9 +2,13 @@
 CHANGES IN Eureka 0.xx
 ======================
 
-+  reload the wad/map after building the nodes (no longer exit)
-
 +  multi-select : LMB toggles each object (before needed CTRL key)
+
++  can click on a texture in the LineDef or Sector panels, it becomes
+   highlighted, the browser is opened (if not already), and only
+   the selected parts are changed when clicking in the browser.
+
++  reload the wad/map after building the nodes (no longer exit)
 
 -  thing panel: radial arrow buttons for setting the angle
 
