@@ -138,7 +138,7 @@ static int parse_environment_vars ()
 /*
  *  play a fascinating tune
  */
-void Beep ()
+void Beep()
 {
 	fl_beep();
 }
@@ -296,102 +296,6 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-int Main_key_handler(int event)
-{
-	if (event != FL_SHORTCUT)
-		return 0;
-
-	switch (Fl::event_key())
-	{
-		case FL_Escape:
-			fl_beep();  // FIXME
-			return 1;
-
-		case FL_F+1:   // F1 = HELP
-			// TODO
-			return 1;
-
-		default: break;
-	}
-
-	return 0;
-}
-
-
-static void InitFLTK()
-{
-	/*
-	 *  Create the window
-	 */
-	Fl::visual(FL_RGB);
-
-	// FIXME: CONFIG OPTION
-	bool alternate_look = false;
-
-	if (! alternate_look)
-	{
-		Fl::background(236, 232, 228);
-		Fl::background2(255, 255, 255);
-		Fl::foreground(0, 0, 0);
-
-		Fl::scheme("plastic");
-	}
-
-#ifdef UNIX
-	Fl_File_Icon::load_system_icons();
-#endif
-
-
-	int screen_w = Fl::w();
-	int screen_h = Fl::h();
-
-	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
-
-	KF = 1;
-#if 0  // TODO
-	KF = 0;
-	if (screen_w >= 1000) KF = 1;
-	if (screen_w >= 1180) KF = 2;
-#endif
-
-	KF_fonth = (14 + KF * 2);
-
-
-	main_win = new UI_MainWin();
-
-	// show window (pass some dummy arguments)
-	{
-		int   argc = 1;
-		char *argv[2];
-
-		argv[0] = StringDup("Eureka.exe");
-		argv[1] = NULL;
-
-		main_win->show(argc, argv);
-	}
-
-	// kill the stupid bright background of the "plastic" scheme
-	if (! alternate_look)
-	{
-		delete Fl::scheme_bg_;
-		Fl::scheme_bg_ = NULL;
-
-		main_win->image(NULL);
-	}
-
-    Fl::add_handler(Main_key_handler);
-
-	main_win->ShowBrowser(0);
-
-	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
-}
-
-
-static void TermFLTK()
-{
-}
-
-
 const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
 {
 	if (! iwad_name)
@@ -494,7 +398,12 @@ static const char * DetermineIWAD()
 			return path;
 	}
 
-	// 3. look in current directory
+	// 3. look in various semi-standard places
+
+	// TODO
+
+
+	// 4. look in current directory
 
 	path = SearchDirForIWAD(".", Iwad);
 	if (path)
@@ -568,6 +477,103 @@ static const char * DetermineLevel()
 	// cannot get here
 	return "XXX";
 }
+
+
+int Main_key_handler(int event)
+{
+	if (event != FL_SHORTCUT)
+		return 0;
+
+	switch (Fl::event_key())
+	{
+		case FL_Escape:
+			fl_beep();  // FIXME
+			return 1;
+
+		case FL_F+1:   // F1 = HELP
+			// TODO
+			return 1;
+
+		default: break;
+	}
+
+	return 0;
+}
+
+
+static void InitFLTK()
+{
+	/*
+	 *  Create the window
+	 */
+	Fl::visual(FL_RGB);
+
+	// FIXME: CONFIG OPTION
+	bool alternate_look = false;
+
+	if (! alternate_look)
+	{
+		Fl::background(236, 232, 228);
+		Fl::background2(255, 255, 255);
+		Fl::foreground(0, 0, 0);
+
+		Fl::scheme("plastic");
+	}
+
+#ifdef UNIX
+	Fl_File_Icon::load_system_icons();
+#endif
+
+
+	int screen_w = Fl::w();
+	int screen_h = Fl::h();
+
+	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
+
+	KF = 1;
+#if 0  // TODO
+	KF = 0;
+	if (screen_w >= 1000) KF = 1;
+	if (screen_w >= 1180) KF = 2;
+#endif
+
+	KF_fonth = (14 + KF * 2);
+
+
+	main_win = new UI_MainWin();
+
+	// show window (pass some dummy arguments)
+	{
+		int   argc = 1;
+		char *argv[2];
+
+		argv[0] = StringDup("Eureka.exe");
+		argv[1] = NULL;
+
+		main_win->show(argc, argv);
+	}
+
+	// kill the stupid bright background of the "plastic" scheme
+	if (! alternate_look)
+	{
+		delete Fl::scheme_bg_;
+		Fl::scheme_bg_ = NULL;
+
+		main_win->image(NULL);
+	}
+
+    Fl::add_handler(Main_key_handler);
+
+	main_win->ShowBrowser(0);
+
+	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
+}
+
+
+static void TermFLTK()
+{
+}
+
 
 
 // used for 'New Map' / 'Open Map' functions too
