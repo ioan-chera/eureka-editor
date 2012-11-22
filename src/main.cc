@@ -398,10 +398,31 @@ static const char * DetermineIWAD()
 			return path;
 	}
 
-	// 3. look in various semi-standard places
+	// 3. look in various standard places
 
-	// TODO
+	/* WISH: check the Steam folder(s) for WIN32 */
 
+	static const char *iwad_places[] =
+	{
+#ifdef WIN32
+		"c:/doom",
+		"c:/doom2",
+		"c:/doom95",
+#else
+		"/usr/share/games/doom",
+		"/usr/share/doom",
+		"/usr/local/share/games/doom",
+		"/usr/local/games/doom",
+#endif
+		NULL
+	};
+
+	for (int i = 0 ; iwad_places[i] ; i++)
+	{
+		path = SearchDirForIWAD(iwad_places[i], Iwad);
+		if (path)
+			return path;
+	}
 
 	// 4. look in current directory
 
