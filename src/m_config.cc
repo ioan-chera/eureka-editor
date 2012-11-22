@@ -43,6 +43,7 @@
 
 // config item variables
 
+extern bool escape_key_quits;
 extern bool leave_offsets_alone;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
@@ -325,6 +326,15 @@ static const opt_desc_t options[] =
 		"Default upper texture",
 		NULL,
 		default_upper_texture
+	},
+
+	{	"escape_key_quits",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"The ESC key will quit Eureka",
+		NULL,
+		&escape_key_quits
 	},
 
 	{	"leave_offsets_alone",

@@ -58,6 +58,7 @@ Editor_State_c edit;
 
 // config items
 bool same_mode_clears_selection = false; 
+bool escape_key_quits = false;
 
 
 Editor_State_c::Editor_State_c()
@@ -408,7 +409,7 @@ static bool Browser_Key(int key, keymod_e mod)
 bool Global_Key(int key, keymod_e mod)
 {
 	// [ESC]: quit
-	if (key == FL_Escape)
+	if (key == FL_Escape && escape_key_quits)
 	{
 		CMD_Quit();
 	}
