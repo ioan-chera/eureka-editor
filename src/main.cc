@@ -102,6 +102,8 @@ bool Replacer = false;
 const char *Iwad = NULL;
 const char *Pwad = NULL;
 
+std::vector< const char * > ResourceWads;
+
 int scroll_less   = 10;
 int scroll_more   = 90;
 int sprite_scale  = 100;
@@ -767,6 +769,7 @@ int main(int argc, char *argv[])
 	LoadDefinitions("ports", Port_name);
 
 
+	// Load the IWAD (read only)
 	base_wad = Wad_file::Open(iwad_name, 'r');
 	if (! base_wad)
 		FatalError("Failed to open IWAD: %s\n", iwad_name);
@@ -775,8 +778,22 @@ int main(int argc, char *argv[])
 
 
 
-	// TODO!!!  open resource wads (-merge option)
+	// Load all resource wads
+	for (int i = 0 ; i < (int)ResourceWads.size() ; i++)
+	{
+		if (! FileExists(ResourceWads[i]))
+			FatalError("Resource does not exist: %s\n", ResourceWads[i]);
 
+		Wad_file *wad = Wad_file::Open(ResourceWads[i], 'r');
+
+		if (! wad)
+			FatalError("Cannot load resource: %s\n", ResourceWads[i]);
+
+		MasterDir_Add(wad);
+	}
+
+
+	// Load the PWAD to edit
 	if (Pwad)
 	{
 		if (! FileExists(Pwad))

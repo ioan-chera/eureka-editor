@@ -210,6 +210,8 @@ extern char  default_upper_texture[8 + 1]; // For new linedefs
 extern const char *Iwad; // Name of the iwad
 extern const char *Pwad;
 
+extern std::vector< const char * > ResourceWads;
+
 extern int   show_help;     // Print usage message and exit.
 extern int   show_version;  // Print version info and exit.
 

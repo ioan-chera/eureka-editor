@@ -204,17 +204,14 @@ static const opt_desc_t options[] =
 		&Pwad
 	},
 
-// TODO
-#if 0
 	{	"merge",
 		0,
 		OPT_STRING_LIST,
 		"h",
 		"Resource file to load",
 		"<file>",
-		&PatchWads
+		&ResourceWads
 	},
-#endif
 
 	{	"port",
 		"p",
