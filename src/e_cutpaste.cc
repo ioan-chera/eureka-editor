@@ -1006,8 +1006,8 @@ bool CMD_Delete(bool keep_things, bool keep_unused)
 
 success:
 	edit.Selected->clear_all();
-	edit.highlighted.nil();
-	edit.split_line.nil();
+	edit.highlighted.clear();
+	edit.split_line.clear();
 
 	UpdateHighlight();
 	return true;

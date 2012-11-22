@@ -772,7 +772,7 @@ void UI_Canvas::HighlightForget()
 	if (highlight.is_nil())
 		return;
 	
-	highlight.nil();
+	highlight.clear();
 	redraw();
 }
 

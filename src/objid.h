@@ -35,30 +35,26 @@ typedef s16_t  obj_no_t;
 
 #define OBJ_NO_NONE    -1
 
-#define is_obj(n)      ((n) >= 0)
+#define is_obj(n)   ((n) >= 0)
 
 class Objid
 {
-public :
+public:
     obj_type_e type;
     obj_no_t   num;
 
     Objid () { num = -1; type = OBJ_NONE; }
     Objid (obj_type_e t, obj_no_t n) { type = t; num = n; }
 
+    void clear () { num = -1; type = OBJ_NONE; }
+
     bool operator== (const Objid& other) const
     {
-      return other.type == type && other.num == num;
+      return (other.type == type) && (other.num == num);
     }
-    bool _is_linedef () const { return type == OBJ_LINEDEFS && num >= 0; }
-    bool _is_sector  () const { return type == OBJ_SECTORS  && num >= 0; }
-    bool _is_thing   () const { return type == OBJ_THINGS   && num >= 0; }
-    bool _is_vertex  () const { return type == OBJ_VERTICES && num >= 0; }
     bool is_nil     () const { return num <  0 || type == OBJ_NONE; }
     bool operator() () const { return num >= 0 && type != OBJ_NONE; } 
-    void nil () { num = -1; type = OBJ_NONE; }
 };
-
 
 #endif  /* __EUREKA_OBJ_ID_H__ */
 

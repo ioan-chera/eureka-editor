@@ -316,12 +316,12 @@ public :
 
 	Close_obj()
 	{
-		nil();
+		clear();
 	}
 
-	void nil()
+	void clear()
 	{
-		obj.nil();
+		obj.clear();
 		distance = 9e9;
 		radius   = (1 << 30);
 		inside   = false;
@@ -404,7 +404,7 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
 		closest.obj.num = OppositeLineDef(closest.obj.num, +1, NULL);
 
 		if (closest.obj.num < 0)
-			closest.nil();
+			closest.clear();
 	}
 #endif
 }

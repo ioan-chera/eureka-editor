@@ -99,7 +99,7 @@ static int zoom_fit()
 
 static void UpdateSplitLine(int drag_vert = -1)
 {
-	edit.split_line.nil();
+	edit.split_line.clear();
 
 	// usually disabled while dragging stuff
 	if (main_win->canvas->isDragActive() && edit.drag_single_vertex < 0)
@@ -183,7 +183,7 @@ void UpdateHighlight()
 
 
 	// find the object to highlight
-	edit.highlighted.nil();
+	edit.highlighted.clear();
 
 	if (edit.pointer_in_window &&
 	    (!dragging || edit.drag_single_vertex >= 0))
@@ -194,7 +194,7 @@ void UpdateHighlight()
 		if (edit.drag_single_vertex >= 0 && edit.highlighted() &&
 			edit.drag_single_vertex == edit.highlighted.num)
 		{
-			edit.highlighted.nil();
+			edit.highlighted.clear();
 		}
 	}
 
@@ -251,8 +251,8 @@ void CMD_ChangeEditMode(char mode)
 			return;
 	}
 
-	edit.highlighted.nil();
-	edit.split_line.nil();
+	edit.highlighted.clear();
+	edit.split_line.clear();
 	edit.did_a_move = false;
 
 	if (prev_type != edit.obj_type)
@@ -1044,7 +1044,7 @@ void EditorMouseRelease()
 	is_butl = false;
 
 	Objid click_obj(edit.clicked);
-	edit.clicked.nil();
+	edit.clicked.clear();
 
 	bool was_did_move = edit.did_a_move;
 	edit.did_a_move = false;
@@ -1246,7 +1246,7 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 		}
 
 		// forget the highlight
-		edit.highlighted.nil();
+		edit.highlighted.clear();
 		main_win->canvas->HighlightForget();
 		return;
 	}
@@ -1275,11 +1275,11 @@ void Editor_Init()
     edit.show_things_squares = false;
     edit.show_things_sprites = true;
 
-    edit.clicked.nil();
+    edit.clicked.clear();
     edit.click_ctrl          = 0;
     edit.did_a_move          = false;
-    edit.highlighted.nil();
-	edit.split_line.nil();
+    edit.highlighted.clear();
+	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 
     edit.Selected = new selection_c(edit.obj_type);
