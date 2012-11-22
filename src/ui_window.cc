@@ -77,7 +77,7 @@ UI_MainWin::UI_MainWin() :
 		menu_bar = Menu_Create(0, 0, w()-3 - panel_W, 28+KF*3);
 		add(menu_bar);
 
-#ifndef MACOSX
+#ifndef __APPLE__
 		cy += menu_bar->h();
 #endif
 	}

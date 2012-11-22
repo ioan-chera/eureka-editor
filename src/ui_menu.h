@@ -21,12 +21,11 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-#ifdef MACOSX
-Fl_Sys_Menu_Bar
+#ifdef __APPLE__
+Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h);
 #else
-Fl_Menu_Bar
+    Fl_Menu_Bar * Menu_Create(int x, int y, int w, int h);
 #endif
-* Menu_Create(int x, int y, int w, int h);
 
 void Menu_SetMode(char mode);
 

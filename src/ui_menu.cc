@@ -396,7 +396,7 @@ static Fl_Menu_Item menu_items[] =
 };
 
 
-#ifdef MACOSX
+#ifdef __APPLE__
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);

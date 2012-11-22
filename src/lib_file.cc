@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #endif
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include <sys/param.h>
 #include <mach-o/dyld.h> // _NSGetExecutablePath
 #endif
@@ -566,7 +566,7 @@ const char *GetExecutablePath(const char *argv0)
 	StringFree(path);
 #endif
 
-#ifdef MACOSX
+#ifdef __APPLE__
 	/*
 	   from http://www.hmug.org/man/3/NSModule.html
 
@@ -596,7 +596,7 @@ const char *GetExecutablePath(const char *argv0)
 	// fallback method: use argv[0]
 	path = StringDup(argv0);
 
-#ifdef MACOSX
+#ifdef __APPLE__
 	// FIXME: check if _inside_ the .app folder
 #endif
 
