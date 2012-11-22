@@ -10,6 +10,8 @@ CHANGES IN Eureka 0.xx
 
 +  reload the wad/map after building the nodes (no longer exit)
 
+-  ESC key no longer quits
+
 -  thing panel has radial arrow buttons for setting the angle
 
 -  allow running locally (without a 'make install')
@@ -25,6 +27,7 @@ CHANGES IN Eureka 0.xx
 -  config: new syntax for config files, no '=' required
 -  config: added 'leave_offsets_alone' var
 -  config: added 'new_islands_are_void' var
+-  config: added 'escape_key_quits' var
 
 -  Browser: faster scrolling with the mouse wheel
 
