@@ -31,6 +31,8 @@ General
    provide words for the buttons (like "Quit Without Saving").
 
 +  CHECK screen
+   -  linedefs without right side
+   -  unclosed sectors
    -  can remove unused Vertices, SideDefs and Sectors
 
 
@@ -69,40 +71,41 @@ ______________________________________________________________________
 General
 -------
 
++  configurable grid colors, 
+   IDEA: grid has separate color for 64x64 flat alignment
+
++  on error, ability to save/export current map
+   [unless error was in save code]
+
++  configurable list of iwad names to look for
+
+
 -  fix: [ ] keys not working when 3D preview is on
 
 ?  fix: SHIFT + move mouse = keep current highlight
 
+-  support DOOMWADPATH for finding iwads (see Chocolate Doom)
+
 -  by default, write logs to ~/.eureka/LOGS.txt
    save early logs in memory
-
--  IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
-
--  uppercase the level lump name (Level_name global var)
-
--  don't save a map at the _END_ of wad file
-   (prefer existing location, or prefer before existing level where
-    the name is <, otherwise at beginning).
 
 -  make sure Load/Export wad filename not already in master_dir
 
 -  grid drawing too slow when small step and zoomed out
 
-+  configurable grid colors, 
-   IDEA: grid has separate color for 64x64 flat alignment
-
 -  a check/fix pass for LoadLevel()
 
-+  on error, ability to save/export current map
-   [unless error was in save code]
+-  ability to use an external node builder
 
-+  can set iwad names to look for in the/a config file.
+-  don't save a map at the _END_ of wad file
+   (prefer existing location, or prefer before existing level where
+    the name is <, otherwise at beginning).
+
+-  uppercase the level lump name (Level_name global var)
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
 
--  support DOOMWADPATH for finding iwads (see Chocolate Doom)
-
--  ability to use an external node builder
+IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
 
 
 
@@ -141,25 +144,9 @@ Coding
 Editing
 -------
 
-++  when dragging a shape next to existing geometry, highlight
-    vertices and linedefs which would get merged, and implement
-    that merging.
-
-++  have a special mode for the Thing/Sector/LineDef panels where
-    the user can set the default values.  Mode is indicated by the
-    title background being blue and title says "Default Properties".
-    Perhaps activated by right clicking the title (and/or a key).
-
--  IDEA: merge vertex and linedef modes
-
--  figure out how 'n' next / 'p' prev functions should work
-
--  ability to move and/or zoom map to show selected object(s)
-   [can zoom OUT, but only zoom IN if multiple and very small]
-
--  when highlighting a sector, draw the things in the same color as
-   the sector is highlighted, but not as bright.  Because many sector
-   functions will affect things too -- make it obvious to the user.
++  when dragging a shape next to existing geometry, highlight
+   vertices and linedefs which would get merged, and implement
+   that merging.
 
 !!  handle self-referencing linedefs in auto create/split sector
 
@@ -171,24 +158,28 @@ Editing
    Example: MAP01 back of line #13 hits line #189
             (should hit either #104 or #360)
 
-+  fix PointOutsideOfMap() code to handle places where the point
-   cannot "see" the surrounding void space.
-   
-   TraceLineLoop on the linedef to the right, if faces_outward
-   then test upto 32 lines (OppositeLineDef) to see if any can
-   see the void.
-
-   if geometry is broken : special result.
-
-?  SHIFT + SPACE = no auto create/split sectors
-
--  for the "Edit -> Paste" menu, turn the cursor into crosshairs
++  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
--  implement Edit/Move (Scale, Rotate) operations which pop up a
++  implement Edit/Move (Scale, Rotate) operations which pop up a
    dialog asking for the offset (scale, angle) to apply.
 
-+  disallow insert of new linedef if it would overlap or cross
++  when copy-n-paste and a real sector is removed (or pasting into
+   a different map or wad) : we get linedefs with "-" as middle texture.
+   Handle this better.
+
++  when one vertex of a linedef is moved (and not the other)
+   update the X offset on the appropriate side (right side for start,
+   left side for end vertex).
+
+-  ability to move and/or zoom map to show selected object(s)
+   [can zoom OUT, but only zoom IN if multiple and very small]
+
+-  when highlighting a sector, draw the things in the same color as
+   the sector is highlighted, but not as bright.  Because many sector
+   functions will affect things too -- make it obvious to the user.
+
+-  disallow insert of new linedef if it would overlap or cross
    an existing linedef (or touch an existing vertex).
    [overridden when SHIFT is pressed, but no auto sectoring then]
 
@@ -200,32 +191,44 @@ Editing
 
    __IDEA__ the 'c' key in linedef mode to fix crossing / overlaps
 
-+  quantization function: prevent linedefs from overlapping / crossing
+-  quantization function: prevent linedefs from overlapping / crossing
+
+-  when moving a sector and the camera is inside it, move camera too
+
+-  Multi-select : if CTRL is pressed, don't clear selection after drag
+
+-  show a red '*' next to map name (info_bar AND window title)
+   when MadeChanges = 1
+   [perhaps make map name DARK_RED when Replacer is true]
+
+-  'X' : exchange object numbers
+
+-  'm' for vertices : merge into one
+   'm' for linedefs? (especially a connected sequence of lines)
+
+-  fix PointOutsideOfMap() code to handle places where the point
+   cannot "see" the surrounding void space.
+   
+   TraceLineLoop on the linedef to the right, if faces_outward
+   then test upto 32 lines (OppositeLineDef) to see if any can
+   see the void.
+
+   if geometry is broken : special result.
+
+??  have a special mode for the Thing/Sector/LineDef panels where
+    the user can set the default values.  Mode is indicated by the
+    title background being blue and title says "Default Properties".
+    Perhaps activated by right clicking the title (and/or a key).
+
+?  figure out how 'n' next / 'p' prev functions should work
+
+?  SHIFT + SPACE = no auto create/split sectors
 
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
       "best" quantization.
 
-+  when one vertex of a linedef is moved (and not the other)
-   update the X offset on the appropriate side (right side for start,
-   left side for end vertex).
-
--  Multi-select : if CTRL is pressed, don't clear selection after drag
-
--  when moving a sector and the camera is inside it, move camera too
-
-?  show a red '*' next to map name (info_bar AND window title)
-   when MadeChanges = 1
-   [perhaps make map name DARK_RED when Replacer is true]
-
--  when copy-n-paste and a real sector is removed (or pasting into
-   a different map or wad) : we get linedefs with "-" as middle texture.
-   Handle this better.
-
--  CTRL-X : exchange object numbers
-
--  'm' for vertices : merge into one
-   'm' for linedefs? (especially a connected sequence of lines)
+IDEA: merge vertex and linedef modes
 
 IDEA: a config item to make the "simple" grid occur when grid-snapping
       and the "normal" grid occur in FREE mode.
@@ -246,8 +249,6 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 -  moving up/down with RMB should not disable gravity when change
    is small
 
--  IDEA: a key (or mouse button) to toggle "grab mouse" mode
-
 -  able to drag things around
    - raise floors?
    - move vertices?
@@ -255,14 +256,16 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 
 -  ability to drag the camera (on 2D viewport)
 
--  IDEA: animation mode, render continuously and show any lighting
-         effects and animated / scrolling textures and sprites
-
 -  make it into a proper widget (occupy same space as Canvas)
 
 ?  an info bar:  X  Y  Z  ANG
 
 -  rotated sprites
+
+IDEA: a key (or mouse button) to toggle "grab mouse" mode
+
+IDEA: animation mode, render continuously and show any lighting
+      effects and animated / scrolling textures and sprites
 
 
 
@@ -277,7 +280,7 @@ Browser
 
 -  no-pic mode for textures and flats
 
-?  search box: ',' for AND, '/' for OR
+-  search box: ',' for AND, '/' for OR
 
 
 
