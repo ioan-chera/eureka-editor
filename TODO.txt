@@ -6,6 +6,16 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
++  resource wads via -merge option
+
+-  MacOSX:
+   (c) handle the -psnXXX argument (see SDL_main.m)
+
+   (d) sort out CMD key (seems to map to META key)
+       -  if the key is a menu shortcut, allow menu to eat it
+       -  otherwise, eat it before distributing to Editor_Key (etc)
+       -  develop a policy for modifier usage
+
 
 
 Documentation
@@ -15,9 +25,18 @@ Documentation
 
 +  MAIN PAGE: put a screenshot there (half size)
 
++  new page for configuration system
+   (a) command line usage
+   (b) command line args
+   (c) ~/.eureka/config.cfg
+   (d) general syntax
+   (e) list of supported vars
+
 -  somewhere: require at least 800x600 resolution, two button mouse
 
 -  KEY CHANGES
+   normal  : MMB for insert
+
    3d mode : 's' --> 'o' (objects)
              'w' --> 'v'
              added WASD for movement (fine with SHIFT)

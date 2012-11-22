@@ -48,6 +48,7 @@ Editing
 -------
 
 
+
 3D View
 -------
 
@@ -71,13 +72,16 @@ ______________________________________________________________________
 General
 -------
 
-+  configurable grid colors, 
-   IDEA: grid has separate color for 64x64 flat alignment
++  by default, write logs to ~/.eureka/LOGS.txt
+   save early logs in memory
+
++  configurable list of iwad names to look for
 
 +  on error, ability to save/export current map
    [unless error was in save code]
 
-+  configurable list of iwad names to look for
++  configurable grid colors, 
+   IDEA: grid has separate color for 64x64 flat alignment
 
 
 -  fix: [ ] keys not working when 3D preview is on
@@ -85,9 +89,6 @@ General
 ?  fix: SHIFT + move mouse = keep current highlight
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
-
--  by default, write logs to ~/.eureka/LOGS.txt
-   save early logs in memory
 
 -  make sure Load/Export wad filename not already in master_dir
 
