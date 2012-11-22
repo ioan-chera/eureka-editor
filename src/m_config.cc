@@ -420,166 +420,133 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 	char *name  = NULL;
 	char *value = NULL;
 
-	// Skip leading whitespace
+	// skip leading whitespace
 	while (isspace (*p))
 		p++;
 
-	// Skip comments
+	// skip comments
 	if (*p == '#')
 		return 0;
 
-	// Remove trailing newline
+	// remove trailing newline and whitespace
 	{
-		size_t len = strlen (p);
-		if (len >= 1 && p[len - 1] == '\n')
+		int len = (int)strlen(p);
+
+		while (len > 0 && isspace(p[len - 1]))
+		{
 			p[len - 1] = 0;
+			len--;
+		}
 	}
 
-	// Skip empty lines
+	// skip empty lines
 	if (*p == 0)
 		return 0;
 
-	// Make <name> point on the <name> field
+	// grab the name
 	name = p;
 	while (y_isident (*p))
 		p++;
 
-#if 0
-	if (*p != 0)
+	if (! isspace(*p))
 	{
-		// Mark the end of the option name
-		*p++ = 0;
+		LogPrintf("WARNING: %s(%u): bad line, no space after keyword.\n", basename, lnum);
+		return 0;
 	}
-#endif
+
+	*p++ = 0;
+
+	// find the option value (occupies rest of the line)
+	while (isspace(*p))
+		p++;
 
 	if (*p == 0)
 	{
-		LogPrintf("WARNING: %s(%u): missing '=', skipping\n", basename, lnum);
+		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename, lnum);
 		return 0;
 	}
-	if (*p == '=')
-	{
-		*p = 0;
-	}
-	else
-	{
-		// Mark the end of the option name
-		*p = 0;
-		p++;
-		// Skip blanks after the option name
-		while (isspace ((unsigned char) *p))
-			p++;
-		if (*p != '=')
-		{
-			LogPrintf("WARNING: %s(%u): missing '=', skipping\n",
-					  basename, lnum);
-			return 0;
-		}
-	}
-	p++;
 
-	// First parameter : <value> points on the first character.
-	// Put a NUL at the end. If there is a second parameter, holler.
-	while (isspace ((unsigned char) *p))
-		p++;
 	value = p;
 
-	{
-		unsigned char *p2 = (unsigned char *) value;
-		while (*p2 != 0 && ! isspace (*p2))
-			p2++;
-		if (*p2 != 0)  // There's trailing whitespace after 1st parameter
-		{
-			for (unsigned char *p3 = p2; *p3 != 0; p3++)
-				if (! isspace (*p3))
-				{
-					LogPrintf("WARNING: %s(%u): extraneous argument\n",
-							  basename, lnum);
-					break;
-				}
-		}
-		*p2 = 0;
-	}
+	// find the option keyword
+	const opt_desc_t * opt;
 
-	// find the option
-	const opt_desc_t *o;
-
-	for (o = options ; ; o++)
+	for (opt = options ; ; opt++)
 	{
-		if (o->opt_type == OPT_END)
+		if (opt->opt_type == OPT_END)
 		{
 			LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
 					  basename, lnum, name);
 			return 0;
 		}
 
-		if (! o->long_name || strcmp(name, o->long_name) != 0)
+		if (! opt->long_name || strcmp(name, opt->long_name) != 0)
 			continue;
 
 		// pre-pass options (like --help) don't make sense in a config file
-		if (strchr(o->flags, '1'))
+		if (strchr(opt->flags, '1'))
 		{
 			LogPrintf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
 			          basename, lnum, name);
 			return 0;
 		}
 
-		switch (o->opt_type)
-		{
-			case OPT_BOOLEAN:
-				if (y_stricmp(value, "no")    == 0 ||
-					y_stricmp(value, "false") == 0 ||
-					y_stricmp(value, "off")   == 0 ||
-					y_stricmp(value, "0")     == 0)
-				{
-					*((bool *) (o->data_ptr)) = false;
-				}
-				else  // anything else is TRUE
-				{
-					*((bool *) (o->data_ptr)) = true;
-				}
-				break;
-
-			case OPT_CONFIRM:
-				*((confirm_t *) o->data_ptr) = confirm_e2i (value);
-				break;
-
-			case OPT_INTEGER:
-				*((int *) (o->data_ptr)) = atoi (value);
-				break;
-
-			case OPT_STRINGBUF8:
-				strncpy ((char *) o->data_ptr, value, 8);
-				((char *) o->data_ptr)[8] = 0;
-				break;
-
-			case OPT_STRING:
-				*((char **) o->data_ptr) = StringDup(value);
-				break;
-
-			case OPT_STRING_LIST:
-				while (*value != 0)
-				{
-					char *v = value;
-					while (*v != 0 && ! isspace ((unsigned char) *v))
-						v++;
-
-					string_list_t * list = (string_list_t *)o->data_ptr;
-					list->push_back(StringDup(value, v - value));
-
-					while (isspace (*v))
-						v++;
-					value = v;
-				}
-				break;
-
-			default:
-				{
-					BugError("INTERNAL ERROR: unknown option type %d", (int) o->opt_type);
-					return -1;
-				}
-		}
+		// found it
 		break;
+	}
+
+	switch (opt->opt_type)
+	{
+		case OPT_BOOLEAN:
+			if (y_stricmp(value, "no")    == 0 ||
+				y_stricmp(value, "false") == 0 ||
+				y_stricmp(value, "off")   == 0 ||
+				y_stricmp(value, "0")     == 0)
+			{
+				*((bool *) (opt->data_ptr)) = false;
+			}
+			else  // anything else is TRUE
+			{
+				*((bool *) (opt->data_ptr)) = true;
+			}
+			break;
+
+		case OPT_CONFIRM:
+			*((confirm_t *) opt->data_ptr) = confirm_e2i (value);
+			break;
+
+		case OPT_INTEGER:
+			*((int *) (opt->data_ptr)) = atoi (value);
+			break;
+
+		case OPT_STRINGBUF8:
+			strncpy ((char *) opt->data_ptr, value, 8);
+			((char *) opt->data_ptr)[8] = 0;
+			break;
+
+		case OPT_STRING:
+			*((char **) opt->data_ptr) = StringDup(value);
+			break;
+
+		case OPT_STRING_LIST:
+			while (*value != 0)
+			{
+				char *v = value;
+				while (*v != 0 && ! isspace ((unsigned char) *v))
+					v++;
+
+				string_list_t * list = (string_list_t *)opt->data_ptr;
+				list->push_back(StringDup(value, v - value));
+
+				while (isspace (*v))
+					v++;
+				value = v;
+			}
+			break;
+
+		default:
+			BugError("INTERNAL ERROR: unknown option type %d", (int) opt->opt_type);
+			return -1;
 	}
 
 	return 0;  // OK

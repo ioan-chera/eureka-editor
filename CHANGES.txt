@@ -22,6 +22,7 @@ CHANGES IN Eureka 0.xx
 -  fixed pink-highlighted tagged sectors when line was off-screen
 
 -  config: can specify a boolean value on the command-line
+-  config: new syntax for config files, no '=' required
 -  config: added 'leave_offsets_alone' var
 -  config: added 'new_islands_are_void' var
 
