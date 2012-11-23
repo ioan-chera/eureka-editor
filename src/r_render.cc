@@ -1627,7 +1627,7 @@ bool Render3D_Key(int key, keymod_e mod)
 
 	// in general, ignore ALT keys
 	if (mod == KM_ALT)
-		return true;
+		return false;
 
 	if (key == FL_Left)
 	{
