@@ -2,7 +2,7 @@
 CHANGES IN Eureka 0.84
 ======================
 
-+  multi-select : LMB toggles each object (before needed CTRL key)
++  multi-select : LMB toggles each object (no need for CTRL key)
 
 +  can click on a texture in the LineDef or Sector panels, it becomes
    highlighted, the browser is opened (if not already), and only
@@ -26,7 +26,7 @@ CHANGES IN Eureka 0.84
 -  fixed state persistence to ignore unused vertices (etc)
 -  fixed inner sector getting defaults when closing simple loop
 -  fixed pink-highlighted tagged sectors when line was off-screen
--  fixed CMD key on MacOS X to not trigger non-menu commands
+-  fixed CMD key on MacOS X to only trigger menu commands
 
 -  config: can specify a boolean value on the command-line
 -  config: new syntax for config files, no '=' required

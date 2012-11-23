@@ -6,15 +6,9 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
-+  resource wads via -merge option
-
 -  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
-
-   (d) sort out CMD key (seems to map to META key)
-       -  if the key is a menu shortcut, allow menu to eat it
-       -  otherwise, eat it before distributing to Editor_Key (etc)
-       -  develop a policy for modifier usage
+       NOTE: probably needs integrating some of SDL's logic
 
 
 
@@ -51,8 +45,6 @@ Coding
 
 Editing
 -------
-
-+  sort out MMB for insert/rotate/scale
 
 I think the snap size for insert vertices should be a bit larger.
 Right now it's hard to get them on an angled line, even at the

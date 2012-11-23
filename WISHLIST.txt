@@ -13,7 +13,7 @@ General
 -------
 
 +  support resource wads
-   (a) -merge option for command line
+   (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
    (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
        [probably port and mod too] and ability to change them
