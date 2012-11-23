@@ -619,6 +619,10 @@ void Editor_Wheel(int delta, keymod_e mod)
 
 bool Editor_Key(int key, keymod_e mod)
 {
+	// in general, ignore ALT key
+	if (mod == KM_ALT)
+		return true;
+
 #if 0
 	// No (do it via menu) --> [F5]: pop up the "Preferences" menu
 

@@ -1614,8 +1614,20 @@ bool Render3D_Key(int key, keymod_e mod)
 	}
 
 	// strafing?
-	if (key == FL_Left  && mod == KM_ALT) key = '<';
-	if (key == FL_Right && mod == KM_ALT) key = '>';
+	if (key == FL_Left  && mod == KM_ALT)
+	{
+		key = '<';
+		mod = KM_none;
+	}
+	if (key == FL_Right && mod == KM_ALT)
+	{
+		key = '>';
+		mod = KM_none;
+	}
+
+	// in general, ignore ALT keys
+	if (mod == KM_ALT)
+		return true;
 
 	if (key == FL_Left)
 	{
