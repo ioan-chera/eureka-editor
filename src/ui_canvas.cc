@@ -1384,7 +1384,7 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keymod_e mod)
 	int dx2 = scale_start_x - scale_param.mid_x;
 	int dy2 = scale_start_y - scale_param.mid_y;
 
-	bool any_aspect = (mod == KM_SHIFT);
+	bool any_aspect = (mod == KM_ALT);
 	bool rotate     = (mod == KM_CTRL);
 
 	scale_param.rotate = 0;
