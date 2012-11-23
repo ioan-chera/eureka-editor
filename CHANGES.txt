@@ -1,5 +1,5 @@
 
-CHANGES IN Eureka 0.xx
+CHANGES IN Eureka 0.84
 ======================
 
 +  multi-select : LMB toggles each object (before needed CTRL key)
@@ -10,7 +10,11 @@ CHANGES IN Eureka 0.xx
 
 +  reload the wad/map after building the nodes (no longer exit)
 
++  implemented a -merge option for resource wads
+
 -  ESC key no longer quits
+
+-  plain MMB now inserts an object (like SPACE or INSERT key)
 
 -  thing panel has radial arrow buttons for setting the angle
 
@@ -22,6 +26,7 @@ CHANGES IN Eureka 0.xx
 -  fixed state persistence to ignore unused vertices (etc)
 -  fixed inner sector getting defaults when closing simple loop
 -  fixed pink-highlighted tagged sectors when line was off-screen
+-  fixed CMD key on MacOS X to not trigger non-menu commands
 
 -  config: can specify a boolean value on the command-line
 -  config: new syntax for config files, no '=' required
