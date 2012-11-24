@@ -23,7 +23,7 @@ Dependencies:
    package: zlib1g-dev
 
 5. XDG Utils
-   (only needed for installing the desktop and icon files)
+   (only needed for Linux, to install the desktop and icon files)
    package: xdg-utils
 
 
