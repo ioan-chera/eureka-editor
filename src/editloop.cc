@@ -234,6 +234,9 @@ void CMD_ChangeEditMode(char mode)
 {
 	obj_type_e prev_type = edit.obj_type;
 
+	if (mode == 'R')
+		mode = 'r';
+
 	// Set the object type according to the new mode.
 	switch (mode)
 	{
@@ -241,7 +244,7 @@ void CMD_ChangeEditMode(char mode)
 		case 'l': edit.obj_type = OBJ_LINEDEFS; break;
 		case 's': edit.obj_type = OBJ_SECTORS;  break;
 		case 'v': edit.obj_type = OBJ_VERTICES; break;
-		case 'R': edit.obj_type = OBJ_RADTRIGS; mode = 'r'; break;
+		case 'r': edit.obj_type = OBJ_RADTRIGS; break;
 
 		default:
 			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
