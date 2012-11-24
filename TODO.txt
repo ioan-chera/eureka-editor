@@ -42,19 +42,12 @@ Coding
 ------
 
 
-
 Editing
 -------
-
-I think the snap size for insert vertices should be a bit larger.
-Right now it's hard to get them on an angled line, even at the
-smaller grid sizes (16x16, 8x8 - smallest I commonly work with).
-
 
 
 Browser
 -------
-
 
 
 Renderer
