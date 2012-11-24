@@ -111,10 +111,7 @@ static void UpdateSplitLine(int drag_vert = -1)
 	if (edit.obj_type == OBJ_VERTICES && edit.pointer_in_window &&
 	    edit.highlighted.is_nil())
 	{
-		int new_x = grid.SnapX(edit.map_x);
-		int new_y = grid.SnapY(edit.map_y);
-
-		GetSplitLineDef(edit.split_line, new_x, new_y, edit.drag_single_vertex);
+		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)

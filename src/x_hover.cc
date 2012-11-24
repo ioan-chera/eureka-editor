@@ -678,6 +678,31 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 	get_split_linedef(closest, x, y, drag_vert);
 
 	o = closest.obj;
+
+	// don't highlight the line if the new vertex would snap onto
+	// the same coordinate as the start or end of the linedef, or
+	// would lie outside of the line's bounding box.
+	if (o() && grid.snap)
+	{
+		int snap_x = grid.SnapX(x);
+		int snap_y = grid.SnapY(y);
+
+		const LineDef * L = LineDefs[o.num];
+
+		int min_x = MIN(L->Start()->x, L->End()->x);
+		int min_y = MIN(L->Start()->y, L->End()->y);
+
+		int max_x = MAX(L->Start()->x, L->End()->x);
+		int max_y = MAX(L->Start()->y, L->End()->y);
+
+		if ( (L->Start()->x == snap_x && L->Start()->y == snap_y) ||
+			 (L->  End()->x == snap_x && L->  End()->y == snap_y) ||
+			 (x < min_x || x > max_x) ||
+			 (y < min_y || y > max_y) )
+		{
+			o.clear();
+		}
+	}
 }
 
 //--- editor settings ---
