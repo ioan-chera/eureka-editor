@@ -241,7 +241,7 @@ void CMD_ChangeEditMode(char mode)
 		case 'l': edit.obj_type = OBJ_LINEDEFS; break;
 		case 's': edit.obj_type = OBJ_SECTORS;  break;
 		case 'v': edit.obj_type = OBJ_VERTICES; break;
-		case 'r': edit.obj_type = OBJ_RADTRIGS; break;
+		case 'R': edit.obj_type = OBJ_RADTRIGS; mode = 'r'; break;
 
 		default:
 			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
@@ -638,7 +638,7 @@ bool Editor_Key(int key, keymod_e mod)
 
 	// [l], [s], [t], [v], [r]: switch mode
 	if (key == 't' || key == 'v' || key == 'l' ||
-		key == 's' || key == 'r')
+		key == 's' || key == 'R')
 	{
 		CMD_ChangeEditMode(key);
 	}
