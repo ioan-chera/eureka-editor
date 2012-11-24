@@ -419,10 +419,10 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int drag_vert)
 	// slack in map units
 	int mapslack = 1 + (int)ceil(8.0f / grid.Scale);
 
-	int lx = x - 2;
-	int ly = y - 2;
-	int hx = x + 2;
-	int hy = y + 2;
+	int lx = x - mapslack;
+	int ly = y - mapslack;
+	int hx = x + mapslack;
+	int hy = y + mapslack;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -680,8 +680,9 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 	o = closest.obj;
 
 	// don't highlight the line if the new vertex would snap onto
-	// the same coordinate as the start or end of the linedef, or
-	// would lie outside of the line's bounding box.
+	// the same coordinate as the start or end of the linedef.
+	// (I tried a bbox test here, but it's bad for axis-aligned lines)
+
 	if (o() && grid.snap)
 	{
 		int snap_x = grid.SnapX(x);
@@ -689,16 +690,8 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 		const LineDef * L = LineDefs[o.num];
 
-		int min_x = MIN(L->Start()->x, L->End()->x);
-		int min_y = MIN(L->Start()->y, L->End()->y);
-
-		int max_x = MAX(L->Start()->x, L->End()->x);
-		int max_y = MAX(L->Start()->y, L->End()->y);
-
 		if ( (L->Start()->x == snap_x && L->Start()->y == snap_y) ||
-			 (L->  End()->x == snap_x && L->  End()->y == snap_y) ||
-			 (x < min_x || x > max_x) ||
-			 (y < min_y || y > max_y) )
+			 (L->  End()->x == snap_x && L->  End()->y == snap_y) )
 		{
 			o.clear();
 		}
