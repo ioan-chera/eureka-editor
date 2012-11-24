@@ -1,5 +1,5 @@
 
-Eureka 0.81 README
+Eureka 0.84 README
 ==================
 
 by Andrew Apted    November 2012
@@ -33,9 +33,9 @@ See the INSTALL.txt document
 RUNNING
 
 You can run Eureka from the command line, or it can be run from
-the desktop menu (if your OS handles .desktop files the same way
-as Debian does).  Eureka will need to be able to find an IWAD to
-run, and the easiest way is to copy one to this directory:
+the desktop menu (if your OS handles .desktop files as per the
+XDG specs).  Eureka will need to be able to find an IWAD to run,
+and the easiest way is to copy one to this directory:
 
    ~/.eureka/iwads
 
@@ -72,8 +72,8 @@ RMB
 * scroll the map around (by dragging)
 
 MMB
-* drag to scale the selected objects
-* with SHIFT key: scale each axis independently
+* insert an object (same as SPACE or INSERT key)
+* with SHIFT key: scale the selected objects
 * with CTRL key: rotate objects
 
 wheel : zoom in or out
@@ -86,7 +86,7 @@ t : enter Thing mode
 l : enter Linedef mode 
 s : enter Sector mode 
 v : enter Vertex mode 
-r : enter RTS mode
+R : enter RTS mode
 
 b : toggle the Browser on or off
 
@@ -170,16 +170,19 @@ E : select sectors with same floor texture
 ----------
 
 (Cursor keys will move forward and back, turn left and right)
+(the WASD keys can also be used to move the camera)
 
 LMB : does not do anything yet 
 RMB : turn or move the camera (by dragging the mouse)
 wheel : move camera forwards or backwards
 
-w : walk, i.e. drop camera to ground + player's view height
+PGUP and PGDN : move camera up and down
 
-l : toggle lighting on or off 
-t : toggle texturing on or off 
-s : toggle sprites on or off
+g : toggle gravity (i.e. as if the player was on the ground)
+
+l : toggle lighting on or off
+t : toggle texturing on or off
+o : toggle objects on or off
 
 F5  : toggle low detail / high detail
 F11 : increase brightness (gamma)
