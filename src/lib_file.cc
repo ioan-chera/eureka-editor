@@ -570,7 +570,7 @@ const char *GetExecutablePath(const char *argv0)
 	/*
 	   from http://www.hmug.org/man/3/NSModule.html
 
-	   extern int _NSGetExecutablePath(char *buf, unsigned long *bufsize);
+	   extern int _NSGetExecutablePath(char *buf, uint32_t *bufsize);
 
 	   _NSGetExecutablePath copies the path of the executable
 	   into the buffer and returns 0 if the path was successfully
@@ -578,7 +578,7 @@ const char *GetExecutablePath(const char *argv0)
 	   enough, -1 is returned and the expected buffer size is
 	   copied in *bufsize.
 	 */
-	int pathlen = PATH_MAX * 2;
+	uint32_t pathlen = PATH_MAX * 2;
 
 	path = StringNew(pathlen+2);
 
