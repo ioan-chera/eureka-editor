@@ -11,6 +11,20 @@ General
        NOTE: probably needs integrating some of SDL's logic
 
 
+(c) can move end vertex of line onto start, WTF?
+
+
+int state   = Fl::event_state();
+        
+if(state == FL_ALT)
+  Editor_Wheel(0 + Fl::event_dy(), StateToMod(Fl::event_state()));
+else
+{
+  grid.orig_x += (int) ((double) ScrMaxX * Fl::event_dx() * scroll_less / 1000 / grid.Scale);
+  grid.orig_y -= (int) ((double) ScrMaxY * Fl::event_dy() * scroll_less / 1000 / grid.Scale);
+  edit.RedrawMap = 1;
+}
+
 
 Documentation
 -------------
@@ -33,9 +47,11 @@ Documentation
 
    3d mode : 's' --> 'o' (objects)
              'w' --> 'v'
+             'r' --> 'R'
              added WASD for movement (fine with SHIFT)
              'g' --> toggle gravity
              PGUP / PGDN can move up (merely document)
+
 
 
 Coding

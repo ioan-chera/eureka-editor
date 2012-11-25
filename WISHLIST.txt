@@ -12,6 +12,8 @@ ______________________________________________________________________
 General
 -------
 
++  make a debian package
+
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
@@ -87,6 +89,8 @@ General
 -  fix: [ ] keys not working when 3D preview is on
 
 ?  fix: SHIFT + move mouse = keep current highlight
+
+-  a way to slow down fake mouse wheels?
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
 
@@ -240,6 +244,8 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 -------
 
 -  handle very tall/thin window : letter box with black
+
+-  closed sectors have a see-through gap (gets bigger further away)
 
 +  being able to select stuff to modify:
    - things
