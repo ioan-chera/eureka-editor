@@ -9,6 +9,9 @@ DEB_DOCDIR = $(DEB_PREFIX)/share/doc/eureka
 
 DEB_FILES = debian/control
 
+all:
+	@echo "ERROR: target must be 'debbuild' or 'debclean'"
+
 debbuild:
 	install -d $(DEB_BASE)
 	install -d $(DEB_PREFIX)
