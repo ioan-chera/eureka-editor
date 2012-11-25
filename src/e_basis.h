@@ -105,9 +105,14 @@ public:
 		y = other->y;
 	}
 
-	bool Matches(int ox, int oy)
+	bool Matches(int ox, int oy) const
 	{
 		return (x == ox) && (y == oy);
+	}
+
+	bool Matches(const Vertex *other) const
+	{
+		return (x == other->x) && (y == other->y);
 	}
 };
 

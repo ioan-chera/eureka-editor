@@ -643,7 +643,8 @@ static void Insert_Vertex()
 			return;
 		}
 
-		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y))
+		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y) ||
+		    Vertices[first_sel]->Matches(Vertices[second_sel]))
 		{
 			Beep();
 			return;
@@ -674,7 +675,7 @@ static void Insert_Vertex()
 	{
 		Vertex *V = Vertices[first_sel];
 
-		if (V->x == new_x && V->y == new_y)
+		if (V->Matches(new_x, new_y))
 		{
 			edit.Selected->clear_all();
 			return;
