@@ -1,0 +1,45 @@
+#
+#   Makefile for Eureka  [DEBIAN package]
+#
+
+DEB_BASE = deb_root
+DEB_PREFIX = $(DEB_BASE)/usr
+DEB_DIR = $(DEB_PREFIX)/share/eureka
+DEB_DOCDIR = $(DEB_PREFIX)/share/doc/eureka
+
+DEB_FILES = debian/control
+
+debbuild:
+	install -d $(DEB_BASE)
+	install -d $(DEB_PREFIX)
+	install -d $(DEB_PREFIX)/bin
+	install -o root -m 755 $(PROGRAM) $(DEB_PREFIX)/bin/
+	#
+	install -d $(DEB_DIR)/games
+	install -d $(DEB_DIR)/common
+	install -d $(DEB_DIR)/ports
+	install -d $(DEB_DIR)/mods
+	#
+	install -o root -m 644 games/*.* $(DEB_DIR)/games
+	install -o root -m 644 common/*.* $(DEB_DIR)/common
+	install -o root -m 644 ports/*.* $(DEB_DIR)/ports
+#	install -o root -m 644 mods/*.*  $(INSTALL_DIR)/mods
+	#
+	# install -o root -m 644 misc/eureka.desktop $(DEB_PREFIX)/share/applications/
+	# install -o root -m 644 misc/eureka.desktop $(DEB_PREFIX)/share/applications/
+	install -d $(DEB_DOCDIR)
+	install -o root -m 644 debian/copyright $(DEB_DOCDIR)
+	install -o root -m 644 debian/changelog $(DEB_DOCDIR)/changelog.Debian
+	#
+	install -d $(DEB_BASE)/DEBIAN
+	cp $(DEB_FILES) $(DEB_BASE)/DEBIAN/
+	#
+	dpkg-deb --build $(DEB_BASE)
+
+debclean:
+	rm -Rvf $(DEB_BASE)
+
+.PHONY: debinstall debclean
+
+#--- editor settings ------------
+# vi:ts=8:sw=8:noexpandtab
