@@ -642,9 +642,9 @@ static bool DoSplitLineDef(int ld)
 	int new_x = (L->Start()->x + L->End()->x) / 2;
 	int new_y = (L->Start()->y + L->End()->y) / 2;
 
-	// don't split if it would create a zero-length line
-	if (L->Start()->Matches(new_x, new_y) ||
-	    L->  End()->Matches(new_x, new_y))
+	// prevent creating tiny lines (especially zero-length)
+	if (abs(L->Start()->x - L->End()->x) < 4 &&
+	    abs(L->Start()->y - L->End()->y) < 4)
 		return false;
 
 	int new_v = BA_New(OBJ_VERTICES);
