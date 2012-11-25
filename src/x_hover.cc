@@ -445,6 +445,11 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int drag_vert)
 		if (x == x1 && y == y1) continue;
 		if (x == x2 && y == y2) continue;
 
+		// skip linedef if too small to split
+		if (abs(L->Start()->x - L->End()->x) < 4 &&
+			abs(L->Start()->y - L->End()->y) < 4)
+			continue;
+
 		float dist = ApproxDistToLineDef(L, x, y);
 
 		if (dist > mapslack)
