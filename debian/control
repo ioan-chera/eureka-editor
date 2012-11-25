@@ -1,11 +1,10 @@
 Package: eureka
-Version: 0.84
+Version: 0.84-1
 Section: games
 Priority: optional
 Maintainer: Andrew Apted <ajapted@users.sf.net>
 Architecture: i386
 Depends: libfltk1.3
-# libjpeg62, libpng12-0
 Description: map editor for DOOM
  Eureka is a map editor for DOOM.
 Homepage: http://eureka-editor.sourceforge.net/
