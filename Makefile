@@ -157,5 +157,37 @@ uninstall:
 
 .PHONY: all clean bin
 
+
+#----- Debian Stuff ------------------------------------------
+
+DEB_BASE = deb_root
+DEB_PREFIX = $(DEB_BASE)/usr
+DEB_DIR = $(DEB_PREFIX)/share/eureka
+
+debinstall: bin
+	install -d $(DEB_BASE)
+	install -d $(DEB_PREFIX)
+	install -d $(DEB_PREFIX)/bin
+	install -o root -m 755 $(PROGRAM) $(DEB_PREFIX)/bin/
+	#
+	install -d $(DEB_DIR)/games
+	install -d $(DEB_DIR)/common
+	install -d $(DEB_DIR)/ports
+	install -d $(DEB_DIR)/mods
+	#
+	install -o root -m 755 games/*.* $(DEB_DIR)/games
+	install -o root -m 755 common/*.* $(DEB_DIR)/common
+	install -o root -m 755 ports/*.* $(DEB_DIR)/ports
+#	install -o root -m 755 mods/*.*  $(INSTALL_DIR)/mods
+	#
+	# install -o root -m 755 misc/eureka.desktop $(DEB_PREFIX)/share/applications/
+	# install -o root -m 755 misc/eureka.desktop $(DEB_PREFIX)/share/applications/
+	echo FIXME dpkg-deb --build BLAH...
+
+debclean:
+	rm -Rvf $(DEB_BASE)
+
+.PHONY: debinstall debclean
+
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
