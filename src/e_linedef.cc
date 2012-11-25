@@ -635,27 +635,34 @@ int SplitLineDefAtVertex(int ld, int new_v)
 }
 
 
-static int DoSplitLineDef(int ld)
+static bool DoSplitLineDef(int ld)
 {
 	LineDef * L = LineDefs[ld];
+
+	int new_x = (L->Start()->x + L->End()->x) / 2;
+	int new_y = (L->Start()->y + L->End()->y) / 2;
+
+	// don't split if it would create a zero-length line
+	if (L->Start()->Matches(new_x, new_y) ||
+	    L->  End()->Matches(new_x, new_y))
+		return false;
 
 	int new_v = BA_New(OBJ_VERTICES);
 
 	Vertex * V = Vertices[new_v];
 
-	V->x = (L->Start()->x + L->End()->x) / 2;
-	V->y = (L->Start()->y + L->End()->y) / 2;
+	V->x = new_x;
+	V->y = new_y;
 
 	SplitLineDefAtVertex(ld, new_v);
 
-	return new_v;
+	return true;
 }
 
 
 /*
    split one or more LineDefs in two, adding new Vertices in the middle
 */
-
 void CMD_SplitLineDefs()
 {
 	selection_c list;
@@ -674,26 +681,30 @@ void CMD_SplitLineDefs()
 	edit.Selected->clear_all();
 
 	int new_first = NumLineDefs;
-	int new_count = list.count_obj();
+	int new_count = 0;
 
 	BA_Begin();
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		DoSplitLineDef(*it);
+		if (DoSplitLineDef(*it))
+			new_count++;
 	}
 
 	BA_End();
 
+	if (new_count < list.count_obj())
+		Beep();
+
 ///---	MarkChanges();
 
-	if (was_selected)
+	if (was_selected && new_count > 0)
 	{
 		// reselect the old _and_ new linedefs
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 			edit.Selected->set(*it);
 
-		edit.Selected->frob_range(new_first, new_first+new_count-1, BOP_ADD);
+		edit.Selected->frob_range(new_first, new_first + new_count - 1, BOP_ADD);
 	}
 }
 

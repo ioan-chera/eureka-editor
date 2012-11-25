@@ -104,6 +104,11 @@ public:
 		x = other->x;
 		y = other->y;
 	}
+
+	bool Matches(int ox, int oy)
+	{
+		return (x == ox) && (y == oy);
+	}
 };
 
 
