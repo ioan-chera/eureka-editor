@@ -242,6 +242,11 @@ public:
 	int WhatSector(int side) const;
 
 	double CalcLength() const;
+
+	bool isZeroLength() const
+	{
+		return (Start()->x == End()->x) && (Start()->y == End()->y);
+	}
 };
 
 

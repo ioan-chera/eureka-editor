@@ -71,6 +71,10 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 	{
 		LineDef *L = LineDefs[n];
 
+		// zero-length lines should not exist, but don't get stroppy if they do
+		if (L->isZeroLength())
+			continue;
+
 		double a, b;
 		
 		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
