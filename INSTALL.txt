@@ -69,14 +69,16 @@ locate the IWAD file:
      the first time Eureka is run (though there is no harm in
      creating it yourself).
 
-  2. If you run Eureka from the command line and have the DOOMWADDIR
+  2. IWADs will also be found in /usr/share/games/doom
+
+  3. If you run Eureka from the command line and have the DOOMWADDIR
      environment variable set, then Eureka should find it in that
      directory.
 
-  3. If running from the command line, Eureka will look in the current
+  4. If running from the command line, Eureka will look in the current
      directory for the IWAD.
 
-  4. You can specify the IWAD file directly with the --iwad option.
+  5. You can specify the IWAD file directly with the --iwad option.
      The value given can also be a directory to search.  This is
      currently the only way to select an IWAD (and game) different
      than the one normally used.
