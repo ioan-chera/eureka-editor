@@ -6,36 +6,15 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
--  MacOSX:
-   (c) handle the -psnXXX argument (see SDL_main.m)
-       NOTE: probably needs integrating some of SDL's logic
-
-
-(c) can move end vertex of line onto start, WTF?
-
-
-int state   = Fl::event_state();
-        
-if(state == FL_ALT)
-  Editor_Wheel(0 + Fl::event_dy(), StateToMod(Fl::event_state()));
-else
-{
-  grid.orig_x += (int) ((double) ScrMaxX * Fl::event_dx() * scroll_less / 1000 / grid.Scale);
-  grid.orig_y -= (int) ((double) ScrMaxY * Fl::event_dy() * scroll_less / 1000 / grid.Scale);
-  edit.RedrawMap = 1;
-}
-
 
 Documentation
 -------------
 
-+  document texture browser (RIGHT click etc)
-
-+  MAIN PAGE: put a screenshot there (half size)
-
 +  new page for configuration system
    (a) command line usage
    (b) command line args
+
+No:
    (c) ~/.eureka/config.cfg
    (d) general syntax
    (e) list of supported vars

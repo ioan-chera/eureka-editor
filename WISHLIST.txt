@@ -12,14 +12,18 @@ ______________________________________________________________________
 General
 -------
 
-+  make a debian package
-
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
    (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
        [probably port and mod too] and ability to change them
    (d) persist in a lump, e.g. "__EUREKA"
+
++  CHECK screen
+   -  linedefs without right side
+   -  zero-length linedefs
+   -  unclosed sectors
+   -  can remove unused Vertices, SideDefs and Sectors
 
 +  configurable keys
    (a) will need at least two contexts: "editor" and "render"
@@ -32,10 +36,7 @@ General
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
 
-+  CHECK screen
-   -  linedefs without right side
-   -  unclosed sectors
-   -  can remove unused Vertices, SideDefs and Sectors
++  Preferences window
 
 
 
@@ -110,12 +111,18 @@ General
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
 
+?  MacOSX:
+   (c) handle the -psnXXX argument (see SDL_main.m)
+       NOTE: probably needs integrating some of SDL's logic
+
 IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
 
 
 
 Documentation
 -------------
+
+-  document texture browser (RIGHT click etc)
 
 +  command line arguments page
 
@@ -127,7 +134,7 @@ Documentation
 
    -q --quiet : don't send messages to stdout
 
--  config file page
+?  config file page
 
 -  built-in cheat sheet for mouse buttons and common keys
 
@@ -242,6 +249,8 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 
 3D View
 -------
+
+-  Render3D_Wheel: add 'dx' parameter, use it
 
 -  handle very tall/thin window : letter box with black
 
