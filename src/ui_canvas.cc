@@ -260,7 +260,7 @@ int UI_Canvas::handle_wheel()
 	if (render3d)
 		Render3D_Wheel(0 - dy, StateToMod(state));
 	else
-		Editor_Wheel(0 - dy, StateToMod(state));
+		Editor_Wheel(dx, dy, StateToMod(state));
 
 	return 1;
 }

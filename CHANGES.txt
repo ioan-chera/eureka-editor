@@ -29,9 +29,10 @@ CHANGES IN Eureka 0.84
 
 -  config: can specify a boolean value on the command-line
 -  config: new syntax for config files, no '=' required
--  config: added 'leave_offsets_alone' var
--  config: added 'new_islands_are_void' var
 -  config: added 'escape_key_quits' var
+-  config: added 'leave_offsets_alone' var
+-  config: added 'mouse_wheel_scrolls_map' var
+-  config: added 'new_islands_are_void' var
 
 -  Browser: faster scrolling with the mouse wheel
 

@@ -81,7 +81,7 @@ extern int InputThingType(int x0, int y0, int *number);
 bool Global_Key(int key, keymod_e mod = KM_none);
 bool Editor_Key(int key, keymod_e mod = KM_none);
 
-void Editor_Wheel(int delta, keymod_e mod);
+void Editor_Wheel(int dx, int dy, keymod_e mod);
 void EditorMousePress(keymod_e mod);
 void EditorMouseRelease();
 void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool drag);

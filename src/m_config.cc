@@ -45,6 +45,7 @@
 
 extern bool escape_key_quits;
 extern bool leave_offsets_alone;
+extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
@@ -341,6 +342,15 @@ static const opt_desc_t options[] =
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
 		&leave_offsets_alone
+	},
+
+	{	"mouse_wheel_scrolls_map",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Use the mouse wheel events for scrolling, not zooming",
+		NULL,
+		&mouse_wheel_scrolls_map
 	},
 
 	{	"new_islands_are_void",

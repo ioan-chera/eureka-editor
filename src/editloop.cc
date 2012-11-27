@@ -57,8 +57,9 @@ Editor_State_c edit;
 
 
 // config items
-bool same_mode_clears_selection = false; 
 bool escape_key_quits = false;
+bool mouse_wheel_scrolls_map = false;
+bool same_mode_clears_selection = false; 
 
 
 Editor_State_c::Editor_State_c()
@@ -571,6 +572,15 @@ static bool Grid_Key(int key, keymod_e mod)
 }
 
 
+void CMD_ScrollMap(int dx, int dy)
+{
+	grid.orig_x += dx;
+	grid.orig_y += dy;
+
+	edit.RedrawMap = 1;
+}
+
+
 void CMD_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = grid.Scale;
@@ -609,11 +619,29 @@ void CMD_GoToCamera()
 }
 
 
-void Editor_Wheel(int delta, keymod_e mod)
+void Editor_Wheel(int dx, int dy, keymod_e mod)
 {
-	delta = (delta > 0) ? +1 : -1;
+	if (mouse_wheel_scrolls_map && mod !=
+#ifdef __APPLE__
+		KM_ALT)
+#else
+		KM_CTRL)
+#endif
+	{
+		int speed = 12;  // FIXME: CONFIG OPTION
 
-	CMD_Zoom(delta, edit.map_x, edit.map_y);
+		if (mod == KM_SHIFT)
+			speed = MAX(1, speed / 3);
+
+		CMD_ScrollMap(  dx * (double) speed / grid.Scale,
+		              - dy * (double) speed / grid.Scale);
+	}
+	else
+	{
+		dy = (dy > 0) ? +1 : -1;
+
+		CMD_Zoom(- dy, edit.map_x, edit.map_y);
+	}
 }
 
 
