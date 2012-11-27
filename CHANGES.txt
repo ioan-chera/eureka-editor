@@ -18,6 +18,8 @@ CHANGES IN Eureka 0.84
 
 -  insert thing: if one already selected, copy its properties
 -  improved line split highlighting when SNAP mode is active
+-  limit size of drawn vertices when zooming right in
+
 -  allow running locally (without a 'make install')
 -  iwad search: check more places (like /usr/share/games/doom)
 
