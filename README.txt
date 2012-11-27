@@ -25,6 +25,14 @@ indepedent program now, and it has a different workflow than
 Yadex or DEU.
 
 
+REQUIREMENTS
+
+-  128 MB of computer memory
+-  800x600 or higher screen resolution
+-  a keyboard and a two-button mouse
+-  the data (iwad) file from a supported game (e.g. DOOM)
+
+
 COMPILING / SETTING UP
 
 See the INSTALL.txt document
@@ -58,7 +66,7 @@ For a summary of useful command line options, type:
 
 
 
-KEYBOARD AND MOUSE
+KEYBOARD AND MOUSE CONTROLS
 
 All Modes
 ---------
