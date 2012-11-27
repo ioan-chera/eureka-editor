@@ -10,28 +10,6 @@ General
 Documentation
 -------------
 
-+  new page for configuration system
-   (a) command line usage
-   (b) command line args
-
-No:
-   (c) ~/.eureka/config.cfg
-   (d) general syntax
-   (e) list of supported vars
-
--  somewhere: require at least 800x600 resolution, two button mouse
-
--  KEY CHANGES
-   normal  : MMB for insert
-
-   3d mode : 's' --> 'o' (objects)
-             'w' --> 'v'
-             'r' --> 'R'
-             added WASD for movement (fine with SHIFT)
-             'g' --> toggle gravity
-             PGUP / PGDN can move up (merely document)
-
-
 
 Coding
 ------

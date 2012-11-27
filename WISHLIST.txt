@@ -134,9 +134,12 @@ Documentation
 
    -q --quiet : don't send messages to stdout
 
-?  config file page
-
 -  built-in cheat sheet for mouse buttons and common keys
+
+??  config file page
+   (a) ~/.eureka/config.cfg
+   (b) general syntax
+   (c) list of supported vars
 
 
 
