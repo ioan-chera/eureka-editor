@@ -443,13 +443,13 @@ static bool Grid_Key(int key, keymod_e mod)
 	// [+]: zooming in  (mouse wheel too)
 	if (key == '+' || key == '=')
 	{
-		Editor_Wheel(+1, KM_none);
+		CMD_Zoom(+1, edit.map_x, edit.map_y);
 	}
 
 	// [-]: zooming out  (mouse wheel too)
 	else if (key == '-' || key == '_')
 	{
-		Editor_Wheel(-1, KM_none);
+		CMD_Zoom(-1, edit.map_x, edit.map_y);
 	}
 
 	// [HOME], [0]: show the whole map in the window
