@@ -28,6 +28,8 @@ cp -av $src/glbsp_src/*.[chr]* $dest/glbsp_src
 
 mkdir $dest/misc
 cp -av $src/misc/*.* $dest/misc
+mkdir $dest/misc/debian
+cp -av $src/misc/debian/* $dest/misc/debian
 
 mkdir $dest/obj_linux
 mkdir $dest/obj_linux/glbsp
