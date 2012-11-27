@@ -102,57 +102,6 @@ int UI_Canvas::handle(int event)
 		case FL_FOCUS:
 			return 1;
 
-		case FL_KEYDOWN:
-		case FL_SHORTCUT:
-		{
-			//      int result = handle_key();
-			//      handle_mouse();
-
-			int key   = Fl::event_key();
-			int state = Fl::event_state();
-
-			switch (key)
-			{
-				case FL_Num_Lock:
-				case FL_Caps_Lock:
-
-				case FL_Shift_L: case FL_Control_L:
-				case FL_Shift_R: case FL_Control_R:
-				case FL_Meta_L:  case FL_Alt_L:
-				case FL_Meta_R:  case FL_Alt_R:
-
-					/* IGNORE */
-					return 1;
-
-				default:
-					/* OK */
-					break;
-			}
-
-			if (key == FL_Tab || key == '\t')
-			{
-				render3d = !render3d;
-				redraw();
-				return 1;
-			}
-
-			if (key != 0)
-			{
-				if (key < 127 && isalpha(key) && (state & FL_SHIFT))
-					key = toupper(key);
-
-				if (key < 127 && isalpha(key) && (state & FL_CTRL))
-					key &= 31;
-
-				if (render3d)
-					return Render3D_Key(key, StateToMod(state)) ? 1 : 0;
-				else
-					return Editor_Key(key, StateToMod(state)) ? 1 : 0;
-			}
-
-			return 0;
-		}
-
 		case FL_ENTER:
 			// we greedily grab the focus
 			if (Fl::focus() != this)
@@ -165,6 +114,10 @@ int UI_Canvas::handle(int event)
 			redraw();
 			return 1;
 
+		case FL_KEYDOWN:
+		case FL_SHORTCUT:
+			return handle_key();
+
 		case FL_DRAG:
 			if (Fl::event_button3())
 			{
@@ -172,63 +125,144 @@ int UI_Canvas::handle(int event)
 				return 1;
 			}
 			/* FALL THROUGH... */
+
 		case FL_MOVE:
-			if (render3d)
-			{ /* TODO */ }
-			else
-			{
-				int state = Fl::event_state();
-				EditorMouseMotion(Fl::event_x(), Fl::event_y(),
-				                  StateToMod(state),
-						MAPX(Fl::event_x()), MAPY(Fl::event_y()), event == FL_DRAG);
-			}
-			return 1;
+			return handle_move(event == FL_DRAG);
 
 		case FL_PUSH:
-			// FIXME: THIS IS REALLY SHIT
-			if (Fl::event_button() == 3)
-			{
-				RightButtonScroll(1);
-				return 1;
-			}
-
-			if (Fl::event_button() == 2)
-			{
-				int state = Fl::event_state();
-				EditorMiddlePress(StateToMod(state));
-			}
-			else if (! render3d)
-			{
-				int state = Fl::event_state();
-				EditorMousePress(StateToMod(state));
-			}
-			return 1;
+			return handle_push();
 
 		case FL_RELEASE:
-			if (Fl::event_button() == 3)
-			{
-				RightButtonScroll(0);
-				return 1;
-			}
-
-			if (Fl::event_button() == 2)
-				EditorMiddleRelease();
-			else if (! render3d)
-				EditorMouseRelease();
-			return 1;
+			return handle_release();
 
 		case FL_MOUSEWHEEL:
-			if (render3d)
-				Render3D_Wheel(0 - Fl::event_dy(), StateToMod(Fl::event_state()));
-			else
-				Editor_Wheel(0 - Fl::event_dy(), StateToMod(Fl::event_state()));
-			return 1;
+			return handle_wheel();
 
 		default:
 			break;
 	}
 
 	return 0;  // unused
+}
+
+
+int UI_Canvas::handle_key()
+{
+	int key   = Fl::event_key();
+	int state = Fl::event_state();
+
+	switch (key)
+	{
+		case FL_Num_Lock:
+		case FL_Caps_Lock:
+
+		case FL_Shift_L: case FL_Control_L:
+		case FL_Shift_R: case FL_Control_R:
+		case FL_Meta_L:  case FL_Alt_L:
+		case FL_Meta_R:  case FL_Alt_R:
+
+			/* IGNORE */
+			return 1;
+
+		default:
+			/* OK */
+			break;
+	}
+
+	if (key == FL_Tab || key == '\t')
+	{
+		render3d = !render3d;
+		redraw();
+		return 1;
+	}
+
+	if (key == 0)
+		return 0;
+
+	if (key < 127 && isalpha(key) && (state & FL_SHIFT))
+		key = toupper(key);
+
+	if (key < 127 && isalpha(key) && (state & FL_CTRL))
+		key &= 31;
+
+	if (render3d)
+		return Render3D_Key(key, StateToMod(state)) ? 1 : 0;
+	else
+		return Editor_Key(key, StateToMod(state)) ? 1 : 0;
+
+	return 0;
+}
+
+
+int UI_Canvas::handle_move(bool drag)
+{
+	int state = Fl::event_state();
+
+	if (render3d)
+	{ /* TODO */ }
+	else
+	{
+		EditorMouseMotion(Fl::event_x(), Fl::event_y(), StateToMod(state),
+				MAPX(Fl::event_x()), MAPY(Fl::event_y()), drag);
+	}
+
+	return 1;
+}
+
+
+int UI_Canvas::handle_push()
+{
+	// FIXME: THIS IS REALLY SHIT
+	if (Fl::event_button() == 3)
+	{
+		RightButtonScroll(1);
+		return 1;
+	}
+
+	if (Fl::event_button() == 2)
+	{
+		int state = Fl::event_state();
+		EditorMiddlePress(StateToMod(state));
+	}
+	else if (! render3d)
+	{
+		int state = Fl::event_state();
+		EditorMousePress(StateToMod(state));
+	}
+
+	return 1;
+}
+
+
+int UI_Canvas::handle_release()
+{
+	if (Fl::event_button() == 3)
+	{
+		RightButtonScroll(0);
+		return 1;
+	}
+
+	if (Fl::event_button() == 2)
+		EditorMiddleRelease();
+	else if (! render3d)
+		EditorMouseRelease();
+	return 1;
+}
+
+
+int UI_Canvas::handle_wheel()
+{
+	int dx = Fl::event_dx();
+	int dy = Fl::event_dy();
+
+	int state = Fl::event_state();
+
+	if (render3d)
+		Render3D_Wheel(0 - dy, StateToMod(state));
+	else
+		Editor_Wheel(0 - dy, StateToMod(state));
+
+	return 1;
 }
 
 
