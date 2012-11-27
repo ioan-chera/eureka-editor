@@ -491,17 +491,14 @@ void UI_Canvas::DrawMapBounds()
 
 /*
  *  vertex_radius - apparent radius of a vertex, in pixels
- *
- *  Try this in Gnuplot :
- *
- *    plot [0:10] x                                          
- *    replot log(x+1.46)/log(1.5)-log(2.46)/log(1.5)+1
  */
 int vertex_radius(double scale)
 {
-	const int VERTEX_PIXELS = 6;
+	int r = 6 * (0.26 + scale / 2);
 
-	return (int)(VERTEX_PIXELS * (0.2 + scale / 2));
+	if (r > 12) r = 12;
+
+	return r;
 }
 
 
