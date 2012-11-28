@@ -42,7 +42,7 @@ public:
 	int handle(int event);
 
 public:
-	void Nil();
+	void Clear();
 
 	void GetFlat(const char * fname);
 	void GetTex (const char * tname);

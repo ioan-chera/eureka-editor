@@ -575,8 +575,8 @@ void UI_SectorBox::UpdateField(int field)
 			f_tex->value("");
 			c_tex->value("");
 
-			f_pic->Nil();
-			c_pic->Nil();
+			f_pic->Clear();
+			c_pic->Clear();
 		}
 	}
 

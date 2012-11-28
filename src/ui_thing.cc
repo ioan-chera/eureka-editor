@@ -575,7 +575,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			type ->value("");
 			desc ->value("");
-			sprite->Nil();
+			sprite->Clear();
 		}
 	}
 

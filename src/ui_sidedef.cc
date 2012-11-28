@@ -468,9 +468,9 @@ void UI_SideBox::UpdateField()
 		m_tex->value("");
 		u_tex->value("");
 
-		l_pic->Nil();
-		m_pic->Nil();
-		u_pic->Nil();
+		l_pic->Clear();
+		m_pic->Clear();
+		u_pic->Clear();
 	}
 }
 

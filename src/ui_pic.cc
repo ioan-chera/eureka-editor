@@ -54,7 +54,7 @@ UI_Pic::~UI_Pic()
 }
 
 
-void UI_Pic::Nil()
+void UI_Pic::Clear()
 {
 	if (rgb)
 	{
@@ -80,7 +80,8 @@ void UI_Pic::GetSprite(int type)
 {
 	//  color(FL_GRAY0 + 2);
 
-	if (rgb) Nil();
+	if (rgb)
+		Clear();
 
 	Img *img = W_GetSprite(type);
 
@@ -158,7 +159,8 @@ void UI_Pic::TiledImg(Img *img, bool has_trans)
 {
 	color(FL_DARK2);
 
-	if (rgb) Nil();
+	if (rgb)
+		Clear();
 
 	if (! img || img->width() < 1 || img->height() < 1)
 		return;
