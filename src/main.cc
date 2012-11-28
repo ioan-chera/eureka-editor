@@ -193,10 +193,15 @@ static void CreateHomeDirs()
 {
 	SYS_ASSERT(home_dir);
 
+	static char dir_name[FL_PATH_MAX];
+
+#ifdef __APPLE__
+	fl_filename_expand(dir_name, "$HOME/documents");
+	FileMakeDir(dir_name);
+#endif
+
 	// try to create home_dir (doesn't matter if it already exists)
 	FileMakeDir(home_dir);
-
-	static char dir_name[FL_PATH_MAX];
 
 	static const char *const subdirs[] =
 	{
@@ -218,20 +223,23 @@ static void Determine_HomeDir(const char *argv0)
 	// already set by cmd-line option?
 	if (! home_dir)
 	{
-#ifdef WIN32
+#if defined(WIN32)
 	// FIXME: check for %appdata% ??
 	//        also, fallback should be EXE path + "/local"
 
 	home_dir = GetExecutablePath(argv0);
 
-#else
+#elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
 
-	if (fl_filename_expand(path, "$HOME/.eureka") == 0)
-		FatalError("Unable to find home directory!\n");
+	if (fl_filename_expand(path, "$HOME/documents/eureka"))
+		home_dir = path;
 
-	home_dir = path;
+#else  // UNIX
+	char * path = StringNew(FL_PATH_MAX + 4);
 
+	if (fl_filename_expand(path, "$HOME/.eureka"))
+		home_dir = path;
 #endif
 	}
 
