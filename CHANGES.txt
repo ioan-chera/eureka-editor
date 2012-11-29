@@ -2,3 +2,5 @@
 CHANGES IN Eureka 0.xx
 ======================
 
+-  shortcut key for 'File/Export Map' is now CTRL-E
+

@@ -305,7 +305,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&New Map",   FL_COMMAND + 'n', FCAL file_do_new },
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 		{ "&Save Map",  FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_F+3,         FCAL file_do_export },
+		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

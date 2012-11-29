@@ -682,7 +682,7 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 
 	// [e]: Select/unselect all linedefs in non-forked path
-	else if ((key == 'e' || key == 5) && edit.obj_type == OBJ_LINEDEFS)
+	else if ((key == 'e') && edit.obj_type == OBJ_LINEDEFS)
 	{
 		CMD_SelectLinesInPath(SLP_Normal);
 	}
