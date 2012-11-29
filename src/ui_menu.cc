@@ -65,6 +65,11 @@ static void file_do_build_nodes(Fl_Widget *w, void * data)
 	CMD_BuildNodes();
 }
 
+static void file_do_play_map(Fl_Widget *w, void * data)
+{
+	CMD_PlayMap();
+}
+
 
 //------------------------------------------------------------------------
 //  EDIT MENU
@@ -319,6 +324,7 @@ static Fl_Menu_Item menu_items[] =
 #endif
 
 		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
+		{ "&Play Map",        FL_COMMAND + 'p', FCAL file_do_play_map },
 
 		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },

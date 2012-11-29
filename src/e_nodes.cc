@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  BUILDING NODES
+//  BUILDING NODES / PLAY THE MAP
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -360,6 +360,44 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		Replacer = false;
 		MadeChanges = 0;
 	}
+}
+
+
+//------------------------------------------------------------------------
+
+
+void CMD_PlayMap()
+{
+	// TODO: remove this restriction
+	if (! edit_wad)
+	{
+		Notify(-1, -1, "Cannot play the map unless you are editing a PWAD.", NULL);
+		return;
+	}
+
+	if (MadeChanges)
+	{
+		// TODO: ideally ask the question "save changes now?"
+		//       HOWEVER we need to know if that was successful (ouch)
+
+		Notify(-1, -1, "You have unsaved changes, please save them first.", NULL);
+		return;
+	}
+
+	char cmd_buffer[FL_PATH_MAX * 2];
+
+	// FIXME: use fl_filename_absolute() to get absolute paths
+
+	snprintf(cmd_buffer, sizeof(cmd_buffer),
+	         "cd /home/aapted/doom; ./edge135 -iwad %s -file %s -warp %s",
+			 base_wad->PathName(),
+			 edit_wad->PathName(),
+			 Level_name);
+
+	LogPrintf("Playing map using the following command:\n");
+	LogPrintf("  %s\n", cmd_buffer);
+
+	system(cmd_buffer);
 }
 
 

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  BUILDING NODES
+//  BUILDING NODES / PLAY THE MAP
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -22,6 +22,7 @@
 #define __EUREKA_E_NODES_H__
 
 void CMD_BuildNodes();
+void CMD_PlayMap();
 
 #endif  /* __EUREKA_E_NODES_H__ */
 
