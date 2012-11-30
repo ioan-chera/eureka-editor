@@ -102,24 +102,39 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_ScaleDialog::UI_ScaleDialog() :
-	Fl_Double_Window(360, 180, "Scale Objects"),
+	Fl_Double_Window(360, 240, "Scale Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
 	title->labelsize(KF_fonth);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	scale_x = new Fl_Float_Input(95, 55, 65, 25,  "scale x:");
-	scale_y = new Fl_Float_Input(240, 55, 65, 25, "scale y:");
+	scale_x = new Fl_Input(95, 55, 85, 25,  "scale x:");
+	scale_y = new Fl_Input(240, 55, 85, 25, "scale y:");
 
-	Fl_Group * grp = new Fl_Group(0, 110, w(), h() - 110);
+	scale_x->value("1");
+	scale_y->value("1");
+	
+	origin = new Fl_Choice(95, 90, 140, 25, "origin:");
+	origin->add("Center|Bottom|Bottom Left|Bottom Right|"
+	            "Left|Right|Top|Top Left|Top Right");
+	origin->value(0);
+
+	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
 	grp->box(FL_FLAT_BOX);
 	grp->color(FL_DARK3, FL_DARK3);
 	{
-		cancel_but = new Fl_Button(30, 130, 95, 30, "Cancel");
+		Fl_Box * help = new Fl_Box(10, 145, w() - 20, 40);
+		help->label("Scale Values:\n"
+		            "    can be real: 0.25 or 3.7\n"
+					"    or percentages: 25%\n"
+					"    or fractions: 3 / 4");
+		help->align(FL_ALIGN_LEFT | FL_ALIGN_TOP | FL_ALIGN_INSIDE);
+
+		cancel_but = new Fl_Button(245, 150, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
 	
-		ok_but = new Fl_Button(245, 130, 95, 30, "Scale");
+		ok_but = new Fl_Button(245, 195, 95, 30, "Scale");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
