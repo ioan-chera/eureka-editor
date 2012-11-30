@@ -169,6 +169,37 @@ void UI_ScaleDialog::Run()
 }
 
 
+static double ParseScaleStr(const char * s)
+{
+	// handle percentages
+	if (strchr(s, '%'))
+	{
+		double val;
+
+		if (sscanf(s, " %lf %% ", &val) != 1)
+			return -1;
+
+		return val;
+	}
+
+	// handle fractions
+	if (strchr(s, '/'))
+	{
+		double num, denom;
+
+		if (sscanf(s, " %lf / %lf ", &num, &denom) != 2)
+			return -1;
+
+		if (denom <= 0)
+			return -1;
+		
+		return num / denom;
+	}
+
+	return atof(s);
+}
+
+
 void UI_ScaleDialog::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ScaleDialog * that = (UI_ScaleDialog *)data;
@@ -181,13 +212,19 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ScaleDialog * that = (UI_ScaleDialog *)data;
 
-	const char *x_val = that->scale_x->value();
-	const char *y_val = that->scale_y->value();
+	double scale_x = ParseScaleStr(that->scale_x->value());
+	double scale_y = ParseScaleStr(that->scale_y->value());
 
-	int x_offset = (that->origin->value() % 3) - 1;
-	int y_offset = (that->origin->value() / 3) - 1;
+	if (scale_x <= 0 || scale_y <= 0)
+	{
+		Beep();
+		return;
+	}
 
-	CMD_ScaleObjectsByStr(x_val, y_val, x_offset, y_offset);
+	int pos_x = (that->origin->value() % 3) - 1;
+	int pos_y = (that->origin->value() / 3) - 1;
+
+	CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
 
 	that->want_close = true;
 }
