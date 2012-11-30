@@ -42,6 +42,16 @@
 #include "x_mirror.h"
 
 
+void scale_param_t::Clear()
+{
+	mid_x = mid_y = 0;
+
+	scale_x = scale_y = 1;
+
+	rotate = 0;
+}
+
+
 void scale_param_t::Apply(int *x, int *y) const
 {
 	*x = *x - mid_x;
@@ -626,17 +636,9 @@ void CMD_ScaleObjects2(scale_param_t& param)
 }
 
 
-static bool ParseScaleStr(const char * s, float *result)
+static void DetermineOrigin(scale_param_t& param, int pos_x, int pos_y)
 {
-	*result = 1.0;  // FIXME
-
-	return true;
-}
-
-
-static void DetermineOrigin(scale_param_t& param, int x_origin, int y_origin)
-{
-	if (x_origin == 0 && y_origin == 0)
+	if (pos_x == 0 && pos_y == 0)
 	{
 		Objs_CalcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
 		return;
@@ -646,41 +648,35 @@ static void DetermineOrigin(scale_param_t& param, int x_origin, int y_origin)
 
 	Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
 
-	if (x_origin < 0)
+	if (pos_x < 0)
 		param.mid_x = lx;
-	else if (x_origin > 0)
+	else if (pos_x > 0)
 		param.mid_x = hx;
 	else
 		param.mid_x = lx + (hx - lx) / 2;
 
-	if (y_origin < 0)
+	if (pos_y < 0)
 		param.mid_y = ly;
-	else if (y_origin > 0)
+	else if (pos_y > 0)
 		param.mid_y = hy;
 	else
 		param.mid_y = ly + (hy - ly) / 2;
 }
 
 
-void CMD_ScaleObjectsByStr(const char *x_val, const char *y_val,
-                           int x_origin, int y_origin)
+void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 {
+	SYS_ASSERT(scale_x > 0);
+	SYS_ASSERT(scale_y > 0);
+
 	scale_param_t param;
 
-	if (! ParseScaleStr(x_val, &param.scale_x) ||
-		! ParseScaleStr(y_val, &param.scale_y))
-	{
-		Beep();
-		return;
-	}
+	param.Clear();
 
-	if (param.scale_x <= 0 || param.scale_y <= 0)
-	{
-		Beep();
-		return;
-	}
+	param.scale_x = scale_x;
+	param.scale_y = scale_y;
 
-	DetermineOrigin(param, x_origin, y_origin);
+	DetermineOrigin(param, pos_x, pos_y);
 
 	BA_Begin();
 

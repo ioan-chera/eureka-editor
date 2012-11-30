@@ -30,9 +30,15 @@
 
 struct scale_param_t
 {
+public:
 	int mid_x, mid_y;
+
 	float scale_x, scale_y;
+
 	int rotate;  // 16 bits (65536 = 360 degrees)
+
+public:
+	void Clear();
 
 	void Apply(int *x, int *y) const;
 };
@@ -48,8 +54,7 @@ void CMD_ScaleObjects (bool is_half);
 
 void CMD_ScaleObjects2(scale_param_t& param);
 
-void CMD_ScaleObjectsByStr(const char *x_val, const char *y_val,
-                           int x_origin, int y_origin);
+void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
 
 void CMD_QuantizeObjects();
 

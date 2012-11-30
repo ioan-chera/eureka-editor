@@ -1382,13 +1382,10 @@ void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
 	scale_start_x = map_x;
 	scale_start_y = map_y;
 
+	scale_param.Clear();
+
 	scale_param.mid_x = middle_x;
 	scale_param.mid_y = middle_y;
-
-	scale_param.scale_x = 1.0;
-	scale_param.scale_y = 1.0;
-
-	scale_param.rotate = 0;
 
 	if (edit.obj_type == OBJ_VERTICES)
 	{
