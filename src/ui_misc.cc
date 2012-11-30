@@ -34,6 +34,9 @@ UI_MoveDialog::UI_MoveDialog() :
 	delta_x = new Fl_Int_Input(95, 55, 65, 25,  "delta x:");
 	delta_y = new Fl_Int_Input(240, 55, 65, 25, "delta y:");
 
+	delta_x->value("0");
+	delta_y->value("0");
+
 	Fl_Group * grp = new Fl_Group(0, 110, w(), h() - 110);
 	grp->box(FL_FLAT_BOX);
 	grp->color(FL_DARK3, FL_DARK3);
