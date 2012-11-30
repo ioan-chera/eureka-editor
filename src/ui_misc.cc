@@ -308,7 +308,13 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 
 	float angle = atof(that->angle->value());
 
-	CMD_RotateObjects2(angle);
+	if (that->dir->value() == 0)
+		angle = -angle;
+
+	int pos_x = (that->origin->value() % 3) - 1;
+	int pos_y = (that->origin->value() / 3) - 1;
+
+	CMD_RotateObjects3(angle, pos_x, pos_y);
 
 	that->want_close = true;
 }

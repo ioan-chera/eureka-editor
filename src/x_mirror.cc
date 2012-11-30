@@ -688,9 +688,27 @@ void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 	DetermineOrigin(param, pos_x, pos_y);
 
 	BA_Begin();
+	{
+		DoScaleTwoStuff(*edit.Selected, param);
+	}
+	BA_End();
+}
 
-	DoScaleTwoStuff(*edit.Selected, param);
 
+void CMD_RotateObjects3(double deg, int pos_x, int pos_y)
+{
+	scale_param_t param;
+
+	param.Clear();
+
+	param.rotate = round(deg * 65536.0 / 360.0);
+
+	DetermineOrigin(param, pos_x, pos_y);
+
+	BA_Begin();
+	{
+		DoScaleTwoStuff(*edit.Selected, param);
+	}
 	BA_End();
 }
 
