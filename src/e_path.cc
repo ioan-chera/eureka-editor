@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "m_bitvec.h"
+#include "m_dialog.h"
 #include "editloop.h"
 #include "e_path.h"
 #include "levels.h"
@@ -295,77 +296,77 @@ void CMD_SelectContiguousSectors(int flags)
 
 void CMD_JumpToObject()
 {
-#if 0
 	const char *buf = fl_input("Enter index number", "");
 
-	if (! buf)
+	if (! buf)   // cancelled
 		return;
 
-	Objid target_obj;
+	// TODO: validate it is a number
 
-	target_obj.type = edit.obj_type;
-	target_obj.num  = atoi(buf);
+	int num = atoi(buf);
 
-	if (target_obj ())
+	if (num < 0 || num >= NumObjects(edit.obj_type))
 	{
-		GoToObject (target_obj);
-
-		edit.RedrawMap = 1;
+		Notify(-1, -1, "Invalid index number", NULL);
+		return;
 	}
-#else
-	Beep();
-	return;
-#endif
+
+	edit.Selected->clear_all();
+	edit.Selected->set(num);
+
+	// alternatively: focus_on_selection()
+
+	GoToObject(Objid(edit.obj_type, num));
 }
 
 
 void CMD_NextObject()
 {
-	int t = edit.highlighted () ? edit.highlighted.type : edit.obj_type;
-
-	obj_no_t nmax = GetMaxObjectNum (t);
-
-	if (is_obj (nmax))
+	if (edit.Selected->count_obj() != 1)
 	{
-		if (edit.highlighted.is_nil())
-		{
-			edit.highlighted.type = (obj_type_e)t;
-			edit.highlighted.num = 0;
-		}
-		else
-		{
-			edit.highlighted.num++;
-			if (edit.highlighted.num > nmax)
-				edit.highlighted.num = 0;
-		}
-		GoToObject (edit.highlighted);
-		edit.RedrawMap = 1;
+		Beep();
+		return;
 	}
+
+	int num = edit.Selected->find_first();
+
+	if (num >= NumObjects(edit.obj_type))
+	{
+		Beep();
+		return;
+	}
+
+	num += 1;
+
+	edit.Selected->clear_all();
+	edit.Selected->set(num);
+
+	GoToObject(Objid(edit.obj_type, num));
 }
 
 
 void CMD_PrevObject()
 {
-	int t = edit.highlighted () ? edit.highlighted.type : edit.obj_type;
-
-	obj_no_t nmax = GetMaxObjectNum (t);
-	
-	if (is_obj (nmax))
+	if (edit.Selected->count_obj() != 1)
 	{
-		if (edit.highlighted.is_nil())
-		{
-			edit.highlighted.type = (obj_type_e)t;
-			edit.highlighted.num = nmax;
-		}
-		else
-		{
-			edit.highlighted.num--;
-			if (edit.highlighted.num < 0)
-				edit.highlighted.num = nmax;
-		}
-		GoToObject (edit.highlighted);
-		edit.RedrawMap = 1;
+		Beep();
+		return;
 	}
+
+	int num = edit.Selected->find_first();
+
+	if (num <= 0)
+	{
+		Beep();
+		return;
+	}
+
+	num -= 1;
+
+	edit.Selected->clear_all();
+	edit.Selected->set(num);
+
+	GoToObject(Objid(edit.obj_type, num));
 }
 
 
