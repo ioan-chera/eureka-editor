@@ -324,7 +324,7 @@ static Fl_Menu_Item menu_items[] =
 #endif
 
 		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
-		{ "&Play Map",        FL_COMMAND + 'p', FCAL file_do_play_map },
+//TODO	{ "&Play Map",        FL_COMMAND + 'p', FCAL file_do_play_map },
 
 		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
