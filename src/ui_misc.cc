@@ -230,5 +230,88 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 }
 
 
+//------------------------------------------------------------------------
+
+
+UI_RotateDialog::UI_RotateDialog() :
+	Fl_Double_Window(360, 200, "Rotate Objects"),
+	want_close(false)
+{
+    Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter # of degrees to rotate objects:");
+	title->labelsize(KF_fonth);
+	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	angle = new Fl_Float_Input(95, 55, 65, 25,  "angle:");
+	angle->value("0");
+
+	dir = new Fl_Choice(170, 55, 140, 25);
+	dir->add("Clockwise|Anti-clockwise");
+	dir->value(0);
+
+	origin = new Fl_Choice(95, 90, 140, 25, "origin:");
+	origin->add("Bottom Left|Bottom|Bottom Right|"
+	            "Left|Centre|Right|"
+	            "Top Left|Top|Top Right");
+	origin->value(4);
+
+	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
+	grp->box(FL_FLAT_BOX);
+	grp->color(FL_DARK3, FL_DARK3);
+	{
+		cancel_but = new Fl_Button(30, 150, 95, 30, "Cancel");
+		cancel_but->callback(close_callback, this);
+	
+		ok_but = new Fl_Button(245, 150, 95, 30, "Rotate");
+		ok_but->labelfont(FL_HELVETICA_BOLD);
+		ok_but->callback(ok_callback, this);
+
+		grp->end();
+	}
+
+	end();
+
+	resizable(NULL);
+
+	callback(close_callback, this);
+}
+
+
+UI_RotateDialog::~UI_RotateDialog()
+{
+}
+
+
+void UI_RotateDialog::Run()
+{
+	set_modal();
+
+	show();
+
+	while (! WantClose())
+	{
+		Fl::wait(0.2);
+	}
+}
+
+
+void UI_RotateDialog::close_callback(Fl_Widget *w, void *data)
+{
+	UI_RotateDialog * that = (UI_RotateDialog *)data;
+
+	that->want_close = true;
+}
+
+
+void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
+{
+	UI_RotateDialog * that = (UI_RotateDialog *)data;
+
+	float angle = atof(that->angle->value());
+
+	CMD_RotateObjects2(angle);
+
+	that->want_close = true;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

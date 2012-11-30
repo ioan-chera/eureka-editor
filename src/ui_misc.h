@@ -45,6 +45,7 @@ private:
 	static void close_callback(Fl_Widget *, void *);
 };
 
+
 //------------------------------------------------------------------------
 
 class UI_ScaleDialog : public Fl_Double_Window
@@ -63,6 +64,35 @@ private:
 public:
 	UI_ScaleDialog();
 	virtual ~UI_ScaleDialog();
+
+	void Run();
+
+	bool WantClose() { return want_close; }
+
+private:
+	static void    ok_callback(Fl_Widget *, void *);
+	static void close_callback(Fl_Widget *, void *);
+};
+
+
+//------------------------------------------------------------------------
+
+class UI_RotateDialog : public Fl_Double_Window
+{
+private:
+	Fl_Float_Input *angle;
+
+	Fl_Choice *dir;
+	Fl_Choice *origin;
+
+	Fl_Button *ok_but;
+	Fl_Button *cancel_but;
+
+	bool want_close;
+
+public:
+	UI_RotateDialog();
+	virtual ~UI_RotateDialog();
 
 	void Run();
 

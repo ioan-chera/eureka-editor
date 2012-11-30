@@ -232,8 +232,17 @@ static void misc_do_scale(Fl_Widget *w, void * data)
 
 static void misc_do_rotate(Fl_Widget *w, void * data)
 {
-	// TODO
-	fl_beep();
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
+	UI_RotateDialog * dialog = new UI_RotateDialog();
+
+	dialog->Run();
+
+	delete dialog;
 }
 
 static void misc_do_mirror_horiz(Fl_Widget *w, void * data)
