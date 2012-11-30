@@ -21,6 +21,8 @@
 #include "main.h"
 #include "ui_window.h"
 #include "ui_about.h"
+#include "ui_misc.h"
+
 #include "editloop.h"
 #include "e_basis.h"
 #include "e_loadsave.h"
@@ -200,8 +202,15 @@ static void search_do_prev(Fl_Widget *w, void * data)
 
 static void misc_do_move(Fl_Widget *w, void * data)
 {
-	// TODO
-	fl_beep();
+	UI_MoveDialog * dialog = new UI_MoveDialog();
+
+	dialog->set_modal();
+	dialog->show();
+
+	while (! dialog->WantClose())
+	{
+		Fl::wait(0.2);
+	}
 }
 
 static void misc_do_scale(Fl_Widget *w, void * data)
@@ -350,8 +359,8 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 // TODO
-#if 0
 		{ "&Move",      0, FCAL misc_do_move },
+#if 0
 		{ "Rotate",     0, FCAL misc_do_rotate },
 		{ "&Scale",     0, FCAL misc_do_scale },
 #endif

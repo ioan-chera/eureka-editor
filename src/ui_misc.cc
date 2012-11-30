@@ -26,7 +26,7 @@
 //
 //  Callbacks
 //
-
+/* TODO
 void UI_NodeDialog::close_callback(Fl_Widget *w, void *data)
 {
 	UI_NodeDialog * that = (UI_NodeDialog *)data;
@@ -47,7 +47,34 @@ void UI_NodeDialog::ok_callback(Fl_Widget *w, void *data)
 	else
 		that->want_cancel = true;
 }
+*/
 
+
+UI_MoveDialog::UI_MoveDialog() :
+	Fl_Double_Window(350, 200, "Move Dialog")
+{
+    Fl_Box *title = new Fl_Box(15, 11, 305, 32, "Offset to move objects by:");
+	title->labeltype(FL_ENGRAVED_LABEL);
+	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	delta_x = new Fl_Value_Input(65, 55, 65, 25, "delta x:");
+	delta_y = new Fl_Value_Input(220, 55, 65, 25, "delta y:");
+
+	ok_but = new Fl_Button(225, 130, 95, 40, "OK");
+//	ok_but->callback(...);
+
+	cancel_but = new Fl_Button(95, 130, 95, 35, "Cancel");
+//	cancel_but->callback(...);
+
+	end();
+
+	resizable(NULL);
+}
+
+
+UI_MoveDialog::~UI_MoveDialog()
+{
+}
 
 
 //--- editor settings ---

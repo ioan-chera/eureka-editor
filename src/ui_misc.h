@@ -21,6 +21,25 @@
 #ifndef __EUREKA_UI_MISC_H__
 #define __EUREKA_UI_MISC_H__
 
+class UI_MoveDialog : public Fl_Double_Window
+{
+private:
+	Fl_Value_Input *delta_x;
+	Fl_Value_Input *delta_y;
+
+	Fl_Button *ok_but;
+	Fl_Button *cancel_but;
+
+public:
+	UI_MoveDialog();
+	virtual ~UI_MoveDialog();
+
+	bool WantClose() { return false; }  //!!!! FIXME
+
+private:
+	static void    ok_callback(Fl_Widget *, void *);
+	static void close_callback(Fl_Widget *, void *);
+};
 
 
 #endif  /* __EUREKA_UI_MISC_H__ */
