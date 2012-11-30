@@ -49,6 +49,8 @@ extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
+extern int  new_sector_size;
+
 
 //------------------------------------------------------------------------
 
@@ -360,6 +362,15 @@ static const opt_desc_t options[] =
 		"Islands created inside a sector will get a void interior",
 		NULL,
 		&new_islands_are_void
+	},
+
+	{	"new_sector_size",
+		0,
+		OPT_INTEGER,
+		"",
+		"Size of sector rectangles created outside of the map",
+		NULL,
+		&new_sector_size
 	},
 
 	{	"same_mode_clears_selection",

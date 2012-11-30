@@ -49,6 +49,7 @@
 
 // config items
 bool new_islands_are_void = false;
+int  new_sector_size = 128;
 
 
 static bool invalidated_totals;
@@ -179,23 +180,11 @@ static void CreateSquare(int model)
 	else
 		Sectors[new_sec]->SetDefaults();
 
-	// make the new sector occupy a single grid square
-
 	int x1 = grid.QuantSnapX(edit.map_x, false);
 	int y1 = grid.QuantSnapX(edit.map_y, false);
 
-	int x2 = grid.QuantSnapX(edit.map_x, true);
-	int y2 = grid.QuantSnapX(edit.map_y, true);
-
-	if (x1 == x2)
-		x2 += grid.step;
-	else if (x1 > x2)
-		std::swap(x1, x2);
-
-	if (y1 == y2)
-		y2 += grid.step;
-	else if (y1 > y2)
-		std::swap(y1, y2);
+	int x2 = x1 + new_sector_size;
+	int y2 = y1 + new_sector_size;
 
 	for (int i = 0 ; i < 4 ; i++)
 	{

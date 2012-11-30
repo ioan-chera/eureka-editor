@@ -8,3 +8,7 @@ CHANGES IN Eureka 0.xx
 
 -  when rotating a group of things, update their angles too
 
+-  sectors created outside of map now have fixed size
+
+-  config: added 'new_sector_size' var
+
