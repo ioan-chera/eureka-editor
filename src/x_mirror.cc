@@ -557,6 +557,15 @@ static void DoScaleTwoThings(selection_c& list, scale_param_t& param)
 
 		BA_ChangeTH(*it, Thing::F_X, new_x);
 		BA_ChangeTH(*it, Thing::F_Y, new_y);
+
+		float rot1 = param.rotate / 8192.0;
+
+		int ang_diff = round(rot1) * 45.0;
+
+		if (ang_diff)
+		{
+			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+		}
 	}
 }
 
