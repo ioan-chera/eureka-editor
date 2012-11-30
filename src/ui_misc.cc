@@ -179,7 +179,7 @@ static double ParseScaleStr(const char * s)
 		if (sscanf(s, " %lf %% ", &val) != 1)
 			return -1;
 
-		return val;
+		return val / 100.0;
 	}
 
 	// handle fractions
