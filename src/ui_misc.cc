@@ -51,20 +51,28 @@ void UI_NodeDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_MoveDialog::UI_MoveDialog() :
-	Fl_Double_Window(350, 200, "Move Dialog")
+	Fl_Double_Window(360, 180, "Move Dialog")
 {
-    Fl_Box *title = new Fl_Box(15, 11, 305, 32, "Offset to move objects by:");
-	title->labeltype(FL_ENGRAVED_LABEL);
+    Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
+	title->labelsize(KF_fonth);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	delta_x = new Fl_Value_Input(65, 55, 65, 25, "delta x:");
-	delta_y = new Fl_Value_Input(220, 55, 65, 25, "delta y:");
+	delta_x = new Fl_Value_Input(95, 55, 65, 25,  "delta x:");
+	delta_y = new Fl_Value_Input(240, 55, 65, 25, "delta y:");
 
-	ok_but = new Fl_Button(225, 130, 95, 40, "OK");
-//	ok_but->callback(...);
+	Fl_Group * grp = new Fl_Group(0, 110, w(), h() - 110);
+	grp->box(FL_FLAT_BOX);
+	grp->color(FL_DARK3, FL_DARK3);
+	{
+		cancel_but = new Fl_Button(30, 130, 95, 30, "Cancel");
+	//	cancel_but->callback(...);
+	
+		ok_but = new Fl_Button(245, 130, 95, 30, "Move");
+		ok_but->labelfont(FL_HELVETICA_BOLD);
+	//	ok_but->callback(...);
 
-	cancel_but = new Fl_Button(95, 130, 95, 35, "Cancel");
-//	cancel_but->callback(...);
+		grp->end();
+	}
 
 	end();
 
