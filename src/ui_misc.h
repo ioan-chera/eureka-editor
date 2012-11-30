@@ -45,6 +45,32 @@ private:
 	static void close_callback(Fl_Widget *, void *);
 };
 
+//------------------------------------------------------------------------
+
+class UI_ScaleDialog : public Fl_Double_Window
+{
+private:
+	Fl_Float_Input *scale_x;
+	Fl_Float_Input *scale_y;
+
+	Fl_Button *ok_but;
+	Fl_Button *cancel_but;
+
+	bool want_close;
+
+public:
+	UI_ScaleDialog();
+	virtual ~UI_ScaleDialog();
+
+	void Run();
+
+	bool WantClose() { return want_close; }
+
+private:
+	static void    ok_callback(Fl_Widget *, void *);
+	static void close_callback(Fl_Widget *, void *);
+};
+
 
 #endif  /* __EUREKA_UI_MISC_H__ */
 

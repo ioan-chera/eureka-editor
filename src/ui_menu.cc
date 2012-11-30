@@ -217,8 +217,17 @@ static void misc_do_move(Fl_Widget *w, void * data)
 
 static void misc_do_scale(Fl_Widget *w, void * data)
 {
-	// TODO
-	fl_beep();
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
+	UI_ScaleDialog * dialog = new UI_ScaleDialog();
+
+	dialog->Run();
+
+	delete dialog;
 }
 
 static void misc_do_rotate(Fl_Widget *w, void * data)
@@ -360,12 +369,11 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-// TODO
-		{ "&Move",      0, FCAL misc_do_move },
-#if 0
-		{ "Rotate",     0, FCAL misc_do_rotate },
-		{ "&Scale",     0, FCAL misc_do_scale },
-#endif
+		{ "&Move Objects...",      0, FCAL misc_do_move },
+		{ "&Scale Objects...",     0, FCAL misc_do_scale },
+		{ "Rotate Objects...",     0, FCAL misc_do_rotate },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Mirror &Horizontally",  0, FCAL misc_do_mirror_horiz },
 		{ "Mirror &Vertically",    0, FCAL misc_do_mirror_vert },
