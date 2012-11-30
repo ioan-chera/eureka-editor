@@ -202,15 +202,17 @@ static void search_do_prev(Fl_Widget *w, void * data)
 
 static void misc_do_move(Fl_Widget *w, void * data)
 {
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
 	UI_MoveDialog * dialog = new UI_MoveDialog();
 
-	dialog->set_modal();
-	dialog->show();
+	dialog->Run();
 
-	while (! dialog->WantClose())
-	{
-		Fl::wait(0.2);
-	}
+	delete dialog;
 }
 
 static void misc_do_scale(Fl_Widget *w, void * data)

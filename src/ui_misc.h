@@ -24,17 +24,21 @@
 class UI_MoveDialog : public Fl_Double_Window
 {
 private:
-	Fl_Value_Input *delta_x;
-	Fl_Value_Input *delta_y;
+	Fl_Int_Input *delta_x;
+	Fl_Int_Input *delta_y;
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
+
+	bool want_close;
 
 public:
 	UI_MoveDialog();
 	virtual ~UI_MoveDialog();
 
-	bool WantClose() { return false; }  //!!!! FIXME
+	void Run();
+
+	bool WantClose() { return want_close; }
 
 private:
 	static void    ok_callback(Fl_Widget *, void *);
