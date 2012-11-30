@@ -48,6 +48,9 @@ void CMD_ScaleObjects (bool is_half);
 
 void CMD_ScaleObjects2(scale_param_t& param);
 
+void CMD_ScaleObjectsByStr(const char *x_val, const char *y_val,
+                           int x_origin, int y_origin);
+
 void CMD_QuantizeObjects();
 
 

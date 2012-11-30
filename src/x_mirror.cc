@@ -59,10 +59,8 @@ void scale_param_t::Apply(int *x, int *y) const
 		*y = y1 * c + x1 * s;
 	}
 
-	// TODO: review this (e.g. if negative coords round differently)
-
-	*x = mid_x + (*x) * scale_x;
-	*y = mid_y + (*y) * scale_y;
+	*x = mid_x + I_ROUND( (*x) * scale_x );
+	*y = mid_y + I_ROUND( (*y) * scale_y );
 }
 
 
@@ -621,6 +619,70 @@ void CMD_ScaleObjects2(scale_param_t& param)
 
 		DoMirrorStuff(*edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
+
+	DoScaleTwoStuff(*edit.Selected, param);
+
+	BA_End();
+}
+
+
+static bool ParseScaleStr(const char * s, float *result)
+{
+	*result = 1.0;  // FIXME
+
+	return true;
+}
+
+
+static void DetermineOrigin(scale_param_t& param, int x_origin, int y_origin)
+{
+	if (x_origin == 0 && y_origin == 0)
+	{
+		Objs_CalcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
+		return;
+	}
+
+	int lx, ly, hx, hy;
+
+	Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
+
+	if (x_origin < 0)
+		param.mid_x = lx;
+	else if (x_origin > 0)
+		param.mid_x = hx;
+	else
+		param.mid_x = lx + (hx - lx) / 2;
+
+	if (y_origin < 0)
+		param.mid_y = ly;
+	else if (y_origin > 0)
+		param.mid_y = hy;
+	else
+		param.mid_y = ly + (hy - ly) / 2;
+}
+
+
+void CMD_ScaleObjectsByStr(const char *x_val, const char *y_val,
+                           int x_origin, int y_origin)
+{
+	scale_param_t param;
+
+	if (! ParseScaleStr(x_val, &param.scale_x) ||
+		! ParseScaleStr(y_val, &param.scale_y))
+	{
+		Beep();
+		return;
+	}
+
+	if (param.scale_x <= 0 || param.scale_y <= 0)
+	{
+		Beep();
+		return;
+	}
+
+	DetermineOrigin(param, x_origin, y_origin);
+
+	BA_Begin();
 
 	DoScaleTwoStuff(*edit.Selected, param);
 

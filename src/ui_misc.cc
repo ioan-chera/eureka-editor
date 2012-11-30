@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ui_window.h"
 #include "ui_misc.h"
+#include "x_mirror.h"
 
 
 UI_MoveDialog::UI_MoveDialog() :
@@ -116,9 +117,10 @@ UI_ScaleDialog::UI_ScaleDialog() :
 	scale_y->value("1");
 	
 	origin = new Fl_Choice(95, 90, 140, 25, "origin:");
-	origin->add("Center|Bottom|Bottom Left|Bottom Right|"
-	            "Left|Right|Top|Top Left|Top Right");
-	origin->value(0);
+	origin->add("Bottom Left|Bottom|Bottom Right|"
+	            "Left|Centre|Right|"
+	            "Top Left|Top|Top Right");
+	origin->value(4);
 
 	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
 	grp->box(FL_FLAT_BOX);
@@ -179,7 +181,13 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ScaleDialog * that = (UI_ScaleDialog *)data;
 
-	/* FIXME */
+	const char *x_val = that->scale_x->value();
+	const char *y_val = that->scale_y->value();
+
+	int x_offset = (that->origin->value() % 3) - 1;
+	int y_offset = (that->origin->value() / 3) - 1;
+
+	CMD_ScaleObjectsByStr(x_val, y_val, x_offset, y_offset);
 
 	that->want_close = true;
 }
