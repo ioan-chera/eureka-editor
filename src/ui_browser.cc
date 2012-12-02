@@ -50,9 +50,9 @@ extern std::map<int, thingtype_t *>  thing_types;
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-	                       const char *_desc, char _category) :
+	                       const char *_desc, int _num, char _category) :
 	Fl_Group(X, Y, W, H, ""),
-	desc(_desc), category(_category),
+	desc(_desc), number(_num), category(_category),
 	button(NULL), pic(NULL)
 {
 	end();
@@ -71,10 +71,10 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 /* image item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-						   const char * _desc, char _category,
+						   const char * _desc, int _num, char _category,
 						   int pic_w, int pic_h, UI_Pic *_pic) :
 	Fl_Group(X, Y, W, H, ""),
-	desc(_desc), category(_category),
+	desc(_desc), number(_num), category(_category),
 	button(NULL), pic(_pic)
 {
 	end();
@@ -122,25 +122,25 @@ void Browser_Item::flat_callback(Fl_Widget *w, void *data)
 
 void Browser_Item::thing_callback(Fl_Widget *w, void *data)
 {
-	int new_type = w->argument();
+	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->thing_box->SetThingType(new_type);
+	main_win->thing_box->SetThingType(item->number);
 }
 
 
 void Browser_Item::line_callback(Fl_Widget *w, void *data)
 {
-	int new_type = w->argument();
+	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->line_box->SetLineType(new_type);
+	main_win->line_box->SetLineType(item->number);
 }
 
 
 void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 {
-	int new_type = w->argument();
+	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->sec_box->SetSectorType(new_type);
+	main_win->sec_box->SetSectorType(item->number);
 }
 
 
@@ -223,7 +223,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 		pics = new Fl_Check_Button(X+202, cy, 20, 22, "Pics");
 		pics->align(FL_ALIGN_RIGHT);
 		pics->value(1);
-///???		pics->callback(filter_callback, this);
+///???		pics->callback(repop_callback, this);
 
 		add(pics);
 	}
@@ -436,20 +436,22 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, int method)
 	const char *sa = A->desc.c_str();
 	const char *sb = B->desc.c_str();
 
-	if (method != 1)  // 1 = Numeric
+	if (method == 1)  // 1 = Numeric
 	{
-		if (strchr(sa, '/')) sa = strchr(sa, '/') + 1;
-		if (strchr(sb, '/')) sb = strchr(sb, '/') + 1;
+		return (A->number - B->number);
+	}
 
-		// 2 = Alphabetical in LINEDEF mode, so skip trigger type (SR etc)
-		if (method == 2)
-		{
-			while (isspace(*sa)) sa++;
-			while (isspace(*sb)) sb++;
+	if (strchr(sa, '/')) sa = strchr(sa, '/') + 1;
+	if (strchr(sb, '/')) sb = strchr(sb, '/') + 1;
 
-			while (! isspace(*sa)) sa++;
-			while (! isspace(*sb)) sb++;
-		}
+	// 2 = Alphabetical in LINEDEF mode, skip trigger type (SR etc)
+	if (method == 2)
+	{
+		while (isspace(*sa)) sa++;
+		while (isspace(*sb)) sb++;
+
+		while (! isspace(*sa)) sa++;
+		while (! isspace(*sb)) sb++;
 	}
 
 	return strcmp(sa, sb);
@@ -600,7 +602,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		}
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, category,
+		                                      full_desc, 0 /* num */, category,
 		                                      pic_w, pic_h, pic);
 		scroll->Add(item);
 
@@ -631,7 +633,7 @@ void UI_Browser_Box::Populate_Sprites()
 		const char *name = info->desc;
 
 		if (sortm->value() & 1)
-			sprintf(full_desc, "%5d", TI->first);
+			sprintf(full_desc, "%d", TI->first);
 		else
 			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
 
@@ -644,13 +646,14 @@ void UI_Browser_Box::Populate_Sprites()
 		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
 
 		pic->color(FL_BLACK);
-
 		pic->GetSprite(TI->first);
-		pic->callback(Browser_Item::thing_callback, NULL);
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, info->group,
+		                                      full_desc, TI->first, info->group,
 		                                      pic_w, pic_h, pic);
+
+		pic->callback(Browser_Item::thing_callback, item);
+
 		scroll->Add(item);
 
 		cy += item->h();
@@ -675,10 +678,9 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, info->group);
 
-		item->button->callback(Browser_Item::thing_callback, NULL);
-		item->button->argument(TI->first);
+		item->button->callback(Browser_Item::thing_callback, item);
 
 		scroll->Add(item);
 
@@ -705,10 +707,9 @@ void UI_Browser_Box::Populate_LineTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
 		         TidyLineDesc(info->desc));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, info->group);
 
-		item->button->callback(Browser_Item::line_callback, NULL);
-		item->button->argument(TI->first);
+		item->button->callback(Browser_Item::line_callback, item);
 
 		scroll->Add(item);
 
@@ -734,10 +735,9 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, 0);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, 0 /* cat */);
 
-		item->button->callback(Browser_Item::sector_callback, NULL);
-		item->button->argument(TI->first);
+		item->button->callback(Browser_Item::sector_callback, item);
 
 		scroll->Add(item);
 

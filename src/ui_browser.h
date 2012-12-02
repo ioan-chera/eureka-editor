@@ -32,6 +32,8 @@ private:
 public:
 	std::string desc;
 
+	int number;
+
 	char category;
 
 	Fl_Repeat_Button * button;
@@ -41,11 +43,11 @@ public:
 public:
 	// this constructor makes a simple text button
 	Browser_Item(int X, int Y, int W, int H,
-	             const char *_desc, char _category);
+	             const char *_desc, int _num, char _category);
 
 	// this constructor makes a picture with a text label below it
 	Browser_Item(int X, int Y, int W, int H,
-	             const char * _desc, char _category,
+	             const char * _desc, int _num, char _category,
 	             int pic_w, int pic_h, UI_Pic *_pic);
 
 	virtual ~Browser_Item();
