@@ -2,6 +2,8 @@
 WORKFLOW DIFFERENCES TO YADEX
 -----------------------------
 
+(TODO: move this stuff to documentation)
+
 1. can "draw" linedefs in VERTEX mode by pressing SPACE.
    
    can start in a blank spot or highlight a vertex to start at.
@@ -31,10 +33,9 @@ WORKFLOW DIFFERENCES TO YADEX
 6. can split a sector by just adding one or more linedefs from
    one side of the sector to the another.
 
-7. in SECTOR mode, can position the mouse pointer inside an area
-   and press SPACE to insert a new sector.  NOTE: any existing
-   sector will be replaced.
-   
-8. in SECTOR mode, the 'c' key will "correct" an existing sector
-   (which currently must be highlighted when pressing the 'c' key).
+7. in SECTOR mode, can position the mouse pointer inside an 
+   sectorless area and press SPACE to insert a new sector.
+ 
+8. in SECTOR mode, the SPACE key will "correct" an existing sector
+   (which currently must be highlighted when pressing SPACE).
 
