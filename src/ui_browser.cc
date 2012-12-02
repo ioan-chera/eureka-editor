@@ -299,7 +299,11 @@ void UI_Browser_Box::sort_callback(Fl_Widget *w, void *data)
 {
 	UI_Browser_Box *that = (UI_Browser_Box *)data;
 
-	that->Sort();
+	// for things in picture mode, need to re-populate
+	if (that->kind == 'O' && that->pics->value())
+		that->Populate();
+	else
+		that->Sort();
 }
 
 
@@ -620,9 +624,16 @@ void UI_Browser_Box::Populate_Sprites()
 	{
 		thingtype_t *info = TI->second;
 
+		// ignore sprite-less things
+		if (y_stricmp(info->sprite, "NULL") == 0)
+			continue;
+
 		const char *name = info->desc;
 
-		snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
+		if (sortm->value() & 1)
+			sprintf(full_desc, "%5d", TI->first);
+		else
+			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
 
 		int pic_w = 80;
 		int pic_h = 80;
