@@ -1,0 +1,432 @@
+#------------------------------------------------------------------------
+#  DOOM 1/2 common textures
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+## FIXME: separate out the DOOM 2 specific ones
+
+texturegroup h "Hell"
+texturegroup n "Natural"
+texturegroup t "Tech"
+texturegroup u "Urban"
+texturegroup - "OTHER"
+
+texture u STONE2
+texture u STONE3
+texture u SW1BRIK
+texture u SW2BRIK
+texture u SW1STON1
+texture u SW2STON1
+texture u CEMENT1
+texture u CEMENT2
+texture u CEMENT3
+texture u CEMENT4
+texture u CEMENT5
+texture u CEMENT6
+texture u SW1CMT
+texture u SW2CMT
+
+texture h BLODRIP1
+texture h BLODRIP2
+texture h BLODRIP3
+texture h BLODRIP4
+texture h DOORBLU2
+texture h DOORRED2
+texture h DOORYEL2
+texture h FIREBLU1
+texture h FIREBLU2
+texture h FIRELAV2
+texture h FIRELAV3
+texture h FIRELAVA
+texture h FIREMAG1
+texture h FIREMAG2
+texture h FIREMAG3
+texture h FIREWALA
+texture h FIREWALB
+texture h FIREWALL
+texture h PIPE1
+texture h REDWALL
+texture h SK_LEFT
+texture h SK_RIGHT
+texture h SKIN2
+texture h SKINCUT
+texture h SKINEDGE
+texture h SKINFACE
+texture h SKINLOW
+texture h SKINMET1
+texture h SKINMET2
+texture h SKINSCAB
+texture h SKINSYMB
+texture h SKSNAKE1
+texture h SKSNAKE2
+texture h SKSPINE1
+texture h SKSPINE2
+texture h SLOPPY1
+texture h SLOPPY2
+texture h SP_FACE1
+texture h SP_FACE2
+texture h SP_HOT1
+texture h SW1HOT
+texture h SW2HOT
+texture h SW1SKIN
+texture h SW2SKIN
+texture h SW1SKULL
+texture h SW2SKULL
+texture h ZZZFACE1
+texture h ZZZFACE2
+texture h ZZZFACE3
+texture h ZZZFACE4
+texture h ZZZFACE5
+texture h ZZZFACE6
+texture h ZZZFACE7
+texture h ZZZFACE8
+texture h ZZZFACE9
+
+texture h GSTFONT1
+texture h GSTFONT2
+texture h GSTFONT3
+texture h GSTGARG
+texture h GSTLION
+texture h GSTONE1
+texture h GSTONE2
+texture h GSTSATYR
+texture h GSTVINE1
+texture h GSTVINE2
+texture h MARBFAC2
+texture h MARBFAC3
+texture h MARBFACE
+texture h MARBLE1
+texture h MARBLE2
+texture h MARBLE3
+texture h MARBLOD1
+texture h SP_DUDE1
+texture h SP_DUDE2
+texture h SP_DUDE4
+texture h SP_DUDE5
+texture h SW1GSTON
+texture h SW2GSTON
+texture h SW1MARB
+texture h SW2MARB
+
+texture t BIGDOOR2
+texture t BIGDOOR3
+texture t BIGDOOR4
+texture t BRNPOIS
+texture t BRNSMAL1
+texture t BRNSMAL2
+texture t BRNSMALC
+texture t BRNSMALL
+texture t BRNSMALR
+texture t BROVINE2
+texture t BROWN1
+texture t BROWN144
+texture t BROWN96
+texture t BROWNGRN
+texture t BROWNHUG
+texture t BROWNPIP
+texture t CRATE1
+texture t CRATE2
+texture t CRATELIT
+texture t CRATINY
+texture t CRATWIDE
+texture t DOORBLU
+texture t DOORRED
+texture t DOORSTOP
+texture t DOORTRAK
+texture t DOORYEL
+texture t EXITDOOR
+texture t EXITSIGN
+texture t EXITSTON
+texture t GRAY1
+texture t GRAY2
+texture t GRAY4
+texture t GRAY5
+texture t GRAY7
+texture t GRAYBIG
+texture t GRAYPOIS
+texture t GRAYTALL
+texture t GRAYVINE
+texture t ICKWALL1
+texture t ICKWALL2
+texture t ICKWALL3
+texture t ICKWALL4
+texture t ICKWALL5
+texture t ICKWALL7
+texture t NUKE24
+texture t NUKEDGE1
+texture t NUKEPOIS
+texture t PIPE2
+texture t PIPE4
+texture t PIPE6
+texture t PLAT1
+texture t SLADPOIS
+texture t SLADSKUL
+texture t SLADWALL
+texture t STEP2
+texture t STEP3
+texture t STEP4
+texture t STEPTOP
+texture t SUPPORT3
+texture t SW1BRCOM
+texture t SW2BRCOM
+texture t SW1BRN1
+texture t SW2BRN1
+texture t SW1BRN2
+texture t SW2BRN2
+texture t SW1BRNGN
+texture t SW2BRNGN
+texture t SW1BROWN
+texture t SW2BROWN
+texture t SW1DIRT
+texture t SW2DIRT
+texture t SW1EXIT
+texture t SW2EXIT
+texture t SW1GRAY
+texture t SW2GRAY
+texture t SW1GRAY1
+texture t SW2GRAY1
+texture t SW1PIPE
+texture t SW2PIPE
+texture t SW1SLAD
+texture t SW2SLAD
+texture t SW1STARG
+texture t SW2STARG
+texture t SW1STON2
+texture t SW2STON2
+texture t SW1STONE
+texture t SW2STONE
+texture t SW1VINE
+texture t SW2VINE
+
+texture t METAL
+texture t METAL1
+texture t MIDBRN1
+texture t MIDGRATE
+texture t SW1GARG
+texture t SW2GARG
+texture t SW1LION
+texture t SW2LION
+texture t SW1MET2
+texture t SW2MET2
+texture t SW1METAL
+texture t SW2METAL
+texture t SW1SATYR
+texture t SW2SATYR
+
+texture n ROCKRED1
+texture n ROCKRED2
+texture n ROCKRED3
+texture n SP_ROCK1
+texture n STONE
+texture n SW1ROCK
+texture n SW2ROCK
+texture n SW1STON6
+texture n SW2STON6
+texture n SKY1
+texture n SKY2
+texture n SKY3
+
+texture t BIGDOOR1
+texture t BLAKWAL1
+texture t BLAKWAL2
+texture t COMPBLUE
+texture t COMPSPAN
+texture t COMPSTA1
+texture t COMPSTA2
+texture t COMPTALL
+texture t COMPWERD
+texture t DOOR1
+texture t DOOR3
+texture t LITE3
+texture t LITE5
+texture t LITEBLU1
+texture t LITEBLU4
+texture t SHAWN1
+texture t SHAWN2
+texture t SHAWN3
+texture t STARBR2
+texture t STARG1
+texture t STARG2
+texture t STARG3
+texture t STARGR1
+texture t STARGR2
+texture t STARTAN2
+texture t STARTAN3
+texture t STEP1
+texture t STEP5
+texture t STEP6
+texture t STEPLAD1
+texture t SUPPORT2
+texture t SW1BLUE
+texture t SW2BLUE
+texture t SW1COMM
+texture t SW2COMM
+texture t SW1COMP
+texture t SW2COMP
+texture t SW1MOD1
+texture t SW2MOD1
+texture t SW1STRTN
+texture t SW2STRTN
+texture t SW1TEK
+texture t SW2TEK
+texture t TEKBRON1
+texture t TEKBRON2
+texture t TEKGREN1
+texture t TEKGREN2
+texture t TEKGREN3
+texture t TEKGREN4
+texture t TEKGREN5
+texture t TEKLITE
+texture t TEKLITE2
+texture t TEKWALL1
+texture t TEKWALL4
+texture t TEKWALL6
+
+texture u BIGDOOR5
+texture u BIGDOOR6
+texture u BIGDOOR7
+texture u SW1WOOD
+texture u SW2WOOD
+texture u WOOD1
+texture u WOOD3
+texture u WOOD4
+texture u WOOD5
+texture u WOODGARG
+
+flat h BLOOD1
+flat h BLOOD2
+flat h BLOOD3
+
+flat u CEIL1_1
+flat t CEIL1_2
+flat t CEIL1_3
+flat t CEIL3_1
+flat t CEIL3_2
+flat t CEIL3_3
+flat t CEIL3_4
+flat t CEIL3_5
+flat t CEIL3_6
+flat t CEIL4_1
+flat t CEIL4_2
+flat t CEIL4_3
+flat t CEIL5_1
+flat t CEIL5_2
+flat t COMP01
+flat t CONS1_1
+flat t CONS1_5
+flat t CONS1_7
+flat t CRATOP1
+flat t CRATOP2
+flat h DEM1_1
+flat h DEM1_2
+flat h DEM1_3
+flat h DEM1_4
+flat h DEM1_5
+flat h DEM1_6
+
+flat t FLAT1
+flat n FLAT10
+flat u FLAT1_1
+flat u FLAT1_2
+flat u FLAT1_3
+flat t FLAT14
+flat t FLAT17
+flat t FLAT18
+flat t FLAT19
+flat t FLAT2
+flat t FLAT20
+flat t FLAT22
+flat t FLAT23
+flat t FLAT3
+flat t FLAT4
+flat t FLAT5
+flat u FLAT5_1
+flat u FLAT5_2
+flat h FLAT5_3
+flat u FLAT5_4
+flat u FLAT5_5
+flat h FLAT5_6
+flat n FLAT5_7
+flat n FLAT5_8
+flat u FLAT8
+flat t FLAT9
+
+flat t FLOOR0_1
+flat t FLOOR0_2
+flat t FLOOR0_3
+flat t FLOOR0_5
+flat t FLOOR0_6
+flat t FLOOR0_7
+flat t FLOOR1_1
+flat t FLOOR1_6
+flat t FLOOR1_7
+flat t FLOOR3_3
+flat t FLOOR4_1
+flat t FLOOR4_5
+flat t FLOOR4_6
+flat t FLOOR4_8
+flat t FLOOR5_1
+flat t FLOOR5_2
+flat t FLOOR5_3
+flat u FLOOR5_4
+flat h FLOOR6_1
+flat n FLOOR6_2
+flat t FLOOR7_1
+flat h FLOOR7_2
+
+flat n F_SKY1
+
+flat n FWATER1
+flat n FWATER2
+flat n FWATER3
+flat n FWATER4
+flat t GATE1
+flat t GATE2
+flat t GATE3
+flat t GATE4
+flat h LAVA1
+flat h LAVA2
+flat h LAVA3
+flat h LAVA4
+flat u MFLR8_1
+flat n MFLR8_2
+flat n MFLR8_3
+flat n MFLR8_4
+
+flat t NUKAGE1
+flat t NUKAGE2
+flat t NUKAGE3
+
+flat h SFLR6_1
+flat h SFLR6_4
+flat h SFLR7_1
+flat h SFLR7_4
+
+flat t STEP1
+flat t STEP2
+flat t TLITE6_1
+flat t TLITE6_4
+flat t TLITE6_5
+flat t TLITE6_6
+
