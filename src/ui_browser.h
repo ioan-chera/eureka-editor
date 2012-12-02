@@ -76,6 +76,8 @@ private:
 
 	UI_Scroll *scroll;
 
+	bool pic_mode;
+
 	char cat_letters[64];
 
 public:

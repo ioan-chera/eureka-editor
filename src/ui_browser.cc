@@ -149,7 +149,7 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 
 UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind) :
     Fl_Group(X, Y, W, H, NULL),
-	kind(_kind)
+	kind(_kind), pic_mode(false)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -201,7 +201,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 		sortm->labelsize(KF_fonth);
 		sortm->textsize(KF_fonth);
 
-		// things (in picture mode anyway) need to repopulate
+		// things need to repopulate (in picture mode anyway)
 		if (kind == 'O')
 			sortm->callback(repop_callback, this);
 		else
@@ -223,7 +223,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	pics = NULL;
 
-	if (strchr("O", kind))
+	if (strchr("O", kind))  // TODO: non-pic mode for textures / flats
 	{
 		pics = new Fl_Check_Button(X+202, cy, 20, 22, "Pics");
 		pics->align(FL_ALIGN_RIGHT);
@@ -267,7 +267,7 @@ void UI_Browser_Box::resize(int X, int Y, int W, int H)
 	rs_box->resize(X + W - 10, Y + rs_box->h(), 8, H - rs_box->h());
 
 	// rearrange images
-	if (kind == 'T' || kind == 'F' || kind == 'O')
+	if (pic_mode)
 	{
 		Filter();
 	}
@@ -308,8 +308,6 @@ bool UI_Browser_Box::Filter(bool force_update)
 {
 //!!!!	pack->scroll_to(0, 0);
 
-	bool side_by_side = (kind == 'F' || kind == 'T' || kind == 'O');
-
 	bool changes = false;
 
 	int left_X  = scroll->x() + SBAR_W;
@@ -347,7 +345,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 		}
 
 		// can it fit on the current row?
-		if (side_by_side && (cx <= left_X || (cx + item->w()) <= right_X))
+		if (pic_mode && (cx <= left_X || (cx + item->w()) <= right_X))
 		{
 			// Yes
 		}
@@ -551,6 +549,8 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
+	pic_mode = true;
+
 	scroll->color(FL_BLACK, FL_BLACK);
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
@@ -615,6 +615,8 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 void UI_Browser_Box::Populate_Sprites()
 {
 	/* Note: the side-by-side packing is done in Filter() method */
+
+	pic_mode = true;
 
 	scroll->color(FL_BLACK, FL_BLACK);
 	scroll->resize_horiz(false);
@@ -760,6 +762,8 @@ void UI_Browser_Box::Populate()
 	scroll->color(FL_DARK3, FL_DARK3);
 	scroll->resize_horiz(true);
 	scroll->Line_size(28 * 2);
+
+	pic_mode = false;
 
 	switch (kind)
 	{
