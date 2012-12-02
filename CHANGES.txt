@@ -4,6 +4,8 @@ CHANGES IN Eureka 0.xx
 
 +  implemented Move/Scale/Rotate dialogs (via Edit menu)
 
++  implemented picture mode for Thing browser
+
 -  shortcut key for 'File/Export Map' is now CTRL-E
 
 -  when rotating a group of things, update their angles too
