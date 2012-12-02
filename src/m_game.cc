@@ -98,9 +98,9 @@ static rgb_color_t ParseHexColor(const char *str)
 }
 
 
-static byte ParseThingdefFlags(const char *s)
+static short ParseThingdefFlags(const char *s)
 {
-	byte flags = 0;
+	short flags = 0;
 
 	if (strchr(s, 'i')) flags |= THINGDEF_INVIS;
 	if (strchr(s, 'c')) flags |= THINGDEF_CEIL;

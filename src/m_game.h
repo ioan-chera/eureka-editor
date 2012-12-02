@@ -75,9 +75,9 @@ thinggroup_t;
 // thing <number> <group> <flags> <radius> <description> [<sprite>]
 typedef struct
 {
-	char group;    // Thing group
-	byte flags;    // Flags
-	int radius;    // Radius of thing
+	char group;      // Thing group
+	short flags;     // Flags
+	short radius;    // Radius of thing
 	const char *desc;  // Short description of thing
 	const char *sprite;  // Root of name of sprite for thing
 	rgb_color_t color;   // RGB color (from group)
