@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  Flat/Texture List
+//  Flat / Texture / Thing Browser
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -121,8 +121,9 @@ private:
 	char *TidySearch() const;
 
 	static void filter_callback(Fl_Widget *w, void *data);
-	static void hide_callback(Fl_Widget *w, void *data);
-	static void sort_callback(Fl_Widget *w, void *data);
+	static void   hide_callback(Fl_Widget *w, void *data);
+	static void  repop_callback(Fl_Widget *w, void *data);
+	static void   sort_callback(Fl_Widget *w, void *data);
 };
 
 

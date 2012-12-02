@@ -200,7 +200,12 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 		sortm->value((kind == 'O') ? 0 : 1);
 		sortm->labelsize(KF_fonth);
 		sortm->textsize(KF_fonth);
-		sortm->callback(sort_callback, this);
+
+		// things (in picture mode anyway) need to repopulate
+		if (kind == 'O')
+			sortm->callback(repop_callback, this);
+		else
+			sortm->callback(sort_callback, this);
 
 		add(sortm);
 
@@ -218,12 +223,12 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	pics = NULL;
 
-	if (strchr("FTO", kind))
+	if (strchr("O", kind))
 	{
 		pics = new Fl_Check_Button(X+202, cy, 20, 22, "Pics");
 		pics->align(FL_ALIGN_RIGHT);
 		pics->value(1);
-///???		pics->callback(repop_callback, this);
+		pics->callback(repop_callback, this);
 
 		add(pics);
 	}
@@ -236,18 +241,6 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	scroll = new UI_Scroll(X, cy, W, H-3 - top_H);
 
 	scroll->box(FL_FLAT_BOX);
-
-	if (kind == 'T' || kind == 'F' || kind == 'O')
-	{
-		scroll->color(FL_BLACK, FL_BLACK);
-		scroll->Line_size(98);
-	}
-	else
-	{
-		scroll->color(FL_DARK3, FL_DARK3);
-		scroll->resize_horiz(true);
-		scroll->Line_size(28 * 2);
-	}
 
 	add(scroll);
 
@@ -295,15 +288,19 @@ void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_Browser_Box::repop_callback(Fl_Widget *w, void *data)
+{
+	UI_Browser_Box *that = (UI_Browser_Box *)data;
+
+	that->Populate();
+}
+
+
 void UI_Browser_Box::sort_callback(Fl_Widget *w, void *data)
 {
 	UI_Browser_Box *that = (UI_Browser_Box *)data;
 
-	// for things in picture mode, need to re-populate
-	if (that->kind == 'O' && that->pics->value())
-		that->Populate();
-	else
-		that->Sort();
+	that->Sort();
 }
 
 
@@ -554,6 +551,10 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
+	scroll->color(FL_BLACK, FL_BLACK);
+	scroll->resize_horiz(false);
+	scroll->Line_size(98);
+
 	std::map<std::string, Img *>::iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
@@ -614,6 +615,10 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 void UI_Browser_Box::Populate_Sprites()
 {
 	/* Note: the side-by-side packing is done in Filter() method */
+
+	scroll->color(FL_BLACK, FL_BLACK);
+	scroll->resize_horiz(false);
+	scroll->Line_size(98);
 
 	std::map<int, thingtype_t *>::iterator TI;
 
@@ -751,6 +756,11 @@ void UI_Browser_Box::Populate()
 	// delete existing ones
 	scroll->Remove_all();
 
+	// default background and scroll rate
+	scroll->color(FL_DARK3, FL_DARK3);
+	scroll->resize_horiz(true);
+	scroll->Line_size(28 * 2);
+
 	switch (kind)
 	{
 		case 'T':
@@ -762,7 +772,10 @@ void UI_Browser_Box::Populate()
 			break;
 
 		case 'O':
-			Populate_Sprites();
+			if (pics->value())
+				Populate_Sprites();
+			else
+				Populate_ThingTypes();
 			break;
 
 		case 'L':
