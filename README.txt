@@ -25,12 +25,30 @@ indepedent program now, and it has a different workflow than
 Yadex or DEU.
 
 
+FEATURES
+
+-  Undo/Redo (multiple levels)
+-  3D preview (does not require hardware acceleration)
+-  editable panels for things, linedefs, sectors (etc)
+-  browser for textures, flats, things (etc)
+-  built-in nodes builder
+
+
+SUPPORTED GAMES
+
+-  DOOM
+-  DOOM 2
+-  Final Doom
+-  FreeDoom
+-  Heretic
+
+
 REQUIREMENTS
 
 -  128 MB of computer memory
 -  800x600 or higher screen resolution
 -  a keyboard and a two-button mouse
--  the data (iwad) file from a supported game (e.g. DOOM)
+-  the data (iwad) file from a supported game
 
 
 COMPILING / SETTING UP
