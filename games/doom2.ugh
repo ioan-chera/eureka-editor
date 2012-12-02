@@ -56,9 +56,9 @@ thing   81 g -  16 BRS1   "Pool of brains"
 thing   85 l l  16 TLMP   "Tall mercury lamp"
 thing   86 l l  16 TLP2   "Short mercury lamp"
 
-thing   87 m l  16 FIREF  "Spawn spot"
-thing   88 m -  16 BBRN   "Boss brain"
-thing   89 m -  16 BOSFB  "Boss shooter"
+thing   87 - l  16 FIREF  "Spawn spot"
+thing   88 - -  16 BBRN   "Boss brain"
+thing   89 - -  16 BOSFB  "Boss shooter"
 
 
 #---- DOOM 2 TEXTURES ----------------
