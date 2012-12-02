@@ -12,13 +12,6 @@ ______________________________________________________________________
 General
 -------
 
-+  support resource wads
-   (a) -merge option for command line [DONE!]
-   (b) open them in R/O mode (like the IWAD)
-   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
-       [probably port and mod too] and ability to change them
-   (d) persist in a lump, e.g. "__EUREKA"
-
 +  CHECK screen
    -  linedefs without right side
    -  zero-length linedefs
@@ -26,7 +19,8 @@ General
    -  can remove unused Vertices, SideDefs and Sectors
 
 +  configurable keys
-   (a) will need at least two contexts: "editor" and "render"
+   (a) will need various contexts: one for each editing mode,
+       one for ALL modes (e.g. "global"), one for 3D view,
        and possibly "browser".
 
 +  nicer way to select map, render a small 2D version of each map
@@ -63,8 +57,6 @@ Editing
 Browser
 -------
 
-+  picture mode for things
-
 
 ______________________________________________________________________
 
@@ -79,12 +71,23 @@ General
    save early logs in memory
 
 +  configurable list of iwad names to look for
+   -  iwad_names.cfg, look in home_dir, otherwise install_dir
 
 +  on error, ability to save/export current map
    [unless error was in save code]
 
 +  configurable grid colors, 
    IDEA: grid has separate color for 64x64 flat alignment
+
++  File / Play Map
+   +  make filenames absolute
+   +  configurable stuff:
+      -  directory to 'cd' into
+      -  program to invoke
+      -  arguments to use (-iwad, -file, -merge, -warp)
+   -  support resource wads
+   -  make sure the user built the nodes
+      (ideally invoke it automatically)
 
 
 -  fix: [ ] keys not working when 3D preview is on
@@ -114,6 +117,9 @@ General
 ?  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
+
+IDEA: after inserting a new object, allow moving another object
+      (i.e. set edit.did_a_move = true).  Perhaps config item.
 
 IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
 
@@ -187,6 +193,7 @@ Editing
    update the X offset on the appropriate side (right side for start,
    left side for end vertex).
 
+
 -  ability to move and/or zoom map to show selected object(s)
    [can zoom OUT, but only zoom IN if multiple and very small]
 
@@ -234,8 +241,6 @@ Editing
     the user can set the default values.  Mode is indicated by the
     title background being blue and title says "Default Properties".
     Perhaps activated by right clicking the title (and/or a key).
-
-?  figure out how 'n' next / 'p' prev functions should work
 
 ?  SHIFT + SPACE = no auto create/split sectors
 

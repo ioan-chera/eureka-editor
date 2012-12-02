@@ -6,6 +6,14 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
++  support resource wads
+   (a) -merge option for command line [DONE!]
+   (b) open them in R/O mode (like the IWAD)
+   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
+       [probably port and mod too] and ability to change them
+   (d) persist in a lump, e.g. "__EUREKA"
+   (e) load definitions from mods/<base>.ugh
+
 
 Documentation
 -------------
@@ -18,9 +26,20 @@ Coding
 Editing
 -------
 
+-  disable 'next' and 'prev' mis-feature
+
+   OLD IDEA: probably use selection:
+   -  if nothing selected, select the first/last object
+   -  if one object selected, reselect the next (beep if last)
+   -  beep if 2+ objects selected
+
+-  jump to object (need a decent GoToObject)
+
 
 Browser
 -------
+
+DONE:  picture mode for things
 
 
 Renderer
@@ -29,4 +48,6 @@ Renderer
 
 Game / Port Definitions
 -----------------------
+
+DONE:  split doom_common --> doom_things, doom_tex
 
