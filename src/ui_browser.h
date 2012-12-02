@@ -107,6 +107,8 @@ private:
 	bool SearchMatch(Browser_Item *item) const;
 
 	void Populate_Images(std::map<std::string, Img *> & img_list);
+	void Populate_Sprites();
+
 	void Populate_ThingTypes();
 	void Populate_LineTypes();
 	void Populate_SectorTypes();

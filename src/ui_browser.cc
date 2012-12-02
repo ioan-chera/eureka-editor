@@ -237,7 +237,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	scroll->box(FL_FLAT_BOX);
 
-	if (kind == 'T' || kind == 'F')
+	if (kind == 'T' || kind == 'F' || kind == 'O')
 	{
 		scroll->color(FL_BLACK, FL_BLACK);
 		scroll->Line_size(98);
@@ -274,7 +274,7 @@ void UI_Browser_Box::resize(int X, int Y, int W, int H)
 	rs_box->resize(X + W - 10, Y + rs_box->h(), 8, H - rs_box->h());
 
 	// rearrange images
-	if (kind == 'T' || kind == 'F')
+	if (kind == 'T' || kind == 'F' || kind == 'O')
 	{
 		Filter();
 	}
@@ -307,7 +307,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 {
 //!!!!	pack->scroll_to(0, 0);
 
-	bool side_by_side = (kind == 'F' || kind == 'T');
+	bool side_by_side = (kind == 'F' || kind == 'T' || kind == 'O');
 
 	bool changes = false;
 
@@ -605,6 +605,48 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 }
 
 
+void UI_Browser_Box::Populate_Sprites()
+{
+	/* Note: the side-by-side packing is done in Filter() method */
+
+	std::map<int, thingtype_t *>::iterator TI;
+
+	int cx = scroll->x() + SBAR_W;
+	int cy = scroll->y();
+
+	char full_desc[256];
+
+	for (TI = thing_types.begin() ; TI != thing_types.end() ; TI++)
+	{
+		thingtype_t *info = TI->second;
+
+		const char *name = info->desc;
+
+		snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
+
+		int pic_w = 80;
+		int pic_h = 80;
+
+		int item_w = 8 + MAX(pic_w, 64) + 2;
+		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
+
+		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
+
+		pic->color(FL_BLACK);
+
+		pic->GetSprite(TI->first);
+		pic->callback(Browser_Item::thing_callback, NULL);
+
+		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
+		                                      full_desc, info->group,
+		                                      pic_w, pic_h, pic);
+		scroll->Add(item);
+
+		cy += item->h();
+	}
+}
+
+
 void UI_Browser_Box::Populate_ThingTypes()
 {
 	std::map<int, thingtype_t *>::iterator TI;
@@ -709,7 +751,7 @@ void UI_Browser_Box::Populate()
 			break;
 
 		case 'O':
-			Populate_ThingTypes();
+			Populate_Sprites();
 			break;
 
 		case 'L':
