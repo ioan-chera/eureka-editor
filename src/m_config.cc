@@ -49,6 +49,10 @@ extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
+extern bool glbsp_fast;
+extern bool glbsp_verbose;
+extern bool glbsp_warn;
+
 extern int gui_scheme;
 extern int gui_color_set;
 extern int new_sector_size;
@@ -248,6 +252,34 @@ static const opt_desc_t options[] =
 		&Level_name
 	},
 
+	/* ------------ Preferences ------------ */
+
+	{	"glbsp_fast",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Node building: enable fast mode (may be lower quality)",
+		NULL,
+		&glbsp_fast
+	},
+
+	{	"glbsp_verbose",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Node building: be verbose, show level information",
+		NULL,
+		&glbsp_verbose
+	},
+
+	{	"glbsp_warn",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Node building: show all warning messages",
+		NULL,
+		&glbsp_warn
+	},
 
 	{	"copy_linedef_reuse_sidedefs",
 		0,

@@ -31,6 +31,12 @@
 #include "glbsp.h"
 
 
+// config items
+bool glbsp_fast    = false;
+bool glbsp_verbose = false;
+bool glbsp_warn    = false;
+
+
 static glbsp::nodebuildinfo_t nb_info;
 static volatile glbsp::nodebuildcomms_t nb_comms;
 
@@ -198,10 +204,11 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.input_file  = glbsp::GlbspStrDup(in_name);
 	nb_info.output_file = glbsp::GlbspStrDup(out_name);
 
-	nb_info.quiet = TRUE;  // CONFIG ITEM
-	nb_info.pack_sides = FALSE;  // CONFIG ITEM
-	nb_info.fast = FALSE;   // CONFIG ITEM
+	nb_info.fast          = glbsp_fast ? TRUE : FALSE;
+	nb_info.quiet         = glbsp_verbose ? FALSE : TRUE;
+	nb_info.mini_warnings = glbsp_warn ? TRUE : FALSE;
 
+	nb_info.pack_sides = FALSE;
 	nb_info.force_normal = TRUE;
 
 	glbsp::glbsp_ret_e  ret;
