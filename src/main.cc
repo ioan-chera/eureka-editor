@@ -112,6 +112,15 @@ int show_help     = 0;
 int show_version  = 0;
 
 
+// config items
+int gui_scheme    = 2;  // plastic
+int gui_color_set = 1;  // bright
+
+rgb_color_t gui_custom_bg = 0xCCD5DD00;
+rgb_color_t gui_custom_ig = 0xFFFFFF00;
+rgb_color_t gui_custom_fg = 0x00000000;
+
+
 /*
  *  Prototypes of private functions
  */
@@ -539,17 +548,38 @@ static void InitFLTK()
 	 */
 	Fl::visual(FL_RGB);
 
-	// FIXME: CONFIG OPTION
-	bool alternate_look = false;
 
-	if (! alternate_look)
+	if (gui_color_set == 0)
+	{
+		// use default colors
+	}
+	else if (gui_color_set == 1)
 	{
 		Fl::background(236, 232, 228);
 		Fl::background2(255, 255, 255);
 		Fl::foreground(0, 0, 0);
+	}
+	else
+	{
+		// custom colors
+		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
+		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
+		Fl::foreground (RGB_RED(gui_custom_fg), RGB_GREEN(gui_custom_fg), RGB_BLUE(gui_custom_fg));
+	}
 
+	if (gui_scheme == 0)
+	{
+		// use default scheme
+	}
+	else if (gui_scheme == 1)
+	{
+		Fl::scheme("gtk+");
+	}
+	else
+	{
 		Fl::scheme("plastic");
 	}
+
 
 #ifdef UNIX
 	Fl_File_Icon::load_system_icons();
@@ -585,7 +615,7 @@ static void InitFLTK()
 	}
 
 	// kill the stupid bright background of the "plastic" scheme
-	if (! alternate_look)
+	if (gui_scheme == 2)
 	{
 		delete Fl::scheme_bg_;
 		Fl::scheme_bg_ = NULL;

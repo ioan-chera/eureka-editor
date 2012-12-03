@@ -49,7 +49,9 @@ extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
-extern int  new_sector_size;
+extern int gui_scheme;
+extern int gui_color_set;
+extern int new_sector_size;
 
 
 //------------------------------------------------------------------------
@@ -335,6 +337,24 @@ static const opt_desc_t options[] =
 		"The ESC key will quit Eureka",
 		NULL,
 		&escape_key_quits
+	},
+
+	{	"gui_scheme",
+		0,
+		OPT_INTEGER,
+		"",
+		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
+		NULL,
+		&gui_scheme
+	},
+
+	{	"gui_color_set",
+		0,
+		OPT_INTEGER,
+		"",
+		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
+		NULL,
+		&gui_color_set
 	},
 
 	{	"leave_offsets_alone",
