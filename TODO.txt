@@ -14,6 +14,8 @@ General
    (d) persist in a lump, e.g. "__EUREKA"
    (e) load definitions from mods/<base>.ugh
 
+-  make multi-select optional (if off, require CTRL key)
+
 
 Documentation
 -------------
@@ -34,6 +36,10 @@ Editing
    -  beep if 2+ objects selected
 
 -  jump to object (need a decent GoToObject)
+
+SUGGEST: Probably switching around [/] and ,/. -- the keys on the lower row
+         should be responsible for floor height and ones on the higher low for
+         the ceiling height.
 
 
 Browser

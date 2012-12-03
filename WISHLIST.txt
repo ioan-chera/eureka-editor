@@ -67,6 +67,13 @@ ______________________________________________________________________
 General
 -------
 
++  ability to set other themes
+   (a) "none", "gtk+", "plastic"
+   (b) colors: default, bright, xxx, custom
+   (c) font size (HARD!)
+
++  able to see what exact warnings and errors from node builder
+
 +  by default, write logs to ~/.eureka/LOGS.txt
    save early logs in memory
 
