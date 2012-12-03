@@ -637,8 +637,6 @@ void UI_Browser_Box::Populate_Sprites()
 		if (y_stricmp(info->sprite, "NULL") == 0)
 			continue;
 
-		const char *name = info->desc;
-
 		if (sortm->value() & 1)
 			sprintf(full_desc, "%d", TI->first);
 		else
