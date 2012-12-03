@@ -871,6 +871,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 				for (int m = 0 ; m < NumSectors ; m++)
 					if (Sectors[m]->tag == LineDefs[objnum]->tag)
 						DrawHighlight(OBJ_SECTORS, m, LIGHTRED);
+
+				fl_color(col);
 			}
 
 			int x1 = dx + LineDefs[objnum]->Start()->x;
@@ -926,6 +928,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 				for (int m = 0 ; m < NumLineDefs ; m++)
 					if (LineDefs[m]->tag == Sectors[objnum]->tag)
 						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED);
+
+				fl_color(col);
 			}
 
 			fl_line_style(FL_SOLID, 2);
