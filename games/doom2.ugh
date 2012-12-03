@@ -67,6 +67,7 @@ thing   86 l l  16 TLP2   "Short mercury lamp"
 thing   87 - l  16 FIREF  "Spawn spot"
 thing   88 - -  16 BBRN   "Boss brain"
 thing   89 - -  16 BOSFB  "Boss shooter"
+thing   72 - c  16 KEEN   "Commander Keen"
 
 
 #---- DOOM 2 TEXTURES ----------------
