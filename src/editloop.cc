@@ -59,6 +59,8 @@ bool escape_key_quits = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
+int multi_select_modifier = KM_none;
+
 
 Editor_State_c::Editor_State_c()
     // FIXME !!!!
@@ -1044,6 +1046,13 @@ void EditorMouseRelease()
 		edit.drag_single_vertex = -1;
 		edit.RedrawMap = 1;
 		return;
+	}
+
+	// optional multi-select : require a certain modifier key
+	if (multi_select_modifier != KM_none &&
+		edit.button_mod != multi_select_modifier)
+	{
+		was_did_move = true;
 	}
 
 	if (click_obj() && was_did_move)

@@ -12,6 +12,10 @@ CHANGES IN Eureka 0.xx
 
 -  sectors created outside of map now have fixed size
 
+-  grid_snap button is easier to use (a toggle button now)
+
+-  can disable multi-select ('multi_select_modifier' config var)
+
 -  fixed wrong color of a tagged linedef or sector
 
 -  config: added 'new_sector_size' var

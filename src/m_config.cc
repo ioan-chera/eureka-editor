@@ -57,6 +57,8 @@ extern int gui_scheme;
 extern int gui_color_set;
 extern int new_sector_size;
 
+extern int multi_select_modifier;
+
 
 //------------------------------------------------------------------------
 
@@ -405,6 +407,15 @@ static const opt_desc_t options[] =
 		"Use the mouse wheel events for scrolling, not zooming",
 		NULL,
 		&mouse_wheel_scrolls_map
+	},
+
+	{	"multi_select_modifier",
+		0,
+		OPT_INTEGER,
+		"",
+		"Require a modifier key for multi-select (0 = none, 1 = SHIFT, 2 = CTRL)",
+		NULL,
+		&multi_select_modifier
 	},
 
 	{	"new_islands_are_void",
