@@ -101,7 +101,7 @@ UI_MainWin::UI_MainWin() :
 
 
 	int BY = 0;     // cy+2
-	int BH = ey-3;  // ey-BY-2
+	int BH = ey-4;  // ey-BY-2
 
 	thing_box = new UI_ThingBox(w() - panel_W, BY, panel_W, BH);
 	add(thing_box);

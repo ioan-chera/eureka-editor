@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Information Panel
+//  Vertex Panel + Default Props
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2012 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -25,6 +25,37 @@
 #include "w_rawdef.h"
 
 
+class UI_DefaultProps : public Fl_Group
+{
+private:
+
+public:
+	UI_DefaultProps(int X, int Y, int W, int H) :
+		Fl_Group(X, Y, W, H, NULL)
+	{
+		box(FL_FLAT_BOX);
+
+
+		Fl_Box *title = new Fl_Box(X + 10, Y + 10, W - 62, 30, "Default Properties");
+		title->labelsize(18+KF*4);
+		add(title);
+
+
+		Fl_Box *rs_box = new Fl_Box(FL_NO_BOX, X + 10, Y + H - 16, W - 20, 12, NULL);
+
+		resizable(rs_box);
+
+		end();
+	}
+
+	virtual ~UI_DefaultProps()
+	{ }
+};
+
+
+
+//------------------------------------------------------------------------
+
 //
 // UI_VertexBox Constructor
 //
@@ -32,9 +63,21 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
-	end();  // cancel begin() in Fl_Group constructor
+	box(FL_FLAT_BOX);
 
-	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
+	color(WINDOW_BG, WINDOW_BG);
+
+
+	int top_h = 172;
+
+	idefs = new UI_DefaultProps(X, Y + top_h + 4, W, H - top_h - 4);
+
+	resizable(idefs);
+
+
+	Fl_Group *top_bit = new Fl_Group(X, Y, W, top_h);
+
+	top_bit->box(FL_FLAT_BOX);
 
 
 	X += 6;
@@ -48,8 +91,6 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 
 	which = new UI_Nombre(X, Y, W-10, 28, "Vertex");
 
-	add(which);
-
 	Y += which->h() + 4;
 
 
@@ -62,23 +103,13 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	pos_x->callback(x_callback, this);
 	pos_y->callback(y_callback, this);
 
-	add(pos_x); add(pos_y);
-
 	Y += pos_y->h() + 4;
 
+	top_bit->end();
 
-
-	// ---- resizable ----
-
-#if 0
-	Fl_Box *resize_control = new Fl_Box(FL_NO_BOX, x(), H-4, w(), 4, NULL);
-
-	add(resize_control);
-	resizable(resize_control);
-#endif 
-
-	resizable(NULL);
+	end();
 }
+
 
 //
 // UI_VertexBox Destructor

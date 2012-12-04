@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  Information Panel
+//  Vertex Panel + Default Props
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -27,6 +27,8 @@ class UI_SectorInfo;
 class UI_VertexInfo;
 class UI_RadiusInfo;
 
+class UI_DefaultProps;
+
 
 class UI_VertexBox : public Fl_Group
 {
@@ -34,13 +36,13 @@ private:
 	int obj;
 	int count;
 
-public: //???
-
+public:
 	UI_Nombre *which;
 
 	Fl_Int_Input *pos_x;
 	Fl_Int_Input *pos_y;
 
+	UI_DefaultProps * idefs;
 
 public:
 	UI_VertexBox(int X, int Y, int W, int H, const char *label = NULL);
