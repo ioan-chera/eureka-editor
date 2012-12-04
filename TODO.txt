@@ -6,6 +6,12 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
+>>>  Default Props
+
+-  tweak horiz of pics in sidedef / props
+
+-  tweak horiz of sector panel / props
+
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
@@ -13,8 +19,6 @@ General
        [probably port and mod too] and ability to change them
    (d) persist in a lump, e.g. "__EUREKA"
    (e) load definitions from mods/<base>.ugh
-
--  make multi-select optional (if off, require CTRL key)
 
 
 Documentation
@@ -29,7 +33,9 @@ Editing
 -------
 
 -  disable 'next' and 'prev' mis-feature
-
+   
+   OR: they can step through objects in a "find selection"
+       
    OLD IDEA: probably use selection:
    -  if nothing selected, select the first/last object
    -  if one object selected, reselect the next (beep if last)
@@ -37,15 +43,10 @@ Editing
 
 -  jump to object (need a decent GoToObject)
 
-SUGGEST: Probably switching around [/] and ,/. -- the keys on the lower row
-         should be responsible for floor height and ones on the higher low for
-         the ceiling height.
 
 
 Browser
 -------
-
-DONE:  picture mode for things
 
 
 Renderer
@@ -54,6 +55,4 @@ Renderer
 
 Game / Port Definitions
 -----------------------
-
-DONE:  split doom_common --> doom_things, doom_tex
 

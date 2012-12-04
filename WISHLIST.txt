@@ -318,7 +318,12 @@ IDEA: animation mode, render continuously and show any lighting
 Browser
 -------
 
-+  persist current width (in .dat cache file)
++  a "Recently used" category (sorted by time)
+   -  remember values in .dat cache
+
+-  a "Used in map" category (sorted by usage)
+
+-  persist current width (in .dat cache file)
 
 -  can change the [max] size of the texture/flat previews
 
