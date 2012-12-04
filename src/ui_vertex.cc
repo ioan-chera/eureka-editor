@@ -49,6 +49,9 @@ private:
 	Fl_Input *f_tex;
 	UI_Pic   *f_pic;
 
+	Fl_Input  *thing;
+	Fl_Output *th_desc;
+
 private:
 	static void tex_callback(Fl_Widget *w, void *data)
 	{ /* TODO */ }
@@ -72,7 +75,7 @@ public:
 
 		// ---- LINEDEF TEXTURES ------------
 
-		Fl_Box *line_tit = new Fl_Box(X, Y, W, 30, "Linedef textures:");
+		Fl_Box *line_tit = new Fl_Box(X, Y, W, 30, "Wall textures:");
 		line_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 		Y += line_tit->h() + 2;
@@ -110,10 +113,12 @@ public:
 
 		// ---- SECTOR PROPS --------------
 
+#if 0
 		Fl_Box *sec_tit = new Fl_Box(X, Y, W, 30, "Sector props:");
 		sec_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 		Y += sec_tit->h() + 2;
+#endif
 
 
 		c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
@@ -188,10 +193,18 @@ public:
 //!!		light->callback(room_callback, this);
 		light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-		Y += light->h() + 12;
+		Y += light->h() + 18;
 
 
 		// ---- THING PROPS --------------
+
+		thing = new Fl_Int_Input(X+58, Y, 64, 24, "Thing:  ");
+		thing->align(FL_ALIGN_LEFT);
+//!!		thing->callback(thing_callback, this);
+		thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+		th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 130, 24);
+		th_desc->value("Cyberdemon");
 
 		// TODO....
 
