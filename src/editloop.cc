@@ -799,26 +799,24 @@ bool Editor_Key(int key, keymod_e mod)
 		CMD_SpinThings(-45);
 	}
 
-	// '[': lower floor height
-	else if ((key == '[' || key == '{') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveFloors((key == '[') ? -16 : -2);
-	}
-	// ']': raise floor height
-	else if ((key == ']' || key == '}') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveFloors((key == ']') ? +16 : +2);
-	}
-
-	// '<': lower ceiling height
+	// [.] and [,]: adjust floor height
 	else if ((key == ',' || key == '<') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveCeilings((key == ',') ? -16 : -2);
+		CMD_MoveFloors((mod == KM_SHIFT) ? -1 : -8);
 	}
-	// '>': raise ceiling height
 	else if ((key == '.' || key == '>') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveCeilings((key == '.') ? +16 : +2);
+		CMD_MoveFloors((mod == KM_SHIFT) ? +1 : +8);
+	}
+
+	// '[' and ']': adjust ceiling height
+	else if ((key == '[' || key == '{') && edit.obj_type == OBJ_SECTORS)
+	{
+		CMD_MoveCeilings((mod == KM_SHIFT) ? -1 : -8);
+	}
+	else if ((key == ']' || key == '}') && edit.obj_type == OBJ_SECTORS)
+	{
+		CMD_MoveCeilings((mod == KM_SHIFT) ? +1 : +8);
 	}
 
 

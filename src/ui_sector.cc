@@ -475,21 +475,17 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	int diff = 8;
 	if (Fl::event_shift())
-		diff = 2;
+		diff = 1;
 	else if (Fl::event_ctrl())
 		diff = 64;
 
 	if (w == box->lt_up)
 	{
-		// if (diff == 2) diff = 1;
-
 		CMD_AdjustLight(+diff);
 		return;
 	}
 	else if (w == box->lt_down)
 	{
-		// if (diff == 2) diff = 1;
-
 		CMD_AdjustLight(-diff);
 		return;
 	}
