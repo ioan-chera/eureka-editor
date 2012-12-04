@@ -46,14 +46,12 @@
 #include "ui_window.h"
 
 
-int active_when = 0;
+Editor_State_c  edit;
+
+
+int active_when = 0;  // MOVE THESE
 int active_wmask = 0;
 
-static bool is_butl = false; //FIXME !!!!!
-static bool is_middle = false;
-
-
-Editor_State_c edit;
 
 
 // config items
@@ -996,12 +994,11 @@ bool Editor_Key(int key, keymod_e mod)
 
 void EditorMousePress(keymod_e mod)
 {
-	if (is_middle)
+	if (edit.button_down >= 2)
 		return;
 
-	bool is_ctrl = (mod == KM_CTRL);
-
-	is_butl = true;
+	edit.button_down = 1;
+	edit.button_mod  = mod;
 
 	Objid object;      // The object under the pointer
 
@@ -1009,71 +1006,19 @@ void EditorMousePress(keymod_e mod)
 
 	edit.clicked = object;
 
-	/* Clicking on an empty space starts a new selection box.
-	   Unless [Ctrl] is pressed, it also clears the current selection.
-	 */
+	// clicking on an empty space starts a new selection box.
+
 	if (object.is_nil())
 	{
-///---	edit.clicked = CANVAS;
-		edit.click_ctrl = is_ctrl;
-
-///---		if (! is_ctrl)
-///---		{
-///---			edit.Selected->clear_all();
-///---			edit.RedrawMap = 1;
-///---		}
-
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
-
-
-#if 0  // OLD STUFF, TO BE REMOVED
-
-	/* Clicking on an unselected object unselects
-	   everything but that object. Additionally,
-	   we write the number of the object in case
-	   the user is about to drag it. */
-
-	if (! is_ctrl
-			&& ! IsSelected (edit.Selected, object.num))
-	{
-		edit.clicked        = object;
-		edit.click_ctrl     = 0;
-		edit.click_time     = 0; // is.time;
-
-		//@@@@@
-		// if (edit.Selected == NOTHING)
-
-		edit.Selected->clear_all();
-		SelectObject (edit.Selected, object.num);
-
-		edit.RedrawMap = 1;
-
-		main_win->canvas->redraw();
-		return;
-	}
-
-	/* Clicking on a selected object does nothing ;
-	   the user might want to drag the selection. */
-
-	if (! is_ctrl
-			&& IsSelected (edit.Selected, object.num))
-	{
-		edit.clicked        = object;
-		edit.click_ctrl     = 0;
-		edit.click_time     = 0; /// is.time;
-
-		edit.RedrawMap = 1;
-		return;
-	}
-#endif
 }
 
 
 void EditorMouseRelease()
 {
-	is_butl = false;
+	edit.button_down = 0;
 
 	Objid click_obj(edit.clicked);
 	edit.clicked.clear();
@@ -1148,7 +1093,7 @@ void EditorMouseRelease()
 
 void EditorMiddlePress(keymod_e mod)
 {
-	if (is_butl)
+	if (edit.button_down & 1)  // allow 0 or 2
 		return;
 
 	// ability to insert stuff via the mouse
@@ -1164,7 +1109,8 @@ void EditorMiddlePress(keymod_e mod)
 		return;
 	}
 
-	is_middle = true;
+	edit.button_down = 2;
+	edit.button_mod  = mod;
 
 	int middle_x, middle_y;
 
@@ -1176,7 +1122,7 @@ void EditorMiddlePress(keymod_e mod)
 
 void EditorMiddleRelease()
 {
-	is_middle = false;
+	edit.button_down = 0;
 
 	if (main_win->canvas->isScaleActive())
 	{
@@ -1211,7 +1157,7 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 
 	// fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
-	if (is_middle)
+	if (edit.button_down == 2)
 	{
 		main_win->canvas->ScaleUpdate(edit.map_x, edit.map_y, mod);
 		return;
@@ -1227,7 +1173,6 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 	   corner of the selection box.
 	*/
 	else if (main_win->canvas->isSelboxActive())
-	         ///---  if (is_butl && edit.clicked == CANVAS)
 	{
 		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
 		return;
@@ -1251,7 +1196,7 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 	   begin dragging?
 	   TODO: require pixel dist from click point to be >= THRESHHOLD
 	 */
-	if (is_butl && edit.clicked())
+	if (edit.button_down == 1 && edit.clicked())
 	{
 		if (! edit.Selected->get(edit.clicked.num))
 		{
@@ -1299,17 +1244,19 @@ void Editor_Init()
 {
     memset(&edit, 0, sizeof(edit));  /* Catch-all */
 
-    edit.move_speed          = 20;
-    edit.extra_zoom          = 0;
-    edit.obj_type            = OBJ_THINGS;
+    edit.move_speed = 20;
+    edit.extra_zoom = 0;
+    edit.obj_type   = OBJ_THINGS;
 
     edit.show_object_numbers = false;
     edit.show_things_squares = false;
     edit.show_things_sprites = true;
 
+	edit.button_down = 0;
+	edit.button_mod  = KM_none;
     edit.clicked.clear();
-    edit.click_ctrl          = 0;
-    edit.did_a_move          = false;
+    edit.did_a_move  = false;
+
     edit.highlighted.clear();
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;

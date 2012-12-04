@@ -45,10 +45,12 @@ public:
 	int map_y;
 	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
 
+	int button_down;  // mouse button 1 to 3, or 0 for none,
+	keymod_e button_mod;  // modifier used when button was pressed
+
 	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred. If clicked on
 						// empty space, == CANVAS.
-	int click_ctrl;   // Was Ctrl pressed at the moment of the click?
 	bool did_a_move;   // just moved stuff, clear the next selection
 
 	selection_c *Selected;    // all selected objects (usually empty)
