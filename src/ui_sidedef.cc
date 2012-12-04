@@ -47,7 +47,6 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	
 	add_button = new Fl_Button(X + W - 120, Y, 50, 20, "ADD");
 	add_button->labelcolor(labelcolor());
-//	add_button->color(FL_DARK3, FL_DARK3);
 	add_button->callback(add_callback, this);
 
 	add(add_button);
@@ -55,7 +54,6 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 	del_button = new Fl_Button(X + W - 60, Y, 50, 20, "DEL");
 	del_button->labelcolor(labelcolor());
-//	del_button->color(FL_DARK3, FL_DARK3);
 	del_button->callback(delete_callback, this);
 
 	add(del_button);

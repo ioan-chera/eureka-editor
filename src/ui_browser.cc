@@ -155,7 +155,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	box(FL_FLAT_BOX);  // box(FL_DOWN_BOX);
 
-	color(FL_DARK3, FL_DARK3);
+	color(WINDOW_BG, WINDOW_BG);
 
 
 	strcpy(cat_letters, "*");
@@ -168,10 +168,9 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	title->labelsize(20+KF*4);
 	add(title);
 
-	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X"); // "@>>"
+	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X");
 	hide_button->callback(hide_callback, this);
 	hide_button->labelsize(14);
-//	hide_button->labelcolor(FL_DARK3);
 	add(hide_button);
 
 	cy += title->h() + 6;
@@ -757,7 +756,7 @@ void UI_Browser_Box::Populate()
 	scroll->Remove_all();
 
 	// default background and scroll rate
-	scroll->color(FL_DARK3, FL_DARK3);
+	scroll->color(WINDOW_BG, WINDOW_BG);
 	scroll->resize_horiz(true);
 	scroll->Line_size(28 * 2);
 

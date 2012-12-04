@@ -64,8 +64,7 @@ UI_MainWin::UI_MainWin() :
 
 	callback((Fl_Callback *) main_win_close_CB);
 
-	color(FL_DARK3, FL_DARK3);
-//  color(WINDOW_BG, WINDOW_BG);
+	color(WINDOW_BG, WINDOW_BG);
 
 	int cy = 0;
 	int ey = h();

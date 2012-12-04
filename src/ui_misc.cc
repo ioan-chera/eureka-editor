@@ -40,7 +40,7 @@ UI_MoveDialog::UI_MoveDialog() :
 
 	Fl_Group * grp = new Fl_Group(0, 110, w(), h() - 110);
 	grp->box(FL_FLAT_BOX);
-	grp->color(FL_DARK3, FL_DARK3);
+	grp->color(WINDOW_BG, WINDOW_BG);
 	{
 		cancel_but = new Fl_Button(30, 130, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
@@ -124,7 +124,7 @@ UI_ScaleDialog::UI_ScaleDialog() :
 
 	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
 	grp->box(FL_FLAT_BOX);
-	grp->color(FL_DARK3, FL_DARK3);
+	grp->color(WINDOW_BG, WINDOW_BG);
 	{
 		Fl_Box * help = new Fl_Box(10, 145, w() - 20, 40);
 		help->label("Scale Values:\n"
@@ -256,7 +256,7 @@ UI_RotateDialog::UI_RotateDialog() :
 
 	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
 	grp->box(FL_FLAT_BOX);
-	grp->color(FL_DARK3, FL_DARK3);
+	grp->color(WINDOW_BG, WINDOW_BG);
 	{
 		cancel_but = new Fl_Button(30, 150, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);

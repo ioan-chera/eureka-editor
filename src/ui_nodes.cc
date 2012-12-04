@@ -68,7 +68,7 @@ UI_NodeDialog::UI_NodeDialog() :
 
 	callback((Fl_Callback *) close_callback, this);
 
-	color(FL_DARK3, FL_DARK3);
+	color(WINDOW_BG, WINDOW_BG);
 
 
 	browser = new Fl_Browser(0, 0, w(), h() - 100);

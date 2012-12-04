@@ -40,9 +40,7 @@
 #include "ui_radius.h"
 
 
-#define WINDOW_BG  fl_gray_ramp(3)
-
-#define BUILD_BG   fl_gray_ramp(9)
+#define WINDOW_BG  FL_DARK3
 
 #define MIN_BROWSER_W  260
 
