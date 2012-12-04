@@ -20,8 +20,16 @@ General
 
 +  configurable keys
    (a) will need various contexts: one for each editing mode,
-       one for ALL modes (e.g. "global"), one for 3D view,
-       and possibly "browser".
+       one for ALL modes ("global"), one for 3D view, one for browser.
+
+       Priorities:
+       1. Browser (if active)
+       2. 3D view (if active)
+       3. specific mode
+       4. global
+
+   (b) decide if uppercase keys are considered as SHIFT modified
+   (c) probably keep menu shortcuts hard-coded
 
 +  nicer way to select map, render a small 2D version of each map
    and present them in a scrolling list.  Perhaps abuse the browser
@@ -67,18 +75,16 @@ ______________________________________________________________________
 General
 -------
 
++  ENTER key pops up an "operation" menu, which provides all the
+   commands that can be done via the keyboard (e.g. flip linedefs)
+
 +  ability to set other themes
-   (a) "none", "gtk+", "plastic"
-   (b) colors: default, bright, xxx, custom
+   (a) "none", "gtk+", "plastic"  [gui_scheme]
+   (b) colors: default, bright, xxx, custom  [gui_color_set]
    (c) font size (HARD!)
+   (d) implemented OPT_COLOR
 
 +  able to see what exact warnings and errors from node builder
-
-+  by default, write logs to ~/.eureka/LOGS.txt
-   save early logs in memory
-
-+  configurable list of iwad names to look for
-   -  iwad_names.cfg, look in home_dir, otherwise install_dir
 
 +  on error, ability to save/export current map
    [unless error was in save code]
@@ -96,6 +102,13 @@ General
    -  make sure the user built the nodes
       (ideally invoke it automatically)
 
+
+-  by default, write logs to ~/.eureka/LOGS.txt
+   save early logs in memory
+   ability to view the current logs
+
+-  configurable list of iwad names to look for
+   -  iwad_names.cfg, look in home_dir, otherwise install_dir
 
 -  fix: [ ] keys not working when 3D preview is on
 
@@ -199,6 +212,8 @@ Editing
 +  when one vertex of a linedef is moved (and not the other)
    update the X offset on the appropriate side (right side for start,
    left side for end vertex).
+
++  scrollbars for the canvas
 
 
 -  ability to move and/or zoom map to show selected object(s)
