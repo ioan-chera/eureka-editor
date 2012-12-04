@@ -28,6 +28,16 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
+	UI_Pic   *l_pic;
+	UI_Pic   *m_pic;
+	UI_Pic   *u_pic;
+
+	Fl_Input *l_tex;
+	Fl_Input *m_tex;
+	Fl_Input *u_tex;
+
+	static void tex_callback(Fl_Widget *w, void *data)
+	{ /* TODO */ }
 
 public:
 	UI_DefaultProps(int X, int Y, int W, int H) :
@@ -36,9 +46,56 @@ public:
 		box(FL_FLAT_BOX);
 
 
-		Fl_Box *title = new Fl_Box(X + 10, Y + 10, W - 62, 30, "Default Properties");
+		Fl_Box *title = new Fl_Box(X + 10, Y + 10, W - 20, 30, "Default Properties");
 		title->labelsize(18+KF*4);
-		add(title);
+
+		Y += 50;
+		X += 6;
+		W -= 12;
+
+		int MX = X + W/2;
+
+
+		Fl_Box *line_tit = new Fl_Box(X, Y, W, 30, "Linedef textures:");
+		line_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+		Y += line_tit->h() + 2;
+
+
+		l_pic = new UI_Pic(X+4,      Y, 64, 64);
+		m_pic = new UI_Pic(MX-32,    Y, 64, 64);
+		u_pic = new UI_Pic(X+W-64-4, Y, 64, 64);
+
+		l_pic->callback(tex_callback, this);
+		m_pic->callback(tex_callback, this);
+		u_pic->callback(tex_callback, this);
+
+		Y += 65;
+
+
+		l_tex = new Fl_Input(X,      Y, 80, 20);
+		m_tex = new Fl_Input(MX-40,  Y, 80, 20);
+		u_tex = new Fl_Input(X+W-80, Y, 80, 20);
+
+		l_tex->textsize(12);
+		m_tex->textsize(12);
+		u_tex->textsize(12);
+
+		l_tex->callback(tex_callback, this);
+		m_tex->callback(tex_callback, this);
+		u_tex->callback(tex_callback, this);
+
+		l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		m_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+		Y += l_tex->h() + 8;
+
+
+		Fl_Box *sec_tit = new Fl_Box(X, Y, W, 30, "Sector props:");
+		sec_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+		Y += sec_tit->h() + 2;
 
 
 		Fl_Box *rs_box = new Fl_Box(FL_NO_BOX, X + 10, Y + H - 16, W - 20, 12, NULL);
@@ -68,7 +125,7 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	color(WINDOW_BG, WINDOW_BG);
 
 
-	int top_h = 172;
+	int top_h = 112;
 
 	idefs = new UI_DefaultProps(X, Y + top_h + 4, W, H - top_h - 4);
 

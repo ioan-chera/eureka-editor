@@ -130,6 +130,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	UpdateAddDel();
 }
 
+
 //
 // Destructor
 //
