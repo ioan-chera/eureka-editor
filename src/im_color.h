@@ -85,9 +85,9 @@ rgb_color_t DarkerColor(rgb_color_t col);
 #define LIGHTMAGENTA    fl_rgb_color(255,128,255)
 
 #define GRID_POINT      fl_rgb_color(0, 0, 0xFF)
-#define GRID_DARK       fl_rgb_color(0, 0, 0x99)
-#define GRID_MEDIUM     fl_rgb_color(0, 0, 0xBB)
 #define GRID_BRIGHT     fl_rgb_color(0, 0, 0xEE)
+#define GRID_MEDIUM     fl_rgb_color(0, 0, 0xBB)
+#define GRID_DARK       fl_rgb_color(0, 0, 0x77)
 
 #define LINEDEF_NO      fl_rgb_color(0x40, 0xd0, 0xf0)
 #define SECTOR_NO       fl_rgb_color(0x40, 0xd0, 0xf0)
