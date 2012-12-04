@@ -1251,28 +1251,30 @@ void EditorResize(int is_width, int is_height)
 
 void Editor_Init()
 {
-    memset(&edit, 0, sizeof(edit));  /* Catch-all */
+	memset(&edit, 0, sizeof(edit));  /* Catch-all */
 
-    edit.move_speed = 20;
-    edit.extra_zoom = 0;
-    edit.obj_type   = OBJ_THINGS;
+	edit.move_speed = 20;
+	edit.extra_zoom = 0;
+	edit.obj_type   = OBJ_THINGS;
 
-    edit.show_object_numbers = false;
-    edit.show_things_squares = false;
-    edit.show_things_sprites = true;
+	edit.show_object_numbers = false;
+	edit.show_things_squares = false;
+	edit.show_things_sprites = true;
 
 	edit.button_down = 0;
 	edit.button_mod  = KM_none;
-    edit.clicked.clear();
-    edit.did_a_move  = false;
+	edit.clicked.clear();
+	edit.did_a_move  = false;
 
-    edit.highlighted.clear();
+	edit.highlighted.clear();
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 
-    edit.Selected = new selection_c(edit.obj_type);
+	edit.Selected = new selection_c(edit.obj_type);
 
-    MadeChanges = 0;
+	grid.Init();
+
+	MadeChanges = 0;
 }
 
 
