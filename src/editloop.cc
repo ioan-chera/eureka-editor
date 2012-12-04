@@ -802,21 +802,21 @@ bool Editor_Key(int key, keymod_e mod)
 	// [.] and [,]: adjust floor height
 	else if ((key == ',' || key == '<') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveFloors((mod == KM_SHIFT) ? -1 : -8);
+		CMD_MoveFloors((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
 	}
 	else if ((key == '.' || key == '>') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveFloors((mod == KM_SHIFT) ? +1 : +8);
+		CMD_MoveFloors((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
 	}
 
 	// '[' and ']': adjust ceiling height
 	else if ((key == '[' || key == '{') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveCeilings((mod == KM_SHIFT) ? -1 : -8);
+		CMD_MoveCeilings((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
 	}
 	else if ((key == ']' || key == '}') && edit.obj_type == OBJ_SECTORS)
 	{
-		CMD_MoveCeilings((mod == KM_SHIFT) ? +1 : +8);
+		CMD_MoveCeilings((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
 	}
 
 
