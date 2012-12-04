@@ -33,7 +33,7 @@ public:
 	Fl_Choice *scale;
 
 	Fl_Choice *grid_size;
-	Fl_Choice *grid_snap;
+	Fl_Toggle_Button *grid_snap;
 
 	Fl_Output *mouse_x;
 	Fl_Output *mouse_y;
@@ -60,7 +60,7 @@ public:
 
 private:
 	void UpdateModeColor();
-	void UpdateSnapColor();
+	void UpdateSnapText();
 
 	static void  mode_callback(Fl_Widget *, void *);
 	static void scale_callback(Fl_Widget *, void *);

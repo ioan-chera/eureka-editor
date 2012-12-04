@@ -29,7 +29,6 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Choice.H>
-#include <FL/Fl_Counter.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_File_Icon.H>
 #include <FL/Fl_Group.H>
@@ -42,7 +41,6 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Native_File_Chooser.H>
-#include <FL/Fl_Pack.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Repeat_Button.H>
 #include <FL/Fl_Return_Button.H>
@@ -55,6 +53,7 @@
 #endif
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Tile.H>
+#include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_Window.H>

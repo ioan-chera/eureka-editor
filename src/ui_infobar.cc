@@ -85,15 +85,16 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	X = grid_size->x() + grid_size->w() + 10;
 
 
-	grid_snap = new Fl_Choice(X+4, Y, 72, H);
-	grid_snap->add("SNAP|Free");
-	grid_snap->value(0);
-	grid_snap->color(SNAP_COLOR);
+	grid_snap = new Fl_Toggle_Button(X+4, Y, 72, H);
+	grid_snap->value(1);
+	grid_snap->color(FREE_COLOR);
+	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
 	grid_snap->labelsize(KF_fonth);
-	grid_snap->textsize(KF_fonth);
 
 	add(grid_snap);
+
+	UpdateSnapText();
 
 	X = grid_snap->x() + grid_snap->w() + 10;
 
@@ -167,26 +168,14 @@ void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 
 void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 {
-	Fl_Choice *choice = (Fl_Choice *)w;
+	Fl_Toggle_Button *grid_snap = (Fl_Toggle_Button *)w;
 
 	UI_InfoBar *bar = (UI_InfoBar *)data;
 
 	// update editor state
-	switch (choice->value())
-	{
-		case 0: // SNAP
-			grid.snap = true;
-			break;
+	grid.snap = grid_snap->value() ? true : false;
 
-		case 1: // FREE
-			grid.snap = false;
-			break;
-
-		default:
-			break;
-	}
-
-	bar->UpdateSnapColor();
+	bar->UpdateSnapText();
 
 	UpdateHighlight();
 }
@@ -324,12 +313,9 @@ void UI_InfoBar::SetWhich(int index, int total)
 
 void UI_InfoBar::UpdateSnap()
 {
-   if (grid.snap)
-	   grid_snap->value(0);
-   else
-	   grid_snap->value(1);
+   grid_snap->value(grid.snap ? 1 : 0);
 
-   UpdateSnapColor();
+   UpdateSnapText();
 }
 
 
@@ -346,12 +332,18 @@ void UI_InfoBar::UpdateModeColor()
 }
 
 
-void UI_InfoBar::UpdateSnapColor()
+void UI_InfoBar::UpdateSnapText()
 {
-	if (grid_snap->value() == 0)
-		grid_snap->color(SNAP_COLOR);
+	if (grid_snap->value())
+	{
+		grid_snap->label("SNAP");
+	}
 	else
-		grid_snap->color(FREE_COLOR);
+	{
+		grid_snap->label("Free");
+	}
+
+	grid_snap->redraw();
 }
 
 //--- editor settings ---
