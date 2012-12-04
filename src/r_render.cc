@@ -1616,14 +1616,18 @@ bool Render3D_Key(int key, keymod_e mod)
 	// strafing?
 	if (key == FL_Left  && mod == KM_ALT)
 	{
-		key = '<';
+		key = 'a';
 		mod = KM_none;
 	}
 	if (key == FL_Right && mod == KM_ALT)
 	{
-		key = '>';
+		key = 'd';
 		mod = KM_none;
 	}
+
+	if ((key == FL_Up || key == FL_Down) && mod == KM_ALT)
+		mod = KM_none;
+		
 
 	// in general, ignore ALT keys
 	if (mod == KM_ALT)
@@ -1651,13 +1655,13 @@ bool Render3D_Key(int key, keymod_e mod)
 		view.y -= view.Sin * mv_speed * 3;
 		Redraw = true;
 	}
-	else if (key == ',' || key == '<' || key == 'a')
+	else if (key == 'a')
 	{
 		view.x -= view.Sin * mv_speed * 2;
 		view.y += view.Cos * mv_speed * 2;
 		Redraw = true;
 	}
-	else if (key == '.' || key == '>' || key == 'd')
+	else if (key == 'd')
 	{
 		view.x += view.Sin * mv_speed * 2;
 		view.y -= view.Cos * mv_speed * 2;
