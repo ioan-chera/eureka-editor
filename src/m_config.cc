@@ -57,6 +57,9 @@ extern int gui_scheme;
 extern int gui_color_set;
 extern int new_sector_size;
 
+extern int  default_grid_size;
+extern bool default_grid_snap;
+
 extern int multi_select_modifier;
 
 
@@ -290,6 +293,24 @@ static const opt_desc_t options[] =
 		"Use same sidedefs as original linedef",
 		NULL,
 		&copy_linedef_reuse_sidedefs
+	},
+
+	{	"default_grid_size",
+		0,
+		OPT_INTEGER,
+		"",
+		"Default grid size",
+		NULL,
+		&default_grid_size
+	},
+
+	{	"default_grid_snap",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Default grid snapping",
+		NULL,
+		&default_grid_snap
 	},
 
 	{	"default_ceiling_height",

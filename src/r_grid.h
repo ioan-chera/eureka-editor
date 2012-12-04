@@ -22,9 +22,6 @@
 #define __EUREKA_R_GRID_H__
 
 
-#define DEFAULT_GRID_STEP  128  // TODO: CONFIG
-
-
 class Grid_State_c
 {
 public:

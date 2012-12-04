@@ -12,11 +12,15 @@ CHANGES IN Eureka 0.xx
 
 -  sectors created outside of map now have fixed size
 
--  grid_snap button is easier to use (a toggle button now)
+-  grid-snap button is easier to use (a toggle button now)
 
 -  can disable multi-select ('multi_select_modifier' config var)
 
 -  fixed wrong color of a tagged linedef or sector
+
+-  config: default grid size is now 16 (was: 128)
+-  config: added 'default_grid_size' var
+-  config: added 'default_grid_snap' var
 
 -  config: added 'new_sector_size' var
 -  config: added 'gui_scheme' and 'gui_color_set' vars

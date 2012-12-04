@@ -30,11 +30,15 @@
 #include "ui_window.h"
 
 
-Grid_State_c grid;
+Grid_State_c  grid;
+
+// config items
+int  default_grid_size = 16;
+bool default_grid_snap = true;
 
 
 Grid_State_c::Grid_State_c() :
-	 step(DEFAULT_GRID_STEP),
+	 step(16 /* dummy */),
 	 snap(true), shown(true), mode(0),
      orig_x(0), orig_y(0), Scale(1.0)
 {
@@ -47,9 +51,17 @@ Grid_State_c::~Grid_State_c()
 
 void Grid_State_c::Init()
 {
-	step = DEFAULT_GRID_STEP / 2;
+	step = default_grid_size - 1;
+
+	if (step < 1)
+		step = 1;
+
+	if (step >= grid_values[1])
+		step =  grid_values[1] - 1;
 
 	AdjustStep(+1);
+
+	snap = default_grid_snap;
 }
 
 
