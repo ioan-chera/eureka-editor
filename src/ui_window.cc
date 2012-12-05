@@ -276,6 +276,7 @@ void UI_MainWin::UnselectPics()
 {
 	line_box->UnselectPics();
 	 sec_box->UnselectPics();
+	vert_box->UnselectPics();
 }
 
 

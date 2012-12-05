@@ -62,6 +62,8 @@ public:
 
 	void UpdateTotal();
 
+	void UnselectPics();
+
 private:
 	static void x_callback(Fl_Widget *, void *);
 	static void y_callback(Fl_Widget *, void *);

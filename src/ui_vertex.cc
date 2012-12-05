@@ -68,6 +68,22 @@ private:
 		th_desc->value(info->desc);
 	}
 
+	void UnselectPicSet(char what /* 'f' or 't' */)
+	{
+		if (what == 'f')
+		{
+			f_pic->Selected(false);
+			c_pic->Selected(false);
+		}
+
+		if (what == 't')
+		{
+			l_pic->Selected(false);
+			m_pic->Selected(false);
+			u_pic->Selected(false);
+		}
+	}
+
 	static const char * NormalizeTex_and_Dup(Fl_Input *w)
 	{
 		char name[WAD_TEX_NAME + 1];
@@ -92,7 +108,16 @@ private:
 			w == box->m_pic ||
 			w == box->u_pic)
 		{
-			// TODO : pics!!
+			UI_Pic * pic = (UI_Pic *) w;
+
+			pic->Selected(! pic->Selected());
+			pic->redraw();
+
+			if (pic->Selected())
+			{
+				box->UnselectPicSet('f');
+				CMD_SetBrowser('T');
+			}
 			return;
 		}
 
@@ -117,7 +142,16 @@ private:
 		if (w == box->f_pic ||
 			w == box->c_pic)
 		{
-			// TODO : pics!!
+			UI_Pic * pic = (UI_Pic *) w;
+
+			pic->Selected(! pic->Selected());
+			pic->redraw();
+
+			if (pic->Selected())
+			{
+				box->UnselectPicSet('t');
+				CMD_SetBrowser('F');
+			}
 			return;
 		}
 
@@ -357,6 +391,12 @@ public:
 
 		SetThingDesc();
 	}
+
+	void UnselectPics()
+	{
+		UnselectPicSet('f');
+		UnselectPicSet('t');
+	}
 };
 
 
@@ -585,6 +625,12 @@ void UI_VertexBox::UpdateField()
 void UI_VertexBox::UpdateTotal()
 {
 	which->SetTotal(NumVertices);
+}
+
+
+void UI_VertexBox::UnselectPics()
+{
+	idefs->UnselectPics();
 }
 
 
