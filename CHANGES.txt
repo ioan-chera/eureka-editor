@@ -6,6 +6,8 @@ CHANGES IN Eureka 0.xx
 
 +  implemented picture mode for Thing browser
 
++  new Default Properties panel (shown in vertex mode)
+
 -  shortcut key for 'File/Export Map' is now CTRL-E
 
 -  when rotating a group of things, update their angles too
