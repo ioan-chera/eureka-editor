@@ -857,6 +857,8 @@ int main(int argc, char *argv[])
 
 	main_win->browser->Populate();
 
+	Props_LoadValues();
+
 
     LogPrintf("Loading initial map : %s\n", Level_name);
 
