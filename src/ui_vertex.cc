@@ -70,7 +70,38 @@ private:
 
 	void SetTexture(const char *name, int e_state)
 	{
-		/* TODO */
+		int sel_pics =	(l_pic->Selected() ? 1 : 0) |
+						(m_pic->Selected() ? 2 : 0) |
+						(u_pic->Selected() ? 4 : 0);
+
+		if (sel_pics == 0)
+		{
+//??		bool low_mid_same = (strcmp(default_lower_tex, default_mid_tex) == 0);
+//??		bool low_upp_same = (strcmp(default_lower_tex, default_upper_tex) == 0);
+
+			if (e_state & FL_BUTTON2)
+				sel_pics = 2;
+			else if (e_state & FL_BUTTON3)
+				sel_pics = 4;
+			else
+				sel_pics = 1;  //??  | (low_mid_same ? 2 : 0) | (low_upp_same ? 4 : 0);
+		}
+
+		if (sel_pics & 1)
+		{
+			l_tex->value(name);
+			l_tex->do_callback();
+		}
+		if (sel_pics & 2)
+		{
+			m_tex->value(name);
+			m_tex->do_callback();
+		}
+		if (sel_pics & 4)
+		{
+			u_tex->value(name);
+			u_tex->do_callback();
+		}
 	}
 
 	void SetFlat(const char *name, int e_state)
@@ -88,7 +119,6 @@ private:
 			f_tex->value(name);
 			f_tex->do_callback();
 		}
-
 		if (sel_pics & 2)
 		{
 			c_tex->value(name);
