@@ -57,15 +57,6 @@ std::string g_sky_flat;
 int g_sky_color;
 
 
-// default_textures...
-std::string g_default_wall;
-std::string g_default_floor;
-std::string g_default_ceiling;
-
-std::string g_default_thing;
-
-
-
 /*
  *  Create empty lists for game definitions
  */
@@ -314,9 +305,12 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 4)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			g_default_wall    = token[1];
-			g_default_floor   = token[2];
-			g_default_ceiling = token[3];
+			default_middle_tex = token[1];
+			default_floor_tex  = token[2];
+			default_ceil_tex   = token[3];
+
+			default_upper_tex = default_middle_tex;
+			default_lower_tex = default_middle_tex;
 		}
 
 		else if (y_stricmp(token[0], "default_thing") == 0)
@@ -324,7 +318,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			g_default_thing = token[1];
+			default_thing = atoi(token[1]);
 		}
 
 		else if (y_stricmp(token[0], "linegroup") == 0)

@@ -36,7 +36,6 @@
 #include "editloop.h"
 #include "levels.h"
 #include "objects.h"
-#include "m_game.h"  // g_default_thing
 #include "r_grid.h"
 #include "selectn.h"
 #include "s_misc.h"
@@ -228,7 +227,7 @@ static void Insert_Thing()
 
 	Thing *T = Things[new_t];
 
-	T->type = atoi(g_default_thing.c_str());
+	T->type = default_thing;
 
 	if (model >= 0)
 		T->RawCopy(Things[model]);

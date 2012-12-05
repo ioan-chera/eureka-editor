@@ -192,25 +192,29 @@ extern const char *Level_name;  // Name of map lump we are editing
 extern const char *config_file; // Name of the configuration file, or NULL
 extern const char *log_file;    // Name of log file, or NULL
 
-extern int remind_to_build_nodes; // Remind the user to build nodes
-
-extern bool Replacer;     // the new map will destroy an existing one if saved
-
-extern int   copy_linedef_reuse_sidedefs;
-
-extern int   default_ceiling_height;      // For new sectors
-extern char  default_ceiling_texture[8 + 1];// For new sectors
-extern int   default_floor_height;      // For new sectors
-extern char  default_floor_texture[8 + 1];  // For new sectors
-extern int   default_light_level;     // For new sectors
-extern char  default_lower_texture[8 + 1]; // For new linedefs
-extern char  default_middle_texture[8 + 1];  // For new linedefs
-extern char  default_upper_texture[8 + 1]; // For new linedefs
-
 extern const char *Iwad; // Name of the iwad
 extern const char *Pwad;
 
 extern std::vector< const char * > ResourceWads;
+
+
+extern int remind_to_build_nodes; // Remind the user to build nodes
+
+extern bool Replacer;     // the new map will destroy an existing one if saved
+
+extern int	copy_linedef_reuse_sidedefs;
+
+extern int	default_floor_h;
+extern int	default_ceil_h;
+extern int	default_light_level;
+extern int	default_thing;
+
+extern const char * default_floor_tex;
+extern const char * default_ceil_tex;
+extern const char * default_lower_tex;
+extern const char * default_middle_tex;
+extern const char * default_upper_tex;
+
 
 extern int   show_help;     // Print usage message and exit.
 extern int   show_version;  // Print version info and exit.

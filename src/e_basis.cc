@@ -50,6 +50,18 @@ std::vector<LineDef *> LineDefs;
 std::vector<RadTrig *> RadTrigs;
 
 
+int default_floor_h		=   0;
+int default_ceil_h		= 128;
+int default_light_level	= 176;
+int	default_thing		= 2001;
+
+const char * default_floor_tex	= "FLAT1";
+const char * default_ceil_tex	= "FLAT1";
+const char * default_lower_tex	= "STARTAN3";
+const char * default_middle_tex	= "STARTAN3";
+const char * default_upper_tex	= "STARTAN3";
+
+
 bool did_make_changes;
 bool wrecked_the_nodes;
 
@@ -132,13 +144,13 @@ const char * Sector::CeilTex() const
 
 void Sector::SetDefaults()
 {
-	floorh = 0;
-	 ceilh = 128;
+	floorh = default_floor_h;
+	 ceilh = default_ceil_h;
 
-	floor_tex = BA_InternaliseString(g_default_floor.c_str());
-	 ceil_tex = BA_InternaliseString(g_default_ceiling.c_str());
-	
-	light = 176;
+	floor_tex = BA_InternaliseString(default_floor_tex);
+	 ceil_tex = BA_InternaliseString(default_ceil_tex);
+
+	light = default_light_level;
 }
 
 
@@ -159,14 +171,13 @@ const char * SideDef::LowerTex() const
 
 void SideDef::SetDefaults(bool two_sided)
 {
-	int wall = BA_InternaliseString(g_default_wall.c_str());
-
-	lower_tex = wall;
-	upper_tex = wall;
-	mid_tex   = wall;
+	lower_tex = BA_InternaliseString(default_lower_tex);
+	upper_tex = BA_InternaliseString(default_upper_tex);
 
 	if (two_sided)
 		mid_tex = BA_InternaliseString("-");
+	else
+		mid_tex = BA_InternaliseString(default_middle_tex);
 }
 
 

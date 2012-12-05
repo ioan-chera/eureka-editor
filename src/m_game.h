@@ -115,13 +115,6 @@ extern int g_sky_color;
 
 extern std::string g_sky_flat;
 
-// default_textures...
-extern std::string g_default_wall;
-extern std::string g_default_floor;
-extern std::string g_default_ceiling;
-
-extern std::string g_default_thing;
-
 
 void InitDefinitions();
 void LoadDefinitions(const char *folder, const char *name,

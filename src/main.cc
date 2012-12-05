@@ -77,17 +77,6 @@ bool want_quit = false;
 const char *config_file = NULL;
 const char *log_file = NULL;
 
-int       copy_linedef_reuse_sidedefs = 0;
-
-int       default_ceiling_height  = 128;
-char      default_ceiling_texture[WAD_FLAT_NAME + 1]  = "CEIL3_5";
-int       default_floor_height        = 0;
-char      default_floor_texture[WAD_FLAT_NAME + 1]  = "FLOOR4_8";
-int       default_light_level       = 144;
-char      default_lower_texture[WAD_TEX_NAME + 1] = "STARTAN3";
-char      default_middle_texture[WAD_TEX_NAME + 1]  = "STARTAN3";
-char      default_upper_texture[WAD_TEX_NAME + 1] = "STARTAN3";
-
 const char *install_dir;
 const char *home_dir;
 
@@ -95,24 +84,28 @@ const char *Game_name;
 const char *Port_name;
 const char *Level_name;
 
-int  remind_to_build_nodes = 0;  // Remind user to build nodes
-
-bool Replacer = false;
 
 const char *Iwad = NULL;
 const char *Pwad = NULL;
 
 std::vector< const char * > ResourceWads;
 
-int scroll_less   = 10;
-int scroll_more   = 90;
-int sprite_scale  = 100;
 
 int show_help     = 0;
 int show_version  = 0;
 
+int  remind_to_build_nodes = 0;  // Remind user to build nodes
+
+bool Replacer = false;
+
 
 // config items
+int  copy_linedef_reuse_sidedefs = 0;
+
+int scroll_less   = 10;
+int scroll_more   = 90;
+int sprite_scale  = 100;
+
 int gui_scheme    = 2;  // plastic
 int gui_color_set = 1;  // bright
 
