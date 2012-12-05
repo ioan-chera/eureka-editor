@@ -71,6 +71,33 @@ private:
 	static void tex_callback(Fl_Widget *w, void *data)
 	{ /* TODO */ }
 
+	static void button_callback(Fl_Widget *w, void *data)
+	{
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+		int diff = 8;
+		if (Fl::event_shift())
+			diff = 1;
+		else if (Fl::event_ctrl())
+			diff = 64;
+
+		if (w == box->fl_up)
+			default_floor_h += diff;
+
+		if (w == box->fl_down)
+			default_floor_h -= diff;
+
+		if (w == box->ce_up)
+			default_ceil_h += diff;
+
+		if (w == box->ce_down)
+			default_ceil_h -= diff;
+
+		box->SetIntVal(box->floor_h, default_floor_h);
+		box->SetIntVal(box-> ceil_h, default_ceil_h);
+	}
+
+
 public:
 	UI_DefaultProps(int X, int Y, int W, int H) :
 		Fl_Group(X, Y, W, H, NULL)
@@ -166,8 +193,8 @@ public:
 		ce_down->labelsize(16);
 		ce_up  ->labelsize(16);
 
-//!!		ce_down->callback(button_callback, this);
-//!!		ce_up  ->callback(button_callback, this);
+		ce_down->callback(button_callback, this);
+		ce_up  ->callback(button_callback, this);
 
 
 		Y += ceil_h->h() + 3;
@@ -189,8 +216,8 @@ public:
 		fl_down->labelsize(16);
 		fl_up  ->labelsize(16);
 
-//!!		fl_down->callback(button_callback, this);
-//!!		fl_up  ->callback(button_callback, this);
+		fl_down->callback(button_callback, this);
+		fl_up  ->callback(button_callback, this);
 
 		Y += floor_h->h() + 3;
 
