@@ -128,7 +128,7 @@ public:
 //!!		f_pic->callback(tex_callback, this);
 
 
-		c_tex = new Fl_Input(X+58, Y, 96, 24, "Ceiling: ");
+		c_tex = new Fl_Input(X+68, Y, 108, 24, "Ceiling: ");
 		c_tex->align(FL_ALIGN_LEFT);
 //!!		c_tex->callback(tex_callback, this);
 		c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -136,7 +136,7 @@ public:
 		Y += c_tex->h() + 3;
 
 
-		ceil_h = new Fl_Int_Input(X+58, Y, 64, 24, "");
+		ceil_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
 		ceil_h->align(FL_ALIGN_LEFT);
 //!!		ceil_h->callback(height_callback, this);
 		ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -144,7 +144,7 @@ public:
 
 
 		ce_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-		ce_up   = new Fl_Button(X+58+68, Y+1, 30, 22, "+");
+		ce_up   = new Fl_Button(X+68+68, Y+1, 30, 22, "+");
 
 		ce_down->labelfont(FL_HELVETICA_BOLD);
 		ce_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -160,14 +160,14 @@ public:
 
 		Y += 5;
 
-		floor_h = new Fl_Int_Input(X+58, Y, 64, 24, "");
+		floor_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
 		floor_h->align(FL_ALIGN_LEFT);
 //!!		floor_h->callback(height_callback, this);
 		floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
 		fl_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-		fl_up   = new Fl_Button(X+58+68, Y+1, 30, 22, "+");
+		fl_up   = new Fl_Button(X+68+68, Y+1, 30, 22, "+");
 
 		fl_down->labelfont(FL_HELVETICA_BOLD);
 		fl_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -180,7 +180,7 @@ public:
 		Y += floor_h->h() + 3;
 
 
-		f_tex = new Fl_Input(X+58, Y, 96, 24, "Floor:   ");
+		f_tex = new Fl_Input(X+68, Y, 108, 24, "Floor:   ");
 		f_tex->align(FL_ALIGN_LEFT);
 //!!		f_tex->callback(tex_callback, this);
 		f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -188,7 +188,7 @@ public:
 		Y += f_tex->h() + 8;
 
 
-		light = new Fl_Int_Input(X+58, Y, 64, 24, "Light:   ");
+		light = new Fl_Int_Input(X+68, Y, 64, 24, "Light:   ");
 		light->align(FL_ALIGN_LEFT);
 //!!		light->callback(room_callback, this);
 		light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -198,7 +198,7 @@ public:
 
 		// ---- THING PROPS --------------
 
-		thing = new Fl_Int_Input(X+58, Y, 64, 24, "Thing:  ");
+		thing = new Fl_Int_Input(X+58, Y, 64, 24, "Thing: ");
 		thing->align(FL_ALIGN_LEFT);
 //!!		thing->callback(thing_callback, this);
 		thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
