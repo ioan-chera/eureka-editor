@@ -328,7 +328,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 		case OBJ_SECTORS:
 			if (kind == 'F')
 			{
-				sec_box->SetTexture(name, e_state);
+				sec_box->SetFlat(name, e_state);
 				return;
 			}
 			if (kind == 'S')

@@ -335,7 +335,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_SectorBox::SetTexture(const char *tex_name, int e_state)
+void UI_SectorBox::SetFlat(const char *name, int e_state)
 {
 	if (count <= 0)
 		return;
@@ -352,13 +352,13 @@ void UI_SectorBox::SetTexture(const char *tex_name, int e_state)
 
 	if (sel_pics & 1)
 	{
-		f_tex->value(tex_name);
+		f_tex->value(name);
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(tex_name);
+		c_tex->value(name);
 		c_tex->do_callback();
 	}
 }
