@@ -305,12 +305,12 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			if (ntoks != 4)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			default_middle_tex = token[1];
-			default_floor_tex  = token[2];
-			default_ceil_tex   = token[3];
+			default_mid_tex		= token[1];
+			default_floor_tex	= token[2];
+			default_ceil_tex	= token[3];
 
-			default_upper_tex = default_middle_tex;
-			default_lower_tex = default_middle_tex;
+			default_upper_tex = default_mid_tex;
+			default_lower_tex = default_mid_tex;
 		}
 
 		else if (y_stricmp(token[0], "default_thing") == 0)

@@ -58,7 +58,7 @@ int	default_thing		= 2001;
 const char * default_floor_tex	= "FLAT1";
 const char * default_ceil_tex	= "FLAT1";
 const char * default_lower_tex	= "STARTAN3";
-const char * default_middle_tex	= "STARTAN3";
+const char * default_mid_tex	= "STARTAN3";
 const char * default_upper_tex	= "STARTAN3";
 
 
@@ -177,7 +177,7 @@ void SideDef::SetDefaults(bool two_sided)
 	if (two_sided)
 		mid_tex = BA_InternaliseString("-");
 	else
-		mid_tex = BA_InternaliseString(default_middle_tex);
+		mid_tex = BA_InternaliseString(default_mid_tex);
 }
 
 

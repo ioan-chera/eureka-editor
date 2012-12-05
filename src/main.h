@@ -212,7 +212,7 @@ extern int	default_thing;
 extern const char * default_floor_tex;
 extern const char * default_ceil_tex;
 extern const char * default_lower_tex;
-extern const char * default_middle_tex;
+extern const char * default_mid_tex;
 extern const char * default_upper_tex;
 
 

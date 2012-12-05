@@ -627,7 +627,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 
 	const SideDef *SD = SideDefs[other_sd];
 
-	int new_tex = BA_InternaliseString(default_middle_tex);
+	int new_tex = BA_InternaliseString(default_mid_tex);
 
 	// grab new texture from lower or upper if possible
 	if (isalnum(SD->LowerTex()[0]))
