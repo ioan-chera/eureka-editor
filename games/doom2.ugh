@@ -31,7 +31,7 @@ sky_color   207
 
 default_port  boom
 default_textures  STARTAN3  FLOOR4_8  CEIL3_5
-default_thing  2001
+default_thing  2014
 
 include "doom_things"
 include "doom_specials"
