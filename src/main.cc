@@ -846,7 +846,7 @@ int main(int argc, char *argv[])
 
 	Editor_Init();
 
-    InitFLTK();
+	InitFLTK();  // creates the main window
 
 	init_progress = 3;
 
@@ -885,7 +885,7 @@ int main(int argc, char *argv[])
 
 	init_progress = 2;
 
-    TermFLTK();
+	TermFLTK();
 
 
 	init_progress = 0;
