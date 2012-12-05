@@ -61,11 +61,30 @@ private:
 		w->value(buffer);
 	}
 
-	void SetThingDesc()
+	void UpdateThingDesc()
 	{
 		const thingtype_t *info = M_GetThingType(default_thing);
 
 		th_desc->value(info->desc);
+	}
+
+	void SetTexture(const char *name, int e_state)
+	{
+		/* TODO */
+	}
+
+	void SetFlat(const char *name, int e_state)
+	{
+		/* TODO */
+	}
+
+	void SetThing(int number)
+	{
+		default_thing = number;
+
+		SetIntVal(thing, default_thing);
+
+		UpdateThingDesc();
 	}
 
 	void UnselectPicSet(char what /* 'f' or 't' */)
@@ -206,7 +225,7 @@ private:
 
 		default_thing = atoi(box->thing->value());
 
-		box->SetThingDesc();
+		box->UpdateThingDesc();
 	}
 
 
@@ -308,10 +327,7 @@ public:
 		ce_up  ->callback(button_callback, this);
 
 
-		Y += ceil_h->h() + 3;
-
-
-		Y += 5;
+		Y += ceil_h->h() + 8;
 
 		floor_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
 		floor_h->align(FL_ALIGN_LEFT);
@@ -389,12 +405,21 @@ public:
 		SetIntVal(  light, default_light_level);
 		SetIntVal(  thing, default_thing);
 
-		SetThingDesc();
+		UpdateThingDesc();
 	}
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state)
 	{
-		/* TODO */
+		switch (kind)
+		{
+			case 'T': SetTexture(name, e_state); break;
+			case 'F': SetFlat   (name, e_state); break;
+			case 'O': SetThing(number); break;
+
+			default:
+				Beep();
+				break;
+		}
 	}
 
 	void UnselectPics()
