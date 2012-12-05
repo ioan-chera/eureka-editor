@@ -343,12 +343,7 @@ void UI_SectorBox::SetFlat(const char *name, int e_state)
 	int sel_pics = GetSelectedPics();
 
 	if (sel_pics == 0)
-	{
-		if (e_state & FL_BUTTON3)
-			sel_pics = 2;
-		else
-			sel_pics = 1;
-	}
+		sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;
 
 	if (sel_pics & 1)
 	{

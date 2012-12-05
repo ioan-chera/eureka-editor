@@ -75,7 +75,25 @@ private:
 
 	void SetFlat(const char *name, int e_state)
 	{
-		/* TODO */
+		// same logic as in UI_SectorBox::SetFlat()
+
+		int sel_pics =	(f_pic->Selected() ? 1 : 0) |
+						(c_pic->Selected() ? 2 : 0);
+
+		if (sel_pics == 0)
+			sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;
+
+		if (sel_pics & 1)
+		{
+			f_tex->value(name);
+			f_tex->do_callback();
+		}
+
+		if (sel_pics & 2)
+		{
+			c_tex->value(name);
+			c_tex->do_callback();
+		}
 	}
 
 	void SetThing(int number)
