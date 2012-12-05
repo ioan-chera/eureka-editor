@@ -57,7 +57,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 {
 	end();
 
-	button = new Fl_Repeat_Button(X + 4, Y + 2, W - 8, H - 4, desc.c_str());
+	button = new Fl_Repeat_Button(X + 4, Y + 1, W - 8, H - 2, desc.c_str());
 
 	button->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   	button->labelfont(FL_COURIER);
@@ -589,8 +589,6 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		                                      full_desc, 0 /* num */, category,
 		                                      pic_w, pic_h, pic);
 		scroll->Add(item);
-
-		cy += item->h();
 	}
 }
 
@@ -643,8 +641,6 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->callback(Browser_Item::thing_callback, item);
 
 		scroll->Add(item);
-
-		cy += item->h();
 	}
 }
 
@@ -666,13 +662,11 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, info->group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
 
 		scroll->Add(item);
-
-		y += item->h() + 3;
 	}
 }
 
@@ -695,13 +689,11 @@ void UI_Browser_Box::Populate_LineTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
 		         TidyLineDesc(info->desc));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, info->group);
 
 		item->button->callback(Browser_Item::line_callback, item);
 
 		scroll->Add(item);
-
-		y += item->h() + 3;
 	}
 }
 
@@ -723,13 +715,11 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 28, full_desc, TI->first, 0 /* cat */);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, 0 /* cat */);
 
 		item->button->callback(Browser_Item::sector_callback, item);
 
 		scroll->Add(item);
-
-		y += item->h() + 3;
 	}
 }
 
@@ -742,7 +732,7 @@ void UI_Browser_Box::Populate()
 	// default background and scroll rate
 	scroll->color(WINDOW_BG, WINDOW_BG);
 	scroll->resize_horiz(true);
-	scroll->Line_size(28 * 2);
+	scroll->Line_size(24 * 2);
 
 	pic_mode = false;
 
