@@ -221,8 +221,41 @@ public:
 
 bool Props_ParseUser(const char ** tokens, int num_tok)
 {
-	// FIXME: Props_ParseUser
-	return false;
+	// syntax is:  default  <prop>  <value>
+	if (num_tok < 3)
+		return false;
+
+	if (strcmp(tokens[0], "default") != 0)
+		return false;
+
+	if (strcmp(tokens[1], "floor_h") == 0)
+		default_floor_h = atoi(tokens[2]);
+
+	if (strcmp(tokens[1], "ceil_h") == 0)
+		default_ceil_h = atoi(tokens[2]);
+
+	if (strcmp(tokens[1], "light_level") == 0)
+		default_light_level = atoi(tokens[2]);
+
+	if (strcmp(tokens[1], "light_level") == 0)
+		default_thing = atoi(tokens[3]);
+
+	if (strcmp(tokens[1], "floor_tex") == 0)
+		default_floor_tex = StringDup(tokens[2]);
+
+	if (strcmp(tokens[1], "ceil_tex") == 0)
+		default_ceil_tex = StringDup(tokens[2]);
+
+	if (strcmp(tokens[1], "lower_tex") == 0)
+		default_lower_tex = StringDup(tokens[2]);
+
+	if (strcmp(tokens[1], "mid_tex") == 0)
+		default_mid_tex = StringDup(tokens[2]);
+
+	if (strcmp(tokens[1], "upper_tex") == 0)
+		default_upper_tex = StringDup(tokens[2]);
+
+	return true;
 }
 
 
@@ -230,16 +263,16 @@ void Props_WriteUser(FILE *fp)
 {
 	fprintf(fp, "\n");
 
-	fprintf(fp, "default_floor_h %d\n", default_floor_h);
-	fprintf(fp, "default_ceil_h %d\n",  default_ceil_h);
-	fprintf(fp, "default_light_level %d\n",  default_light_level);
-	fprintf(fp, "default_thing %d\n",  default_thing);
+	fprintf(fp, "default floor_h %d\n", default_floor_h);
+	fprintf(fp, "default ceil_h %d\n",  default_ceil_h);
+	fprintf(fp, "default light_level %d\n",  default_light_level);
+	fprintf(fp, "default thing %d\n",  default_thing);
 
-	fprintf(fp, "default_floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
-	fprintf(fp, "default_ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
-	fprintf(fp, "default_lower_tex \"%s\"\n", StringTidy(default_lower_tex, "\""));
-	fprintf(fp, "default_mid_tex \"%s\"\n",   StringTidy(default_mid_tex,   "\""));
-	fprintf(fp, "default_upper_tex \"%s\"\n", StringTidy(default_upper_tex, "\""));
+	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
+	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
+	fprintf(fp, "default lower_tex \"%s\"\n", StringTidy(default_lower_tex, "\""));
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_mid_tex,   "\""));
+	fprintf(fp, "default upper_tex \"%s\"\n", StringTidy(default_upper_tex, "\""));
 }
 
 
