@@ -235,11 +235,11 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default_light_level %d\n",  default_light_level);
 	fprintf(fp, "default_thing %d\n",  default_thing);
 
-	fprintf(fp, "default_floor_tex \"%s\"\n", default_floor_tex);
-	fprintf(fp, "default_ceil_tex \"%s\"\n",  default_ceil_tex);
-	fprintf(fp, "default_lower_tex \"%s\"\n", default_lower_tex);
-	fprintf(fp, "default_mid_tex \"%s\"\n",   default_mid_tex);
-	fprintf(fp, "default_upper_tex \"%s\"\n", default_upper_tex);
+	fprintf(fp, "default_floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
+	fprintf(fp, "default_ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
+	fprintf(fp, "default_lower_tex \"%s\"\n", StringTidy(default_lower_tex, "\""));
+	fprintf(fp, "default_mid_tex \"%s\"\n",   StringTidy(default_mid_tex,   "\""));
+	fprintf(fp, "default_upper_tex \"%s\"\n", StringTidy(default_upper_tex, "\""));
 }
 
 

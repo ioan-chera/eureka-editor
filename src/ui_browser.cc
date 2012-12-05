@@ -499,22 +499,6 @@ void UI_Browser_Box::Sort()
 }
 
 
-char * UI_Browser_Box::TidySearch() const
-{
-	static char buffer[FL_PATH_MAX];
-
-	char *dest = buffer;
-
-	for (const char *src = search->value() ; *src ; src++)
-		if (isprint(*src) && *src != '"')
-			*dest++ = *src;
-
-	*dest = 0;
-
-	return buffer;
-}
-
-
 const char * TidyLineDesc(const char *name)
 {
 	// escapes any '&' characters for FLTK
@@ -1117,7 +1101,7 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 	if (sortm)
 		fprintf(fp, "browser %c sort %d\n", kind, sortm->value());
 
-	fprintf(fp, "browser %c search \"%s\"\n", kind, TidySearch());
+	fprintf(fp, "browser %c search \"%s\"\n", kind, StringTidy(search->value(), "\""));
 
 	if (pics)
 		fprintf(fp, "browser %c pics %d\n", kind, pics->value());

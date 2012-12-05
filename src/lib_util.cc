@@ -26,8 +26,6 @@
 
 #include "main.h"
 
-// #include "m_game.h"
-
 #include <sys/time.h>
 #include <time.h>
 
@@ -259,6 +257,25 @@ void StringRemoveCRLF(char *str)
 	if (len > 0 && str[len - 1] == '\r')
 		str[--len] = 0;
 }
+
+
+char * StringTidy(const char *str, const char *bad_chars)
+{
+	static char buffer[FL_PATH_MAX];
+
+	char *dest = buffer;
+	char *d_end = &buffer[FL_PATH_MAX-2];
+
+	for ( ; *str && dest < d_end ; str++)
+		if (isprint(*str) && ! strchr(bad_chars, *str))
+			*dest++ = *str;
+
+	*dest = 0;
+
+	return buffer;
+}
+
+
 
 
 unsigned int TimeGetMillies()

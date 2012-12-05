@@ -119,9 +119,6 @@ private:
 
 	bool CategoryByLetter(char letter);
 
-	// ensure the search string is printable and contains no " quotes
-	char *TidySearch() const;
-
 	static void filter_callback(Fl_Widget *w, void *data);
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void  repop_callback(Fl_Widget *w, void *data);

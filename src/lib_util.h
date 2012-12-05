@@ -44,6 +44,7 @@ char *StringPrintf(const char *str, ...); // GCCATTR((format (printf, 1, 2)));
 void StringFree(const char *str);
 
 void StringRemoveCRLF(char *str);
+char *StringTidy(const char *str, const char *bad_chars = "");
 
 void check_types ();
 
