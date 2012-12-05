@@ -58,6 +58,21 @@ private:
 	Fl_Output    *th_desc;
 
 private:
+	void rawSetShown(int value)
+	{
+		if (value)
+		{
+			sub_grp->show();
+			toggle->label("^");
+		}
+		else
+		{
+			sub_grp->hide();
+			toggle->label("v");
+			UnselectPics();
+		}
+	}
+
 	void SetIntVal(Fl_Int_Input *w, int value)
 	{
 		char buffer[64];
@@ -284,17 +299,7 @@ private:
 	{
 		UI_DefaultProps *box = (UI_DefaultProps *)data;
 		
-		if (! box->toggle->value())
-		{
-			box->sub_grp->hide();
-			box->toggle->label("v");
-			box->UnselectPics();
-		}
-		else
-		{
-			box->sub_grp->show();
-			box->toggle->label("^");
-		}
+		box->rawSetShown(box->toggle->value());
 	}
 
 
@@ -515,6 +520,18 @@ public:
 		UnselectPicSet('f');
 		UnselectPicSet('t');
 	}
+
+	bool isShown() const
+	{
+		return sub_grp->visible();
+	}
+
+	void setShown(int value)
+	{
+		toggle->value(value);
+
+		rawSetShown(value);
+	}
 };
 
 
@@ -526,6 +543,9 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 
 	if (strcmp(tokens[0], "default") != 0)
 		return false;
+
+	if (strcmp(tokens[1], "is_shown") == 0)
+		main_win->vert_box->idefs->setShown(atoi(tokens[2]));
 
 	if (strcmp(tokens[1], "floor_h") == 0)
 		default_floor_h = atoi(tokens[2]);
@@ -561,6 +581,8 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 void Props_WriteUser(FILE *fp)
 {
 	fprintf(fp, "\n");
+
+	fprintf(fp, "default is_shown %d\n", main_win->vert_box->idefs->isShown());
 
 	fprintf(fp, "default floor_h %d\n", default_floor_h);
 	fprintf(fp, "default ceil_h %d\n",  default_ceil_h);
