@@ -306,5 +306,13 @@ void UI_MainWin::SetTitle(Wad_file *wad)
 }
 
 
+void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+//	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
+
+	/* TODO */
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

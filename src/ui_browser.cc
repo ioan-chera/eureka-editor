@@ -103,9 +103,7 @@ void Browser_Item::texture_callback(Fl_Widget *w, void *data)
 	const char *tex_name = (const char *)data;
 	SYS_ASSERT(tex_name);
 
-	int state = Fl::event_state();
-
-	main_win->line_box->SetTexture(tex_name, state);
+	main_win->BrowsedItem('T', 0, tex_name, Fl::event_state());
 }
 
 
@@ -114,9 +112,7 @@ void Browser_Item::flat_callback(Fl_Widget *w, void *data)
 	const char *flat_name = (const char *)data;
 	SYS_ASSERT(flat_name);
 
-	int state = Fl::event_state();
-
-	main_win->sec_box->SetTexture(flat_name, state);
+	main_win->BrowsedItem('F', 0, flat_name, Fl::event_state());
 }
 
 
@@ -124,7 +120,7 @@ void Browser_Item::thing_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->thing_box->SetThingType(item->number);
+	main_win->BrowsedItem('O', item->number, "", Fl::event_state());
 }
 
 
@@ -132,7 +128,7 @@ void Browser_Item::line_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->line_box->SetLineType(item->number);
+	main_win->BrowsedItem('L', item->number, "", Fl::event_state());
 }
 
 
@@ -140,7 +136,7 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->sec_box->SetSectorType(item->number);
+	main_win->BrowsedItem('S', item->number, "", Fl::event_state());
 }
 
 
