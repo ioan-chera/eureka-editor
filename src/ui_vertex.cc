@@ -29,6 +29,10 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
+	Fl_Toggle_Button *toggle;
+
+	Fl_Group *sub_grp;
+
 	UI_Pic   *l_pic;
 	UI_Pic   *m_pic;
 	UI_Pic   *u_pic;
@@ -276,6 +280,23 @@ private:
 		box->UpdateThingDesc();
 	}
 
+	static void toggle_callback(Fl_Widget *w, void *data)
+	{
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+		
+		if (! box->toggle->value())
+		{
+			box->sub_grp->hide();
+			box->toggle->label("v");
+			box->UnselectPics();
+		}
+		else
+		{
+			box->sub_grp->show();
+			box->toggle->label("^");
+		}
+	}
+
 
 public:
 	UI_DefaultProps(int X, int Y, int W, int H) :
@@ -284,10 +305,21 @@ public:
 		box(FL_FLAT_BOX);
 
 
-		Fl_Box *title = new Fl_Box(X + 10, Y + 10, W - 20, 30, "Default Properties");
+		toggle = new Fl_Toggle_Button(X + 10, Y + 10, 28, 28, "^");
+		toggle->value(1);
+		toggle->color(FL_DARK3, FL_DARK3);
+		toggle->callback(toggle_callback, this);
+		toggle->clear_visible_focus();
+
+		Fl_Box *title = new Fl_Box(X + 50, Y + 10, W - 60, 30, "Default Properties");
+		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelsize(18+KF*4);
 
 		Y += 50;
+		H -= 50;
+
+		sub_grp = new Fl_Group(X, Y, W, H);
+
 		X += 6;
 		W -= 12;
 
@@ -423,6 +455,8 @@ public:
 		th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 144, 24);
 
 
+		sub_grp->end();
+
 		resizable(NULL);
 
 		end();
@@ -458,6 +492,12 @@ public:
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state)
 	{
+		if (! sub_grp->visible())
+		{
+			Beep();
+			return;
+		}
+
 		switch (kind)
 		{
 			case 'T': SetTexture(name, e_state); break;
