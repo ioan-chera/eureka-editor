@@ -68,14 +68,67 @@ private:
 		th_desc->value(info->desc);
 	}
 
+	static const char * NormalizeTex_and_Dup(Fl_Input *w)
+	{
+		char name[WAD_TEX_NAME + 1];
+
+		memset(name, 0, sizeof(name));
+
+		strncpy(name, w->value(), WAD_TEX_NAME);
+
+		for (int i = 0 ; i < WAD_TEX_NAME ; i++)
+			name[i] = toupper(name[i]);
+
+		w->value(name);
+
+		return StringDup(name);
+	}
+
 	static void tex_callback(Fl_Widget *w, void *data)
 	{
-		/* TODO */
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+		if (w == box->l_pic ||
+			w == box->m_pic ||
+			w == box->u_pic)
+		{
+			// TODO : pics!!
+			return;
+		}
+
+		if (w == box->l_tex)
+			default_lower_tex = NormalizeTex_and_Dup(box->l_tex);
+
+		if (w == box->m_tex)
+			default_mid_tex = NormalizeTex_and_Dup(box->m_tex);
+
+		if (w == box->u_tex)
+			default_upper_tex = NormalizeTex_and_Dup(box->u_tex);
+
+		box->l_pic->GetTex(box->l_tex->value());
+		box->m_pic->GetTex(box->m_tex->value());
+		box->u_pic->GetTex(box->u_tex->value());
 	}
 
 	static void flat_callback(Fl_Widget *w, void *data)
 	{
-		/* TODO */
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+		if (w == box->f_pic ||
+			w == box->c_pic)
+		{
+			// TODO : pics!!
+			return;
+		}
+
+		if (w == box->f_tex)
+			default_floor_tex = NormalizeTex_and_Dup(box->f_tex);
+
+		if (w == box->c_tex)
+			default_ceil_tex = NormalizeTex_and_Dup(box->c_tex);
+
+		box->f_pic->GetFlat(box->f_tex->value());
+		box->c_pic->GetFlat(box->c_tex->value());
 	}
 
 	static void button_callback(Fl_Widget *w, void *data)
@@ -186,7 +239,6 @@ public:
 
 		Y += sec_tit->h() + 2;
 #endif
-
 
 		c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
 		f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);

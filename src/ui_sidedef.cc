@@ -568,7 +568,7 @@ int UI_SideBox::TexFromWidget(Fl_Input *w)
 
 	strncpy(name, w->value(), WAD_TEX_NAME);
 
-	for (int i = 0; i < WAD_TEX_NAME; i++)
+	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
 		name[i] = toupper(name[i]);
 
 //??	if (name[0] == 0)
