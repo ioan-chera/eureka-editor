@@ -1205,14 +1205,7 @@ bool M_LoadUserState()
 		if (! line)
 			break;
 
-		// remove trailing LF (and CR)  [TODO: move into lib_util]
-		int len = strlen(line);
-
-		if (len > 0 && line[len - 1] == '\n')
-			line[--len] = 0;
-
-		if (len > 0 && line[len - 1] == '\r')
-			line[--len] = 0;
+		StringRemoveCRLF(line);
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS);
 

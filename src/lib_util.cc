@@ -249,6 +249,18 @@ void StringFree(const char *str)
 }
 
 
+void StringRemoveCRLF(char *str)
+{
+	int len = strlen(str);
+
+	if (len > 0 && str[len - 1] == '\n')
+		str[--len] = 0;
+
+	if (len > 0 && str[len - 1] == '\r')
+		str[--len] = 0;
+}
+
+
 unsigned int TimeGetMillies()
 {
 	// Note: you *MUST* handle overflow (it *WILL* happen)
