@@ -310,7 +310,52 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 
-	/* TODO */
+	switch (edit.obj_type)
+	{
+		case OBJ_LINEDEFS:
+			if (kind == 'T')
+			{
+				line_box->SetTexture(name, e_state);
+				return;
+			}
+			if (kind == 'L')
+			{
+				line_box->SetLineType(number);
+				return;
+			}
+			break;
+
+		case OBJ_SECTORS:
+			if (kind == 'F')
+			{
+				sec_box->SetTexture(name, e_state);
+				return;
+			}
+			if (kind == 'S')
+			{
+				sec_box->SetSectorType(number);
+				return;
+			}
+			break;
+
+		case OBJ_THINGS:
+			if (kind == 'O')
+			{
+				thing_box->SetThingType(number);
+				return;
+			}
+			break;
+
+		case OBJ_VERTICES:
+			// pass through for Default Props
+			vert_box->BrowsedItem(kind, number, name, e_state);
+			return;
+
+		default:
+			break;
+	}
+
+	Beep();
 }
 
 

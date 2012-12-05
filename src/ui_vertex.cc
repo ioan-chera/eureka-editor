@@ -392,6 +392,11 @@ public:
 		SetThingDesc();
 	}
 
+	void BrowsedItem(char kind, int number, const char *name, int e_state)
+	{
+		/* TODO */
+	}
+
 	void UnselectPics()
 	{
 		UnselectPicSet('f');
@@ -625,6 +630,12 @@ void UI_VertexBox::UpdateField()
 void UI_VertexBox::UpdateTotal()
 {
 	which->SetTotal(NumVertices);
+}
+
+
+void UI_VertexBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	idefs->BrowsedItem(kind, number, name, e_state);
 }
 
 

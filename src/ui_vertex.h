@@ -62,6 +62,8 @@ public:
 
 	void UpdateTotal();
 
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
+
 	void UnselectPics();
 
 private:
