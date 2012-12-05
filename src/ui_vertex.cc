@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "levels.h"
+#include "m_game.h"
 #include "w_rawdef.h"
 
 
@@ -49,10 +50,24 @@ private:
 	Fl_Input *f_tex;
 	UI_Pic   *f_pic;
 
-	Fl_Input  *thing;
-	Fl_Output *th_desc;
+	Fl_Int_Input *thing;
+	Fl_Output    *th_desc;
 
 private:
+	void SetIntVal(Fl_Int_Input *w, int value)
+	{
+		char buffer[64];
+		sprintf(buffer, "%d", value);
+		w->value(buffer);
+	}
+
+	void SetThingDesc()
+	{
+		const thingtype_t *info = M_GetThingType(default_thing);
+
+		th_desc->value(info->desc);
+	}
+
 	static void tex_callback(Fl_Widget *w, void *data)
 	{ /* TODO */ }
 
@@ -216,6 +231,31 @@ public:
 
 	virtual ~UI_DefaultProps()
 	{ }
+
+public:
+	void LoadValues()
+	{
+		l_tex->value(default_lower_tex);
+		m_tex->value(default_mid_tex);
+		u_tex->value(default_upper_tex);
+
+		l_pic->GetTex(l_tex->value());
+		m_pic->GetTex(m_tex->value());
+		u_pic->GetTex(u_tex->value());
+
+		f_tex->value(default_floor_tex);
+		c_tex->value(default_ceil_tex);
+
+		f_pic->GetFlat(f_tex->value());
+		c_pic->GetFlat(c_tex->value());
+
+		SetIntVal(floor_h, default_floor_h);
+		SetIntVal( ceil_h, default_ceil_h);
+		SetIntVal(  light, default_light_level);
+		SetIntVal(  thing, default_thing);
+
+		SetThingDesc();
+	}
 };
 
 
