@@ -70,6 +70,7 @@ private:
 
 bool Props_ParseUser(const char ** tokens, int num_tok);
 void Props_WriteUser(FILE *fp);
+void Props_LoadValues();
 
 #endif  /* __EUREKA_UI_VERTEX_H__ */
 

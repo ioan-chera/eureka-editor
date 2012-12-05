@@ -1234,6 +1234,8 @@ bool M_LoadUserState()
 
 	fclose(fp);
 
+	Props_LoadValues();
+
 	return true;
 }
 
@@ -1279,7 +1281,6 @@ void M_DefaultUserState()
 
 	if (main_win)
 		main_win->NewEditMode('t');
-
 }
 
 

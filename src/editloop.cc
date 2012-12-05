@@ -1272,6 +1272,8 @@ void Editor_Init()
 
 	grid.Init();
 
+	Props_LoadValues();
+
 	MadeChanges = 0;
 }
 
