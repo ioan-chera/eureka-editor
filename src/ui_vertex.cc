@@ -69,7 +69,14 @@ private:
 	}
 
 	static void tex_callback(Fl_Widget *w, void *data)
-	{ /* TODO */ }
+	{
+		/* TODO */
+	}
+
+	static void flat_callback(Fl_Widget *w, void *data)
+	{
+		/* TODO */
+	}
 
 	static void button_callback(Fl_Widget *w, void *data)
 	{
@@ -95,6 +102,24 @@ private:
 
 		box->SetIntVal(box->floor_h, default_floor_h);
 		box->SetIntVal(box-> ceil_h, default_ceil_h);
+	}
+
+	static void height_callback(Fl_Widget *w, void *data)
+	{
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+		default_floor_h = atoi(box->floor_h->value());
+		default_ceil_h  = atoi(box-> ceil_h->value());
+		default_light_level = atoi(box->light->value());
+	}
+
+	static void thing_callback(Fl_Widget *w, void *data)
+	{
+		UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+		default_thing = atoi(box->thing->value());
+
+		box->SetThingDesc();
 	}
 
 
@@ -166,13 +191,13 @@ public:
 		c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
 		f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);
 
-//!!		c_pic->callback(tex_callback, this);
-//!!		f_pic->callback(tex_callback, this);
+		c_pic->callback(flat_callback, this);
+		f_pic->callback(flat_callback, this);
 
 
 		c_tex = new Fl_Input(X+68, Y, 108, 24, "Ceiling: ");
 		c_tex->align(FL_ALIGN_LEFT);
-//!!		c_tex->callback(tex_callback, this);
+		c_tex->callback(flat_callback, this);
 		c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 		Y += c_tex->h() + 3;
@@ -180,7 +205,7 @@ public:
 
 		ceil_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
 		ceil_h->align(FL_ALIGN_LEFT);
-//!!		ceil_h->callback(height_callback, this);
+		ceil_h->callback(height_callback, this);
 		ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
@@ -204,7 +229,7 @@ public:
 
 		floor_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
 		floor_h->align(FL_ALIGN_LEFT);
-//!!		floor_h->callback(height_callback, this);
+		floor_h->callback(height_callback, this);
 		floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
@@ -224,7 +249,7 @@ public:
 
 		f_tex = new Fl_Input(X+68, Y, 108, 24, "Floor:   ");
 		f_tex->align(FL_ALIGN_LEFT);
-//!!		f_tex->callback(tex_callback, this);
+		f_tex->callback(flat_callback, this);
 		f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 		Y += f_tex->h() + 8;
@@ -232,7 +257,7 @@ public:
 
 		light = new Fl_Int_Input(X+68, Y, 64, 24, "Light:   ");
 		light->align(FL_ALIGN_LEFT);
-//!!		light->callback(room_callback, this);
+		light->callback(height_callback, this);
 		light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 		Y += light->h() + 18;
@@ -242,13 +267,10 @@ public:
 
 		thing = new Fl_Int_Input(X+54, Y, 64, 24, "Thing: ");
 		thing->align(FL_ALIGN_LEFT);
-//!!		thing->callback(thing_callback, this);
+		thing->callback(thing_callback, this);
 		thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 		th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 144, 24);
-		th_desc->value("Cyberdemon");
-
-		// TODO....
 
 
 		resizable(NULL);
@@ -304,8 +326,8 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[1], "light_level") == 0)
 		default_light_level = atoi(tokens[2]);
 
-	if (strcmp(tokens[1], "light_level") == 0)
-		default_thing = atoi(tokens[3]);
+	if (strcmp(tokens[1], "thing") == 0)
+		default_thing = atoi(tokens[2]);
 
 	if (strcmp(tokens[1], "floor_tex") == 0)
 		default_floor_tex = StringDup(tokens[2]);
