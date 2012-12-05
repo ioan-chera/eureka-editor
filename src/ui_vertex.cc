@@ -81,9 +81,9 @@ public:
 		Y += line_tit->h() + 2;
 
 
-		l_pic = new UI_Pic(X+4,      Y, 64, 64);
+		l_pic = new UI_Pic(X+8,      Y, 64, 64);
 		m_pic = new UI_Pic(MX-32,    Y, 64, 64);
-		u_pic = new UI_Pic(X+W-64-4, Y, 64, 64);
+		u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
 
 		l_pic->callback(tex_callback, this);
 		m_pic->callback(tex_callback, this);
@@ -198,12 +198,12 @@ public:
 
 		// ---- THING PROPS --------------
 
-		thing = new Fl_Int_Input(X+58, Y, 64, 24, "Thing: ");
+		thing = new Fl_Int_Input(X+54, Y, 64, 24, "Thing: ");
 		thing->align(FL_ALIGN_LEFT);
 //!!		thing->callback(thing_callback, this);
 		thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-		th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 130, 24);
+		th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 144, 24);
 		th_desc->value("Cyberdemon");
 
 		// TODO....

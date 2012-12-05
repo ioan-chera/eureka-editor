@@ -90,9 +90,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += x_ofs->h() + 4;
 
 
-	l_pic = new UI_Pic(X+4,      Y, 64, 64);
+	l_pic = new UI_Pic(X+8,      Y, 64, 64);
 	m_pic = new UI_Pic(MX-32,    Y, 64, 64);
-	u_pic = new UI_Pic(X+W-64-4, Y, 64, 64);
+	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
 
 	l_pic->callback(tex_callback, this);
 	m_pic->callback(tex_callback, this);
