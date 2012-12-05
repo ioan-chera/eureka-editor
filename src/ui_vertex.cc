@@ -228,7 +228,18 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 
 void Props_WriteUser(FILE *fp)
 {
-	// FIXME: Props_WriteUser
+	fprintf(fp, "\n");
+
+	fprintf(fp, "default_floor_h %d\n", default_floor_h);
+	fprintf(fp, "default_ceil_h %d\n",  default_ceil_h);
+	fprintf(fp, "default_light_level %d\n",  default_light_level);
+	fprintf(fp, "default_thing %d\n",  default_thing);
+
+	fprintf(fp, "default_floor_tex \"%s\"\n", default_floor_tex);
+	fprintf(fp, "default_ceil_tex \"%s\"\n",  default_ceil_tex);
+	fprintf(fp, "default_lower_tex \"%s\"\n", default_lower_tex);
+	fprintf(fp, "default_mid_tex \"%s\"\n",   default_mid_tex);
+	fprintf(fp, "default_upper_tex \"%s\"\n", default_upper_tex);
 }
 
 
