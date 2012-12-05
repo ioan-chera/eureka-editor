@@ -1291,7 +1291,8 @@ bool M_LoadUserState()
 		if (  Editor_ParseUser(tokens, num_tok) ||
 		        Grid_ParseUser(tokens, num_tok) ||
 		    Render3D_ParseUser(tokens, num_tok) ||
-		     Browser_ParseUser(tokens, num_tok))
+		     Browser_ParseUser(tokens, num_tok) ||
+		       Props_ParseUser(tokens, num_tok))
 		{
 			// Ok
 		}
@@ -1330,10 +1331,7 @@ bool M_SaveUserState()
 	    Grid_WriteUser(fp);
 	Render3D_WriteUser(fp);
 	 Browser_WriteUser(fp);
-
-#if 0
-	Browser_WriteUser(fp);
-#endif
+	   Props_WriteUser(fp);
 
 	fclose(fp);
 

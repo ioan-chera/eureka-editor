@@ -219,6 +219,18 @@ public:
 };
 
 
+bool Props_ParseUser(const char ** tokens, int num_tok)
+{
+	// FIXME: Props_ParseUser
+	return false;
+}
+
+
+void Props_WriteUser(FILE *fp)
+{
+	// FIXME: Props_WriteUser
+}
+
 
 //------------------------------------------------------------------------
 

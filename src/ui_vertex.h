@@ -67,6 +67,10 @@ private:
 	static void y_callback(Fl_Widget *, void *);
 };
 
+
+bool Props_ParseUser(const char ** tokens, int num_tok);
+void Props_WriteUser(FILE *fp);
+
 #endif  /* __EUREKA_UI_VERTEX_H__ */
 
 //--- editor settings ---
