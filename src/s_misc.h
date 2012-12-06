@@ -27,8 +27,6 @@
 #ifndef __EUREKA_S_MISC_H__
 #define __EUREKA_S_MISC_H__
 
-void sector_slice (obj_no_t linedef1, obj_no_t linedef2);
-
 #if 0
 void DistributeSectorFloors (SelPtr);
 void DistributeSectorCeilings (SelPtr);
