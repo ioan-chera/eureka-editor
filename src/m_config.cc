@@ -32,6 +32,7 @@
 #include "lib_adler.h"
 #include "editloop.h"
 #include "e_loadsave.h"
+#include "im_color.h"
 #include "m_config.h"
 #include "r_misc.h"
 #include "r_grid.h"
@@ -86,13 +87,17 @@ typedef enum
 	// Receptacle is of type: int
 	OPT_INTEGER,
 
+	// A color value
+	// Receptacle is of type: rgb_color_t
+	OPT_COLOR,
+
 	// String
 	// Receptacle is of type: const char *
 	OPT_STRING,
 
 	// List of strings
 	// Receptacle is of type: std::vector< const char * >
-	OPT_STRING_LIST,
+	OPT_STRING_LIST
 }
 opt_type_t;
 
@@ -562,7 +567,11 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		case OPT_INTEGER:
-			*((int *) (opt->data_ptr)) = atoi (value);
+			*((int *) opt->data_ptr) = atoi(value);
+			break;
+
+		case OPT_COLOR:
+			*((rgb_color_t *) opt->data_ptr) = ParseColor(value);
 			break;
 
 		case OPT_STRING:
@@ -778,7 +787,23 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 
 				if (! ignore)
 				{
-					*((int *) o->data_ptr) = atoi (argv[0]);
+					*((int *) o->data_ptr) = atoi(argv[0]);
+				}
+				break;
+
+			case OPT_COLOR:
+				if (argc < 2)
+				{
+					FatalError("missing argument after '%s'\n", argv[0]);
+					return 1;
+				}
+
+				argv++;
+				argc--;
+
+				if (! ignore)
+				{
+					*((rgb_color_t *) o->data_ptr) = ParseColor(argv[0]);
 				}
 				break;
 
@@ -866,6 +891,8 @@ void dump_parameters(FILE *fp)
 			fprintf (fp, "'%s'", *((char **) o->data_ptr));
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
+		else if (o->opt_type == OPT_COLOR)
+			fprintf (fp, "%06lx", *((rgb_color_t *) o->data_ptr) >> 8);
 		else if (o->opt_type == OPT_STRING_LIST)
 		{
 			string_list_t *list = (string_list_t *)o->data_ptr;
@@ -931,6 +958,7 @@ void dump_command_line_options(FILE *fp)
 			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
+			case OPT_COLOR:         fprintf (fp, "<color>     "); break;
 
 			case OPT_STRING:        fprintf (fp, "<string>    "); break;
 			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
