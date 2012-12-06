@@ -178,8 +178,8 @@ int UI_Canvas::handle_key()
 	if (key < 127 && isalpha(key) && (state & FL_CTRL))
 		key &= 31;
 
-	if (key == '\t')
-		key = FL_Tab;
+	if (key == '\t') key = FL_Tab;
+	if (key == '\b') key = FL_BackSpace;
 
 	// keyboard propagation logic
 

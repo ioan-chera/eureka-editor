@@ -968,17 +968,9 @@ bool Editor_Key(int key, keymod_e mod)
 //!!!		}
 //!!!	}
 
-	// [Ctrl][k]: cut a slice out of a sector
-//!!!	else if (key == 11 && edit.obj_type == OBJ_LINEDEFS
-//!!!			&& edit.Selected && edit.Selected->next && ! edit.Selected->next->next)
-//!!!	{
-//!!!		sector_slice (edit.Selected->next->objnum, edit.Selected->objnum);
-//!!!		edit.Selected->clear_all();
-//!!!		edit.RedrawMap = 1;
-//!!!	}
 
 	// [DEL]: delete the current object(s)
-	else if ((key == '\b' || key == FL_BackSpace || key == FL_Delete))
+	else if (key == FL_BackSpace || key == FL_Delete)
 	{
 		bool keep_unused = (mod == KM_SHIFT) ? true : false;
 
