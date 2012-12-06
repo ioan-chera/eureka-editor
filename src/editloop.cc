@@ -464,8 +464,6 @@ static bool Grid_Key(int key, keymod_e mod)
 		CMD_GoToCamera();
 	}
 
-	// [END]: jump to camera position
-
 	// TODO: CONFIG ITEM : digits set the zoom factor (as in Yadex)
 #if 0
 	// [1] - [9]: set the zoom factor
@@ -644,6 +642,174 @@ void Editor_Wheel(int dx, int dy, keymod_e mod)
 }
 
 
+static bool Thing_Key(int key, keymod_e mod)
+{
+	if (0)
+	{
+	}
+
+	// 'w': spin things 1/8 turn counter-clockwise
+	else if (key == 'w')
+	{
+		CMD_SpinThings(+45);
+	}
+
+	// 'x': spin things 1/8 turn clockwise
+	else if (key == 'x')
+	{
+		CMD_SpinThings(-45);
+	}
+
+
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+static bool LineDef_Key(int key, keymod_e mod)
+{
+	if (0)
+	{
+	}
+
+	// [d]: disconnect linedefs
+	else if (key == 'd')
+	{
+		CMD_DisconnectLineDefs();
+	}
+
+	// [e]: Select/unselect all linedefs in non-forked path
+	else if (key == 'e')
+	{
+		CMD_SelectLinesInPath(SLP_Normal);
+	}
+	else if (key == 'E')
+	{
+		CMD_SelectLinesInPath(SLP_SameTex);
+	}
+
+	// [x]: split linedefs
+	else if (key == 'x')
+	{
+		CMD_SplitLineDefs();
+	}
+
+	// [w]: flip linedefs
+	else if (key == 'w')
+	{
+		CMD_FlipLineDefs();
+	}
+
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+static bool Sector_Key(int key, keymod_e mod)
+{
+	if (0)
+	{
+	}
+
+	// [e]: select/unselect contiguous sectors with same floor height
+	else if (key == 'e')
+	{
+		CMD_SelectContiguousSectors(SCS_Floor_H);
+	}
+	else if (key == 'E')
+	{
+		CMD_SelectContiguousSectors(SCS_FloorTex);
+	}
+
+	// [m]: merge sectors  (with SHIFT : keep common linedefs)
+	else if (key == 'm')
+	{
+		CMD_MergeSectors(false);
+	}
+	else if (key == 'M')
+	{
+		CMD_MergeSectors(true);
+	}
+
+	// [w]: swap flats in sectors
+	else if (key == 'w')
+	{
+		CMD_SwapFlats();
+	}
+
+	// [.] and [,]: adjust floor height
+	else if (key == ',' || key == '<')
+	{
+		CMD_MoveFloors((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
+	}
+	else if (key == '.' || key == '>')
+	{
+		CMD_MoveFloors((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
+	}
+
+	// '[' and ']': adjust ceiling height
+	else if (key == '[' || key == '{')
+	{
+		CMD_MoveCeilings((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
+	}
+	else if (key == ']' || key == '}')
+	{
+		CMD_MoveCeilings((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
+	}
+
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+static bool Vertex_Key(int key, keymod_e mod)
+{
+	if (0)
+	{
+	}
+
+	// [d]: disconnect linedefs
+	else if (key == 'd')
+	{
+		CMD_DisconnectVertices();
+	}
+
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+static bool RadTrig_Key(int key, keymod_e mod)
+{
+	if (0)
+	{
+	}
+
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
 bool Editor_Key(int key, keymod_e mod)
 {
 	// in general, ignore ALT key
@@ -678,26 +844,6 @@ bool Editor_Key(int key, keymod_e mod)
 	{
 		CheckLevel (-1, -1);
 		edit.RedrawMap = 1;
-	}
-
-	// [e]: Select/unselect all linedefs in non-forked path
-	else if ((key == 'e') && edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_SelectLinesInPath(SLP_Normal);
-	}
-	else if (key == 'E' && edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_SelectLinesInPath(SLP_SameTex);
-	}
-
-	// [e]: Select/unselect contiguous sectors with same floor height
-	else if (key == 'e' && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_SelectContiguousSectors(SCS_Floor_H);
-	}
-	else if (key == 'E' && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_SelectContiguousSectors(SCS_FloorTex);
 	}
 
 	// [q]: quantize objects to the grid
@@ -785,76 +931,6 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 */
 
-	// 'w': spin things 1/8 turn counter-clockwise
-	else if (key == 'w' && edit.obj_type == OBJ_THINGS
-			&& (edit.Selected || edit.highlighted ()))
-	{
-		CMD_SpinThings(+45);
-	}
-
-	// 'x': spin things 1/8 turn clockwise
-	else if (key == 'x' && edit.obj_type == OBJ_THINGS)
-	{
-		CMD_SpinThings(-45);
-	}
-
-	// [.] and [,]: adjust floor height
-	else if ((key == ',' || key == '<') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveFloors((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
-	}
-	else if ((key == '.' || key == '>') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveFloors((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
-	}
-
-	// '[' and ']': adjust ceiling height
-	else if ((key == '[' || key == '{') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveCeilings((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
-	}
-	else if ((key == ']' || key == '}') && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MoveCeilings((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
-	}
-
-
-	// [w]: split linedefs and sectors
-//!!!	else if (key == 'w' && edit.obj_type == OBJ_LINEDEFS
-//!!!			&& edit.Selected && edit.Selected->next && ! edit.Selected->next->next)
-//!!!	{
-//!!!		SplitLineDefsAndSector (edit.Selected->next->objnum, edit.Selected->objnum);
-//!!!		edit.Selected->clear_all();
-//!!!		edit.RedrawMap = 1;
-//!!!	}
-
-//!!!	// [w]: split sector between vertices
-//!!!	else if (key == 'w' && edit.obj_type == OBJ_VERTICES
-//!!!			&& edit.Selected && edit.Selected->next && ! edit.Selected->next->next)
-//!!!	{
-//!!!		SplitSector (edit.Selected->next->objnum, edit.Selected->objnum);
-//!!!		edit.Selected->clear_all();
-//!!!		edit.RedrawMap = 1;
-//!!!	}
-
-
-	// [x]: split linedefs
-	else if (key == 'x' && edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_SplitLineDefs();
-	}
-
-	// [w]: flip linedefs
-	else if (key == 'w' && edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_FlipLineDefs();
-	}
-
-	// [w]: swap flats in sectors
-	else if (key == 'w' && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_SwapFlats();
-	}
 
 	// [Ctrl-x]: exchange objects numbers
 //!!!	else if (key == 24)
@@ -909,25 +985,6 @@ bool Editor_Key(int key, keymod_e mod)
 		CMD_CorrectSector();
 	}
 */
-	// [m]: merge sectors  (with SHIFT : keep common linedefs)
-	else if (key == 'm' && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MergeSectors(false);
-	}
-	else if (key == 'M' && edit.obj_type == OBJ_SECTORS)
-	{
-		CMD_MergeSectors(true);
-	}
-
-	// [d]: disconnect linedefs
-	else if (key == 'd' && edit.obj_type == OBJ_VERTICES)
-	{
-		CMD_DisconnectVertices();
-	}
-	else if (key == 'd' && edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_DisconnectLineDefs();
-	}
 
 	// [X]: align textures horizontally
 	else if (key == 'X' and edit.obj_type == OBJ_LINEDEFS)
@@ -984,7 +1041,19 @@ bool Editor_Key(int key, keymod_e mod)
 
 	else
 	{
-		return false;
+		/* try a mode-specific function */
+
+		switch (edit.obj_type)
+		{
+			case OBJ_THINGS:   return Thing_Key(key, mod);
+			case OBJ_LINEDEFS: return LineDef_Key(key, mod);
+			case OBJ_SECTORS:  return Sector_Key(key, mod);
+			case OBJ_VERTICES: return Vertex_Key(key, mod);
+			case OBJ_RADTRIGS: return RadTrig_Key(key, mod);
+
+			default:
+				return false;
+		}
 	}
 
 	return true;
