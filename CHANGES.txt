@@ -8,23 +8,22 @@ CHANGES IN Eureka 0.xx
 
 +  new Default Properties panel (shown in vertex mode)
 
++  added 'm' merge command for vertices
+
 -  shortcut key for 'File/Export Map' is now CTRL-E
-
--  when rotating a group of things, update their angles too
-
--  sectors created outside of map now have fixed size
-
+-  swapped sector height keys: '.' ',' <---> '[' ']'
 -  grid-snap button is easier to use (a toggle button now)
 
+-  when rotating a group of things, update their angles too
+-  sectors created outside of map now have fixed size
 -  can disable multi-select ('multi_select_modifier' config var)
-
--  swapped sector height keys: '.' ',' <---> '[' ']'
 
 -  fixed wrong color of a tagged linedef or sector
 
 -  config: default grid size is now 16 (was: 128)
 -  config: added 'default_grid_size' var
 -  config: added 'default_grid_snap' var
+-  config: added 'digits_set_zoom' var
 
 -  config: added 'new_sector_size' var
 -  config: added 'gui_scheme' and 'gui_color_set' vars

@@ -27,12 +27,13 @@
 #ifndef __EUREKA_E_VERTEX_H__
 #define __EUREKA_E_VERTEX_H__
 
-void MergeVertex(int v1, int v2);
+void MergeVertex(int v1, int v2, bool keep_v1 = false);
 
 void InsertPolygonVertices (int, int, int, int);
 
 int VertexHowManyLineDefs(int v_num);
 
+void CMD_MergeVertices();
 void CMD_DisconnectVertices();
 void CMD_DisconnectLineDefs();
 

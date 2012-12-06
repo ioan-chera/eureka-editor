@@ -806,6 +806,12 @@ static bool Vertex_Key(int key, keymod_e mod)
 		CMD_DisconnectVertices();
 	}
 
+	// [m]: merge vertices
+	else if (key == 'm')
+	{
+		CMD_MergeVertices();
+	}
+
 	else
 	{
 		return false;

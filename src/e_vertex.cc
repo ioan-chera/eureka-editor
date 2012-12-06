@@ -26,14 +26,15 @@
 
 #include "main.h"
 
-#include "m_dialog.h"
-#include "r_grid.h"
 #include "editloop.h"
+#include "e_vertex.h"
+#include "m_dialog.h"
+#include "m_bitvec.h"
+#include "r_grid.h"
 #include "levels.h"
 #include "objects.h"
 #include "selectn.h"
-#include "m_bitvec.h"
-#include "e_vertex.h"
+#include "x_mirror.h"
 
 
 
@@ -55,7 +56,7 @@ void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
 #endif
 
 
-void MergeVertex(int v1, int v2)
+void MergeVertex(int v1, int v2, bool keep_v1)
 {
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
@@ -83,7 +84,11 @@ void MergeVertex(int v1, int v2)
 	}
 
 	// delete V1
-	BA_Delete(OBJ_VERTICES, v1);
+
+	if (! keep_v1)
+	{
+		BA_Delete(OBJ_VERTICES, v1);
+	}
 }
 
 
@@ -179,6 +184,46 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			which++;
 		}
 	}
+}
+
+
+void CMD_MergeVertices()
+{
+	if (edit.Selected->count_obj() < 2)
+	{
+		Beep();
+		return;
+	}
+
+	// the first vertex is kept (but moved to the middle coordinate),
+	// all the other vertices are removed.
+
+	int new_x, new_y;
+
+	Objs_CalcMiddle(edit.Selected, &new_x, &new_y);
+
+	int v = edit.Selected->find_first();
+
+	edit.Selected->clear(v);
+
+	BA_Begin();
+
+	BA_ChangeVT(v, Vertex::F_X, new_x);
+	BA_ChangeVT(v, Vertex::F_Y, new_y);
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		MergeVertex(*it, v, true /* keep_v1 */);
+	}
+
+	DeleteObjects(edit.Selected);
+
+	BA_End();
+
+	edit.Selected->clear_all();
+	edit.Selected->set(v);
 }
 
 
