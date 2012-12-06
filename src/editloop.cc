@@ -660,6 +660,13 @@ static bool Thing_Key(int key, keymod_e mod)
 		CMD_SpinThings(-45);
 	}
 
+	// [K] limit shown things to specific skill (AJA)
+	else if (key == 'K')
+	{
+		active_wmask ^= 1;
+		active_when = active_wmask;
+		edit.RedrawMap = 1;
+	}
 
 	else
 	{
@@ -702,6 +709,17 @@ static bool LineDef_Key(int key, keymod_e mod)
 	else if (key == 'w')
 	{
 		CMD_FlipLineDefs();
+	}
+
+	// [X]: align textures horizontally
+	else if (key == 'X')
+	{
+		CMD_AlignTexturesX();
+	}
+	// [Y]: align textures vertically
+	else if (key == 'Y')
+	{
+		CMD_AlignTexturesY();
 	}
 
 	else
@@ -894,7 +912,7 @@ bool Editor_Key(int key, keymod_e mod)
 
 	// [o]: copy a group of objects
 	else if (key == 'o'
-			&& (edit.Selected || edit.highlighted ()))
+			&& (edit.Selected || edit.highlighted()))
 	{
 		if (CMD_Copy())
 		{
@@ -974,34 +992,6 @@ bool Editor_Key(int key, keymod_e mod)
 
 		UpdateHighlight();
 
-		edit.RedrawMap = 1;
-	}
-
-/*
-	// [c]: correct sector at mouse pointer
-	else if (key == 'c' && edit.obj_type == OBJ_SECTORS &&
-	         edit.pointer_in_window)
-	{
-		CMD_CorrectSector();
-	}
-*/
-
-	// [X]: align textures horizontally
-	else if (key == 'X' and edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_AlignTexturesX();
-	}
-	// [Y]: align textures vertically
-	else if (key == 'Y' and edit.obj_type == OBJ_LINEDEFS)
-	{
-		CMD_AlignTexturesY();
-	}
-
-	// [K] limit shown things to specific skill (AJA)
-	else if (key == 'K' && edit.obj_type == OBJ_THINGS)
-	{
-		active_wmask ^= 1;
-		active_when = active_wmask;
 		edit.RedrawMap = 1;
 	}
 
