@@ -194,7 +194,7 @@ void DrawScreenString (int scrx, int scry, const char *str)
 			i++;
 			p += i;
 		}
-		set_colour (save);
+//		set_colour (save);
 	}
 
 	lastxcur = x + FONTW * len;

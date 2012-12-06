@@ -54,12 +54,6 @@ void DrawScreenText (int, int, const char *, ...);
 void DrawScreenString (int, int, const char *);
 
 
-// OLD CRUD : REMOVE
-#define  set_colour(X)  do{}while(0)
-#define push_colour(X)  do{}while(0)
-#define  pop_colour(X)  do{}while(0)
-
-
 #endif  /* __EUREKA_R_MISC_H__ */
 
 //--- editor settings ---
