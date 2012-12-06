@@ -34,9 +34,6 @@ void RaiseOrLowerSectors (SelPtr obj);
 void BrightenOrDarkenSectors (SelPtr obj);
 #endif
 
-void SplitSector (int, int);
-void SplitLineDefsAndSector (int, int);
-
 #endif  /* __EUREKA_S_MISC_H__ */
 
 //--- editor settings ---

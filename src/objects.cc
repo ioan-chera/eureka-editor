@@ -381,18 +381,6 @@ static bool TwoNeighboringLineDefs(int new_ld, int v1, int v2,
 }
 
 
-#if 0
-static void SplitSector(int new_ld, int v1, int v2,
-{
-	lineloop_c right_loop;
-	lineloop_c  left_loop;
-
-	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
-	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
-}
-#endif
-
-
 static void ClosedLoop_Complex(int new_ld, int v1, int v2, selection_c& flip)
 {
 DebugPrintf("COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
