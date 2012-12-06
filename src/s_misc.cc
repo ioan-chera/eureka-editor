@@ -190,45 +190,5 @@ void BrightenOrDarkenSectors (SelPtr obj)
 #endif
 
 
-static int find_linedef_for_area (int x, int y, int& side)
-{
-	int best_match = -1;
-
-#if 0 // FIXME !!!!
-	int n, m, curx;
-
-	curx = 32767;  // Oh yes, one more hard-coded constant!
-
-	for (n = 0 ; n < NumLineDefs ; n++)
-		if ((Vertices[LineDefs[n].start].y > y)
-				!= (Vertices[LineDefs[n].end].y > y))
-		{
-			int lx0 = Vertices[LineDefs[n].start].x;
-			int ly0 = Vertices[LineDefs[n].start].y;
-			int lx1 = Vertices[LineDefs[n].end].x;
-			int ly1 = Vertices[LineDefs[n].end].y;
-			m = lx0 + (int) ((long) (y - ly0) * (long) (lx1 - lx0)
-					/ (long) (ly1 - ly0));
-			if (m >= x && m < curx)
-			{
-				curx = m;
-				best_match = n;
-			}
-		}
-
-	/* now look if this linedef has a sidedef bound to one sector */
-	if (best_match < 0)
-		return OBJ_NO_NONE;
-
-	if (Vertices[LineDefs[best_match].start].y
-			> Vertices[LineDefs[best_match].end].y)
-		side = 1;
-	else
-		side = 2;
-#endif
-	return best_match;
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
