@@ -6,12 +6,6 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
->>>  Default Props
-
--  tweak horiz of pics in sidedef / props
-
--  tweak horiz of sector panel / props
-
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)

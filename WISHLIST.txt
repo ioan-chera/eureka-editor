@@ -23,17 +23,17 @@ General
        one for ALL modes ("global"), one for 3D view, one for browser.
 
        Priorities:
-       1. Browser (if active)
-       2. 3D view (if active)
-       3. specific mode
-       4. global
+       1. global
+       2. Browser (if active)
+       3. 3D view (if active)
+       4. edit
+       5. thing / linedef / sector / vertex / radtrig
 
    (b) decide if uppercase keys are considered as SHIFT modified
    (c) probably keep menu shortcuts hard-coded
 
 +  nicer way to select map, render a small 2D version of each map
-   and present them in a scrolling list.  Perhaps abuse the browser
-   for this.
+   and present them in a scrolling list.
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -75,6 +75,8 @@ ______________________________________________________________________
 General
 -------
 
++  Hexen support
+
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
@@ -82,7 +84,7 @@ General
    (a) "none", "gtk+", "plastic"  [gui_scheme]
    (b) colors: default, bright, xxx, custom  [gui_color_set]
    (c) font size (HARD!)
-   (d) implemented OPT_COLOR
+   (d) implement OPT_COLOR [done]
 
 +  able to see what exact warnings and errors from node builder
 
@@ -141,8 +143,6 @@ General
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
 
-IDEA: SPACE in LINEDEF mode = add vertex to split line(s)
-
 
 
 Documentation
@@ -173,12 +173,6 @@ Coding
 ------
 
 -  prefix linedef utilities with 'LD_', sector utilities with 'SEC_' etc...
-
-?  rename: edit.highlighted --> edit.Highlighted
-
--  set proper linesize() in browser, use it in Scroll()
-
--  get rid of OPT_STRINGBUF8
 
 
 
@@ -247,8 +241,7 @@ Editing
 
 -  'X' : exchange object numbers
 
--  'm' for vertices : merge into one
-   'm' for linedefs? (especially a connected sequence of lines)
+?  'm' for linedefs? (especially a connected sequence of lines)
 
 -  fix PointOutsideOfMap() code to handle places where the point
    cannot "see" the surrounding void space.
