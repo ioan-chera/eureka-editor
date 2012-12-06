@@ -55,6 +55,7 @@ int active_wmask = 0;
 
 
 // config items
+bool digits_set_zoom = false;
 bool escape_key_quits = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
@@ -464,22 +465,24 @@ static bool Grid_Key(int key, keymod_e mod)
 		CMD_GoToCamera();
 	}
 
-	// TODO: CONFIG ITEM : digits set the zoom factor (as in Yadex)
-#if 0
-	// [1] - [9]: set the zoom factor
-	else if (key >= '1' && key <= '9' && mod == KM_SHIFT)
-	{
-		float S1 = grid.Scale;
-
-		grid.ScaleFromDigit(key - '0');
-		grid.RefocusZoom(edit.map_x, edit.map_y, S1);
-	}
-#endif
-
 	// [1] - [9]: set the grid size
 	else if (key >= '1' && key <= '9')
 	{
-		grid.StepFromDigit(key - '0');
+		bool do_zoom = digits_set_zoom;
+
+		if (mod == KM_SHIFT)
+			do_zoom = !do_zoom;
+
+		if (do_zoom)
+		{
+			float S1 = grid.Scale;
+			grid.ScaleFromDigit(key - '0');
+			grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+		}
+		else
+		{
+			grid.StepFromDigit(key - '0');
+		}
 	}
 
 	// [Left], [Right], [Up], [Down]:

@@ -43,6 +43,7 @@
 
 // config item variables
 
+extern bool digits_set_zoom;
 extern bool escape_key_quits;
 extern bool leave_offsets_alone;
 extern bool mouse_wheel_scrolls_map;
@@ -307,6 +308,15 @@ static const opt_desc_t options[] =
 		"Default grid snapping",
 		NULL,
 		&default_grid_snap
+	},
+
+	{	"digits_set_zoom",
+		0,
+		OPT_BOOLEAN,
+		"",
+		"Digit keys set zoom factor (rather than grid size)",
+		NULL,
+		&digits_set_zoom
 	},
 
 	{	"escape_key_quits",
