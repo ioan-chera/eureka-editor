@@ -1715,14 +1715,6 @@ bool Render3D_Key(int key, keymod_e mod)
 		CMD_BumpGamma();
 		Redraw = true;
 	}
-	else if (key == 'b')
-	{
-		CMD_ToggleBrowser();
-	}
-	else
-	{
-		return Global_Key(key, mod);
-	}
 
 	if (Redraw)
 		edit.RedrawMap = 1;

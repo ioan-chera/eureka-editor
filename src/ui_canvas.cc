@@ -169,13 +169,6 @@ int UI_Canvas::handle_key()
 			break;
 	}
 
-	if (key == FL_Tab || key == '\t')
-	{
-		render3d = !render3d;
-		redraw();
-		return 1;
-	}
-
 	if (key == 0)
 		return 0;
 
@@ -185,10 +178,28 @@ int UI_Canvas::handle_key()
 	if (key < 127 && isalpha(key) && (state & FL_CTRL))
 		key &= 31;
 
-	if (render3d)
-		return Render3D_Key(key, StateToMod(state)) ? 1 : 0;
-	else
-		return Editor_Key(key, StateToMod(state)) ? 1 : 0;
+	// keyboard propagation logic
+
+	keymod_e mod = StateToMod(state);
+
+	if (Browser_Key(key, mod))
+		return 1;
+
+	if (key == FL_Tab || key == '\t')
+	{
+		render3d = !render3d;
+		redraw();
+		return 1;
+	}
+
+	if (render3d && Render3D_Key(key, mod))
+		return 1;
+
+	if (Editor_Key(key, mod))
+		return 1;
+
+	if (Global_Key(key, mod))
+		return 1;
 
 	return 0;
 }

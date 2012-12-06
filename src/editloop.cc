@@ -357,22 +357,29 @@ void CMD_ScrollBrowser(int delta)
 
 
 
-static bool Browser_Key(int key, keymod_e mod)
+bool Browser_Key(int key, keymod_e mod)
 {
 	// [b]: toggle the Browser panel on/off
 	if (key == 'b')
 	{
 		CMD_ToggleBrowser();
+		return true;
 	}
 
 	// [T], [F] etc : open browser at specific kind
-	else if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
+	if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
 	{
 		CMD_SetBrowser(key);
+		return true;
 	}
 
+	/** all other keys require the browser be open **/
+
+	if (! main_win->browser->visible())
+		return false;
+
 	// [C]: cycle through categories in the Browser
-	else if (key == 'C')
+	if (key == 'C')
 	{
 		CMD_CycleCategory(+1);
 	}
@@ -421,11 +428,6 @@ bool Global_Key(int key, keymod_e mod)
 		edit.RedrawMap = 1;
 
 		main_win->redraw();
-	}
-
-	else if (Browser_Key(key, mod))
-	{
-		/* did browser stuff */
 	}
 
 	else
@@ -985,7 +987,7 @@ bool Editor_Key(int key, keymod_e mod)
 
 	else
 	{
-		return Global_Key(key, mod);
+		return false;
 	}
 
 	return true;
