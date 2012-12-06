@@ -38,7 +38,6 @@
 #include "objects.h"
 #include "r_grid.h"
 #include "selectn.h"
-#include "s_misc.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
 #include "x_loop.h"

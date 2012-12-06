@@ -38,7 +38,6 @@
 #include "e_vertex.h"
 #include "levels.h"
 #include "objects.h"
-#include "s_misc.h"
 #include "selectn.h"
 #include "x_mirror.h"
 #include "x_hover.h"

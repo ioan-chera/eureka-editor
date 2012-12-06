@@ -57,6 +57,13 @@ int linedefs_of_sector (obj_no_t s, obj_no_t *&array);
 
 bitvec_c *bv_vertices_of_sector (obj_no_t s);
 
+#if 0
+void DistributeSectorFloors (SelPtr);
+void DistributeSectorCeilings (SelPtr);
+void RaiseOrLowerSectors (SelPtr obj);
+void BrightenOrDarkenSectors (SelPtr obj);
+#endif
+
 #endif  /* __EUREKA_E_SECTOR_H__ */
 
 //--- editor settings ---

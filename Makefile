@@ -69,7 +69,6 @@ OBJS = \
 	$(OBJ_DIR)/r_misc.o  \
 	$(OBJ_DIR)/r_render.o  \
 	$(OBJ_DIR)/selectn.o  \
-	$(OBJ_DIR)/s_misc.o  \
 	$(OBJ_DIR)/sys_debug.o \
 	$(OBJ_DIR)/ui_about.o  \
 	$(OBJ_DIR)/ui_browser.o  \
