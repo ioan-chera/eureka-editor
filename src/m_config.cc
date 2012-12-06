@@ -86,10 +86,6 @@ typedef enum
 	OPT_INTEGER,
 
 	// String
-	// Receptacle is of type: char[9]
-	OPT_STRINGBUF8,
-
-	// String
 	// Receptacle is of type: const char *
 	OPT_STRING,
 
@@ -559,11 +555,6 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			*((int *) (opt->data_ptr)) = atoi (value);
 			break;
 
-		case OPT_STRINGBUF8:
-			strncpy ((char *) opt->data_ptr, value, 8);
-			((char *) opt->data_ptr)[8] = 0;
-			break;
-
 		case OPT_STRING:
 			*((char **) opt->data_ptr) = StringDup(value);
 			break;
@@ -781,23 +772,6 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 				}
 				break;
 
-			case OPT_STRINGBUF8:
-				if (argc < 2)
-				{
-					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
-				}
-
-				argv++;
-				argc--;
-
-				if (! ignore)
-				{
-					strncpy ((char *) o->data_ptr, argv[0], 8);
-					((char *) o->data_ptr)[8] = 0;
-				}
-				break;
-
 			case OPT_STRING:
 				if (argc < 2)
 				{
@@ -878,8 +852,6 @@ void dump_parameters(FILE *fp)
 			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "enabled" : "disabled");
 		else if (o->opt_type == OPT_CONFIRM)
 			fputs (confirm_i2e (*((confirm_t *) o->data_ptr)), fp);
-		else if (o->opt_type == OPT_STRINGBUF8)
-			fprintf (fp, "'%s'", (char *) o->data_ptr);
 		else if (o->opt_type == OPT_STRING)
 			fprintf (fp, "'%s'", *((char **) o->data_ptr));
 		else if (o->opt_type == OPT_INTEGER)
@@ -950,7 +922,6 @@ void dump_command_line_options(FILE *fp)
 			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
 
-			case OPT_STRINGBUF8:
 			case OPT_STRING:        fprintf (fp, "<string>    "); break;
 			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
