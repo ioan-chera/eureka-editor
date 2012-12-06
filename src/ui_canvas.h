@@ -105,6 +105,7 @@ public:
 	void ScaleFinish(scale_param_t& param);
 
 	void ChangeRenderMode(int mode);
+	void ToggleRenderMode() { ChangeRenderMode(! render3d); }
 
 	bool isRenderActive() { return render3d; }
 	bool isSelboxActive() { return selbox_active; }

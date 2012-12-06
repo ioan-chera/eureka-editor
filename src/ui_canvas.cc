@@ -178,19 +178,18 @@ int UI_Canvas::handle_key()
 	if (key < 127 && isalpha(key) && (state & FL_CTRL))
 		key &= 31;
 
+	if (key == '\t')
+		key = FL_Tab;
+
 	// keyboard propagation logic
 
 	keymod_e mod = StateToMod(state);
 
-	if (Browser_Key(key, mod))
+	if (Global_Key(key, mod))
 		return 1;
 
-	if (key == FL_Tab || key == '\t')
-	{
-		render3d = !render3d;
-		redraw();
+	if (main_win->browser->visible() && Browser_Key(key, mod))
 		return 1;
-	}
 
 	if (render3d && Render3D_Key(key, mod))
 		return 1;
@@ -198,8 +197,8 @@ int UI_Canvas::handle_key()
 	if (Editor_Key(key, mod))
 		return 1;
 
-	if (Global_Key(key, mod))
-		return 1;
+	// NOTE: the key may still get handled by something (e.g. Menus)
+	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
 
 	return 0;
 }

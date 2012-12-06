@@ -329,6 +329,11 @@ void CMD_Quit()
 }
 
 
+void CMD_Toggle3Dview()
+{
+	main_win->canvas->ToggleRenderMode();
+}
+
 void CMD_ToggleBrowser()
 {
 	main_win->ShowBrowser('/');
@@ -359,34 +364,11 @@ void CMD_ScrollBrowser(int delta)
 
 bool Browser_Key(int key, keymod_e mod)
 {
-	// [b]: toggle the Browser panel on/off
-	if (key == 'b')
-	{
-		CMD_ToggleBrowser();
-		return true;
-	}
-
-	// [T], [F] etc : open browser at specific kind
-	if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
-	{
-		CMD_SetBrowser(key);
-		return true;
-	}
-
-	/** all other keys require the browser be open **/
-
-	if (! main_win->browser->visible())
-		return false;
-
 	// [C]: cycle through categories in the Browser
 	if (key == 'C')
 	{
 		CMD_CycleCategory(+1);
 	}
-//!!!	else if (key == 'C')
-//!!!	{
-//!!!		CMD_CycleCategory(0);
-//!!!	}
 
 	// [CTRL-K]: clear the Browser search box
 	else if (key == 11)
@@ -404,9 +386,8 @@ bool Browser_Key(int key, keymod_e mod)
 		CMD_ScrollBrowser(+2);
 	}
 
-	else
+	else  // not a browser key
 	{
-		// not a browser key
 		return false;
 	}
 
@@ -430,10 +411,26 @@ bool Global_Key(int key, keymod_e mod)
 		main_win->redraw();
 	}
 
+	// [TAB]: toggle the 3D view on/off
+	else if (key == FL_Tab)
+	{
+		CMD_Toggle3Dview();
+	}
+
+	// [b]: toggle the Browser panel on/off
+	else if (key == 'b')
+	{
+		CMD_ToggleBrowser();
+	}
+
+	// [T], [F] etc : open browser at specific kind
+	else if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
+	{
+		CMD_SetBrowser(key);
+	}
+
 	else
 	{
-		// NOTE: the key may still get handled by something (e.g. Menus)
-		// fprintf(stderr, "Editor_Key: unknown key %d (0x%04x)\n", key, key);
 		return false;
 	}
 
