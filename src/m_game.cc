@@ -77,18 +77,6 @@ void InitDefinitions()
 }
 
 
-static rgb_color_t ParseHexColor(const char *str)
-{
-	int number = strtol(str, NULL, 16);
-
-	int r = (number & 0xF00) >> 8;
-	int g = (number & 0x0F0) >> 4;
-	int b = (number & 0x00F);
-
-	return fl_rgb_color(r*17, g*17, b*17);
-}
-
-
 static short ParseThingdefFlags(const char *s)
 {
 	short flags = 0;
@@ -377,7 +365,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			thinggroup_t * tg = new thinggroup_t;
 
 			tg->group = token[1][0];
-			tg->color = ParseHexColor(token[2]);
+			tg->color = ParseColor(token[2]);
 			tg->desc  = token[3];
 
 			thing_groups[tg->group] = tg;

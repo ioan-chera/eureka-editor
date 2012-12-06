@@ -61,6 +61,8 @@ void W_CreateBrightMap();
 // make the color darker
 rgb_color_t DarkerColor(rgb_color_t col);
 
+rgb_color_t ParseColor(const char *str);
+
 
 //------------------------------------------------------------//
 

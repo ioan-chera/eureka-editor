@@ -183,5 +183,33 @@ void W_CreateBrightMap()
 }
 
 
+rgb_color_t ParseColor(const char *str)
+{
+	if (*str == '#')
+		 str++;
+
+	if (strlen(str) >= 6)  // long form #rrggbb
+	{
+		int number = strtol(str, NULL, 16);
+
+		int r = (number & 0xFF0000) >> 16;
+		int g = (number & 0x00FF00) >> 8;
+		int b = (number & 0x0000FF);
+
+		return fl_rgb_color(r, g, b);
+	}
+	else  // short form: #rgb
+	{
+		int number = strtol(str, NULL, 16);
+
+		int r = (number & 0xF00) >> 8;
+		int g = (number & 0x0F0) >> 4;
+		int b = (number & 0x00F);
+
+		return fl_rgb_color(r*17, g*17, b*17);
+	}
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
