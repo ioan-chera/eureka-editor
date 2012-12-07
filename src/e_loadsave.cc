@@ -32,6 +32,7 @@
 #include "lib_adler.h"
 #include "m_config.h"
 #include "m_dialog.h"
+#include "m_recent.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -881,6 +882,8 @@ void CMD_SaveMap()
 
 	SaveLevel(edit_wad, Level_name);
 
+	M_AddRecent(edit_wad->PathName(), Level_name);
+
 	Replacer = false;
 	MadeChanges = 0;
 }
@@ -974,6 +977,8 @@ void CMD_ExportMap()
 	LogPrintf("Exporting Map : %s %s\n", wad->PathName(), map_name);
 
 	SaveLevel(wad, map_name);
+
+	M_AddRecent(wad->PathName(), map_name);
 
 
 	// the new wad replaces the current PWAD

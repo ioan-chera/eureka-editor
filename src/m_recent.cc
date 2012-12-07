@@ -132,13 +132,15 @@ public:
 		static char name[1024];
 		static char map [64];
 
-		// skip comments on first two lines
-		fgets(name, sizeof(name), fp);
+		// skip comment on first line
 		fgets(name, sizeof(name), fp);
 
 		while (fgets(name, sizeof(name), fp) != NULL &&
 		       fgets(map,  sizeof(map),  fp) != NULL)
 		{
+			StringRemoveCRLF(name);
+			StringRemoveCRLF(map);
+
 			insert(name, map);
 		}
 	}
@@ -150,7 +152,6 @@ public:
 		//  order they are read).
 
 		fprintf(fp, "# Eureka recent file list\n");
-		fprintf(fp, "# (%d entries)\n", size);
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{

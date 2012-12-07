@@ -34,6 +34,7 @@
 #include "editloop.h"
 #include "m_dialog.h"  /* for Confirm() */
 #include "m_game.h"
+#include "m_recent.h"
 #include "r_misc.h"
 #include "levels.h"    /* Because of "viewtex" */
 
@@ -841,6 +842,8 @@ int main(int argc, char *argv[])
 	
 	Level_name = DetermineLevel();
 
+
+	M_LoadRecent();
 
 	W_LoadPalette();
 
