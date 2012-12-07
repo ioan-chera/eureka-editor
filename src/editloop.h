@@ -110,6 +110,7 @@ void CMD_ZoomWholeMap();
 void CMD_GoToCamera();
 
 void CMD_SetBrowser(char kind);
+void CMD_ToggleShowObjNums();
 
 #endif /* __EUREKA_EDITLOOP_H__ */
 

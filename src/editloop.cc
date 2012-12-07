@@ -334,6 +334,14 @@ void CMD_Toggle3Dview()
 	main_win->canvas->ToggleRenderMode();
 }
 
+
+void CMD_ToggleShowObjNums()
+{
+	edit.show_object_numbers = ! edit.show_object_numbers;
+	edit.RedrawMap = 1;
+}
+
+
 void CMD_ToggleBrowser()
 {
 	main_win->ShowBrowser('/');
@@ -985,11 +993,10 @@ bool Editor_Key(int key, keymod_e mod)
 
 	}
 
-	// [&] Show object numbers
-	else if (key == 'P')
+	// [J] Show object numbers
+	else if (key == 'J')
 	{
-		edit.show_object_numbers = ! edit.show_object_numbers;
-		edit.RedrawMap = 1;
+		CMD_ToggleShowObjNums();
 	}
 
 	// [%] Show things sprites

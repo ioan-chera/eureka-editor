@@ -174,6 +174,11 @@ static void view_do_fullscreen(Fl_Widget *w, void * data)
 	main_win->ToggleFullscreen();
 }
 
+static void view_do_object_nums(Fl_Widget *w, void * data)
+{
+	CMD_ToggleShowObjNums();
+}
+
 
 //------------------------------------------------------------------------
 //  SEARCH MENU
@@ -394,8 +399,8 @@ static Fl_Menu_Item menu_items[] =
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
 #if 1
-		{ "Fullscreen", 0, FCAL view_do_fullscreen, 0, FL_MENU_TOGGLE },
-///		{ "&Show Object Nums", 0, FCAL view_do_object_nums, 0, FL_MENU_TOGGLE },
+		{ "Toggle Fullscreen", 0, FCAL view_do_fullscreen },
+		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 #endif
 
