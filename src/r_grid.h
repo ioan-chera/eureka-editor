@@ -95,6 +95,7 @@ public:
 	void AdjustScale(int delta);
 
 	void ToggleShown();
+	void ToggleType();
 	void ToggleSnap();
 
 	// choose the scale nearest to (and less than) the wanted one

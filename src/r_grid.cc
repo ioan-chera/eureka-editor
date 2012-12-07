@@ -434,6 +434,21 @@ void Grid_State_c::ToggleShown()
 }
 
 
+void Grid_State_c::ToggleType()
+{
+	if (! shown)
+	{
+		shown = true;
+	}
+
+	mode = 1 - mode;
+
+	edit.RedrawMap = 1;
+
+	DoSetGrid();
+}
+
+
 void Grid_State_c::ToggleSnap()
 {
 	snap = !snap;
