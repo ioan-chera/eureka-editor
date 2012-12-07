@@ -74,9 +74,12 @@ public:
 	UI_VertexBox *vert_box;
 	UI_RadiusBox *rad_box;
 
-
 private:
 	Fl_Cursor cursor_shape;
+
+	// remember window size/position after going fullscreen.
+	// the 'last_w' and 'last_h' fields are zero when not fullscreen
+	int last_x, last_y, last_w, last_h;
 
 public:
 	UI_MainWin();
@@ -84,6 +87,8 @@ public:
 
 public:
 	void SetTitle(Wad_file *wad);
+
+	void ToggleFullscreen();
 
 	// mode can be 't', 'l', 's', 'v' or 'r'.   FIXME: ENUMERATE
 	void NewEditMode(char mode);
