@@ -82,7 +82,7 @@ static void edit_do_undo(Fl_Widget *w, void * data)
 	if (BA_Undo())
 		edit.RedrawMap = 1;
 	else
-		fl_beep();
+		Beep();
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
@@ -90,14 +90,14 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 	if (BA_Redo())
 		edit.RedrawMap = 1;
 	else
-		fl_beep();
+		Beep();
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
 	if (! CMD_Copy())
 	{
-		fl_beep();
+		Beep();
 		return;
 	}
 
@@ -108,7 +108,7 @@ static void edit_do_copy(Fl_Widget *w, void * data)
 {
 	if (! CMD_Copy())
 	{
-		fl_beep();
+		Beep();
 		return;
 	}
 }
@@ -117,7 +117,7 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 {
 	if (! CMD_Paste())
 	{
-		fl_beep();
+		Beep();
 		return;
 	}
 }
@@ -169,6 +169,11 @@ static void view_do_camera_pos(Fl_Widget *w, void * data)
 	CMD_GoToCamera();
 }
 
+static void view_do_fullscreen(Fl_Widget *w, void * data)
+{
+	main_win->ToggleFullscreen();
+}
+
 
 //------------------------------------------------------------------------
 //  SEARCH MENU
@@ -177,24 +182,19 @@ static void view_do_camera_pos(Fl_Widget *w, void * data)
 static void search_do_find(Fl_Widget *w, void * data)
 {
 	// TODO: CMD_FindObject()
-	fl_beep();
+	Beep();
+}
+
+static void search_do_find_next(Fl_Widget *w, void * data)
+{
+	// CMD_FindObject();
+	Beep();
 }
 
 static void search_do_jump(Fl_Widget *w, void * data)
 {
 	CMD_JumpToObject();
 }
-
-static void search_do_next(Fl_Widget *w, void * data)
-{
-	CMD_NextObject();
-}
-
-static void search_do_prev(Fl_Widget *w, void * data)
-{
-	CMD_PrevObject();
-}
-
 
 //------------------------------------------------------------------------
 //  MISC MENU
@@ -338,19 +338,18 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-//??   "Preferences...",          FL_F+5,  0,
-
 #if 0
-	{ "&DDF", 0, 0, 0, FL_SUBMENU },
-		{ "Load DDF &File",    0, FCAL view_do_zoom_out },
-		{ "Load DDF &WAD",    0, FCAL view_do_zoom_out },
-		{ 0 },
+		{ "&DDF", 0, 0, 0, FL_SUBMENU },
+			{ "Load DDF &File",    0, FCAL view_do_zoom_out },
+			{ "Load DDF &WAD",    0, FCAL view_do_zoom_out },
 
-		{ "&Open RTS File",   0, FCAL view_do_zoom_out },
-		{ "&Import from WAD", 0, FCAL view_do_zoom_out },
-		{ "&Save RTS File",   0, FCAL view_do_zoom_out },
-		{ 0 },
+			{ "&Open RTS File",   0, FCAL view_do_zoom_out },
+			{ "&Import from WAD", 0, FCAL view_do_zoom_out },
+			{ "&Save RTS File",   0, FCAL view_do_zoom_out },
+			{ 0 },
 #endif
+
+//??   "Preferences...",          FL_F+5,  0,
 
 		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
 //TODO	{ "&Play Map",        FL_COMMAND + 'p', FCAL file_do_play_map },
@@ -394,20 +393,22 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
+#if 1
+		{ "Fullscreen", 0, FCAL view_do_fullscreen, 0, FL_MENU_TOGGLE },
+///		{ "&Show Object Nums", 0, FCAL view_do_object_nums, 0, FL_MENU_TOGGLE },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+#endif
+
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },
 		{ "&Whole Map",    0, FCAL view_do_whole_map },
 		{ "Go to &Camera", 0, FCAL view_do_camera_pos },
 
-///		{ "&Show Object Nums", 0, FCAL search_do_jump },
-
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Find Object",  FL_COMMAND + 'f', FCAL search_do_find },
+		{ "Find &Next",    FL_COMMAND + 'g', FCAL search_do_find_next },
 		{ "&Jump to Object",   0, FCAL search_do_jump },
-		{ "&Next Object",      0, FCAL search_do_next },
-		{ "&Prev Object",      0, FCAL search_do_prev },
-		{ "&Find Object by Type", 0, FCAL search_do_find },
-///		{ "&Show Object Nums", 0, FCAL search_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
