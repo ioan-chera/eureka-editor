@@ -166,19 +166,54 @@ static RecentFiles_c  recent_files;
 
 void M_LoadRecent()
 {
-	// FIXME
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/recent.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "r");
+
+	if (! fp)
+	{
+		LogPrintf("No recent list at: %s\n", filename);
+		return;
+	}
+
+	LogPrintf("Reading recent list from: %s\n", filename);
+
+	recent_files.clear();
+	recent_files.ParseFile(fp);
+
+	fclose(fp);
 }
 
 
 void M_SaveRecent()
 {
-	// FIXME
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/recent.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "w");
+
+	if (! fp)
+	{
+		LogPrintf("Failed to save recent list to: %s\n", filename);
+		return;
+	}
+
+	LogPrintf("Writing recent list to: %s\n", filename);
+
+	recent_files.WriteFile(fp);
+
+	fclose(fp);
 }
 
 
 void M_AddRecent(const char *filename, const char *map_name)
 {
 	recent_files.insert(filename, map_name);
+
+	M_SaveRecent();  // why wait?
 }
 
 
