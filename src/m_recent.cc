@@ -39,7 +39,12 @@ private:
 
 public:
 	RecentFiles_c() : size(0)
-	{ }
+	{
+		for (int k = 0 ; k < MAX_RECENT ; k++)
+		{
+			filenames[k] = map_names[k] = NULL;
+		}
+	}
 
 	~RecentFiles_c()
 	{ }
@@ -52,7 +57,7 @@ public:
 			StringFree(map_names[k]);
 
 			filenames[k] = NULL;
-			map_names[k] = 0;
+			map_names[k] = NULL;
 		}
 
 		size = 0;
@@ -60,6 +65,7 @@ public:
 
 	int find(const char *file)
 	{
+		// ignore the path when matching filenames
 		const char *A = fl_filename_name(file);
 
 		for (int k = 0 ; k < size ; k++)
@@ -75,8 +81,8 @@ public:
 
 	void erase(int index)
 	{
-		StringFree(filenames[idx]);
-		StringFree(map_names[idx]);
+		StringFree(filenames[index]);
+		StringFree(map_names[index]);
 
 		size--;
 
@@ -86,8 +92,8 @@ public:
 			map_names[index] = map_names[index + 1];
 		}
 
-		filenames[size] = NULL;
-		map_names[size] = NULL;
+		filenames[index] = NULL;
+		map_names[index] = NULL;
 	}
 
 	void push_front(const char *file, const char *map)
@@ -123,14 +129,28 @@ public:
 
 	void ParseFile(FILE * fp)
 	{
-		// TODO
+		static char name[1024];
+		static char map [64];
+
+		// skip comments on first two lines
+		fgets(name, sizeof(name), fp);
+		fgets(name, sizeof(name), fp);
+
+		while (fgets(name, sizeof(name), fp) != NULL &&
+		       fgets(map,  sizeof(map),  fp) != NULL)
+		{
+			insert(name, map);
+		}
 	}
 
 	void WriteFile(FILE * fp)
 	{
 		// file is in opposite order, newest at the end
+		// (this allows the parser to merely insert() items in the
+		//  order they are read).
 
 		fprintf(fp, "# Eureka recent file list\n");
+		fprintf(fp, "# (%d entries)\n", size);
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
@@ -158,7 +178,7 @@ void M_SaveRecent()
 
 void M_AddRecent(const char *filename, const char *map_name)
 {
-	recent_files.push_front(filename, map_name);
+	recent_files.insert(filename, map_name);
 }
 
 

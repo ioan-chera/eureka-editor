@@ -610,7 +610,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
  */
 static int parse_config_file(FILE *fp, const char *filename)
 {
-	char line[1024];
+	static char line[1024];
 
 	const char *basename = FindBaseName(filename);
 
