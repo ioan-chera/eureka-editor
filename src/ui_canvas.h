@@ -58,6 +58,8 @@ private:
 	int map_lx, map_ly;
 	int map_hx, map_hy;
 
+	bitvec_c seen_sectors;
+
 public:
 	UI_Canvas(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_Canvas();
@@ -126,8 +128,8 @@ private:
 	void DrawThings();
 	void DrawRTS();
 
-	void DrawSectorNums();
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
+	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawObjNum(int x, int y, int num, bool center = false);
 
 	void SelboxDraw();

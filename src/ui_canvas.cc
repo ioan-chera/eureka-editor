@@ -61,7 +61,8 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 	highlight(), split_ld(-1),
 	selbox_active(false),
 	drag_active(false), drag_lines(),
-	scale_active(false), scale_lines()
+	scale_active(false), scale_lines(),
+	seen_sectors(8)
 { }
 
 //
@@ -315,6 +316,15 @@ void UI_Canvas::DrawEverything()
 	map_hx = MAPX(x()+w());
 	map_hy = MAPY(y());
 
+	// setup for drawing sector numbers
+	if (edit.show_object_numbers && edit.obj_type == OBJ_SECTORS)
+	{
+		if (seen_sectors.size() < NumSectors)
+			seen_sectors.resize(NumSectors);
+
+		seen_sectors.clear_all();
+	}
+
 	DrawMap(); 
 
 	DrawSelection(edit.Selected);
@@ -369,11 +379,6 @@ void UI_Canvas::DrawMap()
 
 	if (edit.obj_type == OBJ_RADTRIGS)
 		DrawRTS();
-
-
-	// draw the sector numbers
-	if (edit.obj_type == OBJ_SECTORS && edit.show_object_numbers)
-		DrawSectorNums();
 }
 
 
@@ -679,6 +684,15 @@ void UI_Canvas::DrawLinedefs()
 				}
 
 				DrawMapLine(x1, y1, x2, y2);
+
+				if (edit.show_object_numbers)
+				{
+					if (s1 != OBJ_NO_NONE)
+						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
+
+					if (s2 != OBJ_NO_NONE)
+						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+				}
 			}
 			break;
 
@@ -709,7 +723,7 @@ void UI_Canvas::DrawLinedefs()
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
 
-			DrawLineNumber(x1, y1, x2, y2, SIDE_LEFT, n);
+			DrawLineNumber(x1, y1, x2, y2, 0, n);
 		}
 	}
 }
@@ -796,20 +810,15 @@ void UI_Canvas::DrawRTS()
 }
 
 
-void UI_Canvas::DrawSectorNums()
+void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n)
 {
-	for (int n = 0 ; n < NumSectors ; n++)
-	{
-		int x;
-		int y;
+	// only draw a number for the first linedef actually visible
+	if (seen_sectors.get(n))
+		return;
+	
+	seen_sectors.set(n);
 
-		centre_of_sector(n, &x, &y);
-
-		if (! Vis(x, y, MAX_RADIUS))
-			continue;
-
-		DrawObjNum(SCREENX(x), SCREENY(y) - FONTH / 2, n);
-	}
+	DrawLineNumber(mx1, my1, mx2, my2, side, n);
 }
 
 
@@ -832,20 +841,23 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 		dy = -dy;
 	}
 
-	int len = MAX(4, MAX(abs(dx), abs(dy)));
-	int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 2.0);
-
-	mx += dx * want_len / len;
-	my += dy * want_len / len;
-
-	if (abs(dx) > abs(dy))
+	if (side)
 	{
-		want_len = 2 + want_len / 2;
+		int len = MAX(4, MAX(abs(dx), abs(dy)));
+		int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 1.0);
 
-		if (dx > 0)
-			mx += want_len;
-		else
-			mx -= want_len;
+		mx += dx * want_len / len;
+		my += dy * want_len / len;
+
+		if (abs(dx) > abs(dy))
+		{
+			want_len = 2 + want_len / 2;
+
+			if (dx > 0)
+				mx += want_len;
+			else
+				mx -= want_len;
+		}
 	}
 
 	DrawObjNum(mx, my + fl_descent(), n, true /* center */);
