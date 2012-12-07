@@ -1338,6 +1338,13 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
+	if (strcmp(tokens[0], "show_object_numbers") == 0)
+	{
+		edit.show_object_numbers = 1;
+		edit.RedrawMap = 1;
+		return true;
+	}
+
 	return false;
 }
 
@@ -1357,6 +1364,9 @@ void Editor_WriteUser(FILE *fp)
 
 	if (main_win && main_win->canvas->isRenderActive())
 		fprintf(fp, "render_mode 1\n");
+
+	if (edit.show_object_numbers)
+		fprintf(fp, "show_object_numbers 1\n");
 }
 
 
