@@ -58,14 +58,43 @@ public:
 		size = 0;
 	}
 
+	int find(const char *file)
+	{
+		const char *A = fl_filename_name(file);
+
+		for (int k = 0 ; k < size ; k++)
+		{
+			const char *B = fl_filename_name(filenames[k]);
+
+			if (y_stricmp(A, B) == 0)
+				return k;
+		}
+
+		return -1;  // not found
+	}
+
+	void erase(int index)
+	{
+		StringFree(filenames[idx]);
+		StringFree(map_names[idx]);
+
+		size--;
+
+		for ( ; index < size ; index++)
+		{
+			filenames[index] = filenames[index + 1];
+			map_names[index] = map_names[index + 1];
+		}
+
+		filenames[size] = NULL;
+		map_names[size] = NULL;
+	}
+
 	void push_front(const char *file, const char *map)
 	{
 		if (size >= MAX_RECENT)
 		{
-			StringFree(filenames[MAX_RECENT - 1]);
-			StringFree(map_names[MAX_RECENT - 1]);
-
-			size--;
+			erase(MAX_RECENT - 1);
 		}
 
 		// shift elements up
@@ -76,9 +105,20 @@ public:
 		}
 
 		filenames[0] = StringDup(file);
-		map_names[0] = StringDup(file);
+		map_names[0] = StringDup(map);
 
 		size++;
+	}
+
+	void insert(const char *file, const char *map)
+	{
+		// ensure filename (without any path) is unique
+		int f = find(file);
+
+		if (f >= 0)
+			erase(f);
+
+		push_front(file, map);
 	}
 
 	void ParseFile(FILE * fp)
@@ -90,7 +130,13 @@ public:
 	{
 		// file is in opposite order, newest at the end
 
-		// TODO
+		fprintf(fp, "# Eureka recent file list\n");
+
+		for (int k = size - 1 ; k >= 0 ; k--)
+		{
+			fprintf(fp, "%s\n", filenames[k]);
+			fprintf(fp, "%s\n", map_names[k]);
+		}
 	}
 };
 
