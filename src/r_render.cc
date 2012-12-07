@@ -1716,6 +1716,11 @@ bool Render3D_Key(int key, keymod_e mod)
 		Redraw = true;
 	}
 
+	else  // not a render key
+	{
+		return false;
+	}
+
 	if (Redraw)
 		edit.RedrawMap = 1;
 
