@@ -167,7 +167,7 @@ UI_About::UI_About(int W, int H, const char *label) :
   int bw = 60 + KF * 10;
   int bh = 30 + KF * 3;
 
-  cy += (H - cy - bh) /2;
+  cy += (H - cy - bh) / 2 - 8;
 
   Fl_Color but_color = fl_rgb_color(128, 128, 255);
 
