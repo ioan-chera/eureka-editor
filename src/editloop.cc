@@ -540,12 +540,6 @@ static bool Grid_Key(int key, keymod_e mod)
 		grid.ToggleShown();
 	}
 
-///---	// [P]: toggle the alternate grid mode
-///---	else if (key == 'P')
-///---	{
-///---		main_win->canvas->ToggleAltGrid();
-///---	}
-
 	//???  // [H]: reset the grid to grid_step_max
 	//???  else if (key == 'H')
 	//???  {
@@ -992,7 +986,7 @@ bool Editor_Key(int key, keymod_e mod)
 	}
 
 	// [&] Show object numbers
-	else if (key == '&')
+	else if (key == 'P')
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
 		edit.RedrawMap = 1;

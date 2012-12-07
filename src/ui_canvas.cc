@@ -82,7 +82,11 @@ void UI_Canvas::draw()
 	fl_push_clip(x(), y(), w(), h());
 
 	fl_color(FL_WHITE);
-	fl_font(FL_COURIER, 14);
+
+	// default font (for showing object numbers)
+	int font_size = (grid.Scale < 0.4) ? 10 :
+	                (grid.Scale < 1.9) ? 14 : 18;
+	fl_font(FL_COURIER, font_size);
 
 	if (render3d)
 		Render3D_Draw(x(), y(), w(), h());
@@ -367,42 +371,10 @@ void UI_Canvas::DrawMap()
 		DrawRTS();
 
 
-	int n;
-
-	// Draw the things numbers
-	if (edit.obj_type == OBJ_THINGS && edit.show_object_numbers)
-	{
-		for (n = 0 ; n < NumThings ; n++)
-		{
-			int x = Things[n]->x;
-			int y = Things[n]->y;
-
-			if (Vis(x, y, MAX_RADIUS))
-				DrawObjNum(SCREENX(x) + FONTW, SCREENY(y) + 2, n, THING_NO);
-		}
-	}
-
-	// Draw the sector numbers
+	// draw the sector numbers
 	if (edit.obj_type == OBJ_SECTORS && edit.show_object_numbers)
-	{
-		int xoffset = - FONTW / 2;
-
-		for (n = 0 ; n < NumSectors ; n++)
-		{
-			int x;
-			int y;
-
-			centre_of_sector(n, &x, &y);
-
-			if (Vis(x, y, MAX_RADIUS))
-				DrawObjNum(SCREENX(x) + xoffset, SCREENY(y) - FONTH / 2, n, SECTOR_NO);
-
-			if (n == 10 || n == 100 || n == 1000 || n == 10000)
-				xoffset -= FONTW / 2;
-		}
-	}
+		DrawSectorNums();
 }
-
 
 
 /*
@@ -587,13 +559,13 @@ void UI_Canvas::DrawVertices()
 			int x = Vertices[n]->x;
 			int y = Vertices[n]->y;
 
-			if (Vis(x, y, r))
-			{
-				int sx = SCREENX(x) + 2 * r;
-				int sy = SCREENY(y) + 2;
+			if (! Vis(x, y, r))
+				continue;
 
-				DrawObjNum(sx, sy, n, VERTEX_NO);
-			}
+			int sx = SCREENX(x) + r;
+			int sy = SCREENY(y) - r - 2;
+
+			DrawObjNum(sx, sy, n);
 		}
 	}
 }
@@ -667,13 +639,14 @@ void UI_Canvas::DrawLinedefs()
 					int scnx1       = SCREENX (x2);
 					int scny0       = SCREENY (y1);
 					int scny1       = SCREENY (y2);
+
 					int label_width = 5 * FONTW; ///!!! ((int) log10 (n) + 1) * FONTW;
-					if (abs(scnx1 - scnx0) > label_width + 4
+/*					if (abs(scnx1 - scnx0) > label_width + 4
 							|| abs (scny1 - scny0) > label_width + 4)
-					{
+*/					{
 						int scnx = (scnx0 + scnx1) / 2 - label_width / 2;
 						int scny = (scny0 + scny1) / 2 - FONTH / 2;
-						DrawObjNum(scnx, scny, n, LINEDEF_NO);
+						DrawObjNum(scnx, scny, n);
 					}
 				}
 			}
@@ -794,6 +767,26 @@ void UI_Canvas::DrawThings()
 			DrawMapLine(x, y, x + corner_x, y + corner_y);
 		}
 	}
+
+	// Draw the things numbers
+	if (edit.obj_type == OBJ_THINGS && edit.show_object_numbers)
+	{
+		for (int n = 0 ; n < NumThings ; n++)
+		{
+			int x = Things[n]->x;
+			int y = Things[n]->y;
+
+			if (! Vis(x, y, MAX_RADIUS))
+				continue;
+
+			const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+			x += info->radius;
+			y += info->radius;
+
+			DrawObjNum(SCREENX(x), SCREENY(y) - 2, n);
+		}
+	}
 }
 
 
@@ -803,23 +796,43 @@ void UI_Canvas::DrawRTS()
 }
 
 
+void UI_Canvas::DrawSectorNums()
+{
+	for (int n = 0 ; n < NumSectors ; n++)
+	{
+		int x;
+		int y;
+
+		centre_of_sector(n, &x, &y);
+
+		if (! Vis(x, y, MAX_RADIUS))
+			continue;
+
+		DrawObjNum(SCREENX(x), SCREENY(y) - FONTH / 2, n);
+	}
+}
+
+
 /*
  *  draw_obj_no - draw a number at screen coordinates (x, y)
  */
-void UI_Canvas::DrawObjNum(int x, int y, int obj_no, Fl_Color c)
+void UI_Canvas::DrawObjNum(int x, int y, int obj_no)
 {
+	char buffer[64];
+	sprintf(buffer, "%d", obj_no);
+
 	fl_color(FL_BLACK);
 
-	DrawScreenText(x - 2, y,     "%d", obj_no);
-	DrawScreenText(x - 1, y,     "%d", obj_no);
-	DrawScreenText(x + 1, y,     "%d", obj_no);
-	DrawScreenText(x + 2, y,     "%d", obj_no);
-	DrawScreenText(x,     y + 1, "%d", obj_no);
-	DrawScreenText(x,     y - 1, "%d", obj_no);
+	fl_draw(buffer, x - 2, y);
+	fl_draw(buffer, x - 1, y);
+	fl_draw(buffer, x + 1, y);
+	fl_draw(buffer, x + 2, y);
+	fl_draw(buffer, x,     y + 1);
+	fl_draw(buffer, x,     y - 1);
 
-	fl_color(c);
+	fl_color(OBJ_NUM_COL);
 
-	DrawScreenText(x,     y,     "%d", obj_no);
+	fl_draw(buffer, x, y);
 }
 
 

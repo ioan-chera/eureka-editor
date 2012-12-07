@@ -125,7 +125,9 @@ private:
 	void DrawLinedefs();
 	void DrawThings();
 	void DrawRTS();
-	void DrawObjNum(int x, int y, int obj_no, Fl_Color c);
+
+	void DrawSectorNums();
+	void DrawObjNum(int x, int y, int obj_no);
 
 	void SelboxDraw();
 

@@ -91,10 +91,7 @@ rgb_color_t ParseColor(const char *str);
 #define GRID_MEDIUM     fl_rgb_color(0, 0, 0xBB)
 #define GRID_DARK       fl_rgb_color(0, 0, 0x77)
 
-#define LINEDEF_NO      fl_rgb_color(0x40, 0xd0, 0xf0)
-#define SECTOR_NO       fl_rgb_color(0x40, 0xd0, 0xf0)
-#define THING_NO        fl_rgb_color(0x40, 0xd0, 0xf0)
-#define VERTEX_NO       fl_rgb_color(0x40, 0xd0, 0xf0)
+#define OBJ_NUM_COL     fl_rgb_color(0x44, 0xdd, 0xff)
 #define CLR_ERROR       fl_rgb_color(0xff, 0,    0)
 
 #define SECTOR_TAG      fl_rgb_color(0x00, 0xff, 0x00)
