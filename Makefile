@@ -62,6 +62,7 @@ OBJS = \
 	$(OBJ_DIR)/m_config.o  \
 	$(OBJ_DIR)/m_dialog.o  \
 	$(OBJ_DIR)/m_game.o  \
+	$(OBJ_DIR)/m_recent.o  \
 	$(OBJ_DIR)/m_select.o  \
 	$(OBJ_DIR)/m_strings.o  \
 	$(OBJ_DIR)/objects.o  \
