@@ -884,19 +884,7 @@ bool Editor_Key(int key, keymod_e mod)
 		CMD_JumpToObject();
 	}
 
-	// [n]: highlight the next object
-	else if (key == 'n')
-	{
-		CMD_NextObject();
-	}
-
-	// [p]: highlight the previous object
-	else if (key == 'p' )
-	{
-		CMD_PrevObject();
-	}
-
-	// [f]: find object by type
+	// ???: find object by type
 	// FIXME: CMD_FindObjectByType()
 
 	// [`]: clear selection and redraw the map (CTRL-U too, done via menu)
