@@ -741,6 +741,12 @@ static bool Sector_Key(int key, keymod_e mod)
 	{
 	}
 
+	// [d]: disconnect sectors
+	else if (key == 'd')
+	{
+		CMD_DisconnectSectors();
+	}
+
 	// [e]: select/unselect contiguous sectors with same floor height
 	else if (key == 'e')
 	{

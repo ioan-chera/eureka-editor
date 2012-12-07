@@ -371,5 +371,156 @@ void CMD_DisconnectLineDefs()
 }
 
 
+static void VerticesOfDetachableSectors(selection_c &verts)
+{
+	bitvec_c  in_verts(NumVertices);
+	bitvec_c out_verts(NumVertices);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef * L = LineDefs[n];
+
+		bool innie = false;
+		bool outie = false;
+
+		// TODO: what about no-sided lines??
+
+		if (L->Right())
+		{
+			if (edit.Selected->get(L->Right()->sector))
+				innie = true;
+			else
+				outie = true;
+		}
+
+		if (L->Left())
+		{
+			if (edit.Selected->get(L->Left()->sector))
+				innie = true;
+			else
+				outie = true;
+		}
+
+		if (innie)
+		{
+			in_verts.set(L->start);
+			in_verts.set(L->end);
+		}
+
+		if (outie)
+		{
+			out_verts.set(L->start);
+			out_verts.set(L->end);
+		}
+	}
+
+	for (int k = 0 ; k < NumVertices ; k++)
+	{
+		if (in_verts.get(k) && out_verts.get(k))
+			verts.set(k);
+	}
+}
+
+
+static void DETSEC_DisconnectCoord(int v_num, int *x, int *y)
+{
+	// FIXME
+
+	*x = Vertices[v_num]->x + 5;
+	*y = Vertices[v_num]->y + 9;
+}
+
+
+
+void CMD_DisconnectSectors()
+{
+	if (NumVertices == 0)
+	{
+		Beep();
+		return;
+	}
+
+	int n;
+	bool unselect = false;
+
+	if (edit.Selected->empty())
+	{
+		if (! edit.highlighted())
+		{
+			Beep();
+			return;
+		}
+
+		edit.Selected->set(edit.highlighted.num);
+		unselect = true;
+	}
+
+	// collect all vertices which need to be detached
+	selection_c detach_verts(OBJ_VERTICES);
+	selection_iterator_c it;
+
+	VerticesOfDetachableSectors(detach_verts);
+
+	if (detach_verts.empty())
+	{
+		Beep();
+		return;
+	}
+
+
+	BA_Begin();
+
+	// create new vertices, and a mapping from old --> new
+	int * mapping = new int[NumVertices];
+
+	for (n = 0 ; n < NumVertices ; n++)
+		mapping[n] = -1;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		int new_v = BA_New(OBJ_VERTICES);
+
+		Vertex *newbie = Vertices[new_v];
+
+		mapping[*it] = new_v;
+
+		DETSEC_DisconnectCoord(*it, &newbie->x, &newbie->y);
+	}
+
+	// update linedefs, creating new ones where necessary
+
+	for (n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef * L = LineDefs[n];
+
+		// only process lines which touch a selected sector
+		if (! (	(L->Left()  && edit.Selected->get(L->Left() ->sector)) ||
+				(L->Right() && edit.Selected->get(L->Right()->sector)) ))
+			continue;
+
+		int start2 = mapping[L->start];
+		int end2   = mapping[L->end];
+
+		if (start2 >= 0 && end2 >= 0)
+		{
+			// FIXME: new line
+		}
+		else if (start2 >= 0)
+		{
+			BA_ChangeLD(n, LineDef::F_START, start2);
+		}
+		else if (end2 >= 0)
+		{
+			BA_ChangeLD(n, LineDef::F_END, end2);
+		}
+	}
+
+	BA_End();
+
+	if (unselect)
+		edit.Selected->clear_all();
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
