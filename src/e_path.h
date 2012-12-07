@@ -59,6 +59,9 @@ void CMD_SelectContiguousSectors(int flags);
 
 /* find/next/prev stuff */
 
+void GoToSelection();
+void GoToObject(const Objid& objid);
+
 void CMD_JumpToObject();
 void CMD_NextObject();
 void CMD_PrevObject();

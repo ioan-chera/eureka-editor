@@ -276,6 +276,31 @@ int UI_Canvas::handle_wheel()
 }
 
 
+int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
+{
+	if (mx2 < mx1) std::swap(mx1, mx2);
+	if (my2 < my1) std::swap(my1, my2);
+
+	int x1 = SCREENX(mx1);
+	int x2 = SCREENX(mx2);
+
+	int y1 = SCREENY(my2);
+	int y2 = SCREENY(my1);
+
+	if (x1 < 8 || x2 > w() - 8 ||
+		y1 < 8 || y2 > h() - 8)
+		return 1; // too big
+	
+	float x_ratio = MAX(4, x2 - x1) / (float) MAX(4, w());
+	float y_ratio = MAX(4, y2 - y1) / (float) MAX(4, h());
+
+	if (MAX(x_ratio, y_ratio) < 0.25)
+		return -1;  // too small
+	
+	return 0;
+}
+
+
 //------------------------------------------------------------------------
 
 

@@ -31,8 +31,12 @@
 #include "editloop.h"
 #include "e_path.h"
 #include "levels.h"
+#include "r_grid.h"
 #include "selectn.h"
 #include "w_rawdef.h"
+#include "x_mirror.h"
+
+#include "ui_window.h"
 
 
 static bool MatchingTextures(int index1, int index2)
@@ -293,6 +297,58 @@ void CMD_SelectContiguousSectors(int flags)
 
 
 //------------------------------------------------------------------------
+
+
+void GoToSelection()
+{
+	int x1, y1, x2, y2;
+
+	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+
+	int mid_x = (x1 + x2) / 2;
+	int mid_y = (y1 + y2) / 2;
+
+	grid.CenterMapAt(mid_x, mid_y);
+
+
+	// zoom out until selected objects fit on screen
+	for (int loop = 0 ; loop < 30 ; loop++)
+	{
+		int eval = main_win->canvas->ApproxBoxSize(x1, y1, x2, y2);
+
+		if (eval <= 0)
+			break;
+
+		grid.AdjustScale(-1);
+	}
+
+	// zoom in when bbox is very small (say < 20% of window)
+	for (int loop = 0 ; loop < 30 ; loop++)
+	{
+		if (grid.Scale >= 1.0)
+			break;
+
+		int eval = main_win->canvas->ApproxBoxSize(x1, y1, x2, y2);
+
+		if (eval >= 0)
+			break;
+
+		grid.AdjustScale(+1);
+	}
+}
+
+
+/*
+  centre the map around the object and zoom in if necessary
+*/
+void GoToObject(const Objid& objid)
+{
+	edit.Selected->clear_all();
+	edit.Selected->set(objid.num);
+
+	GoToSelection();
+}
+
 
 void CMD_JumpToObject()
 {
