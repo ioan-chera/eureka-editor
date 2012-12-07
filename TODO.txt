@@ -6,6 +6,8 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
+-  recently used list
+
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
@@ -26,17 +28,7 @@ Coding
 Editing
 -------
 
--  disable 'next' and 'prev' mis-feature
-   
-   OR: they can step through objects in a "find selection"
-       
-   OLD IDEA: probably use selection:
-   -  if nothing selected, select the first/last object
-   -  if one object selected, reselect the next (beep if last)
-   -  beep if 2+ objects selected
-
--  jump to object (need a decent GoToObject)
-
+-  command to move and/or zoom map to show selected object(s)
 
 
 Browser

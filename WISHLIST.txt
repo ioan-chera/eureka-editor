@@ -210,8 +210,7 @@ Editing
 +  scrollbars for the canvas
 
 
--  ability to move and/or zoom map to show selected object(s)
-   [can zoom OUT, but only zoom IN if multiple and very small]
+-  View / Toggle skill mode
 
 -  when highlighting a sector, draw the things in the same color as
    the sector is highlighted, but not as bright.  Because many sector
@@ -300,6 +299,8 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 ?  an info bar:  X  Y  Z  ANG
 
 -  rotated sprites
+
+?  slopes
 
 IDEA: a key (or mouse button) to toggle "grab mouse" mode
 
