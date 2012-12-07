@@ -632,23 +632,6 @@ void UI_Canvas::DrawLinedefs()
 					fl_color(RED);
 
 				DrawKnobbyLine(x1, y1, x2, y2);
-
-				if (edit.show_object_numbers)
-				{
-					int scnx0       = SCREENX (x1);
-					int scnx1       = SCREENX (x2);
-					int scny0       = SCREENY (y1);
-					int scny1       = SCREENY (y2);
-
-					int label_width = 5 * FONTW; ///!!! ((int) log10 (n) + 1) * FONTW;
-/*					if (abs(scnx1 - scnx0) > label_width + 4
-							|| abs (scny1 - scny0) > label_width + 4)
-*/					{
-						int scnx = (scnx0 + scnx1) / 2 - label_width / 2;
-						int scny = (scny0 + scny1) / 2 - FONTH / 2;
-						DrawObjNum(scnx, scny, n);
-					}
-				}
 			}
 			break;
 
@@ -712,6 +695,23 @@ void UI_Canvas::DrawLinedefs()
 			break;
 		}
 	}
+
+	// draw the linedef numbers
+	if (edit.obj_type == OBJ_LINEDEFS && edit.show_object_numbers)
+	{
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			int x1 = LineDefs[n]->Start()->x;
+			int y1 = LineDefs[n]->Start()->y;
+			int x2 = LineDefs[n]->End  ()->x;
+			int y2 = LineDefs[n]->End  ()->y;
+
+			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+				continue;
+
+			DrawLineNumber(x1, y1, x2, y2, SIDE_LEFT, n);
+		}
+	}
 }
 
 
@@ -768,7 +768,7 @@ void UI_Canvas::DrawThings()
 		}
 	}
 
-	// Draw the things numbers
+	// draw the thing numbers
 	if (edit.obj_type == OBJ_THINGS && edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < NumThings ; n++)
@@ -813,13 +813,63 @@ void UI_Canvas::DrawSectorNums()
 }
 
 
+void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n)
+{
+	int x1 = SCREENX(mx1);
+	int y1 = SCREENY(my1);
+	int x2 = SCREENX(mx2);
+	int y2 = SCREENY(my2);
+
+	int mx = (x1 + x2) / 2;
+	int my = (y1 + y2) / 2 - 1;
+
+	int dx = (y1 - y2);
+	int dy = (x2 - x1);
+
+	if (side == SIDE_LEFT)
+	{
+		dx = -dx;
+		dy = -dy;
+	}
+
+	int len = MAX(4, MAX(abs(dx), abs(dy)));
+	int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 2.0);
+
+	mx += dx * want_len / len;
+	my += dy * want_len / len;
+
+	if (abs(dx) > abs(dy))
+	{
+		want_len = 2 + want_len / 2;
+
+		if (dx > 0)
+			mx += want_len;
+		else
+			mx -= want_len;
+	}
+
+	DrawObjNum(mx, my + fl_descent(), n, true /* center */);
+}
+
+
 /*
  *  draw_obj_no - draw a number at screen coordinates (x, y)
  */
-void UI_Canvas::DrawObjNum(int x, int y, int obj_no)
+void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 {
 	char buffer[64];
-	sprintf(buffer, "%d", obj_no);
+	sprintf(buffer, "%d", num);
+
+	if (center)
+	{
+#if 0 /* DEBUG */
+		fl_color(FL_RED);
+		fl_rectf(x - 1, y - 1, 3, 3);
+		return;
+#endif
+		x -= fl_width(buffer) / 2;
+		y += fl_descent();
+	}
 
 	fl_color(FL_BLACK);
 
