@@ -16,6 +16,8 @@ General
    (d) persist in a lump, e.g. "__EUREKA"
    (e) load definitions from mods/<base>.ugh
 
++  Preferences window
+
 
 Documentation
 -------------
@@ -28,7 +30,18 @@ Coding
 Editing
 -------
 
+>>>  'd' disconnect sectors
+ 
+     -  fix textures when separating linedef
+     -  better DisconnectCoord
+     ?  include islands (perhaps with 'D')
+
++  'm' in linedef mode : two one-side linedefs selected, join into one
+   -  allow a shared vertex
+
 -  command to move and/or zoom map to show selected object(s)
+
+-  'e' commands : honor did_a_move
 
 
 Browser

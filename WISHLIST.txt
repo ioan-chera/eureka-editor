@@ -38,8 +38,6 @@ General
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
 
-+  Preferences window
-
 
 
 Documentation
@@ -196,9 +194,6 @@ Editing
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
-+  implement Edit/Move (Scale, Rotate) operations which pop up a
-   dialog asking for the offset (scale, angle) to apply.
-
 +  when copy-n-paste and a real sector is removed (or pasting into
    a different map or wad) : we get linedefs with "-" as middle texture.
    Handle this better.
@@ -208,6 +203,14 @@ Editing
    left side for end vertex).
 
 +  scrollbars for the canvas
+
++  View / Find
+   (use GoToObject for first match, FindNext starts at selected + 1)
+
+   -  VERTEX mode : useful ??
+   -  THING mode : match on type (possibly on flags, TID for hexen)
+   -  SECTOR mode: match on type / desc / tag / flat
+   -  LINEDEF mode: match on type / desc / tag / texture
 
 
 -  View / Toggle skill mode
