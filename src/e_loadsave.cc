@@ -641,7 +641,6 @@ void CMD_OpenMap()
 		if (edit_wad)
 		{
 			MasterDir_Remove(edit_wad);
-
 			delete edit_wad;
 		}
 
@@ -651,7 +650,7 @@ void CMD_OpenMap()
 	}
 
 
-	LogPrintf("Loading Map : %s %s\n", wad->PathName(), map_name);
+	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
 	LoadLevel(wad, map_name);
 
@@ -676,13 +675,20 @@ void CMD_OpenRecentMap()
 	if (! Main_ConfirmQuit("open another map"))
 		return;
 
-	Wad_file *new_wad = Wad_file::Open(filename, 'a');
+	Wad_file *new_wad = NULL;
+
+	// make sure the file exists [Open with 'a' would create it]
+	if (FileExists(filename))
+	{
+		new_wad = Wad_file::Open(filename, 'a');
+	}
 
 	if (! new_wad)
 	{
 		// FIXME: get an error message, add it here
 
-		Notify(-1, -1, "Unable to open that WAD file.", NULL);
+		Notify(-1, -1, "Unable to open that WAD file.\n\n"
+		               "(perhaps it was renamed or deleted?)", NULL);
 		return;
 	}
 
@@ -690,14 +696,34 @@ void CMD_OpenRecentMap()
 	{
 		delete new_wad;
 
-		Notify(-1, -1, "Unable to find the map in that WAD.", NULL);
+		Notify(-1, -1, "Unable to find that map in that WAD.", NULL);
 		return;
 	}
 
 
-	// DO STUFF !!!!
-	
-	LogPrintf("YYYYYYYYYYYYYYYYYYYYYYYY\n");
+	// a new wad replaces the current PWAD
+	if (new_wad)
+	{
+		if (edit_wad)
+		{
+			MasterDir_Remove(edit_wad);
+			delete edit_wad;
+		}
+
+		edit_wad = new_wad;
+
+		MasterDir_Add(edit_wad);
+	}
+
+
+	LogPrintf("Loading Map : %s of %s\n", map_name, new_wad->PathName());
+
+	LoadLevel(new_wad, map_name);
+
+	Replacer = false;
+	MadeChanges = 0;
+
+	CMD_ZoomWholeMap();
 }
 
 
@@ -917,7 +943,7 @@ void CMD_SaveMap()
 		}
 	}
 
-	LogPrintf("Saving Map : %s %s\n", edit_wad->PathName(), Level_name);
+	LogPrintf("Saving Map : %s of %s\n", Level_name, edit_wad->PathName());
 
 	SaveLevel(edit_wad, Level_name);
 
@@ -1013,7 +1039,7 @@ void CMD_ExportMap()
 	}
 
 
-	LogPrintf("Exporting Map : %s %s\n", wad->PathName(), map_name);
+	LogPrintf("Exporting Map : %s of %s\n", map_name, wad->PathName());
 
 	SaveLevel(wad, map_name);
 
