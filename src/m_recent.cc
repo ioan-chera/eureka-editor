@@ -232,6 +232,14 @@ private:
 
 	bool want_close;
 
+private:
+	static void close_callback(Fl_Widget *w, void *data)
+	{
+		UI_RecentFiles * that = (UI_RecentFiles *)data;
+
+		that->want_close = true;
+	}
+
 public:
 	UI_RecentFiles() : Fl_Double_Window(320, 400, "Recent Maps"),
 		want_close(false)
@@ -242,6 +250,7 @@ public:
 		int cy = 10;
 
 		color(WINDOW_BG, WINDOW_BG);
+		callback(close_callback, this);
 
 		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select recent file and map:");
 		title->labelsize(16);
@@ -249,24 +258,21 @@ public:
 
 		cy += title->h() + 12;
 
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "klog2.wad : MAP01");
-		  o->box(FL_ROUND_UP_BOX);
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "klog2.wad : MAP01");
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 30;
+		  cy += 32;
 	  } // Fl_Button* o
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "her_boss3.wad : E1M1");
-		  o->box(FL_ROUND_UP_BOX);
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "her_boss3.wad : E1M1");
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 30;
+		  cy += 32;
 	  } // Fl_Button* o
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "foobie.wad : MAP07");
-		  o->box(FL_ROUND_UP_BOX);
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "foobie.wad : MAP07");
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 30;
+		  cy += 32;
 	  } // Fl_Button* o
 
 		cancel = new Fl_Button(W / 2 - 45, H - 60, 90, 35, "Cancel");
-		cancel->box(FL_ROUNDED_BOX);
+		cancel->callback(close_callback, this);
 
 		end();
 
