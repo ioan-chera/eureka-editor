@@ -284,7 +284,7 @@ public:
 		if (total_num == 0)
 			title->label("There are no recent files.");
 
-		cy += title->h() + 12;
+		cy += title->h() + 10;
 
 		for (int i = 0 ; i < total_num ; i++)
 		{
@@ -306,7 +306,7 @@ public:
 			cy += 28;
 		}
 
-		cancel = new Fl_Button(W / 2 - 45, H - 60, 90, 35, "Cancel");
+		cancel = new Fl_Button(W / 2 - 45, H - 50, 90, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		if (total_num == 0)
