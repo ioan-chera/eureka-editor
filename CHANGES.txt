@@ -2,15 +2,17 @@
 CHANGES IN Eureka 0.xx
 ======================
 
-+  implemented Move/Scale/Rotate dialogs (via Edit menu)
-
-+  implemented picture mode for Thing browser
++  new Recent Files dialog
 
 +  new Default Properties panel (shown in vertex mode)
 
++  implemented picture mode for Thing browser
+
++  implemented Move/Scale/Rotate dialogs (via Edit menu)
+
+-  added 'd' disconnect command for sectors
 -  added 'm' merge command for vertices
 -  added 'm' merge command for two linedefs
--  added 'd' disconnect command for sectors
 
 -  shortcut key for 'File/Export Map' is now CTRL-E
 -  swapped sector height keys: '.' ',' <---> '[' ']'
@@ -24,6 +26,7 @@ CHANGES IN Eureka 0.xx
 -  got the 'j' jump-to-object command working properly
 
 -  fixed wrong color of a tagged linedef or sector
+-  fixed zooming out on File/Open when map has persistent state
 
 -  config: default grid size is now 16 (was: 128)
 -  config: added 'default_grid_size' var
