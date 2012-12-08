@@ -531,10 +531,13 @@ void LoadLevel(Wad_file *wad, const char *level)
 		if (! M_LoadUserState())
 		{
 			M_DefaultUserState();
+			CMD_ZoomWholeMap();
 		}
 	}
 
     edit.RedrawMap = 1;
+
+	MadeChanges = 0;
 }
 
 
@@ -655,9 +658,6 @@ void CMD_OpenMap()
 	LoadLevel(wad, map_name);
 
 	Replacer = false;
-	MadeChanges = 0;
-
-	CMD_ZoomWholeMap();
 }
 
 
@@ -721,9 +721,6 @@ void CMD_OpenRecentMap()
 	LoadLevel(new_wad, map_name);
 
 	Replacer = false;
-	MadeChanges = 0;
-
-	CMD_ZoomWholeMap();
 }
 
 
