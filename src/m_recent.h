@@ -26,7 +26,7 @@ void M_SaveRecent();
 
 void M_AddRecent(const char *filename, const char *map_name);
 
-void M_RecentFilesDialog();
+void M_RecentDialog(const char ** file_v, const char ** map_v);
 
 #endif  /* __EUREKA_M_RECENT_H__ */
 

@@ -33,6 +33,7 @@ void LoadLevel(Wad_file *wad, const char *level);
 
 void CMD_NewMap();
 void CMD_OpenMap();
+void CMD_OpenRecentMap();
 void CMD_SaveMap();
 void CMD_ExportMap();
 

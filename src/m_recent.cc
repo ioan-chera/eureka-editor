@@ -179,6 +179,15 @@ public:
 
 		sprintf(buffer, "%-.32s : %-.10s", file, map);
 	}
+
+	void Lookup(int index, const char ** file_v, const char ** map_v)
+	{
+		SYS_ASSERT(index >= 0);
+		SYS_ASSERT(index < size);
+
+		*file_v = filenames[index];
+		*map_v  = map_names[index];
+	}
 };
 
 
@@ -250,6 +259,8 @@ private:
 
 	bool want_close;
 
+	int picked_num;
+
 private:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
@@ -265,7 +276,7 @@ private:
 
 public:
 	UI_RecentFiles() : Fl_Double_Window(320, need_h(), "Recent Files"),
-		want_close(false)
+		want_close(false), picked_num(-1)
 	{
 		int W = w();
 		int H = h();
@@ -320,7 +331,7 @@ public:
 	~UI_RecentFiles()
 	{ }
 
-	void Run()
+	int Run()
 	{
 		set_modal();
 
@@ -328,19 +339,29 @@ public:
 
 		while (! want_close)
 			Fl::wait(0.2);
+
+		return picked_num;
 	}
 };
 
 
-void M_RecentFilesDialog()
+void M_RecentDialog(const char ** file_v, const char ** map_v)
 {
-	// FIXME
-
 	UI_RecentFiles * dialog = new UI_RecentFiles();
 
-	dialog->Run();
+	int picked = dialog->Run();
 
 	delete dialog;
+
+	if (picked >= 0)
+	{
+		recent_files.Lookup(picked, file_v, map_v);
+	}
+	else
+	{
+		*file_v = NULL;
+		*map_v  = NULL;
+	}
 }
 
 

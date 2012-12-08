@@ -662,6 +662,45 @@ void CMD_OpenMap()
 }
 
 
+void CMD_OpenRecentMap()
+{
+	const char *filename = NULL;
+	const char *map_name = NULL;
+
+	M_RecentDialog(&filename, &map_name);
+
+	// cancelled?
+	if (! filename)
+		return;
+
+	if (! Main_ConfirmQuit("open another map"))
+		return;
+
+	Wad_file *new_wad = Wad_file::Open(filename, 'a');
+
+	if (! new_wad)
+	{
+		// FIXME: get an error message, add it here
+
+		Notify(-1, -1, "Unable to open that WAD file.", NULL);
+		return;
+	}
+
+	if (new_wad->FindLevel(map_name) < 0)
+	{
+		delete new_wad;
+
+		Notify(-1, -1, "Unable to find the map in that WAD.", NULL);
+		return;
+	}
+
+
+	// DO STUFF !!!!
+	
+	LogPrintf("YYYYYYYYYYYYYYYYYYYYYYYY\n");
+}
+
+
 //------------------------------------------------------------------------
 //  SAVING CODE
 //------------------------------------------------------------------------
