@@ -34,6 +34,7 @@
 #include "levels.h"
 #include "objects.h"
 #include "selectn.h"
+#include "w_rawdef.h"
 #include "x_mirror.h"
 
 
@@ -431,6 +432,23 @@ static void DETSEC_DisconnectCoord(int v_num, int *x, int *y)
 }
 
 
+static void DETSEC_AddNewLine(int ld_num, int start2, int end2)
+{
+	const LineDef * L1 = LineDefs[ld_num];
+
+	int new_ld = BA_New(OBJ_LINEDEFS);
+
+	LineDef * L2 = LineDefs[new_ld];
+
+	L2->start = start2;
+	L2->end   = end2;
+
+	L2->flags = MLF_Blocking;
+
+	// FIXME !!! SIDEDEFS (etc)
+}
+
+
 
 void CMD_DisconnectSectors()
 {
@@ -471,12 +489,13 @@ void CMD_DisconnectSectors()
 	BA_Begin();
 
 	// create new vertices, and a mapping from old --> new
+
 	int * mapping = new int[NumVertices];
 
 	for (n = 0 ; n < NumVertices ; n++)
 		mapping[n] = -1;
 
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (detach_verts.begin(&it) ; !it.at_end() ; ++it)
 	{
 		int new_v = BA_New(OBJ_VERTICES);
 
@@ -485,6 +504,8 @@ void CMD_DisconnectSectors()
 		mapping[*it] = new_v;
 
 		DETSEC_DisconnectCoord(*it, &newbie->x, &newbie->y);
+fprintf(stderr, "New vertex #%d at (%d %d)   mapped from %d\n",
+        new_v, newbie->x, newbie->y, *it);
 	}
 
 	// update linedefs, creating new ones where necessary
@@ -498,12 +519,18 @@ void CMD_DisconnectSectors()
 				(L->Right() && edit.Selected->get(L->Right()->sector)) ))
 			continue;
 
+		bool between_two =
+			((L->Left()  && edit.Selected->get(L->Left() ->sector)) &&
+			 (L->Right() && edit.Selected->get(L->Right()->sector)) );
+
 		int start2 = mapping[L->start];
 		int end2   = mapping[L->end];
 
-		if (start2 >= 0 && end2 >= 0)
+fprintf(stderr, "Line #%d : start2 = %d  end2 = %d\n", n, start2, end2);
+
+		if (start2 >= 0 && end2 >= 0 && ! between_two)
 		{
-			// FIXME: new line
+			DETSEC_AddNewLine(n, start2, end2);
 		}
 		else if (start2 >= 0)
 		{
