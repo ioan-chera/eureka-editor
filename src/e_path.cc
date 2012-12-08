@@ -170,7 +170,16 @@ void CMD_SelectLinesInPath(int flags)
 
 	// determine starting linedef
 	if (edit.highlighted.is_nil())
-		return;  // beep?
+	{
+		Beep("No highlighted linedef.");
+		return;
+	}
+
+	if (edit.did_a_move)
+	{
+		edit.did_a_move = false;
+		additive = false;
+	}
 
 	int start_L = edit.highlighted.num;
 
@@ -264,9 +273,18 @@ void CMD_SelectContiguousSectors(int flags)
 {
 	bool additive = ! (flags & SCS_ClearSel);
 
-	// determine starting linedef
+	// determine starting sector
 	if (edit.highlighted.is_nil())
-		return;  // beep?
+	{
+		Beep("No highlighted sector.");
+		return;
+	}
+
+	if (edit.did_a_move)
+	{
+		edit.did_a_move = false;
+		additive = false;
+	}
 
 	int start_sec = edit.highlighted.num;
 
