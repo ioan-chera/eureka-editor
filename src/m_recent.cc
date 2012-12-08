@@ -24,6 +24,8 @@
 #include "m_dialog.h"
 #include "w_wad.h"
 
+#include "ui_window.h"
+
 
 #define MAX_RECENT  10
 
@@ -221,9 +223,80 @@ void M_AddRecent(const char *filename, const char *map_name)
 //------------------------------------------------------------------------
 
 
+class UI_RecentFiles : public Fl_Double_Window
+{
+private:
+	Fl_Button * name_but[MAX_RECENT];
+
+	Fl_Button * cancel;
+
+	bool want_close;
+
+public:
+	UI_RecentFiles() : Fl_Double_Window(320, 400, "Recent Maps"),
+		want_close(false)
+	{
+		int W = w();
+		int H = h();
+
+		int cy = 10;
+
+		color(WINDOW_BG, WINDOW_BG);
+
+		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select recent file and map:");
+		title->labelsize(16);
+		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+		cy += title->h() + 12;
+
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "klog2.wad : MAP01");
+		  o->box(FL_ROUND_UP_BOX);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  cy += 30;
+	  } // Fl_Button* o
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "her_boss3.wad : E1M1");
+		  o->box(FL_ROUND_UP_BOX);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  cy += 30;
+	  } // Fl_Button* o
+	  { Fl_Button* o = new Fl_Button(10, cy, 295, 20, "foobie.wad : MAP07");
+		  o->box(FL_ROUND_UP_BOX);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  cy += 30;
+	  } // Fl_Button* o
+
+		cancel = new Fl_Button(W / 2 - 45, H - 60, 90, 35, "Cancel");
+		cancel->box(FL_ROUNDED_BOX);
+
+		end();
+
+		resizable(NULL);
+	}
+
+	~UI_RecentFiles()
+	{ }
+
+	void Run()
+	{
+		set_modal();
+
+		show();
+
+		while (! want_close)
+			Fl::wait(0.2);
+	}
+};
+
+
 void M_RecentFilesDialog()
 {
 	// FIXME
+
+	UI_RecentFiles * dialog = new UI_RecentFiles();
+
+	dialog->Run();
+
+	delete dialog;
 }
 
 
