@@ -738,7 +738,11 @@ void CMD_MergeTwoLineDefs()
 
 	// ld2 steals the sidedef from ld1
 
+	// FIXME: use LD_AddedSecondSideDef
+
 	BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+	BA_ChangeLD(ld2, LineDef::F_FLAGS, L2->flags & ~MLF_Blocking);
+
 	BA_ChangeLD(ld1, LineDef::F_RIGHT, -1);
 
 	// fix existing lines connected to ld1 : reconnect to ld2
