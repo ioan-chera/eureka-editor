@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "editloop.h"
+#include "e_linedef.h"
 #include "e_vertex.h"
 #include "m_dialog.h"
 #include "m_bitvec.h"
@@ -432,7 +433,7 @@ static void DETSEC_DisconnectCoord(int v_num, int *x, int *y)
 }
 
 
-static void DETSEC_AddNewLine(int ld_num, int start2, int end2)
+static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
 {
 	const LineDef * L1 = LineDefs[ld_num];
 
@@ -440,12 +441,28 @@ static void DETSEC_AddNewLine(int ld_num, int start2, int end2)
 
 	LineDef * L2 = LineDefs[new_ld];
 
-	L2->start = start2;
-	L2->end   = end2;
-
 	L2->flags = MLF_Blocking;
 
-	// FIXME !!! SIDEDEFS (etc)
+	if (in_side == SIDE_LEFT)
+	{
+		L2->start = end2;
+		L2->end   = start2;
+		L2->right = L1->left;
+
+		BA_ChangeLD(ld_num, LineDef::F_LEFT, -1);
+	}
+	else
+	{
+		L2->start = start2;
+		L2->end   = end2;
+		L2->right = L1->right;
+
+		BA_ChangeLD(ld_num, LineDef::F_RIGHT, -1);
+
+		FlipLineDef(ld_num);
+	}
+
+	BA_ChangeLD(ld_num, LineDef::F_FLAGS, L1->flags | MLF_Blocking);
 }
 
 
@@ -504,33 +521,35 @@ void CMD_DisconnectSectors()
 		mapping[*it] = new_v;
 
 		DETSEC_DisconnectCoord(*it, &newbie->x, &newbie->y);
+
 fprintf(stderr, "New vertex #%d at (%d %d)   mapped from %d\n",
         new_v, newbie->x, newbie->y, *it);
 	}
 
 	// update linedefs, creating new ones where necessary
+	// (go backwards so we don't visit newly created lines)
 
-	for (n = 0 ; n < NumLineDefs ; n++)
+	for (n = NumLineDefs-1 ; n >= 0 ; n--)
 	{
 		const LineDef * L = LineDefs[n];
 
 		// only process lines which touch a selected sector
-		if (! (	(L->Left()  && edit.Selected->get(L->Left() ->sector)) ||
-				(L->Right() && edit.Selected->get(L->Right()->sector)) ))
+		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
+		bool right_in = L->Right() && edit.Selected->get(L->Right()->sector);
+
+		if (! (left_in || right_in))
 			continue;
 
-		bool between_two =
-			((L->Left()  && edit.Selected->get(L->Left() ->sector)) &&
-			 (L->Right() && edit.Selected->get(L->Right()->sector)) );
+		bool between_two = (left_in && right_in);
 
 		int start2 = mapping[L->start];
 		int end2   = mapping[L->end];
 
 fprintf(stderr, "Line #%d : start2 = %d  end2 = %d\n", n, start2, end2);
 
-		if (start2 >= 0 && end2 >= 0 && ! between_two)
+		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			DETSEC_AddNewLine(n, start2, end2);
+			DETSEC_AddNewLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
 		}
 		else if (start2 >= 0)
 		{
