@@ -253,20 +253,25 @@ void M_AddRecent(const char *filename, const char *map_name)
 class UI_RecentFiles : public Fl_Double_Window
 {
 private:
-	Fl_Button * name_but[MAX_RECENT];
-
 	Fl_Button * cancel;
 
 	bool want_close;
 
 	int picked_num;
 
+	static UI_RecentFiles * _instance;  // meh!
+
 private:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
-		UI_RecentFiles * that = (UI_RecentFiles *)data;
+		_instance->picked_num = -1;
+		_instance->want_close = true;
+	}
 
-		that->want_close = true;
+	static void button_callback(Fl_Widget *w, void *data)
+	{
+		_instance->picked_num = (int) data;
+		_instance->want_close = true;
 	}
 
 	static int need_h()
@@ -282,6 +287,8 @@ public:
 		int H = h();
 
 		int cy = 10;
+
+		_instance = this;
 
 		color(WINDOW_BG, WINDOW_BG);
 		callback(close_callback, this);
@@ -310,9 +317,10 @@ public:
 
 			recent_files.Format(name_buf, i);
 
-			Fl_Button *o = new Fl_Button(50, cy, W - 70, 24);
-			o->copy_label(name_buf);
-			o->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+			Fl_Button * but = new Fl_Button(50, cy, W - 70, 24);
+			but->copy_label(name_buf);
+			but->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+			but->callback(button_callback, (void *) i);
 
 			cy += 28;
 		}
@@ -329,7 +337,9 @@ public:
 	}
 
 	~UI_RecentFiles()
-	{ }
+	{
+		_instance = NULL;
+	}
 
 	int Run()
 	{
@@ -343,6 +353,9 @@ public:
 		return picked_num;
 	}
 };
+
+
+UI_RecentFiles * UI_RecentFiles::_instance = NULL;
 
 
 void M_RecentDialog(const char ** file_v, const char ** map_v)
