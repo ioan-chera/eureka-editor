@@ -360,8 +360,8 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Recent File", 0, FCAL file_do_recent },
-		{ "Preferences", 0, FCAL file_do_prefs },
+		{ "Recent Files", 0, FCAL file_do_recent },
+		{ "Preferences",  0, FCAL file_do_prefs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 #if 0

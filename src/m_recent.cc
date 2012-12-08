@@ -27,7 +27,7 @@
 #include "ui_window.h"
 
 
-#define MAX_RECENT  10
+#define MAX_RECENT  8
 
 
 class RecentFiles_c
@@ -51,6 +51,11 @@ public:
 	~RecentFiles_c()
 	{ }
 
+	int getSize() const
+	{
+		return size;
+	}
+
 	void clear()
 	{
 		for (int k = 0 ; k < size ; k++)
@@ -65,7 +70,7 @@ public:
 		size = 0;
 	}
 
-	int find(const char *file)
+	int find(const char *file, const char *map = NULL)
 	{
 		// ignore the path when matching filenames
 		const char *A = fl_filename_name(file);
@@ -74,7 +79,10 @@ public:
 		{
 			const char *B = fl_filename_name(filenames[k]);
 
-			if (y_stricmp(A, B) == 0)
+			if (y_stricmp(A, B) != 0)
+				continue;
+
+			if (! map || y_stricmp(map_names[k], map) == 0)
 				return k;
 		}
 
@@ -161,6 +169,16 @@ public:
 			fprintf(fp, "%s\n", map_names[k]);
 		}
 	}
+
+	void Format(char *buffer, int index) const
+	{
+		SYS_ASSERT(index < size);
+
+		const char *file = fl_filename_name(filenames[index]);
+		const char *map  = map_names[index];
+
+		sprintf(buffer, "%-.32s : %-.10s", file, map);
+	}
 };
 
 
@@ -240,8 +258,13 @@ private:
 		that->want_close = true;
 	}
 
+	static int need_h()
+	{
+		return recent_files.getSize() * 28 + 144;
+	}
+
 public:
-	UI_RecentFiles() : Fl_Double_Window(320, 400, "Recent Maps"),
+	UI_RecentFiles() : Fl_Double_Window(320, need_h(), "Recent Files"),
 		want_close(false)
 	{
 		int W = w();
@@ -252,27 +275,42 @@ public:
 		color(WINDOW_BG, WINDOW_BG);
 		callback(close_callback, this);
 
-		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select recent file and map:");
+		int total_num = recent_files.getSize();
+
+		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select the recent file and map:");
 		title->labelsize(16);
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
+		if (total_num == 0)
+			title->label("There are no recent files.");
+
 		cy += title->h() + 12;
 
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "klog2.wad : MAP01");
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 32;
-	  } // Fl_Button* o
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "her_boss3.wad : E1M1");
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 32;
-	  } // Fl_Button* o
-	  { Fl_Button* o = new Fl_Button(10, cy, 295, 24, "foobie.wad : MAP07");
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  cy += 32;
-	  } // Fl_Button* o
+		for (int i = 0 ; i < total_num ; i++)
+		{
+			char number[64];
+			sprintf(number, "%d.", 1 + i);
+
+			Fl_Box * num_box = new Fl_Box(FL_NO_BOX, 10, cy, 35, 25, "");
+			num_box->copy_label(number);
+			num_box->labelfont(FL_HELVETICA_BOLD);
+
+			char name_buf[256];
+
+			recent_files.Format(name_buf, i);
+
+			Fl_Button *o = new Fl_Button(50, cy, W - 70, 24);
+			o->copy_label(name_buf);
+			o->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+
+			cy += 28;
+		}
 
 		cancel = new Fl_Button(W / 2 - 45, H - 60, 90, 35, "Cancel");
 		cancel->callback(close_callback, this);
+
+		if (total_num == 0)
+			cancel->label("OK");
 
 		end();
 
