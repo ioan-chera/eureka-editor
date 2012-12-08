@@ -235,7 +235,8 @@ int entryname_cmp (const char *entry1, const char *entry2);
 bool Main_ConfirmQuit(const char *action);
 
 
-void Beep (void);
+void Beep();
+void Beep(const char *msg, ...);
 
 
 int vertex_radius (double scale);

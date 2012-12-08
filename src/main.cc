@@ -143,9 +143,17 @@ static int parse_environment_vars ()
 /*
  *  play a fascinating tune
  */
+void Beep(const char *msg, ...)
+{
+	// TODO: show message in a status bar and/or log file
+
+	fl_beep();
+}
+
+
 void Beep()
 {
-	fl_beep();
+	Beep("");
 }
 
 
