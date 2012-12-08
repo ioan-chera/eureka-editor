@@ -39,6 +39,8 @@ void CMD_SplitLineDefs();
 void CMD_AlignTexturesX();
 void CMD_AlignTexturesY();
 
+void CMD_MergeTwoLineDefs();
+
 
 bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, int x2, int y2);

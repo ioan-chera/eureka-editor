@@ -709,6 +709,70 @@ void CMD_SplitLineDefs()
 }
 
 
+void CMD_MergeTwoLineDefs()
+{
+	if (edit.Selected->count_obj() != 2)
+	{
+		Beep("Require two selected linedefs to merge.");
+		return;
+	}
+
+	// we will merge the first into the second
+
+	int ld1 = edit.Selected->find_first();
+	int ld2 = edit.Selected->find_second();
+
+	const LineDef * L1 = LineDefs[ld1];
+	const LineDef * L2 = LineDefs[ld2];
+
+	if (! (L1->OneSided() && L2->OneSided()))
+	{
+		Beep("Linedefs to merge must be single sided.");
+		return;
+	}
+
+	edit.Selected->clear_all();
+
+
+	BA_Begin();
+
+	// ld2 steals the sidedef from ld1
+
+	BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+	BA_ChangeLD(ld1, LineDef::F_RIGHT, -1);
+
+	// fix existing lines connected to ld1 : reconnect to ld2
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (n == ld1 || n == ld2)
+			continue;
+
+		const LineDef * L = LineDefs[n];
+
+		if (L->start == L1->start)
+			BA_ChangeLD(n, LineDef::F_START, L2->end);
+		else if (L->start == L1->end)
+			BA_ChangeLD(n, LineDef::F_START, L2->start);
+
+		if (L->end == L1->start)
+			BA_ChangeLD(n, LineDef::F_END, L2->end);
+		else if (L->end == L1->end)
+			BA_ChangeLD(n, LineDef::F_END, L2->start);
+	}
+
+	// delete ld1 and any unused vertices
+
+	selection_c del_line(OBJ_LINEDEFS);
+
+	del_line.set(ld1);
+
+	DeleteLineDefs(&del_line);
+
+	BA_End();
+}
+
+
 void MoveCoordOntoLineDef(int ld, int *x, int *y)
 {
 	const LineDef *L = LineDefs[ld];

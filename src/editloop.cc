@@ -703,6 +703,12 @@ static bool LineDef_Key(int key, keymod_e mod)
 		CMD_SelectLinesInPath(SLP_SameTex);
 	}
 
+	// [m]: merge two one-sided linedefs into one
+	else if (key == 'm')
+	{
+		CMD_MergeTwoLineDefs();
+	}
+
 	// [x]: split linedefs
 	else if (key == 'x')
 	{
