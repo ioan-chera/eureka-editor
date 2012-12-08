@@ -1,0 +1,168 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+widget_class UI_Preferences {
+  label PREFERENCES open
+  xywh {281 180 600 500} type Double visible
+} {
+  Fl_Tabs {} {open
+    xywh {0 0 605 435}
+  } {
+    Fl_Group {} {
+      label { General     } open selected
+      xywh {0 25 605 405} labelsize 16
+    } {
+      Fl_Check_Button {} {
+        label { mouse wheel scrolls the map}
+        xywh {50 300 20 30} down_box DOWN_BOX
+      }
+      Fl_Box {} {
+        label {GUI Appearance}
+        xywh {25 50 145 30} labelfont 1 align 20
+      }
+      Fl_Group {} {open
+        xywh {45 90 250 115}
+      } {
+        Fl_Round_Button {} {
+          label {fltk default  }
+          xywh {50 90 100 20} type Radio down_box ROUND_DOWN_BOX align 24
+        }
+        Fl_Round_Button {} {
+          label {GTK+ theme }
+          xywh {50 120 115 25} type Radio down_box ROUND_DOWN_BOX align 24
+        }
+        Fl_Round_Button {} {
+          label {plastic theme }
+          xywh {50 150 120 25} type Radio down_box ROUND_DOWN_BOX align 24
+        }
+      }
+      Fl_Group {} {
+        xywh {220 90 165 85}
+      } {
+        Fl_Round_Button {} {
+          label {default colors}
+          xywh {245 90 20 25} type Radio down_box ROUND_DOWN_BOX align 8
+        }
+        Fl_Round_Button {} {
+          label {bright colors}
+          xywh {245 120 20 25} type Radio down_box ROUND_DOWN_BOX align 8
+        }
+        Fl_Round_Button {} {
+          label {custom colors}
+          xywh {245 150 20 25} type Radio down_box ROUND_DOWN_BOX align 8
+        }
+      }
+      Fl_Group {} {
+        xywh {385 80 205 100} color 50 align 22
+      } {
+        Fl_Button {} {
+          label background
+          xywh {430 90 45 25} align 8
+        }
+        Fl_Button {} {
+          label {input bg}
+          xywh {430 120 45 25} color 7 align 8
+        }
+        Fl_Button {} {
+          label {text color}
+          xywh {430 150 45 25} color 32 align 8
+        }
+      }
+      Fl_Box {} {
+        label {Map Grid and Scrolling}
+        xywh {30 195 195 25} labelfont 1 align 20
+      }
+      Fl_Check_Button {} {
+        label { default SNAP mode}
+        xywh {50 230 20 30} down_box DOWN_BOX
+      }
+      Fl_Choice {} {
+        label {default grid size } open
+        xywh {435 230 85 25} down_box BORDER_BOX
+      } {}
+      Fl_Box {} {
+        label {Other Stuff}
+        xywh {30 340 280 35} labelfont 1 align 20
+      }
+      Fl_Choice {} {
+        label {small scroll step } open
+        xywh {435 265 85 25} down_box BORDER_BOX
+      } {}
+      Fl_Choice {} {
+        label {large scroll step } open
+        xywh {435 300 85 25} down_box BORDER_BOX
+      } {}
+      Fl_Check_Button {} {
+        label {Escape key can Quit the program}
+        xywh {50 380 20 30} down_box DOWN_BOX
+      }
+      Fl_Check_Button {} {
+        label { digit keys zoom the map}
+        xywh {50 265 20 30} down_box DOWN_BOX
+      }
+    }
+    Fl_Group {} {
+      label { Editing     }
+      xywh {0 25 605 410} labelsize 16 hide
+    } {
+      Fl_Box {} {
+        label {Editing Options}
+        xywh {25 50 355 30} labelfont 1 align 20
+      }
+      Fl_Check_Button {} {
+        label {new islands have void interior}
+        xywh {50 80 20 30} down_box DOWN_BOX align 8
+      }
+      Fl_Check_Button {} {
+        label {same mode key will clear selection}
+        xywh {50 140 20 30} down_box DOWN_BOX align 8
+      }
+      Fl_Check_Button {} {
+        label {auto-adjust X offsets}
+        xywh {50 110 20 30} down_box DOWN_BOX align 8
+      }
+      Fl_Check_Button {} {
+        label {multi-select requires a modifier key}
+        xywh {50 170 20 30} down_box DOWN_BOX align 8
+      }
+      Fl_Choice {} {
+        label {Key: } open
+        xywh {390 170 95 30} down_box BORDER_BOX
+      } {}
+      Fl_Input {} {
+        label {new sector size }
+        xywh {440 80 105 25} type Int
+      }
+    }
+    Fl_Group {} {
+      label { glBSP     }
+      xywh {0 25 605 410} selection_color 50 labelsize 16 hide
+    } {
+      Fl_Box {} {
+        label {glBSP Node Building Options}
+        xywh {25 50 280 30} labelfont 1 align 20
+      }
+      Fl_Check_Button {} {
+        label { Show all warning messages}
+        xywh {60 90 20 30} down_box DOWN_BOX
+      }
+      Fl_Check_Button {} {
+        label { Verbose -- show information about each level}
+        xywh {60 120 20 30} down_box DOWN_BOX
+      }
+      Fl_Check_Button {} {
+        label { Fast -- build the fastest way, but nodes may not be as good}
+        xywh {60 150 20 30} down_box DOWN_BOX
+      }
+    }
+  }
+  Fl_Group {} {open
+    xywh {0 435 600 65} box FLAT_BOX color 74
+  } {
+    Fl_Button {} {
+      label OK
+      xywh {485 450 85 35}
+    }
+  }
+} 

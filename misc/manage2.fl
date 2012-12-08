@@ -1,0 +1,85 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+widget_class UI_ProjectInfo {
+  label {PROJECT INFO} open selected
+  xywh {274 218 400 400} type Double visible
+} {
+  Fl_Choice {} {
+    label {IWAD (Game) file: } open
+    xywh {145 25 120 25} down_box BORDER_BOX
+  } {}
+  Fl_Choice {} {
+    label {Port (Engine) :} open
+    xywh {145 60 120 25} down_box BORDER_BOX
+  } {}
+  Fl_Button {} {
+    label Browse
+    xywh {285 25 100 25}
+  }
+  Fl_Group {} {
+    xywh {0 110 410 190}
+  } {
+    Fl_Box {} {
+      label {Resource Wads:}
+      xywh {15 110 185 35} align 20
+    }
+    Fl_Output {} {
+      label {1.}
+      xywh {35 145 275 25}
+    }
+    Fl_Output {} {
+      label {2.}
+      xywh {35 180 275 25}
+    }
+    Fl_Output {} {
+      label {3.}
+      xywh {35 215 275 25}
+    }
+    Fl_Output {} {
+      label {4.}
+      xywh {35 250 275 25}
+    }
+    Fl_Button {} {
+      label {+}
+      xywh {325 145 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {+}
+      xywh {325 180 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {+}
+      xywh {325 215 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {+}
+      xywh {325 250 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {-}
+      xywh {360 145 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {-}
+      xywh {360 180 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {-}
+      xywh {360 215 30 25} labelsize 20
+    }
+    Fl_Button {} {
+      label {-}
+      xywh {360 250 30 25} labelsize 20
+    }
+  }
+  Fl_Group {} {
+    xywh {0 340 400 60} box FLAT_BOX color 18
+  } {
+    Fl_Button {} {
+      label OK
+      xywh {160 355 80 35} labelfont 1
+    }
+  }
+} 
