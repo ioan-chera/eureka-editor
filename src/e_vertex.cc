@@ -551,13 +551,13 @@ fprintf(stderr, "Line #%d : start2 = %d  end2 = %d\n", n, start2, end2);
 		{
 			DETSEC_AddNewLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
 		}
-		else if (start2 >= 0)
+		else
 		{
-			BA_ChangeLD(n, LineDef::F_START, start2);
-		}
-		else if (end2 >= 0)
-		{
-			BA_ChangeLD(n, LineDef::F_END, end2);
+			if (start2 >= 0)
+				BA_ChangeLD(n, LineDef::F_START, start2);
+
+			if (end2 >= 0)
+				BA_ChangeLD(n, LineDef::F_END, end2);
 		}
 	}
 
