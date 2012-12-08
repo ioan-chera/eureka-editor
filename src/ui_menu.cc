@@ -30,6 +30,7 @@
 #include "e_cutpaste.h"
 #include "e_path.h"
 #include "levels.h"
+#include "m_recent.h"
 #include "r_grid.h"
 #include "x_mirror.h"
 
@@ -61,6 +62,16 @@ static void file_do_save(Fl_Widget *w, void * data)
 static void file_do_export(Fl_Widget *w, void * data)
 {
 	CMD_ExportMap();
+}
+
+static void file_do_recent(Fl_Widget *w, void * data)
+{
+	M_RecentFilesDialog();
+}
+
+static void file_do_prefs(Fl_Widget *w, void * data)
+{
+	Beep();
 }
 
 static void file_do_build_nodes(Fl_Widget *w, void * data)
@@ -349,6 +360,10 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "Recent File", 0, FCAL file_do_recent },
+		{ "Preferences", 0, FCAL file_do_prefs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 #if 0
 		{ "&DDF", 0, 0, 0, FL_SUBMENU },
 			{ "Load DDF &File",    0, FCAL view_do_zoom_out },
