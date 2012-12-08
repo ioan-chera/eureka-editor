@@ -176,6 +176,11 @@ static void view_do_whole_map(Fl_Widget *w, void * data)
 	CMD_ZoomWholeMap();
 }
 
+static void view_do_whole_selection(Fl_Widget *w, void * data)
+{
+	CMD_ZoomSelection();
+}
+
 static void view_do_camera_pos(Fl_Widget *w, void * data)
 {
 	CMD_GoToCamera();
@@ -429,6 +434,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },
 		{ "&Whole Map",    0, FCAL view_do_whole_map },
+		{ "Whole &Selection", 0, FCAL view_do_whole_selection },
 		{ "Go to &Camera", 0, FCAL view_do_camera_pos },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },

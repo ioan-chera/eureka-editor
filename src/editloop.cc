@@ -77,10 +77,10 @@ Editor_State_c::~Editor_State_c()
  *
  *  Return 0 on success, non-zero on failure.
  */
-static int zoom_fit()
+static void zoom_fit()
 {
 	if (NumVertices == 0)
-		return 0;
+		return;
 
 	double xzoom = 1;
 	double yzoom = 1;
@@ -94,7 +94,6 @@ static int zoom_fit()
 	grid.NearestScale(MIN(xzoom, yzoom));
 
 	grid.CenterMapAt((MapBound_lx + MapBound_hx) / 2, (MapBound_ly + MapBound_hy) / 2);
-	return 0;
 }
 
 
@@ -598,6 +597,20 @@ void CMD_ZoomWholeMap()
 		CalculateLevelBounds();
 
 	zoom_fit();
+
+	edit.RedrawMap = 1;
+}
+
+
+void CMD_ZoomSelection()
+{
+	if (edit.Selected->empty())
+	{
+		Beep("Selection is empty.");
+		return;
+	}
+
+	GoToSelection();
 
 	edit.RedrawMap = 1;
 }

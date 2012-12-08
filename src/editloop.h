@@ -107,6 +107,7 @@ void CMD_Quit();
 
 void CMD_Zoom(int delta, int mid_x, int mid_y);
 void CMD_ZoomWholeMap();
+void CMD_ZoomSelection();
 void CMD_GoToCamera();
 
 void CMD_SetBrowser(char kind);
