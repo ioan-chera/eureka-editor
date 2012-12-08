@@ -101,11 +101,8 @@ bool Replacer = false;
 
 
 // config items
-int  copy_linedef_reuse_sidedefs = 0;
-
 int scroll_less   = 10;
 int scroll_more   = 90;
-int sprite_scale  = 100;
 
 int gui_scheme    = 2;  // plastic
 int gui_color_set = 1;  // bright

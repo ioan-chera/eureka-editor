@@ -288,15 +288,6 @@ static const opt_desc_t options[] =
 		&glbsp_warn
 	},
 
-	{	"copy_linedef_reuse_sidedefs",
-		0,
-		OPT_BOOLEAN,
-		"",
-		"Use same sidedefs as original linedef",
-		NULL,
-		&copy_linedef_reuse_sidedefs
-	},
-
 	{	"default_grid_size",
 		0,
 		OPT_INTEGER,
@@ -421,15 +412,6 @@ static const opt_desc_t options[] =
 		"Amp. of scrolling (% of screen size)",
 		NULL,
 		&scroll_more
-	},
-
-	{	"sprite_scale",
-		0,
-		OPT_INTEGER,
-		"",
-		"Relative scale of sprites",
-		NULL,
-		&sprite_scale
 	},
 
 // -AJA- this may be better done with a 'mouse_button_order' string,

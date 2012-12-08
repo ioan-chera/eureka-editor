@@ -202,8 +202,6 @@ extern int remind_to_build_nodes; // Remind the user to build nodes
 
 extern bool Replacer;     // the new map will destroy an existing one if saved
 
-extern int	copy_linedef_reuse_sidedefs;
-
 extern int	default_floor_h;
 extern int	default_ceil_h;
 extern int	default_light_level;
@@ -221,7 +219,6 @@ extern int   show_version;  // Print version info and exit.
 
 extern int   scroll_less;// %s of screenful to scroll by
 extern int   scroll_more;// %s of screenful to scroll by
-extern int   sprite_scale;  // Relative scale used to display sprites
 
 
 extern int KF;  // Kromulent Factor
