@@ -22,6 +22,7 @@
 #include "ui_window.h"
 #include "ui_about.h"
 #include "ui_misc.h"
+#include "ui_prefs.h"
 
 #include "editloop.h"
 #include "e_basis.h"
@@ -70,7 +71,7 @@ static void file_do_recent(Fl_Widget *w, void * data)
 
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
-	Beep();
+	CMD_Preferences();
 }
 
 static void file_do_build_nodes(Fl_Widget *w, void * data)
