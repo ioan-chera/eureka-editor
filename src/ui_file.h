@@ -50,8 +50,9 @@ public:
 	const char * Run();
 
 private:
-	static void    ok_callback(Fl_Widget *, void *);
-	static void close_callback(Fl_Widget *, void *);
+	static void     ok_callback(Fl_Widget *, void *);
+	static void  close_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
 };
 
 

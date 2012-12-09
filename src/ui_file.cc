@@ -34,11 +34,11 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	callback(close_callback, this);
 
 
-	Fl_Box *title = new Fl_Box(20, 23, 285, 32, "Enter the map slot:");
+	Fl_Box *title = new Fl_Box(20, 18, 285, 32, "Enter the map slot:");
 	title->labelfont(FL_HELVETICA_BOLD);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	map_name = new Fl_Input(90, 65, 110, 25);
+	map_name = new Fl_Input(90, 60, 110, 25);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->value(initial_name);
 //!!	map_name->callback(input_callback, this);
@@ -151,11 +151,11 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		Fl_Return_Button *ok_but = new Fl_Return_Button(270, 430, 95, 35, "OK");
+		Fl_Return_Button *ok_but = new Fl_Return_Button(270, 432, 95, 35, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button *cancel = new Fl_Button(130, 430, 95, 35, "Cancel");
+		Fl_Button *cancel = new Fl_Button(130, 432, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -172,7 +172,7 @@ UI_ChooseMap::~UI_ChooseMap()
 
 void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 {
-	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 120, 285, 32, "Or select via these cool buttons:");
+	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 104, 285, 32, "Or select via these cool buttons:");
 	heading->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 	heading->labelfont(FL_HELVETICA_BOLD);
 	add(heading);
@@ -180,27 +180,27 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 	Fl_Color free_col = fl_rgb_color(0x33, 0xDD, 0x77);
 	Fl_Color used_col = fl_rgb_color(0xFF, 0x33, 0x66);
 
-	for (int row = 0 ; row < 8 ; row++)
-	for (int col = 0 ; col < 5 ; col++)
+	for (int col = 0 ; col < 4  ; col++)
+	for (int row = 0 ; row < 10 ; row++)
 	{
-		int cx = x() +  15 + col * 75;
-		int cy = y() + 155 + row * 25 + (row / 2) * 10;
+		int cx = x() +  45 + col * 82;
+		int cy = y() + 145 + row * 25;
 
 		char name_buf[20];
 
 		if (format == 'E')
 		{
-			int epi = 1 + row / 2;
-			int map = 1 + (row % 2) * 5 + col;
+			int epi = 1 + col;
+			int map = 1 + row; // (row % 2) * 5 + col;
 
-			if (map >= 10)
+			if (map > 9)
 				continue;
 
 			sprintf(name_buf, "E%dM%d\n", epi, map);
 		}
 		else
 		{
-			int map = row * 5 + col;
+			int map = 1 + col * 10 + row;
 
 			if (map < 1 || map > 32)
 				continue;
@@ -210,7 +210,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 
 		Fl_Button * but = new Fl_Button(cx, cy, 70, 20);
 		but->copy_label(name_buf);
-//!!!!		but->callback(button_callback, this);
+		but->callback(button_callback, this);
 
 		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
 			but->color(used_col);
@@ -271,6 +271,15 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 		that->action = ACT_ACCEPT;
 	else
 		Beep();
+}
+
+
+void UI_ChooseMap::button_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseMap * that = (UI_ChooseMap *)data;
+
+	that->map_name->value(w->label());
+	that->action = ACT_ACCEPT;
 }
 
 
