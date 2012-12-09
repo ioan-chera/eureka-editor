@@ -38,7 +38,7 @@ private:
 
 	int action;
 
-	bool isNameValid() const;
+	bool isMapValid() const;
 
 public:
 	UI_ChooseMap(const char *initial_name = "");
@@ -55,6 +55,44 @@ private:
 	static void button_callback(Fl_Widget *, void *);
 };
 
+//------------------------------------------------------------------------
+
+class UI_OpenMap : public Fl_Double_Window
+{
+private:
+	Fl_Round_Button *look_iwad;
+	Fl_Round_Button *look_res;
+	Fl_Round_Button *look_pwad;
+
+	Fl_Output *pwad_name;
+	Fl_Input  *map_name;
+
+	Fl_Group *button_grp;
+
+	enum
+	{
+		ACT_none = 0,
+		ACT_CANCEL,
+		ACT_ACCEPT
+	};
+
+	int action;
+
+	bool isMapValid() const;
+
+public:
+	UI_OpenMap();
+	virtual ~UI_OpenMap();
+
+	void PopulateButtons(Wad_file *wad);
+
+	bool Run();
+
+private:
+	static void     ok_callback(Fl_Widget *, void *);
+	static void  close_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
+};
 
 #endif  /* __EUREKA_UI_FILE_H__ */
 
