@@ -296,7 +296,7 @@ UI_OpenMap::UI_OpenMap() :
 
 	{
 		Fl_Box *o = new Fl_Box(10, 15, 300, 37, "Look for the map in which file:");
-		o->labelfont(1);
+		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
@@ -305,12 +305,15 @@ UI_OpenMap::UI_OpenMap() :
 
 		look_iwad = new Fl_Round_Button(50, 55, 215, 25, " the IWAD (Game) file");
 		look_iwad->down_box(FL_ROUND_DOWN_BOX);
+		look_iwad->type(FL_RADIO_BUTTON);
 
 		look_res = new Fl_Round_Button(50, 80, 215, 25, " the Resource wads");
 		look_res->down_box(FL_ROUND_DOWN_BOX);
+		look_res->type(FL_RADIO_BUTTON);
 
 		look_pwad = new Fl_Round_Button(50, 105, 235, 25, " the currently edited PWAD");
 		look_pwad->down_box(FL_ROUND_DOWN_BOX);
+		look_pwad->type(FL_RADIO_BUTTON);
 
 		if (edit_wad)
 			look_pwad->value(1);
@@ -331,19 +334,19 @@ UI_OpenMap::UI_OpenMap() :
 	Fl_Button *load_but = new Fl_Button(305, 175, 70, 30, "Load");
 // load_but->callback(load_callback, this);
 
-	map_name = new Fl_Input(144, 230, 120, 25, "Enter map slot: ");
-	map_name->labelfont(FL_ALIGN_INSIDE);
+	map_name = new Fl_Input(144, 227, 120, 25, "Enter map slot: ");
+	map_name->labelfont(FL_HELVETICA_BOLD);
 
 	{
 		Fl_Box *o = new Fl_Box(10, 263, 300, 37, "Or select from available maps:");
-		o->labelfont(FL_ALIGN_INSIDE);
+		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
 
 	// all the map buttons go into this group
 	
-	button_grp = new Fl_Group(0, 310, 390, 190, "None Found");
+	button_grp = new Fl_Group(0, 310, 395, 190, "None Found");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
 
@@ -353,7 +356,7 @@ UI_OpenMap::UI_OpenMap() :
 } */
 
 	{
-		Fl_Group* o = new Fl_Group(0, 500, 405, 60);
+		Fl_Group* o = new Fl_Group(0, 500, 395, 60);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 

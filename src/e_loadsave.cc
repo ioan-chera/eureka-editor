@@ -555,6 +555,19 @@ void CMD_OpenMap()
 	//       (with a choice for IWAD / PWAD)
 	//       AND A BUTTON TO LOAD A WAD --> sets 'edit_wad'
 
+{
+	UI_OpenMap * dialog = new UI_OpenMap();
+
+	dialog->Run();
+
+	delete dialog;
+
+	Beep();
+	return;
+}
+
+
+
 	Wad_file *new_wad = NULL;
 
 	if (Confirm(-1, -1, "Is the map located in another WAD file?", NULL))
