@@ -287,7 +287,7 @@ void UI_ChooseMap::button_callback(Fl_Widget *w, void *data)
 
 
 UI_OpenMap::UI_OpenMap() :
-	Fl_Double_Window(395, 560, "Open Map"),
+	Fl_Double_Window(395, 520, "Open Map"),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -295,23 +295,23 @@ UI_OpenMap::UI_OpenMap() :
 	callback(close_callback, this);
 
 	{
-		Fl_Box *o = new Fl_Box(10, 15, 300, 37, "Look for the map in which file:");
+		Fl_Box *o = new Fl_Box(10, 10, 300, 37, "Look for the map in which file:");
 		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
 	{
-		Fl_Group *o = new Fl_Group(50, 55, 235, 85);
+		Fl_Group *o = new Fl_Group(50, 50, 235, 85);
 
-		look_iwad = new Fl_Round_Button(50, 55, 215, 25, " the IWAD (Game) file");
+		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the IWAD (Game) file");
 		look_iwad->down_box(FL_ROUND_DOWN_BOX);
 		look_iwad->type(FL_RADIO_BUTTON);
 
-		look_res = new Fl_Round_Button(50, 80, 215, 25, " the Resource wads");
+		look_res = new Fl_Round_Button(50, 75, 215, 25, " the Resource wads");
 		look_res->down_box(FL_ROUND_DOWN_BOX);
 		look_res->type(FL_RADIO_BUTTON);
 
-		look_pwad = new Fl_Round_Button(50, 105, 235, 25, " the currently edited PWAD");
+		look_pwad = new Fl_Round_Button(50, 100, 235, 25, " the currently edited PWAD");
 		look_pwad->down_box(FL_ROUND_DOWN_BOX);
 		look_pwad->type(FL_RADIO_BUTTON);
 
@@ -324,29 +324,29 @@ UI_OpenMap::UI_OpenMap() :
 	}
 
 	{
-		Fl_Box* o = new Fl_Box(10, 138, 300, 37, "Current PWAD file:");
+		Fl_Box* o = new Fl_Box(10, 140, 300, 20, "Current PWAD file:");
 		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
-	pwad_name = new Fl_Output(25, 175, 265, 30);
+	pwad_name = new Fl_Output(25, 165, 265, 30);
 
-	Fl_Button *load_but = new Fl_Button(305, 175, 70, 30, "Load");
+	Fl_Button *load_but = new Fl_Button(305, 165, 70, 30, "Load");
 // load_but->callback(load_callback, this);
 
-	map_name = new Fl_Input(144, 227, 120, 25, "Enter map slot: ");
+	map_name = new Fl_Input(94, 205, 100, 25, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
 
 	{
-		Fl_Box *o = new Fl_Box(10, 263, 300, 37, "Or select from available maps:");
-		o->labelfont(FL_HELVETICA_BOLD);
+		Fl_Box *o = new Fl_Box(10, 240, 300, 20, "Select from available maps:");
+		// o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
 
 	// all the map buttons go into this group
 	
-	button_grp = new Fl_Group(0, 310, 395, 190, "None Found");
+	button_grp = new Fl_Group(0, 260, 395, 200, "\n\nNone Found");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
 
@@ -356,15 +356,15 @@ UI_OpenMap::UI_OpenMap() :
 } */
 
 	{
-		Fl_Group* o = new Fl_Group(0, 500, 395, 60);
+		Fl_Group* o = new Fl_Group(0, 460, 395, 60);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		Fl_Return_Button *ok_but = new Fl_Return_Button(280, 515, 89, 34, "OK");
+		Fl_Return_Button *ok_but = new Fl_Return_Button(280, 475, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 //!!		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(140, 515, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(140, 475, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
