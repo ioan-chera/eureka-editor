@@ -23,8 +23,8 @@
 #include "ui_file.h"
 
 
-UI_ChooseMap::UI_ChooseMap() :
-	Fl_Double_Window(360, 180, "Choose Map"),
+UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
+	Fl_Double_Window(395, 480, "Choose Map"),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -37,6 +37,9 @@ UI_ChooseMap::UI_ChooseMap() :
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	map_name = new Fl_Input(90, 65, 110, 25);
+	map_name->when(FL_WHEN_CHANGED);
+	map_name->value(initial_name);
+//!!	map_name->callback(input_callback, this);
 
 /*
 	{ Fl_Button* o = new Fl_Button(90, 155, 70, 20, "MAP02");
@@ -141,7 +144,6 @@ UI_ChooseMap::UI_ChooseMap() :
 	}
 */
 
-
 	{
 		Fl_Group* o = new Fl_Group(0, 415, 395, 65);
 		o->box(FL_FLAT_BOX);
@@ -180,7 +182,22 @@ const char * UI_ChooseMap::Run()
 	if (action == ACT_CANCEL)
 		return NULL;
 
-	return StringDup(map_name->value());
+	return StringUpper(map_name->value());
+}
+
+
+bool UI_ChooseMap::isNameValid() const
+{
+	const char *p = map_name->value();
+
+	if (strlen(p) == 0)
+		return false;
+
+	for ( ; *p ; p++)
+		if (! (isalnum(*p) || *p == '_'))
+			return false;
+
+	return true;
 }
 
 
@@ -196,7 +213,10 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
-	that->action = ACT_ACCEPT;
+	if (that->isNameValid())
+		that->action = ACT_ACCEPT;
+	else
+		Beep();
 }
 
 

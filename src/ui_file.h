@@ -36,10 +36,12 @@ private:
 		ACT_ACCEPT
 	};
 
-	bool action;
+	int action;
+
+	bool isNameValid() const;
 
 public:
-	UI_ChooseMap();
+	UI_ChooseMap(const char *initial_name = "");
 	virtual ~UI_ChooseMap();
 
 	const char * Run();
