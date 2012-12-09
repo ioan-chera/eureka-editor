@@ -295,6 +295,8 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
    - move vertices?
    + shift textures?
 
+-  View/Place Camera command, cursor turns into +
+
 -  ability to drag the camera (on 2D viewport)
 
 -  make it into a proper widget (occupy same space as Canvas)

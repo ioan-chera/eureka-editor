@@ -6,17 +6,26 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
--  recently used list
+>>>  new Open Map dialog
+    -  implement button callback
+
+    !!!!  how to handle: Load a new edit_wad, then CANCEL
+
 
 +  support resource wads
    (a) -merge option for command line [DONE!]
    (b) open them in R/O mode (like the IWAD)
-   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
+>>>   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
        [probably port and mod too] and ability to change them
    (d) persist in a lump, e.g. "__EUREKA"
    (e) load definitions from mods/<base>.ugh
 
-+  Preferences window
+>>>  Preferences window
+    - coding time!
+
+>>>  UI_ChooseMap
+     -  valid input on each press, only enable OK button 
+        when input is valid (change text color to FL_RED if invalid)
 
 
 Documentation
@@ -32,16 +41,13 @@ Editing
 
 >>>  'd' disconnect sectors
  
-     -  fix textures when separating linedef
+     -  fix textures when separating linedef : LD_RemoveSideDef()
      -  better DisconnectCoord
      ?  include islands (perhaps with 'D')
 
-+  'm' in linedef mode : two one-side linedefs selected, join into one
+>>> 'm' in linedef mode : two one-side linedefs, join into one
    -  allow a shared vertex
-
--  command to move and/or zoom map to show selected object(s)
-
--  'e' commands : honor did_a_move
+   -  fix texturing : use LD_AddedSideDef)
 
 
 Browser
