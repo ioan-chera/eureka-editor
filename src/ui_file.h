@@ -26,8 +26,7 @@ class UI_ChooseMap : public Fl_Double_Window
 private:
 	Fl_Input *map_name;
 
-	Fl_Round_Button *kind_MAPxx;
-	Fl_Round_Button *kind_ExMx;
+	Fl_Return_Button *ok_but;
 
 	enum
 	{
@@ -38,7 +37,7 @@ private:
 
 	int action;
 
-	bool isMapValid() const;
+	void CheckMapName();
 
 public:
 	UI_ChooseMap(const char *initial_name = "");
@@ -53,6 +52,7 @@ private:
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+	static void  input_callback(Fl_Widget *, void *);
 };
 
 //------------------------------------------------------------------------
@@ -77,8 +77,6 @@ private:
 	};
 
 	int action;
-
-	bool isMapValid() const;
 
 	void Populate();
 	void PopulateButtons(Wad_file *wad);

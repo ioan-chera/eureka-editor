@@ -25,6 +25,25 @@
 #include "ui_file.h"
 
 
+// TODO: find a better home for this
+bool ValidateMapName(const char *p)
+{
+	int len = strlen(p);
+
+	if (len == 0 || len > 8)
+		return false;
+
+	if (! isalpha(*p))
+		return false;
+
+	for ( ; *p ; p++)
+		if (! (isalnum(*p) || *p == '_'))
+			return false;
+
+	return true;
+}
+
+
 UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	Fl_Double_Window(395, 480, "Choose Map"),
 	action(ACT_none)
@@ -41,117 +60,14 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	map_name = new Fl_Input(90, 60, 110, 25);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->value(initial_name);
-//!!	map_name->callback(input_callback, this);
-
-/*
-	{ Fl_Button* o = new Fl_Button(90, 155, 70, 20, "MAP02");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 155, 70, 20, "MAP03");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 155, 70, 20, "MAP04");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 155, 70, 20, "MAP05");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 180, 70, 20, "MAP01");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 180, 70, 20, "MAP02");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 180, 70, 20, "MAP03");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 180, 70, 20, "MAP04");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 180, 70, 20, "MAP05");
-		o->color((Fl_Color)213);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 215, 70, 20, "MAP01");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 215, 70, 20, "MAP02");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 215, 70, 20, "MAP03");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 215, 70, 20, "MAP04");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 215, 70, 20, "MAP05");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 240, 70, 20, "MAP01");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 240, 70, 20, "MAP02");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 240, 70, 20, "MAP03");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 240, 70, 20, "MAP04");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 240, 70, 20, "MAP05");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 275, 70, 20, "MAP01");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 275, 70, 20, "MAP02");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 275, 70, 20, "MAP03");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 275, 70, 20, "MAP04");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 275, 70, 20, "MAP05");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 300, 70, 20, "MAP01");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 300, 70, 20, "MAP02");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(165, 300, 70, 20, "MAP03");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(240, 300, 70, 20, "MAP04");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(315, 300, 70, 20, "MAP05");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(15, 335, 70, 20, "MAP01");
-		o->color((Fl_Color)207);
-	}
-	{ Fl_Button* o = new Fl_Button(90, 335, 70, 20, "MAP02");
-		o->color((Fl_Color)207);
-	}
-
-	{ kind_MAPxx = new Fl_Round_Button(40, 115, 75, 25, "MAPxx");
-		kind_MAPxx->down_box(FL_ROUND_DOWN_BOX);
-	}
-	{ kind_ExMx = new Fl_Round_Button(130, 115, 70, 25, "ExMx");
-		kind_ExMx->down_box(FL_ROUND_DOWN_BOX);
-	}
-*/
+	map_name->callback(input_callback, this);
 
 	{
 		Fl_Group* o = new Fl_Group(0, 415, 395, 65);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		Fl_Return_Button *ok_but = new Fl_Return_Button(270, 432, 95, 35, "OK");
+		ok_but = new Fl_Return_Button(270, 432, 95, 35, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
@@ -162,6 +78,8 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	}
 
 	end();
+
+	CheckMapName();
 }
 
 
@@ -240,21 +158,6 @@ const char * UI_ChooseMap::Run()
 }
 
 
-bool UI_ChooseMap::isMapValid() const
-{
-	const char *p = map_name->value();
-
-	if (strlen(p) == 0)
-		return false;
-
-	for ( ; *p ; p++)
-		if (! (isalnum(*p) || *p == '_'))
-			return false;
-
-	return true;
-}
-
-
 void UI_ChooseMap::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
@@ -267,7 +170,7 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
-	if (that->isMapValid())
+	if (ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
 		Beep();
@@ -281,6 +184,39 @@ void UI_ChooseMap::button_callback(Fl_Widget *w, void *data)
 	that->map_name->value(w->label());
 	that->action = ACT_ACCEPT;
 }
+
+
+void UI_ChooseMap::input_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseMap * that = (UI_ChooseMap *)data;
+
+	that->CheckMapName();
+}
+
+
+void UI_ChooseMap::CheckMapName()
+{
+	bool was_valid = ok_but->active();
+	bool  is_valid = ValidateMapName(map_name->value());
+
+	if (was_valid == is_valid)
+		return;
+
+	if (is_valid)
+	{
+		ok_but->activate();
+		map_name->textcolor(FL_FOREGROUND_COLOR);
+	}
+	else
+	{
+		ok_but->deactivate();
+		map_name->textcolor(FL_RED);
+	}
+
+	map_name->redraw();
+}
+
+
 
 
 //------------------------------------------------------------------------
