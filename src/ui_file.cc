@@ -546,6 +546,13 @@ void UI_OpenMap::LoadFile()
 		return;
 	}
 
+	if (new_wad->FindFirstLevel() < 0)
+	{
+		Notify(-1, -1, "The chosen WAD contains no levels.\n\n"
+				"Please try again.", NULL);
+		return;
+	}
+
 	// replace the current PWAD
 
 	if (edit_wad)
