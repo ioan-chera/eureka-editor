@@ -584,7 +584,13 @@ void CMD_OpenMap()
 
 	LoadLevel(wad, map_name);
 
-	Replacer = (edit_wad && wad != edit_wad);
+	// would this replace an existing map?
+	Replacer = false;
+	
+	if (edit_wad && wad != edit_wad && edit_wad->FindLevel(map_name) >= 0)
+	{
+		Replacer = true;
+	}
 }
 
 
