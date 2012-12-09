@@ -329,16 +329,16 @@ UI_OpenMap::UI_OpenMap() :
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
-	pwad_name = new Fl_Output(25, 165, 265, 30);
+	pwad_name = new Fl_Output(25, 165, 265, 26);
 
-	Fl_Button *load_but = new Fl_Button(305, 165, 70, 30, "Load");
+	Fl_Button *load_but = new Fl_Button(305, 164, 70, 28, "Load");
 // load_but->callback(load_callback, this);
 
-	map_name = new Fl_Input(94, 205, 100, 25, "Map slot: ");
+	map_name = new Fl_Input(94, 205, 100, 26, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
 
 	{
-		Fl_Box *o = new Fl_Box(10, 240, 300, 20, "Select from available maps:");
+		Fl_Box *o = new Fl_Box(205, 205, 180, 26, "Available maps:");
 		// o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
@@ -346,14 +346,9 @@ UI_OpenMap::UI_OpenMap() :
 
 	// all the map buttons go into this group
 	
-	button_grp = new Fl_Group(0, 260, 395, 200, "\n\nNone Found");
+	button_grp = new Fl_Group(0, 240, 395, 200, "\n\nNone Found");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
-
-/*
-{ Fl_Button* o = new Fl_Button(35, 310, 70, 20, "MAP01");
-  o->color((Fl_Color)215);
-} */
 
 	{
 		Fl_Group* o = new Fl_Group(0, 460, 395, 60);
@@ -446,8 +441,10 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 	button_grp->label("");
 
 	// limit the number based on available space
-	if (num_levels > 36)
-		num_levels = 36;
+	int max_rows = 8;
+	int max_cols = 5;
+
+	num_levels = MIN(num_levels, max_rows * max_cols);
 
 	std::map<std::string, int> level_names;
 	std::map<std::string, int>::iterator IT;
@@ -459,23 +456,38 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 		level_names[std::string(lump->Name())] = 1;
 	}
 
-	// create them buttons!!
+
+	// determine how many rows and columns, and adjust layout
 
 	int row = 0;
 	int col = 0;
 
-	int row_max = 7;
-	if (num_levels < 20) row_max = 4;
-	if (num_levels < 10) row_max = 2;
+	if (num_levels <= 24) max_rows = 6;
+	if (num_levels <=  9) max_rows = 3;
+	if (num_levels <=  4) max_rows = 2;
+	if (num_levels <=  2) max_rows = 1;
+
+	max_cols = (num_levels + (max_rows - 1)) / max_rows;
+
+	int cx_base = button_grp->x() + 30;
+	int cy_base = button_grp->y() + 5;
+	int but_W   = 56;
+
+	if (max_cols <= 4) { cx_base += 20; but_W += 12; }
+	if (max_cols <= 2) { cx_base += 40; but_W += 12; }
+	if (max_cols <= 1) { cx_base += 40; but_W += 12; }
+
+
+	// create them buttons!!
 
 	Fl_Color but_col = fl_rgb_color(0xff, 0xee, 0x80);
 
 	for (IT = level_names.begin() ; IT != level_names.end() ; IT++)
 	{
-		int cx = button_grp->x() + 30 + col * 65;
-		int cy = button_grp->y() +  5 + row * 22;
+		int cx = cx_base + col * (but_W + but_W / 5);
+		int cy = cy_base + row * 24;
 
-		Fl_Button * but = new Fl_Button(cx, cy, 55, 18);
+		Fl_Button * but = new Fl_Button(cx, cy, but_W, 20);
 		but->copy_label(IT->first.c_str());
 		but->labelsize(12);
 		but->color(but_col);
@@ -483,7 +495,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 		button_grp->add(but);
 
 		row++;
-		if (row > row_max)
+		if (row >= max_rows)
 		{
 			row = 0;
 			col++;
