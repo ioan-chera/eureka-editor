@@ -81,6 +81,9 @@ private:
 	void Populate();
 	void PopulateButtons(Wad_file *wad);
 
+	void LoadFile();
+	void SetPWAD(const char *name);
+
 public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
@@ -90,7 +93,9 @@ public:
 private:
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  close_callback(Fl_Widget *, void *);
+	static void   look_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+	static void   load_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_FILE_H__ */

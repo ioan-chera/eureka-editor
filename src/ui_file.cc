@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_dialog.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -109,7 +110,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		if (format == 'E')
 		{
 			int epi = 1 + col;
-			int map = 1 + row; // (row % 2) * 5 + col;
+			int map = 1 + row;
 
 			if (map > 9)
 				continue;
@@ -242,14 +243,17 @@ UI_OpenMap::UI_OpenMap() :
 		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the IWAD (Game) file");
 		look_iwad->down_box(FL_ROUND_DOWN_BOX);
 		look_iwad->type(FL_RADIO_BUTTON);
+		look_iwad->callback(look_callback, this);
 
 		look_res = new Fl_Round_Button(50, 75, 215, 25, " the Resource wads");
 		look_res->down_box(FL_ROUND_DOWN_BOX);
 		look_res->type(FL_RADIO_BUTTON);
+		look_res->callback(look_callback, this);
 
 		look_pwad = new Fl_Round_Button(50, 100, 235, 25, " the currently edited PWAD");
 		look_pwad->down_box(FL_ROUND_DOWN_BOX);
 		look_pwad->type(FL_RADIO_BUTTON);
+		look_pwad->callback(look_callback, this);
 
 		if (edit_wad)
 			look_pwad->value(1);
@@ -268,7 +272,7 @@ UI_OpenMap::UI_OpenMap() :
 	pwad_name = new Fl_Output(25, 165, 265, 26);
 
 	Fl_Button *load_but = new Fl_Button(305, 164, 70, 28, "Load");
-// load_but->callback(load_callback, this);
+	load_but->callback(load_callback, this);
 
 	map_name = new Fl_Input(94, 205, 100, 26, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
@@ -312,6 +316,9 @@ UI_OpenMap::~UI_OpenMap()
 
 bool UI_OpenMap::Run()
 {
+	if (edit_wad)
+		SetPWAD(edit_wad->PathName());
+
 	Populate();
 
 	set_modal();
@@ -442,12 +449,99 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 }
 
 
+void UI_OpenMap::SetPWAD(const char *name)
+{
+	pwad_name->value(fl_filename_name(name));
+}
+
+
 void UI_OpenMap::close_callback(Fl_Widget *w, void *data)
 {
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	that->action = ACT_CANCEL;
 }
+
+
+void UI_OpenMap::look_callback(Fl_Widget *w, void *data)
+{
+	UI_OpenMap * that = (UI_OpenMap *)data;
+
+	that->Populate();
+}
+
+
+void UI_OpenMap::load_callback(Fl_Widget *w, void *data)
+{
+	UI_OpenMap * that = (UI_OpenMap *)data;
+
+	that->LoadFile();
+}
+
+
+void UI_OpenMap::LoadFile()
+{
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to open");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	// Show native chooser
+	switch (chooser.show())
+	{
+		case -1:
+			LogPrintf("Open Map: error choosing file:\n");
+			LogPrintf("   %s\n", chooser.errmsg());
+
+			Notify(-1, -1, "Unable to open the map:",
+					chooser.errmsg());
+			return;
+
+		case 1:
+			LogPrintf("Open Map: cancelled by user\n");
+			return;
+
+		default:
+			break;  // OK
+	}
+
+	Wad_file * new_wad = Wad_file::Open(chooser.filename(), 'a');
+
+	if (! new_wad)
+	{
+		// FIXME: get an error message, add it here
+
+		Notify(-1, -1, "Unable to open the chosen WAD file.\n\n"
+				"Please try again.", NULL);
+		return;
+	}
+
+	// replace the current PWAD
+
+	if (edit_wad)
+	{
+		MasterDir_Remove(edit_wad);
+		delete edit_wad;
+	}
+
+	edit_wad = new_wad;
+
+	SetPWAD(edit_wad->PathName());
+
+	MasterDir_Add(edit_wad);
+
+	// change the "Look in ..." setting to be the current pwad
+
+	look_iwad->value(0);
+	look_res ->value(0);
+	look_pwad->value(1);
+
+	Populate();
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
