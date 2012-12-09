@@ -179,13 +179,17 @@ void CMD_NewMap()
 
 	if (edit_wad)
 	{
-		const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
-		
+		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
+
+		dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+
+		const char *map_name = dialog->Run();
+
+		delete dialog;
+
 		// cancelled?
 		if (! map_name)
 			return;
-
-		map_name = strdup(map_name);
 
 		// would this replace an existing map?
 		if (edit_wad && edit_wad->FindLevel(map_name) >= 0)
