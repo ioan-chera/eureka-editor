@@ -24,21 +24,25 @@
 class UI_ChooseMap : public Fl_Double_Window
 {
 private:
-	Fl_Int_Input *delta_x;
-	Fl_Int_Input *delta_y;
+	Fl_Input *map_name;
 
-	Fl_Button *ok_but;
-	Fl_Button *cancel_but;
+	Fl_Round_Button *kind_MAPxx;
+	Fl_Round_Button *kind_ExMx;
 
-	bool want_close;
+	enum
+	{
+		ACT_none = 0,
+		ACT_CANCEL,
+		ACT_ACCEPT
+	};
+
+	bool action;
 
 public:
 	UI_ChooseMap();
 	virtual ~UI_ChooseMap();
 
-	void Run();
-
-	bool WantClose() { return want_close; }
+	const char * Run();
 
 private:
 	static void    ok_callback(Fl_Widget *, void *);
