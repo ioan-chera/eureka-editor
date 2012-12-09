@@ -44,6 +44,9 @@ public:
 	UI_ChooseMap(const char *initial_name = "");
 	virtual ~UI_ChooseMap();
 
+	// format is 'E' for ExMx, or 'M' for MAPxx
+	void PopulateButtons(char format, Wad_file *test_wad = NULL);
+
 	const char * Run();
 
 private:

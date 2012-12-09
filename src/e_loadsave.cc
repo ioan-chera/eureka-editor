@@ -1016,6 +1016,8 @@ void CMD_ExportMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
 
+	dialog->PopulateButtons(toupper(Level_name[0]), wad);
+
 	const char *map_name = dialog->Run();
 
 	delete dialog;

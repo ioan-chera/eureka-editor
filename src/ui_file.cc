@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "w_wad.h"
+
 #include "ui_window.h"
 #include "ui_file.h"
 
@@ -32,7 +34,7 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	callback(close_callback, this);
 
 
-	Fl_Box *title = new Fl_Box(20, 23, 285, 32, "Choose map slot");
+	Fl_Box *title = new Fl_Box(20, 23, 285, 32, "Enter the map slot:");
 	title->labelfont(FL_HELVETICA_BOLD);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
@@ -165,6 +167,58 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 
 UI_ChooseMap::~UI_ChooseMap()
 {
+}
+
+
+void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
+{
+	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 120, 285, 32, "Or select via these cool buttons:");
+	heading->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+	heading->labelfont(FL_HELVETICA_BOLD);
+	add(heading);
+
+	Fl_Color free_col = fl_rgb_color(0x33, 0xDD, 0x77);
+	Fl_Color used_col = fl_rgb_color(0xFF, 0x33, 0x66);
+
+	for (int row = 0 ; row < 8 ; row++)
+	for (int col = 0 ; col < 5 ; col++)
+	{
+		int cx = x() +  15 + col * 75;
+		int cy = y() + 155 + row * 25 + (row / 2) * 10;
+
+		char name_buf[20];
+
+		if (format == 'E')
+		{
+			int epi = 1 + row / 2;
+			int map = 1 + (row % 2) * 5 + col;
+
+			if (map >= 10)
+				continue;
+
+			sprintf(name_buf, "E%dM%d\n", epi, map);
+		}
+		else
+		{
+			int map = row * 5 + col;
+
+			if (map < 1 || map > 32)
+				continue;
+
+			sprintf(name_buf, "MAP%02d", map);
+		}
+
+		Fl_Button * but = new Fl_Button(cx, cy, 70, 20);
+		but->copy_label(name_buf);
+//!!!!		but->callback(button_callback, this);
+
+		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
+			but->color(used_col);
+		else
+			but->color(free_col);
+
+		add(but);
+	}
 }
 
 
