@@ -37,6 +37,7 @@
 #include "w_wad.h"
 
 #include "ui_window.h"
+#include "ui_file.h"
 
 
 static void ChecksumThing(crc32_c& crc, const Thing * T)
@@ -990,16 +991,7 @@ void CMD_ExportMap()
 		strcat(filename, ".wad");
 
 
-	const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
-	
-	// cancelled?
-	if (! map_name)
-		return;
-
-	map_name = strdup(map_name);
-
-
-	// does the file already exist?
+	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
 	Wad_file *wad;
@@ -1019,6 +1011,24 @@ void CMD_ExportMap()
 		return;
 	}
 
+
+	// ask user for map name
+
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
+
+	const char *map_name = dialog->Run();
+
+	delete dialog;
+
+
+	// cancelled?
+	if (! map_name)
+	{
+		delete wad;
+		return;
+	}
+
+
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
@@ -1030,7 +1040,6 @@ void CMD_ExportMap()
 		                      "Are you sure you want to continue?", NULL))
 		{
 			delete wad;
-
 			return;
 		}
 	}
