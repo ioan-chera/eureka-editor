@@ -551,123 +551,32 @@ void CMD_OpenMap()
 	if (! Main_ConfirmQuit("open another map"))
 		return;
 
-	// TODO: show a menu of available levels
-	//       (with a choice for IWAD / PWAD)
-	//       AND A BUTTON TO LOAD A WAD --> sets 'edit_wad'
 
-{
+	Wad_file *wad = NULL;
+	const char *map_name = NULL;
+
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	dialog->Run();
+	bool success = dialog->Run(&wad, &map_name);
 
 	delete dialog;
 
-	Beep();
-	return;
-}
 
-
-
-	Wad_file *new_wad = NULL;
-
-	if (Confirm(-1, -1, "Is the map located in another WAD file?", NULL))
+	if (! success)
 	{
-		do {
-			Fl_Native_File_Chooser chooser;
+		// FIXME !!!!  bad state (edit_wad exists)
 
-			chooser.title("Pick file to open");
-			chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-			chooser.filter("Wads\t*.wad");
-
-			//??  chooser.directory("xxx");
-
-			// Show native chooser
-			switch (chooser.show())
-			{
-				case -1:
-					LogPrintf("Open Map: error choosing file:\n");
-					LogPrintf("   %s\n", chooser.errmsg());
-
-					Notify(-1, -1, "Unable to open the map:",
-							chooser.errmsg());
-					return;
-
-				case 1:
-					LogPrintf("Open Map: cancelled by user\n");
-					return;
-
-				default:
-					break;  // OK
-			}
-
-			new_wad = Wad_file::Open(chooser.filename(), 'a');
-
-			if (! new_wad)
-			{
-				// FIXME: get an error message, add it here
-
-				Notify(-1, -1, "Unable to open the chosen WAD file.\n"
-						"\n"
-						"Please try again.", NULL);
-			}
-
-		} while (! new_wad);
-
-		// Note: master directory is updated later (on success)
+		return;
 	}
 
-
-	const char *map_name = fl_input("Enter map slot (e.g. MAP01 or E1M1)", Level_name);
-
-	// cancelled?
-	if (! map_name)
-		return;
-
-	map_name = strdup(map_name);
-
-
-	Wad_file *wad = new_wad ? new_wad : edit_wad ? edit_wad : base_wad;
 
 	if (wad && wad->FindLevel(map_name) < 0)
 	{
-		if (wad != edit_wad)
-		{
-			delete new_wad;
+		Notify(-1, -1, "Hmmmm, cannot find that map !?!", NULL);
 
-			Notify(-1, -1, "No such map: ", map_name);
-			return;
-		}
+		// FIXME !!!!  bad state (edit_wad exists)
 
-		if (! Confirm(-1, -1,	"The map does not exist in the current PWAD.\n"
-								"Do you want to try the other wads?\n", NULL))
-		{
-			return;
-		}
-
-		// FIXME: TRY ALL OTHER WADS (not just iwad)
-
-		wad = base_wad;
-
-		if (wad->FindLevel(map_name) < 0)
-		{
-			Notify(-1, -1, "No such map: ", map_name);
-			return;
-		}
-	}
-
-
-	// a new wad replaces the current PWAD
-	if (new_wad)
-	{
-		if (edit_wad)
-		{
-			MasterDir_Remove(edit_wad);
-			delete edit_wad;
-		}
-
-		edit_wad = new_wad;
-
-		MasterDir_Add(edit_wad);
+		return;
 	}
 
 
@@ -675,7 +584,7 @@ void CMD_OpenMap()
 
 	LoadLevel(wad, map_name);
 
-	Replacer = false;
+	Replacer = (edit_wad && wad != edit_wad);
 }
 
 

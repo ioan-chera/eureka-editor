@@ -218,14 +218,13 @@ void UI_ChooseMap::CheckMapName()
 }
 
 
-
-
 //------------------------------------------------------------------------
 
 
 UI_OpenMap::UI_OpenMap() :
 	Fl_Double_Window(395, 520, "Open Map"),
-	action(ACT_none)
+	action(ACT_none),
+	result_wad(NULL), result_map(NULL)
 {
 	resizable(NULL);
 
@@ -314,8 +313,11 @@ UI_OpenMap::~UI_OpenMap()
 }
 
 
-bool UI_OpenMap::Run()
+bool UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
 {
+	*wad_v = NULL;
+	*map_v = NULL;
+
 	if (edit_wad)
 		SetPWAD(edit_wad->PathName());
 
@@ -331,7 +333,14 @@ bool UI_OpenMap::Run()
 	}
 
 	if (action == ACT_ACCEPT)
+	{
+		SYS_ASSERT(result_wad && result_map);
+
+		*wad_v = result_wad;
+		*map_v = result_map;
+
 		return true;
+	}
 
 	return false;  // cancelled
 }
@@ -341,6 +350,8 @@ void UI_OpenMap::Populate()
 {
 	button_grp->label("\n\nNone Found");
 	button_grp->clear();
+
+	result_wad = NULL;
 
 	if (look_iwad->value())
 	{
@@ -354,10 +365,10 @@ void UI_OpenMap::Populate()
 		if (edit_wad)
 			last--;
 
-		// we just use the first resource was which contains levels
+		// we just use the last resource was which contains levels
 		// TODO: should grab list from each of them and merge into one big list
 
-		for (int r = first ; r <= last ; r++)
+		for (int r = last ; r >= first ; r--)
 		{
 			if (master_dir[r]->FindFirstLevel() >= 0)
 			{
@@ -376,6 +387,8 @@ void UI_OpenMap::Populate()
 
 void UI_OpenMap::PopulateButtons(Wad_file *wad)
 {
+	result_wad = wad;
+
 	int num_levels = wad->NumLevels();
 
 	if (num_levels == 0)
@@ -434,6 +447,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 		but->copy_label(IT->first.c_str());
 		but->labelsize(12);
 		but->color(but_col);
+		but->callback(button_callback, this);
 
 		button_grp->add(but);
 
@@ -460,6 +474,19 @@ void UI_OpenMap::close_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	that->action = ACT_CANCEL;
+}
+
+
+void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
+{
+	UI_OpenMap * that = (UI_OpenMap *)data;
+
+	// sanity check
+	if (! that->result_wad)
+		return;
+
+	that->result_map = StringDup(w->label());
+	that->action = ACT_ACCEPT;
 }
 
 

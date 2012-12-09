@@ -78,6 +78,9 @@ private:
 
 	int action;
 
+	Wad_file   * result_wad;
+	const char * result_map;
+
 	void Populate();
 	void PopulateButtons(Wad_file *wad);
 
@@ -88,7 +91,7 @@ public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	bool Run();
+	bool Run(Wad_file ** wad_v, const char ** map_v);
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);
