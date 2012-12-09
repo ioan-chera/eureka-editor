@@ -381,6 +381,8 @@ UI_OpenMap::~UI_OpenMap()
 
 bool UI_OpenMap::Run()
 {
+	Populate();
+
 	set_modal();
 
 	show();
@@ -394,6 +396,101 @@ bool UI_OpenMap::Run()
 		return true;
 
 	return false;  // cancelled
+}
+
+
+void UI_OpenMap::Populate()
+{
+	button_grp->label("\n\nNone Found");
+	button_grp->clear();
+
+	if (look_iwad->value())
+	{
+		PopulateButtons(base_wad);
+	}
+	else if (look_res->value())
+	{
+		int first = 1;
+		int last  = (int)master_dir.size() - 1;
+
+		if (edit_wad)
+			last--;
+
+		// we just use the first resource was which contains levels
+		// TODO: should grab list from each of them and merge into one big list
+
+		for (int r = first ; r <= last ; r++)
+		{
+			if (master_dir[r]->FindFirstLevel() >= 0)
+			{
+				PopulateButtons(master_dir[r]);
+				break;
+			}
+		}
+	}
+	else
+	{
+		if (edit_wad)
+			PopulateButtons(edit_wad);
+	}
+}
+
+
+void UI_OpenMap::PopulateButtons(Wad_file *wad)
+{
+	int num_levels = wad->NumLevels();
+
+	if (num_levels == 0)
+		return;
+	
+	button_grp->label("");
+
+	// limit the number based on available space
+	if (num_levels > 36)
+		num_levels = 36;
+
+	std::map<std::string, int> level_names;
+	std::map<std::string, int>::iterator IT;
+
+	for (int lev = 0 ; lev < num_levels ; lev++)
+	{
+		Lump_c *lump = wad->GetLump(wad->GetLevel(lev));
+
+		level_names[std::string(lump->Name())] = 1;
+	}
+
+	// create them buttons!!
+
+	int row = 0;
+	int col = 0;
+
+	int row_max = 7;
+	if (num_levels < 20) row_max = 4;
+	if (num_levels < 10) row_max = 2;
+
+	Fl_Color but_col = fl_rgb_color(0xff, 0xee, 0x80);
+
+	for (IT = level_names.begin() ; IT != level_names.end() ; IT++)
+	{
+		int cx = button_grp->x() + 30 + col * 65;
+		int cy = button_grp->y() +  5 + row * 22;
+
+		Fl_Button * but = new Fl_Button(cx, cy, 55, 18);
+		but->copy_label(IT->first.c_str());
+		but->labelsize(12);
+		but->color(but_col);
+
+		button_grp->add(but);
+
+		row++;
+		if (row > row_max)
+		{
+			row = 0;
+			col++;
+		}
+	}
+
+	redraw();
 }
 
 

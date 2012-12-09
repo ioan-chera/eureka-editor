@@ -80,11 +80,12 @@ private:
 
 	bool isMapValid() const;
 
+	void Populate();
+	void PopulateButtons(Wad_file *wad);
+
 public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
-
-	void PopulateButtons(Wad_file *wad);
 
 	bool Run();
 
