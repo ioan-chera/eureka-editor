@@ -638,5 +638,82 @@ void UI_OpenMap::LoadFile()
 }
 
 
+//------------------------------------------------------------------------
+
+
+UI_ProjectInfo::UI_ProjectInfo(bool is_startup) :
+	Fl_Double_Window(400, 372),
+	action(ACT_none)
+{
+	resizable(NULL);
+
+	instance_ = this;  // meh, hacky
+
+	iwad_name = new Fl_Choice(145, 25, 120, 25, "IWAD (Game) file: ");
+	iwad_name->down_box(FL_BORDER_BOX);
+	iwad_name->callback((Fl_Callback*)iwad_callback, this);
+
+	port_name = new Fl_Choice(145, 60, 120, 25, "Port (Engine) :");
+	port_name->down_box(FL_BORDER_BOX);
+	port_name->callback((Fl_Callback*)port_callback, this);
+
+	{
+		Fl_Button* o = new Fl_Button(285, 25, 100, 25, "Browse");
+		o->callback((Fl_Callback*)browse_callback, this);
+	}
+
+	// Resource section
+
+	Fl_Box *res_title = new Fl_Box(15, 110, 185, 35, "Resource Wads:");
+	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	for (int r = 0 ; r < RES_NUM ; r++)
+	{
+		int cy = 145 + r * 35;
+
+		res[r] = new Fl_Output(55, cy, 205, 25, "1. ");
+
+		Fl_Button *kill = new Fl_Button(270, cy, 30, 25, "x");
+		kill->labelsize(20);
+		kill->callback((Fl_Callback*)kill_callback, (void *)r);
+
+		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
+		load->callback((Fl_Callback*)load_callback, (void *)r);
+	}
+
+	// bottom buttons
+	{
+		Fl_Group *o = new Fl_Group(0, 312, 400, 60);
+		o->box(FL_FLAT_BOX);
+		o->color(WINDOW_BG, WINDOW_BG);
+
+		cancel = new Fl_Button(165, 330, 80, 35, is_startup ? "Quit" : "Cancel");
+		cancel->callback((Fl_Callback*)close_callback, this);
+
+		ok_but = new Fl_Button(290, 330, 80, 35, "Use");
+		ok_but->labelfont(FL_HELVETICA_BOLD);
+		ok_but->callback((Fl_Callback*)use_callback, this);
+
+		o->end();
+	}
+
+	end();
+}
+
+
+UI_ProjectInfo::~UI_ProjectInfo()
+{
+}
+
+
+void UI_ChooseMap::close_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseMap * that = (UI_ChooseMap *)data;
+
+	that->action = ACT_CANCEL;
+}
+
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

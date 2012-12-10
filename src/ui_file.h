@@ -107,6 +107,53 @@ private:
 	static void   load_callback(Fl_Widget *, void *);
 };
 
+//------------------------------------------------------------------------
+
+class UI_ProjectInfo : public Fl_Double_Window
+{
+private:
+	Fl_Choice *iwad_name;
+	Fl_Choice *port_name;
+
+	enum
+	{
+		RES_NUM = 4
+	};
+
+	Fl_Output *res[RES_NUM];
+
+	Fl_Button *ok_but;
+	Fl_Button *cancel;
+
+	enum
+	{
+		ACT_none = 0,
+		ACT_CANCEL,
+		ACT_ACCEPT
+	};
+
+	int action;
+
+	static UI_ProjectInfo * instance_;  // meh!
+
+	static void   iwad_callback(Fl_Choice*, void*);
+	static void browse_callback(Fl_Choice*, void*);
+	static void   port_callback(Fl_Choice*, void*);
+
+	static void  kill_callback(Fl_Button*, void*);
+	static void  load_callback(Fl_Button*, void*);
+
+	static void close_callback(Fl_Button*, void*);
+	static void   use_callback(Fl_Button*, void*);
+
+public:
+	UI_ProjectInfo(bool is_startup = false);
+	virtual ~UI_ProjectInfo();
+
+	// returns true if something changed
+	bool Run();
+};
+
 #endif  /* __EUREKA_UI_FILE_H__ */
 
 //--- editor settings ---
