@@ -80,8 +80,7 @@ private:
 
 	int action;
 
-	Wad_file   * result_wad;
-	const char * result_map;
+	Wad_file * result_wad;
 
 	void Populate();
 	void PopulateButtons(Wad_file *wad);

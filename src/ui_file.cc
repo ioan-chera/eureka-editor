@@ -225,7 +225,7 @@ void UI_ChooseMap::CheckMapName()
 UI_OpenMap::UI_OpenMap() :
 	Fl_Double_Window(395, 520, "Open Map"),
 	action(ACT_none),
-	result_wad(NULL), result_map(NULL)
+	result_wad(NULL)
 {
 	resizable(NULL);
 
@@ -297,7 +297,7 @@ UI_OpenMap::UI_OpenMap() :
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		Fl_Return_Button *ok_but = new Fl_Return_Button(280, 475, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(280, 475, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
@@ -339,10 +339,10 @@ void UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
 
 	if (action == ACT_ACCEPT)
 	{
-		SYS_ASSERT(result_wad && result_map);
+		SYS_ASSERT(result_wad);
 
 		*wad_v = result_wad;
-		*map_v = result_map;
+		*map_v = StringUpper(map_name->value());
 	}
 }
 
@@ -524,7 +524,7 @@ void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 	if (! that->result_wad)
 		return;
 
-	that->result_map = StringDup(w->label());
+	that->map_name->value(w->label());
 	that->action = ACT_ACCEPT;
 }
 
@@ -542,6 +542,7 @@ void UI_OpenMap::look_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	that->Populate();
+	that->CheckMapName();
 }
 
 
@@ -550,6 +551,7 @@ void UI_OpenMap::load_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	that->LoadFile();
+	that->CheckMapName();
 }
 
 
