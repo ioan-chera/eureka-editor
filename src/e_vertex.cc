@@ -470,24 +470,25 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 
 	// avoid moving perfectly horizontal or vertical
 	// (also handes the case of dx == dy == 0)
-	while (MAX(abs(*dx), abs(*dy)) > 23)
+
+	if (abs(*dx) > abs(*dy))
 	{
-		*dx = (*dx) / 2;  *dy = (*dy) / 2;
+		*dx = (*dx < 0) ? -9 : +9;
+		*dy = (*dy < 0) ? -5 : +5;
+	}
+	else
+	{
+		*dx = (*dx < 0) ? -5 : +5;
+		*dy = (*dy < 0) ? -9 : +9;
 	}
 
 	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-fprintf(stderr, "before: (%+d %+d)\n", *dx, *dy);
+	int mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
 
-	int len = MAX(abs(*dx), abs(*dy));
-
-	int want_len = 8 / CLAMP(0.25, grid.Scale, 1.0);
-
-	*dx = (*dx) * want_len / len;
-	*dy = (*dy) * want_len / len;
-
-fprintf(stderr, "after: (%+d %+d)\n", *dx, *dy);
+	*dx = (*dx) * mul;
+	*dy = (*dy) * mul;
 }
 
 
