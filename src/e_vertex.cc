@@ -424,15 +424,6 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 }
 
 
-static void DETSEC_DisconnectCoord(int v_num, int *x, int *y)
-{
-	// FIXME
-
-	*x = Vertices[v_num]->x + 5;
-	*y = Vertices[v_num]->y + 9;
-}
-
-
 static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
 {
 	const LineDef * L1 = LineDefs[ld_num];
@@ -466,6 +457,39 @@ static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
 }
 
 
+static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy)
+{
+	int det_mid_x, sec_mid_x;
+	int det_mid_y, sec_mid_y;
+
+	Objs_CalcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
+	Objs_CalcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
+
+	*dx = sec_mid_x - det_mid_x;
+	*dy = sec_mid_y - det_mid_y;
+
+	// avoid moving perfectly horizontal or vertical
+	// (also handes the case of dx == dy == 0)
+	while (MAX(abs(*dx), abs(*dy)) > 23)
+	{
+		*dx = (*dx) / 2;  *dy = (*dy) / 2;
+	}
+
+	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
+	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
+
+fprintf(stderr, "before: (%+d %+d)\n", *dx, *dy);
+
+	int len = MAX(abs(*dx), abs(*dy));
+
+	int want_len = 8 / CLAMP(0.25, grid.Scale, 1.0);
+
+	*dx = (*dx) * want_len / len;
+	*dy = (*dy) * want_len / len;
+
+fprintf(stderr, "after: (%+d %+d)\n", *dx, *dy);
+}
+
 
 void CMD_DisconnectSectors()
 {
@@ -490,6 +514,7 @@ void CMD_DisconnectSectors()
 		unselect = true;
 	}
 
+
 	// collect all vertices which need to be detached
 	selection_c detach_verts(OBJ_VERTICES);
 	selection_iterator_c it;
@@ -501,6 +526,12 @@ void CMD_DisconnectSectors()
 		Beep();
 		return;
 	}
+
+
+	// determine vector to move the detach coords
+	int move_dx, move_dy;
+
+	DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
 	BA_Begin();
@@ -516,14 +547,11 @@ void CMD_DisconnectSectors()
 	{
 		int new_v = BA_New(OBJ_VERTICES);
 
-		Vertex *newbie = Vertices[new_v];
-
 		mapping[*it] = new_v;
 
-		DETSEC_DisconnectCoord(*it, &newbie->x, &newbie->y);
+		Vertex *newbie = Vertices[new_v];
 
-fprintf(stderr, "New vertex #%d at (%d %d)   mapped from %d\n",
-        new_v, newbie->x, newbie->y, *it);
+		newbie->RawCopy(Vertices[*it]);
 	}
 
 	// update linedefs, creating new ones where necessary
@@ -545,8 +573,6 @@ fprintf(stderr, "New vertex #%d at (%d %d)   mapped from %d\n",
 		int start2 = mapping[L->start];
 		int end2   = mapping[L->end];
 
-fprintf(stderr, "Line #%d : start2 = %d  end2 = %d\n", n, start2, end2);
-
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
 			DETSEC_AddNewLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
@@ -559,6 +585,20 @@ fprintf(stderr, "Line #%d : start2 = %d  end2 = %d\n", n, start2, end2);
 			if (end2 >= 0)
 				BA_ChangeLD(n, LineDef::F_END, end2);
 		}
+	}
+
+	// finally move all vertices of selected sectors
+
+	selection_c all_verts(OBJ_VERTICES);
+
+	ConvertSelection(edit.Selected, &all_verts);
+
+	for (all_verts.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Vertex * V = Vertices[*it];
+
+		BA_ChangeVT(*it, Vertex::F_X, V->x + move_dx);
+		BA_ChangeVT(*it, Vertex::F_Y, V->y + move_dy);
 	}
 
 	BA_End();
