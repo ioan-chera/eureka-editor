@@ -225,7 +225,7 @@ void UI_ChooseMap::CheckMapName()
 UI_OpenMap::UI_OpenMap() :
 	Fl_Double_Window(395, 520, "Open Map"),
 	action(ACT_none),
-	result_wad(NULL)
+	result_wad(NULL), new_pwad(NULL)
 {
 	resizable(NULL);
 
@@ -318,10 +318,11 @@ UI_OpenMap::~UI_OpenMap()
 }
 
 
-void UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
+void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
 {
 	*wad_v = NULL;
 	*map_v = NULL;
+	*is_new_pwad = false;
 
 	if (edit_wad)
 		SetPWAD(edit_wad->PathName());
@@ -343,6 +344,17 @@ void UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
 
 		*wad_v = result_wad;
 		*map_v = StringUpper(map_name->value());
+
+		if (result_wad == new_pwad)
+		{
+			*is_new_pwad = true;
+			new_pwad = NULL;
+		}
+	}
+
+	if (new_pwad)
+	{
+		delete new_pwad;
 	}
 }
 
@@ -392,7 +404,7 @@ void UI_OpenMap::Populate()
 		if (edit_wad)
 			last--;
 
-		// we just use the last resource was which contains levels
+		// we simply use the last resource which contains levels
 		// TODO: should grab list from each of them and merge into one big list
 
 		for (int r = last ; r >= first ; r--)
@@ -406,7 +418,9 @@ void UI_OpenMap::Populate()
 	}
 	else
 	{
-		if (edit_wad)
+		if (new_pwad)
+			PopulateButtons(new_pwad);
+		else if (edit_wad)
 			PopulateButtons(edit_wad);
 	}
 }
@@ -584,9 +598,10 @@ void UI_OpenMap::LoadFile()
 			break;  // OK
 	}
 
-	Wad_file * new_wad = Wad_file::Open(chooser.filename(), 'a');
 
-	if (! new_wad)
+	Wad_file * wad = Wad_file::Open(chooser.filename(), 'a');
+
+	if (! wad)
 	{
 		// FIXME: get an error message, add it here
 
@@ -595,26 +610,23 @@ void UI_OpenMap::LoadFile()
 		return;
 	}
 
-	if (new_wad->FindFirstLevel() < 0)
+	if (wad->FindFirstLevel() < 0)
 	{
 		Notify(-1, -1, "The chosen WAD contains no levels.\n\n"
 				"Please try again.", NULL);
 		return;
 	}
 
-	// replace the current PWAD
 
-	if (edit_wad)
+	if (new_pwad)
 	{
-		MasterDir_Remove(edit_wad);
-		delete edit_wad;
+		delete new_pwad;
 	}
 
-	edit_wad = new_wad;
+	new_pwad = wad;
 
-	SetPWAD(edit_wad->PathName());
+	SetPWAD(new_pwad->PathName());
 
-	MasterDir_Add(edit_wad);
 
 	// change the "Look in ..." setting to be the current pwad
 

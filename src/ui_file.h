@@ -81,6 +81,7 @@ private:
 	int action;
 
 	Wad_file * result_wad;
+	Wad_file * new_pwad;
 
 	void Populate();
 	void PopulateButtons(Wad_file *wad);
@@ -93,7 +94,9 @@ public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	void Run(Wad_file ** wad_v, const char ** map_v);
+	// the 'wad' result will be NULL when cancelled.
+	// when OK and 'is_new_pwad' is set, the wad should become the edit_wad
+	void Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v);
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);

@@ -546,6 +546,20 @@ void LoadLevel(Wad_file *wad, const char *level)
 }
 
 
+static void RemoveEditWad()
+{
+	if (! edit_wad)
+		return;
+
+	MasterDir_Remove(edit_wad);
+	delete edit_wad;
+
+	edit_wad = NULL;
+
+	Replacer = false;
+}
+
+
 void CMD_OpenMap()
 {
 	if (! Main_ConfirmQuit("open another map"))
@@ -554,29 +568,40 @@ void CMD_OpenMap()
 
 	Wad_file *wad = NULL;
 	const char *map_name = NULL;
+	bool is_new_pwad = false;
 
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	bool success = dialog->Run(&wad, &map_name);
+	dialog->Run(&wad, &is_new_pwad, &map_name);
 
 	delete dialog;
 
 
-	if (! success)
-	{
-		// FIXME !!!!  bad state (edit_wad exists)
+	// cancelled?
+	if (! wad)
+		return;
 
+
+	// this shouldn't happen -- but just in case...
+	if (wad->FindLevel(map_name) < 0)
+	{
+		Notify(-1, -1, "Hmmmm, cannot find that map !?!", NULL);
 		return;
 	}
 
 
-	if (wad && wad->FindLevel(map_name) < 0)
+	// has this removed or replaced the currently edited wad?
+
+	if (edit_wad && (wad != edit_wad))
 	{
-		Notify(-1, -1, "Hmmmm, cannot find that map !?!", NULL);
+		RemoveEditWad();
+	}
 
-		// FIXME !!!!  bad state (edit_wad exists)
+	if (is_new_pwad)
+	{
+		edit_wad = wad;
 
-		return;
+		MasterDir_Add(edit_wad);
 	}
 
 
@@ -584,13 +609,7 @@ void CMD_OpenMap()
 
 	LoadLevel(wad, map_name);
 
-	// would this replace an existing map?
 	Replacer = false;
-	
-	if (edit_wad && wad != edit_wad && edit_wad->FindLevel(map_name) >= 0)
-	{
-		Replacer = true;
-	}
 }
 
 
@@ -608,15 +627,15 @@ void CMD_OpenRecentMap()
 	if (! Main_ConfirmQuit("open another map"))
 		return;
 
-	Wad_file *new_wad = NULL;
+	Wad_file *wad = NULL;
 
 	// make sure the file exists [Open with 'a' would create it]
 	if (FileExists(filename))
 	{
-		new_wad = Wad_file::Open(filename, 'a');
+		wad = Wad_file::Open(filename, 'a');
 	}
 
-	if (! new_wad)
+	if (! wad)
 	{
 		// FIXME: get an error message, add it here
 
@@ -625,33 +644,27 @@ void CMD_OpenRecentMap()
 		return;
 	}
 
-	if (new_wad->FindLevel(map_name) < 0)
+	if (wad->FindLevel(map_name) < 0)
 	{
-		delete new_wad;
+		delete wad;
 
 		Notify(-1, -1, "Unable to find that map in that WAD.", NULL);
 		return;
 	}
 
 
-	// a new wad replaces the current PWAD
-	if (new_wad)
-	{
-		if (edit_wad)
-		{
-			MasterDir_Remove(edit_wad);
-			delete edit_wad;
-		}
+	// this wad replaces the current PWAD
 
-		edit_wad = new_wad;
+	RemoveEditWad();
 
-		MasterDir_Add(edit_wad);
-	}
+	edit_wad = wad;
+
+	MasterDir_Add(edit_wad);
 
 
-	LogPrintf("Loading Map : %s of %s\n", map_name, new_wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
-	LoadLevel(new_wad, map_name);
+	LoadLevel(wad, map_name);
 
 	Replacer = false;
 }
