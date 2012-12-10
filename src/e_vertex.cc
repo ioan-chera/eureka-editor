@@ -424,15 +424,14 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 }
 
 
-static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
+static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 {
 	const LineDef * L1 = LineDefs[ld_num];
 
 	int new_ld = BA_New(OBJ_LINEDEFS);
+	int lost_sd;
 
 	LineDef * L2 = LineDefs[new_ld];
-
-	L2->flags = MLF_Blocking;
 
 	if (in_side == SIDE_LEFT)
 	{
@@ -440,7 +439,7 @@ static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
 		L2->end   = start2;
 		L2->right = L1->left;
 
-		BA_ChangeLD(ld_num, LineDef::F_LEFT, -1);
+		lost_sd = L1->left;
 	}
 	else
 	{
@@ -448,12 +447,50 @@ static void DETSEC_AddNewLine(int ld_num, int start2, int end2, int in_side)
 		L2->end   = end2;
 		L2->right = L1->right;
 
-		BA_ChangeLD(ld_num, LineDef::F_RIGHT, -1);
+		lost_sd = L1->right;
 
 		FlipLineDef(ld_num);
 	}
 
-	BA_ChangeLD(ld_num, LineDef::F_FLAGS, L1->flags | MLF_Blocking);
+	BA_ChangeLD(ld_num, LineDef::F_LEFT, -1);
+
+
+	// determine new flags
+
+	int new_flags = L1->flags;
+
+	new_flags &= ~MLF_TwoSided;
+	new_flags |=  MLF_Blocking;
+
+	BA_ChangeLD(ld_num, LineDef::F_FLAGS, new_flags);
+
+	L2->flags = L1->flags;
+
+
+	// fix the first line's textures
+
+	int tex = BA_InternaliseString(default_mid_tex);
+
+	const SideDef * SD = SideDefs[L1->right];
+
+	if (isalnum(SD->LowerTex()[0]))
+		tex = SD->lower_tex;
+	else if (isalnum(SD->UpperTex()[0]))
+		tex = SD->upper_tex;
+
+	BA_ChangeSD(L1->right, SideDef::F_MID_TEX, tex);
+
+
+	// now fix the second line's textures
+
+	SD = SideDefs[lost_sd];
+
+	if (isalnum(SD->LowerTex()[0]))
+		tex = SD->lower_tex;
+	else if (isalnum(SD->UpperTex()[0]))
+		tex = SD->upper_tex;
+
+	BA_ChangeSD(lost_sd, SideDef::F_MID_TEX, tex);
 }
 
 
@@ -576,7 +613,7 @@ void CMD_DisconnectSectors()
 
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			DETSEC_AddNewLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
+			DETSEC_SeparateLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
 		}
 		else
 		{
