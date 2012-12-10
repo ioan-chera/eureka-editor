@@ -59,8 +59,8 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	map_name = new Fl_Input(90, 60, 110, 25);
-	map_name->when(FL_WHEN_CHANGED);
 	map_name->value(initial_name);
+	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
 
 	{
@@ -171,6 +171,7 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
+	// santify check
 	if (ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
@@ -275,6 +276,8 @@ UI_OpenMap::UI_OpenMap() :
 
 	map_name = new Fl_Input(94, 205, 100, 26, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
+	map_name->when(FL_WHEN_CHANGED);
+	map_name->callback(input_callback, this);
 
 	{
 		Fl_Box *o = new Fl_Box(205, 205, 180, 26, "Available maps:");
@@ -296,7 +299,7 @@ UI_OpenMap::UI_OpenMap() :
 
 		Fl_Return_Button *ok_but = new Fl_Return_Button(280, 475, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
-//!!		ok_but->callback(ok_callback, this);
+		ok_but->callback(ok_callback, this);
 
 		Fl_Button * cancel = new Fl_Button(140, 475, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
@@ -305,6 +308,8 @@ UI_OpenMap::UI_OpenMap() :
 	}
 
 	end();
+
+	CheckMapName();
 }
 
 
@@ -313,7 +318,7 @@ UI_OpenMap::~UI_OpenMap()
 }
 
 
-bool UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
+void UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
 {
 	*wad_v = NULL;
 	*map_v = NULL;
@@ -338,11 +343,33 @@ bool UI_OpenMap::Run(Wad_file ** wad_v, const char ** map_v)
 
 		*wad_v = result_wad;
 		*map_v = result_map;
+	}
+}
 
-		return true;
+
+void UI_OpenMap::CheckMapName()
+{
+	bool was_valid = ok_but->active();
+
+	bool  is_valid = (result_wad != NULL) &&
+	                 ValidateMapName(map_name->value()) &&
+					 (result_wad->FindLevel(map_name->value()) >= 0);
+
+	if (was_valid == is_valid)
+		return;
+
+	if (is_valid)
+	{
+		ok_but->activate();
+		map_name->textcolor(FL_FOREGROUND_COLOR);
+	}
+	else
+	{
+		ok_but->deactivate();
+		map_name->textcolor(FL_RED);
 	}
 
-	return false;  // cancelled
+	map_name->redraw();
 }
 
 
@@ -477,6 +504,18 @@ void UI_OpenMap::close_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
+{
+	UI_OpenMap * that = (UI_OpenMap *)data;
+
+	// santify check
+	if (that->result_wad && ValidateMapName(that->map_name->value()))
+		that->action = ACT_ACCEPT;
+	else
+		Beep();
+}
+
+
 void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 {
 	UI_OpenMap * that = (UI_OpenMap *)data;
@@ -487,6 +526,14 @@ void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 
 	that->result_map = StringDup(w->label());
 	that->action = ACT_ACCEPT;
+}
+
+
+void UI_OpenMap::input_callback(Fl_Widget *w, void *data)
+{
+	UI_OpenMap * that = (UI_OpenMap *)data;
+
+	that->CheckMapName();
 }
 
 

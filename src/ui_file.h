@@ -69,6 +69,8 @@ private:
 
 	Fl_Group *button_grp;
 
+	Fl_Return_Button *ok_but;
+
 	enum
 	{
 		ACT_none = 0,
@@ -86,18 +88,20 @@ private:
 
 	void LoadFile();
 	void SetPWAD(const char *name);
+	void CheckMapName();
 
 public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	bool Run(Wad_file ** wad_v, const char ** map_v);
+	void Run(Wad_file ** wad_v, const char ** map_v);
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  close_callback(Fl_Widget *, void *);
 	static void   look_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+	static void  input_callback(Fl_Widget *, void *);
 	static void   load_callback(Fl_Widget *, void *);
 };
 
