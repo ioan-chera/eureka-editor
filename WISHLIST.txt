@@ -241,7 +241,9 @@ Editing
    when MadeChanges = 1
    [perhaps make map name DARK_RED when Replacer is true]
 
--  'X' : exchange object numbers
+-  exchange object numbers
+
+?  disconnect sectors : :include islands (perhaps with 'D')
 
 ?  'm' for linedefs? (especially a connected sequence of lines)
 

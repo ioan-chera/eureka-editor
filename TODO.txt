@@ -7,9 +7,10 @@ General
 -------
 
 >>>  new Open Map dialog
-    -  implement button callback
 
-    !!!!  how to handle: Load a new edit_wad, then CANCEL
+    +  review the logic
+
+    -  make sure window title reflects the real state
 
 
 +  support resource wads
@@ -21,11 +22,7 @@ General
    (e) load definitions from mods/<base>.ugh
 
 >>>  Preferences window
-    - coding time!
-
->>>  UI_ChooseMap
-     -  valid input on each press, only enable OK button 
-        when input is valid (change text color to FL_RED if invalid)
+    - codin' time!
 
 
 Documentation
@@ -38,16 +35,6 @@ Coding
 
 Editing
 -------
-
->>>  'd' disconnect sectors
- 
-     -  fix textures when separating linedef : LD_RemoveSideDef()
-     -  better DisconnectCoord
-     ?  include islands (perhaps with 'D')
-
->>> 'm' in linedef mode : two one-side linedefs, join into one
-   -  allow a shared vertex
-   -  fix texturing : use LD_AddedSideDef)
 
 
 Browser
