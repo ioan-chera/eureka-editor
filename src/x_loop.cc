@@ -555,14 +555,11 @@ void lineloop_c::FindIslands()
 }
 
 
-// FIXME: remove to e_linedef
+// FIXME: move to e_linedef
 void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 {
 	LineDef * L  = LineDefs[ld];
 	SideDef * SD = SideDefs[new_sd];
-
-	// FIXME: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
 
 	int new_flags = L->flags;
 
@@ -570,6 +567,9 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 	new_flags &= ~MLF_Blocking;
 
 	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+
+	// FIXME: make this a global pseudo-constant
+	int null_tex = BA_InternaliseString("-");
 
 	const SideDef *other = SideDefs[other_sd];
 

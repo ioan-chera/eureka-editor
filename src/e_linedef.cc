@@ -709,6 +709,55 @@ void CMD_SplitLineDefs()
 }
 
 
+void LD_MergedSecondSideDef(int ld)
+{
+	// similar to above, but with existing sidedefs
+
+	LineDef * L = LineDefs[ld];
+
+	SYS_ASSERT(L->TwoSided());
+
+	int new_flags = L->flags;
+
+	new_flags |=  MLF_TwoSided;
+	new_flags &= ~MLF_Blocking;
+
+	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+
+	// FIXME: make this a global pseudo-constant
+	int null_tex = BA_InternaliseString("-");
+
+	// determine textures for each side
+	int  left_tex = 0;
+	int right_tex = 0;
+
+	if (isalnum(L->Left()->MidTex()[0]))
+		left_tex = L->Left()->mid_tex;
+
+	if (isalnum(L->Right()->MidTex()[0]))
+		right_tex = L->Right()->mid_tex;
+	
+	if (! left_tex)  left_tex = right_tex;
+	if (! right_tex) right_tex = left_tex;
+
+	// use default texture if both sides are empty
+	if (! left_tex)
+	{
+		 left_tex = BA_InternaliseString(default_mid_tex);
+		right_tex = left_tex;
+	}
+
+	BA_ChangeSD(L->left,  SideDef::F_MID_TEX, null_tex);
+	BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+
+	BA_ChangeSD(L->left,  SideDef::F_LOWER_TEX, left_tex);
+	BA_ChangeSD(L->left,  SideDef::F_UPPER_TEX, left_tex);
+
+	BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, right_tex);
+	BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, right_tex);
+}
+
+
 void CMD_MergeTwoLineDefs()
 {
 	if (edit.Selected->count_obj() != 2)
@@ -738,12 +787,10 @@ void CMD_MergeTwoLineDefs()
 
 	// ld2 steals the sidedef from ld1
 
-	// FIXME: use LD_AddedSecondSideDef
-
 	BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
-	BA_ChangeLD(ld2, LineDef::F_FLAGS, L2->flags & ~MLF_Blocking);
-
 	BA_ChangeLD(ld1, LineDef::F_RIGHT, -1);
+
+	LD_MergedSecondSideDef(ld2);
 
 	// fix existing lines connected to ld1 : reconnect to ld2
 
