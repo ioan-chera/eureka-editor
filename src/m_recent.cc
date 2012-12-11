@@ -295,8 +295,9 @@ public:
 
 		int total_num = recent_files.getSize();
 
-		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select the recent file and map:");
+		Fl_Box *title = new Fl_Box(10, cy, W - 20, 44, "Select the recent file and map");
 		title->labelsize(16);
+		title->labelfont(FL_HELVETICA_BOLD);
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 		if (total_num == 0)
