@@ -120,7 +120,7 @@ private:
 		RES_NUM = 4
 	};
 
-	Fl_Output *res[RES_NUM];
+	Fl_Output *res_name[RES_NUM];
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel;
@@ -145,6 +145,16 @@ private:
 
 	static void close_callback(Fl_Button*, void*);
 	static void   use_callback(Fl_Button*, void*);
+
+	void Populate();
+
+public:
+	/*
+	 * current state
+	 */
+	const char * iwad;
+	const char * port;
+	const char * res[RES_NUM];
 
 public:
 	UI_ProjectSetup(bool is_startup = false);

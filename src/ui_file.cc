@@ -240,7 +240,7 @@ UI_OpenMap::UI_OpenMap() :
 	{
 		Fl_Group *o = new Fl_Group(50, 50, 235, 85);
 
-		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the IWAD (Game) file");
+		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the Game (IWAD) file");
 		look_iwad->down_box(FL_ROUND_DOWN_BOX);
 		look_iwad->type(FL_RADIO_BUTTON);
 		look_iwad->callback(look_callback, this);
@@ -646,13 +646,14 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	Fl_Double_Window(400, 372, "Project Setup"),
-	action(ACT_none)
+	action(ACT_none),
+	iwad(NULL), port(NULL)
 {
 	resizable(NULL);
 
 	_instance = this;  // meh, hacky
 
-	iwad_name = new Fl_Choice(145, 25, 120, 25, "IWAD (Game) file: ");
+	iwad_name = new Fl_Choice(145, 25, 120, 25, "Game (IWAD) file: ");
 	iwad_name->down_box(FL_BORDER_BOX);
 	iwad_name->callback((Fl_Callback*)iwad_callback, this);
 
@@ -672,13 +673,15 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
+		res[r] = NULL;
+
 		int cy = 145 + r * 35;
 
 		char res_label[64];
-		sprintf(res_label, "%d. ", r);
+		sprintf(res_label, "%d. ", 1 + r);
 
-		res[r] = new Fl_Output(55, cy, 205, 25);
-		res[r]->copy_label(res_label);
+		res_name[r] = new Fl_Output(55, cy, 205, 25);
+		res_name[r]->copy_label(res_label);
 
 		Fl_Button *kill = new Fl_Button(270, cy, 30, 25, "x");
 		kill->labelsize(20);
@@ -686,6 +689,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
 		load->callback((Fl_Callback*)load_callback, (void *)r);
+
 	}
 
 	// bottom buttons
@@ -716,7 +720,7 @@ UI_ProjectSetup::~UI_ProjectSetup()
 
 bool UI_ProjectSetup::Run()
 {
-	// populate with current values (if any??)
+	Populate();
 
 	set_modal();
 
@@ -728,6 +732,36 @@ bool UI_ProjectSetup::Run()
 	}
 
 	return (action == ACT_ACCEPT);
+}
+
+
+void UI_ProjectSetup::Populate()
+{
+	iwad = Iwad;
+
+	if (iwad)
+	{
+		iwad_name->add(fl_filename_name(iwad));
+		iwad_name->value(0);
+	}
+
+	port = Port_name;
+
+	if (! port)
+		port = "vanilla";
+	
+	port_name->add(port);
+	port_name->value(0);
+
+	for (int r = 0 ; r < RES_NUM ; r++)
+	{
+		if (r < (int)ResourceWads.size())
+		{
+			res[r] = ResourceWads[r];
+
+			res_name[r]->value(fl_filename_name(res[r]));
+		}
+	}
 }
 
 
@@ -775,7 +809,8 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	// TODO
+	int index = (int)data;
+
 }
 
 
