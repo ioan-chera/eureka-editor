@@ -3,83 +3,101 @@ version 1.0300
 header_name {.h} 
 code_name {.cxx}
 widget_class UI_ProjectInfo {
-  label {PROJECT INFO} open selected
-  xywh {274 218 400 400} type Double visible
+  label {PROJECT SETUP}
+  callback load_res_callback open
+  xywh {176 215 400 375} type Double visible
 } {
-  Fl_Choice {} {
-    label {IWAD (Game) file: } open
+  Fl_Choice iwad_name {
+    label {IWAD (Game) file: }
+    callback iwad_callback open
     xywh {145 25 120 25} down_box BORDER_BOX
   } {}
-  Fl_Choice {} {
-    label {Port (Engine) :} open
+  Fl_Choice port_name {
+    label {Port (Engine) :}
+    callback port_callback open
     xywh {145 60 120 25} down_box BORDER_BOX
   } {}
   Fl_Button {} {
     label Browse
+    callback browse_callback
     xywh {285 25 100 25}
   }
-  Fl_Group {} {
+  Fl_Group {} {open
     xywh {0 110 410 190}
   } {
     Fl_Box {} {
       label {Resource Wads:}
       xywh {15 110 185 35} align 20
     }
-    Fl_Output {} {
-      label {1.}
-      xywh {35 145 275 25}
+    Fl_Output {res[0]} {
+      label {1. }
+      xywh {55 145 205 25}
     }
-    Fl_Output {} {
-      label {2.}
-      xywh {35 180 275 25}
+    Fl_Output {res[1]} {
+      label {2. }
+      xywh {55 180 205 25}
     }
-    Fl_Output {} {
-      label {3.}
-      xywh {35 215 275 25}
+    Fl_Output {res[2]} {
+      label {3. }
+      xywh {55 215 205 25}
     }
-    Fl_Output {} {
-      label {4.}
-      xywh {35 250 275 25}
-    }
-    Fl_Button {} {
-      label {+}
-      xywh {325 145 30 25} labelsize 20
+    Fl_Output {res[3]} {
+      label {4. }
+      xywh {55 250 205 25}
     }
     Fl_Button {} {
-      label {+}
-      xywh {325 180 30 25} labelsize 20
+      label x
+      callback kill_callback
+      xywh {270 145 30 25} labelsize 20
     }
     Fl_Button {} {
-      label {+}
-      xywh {325 215 30 25} labelsize 20
+      label x
+      callback kill_callback
+      xywh {270 180 30 25} labelsize 20
     }
     Fl_Button {} {
-      label {+}
-      xywh {325 250 30 25} labelsize 20
+      label x
+      callback kill_callback
+      xywh {270 215 30 25} labelsize 20
     }
     Fl_Button {} {
-      label {-}
-      xywh {360 145 30 25} labelsize 20
+      label x
+      callback kill_callback
+      xywh {270 250 30 25} labelsize 20
     }
     Fl_Button {} {
-      label {-}
-      xywh {360 180 30 25} labelsize 20
+      label Load
+      callback load_callback
+      xywh {315 145 75 25}
     }
     Fl_Button {} {
-      label {-}
-      xywh {360 215 30 25} labelsize 20
+      label Load
+      callback load_callback
+      xywh {315 180 75 25}
     }
     Fl_Button {} {
-      label {-}
-      xywh {360 250 30 25} labelsize 20
+      label Load
+      callback load_callback
+      xywh {315 215 75 25}
+    }
+    Fl_Button {} {
+      label Load
+      callback load_callback
+      xywh {315 250 75 25}
     }
   }
-  Fl_Group {} {
-    xywh {0 340 400 60} box FLAT_BOX color 18
+  Fl_Group {} {open
+    xywh {0 315 400 60} box FLAT_BOX color 18
   } {
-    Fl_Button {} {
-      label OK
-      xywh {160 355 80 35} labelfont 1
+    Fl_Button cancel {
+      label Cancel
+      callback close_callback selected
+      xywh {165 330 80 35}
+    }
+    Fl_Button ok_but {
+      label Use
+      callback apply_callback
+      xywh {290 330 80 35} labelfont 1
     }
   }
 } 
