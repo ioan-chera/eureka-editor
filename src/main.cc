@@ -44,6 +44,7 @@
 #include "w_wad.h"
 
 #include "ui_window.h"
+#include "ui_file.h"
 
 
 /*
@@ -680,6 +681,29 @@ void Main_Loop()
 }
 
 
+bool Main_ProjectSetup(bool is_startup)
+{
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(is_startup);
+
+	bool use = dialog->Run();
+
+	if (use)
+	{
+		// FIXME grab new iwad / port / etc....
+	}
+
+	delete dialog;
+
+	if (! use)
+		return false;
+
+	Fl::wait(0.05); Fl::wait(0.05);
+	Fl::wait(0.05); Fl::wait(0.05);
+
+	return true;
+}
+
+
 /* ----- user information ----------------------------- */
 
 static void ShowHelp()
@@ -857,6 +881,9 @@ int main(int argc, char *argv[])
 	InitFLTK();  // creates the main window
 
 	init_progress = 3;
+
+
+//???  Main_ProjectSetup();
 
 
 	W_LoadFlats();
