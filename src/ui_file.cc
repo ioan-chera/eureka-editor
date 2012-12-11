@@ -641,13 +641,16 @@ void UI_OpenMap::LoadFile()
 //------------------------------------------------------------------------
 
 
-UI_ProjectInfo::UI_ProjectInfo(bool is_startup) :
-	Fl_Double_Window(400, 372),
+UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
+
+
+UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
+	Fl_Double_Window(400, 372, "Project Setup"),
 	action(ACT_none)
 {
 	resizable(NULL);
 
-	instance_ = this;  // meh, hacky
+	_instance = this;  // meh, hacky
 
 	iwad_name = new Fl_Choice(145, 25, 120, 25, "IWAD (Game) file: ");
 	iwad_name->down_box(FL_BORDER_BOX);
@@ -671,7 +674,11 @@ UI_ProjectInfo::UI_ProjectInfo(bool is_startup) :
 	{
 		int cy = 145 + r * 35;
 
-		res[r] = new Fl_Output(55, cy, 205, 25, "1. ");
+		char res_label[64];
+		sprintf(res_label, "%d. ", r);
+
+		res[r] = new Fl_Output(55, cy, 205, 25);
+		res[r]->copy_label(res_label);
 
 		Fl_Button *kill = new Fl_Button(270, cy, 30, 25, "x");
 		kill->labelsize(20);
@@ -701,18 +708,83 @@ UI_ProjectInfo::UI_ProjectInfo(bool is_startup) :
 }
 
 
-UI_ProjectInfo::~UI_ProjectInfo()
+UI_ProjectSetup::~UI_ProjectSetup()
 {
+	_instance = NULL;
 }
 
 
-void UI_ChooseMap::close_callback(Fl_Widget *w, void *data)
+bool UI_ProjectSetup::Run()
 {
-	UI_ChooseMap * that = (UI_ChooseMap *)data;
+	// populate with current values (if any??)
+
+	set_modal();
+
+	show();
+
+	while (action == ACT_none)
+	{
+		Fl::wait(0.2);
+	}
+
+	return (action == ACT_ACCEPT);
+}
+
+
+void UI_ProjectSetup::close_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	that->action = ACT_CANCEL;
 }
 
+
+void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	that->action = ACT_ACCEPT;
+}
+
+
+void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
+}
+
+
+void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
+}
+
+
+void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
+}
+
+
+void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
+}
+
+
+void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
+}
 
 
 //--- editor settings ---

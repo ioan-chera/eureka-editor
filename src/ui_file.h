@@ -109,7 +109,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_ProjectInfo : public Fl_Double_Window
+class UI_ProjectSetup : public Fl_Double_Window
 {
 private:
 	Fl_Choice *iwad_name;
@@ -134,11 +134,11 @@ private:
 
 	int action;
 
-	static UI_ProjectInfo * instance_;  // meh!
+	static UI_ProjectSetup * _instance;  // meh!
 
 	static void   iwad_callback(Fl_Choice*, void*);
-	static void browse_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
+	static void browse_callback(Fl_Button*, void*);
 
 	static void  kill_callback(Fl_Button*, void*);
 	static void  load_callback(Fl_Button*, void*);
@@ -147,8 +147,8 @@ private:
 	static void   use_callback(Fl_Button*, void*);
 
 public:
-	UI_ProjectInfo(bool is_startup = false);
-	virtual ~UI_ProjectInfo();
+	UI_ProjectSetup(bool is_startup = false);
+	virtual ~UI_ProjectSetup();
 
 	// returns true if something changed
 	bool Run();
