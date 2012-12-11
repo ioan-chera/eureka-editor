@@ -681,6 +681,50 @@ void Main_Loop()
 }
 
 
+void Main_LoadResources()
+{
+	Game_name = DetermineGame(Iwad_name);
+
+	LoadDefinitions("games", Game_name);
+
+	LoadDefinitions("ports", Port_name);
+
+
+	// reset the master directory
+	if (edit_wad)
+		MasterDir_Remove(edit_wad);
+	
+	MasterDir_CloseAll();
+
+
+	// Load the IWAD (read only)
+	game_wad = Wad_file::Open(Iwad_name, 'r');
+	if (! game_wad)
+		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
+
+	MasterDir_Add(game_wad);
+
+
+	// Load all resource wads
+	for (int i = 0 ; i < (int)ResourceWads.size() ; i++)
+	{
+		if (! FileExists(ResourceWads[i]))
+			FatalError("Resource does not exist: %s\n", ResourceWads[i]);
+
+		Wad_file *wad = Wad_file::Open(ResourceWads[i], 'r');
+
+		if (! wad)
+			FatalError("Cannot load resource: %s\n", ResourceWads[i]);
+
+		MasterDir_Add(wad);
+	}
+
+
+	if (edit_wad)
+		MasterDir_Add(edit_wad);
+}
+
+
 bool Main_ProjectSetup(bool is_startup)
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(is_startup);
@@ -810,48 +854,20 @@ int main(int argc, char *argv[])
 	init_progress = 2;
 
 
-	// determine IWAD and GAME name
+	// determine IWAD and PORT
 	Iwad_name = DetermineIWAD();
-
-
-	// Load game definitions (*.ugh)
-	InitDefinitions();
-
-	Game_name = DetermineGame(Iwad_name);
-
-	LoadDefinitions("games", Game_name);
-
 
 	if (! Port_name)
 		Port_name = "vanilla";
 
 	LogPrintf("Port name: '%s'\n", Port_name);
 
-	LoadDefinitions("ports", Port_name);
+
+	// Load game definitions (*.ugh)
+	InitDefinitions();
 
 
-	// Load the IWAD (read only)
-	game_wad = Wad_file::Open(Iwad_name, 'r');
-	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
-
-	MasterDir_Add(game_wad);
-
-
-
-	// Load all resource wads
-	for (int i = 0 ; i < (int)ResourceWads.size() ; i++)
-	{
-		if (! FileExists(ResourceWads[i]))
-			FatalError("Resource does not exist: %s\n", ResourceWads[i]);
-
-		Wad_file *wad = Wad_file::Open(ResourceWads[i], 'r');
-
-		if (! wad)
-			FatalError("Cannot load resource: %s\n", ResourceWads[i]);
-
-		MasterDir_Add(wad);
-	}
+	Main_LoadResources();
 
 
 	// Load the PWAD to edit

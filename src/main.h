@@ -231,6 +231,7 @@ int entryname_cmp (const char *entry1, const char *entry2);
 
 bool Main_ConfirmQuit(const char *action);
 bool Main_ProjectSetup(bool is_startup = false);
+void Main_LoadResources();
 
 
 void Beep();
