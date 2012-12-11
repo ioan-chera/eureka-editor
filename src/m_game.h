@@ -119,6 +119,7 @@ extern std::string g_sky_flat;
 void InitDefinitions();
 void LoadDefinitions(const char *folder, const char *name,
                      int include_level = 0);
+bool CanLoadDefinitions(const char *folder, const char *name);
 void FreeDefinitions();
 
 

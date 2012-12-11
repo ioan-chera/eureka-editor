@@ -458,7 +458,7 @@ static const char * DetermineGame(const char *iwad_name)
 {
 	// IDEA: allow override via -game parameter
 
-	char game_name[FL_PATH_MAX];
+	static char game_name[FL_PATH_MAX];
 
 	strcpy(game_name, fl_filename_name(iwad_name));
 
@@ -470,6 +470,20 @@ static const char * DetermineGame(const char *iwad_name)
 	LogPrintf("Game name: '%s'\n", game_name);
 
 	return StringDup(game_name);
+}
+
+
+const char *DetermineMod(const char *res_name)
+{
+	static char mod_name[FL_PATH_MAX];
+		
+	strcpy(mod_name, fl_filename_name(res_name));
+
+	fl_filename_setext(mod_name, "");
+
+	y_strlowr(mod_name);
+
+	return StringDup(mod_name);
 }
 
 
@@ -683,6 +697,9 @@ void Main_Loop()
 
 void Main_LoadResources()
 {
+	// Load game definitions (*.ugh)
+	InitDefinitions();
+
 	Game_name = DetermineGame(Iwad_name);
 
 	LoadDefinitions("games", Game_name);
@@ -717,6 +734,14 @@ void Main_LoadResources()
 			FatalError("Cannot load resource: %s\n", ResourceWads[i]);
 
 		MasterDir_Add(wad);
+
+		// load corresponding mod file (if it exists)
+		const char *mod_name = DetermineMod(ResourceWads[i]);
+		
+		if (CanLoadDefinitions("mods", mod_name))
+		{
+			LoadDefinitions("mods", mod_name);
+		}
 	}
 
 
@@ -862,9 +887,6 @@ int main(int argc, char *argv[])
 
 	LogPrintf("Port name: '%s'\n", Port_name);
 
-
-	// Load game definitions (*.ugh)
-	InitDefinitions();
 
 
 	Main_LoadResources();

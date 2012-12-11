@@ -62,7 +62,7 @@ int g_sky_color;
  */
 void InitDefinitions()
 {
-	// TODO: delete the contents
+	// FIXME: delete the contents
 
     line_groups.clear();
     line_types.clear();
@@ -105,6 +105,19 @@ DebugPrintf("  trying: %s\n", filename);
 		return filename;
 	
 	return NULL;
+}
+
+
+bool CanLoadDefinitions(const char *folder, const char *name)
+{
+	const char * filename;
+
+	filename = FindDefinitionFile(home_dir, folder, name);
+
+	if (! filename)
+		filename = FindDefinitionFile(install_dir, folder, name);
+
+	return (filename != NULL);
 }
 
 
