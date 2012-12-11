@@ -103,9 +103,11 @@ General
       (ideally invoke it automatically)
 
 
--  by default, write logs to ~/.eureka/LOGS.txt
+-  if ! isatty(stdout), write logs to ~/.eureka/LOGS.txt
    save early logs in memory
-   ability to view the current logs
+   ? ability to view the current logs
+
+-  game-def setting: view_height
 
 -  configurable list of iwad names to look for
    -  iwad_names.cfg, look in home_dir, otherwise install_dir

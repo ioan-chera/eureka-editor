@@ -6,6 +6,10 @@ EUREKA SHORT-TERM TODO
 General
 -------
 
+
+IDEA: when no pwad given, load RECENT thing
+
+
 >>>  new Open Map dialog
 
     +  review the logic
@@ -15,14 +19,40 @@ General
 
 +  support resource wads
    (a) -merge option for command line [DONE!]
-   (b) open them in R/O mode (like the IWAD)
+   (b) open them in R/O mode [DONE]
+   (e) load definitions from mods/<base>.ugh  [DONE]
+
 >>>   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
        [probably port and mod too] and ability to change them
+
    (d) persist in a lump, e.g. "__EUREKA"
-   (e) load definitions from mods/<base>.ugh
+
+       # Eureka project info
+       iwad blah_Blah
+       port edge
+       resource foo
+       resource bar
+       resource jiminy_cricket
+
+  -  may need a list of "known iwads" (store in a new .cfg file),
+     when user selects an iwad, add full path there.
+     
+     perhaps rename m_recent.cc --> m_files.cc and put this logic
+     there (as well some stuff currently in main.cc).
+
+     Integrate with SearchDirForIwad() stuff....
+
+
+IDEA: allow ".ugh" files as resources
+      (and perhaps even DDF files)
+
 
 >>>  Preferences window
     - codin' time!
+
+
+-  fl_choice for some dialogs
+
 
 
 Documentation
