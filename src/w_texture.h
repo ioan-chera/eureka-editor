@@ -30,7 +30,6 @@
 #include "im_img.h"
 
 void W_LoadTextures();
-void W_ClearTextures();
 
 Img * W_GetTexture(const char *name);
 

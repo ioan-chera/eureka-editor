@@ -89,12 +89,6 @@ Lump_c * Sprite_loc_by_root (const char *name)
 }
 
 
-void W_LoadSprites()
-{
-	// TODO  W_LoadSprites
-}
-
-
 Img * W_GetSprite(int type)
 {
 	sprite_map_t::iterator P = sprites.find(type);

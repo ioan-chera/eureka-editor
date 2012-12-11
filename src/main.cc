@@ -40,27 +40,12 @@
 
 #include "w_flats.h"
 #include "w_rawdef.h"
+#include "w_sprite.h"
 #include "w_texture.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
 #include "ui_file.h"
-
-
-/*
- *  Constants (declared in main.h)
- */
-const char *const msg_unexpected = "unexpected error";
-const char *const msg_nomem      = "Not enough memory";
-
-
-/*
- *  Not real variables -- just unique pointer values
- *  used by functions that return pointers to 
- */
-char error_non_unique[1];  // Found more than one
-char error_none[1];        // Found none
-char error_invalid[1];     // Invalid parameter
 
 
 /*
@@ -617,6 +602,8 @@ static void InitFLTK()
 
 	main_win = new UI_MainWin();
 
+	main_win->label("Eureka v" EUREKA_VERSION);
+
 	// show window (pass some dummy arguments)
 	{
 		int   argc = 1;
@@ -691,6 +678,9 @@ void Main_Loop()
 
 			want_quit = false;
 		}
+
+		// TODO: handle this a better way
+		main_win->UpdateTitle(MadeChanges ? true : false);
     }
 }
 
@@ -747,6 +737,23 @@ void Main_LoadResources()
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);
+
+
+	// finally, load textures and stuff...
+
+	W_LoadPalette();
+	W_LoadColormap();
+
+	W_LoadFlats();
+	W_LoadTextures();
+	W_ClearSprites();
+
+	if (main_win)
+	{
+		main_win->browser->Populate();
+
+		Props_LoadValues();
+	}
 }
 
 
@@ -876,6 +883,8 @@ int main(int argc, char *argv[])
 	}
 
 
+	M_LoadRecent();
+
 	init_progress = 2;
 
 
@@ -888,7 +897,7 @@ int main(int argc, char *argv[])
 	LogPrintf("Port name: '%s'\n", Port_name);
 
 
-
+// HMMM, avoid this if Pwad has __EUREKA lump
 	Main_LoadResources();
 
 
@@ -910,10 +919,6 @@ int main(int argc, char *argv[])
 	Level_name = DetermineLevel();
 
 
-	M_LoadRecent();
-
-	W_LoadPalette();
-
 	Editor_Init();
 
 	InitFLTK();  // creates the main window
@@ -923,10 +928,6 @@ int main(int argc, char *argv[])
 
 //???  Main_ProjectSetup();
 
-
-	W_LoadFlats();
-	W_LoadTextures();
-	W_LoadColormap();
 
 	main_win->browser->Populate();
 
@@ -965,10 +966,6 @@ int main(int argc, char *argv[])
 
 	MasterDir_CloseAll();
 	LogClose();
-
-	BA_ClearAll();
-	W_ClearTextures();
-	FreeDefinitions();
 
 	return 0;
 }

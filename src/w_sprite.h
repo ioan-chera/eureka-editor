@@ -29,7 +29,7 @@
 
 #include "im_img.h"
 
-void W_LoadSprites();
+void W_ClearSprites();
 
 Img * W_GetSprite(int type);
 

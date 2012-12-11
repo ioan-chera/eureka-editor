@@ -49,7 +49,7 @@ static void DeleteFlat(const std::map<std::string, Img *>::value_type& P)
 }
 
 
-void W_ClearFlats()
+static void W_ClearFlats()
 {
 	std::for_each(flats.begin(), flats.end(), DeleteFlat);
 
@@ -59,6 +59,8 @@ void W_ClearFlats()
 
 void W_LoadFlats()
 {
+	W_ClearFlats();
+
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		LogPrintf("Loading Flats from WAD #%d\n", i+1);

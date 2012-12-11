@@ -47,7 +47,7 @@ static void DeleteTex(const std::map<std::string, Img *>::value_type& P)
 	delete P.second;
 }
 
-void W_ClearTextures()
+static void W_ClearTextures()
 {
 	std::for_each(textures.begin(), textures.end(), DeleteTex);
 
@@ -173,6 +173,8 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 
 void W_LoadTextures()
 {
+	W_ClearTextures();
+
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		LogPrintf("Loading Textures from WAD #%d\n", i+1);
