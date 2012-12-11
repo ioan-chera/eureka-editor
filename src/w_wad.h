@@ -208,7 +208,7 @@ private:
 
 
 // the IWAD, never NULL, always at master_dir.front()
-extern Wad_file * base_wad;
+extern Wad_file * game_wad;
 
 // the current PWAD, or NULL for none.
 // when present it is also at master_dir.back()

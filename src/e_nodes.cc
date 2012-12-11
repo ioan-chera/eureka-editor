@@ -290,6 +290,7 @@ void CMD_BuildNodes()
 
 		delete edit_wad;
 		edit_wad = NULL;
+		Pwad_name = NULL;
 
 		// delete the old file, rename the new file
 		if (! FileDelete(old_name))
@@ -354,6 +355,7 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		LogPrintf("Re-opening the PWAD...\n");
 
 		edit_wad = Wad_file::Open(old_name, 'a');
+		Pwad_name = old_name;
 
 		if (! edit_wad)
 			FatalError("Unable to re-open the PWAD.\n");
@@ -397,7 +399,7 @@ void CMD_PlayMap()
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer),
 	         "cd /home/aapted/doom; ./edge135 -iwad %s -file %s -warp %s",
-			 base_wad->PathName(),
+			 game_wad->PathName(),
 			 edit_wad->PathName(),
 			 Level_name);
 

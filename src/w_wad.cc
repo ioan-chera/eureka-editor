@@ -33,7 +33,7 @@
 #include "w_wad.h"
 
 
-Wad_file * base_wad;
+Wad_file * game_wad;
 Wad_file * edit_wad;
 
 std::vector<Wad_file *> master_dir;

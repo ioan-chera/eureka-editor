@@ -394,7 +394,7 @@ void UI_OpenMap::Populate()
 
 	if (look_iwad->value())
 	{
-		PopulateButtons(base_wad);
+		PopulateButtons(game_wad);
 	}
 	else if (look_res->value())
 	{
@@ -737,7 +737,7 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::Populate()
 {
-	iwad = Iwad;
+	iwad = Iwad_name;
 
 	if (iwad)
 	{

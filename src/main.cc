@@ -82,15 +82,15 @@ const char *log_file = NULL;
 const char *install_dir;
 const char *home_dir;
 
+
+const char *Iwad_name = NULL;
+const char *Pwad_name = NULL;
+
+std::vector< const char * > ResourceWads;
+
 const char *Game_name;
 const char *Port_name;
 const char *Level_name;
-
-
-const char *Iwad = NULL;
-const char *Pwad = NULL;
-
-std::vector< const char * > ResourceWads;
 
 
 int show_help     = 0;
@@ -315,9 +315,9 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
+const char *SearchDirForIWAD(const char *dir_name, const char *iwad_base = NULL)
 {
-	if (! iwad_name)
+	if (! iwad_base)
 	{
 		LogPrintf("Searching for IWAD in dir: %s\n", dir_name);
 
@@ -325,15 +325,15 @@ const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
 
 		// TODO: have an iwad list in EUREKA.CFG, try each in list
 
-		static const char * iwad_names[] =
+		static const char * iwad_list[] =
 		{
 			"doom2.wad", "doom.wad",
 			"tnt.wad", "plutonia.wad", "freedoom.wad", NULL
 		};
 
-		for (int i = 0 ; iwad_names[i] ; i++)
+		for (int i = 0 ; iwad_list[i] ; i++)
 		{
-			result = SearchDirForIWAD(dir_name, iwad_names[i]);
+			result = SearchDirForIWAD(dir_name, iwad_list[i]);
 			if (result) return result;
 		}
 
@@ -343,7 +343,7 @@ const char *SearchDirForIWAD(const char *dir_name, const char *iwad_name = NULL)
 
 	char name_buf[FL_PATH_MAX];
 
-	sprintf(name_buf, "%s/%s", dir_name, iwad_name);
+	sprintf(name_buf, "%s/%s", dir_name, iwad_base);
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
@@ -368,30 +368,30 @@ static const char * DetermineIWAD()
 	const char *path;
 
 	// handle -iwad parameter
-	if (Iwad)
+	if (Iwad_name)
 	{
 		// handle a directory name
-		if (fl_filename_isdir(Iwad))
+		if (fl_filename_isdir(Iwad_name))
 		{
-			path = SearchDirForIWAD(Iwad);
+			path = SearchDirForIWAD(Iwad_name);
 			if (path)
 				return path;
 
-			FatalError("Unable to find any IWAD in directory: %s\n", Iwad);
+			FatalError("Unable to find any IWAD in directory: %s\n", Iwad_name);
 		}
 
 		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad))
+		if (! HasExtension(Iwad_name))
 		{
-			Iwad = ReplaceExtension(Iwad, "wad");
+			Iwad_name = ReplaceExtension(Iwad_name, "wad");
 		}
 
 		// handle a full path
-		if (FindBaseName(Iwad) != Iwad)
-			return Iwad;
+		if (FindBaseName(Iwad_name) != Iwad_name)
+			return Iwad_name;
 
 		// FALL THROUGH to below code
-		// (since Iwad contains a bare name)
+		// (since Iwad_name contains a bare name)
 	}
 
 	static char dir_name[FL_PATH_MAX];
@@ -401,7 +401,7 @@ static const char * DetermineIWAD()
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir);
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	path = SearchDirForIWAD(dir_name, Iwad);
+	path = SearchDirForIWAD(dir_name, Iwad_name);
 	if (path)
 		return path;
 
@@ -412,7 +412,7 @@ static const char * DetermineIWAD()
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(StringDup(doomwaddir), Iwad);
+		path = SearchDirForIWAD(StringDup(doomwaddir), Iwad_name);
 		if (path)
 			return path;
 	}
@@ -438,14 +438,14 @@ static const char * DetermineIWAD()
 
 	for (int i = 0 ; iwad_places[i] ; i++)
 	{
-		path = SearchDirForIWAD(iwad_places[i], Iwad);
+		path = SearchDirForIWAD(iwad_places[i], Iwad_name);
 		if (path)
 			return path;
 	}
 
 	// 4. look in current directory
 
-	path = SearchDirForIWAD(".", Iwad);
+	path = SearchDirForIWAD(".", Iwad_name);
 	if (path)
 		return path;
 
@@ -456,7 +456,7 @@ static const char * DetermineIWAD()
 
 static const char * DetermineGame(const char *iwad_name)
 {
-	// FIXME: allow override via -game parameter
+	// IDEA: allow override via -game parameter
 
 	char game_name[FL_PATH_MAX];
 
@@ -488,7 +488,7 @@ static const char * DetermineLevel()
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? edit_wad : base_wad;
+		Wad_file *wad = (pass == 0) ? edit_wad : game_wad;
 
 		if (! wad)
 			continue;
@@ -811,13 +811,13 @@ int main(int argc, char *argv[])
 
 
 	// determine IWAD and GAME name
-	const char *iwad_name = DetermineIWAD();
+	Iwad_name = DetermineIWAD();
 
 
-	// Load game definitions (*.ygd).
+	// Load game definitions (*.ugh)
 	InitDefinitions();
 
-	Game_name = DetermineGame(iwad_name);
+	Game_name = DetermineGame(Iwad_name);
 
 	LoadDefinitions("games", Game_name);
 
@@ -831,11 +831,11 @@ int main(int argc, char *argv[])
 
 
 	// Load the IWAD (read only)
-	base_wad = Wad_file::Open(iwad_name, 'r');
-	if (! base_wad)
-		FatalError("Failed to open IWAD: %s\n", iwad_name);
-	
-	MasterDir_Add(base_wad);
+	game_wad = Wad_file::Open(Iwad_name, 'r');
+	if (! game_wad)
+		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
+
+	MasterDir_Add(game_wad);
 
 
 
@@ -855,15 +855,15 @@ int main(int argc, char *argv[])
 
 
 	// Load the PWAD to edit
-	if (Pwad)
+	if (Pwad_name)
 	{
-		if (! FileExists(Pwad))
-			FatalError("Given pwad does not exist: %s\n", Pwad);
+		if (! FileExists(Pwad_name))
+			FatalError("Given pwad does not exist: %s\n", Pwad_name);
 
-		edit_wad = Wad_file::Open(Pwad, 'a');
+		edit_wad = Wad_file::Open(Pwad_name, 'a');
 
 		if (! edit_wad)
-			FatalError("Cannot load pwad: %s\n", Pwad);
+			FatalError("Cannot load pwad: %s\n", Pwad_name);
 
 		MasterDir_Add(edit_wad);
 	}
@@ -897,7 +897,7 @@ int main(int argc, char *argv[])
 
     LogPrintf("Loading initial map : %s\n", Level_name);
 
-    LoadLevel(edit_wad ? edit_wad : base_wad, Level_name);
+    LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
 	main_win->UpdateTotals();
 

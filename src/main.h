@@ -192,8 +192,8 @@ extern const char *Level_name;  // Name of map lump we are editing
 extern const char *config_file; // Name of the configuration file, or NULL
 extern const char *log_file;    // Name of log file, or NULL
 
-extern const char *Iwad; // Name of the iwad
-extern const char *Pwad;
+extern const char *Iwad_name; // Name of the iwad
+extern const char *Pwad_name;
 
 extern std::vector< const char * > ResourceWads;
 

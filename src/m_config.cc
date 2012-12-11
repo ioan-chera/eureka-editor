@@ -208,7 +208,7 @@ static const opt_desc_t options[] =
 		"h",
 		"The name of the IWAD",
 		"<file>",
-		&Iwad
+		&Iwad_name
 	},
 
 	{	"file",
@@ -217,7 +217,7 @@ static const opt_desc_t options[] =
 		"h",
 		"Patch wad file to edit",
 		"<file>",
-		&Pwad
+		&Pwad_name
 	},
 
 	{	"merge",
@@ -660,7 +660,7 @@ static void parse_loose_file(const char *filename)
 {
 	// too simplistic??
 
-	Pwad = StringDup(filename);
+	Pwad_name = StringDup(filename);
 }
 
 

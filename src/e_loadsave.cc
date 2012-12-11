@@ -555,6 +555,7 @@ static void RemoveEditWad()
 	delete edit_wad;
 
 	edit_wad = NULL;
+	Pwad_name = NULL;
 
 	Replacer = false;
 }
@@ -600,6 +601,7 @@ void CMD_OpenMap()
 	if (is_new_pwad)
 	{
 		edit_wad = wad;
+		Pwad_name = edit_wad->PathName();
 
 		MasterDir_Add(edit_wad);
 	}
@@ -658,6 +660,7 @@ void CMD_OpenRecentMap()
 	RemoveEditWad();
 
 	edit_wad = wad;
+	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
 
@@ -1009,6 +1012,7 @@ void CMD_ExportMap()
 	}
 
 	edit_wad = wad;
+	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
 
