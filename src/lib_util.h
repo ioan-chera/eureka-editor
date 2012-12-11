@@ -28,11 +28,8 @@
 #define __EUREKA_LIB_UTIL_H__
 
 
-int is_absolute (const char *filename);
 int y_stricmp (const char *s1, const char *s2);
 int y_strnicmp (const char *s1, const char *s2, size_t len);
-int y_snprintf (char *buf, size_t size, const char *fmt, ...);
-int y_vsnprintf (char *buf, size_t size, const char *fmt, va_list args);
 
 void y_strupr (char *str);
 void y_strlowr (char *str);

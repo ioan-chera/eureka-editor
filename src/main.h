@@ -50,7 +50,7 @@
 #include <errno.h>
 #include <math.h>
 
-#if defined Y_UNIX
+#ifndef WIN32
 #include <unistd.h>
 #endif
 
@@ -94,16 +94,6 @@ typedef enum
 side_ref_e;
 
 
-/*
- *  Platform definitions
- */
-#if defined Y_UNIX
-const int Y_PATH      = 255;
-const int Y_FILE_NAME = 255;
-#endif
-typedef char y_file_name_t[Y_FILE_NAME + 1];
-
-
 #include "e_basis.h"
 
 
@@ -125,9 +115,7 @@ keymod_e;
  *  FIXME should move as much of this as possible to the ygd file...
  *  FIXME Hexen has a different value for MIN_DEATHMATH_STARTS
  */
-const int DOOM_PLAYER_HEIGHT         = 56;
-const int DOOM_FLAT_WIDTH            = 64;
-const int DOOM_FLAT_HEIGHT           = 64;
+const int DOOM_PLAYER_HEIGHT  = 56;
 const size_t DOOM_MIN_DEATHMATCH_STARTS = 4;
 const size_t DOOM_MAX_DEATHMATCH_STARTS = 10;
 
@@ -157,22 +145,8 @@ confirm_t;
  *  Even more stuff ("the macros and constants")
  */
 
-extern const char *const msg_unexpected;  // "unexpected error"
-extern const char *const msg_nomem;       // "Not enough memory"
-
 // AYM 19980213: InputIntegerValue() uses this to mean that Esc was pressed
 #define IIV_CANCEL  INT_MIN
-
-
-/*
- *  Not real variables -- just a way for functions
- *  that return pointers to report errors in a better
- *  fashion than by just returning NULL and setting
- *  a global variable.
- */
-extern char error_non_unique[1];  // Found more than one
-extern char error_none[1];        // Found none
-extern char error_invalid[1];     // Invalid parameter
 
 
 /*

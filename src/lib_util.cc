@@ -32,30 +32,6 @@
 #include "w_rawdef.h"
 
 
-
-/*
- *  is_absolute
- *  Tell whether a file name is absolute or relative.
- *
- *  Note: for DOS, a filename of the form "d:foo" is
- *  considered absolute, even though it's technically
- *  relative to the current working directory of "d:".
- *  My reasoning is that someone who wants to specify a
- *  name that's relative to one of the standard
- *  directories is not going to put a "d:" in front of it.
- */
-int is_absolute (const char *filename)
-{
-#if defined Y_UNIX
-	return *filename == '/';
-#elif defined Y_DOS
-	return *filename == '/'
-		|| *filename == '\\'
-		|| isalpha (*filename) && filename[1] == ':';
-#endif
-}
-
-
 /*
  *  y_stricmp
  *  A case-insensitive strcmp()
@@ -106,36 +82,6 @@ int y_strnicmp (const char *s1, const char *s2, size_t len)
 		s2++;
 	}
 	return 0;
-}
-
-
-/*
- *  y_snprintf
- *  If available, snprintf(). Else sprintf().
- */
-int y_snprintf (char *buf, size_t size, const char *fmt, ...)
-{
-	va_list args;
-	va_start (args, fmt);
-#ifdef Y_SNPRINTF
-	return vsnprintf (buf, size, fmt, args);
-#else
-	return vsprintf (buf, fmt, args);
-#endif
-}
-
-
-/*
- *  y_vsnprintf
- *  If available, vsnprintf(). Else vsprintf().
- */
-int y_vsnprintf (char *buf, size_t size, const char *fmt, va_list args)
-{
-#ifdef Y_SNPRINTF
-	return vsnprintf (buf, size, fmt, args);
-#else
-	return vsprintf (buf, fmt, args);
-#endif
 }
 
 

@@ -50,9 +50,6 @@ extern int   ScrMaxY;
 /* gfx.cc */
 void SetWindowSize (int width, int height);
 
-void DrawScreenText (int, int, const char *, ...);
-void DrawScreenString (int, int, const char *);
-
 
 #endif  /* __EUREKA_R_MISC_H__ */
 
