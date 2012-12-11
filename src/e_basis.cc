@@ -53,7 +53,7 @@ std::vector<RadTrig *> RadTrigs;
 int default_floor_h		=   0;
 int default_ceil_h		= 128;
 int default_light_level	= 176;
-int	default_thing		= 2001;
+int default_thing		= 2001;
 
 const char * default_floor_tex	= "FLAT1";
 const char * default_ceil_tex	= "FLAT1";

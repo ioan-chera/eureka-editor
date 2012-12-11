@@ -69,6 +69,11 @@ static void file_do_recent(Fl_Widget *w, void * data)
 	CMD_OpenRecentMap();
 }
 
+static void file_do_setup(Fl_Widget *w, void * data)
+{
+	Main_ProjectSetup();
+}
+
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
 	CMD_Preferences();
@@ -79,7 +84,7 @@ static void file_do_build_nodes(Fl_Widget *w, void * data)
 	CMD_BuildNodes();
 }
 
-static void file_do_play_map(Fl_Widget *w, void * data)
+static void file_do_test_map(Fl_Widget *w, void * data)
 {
 	CMD_PlayMap();
 }
@@ -365,8 +370,9 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Recent Files", 0, FCAL file_do_recent },
-		{ "Preferences",  0, FCAL file_do_prefs },
+		{ "&Recent Files ",  FL_COMMAND + 'r', FCAL file_do_recent },
+		{ "Project Setup",   0, FCAL file_do_setup },
+		{ "&Preferences",    0, FCAL file_do_prefs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 #if 0
@@ -380,10 +386,8 @@ static Fl_Menu_Item menu_items[] =
 			{ 0 },
 #endif
 
-//??   "Preferences...",          FL_F+5,  0,
-
 		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
-//TODO	{ "&Play Map",        FL_COMMAND + 'p', FCAL file_do_play_map },
+//TODO	{ "&Test Map",        FL_COMMAND + 't', FCAL file_do_test_map },
 
 		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
