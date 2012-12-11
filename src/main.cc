@@ -439,7 +439,7 @@ static const char * DetermineIWAD()
 }
 
 
-static const char * DetermineGame(const char *iwad_name)
+const char * DetermineGame(const char *iwad_name)
 {
 	// IDEA: allow override via -game parameter
 
@@ -450,9 +450,6 @@ static const char * DetermineGame(const char *iwad_name)
 	fl_filename_setext(game_name, "");
 
 	y_strlowr(game_name);
-
-	LogPrintf("IWAD name: '%s'\n", iwad_name);
-	LogPrintf("Game name: '%s'\n", game_name);
 
 	return StringDup(game_name);
 }
@@ -687,10 +684,15 @@ void Main_Loop()
 
 void Main_LoadResources()
 {
+	LogPrintf("----- Loading Resources -----\n");
+
 	// Load game definitions (*.ugh)
 	InitDefinitions();
 
 	Game_name = DetermineGame(Iwad_name);
+
+	LogPrintf("IWAD name: '%s'\n", Iwad_name);
+	LogPrintf("Game name: '%s'\n", Game_name);
 
 	LoadDefinitions("games", Game_name);
 
@@ -752,6 +754,7 @@ void Main_LoadResources()
 	{
 		main_win->browser->Populate();
 
+		// TODO: only call this when the IWAD has changed
 		Props_LoadValues();
 	}
 }

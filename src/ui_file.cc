@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_dialog.h"
+#include "m_game.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -640,6 +641,8 @@ void UI_OpenMap::LoadFile()
 
 //------------------------------------------------------------------------
 
+extern const char * DetermineGame(const char *iwad_name);
+
 
 UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
@@ -653,22 +656,25 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 	_instance = this;  // meh, hacky
 
-	iwad_name = new Fl_Choice(145, 25, 120, 25, "Game (IWAD) file: ");
+	iwad_name = new Fl_Choice(120, 25, 170, 29, "Game IWAD: ");
+	iwad_name->labelfont(FL_HELVETICA_BOLD);
 	iwad_name->down_box(FL_BORDER_BOX);
 	iwad_name->callback((Fl_Callback*)iwad_callback, this);
 
-	port_name = new Fl_Choice(145, 60, 120, 25, "Port (Engine) :");
+	port_name = new Fl_Choice(120, 60, 170, 29, "Port: ");
+	port_name->labelfont(FL_HELVETICA_BOLD);
 	port_name->down_box(FL_BORDER_BOX);
 	port_name->callback((Fl_Callback*)port_callback, this);
 
 	{
-		Fl_Button* o = new Fl_Button(285, 25, 100, 25, "Browse");
+		Fl_Button* o = new Fl_Button(305, 27, 75, 25, "Find");
 		o->callback((Fl_Callback*)browse_callback, this);
 	}
 
 	// Resource section
 
 	Fl_Box *res_title = new Fl_Box(15, 110, 185, 35, "Resource Wads:");
+	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	for (int r = 0 ; r < RES_NUM ; r++)
@@ -757,7 +763,7 @@ void UI_ProjectSetup::Populate()
 	{
 		if (r < (int)ResourceWads.size())
 		{
-			res[r] = ResourceWads[r];
+			res[r] = StringDup(ResourceWads[r]);
 
 			res_name[r]->value(fl_filename_name(res[r]));
 		}
@@ -801,24 +807,103 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	// TODO
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to open");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	switch (chooser.show())
+	{
+		case -1:  // error
+			Notify(-1, -1, "Unable to open that wad:", chooser.errmsg());
+			return;
+
+		case 1:  // cancelled
+			return;
+
+		default:
+			break;  // OK
+	}
+
+	// check that a game definition exists
+
+	const char *game = DetermineGame(chooser.filename());
+
+	if (! CanLoadDefinitions("games", game))
+	{
+		Notify(-1, -1, "The game '%s' is not supported (no definition file).\n\n"
+		               "Please try again.", NULL);
+		return;
+	}
+
+
+	that->iwad = StringDup(chooser.filename());
+
+// FIXME : temp crap
+	that->iwad_name->clear();
+	that->iwad_name->add(fl_filename_name(that->iwad));
+	that->iwad_name->value(0);
 }
 
 
 void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
-	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+	int r = (int)data;
+	SYS_ASSERT(0 <= r && r < RES_NUM);
 
-	int index = (int)data;
+	UI_ProjectSetup * that = _instance;
+	SYS_ASSERT(that);
 
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to open");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	switch (chooser.show())
+	{
+		case -1:  // error
+			Notify(-1, -1, "Unable to open that wad:", chooser.errmsg());
+			return;
+
+		case 1:  // cancelled
+			return;
+
+		default:
+			break;  // OK
+	}
+
+	if (that->res[r])
+		StringFree(that->res[r]);
+
+	that->res[r] = StringDup(chooser.filename());
+
+	that->res_name[r]->value(fl_filename_name(that->res[r]));
 }
 
 
 void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 {
-	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+	int r = (int)data;
+	SYS_ASSERT(0 <= r && r < RES_NUM);
 
-	// TODO
+	UI_ProjectSetup * that = _instance;
+	SYS_ASSERT(that);
+
+	if (that->res[r])
+	{
+		StringFree(that->res[r]);
+		that->res[r] = NULL;
+
+		that->res_name[r]->value("");
+	}
+	else
+		Beep();
 }
 
 
