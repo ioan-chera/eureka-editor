@@ -158,9 +158,6 @@ static void FreshLevel()
 	}
 
 	CalculateLevelBounds();
-
-	if (main_win)
-		main_win->SetTitle(NULL);
 }
 
 
@@ -198,6 +195,12 @@ void CMD_NewMap()
 		}
 
 		Level_name = strdup(map_name);
+
+		main_win->SetTitle(Pwad_name, Level_name);
+	}
+	else
+	{
+		main_win->SetTitle(NULL, Level_name);
 	}
 
 	LogPrintf("Created NEW map : %s\n", Level_name);
@@ -526,7 +529,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad);
+		main_win->SetTitle(wad->PathName(), level);
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -854,7 +857,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad);
+		main_win->SetTitle(wad->PathName(), level);
 
 		// save the user state, associated with this map
 

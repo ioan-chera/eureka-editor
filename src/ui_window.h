@@ -86,7 +86,10 @@ public:
 	virtual ~UI_MainWin();
 
 public:
-	void SetTitle(Wad_file *wad);
+	void SetTitle(const char *wad_name, const char *map_name);
+
+	// add or remove the '*' in the title
+	void UpdateTitle(bool want_star);
 
 	void ToggleFullscreen();
 

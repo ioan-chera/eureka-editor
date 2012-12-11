@@ -281,29 +281,51 @@ void UI_MainWin::UnselectPics()
 }
 
 
-void UI_MainWin::SetTitle(Wad_file *wad)
+void UI_MainWin::SetTitle(const char *wad_name, const char *map_name)
 {
 	static char title_buf[FL_PATH_MAX];
 
-	const char *wad_name;
-	
-	if (wad)
+	if (wad_name)
 	{
-		wad_name = wad->PathName();
 		wad_name = fl_filename_name(wad_name);
-
 		sprintf(title_buf, "%s (%s)", wad_name, Level_name);
 	}
 	else
 	{
-		strcpy(title_buf, "Unsaved Map");
+		sprintf(title_buf, "Unsaved %s", Level_name);
 	}
 
-	strcat(title_buf, " - Eureka v" EUREKA_VERSION);
+	strcat(title_buf, " - Eureka");
 
-	label(title_buf);
+	copy_label(title_buf);
 
 	info_bar->SetMap(Level_name, "");
+}
+
+
+void UI_MainWin::UpdateTitle(bool want_star)
+{
+	if (! label())
+		return;
+
+	bool got_star = (label()[0] == '*');
+
+	if (want_star == got_star)
+		return;
+
+	static char title_buf[FL_PATH_MAX];
+
+	if (got_star)
+	{
+		strcpy(title_buf, label() + 1);
+	}
+	else
+	{
+		title_buf[0] = '*';
+		strcpy(title_buf + 1, label());
+	}
+
+	copy_label(title_buf);
 }
 
 
