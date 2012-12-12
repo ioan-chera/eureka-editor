@@ -483,6 +483,54 @@ void FreeDefinitions()
 }
 
 
+void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
+{
+	// TEST
+
+	list.push_back("vanilla");
+	list.push_back("boom");
+	list.push_back("edge");
+	list.push_back("odamex");
+}
+
+
+// result will be '|' separated (ready for Fl_Choice::add)
+// returns the empty string when nothing found
+
+const char * M_CollectDefsForMenu(const char *folder)
+{
+	std::vector<const char *> list;
+
+	M_CollectKnownDefs(folder, list);
+
+	if (list.empty())
+		return "";
+
+	// determine final length
+	int length = 2 + (int)list.size();
+	unsigned int i;
+
+	for (i = 0 ; i < list.size() ; i++)
+		length += strlen(list[i]);
+
+	char * result = StringNew(length);
+	result[0] = 0;
+
+	for (i = 0 ; i < list.size() ; i++)
+	{
+		strcat(result, list[i]);
+
+		if (i + 1 < list.size())
+			strcat(result, "|");
+	}
+
+	return result;
+}
+
+
+//------------------------------------------------------------------------
+
+
 const sectortype_t * M_GetSectorType(int type)
 {
 	std::map<int, sectortype_t *>::iterator SI;
