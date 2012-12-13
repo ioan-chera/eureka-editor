@@ -161,7 +161,7 @@ public:
 		// (this allows the parser to merely insert() items in the
 		//  order they are read).
 
-		fprintf(fp, "# Eureka recent file list\n");
+		fprintf(fp, "# Eureka miscellaneous stuff\n");
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
@@ -198,7 +198,7 @@ void M_LoadRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/recent.cfg", home_dir);
+	sprintf(filename, "%s/misc.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "r");
 
@@ -221,7 +221,7 @@ void M_SaveRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/recent.cfg", home_dir);
+	sprintf(filename, "%s/misc.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "w");
 
