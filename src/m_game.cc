@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include <map>
+#include <algorithm>
 
 #include "im_color.h"
 #include "m_game.h"
@@ -483,19 +484,66 @@ void FreeDefinitions()
 }
 
 
+static void scanner_add_file(const char *name, int flags, void *priv_dat)
+{
+	std::vector<const char*> * list = (std::vector<const char*> *) priv_dat;
+
+//	DebugPrintf("  file [%s] flags:%d\n", name, flags);
+
+	if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
+		return;
+
+	if (! MatchExtension(name, "ugh"))
+		return;
+
+	list->push_back(ReplaceExtension(name, NULL));
+}
+
+
+struct DefName_CMP_pred
+{
+	inline bool operator() (const char *A, const char *B) const
+	{
+		return y_stricmp(A, B) < 0;
+	}
+};
+
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 {
-	// TEST
+	std::vector<const char *> temp_list;
 
-	list.push_back("vanilla");
-	list.push_back("boom");
-	list.push_back("edge");
-	list.push_back("odamex");
+	static char path[FL_PATH_MAX];
+
+//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
+
+	sprintf(path, "%s/%s", install_dir, folder);
+	ScanDirectory(path, scanner_add_file, & temp_list);
+
+	sprintf(path, "%s/%s", home_dir, folder);
+	ScanDirectory(path, scanner_add_file, & temp_list);
+
+	std::sort(temp_list.begin(), temp_list.end(), DefName_CMP_pred());
+
+	// transfer to passed list, removing duplicates as we go
+	unsigned int pos;
+
+	for (pos = 0 ; pos < temp_list.size() ; pos++)
+	{
+		if (pos + 1 < temp_list.size() &&
+			y_stricmp(temp_list[pos], temp_list[pos + 1]) == 0)
+		{
+			StringFree(temp_list[pos]);
+			continue;
+		}
+
+		list.push_back(temp_list[pos]);
+	}
 }
 
 
 // result will be '|' separated (ready for Fl_Choice::add)
-// returns the empty string when nothing found
+// returns the empty string when nothing found.
+// The result should be freed with StringFree().
 //
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
@@ -507,7 +555,7 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 	M_CollectKnownDefs(folder, list);
 
 	if (list.empty())
-		return "";
+		return StringDup("");
 
 	// determine final length
 	int length = 2 + (int)list.size();
@@ -529,6 +577,8 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 		if (y_stricmp(list[i], exist_name) == 0)
 			*exist_val = i;
 	}
+
+//	DebugPrintf( "RESULT = '%s'\n", result);
 
 	return result;
 }
