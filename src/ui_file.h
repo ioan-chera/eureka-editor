@@ -143,7 +143,7 @@ private:
 	static void  kill_callback(Fl_Button*, void*);
 	static void  load_callback(Fl_Button*, void*);
 
-	static void close_callback(Fl_Button*, void*);
+	static void close_callback(Fl_Widget*, void*);
 	static void   use_callback(Fl_Button*, void*);
 
 	void Populate();

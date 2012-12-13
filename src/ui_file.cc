@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_dialog.h"
+#include "m_files.h"
 #include "m_game.h"
 #include "w_wad.h"
 
@@ -652,6 +653,8 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {
+	callback(close_callback, this);
+
 	resizable(NULL);
 
 	_instance = this;  // meh, hacky
@@ -743,22 +746,31 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::Populate()
 {
-	iwad = Iwad_name;
+	iwad = NULL;  //???
 
-	if (iwad)
+
+	const char *iwad_list;
+	int iwad_val = 0;
+
+	iwad_list = M_KnownIWADsForMenu(&iwad_val, Iwad_name ? Iwad_name : "xxx");
+
+	if (iwad_list[0])
 	{
-		iwad_name->add(fl_filename_name(iwad));
-		iwad_name->value(0);
+		iwad_name->add(iwad_list);
+		iwad_name->value(iwad_val);
 	}
 
 
 	const char *port_list;
 	int port_val = 0;
 
-	port_list = M_CollectDefsForMenu("ports", &port_val, Port_name);
+	port_list = M_CollectDefsForMenu("ports", &port_val, Port_name ? Port_name : "xxx");
 
-	port_name->add  (port_list);
-	port_name->value(port_val);
+	if (port_list[0])
+	{
+		port_name->add  (port_list);
+		port_name->value(port_val);
+	}
 
 
 	for (int r = 0 ; r < RES_NUM ; r++)
@@ -773,7 +785,7 @@ void UI_ProjectSetup::Populate()
 }
 
 
-void UI_ProjectSetup::close_callback(Fl_Button *w, void *data)
+void UI_ProjectSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
