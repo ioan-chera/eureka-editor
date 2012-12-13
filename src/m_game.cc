@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  GAME HANDLING
+//  GAME DEFINITION
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -496,8 +496,11 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 
 // result will be '|' separated (ready for Fl_Choice::add)
 // returns the empty string when nothing found
+//
+// will also find an existing name, storing its index in 'exist_val'
+// (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectDefsForMenu(const char *folder)
+const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name)
 {
 	std::vector<const char *> list;
 
@@ -522,6 +525,9 @@ const char * M_CollectDefsForMenu(const char *folder)
 
 		if (i + 1 < list.size())
 			strcat(result, "|");
+
+		if (y_stricmp(list[i], exist_name) == 0)
+			*exist_val = i;
 	}
 
 	return result;

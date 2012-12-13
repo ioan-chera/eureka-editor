@@ -648,7 +648,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
-	Fl_Double_Window(400, 372, "Project Setup"),
+	Fl_Double_Window(400, 372, "Manage Wads"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {
@@ -751,13 +751,15 @@ void UI_ProjectSetup::Populate()
 		iwad_name->value(0);
 	}
 
-	port = Port_name;
 
-	if (! port)
-		port = "vanilla";
-	
-	port_name->add(port);
-	port_name->value(0);
+	const char *port_list;
+	int port_val = 0;
+
+	port_list = M_CollectDefsForMenu("ports", &port_val, Port_name);
+
+	port_name->add  (port_list);
+	port_name->value(port_val);
+
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{

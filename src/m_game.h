@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  GAME HANDLING
+//  GAME DEFINITION
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2011 Andrew Apted
+//  Copyright (C) 2001-2012 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -125,7 +125,7 @@ void FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
-const char * M_CollectDefsForMenu(const char *folder);
+const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name);
 
 
 const sectortype_t * M_GetSectorType(int type);
