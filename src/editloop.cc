@@ -371,8 +371,8 @@ void CMD_ScrollBrowser(int delta)
 
 bool Browser_Key(int key, keymod_e mod)
 {
-	// [C]: cycle through categories in the Browser
-	if (key == 'C')
+	// [\]: cycle through categories in the Browser
+	if (key == '\\')
 	{
 		CMD_CycleCategory(+1);
 	}
