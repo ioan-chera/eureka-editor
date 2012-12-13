@@ -271,6 +271,33 @@ const char * M_QueryKnownIWAD(const char *game)
 }
 
 
+const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
+{
+	exist_name = fl_filename_name(exist_name);
+
+	std::map<std::string, std::string>::iterator KI;
+
+	static char result[2000];
+	result[0] = 0;
+
+	int index = 0;
+
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
+	{
+		const char *name = KI->first.c_str();
+		
+		strcat(result, "|");
+		strcat(result, name);
+///		strcat(result, ".wad");
+
+		if (y_stricmp(fl_filename_name(KI->second.c_str()), exist_name) == 0)
+			*exist_val = index;
+	}
+
+	return StringDup(result + 1);
+}
+
+
 //------------------------------------------------------------------------
 
 

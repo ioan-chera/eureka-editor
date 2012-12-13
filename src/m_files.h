@@ -30,6 +30,7 @@ void M_RecentDialog(const char ** file_v, const char ** map_v);
 
 void M_AddKnownIWAD(const char *game, const char *path);
 const char * M_QueryKnownIWAD(const char *game);
+const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name);
 
 #endif  /* __EUREKA_M_FILES_H__ */
 
