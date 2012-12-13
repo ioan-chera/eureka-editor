@@ -590,7 +590,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
  *
  *  Return 0 on success, negative value on failure.
  */
-static int parse_config_file(FILE *fp, const char *filename)
+static int parse_a_config_file(FILE *fp, const char *filename)
 {
 	static char line[1024];
 
@@ -609,16 +609,42 @@ static int parse_config_file(FILE *fp, const char *filename)
 }
 
 
-/*
- *  parses a user-specified config file
- *
- *  Return 0 on success, negative value on error.
- */
-int parse_config_file_user(const char *filename)
+static const char * default_config_file()
 {
+	static char filename[FL_PATH_MAX];
+
+	if (! home_dir)
+		return NULL;
+
+	sprintf(filename, "%s/config.cfg", home_dir);
+
+	if (FileExists(filename))
+		return filename;
+	else
+		return NULL;
+}
+
+
+/*
+ *  parses the config file (either a user-specific one or the default one).
+ *
+ *  return 0 on success, negative value on error.
+ */
+int M_ParseConfigFile()
+{
+	const char *filename = config_file;
+
+	if (! filename)
+	{
+		filename = default_config_file();
+	
+		if (! filename)
+			return 0;
+	}
+
 	FILE * fp = fopen(filename, "r");
 
-	LogPrintf("Read config file: %s\n", filename);
+	LogPrintf("Reading config file: %s\n", filename);
 
 	if (fp == NULL)
 	{
@@ -626,7 +652,7 @@ int parse_config_file_user(const char *filename)
 		return -1;
 	}
 
-	int rc = parse_config_file(fp, filename);
+	int rc = parse_a_config_file(fp, filename);
 
 	fclose(fp);
 
@@ -635,28 +661,25 @@ int parse_config_file_user(const char *filename)
 
 
 /*
- *  parse the default config file (if any)
- *
- *  Return 0 on success, negative value on failure.
- *  It is OK if this file does not exist.
+ *  parse_environment_vars
+ *  Check certain environment variables.
+ *  Returns 0 on success, <>0 on error.
  */
-int parse_config_file_default()
+int M_ParseEnvironmentVars()
 {
-	char filename[FL_PATH_MAX];
+#if 0
+	char *value;
 
-	if (! home_dir)
-		return 0;
+	value = getenv ("EUREKA_GAME");
+	if (value != NULL)
+		Game = value;
+#endif
 
-	sprintf(filename, "%s/config.cfg", home_dir);
-
-	if (! FileExists(filename))
-		return 0;
-
-	return parse_config_file_user(filename);
+	return 0;
 }
 
 
-static void parse_loose_file(const char *filename)
+static void add_loose_file(const char *filename)
 {
 	// too simplistic??
 
@@ -673,7 +696,7 @@ static void parse_loose_file(const char *filename)
  *  If an error occurs, report it with LogPrintf().
  *  and returns non-zero. Else, returns 0.
  */
-int parse_command_line_options (int argc, const char *const *argv, int pass)
+int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 {
 	const opt_desc_t *o;
 
@@ -685,7 +708,7 @@ int parse_command_line_options (int argc, const char *const *argv, int pass)
 		if (argv[0][0] != '-')
 		{
 			// this is a loose file, handle it now
-			parse_loose_file(argv[0]);
+			add_loose_file(argv[0]);
 
 			argv++;
 			argc--;

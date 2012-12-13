@@ -32,7 +32,7 @@
 #include "lib_adler.h"
 #include "m_config.h"
 #include "m_dialog.h"
-#include "m_recent.h"
+#include "m_files.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 

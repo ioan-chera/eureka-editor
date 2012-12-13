@@ -31,10 +31,9 @@
 typedef std::vector< const char * > string_list_t;
 
 
-int parse_config_file_user(const char *filename);
-int parse_config_file_default();
-
-int parse_command_line_options (int argc, const char *const *argv, int pass);
+int M_ParseConfigFile();
+int M_ParseEnvironmentVars();
+int M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
 void dump_parameters (FILE *fp);
 void dump_command_line_options (FILE *fp);

@@ -34,7 +34,7 @@
 #include "editloop.h"
 #include "m_dialog.h"  /* for Confirm() */
 #include "m_game.h"
-#include "m_recent.h"
+#include "m_files.h"
 #include "r_misc.h"
 #include "levels.h"    /* Because of "viewtex" */
 
@@ -102,25 +102,6 @@ rgb_color_t gui_custom_fg = 0x00000000;
  *  Prototypes of private functions
  */
 static void TermFLTK();
-
-
-/*
- *  parse_environment_vars
- *  Check certain environment variables.
- *  Returns 0 on success, <>0 on error.
- */
-static int parse_environment_vars ()
-{
-#if 0
-	char *value;
-
-	value = getenv ("EUREKA_GAME");
-	if (value != NULL)
-		Game = value;
-#endif
-
-	return 0;
-}
 
 
 /*
@@ -825,7 +806,8 @@ int main(int argc, char *argv[])
 
 	// a quick pass through the command line arguments
 	// to handle special options, like --help, --install, --config
-	r = parse_command_line_options(argc - 1, argv + 1, 1);
+	r = M_ParseCommandLine(argc - 1, argv + 1, 1);
+
 	if (r)
 		exit(3);
 
@@ -860,22 +842,19 @@ int main(int argc, char *argv[])
 	Determine_InstallPath(argv[0]);
 
 
-	// A config file can provides some values
-	if (config_file)
-		r = parse_config_file_user(config_file);
-	else
-		r = parse_config_file_default();
+	// a config file can provides some values
+	M_ParseConfigFile();
 
 	if (r == 0)
 	{
-		// Environment variables can override them
-		r = parse_environment_vars();
+		// environment variables can override them
+		r = M_ParseEnvironmentVars();
 	}
 
 	if (r == 0)
 	{
-		// And command line arguments can override both
-		r = parse_command_line_options(argc - 1, argv + 1, 2);
+		// and command line arguments will override both
+		r = M_ParseCommandLine(argc - 1, argv + 1, 2);
 	}
 
 	if (r != 0)
