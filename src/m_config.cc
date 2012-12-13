@@ -106,14 +106,17 @@ typedef struct
 {
 	const char *long_name;  // Command line arg. or keyword
 	const char *short_name; // Abbreviated command line argument
+
 	opt_type_t opt_type;    // Type of this option
 	const char *flags;    // Flags for this option :
-	// "1" : process only on pass 1 of parse_command_line_options()
-	// "h" : show in help, i.e. in dump_command_line_options()
-	// "f" : string is a filename
-	// "<" : print extra newline after this option (when dumping)
+	// '1' : process only on pass 1 of parse_command_line_options()
+	// 'f' : string is a filename
+	// '<' : print extra newline after this option (when dumping)
+	// 'v' : a real variable (preference setting)
+
 	const char *desc;   // Description of the option
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
+
 	void *data_ptr;   // Pointer to the data
 }
 opt_desc_t;
@@ -128,7 +131,7 @@ static const opt_desc_t options[] =
 	{	"help",
 		"h",
 		OPT_BOOLEAN,
-		"1h",
+		"1",
 		"Show usage summary",
 		NULL,
 		&show_help
@@ -137,7 +140,7 @@ static const opt_desc_t options[] =
 	{	"version",
 		0,
 		OPT_BOOLEAN,
-		"1h",
+		"1",
 		"Show version info",
 		NULL,
 		&show_version
@@ -146,7 +149,7 @@ static const opt_desc_t options[] =
 	{	"debug",
 		"d",
 		OPT_BOOLEAN,
-		"1h",
+		"1",
 		"Enable debugging messages",
 		NULL,
 		&Debugging
@@ -155,7 +158,7 @@ static const opt_desc_t options[] =
 	{	"quiet",
 		"q",
 		OPT_BOOLEAN,
-		"1h<",
+		"1<",
 		"Quiet mode (no messages on stdout)",
 		NULL,
 		&Quiet
@@ -165,7 +168,7 @@ static const opt_desc_t options[] =
 	{	"home",
 		0,
 		OPT_STRING,
-		"1h",
+		"1",
 		"Home directory",
 		"<dir>",
 		&home_dir
@@ -174,7 +177,7 @@ static const opt_desc_t options[] =
 	{	"install",
 		0,
 		OPT_STRING,
-		"1h",
+		"1",
 		"Installation directory",
 		"<dir>",
 		&install_dir
@@ -183,7 +186,7 @@ static const opt_desc_t options[] =
 	{	"log",
 		0,
 		OPT_STRING,
-		"1h",
+		"1",
 		"Log messages to file (instead of stdout)",
 		"<file>",
 		&log_file
@@ -192,8 +195,8 @@ static const opt_desc_t options[] =
 	{	"config",
 		0,
 		OPT_STRING,
-		"1h<",
-		"Config file to load",
+		"1<",
+		"Config file to load / save",
 		"<file>",
 		&config_file
 	},
@@ -205,8 +208,8 @@ static const opt_desc_t options[] =
 	{	"iwad",
 		"i",
 		OPT_STRING,
-		"h",
-		"The name of the IWAD",
+		"",
+		"The name of the IWAD (game data)",
 		"<file>",
 		&Iwad_name
 	},
@@ -214,7 +217,7 @@ static const opt_desc_t options[] =
 	{	"file",
 		"f",
 		OPT_STRING,
-		"h",
+		"",
 		"Patch wad file to edit",
 		"<file>",
 		&Pwad_name
@@ -223,37 +226,25 @@ static const opt_desc_t options[] =
 	{	"merge",
 		0,
 		OPT_STRING_LIST,
-		"h",
-		"Resource file to load",
-		"<file>",
+		"",
+		"Resource file(s) to load",
+		"<file>...",
 		&ResourceWads
 	},
 
 	{	"port",
 		"p",
 		OPT_STRING,
-		"h",
+		"",
 		"Port (engine) name",
 		"<name>",
 		&Port_name
 	},
 
-// TODO
-#if 0
-	{	"mod",
-		0,
-		OPT_STRING,
-		"h",
-		"Mod name",
-		"<name>",
-		&Mod_name
-	},
-#endif
-
 	{	"warp",
 		"w",
 		OPT_STRING,
-		"h",
+		"",
 		"Select level to edit",
 		"<map>",
 		&Level_name
@@ -264,7 +255,7 @@ static const opt_desc_t options[] =
 	{	"glbsp_fast",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
 		&glbsp_fast
@@ -273,7 +264,7 @@ static const opt_desc_t options[] =
 	{	"glbsp_verbose",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Node building: be verbose, show level information",
 		NULL,
 		&glbsp_verbose
@@ -282,7 +273,7 @@ static const opt_desc_t options[] =
 	{	"glbsp_warn",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Node building: show all warning messages",
 		NULL,
 		&glbsp_warn
@@ -291,7 +282,7 @@ static const opt_desc_t options[] =
 	{	"default_grid_size",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"Default grid size",
 		NULL,
 		&default_grid_size
@@ -300,7 +291,7 @@ static const opt_desc_t options[] =
 	{	"default_grid_snap",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Default grid snapping",
 		NULL,
 		&default_grid_snap
@@ -309,7 +300,7 @@ static const opt_desc_t options[] =
 	{	"digits_set_zoom",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Digit keys set zoom factor (rather than grid size)",
 		NULL,
 		&digits_set_zoom
@@ -318,7 +309,7 @@ static const opt_desc_t options[] =
 	{	"escape_key_quits",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"The ESC key will quit Eureka",
 		NULL,
 		&escape_key_quits
@@ -327,7 +318,7 @@ static const opt_desc_t options[] =
 	{	"gui_scheme",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
 		&gui_scheme
@@ -336,7 +327,7 @@ static const opt_desc_t options[] =
 	{	"gui_color_set",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
 		&gui_color_set
@@ -345,7 +336,7 @@ static const opt_desc_t options[] =
 	{	"leave_offsets_alone",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
 		&leave_offsets_alone
@@ -354,7 +345,7 @@ static const opt_desc_t options[] =
 	{	"mouse_wheel_scrolls_map",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Use the mouse wheel events for scrolling, not zooming",
 		NULL,
 		&mouse_wheel_scrolls_map
@@ -363,7 +354,7 @@ static const opt_desc_t options[] =
 	{	"multi_select_modifier",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"Require a modifier key for multi-select (0 = none, 1 = SHIFT, 2 = CTRL)",
 		NULL,
 		&multi_select_modifier
@@ -372,7 +363,7 @@ static const opt_desc_t options[] =
 	{	"new_islands_are_void",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Islands created inside a sector will get a void interior",
 		NULL,
 		&new_islands_are_void
@@ -381,7 +372,7 @@ static const opt_desc_t options[] =
 	{	"new_sector_size",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"Size of sector rectangles created outside of the map",
 		NULL,
 		&new_sector_size
@@ -390,7 +381,7 @@ static const opt_desc_t options[] =
 	{	"same_mode_clears_selection",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Clear the selection when entering the same mode",
 		NULL,
 		&same_mode_clears_selection
@@ -399,7 +390,7 @@ static const opt_desc_t options[] =
 	{	"scroll_less",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"Amp. of scrolling (% of screen size)",
 		NULL,
 		&scroll_less
@@ -408,7 +399,7 @@ static const opt_desc_t options[] =
 	{	"scroll_more",
 		0,
 		OPT_INTEGER,
-		"",
+		"v",
 		"Amp. of scrolling (% of screen size)",
 		NULL,
 		&scroll_more
@@ -421,7 +412,7 @@ static const opt_desc_t options[] =
 	{	"swap_buttons",
 		0,
 		OPT_BOOLEAN,
-		"",
+		"v",
 		"Swap mouse buttons",
 		NULL,
 		&swap_buttons
@@ -919,7 +910,7 @@ void dump_command_line_options(FILE *fp)
 	{
 		int len;
 
-		if (! strchr(o->flags, 'h'))
+		if (strchr(o->flags, 'v'))
 			continue;
 
 		if (o->long_name)
@@ -937,7 +928,7 @@ void dump_command_line_options(FILE *fp)
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		if (! strchr(o->flags, 'h'))
+		if (strchr(o->flags, 'v'))
 			continue;
 
 		if (o->short_name)
@@ -990,7 +981,7 @@ int M_WriteConfigFile()
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		if (strchr(o->flags, '1'))
+		if (! strchr(o->flags, 'v'))
 			continue;
 
 		if (! o->long_name)
@@ -1001,7 +992,7 @@ int M_WriteConfigFile()
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:
-				fprintf(fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
+				fprintf(fp, "%s", *((bool *) o->data_ptr) ? "1" : "0");
 				break;
 
 			case OPT_CONFIRM:
