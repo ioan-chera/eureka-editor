@@ -28,6 +28,9 @@ void M_AddRecent(const char *filename, const char *map_name);
 
 void M_RecentDialog(const char ** file_v, const char ** map_v);
 
+void M_AddKnownIWAD(const char *game, const char *path);
+const char * M_QueryKnownIWAD(const char *game);
+
 #endif  /* __EUREKA_M_FILES_H__ */
 
 //--- editor settings ---

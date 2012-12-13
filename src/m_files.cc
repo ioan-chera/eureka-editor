@@ -27,6 +27,11 @@
 #include "ui_window.h"
 
 
+// list of known iwads (mapping GAME name --> PATH)
+
+static std::map<std::string, std::string> known_iwads;
+
+
 #define MAX_RECENT  8
 
 
@@ -244,6 +249,25 @@ void M_AddRecent(const char *filename, const char *map_name)
 	recent_files.insert(filename, map_name);
 
 	M_SaveRecent();  // why wait?
+}
+
+
+void M_AddKnownIWAD(const char *game, const char *path)
+{
+	known_iwads[game] = std::string(path);
+}
+
+
+const char * M_QueryKnownIWAD(const char *game)
+{
+	std::map<std::string, std::string>::iterator KI;
+
+	KI = known_iwads.find(game);
+
+	if (KI != known_iwads.end())
+		return KI->second.c_str();
+	else
+		return NULL;
 }
 
 
