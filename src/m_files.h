@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  Recently Edited Files
+//  Recent Files / Known Iwads
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_M_RECENT_H__
-#define __EUREKA_M_RECENT_H__
+#ifndef __EUREKA_M_FILES_H__
+#define __EUREKA_M_FILES_H__
 
 void M_LoadRecent();
 void M_SaveRecent();
@@ -28,7 +28,7 @@ void M_AddRecent(const char *filename, const char *map_name);
 
 void M_RecentDialog(const char ** file_v, const char ** map_v);
 
-#endif  /* __EUREKA_M_RECENT_H__ */
+#endif  /* __EUREKA_M_FILES_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
