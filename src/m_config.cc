@@ -613,15 +613,11 @@ static const char * default_config_file()
 {
 	static char filename[FL_PATH_MAX];
 
-	if (! home_dir)
-		return NULL;
+	SYS_ASSERT(home_dir);
 
 	sprintf(filename, "%s/config.cfg", home_dir);
 
-	if (FileExists(filename))
-		return filename;
-	else
-		return NULL;
+	return StringDup(filename);
 }
 
 
@@ -632,19 +628,14 @@ static const char * default_config_file()
  */
 int M_ParseConfigFile()
 {
-	const char *filename = config_file;
-
-	if (! filename)
+	if (! config_file)
 	{
-		filename = default_config_file();
-	
-		if (! filename)
-			return 0;
+		config_file = default_config_file();
 	}
 
-	FILE * fp = fopen(filename, "r");
+	FILE * fp = fopen(config_file, "r");
 
-	LogPrintf("Reading config file: %s\n", filename);
+	LogPrintf("Reading config file: %s\n", config_file);
 
 	if (fp == NULL)
 	{
@@ -652,7 +643,7 @@ int M_ParseConfigFile()
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, filename);
+	int rc = parse_a_config_file(fp, config_file);
 
 	fclose(fp);
 
@@ -889,15 +880,18 @@ void dump_parameters(FILE *fp)
 		fprintf (fp, "%-*s  %-*s  ", name_maxlen, o->long_name, desc_maxlen, o->desc);
 
 		if (o->opt_type == OPT_BOOLEAN)
-			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "enabled" : "disabled");
+			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
 		else if (o->opt_type == OPT_CONFIRM)
 			fputs (confirm_i2e (*((confirm_t *) o->data_ptr)), fp);
-		else if (o->opt_type == OPT_STRING)
-			fprintf (fp, "'%s'", *((char **) o->data_ptr));
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
 		else if (o->opt_type == OPT_COLOR)
 			fprintf (fp, "%06lx", *((rgb_color_t *) o->data_ptr) >> 8);
+		else if (o->opt_type == OPT_STRING)
+		{
+			const char *str = *((const char **) o->data_ptr);
+			fprintf(fp, "'%s'", str ? str : "--none--");
+		}
 		else if (o->opt_type == OPT_STRING_LIST)
 		{
 			string_list_t *list = (string_list_t *)o->data_ptr;
@@ -975,6 +969,81 @@ void dump_command_line_options(FILE *fp)
 		if (strchr(o->flags, '<'))
 			fprintf (fp, "\n");
 	}
+}
+
+
+int M_WriteConfigFile()
+{
+	SYS_ASSERT(config_file);
+
+	LogPrintf("Writing config file: %s\n", config_file);
+
+	FILE * fp = fopen(config_file, "w");
+
+	if (! fp)
+	{
+		LogPrintf("--> %s\n", strerror(errno));
+		return -1;
+	}
+
+	const opt_desc_t *o;
+
+	for (o = options; o->opt_type != OPT_END; o++)
+	{
+		if (strchr(o->flags, '1'))
+			continue;
+
+		if (! o->long_name)
+			continue;
+
+		fprintf(fp, "%s ", o->long_name);
+
+		switch (o->opt_type)
+		{
+			case OPT_BOOLEAN:
+				fprintf(fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
+				break;
+
+			case OPT_CONFIRM:
+				fprintf(fp, "%s", confirm_i2e (*((confirm_t *) o->data_ptr)));
+				break;
+
+			case OPT_STRING:
+			{
+				const char *str = *((const char **) o->data_ptr);
+				fprintf(fp, "%s", str ? str : "{}");
+				break;
+			}
+
+			case OPT_INTEGER:
+				fprintf(fp, "%d", *((int *) o->data_ptr));
+				break;
+
+			case OPT_COLOR:
+				fprintf(fp, "%06lx", *((rgb_color_t *) o->data_ptr) >> 8);
+				break;
+
+			case OPT_STRING_LIST:
+			{
+				string_list_t *list = (string_list_t *)o->data_ptr;
+
+				if (list->empty())
+					fprintf(fp, "{}");
+				else for (unsigned int i = 0 ; i < list->size() ; i++)
+					fprintf(fp, "%s ", list->at(i));
+			}
+
+			default:
+				break;
+		}
+
+		fprintf(fp, "\n");
+	}
+
+	fflush(fp);
+	fclose(fp);
+
+	return 0;  // OK
 }
 
 
