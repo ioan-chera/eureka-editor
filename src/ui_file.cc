@@ -648,7 +648,7 @@ extern const char * DetermineGame(const char *iwad_name);
 UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
-#define STARTUP_MSG  "No IWADs could be found.  Please\nselect one now"
+#define STARTUP_MSG  "No IWADs could be found."
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
@@ -666,10 +666,12 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	
 	if (is_startup)
 	{
-		Fl_Box * message = new Fl_Box(FL_NO_BOX, 10, 5, 380, 30, STARTUP_MSG);
+		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 10, 370, 46, STARTUP_MSG);
+		message->align(FL_ALIGN_INSIDE);
+		message->color(FL_RED, FL_RED);
+		message->labelcolor(FL_YELLOW);
+		message->labelsize(18);
 
-		message->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-		
 		by += 40;
 	}
 	
@@ -720,10 +722,10 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		cancel = new Fl_Button(165, o->y() + 18, 80, 35, is_startup ? "Quit" : "Cancel");
+		cancel = new Fl_Button(165, o->y() + 14, 80, 35, is_startup ? "Quit" : "Cancel");
 		cancel->callback((Fl_Callback*)close_callback, this);
 
-		ok_but = new Fl_Button(290, o->y() + 18, 80, 35, "Use");
+		ok_but = new Fl_Button(290, o->y() + 14, 80, 35, "Use");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
