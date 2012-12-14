@@ -761,19 +761,23 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::Populate()
 {
-	iwad = NULL;  //???
-
-
 	const char *iwad_list;
 	int iwad_val = 0;
 
 	iwad_list = M_KnownIWADsForMenu(&iwad_val, Iwad_name ? Iwad_name : "xxx");
 
+	iwad = NULL;
+
 	if (iwad_list[0])
 	{
 		iwad_name->add(iwad_list);
 		iwad_name->value(iwad_val);
+
+		iwad = M_QueryKnownIWAD(iwad_name->mvalue()->text);
 	}
+
+	if (! iwad)
+		ok_but->deactivate();
 
 
 	const char *port_list;
@@ -823,7 +827,17 @@ void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	// TODO
+	const char * name = w->mvalue()->text;
+
+	that->iwad = StringDup(M_QueryKnownIWAD(name));
+
+	if (that->iwad)
+		that->ok_but->activate();
+	else
+	{
+		Beep();
+		that->ok_but->deactivate();
+	}
 }
 
 
@@ -831,7 +845,9 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	// TODO
+	const char * name = w->mvalue()->text;
+
+	that->port = StringDup(name);
 }
 
 
@@ -874,7 +890,13 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 	that->iwad = StringDup(chooser.filename());
 
-// FIXME : temp crap
+	that->ok_but->activate();
+
+// FIXME : temp crap !!!!!
+	M_AddKnownIWAD(game, that->iwad);
+	M_SaveRecent();
+
+	// FIXME: rebuild iwad_name menu
 	that->iwad_name->clear();
 	that->iwad_name->add(fl_filename_name(that->iwad));
 	that->iwad_name->value(0);
