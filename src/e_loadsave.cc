@@ -423,7 +423,7 @@ static void LoadLineDefs()
 # endif
 
 	if (count == 0)
-		FatalError("Couldn't find any Linedefs");
+		FatalError("Couldn't find any Linedefs\n");
 
 	for (int i = 0 ; i < count ; i++)
 	{

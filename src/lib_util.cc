@@ -169,7 +169,7 @@ char *StringPrintf(const char *str, ...)
 
     buf = (char*)realloc(buf, buf_size);
     if (!buf)
-      FatalError("Out of memory (formatting string)");
+      FatalError("Out of memory (formatting string)\n");
 
     va_start(args, str);
     out_len = vsnprintf(buf, buf_size, str, args);
@@ -252,7 +252,7 @@ unsigned int TimeGetMillies()
   do                  \
   {                 \
     if (sizeof (type) != size)            \
-      FatalError("sizeof " #type " is %d (should be " #size ")",  \
+      FatalError("sizeof " #type " is %d (should be " #size ")\n",  \
   (int) sizeof (type));           \
   }                 \
   while (0)
@@ -262,7 +262,7 @@ unsigned int TimeGetMillies()
   {                 \
     type n = high;              \
     if (++n != low)             \
-      FatalError("Type " #type " wraps around to %lu (should be " #low ")",\
+      FatalError("Type " #type " wraps around to %lu (should be " #low ")\n",\
   (unsigned long) n);           \
   }                 \
   while (0)

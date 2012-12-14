@@ -159,7 +159,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 	}
 
 	if (! filename)
-		FatalError("Cannot find definition file: %s", basename);
+		FatalError("Cannot find definition file: %s\n", basename);
 
 
 	DebugPrintf("  found at: %s\n", filename);
@@ -176,7 +176,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 	FILE *fp = fopen(filename, "r");
 	if (! fp)
-		FatalError("Cannot open %s: %s", filename, strerror(errno));
+		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
 
 	/* Read the game definition file, line by line. */
 
@@ -191,7 +191,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 		char       *buf;
 
 		const char *const bad_arg_count =
-			"%s(%d): directive \"%s\" takes %d parameters";
+			"%s(%d): directive \"%s\" takes %d parameters\n";
 
 		// create a buffer to contain the tokens [Note: never freed]
 		buf = StringNew(strlen(readbuf) + 1);
@@ -218,7 +218,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			else if (! in_token && (quoted || ! isspace(*iptr)))
 			{
 				if (ntoks >= (int) (sizeof token / sizeof *token))
-					FatalError("%s(%d): more than %d tokens",
+					FatalError("%s(%d): more than %d tokens\n",
 							basename, lineno, sizeof token / sizeof *token);
 				token[ntoks] = optr;
 				ntoks++;
@@ -239,7 +239,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 		}
 
 		if (quoted)
-			FatalError("%s(%d): unmatched double quote", basename, lineno);
+			FatalError("%s(%d): unmatched double quote\n", basename, lineno);
 
 		/* process the line */
 
@@ -273,7 +273,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			else if (! strcmp(token[1], "map01"))
 				yg_level_name = YGLN_MAP01;
 			else
-				FatalError("%s(%d): invalid argument \"%.32s\" (e1m1|e1m10|map01)",
+				FatalError("%s(%d): invalid argument \"%.32s\" (e1m1|e1m10|map01)\n",
 						   basename, lineno, token[1]);
 		}
 
@@ -462,7 +462,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 		else
 		{
-			FatalError("%s(%d): unknown directive \"%.32s\"",
+			FatalError("%s(%d): unknown directive: %.32s\n",
 					   basename, lineno, token[0]);
 		}
 	}

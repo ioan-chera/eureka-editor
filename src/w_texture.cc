@@ -90,14 +90,14 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size)
 DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 		if (width == 0 || height == 0)
-			FatalError("W_InitTextures: Texture '%.8s' has zero size", raw->name);
+			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
 
 		Img *img = new Img(width, height, false);
 
 		// apply all the patches
 		int num_patches = LE_S16(raw->patch_count);
 		if (! num_patches)
-			FatalError("W_InitTextures: Texture '%.8s' has no patches", raw->name);
+			FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
 
 		const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
 
