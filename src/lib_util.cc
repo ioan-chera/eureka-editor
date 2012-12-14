@@ -125,6 +125,9 @@ char *StringNew(int length)
 
 char *StringDup(const char *orig, int limit)
 {
+  if (! orig)
+  	return NULL;
+
   if (limit < 0)
   {
     char *s = strdup(orig);
