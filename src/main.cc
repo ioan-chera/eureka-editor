@@ -574,6 +574,12 @@ void Main_LoadResources()
 
 	LoadDefinitions("games", Game_name);
 
+	// normally the game definition will set a default port
+	if (! Port_name)
+		Port_name = "vanilla";
+
+	LogPrintf("Port name: '%s'\n", Port_name);
+
 	LoadDefinitions("ports", Port_name);
 
 
@@ -762,28 +768,20 @@ int main(int argc, char *argv[])
 	}
 
 
-	M_LoadRecent();
-
 	init_progress = 2;
 
 
-	// determine IWAD and PORT
+	M_LoadRecent();
 	M_LookForIWADs();
 
-	Iwad_name = "foobie.bletch";  //!!!! FIXME
+	Editor_Init();
+
+	InitFLTK();  // creates the main window
+
+	init_progress = 3;
 
 
-	if (! Port_name)
-		Port_name = "vanilla";
-
-	LogPrintf("Port name: '%s'\n", Port_name);
-
-
-// HMMM, avoid this if Pwad has __EUREKA lump
-	Main_LoadResources();
-
-
-	// Load the PWAD to edit
+	// open a specified PWAD now
 	if (Pwad_name)
 	{
 		if (! FileExists(Pwad_name))
@@ -794,26 +792,43 @@ int main(int argc, char *argv[])
 		if (! edit_wad)
 			FatalError("Cannot load pwad: %s\n", Pwad_name);
 
+		// Note: the Main_LoadResources() call will ensure this gets
+		//       placed at the correct spot (at the end)
 		MasterDir_Add(edit_wad);
 	}
 
-	
+
+	// the '__EUREKA' lump, here at least, is equivalent to using the
+	// -iwad, -merge and -port command line options.
+
+	if (edit_wad && edit_wad->FindLump("EUREKA_LUMP"))
+	{
+		// FIXME: M_ParseEurekaLump(edit_wad);
+	}
+
+
+	// determine which IWAD to use
+
+	if (Iwad_name)
+	{
+		if (! FileExists(Iwad_name))
+			FatalError("Given IWAD does not exist: %s\n", Iwad_name);
+
+		const char *game = DetermineGame(Iwad_name);
+
+		M_AddKnownIWAD(game, Iwad_name);
+		M_SaveRecent();
+	}
+	else
+	{
+		// FIXME
+	}
+
+
+	Main_LoadResources();
+
+
 	Level_name = DetermineLevel();
-
-
-	Editor_Init();
-
-	InitFLTK();  // creates the main window
-
-	init_progress = 3;
-
-
-//???  Main_ProjectSetup();
-
-
-	main_win->browser->Populate();
-
-	Props_LoadValues();
 
 
 	LogPrintf("Loading initial map : %s\n", Level_name);
