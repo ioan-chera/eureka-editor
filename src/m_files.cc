@@ -142,36 +142,15 @@ public:
 		push_front(file, map);
 	}
 
-	void ParseFile(FILE * fp)
-	{
-		static char name[1024];
-		static char map [64];
-
-		// skip comment on first line
-		fgets(name, sizeof(name), fp);
-
-		while (fgets(name, sizeof(name), fp) != NULL &&
-		       fgets(map,  sizeof(map),  fp) != NULL)
-		{
-			StringRemoveCRLF(name);
-			StringRemoveCRLF(map);
-
-			insert(name, map);
-		}
-	}
-
 	void WriteFile(FILE * fp)
 	{
 		// file is in opposite order, newest at the end
 		// (this allows the parser to merely insert() items in the
 		//  order they are read).
 
-		fprintf(fp, "# Eureka miscellaneous stuff\n");
-
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
-			fprintf(fp, "%s\n", filenames[k]);
-			fprintf(fp, "%s\n", map_names[k]);
+			fprintf(fp, "recent %s %s\n", map_names[k], filenames[k]);
 		}
 	}
 
@@ -199,8 +178,28 @@ public:
 static RecentFiles_c  recent_files;
 
 
+static void ParseMiscConfig(FILE * fp)
+{
+	static char line [FL_PATH_MAX];
+	static char token[128];
+	static char map  [128];
+
+	// skip comment on first line
+	fgets(line, sizeof(line), fp);
+
+	while (fgets(line, sizeof(line), fp) != NULL)
+	{
+		StringRemoveCRLF(line);
+
+//!!!!		insert(name, map);
+	}
+}
+
+
 void M_LoadRecent()
 {
+return; //!!!!
+
 	static char filename[FL_PATH_MAX];
 
 	sprintf(filename, "%s/misc.cfg", home_dir);
@@ -216,7 +215,9 @@ void M_LoadRecent()
 	LogPrintf("Reading recent list from: %s\n", filename);
 
 	recent_files.clear();
-	recent_files.ParseFile(fp);
+	 known_iwads.clear();
+
+	ParseMiscConfig(fp);
 
 	fclose(fp);
 }
@@ -238,7 +239,18 @@ void M_SaveRecent()
 
 	LogPrintf("Writing recent list to: %s\n", filename);
 
+	fprintf(fp, "# Eureka miscellaneous stuff\n");
+
 	recent_files.WriteFile(fp);
+
+	// known iwad files
+
+	std::map<std::string, std::string>::iterator KI;
+
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
+	{
+		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
+	}
 
 	fclose(fp);
 }
