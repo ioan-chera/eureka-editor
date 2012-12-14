@@ -31,6 +31,7 @@ void M_LookForIWADs();
 void M_AddKnownIWAD(const char *game, const char *path);
 const char * M_QueryKnownIWAD(const char *game);
 const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name);
+const char * M_PickDefaultIWAD();
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

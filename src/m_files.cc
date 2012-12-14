@@ -447,9 +447,6 @@ static const char * SearchForIWAD(const char *game)
  */
 void M_LookForIWADs()
 {
-	// FIXME !!!  handle Iwad_name
-
-
 	LogPrintf("Looking for IWADs....\n");
 
 	string_list_t  game_list;
@@ -475,6 +472,59 @@ void M_LookForIWADs()
 	}
 
 	M_SaveRecent();
+}
+
+
+const char * M_PickDefaultIWAD()
+{
+	// guess either DOOM or DOOM 2 based on level names
+	const char *default_game = "doom2";
+
+	if (Level_name && toupper(Level_name[0]) == 'E')
+	{
+		default_game = "doom";
+	}
+	else if (edit_wad)
+	{
+		int lev = edit_wad->FindFirstLevel();
+		const char *lev_name = "";
+
+		if (lev >= 0)
+		{
+			lev_name = edit_wad->GetLump(lev)->Name();
+
+			if (toupper(lev_name[0]) == 'E')
+				default_game = "doom";
+		}
+	}
+
+	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
+
+	const char *result;
+	
+	if ((result = M_QueryKnownIWAD(default_game)))
+		return StringDup(result);
+
+	DebugPrintf("pick default iwad, trying: 'freedoom'\n");
+
+	if ((result = M_QueryKnownIWAD("freedoom")))
+		return StringDup(result);
+
+	// try any known iwad
+
+	DebugPrintf("pick default iwad, trying first known iwad...\n");
+
+	std::map<std::string, std::string>::iterator KI;
+
+	KI = known_iwads.begin();
+
+	if (KI != known_iwads.end())
+		return StringDup(KI->second.c_str());
+
+	// nothing left to try
+	DebugPrintf("pick default iwad failed.\n");
+
+	return NULL;
 }
 
 
