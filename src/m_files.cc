@@ -235,8 +235,6 @@ static void ParseMiscConfig(FILE * fp)
 
 void M_LoadRecent()
 {
-return; //!!!!
-
 	static char filename[FL_PATH_MAX];
 
 	sprintf(filename, "%s/misc.cfg", home_dir);
