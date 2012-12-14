@@ -12,6 +12,8 @@ ______________________________________________________________________
 General
 -------
 
++  Preferences window
+
 +  CHECK screen
    -  linedefs without right side
    -  zero-length linedefs
@@ -32,11 +34,15 @@ General
    (b) decide if uppercase keys are considered as SHIFT modified
    (c) probably keep menu shortcuts hard-coded
 
-+  nicer way to select map, render a small 2D version of each map
-   and present them in a scrolling list.
+   (d) some functions need a parameter (or two), perhaps handle this
+       from user's POV using a choice (e.g. "less|more" or "-1|+1" or so),
+       and figure out how to implement calling the function,
+       e.g. int CMD_Whatever(int parm1, int parm2)
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
+
+-  fl_choice for some dialogs (or custom version)
 
 
 
@@ -109,6 +115,8 @@ General
 
 -  game-def setting: view_height
 
+-  config var for default starting mode
+
 -  configurable list of iwad names to look for
    -  iwad_names.cfg, look in home_dir, otherwise install_dir
 
@@ -136,9 +144,17 @@ General
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
 
+?  nicer way to select map, render a small 2D version of each map
+   and present them in a scrolling list.
+
 ?  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
+
+IDEA: when no pwad given, load RECENT thing  [config item, default off]
+
+IDEA: allow ".ugh" files as resources
+      (and perhaps even DDF files)
 
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
