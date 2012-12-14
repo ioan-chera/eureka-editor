@@ -293,7 +293,10 @@ void M_SaveRecent()
 
 void M_AddRecent(const char *filename, const char *map_name)
 {
-	recent_files.insert(filename, map_name);
+	char absolute_name[FL_PATH_MAX];
+	fl_filename_absolute(absolute_name, filename);
+
+	recent_files.insert(absolute_name, map_name);
 
 	M_SaveRecent();  // why wait?
 }
@@ -301,7 +304,10 @@ void M_AddRecent(const char *filename, const char *map_name)
 
 void M_AddKnownIWAD(const char *game, const char *path)
 {
-	known_iwads[game] = std::string(path);
+	char absolute_name[FL_PATH_MAX];
+	fl_filename_absolute(absolute_name, path);
+
+	known_iwads[game] = std::string(absolute_name);
 }
 
 
