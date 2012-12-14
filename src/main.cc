@@ -281,56 +281,9 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-const char *SearchDirForIWAD(const char *dir_name, const char *iwad_base = NULL)
-{
-	if (! iwad_base)
-	{
-		LogPrintf("Searching for IWAD in dir: %s\n", dir_name);
-
-		const char *result;
-
-		// TODO: have an iwad list in EUREKA.CFG, try each in list
-
-		static const char * iwad_list[] =
-		{
-			"doom2.wad", "doom.wad",
-			"tnt.wad", "plutonia.wad", "freedoom.wad", NULL
-		};
-
-		for (int i = 0 ; iwad_list[i] ; i++)
-		{
-			result = SearchDirForIWAD(dir_name, iwad_list[i]);
-			if (result) return result;
-		}
-
-		return NULL;
-	}
-
-
-	char name_buf[FL_PATH_MAX];
-
-	sprintf(name_buf, "%s/%s", dir_name, iwad_base);
-
-	DebugPrintf("  trying: %s\n", name_buf);
-
-	if (FileExists(name_buf))
-		return StringDup(name_buf);
-	
-	// try uppercasing the name, to find e.g. DOOM2.WAD
-
-	y_strupr(name_buf + strlen(dir_name) + 1);
-
-	DebugPrintf("  trying: %s\n", name_buf);
-
-	if (FileExists(name_buf))
-		return StringDup(name_buf);
-
-	return NULL;
-}
-
-
 static const char * DetermineIWAD()
 {
+#if 0
 	const char *path;
 
 	// handle -iwad parameter
@@ -359,61 +312,7 @@ static const char * DetermineIWAD()
 		// FALL THROUGH to below code
 		// (since Iwad_name contains a bare name)
 	}
-
-	static char dir_name[FL_PATH_MAX];
-
-	// 1. look in ~/.eureka/iwads first
-
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir);
-	dir_name[FL_PATH_MAX-1] = 0;
-
-	path = SearchDirForIWAD(dir_name, Iwad_name);
-	if (path)
-		return path;
-
-	// 2. look in $DOOMWADDIR
-
-	/* WISH: support $DOOMWADPATH */
-
-	const char *doomwaddir = getenv("DOOMWADDIR");
-	if (doomwaddir)
-	{
-		path = SearchDirForIWAD(StringDup(doomwaddir), Iwad_name);
-		if (path)
-			return path;
-	}
-
-	// 3. look in various standard places
-
-	/* WISH: check the Steam folder(s) for WIN32 */
-
-	static const char *iwad_places[] =
-	{
-#ifdef WIN32
-		"c:/doom",
-		"c:/doom2",
-		"c:/doom95",
-#else
-		"/usr/share/games/doom",
-		"/usr/share/doom",
-		"/usr/local/share/games/doom",
-		"/usr/local/games/doom",
 #endif
-		NULL
-	};
-
-	for (int i = 0 ; iwad_places[i] ; i++)
-	{
-		path = SearchDirForIWAD(iwad_places[i], Iwad_name);
-		if (path)
-			return path;
-	}
-
-	// 4. look in current directory
-
-	path = SearchDirForIWAD(".", Iwad_name);
-	if (path)
-		return path;
 
 	FatalError("Unable to find any IWAD\n");
 	return ""; /* NOT REACHED */
@@ -871,7 +770,10 @@ int main(int argc, char *argv[])
 
 
 	// determine IWAD and PORT
-	Iwad_name = DetermineIWAD();
+	M_LookForIWADs();
+
+	Iwad_name = "foobie.bletch";  //!!!! FIXME
+
 
 	if (! Port_name)
 		Port_name = "vanilla";

@@ -28,9 +28,6 @@
 #define __EUREKA_M_CONFIG_H__
 
 
-typedef std::vector< const char * > string_list_t;
-
-
 int M_ParseConfigFile();
 int M_WriteConfigFile();
 

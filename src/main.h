@@ -109,6 +109,9 @@ typedef enum
 keymod_e;
 
 
+typedef std::vector< const char * > string_list_t;
+
+
 /*
  *  Doom definitions
  *  Things about the Doom engine

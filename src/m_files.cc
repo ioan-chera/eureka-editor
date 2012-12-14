@@ -22,6 +22,7 @@
 #include "levels.h"
 #include "e_loadsave.h"
 #include "m_dialog.h"
+#include "m_game.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -348,6 +349,130 @@ const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
 	}
 
 	return StringDup(result + 1);
+}
+
+
+//------------------------------------------------------------------------
+
+
+static const char * SearchDirForIWAD(const char *dir_name, const char *game)
+{
+	char name_buf[FL_PATH_MAX];
+
+	sprintf(name_buf, "%s/%s", dir_name, game);
+
+	DebugPrintf("  trying: %s\n", name_buf);
+
+	if (FileExists(name_buf))
+		return StringDup(name_buf);
+
+	// try uppercasing the name, to find e.g. DOOM2.WAD
+
+	y_strupr(name_buf + strlen(dir_name) + 1);
+
+	DebugPrintf("  trying: %s\n", name_buf);
+
+	if (FileExists(name_buf))
+		return StringDup(name_buf);
+
+	return NULL;
+}
+
+
+static const char * SearchForIWAD(const char *game)
+{
+	DebugPrintf("Searching for '%s' IWAD\n", game);
+
+	static char dir_name[FL_PATH_MAX];
+
+	// 1. look in ~/.eureka/iwads first
+
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir);
+	dir_name[FL_PATH_MAX-1] = 0;
+
+	const char * path = SearchDirForIWAD(dir_name, game);
+	if (path)
+		return path;
+
+	// 2. look in $DOOMWADDIR
+
+	/* TODO: support $DOOMWADPATH */
+
+	const char *doomwaddir = getenv("DOOMWADDIR");
+	if (doomwaddir)
+	{
+		path = SearchDirForIWAD(StringDup(doomwaddir), game);
+		if (path)
+			return path;
+	}
+
+	// 3. look in various standard places
+
+	/* WISH: check the Steam folder(s) for WIN32 */
+
+	static const char *standard_iwad_places[] =
+	{
+#ifdef WIN32
+		"c:/doom",
+		"c:/doom2",
+		"c:/doom95",
+#else
+		"/usr/share/games/doom",
+		"/usr/share/doom",
+		"/usr/local/share/games/doom",
+		"/usr/local/games/doom",
+#endif
+		NULL
+	};
+
+	for (int i = 0 ; standard_iwad_places[i] ; i++)
+	{
+		path = SearchDirForIWAD(standard_iwad_places[i], game);
+		if (path)
+			return path;
+	}
+
+	// 4. last resort : the current directory
+
+	path = SearchDirForIWAD(".", game);
+	if (path)
+		return path;
+
+	return NULL;  // not found
+}
+
+
+/*
+ * search for iwads in various places
+ */
+void M_LookForIWADs()
+{
+	// FIXME !!!  handle Iwad_name
+
+
+	string_list_t  game_list;
+
+	M_CollectKnownDefs("games", game_list);
+
+	for (unsigned int i ; i < game_list.size() ; i++)
+	{
+		const char *game = game_list[i];
+
+		// already have it?
+		if (M_QueryKnownIWAD(game))
+			continue;
+
+		const char *path = SearchForIWAD(game);
+
+		if (path)
+		{
+			LogPrintf("Found '%s' IWAD file: %s\n", game, path);
+
+			M_AddKnownIWAD(game, path);
+		}
+	}
+
+	M_SaveRecent();
 }
 
 
