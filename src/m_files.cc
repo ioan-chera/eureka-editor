@@ -212,11 +212,17 @@ static void ParseMiscConfig(FILE * fp)
 
 		if (strcmp(line, "recent") == 0)
 		{
-			recent_files.insert(pos, map);
+			if (FileExists(pos))
+				recent_files.insert(pos, map);
+			else
+				LogPrintf("  no longer exists: %s\n", pos);
 		}
 		else if (strcmp(line, "known_iwad") == 0)
 		{
-			known_iwads[map] = std::string(pos);
+			if (FileExists(pos))
+				known_iwads[map] = std::string(pos);
+			else
+				LogPrintf("  no longer exists: %s\n", pos);
 		}
 		else
 		{
@@ -395,7 +401,7 @@ public:
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 		if (total_num == 0)
-			title->label("There are no recent files.");
+			title->label("  There are no recent files");
 
 		cy += title->h() + 10;
 
