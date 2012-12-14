@@ -111,14 +111,15 @@ private:
 
 class UI_ProjectSetup : public Fl_Double_Window
 {
-private:
-	Fl_Choice *iwad_name;
-	Fl_Choice *port_name;
-
+public:
 	enum
 	{
 		RES_NUM = 4
 	};
+
+private:
+	Fl_Choice *iwad_name;
+	Fl_Choice *port_name;
 
 	Fl_Output *res_name[RES_NUM];
 

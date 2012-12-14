@@ -333,7 +333,7 @@ const char * DetermineGame(const char *iwad_name)
 }
 
 
-const char *DetermineMod(const char *res_name)
+const char * DetermineMod(const char *res_name)
 {
 	static char mod_name[FL_PATH_MAX];
 		
@@ -648,20 +648,34 @@ bool Main_ProjectSetup(bool is_startup)
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(is_startup);
 
-	bool use = dialog->Run();
+	bool ok = dialog->Run();
 
-	if (use)
+	if (ok)
 	{
-		// FIXME grab new iwad / port / etc....
+		// grab new information
+
+		Iwad_name = StringDup(dialog->iwad);
+		Port_name = StringDup(dialog->port);
+
+		ResourceWads.clear();
+
+		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
+		{
+			if (dialog->res[i])
+				ResourceWads.push_back(StringDup(dialog->res[i]));
+		}
 	}
 
 	delete dialog;
 
-	if (! use)
+	Fl::wait(0.1);
+	Fl::wait(0.1);
+
+	if (! ok)
 		return false;
 
-	Fl::wait(0.05); Fl::wait(0.05);
-	Fl::wait(0.05); Fl::wait(0.05);
+	if (! is_startup)
+		Main_LoadResources();
 
 	return true;
 }
@@ -827,9 +841,8 @@ int main(int argc, char *argv[])
 			Iwad_name = StringDup(Iwad_name);
 		else
 		{
-			// FIXME !!!!  show the Manage Wads dialog
-
-			FatalError("Cannot find any iwads!\n");
+			if (! Main_ProjectSetup(true))
+				goto quit;
 		}
 	}
 
@@ -853,6 +866,7 @@ int main(int argc, char *argv[])
 
 	/* that's all folks! */
 
+quit:
 	LogPrintf("Quit\n");
 
 

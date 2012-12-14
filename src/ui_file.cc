@@ -648,8 +648,11 @@ extern const char * DetermineGame(const char *iwad_name);
 UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
+#define STARTUP_MSG  "No IWADs could be found.  Please\nselect one now"
+
+
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
-	Fl_Double_Window(400, 372, "Manage Wads"),
+	Fl_Double_Window(400, is_startup ? 412 : 372, "Manage Wads"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {
@@ -659,24 +662,35 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 	_instance = this;  // meh, hacky
 
-	iwad_name = new Fl_Choice(120, 25, 170, 29, "Game IWAD: ");
+	int by = 0;
+	
+	if (is_startup)
+	{
+		Fl_Box * message = new Fl_Box(FL_NO_BOX, 10, 5, 380, 30, STARTUP_MSG);
+
+		message->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+		
+		by += 40;
+	}
+	
+	iwad_name = new Fl_Choice(120, by+25, 170, 29, "Game IWAD: ");
 	iwad_name->labelfont(FL_HELVETICA_BOLD);
 	iwad_name->down_box(FL_BORDER_BOX);
 	iwad_name->callback((Fl_Callback*)iwad_callback, this);
 
-	port_name = new Fl_Choice(120, 60, 170, 29, "Port: ");
+	port_name = new Fl_Choice(120, by+60, 170, 29, "Port: ");
 	port_name->labelfont(FL_HELVETICA_BOLD);
 	port_name->down_box(FL_BORDER_BOX);
 	port_name->callback((Fl_Callback*)port_callback, this);
 
 	{
-		Fl_Button* o = new Fl_Button(305, 27, 75, 25, "Find");
+		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
 		o->callback((Fl_Callback*)browse_callback, this);
 	}
 
 	// Resource section
 
-	Fl_Box *res_title = new Fl_Box(15, 110, 185, 35, "Resource Wads:");
+	Fl_Box *res_title = new Fl_Box(15, by+110, 185, 35, "Resource Wads:");
 	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
@@ -684,7 +698,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	{
 		res[r] = NULL;
 
-		int cy = 145 + r * 35;
+		int cy = by + 145 + r * 35;
 
 		char res_label[64];
 		sprintf(res_label, "%d. ", 1 + r);
@@ -698,19 +712,18 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
 		load->callback((Fl_Callback*)load_callback, (void *)r);
-
 	}
 
 	// bottom buttons
 	{
-		Fl_Group *o = new Fl_Group(0, 312, 400, 60);
+		Fl_Group *o = new Fl_Group(0, by+312, 400, 60);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		cancel = new Fl_Button(165, 330, 80, 35, is_startup ? "Quit" : "Cancel");
+		cancel = new Fl_Button(165, o->y() + 18, 80, 35, is_startup ? "Quit" : "Cancel");
 		cancel->callback((Fl_Callback*)close_callback, this);
 
-		ok_but = new Fl_Button(290, 330, 80, 35, "Use");
+		ok_but = new Fl_Button(290, o->y() + 18, 80, 35, "Use");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
@@ -772,6 +785,9 @@ void UI_ProjectSetup::Populate()
 		port_name->value(port_val);
 	}
 
+
+	// Note: these resource wads may be invalid (not exist) during startup.
+	//       This is probably NOT the place to validate them...
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
@@ -848,7 +864,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 	if (! CanLoadDefinitions("games", game))
 	{
-		Notify(-1, -1, "The game '%s' is not supported (no definition file).\n\n"
+		Notify(-1, -1, "That game is not supported (no definition file).\n\n"
 		               "Please try again.", NULL);
 		return;
 	}

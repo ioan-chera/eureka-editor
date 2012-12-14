@@ -69,7 +69,7 @@ static void file_do_recent(Fl_Widget *w, void * data)
 	CMD_OpenRecentMap();
 }
 
-static void file_do_setup(Fl_Widget *w, void * data)
+static void file_do_manage_wads(Fl_Widget *w, void * data)
 {
 	Main_ProjectSetup();
 }
@@ -371,7 +371,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Recent Files ",  FL_COMMAND + 'r', FCAL file_do_recent },
-		{ "&Manage Wads",    0, FCAL file_do_setup },
+		{ "&Manage Wads",    0, FCAL file_do_manage_wads },
 		{ "&Preferences",    0, FCAL file_do_prefs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
