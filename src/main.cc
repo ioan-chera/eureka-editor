@@ -821,15 +821,25 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		// FIXME
+		Iwad_name = M_PickDefaultIWAD();
+
+		if (Iwad_name)
+			Iwad_name = StringDup(Iwad_name);
+		else
+		{
+			// FIXME !!!!  show the Manage Wads dialog
+
+			FatalError("Cannot find any iwads!\n");
+		}
 	}
 
 
 	Main_LoadResources();
 
 
-	Level_name = DetermineLevel();
+	// load the initial level
 
+	Level_name = DetermineLevel();
 
 	LogPrintf("Loading initial map : %s\n", Level_name);
 
