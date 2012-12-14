@@ -175,8 +175,6 @@ extern const char *Pwad_name;
 extern std::vector< const char * > ResourceWads;
 
 
-extern int remind_to_build_nodes; // Remind the user to build nodes
-
 extern bool Replacer;     // the new map will destroy an existing one if saved
 
 extern int	default_floor_h;

@@ -81,8 +81,6 @@ const char *Level_name;
 int show_help     = 0;
 int show_version  = 0;
 
-int  remind_to_build_nodes = 0;  // Remind user to build nodes
-
 bool Replacer = false;
 
 
@@ -818,22 +816,14 @@ int main(int argc, char *argv[])
 	Props_LoadValues();
 
 
-    LogPrintf("Loading initial map : %s\n", Level_name);
+	LogPrintf("Loading initial map : %s\n", Level_name);
 
-    LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
+	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
 	main_win->UpdateTotals();
 
 
 	Main_Loop();
-
-
-// FIXME: use dialog box instead
-	if (remind_to_build_nodes)
-		printf ("\n"
-				"** You have made changes to one or more wads. Don't forget to pass\n"
-				"** them through a nodes builder (E.G. BSP) before running them.\n"
-				"** Like this: \"ybsp foo.wad -o tmp.wad; doom -file tmp.wad\"\n\n");
 
 
 	/* that's all folks! */
