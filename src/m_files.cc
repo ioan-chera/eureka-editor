@@ -359,7 +359,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 {
 	char name_buf[FL_PATH_MAX];
 
-	sprintf(name_buf, "%s/%s", dir_name, game);
+	sprintf(name_buf, "%s/%s.wad", dir_name, game);
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
@@ -449,6 +449,8 @@ void M_LookForIWADs()
 {
 	// FIXME !!!  handle Iwad_name
 
+
+	LogPrintf("Looking for IWADs....\n");
 
 	string_list_t  game_list;
 
