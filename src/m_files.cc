@@ -181,8 +181,7 @@ static RecentFiles_c  recent_files;
 static void ParseMiscConfig(FILE * fp)
 {
 	static char line [FL_PATH_MAX];
-	static char token[128];
-	static char map  [128];
+	static char * map;
 
 	// skip comment on first line
 	fgets(line, sizeof(line), fp);
@@ -191,7 +190,39 @@ static void ParseMiscConfig(FILE * fp)
 	{
 		StringRemoveCRLF(line);
 
-//!!!!		insert(name, map);
+		char *pos = strchr(line, ' ');
+		if (! pos)
+		{
+			// FIXME warning
+			continue;
+		}
+
+		*pos++ = 0;
+
+		map = pos;
+
+		pos = strchr(map, ' ');
+		if (! pos)
+		{
+			// FIXME warning
+			continue;
+		}
+
+		*pos++ = 0;
+
+		if (strcmp(line, "recent") == 0)
+		{
+			recent_files.insert(pos, map);
+		}
+		else if (strcmp(line, "known_iwad") == 0)
+		{
+			known_iwads[map] = std::string(pos);
+		}
+		else
+		{
+			// FIXME: warning
+			continue;
+		}
 	}
 }
 
