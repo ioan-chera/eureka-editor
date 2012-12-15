@@ -528,6 +528,31 @@ const char * M_PickDefaultIWAD()
 }
 
 
+bool M_ParseEurekaLump(Wad_file *wad)
+{
+	// FIXME !!!
+}
+
+
+void M_WriteEurekaLump(Wad_file *wad)
+{
+	int oldie = wad->FindLumpNum(EUREKA_LUMP);
+	if (oldie >= 0)
+		wad->RemoveLumps(oldie, 1);
+	
+	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
+
+	if (Iwad_name)
+		lump->Printf("iwad %s\n", Iwad_name);
+
+	if (Port_name)
+		lump->Printf("port %s\n", Port_name);
+
+	for (unsigned int i = 0 ; i < ResourceWads.size() ; i++)
+		lump->Printf("resource %s\n", ResourceWads[i]);
+}
+
+
 //------------------------------------------------------------------------
 
 

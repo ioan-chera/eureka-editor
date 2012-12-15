@@ -817,7 +817,7 @@ int main(int argc, char *argv[])
 
 	if (edit_wad && edit_wad->FindLump("EUREKA_LUMP"))
 	{
-		// FIXME: M_ParseEurekaLump(edit_wad);
+		M_ParseEurekaLump(edit_wad);
 	}
 
 
