@@ -815,7 +815,7 @@ int main(int argc, char *argv[])
 	// the '__EUREKA' lump, here at least, is equivalent to using the
 	// -iwad, -merge and -port command line options.
 
-	if (edit_wad && edit_wad->FindLump("EUREKA_LUMP"))
+	if (edit_wad)
 	{
 		M_ParseEurekaLump(edit_wad);
 	}

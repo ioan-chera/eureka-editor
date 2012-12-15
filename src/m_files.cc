@@ -181,14 +181,15 @@ static RecentFiles_c  recent_files;
 
 static void ParseMiscConfig(FILE * fp)
 {
-	static char line [FL_PATH_MAX];
+	static char line[FL_PATH_MAX];
 	static char * map;
-
-	// skip comment on first line
-	fgets(line, sizeof(line), fp);
 
 	while (fgets(line, sizeof(line), fp) != NULL)
 	{
+		// comment?
+		if (line[0] == '#')
+			continue;
+
 		StringRemoveCRLF(line);
 
 		char *pos = strchr(line, ' ');
@@ -550,11 +551,12 @@ void M_ParseEurekaLump(Wad_file *wad)
 
 	static char line[FL_PATH_MAX];
 
-	// skip comment on first line
-	lump->GetLine(line, sizeof(line));
-
 	while (lump->GetLine(line, sizeof(line)))
 	{
+		// comment?
+		if (line[0] == '#')
+			continue;
+
 		StringRemoveCRLF(line);
 
 		char *pos = strchr(line, ' ');
