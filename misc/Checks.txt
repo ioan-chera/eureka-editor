@@ -1,0 +1,48 @@
+
+Broken Geometry
+
++  unclosed sectors
++  sectors with ceil_h < floor_h
+
++  linedefs without a right side
++  zero length linedefs
+
++  linedefs which directly overlap (share a pair of vertices)
++  linedefs which partially overlap / cross over  [ties in with unclosed logic]
+
++  vertices at same location
+
+
+Things
+
++  things stuck in walls or each other
++  no player 1 start
+-  no player 2/3/4 start  (merely show it)
+-  no deathmatch starts   (merely show it)
+
+
+Texturing
+
+-  missing textures on solid walls
+-  mid-masked textures on solid walls
+
+-  valid flat names in sectors
+-  valid texture names in sidedefs
+
+
+Miscellaneous
+
+-  one-sided lines without IMPASS flag   [FIX]
+-  two-sided lines without 2S flag       [FIX]
+
+-  unused vertices  [REMOVE]
+-  unused sidedefs  [REMOVE]
+-  unused sectors   [REMOVE]
+
+-  sidedefs used on multiple lines (or same line twice)  [UNPACK]
+
+?  linedef with tag but no matching sector
+?  sector with tag but no matching linedef
+
+?  list of used tag numbers
+
