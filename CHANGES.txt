@@ -2,15 +2,19 @@
 CHANGES IN Eureka 0.xx
 ======================
 
-+  new Recent Files dialog
++  large overhaul of file handling (and File menu)
+   +  'Manage Wads' dialog allows setting the IWAD, port and resource wads  
+   +  'Open Map' dialog, with buttons for easy map selection
+   +  'Recent Files' dialog (CTRL-R or File menu)
+   +  the iwad/port/resource settings are saved in the PWAD
+   +  better 'Export Map' dialog 
+   +  IWADs found by the user are remembered
 
 +  new Default Properties panel (shown in vertex mode)
 
 +  implemented picture mode for Thing browser
 
-+  implemented Move/Scale/Rotate dialogs (via Edit menu)
-
-+  better dialog for choosing maps
++  new Move/Scale/Rotate dialogs (via Edit menu)
 
 -  added 'd' disconnect command for sectors
 -  added 'm' merge command for vertices
@@ -26,6 +30,7 @@ CHANGES IN Eureka 0.xx
 -  sectors created outside of map now have fixed size
 -  can disable multi-select ('multi_select_modifier' config var)
 -  got the 'j' jump-to-object command working properly
+-  show a '*' in window title when map has unsaved changes
 -  new 'View/Whole Selection' command
 
 -  fixed wrong color of a tagged linedef or sector
