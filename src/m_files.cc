@@ -528,19 +528,82 @@ const char * M_PickDefaultIWAD()
 }
 
 
-bool M_ParseEurekaLump(Wad_file *wad)
+void M_ParseEurekaLump(Wad_file *wad)
 {
-	// FIXME !!!
+	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
+
+	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
+
+	if (! lump)
+	{
+		LogPrintf("--> does not exist.\n");
+		return;
+	}
+	
+	if (! lump->Seek())
+	{
+		LogPrintf("--> error seeking.\n");
+		return;
+	}
+
+	ResourceWads.clear();
+
+	static char line[FL_PATH_MAX];
+
+	// skip comment on first line
+	lump->GetLine(line, sizeof(line));
+
+	while (lump->GetLine(line, sizeof(line)))
+	{
+		StringRemoveCRLF(line);
+
+		char *pos = strchr(line, ' ');
+		if (! pos)
+		{
+			// FIXME warning
+			continue;
+		}
+
+		*pos++ = 0;
+
+		if (strcmp(line, "iwad") == 0)
+		{
+			if (FileExists(pos))
+				Iwad_name = StringDup(pos);
+			else
+				LogPrintf("  no longer exists: %s\n", pos);
+		}
+		else if (strcmp(line, "resource") == 0)
+		{
+			if (FileExists(pos))
+				ResourceWads.push_back(StringDup(pos));
+			else
+				LogPrintf("  no longer exists: %s\n", pos);
+		}
+		else if (strcmp(line, "port") == 0)
+		{
+			Port_name = StringDup(pos);
+		}
+		else
+		{
+			// FIXME: warning
+			continue;
+		}
+	}
 }
 
 
 void M_WriteEurekaLump(Wad_file *wad)
 {
+	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
+
 	int oldie = wad->FindLumpNum(EUREKA_LUMP);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
 	
 	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
+
+	lump->Printf("# Eureka project info\n");
 
 	if (Iwad_name)
 		lump->Printf("iwad %s\n", Iwad_name);
@@ -550,6 +613,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	for (unsigned int i = 0 ; i < ResourceWads.size() ; i++)
 		lump->Printf("resource %s\n", ResourceWads[i]);
+
+	lump->Finish();
 }
 
 
