@@ -375,12 +375,12 @@ fprintf(stderr, "new_name : %s\n", new_name);
 //------------------------------------------------------------------------
 
 
-void CMD_PlayMap()
+void CMD_TestMap()
 {
 	// TODO: remove this restriction
 	if (! edit_wad)
 	{
-		Notify(-1, -1, "Cannot play the map unless you are editing a PWAD.", NULL);
+		Notify(-1, -1, "Cannot test the map unless you are editing a PWAD.", NULL);
 		return;
 	}
 

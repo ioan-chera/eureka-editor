@@ -22,7 +22,7 @@
 #define __EUREKA_E_NODES_H__
 
 void CMD_BuildNodes();
-void CMD_PlayMap();
+void CMD_TestMap();
 
 #endif  /* __EUREKA_E_NODES_H__ */
 

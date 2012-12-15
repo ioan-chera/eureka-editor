@@ -86,7 +86,7 @@ static void file_do_build_nodes(Fl_Widget *w, void * data)
 
 static void file_do_test_map(Fl_Widget *w, void * data)
 {
-	CMD_PlayMap();
+	CMD_TestMap();
 }
 
 
