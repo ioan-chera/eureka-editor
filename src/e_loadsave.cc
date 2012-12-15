@@ -612,6 +612,12 @@ void CMD_OpenMap()
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		M_ParseEurekaLump(wad);
+		Main_LoadResources();
+	}
+
 	LoadLevel(wad, map_name);
 
 	Replacer = false;
@@ -669,6 +675,12 @@ void CMD_OpenRecentMap()
 
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
+
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		M_ParseEurekaLump(wad);
+		Main_LoadResources();
+	}
 
 	LoadLevel(wad, map_name);
 
