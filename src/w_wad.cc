@@ -116,6 +116,22 @@ bool Lump_c::Write(void *data, int len)
 }
 
 
+void Lump_c::Printf(const char *msg, ...)
+{
+	static char buffer[FL_PATH_MAX];
+
+	va_list args;
+
+	va_start(args, msg);
+	vsnprintf(buffer, sizeof(buffer), msg, args);
+	va_end(args);
+
+	buffer[sizeof(buffer) - 1] = 0;
+
+	Write(buffer, strlen(buffer));
+}
+
+
 bool Lump_c::Finish()
 {
 	return parent->FinishLump();

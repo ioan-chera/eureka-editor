@@ -66,6 +66,9 @@ public:
 	// been created with Wad_file::AddLump() can be written to.
 	bool Write(void *data, int len);
 
+	// write some text to the lump
+	void Printf(const char *msg, ...);
+
 	// mark the lump as finished (after writing it).
 	bool Finish();
 
