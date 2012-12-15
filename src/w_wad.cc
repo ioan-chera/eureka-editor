@@ -103,6 +103,41 @@ bool Lump_c::Read(void *data, int len)
 }
 
 
+bool Lump_c::GetLine(char *buffer, size_t buf_size)
+{
+	int cur_pos = (int)ftell(parent->fp);
+
+	if (cur_pos < 0)
+		return false;
+
+	cur_pos -= l_start;
+
+	if (cur_pos >= l_length)
+		return false;  // EOF
+
+	char *dest = buffer;
+	char *dest_end = buffer + buf_size - 1;
+
+	for (; cur_pos < l_length && dest < dest_end ; cur_pos++)
+	{
+		*dest++ = fgetc(parent->fp);
+
+		if (dest[-1] == '\n')
+			break;
+
+		if (ferror(parent->fp))
+			return false;
+
+		if (feof(parent->fp))
+			break;
+	}
+
+	*dest = 0;
+
+	return true;  // OK
+}
+
+
 bool Lump_c::Write(void *data, int len)
 {
 	SYS_ASSERT(data && len > 0);

@@ -62,6 +62,9 @@ public:
 	// read some data from the lump, returning true if OK.
 	bool Read(void *data, int len);
 
+	// read a line of text, returns true if OK, false on EOF
+	bool GetLine(char *buffer, size_t buf_size);
+
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() can be written to.
 	bool Write(void *data, int len);
