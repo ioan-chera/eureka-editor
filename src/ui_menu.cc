@@ -443,8 +443,8 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Find Object",  FL_COMMAND + 'f', FCAL search_do_find },
-		{ "Find &Next",    FL_COMMAND + 'g', FCAL search_do_find_next },
+//TODO		{ "&Find Object",  FL_COMMAND + 'f', FCAL search_do_find },
+//TODO		{ "Find &Next",    FL_COMMAND + 'g', FCAL search_do_find_next },
 		{ "&Jump to Object",   0, FCAL search_do_jump },
 		{ 0 },
 
