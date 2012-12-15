@@ -11,27 +11,9 @@ General
 -  re-implement when 'Iwad_name' is a directory name
 
 
-+  support resource wads
-
->>>   (c) File / Manage Wads: a window showing iwad, pwad & resource wads,
-       [probably port and mod too] and ability to change them
-
-   (d) persist in a lump, e.g. "__EUREKA"
-
-       # Eureka project info
-       iwad blah_Blah
-       port edge
-       resource foo
-       resource bar
-       resource jiminy_cricket
-
-
-
 
 Documentation
 -------------
-
-(e) PUT IN CHANGELOG: load definitions from mods/<base>.ugh
 
 
 Coding
