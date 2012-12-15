@@ -118,8 +118,8 @@ public:
 	};
 
 private:
-	Fl_Choice *iwad_name;
-	Fl_Choice *port_name;
+	Fl_Choice *iwad_choice;
+	Fl_Choice *port_choice;
 
 	Fl_Output *res_name[RES_NUM];
 
@@ -148,6 +148,7 @@ private:
 	static void   use_callback(Fl_Button*, void*);
 
 	void Populate();
+	void PopulateIWADs(const char *curr_iwad);
 
 public:
 	/*

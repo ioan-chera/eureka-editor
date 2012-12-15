@@ -675,15 +675,15 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 		by += 40;
 	}
 	
-	iwad_name = new Fl_Choice(120, by+25, 170, 29, "Game IWAD: ");
-	iwad_name->labelfont(FL_HELVETICA_BOLD);
-	iwad_name->down_box(FL_BORDER_BOX);
-	iwad_name->callback((Fl_Callback*)iwad_callback, this);
+	iwad_choice = new Fl_Choice(120, by+25, 170, 29, "Game IWAD: ");
+	iwad_choice->labelfont(FL_HELVETICA_BOLD);
+	iwad_choice->down_box(FL_BORDER_BOX);
+	iwad_choice->callback((Fl_Callback*)iwad_callback, this);
 
-	port_name = new Fl_Choice(120, by+60, 170, 29, "Port: ");
-	port_name->labelfont(FL_HELVETICA_BOLD);
-	port_name->down_box(FL_BORDER_BOX);
-	port_name->callback((Fl_Callback*)port_callback, this);
+	port_choice = new Fl_Choice(120, by+60, 170, 29, "Port: ");
+	port_choice->labelfont(FL_HELVETICA_BOLD);
+	port_choice->down_box(FL_BORDER_BOX);
+	port_choice->callback((Fl_Callback*)port_callback, this);
 
 	{
 		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
@@ -759,36 +759,43 @@ bool UI_ProjectSetup::Run()
 }
 
 
-void UI_ProjectSetup::Populate()
+void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 {
-	const char *iwad_list;
+	const char *iwad_string;
 	int iwad_val = 0;
 
-	iwad_list = M_KnownIWADsForMenu(&iwad_val, Iwad_name ? Iwad_name : "xxx");
+	iwad_string = M_KnownIWADsForMenu(&iwad_val, curr_iwad ? curr_iwad : "xxx");
 
+	iwad_choice->clear();
+
+	if (iwad_string[0])
+	{
+		iwad_choice->add(iwad_string);
+		iwad_choice->value(iwad_val);
+
+		iwad = M_QueryKnownIWAD(iwad_choice->mvalue()->text);
+	}
+}
+
+
+void UI_ProjectSetup::Populate()
+{
 	iwad = NULL;
 
-	if (iwad_list[0])
-	{
-		iwad_name->add(iwad_list);
-		iwad_name->value(iwad_val);
-
-		iwad = M_QueryKnownIWAD(iwad_name->mvalue()->text);
-	}
+	PopulateIWADs(Iwad_name);
 
 	if (! iwad)
 		ok_but->deactivate();
 
-
-	const char *port_list;
+	const char *port_string;
 	int port_val = 0;
 
-	port_list = M_CollectDefsForMenu("ports", &port_val, Port_name ? Port_name : "xxx");
+	port_string = M_CollectDefsForMenu("ports", &port_val, Port_name ? Port_name : "xxx");
 
-	if (port_list[0])
+	if (port_string[0])
 	{
-		port_name->add  (port_list);
-		port_name->value(port_val);
+		port_choice->add  (port_string);
+		port_choice->value(port_val);
 	}
 
 
@@ -892,14 +899,10 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 	that->ok_but->activate();
 
-// FIXME : temp crap !!!!!
 	M_AddKnownIWAD(game, that->iwad);
 	M_SaveRecent();
 
-	// FIXME: rebuild iwad_name menu
-	that->iwad_name->clear();
-	that->iwad_name->add(fl_filename_name(that->iwad));
-	that->iwad_name->value(0);
+	that->PopulateIWADs(that->iwad);
 }
 
 
