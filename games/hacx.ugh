@@ -1,0 +1,796 @@
+#------------------------------------------------------------------------
+#  HACX definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2012 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+level_name  map01
+
+sky_flat  F_SKY1
+sky_color   207
+
+default_port  boom
+default_textures  STARTAN3  FLOOR4_8  CEIL3_5
+default_thing  2014
+
+include "doom_specials"
+
+#---- THINGS ----------------
+
+thinggroup p 4F4 "Player"
+thinggroup m F00 "Monster"
+thinggroup w FA0 "Weapon"
+thinggroup a 850 "Ammunition"
+thinggroup h 280 "Health, Armor"
+thinggroup b 280 "Bonus"
+thinggroup k F0F "Key"
+thinggroup d 66C "Decoration"
+thinggroup l 66C "Light Source"
+thinggroup g 66C "Gore"
+thinggroup - 0BD "OTHER"
+
+thing    1 p -  16 PLAY   "Player 1 start"
+thing    2 p -  16 PLAY   "Player 2 start"
+thing    3 p -  16 PLAY   "Player 3 start"
+thing    4 p -  16 PLAY   "Player 4 start"
+thing  888 p -  12 DOGS   "Dog (MBF)"
+thing   11 p -  16 PLAYF1 "Deathmatch start"
+thing   14 p -  16 TFOG   "Teleport exit"
+
+thing 2001 w -  20 SHOT   "Tazer"
+thing   82 w -  20 SGN2   "Cyrogun"
+thing 2002 w -  20 MGUN   "Uzi"
+thing 2003 w -  20 LAUN   "Photon Zooka"
+thing 2004 w -  20 PLAS   "Anti-gun"
+thing 2005 w -  20 CSAW   "Reznator"
+thing 2006 w -  20 BFUG   "Nuker"
+
+thing 2007 a -  20 CLIP   "Clip"
+thing 2048 a -  20 AMMO   "Box of bullets"
+thing 2008 a -  20 SHEL   "Shells"
+thing 2049 a -  20 SBOX   "Box of shells"
+thing 2010 a -  20 ROCK   "Torpedo"
+thing 2046 a -  20 BROK   "Box of torpedoes"
+thing 2047 a -  20 CELL   "Molecules"
+thing   17 a -  20 CELP   "Box of molecules"
+
+## FIXME: names for these
+thing    8 b -  20 BPAK   "Backpack of ammo"
+thing 2022 b l  20 PINV   "Invulnerability"
+thing 2023 b l  20 PSTR   "Berserk"
+thing 2024 b l  20 PINS   "Partial invisibility"
+thing 2025 b l  20 SUIT   "Radiation suit"
+thing 2026 b -  20 PMAP   "Computer map"
+thing 2045 b l  20 PVIS   "Light amp. goggles"
+
+thing 2011 h -  20 STIM   "Microkit"
+thing 2012 h -  20 MEDI   "Hypo"
+thing 2013 h l  20 SOUL   "Smart drug"
+thing 2014 h -  20 BON1   "Dampener"
+thing 2015 h -  20 BON2   "Inhaler"
+thing 2018 h l  20 ARM1   "Kevlar Armor"
+thing 2019 h l  20 ARM2   "Super Armor"
+
+thing    5 k l  20 BKEY   "Password"
+thing    6 k l  20 YKEY   "C-key"
+thing   13 k l  20 RKEY   "Keycard"
+thing   40 k l  20 BSKU   "Blue Z-key"
+thing   39 k l  20 YSKU   "Yellow Z-key"
+thing   38 k l  20 RSKU   "Red Z-key"
+
+##thing   15 g -  16 PLAYN  "Dead player (green)"
+##thing   18 g -  20 POSSL  "Dead trooper"
+##thing   19 g -  20 SPOSL  "Dead sergeant"
+##thing   20 g -  20 TROOM  "Dead imp"
+##thing   21 g -  16 SARGN  "Dead demon"
+##thing   23 g -  16 SKULK  "Dead lost soul"
+
+thing 3004 m -  20 POSS   "Thug"
+thing    9 m -  20 SPOS   "Android"
+thing 3001 m -  20 TROO   "I_C_E"
+thing 3002 m -  30 SARG   "Buzzer"
+thing 3003 m -  24 BOSS   "Terminatrix"
+thing   58 m i  30 SARG   "Stealth"
+thing 3006 m l  16 SKUL   "D-Man"
+thing   16 m -  40 CYBR   "Cyberdemon"
+thing   84 m -  20 SSWV   "Roaming mine"
+thing   65 m -  20 CPOS   "Monstruct"
+thing   69 m -  24 BOS2A1C1 "Mechamaniac"
+thing   68 m -  64 BSPI   "Thorn Thing"
+thing   71 m -  31 PAIN   "Majong 7"
+thing   67 m -  48 FATT   "Phage"
+
+## FIXME !!! decorations (ETC).... !!!
+
+
+#---- TEXTURES ----------------
+
+## FIXME: more categories
+texturegroup y "Cyberspace"
+texturegroup - "OTHER"
+
+## FIXME: assign to categories
+texture - AASHITTY
+texture - ASHWALL2
+texture - ASHWALL3
+texture - ASHWALL4
+texture - ASHWALL6
+texture - ASHWALL7
+texture - BFALL1
+texture - BFALL2
+texture - BFALL3
+texture - BFALL4
+texture - BIGBRIK1
+texture - BIGBRIK2
+texture - BIGBRIK3
+texture - BIGDOOR1
+texture - BIGDOOR2
+texture - BIGDOOR4
+texture - BLAKWAL1
+texture - BLAKWAL2
+texture - BLODGR1
+texture - BLODGR2
+texture - BLODGR3
+texture - BLODGR4
+texture - BLODRIP1
+texture - BLODRIP2
+texture - BLODRIP3
+texture - BLODRIP4
+texture - BRICK1
+texture - BRICK10
+texture - BRICK11
+texture - BRICK12
+texture - BRICK2
+texture - BRICK3
+texture - BRICK4
+texture - BRICK5
+texture - BRICK6
+texture - BRICK7
+texture - BRICK8
+texture - BRICK9
+texture - BRICKLIT
+texture - BRNBIGC
+texture - BRNBIGL
+texture - BRNBIGR
+texture - BRNPOIS
+texture - BRNPOIS2
+texture - BRNSMAL1
+texture - BRNSMAL2
+texture - BRNSMALC
+texture - BRNSMALL
+texture - BRNSMALR
+texture - BRONZE1
+texture - BRONZE2
+texture - BRONZE3
+texture - BRONZE4
+texture - BROWN1
+texture - BROWN144
+texture - BROWN96
+texture - BROWNGRN
+texture - BROWNHUG
+texture - BROWNPIP
+texture - BRWINDOW
+texture - BSTONE1
+texture - BSTONE2
+texture - BSTONE3
+texture - CEMENT7
+texture - CEMENT8
+texture - CEMENT9
+texture - COMP2
+texture - COMPSPAN
+texture - COMPSTA1
+texture - COMPSTA2
+texture - COMPTALL
+texture - COMPTILE
+texture - COMPUTE1
+texture - COMPUTE2
+texture - COMPUTE3
+texture - CRACKLE2
+texture - CRACKLE4
+texture - CRATE3
+texture - DBRAIN1
+texture - DBRAIN2
+texture - DBRAIN3
+texture - DBRAIN4
+texture - DOOR1
+texture - DOOR3
+texture - DOORBLU
+texture - DOORRED
+texture - DOORSTOP
+texture - DOORTRAK
+texture - DOORYEL
+texture - EXITDOOR
+texture - EXITSIGN
+texture - FIREWALA
+texture - FIREWALB
+texture - FIREWALC
+texture - FIREWALD
+texture - FIREWALL
+texture - GRAY4
+texture - GRAY5
+texture - GRAY7
+texture - GRAYTALL
+texture - GSTFONT1
+texture - GSTFONT2
+texture - GSTFONT3
+texture - HD1
+texture - HD2
+texture - HD3
+texture - HD4
+texture - HD5
+texture - HD6
+texture - HD7
+texture - HD8
+texture - HD9
+texture - HW162
+texture - HW163
+texture - HW164
+texture - HW165
+texture - HW166
+texture - HW167
+texture - HW168
+texture - HW169
+texture - HW170
+texture - HW171
+texture - HW172
+texture - HW173
+texture - HW174
+texture - HW175
+texture - HW176
+texture - HW177
+texture - HW178
+texture - HW179
+texture - HW180
+texture - HW181
+texture - HW182
+texture - HW183
+texture - HW184
+texture - HW185
+texture - HW186
+texture - HW187
+texture - HW188
+texture - HW189
+texture - HW190
+texture - HW191
+texture - HW192
+texture - HW193
+texture - HW194
+texture - HW195
+texture - HW196
+texture - HW197
+texture - HW198
+texture - HW199
+texture - HW200
+texture - HW201
+texture - HW202
+texture - HW203
+texture - HW204
+texture - HW205
+texture - HW206
+texture - HW207
+texture - HW208
+texture - HW209
+texture - HW210
+texture - HW211
+texture - HW212
+texture - HW213
+texture - HW214
+texture - HW215
+texture - HW216
+texture - HW217
+texture - HW218
+texture - HW219
+texture - HW221
+texture - HW222
+texture - HW223
+texture - HW224
+texture - HW225
+texture - HW226
+texture - HW227
+texture - HW228
+texture - HW229
+texture - HW24
+texture - HW300
+texture - HW301
+texture - HW302
+texture - HW303
+texture - HW304
+texture - HW305
+texture - HW306
+texture - HW307
+texture - HW308
+texture - HW309
+texture - HW310
+texture - HW311
+texture - HW312
+texture - HW313
+texture - HW314
+texture - HW315
+texture - HW316
+texture - HW317
+texture - HW318
+texture - HW319
+texture - HW320
+texture - HW321
+texture - HW322
+texture - HW323
+texture - HW324
+texture - HW325
+texture - HW326
+texture - HW327
+texture - HW328
+texture - HW329
+texture - HW330
+texture - HW331
+texture - HW332
+texture - HW333
+texture - HW334
+texture - HW335
+texture - HW336
+texture - HW337
+texture - HW338
+texture - HW339
+texture - HW340
+texture - HW341
+texture - HW343
+texture - HW344
+texture - HW345
+texture - HW347
+texture - HW348
+texture - HW349
+texture - HW350
+texture - HW351
+texture - HW352
+texture - HW353
+texture - HW354
+texture - HW355
+texture - HW356
+texture - HW357
+texture - HW358
+texture - HW361
+texture - HW363
+texture - HW364
+texture - HW365
+texture - HW366
+texture - HW367
+texture - HW500
+texture - HW501
+texture - HW502
+texture - HW503
+texture - HW504
+texture - HW505
+texture - HW506
+texture - HW507
+texture - HW508
+texture - HW509
+texture - HW510
+texture - HW511
+texture - HW512
+texture - HW513
+texture - HW600
+texture - HW601
+texture - LITE2
+texture - LITE3
+texture - LITE4
+texture - LITE5
+texture - LITEBLU1
+texture - LITEBLU2
+texture - LITEBLU3
+texture - LITEBLU4
+texture - MARBFAC4
+texture - MARBGRAY
+texture - METAL1
+texture - METAL2
+texture - METAL3
+texture - METAL4
+texture - METAL5
+texture - METAL6
+texture - METAL7
+texture - MIDBARS1
+texture - MIDBARS3
+texture - MIDBRONZ
+texture - MIDSPACE
+texture - MODWALL1
+texture - MODWALL2
+texture - MODWALL3
+texture - MODWALL4
+texture - NUKE24
+texture - NUKEDGE1
+texture - NUKESLAD
+texture - PANBLACK
+texture - PANBLUE
+texture - PANBOOK
+texture - PANBORD1
+texture - PANBORD2
+texture - PANCASE1
+texture - PANCASE2
+texture - PANEL1
+texture - PANEL2
+texture - PANEL3
+texture - PANEL4
+texture - PANEL5
+texture - PANEL6
+texture - PANEL7
+texture - PANEL8
+texture - PANEL9
+texture - PANRED
+texture - PIPE2
+texture - PIPES
+texture - PIPEWAL1
+texture - PIPEWAL2
+texture - PLANET1
+texture - PLAT1
+texture - REDWALL1
+texture - ROCK1
+texture - ROCK2
+texture - ROCK3
+texture - ROCK4
+texture - ROCK5
+texture - SAILBOTA
+texture - SAILBOTB
+texture - SAILTOPA
+texture - SAILTOPB
+texture - SFALL1
+texture - SFALL2
+texture - SFALL3
+texture - SFALL4
+texture - SHAWN2
+texture - SILVER1
+texture - SILVER2
+texture - SILVER3
+texture - SK_LEFT
+texture - SK_RIGHT
+texture - SKY1
+texture - SKY2
+texture - SKY3
+texture - SLADPOIS
+texture - SLADRIP1
+texture - SLADRIP2
+texture - SLADRIP3
+texture - SLADWALL
+texture - SLOPPY1
+texture - SLOPPY2
+texture - SPACEW2
+texture - SPACEW3
+texture - SPACEW4
+texture - SPCDOOR1
+texture - SPCDOOR2
+texture - SPCDOOR3
+texture - SPCDOOR4
+texture - SP_DUDE7
+texture - SP_DUDE8
+texture - SP_FACE2
+texture - STARG1
+texture - STARG3
+texture - STARGR1
+texture - STARTAN1
+texture - STARTAN2
+texture - STARTAN3
+texture - STEP1
+texture - STEP2
+texture - STEP3
+texture - STEP4
+texture - STEP5
+texture - STEP6
+texture - STONE
+texture - STONE2
+texture - STONE3
+texture - STONE4
+texture - STONE5
+texture - STONE6
+texture - STONE7
+texture - STONPOIS
+texture - STUCCO
+texture - STUCCO1
+texture - STUCCO2
+texture - STUCCO3
+texture - SUPPORT2
+texture - SW1BLUE
+texture - SW1BRCOM
+texture - SW1BRIK
+texture - SW1BRN1
+texture - SW1BRN2
+texture - SW1BRNGN
+texture - SW1BROWN
+texture - SW1CMT
+texture - SW1COMM
+texture - SW1COMP
+texture - SW1DIRT
+texture - SW1EXIT
+texture - SW1GARG
+texture - SW1GRAY
+texture - SW1GRAY1
+texture - SW1GSTON
+texture - SW1HOT
+texture - SW1LION
+texture - SW1MARB
+texture - SW1MET2
+texture - SW1METAL
+texture - SW1MOD1
+texture - SW1PANEL
+texture - SW1PIPE
+texture - SW1ROCK
+texture - SW1SATYR
+texture - SW1SKIN
+texture - SW1SKULL
+texture - SW1SLAD
+texture - SW1STARG
+texture - SW1STON1
+texture - SW1STON2
+texture - SW1STON6
+texture - SW1STONE
+texture - SW1STRTN
+texture - SW1TEK
+texture - SW1VINE
+texture - SW1WDMET
+texture - SW1WOOD
+texture - SW1ZIM
+texture - SW2BLUE
+texture - SW2BRCOM
+texture - SW2BRIK
+texture - SW2BRN1
+texture - SW2BRN2
+texture - SW2BRNGN
+texture - SW2BROWN
+texture - SW2CMT
+texture - SW2COMM
+texture - SW2COMP
+texture - SW2DIRT
+texture - SW2EXIT
+texture - SW2GARG
+texture - SW2GRAY
+texture - SW2GRAY1
+texture - SW2GSTON
+texture - SW2HOT
+texture - SW2LION
+texture - SW2MARB
+texture - SW2MET2
+texture - SW2METAL
+texture - SW2MOD1
+texture - SW2PANEL
+texture - SW2PIPE
+texture - SW2ROCK
+texture - SW2SATYR
+texture - SW2SKIN
+texture - SW2SKULL
+texture - SW2SLAD
+texture - SW2STARG
+texture - SW2STON1
+texture - SW2STON2
+texture - SW2STON6
+texture - SW2STONE
+texture - SW2STRTN
+texture - SW2TEK
+texture - SW2VINE
+texture - SW2WDMET
+texture - SW2WOOD
+texture - SW2ZIM
+texture - TANROCK2
+texture - TANROCK3
+texture - TANROCK4
+texture - TANROCK5
+texture - TANROCK7
+texture - TANROCK8
+texture - TEKBRON1
+texture - TEKBRON2
+texture - TEKGREN1
+texture - TEKGREN2
+texture - TEKGREN3
+texture - TEKGREN4
+texture - TEKGREN5
+texture - TEKLITE
+texture - TEKLITE2
+texture - TEKWALL1
+texture - TEKWALL2
+texture - TEKWALL3
+texture - TEKWALL4
+texture - TEKWALL5
+texture - TEKWALL6
+texture - WFALL1
+texture - WFALL2
+texture - WFALL3
+texture - WFALL4
+texture - WOOD10
+texture - WOOD12
+texture - WOOD6
+texture - WOOD7
+texture - WOOD8
+texture - WOOD9
+texture - WOODMET1
+texture - WOODMET2
+texture - WOODMET3
+texture - WOODMET4
+texture - WOODVERT
+texture - ZDOORB1
+texture - ZDOORF1
+texture - ZELDOOR
+texture - ZIMMER1
+texture - ZIMMER2
+texture - ZIMMER3
+texture - ZIMMER4
+texture - ZIMMER5
+texture - ZIMMER7
+texture - ZIMMER8
+texture - ZZWOLF1
+texture - ZZWOLF10
+texture - ZZWOLF11
+texture - ZZWOLF12
+texture - ZZWOLF13
+texture - ZZWOLF2
+texture - ZZWOLF3
+texture - ZZWOLF4
+texture - ZZWOLF5
+texture - ZZWOLF6
+texture - ZZWOLF7
+texture - ZZWOLF9
+texture - ZZZFACE1
+texture - ZZZFACE2
+texture - ZZZFACE3
+texture - ZZZFACE4
+texture - ZZZFACE5
+texture - ZZZFACE6
+texture - ZZZFACE7
+texture - ZZZFACE8
+texture - ZZZFACE9
+
+
+#---- FLATS ----------------
+
+## FIXME: assign to categories
+flat - BLOOD1
+flat - BLOOD2
+flat - BLOOD3
+flat - CEIL1_1
+flat - CEIL1_2
+flat - CEIL1_3
+flat - CEIL3_1
+flat - CEIL3_2
+flat - CEIL3_3
+flat - CEIL3_4
+flat - CEIL3_5
+flat - CEIL3_6
+flat - CEIL4_1
+flat - CEIL4_2
+flat - CEIL4_3
+flat - CEIL5_1
+flat - CEIL5_2
+flat - COMP01
+flat - CONS1_1
+flat - CONS1_5
+flat - CONS1_7
+flat - CRATOP1
+flat - CRATOP2
+flat - DEM1_1
+flat - DEM1_2
+flat - DEM1_3
+flat - DEM1_4
+flat - DEM1_5
+flat - DEM1_6
+flat - FLAT1
+flat - FLAT10
+flat - FLAT1_1
+flat - FLAT1_2
+flat - FLAT1_3
+flat - FLAT14
+flat - FLAT17
+flat - FLAT18
+flat - FLAT19
+flat - FLAT2
+flat - FLAT20
+flat - FLAT22
+flat - FLAT23
+flat - FLAT3
+flat - FLAT4
+flat - FLAT5
+flat - FLAT5_1
+flat - FLAT5_2
+flat - FLAT5_3
+flat - FLAT5_4
+flat - FLAT5_5
+flat - FLAT5_6
+flat - FLAT5_7
+flat - FLAT5_8
+flat - FLAT8
+flat - FLAT9
+flat - FLOOR0_1
+flat - FLOOR0_2
+flat - FLOOR0_3
+flat - FLOOR0_5
+flat - FLOOR0_6
+flat - FLOOR0_7
+flat - FLOOR1_1
+flat - FLOOR1_6
+flat - FLOOR1_7
+flat - FLOOR3_3
+flat - FLOOR4_1
+flat - FLOOR4_5
+flat - FLOOR4_6
+flat - FLOOR4_8
+flat - FLOOR5_1
+flat - FLOOR5_2
+flat - FLOOR5_3
+flat - FLOOR5_4
+flat - FLOOR6_1
+flat - FLOOR6_2
+flat - FLOOR7_1
+flat - FLOOR7_2
+flat - F_SKY1
+flat - FWATER1
+flat - FWATER2
+flat - FWATER3
+flat - FWATER4
+flat - GATE1
+flat - GATE2
+flat - GATE3
+flat - GATE4
+flat - GRASS1
+flat - GRASS2
+flat - GRNLITE1
+flat - GRNROCK
+flat - LAVA1
+flat - LAVA2
+flat - LAVA3
+flat - LAVA4
+flat - MFLR8_1
+flat - MFLR8_2
+flat - MFLR8_3
+flat - MFLR8_4
+flat - NUKAGE1
+flat - NUKAGE2
+flat - NUKAGE3
+flat - RROCK01
+flat - RROCK02
+flat - RROCK03
+flat - RROCK04
+flat - RROCK05
+flat - RROCK06
+flat - RROCK07
+flat - RROCK08
+flat - RROCK09
+flat - RROCK10
+flat - RROCK11
+flat - RROCK12
+flat - RROCK13
+flat - RROCK14
+flat - RROCK15
+flat - SFLR6_1
+flat - SFLR6_4
+flat - SFLR7_1
+flat - SFLR7_4
+flat - SLIME01
+flat - SLIME02
+flat - SLIME03
+flat - SLIME04
+flat - SLIME05
+flat - SLIME06
+flat - SLIME07
+flat - SLIME08
+flat - SLIME09
+flat - SLIME10
+flat - SLIME11
+flat - SLIME12
+flat - SLIME13
+flat - SLIME14
+flat - SLIME15
+flat - SLIME16
+flat - STEP1
+flat - STEP2
+flat - TLITE6_1
+flat - TLITE6_4
+flat - TLITE6_5
+flat - TLITE6_6
+
