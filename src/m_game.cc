@@ -350,7 +350,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			if (line_groups.find( info->group) == line_groups.end())
 			{
-				LogPrintf("%s(%d): unknown line group '%c'.\n",
+				LogPrintf("%s(%d): unknown line group '%c'\n",
 						basename, lineno,  info->group);
 			}
 			else
@@ -402,7 +402,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			if (thing_groups.find(info->group) == thing_groups.end())
 			{
-				LogPrintf("%s(%d): unknown thing group '%c'.\n",
+				LogPrintf("%s(%d): unknown thing group '%c'\n",
 						basename, lineno, info->group);
 			}
 			else
@@ -436,7 +436,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
-				LogPrintf("%s(%d): unknown texture group '%c'.\n",
+				LogPrintf("%s(%d): unknown texture group '%c'\n",
 						  basename, lineno, group);
 			}
 			else
@@ -453,7 +453,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
-				LogPrintf("%s(%d): unknown texture group '%c'.\n",
+				LogPrintf("%s(%d): unknown texture group '%c'\n",
 						basename, lineno, group);
 			}
 			else
