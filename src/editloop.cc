@@ -865,25 +865,9 @@ static bool RadTrig_Key(int key, keymod_e mod)
 
 bool Editor_Key(int key, keymod_e mod)
 {
-	// in general, ignore ALT key
+	// in general, ignore ALT key (and META)
 	if (mod == KM_ALT)
 		return false;
-
-#if 0
-	// No (do it via menu) --> [F5]: pop up the "Preferences" menu
-
-	// Ditto: [M]: pop up the "Misc. operations" menu
-	if (key == 9876)
-	{
-		///---    edit.modpopup->set (edit.menubar->get_menu (MBI_MISC), 1);
-	}
-
-	// Ditto: [F9]: pop up the "Insert a standard object" menu
-	else if (key == FL_F+9)
-	{
-		///---    edit.modpopup->set (edit.menubar->get_menu (MBI_OBJECTS), 1);
-	}
-#endif
 
 	// [l], [s], [t], [v], [r]: switch mode
 	if (key == 't' || key == 'v' || key == 'l' ||
