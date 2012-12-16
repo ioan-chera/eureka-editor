@@ -39,6 +39,12 @@ General
        and figure out how to implement calling the function,
        e.g. int CMD_Whatever(int parm1, int parm2)
 
++  backup system
+      e.g. create ~/.eureka/backups/<basename>_###.wad
+           where ### is a number higher than any existing backup of that file
+      file is created whenever we CTRL-S, or CTRL-E into existing wad
+      limit files to a configurable number and size (delete lowest num)
+
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
    use fl_choice() code to bootstrap it.
@@ -191,13 +197,15 @@ Coding
 Editing
 -------
 
++  texture alignment feature
+
++  a menu for inserting shapes, especially N-sided polygon
+
 +  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
    that merging.
 
 !!  handle self-referencing linedefs in auto create/split sector
-
-+  texture alignment feature
 
 +  fix ClosestLine_CastXXX() and OppositeLineDef() to handle
    the case where the casted ray hits a vertex.
