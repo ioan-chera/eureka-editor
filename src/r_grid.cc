@@ -33,7 +33,7 @@
 Grid_State_c  grid;
 
 // config items
-int  default_grid_size = 16;
+int  default_grid_size = 64;
 bool default_grid_snap = true;
 
 
