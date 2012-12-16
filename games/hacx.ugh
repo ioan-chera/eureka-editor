@@ -40,7 +40,6 @@ thinggroup b 280 "Bonus"
 thinggroup k F0F "Key"
 thinggroup d 66C "Decoration"
 thinggroup l 66C "Light Source"
-thinggroup g 66C "Gore"
 thinggroup - 0BD "OTHER"
 
 thing    1 p -  16 PLAY   "Player 1 start"
@@ -79,11 +78,11 @@ thing 2045 b l  20 PVIS   "Light amp. goggles"
 
 thing 2011 h -  20 STIM   "Microkit"
 thing 2012 h -  20 MEDI   "Hypo"
-thing 2013 h l  20 SOUL   "Smart drug"
+thing 2013 h -  20 SOUL   "Smart drug"
 thing 2014 h -  20 BON1   "Dampener"
 thing 2015 h -  20 BON2   "Inhaler"
-thing 2018 h l  20 ARM1   "Kevlar Armor"
-thing 2019 h l  20 ARM2   "Super Armor"
+thing 2018 h -  20 ARM1   "Kevlar Armor"
+thing 2019 h -  20 ARM2   "Super Armor"
 
 thing    5 k l  20 BKEY   "Password"
 thing    6 k l  20 YKEY   "C-key"
@@ -105,8 +104,7 @@ thing 3001 m -  20 TROO   "I_C_E"
 thing 3002 m -  30 SARG   "Buzzer"
 thing 3003 m -  24 BOSS   "Terminatrix"
 thing   58 m i  30 SARG   "Stealth"
-thing 3006 m l  16 SKUL   "D-Man"
-thing   16 m -  40 CYBR   "Cyberdemon"
+thing 3006 m -  16 SKUL   "D-Man"
 thing   84 m -  20 SSWV   "Roaming mine"
 thing   65 m -  20 CPOS   "Monstruct"
 thing   69 m -  24 BOS2A1C1 "Mechamaniac"
@@ -114,7 +112,32 @@ thing   68 m -  64 BSPI   "Thorn Thing"
 thing   71 m -  31 PAIN   "Majong 7"
 thing   67 m -  48 FATT   "Phage"
 
-## FIXME !!! decorations (ETC).... !!!
+## FIXME !!! many decorations are missing
+
+thing   45 l cl 16 TBLU   "Ceiling light"
+thing   46 l cl 16 TRED   "Chandelier"
+thing   56 l l  16 SMGT   "Torch"
+thing   55 l l  16 SMBT   "Desk Lamp"
+
+thing 2028 d -  16 COLU   "Monitor"
+thing   30 d -  16 COL1   "Robot torso"
+thing   31 d -  16 COL2   "Robot legs"
+thing   35 d -  16 CBRA   "Chair"
+thing   80 d -  16 POB2   "Skeleton"
+thing   44 d -  16 TGRN   "Shiny ball"
+
+thing   43 d -  16 TRE1   "Tall tree"
+thing   54 d -  32 TRE2   "Big tree"
+thing   47 d -  16 SMIT   "Shrub"
+thing   27 d -  16 POL4   "Bonzai"
+thing   26 d -  16 POL6   "Clay jug"
+thing   32 d -  16 COL3   "Pink flowers"
+
+thing   79 d -  16 POB1   "Stalagmite 1"
+thing   75 d -  16 HDB3   "Stalagmite 2"
+thing   76 d -  16 HDB4   "Stalagmite 3"
+thing   77 d c  16 HDB5   "Stalactite 1"
+thing   78 d c  16 HDB6   "Stalactite 2"
 
 
 #---- TEXTURES ----------------
