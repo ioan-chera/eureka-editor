@@ -118,15 +118,7 @@ General
    save early logs in memory
    ? ability to view the current logs
 
--  game-def setting: view_height
-
 -  config var for default starting mode
-
--  fix: [ ] keys not working when 3D preview is on
-
-?  fix: SHIFT + move mouse = keep current highlight
-
--  a way to slow down fake mouse wheels?
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
 
@@ -145,6 +137,10 @@ General
 -  uppercase the level lump name (Level_name global var)
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
+
+?  SHIFT + move mouse = keep current highlight
+
+?  a way to slow down fake mouse wheels?
 
 ?  nicer way to select map, render a small 2D version of each map
    and present them in a scrolling list.
@@ -216,14 +212,6 @@ Editing
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
-+  when copy-n-paste and a real sector is removed (or pasting into
-   a different map or wad) : we get linedefs with "-" as middle texture.
-   Handle this better.
-
-+  when one vertex of a linedef is moved (and not the other)
-   update the X offset on the appropriate side (right side for start,
-   left side for end vertex).
-
 +  scrollbars for the canvas
 
 +  View / Find
@@ -255,19 +243,15 @@ Editing
 
 -  quantization function: prevent linedefs from overlapping / crossing
 
--  when moving a sector and the camera is inside it, move camera too
-
 -  Multi-select : if CTRL is pressed, don't clear selection after drag
-
--  show a red '*' next to map name (info_bar AND window title)
-   when MadeChanges = 1
-   [perhaps make map name DARK_RED when Replacer is true]
 
 -  exchange object numbers
 
 ?  disconnect sectors : include islands (perhaps with 'D')
 
--  fix PointOutsideOfMap() code to handle places where the point
+?  when moving a sector and the camera is inside it, move camera too
+
+?  fix PointOutsideOfMap() code to handle places where the point
    cannot "see" the surrounding void space.
    
    TraceLineLoop on the linedef to the right, if faces_outward
@@ -276,10 +260,9 @@ Editing
 
    if geometry is broken : special result.
 
-??  have a special mode for the Thing/Sector/LineDef panels where
-    the user can set the default values.  Mode is indicated by the
-    title background being blue and title says "Default Properties".
-    Perhaps activated by right clicking the title (and/or a key).
+??  when one vertex of a linedef is moved (and not the other)
+    update the X offset on the appropriate side (right side for start,
+    left side for end vertex).
 
 ?  SHIFT + SPACE = no auto create/split sectors
 
@@ -361,7 +344,9 @@ Browser
 Game / Port Definitions
 -----------------------
 
-+  support HacX
+-  game-def setting: view_height
+
++  finish HacX support -- categorize the textures
 
 +  support Harmony
 
