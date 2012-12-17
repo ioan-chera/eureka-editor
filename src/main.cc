@@ -279,44 +279,6 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-static const char * DetermineIWAD()
-{
-#if 0
-	const char *path;
-
-	// handle -iwad parameter
-	if (Iwad_name)
-	{
-		// handle a directory name
-		if (fl_filename_isdir(Iwad_name))
-		{
-			path = SearchDirForIWAD(Iwad_name);
-			if (path)
-				return path;
-
-			FatalError("Unable to find any IWAD in directory: %s\n", Iwad_name);
-		}
-
-		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name))
-		{
-			Iwad_name = ReplaceExtension(Iwad_name, "wad");
-		}
-
-		// handle a full path
-		if (FindBaseName(Iwad_name) != Iwad_name)
-			return Iwad_name;
-
-		// FALL THROUGH to below code
-		// (since Iwad_name contains a bare name)
-	}
-#endif
-
-	FatalError("Unable to find any IWAD\n");
-	return ""; /* NOT REACHED */
-}
-
-
 const char * DetermineGame(const char *iwad_name)
 {
 	// IDEA: allow override via -game parameter
@@ -825,6 +787,10 @@ int main(int argc, char *argv[])
 
 	if (Iwad_name)
 	{
+		// if extension is missing, add ".wad"
+		if (! HasExtension(Iwad_name))
+			Iwad_name = ReplaceExtension(Iwad_name, "wad");
+
 		if (! FileExists(Iwad_name))
 			FatalError("Given IWAD does not exist: %s\n", Iwad_name);
 
