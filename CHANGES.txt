@@ -25,18 +25,19 @@ CHANGES IN Eureka 0.88
 -  shortcut key for 'File/Export Map' is now CTRL-E
 -  swapped sector height keys: '.' ',' <---> '[' ']'
 -  grid-snap button is easier to use (a toggle button now)
--  object number display works again, bound to 'J' key
--  added 'Toggle Grid Type' command to View menu
-
--  when rotating a group of things, update their angles too
--  sectors created outside of map now have fixed size
 -  can disable multi-select ('multi_select_modifier' config var)
--  got the 'j' jump-to-object command working properly
+-  sectors created outside of map now have fixed size
 -  show a '*' in window title when map has unsaved changes
--  new 'View/Whole Selection' command
 
+-  got 'View/Jump to Object' command working ('j' key)
+-  got 'View/Show Object Numbers' working (also on 'J' key)
+-  new 'View/Whole Selection' command
+-  new 'View/Toggle Grid Type' command
+
+-  fixed rotating a group of things to update their angles too
 -  fixed wrong color of a tagged linedef or sector
 -  fixed zooming out on File/Open when map has persistent state
+-  fixed middle texture when pasting and linedef lost a side
 
 +  support for HACX (not quite finished, but usable)
 
