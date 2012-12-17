@@ -783,9 +783,27 @@ int main(int argc, char *argv[])
 	}
 
 
-	// determine which IWAD to use
+	// determine which IWAD to use.
 
-	if (Iwad_name)
+	if (Iwad_name && FilenameIsBare(Iwad_name))
+	{
+		// a bare name (e.g. "heretic") is treated as a game name
+
+		// make lowercase
+		Iwad_name = StringDup(Iwad_name);
+		y_strlowr((char *)Iwad_name);
+
+		if (! CanLoadDefinitions("games", Iwad_name))
+			FatalError("Unsupported game: %s\n", Iwad_name);
+
+		const char * path = M_QueryKnownIWAD(Iwad_name);
+
+		if (! path)
+			FatalError("Cannot find IWAD for game: %s\n", Iwad_name);
+
+		Iwad_name = StringDup(path);
+	}
+	else if (Iwad_name)
 	{
 		// if extension is missing, add ".wad"
 		if (! HasExtension(Iwad_name))
