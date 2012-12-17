@@ -295,7 +295,61 @@ const char * DetermineGame(const char *iwad_name)
 }
 
 
-const char * DetermineMod(const char *res_name)
+static bool DetermineIWAD()
+{
+	if (Iwad_name && FilenameIsBare(Iwad_name))
+	{
+		// a bare name (e.g. "heretic") is treated as a game name
+
+		// make lowercase
+		Iwad_name = StringDup(Iwad_name);
+		y_strlowr((char *)Iwad_name);
+
+		if (! CanLoadDefinitions("games", Iwad_name))
+			FatalError("Unsupported game: %s\n", Iwad_name);
+
+		const char * path = M_QueryKnownIWAD(Iwad_name);
+
+		if (! path)
+			FatalError("Cannot find IWAD for game: %s\n", Iwad_name);
+
+		Iwad_name = StringDup(path);
+	}
+	else if (Iwad_name)
+	{
+		// if extension is missing, add ".wad"
+		if (! HasExtension(Iwad_name))
+			Iwad_name = ReplaceExtension(Iwad_name, "wad");
+
+		if (! FileExists(Iwad_name))
+			FatalError("Given IWAD does not exist: %s\n", Iwad_name);
+
+		const char *game = DetermineGame(Iwad_name);
+
+		if (! CanLoadDefinitions("games", game))
+			FatalError("Unsupported game: %s\n", Iwad_name);
+
+		M_AddKnownIWAD(game, Iwad_name);
+		M_SaveRecent();
+	}
+	else
+	{
+		Iwad_name = M_PickDefaultIWAD();
+
+		if (Iwad_name)
+			Iwad_name = StringDup(Iwad_name);
+		else
+		{
+			if (! Main_ProjectSetup(true))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+
+static const char * DetermineMod(const char *res_name)
 {
 	static char mod_name[FL_PATH_MAX];
 		
@@ -783,52 +837,9 @@ int main(int argc, char *argv[])
 	}
 
 
-	// determine which IWAD to use.
-
-	if (Iwad_name && FilenameIsBare(Iwad_name))
-	{
-		// a bare name (e.g. "heretic") is treated as a game name
-
-		// make lowercase
-		Iwad_name = StringDup(Iwad_name);
-		y_strlowr((char *)Iwad_name);
-
-		if (! CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unsupported game: %s\n", Iwad_name);
-
-		const char * path = M_QueryKnownIWAD(Iwad_name);
-
-		if (! path)
-			FatalError("Cannot find IWAD for game: %s\n", Iwad_name);
-
-		Iwad_name = StringDup(path);
-	}
-	else if (Iwad_name)
-	{
-		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name))
-			Iwad_name = ReplaceExtension(Iwad_name, "wad");
-
-		if (! FileExists(Iwad_name))
-			FatalError("Given IWAD does not exist: %s\n", Iwad_name);
-
-		const char *game = DetermineGame(Iwad_name);
-
-		M_AddKnownIWAD(game, Iwad_name);
-		M_SaveRecent();
-	}
-	else
-	{
-		Iwad_name = M_PickDefaultIWAD();
-
-		if (Iwad_name)
-			Iwad_name = StringDup(Iwad_name);
-		else
-		{
-			if (! Main_ProjectSetup(true))
-				goto quit;
-		}
-	}
+	// determine which IWAD to use
+	if (! DetermineIWAD())
+		goto quit;
 
 
 	Main_LoadResources();
@@ -848,9 +859,9 @@ int main(int argc, char *argv[])
 	Main_Loop();
 
 
+quit:
 	/* that's all folks! */
 
-quit:
 	LogPrintf("Quit\n");
 
 
