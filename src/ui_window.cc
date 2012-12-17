@@ -299,7 +299,7 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name)
 
 	copy_label(title_buf);
 
-	info_bar->SetMap(Level_name, "");
+	info_bar->SetMap(Level_name);
 }
 
 
@@ -326,6 +326,8 @@ void UI_MainWin::UpdateTitle(bool want_star)
 	}
 
 	copy_label(title_buf);
+
+	info_bar->SetMap(Level_name, want_star);
 }
 
 

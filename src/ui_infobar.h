@@ -46,7 +46,7 @@ public:
 	// FLTK virtual method for handling input events.
 
 public:
-	void SetMap(const char *name, const char *wad);
+	void SetMap(const char *name, bool want_star = false);
 	void SetChanged(bool is_changed);
 
 	void NewEditMode(char _mode);

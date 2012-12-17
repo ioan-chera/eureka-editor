@@ -223,11 +223,11 @@ void UI_InfoBar::SetMouse(double mx, double my)
 }
 
 
-void UI_InfoBar::SetMap(const char *name, const char *wad_name)
+void UI_InfoBar::SetMap(const char *name, bool want_star)
 {
-	char buffer[512];
+	char buffer[128];
 
-	sprintf(buffer, "%s  %s\n", name, wad_name);
+	sprintf(buffer, "%s%s", want_star ? "*" : "", name);
 
 	map_name->copy_label(buffer);
 }
