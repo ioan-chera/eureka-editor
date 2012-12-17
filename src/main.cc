@@ -304,7 +304,7 @@ static bool DetermineIWAD()
 		y_strlowr((char *)Iwad_name);
 
 		if (! CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unsupported game: %s\n", Iwad_name);
+			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
 
 		const char * path = M_QueryKnownIWAD(Iwad_name);
 
@@ -325,7 +325,7 @@ static bool DetermineIWAD()
 		const char *game = DetermineGame(Iwad_name);
 
 		if (! CanLoadDefinitions("games", game))
-			FatalError("Unsupported game: %s\n", Iwad_name);
+			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
 
 		M_AddKnownIWAD(game, Iwad_name);
 		M_SaveRecent();
