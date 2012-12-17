@@ -582,16 +582,22 @@ static void PasteGroupOfObjects(int pos_x, int pos_y)
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->right >= 0)
+		if (L->Right())
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->left >= 0)
+		if (L->Left())
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
+		}
+
+		// flip linedef if necessary
+		if (L->Left() && ! L->Right())
+		{
+			FlipLineDef(new_l);
 		}
 	}
 
