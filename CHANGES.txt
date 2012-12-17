@@ -20,6 +20,8 @@ CHANGES IN Eureka 0.88
 -  added 'm' merge command for vertices
 -  added 'm' merge command for two linedefs
 
+!  the -iwad parameter can no longer be a directory name
+
 -  shortcut key for 'File/Export Map' is now CTRL-E
 -  swapped sector height keys: '.' ',' <---> '[' ']'
 -  grid-snap button is easier to use (a toggle button now)
