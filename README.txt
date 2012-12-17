@@ -1,5 +1,5 @@
 
-Eureka 0.84 README
+Eureka 0.88 README
 ==================
 
 by Andrew Apted    November 2012
