@@ -179,6 +179,17 @@ const char *FindBaseName(const char *filename)
 }
 
 
+bool FilenameIsBare(const char *filename)
+{
+	if (strchr(filename, '.')) return false;
+	if (strchr(filename, '/')) return false;
+	if (strchr(filename, '\\')) return false;
+	if (strchr(filename, ':')) return false;
+
+	return true;
+}
+
+
 void FilenameStripBase(char *buffer)
 {
 	char *pos = buffer + strlen(buffer) - 1;

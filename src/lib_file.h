@@ -34,6 +34,7 @@ bool HasExtension(const char *filename);
 bool MatchExtension(const char *filename, const char *ext);
 char *ReplaceExtension(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);
+bool FilenameIsBare(const char *filename);
 
 // file utilities
 bool FileExists(const char *filename);
