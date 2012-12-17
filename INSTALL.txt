@@ -60,16 +60,21 @@ games and source ports, and the desktop and icon files.
 SETTING UP Eureka
 =================
 
-Eureka requires an IWAD file from one of the supported games, fpr
-example "doom2.wad".  There are several ways which Eureka can
-locate the IWAD file:
+Eureka requires an IWAD file from one of the supported games, for
+example "doom2.wad".  Eureka will look for IWADs when it starts up,
+but if it cannot find any then the 'Manage Wads' dialog will open
+and you can browse for an IWAD file there, which will be remembered
+for next time.
 
-  1. The most reliable way is to copy the IWAD(s) into the
-     ~/.eureka/iwads directory.  This directory will be created
+Places where Eureka looks for IWADs:
+
+  1. The "iwads" directory in Eureka's home directory.  In Linux
+     this will be "~/.eureka/iwads".  It is created automatically
      the first time Eureka is run (though there is no harm in
      creating it yourself).
 
-  2. IWADs will also be found in /usr/share/games/doom
+  2. (a) In Linux: /usr/share/games/doom
+     (b) In Windows: C:\DOOM and C:\DOOM2
 
   3. If you run Eureka from the command line and have the DOOMWADDIR
      environment variable set, then Eureka should find it in that
@@ -79,7 +84,5 @@ locate the IWAD file:
      directory for the IWAD.
 
   5. You can specify the IWAD file directly with the --iwad option.
-     The value given can also be a directory to search.  This is
-     currently the only way to select an IWAD (and game) different
-     than the one normally used.
+     The value given can also be a directory to search.
 
