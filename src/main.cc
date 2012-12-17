@@ -281,8 +281,6 @@ static void Determine_InstallPath(const char *argv0)
 
 const char * DetermineGame(const char *iwad_name)
 {
-	// IDEA: allow override via -game parameter
-
 	static char game_name[FL_PATH_MAX];
 
 	strcpy(game_name, fl_filename_name(iwad_name));
