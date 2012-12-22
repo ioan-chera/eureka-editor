@@ -84,5 +84,4 @@ Places where Eureka looks for IWADs:
      directory for the IWAD.
 
   5. You can specify the IWAD file directly with the --iwad option.
-     The value given can also be a directory to search.
 
