@@ -169,7 +169,10 @@ static void CreateHomeDirs()
 	static char dir_name[FL_PATH_MAX];
 
 #ifdef __APPLE__
-	fl_filename_expand(dir_name, "$HOME/documents");
+	fl_filename_expand(dir_name, "$HOME/Library");
+	FileMakeDir(dir_name);
+
+	fl_filename_expand(dir_name, "$HOME/Library/Application Support");
 	FileMakeDir(dir_name);
 #endif
 
@@ -205,7 +208,7 @@ static void Determine_HomeDir(const char *argv0)
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
 
-	if (fl_filename_expand(path, "$HOME/documents/eureka"))
+	if (fl_filename_expand(path, "$HOME/Library/Application Support/eureka-editor"))
 		home_dir = path;
 
 #else  // UNIX
