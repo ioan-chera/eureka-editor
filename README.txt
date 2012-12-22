@@ -2,7 +2,7 @@
 Eureka 0.88 README
 ==================
 
-by Andrew Apted    November 2012
+by Andrew Apted    Christmas 2012
 
 
 INTRODUCTION
@@ -28,7 +28,7 @@ Yadex or DEU.
 FEATURES
 
 -  Undo/Redo (multiple levels)
--  3D preview (does not require hardware acceleration)
+-  3D preview (which does not require hardware acceleration)
 -  editable panels for things, linedefs, sectors (etc)
 -  browser for textures, flats, things (etc)
 -  built-in nodes builder
@@ -40,6 +40,7 @@ SUPPORTED GAMES
 -  DOOM 2
 -  Final Doom
 -  FreeDoom
+-  HacX
 -  Heretic
 
 
@@ -61,9 +62,8 @@ RUNNING
 You can run Eureka from the command line, or it can be run from
 the desktop menu (if your OS handles .desktop files as per the
 XDG specs).  Eureka will need to be able to find an IWAD to run,
-and the easiest way is to copy one to this directory:
-
-   ~/.eureka/iwads
+if it cannot find any then the "Manage Wads" dialog will open up,
+allowing you to "Find" one (which is remembered for next time).
 
 You can open a PWAD file using the File/Open menu (the interface
 is very clunky at the moment) -- or create a new map with File/New.
@@ -131,7 +131,10 @@ END  : move 2D viewport to camera location
 g : grid size adjustment : smaller 
 G : grid size adjustment : larger 
 h : grid mode toggle : on, simple, off 
+
 f : toggle grid snapping on or off
+J : toggle object number display
+j : jump to object (by its numberic id)
 
 o : copy and paste the selected objects
 
@@ -160,6 +163,7 @@ SPACE
 * if a vertex is already selected, adds a new linedef too
 
 d : disconnect all linedefs at the selected vertices
+m : merge selected vertices into a single one
 
 
 Linedef Mode
@@ -167,9 +171,12 @@ Linedef Mode
 
 e : select a chain of linedefs 
 E : select a chain of linedefs with same textures
+
 w : flip linedefs 
 x : split linedefs in two
+
 d : disconnect selected linedefs from the rest
+m : merge two one-sided linedefs into a two-sided linedef
 
 
 Sector Mode
@@ -180,16 +187,18 @@ SPACE
 * fix broken sectoring in an area (use CTRL key to force a new sector)
 * if a sector is selected, copy that sector instead of using defaults
 
+d : disconnect sector(s) from their neighbors
 m : merge all selected sectors into a single one
+
 w : swap floor and ceiling textures
 
 e : select sectors with same floor height 
 E : select sectors with same floor texture
 
-[ and { : lower floor heights 
-] and } : raise floor heights
-, and < : lower ceiling heights 
-. and > : raise ceiling heights
+, and < : lower floor heights 
+. and > : raise floor heights
+[ and { : lower ceiling heights 
+] and } : raise ceiling heights
 
 
 3D Preview
