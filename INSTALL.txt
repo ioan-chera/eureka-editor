@@ -10,7 +10,7 @@ Dependencies:
 2. GNU make
    package: make
 
-3. FLTK 1.3.0 
+3. FLTK 1.3 
    website: http://www.fltk.org/
    package: libfltk1.3-dev
 
