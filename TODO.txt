@@ -3,35 +3,3 @@ EUREKA SHORT-TERM TODO
 ======================
 
 
-General
--------
-
--  re-implement when 'Iwad_name' is a bare name (with or without extension)
-
--  re-implement when 'Iwad_name' is a directory name
-
-
-
-Documentation
--------------
-
-
-Coding
-------
-
-
-Editing
--------
-
-
-Browser
--------
-
-
-Renderer
---------
-
-
-Game / Port Definitions
------------------------
-

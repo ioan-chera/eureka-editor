@@ -223,6 +223,8 @@ Editing
    -  LINEDEF mode: match on type / desc / tag / texture
 
 
+-  assume texture names beginning with '#' are special
+
 -  View / Toggle skill mode
 
 -  when highlighting a sector, draw the things in the same color as
