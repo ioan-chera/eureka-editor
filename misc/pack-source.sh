@@ -57,9 +57,6 @@ cp -av $src/*.txt $dest
 mkdir $dest/docs
 cp -av $src/docs/*.* $dest/docs
 
-rm $dest/docs/New_Workflow.txt
-rm $dest/docs/Features.txt
-
 #
 # all done
 #
