@@ -839,6 +839,7 @@ int main(int argc, char *argv[])
 		{
 			// user cancelled the load
 			RemoveEditWad();
+			goto quit;
 		}
 	}
 

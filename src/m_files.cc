@@ -304,10 +304,12 @@ void M_AddRecent(const char *filename, const char *map_name)
 }
 
 
-void M_AddKnownIWAD(const char *game, const char *path)
+void M_AddKnownIWAD(const char *path)
 {
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
+
+	const char *game = DetermineGame(path);
 
 	known_iwads[game] = std::string(absolute_name);
 }
@@ -468,7 +470,7 @@ void M_LookForIWADs()
 		{
 			LogPrintf("Found '%s' IWAD file: %s\n", game, path);
 
-			M_AddKnownIWAD(game, path);
+			M_AddKnownIWAD(path);
 		}
 	}
 
@@ -503,13 +505,15 @@ const char * M_PickDefaultIWAD()
 
 	const char *result;
 	
-	if ((result = M_QueryKnownIWAD(default_game)))
-		return StringDup(result);
+	result = StringDup(M_QueryKnownIWAD(default_game));
+	if (result)
+		return result;
 
 	DebugPrintf("pick default iwad, trying: 'freedoom'\n");
 
-	if ((result = M_QueryKnownIWAD("freedoom")))
-		return StringDup(result);
+	result = StringDup(M_QueryKnownIWAD("freedoom"));
+	if (result)
+		return result;
 
 	// try any known iwad
 
@@ -529,7 +533,9 @@ const char * M_PickDefaultIWAD()
 }
 
 
-void M_ParseEurekaLump(Wad_file *wad)
+/* returns false if user wanted to cancel the load */
+
+bool M_ParseEurekaLump(Wad_file *wad)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -538,16 +544,21 @@ void M_ParseEurekaLump(Wad_file *wad)
 	if (! lump)
 	{
 		LogPrintf("--> does not exist.\n");
-		return;
+		return true;
 	}
 	
 	if (! lump->Seek())
 	{
 		LogPrintf("--> error seeking.\n");
-		return;
+		return true;
 	}
 
-	ResourceWads.clear();
+
+	const char * new_iwad = NULL;
+	const char * new_port = NULL;
+
+	std::vector< const char * > new_resources;
+
 
 	static char line[FL_PATH_MAX];
 
@@ -560,9 +571,10 @@ void M_ParseEurekaLump(Wad_file *wad)
 		StringRemoveCRLF(line);
 
 		char *pos = strchr(line, ' ');
-		if (! pos)
+
+		if (! pos || pos == line)
 		{
-			// FIXME warning
+			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
 			continue;
 		}
 
@@ -570,28 +582,90 @@ void M_ParseEurekaLump(Wad_file *wad)
 
 		if (strcmp(line, "iwad") == 0)
 		{
-			if (FileExists(pos))
-				Iwad_name = StringDup(pos);
+			const char *game = DetermineGame(pos);
+
+			if (! CanLoadDefinitions("games", game))
+			{
+				LogPrintf("  unknown game: %s\n", pos /* show full path */);
+
+				int res = fl_choice("Warning: the pwad specifies an unsupported game:\n\n%s",
+				                    NULL, "IGNORE", "Cancel", game);
+				if (res == 2)
+					return false;
+			}
+			else if (! FileExists(pos))
+			{
+				LogPrintf("  file not found: %s\n", pos);
+
+				// no problem if the game has a known iwad
+				new_iwad = StringDup(M_QueryKnownIWAD(game));
+
+				if (new_iwad)
+					LogPrintf("  --> using known iwad\n");
+				else
+				{
+					int res = fl_choice("Warning: the pwad specifies an IWAD which cannot be found:\n\n%s",
+				                        NULL, "IGNORE", "Cancel", pos);
+					if (res == 2)
+						return false;
+				}
+			}
 			else
-				LogPrintf("  no longer exists: %s\n", pos);
+			{
+				new_iwad = StringDup(pos);
+				
+				if (! M_QueryKnownIWAD(game))
+				{
+					M_AddKnownIWAD(new_iwad);
+					M_SaveRecent();
+				}
+			}
 		}
 		else if (strcmp(line, "resource") == 0)
 		{
 			if (FileExists(pos))
-				ResourceWads.push_back(StringDup(pos));
+				new_resources.push_back(StringDup(pos));
 			else
-				LogPrintf("  no longer exists: %s\n", pos);
+			{
+				LogPrintf("  file not found: %s\n", pos);
+
+				Notify(-1, -1, "Warning: the pwad specifies a resource "
+				               "which cannot be found:\n", pos);
+			}
 		}
 		else if (strcmp(line, "port") == 0)
 		{
-			Port_name = StringDup(pos);
+			if (CanLoadDefinitions("ports", pos))
+				new_port = StringDup(pos);
+			else
+			{
+				LogPrintf("  unknown port: %s\n", pos);
+
+				Notify(-1, -1, "Warning: the pwad specifies an unknown port:\n", pos);
+			}
 		}
 		else
 		{
-			// FIXME: warning
+			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line, EUREKA_LUMP);
 			continue;
 		}
 	}
+
+	// no iwad?  act as if the lump didn't exist  [warn user??]
+	if (! new_iwad)
+	{
+		LogPrintf("--> no iwad specified\n");
+		return true;
+	}
+
+	/* OK */
+
+	Iwad_name = new_iwad;
+	Port_name = new_port;
+
+	ResourceWads.swap(new_resources);
+
+	return true;
 }
 
 

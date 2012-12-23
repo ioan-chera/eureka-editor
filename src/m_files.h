@@ -30,12 +30,12 @@ void M_AddRecent(const char *filename, const char *map_name);
 void M_RecentDialog(const char ** file_v, const char ** map_v);
 
 void M_LookForIWADs();
-void M_AddKnownIWAD(const char *game, const char *path);
+void M_AddKnownIWAD(const char *path);
 const char * M_QueryKnownIWAD(const char *game);
 const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name);
 const char * M_PickDefaultIWAD();
 
-void M_ParseEurekaLump(Wad_file *wad);
+bool M_ParseEurekaLump(Wad_file *wad);
 void M_WriteEurekaLump(Wad_file *wad);
 
 #endif  /* __EUREKA_M_FILES_H__ */
