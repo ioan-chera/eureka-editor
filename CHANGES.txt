@@ -1,6 +1,8 @@
 
-CHANGES IN Eureka 0.88
-======================
+CHANGES IN Eureka 0.88 (r584)
+=============================
+
+(Changes since 0.84 version, r304)
 
 +  large overhaul of file handling:
    +  'Manage Wads' dialog allows setting the IWAD, port and resource wads  
