@@ -113,10 +113,10 @@ General
    -  make sure the user built the nodes
       (ideally invoke it automatically)
 
++  ability to view the current logs
+   -  probably store last N lines in memory (no debug info)
+   ?  if ! isatty(stdout), write logs to ~/.eureka/LOGS.txt
 
--  if ! isatty(stdout), write logs to ~/.eureka/LOGS.txt
-   save early logs in memory
-   ? ability to view the current logs
 
 -  config var for default starting mode
 
