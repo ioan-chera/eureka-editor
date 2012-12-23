@@ -580,44 +580,27 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 		*pos++ = 0;
 
-		if (strcmp(line, "iwad") == 0)
+		if (strcmp(line, "game") == 0)
 		{
-			const char *game = DetermineGame(pos);
-
-			if (! CanLoadDefinitions("games", game))
+			if (! CanLoadDefinitions("games", pos))
 			{
 				LogPrintf("  unknown game: %s\n", pos /* show full path */);
 
 				int res = fl_choice("Warning: the pwad specifies an unsupported game:\n\n%s",
-				                    NULL, "IGNORE", "Cancel", game);
+				                    NULL, "IGNORE", "Cancel", pos);
 				if (res == 2)
 					return false;
 			}
-			else if (! FileExists(pos))
+			else
 			{
-				LogPrintf("  file not found: %s\n", pos);
+				new_iwad = StringDup(M_QueryKnownIWAD(pos));
 
-				// no problem if the game has a known iwad
-				new_iwad = StringDup(M_QueryKnownIWAD(game));
-
-				if (new_iwad)
-					LogPrintf("  --> using known iwad\n");
-				else
+				if (! new_iwad)
 				{
-					int res = fl_choice("Warning: the pwad specifies an IWAD which cannot be found:\n\n%s",
+					int res = fl_choice("Warning: the pwad specifies an IWAD which cannot be found:\n\n%s.wad",
 				                        NULL, "IGNORE", "Cancel", pos);
 					if (res == 2)
 						return false;
-				}
-			}
-			else
-			{
-				new_iwad = StringDup(pos);
-				
-				if (! M_QueryKnownIWAD(game))
-				{
-					M_AddKnownIWAD(new_iwad);
-					M_SaveRecent();
 				}
 			}
 		}
@@ -651,17 +634,10 @@ bool M_ParseEurekaLump(Wad_file *wad)
 		}
 	}
 
-	// no iwad?  act as if the lump didn't exist  [warn user??]
-	if (! new_iwad)
-	{
-		LogPrintf("--> no iwad specified\n");
-		return true;
-	}
-
 	/* OK */
 
-	Iwad_name = new_iwad;
-	Port_name = new_port;
+	if (new_iwad) Iwad_name = new_iwad;
+	if (new_port) Port_name = new_port;
 
 	ResourceWads.swap(new_resources);
 
@@ -681,8 +657,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	lump->Printf("# Eureka project info\n");
 
-	if (Iwad_name)
-		lump->Printf("iwad %s\n", Iwad_name);
+	if (Game_name)
+		lump->Printf("game %s\n", Game_name);
 
 	if (Port_name)
 		lump->Printf("port %s\n", Port_name);
