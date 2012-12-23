@@ -642,8 +642,6 @@ void UI_OpenMap::LoadFile()
 
 //------------------------------------------------------------------------
 
-extern const char * DetermineGame(const char *iwad_name);
-
 
 UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
@@ -895,14 +893,14 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	}
 
 
-	that->iwad = StringDup(chooser.filename());
-
-	that->ok_but->activate();
-
-	M_AddKnownIWAD(game, that->iwad);
+	M_AddKnownIWAD(chooser.filename());
 	M_SaveRecent();
 
+	that->iwad = StringDup(chooser.filename());
+
 	that->PopulateIWADs(that->iwad);
+
+	that->ok_but->activate();
 }
 
 

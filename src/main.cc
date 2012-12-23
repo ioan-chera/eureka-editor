@@ -330,7 +330,7 @@ static bool DetermineIWAD()
 		if (! CanLoadDefinitions("games", game))
 			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
 
-		M_AddKnownIWAD(game, Iwad_name);
+		M_AddKnownIWAD(Iwad_name);
 		M_SaveRecent();
 	}
 	else
@@ -829,12 +829,17 @@ int main(int argc, char *argv[])
 	}
 
 
-	// the '__EUREKA' lump, here at least, is equivalent to using the
-	// -iwad, -merge and -port command line options.
+	// handle the '__EUREKA' lump.  It is almost equivalent to using the
+	// -iwad, -merge and -port command line options, but with extra
+	// checks (to allow editing a wad containing dud information).
 
 	if (edit_wad)
 	{
-		M_ParseEurekaLump(edit_wad);
+		if (! M_ParseEurekaLump(edit_wad))
+		{
+			// user cancelled the load
+			RemoveEditWad();
+		}
 	}
 
 

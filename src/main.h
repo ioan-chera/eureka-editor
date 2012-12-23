@@ -210,6 +210,9 @@ bool Main_ConfirmQuit(const char *action);
 bool Main_ProjectSetup(bool is_startup = false);
 void Main_LoadResources();
 
+const char * DetermineGame(const char *iwad_name);
+
+
 
 void Beep();
 void Beep(const char *msg, ...);

@@ -549,7 +549,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 }
 
 
-static void RemoveEditWad()
+void RemoveEditWad()
 {
 	if (! edit_wad)
 		return;
@@ -564,10 +564,10 @@ static void RemoveEditWad()
 }
 
 
-void CMD_OpenMap()
+bool CMD_OpenMap()
 {
 	if (! Main_ConfirmQuit("open another map"))
-		return;
+		return false;
 
 
 	Wad_file *wad = NULL;
@@ -583,14 +583,23 @@ void CMD_OpenMap()
 
 	// cancelled?
 	if (! wad)
-		return;
+		return false;
 
 
 	// this shouldn't happen -- but just in case...
 	if (wad->FindLevel(map_name) < 0)
 	{
 		Notify(-1, -1, "Hmmmm, cannot find that map !?!", NULL);
-		return;
+		return false;
+	}
+
+
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		if (! M_ParseEurekaLump(wad))
+			return false;
+
+		Main_LoadResources();
 	}
 
 
@@ -612,15 +621,11 @@ void CMD_OpenMap()
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
-	if (wad->FindLump(EUREKA_LUMP))
-	{
-		M_ParseEurekaLump(wad);
-		Main_LoadResources();
-	}
-
 	LoadLevel(wad, map_name);
 
 	Replacer = false;
+
+	return true;
 }
 
 
@@ -664,6 +669,15 @@ void CMD_OpenRecentMap()
 	}
 
 
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		if (! M_ParseEurekaLump(wad))
+			return;
+
+		Main_LoadResources();
+	}
+
+
 	// this wad replaces the current PWAD
 
 	RemoveEditWad();
@@ -675,12 +689,6 @@ void CMD_OpenRecentMap()
 
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
-
-	if (wad->FindLump(EUREKA_LUMP))
-	{
-		M_ParseEurekaLump(wad);
-		Main_LoadResources();
-	}
 
 	LoadLevel(wad, map_name);
 
