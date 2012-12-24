@@ -785,6 +785,9 @@ void UI_ProjectSetup::Populate()
 	if (! iwad)
 		ok_but->deactivate();
 
+
+	port = NULL;
+
 	const char *port_string;
 	int port_val = 0;
 
@@ -794,6 +797,8 @@ void UI_ProjectSetup::Populate()
 	{
 		port_choice->add  (port_string);
 		port_choice->value(port_val);
+
+		port = port_choice->mvalue()->text;
 	}
 
 
