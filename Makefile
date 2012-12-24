@@ -25,16 +25,27 @@ CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
 
 LDFLAGS=-L/usr/X11R6/lib
 
-LIBS=-lm -lz  \
+LIBS= \
      -lfltk_images -lfltk_gl -lfltk  \
      -lX11 -lXext -lXft -lfontconfig -lXinerama  \
-     -lpng -ljpeg -lGL
+     -lpng -ljpeg -lGL -lz -lm
+
 
 # support for a non-standard install of FLTK
 ifneq ($(FLTK_PREFIX),)
 CXXFLAGS += -I$(FLTK_PREFIX)/include
 LDFLAGS += -L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib
 endif
+
+# support for statically linking FLTK (no GL, local JPEG and PNG)
+ifneq ($(FLTK_STATIC),)
+LIBS= \
+     -lfltk_images -lfltk  \
+     -lfltk_png -lfltk_jpeg \
+     -lX11 -lXext -lXft -lfontconfig -lXinerama \
+     -lz -lm
+endif
+
 
 #----- Object files ----------------------------------------------
 
