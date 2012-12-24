@@ -1,5 +1,5 @@
-eureka (0.84-1) UNRELEASED; urgency=low
+eureka (0.88-3) UNRELEASED; urgency=low
 
   * Initial release.
 
- -- Andrew Apted <ajapted@users.sf.net>  Sun, 25 Nov 2012 14:22:44 +1100
+ -- Andrew Apted <ajapted@users.sf.net>  Sun, 24 Dec 2012 14:22:44 +1100
