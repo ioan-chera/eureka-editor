@@ -1,0 +1,153 @@
+#------------------------------------------------------------------------
+#  DOOMLEGACY 1.44 definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C)      2012 Wesley Johnson
+#  Copyright (C) 2001-2012 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+include "boom"
+
+#---- DOOMLEGACY THINGS -------------
+
+thing 5003 - -  8 NULL "LEG: Camera"
+thing 5004 - - 16 NULL "LEG: Node"
+
+# JDS group player starts
+thing 4001 p - 16 NULL "Player 5 start"
+thing 4002 p - 16 NULL "Player 6 start"
+thing 4003 p - 16 NULL "Player 7 start"
+thing 4004 p - 16 NULL "Player 8 start"
+thing 4005 p - 16 NULL "Player 9 start"
+thing 4006 p - 16 NULL "Player 10 start"
+thing 4007 p - 16 NULL "Player 11 start"
+thing 4008 p - 16 NULL "Player 12 start"
+thing 4009 p - 16 NULL "Player 13 start"
+thing 4010 p - 16 NULL "Player 14 start"
+thing 4011 p - 16 NULL "Player 15 start"
+thing 4012 p - 16 NULL "Player 16 start"
+thing 4013 p - 16 NULL "Player 17 start"
+thing 4014 p - 16 NULL "Player 18 start"
+thing 4015 p - 16 NULL "Player 19 start"
+thing 4016 p - 16 NULL "Player 20 start"
+thing 4017 p - 16 NULL "Player 21 start"
+thing 4018 p - 16 NULL "Player 22 start"
+thing 4019 p - 16 NULL "Player 23 start"
+thing 4020 p - 16 NULL "Player 24 start"
+thing 4021 p - 16 NULL "Player 25 start"
+thing 4022 p - 16 NULL "Player 26 start"
+thing 4023 p - 16 NULL "Player 27 start"
+thing 4024 p - 16 NULL "Player 28 start"
+thing 4025 p - 16 NULL "Player 29 start"
+thing 4026 p - 16 NULL "Player 30 start"
+thing 4027 p - 16 NULL "Player 31 start"
+thing 4028 p - 16 NULL "Player 32 start"
+
+
+#---- DOOMLEGACY LINETYPES ----------
+
+linegroup x "LEG: Extrafloor"
+linegroup y "LEG: Effects"
+linegroup z "LEG: FraggleScript"
+
+line 290 f "-- LEG: Instant lower floor"
+line 291 c "-- LEG: Instant raise ceil"
+
+line 284 y "-- LEG: Translucent MED"
+line 285 y "-- LEG: Translucent MORE"
+line 286 y "-- LEG: Translucent HI"
+line 287 y "-- LEG: Translucent FIRE"
+line 288 y "-- LEG: Translucent FX1 "
+
+line 280 y "-- LEG: Swim Water"
+
+line 282 y "-- LEG: Gen Colormap #UML"
+# side1 upper texture: #rrggbba ( or texture name ) Color
+# where:
+# rr, gg, bb= red, green, blue (hex 00..FF)
+# a= alpha (letter 'a'..'z')
+# side1 middle texture: #fssee ( or texture name )
+# where:
+# f: (0,1) fog colormap
+# ss: (dec 0..32) Fade begin
+# ee: (dec 1..33) Fade end
+# side1 lower texture: #rrggbb ( or texture name ) Fade-to-color
+# where:
+# rr, gg, bb= red, green, blue (hex 00..FF)
+
+line 283 y "-- LEG: Fog sheet"
+
+line 281 x "-- LEG: Floor Solid shadow"
+line 289 x "-- LEG: Floor Solid"
+
+line 300 x "-- LEG: Floor Trans #U"
+# side1 upper texture: #aaa ( or texture name ) Alpha
+# where: aaa= alpha (0..255)
+
+line 301 x "-- LEG: 3d Water Translu #U"
+# side1 upper texture: #aaaf ( or texture name ) Alpha
+# where:
+# aaa= alpha (0..255)
+# f= fog effect (letter 'A'..'F')
+
+line 304 x "-- LEG: 3d Water Opaque #U"
+# side1 upper texture: #aaaf ( or texture name ) Alpha inside water
+# where:
+# aaa= alpha (0..255)
+# f= fog effect (letter 'A'..'F')
+
+line 302 x "-- LEG: 3d Fog #U"
+# side1 upper texture: #aaaf ( or texture name ) Alpha inside water
+# where:
+# aaa= alpha (0..255)
+# f= fog effect (letter 'A'..'F')
+
+# Fog effect chart
+# 'A'= Clear, no fog
+# 'B'= Cast
+# 'C'= Colormap
+# 'D'= Fog inside
+# 'E'= Fog lite
+# 'F'= Fog dust
+# 'G'= Fog distance
+# 'H'= Fog fluid
+
+line 303 x "-- LEG: 3d Ceiling Light"
+line 305 x "-- LEG: 3d Light Slab"
+line 306 x "-- LEG: Floor Invisible"
+
+# not in DoomLegacy
+line 271 - "-- (Unsupported)"
+
+# start the script with the tag number
+line 272 z "WR LEG: Script Trigger"
+line 273 z "WR LEG: Script 1-way"
+line 274 z "W1 LEG: Script Trigger"
+line 275 z "W1 LEG: Script 1-way"
+line 276 z "SR LEG: Script Trigger"
+line 277 z "S1 LEG: Script Trigger"
+line 278 z "GR LEG: Script Trigger"
+line 279 z "G1 LEG: Script Trigger"
+
+#linedef flags
+
+# Flag 512 (0x200) "PassThru"
+# Flag 1024 (0x400) "AllTrigger"
