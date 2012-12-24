@@ -693,7 +693,7 @@ private:
 
 	static void button_callback(Fl_Widget *w, void *data)
 	{
-		_instance->picked_num = (int) data;
+		_instance->picked_num = (long) data;
 		_instance->want_close = true;
 	}
 
@@ -728,10 +728,10 @@ public:
 
 		cy += title->h() + 10;
 
-		for (int i = 0 ; i < total_num ; i++)
+		for (long i = 0 ; i < total_num ; i++)
 		{
 			char number[64];
-			sprintf(number, "%d.", 1 + i);
+			sprintf(number, "%ld.", 1 + i);
 
 			Fl_Box * num_box = new Fl_Box(FL_NO_BOX, 10, cy, 35, 25, "");
 			num_box->copy_label(number);

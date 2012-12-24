@@ -694,14 +694,14 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	for (int r = 0 ; r < RES_NUM ; r++)
+	for (long r = 0 ; r < RES_NUM ; r++)
 	{
 		res[r] = NULL;
 
 		int cy = by + 145 + r * 35;
 
 		char res_label[64];
-		sprintf(res_label, "%d. ", 1 + r);
+		sprintf(res_label, "%ld. ", 1 + r);
 
 		res_name[r] = new Fl_Output(55, cy, 205, 25);
 		res_name[r]->copy_label(res_label);
@@ -906,7 +906,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
-	int r = (int)data;
+	int r = (long)data;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	UI_ProjectSetup * that = _instance;
@@ -944,7 +944,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 
 void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 {
-	int r = (int)data;
+	int r = (long)data;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	UI_ProjectSetup * that = _instance;
