@@ -249,6 +249,8 @@ Editing
 
 -  exchange object numbers
 
+-  some port-specific line/thing flags
+
 ?  disconnect sectors : include islands (perhaps with 'D')
 
 ?  when moving a sector and the camera is inside it, move camera too
@@ -345,6 +347,8 @@ Browser
 
 Game / Port Definitions
 -----------------------
+
++  ability to "remove line 271" (etc)
 
 -  game-def setting: view_height
 
