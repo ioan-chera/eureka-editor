@@ -149,5 +149,4 @@ line 279 z "G1 LEG: Script Trigger"
 
 #linedef flags
 
-# Flag 512 (0x200) "PassThru"
 # Flag 1024 (0x400) "AllTrigger"

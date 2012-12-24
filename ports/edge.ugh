@@ -272,6 +272,11 @@ line 824 a "-- EDGE: Scale F1 + C1"
 line 825 a "-- EDGE: Scale F2 + C2"
 
 
+# not in EDGE
+line 271 - "-- (Unsupported)"
+line 272 - "-- (Unsupported)"
+
+
 #---- EDGE SECTOR TYPES ----------
 
 sector 29 "EDGE: Hub entry area"
