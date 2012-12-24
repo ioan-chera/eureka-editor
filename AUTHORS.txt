@@ -14,6 +14,9 @@ CONTRIBUTORS:
 Ioan Chera
   * MacOS X port
 
+Wesley Johnson
+  * Doom Legacy definition file
+
 
 EARLIER WORK:
 
