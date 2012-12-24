@@ -183,7 +183,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += 19;
 
 
-	f_passthru = new Fl_Check_Button(X+12, Y+2, 20, 20, "pass use");
+	f_passthru = new Fl_Check_Button(X+12, Y+2, 20, 20, "pass thru");
 	f_passthru->align(FL_ALIGN_RIGHT);
 	f_passthru->labelsize(12);
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_PassThru));
