@@ -168,9 +168,10 @@ install: bin
 uninstall:
 	rm -v $(INSTALL_PREFIX)/bin/$(PROGRAM)
 	rm -Rv $(INSTALL_DIR) 
+	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
+	xdg-icon-resource uninstall --novendor --size 32 eureka
 
-.PHONY: all clean bin
-
+.PHONY: all clean bin install uninstall
 
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
