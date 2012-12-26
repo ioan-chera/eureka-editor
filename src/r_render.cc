@@ -314,21 +314,48 @@ public:
 	{
 		inline bool operator() (const DrawWall * A, const DrawWall * B) const
 		{
-			if (fabs(A->cur_iz - B->cur_iz) < IZ_EPSILON)
+			if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
 			{
-				// this usually occurs at the place where two walls share a vertex.
-				// the following test works rather well, but not perfectly.
-				//
-				// TODO: check if A->ld and B->ld actually share a vertex, if so then
-				//       do better test (A->other_vert on same side of B as camera)
-
-				return A->mid_iz > B->mid_iz;
-
-				// this test was worse, but better than nothing:
-				//    return fabs(A->diz) > fabs(B->diz);
+				// this is the normal case
+				return A->cur_iz > B->cur_iz;
 			}
 
-			return A->cur_iz > B->cur_iz;
+			// this case usually occurs at a column where two walls share a vertex.
+			// 
+			// hence we check if they actually share a vertex, and if so then
+			// we test whether A is behind B or not -- by checking which side
+			// of B the camera and the other vertex of A are on.
+
+			if (A->ld && B->ld)
+			{
+				// find the vertex of A _not_ shared with B
+				int A_other = -1;
+
+				if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
+				if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
+
+				if (A_other >= 0)
+				{
+					int ax = Vertices[A_other]->x;
+					int ay = Vertices[A_other]->y;
+
+					int bx1 = B->ld->Start()->x;
+					int by1 = B->ld->Start()->y;
+					int bx2 = B->ld->End()->x;
+					int by2 = B->ld->End()->y;
+
+					int cx = (int)view.x;  // camera
+					int cy = (int)view.y;
+
+					int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
+					int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
+
+					return (A_side * C_side >= 0);
+				}
+			}
+
+			// a pretty good fallback:
+			return A->mid_iz > B->mid_iz;
 		}
 	};
 
