@@ -68,8 +68,6 @@ Editing
 
 +  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
-+  fix the slime-trails
-
 
 Browser
 -------
