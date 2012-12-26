@@ -298,7 +298,7 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
-#define IZ_EPSILON  0.000001
+#define IZ_EPSILON  1e-6
 
    /* PREDICATES */
 
@@ -315,7 +315,18 @@ public:
 		inline bool operator() (const DrawWall * A, const DrawWall * B) const
 		{
 			if (fabs(A->cur_iz - B->cur_iz) < IZ_EPSILON)
-				return A->diz > B->diz;
+			{
+				// this usually occurs at the place where two walls share a vertex.
+				// the following test works rather well, but not perfectly.
+				//
+				// TODO: check if A->ld and B->ld actually share a vertex, if so then
+				//       do better test (A->other_vert on same side of B as camera)
+
+				return A->mid_iz > B->mid_iz;
+
+				// this test was worse, but better than nothing:
+				//    return fabs(A->diz) > fabs(B->diz);
+			}
 
 			return A->cur_iz > B->cur_iz;
 		}
@@ -1241,7 +1252,7 @@ public:
 
 			dw->cur_iz = dw->iz1 + dw->diz * (x - dw->sx1);
 
-			if (P != S && (*(P-1))->cur_iz < dw->cur_iz)
+			if (P != S && (*(P-1))->cur_iz < dw->cur_iz + IZ_EPSILON)
 				changes = true;
 
 			dw->cur_ang = dw->ang1 + dw->dang * (x - dw->sx1);
