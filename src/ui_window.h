@@ -53,11 +53,7 @@ class UI_MainWin : public Fl_Double_Window
 public:
 	// main child widgets
 
-#ifdef MACOSX
 	Fl_Sys_Menu_Bar *menu_bar;
-#else
-	Fl_Menu_Bar *menu_bar;
-#endif
 
 	int panel_W;
 

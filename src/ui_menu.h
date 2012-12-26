@@ -21,13 +21,7 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-#ifdef __APPLE__
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h);
-#else
-    Fl_Menu_Bar * Menu_Create(int x, int y, int w, int h);
-#endif
-
-void Menu_SetMode(char mode);
 
 #endif  /* __EUREKA_UI_MENU_H__ */
 

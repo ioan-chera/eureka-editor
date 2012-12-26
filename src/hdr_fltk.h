@@ -48,9 +48,7 @@
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Scrollbar.H>
 #include <FL/Fl_Slider.H>
-#ifdef __APPLE__
 #include <FL/Fl_Sys_Menu_Bar.H>
-#endif
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Tile.H>
 #include <FL/Fl_Toggle_Button.H>
