@@ -486,54 +486,5 @@ Fl_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 #endif
 
 
-#if 0  // UNUSED
-
-static void Menu_ModeByName(Fl_Menu_Bar *bar, const char *name, int new_mode)
-{
-	for (int i = bar->size() - 1; i >= 0; i--)
-	{
-		const char *menu_text = bar->text(i);
-
-		if (! menu_text)
-			continue;
-
-		if (menu_text[0] == '&')
-			menu_text++;
-
-		if (strcmp(menu_text, name) == 0)
-		{
-			bar->mode(i, new_mode);
-			return;
-		}
-	}
-}
-
-void Menu_SetMode(char mode)
-{
-	Fl_Menu_Bar *bar = main_win->menu_bar;
-
-	Menu_ModeByName(bar, "Things",   FL_SUBMENU | FL_MENU_INACTIVE);
-	Menu_ModeByName(bar, "Linedefs", FL_SUBMENU | FL_MENU_INACTIVE);
-	Menu_ModeByName(bar, "Sectors",  FL_SUBMENU | FL_MENU_INACTIVE);
-	Menu_ModeByName(bar, "Vertices", FL_SUBMENU | FL_MENU_INACTIVE);
-	Menu_ModeByName(bar, "RTS",      FL_SUBMENU | FL_MENU_INACTIVE);
-
-	switch (mode)
-	{
-		case 't': Menu_ModeByName(bar, "Things",   FL_SUBMENU); break;
-		case 'l': Menu_ModeByName(bar, "Linedefs", FL_SUBMENU); break;
-		case 's': Menu_ModeByName(bar, "Sectors",  FL_SUBMENU); break;
-		case 'v': Menu_ModeByName(bar, "Vertices", FL_SUBMENU); break;
-		case 'r': Menu_ModeByName(bar, "RTS",      FL_SUBMENU); break;
-
-		default: break;
-	}
-
-	bar->redraw();
-}
-
-#endif // UNUSED
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
