@@ -191,7 +191,27 @@ Coding
 Editing
 -------
 
+-  move 'x' split linedef to SPACE/INSERT, put vertex where mouse is
+
 +  texture alignment feature
+
+   - 'x' and 'y' keys align the lower / middle (both sides)
+   - 'X' and 'Y' keys align the upper (both sides)
+
+   - unpeg flags are NOT set, but affect vertical alignment
+
+   - always need to pick an adjoining sidedef to align with:
+     -  main factor is matching texture on chosen part
+     -  prefer same one-sideness or two-sideness
+     -  perhaps prefer a sidedef in the selection ??
+     -  perhaps a cost for sharp angles?
+     -  prefer the "left" side (tie breaker)
+
+   - when adjoining sidedef is in selection, need to process that
+     one first.  But detect loops!
+
+   - handle each side of linedef individually (i.e. do not process
+     one linedef at a time, process a SIDE at a time).
 
 +  a menu for inserting shapes, especially N-sided polygon
 
