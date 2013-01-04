@@ -5,6 +5,6 @@ Priority: optional
 Maintainer: Andrew Apted <ajapted@users.sf.net>
 Architecture: i386
 Depends: libc6, libstdc++6, libfontconfig1 (>= 2.4.0), libx11-6, libxext6, libxft2 (>> 2.1.1), libxinerama1, libxpm4, zlib1g (>= 1:1.1.4)
-Description: map editor for DOOM
+Description: DOOM map editor
  Eureka is a map editor for DOOM.
 Homepage: http://eureka-editor.sourceforge.net/
