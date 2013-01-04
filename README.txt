@@ -2,7 +2,7 @@
 Eureka 0.88 README
 ==================
 
-by Andrew Apted    Christmas 2012
+by Andrew Apted  <ajapted@users.sf.net>   Christmas 2012
 
 
 INTRODUCTION
@@ -54,7 +54,7 @@ REQUIREMENTS
 
 COMPILING / SETTING UP
 
-See the INSTALL.txt document
+See the INSTALL.txt document (in source code)
 
 
 RUNNING
