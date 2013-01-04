@@ -13,16 +13,12 @@ CHANGES IN Eureka 0.88c (r605)
    +  IWADs found by the user are remembered
 
 +  new Default Properties panel (shown in vertex mode)
-
 +  implemented picture mode for Thing browser
-
 +  new Move/Scale/Rotate dialogs (via Edit menu)
 
 +  support for Doom Legacy, courtesy Wesley Johnson
-
-+  3D view: fixed the slime trails
-
 +  support for HACX (not quite finished, but usable)
++  3D view: fixed the slime trails
 
 -  added 'd' disconnect command for sectors
 -  added 'm' merge command for vertices
