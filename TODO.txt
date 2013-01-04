@@ -23,6 +23,9 @@ General
    -  unclosed sectors
    -  can remove unused Vertices, SideDefs and Sectors
 
++  commands bound to a plain key (e.g. 'b') should not be usable
+   when ALT or META is pressed.
+
 +  configurable keys
    (a) will need various contexts: one for each editing mode,
        one for ALL modes ("global"), one for 3D view, one for browser.
@@ -48,6 +51,9 @@ General
       file is created whenever we CTRL-S, or CTRL-E into existing wad
       limit files to a configurable number and size (delete lowest num)
 
+   -  maybe an auto-save feature (e.g. every 10 minutes unless no
+      changes occurred in the last 10 minutes).
+
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
    use fl_choice() code to bootstrap it.
@@ -63,6 +69,12 @@ Documentation
 
 Editing
 -------
+
++  dragging a vertex so that two linedefs overlap should merge the
+   linedefs
+
++  added lines inside a void island, when connect then lose the void
+   (a sector is added which is not wanted).
 
 
 
