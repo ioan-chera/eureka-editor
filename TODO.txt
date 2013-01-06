@@ -262,7 +262,10 @@ Editing
 
 -  View / Toggle skill mode
 
--  when highlighting a sector, draw the things in the same color as
+-  show missing (HOM-producing) textures in linedef panel with
+   a special picture, e.g. exclamation mark on a red background
+
+?  when highlighting a sector, draw the things in the same color as
    the sector is highlighted, but not as bright.  Because many sector
    functions will affect things too -- make it obvious to the user.
 
