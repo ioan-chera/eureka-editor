@@ -324,6 +324,11 @@ IDEA: a config item to make the "simple" grid occur when grid-snapping
 
 -  Render3D_Wheel: add 'dx' parameter, use it
 
++  smooth movement via keyboard
+   -  call a function in Main_Loop
+   -  if did a move, Fl::wait(0) instead of 0.2
+   -  handle key up/down events in UI_Canvas::handle()
+
 -  handle very tall/thin window : letter box with black
 
 -  closed sectors have a see-through gap (gets bigger further away)
