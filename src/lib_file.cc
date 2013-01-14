@@ -227,18 +227,17 @@ const char *FilenameReposition(const char *filename, const char *othername)
 
 	const char *op = fl_filename_name(othername);
 
-	int dir_len = othername - op;
+	int dir_len = op - othername;
 	if (dir_len <= 0)
 		return StringDup(filename);
 
-	int len = strlen(filename) + 1 + dir_len;
+	int len = strlen(filename) + dir_len;
 
 	char *result = StringNew(len + 10);
 
 	memcpy(result, othername, dir_len);
 	result[dir_len] = 0;
 
-	strcat(result, "/");
 	strcat(result, filename);
 
 	return result;
