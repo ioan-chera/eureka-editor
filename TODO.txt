@@ -141,6 +141,9 @@ General
 
 -  grid drawing too slow when small step and zoomed out
 
+-  in EUREKA lump, if a path is under $HOME store it as "~/blah..."
+   and expand that syntax on load.
+
 -  a check/fix pass for LoadLevel()
 
 -  ability to use an external node builder
@@ -163,6 +166,11 @@ General
 ?  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
+
+IDEA: a dialog to specify directories to find wads.
+      Initially populate it with the currently hard-coded places
+      and $DOOMWADDIR and $DOOMWADPATH.  Perhaps add places where
+      the user opened a wad automatically (or ask?).
 
 IDEA: when no pwad given, load RECENT thing  [config item, default off]
 
