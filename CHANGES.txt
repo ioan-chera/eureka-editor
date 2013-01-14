@@ -1,0 +1,6 @@
+
+CHANGELOG
+=========
+
+-  when a resource cannot be found, look in same dir as PWAD and IWAD
+
