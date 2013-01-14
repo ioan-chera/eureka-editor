@@ -218,6 +218,33 @@ void FilenameStripBase(char *buffer)
 }
 
 
+/* takes the basename in 'filename' and prepends the path from 'othername'.
+ * returns a newly allocated string.
+ */
+const char *FilenameReposition(const char *filename, const char *othername)
+{
+	filename = fl_filename_name(filename);
+
+	const char *op = fl_filename_name(othername);
+
+	int dir_len = othername - op;
+	if (dir_len <= 0)
+		return StringDup(filename);
+
+	int len = strlen(filename) + 1 + dir_len;
+
+	char *result = StringNew(len + 10);
+
+	memcpy(result, othername, dir_len);
+	result[dir_len] = 0;
+
+	strcat(result, "/");
+	strcat(result, filename);
+
+	return result;
+}
+
+
 bool FileCopy(const char *src_name, const char *dest_name)
 {
 	char buffer[1024];
