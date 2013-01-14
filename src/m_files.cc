@@ -606,12 +606,28 @@ bool M_ParseEurekaLump(Wad_file *wad)
 		}
 		else if (strcmp(line, "resource") == 0)
 		{
-			if (FileExists(pos))
-				new_resources.push_back(StringDup(pos));
-			else
+			const char *res = pos;
+
+			// if not found at absolute location, try same place as PWAD
+
+			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
+			
+				res = FilenameReposition(pos, wad->PathName());
+				LogPrintf("  trying: %s\n", res);
+			}
 
+			if (! FileExists(res) && Iwad_name)
+			{
+				res = FilenameReposition(pos, Iwad_name);
+				LogPrintf("  trying: %s\n", res);
+			}
+
+			if (FileExists(res))
+				new_resources.push_back(StringDup(res));
+			else
+			{
 				Notify(-1, -1, "Warning: the pwad specifies a resource "
 				               "which cannot be found:\n", pos);
 			}
