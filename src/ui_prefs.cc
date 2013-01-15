@@ -205,6 +205,8 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ edit_modkey = new Fl_Choice(370, 170, 95, 30, "---->   ");
 		  edit_modkey->down_box(FL_BORDER_BOX);
+		  edit_modkey->add("CTRL");
+		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 80, 105, 25, "new sector size:");
 		  edit_sectorsize->type(2);
@@ -291,6 +293,11 @@ void UI_Preferences::Run()
 void UI_Preferences::LoadValues()
 {
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
+
+	edit_newislands->value(new_islands_are_void ? 1 : 0);
+	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
+	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
+	edit_multiselect->value((multi_select_modifier == KM_none) ? 0 : 1);
 }
 
 
@@ -298,6 +305,11 @@ void UI_Preferences::SaveValues()
 {
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(2, new_sector_size, 8192);
+
+	new_islands_are_void = edit_newislands->value() ? true : false;
+	same_mode_clears_selection = edit_samemode->value() ? true : false;
+	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
+	multi_select_modifier = edit_multiselect->value() ? KM_CTRL : KM_none;
 }
 
 
