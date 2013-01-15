@@ -3,9 +3,6 @@ EUREKA WISH-LIST
 ================
 
 
->>  make About window modal
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY

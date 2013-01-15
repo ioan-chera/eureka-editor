@@ -30,7 +30,7 @@ Both Yadex and DEU had many contributors, a comprehensive list of them
 can be found in the Yadex documentation.
 
 
-NOTES:
+ACKNOWLEDGEMENTS:
 
 Eureka uses the FLTK widget library (http://www.fltk.org)
 
