@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
+
 #include "ui_window.h"
 #include "ui_prefs.h"
 
@@ -280,19 +282,22 @@ void UI_Preferences::Run()
 
 	SaveValues();
 
+	M_WriteConfigFile();
+
 	last_active_tab = tabs->find(tabs->value());
 }
 
 
 void UI_Preferences::LoadValues()
 {
-	// FIXME
+	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 }
 
 
 void UI_Preferences::SaveValues()
 {
-	// FIXME
+	new_sector_size = atoi(edit_sectorsize->value());
+	new_sector_size = CLAMP(2, new_sector_size, 8192);
 }
 
 
