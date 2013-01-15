@@ -23,10 +23,41 @@
 #include "ui_prefs.h"
 
 
+//------------------------------------------------------------------------
+
+
+void UI_Preferences::Run()
+{
+	set_modal();
+
+	show();
+
+	while (! want_quit)
+	{
+		Fl::wait(0.2);
+	}
+}
+
+
+void UI_Preferences::Load()
+{
+}
+
+
+void UI_Preferences::Save()
+{
+}
+
+
 void CMD_Preferences()
 {
-	Beep();
+	UI_Preferences * dialog = new UI_Preferences();
 
+	dialog->Load();
+	dialog->Run();
+	dialog->Save();
+
+	delete dialog;
 }
 
 
