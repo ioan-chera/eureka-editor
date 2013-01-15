@@ -311,6 +311,33 @@ static const opt_desc_t options[] =
 		&gui_color_set
 	},
 
+	{	"gui_custom_bg",
+		0,
+		OPT_COLOR,
+		"v",
+		"GUI custom background color",
+		NULL,
+		&gui_custom_bg
+	},
+
+	{	"gui_custom_ig",
+		0,
+		OPT_COLOR,
+		"v",
+		"GUI custom input color",
+		NULL,
+		&gui_custom_ig
+	},
+
+	{	"gui_custom_fg",
+		0,
+		OPT_COLOR,
+		"v",
+		"GUI custom foreground (text) color",
+		NULL,
+		&gui_custom_fg
+	},
+
 	{	"leave_offsets_alone",
 		0,
 		OPT_BOOLEAN,
