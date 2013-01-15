@@ -618,9 +618,9 @@ bool M_ParseEurekaLump(Wad_file *wad)
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (! FileExists(res) && Iwad_name)
+			if (! FileExists(res) && new_iwad)
 			{
-				res = FilenameReposition(pos, Iwad_name);
+				res = FilenameReposition(pos, new_iwad);
 				LogPrintf("  trying: %s\n", res);
 			}
 
