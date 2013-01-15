@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cxx}
 widget_class UI_Preferences {
@@ -136,7 +136,7 @@ widget_class UI_Preferences {
       }
     }
     Fl_Group {} {
-      label { glBSP     } open selected
+      label { glBSP     } open
       xywh {0 25 585 410} selection_color 50 labelsize 16
     } {
       Fl_Box {} {
@@ -158,7 +158,7 @@ widget_class UI_Preferences {
     }
   }
   Fl_Button {} {
-    label OK
-    xywh {485 450 85 35}
+    label OK selected
+    xywh {460 450 85 35}
   }
 } 
