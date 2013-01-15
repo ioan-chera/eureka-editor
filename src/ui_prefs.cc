@@ -312,6 +312,17 @@ void UI_Preferences::LoadValues()
 	ig_colorbox->color(gui_custom_ig);
 	fg_colorbox->color(gui_custom_fg);
 
+	/* General stuff */
+
+	grid_snap->value(default_grid_snap ? 1 : 0);
+	// FIXME: grid_size / default_grid_size
+
+	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
+	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
+	gen_escapequit ->value(escape_key_quits ? 1 : 0);
+
+	// TODO: smallscroll, largescroll
+
 	/* Edit panel */
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
@@ -349,6 +360,17 @@ void UI_Preferences::SaveValues()
 	gui_custom_bg = (rgb_color_t) bg_colorbox->color();
 	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
 	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
+
+	/* General stuff */
+
+	default_grid_snap = grid_snap->value() ? true : false;
+	// FIXME: grid_size / default_grid_size
+
+	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
+	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
+	escape_key_quits        = gen_escapequit ->value() ? true : false;
+
+	// TODO: smallscroll, largescroll
 
 	/* Edit panel */
 
