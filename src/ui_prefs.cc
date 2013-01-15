@@ -52,6 +52,8 @@ public:
 	void LoadValues();
 	void SaveValues();
 
+	int GridSizeToChoice(int size);
+
 
 	Fl_Tabs *tabs;
 
@@ -162,6 +164,7 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ grid_size = new Fl_Choice(435, 230, 85, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
+		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
 		}
 		{ gen_digitzoom = new Fl_Check_Button(50, 265, 240, 25, " digit keys zoom the map");
 		  gen_digitzoom->down_box(FL_DOWN_BOX);
@@ -290,6 +293,22 @@ void UI_Preferences::Run()
 }
 
 
+int UI_Preferences::GridSizeToChoice(int size)
+{
+	if (size > 512) return 0;
+	if (size > 256) return 1;
+	if (size > 128) return 2;
+	if (size >  64) return 3;
+	if (size >  32) return 4;
+	if (size >  16) return 5;
+	if (size >   8) return 6;
+	if (size >   4) return 7;
+	if (size >   2) return 8;
+
+	return 9;
+}
+
+
 void UI_Preferences::LoadValues()
 {
 	/* Theme stuff */
@@ -315,7 +334,7 @@ void UI_Preferences::LoadValues()
 	/* General stuff */
 
 	grid_snap->value(default_grid_snap ? 1 : 0);
-	// FIXME: grid_size / default_grid_size
+	grid_size->value(GridSizeToChoice(default_grid_size));
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
@@ -364,7 +383,7 @@ void UI_Preferences::SaveValues()
 	/* General stuff */
 
 	default_grid_snap = grid_snap->value() ? true : false;
-	// FIXME: grid_size / default_grid_size
+	default_grid_size = atoi(grid_size->mvalue()->text);
 
 	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
