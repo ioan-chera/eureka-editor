@@ -12,8 +12,6 @@ ______________________________________________________________________
 General
 -------
 
-+  Preferences window
-
 +  CHECK screen
    -  linedefs without right side
    -  zero-length linedefs
@@ -128,6 +126,10 @@ General
    ?  if ! isatty(stdout), write logs to ~/.eureka/LOGS.txt
 
 +  ability to hide the right-side panel
+
++  Preferences window:
+   -  implement the scrolling sizes
+   -  add more stuff (see USER CONFIG NEEDED, below)
 
 
 -  config var for default starting mode
@@ -563,12 +565,6 @@ versa).
 USER CONFIG NEEDED
 -------------------
 
-snap_to_grid
-
-default_floor_height
-default_ceiling_height
-default_lighting
-
 gamma
 
 floor_bump_small   (2)
@@ -592,8 +588,6 @@ map_selection_color
 map_high_sel_color
 
 midmask_back_color
-
-islands_get_new_sector  (true)
 
 
 GAME CONFIG NEEDED
