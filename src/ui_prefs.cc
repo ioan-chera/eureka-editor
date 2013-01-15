@@ -29,6 +29,8 @@
 #define PREF_WINDOW_TITLE  "Eureka Preferences"
 
 
+static int last_active_tab = 0;
+
 
 class UI_Preferences : public Fl_Double_Window
 {
@@ -36,6 +38,7 @@ private:
 	bool want_quit;
 
 	static void close_callback(Fl_Widget *w, void *data);
+	static void color_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -45,6 +48,8 @@ public:
 	void LoadValues();
 	void SaveValues();
 
+
+	Fl_Tabs *tabs;
 
 	Fl_Round_Button *theme_FLTK;
 	Fl_Round_Button *theme_GTK;
@@ -84,7 +89,7 @@ UI_Preferences::UI_Preferences() :
 	color(fl_gray_ramp(4));
 	callback(close_callback, this);
 
-	{ Fl_Tabs* o = new Fl_Tabs(0, 0, 585, 435);
+	{ tabs = new Fl_Tabs(0, 0, 585, 435);
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General     ");
 		o->labelsize(16);
 		o->hide();
@@ -128,16 +133,19 @@ UI_Preferences::UI_Preferences() :
 		  { bg_colorbox = new Fl_Button(430, 90, 45, 25, "background");
 			bg_colorbox->box(FL_BORDER_BOX);
 			bg_colorbox->align(Fl_Align(FL_ALIGN_RIGHT));
+			bg_colorbox->callback((Fl_Callback*)color_callback, this);
 		  }
 		  { ig_colorbox = new Fl_Button(430, 120, 45, 25, "input bg");
 			ig_colorbox->box(FL_BORDER_BOX);
 			ig_colorbox->color(FL_BACKGROUND2_COLOR);
 			ig_colorbox->align(Fl_Align(FL_ALIGN_RIGHT));
+			ig_colorbox->callback((Fl_Callback*)color_callback, this);
 		  }
 		  { fg_colorbox = new Fl_Button(430, 150, 45, 25, "text color");
 			fg_colorbox->box(FL_BORDER_BOX);
 			fg_colorbox->color(FL_GRAY0);
 			fg_colorbox->align(Fl_Align(FL_ALIGN_RIGHT));
+			fg_colorbox->callback((Fl_Callback*)color_callback, this);
 		  }
 		  o->end();
 		}
@@ -217,7 +225,7 @@ UI_Preferences::UI_Preferences() :
 		}
 		o->end();
 	  }
-	  o->end();
+	  tabs->end();
 	}
 	{ Fl_Button *o = new Fl_Button(460, 450, 85, 35, "OK");
 	  o->callback(close_callback, this);
@@ -226,8 +234,8 @@ UI_Preferences::UI_Preferences() :
 end();
 }
 
-//------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
 
 void UI_Preferences::close_callback(Fl_Widget *w, void *data)
 {
@@ -237,8 +245,19 @@ void UI_Preferences::close_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_Preferences::color_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	Beep();
+}
+
+
 void UI_Preferences::Run()
 {
+	if (last_active_tab < tabs->children())
+		tabs->value(tabs->child(last_active_tab));
+
 	LoadValues();
 
 	set_modal();
@@ -251,6 +270,8 @@ void UI_Preferences::Run()
 	}
 
 	SaveValues();
+
+	last_active_tab = tabs->find(tabs->value());
 }
 
 
@@ -265,6 +286,8 @@ void UI_Preferences::SaveValues()
 	// FIXME
 }
 
+
+//------------------------------------------------------------------------
 
 void CMD_Preferences()
 {
