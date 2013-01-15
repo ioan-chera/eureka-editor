@@ -35,6 +35,8 @@ class UI_Preferences : public Fl_Double_Window
 private:
 	bool want_quit;
 
+	static void close_callback(Fl_Widget *w, void *data);
+
 public:
 	UI_Preferences();
 
@@ -80,6 +82,7 @@ UI_Preferences::UI_Preferences() :
 	  want_quit(false)
 {
 	color(fl_gray_ramp(4));
+	callback(close_callback, this);
 
 	{ Fl_Tabs* o = new Fl_Tabs(0, 0, 585, 435);
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General     ");
@@ -216,13 +219,22 @@ UI_Preferences::UI_Preferences() :
 	  }
 	  o->end();
 	}
-	{ new Fl_Button(460, 450, 85, 35, "OK");
+	{ Fl_Button *o = new Fl_Button(460, 450, 85, 35, "OK");
+	  o->callback(close_callback, this);
 	}
 
 end();
 }
 
 //------------------------------------------------------------------------
+
+
+void UI_Preferences::close_callback(Fl_Widget *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	dialog->want_quit = true;
+}
 
 
 void UI_Preferences::Run()
