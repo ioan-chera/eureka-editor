@@ -42,28 +42,6 @@
 #include "ui_window.h"  // meh!
 
 
-// config item variables
-
-extern bool digits_set_zoom;
-extern bool escape_key_quits;
-extern bool leave_offsets_alone;
-extern bool mouse_wheel_scrolls_map;
-extern bool new_islands_are_void;
-extern bool same_mode_clears_selection;
-
-extern bool glbsp_fast;
-extern bool glbsp_verbose;
-extern bool glbsp_warn;
-
-extern int gui_scheme;
-extern int gui_color_set;
-extern int new_sector_size;
-
-extern int  default_grid_size;
-extern bool default_grid_snap;
-
-extern int multi_select_modifier;
-
 
 //------------------------------------------------------------------------
 
