@@ -80,9 +80,9 @@ public:
 	Fl_Choice *edit_modkey;
 	Fl_Int_Input *edit_sectorsize;
 
-	Fl_Check_Button *glbsp_warn;
-	Fl_Check_Button *glbsp_verbose;
-	Fl_Check_Button *glbsp_fast;
+	Fl_Check_Button *bsp_warn;
+	Fl_Check_Button *bsp_verbose;
+	Fl_Check_Button *bsp_fast;
 };
 
 
@@ -220,14 +220,14 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ glbsp_warn = new Fl_Check_Button(60, 90, 220, 30, " Show all warning messages");
-		  glbsp_warn->down_box(FL_DOWN_BOX);
+		{ bsp_warn = new Fl_Check_Button(60, 90, 220, 30, " Show all warning messages");
+		  bsp_warn->down_box(FL_DOWN_BOX);
 		}
-		{ glbsp_verbose = new Fl_Check_Button(60, 120, 350, 30, " Verbose -- show information about each level");
-		  glbsp_verbose->down_box(FL_DOWN_BOX);
+		{ bsp_verbose = new Fl_Check_Button(60, 120, 350, 30, " Verbose -- show information about each level");
+		  bsp_verbose->down_box(FL_DOWN_BOX);
 		}
-		{ glbsp_fast = new Fl_Check_Button(60, 150, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
-		  glbsp_fast->down_box(FL_DOWN_BOX);
+		{ bsp_fast = new Fl_Check_Button(60, 150, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		  bsp_fast->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -292,17 +292,26 @@ void UI_Preferences::Run()
 
 void UI_Preferences::LoadValues()
 {
-	edit_sectorsize->value(Int_TmpStr(new_sector_size));
+	/* Edit panel */
 
+	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 	edit_multiselect->value((multi_select_modifier == KM_none) ? 0 : 1);
+
+	/* glBSP panel */
+
+	bsp_fast->value(glbsp_fast ? 1 : 0);
+	bsp_verbose->value(glbsp_verbose ? 1 : 0);
+	bsp_warn->value(glbsp_warn ? 1 : 0);
 }
 
 
 void UI_Preferences::SaveValues()
 {
+	/* Edit panel */
+
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(2, new_sector_size, 8192);
 
@@ -310,6 +319,12 @@ void UI_Preferences::SaveValues()
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? KM_CTRL : KM_none;
+
+	/* glBSP panel */
+
+	glbsp_fast = bsp_fast->value() ? true : false;
+	glbsp_verbose = bsp_verbose->value() ? true : false;
+	glbsp_warn = bsp_warn->value() ? true : false;
 }
 
 
