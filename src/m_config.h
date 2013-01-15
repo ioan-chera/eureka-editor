@@ -27,6 +27,8 @@
 #ifndef __EUREKA_M_CONFIG_H__
 #define __EUREKA_M_CONFIG_H__
 
+#include "im_color.h"
+
 /* ==== CONFIG VARIABLES ==================== */
 
 extern bool digits_set_zoom;
@@ -36,18 +38,22 @@ extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
-extern bool glbsp_fast;
-extern bool glbsp_verbose;
-extern bool glbsp_warn;
-
 extern int gui_scheme;
 extern int gui_color_set;
+extern rgb_color_t gui_custom_bg;
+extern rgb_color_t gui_custom_ig;
+extern rgb_color_t gui_custom_fg;
+
 extern int new_sector_size;
 
 extern int  default_grid_size;
 extern bool default_grid_snap;
 
 extern int multi_select_modifier;
+
+extern bool glbsp_fast;
+extern bool glbsp_verbose;
+extern bool glbsp_warn;
 
 
 /* ==== FUNCTIONS ==================== */

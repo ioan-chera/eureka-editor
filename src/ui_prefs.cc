@@ -292,6 +292,26 @@ void UI_Preferences::Run()
 
 void UI_Preferences::LoadValues()
 {
+	/* Theme stuff */
+	
+	switch (gui_scheme)
+	{
+		case 0: theme_FLTK->value(1); break;
+		case 1: theme_GTK->value(1); break;
+		case 2: theme_plastic->value(1); break;
+	}
+
+	switch (gui_color_set)
+	{
+		case 0: cols_default->value(1); break;
+		case 1: cols_bright->value(1); break;
+		case 2: cols_custom->value(1); break;
+	}
+
+	bg_colorbox->color(gui_custom_bg);
+	ig_colorbox->color(gui_custom_ig);
+	fg_colorbox->color(gui_custom_fg);
+
 	/* Edit panel */
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
@@ -310,6 +330,26 @@ void UI_Preferences::LoadValues()
 
 void UI_Preferences::SaveValues()
 {
+	/* Theme stuff */
+
+	if (theme_FLTK->value())
+		gui_scheme = 0;
+	else if (theme_GTK->value())
+		gui_scheme = 1;
+	else
+		gui_scheme = 2;
+
+	if (cols_default->value())
+		gui_color_set = 0;
+	else if (cols_bright->value())
+		gui_color_set = 1;
+	else
+		gui_color_set = 2;
+
+	gui_custom_bg = (rgb_color_t) bg_colorbox->color();
+	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
+	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
+
 	/* Edit panel */
 
 	new_sector_size = atoi(edit_sectorsize->value());
