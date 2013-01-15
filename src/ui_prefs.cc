@@ -22,6 +22,8 @@
 #include "ui_window.h"
 #include "ui_prefs.h"
 
+#include <FL/Fl_Color_Chooser.H>
+
 
 #define PREF_WINDOW_W  600
 #define PREF_WINDOW_H  500
@@ -247,9 +249,16 @@ void UI_Preferences::close_callback(Fl_Widget *w, void *data)
 
 void UI_Preferences::color_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+//	UI_Preferences *dialog = (UI_Preferences *)data;
 
-	Beep();
+	uchar r, g, b;
+
+	Fl::get_color(w->color(), r, g, b);
+
+	if (! fl_color_chooser("New color:", r, g, b, 3))
+		return;
+
+	w->color(fl_rgb_color(r, g, b));
 }
 
 
