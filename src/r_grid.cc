@@ -35,6 +35,7 @@ Grid_State_c  grid;
 // config items
 int  default_grid_size = 64;
 bool default_grid_snap = true;
+int  default_grid_mode = 1;  // normal
 
 
 Grid_State_c::Grid_State_c() :
@@ -59,7 +60,22 @@ void Grid_State_c::Init()
 	if (step >= grid_values[1])
 		step =  grid_values[1] - 1;
 
+	shown = true;  // prevent a beep in AdjustStep
+
 	AdjustStep(+1);
+
+	if (default_grid_mode == 0)
+	{
+		shown = false;
+
+		if (main_win)
+			main_win->info_bar->SetGrid(0);
+	}
+	else
+	{
+		shown = true;
+		mode  = default_grid_mode - 1;
+	}
 
 	snap = default_grid_snap;
 }

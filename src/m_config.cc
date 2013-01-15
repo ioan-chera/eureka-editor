@@ -257,6 +257,15 @@ static const opt_desc_t options[] =
 		&glbsp_warn
 	},
 
+	{	"default_grid_mode",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default grid mode: 0 = OFF, 1 = normal, 2 = simple",
+		NULL,
+		&default_grid_mode
+	},
+
 	{	"default_grid_size",
 		0,
 		OPT_INTEGER,

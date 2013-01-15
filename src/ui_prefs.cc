@@ -68,6 +68,7 @@ public:
 	Fl_Button *fg_colorbox;
 
 	Fl_Check_Button *grid_snap;
+	Fl_Choice *grid_mode;
 	Fl_Choice *grid_size;
 	Fl_Check_Button *gen_digitzoom;
 	Fl_Choice *gen_smallscroll;
@@ -162,17 +163,22 @@ UI_Preferences::UI_Preferences() :
 		{ grid_snap = new Fl_Check_Button(50, 230, 235, 25, " default SNAP mode");
 		  grid_snap->down_box(FL_DOWN_BOX);
 		}
-		{ grid_size = new Fl_Choice(435, 230, 85, 25, "default grid size ");
+		{ grid_mode = new Fl_Choice(435, 230, 95, 25, "default grid mode ");
+		  grid_mode->down_box(FL_BORDER_BOX);
+		  grid_mode->add("OFF|Normal|Simple");
+		}
+		{ grid_size = new Fl_Choice(435, 265, 95, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
 		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
 		}
 		{ gen_digitzoom = new Fl_Check_Button(50, 265, 240, 25, " digit keys zoom the map");
 		  gen_digitzoom->down_box(FL_DOWN_BOX);
 		}
-		{ gen_smallscroll = new Fl_Choice(435, 265, 85, 25, "small scroll step ");
+		{ gen_smallscroll = new Fl_Choice(435, 265, 95, 25, "small scroll step ");
 		  gen_smallscroll->down_box(FL_BORDER_BOX);
+		  gen_smallscroll->hide();
 		}
-		{ gen_largescroll = new Fl_Choice(435, 300, 85, 25, "large scroll step ");
+		{ gen_largescroll = new Fl_Choice(435, 300, 95, 25, "large scroll step ");
 		  gen_largescroll->down_box(FL_BORDER_BOX);
 		}
 		{ gen_wheelscroll = new Fl_Check_Button(50, 300, 245, 25, " mouse wheel scrolls the map");
@@ -333,8 +339,12 @@ void UI_Preferences::LoadValues()
 
 	/* General stuff */
 
+	if (default_grid_mode < 0 || default_grid_mode > 2)
+		default_grid_mode = 1;
+
 	grid_snap->value(default_grid_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(default_grid_size));
+	grid_mode->value(default_grid_mode);
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
@@ -384,6 +394,7 @@ void UI_Preferences::SaveValues()
 
 	default_grid_snap = grid_snap->value() ? true : false;
 	default_grid_size = atoi(grid_size->mvalue()->text);
+	default_grid_mode = grid_mode->value();
 
 	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
