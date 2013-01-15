@@ -26,9 +26,8 @@
 class UI_About : public Fl_Window
 {
 private:
-  bool want_quit;
+  static UI_About * _instance;
 
-public:
   UI_About(int W, int H, const char *label = NULL);
 
   virtual ~UI_About()
@@ -36,12 +35,20 @@ public:
     // nothing needed
   }
 
-  bool WantQuit() const
+public:
+  static void Open()
   {
-    return want_quit;
+    if (_instance)  // already up?
+      return;
+
+    int about_w = 326 + KF * 30;
+    int about_h = 330 + KF * 40;
+
+    _instance = new UI_About(about_w, about_h, "About Eureka");
+
+    _instance->show();
   }
 
-public:
   // FLTK virtual method for handling input events.
   int handle(int event)
   {
@@ -51,10 +58,10 @@ public:
 
       if (key == FL_Escape)
       {
-        want_quit = true;
+        callback_Close(this, this);
         return 1;
       }
-        
+
       // eat all other function keys
       if (FL_F+1 <= key && key <= FL_F+12)
         return 1;
@@ -64,11 +71,13 @@ public:
   }
 
 private:
-  static void callback_Quit(Fl_Widget *w, void *data)
+  static void callback_Close(Fl_Widget *w, void *data)
   {
-    UI_About *that = (UI_About *)data;
-
-    that->want_quit = true;
+    if (_instance)
+    {
+      _instance->default_callback(_instance, data);
+      _instance = NULL;
+    }
   }
 
   static const char *Logo;
@@ -76,6 +85,9 @@ private:
   static const char *Text2;
   static const char *URL;
 };
+
+
+UI_About * UI_About::_instance;
 
 
 const char *UI_About::Logo = EUREKA_TITLE "\n v" EUREKA_VERSION;
@@ -104,15 +116,11 @@ const char *UI_About::URL = "http://awwports.sf.net/eureka";
 // Constructor
 //
 UI_About::UI_About(int W, int H, const char *label) :
-    Fl_Window(W, H, label),
-    want_quit(false)
+    Fl_Window(W, H, label)
 {
-  // cancel Fl_Group's automatic add crap
-  end();
-
   // non-resizable
   size_range(W, H, W, H);
-  callback(callback_Quit, this);
+  callback(callback_Close, this);
 
   int cy = 22;
 
@@ -122,8 +130,6 @@ UI_About::UI_About(int W, int H, const char *label) :
   box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
   box->labelcolor(FL_BLUE);
   box->labelsize(24);
-
-  add(box);
 
   cy += box->h() + 10;
   
@@ -136,16 +142,12 @@ UI_About::UI_About(int W, int H, const char *label) :
   box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
   box->labelfont(FL_HELVETICA_BOLD);
 
-  add(box);
-
   cy += box->h();
 
 
   box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 186, Text2);
   box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
   box->labelfont(FL_HELVETICA);
-
-  add(box);
 
   cy += box->h();
 
@@ -156,8 +158,6 @@ UI_About::UI_About(int W, int H, const char *label) :
   link->align(FL_ALIGN_CENTER);
   link->labelsize(20);
   link->color(color());
-
-  add(link);
 
   cy += link->h() + 16;
 #endif
@@ -173,34 +173,16 @@ UI_About::UI_About(int W, int H, const char *label) :
 
   Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
   button->color(but_color, but_color);
-  button->callback(callback_Quit, this);
+  button->callback(callback_Close, this);
 
-  add(button);
+
+  end();
 }
 
 
 void DLG_AboutText(void)
 {
-  static UI_About * about_window = NULL;
-
-  if (about_window)  // already up?
-    return;
-
-  int about_w = 326 + KF * 30;
-  int about_h = 330 + KF * 40;
-
-  about_window = new UI_About(about_w, about_h, "About Eureka");
-
-  about_window->show();
-
-  // run the GUI until the user closes
-  while (! about_window->WantQuit())
-    Fl::wait();
-
-  // this deletes all the child widgets too...
-  delete about_window;
-
-  about_window = NULL;
+  UI_About::Open();
 }
 
 
