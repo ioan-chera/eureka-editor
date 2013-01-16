@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -99,6 +99,31 @@ side_ref_e;
 #include "e_basis.h"
 
 
+/* key value:
+ *   - can be a printable ASCII character, e.g. 'a', 'A', '2', '@'
+ *   - spacebar is ' '
+ *   - all other keys use the FLTK code (e.g. FL_Enter, FL_Up, etc)
+ *   - control keys (like CTRL-A) use MOD_COMMAND flag (never '\001')
+ *
+ * modifier (MOD_XXXX value) is or-ed with the bare key.
+ *   - uppercase letters (etc) do _not_ have the MOD_SHIFT flag
+ *   - can extract bare key with FL_KEY_MASK
+ *   - can extract modifier with MOD_ALL_MASK
+ *   - currently only a single modifier will be present:
+ *       MOD_COMMAND > MOD_META > MOD_ALT > MOD_SHIFT
+ *   - using my own names since "FL_CONTROL" is fucking confusing
+ */
+typedef unsigned int key_code_t;
+
+#define MOD_COMMAND  FL_COMMAND
+#define MOD_META     FL_CONTROL
+#define MOD_ALT      FL_ALT
+#define MOD_SHIFT    FL_SHIFT
+
+#define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
+
+
+// FIXME: REMOVE OLD WAY
 // key modifier (does not allow two at once, e.g. CTRL+SHIFT)
 typedef enum
 {
