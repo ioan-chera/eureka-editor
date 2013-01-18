@@ -116,6 +116,8 @@ side_ref_e;
  */
 typedef unsigned int keycode_t;
 
+#define MOD_none     0
+
 #define MOD_COMMAND  FL_COMMAND
 #define MOD_META     FL_CONTROL
 #define MOD_ALT      FL_ALT

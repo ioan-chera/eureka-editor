@@ -84,7 +84,7 @@ bool  Global_Key(keycode_t key);
 bool  Editor_Key(keycode_t key);
 bool Browser_Key(keycode_t key);
 
-void Editor_Wheel(int dx, int dy, keymod_e mod);
+void Editor_Wheel(int dx, int dy, keycode_t mod);
 void EditorMousePress(keymod_e mod);
 void EditorMouseRelease();
 void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool drag);

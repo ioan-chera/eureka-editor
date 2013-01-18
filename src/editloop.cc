@@ -637,18 +637,18 @@ void CMD_GoToCamera()
 }
 
 
-void Editor_Wheel(int dx, int dy, keymod_e mod)
+void Editor_Wheel(int dx, int dy, keycode_t mod)
 {
 	if (mouse_wheel_scrolls_map && mod !=
 #ifdef __APPLE__
-		KM_ALT)
+		MOD_ALT)
 #else
-		KM_CTRL)
+		MOD_COMMAND)
 #endif
 	{
 		int speed = 12;  // FIXME: CONFIG OPTION
 
-		if (mod == KM_SHIFT)
+		if (mod == MOD_SHIFT)
 			speed = MAX(1, speed / 3);
 
 		CMD_ScrollMap(  dx * (double) speed / grid.Scale,

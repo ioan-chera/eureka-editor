@@ -1766,13 +1766,13 @@ bool Render3D_Key(keycode_t key)
 }
 
 
-void Render3D_Wheel(int delta, keymod_e mod)
+void Render3D_Wheel(int delta, keycode_t mod)
 {
 	int speed = 16;  // TODO: CONFIG ITEM
 
-	if (mod == KM_SHIFT)
+	if (mod == MOD_SHIFT)
 		speed = MAX(1, speed / 8);
-	else if (mod == KM_CTRL)
+	else if (mod == MOD_COMMAND)
 		speed *= 4;
 
 	delta = delta * speed * 3;
@@ -1784,7 +1784,7 @@ void Render3D_Wheel(int delta, keymod_e mod)
 }
 
 
-void Render3D_RBScroll(int dx, int dy, keymod_e mod)
+void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 {
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
@@ -1799,7 +1799,7 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 			dx = 0;
 	}
 
-	if (mod == KM_ALT)  // strafing
+	if (mod == MOD_ALT)  // strafing
 	{
 		if (dx)
 		{
@@ -1825,9 +1825,9 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 	{
 		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
 
-		if (mod == KM_SHIFT)
+		if (mod == MOD_SHIFT)
 			speed = MAX(1, speed / 4);
-		else if (mod == KM_CTRL)
+		else if (mod == MOD_COMMAND)
 			speed *= 3;
 
 		double d_ang = dx * M_PI * speed / (1440.0*4.0);
@@ -1839,9 +1839,9 @@ void Render3D_RBScroll(int dx, int dy, keymod_e mod)
 	{
 		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
 
-		if (mod == KM_SHIFT)
+		if (mod == MOD_SHIFT)
 			speed = MAX(1, speed / 4);
-		else if (mod == KM_CTRL)
+		else if (mod == MOD_COMMAND)
 			speed *= 3;
 
 		view.z -= dy * speed / 16;

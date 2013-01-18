@@ -284,12 +284,12 @@ int UI_Canvas::handle_wheel()
 	int dx = Fl::event_dx();
 	int dy = Fl::event_dy();
 
-	int state = Fl::event_state();
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
 	if (render3d)
-		Render3D_Wheel(0 - dy, StateToMod(state));
+		Render3D_Wheel(0 - dy, mod);
 	else
-		Editor_Wheel(dx, dy, StateToMod(state));
+		Editor_Wheel(dx, dy, mod);
 
 	return 1;
 }
@@ -1587,14 +1587,15 @@ void UI_Canvas::ChangeRenderMode(int mode)
 
 void UI_Canvas::RightButtonScroll(int mode)
 {
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
 	if (mode == 0)
 		main_win->SetCursor(FL_CURSOR_DEFAULT);
+
 	else if (mode == 1)
 		main_win->SetCursor(FL_CURSOR_HAND);
 
-	keymod_e mod = StateToMod(Fl::event_state());
-
-	if (mode == 2)
+	else if (mode == 2)
 	{
 		int dx = Fl::event_x() - rbscroll_x;
 		int dy = Fl::event_y() - rbscroll_y;
@@ -1607,9 +1608,9 @@ void UI_Canvas::RightButtonScroll(int mode)
 		{
 			int speed = 8;  // FIXME: CONFIG OPTION
 
-			if (mod == KM_SHIFT)
+			if (mod == MOD_SHIFT)
 				speed /= 2;
-			else if (mod == KM_CTRL)
+			else if (mod == MOD_COMMAND)
 				speed *= 2;
 
 			grid.orig_x -= (int) ((double) dx * speed / 8.0 / grid.Scale);
