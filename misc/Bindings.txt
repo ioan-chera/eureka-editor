@@ -1,150 +1,150 @@
+# Eureka key bindings
+# vi:ts=16:noexpandtab
 
-/bind global ESC Quit
-/bind global CMD-L ForceRedraw
-/bind global TAB Toggle3D
-/bind global b ToggleBrowser
+global	ESC	Quit
+global	TAB	Toggle3D
+global	b	ToggleBrowser
 
-/bind global T OpenBrowser tex
-/bind global F OpenBrowser flat
-/bind global O OpenBrowser thing
-/bind global L OpenBrowser line
-/bind global S OpenBrowser sec
-
-
-/bind browser \ BR_CycleCategory +1
-/bind browser CMD-k BR_ClearSearch
-/bind browser PGUP  BR_Scroll -2
-/bind browser PGDN  BR_Scroll +2
+global	T	OpenBrowser	tex
+global	F	OpenBrowser	flat
+global	O	OpenBrowser	obj
+global	L	OpenBrowser	line
+global	S	OpenBrowser	sec
 
 
-/bind render w CAM_Forward 16
-/bind render W CAM_Forward 4
-/bind render s CAM_Backward 16
-/bind render S CAM_Backward 4
-/bind render a CAM_Left 16
-/bind render A CAM_Left 4
-/bind render d CAM_Right 16
-/bind render D CAM_Right 4
-
-/bind render UP CAM_Forward 16
-/bind render SHIFT-UP CAM_Forward 4
-/bind render CMD-UP CAM_Forward 64
-/bind render DOWN CAM_Backward 16
-/bind render SHIFT-DOWN CAM_Backward 4
-/bind render CMD-DOWN CAM_Backward 64
-/bind render LEFT CAM_Turn 22.5
-/bind render SHIFT-LEFT CAM_Turn 6
-/bind render CMD-LEFT CAM_Turn 90
-/bind render RIGHT CAM_Turn -22.5
-/bind render SHIFT-RIGHT CAM_Turn -6
-/bind render CMD-RIGHT CAM_Turn -90
-
-/bind render PGUP CAM_MoveUp 16
-/bind render SHIFT-PGUP CAM_MoveUp 4
-/bind render CMD-PGUP CAM_MoveUp 64
-/bind render PGDN CAM_MoveDown 16
-/bind render SHIFT-PGDN CAM_MoveDown 4
-/bind render CMD-PGDN CAM_MoveDown 64
-/bind render v RN_DropToFloor
-
-/bind render t RN_Toggle tex
-/bind render o RN_Toggle obj
-/bind render l RN_Toggle light
-/bind render g RN_Toggle grav
-
-/bind render F5  RN_Toggle detail
-/bind render F11 RN_Gamma +1
+browser	\	BR_CycleCategory
+browser	CMD-k	BR_ClearSearch
+browser	PGUP	BR_Scroll	-3
+browser	PGDN	BR_Scroll	+3
 
 
-/bind thing w TH_Spin +45
-/bind thing x TH_Spin -45
+render	w	3D_Forward	16
+render	W	3D_Forward	4
+render	s	3D_Backward	16
+render	S	3D_Backward	4
+render	a	3D_Left	16
+render	A	3D_Left	4
+render	d	3D_Right	16
+render	D	3D_Right	4
 
-/bind thing K TH_Toggle skills
+render	UP	3D_Forward	16
+render	SHIFT-UP	3D_Forward	4
+render	CMD-UP	3D_Forward	64
+render	DOWN	3D_Backward	16
+render	SHIFT-DOWN	3D_Backward	4
+render	CMD-DOWN	3D_Backward	64
+render	LEFT	3D_Turn	22.5
+render	SHIFT-LEFT	3D_Turn	6
+render	CMD-LEFT	3D_Turn	90
+render	RIGHT	3D_Turn	-22.5
+render	SHIFT-RIGHT	3D_Turn	-6
+render	CMD-RIGHT	3D_Turn	-90
 
+render	PGUP	3D_MoveUp	16
+render	SHIFT-PGUP	3D_MoveUp	4
+render	CMD-PGUP	3D_MoveUp	64
+render	PGDN	3D_MoveDown	16
+render	SHIFT-PGDN	3D_MoveDown	4
+render	CMD-PGDN	3D_MoveDown	64
+render	v	3D_DropToFloor
 
-/bind line d LN_Disconnect
-/bind line e LN_SelectPath normal
-/bind line E LN_SelectPath sametex
+render	t	3D_Toggle	tex
+render	o	3D_Toggle	obj
+render	l	3D_Toggle	light
+render	g	3D_Toggle	grav
 
-/bind line m LN_MergeTwo
-/bind line c LN_SplitHalf
-/bind line f LN_Flip
-/bind line x LN_AlignX
-/bind line y LN_AlignY
-
-
-/bind sector d SEC_Disconnect
-/bind sector m SEC_Merge
-/bind sector M SEC_Merge keep
-/bind sector e SEC_SelectGroup h
-/bind sector e SEC_SelectGroup tex
-/bind sector w SEC_SwapFlats
-
-/bind sector , SEC_Floor -8
-/bind sector . SEC_Floor +8
-/bind sector < SEC_Floor -1
-/bind sector > SEC_Floor +1
-/bind sector CMD-, SEC_Floor -64
-/bind sector CMD-. SEC_Floor +64
-
-/bind sector [ SEC_Ceil -8
-/bind sector ] SEC_Ceil +8
-/bind sector { SEC_Ceil -1
-/bind sector } SEC_Ceil +1
-/bind sector CMD-[ SEC_Ceil -64
-/bind sector CMD-] SEC_Ceil +64
-
-
-/bind vertex d VT_Disconnect
-/bind vertex m VT_Merge
+render	F5	3D_Toggle	detail
+render	F11	3D_Gamma	+1
 
 
-/bind edit + Zoom +1
-/bind edit = Zoom +1
-/bind edit - Zoom -1
-/bind edit _ Zoom -1
+thing	w	TH_Spin	+45
+thing	x	TH_Spin	-45
+thing	K	TH_Toggle	skills
 
-/bind edit HOME ZoomWholeMap
-/bind edit 0 ZoomWholeMap
-/bind edit END GoToCamera
-/bind edit ' MoveCameraHere
 
-/bind edit UP    Scroll 0 +2
-/bind edit DOWN  Scroll 0 -2
-/bind edit LEFT  Scroll -2 0
-/bind edit RIGHT Scroll +2 0
+line	d	LN_Disconnect
+line	e	LN_SelectPath	normal
+line	E	LN_SelectPath	sametex
 
-/bind edit g GR_Step +1
-/bind edit G GR_Step -1
+line	m	LN_MergeTwo
+line	c	LN_SplitHalf
+line	f	LN_Flip
+line	x	LN_AlignX
+line	y	LN_AlignY
 
-/bind edit h GR_Toggle shown
-/bind edit f GR_Toggle snap
 
-/bind edit l EditMode line
-/bind edit s EditMode sector
-/bind edit v EditMode vertex
-/bind edit t EditMode thing
-/bind edit r EditMode radtrig
+sector	d	SEC_Disconnect
+sector	m	SEC_Merge
+sector	M	SEC_Merge	keep
+sector	e	SEC_SelectGroup	floor_h
+sector	e	SEC_SelectGroup	floor_tex
+sector	w	SEC_SwapFlats
 
-/bind edit SPACE Insert
-/bind edit INS   Insert
+sector	,	SEC_Floor	-8
+sector	.	SEC_Floor	+8
+sector	<	SEC_Floor	-1
+sector	>	SEC_Floor	+1
+sector	CMD-,	SEC_Floor	-64
+sector	CMD-.	SEC_Floor	+64
 
-/bind edit DEL   Delete
-/bind edit BKSPC Delete
-/bind edit SHIFT-DEL   Delete keep
-/bind edit SHIFT-BKSPC Delete keep
+sector	[	SEC_Ceil	-8
+sector	]	SEC_Ceil	+8
+sector	{	SEC_Ceil	-1
+sector	}	SEC_Ceil	+1
+sector	CMD-[	SEC_Ceil	-64
+sector	CMD-]	SEC_Ceil	+64
 
-/bind edit q Quantize
-/bind edit j JumpToObject
-/bind edit ` UnselectAll
 
-/bind edit o CopyAndPaste
+vertex	d	VT_Disconnect
+vertex	m	VT_Merge
 
-/bind edit W RotateObjects +1
-/bind edit R RotateObjects -1
-/bind edit H MirrorObjects horiz
-/bind edit v MirrorObjects vert
 
-/bind edit c CopyProperties
-/bind edit J Toggle obj_nums
+edit	+	Zoom	+1
+edit	=	Zoom	+1
+edit	-	Zoom	-1
+edit	_	Zoom	-1
+
+edit	HOME	ZoomWholeMap
+edit	END	GoToCamera
+edit	0	ZoomWholeMap
+edit	'	MoveCameraHere
+
+edit	UP	Scroll	0	+2
+edit	DOWN	Scroll	0	-2
+edit	LEFT	Scroll	-2	0
+edit	RIGHT	Scroll	+2	0
+
+edit	g	GR_Step	+1
+edit	G	GR_Step	-1
+
+edit	h	GR_Toggle	shown
+edit	f	GR_Toggle	snap
+
+edit	l	EditMode	line
+edit	s	EditMode	sector
+edit	v	EditMode	vertex
+edit	t	EditMode	thing
+edit	r	EditMode	radtrig
+
+edit	SPACE	Insert
+edit	INS	Insert
+
+edit	DEL	Delete
+edit	BS	Delete
+edit	SHIFT-DEL	Delete	keep
+edit	SHIFT-BS	Delete	keep
+
+edit	q	Quantize
+edit	j	JumpToObject
+edit	`	UnselectAll
+
+edit	o	CopyAndPaste
+
+edit	W	RotateObjects	+1
+edit	R	RotateObjects	-1
+edit	H	MirrorObjects	horiz
+edit	v	MirrorObjects	vert
+
+edit	c	CopyProperties
+edit	J	Toggle	obj_nums
 
