@@ -4,16 +4,18 @@
 /bind global TAB Toggle3D
 /bind global b ToggleBrowser
 
-/bind global T BR_Open tex
-/bind global F BR_Open flat
-/bind global O BR_Open thing
-/bind global L BR_Open line
-/bind global S BR_Open sec
+/bind global T OpenBrowser tex
+/bind global F OpenBrowser flat
+/bind global O OpenBrowser thing
+/bind global L OpenBrowser line
+/bind global S OpenBrowser sec
+
 
 /bind browser \ BR_CycleCategory +1
-/bind browser CMD-k BR_ClearSearchBox
+/bind browser CMD-k BR_ClearSearch
 /bind browser PGUP  BR_Scroll -2
 /bind browser PGDN  BR_Scroll +2
+
 
 /bind render w CAM_Forward 16
 /bind render W CAM_Forward 4
@@ -43,455 +45,106 @@
 /bind render PGDN CAM_MoveDown 16
 /bind render SHIFT-PGDN CAM_MoveDown 4
 /bind render CMD-PGDN CAM_MoveDown 64
+/bind render v RN_DropToFloor
 
 /bind render t RN_Toggle tex
 /bind render o RN_Toggle obj
 /bind render l RN_Toggle light
 /bind render g RN_Toggle grav
-/bind render v RN_DropToFloor
 
 /bind render F5  RN_Toggle detail
 /bind render F11 RN_Gamma +1
 
 
-static bool Thing_Key(keycode_t key)
-{
-	if (0)
-	{
-	}
-
-	// 'w': spin things 1/8 turn counter-clockwise
-	else if (key == 'w')
-	{
-		CMD_SpinThings(+45);
-	}
-
-	// 'x': spin things 1/8 turn clockwise
-	else if (key == 'x')
-	{
-		CMD_SpinThings(-45);
-	}
-
-	// [K] limit shown things to specific skill (AJA)
-	else if (key == 'K')
-	{
-		active_wmask ^= 1;
-		active_when = active_wmask;
-		edit.RedrawMap = 1;
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-static bool LineDef_Key(keycode_t key)
-{
-	if (0)
-	{
-	}
-
-	// [d]: disconnect linedefs
-	else if (key == 'd')
-	{
-		CMD_DisconnectLineDefs();
-	}
-
-	// [e]: Select/unselect all linedefs in non-forked path
-	else if (key == 'e')
-	{
-		CMD_SelectLinesInPath(SLP_Normal);
-	}
-	else if (key == 'E')
-	{
-		CMD_SelectLinesInPath(SLP_SameTex);
-	}
-
-	// [m]: merge two one-sided linedefs into one
-	else if (key == 'm')
-	{
-		CMD_MergeTwoLineDefs();
-	}
-
-	// [x]: split linedefs
-	else if (key == 'x')
-	{
-		CMD_SplitLineDefs();
-	}
-
-	// [w]: flip linedefs
-	else if (key == 'w')
-	{
-		CMD_FlipLineDefs();
-	}
-
-	// [X]: align textures horizontally
-	else if (key == 'X')
-	{
-		CMD_AlignTexturesX();
-	}
-	// [Y]: align textures vertically
-	else if (key == 'Y')
-	{
-		CMD_AlignTexturesY();
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-static bool Sector_Key(keycode_t key)
-{
-	keycode_t bare_key = key & FL_KEY_MASK;
-
-	if (0)
-	{
-	}
-
-	// [d]: disconnect sectors
-	else if (key == 'd')
-	{
-		CMD_DisconnectSectors();
-	}
-
-	// [e]: select/unselect contiguous sectors with same floor height
-	else if (key == 'e')
-	{
-		CMD_SelectContiguousSectors(SCS_Floor_H);
-	}
-	else if (key == 'E')
-	{
-		CMD_SelectContiguousSectors(SCS_FloorTex);
-	}
-
-	// [m]: merge sectors  (with SHIFT : keep common linedefs)
-	else if (key == 'm')
-	{
-		CMD_MergeSectors(false);
-	}
-	else if (key == 'M')
-	{
-		CMD_MergeSectors(true);
-	}
-
-	// [w]: swap flats in sectors
-	else if (key == 'w')
-	{
-		CMD_SwapFlats();
-	}
-
-	// [.] and [,]: adjust floor height
-	else if (bare_key == ',' || bare_key == '<')
-	{
-		CMD_MoveFloors((key & MOD_COMMAND) ? -64 : (bare_key == '<') ? -1 : -8);
-	}
-	else if (bare_key == '.' || bare_key == '>')
-	{
-		CMD_MoveFloors((key & MOD_COMMAND) ? +64 : (bare_key == '>') ? +1 : +8);
-	}
-
-	// '[' and ']': adjust ceiling height
-	else if (bare_key == '[' || bare_key == '{')
-	{
-		CMD_MoveCeilings((key & MOD_COMMAND) ? -64 : (bare_key == '{') ? -1 : -8);
-	}
-	else if (bare_key == ']' || bare_key == '}')
-	{
-		CMD_MoveCeilings((key & MOD_COMMAND) ? +64 : (bare_key == '}') ? +1 : +8);
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-static bool Vertex_Key(keycode_t key)
-{
-	if (0)
-	{
-	}
-
-	// [d]: disconnect linedefs
-	else if (key == 'd')
-	{
-		CMD_DisconnectVertices();
-	}
-
-	// [m]: merge vertices
-	else if (key == 'm')
-	{
-		CMD_MergeVertices();
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-
-bool Editor_Key(keycode_t key)
-{
-	keycode_t bare_key = key & FL_KEY_MASK;
-	keycode_t unshifted_key = key & ~MOD_SHIFT;
-
-	// [+]: zooming in  (mouse wheel too)
-	if (key == '+' || key == '=')
-	{
-		CMD_Zoom(+1, edit.map_x, edit.map_y);
-	}
-
-	// [-]: zooming out  (mouse wheel too)
-	else if (key == '-' || key == '_')
-	{
-		CMD_Zoom(-1, edit.map_x, edit.map_y);
-	}
-
-	// [HOME], [0]: show the whole map in the window
-	else if (key == FL_Home || key == '0')
-	{
-		CMD_ZoomWholeMap();
-	}
-
-	// [END]: go to camera position
-	else if (key == FL_End)
-	{
-		CMD_GoToCamera();
-	}
-
-	// [1] - [9]: set the grid size
-	else if (unshifted_key >= '1' && unshifted_key <= '9')
-	{
-		int digit = unshifted_key - '0';
-
-		bool do_zoom = digits_set_zoom;
-
-		if (key & MOD_SHIFT)
-			do_zoom = !do_zoom;
-
-		if (do_zoom)
-		{
-			float S1 = grid.Scale;
-			grid.ScaleFromDigit(digit);
-			grid.RefocusZoom(edit.map_x, edit.map_y, S1);
-		}
-		else
-		{
-			grid.StepFromDigit(digit);
-		}
-	}
-
-	// [Left], [Right], [Up], [Down]:
-	// scroll <scroll_less> percents of a screenful.
-	else if (key == FL_Left && grid.orig_x > -30000)
-	{
-		grid.orig_x -= (int) ((double) ScrMaxX * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Right && grid.orig_x < 30000)
-	{
-		grid.orig_x += (int) ((double) ScrMaxX * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Up && grid.orig_y < 30000)
-	{
-		grid.orig_y += (int) ((double) ScrMaxY * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Down && grid.orig_y > -30000)
-	{
-		grid.orig_y -= (int) ((double) ScrMaxY * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-
-	// [G]: increase the grid step
-	else if (key == 'G')
-	{
-		grid.AdjustStep(+1);
-	}
-
-	// [g]: decrease the grid step
-	else if (key == 'g')
-	{
-		grid.AdjustStep(-1);
-	}
-
-	// [h]: display or hide the grid
-	else if (key == 'h')
-	{
-		grid.ToggleShown();
-	}
-
-	// [f]: toggle the snap_to_grid flag
-	else if (key == 'f')
-	{
-		grid.ToggleSnap();
-
-		UpdateHighlight();
-	}
-
-
-	// [l], [s], [t], [v], [r]: switch mode
-	else if (key == 't' || key == 'v' || key == 'l' ||
-		key == 's' || key == 'R')
-	{
-		CMD_ChangeEditMode(key);
-	}
-
-	// [F10]: pop up the "Checks" menu
-	else if (key == FL_F+10)
-	{
-		CheckLevel (-1, -1);
-		edit.RedrawMap = 1;
-	}
-
-	// [q]: quantize objects to the grid
-	else if (key == 'q')
-	{
-		CMD_QuantizeObjects();
-	}
-
-	// [j]: jump to object by number
-	else if (key == 'j')
-	{
-		CMD_JumpToObject();
-	}
-
-	// ???: find object by type
-	// FIXME: CMD_FindObjectByType()
-
-	// [`]: clear selection and redraw the map (CTRL-U too, done via menu)
-	else if (key == '`')
-	{
-		CMD_UnselectAll();
-	}
-
-	// [']: move camera to spot under cursor
-	else if (key == '\'')
-	{
-		// IDEA: activate 3D mode (CONFIG ITEM)
-
-		if (edit.pointer_in_window)
-		{
-			Render3D_SetCameraPos(edit.map_x, edit.map_y);
-
-			edit.RedrawMap = 1;
-		}
-	}
-
-	// [o]: copy a group of objects
-	else if (key == 'o'
-			&& (edit.Selected || edit.highlighted()))
-	{
-		if (CMD_Copy())
-		{
-			CMD_Paste();
-		}
-	}
-
-	else if (key == 'W')
-	{
-		CMD_RotateObjects(true);
-	}
-	else if (key == 'R')
-	{
-		CMD_RotateObjects(false);
-	}
-
-	else if (key == 'H')
-	{
-		CMD_MirrorObjects(false);
-	}
-	else if (key == 'V')
-	{
-		CMD_MirrorObjects(true);
-	}
-
-
-
-	// [DEL]: delete the current object(s)
-	else if (unshifted_key == FL_BackSpace || unshifted_key == FL_Delete)
-	{
-		bool keep_unused = (key & MOD_SHIFT) ? true : false;
-
-		CMD_Delete(keep_unused, keep_unused);
-	}
-
-	// [INS], [SPACE]: insert a new object
-	else if (bare_key == ' ' || bare_key == FL_Insert)
-	{
-		CMD_InsertNewObject(KM_none /* FIXME!!!! */);
-
-		UpdateHighlight();
-
-		edit.RedrawMap = 1;
-	}
-
-	// [c] Copy properties to the highlighted object
-	else if (key == 'c' && edit.Selected->notempty() &&
-			 edit.highlighted())
-	{
-		CMD_CopyProperties();
-
-	}
-
-	// [J] Show object numbers
-	else if (key == 'J')
-	{
-		CMD_ToggleShowObjNums();
-	}
-
-	// [%] Show things sprites
-	else if (key == '%')
-	{
-		edit.show_things_sprites = ! edit.show_things_sprites;
-		edit.show_things_squares = ! edit.show_things_sprites;  // Not a typo !
-		edit.RedrawMap = 1;
-	}
-
-	// [PRTSCR]: save a screen shot.   FIXME
-	else if (key == FL_Print)
-	{
-		Beep();
-	}
-
-	else if (Grid_Key(key))
-	{
-		/* did grid stuff */
-	}
-
-	else
-	{
-		/* try a mode-specific function */
-
-		switch (edit.obj_type)
-		{
-			case OBJ_THINGS:   return Thing_Key(key);
-			case OBJ_LINEDEFS: return LineDef_Key(key);
-			case OBJ_SECTORS:  return Sector_Key(key);
-			case OBJ_VERTICES: return Vertex_Key(key);
-			case OBJ_RADTRIGS: return RadTrig_Key(key);
-
-			default:
-				return false;
-		}
-	}
-
-	return true;
-}
+/bind thing w TH_Spin +45
+/bind thing x TH_Spin -45
+
+/bind thing K TH_Toggle skills
+
+
+/bind line d LN_Disconnect
+/bind line e LN_SelectPath normal
+/bind line E LN_SelectPath sametex
+
+/bind line m LN_MergeTwo
+/bind line c LN_SplitHalf
+/bind line f LN_Flip
+/bind line x LN_AlignX
+/bind line y LN_AlignY
+
+
+/bind sector d SEC_Disconnect
+/bind sector m SEC_Merge
+/bind sector M SEC_Merge keep
+/bind sector e SEC_SelectGroup h
+/bind sector e SEC_SelectGroup tex
+/bind sector w SEC_SwapFlats
+
+/bind sector , SEC_Floor -8
+/bind sector . SEC_Floor +8
+/bind sector < SEC_Floor -1
+/bind sector > SEC_Floor +1
+/bind sector CMD-, SEC_Floor -64
+/bind sector CMD-. SEC_Floor +64
+
+/bind sector [ SEC_Ceil -8
+/bind sector ] SEC_Ceil +8
+/bind sector { SEC_Ceil -1
+/bind sector } SEC_Ceil +1
+/bind sector CMD-[ SEC_Ceil -64
+/bind sector CMD-] SEC_Ceil +64
+
+
+/bind vertex d VT_Disconnect
+/bind vertex m VT_Merge
+
+
+/bind edit + Zoom +1
+/bind edit = Zoom +1
+/bind edit - Zoom -1
+/bind edit _ Zoom -1
+
+/bind edit HOME ZoomWholeMap
+/bind edit 0 ZoomWholeMap
+/bind edit END GoToCamera
+/bind edit ' MoveCameraHere
+
+/bind edit UP    Scroll 0 +2
+/bind edit DOWN  Scroll 0 -2
+/bind edit LEFT  Scroll -2 0
+/bind edit RIGHT Scroll +2 0
+
+/bind edit g GR_Step +1
+/bind edit G GR_Step -1
+
+/bind edit h GR_Toggle shown
+/bind edit f GR_Toggle snap
+
+/bind edit l EditMode line
+/bind edit s EditMode sector
+/bind edit v EditMode vertex
+/bind edit t EditMode thing
+/bind edit r EditMode radtrig
+
+/bind edit SPACE Insert
+/bind edit INS   Insert
+
+/bind edit DEL   Delete
+/bind edit BKSPC Delete
+/bind edit SHIFT-DEL   Delete keep
+/bind edit SHIFT-BKSPC Delete keep
+
+/bind edit q Quantize
+/bind edit j JumpToObject
+/bind edit ` UnselectAll
+
+/bind edit o CopyAndPaste
+
+/bind edit W RotateObjects +1
+/bind edit R RotateObjects -1
+/bind edit H MirrorObjects horiz
+/bind edit v MirrorObjects vert
+
+/bind edit c CopyProperties
+/bind edit J Toggle obj_nums
+
