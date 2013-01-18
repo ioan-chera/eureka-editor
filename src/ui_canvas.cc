@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2012 Andrew Apted
+//  Copyright (C) 2006-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -153,7 +153,8 @@ int UI_Canvas::handle(int event)
 
 int UI_Canvas::handle_key()
 {
-	int key   = Fl::event_key();
+	keycode_t key = Fl::event_key();
+
 	int state = Fl::event_state();
 
 	switch (key)
@@ -177,29 +178,36 @@ int UI_Canvas::handle_key()
 	if (key == 0)
 		return 0;
 
-	if (key < 127 && isalpha(key) && (state & FL_SHIFT))
-		key = toupper(key);
-
-	if (key < 127 && isalpha(key) && (state & FL_CTRL))
-		key &= 31;
-
 	if (key == '\t') key = FL_Tab;
 	if (key == '\b') key = FL_BackSpace;
 
+	// modifier logic -- only allow a single one 
+
+	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
+	else if (state & MOD_META)    key |= MOD_META;
+	else if (state & MOD_ALT)     key |= MOD_ALT;
+	else if (state & MOD_SHIFT)
+	{
+		if (key < 127 && isalpha(key))
+			key = toupper(key);
+		else
+			key |= MOD_SHIFT;
+	}
+
+fprintf(stderr, "Key: 0x%08x\n", key);
+
 	// keyboard propagation logic
 
-	keymod_e mod = StateToMod(state);
-
-	if (Global_Key(key, mod))
+	if (Global_Key(key))
 		return 1;
 
-	if (main_win->browser->visible() && Browser_Key(key, mod))
+	if (main_win->browser->visible() && Browser_Key(key))
 		return 1;
 
-	if (render3d && Render3D_Key(key, mod))
+	if (render3d && Render3D_Key(key))
 		return 1;
 
-	if (Editor_Key(key, mod))
+	if (Editor_Key(key))
 		return 1;
 
 	// NOTE: the key may still get handled by something (e.g. Menus)

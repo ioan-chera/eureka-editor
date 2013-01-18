@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -369,7 +369,7 @@ void CMD_ScrollBrowser(int delta)
 
 
 
-bool Browser_Key(int key, keymod_e mod)
+bool Browser_Key(keycode_t key)
 {
 	// [\]: cycle through categories in the Browser
 	if (key == '\\')
@@ -378,7 +378,7 @@ bool Browser_Key(int key, keymod_e mod)
 	}
 
 	// [CTRL-K]: clear the Browser search box
-	else if (key == 11)
+	else if (key == ('k' | MOD_COMMAND))
 	{
 		CMD_ClearSearchBox();
 	}
@@ -402,7 +402,7 @@ bool Browser_Key(int key, keymod_e mod)
 }
 
 
-bool Global_Key(int key, keymod_e mod)
+bool Global_Key(keycode_t key)
 {
 	// [ESC]: quit
 	if (key == FL_Escape && escape_key_quits)
@@ -411,7 +411,7 @@ bool Global_Key(int key, keymod_e mod)
 	}
 
 	// [CTRL-L]: force redraw
-	else if (key == '\f')
+	else if (key == ('l' | MOD_COMMAND))
 	{
 		edit.RedrawMap = 1;
 
@@ -445,8 +445,10 @@ bool Global_Key(int key, keymod_e mod)
 }
 
 
-static bool Grid_Key(int key, keymod_e mod)
+static bool Grid_Key(keycode_t key)
 {
+	keycode_t unshifted_key = key & ~MOD_SHIFT;
+
 	// [+]: zooming in  (mouse wheel too)
 	if (key == '+' || key == '=')
 	{
@@ -472,22 +474,24 @@ static bool Grid_Key(int key, keymod_e mod)
 	}
 
 	// [1] - [9]: set the grid size
-	else if (key >= '1' && key <= '9')
+	else if (unshifted_key >= '1' && unshifted_key <= '9')
 	{
+		int digit = unshifted_key - '0';
+
 		bool do_zoom = digits_set_zoom;
 
-		if (mod == KM_SHIFT)
+		if (key & MOD_SHIFT)
 			do_zoom = !do_zoom;
 
 		if (do_zoom)
 		{
 			float S1 = grid.Scale;
-			grid.ScaleFromDigit(key - '0');
+			grid.ScaleFromDigit(digit);
 			grid.RefocusZoom(edit.map_x, edit.map_y, S1);
 		}
 		else
 		{
-			grid.StepFromDigit(key - '0');
+			grid.StepFromDigit(digit);
 		}
 	}
 
@@ -659,7 +663,7 @@ void Editor_Wheel(int dx, int dy, keymod_e mod)
 }
 
 
-static bool Thing_Key(int key, keymod_e mod)
+static bool Thing_Key(keycode_t key)
 {
 	if (0)
 	{
@@ -694,7 +698,7 @@ static bool Thing_Key(int key, keymod_e mod)
 }
 
 
-static bool LineDef_Key(int key, keymod_e mod)
+static bool LineDef_Key(keycode_t key)
 {
 	if (0)
 	{
@@ -754,8 +758,10 @@ static bool LineDef_Key(int key, keymod_e mod)
 }
 
 
-static bool Sector_Key(int key, keymod_e mod)
+static bool Sector_Key(keycode_t key)
 {
+	keycode_t bare_key = key & FL_KEY_MASK;
+
 	if (0)
 	{
 	}
@@ -793,23 +799,23 @@ static bool Sector_Key(int key, keymod_e mod)
 	}
 
 	// [.] and [,]: adjust floor height
-	else if (key == ',' || key == '<')
+	else if (bare_key == ',' || bare_key == '<')
 	{
-		CMD_MoveFloors((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
+		CMD_MoveFloors((key & MOD_COMMAND) ? -64 : (bare_key == '<') ? -1 : -8);
 	}
-	else if (key == '.' || key == '>')
+	else if (bare_key == '.' || bare_key == '>')
 	{
-		CMD_MoveFloors((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
+		CMD_MoveFloors((key & MOD_COMMAND) ? +64 : (bare_key == '>') ? +1 : +8);
 	}
 
 	// '[' and ']': adjust ceiling height
-	else if (key == '[' || key == '{')
+	else if (bare_key == '[' || bare_key == '{')
 	{
-		CMD_MoveCeilings((mod == KM_CTRL) ? -64 : (mod == KM_SHIFT) ? -1 : -8);
+		CMD_MoveCeilings((key & MOD_COMMAND) ? -64 : (bare_key == '{') ? -1 : -8);
 	}
-	else if (key == ']' || key == '}')
+	else if (bare_key == ']' || bare_key == '}')
 	{
-		CMD_MoveCeilings((mod == KM_CTRL) ? +64 : (mod == KM_SHIFT) ? +1 : +8);
+		CMD_MoveCeilings((key & MOD_COMMAND) ? +64 : (bare_key == '}') ? +1 : +8);
 	}
 
 	else
@@ -821,7 +827,7 @@ static bool Sector_Key(int key, keymod_e mod)
 }
 
 
-static bool Vertex_Key(int key, keymod_e mod)
+static bool Vertex_Key(keycode_t key)
 {
 	if (0)
 	{
@@ -848,7 +854,7 @@ static bool Vertex_Key(int key, keymod_e mod)
 }
 
 
-static bool RadTrig_Key(int key, keymod_e mod)
+static bool RadTrig_Key(keycode_t key)
 {
 	if (0)
 	{
@@ -863,11 +869,10 @@ static bool RadTrig_Key(int key, keymod_e mod)
 }
 
 
-bool Editor_Key(int key, keymod_e mod)
+bool Editor_Key(keycode_t key)
 {
-	// in general, ignore ALT key (and META)
-	if (mod == KM_ALT)
-		return false;
+	keycode_t bare_key = key & FL_KEY_MASK;
+	keycode_t unshifted_key = key & ~MOD_SHIFT;
 
 	// [l], [s], [t], [v], [r]: switch mode
 	if (key == 't' || key == 'v' || key == 'l' ||
@@ -977,17 +982,17 @@ bool Editor_Key(int key, keymod_e mod)
 
 
 	// [DEL]: delete the current object(s)
-	else if (key == FL_BackSpace || key == FL_Delete)
+	else if (unshifted_key == FL_BackSpace || unshifted_key == FL_Delete)
 	{
-		bool keep_unused = (mod == KM_SHIFT) ? true : false;
+		bool keep_unused = (key & MOD_SHIFT) ? true : false;
 
 		CMD_Delete(keep_unused, keep_unused);
 	}
 
 	// [INS], [SPACE]: insert a new object
-	else if (key == ' ' || key == FL_Insert)
+	else if (bare_key == ' ' || bare_key == FL_Insert)
 	{
-		CMD_InsertNewObject(mod);
+		CMD_InsertNewObject(KM_none /* FIXME!!!! */);
 
 		UpdateHighlight();
 
@@ -1022,7 +1027,7 @@ bool Editor_Key(int key, keymod_e mod)
 		Beep();
 	}
 
-	else if (Grid_Key(key, mod))
+	else if (Grid_Key(key))
 	{
 		/* did grid stuff */
 	}
@@ -1033,11 +1038,11 @@ bool Editor_Key(int key, keymod_e mod)
 
 		switch (edit.obj_type)
 		{
-			case OBJ_THINGS:   return Thing_Key(key, mod);
-			case OBJ_LINEDEFS: return LineDef_Key(key, mod);
-			case OBJ_SECTORS:  return Sector_Key(key, mod);
-			case OBJ_VERTICES: return Vertex_Key(key, mod);
-			case OBJ_RADTRIGS: return RadTrig_Key(key, mod);
+			case OBJ_THINGS:   return Thing_Key(key);
+			case OBJ_LINEDEFS: return LineDef_Key(key);
+			case OBJ_SECTORS:  return Sector_Key(key);
+			case OBJ_VERTICES: return Vertex_Key(key);
+			case OBJ_RADTRIGS: return RadTrig_Key(key);
 
 			default:
 				return false;
@@ -1162,7 +1167,7 @@ void EditorMiddlePress(keymod_e mod)
 	// ability to insert stuff via the mouse
 	if (mod == KM_none)
 	{
-		Editor_Key(' ', mod);
+		Editor_Key(' ');
 		return;
 	}
 

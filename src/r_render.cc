@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1628,117 +1628,117 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 }
 
 
-bool Render3D_Key(int key, keymod_e mod)
+bool Render3D_Key(keycode_t key)
 {
 	/* handle keypress */
 
+	keycode_t bare_key = key & FL_KEY_MASK;
+
+	if (key & MOD_COMMAND)
+		if (isalpha(bare_key))
+			return false;
+
 	bool Redraw = false;
 
-	///###  if (key == YK_ESC || key == 'q')
-	///###    return false; // FIXME: close window
+	if ('A' <= key && key <= 'Z')
+	{
+		bare_key = tolower(key);
+		key = bare_key | MOD_SHIFT;
+	}
 
 	int mv_speed = 16;  // TODO: CONFIG ITEM
 
-	if (mod == KM_SHIFT)
+	if (key & MOD_SHIFT)
 		mv_speed = MAX(1, mv_speed / 4);
-	else if (mod == KM_CTRL)
+	else if (key & MOD_COMMAND)
 		mv_speed *= 4;
 
-	if ('A' <= key && key <= 'Z' && mod != KM_ALT)
-	{
-		key = tolower(key);
-		mod = KM_SHIFT;
-		mv_speed = mv_speed / 4;
-	}
-
 	// strafing?
-	if (key == FL_Left  && mod == KM_ALT)
+	if (key == (FL_Left | MOD_ALT))
 	{
 		key = 'a';
-		mod = KM_none;
 	}
-	if (key == FL_Right && mod == KM_ALT)
+	if (key == (FL_Right | MOD_ALT))
 	{
 		key = 'd';
-		mod = KM_none;
 	}
 
-	if ((key == FL_Up || key == FL_Down) && mod == KM_ALT)
-		mod = KM_none;
+	if ((key == (FL_Up | MOD_ALT)) || key == (FL_Down | MOD_ALT))
+		key &= ~MOD_ALT;
 		
 
 	// in general, ignore ALT keys
-	if (mod == KM_ALT)
+	if (key & MOD_ALT)
 		return false;
 
-	if (key == FL_Left)
+	if (bare_key == FL_Left)
 	{
 		view.SetAngle(view.angle + M_PI / 8);
 		Redraw = true;
 	}
-	else if (key == FL_Right)
+	else if (bare_key == FL_Right)
 	{
 		view.SetAngle(view.angle - M_PI / 8);
 		Redraw = true;
 	}
-	else if (key == FL_Up || key == 'w')
+	else if (bare_key == FL_Up || key == 'w')
 	{
 		view.x += view.Cos * mv_speed * 3;
 		view.y += view.Sin * mv_speed * 3;
 		Redraw = true;
 	}
-	else if (key == FL_Down || key == 's')
+	else if (bare_key == FL_Down || bare_key == 's')
 	{
 		view.x -= view.Cos * mv_speed * 3;
 		view.y -= view.Sin * mv_speed * 3;
 		Redraw = true;
 	}
-	else if (key == 'a')
+	else if (bare_key == 'a')
 	{
 		view.x -= view.Sin * mv_speed * 2;
 		view.y += view.Cos * mv_speed * 2;
 		Redraw = true;
 	}
-	else if (key == 'd')
+	else if (bare_key == 'd')
 	{
 		view.x += view.Sin * mv_speed * 2;
 		view.y -= view.Cos * mv_speed * 2;
 		Redraw = true;
 	}
-	else if (key == FL_Page_Up)
+	else if (bare_key == FL_Page_Up)
 	{
 		view.z += mv_speed * 1;
 		view.gravity = false;
 		Redraw = true;
 	}
-	else if (key == FL_Page_Down)
+	else if (bare_key == FL_Page_Down)
 	{
 		view.z -= mv_speed * 1;
 		view.gravity = false;
 		Redraw = true;
 	}
-	else if (key == 't')
+	else if (bare_key == 't')
 	{
 		view.texturing = ! view.texturing;
 		Redraw = true;
 	}
-	else if (key == 'o')
+	else if (bare_key == 'o')
 	{
 		view.sprites = ! view.sprites;
 		view.thsec_invalidated = true;
 		Redraw = true;
 	}
-	else if (key == 'l')
+	else if (bare_key == 'l')
 	{
 		view.lighting = ! view.lighting;
 		Redraw = true;
 	}
-	else if (key == 'g')
+	else if (bare_key == 'g')
 	{
 		view.gravity = ! view.gravity;
 		Redraw = true;
 	}
-	else if (key == 'v')
+	else if (bare_key == 'v')
 	{
 		view.CalcViewZ();
 		Redraw = true;
