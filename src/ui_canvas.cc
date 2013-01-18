@@ -188,13 +188,19 @@ int UI_Canvas::handle_key()
 	else if (state & MOD_ALT)     key |= MOD_ALT;
 	else if (state & MOD_SHIFT)
 	{
+		// Note: SHIFT + digit is kept that way (rather than get '!', '@' etc)
+
 		if (key < 127 && isalpha(key))
 			key = toupper(key);
+		else if (ispunct(key) && strlen(Fl::event_text()) == 1)
+			key = Fl::event_text()[0];
 		else
 			key |= MOD_SHIFT;
 	}
 
-fprintf(stderr, "Key: 0x%08x\n", key);
+#if 0  // DEBUG
+	fprintf(stderr, "Key code: 0x%08x\n", key);
+#endif
 
 	// keyboard propagation logic
 
