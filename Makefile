@@ -74,6 +74,7 @@ OBJS = \
 	$(OBJ_DIR)/m_dialog.o  \
 	$(OBJ_DIR)/m_files.o  \
 	$(OBJ_DIR)/m_game.o  \
+	$(OBJ_DIR)/m_keys.o  \
 	$(OBJ_DIR)/m_select.o  \
 	$(OBJ_DIR)/m_strings.o  \
 	$(OBJ_DIR)/objects.o  \

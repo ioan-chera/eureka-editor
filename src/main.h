@@ -98,32 +98,7 @@ side_ref_e;
 
 #include "e_basis.h"
 
-
-/* key value:
- *   - can be a printable ASCII character, e.g. 'a', 'A', '2', ';'
- *   - spacebar is ' '
- *   - all other keys use the FLTK code (e.g. FL_Enter, FL_Up, etc)
- *   - control keys (like CTRL-A) use MOD_COMMAND flag (never '\001')
- *
- * modifier (MOD_XXXX value) is or-ed with the bare key.
- *   - uppercase letters (etc) do _not_ have the MOD_SHIFT flag
- *   - digits, however, _do_ have MOD_SHIFT
- *   - can extract bare key with FL_KEY_MASK
- *   - can extract modifier with MOD_ALL_MASK
- *   - currently only a single modifier will be present:
- *       MOD_COMMAND > MOD_META > MOD_ALT > MOD_SHIFT
- *   - using my own names since "FL_CONTROL" is fucking confusing
- */
-typedef unsigned int keycode_t;
-
-#define MOD_none     0
-
-#define MOD_COMMAND  FL_COMMAND
-#define MOD_META     FL_CONTROL
-#define MOD_ALT      FL_ALT
-#define MOD_SHIFT    FL_SHIFT
-
-#define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
+#include "m_keys.h"
 
 
 // FIXME: REMOVE OLD WAY
