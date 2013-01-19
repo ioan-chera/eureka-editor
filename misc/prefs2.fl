@@ -6,7 +6,7 @@ widget_class UI_Preferences {
   label PREFERENCES open
   xywh {325 145 600 500} type Double color 18 visible
 } {
-  Fl_Tabs {} {open
+  Fl_Tabs tabs {open selected
     xywh {0 0 585 435}
   } {
     Fl_Group {} {
@@ -158,7 +158,7 @@ widget_class UI_Preferences {
     }
   }
   Fl_Button {} {
-    label OK selected
+    label OK
     xywh {460 450 85 35}
   }
 } 
