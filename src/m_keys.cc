@@ -57,6 +57,92 @@ static const editor_command_t * FindEditorCommand(const char *name)
 //------------------------------------------------------------------------
 
 
+// FIXME: TABLE OF KEY NAMES <--> CODES
+
+
+/* returns zero (an invalid key) if parsing fails */
+keycode_t M_ParseKeyString(const char *str)
+{
+	int key = 0;
+
+	if (y_strnicmp(str, "CMD-", 4) == 0)
+	{
+		key |= MOD_COMMAND;  str += 4;
+	}
+	else if (y_strnicmp(str, "META-", 5) == 0)
+	{
+		key |= MOD_META;  str += 5;
+	}
+	else if (y_strnicmp(str, "ALT-", 4) == 0)
+	{
+		key |= MOD_ALT;  str += 4;
+	}
+	else if (y_strnicmp(str, "SHIFT-", 6) == 0)
+	{
+		key |= MOD_META;  str += 6;
+	}
+
+	if (str[0] > 32 && str[0] < 127 && isprint(str[0]))
+		return key | (unsigned char) str[0];
+
+	if (str[0] == '0' && str[1] == 'x')
+		return key | atoi(str);
+
+	// FIXME: FIND NAME IN TABLE
+
+	return 0;
+}
+
+
+static const char * BareKeyName(keycode_t key)
+{
+	static char buffer[200];
+
+	if (key < 127 && key > 32 && isprint(key))
+	{
+		buffer[0] = (char) key;
+		buffer[1] = 0;
+
+		return buffer;
+	}
+
+	// FIXME: FIND KEY IN TABLE
+
+	// fallback : hex code
+
+	sprintf(buffer, "0x%04x", key);
+
+	return buffer;
+}
+
+
+const char * M_KeyToString(keycode_t key)
+{
+	const char *mod = "";
+
+	if (key & MOD_COMMAND)
+		mod = "CMD-";
+	else if (key & MOD_META)
+		mod = "META-";
+	else if (key & MOD_ALT)
+		mod = "ALT-";
+	else if (key & MOD_SHIFT)
+		mod = "SHIFT-";
+
+
+	static char buffer[200];
+
+	strcpy(buffer, mod);
+
+	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
+
+	return buffer;
+}
+
+
+//------------------------------------------------------------------------
+
+
 typedef enum
 {
 	KCTX_INVALID = 0,
@@ -76,7 +162,7 @@ typedef enum
 } key_context_e;
 
 
-static int ParseKeyContext(const char *str)
+int M_ParseKeyContext(const char *str)
 {
 	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
 	if (y_stricmp(str, "browser") == 0) return KCTX_Browser;
@@ -91,7 +177,7 @@ static int ParseKeyContext(const char *str)
 	return KCTX_INVALID;
 }
 
-static const char *KeyContextString(key_context_e context)
+const char * M_KeyContextString(key_context_e context)
 {
 	switch (context)
 	{
@@ -132,17 +218,49 @@ typedef struct
 static std::vector<key_binding_t> all_bindings;
 
 
-int M_ParseBindings()
+void M_ParseBindings()
 {
+	all_bindings.clear();
+
 	// TODO
 }
 
 
-int M_WriteBindings()
+void M_WriteBindings()
 {
-	// TODO
-}
+	static char filename[FL_PATH_MAX];
 
+	sprintf(filename, "%s/bindings.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "w");
+
+	if (! fp)
+	{
+		LogPrintf("Failed to save key bindings to: %s\n", filename);
+		return;
+	}
+
+	LogPrintf("Writing key bindings to: %s\n", filename);
+
+	fprintf(fp, "# Eureka key bindings\n");
+	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
+
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	{
+		key_binding_t& bind = all_bindings[i];
+
+		if (bind.context == KCTX_INVALID)
+			continue;
+		
+		fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
+		        M_KeyToString(bind.key), bind.cmd->name);
+
+		if (bind.param1[0]) fprintf(fp, "\t%s", bind.param1);
+		if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
+
+		fprintf(fp, "\n");
+	}
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -51,13 +51,14 @@ typedef unsigned int keycode_t;
 
 typedef void (* command_func_t)(void);
 
-
 void M_RegisterCommand(const char *name, command_func_t func);
 
 
-int M_ParseBindings();
-int M_WriteBindings();
+keycode_t M_ParseKeyString(const char *str);
+const char * M_KeyToString(keycode_t key);
 
+void M_ParseBindings();
+void M_WriteBindings();
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 
