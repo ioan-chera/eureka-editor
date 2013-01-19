@@ -404,34 +404,8 @@ bool Browser_Key(keycode_t key)
 
 bool Global_Key(keycode_t key)
 {
-	// [ESC]: quit
-	if (key == FL_Escape && escape_key_quits)
-	{
-		CMD_Quit();
-	}
-
-	// [CTRL-L]: force redraw
-	else if (key == ('l' | MOD_COMMAND))
-	{
-		edit.RedrawMap = 1;
-
-		main_win->redraw();
-	}
-
-	// [TAB]: toggle the 3D view on/off
-	else if (key == FL_Tab)
-	{
-		CMD_Toggle3D();
-	}
-
-	// [b]: toggle the Browser panel on/off
-	else if (key == 'b')
-	{
-		CMD_ToggleBrowser();
-	}
-
 	// [T], [F] etc : open browser at specific kind
-	else if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
+	if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
 	{
 		CMD_SetBrowser(key);
 	}
