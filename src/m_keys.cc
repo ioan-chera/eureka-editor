@@ -25,6 +25,9 @@
 #include "editloop.h"
 
 
+const char * EXEC_Param[4];
+
+
 typedef struct
 {
 	const char *name;
@@ -449,13 +452,17 @@ key_context_e M_ModeToKeyContext(obj_type_e mode)
 
 bool ExecuteKey(keycode_t key, key_context_e context)
 {
+	EXEC_Param[0] = EXEC_Param[1] = NULL;
+	EXEC_Param[2] = EXEC_Param[3] = NULL;
+
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
 		key_binding_t& bind = all_bindings[i];
 
 		if (bind.key == key && bind.context == context)
 		{
-			// FIXME parameters !!!!
+			EXEC_Param[0] = bind.param1;
+			EXEC_Param[1] = bind.param2;
 
 			(* bind.cmd->func)();
 

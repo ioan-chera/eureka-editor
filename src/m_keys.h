@@ -85,6 +85,8 @@ void M_SaveBindings();
 
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
+extern const char * EXEC_Param[4];
+
 bool ExecuteKey(keycode_t key, key_context_e context);
 
 #endif  /* __EUREKA_M_KEYS_H__ */
