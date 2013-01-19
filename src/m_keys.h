@@ -49,16 +49,42 @@ typedef unsigned int keycode_t;
 #define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
 
 
-typedef void (* command_func_t)(void);
+typedef enum
+{
+	KCTX_INVALID = 0,
 
-void M_RegisterCommand(const char *name, command_func_t func);
+	KCTX_Global,
+	KCTX_Browser,
+	KCTX_Render,
 
+	KCTX_Line,
+	KCTX_Sector,
+	KCTX_Thing,
+	KCTX_Vertex,
+	KCTX_RadTrig,
+
+	KCTX_Edit
+
+} key_context_e;
+
+
+key_context_e M_ParseKeyContext(const char *str);
+const char * M_KeyContextString(key_context_e context);
 
 keycode_t M_ParseKeyString(const char *str);
 const char * M_KeyToString(keycode_t key);
 
+
+typedef void (* command_func_t)(void);
+
+void M_RegisterCommand(const char *name, command_func_t func);
+
 void M_LoadBindings();
 void M_SaveBindings();
+
+key_context_e M_ModeToKeyContext();
+
+bool ExecuteKey(keycode_t key, key_context_e context);
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 

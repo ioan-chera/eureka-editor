@@ -22,6 +22,8 @@
 #include "m_config.h"
 #include "m_dialog.h"
 
+#include "editloop.h"
+
 
 typedef struct
 {
@@ -220,25 +222,6 @@ const char * M_KeyToString(keycode_t key)
 //------------------------------------------------------------------------
 
 
-typedef enum
-{
-	KCTX_INVALID = 0,
-
-	KCTX_Global,
-	KCTX_Browser,
-	KCTX_Render,
-
-	KCTX_Line,
-	KCTX_Sector,
-	KCTX_Thing,
-	KCTX_Vertex,
-	KCTX_RadTrig,
-
-	KCTX_Edit
-
-} key_context_e;
-
-
 key_context_e M_ParseKeyContext(const char *str)
 {
 	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
@@ -299,6 +282,7 @@ static void ParseBinding(const char ** tokens, int num_tok)
 {
 	key_binding_t temp;
 
+	// this ensures param1/2 are NUL terminated
 	memset(&temp, 0, sizeof(temp));
 
 	temp.key = M_ParseKeyString(tokens[1]);
@@ -428,6 +412,43 @@ void M_SaveBindings()
 
 		fprintf(fp, "\n");
 	}
+}
+
+
+key_context_e M_ModeToKeyContext()
+{
+	switch (edit.obj_type)
+	{
+		case OBJ_THINGS:   return KCTX_Thing;
+		case OBJ_LINEDEFS: return KCTX_Line;
+		case OBJ_SECTORS:  return KCTX_Sector;
+		case OBJ_VERTICES: return KCTX_Vertex;
+		case OBJ_RADTRIGS: return KCTX_RadTrig;
+
+		default: break;
+	}
+
+	return KCTX_INVALID;  /* shouldn't happen */
+}
+
+
+bool ExecuteKey(keycode_t key, key_context_e context)
+{
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	{
+		key_binding_t& bind = all_bindings[i];
+
+		if (bind.key == key && bind.context == context)
+		{
+			// FIXME parameters !!!!
+
+			(* bind.cmd->func)();
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 //--- editor settings ---
