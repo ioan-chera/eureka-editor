@@ -623,13 +623,16 @@ int linedefs_of_sector (obj_no_t s, obj_no_t *&array)
 }
 
 
-bool CMD_SwapFlats()
+void SEC_SwapFlats()
 {
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("No sectors to swap");
+		return;
+	}
 
 	BA_Begin();
 		
@@ -650,9 +653,7 @@ bool CMD_SwapFlats()
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	MarkChanges();
-	return true;
 }
-
 
 
 static void LineDefsBetweenSectors(selection_c *list, int sec1, int sec2)

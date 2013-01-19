@@ -22,8 +22,6 @@
 #include "m_config.h"
 #include "m_dialog.h"
 
-#include "editloop.h"
-
 
 const char * EXEC_Param[4];
 

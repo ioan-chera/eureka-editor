@@ -33,7 +33,7 @@ bool CMD_MoveFloors(int diff);
 bool CMD_MoveCeilings(int diff);
 bool CMD_AdjustLight(int delta);
 
-bool CMD_SwapFlats();
+void SEC_SwapFlats();
 
 void CMD_MergeSectors(bool keep_common_lines);
 

@@ -766,11 +766,6 @@ static bool Sector_Key(keycode_t key)
 		CMD_MergeSectors(true);
 	}
 
-	// [w]: swap flats in sectors
-	else if (key == 'w')
-	{
-		CMD_SwapFlats();
-	}
 
 	// [.] and [,]: adjust floor height
 	else if (bare_key == ',' || bare_key == '<')
@@ -1278,9 +1273,33 @@ void EditorResize(int is_width, int is_height)
 }
 
 
-/*
-  the editor main loop
-*/
+void Editor_RegisterCommands()
+{
+	/* global */
+
+	M_RegisterCommand("Quit", &CMD_Quit);
+	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
+	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
+
+	/* edit */
+
+	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
+
+	M_RegisterCommand("SelectAll", &CMD_SelectAll);
+	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
+	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
+
+	/* line */
+
+	/* sector */
+
+	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
+
+	/* thing */
+
+	/* vertex */
+}
+
 
 void Editor_Init()
 {
@@ -1309,14 +1328,8 @@ void Editor_Init()
 
 	MadeChanges = 0;
 
-	M_RegisterCommand("Quit", &CMD_Quit);
-	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
-	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
-	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
-
-	M_RegisterCommand("SelectAll", &CMD_SelectAll);
-	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
-	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
+	Editor_RegisterCommands();
+/// TODO	Render_RegisterCommands();
 }
 
 
