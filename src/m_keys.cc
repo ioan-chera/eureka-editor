@@ -239,7 +239,7 @@ typedef enum
 } key_context_e;
 
 
-int M_ParseKeyContext(const char *str)
+key_context_e M_ParseKeyContext(const char *str)
 {
 	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
 	if (y_stricmp(str, "browser") == 0) return KCTX_Browser;
@@ -295,6 +295,46 @@ typedef struct
 static std::vector<key_binding_t> all_bindings;
 
 
+static void ParseBinding(const char ** tokens, int num_tok)
+{
+	key_binding_t temp;
+
+	memset(&temp, 0, sizeof(temp));
+
+	temp.key = M_ParseKeyString(tokens[1]);
+
+	if (! temp.key)
+	{
+		LogPrintf("bindings.cfg: cannot parse key name: %s\n", tokens[1]);
+		return;
+	}
+
+	temp.context = M_ParseKeyContext(tokens[0]);
+
+	if (temp.context == KCTX_INVALID)
+	{
+		LogPrintf("bindings.cfg: unknown context: %s\n", tokens[0]);
+		return;
+	}
+
+	temp.cmd = FindEditorCommand(tokens[2]);
+
+	if (! temp.cmd)
+	{
+		LogPrintf("bindings.cfg: unknown function: %s\n", tokens[2]);
+		return;
+	}
+
+	if (num_tok >= 4)
+		strncpy(temp.param1, tokens[3], MAX_BIND_PARAM_LEN-1);
+
+	if (num_tok >= 5)
+		strncpy(temp.param2, tokens[4], MAX_BIND_PARAM_LEN-1);
+
+	all_bindings.push_back(temp);
+}
+
+
 #define MAX_TOKENS  8
 
 void M_LoadBindings()
@@ -340,13 +380,11 @@ void M_LoadBindings()
 
 		if (num_tok < 3)
 		{
-			LogPrintf("Error in key bindings: %s\n", line);
+			LogPrintf("Syntax error in bindings: %s\n", line);
 			continue;
 		}
 
-		// FIXME
-		fprintf(stderr, "PARSE BINDING: '%s' '%s' '%s'\n",
-				tokens[0], tokens[1], tokens[2]);
+		ParseBinding(tokens, num_tok);
 	}
 
 	fclose(fp);
