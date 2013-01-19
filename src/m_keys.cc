@@ -263,6 +263,8 @@ const char * M_KeyContextString(key_context_e context)
 }
 
 
+//------------------------------------------------------------------------
+
 #define MAX_BIND_PARAM_LEN  16
 
 typedef struct
@@ -280,6 +282,25 @@ typedef struct
 
 
 static std::vector<key_binding_t> all_bindings;
+
+
+void M_RemoveBinding(keycode_t key, key_context_e context)
+{
+	std::vector<key_binding_t>::iterator IT;
+
+	for (IT = all_bindings.begin() ; IT != all_bindings.end() ; IT++)
+	{
+		if (IT->key == key && IT->context == context)
+		{
+			// found it
+			all_bindings.erase(IT);
+
+			// there should never be more than one
+			// (besides, our iterator is now invalid)
+			return;
+		}
+	}
+}
 
 
 static void ParseBinding(const char ** tokens, int num_tok)
@@ -330,6 +351,8 @@ static void ParseBinding(const char ** tokens, int num_tok)
 #if 0  // DEBUG
 fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
 #endif
+
+	M_RemoveBinding(temp.key, temp.context);
 
 	all_bindings.push_back(temp);
 }

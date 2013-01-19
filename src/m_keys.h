@@ -83,6 +83,11 @@ void M_RegisterCommand(const char *name, command_func_t func,
 void M_LoadBindings();
 void M_SaveBindings();
 
+void M_RemoveBinding(keycode_t key, key_context_e context);
+
+// TODO: M_AddBinding
+
+
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 extern const char * EXEC_Param[4];
