@@ -57,7 +57,39 @@ static const editor_command_t * FindEditorCommand(const char *name)
 //------------------------------------------------------------------------
 
 
-// FIXME: TABLE OF KEY NAMES <--> CODES
+typedef struct
+{
+	keycode_t key;
+	const char * name;
+
+} key_mapping_t;
+
+
+static key_mapping_t key_map[] =
+{
+	{ ' ',			"SPACE" },
+	{ FL_BackSpace,	"BS" },
+	{ FL_Tab,		"TAB" },
+	{ FL_Enter,		"ENTER" },
+	{ FL_Pause,		"PAUSE" },
+	{ FL_Escape,	"ESC" },
+	{ FL_Left,		"LEFT" },
+	{ FL_Up,		"UP" },
+	{ FL_Right,		"RIGHT" },
+	{ FL_Down,		"DOWN" },
+	{ FL_Page_Up,	"PGUP" },
+	{ FL_Page_Down,	"PGDN" },
+	{ FL_Home,		"HOME" },
+	{ FL_End,		"END" },
+	{ FL_Print,		"PRINT" },
+	{ FL_Insert,	"INS" },
+	{ FL_Delete,	"DEL" },
+	{ FL_Menu,		"MENU" },
+
+	{ FL_KP_Enter,	"KP_Enter"},
+
+	{ 0, NULL } // the end
+};
 
 
 /* returns zero (an invalid key) if parsing fails */
@@ -88,7 +120,11 @@ keycode_t M_ParseKeyString(const char *str)
 	if (str[0] == '0' && str[1] == 'x')
 		return key | atoi(str);
 
-	// FIXME: FIND NAME IN TABLE
+	// find name in table
+
+	for (int k = 0 ; key_map[k].name ; k++)
+		if (y_stricmp(str, key_map[k].name) == 0)
+			return key_map[k].key;
 
 	return 0;
 }
@@ -106,7 +142,11 @@ static const char * BareKeyName(keycode_t key)
 		return buffer;
 	}
 
-	// FIXME: FIND KEY IN TABLE
+	// find key in table
+
+	for (int k = 0 ; key_map[k].name ; k++)
+		if (key == key_map[k].key)
+			return key_map[k].name;
 
 	// fallback : hex code
 
