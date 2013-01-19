@@ -337,25 +337,20 @@ fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
 
 #define MAX_TOKENS  8
 
-void M_LoadBindings()
+static void LoadBindingsFromPath(const char *path, bool required)
 {
-	all_bindings.clear();
-
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/bindings.cfg", home_dir);
+	sprintf(filename, "%s/bindings.cfg", path);
 
 	FILE *fp = fopen(filename, "r");
 
 	if (! fp)
 	{
-		// fallback to installed version
-		sprintf(filename, "%s/bindings.cfg", install_dir);
+		if (! required)
+			return;
 
-		fp = fopen(filename, "r");
-
-		if (! fp)
-			FatalError("Cannot open default key bindings file:\n%s\n", filename);
+		FatalError("Cannot open default key bindings file:\n%s\n", filename);
 	}
 
 	LogPrintf("Reading key bindings from: %s\n", filename);
@@ -373,7 +368,7 @@ void M_LoadBindings()
 		
 		StringRemoveCRLF(line);
 
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS);
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, false /* do_strings */);
 
 		if (num_tok == 0)
 			continue;
@@ -388,6 +383,15 @@ void M_LoadBindings()
 	}
 
 	fclose(fp);
+}
+
+
+void M_LoadBindings()
+{
+	all_bindings.clear();
+
+	LoadBindingsFromPath(install_dir, true /* required */);
+	LoadBindingsFromPath(home_dir, false);
 }
 
 
