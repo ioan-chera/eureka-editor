@@ -57,8 +57,8 @@ void M_RegisterCommand(const char *name, command_func_t func);
 keycode_t M_ParseKeyString(const char *str);
 const char * M_KeyToString(keycode_t key);
 
-void M_ParseBindings();
-void M_WriteBindings();
+void M_LoadBindings();
+void M_SaveBindings();
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 

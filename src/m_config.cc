@@ -1156,7 +1156,7 @@ int word_splitting (std::vector<std::string>& tokens, const char *string)
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, const char ** tokens, int max_tok)
+int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_strings)
 {
 	int num_tok = 0;
 
@@ -1194,7 +1194,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok)
 			tokenlen = 0;
 
 			// begin a string?
-			if (ch == '"')
+			if (ch == '"' && do_strings)
 			{
 				in_string = true;
 				continue;

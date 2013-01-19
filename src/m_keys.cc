@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
+#include "m_dialog.h"
 
 
 typedef struct
@@ -293,15 +295,65 @@ typedef struct
 static std::vector<key_binding_t> all_bindings;
 
 
-void M_ParseBindings()
+#define MAX_TOKENS  8
+
+void M_LoadBindings()
 {
 	all_bindings.clear();
 
-	// TODO
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/bindings.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "r");
+
+	if (! fp)
+	{
+		// fallback to installed version
+		sprintf(filename, "%s/bindings.cfg", install_dir);
+
+		fp = fopen(filename, "r");
+
+		if (! fp)
+			FatalError("Cannot open default key bindings file:\n%s\n", filename);
+	}
+
+	LogPrintf("Reading key bindings from: %s\n", filename);
+
+	static char line_buf[FL_PATH_MAX];
+
+	const char * tokens[MAX_TOKENS];
+
+	while (! feof(fp))
+	{
+		char *line = fgets(line_buf, FL_PATH_MAX, fp);
+
+		if (! line)
+			break;
+		
+		StringRemoveCRLF(line);
+
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS);
+
+		if (num_tok == 0)
+			continue;
+
+		if (num_tok < 3)
+		{
+			LogPrintf("Error in key bindings: %s\n", line);
+			continue;
+		}
+
+		// FIXME
+		fprintf(stderr, "PARSE BINDING: '%s' '%s' '%s'\n",
+				tokens[0], tokens[1], tokens[2]);
+	}
+
+	fclose(fp);
 }
 
 
-void M_WriteBindings()
+void M_SaveBindings()
 {
 	static char filename[FL_PATH_MAX];
 
@@ -312,6 +364,9 @@ void M_WriteBindings()
 	if (! fp)
 	{
 		LogPrintf("Failed to save key bindings to: %s\n", filename);
+
+		Notify(-1, -1, "Warning: failed to save key bindings\n"
+		               "(filename: %s)", filename);
 		return;
 	}
 

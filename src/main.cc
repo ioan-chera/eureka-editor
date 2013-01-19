@@ -807,6 +807,8 @@ int main(int argc, char *argv[])
 
 	Editor_Init();
 
+	M_LoadBindings();
+
 	InitFLTK();  // creates the main window
 
 	init_progress = 3;
