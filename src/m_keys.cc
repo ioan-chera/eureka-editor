@@ -136,14 +136,19 @@ keycode_t M_ParseKeyString(const char *str)
 	if (str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
 
-	if (str[0] == '0' && str[1] == 'x')
-		return key | atoi(str);
+	if (y_strnicmp(str, "F", 1) == 0 && isdigit(str[1]))
+		return key | (FL_F + atoi(str + 1));
 
-	// find name in table
-
+	// find name in mapping table
 	for (int k = 0 ; key_map[k].name ; k++)
 		if (y_stricmp(str, key_map[k].name) == 0)
 			return key_map[k].key;
+
+	if (y_strnicmp(str, "KP_", 3) == 0 && 33 < str[3] && str[3] <= 0x3d)
+		return key | (FL_KP + str[3]);
+
+	if (str[0] == '0' && str[1] == 'x')
+		return key | atoi(str);
 
 	return 0;
 }
@@ -161,11 +166,22 @@ static const char * BareKeyName(keycode_t key)
 		return buffer;
 	}
 
-	// find key in table
+	if (FL_F < key && key <= FL_F_Last)
+	{
+		sprintf(buffer, "F%d", key - FL_F);
+		return buffer;
+	}
 
+	// find key in mapping table
 	for (int k = 0 ; key_map[k].name ; k++)
 		if (key == key_map[k].key)
 			return key_map[k].name;
+
+	if (FL_KP + 33 <= key && key <= FL_KP_Last)
+	{
+		sprintf(buffer, "KP_%c", (char)(key & 127));
+		return buffer;
+	}
 
 	// fallback : hex code
 
