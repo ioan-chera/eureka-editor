@@ -51,7 +51,7 @@ typedef unsigned int keycode_t;
 
 typedef enum
 {
-	KCTX_INVALID = 0,
+	KCTX_NONE = 0,  /* INVALID */
 
 	KCTX_Global,
 	KCTX_Browser,
@@ -77,12 +77,13 @@ const char * M_KeyToString(keycode_t key);
 
 typedef void (* command_func_t)(void);
 
-void M_RegisterCommand(const char *name, command_func_t func);
+void M_RegisterCommand(const char *name, command_func_t func,
+                       key_context_e req_context = KCTX_NONE);
 
 void M_LoadBindings();
 void M_SaveBindings();
 
-key_context_e M_ModeToKeyContext();
+key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 bool ExecuteKey(keycode_t key, key_context_e context);
 

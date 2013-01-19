@@ -29,6 +29,7 @@ typedef struct
 {
 	const char *name;
 	command_func_t func;
+	key_context_e req_context;
 
 } editor_command_t;
 
@@ -37,12 +38,14 @@ static std::vector<editor_command_t *> all_commands;
 
 
 /* this should only be called during startup */
-void M_RegisterCommand(const char *name, command_func_t func)
+void M_RegisterCommand(const char *name, command_func_t func,
+                       key_context_e req_context)
 {
 	editor_command_t *cmd = new editor_command_t;
 
 	cmd->name = name;
 	cmd->func = func;
+	cmd->req_context = req_context;
 
 	all_commands.push_back(cmd);
 }
@@ -234,7 +237,7 @@ key_context_e M_ParseKeyContext(const char *str)
 	if (y_stricmp(str, "radtrig") == 0) return KCTX_RadTrig;
 	if (y_stricmp(str, "edit")    == 0) return KCTX_Edit;
 
-	return KCTX_INVALID;
+	return KCTX_NONE;
 }
 
 const char * M_KeyContextString(key_context_e context)
@@ -295,7 +298,7 @@ static void ParseBinding(const char ** tokens, int num_tok)
 
 	temp.context = M_ParseKeyContext(tokens[0]);
 
-	if (temp.context == KCTX_INVALID)
+	if (temp.context == KCTX_NONE)
 	{
 		LogPrintf("bindings.cfg: unknown context: %s\n", tokens[0]);
 		return;
@@ -306,6 +309,14 @@ static void ParseBinding(const char ** tokens, int num_tok)
 	if (! temp.cmd)
 	{
 		LogPrintf("bindings.cfg: unknown function: %s\n", tokens[2]);
+		return;
+	}
+
+	if (temp.cmd->req_context != KCTX_NONE &&
+	    temp.context != temp.cmd->req_context)
+	{
+		LogPrintf("bindings.cfg: function '%s' in wrong context '%s'\n",
+				  tokens[2], tokens[0]);
 		return;
 	}
 
@@ -405,7 +416,7 @@ void M_SaveBindings()
 	{
 		key_binding_t& bind = all_bindings[i];
 
-		if (bind.context == KCTX_INVALID)
+		if (bind.context == KCTX_NONE)
 			continue;
 		
 		fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
@@ -419,9 +430,9 @@ void M_SaveBindings()
 }
 
 
-key_context_e M_ModeToKeyContext()
+key_context_e M_ModeToKeyContext(obj_type_e mode)
 {
-	switch (edit.obj_type)
+	switch (mode)
 	{
 		case OBJ_THINGS:   return KCTX_Thing;
 		case OBJ_LINEDEFS: return KCTX_Line;
@@ -432,7 +443,7 @@ key_context_e M_ModeToKeyContext()
 		default: break;
 	}
 
-	return KCTX_INVALID;  /* shouldn't happen */
+	return KCTX_NONE;  /* shouldn't happen */
 }
 
 
