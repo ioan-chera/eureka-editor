@@ -137,7 +137,7 @@ keycode_t M_ParseKeyString(const char *str)
 		key |= MOD_META;  str += 6;
 	}
 
-	if (str[0] > 32 && str[0] < 127 && isprint(str[0]))
+	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
 
 	if (y_strnicmp(str, "F", 1) == 0 && isdigit(str[1]))
@@ -314,6 +314,10 @@ static void ParseBinding(const char ** tokens, int num_tok)
 
 	if (num_tok >= 5)
 		strncpy(temp.param2, tokens[4], MAX_BIND_PARAM_LEN-1);
+
+#if 0  // DEBUG
+fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
+#endif
 
 	all_bindings.push_back(temp);
 }
