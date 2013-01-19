@@ -413,18 +413,23 @@ void M_SaveBindings()
 	fprintf(fp, "# Eureka key bindings\n");
 	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
 
-	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	for (int ctx = KCTX_Global ; ctx <= KCTX_Edit ; ctx++)
 	{
-		key_binding_t& bind = all_bindings[i];
+		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+		{
+			key_binding_t& bind = all_bindings[i];
 
-		if (bind.context == KCTX_NONE)
-			continue;
-		
-		fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
-		        M_KeyToString(bind.key), bind.cmd->name);
+			if (bind.context != (key_context_e)ctx)
+				continue;
 
-		if (bind.param1[0]) fprintf(fp, "\t%s", bind.param1);
-		if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
+			fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
+					M_KeyToString(bind.key), bind.cmd->name);
+
+			if (bind.param1[0]) fprintf(fp, "\t%s", bind.param1);
+			if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
+
+			fprintf(fp, "\n");
+		}
 
 		fprintf(fp, "\n");
 	}
