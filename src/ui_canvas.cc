@@ -204,6 +204,24 @@ int UI_Canvas::handle_key()
 
 	// keyboard propagation logic
 
+	if (ExecuteKey(key, KCTX_Global))
+		return 1;
+
+	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+		return 1;
+
+	if (render3d && ExecuteKey(key, KCTX_Render))
+		return 1;
+
+	if (ExecuteKey(key, M_ModeToKeyContext()))
+		return 1;
+	
+	if (ExecuteKey(key, KCTX_Edit))
+		return 1;
+
+
+// OLD CRUD, REMOVE !!!
+
 	if (Global_Key(key))
 		return 1;
 
