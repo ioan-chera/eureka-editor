@@ -872,12 +872,6 @@ bool Editor_Key(keycode_t key)
 	// ???: find object by type
 	// FIXME: CMD_FindObjectByType()
 
-	// [`]: clear selection and redraw the map (CTRL-U too, done via menu)
-	else if (key == '`')
-	{
-		CMD_UnselectAll();
-	}
-
 	// [']: move camera to spot under cursor
 	else if (key == '\'')
 	{
