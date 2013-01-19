@@ -49,7 +49,7 @@ typedef unsigned int keycode_t;
 #define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
 
 
-typedef bool (* command_func_t)(void);
+typedef void (* command_func_t)(void);
 
 
 void M_AddEditorCommand(const char *name, command_func_t func);
