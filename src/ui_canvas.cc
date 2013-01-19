@@ -204,9 +204,6 @@ int UI_Canvas::handle_key()
 
 	// keyboard propagation logic
 
-	if (ExecuteKey(key, KCTX_Global))
-		return 1;
-
 	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
@@ -216,7 +213,7 @@ int UI_Canvas::handle_key()
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
 		return 1;
 	
-	if (ExecuteKey(key, KCTX_Edit))
+	if (ExecuteKey(key, KCTX_Global))
 		return 1;
 
 

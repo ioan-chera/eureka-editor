@@ -228,15 +228,15 @@ const char * M_KeyToString(keycode_t key)
 
 key_context_e M_ParseKeyContext(const char *str)
 {
-	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
 	if (y_stricmp(str, "browser") == 0) return KCTX_Browser;
 	if (y_stricmp(str, "render")  == 0) return KCTX_Render;
+	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
+
 	if (y_stricmp(str, "line")    == 0) return KCTX_Line;
 	if (y_stricmp(str, "sector")  == 0) return KCTX_Sector;
 	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
 	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
 	if (y_stricmp(str, "radtrig") == 0) return KCTX_RadTrig;
-	if (y_stricmp(str, "edit")    == 0) return KCTX_Edit;
 
 	return KCTX_NONE;
 }
@@ -245,15 +245,15 @@ const char * M_KeyContextString(key_context_e context)
 {
 	switch (context)
 	{
-		case KCTX_Global:  return "global";
 		case KCTX_Browser: return "browser";
 		case KCTX_Render:  return "render";
+		case KCTX_Global:  return "global";
+
 		case KCTX_Line:    return "line";
 		case KCTX_Sector:  return "sector";
 		case KCTX_Thing:   return "thing";
 		case KCTX_Vertex:  return "vertex";
 		case KCTX_RadTrig: return "radtrig";
-		case KCTX_Edit:    return "edit";
 
 		default:
 			break;
@@ -440,7 +440,7 @@ void M_SaveBindings()
 	fprintf(fp, "# Eureka key bindings\n");
 	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
 
-	for (int ctx = KCTX_Global ; ctx <= KCTX_Edit ; ctx++)
+	for (int ctx = KCTX_Browser ; ctx <= KCTX_RadTrig ; ctx++)
 	{
 		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 		{

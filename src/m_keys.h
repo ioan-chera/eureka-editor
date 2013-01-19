@@ -53,17 +53,15 @@ typedef enum
 {
 	KCTX_NONE = 0,  /* INVALID */
 
-	KCTX_Global,
 	KCTX_Browser,
 	KCTX_Render,
+	KCTX_Global,
 
 	KCTX_Line,
 	KCTX_Sector,
 	KCTX_Thing,
 	KCTX_Vertex,
-	KCTX_RadTrig,
-
-	KCTX_Edit
+	KCTX_RadTrig
 
 } key_context_e;
 
