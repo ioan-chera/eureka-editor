@@ -213,7 +213,7 @@ int UI_Canvas::handle_key()
 	if (render3d && ExecuteKey(key, KCTX_Render))
 		return 1;
 
-	if (ExecuteKey(key, M_ModeToKeyContext()))
+	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
 		return 1;
 	
 	if (ExecuteKey(key, KCTX_Edit))
