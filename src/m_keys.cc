@@ -33,7 +33,7 @@ static std::vector<editor_command_t *> all_commands;
 
 
 /* this should only be called during startup */
-void M_AddEditorCommand(const char *name, command_func_t func)
+void M_RegisterCommand(const char *name, command_func_t func)
 {
 	editor_command_t *cmd = new editor_command_t;
 

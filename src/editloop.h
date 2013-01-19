@@ -99,19 +99,19 @@ bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
 void CMD_ChangeEditMode(char mode);
-void CMD_SelectAll();
-void CMD_UnselectAll();
-void CMD_InvertSelection();
+void CMD_SelectAll(void);
+void CMD_UnselectAll(void);
+void CMD_InvertSelection(void);
 
-void CMD_Quit();
+void CMD_Quit(void);
 
 void CMD_Zoom(int delta, int mid_x, int mid_y);
-void CMD_ZoomWholeMap();
-void CMD_ZoomSelection();
-void CMD_GoToCamera();
+void CMD_ZoomWholeMap(void);
+void CMD_ZoomSelection(void);
+void CMD_GoToCamera(void);
 
 void CMD_SetBrowser(char kind);
-void CMD_ToggleShowObjNums();
+void CMD_ToggleObjNums(void);
 
 #endif /* __EUREKA_EDITLOOP_H__ */
 

@@ -279,7 +279,7 @@ void CMD_ChangeEditMode(char mode)
 }
 
 
-void CMD_SelectAll()
+void CMD_SelectAll(void)
 {
 	int total = NumObjects(edit.obj_type);
 
@@ -291,7 +291,7 @@ void CMD_SelectAll()
 }
 
 
-void CMD_UnselectAll()
+void CMD_UnselectAll(void)
 {
 	edit.Selected->change_type(edit.obj_type);
 	edit.Selected->clear_all();
@@ -301,7 +301,7 @@ void CMD_UnselectAll()
 }
 
 
-void CMD_InvertSelection()
+void CMD_InvertSelection(void)
 {
 	int total = NumObjects(edit.obj_type);
 
@@ -322,26 +322,26 @@ void CMD_InvertSelection()
 }
 
 
-void CMD_Quit()
+void CMD_Quit(void)
 {
 	want_quit = true;
 }
 
 
-void CMD_Toggle3Dview()
+void CMD_Toggle3D(void)
 {
 	main_win->canvas->ToggleRenderMode();
 }
 
 
-void CMD_ToggleShowObjNums()
+void CMD_ToggleObjNums(void)
 {
 	edit.show_object_numbers = ! edit.show_object_numbers;
 	edit.RedrawMap = 1;
 }
 
 
-void CMD_ToggleBrowser()
+void CMD_ToggleBrowser(void)
 {
 	main_win->ShowBrowser('/');
 }
@@ -357,7 +357,7 @@ void CMD_CycleCategory(int dir)
 	main_win->browser->CycleCategory(dir);
 }
 
-void CMD_ClearSearchBox()
+void CMD_ClearSearchBox(void)
 {
 	main_win->browser->ClearSearchBox();
 }
@@ -421,7 +421,7 @@ bool Global_Key(keycode_t key)
 	// [TAB]: toggle the 3D view on/off
 	else if (key == FL_Tab)
 	{
-		CMD_Toggle3Dview();
+		CMD_Toggle3D();
 	}
 
 	// [b]: toggle the Browser panel on/off
@@ -595,7 +595,7 @@ void CMD_Zoom(int delta, int mid_x, int mid_y)
 }
 
 
-void CMD_ZoomWholeMap()
+void CMD_ZoomWholeMap(void)
 {
 	if (MadeChanges)
 		CalculateLevelBounds();
@@ -606,7 +606,7 @@ void CMD_ZoomWholeMap()
 }
 
 
-void CMD_ZoomSelection()
+void CMD_ZoomSelection(void)
 {
 	if (edit.Selected->empty())
 	{
@@ -620,7 +620,7 @@ void CMD_ZoomSelection()
 }
 
 
-void CMD_GoToCamera()
+void CMD_GoToCamera(void)
 {
 	int x, y;
 	float angle;
@@ -1010,7 +1010,7 @@ bool Editor_Key(keycode_t key)
 	// [J] Show object numbers
 	else if (key == 'J')
 	{
-		CMD_ToggleShowObjNums();
+		CMD_ToggleObjNums();
 	}
 
 	// [%] Show things sprites
@@ -1334,6 +1334,15 @@ void Editor_Init()
 	grid.Init();
 
 	MadeChanges = 0;
+
+	M_RegisterCommand("Quit", &CMD_Quit);
+	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
+	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
+	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
+
+	M_RegisterCommand("SelectAll", &CMD_SelectAll);
+	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
+	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
 }
 
 

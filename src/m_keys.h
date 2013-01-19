@@ -52,7 +52,7 @@ typedef unsigned int keycode_t;
 typedef void (* command_func_t)(void);
 
 
-void M_AddEditorCommand(const char *name, command_func_t func);
+void M_RegisterCommand(const char *name, command_func_t func);
 
 
 int M_ParseBindings();
