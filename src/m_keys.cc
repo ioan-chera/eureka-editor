@@ -85,8 +85,27 @@ static key_mapping_t key_map[] =
 	{ FL_Insert,	"INS" },
 	{ FL_Delete,	"DEL" },
 	{ FL_Menu,		"MENU" },
+	{ FL_Help,		"HELP" },
 
 	{ FL_KP_Enter,	"KP_Enter"},
+
+	{ FL_Volume_Down,	"VOL_DOWN" },
+	{ FL_Volume_Mute,	"VOL_MUTE" },
+	{ FL_Volume_Up,		"VOL_UP" },
+	{ FL_Media_Play,	"CD_PLAY" },
+	{ FL_Media_Stop,	"CD_STOP" },
+	{ FL_Media_Prev,	"CD_PREV" },
+	{ FL_Media_Next,	"CD_NEXT" },
+	{ FL_Home_Page,		"HOME_PAGE" },
+
+	{ FL_Mail,		"MAIL" },
+	{ FL_Search,	"SEARCH" },
+	{ FL_Back,		"BACK" },
+	{ FL_Forward,	"FORWARD" },
+	{ FL_Stop,		"STOP" },
+	{ FL_Refresh,	"REFRESH" },
+	{ FL_Sleep,		"SLEEP" },
+	{ FL_Favorites,	"FAVORITES" },
 
 	{ 0, NULL } // the end
 };
