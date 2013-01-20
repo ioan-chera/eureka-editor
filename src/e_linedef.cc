@@ -758,7 +758,7 @@ void LD_MergedSecondSideDef(int ld)
 }
 
 
-void CMD_MergeTwoLineDefs()
+void LIN_MergeTwo(void)
 {
 	if (edit.Selected->count_obj() != 2)
 	{

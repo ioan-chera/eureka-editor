@@ -189,11 +189,11 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 }
 
 
-void CMD_MergeVertices()
+void VERT_Merge(void)
 {
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep();
+		Beep("Need at least two vertices to merge");
 		return;
 	}
 
@@ -229,13 +229,13 @@ void CMD_MergeVertices()
 }
 
 
-void CMD_DisconnectVertices()
+void VERT_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
 		if (! edit.highlighted())
 		{
-			Beep();
+			Beep("No vertices to disconnect");
 			return;
 		}
 
@@ -328,10 +328,10 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 }
 
 
-void CMD_DisconnectLineDefs()
+void LIN_Disconnect(void)
 {
 	// Note: the logic here is significantly different than the logic
-	//       in CMD_DisconnectVertices, since we want to keep linedefs
+	//       in VERT_Disconnect, since we want to keep linedefs
 	//       in the selection connected, and only disconnect from
 	//       linedefs NOT in the selection.
 	//
@@ -529,7 +529,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 }
 
 
-void CMD_DisconnectSectors()
+void SEC_Disconnect(void)
 {
 	if (NumVertices == 0)
 	{

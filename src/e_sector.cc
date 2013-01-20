@@ -688,14 +688,19 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 }
 
 
-void CMD_MergeSectors(bool keep_common_lines)
+void SEC_Merge(void)
 {
 	// need a selection
 	if (edit.Selected->empty())
 	{
-		Beep();
+		Beep("No sectors to merge");
 		return;
 	}
+
+	bool keep_common_lines = false;
+
+	if (tolower(EXEC_Param[0][0]) == 'k')
+		keep_common_lines = true;
 
 	int source = edit.Selected->find_first();
 

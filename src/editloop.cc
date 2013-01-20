@@ -666,12 +666,6 @@ static bool LineDef_Key(keycode_t key)
 	{
 	}
 
-	// [d]: disconnect linedefs
-	else if (key == 'd')
-	{
-		CMD_DisconnectLineDefs();
-	}
-
 	// [e]: Select/unselect all linedefs in non-forked path
 	else if (key == 'e')
 	{
@@ -680,12 +674,6 @@ static bool LineDef_Key(keycode_t key)
 	else if (key == 'E')
 	{
 		CMD_SelectLinesInPath(SLP_SameTex);
-	}
-
-	// [m]: merge two one-sided linedefs into one
-	else if (key == 'm')
-	{
-		CMD_MergeTwoLineDefs();
 	}
 
 	// [x]: split linedefs
@@ -728,12 +716,6 @@ static bool Sector_Key(keycode_t key)
 	{
 	}
 
-	// [d]: disconnect sectors
-	else if (key == 'd')
-	{
-		CMD_DisconnectSectors();
-	}
-
 	// [e]: select/unselect contiguous sectors with same floor height
 	else if (key == 'e')
 	{
@@ -742,16 +724,6 @@ static bool Sector_Key(keycode_t key)
 	else if (key == 'E')
 	{
 		CMD_SelectContiguousSectors(SCS_FloorTex);
-	}
-
-	// [m]: merge sectors  (with SHIFT : keep common linedefs)
-	else if (key == 'm')
-	{
-		CMD_MergeSectors(false);
-	}
-	else if (key == 'M')
-	{
-		CMD_MergeSectors(true);
 	}
 
 
@@ -786,43 +758,13 @@ static bool Sector_Key(keycode_t key)
 
 static bool Vertex_Key(keycode_t key)
 {
-	if (0)
-	{
-	}
-
-	// [d]: disconnect linedefs
-	else if (key == 'd')
-	{
-		CMD_DisconnectVertices();
-	}
-
-	// [m]: merge vertices
-	else if (key == 'm')
-	{
-		CMD_MergeVertices();
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 
 static bool RadTrig_Key(keycode_t key)
 {
-	if (0)
-	{
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 
@@ -1265,6 +1207,7 @@ void Editor_RegisterCommands()
 
 	/* edit */
 
+	// FIXME: just a "Toggle" command, what to toggle is param[0]
 	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
@@ -1273,8 +1216,13 @@ void Editor_RegisterCommands()
 
 	/* line */
 
+	M_RegisterCommand("LIN_Disconnect", &LIN_Disconnect, KCTX_Line);
+	M_RegisterCommand("LIN_MergeTwo", &LIN_MergeTwo, KCTX_Line);
+
 	/* sector */
 
+	M_RegisterCommand("SEC_Disconnect", &SEC_Disconnect, KCTX_Sector);
+	M_RegisterCommand("SEC_Merge", &SEC_Merge, KCTX_Sector);
 	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
 
 	/* thing */
@@ -1282,6 +1230,9 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("TH_Spin", &TH_SpinThings, KCTX_Thing);
 
 	/* vertex */
+
+	M_RegisterCommand("VERT_Disconnect", &VERT_Disconnect, KCTX_Vertex);
+	M_RegisterCommand("VERT_Merge", &VERT_Merge, KCTX_Vertex);
 }
 
 

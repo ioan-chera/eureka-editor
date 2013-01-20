@@ -29,14 +29,6 @@
 
 #include "selectn.h"
 
-bool CMD_MoveFloors(int diff);
-bool CMD_MoveCeilings(int diff);
-bool CMD_AdjustLight(int delta);
-
-void SEC_SwapFlats();
-
-void CMD_MergeSectors(bool keep_common_lines);
-
 
 void centre_of_sector (obj_no_t s, int *x, int *y);
 
@@ -63,6 +55,15 @@ void DistributeSectorCeilings (SelPtr);
 void RaiseOrLowerSectors (SelPtr obj);
 void BrightenOrDarkenSectors (SelPtr obj);
 #endif
+
+/* commands */
+
+bool CMD_MoveFloors(int diff);
+bool CMD_MoveCeilings(int diff);
+bool CMD_AdjustLight(int delta);
+
+void SEC_Merge(void);
+void SEC_SwapFlats(void);
 
 #endif  /* __EUREKA_E_SECTOR_H__ */
 

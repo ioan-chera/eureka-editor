@@ -33,14 +33,6 @@ class bitvec_c;
 void FlipLineDef(int ld);
 void FlipLineDefGroup(selection_c& flip);
 
-void CMD_FlipLineDefs();
-void CMD_SplitLineDefs();
-
-void CMD_AlignTexturesX();
-void CMD_AlignTexturesY();
-
-void CMD_MergeTwoLineDefs();
-
 
 bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, int x2, int y2);
@@ -61,6 +53,16 @@ void frob_linedefs_flags (selection_c * list, int op, int operand);
 void MakeRectangularNook (SelPtr obj, int width, int depth, int convex);
 void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex);
 #endif
+
+/* commands */
+
+void CMD_FlipLineDefs();
+void CMD_SplitLineDefs();
+
+void CMD_AlignTexturesX();
+void CMD_AlignTexturesY();
+
+void LIN_MergeTwo(void);
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 

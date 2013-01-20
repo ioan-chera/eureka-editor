@@ -33,11 +33,11 @@ void InsertPolygonVertices (int, int, int, int);
 
 int VertexHowManyLineDefs(int v_num);
 
-void CMD_MergeVertices();
+void VERT_Merge(void);
+void VERT_Disconnect(void);
 
-void CMD_DisconnectVertices();
-void CMD_DisconnectLineDefs();
-void CMD_DisconnectSectors();
+void LIN_Disconnect(void);
+void SEC_Disconnect(void);
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 
