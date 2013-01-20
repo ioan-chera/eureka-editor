@@ -427,22 +427,16 @@ static const char * DetermineLevel()
 }
 
 
+/* this is only to prevent ESCAPE key from quitting */
 int Main_key_handler(int event)
 {
 	if (event != FL_SHORTCUT)
 		return 0;
 
-	switch (Fl::event_key())
+	if (Fl::event_key() == FL_Escape)
 	{
-		case FL_Escape:
-			fl_beep();  // FIXME
-			return 1;
-
-		case FL_F+1:   // F1 = HELP
-			// TODO
-			return 1;
-
-		default: break;
+		fl_beep();
+		return 1;
 	}
 
 	return 0;
