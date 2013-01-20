@@ -98,7 +98,8 @@ void Editor_WriteUser(FILE *fp);
 bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
-void CMD_ChangeEditMode(char mode);
+void Editor_ChangeMode(char mode);
+
 void CMD_SelectAll(void);
 void CMD_UnselectAll(void);
 void CMD_InvertSelection(void);

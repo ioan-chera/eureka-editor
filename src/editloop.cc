@@ -230,7 +230,7 @@ bool GetCurrentObjects(selection_c *list)
 }
 
 
-void CMD_ChangeEditMode(char mode)
+void Editor_ChangeMode(char mode)
 {
 	obj_type_e prev_type = edit.obj_type;
 
@@ -276,6 +276,20 @@ void CMD_ChangeEditMode(char mode)
 	UpdateHighlight();
 
 	edit.RedrawMap = 1;
+}
+
+
+void CMD_EditMode(void)
+{
+	char mode = tolower(EXEC_Param[0][0]);
+
+	if (! mode || ! strchr("lstvr", mode))
+	{
+		Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0]);
+		return;
+	}
+
+	Editor_ChangeMode(mode);
 }
 
 
@@ -788,15 +802,8 @@ bool Editor_Key(keycode_t key)
 	keycode_t bare_key = key & FL_KEY_MASK;
 	keycode_t unshifted_key = key & ~MOD_SHIFT;
 
-	// [l], [s], [t], [v], [r]: switch mode
-	if (key == 't' || key == 'v' || key == 'l' ||
-		key == 's' || key == 'R')
-	{
-		CMD_ChangeEditMode(key);
-	}
-
 	// [F10]: pop up the "Checks" menu
-	else if (key == FL_F+10)
+	if (key == FL_F+10)
 	{
 		CheckLevel (-1, -1);
 		edit.RedrawMap = 1;
@@ -1171,6 +1178,7 @@ void Editor_RegisterCommands()
 	/* global */
 
 	M_RegisterCommand("Quit", &CMD_Quit);
+	M_RegisterCommand("EditMode", &CMD_EditMode);
 	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
 	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
 
@@ -1247,7 +1255,7 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "edit_mode") == 0 && num_tok >= 2)
 	{
-		CMD_ChangeEditMode(tokens[1][0]);
+		Editor_ChangeMode(tokens[1][0]);
 		return true;
 	}
 

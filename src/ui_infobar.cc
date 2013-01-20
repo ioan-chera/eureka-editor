@@ -146,7 +146,7 @@ void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 
 	static const char *mode_keys = "tlsvr";
 
-	CMD_ChangeEditMode(mode_keys[mode->value()]);
+	Editor_ChangeMode(mode_keys[mode->value()]);
 }
 
 
