@@ -38,7 +38,7 @@ public:
 	Fl_Output *mouse_x;
 	Fl_Output *mouse_y;
 
-	Fl_Box *map_name;
+	Fl_Box *status;
 
 
 public:
@@ -46,8 +46,7 @@ public:
 	// FLTK virtual method for handling input events.
 
 public:
-	void SetMap(const char *name, bool want_star = false);
-	void SetChanged(bool is_changed);
+	void SetStatus(const char *str);
 
 	void NewEditMode(char _mode);
 

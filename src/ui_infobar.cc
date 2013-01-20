@@ -35,8 +35,6 @@
 UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) : 
     Fl_Group(X, Y, W, H, label)
 {
-	end();  // cancel begin() in Fl_Group constructor
-
 	box(FL_FLAT_BOX);
 
 
@@ -53,8 +51,6 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	mode->labelsize(KF_fonth);
 	mode->textsize(KF_fonth);
 
-	add(mode);
-
 	X = mode->x() + mode->w() + 10;
 
 
@@ -65,8 +61,6 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	scale->callback(scale_callback, this);
 	scale->labelsize(KF_fonth);
 	scale->textsize(KF_fonth);
-
-	add(scale);
 
 	X = scale->x() + scale->w() + 10;
 
@@ -80,8 +74,6 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	grid_size->labelsize(KF_fonth);
 	grid_size->textsize(KF_fonth);
 
-	add(grid_size);
-
 	X = grid_size->x() + grid_size->w() + 10;
 
 
@@ -91,8 +83,6 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
 	grid_snap->labelsize(KF_fonth);
-
-	add(grid_snap);
 
 	UpdateSnapText();
 
@@ -108,23 +98,18 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	mouse_x->labelsize(KF_fonth); mouse_y->labelsize(KF_fonth);
 	mouse_x->textsize(KF_fonth);  mouse_y->textsize(KF_fonth);
 
-	add(mouse_x);
-	add(mouse_y);
-
 	X = mouse_y->x() + mouse_y->w() + 14;
 
 
-	map_name = new Fl_Box(FL_FLAT_BOX, X, Y, 80, H, "");
-	map_name->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-	map_name->label(Level_name);
-	map_name->labelsize(KF_fonth);
-
-	add(map_name);
+	status = new Fl_Box(FL_FLAT_BOX, X, Y-4, W - 4 - X, H+4, "Ready");
+	status->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_CLIP);
 
 
 	// ---- resizable ----
  
- 	resizable(NULL);
+ 	resizable(status);
+
+	end();
 }
 
 //
@@ -223,21 +208,9 @@ void UI_InfoBar::SetMouse(double mx, double my)
 }
 
 
-void UI_InfoBar::SetMap(const char *name, bool want_star)
+void UI_InfoBar::SetStatus(const char *str)
 {
-	char buffer[128];
-
-	sprintf(buffer, "%s%s", want_star ? "*" : "", name);
-
-	map_name->copy_label(buffer);
-}
-
-
-void UI_InfoBar::SetChanged(bool is_changed)
-{
-	map_name->labelcolor(is_changed ? FL_RED : FL_BLACK);
-
-	redraw();
+	status->copy_label(str);
 }
 
 
@@ -344,6 +317,34 @@ void UI_InfoBar::UpdateSnapText()
 	}
 
 	grid_snap->redraw();
+}
+
+
+void Status_Set(const char *fmt, ...)
+{
+	if (! main_win)
+		return;
+
+	va_list arg_ptr;
+
+	static char buffer[MSG_BUF_LEN];
+
+	va_start(arg_ptr, fmt);
+	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	va_end(arg_ptr);
+
+	buffer[MSG_BUF_LEN-1] = 0;
+
+	main_win->info_bar->SetStatus(buffer);
+}
+
+
+void Status_Clear()
+{
+	if (! main_win)
+		return;
+
+	main_win->info_bar->SetStatus("");
 }
 
 //--- editor settings ---
