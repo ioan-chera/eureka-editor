@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -99,7 +99,7 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 	{
 		case OBJ_THINGS:
 		{
-			for (list->begin(&it); !it.at_end(); ++it, ++count)
+			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
 			{
 				sum_x += Things[*it]->x;
 				sum_y += Things[*it]->y;
@@ -109,7 +109,7 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 
 		case OBJ_VERTICES:
 		{
-			for (list->begin(&it); !it.at_end(); ++it, ++count)
+			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
 			{
 				sum_x += Vertices[*it]->x;
 				sum_y += Vertices[*it]->y;
@@ -119,7 +119,7 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 
 		case OBJ_RADTRIGS:
 		{
-			for (list->begin(&it); !it.at_end(); ++it, ++count)
+			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
 			{
 				sum_x += RadTrigs[*it]->mx;
 				sum_y += RadTrigs[*it]->my;
@@ -167,7 +167,7 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 	{
 		case OBJ_THINGS:
 		{
-			for (list->begin(&it); !it.at_end(); ++it)
+			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
 				const Thing *T = Things[*it];
 
@@ -184,7 +184,7 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 
 		case OBJ_VERTICES:
 		{
-			for (list->begin(&it); !it.at_end(); ++it)
+			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
 				const Vertex *V = Vertices[*it];
 
@@ -198,7 +198,7 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 
 		case OBJ_RADTRIGS:
 		{
-			for (list->begin(&it); !it.at_end(); ++it)
+			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
 				const RadTrig *R = RadTrigs[*it];
 
@@ -234,7 +234,7 @@ static void DoMirrorThings(selection_c& list, bool is_vert, int mid_x, int mid_y
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -266,7 +266,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, int mid_x, int mid
 
 	selection_iterator_c it;
 
-	for (verts.begin(&it); !it.at_end(); ++it)
+	for (verts.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -281,7 +281,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, int mid_x, int mid
 
 	ConvertSelection(&verts, &lines);
 
-	for (lines.begin(&it); !it.at_end(); ++it)
+	for (lines.begin(&it) ; !it.at_end() ; ++it)
 	{
 		LineDef * L = LineDefs[*it];
 
@@ -318,15 +318,20 @@ static void DoMirrorStuff(selection_c& list, bool is_vert, int mid_x, int mid_y)
 }
 
 
-void CMD_MirrorObjects(bool is_vert)
+void CMD_Mirror(void)
 {
 	selection_c list;
 
 	if (! GetCurrentObjects(&list) || edit.obj_type == OBJ_RADTRIGS)
 	{
-		Beep();
+		Beep("No objects to mirror");
 		return;
 	}
+
+	bool is_vert = false;
+
+	if (tolower(EXEC_Param[0][0]) == 'v')
+		is_vert = true;
 
 	int mid_x, mid_y;
 
@@ -344,7 +349,7 @@ static void DoRotate90Things(selection_c& list, bool anti_clockwise, int mid_x, 
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -369,15 +374,16 @@ static void DoRotate90Things(selection_c& list, bool anti_clockwise, int mid_x, 
 }
 
 
-
-void CMD_RotateObjects(bool anti_clockwise)  // 90 degrees
+void CMD_Rotate90(void)
 {
+	bool anti_clockwise = atoi(EXEC_Param[0]) >= 0;
+
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list) || edit.obj_type == OBJ_RADTRIGS)
 	{
-		Beep();
+		Beep("No objects to rotate by 90deg");
 		return;
 	}
 
@@ -408,7 +414,7 @@ void CMD_RotateObjects(bool anti_clockwise)  // 90 degrees
 
 		ConvertSelection(&list, &verts);
 
-		for (verts.begin(&it); !it.at_end(); ++it)
+		for (verts.begin(&it) ; !it.at_end() ; ++it)
 		{
 			const Vertex * V = Vertices[*it];
 
@@ -432,39 +438,41 @@ void CMD_RotateObjects(bool anti_clockwise)  // 90 degrees
 }
  
 
-static void DoScale2xThings(selection_c& list, bool is_half, int mid_x, int mid_y)
+static void DoEnlargeThings(selection_c& list, int mul, int mid_x, int mid_y)
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
 		int dx = T->x - mid_x;
 		int dy = T->y - mid_y;
 
-		if (is_half)
-		{
-			BA_ChangeTH(*it, Thing::F_X, mid_x + dx / 2);
-			BA_ChangeTH(*it, Thing::F_Y, mid_y + dy / 2);
-		}
-		else
-		{
-			BA_ChangeTH(*it, Thing::F_X, mid_x + dx * 2);
-			BA_ChangeTH(*it, Thing::F_Y, mid_y + dy * 2);
-		}
+		BA_ChangeTH(*it, Thing::F_X, mid_x + dx * mul);
+		BA_ChangeTH(*it, Thing::F_Y, mid_y + dy * mul);
 	}
 }
 
 
-void CMD_ScaleObjects(bool is_half)
+void CMD_Enlarge(void)
 {
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep();
+		Beep("No objects to enlarge");
+		return;
+	}
+
+	int mul = 2;
+	if (EXEC_Param[0][0])
+		mul = atoi(EXEC_Param[0]);
+
+	if (mul < 1 || mul > 64)
+	{
+		Beep("Bad parameter for enlarge: %s", EXEC_Param[0]);
 		return;
 	}
 
@@ -486,20 +494,17 @@ void CMD_ScaleObjects(bool is_half)
 	if (edit.obj_type == OBJ_RADTRIGS)
 	{
 		// Note: the positions of the trigger(s) are not changed
-		for (list.begin(&it); !it.at_end(); ++it)
+		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			const RadTrig * R = RadTrigs[*it];
 
-			int new_rw = is_half ? ((R->rw+1) / 2) : (R->rw * 2);
-			int new_rh = is_half ? ((R->rh+1) / 2) : (R->rh * 2);
-
-			BA_ChangeRAD(*it, RadTrig::F_RW, new_rw);
-			BA_ChangeRAD(*it, RadTrig::F_RH, new_rh);
+			BA_ChangeRAD(*it, RadTrig::F_RW, R->rw * mul);
+			BA_ChangeRAD(*it, RadTrig::F_RH, R->rh * mul);
 		}
 	}
 	else if (edit.obj_type == OBJ_THINGS)
 	{
-		DoScale2xThings(list, is_half, mid_x, mid_y);
+		DoEnlargeThings(list, mul, mid_x, mid_y);
 	}
 	else
 	{
@@ -510,7 +515,7 @@ void CMD_ScaleObjects(bool is_half)
 
 			ConvertSelection(&list, &things);
 
-			DoScale2xThings(things, is_half, mid_x, mid_y);
+			DoEnlargeThings(things, mul, mid_x, mid_y);
 		}
 
 		// everything else just scales the vertices
@@ -518,23 +523,116 @@ void CMD_ScaleObjects(bool is_half)
 
 		ConvertSelection(&list, &verts);
 
-		for (verts.begin(&it); !it.at_end(); ++it)
+		for (verts.begin(&it) ; !it.at_end() ; ++it)
 		{
 			const Vertex * V = Vertices[*it];
 
 			int dx = V->x - mid_x;
 			int dy = V->y - mid_y;
 
-			if (is_half)
-			{
-				BA_ChangeVT(*it, Vertex::F_X, mid_x + dx / 2);
-				BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy / 2);
-			}
-			else
-			{
-				BA_ChangeVT(*it, Vertex::F_X, mid_x + dx * 2);
-				BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy * 2);
-			}
+			BA_ChangeVT(*it, Vertex::F_X, mid_x + dx * mul);
+			BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy * mul);
+		}
+	}
+
+	BA_End();
+}
+
+
+static void DoShrinkThings(selection_c& list, int div, int mid_x, int mid_y)
+{
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Thing * T = Things[*it];
+
+		int dx = T->x - mid_x;
+		int dy = T->y - mid_y;
+
+		BA_ChangeTH(*it, Thing::F_X, mid_x + dx / div);
+		BA_ChangeTH(*it, Thing::F_Y, mid_y + dy / div);
+	}
+}
+
+
+void CMD_Shrink(void)
+{
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("No objects to shrink");
+		return;
+	}
+
+	int div = 2;
+	if (EXEC_Param[0][0])
+		div = atoi(EXEC_Param[0]);
+
+	if (div < 1 || div > 64)
+	{
+		Beep("Bad parameter for shrink: %s", EXEC_Param[0]);
+		return;
+	}
+
+	int mid_x, mid_y, hx, hy;
+
+	// TODO: CONFIG ITEM
+	if (true)
+		Objs_CalcMiddle(&list, &mid_x, &mid_y);
+	else
+	{
+		Objs_CalcBBox(&list, &mid_x, &mid_y, &hx, &hy);
+
+		mid_x = mid_x + (hx - mid_x) / 2;
+		mid_y = mid_y + (hy - mid_y) / 2;
+	}
+
+	BA_Begin();
+
+	if (edit.obj_type == OBJ_RADTRIGS)
+	{
+		// Note: the positions of the trigger(s) are not changed
+		for (list.begin(&it) ; !it.at_end() ; ++it)
+		{
+			const RadTrig * R = RadTrigs[*it];
+
+			BA_ChangeRAD(*it, RadTrig::F_RW, MAX(1, R->rw / div));
+			BA_ChangeRAD(*it, RadTrig::F_RH, MAX(1, R->rh / div));
+		}
+	}
+	else if (edit.obj_type == OBJ_THINGS)
+	{
+		DoShrinkThings(list, div, mid_x, mid_y);
+	}
+	else
+	{
+		// handle things inside sectors
+		if (edit.obj_type == OBJ_SECTORS)
+		{
+			selection_c things(OBJ_THINGS);
+
+			ConvertSelection(&list, &things);
+
+			DoShrinkThings(things, div, mid_x, mid_y);
+		}
+
+		// everything else just scales the vertices
+		selection_c verts(OBJ_VERTICES);
+
+		ConvertSelection(&list, &verts);
+
+		for (verts.begin(&it) ; !it.at_end() ; ++it)
+		{
+			const Vertex * V = Vertices[*it];
+
+			int dx = V->x - mid_x;
+			int dy = V->y - mid_y;
+
+			BA_ChangeVT(*it, Vertex::F_X, mid_x + dx / div);
+			BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy / div);
 		}
 	}
 
@@ -546,7 +644,7 @@ static void DoScaleTwoThings(selection_c& list, scale_param_t& param)
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -578,7 +676,7 @@ static void DoScaleTwoVertices(selection_c& list, scale_param_t& param)
 
 	selection_iterator_c it;
 
-	for (verts.begin(&it); !it.at_end(); ++it)
+	for (verts.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -746,7 +844,7 @@ static void Quantize_Things(selection_c& list)
 
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -838,7 +936,7 @@ static void Quantize_Vertices(selection_c& list)
 
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -891,7 +989,7 @@ static void Quantize_RadTrigs(selection_c& list)
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const RadTrig * R = RadTrigs[*it];
 
@@ -907,13 +1005,13 @@ static void Quantize_RadTrigs(selection_c& list)
 }
 
 
-void CMD_QuantizeObjects()
+void CMD_Quantize(void)
 {
 	if (edit.Selected->empty())
 	{
 		if (edit.highlighted.is_nil())
 		{
-			Beep();
+			Beep("Nothing to quantize");
 			return;
 		}
 

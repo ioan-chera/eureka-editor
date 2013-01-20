@@ -787,12 +787,6 @@ bool Editor_Key(keycode_t key)
 		edit.RedrawMap = 1;
 	}
 
-	// [q]: quantize objects to the grid
-	else if (key == 'q')
-	{
-		CMD_QuantizeObjects();
-	}
-
 	// [j]: jump to object by number
 	else if (key == 'j')
 	{
@@ -824,36 +818,6 @@ bool Editor_Key(keycode_t key)
 			CMD_Paste();
 		}
 	}
-
-	else if (key == 'W')
-	{
-		CMD_RotateObjects(true);
-	}
-	else if (key == 'R')
-	{
-		CMD_RotateObjects(false);
-	}
-
-	else if (key == 'H')
-	{
-		CMD_MirrorObjects(false);
-	}
-	else if (key == 'V')
-	{
-		CMD_MirrorObjects(true);
-	}
-
-/*
-	else if (key == 'p')
-	{
-		CMD_ScaleObjects(true);
-	}
-	else if (key == 'P')
-	{
-		CMD_ScaleObjects(false);
-	}
-*/
-
 
 	// [Ctrl-x]: exchange objects numbers
 //!!!	else if (key == 24)
@@ -1205,14 +1169,18 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
 	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
 
-	/* edit */
-
 	// FIXME: just a "Toggle" command, what to toggle is param[0]
 	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
 	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
+
+	M_RegisterCommand("Mirror",   &CMD_Mirror);
+	M_RegisterCommand("Rotate90", &CMD_Rotate90);
+	M_RegisterCommand("Enlarge",  &CMD_Enlarge);
+	M_RegisterCommand("Shrink",   &CMD_Shrink);
+	M_RegisterCommand("Quantize", &CMD_Quantize);
 
 	/* line */
 

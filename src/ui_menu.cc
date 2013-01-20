@@ -279,12 +279,16 @@ static void misc_do_rotate(Fl_Widget *w, void * data)
 
 static void misc_do_mirror_horiz(Fl_Widget *w, void * data)
 {
-	CMD_MirrorObjects(false);
+	EXEC_Param[0] = "horiz";
+
+	CMD_Mirror();
 }
 
 static void misc_do_mirror_vert(Fl_Widget *w, void * data)
 {
-	CMD_MirrorObjects(true);
+	EXEC_Param[0] = "vert";
+
+	CMD_Mirror();
 }
 
 #if 0

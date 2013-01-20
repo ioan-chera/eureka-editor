@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -47,23 +47,24 @@ public:
 void Objs_CalcMiddle(selection_c * list, int *x, int *y);
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
 
-void CMD_MirrorObjects(bool is_vert);
-// FIXME: rename these two
-void CMD_RotateObjects(bool anti_clockwise);  // 90 degrees
-void CMD_ScaleObjects (bool is_half);
+#if 0
+int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust);
+#endif
+
+
+/* commands */
+
+void CMD_Mirror(void);
+void CMD_Rotate90(void);
+void CMD_Enlarge (void);
+void CMD_Shrink  (void);
+void CMD_Quantize(void);
 
 void CMD_ScaleObjects2(scale_param_t& param);
 
 void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
 
 void CMD_RotateObjects3(double deg, int pos_x, int pos_y);
-
-void CMD_QuantizeObjects();
-
-
-#if 0
-int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust);
-#endif
 
 
 #endif  /* __EUREKA_X_MIRROR_H__ */
