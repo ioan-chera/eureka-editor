@@ -382,6 +382,34 @@ void CMD_ScrollBrowser(int delta)
 }
 
 
+void Editor_ScrollMap(int dx, int dy)
+{
+	grid.orig_x += dx;
+	grid.orig_y += dy;
+
+	edit.RedrawMap = 1;
+}
+
+
+void CMD_Scroll(void)
+{
+	// these are percentages
+	int delta_x = atoi(EXEC_Param[0]);
+	int delta_y = atoi(EXEC_Param[1]);
+
+	if (delta_x == 0 && delta_y == 0)
+	{
+		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0], EXEC_Param[1]);
+		return;
+	}
+
+	delta_x = delta_x * main_win->canvas->w() / 100.0 / grid.Scale;
+	delta_y = delta_y * main_win->canvas->h() / 100.0 / grid.Scale;
+
+	Editor_ScrollMap(delta_x, delta_y);
+}
+
+
 
 bool Browser_Key(keycode_t key)
 {
@@ -483,44 +511,6 @@ static bool Grid_Key(keycode_t key)
 		}
 	}
 
-	// [Left], [Right], [Up], [Down]:
-	// scroll <scroll_less> percents of a screenful.
-	else if (key == FL_Left && grid.orig_x > -30000)
-	{
-		grid.orig_x -= (int) ((double) ScrMaxX * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Right && grid.orig_x < 30000)
-	{
-		grid.orig_x += (int) ((double) ScrMaxX * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Up && grid.orig_y < 30000)
-	{
-		grid.orig_y += (int) ((double) ScrMaxY * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Down && grid.orig_y > -30000)
-	{
-		grid.orig_y -= (int) ((double) ScrMaxY * scroll_less / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-
-#if 0
-	// [PGUP], [PGDN]
-	// scroll <scroll_more> percents of a screenful.
-	else if (key == FL_Page_Up && (grid.orig_y) < /*MapBound_hy*/ 20000)
-	{
-		grid.orig_y += (int) ((double) ScrMaxY * scroll_more / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-	else if (key == FL_Page_Down && (grid.orig_y) > /*MapBound_ly*/ -20000)
-	{
-		grid.orig_y -= (int) ((double) ScrMaxY * scroll_more / 100 / grid.Scale);
-		edit.RedrawMap = 1;
-	}
-#endif
-
 	// [G]: increase the grid step
 	else if (key == 'G')
 	{
@@ -561,15 +551,6 @@ static bool Grid_Key(keycode_t key)
 	}
 
 	return true;
-}
-
-
-void CMD_ScrollMap(int dx, int dy)
-{
-	grid.orig_x += dx;
-	grid.orig_y += dy;
-
-	edit.RedrawMap = 1;
 }
 
 
@@ -654,8 +635,8 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 		if (mod == MOD_SHIFT)
 			speed = MAX(1, speed / 3);
 
-		CMD_ScrollMap(  dx * (double) speed / grid.Scale,
-		              - dy * (double) speed / grid.Scale);
+		Editor_ScrollMap(  dx * (double) speed / grid.Scale,
+		                 - dy * (double) speed / grid.Scale);
 	}
 	else
 	{
@@ -1188,6 +1169,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
 	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
+
+	M_RegisterCommand("Scroll", &CMD_Scroll);
 
 	M_RegisterCommand("Mirror",   &CMD_Mirror);
 	M_RegisterCommand("Rotate90", &CMD_Rotate90);
