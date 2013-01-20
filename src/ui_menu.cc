@@ -141,8 +141,6 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	// NOTE: actually handled by Editor_Key(), so should not get here
-
 	CMD_Delete(false, false);
 }
 
@@ -406,7 +404,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "Cu&t",    FL_COMMAND + 'x',  FCAL edit_do_cut },
 		{ "&Copy",   FL_COMMAND + 'c',  FCAL edit_do_copy },
 		{ "&Paste",  FL_COMMAND + 'v',  FCAL edit_do_paste },
-		{ "Delete",  FL_Delete,           FCAL edit_do_delete },
+		{ "Delete",  FL_Delete,         FCAL edit_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

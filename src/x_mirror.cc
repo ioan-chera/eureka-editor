@@ -472,7 +472,7 @@ void CMD_Enlarge(void)
 
 	if (mul < 1 || mul > 64)
 	{
-		Beep("Bad parameter for enlarge: %s", EXEC_Param[0]);
+		Beep("Bad parameter for enlarge: '%s'", EXEC_Param[0]);
 		return;
 	}
 
@@ -573,7 +573,7 @@ void CMD_Shrink(void)
 
 	if (div < 1 || div > 64)
 	{
-		Beep("Bad parameter for shrink: %s", EXEC_Param[0]);
+		Beep("Bad parameter for shrink: '%s'", EXEC_Param[0]);
 		return;
 	}
 
