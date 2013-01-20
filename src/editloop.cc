@@ -643,18 +643,6 @@ static bool Thing_Key(keycode_t key)
 	{
 	}
 
-	// 'w': spin things 1/8 turn counter-clockwise
-	else if (key == 'w')
-	{
-		CMD_SpinThings(+45);
-	}
-
-	// 'x': spin things 1/8 turn clockwise
-	else if (key == 'x')
-	{
-		CMD_SpinThings(-45);
-	}
-
 	// [K] limit shown things to specific skill (AJA)
 	else if (key == 'K')
 	{
@@ -1290,6 +1278,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
 
 	/* thing */
+
+	M_RegisterCommand("TH_Spin", &TH_SpinThings, KCTX_Thing);
 
 	/* vertex */
 }

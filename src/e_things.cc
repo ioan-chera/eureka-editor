@@ -151,13 +151,21 @@ int calc_new_angle(int angle, int diff)
 /*
  *  spin_thing - change the angle of things
  */
-bool CMD_SpinThings(int degrees)
+void TH_SpinThings(void)
 {
+	int degrees = atoi(EXEC_Param[0]);
+
+	if (! degrees)
+		degrees = +45;
+
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("No things to spin");
+		return;
+	}
 
 	BA_Begin();
 
@@ -171,8 +179,6 @@ bool CMD_SpinThings(int degrees)
 	BA_End();
 
 	main_win->thing_box->UpdateField(Thing::F_ANGLE);
-
-	return true;
 }
 
 

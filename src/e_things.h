@@ -56,7 +56,7 @@ inline int angle_to_direction (int angle)
 }
 
 
-bool CMD_SpinThings(int degrees);
+void TH_SpinThings(void);
 
 void frob_things_flags (selection_c * list, int op, int operand);
 
