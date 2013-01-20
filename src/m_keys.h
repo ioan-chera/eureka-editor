@@ -86,6 +86,8 @@ void M_RemoveBinding(keycode_t key, key_context_e context);
 // TODO: M_AddBinding
 
 
+keycode_t M_TranslateKey(int key, int state);
+
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 extern const char * EXEC_Param[4];

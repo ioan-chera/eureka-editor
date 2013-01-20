@@ -463,6 +463,48 @@ void M_SaveBindings()
 }
 
 
+//------------------------------------------------------------------------
+
+
+keycode_t M_TranslateKey(int key, int state)
+{
+	// ignore modifier keys themselves
+	switch (key)
+	{
+		case FL_Num_Lock:
+		case FL_Caps_Lock:
+
+		case FL_Shift_L: case FL_Control_L:
+		case FL_Shift_R: case FL_Control_R:
+		case FL_Meta_L:  case FL_Alt_L:
+		case FL_Meta_R:  case FL_Alt_R:
+			return 0;
+	}
+
+	if (key == '\t') key = FL_Tab;
+	if (key == '\b') key = FL_BackSpace;
+
+	// modifier logic -- only allow a single one 
+
+	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
+	else if (state & MOD_META)    key |= MOD_META;
+	else if (state & MOD_ALT)     key |= MOD_ALT;
+	else if (state & MOD_SHIFT)
+	{
+		// Note: SHIFT + digit is kept that way (rather than get '!', '@' etc)
+
+		if (key < 127 && isalpha(key))
+			key = toupper(key);
+		else if (ispunct(key) && strlen(Fl::event_text()) == 1)
+			key = Fl::event_text()[0];
+		else
+			key |= MOD_SHIFT;
+	}
+
+	return key;
+}
+
+
 key_context_e M_ModeToKeyContext(obj_type_e mode)
 {
 	switch (mode)

@@ -153,50 +153,10 @@ int UI_Canvas::handle(int event)
 
 int UI_Canvas::handle_key()
 {
-	keycode_t key = Fl::event_key();
-
-	int state = Fl::event_state();
-
-	switch (key)
-	{
-		case FL_Num_Lock:
-		case FL_Caps_Lock:
-
-		case FL_Shift_L: case FL_Control_L:
-		case FL_Shift_R: case FL_Control_R:
-		case FL_Meta_L:  case FL_Alt_L:
-		case FL_Meta_R:  case FL_Alt_R:
-
-			/* IGNORE */
-			return 1;
-
-		default:
-			/* OK */
-			break;
-	}
+	keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
 
 	if (key == 0)
 		return 0;
-
-	if (key == '\t') key = FL_Tab;
-	if (key == '\b') key = FL_BackSpace;
-
-	// modifier logic -- only allow a single one 
-
-	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
-	else if (state & MOD_META)    key |= MOD_META;
-	else if (state & MOD_ALT)     key |= MOD_ALT;
-	else if (state & MOD_SHIFT)
-	{
-		// Note: SHIFT + digit is kept that way (rather than get '!', '@' etc)
-
-		if (key < 127 && isalpha(key))
-			key = toupper(key);
-		else if (ispunct(key) && strlen(Fl::event_text()) == 1)
-			key = Fl::event_text()[0];
-		else
-			key |= MOD_SHIFT;
-	}
 
 #if 0  // DEBUG
 	fprintf(stderr, "Key code: 0x%08x\n", key);
