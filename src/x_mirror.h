@@ -54,7 +54,7 @@ int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust);
 
 /* commands */
 
-void CMD_Mirror(void);
+void CMD_Mirror  (void);
 void CMD_Rotate90(void);
 void CMD_Enlarge (void);
 void CMD_Shrink  (void);

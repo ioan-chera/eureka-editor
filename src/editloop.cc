@@ -611,6 +611,21 @@ void CMD_GoToCamera(void)
 }
 
 
+void CMD_CopyAndPaste(void)
+{
+	if (! (edit.Selected || edit.highlighted()))
+	{
+		Beep("Nothing to copy and paste");
+		return;
+	}
+
+	if (CMD_Copy())
+	{
+		CMD_Paste();
+	}
+}
+
+
 void Editor_Wheel(int dx, int dy, keycode_t mod)
 {
 	if (mouse_wheel_scrolls_map && mod !=
@@ -806,16 +821,6 @@ bool Editor_Key(keycode_t key)
 			Render3D_SetCameraPos(edit.map_x, edit.map_y);
 
 			edit.RedrawMap = 1;
-		}
-	}
-
-	// [o]: copy a group of objects
-	else if (key == 'o'
-			&& (edit.Selected || edit.highlighted()))
-	{
-		if (CMD_Copy())
-		{
-			CMD_Paste();
 		}
 	}
 
@@ -1181,6 +1186,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Enlarge",  &CMD_Enlarge);
 	M_RegisterCommand("Shrink",   &CMD_Shrink);
 	M_RegisterCommand("Quantize", &CMD_Quantize);
+
+	M_RegisterCommand("CopyAndPaste", &CMD_CopyAndPaste);
 
 	/* line */
 
