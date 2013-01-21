@@ -169,7 +169,7 @@ void TH_SpinThings(void)
 
 	BA_Begin();
 
-	for (list.begin(&it); !it.at_end(); ++it)
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing *T = Things[*it];
 
@@ -216,6 +216,165 @@ void frob_things_flags (SelPtr list, int op, int operand)
 	MarkChanges();
 }
 #endif
+
+
+static void CollectOverlappingThings(selection_c& list)
+{
+	selection_c newbies(OBJ_THINGS);
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Thing *T1 = Things[*it];
+		int r1 = M_GetThingType(T1->type)->radius;
+
+		for (int k = 0 ; k < NumThings ; k++)
+		{
+			if (k == *it)
+				continue;
+
+			const Thing *T2 = Things[k];
+			int r2 = M_GetThingType(T2->type)->radius;
+
+			int dx = abs(T1->x - T2->x);
+			int dy = abs(T1->y - T2->y);
+
+			if (MAX(dx, dy) <= r1 + r2)
+			{
+				newbies.set(k);
+			}
+		}
+	}
+
+	list.merge(newbies);
+}
+
+
+static bool HasOverlappingThings(selection_c& list)
+{
+	selection_iterator_c it1;
+	selection_iterator_c it2;
+
+	for (list.begin(&it1) ; !it1.at_end() ; ++it1)
+	{
+		const Thing *T1 = Things[*it1];
+		int r1 = M_GetThingType(T1->type)->radius;
+
+		for (list.begin(&it2) ; !it2.at_end() ; ++it2)
+		{
+			if (*it1 >= *it2)
+				continue;
+
+			const Thing *T2 = Things[*it2];
+			int r2 = M_GetThingType(T2->type)->radius;
+
+			int dx = abs(T1->x - T2->x);
+			int dy = abs(T1->y - T2->y);
+
+			if (MAX(dx, dy) <= r1 + r2)
+				return true;
+		}
+	}
+
+	return false;  // nothing overlapping any more
+}
+
+
+static void MoveOverlappingThings(selection_c& list, int mid_x, int mid_y)
+{
+	int total = list.count_obj();
+	int n;
+
+	// determine distance to move (find largest thing)
+	int dist = 8;
+
+/*
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Thing *T = Things[*it];
+		const thingtype_t *info = M_GetThingType(T->type)
+		
+		dist = MAX(dist, info->radius);
+	}
+*/
+
+	// move 'em!
+
+	selection_iterator_c it;
+
+	for (n = 0, list.begin(&it) ; !it.at_end() ; ++it, ++n)
+	{
+		const Thing *T = Things[*it];
+
+		float vec_x, vec_y;
+
+		vec_x = (T->x - mid_x) + ((rand() & 255) - 127) / 127.0;
+		vec_y = (T->y - mid_y) + ((rand() & 255) - 127) / 127.0;
+
+		float len = sqrt(vec_x*vec_x + vec_y*vec_y);
+
+		if (len < 0.2) len = 0.2;
+
+		float dist = 2 + (rand() & 255) / 60.0;
+
+		int new_x = T->x + vec_x * dist / len;
+		int new_y = T->y + vec_y * dist / len;
+
+		BA_ChangeTH(*it, Thing::F_X, new_x);
+		BA_ChangeTH(*it, Thing::F_Y, new_y);
+	}
+}
+
+
+void TH_Disconnect(void)
+{
+	if (edit.Selected->empty())
+	{
+		if (! edit.highlighted())
+		{
+			Beep("No vertices to disconnect");
+			return;
+		}
+
+		edit.Selected->set(edit.highlighted.num);
+	}
+
+	BA_Begin();
+
+	while (! edit.Selected->empty())
+	{
+		int first = edit.Selected->find_first();
+
+		// find all the things which overlap this one
+		selection_c overlaps(OBJ_THINGS);
+
+		overlaps.set(first);
+
+		for (int pass = 0 ; pass < 3 ; pass++)
+			CollectOverlappingThings(overlaps);
+
+		// remove these from the selection
+		edit.Selected->unmerge(overlaps);
+
+		if (overlaps.count_obj() < 2)
+			continue;
+
+		int mid_x, mid_y;
+
+		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
+
+		do
+		{
+			MoveOverlappingThings(overlaps, mid_x, mid_y);
+		
+		} while (HasOverlappingThings(overlaps));
+	}
+
+	BA_End();
+}
 
 
 //--- editor settings ---

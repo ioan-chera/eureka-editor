@@ -56,11 +56,15 @@ inline int angle_to_direction (int angle)
 }
 
 
-void TH_SpinThings(void);
-
 void frob_things_flags (selection_c * list, int op, int operand);
 
 int calc_new_angle(int angle, int diff);
+
+
+/* commands */
+
+void TH_SpinThings(void);
+void TH_Disconnect(void);
 
 
 #endif  /* __EUREKA_E_THINGS_H__ */
