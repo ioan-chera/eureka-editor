@@ -331,6 +331,9 @@ static void ParseBinding(const char ** tokens, int num_tok)
 	// handle un-bound keys
 	if (y_stricmp(tokens[2], "UNBOUND") == 0)
 	{
+#if 0
+fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
+#endif
 		M_RemoveBinding(temp.key, temp.context);
 		return;
 	}
@@ -493,6 +496,8 @@ void M_SaveBindings()
 
 	for (int ctx = KCTX_Browser ; ctx <= KCTX_RadTrig ; ctx++)
 	{
+		int count = 0;
+
 		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 		{
 			key_binding_t& bind = all_bindings[i];
@@ -511,6 +516,7 @@ void M_SaveBindings()
 			if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
 
 			fprintf(fp, "\n");
+			count++;
 		}
 
 		// find un-bound keys (relative to installation)
@@ -519,14 +525,19 @@ void M_SaveBindings()
 		{
 			key_binding_t& bind = install_binds[i];
 
+			if (bind.context != ctx)
+				continue;
+
 			if (! BindingExists(all_bindings, bind, false /* full match */))
 			{
 				fprintf(fp, "%s\t%s\t%s\n", M_KeyContextString(bind.context),
 						M_KeyToString(bind.key), "UNBOUND");
+				count++;
 			}
 		}
 
-		fprintf(fp, "\n");
+		if (count > 0)
+			fprintf(fp, "\n");
 	}
 }
 
