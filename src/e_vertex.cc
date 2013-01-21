@@ -193,7 +193,7 @@ void VERT_Merge(void)
 {
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep("Need at least two vertices to merge");
+		Beep("Need 2 or more vertices to merge");
 		return;
 	}
 
@@ -533,7 +533,7 @@ void SEC_Disconnect(void)
 {
 	if (NumVertices == 0)
 	{
-		Beep();
+		Beep("No sectors to disconnect");
 		return;
 	}
 
@@ -544,7 +544,7 @@ void SEC_Disconnect(void)
 	{
 		if (! edit.highlighted())
 		{
-			Beep();
+			Beep("No sectors to disconnect");
 			return;
 		}
 
@@ -561,7 +561,7 @@ void SEC_Disconnect(void)
 
 	if (detach_verts.empty())
 	{
-		Beep();
+		Beep("Already disconnected");
 		return;
 	}
 
