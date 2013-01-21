@@ -327,6 +327,15 @@ static void ParseBinding(const char ** tokens, int num_tok)
 		return;
 	}
 
+
+	// handle un-bound keys
+	if (y_stricmp(tokens[2], "UNBOUND") == 0)
+	{
+		M_RemoveBinding(temp.key, temp.context);
+		return;
+	}
+
+
 	temp.cmd = FindEditorCommand(tokens[2]);
 
 	if (! temp.cmd)
@@ -421,6 +430,32 @@ static void CopyInstallBindings()
 }
 
 
+static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
+                          bool full_match)
+{
+	for (unsigned int i = 0 ; i < list.size() ; i++)
+	{
+		key_binding_t& other = list[i];
+
+		if (bind.key != other.key)
+			continue;
+
+		if (bind.context != other.context)
+			continue;
+
+		if (! full_match ||
+			(bind.cmd == other.cmd &&
+			 strcmp(bind.param1, other.param1) == 0 &&
+			 strcmp(bind.param2, other.param2) == 0))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 void M_LoadBindings()
 {
 	all_bindings.clear();
@@ -453,7 +488,7 @@ void M_SaveBindings()
 
 	LogPrintf("Writing key bindings to: %s\n", filename);
 
-	fprintf(fp, "# Eureka key bindings\n");
+	fprintf(fp, "# Eureka key bindings (local)\n");
 	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
 
 	for (int ctx = KCTX_Browser ; ctx <= KCTX_RadTrig ; ctx++)
@@ -465,6 +500,10 @@ void M_SaveBindings()
 			if (bind.context != (key_context_e)ctx)
 				continue;
 
+			// no need to write it if unchanged from install_dir
+			if (BindingExists(install_binds, bind, true /* full match */))
+				continue;
+
 			fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
 					M_KeyToString(bind.key), bind.cmd->name);
 
@@ -472,6 +511,19 @@ void M_SaveBindings()
 			if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
 
 			fprintf(fp, "\n");
+		}
+
+		// find un-bound keys (relative to installation)
+
+		for (unsigned int i = 0 ; i < install_binds.size() ; i++)
+		{
+			key_binding_t& bind = install_binds[i];
+
+			if (! BindingExists(all_bindings, bind, false /* full match */))
+			{
+				fprintf(fp, "%s\t%s\t%s\n", M_KeyContextString(bind.context),
+						M_KeyToString(bind.key), "UNBOUND");
+			}
 		}
 
 		fprintf(fp, "\n");
