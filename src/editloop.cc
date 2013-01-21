@@ -410,6 +410,61 @@ void CMD_Scroll(void)
 }
 
 
+void CMD_Merge(void)
+{
+	switch (edit.obj_type)
+	{
+		case OBJ_VERTICES:
+			VERT_Merge();
+			break;
+
+		case OBJ_LINEDEFS:
+			LIN_MergeTwo();
+			break;
+
+		case OBJ_SECTORS:
+			SEC_Merge();
+			break;
+
+		case OBJ_THINGS:
+			Beep("Cannot merge things");
+			break;
+
+		default:
+			Beep("Cannot merge that");
+			break;
+	}
+}
+
+
+void CMD_Disconnect(void)
+{
+	switch (edit.obj_type)
+	{
+		case OBJ_VERTICES:
+			VERT_Disconnect();
+			break;
+
+		case OBJ_LINEDEFS:
+			LIN_Disconnect();
+			break;
+
+		case OBJ_SECTORS:
+			SEC_Disconnect();
+			break;
+
+		case OBJ_THINGS:
+			/* TODO: implement pushing apart things which touch or overlap */
+			Beep("Cannot disconnect things");
+			break;
+
+		default:
+			Beep("Cannot disconnect that");
+			break;
+	}
+}
+
+
 
 bool Browser_Key(keycode_t key)
 {
@@ -1176,20 +1231,20 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Rotate90", &CMD_Rotate90);
 	M_RegisterCommand("Enlarge",  &CMD_Enlarge);
 	M_RegisterCommand("Shrink",   &CMD_Shrink);
+
+	M_RegisterCommand("Disconnect", &CMD_Disconnect);
+	M_RegisterCommand("Merge", &CMD_Merge);
 	M_RegisterCommand("Quantize", &CMD_Quantize);
 
 	M_RegisterCommand("CopyAndPaste", &CMD_CopyAndPaste);
 
 	/* line */
 
-	M_RegisterCommand("LIN_Disconnect", &LIN_Disconnect, KCTX_Line);
-	M_RegisterCommand("LIN_MergeTwo", &LIN_MergeTwo, KCTX_Line);
+///---	M_RegisterCommand("LIN_Disconnect", &LIN_Disconnect, KCTX_Line);
 
 	/* sector */
 
-	M_RegisterCommand("SEC_Disconnect", &SEC_Disconnect, KCTX_Sector);
-	M_RegisterCommand("SEC_Merge", &SEC_Merge, KCTX_Sector);
-	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
+///---	M_RegisterCommand("SEC_Disconnect", &SEC_Disconnect, KCTX_Sector);
 
 	/* thing */
 
@@ -1197,8 +1252,7 @@ void Editor_RegisterCommands()
 
 	/* vertex */
 
-	M_RegisterCommand("VERT_Disconnect", &VERT_Disconnect, KCTX_Vertex);
-	M_RegisterCommand("VERT_Merge", &VERT_Merge, KCTX_Vertex);
+///---	M_RegisterCommand("VERT_Merge", &VERT_Merge, KCTX_Vertex);
 }
 
 

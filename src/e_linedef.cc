@@ -760,9 +760,14 @@ void LD_MergedSecondSideDef(int ld)
 
 void LIN_MergeTwo(void)
 {
-	if (edit.Selected->count_obj() != 2)
+	if (edit.Selected->count_obj() < 2)
 	{
-		Beep("Require two selected linedefs to merge.");
+		Beep("Less than two lines selected");
+		return;
+	}
+	else if (edit.Selected->count_obj() > 2)
+	{
+		Beep("More than two lines selected");
 		return;
 	}
 
