@@ -282,6 +282,7 @@ typedef struct
 
 
 static std::vector<key_binding_t> all_bindings;
+static std::vector<key_binding_t> install_binds;
 
 
 void M_RemoveBinding(keycode_t key, key_context_e context)
@@ -409,11 +410,26 @@ static void LoadBindingsFromPath(const char *path, bool required)
 }
 
 
+static void CopyInstallBindings()
+{
+	install_binds.clear();
+
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	{
+		install_binds.push_back(all_bindings[i]);
+	}
+}
+
+
 void M_LoadBindings()
 {
 	all_bindings.clear();
 
 	LoadBindingsFromPath(install_dir, true /* required */);
+
+	// keep a copy of the install_dir bindings
+	CopyInstallBindings();
+
 	LoadBindingsFromPath(home_dir, false);
 }
 
