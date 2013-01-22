@@ -354,8 +354,40 @@ void CMD_Toggle3D(void)
 }
 
 
+void CMD_SetVar(void)
+{
+	if (! EXEC_Param[0][0])
+	{
+		Beep("Set: missing var name");
+		return;
+	}
+
+	if (! EXEC_Param[0][1])
+	{
+		Beep("Set: missing value");
+		return;
+	}
+
+	if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	{
+		edit.show_object_numbers = (atoi(EXEC_Param[1]) > 0);
+		edit.RedrawMap = 1;
+	}
+	else   // TODO: "skills"
+	{
+		Beep("Set: unknown var '%s'", EXEC_Param[0]);
+	}
+}
+
+
 void CMD_ToggleVar(void)
 {
+	if (! EXEC_Param[0][0])
+	{
+		Beep("Toggle: missing var name");
+		return;
+	}
+
 	if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
@@ -369,7 +401,7 @@ void CMD_ToggleVar(void)
 	}
 	else
 	{
-		Beep("Unknown toggle var: '%s'\n", EXEC_Param[0]);
+		Beep("Toggle: unknown var '%s'\n", EXEC_Param[0]);
 	}
 }
 
@@ -1198,6 +1230,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
 	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
 
+	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
