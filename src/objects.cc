@@ -729,7 +729,7 @@ static void Correct_Sector(int sec_num)
 }
 
 
-static void Insert_Sector(keymod_e mod)
+static void Insert_Sector(bool force_new)
 {
 	int sel_count = edit.Selected->count_obj();
 	if (sel_count > 1)
@@ -757,7 +757,7 @@ static void Insert_Sector(keymod_e mod)
 	}
 
 	// if a sector is highlighted, merely correct it (unless CTRL is pressed)
-	if (edit.highlighted() && mod != KM_CTRL)
+	if (edit.highlighted() && ! force_new)
 	{
 		// must not be any selection
 		if (sel_count > 0)
@@ -802,7 +802,7 @@ static void Insert_Sector(keymod_e mod)
 }
 
 
-void CMD_InsertNewObject(keymod_e mod)
+void CMD_Insert(void)
 {
 	switch (edit.obj_type)
 	{
@@ -815,13 +815,20 @@ void CMD_InsertNewObject(keymod_e mod)
 			break;
 
 		case OBJ_SECTORS:
-			Insert_Sector(mod);
+			{
+				bool force_new = (tolower(EXEC_Param[0][0]) == 'f');
+				Insert_Sector(force_new);
+			}
 			break;
 
 		default:
 			Beep();
 			break;
 	}
+
+	UpdateHighlight();
+
+	edit.RedrawMap = 1;
 }
 
 

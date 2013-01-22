@@ -28,13 +28,6 @@
 #define __EUREKA_OBJECTS_H__
 
 
-void CMD_InsertNewObject(keymod_e mod);
-
-void CMD_MoveObjects(int delta_x, int delta_y);
-
-void CMD_CopyProperties();
-
-
 void ObjectBox_NotifyBegin();
 void ObjectBox_NotifyInsert(obj_type_e type, int objnum);
 void ObjectBox_NotifyDelete(obj_type_e type, int objnum);
@@ -55,6 +48,15 @@ void  GetObjectCoords (int, int, int *, int *);
 int FindFreeTag (void);
 
 void GetDragFocus(int *x, int *y, int map_x, int map_y);
+
+
+/* commands */
+
+void CMD_Insert(void);
+
+void CMD_MoveObjects(int delta_x, int delta_y);
+
+void CMD_CopyProperties();
 
 
 #endif  /* __EUREKA_OBJECTS_H__ */

@@ -405,7 +405,7 @@ void UI_Preferences::SaveValues()
 	/* Edit panel */
 
 	new_sector_size = atoi(edit_sectorsize->value());
-	new_sector_size = CLAMP(2, new_sector_size, 8192);
+	new_sector_size = CLAMP(4, new_sector_size, 8192);
 
 	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;

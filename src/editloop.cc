@@ -899,16 +899,6 @@ bool Editor_Key(keycode_t key)
 		CMD_Delete(keep_unused, keep_unused);
 	}
 
-	// [INS], [SPACE]: insert a new object
-	else if (bare_key == ' ' || bare_key == FL_Insert)
-	{
-		CMD_InsertNewObject(KM_none /* FIXME!!!! */);
-
-		UpdateHighlight();
-
-		edit.RedrawMap = 1;
-	}
-
 	// [c] Copy properties to the highlighted object
 	else if (key == 'c' && edit.Selected->notempty() &&
 			 edit.highlighted())
@@ -1077,7 +1067,8 @@ void EditorMiddlePress(keymod_e mod)
 	// ability to insert stuff via the mouse
 	if (mod == KM_none)
 	{
-		Editor_Key(' ');
+		EXEC_Param[0] = "";
+		CMD_Insert();
 		return;
 	}
 
@@ -1232,6 +1223,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
 	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
 
+	M_RegisterCommand("Insert", &CMD_Insert);
 	M_RegisterCommand("Scroll", &CMD_Scroll);
 
 	M_RegisterCommand("Mirror",   &CMD_Mirror);
