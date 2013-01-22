@@ -358,7 +358,7 @@ void UI_Preferences::LoadValues()
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
-	edit_multiselect->value((multi_select_modifier == KM_none) ? 0 : 1);
+	edit_multiselect->value(multi_select_modifier ? 2 : 0);
 
 	/* glBSP panel */
 
@@ -410,7 +410,7 @@ void UI_Preferences::SaveValues()
 	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
-	multi_select_modifier = edit_multiselect->value() ? KM_CTRL : KM_none;
+	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
 
 	/* glBSP panel */
 

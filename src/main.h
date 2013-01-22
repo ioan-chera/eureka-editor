@@ -101,19 +101,6 @@ side_ref_e;
 #include "m_keys.h"
 
 
-// FIXME: REMOVE OLD WAY
-// key modifier (does not allow two at once, e.g. CTRL+SHIFT)
-typedef enum
-{
-	KM_none = 0,
-
-	KM_SHIFT = 1,
-	KM_CTRL  = 2,
-	KM_ALT   = 3,
-}
-keymod_e;
-
-
 typedef std::vector< const char * > string_list_t;
 
 

@@ -46,7 +46,7 @@ public:
 	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
 
 	int button_down;  // mouse button 1 to 3, or 0 for none,
-	keymod_e button_mod;  // modifier used when button was pressed
+	keycode_t button_mod;  // modifier(s) used when button was pressed
 
 	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred. If clicked on
@@ -85,12 +85,12 @@ bool  Editor_Key(keycode_t key);
 bool Browser_Key(keycode_t key);
 
 void Editor_Wheel(int dx, int dy, keycode_t mod);
-void EditorMousePress(keymod_e mod);
-void EditorMouseRelease();
-void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool drag);
-void EditorMiddlePress(keymod_e mod);
-void EditorMiddleRelease();
-void EditorLeaveWindow();
+void Editor_MousePress(keycode_t mod);
+void Editor_MouseRelease();
+void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool drag);
+void Editor_MiddlePress(keycode_t mod);
+void Editor_MiddleRelease();
+void Editor_LeaveWindow();
 
 bool Editor_ParseUser(const char ** tokens, int num_tok);
 void Editor_WriteUser(FILE *fp);

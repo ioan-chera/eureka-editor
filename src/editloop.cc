@@ -59,7 +59,7 @@ bool escape_key_quits = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
-int multi_select_modifier = KM_none;
+int multi_select_modifier = 0;
 
 
 Editor_State_c::Editor_State_c()
@@ -953,7 +953,7 @@ bool Editor_Key(keycode_t key)
 }
 
 
-void EditorMousePress(keymod_e mod)
+void Editor_MousePress(keycode_t mod)
 {
 	if (edit.button_down >= 2)
 		return;
@@ -977,7 +977,7 @@ void EditorMousePress(keymod_e mod)
 }
 
 
-void EditorMouseRelease()
+void Editor_MouseRelease()
 {
 	edit.button_down = 0;
 
@@ -1008,8 +1008,8 @@ void EditorMouseRelease()
 	}
 
 	// optional multi-select : require a certain modifier key
-	if (multi_select_modifier != KM_none &&
-		edit.button_mod != multi_select_modifier)
+	if (multi_select_modifier &&
+		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
 	{
 		was_did_move = true;
 	}
@@ -1059,13 +1059,13 @@ void EditorMouseRelease()
 }
 
 
-void EditorMiddlePress(keymod_e mod)
+void Editor_MiddlePress(keycode_t mod)
 {
 	if (edit.button_down & 1)  // allow 0 or 2
 		return;
 
 	// ability to insert stuff via the mouse
-	if (mod == KM_none)
+	if (mod == 0)
 	{
 		EXEC_Param[0] = "";
 		CMD_Insert();
@@ -1089,7 +1089,7 @@ void EditorMiddlePress(keymod_e mod)
 }
 
 
-void EditorMiddleRelease()
+void Editor_MiddleRelease()
 {
 	edit.button_down = 0;
 
@@ -1107,7 +1107,7 @@ void EditorMiddleRelease()
 
 
 
-void EditorLeaveWindow()
+void Editor_LeaveWindow()
 {
 	edit.pointer_in_window = false;
 	
@@ -1115,7 +1115,7 @@ void EditorLeaveWindow()
 }
 
 
-void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool drag)
+void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool drag)
 {
 	edit.map_x = map_x;
 	edit.map_y = map_y;
@@ -1199,7 +1199,7 @@ void EditorMouseMotion(int x, int y, keymod_e mod, int map_x, int map_y, bool dr
 }
 
 
-void EditorResize(int is_width, int is_height)
+void Editor_Resize(int is_width, int is_height)
 {
 	edit.RedrawMap = 1;
 }
@@ -1268,7 +1268,7 @@ void Editor_Init()
 	edit.show_things_sprites = true;
 
 	edit.button_down = 0;
-	edit.button_mod  = KM_none;
+	edit.button_mod  = 0;
 	edit.clicked.clear();
 	edit.did_a_move  = false;
 

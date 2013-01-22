@@ -41,17 +41,6 @@ extern int active_when;
 extern int active_wmask;
 
 
-keymod_e StateToMod(int state)
-{
-	if (state & FL_CTRL)  return KM_CTRL;
-	if (state & FL_ALT)   return KM_ALT;
-	if (state & FL_META)  return KM_ALT;
-	if (state & FL_SHIFT) return KM_SHIFT;
-
-	return KM_none;
-}
-
-
 //
 // UI_Canvas Constructor
 //
@@ -115,7 +104,7 @@ int UI_Canvas::handle(int event)
 			return 1;
 
 		case FL_LEAVE:
-			EditorLeaveWindow();
+			Editor_LeaveWindow();
 			redraw();
 			return 1;
 
@@ -200,13 +189,13 @@ int UI_Canvas::handle_key()
 
 int UI_Canvas::handle_move(bool drag)
 {
-	int state = Fl::event_state();
+	int mod = Fl::event_state() & MOD_ALL_MASK;
 
 	if (render3d)
 	{ /* TODO */ }
 	else
 	{
-		EditorMouseMotion(Fl::event_x(), Fl::event_y(), StateToMod(state),
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
 				MAPX(Fl::event_x()), MAPY(Fl::event_y()), drag);
 	}
 
@@ -223,15 +212,15 @@ int UI_Canvas::handle_push()
 		return 1;
 	}
 
+	int mod = Fl::event_state() & MOD_ALL_MASK;
+
 	if (Fl::event_button() == 2)
 	{
-		int state = Fl::event_state();
-		EditorMiddlePress(StateToMod(state));
+		Editor_MiddlePress(mod);
 	}
 	else if (! render3d)
 	{
-		int state = Fl::event_state();
-		EditorMousePress(StateToMod(state));
+		Editor_MousePress(mod);
 	}
 
 	return 1;
@@ -247,9 +236,9 @@ int UI_Canvas::handle_release()
 	}
 
 	if (Fl::event_button() == 2)
-		EditorMiddleRelease();
+		Editor_MiddleRelease();
 	else if (! render3d)
-		EditorMouseRelease();
+		Editor_MouseRelease();
 	return 1;
 }
 
@@ -1507,7 +1496,7 @@ void UI_Canvas::ScaleFinish(scale_param_t& param)
 	param = scale_param;
 }
 
-void UI_Canvas::ScaleUpdate(int map_x, int map_y, keymod_e mod)
+void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 {
 	int dx1 = map_x - scale_param.mid_x;
 	int dy1 = map_y - scale_param.mid_y;
@@ -1515,8 +1504,8 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keymod_e mod)
 	int dx2 = scale_start_x - scale_param.mid_x;
 	int dy2 = scale_start_y - scale_param.mid_y;
 
-	bool any_aspect = (mod == KM_ALT);
-	bool rotate     = (mod == KM_CTRL);
+	bool any_aspect = (mod & MOD_ALT)     ? true : false;
+	bool rotate     = (mod & MOD_COMMAND) ? true : false;
 
 	scale_param.rotate = 0;
 

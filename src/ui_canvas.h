@@ -103,7 +103,7 @@ public:
 	void DragFinish(int *dx, int *dy);
 
 	void ScaleBegin(int map_x, int map_y, int middle_x, int middle_y);
-	void ScaleUpdate(int map_x, int map_y, keymod_e mod);
+	void ScaleUpdate(int map_x, int map_y, keycode_t mod);
 	void ScaleFinish(scale_param_t& param);
 
 	void ChangeRenderMode(int mode);
