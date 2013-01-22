@@ -138,7 +138,7 @@ keycode_t M_ParseKeyString(const char *str)
 	}
 	else if (y_strnicmp(str, "SHIFT-", 6) == 0)
 	{
-		key |= MOD_META;  str += 6;
+		key |= MOD_SHIFT;  str += 6;
 	}
 
 	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
@@ -150,9 +150,9 @@ keycode_t M_ParseKeyString(const char *str)
 	// find name in mapping table
 	for (int k = 0 ; key_map[k].name ; k++)
 		if (y_stricmp(str, key_map[k].name) == 0)
-			return key_map[k].key;
+			return key | key_map[k].key;
 
-	if (y_strnicmp(str, "KP_", 3) == 0 && 33 < str[3] && str[3] <= 0x3d)
+	if (y_strnicmp(str, "KP_", 3) == 0 && 33 < str[3] && (FL_KP + str[3]) <= FL_KP_Last)
 		return key | (FL_KP + str[3]);
 
 	if (str[0] == '0' && str[1] == 'x')
