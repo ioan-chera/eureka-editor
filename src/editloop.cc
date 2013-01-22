@@ -48,7 +48,7 @@
 Editor_State_c  edit;
 
 
-int active_when = 0;  // MOVE THESE
+int active_when = 0;  // FIXME MOVE THESE into Editor_State
 int active_wmask = 0;
 
 
@@ -354,10 +354,23 @@ void CMD_Toggle3D(void)
 }
 
 
-void CMD_ToggleObjNums(void)
+void CMD_ToggleVar(void)
 {
-	edit.show_object_numbers = ! edit.show_object_numbers;
-	edit.RedrawMap = 1;
+	if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	{
+		edit.show_object_numbers = ! edit.show_object_numbers;
+		edit.RedrawMap = 1;
+	}
+	else if (y_stricmp(EXEC_Param[0], "skills") == 0)
+	{
+		active_wmask ^= 1;
+		active_when = active_wmask;
+		edit.RedrawMap = 1;
+	}
+	else
+	{
+		Beep("Unknown toggle var: '%s'\n", EXEC_Param[0]);
+	}
 }
 
 
@@ -709,24 +722,7 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 
 static bool Thing_Key(keycode_t key)
 {
-	if (0)
-	{
-	}
-
-	// [K] limit shown things to specific skill (AJA)
-	else if (key == 'K')
-	{
-		active_wmask ^= 1;
-		active_when = active_wmask;
-		edit.RedrawMap = 1;
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 
@@ -897,12 +893,6 @@ bool Editor_Key(keycode_t key)
 	{
 		CMD_CopyProperties();
 
-	}
-
-	// [J] Show object numbers
-	else if (key == 'J')
-	{
-		CMD_ToggleObjNums();
 	}
 
 	// [%] Show things sprites
@@ -1208,8 +1198,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
 	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
 
-	// FIXME: just a "Toggle" command, what to toggle is param[0]
-	M_RegisterCommand("ToggleObjNums", &CMD_ToggleObjNums);
+	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);

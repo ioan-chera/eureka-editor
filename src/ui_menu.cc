@@ -200,7 +200,9 @@ static void view_do_fullscreen(Fl_Widget *w, void * data)
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
 {
-	CMD_ToggleObjNums();
+	EXEC_Param[0] = "obj_nums";
+
+	CMD_ToggleVar();
 }
 
 static void view_do_grid_type(Fl_Widget *w, void * data)
