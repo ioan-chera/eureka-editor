@@ -454,8 +454,7 @@ void CMD_Disconnect(void)
 			break;
 
 		case OBJ_THINGS:
-			/* TODO: implement pushing apart things which touch or overlap */
-			Beep("Cannot disconnect things");
+			TH_Disconnect();
 			break;
 
 		default:

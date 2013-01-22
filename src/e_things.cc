@@ -218,117 +218,65 @@ void frob_things_flags (SelPtr list, int op, int operand)
 #endif
 
 
-static void CollectOverlappingThings(selection_c& list)
+bool ThingsOverlap(int th1, int th2)
 {
-	selection_c newbies(OBJ_THINGS);
+	const Thing *T1 = Things[th1];
+	const Thing *T2 = Things[th2];
 
-	selection_iterator_c it;
+	int r1 = M_GetThingType(T1->type)->radius;
+	int r2 = M_GetThingType(T2->type)->radius;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-	{
-		const Thing *T1 = Things[*it];
-		int r1 = M_GetThingType(T1->type)->radius;
+	int dx = abs(T1->x - T2->x);
+	int dy = abs(T1->y - T2->y);
 
-		for (int k = 0 ; k < NumThings ; k++)
-		{
-			if (k == *it)
-				continue;
-
-			const Thing *T2 = Things[k];
-			int r2 = M_GetThingType(T2->type)->radius;
-
-			int dx = abs(T1->x - T2->x);
-			int dy = abs(T1->y - T2->y);
-
-			if (MAX(dx, dy) <= r1 + r2)
-			{
-				newbies.set(k);
-			}
-		}
-	}
-
-	list.merge(newbies);
+	return (MAX(dx, dy) < r1 + r2);
 }
 
 
-static bool HasOverlappingThings(selection_c& list)
+bool ThingsAtSameLoc(int th1, int th2)
 {
-	selection_iterator_c it1;
-	selection_iterator_c it2;
+	const Thing *T1 = Things[th1];
+	const Thing *T2 = Things[th2];
 
-	for (list.begin(&it1) ; !it1.at_end() ; ++it1)
-	{
-		const Thing *T1 = Things[*it1];
-		int r1 = M_GetThingType(T1->type)->radius;
+	int dx = abs(T1->x - T2->x);
+	int dy = abs(T1->y - T2->y);
 
-		for (list.begin(&it2) ; !it2.at_end() ; ++it2)
-		{
-			if (*it1 >= *it2)
-				continue;
-
-			const Thing *T2 = Things[*it2];
-			int r2 = M_GetThingType(T2->type)->radius;
-
-			int dx = abs(T1->x - T2->x);
-			int dy = abs(T1->y - T2->y);
-
-			if (MAX(dx, dy) <= r1 + r2)
-				return true;
-		}
-	}
-
-	return false;  // nothing overlapping any more
+	return (dx < 8 && dy < 8);
 }
 
 
-static void MoveOverlappingThings(selection_c& list, int mid_x, int mid_y)
+static void CollectOverlapGroup(selection_c& list)
 {
-	int total = list.count_obj();
-	int n;
+	int first = edit.Selected->find_first();
 
-	// determine distance to move (find largest thing)
-	int dist = 8;
+	list.set(first);
 
-/*
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-	{
-		const Thing *T = Things[*it];
-		const thingtype_t *info = M_GetThingType(T->type)
-		
-		dist = MAX(dist, info->radius);
-	}
-*/
-
-	// move 'em!
-
-	selection_iterator_c it;
-
-	for (n = 0, list.begin(&it) ; !it.at_end() ; ++it, ++n)
-	{
-		const Thing *T = Things[*it];
-
-		float vec_x, vec_y;
-
-		vec_x = (T->x - mid_x) + ((rand() & 255) - 127) / 127.0;
-		vec_y = (T->y - mid_y) + ((rand() & 255) - 127) / 127.0;
-
-		float len = sqrt(vec_x*vec_x + vec_y*vec_y);
-
-		if (len < 0.2) len = 0.2;
-
-		float dist = 2 + (rand() & 255) / 60.0;
-
-		int new_x = T->x + vec_x * dist / len;
-		int new_y = T->y + vec_y * dist / len;
-
-		BA_ChangeTH(*it, Thing::F_X, new_x);
-		BA_ChangeTH(*it, Thing::F_Y, new_y);
-	}
+	for (int k = 0 ; k < NumThings ; k++)
+		if (k != first && ThingsAtSameLoc(k, first))
+			list.set(k);
 }
 
 
+static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
+{
+	float angle = n * 360 / total;
+
+	float vec_x = cos(angle * M_PI / 180.0);
+	float vec_y = sin(angle * M_PI / 180.0);
+
+	float dist = 8 + 6 * MIN(100, total);
+
+	const Thing *T = Things[th];
+
+	BA_ChangeTH(th, Thing::F_X, T->x + vec_x * dist);
+	BA_ChangeTH(th, Thing::F_Y, T->y + vec_y * dist);
+}
+
+
+/*  all things lying at same location (or very near) to the selected
+ *  things are moved so they are more distinct -- about 8 units away
+ *  from that location.
+ */
 void TH_Disconnect(void)
 {
 	if (edit.Selected->empty())
@@ -346,31 +294,31 @@ void TH_Disconnect(void)
 
 	while (! edit.Selected->empty())
 	{
-		int first = edit.Selected->find_first();
-
-		// find all the things which overlap this one
 		selection_c overlaps(OBJ_THINGS);
 
-		overlaps.set(first);
-
-		for (int pass = 0 ; pass < 3 ; pass++)
-			CollectOverlappingThings(overlaps);
+		CollectOverlapGroup(overlaps);
 
 		// remove these from the selection
 		edit.Selected->unmerge(overlaps);
 
-		if (overlaps.count_obj() < 2)
+
+		int total = overlaps.count_obj();
+		int n;
+
+		if (total < 2)
 			continue;
 
-		int mid_x, mid_y;
+ 		int mid_x, mid_y;
+ 
+ 		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
 
-		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
 
-		do
+		selection_iterator_c it;
+
+		for (n = 0, overlaps.begin(&it) ; !it.at_end() ; ++it, ++n)
 		{
-			MoveOverlappingThings(overlaps, mid_x, mid_y);
-		
-		} while (HasOverlappingThings(overlaps));
+			MoveOverlapThing(*it, mid_x, mid_y, n, total);
+		}
 	}
 
 	BA_End();
