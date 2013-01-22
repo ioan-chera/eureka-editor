@@ -279,6 +279,12 @@ void Editor_ChangeMode(char mode)
 }
 
 
+void CMD_Nothing(void)
+{
+	/* hey jude, don't make it bad */
+}
+
+
 void CMD_EditMode(void)
 {
 	char mode = tolower(EXEC_Param[0][0]);
@@ -1211,6 +1217,8 @@ void EditorResize(int is_width, int is_height)
 void Editor_RegisterCommands()
 {
 	/* global */
+
+	M_RegisterCommand("Nothing", &CMD_Nothing);
 
 	M_RegisterCommand("Quit", &CMD_Quit);
 	M_RegisterCommand("EditMode", &CMD_EditMode);
