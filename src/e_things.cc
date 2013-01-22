@@ -325,5 +325,32 @@ void TH_Disconnect(void)
 }
 
 
+/* place all selected things at same location */
+void TH_Merge(void)
+{
+	if (edit.Selected->count_obj() < 2)
+	{
+		Beep("Need 2 or more things to merge");
+		return;
+	}
+
+ 	int mid_x, mid_y;
+
+	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
+
+	BA_Begin();
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		BA_ChangeTH(*it, Thing::F_X, mid_x);
+		BA_ChangeTH(*it, Thing::F_Y, mid_y);
+	}
+
+	BA_End();
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

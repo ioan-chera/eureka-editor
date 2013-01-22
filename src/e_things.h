@@ -65,6 +65,7 @@ int calc_new_angle(int angle, int diff);
 
 void TH_SpinThings(void);
 void TH_Disconnect(void);
+void TH_Merge(void);
 
 
 #endif  /* __EUREKA_E_THINGS_H__ */

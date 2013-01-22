@@ -427,7 +427,7 @@ void CMD_Merge(void)
 			break;
 
 		case OBJ_THINGS:
-			Beep("Cannot merge things");
+			TH_Merge();
 			break;
 
 		default:
