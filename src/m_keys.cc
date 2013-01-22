@@ -574,7 +574,7 @@ keycode_t M_TranslateKey(int key, int state)
 
 		if (key < 127 && isalpha(key))
 			key = toupper(key);
-		else if (ispunct(key) && strlen(Fl::event_text()) == 1)
+		else if (key < 127 && ispunct(key) && strlen(Fl::event_text()) == 1)
 			key = Fl::event_text()[0];
 		else
 			key |= MOD_SHIFT;
