@@ -944,12 +944,21 @@ static void DeleteVertex_MergeLineDefs(int v_num)
 }
 
 
-bool CMD_Delete(bool keep_things, bool keep_unused)
+void CMD_Delete(void)
 {
 	selection_c list;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("Nothing to delete");
+		return;
+	}
+
+	bool keep = (tolower(EXEC_Param[0][0]) == 'k');
+
+	// TODO: decide how to differentiate these (if at all)
+	bool keep_things = keep;
+	bool keep_unused = keep;
 
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
@@ -1031,9 +1040,7 @@ success:
 	edit.split_line.clear();
 
 	UpdateHighlight();
-	return true;
 }
-
 
 
 //--- editor settings ---

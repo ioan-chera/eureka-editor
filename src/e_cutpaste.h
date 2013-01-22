@@ -35,7 +35,7 @@ void Clipboard_NotifyEnd();
 void UnusedVertices(selection_c *lines, selection_c *result);
 void UnusedSideDefs(selection_c *lines, selection_c *result);
 
-bool CMD_Delete(bool keep_things, bool keep_unused);
+void CMD_Delete(void);
 
 bool CMD_Copy();
 bool CMD_Paste();

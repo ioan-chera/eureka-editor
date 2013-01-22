@@ -118,7 +118,9 @@ static void edit_do_cut(Fl_Widget *w, void * data)
 		return;
 	}
 
-	CMD_Delete(false, false);
+	EXEC_Param[0] = "";
+
+	CMD_Delete();
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
@@ -141,7 +143,9 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	CMD_Delete(false, false);
+	EXEC_Param[0] = "";
+
+	CMD_Delete();
 }
 
 static void edit_do_select_all(Fl_Widget *w, void * data)

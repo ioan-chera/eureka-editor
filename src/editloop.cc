@@ -891,14 +891,6 @@ bool Editor_Key(keycode_t key)
 //!!!	}
 
 
-	// [DEL]: delete the current object(s)
-	else if (unshifted_key == FL_BackSpace || unshifted_key == FL_Delete)
-	{
-		bool keep_unused = (key & MOD_SHIFT) ? true : false;
-
-		CMD_Delete(keep_unused, keep_unused);
-	}
-
 	// [c] Copy properties to the highlighted object
 	else if (key == 'c' && edit.Selected->notempty() &&
 			 edit.highlighted())
@@ -1224,6 +1216,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
 
 	M_RegisterCommand("Insert", &CMD_Insert);
+	M_RegisterCommand("Delete", &CMD_Delete);
 	M_RegisterCommand("Scroll", &CMD_Scroll);
 
 	M_RegisterCommand("Mirror",   &CMD_Mirror);
