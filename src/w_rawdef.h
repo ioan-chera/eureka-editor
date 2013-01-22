@@ -34,8 +34,8 @@ typedef struct raw_wad_header_s
 
 	u32_t num_entries;
 	u32_t dir_start;
-}
-raw_wad_header_t;
+
+} PACKEDATTR raw_wad_header_t;
 
 
 // directory entry
@@ -45,8 +45,8 @@ typedef struct raw_wad_entry_s
 	u32_t size;
 
 	char name[8];
-}
-raw_wad_entry_t;
+
+} PACKEDATTR raw_wad_entry_t;
 
 
 
@@ -74,14 +74,14 @@ enum
 typedef struct raw_vertex_s
 {
 	s16_t x, y;
-}
-raw_vertex_t;
+
+} PACKEDATTR raw_vertex_t;
 
 typedef struct raw_v2_vertex_s
 {
 	s32_t x, y;
-}
-raw_v2_vertex_t;
+
+} PACKEDATTR raw_v2_vertex_t;
 
 
 typedef struct raw_linedef_s
@@ -93,8 +93,8 @@ typedef struct raw_linedef_s
 	s16_t tag;      // this linedef activates the sector with same tag
 	u16_t right;    // right sidedef
 	u16_t left;     // left sidedef (only if this line adjoins 2 sectors)
-}
-raw_linedef_t;
+
+} PACKEDATTR raw_linedef_t;
 
 typedef struct raw_hexen_linedef_s
 {
@@ -105,8 +105,8 @@ typedef struct raw_hexen_linedef_s
 	u8_t  args[5];    // special arguments
 	u16_t right;      // right sidedef
 	u16_t left;       // left sidedef
-}
-raw_hexen_linedef_t;
+
+} PACKEDATTR raw_hexen_linedef_t;
 
 
 typedef struct raw_sidedef_s
@@ -119,8 +119,8 @@ typedef struct raw_sidedef_s
 	char mid_tex[8];    // texture name for the regular part
 
 	u16_t sector;    // adjacent sector
-}
-raw_sidedef_t;
+
+} PACKEDATTR raw_sidedef_t;
 
 
 typedef struct raw_sector_s
@@ -134,8 +134,8 @@ typedef struct raw_sector_s
 	u16_t light;     // light level (0-255)
 	u16_t type;      // special type (0 = normal, 9 = secret, ...)
 	s16_t tag;       // sector activated by a linedef with same tag
-}
-raw_sector_t;
+
+} PACKEDATTR raw_sector_t;
 
 
 typedef struct raw_thing_s
@@ -144,8 +144,8 @@ typedef struct raw_thing_s
 	s16_t angle;     // angle thing faces (degrees)
 	u16_t type;      // type of thing
 	u16_t options;   // when appears, deaf, etc..
-}
-raw_thing_t;
+
+} PACKEDATTR raw_thing_t;
 
 
 // -JL- Hexen thing definition
@@ -160,8 +160,8 @@ typedef struct raw_hexen_thing_s
 
 	u8_t special;    // special type
 	u8_t args[5];    // special arguments
-} 
-raw_hexen_thing_t;
+
+}  PACKEDATTR raw_hexen_thing_t;
 
 
 /* ----- Graphical structures ---------------------- */
@@ -174,8 +174,8 @@ typedef struct
 	u16_t pname;    // index into PNAMES
 	u16_t stepdir;  // NOT USED
 	u16_t colormap; // NOT USED
-}
-raw_patchdef_t;
+
+} PACKEDATTR raw_patchdef_t;
 
 
 // Texture definition.
@@ -194,8 +194,8 @@ typedef struct
 	u16_t patch_count;
 
 	raw_patchdef_t patches[1];
-}
-raw_texture_t;
+
+} PACKEDATTR raw_texture_t;
 
 
 // Patches.
@@ -218,8 +218,8 @@ typedef struct patch_s
 	s16_t topoffset;
 
 	u32_t columnofs[1];  // only [width] used
-}
-patch_t;
+
+} PACKEDATTR patch_t;
 
 
 //
