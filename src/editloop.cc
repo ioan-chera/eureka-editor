@@ -807,28 +807,6 @@ static bool LineDef_Key(keycode_t key)
 		CMD_SelectLinesInPath(SLP_SameTex);
 	}
 
-	// [x]: split linedefs
-	else if (key == 'x')
-	{
-		CMD_SplitLineDefs();
-	}
-
-	// [w]: flip linedefs
-	else if (key == 'w')
-	{
-		CMD_FlipLineDefs();
-	}
-
-	// [X]: align textures horizontally
-	else if (key == 'X')
-	{
-		CMD_AlignTexturesX();
-	}
-	// [Y]: align textures vertically
-	else if (key == 'Y')
-	{
-		CMD_AlignTexturesY();
-	}
 
 	else
 	{
@@ -1191,7 +1169,7 @@ void Editor_Resize(int is_width, int is_height)
 
 void Editor_RegisterCommands()
 {
-	/* global */
+	/* global | interface stuff */
 
 	M_RegisterCommand("Nothing", &CMD_Nothing);
 
@@ -1206,9 +1184,14 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
 	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
 
+	M_RegisterCommand("Scroll", &CMD_Scroll);
+	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
+	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
+
+	/* global | map stuff */
+
 	M_RegisterCommand("Insert", &CMD_Insert);
 	M_RegisterCommand("Delete", &CMD_Delete);
-	M_RegisterCommand("Scroll", &CMD_Scroll);
 
 	M_RegisterCommand("Mirror",   &CMD_Mirror);
 	M_RegisterCommand("Rotate90", &CMD_Rotate90);
@@ -1222,12 +1205,12 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("CopyAndPaste",   &CMD_CopyAndPaste);
 	M_RegisterCommand("CopyProperties", &CMD_CopyProperties);
 
-	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
-	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
-
 	/* line */
 
-///---	M_RegisterCommand("LIN_Disconnect", &LIN_Disconnect, KCTX_Line);
+	M_RegisterCommand("LIN_Flip", &LIN_Flip, KCTX_Line);
+	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf, KCTX_Line);
+	M_RegisterCommand("LIN_AlignX", &LIN_AlignX, KCTX_Line);
+	M_RegisterCommand("LIN_AlignY", &LIN_AlignY, KCTX_Line);
 
 	/* sector */
 

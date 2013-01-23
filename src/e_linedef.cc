@@ -481,14 +481,14 @@ void AlignTexturesX (SelPtr *sdlist)
 #endif
 
 
-void CMD_AlignTexturesX()
+void LIN_AlignX(void)
 {
 	// TODO
 	Beep();
 }
 
 
-void CMD_AlignTexturesY()
+void LIN_AlignY(void)
 {
 	// TODO
 	Beep();
@@ -561,13 +561,13 @@ void FlipLineDefGroup(selection_c& flip)
 /*
    flip one or several LineDefs
 */
-void CMD_FlipLineDefs()
+void LIN_Flip(void)
 {
 	selection_c list;
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep();
+		Beep("no lines to flip");
 		return;
 	}
 
@@ -663,14 +663,14 @@ static bool DoSplitLineDef(int ld)
 /*
    split one or more LineDefs in two, adding new Vertices in the middle
 */
-void CMD_SplitLineDefs()
+void LIN_SplitHalf(void)
 {
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep();
+		Beep("no lines to split in half");
 		return;
 	}
 
@@ -693,10 +693,9 @@ void CMD_SplitLineDefs()
 
 	BA_End();
 
+	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < list.count_obj())
-		Beep();
-
-///---	MarkChanges();
+		Beep("some lines were too short!");
 
 	if (was_selected && new_count > 0)
 	{

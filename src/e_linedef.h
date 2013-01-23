@@ -56,11 +56,11 @@ void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex);
 
 /* commands */
 
-void CMD_FlipLineDefs();
-void CMD_SplitLineDefs();
+void LIN_Flip(void);
+void LIN_SplitHalf(void);
 
-void CMD_AlignTexturesX();
-void CMD_AlignTexturesY();
+void LIN_AlignX(void);
+void LIN_AlignY(void);
 
 void LIN_MergeTwo(void);
 
