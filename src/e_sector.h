@@ -58,9 +58,10 @@ void BrightenOrDarkenSectors (SelPtr obj);
 
 /* commands */
 
-bool CMD_MoveFloors(int diff);
-bool CMD_MoveCeilings(int diff);
-bool CMD_AdjustLight(int delta);
+void SEC_Floor(void);
+void SEC_Ceil(void);
+
+void CMD_AdjustLight(int delta);
 
 void SEC_Merge(void);
 void SEC_SwapFlats(void);

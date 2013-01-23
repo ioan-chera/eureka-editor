@@ -848,27 +848,6 @@ static bool Sector_Key(keycode_t key)
 		CMD_SelectContiguousSectors(SCS_FloorTex);
 	}
 
-
-	// [.] and [,]: adjust floor height
-	else if (bare_key == ',' || bare_key == '<')
-	{
-		CMD_MoveFloors((key & MOD_COMMAND) ? -64 : (bare_key == '<') ? -1 : -8);
-	}
-	else if (bare_key == '.' || bare_key == '>')
-	{
-		CMD_MoveFloors((key & MOD_COMMAND) ? +64 : (bare_key == '>') ? +1 : +8);
-	}
-
-	// '[' and ']': adjust ceiling height
-	else if (bare_key == '[' || bare_key == '{')
-	{
-		CMD_MoveCeilings((key & MOD_COMMAND) ? -64 : (bare_key == '{') ? -1 : -8);
-	}
-	else if (bare_key == ']' || bare_key == '}')
-	{
-		CMD_MoveCeilings((key & MOD_COMMAND) ? +64 : (bare_key == '}') ? +1 : +8);
-	}
-
 	else
 	{
 		return false;
@@ -1272,7 +1251,8 @@ void Editor_RegisterCommands()
 
 	/* sector */
 
-///---	M_RegisterCommand("SEC_Disconnect", &SEC_Disconnect, KCTX_Sector);
+	M_RegisterCommand("SEC_Floor", &SEC_Floor, KCTX_Sector);
+	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil,  KCTX_Sector);
 
 	/* thing */
 

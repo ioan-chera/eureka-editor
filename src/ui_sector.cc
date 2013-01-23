@@ -487,23 +487,27 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->ce_up)
 	{
-		CMD_MoveCeilings(+diff);
+		EXEC_Param[0] = Int_TmpStr(+diff);
+		SEC_Ceil();
 		return;
 	}
 	else if (w == box->ce_down)
 	{
-		CMD_MoveCeilings(-diff);
+		EXEC_Param[0] = Int_TmpStr(-diff);
+		SEC_Ceil();
 		return;
 	}
 
 	if (w == box->fl_up)
 	{
-		CMD_MoveFloors(+diff);
+		EXEC_Param[0] = Int_TmpStr(+diff);
+		SEC_Floor();
 		return;
 	}
 	else if (w == box->fl_down)
 	{
-		CMD_MoveFloors(-diff);
+		EXEC_Param[0] = Int_TmpStr(-diff);
+		SEC_Floor();
 		return;
 	}
 }

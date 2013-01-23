@@ -39,13 +39,26 @@
 #include "ui_window.h"
 
 
-bool CMD_MoveFloors(int diff)
+void SEC_Floor(void)
 {
+	int diff = atoi(EXEC_Param[0]);
+
+	if (diff == 0)
+	{
+		Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0]);
+		return;
+	}
+
+
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("no sectors to move floor");
+		return;
+	}
+
 
 	BA_Begin();
 		
@@ -62,17 +75,28 @@ bool CMD_MoveFloors(int diff)
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 	MarkChanges();
-	return true;
 }
 
 
-bool CMD_MoveCeilings(int diff)
+void SEC_Ceil(void)
 {
+	int diff = atoi(EXEC_Param[0]);
+
+	if (diff == 0)
+	{
+		Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0]);
+		return;
+	}
+
+
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("no sectors to move ceiling");
+		return;
+	}
 
 	BA_Begin();
 		
@@ -89,7 +113,6 @@ bool CMD_MoveCeilings(int diff)
 
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
 	MarkChanges();
-	return true;
 }
 
 
@@ -113,13 +136,16 @@ static int light_add_delta(int level, int delta)
 	return CLAMP(0, level, 255);
 }
 
-bool CMD_AdjustLight(int delta)
+void CMD_AdjustLight(int delta)
 {
 	selection_c list;
 	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&list))
-		return false;
+	{
+		Beep("no sectors to adjust light");
+		return;
+	}
 
 	BA_Begin();
 		
@@ -136,7 +162,6 @@ bool CMD_AdjustLight(int delta)
 
 	main_win->sec_box->UpdateField(Sector::F_LIGHT);
 	MarkChanges();
-	return true;
 }
 
 
