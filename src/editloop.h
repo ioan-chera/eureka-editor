@@ -107,8 +107,11 @@ void CMD_ZoomWholeMap(void);
 void CMD_ZoomSelection(void);
 void CMD_GoToCamera(void);
 
-void CMD_SetBrowser(char kind);
+void CMD_BrowserMode(char kind);
 void CMD_ToggleVar(void);
+
+// FIXME
+#define CMD_SetBrowser  CMD_BrowserMode
 
 #endif /* __EUREKA_EDITLOOP_H__ */
 

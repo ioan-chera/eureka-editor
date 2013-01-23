@@ -348,12 +348,6 @@ void CMD_Quit(void)
 }
 
 
-void CMD_Toggle3D(void)
-{
-	main_win->canvas->ToggleRenderMode();
-}
-
-
 void CMD_SetVar(void)
 {
 	if (! EXEC_Param[0][0])
@@ -368,7 +362,19 @@ void CMD_SetVar(void)
 		return;
 	}
 
-	if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	if (y_stricmp(EXEC_Param[0], "3d") == 0)
+	{
+		main_win->canvas->ChangeRenderMode(atoi(EXEC_Param[1]) > 0);
+	}
+	else if (y_stricmp(EXEC_Param[0], "browser") == 0)
+	{
+		int want_vis   = (atoi(EXEC_Param[0]) > 0) ? 1 : 0;
+		int is_visible = main_win->browser->visible() ? 1 : 0;
+
+		if (want_vis != is_visible)
+			main_win->ShowBrowser('/');
+	}
+	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
 	{
 		edit.show_object_numbers = (atoi(EXEC_Param[1]) > 0);
 		edit.RedrawMap = 1;
@@ -388,7 +394,15 @@ void CMD_ToggleVar(void)
 		return;
 	}
 
-	if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	if (y_stricmp(EXEC_Param[0], "3d") == 0)
+	{
+		main_win->canvas->ToggleRenderMode();
+	}
+	else if (y_stricmp(EXEC_Param[0], "browser") == 0)
+	{
+		main_win->ShowBrowser('/');
+	}
+	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
 		edit.RedrawMap = 1;
@@ -406,12 +420,7 @@ void CMD_ToggleVar(void)
 }
 
 
-void CMD_ToggleBrowser(void)
-{
-	main_win->ShowBrowser('/');
-}
-
-void CMD_SetBrowser(char kind)
+void CMD_BrowserMode(char kind)
 {
 	main_win->ShowBrowser(kind);
 }
@@ -554,7 +563,7 @@ bool Global_Key(keycode_t key)
 	// [T], [F] etc : open browser at specific kind
 	if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
 	{
-		CMD_SetBrowser(key);
+		CMD_BrowserMode(key);
 	}
 
 	else
@@ -1217,8 +1226,7 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("Quit", &CMD_Quit);
 	M_RegisterCommand("EditMode", &CMD_EditMode);
-	M_RegisterCommand("Toggle3D", &CMD_Toggle3D);
-	M_RegisterCommand("ToggleBrowser", &CMD_ToggleBrowser);
+// 	M_RegisterCommand("BrowserMode", &CMD_BrowserMode);
 
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
