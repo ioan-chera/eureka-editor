@@ -220,6 +220,7 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 	bool changed = false;
 
 	bool allow_doors = strchr(match, 'd') ? true : false;
+	bool walk_test   = strchr(match, 'w') ? true : false;
 
 	bool do_floor_h   = strchr(match, 'f') ? true : false;
 	bool do_floor_tex = strchr(match, 'F') ? true : false;
@@ -249,6 +250,23 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
 			continue;
+
+		if (walk_test)
+		{
+			if (L->flags & MLF_Blocking)
+				continue;
+
+			// too big a step?
+			if (abs(S1->floorh - S2->floorh) > 24)
+				continue;
+
+			// player wouldn't fit vertically?
+			int f_max = MAX(S1->floorh, S2->floorh);
+			int c_min = MIN(S1-> ceilh, S2-> ceilh);
+
+			if (c_min - f_max < DOOM_PLAYER_HEIGHT)
+				continue;
+		}
 
 		/* perform match */
 
@@ -282,6 +300,7 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 /* Possible flags:
  *    a : additive
  *    d : pass through doors (closed sectors)
+ *    w : walk check
  *    
  *    f : match floor height
  *    F : match floor texture
