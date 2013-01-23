@@ -441,18 +441,47 @@ void CMD_BrowserMode(void)
 }
 
 
-void CMD_CycleCategory(int dir)
+void BR_CycleCategory(void)
 {
+	if (! main_win->browser->visible())
+	{
+		Beep("browser not open");
+		return;
+	}
+
+	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
+
 	main_win->browser->CycleCategory(dir);
 }
 
-void CMD_ClearSearchBox(void)
+void BR_ClearSearch(void)
 {
+	if (! main_win->browser->visible())
+	{
+		Beep("browser not open");
+		return;
+	}
+
 	main_win->browser->ClearSearchBox();
 }
 
-void CMD_ScrollBrowser(int delta)
+
+void BR_Scroll(void)
 {
+	if (! main_win->browser->visible())
+	{
+		Beep("browser not open");
+		return;
+	}
+
+	if (! EXEC_Param[0][0])
+	{
+		Beep("missing parameter to BR_Scroll");
+		return;
+	}
+
+	int delta = atoi(EXEC_Param[0]);
+
 	main_win->browser->Scroll(delta);
 }
 
@@ -536,39 +565,6 @@ void CMD_Disconnect(void)
 			Beep("Cannot disconnect that");
 			break;
 	}
-}
-
-
-bool Browser_Key(keycode_t key)
-{
-	// [\]: cycle through categories in the Browser
-	if (key == '\\')
-	{
-		CMD_CycleCategory(+1);
-	}
-
-	// [CTRL-K]: clear the Browser search box
-	else if (key == ('k' | MOD_COMMAND))
-	{
-		CMD_ClearSearchBox();
-	}
-
-	// [PGUP], [PGDN]: scroll the Browser
-	else if (key == FL_Page_Up)
-	{
-		CMD_ScrollBrowser(-2);
-	}
-	else if (key == FL_Page_Down)
-	{
-		CMD_ScrollBrowser(+2);
-	}
-
-	else  // not a browser key
-	{
-		return false;
-	}
-
-	return true;
 }
 
 
@@ -1162,6 +1158,12 @@ void Editor_RegisterCommands()
 	/* vertex */
 
 ///---	M_RegisterCommand("VERT_Merge", &VERT_Merge, KCTX_Vertex);
+
+	/* browser */
+
+	M_RegisterCommand("BR_CycleCategory", &BR_CycleCategory);
+	M_RegisterCommand("BR_ClearSearch", &BR_ClearSearch);
+	M_RegisterCommand("BR_Scroll", &BR_Scroll);
 }
 
 

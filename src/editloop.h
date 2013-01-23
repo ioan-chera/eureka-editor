@@ -75,7 +75,6 @@ extern Editor_State_c edit;
 void Editor_Init();
 
 bool  Editor_Key(keycode_t key);
-bool Browser_Key(keycode_t key);
 
 void Editor_Wheel(int dx, int dy, keycode_t mod);
 void Editor_MousePress(keycode_t mod);
