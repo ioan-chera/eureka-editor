@@ -99,7 +99,7 @@ static void edit_do_undo(Fl_Widget *w, void * data)
 	if (BA_Undo())
 		edit.RedrawMap = 1;
 	else
-		Beep();
+		Beep("no operation to undo");
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
@@ -107,7 +107,7 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 	if (BA_Redo())
 		edit.RedrawMap = 1;
 	else
-		Beep();
+		Beep("no operation to redo");
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
@@ -118,9 +118,7 @@ static void edit_do_cut(Fl_Widget *w, void * data)
 		return;
 	}
 
-	EXEC_Param[0] = "";
-
-	CMD_Delete();
+	ExecuteCommand("Delete");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
@@ -143,9 +141,7 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	EXEC_Param[0] = "";
-
-	CMD_Delete();
+	ExecuteCommand("Delete");
 }
 
 static void edit_do_select_all(Fl_Widget *w, void * data)
@@ -200,9 +196,7 @@ static void view_do_fullscreen(Fl_Widget *w, void * data)
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
 {
-	EXEC_Param[0] = "obj_nums";
-
-	CMD_ToggleVar();
+	ExecuteCommand("Toggle", "obj_nums");
 }
 
 static void view_do_grid_type(Fl_Widget *w, void * data)
