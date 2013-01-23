@@ -454,7 +454,7 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 		box->AdjustExtraFloor(+1);
 
 	if (w == box->choose || w == box->sprite)
-		CMD_SetBrowser('O');
+		main_win->ShowBrowser('O');
 
 	// check for the angle buttons
 	for (int i = 0 ; i < 8 ; i++)

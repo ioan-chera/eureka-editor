@@ -202,7 +202,7 @@ private:
 			if (pic->Selected())
 			{
 				box->UnselectPicSet('f');
-				CMD_SetBrowser('T');
+				main_win->ShowBrowser('T');
 			}
 			return;
 		}
@@ -236,7 +236,7 @@ private:
 			if (pic->Selected())
 			{
 				box->UnselectPicSet('t');
-				CMD_SetBrowser('F');
+				main_win->ShowBrowser('F');
 			}
 			return;
 		}

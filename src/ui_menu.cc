@@ -304,27 +304,27 @@ static void misc_do_other_op(Fl_Widget *w, void * data)
 
 static void browser_do_textures(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser('T');
+	main_win->ShowBrowser('T');
 }
 
 static void browser_do_flats(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser('F');
+	main_win->ShowBrowser('F');
 }
 
 static void browser_do_things(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser('O');
+	main_win->ShowBrowser('O');
 }
 
 static void browser_do_lines(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser('L');
+	main_win->ShowBrowser('L');
 }
 
 static void browser_do_sectors(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser('S');
+	main_win->ShowBrowser('S');
 }
 
 
@@ -342,7 +342,7 @@ static void browser_go_narrow(Fl_Widget *w, void * data)
 
 static void browser_hide(Fl_Widget *w, void * data)
 {
-	CMD_SetBrowser(0);
+	main_win->ShowBrowser(0);
 }
 
 

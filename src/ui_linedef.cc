@@ -461,7 +461,7 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		CMD_SetBrowser('L');
+		main_win->ShowBrowser('L');
 		return;
 	}
 }

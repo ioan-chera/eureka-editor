@@ -168,9 +168,6 @@ int UI_Canvas::handle_key()
 
 // OLD CRUD, REMOVE !!!
 
-	if (Global_Key(key))
-		return 1;
-
 	if (main_win->browser->visible() && Browser_Key(key))
 		return 1;
 

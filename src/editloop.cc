@@ -420,9 +420,24 @@ void CMD_ToggleVar(void)
 }
 
 
-void CMD_BrowserMode(char kind)
+void CMD_BrowserMode(void)
 {
-	main_win->ShowBrowser(kind);
+	if (! EXEC_Param[0][0])
+	{
+		Beep("missing parameter to CMD_BrowserMode");
+		return;
+	}
+
+	char mode = toupper(EXEC_Param[0][0]);
+
+	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
+	       mode == 'T' || mode == 'F'))
+	{
+		Beep("unknown browser mode: %s", EXEC_Param[0]);
+		return;
+	}
+
+	main_win->ShowBrowser(mode);
 }
 
 
@@ -524,7 +539,6 @@ void CMD_Disconnect(void)
 }
 
 
-
 bool Browser_Key(keycode_t key)
 {
 	// [\]: cycle through categories in the Browser
@@ -550,23 +564,6 @@ bool Browser_Key(keycode_t key)
 	}
 
 	else  // not a browser key
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-bool Global_Key(keycode_t key)
-{
-	// [T], [F] etc : open browser at specific kind
-	if (key == 'T' || key == 'F' || key == 'O' || key == 'L' || key == 'S')
-	{
-		CMD_BrowserMode(key);
-	}
-
-	else
 	{
 		return false;
 	}
@@ -1113,7 +1110,7 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("Quit", &CMD_Quit);
 	M_RegisterCommand("EditMode", &CMD_EditMode);
-// 	M_RegisterCommand("BrowserMode", &CMD_BrowserMode);
+ 	M_RegisterCommand("BrowserMode", &CMD_BrowserMode);
 
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);

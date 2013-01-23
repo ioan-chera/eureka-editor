@@ -156,7 +156,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		pic->redraw();
 
 		if (pic->Selected())
-			CMD_SetBrowser('T');
+			main_win->ShowBrowser('T');
 		return;
 	}
 

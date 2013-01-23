@@ -279,7 +279,7 @@ void UI_Browser_Box::filter_callback(Fl_Widget *w, void *data)
 
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	CMD_SetBrowser(0);
+	main_win->ShowBrowser(0);
 }
 
 

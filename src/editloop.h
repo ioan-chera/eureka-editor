@@ -74,7 +74,6 @@ extern Editor_State_c edit;
 
 void Editor_Init();
 
-bool  Global_Key(keycode_t key);
 bool  Editor_Key(keycode_t key);
 bool Browser_Key(keycode_t key);
 
@@ -107,11 +106,7 @@ void CMD_ZoomWholeMap(void);
 void CMD_ZoomSelection(void);
 void CMD_GoToCamera(void);
 
-void CMD_BrowserMode(char kind);
 void CMD_ToggleVar(void);
-
-// FIXME
-#define CMD_SetBrowser  CMD_BrowserMode
 
 #endif /* __EUREKA_EDITLOOP_H__ */
 

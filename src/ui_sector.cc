@@ -302,7 +302,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		pic->redraw();
 
 		if (pic->Selected())
-			CMD_SetBrowser('F');
+			main_win->ShowBrowser('F');
 		return;
 	}
 
@@ -463,7 +463,7 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		CMD_SetBrowser('S');
+		main_win->ShowBrowser('S');
 		return;
 	}
 
