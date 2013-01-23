@@ -785,56 +785,6 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 }
 
 
-static bool Thing_Key(keycode_t key)
-{
-	return false;
-}
-
-
-static bool LineDef_Key(keycode_t key)
-{
-	if (0)
-	{
-	}
-
-	// [e]: Select/unselect all linedefs in non-forked path
-	else if (key == 'e')
-	{
-		CMD_SelectLinesInPath(SLP_Normal);
-	}
-	else if (key == 'E')
-	{
-		CMD_SelectLinesInPath(SLP_SameTex);
-	}
-
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-static bool Sector_Key(keycode_t key)
-{
-	return false;
-}
-
-
-static bool Vertex_Key(keycode_t key)
-{
-	return false;
-}
-
-
-static bool RadTrig_Key(keycode_t key)
-{
-	return false;
-}
-
-
 bool Editor_Key(keycode_t key)
 {
 	keycode_t bare_key = key & FL_KEY_MASK;
@@ -896,19 +846,7 @@ bool Editor_Key(keycode_t key)
 
 	else
 	{
-		/* try a mode-specific function */
-
-		switch (edit.obj_type)
-		{
-			case OBJ_THINGS:   return Thing_Key(key);
-			case OBJ_LINEDEFS: return LineDef_Key(key);
-			case OBJ_SECTORS:  return Sector_Key(key);
-			case OBJ_VERTICES: return Vertex_Key(key);
-			case OBJ_RADTRIGS: return RadTrig_Key(key);
-
-			default:
-				return false;
-		}
+		return false;
 	}
 
 	return true;
@@ -1209,6 +1147,8 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("LIN_Flip", &LIN_Flip, KCTX_Line);
 	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf, KCTX_Line);
+	M_RegisterCommand("LIN_SelectPath", &LIN_SelectPath, KCTX_Line);
+
 	M_RegisterCommand("LIN_AlignX", &LIN_AlignX, KCTX_Line);
 	M_RegisterCommand("LIN_AlignY", &LIN_AlignY, KCTX_Line);
 

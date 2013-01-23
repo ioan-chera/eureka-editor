@@ -39,6 +39,16 @@
 #include "ui_window.h"
 
 
+typedef enum
+{
+	SLP_Normal = 0,
+
+	SLP_SameTex  = (1 << 1),  // require lines have same textures
+	SLP_OneSided = (1 << 2),  // only handle one-sided lines
+}
+select_lines_in_path_flag_e;
+
+
 static bool MatchingTextures(int index1, int index2)
 {
 	LineDef *L1 = LineDefs[index1];
@@ -140,7 +150,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 // then it is added to the selection and we continue from the new
 // linedef and vertex.
 
-static void SelectLinesInHalfPath(int L, int V, selection_c &seen, int match)
+static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 {
 	int start_L = L;
 
@@ -164,16 +174,31 @@ static void SelectLinesInHalfPath(int L, int V, selection_c &seen, int match)
 }
 
 
-void CMD_SelectLinesInPath(int flags)
+/* Select/unselect all linedefs in non-forked path.
+ *
+ * Possible flags:
+ *    1 : one-sided only
+ *    a : additive
+ *    s : same texture
+ *
+ */
+void LIN_SelectPath(void)
 {
-	bool additive = ! (flags & SLP_ClearSel);
-
 	// determine starting linedef
 	if (edit.highlighted.is_nil())
 	{
-		Beep("No highlighted linedef.");
+		Beep("no highlighted line");
 		return;
 	}
+
+	const char *flags = EXEC_Param[0];
+
+	bool additive = strchr(flags, 'a') ? true : false;
+
+	int match = 0;
+
+	if (strchr(flags, '1')) match |= SLP_OneSided;
+	if (strchr(flags, 's')) match |= SLP_SameTex;
 
 	if (edit.did_a_move)
 	{
@@ -181,9 +206,10 @@ void CMD_SelectLinesInPath(int flags)
 		additive = false;
 	}
 
+
 	int start_L = edit.highlighted.num;
 
-	if ((flags & SLP_OneSided) && ! LineDefs[start_L]->OneSided())
+	if ((match & SLP_OneSided) && ! LineDefs[start_L]->OneSided())
 		return;
 
 	bool unset_them = false;
@@ -195,8 +221,8 @@ void CMD_SelectLinesInPath(int flags)
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(start_L, LineDefs[start_L]->start, seen, flags);
-	SelectLinesInHalfPath(start_L, LineDefs[start_L]->end,   seen, flags);
+	SelectLinesInHalfPath(start_L, LineDefs[start_L]->start, seen, match);
+	SelectLinesInHalfPath(start_L, LineDefs[start_L]->end,   seen, match);
 
 	if (! additive)
 		edit.Selected->clear_all();
@@ -297,7 +323,9 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 }
 
 
-/* Possible flags:
+/* Select/unselect a contiguous group of sectors.
+ *
+ * Possible flags:
  *    a : additive
  *    d : pass through doors (closed sectors)
  *    w : walk check
@@ -314,12 +342,6 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 void SEC_SelectGroup(void)
 {
 	const char *match = EXEC_Param[0];
-
-	if (! match[0])
-	{
-		Beep("missing flags for CMD_SelectGroup");
-		return;
-	}
 
 	bool additive = strchr(match, 'a') ? true : false;
 

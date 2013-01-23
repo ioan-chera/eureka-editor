@@ -27,29 +27,17 @@
 #ifndef __EUREKA_E_PATH_H__
 #define __EUREKA_E_PATH_H__
 
-typedef enum
-{
-	SLP_Normal = 0,
-
-	SLP_ClearSel = (1 << 0),  // clear the selection first
-	SLP_SameTex  = (1 << 1),  // require lines have same textures
-	SLP_OneSided = (1 << 2),  // only handle one-sided lines
-}
-select_lines_in_path_flag_e;
-
-
-void CMD_SelectLinesInPath(int flags);
-
-
 /* find/next/prev stuff */
 
 void GoToSelection();
 void GoToObject(const Objid& objid);
 
+
 /* commands */
 
-void SEC_SelectGroup(void);
+void LIN_SelectPath(void);
 
+void SEC_SelectGroup(void);
 
 void CMD_JumpToObject();
 void CMD_NextObject();
