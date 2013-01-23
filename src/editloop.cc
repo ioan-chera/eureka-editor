@@ -588,12 +588,6 @@ static bool Grid_Key(keycode_t key)
 		CMD_ZoomWholeMap();
 	}
 
-	// [END]: go to camera position
-	else if (key == FL_End)
-	{
-		CMD_GoToCamera();
-	}
-
 	// [1] - [9]: set the grid size
 	else if (unshifted_key >= '1' && unshifted_key <= '9')
 	{
@@ -706,6 +700,36 @@ void CMD_GoToCamera(void)
 	// FIXME: this is not right, we want to recompute where mouse pointer is
 	edit.map_x = x;
 	edit.map_y = y;
+
+	edit.RedrawMap = 1;
+}
+
+
+void CMD_PlaceCamera(void)
+{
+	if (main_win->canvas->isRenderActive())
+	{
+		Beep("not supported in 3D view");
+		return;
+	}
+
+	if (! edit.pointer_in_window)
+	{
+		// IDEA: turn cursor into cross, wait for click in map window
+
+		Beep("mouse is not over map");
+		return;
+	}
+
+	int x = edit.map_x;
+	int y = edit.map_y;
+
+	Render3D_SetCameraPos(x, y);
+
+	if (isalpha(EXEC_Param[0][0]))  // open3d
+	{
+		main_win->canvas->ChangeRenderMode(1);
+	}
 
 	edit.RedrawMap = 1;
 }
@@ -886,19 +910,6 @@ bool Editor_Key(keycode_t key)
 
 	// ???: find object by type
 	// FIXME: CMD_FindObjectByType()
-
-	// [']: move camera to spot under cursor
-	else if (key == '\'')
-	{
-		// IDEA: activate 3D mode (CONFIG ITEM)
-
-		if (edit.pointer_in_window)
-		{
-			Render3D_SetCameraPos(edit.map_x, edit.map_y);
-
-			edit.RedrawMap = 1;
-		}
-	}
 
 	// [Ctrl-x]: exchange objects numbers
 //!!!	else if (key == 24)
@@ -1251,6 +1262,9 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Quantize", &CMD_Quantize);
 
 	M_RegisterCommand("CopyAndPaste", &CMD_CopyAndPaste);
+
+	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
+	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
 
 	/* line */
 
