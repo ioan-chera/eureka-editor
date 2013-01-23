@@ -25,6 +25,8 @@
 
 const char * EXEC_Param[4];
 
+int EXEC_Result;
+
 
 typedef struct
 {
@@ -606,6 +608,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	EXEC_Param[0] = EXEC_Param[1] = "";
 	EXEC_Param[2] = EXEC_Param[3] = "";
 
+	EXEC_Result = 0;
+
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
 		key_binding_t& bind = all_bindings[i];
@@ -622,6 +626,27 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	}
 
 	return false;
+}
+
+
+bool ExecuteCommand(const char *name, const char *param1,
+                    const char *param2, const char *param3)
+{
+	const editor_command_t * cmd = FindEditorCommand(name);
+
+	if (! cmd)
+		return false;
+	
+	EXEC_Param[0] = param1;
+	EXEC_Param[1] = param2;
+	EXEC_Param[2] = param3;
+	EXEC_Param[3] = "";
+
+	EXEC_Result = 0;
+
+	(* cmd->func)();
+
+	return true;
 }
 
 //--- editor settings ---

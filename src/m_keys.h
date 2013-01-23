@@ -91,8 +91,12 @@ keycode_t M_TranslateKey(int key, int state);
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 extern const char * EXEC_Param[4];
+extern int          EXEC_Result;
 
 bool ExecuteKey(keycode_t key, key_context_e context);
+
+bool ExecuteCommand(const char *name, const char *param1 = "",
+                    const char *param2 = "", const char *param3 = "");
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 
