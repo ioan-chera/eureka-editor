@@ -841,28 +841,7 @@ static bool LineDef_Key(keycode_t key)
 
 static bool Sector_Key(keycode_t key)
 {
-	keycode_t bare_key = key & FL_KEY_MASK;
-
-	if (0)
-	{
-	}
-
-	// [e]: select/unselect contiguous sectors with same floor height
-	else if (key == 'e')
-	{
-		CMD_SelectContiguousSectors(SCS_Floor_H);
-	}
-	else if (key == 'E')
-	{
-		CMD_SelectContiguousSectors(SCS_FloorTex);
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 
@@ -1261,6 +1240,7 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("SEC_Floor", &SEC_Floor, KCTX_Sector);
 	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil,  KCTX_Sector);
+	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup, KCTX_Sector);
 
 	/* thing */
 

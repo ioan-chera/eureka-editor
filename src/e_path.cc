@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -213,11 +213,22 @@ void CMD_SelectLinesInPath(int flags)
 //------------------------------------------------------------------------
 
 
-static bool GrowContiguousSectors(selection_c &seen, int match)
+static bool GrowContiguousSectors(selection_c &seen, const char *match)
 {
 	// returns TRUE when a new sector got added
 
 	bool changed = false;
+
+	bool allow_doors = strchr(match, 'd') ? true : false;
+
+	bool do_floor_h   = strchr(match, 'f') ? true : false;
+	bool do_floor_tex = strchr(match, 'F') ? true : false;
+	bool do_ceil_h    = strchr(match, 'c') ? true : false;
+	bool do_ceil_tex  = strchr(match, 'C') ? true : false;
+
+	bool do_light   = strchr(match, 'l') ? true : false;
+	bool do_tag     = strchr(match, 't') ? true : false;
+	bool do_special = strchr(match, 's') ? true : false;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -236,21 +247,20 @@ static bool GrowContiguousSectors(selection_c &seen, int match)
 		Sector *S2 = Sectors[sec2];
 
 		// skip closed doors
-		if (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh)
+		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
 			continue;
 
-		// check whether match is satisfied
-		if ((match & SCS_Floor_H) && (S1->floorh != S2->floorh))
-			continue;
+		/* perform match */
 
-		if ((match & SCS_FloorTex) && (S1->floor_tex != S2->floor_tex))
-			continue;
+		if (do_floor_h && (S1->floorh != S2->floorh)) continue;
+		if (do_ceil_h  && (S1->ceilh  != S2->ceilh))  continue;
 
-		if ((match & SCS_Ceil_H) && (S1->ceilh != S2->ceilh))
-			continue;
+		if (do_floor_tex && (S1->floor_tex != S2->floor_tex)) continue;
+		if (do_ceil_tex  && (S1->ceil_tex  != S2->ceil_tex))  continue;
 
-		if ((match & SCS_CeilTex) && (S1->ceil_tex != S2->ceil_tex))
-			continue;
+		if (do_light   && (S1->light != S2->light)) continue;
+		if (do_tag     && (S1->tag   != S2->tag  )) continue;
+		if (do_special && (S1->type  != S2->type))  continue;
 
 		// check if only one of the sectors is part of current set
 		// (doing this _AFTER_ the match since this can be a bit slow)
@@ -269,14 +279,35 @@ static bool GrowContiguousSectors(selection_c &seen, int match)
 }
 
 
-void CMD_SelectContiguousSectors(int flags)
+/* Possible flags:
+ *    a : additive
+ *    d : pass through doors (closed sectors)
+ *    
+ *    f : match floor height
+ *    F : match floor texture
+ *    c : match ceiling height
+ *    C : match ceiling texture
+ *
+ *    l : match lighting
+ *    t : match tag
+ *    s : match special
+ */
+void SEC_SelectGroup(void)
 {
-	bool additive = ! (flags & SCS_ClearSel);
+	const char *match = EXEC_Param[0];
+
+	if (! match[0])
+	{
+		Beep("missing flags for CMD_SelectGroup");
+		return;
+	}
+
+	bool additive = strchr(match, 'a') ? true : false;
 
 	// determine starting sector
 	if (edit.highlighted.is_nil())
 	{
-		Beep("No highlighted sector.");
+		Beep("no sector is highlighted");
 		return;
 	}
 
@@ -297,9 +328,9 @@ void CMD_SelectContiguousSectors(int flags)
 
 	seen.set(start_sec);
 
-	// TODO: force 'seen' to be a bitvec (should be much faster)
+	// TODO: use a bitvec for 'seen' (should be much faster)
 
-	while (GrowContiguousSectors(seen, flags))
+	while (GrowContiguousSectors(seen, match))
 	{ }
 
 	if (! additive)

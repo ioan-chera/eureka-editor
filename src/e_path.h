@@ -41,26 +41,15 @@ select_lines_in_path_flag_e;
 void CMD_SelectLinesInPath(int flags);
 
 
-typedef enum
-{
-	SCS_Normal = 0,
-
-	SCS_ClearSel = (1 << 0),  // clear the selection first
-	SCS_Floor_H  = (1 << 1),  // sectors have same floor height
-	SCS_FloorTex = (1 << 2),  // sectors have same floor texture
-	SCS_Ceil_H   = (1 << 3),  // sectors have same ceiling height
-	SCS_CeilTex  = (1 << 4),  // sectors have same ceiling texture
-}
-select_contiguous_sectors_flag_e;
-
-
-void CMD_SelectContiguousSectors(int flags);
-
-
 /* find/next/prev stuff */
 
 void GoToSelection();
 void GoToObject(const Objid& objid);
+
+/* commands */
+
+void SEC_SelectGroup(void);
+
 
 void CMD_JumpToObject();
 void CMD_NextObject();
