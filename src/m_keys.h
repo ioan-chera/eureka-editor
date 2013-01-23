@@ -90,8 +90,11 @@ keycode_t M_TranslateKey(int key, int state);
 
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
+// parameter(s) for command function -- must be valid strings
 extern const char * EXEC_Param[4];
-extern int          EXEC_Result;
+
+// result from command function, 0 is OK
+extern int EXEC_Errno;
 
 bool ExecuteKey(keycode_t key, key_context_e context);
 

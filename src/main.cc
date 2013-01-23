@@ -126,6 +126,8 @@ void Beep(const char *fmt, ...)
 	else
 		Status_Set("Problem occurred");
 
+	EXEC_Errno = 1;
+
 	fl_beep();
 }
 

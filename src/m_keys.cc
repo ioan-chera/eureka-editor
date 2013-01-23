@@ -25,7 +25,7 @@
 
 const char * EXEC_Param[4];
 
-int EXEC_Result;
+int EXEC_Errno;
 
 
 typedef struct
@@ -608,7 +608,7 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	EXEC_Param[0] = EXEC_Param[1] = "";
 	EXEC_Param[2] = EXEC_Param[3] = "";
 
-	EXEC_Result = 0;
+	EXEC_Errno = 0;
 
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
@@ -642,7 +642,7 @@ bool ExecuteCommand(const char *name, const char *param1,
 	EXEC_Param[2] = param3;
 	EXEC_Param[3] = "";
 
-	EXEC_Result = 0;
+	EXEC_Errno = 0;
 
 	(* cmd->func)();
 
