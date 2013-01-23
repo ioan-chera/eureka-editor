@@ -1209,17 +1209,29 @@ void TransferLinedefProperties(int src_line, int dest_line)
 }
 
 
-void CMD_CopyProperties()
+void CMD_CopyProperties(void)
 {
-	if (! edit.highlighted() || edit.Selected->count_obj() != 1)
+	if (! edit.highlighted())
 	{
-		Beep();
+		Beep("no target for CopyProperties");
 		return;
 	}
+	else if (edit.Selected->empty())
+	{
+		Beep("no source for CopyProperties");
+		return;
+	}
+	else if (edit.Selected->count_obj() != 1)
+	{
+		Beep("too many sources for CopyProperties");
+		return;
+	}
+
 
 	int source = edit.Selected->find_first();
 	int target = edit.highlighted.num;
 
+	// silently allow copying onto self
 	if (source == target)
 		return;
 
@@ -1239,7 +1251,7 @@ void CMD_CopyProperties()
 			break;
 
 		default:
-			Beep();
+			Beep("no properties to copy");
 			return;
 	}
 

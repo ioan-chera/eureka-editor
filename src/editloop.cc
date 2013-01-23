@@ -897,14 +897,6 @@ bool Editor_Key(keycode_t key)
 //!!!	}
 
 
-	// [c] Copy properties to the highlighted object
-	else if (key == 'c' && edit.Selected->notempty() &&
-			 edit.highlighted())
-	{
-		CMD_CopyProperties();
-
-	}
-
 	// [%] Show things sprites
 	else if (key == '%')
 	{
@@ -1227,7 +1219,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Merge", &CMD_Merge);
 	M_RegisterCommand("Quantize", &CMD_Quantize);
 
-	M_RegisterCommand("CopyAndPaste", &CMD_CopyAndPaste);
+	M_RegisterCommand("CopyAndPaste",   &CMD_CopyAndPaste);
+	M_RegisterCommand("CopyProperties", &CMD_CopyProperties);
 
 	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
 	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);

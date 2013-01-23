@@ -56,7 +56,7 @@ void CMD_Insert(void);
 
 void CMD_MoveObjects(int delta_x, int delta_y);
 
-void CMD_CopyProperties();
+void CMD_CopyProperties(void);
 
 
 #endif  /* __EUREKA_OBJECTS_H__ */
