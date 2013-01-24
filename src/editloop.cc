@@ -351,6 +351,7 @@ void CMD_Quit(void)
 void CMD_SetVar(void)
 {
 	const char *var_name = EXEC_Param[0];
+	const char *value    = EXEC_Param[0];
 
 	if (! var_name[0])
 	{
@@ -358,19 +359,23 @@ void CMD_SetVar(void)
 		return;
 	}
 
-	if (! var_name[1])
+	if (! value[0])
 	{
 		Beep("Set: missing value");
 		return;
 	}
 
+	 int  int_val = atoi(value);
+	bool bool_val = (int_val > 0);
+
+
 	if (y_stricmp(var_name, "3d") == 0)
 	{
-		main_win->canvas->ChangeRenderMode(atoi(EXEC_Param[1]) > 0);
+		main_win->canvas->ChangeRenderMode(bool_val);
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
-		int want_vis   = (atoi(var_name) > 0) ? 1 : 0;
+		int want_vis   = bool_val ? 1 : 0;
 		int is_visible = main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
@@ -378,15 +383,15 @@ void CMD_SetVar(void)
 	}
 	else if (y_stricmp(var_name, "grid") == 0)
 	{
-		grid.SetShown(atoi(EXEC_Param[1]) > 0);
+		grid.SetShown(bool_val);
 	}
 	else if (y_stricmp(var_name, "snap") == 0)
 	{
-		grid.SetSnap(atoi(EXEC_Param[1]) > 0);
+		grid.SetSnap(bool_val);
 	}
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
-		edit.show_object_numbers = (atoi(EXEC_Param[1]) > 0);
+		edit.show_object_numbers = bool_val;
 		edit.RedrawMap = 1;
 	}
 	else   // TODO: "skills"
