@@ -1,0 +1,88 @@
+
+Script API
+==========
+
+
+Global Vars
+-----------
+
+edit_mode = "line" or "sector" (etc)
+
+SELECT : the main selection
+
+NumThings, NumLines,
+NumSectors, NumVerts, NumRadTrigs
+
+
+Selection
+---------
+
+These are methods of a selection object:
+
+sel_obj.is_empty()
+sel_obj.not_empty()
+sel_obj.count_obj()
+
+sel_obj.get(N)
+sel_obj.get_first()
+sel_obj.get_second()
+
+sel_obj.clear_all()
+
+sel_obj.set(N)
+sel_obj.clear(N)
+sel_obj.toggle(N)
+
+sel_obj.to_list()
+sel_obj.from_list(LIST)
+sel_obj.merge(SEL or LIST)
+sel_obj.unmerge(SEL or LIST)
+
+NewSelection(mode) : returns a new selection object
+
+
+Map Access
+----------
+
+Thing(N)   : returns an object representing that thing, or nil if out of range
+Line(N)    : returns an object representing that line, or nil
+Sector(N)  : returns an object representing that sector, or nil
+Vertex(N)  : returns an object representing that vertex, or nil
+SideDef(N) : returns an object representing that sidedef, or nil
+RadTrig(N) : returns an object representing that radius trigger, or nil
+
+These objects use metatables to allow reading and setting the fields of
+the actual map structures (setting will be via BA_ChangeXX).
+They will have an "id" pseudo-field (read only).
+
+They will also have some convenience functions, e.g. line_obj.Right()
+which is equivalent to SideDef(line_obj.right)
+
+Can assign references to certain fields, e.g.
+     sidedef_obj.sector = Sector(3)
+
+
+Creating and Deleting
+---------------------
+
+NewThing(), NewLine(), NewSector(),
+NewVertex(), NewRadTrig()  :  this will get default properties.
+                              linedefs will have no sidedefs.
+
+Copy(obj) : create new object with same properties as previous.
+            for linedefs, this copies any sidedefs too.
+
+Delete(obj)
+Delete(SEL or LIST)
+
+Note that deleting objects can invalidate existing references.
+
+MarkDelete(obj)  :  delete the object when script finishes
+MarkDelete(SEL or LIST)
+
+
+User Interaction
+----------------
+
+TODO
+

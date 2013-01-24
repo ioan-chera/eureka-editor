@@ -87,6 +87,8 @@ General
 
 +  Hexen support
 
++  Scripting language
+
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
