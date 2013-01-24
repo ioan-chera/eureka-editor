@@ -1065,14 +1065,13 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("SEC_Floor", &SEC_Floor, KCTX_Sector);
 	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil,  KCTX_Sector);
 	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup, KCTX_Sector);
+	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
 
 	/* thing */
 
 	M_RegisterCommand("TH_Spin", &TH_SpinThings, KCTX_Thing);
 
 	/* vertex */
-
-///---	M_RegisterCommand("VERT_Merge", &VERT_Merge, KCTX_Vertex);
 
 	/* browser */
 
