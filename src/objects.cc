@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -833,45 +833,51 @@ void CMD_Insert(void)
 
 
 /*
-   check if a (part of a) LineDef is inside a given block
+   check if a (part of a) LineDef is inside a given box
 */
-bool IsLineDefInside (int ldnum, int x0, int y0, int x1, int y1) /* SWAP - needs Vertices & LineDefs */
+bool LineCrossesBox (int ld, int x0, int y0, int x1, int y1)
 {
-	int lx0 = LineDefs[ldnum]->Start()->x;
-	int ly0 = LineDefs[ldnum]->Start()->y;
-	int lx1 = LineDefs[ldnum]->End()->x;
-	int ly1 = LineDefs[ldnum]->End()->y;
+	int lx0 = LineDefs[ld]->Start()->x;
+	int ly0 = LineDefs[ld]->Start()->y;
+	int lx1 = LineDefs[ld]->End()->x;
+	int ly1 = LineDefs[ld]->End()->y;
+
 	int i;
 
-	/* do you like mathematics? */
+	// start is entirely inside the square?
 	if (lx0 >= x0 && lx0 <= x1 && ly0 >= y0 && ly0 <= y1)
-		return 1; /* the linedef start is entirely inside the square */
+		return true;
+
+	// end is entirely inside the square?
 	if (lx1 >= x0 && lx1 <= x1 && ly1 >= y0 && ly1 <= y1)
-		return 1; /* the linedef end is entirely inside the square */
+		return true;
+	
+
 	if ((ly0 > y0) != (ly1 > y0))
 	{
-		i = lx0 + (int) ((long) (y0 - ly0) * (long) (lx1 - lx0) / (long) (ly1 - ly0));
+		i = lx0 + (int) ((double) (y0 - ly0) * (double) (lx1 - lx0) / (double) (ly1 - ly0));
 		if (i >= x0 && i <= x1)
-			return true; /* the linedef crosses the y0 side (left) */
+			return true; /* the linedef crosses the left side */
 	}
 	if ((ly0 > y1) != (ly1 > y1))
 	{
-		i = lx0 + (int) ((long) (y1 - ly0) * (long) (lx1 - lx0) / (long) (ly1 - ly0));
+		i = lx0 + (int) ((double) (y1 - ly0) * (double) (lx1 - lx0) / (double) (ly1 - ly0));
 		if (i >= x0 && i <= x1)
-			return true; /* the linedef crosses the y1 side (right) */
+			return true; /* the linedef crosses the right side */
 	}
 	if ((lx0 > x0) != (lx1 > x0))
 	{
-		i = ly0 + (int) ((long) (x0 - lx0) * (long) (ly1 - ly0) / (long) (lx1 - lx0));
+		i = ly0 + (int) ((double) (x0 - lx0) * (double) (ly1 - ly0) / (double) (lx1 - lx0));
 		if (i >= y0 && i <= y1)
-			return true; /* the linedef crosses the x0 side (down) */
+			return true; /* the linedef crosses the bottom side */
 	}
 	if ((lx0 > x1) != (lx1 > x1))
 	{
-		i = ly0 + (int) ((long) (x1 - lx0) * (long) (ly1 - ly0) / (long) (lx1 - lx0));
+		i = ly0 + (int) ((double) (x1 - lx0) * (double) (ly1 - ly0) / (double) (lx1 - lx0));
 		if (i >= y0 && i <= y1)
-			return true; /* the linedef crosses the x1 side (up) */
+			return true; /* the linedef crosses the top side */
 	}
+
 	return false;
 }
 
@@ -928,7 +934,7 @@ int GetOppositeSector (int ld1, bool firstside)
 					dx2 = LineDefs[ld2]->End()->x - x2;
 					dy2 = LineDefs[ld2]->End()->y - y2;
 
-					dist = y2 + (int) ((long) (x1 - x2) * (long) dy2 / (long) dx2);
+					dist = y2 + (int) ((double) (x1 - x2) * (double) dy2 / (double) dx2);
 					if (dist > y1 && (dist < bestdist
 								|| (dist == bestdist && (y2 + dy2 / 2) < bestmdist)))
 					{
@@ -952,7 +958,7 @@ int GetOppositeSector (int ld1, bool firstside)
 					dx2 = LineDefs[ld2]->End()->x - x2;
 					dy2 = LineDefs[ld2]->End()->y - y2;
 
-					dist = y2 + (int) ((long) (x1 - x2) * (long) dy2 / (long) dx2);
+					dist = y2 + (int) ((double) (x1 - x2) * (double) dy2 / (double) dx2);
 					if (dist < y1 && (dist > bestdist
 								|| (dist == bestdist && (y2 + dy2 / 2) > bestmdist)))
 					{
@@ -979,7 +985,7 @@ int GetOppositeSector (int ld1, bool firstside)
 					dx2 = LineDefs[ld2]->End()->x - x2;
 					dy2 = LineDefs[ld2]->End()->y - y2;
 
-					dist = x2 + (int) ((long) (y1 - y2) * (long) dx2 / (long) dy2);
+					dist = x2 + (int) ((double) (y1 - y2) * (double) dx2 / (double) dy2);
 					if (dist > x1 && (dist < bestdist
 								|| (dist == bestdist && (x2 + dx2 / 2) < bestmdist)))
 					{
@@ -1003,7 +1009,7 @@ int GetOppositeSector (int ld1, bool firstside)
 					dx2 = LineDefs[ld2]->End()->x - x2;
 					dy2 = LineDefs[ld2]->End()->y - y2;
 
-					dist = x2 + (int) ((long) (y1 - y2) * (long) dx2 / (long) dy2);
+					dist = x2 + (int) ((double) (y1 - y2) * (double) dx2 / (double) dy2);
 					if (dist < x1 && (dist > bestdist
 								|| (dist == bestdist && (x2 + dx2 / 2) > bestmdist)))
 					{
@@ -1258,102 +1264,6 @@ void CMD_CopyProperties(void)
 	MarkChanges();
 
 	edit.RedrawMap = 1;
-}
-
-
-/*
-   get the coordinates (approx.) of an object
-*/
-void GetObjectCoords (int objtype, int objnum, int *xpos, int *ypos)
-{
-	int  n, v1, v2, sd1, sd2;
-	long accx, accy, num;
-
-	switch (objtype)
-	{
-		case OBJ_THINGS:
-			SYS_ASSERT(is_thing(objnum));
-
-			*xpos = Things[objnum]->x;
-			*ypos = Things[objnum]->y;
-			break;
-
-		case OBJ_VERTICES:
-			SYS_ASSERT(is_vertex(objnum));
-
-			*xpos = Vertices[objnum]->x;
-			*ypos = Vertices[objnum]->y;
-			break;
-
-		case OBJ_LINEDEFS:
-			SYS_ASSERT(is_linedef(objnum));
-
-			v1 = LineDefs[objnum]->start;
-			v2 = LineDefs[objnum]->end;
-
-			*xpos = (Vertices[v1]->x + Vertices[v2]->x) / 2;
-			*ypos = (Vertices[v1]->y + Vertices[v2]->y) / 2;
-			break;
-
-		case OBJ_SIDEDEFS:
-			SYS_ASSERT(is_sidedef(objnum));
-
-			for (n = 0 ; n < NumLineDefs ; n++)
-				if (LineDefs[n]->right == objnum || LineDefs[n]->left == objnum)
-				{
-					v1 = LineDefs[n]->start;
-					v2 = LineDefs[n]->end;
-
-					*xpos = (Vertices[v1]->x + Vertices[v2]->x) / 2;
-					*ypos = (Vertices[v1]->y + Vertices[v2]->y) / 2;
-					return;
-				}
-			*xpos = (MapBound_lx + MapBound_hx) / 2;
-			*ypos = (MapBound_ly + MapBound_hy) / 2;
-			break;
-
-		case OBJ_SECTORS:
-			SYS_ASSERT(is_sector(objnum));
-
-			accx = 0L;
-			accy = 0L;
-			num = 0L;
-			for (n = 0 ; n < NumLineDefs ; n++)
-			{
-
-				sd1 = LineDefs[n]->right;
-				sd2 = LineDefs[n]->left;
-				v1 = LineDefs[n]->start;
-				v2 = LineDefs[n]->end;
-
-				if ((sd1 >= 0 && SideDefs[sd1]->sector == objnum)
-						|| (sd2 >= 0 && SideDefs[sd2]->sector == objnum))
-				{
-
-					/* if the Sector is closed, all Vertices will be counted twice */
-					accx += (long) Vertices[v1]->x;
-					accy += (long) Vertices[v1]->y;
-					num++;
-					accx += (long) Vertices[v2]->x;
-					accy += (long) Vertices[v2]->y;
-					num++;
-				}
-			}
-			if (num > 0)
-			{
-				*xpos = (int) ((accx + num / 2L) / num);
-				*ypos = (int) ((accy + num / 2L) / num);
-			}
-			else
-			{
-				*xpos = (MapBound_lx + MapBound_hx) / 2;
-				*ypos = (MapBound_ly + MapBound_hy) / 2;
-			}
-			break;
-
-		default:
-			BugError("GetObjectCoords: bad objtype %d", objtype);  // Can't happen
-	}
 }
 
 
