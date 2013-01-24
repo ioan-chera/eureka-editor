@@ -148,7 +148,7 @@ int UI_Canvas::handle_key()
 		return 0;
 
 #if 0  // DEBUG
-	fprintf(stderr, "Key code: 0x%08x\n", key);
+	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
 #endif
 
 	// keyboard propagation logic
