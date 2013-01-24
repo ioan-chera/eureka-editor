@@ -48,19 +48,6 @@
 #define REND_SEL_COL  196
 
 
-void CMD_BumpGamma()
-{
-	usegamma = (usegamma + 1) % 5;
-
-	W_UpdateGamma();
-
-//	main_win->canvas->redraw();
-}
-
-
-extern void CMD_ToggleBrowser();
-
-
 struct Y_View
 {
 public:
@@ -1660,29 +1647,7 @@ bool Render3D_Key(keycode_t key)
 	if (key & MOD_ALT)
 		return false;
 
-	if (bare_key == FL_Left)
-	{
-		view.SetAngle(view.angle + M_PI / 8);
-		Redraw = true;
-	}
-	else if (bare_key == FL_Right)
-	{
-		view.SetAngle(view.angle - M_PI / 8);
-		Redraw = true;
-	}
-	else if (bare_key == FL_Page_Up)
-	{
-		view.z += mv_speed * 1;
-		view.gravity = false;
-		Redraw = true;
-	}
-	else if (bare_key == FL_Page_Down)
-	{
-		view.z -= mv_speed * 1;
-		view.gravity = false;
-		Redraw = true;
-	}
-	else if (bare_key == 't')
+	if (bare_key == 't')
 	{
 		view.texturing = ! view.texturing;
 		Redraw = true;
@@ -1703,19 +1668,9 @@ bool Render3D_Key(keycode_t key)
 		view.gravity = ! view.gravity;
 		Redraw = true;
 	}
-	else if (bare_key == 'v')
-	{
-		view.CalcViewZ();
-		Redraw = true;
-	}
 	else if (key == FL_F+5)
 	{
 		view.low_detail = ! view.low_detail;
-		Redraw = true;
-	}
-	else if (key == FL_F+11)
-	{
-		CMD_BumpGamma();
 		Redraw = true;
 	}
 
@@ -1860,6 +1815,58 @@ void R3D_Right(void)
 	edit.RedrawMap = 1;
 }
 
+void R3D_Up(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.z += dist;
+	view.gravity = false;
+
+	edit.RedrawMap = 1;
+}
+
+void R3D_Down(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.z -= dist;
+	view.gravity = false;
+
+	edit.RedrawMap = 1;
+}
+
+
+void R3D_Turn(void)
+{
+	float angle = atof(EXEC_Param[0]);
+
+	// convert to radians
+	angle = angle * M_PI / 180.0;
+
+	view.SetAngle(view.angle + angle);
+
+	edit.RedrawMap = 1;
+}
+
+void R3D_DropToFloor(void)
+{
+	view.CalcViewZ();
+
+	edit.RedrawMap = 1;
+}
+
+
+void R3D_Gamma(void)
+{
+	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
+
+	usegamma = (usegamma + delta + 5) % 5;
+
+	W_UpdateGamma();
+
+	edit.RedrawMap = 1;
+}
+
 
 void Render3D_RegisterCommands()
 {
@@ -1867,6 +1874,13 @@ void Render3D_RegisterCommands()
 	M_RegisterCommand("3D_Backward", &R3D_Backward);
 	M_RegisterCommand("3D_Left",     &R3D_Left);
 	M_RegisterCommand("3D_Right",    &R3D_Right);
+
+	M_RegisterCommand("3D_Up",       &R3D_Up);
+	M_RegisterCommand("3D_Down",     &R3D_Down);
+	M_RegisterCommand("3D_Turn",     &R3D_Turn);
+
+	M_RegisterCommand("3D_DropToFloor", &R3D_DropToFloor);
+	M_RegisterCommand("3D_Gamma",    &R3D_Gamma);
 }
 
 
