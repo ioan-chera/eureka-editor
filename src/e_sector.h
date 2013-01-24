@@ -30,8 +30,6 @@
 #include "selectn.h"
 
 
-void centre_of_sector (obj_no_t s, int *x, int *y);
-
 void MakeDoorFromSector (int);
 void MakeLiftFromSector (int);
 

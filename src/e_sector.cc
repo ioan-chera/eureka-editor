@@ -166,44 +166,6 @@ void CMD_AdjustLight(int delta)
 
 
 /*
- *  centre_of_sector
- *  Return the coordinates of the centre of a sector.
- *
- *  FIXME The algorithm is desesperatingly simple-minded and
- *  does not take into account concave sectors and sectors
- *  that are enclosed by several distinct paths of linedefs.
- */
-void centre_of_sector (obj_no_t s, int *x, int *y)
-{
-	bitvec_c *vertices = bv_vertices_of_sector (s);
-
-	long x_sum  = 0;
-	long y_sum  = 0;
-	int  nitems = 0;
-
-	for (int n = 0 ; n < vertices->size() ; n++)
-		if (vertices->get (n))
-		{
-			x_sum += Vertices[n]->x;
-			y_sum += Vertices[n]->y;
-			nitems++;
-		}
-	if (nitems == 0)
-	{
-		*x = 0;
-		*y = 0;
-	}
-	else
-	{
-		*x = (int) (x_sum / nitems);
-		*y = (int) (y_sum / nitems);
-	}
-	delete vertices;
-}
-
-
-
-/*
    merge two or more Sectors into one
 */
 
