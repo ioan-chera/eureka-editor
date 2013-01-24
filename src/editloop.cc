@@ -584,12 +584,6 @@ static bool Grid_Key(keycode_t key)
 		CMD_Zoom(-1, edit.map_x, edit.map_y);
 	}
 
-	// [HOME], [0]: show the whole map in the window
-	else if (key == FL_Home || key == '0')
-	{
-		CMD_ZoomWholeMap();
-	}
-
 	// [1] - [9]: set the grid size
 	else if (unshifted_key >= '1' && unshifted_key <= '9')
 	{
@@ -680,7 +674,7 @@ void CMD_ZoomSelection(void)
 {
 	if (edit.Selected->empty())
 	{
-		Beep("Selection is empty.");
+		Beep("no selection to zoom");
 		return;
 	}
 
@@ -1118,6 +1112,9 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Scroll", &CMD_Scroll);
 	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
 	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
+
+	M_RegisterCommand("ZoomWholeMap",  &CMD_ZoomWholeMap);
+	M_RegisterCommand("ZoomSelection", &CMD_ZoomSelection);
 
 	/* global | map stuff */
 
