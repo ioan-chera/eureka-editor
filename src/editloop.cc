@@ -568,6 +568,16 @@ void CMD_Disconnect(void)
 }
 
 
+void GRID_Step(void)
+{
+	int delta = atoi(EXEC_Param[0]);
+
+	delta = (delta >= 0) ? +1 : -1;
+
+	grid.AdjustStep(delta);
+}
+
+
 static bool Grid_Key(keycode_t key)
 {
 	keycode_t unshifted_key = key & ~MOD_SHIFT;
@@ -594,17 +604,6 @@ static bool Grid_Key(keycode_t key)
 		}
 	}
 
-	// [G]: increase the grid step
-	else if (key == 'G')
-	{
-		grid.AdjustStep(+1);
-	}
-
-	// [g]: decrease the grid step
-	else if (key == 'g')
-	{
-		grid.AdjustStep(-1);
-	}
 
 	// [h]: display or hide the grid
 	else if (key == 'h')
@@ -1117,6 +1116,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Zoom",          &CMD_Zoom);
 	M_RegisterCommand("ZoomWholeMap",  &CMD_ZoomWholeMap);
 	M_RegisterCommand("ZoomSelection", &CMD_ZoomSelection);
+
+	M_RegisterCommand("GRID_Step", &GRID_Step);
 
 	/* global | map stuff */
 
