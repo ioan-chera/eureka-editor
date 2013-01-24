@@ -594,47 +594,27 @@ void GRID_Step(void)
 }
 
 
-static bool Grid_Key(keycode_t key)
+void Editor_DigitKey(keycode_t key)
 {
-	keycode_t unshifted_key = key & ~MOD_SHIFT;
-
 	// [1] - [9]: set the grid size
-	if (unshifted_key >= '1' && unshifted_key <= '9')
+
+	int digit = (key & 127) - '0';
+
+	bool do_zoom = digits_set_zoom;
+
+	if (key & MOD_SHIFT)
+		do_zoom = !do_zoom;
+
+	if (do_zoom)
 	{
-		int digit = unshifted_key - '0';
-
-		bool do_zoom = digits_set_zoom;
-
-		if (key & MOD_SHIFT)
-			do_zoom = !do_zoom;
-
-		if (do_zoom)
-		{
-			float S1 = grid.Scale;
-			grid.ScaleFromDigit(digit);
-			grid.RefocusZoom(edit.map_x, edit.map_y, S1);
-		}
-		else
-		{
-			grid.StepFromDigit(digit);
-		}
+		float S1 = grid.Scale;
+		grid.ScaleFromDigit(digit);
+		grid.RefocusZoom(edit.map_x, edit.map_y, S1);
 	}
-
-
-	//???  // [H]: reset the grid to grid_step_max
-	//???  else if (key == 'H')
-	//???  {
-	//???    e.grid_step = e.grid_step_max;
-	//???    edit.RedrawMap = 1;
-	//???  }
-
 	else
 	{
-		// not a grid key
-		return false;
+		grid.StepFromDigit(digit);
 	}
-
-	return true;
 }
 
 
@@ -826,11 +806,6 @@ bool Editor_Key(keycode_t key)
 	else if (key == FL_Print)
 	{
 		Beep();
-	}
-
-	else if (Grid_Key(key))
-	{
-		/* did grid stuff */
 	}
 
 	else

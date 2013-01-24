@@ -153,6 +153,13 @@ int UI_Canvas::handle_key()
 
 	// keyboard propagation logic
 
+	// handle digits specially
+	if ('1' <= (key & FL_KEY_MASK) && (key & FL_KEY_MASK) <= '9')
+	{
+		Editor_DigitKey(key);
+		return 1;
+	}
+
 	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
