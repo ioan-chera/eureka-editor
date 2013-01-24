@@ -1783,6 +1783,64 @@ void R3D_DropToFloor(void)
 }
 
 
+void R3D_Set(void)
+{
+	const char *var_name = EXEC_Param[0];
+	const char *value    = EXEC_Param[1];
+
+	if (! var_name[0])
+	{
+		Beep("3D_Set: missing var name");
+		return;
+	}
+
+	if (! value[0])
+	{
+		Beep("3D_Set: missing value");
+		return;
+	}
+
+	 int  int_val = atoi(value);
+	bool bool_val = (int_val > 0);
+
+
+	if (y_stricmp(var_name, "gamma") == 0)
+	{
+		usegamma = int_val % 5;
+		if (usegamma < 0) usegamma = 0;
+		W_UpdateGamma();
+	}
+	if (y_stricmp(var_name, "tex") == 0)
+	{
+		view.texturing = bool_val;
+	}
+	else if (y_stricmp(var_name, "obj") == 0)
+	{
+		view.sprites = bool_val;
+		view.thsec_invalidated = true;
+	}
+	else if (y_stricmp(var_name, "light") == 0)
+	{
+		view.lighting = bool_val;
+	}
+	else if (y_stricmp(var_name, "grav") == 0)
+	{
+		view.gravity = bool_val;
+	}
+	else if (y_stricmp(var_name, "detail") == 0)
+	{
+		view.low_detail = bool_val;
+	}
+	else
+	{
+		Beep("3D_Set: unknown var: %s", var_name);
+		return;
+	}
+
+	edit.RedrawMap = 1;
+}
+
+
 void R3D_Toggle(void)
 {
 	const char *var_name = EXEC_Param[0];
@@ -1849,6 +1907,7 @@ void Render3D_RegisterCommands()
 	M_RegisterCommand("3D_DropToFloor", &R3D_DropToFloor);
 
 	M_RegisterCommand("3D_Gamma",  &R3D_Gamma);
+	M_RegisterCommand("3D_Set",    &R3D_Set);
 	M_RegisterCommand("3D_Toggle", &R3D_Toggle);
 }
 
