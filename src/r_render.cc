@@ -1469,11 +1469,7 @@ int UI_RenderWin::handle(int event)
 #endif
 
 
-/*
- *  Render a 3D view from the player's position. 
- */
-
-void Render3D_Init()
+void Render3D_Setup()
 {
 	if (! view.p_type)
 	{
@@ -1584,10 +1580,12 @@ void Render3D_BlitLores(int ox, int oy, int ow, int oh)
 }
 
 
+/*
+ *  Render a 3D view from the player's position. 
+ */
+
 void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
-	/* render image */
-
 	if (view.thsec_invalidated || !view.screen ||
 	    NumThings  != (int)view.thing_sectors.size() ||
 		NumSectors != view.thsec_sector_num)
@@ -1653,15 +1651,6 @@ bool Render3D_Key(keycode_t key)
 	else if (key & MOD_COMMAND)
 		mv_speed *= 4;
 
-	// strafing?
-	if (key == (FL_Left | MOD_ALT))
-	{
-		key = 'a';
-	}
-	if (key == (FL_Right | MOD_ALT))
-	{
-		key = 'd';
-	}
 
 	if ((key == (FL_Up | MOD_ALT)) || key == (FL_Down | MOD_ALT))
 		key &= ~MOD_ALT;
@@ -1679,30 +1668,6 @@ bool Render3D_Key(keycode_t key)
 	else if (bare_key == FL_Right)
 	{
 		view.SetAngle(view.angle - M_PI / 8);
-		Redraw = true;
-	}
-	else if (bare_key == FL_Up || key == 'w')
-	{
-		view.x += view.Cos * mv_speed * 3;
-		view.y += view.Sin * mv_speed * 3;
-		Redraw = true;
-	}
-	else if (bare_key == FL_Down || bare_key == 's')
-	{
-		view.x -= view.Cos * mv_speed * 3;
-		view.y -= view.Sin * mv_speed * 3;
-		Redraw = true;
-	}
-	else if (bare_key == 'a')
-	{
-		view.x -= view.Sin * mv_speed * 2;
-		view.y += view.Cos * mv_speed * 2;
-		Redraw = true;
-	}
-	else if (bare_key == 'd')
-	{
-		view.x += view.Sin * mv_speed * 2;
-		view.y -= view.Cos * mv_speed * 2;
 		Redraw = true;
 	}
 	else if (bare_key == FL_Page_Up)
@@ -1853,7 +1818,59 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 }
 
 
-void Render3D_Close()
+/* commands... */
+
+void R3D_Forward(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.x += view.Cos * dist;
+	view.y += view.Sin * dist;
+
+	edit.RedrawMap = 1;
+}
+
+void R3D_Backward(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.x -= view.Cos * dist;
+	view.y -= view.Sin * dist;
+
+	edit.RedrawMap = 1;
+}
+
+void R3D_Left(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.x -= view.Sin * dist;
+	view.y += view.Cos * dist;
+
+	edit.RedrawMap = 1;
+}
+
+void R3D_Right(void)
+{
+	int dist = atoi(EXEC_Param[0]);
+
+	view.x += view.Sin * dist;
+	view.y -= view.Cos * dist;
+
+	edit.RedrawMap = 1;
+}
+
+
+void Render3D_RegisterCommands()
+{
+	M_RegisterCommand("3D_Forward",  &R3D_Forward);
+	M_RegisterCommand("3D_Backward", &R3D_Backward);
+	M_RegisterCommand("3D_Left",     &R3D_Left);
+	M_RegisterCommand("3D_Right",    &R3D_Right);
+}
+
+
+void Render3D_Term()
 {
 	/* all done */
 

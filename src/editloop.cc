@@ -1109,7 +1109,7 @@ void Editor_Init()
 	MadeChanges = 0;
 
 	Editor_RegisterCommands();
-/// TODO	Render_RegisterCommands();
+	Render3D_RegisterCommands();
 }
 
 

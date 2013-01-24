@@ -27,7 +27,9 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
-void Render3D_Init();
+void Render3D_Setup();
+void Render3D_RegisterCommands();
+
 void Render3D_Draw(int ox, int oy, int ow, int oh);
 
 bool Render3D_Key(keycode_t key);

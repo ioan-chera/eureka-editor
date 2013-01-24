@@ -1365,7 +1365,7 @@ void M_DefaultUserState()
 
 	CMD_ZoomWholeMap();
 
-    Render3D_Init();
+    Render3D_Setup();
 
 	if (main_win)
 		main_win->NewEditMode('t');
