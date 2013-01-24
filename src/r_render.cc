@@ -1810,7 +1810,7 @@ void R3D_Set(void)
 		if (usegamma < 0) usegamma = 0;
 		W_UpdateGamma();
 	}
-	if (y_stricmp(var_name, "tex") == 0)
+	else if (y_stricmp(var_name, "tex") == 0)
 	{
 		view.texturing = bool_val;
 	}
