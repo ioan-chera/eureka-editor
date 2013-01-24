@@ -74,7 +74,6 @@ extern Editor_State_c edit;
 
 void Editor_Init();
 
-bool  Editor_Key(keycode_t key);
 void Editor_DigitKey(keycode_t key);
 
 void Editor_Wheel(int dx, int dy, keycode_t mod);

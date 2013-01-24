@@ -440,7 +440,7 @@ void GoToObject(const Objid& objid)
 }
 
 
-void CMD_JumpToObject()
+void CMD_JumpToObject(void)
 {
 	const char *buf = fl_input("Enter index number", "");
 
@@ -453,7 +453,7 @@ void CMD_JumpToObject()
 
 	if (num < 0 || num >= NumObjects(edit.obj_type))
 	{
-		Notify(-1, -1, "Invalid index number", NULL);
+		Beep("no such object: %d", num);
 		return;
 	}
 

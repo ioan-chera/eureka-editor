@@ -178,9 +178,6 @@ int UI_Canvas::handle_key()
 	if (render3d && Render3D_Key(key))
 		return 1;
 
-	if (Editor_Key(key))
-		return 1;
-
 	// NOTE: the key may still get handled by something (e.g. Menus)
 	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
 

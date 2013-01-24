@@ -754,69 +754,6 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 }
 
 
-bool Editor_Key(keycode_t key)
-{
-	keycode_t bare_key = key & FL_KEY_MASK;
-	keycode_t unshifted_key = key & ~MOD_SHIFT;
-
-	// [F10]: pop up the "Checks" menu
-	if (key == FL_F+10)
-	{
-		CheckLevel (-1, -1);
-		edit.RedrawMap = 1;
-	}
-
-	// [j]: jump to object by number
-	else if (key == 'j')
-	{
-		CMD_JumpToObject();
-	}
-
-	// ???: find object by type
-	// FIXME: CMD_FindObjectByType()
-
-	// [Ctrl-x]: exchange objects numbers
-//!!!	else if (key == 24)
-//!!!	{
-//!!!		if (! edit.Selected
-//!!!				|| ! edit.Selected->next
-//!!!				|| (edit.Selected->next)->next)
-//!!!		{
-//!!!			Beep ();
-//!!!			Notify (-1, -1, "You must select exactly two objects", 0);
-//!!!			edit.RedrawMap = 1;
-//!!!		}
-//!!!		else
-//!!!		{
-//!!!			exchange_objects_numbers (edit.obj_type, edit.Selected, true);
-//!!!			edit.RedrawMap = 1;
-//!!!		}
-//!!!	}
-
-
-	// [%] Show things sprites
-	else if (key == '%')
-	{
-		edit.show_things_sprites = ! edit.show_things_sprites;
-		edit.show_things_squares = ! edit.show_things_sprites;  // Not a typo !
-		edit.RedrawMap = 1;
-	}
-
-	// [PRTSCR]: save a screen shot.   FIXME
-	else if (key == FL_Print)
-	{
-		Beep();
-	}
-
-	else
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
 void Editor_MousePress(keycode_t mod)
 {
 	if (edit.button_down >= 2)
@@ -1089,6 +1026,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Scroll", &CMD_Scroll);
 	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
 	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
+	M_RegisterCommand("JumpToObject", &CMD_JumpToObject);
 
 	M_RegisterCommand("Zoom",          &CMD_Zoom);
 	M_RegisterCommand("ZoomWholeMap",  &CMD_ZoomWholeMap);
