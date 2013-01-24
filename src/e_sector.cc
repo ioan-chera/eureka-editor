@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -678,9 +678,9 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 void SEC_Merge(void)
 {
 	// need a selection
-	if (edit.Selected->empty())
+	if (edit.Selected->count_obj() < 2)
 	{
-		Beep("No sectors to merge");
+		Beep("Need 2 or more sectors to merge");
 		return;
 	}
 
