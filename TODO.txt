@@ -3,6 +3,9 @@ EUREKA WISH-LIST
 ================
 
 
+fix UI_Browser::Scroll()
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -12,33 +15,23 @@ ______________________________________________________________________
 General
 -------
 
-+  CHECK screen
-   -  linedefs without right side
-   -  zero-length linedefs
-   -  unclosed sectors
-   -  can remove unused Vertices, SideDefs and Sectors
++  CHECK screen  (see misc/Checks.txt for more info)
 
-+  commands bound to a plain key (e.g. 'b') should not be usable
-   when ALT or META is pressed.
++  GUI for key bindings
+   (a) probably implement with an Fl_Table.
 
-+  configurable keys
-   (a) will need various contexts: one for each editing mode,
-       one for ALL modes ("global"), one for 3D view, one for browser.
+       ability to sort by a particular column (key / context / command).
+       if pick a new column, previous becomes secondary sort criterion.
 
-       Priorities:
-       1. global
-       2. Browser (if active)
-       3. 3D view (if active)
-       4. edit
-       5. thing / linedef / sector / vertex / radtrig
+   (b) replace M_RegisterCommand() with a data-driven approach
+       (similar to what's in m_config.cc).
 
-   (b) decide if uppercase keys are considered as SHIFT modified
-   (c) probably keep menu shortcuts hard-coded
+       Provide a description of each binding command, and info
+       about the parameters (if any).
 
-   (d) some functions need a parameter (or two), perhaps handle this
-       from user's POV using a choice (e.g. "less|more" or "-1|+1" or so),
-       and figure out how to implement calling the function,
-       e.g. int CMD_Whatever(int parm1, int parm2)
+   (c) if a parameter has a limited set of usable values, provide
+       a choice button (e.g. "-1|+1").  Or at least validate the
+       parameter values (use RED for unknown keywords).
 
 +  backup system
       e.g. create ~/.eureka/backups/<basename>_###.wad
@@ -131,12 +124,18 @@ General
    -  implement the scrolling sizes
    -  add more stuff (see USER CONFIG NEEDED, below)
 
++  un-hard-code menu shortcuts? (how ??)
+
 
 -  config var for default starting mode
+
+?  config system: OPT_KEY values
 
 -  support DOOMWADPATH for finding iwads (see Chocolate Doom)
 
 -  make sure Load/Export wad filename not already in master_dir
+
+-  PRINT key to make a screenshot of map or 3D view
 
 -  grid drawing too slow when small step and zoomed out
 
