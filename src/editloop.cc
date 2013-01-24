@@ -350,80 +350,84 @@ void CMD_Quit(void)
 
 void CMD_SetVar(void)
 {
-	if (! EXEC_Param[0][0])
+	const char *var_name = EXEC_Param[0];
+
+	if (! var_name[0])
 	{
 		Beep("Set: missing var name");
 		return;
 	}
 
-	if (! EXEC_Param[0][1])
+	if (! var_name[1])
 	{
 		Beep("Set: missing value");
 		return;
 	}
 
-	if (y_stricmp(EXEC_Param[0], "3d") == 0)
+	if (y_stricmp(var_name, "3d") == 0)
 	{
 		main_win->canvas->ChangeRenderMode(atoi(EXEC_Param[1]) > 0);
 	}
-	else if (y_stricmp(EXEC_Param[0], "browser") == 0)
+	else if (y_stricmp(var_name, "browser") == 0)
 	{
-		int want_vis   = (atoi(EXEC_Param[0]) > 0) ? 1 : 0;
+		int want_vis   = (atoi(var_name) > 0) ? 1 : 0;
 		int is_visible = main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
 			main_win->ShowBrowser('/');
 	}
-	else if (y_stricmp(EXEC_Param[0], "grid") == 0)
+	else if (y_stricmp(var_name, "grid") == 0)
 	{
 		grid.SetShown(atoi(EXEC_Param[1]) > 0);
 	}
-	else if (y_stricmp(EXEC_Param[0], "snap") == 0)
+	else if (y_stricmp(var_name, "snap") == 0)
 	{
 		grid.SetSnap(atoi(EXEC_Param[1]) > 0);
 	}
-	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = (atoi(EXEC_Param[1]) > 0);
 		edit.RedrawMap = 1;
 	}
 	else   // TODO: "skills"
 	{
-		Beep("Set: unknown var '%s'", EXEC_Param[0]);
+		Beep("Set: unknown var '%s'", var_name);
 	}
 }
 
 
 void CMD_ToggleVar(void)
 {
-	if (! EXEC_Param[0][0])
+	const char *var_name = EXEC_Param[0];
+
+	if (! var_name[0])
 	{
 		Beep("Toggle: missing var name");
 		return;
 	}
 
-	if (y_stricmp(EXEC_Param[0], "3d") == 0)
+	if (y_stricmp(var_name, "3d") == 0)
 	{
 		main_win->canvas->ToggleRenderMode();
 	}
-	else if (y_stricmp(EXEC_Param[0], "browser") == 0)
+	else if (y_stricmp(var_name, "browser") == 0)
 	{
 		main_win->ShowBrowser('/');
 	}
-	else if (y_stricmp(EXEC_Param[0], "grid") == 0)
+	else if (y_stricmp(var_name, "grid") == 0)
 	{
 		grid.ToggleShown();
 	}
-	else if (y_stricmp(EXEC_Param[0], "snap") == 0)
+	else if (y_stricmp(var_name, "snap") == 0)
 	{
 		grid.ToggleSnap();
 	}
-	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
+	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
 		edit.RedrawMap = 1;
 	}
-	else if (y_stricmp(EXEC_Param[0], "skills") == 0)
+	else if (y_stricmp(var_name, "skills") == 0)
 	{
 		active_wmask ^= 1;
 		active_when = active_wmask;
@@ -431,7 +435,7 @@ void CMD_ToggleVar(void)
 	}
 	else
 	{
-		Beep("Toggle: unknown var '%s'\n", EXEC_Param[0]);
+		Beep("Toggle: unknown var '%s'", var_name);
 	}
 }
 
