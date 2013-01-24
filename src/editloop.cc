@@ -572,20 +572,8 @@ static bool Grid_Key(keycode_t key)
 {
 	keycode_t unshifted_key = key & ~MOD_SHIFT;
 
-	// [+]: zooming in  (mouse wheel too)
-	if (key == '+' || key == '=')
-	{
-		CMD_Zoom(+1, edit.map_x, edit.map_y);
-	}
-
-	// [-]: zooming out  (mouse wheel too)
-	else if (key == '-' || key == '_')
-	{
-		CMD_Zoom(-1, edit.map_x, edit.map_y);
-	}
-
 	// [1] - [9]: set the grid size
-	else if (unshifted_key >= '1' && unshifted_key <= '9')
+	if (unshifted_key >= '1' && unshifted_key <= '9')
 	{
 		int digit = unshifted_key - '0';
 
@@ -649,13 +637,26 @@ static bool Grid_Key(keycode_t key)
 }
 
 
-void CMD_Zoom(int delta, int mid_x, int mid_y)
+void Editor_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = grid.Scale;
 
     grid.AdjustScale(delta);
 
     grid.RefocusZoom(mid_x, mid_y, S1);
+}
+
+void CMD_Zoom(void)
+{
+	int delta = atoi(EXEC_Param[0]);
+
+	if (delta == 0)
+	{
+		Beep("bad parameter to CMD_Zoom");
+		return;
+	}
+
+	Editor_Zoom(delta, edit.map_x, edit.map_y);
 }
 
 
@@ -767,7 +768,7 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 	{
 		dy = (dy > 0) ? +1 : -1;
 
-		CMD_Zoom(- dy, edit.map_x, edit.map_y);
+		Editor_Zoom(- dy, edit.map_x, edit.map_y);
 	}
 }
 
@@ -1113,6 +1114,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
 	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
 
+	M_RegisterCommand("Zoom",          &CMD_Zoom);
 	M_RegisterCommand("ZoomWholeMap",  &CMD_ZoomWholeMap);
 	M_RegisterCommand("ZoomSelection", &CMD_ZoomSelection);
 

@@ -166,12 +166,12 @@ static void edit_do_invert_sel(Fl_Widget *w, void * data)
 
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
-	CMD_Zoom(+1, grid.orig_x, grid.orig_y);
+	Editor_Zoom(+1, grid.orig_x, grid.orig_y);
 }
 
 static void view_do_zoom_out(Fl_Widget *w, void * data)
 {
-	CMD_Zoom(-1, grid.orig_x, grid.orig_y);
+	Editor_Zoom(-1, grid.orig_x, grid.orig_y);
 }
 
 static void view_do_whole_map(Fl_Widget *w, void * data)

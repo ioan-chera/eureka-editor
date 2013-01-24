@@ -91,6 +91,7 @@ bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
 void Editor_ChangeMode(char mode);
+void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 /* commands */
 
@@ -100,7 +101,6 @@ void CMD_InvertSelection(void);
 
 void CMD_Quit(void);
 
-void CMD_Zoom(int delta, int mid_x, int mid_y);
 void CMD_ZoomWholeMap(void);
 void CMD_ZoomSelection(void);
 void CMD_GoToCamera(void);
