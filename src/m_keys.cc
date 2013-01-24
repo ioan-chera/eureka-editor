@@ -605,6 +605,8 @@ key_context_e M_ModeToKeyContext(obj_type_e mode)
 
 bool ExecuteKey(keycode_t key, key_context_e context)
 {
+	Status_Clear();
+
 	EXEC_Param[0] = EXEC_Param[1] = "";
 	EXEC_Param[2] = EXEC_Param[3] = "";
 
@@ -637,6 +639,8 @@ bool ExecuteCommand(const char *name, const char *param1,
 	if (! cmd)
 		return false;
 	
+	Status_Clear();
+
 	EXEC_Param[0] = param1;
 	EXEC_Param[1] = param2;
 	EXEC_Param[2] = param3;
