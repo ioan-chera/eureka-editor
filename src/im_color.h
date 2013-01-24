@@ -28,7 +28,7 @@
 #define __EUREKA_IM_COLOR_H__
 
 
-typedef unsigned long rgb_color_t;
+typedef u32_t rgb_color_t;
 
 #define RGB_INVALID  0xffffffff  /* an "impossible" color */
 
