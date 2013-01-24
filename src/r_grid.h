@@ -94,8 +94,12 @@ public:
 	void AdjustStep(int delta);
 	void AdjustScale(int delta);
 
+	void SetShown(bool enable);
+	void SetSnap (bool enable);
+	void SetMode (int new_mode);
+
 	void ToggleShown();
-	void ToggleType();
+	void ToggleMode();
 	void ToggleSnap();
 
 	// choose the scale nearest to (and less than) the wanted one

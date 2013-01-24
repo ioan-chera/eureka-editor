@@ -428,6 +428,15 @@ void Grid_State_c::DoSetGrid()
 }
 
 
+void Grid_State_c::SetShown(bool enable)
+{
+	shown = enable;
+
+	edit.RedrawMap = 1;
+
+	DoSetGrid();
+}
+
 void Grid_State_c::ToggleShown()
 {
 	if (! shown)
@@ -450,27 +459,39 @@ void Grid_State_c::ToggleShown()
 }
 
 
-void Grid_State_c::ToggleType()
+void Grid_State_c::SetMode(int new_mode)
 {
-	if (! shown)
-	{
-		shown = true;
-	}
-
-	mode = 1 - mode;
+	mode = new_mode;
 
 	edit.RedrawMap = 1;
 
 	DoSetGrid();
 }
 
-
-void Grid_State_c::ToggleSnap()
+void Grid_State_c::ToggleMode()
 {
-	snap = !snap;
+	if (! shown)
+	{
+		shown = true;
+	}
+
+	SetMode(1 - mode);
+}
+
+
+void Grid_State_c::SetSnap(bool enable)
+{
+	snap = enable;
 
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
+
+	UpdateHighlight();
+}
+
+void Grid_State_c::ToggleSnap()
+{
+	SetSnap(! snap);
 }
 
 

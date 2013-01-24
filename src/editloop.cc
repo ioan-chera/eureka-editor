@@ -374,6 +374,14 @@ void CMD_SetVar(void)
 		if (want_vis != is_visible)
 			main_win->ShowBrowser('/');
 	}
+	else if (y_stricmp(EXEC_Param[0], "grid") == 0)
+	{
+		grid.SetShown(atoi(EXEC_Param[1]) > 0);
+	}
+	else if (y_stricmp(EXEC_Param[0], "snap") == 0)
+	{
+		grid.SetSnap(atoi(EXEC_Param[1]) > 0);
+	}
 	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
 	{
 		edit.show_object_numbers = (atoi(EXEC_Param[1]) > 0);
@@ -401,6 +409,14 @@ void CMD_ToggleVar(void)
 	else if (y_stricmp(EXEC_Param[0], "browser") == 0)
 	{
 		main_win->ShowBrowser('/');
+	}
+	else if (y_stricmp(EXEC_Param[0], "grid") == 0)
+	{
+		grid.ToggleShown();
+	}
+	else if (y_stricmp(EXEC_Param[0], "snap") == 0)
+	{
+		grid.ToggleSnap();
 	}
 	else if (y_stricmp(EXEC_Param[0], "obj_nums") == 0)
 	{
@@ -605,26 +621,12 @@ static bool Grid_Key(keycode_t key)
 	}
 
 
-	// [h]: display or hide the grid
-	else if (key == 'h')
-	{
-		grid.ToggleShown();
-	}
-
 	//???  // [H]: reset the grid to grid_step_max
 	//???  else if (key == 'H')
 	//???  {
 	//???    e.grid_step = e.grid_step_max;
 	//???    edit.RedrawMap = 1;
 	//???  }
-
-	// [f]: toggle the snap_to_grid flag
-	else if (key == 'f')
-	{
-		grid.ToggleSnap();
-
-		UpdateHighlight();
-	}
 
 	else
 	{
