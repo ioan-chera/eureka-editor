@@ -709,7 +709,7 @@ private:
 
 	static void button_callback(Fl_Widget *w, void *data)
 	{
-		_instance->picked_num = (long) data;
+		_instance->picked_num = (int)(long)data;
 		_instance->want_close = true;
 	}
 
@@ -755,7 +755,7 @@ public:
 
 			char name_buf[256];
 
-			recent_files.Format(name_buf, i);
+			recent_files.Format(name_buf, (int)i);
 
 			Fl_Button * but = new Fl_Button(50, cy, W - 70, 24);
 			but->copy_label(name_buf);

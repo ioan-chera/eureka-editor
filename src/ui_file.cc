@@ -911,7 +911,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
-	int r = (long)data;
+	int r = (int)(long)data;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	UI_ProjectSetup * that = _instance;
@@ -949,7 +949,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 
 void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 {
-	int r = (long)data;
+	int r = (int)(long)data;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	UI_ProjectSetup * that = _instance;

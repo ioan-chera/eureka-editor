@@ -891,7 +891,7 @@ void dump_parameters(FILE *fp)
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
 		else if (o->opt_type == OPT_COLOR)
-			fprintf (fp, "%06lx", *((rgb_color_t *) o->data_ptr) >> 8);
+			fprintf (fp, "%06x", *((rgb_color_t *) o->data_ptr) >> 8);
 		else if (o->opt_type == OPT_STRING)
 		{
 			const char *str = *((const char **) o->data_ptr);
@@ -1025,7 +1025,7 @@ int M_WriteConfigFile()
 				break;
 
 			case OPT_COLOR:
-				fprintf(fp, "%06lx", *((rgb_color_t *) o->data_ptr) >> 8);
+				fprintf(fp, "%06x", *((rgb_color_t *) o->data_ptr) >> 8);
 				break;
 
 			case OPT_STRING_LIST:
