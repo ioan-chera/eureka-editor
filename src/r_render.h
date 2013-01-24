@@ -32,7 +32,6 @@ void Render3D_RegisterCommands();
 
 void Render3D_Draw(int ox, int oy, int ow, int oh);
 
-bool Render3D_Key(keycode_t key);
 void Render3D_Wheel(int delta, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
 

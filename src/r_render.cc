@@ -1613,79 +1613,6 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 }
 
 
-bool Render3D_Key(keycode_t key)
-{
-	/* handle keypress */
-
-	keycode_t bare_key = key & FL_KEY_MASK;
-
-	if (key & MOD_COMMAND)
-		if (isalpha(bare_key))
-			return false;
-
-	bool Redraw = false;
-
-	if ('A' <= key && key <= 'Z')
-	{
-		bare_key = tolower(key);
-		key = bare_key | MOD_SHIFT;
-	}
-
-	int mv_speed = 16;  // TODO: CONFIG ITEM
-
-	if (key & MOD_SHIFT)
-		mv_speed = MAX(1, mv_speed / 4);
-	else if (key & MOD_COMMAND)
-		mv_speed *= 4;
-
-
-	if ((key == (FL_Up | MOD_ALT)) || key == (FL_Down | MOD_ALT))
-		key &= ~MOD_ALT;
-		
-
-	// in general, ignore ALT keys
-	if (key & MOD_ALT)
-		return false;
-
-	if (bare_key == 't')
-	{
-		view.texturing = ! view.texturing;
-		Redraw = true;
-	}
-	else if (bare_key == 'o')
-	{
-		view.sprites = ! view.sprites;
-		view.thsec_invalidated = true;
-		Redraw = true;
-	}
-	else if (bare_key == 'l')
-	{
-		view.lighting = ! view.lighting;
-		Redraw = true;
-	}
-	else if (bare_key == 'g')
-	{
-		view.gravity = ! view.gravity;
-		Redraw = true;
-	}
-	else if (key == FL_F+5)
-	{
-		view.low_detail = ! view.low_detail;
-		Redraw = true;
-	}
-
-	else  // not a render key
-	{
-		return false;
-	}
-
-	if (Redraw)
-		edit.RedrawMap = 1;
-
-	return true;
-}
-
-
 void Render3D_Wheel(int delta, keycode_t mod)
 {
 	int speed = 16;  // TODO: CONFIG ITEM
@@ -1856,6 +1783,47 @@ void R3D_DropToFloor(void)
 }
 
 
+void R3D_Toggle(void)
+{
+	const char *var_name = EXEC_Param[0];
+
+	if (! var_name[0])
+	{
+		Beep("3D_Toggle: missing var name");
+		return;
+	}
+
+	if (y_stricmp(var_name, "tex") == 0)
+	{
+		view.texturing = ! view.texturing;
+	}
+	else if (y_stricmp(var_name, "obj") == 0)
+	{
+		view.sprites = ! view.sprites;
+		view.thsec_invalidated = true;
+	}
+	else if (y_stricmp(var_name, "light") == 0)
+	{
+		view.lighting = ! view.lighting;
+	}
+	else if (y_stricmp(var_name, "grav") == 0)
+	{
+		view.gravity = ! view.gravity;
+	}
+	else if (y_stricmp(var_name, "detail") == 0)
+	{
+		view.low_detail = ! view.low_detail;
+	}
+	else
+	{
+		Beep("3D_Toggle: unknown var: %s", var_name);
+		return;
+	}
+
+	edit.RedrawMap = 1;
+}
+
+
 void R3D_Gamma(void)
 {
 	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
@@ -1878,9 +1846,10 @@ void Render3D_RegisterCommands()
 	M_RegisterCommand("3D_Up",       &R3D_Up);
 	M_RegisterCommand("3D_Down",     &R3D_Down);
 	M_RegisterCommand("3D_Turn",     &R3D_Turn);
-
 	M_RegisterCommand("3D_DropToFloor", &R3D_DropToFloor);
-	M_RegisterCommand("3D_Gamma",    &R3D_Gamma);
+
+	M_RegisterCommand("3D_Gamma",  &R3D_Gamma);
+	M_RegisterCommand("3D_Toggle", &R3D_Toggle);
 }
 
 
