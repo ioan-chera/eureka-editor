@@ -45,7 +45,7 @@
 #include "ui_window.h"
 
 
-Editor_State_c  edit;
+Editor_State_t  edit;
 
 
 int active_when = 0;  // FIXME MOVE THESE into Editor_State
@@ -60,16 +60,6 @@ bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
 int multi_select_modifier = 0;
-
-
-Editor_State_c::Editor_State_c()
-    // FIXME !!!!
-{
-}
-
-Editor_State_c::~Editor_State_c()
-{
-}
 
 
 /*

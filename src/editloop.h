@@ -27,11 +27,10 @@
 #ifndef __EUREKA_EDITLOOP_H__
 #define __EUREKA_EDITLOOP_H__
 
-// this class holds some miscellaneous editor state.
+/* this holds some miscellaneous editor state */
 
-class Editor_State_c
+typedef struct
 {
-public:
 	obj_type_e obj_type;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
 	int move_speed;   // Movement speed.
@@ -63,13 +62,10 @@ public:
 
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 
-public:
-	Editor_State_c();
-	virtual ~Editor_State_c();
-};
+} Editor_State_t;
 
 
-extern Editor_State_c edit;
+extern Editor_State_t  edit;
 
 
 void Editor_Init();
