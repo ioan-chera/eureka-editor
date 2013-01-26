@@ -728,7 +728,7 @@ public:
 
 	~undo_group_c()
 	{
-		for (int i = ops.size()-1; i >= 0; i--)
+		for (int i = (int)ops.size() - 1 ; i >= 0 ; i--)
 		{
 			ops[i].Destroy();
 		}

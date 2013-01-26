@@ -198,7 +198,7 @@ void StringFree(const char *str)
 
 void StringRemoveCRLF(char *str)
 {
-	int len = strlen(str);
+	size_t len = strlen(str);
 
 	if (len > 0 && str[len - 1] == '\n')
 		str[--len] = 0;
@@ -239,7 +239,7 @@ unsigned int TimeGetMillies()
 
 	gettimeofday(&tv, &tz);
 
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+	return ((int)tv.tv_sec * 1000 + (int)tv.tv_usec / 1000);
 #endif
 }
 

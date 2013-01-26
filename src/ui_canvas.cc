@@ -742,12 +742,13 @@ void UI_Canvas::DrawThings()
 		DrawMapLine(x-r, y+r, x-r, y-r);
 
 		{
-			size_t direction = angle_to_direction(Things[n]->angle);
+			int dir = angle_to_direction(Things[n]->angle);
+
 			static const short xsign[] = {  1,  1,  0, -1, -1, -1,  0,  1,  0 };
 			static const short ysign[] = {  0,  1,  1,  1,  0, -1, -1, -1,  0 };
 
-			int corner_x = r * xsign[direction];
-			int corner_y = r * ysign[direction];
+			int corner_x = r * xsign[dir];
+			int corner_y = r * ysign[dir];
 
 			DrawMapLine(x, y, x + corner_x, y + corner_y);
 		}

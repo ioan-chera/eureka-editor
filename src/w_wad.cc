@@ -163,7 +163,7 @@ void Lump_c::Printf(const char *msg, ...)
 
 	buffer[sizeof(buffer) - 1] = 0;
 
-	Write(buffer, strlen(buffer));
+	Write(buffer, (int)strlen(buffer));
 }
 
 

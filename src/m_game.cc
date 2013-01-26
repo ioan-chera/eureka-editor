@@ -194,7 +194,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 			"%s(%d): directive \"%s\" takes %d parameters\n";
 
 		// create a buffer to contain the tokens [Note: never freed]
-		buf = StringNew(strlen(readbuf) + 1);
+		buf = StringNew((int)strlen(readbuf) + 1);
 
 		/* break the line into whitespace-separated tokens.
 		   whitespace can be enclosed in double quotes. */

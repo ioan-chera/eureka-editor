@@ -190,7 +190,7 @@ rgb_color_t ParseColor(const char *str)
 
 	if (strlen(str) >= 6)  // long form #rrggbb
 	{
-		int number = strtol(str, NULL, 16);
+		int number = (int)strtol(str, NULL, 16);
 
 		int r = (number & 0xFF0000) >> 16;
 		int g = (number & 0x00FF00) >> 8;
@@ -200,7 +200,7 @@ rgb_color_t ParseColor(const char *str)
 	}
 	else  // short form: #rgb
 	{
-		int number = strtol(str, NULL, 16);
+		int number = (int)strtol(str, NULL, 16);
 
 		int r = (number & 0xF00) >> 8;
 		int g = (number & 0x0F0) >> 4;

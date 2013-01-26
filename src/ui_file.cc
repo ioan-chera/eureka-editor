@@ -694,24 +694,24 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	for (long r = 0 ; r < RES_NUM ; r++)
+	for (int r = 0 ; r < RES_NUM ; r++)
 	{
 		res[r] = NULL;
 
 		int cy = by + 145 + r * 35;
 
 		char res_label[64];
-		sprintf(res_label, "%ld. ", 1 + r);
+		sprintf(res_label, "%d. ", 1 + r);
 
 		res_name[r] = new Fl_Output(55, cy, 205, 25);
 		res_name[r]->copy_label(res_label);
 
 		Fl_Button *kill = new Fl_Button(270, cy, 30, 25, "x");
 		kill->labelsize(20);
-		kill->callback((Fl_Callback*)kill_callback, (void *)r);
+		kill->callback((Fl_Callback*)kill_callback, (void *)(long)r);
 
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
-		load->callback((Fl_Callback*)load_callback, (void *)r);
+		load->callback((Fl_Callback*)load_callback, (void *)(long)r);
 	}
 
 	// bottom buttons

@@ -573,7 +573,8 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 					v++;
 
 				string_list_t * list = (string_list_t *)opt->data_ptr;
-				list->push_back(StringDup(value, v - value));
+
+				list->push_back(StringDup(value, (int)(v - value)));
 
 				while (isspace (*v))
 					v++;
@@ -868,11 +869,11 @@ void dump_parameters(FILE *fp)
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		int len = strlen (o->desc);
+		int len = (int)strlen (o->desc);
 		desc_maxlen = MAX(desc_maxlen, len);
 		if (o->long_name)
 		{
-			len = strlen (o->long_name);
+			len = (int)strlen (o->long_name);
 			name_maxlen = MAX(name_maxlen, len);
 		}
 	}
@@ -929,13 +930,13 @@ void dump_command_line_options(FILE *fp)
 
 		if (o->long_name)
 		{
-			len = strlen (o->long_name);
+			len = (int)strlen (o->long_name);
 			name_maxlen = MAX(name_maxlen, len);
 		}
 
 		if (o->arg_desc)
 		{
-			len = strlen (o->arg_desc);
+			len = (int)strlen (o->arg_desc);
 			arg_maxlen = MAX(arg_maxlen, len);
 		}
 	}

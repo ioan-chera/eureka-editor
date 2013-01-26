@@ -116,7 +116,9 @@ char *ReplaceExtension(const char *filename, const char *ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
-	char *buffer = StringNew(strlen(filename) + (ext ? strlen(ext) : 0) + 10);
+	size_t total_len = strlen(filename) + (ext ? strlen(ext) : 0);
+
+	char *buffer = StringNew((int)total_len + 10);
 
 	strcpy(buffer, filename);
 
@@ -227,13 +229,13 @@ const char *FilenameReposition(const char *filename, const char *othername)
 
 	const char *op = fl_filename_name(othername);
 
-	int dir_len = op - othername;
-	if (dir_len <= 0)
+	if (op <= othername)
 		return StringDup(filename);
 
-	int len = strlen(filename) + dir_len;
+	size_t dir_len = op - othername;
+	size_t len = strlen(filename) + dir_len;
 
-	char *result = StringNew(len + 10);
+	char *result = StringNew((int)len + 10);
 
 	memcpy(result, othername, dir_len);
 	result[dir_len] = 0;
@@ -261,11 +263,11 @@ bool FileCopy(const char *src_name, const char *dest_name)
 
 	while (true)
 	{
-		int rlen = fread(buffer, 1, sizeof(buffer), src);
+		size_t rlen = fread(buffer, 1, sizeof(buffer), src);
 		if (rlen <= 0)
 			break;
 
-		int wlen = fwrite(buffer, 1, rlen, dest);
+		size_t wlen = fwrite(buffer, 1, rlen, dest);
 		if (wlen != rlen)
 			break;
 	}
@@ -414,11 +416,11 @@ const char * FileFindInPath(const char *paths, const char *base_name)
 	for (;;)
 	{
 		const char *sep = strchr(paths, ';');
-		int len = sep ? (sep - paths) : strlen(paths);
+		size_t len = sep ? (sep - paths) : strlen(paths);
 
 		SYS_ASSERT(len > 0);
 
-		const char *filename = StringPrintf("%.*s/%s", len, paths, base_name);
+		const char *filename = StringPrintf("%.*s/%s", (int)len, paths, base_name);
 
 		//  fprintf(stderr, "Trying data file: [%s]\n", filename);
 

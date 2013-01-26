@@ -111,8 +111,8 @@ typedef std::vector< const char * > string_list_t;
  *  FIXME Hexen has a different value for MIN_DEATHMATH_STARTS
  */
 const int DOOM_PLAYER_HEIGHT  = 56;
-const size_t DOOM_MIN_DEATHMATCH_STARTS = 4;
-const size_t DOOM_MAX_DEATHMATCH_STARTS = 10;
+const int DOOM_MIN_DEATHMATCH_STARTS = 4;
+const int DOOM_MAX_DEATHMATCH_STARTS = 10;
 
 
 /*

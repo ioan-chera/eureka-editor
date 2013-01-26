@@ -405,7 +405,7 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 	
 	strcat(pattern, search_pat);
 
-	int len = strlen(pattern);
+	size_t len = strlen(pattern);
 
 	if (len == 0)
 		return true;

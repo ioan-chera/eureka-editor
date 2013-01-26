@@ -176,7 +176,7 @@ bool CheckFailed (int x0, int y0, char *prompt1, char *prompt2, bool fatal,
 {
 #if 0
 	int key;
-	size_t maxlen;
+	int maxlen;
 
 	if (fatal)
 		maxlen = 44;
@@ -883,7 +883,7 @@ bool CheckStartingPos ()
 	bool p2 = false;
 	bool p3 = false;
 	bool p4 = false;
-	size_t dm = 0;
+	int dm = 0;
 	int  t;
 
 	for (t = 0 ; t < NumThings ; t++)
