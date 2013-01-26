@@ -456,7 +456,7 @@ void M_LookForIWADs()
 
 	M_CollectKnownDefs("games", game_list);
 
-	for (unsigned int i ; i < game_list.size() ; i++)
+	for (unsigned int i = 0 ; i < game_list.size() ; i++)
 	{
 		const char *game = game_list[i];
 
@@ -744,10 +744,10 @@ public:
 
 		cy += title->h() + 10;
 
-		for (long i = 0 ; i < total_num ; i++)
+		for (int i = 0 ; i < total_num ; i++)
 		{
 			char number[64];
-			sprintf(number, "%ld.", 1 + i);
+			sprintf(number, "%d.", 1 + i);
 
 			Fl_Box * num_box = new Fl_Box(FL_NO_BOX, 10, cy, 35, 25, "");
 			num_box->copy_label(number);
@@ -755,12 +755,12 @@ public:
 
 			char name_buf[256];
 
-			recent_files.Format(name_buf, (int)i);
+			recent_files.Format(name_buf, i);
 
 			Fl_Button * but = new Fl_Button(50, cy, W - 70, 24);
 			but->copy_label(name_buf);
 			but->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-			but->callback(button_callback, (void *) i);
+			but->callback(button_callback, (void *)(long)i);
 
 			cy += 28;
 		}
