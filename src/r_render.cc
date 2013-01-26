@@ -1809,6 +1809,7 @@ void R3D_Set(void)
 		usegamma = int_val % 5;
 		if (usegamma < 0) usegamma = 0;
 		W_UpdateGamma();
+		Status_Set("Gamma level %d", usegamma);
 	}
 	else if (y_stricmp(var_name, "tex") == 0)
 	{
@@ -1889,6 +1890,8 @@ void R3D_Gamma(void)
 	usegamma = (usegamma + delta + 5) % 5;
 
 	W_UpdateGamma();
+
+	Status_Set("Gamma level %d", usegamma);
 
 	edit.RedrawMap = 1;
 }
