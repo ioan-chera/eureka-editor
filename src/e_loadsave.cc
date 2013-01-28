@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -527,6 +527,8 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	Level_name = strdup(level);
 
+	Status_Set("Loaded %s", Level_name);
+
 	if (main_win)
 	{
 		main_win->SetTitle(wad->PathName(), level);
@@ -876,6 +878,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	save_wad->EndWrite();
 
 	Level_name = strdup(level);
+
+	Status_Set("Saved %s", Level_name);
 
 	if (main_win)
 	{
