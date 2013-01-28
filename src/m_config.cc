@@ -1296,7 +1296,7 @@ bool M_LoadUserState()
 
 		StringRemoveCRLF(line);
 
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS);
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
 
 		if (num_tok == 0)
 			continue;
