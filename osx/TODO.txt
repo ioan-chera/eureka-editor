@@ -1,0 +1,1 @@
+- add support for opening files from drag-drop even after it's run

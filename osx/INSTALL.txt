@@ -1,0 +1,37 @@
+Building for Mac OS X
+---------------------
+
+The Eureka Doom Editor.xcodeproj package has been made with Xcode 4. For info on how to build using an older version or by using another development environment or build automation, see Section "Building by other means".
+
+Xcode 4 can be downloaded from the Mac App Store for free, if you have Mac OS X 10.7 "Lion" or more. Xcode 3 comes bundled with the Mac OS X 10.6 or earlier DVD.
+
+Dependencies:
+
+- fltk.framework
+- fltk_zlib.framework
+
+FLTK can be downloaded from the FLTK website, http://www.fltk.org 
+
+Follow the instructions in the FLTK source readme file on how to build them (at this time, you can choose between command-line, Xcode 3 and Xcode 4). Then copy them either to /Library/Frameworks (will require admin password) or to ~/Library/Frameworks (from within your home folder).
+
+
+Building by other means
+-----------------------
+
+If you're using Xcode 4 to load the project, ignore this section.
+
+For compilation, include the *.cc and *.h files from "src" and those from "glbsp_src". 
+
+For editor data, make sure to stage the "common", "games", "mods", "ports" folders for packaging into the target *.app bundle, at the base destination (i.e. sisters with "Contents", the topmost folder from inside an *.app package), by preserving the directory trees, i.e. if you need to choose between loading as groups and loading the folder references, choose the latter.
+
+By default, this has been built as 32+64 bit Intel, 10.5 minimum.
+
+Preprocessor definitions used in this project:
+
+main=main_ORIGINAL
+
+ -> redefines the main() function from the base program, so that the OS X port
+    can call its own implementation.
+
+----
+Ioan Chera
