@@ -3,6 +3,8 @@ EUREKA WISH-LIST
 ================
 
 
+-  remove 'escape_key_quits' config item
+
 fix UI_Browser::Scroll()
 
 
