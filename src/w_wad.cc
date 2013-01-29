@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -696,7 +696,7 @@ void Wad_file::BeginWrite()
 		BugError("Wad_file::BeginWrite() called on read-only file\n");
 
 	if (begun_write)
-		BugError("Wad_file::BeginWrite() called again with EndWrite()\n");
+		BugError("Wad_file::BeginWrite() called again without EndWrite()\n");
 
 	// put the size into a quantum state
 	total_size = 0;
@@ -954,6 +954,14 @@ void Wad_file::WriteDirectory()
 		FatalError("Error writing WAD header.\n");
 
 	fflush(fp);
+}
+
+
+bool Wad_file::Backup(const char *filename)
+{
+	fflush(fp);
+
+	return FileCopy(PathName(), filename);
 }
 
 

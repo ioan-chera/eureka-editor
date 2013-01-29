@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -157,7 +157,11 @@ public:
 	// in directory size or location, and directory contents (CRC).
 	bool WasExternallyModified();
 
-	// all changes to the was must occur between calls to BeginWrite()
+	// backup the current wad into the given filename.
+	// returns true if successful, false on error.
+	bool Backup(const char *filename);
+
+	// all changes to the wad must occur between calls to BeginWrite()
 	// and EndWrite() methods.
 	void BeginWrite();
 	void EndWrite();
