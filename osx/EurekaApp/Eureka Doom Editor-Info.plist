@@ -38,11 +38,12 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>745.0.0</string>
+	<string>760</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2001-2013 Andrew Apted, © 1997-2003 André Majorel</string>
+	<string>Copyright © 2001-2013 Andrew Apted 
+Copyright © 1997-2003 André Majorel et al.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

@@ -1,46 +1,30 @@
+//------------------------------------------------------------------------
+//  OS X EDITOR APP DELEGATE INTERFACE
+//------------------------------------------------------------------------
 //
-//  AppDelegate.h
-//  EurekaApp
+//  Eureka DOOM Editor
 //
-//  Created by Ioan on 20.11.2012.
-//  Copyright (c) 2012 Ioan Chera
+//  Copyright (C) 2012-2013 Ioan Chera
 //
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//------------------------------------------------------------------------
+//
+//  Based on Yadex which incorporated code from DEU 5.21 that was put
+//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//
+//------------------------------------------------------------------------
 
 #import <Cocoa/Cocoa.h>
 
-
-//int mainCpp();
-//void mainQuitCpp();
-
-//extern const char *install_dir;  // install dir (e.g. /usr/share/eureka)
-//extern const char *home_dir;     // home dir (e.g. $HOME/.eureka)
-
-
-
-
-// IOAN 20121121
-//int mainLine(int argc, char *argv[]);
-//int NSMyApplicationMain(int argc, char *argv[]);
-
-//@class EUSettingsWindowController;
-@class EUExtraInterface;
-
-
 @interface AppDelegate : NSObject
-{
-    NSString *bundlePath;
-	NSString *pwadName;
-    IBOutlet NSMenu *appMenu;
-    
-//    EUSettingsWindowController *settingsWindowController;
-	
-	IBOutlet EUExtraInterface *extraInterface;
-}
-
-@property (readonly) NSString *bundlePath;
-//@property (readonly) EUSettingsWindowController *settingsWindowController;
-
-
-- (void)launchMainLine;
 
 @end
