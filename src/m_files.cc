@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Recent Files / Known Iwads
+//  Recent Files / Known Iwads / Backups
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -356,6 +356,8 @@ const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
 
 
 //------------------------------------------------------------------------
+//  EUREKA LUMP HANDLING
+//------------------------------------------------------------------------
 
 
 static const char * SearchDirForIWAD(const char *dir_name, const char *game)
@@ -687,6 +689,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 
 //------------------------------------------------------------------------
+//  RECENT FILES
+//------------------------------------------------------------------------
 
 
 class UI_RecentFiles : public Fl_Double_Window
@@ -817,6 +821,18 @@ void M_RecentDialog(const char ** file_v, const char ** map_v)
 	}
 }
 
+
+//------------------------------------------------------------------------
+//  BACKUP SYSTEM
+//------------------------------------------------------------------------
+
+
+void M_BackupWad(Wad_file *wad)
+{
+	// FIXME
+
+	LogPrintf("would like to back-up this: %s\n", wad->PathName());
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Recent Files / Known Iwads
+//  Recent Files / Known Iwads / Backups
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -37,6 +37,8 @@ const char * M_PickDefaultIWAD();
 
 bool M_ParseEurekaLump(Wad_file *wad);
 void M_WriteEurekaLump(Wad_file *wad);
+
+void M_BackupWad(Wad_file *wad);
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

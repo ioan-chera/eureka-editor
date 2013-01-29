@@ -200,7 +200,7 @@ static void CreateHomeDirs()
 
 	static const char *const subdirs[] =
 	{
-		"cache", "iwads", "games", "ports", "mods", NULL
+		"cache", "iwads", "games", "ports", "mods", "backups", NULL
 	};
 
 	for (int i = 0 ; subdirs[i] ; i++)

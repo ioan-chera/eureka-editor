@@ -885,8 +885,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	{
 		main_win->SetTitle(wad->PathName(), level);
 
-		// save the user state, associated with this map
-
+		// save the user state associated with this map
 		M_SaveUserState();
 	}
 }
@@ -917,6 +916,8 @@ void CMD_SaveMap()
 			return;
 		}
 	}
+
+	M_BackupWad(edit_wad);
 
 	LogPrintf("Saving Map : %s of %s\n", Level_name, edit_wad->PathName());
 
@@ -1021,6 +1022,12 @@ void CMD_ExportMap()
 			delete wad;
 			return;
 		}
+	}
+
+	// back-up an existing wad
+	if (exists)
+	{
+		M_BackupWad(wad);
 	}
 
 
