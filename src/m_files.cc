@@ -827,11 +827,90 @@ void M_RecentDialog(const char ** file_v, const char ** map_v)
 //------------------------------------------------------------------------
 
 
+// config variables
+int backup_max_files = 2;
+int backup_max_space = 100;  // MB
+
+
+static bool Backup_ScanDir(const char *dir_name, int *low, int *high)
+{
+	*high = 0;
+	*low  = (1 << 30);
+
+	// FIXME
+}
+
+
+static const char *Backup_Name(const char *dir_name, int slot)
+{
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/%d.wad", dir_name, slot);
+
+	return filename;
+}
+
+
+static void Backup_Prune(const char *dir_name, int b_low, int b_high)
+{
+	// TODO: implement space checking too
+
+	for ( ; b_low <= b_high - backup_max_files + 1 ; b_low++)
+	{
+		FileDelete(Backup_Name(dir_name, b_low));
+	}
+}
+
+
 void M_BackupWad(Wad_file *wad)
 {
-	// FIXME
+return; // DISABLED
 
-	LogPrintf("would like to back-up this: %s\n", wad->PathName());
+
+	// convert wad filename to a directory name in $home_dir/backups
+
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/backups/%s", home_dir, fl_filename_name(wad->PathName()));
+
+	char * dir_name = ReplaceExtension(filename, NULL);
+
+	DebugPrintf("dir_name for backup: '%s'\n", dir_name);
+
+	// create the directory if it doesn't already exist
+	// (this will fail if it DOES already exist, but that's OK)
+	FileMakeDir(dir_name);
+
+	// scan directory to determine lowest and highest numbers in use
+	int b_low, b_high;
+
+	if (! Backup_ScanDir(dir_name, &b_low, &b_high))
+	{
+		// Hmmm, show a dialog ??
+		LogPrintf("WARNING: backup failed (cannot scan dir)\n");
+		StringFree(dir_name);
+		return;
+	}
+
+	if (b_low < b_high)
+	{
+		Backup_Prune(dir_name, b_low, b_high);
+	}
+
+	// actually back-up the file
+
+	const char * dest_name = Backup_Name(dir_name, b_high + 1);
+
+	StringFree(dir_name);
+
+	if (! wad->Backup(dest_name))
+	{
+		// Hmmm, show a dialog ??
+		LogPrintf("WARNING: backup failed (cannot copy file)\n");
+		return;
+	}
+
+	LogPrintf("Backed up wad to: %s\n", filename);
 }
 
 //--- editor settings ---
