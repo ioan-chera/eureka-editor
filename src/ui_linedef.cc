@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -56,8 +56,6 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
-	end();  // cancel begin() in Fl_Group constructor
-
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
 
@@ -70,8 +68,6 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	which = new UI_Nombre(X, Y, W-10, 28, "Linedef");
 
-	add(which);
-
 	Y += which->h() + 4;
 
 
@@ -80,20 +76,14 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(type);
-
 	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
-
-	add(choose);
 
 	Y += type->h() + 2;
 
 
 	desc = new Fl_Output(X+58, Y, W-66, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
-
-	add(desc);
 
 	Y += desc->h() + 2;
 
@@ -103,21 +93,15 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(tag);
-
 
 	length = new Fl_Output(X+58, Y, 64, 24, "Length: ");
 	length->align(FL_ALIGN_LEFT);
-
-	add(length);
 
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		args[a] = new Fl_Int_Input(X+58+43*a, Y, 39, 24);
 		args[a]->hide();
-
-		add(args[a]);
 	}
 
 	args[0]->label("Args:");
@@ -131,72 +115,52 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X, Y, 64, 24, "Flags: ");
 	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
-	add(flags);
-
 
 	f_automap = new Fl_Choice(X+W-104, Y, 104, 22);
 	f_automap->add("Normal|Invisible|Mapped|Secret");
 	f_automap->value(0);
 	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
 
-	add(f_automap);
-
 
 	Y += flags->h() - 1;
 
 
-	f_upper = new Fl_Check_Button(X+12, Y+2, 20, 20, "upper unpeg");
-	f_upper->align(FL_ALIGN_RIGHT);
+	int FW = 110;
+
+	f_upper = new Fl_Check_Button(X+12, Y+2, FW, 20, "upper unpeg");
 	f_upper->labelsize(12);
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
-	add(f_upper);
 
-
-	f_walk = new Fl_Check_Button(X+W-120, Y+2, 20, 20, "block walk");
-	f_walk->align(FL_ALIGN_RIGHT);
+	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block walk");
 	f_walk->labelsize(12);
 	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
 
-	add(f_walk);
-
 
 	Y += 19;
 
 
-	f_lower = new Fl_Check_Button(X+12, Y+2, 20, 20, "lower unpeg");
-	f_lower->align(FL_ALIGN_RIGHT);
+	f_lower = new Fl_Check_Button(X+12, Y+2, FW, 20, "lower unpeg");
 	f_lower->labelsize(12);
 	f_lower->callback(flags_callback, new line_flag_CB_data_c(this, MLF_LowerUnpegged));
 
-	add(f_lower);
 
-
-	f_mons = new Fl_Check_Button(X+W-120, Y+2, 20, 20, "block mons");
-	f_mons->align(FL_ALIGN_RIGHT);
+	f_mons = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block mons");
 	f_mons->labelsize(12);
 	f_mons->callback(flags_callback, new line_flag_CB_data_c(this, MLF_BlockMonsters));
-
-	add(f_mons);
 
 
 	Y += 19;
 
 
-	f_passthru = new Fl_Check_Button(X+12, Y+2, 20, 20, "pass thru");
-	f_passthru->align(FL_ALIGN_RIGHT);
+	f_passthru = new Fl_Check_Button(X+12, Y+2, FW, 20, "pass thru");
 	f_passthru->labelsize(12);
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_PassThru));
 
-	add(f_passthru);
 
-
-	f_sound = new Fl_Check_Button(X+W-120, Y+2, 20, 20, "block sound");
-	f_sound->align(FL_ALIGN_RIGHT);
+	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block sound");
 	f_sound->labelsize(12);
 	f_sound->callback(flags_callback, new line_flag_CB_data_c(this, MLF_SoundBlock));
-
-	add(f_sound);
 
 
 	Y += 36;
@@ -204,17 +168,15 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	front = new UI_SideBox(x(), Y, w(), 140, 0);
 
-	add(front);
-
 	Y += front->h() + 10;
 
 
 	back = new UI_SideBox(x(), Y, w(), 140, 1);
 
-	add(back);
-
 	Y += back->h();
 
+
+	end();
 
 	resizable(NULL);
 }
