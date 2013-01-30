@@ -3,6 +3,8 @@ EUREKA WISH-LIST
 ================
 
 
++  bboxes of thing/line flag widgets
+
 -  remove 'escape_key_quits' config item
 
 fix UI_Browser::Scroll()
@@ -47,6 +49,14 @@ General
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
    use fl_choice() code to bootstrap it.
+
++  if multiple files are specified (by drag'n'drop or command line),
+   then remember them and have a choice widget in the Open Map dialog
+   which lets you select them.
+
+   Also have OpenNext / OpenPrev binding commands.
+
+   IDEA: include the recent files in there too
 
 
 
@@ -168,6 +178,8 @@ General
 ?  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
+
+IDEA: if a given pwad (from command line) does not exist, ask to create it
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
