@@ -663,6 +663,8 @@ bool M_ParseEurekaLump(Wad_file *wad)
 }
 
 
+/* Note: this assumes that wad->BeginWrite() has already been called.
+ */
 void M_WriteEurekaLump(Wad_file *wad)
 {
 	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
@@ -851,11 +853,20 @@ static const char *Backup_Name(const char *dir_name, int slot)
 }
 
 
-static void Backup_Prune(const char *dir_name, int b_low, int b_high)
+static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_size)
 {
-	// TODO: implement space checking too
+	// Note: the logic here for checking space is very crude, it assumes
+	//       all existing backups have the same size as the currrent wad.
 
-	for ( ; b_low <= b_high - backup_max_files + 1 ; b_low++)
+	// do calculations in KB units
+	wad_size = wad_size / 1024 + 1;
+
+	int backup_num = 2 + backup_max_space * 1024 / wad_size;
+
+	if (backup_num > backup_max_files)
+		backup_num = backup_max_files;
+
+	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
 		FileDelete(Backup_Name(dir_name, b_low));
 	}
@@ -864,8 +875,11 @@ static void Backup_Prune(const char *dir_name, int b_low, int b_high)
 
 void M_BackupWad(Wad_file *wad)
 {
-return; // DISABLED
+	// disabled ?
+	if (backup_max_files <= 0 || backup_max_space <= 0)
+		return;
 
+return;
 
 	// convert wad filename to a directory name in $home_dir/backups
 
@@ -894,7 +908,9 @@ return; // DISABLED
 
 	if (b_low < b_high)
 	{
-		Backup_Prune(dir_name, b_low, b_high);
+		int wad_size = wad->TotalSize();
+
+		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
 	// actually back-up the file
