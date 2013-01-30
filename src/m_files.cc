@@ -830,16 +830,35 @@ void M_RecentDialog(const char ** file_v, const char ** map_v)
 
 
 // config variables
-int backup_max_files = 2;
-int backup_max_space = 100;  // MB
+int backup_max_files = 40;
+int backup_max_space = 60;  // MB
 
 
-static bool Backup_ScanDir(const char *dir_name, int *low, int *high)
+typedef struct
 {
-	*high = 0;
-	*low  = (1 << 30);
+	int low;
+	int high;
 
-	// FIXME
+} backup_scan_data_t;
+
+
+static void backup_scan_file(const char *name, int flags, void *priv_dat)
+{
+	backup_scan_data_t * data = (backup_scan_data_t *)priv_dat;
+
+	if (flags & SCAN_F_Hidden)
+		return;
+
+	if (flags & SCAN_F_IsDir)
+		return;
+
+	if (! isdigit(name[0]))
+		return;
+
+	int num = atoi(name);
+
+	data->low  = MIN(data->low,  num);
+	data->high = MAX(data->high, num);
 }
 
 
@@ -879,8 +898,6 @@ void M_BackupWad(Wad_file *wad)
 	if (backup_max_files <= 0 || backup_max_space <= 0)
 		return;
 
-return;
-
 	// convert wad filename to a directory name in $home_dir/backups
 
 	static char filename[FL_PATH_MAX];
@@ -896,15 +913,21 @@ return;
 	FileMakeDir(dir_name);
 
 	// scan directory to determine lowest and highest numbers in use
-	int b_low, b_high;
+	backup_scan_data_t  scan_data;
 
-	if (! Backup_ScanDir(dir_name, &b_low, &b_high))
+	scan_data.low  = (1 << 30);
+	scan_data.high = 0;
+
+	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot scan dir)\n");
 		StringFree(dir_name);
 		return;
 	}
+
+	int b_low  = scan_data.low;
+	int b_high = scan_data.high;
 
 	if (b_low < b_high)
 	{
@@ -926,7 +949,7 @@ return;
 		return;
 	}
 
-	LogPrintf("Backed up wad to: %s\n", filename);
+	LogPrintf("Backed up wad to: %s\n", dest_name);
 }
 
 //--- editor settings ---
