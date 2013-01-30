@@ -892,7 +892,7 @@ int Wad_file::PositionForWrite(int max_size)
 {
 	int want_pos;
 
-	if (max_size < 0)
+	if (max_size <= 0)
 		want_pos = HighWaterMark();
 	else
 		want_pos = FindFreeSpace(max_size);
