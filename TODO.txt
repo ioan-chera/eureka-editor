@@ -3,8 +3,6 @@ EUREKA WISH-LIST
 ================
 
 
-+  bboxes of thing/line flag widgets
-
 fix UI_Browser::Scroll()
 
 
@@ -255,12 +253,6 @@ Editing
    that merging.
 
 !!  handle self-referencing linedefs in auto create/split sector
-
-+  fix ClosestLine_CastXXX() and OppositeLineDef() to handle
-   the case where the casted ray hits a vertex.
-
-   Example: MAP01 back of line #13 hits line #189
-            (should hit either #104 or #360)
 
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
