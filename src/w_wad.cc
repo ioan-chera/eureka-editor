@@ -166,6 +166,9 @@ void Lump_c::Printf(const char *msg, ...)
 
 bool Lump_c::Finish()
 {
+	if (l_length == 0)
+		l_start = 0;
+
 	return parent->FinishLump(l_length);
 }
 
