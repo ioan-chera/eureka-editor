@@ -383,7 +383,7 @@ void CMD_Rotate90(void)
 
 	if (! GetCurrentObjects(&list) || edit.obj_type == OBJ_RADTRIGS)
 	{
-		Beep("No objects to rotate by 90deg");
+		Beep("No objects to rotate");
 		return;
 	}
 
