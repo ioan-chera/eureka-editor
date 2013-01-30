@@ -4,7 +4,9 @@ CHANGELOG
 
 +  Preferences dialog
 
-+  Key binding system (but no GUI yet)
++  key binding system (but no GUI yet)
+
++  automatically create multiple backups of edited pwads
 
 +  fixed explosion of wad size when saving repeatedly
 

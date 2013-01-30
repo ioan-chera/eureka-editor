@@ -5,8 +5,6 @@ EUREKA WISH-LIST
 
 +  bboxes of thing/line flag widgets
 
--  remove 'escape_key_quits' config item
-
 fix UI_Browser::Scroll()
 
 
@@ -36,15 +34,6 @@ General
    (c) if a parameter has a limited set of usable values, provide
        a choice button (e.g. "-1|+1").  Or at least validate the
        parameter values (use RED for unknown keywords).
-
-+  backup system
-      e.g. create ~/.eureka/backups/<basename>_###.wad
-           where ### is a number higher than any existing backup of that file
-      file is created whenever we CTRL-S, or CTRL-E into existing wad
-      limit files to a configurable number and size (delete lowest num)
-
-   -  maybe an auto-save feature (e.g. every 10 minutes unless no
-      changes occurred in the last 10 minutes).
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -135,10 +124,13 @@ General
 +  ability to hide the right-side panel
 
 +  Preferences window:
+   +  add backup_max_files / backup_max_space
    -  implement the scrolling sizes
    -  add more stuff (see USER CONFIG NEEDED, below)
 
 +  un-hard-code menu shortcuts? (how ??)
+
++  a dialog to view / load / prune backups.
 
 
 -  config var for default starting mode
@@ -167,6 +159,10 @@ General
 -  uppercase the level lump name (Level_name global var)
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
+
+?  an auto-save feature (e.g. save every N minutes unless no
+   changes occurred in the last N minutes).
+   really needs the backup view/load/prune dialog too.
 
 ?  SHIFT + move mouse = keep current highlight
 
