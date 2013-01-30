@@ -128,6 +128,7 @@ private:
 	Texture_info *tex_info;
 
 	bool begun_write;
+	int  begun_max_size;
 
 	// constructor is private
 	Wad_file(const char *_name, char _mode, FILE * _fp);
@@ -214,12 +215,13 @@ private:
 	// is ignored since it will be re-written at EndWrite().
 	int FindFreeSpace(int length);
 
-	// set the file write position to match 'total_size', appending
-	// zeros if the file is currently shorter (the different should
+	// find a place (possibly at end of WAD) where we can write some
+	// data of max_size (-1 means unlimited), and seek to that spot
+	// (possibly writing some padding zeros -- the difference should
 	// be no more than a few bytes).  Returns new position.
-	int PositionForWrite();
+	int PositionForWrite(int max_size = -1);
 
-	bool FinishLump();
+	bool FinishLump(int final_size);
 	int  WritePadding(int count);
 
 	// write the new directory, updating the dir_xxx variables

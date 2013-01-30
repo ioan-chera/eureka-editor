@@ -144,9 +144,6 @@ bool Lump_c::Write(void *data, int len)
 
 	l_length += len;
 
-	// hmmm, maybe move this into Wad_file
-	parent->total_size += len;
-
 	return (fwrite(data, len, 1, parent->fp) == 1);
 }
 
@@ -169,7 +166,7 @@ void Lump_c::Printf(const char *msg, ...)
 
 bool Lump_c::Finish()
 {
-	return parent->FinishLump();
+	return parent->FinishLump(l_length);
 }
 
 
@@ -653,7 +650,7 @@ bool Wad_file::WasExternallyModified()
 
 	if (total_size != (int)ftell(fp))
 		return true;
-	
+
 	rewind(fp);
 
 	raw_wad_header_t header;
@@ -803,7 +800,9 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 {
 	SYS_ASSERT(begun_write);
 
-	int start = PositionForWrite();
+	begun_max_size = max_size;
+
+	int start = PositionForWrite(max_size);
 
 	Lump_c *lump = new Lump_c(this, name, start, 0);
 
@@ -889,43 +888,67 @@ int Wad_file::FindFreeSpace(int length)
 }
 
 
-int Wad_file::PositionForWrite()
+int Wad_file::PositionForWrite(int max_size)
 {
-	// already got the position?
-	if (total_size > 0)
-		return total_size;
+	int want_pos;
 
-	total_size = HighWaterMark();
-	SYS_ASSERT(total_size > 0);
+	if (max_size < 0)
+		want_pos = HighWaterMark();
+	else
+		want_pos = FindFreeSpace(max_size);
+
+	// determine if position is past end of file
+	// (difference should only be a few bytes)
+	//
+	// Note: doing this for every new lump may be a little expensive,
+	//       but trying to optimise it away will just make the code
+	//       needlessly complex and hard to follow.
 
 	if (fseek(fp, 0, SEEK_END) < 0)
 		FatalError("Error seeking to new write position.\n");
 
-	int pos = (int)ftell(fp);
+	total_size = (int)ftell(fp);
 
-	if (pos < 0)
+	if (total_size < 0)
 		FatalError("Error seeking to new write position.\n");
-	
-	if (pos < total_size)
+
+	if (want_pos > total_size)
 	{
-		WritePadding(total_size - pos);
-		fflush(fp);
+		SYS_ASSERT(want_pos < total_size + 8);
+
+		WritePadding(want_pos - total_size);
 	}
-	else if (pos > total_size)
+	else if (want_pos == total_size)
 	{
-		if (fseek(fp, total_size, SEEK_SET) < 0)
+		/* ready to write */
+	}
+	else
+	{
+		if (fseek(fp, want_pos, SEEK_SET) < 0)
 			FatalError("Error seeking to new write position.\n");
 	}
 
-	return total_size;
+	DebugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
+
+	return want_pos;
 }
 
 
-bool Wad_file::FinishLump()
+bool Wad_file::FinishLump(int final_size)
 {
-	if (total_size & 3)
+	fflush(fp);
+
+	// sanity check
+	if (begun_max_size >= 0)
+		if (final_size > begun_max_size)
+			BugError("Internal Error: wrote too much in lump (%d > %d)\n",
+					 final_size, begun_max_size);
+
+	int pos = (int)ftell(fp);
+
+	if (pos & 3)
 	{
-		total_size += WritePadding(4 - (total_size & 3));
+		WritePadding(4 - (pos & 3));
 	}
 
 	fflush(fp);
