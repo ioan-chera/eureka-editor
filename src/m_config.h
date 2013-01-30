@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -50,6 +50,9 @@ extern bool default_grid_snap;
 extern int  default_grid_mode;
 
 extern int multi_select_modifier;
+
+extern int backup_max_files;
+extern int backup_max_space;
 
 extern bool glbsp_fast;
 extern bool glbsp_verbose;

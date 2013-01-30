@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -229,6 +229,24 @@ static const opt_desc_t options[] =
 	},
 
 	/* ------------ Preferences ------------ */
+
+	{	"backup_max_files",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Maximum copies to make when backing up a wad",
+		NULL,
+		&backup_max_files
+	},
+
+	{	"backup_max_space",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Maximum space to use (in MB) when backing up a wad",
+		NULL,
+		&backup_max_space
+	},
 
 	{	"glbsp_fast",
 		0,
