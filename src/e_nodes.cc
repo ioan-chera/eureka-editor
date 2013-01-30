@@ -334,10 +334,14 @@ fprintf(stderr, "new_name : %s\n", new_name);
 	else if (nb_comms.cancelled)
 	{
 		dialog->Finish_Cancel();
+
+		Status_Set("Cancelled");
 	}
 	else
 	{
 		dialog->Finish_Error();
+
+		Status_Set("Error building nodes");
 	}
 
 	while (! dialog->WantClose())
@@ -365,6 +369,8 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		LogPrintf("Re-opening the map (%s)\n", Level_name);
 
 		LoadLevel(edit_wad, Level_name);
+
+		Status_Set("Built nodes OK");
 
 		Replacer = false;
 		MadeChanges = 0;
