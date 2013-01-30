@@ -95,18 +95,18 @@ int ClosestLine_CastingHoriz(int x, int y, int *side)
 		int ly1 = LineDefs[n]->Start()->y;
 		int ly2 = LineDefs[n]->End()->y;
 
-		// does the linedef cross the horizontal ray?
-		if ( (ly1 > y) == (ly2 > y) )
-			continue;
-
 		// ignore purely horizontal lines
 		if (ly1 == ly2)
+			continue;
+
+		// does the linedef cross the horizontal ray?
+		if (MIN(ly1, ly2) >= y + 1 || MAX(ly1, ly2) <= y)
 			continue;
 
 		int lx1 = LineDefs[n]->Start()->x;
 		int lx2 = LineDefs[n]->End()->x;
 
-		float dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (float)(ly2 - ly1);
+		float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
 
 		if (fabs(dist) < best_dist)
 		{
@@ -115,7 +115,7 @@ int ClosestLine_CastingHoriz(int x, int y, int *side)
 
 			if (side)
 			{
-				if (best_dist < 0.5)
+				if (best_dist < 0.2)
 					*side = 0;  // on the line
 				else if ( (ly1 > ly2) == (dist > 0))
 					*side = 1;  // right side
@@ -139,18 +139,18 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 		int lx1 = LineDefs[n]->Start()->x;
 		int lx2 = LineDefs[n]->End()->x;
 
-		// does the linedef cross the vertical ray?
-		if ( (lx1 > x) == (lx2 > x) )
-			continue;
-
 		// ignore purely vertical lines
 		if (lx1 == lx2)
+			continue;
+
+		// does the linedef cross the vertical ray?
+		if (MIN(lx1, lx2) >= x + 1 || MAX(lx1, lx2) <= x)
 			continue;
 
 		int ly1 = LineDefs[n]->Start()->y;
 		int ly2 = LineDefs[n]->End()->y;
 
-		float dist = ly1 - y + (ly2 - ly1) * (x - lx1) / (float)(lx2 - lx1);
+		float dist = ly1 - (y + 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
 
 		if (fabs(dist) < best_dist)
 		{
@@ -159,7 +159,7 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 
 			if (side)
 			{
-				if (best_dist < 0.5)
+				if (best_dist < 0.2)
 					*side = 0;  // on the line
 				else if ( (lx1 > lx2) == (dist < 0))
 					*side = 1;  // right side
@@ -186,9 +186,9 @@ bool PointOutsideOfMap(int x, int y)
 		int ly2 = LineDefs[n]->End()->y;
 
 		// does the linedef cross the horizontal ray?
-		if ( (ly1 > y) != (ly2 > y) && (ly1 != ly2))
+		if (MIN(ly1, ly2) <= y && MAX(ly1, ly2) >= y + 1)
 		{
-			float dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (float)(ly2 - ly1);
+			float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
 
 			dirs |= (dist < 0) ? 1 : 2;
 
@@ -196,9 +196,9 @@ bool PointOutsideOfMap(int x, int y)
 		}
 
 		// does the linedef cross the vertical ray?
-		if ( (lx1 > x) != (lx2 > x) && (lx1 != lx2))
+		if (MIN(lx1, lx2) <= x && MAX(lx1, lx2) >= x + 1)
 		{
-			float dist = ly1 - y + (ly2 - ly1) * (x - lx1) / (float)(lx2 - lx1);
+			float dist = ly1 - (y - 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
 
 			dirs |= (dist < 0) ? 4 : 8;
 
@@ -241,10 +241,10 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 
 		if (abs(dy) >= abs(dx))  // casting a horizontal ray
 		{
-			if ( (ny1 > y) == (ny2 > y) || ny1 == ny2 )
+			if (MIN(ny1, ny2) >= y + 1 || MAX(ny1, ny2) <= y)
 				continue;
 
-			float dist = nx1 - x + (nx2 - nx1) * (y - ny1) / (float)(ny2 - ny1);
+			float dist = nx1 - (x + 0.5) + (nx2 - nx1) * (y + 0.5 - ny1) / (float)(ny2 - ny1);
 
 			if ( (dy < 0) == (ld_side > 0) )
 				dist = -dist;
@@ -265,10 +265,10 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 		}
 		else  // casting a vertical ray
 		{
-			if ( (nx1 > x) == (nx2 > x) || nx1 == nx2 )
+			if (MIN(nx1, nx2) >= x + 1 || MAX(nx1, nx2) <= x)
 				continue;
 
-			float dist = ny1 - y + (ny2 - ny1) * (x - nx1) / (float)(nx2 - nx1);
+			float dist = ny1 - (y + 0.5) + (ny2 - ny1) * (x + 0.5 - nx1) / (float)(nx2 - nx1);
 
 			if ( (dx > 0) == (ld_side > 0) )
 				dist = -dist;
@@ -303,7 +303,6 @@ int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2)
 
 	return (tmp < 0) ? -1 : (tmp > 0) ? +1 : 0;
 }
-
 
 
 class Close_obj
