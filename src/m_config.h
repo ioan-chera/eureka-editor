@@ -32,7 +32,6 @@
 /* ==== CONFIG VARIABLES ==================== */
 
 extern bool digits_set_zoom;
-extern bool escape_key_quits;
 extern bool leave_offsets_alone;
 extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;

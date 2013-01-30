@@ -293,15 +293,6 @@ static const opt_desc_t options[] =
 		&digits_set_zoom
 	},
 
-	{	"escape_key_quits",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"The ESC key will quit Eureka",
-		NULL,
-		&escape_key_quits
-	},
-
 	{	"gui_scheme",
 		0,
 		OPT_INTEGER,

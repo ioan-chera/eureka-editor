@@ -55,7 +55,6 @@ int active_wmask = 0;
 
 // config items
 bool digits_set_zoom = false;
-bool escape_key_quits = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
