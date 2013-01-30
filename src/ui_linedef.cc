@@ -579,10 +579,6 @@ int UI_LineBox::CalcFlags() const
 
 	int lineflags = 0;
 
-	// FIXME: not sure if this belongs here
-	if (LineDefs[obj]->left >= 0)
-		lineflags |= MLF_TwoSided;
-
 	switch (f_automap->value())
 	{
 		case 0: /* Normal    */; break;
