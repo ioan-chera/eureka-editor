@@ -830,7 +830,7 @@ void M_RecentDialog(const char ** file_v, const char ** map_v)
 
 
 // config variables
-int backup_max_files = 40;
+int backup_max_files = 30;
 int backup_max_space = 60;  // MB
 
 
