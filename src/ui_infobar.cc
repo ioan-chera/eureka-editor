@@ -38,7 +38,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	box(FL_FLAT_BOX);
 
 
-	// fitts' law : keep buttons flush with button of window
+	// Fitts' law : keep buttons flush with bottom of window
 	Y += 4;
 	H -= 4;
 
@@ -86,7 +86,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	UpdateSnapText();
 
-	X = grid_snap->x() + grid_snap->w() + 10;
+	X = grid_snap->x() + grid_snap->w() + 4;
 
 
 	mouse_x = new Fl_Output(X+28,       Y, 64, H, "x");
@@ -98,11 +98,18 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	mouse_x->labelsize(KF_fonth); mouse_y->labelsize(KF_fonth);
 	mouse_x->textsize(KF_fonth);  mouse_y->textsize(KF_fonth);
 
-	X = mouse_y->x() + mouse_y->w() + 14;
+	X = mouse_y->x() + mouse_y->w() + 10;
+
+
+	Fl_Box *div = new Fl_Box(FL_FLAT_BOX, X, Y-4, 3, H+4, NULL);
+	div->color(WINDOW_BG, WINDOW_BG);
+
+	X += 6;
 
 
 	status = new Fl_Box(FL_FLAT_BOX, X, Y-4, W - 4 - X, H+4, "Ready");
 	status->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_CLIP);
+	status->labelfont(FL_HELVETICA_BOLD);
 
 
 	// ---- resizable ----
