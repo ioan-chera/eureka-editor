@@ -6,6 +6,8 @@ CHANGELOG
 
 +  Key binding system (but no GUI yet)
 
++  fixed explosion of wad size when saving repeatedly
+
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
 -  added a status area on info bar (replaces map name)
