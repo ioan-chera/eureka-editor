@@ -835,12 +835,55 @@ int Wad_file::HighWaterMark()
 
 		int l_end = lump->l_start + lump->l_length;
 
+		l_end = ((l_end + 3) / 4) * 4;
+
 		if (offset < l_end)
 			offset = l_end;
 	}
 
-	// round up to a multiple of 4
-	offset = ((offset + 3) / 4) * 4;
+	return offset;
+}
+
+
+int Wad_file::FindFreeSpace(int length)
+{
+	length = ((length + 3) / 4) * 4;
+
+	// collect non-zero length lumps and sort by their offset
+	std::vector<Lump_c *> sorted_dir;
+
+	for (short k = 0 ; k < NumLumps() ; k++)
+	{
+		Lump_c *lump = directory[k];
+
+		if (lump->Length() > 0)
+			sorted_dir.push_back(lump);
+	}
+
+	std::sort(sorted_dir.begin(), sorted_dir.end(), Lump_c::offset_CMP_pred());
+
+
+	int offset = (int)sizeof(raw_wad_header_t);
+
+	for (unsigned int k = 0 ; k < sorted_dir.size() ; k++)
+	{
+		Lump_c *lump = sorted_dir[k];
+
+		int l_start = lump->l_start;
+		int l_end   = lump->l_start + lump->l_length;
+
+		l_end = ((l_end + 3) / 4) * 4;
+
+		if (l_end <= offset)
+			continue;
+
+		if (l_start >= offset + length)
+			continue;
+
+		// the lump overlapped the current gap, so bump offset
+
+		offset = l_end;
+	}
 
 	return offset;
 }

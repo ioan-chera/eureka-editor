@@ -75,6 +75,15 @@ public:
 	// mark the lump as finished (after writing it).
 	bool Finish();
 
+	// predicate for std::sort()
+	struct offset_CMP_pred
+	{
+		inline bool operator() (const Lump_c * A, const Lump_c * B) const
+		{
+			return A->l_start < B->l_start;
+		}
+	};
+
 private:
 	// deliberately don't implement these
 	Lump_c(const Lump_c& other);
@@ -135,6 +144,8 @@ public:
 	const char *PathName() const { return filename; }
 	bool IsReadOnly() const { return mode == 'r'; }
 
+	int TotalSize() const { return total_size; }
+
 	short NumLumps() const { return (short)directory.size(); }
 
 	Lump_c * GetLump(short index);
@@ -193,8 +204,15 @@ private:
 	void ProcessNamespaces();
 
 	// look at all the lumps and determine the lowest offset from
-	// start of file where we can write new data.
+	// start of file where we can write new data.  The directory itself
+	// is ignored for this.
 	int HighWaterMark();
+
+	// look at all lumps in directory and determine the lowest offset
+	// where a lump of the given length will fit.  Returns same as
+	// HighWaterMark() when no largest gaps exist.  The directory itself
+	// is ignored since it will be re-written at EndWrite().
+	int FindFreeSpace(int length);
 
 	// set the file write position to match 'total_size', appending
 	// zeros if the file is currently shorter (the different should
