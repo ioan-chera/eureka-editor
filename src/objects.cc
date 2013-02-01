@@ -1270,6 +1270,47 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		}
 		else
 		{
+			const SideDef *RS = L1->Right();
+			const SideDef *LS = L1->Left();
+
+			const Sector *F1 = L1->Right()->SecRef();
+			const Sector *B1 = L1-> Left()->SecRef();
+			const Sector *F2 = L2->Right()->SecRef();
+			const Sector *B2 = L2-> Left()->SecRef();
+
+			// logic to determine which sides we copy 
+
+			int f_diff1 = B1->floorh - F1->floorh;
+			int f_diff2 = B2->floorh - F2->floorh;
+			int c_diff1 = B1->ceilh  - F1->ceilh;
+			int c_diff2 = B2->ceilh  - F2->ceilh;
+
+			if (f_diff1 * f_diff2 > 0)
+			  { /* no change */ }
+			else if (f_diff1 * f_diff2 < 0)
+			  std::swap(LS, RS);
+			else if (c_diff1 * c_diff2 > 0)
+			  { /* no change */ }
+			else if (c_diff1 * c_diff2 < 0)
+			  std::swap(LS, RS);
+			else if (L1->start == L2->end || L1->end == L2->start)
+			  { /* no change */ }
+			else if (L1->start == L2->start || L1->end == L2->end)
+			  std::swap(LS, RS);
+			else if (F1 == F2 || B1 == B2)
+			  { /* no change */ }
+			else if (F1 == B1 || F1 == B2 || F2 == B1 || F2 == B2)
+			  std::swap(LS, RS);
+
+			// TODO; review if we should copy '-' into lowers or uppers
+
+			BA_ChangeSD(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			BA_ChangeSD(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
+			BA_ChangeSD(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+
+			BA_ChangeSD(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			BA_ChangeSD(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
+			BA_ChangeSD(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 
