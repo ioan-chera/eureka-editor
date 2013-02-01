@@ -145,8 +145,8 @@ private:
 	void RightButtonScroll(int mode);
 
 	// convert screen coordinates to map coordinates
-	inline int MAPX(int sx) const { return (grid.orig_x + I_ROUND((sx - w()/2 - x()) / grid.Scale)); }
-	inline int MAPY(int sy) const { return (grid.orig_y + I_ROUND((h()/2 - sy + y()) / grid.Scale)); }
+	inline int MAPX(int sx) const { return I_ROUND(grid.orig_x + (sx - w()/2 - x()) / grid.Scale); }
+	inline int MAPY(int sy) const { return I_ROUND(grid.orig_y + (h()/2 - sy + y()) / grid.Scale); }
 
 	// convert map coordinates to screen coordinates
 	inline int SCREENX(int mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }

@@ -38,8 +38,8 @@ public:
 	int mode;
 
 	// map coordinates for centre of canvas
-	int orig_x;
-	int orig_y;
+	double orig_x;
+	double orig_y;
 
 	// scale for drawing map
 	float Scale;

@@ -703,8 +703,8 @@ bool CMD_Paste()
 
 	if (! edit.pointer_in_window)
 	{
-		pos_x = grid.orig_x;
-		pos_y = grid.orig_y;
+		pos_x = I_ROUND(grid.orig_x);
+		pos_y = I_ROUND(grid.orig_y);
 	}
 
 	// honor the grid snapping setting

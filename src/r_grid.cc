@@ -41,7 +41,7 @@ int  default_grid_mode = 1;  // normal
 Grid_State_c::Grid_State_c() :
 	 step(16 /* dummy */),
 	 snap(true), shown(true), mode(0),
-     orig_x(0), orig_y(0), Scale(1.0)
+     orig_x(0.0), orig_y(0.0), Scale(1.0)
 {
 }
 
@@ -83,7 +83,7 @@ void Grid_State_c::Init()
 
 void Grid_State_c::CenterMapAt(int x, int y)
 {
-	if (orig_x != x || orig_y != y)
+	if ((int)orig_x != x || (int)orig_y != y)
 	{
 		orig_x = x;
 		orig_y = y;
@@ -189,8 +189,8 @@ void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
 {
 	float dist_factor = (1.0 - before_Scale / Scale);
 
-	orig_x += I_ROUND((map_x - orig_x) * dist_factor);
-	orig_y += I_ROUND((map_y - orig_y) * dist_factor);
+	orig_x += (map_x - orig_x) * dist_factor;
+	orig_y += (map_y - orig_y) * dist_factor;
 
 	if (main_win)
 		main_win->canvas->redraw();
@@ -546,8 +546,8 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "map_pos") == 0 && num_tok >= 4)
 	{
-		grid.orig_x = atoi(tokens[1]);
-		grid.orig_y = atoi(tokens[2]);
+		grid.orig_x = atof(tokens[1]);
+		grid.orig_y = atof(tokens[2]);
 
 		grid.Scale = atof(tokens[3]);
 
@@ -590,7 +590,7 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 void Grid_WriteUser(FILE *fp)
 {
-	fprintf(fp, "map_pos %d %d %1.6f\n",
+	fprintf(fp, "map_pos %1.0f %1.0f %1.6f\n",
 	        grid.orig_x,
 			grid.orig_y,
 			grid.Scale);

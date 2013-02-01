@@ -10,6 +10,7 @@ CHANGELOG
 
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
+-  fixed jerky RMB scrolling at large zoom factors
 
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
