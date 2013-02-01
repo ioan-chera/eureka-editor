@@ -16,6 +16,8 @@ CHANGELOG
 -  disconnect command for things at same location
 -  merge command for things -- place them at same location
 
+-  prevent making two lines overlap when merging vertices
+
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
 -  added a status area on info bar (replaces map name)

@@ -17,6 +17,12 @@ General
 
 +  CHECK screen  (see misc/Checks.txt for more info)
 
++  ability to view the current logs
+   -  store initial logs in memory (until we know $home_dir)
+   -  always write to $home_dir/LOGS.txt (override with --log)
+   -  if isatty(stdout), write a copy to stdout unless -q
+   -  fopen the log file for View/Logs dialog
+
 +  GUI for key bindings
    (a) probably implement with an Fl_Table.
 
@@ -57,9 +63,6 @@ Documentation
 Editing
 -------
 
-+  dragging a vertex so that two linedefs overlap should merge the
-   linedefs
-
 +  added lines inside a void island, when connect then lose the void
    (a sector is added which is not wanted).
 
@@ -97,11 +100,6 @@ General
    (c) font size (HARD!)
    (d) implement OPT_COLOR [done]
 
-+  able to see what exact warnings and errors from node builder
-
-+  on error, ability to save/export current map
-   [unless error was in save code]
-
 +  configurable grid colors, 
    IDEA: grid has separate color for 64x64 flat alignment
 
@@ -115,10 +113,6 @@ General
    -  make sure the user built the nodes
       (ideally invoke it automatically)
 
-+  ability to view the current logs
-   -  probably store last N lines in memory (no debug info)
-   ?  if ! isatty(stdout), write logs to ~/.eureka/LOGS.txt
-
 +  ability to hide the right-side panel
 
 +  Preferences window:
@@ -130,6 +124,8 @@ General
 
 +  a dialog to view / load / prune backups.
 
+
+-  binding functions for all menu stuff (NewMap, OpenMap, etc....)
 
 -  config var for default starting mode
 
