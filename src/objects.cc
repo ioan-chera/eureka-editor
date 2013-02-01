@@ -1118,7 +1118,12 @@ void CMD_MoveObjects(int delta_x, int delta_y)
 	if (edit.obj_type == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
 	    edit.highlighted())
 	{
-		MergeVertex(edit.drag_single_vertex, edit.highlighted.num);
+		MergeVertex(edit.drag_single_vertex, edit.highlighted.num,
+		            true /* v1_will_be_deleted */);
+
+		BA_Delete(OBJ_VERTICES, edit.drag_single_vertex);
+
+		edit.drag_single_vertex = -1;
 
 		goto success;
 	}

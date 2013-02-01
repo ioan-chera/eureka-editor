@@ -27,7 +27,7 @@
 #ifndef __EUREKA_E_VERTEX_H__
 #define __EUREKA_E_VERTEX_H__
 
-void MergeVertex(int v1, int v2, bool keep_v1 = false);
+void MergeVertex(int v1, int v2, bool v1_will_be_deleted);
 
 void InsertPolygonVertices (int, int, int, int);
 

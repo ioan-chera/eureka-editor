@@ -58,13 +58,57 @@ void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
 #endif
 
 
-void MergeVertex(int v1, int v2, bool keep_v1)
+/* we merge ld1 into ld2 -- v is the common vertex
+ */
+static void MergeConnectedLines(int ld1, int ld2, int v)
+{
+	// TODO: review if we should e.g. muck around with sidedefs
+
+	BA_Delete(OBJ_LINEDEFS, ld1);
+}
+
+
+void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 {
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
 
+	// first check if two linedefs would overlap after the merge
+	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (! (L->start == v1 || L->end == v1))
+			continue;
+
+		int v3 = (L->start == v1) ? L->end : L->start;
+
+		int found = -1;
+
+		for (int k = NumLineDefs - 1 ; k >= 0 ; k--)
+		{
+			if (k == n)
+				continue;
+
+			const LineDef *K = LineDefs[k];
+
+			if ((K->start == v3 && K->end == v2) ||
+				(K->start == v2 && K->end == v3))
+			{
+				found = k;
+				break;
+			}
+		}
+
+		if (found >= 0)
+		{
+			// this deletes linedef [n]
+			MergeConnectedLines(n, found, v3);
+		}
+	}
+
 	// update any linedefs which use V1 to use V2 instead
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
 	{
 		const LineDef *L = LineDefs[n];
 
@@ -72,9 +116,16 @@ void MergeVertex(int v1, int v2, bool keep_v1)
 		if ((L->start == v1 && L->end == v2) ||
 			(L->start == v2 && L->end == v1))
 		{
-			// we simply skip it, hence when V1 is deleted this line
-			// will automatically be deleted too (as it refers to V1).
-			// Clever huh?
+			if (v1_will_be_deleted)
+			{
+				// we simply skip it, hence when V1 is deleted this line
+				// will automatically be deleted too (as it refers to V1).
+				// Clever huh?
+			}
+			else
+			{
+				BA_Delete(OBJ_LINEDEFS, n);
+			}
 			continue;
 		}
 
@@ -83,13 +134,6 @@ void MergeVertex(int v1, int v2, bool keep_v1)
 
 		if (L->end == v1)
 			BA_ChangeLD(n, LineDef::F_END, v2);
-	}
-
-	// delete V1
-
-	if (! keep_v1)
-	{
-		BA_Delete(OBJ_VERTICES, v1);
 	}
 }
 
@@ -217,7 +261,7 @@ void VERT_Merge(void)
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		MergeVertex(*it, v, true /* keep_v1 */);
+		MergeVertex(*it, v, true /* v1_will_be_deleted */);
 	}
 
 	DeleteObjects(edit.Selected);
