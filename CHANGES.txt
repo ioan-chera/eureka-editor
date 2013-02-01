@@ -12,12 +12,13 @@ CHANGELOG
 -  fixed crash clicking a linedef flag when nothing was selected
 -  fixed jerky RMB scrolling at large zoom factors
 
+-  copy properties command ('c') now copies linedef textures
+-  disconnect command for things at same location
+-  merge command for things -- place them at same location
+
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
 -  added a status area on info bar (replaces map name)
-
--  disconnect command for things at same location
--  merge command for things -- place them at same location
 
 -  removed '192' as a possible grid size
 
