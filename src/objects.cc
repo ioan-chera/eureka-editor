@@ -1184,31 +1184,66 @@ void TransferSectorProperties(int src_sec, int dest_sec)
 }
 
 
-/*
- *   TransferLinedefProperties
- *
- *   Note: right now nothing is done about sidedefs.  Being able to
- *   (intelligently) transfer sidedef properties from source line to
- *   destination linedefs could be a useful feature -- though it is
- *   unclear the best way to do it.  OTOH not touching sidedefs might
- *   be useful too.
- *
- *   -AJA- 2001-05-27
- */
-#define LINEDEF_FLAG_KEEP  (1 + 4)
+#define LINEDEF_FLAG_KEEP  (MLF_Blocking + MLF_TwoSided)
 
-void TransferLinedefProperties(int src_line, int dest_line)
+void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 {
-	const LineDef * L = LineDefs[src_line];
+	const LineDef * L1 = LineDefs[src_line];
+	const LineDef * L2 = LineDefs[dest_line];
 
 	// don't transfer certain flags
 	int flags = LineDefs[dest_line]->flags;
-	flags = (flags & LINEDEF_FLAG_KEEP) | (L->flags & ~LINEDEF_FLAG_KEEP);
+	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
 
 	BA_Begin();
 
-	BA_ChangeLD(dest_line, LineDef::F_TYPE, L->type);
-	BA_ChangeLD(dest_line, LineDef::F_TAG,  L->tag);
+	// handle textures
+	if (do_tex && L1->Right() && L2->Right())
+	{
+		/* There are four cases, depending on number of sides: 
+		 *
+		 * (a) single --> single : easy
+		 *
+		 * (b) single --> double : copy mid_tex to both sides upper and lower
+		 *                         [alternate idea: copy mid_tex to VISIBLE sides]
+		 *
+		 * (c) double --> single : pick a texture (e.g. visible lower) to copy
+		 *
+		 * (d) double --> double : copy each side, but possibly flip the
+		 *                         second linedef based on floor or ceil diff.
+		 */
+		if (! L1->Left())
+		{
+			int tex = L1->Right()->mid_tex;
+
+			if (! L2->Left())
+			{
+				BA_ChangeSD(L2->right, SideDef::F_MID_TEX, tex);
+			}
+			else
+			{
+				BA_ChangeSD(L2->right, SideDef::F_LOWER_TEX, tex);
+				BA_ChangeSD(L2->right, SideDef::F_UPPER_TEX, tex);
+
+				BA_ChangeSD(L2->left,  SideDef::F_LOWER_TEX, tex);
+				BA_ChangeSD(L2->left,  SideDef::F_UPPER_TEX, tex);
+
+				// this is debatable....
+				flags |= MLF_LowerUnpegged;
+				flags |= MLF_UpperUnpegged;
+			}
+		}
+		else if (! L2->Left())
+		{
+			// TODO
+		}
+		else
+		{
+		}
+	}
+
+	BA_ChangeLD(dest_line, LineDef::F_TYPE,  L1->type);
+	BA_ChangeLD(dest_line, LineDef::F_TAG,   L1->tag);
 	BA_ChangeLD(dest_line, LineDef::F_FLAGS, flags);
 
 	BA_End();
@@ -1253,7 +1288,7 @@ void CMD_CopyProperties(void)
 			break;
 
 		case OBJ_LINEDEFS:
-			TransferLinedefProperties(source, target);
+			TransferLinedefProperties(source, target, true /* do_tex */);
 			break;
 
 		default:

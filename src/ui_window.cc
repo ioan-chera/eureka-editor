@@ -260,7 +260,10 @@ void UI_MainWin::UpdatePanelObj()
 		thing_box->UpdateField();
 
 	if (line_box->visible())
+	{
 		line_box->UpdateField();
+		line_box->UpdateSides();
+	}
 
 	if (sec_box->visible())
 		sec_box->UpdateField();
