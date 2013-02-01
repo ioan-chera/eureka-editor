@@ -1235,7 +1235,38 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		}
 		else if (! L2->Left())
 		{
-			// TODO
+			/* pick which texture to copy */
+
+			const Sector *front = L1->Right()->SecRef();
+			const Sector *back  = L1-> Left()->SecRef();
+
+			int f_l = L1->Right()->lower_tex;
+			int f_u = L1->Right()->upper_tex;
+			int b_l = L1-> Left()->lower_tex;
+			int b_u = L1-> Left()->upper_tex;
+
+			// ignore missing textures
+			if (BA_GetString(f_l)[0] == '-') f_l = 0;
+			if (BA_GetString(f_u)[0] == '-') f_u = 0;
+			if (BA_GetString(b_l)[0] == '-') b_l = 0;
+			if (BA_GetString(b_u)[0] == '-') b_u = 0;
+
+			// try hard to find a usable texture
+			int tex = -1;
+
+				 if (front->floorh < back->floorh && f_l > 0) tex = f_l;
+			else if (front->floorh > back->floorh && b_l > 0) tex = b_l;
+			else if (front-> ceilh > back-> ceilh && f_u > 0) tex = f_u;
+			else if (front-> ceilh < back-> ceilh && b_u > 0) tex = b_u;
+			else if (f_l > 0) tex = f_l;
+			else if (b_l > 0) tex = b_l;
+			else if (f_u > 0) tex = f_u;
+			else if (b_u > 0) tex = b_u;
+
+			if (tex > 0)
+			{
+				BA_ChangeSD(L2->right, SideDef::F_MID_TEX, tex);
+			}
 		}
 		else
 		{
