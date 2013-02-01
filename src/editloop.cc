@@ -438,7 +438,7 @@ void CMD_BrowserMode(void)
 {
 	if (! EXEC_Param[0][0])
 	{
-		Beep("missing parameter to CMD_BrowserMode");
+		Beep("Missing parameter to CMD_BrowserMode");
 		return;
 	}
 
@@ -447,7 +447,7 @@ void CMD_BrowserMode(void)
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F'))
 	{
-		Beep("unknown browser mode: %s", EXEC_Param[0]);
+		Beep("Unknown browser mode: %s", EXEC_Param[0]);
 		return;
 	}
 
@@ -459,7 +459,7 @@ void BR_CycleCategory(void)
 {
 	if (! main_win->browser->visible())
 	{
-		Beep("browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
@@ -472,7 +472,7 @@ void BR_ClearSearch(void)
 {
 	if (! main_win->browser->visible())
 	{
-		Beep("browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
@@ -484,13 +484,13 @@ void BR_Scroll(void)
 {
 	if (! main_win->browser->visible())
 	{
-		Beep("browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
 	if (! EXEC_Param[0][0])
 	{
-		Beep("missing parameter to BR_Scroll");
+		Beep("Missing parameter to BR_Scroll");
 		return;
 	}
 
@@ -631,7 +631,7 @@ void CMD_Zoom(void)
 
 	if (delta == 0)
 	{
-		Beep("bad parameter to CMD_Zoom");
+		Beep("Bad parameter to CMD_Zoom");
 		return;
 	}
 
@@ -654,7 +654,7 @@ void CMD_ZoomSelection(void)
 {
 	if (edit.Selected->empty())
 	{
-		Beep("no selection to zoom");
+		Beep("No selection to zoom");
 		return;
 	}
 
@@ -685,7 +685,7 @@ void CMD_PlaceCamera(void)
 {
 	if (main_win->canvas->isRenderActive())
 	{
-		Beep("not supported in 3D view");
+		Beep("Not supported in 3D view");
 		return;
 	}
 
@@ -693,7 +693,7 @@ void CMD_PlaceCamera(void)
 	{
 		// IDEA: turn cursor into cross, wait for click in map window
 
-		Beep("mouse is not over map");
+		Beep("Mouse is not over map");
 		return;
 	}
 

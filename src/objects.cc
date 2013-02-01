@@ -1326,17 +1326,17 @@ void CMD_CopyProperties(void)
 {
 	if (! edit.highlighted())
 	{
-		Beep("no target for CopyProperties");
+		Beep("No target for CopyProperties");
 		return;
 	}
 	else if (edit.Selected->empty())
 	{
-		Beep("no source for CopyProperties");
+		Beep("No source for CopyProperties");
 		return;
 	}
 	else if (edit.Selected->count_obj() != 1)
 	{
-		Beep("too many sources for CopyProperties");
+		Beep("Too many sources for CopyProperties");
 		return;
 	}
 
@@ -1364,7 +1364,7 @@ void CMD_CopyProperties(void)
 			break;
 
 		default:
-			Beep("no properties to copy");
+			Beep("No properties to copy");
 			return;
 	}
 

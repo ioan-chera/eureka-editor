@@ -567,7 +567,7 @@ void LIN_Flip(void)
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep("no lines to flip");
+		Beep("No lines to flip");
 		return;
 	}
 
@@ -670,7 +670,7 @@ void LIN_SplitHalf(void)
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep("no lines to split in half");
+		Beep("No lines to split");
 		return;
 	}
 
@@ -695,7 +695,7 @@ void LIN_SplitHalf(void)
 
 	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < list.count_obj())
-		Beep("some lines were too short!");
+		Beep("Some lines were too short!");
 
 	if (was_selected && new_count > 0)
 	{

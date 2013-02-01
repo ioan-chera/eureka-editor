@@ -99,7 +99,7 @@ static void edit_do_undo(Fl_Widget *w, void * data)
 	if (BA_Undo())
 		edit.RedrawMap = 1;
 	else
-		Beep("no operation to undo");
+		Beep("No operation to undo");
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
@@ -107,7 +107,7 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 	if (BA_Redo())
 		edit.RedrawMap = 1;
 	else
-		Beep("no operation to redo");
+		Beep("No operation to redo");
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)

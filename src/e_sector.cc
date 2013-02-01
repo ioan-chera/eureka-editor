@@ -55,7 +55,7 @@ void SEC_Floor(void)
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep("no sectors to move floor");
+		Beep("No sectors to move");
 		return;
 	}
 
@@ -94,7 +94,7 @@ void SEC_Ceil(void)
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep("no sectors to move ceiling");
+		Beep("No sectors to move");
 		return;
 	}
 
@@ -143,7 +143,7 @@ void CMD_AdjustLight(int delta)
 
 	if (! GetCurrentObjects(&list))
 	{
-		Beep("no sectors to adjust light");
+		Beep("No sectors to adjust light");
 		return;
 	}
 

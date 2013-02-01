@@ -187,7 +187,7 @@ void LIN_SelectPath(void)
 	// determine starting linedef
 	if (edit.highlighted.is_nil())
 	{
-		Beep("no highlighted line");
+		Beep("No highlighted line");
 		return;
 	}
 
@@ -348,7 +348,7 @@ void SEC_SelectGroup(void)
 	// determine starting sector
 	if (edit.highlighted.is_nil())
 	{
-		Beep("no sector is highlighted");
+		Beep("No highlighted sector");
 		return;
 	}
 
@@ -453,7 +453,7 @@ void CMD_JumpToObject(void)
 
 	if (num < 0 || num >= NumObjects(edit.obj_type))
 	{
-		Beep("no such object: %d", num);
+		Beep("No such object: #%d", num);
 		return;
 	}
 
