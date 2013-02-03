@@ -337,7 +337,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::SetFlat(const char *name, int e_state)
 {
-	if (count <= 0)
+	if (obj < 0)
 		return;
 
 	int sel_pics = GetSelectedPics();
@@ -388,7 +388,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::SetSectorType(int new_type)
 {
-	if (count <= 0)
+	if (obj < 0)
 		return;
 
 	char buffer[64];
@@ -517,9 +517,6 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::SetObj(int _index, int _count)
 {
-	if (_count == 0)
-		_index = -1;
-
 	if (obj == _index && count == _count)
 		return;
 

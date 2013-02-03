@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -730,9 +730,6 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 void UI_VertexBox::SetObj(int _index, int _count)
 {
-	if (_count == 0)
-		_index = -1;
-
 	if (obj == _index && count == _count)
 		return;
 

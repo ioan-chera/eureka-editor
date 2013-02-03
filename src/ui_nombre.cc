@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "ui_window.h"
 #include "ui_nombre.h"
 
 
@@ -63,12 +65,16 @@ void UI_Nombre::Update()
 		sprintf(buffer, "%s #%-4d / %d\n", type_name, index, total);
 
 	if (index < 0 || total == 0)
-		labelcolor(FL_LIGHT1);
+		labelcolor(FL_DARK1);
 	else
 		labelcolor(FL_YELLOW);
 
-	if (index < 0 || total == 0 || selected < 2)
-		color(FL_GRAY0+2);
+	if (index < 0 || total == 0)
+		color(FL_GRAY0+1);
+	else if (selected == 0)
+		color(FL_GRAY0+1);   // same as above
+	else if (selected == 1)
+		color(FL_BLUE);
 	else
 		color(FL_RED);
 

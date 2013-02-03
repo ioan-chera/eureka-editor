@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Spawn-Thing Info
+//  Thing Panel
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -281,9 +281,6 @@ UI_ThingBox::~UI_ThingBox()
 
 void UI_ThingBox::SetObj(int _index, int _count)
 {
-	if (_count == 0)
-		_index = -1;
-
 	if (obj == _index && count == _count)
 		return;
 
@@ -331,15 +328,15 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 void UI_ThingBox::SetThingType(int new_type)
 {
-	if (count > 0)
-	{
-		char buffer[64];
+	if (obj < 0)
+		return;
 
-		sprintf(buffer, "%d", new_type);
+	char buffer[64];
 
-		type->value(buffer);
-		type->do_callback();
-	}
+	sprintf(buffer, "%d", new_type);
+
+	type->value(buffer);
+	type->do_callback();
 }
 
 

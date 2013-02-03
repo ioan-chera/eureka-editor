@@ -352,7 +352,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 
 void UI_LineBox::SetLineType(int new_type)
 {
-	if (count <= 0)
+	if (obj < 0)
 		return;
 
 	char buffer[64];
@@ -433,9 +433,6 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 void UI_LineBox::SetObj(int _index, int _count)
 {
-	if (_count == 0)
-		_index = -1;
-
 	if (obj == _index && count == _count)
 		return;
 

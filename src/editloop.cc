@@ -115,29 +115,31 @@ static void UpdateSplitLine(int drag_vert = -1)
 
 static void UpdatePanel()
 {
-	// choose object to show in right-hand Panel
-	int obj_idx = edit.highlighted.num;
-	int obj_count = (obj_idx < 0) ? 0 : 1;
-
-	if (edit.highlighted.is_nil() && edit.Selected->notempty())
-	{
-		obj_idx = edit.Selected->find_first();
-	}
-
-	if (edit.Selected->notempty())
-	{
-		// handle object which is highlighted but NOT in the selection
-		if (obj_idx >= 0 && ! edit.Selected->get(obj_idx))
-			obj_count = 1;
-		else
-			obj_count = edit.Selected->count_obj();
-	}
-
-
 	// -AJA- I think the highlighted object is always the same type as
 	//       the current editing mode.  But do this check for safety.
 	if (edit.highlighted() && edit.highlighted.type != edit.obj_type)
 		return;
+
+
+	// Choose object to show in right-hand panel:
+	//   - the highlighted object takes priority
+	//   - otherwise show the selection (first + count)
+	// 
+	// It's a little more complicated since highlight may or may not
+	// be part of the selection.
+
+	int obj_idx   = edit.highlighted.num;
+	int obj_count = edit.Selected->count_obj();
+
+	if (obj_idx >= 0)
+	{
+		if (! edit.Selected->get(obj_idx))
+			obj_count = 0;
+	}
+	else if (obj_count > 0)
+	{
+		obj_idx = edit.Selected->find_first();
+	}
 
 
 	switch (edit.obj_type)
