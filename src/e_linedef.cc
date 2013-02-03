@@ -759,16 +759,21 @@ void LD_MergedSecondSideDef(int ld)
 
 void LIN_MergeTwo(void)
 {
+	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	{
+		edit.Selected->set(edit.highlighted.num);
+	}
+
 	if (edit.Selected->count_obj() != 2)
 	{
 		Beep("Need 2 linedefs to merge (got %d)", edit.Selected->count_obj());
 		return;
 	}
 
-	// we will merge the first into the second
+	// we will merge the second into the first
 
-	int ld1 = edit.Selected->find_first();
-	int ld2 = edit.Selected->find_second();
+	int ld2 = edit.Selected->find_first();
+	int ld1 = edit.Selected->find_second();
 
 	const LineDef * L1 = LineDefs[ld1];
 	const LineDef * L2 = LineDefs[ld2];
