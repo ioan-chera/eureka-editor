@@ -8,6 +8,8 @@ CHANGELOG
 
 +  automatically create multiple backups of edited pwads
 
+-  added a status area on info bar (replaces map name)
+
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
 -  fixed jerky RMB scrolling at large zoom factors
@@ -18,9 +20,10 @@ CHANGELOG
 
 -  prevent making two lines overlap when merging vertices
 
--  when a resource cannot be found, look in same dir as PWAD and IWAD
+-  merge sectors: support one selected + one highlighted
+-  merge linedefs: support one selected + one highlighted
 
--  added a status area on info bar (replaces map name)
+-  when a resource cannot be found, look in same dir as PWAD and IWAD
 
 -  removed '192' as a possible grid size
 
