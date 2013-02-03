@@ -6,6 +6,7 @@ EUREKA WISH-LIST
 fix UI_Browser::Scroll()
 
 
+
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -213,7 +214,12 @@ Documentation
 Coding
 ------
 
--  prefix linedef utilities with 'LD_', sector utilities with 'SEC_' etc...
+IDEA: BA_MarkDelete() : remember an object for deletion, but only
+      delete them when BA_End() is called.
+
+      probably need BA_IsDeleted() for testing if marked
+
+      possibly make this the ONLY way to delete stuff
 
 
 
