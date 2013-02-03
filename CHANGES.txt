@@ -20,8 +20,7 @@ CHANGELOG
 
 -  prevent making two lines overlap when merging vertices
 
--  merge sectors: support one selected + one highlighted
--  merge linedefs: support one selected + one highlighted
+-  merge commands: support one selected + one highlighted
 
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
