@@ -328,6 +328,11 @@ void TH_Disconnect(void)
 /* place all selected things at same location */
 void TH_Merge(void)
 {
+	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	{
+		edit.Selected->set(edit.highlighted.num);
+	}
+
 	if (edit.Selected->count_obj() < 2)
 	{
 		Beep("Need 2 or more things to merge");

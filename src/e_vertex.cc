@@ -235,6 +235,11 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 
 void VERT_Merge(void)
 {
+	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	{
+		edit.Selected->set(edit.highlighted.num);
+	}
+
 	if (edit.Selected->count_obj() < 2)
 	{
 		Beep("Need 2 or more vertices to merge");
@@ -269,7 +274,6 @@ void VERT_Merge(void)
 	BA_End();
 
 	edit.Selected->clear_all();
-	edit.Selected->set(v);
 }
 
 
