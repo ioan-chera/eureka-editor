@@ -166,101 +166,6 @@ void CMD_AdjustLight(int delta)
 
 
 /*
-   merge two or more Sectors into one
-*/
-
-#if 0  // FIXME !!!
-
-void MergeSectors (SelPtr *slist)
-{
-	SelPtr cur;
-	int    n, olds, news;
-
-	/* save the first Sector number */
-	news = (*slist)->objnum;
-	UnSelectObject (slist, news);
-
-	/* change all SideDefs references to the other Sectors */
-	for (cur = *slist ; cur ; cur = cur->next)
-	{
-		olds = cur->objnum;
-		for (n = 0 ; n < NumSideDefs ; n++)
-		{
-			if (SideDefs[n]->sector == olds)
-				SideDefs[n]->sector = news;
-		}
-	}
-
-	/* delete the Sectors */
-	DeleteObjects (OBJ_SECTORS, slist);
-
-	/* the returned list contains only the first Sector */
-	SelectObject (slist, news);
-}
-#endif
-
-
-
-/*
-   delete one or several two-sided LineDefs and join the two Sectors
-*/
-#if 0  // FIXME !!!
-
-void DeleteLineDefsJoinSectors(SelPtr *ldlist)
-{
-
-	SelPtr cur, slist;
-	char   msg[80];
-
-	/* first, do the tests for all LineDefs */
-	for (cur = *ldlist ; cur ; cur = cur->next)
-	{
-		int sd1 = LineDefs[cur->objnum]->right;
-		int sd2 = LineDefs[cur->objnum]->left;
-
-		if (sd1 < 0 || sd2 < 0)
-		{
-			Beep ();
-			sprintf (msg, "ERROR: Linedef #%d has only one side", cur->objnum);
-			Notify (-1, -1, msg, NULL);
-			return;
-		}
-
-		int s1 = SideDefs[sd1]->sector;
-		int s2 = SideDefs[sd2]->sector;
-
-		if (s1 < 0 || s2 < 0)
-		{
-			Beep ();
-			sprintf (msg, "ERROR: Linedef #%d has two sides, but one", cur->objnum);
-			Notify (-1, -1, msg, "side is not bound to any sector");
-			return;
-		}
-	}
-
-	/* then join the Sectors and delete the LineDefs */
-	for (cur = *ldlist ; cur ; cur = cur->next)
-	{
-		int sd1 = LineDefs[cur->objnum]->right;
-		int sd2 = LineDefs[cur->objnum]->left;
-
-		int s1 = SideDefs[sd1]->sector;
-		int s2 = SideDefs[sd2]->sector;
-
-		slist = NULL;
-		SelectObject (&slist, s2);
-		SelectObject (&slist, s1);
-		MergeSectors (&slist);
-		ForgetSelection (&slist);
-	}
-
-	DeleteObjects(OBJ_LINEDEFS, ldlist);
-}
-#endif
-
-
-
-/*
    turn a sector into a door: change the linedefs and sidedefs
 */
 
@@ -678,6 +583,11 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 void SEC_Merge(void)
 {
 	// need a selection
+	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	{
+		edit.Selected->set(edit.highlighted.num);
+	}
+
 	if (edit.Selected->count_obj() < 2)
 	{
 		Beep("Need 2 or more sectors to merge");
