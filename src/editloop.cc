@@ -942,6 +942,9 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 	*/
 	else if (main_win->canvas->isSelboxActive())
 	{
+		if (edit.did_a_move)
+			edit.Selected->clear_all();
+
 		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
 		return;
 	}
