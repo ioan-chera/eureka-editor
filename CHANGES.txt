@@ -10,6 +10,8 @@ CHANGELOG
 
 -  added a status area on info bar (replaces map name)
 
+-  PruneUnused command removes unused sectors, sidedefs and vertices
+
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
 -  fixed jerky RMB scrolling at large zoom factors
