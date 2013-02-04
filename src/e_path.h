@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -42,6 +42,8 @@ void SEC_SelectGroup(void);
 void CMD_JumpToObject(void);
 void CMD_NextObject();
 void CMD_PrevObject();
+
+void CMD_PruneUnused(void);
 
 
 #endif  /* __EUREKA_E_PATH_H__ */

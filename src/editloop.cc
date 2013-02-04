@@ -1054,6 +1054,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("CopyAndPaste",   &CMD_CopyAndPaste);
 	M_RegisterCommand("CopyProperties", &CMD_CopyProperties);
 
+	M_RegisterCommand("PruneUnused", &CMD_PruneUnused);
+
 	/* line */
 
 	M_RegisterCommand("LIN_Flip", &LIN_Flip, KCTX_Line);

@@ -572,5 +572,57 @@ void CMD_FindObjectByType()
 }
 
 
+void CMD_PruneUnused(void)
+{
+	selection_c used_secs (OBJ_SECTORS);
+	selection_c used_sides(OBJ_SIDEDEFS);
+	selection_c used_verts(OBJ_VERTICES);
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		const LineDef * L = LineDefs[i];
+
+		used_verts.set(L->start);
+		used_verts.set(L->end);
+
+		if (L->left >= 0)
+		{
+			used_sides.set(L->left);
+			used_secs.set(L->Left()->sector);
+		}
+
+		if (L->right >= 0)
+		{
+			used_sides.set(L->right);
+			used_secs.set(L->Right()->sector);
+		}
+	}
+
+	used_secs .frob_range(0, NumSectors -1, BOP_TOGGLE);
+	used_sides.frob_range(0, NumSideDefs-1, BOP_TOGGLE);
+	used_verts.frob_range(0, NumVertices-1, BOP_TOGGLE);
+
+	int num_secs  = used_secs .count_obj();
+	int num_sides = used_sides.count_obj();
+	int num_verts = used_verts.count_obj();
+
+	if (num_verts == 0 && num_sides == 0 && num_secs == 0)
+	{
+		Beep("Nothing to prune");
+		return;
+	}
+
+	BA_Begin();
+
+	DeleteObjects(&used_sides);
+	DeleteObjects(&used_secs);
+	DeleteObjects(&used_verts);
+
+	Status_Set("Pruned %d SEC, %d SID, %d VRT", num_secs, num_sides, num_verts);
+
+	BA_End();
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

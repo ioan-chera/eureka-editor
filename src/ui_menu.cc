@@ -144,6 +144,7 @@ static void edit_do_delete(Fl_Widget *w, void * data)
 	ExecuteCommand("Delete");
 }
 
+
 static void edit_do_select_all(Fl_Widget *w, void * data)
 {
 	CMD_SelectAll();
@@ -157,6 +158,67 @@ static void edit_do_unselect_all(Fl_Widget *w, void * data)
 static void edit_do_invert_sel(Fl_Widget *w, void * data)
 {
 	CMD_InvertSelection();
+}
+
+
+static void edit_do_move(Fl_Widget *w, void * data)
+{
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
+	UI_MoveDialog * dialog = new UI_MoveDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+static void edit_do_scale(Fl_Widget *w, void * data)
+{
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
+	UI_ScaleDialog * dialog = new UI_ScaleDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+static void edit_do_rotate(Fl_Widget *w, void * data)
+{
+	if (edit.Selected->empty())
+	{
+		Beep();
+		return;
+	}
+
+	UI_RotateDialog * dialog = new UI_RotateDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+static void edit_do_prune_unused(Fl_Widget *w, void * data)
+{
+	CMD_PruneUnused();
+}
+
+static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Mirror", "horiz");
+}
+
+static void edit_do_mirror_vert(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Mirror", "vert");
 }
 
 
@@ -225,77 +287,6 @@ static void search_do_jump(Fl_Widget *w, void * data)
 {
 	CMD_JumpToObject();
 }
-
-//------------------------------------------------------------------------
-//  MISC MENU
-//------------------------------------------------------------------------
-
-static void misc_do_move(Fl_Widget *w, void * data)
-{
-	if (edit.Selected->empty())
-	{
-		Beep();
-		return;
-	}
-
-	UI_MoveDialog * dialog = new UI_MoveDialog();
-
-	dialog->Run();
-
-	delete dialog;
-}
-
-static void misc_do_scale(Fl_Widget *w, void * data)
-{
-	if (edit.Selected->empty())
-	{
-		Beep();
-		return;
-	}
-
-	UI_ScaleDialog * dialog = new UI_ScaleDialog();
-
-	dialog->Run();
-
-	delete dialog;
-}
-
-static void misc_do_rotate(Fl_Widget *w, void * data)
-{
-	if (edit.Selected->empty())
-	{
-		Beep();
-		return;
-	}
-
-	UI_RotateDialog * dialog = new UI_RotateDialog();
-
-	dialog->Run();
-
-	delete dialog;
-}
-
-static void misc_do_mirror_horiz(Fl_Widget *w, void * data)
-{
-	EXEC_Param[0] = "horiz";
-
-	CMD_Mirror();
-}
-
-static void misc_do_mirror_vert(Fl_Widget *w, void * data)
-{
-	EXEC_Param[0] = "vert";
-
-	CMD_Mirror();
-}
-
-#if 0
-static void misc_do_other_op(Fl_Widget *w, void * data)
-{
-	// TODO
-	fl_beep();
-}
-#endif
 
 
 //------------------------------------------------------------------------
@@ -414,16 +405,15 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Move Objects...",      0, FCAL misc_do_move },
-		{ "&Scale Objects...",     0, FCAL misc_do_scale },
-		{ "Rotate Objects...",     0, FCAL misc_do_rotate },
+		{ "&Move Objects...",      0, FCAL edit_do_move },
+		{ "&Scale Objects...",     0, FCAL edit_do_scale },
+		{ "Rotate Objects...",     0, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Mirror &Horizontally",  0, FCAL misc_do_mirror_horiz },
-		{ "Mirror &Vertically",    0, FCAL misc_do_mirror_vert },
-
-//??	{ "&Other Operation...",   0, FCAL misc_do_other_op },
+		{ "&Prune Unused Objs",    0, FCAL edit_do_prune_unused },
+		{ "Mirror &Horizontally",  0, FCAL edit_do_mirror_horiz },
+		{ "Mirror &Vertically",    0, FCAL edit_do_mirror_vert },
 
 //??   "~Exchange object numbers", 24,     0,
 		{ 0 },
