@@ -700,6 +700,32 @@ void UI_Canvas::DrawLinedefs()
 }
 
 
+void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
+{
+	DrawMapLine(x-r, y-r, x-r, y+r);
+	DrawMapLine(x-r, y+r, x+r, y+r);
+	DrawMapLine(x+r, y+r, x+r, y-r);
+	DrawMapLine(x+r, y-r, x-r, y-r);
+
+	if (big_arrow)
+	{
+		DrawMapArrow(x, y, angle * 182);
+	}
+	else
+	{
+		int dir = angle_to_direction(angle);
+
+		static const short xsign[] = {  1,  1,  0, -1, -1, -1,  0,  1,  0 };
+		static const short ysign[] = {  0,  1,  1,  1,  0, -1, -1, -1,  0 };
+
+		int corner_x = r * xsign[dir];
+		int corner_y = r * ysign[dir];
+
+		DrawMapLine(x, y, x + corner_x, y + corner_y);
+	}
+}
+
+
 /*
  *  draw_things_squares - the obvious
  */
@@ -719,9 +745,11 @@ void UI_Canvas::DrawThings()
 
 		if (edit.obj_type == OBJ_THINGS)
 		{
-			fl_color((Fl_Color) info->color);
-
-			if (active_wmask)
+			if (edit.error_mode)
+			{
+				fl_color(LIGHTGREY);
+			}
+			else if (active_wmask)
 			{
 				if (Things[n]->options & 1)
 					fl_color (YELLOW);
@@ -732,26 +760,13 @@ void UI_Canvas::DrawThings()
 				else
 					fl_color (DARKGREY);
 			}
+			else
+				fl_color((Fl_Color) info->color);
 		}
 
 		int r = info->radius;
 
-		DrawMapLine(x-r, y-r, x+r, y-r);
-		DrawMapLine(x+r, y-r, x+r, y+r);
-		DrawMapLine(x+r, y+r, x-r, y+r);
-		DrawMapLine(x-r, y+r, x-r, y-r);
-
-		{
-			int dir = angle_to_direction(Things[n]->angle);
-
-			static const short xsign[] = {  1,  1,  0, -1, -1, -1,  0,  1,  0 };
-			static const short ysign[] = {  0,  1,  1,  1,  0, -1, -1, -1,  0 };
-
-			int corner_x = r * xsign[dir];
-			int corner_y = r * ysign[dir];
-
-			DrawMapLine(x, y, x + corner_x, y + corner_y);
-		}
+		DrawThing(x, y, r, Things[n]->angle, false);
 	}
 
 	// draw the thing numbers
@@ -914,7 +929,8 @@ void UI_Canvas::SplitLineForget()
 /*
    highlight the selected object
 */
-void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int dy)
+void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
+                              bool do_tagged, int dx, int dy)
 {
 	fl_color(col);
 
@@ -934,25 +950,23 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
-			int r = (info->radius * 3) / 2;
+			int r = info->radius;
 
-			DrawMapLine(x-r, y-r, x-r, y+r);
-			DrawMapLine(x-r, y+r, x+r, y+r);
-			DrawMapLine(x+r, y+r, x+r, y-r);
-			DrawMapLine(x+r, y-r, x-r, y-r);
+			if (edit.error_mode)
+				DrawThing(x, y, r, Things[objnum]->angle, false /* big_arrow */);
 
-			DrawMapArrow(x, y, Things[objnum]->angle * 182);
+			DrawThing(x, y, r * 3 / 2, Things[objnum]->angle, true);
 		}
 		break;
 
 		case OBJ_LINEDEFS:
 		{
 			// handle tagged linedefs : show matching sector(s)
-			if (col != LIGHTRED && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
+			if (do_tagged && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
 			{
 				for (int m = 0 ; m < NumSectors ; m++)
 					if (Sectors[m]->tag == LineDefs[objnum]->tag)
-						DrawHighlight(OBJ_SECTORS, m, LIGHTRED);
+						DrawHighlight(OBJ_SECTORS, m, LIGHTRED, false);
 
 				fl_color(col);
 			}
@@ -1005,11 +1019,11 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col, int dx, int
 		case OBJ_SECTORS:
 		{
 			// handle tagged sectors : show matching line(s)
-			if (col != LIGHTRED && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
+			if (do_tagged && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
 			{
 				for (int m = 0 ; m < NumLineDefs ; m++)
 					if (LineDefs[m]->tag == Sectors[objnum]->tag)
-						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED);
+						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED, false);
 
 				fl_color(col);
 			}
@@ -1059,14 +1073,9 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
-			int r = (info->radius * 3) / 2;
+			int r = info->radius;
 
-			DrawMapLine(x-r, y-r, x-r, y+r);
-			DrawMapLine(x-r, y+r, x+r, y+r);
-			DrawMapLine(x+r, y+r, x+r, y-r);
-			DrawMapLine(x+r, y-r, x-r, y-r);
-
-			DrawMapArrow(x, y, Things[objnum]->angle * 182);
+			DrawThing(x, y, r * 3 / 2, Things[objnum]->angle, true);
 		}
 		break;
 
@@ -1182,7 +1191,8 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
-		DrawHighlight(list->what_type(), *it, SEL_COL, dx, dy);
+		DrawHighlight(list->what_type(), *it, edit.error_mode ? FL_RED : SEL_COL,
+		              ! edit.error_mode /* do_tagged */, dx, dy);
 	}
 }
 

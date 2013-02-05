@@ -1101,13 +1101,15 @@ void Editor_Init()
 	edit.button_down = 0;
 	edit.button_mod  = 0;
 	edit.clicked.clear();
-	edit.did_a_move  = false;
 
 	edit.highlighted.clear();
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 
 	edit.Selected = new selection_c(edit.obj_type);
+
+	edit.error_mode = false;
+	edit.did_a_move = false;
 
 	grid.Init();
 

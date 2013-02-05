@@ -54,6 +54,8 @@ typedef struct
 
 	selection_c *Selected;    // all selected objects (usually empty)
 
+	bool error_mode;  // draw selection in red
+
 	Objid highlighted;   // The highlighted object
 
 	Objid split_line;  // linedef which would be split by a new vertex

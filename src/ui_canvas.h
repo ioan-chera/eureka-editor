@@ -74,16 +74,6 @@ public:
 
 	void DrawEverything();
 
-	void DrawMap();
-
-	void DrawMapPoint(int map_x, int map_y);
-	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawMapArrow(int map_x1, int map_y1, unsigned angle);
-	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawVertex(int map_x, int map_y, int r);
-	void DrawCamera();
-
 	void HighlightSet(Objid& obj);
 	void HighlightForget();
 
@@ -91,7 +81,7 @@ public:
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
-	void DrawHighlight(int objtype, int objnum, Fl_Color col, int dx=0, int dy=0);
+	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true, int dx=0, int dy=0);
 	void DrawHighlightScaled(int objtype, int objnum, Fl_Color col);
 
 	void SelboxBegin(int map_x, int map_y);
@@ -121,12 +111,23 @@ private:
 	// FLTK virtual method for drawing.
 	void draw();
 
+	void DrawMap();
 	void DrawGrid();
+
 	void DrawMapBounds();
 	void DrawVertices();
 	void DrawLinedefs();
 	void DrawThings();
 	void DrawRTS();
+
+	void DrawMapPoint(int map_x, int map_y);
+	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawMapArrow(int map_x1, int map_y1, unsigned angle);
+	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawVertex(int map_x, int map_y, int r);
+	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
+	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
