@@ -103,40 +103,49 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_ScaleDialog::UI_ScaleDialog() :
-	Fl_Double_Window(360, 240, "Scale Objects"),
+	Fl_Double_Window(360, 270, "Scale Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
 	title->labelsize(KF_fonth);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	scale_x = new Fl_Input(95, 55, 85, 25,  "scale x:");
-	scale_y = new Fl_Input(240, 55, 85, 25, "scale y:");
+	scale_x = new Fl_Input( 95,  55, 85, 25, "scale x:");
+	scale_y = new Fl_Input( 95,  85, 85, 25, "scale y:");
+	scale_z = new Fl_Input( 95, 115, 85, 25, "scale z:");
 
 	scale_x->value("1");
 	scale_y->value("1");
+	scale_z->value("1");
 	
-	origin = new Fl_Choice(95, 90, 140, 25, "origin:");
-	origin->add("Bottom Left|Bottom|Bottom Right|"
-	            "Left|Centre|Right|"
-	            "Top Left|Top|Top Right");
-	origin->value(4);
+	origin_x = new Fl_Choice(234,  55, 100, 25, "from:");
+	origin_y = new Fl_Choice(234,  85, 100, 25, "from:");
+	origin_z = new Fl_Choice(234, 115, 100, 25, "from:");
 
-	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
+	origin_x->add("Left|Centre|Right");
+	origin_x->value(1);
+
+	origin_y->add("Bottom|Centre|Top");
+	origin_y->value(1);
+
+	origin_z->add("Bottom|Middle|Top");
+	origin_z->value(0);
+
+	Fl_Group * grp = new Fl_Group(0, 160, w(), h() - 160);
 	grp->box(FL_FLAT_BOX);
 	grp->color(WINDOW_BG, WINDOW_BG);
 	{
-		Fl_Box * help = new Fl_Box(10, 145, w() - 20, 40);
+		Fl_Box * help = new Fl_Box(10, 175, w() - 20, 40);
 		help->label("Scale Values:\n"
 		            "    can be real: 0.25 or 3.7\n"
 					"    or percentages: 25%\n"
 					"    or fractions: 3 / 4");
 		help->align(FL_ALIGN_LEFT | FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 
-		cancel_but = new Fl_Button(245, 150, 95, 30, "Cancel");
+		cancel_but = new Fl_Button(245, 180, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
 	
-		ok_but = new Fl_Button(245, 195, 95, 30, "Scale");
+		ok_but = new Fl_Button(245, 225, 95, 30, "Scale");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
@@ -158,6 +167,12 @@ UI_ScaleDialog::~UI_ScaleDialog()
 
 void UI_ScaleDialog::Run()
 {
+	if (edit.obj_type != OBJ_SECTORS)
+	{
+		 scale_z->hide();
+		origin_z->hide();
+	}
+
 	set_modal();
 
 	show();
@@ -214,15 +229,17 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 
 	double scale_x = ParseScaleStr(that->scale_x->value());
 	double scale_y = ParseScaleStr(that->scale_y->value());
+	double scale_z = ParseScaleStr(that->scale_z->value());
 
-	if (scale_x <= 0 || scale_y <= 0)
+	if (scale_x <= 0 || scale_y <= 0 || scale_z <= 0)
 	{
 		Beep();
 		return;
 	}
 
-	int pos_x = (that->origin->value() % 3) - 1;
-	int pos_y = (that->origin->value() / 3) - 1;
+	int pos_x = that->origin_x->value() - 1;
+	int pos_y = that->origin_y->value() - 1;
+	int pos_z = that->origin_z->value() - 1;
 
 	CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
 

@@ -53,8 +53,11 @@ class UI_ScaleDialog : public Fl_Double_Window
 private:
 	Fl_Input *scale_x;
 	Fl_Input *scale_y;
+	Fl_Input *scale_z;
 
-	Fl_Choice *origin;
+	Fl_Choice *origin_x;
+	Fl_Choice *origin_y;
+	Fl_Choice *origin_z;
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
