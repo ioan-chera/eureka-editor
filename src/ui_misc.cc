@@ -241,7 +241,10 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_y = that->origin_y->value() - 1;
 	int pos_z = that->origin_z->value() - 1;
 
-	CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
+	if (edit.obj_type == OBJ_SECTORS)
+		CMD_ScaleObjects3(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
+	else
+		CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
 
 	that->want_close = true;
 }

@@ -793,6 +793,70 @@ void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 }
 
 
+static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
+{
+	SYS_ASSERT(! list.empty());
+
+	selection_iterator_c it;
+
+	// determine Z range and origin
+	int lz = +99999;
+	int hz = -99999;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Sector * S = Sectors[*it];
+
+		lz = MIN(lz, S->floorh);
+		hz = MAX(hz, S->ceilh);
+	}
+
+	int mid_z;
+
+	if (pos_z < 0)
+		mid_z = lz;
+	else if (pos_z > 0)
+		mid_z = hz;
+	else
+		mid_z = lz + (hz - lz) / 2;
+
+	// apply the scaling
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Sector * S = Sectors[*it];
+		
+		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
+		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
+
+		BA_ChangeSEC(*it, Sector::F_FLOORH, new_f);
+		BA_ChangeSEC(*it, Sector::F_CEILH,  new_c);
+	}
+}
+
+void CMD_ScaleObjects3(double scale_x, double scale_y, double scale_z,
+                       int pos_x, int pos_y, int pos_z)
+{
+	SYS_ASSERT(edit.obj_type == OBJ_SECTORS);
+
+	scale_param_t param;
+
+	param.Clear();
+
+	param.scale_x = scale_x;
+	param.scale_y = scale_y;
+
+	DetermineOrigin(param, pos_x, pos_y);
+
+	BA_Begin();
+	{
+		DoScaleTwoStuff(*edit.Selected, param);
+		DoScaleSectorHeights(*edit.Selected, scale_z, pos_z);
+	}
+	BA_End();
+}
+
+
 void CMD_RotateObjects3(double deg, int pos_x, int pos_y)
 {
 	scale_param_t param;
