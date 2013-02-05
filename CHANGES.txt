@@ -10,19 +10,19 @@ CHANGELOG
 
 -  added a status area on info bar (replaces map name)
 
--  PruneUnused command removes unused sectors, sidedefs and vertices
+-  new PruneUnused command removes unused stuff (sectors etc)
 
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
 -  fixed jerky RMB scrolling at large zoom factors
 
+-  Scale Objects: implemented Z scaling for sectors
 -  copy properties command ('c') now copies linedef textures
--  disconnect command for things at same location
--  merge command for things -- place them at same location
 
 -  prevent making two lines overlap when merging vertices
-
 -  merge commands: support one selected + one highlighted
+-  merge command for things -- place them at same location
+-  disconnect command for things at same location
 
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 
