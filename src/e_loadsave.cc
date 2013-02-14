@@ -541,7 +541,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 		if (! M_LoadUserState())
 		{
 			M_DefaultUserState();
-			CMD_ZoomWholeMap();
 		}
 	}
 
