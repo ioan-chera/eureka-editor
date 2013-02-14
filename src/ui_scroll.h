@@ -58,6 +58,14 @@ public:
 
 	void Line_size(int pixels);
 
+	// delta is positive to move further down the list, negative to
+	// move further up.  Its absolute value can be:
+	//   1 : scroll by a small amount
+	//   2 : scroll by one "line"
+	//   3 : scroll to next/previous page
+	//   4 : scroll to end
+	void Scroll(int delta);
+
 private:
 	void do_scroll();
 	void calc_extents();

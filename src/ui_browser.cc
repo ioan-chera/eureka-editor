@@ -837,47 +837,7 @@ void UI_Browser_Box::ClearSearchBox()
 
 void UI_Browser_Box::Scroll(int delta)
 {
-       //!!!!! FIXME move this into UI_Scroll widget
-#if 0
-
-	// get the scrollbar (OMG this is hacky shit)
-	int index = scroll->children() - 1;
-
-	Fl_Scrollbar *bar = (Fl_Scrollbar *)pack->child(index);
-
-	SYS_ASSERT(bar);
-
-	// this logic is copied from FLTK
-	// (would be nice if we could just resend the event to the widget)
-
-	float ssz = bar->slider_size();
-
-	if (ssz >= 1.0)
-		return;
-
-	int v  = bar->value();
-	int ls = (kind == 'F' || kind == 'T') ? 100 : 40;
-
-	if (delta < 0)
-	{
-		// PAGE-UP
-		v -= int((bar->maximum() - bar->minimum()) * ssz / (1.0 - ssz));
-		v += ls;
-	}
-	else
-	{
-		// PAGE-DOWN
-		v += int((bar->maximum() - bar->minimum()) * ssz / (1.0 - ssz));
-		v -= ls;
-	}
-
-    v = int(bar->clamp(v));
-
-	bar->value(v);
-	bar->damage(FL_DAMAGE_ALL);
-	bar->set_changed();
-	bar->do_callback();
-#endif
+	scroll->Scroll(delta);
 }
 
 
