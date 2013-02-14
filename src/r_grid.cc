@@ -78,6 +78,9 @@ void Grid_State_c::Init()
 	}
 
 	snap = default_grid_snap;
+
+	if (main_win)
+		main_win->info_bar->UpdateSnap();
 }
 
 
