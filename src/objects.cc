@@ -816,7 +816,8 @@ void CMD_Insert(void)
 
 		case OBJ_SECTORS:
 			{
-				bool force_new = (tolower(EXEC_Param[0][0]) == 'f');
+				bool force_new = (tolower(EXEC_Param[0][0]) == 'n');
+
 				Insert_Sector(force_new);
 			}
 			break;
