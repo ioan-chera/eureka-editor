@@ -596,7 +596,7 @@ bool CMD_OpenMap()
 	}
 
 
-	if (wad->FindLump(EUREKA_LUMP))
+	if (is_new_pwad && wad->FindLump(EUREKA_LUMP))
 	{
 		if (! M_ParseEurekaLump(wad))
 			return false;
