@@ -89,6 +89,10 @@ public:
 	Fl_Check_Button *bsp_fast;
 
 	Fl_Hold_Browser *key_list;
+	Fl_Button *key_group;
+	Fl_Button *key_key;
+	Fl_Button *key_func;
+	Fl_Button *key_change;
 };
 
 
@@ -242,6 +246,18 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
+		{ key_group = new Fl_Button(25, 90, 95, 25, "GROUP");
+		  key_group->color((Fl_Color)231);
+		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ key_key = new Fl_Button(120, 90, 120, 25, "KEY");
+		  key_key->color((Fl_Color)231);
+		  key_key->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ key_func = new Fl_Button(240, 90, 320, 25, "FUNCTION");
+		  key_func->color((Fl_Color)231);
+		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
 		{ key_list = new Fl_Hold_Browser(30, 115, 540, 220);
 		  key_list->textfont(FL_COURIER);
 		}
