@@ -232,13 +232,16 @@ key_context_e M_ParseKeyContext(const char *str)
 {
 	if (y_stricmp(str, "browser") == 0) return KCTX_Browser;
 	if (y_stricmp(str, "render")  == 0) return KCTX_Render;
-	if (y_stricmp(str, "global")  == 0) return KCTX_Global;
+	if (y_stricmp(str, "general") == 0) return KCTX_General;
 
 	if (y_stricmp(str, "line")    == 0) return KCTX_Line;
 	if (y_stricmp(str, "sector")  == 0) return KCTX_Sector;
 	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
 	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
 	if (y_stricmp(str, "radtrig") == 0) return KCTX_RadTrig;
+
+// TEMPORARY for compatibility
+	if (y_stricmp(str, "global")  == 0) return KCTX_General;
 
 	return KCTX_NONE;
 }
@@ -249,7 +252,7 @@ const char * M_KeyContextString(key_context_e context)
 	{
 		case KCTX_Browser: return "browser";
 		case KCTX_Render:  return "render";
-		case KCTX_Global:  return "global";
+		case KCTX_General: return "general";
 
 		case KCTX_Line:    return "line";
 		case KCTX_Sector:  return "sector";
@@ -552,7 +555,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	sprintf(buffer, "%-10.10s %-14.14s %.30s",
 			M_KeyContextString(all_bindings[index].context),
-			changing_key ? "<????>" : M_KeyToString(all_bindings[index].key),
+			changing_key ? "<?\077?>" : M_KeyToString(all_bindings[index].key),
 			all_bindings[index].cmd->name);
 
 	// add the parameters

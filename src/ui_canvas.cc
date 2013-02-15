@@ -169,7 +169,7 @@ int UI_Canvas::handle_key()
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
 		return 1;
 	
-	if (ExecuteKey(key, KCTX_Global))
+	if (ExecuteKey(key, KCTX_General))
 		return 1;
 
 

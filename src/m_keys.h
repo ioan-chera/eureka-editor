@@ -55,13 +55,14 @@ typedef enum
 
 	KCTX_Browser,
 	KCTX_Render,
-	KCTX_Global,
 
 	KCTX_Line,
 	KCTX_Sector,
 	KCTX_Thing,
 	KCTX_Vertex,
-	KCTX_RadTrig
+	KCTX_RadTrig,
+
+	KCTX_General
 
 } key_context_e;
 
