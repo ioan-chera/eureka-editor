@@ -81,9 +81,12 @@ void M_RegisterCommand(const char *name, command_func_t func,
 void M_LoadBindings();
 void M_SaveBindings();
 
+// TODO: M_AddBinding
+
 void M_RemoveBinding(keycode_t key, key_context_e context);
 
-// TODO: M_AddBinding
+// used by preferences dialog:
+const char * M_StringForBinding(int index);
 
 
 keycode_t M_TranslateKey(int key, int state);

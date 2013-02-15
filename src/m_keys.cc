@@ -277,8 +277,7 @@ typedef struct
 
 	const editor_command_t *cmd;
 
-	char param1[MAX_BIND_PARAM_LEN];
-	char param2[MAX_BIND_PARAM_LEN];
+	char param[2][MAX_BIND_PARAM_LEN];
 
 } key_binding_t;
 
@@ -310,7 +309,7 @@ static void ParseBinding(const char ** tokens, int num_tok)
 {
 	key_binding_t temp;
 
-	// this ensures param1/2 are NUL terminated
+	// this ensures the parameters are NUL terminated
 	memset(&temp, 0, sizeof(temp));
 
 	temp.key = M_ParseKeyString(tokens[1]);
@@ -358,10 +357,10 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 	}
 
 	if (num_tok >= 4)
-		strncpy(temp.param1, tokens[3], MAX_BIND_PARAM_LEN-1);
+		strncpy(temp.param[0], tokens[3], MAX_BIND_PARAM_LEN-1);
 
 	if (num_tok >= 5)
-		strncpy(temp.param2, tokens[4], MAX_BIND_PARAM_LEN-1);
+		strncpy(temp.param[1], tokens[4], MAX_BIND_PARAM_LEN-1);
 
 #if 0  // DEBUG
 fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
@@ -450,8 +449,8 @@ static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
 
 		if (! full_match ||
 			(bind.cmd == other.cmd &&
-			 strcmp(bind.param1, other.param1) == 0 &&
-			 strcmp(bind.param2, other.param2) == 0))
+			 strcmp(bind.param[0], other.param[0]) == 0 &&
+			 strcmp(bind.param[1], other.param[1]) == 0))
 		{
 			return true;
 		}
@@ -514,8 +513,8 @@ void M_SaveBindings()
 			fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
 					M_KeyToString(bind.key), bind.cmd->name);
 
-			if (bind.param1[0]) fprintf(fp, "\t%s", bind.param1);
-			if (bind.param2[0]) fprintf(fp, "\t%s", bind.param2);
+			if (bind.param[0][0]) fprintf(fp, "\t%s", bind.param[0]);
+			if (bind.param[1][0]) fprintf(fp, "\t%s", bind.param[1]);
 
 			fprintf(fp, "\n");
 			count++;
@@ -541,6 +540,49 @@ void M_SaveBindings()
 		if (count > 0)
 			fprintf(fp, "\n");
 	}
+}
+
+
+const char * M_StringForBinding(int index)
+{
+	if (index >= (int)all_bindings.size())
+		return NULL;
+
+	static char buffer[600];
+
+	sprintf(buffer, "%-10.10s %-14.14s %.30s",
+			M_KeyContextString(all_bindings[index].context),
+			M_KeyToString(all_bindings[index].key),
+			all_bindings[index].cmd->name);
+
+	// add the parameters
+
+	char *pos = buffer;
+
+	for (int k = 0 ; k < 2 ; k++)
+	{
+		const char *param = all_bindings[index].param[k];
+
+		if (! param[0])
+			break;
+
+		if (k == 0)
+			strcat(buffer, "(");
+
+		pos = buffer + strlen(buffer);
+
+		if (k > 0)
+		{
+			*pos++ = ',';
+			*pos++ = ' ';
+		}
+
+		sprintf(pos, "%.30s", param);
+	strcat(buffer, ")");
+	}
+
+
+	return buffer;
 }
 
 
@@ -618,8 +660,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 		if (bind.key == key && bind.context == context)
 		{
-			EXEC_Param[0] = bind.param1;
-			EXEC_Param[1] = bind.param2;
+			EXEC_Param[0] = bind.param[0];
+			EXEC_Param[1] = bind.param[1];
 
 			(* bind.cmd->func)();
 
