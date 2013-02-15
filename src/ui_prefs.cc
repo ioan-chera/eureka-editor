@@ -52,6 +52,8 @@ public:
 	void LoadValues();
 	void SaveValues();
 
+	void LoadKeys();
+
 	int GridSizeToChoice(int size);
 
 
@@ -85,6 +87,8 @@ public:
 	Fl_Check_Button *bsp_warn;
 	Fl_Check_Button *bsp_verbose;
 	Fl_Check_Button *bsp_fast;
+
+	Fl_Hold_Browser *key_list;
 };
 
 
@@ -96,9 +100,13 @@ UI_Preferences::UI_Preferences() :
 	callback(close_callback, this);
 
 	{ tabs = new Fl_Tabs(0, 0, 585, 435);
+
+	  /* ---- General Tab ---- */
+
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General     ");
 		o->labelsize(16);
-		o->hide();
+		// o->hide();
+
 		{ Fl_Box* o = new Fl_Box(25, 50, 145, 30, "GUI Appearance");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
@@ -189,9 +197,13 @@ UI_Preferences::UI_Preferences() :
 		}
 		o->end();
 	  }
+
+	  /* ---- Editing Tab ---- */
+
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing     ");
 		o->labelsize(16);
 		o->hide();
+
 		{ Fl_Box* o = new Fl_Box(25, 50, 355, 30, "Editing Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
@@ -218,9 +230,31 @@ UI_Preferences::UI_Preferences() :
 		}
 		o->end();
 	  }
+
+	  /* ---- Key bindings Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys     ");
+		o->labelsize(16);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(15, 50, 355, 30, "Key Bindings");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+
+		{ key_list = new Fl_Hold_Browser(30, 115, 540, 220);
+		  key_list->textfont(FL_COURIER);
+		}
+		o->end();
+	  }
+
+	  /* ---- glBSP Tab ---- */
+
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " glBSP     ");
 		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
+		o->hide();
+
 		{ Fl_Box* o = new Fl_Box(25, 50, 280, 30, "glBSP Node Building Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
@@ -277,6 +311,7 @@ void UI_Preferences::Run()
 		tabs->value(tabs->child(last_active_tab));
 
 	LoadValues();
+	LoadKeys();
 
 	set_modal();
 
@@ -411,6 +446,22 @@ void UI_Preferences::SaveValues()
 	glbsp_fast = bsp_fast->value() ? true : false;
 	glbsp_verbose = bsp_verbose->value() ? true : false;
 	glbsp_warn = bsp_warn->value() ? true : false;
+}
+
+
+void UI_Preferences::LoadKeys()
+{
+	key_list->clear();
+
+	for (int i = 0 ; ; i++)
+	{
+		const char *str = M_StringForBinding(i);
+
+		if (! str)
+			break;
+
+		key_list->add(str, (void *)(long)i);
+	}
 }
 
 
