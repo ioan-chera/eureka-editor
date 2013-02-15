@@ -4,14 +4,14 @@ header_name {.h}
 code_name {.cxx}
 widget_class UI_Preferences {
   label PREFERENCES open
-  xywh {325 145 600 500} type Double color 18 visible
+  xywh {376 124 600 500} type Double color 18 visible
 } {
-  Fl_Tabs tabs {open selected
-    xywh {0 0 585 435}
+  Fl_Tabs tabs {open
+    xywh {0 0 590 435}
   } {
     Fl_Group {} {
       label { General     } open
-      xywh {0 25 585 405} labelsize 16 hide
+      xywh {0 25 590 405} labelsize 16 hide
     } {
       Fl_Box {} {
         label {GUI Appearance}
@@ -137,7 +137,7 @@ widget_class UI_Preferences {
     }
     Fl_Group {} {
       label { glBSP     } open
-      xywh {0 25 585 410} selection_color 50 labelsize 16
+      xywh {0 25 585 410} selection_color 50 labelsize 16 hide
     } {
       Fl_Box {} {
         label {glBSP Node Building Options}
@@ -154,6 +154,46 @@ widget_class UI_Preferences {
       Fl_Check_Button glbsp_fast {
         label { Fast -- build the fastest way, but nodes may not be as good}
         xywh {60 150 440 30} down_box DOWN_BOX
+      }
+    }
+    Fl_Group {} {
+      label { Keys     } open
+      xywh {0 25 585 410} selection_color 50 labelsize 16
+    } {
+      Fl_Box {} {
+        label {Key Bindings}
+        xywh {10 46 440 29} labelfont 1 align 20
+      }
+      Fl_Browser {} {
+        xywh {25 116 555 238} type Hold
+      }
+      Fl_Button {} {
+        label Add
+        xywh {50 375 90 35} color 55
+      }
+      Fl_Button {} {
+        label {Change Key}
+        xywh {290 375 122 35} color 55
+      }
+      Fl_Button {} {
+        label Edit
+        xywh {175 375 83 35} color 55
+      }
+      Fl_Button {} {
+        label Remove
+        xywh {440 375 104 35} color 55
+      }
+      Fl_Button key_group {
+        label Group
+        xywh {25 87 125 28} color 231 align 20
+      }
+      Fl_Button key_key {
+        label Key
+        xywh {150 87 150 28} color 231 align 20
+      }
+      Fl_Button key_func {
+        label Function selected
+        xywh {300 87 260 28} color 231 align 20
       }
     }
   }
