@@ -251,7 +251,7 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_group = new Fl_Button(25, 90, 95, 25, "GROUP");
+		{ key_group = new Fl_Button(25, 90, 95, 25, "CONTEXT");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
