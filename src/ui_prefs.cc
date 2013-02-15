@@ -44,6 +44,9 @@ private:
 	static void close_callback(Fl_Widget *w, void *data);
 	static void color_callback(Fl_Button *w, void *data);
 
+	static void bind_key_callback(Fl_Button *w, void *data);
+	static void edit_key_callback(Fl_Button *w, void *data);
+
 public:
 	UI_Preferences();
 
@@ -92,7 +95,9 @@ public:
 	Fl_Button *key_group;
 	Fl_Button *key_key;
 	Fl_Button *key_func;
+
 	Fl_Button *key_change;
+	Fl_Button *key_edit;
 };
 
 
@@ -254,12 +259,18 @@ UI_Preferences::UI_Preferences() :
 		  key_key->color((Fl_Color)231);
 		  key_key->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ key_func = new Fl_Button(240, 90, 320, 25, "FUNCTION");
+		{ key_func = new Fl_Button(240, 90, 200, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 540, 220);
+		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
 		  key_list->textfont(FL_COURIER);
+		}
+		{ key_change = new Fl_Button(470, 145, 90, 30, "Bind");
+		  key_change->callback((Fl_Callback*)bind_key_callback, this);
+		}
+		{ key_edit = new Fl_Button(470, 190, 90, 30, "Edit");
+		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
 		}
 		o->end();
 	  }
@@ -318,6 +329,54 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 		return;
 
 	w->color(fl_rgb_color(r, g, b));
+}
+
+
+void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	int line = dialog->key_list->value();
+	if (line < 1)
+	{
+		fl_beep();
+		return;
+	}
+
+	int bind_idx = (int)(long)dialog->key_list->data(line);
+	SYS_ASSERT(bind_idx >= 0);
+
+	// mark line with ??? (show ready to accept new key)
+
+	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
+	SYS_ASSERT(str);
+
+	dialog->key_list->text(line, str);
+
+	// FIXME !!!  set flag, have handle() method to grab key
+	//            and update the binding.
+}
+
+
+void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	int line = dialog->key_list->value();
+	if (line < 1)
+	{
+		fl_beep();
+		return;
+	}
+
+	int bind_idx = (int)(long)dialog->key_list->data(line);
+
+	const char *str = M_StringForBinding(bind_idx);
+	str += MIN(strlen(str), 26);
+
+	const char *new_str = fl_input("Enter new function", str);
+
+	// FIXME !!
 }
 
 
@@ -478,6 +537,8 @@ void UI_Preferences::LoadKeys()
 
 		key_list->add(str, (void *)(long)i);
 	}
+
+	key_list->select(1);
 }
 
 

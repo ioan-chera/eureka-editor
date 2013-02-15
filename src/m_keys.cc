@@ -543,7 +543,7 @@ void M_SaveBindings()
 }
 
 
-const char * M_StringForBinding(int index)
+const char * M_StringForBinding(int index, bool changing_key)
 {
 	if (index >= (int)all_bindings.size())
 		return NULL;
@@ -552,7 +552,7 @@ const char * M_StringForBinding(int index)
 
 	sprintf(buffer, "%-10.10s %-14.14s %.30s",
 			M_KeyContextString(all_bindings[index].context),
-			M_KeyToString(all_bindings[index].key),
+			changing_key ? "<????>" : M_KeyToString(all_bindings[index].key),
 			all_bindings[index].cmd->name);
 
 	// add the parameters

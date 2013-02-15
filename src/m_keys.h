@@ -86,7 +86,7 @@ void M_SaveBindings();
 void M_RemoveBinding(keycode_t key, key_context_e context);
 
 // used by preferences dialog:
-const char * M_StringForBinding(int index);
+const char * M_StringForBinding(int index, bool changing_key = false);
 
 
 keycode_t M_TranslateKey(int key, int state);
