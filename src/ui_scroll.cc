@@ -22,6 +22,9 @@
 #include "ui_scroll.h"
 
 
+#define HUGE_DIST  (1 << 24)
+
+
 //
 // UI_Scroll Constructor
 //
@@ -121,8 +124,8 @@ void UI_Scroll::calc_extents()
 		return;
 	}
 
-	   top_y =  999999;
-	bottom_y = -999999;
+	   top_y =  HUGE_DIST;
+	bottom_y = -HUGE_DIST;
 
 	for (int i = 0 ; i < Children() ; i++)
 	{
@@ -156,46 +159,37 @@ void UI_Scroll::reposition_all(int start_y)
 
 void UI_Scroll::Scroll(int delta)
 {
-#if 0  // FIXME
+	int pixels;
+	int line_size = scrollbar->linesize();
 
-	// get the scrollbar (OMG this is hacky shit)
-	int index = scroll->children() - 1;
-
-	Fl_Scrollbar *bar = (Fl_Scrollbar *)pack->child(index);
-
-	SYS_ASSERT(bar);
-
-	// this logic is copied from FLTK
-	// (would be nice if we could just resend the event to the widget)
-
-	float ssz = bar->slider_size();
-
-	if (ssz >= 1.0)
-		return;
-
-	int v  = bar->value();
-	int ls = (kind == 'F' || kind == 'T') ? 100 : 40;
+	if (abs(delta) <= 1)
+		pixels = MAX(1, line_size / 4);
+	else if (abs(delta) == 2)
+		pixels = line_size;
+	else if (abs(delta) == 3)
+		pixels = MAX(h() - line_size / 2, h() * 2 / 3);
+	else
+		pixels = HUGE_DIST;
 
 	if (delta < 0)
-	{
-		// PAGE-UP
-		v -= int((bar->maximum() - bar->minimum()) * ssz / (1.0 - ssz));
-		v += ls;
-	}
-	else
-	{
-		// PAGE-DOWN
-		v += int((bar->maximum() - bar->minimum()) * ssz / (1.0 - ssz));
-		v -= ls;
-	}
+		pixels = -pixels;
 
-    v = int(bar->clamp(v));
 
-	bar->value(v);
-	bar->damage(FL_DAMAGE_ALL);
-	bar->set_changed();
-	bar->do_callback();
-#endif
+	int pos = scrollbar->value() + pixels;
+
+	int total_h = bottom_y - top_y;
+
+	if (pos > total_h - h())
+		pos = total_h - h();
+
+	if (pos < 0)
+		pos = 0;
+
+	scrollbar->value(pos, h(), 0, MAX(h(), total_h));
+
+	reposition_all(y() - pos);
+
+	redraw();
 }
 
 
