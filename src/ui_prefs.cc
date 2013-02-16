@@ -41,6 +41,14 @@ class UI_Preferences : public Fl_Double_Window
 private:
 	bool want_quit;
 
+	std::vector<int> key_order;
+
+	char key_sort_mode;
+	bool key_sort_rev;
+
+	// -1 normally (not waiting for a key)
+	int awaiting_slot;
+
 	static void close_callback(Fl_Widget *w, void *data);
 	static void color_callback(Fl_Button *w, void *data);
 
@@ -60,7 +68,14 @@ public:
 
 	int GridSizeToChoice(int size);
 
+	/* FLTK override */
+	int handle(int event);
 
+	void ClearWaiting();
+	void SetBinding(keycode_t key);
+
+
+public:
 	Fl_Tabs *tabs;
 
 	Fl_Round_Button *theme_FLTK;
@@ -99,18 +114,14 @@ public:
 
 	Fl_Button *key_change;
 	Fl_Button *key_edit;
-
-	std::vector<int> key_order;
-
-	char key_sort_mode;
-	bool key_sort_rev;
 };
 
 
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), key_order(),
-	  key_sort_mode('c'), key_sort_rev(false)
+	  key_sort_mode('c'), key_sort_rev(false),
+	  awaiting_slot(-1)
 {
 	color(fl_gray_ramp(4));
 	callback(close_callback, this);
@@ -356,15 +367,16 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	int bind_idx = (int)(long)dialog->key_list->data(line);
 	SYS_ASSERT(bind_idx >= 0);
 
-	// mark line with ??? (show ready to accept new key)
+	// show we're ready to accept a new key
 
 	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
 	SYS_ASSERT(str);
 
 	dialog->key_list->text(line, str);
 
-	// FIXME !!!  set flag, have handle() method to grab key
-	//            and update the binding.
+	dialog->key_list->selection_color(FL_YELLOW);
+
+	dialog->awaiting_slot = line;
 }
 
 
@@ -382,7 +394,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	int bind_idx = (int)(long)dialog->key_list->data(line);
 
 	const char *str = M_StringForBinding(bind_idx);
-	str += MIN(strlen(str), 26);
+	str += MIN(strlen(str), 25);
 
 	const char *new_str = fl_input("Enter new function", str);
 
@@ -579,21 +591,76 @@ void UI_Preferences::LoadKeys()
 
 	key_list->clear();
 
-	for (unsigned int i = 0 ; i < key_order.size() ; i++)
+	for (unsigned int n = 0 ; n < key_order.size() ; n++)
 	{
-		const char *str = M_StringForBinding(key_order[i]);
+		int index = key_order[n];
 
-		if (! str)
-			break;
+		const char *str = M_StringForBinding(index);
+		SYS_ASSERT(str);
 
-		key_list->add(str, (void *)(long)i);
+		key_list->add(str, (void *)(long)index);
 	}
 
 	key_list->select(1);
 }
 
 
+void UI_Preferences::ClearWaiting()
+{
+	if (awaiting_slot >= 0)
+	{
+		// restore the text line
+
+		int bind_idx = (int)(long)key_list->data(awaiting_slot);
+		SYS_ASSERT(bind_idx >= 0);
+
+		const char *str = M_StringForBinding(bind_idx);
+		SYS_ASSERT(str);
+
+		key_list->text(awaiting_slot, str);
+	}
+
+	awaiting_slot = -1;
+
+	key_list->selection_color(FL_SELECTION_COLOR);
+}
+
+
+void UI_Preferences::SetBinding(keycode_t key)
+{
+	int bind_idx = (int)(long)key_list->data(awaiting_slot);
+	SYS_ASSERT(bind_idx >= 0);
+
+	// FIXME
+}
+
+
+int UI_Preferences::handle(int event)
+{
+	if (awaiting_slot >= 0)
+	{
+		if (event == FL_KEYDOWN)
+		{
+			keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+
+			if (key != 0)
+			{
+				SetBinding(key);
+				ClearWaiting();
+				return 1;
+			}
+		}
+
+		if (event == FL_PUSH)
+			ClearWaiting();
+	}
+
+	return Fl_Double_Window::handle(event);
+}
+
+
 //------------------------------------------------------------------------
+
 
 void CMD_Preferences()
 {

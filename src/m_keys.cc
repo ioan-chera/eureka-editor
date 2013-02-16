@@ -650,8 +650,8 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	sprintf(buffer, "%-8.8s %6.6s%-9.9s %.30s",
 			M_KeyContextString(bind.context),
-			changing_key ? "" : ModName(bind.key),
-			changing_key ? "<?\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
+			changing_key ? "<?"     : ModName(bind.key),
+			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
 			bind.cmd->name);
 
 	// add the parameters
