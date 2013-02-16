@@ -67,6 +67,8 @@ typedef enum
 } key_context_e;
 
 
+int M_KeyCmp(keycode_t A, keycode_t B);
+
 key_context_e M_ParseKeyContext(const char *str);
 const char * M_KeyContextString(key_context_e context);
 

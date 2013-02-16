@@ -227,6 +227,37 @@ const char * M_KeyToString(keycode_t key)
 }
 
 
+int M_KeyCmp(keycode_t A, keycode_t B)
+{
+	keycode_t A_mod = A & MOD_ALL_MASK;
+	keycode_t B_mod = B & MOD_ALL_MASK;
+
+	A &= FL_KEY_MASK;
+	B &= FL_KEY_MASK;
+
+	// we want lower- and uppercase of a key together (e.g. a + A)
+
+	if (A < 256 && isupper(A))
+	{
+		A = tolower(A); A_mod |= MOD_SHIFT;
+	}
+
+	if (B < 256 && isupper(B))
+	{
+		B = tolower(B); B_mod |= MOD_SHIFT;
+	}
+
+	// base key is most important
+
+	if (A != B)
+		return (int)A - (int)B;
+
+	// modifiers are the least important
+
+	return (int)A_mod - (int)B_mod;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -570,7 +601,7 @@ public:
 			return k1.context < k2.context;
 			
 		if (k1.key != k2.key)
-			return k1.key < k2.key;
+			return M_KeyCmp(k1.key, k2.key) < 0;
 
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
