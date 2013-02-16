@@ -87,6 +87,8 @@ void M_SaveBindings();
 void M_RemoveBinding(keycode_t key, key_context_e context);
 
 // used by preferences dialog:
+void M_SortBindingsToVec(std::vector<int>& list, char column, bool reverse);
+
 const char * M_StringForBinding(int index, bool changing_key = false);
 
 

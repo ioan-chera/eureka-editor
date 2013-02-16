@@ -22,6 +22,8 @@
 #include "m_config.h"
 #include "m_dialog.h"
 
+#include <algorithm>
+
 
 const char * EXEC_Param[4];
 
@@ -543,6 +545,50 @@ void M_SaveBindings()
 		if (count > 0)
 			fprintf(fp, "\n");
 	}
+}
+
+
+struct KeyBind_CMP_pred
+{
+private:
+	char column;
+	bool reverse;
+
+public:
+	KeyBind_CMP_pred(char _col, bool _rev) : column(_col), reverse(_rev)
+	{ }
+
+	inline bool operator() (const int A, const int B) const
+	{
+		if (A == B)
+			return 0;
+
+		key_binding_t& k1 = all_bindings[A];
+		key_binding_t& k2 = all_bindings[B];
+
+		if (k1.context != k2.context)
+			return k1.context < k2.context;
+			
+		if (k1.key != k2.key)
+			return k1.key < k2.key;
+
+		if (k1.cmd != k2.cmd)
+			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
+
+		return y_stricmp(k1.param[0], k2.param[0]) * 2 +
+		       y_stricmp(k1.param[1], k2.param[1]);
+	}
+};
+
+
+void M_SortBindingsToVec(std::vector<int>& list, char column, bool reverse)
+{
+	list.resize(all_bindings.size());
+
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+		list[i] = i;
+	
+	std::sort(list.begin(), list.end(), KeyBind_CMP_pred(column, reverse));
 }
 
 

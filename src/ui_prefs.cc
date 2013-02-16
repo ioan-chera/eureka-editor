@@ -98,6 +98,8 @@ public:
 
 	Fl_Button *key_change;
 	Fl_Button *key_edit;
+
+	std::vector<int> key_order;
 };
 
 
@@ -526,11 +528,13 @@ void UI_Preferences::SaveValues()
 
 void UI_Preferences::LoadKeys()
 {
+	M_SortBindingsToVec(key_order, 'c', false);
+
 	key_list->clear();
 
-	for (int i = 0 ; ; i++)
+	for (unsigned int i = 0 ; i < key_order.size() ; i++)
 	{
-		const char *str = M_StringForBinding(i);
+		const char *str = M_StringForBinding(key_order[i]);
 
 		if (! str)
 			break;
