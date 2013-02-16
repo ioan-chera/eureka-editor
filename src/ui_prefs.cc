@@ -631,7 +631,9 @@ void UI_Preferences::SetBinding(keycode_t key)
 	int bind_idx = (int)(long)key_list->data(awaiting_slot);
 	SYS_ASSERT(bind_idx >= 0);
 
-	// FIXME
+	M_ChangeBindingKey(bind_idx, key);
+
+	ClearWaiting();
 }
 
 
@@ -646,7 +648,6 @@ int UI_Preferences::handle(int event)
 			if (key != 0)
 			{
 				SetBinding(key);
-				ClearWaiting();
 				return 1;
 			}
 		}

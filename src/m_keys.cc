@@ -685,6 +685,15 @@ const char * M_StringForBinding(int index, bool changing_key)
 }
 
 
+void M_ChangeBindingKey(int index, keycode_t key)
+{
+	SYS_ASSERT(0 <= index && index < (int)all_bindings.size());
+	SYS_ASSERT(key != 0);
+
+	all_bindings[index].key = key;
+}
+
+
 //------------------------------------------------------------------------
 
 
