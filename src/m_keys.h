@@ -94,6 +94,7 @@ void M_SortBindingsToVec(std::vector<int>& list, char column, bool reverse);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
 void M_ChangeBindingKey(int index, keycode_t key);
+bool M_ParseBindingFunc(int index, const char * str);
 
 
 keycode_t M_TranslateKey(int key, int state);

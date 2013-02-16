@@ -340,7 +340,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
 }
 
 
-static void ParseBinding(const char ** tokens, int num_tok)
+static void ParseKeyBinding(const char ** tokens, int num_tok)
 {
 	key_binding_t temp;
 
@@ -451,7 +451,7 @@ static void LoadBindingsFromPath(const char *path, bool required)
 			continue;
 		}
 
-		ParseBinding(tokens, num_tok);
+		ParseKeyBinding(tokens, num_tok);
 	}
 
 	fclose(fp);
@@ -578,6 +578,9 @@ void M_SaveBindings()
 }
 
 
+//------------------------------------------------------------------------
+
+
 struct KeyBind_CMP_pred
 {
 private:
@@ -658,6 +661,8 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	char *pos = buffer;
 
+	bool saw_arg = false;
+
 	for (int k = 0 ; k < 2 ; k++)
 	{
 		const char *param = bind.param[k];
@@ -665,8 +670,11 @@ const char * M_StringForBinding(int index, bool changing_key)
 		if (! param[0])
 			break;
 
-		if (k == 0)
+		if (! saw_arg)
+		{
 			strcat(buffer, "(");
+			saw_arg = true;
+		}
 
 		pos = buffer + strlen(buffer);
 
@@ -677,9 +685,10 @@ const char * M_StringForBinding(int index, bool changing_key)
 		}
 
 		sprintf(pos, "%.30s", param);
-	strcat(buffer, ")");
 	}
 
+	if (saw_arg)
+		strcat(buffer, ")");
 
 	return buffer;
 }
@@ -691,6 +700,56 @@ void M_ChangeBindingKey(int index, keycode_t key)
 	SYS_ASSERT(key != 0);
 
 	all_bindings[index].key = key;
+}
+
+
+bool M_ParseBindingFunc(int index, const char * str)
+{
+	SYS_ASSERT(0 <= index && index < (int)all_bindings.size());
+
+	// convert the brackets and commas into spaces and use the
+	// line tokeniser.
+
+	static char buffer[600];
+	strncpy(buffer, str, sizeof(buffer));
+	buffer[sizeof(buffer) - 1] = 0;
+
+	for (unsigned int k = 0 ; buffer[k] ; k++)
+		if (buffer[k] == '(' || buffer[k] == ')' || buffer[k] == ',')
+			buffer[k] = ' ';
+
+	const char * tokens[MAX_TOKENS];
+
+	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
+
+	if (num_tok == 0)
+		return false;
+
+	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
+
+	if (! cmd)
+		return false;
+
+	key_binding_t& bind = all_bindings[index];
+
+	if (cmd->req_context != KCTX_NONE &&
+	    bind.context != cmd->req_context)
+	{
+		// FIXME: show user this is wrong context
+		return false;
+	}
+
+	/* OK : change the binding function */
+
+	bind.cmd = cmd;
+
+	if (num_tok >= 2)
+		strncpy(bind.param[0], tokens[1], MAX_BIND_PARAM_LEN-1);
+
+	if (num_tok >= 3)
+		strncpy(bind.param[1], tokens[2], MAX_BIND_PARAM_LEN-1);
+
+	return true;
 }
 
 

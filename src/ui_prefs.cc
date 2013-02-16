@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_config.h"
+#include "m_dialog.h"
 
 #include "ui_window.h"
 #include "ui_prefs.h"
@@ -398,7 +399,19 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	const char *new_str = fl_input("Enter new function", str);
 
-	// FIXME !!
+	// cancelled ?
+	if (! new_str)
+		return;
+
+	if (! M_ParseBindingFunc(bind_idx, new_str))
+	{
+		Notify(-1, -1, "Unknown binding command or bad syntax:", new_str);
+		return;
+	}
+	
+	// update browser line
+
+	dialog->key_list->text(line, M_StringForBinding(bind_idx));
 }
 
 
