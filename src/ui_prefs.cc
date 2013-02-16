@@ -46,6 +46,7 @@ private:
 
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
+	static void sort_key_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -100,12 +101,16 @@ public:
 	Fl_Button *key_edit;
 
 	std::vector<int> key_order;
+
+	char key_sort_mode;
+	bool key_sort_rev;
 };
 
 
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
-	  want_quit(false)
+	  want_quit(false), key_order(),
+	  key_sort_mode('c'), key_sort_rev(false)
 {
 	color(fl_gray_ramp(4));
 	callback(close_callback, this);
@@ -256,14 +261,17 @@ UI_Preferences::UI_Preferences() :
 		{ key_group = new Fl_Button(25, 90, 95, 25, "CONTEXT");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_group->callback((Fl_Callback*)sort_key_callback, this);
 		}
 		{ key_key = new Fl_Button(120, 90, 120, 25, "KEY");
 		  key_key->color((Fl_Color)231);
 		  key_key->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_key->callback((Fl_Callback*)sort_key_callback, this);
 		}
 		{ key_func = new Fl_Button(240, 90, 200, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
 		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
 		  key_list->textfont(FL_COURIER);
@@ -379,6 +387,45 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	const char *new_str = fl_input("Enter new function", str);
 
 	// FIXME !!
+}
+
+
+void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	if (w == dialog->key_group)
+	{
+		if (dialog->key_sort_mode != 'c')
+		{
+			dialog->key_sort_mode  = 'c';
+			dialog->key_sort_rev = false;
+		}
+		else
+			dialog->key_sort_rev = !dialog->key_sort_rev;
+	}
+	else if (w == dialog->key_key)
+	{
+		if (dialog->key_sort_mode != 'k')
+		{
+			dialog->key_sort_mode  = 'k';
+			dialog->key_sort_rev = false;
+		}
+		else
+			dialog->key_sort_rev = !dialog->key_sort_rev;
+	}
+	else if (w == dialog->key_func)
+	{
+		if (dialog->key_sort_mode != 'f')
+		{
+			dialog->key_sort_mode  = 'f';
+			dialog->key_sort_rev = false;
+		}
+		else
+			dialog->key_sort_rev = !dialog->key_sort_rev;
+	}
+
+	dialog->LoadKeys();
 }
 
 
@@ -528,7 +575,10 @@ void UI_Preferences::SaveValues()
 
 void UI_Preferences::LoadKeys()
 {
-	M_SortBindingsToVec(key_order, 'c', false);
+fprintf(stderr, "LOAD KEYS BY '%c' rev:%d\n", 
+        key_sort_mode, key_sort_rev ? 1 : 0);
+
+	M_SortBindingsToVec(key_order, key_sort_mode, key_sort_rev);
 
 	key_list->clear();
 

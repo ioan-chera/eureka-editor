@@ -589,7 +589,7 @@ public:
 	KeyBind_CMP_pred(char _col, bool _rev) : column(_col), reverse(_rev)
 	{ }
 
-	inline bool operator() (const int A, const int B) const
+	inline bool Compare(const int A, const int B) const
 	{
 		if (A == B)
 			return 0;
@@ -597,17 +597,34 @@ public:
 		key_binding_t& k1 = all_bindings[A];
 		key_binding_t& k2 = all_bindings[B];
 
-		if (k1.context != k2.context)
+		if (column == 'c' && k1.context != k2.context)
 			return k1.context < k2.context;
 			
-		if (k1.key != k2.key)
+		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
 
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
-		return y_stricmp(k1.param[0], k2.param[0]) * 2 +
-		       y_stricmp(k1.param[1], k2.param[1]);
+		int param_cmp = y_stricmp(k1.param[0], k2.param[0]) * 2 +
+		                y_stricmp(k1.param[1], k2.param[1]);
+		
+		if (param_cmp != 0)
+			return param_cmp < 0;
+
+		if (column == 'f' && k1.key != k2.key)
+			return M_KeyCmp(k1.key, k2.key) < 0;
+
+		return k1.context < k2.context;
+	}
+
+	inline bool operator() (const int A, const int B) const
+	{
+		bool result = Compare(A, B);
+
+		if (reverse) result = !result;
+
+		return result;
 	}
 };
 
