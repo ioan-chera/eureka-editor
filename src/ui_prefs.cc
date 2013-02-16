@@ -258,17 +258,17 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_group = new Fl_Button(25, 90, 95, 25, "CONTEXT");
+		{ key_group = new Fl_Button(25, 90, 80, 25, "CONTEXT");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_group->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_key = new Fl_Button(120, 90, 120, 25, "KEY");
+		{ key_key = new Fl_Button(110, 90, 115, 25, "KEY");
 		  key_key->color((Fl_Color)231);
 		  key_key->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_key->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_func = new Fl_Button(240, 90, 200, 25, "FUNCTION");
+		{ key_func = new Fl_Button(230, 90, 210, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
@@ -575,9 +575,6 @@ void UI_Preferences::SaveValues()
 
 void UI_Preferences::LoadKeys()
 {
-fprintf(stderr, "LOAD KEYS BY '%c' rev:%d\n", 
-        key_sort_mode, key_sort_rev ? 1 : 0);
-
 	M_SortBindingsToVec(key_order, key_sort_mode, key_sort_rev);
 
 	key_list->clear();

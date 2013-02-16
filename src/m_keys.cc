@@ -203,23 +203,22 @@ static const char * BareKeyName(keycode_t key)
 }
 
 
+static const char *ModName(keycode_t mod)
+{
+	if (mod & MOD_COMMAND) return "CMD-";
+	if (mod & MOD_META)    return "META-";
+	if (mod & MOD_ALT)     return "ALT-";
+	if (mod & MOD_SHIFT)   return "SHIFT-";
+
+	return "";
+}
+
+
 const char * M_KeyToString(keycode_t key)
 {
-	const char *mod = "";
-
-	if (key & MOD_COMMAND)
-		mod = "CMD-";
-	else if (key & MOD_META)
-		mod = "META-";
-	else if (key & MOD_ALT)
-		mod = "ALT-";
-	else if (key & MOD_SHIFT)
-		mod = "SHIFT-";
-
-
 	static char buffer[200];
 
-	strcpy(buffer, mod);
+	strcpy(buffer, ModName(key));
 
 	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
 
@@ -645,12 +644,15 @@ const char * M_StringForBinding(int index, bool changing_key)
 	if (index >= (int)all_bindings.size())
 		return NULL;
 
+	key_binding_t& bind = all_bindings[index];
+
 	static char buffer[600];
 
-	sprintf(buffer, "%-10.10s %-14.14s %.30s",
-			M_KeyContextString(all_bindings[index].context),
-			changing_key ? "<?\077?>" : M_KeyToString(all_bindings[index].key),
-			all_bindings[index].cmd->name);
+	sprintf(buffer, "%-8.8s %6.6s%-9.9s %.30s",
+			M_KeyContextString(bind.context),
+			changing_key ? "" : ModName(bind.key),
+			changing_key ? "<?\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
+			bind.cmd->name);
 
 	// add the parameters
 
@@ -658,7 +660,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	for (int k = 0 ; k < 2 ; k++)
 	{
-		const char *param = all_bindings[index].param[k];
+		const char *param = bind.param[k];
 
 		if (! param[0])
 			break;
