@@ -100,10 +100,12 @@ int  M_NumBindings();
 const char * M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
-void M_AddBinding(int after, keycode_t key, key_context_e context,
-                  const char *func_str);
 void M_ChangeBindingKey(int index, keycode_t key);
 const char * M_ChangeBindingFunc(int index, const char * func_str);
+
+const char * M_AddLocalBinding(int where, keycode_t key, key_context_e context,
+                               const char *func_str);
+void M_DeleteLocalBinding(int index);
 
 
 /* --- command execution stuff --- */

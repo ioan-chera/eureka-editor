@@ -737,12 +737,9 @@ void M_ChangeBindingKey(int index, keycode_t key)
 }
 
 
-const char * M_ChangeBindingFunc(int index, const char * func_str)
+static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_str)
 {
-	// returns an error message, or NULL if OK
 	static char error_msg[1024];
-
-	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 
 	// convert the brackets and commas into spaces and use the
 	// line tokeniser.
@@ -770,8 +767,6 @@ const char * M_ChangeBindingFunc(int index, const char * func_str)
 		return error_msg;
 	}
 
-	key_binding_t& bind = pref_binds[index];
-
 	// check context is suitable
 
 	if (cmd->req_context != KCTX_NONE &&
@@ -798,6 +793,44 @@ const char * M_ChangeBindingFunc(int index, const char * func_str)
 		strncpy(bind.param[1], tokens[2], MAX_BIND_PARAM_LEN-1);
 
 	return NULL;
+}
+
+
+// returns an error message, or NULL if OK
+const char * M_ChangeBindingFunc(int index, const char * func_str)
+{
+	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
+
+	return DoParseBindingFunc(pref_binds[index], func_str);
+}
+
+
+const char * M_AddLocalBinding(int where, keycode_t key, key_context_e context,
+                       const char *func_str)
+{
+	SYS_ASSERT(0 <= where && where < (int)pref_binds.size());
+
+	key_binding_t temp;
+
+	temp.key = key;
+	temp.context = context;
+
+	const char *err_msg = DoParseBindingFunc(temp, func_str);
+
+	if (err_msg)
+		return err_msg;
+
+	pref_binds.insert(pref_binds.begin() + where, temp);
+
+	return NULL;  // OK
+}
+
+
+void M_DeleteLocalBinding(int index)
+{
+	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
+
+	pref_binds.erase(pref_binds.begin() + index);
 }
 
 
