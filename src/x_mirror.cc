@@ -937,7 +937,7 @@ static void Quantize_Things(selection_c& list)
 	list.unmerge(moved);
 
 	if (list.notempty())
-		Beep();
+		Beep("Quantize: could not move %d things", list.count_obj());
 }
 
 
@@ -1045,7 +1045,7 @@ static void Quantize_Vertices(selection_c& list)
 	list.unmerge(moved);
 
 	if (list.notempty())
-		Beep();
+		Beep("Quantize: could not move %d vertices", list.count_obj());
 }
 
 
