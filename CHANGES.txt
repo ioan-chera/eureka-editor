@@ -26,6 +26,7 @@ CHANGELOG
 -  disconnect command for things at same location
 
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
+-  when saving over a map, use existing location in the wad
 
 -  removed '192' as a possible grid size
 

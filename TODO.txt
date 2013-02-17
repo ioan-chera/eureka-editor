@@ -3,9 +3,7 @@ EUREKA WISH-LIST
 ================
 
 
-!!  write bindings when changed
-
-DONE:  Delete button
+!!  write bindings when APPLY is chosen
 
 +  Add and Edit buttons : need a dialog box with these components:
    -  key name
@@ -15,11 +13,7 @@ DONE:  Delete button
    -  an "OK" button in bottom section [disabled if function invalid]
    -  a "Cancel" button in bottom section
 
--  keyboard shortcuts:
-   -  BACKSPACE/DELETE to delete a binding
-   -  INSERT key to add a binding
-   -  ENTER key to re-bind the line (or edit it)
-
+-  plain Beep()s
 
 ______________________________________________________________________
 
@@ -137,10 +131,6 @@ General
 
 +  a dialog to view / load / prune backups.
 
-+  don't save a map at the _END_ of wad file
-   (prefer existing location, or prefer before existing level where
-    the name is <, otherwise at beginning).
-
 ?  Scripting language
 
 
@@ -164,8 +154,6 @@ General
 -  a check/fix pass for LoadLevel()
 
 -  ability to use an external node builder
-
--  uppercase the level lump name (Level_name global var)
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
 
