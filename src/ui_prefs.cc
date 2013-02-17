@@ -43,7 +43,6 @@ private:
 	bool want_quit;
 	bool want_discard;
 
-	int  num_bindings;
 	int  changed_keys;
 
 	char key_sort_mode;
@@ -132,7 +131,7 @@ public:
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
-	  num_bindings(0), changed_keys(0),
+	  changed_keys(0),
 	  key_sort_mode('c'), key_sort_rev(false),
 	  awaiting_slot(-1)
 {
@@ -499,7 +498,19 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *dialog = (UI_Preferences *)data;
 
-	// FIXME
+	int line = dialog->key_list->value();
+	if (line < 1)
+	{
+		fl_beep();
+		return;
+	}
+
+	dialog->key_list->remove(line);
+
+	M_DeleteLocalBinding(line - 1);
+
+	if (line <= dialog->key_list->size())
+		dialog->key_list->select(line);
 }
 
 
@@ -685,11 +696,9 @@ void UI_Preferences::LoadKeys()
 {
 	M_SortBindings(key_sort_mode, key_sort_rev);
 
-	num_bindings = M_NumBindings();
-
 	key_list->clear();
 
-	for (int i = 0 ; i < num_bindings ; i++)
+	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
 		const char *str = M_StringForBinding(i);
 		SYS_ASSERT(str);
