@@ -37,6 +37,84 @@
 static int last_active_tab = 0;
 
 
+class UI_EditKey : public Fl_Double_Window
+{
+private:
+	Fl_Input  *key_name;
+	Fl_Choice *context;
+	Fl_Input  *func_text;
+
+	Fl_Button *cancel;
+	Fl_Button *ok_but;
+
+private:
+	static void check_key_callback (Fl_Widget *w, void *data)
+	{
+	}
+
+	static void check_func_callback(Fl_Widget *w, void *data)
+	{
+	}
+
+	static void grab_key_callback(Fl_Button *w, void *data)
+	{
+	}
+
+	static void find_func_callback(Fl_Button *w, void *data)
+	{
+	}
+
+	static void close_callback(Fl_Button *w, void *data)
+	{
+	}
+
+	static void ok_callback(Fl_Button *w, void *data)
+	{
+	}
+
+public:
+	UI_EditKey() : Fl_Double_Window(460, 400, "EDIT KEY")
+	{
+		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
+		  key_name->callback((Fl_Callback*)check_key_callback);
+		}
+		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
+		  o->callback((Fl_Callback*)grab_key_callback);
+		}
+
+		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
+		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|RadTrig|General");
+		  context->value(7);
+		  context->callback((Fl_Callback*)check_func_callback);
+		}
+
+		{ func_text = new Fl_Input(85, 105, 210, 25, "Function:");
+		  func_text->callback((Fl_Callback*)check_func_callback);
+		}
+		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
+		  o->callback((Fl_Callback*)find_func_callback);
+		}
+
+		{ Fl_Group *o = new Fl_Group(0, 169, 400, 66);
+
+		  o->box(FL_FLAT_BOX);
+		  o->color((Fl_Color)18);
+
+		  { cancel = new Fl_Button(170, 184, 80, 35, "Cancel");
+			cancel->callback((Fl_Callback*)close_callback);
+		  }
+		  { ok_but = new Fl_Button(295, 184, 80, 35, "OK");
+			ok_but->labelfont(1);
+			ok_but->callback((Fl_Callback*)ok_callback);
+		  }
+		  o->end();
+		}
+
+		end();
+	}
+};
+
+
 class UI_Preferences : public Fl_Double_Window
 {
 private:
