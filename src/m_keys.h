@@ -100,6 +100,9 @@ int  M_NumBindings();
 const char * M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
+void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context);
+bool M_IsBindingFuncValid(key_context_e context, const char * func_str);
+
 void M_ChangeBindingKey(int index, keycode_t key);
 const char * M_ChangeBindingFunc(int index, const char * func_str);
 

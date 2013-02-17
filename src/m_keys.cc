@@ -728,6 +728,15 @@ const char * M_StringForBinding(int index, bool changing_key)
 }
 
 
+void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context)
+{
+	// hmmm... exposing key_binding_t may have been easier...
+
+	*key     = pref_binds[index].key;
+	*context = pref_binds[index].context;
+}
+
+
 void M_ChangeBindingKey(int index, keycode_t key)
 {
 	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
@@ -793,6 +802,17 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 		strncpy(bind.param[1], tokens[2], MAX_BIND_PARAM_LEN-1);
 
 	return NULL;
+}
+
+
+bool M_IsBindingFuncValid(key_context_e context, const char * func_str)
+{
+	key_binding_t temp;
+
+	temp.key = 'a';  // dummy key
+	temp.context = context;
+
+	return (DoParseBindingFunc(temp, func_str) == NULL);
 }
 
 
