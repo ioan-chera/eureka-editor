@@ -729,6 +729,7 @@ void M_ChangeBindingKey(int index, keycode_t key)
 const char * M_ChangeBindingFunc(int index, const char * func_str)
 {
 	// returns an error message, or NULL if OK
+	static char error_msg[1024];
 
 	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 
@@ -748,20 +749,24 @@ const char * M_ChangeBindingFunc(int index, const char * func_str)
 	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
 
 	if (num_tok == 0)
-		return "Missing function name for binding";
+		return "Missing function name";
 
 	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
 
 	if (! cmd)
-		return "Unknown function name";
+	{
+		sprintf(error_msg, "Unknown function name: '%s'", tokens[0]);
+		return error_msg;
+	}
 
 	key_binding_t& bind = pref_binds[index];
 
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
-		// FIXME: show user this is wrong context
-		return "Binding function can only be used in XXX mode";
+		sprintf(error_msg, "The '%s' function can only be used in %s mode",
+		        tokens[0], M_KeyContextString(cmd->req_context));
+		return error_msg;
 	}
 
 	/* OK : change the binding function */
