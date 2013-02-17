@@ -3,8 +3,22 @@ EUREKA WISH-LIST
 ================
 
 
-fix UI_Browser::Scroll()
+!!  write bindings when changed
 
+DONE:  Delete button
+
++  Add and Edit buttons : need a dialog box with these components:
+   -  key name
+   -  key set button
+   -  mode choice
+   -  function input box
+   -  an "OK" button in bottom section [disabled if function invalid]
+   -  a "Cancel" button in bottom section
+
+-  keyboard shortcuts:
+   -  BACKSPACE/DELETE to delete a binding
+   -  INSERT key to add a binding
+   -  ENTER key to re-bind the line (or edit it)
 
 
 ______________________________________________________________________
@@ -17,12 +31,6 @@ General
 -------
 
 +  CHECK screen  (see misc/Checks.txt for more info)
-
-+  ability to view the current logs
-   -  store initial logs in memory (until we know $home_dir)
-   -  always write to $home_dir/LOGS.txt (override with --log)
-   -  if isatty(stdout), write a copy to stdout unless -q
-   -  fopen the log file for View/Logs dialog
 
 +  GUI for key bindings
    (a) probably implement with an Fl_Table.
@@ -90,7 +98,11 @@ General
 
 +  Hexen support
 
-+  Scripting language
++  ability to view the current logs
+   -  store initial logs in memory (until we know $home_dir)
+   -  always write to $home_dir/LOGS.txt (override with --log)
+   -  if isatty(stdout), write a copy to stdout unless -q
+   -  fopen the log file for View/Logs dialog
 
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
@@ -125,6 +137,12 @@ General
 
 +  a dialog to view / load / prune backups.
 
++  don't save a map at the _END_ of wad file
+   (prefer existing location, or prefer before existing level where
+    the name is <, otherwise at beginning).
+
+?  Scripting language
+
 
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
 
@@ -146,10 +164,6 @@ General
 -  a check/fix pass for LoadLevel()
 
 -  ability to use an external node builder
-
--  don't save a map at the _END_ of wad file
-   (prefer existing location, or prefer before existing level where
-    the name is <, otherwise at beginning).
 
 -  uppercase the level lump name (Level_name global var)
 
