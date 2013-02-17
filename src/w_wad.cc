@@ -182,7 +182,8 @@ Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 	total_size(0), directory(),
 	dir_start(0), dir_count(0), dir_crc(0),
 	levels(), patches(), sprites(), flats(),
-	tex_info(NULL), begun_write(false)
+	tex_info(NULL), begun_write(false),
+	insert_point(-1)
 {
 	filename = strdup(_name);
 }
@@ -756,7 +757,8 @@ void Wad_file::RemoveLevel(short index)
 
 	short count = 1;
 
-	// this will stop when it hits another level marker (e.g. MAP02)
+	// collect associated lumps (THINGS, VERTEXES etc)
+	// this will stop when it hits a non-level lump
 	while (count < 21 && index+count < NumLumps() &&
 		   (IsLevelLump(directory[index+count]->name) ||
 		    IsGLNodeLump(directory[index+count]->name)) )
@@ -809,7 +811,13 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 
 	Lump_c *lump = new Lump_c(this, name, start, 0);
 
-	directory.push_back(lump);
+	if (insert_point >= 0 && insert_point < (int)directory.size())
+	{
+		directory.insert(directory.begin() + insert_point, lump);
+		insert_point++;
+	}
+	else
+		directory.push_back(lump);
 
 	return lump;
 }
@@ -820,6 +828,13 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 	levels.push_back(NumLumps());
 
 	return AddLump(name, max_size);
+}
+
+
+void Wad_file::InsertPoint(short index)
+{
+	// is validated at usage
+	insert_point = index;
 }
 
 

@@ -130,6 +130,8 @@ private:
 	bool begun_write;
 	int  begun_max_size;
 
+	int  insert_point;
+
 	// constructor is private
 	Wad_file(const char *_name, char _mode, FILE * _fp);
 
@@ -194,6 +196,10 @@ public:
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
 	Lump_c * AddLevel(const char *name, int max_size = -1);
+
+	// set the insertion point -- the next lump will be added _before_
+	// this index.  A negative value (the default) means the end.
+	void InsertPoint(short index = -1);
 
 private:
 	static Wad_file * Create(const char *filename, char mode);

@@ -855,6 +855,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	if (level_lump >= 0)
 		save_wad->RemoveLevel(level_lump);
 
+	save_wad->InsertPoint(level_lump);
+
 	save_wad->AddLevel(level, 0)->Finish();
 
 	SaveThings  ();

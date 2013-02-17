@@ -673,6 +673,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
 	
+	wad->InsertPoint();  // at end
+
 	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
 
 	lump->Printf("# Eureka project info\n");
