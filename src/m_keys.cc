@@ -766,17 +766,24 @@ const char * M_ChangeBindingFunc(int index, const char * func_str)
 
 	if (! cmd)
 	{
-		sprintf(error_msg, "Unknown function name: '%s'", tokens[0]);
+		sprintf(error_msg, "Unknown function name: %s", tokens[0]);
 		return error_msg;
 	}
 
 	key_binding_t& bind = pref_binds[index];
 
+	// check context is suitable
+
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
-		sprintf(error_msg, "The '%s' function can only be used in %s mode",
-		        tokens[0], M_KeyContextString(cmd->req_context));
+		char *mode = StringUpper(M_KeyContextString(cmd->req_context));
+
+		sprintf(error_msg, "%s can only be used in %s mode",
+		        tokens[0], mode);
+		
+		StringFree(mode);
+
 		return error_msg;
 	}
 
