@@ -391,7 +391,7 @@ static const char * DetermineLevel()
 	if (Level_name && Level_name[0])
 	{
 		if (! isdigit(Level_name[0]))
-			return Level_name;
+			return StringUpper(Level_name);
 
 		level_number = atoi(Level_name);
 	}

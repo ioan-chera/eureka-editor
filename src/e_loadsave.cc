@@ -194,7 +194,7 @@ void CMD_NewMap()
 			Replacer = true;
 		}
 
-		Level_name = strdup(map_name);
+		Level_name = StringUpper(map_name);
 
 		main_win->SetTitle(Pwad_name, Level_name);
 	}
@@ -525,7 +525,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	CalculateLevelBounds();
 
-	Level_name = strdup(level);
+	Level_name = StringUpper(level);
 
 	Status_Set("Loaded %s", Level_name);
 
@@ -876,7 +876,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	// write out the new directory
 	save_wad->EndWrite();
 
-	Level_name = strdup(level);
+	Level_name = StringUpper(level);
 
 	Status_Set("Saved %s", Level_name);
 
