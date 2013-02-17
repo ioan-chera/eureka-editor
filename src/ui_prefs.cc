@@ -123,7 +123,7 @@ public:
 	Fl_Button *key_add;
 	Fl_Button *key_change;
 	Fl_Button *key_edit;
-	Fl_Button *key_remove;
+	Fl_Button *key_delete;
 	Fl_Button *key_reset;
 };
 
@@ -301,15 +301,18 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ key_add = new Fl_Button(470, 140, 90, 30, "Add");
 		  key_add->callback((Fl_Callback*)add_key_callback, this);
+		  key_add->shortcut(FL_Insert);
 		}
 		{ key_change = new Fl_Button(470, 185, 90, 30, "Bind");
 		  key_change->callback((Fl_Callback*)bind_key_callback, this);
+		  key_change->shortcut(FL_Enter);
 		}
 		{ key_edit = new Fl_Button(470, 230, 90, 30, "Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_remove = new Fl_Button(470, 275, 90, 30, "Delete");
-		  key_remove->callback((Fl_Callback*)del_key_callback, this);
+		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
+		  key_delete->callback((Fl_Callback*)del_key_callback, this);
+		  key_delete->shortcut(FL_Delete);
 		}
 		{ key_reset = new Fl_Button(470, 335, 90, 50, "Load\nDefaults");
 		  key_reset->callback((Fl_Callback*)restore_callback, this);
@@ -509,7 +512,11 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 	M_DeleteLocalBinding(line - 1);
 
 	if (line <= dialog->key_list->size())
+	{
 		dialog->key_list->select(line);
+
+		Fl::focus(dialog->key_list);
+	}
 }
 
 
@@ -718,6 +725,8 @@ void UI_Preferences::ClearWaiting()
 		int bind_idx = awaiting_line - 1;
 
 		key_list->text(awaiting_line, M_StringForBinding(bind_idx));
+
+		Fl::focus(key_list);
 	}
 
 	awaiting_line = 0;
@@ -744,6 +753,12 @@ int UI_Preferences::handle(int event)
 	{
 		if (event == FL_KEYDOWN)
 		{
+			if (Fl::event_key() == FL_Escape)
+			{
+				ClearWaiting();
+				return 1;
+			}
+
 			keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
 
 			if (key != 0)
