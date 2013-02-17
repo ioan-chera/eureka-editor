@@ -4,7 +4,7 @@ CHANGELOG
 
 +  Preferences dialog
 
-+  key binding system (but no GUI yet)
++  Key binding system, with GUI in preferences
 
 +  automatically create multiple backups of edited pwads
 
@@ -14,13 +14,14 @@ CHANGELOG
 
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
+-  fixed PGUP / PGDN keys to scroll the browser
 -  fixed jerky RMB scrolling at large zoom factors
 
 -  Scale Objects: implemented Z scaling for sectors
 -  copy properties command ('c') now copies linedef textures
 
 -  prevent making two lines overlap when merging vertices
--  merge commands: support one selected + one highlighted
+-  merge: support one selected + one highlighted
 -  merge command for things -- place them at same location
 -  disconnect command for things at same location
 
