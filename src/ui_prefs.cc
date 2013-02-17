@@ -41,6 +41,7 @@ class UI_Preferences : public Fl_Double_Window
 {
 private:
 	bool want_quit;
+	bool want_discard;
 
 	std::vector<int> key_order;
 
@@ -78,6 +79,9 @@ public:
 
 public:
 	Fl_Tabs *tabs;
+
+	Fl_Button *apply_but;
+	Fl_Button *discard_but;
 
 	Fl_Round_Button *theme_FLTK;
 	Fl_Round_Button *theme_GTK;
@@ -120,7 +124,8 @@ public:
 
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
-	  want_quit(false), key_order(),
+	  want_quit(false), want_discard(false),
+	  key_order(),
 	  key_sort_mode('c'), key_sort_rev(false),
 	  awaiting_slot(-1)
 {
@@ -321,8 +326,12 @@ UI_Preferences::UI_Preferences() :
 	  }
 	  tabs->end();
 	}
-	{ Fl_Button *o = new Fl_Button(460, 450, 85, 35, "OK");
-	  o->callback(close_callback, this);
+	{ apply_but = new Fl_Button(480, 450, 95, 35, "Apply");
+	  apply_but->labelfont(1);
+	  apply_but->callback(close_callback, this);
+	}
+	{ discard_but = new Fl_Button(350, 450, 95, 35, "Discard");
+	  discard_but->callback(close_callback, this);
 	}
 
 end();
@@ -336,6 +345,9 @@ void UI_Preferences::close_callback(Fl_Widget *w, void *data)
 	UI_Preferences *dialog = (UI_Preferences *)data;
 
 	dialog->want_quit = true;
+
+	if (w == dialog->discard_but)
+		dialog->want_discard = true;
 }
 
 
@@ -471,11 +483,16 @@ void UI_Preferences::Run()
 		Fl::wait(0.2);
 	}
 
-	SaveValues();
-
-	M_WriteConfigFile();
-
 	last_active_tab = tabs->find(tabs->value());
+
+	if (want_discard)
+		LogPrintf("Preferences: discarded changes\n");
+	else
+	{
+		SaveValues();
+
+		M_WriteConfigFile();
+	}
 }
 
 
