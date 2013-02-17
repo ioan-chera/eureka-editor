@@ -54,9 +54,12 @@ private:
 	static void close_callback(Fl_Widget *w, void *data);
 	static void color_callback(Fl_Button *w, void *data);
 
+	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
-	static void sort_key_callback(Fl_Button *w, void *data);
+	static void  add_key_callback(Fl_Button *w, void *data);
+	static void  del_key_callback(Fl_Button *w, void *data);
+	static void  restore_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -117,8 +120,11 @@ public:
 	Fl_Button *key_key;
 	Fl_Button *key_func;
 
+	Fl_Button *key_add;
 	Fl_Button *key_change;
 	Fl_Button *key_edit;
+	Fl_Button *key_remove;
+	Fl_Button *key_reset;
 };
 
 
@@ -280,7 +286,7 @@ UI_Preferences::UI_Preferences() :
 		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_key->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_group = new Fl_Button(155, 90, 90, 25, "CONTEXT");
+		{ key_group = new Fl_Button(155, 90, 90, 25, "MODE");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_group->callback((Fl_Callback*)sort_key_callback, this);
@@ -293,11 +299,20 @@ UI_Preferences::UI_Preferences() :
 		{ key_list = new Fl_Hold_Browser(30, 115, 430, 275);
 		  key_list->textfont(FL_COURIER);
 		}
-		{ key_change = new Fl_Button(470, 145, 90, 30, "Bind");
+		{ key_add = new Fl_Button(470, 140, 90, 30, "Add");
+		  key_add->callback((Fl_Callback*)add_key_callback, this);
+		}
+		{ key_change = new Fl_Button(470, 185, 90, 30, "Bind");
 		  key_change->callback((Fl_Callback*)bind_key_callback, this);
 		}
-		{ key_edit = new Fl_Button(470, 190, 90, 30, "Edit");
+		{ key_edit = new Fl_Button(470, 230, 90, 30, "Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
+		}
+		{ key_remove = new Fl_Button(470, 275, 90, 30, "Delete");
+		  key_remove->callback((Fl_Callback*)del_key_callback, this);
+		}
+		{ key_reset = new Fl_Button(470, 335, 90, 50, "Load\nDefaults");
+		  key_reset->callback((Fl_Callback*)restore_callback, this);
 		}
 		o->end();
 	  }
@@ -463,6 +478,32 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 	}
 
 	dialog->LoadKeys();
+}
+
+
+void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
+{
+	// FIXME
+}
+
+
+void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
+{
+	// FIXME
+}
+
+
+void UI_Preferences::restore_callback(Fl_Button *w, void *data)
+{
+    int res = fl_choice("This will restore all key bindings to their default state."
+                        "Any changes you have made will be lost."
+						"Are you sure you want to continue?",
+						NULL, "RESTORE", "Cancel");
+
+    if (res != 2)
+       return;
+
+	// FIXME
 }
 
 
