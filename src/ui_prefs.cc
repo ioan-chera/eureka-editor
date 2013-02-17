@@ -43,12 +43,13 @@ private:
 	bool want_quit;
 	bool want_discard;
 
-	std::vector<int> key_order;
+	int  num_bindings;
+	int  changed_keys;
 
 	char key_sort_mode;
 	bool key_sort_rev;
 
-	// -1 normally (not waiting for a key)
+	// normally -1 (not waiting for a key)
 	int awaiting_slot;
 
 	static void close_callback(Fl_Widget *w, void *data);
@@ -131,7 +132,7 @@ public:
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
-	  key_order(),
+	  num_bindings(0), changed_keys(0),
 	  key_sort_mode('c'), key_sort_rev(false),
 	  awaiting_slot(-1)
 {
@@ -421,8 +422,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	int bind_idx = (int)(long)dialog->key_list->data(line);
 
-	const char *str = M_StringForBinding(bind_idx);
-	str += MIN(strlen(str), 27);
+	const char *str = M_StringForFunc(bind_idx);
 
 	const char *new_str = fl_input("Enter new function", str);
 
@@ -430,15 +430,19 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (! new_str)
 		return;
 
-	if (! M_ParseBindingFunc(bind_idx, new_str))
+	const char *error_msg = M_ChangeBindingFunc(bind_idx, new_str);
+
+	if (error_msg)
 	{
-		Notify(-1, -1, "Unknown binding command or bad syntax:", new_str);
+		Notify(-1, -1, error_msg, NULL);
 		return;
 	}
-	
+
 	// update browser line
 
 	dialog->key_list->text(line, M_StringForBinding(bind_idx));
+
+	dialog->changed_keys++;
 }
 
 
@@ -483,27 +487,40 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 
 void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 {
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
 	// FIXME
 }
 
 
 void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 {
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
 	// FIXME
 }
 
 
 void UI_Preferences::restore_callback(Fl_Button *w, void *data)
 {
-    int res = fl_choice("This will restore all key bindings to their default state."
-                        "Any changes you have made will be lost."
-						"Are you sure you want to continue?",
-						NULL, "RESTORE", "Cancel");
+	UI_Preferences *dialog = (UI_Preferences *)data;
 
-    if (res != 2)
-       return;
+	if (dialog->changed_keys > 1)
+	{
+		int res = fl_choice("You have made several changes to the key bindings.\n"
+		                    "These will be lost after loading the defaults.\n"
+							"\n"
+							"Are you sure you want to continue?",
+							NULL, "LOAD", "Cancel");
+		if (res != 1)
+			return;
+	}
 
-	// FIXME
+	M_CopyBindings(true /* from_defaults */);
+
+	dialog->LoadKeys();
+
+	dialog->changed_keys = 0;
 }
 
 
@@ -511,6 +528,8 @@ void UI_Preferences::Run()
 {
 	if (last_active_tab < tabs->children())
 		tabs->value(tabs->child(last_active_tab));
+
+	M_CopyBindings();
 
 	LoadValues();
 	LoadKeys();
@@ -532,7 +551,11 @@ void UI_Preferences::Run()
 	{
 		SaveValues();
 
+		M_ApplyBindings();
+
 		M_WriteConfigFile();
+
+		// FIXME: M_WriteBindings()
 	}
 }
 
@@ -658,18 +681,18 @@ void UI_Preferences::SaveValues()
 
 void UI_Preferences::LoadKeys()
 {
-	M_SortBindingsToVec(key_order, key_sort_mode, key_sort_rev);
+	M_SortBindings(key_sort_mode, key_sort_rev);
+
+	num_bindings = M_NumBindings();
 
 	key_list->clear();
 
-	for (unsigned int n = 0 ; n < key_order.size() ; n++)
+	for (int i = 0 ; i < num_bindings ; i++)
 	{
-		int index = key_order[n];
-
-		const char *str = M_StringForBinding(index);
+		const char *str = M_StringForBinding(i);
 		SYS_ASSERT(str);
 
-		key_list->add(str, (void *)(long)index);
+		key_list->add(str, (void *)(long)i);
 	}
 
 	key_list->select(1);
@@ -703,6 +726,8 @@ void UI_Preferences::SetBinding(keycode_t key)
 	SYS_ASSERT(bind_idx >= 0);
 
 	M_ChangeBindingKey(bind_idx, key);
+
+	changed_keys++;
 
 	ClearWaiting();
 }

@@ -665,20 +665,13 @@ void M_SortBindings(char column, bool reverse)
 }
 
 
-const char * M_StringForBinding(int index, bool changing_key)
+const char * M_StringForFunc(int index)
 {
-	if (index >= (int)pref_binds.size())
-		return NULL;
+	static char buffer[300];
 
 	key_binding_t& bind = pref_binds[index];
 
-	static char buffer[600];
-
-	sprintf(buffer, "%6.6s%-9.9s %-10.10s %.30s",
-			changing_key ? "<?"     : ModName(bind.key),
-			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
-			M_KeyContextString(bind.context),
-			bind.cmd->name);
+	strcpy(buffer, bind.cmd->name);
 
 	// add the parameters
 
@@ -712,6 +705,24 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	if (saw_arg)
 		strcat(buffer, ")");
+
+	return buffer;
+}
+
+
+const char * M_StringForBinding(int index, bool changing_key)
+{
+	SYS_ASSERT(index < (int)pref_binds.size());
+
+	key_binding_t& bind = pref_binds[index];
+
+	static char buffer[600];
+
+	sprintf(buffer, "%6.6s%-9.9s %-10.10s %.30s",
+			changing_key ? "<?"     : ModName(bind.key),
+			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
+			M_KeyContextString(bind.context),
+			M_StringForFunc(index) );
 
 	return buffer;
 }
