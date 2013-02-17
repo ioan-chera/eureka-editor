@@ -275,22 +275,22 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_group = new Fl_Button(25, 90, 80, 25, "CONTEXT");
+		{ key_key = new Fl_Button(30, 90, 120, 25, "KEY");
+		  key_key->color((Fl_Color)231);
+		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
+		  key_key->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_group = new Fl_Button(155, 90, 90, 25, "CONTEXT");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_group->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_key = new Fl_Button(110, 90, 115, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_func = new Fl_Button(230, 90, 210, 25, "FUNCTION");
+		{ key_func = new Fl_Button(250, 90, 190, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
+		{ key_list = new Fl_Hold_Browser(30, 115, 430, 275);
 		  key_list->textfont(FL_COURIER);
 		}
 		{ key_change = new Fl_Button(470, 145, 90, 30, "Bind");
@@ -407,7 +407,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	int bind_idx = (int)(long)dialog->key_list->data(line);
 
 	const char *str = M_StringForBinding(bind_idx);
-	str += MIN(strlen(str), 25);
+	str += MIN(strlen(str), 27);
 
 	const char *new_str = fl_input("Enter new function", str);
 

@@ -651,10 +651,10 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	static char buffer[600];
 
-	sprintf(buffer, "%-8.8s %6.6s%-9.9s %.30s",
-			M_KeyContextString(bind.context),
+	sprintf(buffer, "%6.6s%-9.9s %-10.10s %.30s",
 			changing_key ? "<?"     : ModName(bind.key),
 			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
+			M_KeyContextString(bind.context),
 			bind.cmd->name);
 
 	// add the parameters
