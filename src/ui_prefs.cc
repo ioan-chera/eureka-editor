@@ -297,7 +297,7 @@ UI_Preferences::UI_Preferences() :
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 275);
+		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
 		  key_list->textfont(FL_COURIER);
 		}
 		{ key_add = new Fl_Button(470, 140, 90, 30, "Add");
@@ -404,6 +404,8 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	dialog->key_list->text(line, str);
 
 	dialog->key_list->selection_color(FL_YELLOW);
+
+	Fl::focus(dialog);
 
 	dialog->awaiting_slot = line;
 }
