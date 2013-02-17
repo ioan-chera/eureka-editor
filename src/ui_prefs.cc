@@ -48,8 +48,8 @@ private:
 	char key_sort_mode;
 	bool key_sort_rev;
 
-	// normally -1 (not waiting for a key)
-	int awaiting_slot;
+	// normally zero (not waiting for a key)
+	int awaiting_line;
 
 	static void close_callback(Fl_Widget *w, void *data);
 	static void color_callback(Fl_Button *w, void *data);
@@ -133,7 +133,7 @@ UI_Preferences::UI_Preferences() :
 	  want_quit(false), want_discard(false),
 	  changed_keys(0),
 	  key_sort_mode('c'), key_sort_rev(false),
-	  awaiting_slot(-1)
+	  awaiting_line(0)
 {
 	color(fl_gray_ramp(4));
 	callback(close_callback, this);
@@ -392,8 +392,7 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	int bind_idx = (int)(long)dialog->key_list->data(line);
-	SYS_ASSERT(bind_idx >= 0);
+	int bind_idx = line - 1;
 
 	// show we're ready to accept a new key
 
@@ -406,7 +405,7 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	Fl::focus(dialog);
 
-	dialog->awaiting_slot = line;
+	dialog->awaiting_line = line;
 }
 
 
@@ -421,7 +420,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	int bind_idx = (int)(long)dialog->key_list->data(line);
+	int bind_idx = line - 1;
 
 	const char *str = M_StringForFunc(bind_idx);
 
@@ -703,7 +702,7 @@ void UI_Preferences::LoadKeys()
 		const char *str = M_StringForBinding(i);
 		SYS_ASSERT(str);
 
-		key_list->add(str, (void *)(long)i);
+		key_list->add(str);
 	}
 
 	key_list->select(1);
@@ -712,20 +711,16 @@ void UI_Preferences::LoadKeys()
 
 void UI_Preferences::ClearWaiting()
 {
-	if (awaiting_slot >= 0)
+	if (awaiting_line > 0)
 	{
 		// restore the text line
 
-		int bind_idx = (int)(long)key_list->data(awaiting_slot);
-		SYS_ASSERT(bind_idx >= 0);
+		int bind_idx = awaiting_line - 1;
 
-		const char *str = M_StringForBinding(bind_idx);
-		SYS_ASSERT(str);
-
-		key_list->text(awaiting_slot, str);
+		key_list->text(awaiting_line, M_StringForBinding(bind_idx));
 	}
 
-	awaiting_slot = -1;
+	awaiting_line = 0;
 
 	key_list->selection_color(FL_SELECTION_COLOR);
 }
@@ -733,8 +728,7 @@ void UI_Preferences::ClearWaiting()
 
 void UI_Preferences::SetBinding(keycode_t key)
 {
-	int bind_idx = (int)(long)key_list->data(awaiting_slot);
-	SYS_ASSERT(bind_idx >= 0);
+	int bind_idx = awaiting_line - 1;
 
 	M_ChangeBindingKey(bind_idx, key);
 
@@ -746,7 +740,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 
 int UI_Preferences::handle(int event)
 {
-	if (awaiting_slot >= 0)
+	if (awaiting_line > 0)
 	{
 		if (event == FL_KEYDOWN)
 		{
