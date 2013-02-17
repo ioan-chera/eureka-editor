@@ -579,26 +579,59 @@ void M_SaveBindings()
 
 
 //------------------------------------------------------------------------
+//  PREFERENCE DIALOG STUFF
+//------------------------------------------------------------------------
+
+// local copy of the bindings
+// these only become live after M_ApplyBindings()
+static std::vector<key_binding_t> pref_binds;
+
+
+void M_CopyBindings(bool from_defaults)
+{
+	// returns # of bindings
+
+	pref_binds.clear();
+
+	if (from_defaults)
+	{
+		for (unsigned int i = 0 ; i < install_binds.size() ; i++)
+			pref_binds.push_back(install_binds[i]);
+	}
+	else
+	{
+		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+			pref_binds.push_back(all_bindings[i]);
+	}
+}
+
+
+void M_ApplyBindings()
+{
+	all_bindings.clear();
+
+	for (unsigned int i = 0 ; i < pref_binds.size() ; i++)
+		all_bindings.push_back(pref_binds[i]);
+}
+
+
+int M_NumBindings()
+{
+	return (int)pref_binds.size();
+}
 
 
 struct KeyBind_CMP_pred
 {
 private:
 	char column;
-	bool reverse;
 
 public:
-	KeyBind_CMP_pred(char _col, bool _rev) : column(_col), reverse(_rev)
+	KeyBind_CMP_pred(char _col) : column(_col)
 	{ }
 
-	inline bool Compare(const int A, const int B) const
+	inline bool operator() (const key_binding_t& k1, const key_binding_t& k2) const
 	{
-		if (A == B)
-			return 0;
-
-		key_binding_t& k1 = all_bindings[A];
-		key_binding_t& k2 = all_bindings[B];
-
 		if (column == 'c' && k1.context != k2.context)
 			return k1.context < k2.context;
 			
@@ -619,35 +652,25 @@ public:
 
 		return k1.context < k2.context;
 	}
-
-	inline bool operator() (const int A, const int B) const
-	{
-		bool result = Compare(A, B);
-
-		if (reverse) result = !result;
-
-		return result;
-	}
 };
 
 
-void M_SortBindingsToVec(std::vector<int>& list, char column, bool reverse)
+void M_SortBindings(char column, bool reverse)
 {
-	list.resize(all_bindings.size());
+	std::sort(pref_binds.begin(), pref_binds.end(),
+	          KeyBind_CMP_pred(column));
 
-	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
-		list[i] = i;
-	
-	std::sort(list.begin(), list.end(), KeyBind_CMP_pred(column, reverse));
+	if (reverse)
+		std::reverse(pref_binds.begin(), pref_binds.end());
 }
 
 
 const char * M_StringForBinding(int index, bool changing_key)
 {
-	if (index >= (int)all_bindings.size())
+	if (index >= (int)pref_binds.size())
 		return NULL;
 
-	key_binding_t& bind = all_bindings[index];
+	key_binding_t& bind = pref_binds[index];
 
 	static char buffer[600];
 
@@ -696,22 +719,24 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 void M_ChangeBindingKey(int index, keycode_t key)
 {
-	SYS_ASSERT(0 <= index && index < (int)all_bindings.size());
+	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 	SYS_ASSERT(key != 0);
 
-	all_bindings[index].key = key;
+	pref_binds[index].key = key;
 }
 
 
-bool M_ParseBindingFunc(int index, const char * str)
+const char * M_ChangeBindingFunc(int index, const char * func_str)
 {
-	SYS_ASSERT(0 <= index && index < (int)all_bindings.size());
+	// returns an error message, or NULL if OK
+
+	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 
 	// convert the brackets and commas into spaces and use the
 	// line tokeniser.
 
 	static char buffer[600];
-	strncpy(buffer, str, sizeof(buffer));
+	strncpy(buffer, func_str, sizeof(buffer));
 	buffer[sizeof(buffer) - 1] = 0;
 
 	for (unsigned int k = 0 ; buffer[k] ; k++)
@@ -723,20 +748,20 @@ bool M_ParseBindingFunc(int index, const char * str)
 	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
 
 	if (num_tok == 0)
-		return false;
+		return "Missing function name for binding";
 
 	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
 
 	if (! cmd)
-		return false;
+		return "Unknown function name";
 
-	key_binding_t& bind = all_bindings[index];
+	key_binding_t& bind = pref_binds[index];
 
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
 		// FIXME: show user this is wrong context
-		return false;
+		return "Binding function can only be used in XXX mode";
 	}
 
 	/* OK : change the binding function */
@@ -749,10 +774,12 @@ bool M_ParseBindingFunc(int index, const char * str)
 	if (num_tok >= 3)
 		strncpy(bind.param[1], tokens[2], MAX_BIND_PARAM_LEN-1);
 
-	return true;
+	return NULL;
 }
 
 
+//------------------------------------------------------------------------
+//  COMMAND EXECUTION STUFF
 //------------------------------------------------------------------------
 
 

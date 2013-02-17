@@ -66,6 +66,10 @@ typedef enum
 
 } key_context_e;
 
+typedef void (* command_func_t)(void);
+
+
+/* --- general manipulation --- */
 
 int M_KeyCmp(keycode_t A, keycode_t B);
 
@@ -76,26 +80,33 @@ keycode_t M_ParseKeyString(const char *str);
 const char * M_KeyToString(keycode_t key);
 
 
-typedef void (* command_func_t)(void);
-
 void M_RegisterCommand(const char *name, command_func_t func,
                        key_context_e req_context = KCTX_NONE);
 
 void M_LoadBindings();
 void M_SaveBindings();
 
-// TODO: M_AddBinding
-
 void M_RemoveBinding(keycode_t key, key_context_e context);
 
-// used by preferences dialog:
-void M_SortBindingsToVec(std::vector<int>& list, char column, bool reverse);
 
+/* --- preferences dialog stuff --- */
+
+void M_CopyBindings(bool from_defaults = false);
+void M_SortBindings(char column, bool reverse);
+void M_ApplyBindings();
+
+int  M_NumBindings();
+
+const char * M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
+void M_AddBinding(int after, keycode_t key, key_context_e context,
+                  const char *func_str);
 void M_ChangeBindingKey(int index, keycode_t key);
-bool M_ParseBindingFunc(int index, const char * str);
+const char * M_ChangeBindingFunc(int index, const char * func_str);
 
+
+/* --- command execution stuff --- */
 
 keycode_t M_TranslateKey(int key, int state);
 
