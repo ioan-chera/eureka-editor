@@ -119,6 +119,16 @@ static key_mapping_t key_map[] =
 	{ FL_Sleep,		"SLEEP" },
 	{ FL_Favorites,	"FAVORITES" },
 
+	// some synonyms for user input
+	{ ' ',			"SPC" },
+	{ FL_BackSpace,	"BACKSPACE" },
+	{ FL_Enter,		"RETURN" },
+	{ FL_Escape,	"ESCAPE" },
+	{ FL_Insert,	"INSERT" },
+	{ FL_Delete,	"DELETE" },
+	{ FL_Page_Up,	"PAGEUP" },
+	{ FL_Page_Down,	"PAGEDOWN" },
+
 	{ 0, NULL } // the end
 };
 
@@ -160,7 +170,7 @@ keycode_t M_ParseKeyString(const char *str)
 		return key | (FL_KP + str[3]);
 
 	if (str[0] == '0' && str[1] == 'x')
-		return key | atoi(str);
+		return key | (int)strtol(str, NULL, 0);
 
 	return 0;
 }
