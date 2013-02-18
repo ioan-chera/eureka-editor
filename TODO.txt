@@ -5,15 +5,12 @@ EUREKA WISH-LIST
 
 !!  write bindings when APPLY is chosen
 
-+  Add and Edit buttons : need a dialog box with these components:
-   -  key name
-   -  key set button
-   -  mode choice
-   -  function input box
-   -  an "OK" button in bottom section [disabled if function invalid]
-   -  a "Cancel" button in bottom section
++  UI_EditKey : mechanism to get result
+
++  AddKey : actually add the key
 
 -  plain Beep()s
+
 
 ______________________________________________________________________
 
@@ -25,22 +22,6 @@ General
 -------
 
 +  CHECK screen  (see misc/Checks.txt for more info)
-
-+  GUI for key bindings
-   (a) probably implement with an Fl_Table.
-
-       ability to sort by a particular column (key / context / command).
-       if pick a new column, previous becomes secondary sort criterion.
-
-   (b) replace M_RegisterCommand() with a data-driven approach
-       (similar to what's in m_config.cc).
-
-       Provide a description of each binding command, and info
-       about the parameters (if any).
-
-   (c) if a parameter has a limited set of usable values, provide
-       a choice button (e.g. "-1|+1").  Or at least validate the
-       parameter values (use RED for unknown keywords).
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -60,6 +41,8 @@ Documentation
 -------------
 
 +  a tutorial for the basics
+
++  information on each binding command, parameters etc..
 
 
 
