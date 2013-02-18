@@ -85,10 +85,13 @@ private:
 	}
 
 public:
-	UI_EditKey() : Fl_Double_Window(400, 236, "Edit Key Binding"),
-		want_close(false), cancelled(false), key(0)
+	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
+		Fl_Double_Window(400, 236, "Edit Key Binding"),
+		want_close(false), cancelled(false), key(_key)
 	{
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
+		  if (key)
+			  key_name->value(M_KeyToString(key));
 		  key_name->callback((Fl_Callback*)check_key_callback);
 		}
 		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
@@ -97,11 +100,12 @@ public:
 
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
 		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|RadTrig|General");
-		  context->value(7);
+		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)check_func_callback, this);
 		}
 
 		{ func_text = new Fl_Input(85, 105, 210, 25, "Function:");
+		  func_text->value(_func);
 		  func_text->callback((Fl_Callback*)check_func_callback, this);
 		}
 		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
@@ -464,12 +468,12 @@ end();
 
 void UI_Preferences::close_callback(Fl_Widget *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	dialog->want_quit = true;
+	prefs->want_quit = true;
 
-	if (w == dialog->discard_but)
-		dialog->want_discard = true;
+	if (w == prefs->discard_but)
+		prefs->want_discard = true;
 }
 
 
@@ -490,9 +494,9 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 
 void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = dialog->key_list->value();
+	int line = prefs->key_list->value();
 	if (line < 1)
 	{
 		fl_beep();
@@ -506,52 +510,52 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
 	SYS_ASSERT(str);
 
-	dialog->key_list->text(line, str);
+	prefs->key_list->text(line, str);
 
-	dialog->key_list->selection_color(FL_YELLOW);
+	prefs->key_list->selection_color(FL_YELLOW);
 
-	Fl::focus(dialog);
+	Fl::focus(prefs);
 
-	dialog->awaiting_line = line;
+	prefs->awaiting_line = line;
 }
 
 
 void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	if (w == dialog->key_group)
+	if (w == prefs->key_group)
 	{
-		if (dialog->key_sort_mode != 'c')
+		if (prefs->key_sort_mode != 'c')
 		{
-			dialog->key_sort_mode  = 'c';
-			dialog->key_sort_rev = false;
+			prefs->key_sort_mode  = 'c';
+			prefs->key_sort_rev = false;
 		}
 		else
-			dialog->key_sort_rev = !dialog->key_sort_rev;
+			prefs->key_sort_rev = !prefs->key_sort_rev;
 	}
-	else if (w == dialog->key_key)
+	else if (w == prefs->key_key)
 	{
-		if (dialog->key_sort_mode != 'k')
+		if (prefs->key_sort_mode != 'k')
 		{
-			dialog->key_sort_mode  = 'k';
-			dialog->key_sort_rev = false;
+			prefs->key_sort_mode  = 'k';
+			prefs->key_sort_rev = false;
 		}
 		else
-			dialog->key_sort_rev = !dialog->key_sort_rev;
+			prefs->key_sort_rev = !prefs->key_sort_rev;
 	}
-	else if (w == dialog->key_func)
+	else if (w == prefs->key_func)
 	{
-		if (dialog->key_sort_mode != 'f')
+		if (prefs->key_sort_mode != 'f')
 		{
-			dialog->key_sort_mode  = 'f';
-			dialog->key_sort_rev = false;
+			prefs->key_sort_mode  = 'f';
+			prefs->key_sort_rev = false;
 		}
 		else
-			dialog->key_sort_rev = !dialog->key_sort_rev;
+			prefs->key_sort_rev = !prefs->key_sort_rev;
 	}
 
-	dialog->LoadKeys();
+	prefs->LoadKeys();
 }
 
 
@@ -561,12 +565,24 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 
 	int line = prefs->key_list->value();
 
-	// FIXME
+	keycode_t     init_key = 0;
+	key_context_e init_context = KCTX_General;
+	const char   *init_func = "";
 
-	UI_EditKey *dialog = new UI_EditKey();
+	if (line > 0)
+	{
+		int bind_idx = line - 1;
+
+		M_GetBindingInfo(bind_idx, &init_key, &init_context);
+
+		init_func = M_StringForFunc(bind_idx);
+	}
+
+	UI_EditKey *dialog = new UI_EditKey(init_key, init_context, init_func);
 
 	if (dialog->Run())
 	{
+		// FIXME
 	}
 
 	delete dialog;
@@ -575,9 +591,9 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 
 void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = dialog->key_list->value();
+	int line = prefs->key_list->value();
 	if (line < 1)
 	{
 		fl_beep();
@@ -586,6 +602,23 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	int bind_idx = line - 1;
 
+	keycode_t     init_key;
+	key_context_e init_context;
+
+	M_GetBindingInfo(bind_idx, &init_key, &init_context);
+
+	const char *init_func = M_StringForFunc(bind_idx);
+
+
+	UI_EditKey *dialog = new UI_EditKey(init_key, init_context, init_func);
+
+	if (dialog->Run())
+	{
+		// FIXME
+	}
+
+	delete dialog;
+/*
 	const char *str = M_StringForFunc(bind_idx);
 
 	const char *new_str = fl_input("Enter new function", str);
@@ -607,38 +640,39 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	dialog->key_list->text(line, M_StringForBinding(bind_idx));
 
 	dialog->changed_keys++;
+*/
 }
 
 
 void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = dialog->key_list->value();
+	int line = prefs->key_list->value();
 	if (line < 1)
 	{
 		fl_beep();
 		return;
 	}
 
-	dialog->key_list->remove(line);
+	prefs->key_list->remove(line);
 
 	M_DeleteLocalBinding(line - 1);
 
-	if (line <= dialog->key_list->size())
+	if (line <= prefs->key_list->size())
 	{
-		dialog->key_list->select(line);
+		prefs->key_list->select(line);
 
-		Fl::focus(dialog->key_list);
+		Fl::focus(prefs->key_list);
 	}
 }
 
 
 void UI_Preferences::restore_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	if (dialog->changed_keys > 1)
+	if (prefs->changed_keys > 1)
 	{
 		int res = fl_choice("You have made several changes to the key bindings.\n"
 		                    "These will be lost after loading the defaults.\n"
@@ -651,9 +685,9 @@ void UI_Preferences::restore_callback(Fl_Button *w, void *data)
 
 	M_CopyBindings(true /* from_defaults */);
 
-	dialog->LoadKeys();
+	prefs->LoadKeys();
 
-	dialog->changed_keys = 0;
+	prefs->changed_keys = 0;
 }
 
 
