@@ -47,18 +47,50 @@ private:
 
 	Fl_Input  *key_name;
 	Fl_Choice *context;
-	Fl_Input  *func_text;
+	Fl_Input  *func_name;
 
 	Fl_Button *cancel;
 	Fl_Button *ok_but;
 
 private:
-	static void check_key_callback (Fl_Widget *w, void *data)
+	bool ValidateKey()
 	{
+		keycode_t new_key = M_ParseKeyString(key_name->value());
+
+		if (new_key > 0)
+		{
+			key = new_key;
+			return true;
+		}
+
+		return false;
 	}
 
-	static void check_func_callback(Fl_Widget *w, void *data)
+	bool ValidateFunc()
 	{
+		// TODO
+
+		return false;
+	}
+
+	static void validate_callback(Fl_Widget *w, void *data)
+	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		bool valid_key  = dialog->ValidateKey();
+		bool valid_func = dialog->ValidateFunc();
+
+		dialog-> key_name->textcolor(valid_key  ? FL_FOREGROUND_COLOR : FL_RED);
+		dialog->func_name->textcolor(valid_func ? FL_FOREGROUND_COLOR : FL_RED);
+
+		// need to redraw the input boxes (otherwise get a mix of colors)
+		dialog-> key_name->redraw();
+		dialog->func_name->redraw();
+
+		if (valid_key && valid_func)
+			dialog->ok_but->activate();
+		else
+			dialog->ok_but->deactivate();
 	}
 
 	static void grab_key_callback(Fl_Button *w, void *data)
@@ -67,6 +99,7 @@ private:
 
 	static void find_func_callback(Fl_Button *w, void *data)
 	{
+		// TODO: show a list of all commands
 	}
 
 	static void close_callback(Fl_Button *w, void *data)
@@ -92,7 +125,8 @@ public:
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
 		  if (key)
 			  key_name->value(M_KeyToString(key));
-		  key_name->callback((Fl_Callback*)check_key_callback);
+		  key_name->when(FL_WHEN_CHANGED);
+		  key_name->callback((Fl_Callback*)validate_callback, this);
 		}
 		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
 		  o->callback((Fl_Callback*)grab_key_callback, this);
@@ -101,15 +135,17 @@ public:
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
 		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|RadTrig|General");
 		  context->value((int)ctx - 1);
-		  context->callback((Fl_Callback*)check_func_callback, this);
+		  context->callback((Fl_Callback*)validate_callback, this);
 		}
 
-		{ func_text = new Fl_Input(85, 105, 210, 25, "Function:");
-		  func_text->value(_func);
-		  func_text->callback((Fl_Callback*)check_func_callback, this);
+		{ func_name = new Fl_Input(85, 105, 210, 25, "Function:");
+		  func_name->value(_func);
+		  func_name->when(FL_WHEN_CHANGED);
+		  func_name->callback((Fl_Callback*)validate_callback, this);
 		}
 		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
-		  o->callback((Fl_Callback*)find_func_callback);
+		  o->callback((Fl_Callback*)find_func_callback, this);
+		  o->hide();  // TODO: IMPLEMENT THIS
 		}
 
 		{ Fl_Group *o = new Fl_Group(0, 170, 400, 66);
@@ -133,6 +169,9 @@ public:
 
 	bool Run()
 	{
+		// check the initial state
+		validate_callback(this, this);
+
 		set_modal();
 
 		show();
