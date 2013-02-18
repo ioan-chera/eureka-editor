@@ -43,6 +43,8 @@ private:
 	bool want_close;
 	bool cancelled;
 
+	bool grab_active;
+
 	keycode_t key;
 
 	Fl_Input  *key_name;
@@ -68,9 +70,9 @@ private:
 
 	bool ValidateFunc()
 	{
-		// TODO
+		key_context_e ctx = (key_context_e)(1 + context->value());
 
-		return false;
+		return M_IsBindingFuncValid(ctx, func_name->value());
 	}
 
 	static void validate_callback(Fl_Widget *w, void *data)
@@ -120,7 +122,8 @@ private:
 public:
 	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
 		Fl_Double_Window(400, 236, "Edit Key Binding"),
-		want_close(false), cancelled(false), key(_key)
+		want_close(false), cancelled(false), grab_active(false),
+		key(_key)
 	{
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
 		  if (key)
