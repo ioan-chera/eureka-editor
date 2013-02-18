@@ -70,6 +70,12 @@ private:
 
 	bool ValidateFunc()
 	{
+		// check for matching brackets
+		const char *p = strchr(func_name->value(), '(');
+
+		if (p && ! strchr(p, ')'))
+			return false;
+
 		key_context_e ctx = (key_context_e)(1 + context->value());
 
 		return M_IsBindingFuncValid(ctx, func_name->value());
