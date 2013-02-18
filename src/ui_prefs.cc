@@ -40,6 +40,11 @@ static int last_active_tab = 0;
 class UI_EditKey : public Fl_Double_Window
 {
 private:
+	bool want_close;
+	bool cancelled;
+
+	keycode_t key;
+
 	Fl_Input  *key_name;
 	Fl_Choice *context;
 	Fl_Input  *func_text;
@@ -66,51 +71,72 @@ private:
 
 	static void close_callback(Fl_Button *w, void *data)
 	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->want_close = true;
+		dialog->cancelled  = true;
 	}
 
 	static void ok_callback(Fl_Button *w, void *data)
 	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->want_close = true;
 	}
 
 public:
-	UI_EditKey() : Fl_Double_Window(460, 400, "EDIT KEY")
+	UI_EditKey() : Fl_Double_Window(400, 236, "Edit Key Binding"),
+		want_close(false), cancelled(false), key(0)
 	{
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
 		  key_name->callback((Fl_Callback*)check_key_callback);
 		}
 		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
-		  o->callback((Fl_Callback*)grab_key_callback);
+		  o->callback((Fl_Callback*)grab_key_callback, this);
 		}
 
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
 		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|RadTrig|General");
 		  context->value(7);
-		  context->callback((Fl_Callback*)check_func_callback);
+		  context->callback((Fl_Callback*)check_func_callback, this);
 		}
 
 		{ func_text = new Fl_Input(85, 105, 210, 25, "Function:");
-		  func_text->callback((Fl_Callback*)check_func_callback);
+		  func_text->callback((Fl_Callback*)check_func_callback, this);
 		}
 		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
 		  o->callback((Fl_Callback*)find_func_callback);
 		}
 
-		{ Fl_Group *o = new Fl_Group(0, 169, 400, 66);
+		{ Fl_Group *o = new Fl_Group(0, 170, 400, 66);
 
 		  o->box(FL_FLAT_BOX);
-		  o->color((Fl_Color)18);
+		  o->color(WINDOW_BG, WINDOW_BG);
 
 		  { cancel = new Fl_Button(170, 184, 80, 35, "Cancel");
-			cancel->callback((Fl_Callback*)close_callback);
+			cancel->callback((Fl_Callback*)close_callback, this);
 		  }
 		  { ok_but = new Fl_Button(295, 184, 80, 35, "OK");
 			ok_but->labelfont(1);
-			ok_but->callback((Fl_Callback*)ok_callback);
+			ok_but->callback((Fl_Callback*)ok_callback, this);
+			ok_but->deactivate();
 		  }
 		  o->end();
 		}
 
 		end();
+	}
+
+	bool Run()
+	{
+		set_modal();
+
+		show();
+
+		while (! want_close)
+			Fl::wait(0.2);
+
+		return ! cancelled;
 	}
 };
 
@@ -490,43 +516,6 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
-{
-	UI_Preferences *dialog = (UI_Preferences *)data;
-
-	int line = dialog->key_list->value();
-	if (line < 1)
-	{
-		fl_beep();
-		return;
-	}
-
-	int bind_idx = line - 1;
-
-	const char *str = M_StringForFunc(bind_idx);
-
-	const char *new_str = fl_input("Enter new function", str);
-
-	// cancelled ?
-	if (! new_str)
-		return;
-
-	const char *error_msg = M_ChangeBindingFunc(bind_idx, new_str);
-
-	if (error_msg)
-	{
-		Notify(-1, -1, error_msg, NULL);
-		return;
-	}
-
-	// update browser line
-
-	dialog->key_list->text(line, M_StringForBinding(bind_idx));
-
-	dialog->changed_keys++;
-}
-
-
 void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *dialog = (UI_Preferences *)data;
@@ -568,9 +557,56 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 
 void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 {
-	UI_Preferences *dialog = (UI_Preferences *)data;
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	int line = prefs->key_list->value();
 
 	// FIXME
+
+	UI_EditKey *dialog = new UI_EditKey();
+
+	if (dialog->Run())
+	{
+	}
+
+	delete dialog;
+}
+
+
+void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *dialog = (UI_Preferences *)data;
+
+	int line = dialog->key_list->value();
+	if (line < 1)
+	{
+		fl_beep();
+		return;
+	}
+
+	int bind_idx = line - 1;
+
+	const char *str = M_StringForFunc(bind_idx);
+
+	const char *new_str = fl_input("Enter new function", str);
+
+	// cancelled ?
+	if (! new_str)
+		return;
+
+	const char *error_msg = M_ChangeBindingFunc(bind_idx, new_str);
+
+	if (error_msg)
+	{
+		Notify(-1, -1, error_msg, NULL);
+		return;
+	}
+
+	// update browser line
+
+	dialog->key_list->text(line, M_StringForBinding(bind_idx));
+
+	dialog->changed_keys++;
 }
 
 
