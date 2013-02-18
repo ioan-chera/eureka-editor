@@ -638,6 +638,9 @@ public:
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
 
+		if (column == 'k' && k1.context != k2.context)
+			return k1.context < k2.context;
+			
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
@@ -718,7 +721,20 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	static char buffer[600];
 
-	sprintf(buffer, "%6.6s%-9.9s %-10.10s %.30s",
+	bool is_duplicate = false;
+
+	if ((index > 0 &&
+		 pref_binds[index - 1].key     == pref_binds[index].key &&
+		 pref_binds[index - 1].context == pref_binds[index].context) ||
+	    (index + 1 < (int)pref_binds.size() &&
+		 pref_binds[index + 1].key     == pref_binds[index].key &&
+		 pref_binds[index + 1].context == pref_binds[index].context))
+	{
+		is_duplicate = true;
+	}
+
+	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
+			is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName(bind.key),
 			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
 			M_KeyContextString(bind.context),

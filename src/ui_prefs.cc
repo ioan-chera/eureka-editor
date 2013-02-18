@@ -178,6 +178,7 @@ public:
 	void SaveValues();
 
 	void LoadKeys();
+	void ReloadKeys();
 
 	int GridSizeToChoice(int size);
 
@@ -586,6 +587,7 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 	}
 
 	delete dialog;
+
 }
 
 
@@ -618,6 +620,10 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	}
 
 	delete dialog;
+
+	prefs->ReloadKeys();
+
+	prefs->changed_keys += 1;
 /*
 	const char *str = M_StringForFunc(bind_idx);
 
@@ -638,8 +644,6 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	// update browser line
 
 	dialog->key_list->text(line, M_StringForBinding(bind_idx));
-
-	dialog->changed_keys++;
 */
 }
 
@@ -655,9 +659,10 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	prefs->key_list->remove(line);
-
 	M_DeleteLocalBinding(line - 1);
+
+	prefs->key_list->remove(line);
+	prefs->ReloadKeys();
 
 	if (line <= prefs->key_list->size())
 	{
@@ -864,6 +869,17 @@ void UI_Preferences::LoadKeys()
 }
 
 
+void UI_Preferences::ReloadKeys()
+{
+	for (int i = 0 ; i < M_NumBindings() ; i++)
+	{
+		const char *str = M_StringForBinding(i);
+
+		key_list->text(i + 1, str);
+	}
+}
+
+
 void UI_Preferences::ClearWaiting()
 {
 	if (awaiting_line > 0)
@@ -872,7 +888,7 @@ void UI_Preferences::ClearWaiting()
 
 		int bind_idx = awaiting_line - 1;
 
-		key_list->text(awaiting_line, M_StringForBinding(bind_idx));
+		ReloadKeys();
 
 		Fl::focus(key_list);
 	}
