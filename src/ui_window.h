@@ -120,6 +120,29 @@ public:
 extern UI_MainWin * main_win;
 
 
+//------------------------------------------------------------------------
+
+
+class UI_LogViewer : public Fl_Double_Window
+{
+private:
+	bool want_close;
+
+	Fl_Browser * browser;
+
+	static void close_callback(Fl_Widget*, void*);
+
+public:
+	UI_LogViewer();
+	virtual ~UI_LogViewer();
+
+	void Add(const char *line);
+};
+
+
+extern UI_LogViewer * log_viewer;
+
+
 #endif  /* __EUREKA_UI_WINDOW_H__ */
 
 //--- editor settings ---

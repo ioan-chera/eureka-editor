@@ -27,6 +27,10 @@ bool Debugging = false;
 static FILE * log_fp;
 
 
+// hack here to avoid bringing in ui_window.h and FLTK headers
+extern void LogViewer_AddLine(const char *str);
+
+
 void LogOpen(const char *filename)
 {
 	if (filename)
@@ -53,6 +57,19 @@ void LogClose(void)
 
 void LogPrintf(const char *str, ...)
 {
+	static char buffer[MSG_BUF_LEN];
+
+	va_list args;
+
+	va_start(args, str);
+	vsnprintf(buffer, MSG_BUF_LEN, str, args);
+	va_end(args);
+
+	buffer[MSG_BUF_LEN-1] = 0;
+
+	LogViewer_AddLine(buffer);
+
+/* FIXME
 	if (log_fp)
 	{
 		va_list args;
@@ -73,6 +90,7 @@ void LogPrintf(const char *str, ...)
 
 		fflush(stdout);
 	}
+*/
 }
 
 

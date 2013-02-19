@@ -394,5 +394,49 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 }
 
 
+//------------------------------------------------------------------------
+
+
+#define MAX_LOG_LINES  2000
+
+
+UI_LogViewer * log_viewer;
+
+
+UI_LogViewer::UI_LogViewer() :
+	Fl_Double_Window(600, 400, "Eureka Log Viewer"),
+	want_close(false)
+{
+	box(FL_NO_BOX);
+
+	size_range(350, 123);
+
+	browser = new Fl_Browser(0, 0, w(), h());
+
+	resizable(browser);
+	
+	end();
+}
+
+UI_LogViewer::~UI_LogViewer()
+{ }
+
+
+void UI_LogViewer::Add(const char *line)
+{
+	browser->add(line);
+
+	if (browser->size() > MAX_LOG_LINES)
+		browser->remove(1);
+}
+
+
+void LogViewer_AddLine(const char *str)
+{
+	if (log_viewer)
+		log_viewer->Add(str);
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

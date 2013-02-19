@@ -523,6 +523,9 @@ static void InitFLTK()
 		main_win->image(NULL);
 	}
 
+	log_viewer = new UI_LogViewer();
+	log_viewer->show();
+
     Fl::add_handler(Main_key_handler);
 
 	main_win->ShowBrowser(0);
