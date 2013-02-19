@@ -176,8 +176,12 @@ public:
 		end();
 	}
 
-	bool Run()
+	bool Run(keycode_t *key_v, key_context_e *ctx_v, const char **func_v)
 	{
+		*key_v  = 0;
+		*ctx_v  = KCTX_NONE;
+		*func_v = NULL;
+
 		// check the initial state
 		validate_callback(this, this);
 
@@ -188,7 +192,14 @@ public:
 		while (! want_close)
 			Fl::wait(0.2);
 
-		return ! cancelled;
+		if (cancelled)
+			return false;
+
+		*key_v  = key;
+		*ctx_v  = (key_context_e)(1 + context->value());
+		*func_v = StringDup(func_name->value());
+
+		return true;
 	}
 };
 
@@ -614,28 +625,45 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 
 	int line = prefs->key_list->value();
 
-	keycode_t     init_key = 0;
-	key_context_e init_context = KCTX_General;
-	const char   *init_func = "";
+	keycode_t     new_key  = 0;
+	key_context_e new_context = KCTX_General;
+	const char   *new_func = "";
 
 	if (line > 0)
 	{
 		int bind_idx = line - 1;
 
-		M_GetBindingInfo(bind_idx, &init_key, &init_context);
+		M_GetBindingInfo(bind_idx, &new_key, &new_context);
 
-		init_func = M_StringForFunc(bind_idx);
+		new_func = M_StringForFunc(bind_idx);
 	}
 
-	UI_EditKey *dialog = new UI_EditKey(init_key, init_context, init_func);
+	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
 
-	if (dialog->Run())
+	if (dialog->Run(&new_key, &new_context, &new_func))
 	{
-		// FIXME
+		int bind_idx = (line > 0) ? line - 1 : -1 /* at end */;
+
+		M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+
+		// we will reload the lines, so can use dummy here
+		if (bind_idx < 0)
+		{
+			prefs->key_list->add("");
+			prefs->key_list->select(prefs->key_list->size());
+		}
+		else
+		{
+			prefs->key_list->insert(line + 1, "");
+			prefs->key_list->select(line + 1);
+		}
 	}
 
 	delete dialog;
 
+	prefs->ReloadKeys();
+
+	prefs->changed_keys += 1;
 }
 
 
@@ -652,19 +680,20 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	int bind_idx = line - 1;
 
-	keycode_t     init_key;
-	key_context_e init_context;
+	keycode_t     new_key;
+	key_context_e new_context;
 
-	M_GetBindingInfo(bind_idx, &init_key, &init_context);
+	M_GetBindingInfo(bind_idx, &new_key, &new_context);
 
-	const char *init_func = M_StringForFunc(bind_idx);
+	const char *new_func = M_StringForFunc(bind_idx);
 
 
-	UI_EditKey *dialog = new UI_EditKey(init_key, init_context, init_func);
+	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
 
-	if (dialog->Run())
+	if (dialog->Run(&new_key, &new_context, &new_func))
 	{
-		// FIXME
+		// assume it works (since we validated it)
+		M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
 	}
 
 	delete dialog;
@@ -672,27 +701,6 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	prefs->ReloadKeys();
 
 	prefs->changed_keys += 1;
-/*
-	const char *str = M_StringForFunc(bind_idx);
-
-	const char *new_str = fl_input("Enter new function", str);
-
-	// cancelled ?
-	if (! new_str)
-		return;
-
-	const char *error_msg = M_ChangeBindingFunc(bind_idx, new_str);
-
-	if (error_msg)
-	{
-		Notify(-1, -1, error_msg, NULL);
-		return;
-	}
-
-	// update browser line
-
-	dialog->key_list->text(line, M_StringForBinding(bind_idx));
-*/
 }
 
 
@@ -933,9 +941,6 @@ void UI_Preferences::ClearWaiting()
 	if (awaiting_line > 0)
 	{
 		// restore the text line
-
-		int bind_idx = awaiting_line - 1;
-
 		ReloadKeys();
 
 		Fl::focus(key_list);
@@ -953,7 +958,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 
 	M_ChangeBindingKey(bind_idx, key);
 
-	changed_keys++;
+	changed_keys += 1;
 
 	ClearWaiting();
 }

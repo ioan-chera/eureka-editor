@@ -843,20 +843,27 @@ bool M_IsBindingFuncValid(key_context_e context, const char * func_str)
 
 
 // returns an error message, or NULL if OK
-const char * M_ChangeBindingFunc(int index, const char * func_str)
+const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
+                       const char *func_str)
 {
 	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 
-	return DoParseBindingFunc(pref_binds[index], func_str);
+	pref_binds[index].key = key;
+	pref_binds[index].context = context;
+
+	const char *err_msg = DoParseBindingFunc(pref_binds[index], func_str);
+
+	return err_msg;
 }
 
 
-const char * M_AddLocalBinding(int where, keycode_t key, key_context_e context,
+const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
                        const char *func_str)
 {
-	SYS_ASSERT(0 <= where && where < (int)pref_binds.size());
-
 	key_binding_t temp;
+
+	// this ensures the parameters are NUL terminated
+	memset(&temp, 0, sizeof(temp));
 
 	temp.key = key;
 	temp.context = context;
@@ -866,7 +873,10 @@ const char * M_AddLocalBinding(int where, keycode_t key, key_context_e context,
 	if (err_msg)
 		return err_msg;
 
-	pref_binds.insert(pref_binds.begin() + where, temp);
+	if (after < 0)
+		pref_binds.push_back(temp);
+	else
+		pref_binds.insert(pref_binds.begin() + (1 + after), temp);
 
 	return NULL;  // OK
 }
