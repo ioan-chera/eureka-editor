@@ -310,8 +310,8 @@ public:
 		box(FL_FLAT_BOX);
 
 
-		toggle = new Fl_Toggle_Button(X + 10, Y + 10, 28, 28, "^");
-		toggle->value(1);
+		toggle = new Fl_Toggle_Button(X + 10, Y + 10, 28, 28, "v");
+		toggle->value(0);
 		toggle->color(FL_DARK3, FL_DARK3);
 		toggle->callback(toggle_callback, this);
 		toggle->clear_visible_focus();
@@ -461,6 +461,7 @@ public:
 
 
 		sub_grp->end();
+		sub_grp->hide();
 
 		resizable(NULL);
 
