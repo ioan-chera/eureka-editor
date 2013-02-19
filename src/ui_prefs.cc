@@ -910,6 +910,7 @@ void UI_Preferences::SaveValues()
 void UI_Preferences::LoadKeys()
 {
 	M_SortBindings(key_sort_mode, key_sort_rev);
+	M_DetectConflictingBinds();
 
 	key_list->clear();
 
@@ -927,6 +928,8 @@ void UI_Preferences::LoadKeys()
 
 void UI_Preferences::ReloadKeys()
 {
+	M_DetectConflictingBinds();
+
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
 		const char *str = M_StringForBinding(i);

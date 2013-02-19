@@ -96,6 +96,7 @@ void M_SortBindings(char column, bool reverse);
 void M_ApplyBindings();
 
 int  M_NumBindings();
+void M_DetectConflictingBinds();
 
 const char * M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);

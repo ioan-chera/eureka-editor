@@ -324,6 +324,9 @@ typedef struct
 
 	char param[2][MAX_BIND_PARAM_LEN];
 
+	// this field ONLY used by M_DetectConflictingBinds()
+	bool is_duplicate;
+
 } key_binding_t;
 
 
@@ -678,6 +681,42 @@ void M_SortBindings(char column, bool reverse)
 }
 
 
+void M_DetectConflictingBinds()
+{
+	// copy the local bindings and sort them.
+	// duplicate bindings will be contiguous in the list.
+
+	std::vector<key_binding_t> list;
+
+	for (unsigned int i = 0 ; i < pref_binds.size() ; i++)
+	{
+		pref_binds[i].is_duplicate = false;
+
+		list.push_back(pref_binds[i]);
+	}
+
+	std::sort(list.begin(), list.end(), KeyBind_CMP_pred('c'));
+
+	for (unsigned int k = 0 ; k + 1 < list.size() ; k++)
+	{
+		if (! (list[k].key     == list[k+1].key &&
+			   list[k].context == list[k+1].context))
+			continue;
+
+		// mark these in the local bindings
+
+		for (unsigned int n = 0 ; n < pref_binds.size() ; n++)
+		{
+			if (pref_binds[n].key     == list[k].key &&
+			    pref_binds[n].context == list[k].context)
+			{
+				pref_binds[n].is_duplicate = true;
+			}
+		}
+	}
+}
+
+
 const char * M_StringForFunc(int index)
 {
 	static char buffer[300];
@@ -731,20 +770,8 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	static char buffer[600];
 
-	bool is_duplicate = false;
-
-	if ((index > 0 &&
-		 pref_binds[index - 1].key     == pref_binds[index].key &&
-		 pref_binds[index - 1].context == pref_binds[index].context) ||
-	    (index + 1 < (int)pref_binds.size() &&
-		 pref_binds[index + 1].key     == pref_binds[index].key &&
-		 pref_binds[index + 1].context == pref_binds[index].context))
-	{
-		is_duplicate = true;
-	}
-
 	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
-			is_duplicate ? "@C1" : "",
+			bind.is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName(bind.key),
 			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
 			M_KeyContextString(bind.context),
