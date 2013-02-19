@@ -22,8 +22,6 @@
 #include "ui_window.h"
 #include "w_wad.h"
 
-#include "editloop.h"  // hack??
-
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -404,8 +402,7 @@ UI_LogViewer * log_viewer;
 
 
 UI_LogViewer::UI_LogViewer() :
-	Fl_Double_Window(600, 400, "Eureka Log Viewer"),
-	want_close(false)
+	Fl_Double_Window(600, 400, "Eureka Log Viewer")
 {
 	box(FL_NO_BOX);
 

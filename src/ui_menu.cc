@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -226,6 +226,12 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 //  VIEW MENU
 //------------------------------------------------------------------------
 
+static void view_do_logs(Fl_Widget *w, void * data)
+{
+	if (! log_viewer->shown())
+		  log_viewer->show();
+}
+
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
 	Editor_Zoom(+1, I_ROUND(grid.orig_x), I_ROUND(grid.orig_y));
@@ -420,12 +426,14 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
+		{ "Logs....",   0, FCAL view_do_logs },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 #if 1
 		{ "Toggle Fullscreen",   0, FCAL view_do_fullscreen },
+#endif
 		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
 		{ "Toggle Grid Type",    0, FCAL view_do_grid_type },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-#endif
 
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },

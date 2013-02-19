@@ -524,7 +524,9 @@ static void InitFLTK()
 	}
 
 	log_viewer = new UI_LogViewer();
-	log_viewer->show();
+
+//  CONFIG ITEM??  show logs at startup
+//		log_viewer->show();
 
     Fl::add_handler(Main_key_handler);
 
