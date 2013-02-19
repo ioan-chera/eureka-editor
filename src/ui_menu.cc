@@ -114,7 +114,7 @@ static void edit_do_cut(Fl_Widget *w, void * data)
 {
 	if (! CMD_Copy())
 	{
-		Beep();
+		Beep("Nothing to cut");
 		return;
 	}
 
@@ -125,7 +125,7 @@ static void edit_do_copy(Fl_Widget *w, void * data)
 {
 	if (! CMD_Copy())
 	{
-		Beep();
+		Beep("Nothing to copy");
 		return;
 	}
 }
@@ -134,7 +134,7 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 {
 	if (! CMD_Paste())
 	{
-		Beep();
+		Beep("Clipboard is empty");
 		return;
 	}
 }
@@ -165,7 +165,7 @@ static void edit_do_move(Fl_Widget *w, void * data)
 {
 	if (edit.Selected->empty())
 	{
-		Beep();
+		Beep("Nothing to move");
 		return;
 	}
 
@@ -180,7 +180,7 @@ static void edit_do_scale(Fl_Widget *w, void * data)
 {
 	if (edit.Selected->empty())
 	{
-		Beep();
+		Beep("Nothing to scale");
 		return;
 	}
 
@@ -195,7 +195,7 @@ static void edit_do_rotate(Fl_Widget *w, void * data)
 {
 	if (edit.Selected->empty())
 	{
-		Beep();
+		Beep("Nothing to rotate");
 		return;
 	}
 
@@ -274,13 +274,13 @@ static void view_do_grid_type(Fl_Widget *w, void * data)
 static void search_do_find(Fl_Widget *w, void * data)
 {
 	// TODO: CMD_FindObject()
-	Beep();
+	Beep("Find: not implemented");
 }
 
 static void search_do_find_next(Fl_Widget *w, void * data)
 {
 	// CMD_FindObject();
-	Beep();
+	Beep("Find: not implemented");
 }
 
 static void search_do_jump(Fl_Widget *w, void * data)

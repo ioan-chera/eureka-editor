@@ -177,7 +177,7 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 	if (ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
-		Beep();
+		fl_beep();
 }
 
 
@@ -528,7 +528,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 	if (that->result_wad && ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
-		Beep();
+		fl_beep();
 }
 
 
@@ -845,8 +845,9 @@ void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
 		that->ok_but->activate();
 	else
 	{
-		Beep();
 		that->ok_but->deactivate();
+
+		fl_beep();
 	}
 }
 
@@ -963,7 +964,7 @@ void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 		that->res_name[r]->value("");
 	}
 	else
-		Beep();
+		fl_beep();
 }
 
 

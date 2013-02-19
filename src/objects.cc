@@ -577,7 +577,7 @@ static void Insert_Vertex()
 
 	if (edit.Selected->count_obj() > 2)
 	{
-		Beep();
+		Beep("Too many vertices to add a linedef");
 		return;
 	}
 
@@ -621,7 +621,7 @@ static void Insert_Vertex()
 		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y) ||
 		    Vertices[first_sel]->Matches(Vertices[second_sel]))
 		{
-			Beep();
+			Beep("New linedef would overlap another");
 			return;
 		}
 
@@ -672,7 +672,7 @@ static void Insert_Vertex()
 	// prevent adding a linedef that would overlap an existing one
 	if (first_sel >= 0 && LineDefWouldOverlap(first_sel, new_x, new_y))
 	{
-		Beep();
+		Beep("New linedef would overlap another");
 		return;
 	}
 
@@ -734,7 +734,7 @@ static void Insert_Sector(bool force_new)
 	int sel_count = edit.Selected->count_obj();
 	if (sel_count > 1)
 	{
-		Beep();
+		Beep("Too many sectors to copy from");
 		return;
 	}
 
@@ -762,7 +762,7 @@ static void Insert_Sector(bool force_new)
 		// must not be any selection
 		if (sel_count > 0)
 		{
-			Beep();
+			Beep("Correct sector not supported on selection");
 			return;
 		}
 
@@ -823,7 +823,7 @@ void CMD_Insert(void)
 			break;
 
 		default:
-			Beep();
+			Beep("Cannot insert in this mode");
 			break;
 	}
 

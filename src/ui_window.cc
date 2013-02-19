@@ -401,7 +401,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 			break;
 	}
 
-	Beep();
+	fl_beep();
 }
 
 

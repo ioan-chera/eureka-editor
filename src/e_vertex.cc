@@ -283,7 +283,7 @@ void VERT_Disconnect(void)
 	{
 		if (! edit.highlighted())
 		{
-			Beep("No vertices to disconnect");
+			Beep("Nothing to disconnect");
 			return;
 		}
 
@@ -312,7 +312,7 @@ void VERT_Disconnect(void)
 	}
 
 	if (! seen_one)
-		Beep();
+		Beep("Nothing was disconnected");
 
 	BA_End();
 
@@ -391,7 +391,7 @@ void LIN_Disconnect(void)
 	{
 		if (! edit.highlighted())
 		{
-			Beep();
+			Beep("Nothing to disconnect");
 			return;
 		}
 
@@ -414,7 +414,7 @@ void LIN_Disconnect(void)
 	BA_End();
 
 	if (! seen_one)
-		Beep();
+		Beep("Nothing was disconnected");
 
 	if (unselect)
 		edit.Selected->clear_all();

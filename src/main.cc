@@ -132,12 +132,6 @@ void Beep(const char *fmt, ...)
 }
 
 
-void Beep()
-{
-	Beep("");
-}
-
-
 /*
  *  Show an error message and terminate the program
  */

@@ -901,7 +901,7 @@ bool CheckStartingPos ()
 	}
 	if (! p1)
 	{
-		Beep ();
+		//Beep ();
 		if (! Confirm (-1, -1, "Warning: there is no player 1 starting point. The"
 					" game", "will crash if you play with this level. Save anyway ?"))
 			return false;

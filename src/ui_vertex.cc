@@ -499,7 +499,7 @@ public:
 	{
 		if (! sub_grp->visible())
 		{
-			Beep();
+			fl_beep();
 			return;
 		}
 
@@ -510,7 +510,7 @@ public:
 			case 'O': SetThing(number); break;
 
 			default:
-				Beep();
+				fl_beep();
 				break;
 		}
 	}

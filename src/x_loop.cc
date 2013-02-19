@@ -736,7 +736,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 
 	if (ld < 0)
 	{
-		Beep();
+		Beep("Area is not closed");
 		DebugPrintf("Area is not closed (can see infinity)\n");
 		return;
 	}
@@ -745,7 +745,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 
 	if (! TraceLineLoop(ld, side, loop))
 	{
-		Beep();
+		Beep("Area is not closed");
 		DebugPrintf("Area is not closed (tracing a loop failed)\n");
 		return;
 	}
@@ -754,7 +754,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 
 	if (loop.faces_outward)
 	{
-		Beep();
+		Beep("Line loop faces outward");
 		DebugPrintf("Line loop faces outward\n");
 		return;
 	}

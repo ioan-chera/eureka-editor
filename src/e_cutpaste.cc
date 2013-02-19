@@ -498,7 +498,6 @@ bool CMD_Copy()
 			break;
 
 		default:
-			Beep();
 			return false;
 	}
 
@@ -782,7 +781,6 @@ bool CMD_Paste()
 		}
 
 		default:
-			Beep();
 			break;
 	}
 

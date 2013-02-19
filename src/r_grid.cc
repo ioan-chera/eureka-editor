@@ -303,7 +303,7 @@ void Grid_State_c::AdjustStep(int delta)
 {
 	if (! shown)
 	{
-		Beep();
+		Beep("Grid is off (cannot change step)");
 		return;
 	}
 

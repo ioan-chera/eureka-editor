@@ -875,7 +875,7 @@ void Editor_MiddlePress(keycode_t mod)
 
 	if (edit.Selected->empty())
 	{
-		Beep();
+		Beep("Nothing to scale");
 		return;
 	}
 

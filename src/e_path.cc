@@ -470,7 +470,7 @@ void CMD_NextObject()
 {
 	if (edit.Selected->count_obj() != 1)
 	{
-		Beep();
+		Beep("Next: need a single object");
 		return;
 	}
 
@@ -478,7 +478,7 @@ void CMD_NextObject()
 
 	if (num >= NumObjects(edit.obj_type))
 	{
-		Beep();
+		Beep("Next: no more objects");
 		return;
 	}
 
@@ -495,7 +495,7 @@ void CMD_PrevObject()
 {
 	if (edit.Selected->count_obj() != 1)
 	{
-		Beep();
+		Beep("Prev: need a single object");
 		return;
 	}
 
@@ -503,7 +503,7 @@ void CMD_PrevObject()
 
 	if (num <= 0)
 	{
-		Beep();
+		Beep("Prev: no more objects");
 		return;
 	}
 
