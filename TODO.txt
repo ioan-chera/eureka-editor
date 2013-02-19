@@ -3,13 +3,7 @@ EUREKA WISH-LIST
 ================
 
 
-!!  write bindings when APPLY is chosen
-
-+  UI_EditKey : mechanism to get result
-
-+  AddKey : actually add the key
-
--  plain Beep()s
++  WIN32 port
 
 
 ______________________________________________________________________
@@ -22,6 +16,8 @@ General
 -------
 
 +  CHECK screen  (see misc/Checks.txt for more info)
+
++  Hexen support
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -73,22 +69,15 @@ ______________________________________________________________________
 General
 -------
 
-+  Hexen support
-
-+  ability to view the current logs
-   -  store initial logs in memory (until we know $home_dir)
-   -  always write to $home_dir/LOGS.txt (override with --log)
-   -  if isatty(stdout), write a copy to stdout unless -q
-   -  fopen the log file for View/Logs dialog
-
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
 +  ability to set other themes
-   (a) "none", "gtk+", "plastic"  [gui_scheme]
-   (b) colors: default, bright, xxx, custom  [gui_color_set]
-   (c) font size (HARD!)
+   (a) "none", "gtk+", "plastic"  [done]
+   (b) colors: default, bright, custom  [done]
+   (c) font size [too hard]
    (d) implement OPT_COLOR [done]
+   (e) fix black scroll buttons in browser (etc?)
 
 +  configurable grid colors, 
    IDEA: grid has separate color for 64x64 flat alignment
@@ -118,6 +107,12 @@ General
 
 
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
+   (perhaps prefix with MENU_xxx)
+
+-  improve Key binding preferences:
+   +  "Grab" button in UI_EditKey
+   -  "Find" or "Match" button for function in UI_EditKey
+   -  reverse ordering of KCTX_XXX values
 
 -  config var for default starting mode
 
@@ -177,17 +172,16 @@ Documentation
 
 -  document texture browser (RIGHT click etc)
 
-+  command line arguments page
+-  built-in cheat sheet for mouse buttons and common keys
+
+??  command line arguments page
 
    --log : specify a log file to store messages
-           without this, messages are sent to stdout
 
    -d --debug : enable debugging messages
                 they go to log file if used, otherwise stderr
 
    -q --quiet : don't send messages to stdout
-
--  built-in cheat sheet for mouse buttons and common keys
 
 ??  config file page
    (a) ~/.eureka/config.cfg
