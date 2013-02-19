@@ -422,7 +422,7 @@ fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
 
 #define MAX_TOKENS  8
 
-static void LoadBindingsFromPath(const char *path, bool required)
+static bool LoadBindingsFromPath(const char *path, bool required)
 {
 	static char filename[FL_PATH_MAX];
 
@@ -433,9 +433,9 @@ static void LoadBindingsFromPath(const char *path, bool required)
 	if (! fp)
 	{
 		if (! required)
-			return;
+			return false;
 
-		FatalError("Cannot open default key bindings file:\n%s\n", filename);
+		FatalError("Cannot open key bindings file:\n%s\n", filename);
 	}
 
 	LogPrintf("Reading key bindings from: %s\n", filename);
@@ -468,6 +468,8 @@ static void LoadBindingsFromPath(const char *path, bool required)
 	}
 
 	fclose(fp);
+
+	return true;
 }
 
 
@@ -543,7 +545,7 @@ void M_SaveBindings()
 	fprintf(fp, "# Eureka key bindings (local)\n");
 	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
 
-	for (int ctx = KCTX_Browser ; ctx <= KCTX_RadTrig ; ctx++)
+	for (int ctx = KCTX_Browser ; ctx <= KCTX_General ; ctx++)
 	{
 		int count = 0;
 
@@ -646,13 +648,13 @@ public:
 	inline bool operator() (const key_binding_t& k1, const key_binding_t& k2) const
 	{
 		if (column == 'c' && k1.context != k2.context)
-			return k1.context < k2.context;
+			return k1.context > k2.context;
 			
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
 
-		if (column == 'k' && k1.context != k2.context)
-			return k1.context < k2.context;
+///		if (column == 'k' && k1.context != k2.context)
+///			return k1.context > k2.context;
 			
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;

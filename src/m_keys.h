@@ -56,11 +56,11 @@ typedef enum
 	KCTX_Browser,
 	KCTX_Render,
 
-	KCTX_Line,
-	KCTX_Sector,
-	KCTX_Thing,
 	KCTX_Vertex,
 	KCTX_RadTrig,
+	KCTX_Thing,
+	KCTX_Sector,
+	KCTX_Line,
 
 	KCTX_General
 

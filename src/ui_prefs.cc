@@ -103,6 +103,7 @@ private:
 
 	static void grab_key_callback(Fl_Button *w, void *data)
 	{
+		// FIXME
 	}
 
 	static void find_func_callback(Fl_Button *w, void *data)
@@ -139,6 +140,7 @@ public:
 		}
 		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
 		  o->callback((Fl_Callback*)grab_key_callback, this);
+		  o->hide();  // TODO: IMPLEMENT THIS
 		}
 
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
@@ -765,17 +767,16 @@ void UI_Preferences::Run()
 	last_active_tab = tabs->find(tabs->value());
 
 	if (want_discard)
-		LogPrintf("Preferences: discarded changes\n");
-	else
 	{
-		SaveValues();
-
-		M_ApplyBindings();
-
-		M_WriteConfigFile();
-
-		// FIXME: M_WriteBindings()
+		LogPrintf("Preferences: discarded changes\n");
+		return;
 	}
+
+	SaveValues();
+	M_WriteConfigFile();
+
+	M_ApplyBindings();
+	M_SaveBindings();
 }
 
 
