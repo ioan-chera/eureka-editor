@@ -189,6 +189,8 @@ public:
 
 		show();
 
+		Fl::focus(func_name);
+
 		while (! want_close)
 			Fl::wait(0.2);
 
@@ -288,8 +290,8 @@ public:
 	Fl_Button *key_key;
 	Fl_Button *key_func;
 
-	Fl_Button *key_add;
-	Fl_Button *key_change;
+	Fl_Button *key_bind;
+	Fl_Button *key_copy;
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
 	Fl_Button *key_reset;
@@ -467,15 +469,14 @@ UI_Preferences::UI_Preferences() :
 		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
 		  key_list->textfont(FL_COURIER);
 		}
-		{ key_add = new Fl_Button(470, 140, 90, 30, "Add");
-		  key_add->callback((Fl_Callback*)add_key_callback, this);
-		  key_add->shortcut(FL_Insert);
+		{ key_bind = new Fl_Button(470, 140, 90, 30, "Bind");
+		  key_bind->callback((Fl_Callback*)bind_key_callback, this);
+		  key_bind->shortcut(FL_Enter);
 		}
-		{ key_change = new Fl_Button(470, 185, 90, 30, "Bind");
-		  key_change->callback((Fl_Callback*)bind_key_callback, this);
-		  key_change->shortcut(FL_Enter);
+		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
+		  key_copy->callback((Fl_Callback*)add_key_callback, this);
 		}
-		{ key_edit = new Fl_Button(470, 230, 90, 30, "Edit");
+		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
 		}
 		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
@@ -624,46 +625,34 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
 	int line = prefs->key_list->value();
-
-	keycode_t     new_key  = 0;
-	key_context_e new_context = KCTX_General;
-	const char   *new_func = "";
-
-	if (line > 0)
+	if (line < 1)
 	{
-		int bind_idx = line - 1;
-
-		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
-		new_func = M_StringForFunc(bind_idx);
+		fl_beep();
+		return;
 	}
 
-	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
+	int bind_idx = line - 1;
 
-	if (dialog->Run(&new_key, &new_context, &new_func))
-	{
-		int bind_idx = (line > 0) ? line - 1 : -1 /* at end */;
+	keycode_t     new_key;
+	key_context_e new_context;
 
-		M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+	M_GetBindingInfo(bind_idx, &new_key, &new_context);
 
-		// we will reload the lines, so can use dummy here
-		if (bind_idx < 0)
-		{
-			prefs->key_list->add("");
-			prefs->key_list->select(prefs->key_list->size());
-		}
-		else
-		{
-			prefs->key_list->insert(line + 1, "");
-			prefs->key_list->select(line + 1);
-		}
-	}
+	const char *new_func = M_StringForFunc(bind_idx);
 
-	delete dialog;
+	
+	M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+
+	// we will reload the lines, so use a dummy one here
+
+	prefs->key_list->insert(line + 1, "");
+	prefs->key_list->select(line + 1);
 
 	prefs->ReloadKeys();
 
 	prefs->changed_keys += 1;
+
+	bind_key_callback(w, data);
 }
 
 
@@ -701,6 +690,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	prefs->ReloadKeys();
 
 	prefs->changed_keys += 1;
+
+	Fl::focus(prefs->key_list);
 }
 
 
