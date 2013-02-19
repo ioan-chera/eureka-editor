@@ -427,7 +427,8 @@ void UI_LogViewer::Add(const char *line)
 	if (browser->size() > MAX_LOG_LINES)
 		browser->remove(1);
 
-	browser->bottomline(browser->size());
+	if (shown())
+		browser->bottomline(browser->size());
 }
 
 
