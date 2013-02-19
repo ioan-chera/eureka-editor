@@ -26,7 +26,6 @@
 
 #include "main.h"
 #include "m_dialog.h"
-#include "r_misc.h"
 
 
 /*

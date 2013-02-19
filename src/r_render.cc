@@ -25,7 +25,6 @@
 #include <algorithm>
 
 #include "levels.h"
-#include "r_misc.h"
 #include "im_color.h"
 #include "im_img.h"
 #include "e_things.h"

@@ -30,7 +30,6 @@
 #include "m_dialog.h"
 #include "editloop.h"
 #include "e_cutpaste.h"
-#include "r_misc.h"
 #include "r_grid.h"
 #include "e_linedef.h"
 #include "e_sector.h"
@@ -73,6 +72,9 @@ static void zoom_fit()
 
 	double xzoom = 1;
 	double yzoom = 1;
+
+	int ScrMaxX = main_win->canvas->w();
+	int ScrMaxY = main_win->canvas->h();
 
 	if (MapBound_lx < MapBound_hx)
 		xzoom = ScrMaxX / (double)(MapBound_hx - MapBound_lx);

@@ -28,7 +28,6 @@
 
 #include <algorithm>
 
-#include "r_misc.h"
 #include "e_linedef.h"
 #include "e_sector.h"
 #include "e_things.h"

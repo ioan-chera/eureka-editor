@@ -34,7 +34,6 @@
 #include "e_loadsave.h"
 #include "im_color.h"
 #include "m_config.h"
-#include "r_misc.h"
 #include "r_grid.h"
 #include "r_render.h"
 #include "levels.h"

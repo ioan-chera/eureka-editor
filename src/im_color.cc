@@ -28,7 +28,6 @@
 
 #include "im_color.h"
 #include "im_img.h"  // TRANS_PIXEL
-#include "r_misc.h"
 #include "w_wad.h"
 
 

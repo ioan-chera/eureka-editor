@@ -26,7 +26,6 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
-#include "r_misc.h"
 #include "r_grid.h"
 #include "im_color.h"
 #include "levels.h"

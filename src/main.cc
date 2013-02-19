@@ -35,7 +35,6 @@
 #include "m_dialog.h"  /* for Confirm() */
 #include "m_game.h"
 #include "m_files.h"
-#include "r_misc.h"
 #include "levels.h"    /* Because of "viewtex" */
 
 #include "w_flats.h"
@@ -82,6 +81,9 @@ int show_help     = 0;
 int show_version  = 0;
 
 bool Replacer = false;
+
+int KF;
+int KF_fonth;
 
 
 // config items
@@ -531,8 +533,6 @@ static void InitFLTK()
     Fl::add_handler(Main_key_handler);
 
 	main_win->ShowBrowser(0);
-
-	SetWindowSize (main_win->canvas->w(), main_win->canvas->h());
 }
 
 

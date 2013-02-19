@@ -79,7 +79,6 @@ OBJS = \
 	$(OBJ_DIR)/m_strings.o  \
 	$(OBJ_DIR)/objects.o  \
 	$(OBJ_DIR)/r_grid.o  \
-	$(OBJ_DIR)/r_misc.o  \
 	$(OBJ_DIR)/r_render.o  \
 	$(OBJ_DIR)/selectn.o  \
 	$(OBJ_DIR)/sys_debug.o \
