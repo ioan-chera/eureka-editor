@@ -395,7 +395,8 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 //------------------------------------------------------------------------
 
 
-#define MAX_LOG_LINES  2000
+// TODO: config itme
+#define MAX_LOG_LINES  600
 
 
 UI_LogViewer * log_viewer;
@@ -425,6 +426,8 @@ void UI_LogViewer::Add(const char *line)
 
 	if (browser->size() > MAX_LOG_LINES)
 		browser->remove(1);
+
+	browser->bottomline(browser->size());
 }
 
 
