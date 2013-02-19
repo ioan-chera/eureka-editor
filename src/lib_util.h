@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -55,6 +55,9 @@ double PerpDist(double x, double y,  /* coord to test */
 
 double AlongDist(double x, double y, /* coord to test */
                  double x1, double y1, double x2, double y2 /* line */);
+
+
+const char * Int_TmpStr(int value);
 
 
 /*

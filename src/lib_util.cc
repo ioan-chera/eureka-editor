@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -333,6 +333,16 @@ double AlongDist(double x, double y,
 	SYS_ASSERT(len > 0);
 
 	return (x * x2 + y * y2) / len;
+}
+
+
+const char *Int_TmpStr(int value)
+{
+	static char buffer[200];
+
+	sprintf(buffer, "%d", value);
+
+	return buffer;
 }
 
 

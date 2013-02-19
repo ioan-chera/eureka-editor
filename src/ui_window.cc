@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2012 Andrew Apted
+//  Copyright (C) 2006-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -196,17 +196,6 @@ void UI_MainWin::ShowBrowser(char kind)
 	{
 		browser->ChangeMode(kind);
 	}
-}
-
-
-// FIXME: move into utility code
-const char *Int_TmpStr(int value)
-{
-	static char buffer[200];
-
-	sprintf(buffer, "%d", value);
-
-	return buffer;
 }
 
 

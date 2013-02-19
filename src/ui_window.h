@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2012 Andrew Apted
+//  Copyright (C) 2006-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -118,9 +118,6 @@ public:
 
 
 extern UI_MainWin * main_win;
-
-
-const char *Int_TmpStr(int value);  // FIXME: put elsewhere
 
 
 #endif  /* __EUREKA_UI_WINDOW_H__ */
