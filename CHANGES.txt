@@ -8,7 +8,9 @@ CHANGELOG
 
 +  automatically create multiple backups of edited pwads
 
--  added a status area on info bar (replaces map name)
++  Status area on info bar (replaces map name)
+
++  Log viewer
 
 -  new PruneUnused command removes unused stuff (sectors etc)
 
@@ -18,7 +20,9 @@ CHANGELOG
 -  fixed jerky RMB scrolling at large zoom factors
 
 -  Scale Objects: implemented Z scaling for sectors
+-  Default Props panel is now hidden by default
 -  copy properties command ('c') now copies linedef textures
+-  swapped grid keys: 'g' now makes the grid smaller, 'G' bigger
 
 -  prevent making two lines overlap when merging vertices
 -  merge: support one selected + one highlighted
@@ -27,6 +31,7 @@ CHANGELOG
 
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 -  when saving over a map, use existing location in the wad
+-  command line options: '-m' is shorthand for '--merge'
 
--  removed '192' as a possible grid size
+!  removed '192' grid size
 
