@@ -115,7 +115,7 @@ static const opt_desc_t options[] =
 	},
 
 	{	"version",
-		0,
+		"v",
 		OPT_BOOLEAN,
 		"1",
 		"Show version info",
@@ -164,7 +164,7 @@ static const opt_desc_t options[] =
 		0,
 		OPT_STRING,
 		"1",
-		"Log messages to file (instead of stdout)",
+		"Log messages to specified file",
 		"<file>",
 		&log_file
 	},
@@ -201,7 +201,7 @@ static const opt_desc_t options[] =
 	},
 
 	{	"merge",
-		0,
+		"m",
 		OPT_STRING_LIST,
 		"",
 		"Resource file(s) to load",
