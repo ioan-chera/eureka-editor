@@ -61,7 +61,7 @@ int  init_progress;
 bool want_quit = false;
 
 const char *config_file = NULL;
-const char *log_file = NULL;
+const char *log_file;
 
 const char *install_dir;
 const char *home_dir;
@@ -241,6 +241,9 @@ static void Determine_HomeDir(const char *argv0)
 
 	// create cache directory (etc)
 	CreateHomeDirs();
+
+	// determine log filename
+	log_file = StringPrintf("%s/logs.txt", home_dir);
 }
 
 
@@ -527,8 +530,7 @@ static void InitFLTK()
 
 	log_viewer = new UI_LogViewer();
 
-//  CONFIG ITEM??  show logs at startup
-//		log_viewer->show();
+	LogOpenWindow();
 
     Fl::add_handler(Main_key_handler);
 
@@ -539,7 +541,6 @@ static void InitFLTK()
 static void TermFLTK()
 {
 }
-
 
 
 // used for 'New Map' / 'Open Map' functions too
@@ -771,8 +772,6 @@ int main(int argc, char *argv[])
 	//printf ("%s\n", what ());
 
 
-	LogOpen(log_file);
-
 	init_progress = 1;
 
 
@@ -786,6 +785,9 @@ int main(int argc, char *argv[])
 
 	Determine_HomeDir(argv[0]);
 	Determine_InstallPath(argv[0]);
+
+
+	LogOpenFile(log_file);
 
 
 	// a config file can provides some values

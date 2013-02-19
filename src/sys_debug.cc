@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2009 Andrew Apted
+//  Copyright (C) 2006-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -24,34 +24,58 @@
 bool Quiet = false;
 bool Debugging = false;
 
+
 static FILE * log_fp;
+
+// need to keep an in-memory copy of logs until the log viewer is open
+static bool log_window_open;
+
+static std::vector<const char *> kept_messages;
 
 
 // hack here to avoid bringing in ui_window.h and FLTK headers
 extern void LogViewer_AddLine(const char *str);
 
 
-void LogOpen(const char *filename)
+void LogOpenFile(const char *filename)
 {
-	if (filename)
-	{
-		log_fp = fopen(filename, "w");
+	log_fp = fopen(filename, "w");
 
-		LogPrintf("======= START OF LOGS =======\n");
-	}
+	if (! log_fp)
+		FatalError("Cannot open log file: %s\n", filename);
+
+	fprintf(log_fp, "======= START OF LOGS =======\n\n");
+
+	// add all messages saved so far
+
+	for (unsigned int i = 0 ; i < kept_messages.size() ; i++)
+		fputs(kept_messages[i], log_fp);
 }
 
 
-void LogClose(void)
+void LogOpenWindow()
+{
+	log_window_open = true;
+
+	// retrieve all messages saved so far
+
+	for (unsigned int i = 0 ; i < kept_messages.size() ; i++)
+		LogViewer_AddLine(kept_messages[i]);
+}
+
+
+void LogClose()
 {
 	if (log_fp)
 	{
-		LogPrintf("\n======== END OF LOGS ========\n");
+		fprintf(log_fp, "\n\n======== END OF LOGS ========\n");
 
 		fclose(log_fp);
 
 		log_fp = NULL;
 	}
+
+	log_window_open = false;
 }
 
 
@@ -67,36 +91,28 @@ void LogPrintf(const char *str, ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	LogViewer_AddLine(buffer);
-
-/* FIXME
 	if (log_fp)
 	{
-		va_list args;
-
-		va_start(args, str);
-		vfprintf(log_fp, str, args);
-		va_end(args);
-
+		fputs(buffer, log_fp);
 		fflush(log_fp);
 	}
-	else if (! Quiet)
+
+	if (log_window_open)
+		LogViewer_AddLine(buffer);
+	else
+		kept_messages.push_back(StringDup(buffer));
+
+	if (! Quiet)
 	{
-		va_list args;
-
-		va_start(args, str);
-		vfprintf(stdout, str, args);
-		va_end(args);
-
+		fputs(buffer, stdout);
 		fflush(stdout);
 	}
-*/
 }
 
 
 void DebugPrintf(const char *str, ...)
 {
-	if (Debugging)
+	if (Debugging && log_fp)
 	{
 		static char buffer[MSG_BUF_LEN];
 
@@ -119,13 +135,13 @@ void DebugPrintf(const char *str, ...)
 
 			if (next) *next++ = 0;
 
-			if (log_fp)
+			fprintf(log_fp, "# %s\n", pos);
+			fflush(log_fp);
+
+			if (! Quiet)
 			{
-				fprintf(log_fp, "# %s\n", pos);
-				fflush(log_fp);
-			}
-			else
 				fprintf(stderr, "# %s\n", pos);
+			}
 
 			pos = next;
 		}

@@ -166,7 +166,9 @@ void UI_HyperLink::callback_Link(Fl_Widget *w, void *data)
 
   if (! fl_open_uri(link->url))
   {
-    LogPrintf("\nOpen URL failed: %s\n\n", link->url);
+    LogPrintf("\n");
+    LogPrintf("Open URL failed: %s\n", link->url);
+    LogPrintf("\n");
   }
 }
 

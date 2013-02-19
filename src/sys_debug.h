@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2008 Andrew Apted
+//  Copyright (C) 2006-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,7 +26,8 @@
 extern bool Quiet;
 extern bool Debugging;
 
-void LogOpen(const char *filename);  // NULL for none
+void LogOpenFile(const char *filename);
+void LogOpenWindow(void);
 void LogClose(void);
 
 void LogPrintf(const char *str, ...);
