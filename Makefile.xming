@@ -1,19 +1,21 @@
 #  --- Eureka Editor ---
 #
-#  Makefile for Unixy system-wide install
+#  Makefile for WIN32, using a CROSS-COMPILER on Linux
 #
 
-PROGRAM=eureka
+PROGRAM=Eureka.exe
 
-# prefix choices: /usr  /usr/local  /opt
-INSTALL_PREFIX=/usr/local
+MINGW=i586-mingw32msvc
 
-OBJ_DIR=obj_linux
+CXX=$(MINGW)-g++
 
-OPTIMISE=-O0 -g3
+LIB_LOC=lib_win32
+OBJ_DIR=obj_win32
+
+OPTIMISE=-O2
 
 # operating system choices: UNIX WIN32
-OS=UNIX
+OS=WIN32
 
 
 #--- Internal stuff from here -----------------------------------
@@ -153,27 +155,7 @@ $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
 bin: $(PROGRAM)
 	strip --strip-unneeded $(PROGRAM)
 
-install: bin
-	install -o root -m 755 $(PROGRAM) $(INSTALL_PREFIX)/bin/
-	install -d $(INSTALL_DIR)/games
-	install -d $(INSTALL_DIR)/common
-	install -d $(INSTALL_DIR)/ports
-	install -d $(INSTALL_DIR)/mods
-	install -o root -m 644 misc/bindings.cfg $(INSTALL_DIR)/bindings.cfg
-	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
-	install -o root -m 644 common/*.* $(INSTALL_DIR)/common
-	install -o root -m 644 ports/*.* $(INSTALL_DIR)/ports
-#	install -o root -m 644 mods/*.*  $(INSTALL_DIR)/mods
-	xdg-desktop-menu  install --novendor misc/eureka.desktop
-	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
-
-uninstall:
-	rm -v $(INSTALL_PREFIX)/bin/$(PROGRAM)
-	rm -Rv $(INSTALL_DIR) 
-	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
-	xdg-icon-resource uninstall --novendor --size 32 eureka
-
-.PHONY: all clean bin install uninstall
+.PHONY: all clean bin 
 
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
