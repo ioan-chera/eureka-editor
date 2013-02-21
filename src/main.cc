@@ -202,6 +202,9 @@ static void CreateHomeDirs()
 
 	fl_filename_expand(dir_name, "$HOME/Library/Application Support");
 	FileMakeDir(dir_name);
+
+	fl_filename_expand(dir_name, "$HOME/Library/Caches");
+	FileMakeDir(dir_name);
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
@@ -257,6 +260,9 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (fl_filename_expand(path, "$HOME/Library/Application Support/eureka-editor"))
 		home_dir = path;
+
+	if (fl_filename_expand(path, "$HOME/Library/Caches/eureka-editor"))
+		local_dir = path;
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);
