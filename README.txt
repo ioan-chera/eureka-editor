@@ -1,15 +1,15 @@
 
-Eureka 0.88 README
+Eureka 0.95 README
 ==================
 
-by Andrew Apted  <ajapted@users.sf.net>   Christmas 2012
+by Andrew Apted  <ajapted@users.sf.net>   Feb 2013
 
 
 INTRODUCTION
 
-Eureka is a map editor for the classic DOOM games, and the main
-target is Linux operating systems (although a version of Windows
-may come later).
+Eureka is a cross-platform map editor for the classic DOOM games.
+The supported operating systems are Linux (and other Unix-likes),
+Windows and MacOS X.
 
 It started when I made a fork of the Yadex editor and attempted
 to make it use a proper GUI toolkit, namely FLTK.  I also wanted
@@ -31,6 +31,7 @@ FEATURES
 -  3D preview (which does not require hardware acceleration)
 -  editable panels for things, linedefs, sectors (etc)
 -  browser for textures, flats, things (etc)
+-  key binding system
 -  built-in nodes builder
 
 
@@ -137,13 +138,13 @@ J : toggle object number display
 j : jump to object (by its numberic id)
 
 o : copy and paste the selected objects
+c : copy properties from the selection to the highlighted object
+P : prune unused sectors, sidedefs and vertices
 
 H : mirror objects horizontally 
 V : mirror objects vertically
 R : rotate objects 90 degrees clockwise 
 W : rotate objects 90 degrees anti-clockwise
-
-c : copy properties from the selection to the highlighted object
 
 
 Things Mode
@@ -173,7 +174,7 @@ e : select a chain of linedefs
 E : select a chain of linedefs with same textures
 
 w : flip linedefs 
-x : split linedefs in two
+k : split linedefs in two
 
 d : disconnect selected linedefs from the rest
 m : merge two one-sided linedefs into a two-sided linedef

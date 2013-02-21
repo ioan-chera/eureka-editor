@@ -1,6 +1,9 @@
 
-CHANGELOG
-=========
+CHANGES IN Eureka 0.95 (r###)
+=============================
+
+(Changes since 0.88 version, r605)
+
 
 +  Preferences dialog
 
@@ -10,9 +13,11 @@ CHANGELOG
 
 +  Status area on info bar (replaces map name)
 
++  Windows port (32-bit), with an installer
+
 +  Log viewer
 
--  new PruneUnused command removes unused stuff (sectors etc)
+-  new 'Prune Unused' command removes unused stuff (sectors etc)
 
 -  fixed explosion of wad size when saving repeatedly
 -  fixed crash clicking a linedef flag when nothing was selected
@@ -23,6 +28,7 @@ CHANGELOG
 -  Default Props panel is now hidden by default
 -  copy properties command ('c') now copies linedef textures
 -  swapped grid keys: 'g' now makes the grid smaller, 'G' bigger
+-  key for splitting lines in half is now 'k' (was 'x')
 
 -  prevent making two lines overlap when merging vertices
 -  merge: support one selected + one highlighted
