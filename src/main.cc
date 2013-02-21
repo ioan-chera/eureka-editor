@@ -314,6 +314,9 @@ static void Determine_InstallPath(const char *argv0)
 	if (type != REG_SZ)
 		FatalError("Broken installation (registry value is not a string)\n");
 
+	// ensure string is NUL-terminated
+	reg_string[len] = 0;
+
 	install_dir = StringDup(reg_string);
 	StringFree(reg_string);
 
