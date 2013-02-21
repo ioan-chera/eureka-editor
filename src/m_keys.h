@@ -41,6 +41,9 @@ typedef unsigned int keycode_t;
 
 #define MOD_none     0
 
+#undef  MOD_ALT    // these clash with Windows defines
+#undef  MOD_SHIFT  //
+
 #define MOD_COMMAND  FL_COMMAND
 #define MOD_META     FL_CONTROL
 #define MOD_ALT      FL_ALT

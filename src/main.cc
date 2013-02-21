@@ -239,10 +239,16 @@ static void Determine_HomeDir(const char *argv0)
 	if (! SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
 		FatalError("Failed to read %%APPDATA%% location");
 
+	AppendPath(path, "EurekaEditor");
+
 	home_dir = StringDup(path);
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
+	{
+		AppendPath(path, "EurekaEditor");
+
 		local_dir = StringDup(path);
+	}
 
 	StringFree(path);
 
@@ -285,16 +291,18 @@ static void Determine_InstallPath(const char *argv0)
 #ifdef WIN32
 	// read the registry key which the installer created
 	HKEY key;
-	DWORD len = (DWORD)FL_MAX_PATH;
-
-	char *reg_string = StringNew(FL_MAX_PATH + 100);
 
 	if (! SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\EurekaEditor", 
 	                             0, KEY_QUERY_VALUE, &key)))
 		FatalError("Broken installation (missing registry key)\n");
 
-	if (! SUCCEEDED(RegQueryValueExW(key, L"Install_Dir", 0L, &type,
-	                (BYTE*)reg_string, (DWORD)FL_MAX_PATH, &len)))
+	DWORD type;
+	DWORD len = (DWORD)FL_PATH_MAX;
+
+	char *reg_string = StringNew(FL_PATH_MAX + 100);
+
+	if (! SUCCEEDED(RegQueryValueExW(key, L"Install_Dir", 0L,
+	                                 &type, (BYTE*)reg_string, &len)))
 		FatalError("Broken installation (missing registry value)\n");
 
 	install_dir = StringDup(reg_string);
