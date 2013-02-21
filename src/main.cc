@@ -69,6 +69,7 @@ const char *log_file;
 
 const char *install_dir;
 const char *home_dir;
+const char *local_dir;
 
 
 const char *Iwad_name = NULL;
@@ -171,6 +172,14 @@ void FatalError(const char *fmt, ...)
 
 		TermFLTK();
 	}
+#ifdef WIN32
+	else
+	{
+		MessageBox(NULL, buffer, "Eureka : Error",
+		           MB_ICONEXCLAMATION | MB_OK |
+				   MB_SYSTEMMODAL | MB_SETFOREGROUND);
+	}
+#endif
 
 	init_progress = 0;
 
@@ -257,7 +266,22 @@ static void Determine_InstallPath(const char *argv0)
 	if (! install_dir)
 	{
 #ifdef WIN32
-	install_dir = GetExecutablePath(argv0);
+	// read the registry key which the installer created
+	HKEY key;
+	DWORD len = (DWORD)FL_MAX_PATH;
+
+	char reg_string[FL_MAX_PATH + 100];
+
+	if (! SUCCEEDED(RegOpenKeyW(HKEY_LOCAL_MACHINE, "Software\\EurekaLevelEditor", &key))
+		FatalError("Broken installation (missing registry key)\n");
+
+	if (! SUCCEEDED(RegQueryValueExW(key, L"Install_Dir", 0L, &type,
+	                (BYTE*)reg_string, (DWORD)FL_MAX_PATH, &len))
+		FatalError("Broken installation (missing registry value)\n");
+
+	install_dir = StringDup(reg_string);
+
+	RegCloseKey(key);
 
 #else
 	static const char *prefixes[] =
