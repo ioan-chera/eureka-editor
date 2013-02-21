@@ -1,3 +1,4 @@
+#
 #  --- Eureka Editor ---
 #
 #  Makefile for WIN32, using a CROSS-COMPILER on Linux
@@ -5,12 +6,15 @@
 
 PROGRAM=Eureka.exe
 
-MINGW=i586-mingw32msvc
+MINGW=i586-mingw32msvc-
 
-CXX=$(MINGW)-g++
+CXX=$(MINGW)g++
 
 LIB_LOC=lib_win32
 OBJ_DIR=obj_win32
+
+FLTK_DIR=$(LIB_LOC)/fltk-1.3.0
+ZLIB_DIR=$(LIB_LOC)/zlib-1.2.3
 
 OPTIMISE=-O2
 
@@ -20,34 +24,21 @@ OS=WIN32
 
 #--- Internal stuff from here -----------------------------------
 
-INSTALL_DIR=$(INSTALL_PREFIX)/share/eureka
+FLTK_FLAGS=-I$(FLTK_DIR)
+FLTK_LIBS=$(FLTK_DIR)/mingw/lib/libfltk_images.a \
+          $(FLTK_DIR)/mingw/lib/libfltk.a
 
-CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
-         -Iglbsp_src  \
-         -D_THREAD_SAFE -D_REENTRANT
+ZLIB_FLAGS=-I$(ZLIB_DIR)
+ZLIB_LIBS=$(ZLIB_DIR)/libz.a
 
-LDFLAGS=-L/usr/X11R6/lib
+CXXFLAGS=$(OPTIMISE) -Wall -Wno-strict-aliasing -D$(OS) \
+         -Iglbsp_src $(FLTK_FLAGS) $(ZLIB_FLAGS)
 
-LIBS= \
-     -lfltk_images -lfltk_gl -lfltk  \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama  \
-     -lpng -ljpeg -lGL -lz -lm
+LDFLAGS=
 
-
-# support for a non-standard install of FLTK
-ifneq ($(FLTK_PREFIX),)
-CXXFLAGS += -I$(FLTK_PREFIX)/include
-LDFLAGS += -L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib
-endif
-
-# support for statically linking FLTK (no GL, local JPEG and PNG)
-ifneq ($(FLTK_STATIC),)
-LIBS= \
-     -lfltk_images -lfltk  \
-     -lfltk_png -lfltk_jpeg \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama \
-     -lz -lm
-endif
+LIBS=-lm $(FLTK_LIBS) $(ZLIB_LIBS) \
+     -mwindows -lcomdlg32 -lole32 -luuid -lgdi32 \
+     -lcomctl32 -lwsock32 -lsupc++
 
 
 #----- Object files ----------------------------------------------
@@ -134,7 +125,7 @@ GLBSP_OBJS= \
 	$(OBJ_DIR)/glbsp/util.o     \
 	$(OBJ_DIR)/glbsp/wad.o
 
-GLBSP_CXXFLAGS=$(OPTIMISE) -Wall -DINLINE_G=inline
+GLBSP_CXXFLAGS=$(OPTIMISE) -Wall -DINLINE_G=inline $(ZLIB_FLAGS)
 
 $(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
 	$(CXX) $(GLBSP_CXXFLAGS) -o $@ -c $< 
@@ -142,18 +133,24 @@ $(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
 
 #----- Targets -----------------------------------------------
 
-all: $(PROGRAM)
+all: stripped
 
 clean:
-	rm -f $(PROGRAM) $(OBJ_DIR)/*.* core core.*
+	rm -f $(PROGRAM) $(OBJ_DIR)/*.*
 	rm -f $(OBJ_DIR)/glbsp/*.*
 	rm -f ERRS LOG.txt update.log
 
 $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
-	$(CXX) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
-bin: $(PROGRAM)
-	strip --strip-unneeded $(PROGRAM)
+stripped: $(PROGRAM)
+	$(MINGW)strip --strip-unneeded $(PROGRAM)
+
+$(OBJ_DIR)/eureka_res.o: misc/eureka.rc
+	$(MINGW)windres $^ -o $@
+
+installer: stripped
+	nsis misc/eureka.nsi
 
 .PHONY: all clean bin 
 

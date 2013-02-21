@@ -1,3 +1,4 @@
+#
 #  --- Eureka Editor ---
 #
 #  Makefile for Unixy system-wide install
@@ -148,12 +149,12 @@ clean:
 	rm -f ERRS LOG.txt update.log
 
 $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
-	$(CXX) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
-bin: $(PROGRAM)
+stripped: $(PROGRAM)
 	strip --strip-unneeded $(PROGRAM)
 
-install: bin
+install: stripped
 	install -o root -m 755 $(PROGRAM) $(INSTALL_PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
 	install -d $(INSTALL_DIR)/common
@@ -173,7 +174,7 @@ uninstall:
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
 
-.PHONY: all clean bin install uninstall
+.PHONY: all clean stripped install uninstall
 
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
