@@ -5,6 +5,9 @@ EUREKA WISH-LIST
 
 +  WIN32 port
 
++  added lines inside a void island, when connect then lose the void
+   (a sector is added which is not wanted).
+
 
 ______________________________________________________________________
 
@@ -44,9 +47,6 @@ Documentation
 
 Editing
 -------
-
-+  added lines inside a void island, when connect then lose the void
-   (a sector is added which is not wanted).
 
 
 
