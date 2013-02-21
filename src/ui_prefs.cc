@@ -552,6 +552,8 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 		return;
 
 	w->color(fl_rgb_color(r, g, b));
+
+	w->redraw();
 }
 
 
