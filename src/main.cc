@@ -289,7 +289,7 @@ static void Determine_InstallPath(const char *argv0)
 
 	char *reg_string = StringNew(FL_MAX_PATH + 100);
 
-	if (! SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\EurekaLevelEditor", 
+	if (! SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\EurekaEditor", 
 	                             0, KEY_QUERY_VALUE, &key)))
 		FatalError("Broken installation (missing registry key)\n");
 

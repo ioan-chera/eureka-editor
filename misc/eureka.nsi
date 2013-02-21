@@ -11,11 +11,11 @@ Name "Eureka Setup"
 OutFile "Eureka_setup.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\EurekaLevelEditor
+InstallDir $PROGRAMFILES\EurekaEditor
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\EurekaLevelEditor" "Install_Dir"
+InstallDirRegKey HKLM "Software\EurekaEditor" "Install_Dir"
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel user
@@ -48,6 +48,6 @@ Section "" ;No components page, name is not important
   File mods\*.*
 
   ; Write the installation path into the registry
-  WriteRegStr HKLM "Software\EurekaLevelEditor" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "Software\EurekaEditor" "Install_Dir" "$INSTDIR"
   
 SectionEnd
