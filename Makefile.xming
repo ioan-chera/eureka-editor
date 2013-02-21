@@ -5,6 +5,7 @@
 #
 
 PROGRAM=Eureka.exe
+INSTALLER=Eureka_setup.exe
 
 MINGW=i586-mingw32msvc-
 
@@ -149,8 +150,40 @@ stripped: $(PROGRAM)
 $(OBJ_DIR)/eureka_res.o: misc/eureka.rc
 	$(MINGW)windres $^ -o $@
 
-installer: stripped
-	makensis -NOCD misc/eureka.nsi
+# we need to recreate the final directory structure
+# (since NSIS cannot convert unix text files to msdos format)
+NSIS_BUILD=obj_win32/nsis
+
+nsis_build: nsis_clean stripped
+	# folders
+	mkdir $(NSIS_BUILD)
+	mkdir $(NSIS_BUILD)/games
+	mkdir $(NSIS_BUILD)/common
+	mkdir $(NSIS_BUILD)/ports
+	mkdir $(NSIS_BUILD)/mods
+	#
+	# config file
+	cp misc/bindings.cfg $(NSIS_BUILD)/bindings.cfg
+	todos $(NSIS_BUILD)/*.cfg
+	#
+	# definition files
+	cp games/*.ugh  $(NSIS_BUILD)/games
+	cp common/*.ugh $(NSIS_BUILD)/common
+	cp ports/*.ugh  $(NSIS_BUILD)/ports
+	todos $(NSIS_BUILD)/*/*.ugh
+	#
+	# text documents
+	cp README.txt TODO.txt AUTHORS.txt GPL.txt $(NSIS_BUILD)
+	todos $(NSIS_BUILD)/*.txt
+	#
+	# run the MAKENSIS program
+	cp misc/eureka.nsi $(NSIS_BUILD)/eureka.nsi
+	makensis $(NSIS_BUILD)/eureka.nsi
+	#
+	mv $(NSIS_BUILD)/Eureka*.exe .
+
+nsis_clean:
+	rm -Rf $(NSIS_BUILD)
 
 .PHONY: all clean bin 
 

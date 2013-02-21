@@ -38,14 +38,12 @@ Section "" ;No components page, name is not important
   
   ; Put file there
   File Eureka.exe
-  File GPL.txt
-  File AUTHORS.txt
-  File README.txt
-  File TODO.txt
-  File /r /x .svn games
-  File /r /x .svn common
-  File /r /x .svn ports
-  File /r /x .svn mods
+  File *.txt
+  File bindings.cfg
+  File /r games
+  File /r common
+  File /r ports
+  File /nonfatal /r mods
 
   ; Write the installation path into the registry
   WriteRegStr HKLM "Software\EurekaEditor" "Install_Dir" "$INSTDIR"
