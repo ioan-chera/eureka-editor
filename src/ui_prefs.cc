@@ -872,6 +872,15 @@ void UI_Preferences::SaveValues()
 	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
 	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
 
+	if (gui_color_set == 2)
+	{
+		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
+		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
+		Fl::foreground (RGB_RED(gui_custom_fg), RGB_GREEN(gui_custom_fg), RGB_BLUE(gui_custom_fg));
+
+		main_win->redraw();
+	}
+
 	/* General stuff */
 
 	default_grid_snap = grid_snap->value() ? true : false;
