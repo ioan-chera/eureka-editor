@@ -239,13 +239,13 @@ static void Determine_HomeDir(const char *argv0)
 	if (! SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
 		FatalError("Failed to read %%APPDATA%% location");
 
-	PathAppend(path, "EurekaEditor");
+	strcat(path, "\\EurekaEditor");
 
 	home_dir = StringDup(path);
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
 	{
-		PathAppend(path, "EurekaEditor");
+		strcat(path, "\\EurekaEditor");
 
 		local_dir = StringDup(path);
 	}
