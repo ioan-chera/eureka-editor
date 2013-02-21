@@ -1265,7 +1265,7 @@ char * PersistFilename(const crc32_c& crc)
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/cache/%08X%08X.dat", local_dir,
+	sprintf(filename, "%s/cache/%08X%08X.dat", cache_dir,
 	        crc.extra, crc.raw);
 
 	return filename;

@@ -69,7 +69,7 @@ const char *log_file;
 
 const char *install_dir;
 const char *home_dir;
-const char *local_dir;
+const char *cache_dir;
 
 
 const char *Iwad_name = NULL;
@@ -209,7 +209,7 @@ static void CreateHomeDirs()
 
 	// try to create home_dir (doesn't matter if it already exists)
 	FileMakeDir(home_dir);
-	FileMakeDir(local_dir);
+	FileMakeDir(cache_dir);
 
 	static const char *const subdirs[] =
 	{
@@ -220,7 +220,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? local_dir : home_dir, subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir : home_dir, subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -250,7 +250,7 @@ static void Determine_HomeDir(const char *argv0)
 	{
 		strcat(path, "\\EurekaEditor");
 
-		local_dir = StringDup(path);
+		cache_dir = StringDup(path);
 	}
 
 	StringFree(path);
@@ -262,7 +262,7 @@ static void Determine_HomeDir(const char *argv0)
 		home_dir = path;
 
 	if (fl_filename_expand(path, "$HOME/Library/Caches/eureka-editor"))
-		local_dir = path;
+		cache_dir = path;
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);
@@ -275,11 +275,11 @@ static void Determine_HomeDir(const char *argv0)
 	if (! home_dir)
 		FatalError("Unable to find home directory!\n");
 	
-	if (! local_dir)
-		local_dir = home_dir;
+	if (! cache_dir)
+		cache_dir = home_dir;
 
     LogPrintf("Home  dir: %s\n", home_dir);
-    LogPrintf("Local dir: %s\n", local_dir);
+    LogPrintf("Cache dir: %s\n", cache_dir);
 
 	// create cache directory (etc)
 	CreateHomeDirs();

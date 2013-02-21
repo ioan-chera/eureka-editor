@@ -900,11 +900,11 @@ void M_BackupWad(Wad_file *wad)
 	if (backup_max_files <= 0 || backup_max_space <= 0)
 		return;
 
-	// convert wad filename to a directory name in $local_dir/backups
+	// convert wad filename to a directory name in $cache_dir/backups
 
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/backups/%s", local_dir, fl_filename_name(wad->PathName()));
+	sprintf(filename, "%s/backups/%s", cache_dir, fl_filename_name(wad->PathName()));
 
 	char * dir_name = ReplaceExtension(filename, NULL);
 
