@@ -206,15 +206,18 @@ static void CreateHomeDirs()
 
 	// try to create home_dir (doesn't matter if it already exists)
 	FileMakeDir(home_dir);
+	FileMakeDir(local_dir);
 
 	static const char *const subdirs[] =
 	{
-		"cache", "iwads", "games", "ports", "mods", "backups", NULL
+		"cache", "backups",
+		"iwads", "games", "ports", "mods",
+		NULL
 	};
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", home_dir, subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? local_dir : home_dir, subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
