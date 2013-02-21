@@ -231,10 +231,20 @@ static void Determine_HomeDir(const char *argv0)
 	if (! home_dir)
 	{
 #if defined(WIN32)
-	// FIXME: check for %appdata% ??
-	//        also, fallback should be EXE path + "/local"
+	// get the %APPDATA% location
+	// FIXME: have a fallback e.g. EXE path + "/local"
 
-	home_dir = GetExecutablePath(argv0);
+	TCHAR * path = StringNew(MAX_PATH);
+
+	if (! SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
+		FatalError("Failed to read %%APPDATA%% location");
+
+	home_dir = StringDup(path);
+
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
+		local_dir = StringDup(path);
+
+	StringFree(path);
 
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
@@ -252,8 +262,12 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (! home_dir)
 		FatalError("Unable to find home directory!\n");
+	
+	if (! local_dir)
+		local_dir = home_dir;
 
-    LogPrintf("Home dir: %s\n", home_dir);
+    LogPrintf("Home  dir: %s\n", home_dir);
+    LogPrintf("Local dir: %s\n", local_dir);
 
 	// create cache directory (etc)
 	CreateHomeDirs();
@@ -273,16 +287,18 @@ static void Determine_InstallPath(const char *argv0)
 	HKEY key;
 	DWORD len = (DWORD)FL_MAX_PATH;
 
-	char reg_string[FL_MAX_PATH + 100];
+	char *reg_string = StringNew(FL_MAX_PATH + 100);
 
-	if (! SUCCEEDED(RegOpenKeyW(HKEY_LOCAL_MACHINE, "Software\\EurekaLevelEditor", &key))
+	if (! SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\EurekaLevelEditor", 
+	                             0, KEY_QUERY_VALUE, &key)))
 		FatalError("Broken installation (missing registry key)\n");
 
 	if (! SUCCEEDED(RegQueryValueExW(key, L"Install_Dir", 0L, &type,
-	                (BYTE*)reg_string, (DWORD)FL_MAX_PATH, &len))
+	                (BYTE*)reg_string, (DWORD)FL_MAX_PATH, &len)))
 		FatalError("Broken installation (missing registry value)\n");
 
 	install_dir = StringDup(reg_string);
+	StringFree(reg_string);
 
 	RegCloseKey(key);
 
