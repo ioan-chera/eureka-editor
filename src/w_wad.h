@@ -234,7 +234,7 @@ private:
 	// (including the CRC).
 	void WriteDirectory();
 
-	void FixGroup(std::vector<short>& group, short index, short removed);
+	void FixGroup(std::vector<short>& group, short index, short num_added, short num_removed);
 
 private:
 	// deliberately don't implement these

@@ -727,14 +727,7 @@ void Wad_file::RemoveLumps(short index, short count)
 
 	for (i = 0 ; i < count ; i++)
 	{
-		Lump_c * lump = directory[index + i];
-
-		// it would be possible to put this lump into a list of
-		// 'holes' for later re-use.  However due to the chance
-		// of aliasing (two entries in the directory refering
-		// to the same data) it becomes harder to implement.
-
-		delete lump;
+		delete directory[index + i];
 	}
 
 	for (i = index ; i+count < NumLumps() ; i++)
@@ -743,10 +736,10 @@ void Wad_file::RemoveLumps(short index, short count)
 	directory.resize(directory.size() - (size_t)count);
 
 	// fix various arrays containing lump indices
-	FixGroup(levels,  index, count);
-	FixGroup(patches, index, count);
-	FixGroup(sprites, index, count);
-	FixGroup(flats,   index, count);
+	FixGroup(levels,  index, 0, count);
+	FixGroup(patches, index, 0, count);
+	FixGroup(sprites, index, 0, count);
+	FixGroup(flats,   index, 0, count);
 }
 
 
@@ -772,24 +765,25 @@ void Wad_file::RemoveLevel(short index)
 }
 
 
-void Wad_file::FixGroup(std::vector<short>& group, short index, short removed)
+void Wad_file::FixGroup(std::vector<short>& group, short index,
+                        short num_added, short num_removed)
 {
-	short high = index + removed - 1;
 	bool did_remove = false;
 
-	for (short k = (short)group.size()-1 ; k >= 0 ; k--)
+	for (short k = 0 ; k < (short)group.size() ; k++)
 	{
 		if (group[k] < index)
 			continue;
 
-		if (group[k] > high)
+		if (group[k] < index + num_removed)
 		{
-			group[k] -= removed;
+			group[k] = -1;
+			did_remove = true;
 			continue;
 		}
 
-		group[k] = -1;
-		did_remove = true;
+		group[k] += num_added;
+		group[k] -= num_removed;
 	}
 
 	if (did_remove)
@@ -813,6 +807,12 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 
 	if (insert_point >= 0 && insert_point < (int)directory.size())
 	{
+		// fix various arrays containing lump indices
+		FixGroup(levels,  insert_point, 1, 0);
+		FixGroup(patches, insert_point, 1, 0);
+		FixGroup(sprites, insert_point, 1, 0);
+		FixGroup(flats,   insert_point, 1, 0);
+
 		directory.insert(directory.begin() + insert_point, lump);
 		insert_point++;
 	}
@@ -825,15 +825,22 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 
 Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 {
-	levels.push_back(NumLumps());
+	int actual_point = insert_point;
 
-	return AddLump(name, max_size);
+	if (actual_point < 0 || actual_point >= (int)directory.size())
+		actual_point = NumLumps();
+
+	Lump_c * lump = AddLump(name, max_size);
+
+	levels.push_back(actual_point);
+
+	return lump;
 }
 
 
 void Wad_file::InsertPoint(short index)
 {
-	// is validated at usage
+	// this is validated on usage
 	insert_point = index;
 }
 

@@ -436,7 +436,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 
 	if (num_levels == 0)
 		return;
-	
+
 	button_grp->label("");
 
 	// limit the number based on available space
