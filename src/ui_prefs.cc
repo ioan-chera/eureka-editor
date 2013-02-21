@@ -872,7 +872,17 @@ void UI_Preferences::SaveValues()
 	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
 	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
 
-	if (gui_color_set == 2)
+	// update the colors
+	// FIXME: how to reset the "default" colors??
+	if (gui_color_set == 1)
+	{
+		Fl::background(236, 232, 228);
+		Fl::background2(255, 255, 255);
+		Fl::foreground(0, 0, 0);
+
+		main_win->redraw();
+	}
+	else if (gui_color_set == 2)
 	{
 		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
 		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
