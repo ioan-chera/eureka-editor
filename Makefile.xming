@@ -162,6 +162,9 @@ nsis_build: nsis_clean stripped
 	mkdir $(NSIS_BUILD)/ports
 	mkdir $(NSIS_BUILD)/mods
 	#
+	# executable
+	cp Eureka.exe $(NSIS_BUILD)
+	#
 	# config file
 	cp misc/bindings.cfg $(NSIS_BUILD)/bindings.cfg
 	todos $(NSIS_BUILD)/*.cfg
