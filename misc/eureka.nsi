@@ -42,10 +42,10 @@ Section "" ;No components page, name is not important
   File AUTHORS.txt
   File README.txt
   File TODO.txt
-  File games\*.*
-  File common\*.*
-  File ports\*.*
-  File mods\*.*
+  File /r /x .svn games
+  File /r /x .svn common
+  File /r /x .svn ports
+  File /r /x .svn mods
 
   ; Write the installation path into the registry
   WriteRegStr HKLM "Software\EurekaEditor" "Install_Dir" "$INSTDIR"

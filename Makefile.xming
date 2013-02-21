@@ -150,7 +150,7 @@ $(OBJ_DIR)/eureka_res.o: misc/eureka.rc
 	$(MINGW)windres $^ -o $@
 
 installer: stripped
-	nsis misc/eureka.nsi
+	makensis -NOCD misc/eureka.nsi
 
 .PHONY: all clean bin 
 
