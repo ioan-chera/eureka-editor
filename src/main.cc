@@ -602,6 +602,7 @@ static void InitFLTK()
     Fl::add_handler(Main_key_handler);
 
 	main_win->ShowBrowser(0);
+	main_win->NewEditMode('t');
 }
 
 
