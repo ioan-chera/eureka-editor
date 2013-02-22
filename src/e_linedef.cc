@@ -40,9 +40,6 @@
 bool leave_offsets_alone = false;
 
 
-static void SliceLinedef (int linedefno, int times);
-
-
 bool LineDefAlreadyExists(int v1, int v2)
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
@@ -861,9 +858,9 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
  *  MakeRectangularNook - Make a nook or boss in a wall
  *  
  *  Before :    After :
- *          ^-->
- *          |  |
- *  +----------------->     +------->  v------->
+ *                                  ^--->
+ *                                  |   |
+ *  +----------------->     +------->   v------->
  *      1st sidedef             1st sidedef
  *
  *  The length of the sides of the nook is sidelen.
@@ -872,101 +869,11 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
  */
 void MakeRectangularNook (SelPtr obj, int width, int depth, int convex)
 {
-	SelPtr cur;
-
-	for (cur = obj ; cur ; cur = cur->next)
-	{
-		int vstart, vend;
-		int x0;
-		int y0;
-		int dx0, dx1, dx2;
-		int dy0, dy1, dy2;
-		int line_len;
-		double real_width;
-		double angle;
-
-		vstart = LineDefs[cur->objnum]->start;
-		vend   = LineDefs[cur->objnum]->end;
-		x0     = Vertices[vstart]->x;
-		y0     = Vertices[vstart]->y;
-		dx0    = Vertices[vend]->x - x0;
-		dy0    = Vertices[vend]->y - y0;
-
-		/* First split the line 4 times */
-		SliceLinedef (cur->objnum, 4);
-
-		/* Then position the vertices */
-		angle  = atan2 (dy0, dx0);
-
-		/* If line to split is not longer than sidelen,
-		   force sidelen to 1/3 of length */
-		line_len   = ComputeDist (dx0, dy0);
-		real_width = line_len > width ? width : line_len / 3;
-
-		dx2 = (int) (real_width * cos (angle));
-		dy2 = (int) (real_width * sin (angle));
-
-		dx1 = (dx0 - dx2) / 2;
-		dy1 = (dy0 - dy2) / 2;
-
-		{
-			double normal = convex ? angle-M_PI/2 : angle+M_PI/2;
-			Vertices[NumVertices-1-3]->x = x0 + dx1;
-			Vertices[NumVertices-1-3]->y = y0 + dy1;
-			Vertices[NumVertices-1-2]->x = x0 + dx1 + (int) (depth * cos (normal));
-			Vertices[NumVertices-1-2]->y = y0 + dy1 + (int) (depth * sin (normal));
-			Vertices[NumVertices-1-1]->x = x0 + dx1 + dx2 + (int) (depth * cos (normal));
-			Vertices[NumVertices-1-1]->y = y0 + dy1 + dy2 + (int) (depth * sin (normal));
-			Vertices[NumVertices-1  ]->x = x0 + dx1 + dx2;
-			Vertices[NumVertices-1  ]->y = y0 + dy1 + dy2;
-		}
-
-		MarkChanges(2);
-	}
+	....
 }
+
 #endif
 
-
-/*
- *  SliceLinedef - Split a linedef several times
- *
- *  Splits linedef no. <linedefno> <times> times.
- *  Side-effects : creates <times> new vertices, <times> new
- *  linedefs and 0, <times> or 2*<times> new sidedefs.
- *  The new vertices are put at (0,0).
- *  See SplitLineDefs() and MakeRectangularNook() for example of use.
- */
-static void SliceLinedef (int linedefno, int times)
-{
-#if 0  // FIXME SliceLinedef
-	int prev_ld_no;
-	for (prev_ld_no = linedefno ; times > 0 ; times--, prev_ld_no = NumLineDefs-1)
-	{
-		int sd;
-
-		InsertObject (OBJ_VERTICES, -1, 0, 0);
-		InsertObject (OBJ_LINEDEFS, linedefno, 0, 0);
-		LineDefs[NumLineDefs-1]->start = NumVertices - 1;
-		LineDefs[NumLineDefs-1]->end   = LineDefs[prev_ld_no]->end;
-		LineDefs[prev_ld_no   ]->end   = NumVertices - 1;
-
-		sd = LineDefs[linedefno]->right;
-		if (sd >= 0)
-		{
-			InsertObject (OBJ_SIDEDEFS, sd, 0, 0);
-
-			LineDefs[NumLineDefs-1]->right = NumSideDefs - 1;
-		}
-		sd = LineDefs[linedefno]->left;
-		if (sd >= 0)
-		{
-			InsertObject (OBJ_SIDEDEFS, sd, 0, 0);
-
-			LineDefs[NumLineDefs-1]->left = NumSideDefs - 1;
-		}
-	}
-#endif
-}
 
 
 #if 0  // FIXME  SetLinedefLength
