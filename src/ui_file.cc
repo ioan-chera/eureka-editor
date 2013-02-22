@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_dialog.h"
+#include "m_config.h"
 #include "m_files.h"
 #include "m_game.h"
 #include "w_wad.h"
@@ -29,7 +30,7 @@
 
 
 #define FREE_COL  fl_rgb_color(0x33, 0xFF, 0xAA)
-#define USED_COL  fl_rgb_color(0xFF, 0x11, 0x11)
+#define USED_COL  (gui_scheme == 2 ? fl_rgb_color(0xFF, 0x11, 0x11) : fl_rgb_color(0xFF, 0x88, 0x88))
 
 
 // TODO: find a better home for this

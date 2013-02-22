@@ -28,6 +28,7 @@
 
 #include "im_img.h"
 #include "im_color.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_things.h"
 #include "w_rawdef.h"
@@ -45,6 +46,9 @@ extern std::map<char, thinggroup_t *> thing_groups;
 extern std::map<int, linetype_t *>   line_types;
 extern std::map<int, sectortype_t *> sector_types;
 extern std::map<int, thingtype_t *>  thing_types;
+
+
+#define  BROWBACK_COL  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 
 
 /* text item */
@@ -151,7 +155,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	box(FL_FLAT_BOX);  // box(FL_DOWN_BOX);
 
-	color(WINDOW_BG, WINDOW_BG);
+	color(BROWBACK_COL, BROWBACK_COL);
 
 
 	strcpy(cat_letters, "*");

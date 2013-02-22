@@ -19,10 +19,14 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
 #include "ui_scroll.h"
 
 
 #define HUGE_DIST  (1 << 24)
+
+
+#define SCRBAR_COL  (gui_scheme == 2 ? FL_GRAY0 : FL_LIGHT2)
 
 
 //
@@ -39,7 +43,7 @@ UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 
 	scrollbar->align(FL_ALIGN_LEFT);
 	scrollbar->color(FL_DARK2, FL_DARK2);
-	scrollbar->selection_color(FL_GRAY0);
+	scrollbar->selection_color(SCRBAR_COL);
 	scrollbar->callback(bar_callback, this);
 
 	add(scrollbar);

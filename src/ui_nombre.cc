@@ -19,9 +19,13 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
 
 #include "ui_window.h"
 #include "ui_nombre.h"
+
+
+#define NOMBRBACK_COL  (gui_scheme == 2 ? FL_GRAY0+1 : FL_GRAY0+3)
 
 
 //
@@ -34,7 +38,7 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
 	type_name = strdup(what);  // FIXME: consistent string handling
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-	color(FL_GRAY0+2);
+	color(NOMBRBACK_COL);
 
 	labelfont(FL_COURIER_BOLD);
 	labelsize(16 + KF*3);
@@ -70,9 +74,9 @@ void UI_Nombre::Update()
 		labelcolor(FL_YELLOW);
 
 	if (index < 0 || total == 0)
-		color(FL_GRAY0+1);
+		color(NOMBRBACK_COL);
 	else if (selected == 0)
-		color(FL_GRAY0+1);   // same as above
+		color(NOMBRBACK_COL);   // same as above
 	else if (selected == 1)
 		color(FL_BLUE);
 	else
