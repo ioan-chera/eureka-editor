@@ -53,7 +53,7 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
-	Fl_Double_Window(420, 430, "Choose Map"),
+	Fl_Double_Window(420, 380, "Choose Map"),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -72,7 +72,7 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	map_name->value(initial_name);
 
 	{
-		int bottom_y = 365;
+		int bottom_y = 315;
 
 		Fl_Group* o = new Fl_Group(0, bottom_y, 420, 65);
 		o->box(FL_FLAT_BOX);
@@ -118,8 +118,8 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 
 		if (format == 'E')
 		{
-			int epi = 1 + col + (row & 1) * 5;
-			int map = 1 + row / 2;
+			int epi = 1 + row / 2;
+			int map = 1 + col + (row & 1) * 5;
 
 			if (map > 9)
 				continue;
@@ -303,7 +303,7 @@ UI_OpenMap::UI_OpenMap() :
 
 	// all the map buttons go into this group
 	
-	button_grp = new Fl_Group(0, 240, 395, 200, "\n\nNone Found");
+	button_grp = new Fl_Group(0, 235, w(), 230, "\n\nNone Found");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
 
