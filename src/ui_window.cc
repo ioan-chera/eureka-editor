@@ -321,6 +321,8 @@ void UI_MainWin::UpdateTitle(bool want_star)
 }
 
 
+/* DISABLED, since it fails miserably on every platform
+
 void UI_MainWin::ToggleFullscreen()
 {
 	if (last_w)
@@ -337,6 +339,7 @@ void UI_MainWin::ToggleFullscreen()
 		fullscreen();
 	}
 }
+*/
 
 
 void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_state)
