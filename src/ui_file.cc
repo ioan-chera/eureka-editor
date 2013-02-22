@@ -28,6 +28,10 @@
 #include "ui_file.h"
 
 
+#define FREE_COL  fl_rgb_color(0x33, 0xFF, 0xAA)
+#define USED_COL  fl_rgb_color(0xFF, 0x11, 0x11)
+
+
 // TODO: find a better home for this
 bool ValidateMapName(const char *p)
 {
@@ -48,7 +52,7 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
-	Fl_Double_Window(395, 480, "Choose Map"),
+	Fl_Double_Window(420, 430, "Choose Map"),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -56,25 +60,28 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	callback(close_callback, this);
 
 
-	Fl_Box *title = new Fl_Box(20, 18, 285, 32, "Enter the map slot:");
-	title->labelfont(FL_HELVETICA_BOLD);
-	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+///---	Fl_Box *title = new Fl_Box(20, 18, 285, 32, "Enter the map slot:");
+///---	title->labelfont(FL_HELVETICA_BOLD);
+///---	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-	map_name = new Fl_Input(90, 60, 110, 25);
-	map_name->value(initial_name);
+	map_name = new Fl_Input(94, 25, 120, 25, "Map slot: ");
+	map_name->labelfont(FL_HELVETICA_BOLD);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
+	map_name->value(initial_name);
 
 	{
-		Fl_Group* o = new Fl_Group(0, 415, 395, 65);
+		int bottom_y = 365;
+
+		Fl_Group* o = new Fl_Group(0, bottom_y, 420, 65);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(270, 432, 95, 35, "OK");
+		ok_but = new Fl_Return_Button(270, bottom_y + 17, 95, 35, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button *cancel = new Fl_Button(130, 432, 95, 35, "Cancel");
+		Fl_Button *cancel = new Fl_Button(130, bottom_y + 17, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -93,19 +100,16 @@ UI_ChooseMap::~UI_ChooseMap()
 
 void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 {
-	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 104, 285, 32, "Or select via these cool buttons:");
-	heading->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-	heading->labelfont(FL_HELVETICA_BOLD);
-	add(heading);
-
-	Fl_Color free_col = fl_rgb_color(0x33, 0xDD, 0x77);
-	Fl_Color used_col = fl_rgb_color(0xFF, 0x33, 0x66);
+///---	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 104, 285, 32, "Or select via these cool buttons:");
+///---	heading->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+///---	heading->labelfont(FL_HELVETICA_BOLD);
+///---	add(heading);
 
 	for (int col = 0 ; col < 4  ; col++)
 	for (int row = 0 ; row < 10 ; row++)
 	{
-		int cx = x() +  45 + col * 82;
-		int cy = y() + 145 + row * 25;
+		int cx = x() + 45 + col * 82;
+		int cy = y() + 75 + row * 25;
 
 		char name_buf[20];
 
@@ -129,14 +133,14 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 			sprintf(name_buf, "MAP%02d", map);
 		}
 
-		Fl_Button * but = new Fl_Button(cx, cy, 70, 20);
+		Fl_Button * but = new Fl_Button(cx, cy, 60, 20);
 		but->copy_label(name_buf);
 		but->callback(button_callback, this);
 
 		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
-			but->color(used_col);
+			but->color(USED_COL);
 		else
-			but->color(free_col);
+			but->color(FREE_COL);
 
 		add(but);
 	}
@@ -225,7 +229,7 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap() :
-	Fl_Double_Window(395, 520, "Open Map"),
+	Fl_Double_Window(420, 530, "Open Map"),
 	action(ACT_none),
 	result_wad(NULL), new_pwad(NULL)
 {
@@ -295,15 +299,17 @@ UI_OpenMap::UI_OpenMap() :
 	button_grp->end();
 
 	{
-		Fl_Group* o = new Fl_Group(0, 460, 395, 60);
+		int bottom_y = 470;
+
+		Fl_Group* o = new Fl_Group(0, bottom_y, w(), 60);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(280, 475, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(280, bottom_y + 15, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(140, 475, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(140, bottom_y + 15, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -462,24 +468,23 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 	int col = 0;
 
 	if (num_levels <= 24) max_rows = 6;
+/*
 	if (num_levels <=  9) max_rows = 3;
 	if (num_levels <=  4) max_rows = 2;
 	if (num_levels <=  2) max_rows = 1;
-
+*/
 	max_cols = (num_levels + (max_rows - 1)) / max_rows;
 
 	int cx_base = button_grp->x() + 30;
 	int cy_base = button_grp->y() + 5;
-	int but_W   = 56;
-
+	int but_W   = 60;
+/*
 	if (max_cols <= 4) { cx_base += 20; but_W += 12; }
 	if (max_cols <= 2) { cx_base += 40; but_W += 12; }
 	if (max_cols <= 1) { cx_base += 40; but_W += 12; }
-
+*/
 
 	// create them buttons!!
-
-	Fl_Color but_col = fl_rgb_color(0xff, 0xee, 0x80);
 
 	for (IT = level_names.begin() ; IT != level_names.end() ; IT++)
 	{
@@ -488,8 +493,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 
 		Fl_Button * but = new Fl_Button(cx, cy, but_W, 20);
 		but->copy_label(IT->first.c_str());
-		but->labelsize(12);
-		but->color(but_col);
+		but->color(FREE_COL);
 		but->callback(button_callback, this);
 
 		button_grp->add(but);
