@@ -65,6 +65,9 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size)
 	byte *tex_data;
 	int tex_length = W_LoadLumpData(lump, &tex_data);
 
+	// shut the fuck up, compiler
+	(void) tex_length;
+
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data;
 
