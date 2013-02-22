@@ -11,7 +11,7 @@ INSTALL_PREFIX=/usr/local
 
 OBJ_DIR=obj_linux
 
-OPTIMISE=-O0 -g3
+OPTIMISE=-O0 -g3 -fno-strict-aliasing
 
 # operating system choices: UNIX WIN32
 OS=UNIX
