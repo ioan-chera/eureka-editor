@@ -105,18 +105,20 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 ///---	heading->labelfont(FL_HELVETICA_BOLD);
 ///---	add(heading);
 
-	for (int col = 0 ; col < 4  ; col++)
-	for (int row = 0 ; row < 10 ; row++)
+	int but_W = 60;
+
+	for (int col = 0 ; col < 5 ; col++)
+	for (int row = 0 ; row < 8 ; row++)
 	{
-		int cx = x() + 45 + col * 82;
-		int cy = y() + 75 + row * 25;
+		int cx = x() + 30 + col * (but_W + but_W / 5);
+		int cy = y() + 75 + row * 24 + (row / 2) * 10;
 
 		char name_buf[20];
 
 		if (format == 'E')
 		{
-			int epi = 1 + col;
-			int map = 1 + row;
+			int epi = 1 + col + (row & 1) * 5;
+			int map = 1 + row / 2;
 
 			if (map > 9)
 				continue;
@@ -125,7 +127,13 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		}
 		else
 		{
-			int map = 1 + col * 10 + row;
+			int map = 1 + col + row * 5;
+
+			// this logic matches UI_OpenMap on the IWAD
+			if (row >= 2)
+				map--;
+			else if (row == 1 && col == 4)
+				continue;
 
 			if (map < 1 || map > 32)
 				continue;
@@ -434,6 +442,25 @@ void UI_OpenMap::Populate()
 }
 
 
+static bool DifferentEpisode(const char *A, const char *B)
+{
+	if (A[0] != B[0])
+		return true;
+	
+	// handle ExMx
+	if (toupper(A[0]) == 'E')
+	{
+		return A[1] != B[1];
+	}
+
+	// handle MAPxx
+	if (strlen(A) < 4 && strlen(B) < 4)
+		return false;
+	
+	return A[3] != B[3];
+}
+
+
 void UI_OpenMap::PopulateButtons(Wad_file *wad)
 {
 	result_wad = wad;
@@ -446,11 +473,12 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 	button_grp->label("");
 
 	// limit the number based on available space
+/*
 	int max_rows = 8;
 	int max_cols = 5;
 
 	num_levels = MIN(num_levels, max_rows * max_cols);
-
+*/
 	std::map<std::string, int> level_names;
 	std::map<std::string, int>::iterator IT;
 
@@ -461,12 +489,9 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 		level_names[std::string(lump->Name())] = 1;
 	}
 
-
 	// determine how many rows and columns, and adjust layout
 
-	int row = 0;
-	int col = 0;
-
+#if 0
 	if (num_levels <= 24) max_rows = 6;
 /*
 	if (num_levels <=  9) max_rows = 3;
@@ -474,6 +499,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 	if (num_levels <=  2) max_rows = 1;
 */
 	max_cols = (num_levels + (max_rows - 1)) / max_rows;
+#endif
 
 	int cx_base = button_grp->x() + 30;
 	int cy_base = button_grp->y() + 5;
@@ -486,24 +512,45 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 
 	// create them buttons!!
 
+	int row = 0;
+	int col = 0;
+
+	const char *last_name = NULL;
+
 	for (IT = level_names.begin() ; IT != level_names.end() ; IT++)
 	{
+		const char *name = IT->first.c_str();
+
+		if (col > 0 && last_name && DifferentEpisode(last_name, name))
+		{
+			col = 0;
+			row++;
+
+			if (row >= 8)
+				break;
+		}
+
 		int cx = cx_base + col * (but_W + but_W / 5);
-		int cy = cy_base + row * 24;
+		int cy = cy_base + row * 24 + (row / 2) * 8;
 
 		Fl_Button * but = new Fl_Button(cx, cy, but_W, 20);
-		but->copy_label(IT->first.c_str());
+		but->copy_label(name);
 		but->color(FREE_COL);
 		but->callback(button_callback, this);
 
 		button_grp->add(but);
 
-		row++;
-		if (row >= max_rows)
+		col++;
+		if (col >= 5)
 		{
-			row = 0;
-			col++;
+			col = 0;
+			row++;
+
+			if (row >= 8)
+				break;
 		}
+
+		last_name = name;
 	}
 
 	redraw();
