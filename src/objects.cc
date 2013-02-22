@@ -385,8 +385,8 @@ DebugPrintf("COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
 
 	// find the two linedefs which are nearest to the new line
 
-	int left_ld,   right_ld;
-	int left_side, right_side;
+	int left_ld = 0,   right_ld = 0;
+	int left_side = 0, right_side = 0;
 
 	if (! TwoNeighboringLineDefs(new_ld, v1, v2, &right_ld, &right_side, &left_ld, &left_side))
 	{
