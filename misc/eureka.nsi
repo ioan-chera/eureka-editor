@@ -31,7 +31,7 @@ Page instfiles
 
 ; The stuff to install
 
-Section "" ;No components page, name is not important
+Section
 
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
@@ -47,5 +47,8 @@ Section "" ;No components page, name is not important
 
   ; Write the installation path into the registry
   WriteRegStr HKLM "Software\EurekaEditor" "Install_Dir" "$INSTDIR"
+
+  ; Create the Start Menu link
+  createShortCut "$SMPROGRAMS\Eureka Doom Editor.lnk" "$INSTDIR\Eureka.exe"
   
 SectionEnd
