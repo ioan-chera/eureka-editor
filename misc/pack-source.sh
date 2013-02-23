@@ -57,6 +57,9 @@ cp -av $src/*.txt $dest
 mkdir $dest/docs
 cp -av $src/docs/*.* $dest/docs
 
+mkdir $dest/changelogs
+cp -av $src/changelogs/*.* $dest/changelogs
+
 #
 # all done
 #
