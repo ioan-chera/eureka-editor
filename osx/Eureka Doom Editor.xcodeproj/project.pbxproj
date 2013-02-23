@@ -57,7 +57,6 @@
 		FABBC110165B90280080245F /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0AD165B90280080245F /* m_strings.cc */; };
 		FABBC112165B90280080245F /* objects.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0B1165B90280080245F /* objects.cc */; };
 		FABBC113165B90280080245F /* r_grid.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0B4165B90280080245F /* r_grid.cc */; };
-		FABBC114165B90280080245F /* r_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0B6165B90280080245F /* r_misc.cc */; };
 		FABBC115165B90280080245F /* r_render.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0B8165B90280080245F /* r_render.cc */; };
 		FABBC117165B90280080245F /* selectn.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0BC165B90280080245F /* selectn.cc */; };
 		FABBC118165B90280080245F /* sys_debug.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0BE165B90280080245F /* sys_debug.cc */; };
@@ -234,8 +233,6 @@
 		FABBC0B3165B90280080245F /* objid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = objid.h; path = ../../src/objid.h; sourceTree = "<group>"; };
 		FABBC0B4165B90280080245F /* r_grid.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = r_grid.cc; path = ../../src/r_grid.cc; sourceTree = "<group>"; };
 		FABBC0B5165B90280080245F /* r_grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = r_grid.h; path = ../../src/r_grid.h; sourceTree = "<group>"; };
-		FABBC0B6165B90280080245F /* r_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = r_misc.cc; path = ../../src/r_misc.cc; sourceTree = "<group>"; };
-		FABBC0B7165B90280080245F /* r_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = r_misc.h; path = ../../src/r_misc.h; sourceTree = "<group>"; };
 		FABBC0B8165B90280080245F /* r_render.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = r_render.cc; path = ../../src/r_render.cc; sourceTree = "<group>"; };
 		FABBC0B9165B90280080245F /* r_render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = r_render.h; path = ../../src/r_render.h; sourceTree = "<group>"; };
 		FABBC0BC165B90280080245F /* selectn.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = selectn.cc; path = ../../src/selectn.cc; sourceTree = "<group>"; };
@@ -557,8 +554,6 @@
 			children = (
 				FABBC0B4165B90280080245F /* r_grid.cc */,
 				FABBC0B5165B90280080245F /* r_grid.h */,
-				FABBC0B6165B90280080245F /* r_misc.cc */,
-				FABBC0B7165B90280080245F /* r_misc.h */,
 				FABBC0B8165B90280080245F /* r_render.cc */,
 				FABBC0B9165B90280080245F /* r_render.h */,
 			);
@@ -840,7 +835,6 @@
 				FABBC110165B90280080245F /* m_strings.cc in Sources */,
 				FABBC112165B90280080245F /* objects.cc in Sources */,
 				FABBC113165B90280080245F /* r_grid.cc in Sources */,
-				FABBC114165B90280080245F /* r_misc.cc in Sources */,
 				FABBC115165B90280080245F /* r_render.cc in Sources */,
 				FABBC117165B90280080245F /* selectn.cc in Sources */,
 				FABBC118165B90280080245F /* sys_debug.cc in Sources */,
