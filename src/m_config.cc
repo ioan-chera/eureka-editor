@@ -427,6 +427,15 @@ static const opt_desc_t options[] =
 		&scroll_more
 	},
 
+	{	"swap_sidedefs",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Swap upper and lower sidedefs in the Linedef panel",
+		NULL,
+		&swap_sidedefs
+	},
+
 // -AJA- this may be better done with a 'mouse_button_order' string,
 //       where the default is "123", and user could have "321"
 //       or "132" or any other combination.

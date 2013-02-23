@@ -26,6 +26,9 @@
 #include "x_loop.h"
 
 
+// config item
+bool swap_sidedefs;
+
 //
 // Constructor
 //
@@ -89,10 +92,17 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 	Y += x_ofs->h() + 4;
 
+	int LX = X+8;
+	int UX = X+W-64-8;
+	    MX = MX-32;
+	
+	if (swap_sidedefs)
+		std::swap(LX, UX);
 
-	l_pic = new UI_Pic(X+8,      Y, 64, 64);
-	m_pic = new UI_Pic(MX-32,    Y, 64, 64);
-	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
+
+	l_pic = new UI_Pic(LX, Y, 64, 64);
+	m_pic = new UI_Pic(MX, Y, 64, 64);
+	u_pic = new UI_Pic(UX, Y, 64, 64);
 
 	l_pic->callback(tex_callback, this);
 	m_pic->callback(tex_callback, this);
@@ -101,9 +111,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += 65;
 
 
-	l_tex = new Fl_Input(X,      Y, 80, 20);
-	m_tex = new Fl_Input(MX-40,  Y, 80, 20);
-	u_tex = new Fl_Input(X+W-80, Y, 80, 20);
+	l_tex = new Fl_Input(LX-8, Y, 80, 20);
+	m_tex = new Fl_Input(MX-8, Y, 80, 20);
+	u_tex = new Fl_Input(UX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
 	m_tex->textsize(12);

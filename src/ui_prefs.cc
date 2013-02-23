@@ -275,6 +275,7 @@ public:
 	Fl_Choice *gen_smallscroll;
 	Fl_Choice *gen_largescroll;
 	Fl_Check_Button *gen_wheelscroll;
+	Fl_Check_Button *gen_swapsides;
 
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
@@ -405,6 +406,9 @@ UI_Preferences::UI_Preferences() :
 		{ Fl_Box* o = new Fl_Box(30, 340, 280, 35, "Other Stuff");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ gen_swapsides = new Fl_Check_Button(50, 382, 300, 25, " swap upper and lower sidedefs in Linedef panel");
+		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -831,6 +835,7 @@ void UI_Preferences::LoadValues()
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
+	gen_swapsides  ->value(swap_sidedefs ? 1 : 0);
 
 	// TODO: smallscroll, largescroll
 
@@ -899,6 +904,7 @@ void UI_Preferences::SaveValues()
 
 	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
+	swap_sidedefs           = gen_swapsides  ->value() ? true : false;
 
 	// TODO: smallscroll, largescroll
 
