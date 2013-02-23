@@ -28,11 +28,12 @@ Yadex or DEU.
 FEATURES
 
 -  Undo/Redo (multiple levels)
--  3D preview (which does not require hardware acceleration)
--  editable panels for things, linedefs, sectors (etc)
--  browser for textures, flats, things (etc)
--  key binding system
--  built-in nodes builder
+-  3D preview
+-  Low system requirements, no 3D card needed
+-  Editable panels for things, linedefs, sectors (etc)
+-  Browser for textures, flats, things (etc)
+-  Key binding system
+-  Built-in nodes builder
 
 
 SUPPORTED GAMES
@@ -66,8 +67,8 @@ XDG specs).  Eureka will need to be able to find an IWAD to run,
 if it cannot find any then the "Manage Wads" dialog will open up,
 allowing you to "Find" one (which is remembered for next time).
 
-You can open a PWAD file using the File/Open menu (the interface
-is very clunky at the moment) -- or create a new map with File/New.
+You can open a PWAD file using the File/Open menu command, or start
+a new map with File/New command.
 
 You can also specify the PWAD to edit on the command line, either
 on its own or with the -file option:
