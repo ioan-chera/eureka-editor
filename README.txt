@@ -153,6 +153,9 @@ Things Mode
 
 SPACE : add a new thing
 
+d : disconnect things at the same location
+m : move selected things to occupy the same location
+
 w : rotate things 45 degrees anti-clockwise 
 x : rotate things 45 degrees clockwise
 
