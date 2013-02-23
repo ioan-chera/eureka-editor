@@ -1,6 +1,6 @@
 
-EUREKA WISH-LIST
-================
+Eureka TODO / WISHLIST
+======================
 
 
 ______________________________________________________________________
@@ -28,7 +28,9 @@ General
 
    IDEA: include the recent files in there too
 
-+  Preferences: ability to change what mouse buttons do
++  Preferences:
+   -  ability to change what mouse buttons do
+   -  ability to change mouse move/turn speed in 3D view
 
 
 
