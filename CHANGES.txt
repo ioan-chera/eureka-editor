@@ -1,5 +1,5 @@
 
-CHANGES IN Eureka 0.95 (r###)
+CHANGES IN Eureka 0.95 (r922)
 =============================
 
 (Changes since 0.88 version, r605)
@@ -9,11 +9,11 @@ CHANGES IN Eureka 0.95 (r###)
 
 +  Key binding system, with GUI in preferences
 
-+  automatically create multiple backups of edited pwads
++  Windows port (32-bit), with an installer
+
++  Automatically back-up edited wads (multiple times)
 
 +  Status area on info bar (replaces map name)
-
-+  Windows port (32-bit), with an installer
 
 +  Log viewer
 
@@ -38,6 +38,7 @@ CHANGES IN Eureka 0.95 (r###)
 -  when a resource cannot be found, look in same dir as PWAD and IWAD
 -  when saving over a map, use existing location in the wad
 -  command line options: '-m' is shorthand for '--merge'
+-  preference setting to swap upper and lower in Linedef panel
 
 !  removed '192' grid size
 
