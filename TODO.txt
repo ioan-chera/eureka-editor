@@ -3,12 +3,6 @@ EUREKA WISH-LIST
 ================
 
 
-+  WIN32 port
-
-+  added lines inside a void island, when connect then lose the void
-   (a sector is added which is not wanted).
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -34,6 +28,8 @@ General
 
    IDEA: include the recent files in there too
 
++  Preferences: ability to change what mouse buttons do
+
 
 
 Documentation
@@ -47,6 +43,35 @@ Documentation
 
 Editing
 -------
+
++  added lines inside a void island, when connect then lose the void
+   (a sector is added which is not wanted).
+
++  grid drawing too slow when small step and zoomed out
+   (since we render a huge number of dots)
+
+   --> create an in-memory image (e.g. 64x64) of the dotty grid 
+       and blast it repeatedly to the window
+
++  texture alignment feature
+
+   - 'x' and 'y' keys align the lower / middle (both sides)
+   - 'X' and 'Y' keys align the upper (both sides)
+
+   - unpeg flags are NOT set, but affect vertical alignment
+
+   - always need to pick an adjoining sidedef to align with:
+     -  main factor is matching texture on chosen part
+     -  prefer same one-sideness or two-sideness
+     -  perhaps prefer a sidedef in the selection ??
+     -  perhaps a cost for sharp angles?
+     -  prefer the "left" side (tie breaker)
+
+   - when adjoining sidedef is in selection, need to process that
+     one first.  But detect loops!
+
+   - handle each side of linedef individually (i.e. do not process
+     one linedef at a time, process a SIDE at a time).
 
 
 
@@ -72,14 +97,8 @@ General
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
-+  ability to set other themes
-   (a) "none", "gtk+", "plastic"  [done]
-   (b) colors: default, bright, custom  [done]
-   (c) font size [too hard]
-   (d) implement OPT_COLOR [done]
-   (e) fix black scroll buttons in browser (etc?)
-
 +  configurable grid colors, 
+
    IDEA: grid has separate color for 64x64 flat alignment
 
 +  File / Test Map
@@ -106,6 +125,8 @@ General
 ?  Scripting language
 
 
+-  File / Delete Map
+
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
    (perhaps prefix with MENU_xxx)
 
@@ -123,8 +144,6 @@ General
 -  make sure Load/Export wad filename not already in master_dir
 
 -  PRINT key to make a screenshot of map or 3D view
-
--  grid drawing too slow when small step and zoomed out
 
 -  in EUREKA lump, if a path is under $HOME store it as "~/blah..."
    and expand that syntax on load.
@@ -205,27 +224,7 @@ IDEA: BA_MarkDelete() : remember an object for deletion, but only
 Editing
 -------
 
--  move 'x' split linedef to SPACE/INSERT, put vertex where mouse is
-
-+  texture alignment feature
-
-   - 'x' and 'y' keys align the lower / middle (both sides)
-   - 'X' and 'Y' keys align the upper (both sides)
-
-   - unpeg flags are NOT set, but affect vertical alignment
-
-   - always need to pick an adjoining sidedef to align with:
-     -  main factor is matching texture on chosen part
-     -  prefer same one-sideness or two-sideness
-     -  perhaps prefer a sidedef in the selection ??
-     -  perhaps a cost for sharp angles?
-     -  prefer the "left" side (tie breaker)
-
-   - when adjoining sidedef is in selection, need to process that
-     one first.  But detect loops!
-
-   - handle each side of linedef individually (i.e. do not process
-     one linedef at a time, process a SIDE at a time).
+-  move 'k' split linedef to SPACE/INSERT, put vertex where mouse is
 
 +  a menu for inserting shapes, especially N-sided polygon
 
@@ -382,9 +381,9 @@ Browser
 Game / Port Definitions
 -----------------------
 
-+  ability to "remove line 271" (etc)
-
 -  game-def setting: view_height
+
++  ability to "remove line 271" (etc)
 
 +  finish HacX support -- categorize the textures
 
