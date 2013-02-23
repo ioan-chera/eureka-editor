@@ -18,7 +18,7 @@ InstallDir $PROGRAMFILES\EurekaEditor
 InstallDirRegKey HKLM "Software\EurekaEditor" "Install_Dir"
 
 ; Request application privileges for Windows Vista
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 ;--------------------------------
 
