@@ -191,6 +191,8 @@ IDEA: after inserting a new object, allow moving another object
 Documentation
 -------------
 
+-  make a simple manpage for the debian package
+
 -  document texture browser (RIGHT click etc)
 
 -  built-in cheat sheet for mouse buttons and common keys
