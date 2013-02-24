@@ -259,10 +259,12 @@ static void Determine_HomeDir(const char *argv0)
 	char * path = StringNew(FL_PATH_MAX + 4);
 
 	if (fl_filename_expand(path, "$HOME/Library/Application Support/eureka-editor"))
-		home_dir = path;
+		home_dir = StringDup(path);
 
 	if (fl_filename_expand(path, "$HOME/Library/Caches/eureka-editor"))
-		cache_dir = path;
+		cache_dir = StringDup(path);
+
+	StringFree(path);
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);
