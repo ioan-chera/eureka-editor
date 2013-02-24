@@ -2,6 +2,2013 @@ REPOSITORY HISTORY
 ==================
 
 ------------------------------------------------------------------------
+r932 | ajapted | 2013-02-24 15:30:07 +1100 (Sun, 24 Feb 2013) | 2 lines
+
+Pack-source script: copy the 'osx' directory too.
+
+------------------------------------------------------------------------
+r931 | ajapted | 2013-02-24 15:25:07 +1100 (Sun, 24 Feb 2013) | 2 lines
+
+MacOSX: fixed bug in Determine_HomeDir() using 'path' twice.
+
+------------------------------------------------------------------------
+r930 | printz | 2013-02-23 21:26:12 +1100 (Sat, 23 Feb 2013) | 1 line
+
+Bumped PLIST version
+
+------------------------------------------------------------------------
+r929 | printz | 2013-02-23 21:13:44 +1100 (Sat, 23 Feb 2013) | 1 line
+
+Removed deleted file references in the xcode project
+
+------------------------------------------------------------------------
+r928 | ajapted | 2013-02-23 20:11:21 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+Win32 / installer: fixed NSIS script to require "admin" rights.
+
+------------------------------------------------------------------------
+r927 | ajapted | 2013-02-23 17:49:36 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+Pack-source script: updated for 'changelogs' folder.
+
+------------------------------------------------------------------------
+r926 | ajapted | 2013-02-23 17:48:30 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+Moved changelog documents from docs/ --> changelogs/
+
+------------------------------------------------------------------------
+r925 | ajapted | 2013-02-23 17:46:31 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+New top-level folder 'changelogs' -- no prizes for guessing what will go in there!
+
+------------------------------------------------------------------------
+r924 | ajapted | 2013-02-23 17:39:06 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+README.txt : updated keys for 'd' and 'm' in Things mode.
+
+------------------------------------------------------------------------
+r923 | ajapted | 2013-02-23 16:38:12 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r922 | ajapted | 2013-02-23 16:35:31 +1100 (Sat, 23 Feb 2013) | 3 lines
+
+Config: added 'swap_sidedefs' preference setting which swaps the upper
+and lower sidedefs in the Linedef panel (i.e. to Upper/Middle/Lower).
+
+------------------------------------------------------------------------
+r921 | ajapted | 2013-02-23 15:45:40 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+Debian: updated control info (mainly version #) for 0.95 release.
+
+------------------------------------------------------------------------
+r920 | ajapted | 2013-02-23 15:41:53 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+TODO.txt : another addition.
+
+------------------------------------------------------------------------
+r919 | ajapted | 2013-02-23 15:33:01 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+README.txt : minor changes to FEATURES section.
+
+------------------------------------------------------------------------
+r918 | ajapted | 2013-02-23 15:31:39 +1100 (Sat, 23 Feb 2013) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r917 | ajapted | 2013-02-22 19:27:32 +1100 (Fri, 22 Feb 2013) | 4 lines
+
+1. made UI_ChooseMap window shorter
+2. fixed weird order of "ExMx" level names in UI_ChooseMap 
+3. fixed unclickable bottom row of buttons in UI_OpenMap dialog
+
+------------------------------------------------------------------------
+r916 | ajapted | 2013-02-22 19:14:58 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Fixed the mode widget on info bar not having any color at startup.
+
+------------------------------------------------------------------------
+r915 | ajapted | 2013-02-22 19:08:35 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Tweaked background colors of some widgets for non-plastic themes.
+
+------------------------------------------------------------------------
+r914 | ajapted | 2013-02-22 17:26:14 +1100 (Fri, 22 Feb 2013) | 5 lines
+
+Made map buttons in ChooseMap and OpenMap dialogs be ordered differently,
+increasing across-ways instead of down in columns.  That's because I want
+the map buttons to be placed in predictable places (e.g. the layout does
+not change depending on number of maps present) -- for better usability.
+
+------------------------------------------------------------------------
+r913 | ajapted | 2013-02-22 16:58:48 +1100 (Fri, 22 Feb 2013) | 3 lines
+
+Partial work to make ChooseMap and OpenMap dialogs consistent w.r.t the
+map selection buttons -- same color, font size and positioning.
+
+------------------------------------------------------------------------
+r912 | ajapted | 2013-02-22 16:57:42 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Queiten another warning.
+
+------------------------------------------------------------------------
+r911 | ajapted | 2013-02-22 16:29:09 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Code: quieten a compiler warning.
+
+------------------------------------------------------------------------
+r910 | ajapted | 2013-02-22 15:49:54 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Dead code removal : SliceLineDef() and MakeRectangularNook().
+
+------------------------------------------------------------------------
+r909 | ajapted | 2013-02-22 15:44:42 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Makefiles: added -fno-strict-aliasing to compiler flags.
+
+------------------------------------------------------------------------
+r908 | ajapted | 2013-02-22 15:35:02 +1100 (Fri, 22 Feb 2013) | 2 lines
+
+Win32 / installer: create a shortcut in the Start Menu.
+
+------------------------------------------------------------------------
+r907 | ajapted | 2013-02-22 13:57:16 +1100 (Fri, 22 Feb 2013) | 3 lines
+
+View menu: removed the 'Toggle Fullscreen' command, the FLTK fullscreen()
+method fails miserably on every platform tested, especially Windows XP.
+
+------------------------------------------------------------------------
+r906 | ajapted | 2013-02-21 23:30:12 +1100 (Thu, 21 Feb 2013) | 3 lines
+
+Wad code: fixed some bugs when adding level lumps -- especially need to
+fix all the groups when the 'insert_point' is valid.
+
+------------------------------------------------------------------------
+r905 | ajapted | 2013-02-21 19:21:36 +1100 (Thu, 21 Feb 2013) | 4 lines
+
+Prefs: reset colors when user chooses the "Bright" setting.
+
+Unfortunately I don't know how to reset the "Default" colors....
+
+------------------------------------------------------------------------
+r904 | ajapted | 2013-02-21 19:13:10 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Prefs: when 'Custom Colors' is enabled, update the colors immediately.
+
+------------------------------------------------------------------------
+r903 | ajapted | 2013-02-21 19:06:02 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Prefs: fixed (I think) the color buttons not updating to a new color.
+
+------------------------------------------------------------------------
+r902 | ajapted | 2013-02-21 17:38:56 +1100 (Thu, 21 Feb 2013) | 4 lines
+
+Win32: when reading Install_Dir from the registry, ensure that the
+string is NUL-terminated (the MSDN docs mention that the string may
+have been stored without a trailing NUL).
+
+------------------------------------------------------------------------
+r901 | ajapted | 2013-02-21 17:28:21 +1100 (Thu, 21 Feb 2013) | 3 lines
+
+Win32: attempt to fix the problem reading the $Install_Dir registry value,
+which was returning (I think) UCS2 format unicode instead of ASCII.
+
+------------------------------------------------------------------------
+r900 | ajapted | 2013-02-21 17:16:54 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Renamed global var: 'local_dir' --> 'cache_dir'
+
+------------------------------------------------------------------------
+r899 | ajapted | 2013-02-21 17:14:53 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+MacOSX: set the 'cache_dir' to $HOME/Library/Caches/eureka-editor
+
+------------------------------------------------------------------------
+r898 | ajapted | 2013-02-21 16:49:06 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Removed dummy mods/foo.bar file.
+
+------------------------------------------------------------------------
+r897 | ajapted | 2013-02-21 16:48:42 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32 / nsis_build: I forgot to copy the executable, duh.
+
+------------------------------------------------------------------------
+r896 | ajapted | 2013-02-21 16:46:05 +1100 (Thu, 21 Feb 2013) | 4 lines
+
+Win32: reworked NSIS script and Makefile.xming so that we first create a
+replicate of the final directory structure.  Main reason is because we
+need to convert the text files to MSDOS/Windows format.
+
+------------------------------------------------------------------------
+r895 | ajapted | 2013-02-21 15:45:18 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+svn:ignore update
+
+------------------------------------------------------------------------
+r894 | ajapted | 2013-02-21 15:44:24 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Added empty mods/foo.bar file, to keep NSIS happy.
+
+------------------------------------------------------------------------
+r893 | ajapted | 2013-02-21 15:41:23 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Version bump to 0.95 -- for upcoming release.
+
+------------------------------------------------------------------------
+r892 | ajapted | 2013-02-21 15:40:43 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: some fixes for building the NSIS installer.
+
+------------------------------------------------------------------------
+r891 | ajapted | 2013-02-21 15:22:38 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: created obj_win32/glbsp folder.
+
+------------------------------------------------------------------------
+r890 | ajapted | 2013-02-21 15:21:47 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: hmmmm, PathAppend() doesn't seem available -- use strcat() instead.
+
+------------------------------------------------------------------------
+r889 | ajapted | 2013-02-21 15:16:00 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Fixed typo in last commit.
+
+------------------------------------------------------------------------
+r888 | ajapted | 2013-02-21 15:14:52 +1100 (Thu, 21 Feb 2013) | 4 lines
+
+Win32 port:
+1. fixed not appending our own folder name to %APPDATA%
+2. fixed a few compiling issues (e.g. MOD_SHIFT conflicts with windows headers)
+
+------------------------------------------------------------------------
+r887 | ajapted | 2013-02-21 14:56:52 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: more work on Makefile.xming, should be usable now (barring mistakes).
+
+------------------------------------------------------------------------
+r886 | ajapted | 2013-02-21 14:55:38 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: added folder for build objects: obj_win32/
+
+------------------------------------------------------------------------
+r885 | ajapted | 2013-02-21 14:54:00 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: created a resource file : eureka.rc
+
+------------------------------------------------------------------------
+r884 | ajapted | 2013-02-21 14:38:14 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Win32: tweaked name of install directory and registry key.
+
+------------------------------------------------------------------------
+r883 | ajapted | 2013-02-21 14:37:08 +1100 (Thu, 21 Feb 2013) | 3 lines
+
+Win32: started work on Makefile.xming -- uses a cross-compiler to make
+the Windows executable.
+
+------------------------------------------------------------------------
+r882 | ajapted | 2013-02-21 13:11:31 +1100 (Thu, 21 Feb 2013) | 5 lines
+
+Win32: implemented Determine_HomeDir() logic, which uses SHGetFolderPath
+to determine the %APPDATA% folder.
+
+Also have fallback for 'local_dir' value (needed for Linux).
+
+------------------------------------------------------------------------
+r881 | ajapted | 2013-02-21 12:57:05 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Use $local_dir (not $home_dir) as prefix for 'cache' and 'backups' folders.
+
+------------------------------------------------------------------------
+r880 | ajapted | 2013-02-21 12:51:57 +1100 (Thu, 21 Feb 2013) | 10 lines
+
+1. implemented WIN32 logic to read the "Install_Dir" registry key which
+   is created by the NSIS installer
+
+2. made FatalError() on WIN32 use the system MessageBox() function
+   when FLTK has not been initialized yet.
+
+3. added 'local_dir' global var, this will be the place for the cache
+   and backup folders -- i.e. non-roamable stuff.  On Linux it will
+   just be the same as $home_dir.
+
+------------------------------------------------------------------------
+r879 | ajapted | 2013-02-21 11:49:16 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r878 | ajapted | 2013-02-21 11:48:36 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Updated README.txt and CHANGES.txt -- preparing for a release.
+
+------------------------------------------------------------------------
+r877 | ajapted | 2013-02-21 11:35:15 +1100 (Thu, 21 Feb 2013) | 2 lines
+
+Checked in basic NSIS script to create a Win32 installer : eureka.nsi
+
+------------------------------------------------------------------------
+r876 | ajapted | 2013-02-19 22:23:44 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r875 | ajapted | 2013-02-19 22:16:21 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r874 | ajapted | 2013-02-19 22:09:43 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+Default Props panel: now hidden by default.
+
+------------------------------------------------------------------------
+r873 | ajapted | 2013-02-19 22:05:07 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+log viewer tweak
+
+------------------------------------------------------------------------
+r872 | ajapted | 2013-02-19 22:03:30 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Log Viewer: reduced MAX_LINES to 600, and made it jump to the bottom
+when adding a new line.
+
+------------------------------------------------------------------------
+r871 | ajapted | 2013-02-19 21:56:26 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+Print the current time (in the log file) at startup.
+
+------------------------------------------------------------------------
+r870 | ajapted | 2013-02-19 21:49:59 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+main.h : ensure we #include <windows.h> for WIN32 builds
+
+------------------------------------------------------------------------
+r869 | ajapted | 2013-02-19 21:38:58 +1100 (Tue, 19 Feb 2013) | 8 lines
+
+Log file rejigging:
+1. we always create a log file, default is $home_dir/logs.txt
+2. all messages are sent to stdout (unless --quiet is used)
+3. remember messages in memory until LogViewer window is opened
+4. after opening the log file, write saved messages to it
+5. after created LogViewer window, grab the saved messages
+6. tweaks to debug handling
+
+------------------------------------------------------------------------
+r868 | ajapted | 2013-02-19 18:12:36 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Config: added "-m" as short option for "--merge", and "-v" as short
+option for "--version".
+
+------------------------------------------------------------------------
+r867 | ajapted | 2013-02-19 17:56:53 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Removed 'r_misc' code files -- since we longer use anything in there
+(such as the SetWindowSize() function and ScrMaxX/Y variables).
+
+------------------------------------------------------------------------
+r866 | ajapted | 2013-02-19 16:53:54 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Log Viewer: added 'View/Logs' menu to show the log viewer, and don't show
+it automatically on start-up.
+
+------------------------------------------------------------------------
+r865 | ajapted | 2013-02-19 16:42:58 +1100 (Tue, 19 Feb 2013) | 4 lines
+
+Began working on a Log Viewing window.  So far the window is opened at
+startup, and it contains only an Fl_Browser to show the text.  Also the
+LogPrintf() function has been hacked up to send the lines into it.
+
+------------------------------------------------------------------------
+r864 | ajapted | 2013-02-19 16:17:15 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+Moved Int_TmpStr() function to lib_util.cc/h
+
+------------------------------------------------------------------------
+r863 | ajapted | 2013-02-19 15:26:19 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+minor menu tweak.
+
+------------------------------------------------------------------------
+r862 | ajapted | 2013-02-19 15:23:03 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+bindings.cfg : swapped grid keys, 'g' now goes smaller, 'G' goes bigger.
+
+------------------------------------------------------------------------
+r861 | ajapted | 2013-02-19 15:20:29 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+1. made sure every Beep() call has a message
+2. removed the no-message Beep() function
+
+------------------------------------------------------------------------
+r860 | ajapted | 2013-02-19 14:43:44 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+File menu: use CTRL-M for Manage Wads, CTRL-P for Preferences.
+
+------------------------------------------------------------------------
+r859 | ajapted | 2013-02-19 14:38:28 +1100 (Tue, 19 Feb 2013) | 5 lines
+
+Prefs / key binds:
+1. save the bindings when APPLY button is clicked
+2. fixed bug in M_SaveBindings() which skipped the general context
+3. changed ordering which contexts are displayed in the key browser
+
+------------------------------------------------------------------------
+r858 | ajapted | 2013-02-19 14:27:21 +1100 (Tue, 19 Feb 2013) | 2 lines
+
+bindings.cfg : moved PruneUnused from 'p' --> 'P' key
+
+------------------------------------------------------------------------
+r857 | ajapted | 2013-02-19 13:32:11 +1100 (Tue, 19 Feb 2013) | 7 lines
+
+Prefs / key binds:
+1. changed "Add" button into a "Copy" button, which copies the line
+   and automatically goes into grab-key mode
+2. moved "Bind" button to the top
+3. made UI_EditKey dialog give focus to the function name input
+4. fixed "Edit" button so arrow keys control the browser afterwards
+
+------------------------------------------------------------------------
+r856 | ajapted | 2013-02-19 13:03:53 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Prefs / key binds: implemented good method to detect conflicting key
+bindings -- will be shown in RED no matter how the list is sorted.
+
+------------------------------------------------------------------------
+r855 | ajapted | 2013-02-19 12:46:01 +1100 (Tue, 19 Feb 2013) | 3 lines
+
+Prefs / key binds: got the "Edit" and "Add" buttons working, using the
+values chosen in the UI_EditKey dialog.
+
+------------------------------------------------------------------------
+r854 | ajapted | 2013-02-18 23:10:56 +1100 (Mon, 18 Feb 2013) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r853 | ajapted | 2013-02-18 23:02:38 +1100 (Mon, 18 Feb 2013) | 2 lines
+
+UI_EditKey dialog: when validating func_name, check the brackets.
+
+------------------------------------------------------------------------
+r852 | ajapted | 2013-02-18 22:58:20 +1100 (Mon, 18 Feb 2013) | 2 lines
+
+UI_EditKey dialog: implemented ValidateFunc().
+
+------------------------------------------------------------------------
+r851 | ajapted | 2013-02-18 22:52:48 +1100 (Mon, 18 Feb 2013) | 4 lines
+
+1. fixed M_ParseKeyString() not handling hex values like "0x1234"
+2. added some synonyms to the M_ParseKeyString() key table, such as
+   "RETURN" for "ENTER", "INSERT" for "INS", etc...
+
+------------------------------------------------------------------------
+r850 | ajapted | 2013-02-18 22:41:53 +1100 (Mon, 18 Feb 2013) | 3 lines
+
+UI_EditKey dialog: implemented validation of the key name (drawn red
+when the name fails to parse).
+
+------------------------------------------------------------------------
+r849 | ajapted | 2013-02-18 22:23:51 +1100 (Mon, 18 Feb 2013) | 7 lines
+
+Prefs / key binds: show duplicated key bindings (same mode and key) using
+red text in the key browser.
+
+This only works when the two keys are together in the list (i.e. the list
+has been recently sorted, and the sort criterion was either KEY or MODE).
+It could be done better -- but this will suffice for now.
+
+------------------------------------------------------------------------
+r848 | ajapted | 2013-02-18 22:02:05 +1100 (Mon, 18 Feb 2013) | 2 lines
+
+Version bump to 0.92
+
+------------------------------------------------------------------------
+r847 | ajapted | 2013-02-18 16:39:04 +1100 (Mon, 18 Feb 2013) | 4 lines
+
+Prefs / key binds:
+1. setup the initial values for UI_EditKey dialog
+2. renamed 'dialog' --> 'prefs' in all UI_Preferences callbacks
+
+------------------------------------------------------------------------
+r846 | ajapted | 2013-02-18 16:27:00 +1100 (Mon, 18 Feb 2013) | 3 lines
+
+Prefs / key binds: bit more work on UI_EditKey dialog, fixed a few
+layout issues, added Run() method, implemented Close and OK buttons.
+
+------------------------------------------------------------------------
+r845 | ajapted | 2013-02-18 10:31:29 +1100 (Mon, 18 Feb 2013) | 2 lines
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+r844 | ajapted | 2013-02-18 10:27:00 +1100 (Mon, 18 Feb 2013) | 3 lines
+
+When saving a map, prefer existing location in the wad directory
+(i.e. if map already exists, don't place lumps at end of wad).
+
+------------------------------------------------------------------------
+r843 | ajapted | 2013-02-17 22:36:36 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Quantize: status message when cannot move some things / vertices.
+
+------------------------------------------------------------------------
+r842 | ajapted | 2013-02-17 22:31:18 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+CHANGELOG updated.
+
+------------------------------------------------------------------------
+r841 | ajapted | 2013-02-17 22:26:51 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Ensure displayed level name is always uppercase.
+
+------------------------------------------------------------------------
+r840 | ajapted | 2013-02-17 21:38:58 +1100 (Sun, 17 Feb 2013) | 6 lines
+
+Prefs / key binds: initial work on a UI_EditKey dialog, which allows
+the user to change the key, context and function of a binding.
+
+So far only the layout is done (code is output of Fluid with some
+tidying up).
+
+------------------------------------------------------------------------
+r839 | ajapted | 2013-02-17 21:04:03 +1100 (Sun, 17 Feb 2013) | 3 lines
+
+Prefs / key binds: added two utility functions: M_GetBindingInfo() and
+M_IsBindingFuncValid().
+
+------------------------------------------------------------------------
+r838 | ajapted | 2013-02-17 20:41:07 +1100 (Sun, 17 Feb 2013) | 6 lines
+
+Prefs / key binds:
+1. the ESCAPE key now cancels a bind-in-progress
+2. added some shortcut keys: ENTER for "Bind", INSERT and DELETE
+3. ensure key browser gets focus after these operations so user can
+   use up/down arrow keys to move through the list.
+
+------------------------------------------------------------------------
+r837 | ajapted | 2013-02-17 19:58:52 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+TODO.txt : update
+
+------------------------------------------------------------------------
+r836 | ajapted | 2013-02-17 19:55:59 +1100 (Sun, 17 Feb 2013) | 7 lines
+
+Prefs / key binds:
+1. no longer use the 'data' field of browser lines for bind indices,
+   since browser lines map one-to-one with the local bindings
+
+2. renamed 'awaiting_slot' --> 'awaiting_line' and made zero be the
+   "off" value
+
+------------------------------------------------------------------------
+r835 | ajapted | 2013-02-17 19:45:34 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Prefs / key binds: implemented the "Delete" button.
+
+------------------------------------------------------------------------
+r834 | ajapted | 2013-02-17 19:34:03 +1100 (Sun, 17 Feb 2013) | 3 lines
+
+Prefs / key binds: wrote M_AddLocalBinding() and M_DeleteLocalBinding()
+functions.
+
+------------------------------------------------------------------------
+r833 | ajapted | 2013-02-17 19:06:22 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Prefs / key bindings: message tweaks.
+
+------------------------------------------------------------------------
+r832 | ajapted | 2013-02-17 17:08:10 +1100 (Sun, 17 Feb 2013) | 8 lines
+
+Prefs / key bindings:
+1. made key browser higher (i.e. revert previous change, since I don't
+   think a message area will be needded)
+
+2. when waiting for a key press, give the whole preferences window
+   the keyboard focus (via Fl::focus).  This fixes certain keys not
+   being bindable (like SPACE).
+
+------------------------------------------------------------------------
+r831 | ajapted | 2013-02-17 16:44:00 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Prefs / key bindings: updated code for m_keys rejiggage.
+
+------------------------------------------------------------------------
+r830 | ajapted | 2013-02-17 15:47:23 +1100 (Sun, 17 Feb 2013) | 2 lines
+
+Prefs / key bindings: better error messages for M_ChangeBindingFunc().
+
+------------------------------------------------------------------------
+r829 | ajapted | 2013-02-17 15:42:41 +1100 (Sun, 17 Feb 2013) | 5 lines
+
+Prefs / key bindings: reworked code in m_keys, it now follows a model
+where the key bindings are copied and the dialog will query and change
+that copy.  The M_ApplyBindings() function will transfer them back.
+Also the M_ChangeBindingFunc() now returns an error string.
+
+------------------------------------------------------------------------
+r828 | ajapted | 2013-02-17 15:19:21 +1100 (Sun, 17 Feb 2013) | 4 lines
+
+Prefs / key bindings:
+1. renamed CONTEXT column --> MODE
+2. began work on "Add", "Delete" and "Load Defaults" buttons
+
+------------------------------------------------------------------------
+r827 | ajapted | 2013-02-17 14:54:56 +1100 (Sun, 17 Feb 2013) | 4 lines
+
+Prefs / key bindings:
+1. changed order of columns to: KEY | CONTEXT | FUNCTION
+2. added some space underneath the list for a message
+
+------------------------------------------------------------------------
+r826 | ajapted | 2013-02-17 14:05:03 +1100 (Sun, 17 Feb 2013) | 3 lines
+
+Preferences dialog: changed "OK" button to "Apply", and added a "Discard"
+button which does not keep the changes made.
+
+------------------------------------------------------------------------
+r825 | ajapted | 2013-02-16 15:15:28 +1100 (Sat, 16 Feb 2013) | 3 lines
+
+Prefs / key bindings: implemented the "Edit" button, with code to parse
+the entered string, find the command and store it + parameters.
+
+------------------------------------------------------------------------
+r824 | ajapted | 2013-02-16 13:37:41 +1100 (Sat, 16 Feb 2013) | 2 lines
+
+Prefs / key bindings: can actually change a key binding now.
+
+------------------------------------------------------------------------
+r823 | ajapted | 2013-02-16 12:44:02 +1100 (Sat, 16 Feb 2013) | 4 lines
+
+Prefs / key bindings: worked on ability to show <???> in the current
+binding (with background changed to yellow) and the next key-press will
+become the new binding -- or clear the binding on a mouse press.
+
+------------------------------------------------------------------------
+r822 | ajapted | 2013-02-16 11:46:55 +1100 (Sat, 16 Feb 2013) | 3 lines
+
+Prefs / key bindings: improved display of keys with modifiers, show the
+modifier in its own column (so that the bare keys are aligned).
+
+------------------------------------------------------------------------
+r821 | ajapted | 2013-02-16 11:36:23 +1100 (Sat, 16 Feb 2013) | 4 lines
+
+Prefs / key bindings: implemented the different sorting modes -- clicking
+on the header buttons will select that as the sort column, or toggle
+reverse mode if it already was.
+
+------------------------------------------------------------------------
+r820 | ajapted | 2013-02-16 11:16:32 +1100 (Sat, 16 Feb 2013) | 2 lines
+
+Key handling: implemented a key compare function: M_KeyCmp()
+
+------------------------------------------------------------------------
+r819 | ajapted | 2013-02-16 11:05:17 +1100 (Sat, 16 Feb 2013) | 5 lines
+
+Prefs / key bindings: added M_SortBindingsToVec() which sorts the key
+bindings (actually an int vector) for display by the key browser.
+Different sorting methods are not implemented yet.
+
+
+------------------------------------------------------------------------
+r818 | ajapted | 2013-02-16 10:31:02 +1100 (Sat, 16 Feb 2013) | 2 lines
+
+Key handling: renamed 'global' context --> 'general'.
+
+------------------------------------------------------------------------
+r817 | ajapted | 2013-02-15 23:08:46 +1100 (Fri, 15 Feb 2013) | 2 lines
+
+Prefs / key bindings: renamed 'GROUP' column --> 'CONTEXT'
+
+------------------------------------------------------------------------
+r816 | ajapted | 2013-02-15 22:36:57 +1100 (Fri, 15 Feb 2013) | 2 lines
+
+Fluid work : prefs2.fl 
+
+------------------------------------------------------------------------
+r815 | ajapted | 2013-02-15 22:36:05 +1100 (Fri, 15 Feb 2013) | 2 lines
+
+Prefs / key bindings: partial work on "Bind" and "Edit" buttons.
+
+------------------------------------------------------------------------
+r814 | ajapted | 2013-02-15 22:01:55 +1100 (Fri, 15 Feb 2013) | 3 lines
+
+Prefs / Key bindings: added buttons above the browser which show what
+each column is (and later will allow sorting by that column).
+
+------------------------------------------------------------------------
+r813 | ajapted | 2013-02-15 21:20:01 +1100 (Fri, 15 Feb 2013) | 3 lines
+
+Preference dialog: worked on a new "Keys" tab, which will allow the user
+to edit the key bindings.  So far it can only display them.
+
+------------------------------------------------------------------------
+r812 | ajapted | 2013-02-15 21:18:28 +1100 (Fri, 15 Feb 2013) | 3 lines
+
+Key handling: added M_StringForBinding() function to format a binding
+into a string suitable for an Fl_Browser widget.
+
+------------------------------------------------------------------------
+r811 | ajapted | 2013-02-15 19:39:32 +1100 (Fri, 15 Feb 2013) | 3 lines
+
+bindings.cfg : minor change: use '/' to separate flags letters for
+LIN_SelectPath and SEC_SelectGroup.
+
+------------------------------------------------------------------------
+r810 | ajapted | 2013-02-15 17:16:16 +1100 (Fri, 15 Feb 2013) | 2 lines
+
+UI_Scroll: implemented the Scroll() method.
+
+------------------------------------------------------------------------
+r809 | ajapted | 2013-02-14 22:43:42 +1100 (Thu, 14 Feb 2013) | 2 lines
+
+Browser: started work to fix keyboard scrolling....
+
+------------------------------------------------------------------------
+r808 | ajapted | 2013-02-14 22:21:47 +1100 (Thu, 14 Feb 2013) | 4 lines
+
+Fixed editor mode getting out-of-sync with the GUI (side panel etc) after
+loading a map with no user state.
+
+
+------------------------------------------------------------------------
+r807 | ajapted | 2013-02-14 22:17:14 +1100 (Thu, 14 Feb 2013) | 3 lines
+
+Fixed SNAP button which could become out-of-sync with the editor
+after loading a map with no user state.
+
+------------------------------------------------------------------------
+r806 | ajapted | 2013-02-14 22:11:40 +1100 (Thu, 14 Feb 2013) | 4 lines
+
+File / OpenMap: don't parse the EUREKA lump (and reload the IWAD and
+resource files) when the current pwad has not changed.
+
+
+------------------------------------------------------------------------
+r805 | ajapted | 2013-02-14 21:56:13 +1100 (Thu, 14 Feb 2013) | 4 lines
+
+Added bindings for CTRL + SPACE and CTRL + INSERT to re-enable the
+feature of forcing a new sector to be created (rather than correcting
+an existing one).  Thanks to d1337r for the bug report.
+
+------------------------------------------------------------------------
+r804 | ajapted | 2013-02-05 14:32:43 +1100 (Tue, 05 Feb 2013) | 6 lines
+
+Added an 'error_mode' field to Editor_State_t -- when enabled, the
+current selection is drawn in bright red instead of blue.  This will
+be used later by the error detection dialog.
+
+UI_Canvas: factored some common code --> DrawThing() method.
+
+------------------------------------------------------------------------
+r803 | ajapted | 2013-02-05 13:58:06 +1100 (Tue, 05 Feb 2013) | 2 lines
+
+CHANGELOG update and rearrangement.
+
+------------------------------------------------------------------------
+r802 | ajapted | 2013-02-05 13:55:23 +1100 (Tue, 05 Feb 2013) | 2 lines
+
+Scale Objects dialog: finished ability to scale Z of sectors.
+
+------------------------------------------------------------------------
+r801 | ajapted | 2013-02-05 11:53:13 +1100 (Tue, 05 Feb 2013) | 3 lines
+
+Scale Objects dialog: partial work to introduce a 'Z' component (hidden
+for modes where it doesn't make sense -- which is most of them).
+
+------------------------------------------------------------------------
+r800 | ajapted | 2013-02-05 11:51:26 +1100 (Tue, 05 Feb 2013) | 2 lines
+
+Checks.txt : minor addition
+
+------------------------------------------------------------------------
+r799 | ajapted | 2013-02-04 14:10:36 +1100 (Mon, 04 Feb 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r798 | ajapted | 2013-02-04 14:08:00 +1100 (Mon, 04 Feb 2013) | 3 lines
+
+Implemented new 'PruneUnused' command -- remove unused sectors, sidedefs
+and vertices.  Default binding is on 'p' key.
+
+------------------------------------------------------------------------
+r797 | ajapted | 2013-02-03 22:03:16 +1100 (Sun, 03 Feb 2013) | 2 lines
+
+Yet another CHANGELOG update.
+
+------------------------------------------------------------------------
+r796 | ajapted | 2013-02-03 22:02:45 +1100 (Sun, 03 Feb 2013) | 4 lines
+
+1. TH_Merge and VERT_Merge: support one selected + highlight
+2. VERT_Merge: don't re-select the final vertex -- index can be wrong
+   (due to deletions).
+
+------------------------------------------------------------------------
+r795 | ajapted | 2013-02-03 20:34:38 +1100 (Sun, 03 Feb 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r794 | ajapted | 2013-02-03 20:30:13 +1100 (Sun, 03 Feb 2013) | 4 lines
+
+Side panels: show blue background of 'Nombre' when a single object
+is selected.  This is another visual cue that something is selected,
+especially when that object is off-screen.
+
+------------------------------------------------------------------------
+r793 | ajapted | 2013-02-03 19:09:00 +1100 (Sun, 03 Feb 2013) | 4 lines
+
+Fixed bug not clearing an after-drag selection when selecting a group
+of objects via the outline box.
+
+
+------------------------------------------------------------------------
+r792 | ajapted | 2013-02-03 17:19:15 +1100 (Sun, 03 Feb 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r791 | ajapted | 2013-02-03 17:18:08 +1100 (Sun, 03 Feb 2013) | 3 lines
+
+LIN_MergeTwo: support one selected + one highlighted, and merge the
+second linedef into the first (consistent with SEC_Merge).
+
+------------------------------------------------------------------------
+r790 | ajapted | 2013-02-03 17:14:10 +1100 (Sun, 03 Feb 2013) | 2 lines
+
+SEC_Merge: support one selected + one highlighted.
+
+------------------------------------------------------------------------
+r789 | ajapted | 2013-02-01 22:37:22 +1100 (Fri, 01 Feb 2013) | 2 lines
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+r788 | ajapted | 2013-02-01 22:35:21 +1100 (Fri, 01 Feb 2013) | 4 lines
+
+When merging vertices (especially the one being dragged), check for
+the situation where two linedefs would end up overlapping, if so then
+delete one of them (the one connected to the dragged vertex).
+
+------------------------------------------------------------------------
+r787 | ajapted | 2013-02-01 15:50:11 +1100 (Fri, 01 Feb 2013) | 3 lines
+
+Beep messages: ensure first letter is uppercase, also simplified a few
+of the messages.
+
+------------------------------------------------------------------------
+r786 | ajapted | 2013-02-01 15:41:22 +1100 (Fri, 01 Feb 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r785 | ajapted | 2013-02-01 15:39:43 +1100 (Fri, 01 Feb 2013) | 3 lines
+
+CMD_CopyProperties: implemented 2S --> 2S for linedef textures, with
+logic to "intelligently" decide which sides to copy.
+
+------------------------------------------------------------------------
+r784 | ajapted | 2013-02-01 15:20:28 +1100 (Fri, 01 Feb 2013) | 2 lines
+
+CMD_CopyProperties: implemented 2S --> 1S case for linedefs.
+
+------------------------------------------------------------------------
+r783 | ajapted | 2013-02-01 15:01:14 +1100 (Fri, 01 Feb 2013) | 2 lines
+
+CMD_CopyProperties: partial work to copy textures between linedefs.
+
+------------------------------------------------------------------------
+r782 | ajapted | 2013-02-01 12:00:36 +1100 (Fri, 01 Feb 2013) | 3 lines
+
+Fixed jerky RMB scrolling at large zoom factors, done by changing the
+grid fields 'orig_x' and 'orig_y' from int --> double.
+
+------------------------------------------------------------------------
+r781 | ajapted | 2013-01-30 22:32:28 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Yet another TODO / CHANGELOG update.
+
+------------------------------------------------------------------------
+r780 | ajapted | 2013-01-30 22:30:55 +1100 (Wed, 30 Jan 2013) | 3 lines
+
+Fixed (I hope) ClosestLine_XXX() and OppositeLineDef() functions so that
+they can never hit a vertex, by offsetting the (x,y) coord by 0.5 units.  
+
+------------------------------------------------------------------------
+r779 | ajapted | 2013-01-30 22:07:02 +1100 (Wed, 30 Jan 2013) | 3 lines
+
+LineDef panel: fixed CRASH when clicking on a flag button and no linedef
+was selected.
+
+------------------------------------------------------------------------
+r778 | ajapted | 2013-01-30 21:37:46 +1100 (Wed, 30 Jan 2013) | 3 lines
+
+LineDef panel: made the flag widgets ("upper unpeg" etc) easier to
+click on, the effective width covers the text (not just the checkbox).
+
+------------------------------------------------------------------------
+r777 | ajapted | 2013-01-30 21:15:37 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+CHANGELOG and TODO updated.
+
+------------------------------------------------------------------------
+r776 | ajapted | 2013-01-30 21:10:48 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Config: added 'backup_max_files' and 'backup_max_space' vars.
+
+------------------------------------------------------------------------
+r775 | ajapted | 2013-01-30 21:04:28 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Removed the 'escape_key_quits' config var (and from Prefs dialog).
+
+------------------------------------------------------------------------
+r774 | ajapted | 2013-01-30 20:55:42 +1100 (Wed, 30 Jan 2013) | 1 line
+
+tweak
+------------------------------------------------------------------------
+r773 | ajapted | 2013-01-30 20:55:22 +1100 (Wed, 30 Jan 2013) | 4 lines
+
+Backup system: implemented the directory scanning (to get the low and
+high values which are present).  The backup system is enabled now, and
+it seems to be working OK.
+
+------------------------------------------------------------------------
+r772 | ajapted | 2013-01-30 19:58:56 +1100 (Wed, 30 Jan 2013) | 4 lines
+
+Backup system: implemented logic to limit backups (of a certain wad)
+to a certain space limit -- currently hard-coded as 100 MB.
+
+
+------------------------------------------------------------------------
+r771 | ajapted | 2013-01-30 16:57:44 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Wad code: set offset to 0 for zero-length lumps.
+
+------------------------------------------------------------------------
+r770 | ajapted | 2013-01-30 15:52:49 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r769 | ajapted | 2013-01-30 15:44:25 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Wad code: small optimisation for zero-length lumps.
+
+------------------------------------------------------------------------
+r768 | ajapted | 2013-01-30 15:37:12 +1100 (Wed, 30 Jan 2013) | 4 lines
+
+Wad code: implemented new PositionForWrite() logic which tries to use
+free space in the wad file.  We also check that a lump did not write
+more than the 'max_size' value given to AddLump().
+
+------------------------------------------------------------------------
+r767 | ajapted | 2013-01-30 14:29:24 +1100 (Wed, 30 Jan 2013) | 3 lines
+
+Wad code: implemented private FindFreeSpace() method, which can find
+an unused area of a given size.
+
+------------------------------------------------------------------------
+r766 | ajapted | 2013-01-30 13:01:17 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+status message tweak.
+
+------------------------------------------------------------------------
+r765 | ajapted | 2013-01-30 12:59:08 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+Made the status area more distinct: bold font, vertical divider.
+
+------------------------------------------------------------------------
+r764 | ajapted | 2013-01-30 12:50:14 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+CMD_BuildNodes: update status area.
+
+------------------------------------------------------------------------
+r763 | ajapted | 2013-01-30 12:11:49 +1100 (Wed, 30 Jan 2013) | 2 lines
+
+TODO: added plan to handle multiple files.
+
+------------------------------------------------------------------------
+r762 | printz | 2013-01-29 21:53:11 +1100 (Tue, 29 Jan 2013) | 3 lines
+
+osx port:
+* Updated project to Xcode 4.6
+* Removed user-specific files from inside *.xcodeproj
+------------------------------------------------------------------------
+r761 | printz | 2013-01-29 21:52:55 +1100 (Tue, 29 Jan 2013) | 4 lines
+
+osx port:
+* Removed dead code and comments
+* Added descriptive comments
+* Updated version info and copyright formatting in the native automatic About box
+------------------------------------------------------------------------
+r760 | ajapted | 2013-01-29 17:16:28 +1100 (Tue, 29 Jan 2013) | 3 lines
+
+Backup system: the main M_BackupWad() logic is done, but some helper
+functions are not implemented yet -- namely Backup_ScanDir().
+
+------------------------------------------------------------------------
+r759 | ajapted | 2013-01-29 16:43:06 +1100 (Tue, 29 Jan 2013) | 7 lines
+
+Began work on the Back-up system, which will save a copy of the wad
+into the "backups" folder in $home_dir whenever the user saves the
+map (CTRL-S) or exports the map into an existing wad.
+
+This commit merely (a) creates the "backups" folder and (b) adds the
+calls to M_BackupWad() at the appropriate places.
+
+------------------------------------------------------------------------
+r758 | ajapted | 2013-01-29 16:29:31 +1100 (Tue, 29 Jan 2013) | 3 lines
+
+Wad class: implemented a Backup() method.
+
+
+------------------------------------------------------------------------
+r757 | ajapted | 2013-01-29 14:58:32 +1100 (Tue, 29 Jan 2013) | 2 lines
+
+Checked in the MacOS X port source, created by Ioan Chera.
+
+------------------------------------------------------------------------
+r756 | ajapted | 2013-01-29 14:56:56 +1100 (Tue, 29 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r755 | ajapted | 2013-01-28 16:45:37 +1100 (Mon, 28 Jan 2013) | 2 lines
+
+After loading or saving a map, show a message in status bar.
+
+------------------------------------------------------------------------
+r754 | ajapted | 2013-01-28 14:47:17 +1100 (Mon, 28 Jan 2013) | 3 lines
+
+Fixed bug parsing user state for maps (.dat files), which was not
+handling strings properly.
+
+------------------------------------------------------------------------
+r753 | ajapted | 2013-01-28 14:11:29 +1100 (Mon, 28 Jan 2013) | 2 lines
+
+bindings.cfg : removed ESC key (bound to Quit).
+
+------------------------------------------------------------------------
+r752 | ajapted | 2013-01-28 11:20:25 +1100 (Mon, 28 Jan 2013) | 2 lines
+
+bindings.cfg : fixed LIN_Flip key, which clashed with SNAP toggle key.
+
+------------------------------------------------------------------------
+r751 | ajapted | 2013-01-26 14:06:30 +1100 (Sat, 26 Jan 2013) | 2 lines
+
+Made Editor_State_t be a struct (not a class).
+
+------------------------------------------------------------------------
+r750 | ajapted | 2013-01-26 14:01:44 +1100 (Sat, 26 Jan 2013) | 3 lines
+
+Silenced 64-bit compiler warnings (loss of precision when assigning a 64-bit
+value to a 32-bit variable or parameter).
+
+------------------------------------------------------------------------
+r749 | ajapted | 2013-01-26 13:55:34 +1100 (Sat, 26 Jan 2013) | 2 lines
+
+Fixed a uninitialized variable bug, and some 64-bit tweaks.
+
+------------------------------------------------------------------------
+r748 | ajapted | 2013-01-26 13:39:55 +1100 (Sat, 26 Jan 2013) | 2 lines
+
+Render3D: when changing gamma, show new value in status area.
+
+------------------------------------------------------------------------
+r747 | ajapted | 2013-01-25 09:43:00 +1100 (Fri, 25 Jan 2013) | 2 lines
+
+Wrote some notes about possible scripting API : misc/Scripting.txt
+
+------------------------------------------------------------------------
+r746 | ajapted | 2013-01-24 21:42:16 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+debug tweak.
+
+------------------------------------------------------------------------
+r745 | ajapted | 2013-01-24 21:37:41 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r744 | ajapted | 2013-01-24 21:36:59 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r743 | ajapted | 2013-01-24 21:36:27 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+When executing key bindings, clear status area if no error occurs.
+(Implementation detail: we clear it beforehand).
+
+------------------------------------------------------------------------
+r742 | ajapted | 2013-01-24 21:32:17 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+SEC_Merge: beep at user if only 1 sector was selected.
+
+------------------------------------------------------------------------
+r741 | ajapted | 2013-01-24 16:56:20 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Version bump, in honor of new key binding system (all hard-coded keys,
+except for digits and the menus, are now handled via key bindings).
+
+------------------------------------------------------------------------
+r740 | ajapted | 2013-01-24 15:57:37 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Fixed missing "else" in R3D_Set() function.
+
+------------------------------------------------------------------------
+r739 | ajapted | 2013-01-24 15:56:43 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Implemented new '3D_Set' binding command.
+
+------------------------------------------------------------------------
+r738 | ajapted | 2013-01-24 15:55:02 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Fixed some bugs in CMD_Set().
+
+------------------------------------------------------------------------
+r737 | ajapted | 2013-01-24 15:43:48 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+1. implemented '3D_Toggle' binding command
+2. removed the now-dead Render3D_Key() function
+
+------------------------------------------------------------------------
+r736 | ajapted | 2013-01-24 15:42:38 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Tidying of the CMD_Toggle() and CMD_Set() code.
+
+------------------------------------------------------------------------
+r735 | ajapted | 2013-01-24 15:30:16 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+bindings.cfg : fixed wrong comment syntax
+
+------------------------------------------------------------------------
+r734 | ajapted | 2013-01-24 15:28:09 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Implemented more render binding commands: '3D_Up', '3D_Down', '3D_Turn',
+'3D_DropToFloor' and '3D_Gamma'.
+
+------------------------------------------------------------------------
+r733 | ajapted | 2013-01-24 14:43:31 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Implemented four binding commands for renderer: '3D_Forward', '3D_Backward',
+'3D_Left' and '3D_Right'.
+
+------------------------------------------------------------------------
+r732 | ajapted | 2013-01-24 14:23:17 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Fixed missing 'SEC_SwapFlats' registration (I must have clobbered it
+accidentally in an earlier commit).
+
+------------------------------------------------------------------------
+r731 | ajapted | 2013-01-24 14:14:17 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+1. implemented 'JumpToObject' binding command
+2. removed the now-dead Editor_Key() code
+
+------------------------------------------------------------------------
+r730 | ajapted | 2013-01-24 13:31:03 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Added Editor_DigitKey() function to handle digit keys (which do not
+use the key binding system).
+
+------------------------------------------------------------------------
+r729 | ajapted | 2013-01-24 13:24:18 +1100 (Thu, 24 Jan 2013) | 3 lines
+
+Implemented "grid" and "snap" variables for 'Toggle' and 'Set' binding
+commands.
+
+------------------------------------------------------------------------
+r728 | ajapted | 2013-01-24 13:11:53 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Implemented 'GRID_Step' binding command.
+
+------------------------------------------------------------------------
+r727 | ajapted | 2013-01-24 12:53:24 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Implemented 'Zoom' binding command.
+
+------------------------------------------------------------------------
+r726 | ajapted | 2013-01-24 12:46:03 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Implemented 'ZoomWholeMap' and 'ZoomSelection' binding commands.
+
+------------------------------------------------------------------------
+r725 | ajapted | 2013-01-24 12:32:17 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Tweaked a few bits of 'long' usage to prevent warnings.
+
+------------------------------------------------------------------------
+r724 | ajapted | 2013-01-24 12:24:56 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Changed rgb_color_t typedef to use u32_t (was: unsigned long).
+
+------------------------------------------------------------------------
+r723 | ajapted | 2013-01-24 12:23:49 +1100 (Thu, 24 Jan 2013) | 2 lines
+
+Removed unused centre_of_sectors() function.
+
+------------------------------------------------------------------------
+r722 | ajapted | 2013-01-24 12:18:50 +1100 (Thu, 24 Jan 2013) | 5 lines
+
+1. renamed IsLineDefInside() --> LineCrossesBox(), tidied up the code
+   and replaced 'long' usage
+2. removed unused GetObjectCoords() function
+3. replaced 'long' usage in GetOppositeSector()
+
+------------------------------------------------------------------------
+r721 | ajapted | 2013-01-23 23:57:42 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+Implemented three browser-related binding commands, and removed the
+no-longer-needed Browser_Key() function.
+
+------------------------------------------------------------------------
+r720 | ajapted | 2013-01-23 20:46:04 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. implemented 'CMD_SetBrowser' binding command
+2. removed dead Global_Key() function
+
+------------------------------------------------------------------------
+r719 | ajapted | 2013-01-23 19:48:26 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. implemented 'LIN_SelectPath' binding command
+2. removed the dead Thing_Key / Sector_Key (etc) functions
+
+------------------------------------------------------------------------
+r718 | ajapted | 2013-01-23 19:28:16 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. implemented 'LIN_Flip' and 'LIN_SplitHalf' binding commands
+2. changed binding of LIN_SplitHalf from 'x' --> 'k'
+
+------------------------------------------------------------------------
+r717 | ajapted | 2013-01-23 19:12:53 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. Use ExecuteCommand() for some menu functions
+2. added some Beep() error messages
+
+------------------------------------------------------------------------
+r716 | ajapted | 2013-01-23 16:53:24 +1100 (Wed, 23 Jan 2013) | 2 lines
+
+Implemented 'CopyProperties' binding command.
+
+------------------------------------------------------------------------
+r715 | ajapted | 2013-01-23 16:45:04 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. renamed EXEC_Result --> EXEC_Errno
+2. set EXEC_Errno to 1 in the Beep() error function
+
+------------------------------------------------------------------------
+r714 | ajapted | 2013-01-23 16:40:45 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+1. added EXEC_Result global, for testing if a command failed
+2. implemented an ExecuteCommand() function
+
+------------------------------------------------------------------------
+r713 | ajapted | 2013-01-23 15:08:41 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+SEC_SelectGroup : implemented new 'w' flag, perform a walking test
+(i.e. don't spread selection across lines which block the player).
+
+------------------------------------------------------------------------
+r712 | ajapted | 2013-01-23 14:56:10 +1100 (Wed, 23 Jan 2013) | 4 lines
+
+Implemented 'SEC_SelectGroup' binding command, and expanding the matching
+capabilities to support matching the light, tag and special values, and
+also have a flag to allow passing through doors.
+
+------------------------------------------------------------------------
+r711 | ajapted | 2013-01-23 12:59:05 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+Support "3d" and "browser" variables with 'Toggle' and 'Set' binding
+commands.  This replaces the 'Toggle3D' and 'ToggleBrowser' commands.
+
+------------------------------------------------------------------------
+r710 | ajapted | 2013-01-23 12:31:05 +1100 (Wed, 23 Jan 2013) | 2 lines
+
+Implemented 'SEC_Floor' and 'SEC_Ceil' binding commands.
+
+------------------------------------------------------------------------
+r709 | ajapted | 2013-01-23 11:13:31 +1100 (Wed, 23 Jan 2013) | 2 lines
+
+Implemented 'GoToCamera' and 'PlaceCamera' binding commands.
+
+------------------------------------------------------------------------
+r708 | ajapted | 2013-01-23 10:57:03 +1100 (Wed, 23 Jan 2013) | 3 lines
+
+Implemented new 'Set' binding command, this can set a variable to a
+particular value.  Only one variable "obj_nums" is supported so far.
+
+------------------------------------------------------------------------
+r707 | ajapted | 2013-01-23 10:48:00 +1100 (Wed, 23 Jan 2013) | 4 lines
+
+Implemented 'Toggle' binding command, which takes a variable name to
+toggle.  Current variables are "obj_nums" and "skills".  This replaces
+the previous 'ToggleObjNums' command.
+
+------------------------------------------------------------------------
+r706 | ajapted | 2013-01-22 22:59:16 +1100 (Tue, 22 Jan 2013) | 2 lines
+
+Implemented the 'Delete' binding command, with optional "keep" parameter.
+
+------------------------------------------------------------------------
+r705 | ajapted | 2013-01-22 22:57:14 +1100 (Tue, 22 Jan 2013) | 4 lines
+
+Fixed two bugs in M_ParseKeyString() :-
+1. the "SHIFT-" modifier had the wrong value
+2. keys found in the table did not apply any modifier mask
+
+------------------------------------------------------------------------
+r704 | ajapted | 2013-01-22 22:48:47 +1100 (Tue, 22 Jan 2013) | 3 lines
+
+Keys: fixed bug in M_TranslateKey() -- don't use ispunct() on keys which
+are not ASCII (especially values like FL_BackSpace).
+
+------------------------------------------------------------------------
+r703 | ajapted | 2013-01-22 18:56:04 +1100 (Tue, 22 Jan 2013) | 3 lines
+
+1. removed last vestiges of 'keymod_e' and KM_XXX
+2. renamed some editor functions to have "Editor_" prefix
+
+------------------------------------------------------------------------
+r702 | ajapted | 2013-01-22 18:21:50 +1100 (Tue, 22 Jan 2013) | 5 lines
+
+1. define PACKEDATTR in sys_macro.h -- source was Chocolate-Doom
+
+2. added PACKEDATTR macro to all the raw on-disk structures, which
+   may be needed on certain systems (especially 64-bit systems).
+
+------------------------------------------------------------------------
+r701 | ajapted | 2013-01-22 14:26:53 +1100 (Tue, 22 Jan 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r700 | ajapted | 2013-01-22 14:26:11 +1100 (Tue, 22 Jan 2013) | 2 lines
+
+Implemented 'Insert' binding command.
+
+------------------------------------------------------------------------
+r699 | ajapted | 2013-01-22 14:08:29 +1100 (Tue, 22 Jan 2013) | 3 lines
+
+Implemented a 'Nothing' command binding, as the name suggests it does
+nothing at all -- possibly more useful than it sounds.
+
+------------------------------------------------------------------------
+r698 | ajapted | 2013-01-22 14:04:56 +1100 (Tue, 22 Jan 2013) | 3 lines
+
+Implemented 'Merge' binding command for things, which places all the
+selected things at a single location.
+
+------------------------------------------------------------------------
+r697 | ajapted | 2013-01-22 12:21:29 +1100 (Tue, 22 Jan 2013) | 3 lines
+
+Things: new logic for 'Disconnect' -- the semantics are to move apart
+things at the same location (or very close).
+
+------------------------------------------------------------------------
+r696 | ajapted | 2013-01-22 10:44:39 +1100 (Tue, 22 Jan 2013) | 2 lines
+
+Added or tweaked some Beep() messages.
+
+------------------------------------------------------------------------
+r695 | ajapted | 2013-01-22 10:43:28 +1100 (Tue, 22 Jan 2013) | 4 lines
+
+Things: worked on 'Disconnect' for things, which will separate things
+which are overlapping each other.  The logic in this commit is rather
+flawed though...
+
+------------------------------------------------------------------------
+r694 | ajapted | 2013-01-22 09:55:10 +1100 (Tue, 22 Jan 2013) | 4 lines
+
+Implemented 'Merge' and 'Disconnect' binding commands, which are used
+for every mode ("global" context).  These replace the mode-specific
+binding commands like 'LIN_MergeTwo'.
+
+------------------------------------------------------------------------
+r693 | ajapted | 2013-01-22 09:49:08 +1100 (Tue, 22 Jan 2013) | 1 line
+
+minor tweak
+------------------------------------------------------------------------
+r692 | ajapted | 2013-01-21 13:09:26 +1100 (Mon, 21 Jan 2013) | 4 lines
+
+Key handling / M_SaveBindings:
+1. fixed bug writing an 'UNBOUND' key multiple times
+2. aesthetic change : no contiguous blank lines
+
+------------------------------------------------------------------------
+r691 | ajapted | 2013-01-21 12:59:36 +1100 (Mon, 21 Jan 2013) | 1 line
+
+tweak
+------------------------------------------------------------------------
+r690 | ajapted | 2013-01-21 12:58:36 +1100 (Mon, 21 Jan 2013) | 6 lines
+
+Key handling:
+1. when writing the local bindings.cfg, skip bindings which are exactly
+   the same as one from the install_dir
+2. detect un-bound keys and write them using "UNBOUND" as the command
+3. parse this "UNBOUND" keyword when reading a bindings.cfg
+
+------------------------------------------------------------------------
+r689 | ajapted | 2013-01-21 12:23:55 +1100 (Mon, 21 Jan 2013) | 3 lines
+
+Key handling: keep an in-memory copy of the install_dir bindings.
+It will be needed for M_SaveBindings() to only write the differences.
+
+------------------------------------------------------------------------
+r688 | ajapted | 2013-01-21 10:38:05 +1100 (Mon, 21 Jan 2013) | 2 lines
+
+tidied up Main_key_handler().
+
+------------------------------------------------------------------------
+r687 | ajapted | 2013-01-21 08:53:42 +1100 (Mon, 21 Jan 2013) | 3 lines
+
+Key handling: moved translation code to M_TranslateKey() function
+(out of UI_Canvas::handle_key method).
+
+------------------------------------------------------------------------
+r686 | ajapted | 2013-01-21 08:29:28 +1100 (Mon, 21 Jan 2013) | 4 lines
+
+1. replaced map name on info bar with a status box
+2. added Status_Set() and Status_Clear() functions
+3. updated Beep() to set the status and show message in log
+
+------------------------------------------------------------------------
+r685 | ajapted | 2013-01-20 19:05:39 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+Implemented 'Scroll' binding command (for scrolling the map view).
+
+------------------------------------------------------------------------
+r684 | ajapted | 2013-01-20 18:37:07 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+Implemented 'EditMode' binding command.
+
+------------------------------------------------------------------------
+r683 | ajapted | 2013-01-20 18:35:16 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+tweaks.
+
+------------------------------------------------------------------------
+r682 | ajapted | 2013-01-20 16:28:38 +1100 (Sun, 20 Jan 2013) | 4 lines
+
+bindings.cfg :
+1. fixed key for vertical mirror ('V' not 'v')
+2. fixed some command names
+
+------------------------------------------------------------------------
+r681 | ajapted | 2013-01-20 16:20:48 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+Implemented 'CopyAndPaste' binding command.
+
+------------------------------------------------------------------------
+r680 | ajapted | 2013-01-20 16:15:43 +1100 (Sun, 20 Jan 2013) | 7 lines
+
+Implemented these binding commands:
+   Mirror    (parameter is "horiz" or "vert")
+   Rotate90  (parameter is direction, +1 for acw, -1 for cw)
+   Enlarge   (replaces CMD_ScaleObjects, parameter is multiplier)
+   Shrink    (replaces CMD_ScaleObjects, parameter is divisor)
+   Quantize
+
+------------------------------------------------------------------------
+r679 | ajapted | 2013-01-20 13:14:41 +1100 (Sun, 20 Jan 2013) | 5 lines
+
+Implemented following as binding commands:
+1. VERT_Merge, VERT_Disconnect
+2. LIN_MergeTwo, LIN_Disconnect
+3. SEC_Merge, SEC_Disconnect
+
+------------------------------------------------------------------------
+r678 | ajapted | 2013-01-20 12:46:06 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+Key binding: Implemented 'TH_Spin' command (removed hard-coded 'w' and 'x' keys).
+
+------------------------------------------------------------------------
+r677 | ajapted | 2013-01-20 12:36:23 +1100 (Sun, 20 Jan 2013) | 3 lines
+
+Key handling: ensure the EXEC_Param[] values are never NULL, use the
+empty string instead.
+
+------------------------------------------------------------------------
+r676 | ajapted | 2013-01-20 12:06:46 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+bindings.cfg : tweaked prefixes (e.g. LN --> LIN, GR --> GRID)
+
+------------------------------------------------------------------------
+r675 | ajapted | 2013-01-20 10:59:59 +1100 (Sun, 20 Jan 2013) | 2 lines
+
+Key handling: merged "edit" and "global" contexts into one (global).
+
+------------------------------------------------------------------------
+r674 | ajapted | 2013-01-20 10:36:01 +1100 (Sun, 20 Jan 2013) | 3 lines
+
+Key handling: implemented M_RemoveBinding(), and use it to ensure that
+bindings from the home_dir replace bindings from the install_dir.
+
+------------------------------------------------------------------------
+r673 | ajapted | 2013-01-20 10:23:59 +1100 (Sun, 20 Jan 2013) | 5 lines
+
+Key handling:
+1. load bindings from BOTH install_dir and home_dir paths (otherwise
+   new releases of Eureka would be unable to add new bindings)
+2. fixed parsing of double quotes (") in bindings.cfg
+
+------------------------------------------------------------------------
+r672 | ajapted | 2013-01-19 21:59:24 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Key handling: un-hard-code the ` (back-quote) key -- rely on binding.
+
+------------------------------------------------------------------------
+r671 | ajapted | 2013-01-19 21:57:25 +1100 (Sat, 19 Jan 2013) | 3 lines
+
+Key handling: when writing the bindings, group them by their context
+(a purely aesthetic change).
+
+------------------------------------------------------------------------
+r670 | ajapted | 2013-01-19 21:31:19 +1100 (Sat, 19 Jan 2013) | 5 lines
+
+Key handling:
+1. renamed CMD_SwapFlats --> SEC_SwapFlats
+2. made it use key bindings (no hard-coded test against 'w' key)
+3. moved M_RegisterCommand() calls into a separate function (editloop.cc)
+
+------------------------------------------------------------------------
+r669 | ajapted | 2013-01-19 21:23:30 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+tweaked M_ModeToKeyContext()
+
+------------------------------------------------------------------------
+r668 | ajapted | 2013-01-19 21:21:23 +1100 (Sat, 19 Jan 2013) | 3 lines
+
+Key handling: have EXEC_Param[] global var to contain the parameters
+from the key binding being executed.
+
+------------------------------------------------------------------------
+r667 | ajapted | 2013-01-19 21:15:16 +1100 (Sat, 19 Jan 2013) | 5 lines
+
+Key handling:
+1. renamed KCTX_INVALID --> KCTX_NONE
+2. when registering commands, can specify a required context
+3. prevent binding keys to a command in the wrong context
+
+------------------------------------------------------------------------
+r666 | ajapted | 2013-01-19 18:48:38 +1100 (Sat, 19 Jan 2013) | 3 lines
+
+Key handler: a few commands now rely on new system, e.g. TAB to toggle
+the 3D view, and 'b' to toggle the browser panel.
+
+------------------------------------------------------------------------
+r665 | ajapted | 2013-01-19 18:45:22 +1100 (Sat, 19 Jan 2013) | 7 lines
+
+Key handling: use new ExecuteKey() function to handle keys, using the
+same propagation logic.  A few commands now rely on this, e.g. TAB to
+toggle the 3D view.
+
+The existing XXX_Key() functions are still in place, but will only
+remain during the transition to the new system.
+
+------------------------------------------------------------------------
+r664 | ajapted | 2013-01-19 18:40:36 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Key handling: fixed parsing of long key names (like "ESC").
+
+------------------------------------------------------------------------
+r663 | ajapted | 2013-01-19 18:32:38 +1100 (Sat, 19 Jan 2013) | 5 lines
+
+Key handling:
+1. moved key_context_e enumeration to global scope (header file)
+2. added M_ModeToKeyContext() function
+3. implemented ExecuteKey() function
+
+------------------------------------------------------------------------
+r662 | ajapted | 2013-01-19 15:47:37 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Key handling: finished M_LoadBindings() -- parse each binding and add it.
+
+------------------------------------------------------------------------
+r661 | ajapted | 2013-01-19 15:31:46 +1100 (Sat, 19 Jan 2013) | 3 lines
+
+Key handling: partial work implementing M_LoadBindings().
+This commit just has the code to open the file and read tokens.
+
+------------------------------------------------------------------------
+r660 | ajapted | 2013-01-19 14:23:30 +1100 (Sat, 19 Jan 2013) | 3 lines
+
+Key handling: handle function and keypad keys in M_ParseKeyString() and
+M_KeyToString().
+
+------------------------------------------------------------------------
+r659 | ajapted | 2013-01-19 14:10:42 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Key handling: more names for key_map[] table (e.g. VOL_DOWN, CD_PLAY, etc).
+
+------------------------------------------------------------------------
+r658 | ajapted | 2013-01-19 14:00:15 +1100 (Sat, 19 Jan 2013) | 4 lines
+
+Key handling: added a key_map[] table for mapping special keys from
+their code to their name or vice versa.
+
+------------------------------------------------------------------------
+r657 | ajapted | 2013-01-19 13:25:45 +1100 (Sat, 19 Jan 2013) | 4 lines
+
+Key handling:
+1. implemented M_WriteBindings()
+2. partial work on M_ParseKeyString() and M_KeyToString()
+
+------------------------------------------------------------------------
+r656 | ajapted | 2013-01-19 12:52:29 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Makefile: install the 'bindings.cfg' file.
+
+------------------------------------------------------------------------
+r655 | ajapted | 2013-01-19 12:45:29 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Added some M_RegisterCommand() calls in Editor_Init().
+
+------------------------------------------------------------------------
+r654 | ajapted | 2013-01-19 12:42:18 +1100 (Sat, 19 Jan 2013) | 2 lines
+
+Key handling: changed command_func_t to return 'void' (not 'bool').
+
+------------------------------------------------------------------------
+r653 | ajapted | 2013-01-19 10:41:47 +1100 (Sat, 19 Jan 2013) | 7 lines
+
+Key handling (m_keys.cc) :
+1. added editor_command_t structure
+2. added M_AddEditorCommand() and FindEditorCommand()
+3. added key_context_e enumeration
+4. added ParseKeyContext() and KeyContextString() functions
+5. added key_binding_t structure
+
+------------------------------------------------------------------------
+r652 | ajapted | 2013-01-18 21:59:36 +1100 (Fri, 18 Jan 2013) | 2 lines
+
+New code files to handle key binding logic : m_keys.cc/h
+
+------------------------------------------------------------------------
+r651 | ajapted | 2013-01-18 21:52:26 +1100 (Fri, 18 Jan 2013) | 3 lines
+
+Key handling: changed some keymod_e (KM_XXX) usages to use keycode_t
+(MOD_XXX) defines instead.
+
+------------------------------------------------------------------------
+r650 | ajapted | 2013-01-18 21:18:44 +1100 (Fri, 18 Jan 2013) | 2 lines
+
+Bindings.txt : simpler format, a few tweaks.
+
+------------------------------------------------------------------------
+r649 | ajapted | 2013-01-18 17:11:03 +1100 (Fri, 18 Jan 2013) | 2 lines
+
+Finished the list of needed key bindings.
+
+------------------------------------------------------------------------
+r648 | ajapted | 2013-01-18 16:42:37 +1100 (Fri, 18 Jan 2013) | 2 lines
+
+Partial work on a list of needed key bindings.
+
+------------------------------------------------------------------------
+r647 | ajapted | 2013-01-18 16:08:29 +1100 (Fri, 18 Jan 2013) | 3 lines
+
+Key handling: convert SHIFT + punctuation key to the shifted value,
+for example SHIFT + ',' --> '<'
+
+------------------------------------------------------------------------
+r646 | ajapted | 2013-01-18 15:55:59 +1100 (Fri, 18 Jan 2013) | 3 lines
+
+Updated key handling code (UI_Canvas::handle_key, XXX_Key functions) to
+use the new keycode_t semantics.
+
+------------------------------------------------------------------------
+r645 | ajapted | 2013-01-18 15:35:20 +1100 (Fri, 18 Jan 2013) | 2 lines
+
+Updated semantics of keycode_t for digits.
+
+------------------------------------------------------------------------
+r644 | ajapted | 2013-01-16 22:16:55 +1100 (Wed, 16 Jan 2013) | 3 lines
+
+Added key_code_t typedef (and more importantly, comments defining its
+semantics).  Not used yet, but will be needed for configurable keys...
+
+------------------------------------------------------------------------
+r643 | ajapted | 2013-01-15 22:11:41 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r642 | ajapted | 2013-01-15 22:09:55 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Updated some copyright messages for 2013.
+
+------------------------------------------------------------------------
+r641 | ajapted | 2013-01-15 22:05:22 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r640 | ajapted | 2013-01-15 21:28:58 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs and Config: implemented a "default grid mode" setting.
+
+------------------------------------------------------------------------
+r639 | ajapted | 2013-01-15 21:05:24 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: implemented 'default_grid_size' setting.
+
+------------------------------------------------------------------------
+r638 | ajapted | 2013-01-15 20:52:38 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Grid: removed '192' as a possible grid size.
+
+------------------------------------------------------------------------
+r637 | ajapted | 2013-01-15 19:18:17 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+Prefs dialog: implemented some of remaining General stuff, such as:
+default_grid_snap, digits_set_zoom and escape_key_quits.
+
+------------------------------------------------------------------------
+r636 | ajapted | 2013-01-15 16:33:40 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Config: added gui_custom_xx color variables.
+
+------------------------------------------------------------------------
+r635 | ajapted | 2013-01-15 16:20:40 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: got the theme section of 'General' tab working.
+
+------------------------------------------------------------------------
+r634 | ajapted | 2013-01-15 16:03:28 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: got the glBSP settings working.
+
+------------------------------------------------------------------------
+r633 | ajapted | 2013-01-15 14:21:08 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+Prefs dialog: implemented rest of Editing options (except the modifier
+key for multi-select has only one choice: CTRL).
+
+------------------------------------------------------------------------
+r632 | ajapted | 2013-01-15 14:08:23 +1100 (Tue, 15 Jan 2013) | 4 lines
+
+Prefs dialog:
+1. call M_WriteConfigFile() to persist the changes
+2. implemented one of the settings : new_sector_size
+
+------------------------------------------------------------------------
+r631 | ajapted | 2013-01-15 14:04:01 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+Config: moved extern declarations into header (m_config.h) so that the
+preferences code can access them.
+
+------------------------------------------------------------------------
+r630 | ajapted | 2013-01-15 13:55:52 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: implemented color_callback().
+
+------------------------------------------------------------------------
+r629 | ajapted | 2013-01-15 13:50:09 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+Prefs dialog: make initial tab be the first one, and remember the last
+active tab for next time preferences dialog is opened.
+
+------------------------------------------------------------------------
+r628 | ajapted | 2013-01-15 13:29:10 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: implemented callback for OK button and window close.
+
+------------------------------------------------------------------------
+r627 | ajapted | 2013-01-15 13:28:28 +1100 (Tue, 15 Jan 2013) | 1 line
+
+layout tweak
+------------------------------------------------------------------------
+r626 | ajapted | 2013-01-15 12:34:10 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+EUREKA lump: better iwad check when a resource cannot be found (i.e.
+use the IWAD path for the game specified in the lump, not Iwad_name).
+
+------------------------------------------------------------------------
+r625 | ajapted | 2013-01-15 12:24:53 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+docco tweaks.
+
+------------------------------------------------------------------------
+r624 | ajapted | 2013-01-15 12:19:24 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+Prefs dialog: inserted the code generated by fluid (from prefs2.fl),
+with some tidying and adding missing fields and methods.
+
+------------------------------------------------------------------------
+r623 | ajapted | 2013-01-15 12:03:19 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+Prefs dialog: started work on it, e.g. the basic Run() method.
+
+------------------------------------------------------------------------
+r622 | ajapted | 2013-01-15 11:50:35 +1100 (Tue, 15 Jan 2013) | 4 lines
+
+About dialog: reworked code, use an '_instance' field to keep track of
+the current window, and allow the rest of the application to function
+while it is open (i.e. it is _not_ modal).
+
+------------------------------------------------------------------------
+r621 | ajapted | 2013-01-15 10:33:13 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r620 | ajapted | 2013-01-15 10:25:36 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+CHANGELOG: created a fresh one (after 0.88c release).
+
+------------------------------------------------------------------------
+r619 | ajapted | 2013-01-15 10:20:53 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+When parsing the EUREKA lump and a resource wad cannot be found, look
+for it same directory as the PWAD, then try same dir as the IWAD.
+
+------------------------------------------------------------------------
+r618 | ajapted | 2013-01-15 10:18:26 +1100 (Tue, 15 Jan 2013) | 2 lines
+
+File utils: fixed some bugs in FileReposition().
+
+------------------------------------------------------------------------
+r617 | ajapted | 2013-01-15 10:06:08 +1100 (Tue, 15 Jan 2013) | 3 lines
+
+File utils: implemented FilenameReposition() function, which takes a
+filename and replaces its path with the path from another filename.
+
+------------------------------------------------------------------------
+r616 | ajapted | 2013-01-10 22:47:36 +1100 (Thu, 10 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r615 | ajapted | 2013-01-06 19:34:04 +1100 (Sun, 06 Jan 2013) | 2 lines
+
+more TO-DO goodies...
+
+------------------------------------------------------------------------
+r614 | ajapted | 2013-01-04 12:58:27 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+Version bump after 0.88c release.
+
+------------------------------------------------------------------------
+r613 | ajapted | 2013-01-04 12:57:24 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+README.txt : added my SF email address.
+
+------------------------------------------------------------------------
+r612 | ajapted | 2013-01-04 12:56:59 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+Debian: control tweak
+
+------------------------------------------------------------------------
+r611 | ajapted | 2013-01-04 12:56:29 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+Moved CHANGES.txt --> docs/ folder, after 0.88c release.
+
+------------------------------------------------------------------------
+r610 | ajapted | 2013-01-04 12:55:45 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+CHANGELOG tweak.
+
+------------------------------------------------------------------------
+r609 | ajapted | 2013-01-04 12:55:19 +1100 (Fri, 04 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r608 | ajapted | 2013-01-02 15:26:44 +1100 (Wed, 02 Jan 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r607 | ajapted | 2012-12-27 21:03:42 +1100 (Thu, 27 Dec 2012) | 2 lines
+
+TODO.txt : document logic for texture alignment keys.
+
+------------------------------------------------------------------------
+r606 | ajapted | 2012-12-26 21:08:54 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r605 | ajapted | 2012-12-26 19:08:02 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+TODO update (fixed the slime trails).
+
+------------------------------------------------------------------------
+r604 | ajapted | 2012-12-26 19:06:11 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+Makefile: made 'uninstall' also remove the desktop and icon files.
+
+------------------------------------------------------------------------
+r603 | ajapted | 2012-12-26 18:44:19 +1100 (Wed, 26 Dec 2012) | 3 lines
+
+3D View: implemented even better DistCmp() logic, which has eliminated
+nearly all trails.
+
+------------------------------------------------------------------------
+r602 | ajapted | 2012-12-26 18:12:10 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+3D View: reduced the slime trails.
+
+------------------------------------------------------------------------
+r601 | ajapted | 2012-12-26 16:17:53 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+Coding: simpler usage of Fl_Sys_Menu_Bar.
+
+------------------------------------------------------------------------
+r600 | ajapted | 2012-12-26 16:17:11 +1100 (Wed, 26 Dec 2012) | 2 lines
+
+Dead code removal (ui_menu.cc)
+
+------------------------------------------------------------------------
+r599 | ajapted | 2012-12-24 22:23:01 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+Renamed WISHLIST.txt --> TODO.txt
+
+------------------------------------------------------------------------
+r598 | ajapted | 2012-12-24 22:21:49 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+Removed TODO.txt file : about to rename WISHLIST --> TODO...
+
+------------------------------------------------------------------------
+r597 | ajapted | 2012-12-24 22:18:25 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+WISHLIST update.
+
+------------------------------------------------------------------------
+r596 | ajapted | 2012-12-24 22:17:25 +1100 (Mon, 24 Dec 2012) | 1 line
+
+tweak
+------------------------------------------------------------------------
+r595 | ajapted | 2012-12-24 22:16:30 +1100 (Mon, 24 Dec 2012) | 5 lines
+
+Debian: updated control file:
+1. removed libfltk1.3 as a dependency (statically linked now)
+2. added various dependencies, esp. X window stuff
+3. bumped version
+
+------------------------------------------------------------------------
+r594 | ajapted | 2012-12-24 22:14:49 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+Debian: updated Makefile to "install" the eureka desktop file and icon.
+
+------------------------------------------------------------------------
+r593 | ajapted | 2012-12-24 19:22:34 +1100 (Mon, 24 Dec 2012) | 4 lines
+
+Makefile: support for static linking with an FLTK which does not include
+OpenGL support and which uses 'localjpeg' and 'localpng' configuration.
+That is conditional on FLTK_STATIC being defined.
+
+------------------------------------------------------------------------
+r592 | ajapted | 2012-12-24 19:18:58 +1100 (Mon, 24 Dec 2012) | 3 lines
+
+Manage Wads dialog: fixed bug where the selected port reset to 'boom'
+unless the user selected something in the choice button.
+
+------------------------------------------------------------------------
+r591 | ajapted | 2012-12-24 16:54:40 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+PORT defs: tweaks.
+
+------------------------------------------------------------------------
+r590 | ajapted | 2012-12-24 16:53:49 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+AUTHORS.txt updated.
+
+------------------------------------------------------------------------
+r589 | ajapted | 2012-12-24 16:50:52 +1100 (Mon, 24 Dec 2012) | 2 lines
+
+LineDef panel: minor rename: 'pass use' --> 'pass thru'
+
+------------------------------------------------------------------------
+r588 | ajapted | 2012-12-24 15:47:37 +1100 (Mon, 24 Dec 2012) | 3 lines
+
+PORTS: added Doom Legacy definition 'legacy.ugh', by wesleyjohnson
+(with a few tweaks by me).
+
+------------------------------------------------------------------------
+r587 | ajapted | 2012-12-24 12:13:04 +1100 (Mon, 24 Dec 2012) | 3 lines
+
+Fix (hopefully) for compile error on 64-bit targets: casting a 'void*'
+to an 'int' losing precision.
+
+------------------------------------------------------------------------
+r586 | ajapted | 2012-12-23 18:24:18 +1100 (Sun, 23 Dec 2012) | 2 lines
+
+CHANGELOG: added revision numbers and "Changes since ..." line.
+
+------------------------------------------------------------------------
+r585 | ajapted | 2012-12-23 16:12:45 +1100 (Sun, 23 Dec 2012) | 3 lines
+
+Docs: created a single file with all the repository commit history,
+namely the 'docs/History.txt' file.  Hence removed the other copies.
+
+------------------------------------------------------------------------
 r584 | ajapted | 2012-12-23 14:55:34 +1100 (Sun, 23 Dec 2012) | 2 lines
 
 WISHLIST update.
