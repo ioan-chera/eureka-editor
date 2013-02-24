@@ -10,6 +10,8 @@ echo "Creating source package for Eureka..."
 
 cd ..
 
+topdir=$PWD
+
 src=eureka
 dest=PACK-SRC
 
@@ -23,6 +25,15 @@ cp -av $src/src/*.[chr]* $dest/src
 cp -av $src/Makefile* $dest/
 # cp -av $src/src/*.ico $dest/src
 
+rm -f ~/osx.tar
+cd $src
+tar cf ~/osx.tar --exclude-vcs osx
+cd $topdir
+cd $dest
+tar xf ~/osx.tar
+cd $topdir
+rm -f ~/osx.tar
+
 mkdir $dest/glbsp_src
 cp -av $src/glbsp_src/*.[chr]* $dest/glbsp_src
 
@@ -33,6 +44,8 @@ cp -av $src/misc/debian/* $dest/misc/debian
 
 mkdir $dest/obj_linux
 mkdir $dest/obj_linux/glbsp
+mkdir $dest/obj_win32
+mkdir $dest/obj_win32/glbsp
 
 #
 #  Data files
