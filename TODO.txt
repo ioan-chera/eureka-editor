@@ -3,6 +3,10 @@ Eureka TODO / WISHLIST
 ======================
 
 
+
++  SEC_Light binding command (akin to SEC_Floor etc)
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -113,6 +117,8 @@ General
    -  make sure the user built the nodes
       (ideally invoke it automatically)
 
++  check that current pwad has been externally modified
+
 +  ability to hide the right-side panel
 
 +  Preferences window:
@@ -193,6 +199,8 @@ Documentation
 
 -  make a simple manpage for the debian package
 
+-  running on Windows 98SE requires KernelEx
+
 -  document texture browser (RIGHT click etc)
 
 -  built-in cheat sheet for mouse buttons and common keys
@@ -231,6 +239,8 @@ Editing
 -  move 'k' split linedef to SPACE/INSERT, put vertex where mouse is
 
 +  a menu for inserting shapes, especially N-sided polygon
+
++  support generalized BOOM line and sector types
 
 +  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
