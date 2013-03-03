@@ -132,6 +132,8 @@ General
 
 ?  Scripting language
 
+WISH: support UDMF format
+
 
 -  File / Delete Map
 
