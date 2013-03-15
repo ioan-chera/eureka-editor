@@ -626,6 +626,10 @@ void SEC_Merge(void)
 
 	BA_End();
 
+	// re-select the final sector
+	edit.Selected->clear_all();
+	edit.Selected->set(source);
+
 	MarkChanges();
 }
 

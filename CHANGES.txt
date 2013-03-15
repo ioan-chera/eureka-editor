@@ -3,3 +3,5 @@ CHANGES IN Eureka
 =================
 
 
+-  fixed the selection after a sector merge 
+
