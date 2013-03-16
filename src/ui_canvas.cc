@@ -364,7 +364,7 @@ void UI_Canvas::DrawGrid()
 	float pixels_1 = grid.step * grid.Scale;
 
 
-	if (pixels_1 < 1.99)
+	if (pixels_1 < 0.99)
 	{
 		fl_color(GRID_DARK);
 		fl_rectf(x(), y(), w(), h());
@@ -375,24 +375,44 @@ void UI_Canvas::DrawGrid()
 	// alternate grid mode : simple squares
 	if (grid.mode == 1)
 	{
-		fl_color(GRID_BRIGHT);
+		if (grid.step < 64)
+			fl_color(GRID_BRIGHT); // fl_rgb_color(160, 96, 96));
+		else
+			fl_color(fl_rgb_color(0, 96, 0));
+
+		int flat_step = 64;
+
+		int gx = (map_lx / flat_step) * flat_step;
+
+		for (; gx <= map_hx; gx += flat_step)
+			DrawMapLine(gx, map_ly, gx, map_hy);
+
+		int gy = (map_ly / flat_step) * flat_step;
+
+		for (; gy <= map_hy; gy += flat_step)
+			DrawMapLine(map_lx, gy, map_hx, gy);
+
+		if (grid.step < 64)
+			fl_color(fl_rgb_color(72, 72, 128));
+		else
+			fl_color(GRID_BRIGHT);
+
+		gx = (map_lx / grid_step_1) * grid_step_1;
+
+		for (; gx <= map_hx; gx += grid_step_1)
+			if (grid.step >= 64 || (gx & 63) != 0)
+				DrawMapLine(gx, map_ly, gx, map_hy);
+
+		gy = (map_ly / grid_step_1) * grid_step_1;
+
+		for (; gy <= map_hy; gy += grid_step_1)
+			if (grid.step >= 64 || (gy & 63) != 0)
+				DrawMapLine(map_lx, gy, map_hx, gy);
+
+		fl_color(fl_rgb_color(0, 144, 255));
 
 		DrawMapLine(0, map_ly, 0, map_hy);
 		DrawMapLine(map_lx, 0, map_hx, 0);
-
-		fl_color(GRID_MEDIUM);
-
-		int gx = (map_lx / grid_step_1) * grid_step_1;
-
-		for (; gx <= map_hx; gx += grid_step_1)
-			if (gx != 0)
-				DrawMapLine(gx, map_ly, gx, map_hy);
-
-		int gy = (map_ly / grid_step_1) * grid_step_1;
-
-		for (; gy <= map_hy; gy += grid_step_1)
-			if (gy != 0)
-				DrawMapLine(map_lx, gy, map_hx, gy);
 
 		return;
 	}
