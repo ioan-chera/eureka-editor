@@ -54,6 +54,7 @@ endif
 #----- Object files ----------------------------------------------
 
 OBJS = \
+	$(OBJ_DIR)/silage/main.o   \
 	$(OBJ_DIR)/silage/window.o
 
 $(OBJ_DIR)/silage/%.o: misc/silage/%.cc
