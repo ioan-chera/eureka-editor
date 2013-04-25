@@ -116,6 +116,54 @@ static void Main_OpenWindow()
 
 static void Main_CloseWindow()
 {
+	if (main_win)
+		delete main_win;
+	
+	main_win = NULL;
+}
+
+
+static void Main_Build()
+{
+	want_build = false;
+
+
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick output filename");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	switch (chooser.show())
+	{
+		case -1:
+//			LogPrintf("Export Map: error choosing file:\n");
+//			LogPrintf("   %s\n", chooser.errmsg());
+
+			fl_alert("%s", chooser.errmsg());
+			return;
+
+		case 1:
+//			LogPrintf("Export Map: cancelled by user\n");
+			return;
+
+		default:
+			break;  // OK
+	}
+
+	/// if extension is missing then add ".wad"
+	char filename[FL_PATH_MAX];
+
+	strcpy(filename, chooser.filename());
+
+	char *pos = (char *)fl_filename_ext(filename);
+	if (! *pos)
+		strcat(filename, ".wad");
+
+
+fprintf(stderr, "BUILD FILENAME = '%s'\n", filename);
 }
 
 
@@ -166,6 +214,9 @@ int main(int argc, char *argv[])
     while (! want_quit)
     {
         Fl::wait(0.2);
+
+		if (want_build)
+			Main_Build();
     }
 
 

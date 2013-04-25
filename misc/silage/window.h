@@ -11,10 +11,13 @@
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_File_Icon.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Native_File_Chooser.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Double_Window.H>
+
+#include <FL/fl_ask.H>
 
 
 #define WINDOW_BG  fl_gray_ramp(3)
@@ -55,6 +58,7 @@ public:
 extern UI_MainWin * main_win;
 
 extern bool want_quit;
+extern bool want_build;
 
 #endif  /* __WINDOW_H__ */
 

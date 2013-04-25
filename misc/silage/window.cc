@@ -12,12 +12,13 @@
 UI_MainWin * main_win;
 
 bool want_quit;
+bool want_build;
 
 
 #define MIN_ROOMS  2
 #define MAX_ROOMS  50
 
-#define MAX_MACHO  180
+#define MAX_MACHO  160
 
 
 static void set_default_seed(Fl_Int_Input *w)
@@ -50,16 +51,21 @@ static void close_callback(Fl_Widget *w, void *data)
 
 static void about_callback(Fl_Button *w, void *data)
 {
+	// FIXME
+
+	fl_message("Silage = SLIGE + GUI");
 }
 
 
 static void build_callback(Fl_Button *w, void *data)
 {
+	want_build = true;
 }
 
 
 static void load_callback(Fl_Button *w, void *data)
 {
+	// TODO
 }
 
 
@@ -155,12 +161,12 @@ UI_MainWin::UI_MainWin(const char *title) :
 		game->add("Doom 1|Doom 2");
 		game->value(1);
 
-		mode = new Fl_Choice(80, 95, 140, 25, "Mode:");
+		mode = new Fl_Choice(80, 90, 140, 25, "Mode:");
 		mode->down_box(FL_BORDER_BOX);
 		mode->add("Single Player|DeathMatch");
 		mode->value(0);
 
-		length = new Fl_Choice(80, 135, 140, 25, "Length:");
+		length = new Fl_Choice(80, 130, 140, 25, "Length:");
 		length->down_box(FL_BORDER_BOX);
 		length->add("Single|A Few Maps|Episode|Full Game");
 		length->value(3);
@@ -183,6 +189,7 @@ UI_MainWin::UI_MainWin(const char *title) :
 		{ Fl_Button* o = new Fl_Button(190, 195, 55, 30, "Load");
 			o->labelsize(12);
 			o->callback((Fl_Callback*)load_callback);
+			o->hide();  // FIXME: not implemented yet
 		}
 
 		grp->end();
