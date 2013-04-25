@@ -49,9 +49,14 @@ public:
 	Fl_Button *quit;
 	Fl_Progress *progress;
 
+	char prog_label[100];
+
 public:
 	 UI_MainWin(const char *title);
 	~UI_MainWin();
+
+	void Prog_Clear();
+	void Prog_Set(int perc);
 };
 
 

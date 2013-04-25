@@ -15,6 +15,10 @@ bool want_quit;
 bool want_build;
 
 
+#define PROGRESS_BG  FL_DARK1  //  fl_gray_ramp(16)
+#define PROGRESS_FG  fl_color_cube(1,4,2)
+
+
 #define MIN_ROOMS  2
 #define MAX_ROOMS  50
 
@@ -258,7 +262,11 @@ UI_MainWin::UI_MainWin(const char *title) :
 	quit->labelsize(16);
 	quit->callback((Fl_Callback*)close_callback);
 
-	progress = new Fl_Progress(10, 354, 185, 36, "Ready!");
+	progress = new Fl_Progress(10, 357, 185, 30, "Ready!");
+	progress->box(FL_FLAT_BOX);
+	progress->color(PROGRESS_BG, PROGRESS_FG);
+	progress->minimum(0.0);
+	progress->maximum(100.0);
 
 	end();
 }
@@ -267,6 +275,20 @@ UI_MainWin::UI_MainWin(const char *title) :
 UI_MainWin::~UI_MainWin()
 {
 	// nothing needed
+}
+
+
+void UI_MainWin::Prog_Clear()
+{
+	progress->value(0.0);
+}
+
+void UI_MainWin::Prog_Set(int perc)
+{
+	sprintf(prog_label, "%d%%", perc);
+
+	progress->value((float)perc);
+	progress->label(prog_label);
 }
 
 //--- editor settings ---

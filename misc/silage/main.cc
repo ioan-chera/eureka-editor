@@ -117,6 +117,12 @@ static void Main_CloseWindow()
 }
 
 
+void Main_ProgStatus(const char *msg)
+{
+	main_win->Prog_Clear();
+	main_win->progress->label(msg);
+}
+
 
 //------------------------------------------------------------------------
 
@@ -127,8 +133,11 @@ static volatile glbsp::nodebuildcomms_t nb_comms;
 
 static int display_mode = glbsp::DIS_INVALID;
 static int progress_limit;
+static int progress_last;
 
 static char message_buf[MSG_BUF_LEN];
+
+#define CANCEL_COLOR  fl_color_cube(3,1,1)
 
 
 static const char *glbsp_ErrorString(glbsp::glbsp_ret_e ret)
@@ -187,8 +196,17 @@ static void GB_FatalError(const char *str, ...)
 
 static void GB_Ticker(void)
 {
-	if (want_build /* is now a "cancel" button */)
+	static int test;
+
+	if (((++test) & 1) != 0)
+		return;
+
+	Fl::check();
+
+	if (want_quit /* now a "cancel" button */)
 	{
+		want_quit = false;
+
 		nb_comms.cancelled = TRUE;
 	}
 }
@@ -217,6 +235,7 @@ static void GB_DisplaySetBarLimit(int barnum, int limit)
 	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		progress_limit = MAX(1, limit);
+		progress_last  = -1;
 	}
 }
 
@@ -226,7 +245,12 @@ static void GB_DisplaySetBar(int barnum, int count)
 	{
 		int perc = count * 100.0 / progress_limit;
 
-		// FIXME: main_win->SetProgress(perc);
+		if (perc > progress_last)
+		{
+			main_win->Prog_Set(perc);
+
+			progress_last = perc;
+		}
 	}
 }
 
@@ -264,7 +288,7 @@ static bool Main_RunGLBSP(const char *filename)
 	nb_info.quiet         = TRUE;
 	nb_info.mini_warnings = FALSE;
 
-	nb_info.pack_sides = FALSE;
+	nb_info.pack_sides   = FALSE;
 	nb_info.force_normal = TRUE;
 
 
@@ -278,6 +302,7 @@ static bool Main_RunGLBSP(const char *filename)
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Param Check FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
+		Main_ProgStatus("glBSP Error");
 		return false;
 	}
 
@@ -288,6 +313,7 @@ static bool Main_RunGLBSP(const char *filename)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
+		Main_ProgStatus("Cancelled");
 		return false;
 	}
 
@@ -297,8 +323,11 @@ static bool Main_RunGLBSP(const char *filename)
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building FAILED: %s\n", glbsp_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
+		Main_ProgStatus("glBSP Error");
 		return false;
 	}
+
+	Main_ProgStatus("Success");
 
 	return true;
 }
@@ -307,6 +336,8 @@ static bool Main_RunGLBSP(const char *filename)
 static void Main_Build()
 {
 	want_build = false;
+
+	main_win->Prog_Clear();
 
 
 	Fl_Native_File_Chooser chooser;
@@ -343,10 +374,24 @@ static void Main_Build()
 	if (! *pos)
 		strcat(filename, ".wad");
 
-
 fprintf(stderr, "BUILD FILENAME = '%s'\n", filename);
 
+
+	// convert quit button into a "cancel" button
+	main_win->quit->label("Cancel");
+	main_win->quit->labelcolor(CANCEL_COLOR);
+	main_win->quit->labelfont(FL_HELVETICA_BOLD);
+
+	Fl::wait(0.2);
+
+
 	Main_RunGLBSP(filename);
+
+	main_win->quit->label("Quit");
+	main_win->quit->labelcolor(FL_BLACK);
+	main_win->quit->labelfont(FL_HELVETICA);
+
+	Fl::wait(0.2);
 }
 
 
