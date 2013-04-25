@@ -45,6 +45,35 @@
 
 
 /*
+ *  Useful macros
+ */
+#ifndef NULL
+#define NULL    ((void*) 0)
+#endif
+
+#ifndef MAX
+#define MAX(a,b)  ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)  ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef ABS
+#define ABS(a)  ((a) < 0 ? -(a) : (a))
+#endif
+
+#ifndef I_ROUND
+#define I_ROUND(x)  ((int) (((x) < 0.0f) ? ((x) - 0.5f) : ((x) + 0.5f)))
+#endif
+
+#ifndef CLAMP
+#define CLAMP(low,x,high)  \
+    ((x) < (low) ? (low) : (x) > (high) ? (high) : (x))
+#endif
+
+
+/*
  *  Exports from main.cc
  */
 void FatalError(const char *fmt, ...);
