@@ -3,11 +3,47 @@
 
 #include "window.h"
 
+
+#define MAIN_WINDOW_W  525
+#define MAIN_WINDOW_H  410
+
+UI_MainWin * main_win;
+
+bool want_quit;
+
+
+static void close_callback(Fl_Widget *w, void *data)
+{
+	want_quit = true;
+}
+
+
+static void about_callback(Fl_Button *w, void *data)
+{
+}
+
+
+static void build_callback(Fl_Button *w, void *data)
+{
+}
+
+
+static void minus_callback(Fl_Button *w, void *data)
+{
+}
+
+
+static void plus_callback(Fl_Button *w, void *data)
+{
+}
+
+
 UI_MainWin::UI_MainWin(const char *title) :
   Fl_Double_Window(MAIN_WINDOW_W, MAIN_WINDOW_H, title)
 {
 	color((Fl_Color)18);
-	callback((Fl_Callback*)load_res_callback);
+
+	callback((Fl_Callback*)close_callback);
 
 	/* main settings */
 
@@ -19,25 +55,22 @@ UI_MainWin::UI_MainWin(const char *title) :
 		}
 		{ game = new Fl_Choice(80, 50, 120, 25, "Game:");
 			game->down_box(FL_BORDER_BOX);
-			game->callback((Fl_Callback*)iwad_callback);
 		}
 		{ mode = new Fl_Choice(80, 95, 120, 25, "Mode:");
 			mode->down_box(FL_BORDER_BOX);
-			mode->callback((Fl_Callback*)port_callback);
 		}
 		{ length = new Fl_Choice(80, 135, 120, 25, "Length:");
 			length->down_box(FL_BORDER_BOX);
-			length->callback((Fl_Callback*)port_callback);
 		}
 		{ seed = new Fl_Value_Input(75, 245, 85, 30, "Seed:");
 		}
 		{ Fl_Button* o = new Fl_Button(170, 245, 30, 30, "-");
 			o->labelsize(20);
-			o->callback((Fl_Callback*)kill_callback);
+			o->callback((Fl_Callback*)minus_callback);
 		}
 		{ Fl_Button* o = new Fl_Button(210, 245, 30, 30, "+");
 			o->labelsize(20);
-			o->callback((Fl_Callback*)kill_callback);
+			o->callback((Fl_Callback*)plus_callback);
 		}
 		{ config = new Fl_Output(75, 195, 105, 30, "Config:");
 		}
@@ -65,19 +98,21 @@ UI_MainWin::UI_MainWin(const char *title) :
 		}
 		{ Fl_Button* o = new Fl_Button(430, 195, 30, 30, "-");
 			o->labelsize(20);
+			o->callback((Fl_Callback*)minus_callback);
 		}
 		{ Fl_Button* o = new Fl_Button(470, 195, 30, 30, "+");
 			o->labelsize(20);
+			o->callback((Fl_Callback*)plus_callback);
 		}
 		{ rooms = new Fl_Value_Input(340, 245, 80, 30, "Rooms:");
 		}
 		{ Fl_Button* o = new Fl_Button(430, 245, 30, 30, "-");
 			o->labelsize(20);
-			o->callback((Fl_Callback*)kill_callback);
+			o->callback((Fl_Callback*)minus_callback);
 		}
 		{ Fl_Button* o = new Fl_Button(470, 245, 30, 30, "+");
 			o->labelsize(20);
-			o->callback((Fl_Callback*)kill_callback);
+			o->callback((Fl_Callback*)plus_callback);
 		}
 		o->end();
 	}
@@ -86,12 +121,12 @@ UI_MainWin::UI_MainWin(const char *title) :
 
 	about = new Fl_Button(220, 355, 80, 36, "About");
 	about->labelsize(16);
-	about->callback((Fl_Callback*)close_callback);
+	about->callback((Fl_Callback*)about_callback);
 
 	build = new Fl_Button(325, 355, 80, 36, "Build");
 	build->labelfont(1);
 	build->labelsize(16);
-	build->callback((Fl_Callback*)apply_callback);
+	build->callback((Fl_Callback*)build_callback);
 
 	quit = new Fl_Button(430, 355, 75, 36, "Quit");
 	quit->labelsize(16);
@@ -100,6 +135,12 @@ UI_MainWin::UI_MainWin(const char *title) :
 	progress = new Fl_Progress(10, 354, 185, 36, "Ready!");
 
 	end();
+}
+
+
+UI_MainWin::~UI_MainWin()
+{
+	// nothing needed
 }
 
 //--- editor settings ---
