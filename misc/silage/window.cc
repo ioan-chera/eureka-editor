@@ -3,6 +3,8 @@
 
 #include "window.h"
 
+#include <time.h>
+
 
 #define MAIN_WINDOW_W  525
 #define MAIN_WINDOW_H  410
@@ -10,6 +12,18 @@
 UI_MainWin * main_win;
 
 bool want_quit;
+
+
+static void set_default_seed(Fl_Int_Input *w)
+{
+	char buffer[64];
+
+	int value = (time(NULL) & 0x3FFFFF0) / 7;
+
+	sprintf(buffer, "%07d", value);
+
+	w->value(buffer);
+}
 
 
 static void close_callback(Fl_Widget *w, void *data)
@@ -24,6 +38,11 @@ static void about_callback(Fl_Button *w, void *data)
 
 
 static void build_callback(Fl_Button *w, void *data)
+{
+}
+
+
+static void load_callback(Fl_Button *w, void *data)
 {
 }
 
@@ -47,23 +66,32 @@ UI_MainWin::UI_MainWin(const char *title) :
 
 	/* main settings */
 
-	{	Fl_Group* o = new Fl_Group(0, 0, 260, 340);
-		o->box(FL_FLAT_BOX);
+	{	Fl_Group *grp = new Fl_Group(0, 0, 260, 340);
+		grp->box(FL_FLAT_BOX);
+
 		{ Fl_Box* o = new Fl_Box(10, 5, 195, 45, "Main Settings");
 			o->labelfont(1);
 			o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ game = new Fl_Choice(80, 50, 120, 25, "Game:");
-			game->down_box(FL_BORDER_BOX);
-		}
-		{ mode = new Fl_Choice(80, 95, 120, 25, "Mode:");
-			mode->down_box(FL_BORDER_BOX);
-		}
-		{ length = new Fl_Choice(80, 135, 120, 25, "Length:");
-			length->down_box(FL_BORDER_BOX);
-		}
-		{ seed = new Fl_Value_Input(75, 245, 85, 30, "Seed:");
-		}
+
+		game = new Fl_Choice(80, 50, 120, 25, "Game:");
+		game->down_box(FL_BORDER_BOX);
+		game->add("Doom 1|Doom 2");
+		game->value(1);
+
+		mode = new Fl_Choice(80, 95, 120, 25, "Mode:");
+		mode->down_box(FL_BORDER_BOX);
+		game->add("SP|DM");
+		game->value(0);
+
+		length = new Fl_Choice(80, 135, 120, 25, "Length:");
+		length->down_box(FL_BORDER_BOX);
+		game->add("Single|Few|Episode|Game");
+		game->value(3);
+
+		seed = new Fl_Int_Input(75, 245, 85, 30, "Seed:");
+		set_default_seed(seed);
+
 		{ Fl_Button* o = new Fl_Button(170, 245, 30, 30, "-");
 			o->labelsize(20);
 			o->callback((Fl_Callback*)minus_callback);
@@ -72,30 +100,37 @@ UI_MainWin::UI_MainWin(const char *title) :
 			o->labelsize(20);
 			o->callback((Fl_Callback*)plus_callback);
 		}
-		{ config = new Fl_Output(75, 195, 105, 30, "Config:");
-		}
+
+		config = new Fl_Output(75, 195, 105, 30, "Config:");
+		config->value("DEFAULT");
+
 		{ Fl_Button* o = new Fl_Button(190, 195, 55, 30, "Load");
 			o->labelsize(12);
+			o->callback((Fl_Callback*)load_callback);
 		}
-		o->end();
+
+		grp->end();
 	}
 
 	/* user options */
 
-	{	Fl_Group* o = new Fl_Group(265, 0, 260, 340);
-		o->box(FL_FLAT_BOX);
+	{	Fl_Group *grp = new Fl_Group(265, 0, 260, 340);
+		grp->box(FL_FLAT_BOX);
+
 		{ Fl_Box* o = new Fl_Box(275, 8, 160, 34, "Playing Options");
 			o->labelfont(1);
 			o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ big_mon = new Fl_Check_Button(305, 50, 180, 30, " Big monsters");
-			big_mon->down_box(FL_DOWN_BOX);
-		}
-		{ big_weap = new Fl_Check_Button(305, 90, 180, 30, " Big weapons");
-			big_weap->down_box(FL_DOWN_BOX);
-		}
-		{ macho = new Fl_Value_Input(340, 195, 80, 30, "Macho:");
-		}
+
+		big_mon = new Fl_Check_Button(305, 50, 180, 30, " Big monsters");
+		big_mon->down_box(FL_DOWN_BOX);
+
+		big_weap = new Fl_Check_Button(305, 90, 180, 30, " Big weapons");
+		big_weap->down_box(FL_DOWN_BOX);
+
+		macho = new Fl_Int_Input(340, 195, 80, 30, "Macho:");
+		macho->value("10");
+
 		{ Fl_Button* o = new Fl_Button(430, 195, 30, 30, "-");
 			o->labelsize(20);
 			o->callback((Fl_Callback*)minus_callback);
@@ -104,8 +139,10 @@ UI_MainWin::UI_MainWin(const char *title) :
 			o->labelsize(20);
 			o->callback((Fl_Callback*)plus_callback);
 		}
-		{ rooms = new Fl_Value_Input(340, 245, 80, 30, "Rooms:");
-		}
+
+		rooms = new Fl_Int_Input(340, 245, 80, 30, "Rooms:");
+		rooms->value("18");
+
 		{ Fl_Button* o = new Fl_Button(430, 245, 30, 30, "-");
 			o->labelsize(20);
 			o->callback((Fl_Callback*)minus_callback);
@@ -114,7 +151,8 @@ UI_MainWin::UI_MainWin(const char *title) :
 			o->labelsize(20);
 			o->callback((Fl_Callback*)plus_callback);
 		}
-		o->end();
+
+		grp->end();
 	}
 
 	/* bottom panel */

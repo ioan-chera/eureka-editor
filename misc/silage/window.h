@@ -12,7 +12,7 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Progress.H>
-#include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Double_Window.H>
 
 class UI_MainWin : public Fl_Double_Window
@@ -23,15 +23,15 @@ public:
 	Fl_Choice *game;
 	Fl_Choice *mode;
 	Fl_Choice *length;
-	Fl_Value_Input *seed;
+	Fl_Int_Input *seed;
 	Fl_Output *config;
 
 	// user options
 
 	Fl_Check_Button *big_mon;
 	Fl_Check_Button *big_weap;
-	Fl_Value_Input *macho;
-	Fl_Value_Input *rooms;
+	Fl_Int_Input *macho;
+	Fl_Int_Input *rooms;
 
 	// bottom panel
 
