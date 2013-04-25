@@ -23,6 +23,8 @@ static void Main_CloseWindow();
 /*
  *  Show an error message and terminate the program
  */
+#define MSG_BUF_LEN  2000
+
 void FatalError(const char *fmt, ...)
 {
 	va_list arg_ptr;
@@ -86,19 +88,17 @@ static void Main_OpenWindow()
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
 
-	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
+//	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
 
 
-	main_win = new UI_MainWin();
-
-	main_win->label("Silage v" VERSION);
+	main_win = new UI_MainWin("Silage v" SILAGE_VERSION);
 
 	// show window (pass some dummy arguments)
 	{
 		int   argc = 1;
 		char *argv[2];
 
-		argv[0] = StringDup("Silage.exe");
+		argv[0] = strdup("Silage.exe");
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
@@ -111,9 +111,6 @@ static void Main_OpenWindow()
 
 		main_win->image(NULL);
 	}
-
-
-    Fl::add_handler(Main_key_handler);
 }
 
 
@@ -127,7 +124,7 @@ static void Main_CloseWindow()
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** Silage v" VERSION " ***\n"
+			"*** Silage v" SILAGE_VERSION " ***\n"
 			"\n");
 
 	fflush(stdout);

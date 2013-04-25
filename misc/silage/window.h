@@ -9,11 +9,17 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Choice.H>
+#include <FL/Fl_File_Icon.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Double_Window.H>
+
+
+#define WINDOW_BG  fl_gray_ramp(3)
+#define  PANEL_BG  fl_gray_ramp(3)  // UP_BOX makes it a lot lighter
+
 
 class UI_MainWin : public Fl_Double_Window
 {

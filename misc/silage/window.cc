@@ -60,34 +60,35 @@ static void plus_callback(Fl_Button *w, void *data)
 UI_MainWin::UI_MainWin(const char *title) :
   Fl_Double_Window(MAIN_WINDOW_W, MAIN_WINDOW_H, title)
 {
-	color((Fl_Color)18);
+	color(WINDOW_BG);
 
 	callback((Fl_Callback*)close_callback);
 
 	/* main settings */
 
 	{	Fl_Group *grp = new Fl_Group(0, 0, 260, 340);
-		grp->box(FL_FLAT_BOX);
+		grp->box(FL_THIN_UP_BOX);
+		grp->color(PANEL_BG);
 
 		{ Fl_Box* o = new Fl_Box(10, 5, 195, 45, "Main Settings");
 			o->labelfont(1);
 			o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		game = new Fl_Choice(80, 50, 120, 25, "Game:");
+		game = new Fl_Choice(80, 50, 140, 25, "Game:");
 		game->down_box(FL_BORDER_BOX);
 		game->add("Doom 1|Doom 2");
 		game->value(1);
 
-		mode = new Fl_Choice(80, 95, 120, 25, "Mode:");
+		mode = new Fl_Choice(80, 95, 140, 25, "Mode:");
 		mode->down_box(FL_BORDER_BOX);
-		game->add("SP|DM");
-		game->value(0);
+		mode->add("Single Player|DeathMatch");
+		mode->value(0);
 
-		length = new Fl_Choice(80, 135, 120, 25, "Length:");
+		length = new Fl_Choice(80, 135, 140, 25, "Length:");
 		length->down_box(FL_BORDER_BOX);
-		game->add("Single|Few|Episode|Game");
-		game->value(3);
+		length->add("Single|A Few Maps|Episode|Full Game");
+		length->value(3);
 
 		seed = new Fl_Int_Input(75, 245, 85, 30, "Seed:");
 		set_default_seed(seed);
@@ -115,7 +116,8 @@ UI_MainWin::UI_MainWin(const char *title) :
 	/* user options */
 
 	{	Fl_Group *grp = new Fl_Group(265, 0, 260, 340);
-		grp->box(FL_FLAT_BOX);
+		grp->box(FL_THIN_UP_BOX);
+		grp->color(PANEL_BG);
 
 		{ Fl_Box* o = new Fl_Box(275, 8, 160, 34, "Playing Options");
 			o->labelfont(1);

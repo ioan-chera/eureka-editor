@@ -6,7 +6,7 @@
 #define __MAIN_H__
 
 
-#define SILAGE_VERSION  "0.51"
+#define SILAGE_VERSION  "0.5.490"
 
 /*
  *  Standard headers
