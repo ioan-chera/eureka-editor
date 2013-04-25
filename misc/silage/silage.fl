@@ -11,8 +11,8 @@ widget_class UI_ProjectInfo {
     xywh {0 0 260 340} box FLAT_BOX
   } {
     Fl_Box {} {
-      label {Main Stuff}
-      xywh {5 0 195 45} labelfont 1 align 20
+      label {Main Settings}
+      xywh {10 5 195 45} labelfont 1 align 20
     }
     Fl_Choice game {
       label {Game:}
@@ -52,20 +52,20 @@ widget_class UI_ProjectInfo {
       xywh {190 195 55 30} labelsize 12
     }
   }
-  Fl_Group {} {open
+  Fl_Group {} {open selected
     xywh {265 0 260 340} box FLAT_BOX
   } {
     Fl_Box {} {
-      label {Other Stuff}
+      label {Playing Options}
       xywh {275 8 160 34} labelfont 1 align 20
     }
     Fl_Check_Button big_mon {
       label { Big monsters}
-      xywh {305 45 180 30} down_box DOWN_BOX
+      xywh {305 50 180 30} down_box DOWN_BOX
     }
     Fl_Check_Button big_weap {
       label { Big weapons}
-      xywh {305 85 180 30} down_box DOWN_BOX
+      xywh {305 90 180 30} down_box DOWN_BOX
     }
     Fl_Value_Input macho {
       label {Macho:}
@@ -110,7 +110,7 @@ widget_class UI_ProjectInfo {
     xywh {430 355 75 36} labelsize 16
   }
   Fl_Progress progress {
-    label {Ready!} selected
+    label {Ready!}
     xywh {10 354 185 36}
   }
 } 
