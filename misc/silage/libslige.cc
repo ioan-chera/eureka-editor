@@ -66,6 +66,8 @@
         (for example: s_texture, s_level, s_quest, ...)
 
      2. added 'const' to nearly all 'char *' stuff
+
+     3. surrounded everything by a 'slige' namespace
 */
 
 
@@ -398,6 +400,9 @@
 #define RAND_SUCKS
 #define USE_STRICMP
 #endif
+
+namespace slige
+{
 
 typedef unsigned char boolean;
 #define TRUE (1==1)
@@ -14834,6 +14839,8 @@ void NewLevel(s_level *l, s_haa *ThisHaa, s_config *c)
        l->first_room->special = SECRET_SECTOR;
 
 }
+
+}  // namespace slige
 
 /****** the end of SLIGE.C ********* please come again *********/
 
