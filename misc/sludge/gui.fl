@@ -3,7 +3,7 @@ version 1.0302
 header_name {.h} 
 code_name {.cxx}
 widget_class UI_ProjectInfo {
-  label {Silage v0.50}
+  label {Sludge v0.50}
   callback load_res_callback open
   xywh {326 60 525 410} type Double color 18 visible
 } {

@@ -60,7 +60,7 @@
 #define SOURCE_SERIAL (490)
 
 /*
-   Changes for Silage by Andrew Apted, APRIL 2013:
+   Changes for Sludge by Andrew Apted, APRIL 2013:
 
      1. use C++ style structs (no typedef) and prefix names with 's_'
         (for example: s_texture, s_level, s_quest, ...)
