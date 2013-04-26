@@ -55,7 +55,9 @@ endif
 
 OBJS = \
 	$(OBJ_DIR)/silage/main.o   \
-	$(OBJ_DIR)/silage/window.o
+	$(OBJ_DIR)/silage/window.o \
+	\
+	$(OBJ_DIR)/silage/libslige.o
 
 $(OBJ_DIR)/silage/%.o: misc/silage/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
