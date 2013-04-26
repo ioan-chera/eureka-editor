@@ -58,6 +58,14 @@
 
 */
 #define SOURCE_SERIAL (490)
+
+/*
+   Changes for Silage port by Andrew Apted, APRIL 2013:
+
+     1. use C++ style structs (no typedef) and prefix names with 's_'
+        (for example: s_texture, s_level, s_quest, ...)
+*/
+
 /*
 
    New stuff (since 485): -huge switch, fixed gate-to-gate-to-arena bug
@@ -504,13 +512,15 @@ typedef unsigned long propertybits;  /* Another bitarray */
 #define BOSS (0x100)
 #define SPECIAL (0x800)
 
-typedef struct s_theme {
+struct s_theme
+{
   char *name;
   boolean secret;
-  struct s_theme *next;
-} theme, *ptheme;
+  s_theme *next;
+};
 
-typedef struct s_texture {
+struct s_texture
+{
   char name[9];   /* Room for the eos */
   char *realname; /* the DOOM name, in case the name name is an alias */
   gamebits gamemask;
@@ -521,25 +531,27 @@ typedef struct s_texture {
   short height;
   short y_hint;
   short y_bias;    /* Y offset that a switch needs */
-  struct s_texture *subtle;
-  struct s_texture *switch_texture;
+  s_texture *subtle;
+  s_texture *switch_texture;
   boolean used;
-  struct s_texture *next;
-} texture, *ptexture;
+  s_texture *next;
+};
 
-typedef struct s_flat {
+struct s_flat
+{
   char name[9];  /* Room for the eos */
   gamebits gamemask;
   themebits compatible;
   propertybits props;
   boolean used;
-  struct s_flat *next;
-} flat, *pflat;
+  s_flat *next;
+};
 
-typedef struct s_linedef linedef, *plinedef;
-typedef struct s_gate gate, *pgate;
+struct s_linedef;
+struct s_gate;
 
-typedef struct s_link {
+struct s_link
+{
   int type;
   propertybits bits;
   int height1;     /* Basic height, or zero for "floor-to-ceiling" */
@@ -550,9 +562,9 @@ typedef struct s_link {
   int depth3;      /* Length (depth) of the core (if any) */
   int floordelta;  /* Far sector floorheight - near sector floorheight */
   int stepcount;   /* Number of steps to slice depth3 into (minus one) */
-  linedef *cld;    /* The inner side of a twinned core, sometimes */
-  struct s_link *next;
-} link, *plink;
+  s_linedef *cld;  /* The inner side of a twinned core, sometimes */
+  s_link *next;
+};
 
 /* Values for link.type */
 #define BASIC_LINK 1001
@@ -583,7 +595,8 @@ typedef struct s_link {
 
 /* The kinds of things that there are */
 
-typedef struct s_genus {
+struct s_genus
+{
   gamebits gamemask;
   themebits compatible;
   propertybits bits;
@@ -620,8 +633,8 @@ typedef struct s_genus {
   float damage[3];         /* damage[0] will be health provided by HEALTHs */
   float altdamage[3];
   boolean marked;
-  struct s_genus *next;
-} genus, *pgenus;
+  s_genus *next;
+};
 
 #define ID_SHOTGUN (0x7d1)
 #define ID_SSGUN (0x052)
@@ -680,35 +693,36 @@ typedef struct s_genus {
 
 /* The style is the dynamic architectural knowledge and stuff. */
 /* It changes throughout the run.                              */
-typedef struct s_style {
+struct s_style
+{
   int theme_number;
-  flat *floor0;
-  flat *ceiling0;
-  flat *ceilinglight;
-  flat *doorfloor;
-  flat *doorceiling;
-  flat *stepfloor;
-  flat *nukage1;
-  texture *wall0;
-  texture *switch0;
-  texture *support0;
-  texture *doorjamb;
-  texture *widedoorface;
-  texture *narrowdoorface;
-  texture *twdoorface;       /* tall-wide */
-  texture *tndoorface;       /* tall-narrow */
-  texture *lockdoorface;         /* can be NULL */
-  texture *walllight;            /* Can be NULL */
-  texture *liftface;        /* can be NULL */
-  texture *kickplate;            /* At least 64 tall */
-  texture *stepfront;            /* May be quite short */
-  texture *grating;
-  texture *plaque;
-  texture *redface;
-  texture *blueface;
-  texture *yellowface;
-  genus *lamp0;
-  genus *shortlamp0;
+  s_flat *floor0;
+  s_flat *ceiling0;
+  s_flat *ceilinglight;
+  s_flat *doorfloor;
+  s_flat *doorceiling;
+  s_flat *stepfloor;
+  s_flat *nukage1;
+  s_texture *wall0;
+  s_texture *switch0;
+  s_texture *support0;
+  s_texture *doorjamb;
+  s_texture *widedoorface;
+  s_texture *narrowdoorface;
+  s_texture *twdoorface;       /* tall-wide */
+  s_texture *tndoorface;       /* tall-narrow */
+  s_texture *lockdoorface;         /* can be NULL */
+  s_texture *walllight;            /* Can be NULL */
+  s_texture *liftface;        /* can be NULL */
+  s_texture *kickplate;            /* At least 64 tall */
+  s_texture *stepfront;            /* May be quite short */
+  s_texture *grating;
+  s_texture *plaque;
+  s_texture *redface;
+  s_texture *blueface;
+  s_texture *yellowface;
+  s_genus *lamp0;
+  s_genus *shortlamp0;
   short doorlight0;
   short roomlight0;
   short wallheight0;
@@ -718,7 +732,7 @@ typedef struct s_style {
   short closet_light_delta;
   /* Shouldn't all these booleans just be in a properties bitarray? */
   boolean moving_jambs;
-  boolean secret_doors;    /* a silly thing */
+  boolean secret_doors;    /* a silly s_thing */
   boolean soundproof_doors;
   boolean center_pillars;
   boolean paint_recesses;  /* Put keycolors on recesses, not doors? */
@@ -748,110 +762,118 @@ typedef struct s_style {
   boolean peg_lightstrips;
   int construct_family;
   boolean do_constructs;
-  link *link0;
-  struct s_style *next;
-} style, *pstyle;
+  s_link *link0;
+  s_style *next;
+};
 
 /* General linked list of textures, for constructs */
-typedef struct s_texture_cell {
-  texture *texture;
+struct s_texture_cell
+{
+  s_texture *texture;
   boolean marked;
   boolean primary;
   short y_offset1;
   short y_offset2;
   short width;
-  struct s_texture_cell *next;
-} texture_cell, *ptexture_cell;
+  s_texture_cell *next;
+};
 
 /* General linked list of flats */
-typedef struct s_flat_cell {
-  flat *flat;
-  struct s_flat_cell *next;
-} flat_cell, *pflat_cell;
+struct s_flat_cell
+{
+  s_flat *flat;
+  s_flat_cell *next;
+};
 
 /* Things that are basically boxes with sides */
-typedef struct s_construct {
+struct s_construct
+{
   gamebits gamemask;
   themebits compatible;
   int family;    /* What general kind of thing is it? */
   short height;
-  texture_cell *texture_cell_anchor;
-  flat_cell *flat_cell_anchor;
+  s_texture_cell *texture_cell_anchor;
+  s_flat_cell *flat_cell_anchor;
   boolean marked;
-  struct s_construct *next;
-} construct, *pconstruct;
+  s_construct *next;
+};
 
-typedef struct s_thing {
+struct s_thing
+{
   short x;
   short y;
   short angle;
-  genus *genus;
+  s_genus *genus;
   short options;
   short number;
-  struct s_thing *next;
-} thing, *pthing;
+  s_thing *next;
+};
 
 /* These are sort of two-natured; they represent both sectors in the */
 /* DooM-engine sense, and rooms.  Split the meanings someday. */
-typedef struct s_sector {
+struct s_sector
+{
   short floor_height;
   short ceiling_height;
-  flat *floor_flat;
-  flat *ceiling_flat;
+  s_flat *floor_flat;
+  s_flat *ceiling_flat;
   short light_level;
   short special;
   short tag;
   short number;            /* Used only during dumping */
-  style *style;            /* Style used to create it */
+  s_style *style;            /* Style used to create it */
   boolean marked;
   boolean has_key;         /* Has a key been placed in here? */
   boolean has_dm;          /* A DM start in here? */
   boolean has_dm_weapon;      /* Any weapons in here yet in DM? */
   boolean middle_enhanced;      /* Already specially enhanced */
-  gate *gate;
+  s_gate *gate;
   short entry_x, entry_y;
   boolean findrec_data_valid;
   short minx, miny, maxx, maxy;
-  struct s_sector *next;
-} sector, *psector;
+  s_sector *next;
+};
 
-typedef struct s_vertex {
+struct s_vertex
+{
   short x;
   short y;
   short number;
   boolean marked;
-  struct s_vertex *next;
-} vertex, *pvertex;
+  s_vertex *next;
+};
 
-typedef struct s_sidedef {
+struct s_sidedef
+{
   short x_offset;
   short x_misalign;
   short y_offset;
   short y_misalign;
-  texture *upper_texture;
-  texture *lower_texture;
-  texture *middle_texture;
-  sector *sector;
+  s_texture *upper_texture;
+  s_texture *lower_texture;
+  s_texture *middle_texture;
+  s_sector *sector;
   short number;
   boolean isBoundary;
-  struct s_sidedef *next;
-} sidedef, *psidedef;
+  s_sidedef *next;
+};
 
-struct s_linedef {
-  vertex *from;
-  vertex *to;
+struct s_linedef
+{
+  s_vertex *from;
+  s_vertex *to;
   short flags;
   short type;   /* Ooh, could even have linedef-type-kind records! */
   short tag;
-  sidedef *right;
-  sidedef *left;
+  s_sidedef *right;
+  s_sidedef *left;
   short number;
   boolean marked;
   boolean f_misaligned;
   boolean b_misaligned;
-  struct s_linedef *group_next;         /* Used during texture-alignment */
-  struct s_linedef *group_previous;     /* A group gets aligned together */
-  struct s_linedef *next;
+  s_linedef *group_next;         /* Used during texture-alignment */
+  s_linedef *group_previous;     /* A group gets aligned together */
+  s_linedef *next;
 };   /* linedef and plinedef defined above; gcc chokes if we do it again! */
 
 /* Linedef flags */
@@ -914,21 +936,26 @@ struct s_linedef {
 
 /* Stuff related to an open PWAD we're generating */
 
-typedef struct s_index_entry {
+struct s_index_entry
+{
   char name[9];
   unsigned int offset;
   unsigned int length;
-  struct s_index_entry *next;
-} index_entry, *pindex_entry;
+  s_index_entry *next;
+};
 
-typedef struct s_dump_record {
+struct s_dump_record
+{
   FILE *f;
   unsigned int offset_to_index;
   unsigned int lmpcount;
-  index_entry *index_entry_anchor;
-} dump_record, *pdump_record, *dumphandle;
+  s_index_entry *index_entry_anchor;
+};
 
-typedef struct s_musheader {
+typedef s_dump_record * dumphandle;
+
+struct s_musheader
+{
   char tag[4];     /* MUS[0x1a] */
   short muslength;
   short headerlength;
@@ -936,31 +963,35 @@ typedef struct s_musheader {
   short secchannels;
   short patches;
   short dummy;
-} musheader, *pmusheader;
+};
 
-typedef struct s_patch {
+struct s_patch
+{
   short number;
   short x;
   short y;
-  struct s_patch *next;
-} patch, *ppatch;
+  s_patch *next;
+};
 
-typedef struct s_custom_texture {
+struct s_custom_texture
+{
   char *name;
   short xsize;
   short ysize;
-  patch *patch_anchor;
-  struct s_custom_texture *next;
-} custom_texture, *pcustom_texture;
+  s_patch *patch_anchor;
+  s_custom_texture *next;
+};
 
-typedef struct s_texture_lmp {
+struct s_texture_lmp
+{
   char *name;
-  custom_texture *custom_texture_anchor;
-} texture_lmp, *ptexture_lmp;
+  s_custom_texture *custom_texture_anchor;
+};
 
 /* Health, Armor, and Ammo estimates */
 
-typedef struct s_one_haa {
+struct s_one_haa
+{
   float health;
   float armor;
   float ammo;
@@ -974,29 +1005,31 @@ typedef struct s_one_haa {
   boolean has_ssgun;
   boolean shells_pending;
   boolean chaingun_pending;
-} one_haa, *pone_haa;
+};
 
-typedef struct s_haa {
-  one_haa haas[3];
+struct s_haa
+{
+  s_one_haa haas[3];
 #define ITYTD (0)
 #define HMP (1)
 #define UV (2)
-} haa, *phaa;
+};
 
-typedef struct s_quest {
+struct s_quest
+{
   short goal;          /* What kind of quest? */
   short tag;           /* If a linedef/switch, what's the tag? */
   short tag2;          /* Another tag, if needed for GATEs etc. */
   short type;          /* What should we do to the tag? */
                        /* Or what's the ID of the key */
-  sector *room;        /* What room will the quest let us into? */
+  s_sector *room;      /* What room will the quest let us into? */
   short count;         /* How many rooms in the quest so far? */
   short minrooms;      /* How many rooms at least should it have? */
   short auxtag;        /* Tag of door to open when taking goal */
-  linedef *surprise;   /* Linedef to populate after goal room */
-  thing *thing;        /* Thing that closed a closed thing-quest */
-  struct s_quest *next;  /* For the quest stack */
-} quest, *pquest;
+  s_linedef *surprise; /* Linedef to populate after goal room */
+  s_thing *thing;      /* Thing that closed a closed thing-s_quest */
+  s_quest *next;  /* For the quest stack */
+};
 
 /* Values for quest.goal */
 #define LEVEL_END_GOAL 101
@@ -1007,58 +1040,61 @@ typedef struct s_quest {
 #define GATE_GOAL 106
 
 /* Teleport gates */
-struct s_gate {
+struct s_gate
+{
   short in_tag;
   short out_tag;
-  short gate_lock;   /* The linedef-type, if any, to open the gate */
+  short gate_lock;   /* The linedef-type, if any, to open the s_gate */
   boolean is_entry;  /* Does one enter the room by it the first time? */
-  gate *next;
+  s_gate *next;
 };
 
 /* The Arena */
 
-typedef struct s_arena {
+struct s_arena
+{
   propertybits props;
 #define ARENA_ROOF (0x01)
 #define ARENA_PORCH (0x02)
 #define ARENA_LAMPS (0x04)
 #define ARENA_ARRIVAL_HOLE (0x08)
 #define ARENA_NUKAGE (0x10)
-  genus *boss;
+  s_genus *boss;
   int boss_count;
-  genus *weapon;
-  genus *ammo;
-  flat *floor;
-  texture *walls;
+  s_genus *weapon;
+  s_genus *ammo;
+  s_flat *floor;
+  s_texture *walls;
   boolean placed_health;
   boolean placed_armor;
   boolean placed_ammo;
   boolean placed_weapon;
   short minx, miny, maxx, maxy;
-  sector *innersec;
-  sector *outersec;
+  s_sector *innersec;
+  s_sector *outersec;
   short fromtag;
-  struct s_arena *next;
-} arena, *parena;
+  s_arena *next;
+};
 
-typedef struct s_level {
-  thing *thing_anchor;
-  sector *sector_anchor;
-  vertex *vertex_anchor;
-  sidedef *sidedef_anchor;
-  linedef *linedef_anchor;
+struct s_level
+{
+  s_thing *thing_anchor;
+  s_sector *sector_anchor;
+  s_vertex *vertex_anchor;
+  s_sidedef *sidedef_anchor;
+  s_linedef *linedef_anchor;
   boolean used_red;
   boolean used_blue;
   boolean used_yellow;
   int last_tag_used;
   short sl_tag;       /* Tag for thing to activate to open secret level exit */
   short sl_type;      /* Type for ... */
-  sector *sl_open_start;  /* The first room the opener can go in */
+  s_sector *sl_open_start;  /* The first room the opener can go in */
   boolean sl_open_ok;     /* Is it time to do the opener yet? */
-  sector *sl_exit_sector; /* The room the exit switch is in */
+  s_sector *sl_exit_sector; /* The room the exit switch is in */
   boolean sl_done;        /* Did we done it yet? */
-  sector *first_room;
-  sector *goal_room;
+  s_sector *first_room;
+  s_sector *goal_room;
   int secret_count;
   int dm_count;
   int dm_rho;
@@ -1099,15 +1135,16 @@ typedef struct s_level {
   short bright_light_level;  /* How bright a bright room is */
   short lit_light_level;     /* How bright a working lamp/light is */
   /* These lists are just for memory-freeing purposes */
-  style *style_anchor;
-  link *link_anchor;
-  gate *gate_anchor;
-  arena *arena_anchor;
-} level, *plevel;
+  s_style *style_anchor;
+  s_link *link_anchor;
+  s_gate *gate_anchor;
+  s_arena *arena_anchor;
+};
 
 /* The config is the static architectural knowledge and stuff. */
 /* It's read from a config file (parts of it, anyway!).        */
-typedef struct s_config {
+struct s_config
+{
   char *configfile;    /* Name of the configuration file */
   char *configdata;    /* Contents of the configuration file */
   char *outfile;       /* Name of the output file */
@@ -1126,16 +1163,16 @@ typedef struct s_config {
   propertybits required_monster_bits;
   propertybits forbidden_monster_bits;
   short minrooms;
-  theme *theme_anchor;
-  genus *genus_anchor;
-  flat *flat_anchor;
-  texture *texture_anchor;
-  construct *construct_anchor;
-  flat *sky_flat;
-  flat *water_flat;
-  texture *null_texture;
-  texture *error_texture;
-  texture *gate_exitsign_texture;
+  s_theme *theme_anchor;
+  s_genus *genus_anchor;
+  s_flat *flat_anchor;
+  s_texture *texture_anchor;
+  s_construct *construct_anchor;
+  s_flat *sky_flat;
+  s_flat *water_flat;
+  s_texture *null_texture;
+  s_texture *error_texture;
+  s_texture *gate_exitsign_texture;
   gamebits gamemask;  /* Which games must we be compatible with? */
   int levelcount;       /* How many levels to produce */
   boolean produce_null_lmps;
@@ -1171,9 +1208,9 @@ typedef struct s_config {
   int p_grid_gaps;
   int p_pushquest;
   int rad_newtheme;      /* How likely to use a random theme beyond a lock */
-  int norm_newtheme;      /* How likely beyond a non-lock link */
+  int norm_newtheme;      /* How likely beyond a non-lock s_link */
   int rad_vary;           /* How much to vary the style beyond a lock */
-  int norm_vary;          /* How much beyon a non-lock link */
+  int norm_vary;          /* How much beyon a non-lock s_link */
   boolean monsters_can_teleport;
   boolean window_airshafts;
   int homogenize_monsters;  /* How likely to have all room monsters == */
@@ -1182,166 +1219,166 @@ typedef struct s_config {
   /* These are *not* actually static */
   int episode, mission, map;  /* What map/mission we're on now. */
   boolean last_mission;       /* This the last one we're doing? */
-} config, *pconfig;
+};
 
 /* Lots and lots and lots of functions */
 /* And this isn't even all of 'em! */
 
-config *get_config(int argc, char *arg[]);
-void NewLevel(level *l, haa *init_haa, config *c);
-void DumpLevel(dumphandle dh,config *c,level *l,int episode,int mission,int map);
-void FreeLevel(level *l);
-dumphandle OpenDump(config *c);
+s_config *get_config(int argc, char *arg[]);
+void NewLevel(s_level *l, s_haa *s_init_haa, s_config *c);
+void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map);
+void FreeLevel(s_level *l);
+dumphandle OpenDump(s_config *c);
 void CloseDump(dumphandle dh);
-quest *starting_quest(level *l,config *c);
-haa *starting_haa(void);
-style *random_style(level *l,config *c);
-boolean enough_quest(level *l,sector *s,quest *ThisQuest,config *c);
+s_quest *starting_quest(s_level *l,s_config *c);
+s_haa *starting_haa(void);
+s_style *random_style(s_level *l,s_config *c);
+boolean enough_quest(s_level *l,s_sector *s,s_quest *ThisQuest,s_config *c);
 boolean rollpercent(int percent);
 int roll(int zero_to_this_minus_one);
-linedef *starting_linedef(level *l,style *ThisStyle,config *c);
-int mark_adequate_linedefs(level *l,sector *s,style *ThisStyle,config *c);
-int mark_decent_boundary_linedefs(level *l,sector *s,int minlen);
-boolean isAdequate(level *l,linedef *ld,style *ThisStyle,config *c);
-linedef *random_marked_linedef(level *l,int i);
-void unmark_linedefs(level *l);
-void embellish_room(level *l,sector *oldsector, haa *haa,
-  style *ThisStyle,quest *ThisQuest,boolean should_watermark,
-  boolean edges_only, config *c);
-boolean grid_room(level *l,sector *oldsector, haa *haa,
-  style *ThisStyle,quest *ThisQuest,boolean first_room,config *c);
-void enhance_room(level *l,sector *oldsector, haa *haa,
-  style *ThisStyle,quest *ThisQuest,boolean first_room,config *c);
-void align_textures(level *l,sector *oldsector,config *c);
-void gloabl_align_textures(level *l,config *c);
-void populate(level *l,sector *oldsector,config *c,haa *ThisHaa,boolean first);
-void gate_populate(level *l,sector *s,haa *haa, boolean first, config *c);
-link *random_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                   config *c);
-link *random_open_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                       config *c);
-link *random_basic_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                        config *c);
-link *gate_link(level *l,config *c);
-sector *generate_room_outline(level *l,linedef *ld,style *ThisStyle,
-                              boolean try_reduction,config *c);
-int lengthsquared(linedef *ld);
+s_linedef *starting_linedef(s_level *l,s_style *ThisStyle,s_config *c);
+int mark_adequate_linedefs(s_level *l,s_sector *s,s_style *ThisStyle,s_config *c);
+int mark_decent_boundary_linedefs(s_level *l,s_sector *s,int minlen);
+boolean isAdequate(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c);
+s_linedef *random_marked_linedef(s_level *l,int i);
+void unmark_linedefs(s_level *l);
+void embellish_room(s_level *l,s_sector *oldsector, s_haa *haa,
+  s_style *ThisStyle,s_quest *ThisQuest,boolean should_watermark,
+  boolean edges_only, s_config *c);
+boolean grid_room(s_level *l,s_sector *oldsector, s_haa *haa,
+  s_style *ThisStyle,s_quest *ThisQuest,boolean first_room,s_config *c);
+void enhance_room(s_level *l,s_sector *oldsector, s_haa *haa,
+  s_style *ThisStyle,s_quest *ThisQuest,boolean first_room,s_config *c);
+void align_textures(s_level *l,s_sector *oldsector,s_config *c);
+void gloabl_align_textures(s_level *l,s_config *c);
+void populate(s_level *l,s_sector *oldsector,s_config *c,s_haa *ThisHaa,boolean first);
+void gate_populate(s_level *l,s_sector *s,s_haa *haa, boolean first, s_config *c);
+s_link *random_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                   s_config *c);
+s_link *random_open_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                       s_config *c);
+s_link *random_basic_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                        s_config *c);
+s_link *gate_link(s_level *l,s_config *c);
+s_sector *generate_room_outline(s_level *l,s_linedef *ld,s_style *ThisStyle,
+                              boolean try_reduction,s_config *c);
+int lengthsquared(s_linedef *ld);
 int distancesquared(int x1, int y1, int x2, int y2);
 int infinity_norm(int x1, int y1, int x2, int y2);
-boolean empty_rectangle(level *l,int x1, int y1, int x2, int y2,
+boolean empty_rectangle(s_level *l,int x1, int y1, int x2, int y2,
                                  int x3, int y3, int x4, int y4);
-boolean empty_left_side(level *l, linedef *ld, int sdepth);
-void close_quest(level *l,sector *s,quest *ThisQuest,haa *haa,config *c);
-void maybe_push_quest(level *l,sector *s,quest *ThisQuest,config *c);
-linedef *make_parallel(level *l,linedef *ld,int depth,linedef *old);
-linedef *lefthand_box_ext(level *l,linedef *ldf1,int depth,
-                                  style *ThisStyle,config *c,
-                                  linedef **nld1, linedef **nld2);
+boolean empty_left_side(s_level *l, s_linedef *ld, int sdepth);
+void close_quest(s_level *l,s_sector *s,s_quest *ThisQuest,s_haa *haa,s_config *c);
+void maybe_push_quest(s_level *l,s_sector *s,s_quest *ThisQuest,s_config *c);
+s_linedef *make_parallel(s_level *l,s_linedef *ld,int depth,s_linedef *old);
+s_linedef *lefthand_box_ext(s_level *l,s_linedef *ldf1,int depth,
+                                  s_style *ThisStyle,s_config *c,
+                                  s_linedef **nld1, s_linedef **nld2);
 #define lefthand_box(l,ldf1,depth,ThisStyle,c) (lefthand_box_ext(l,ldf1,depth,ThisStyle,c,NULL,NULL))
 int facing_along(int x1, int y1, int x2, int y2);
 int facing_right_from(int x1, int y1, int x2, int y2);
-int facing_right_from_ld(linedef *ld);
-linedef *make_linkto(level *l,linedef *ldf,link *ThisLink,
-                              style *ThisStyle,config *c, linedef *old);
-void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                short flipstate, haa *haa,config *c);
-void e_ol_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                haa *haa,config *c);
-void establish_basic_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                          quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                          haa *haa,config *c);
-void establish_open_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                         quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                         haa *haa,config *c);
-void establish_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                     quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                     haa *haa,config *c);
-void stairify(level *l,linedef *ldf1,linedef *ldf2,linedef *lde1,
-              linedef *lde2,short nearheight,short farheight,
-              quest *ThisQuest, style *ThisStyle, config *c);
-void paint_room(level *l,sector *s,style *ThisStyle,config *c);
-linedef *split_linedef(level *l, linedef *ld, int len, config *c);
-boolean link_fitsq(link *ThisLink,quest *ThisQuest);
-boolean link_fitsh(linedef *ldf,link *ThisLink,config *c);
-boolean link_fitsv(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink);
+int facing_right_from_ld(s_linedef *ld);
+s_linedef *make_linkto(s_level *l,s_linedef *ldf,s_link *ThisLink,
+                              s_style *ThisStyle,s_config *c, s_linedef *old);
+void e_bl_inner(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                short flipstate, s_haa *haa,s_config *c);
+void e_ol_inner(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                s_haa *haa,s_config *c);
+void establish_basic_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                          s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                          s_haa *haa,s_config *c);
+void establish_open_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                         s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                         s_haa *haa,s_config *c);
+void establish_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                     s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                     s_haa *haa,s_config *c);
+void stairify(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_linedef *lde1,
+              s_linedef *lde2,short nearheight,short farheight,
+              s_quest *ThisQuest, s_style *ThisStyle, s_config *c);
+void paint_room(s_level *l,s_sector *s,s_style *ThisStyle,s_config *c);
+s_linedef *split_linedef(s_level *l, s_linedef *ld, int len, s_config *c);
+boolean link_fitsq(s_link *ThisLink,s_quest *ThisQuest);
+boolean link_fitsh(s_linedef *ldf,s_link *ThisLink,s_config *c);
+boolean link_fitsv(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink);
 void Usage0(void);
 void Usage(void);
 void Usage2(void);
-boolean do_switches(int argc,char *argv[],config *c,char *s,int conly);
-boolean read_switches(config *c);
-boolean nonswitch_config(config *c);
-void load_config(config *c);
-void unload_config(config *c);
-texture *new_texture(config *c, char *name);
-texture *find_texture(config *c, char *name);
-genus *find_genus(config *c, int thingid);
-genus *new_genus(config *c,int thingid);
-flat *new_flat(config *c, char *name);
-flat *find_flat(config *c, char *name);
-theme *new_theme(config *c, char *name, boolean secret);
-gate *new_gate(level *l,short in,short out,short lock,boolean entry,config *c);
-void patch_upper(linedef *ld,texture *t,config *c);
-void patch_lower(linedef *ld,texture *t,config *c);
-linedef *flip_linedef(linedef *ld);
-sector *make_box_ext(level *l,linedef *ldf1, linedef *ldf2,
-                        style *ThisStyle, config *c,
-                        linedef **nld1, linedef **nld2);
+boolean do_switches(int argc,char *argv[],s_config *c,char *s,int conly);
+boolean read_switches(s_config *c);
+boolean nonswitch_config(s_config *c);
+void load_config(s_config *c);
+void unload_config(s_config *c);
+s_texture *new_texture(s_config *c, char *name);
+s_texture *find_texture(s_config *c, char *name);
+s_genus *find_genus(s_config *c, int thingid);
+s_genus *new_genus(s_config *c,int thingid);
+s_flat *new_flat(s_config *c, char *name);
+s_flat *find_flat(s_config *c, char *name);
+s_theme *new_theme(s_config *c, char *name, boolean secret);
+s_gate *new_gate(s_level *l,short in,short out,short lock,boolean entry,s_config *c);
+void patch_upper(s_linedef *ld,s_texture *t,s_config *c);
+void patch_lower(s_linedef *ld,s_texture *t,s_config *c);
+s_linedef *flip_linedef(s_linedef *ld);
+s_sector *make_box_ext(s_level *l,s_linedef *ldf1, s_linedef *ldf2,
+                        s_style *ThisStyle, s_config *c,
+                        s_linedef **nld1, s_linedef **nld2);
 #define make_box(l,ld1,ld2,st,c) (make_box_ext(l,ld1,ld2,st,c,NULL,NULL))
-thing *place_object(level *l,sector *s,config *c,short thingid,int width,
+s_thing *place_object(s_level *l,s_sector *s,s_config *c,short thingid,int width,
                        int angle,int ax,int ay,int bits);
-thing *place_object_in_region(level *l,int minx, int miny, int maxx, int maxy,
-                       config *c,short thingid,int width,
+s_thing *place_object_in_region(s_level *l,int minx, int miny, int maxx, int maxy,
+                       s_config *c,short thingid,int width,
                        int angle,int ax,int ay,int bits);
-thing *place_required_pickable(level *l,sector *s,config *c,short id);
-genus *timely_monster(haa *haa,config *c,int *levels,boolean biggest,int mno);
-genus *timely_monster_ex(haa *haa,config *c,int *levels,boolean biggest,
+s_thing *place_required_pickable(s_level *l,s_sector *s,s_config *c,short id);
+s_genus *timely_monster(s_haa *haa,s_config *c,int *levels,boolean biggest,int mno);
+s_genus *timely_monster_ex(s_haa *haa,s_config *c,int *levels,boolean biggest,
                          int mno,propertybits req);
-void update_haa_for_monster(haa *haa,genus *m,int levels,int mno,config *c);
-void ammo_value(short ammotype, haa *haa, int *a0, int *a1, int *a2);
-void haa_unpend(haa *haa);
-void trigger_box(level *l,thing *t,sector *s,short tag,short type,config *c);
-void populate_linedef(level *l,linedef *ldnew2,haa *haa,config *c,boolean s);
-void find_rec(level *l, sector *s, int *minx, int *miny, int *maxx, int *maxy);
-void mid_tile(level *l, sector *s, short *tlx, short *tly, short *thx, short *thy);
-linedef *centerpart(level *l,linedef *ld,linedef **ld2,int width,
-                    style *ThisStyle,config *c);
-texture *texture_for_key(short key, style *s, config *c);
-texture *texture_for_bits(propertybits pb, style *s, config *c);
+void update_haa_for_monster(s_haa *haa,s_genus *m,int levels,int mno,s_config *c);
+void ammo_value(short ammotype, s_haa *haa, int *a0, int *a1, int *a2);
+void haa_unpend(s_haa *haa);
+void trigger_box(s_level *l,s_thing *t,s_sector *s,short tag,short type,s_config *c);
+void populate_linedef(s_level *l,s_linedef *ldnew2,s_haa *haa,s_config *c,boolean s);
+void find_rec(s_level *l, s_sector *s, int *minx, int *miny, int *maxx, int *maxy);
+void mid_tile(s_level *l, s_sector *s, short *tlx, short *tly, short *thx, short *thy);
+s_linedef *centerpart(s_level *l,s_linedef *ld,s_linedef **ld2,int width,
+                    s_style *ThisStyle,s_config *c);
+s_texture *texture_for_key(short key, s_style *s, s_config *c);
+s_texture *texture_for_bits(propertybits pb, s_style *s, s_config *c);
 short type_for_key(short key);
-void make_lighted(level *l, sector *s, config *c);
-short locked_linedef_for(short type,short key,config *c);
-void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
-                  boolean force_exit_style,config *c);
-void frame_innersec_ex(level *l,sector *oldsector,sector *innersec,
-                      texture *tm, texture *tu, texture *tl,
+void make_lighted(s_level *l, s_sector *s, s_config *c);
+short locked_linedef_for(short type,short key,s_config *c);
+void install_gate(s_level *l,s_sector *s,s_style *ThisStyle,s_haa *ThisHaa,
+                  boolean force_exit_style,s_config *c);
+void frame_innersec_ex(s_level *l,s_sector *oldsector,s_sector *innersec,
+                      s_texture *tm, s_texture *tu, s_texture *tl,
                       int x1,int y1,int x2,int y2,
                       int x3,int y3,int x4,int y4,
-                      config *c,
-                      linedef **l1, linedef **l2, linedef **l3, linedef **l4);
+                      s_config *c,
+                      s_linedef **l1, s_linedef **l2, s_linedef **l3, s_linedef **l4);
 #define frame_innersec(l,s,i,tm,tu,tl,x1,y1,x2,y2,x3,y3,x4,y4,c) frame_innersec_ex(l,s,i,tm,tu,tl,x1,y1,x2,y2,x3,y3,x4,y4,c,NULL,NULL,NULL,NULL)
-void parallel_innersec_ex(level *l,sector *oldsector,sector *innersec,
-                         texture *tm, texture *tu, texture *tl,
-                         int minx,int miny,int maxx,int maxy,config *c,
-                         linedef **l1, linedef **l2, linedef **l3, linedef **l4);
+void parallel_innersec_ex(s_level *l,s_sector *oldsector,s_sector *innersec,
+                         s_texture *tm, s_texture *tu, s_texture *tl,
+                         int minx,int miny,int maxx,int maxy,s_config *c,
+                         s_linedef **l1, s_linedef **l2, s_linedef **l3, s_linedef **l4);
 #define parallel_innersec(l,o,i,tm,tu,tl,ix,iy,ax,ay,c) parallel_innersec_ex(l,o,i,tm,tu,tl,ix,iy,ax,ay,c,NULL,NULL,NULL,NULL)
-boolean install_construct(level *l,sector *oldsector,
+boolean install_construct(s_level *l,s_sector *oldsector,
                        int minx,int miny,int maxx,int maxy,
-                       style *ThisStyle,config *c);
+                       s_style *ThisStyle,s_config *c);
 
-void make_music(dumphandle dh,config *c);
-void make_slinfo(dumphandle dh,config *c);
-void record_custom_textures(dumphandle dh,config *c);
-void record_custom_flats(dumphandle dh,config *c,boolean even_unused);
-void record_custom_patches(dumphandle dh,config *c,boolean even_unused);
+void make_music(dumphandle dh,s_config *c);
+void make_slinfo(dumphandle dh,s_config *c);
+void record_custom_textures(dumphandle dh,s_config *c);
+void record_custom_flats(dumphandle dh,s_config *c,boolean even_unused);
+void record_custom_patches(dumphandle dh,s_config *c,boolean even_unused);
 
-boolean need_secret_level(config *c);
-void make_secret_level(dumphandle dh, haa *haa, config *c);
-void secretize_config(config *c);
-boolean install_sl_exit(level *l,sector *oldsector,haa *ThisHaa,
-                        style *ThisStyle, quest *ThisQuest,
-                        boolean opens, config *c);
+boolean need_secret_level(s_config *c);
+void make_secret_level(dumphandle dh, s_haa *haa, s_config *c);
+void secretize_config(s_config *c);
+boolean install_sl_exit(s_level *l,s_sector *oldsector,s_haa *ThisHaa,
+                        s_style *ThisStyle, s_quest *ThisQuest,
+                        boolean opens, s_config *c);
 
 #define NONE -1
 #define VERBOSE 0
@@ -1357,63 +1394,63 @@ void point_from(int x1, int y1, int x2, int y2, int angle, int len,
                 int *x3, int *y3);
 unsigned short psi_sqrt(int v);
 #define linelen(x) (psi_sqrt(lengthsquared(x)))
-boolean no_monsters_stuck_on(level *l,linedef *ld1);
+boolean no_monsters_stuck_on(s_level *l,s_linedef *ld1);
 
-flat *random_ceiling0(config *c, style *s);
-flat *random_ceilinglight(config *c, style *s);
-flat *random_floor0(config *c, style *s);
-flat *random_gate(config *c, style *s);
-flat *random_doorceiling(config *c,style *s);
-flat *random_doorfloor(config *c,style *s);
-flat *random_stepfloor(config *c,style *s);
-flat *random_nukage1(config *c,style *s);
-flat *random_flat0(propertybits pmask, config *c, style *s);
-genus *random_thing0(propertybits pmask,config *c,style *s,int minh,int maxh);
-texture *random_texture0(propertybits pmask, config *c, style *s);
-texture *random_wall0(config *c,style *s);
-texture *random_kickplate(config *c,style *s);
-texture *random_stepfront(config *c,style *s);
-texture *switch0_for(config *c, style *s);
-texture *random_support0(config *c, style *s);
-texture *random_doorjamb(config *c, style *s);
-texture *random_widedoorface(config *c, style *s);
-texture *random_widedoorface_ex(config *c, style *s,boolean hi);
-texture *random_narrowdoorface(config *c, style *s);
-texture *random_narrowdoorface_ex(config *c, style *s,boolean hi);
-texture *random_twdoorface(config *c, style *s);
-texture *random_tndoorface(config *c, style *s);
-texture *random_lockdoorface(config *c, style *s);
-texture *random_grating(config *c, style *s);
-texture *random_walllight(config *c, style *s);
-texture *random_liftface(config *c, style *s);
-texture *random_plaque(config *c, style *s);
-genus *random_lamp0(config *c, style *s);
-genus *random_shortlamp0(config *c, style *s);
-genus *random_barrel(config *c, style *s);
-genus *random_plant(config *c, style *s);
-texture *random_redface(config*c, style *s);
-texture *random_blueface(config*c, style *s);
-texture *random_yellowface(config*c, style *s);
+s_flat *random_ceiling0(s_config *c, s_style *s);
+s_flat *random_ceilinglight(s_config *c, s_style *s);
+s_flat *random_floor0(s_config *c, s_style *s);
+s_flat *random_gate(s_config *c, s_style *s);
+s_flat *random_doorceiling(s_config *c,s_style *s);
+s_flat *random_doorfloor(s_config *c,s_style *s);
+s_flat *random_stepfloor(s_config *c,s_style *s);
+s_flat *random_nukage1(s_config *c,s_style *s);
+s_flat *random_flat0(propertybits pmask, s_config *c, s_style *s);
+s_genus *random_thing0(propertybits pmask,s_config *c,s_style *s,int minh,int maxh);
+s_texture *random_texture0(propertybits pmask, s_config *c, s_style *s);
+s_texture *random_wall0(s_config *c,s_style *s);
+s_texture *random_kickplate(s_config *c,s_style *s);
+s_texture *random_stepfront(s_config *c,s_style *s);
+s_texture *switch0_for(s_config *c, s_style *s);
+s_texture *random_support0(s_config *c, s_style *s);
+s_texture *random_doorjamb(s_config *c, s_style *s);
+s_texture *random_widedoorface(s_config *c, s_style *s);
+s_texture *random_widedoorface_ex(s_config *c, s_style *s,boolean hi);
+s_texture *random_narrowdoorface(s_config *c, s_style *s);
+s_texture *random_narrowdoorface_ex(s_config *c, s_style *s,boolean hi);
+s_texture *random_twdoorface(s_config *c, s_style *s);
+s_texture *random_tndoorface(s_config *c, s_style *s);
+s_texture *random_lockdoorface(s_config *c, s_style *s);
+s_texture *random_grating(s_config *c, s_style *s);
+s_texture *random_walllight(s_config *c, s_style *s);
+s_texture *random_liftface(s_config *c, s_style *s);
+s_texture *random_plaque(s_config *c, s_style *s);
+s_genus *random_lamp0(s_config *c, s_style *s);
+s_genus *random_shortlamp0(s_config *c, s_style *s);
+s_genus *random_barrel(s_config *c, s_style *s);
+s_genus *random_plant(s_config *c, s_style *s);
+s_texture *random_redface(s_config*c, s_style *s);
+s_texture *random_blueface(s_config*c, s_style *s);
+s_texture *random_yellowface(s_config*c, s_style *s);
 
-void place_monsters(level *l,sector *s,config *c,haa *haa);
-void place_timely_something(level *l,haa *haa, config *c,int x, int y);
-void place_armor(level *l,sector *s,config *c,haa *haa);
-void place_ammo(level *l,sector *s,config *c,haa *haa);
-void place_health(level *l,sector *s,config *c,haa *haa);
-void place_barrels(level *l,sector *s,config *c,haa *haa);
-void place_plants(level *l,int allow,sector *s,config *c);
+void place_monsters(s_level *l,s_sector *s,s_config *c,s_haa *haa);
+void place_timely_something(s_level *l,s_haa *haa, s_config *c,int x, int y);
+void place_armor(s_level *l,s_sector *s,s_config *c,s_haa *haa);
+void place_ammo(s_level *l,s_sector *s,s_config *c,s_haa *haa);
+void place_health(s_level *l,s_sector *s,s_config *c,s_haa *haa);
+void place_barrels(s_level *l,s_sector *s,s_config *c,s_haa *haa);
+void place_plants(s_level *l,int allow,s_sector *s,s_config *c);
 
-boolean common_texture(sidedef *sd1, sidedef *sd2);
-boolean coalignable(texture *t1, texture *t2);
+boolean common_texture(s_sidedef *sd1, s_sidedef *sd2);
+boolean coalignable(s_texture *t1, s_texture *t2);
 
-void global_align_textures(level *l,config *c);
-void global_align_linedef(level *l, linedef *ld);
-void global_align_forward(level *l, linedef *ld);
-void global_align_backward(level *l, linedef *ld);
-void global_align_group_backbone_forward(level *l,linedef *ld);
-void global_align_group_backbone_backward(level *l,linedef *ld);
-void global_align_group_etc_forward(level *l,linedef *ld);
-void global_align_group_etc_backward(level *l,linedef *ld);
+void global_align_textures(s_level *l,s_config *c);
+void global_align_linedef(s_level *l, s_linedef *ld);
+void global_align_forward(s_level *l, s_linedef *ld);
+void global_align_backward(s_level *l, s_linedef *ld);
+void global_align_group_backbone_forward(s_level *l,s_linedef *ld);
+void global_align_group_backbone_backward(s_level *l,s_linedef *ld);
+void global_align_group_etc_forward(s_level *l,s_linedef *ld);
+void global_align_group_etc_backward(s_level *l,s_linedef *ld);
 
 int global_verbosity = 0;    /* Oooh, a global variable! */
 boolean ok_to_roll = FALSE;  /* Stop breaking -seed...   */
@@ -1467,9 +1504,9 @@ int main(int argc, char *argv[]) {
 
   /* A stubby but functional main() */
 
-  level ThisLevel;
-  haa *ThisHaa = NULL;
-  config *ThisConfig;
+  s_level ThisLevel;
+  s_haa *ThisHaa = NULL;
+  s_config *ThisConfig;
   int i;
   dumphandle dh;
 
@@ -1532,9 +1569,10 @@ int main(int argc, char *argv[]) {
 }
 
 /* Open a file ready to dump multiple levels into */
-dumphandle OpenDump(config *c)
+dumphandle OpenDump(s_config *c)
 {
   dumphandle answer;
+
   struct {
     char tag[4];
     unsigned long lmpcount;
@@ -1567,7 +1605,7 @@ void CloseDump(dumphandle dh)
     char lumpname[8];
   } directory_entry;
 
-  index_entry *ie;
+  s_index_entry *ie;
 
   /* Write the index entries */
   for (ie=dh->index_entry_anchor;ie;ie=ie->next) {
@@ -1597,17 +1635,17 @@ void CloseDump(dumphandle dh)
 /* Free up all the allocated structures associated with the */
 /* level, so we can start on a new one without burning too  */
 /* much memory.                                             */
-void FreeLevel(level *l)
+void FreeLevel(s_level *l)
 {
-  linedef *ld, *ldn;
-  sidedef *sd, *sdn;
-  vertex *v, *vn;
-  thing *t, *tn;
-  sector *s, *sn;
-  link *link, *linkn;
-  style *style, *stylen;
-  arena *arena, *arenan;
-  gate *gate, *gaten;
+  s_linedef *ld, *ldn;
+  s_sidedef *sd, *sdn;
+  s_vertex *v, *vn;
+  s_thing *t, *tn;
+  s_sector *s, *sn;
+  s_link *link, *linkn;
+  s_style *style, *stylen;
+  s_arena *arena, *arenan;
+  s_gate *gate, *gaten;
 
   for (ld=l->linedef_anchor;ld;ld=ldn) {
     ldn = ld->next;
@@ -1659,9 +1697,9 @@ void FreeLevel(level *l)
 /* Record the information about a new lmp of the given size */
 void RegisterLmp(dumphandle dh,char *s,unsigned int size)
 {
-  index_entry *ie, *ie2;
+  s_index_entry *ie, *ie2;
 
-  ie = (index_entry *)malloc(sizeof(*ie));
+  ie = (s_index_entry *)malloc(sizeof(*ie));
   ie->next = NULL;
   /* This list really has to be in frontwards order! */
   if (dh->index_entry_anchor==NULL) {
@@ -1680,7 +1718,7 @@ void RegisterLmp(dumphandle dh,char *s,unsigned int size)
 /* Given a dumphandle, a music header, a music buffer, a lump name, */
 /* and for some reason a config, do what's necessary to record it   */
 /* in the file and index and stuff. */
-void record_music(dumphandle dh,musheader *mh,byte *buf,char *s,config *c)
+void record_music(dumphandle dh,s_musheader *mh,byte *buf,char *s,s_config *c)
 {
   unsigned int lsize;
 
@@ -1692,7 +1730,7 @@ void record_music(dumphandle dh,musheader *mh,byte *buf,char *s,config *c)
   swapshort((unsigned short *)&(mh->secchannels));
   swapshort((unsigned short *)&(mh->patches));
   swapshort((unsigned short *)&(mh->dummy));
-  fwrite(mh,sizeof(musheader),1,dh->f);  /* Write fixed header */
+  fwrite(mh,sizeof(s_musheader),1,dh->f);  /* Write fixed header */
   swapshort((unsigned short *)&(mh->muslength));
   swapshort((unsigned short *)&(mh->headerlength));
   swapshort((unsigned short *)&(mh->primchannels));
@@ -1703,9 +1741,9 @@ void record_music(dumphandle dh,musheader *mh,byte *buf,char *s,config *c)
 }
 
 /* Make the special SLINFO lmp, containing whatever we like */
-void make_slinfo(dumphandle dh, config *c)
+void make_slinfo(dumphandle dh, s_config *c)
 {
-#ifdef RISCOS
+#if 1  // def RISCOS
   static char slinfo[100]; /* sprintf takes a char *, byte is unsigned */
 #else
   static byte slinfo[100];
@@ -1720,14 +1758,14 @@ void make_slinfo(dumphandle dh, config *c)
 /* Write out a PWAD containing just the THINGS, LINEDEFS, SIDEDEFS, */
 /* VERTEXES, and SECTORS for the given episode/mission.  The user   */
 /* will have to run a nodebuilder and reject mapper hisself.        */
-void DumpLevel(dumphandle dh,config *c,level *l,int episode,int mission,int map)
+void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map)
 {
   unsigned int i;
-  sector *pSector;
-  thing *pThing;
-  vertex *pVertex;
-  linedef *pLinedef;
-  sidedef *pSidedef;
+  s_sector *pSector;
+  s_thing *pThing;
+  s_vertex *pVertex;
+  s_linedef *pLinedef;
+  s_sidedef *pSidedef;
 
   struct {
     short x;
@@ -1941,15 +1979,15 @@ void DumpLevel(dumphandle dh,config *c,level *l,int episode,int mission,int map)
 
 }  /* end DumpLevel */
 
-/* Get the next unused tag for the level */
-short new_tag(level *l)
+/* Get the next unused tag for the s_level */
+short new_tag(s_level *l)
 {
   return (short)++(l->last_tag_used);
 }
 
 /* Get an unused-color key for the level (if any), and use it. */
 /* Zero if all are used. */
-short new_key(level *l)
+short new_key(s_level *l)
 {
   if ((!l->used_red)&&rollpercent(33)) {
     l->used_red = TRUE;
@@ -1965,9 +2003,9 @@ short new_key(level *l)
 
 /* Remove a vertex from the level.  Frees the memory, but */
 /* doesn't do anything about linedefs nor nothin'.        */
-void delete_vertex(level *l, vertex *v)
+void delete_vertex(s_level *l, s_vertex *v)
 {
-  vertex *v1;
+  s_vertex *v1;
 
   if (v==l->vertex_anchor) {
     l->vertex_anchor = v->next;
@@ -1983,11 +2021,11 @@ void delete_vertex(level *l, vertex *v)
 }
 
 /* Add a vertex to the given level at the given place.  Return it. */
-vertex *new_vertex(level *l,int x,int y)
+s_vertex *new_vertex(s_level *l,int x,int y)
 {
-  vertex *answer;
+  s_vertex *answer;
 
-  answer = (vertex *)malloc(sizeof(*answer));
+  answer = (s_vertex *)malloc(sizeof(*answer));
   answer->x = x;
   answer->y = y;
   answer->marked = 0;
@@ -1998,9 +2036,9 @@ vertex *new_vertex(level *l,int x,int y)
 
 /* Remove a linedef from the level.  Frees the memory, but */
 /* doesn't do anything about sidedefs nor nothin'.         */
-void delete_linedef(level *l, linedef *ld)
+void delete_linedef(s_level *l, s_linedef *ld)
 {
-  linedef *ld1;
+  s_linedef *ld1;
 
   if (ld==l->linedef_anchor) {
     l->linedef_anchor = ld->next;
@@ -2017,11 +2055,11 @@ void delete_linedef(level *l, linedef *ld)
 
 /* Add a linedef to the given level between the given vertexes.  No  */
 /* sidedefs or anything are filled in.                               */
-linedef *new_linedef(level *l,vertex *from,vertex *to)
+s_linedef *new_linedef(s_level *l,s_vertex *from,s_vertex *to)
 {
-  linedef *answer;
+  s_linedef *answer;
 
-  answer = (linedef *)malloc(sizeof(*answer));
+  answer = (s_linedef *)malloc(sizeof(*answer));
   answer->from = from;
   answer->to = to;
   answer->flags = 0;
@@ -2037,14 +2075,14 @@ linedef *new_linedef(level *l,vertex *from,vertex *to)
   return answer;
 }
 
-/* Return a new sector for the given level */
-sector *new_sector(level *l,short fh, short ch, flat *ft, flat *ct)
+/* Return a new sector for the given s_level */
+s_sector *new_sector(s_level *l,short fh, short ch, s_flat *ft, s_flat *ct)
 {
-  sector *answer;
+  s_sector *answer;
 
   if ((ft==NULL) || (ct==NULL))
     announce(WARNING,"Null flat in new_sector.");
-  answer = (sector *)malloc(sizeof(*answer));
+  answer = (s_sector *)malloc(sizeof(*answer));
   answer->floor_height = fh;
   answer->ceiling_height = ch;
   answer->floor_flat = ft;
@@ -2067,9 +2105,9 @@ sector *new_sector(level *l,short fh, short ch, flat *ft, flat *ct)
 }
 
 /* Return a new sector just like the old sector (mostly) */
-sector *clone_sector(level *l,sector *s)
+s_sector *clone_sector(s_level *l,s_sector *s)
 {
-  sector *answer;
+  s_sector *answer;
   answer = new_sector(l,s->floor_height,s->ceiling_height,
                         s->floor_flat,s->ceiling_flat);
   answer->style = s->style;
@@ -2078,12 +2116,12 @@ sector *clone_sector(level *l,sector *s)
 }
 
 /* A new sidedef, similarly, with sensible defaults */
-sidedef *new_sidedef(level *l, sector *s, config *c)
+s_sidedef *new_sidedef(s_level *l, s_sector *s, s_config *c)
 {
-  sidedef *answer;
+  s_sidedef *answer;
 
   if (s==NULL) announce(ERROR,"Null sector passed to new_sidedef!");
-  answer = (sidedef *)malloc(sizeof(*answer));
+  answer = (s_sidedef *)malloc(sizeof(*answer));
   answer->x_offset = 0;
   answer->x_misalign = 0;
   answer->y_offset = 0;
@@ -2099,17 +2137,17 @@ sidedef *new_sidedef(level *l, sector *s, config *c)
 }
 
 /* Put down a new thing as given */
-thing *new_thing(level *l, int x, int y, short angle, short type,
-                          short options, config *c)
+s_thing *new_thing(s_level *l, int x, int y, short angle, short type,
+                          short options, s_config *c)
 {
-  thing *answer;
+  s_thing *answer;
 
   if (type==ID_ELEC) announce(VERBOSE,"Tech column");
   if (type==ID_CBRA) announce(VERBOSE,"Candelabra");
   if (type==ID_LAMP2) announce(VERBOSE,"Lamp2");
   if (type==ID_TLAMP2) announce(VERBOSE,"Tlamp2");
   if (type==ID_LAMP) announce(VERBOSE,"Lamp");
-  answer = (thing *)malloc(sizeof(*answer));
+  answer = (s_thing *)malloc(sizeof(*answer));
   answer->x = (short)x;
   answer->y = (short)y;
   answer->angle = angle;
@@ -2121,9 +2159,9 @@ thing *new_thing(level *l, int x, int y, short angle, short type,
 }
 
 /* Return a new arena approprite for the level. */
-arena *new_arena(level *l, config *c)
+s_arena *new_arena(s_level *l, s_config *c)
 {
-  arena *answer = (arena *)malloc(sizeof(*answer));
+  s_arena *answer = (s_arena *)malloc(sizeof(*answer));
   int bossno;
 
   answer->boss_count = 1;   /* Default */
@@ -2276,8 +2314,8 @@ int infinity_norm(int x1, int y1, int x2, int y2)
     else return yd;
 }
 
-/* length-sqaured of a linedef */
-int lengthsquared(linedef *ld)
+/* length-sqaured of a s_linedef */
+int lengthsquared(s_linedef *ld)
 {
   int xd,yd;
 
@@ -2288,11 +2326,11 @@ int lengthsquared(linedef *ld)
 
 /* Return a quest for the very start of the game; always level-end, */
 /* consult the config for length and stuff.                         */
-quest *starting_quest(level *l,config *c)
+s_quest *starting_quest(s_level *l,s_config *c)
 {
-  quest *answer;
+  s_quest *answer;
 
-  answer = (quest *)malloc(sizeof(*answer));
+  answer = (s_quest *)malloc(sizeof(*answer));
   answer->goal = LEVEL_END_GOAL;
   answer->room = NULL; /* won't be used, because this is always stack bottom */
   answer->tag = 0;     /* not a linedef goal */
@@ -2308,12 +2346,12 @@ quest *starting_quest(level *l,config *c)
 }
 
 /* Return a health/armor/ammo estimate for the game start */
-haa *starting_haa(void)
+s_haa *starting_haa(void)
 {
-  haa *answer;
+  s_haa *answer;
   int i;
 
-  answer = (haa *)malloc(sizeof(* answer));
+  answer = (s_haa *)malloc(sizeof(* answer));
 
   for (i=ITYTD;i<=UV;i++) {
     answer->haas[i].health = (float)100;
@@ -2336,10 +2374,10 @@ haa *starting_haa(void)
 
 /* Mark each boundary linedef from the given sector which isn't */
 /* already in obvious use, and which is at least minlen long.   */
-int mark_decent_boundary_linedefs(level *l,sector *s,int minlen)
+int mark_decent_boundary_linedefs(s_level *l,s_sector *s,int minlen)
 {
-  linedef *ld;
-  sidedef *sd;
+  s_linedef *ld;
+  s_sidedef *sd;
   int answer = 0;
 
   minlen = minlen * minlen;
@@ -2362,10 +2400,10 @@ int mark_decent_boundary_linedefs(level *l,sector *s,int minlen)
 /* Look at each linedef out of the given sector.  Mark it if it's  */
 /* reasonable to consider putting a room on the other side of it.  */
 /* Return the number of linedefs marked.                           */
-int mark_adequate_linedefs(level *l,sector *s,style *ThisStyle,config *c)
+int mark_adequate_linedefs(s_level *l,s_sector *s,s_style *ThisStyle,s_config *c)
 {
-  linedef *ld;
-  sidedef *sd;
+  s_linedef *ld;
+  s_sidedef *sd;
   int answer = 0;
 
   for (ld = l->linedef_anchor;ld;ld=ld->next) {
@@ -2383,9 +2421,9 @@ int mark_adequate_linedefs(level *l,sector *s,style *ThisStyle,config *c)
 
 /* Given that there are i marked linedefs, return a */
 /* random one of them.  NULL if zero.               */
-linedef *random_marked_linedef(level *l,int i)
+s_linedef *random_marked_linedef(s_level *l,int i)
 {
-  linedef *ld;
+  s_linedef *ld;
 
   if (i==0) return NULL;
   i = roll(i);
@@ -2403,9 +2441,9 @@ linedef *random_marked_linedef(level *l,int i)
 }
 
 /* Reset all the linedef marks */
-void unmark_linedefs(level *l)
+void unmark_linedefs(s_level *l)
 {
-  linedef *ld;
+  s_linedef *ld;
   for (ld=l->linedef_anchor;ld;ld=ld->next) ld->marked = 0;
 }
 
@@ -2468,9 +2506,9 @@ unsigned short psi_sqrt(int v)
 
 /* Find a flat with the given name, creating one if */
 /* it doesn't already exist.                        */
-flat *find_flat(config *c, char *name)
+s_flat *find_flat(s_config *c, char *name)
 {
-  flat *t = NULL;
+  s_flat *t = NULL;
 
   for (t=c->flat_anchor;t;t=t->next)
     if (!strcmp(name,t->name)) return t;
@@ -2478,11 +2516,11 @@ flat *find_flat(config *c, char *name)
 }
 
 /* Return a new flat with the given name */
-flat *new_flat(config *c,char *name)
+s_flat *new_flat(s_config *c,char *name)
 {
-  flat *answer;
+  s_flat *answer;
 
-  answer = (flat *)malloc(sizeof(*answer));
+  answer = (s_flat *)malloc(sizeof(*answer));
   memset(answer->name,0,9);
   memcpy(answer->name,name,strlen(name));
   answer->gamemask = DOOM0_BIT | DOOM1_BIT | DOOM2_BIT | DOOMC_BIT | DOOMI_BIT;
@@ -2495,10 +2533,10 @@ flat *new_flat(config *c,char *name)
 }
 
 /* Return a new gate with the given attributes and stuff */
-gate *new_gate(level *l, short intag, short outtag, short lock,
-               boolean entry, config *c)
+s_gate *new_gate(s_level *l, short intag, short outtag, short lock,
+               boolean entry, s_config *c)
 {
-  gate *answer = (gate *)malloc(sizeof(*answer));
+  s_gate *answer = (s_gate *)malloc(sizeof(*answer));
   answer->in_tag = intag;
   answer->out_tag = outtag;
   answer->gate_lock = lock;
@@ -2510,10 +2548,10 @@ gate *new_gate(level *l, short intag, short outtag, short lock,
 
 /* Return a new theme with the given name and secretness.  Non-secret */
 /* themes go at the start of the list, secret ones at the end */
-theme *new_theme(config *c,char *name,boolean secret)
+s_theme *new_theme(s_config *c,char *name,boolean secret)
 {
-  theme *answer = (theme *)malloc(sizeof(*answer));
-  theme *t;
+  s_theme *answer = (s_theme *)malloc(sizeof(*answer));
+  s_theme *t;
 
   answer->name = strdup(name);
   answer->secret = secret;
@@ -2541,9 +2579,9 @@ theme *new_theme(config *c,char *name,boolean secret)
 }
 
 /* Return a new monster-class with the given thingid */
-genus *new_monster(config *c, int thingid)
+s_genus *new_monster(s_config *c, int thingid)
 {
-  genus *answer;
+  s_genus *answer;
   int i;
 
   answer = new_genus(c,thingid);
@@ -2559,11 +2597,11 @@ genus *new_monster(config *c, int thingid)
 }
 
 /* Return a new genus with the given thingid */
-genus *new_genus(config *c,int thingid)
+s_genus *new_genus(s_config *c,int thingid)
 {
-  genus *answer;
+  s_genus *answer;
 
-  answer = (genus *)malloc(sizeof(*answer));
+  answer = (s_genus *)malloc(sizeof(*answer));
   /* Default mask */
   answer->gamemask = DOOM0_BIT|DOOM1_BIT|DOOM2_BIT|DOOMC_BIT|DOOMI_BIT;
   answer->compatible = ~(unsigned long)0;     /* Assume all themes OK */
@@ -2579,9 +2617,9 @@ genus *new_genus(config *c,int thingid)
 
 /* Return a monster-class with the given thingid, */
 /* creating it first if needed.                   */
-genus *find_monster(config *c, int thingid)
+s_genus *find_monster(s_config *c, int thingid)
 {
-  genus *g;
+  s_genus *g;
 
   for (g=c->genus_anchor;g;g=g->next) {
     if (g->thingid==thingid) return g;
@@ -2591,9 +2629,9 @@ genus *find_monster(config *c, int thingid)
 
 /* Return a thing-class with the given thingid, */
 /* creating it first if needed.                 */
-genus *find_genus(config *c, int thingid)
+s_genus *find_genus(s_config *c, int thingid)
 {
-  genus *g;
+  s_genus *g;
 
   for (g=c->genus_anchor;g;g=g->next) {
     if (g->thingid==thingid) return g;
@@ -2603,9 +2641,9 @@ genus *find_genus(config *c, int thingid)
 
 /* Find a texture with the given name, creating one if */
 /* it doesn't already exist.                           */
-texture *find_texture(config *c, char *name)
+s_texture *find_texture(s_config *c, char *name)
 {
-  texture *t = NULL;
+  s_texture *t = NULL;
 
   for (t=c->texture_anchor;t;t=t->next)
     if (!strcmp(name,t->name)) return t;
@@ -2613,11 +2651,11 @@ texture *find_texture(config *c, char *name)
 }
 
 /* Return a new texture with the given name */
-texture *new_texture(config *c,char *name)
+s_texture *new_texture(s_config *c,char *name)
 {
-  texture *answer;
+  s_texture *answer;
 
-  answer = (texture *)malloc(sizeof(*answer));
+  answer = (s_texture *)malloc(sizeof(*answer));
   memset(answer->name,0,9);
   memcpy(answer->name,name,strlen(name));
   answer->realname = answer->name;
@@ -2639,12 +2677,12 @@ texture *new_texture(config *c,char *name)
 
 /* Split the given linedef at the given distance along it. */
 /* Return the new (after-splitpoint) linedef.              */
-linedef *split_linedef(level *l, linedef *ld, int len, config *c)
+s_linedef *split_linedef(s_level *l, s_linedef *ld, int len, s_config *c)
 {
   double ratio;
   int dx,dy;
-  vertex *v;
-  linedef *answer;
+  s_vertex *v;
+  s_linedef *answer;
 
   assert(len>0);
 
@@ -2688,7 +2726,7 @@ linedef *split_linedef(level *l, linedef *ld, int len, config *c)
 }
 
 /* Put in any upper textures required */
-void patch_upper(linedef *ld,texture *t,config *c)
+void patch_upper(s_linedef *ld,s_texture *t,s_config *c)
 {
 #ifdef TOLERATE_ERRORS
   if (ld->left==NULL) return;
@@ -2712,7 +2750,7 @@ void patch_upper(linedef *ld,texture *t,config *c)
 }
 
 /* Put in any lower textures required */
-void patch_lower(linedef *ld,texture *t,config *c)
+void patch_lower(s_linedef *ld,s_texture *t,s_config *c)
 {
 #ifdef TOLERATE_ERRORS
   if (ld->left==NULL) return;
@@ -2736,10 +2774,10 @@ void patch_lower(linedef *ld,texture *t,config *c)
 }
 
 /* Flip the linedef end-for-end */
-linedef *flip_linedef(linedef *ld)
+s_linedef *flip_linedef(s_linedef *ld)
 {
-  sidedef *sd;
-  vertex *v;
+  s_sidedef *sd;
+  s_vertex *v;
 
   v = ld->from;
   sd = ld->left;
@@ -2773,9 +2811,9 @@ void Usage(void)
 /* Remove anything from the config that would be dangerous if left */
 /* in, and optionally remove anything that just benignly won't ever */
 /* be used and might take up valuable time and space. */
-void compact_config(config *c)
+void compact_config(s_config *c)
 {
-  texture *t;
+  s_texture *t;
 
   /* NULLify any texture subtles that aren't in this DOOM version */
   for (t=c->texture_anchor;t;t=t->next)
@@ -2790,7 +2828,7 @@ void compact_config(config *c)
 
 /* Alter this config to be good and strange for a secret */
 /* level.  Add stuff to this over time! */
-void secretize_config(config *c)
+void secretize_config(s_config *c)
 {
   boolean something_special = FALSE;
 
@@ -2804,7 +2842,7 @@ void secretize_config(config *c)
 
   for (;!something_special;) {
 
-    /* Sometimes bizarre theme */
+    /* Sometimes bizarre s_theme */
     if (rollpercent(30)) {
       c->secret_themes = TRUE;
       something_special = TRUE;
@@ -2831,7 +2869,7 @@ void secretize_config(config *c)
       }
     }
 
-    /* Sometimes some monster thing */
+    /* Sometimes some monster s_thing */
     if (rollpercent(30) && !something_special) {
       if (rollpercent(50)) {
         c->required_monster_bits |= BIG;
@@ -2856,13 +2894,13 @@ void secretize_config(config *c)
 /* 3. Parse the arglist to get overrides to switches,         */
 /* 4. Read the config for non-switches (flats, themes, etc).  */
 /* 5. Do postproduction defaults and calculations and such.   */
-config *get_config(int argc, char *argv[])
+s_config *get_config(int argc, char *argv[])
 {
-  config *answer;
+  s_config *answer;
   int i;
-  genus *m;
+  s_genus *m;
 
-  answer = (config *)malloc(sizeof(*answer));
+  answer = (s_config *)malloc(sizeof(*answer));
 
   /* Set various defaults and stuff */
   if ( (answer->configfile = getenv(SLIGE_CONFIG)) == NULL)
@@ -3038,27 +3076,27 @@ config *get_config(int argc, char *argv[])
 
 }
 
-vertex *make_watermark_path(level *l,vertex *v1,vertex *v2,
-                            sidedef *rsd, sidedef *lsd)
+s_vertex *make_watermark_path(s_level *l,s_vertex *v1,s_vertex *v2,
+                            s_sidedef *rsd, s_sidedef *lsd)
 {
-  linedef *ld = new_linedef(l,v1,v2);
+  s_linedef *ld = new_linedef(l,v1,v2);
   ld->flags = TWO_SIDED;
   ld->left = lsd;
   ld->right = rsd;
   return v2;
 }
 
-void watermark_sector(level *l,sector *s, style *ThisStyle, config *c)
+void watermark_sector(s_level *l,s_sector *s, s_style *ThisStyle, s_config *c)
 {
    /* This isn't a stub except that find_rec is */
    /* Well, and it's not clear what you'd do with a */
-   /* non-rectangular sector */
+   /* non-rectangular s_sector */
    int minx, miny, maxx, maxy;
    int x1, x2, x3, x4;
    int y1, y2, y3, y4, y5, y6;
-   sector *newsector;
-   sidedef *lsd, *rsd;
-   vertex *v0, *v1;
+   s_sector *newsector;
+   s_sidedef *lsd, *rsd;
+   s_vertex *v0, *v1;
 
    /* Make a new sector for the S-shape */
    newsector = new_sector(l,s->floor_height,(short)(s->ceiling_height+16),
@@ -3135,9 +3173,9 @@ boolean intersects(int XA, int YA, int XB, int YB,
 /* Fix up any obvious HOMs with an obvious error texture. */
 /* Note that you can still get HOMs with lifts and other */
 /* floors and ceilings that move during play. */
-void global_paint_HOMs(level *l, config *c)
+void global_paint_HOMs(s_level *l, s_config *c)
 {
-  linedef *ld;
+  s_linedef *ld;
   for (ld=l->linedef_anchor;ld;ld=ld->next) {
     if (ld->right)
       if (ld->left) {
@@ -3149,7 +3187,7 @@ void global_paint_HOMs(level *l, config *c)
 
 /* Return the (int number of) a random theme that exists in */
 /* the given configuration.  Need anything fancier here?    */
-int random_theme(config *c)
+int random_theme(s_config *c)
 {
   int answer;
 
@@ -3172,7 +3210,7 @@ int random_theme(config *c)
 /* Need anything fancier in these next few things? */
 
 /* Linedef type for an ordinary inter-room non-secret door */
-short random_doortype(level *l, config *c, style *s)
+short random_doortype(s_level *l, s_config *c, s_style *s)
 {
   short answer;
 
@@ -3186,7 +3224,7 @@ short random_doortype(level *l, config *c, style *s)
   return answer;
 }
 
-short random_slifttype(config *c, style *s)
+short random_slifttype(s_config *c, s_style *s)
 {
   short answer;
 
@@ -3196,7 +3234,7 @@ short random_slifttype(config *c, style *s)
   return answer;
 }
 
-int random_sillheight(config *c, style *s)
+int random_sillheight(s_config *c, s_style *s)
 {
   if (s->window_grate) {
     if (rollpercent(50)) return 0;
@@ -3204,18 +3242,18 @@ int random_sillheight(config *c, style *s)
   } else return 28 + 4 * roll(6);
 }
 
-int random_windowheight(config *c, style *s)
+int random_windowheight(s_config *c, s_style *s)
 {
   if (s->window_grate) return 64 + roll(16);     /* Does this make any sense? */
     else return 16 + 4 * roll(9);
 }
 
-int random_windowborder(config *c, style *s)
+int random_windowborder(s_config *c, s_style *s)
 {
   return 4 + 4 * roll(6);
 }
 
-int random_windowdecor(config*c, style *s)
+int random_windowdecor(s_config*c, s_style *s)
 {
   switch (roll(5)) {
     case 0:
@@ -3226,7 +3264,7 @@ int random_windowdecor(config*c, style *s)
   }
 }
 
-int random_lightboxlighting(config*c, style *s)
+int random_lightboxlighting(s_config*c, s_style *s)
 {
   switch (roll(4)) {
     case 0: return LIGHTBOX_NORMAL;
@@ -3237,9 +3275,9 @@ int random_lightboxlighting(config*c, style *s)
 }
 
 /* Various plants etc; should be from the config also of course. */
-genus *random_plant(config *c, style *s)
+s_genus *random_plant(s_config *c, s_style *s)
 {
-  genus *answer;
+  s_genus *answer;
   int tcount;
 
   tcount = (c->gamemask & DOOM1_BIT) ? 3 : 4;
@@ -3264,15 +3302,15 @@ genus *random_plant(config *c, style *s)
 
 /* Can return NULL if there are no explodables that are */
 /* compatible with the theme. */
-genus *random_barrel(config *c, style *s)
+s_genus *random_barrel(s_config *c, s_style *s)
 {
   return random_thing0(EXPLODES,c,s,0,10000);
 }
 
 /* A lamp or similar decoration, tall or short */
-genus *random_lamp0(config *c, style *s)
+s_genus *random_lamp0(s_config *c, s_style *s)
 {
-  genus *answer;
+  s_genus *answer;
 
   answer = random_thing0(LIGHT,c,s,70,10000);
   if (answer==NULL) answer = random_thing0(LIGHT,c,s,0,10000);
@@ -3280,7 +3318,7 @@ genus *random_lamp0(config *c, style *s)
 }
 
 /* A lamp or similar decoration, no taller than a player */
-genus *random_shortlamp0(config *c, style *s)
+s_genus *random_shortlamp0(s_config *c, s_style *s)
 {
   return random_thing0(LIGHT,c,s,0,56);
 }
@@ -3288,9 +3326,9 @@ genus *random_shortlamp0(config *c, style *s)
 
 /* Return the number of a random construct family that contains at */
 /* least one construct compatible with this style's theme.  */
-int construct_family_for(config *c, style *s)
+int construct_family_for(s_config *c, s_style *s)
 {
-  construct *cs;
+  s_construct *cs;
   int tmask = 0x01 << s->theme_number;
 #define MAX_COMPATIBLE_FAMILIES (5)
   int compats[MAX_COMPATIBLE_FAMILIES];
@@ -3321,13 +3359,13 @@ int construct_family_for(config *c, style *s)
 /* given style.  Vary is a number from 0 to 100 saying how     */
 /* noisy the copy should be; not linear!  If vary is 100, old  */
 /* can be NULL or whatever.                                    */
-style *copy_style(level *l,style *old,int themenumber,int vary,config *c)
+s_style *copy_style(s_level *l,s_style *old,int themenumber,int vary,s_config *c)
 {
-  style *answer;
+  s_style *answer;
 
   /* Is this the correct sort of nonlinearity? */
 
-  answer = (style *)malloc(sizeof(*answer));
+  answer = (s_style *)malloc(sizeof(*answer));
   answer->next = l->style_anchor;
   l->style_anchor = answer;
   answer->theme_number = themenumber;
@@ -3488,36 +3526,36 @@ style *copy_style(level *l,style *old,int themenumber,int vary,config *c)
   return answer;
 }
 
-/* Return a new style derived from the given one, based on the config */
+/* Return a new style derived from the given one, based on the s_config */
 /* If "radical", choose a whole new theme.  Else don't.               */
 /* should be.  It's not linear!                                      */
-style *new_style(level *l,style *old, boolean radical, config *c)
+s_style *new_style(s_level *l,s_style *old, boolean radical, s_config *c)
 {
   int newtheme = radical ? c->rad_newtheme : c->norm_newtheme;
   int vary = radical ? c->rad_vary : c->norm_vary;
 
   if ((!c->lock_themes)&&rollpercent(newtheme)) {  /* Sometimes entirely new */
     return copy_style(l,old,random_theme(c),100,c);
-  } else if (rollpercent(vary)) {  /* Sometimes new, same theme */
+  } else if (rollpercent(vary)) {  /* Sometimes new, same s_theme */
     return copy_style(l,old,old->theme_number,100,c);
-  } else {   /* else partly new, same theme */
+  } else {   /* else partly new, same s_theme */
     return copy_style(l,old,old->theme_number,vary,c);
   }
 }
 
 /* Return a random style structure according to the configuration */
-style *random_style(level *l,config *c)
+s_style *random_style(s_level *l,s_config *c)
 {
   return copy_style(l,NULL,random_theme(c),100,c);
 }
 
 /* Shockingly special-purpose routine that puts some stuff into */
 /* a room that contains a gate in the midtile. */
-void gate_populate(level *l,sector *s,haa *haa, boolean first, config *c)
+void gate_populate(s_level *l,s_sector *s,s_haa *haa, boolean first, s_config *c)
 {
   int minx,miny,maxx,maxy;
   short tlx, tly, thx, thy;
-  genus *m;
+  s_genus *m;
   int levels;
 
   if (first) return;   /* punt! */
@@ -3578,7 +3616,7 @@ void gate_populate(level *l,sector *s,haa *haa, boolean first, config *c)
 
 /* Put monsters and health and armor and stuff in the room */
 /* Update the health/ammo/armor estimate structure also    */
-void populate(level *l,sector *s,config *c,haa *haa,boolean first_room)
+void populate(s_level *l,s_sector *s,s_config *c,s_haa *haa,boolean first_room)
 {
   if ((!first_room)||(c->immediate_monsters))
     place_monsters(l,s,c,haa);
@@ -3593,7 +3631,7 @@ void populate(level *l,sector *s,config *c,haa *haa,boolean first_room)
 /* enough rooms into the current quest yet?             */
 /* This routine can also mess with the current quest,   */
 /* to do special end-stuff, like arenas.                */
-boolean enough_quest(level *l,sector *s,quest *ThisQuest,config *c)
+boolean enough_quest(s_level *l,s_sector *s,s_quest *ThisQuest,s_config *c)
 {
 #ifndef NOT_DOING_ARENAS
   /* Perhaps an arena? */
@@ -3625,7 +3663,7 @@ boolean enough_quest(level *l,sector *s,quest *ThisQuest,config *c)
 /* given config structure.  Use s in error messages.  If conly, */
 /* all we're parsing for here are -config and -seed.            */
 /* Print msg and return FALSE if error, else return TRUE.       */
-boolean do_switches(int argc,char *argv[],config *c,char *s,int conly)
+boolean do_switches(int argc,char *argv[],s_config *c,char *s,int conly)
 {
   int i;
 
@@ -3795,9 +3833,9 @@ boolean do_switches(int argc,char *argv[],config *c,char *s,int conly)
 }
 
 /* Put this object in this sector.  It's a non-obstable object */
-thing *place_required_pickable(level *l,sector *s,config *c,short id)
+s_thing *place_required_pickable(s_level *l,s_sector *s,s_config *c,short id)
 {
-  thing *answer;
+  s_thing *answer;
 
   answer = place_object(l,s,c,id,48,0,0,0,7);   /* 48 for nice-looking-ness */
   if (answer==NULL)
@@ -3806,7 +3844,7 @@ thing *place_required_pickable(level *l,sector *s,config *c,short id)
   return answer;
 }
 
-thing *place_required_small_pickable(level *l,sector *s,config *c)
+s_thing *place_required_small_pickable(s_level *l,s_sector *s,s_config *c)
 {
   short tid;
 
@@ -3818,14 +3856,14 @@ thing *place_required_small_pickable(level *l,sector *s,config *c)
 
 /* This is for sector-specific texture alignment.  Is there */
 /* some reason to want to do that?                          */
-void align_textures(level *l,sector *oldsector,config *c)
+void align_textures(s_level *l,s_sector *oldsector,s_config *c)
 {
   return;
 }
 
 /* Do these two sidedefs share any texture(s) that should */
 /* be aligned together?                                   */
-boolean common_texture(sidedef *sd1, sidedef *sd2)
+boolean common_texture(s_sidedef *sd1, s_sidedef *sd2)
 {
   /* Pass along most of the job to coalignable(). */
   if (sd1->middle_texture->name[0]!='-') {
@@ -3846,10 +3884,10 @@ boolean common_texture(sidedef *sd1, sidedef *sd2)
   return 0;
 }
 
-void global_align_forward(level *l, linedef *ld)
+void global_align_forward(s_level *l, s_linedef *ld)
 {
-  vertex *v;
-  linedef *ld2;
+  s_vertex *v;
+  s_linedef *ld2;
   int newoff;
 
   v = ld->to;
@@ -3867,14 +3905,14 @@ void global_align_forward(level *l, linedef *ld)
           if (ld2->right->x_offset!=newoff)
             ld->f_misaligned = 1;
         }
-      }  /* end if common texture */
+      }  /* end if common s_texture */
   }  /* end for ld2 */
 }
 
-void global_align_backward(level *l, linedef *ld)
+void global_align_backward(s_level *l, s_linedef *ld)
 {
-  vertex *v;
-  linedef *ld2;
+  s_vertex *v;
+  s_linedef *ld2;
   int newoff;
 
   v = ld->from;
@@ -3892,11 +3930,11 @@ void global_align_backward(level *l, linedef *ld)
           if (ld2->right->x_offset!=newoff)
             ld->b_misaligned = 1;
         }
-      }  /* end if common texture */
+      }  /* end if common s_texture */
   }  /* end for ld2 */
 }
 
-void global_align_linedef(level *l, linedef *ld)
+void global_align_linedef(s_level *l, s_linedef *ld)
 {
   ld->marked = 1;
   global_align_group_backbone_forward(l,ld);
@@ -3905,9 +3943,9 @@ void global_align_linedef(level *l, linedef *ld)
   global_align_group_etc_backward(l,ld);
 }
 
-void global_align_group_backbone_forward(level *l,linedef *ld)
+void global_align_group_backbone_forward(s_level *l,s_linedef *ld)
 {
-  linedef *ldnext;
+  s_linedef *ldnext;
   int newoff;
 
   if (NULL != (ldnext = ld->group_next)) {
@@ -3925,31 +3963,31 @@ void global_align_group_backbone_forward(level *l,linedef *ld)
         if (ldnext->right->x_offset!=newoff)
           ldnext->f_misaligned = 1;
       }
-    }  /* end if common texture */
+    }  /* end if common s_texture */
   }
 }
 
-void global_align_group_etc_forward(level *l,linedef *ld)
+void global_align_group_etc_forward(s_level *l,s_linedef *ld)
 {
-  linedef *ldnext;
+  s_linedef *ldnext;
 
   if (NULL != (ldnext = ld->group_next))
     global_align_group_etc_forward(l,ldnext);
   global_align_forward(l,ld);
 }
 
-void global_align_group_etc_backward(level *l,linedef *ld)
+void global_align_group_etc_backward(s_level *l,s_linedef *ld)
 {
-  linedef *ldnext;
+  s_linedef *ldnext;
 
   if (NULL != (ldnext = ld->group_previous))
     global_align_group_etc_backward(l,ldnext);
   global_align_backward(l,ld);
 }
 
-void global_align_group_backbone_backward(level *l,linedef *ld)
+void global_align_group_backbone_backward(s_level *l,s_linedef *ld)
 {
-  linedef *ldprev;
+  s_linedef *ldprev;
   int newoff;
 
   if (NULL != (ldprev = ld->group_previous)) {
@@ -3967,17 +4005,17 @@ void global_align_group_backbone_backward(level *l,linedef *ld)
         if (ldprev->right->x_offset!=newoff)
           ldprev->b_misaligned = 1;
       }
-    }  /* end if common texture */
+    }  /* end if common s_texture */
   }
 }
 
-/* Align textures all around the level */
-void global_align_textures(level *l,config *c)
+/* Align textures all around the s_level */
+void global_align_textures(s_level *l,s_config *c)
 {
   /* This complicated knot of recursives seem pretty good. */
   /* It doesn't know about NOSPLITs and stuff yet, and it */
   /* only does horizontal alignment.  Should we do Y here also? */
-  linedef *ld1, *ld2;
+  s_linedef *ld1, *ld2;
   int newoff;
 
   announce(LOG,"Globally aligning...");
@@ -4063,19 +4101,19 @@ void global_align_textures(level *l,config *c)
   return;
 }
 
-/* Random other last-minute fixups to a level */
-void global_fixups(level *l)
+/* Random other last-minute fixups to a s_level */
+void global_fixups(s_level *l)
 {
-  linedef *ld;
+  s_linedef *ld;
 
   for (ld=l->linedef_anchor;ld;ld=ld->next)
     if (ld->left==NULL) ld->flags |= IMPASSIBLE;
 }
 
-/* This just paints all one-sided boundary sidddefs of the sector */
-void paint_room(level *l,sector *s,style *ThisStyle,config *c)
+/* This just paints all one-sided boundary sidddefs of the s_sector */
+void paint_room(s_level *l,s_sector *s,s_style *ThisStyle,s_config *c)
 {
-  linedef *ld;
+  s_linedef *ld;
 
   for (ld=l->linedef_anchor;ld;ld=ld->next) {
     if (ld->right)
@@ -4097,9 +4135,9 @@ void paint_room(level *l,sector *s,style *ThisStyle,config *c)
 /* Construct a linedef on the left side of this linedef, */
 /* <depth> away from it and pro-parallel to it.          */
 /* If old is not NULL, re-use it, just changing its to and from. */
-linedef *make_parallel(level *l,linedef *ld,int depth,linedef *old)
+s_linedef *make_parallel(s_level *l,s_linedef *ld,int depth,s_linedef *old)
 {
-  vertex *v1, *v2;
+  s_vertex *v1, *v2;
   int x,y;
 
   point_from(ld->from->x, ld->from->y, ld->to->x, ld->to->y,
@@ -4126,20 +4164,20 @@ linedef *make_parallel(level *l,linedef *ld,int depth,linedef *old)
 /* Return the sector.  If the edge1 and edge2 args are not null, */
 /* they get the from-joining new linedef, and the to-joining one */
 /* respectively.                                                 */
-sector *make_box_ext(level *l,linedef *ldf1, linedef *ldf2,
-                        style *ThisStyle, config *c,
-                        linedef **edge1, linedef **edge2)
+s_sector *make_box_ext(s_level *l,s_linedef *ldf1, s_linedef *ldf2,
+                        s_style *ThisStyle, s_config *c,
+                        s_linedef **edge1, s_linedef **edge2)
 {
-  sector *answer;
-  linedef *ldnew1, *ldnew2;
-  sector *oldsec;
+  s_sector *answer;
+  s_linedef *ldnew1, *ldnew2;
+  s_sector *oldsec;
 
   /* Make the orthogonal sides */
   ldnew1 = new_linedef(l,ldf1->from,ldf2->from);
   ldnew2 = new_linedef(l,ldf2->to,ldf1->to);
   if (edge1) *edge1 = ldnew1;
   if (edge2) *edge2 = ldnew2;
-  /* Now tie them all to a sector */
+  /* Now tie them all to a s_sector */
   answer = new_sector(l,0,0,c->sky_flat,c->sky_flat);
   answer->style = ThisStyle;
   if (ldf1->right) {
@@ -4169,12 +4207,12 @@ sector *make_box_ext(level *l,linedef *ldf1, linedef *ldf2,
 /* Given a one-sided linedef, construct a rectangular sector on */
 /* the left side of it, of the given depth.  Returns the other  */
 /* (parallel) long side.                                        */
-linedef *lefthand_box_ext(level *l,linedef *ldf1,int depth,
-                              style *ThisStyle,config *c,
-                              linedef **nld1, linedef **nld2)
+s_linedef *lefthand_box_ext(s_level *l,s_linedef *ldf1,int depth,
+                              s_style *ThisStyle,s_config *c,
+                              s_linedef **nld1, s_linedef **nld2)
 {
-  linedef *answer;
-  sector *s;
+  s_linedef *answer;
+  s_sector *s;
 
   /* Get the other side of the box */
   answer = make_parallel(l,ldf1,depth,NULL);
@@ -4185,10 +4223,10 @@ linedef *lefthand_box_ext(level *l,linedef *ldf1,int depth,
 /* Find the corners of the minimal enclosing rectangle around the */
 /* given sector.  Or something like that.  Uses a cache in the    */
 /* sector record for speed.  How dangerous is that? */
-void find_rec(level *l, sector *s, int *minx, int *miny, int *maxx, int *maxy)
+void find_rec(s_level *l, s_sector *s, int *minx, int *miny, int *maxx, int *maxy)
 {
   /* Not a stub, but many of its callers are */
-  linedef *ld;
+  s_linedef *ld;
 
   if (!s->findrec_data_valid) {
     int lx,ly,hx,hy;
@@ -4212,7 +4250,7 @@ void find_rec(level *l, sector *s, int *minx, int *miny, int *maxx, int *maxy)
   *minx = s->minx;  *miny = s->miny;  *maxx = s->maxx;  *maxy = s->maxy;
 }
 
-void dump_link(linedef *ldf1,linedef *ldf2,link *ThisLink,char *s1)
+void dump_link(s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,char *s1)
 {
   char s[200];
 
@@ -4242,11 +4280,11 @@ void dump_link(linedef *ldf1,linedef *ldf2,link *ThisLink,char *s1)
 }
 
 /* Push a new (defaulty) quest onto the given stack */
-quest *push_quest(quest *old)
+s_quest *push_quest(s_quest *old)
 {
-  quest *answer;
+  s_quest *answer;
 
-  answer = (quest *)malloc(sizeof(*answer));
+  answer = (s_quest *)malloc(sizeof(*answer));
 
   answer->goal = NULL_GOAL;
   answer->tag = 0;
@@ -4261,9 +4299,9 @@ quest *push_quest(quest *old)
 }
 
 /* Pop the top off the stack, free it, return new top */
-quest *pop_quest(quest *current)
+s_quest *pop_quest(s_quest *current)
 {
-  quest *answer;
+  s_quest *answer;
 
   answer = current->next;
   free(current);
@@ -4300,13 +4338,13 @@ void Usage2(void)
    order, do any existing linedefs between unmarked vertexes
    intersect any of these four lines?  Probably pretty suboptimal!
 */
-boolean empty_rectangle(level *l, int x1, int y1, int x2, int y2,
+boolean empty_rectangle(s_level *l, int x1, int y1, int x2, int y2,
                                   int x3, int y3, int x4, int y4)
 {
   int minx, maxx, miny, maxy;
-  vertex *v;
-  sector *s;
-  linedef *ld;
+  s_vertex *v;
+  s_sector *s;
+  s_linedef *ld;
 
   /* Find the enclosing rectangle of these points */
   if (x1>x2) {
@@ -4391,7 +4429,7 @@ boolean empty_rectangle(level *l, int x1, int y1, int x2, int y2,
 /* side, negative if to the left.  May return HUGE_NUMBER if */
 /* the point is not in either axis-shadow of the linedef, and */
 /* may assume that the linedef is basically axis-parallel. */
-int point_from_linedef(level *l, int x, int y, linedef *ld)
+int point_from_linedef(s_level *l, int x, int y, s_linedef *ld)
 {
   int answer = HUGE_NUMBER;
   int candidate;
@@ -4463,12 +4501,12 @@ int point_from_linedef(level *l, int x, int y, linedef *ld)
 
 }
 
-/* Are any non-flying monsters so close to this linedef */
+/* Are any non-flying monsters so close to this s_linedef */
 /* that if the sides of the linedef were unwalkable, the */
 /* monster would be stuck? */
-boolean no_monsters_stuck_on(level *l, linedef *ld)
+boolean no_monsters_stuck_on(s_level *l, s_linedef *ld)
 {
-  thing *m;
+  s_thing *m;
   int dist;
 
   for (m=l->thing_anchor;m;m=m->next) {
@@ -4493,11 +4531,11 @@ boolean no_monsters_stuck_on(level *l, linedef *ld)
 /* it is.  Or something like that.  NULL if in no sector. */
 /* Set <danger>, if non-NULL, if any non-normal linedef is */
 /* within 48 of the point. */
-sector *point_sector(level *l,int x, int y, int *dist, boolean *danger)
+s_sector *point_sector(s_level *l,int x, int y, int *dist, boolean *danger)
 {
   int thisdist, closest;
-  linedef *ld, *ldbest;
-  sector *answer = NULL;
+  s_linedef *ld, *ldbest;
+  s_sector *answer = NULL;
 
   if (danger!=NULL) *danger = FALSE;
   closest = HUGE_NUMBER;
@@ -4537,7 +4575,7 @@ sector *point_sector(level *l,int x, int y, int *dist, boolean *danger)
 /* Return a patch array followed by MUS-format pseudo-MIDI */
 /* for one piece of music, and fill in the given header */
 /* with the data it needs.  Return value is free()able. */
-byte *one_piece(musheader *pmh)
+byte *one_piece(s_musheader *pmh)
 {
   byte *answer;
   byte patch = roll(128);
@@ -4551,13 +4589,13 @@ byte *one_piece(musheader *pmh)
   pmh->secchannels = 0;
   pmh->dummy = 0;
   pmh->patches = 1;
-  pmh->headerlength = sizeof(musheader)+pmh->patches*sizeof(short);
+  pmh->headerlength = sizeof(s_musheader)+pmh->patches*sizeof(short);
   pmh->muslength = 17;
   answer = (byte *)malloc( pmh->patches*sizeof(short)+pmh->muslength );
   answer[0] = patch;  /* instrument */
   answer[1] = 0;
   answer[2] = 0x40;  /* Control change, channel zero */
-  answer[3] = 0x00;  /* Select patch */
+  answer[3] = 0x00;  /* Select s_patch */
   answer[4] = patch; /* that again */
   answer[5] = 0x40;  /* Control change, channel zero */
   answer[6] = 0x07;  /* volume */
@@ -4579,9 +4617,9 @@ byte *one_piece(musheader *pmh)
 }
 
 /* Allocate, initialize, and return a new lmp for custom textures */
-texture_lmp *new_texture_lmp(char *name)
+s_texture_lmp *new_texture_lmp(char *name)
 {
-  texture_lmp *answer = (texture_lmp *)malloc(sizeof(*answer));
+  s_texture_lmp *answer = (s_texture_lmp *)malloc(sizeof(*answer));
 
   answer->name = strdup(name);
   answer->custom_texture_anchor = NULL;
@@ -4589,11 +4627,11 @@ texture_lmp *new_texture_lmp(char *name)
 }
 
 /* Allocate, initialize, register with the texture (but don't */
-/* bother returning) a new patch for this texture */
-void add_patch(custom_texture *ct,short patchid,short x,short y)
+/* bother returning) a new patch for this s_texture */
+void add_patch(s_custom_texture *ct,short patchid,short x,short y)
 {
-  patch *answer = (patch *)malloc(sizeof(*answer));
-  patch *p;
+  s_patch *answer = (s_patch *)malloc(sizeof(*answer));
+  s_patch *p;
 
   answer->number = patchid;
   answer->x = x;
@@ -4609,11 +4647,11 @@ void add_patch(custom_texture *ct,short patchid,short x,short y)
 }
 
 /* Allocate, initialize, register with the given lmp, and return */
-/* a new custom texture record structure thing */
-custom_texture *new_custom_texture(texture_lmp *tl,char *name,
+/* a new custom texture record structure s_thing */
+s_custom_texture *new_custom_texture(s_texture_lmp *tl,char *name,
                                    short xsize, short ysize)
 {
-  custom_texture *answer = (custom_texture *)malloc(sizeof(*answer));
+  s_custom_texture *answer = (s_custom_texture *)malloc(sizeof(*answer));
 
   answer->name = strdup(name);
   answer->xsize = xsize;
@@ -4625,17 +4663,17 @@ custom_texture *new_custom_texture(texture_lmp *tl,char *name,
 }
 
 /* Free up all resources associated with a texture lump */
-void free_texture_lmp(texture_lmp *tl)
+void free_texture_lmp(s_texture_lmp *tl)
 {
-  custom_texture* ctp;
-  patch *p;
+  s_custom_texture* ctp;
+  s_patch *p;
 
-  /* Free each texture */
+  /* Free each s_texture */
   for (;;) {
     ctp = tl->custom_texture_anchor;
     if (ctp==NULL) break;
     tl->custom_texture_anchor = tl->custom_texture_anchor->next;
-    /* Free each patch */
+    /* Free each s_patch */
     for (;;) {
       p = ctp->patch_anchor;
       if (p==NULL) break;
@@ -4650,19 +4688,19 @@ void free_texture_lmp(texture_lmp *tl)
 }
 
 /* Dump the given texture lmp to the given dump-handle */
-void dump_texture_lmp(dumphandle dh,texture_lmp *tl)
+void dump_texture_lmp(dumphandle dh,s_texture_lmp *tl)
 {
   int texturecount = 0;
   int patchcount;
   int lmpsize,isize,i;
-  custom_texture *ct;
-  patch *p;
+  s_custom_texture *ct;
+  s_patch *p;
   byte *buf, *tbuf;
 
   /* First figure entire lmp size.  Four bytes of tcount... */
   lmpsize = 4;
 
-  /* Plus four-plus-22 bytes per texture, plus 10 per patch */
+  /* Plus four-plus-22 bytes per texture, plus 10 per s_patch */
   for (ct=tl->custom_texture_anchor;ct;ct=ct->next) {
     texturecount++;
     lmpsize += 4 + 22;    /* Four bytes index, 22 bytes structure */
@@ -4722,10 +4760,10 @@ void dump_texture_lmp(dumphandle dh,texture_lmp *tl)
 /* we might want to show off by using.  Only works in DOOM2, sadly. */
 /* In DOOM I, we'd have to recreate the entire TEXTURE2 (or 1) lump, */
 /* and then add our stuff to it. */
-void record_custom_textures(dumphandle dh, config *c)
+void record_custom_textures(dumphandle dh, s_config *c)
 {
-  texture_lmp *tl;
-  custom_texture *ct;
+  s_texture_lmp *tl;
+  s_custom_texture *ct;
 
   /* Return if TEXTURE2 not available */
   if (c->gamemask&(DOOM0_BIT|DOOM1_BIT|DOOMI_BIT)) return;
@@ -4779,7 +4817,7 @@ void record_custom_textures(dumphandle dh, config *c)
 }  /* end record_custom_textures */
 
 
-/* A primitive not-quite-random-field image-writing thing */
+/* A primitive not-quite-random-field image-writing s_thing */
 void basic_background(byte *fbuf, byte bottom, int range)
 {
   int i,j;
@@ -4807,7 +4845,7 @@ void basic_background(byte *fbuf, byte bottom, int range)
   }
 }
 
-/* A primitive not-quite-random-field image-writing thing */
+/* A primitive not-quite-random-field image-writing s_thing */
 void basic_background2(byte *fbuf, byte bottom, int range)
 {
   int i,j;
@@ -4853,7 +4891,7 @@ void basic_background2(byte *fbuf, byte bottom, int range)
   }
 }
 
-/* A primitive not-quite-random-field image-writing thing */
+/* A primitive not-quite-random-field image-writing s_thing */
 void basic_background3(byte *fbuf, byte bottom, int range)
 {
   int i,j;
@@ -4907,7 +4945,7 @@ byte pbuf[TLMPSIZE(0x80,0x40)];      /* Also */
 
 /* Record any custom flats that we might want to show off by using. */
 /* This is *much* simpler than textures! */
-void record_custom_flats(dumphandle dh, config *c, boolean even_unused)
+void record_custom_flats(dumphandle dh, s_config *c, boolean even_unused)
 {
   short i,j,x,x2,y,dx,dy;
   boolean started = FALSE;
@@ -5060,7 +5098,7 @@ void record_custom_flats(dumphandle dh, config *c, boolean even_unused)
 
 /* Record any custom/replacement patches that we might want to show off */
 /* by using. */
-void record_custom_patches(dumphandle dh, config *c, boolean even_unused)
+void record_custom_patches(dumphandle dh, s_config *c, boolean even_unused)
 {
   int rows, columns, i, j, lsize;
   byte *p, thispel;
@@ -5079,7 +5117,7 @@ void record_custom_patches(dumphandle dh, config *c, boolean even_unused)
     rows = 0x80;
     columns = 0x40;
     lsize = TLMPSIZE(rows,columns);
-    if (lsize>sizeof(pbuf))
+    if (lsize > (int)sizeof(pbuf))
       announce(ERROR,"Buffer overflow in r_c_t()");
     p = pbuf;
     /* The picture header */
@@ -5122,7 +5160,7 @@ void record_custom_patches(dumphandle dh, config *c, boolean even_unused)
     rows = 0x80;
     columns = 0x40;
     lsize = TLMPSIZE(rows,columns);
-    if (lsize>sizeof(pbuf))
+    if (lsize > (int)sizeof(pbuf))
       announce(ERROR,"Buffer overflow in r_c_t()");
     p = pbuf;
     /* The picture header */
@@ -5171,11 +5209,11 @@ void record_custom_patches(dumphandle dh, config *c, boolean even_unused)
     /* First a little correlated noise for "dirtying" */
     basic_background2(fbuf,0,5);
 
-    /* Then the actual patch */
+    /* Then the actual s_patch */
     rows = 0x80;
     columns = 0x40;
     lsize = TLMPSIZE(rows,columns);
-    if (lsize>sizeof(pbuf))
+    if (lsize > (int)sizeof(pbuf))
       announce(ERROR,"Buffer overflow in r_c_t()");
     p = pbuf;
     /* The picture header */
@@ -5218,9 +5256,9 @@ void record_custom_patches(dumphandle dh, config *c, boolean even_unused)
 
 /* Compose replacements for the music sections used by the */
 /* given config, and send them out the dumphandle. */
-void make_music(dumphandle dh, config *c)
+void make_music(dumphandle dh, s_config *c)
 {
-  musheader mh;
+  s_musheader mh;
   byte *musbuf;
 
   /* Definitely a stub! */
@@ -5238,7 +5276,7 @@ void make_music(dumphandle dh, config *c)
 }  /* end stubby make_music() */
 
 /* Should there be a secret level after the current level? */
-boolean need_secret_level(config *c)
+boolean need_secret_level(s_config *c)
 {
   if (c->do_seclevels==FALSE) return FALSE;
   if (c->map==15) return TRUE;
@@ -5254,15 +5292,15 @@ boolean need_secret_level(config *c)
 
 /* Make a secret level following the current level.  With luck, */
 /* the current level has an exit to it! */
-void make_secret_level(dumphandle dh, haa *oldhaa, config *c)
+void make_secret_level(dumphandle dh, s_haa *oldhaa, s_config *c)
 {
-  config *SecConfig;
-  level SecLevel;
-  haa *SecHaa;
+  s_config *SecConfig;
+  s_level SecLevel;
+  s_haa *SecHaa;
 
-  SecConfig = (config *)malloc(sizeof(*SecConfig));
+  SecConfig = (s_config *)malloc(sizeof(*SecConfig));
   memcpy(SecConfig,c,sizeof(*c));
-  SecHaa = (haa *)malloc(sizeof(*SecHaa));
+  SecHaa = (s_haa *)malloc(sizeof(*SecHaa));
   memcpy(SecHaa,oldhaa,sizeof(*oldhaa));
   secretize_config(SecConfig);
   if (SecConfig->map==31) SecConfig->map++;
@@ -5286,7 +5324,7 @@ void make_secret_level(dumphandle dh, haa *oldhaa, config *c)
 /* Can this link be locked to the given quest?   Note that this is */
 /* only called to check if an existing link made up at random can  */
 /* be locked, so it can false-negative sometimes safely.           */
-boolean link_fitsq(link *ThisLink,quest *ThisQuest)
+boolean link_fitsq(s_link *ThisLink,s_quest *ThisQuest)
 {
   if (ThisQuest==NULL) return TRUE;  /* Nothing to fit */
 
@@ -5308,7 +5346,7 @@ boolean link_fitsq(link *ThisLink,quest *ThisQuest)
 }
 
 /* Will this link fit along this linedef? */
-boolean link_fitsh(linedef *ldf,link *ThisLink,config *c)
+boolean link_fitsh(s_linedef *ldf,s_link *ThisLink,s_config *c)
 {
    int available, required;
 
@@ -5346,12 +5384,12 @@ boolean link_fitsh(linedef *ldf,link *ThisLink,config *c)
 /* Note that barwidth must be 32 or less, because the algorithm   */
 /* has some quirks that I really ought to fix; if barwidth is too */
 /* big, it can recurse forever or something like that.            */
-void barify(level *l,linedef *ldf1,linedef *ldf2,quest *ThisQuest,
-            int barwidth,sector *newsector,style *ThisStyle,config *c)
+void barify(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_quest *ThisQuest,
+            int barwidth,s_sector *newsector,s_style *ThisStyle,s_config *c)
 {
-  linedef *ld1a, *ld1b, *ld2a, *ld2b, *ldedge1, *ldedge2;
-  sector *oldsector;
-  texture *t1;
+  s_linedef *ld1a, *ld1b, *ld2a, *ld2b, *ldedge1, *ldedge2;
+  s_sector *oldsector;
+  s_texture *t1;
   short type1;
 
   if (linelen(ldf1)<=32) return;  /* Already impassable */
@@ -5420,11 +5458,11 @@ void barify(level *l,linedef *ldf1,linedef *ldf2,quest *ThisQuest,
 /* and recurse on the halves, for a set of slits.  Use the given  */
 /* sector for the sector in the slits, or make one if NULL.       */
 /* Sort of like both barify() and make_window().                  */
-boolean slitify(level *l,linedef *ldf1,linedef *ldf2, int slitwidth,
-                sector *newsector,style *ThisStyle,config *c)
+boolean slitify(s_level *l,s_linedef *ldf1,s_linedef *ldf2, int slitwidth,
+                s_sector *newsector,s_style *ThisStyle,s_config *c)
 {
-  linedef *ld1a, *ld2a, *ldedge1, *ldedge2;
-  sector *nearsector, *farsector;
+  s_linedef *ld1a, *ld2a, *ldedge1, *ldedge2;
+  s_sector *nearsector, *farsector;
   short newch, newch2, newfh, newfh2;
   int len = linelen(ldf1);
 
@@ -5499,16 +5537,16 @@ boolean slitify(level *l,linedef *ldf1,linedef *ldf2, int slitwidth,
 /* will make it into a flight of climbable stairs from nearheight */
 /* at the ldf1 end to farheight at the ldf2 end. */
 /* Should level-hugeness do anything in here? */
-void stairify(level *l,linedef *ldf1,linedef *ldf2,linedef *lde1,
-              linedef *lde2,short nearheight,short farheight,
-              quest *ThisQuest, style *ThisStyle, config *c)
+void stairify(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_linedef *lde1,
+              s_linedef *lde2,short nearheight,short farheight,
+              s_quest *ThisQuest, s_style *ThisStyle, s_config *c)
 {
-  linedef *ldn1, *ldn2, *ldl;
-  sector *s, *nearsec;
+  s_linedef *ldn1, *ldn2, *ldl;
+  s_sector *s, *nearsec;
   int len, stepdepth, i;
   int minstepcount, maxstepcount, stepcount, stepheight;
   boolean need_lock = (ThisQuest!=NULL) && (ThisQuest->goal==SWITCH_GOAL);
-  texture *front = ThisStyle->kickplate;
+  s_texture *front = ThisStyle->kickplate;
   boolean do_edges = FALSE;
 
   nearsec = ldf1->right->sector;
@@ -5618,8 +5656,8 @@ void stairify(level *l,linedef *ldf1,linedef *ldf2,linedef *lde1,
 
 /* Make the given sector into a standard door, opened by the */
 /* given linedefs.  Doesn't do any flipping, or alter jambs. */
-void doorify(sector *s,linedef *ldf1,linedef *ldf2,
-             style *ThisStyle,style *NewStyle, config *c)
+void doorify(s_sector *s,s_linedef *ldf1,s_linedef *ldf2,
+             s_style *ThisStyle,s_style *NewStyle, s_config *c)
 {
   /* Needs to use style more, but almost done */
   int lensq;
@@ -5706,12 +5744,12 @@ void doorify(sector *s,linedef *ldf1,linedef *ldf2,
 }  /* end doorify */
 
 /* Make a window between the given antiparallel linedefs */
-boolean make_window_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                                 style *ThisStyle,style *NewStyle,config *c)
+boolean make_window_inner(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                                 s_style *ThisStyle,s_style *NewStyle,s_config *c)
 {
-  linedef *ldnew1, *ldnew2;
-  sector *nearsec, *farsec, *newsec;
-  texture *t1, *t2;
+  s_linedef *ldnew1, *ldnew2;
+  s_sector *nearsec, *farsec, *newsec;
+  s_texture *t1, *t2;
   int len;
 
   announce(VERBOSE,"Making a window");
@@ -5820,16 +5858,16 @@ boolean make_window_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 
 /* Make a window between the given antiparallel linedefs, */
 /* possibly elaborately. */
-boolean make_window(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                           style *ThisStyle,style *NewStyle,config *c)
+boolean make_window(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                           s_style *ThisStyle,s_style *NewStyle,s_config *c)
 {
   if ((distancesquared(ldf1->to->x,ldf1->to->y,ldf2->from->x,ldf2->from->y)
       >=(l->hugeness*l->hugeness*96*96)) && c->window_airshafts) {
-    linedef *ld1n, *ld2n, *lde1, *lde2;
-    sector *newsec;
+    s_linedef *ld1n, *ld2n, *lde1, *lde2;
+    s_sector *newsec;
     short newfh, newch;
-    sector *nearsec = ldf1->right->sector;
-    sector *farsec = ldf2->right->sector;
+    s_sector *nearsec = ldf1->right->sector;
+    s_sector *farsec = ldf2->right->sector;
     boolean rc1, rc2;
     ld1n = make_parallel(l,ldf1,16*l->hugeness,NULL);
     flip_linedef(ld1n);
@@ -5871,13 +5909,13 @@ boolean make_window(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 }
 
 /* Make a decorative room between the given antiparallel linedefs */
-boolean make_decroom(level *l,linedef *ldf1,linedef *ldf2,config *c)
+boolean make_decroom(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_config *c)
 {
-  linedef *ldnew1, *ldnew2;
-  sector *nearsec, *farsec, *newsec;
-  texture *t1;
+  s_linedef *ldnew1, *ldnew2;
+  s_sector *nearsec, *farsec, *newsec;
+  s_texture *t1;
   int len;
-  style *ThisStyle = ldf1->right->sector->style;
+  s_style *ThisStyle = ldf1->right->sector->style;
 
   nearsec = ldf1->right->sector;
   farsec = ldf2->right->sector;
@@ -5932,7 +5970,7 @@ boolean make_decroom(level *l,linedef *ldf1,linedef *ldf2,config *c)
 
   len = linelen(ldnew1);
   if (len>31) {  /* Inset a bit */
-    linedef *lt1, *lt2;
+    s_linedef *lt1, *lt2;
     /* Unhook from alignment groups, for simplicity */
     if (ldf1->group_previous) {
       ldf1->group_previous->group_next = NULL;
@@ -5975,7 +6013,7 @@ boolean make_decroom(level *l,linedef *ldf1,linedef *ldf2,config *c)
 
 }  /* end make_decroom */
 
-texture *texture_for_key(short key, style *s, config *c)
+s_texture *texture_for_key(short key, s_style *s, s_config *c)
 {
   switch (key) {
     case ID_BLUEKEY:
@@ -5989,9 +6027,9 @@ texture *texture_for_key(short key, style *s, config *c)
   return c->error_texture;
 }
 
-texture *texture_for_bits(propertybits pb, style *s, config *c)
+s_texture *texture_for_bits(propertybits pb, s_style *s, s_config *c)
 {
-  texture *answer = NULL;
+  s_texture *answer = NULL;
 
   switch (pb) {
     case BLUE: answer = s->blueface; break;
@@ -6019,11 +6057,11 @@ short type_for_key(short key)
 
 /* Mark the given door of the given level to look like it's locked */
 /* with the given key (thingid).                                   */
-void mark_door_for_key(level *l,linedef *ldf1,short key,
-                       style *ThisStyle,config *c)
+void mark_door_for_key(s_level *l,s_linedef *ldf1,short key,
+                       s_style *ThisStyle,s_config *c)
 {
-  linedef *ldf2;
-  texture *t1;
+  s_linedef *ldf2;
+  s_texture *t1;
 
   if (ThisStyle->gaudy_locks) {
     announce(VERBOSE,"Gaudy door");
@@ -6038,7 +6076,7 @@ void mark_door_for_key(level *l,linedef *ldf1,short key,
   }
 }
 
-void mark_door_for_lock(level *l,linedef *ldf1,style *ThisStyle,config *c)
+void mark_door_for_lock(s_level *l,s_linedef *ldf1,s_style *ThisStyle,s_config *c)
 {
   if (ThisStyle->lockdoorface==NULL) return;
   if (ThisStyle->lockdoorface->height!=128)
@@ -6051,7 +6089,7 @@ void mark_door_for_lock(level *l,linedef *ldf1,style *ThisStyle,config *c)
 
 /* Given a linedef type, return the equivalent linedef type, */
 /* only locked with the given key.  If there isn't one, return 0 */
-short locked_linedef_for(short type,short key,config *c)
+short locked_linedef_for(short type,short key,s_config *c)
 {
   switch (type) {
     case LINEDEF_S1_OPEN_DOOR:
@@ -6075,7 +6113,7 @@ short locked_linedef_for(short type,short key,config *c)
 }
 
 /* Make the sector look likeit's in the range of a light */
-void make_lighted(level *l, sector *s, config *c)
+void make_lighted(s_level *l, s_sector *s, s_config *c)
 {
   /* Too many hardcoded constants! */
   if (rollpercent(60))
@@ -6085,13 +6123,13 @@ void make_lighted(level *l, sector *s, config *c)
     s->special = RANDOM_BLINK;
 }
 
-/* Make a nice box with a thing to the left of the linedef */
-linedef *lightbox(level *l,linedef *ld,genus *g,style *ThisStyle,config *c)
+/* Make a nice box with a thing to the left of the s_linedef */
+s_linedef *lightbox(s_level *l,s_linedef *ld,s_genus *g,s_style *ThisStyle,s_config *c)
 {
   int len;
-  linedef *ldb;
+  s_linedef *ldb;
   int x,y;
-  sector *oldsec, *newsec;
+  s_sector *oldsec, *newsec;
 
   len = linelen(ld);
   if (len<48) return NULL;  /* All these "48"s should vary, eh? */ /* Hugeness? */
@@ -6119,13 +6157,13 @@ linedef *lightbox(level *l,linedef *ld,genus *g,style *ThisStyle,config *c)
   return ld;
 }
 
-/* Make a nice bar with lights to the left of the linedef */
+/* Make a nice bar with lights to the left of the s_linedef */
 /* Actually looks pretty terrible!  Fix before using */
-void lightbar(level *l,linedef *ld,propertybits pb,style *ThisStyle,config *c)
+void lightbar(s_level *l,s_linedef *ld,propertybits pb,s_style *ThisStyle,s_config *c)
 {
   int len, wid, dep;
-  linedef *ldb,*lde1,*lde2;
-  sector *oldsec, *newsec;
+  s_linedef *ldb,*lde1,*lde2;
+  s_sector *oldsec, *newsec;
 
   len = linelen(ld);
   if (len<16) return;
@@ -6140,7 +6178,7 @@ void lightbar(level *l,linedef *ld,propertybits pb,style *ThisStyle,config *c)
    lde1->right->middle_texture =
    lde2->right->middle_texture = texture_for_bits(pb,ThisStyle,c);
   {
-    texture *t = lde1->right->middle_texture;
+    s_texture *t = lde1->right->middle_texture;
     if (t!=ThisStyle->wall0)
       if (!(t->props & LIGHT))
         announce(LOG,"Colorbar");
@@ -6156,11 +6194,11 @@ void lightbar(level *l,linedef *ld,propertybits pb,style *ThisStyle,config *c)
 /* Return a <width>-long linedef which is the center of */
 /* the given linedef.  In ld2, return the linedef that  */
 /* is the far part of the triply-split line.            */
-linedef *centerpart(level *l,linedef *ld,linedef **ld2,int width,
-                    style *ThisStyle,config *c)
+s_linedef *centerpart(s_level *l,s_linedef *ld,s_linedef **ld2,int width,
+                    s_style *ThisStyle,s_config *c)
 {
   int len, border;
-  linedef *answer, *answer2;
+  s_linedef *answer, *answer2;
 
   len = linelen(ld);
   border = (len - width) / 2;
@@ -6180,14 +6218,14 @@ linedef *centerpart(level *l,linedef *ld,linedef **ld2,int width,
 /* Return a <width>-long linedef which is the center of */
 /* the given linedef.  Optionally embellish the borders, */
 /* if called for in the style. */
-linedef *borderize(level *l,linedef *ld,int width,boolean fancy,
-                   style *ThisStyle,propertybits pb,genus *keyg,
-                   boolean *painted_door,config *c)
+s_linedef *borderize(s_level *l,s_linedef *ld,int width,boolean fancy,
+                   s_style *ThisStyle,propertybits pb,s_genus *keyg,
+                   boolean *painted_door,s_config *c)
 {
-  linedef *answer, *ld2;
-  sector *nearsec = ld->right->sector;
-  sector *lsec;
-  linedef *ldt;
+  s_linedef *answer, *ld2;
+  s_sector *nearsec = ld->right->sector;
+  s_sector *lsec;
+  s_linedef *ldt;
   boolean try_keybox = TRUE;
 
   answer = centerpart(l,ld,&ld2,width,ThisStyle,c);
@@ -6202,7 +6240,7 @@ linedef *borderize(level *l,linedef *ld,int width,boolean fancy,
         if ((linelen(ld)>=64)) {
           short box_light_level = nearsec->light_level;
           short box_special = 0;
-          genus *g = keyg;
+          s_genus *g = keyg;
           if (g==NULL) {
             if (rollpercent(l->p_barrels*2))
               g = random_barrel(c,ThisStyle);
@@ -6265,14 +6303,14 @@ linedef *borderize(level *l,linedef *ld,int width,boolean fancy,
 
 /* Try sticking a falling-core trap into the core bounded by the */
 /* two given linedefs. */
-void try_falling_core(level *l,linedef *ld1,linedef *ld2,haa *haa,config *c)
+void try_falling_core(s_level *l,s_linedef *ld1,s_linedef *ld2,s_haa *haa,s_config *c)
 {
   int len, depth;
   boolean room1, room2;
-  linedef *ldn1, *ldn2, *ldfar;
-  sector *oldsec, *coresec;
-  sector *downsec1 = NULL;
-  sector *downsec2 = NULL;
+  s_linedef *ldn1, *ldn2, *ldfar;
+  s_sector *oldsec, *coresec;
+  s_sector *downsec1 = NULL;
+  s_sector *downsec2 = NULL;
   short downspec;
 
   oldsec = ld1->right->sector;
@@ -6391,9 +6429,9 @@ void try_falling_core(level *l,linedef *ld1,linedef *ld2,haa *haa,config *c)
 
 /* Implement the given link between the given linedefs. */
 /* For OPEN and BASIC links, these are antiparallel. */
-void establish_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                     quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                     haa *haa,config *c)
+void establish_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                     s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                     s_haa *haa,s_config *c)
 {
   switch (ThisLink->type) {
     case BASIC_LINK:
@@ -6429,12 +6467,12 @@ void establish_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 
 /* Implement the given link between the given (antiparallel) linedefs. */
 /* Decide which way is up-going, call the inner routine. */
-void establish_open_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                         quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                         haa *haa,config *c)
+void establish_open_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                         s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                         s_haa *haa,s_config *c)
 {
   int newfloor;
-  sector *nearsec, *farsec;
+  s_sector *nearsec, *farsec;
   boolean need_lock;
 
   need_lock = (ThisQuest) && ( (ThisQuest->goal==SWITCH_GOAL) ||
@@ -6482,14 +6520,14 @@ void establish_open_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 
 /* Implement the given link between the given (antiparallel) linedefs, */
 /* always upward-going. */
-void e_ol_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                haa *haa,config *c)
+void e_ol_inner(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                s_haa *haa,s_config *c)
 {
-  linedef *ldf1a, *ldf1b, *ldf2a, *ldf2b;
-  linedef *lde1, *lde2, *ldes;
-  sector *sideseca, *sidesecb, *midsec;
-  sector *nearsec, *farsec;
+  s_linedef *ldf1a, *ldf1b, *ldf2a, *ldf2b;
+  s_linedef *lde1, *lde2, *ldes;
+  s_sector *sideseca, *sidesecb, *midsec;
+  s_sector *nearsec, *farsec;
   int midwidth, len, sidefloor, dieroll;
   boolean nukage = FALSE;
   boolean high_sides = FALSE;
@@ -6567,7 +6605,7 @@ void e_ol_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
   if (((len-midwidth)/2)<33) midwidth = len - 66;
   if (midwidth<33) midwidth = 33;
 
-  /* Decide if doing the sideways-step thing */
+  /* Decide if doing the sideways-step s_thing */
   if ( (ThisLink->bits&LINK_STEPS) && (ThisLink->bits&LINK_ALCOVE) &&
        (midwidth>=(farsec->floor_height - nearsec->floor_height)) ) {
     sidesteps = TRUE;
@@ -6729,7 +6767,7 @@ void e_ol_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
     announce(VERBOSE,"Open stairs");
     /* Maybe stick on some lights */
     if (rollpercent(50)) {                      /* 50 should vary? */
-      genus *g = ThisStyle->lamp0;
+      s_genus *g = ThisStyle->lamp0;
       if (g->height>(sideseca->ceiling_height-sideseca->floor_height))
         g = ThisStyle->shortlamp0;
       if ( (high_sides&&((len-midwidth)/2 >= 2 * g->width)) ||
@@ -6838,9 +6876,9 @@ void e_ol_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 
 /* Implement the given link between the given (antiparallel) linedefs. */
 /* Set bits for any ephemera, then call inner recursive routine.  */
-void establish_basic_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                          quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                          haa *haa,config *c)
+void establish_basic_link(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                          s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                          s_haa *haa,s_config *c)
 {
   ThisStyle->lightboxes = rollpercent(5);  /* Should be from style, or? */
   e_bl_inner(l,ldf1,ldf2,ThisLink,ThisQuest,ThisStyle,NewStyle,0,haa,c);
@@ -6851,22 +6889,22 @@ void establish_basic_link(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 /* Potentially recursive, for windows and twinnings.                  */
 /* Needs lots of cleaning up and organizing and splitting into */
 /* smaller functions!                                          */
-void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
-                     quest *ThisQuest,style *ThisStyle,style *NewStyle,
-                     short flipstate, haa *haa,config *c)
+void e_bl_inner(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,
+                     s_quest *ThisQuest,s_style *ThisStyle,s_style *NewStyle,
+                     short flipstate, s_haa *haa,s_config *c)
 {
-  linedef *ldnew1, *ldnew2;
+  s_linedef *ldnew1, *ldnew2;
   int len, border, maxtop;
-  texture *t1, *t2;
-  sector *nearsec, *farsec, *newsec = NULL;
+  s_texture *t1, *t2;
+  s_sector *nearsec, *farsec, *newsec = NULL;
   boolean need_to_doorify = FALSE;
-  linedef *ldflip1a = NULL;
-  linedef *ldflip1b = NULL;
-  linedef *ldflip2a = NULL;
-  linedef *ldflip2b = NULL;
-  sector *sflip1 = NULL;
-  sector *sflip2 = NULL;
-  linedef *ldedge1, *ldedge2;
+  s_linedef *ldflip1a = NULL;
+  s_linedef *ldflip1b = NULL;
+  s_linedef *ldflip2a = NULL;
+  s_linedef *ldflip2b = NULL;
+  s_sector *sflip1 = NULL;
+  s_sector *sflip2 = NULL;
+  s_linedef *ldedge1, *ldedge2;
   int tag1 = 0;
   boolean trigger_lift = FALSE;
   boolean trigger_door = FALSE;
@@ -6910,7 +6948,7 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
   nearsec = ldf1->right->sector;
   farsec = ldf2->right->sector;
 
-  /* Figure floor and ceiling heights for new sector */
+  /* Figure floor and ceiling heights for new s_sector */
   farsec->floor_height = nearsec->floor_height + ThisLink->floordelta;
   farsec->ceiling_height = farsec->floor_height + NewStyle->wallheight0;
 
@@ -6936,7 +6974,7 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
     }
   }
 
-  /* If we need to twin, split and recurse, or do the window thing */
+  /* If we need to twin, split and recurse, or do the window s_thing */
   if ((flipstate==0)&&(ThisLink->bits&LINK_TWIN)) {
     len = linelen(ldf1)/2;
     ldnew1 = split_linedef(l,ldf1,len,c);
@@ -7179,7 +7217,7 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
     ldf2 = ldnew2;
   }
 
-  /* If no core or alcoves, make the one arch/door sector */
+  /* If no core or alcoves, make the one arch/door s_sector */
   if (!(ThisLink->bits&(LINK_CORE|LINK_ALCOVE))) {
     flip_linedef(ldf2);
     newsec = make_box_ext(l,ldf1,ldf2,ThisStyle,c,&ldnew1,&ldnew2);
@@ -7299,7 +7337,7 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 
   /* If alcoves, make them now, and take new linedefs */
   if (ThisLink->bits&LINK_ALCOVE) {
-    linedef *ldedgeopen, *ldedgeclosed;
+    s_linedef *ldedgeopen, *ldedgeclosed;
     announce(VERBOSE,"Making alcoves");
     ldnew1 = lefthand_box_ext(l,ldf1,ThisLink->width2,ThisStyle,c,&ldedge1,&ldedge2);
     if (effective_left) {
@@ -7376,8 +7414,8 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
   /* If the core is stairs, put in all but the last */
   if (ThisLink->bits&LINK_STEPS) {
     int i, depth, stepdelta, x, y;
-    texture *front = ThisStyle->kickplate;
-    genus *g = ThisStyle->lamp0;
+    s_texture *front = ThisStyle->kickplate;
+    s_genus *g = ThisStyle->lamp0;
     boolean add_lamps = FALSE;
     if (g->height>ThisLink->height1) g = ThisStyle->shortlamp0;
     depth = ThisLink->depth3 / (ThisLink->stepcount+1);
@@ -7549,10 +7587,10 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
     patch_upper(ldf2,NewStyle->wall0,c);
   }  /* end if doing a lift */
 
-  /* Maybe put a monster in the link */
+  /* Maybe put a monster in the s_link */
   if ((haa!=NULL)&&(ThisLink->bits&LINK_CORE)&&(rollpercent(40))) {
     int levels;
-    genus *m = timely_monster(haa,c,&levels,rollpercent(l->p_biggest_monsters),0);
+    s_genus *m = timely_monster(haa,c,&levels,rollpercent(l->p_biggest_monsters),0);
     if (m) {
       if (rollpercent(15)) levels |= 0x08;   /* deaf */
       /* Try to place it */
@@ -7614,9 +7652,9 @@ void e_bl_inner(level *l,linedef *ldf1,linedef *ldf2,link *ThisLink,
 }  /* end e_bl_inner() */
 
 /* Return a random linedef in the plain; no sidedefs or anything. */
-linedef *starting_linedef(level *l,style *ThisStyle,config *c)
+s_linedef *starting_linedef(s_level *l,s_style *ThisStyle,s_config *c)
 {
-  vertex *v1,*v2;
+  s_vertex *v1,*v2;
 
   v1 = new_vertex(l,0,0);  /* Might as well */
   /* Should consult the style/config? */
@@ -7677,12 +7715,12 @@ void announce(int announcelevel, char *s)
 /* that new linedef, else the old one.  Doesn't set the */
 /* type or tag, just the texture and stuff.   If xld is */
 /* given, it gets the two-sided center part of ld. */
-linedef *install_switch(level *l,linedef *ld,boolean recess,boolean fancy,
-                        short key, style *ThisStyle,config *c,linedef **xld)
+s_linedef *install_switch(s_level *l,s_linedef *ld,boolean recess,boolean fancy,
+                        short key, s_style *ThisStyle,s_config *c,s_linedef **xld)
 {
-  linedef *ld2, *ldedge1, *ldedge2;
+  s_linedef *ld2, *ldedge1, *ldedge2;
   int rdepth = 8;
-  texture *tx = NULL;
+  s_texture *tx = NULL;
 
   if (fancy) {
     ThisStyle->lightboxes = TRUE;
@@ -7699,7 +7737,7 @@ linedef *install_switch(level *l,linedef *ld,boolean recess,boolean fancy,
        if (!empty_left_side(l,ld,rdepth)) rdepth=8;
     }
     if (empty_left_side(l,ld,rdepth)) {
-      texture *t1 = ld->right->middle_texture;
+      s_texture *t1 = ld->right->middle_texture;
       ld2 = lefthand_box_ext(l,ld,rdepth,ThisStyle,c,&ldedge1,&ldedge2);
       ld2->right->sector->ceiling_height =
         ld2->right->sector->floor_height + 72;  /* Should vary? */
@@ -7728,7 +7766,7 @@ linedef *install_switch(level *l,linedef *ld,boolean recess,boolean fancy,
 
 /* Perhaps add a deathmatch start to this sector, if it doesn't */
 /* already have one, and we're doing deathmatch stuff. */
-boolean maybe_add_dm_start(level *l, sector *s, config *c, boolean force) {
+boolean maybe_add_dm_start(s_level *l, s_sector *s, s_config *c, boolean force) {
 
   if (!c->do_dm) return FALSE;
   if (s->has_dm && !force) return FALSE;
@@ -7745,9 +7783,9 @@ boolean maybe_add_dm_start(level *l, sector *s, config *c, boolean force) {
 
 /* Does anything involved with closing a quest that has to happen */
 /* -after- the room is populated and embellished and stuff.       */
-void close_quest_final(level *l, sector *s, quest *q, haa *haa, config *c)
+void close_quest_final(s_level *l, s_sector *s, s_quest *q, s_haa *haa, s_config *c)
 {
-  thing *t = q->thing;
+  s_thing *t = q->thing;
 
   l->goal_room = s;
 
@@ -7775,7 +7813,7 @@ void close_quest_final(level *l, sector *s, quest *q, haa *haa, config *c)
   if (need_secret_level(c) && !l->sl_done &&!l->sl_tag &&
       q->goal==LEVEL_END_GOAL) {
     int i;
-    linedef *ldf;
+    s_linedef *ldf;
     i = mark_decent_boundary_linedefs(l,s,32);
     ldf = random_marked_linedef(l,i);
     unmark_linedefs(l);
@@ -7793,11 +7831,11 @@ void close_quest_final(level *l, sector *s, quest *q, haa *haa, config *c)
 /* Make one of them instant-death rooms, like at the end */
 /* of E1M8, using the linedef in the linkto(), and the */
 /* style for the walls 'n' stuff. */
-short death_room(level *l,linedef *ld,style *ThisStyle,config *c)
+short death_room(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c)
 {
-  linedef *ldnew;
-  link *gatelink = gate_link(l,c);
-  sector *newsector;
+  s_linedef *ldnew;
+  s_link *gatelink = gate_link(l,c);
+  s_sector *newsector;
   int minx,miny,maxx,maxy;
   int x;
 
@@ -7831,7 +7869,7 @@ short death_room(level *l,linedef *ld,style *ThisStyle,config *c)
 
 /* Simple trial implementation: just an "EXIT" gate to */
 /* an e1m8 instant-death room. */
-boolean e1m8_gate(level *l,linedef *ld,sector *s,haa *haa,config *c)
+boolean e1m8_gate(s_level *l,s_linedef *ld,s_sector *s,s_haa *haa,s_config *c)
 {
   short tag = death_room(l,ld,s->style,c);
 
@@ -7846,23 +7884,23 @@ boolean e1m8_gate(level *l,linedef *ld,sector *s,haa *haa,config *c)
 
 /* Put down zero or more of the required powerups in the */
 /* arena's prep-room. */
-void prepare_arena_gate(level *l,sector *s,arena *a, haa *haa,config *c)
+void prepare_arena_gate(s_level *l,s_sector *s,s_arena *a, s_haa *haa,s_config *c)
 {
   /*STUB!*/
 }
 
 /* Actually put down the main linedefs and sectors */
 /* and stuff for the arena. */
-void install_arena(level *l,arena *a,sector *s,haa *haa,config *c)
+void install_arena(s_level *l,s_arena *a,s_sector *s,s_haa *haa,s_config *c)
 {
   int maxx = 0-HUGE_NUMBER;
-  vertex *v, *v1, *v2, *v3, *v4;
-  vertex *vt1, *vt2;
+  s_vertex *v, *v1, *v2, *v3, *v4;
+  s_vertex *vt1, *vt2;
   int upness, acrossness, border, i, n;
-  sector *newsec;
-  linedef *ld;
+  s_sector *newsec;
+  s_linedef *ld;
   short ch;
-  genus *lamp;
+  s_genus *lamp;
 
   ch = 128;   /* Too simple */
   newsec = new_sector(l,0,ch,a->floor,c->sky_flat);
@@ -7975,7 +8013,7 @@ void install_arena(level *l,arena *a,sector *s,haa *haa,config *c)
     ld->right->middle_texture = a->walls;
   }
 
-  /* Now the inner sector */
+  /* Now the inner s_sector */
 
   ch = 256 + 64 * roll(3);  /* Too simple? */
   newsec = new_sector(l,0,ch,a->floor,c->sky_flat);
@@ -7993,7 +8031,7 @@ void install_arena(level *l,arena *a,sector *s,haa *haa,config *c)
 
   /* Some sector adjustments... */
   if (rollpercent(30) && (a->props&ARENA_PORCH)) {
-    flat *light_flat;
+    s_flat *light_flat;
     a->outersec->special = RANDOM_BLINK;
     a->outersec->light_level += 20;
     if (a->outersec->light_level > l->bright_light_level)
@@ -8070,14 +8108,14 @@ void install_arena(level *l,arena *a,sector *s,haa *haa,config *c)
 
 /* Make the arrival area, where the player first enters */
 /* the arena, as well as any powerups he needs. */
-void arena_arrival(level *l,arena *a,haa *haa,config *c)
+void arena_arrival(s_level *l,s_arena *a,s_haa *haa,s_config *c)
 {
   int minx,maxx;
   int cx,cy;
   float na0, na1, na2;   /* Needed ammos */
   int f0,f1,f2;
   int mask = 7;
-  sector *newsec;
+  s_sector *newsec;
 
   minx = a->minx;
   maxx = a->minx + ( a->maxx - a->minx ) / 3;
@@ -8092,7 +8130,7 @@ void arena_arrival(level *l,arena *a,haa *haa,config *c)
 
   /* except for this */
   if (a->props&ARENA_ARRIVAL_HOLE) {
-    linedef *ld1,*ld2,*ld3,*ld4;
+    s_linedef *ld1,*ld2,*ld3,*ld4;
     newsec = clone_sector(l,a->innersec);
     newsec->floor_height -= 384;   /* Down in a hole! */
     parallel_innersec_ex(l,a->innersec,newsec,
@@ -8152,13 +8190,13 @@ void arena_arrival(level *l,arena *a,haa *haa,config *c)
 
 /* Make some decorations, ponds, cover, and so on in */
 /* the arena.  */
-void arena_decor(level *l,arena *a,haa *haa,config *c)
+void arena_decor(s_level *l,s_arena *a,s_haa *haa,s_config *c)
 {
   /* STUB; just a pillar in the center */
   int cx,cy,xmult,ymult,zmult;
-  sector *newsec;
-  texture *tm;
-  linedef *ld1, *ld2, *ld3, *ld4;
+  s_sector *newsec;
+  s_texture *tm;
+  s_linedef *ld1, *ld2, *ld3, *ld4;
 
   if (rollpercent(25)) {
     xmult=1;
@@ -8193,7 +8231,7 @@ void arena_decor(level *l,arena *a,haa *haa,config *c)
   ld3->flags &= ~LOWER_UNPEGGED;
   ld4->flags &= ~LOWER_UNPEGGED;
   if ((a->props&ARENA_LAMPS)&&rollpercent(50)) {
-    genus *lamp;
+    s_genus *lamp;
     lamp = a->innersec->style->lamp0;
     if ( (a->innersec->ceiling_flat != c->sky_flat) &
          (lamp->height < (a->innersec->ceiling_height - newsec->floor_height)))
@@ -8214,7 +8252,7 @@ void arena_decor(level *l,arena *a,haa *haa,config *c)
 
 /* Put down the main enemy for the arena, his structures, */
 /* and whatever ending gates and/or switches are needed. */
-void arena_boss(level *l,arena *a,haa *haa,config *c)
+void arena_boss(s_level *l,s_arena *a,s_haa *haa,s_config *c)
 {
   /* STUB */
   int cx,cy;
@@ -8231,8 +8269,8 @@ void arena_boss(level *l,arena *a,haa *haa,config *c)
   if ((c->episode==2)&&(c->mission==8)) need_switch = FALSE;
   if ((c->episode==3)&&(c->mission==8)) need_switch = FALSE;
   if (((c->episode==4)&&(c->mission==8))||(c->map==7)) {
-    linedef *ld1, *ld2, *ld3, *ld4;
-    sector *newsec;
+    s_linedef *ld1, *ld2, *ld3, *ld4;
+    s_sector *newsec;
     need_switch = FALSE;
     cx -= 32;
     cx &= ~(63);
@@ -8260,8 +8298,8 @@ void arena_boss(level *l,arena *a,haa *haa,config *c)
     ld4->flags &= ~LOWER_UNPEGGED;
   }
   if ((c->episode==1)&&(c->mission==8)) {
-    linedef *ld1, *ld2, *ld3, *ld4;
-    sector *newsec;
+    s_linedef *ld1, *ld2, *ld3, *ld4;
+    s_sector *newsec;
     short tag = death_room(l,NULL,a->innersec->style,c);
     if (tag) {
       need_switch = FALSE;
@@ -8297,8 +8335,8 @@ void arena_boss(level *l,arena *a,haa *haa,config *c)
   }
 
   if (need_switch) {
-    linedef *ld;
-    texture *tm;
+    s_linedef *ld;
+    s_texture *tm;
     cx -= 64;
     cy += a->boss->width+8;
     parallel_innersec_ex(l,a->innersec,NULL,
@@ -8325,14 +8363,14 @@ void arena_boss(level *l,arena *a,haa *haa,config *c)
 /* Gate out to a big place to fight bosses. */
 /* NOTE: this renders the haa invalid at the moment, and so can only */
 /* be used in an Episode 8, or the end of a PWAD. */
-void arena_gate(level *l,sector *s,haa *haa,config *c)
+void arena_gate(s_level *l,s_sector *s,s_haa *haa,s_config *c)
 {
-  arena *ThisArena = new_arena(l,c);
+  s_arena *ThisArena = new_arena(l,c);
   unsigned int newseed = bigrand();
 
   if (s->gate) announce(WARNING,"Stacked gates?");
 
-  /* Put in an exit-style outgoing gate */
+  /* Put in an exit-style outgoing s_gate */
   s->gate = new_gate(l,0,new_tag(l),0,FALSE,c);
   ThisArena->fromtag = s->gate->out_tag;
   install_gate(l,s,s->style,haa,FALSE,c);   /* Don't want EXIT style, eh? */
@@ -8364,14 +8402,14 @@ void arena_gate(level *l,sector *s,haa *haa,config *c)
 
 /* A room that has a big well in the center that eventually rises */
 /* while you fight the awful monsters with the big teeth. */
-boolean rising_room(level *l,sector *s,config *c,haa *haa,quest *ThisQuest)
+boolean rising_room(s_level *l,s_sector *s,s_config *c,s_haa *haa,s_quest *ThisQuest)
 {
   int minx, miny, maxx, maxy;
   int xborder, yborder, depth;
-  sector *newsec;
+  s_sector *newsec;
   boolean did_trigger = FALSE;
-  linedef *ld1,*ld2,*ld3,*ld4;
-  thing *t;
+  s_linedef *ld1,*ld2,*ld3,*ld4;
+  s_thing *t;
   short tid = rollpercent(50) ? ID_POTION : ID_HELMET;
 
   if (s->gate) return FALSE;
@@ -8458,13 +8496,13 @@ boolean rising_room(level *l,sector *s,config *c,haa *haa,quest *ThisQuest)
 }
 
 
-/* Put whatever's required by this quest into this sector */
-void close_quest(level *l,sector *s,quest *q,haa *haa,config *c)
+/* Put whatever's required by this quest into this s_sector */
+void close_quest(s_level *l,s_sector *s,s_quest *q,s_haa *haa,s_config *c)
 {
-  linedef *ld;
+  s_linedef *ld;
   int i, j;
-  thing *t;
-  texture *tm;
+  s_thing *t;
+  s_texture *tm;
   boolean done = FALSE;
 
   s->has_key = TRUE;
@@ -8521,7 +8559,7 @@ void close_quest(level *l,sector *s,quest *q,haa *haa,config *c)
           }
         }
         if ((!done)&&(s->gate==NULL)&&rollpercent(c->p_gate_ends_level)) {
-          /* Do an exit gate */
+          /* Do an exit s_gate */
           s->gate = new_gate(l,0,0,0,TRUE,c);
           install_gate(l,s,s->style,haa,FALSE,c);
           gate_populate(l,s,haa,FALSE,c);  /* Some stuff */
@@ -8587,10 +8625,10 @@ void close_quest(level *l,sector *s,quest *q,haa *haa,config *c)
 /* Consider "pushing" the current quest, which really means */
 /* putting its goal right here, but guarding it with something */
 /* that still has to be quested for. */
-void maybe_push_quest(level *l,sector *s,quest *q,config *c)
+void maybe_push_quest(s_level *l,s_sector *s,s_quest *q,s_config *c)
 {
   short newkey;
-  linedef *ld;
+  s_linedef *ld;
   short locked_linedef_type;
   int i;
 
@@ -8615,7 +8653,7 @@ void maybe_push_quest(level *l,sector *s,quest *q,config *c)
   ld->type = locked_linedef_type;
   ld->tag = q->tag;
 
-  /* Now modify the quest */
+  /* Now modify the s_quest */
   q->goal = KEY_GOAL;
   q->type = newkey;
   q->tag = 0;
@@ -8630,8 +8668,8 @@ void maybe_push_quest(level *l,sector *s,quest *q,config *c)
 /* its to and from. */
 /* For most links this will be an antiparallel linedef on the left */
 /* side of this one. */
-linedef *make_linkto(level *l,linedef *ld,link *ThisLink, style *ThisStyle,
-                     config *c, linedef *old)
+s_linedef *make_linkto(s_level *l,s_linedef *ld,s_link *ThisLink, s_style *ThisStyle,
+                     s_config *c, s_linedef *old)
 {
   int depth;
 
@@ -8658,8 +8696,8 @@ linedef *make_linkto(level *l,linedef *ld,link *ThisLink, style *ThisStyle,
     depth = ThisLink->depth1;
     break;
   case GATE_LINK: {
-    linedef *ldnew;
-    vertex *v, *v1;
+    s_linedef *ldnew;
+    s_vertex *v, *v1;
     int newsize;
     int minx = HUGE_NUMBER;
     for (v=l->vertex_anchor;v;v=v->next) if (v->x < minx) minx = v->x;
@@ -8691,9 +8729,9 @@ linedef *make_linkto(level *l,linedef *ld,link *ThisLink, style *ThisStyle,
 }
 
 /* Given two antiparallel linedefs, does there seem to be an empty */
-/* rectangle between their left sides, or whatever else this link  */
+/* rectangle between their left sides, or whatever else this s_link  */
 /* needs? */
-boolean link_fitsv(level *l,linedef *ldf1, linedef *ldf2, link *ThisLink)
+boolean link_fitsv(s_level *l,s_linedef *ldf1, s_linedef *ldf2, s_link *ThisLink)
 {
   boolean answer;
 
@@ -8718,7 +8756,7 @@ boolean link_fitsv(level *l,linedef *ldf1, linedef *ldf2, link *ThisLink)
   return answer;
 }
 
-void mid_tile(level *l, sector *s,
+void mid_tile(s_level *l, s_sector *s,
               short *tlx, short *tly, short *thx, short *thy)
 {
   int minx,miny,maxx,maxy;
@@ -8738,7 +8776,7 @@ void mid_tile(level *l, sector *s,
 
 /* Is it OK to obstruct the middle (as defined by mid_tile()) tile */
 /* of this sector?  i.e. might it block a way or a door? */
-boolean ok_to_block_mid_tile(level *l, sector *s)
+boolean ok_to_block_mid_tile(s_level *l, s_sector *s)
 {
   short tlx, tly, thx, thy;
   int minx, miny, maxx, maxy;
@@ -8754,12 +8792,12 @@ boolean ok_to_block_mid_tile(level *l, sector *s)
 }
 
 /* Given a bare linedef, make a room extending from its right side. */
-sector *generate_room_outline(level *l,linedef *ld,style *ThisStyle,
-                              boolean try_reduction,config *c)
+s_sector *generate_room_outline(s_level *l,s_linedef *ld,s_style *ThisStyle,
+                              boolean try_reduction,s_config *c)
 {
-  sector *answer;
-  linedef *newld;
-  vertex *v1,*v2;
+  s_sector *answer;
+  s_linedef *newld;
+  s_vertex *v1,*v2;
   int x1,y1,x2,y2,len1,len2;
 
   /* Very simple squarish rooms */
@@ -8847,10 +8885,10 @@ sector *generate_room_outline(level *l,linedef *ld,style *ThisStyle,
 /* Return a random link that will fit on this linedef, */
 /* and that can be locked for this quest (if any). */
 /* Note that ld can be NULL, meaning "don't worry about it" */
-link *random_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                   config *c)
+s_link *random_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                   s_config *c)
 {
-  link *answer = NULL;
+  s_link *answer = NULL;
   boolean open_ok = TRUE;
 
   if (ld) if (linelen(ld)<100) open_ok = FALSE;
@@ -8881,13 +8919,13 @@ link *random_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
   return answer;
 }
 
-/* Return a random open link that will fit on this linedef */
+/* Return a random open link that will fit on this s_linedef */
 /* Note that ld can be NULL, meaning "don't worry about it" */
-link *random_open_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                       config *c)
+s_link *random_open_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                       s_config *c)
 {
   int dieroll, len = 0;
-  link *answer = (link *)malloc(sizeof (*answer));
+  s_link *answer = (s_link *)malloc(sizeof (*answer));
 
   answer->bits = 0;
   answer->type = OPEN_LINK;
@@ -8933,14 +8971,14 @@ link *random_open_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
   return answer;
 }
 
-/* Return a random basic link that will fit on this linedef */
+/* Return a random basic link that will fit on this s_linedef */
 /* Note that ld can be NULL, meaning "don't worry about it" */
 /* This routine has grown like kudzu, and needs to be */
 /* heavily pruned and organized and fixed. */
-link *random_basic_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
-                        config *c)
+s_link *random_basic_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_quest *ThisQuest,
+                        s_config *c)
 {
-  link *answer;
+  s_link *answer;
   int dieroll;
   int len = 0;
   boolean need_door = FALSE;
@@ -8948,7 +8986,7 @@ link *random_basic_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
 
   if (ld) len = linelen(ld);
 
-  answer = (link *)malloc(sizeof (*answer));
+  answer = (s_link *)malloc(sizeof (*answer));
 
   /* Should use style and config more here and there */
 
@@ -9159,7 +9197,7 @@ link *random_basic_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
   /* From here on down all we do is turn off fancy bits that worry us, */
   /* or make sure core-depth isn't too small. */
 
-  /* Make sure we're not twinning/alcoving on a too-narrow linedef */
+  /* Make sure we're not twinning/alcoving on a too-narrow s_linedef */
   /* Although this should all be covered above already */
   if (ld) {
     if (len<144) answer->bits &= ~(LINK_TWIN|LINK_ALCOVE);
@@ -9193,13 +9231,13 @@ link *random_basic_link(level *l,linedef *ld,style *ThisStyle,quest *ThisQuest,
 
 }  /* end random_link() */
 
-/* Make a cool recessed lightstrip in the given linedef */
-void make_lightstrip(level *l, linedef *ld,style *ThisStyle,int ll,int depth,
-                     int spec, int fh, int ch, config *c)
+/* Make a cool recessed lightstrip in the given s_linedef */
+void make_lightstrip(s_level *l, s_linedef *ld,s_style *ThisStyle,int ll,int depth,
+                     int spec, int fh, int ch, s_config *c)
 {
-  linedef *ldnew;
-  sector *s;
-  texture *t;
+  s_linedef *ldnew;
+  s_sector *s;
+  s_texture *t;
 
   /* should do an empty_area check here */
   t = ld->right->middle_texture;
@@ -9238,7 +9276,7 @@ void make_lightstrip(level *l, linedef *ld,style *ThisStyle,int ll,int depth,
 
 /* Is there an <sdepth> empty area on the lefthand side */
 /* of the linedef?                                      */
-boolean empty_left_side(level *l, linedef *ld, int sdepth)
+boolean empty_left_side(s_level *l, s_linedef *ld, int sdepth)
 {
   int newx1, newy1, newx2, newy2;
   boolean rc;
@@ -9262,11 +9300,11 @@ boolean empty_left_side(level *l, linedef *ld, int sdepth)
 /* in sno places.  sno must be 2 or 3.                        */
 /* Makes boring rectangular rooms a little more interesting */
 /* Seems to have some strange bugs */
-void swell_linedef(level *l,linedef *ld,style *ThisStyle,config *c,
+void swell_linedef(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c,
                    int sno,int sdepth)
 {
   int len,newx1,newy1,newx2,newy2;
-  linedef *ldnew1, *ldnew2;
+  s_linedef *ldnew1, *ldnew2;
   boolean rc;
   char logstring[200];
 
@@ -9302,7 +9340,7 @@ void swell_linedef(level *l,linedef *ld,style *ThisStyle,config *c,
 }  /* end swell_linedef */
 
 /* Should these textures be aligned as if they were the same? */
-boolean coalignable(texture *t1, texture *t2)
+boolean coalignable(s_texture *t1, s_texture *t2)
 {
   if (t1->subtle==t2) return TRUE;
   if (t2->subtle==t1) return TRUE;
@@ -9312,9 +9350,9 @@ boolean coalignable(texture *t1, texture *t2)
 /* Is there room on the given level for the given type of object */
 /* at the given point, allowing for at the very least the given  */
 /* width?                                                        */
-boolean room_at(level *l,genus *g,int x,int y,int width,config *c)
+boolean room_at(s_level *l,s_genus *g,int x,int y,int width,s_config *c)
 {
-  thing *t;
+  s_thing *t;
 
   /* Check for requested length */
   for (t=l->thing_anchor;t;t=t->next)
@@ -9335,7 +9373,7 @@ boolean room_at(level *l,genus *g,int x,int y,int width,config *c)
 /* given sector.  Use the given appearance bits, and heading       */
 /* deafness.  Return the new thing, or NULL if no room to be found */
 /* If angle is -1, point it toward ax/ay. */
-thing *place_object(level *l,sector *s,config *c,short thingid,int width,
+s_thing *place_object(s_level *l,s_sector *s,s_config *c,short thingid,int width,
                        int angle,int ax, int ay,int bits)
 {
   int minx,miny,maxx,maxy;
@@ -9353,14 +9391,14 @@ thing *place_object(level *l,sector *s,config *c,short thingid,int width,
 /* given box.  Use the given appearance bits, and heading          */
 /* deafness.  Return the new thing, or NULL if no room to be found */
 /* If angle is -1, point it toward ax/ay. */
-thing *place_object_in_region(level *l,int minx, int miny, int maxx, int maxy,
-                       config *c,short thingid,int width,
+s_thing *place_object_in_region(s_level *l,int minx, int miny, int maxx, int maxy,
+                       s_config *c,short thingid,int width,
                        int angle,int ax,int ay,int bits)
 {
   /* Stub assumes rectangles and stuff */
   int x,y,i,n,decksize,tangle;
-  genus *g;
-  thing *answer;
+  s_genus *g;
+  s_thing *answer;
   struct s_deck {
     int x;
     int y;
@@ -9442,10 +9480,10 @@ thing *place_object_in_region(level *l,int minx, int miny, int maxx, int maxy,
 /* Maybe place some explodables.  Should this effect the haa?  Well, */
 /* you can get hurt by an exploding one; on the other hand, you can use */
 /* one to kill a monster and thus avoid getting hurt.  So punt. */
-void place_barrels(level *l,sector *s,config *c,haa *haa)
+void place_barrels(s_level *l,s_sector *s,s_config *c,s_haa *haa)
 {
   int i = 0;
-  genus *g;
+  s_genus *g;
 
   if (!rollpercent(l->p_barrels)) return;
 
@@ -9465,9 +9503,9 @@ void place_barrels(level *l,sector *s,config *c,haa *haa)
 }  /* end place_barrels */
 
 /* Maybe place some plants and other lawn decorations. */
-void place_plants(level *l,int allow,sector *s,config *c)
+void place_plants(s_level *l,int allow,s_sector *s,s_config *c)
 {
-  genus *g;
+  s_genus *g;
 
   for (;;) {
     g = random_plant(c,s->style);
@@ -9488,13 +9526,13 @@ void place_plants(level *l,int allow,sector *s,config *c)
 
 /* Return some random piece of armor, and a note as to which */
 /* levels need some. */
-int timely_armor(haa *haa, int *rlevels, config *c)
+int timely_armor(s_haa *haa, int *rlevels, s_config *c)
 {
   int i, levels, armortype;
 
   /* See which levels need more */
   levels = 0;
-  for (i=0;i<3;i++) {  /* for each hardness level */
+  for (i=0;i<3;i++) {  /* for each hardness s_level */
     levels >>= 1;
     if (haa->haas[i].armor < c->usualarmor[i]) levels |= 0x04;
   }
@@ -9519,7 +9557,7 @@ int timely_armor(haa *haa, int *rlevels, config *c)
 /* Update the haa in the obvious way.  Well, almost the obvious */
 /* way.  It has to make some assumptions about how optimally */
 /* the player will utilize a suit.  Some random parameters in here! */
-void update_haa_for_armor(haa *haa,int levels,short armortype)
+void update_haa_for_armor(s_haa *haa,int levels,short armortype)
 {
 
   switch (armortype) {
@@ -9562,8 +9600,8 @@ void update_haa_for_armor(haa *haa,int levels,short armortype)
 
 }
 
-/* Maybe place some armor, update the haa */
-void place_armor(level *l,sector *s,config *c,haa *haa)
+/* Maybe place some armor, update the s_haa */
+void place_armor(s_level *l,s_sector *s,s_config *c,s_haa *haa)
 {
   int levels = 0;
   int armortype;
@@ -9585,7 +9623,7 @@ void place_armor(level *l,sector *s,config *c,haa *haa)
 
 /* Return some useful kind of ammo or weapon, and what levels */
 /* it ought to be given to. */
-int timely_ammo(haa *haa, int *rlevels, config *c)
+int timely_ammo(s_haa *haa, int *rlevels, s_config *c)
 {
   int levels = 0;
   int i, ammotype = 0;
@@ -9596,7 +9634,7 @@ int timely_ammo(haa *haa, int *rlevels, config *c)
   need_launcher = FALSE;
 
   /* See which levels need more */
-  for (i=0;i<3;i++) {  /* for each hardness level */
+  for (i=0;i<3;i++) {  /* for each hardness s_level */
     levels >>= 1;
     if (haa->haas[i].ammo < c->usualammo[i]) levels |= 0x04;
     if (haa->haas[i].can_use_shells == FALSE) need_shotgun = TRUE;
@@ -9677,12 +9715,12 @@ int timely_ammo(haa *haa, int *rlevels, config *c)
 
 /* How much is that ammo in the window?   Three numbers, one for each */
 /* skill level (since value can vary with what weapons you have!) */
-void ammo_value(short ammotype,haa *haa,int *f0,int *f1,int *f2)
+void ammo_value(short ammotype,s_haa *haa,int *f0,int *f1,int *f2)
 {
   int answer;
   boolean special_case = FALSE;
 
-  /* These numbers should just be stored in the config, in the genus */
+  /* These numbers should just be stored in the config, in the s_genus */
   switch (ammotype) {
     case ID_SSGUN:
     case ID_SHOTGUN: answer = 560;
@@ -9717,8 +9755,8 @@ void ammo_value(short ammotype,haa *haa,int *f0,int *f1,int *f2)
   return;
 }
 
-/* The obvious thing */
-void update_haa_for_ammo(haa *haa,int levels,short ammotype)
+/* The obvious s_thing */
+void update_haa_for_ammo(s_haa *haa,int levels,short ammotype)
 {
   int a0,a1,a2;
 
@@ -9770,8 +9808,8 @@ boolean is_weapon(short thingid)
   }
 }
 
-/* Maybe place some ammo, update the haa */
-void place_ammo(level *l,sector *s,config *c,haa *haa)
+/* Maybe place some ammo, update the s_haa */
+void place_ammo(s_level *l,s_sector *s,s_config *c,s_haa *haa)
 {
   int levels = 0;
   short ammotype;
@@ -9795,7 +9833,7 @@ void place_ammo(level *l,sector *s,config *c,haa *haa)
 }
 
 /* Update the haa in the obvious way */
-void update_haa_for_health(haa *haa,int levels,short healthtype)
+void update_haa_for_health(s_haa *haa,int levels,short healthtype)
 {
   int amount;
 
@@ -9834,14 +9872,14 @@ void update_haa_for_health(haa *haa,int levels,short healthtype)
 /* Return a random kind of ordinary health-bonus for those levels */
 /* that need some health.  If *levels comes back as zero, return */
 /* value is undefined. */
-short timely_health(haa *haa,int *levels,config *c)
+short timely_health(s_haa *haa,int *levels,s_config *c)
 {
   int i;
   boolean berserk_ok = FALSE;
   short healthtype;
 
   /* See which levels need more */
-  for ((*levels)=0,i=0;i<3;i++) {  /* for each hardness level */
+  for ((*levels)=0,i=0;i<3;i++) {  /* for each hardness s_level */
     (*levels) >>= 1;
     if (haa->haas[i].health < c->usualhealth[i]) (*levels) |= 0x04;
     if (haa->haas[i].has_berserk==FALSE) berserk_ok = TRUE;
@@ -9863,8 +9901,8 @@ short timely_health(haa *haa,int *levels,config *c)
   return healthtype;
 }
 
-/* Maybe place some health boni, update the haa */
-void place_health(level *l,sector *s,config *c,haa *haa)
+/* Maybe place some health boni, update the s_haa */
+void place_health(s_level *l,s_sector *s,s_config *c,s_haa *haa)
 {
   int levels = 0;
   short healthtype;
@@ -9892,7 +9930,7 @@ void place_health(level *l,sector *s,config *c,haa *haa)
 
 /* Probably put some random bonus that the player needs at */
 /* the given location, and update the haa accordingly. */
-void place_timely_something(level *l,haa *haa, config *c,int x, int y)
+void place_timely_something(s_level *l,s_haa *haa, s_config *c,int x, int y)
 {
   int thingtype, levels;
 
@@ -9923,7 +9961,7 @@ void place_timely_something(level *l,haa *haa, config *c,int x, int y)
 
 /* Return the size of monster, and the difficulty levels, that's due */
 /* in the current user-model (the haa).                              */
-boolean haa_monster_data(haa *haa,config *c, float *monster_size_health,
+boolean haa_monster_data(s_haa *haa,s_config *c, float *monster_size_health,
                          float *monster_size_ammo,int *levels)
 {
   float excess_health;
@@ -9966,11 +10004,11 @@ boolean haa_monster_data(haa *haa,config *c, float *monster_size_health,
 /* Find a monster that fits the given health and ammo allowance, */
 /* for the given apearence bits.  If none, return the monster    */
 /* that's the easiest to kill.  Never return null!               */
-genus *proper_monster(float health,float ammo,int bits,haa *haa,
+s_genus *proper_monster(float health,float ammo,int bits,s_haa *haa,
                       int mno,propertybits require,propertybits forbid,
-                      boolean biggest, config *c)
+                      boolean biggest, s_config *c)
 {
-  genus *m, *m1, *m0, *mx, *my;
+  s_genus *m, *m1, *m0, *mx, *my;
   float damage,ammo0,bx;
   int i,count;
   float hl, am;
@@ -10057,7 +10095,7 @@ genus *proper_monster(float health,float ammo,int bits,haa *haa,
 /* This says that the current battle is over, so any pending */
 /* weapon-pickups can occur.  If we ever want to be kind, we */
 /* can defer the ammo to this point as well. */
-void haa_unpend(haa *haa)
+void haa_unpend(s_haa *haa)
 {
   int i;
 
@@ -10076,7 +10114,7 @@ void haa_unpend(haa *haa)
 /* This makes the model assume that, unlike in-room goodies, ammo */
 /* from monsters is taken at once.  challenging!   Weapons, on the */
 /* other hand, just go into the _pending bits, for haa_unpend(). */
-void update_haa_for_monster(haa *haa,genus *m,int levels,int mno,config *c)
+void update_haa_for_monster(s_haa *haa,s_genus *m,int levels,int mno,s_config *c)
 {
   int i, thisbit;
   float damage;
@@ -10115,12 +10153,12 @@ void update_haa_for_monster(haa *haa,genus *m,int levels,int mno,config *c)
     if (m->thingid == ID_SERGEANT) haa->haas[i].shells_pending = TRUE;
     if (m->thingid == ID_COMMANDO) haa->haas[i].chaingun_pending = TRUE;
 
-  }  /* end for levels adjusting haa */
+  }  /* end for levels adjusting s_haa */
 
 }   /* end update_haa_for_monster */
 
 /* Return a monster that there's room for in the model now.  */
-genus *timely_monster(haa *haa,config *c,int *levels,boolean biggest,
+s_genus *timely_monster(s_haa *haa,s_config *c,int *levels,boolean biggest,
                       int mno)
 {
   /* Should just be a macro, eh? */
@@ -10131,7 +10169,7 @@ genus *timely_monster(haa *haa,config *c,int *levels,boolean biggest,
 /* some required bits set. */
 /* Should really take into account the _size_ of the place you're */
 /* planning to put the monster, eh? */
-genus *timely_monster_ex(haa *haa,config *c,int *levels,boolean biggest,
+s_genus *timely_monster_ex(s_haa *haa,s_config *c,int *levels,boolean biggest,
                       int mno,propertybits req)
 {
   float monster_size_health;
@@ -10140,7 +10178,7 @@ genus *timely_monster_ex(haa *haa,config *c,int *levels,boolean biggest,
   /* Find how big a monster we can tolerate */
   if (!haa_monster_data(haa,c,
                         &monster_size_health,&monster_size_ammo,levels))
-    return NULL;   /* Not enough excess health in any level */
+    return NULL;   /* Not enough excess health in any s_level */
 
   /* Find a monster of that size */
   return proper_monster(monster_size_health,monster_size_ammo,*levels,haa,mno,
@@ -10149,12 +10187,12 @@ genus *timely_monster_ex(haa *haa,config *c,int *levels,boolean biggest,
                         biggest,c);
 }
 
-/* Maybe add some monsters, update the haa */
-void place_monsters(level *l,sector *s,config *c,haa *haa)
+/* Maybe add some monsters, update the s_haa */
+void place_monsters(s_level *l,s_sector *s,s_config *c,s_haa *haa)
 {
   int mno,n;
   int levels;
-  genus *m, *lastm;
+  s_genus *m, *lastm;
   boolean rc;
 
   /* Decide on a limit, if any, for the monster loop; should be config/style? */
@@ -10218,7 +10256,7 @@ done_monsters:
 
 /* Boy is this primitive!  On the other hand, other checks later */
 /* mean that this can probably be somewhat optimistic.           */
-boolean isAdequate(level *l,linedef *ld,style *ThisStyle,config *c)
+boolean isAdequate(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c)
 {
   /* Assume all 1S longish linedefs are OK; very dangerous! */
   if (ld->left) return 0;
@@ -10231,7 +10269,7 @@ boolean isAdequate(level *l,linedef *ld,style *ThisStyle,config *c)
 }
 
 /* Fill in the default config-file data contents stuff */
-void load_default_config(config *c)
+void load_default_config(s_config *c)
 {
   char *p;
   c->configdata = strdup(    /* So we can free() it */
@@ -10553,7 +10591,7 @@ void load_default_config(config *c)
 }
 
 /* Make the config-file data accessible */
-void load_config(config *c)
+void load_config(s_config *c)
 {
   FILE *f;
   char thisline[200];
@@ -10605,7 +10643,7 @@ void load_config(config *c)
 }
 
 /* Free up config-file resources */
-void unload_config(config *c)
+void unload_config(s_config *c)
 {
   if (c->configdata) free(c->configdata);
   c->configdata = NULL;
@@ -10615,16 +10653,16 @@ void unload_config(config *c)
 /* Look through the config's config file, and fill in values for */
 /* the switch lines therein.  Return FALSE if error.  These are  */
 /* of course overridable by command-line switches.               */
-boolean read_switches(config *c)
+boolean read_switches(s_config *c)
 {
   /* Dis here is a STUB */
   return TRUE;
 }
 
-/* Allocate and return a new, empty construct */
-construct *new_construct(config *c)
+/* Allocate and return a new, empty s_construct */
+s_construct *new_construct(s_config *c)
 {
-  construct *answer = (construct *)malloc(sizeof(*answer));
+  s_construct *answer = (s_construct *)malloc(sizeof(*answer));
 
   answer->height = 64;
   answer->gamemask = DOOM1_BIT|DOOM0_BIT|DOOM2_BIT|DOOMI_BIT|DOOMC_BIT;
@@ -10638,9 +10676,9 @@ construct *new_construct(config *c)
   return answer;
 }
 
-flat_cell *add_flat_cell(construct *cn,char *name,config *c)
+s_flat_cell *add_flat_cell(s_construct *cn,char *name,s_config *c)
 {
-  flat_cell *answer = (flat_cell *)malloc(sizeof(*answer));
+  s_flat_cell *answer = (s_flat_cell *)malloc(sizeof(*answer));
 
   answer->flat = find_flat(c,name);
   answer->next = cn->flat_cell_anchor;
@@ -10648,10 +10686,10 @@ flat_cell *add_flat_cell(construct *cn,char *name,config *c)
   return answer;
 }
 
-texture_cell *add_texture_cell(construct *cn,char *name,boolean primary,
-                               short y1, short y2,config *c)
+s_texture_cell *add_texture_cell(s_construct *cn,char *name,boolean primary,
+                               short y1, short y2,s_config *c)
 {
-  texture_cell *answer = (texture_cell *)malloc(sizeof(*answer));
+  s_texture_cell *answer = (s_texture_cell *)malloc(sizeof(*answer));
 
   answer->texture = find_texture(c,name);
   answer->width = 128;    /* A nicer default, as it happens */
@@ -10668,10 +10706,10 @@ texture_cell *add_texture_cell(construct *cn,char *name,boolean primary,
 
 #ifndef CONFIG_DUMP_VERBOSE_NOT
 
-void dump_foo_themebits(themebits yes, themebits no, char *tag, config *c)
+void dump_foo_themebits(themebits yes, themebits no, char *tag, s_config *c)
 {
   themebits mask = 1;
-  theme *t = c->theme_anchor;
+  s_theme *t = c->theme_anchor;
 
   for (t=c->theme_anchor;t;t=t->next) {
     if ((yes&mask) && !(no&&mask)) printf("%s %s ",tag,t->name);
@@ -10679,7 +10717,7 @@ void dump_foo_themebits(themebits yes, themebits no, char *tag, config *c)
   }
 }
 
-void dump_foo_texture(texture *t,config *c)
+void dump_foo_texture(s_texture *t,s_config *c)
 {
   printf("Texture %s ",t->name);
   if ((t->width!=256)||(t->height!=128))
@@ -10723,7 +10761,7 @@ void dump_foo_texture(texture *t,config *c)
 
 }
 
-void dump_foo_flat(flat *f,config *c)
+void dump_foo_flat(s_flat *f,s_config *c)
 {
   printf("Flat %s ",f->name);
 
@@ -10745,7 +10783,7 @@ void dump_foo_flat(flat *f,config *c)
   printf("\n");
 }
 
-void dump_foo_genus(genus *g,config *c)
+void dump_foo_genus(s_genus *g,s_config *c)
 {
   if (g->compatible==0) return;
   if (g->compatible==~(unsigned long)0) return;
@@ -10754,10 +10792,10 @@ void dump_foo_genus(genus *g,config *c)
   printf("\n");
 }
 
-void dump_foo_construct(construct *x,config *c)
+void dump_foo_construct(s_construct *x,s_config *c)
 {
-  texture_cell *tc;
-  flat_cell *fc;
+  s_texture_cell *tc;
+  s_flat_cell *fc;
   printf("Construct family %d height %d ",x->family,x->height);
 
   dump_foo_themebits(x->compatible,0,"comp",c);
@@ -10783,7 +10821,7 @@ void dump_foo_construct(construct *x,config *c)
 
 #else
 
-void dump_foo_texture(texture *t,config *c)
+void dump_foo_texture(s_texture *t,s_config *c)
 {
   printf("t %s ",t->name);
   if ((t->width!=256)||(t->height!=128))
@@ -10827,7 +10865,7 @@ void dump_foo_texture(texture *t,config *c)
 
 }
 
-void dump_foo_flat(flat *f,config *c)
+void dump_foo_flat(s_flat *f,s_config *c)
 {
   printf("f %s ",f->name);
 
@@ -10849,7 +10887,7 @@ void dump_foo_flat(flat *f,config *c)
   printf("\n");
 }
 
-void dump_foo_genus(genus *g,config *c)
+void dump_foo_genus(s_genus *g,s_config *c)
 {
   if (g->compatible==0) return;
   printf(". %d ",g->thingid);
@@ -10857,10 +10895,10 @@ void dump_foo_genus(genus *g,config *c)
   printf("\n");
 }
 
-void dump_foo_construct(construct *x,config *c)
+void dump_foo_construct(s_construct *x,s_config *c)
 {
-  texture_cell *tc;
-  flat_cell *fc;
+  s_texture_cell *tc;
+  s_flat_cell *fc;
   printf("x m %d h %d ",x->family,x->height);
 
   dump_foo_themebits(x->compatible,0,"c",c);
@@ -10886,12 +10924,12 @@ void dump_foo_construct(construct *x,config *c)
 #endif
 
 
-void dump_foo(config *c)
+void dump_foo(s_config *c)
 {
-  texture *t;
-  flat *f;
-  construct *x;
-  genus *g;
+  s_texture *t;
+  s_flat *f;
+  s_construct *x;
+  s_genus *g;
   for (t=c->texture_anchor;t;t=t->next) dump_foo_texture(t,c);
   for (f=c->flat_anchor;f;f=f->next) dump_foo_flat(f,c);
   for (x=c->construct_anchor;x;x=x->next) dump_foo_construct(x,c);
@@ -10902,9 +10940,9 @@ void dump_foo(config *c)
 
 /* Get the hardwired nonswitch-nontheme config stuff (like */
 /* monsters and obstables and such.                        */
-boolean hardwired_nonswitch_nontheme_config(config *c)
+boolean hardwired_nonswitch_nontheme_config(s_config *c)
 {
-  genus *m;
+  s_genus *m;
 
   /* get these obstacles registered as non-pickables */
   m = find_genus(c,ID_LAMP);
@@ -11282,10 +11320,10 @@ gamebits absorb_gamebit(char **r)
 
 /* Absorb a Theme record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_theme(char *p, config *c)
+char *absorb_theme(char *p, s_config *c)
 {
   char *q, *name;
-  theme *t;
+  s_theme *t;
   boolean b = FALSE;
 
   p += 1+strlen(p);  /* That's the name */
@@ -11303,9 +11341,9 @@ char *absorb_theme(char *p, config *c)
 }
 
 /* Return a themebit for the given name, or zero if none */
-themebits themebit_for_name(char *name, config *c)
+themebits themebit_for_name(char *name, s_config *c)
 {
-  theme *t;
+  s_theme *t;
   themebits answer = 1;
 
   for (t=c->theme_anchor;t;t=t->next) {
@@ -11349,11 +11387,11 @@ boolean absorb_two_shorts(char **r,char *ln,char *sn,short *s,short *t)
 
 /* Absorb a Texture record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_texture(char *p, config *c)
+char *absorb_texture(char *p, s_config *c)
 {
   char *q, *name;
   short n,m;
-  texture *t;
+  s_texture *t;
   propertybits pb;
   gamebits gb;
   themebits tb;
@@ -11411,10 +11449,10 @@ char *absorb_texture(char *p, config *c)
 
 /* Absorb a Flat record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_flat(char *p, config *c)
+char *absorb_flat(char *p, s_config *c)
 {
   char *q, *name;
-  flat *f;
+  s_flat *f;
   propertybits pb;
   gamebits gb;
   themebits tb;
@@ -11452,10 +11490,10 @@ char *absorb_flat(char *p, config *c)
 
 /* Absorb a Thing record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_thing(char *p, config *c)
+char *absorb_thing(char *p, s_config *c)
 {
   char *q, *name;
-  genus *g;
+  s_genus *g;
   themebits tb;
 
   p += 1+strlen(p);  /* That's the number */
@@ -11483,10 +11521,10 @@ char *absorb_thing(char *p, config *c)
 /* Absorb a cell subrecord of a construct record, returning TRUE if */
 /* there is one there, or FALSE if not.  Update r to point to the */
 /* last string we actually used. */
-boolean absorb_cell(construct *x,char **r,char *ln,char *sn,boolean b,config *c)
+boolean absorb_cell(s_construct *x,char **r,char *ln,char *sn,boolean b,s_config *c)
 {
   char *p, *q, *name;
-  texture_cell *tc;
+  s_texture_cell *tc;
   short o1 = 0;
   short o2 = 0;
   short width = 128;
@@ -11516,11 +11554,11 @@ boolean absorb_cell(construct *x,char **r,char *ln,char *sn,boolean b,config *c)
 
 /* Absorb a Construct record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_construct(char *p, config *c)
+char *absorb_construct(char *p, s_config *c)
 {
   char *q, *name;
   short s;
-  construct *x;
+  s_construct *x;
   gamebits gb;
   themebits tb;
 
@@ -11555,7 +11593,7 @@ char *absorb_construct(char *p, config *c)
 
 /* Look through the config's config file, and fill in values for */
 /* all the non-switch lines therein.  Return FALSE if error.     */
-boolean nonswitch_config(config *c)
+boolean nonswitch_config(s_config *c)
 {
 
 #ifndef USE_OLD_HARDWIRED_STUFF
@@ -11610,11 +11648,11 @@ boolean nonswitch_config(config *c)
 /* Return a random thing in the given style and config, */
 /* satisfying the given pmask, in the given height-range. */
 /* Ignore s if NULL. */
-genus *random_thing0(propertybits pmask,config *c,style *s,int minh,int maxh)
+s_genus *random_thing0(propertybits pmask,s_config *c,s_style *s,int minh,int maxh)
 {
   int tmask = 0;
   int tcount;
-  genus *answer;
+  s_genus *answer;
 
   if (s)
     tmask = 0x01 << s->theme_number;
@@ -11648,11 +11686,11 @@ genus *random_thing0(propertybits pmask,config *c,style *s,int minh,int maxh)
 
 /* Return a random flat in the given style and config, */
 /* satisfying the given pmask.  If s is NULL, ignore it. */
-flat *random_flat0(propertybits pmask, config *c, style *s)
+s_flat *random_flat0(propertybits pmask, s_config *c, s_style *s)
 {
   int fmask = 0;
   int fcount;
-  flat *answer;
+  s_flat *answer;
 
   if (s)
     fmask = 0x01 << s->theme_number;
@@ -11680,55 +11718,55 @@ flat *random_flat0(propertybits pmask, config *c, style *s)
   return NULL;
 }
 
-flat *random_floor0(config *c, style *s)
+s_flat *random_floor0(s_config *c, s_style *s)
 {
   return random_flat0(FLOOR,c,s);
 }
 
-flat *random_gate(config *c, style *s)
+s_flat *random_gate(s_config *c, s_style *s)
 {
   return random_flat0(GATE,c,s);
 }
 
-flat *random_ceiling0(config *c, style *s)
+s_flat *random_ceiling0(s_config *c, s_style *s)
 {
   return random_flat0(CEILING,c,s);
 }
 
-flat *random_ceilinglight(config *c, style *s)
+s_flat *random_ceilinglight(s_config *c, s_style *s)
 {
   return random_flat0(CEILING+LIGHT,c,s);
 }
 
-flat *random_nukage1(config *c,style *s)
+s_flat *random_nukage1(s_config *c,s_style *s)
 {
   return random_flat0(NUKAGE,c,s);
 }
 
-flat *random_doorceiling(config *c,style *s)
+s_flat *random_doorceiling(s_config *c,s_style *s)
 {
   if (rollpercent(50)) return s->ceiling0;
     else return random_ceiling0(c,s);
 }
 
-flat *random_doorfloor(config *c,style *s)
+s_flat *random_doorfloor(s_config *c,s_style *s)
 {
   if (rollpercent(50)) return s->floor0;
     else return random_floor0(c,s);   /* stub */
 }
 
-flat *random_stepfloor(config *c,style *s)
+s_flat *random_stepfloor(s_config *c,s_style *s)
 {
   return random_doorfloor(c,s);  /* stub stub */
 }
 
 /* Return a random texture in the given style and config, */
 /* satisfying the given pmask.  If s is NULL, ignore it. */
-texture *random_texture0(propertybits pmask, config *c, style *s)
+s_texture *random_texture0(propertybits pmask, s_config *c, s_style *s)
 {
   int tmask = 0;
   int tcount;
-  texture *answer;
+  s_texture *answer;
 
   if (s) {
     tmask = 0x01 << s->theme_number;
@@ -11757,19 +11795,19 @@ texture *random_texture0(propertybits pmask, config *c, style *s)
   return NULL;
 }
 
-texture *random_support0(config *c, style *s)
+s_texture *random_support0(s_config *c, s_style *s)
 {
   return random_texture0(SUPPORT,c,s);
 }
 
-texture *random_wall0(config *c, style *s)
+s_texture *random_wall0(s_config *c, s_style *s)
 {
   int tmask, tcount;
-  texture *answer;
+  s_texture *answer;
 
   tmask = 0x01 << s->theme_number;
 
-  if (rollpercent(80)) {  /* Use a core wall texture */
+  if (rollpercent(80)) {  /* Use a core wall s_texture */
     tcount = 0;
     for (answer=c->texture_anchor;answer;answer=answer->next) {
       if (!(answer->props&WALL)) continue;
@@ -11789,14 +11827,14 @@ texture *random_wall0(config *c, style *s)
         if (tcount==0) return answer;
       }
     }
-  } else {  /* Use any compatible wall texture */
+  } else {  /* Use any compatible wall s_texture */
     return random_texture0(WALL,c,s);
   }
 
   return NULL;
 }
 
-texture *random_kickplate(config *c, style *s)
+s_texture *random_kickplate(s_config *c, s_style *s)
 {
   return random_support0(c,s);
 #if 0
@@ -11804,9 +11842,9 @@ texture *random_kickplate(config *c, style *s)
 #endif
 }
 
-texture *random_stepfront(config *c, style *s)
+s_texture *random_stepfront(s_config *c, s_style *s)
 {
-  texture *answer;
+  s_texture *answer;
   if (!rollpercent(c->p_use_steps))
     answer = random_kickplate(c,s);
     else answer = random_texture0(STEP,c,s);
@@ -11814,7 +11852,7 @@ texture *random_stepfront(config *c, style *s)
   return answer;
 }
 
-texture *switch0_for(config *c, style *s)
+s_texture *switch0_for(s_config *c, s_style *s)
 {
   if (s->wall0->switch_texture) {
     return s->wall0->switch_texture;
@@ -11823,32 +11861,32 @@ texture *switch0_for(config *c, style *s)
   }
 }
 
-texture *random_doorjamb(config *c, style *s)
+s_texture *random_doorjamb(s_config *c, s_style *s)
 {
   return random_texture0(JAMB,c,s);
 }
 
-texture *random_redface(config*c, style *s)
+s_texture *random_redface(s_config*c, s_style *s)
 {
   return random_texture0(RED,c,s);
 }
 
-texture *random_blueface(config*c, style *s)
+s_texture *random_blueface(s_config*c, s_style *s)
 {
   return random_texture0(BLUE,c,s);
 }
 
-texture *random_yellowface(config*c, style *s)
+s_texture *random_yellowface(s_config*c, s_style *s)
 {
   return random_texture0(YELLOW,c,s);
 }
 
-texture *random_walllight(config*c, style *s)
+s_texture *random_walllight(s_config*c, s_style *s)
 {
   return random_texture0(LIGHT,c,s);
 }
 
-texture *random_liftface(config*c, style *s)
+s_texture *random_liftface(s_config*c, s_style *s)
 {
   return random_texture0(LIFT_TEXTURE,c,s);
 }
@@ -11857,18 +11895,18 @@ texture *random_liftface(config*c, style *s)
 
 
 /* Return a door-face that looks good on a wide door. */
-texture *random_widedoorface(config *c, style *s)
+s_texture *random_widedoorface(s_config *c, s_style *s)
 {
   return random_widedoorface_ex(c,s,FALSE);
 }
 
 /* Return a door-face that looks good on a wide door.  If needhigh, */
 /* also require 128 high. */
-texture *random_widedoorface_ex(config *c, style *s, boolean needhigh)
+s_texture *random_widedoorface_ex(s_config *c, s_style *s, boolean needhigh)
 {
   int tmask = 0;
   int tcount;
-  texture *answer;
+  s_texture *answer;
 
   tmask = 0x01 << s->theme_number;
 
@@ -11902,19 +11940,19 @@ texture *random_widedoorface_ex(config *c, style *s, boolean needhigh)
 }
 
 /* Return a door-face that looks good on a narrow door. */
-texture *random_narrowdoorface(config *c, style *s)
+s_texture *random_narrowdoorface(s_config *c, s_style *s)
 {
-  texture *answer = random_narrowdoorface_ex(c,s,FALSE);
+  s_texture *answer = random_narrowdoorface_ex(c,s,FALSE);
   return answer;
 }
 
 /* Return a door-face that looks good on a wide door.  If needhigh, */
 /* also require 128 high. */
-texture *random_narrowdoorface_ex(config *c, style *s, boolean needhigh)
+s_texture *random_narrowdoorface_ex(s_config *c, s_style *s, boolean needhigh)
 {
   int tmask = 0;
   int tcount;
-  texture *answer;
+  s_texture *answer;
 
   tmask = 0x01 << s->theme_number;
 
@@ -11950,7 +11988,7 @@ texture *random_narrowdoorface_ex(config *c, style *s, boolean needhigh)
 
 /* Looks good wide, and is 128 high.  Note this should only be called */
 /* after the style's "widedoorface" has been set. */
-texture *random_twdoorface(config *c, style *s)
+s_texture *random_twdoorface(s_config *c, s_style *s)
 {
   if (s->widedoorface->height>=128) return s->widedoorface;
   return random_widedoorface_ex(c,s,TRUE);
@@ -11959,21 +11997,21 @@ texture *random_twdoorface(config *c, style *s)
 
 /* Looks good narrow, and is 128 high.  Note this should only be called */
 /* after the style's "narrowdoorface" has been set. */
-texture *random_tndoorface(config *c, style *s)
+s_texture *random_tndoorface(s_config *c, s_style *s)
 {
-  texture *answer;
+  s_texture *answer;
   if (s->narrowdoorface->height>=128) answer = s->narrowdoorface;
     else answer = random_narrowdoorface_ex(c,s,TRUE);
   return answer;
 }
 
 /* Special texture to use (if it fits) on locked doors */
-/* May return NULL for a given style */
-texture *random_lockdoorface(config *c, style *s)
+/* May return NULL for a given s_style */
+s_texture *random_lockdoorface(s_config *c, s_style *s)
 {
   int tmask = 0;
   int tcount;
-  texture *answer;
+  s_texture *answer;
 
   tmask = 0x01 << s->theme_number;
 
@@ -12002,17 +12040,17 @@ texture *random_lockdoorface(config *c, style *s)
   return NULL;
 }
 
-texture *random_grating(config *c, style *s)
+s_texture *random_grating(s_config *c, s_style *s)
 {
   return random_texture0(GRATING,c,s);
 }
 
-texture *random_plaque(config *c, style *s)
+s_texture *random_plaque(s_config *c, s_style *s)
 {
   return random_texture0(PLAQUE,c,s);
 }
 
-/* Return the angle (east is zero, north is ninety) of a thing */
+/* Return the angle (east is zero, north is ninety) of a s_thing */
 /* that's standing in the linedef, facing right from it.       */
 int facing_along(int x1, int y1, int x2, int y2)
 {
@@ -12020,7 +12058,7 @@ int facing_along(int x1, int y1, int x2, int y2)
   return (answer==270) ? 0 : (answer + 90);
 }
 
-/* Return the angle (east is zero, north is ninety) of a thing */
+/* Return the angle (east is zero, north is ninety) of a s_thing */
 /* that's standing in the linedef, facing right from it.       */
 int facing_right_from(int x1, int y1, int x2, int y2)
 {
@@ -12041,9 +12079,9 @@ int facing_right_from(int x1, int y1, int x2, int y2)
   }
 }
 
-/* Return the angle (east is zero, north is ninety) of a thing */
+/* Return the angle (east is zero, north is ninety) of a s_thing */
 /* that's standing in the linedef, facing right from it.       */
-int facing_right_from_ld(linedef *ld)
+int facing_right_from_ld(s_linedef *ld)
 {
   /* could be a macro */
   return facing_right_from(ld->from->x,ld->from->y,ld->to->x,ld->to->y);
@@ -12053,15 +12091,15 @@ int facing_right_from_ld(linedef *ld)
 /* Or if innersec is NULL, put a void sector in there, and use the given */
 /* texture on the walls.  If the four last pointers are given, returns   */
 /* the four linedefs it makes. */
-void frame_innersec_ex(level *l,sector *oldsector,sector *innersec,
-                      texture *tm, texture *tu, texture *tl,
+void frame_innersec_ex(s_level *l,s_sector *oldsector,s_sector *innersec,
+                      s_texture *tm, s_texture *tu, s_texture *tl,
                       int x1,int y1,int x2,int y2,
                       int x3,int y3,int x4,int y4,
-                      config *c,
-                      linedef **ld1, linedef **ld2, linedef **ld3, linedef **ld4)
+                      s_config *c,
+                      s_linedef **ld1, s_linedef **ld2, s_linedef **ld3, s_linedef **ld4)
 {
-  linedef *ld;
-  vertex *v0, *v1, *v2;
+  s_linedef *ld;
+  s_vertex *v0, *v1, *v2;
   short newflags;
 
   if (innersec) newflags = TWO_SIDED;
@@ -12134,11 +12172,11 @@ void frame_innersec_ex(level *l,sector *oldsector,sector *innersec,
 /* The common axis-parallel case of frame_innersec.  If the four pointers */
 /* are given, the first and third will be y-parallel, the second and */
 /* fourth x-parallel. */
-void parallel_innersec_ex(level *l,sector *oldsector,sector *innersec,
-                         texture *tm, texture *tu, texture *tl,
-                         int minx,int miny,int maxx,int maxy,config *c,
-                         linedef **ld1, linedef **ld2,
-                         linedef **ld3, linedef **ld4)
+void parallel_innersec_ex(s_level *l,s_sector *oldsector,s_sector *innersec,
+                         s_texture *tm, s_texture *tu, s_texture *tl,
+                         int minx,int miny,int maxx,int maxy,s_config *c,
+                         s_linedef **ld1, s_linedef **ld2,
+                         s_linedef **ld3, s_linedef **ld4)
 {
   frame_innersec_ex(l,oldsector,innersec,tm,tu,tl,
                     minx,miny,minx,maxy,maxx,maxy,maxx,miny,c,
@@ -12148,20 +12186,20 @@ void parallel_innersec_ex(level *l,sector *oldsector,sector *innersec,
 /* Your basic visual room-center embellishments */
 /* Square in the middle of the room with higher/lower/no ceiling, */
 /* possibly different floor, light level, nukage, etc. */
-boolean ceiling_effect(level *l, sector *oldsector,
-                       style *ThisStyle, haa *haa, config *c)
+boolean ceiling_effect(s_level *l, s_sector *oldsector,
+                       s_style *ThisStyle, s_haa *haa, s_config *c)
 {
   int minx, miny, maxx, maxy, offset, deltah;
-  genus *g = ThisStyle->lamp0;
+  s_genus *g = ThisStyle->lamp0;
   short thing_id;
   int beamsize, maxbeam;
-  sector *innersec;
+  s_sector *innersec;
   boolean force_nukage = rollpercent(l->p_force_nukage);
   boolean force_sky = rollpercent(l->p_force_sky);
   boolean force_quad = rollpercent(15);
   boolean edge_lights = FALSE;
   boolean center_light = FALSE;
-  texture *upt = oldsector->style->wall0;
+  s_texture *upt = oldsector->style->wall0;
 
   if (g->height>(oldsector->ceiling_height-oldsector->floor_height))
     g = ThisStyle->shortlamp0;
@@ -12343,7 +12381,7 @@ boolean ceiling_effect(level *l, sector *oldsector,
                    c);
   } else {
     /* Just an old fashioned square */
-    linedef *ld1, *ld2, *ld3, *ld4;
+    s_linedef *ld1, *ld2, *ld3, *ld4;
     boolean fancied = FALSE;
     parallel_innersec_ex(l,oldsector,innersec,
                          NULL,upt,oldsector->style->wall0,
@@ -12357,8 +12395,8 @@ boolean ceiling_effect(level *l, sector *oldsector,
         no_monsters_stuck_on(l,ld4) &&
         rollpercent(l->p_deep_baths) ) {
       int xsize = maxx-minx;
-      linedef *ld2new, *ld4new, *ldnew;
-      sector *newsec;
+      s_linedef *ld2new, *ld4new, *ldnew;
+      s_sector *newsec;
       deltah = -24;            /* 24? */
       innersec->floor_height = oldsector->floor_height + deltah;
       for (;xsize>=(128*l->hugeness);) {
@@ -12382,7 +12420,7 @@ boolean ceiling_effect(level *l, sector *oldsector,
         ld3 = ldnew;
         fancied = TRUE;
         if (rollpercent(30)) break;
-      }  /* end loop-thing */
+      }  /* end loop-s_thing */
       if (innersec->floor_flat != ThisStyle->nukage1)
         if (rollpercent(75)) {
           innersec->floor_flat = c->water_flat;
@@ -12394,7 +12432,7 @@ boolean ceiling_effect(level *l, sector *oldsector,
     if (rollpercent(20) && (!fancied) &&                /* Generalize "20" */
        (maxx-minx>128) && (maxy-miny>128) &&
        (innersec->floor_flat!=ThisStyle->nukage1)) {
-      sector *inner2;
+      s_sector *inner2;
       int deltah;
       deltah = 12 + roll(13);                         /* Generalize this? */
       if (rollpercent(50)) deltah = 0 - deltah;
@@ -12425,9 +12463,9 @@ boolean ceiling_effect(level *l, sector *oldsector,
 
 /* Perhaps place a timely monster just to the right of the center */
 /* of the givenly-ended line.  Update the haa if. */
-void righthand_monster(level *l,int xa,int ya,int xb,int yb,haa *haa,config *c)
+void righthand_monster(s_level *l,int xa,int ya,int xb,int yb,s_haa *haa,s_config *c)
 {
-  genus *m;
+  s_genus *m;
   int x1, y1, x, y, flags;
   short angle;
 
@@ -12442,7 +12480,7 @@ void righthand_monster(level *l,int xa,int ya,int xb,int yb,haa *haa,config *c)
   /* Fill in other details */
   angle = facing_right_from(xa,ya,xb,yb);  /* Correct? */
   if (rollpercent(50)) flags |= 0x08;   /* deaf; how often? */
-  /* And finally create it and update the haa */
+  /* And finally create it and update the s_haa */
   new_thing(l,x,y,angle,m->thingid,(short)flags,c);
   update_haa_for_monster(haa,m,flags,1,c);  /* 1 correct? */
 
@@ -12452,12 +12490,12 @@ void righthand_monster(level *l,int xa,int ya,int xb,int yb,haa *haa,config *c)
 /* Now with sometimes monsters! */
 /* Should shrink the candidate pillar, not just give up, if */
 /* it finds an existing thing in the way. */
-void do_pillar(level *l,sector *oldsector,style *ThisStyle,haa *haa,config *c)
+void do_pillar(s_level *l,s_sector *oldsector,s_style *ThisStyle,s_haa *haa,s_config *c)
 {
   int minx, miny, maxx, maxy;
   int xsize, ysize, xoff, yoff;
-  thing *t;
-  texture *t1;
+  s_thing *t;
+  s_texture *t1;
 
   /* Figure out where we might want to put it */
   find_rec(l,oldsector,&minx,&miny,&maxx,&maxy);
@@ -12526,13 +12564,13 @@ void do_pillar(level *l,sector *oldsector,style *ThisStyle,haa *haa,config *c)
 
 /* Does this construct fit into this sector, on sides of these */
 /* sizes, in this style? */
-boolean construct_fits(construct *cs,int xsize, int ysize,sector *s,
-                       style *ThisStyle, config *c)
+boolean construct_fits(s_construct *cs,int xsize, int ysize,s_sector *s,
+                       s_style *ThisStyle, s_config *c)
 {
   boolean good_primary = FALSE;
   boolean x_fit = FALSE;
   boolean y_fit = FALSE;
-  texture_cell *tc;
+  s_texture_cell *tc;
 
   /* Needs to be room between the floor and ceiling */
   if ( cs->height > (s->ceiling_height - s->floor_height) ) return FALSE;
@@ -12560,11 +12598,11 @@ boolean construct_fits(construct *cs,int xsize, int ysize,sector *s,
 
 /* Return a texture-cell from the given construct that */
 /* fits the given size.  If accept_secondaries, then do */
-texture_cell *fitting_tc(construct *cs, int size, boolean accept_secondaries,
-                         config *c)
+s_texture_cell *fitting_tc(s_construct *cs, int size, boolean accept_secondaries,
+                         s_config *c)
 {
-  texture_cell *tc1;
-  texture_cell *answer = NULL;
+  s_texture_cell *tc1;
+  s_texture_cell *answer = NULL;
   int ccount;
 
   for (tc1=cs->texture_cell_anchor;tc1;tc1=tc1->next) tc1->marked=FALSE;
@@ -12587,17 +12625,17 @@ texture_cell *fitting_tc(construct *cs, int size, boolean accept_secondaries,
 
 /* Install, if possible, some construct that fits the style, */
 /* in the given place. */
-boolean install_construct(level *l,sector *oldsector,
+boolean install_construct(s_level *l,s_sector *oldsector,
                        int minx,int miny,int maxx,int maxy,
-                       style *ThisStyle,config *c)
+                       s_style *ThisStyle,s_config *c)
 {
-  construct *cs, *cs2;
-  sector *innersec;
+  s_construct *cs, *cs2;
+  s_sector *innersec;
   int ccount = 0;
   boolean floor_to_ceiling, primary_on_x = FALSE;
-  linedef *ld1, *ld2, *ld3, *ld4;
-  texture_cell *tc1, *tc2, *tc3, *tc4, *tcp;
-  flat_cell *fc;
+  s_linedef *ld1, *ld2, *ld3, *ld4;
+  s_texture_cell *tc1, *tc2, *tc3, *tc4, *tcp;
+  s_flat_cell *fc;
   int xsize, ysize, mult;
 
   /* Mark just those constructs that fit */
@@ -12694,7 +12732,7 @@ boolean install_construct(level *l,sector *oldsector,
   if (rollpercent(50)) mult = 1 + roll(mult);
   ysize *= mult;
 
-  /* Finally!  Make the sector */
+  /* Finally!  Make the s_sector */
   parallel_innersec_ex(l,oldsector,innersec,NULL,NULL,NULL,
                        minx,miny,minx+xsize,miny+ysize,c,
                        &ld2,&ld1,&ld4,&ld3);
@@ -12734,14 +12772,14 @@ boolean install_construct(level *l,sector *oldsector,
 /* else if NULL use a random one, or sometimes use a     */
 /* plaque texture.  If innersec is not null, use that    */
 /* inside the pillar (else void).                        */
-boolean do_new_pillar(level *l,sector *oldsector,sector *innersec,texture *t1,
-                      style *ThisStyle, haa *haa,config *c)
+boolean do_new_pillar(s_level *l,s_sector *oldsector,s_sector *innersec,s_texture *t1,
+                      s_style *ThisStyle, s_haa *haa,s_config *c)
 {
   int minx, miny, maxx, maxy, tx, ty;
-  thing *t;
-  vertex *v;
-  linedef *ld;
-  texture *tm;
+  s_thing *t;
+  s_vertex *v;
+  s_linedef *ld;
+  s_texture *tm;
 
   /* Initialize the 64-enclosing range */
   find_rec(l,oldsector,&minx,&miny,&maxx,&maxy);
@@ -12797,12 +12835,12 @@ boolean do_new_pillar(level *l,sector *oldsector,sector *innersec,texture *t1,
   /* If we made it this far, we found room! */
   /* Now decide how much to use (i.e. should sometimes shrink/narrow here) */
   /* and finally make the pillar (or whatever!) */
-  /* Perhaps a construct */
+  /* Perhaps a s_construct */
   if (ThisStyle->do_constructs) {
     install_construct(l,oldsector,minx,miny,maxx,maxy,ThisStyle,c);
   } else {
     if (t1==NULL) t1 = random_wall0(c,ThisStyle);
-    /* Sometimes do a special plaque thing */
+    /* Sometimes do a special plaque s_thing */
     if ((innersec==NULL) && ((maxx-minx)>=128) && ((maxy-miny)>=128) &&
          ( oldsector->ceiling_height - oldsector->floor_height == 128) ) {
       minx = minx + ((maxx-minx)-128)/2;
@@ -12835,12 +12873,12 @@ boolean do_new_pillar(level *l,sector *oldsector,sector *innersec,texture *t1,
 /* Put in a bunch of pillarish things, with a much cleverer */
 /* algorithm than do_pillar. */
 /* No monsters at present */
-void do_new_pillars(level *l,sector *oldsector,style *ThisStyle,
-                    haa *haa,config *c)
+void do_new_pillars(s_level *l,s_sector *oldsector,s_style *ThisStyle,
+                    s_haa *haa,s_config *c)
 {
    int want, tried, delta;
-   texture *t = NULL;
-   sector *s = NULL;
+   s_texture *t = NULL;
+   s_sector *s = NULL;
 
    switch(roll(4)) {
      case 0:
@@ -12858,7 +12896,7 @@ void do_new_pillars(level *l,sector *oldsector,style *ThisStyle,
      default: want = 40;   /* Impossible! */
    }
 
-   /* Decide if the pillars should have a non-void inside sector */
+   /* Decide if the pillars should have a non-void inside s_sector */
    if ((ThisStyle->do_constructs==FALSE)&&(rollpercent(100))) {   /* 100? */
      s = clone_sector(l,oldsector);
      if (rollpercent(30)) {
@@ -12888,13 +12926,13 @@ void do_new_pillars(level *l,sector *oldsector,style *ThisStyle,
 /* side of the given linedef.  Adjust the haa (haa adjustment */
 /* assumes that ITYTD doesn't find the bonuses, and HMP only */
 /* finds them half the time, if <secret> is true).            */
-void populate_linedef(level *l,linedef *ldnew2,haa *haa,config *c,
+void populate_linedef(s_level *l,s_linedef *ldnew2,s_haa *haa,s_config *c,
                       boolean secret)
 {
   int x,y,x1,y1;
   short bonustype;
   int bonusamount;
-  genus *m;
+  s_genus *m;
   int levels, farness, plen;
   short angle;
 
@@ -13008,12 +13046,12 @@ void populate_linedef(level *l,linedef *ldnew2,haa *haa,config *c,
 /* the linedef of the far wall of the closet.  If a haa is */
 /* given, will also populate the closet.  Use the given    */
 /* ceiling_height (ch) for y-alignment.  */
-linedef *secret_closet(level *l,linedef *ld,style *ThisStyle,int h,
-                      haa *haa, config *c, boolean inside_sr, int tag, short ch,
+s_linedef *secret_closet(s_level *l,s_linedef *ld,s_style *ThisStyle,int h,
+                      s_haa *haa, s_config *c, boolean inside_sr, int tag, short ch,
                       boolean secret)
 {
-  linedef *ldnew, *ldnew2, *ldedge1, *ldedge2;
-  sector *s;
+  s_linedef *ldnew, *ldnew2, *ldedge1, *ldedge2;
+  s_sector *s;
   short doortype;
 
   if (!empty_left_side(l,ld,72)) return NULL;   /* Room? */
@@ -13089,13 +13127,13 @@ linedef *secret_closet(level *l,linedef *ld,style *ThisStyle,int h,
 
 /* Put a box around the given thing, with the given tag and */
 /* type on each of the linedefs.                            */
-void trigger_box(level *l,thing *t,sector* oldsector,short tag,short type,
-                 config *c)
+void trigger_box(s_level *l,s_thing *t,s_sector* oldsector,short tag,short type,
+                 s_config *c)
 {
-  vertex *v1, *v2, *v3, *v4;
-  linedef *ldnew;
+  s_vertex *v1, *v2, *v3, *v4;
+  s_linedef *ldnew;
   int dist;
-  sector *ns;
+  s_sector *ns;
 
   /* Incoming sector is just a guess; confirm it */
   ns = point_sector(l,t->x,t->y,&dist,NULL);  /* Should check "danger"! */
@@ -13153,9 +13191,9 @@ void trigger_box(level *l,thing *t,sector* oldsector,short tag,short type,
 
 /* Make a small floor-preserving link that fits on the given */
 /* linedef.  Suitable for walking out onto the patio.        */
-link *random_patio_link(level *l,linedef *ld,style *ThisStyle,config *c)
+s_link *random_patio_link(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c)
 {
-  link *answer = (link *)malloc(sizeof (*answer));
+  s_link *answer = (s_link *)malloc(sizeof (*answer));
 
   answer->type = BASIC_LINK;
   answer->bits = 0;
@@ -13196,16 +13234,16 @@ link *random_patio_link(level *l,linedef *ld,style *ThisStyle,config *c)
 }
 
 /* Try to make a little patio out of the given room */
-void make_extroom(level *l, sector *oldsector, haa *haa,
-                  style *ThisStyle, config *c)
+void make_extroom(s_level *l, s_sector *oldsector, s_haa *haa,
+                  s_style *ThisStyle, s_config *c)
 {
   int i, depth, x, y, fenceh, saveh;
   short cthick;
-  linedef *ld, *newldf, *ldfar, *lde1, *lde2, *ldt;
-  texture *t1;
-  link *ThisLink;
-  sector *hisec, *losec;
-  vertex *v;
+  s_linedef *ld, *newldf, *ldfar, *lde1, *lde2, *ldt;
+  s_texture *t1;
+  s_link *ThisLink;
+  s_sector *hisec, *losec;
+  s_vertex *v;
   boolean outtex = rollpercent(70);
 
   fenceh = 96;  /* Should vary */
@@ -13271,7 +13309,7 @@ void make_extroom(level *l, sector *oldsector, haa *haa,
     ldfar->right->y_offset = lde1->right->y_offset = lde2->right->y_offset =
       oldsector->ceiling_height - losec->ceiling_height;
     newldf->right->y_offset = oldsector->ceiling_height - hisec->ceiling_height;
-    /* Actually make the link */
+    /* Actually make the s_link */
     saveh = hisec->ceiling_height;
     establish_link(l,ld,newldf,ThisLink,NULL,ThisStyle,ThisStyle,haa,c);
     hisec->ceiling_flat = c->sky_flat;
@@ -13294,12 +13332,12 @@ void make_extroom(level *l, sector *oldsector, haa *haa,
 
 
 /* Try to make an external window out of the given room */
-void make_extwindow(level *l, sector *oldsector, style *ThisStyle, config *c)
+void make_extwindow(s_level *l, s_sector *oldsector, s_style *ThisStyle, s_config *c)
 {
   int wlen, wheight, i, depth, ldlen, border;
-  linedef *ld, *ldnew;
-  texture *t1;
-  linedef *e1, *e2;
+  s_linedef *ld, *ldnew;
+  s_texture *t1;
+  s_linedef *e1, *e2;
   short yoff;
 
   i = mark_decent_boundary_linedefs(l,oldsector,64);
@@ -13354,12 +13392,12 @@ void make_extwindow(level *l, sector *oldsector, style *ThisStyle, config *c)
       ldnew->right->sector->ceiling_flat = c->sky_flat;
       announce(VERBOSE,"Outside Window");
     }  /* end if enough room */
-  }  /* end if found a linedef */
+  }  /* end if found a s_linedef */
 }
 
 /* Special room all full of pillars and stuff.  TRUE if works. */
-boolean grid_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
-               quest *ThisQuest,boolean first, config *c)
+boolean grid_room(s_level *l,s_sector *oldsector,s_haa *haa,s_style *ThisStyle,
+               s_quest *ThisQuest,boolean first, s_config *c)
 {
   int minx, miny, maxx, maxy;
   int x1,y1,xi,yi;
@@ -13370,10 +13408,10 @@ boolean grid_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
   int secrety = -1;
   int sx = 0;
   int sy = 0;
-  genus *m;
+  s_genus *m;
   int levels;
   short facing;
-  texture *t;
+  s_texture *t;
   boolean trying_constructs;
 
   find_rec(l,oldsector,&minx,&miny,&maxx,&maxy);
@@ -13424,9 +13462,9 @@ boolean grid_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
   for (xi=0,x1=minx+(xspace-xwidth)/2;xi<xcount;x1+=xspace,xi++)
     for (yi=0,y1=miny+(yspace-ywidth)/2;yi<ycount;y1+=yspace,yi++) {
       if ( (xi==secretx) && (yi==secrety) ) {
-        linedef *ld1, *ld2, *ld3, *ld4;
-        texture *tx = ThisStyle->support0;
-        sector *newsec = clone_sector(l,oldsector);
+        s_linedef *ld1, *ld2, *ld3, *ld4;
+        s_texture *tx = ThisStyle->support0;
+        s_sector *newsec = clone_sector(l,oldsector);
         newsec->floor_height = newsec->ceiling_height;
         newsec->ceiling_height += 96;     /* Fixed? */
         if (tx==t) tx = ThisStyle->wall0;
@@ -13517,16 +13555,16 @@ boolean grid_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
 
 /* Install a teleport gate in the room, and any attendant monsters */
 /* and stuff.  Even nukage! */
-void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
-                  boolean force_exit_style, config *c)
+void install_gate(s_level *l,s_sector *s,s_style *ThisStyle,s_haa *ThisHaa,
+                  boolean force_exit_style, s_config *c)
 {
   short lowx,lowy,hix,hiy;
-  sector *innersec, *outersec;
-  linedef *ld1, *ld2, *ld3, *ld4;
-  flat *gateflat = random_gate(c,s->style);
+  s_sector *innersec, *outersec;
+  s_linedef *ld1, *ld2, *ld3, *ld4;
+  s_flat *gateflat = random_gate(c,s->style);
   boolean exit_style = force_exit_style;
   boolean exit_gate = (s->gate->in_tag==0) && (s->gate->out_tag==0);
-  texture *front;
+  s_texture *front;
   int rise = 0;
   short tag_mask;
 
@@ -13573,7 +13611,7 @@ void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
       innersec->ceiling_flat = ThisStyle->ceilinglight;
       announce(VERBOSE,"gcl");
     }
-    innersec->light_level = 240;       /* Should vary by style or level */
+    innersec->light_level = 240;       /* Should vary by style or s_level */
     innersec->special = GLOW_BLINK;    /* Also */
   }
   if (s->gate->in_tag) {
@@ -13638,7 +13676,7 @@ void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
     ld4->type = LINEDEF_TELEPORT;
     ld4->flags |= tag_mask;      /* Always? */
     ld4->tag = s->gate->out_tag;
-  } else if (0==s->gate->in_tag) {   /* Must be a level-end gate */
+  } else if (0==s->gate->in_tag) {   /* Must be a level-end s_gate */
     exit_style = TRUE;
     ld1->type = LINEDEF_W1_END_LEVEL;
     ld1->flags |= tag_mask;
@@ -13648,7 +13686,7 @@ void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
     ld3->flags |= tag_mask;
     ld4->type = LINEDEF_W1_END_LEVEL;
     ld4->flags |= tag_mask;
-  }   /* Otherwise an in-only gate */
+  }   /* Otherwise an in-only s_gate */
   if (exit_style) {
     innersec->floor_height = outersec->floor_height + 16;
     if (c->gate_exitsign_texture) {
@@ -13686,14 +13724,14 @@ void install_gate(level *l,sector *s,style *ThisStyle,haa *ThisHaa,
 /* leads to a Secret Level.  If it works, set the sl_tag and */
 /* sl_type things in the level.  If <opens>, make it openable, */
 /* and immediately set sl_done. */
-boolean install_sl_exit(level *l,sector *oldsector,haa *ThisHaa,
-                        style *ThisStyle, quest *ThisQuest,
-                        boolean opens, config *c)
+boolean install_sl_exit(s_level *l,s_sector *oldsector,s_haa *ThisHaa,
+                        s_style *ThisStyle, s_quest *ThisQuest,
+                        boolean opens, s_config *c)
 {
   int i, tries;
-  linedef *ld, *ld2, *ld3;
+  s_linedef *ld, *ld2, *ld3;
   short tag;
-  sector *newsec;
+  s_sector *newsec;
   boolean found;
 
   for (found=FALSE,tries=0,ld=NULL;(!found)&&(tries<5);tries++) {
@@ -13740,10 +13778,10 @@ boolean install_sl_exit(level *l,sector *oldsector,haa *ThisHaa,
 
 /* Try to put a triggerbox around something in this sector, */
 /* to open the sl exit thing. */
-void try_sl_triggerbox(level *l, sector *oldsector, config *c)
+void try_sl_triggerbox(s_level *l, s_sector *oldsector, s_config *c)
 {
   boolean danger;
-  thing *t;
+  s_thing *t;
   int border;
 
   for (t=l->thing_anchor;t;t=t->next) {
@@ -13759,12 +13797,12 @@ void try_sl_triggerbox(level *l, sector *oldsector, config *c)
     l->sl_done = TRUE;
     l->sl_open_ok = FALSE;
     announce(VERBOSE,"Did sl triggerbox");
-  }  /* if found a good thing */
+  }  /* if found a good s_thing */
 }
 
 /* Fancy up the room, put stuff in it, install gates, etc. */
-void enhance_room(level *l,sector *oldsector,haa *ThisHaa,style *ThisStyle,
-                  quest *ThisQuest,boolean first, config *c)
+void enhance_room(s_level *l,s_sector *oldsector,s_haa *ThisHaa,s_style *ThisStyle,
+                  s_quest *ThisQuest,boolean first, s_config *c)
 {
   boolean done_room = FALSE;
   boolean did_dm = FALSE;
@@ -13822,15 +13860,15 @@ void enhance_room(level *l,sector *oldsector,haa *ThisHaa,style *ThisStyle,
 /* Fancy-up the room, after all links are established, and after  */
 /* populating with Things.  If <first>, do the obvious            */
 /* SLIGE-mark to the room, and prolly no monsters.                */
-void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
-                    quest *ThisQuest,boolean first, boolean edges_only,
-                    config *c)
+void embellish_room(s_level *l,s_sector *oldsector,s_haa *haa,s_style *ThisStyle,
+                    s_quest *ThisQuest,boolean first, boolean edges_only,
+                    s_config *c)
 {
   /* Just some random fun things; assumes rectangles etc */
   int i, border, ldlen, depth;
   int switch_tag = 0;
-  linedef *switch_ld = NULL;
-  linedef *ld;
+  s_linedef *switch_ld = NULL;
+  s_linedef *ld;
   boolean did_ceiling = FALSE;
   boolean install_closet, switch_closet;
 
@@ -13875,8 +13913,8 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
   if ((!first)||(c->immediate_monsters))   /* Not right off! */
     if (rollpercent(l->amcl_rho)) {
       int n, k, clen, depth, yoff, x1, y1;
-      linedef *ldnew, *ldedge1, *ldedge2;
-      texture *t1;
+      s_linedef *ldnew, *ldedge1, *ldedge2;
+      s_texture *t1;
       boolean sky_thing = rollpercent(l->skyclosets);
       boolean crushing = FALSE;
       n = 1+roll(3);
@@ -13899,10 +13937,10 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
           }
           depth = ThisStyle->closet_depth;
           if (empty_left_side(l,ld,depth)) {
-            genus *m;
+            s_genus *m;
             int levels;
             short angle, bonustype;
-            sector *innersec, *outersec;
+            s_sector *innersec, *outersec;
             ldnew = lefthand_box_ext(l,ld,depth,ThisStyle,c,&ldedge1,&ldedge2);
             outersec = ldnew->right->sector;
             ldnew->right->middle_texture = ldedge1->right->middle_texture;
@@ -13972,7 +14010,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
                 announce(VERBOSE,"Crush ambush");
               } /* end if crushing */
               if (oldsector->light_level - outersec->light_level >= 16) {
-                linedef *ldnew2;
+                s_linedef *ldnew2;
                 announce(VERBOSE,"shadow");
                 innersec = clone_sector(l,outersec);
                 innersec->tag = outersec->tag;
@@ -14042,7 +14080,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
               new_thing(l,x1+1,y1+1,0,bonustype,7,c);  /* Place the bonus */
             }  /* end some small bonus */
           }  /* end if empty space */
-        }  /* end if found a linedef */
+        }  /* end if found a s_linedef */
       }  /* end for k */
     }  /* end if 1/n */
 
@@ -14053,8 +14091,8 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
     int sync_tag = -1;
     int sync_count = 0;    /* Just for announcing */
     int yoff, pheight, j, pup;
-    linedef *ldnew, *ldedge1, *ldedge2;
-    texture *t1, *tplaque;
+    s_linedef *ldnew, *ldedge1, *ldedge2;
+    s_texture *t1, *tplaque;
     pheight = ThisStyle->plaque->height;
     if (ThisStyle->plaque->props&HALF_PLAQUE)
       if (rollpercent(80)) pheight = pheight / 2;
@@ -14125,7 +14163,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
                 }
               }  /* end if secret closet */
           }  /* end if empty space */
-        }  /* end if found a linedef */
+        }  /* end if found a s_linedef */
         if (rollpercent(50)) break;
         if (j>4) break;
         tplaque = random_plaque(c,ThisStyle);
@@ -14152,11 +14190,11 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
     }
   }
   if (install_closet) {
-    thing *t = NULL;
+    s_thing *t = NULL;
     short tag = -1;
     int plen, pheight;
     boolean goal_trigger, had_map;
-    linedef *ldc;
+    s_linedef *ldc;
 
     i = mark_decent_boundary_linedefs(l,oldsector,128);
     ld = random_marked_linedef(l,i);
@@ -14200,7 +14238,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
           if (t) {
             tag = new_tag(l);
             trigger_box(l,t,oldsector,tag,LINEDEF_WR_OPEN_DOOR,c);
-          }  /* if found a good thing */
+          }  /* if found a good s_thing */
         }  /* if triggered closet */
         pheight = 72 + roll( 1 +
           (oldsector->ceiling_height - oldsector->floor_height) - 72);
@@ -14223,7 +14261,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
             boolean hinted=FALSE;
             if (rollpercent(5)) {
               /* Use a barrel or candle */
-              genus *g = random_barrel(c,ThisStyle);
+              s_genus *g = random_barrel(c,ThisStyle);
               int x = (ld->from->x+ld->to->x)/2;
               int y = (ld->from->y+ld->to->y)/2;
               if ((g==NULL)||rollpercent(50))
@@ -14247,7 +14285,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
             }
             if ((!hinted)&&rollpercent(90) &&
                 (ld->right->upper_texture->subtle!=NULL)) {
-              /* Subtly different texture */
+              /* Subtly different s_texture */
               ld->right->upper_texture = ld->right->upper_texture->subtle;
               announce(VERBOSE,"subtle");
               hinted = TRUE;
@@ -14267,7 +14305,7 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
           ThisQuest->auxtag = 0;
         }  /* end else if secret closet failed and we were goal triggered */
       }  /* end if enough room */
-    }  /* end if found a linedef */
+    }  /* end if found a s_linedef */
   }  /* end if try a closet */
 
   if (rollpercent(l->p_extroom))
@@ -14325,9 +14363,9 @@ void embellish_room(level *l,sector *oldsector,haa *haa,style *ThisStyle,
 }
 
 /* Return a gate-type link.  Not many properties! */
-link *gate_link(level *l,config *c)
+s_link *gate_link(s_level *l,s_config *c)
 {
-  link *answer = (link *)malloc(sizeof (*answer));
+  s_link *answer = (s_link *)malloc(sizeof (*answer));
 
   answer->bits = 0;
   answer->type = GATE_LINK;
@@ -14341,18 +14379,18 @@ link *gate_link(level *l,config *c)
 /* and return the linedefs by which they should be joined.  NULL if   */
 /* no room could be placed.  The returned linedef is the one in the   */
 /* new room; the **ldf one is the one in oldsector.                   */
-linedef *make_next_room(level *l,sector *oldsector,boolean radical,config *c,
-                         linedef **ldf, link **ThisLink, quest *ThisQuest)
+s_linedef *make_next_room(s_level *l,s_sector *oldsector,boolean radical,s_config *c,
+                         s_linedef **ldf, s_link **ThisLink, s_quest *ThisQuest)
 {
-  linedef *newldf;
+  s_linedef *newldf;
   int i, tries;
   boolean try_reduction;
-  sector *newsector;
-  style *ThisStyle,*NewStyle;
+  s_sector *newsector;
+  s_style *ThisStyle,*NewStyle;
 
 #ifdef DEBUG_QUEST_STACK
   {
-    quest *q = ThisQuest;
+    s_quest *q = ThisQuest;
     for (;q;q=q->next) printf("%d of %d; ",q->count,q->minrooms);
     printf("\n");
   }
@@ -14369,14 +14407,14 @@ linedef *make_next_room(level *l,sector *oldsector,boolean radical,config *c,
       *ldf = random_marked_linedef(l,i);
       unmark_linedefs(l);
       if (i==0) return NULL;
-      /* Decide on a link-style for this link */
+      /* Decide on a link-style for this s_link */
       if (roll(3)&&(link_fitsq(ThisStyle->link0,ThisQuest))) {
         *ThisLink = ThisStyle->link0;  /* Often use style default */
       } else {
         /* Sometimes not */
         *ThisLink = random_link(l,*ldf,ThisStyle,ThisQuest,c);
       }
-      /* If we're getting really desparate, maybe use a gate */
+      /* If we're getting really desparate, maybe use a s_gate */
       if (l->use_gates&&try_reduction&&(tries>15)&&(ThisQuest==NULL)) {
         i = mark_adequate_linedefs(l,oldsector,ThisStyle,c);
         *ldf = random_marked_linedef(l,i);
@@ -14414,8 +14452,8 @@ linedef *make_next_room(level *l,sector *oldsector,boolean radical,config *c,
 
 }  /* end make_next_room() */
 
-/* Place the start positions for Players 1-4 in the given sector */
-void place_start_things(level *l,sector *s,config *c)
+/* Place the start positions for Players 1-4 in the given s_sector */
+void place_start_things(s_level *l,s_sector *s,s_config *c)
 {
   int minx, miny, maxx, maxy;
   short angle;
@@ -14446,7 +14484,7 @@ void place_start_things(level *l,sector *s,config *c)
 }
 
 /* Set all the fields of the given level to empty things */
-void empty_level(level *l, config *c)
+void empty_level(s_level *l, s_config *c)
 {
    int dieroll;
 
@@ -14601,13 +14639,13 @@ void empty_level(level *l, config *c)
 
 /* Make a whole new level, assuming the player starts with the given */
 /* amount of health, ammo, and armor, using the given config.        */
-void NewLevel(level *l, haa *ThisHaa, config *c)
+void NewLevel(s_level *l, s_haa *ThisHaa, s_config *c)
 {
-   style *ThisStyle, *NewStyle;    /* basic decors */
-   quest *ThisQuest;               /* stack of pending goals */
-   link *ThisLink, *ForkLink;      /* Particular instances */
-   linedef *ldf, *newldf = NULL;
-   sector *oldsector, *newsector = NULL;
+   s_style *ThisStyle, *NewStyle;    /* basic decors */
+   s_quest *ThisQuest;               /* stack of pending goals */
+   s_link *ThisLink, *ForkLink;      /* Particular instances */
+   s_linedef *ldf, *newldf = NULL;
+   s_sector *oldsector, *newsector = NULL;
    int i, forks, nullforks;
    boolean done_quest = FALSE;
    boolean first_room = TRUE;
@@ -14622,7 +14660,7 @@ void NewLevel(level *l, haa *ThisHaa, config *c)
    oldsector = generate_room_outline(l,ldf,ThisStyle,TRUE,c);
    l->first_room = oldsector;
 
-   /* Make starting position(s) in the first sector */
+   /* Make starting position(s) in the first s_sector */
    place_start_things(l,oldsector,c);
 
    /* first call to embellish() will add the SLIGE watermark */
@@ -14673,7 +14711,7 @@ void NewLevel(level *l, haa *ThisHaa, config *c)
      */
      /* Fork some number of times */
      for (nullforks=0,forks=0;forks<4;forks++) {
-       linedef *lld1, *lld2;
+       s_linedef *lld1, *lld2;
        boolean radical;
        short newkey;
        if (done_quest) break;
@@ -14764,7 +14802,7 @@ void NewLevel(level *l, haa *ThisHaa, config *c)
    global_align_textures(l,c);
    global_fixups(l);
 
-   /* Warn if we failed to do a secret level */
+   /* Warn if we failed to do a secret s_level */
    if (need_secret_level(c) && !l->sl_done)
      announce(WARNING,"Secret level(s) may be unreachable; durn!");
 
