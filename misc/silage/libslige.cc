@@ -68,6 +68,8 @@
      2. added 'const' to nearly all 'char *' stuff
 
      3. surrounded everything by a 'slige' namespace
+
+     4. added libslige.h and the Slige_XXX() API functions
 */
 
 
@@ -392,6 +394,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include <assert.h>
@@ -1507,7 +1510,7 @@ void swapint(unsigned int *l)
 
 #endif
 
-int main(int argc, const char *argv[]) {
+int old_main(int argc, const char *argv[]) {
 
   /* A stubby but functional main() */
 
@@ -14841,6 +14844,92 @@ void NewLevel(s_level *l, s_haa *ThisHaa, s_config *c)
 }
 
 }  // namespace slige
+
+
+/* API functions */
+
+#define MSG_BUF_LEN  2000
+
+static char error_buffer[MSG_BUF_LEN];
+
+static void ClearError(void)
+{
+  strcpy(error_buffer, "");
+}
+
+static void SetError(const char *msg, ...)
+{
+  va_list argptr;
+
+  va_start(argptr, msg);
+  memset(error_buffer, 0, sizeof(error_buffer));
+  vsnprintf(error_buffer, sizeof(error_buffer) - 1, msg, argptr);
+  va_end(argptr);
+}
+
+const char * Slige_GetError(void)
+{
+  return error_buffer;
+}
+
+
+static slige::s_config * ThisConfig;
+
+bool Slige_LoadConfig(const char *base_name)
+{
+  // FIXME
+
+  return true;
+}
+
+
+void Slige_SetOption(const char *name, const char *value)
+{
+  // FIXME
+}
+
+
+bool Slige_GenerateWAD(const char *filename)
+{
+  ClearError();
+
+  slige::s_level ThisLevel;
+  slige::s_haa *ThisHaa = NULL;
+  int i;
+
+  slige::dumphandle dh;
+  dh = slige::OpenDump(ThisConfig);
+  if (dh==NULL)
+  {
+    SetError("Failed to create output file!\n");
+    return false;
+  }
+
+  for (i=0;i<ThisConfig->levelcount;i++) {
+    if ((!ThisHaa) || (ThisConfig->mission==1)) {
+      if (ThisHaa) free(ThisHaa);
+      ThisHaa = slige::starting_haa();
+    }
+    if ((i+1)==(ThisConfig->levelcount)) ThisConfig->last_mission = TRUE;
+    slige::NewLevel(&ThisLevel,ThisHaa,ThisConfig);
+    slige::DumpLevel(dh,ThisConfig,&ThisLevel,ThisConfig->episode,
+                                              ThisConfig->mission,
+                                              ThisConfig->map);
+    if (need_secret_level(ThisConfig))
+      slige::make_secret_level(dh,ThisHaa,ThisConfig);
+    if (ThisConfig->map) ThisConfig->map++;
+    if (ThisConfig->mission) ThisConfig->mission++;
+    if (ThisConfig->mission==9) {    /* Around the corner */
+      ThisConfig->episode++;
+      ThisConfig->mission=1;
+    }
+    slige::FreeLevel(&ThisLevel);
+  }
+  CloseDump(dh);
+
+  return true;
+}
+
 
 /****** the end of SLIGE.C ********* please come again *********/
 

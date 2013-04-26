@@ -41,6 +41,7 @@
 // #include "sys_type.h"
 // #include "sys_macro.h"
 
+#include "libslige.h"
 #include "window.h"
 
 
