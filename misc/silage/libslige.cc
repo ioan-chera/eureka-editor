@@ -60,14 +60,16 @@
 #define SOURCE_SERIAL (490)
 
 /*
-   Changes for Silage port by Andrew Apted, APRIL 2013:
+   Changes for Silage by Andrew Apted, APRIL 2013:
 
      1. use C++ style structs (no typedef) and prefix names with 's_'
         (for example: s_texture, s_level, s_quest, ...)
+
+     2. added 'const' to nearly all 'char *' stuff
 */
 
-/*
 
+/*
    New stuff (since 485): -huge switch, fixed gate-to-gate-to-arena bug
      (not as elegantly as I could have!), RISCOS source mods from JF,
      -fstart -ffstart -fend -ffend switches, getenv() var for cfg filename,
@@ -447,7 +449,7 @@ int strncasecmp (const char *a, const char *b, int n)
 #endif
 
 #ifdef NO_STRDUP
-char *strdup(char *str)
+const char *strdup(const char *str)
 {
   char *newstr=malloc(strlen(str)+1);
   if (newstr==NULL) return NULL;
@@ -514,7 +516,7 @@ typedef unsigned long propertybits;  /* Another bitarray */
 
 struct s_theme
 {
-  char *name;
+  const char *name;
   boolean secret;
   s_theme *next;
 };
@@ -522,7 +524,7 @@ struct s_theme
 struct s_texture
 {
   char name[9];   /* Room for the eos */
-  char *realname; /* the DOOM name, in case the name name is an alias */
+  const char *realname; /* the DOOM name, in case the name name is an alias */
   gamebits gamemask;
   themebits compatible;
   themebits core;
@@ -975,7 +977,7 @@ struct s_patch
 
 struct s_custom_texture
 {
-  char *name;
+  const char *name;
   short xsize;
   short ysize;
   s_patch *patch_anchor;
@@ -984,7 +986,7 @@ struct s_custom_texture
 
 struct s_texture_lmp
 {
-  char *name;
+  const char *name;
   s_custom_texture *custom_texture_anchor;
 };
 
@@ -1145,9 +1147,9 @@ struct s_level
 /* It's read from a config file (parts of it, anyway!).        */
 struct s_config
 {
-  char *configfile;    /* Name of the configuration file */
-  char *configdata;    /* Contents of the configuration file */
-  char *outfile;       /* Name of the output file */
+  const char *configfile;    /* Name of the configuration file */
+  const char *configdata;    /* Contents of the configuration file */
+  const char *outfile;       /* Name of the output file */
   boolean cwadonly;    /* Do we want just the customization lumps? */
   boolean fcontrol;
   boolean fstart;
@@ -1224,7 +1226,7 @@ struct s_config
 /* Lots and lots and lots of functions */
 /* And this isn't even all of 'em! */
 
-s_config *get_config(int argc, char *arg[]);
+s_config *get_config(int argc, const char *arg[]);
 void NewLevel(s_level *l, s_haa *s_init_haa, s_config *c);
 void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map);
 void FreeLevel(s_level *l);
@@ -1306,18 +1308,18 @@ boolean link_fitsv(s_level *l,s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink);
 void Usage0(void);
 void Usage(void);
 void Usage2(void);
-boolean do_switches(int argc,char *argv[],s_config *c,char *s,int conly);
+boolean do_switches(int argc,const char *argv[],s_config *c,const char *s,int conly);
 boolean read_switches(s_config *c);
 boolean nonswitch_config(s_config *c);
 void load_config(s_config *c);
 void unload_config(s_config *c);
-s_texture *new_texture(s_config *c, char *name);
-s_texture *find_texture(s_config *c, char *name);
+s_texture *new_texture(s_config *c, const char *name);
+s_texture *find_texture(s_config *c, const char *name);
 s_genus *find_genus(s_config *c, int thingid);
 s_genus *new_genus(s_config *c,int thingid);
-s_flat *new_flat(s_config *c, char *name);
-s_flat *find_flat(s_config *c, char *name);
-s_theme *new_theme(s_config *c, char *name, boolean secret);
+s_flat *new_flat(s_config *c, const char *name);
+s_flat *find_flat(s_config *c, const char *name);
+s_theme *new_theme(s_config *c, const char *name, boolean secret);
 s_gate *new_gate(s_level *l,short in,short out,short lock,boolean entry,s_config *c);
 void patch_upper(s_linedef *ld,s_texture *t,s_config *c);
 void patch_lower(s_linedef *ld,s_texture *t,s_config *c);
@@ -1386,7 +1388,7 @@ boolean install_sl_exit(s_level *l,s_sector *oldsector,s_haa *ThisHaa,
 #define NOTE 2
 #define WARNING 3
 #define ERROR 4
-void announce(int announcetype, char *s);
+void announce(int announcetype, const char *s);
 
 #define RIGHT_TURN (90)
 #define LEFT_TURN (270)
@@ -1465,8 +1467,8 @@ void swapshort(unsigned short *i)
 {
   unsigned short int t;
 
-  ((char *) &t)[ 0] = ((char *) i)[ 1];
-  ((char *) &t)[ 1] = ((char *) i)[ 0];
+  ((const char *) &t)[ 0] = ((const char *) i)[ 1];
+  ((const char *) &t)[ 1] = ((const char *) i)[ 0];
   *i = t;
 }
 
@@ -1474,10 +1476,10 @@ void swaplong(unsigned long *l)
 {
   unsigned long t;
 
-  ((char *) &t)[ 0] = ((char *) l)[ 3];
-  ((char *) &t)[ 1] = ((char *) l)[ 2];
-  ((char *) &t)[ 2] = ((char *) l)[ 1];
-  ((char *) &t)[ 3] = ((char *) l)[ 0];
+  ((const char *) &t)[ 0] = ((const char *) l)[ 3];
+  ((const char *) &t)[ 1] = ((const char *) l)[ 2];
+  ((const char *) &t)[ 2] = ((const char *) l)[ 1];
+  ((const char *) &t)[ 3] = ((const char *) l)[ 0];
   *l = t;
 }
 
@@ -1485,10 +1487,10 @@ void swapint(unsigned int *l)
 {
   unsigned int t;
 
-  ((char *) &t)[ 0] = ((char *) l)[ 3];
-  ((char *) &t)[ 1] = ((char *) l)[ 2];
-  ((char *) &t)[ 2] = ((char *) l)[ 1];
-  ((char *) &t)[ 3] = ((char *) l)[ 0];
+  ((const char *) &t)[ 0] = ((const char *) l)[ 3];
+  ((const char *) &t)[ 1] = ((const char *) l)[ 2];
+  ((const char *) &t)[ 2] = ((const char *) l)[ 1];
+  ((const char *) &t)[ 3] = ((const char *) l)[ 0];
   *l = t;
 }
 
@@ -1500,7 +1502,7 @@ void swapint(unsigned int *l)
 
 #endif
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
 
   /* A stubby but functional main() */
 
@@ -1695,7 +1697,7 @@ void FreeLevel(s_level *l)
 }
 
 /* Record the information about a new lmp of the given size */
-void RegisterLmp(dumphandle dh,char *s,unsigned int size)
+void RegisterLmp(dumphandle dh,const char *s,unsigned int size)
 {
   s_index_entry *ie, *ie2;
 
@@ -1718,7 +1720,7 @@ void RegisterLmp(dumphandle dh,char *s,unsigned int size)
 /* Given a dumphandle, a music header, a music buffer, a lump name, */
 /* and for some reason a config, do what's necessary to record it   */
 /* in the file and index and stuff. */
-void record_music(dumphandle dh,s_musheader *mh,byte *buf,char *s,s_config *c)
+void record_music(dumphandle dh,s_musheader *mh,byte *buf,const char *s,s_config *c)
 {
   unsigned int lsize;
 
@@ -1744,7 +1746,7 @@ void record_music(dumphandle dh,s_musheader *mh,byte *buf,char *s,s_config *c)
 void make_slinfo(dumphandle dh, s_config *c)
 {
 #if 1  // def RISCOS
-  static char slinfo[100]; /* sprintf takes a char *, byte is unsigned */
+  static char slinfo[100]; /* sprintf takes a const char *, byte is unsigned */
 #else
   static byte slinfo[100];
 #endif
@@ -2506,7 +2508,7 @@ unsigned short psi_sqrt(int v)
 
 /* Find a flat with the given name, creating one if */
 /* it doesn't already exist.                        */
-s_flat *find_flat(s_config *c, char *name)
+s_flat *find_flat(s_config *c, const char *name)
 {
   s_flat *t = NULL;
 
@@ -2516,7 +2518,7 @@ s_flat *find_flat(s_config *c, char *name)
 }
 
 /* Return a new flat with the given name */
-s_flat *new_flat(s_config *c,char *name)
+s_flat *new_flat(s_config *c,const char *name)
 {
   s_flat *answer;
 
@@ -2548,7 +2550,7 @@ s_gate *new_gate(s_level *l, short intag, short outtag, short lock,
 
 /* Return a new theme with the given name and secretness.  Non-secret */
 /* themes go at the start of the list, secret ones at the end */
-s_theme *new_theme(s_config *c,char *name,boolean secret)
+s_theme *new_theme(s_config *c,const char *name,boolean secret)
 {
   s_theme *answer = (s_theme *)malloc(sizeof(*answer));
   s_theme *t;
@@ -2641,7 +2643,7 @@ s_genus *find_genus(s_config *c, int thingid)
 
 /* Find a texture with the given name, creating one if */
 /* it doesn't already exist.                           */
-s_texture *find_texture(s_config *c, char *name)
+s_texture *find_texture(s_config *c, const char *name)
 {
   s_texture *t = NULL;
 
@@ -2651,7 +2653,7 @@ s_texture *find_texture(s_config *c, char *name)
 }
 
 /* Return a new texture with the given name */
-s_texture *new_texture(s_config *c,char *name)
+s_texture *new_texture(s_config *c,const char *name)
 {
   s_texture *answer;
 
@@ -2894,7 +2896,7 @@ void secretize_config(s_config *c)
 /* 3. Parse the arglist to get overrides to switches,         */
 /* 4. Read the config for non-switches (flats, themes, etc).  */
 /* 5. Do postproduction defaults and calculations and such.   */
-s_config *get_config(int argc, char *argv[])
+s_config *get_config(int argc, const char *argv[])
 {
   s_config *answer;
   int i;
@@ -3663,7 +3665,7 @@ boolean enough_quest(s_level *l,s_sector *s,s_quest *ThisQuest,s_config *c)
 /* given config structure.  Use s in error messages.  If conly, */
 /* all we're parsing for here are -config and -seed.            */
 /* Print msg and return FALSE if error, else return TRUE.       */
-boolean do_switches(int argc,char *argv[],s_config *c,char *s,int conly)
+boolean do_switches(int argc,const char *argv[],s_config *c,const char *s,int conly)
 {
   int i;
 
@@ -4250,7 +4252,7 @@ void find_rec(s_level *l, s_sector *s, int *minx, int *miny, int *maxx, int *max
   *minx = s->minx;  *miny = s->miny;  *maxx = s->maxx;  *maxy = s->maxy;
 }
 
-void dump_link(s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,char *s1)
+void dump_link(s_linedef *ldf1,s_linedef *ldf2,s_link *ThisLink,const char *s1)
 {
   char s[200];
 
@@ -4617,7 +4619,7 @@ byte *one_piece(s_musheader *pmh)
 }
 
 /* Allocate, initialize, and return a new lmp for custom textures */
-s_texture_lmp *new_texture_lmp(char *name)
+s_texture_lmp *new_texture_lmp(const char *name)
 {
   s_texture_lmp *answer = (s_texture_lmp *)malloc(sizeof(*answer));
 
@@ -4648,7 +4650,7 @@ void add_patch(s_custom_texture *ct,short patchid,short x,short y)
 
 /* Allocate, initialize, register with the given lmp, and return */
 /* a new custom texture record structure s_thing */
-s_custom_texture *new_custom_texture(s_texture_lmp *tl,char *name,
+s_custom_texture *new_custom_texture(s_texture_lmp *tl,const char *name,
                                    short xsize, short ysize)
 {
   s_custom_texture *answer = (s_custom_texture *)malloc(sizeof(*answer));
@@ -4680,10 +4682,10 @@ void free_texture_lmp(s_texture_lmp *tl)
       ctp->patch_anchor = ctp->patch_anchor->next;
       free(p);
     }
-    free(ctp->name);
+    free((char *)ctp->name);
     free(ctp);
   }
-  free(tl->name);
+  free((char *)tl->name);
   free(tl);
 }
 
@@ -7696,7 +7698,7 @@ void point_from(int x1, int y1, int x2, int y2, int angle, int len,
 }
 
 /* Print, log, whatever.  Really ought to support real log files. */
-void announce(int announcelevel, char *s)
+void announce(int announcelevel, const char *s)
 {
   switch (announcelevel) {
     case NONE: return;
@@ -10272,7 +10274,9 @@ boolean isAdequate(s_level *l,s_linedef *ld,s_style *ThisStyle,s_config *c)
 void load_default_config(s_config *c)
 {
   char *p;
-  c->configdata = strdup(    /* So we can free() it */
+  char *configdata;
+
+  configdata = strdup(    /* So we can free() it */
     "[THEMES] T W T M T B T R ? "
     "t PANEL5 0 1 "
     "t PANCASE2 0 1 "
@@ -10585,8 +10589,11 @@ void load_default_config(s_config *c)
     ". 70 c M c W "
     ". 35 c W "
     "# ");
-  for (p=c->configdata;*p;p++)
+
+  for (p=configdata;*p;p++)
     if (*p==' ') *p = '\0';
+
+  c->configdata = configdata;
   return;
 }
 
@@ -10595,7 +10602,8 @@ void load_config(s_config *c)
 {
   FILE *f;
   char thisline[200];
-  char *inc, *outc;
+  const char *inc;
+  char *outc;
   long flen;
   boolean blankmode = TRUE;   /* Strip leading blanks */
 
@@ -10608,8 +10616,8 @@ void load_config(s_config *c)
     fseek(f,0,SEEK_END);
     flen = ftell(f);
     fseek(f,0,SEEK_SET);
-    c->configdata = (char *)malloc(5+flen);
-    outc = c->configdata;
+    outc = (char *)malloc(5+flen);
+    c->configdata = outc;
     printf("Loading %s...\n",c->configfile);
     for (;;) {
       fgets(thisline,190,f);
@@ -10632,7 +10640,8 @@ void load_config(s_config *c)
     if (!blankmode) *(outc++) = '\0';
     *(outc++) = '\0';
     printf("Loaded.\n");
-    c->configdata = (char *)realloc(c->configdata,1+(outc-c->configdata));
+///??? // andrewj: this doesn't seem necessary (outc is not freed)
+///??? c->configdata = (const char *)realloc(c->configdata,1+(outc-c->configdata));
     fclose(f);
   }
 #if 0
@@ -10645,7 +10654,7 @@ void load_config(s_config *c)
 /* Free up config-file resources */
 void unload_config(s_config *c)
 {
-  if (c->configdata) free(c->configdata);
+  if (c->configdata) free((char *)c->configdata);
   c->configdata = NULL;
   return;
 }
@@ -10676,7 +10685,7 @@ s_construct *new_construct(s_config *c)
   return answer;
 }
 
-s_flat_cell *add_flat_cell(s_construct *cn,char *name,s_config *c)
+s_flat_cell *add_flat_cell(s_construct *cn,const char *name,s_config *c)
 {
   s_flat_cell *answer = (s_flat_cell *)malloc(sizeof(*answer));
 
@@ -10686,7 +10695,7 @@ s_flat_cell *add_flat_cell(s_construct *cn,char *name,s_config *c)
   return answer;
 }
 
-s_texture_cell *add_texture_cell(s_construct *cn,char *name,boolean primary,
+s_texture_cell *add_texture_cell(s_construct *cn,const char *name,boolean primary,
                                short y1, short y2,s_config *c)
 {
   s_texture_cell *answer = (s_texture_cell *)malloc(sizeof(*answer));
@@ -10706,7 +10715,7 @@ s_texture_cell *add_texture_cell(s_construct *cn,char *name,boolean primary,
 
 #ifndef CONFIG_DUMP_VERBOSE_NOT
 
-void dump_foo_themebits(themebits yes, themebits no, char *tag, s_config *c)
+void dump_foo_themebits(themebits yes, themebits no, const char *tag, s_config *c)
 {
   themebits mask = 1;
   s_theme *t = c->theme_anchor;
@@ -11267,9 +11276,9 @@ boolean hardwired_nonswitch_nontheme_config(s_config *c)
 /* update *r to point to the last string we used (but since all */
 /* the properties we handle are one token long, we never actually */
 /* change *r). */
-propertybits absorb_propertybit(char **r)
+propertybits absorb_propertybit(const char **r)
 {
-  char *p;
+  const char *p;
 
   p = *r;
 
@@ -11303,9 +11312,9 @@ propertybits absorb_propertybit(char **r)
 /* update *r to point to the last string we used (but since all */
 /* the restrictions we handle are one token long, we never actually */
 /* change *r). */
-gamebits absorb_gamebit(char **r)
+gamebits absorb_gamebit(const char **r)
 {
-  char *p;
+  const char *p;
 
   p = *r;
 
@@ -11320,9 +11329,9 @@ gamebits absorb_gamebit(char **r)
 
 /* Absorb a Theme record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_theme(char *p, s_config *c)
+const char *absorb_theme(const char *p, s_config *c)
 {
-  char *q, *name;
+  const char *q, *name;
   s_theme *t;
   boolean b = FALSE;
 
@@ -11341,7 +11350,7 @@ char *absorb_theme(char *p, s_config *c)
 }
 
 /* Return a themebit for the given name, or zero if none */
-themebits themebit_for_name(char *name, s_config *c)
+themebits themebit_for_name(const char *name, s_config *c)
 {
   s_theme *t;
   themebits answer = 1;
@@ -11356,7 +11365,7 @@ themebits themebit_for_name(char *name, s_config *c)
 /* Absorb a parameter like "thing stringval", returning stringval.  If */
 /* neither the short nor long "thing"s given match, return NULL.  Update */
 /* *r to point to the last string we used. */
-char *absorb_string(char **r,char *ln, char *sn)
+const char *absorb_string(const char **r,const char *ln, const char *sn)
 {
   /* Needs more error-checking.  Input Is Evil. */
   if (stricmp(*r,ln) && strcmp(*r,sn)) return NULL;
@@ -11366,18 +11375,18 @@ char *absorb_string(char **r,char *ln, char *sn)
 }
 
 /* Absorb a parameter like "yhint 5", etc etc etc, see above. */
-boolean absorb_short(char **r,char *ln,char *sn,short *s)
+boolean absorb_short(const char **r,const char *ln,const char *sn,short *s)
 {
-  char *v = absorb_string(r,ln,sn);
+  const char *v = absorb_string(r,ln,sn);
   if (v==NULL) return FALSE;
   *s = (short)atoi(v);
   return TRUE;
 }
 
 /* Absorb a parameter like "size 5 6", etc etc etc, see above. */
-boolean absorb_two_shorts(char **r,char *ln,char *sn,short *s,short *t)
+boolean absorb_two_shorts(const char **r,const char *ln,const char *sn,short *s,short *t)
 {
-  char *v = absorb_string(r,ln,sn);
+  const char *v = absorb_string(r,ln,sn);
   if (v==NULL) return FALSE;
   *s = (short)atoi(v);
   *r += 1 + strlen(*r);
@@ -11387,9 +11396,9 @@ boolean absorb_two_shorts(char **r,char *ln,char *sn,short *s,short *t)
 
 /* Absorb a Texture record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_texture(char *p, s_config *c)
+const char *absorb_texture(const char *p, s_config *c)
 {
-  char *q, *name;
+  const char *q, *name;
   short n,m;
   s_texture *t;
   propertybits pb;
@@ -11449,9 +11458,9 @@ char *absorb_texture(char *p, s_config *c)
 
 /* Absorb a Flat record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_flat(char *p, s_config *c)
+const char *absorb_flat(const char *p, s_config *c)
 {
-  char *q, *name;
+  const char *q, *name;
   s_flat *f;
   propertybits pb;
   gamebits gb;
@@ -11490,9 +11499,9 @@ char *absorb_flat(char *p, s_config *c)
 
 /* Absorb a Thing record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_thing(char *p, s_config *c)
+const char *absorb_thing(const char *p, s_config *c)
 {
-  char *q, *name;
+  const char *q, *name;
   s_genus *g;
   themebits tb;
 
@@ -11521,9 +11530,9 @@ char *absorb_thing(char *p, s_config *c)
 /* Absorb a cell subrecord of a construct record, returning TRUE if */
 /* there is one there, or FALSE if not.  Update r to point to the */
 /* last string we actually used. */
-boolean absorb_cell(s_construct *x,char **r,char *ln,char *sn,boolean b,s_config *c)
+boolean absorb_cell(s_construct *x,const char **r,const char *ln,const char *sn,boolean b,s_config *c)
 {
-  char *p, *q, *name;
+  const char *p, *q, *name;
   s_texture_cell *tc;
   short o1 = 0;
   short o2 = 0;
@@ -11554,9 +11563,9 @@ boolean absorb_cell(s_construct *x,char **r,char *ln,char *sn,boolean b,s_config
 
 /* Absorb a Construct record from the config data, returning the last */
 /* string that we actually used. */
-char *absorb_construct(char *p, s_config *c)
+const char *absorb_construct(const char *p, s_config *c)
 {
-  char *q, *name;
+  const char *q, *name;
   short s;
   s_construct *x;
   gamebits gb;
@@ -11598,7 +11607,7 @@ boolean nonswitch_config(s_config *c)
 
 #ifndef USE_OLD_HARDWIRED_STUFF
 
-  char *p;
+  const char *p;
 
   /* Skip to the "[THEMES]" section */
   for (p=c->configdata;*p;p+=1+strlen(p))
