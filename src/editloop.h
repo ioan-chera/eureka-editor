@@ -54,7 +54,7 @@ typedef struct
 
 	selection_c *Selected;    // all selected objects (usually empty)
 
-	bool error_mode;  // draw selection in red
+	bool error_mode;  // draw selection in red  (FIXME: have an enum)
 
 	Objid highlighted;   // The highlighted object
 

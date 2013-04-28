@@ -378,7 +378,7 @@ void UI_Canvas::DrawGrid()
 		if (grid.step < 64)
 			fl_color(GRID_BRIGHT); // fl_rgb_color(160, 96, 96));
 		else
-			fl_color(fl_rgb_color(0, 88, 0));
+			fl_color(fl_rgb_color(48, 96, 48));
 
 		int flat_step = 64;
 
@@ -393,7 +393,7 @@ void UI_Canvas::DrawGrid()
 			DrawMapLine(map_lx, gy, map_hx, gy);
 
 		if (grid.step < 64)
-			fl_color(fl_rgb_color(72, 72, 128));
+			fl_color(fl_rgb_color(60, 60, 120));
 		else
 			fl_color(GRID_BRIGHT);
 
