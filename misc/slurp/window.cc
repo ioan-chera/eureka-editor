@@ -55,7 +55,7 @@ static void about_callback(Fl_Button *w, void *data)
 {
 	// FIXME
 
-	fl_message("Sludge = SLIGE + GUI");
+	fl_message("Slurp = SLIGE + GUI");
 }
 
 

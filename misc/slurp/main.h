@@ -6,7 +6,7 @@
 #define __MAIN_H__
 
 
-#define SLUDGE_VERSION  "0.5.490"
+#define SLURP_VERSION  "0.5.490"
 
 /*
  *  Standard headers

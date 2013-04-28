@@ -1,12 +1,12 @@
 #
-#  --- Sludge = SLIGE + GUI ---
+#  --- Slurp = SLIGE + GUI ---
 #
 #  Makefile for Unixy system-wide install
 #
-#  NOTE: Run from top level: make -f misc/sludge/Makefile
+#  NOTE: Run from top level: make -f misc/slurp/Makefile
 #
 
-PROGRAM=sludge
+PROGRAM=slurp
 
 # prefix choices: /usr  /usr/local  /opt
 INSTALL_PREFIX=/usr/local
@@ -21,7 +21,7 @@ OS=UNIX
 
 #--- Internal stuff from here -----------------------------------
 
-INSTALL_DIR=$(INSTALL_PREFIX)/share/sludge
+INSTALL_DIR=$(INSTALL_PREFIX)/share/slurp
 
 CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
          -Iglbsp_src  \
@@ -54,12 +54,12 @@ endif
 #----- Object files ----------------------------------------------
 
 OBJS = \
-	$(OBJ_DIR)/sludge/main.o   \
-	$(OBJ_DIR)/sludge/window.o \
+	$(OBJ_DIR)/slurp/main.o   \
+	$(OBJ_DIR)/slurp/window.o \
 	\
-	$(OBJ_DIR)/sludge/libslige.o
+	$(OBJ_DIR)/slurp/libslige.o
 
-$(OBJ_DIR)/sludge/%.o: misc/sludge/%.cc
+$(OBJ_DIR)/slurp/%.o: misc/slurp/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 
@@ -88,7 +88,7 @@ $(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
 all: $(PROGRAM)
 
 clean:
-	rm -f $(PROGRAM) $(OBJ_DIR)/sludge/*.*
+	rm -f $(PROGRAM) $(OBJ_DIR)/slurp/*.*
 	rm -f $(OBJ_DIR)/glbsp/*.*
 	rm -f ERRS LOG.txt update.log
 

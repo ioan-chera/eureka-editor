@@ -53,7 +53,7 @@ void FatalError(const char *fmt, ...)
 #ifdef WIN32
 	else
 	{
-		MessageBox(NULL, buffer, "Sludge : Error",
+		MessageBox(NULL, buffer, "Slurp : Error",
 		           MB_ICONEXCLAMATION | MB_OK |
 				   MB_SYSTEMMODAL | MB_SETFOREGROUND);
 	}
@@ -85,14 +85,14 @@ static void Main_OpenWindow()
 #endif
 
 
-	main_win = new UI_MainWin("Sludge v" SLUDGE_VERSION);
+	main_win = new UI_MainWin("Slurp v" SLURP_VERSION);
 
 	// show window (pass some dummy arguments)
 	{
 		int   argc = 1;
 		char *argv[2];
 
-		argv[0] = strdup("Sludge.exe");
+		argv[0] = strdup("Slurp.exe");
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
@@ -400,7 +400,7 @@ fprintf(stderr, "BUILD FILENAME = '%s'\n", filename);
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** Sludge v" SLUDGE_VERSION " ***\n"
+			"*** Slurp v" SLURP_VERSION " ***\n"
 			"\n");
 
 	fflush(stdout);
