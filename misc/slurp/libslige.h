@@ -65,7 +65,7 @@
 
 const char * Slige_GetError(void);
 
-bool Slige_LoadConfig(const char *filename);
+bool Slige_LoadConfig(const char *filename, int seed);
 void Slige_SetOption(const char *name, const char *value);
 bool Slige_GenerateWAD(const char *filename);
 

@@ -1234,7 +1234,7 @@ struct s_config
 /* Lots and lots and lots of functions */
 /* And this isn't even all of 'em! */
 
-s_config *get_config(const char *config_filename);
+s_config *get_config(const char *config_filename, int seed);
 void NewLevel(s_level *l, s_haa *s_init_haa, s_config *c);
 void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map);
 void FreeLevel(s_level *l);
@@ -2910,7 +2910,7 @@ void secretize_config(s_config *c)
 
 // andrewj: changed to pass config filename directly, and don't parse arguments
 
-s_config *get_config(const char *config_filename)
+s_config *get_config(const char *config_filename, int seed)
 {
   s_config *answer;
   int i;
@@ -2927,9 +2927,12 @@ s_config *get_config(const char *config_filename)
 ///    answer->configfile = strdup(answer->configfile);
   answer->outfile = NULL;
   answer->cwadonly = FALSE;
-  srand((unsigned int)time(NULL));
-  for (i=0;i<20;i++) rand();
-  answer->ranseed = (unsigned int)bigrand();
+  answer->ranseed = seed;
+  
+  srand(answer->ranseed);
+
+///  for (i=0;i<20;i++) rand();
+///  answer->ranseed = (unsigned int)bigrand();
 
 ///  /* Do initial parsing for possible other config file and ranseed */
 ///  if (!do_switches(argc,argv,answer,"Command line",1)) return NULL;
@@ -14884,7 +14887,7 @@ const char * Slige_GetError(void)
 
 static slige::s_config * ThisConfig;
 
-bool Slige_LoadConfig(const char *filename)
+bool Slige_LoadConfig(const char *filename, int seed)
 {
   ClearError();
 
@@ -14899,7 +14902,7 @@ bool Slige_LoadConfig(const char *filename)
 
   fclose(fp);
 
-  ThisConfig = slige::get_config(filename);
+  ThisConfig = slige::get_config(filename, seed);
 
   if (! ThisConfig)
   {
@@ -14915,13 +14918,7 @@ void Slige_SetOption(const char *name, const char *value)
 {
   ClearError();
 
-  if (strcmp(name, "seed") == 0)
-  {
-    srand(atoi(value));
-    return;
-  }
-
-  // FIXME : other stuff !!!!
+  // FIXME : stuff !!!!
 
 }
 
@@ -14944,6 +14941,10 @@ bool Slige_GenerateWAD(const char *filename)
     SetError("Failed to create file: '%s'", filename);
     return false;
   }
+
+  srand(ThisConfig->ranseed ^ 1);
+
+  if (ThisConfig->do_slinfo) make_slinfo(dh,ThisConfig);
 
   for (i=0;i<ThisConfig->levelcount;i++) {
     if ((!ThisHaa) || (ThisConfig->mission==1)) {

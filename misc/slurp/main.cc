@@ -338,7 +338,9 @@ static bool Main_RunSLIGE(const char *filename)
 {
 	// FIXME: full path
 
-	if (! Slige_LoadConfig("default.cfg"))
+	int seed = 1;
+
+	if (! Slige_LoadConfig("default.cfg", seed))
 	{
 		fl_alert("Error loading config file:\n\n%s", Slige_GetError());
 		Main_ProgStatus("Config Error");
