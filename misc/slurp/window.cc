@@ -210,9 +210,11 @@ UI_MainWin::UI_MainWin(const char *title) :
 
 		big_mon = new Fl_Check_Button(305, 50, 180, 30, " Big monsters");
 		big_mon->down_box(FL_DOWN_BOX);
+		big_mon->value(1);
 
 		big_weap = new Fl_Check_Button(305, 90, 180, 30, " Big weapons");
 		big_weap->down_box(FL_DOWN_BOX);
+		big_weap->value(1);
 
 		macho = new Fl_Int_Input(340, 195, 80, 30, "Macho:");
 		macho->value("0");
