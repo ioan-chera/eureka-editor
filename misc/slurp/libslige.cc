@@ -1234,7 +1234,7 @@ struct s_config
 /* Lots and lots and lots of functions */
 /* And this isn't even all of 'em! */
 
-s_config *get_config(int argc, const char *arg[]);
+s_config *get_config(const char *config_filename);
 void NewLevel(s_level *l, s_haa *s_init_haa, s_config *c);
 void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map);
 void FreeLevel(s_level *l);
@@ -1510,7 +1510,8 @@ void swapint(unsigned int *l)
 
 #endif
 
-int old_main(int argc, const char *argv[]) {
+#if 0 // andrewj: not needed for Slurp
+int main(int argc, const char *argv[]) {
 
   /* A stubby but functional main() */
 
@@ -1577,6 +1578,8 @@ int old_main(int argc, const char *argv[]) {
   return 0;
 
 }
+#endif
+
 
 /* Open a file ready to dump multiple levels into */
 dumphandle OpenDump(s_config *c)
@@ -2904,7 +2907,10 @@ void secretize_config(s_config *c)
 /* 3. Parse the arglist to get overrides to switches,         */
 /* 4. Read the config for non-switches (flats, themes, etc).  */
 /* 5. Do postproduction defaults and calculations and such.   */
-s_config *get_config(int argc, const char *argv[])
+
+// andrewj: changed to pass config filename directly, and don't parse arguments
+
+s_config *get_config(const char *config_filename)
 {
   s_config *answer;
   int i;
@@ -2912,19 +2918,21 @@ s_config *get_config(int argc, const char *argv[])
 
   answer = (s_config *)malloc(sizeof(*answer));
 
+  answer->configfile = strdup(config_filename);
+
   /* Set various defaults and stuff */
-  if ( (answer->configfile = getenv(SLIGE_CONFIG)) == NULL)
-    answer->configfile = strdup("slige" EXT_SEP "cfg"); /* So's we kin free() it */
-  else
-    answer->configfile = strdup(answer->configfile);
+///  if ( (answer->configfile = getenv(SLIGE_CONFIG)) == NULL)
+///    answer->configfile = strdup("slige" EXT_SEP "cfg"); /* So's we kin free() it */
+///  else
+///    answer->configfile = strdup(answer->configfile);
   answer->outfile = NULL;
   answer->cwadonly = FALSE;
   srand((unsigned int)time(NULL));
   for (i=0;i<20;i++) rand();
   answer->ranseed = (unsigned int)bigrand();
 
-  /* Do initial parsing for possible other config file and ranseed */
-  if (!do_switches(argc,argv,answer,"Command line",1)) return NULL;
+///  /* Do initial parsing for possible other config file and ranseed */
+///  if (!do_switches(argc,argv,answer,"Command line",1)) return NULL;
 
   ok_to_roll = TRUE;
 
@@ -3039,8 +3047,9 @@ s_config *get_config(int argc, const char *argv[])
   /* Read switch-defaults from the config file */
   if (!read_switches(answer)) return NULL;
 
-  /* Now scan the command line again */
-  if (!do_switches(argc,argv,answer,"Command line",0)) return NULL;
+//// andrewj: disabled for Slurp
+//  /* Now scan the command line again */
+//  if (!do_switches(argc,argv,answer,"Command line",0)) return NULL;
 
   /* And finally read in all the hard stuff from the file */
   if (!nonswitch_config(answer)) return NULL;
@@ -3049,8 +3058,8 @@ s_config *get_config(int argc, const char *argv[])
   unload_config(answer);
 
   /* Then we set some final defaulty stuff */
-  if (answer->outfile==NULL)
-    answer->outfile = strdup("slige" EXT_SEP "out");   /* So we can free it */
+///  if (answer->outfile==NULL)
+///    answer->outfile = strdup("slige" EXT_SEP "out");   /* So we can free it */
   if (answer->error_texture==NULL)   /* Use REDWALL if none specified */
     answer->error_texture = find_texture(answer,"REDWALL");  /* OK default? */
   if (answer->sky_flat==NULL)
@@ -14875,9 +14884,28 @@ const char * Slige_GetError(void)
 
 static slige::s_config * ThisConfig;
 
-bool Slige_LoadConfig(const char *base_name)
+bool Slige_LoadConfig(const char *filename)
 {
-  // FIXME
+  ClearError();
+
+  // test it exists
+  FILE * fp = fopen(filename, "rb");
+  
+  if (! fp)
+  {
+    SetError("No such file: '%s'", filename);
+    return false;
+  }
+
+  fclose(fp);
+
+  ThisConfig = slige::get_config(filename);
+
+  if (! ThisConfig)
+  {
+    SetError("Error in the config file.");
+    return false;
+  }
 
   return true;
 }
@@ -14885,13 +14913,25 @@ bool Slige_LoadConfig(const char *base_name)
 
 void Slige_SetOption(const char *name, const char *value)
 {
-  // FIXME
+  ClearError();
+
+  if (strcmp(name, "seed") == 0)
+  {
+    srand(atoi(value));
+    return;
+  }
+
+  // FIXME : other stuff !!!!
+
 }
 
 
 bool Slige_GenerateWAD(const char *filename)
 {
   ClearError();
+
+  // FIXME: fopen this here
+  ThisConfig->outfile = filename;
 
   slige::s_level ThisLevel;
   slige::s_haa *ThisHaa = NULL;
@@ -14901,7 +14941,7 @@ bool Slige_GenerateWAD(const char *filename)
   dh = slige::OpenDump(ThisConfig);
   if (dh==NULL)
   {
-    SetError("Failed to create output file!\n");
+    SetError("Failed to create file: '%s'", filename);
     return false;
   }
 
@@ -14926,6 +14966,8 @@ bool Slige_GenerateWAD(const char *filename)
     slige::FreeLevel(&ThisLevel);
   }
   CloseDump(dh);
+
+  /* TODO: FreeConfig(ThisConfig) */
 
   return true;
 }
