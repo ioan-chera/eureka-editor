@@ -327,7 +327,34 @@ static bool Main_RunGLBSP(const char *filename)
 		return false;
 	}
 
-	Main_ProgStatus("Success");
+	return true;
+}
+
+
+//------------------------------------------------------------------------
+
+
+static bool Main_RunSLIGE(const char *filename)
+{
+	// FIXME: full path
+
+	if (! Slige_LoadConfig("default.cfg"))
+	{
+		fl_alert("Error loading config file:\n\n%s", Slige_GetError());
+		Main_ProgStatus("Config Error");
+		return false;
+	}
+
+
+	// !!!!! FIXME set options.....
+
+
+	if (! Slige_GenerateWAD(filename))
+	{
+		fl_alert("Error generating WAD:\n\n%s", Slige_GetError());
+		Main_ProgStatus("Generate Error");
+		return false;
+	}
 
 	return true;
 }
@@ -374,24 +401,40 @@ static void Main_Build()
 	if (! *pos)
 		strcat(filename, ".wad");
 
-fprintf(stderr, "BUILD FILENAME = '%s'\n", filename);
 
+	if (! Main_RunSLIGE(filename))
+	{
+		return;
+	}
+
+
+	Main_ProgStatus("Building nodes");
 
 	// convert quit button into a "cancel" button
 	main_win->quit->label("Cancel");
 	main_win->quit->labelcolor(CANCEL_COLOR);
 	main_win->quit->labelfont(FL_HELVETICA_BOLD);
 
-	Fl::wait(0.2);
+	Fl::wait(0.1);
+	Fl::wait(0.1);
 
 
-	Main_RunGLBSP(filename);
+	if (Main_RunGLBSP(filename))
+	{
+		Main_ProgStatus("Success");
+	}
 
 	main_win->quit->label("Quit");
 	main_win->quit->labelcolor(FL_BLACK);
 	main_win->quit->labelfont(FL_HELVETICA);
 
-	Fl::wait(0.2);
+	Fl::wait(0.1);
+	Fl::wait(0.1);
+}
+
+
+static void Main_GetInstallDir()
+{
 }
 
 
