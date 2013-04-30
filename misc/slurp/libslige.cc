@@ -14921,8 +14921,56 @@ void Slige_SetOption(const char *name, const char *value)
 {
   ClearError();
 
-  // FIXME : stuff !!!!
+  slige::s_config *c = ThisConfig;
 
+  if (strcmp(name, "game") == 0)
+  {
+    if (strcmp(value, "doom1") == 0)
+    {
+      c->gamemask = DOOM1_BIT;
+      if (c->episode==0) c->episode = c->mission = 1;
+      c->map = 0;
+    }
+    else if (strcmp(value, "doom2") == 0)
+    {
+      c->gamemask = DOOM2_BIT;
+      c->episode = c->mission = 0;
+      if (c->map==0) c->map = 1;
+    }
+  }
+
+  if (strcmp(name, "length") == 0)
+  {
+    c->levelcount = atoi(value);
+  }
+
+  if (strcmp(name, "mode") == 0 && strcmp(value, "dm") == 0)
+  {
+    c->do_dm = TRUE;
+  }
+
+  if (strcmp(name, "monsters") == 0)
+  {
+    c->big_monsters = atoi(value) ? TRUE : FALSE;
+  }
+
+  if (strcmp(name, "weapons") == 0)
+  {
+    c->big_weapons = atoi(value) ? TRUE : FALSE;
+  }
+
+  if (strcmp(name, "rooms") == 0)
+  {
+    c->minrooms = atoi(value);
+  }
+
+  if (strcmp(name, "macho") == 0)
+  {
+    int mfac = atoi(value);
+
+    c->machoh = 1.0 - mfac / 400.0;
+    c->machou = 1.0 - mfac / 200.0;
+  }
 }
 
 
