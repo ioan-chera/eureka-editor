@@ -1395,7 +1395,7 @@ boolean install_sl_exit(s_level *l,s_sector *oldsector,s_haa *ThisHaa,
 #define NOTE 2
 #define WARNING 3
 #define ERROR 4
-void announce(int announcetype, const char *s);
+void announce(int announcelevel, const char *s);
 
 #define RIGHT_TURN (90)
 #define LEFT_TURN (270)
@@ -2931,7 +2931,7 @@ s_config *get_config(const char *config_filename, int seed)
   answer->cwadonly = FALSE;
   answer->ranseed = seed;
   
-  srand(answer->ranseed);
+  srand(answer->ranseed - 1);
 
 ///  srand((unsigned int)time(NULL));
 ///  for (i=0;i<20;i++) rand();
@@ -14919,6 +14919,13 @@ bool Slige_LoadConfig(const char *filename, int seed)
 
 void Slige_SetOption(const char *name, const char *value)
 {
+  char message[512];
+
+  sprintf(message, "Option: %s = '%s'", name, value);
+
+  slige::announce(VERBOSE, message);
+
+
   ClearError();
 
   slige::s_config *c = ThisConfig;
@@ -14949,12 +14956,12 @@ void Slige_SetOption(const char *name, const char *value)
     c->do_dm = TRUE;
   }
 
-  if (strcmp(name, "monsters") == 0)
+  if (strcmp(name, "big_mon") == 0)
   {
     c->big_monsters = atoi(value) ? TRUE : FALSE;
   }
 
-  if (strcmp(name, "weapons") == 0)
+  if (strcmp(name, "big_weap") == 0)
   {
     c->big_weapons = atoi(value) ? TRUE : FALSE;
   }
@@ -14993,13 +15000,16 @@ bool Slige_GenerateWAD(const char *filename)
     return false;
   }
 
-  dh = slige::OpenDump(ThisConfig, fp);
+  // force -nocustom mode
+  ThisConfig->gamemask |= DOOMI_BIT;
 
-  srand(ThisConfig->ranseed ^ 1);
+  dh = slige::OpenDump(ThisConfig, fp);
 
   if (ThisConfig->do_slinfo) make_slinfo(dh,ThisConfig);
 
   for (i=0;i<ThisConfig->levelcount;i++) {
+    srand(ThisConfig->ranseed + i);
+
     if ((!ThisHaa) || (ThisConfig->mission==1)) {
       if (ThisHaa) free(ThisHaa);
       ThisHaa = slige::starting_haa();
