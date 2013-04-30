@@ -402,6 +402,11 @@ static void Main_Build()
 		strcat(filename, ".wad");
 
 
+	Main_ProgStatus("Generating...");
+
+	Fl::wait(0.1);
+	Fl::wait(0.1);
+
 	if (! Main_RunSLIGE(filename))
 	{
 		return;
