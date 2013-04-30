@@ -396,7 +396,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <time.h>
 #include <assert.h>
 
 #ifdef _MSC_VER
@@ -1238,7 +1237,7 @@ s_config *get_config(const char *config_filename, int seed);
 void NewLevel(s_level *l, s_haa *s_init_haa, s_config *c);
 void DumpLevel(dumphandle dh,s_config *c,s_level *l,int episode,int mission,int map);
 void FreeLevel(s_level *l);
-dumphandle OpenDump(s_config *c);
+dumphandle OpenDump(s_config *c, FILE *fp);
 void CloseDump(dumphandle dh);
 s_quest *starting_quest(s_level *l,s_config *c);
 s_haa *starting_haa(void);
@@ -1582,7 +1581,7 @@ int main(int argc, const char *argv[]) {
 
 
 /* Open a file ready to dump multiple levels into */
-dumphandle OpenDump(s_config *c)
+dumphandle OpenDump(s_config *c, FILE *fp)
 {
   dumphandle answer;
 
@@ -1593,12 +1592,15 @@ dumphandle OpenDump(s_config *c)
   } headerstuff;
 
   answer = (dumphandle)malloc(sizeof (*answer));
-  answer->f = fopen(c->outfile,"wb");
-  if (answer->f==NULL) {
-    fprintf(stderr,"Error opening <%s>.\n",c->outfile);
-    perror("Maybe");
-    return NULL;
-  }
+  answer->f = fp;
+
+///  answer->f = fopen(c->outfile,"wb");
+///  if (answer->f==NULL) {
+///    fprintf(stderr,"Error opening <%s>.\n",c->outfile);
+///    perror("Maybe");
+///    return NULL;
+///  }
+
   memcpy(headerstuff.tag,"PWAD",4);
   headerstuff.lmpcount = 0;  /* To be filled in later */
   headerstuff.inxoffset = 0;
@@ -2931,6 +2933,7 @@ s_config *get_config(const char *config_filename, int seed)
   
   srand(answer->ranseed);
 
+///  srand((unsigned int)time(NULL));
 ///  for (i=0;i<20;i++) rand();
 ///  answer->ranseed = (unsigned int)bigrand();
 
@@ -14927,20 +14930,22 @@ bool Slige_GenerateWAD(const char *filename)
 {
   ClearError();
 
-  // FIXME: fopen this here
-  ThisConfig->outfile = filename;
-
   slige::s_level ThisLevel;
   slige::s_haa *ThisHaa = NULL;
+  slige::dumphandle dh;
   int i;
 
-  slige::dumphandle dh;
-  dh = slige::OpenDump(ThisConfig);
-  if (dh==NULL)
+  ThisConfig->outfile = filename;
+
+  FILE *fp = fopen(filename, "wb");
+
+  if (! fp)
   {
     SetError("Failed to create file: '%s'", filename);
     return false;
   }
+
+  dh = slige::OpenDump(ThisConfig, fp);
 
   srand(ThisConfig->ranseed ^ 1);
 
