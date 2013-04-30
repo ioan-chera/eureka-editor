@@ -336,11 +336,14 @@ static bool Main_RunGLBSP(const char *filename)
 
 static bool Main_RunSLIGE(const char *filename)
 {
+	// ---- initialize the config ----
+
+	int seed = atoi(main_win->seed->value());
+
 	// FIXME: full path
+	const char *config_file = "default.cfg";
 
-	int seed = 1;
-
-	if (! Slige_LoadConfig("default.cfg", seed))
+	if (! Slige_LoadConfig(config_file, seed))
 	{
 		fl_alert("Error loading config file:\n\n%s", Slige_GetError());
 		Main_ProgStatus("Config Error");
@@ -348,8 +351,38 @@ static bool Main_RunSLIGE(const char *filename)
 	}
 
 
-	// !!!!! FIXME set options.....
+	// ---- transfer settings from GUI ----
 
+	int game = main_win->game->value();
+
+	switch (game)
+	{
+		case 0: Slige_SetOption("game", "doom1"); break;
+		case 1: Slige_SetOption("game", "doom2"); break;
+	}
+
+	switch (main_win->mode->value())
+	{
+		case 0: Slige_SetOption("mode", "sp"); break;
+		case 1: Slige_SetOption("mode", "dm"); break;
+	}
+
+	switch (main_win->length->value())
+	{
+		case 0: Slige_SetOption("length", "1"); break;
+		case 1: Slige_SetOption("length", "4"); break;
+		case 2: Slige_SetOption("length", game ? "11" : "8");  break;
+		case 3: Slige_SetOption("length", game ? "30" : "24"); break;
+	}
+
+	Slige_SetOption("big_mon",  Int_TempStr(main_win->big_mon-> value()));
+	Slige_SetOption("big_weap", Int_TempStr(main_win->big_weap->value()));
+
+	Slige_SetOption("rooms", main_win->rooms->value());
+	Slige_SetOption("macho", main_win->macho->value());
+
+
+	// ---- make some maps ----
 
 	if (! Slige_GenerateWAD(filename))
 	{
@@ -404,7 +437,7 @@ static void Main_Build()
 		strcat(filename, ".wad");
 
 
-	Main_ProgStatus("Generating...");
+	Main_ProgStatus("Generating maps");
 
 	Fl::wait(0.1);
 	Fl::wait(0.1);

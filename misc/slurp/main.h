@@ -79,6 +79,8 @@
  */
 void FatalError(const char *fmt, ...);
 
+const char * Int_TempStr(int value);
+
 
 #endif  /* __MAIN_H__ */
 
