@@ -37,7 +37,7 @@
 
 
 // config items
-bool leave_offsets_alone = false;
+bool leave_offsets_alone = true;
 
 
 bool LineDefAlreadyExists(int v1, int v2)
