@@ -370,9 +370,8 @@ static bool Main_RunSLIGE(const char *filename)
 	switch (main_win->length->value())
 	{
 		case 0: Slige_SetOption("length", "1"); break;
-		case 1: Slige_SetOption("length", "4"); break;
-		case 2: Slige_SetOption("length", game ? "11" : "8");  break;
-		case 3: Slige_SetOption("length", game ? "30" : "24"); break;
+		case 1: Slige_SetOption("length", game ? "11" : "8");  break;
+		case 2: Slige_SetOption("length", game ? "30" : "24"); break;
 	}
 
 	Slige_SetOption("big_mon",  Int_TempStr(main_win->big_mon-> value()));

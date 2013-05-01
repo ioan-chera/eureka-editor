@@ -170,8 +170,8 @@ UI_MainWin::UI_MainWin(const char *title) :
 
 		length = new Fl_Choice(80, 130, 140, 25, "Length:");
 		length->down_box(FL_BORDER_BOX);
-		length->add("Single|A Few Maps|Episode|Full Game");
-		length->value(3);
+		length->add("Single Map|Episode|Full Game");
+		length->value(2);
 
 		seed = new Fl_Int_Input(75, 245, 85, 30, "Seed:");
 		set_default_seed(seed);
