@@ -3,5 +3,8 @@ CHANGES IN Eureka
 =================
 
 
+-  fixed crash bug when loading or saving a map containing linedefs
+   which have no right sidedef
+
 -  fixed the selection after a sector merge 
 
