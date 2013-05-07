@@ -90,13 +90,9 @@ static void ChecksumLineDef(crc32_c& crc, const LineDef * L)
 
 	if (L->Right())
 		ChecksumSideDef(crc, L->Right());
-	else
-		crc += L->right;
 
 	if (L->Left())
 		ChecksumSideDef(crc, L->Left());
-	else
-		crc += L->left;
 }
 
 
