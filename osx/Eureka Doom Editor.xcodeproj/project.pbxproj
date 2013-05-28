@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA177ABE165FD57600B797F3 /* fltk_zlib.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = FAF8A086165BDE04009B4C14 /* fltk_zlib.framework */; };
-		FA177ABF165FD57600B797F3 /* fltk.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = FABBC23D165B98100080245F /* fltk.framework */; };
+		4F2181611755526A0053D99E /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2181601755526A0053D99E /* libfltk.a */; };
+		4F218163175553040053D99E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F218162175553040053D99E /* libz.a */; };
 		FA1E04EE16689A2900ED41DC /* ui_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA1E04EC16689A2900ED41DC /* ui_misc.cc */; };
 		FA244640166CAA6100C68ED8 /* common in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463A166CAA6100C68ED8 /* common */; };
 		FA244641166CAA6100C68ED8 /* docs in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463B166CAA6100C68ED8 /* docs */; };
@@ -87,7 +87,6 @@
 		FABBC131165B90280080245F /* x_hover.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0F4165B90280080245F /* x_hover.cc */; };
 		FABBC132165B90280080245F /* x_loop.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0F6165B90280080245F /* x_loop.cc */; };
 		FABBC133165B90280080245F /* x_mirror.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0F8165B90280080245F /* x_mirror.cc */; };
-		FABBC23E165B98100080245F /* fltk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FABBC23D165B98100080245F /* fltk.framework */; };
 		FABBC255165B990C0080245F /* analyze.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC240165B990C0080245F /* analyze.cc */; };
 		FABBC256165B990C0080245F /* blockmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC242165B990C0080245F /* blockmap.cc */; };
 		FABBC257165B990C0080245F /* glbsp.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC244165B990C0080245F /* glbsp.cc */; };
@@ -99,7 +98,6 @@
 		FABBC25D165B990C0080245F /* util.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC251165B990C0080245F /* util.cc */; };
 		FABBC25E165B990C0080245F /* wad.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC253165B990C0080245F /* wad.cc */; };
 		FADB99F316B017D600A28204 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = FADB99F216B017D600A28204 /* AppDelegate.mm */; };
-		FAF8A087165BDE04009B4C14 /* fltk_zlib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAF8A086165BDE04009B4C14 /* fltk_zlib.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,8 +117,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				FA177ABE165FD57600B797F3 /* fltk_zlib.framework in CopyFiles */,
-				FA177ABF165FD57600B797F3 /* fltk.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +139,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4F2181601755526A0053D99E /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = staticlib/libfltk.a; sourceTree = "<group>"; };
+		4F218162175553040053D99E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = staticlib/libz.a; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; };
 		FA1E04ED16689A2900ED41DC /* ui_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_misc.h; path = ../../src/ui_misc.h; sourceTree = "<group>"; };
 		FA24463A166CAA6100C68ED8 /* common */ = {isa = PBXFileReference; lastKnownFileType = folder; name = common; path = ../common; sourceTree = "<group>"; };
@@ -297,7 +295,6 @@
 		FABBC0F7165B90280080245F /* x_loop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = x_loop.h; path = ../../src/x_loop.h; sourceTree = "<group>"; };
 		FABBC0F8165B90280080245F /* x_mirror.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = x_mirror.cc; path = ../../src/x_mirror.cc; sourceTree = "<group>"; };
 		FABBC0F9165B90280080245F /* x_mirror.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = x_mirror.h; path = ../../src/x_mirror.h; sourceTree = "<group>"; };
-		FABBC23D165B98100080245F /* fltk.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk.framework; path = ../../../../../../Library/Frameworks/fltk.framework; sourceTree = "<group>"; };
 		FABBC240165B990C0080245F /* analyze.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = analyze.cc; sourceTree = "<group>"; };
 		FABBC241165B990C0080245F /* analyze.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = analyze.h; sourceTree = "<group>"; };
 		FABBC242165B990C0080245F /* blockmap.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blockmap.cc; sourceTree = "<group>"; };
@@ -320,7 +317,6 @@
 		FABBC253165B990C0080245F /* wad.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wad.cc; sourceTree = "<group>"; };
 		FABBC254165B990C0080245F /* wad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wad.h; sourceTree = "<group>"; };
 		FADB99F216B017D600A28204 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
-		FAF8A086165BDE04009B4C14 /* fltk_zlib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_zlib.framework; path = ../../../../../../Library/Frameworks/fltk_zlib.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -329,8 +325,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA5E2C2D165B8F860024D6A5 /* Cocoa.framework in Frameworks */,
-				FABBC23E165B98100080245F /* fltk.framework in Frameworks */,
-				FAF8A087165BDE04009B4C14 /* fltk_zlib.framework in Frameworks */,
+				4F2181611755526A0053D99E /* libfltk.a in Frameworks */,
+				4F218163175553040053D99E /* libz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,8 +371,8 @@
 		FA5E2C2B165B8F860024D6A5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FAF8A086165BDE04009B4C14 /* fltk_zlib.framework */,
-				FABBC23D165B98100080245F /* fltk.framework */,
+				4F218162175553040053D99E /* libz.a */,
+				4F2181601755526A0053D99E /* libfltk.a */,
 				FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */,
 				FA5E2C4A165B8F870024D6A5 /* SenTestingKit.framework */,
 				FA5E2C2E165B8F860024D6A5 /* Other Frameworks */,
@@ -968,8 +964,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "/Library/Frameworks/fltk.framework/**";
+				HEADER_SEARCH_PATHS = /opt/local/include;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -998,8 +995,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "/Library/Frameworks/fltk.framework/**";
+				HEADER_SEARCH_PATHS = /opt/local/include;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				SDKROOT = macosx;
 			};
@@ -1017,6 +1015,10 @@
 					"main=main_ORIGINAL",
 				);
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/staticlib\"",
+				);
 				PRODUCT_NAME = "Eureka Doom Editor";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1030,6 +1032,10 @@
 				GCC_PREFIX_HEADER = "EurekaApp/Eureka Doom Editor-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "main=main_ORIGINAL";
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/staticlib\"",
+				);
 				PRODUCT_NAME = "Eureka Doom Editor";
 				WRAPPER_EXTENSION = app;
 			};
