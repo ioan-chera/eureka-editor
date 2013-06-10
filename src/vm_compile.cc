@@ -1699,7 +1699,7 @@ PR_CompileFile
 compiles the 0 terminated text, adding defintions to the pr2 structure
 ============
 */
-bool PR_CompileFile (char *string, char *filename)
+bool PR_CompileFile (char *string, const char *filename)
 {	
 	pr_file_p = string;
 	s_file = CopyString (filename);

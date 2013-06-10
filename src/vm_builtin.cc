@@ -494,7 +494,7 @@ void PC_format_string (void)
 
 //============================================================================
 
-builtin_t  builtins[] =
+builtin_t  all_builtins[] =
 {
 	// very first one is a dummy -- never used
 	{ "<DUMMY>",  PC_Fixme },

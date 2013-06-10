@@ -46,6 +46,8 @@
 #include "ui_window.h"
 #include "ui_file.h"
 
+#include "vm.h"
+
 #ifndef WIN32
 #include <time.h>
 #endif
@@ -844,6 +846,33 @@ static void ShowTime()
 }
 
 
+static void Test_VM()
+{
+	VM_Init();
+
+	if (VM_CompileFile("hello_world.ac") != 0)
+	{
+		fprintf(stderr, "\n Test_VM: COMPILE FAILED\n");
+		return;
+	}
+
+	int func = VM_FindFunction("test");
+
+	if (func == VM_NIL)
+	{
+		fprintf(stderr, "\n Test_VM: NO FUNCTION 'test'\n");
+		return;
+	}
+
+	VM_Frame();
+
+	if (VM_Call(func) != 0)
+	{
+		fprintf(stderr, "\n Test_VM: VM_CALL FAILED\n");
+	}
+}
+
+
 /*
  *  the driving program
  */
@@ -918,6 +947,9 @@ int main(int argc, char *argv[])
 
 
 	init_progress = 2;
+
+
+Test_VM();
 
 
 	M_LoadRecent();

@@ -309,6 +309,11 @@ extern	int			pr_source_line;
 extern	char		*pr_file_p;
 
 
+// vm_compile
+
+bool PR_CompileFile (char *string, const char *filename);
+
+
 //=============================================================================
 
 #define	MAX_STRINGS		500000
@@ -354,12 +359,22 @@ extern  mem_progs_t  mpr;
 
 //============================================================================
 
-// vm_execute
+// vm_builtin
 
-typedef struct {
+typedef struct
+{
 	const char *name;
+
 	void (*func) (void);
+
 } builtin_t;
+
+extern builtin_t  all_builtins[];
+
+
+//============================================================================
+
+// vm_execute
 
 #define	MAX_FIELD_LEN	64
 
@@ -383,8 +398,6 @@ typedef struct
 	bool  trace;
 
 	int		argc;
-
-	builtin_t * builtins;
 
 	const dfunction_t	* x_func;
 	int					  x_ip;

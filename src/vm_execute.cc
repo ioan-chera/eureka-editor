@@ -343,7 +343,7 @@ static void PR_CallBuiltin (const dfunction_t *f)
 	exec.next_frame = -1;
 
 	{
-		exec.builtins[f->first_statement].func ();
+		all_builtins[f->first_statement].func ();
 	}
 
 	exec.stack_top  = exec.frame;
@@ -484,11 +484,6 @@ void PR_ExecuteProgram (func_t fnum)
 // make a stack frame
 	exit_depth = exec.call_depth;
 	exit_stack = exec.stack_top;
-
-
-	// do a fake OP_FRAME
-	exec.stack[exec.stack_top++]._int = exec.next_frame;
-	exec.next_frame = exec.stack_top;
 
 
 	ip = PR_EnterFunction(f);
@@ -891,13 +886,100 @@ if (exec.trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 }
 
 
-int VM_FindFunction (const char *name)
+/*
+============================================================================
+
+   PUBLIC API
+
+============================================================================
+*/
+
+void VM_Init()
+{
+	mpr.numregisters = RESERVED_OFS;
+
+	// #0 for these means "nil"
+	mpr.numfunctions  = 1;
+
+	mpr.strofs = 257;  // 0 = "", 1..256 = temp buf
+}
+
+
+int VM_CompileFile(const char *filename)
+{
+	int length;
+
+	u8_t *source = FileLoad(filename, &length);
+
+	if (! source)
+		return -2;
+	
+	if (! PR_CompileFile((char *)source, filename))
+		return -1;
+	
+	FileFree(source);
+
+	return 0;  // OK
+}
+
+
+int VM_FindFunction(const char *name)
 {
 	for (int i=1 ; i < mpr.numfunctions ; i++)
 		if (strcmp(mpr.strings + mpr.functions[i].s_name, name) == 0)
 			return i;
 
 	return VM_NIL;
+}
+
+
+void VM_Frame()
+{
+	// do a fake OP_FRAME
+	exec.stack[exec.stack_top++]._int = exec.next_frame;
+	exec.next_frame = exec.stack_top;
+}
+
+
+int VM_Call(int func_id)
+{
+	// FIXME: try { } catch () ...
+
+	PR_ExecuteProgram(func_id);
+
+	return 0;
+}
+
+
+void VM_Push_Int(int v)
+{
+	exec.stack[exec.stack_top++]._int = v;
+}
+
+void VM_Push_Float(float v)
+{
+	exec.stack[exec.stack_top++]._float = v;
+}
+
+void VM_Push_String(const char *s)
+{
+	// FIXME
+}
+
+
+int VM_Result_Int()
+{
+	return G_INT(OFS_RETURN);
+}
+
+float VM_Result_Float()
+{
+	return G_FLOAT(OFS_RETURN);
+}
+
+const char * VM_Result_String()
+{
+	return G_STRING(OFS_RETURN);
 }
 
 
