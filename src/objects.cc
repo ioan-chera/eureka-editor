@@ -47,6 +47,7 @@
 // config items
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
+bool reselect_second_vertex = false;
 
 
 static bool invalidated_totals;
@@ -625,7 +626,7 @@ static void Insert_Vertex()
 		}
 
 	    // TODO: CONFIG ITEM to always reselect second
-		if (VertexHowManyLineDefs(second_sel) > 0)
+		if (!reselect_second_vertex && VertexHowManyLineDefs(second_sel) > 0)
 			reselect = false;
 
 		BA_Begin();
@@ -699,7 +700,8 @@ static void Insert_Vertex()
 
 		SplitLineDefAtVertex(edit.split_line.num, new_v);
 
-		if (first_sel >= 0)
+		// CONFIG ITEM
+		if (!reselect_second_vertex && first_sel >= 0)
 			reselect = false;
 	}
 
