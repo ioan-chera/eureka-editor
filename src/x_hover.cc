@@ -601,26 +601,6 @@ static void get_cur_vertex(Close_obj& closest, int x, int y, bool snap)
 
 
 /*
- *  get_cur_rts - determine which RTS trigger is under the pointer
- */
-static void get_cur_rts(Close_obj& closest, int x, int y)
-{
-// TODO: get_cur_rts
-
-#if 0
-	const int screenradius = vertex_radius (grid.Scale);  // Radius in pixels
-	const int screenslack  = screenradius + 16;   // Slack in pixels
-	double    mapslack     = fabs (screenslack / grid.Scale); // Slack in map units
-
-	int lx = x - mapslack;
-	int ly = y - mapslack;
-	int hx = x + mapslack;
-	int hy = y + mapslack;
-#endif
-}
-
-
-/*
  *  GetCurObject - determine which object is under the pointer
  * 
  *  Set <o> to point to the object under the pointer (map
@@ -657,13 +637,6 @@ void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap)
 		case OBJ_SECTORS:
 		{
 			get_cur_sector(closest, x, y);
-			o = closest.obj;
-			break;
-		}
-
-		case OBJ_RADTRIGS:
-		{
-			get_cur_rts(closest, x, y);
 			o = closest.obj;
 			break;
 		}

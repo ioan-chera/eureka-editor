@@ -25,7 +25,6 @@ class UI_ThingInfo;
 class UI_LineInfo;
 class UI_SectorInfo;
 class UI_VertexInfo;
-class UI_RadiusInfo;
 
 class UI_DefaultProps;
 

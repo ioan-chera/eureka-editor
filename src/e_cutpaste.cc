@@ -65,13 +65,12 @@ public:
 	std::vector<Sector *>  sectors;
 	std::vector<SideDef *> sides;
 	std::vector<LineDef *> lines;
-	std::vector<RadTrig *> radtrigs;
 
 public:
 	clipboard_data_c(obj_type_e _mode) :
 		mode(_mode), uses_real_sectors(false),
 		things(), verts(), sectors(),
-		sides(), lines(), radtrigs()
+		sides(), lines()
 	{
 		if (mode == OBJ_LINEDEFS || mode == OBJ_SECTORS)
 			uses_real_sectors = true;
@@ -86,7 +85,6 @@ public:
 		for (i = 0 ; i < sectors.size()  ; i++) delete sectors[i];
 		for (i = 0 ; i < sides.size()    ; i++) delete sides[i];
 		for (i = 0 ; i < lines.size()    ; i++) delete lines[i];
-		for (i = 0 ; i < radtrigs.size() ; i++) delete radtrigs[i];
 	}
 
 	void CentreOfThings(int *cx, int *cy)
@@ -175,30 +173,6 @@ public:
 			}
 		}
 #endif
-	}
-
-	void CentreOfRadTrigs(int *cx, int *cy)
-	{
-		if (radtrigs.empty())
-		{
-			*cx = *cy = 0;
-			return;
-		}
-
-		double sum_x = 0;
-		double sum_y = 0;
-
-		for (unsigned int i = 0 ; i < radtrigs.size() ; i++)
-		{
-			sum_x += radtrigs[i]->mx;
-			sum_y += radtrigs[i]->my;
-		}
-
-		sum_x /= (double)radtrigs.size();
-		sum_y /= (double)radtrigs.size();
-
-		*cx = I_ROUND(sum_x);
-		*cy = I_ROUND(sum_y);
 	}
 
 	bool HasSectorRefs(int s1, int s2)
@@ -493,15 +467,6 @@ bool CMD_Copy()
 			}
 			break;
 
-		case OBJ_RADTRIGS:
-			for (list.begin(&it) ; !it.at_end() ; ++it)
-			{
-				RadTrig * R = new RadTrig;
-				R->RawCopy(RadTrigs[*it]);
-				clip_board->radtrigs.push_back(R);
-			}
-			break;
-
 		case OBJ_LINEDEFS:
 		case OBJ_SECTORS:
 			CopyGroupOfObjects(&list);
@@ -664,7 +629,6 @@ static void ReselectGroup()
 			    	  edit.obj_type == OBJ_LINEDEFS ||
 					  edit.obj_type == OBJ_SECTORS);
 
-	// we don't bother to reselect RTS triggers
 	if (! (was_mappy && is_mappy))
 		return;
 
@@ -761,28 +725,7 @@ bool CMD_Paste()
 			}
 			break;
 		}
-		
-		case OBJ_RADTRIGS:
-		{
-			int cx, cy;
-			clip_board->CentreOfRadTrigs(&cx, &cy);
 
-			for (i = 0 ; i < clip_board->radtrigs.size() ; i++)
-			{
-				int new_r = BA_New(OBJ_RADTRIGS);
-				RadTrig * R = RadTrigs[new_r];
-				
-				R->RawCopy(clip_board->radtrigs[i]);
-
-				R->mx += pos_x - cx;
-				R->my += pos_y - cy;
-
-				// don't copy the RTS code string
-				R->code = 0;
-			}
-			break;
-		}
-		
 		case OBJ_LINEDEFS:
 		case OBJ_SECTORS:
 		{

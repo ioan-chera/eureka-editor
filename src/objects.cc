@@ -1071,16 +1071,6 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
 			}
 			break;
 
-		case OBJ_RADTRIGS:
-			for (list->begin(&it) ; !it.at_end() ; ++it)
-			{
-				RadTrig * R = RadTrigs[*it];
-
-				BA_ChangeRAD(*it, RadTrig::F_MX, R->mx + delta_x);
-				BA_ChangeRAD(*it, RadTrig::F_MY, R->my + delta_y);
-			}
-			break;
-	
 		case OBJ_VERTICES:
 			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{

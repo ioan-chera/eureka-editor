@@ -346,9 +346,6 @@ void UI_Canvas::DrawMap()
 
 	if (edit.obj_type == OBJ_THINGS)
 		DrawThings();
-
-	if (edit.obj_type == OBJ_RADTRIGS)
-		DrawRTS();
 }
 
 
@@ -807,12 +804,6 @@ void UI_Canvas::DrawThings()
 			DrawObjNum(SCREENX(x), SCREENY(y) - 2, n);
 		}
 	}
-}
-
-
-void UI_Canvas::DrawRTS()
-{
-  // TODO: DrawRTS
 }
 
 

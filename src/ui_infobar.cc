@@ -45,7 +45,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	mode = new Fl_Choice(X+58, Y, 88, H, "Mode:");
 	mode->align(FL_ALIGN_LEFT);
-	mode->add("Things|Linedefs|Sectors|Vertices|RTS");
+	mode->add("Things|Linedefs|Sectors|Vertices");
 	mode->value(0);
 	mode->callback(mode_callback, this);
 	mode->labelsize(KF_fonth);
@@ -307,7 +307,6 @@ void UI_InfoBar::UpdateModeColor()
 		case 1: /* Linedefs */ mode->color(fl_rgb_color(0,128,255)); break;
 		case 2: /* Sectors  */ mode->color(FL_YELLOW); break;
 		case 3: /* Vertices */ mode->color(fl_rgb_color(0,192,96));  break;
-		case 4: /* RTS      */ mode->color(FL_RED); break;
 	}
 }
 

@@ -571,7 +571,9 @@ versa).
 USER CONFIG NEEDED
 -------------------
 
-gamma
+reselect_second_vertex
+
+default_gamma
 
 floor_bump_small   (2)
 floor_bump_medium  (16)

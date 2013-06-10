@@ -60,7 +60,6 @@ typedef enum
 	KCTX_Render,
 
 	KCTX_Vertex,
-	KCTX_RadTrig,
 	KCTX_Thing,
 	KCTX_Sector,
 	KCTX_Line,

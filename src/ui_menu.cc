@@ -374,9 +374,7 @@ static Fl_Menu_Item menu_items[] =
 			{ "Load DDF &File",    0, FCAL view_do_zoom_out },
 			{ "Load DDF &WAD",    0, FCAL view_do_zoom_out },
 
-			{ "&Open RTS File",   0, FCAL view_do_zoom_out },
 			{ "&Import from WAD", 0, FCAL view_do_zoom_out },
-			{ "&Save RTS File",   0, FCAL view_do_zoom_out },
 			{ 0 },
 #endif
 

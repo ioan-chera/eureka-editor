@@ -116,11 +116,6 @@ UI_MainWin::UI_MainWin() :
 	vert_box = new UI_VertexBox(w() - panel_W, BY, panel_W, BH);
 	vert_box->hide();
 	add(vert_box);
-
-	rad_box = new UI_RadiusBox(w() - panel_W, BY, panel_W, BH);
-	rad_box->hide();
-	add(rad_box);
-
 }
 
 //
@@ -138,7 +133,6 @@ void UI_MainWin::NewEditMode(char mode)
 	 line_box->hide();
 	  sec_box->hide();
 	 vert_box->hide();
-	  rad_box->hide();
 
 	switch (mode)
 	{
@@ -146,7 +140,6 @@ void UI_MainWin::NewEditMode(char mode)
 		case 'l':  line_box->show(); break;
 		case 's':   sec_box->show(); break;
 		case 'v':  vert_box->show(); break;
-		case 'r':   rad_box->show(); break;
 
 		default: break;
 	}
@@ -203,7 +196,6 @@ void UI_MainWin::UpdateTotals()
 	 line_box->UpdateTotal();
 	  sec_box->UpdateTotal();
 	 vert_box->UpdateTotal();
-	  rad_box->UpdateTotal();
 }
 
 
@@ -216,7 +208,6 @@ int UI_MainWin::GetPanelObjNum() const
 		case OBJ_VERTICES: return  vert_box->GetObj();
 		case OBJ_SECTORS:  return   sec_box->GetObj();
 		case OBJ_LINEDEFS: return  line_box->GetObj();
-		case OBJ_RADTRIGS: return   rad_box->GetObj();
 
 		default:
 			return -1;
@@ -236,9 +227,6 @@ void UI_MainWin::InvalidatePanelObj()
 
 	if (vert_box->visible())
 		vert_box->SetObj(-1, 0);
-
-///!!	if (rad_box->visible())
-///!!		rad_box->SetObj(-1, 0);
 }
 
 void UI_MainWin::UpdatePanelObj()
@@ -257,9 +245,6 @@ void UI_MainWin::UpdatePanelObj()
 
 	if (vert_box->visible())
 		vert_box->UpdateField();
-
-///!!	if (rad_box->visible())
-///!!		rad_box->UpdateField();
 }
 
 

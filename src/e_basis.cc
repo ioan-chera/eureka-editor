@@ -47,7 +47,6 @@ std::vector<Vertex *>  Vertices;
 std::vector<Sector *>  Sectors;
 std::vector<SideDef *> SideDefs;
 std::vector<LineDef *> LineDefs;
-std::vector<RadTrig *> RadTrigs;
 
 
 int default_floor_h		=   0;
@@ -78,7 +77,6 @@ int NumObjects(obj_type_e type)
 		case OBJ_SIDEDEFS: return NumSideDefs;
 		case OBJ_VERTICES: return NumVertices;
 		case OBJ_SECTORS:  return NumSectors;
-		case OBJ_RADTRIGS: return NumRadTrigs;
 
 		default:
 			BugError("NumObjects: bad type: %d\n", (int)type);
@@ -353,19 +351,6 @@ static void RawInsertSector(int objnum, int *ptr)
 	}
 }
 
-static void RawInsertRadTrig(int objnum, int *ptr)
-{
-	SYS_ASSERT(0 <= objnum && objnum <= NumRadTrigs);
-
-	RadTrigs.push_back(NULL);
-
-	for (int n = NumRadTrigs-1 ; n > objnum ; n--)
-		RadTrigs[n] = RadTrigs[n - 1];
-
-	RadTrigs[objnum] = (RadTrig*) ptr;
-}
-
-
 static int * RawDeleteThing(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumThings);
@@ -411,10 +396,6 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 		case OBJ_LINEDEFS:
 			wrecked_the_nodes = true;
 			RawInsertLineDef(objnum, ptr);
-			break;
-
-		case OBJ_RADTRIGS:
-			RawInsertRadTrig(objnum, ptr);
 			break;
 
 		default:
@@ -524,20 +505,6 @@ static int * RawDeleteSector(int objnum)
 	return result;
 }
 
-static int * RawDeleteRadTrig(int objnum)
-{
-	SYS_ASSERT(0 <= objnum && objnum < NumRadTrigs);
-
-	int * result = (int*) RadTrigs[objnum];
-
-	for (int n = objnum ; n < NumRadTrigs-1 ; n++)
-		RadTrigs[n] = RadTrigs[n + 1];
-
-	RadTrigs.pop_back();
-
-	return result;
-}
-
 static int * RawDelete(obj_type_e objtype, int objnum)
 {
 	did_make_changes = true;
@@ -566,9 +533,6 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 			wrecked_the_nodes = true;
 			return RawDeleteLineDef(objnum);
 
-		case OBJ_RADTRIGS:
-			return RawDeleteRadTrig(objnum);
-
 		default:
 			BugError("RawDelete: bad objtype %d", (int) objtype);
 			return NULL; /* NOT REACHED */
@@ -586,7 +550,6 @@ static void DeleteFinally(obj_type_e objtype, int *ptr)
 		case OBJ_SECTORS:  delete (Sector *)  ptr; break;
 		case OBJ_SIDEDEFS: delete (SideDef *) ptr; break;
 		case OBJ_LINEDEFS: delete (LineDef *) ptr; break;
-		case OBJ_RADTRIGS: delete (RadTrig *) ptr; break;
 
 		default:
 			BugError("DeleteFinally: bad objtype %d", (int) objtype);
@@ -620,10 +583,6 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 		case OBJ_LINEDEFS:
 			wrecked_the_nodes = true;
 			pos = (int*) LineDefs[objnum];
-			break;
-
-		case OBJ_RADTRIGS:
-			pos = (int*) RadTrigs[objnum];
 			break;
 
 		default:
@@ -859,11 +818,6 @@ int BA_New(obj_type_e type)
 			op.ptr = (int*) new Sector;
 			break;
 
-		case OBJ_RADTRIGS:
-			op.objnum = NumRadTrigs;
-			op.ptr = (int*) new RadTrig;
-			break;
-
 		default: BugError("BA_New");
 	}
 
@@ -995,14 +949,12 @@ void BA_ClearAll()
 	for (i = 0 ; i < NumSectors  ; i++) delete Sectors[i];
 	for (i = 0 ; i < NumSideDefs ; i++) delete SideDefs[i];
 	for (i = 0 ; i < NumLineDefs ; i++) delete LineDefs[i];
-	for (i = 0 ; i < NumRadTrigs ; i++) delete RadTrigs[i];
 
 	Things.clear();
 	Vertices.clear();
 	Sectors.clear();
 	SideDefs.clear();
 	LineDefs.clear();
-	RadTrigs.clear();
 
 	ClearUndoHistory();
 	ClearRedoFuture();
@@ -1054,14 +1006,6 @@ bool BA_ChangeLD(int line, byte field, int value)
 	SYS_ASSERT(field <= LineDef::F_LEFT);
 
 	return BA_Change(OBJ_LINEDEFS, line, field, value);
-}
-
-bool BA_ChangeRAD(int rad, byte field, int value)
-{
-	SYS_ASSERT(is_radtrig(rad));
-	SYS_ASSERT(field <= RadTrig::F_CODE);
-
-	return BA_Change(OBJ_RADTRIGS, rad, field, value);
 }
 
 //--- editor settings ---

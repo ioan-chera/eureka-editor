@@ -37,7 +37,6 @@
 #include "ui_sidedef.h"
 #include "ui_linedef.h"
 #include "ui_vertex.h"
-#include "ui_radius.h"
 
 
 #define WINDOW_BG  FL_DARK3
@@ -68,7 +67,6 @@ public:
 	UI_LineBox   *line_box;
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
-	UI_RadiusBox *rad_box;
 
 private:
 	Fl_Cursor cursor_shape;

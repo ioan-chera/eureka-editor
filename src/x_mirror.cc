@@ -117,16 +117,6 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 			break;
 		}
 
-		case OBJ_RADTRIGS:
-		{
-			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
-			{
-				sum_x += RadTrigs[*it]->mx;
-				sum_y += RadTrigs[*it]->my;
-			}
-			break;
-		}
-
 		// everything else: just use the vertices
 		default:
 		{
@@ -192,23 +182,6 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 				if (V->y < *y1) *y1 = V->y;
 				if (V->x > *x2) *x2 = V->x;
 				if (V->y > *y2) *y2 = V->y;
-			}
-			break;
-		}
-
-		case OBJ_RADTRIGS:
-		{
-			for (list->begin(&it) ; !it.at_end() ; ++it)
-			{
-				const RadTrig *R = RadTrigs[*it];
-
-				int rx = (R->rw+1) / 2;
-				int ry = (R->rh+1) / 2;
-
-				if (R->mx - rx < *x1) *x1 = R->mx - rx;
-				if (R->my - ry < *y1) *y1 = R->my - ry;
-				if (R->mx + rx > *x2) *x2 = R->mx + rx;
-				if (R->my + ry > *y2) *y2 = R->my + ry;
 			}
 			break;
 		}
@@ -322,7 +295,7 @@ void CMD_Mirror(void)
 {
 	selection_c list;
 
-	if (! GetCurrentObjects(&list) || edit.obj_type == OBJ_RADTRIGS)
+	if (! GetCurrentObjects(&list))
 	{
 		Beep("No objects to mirror");
 		return;
@@ -381,7 +354,7 @@ void CMD_Rotate90(void)
 	selection_c list;
 	selection_iterator_c it;
 
-	if (! GetCurrentObjects(&list) || edit.obj_type == OBJ_RADTRIGS)
+	if (! GetCurrentObjects(&list))
 	{
 		Beep("No objects to rotate");
 		return;
@@ -491,18 +464,7 @@ void CMD_Enlarge(void)
 
 	BA_Begin();
 
-	if (edit.obj_type == OBJ_RADTRIGS)
-	{
-		// Note: the positions of the trigger(s) are not changed
-		for (list.begin(&it) ; !it.at_end() ; ++it)
-		{
-			const RadTrig * R = RadTrigs[*it];
-
-			BA_ChangeRAD(*it, RadTrig::F_RW, R->rw * mul);
-			BA_ChangeRAD(*it, RadTrig::F_RH, R->rh * mul);
-		}
-	}
-	else if (edit.obj_type == OBJ_THINGS)
+	if (edit.obj_type == OBJ_THINGS)
 	{
 		DoEnlargeThings(list, mul, mid_x, mid_y);
 	}
@@ -592,18 +554,7 @@ void CMD_Shrink(void)
 
 	BA_Begin();
 
-	if (edit.obj_type == OBJ_RADTRIGS)
-	{
-		// Note: the positions of the trigger(s) are not changed
-		for (list.begin(&it) ; !it.at_end() ; ++it)
-		{
-			const RadTrig * R = RadTrigs[*it];
-
-			BA_ChangeRAD(*it, RadTrig::F_RW, MAX(1, R->rw / div));
-			BA_ChangeRAD(*it, RadTrig::F_RH, MAX(1, R->rh / div));
-		}
-	}
-	else if (edit.obj_type == OBJ_THINGS)
+	if (edit.obj_type == OBJ_THINGS)
 	{
 		DoShrinkThings(list, div, mid_x, mid_y);
 	}
@@ -1049,26 +1000,6 @@ static void Quantize_Vertices(selection_c& list)
 }
 
 
-static void Quantize_RadTrigs(selection_c& list)
-{
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-	{
-		const RadTrig * R = RadTrigs[*it];
-
-		BA_ChangeRAD(*it, RadTrig::F_MX, grid.ForceSnapX(R->mx));
-		BA_ChangeRAD(*it, RadTrig::F_MY, grid.ForceSnapY(R->my));
-
-		int new_rw = grid.step * ((R->rw + grid.step - 1) / grid.step);
-		int new_rh = grid.step * ((R->rh + grid.step - 1) / grid.step);
-
-		BA_ChangeRAD(*it, RadTrig::F_RW, new_rw);
-		BA_ChangeRAD(*it, RadTrig::F_RH, new_rh);
-	}
-}
-
-
 void CMD_Quantize(void)
 {
 	if (edit.Selected->empty())
@@ -1088,10 +1019,6 @@ void CMD_Quantize(void)
 	{
 		case OBJ_THINGS:
 			Quantize_Things(*edit.Selected);
-			break;
-
-		case OBJ_RADTRIGS:
-			Quantize_RadTrigs(*edit.Selected);
 			break;
 
 		case OBJ_VERTICES:

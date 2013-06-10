@@ -56,7 +56,6 @@ typedef enum
 	OBJ_SIDEDEFS,
 	OBJ_VERTICES,
 	OBJ_SECTORS,
-	OBJ_RADTRIGS,
 }
 obj_type_e;
 
@@ -260,53 +259,6 @@ public:
 };
 
 
-#define RADF_Square  (1 << 20)
-
-class RadTrig
-{
-public:
-	int mx;  // mid-point
-	int my;
-	int rw;  // radius (width/2 and height/2)
-	int rh;
-
-	int z1;
-	int z2;
-
-	int name;
-	int tag;
-	int options;
-	int code;
-
-	enum { F_MX, F_MY, F_RW, F_RH, F_Z1, F_Z2, F_NAME, F_TAG, F_FLAGS, F_CODE };
-
-public:
-	RadTrig() : mx(0), my(0), rw(128), rh(128), z1(0), z2(0),
-				name(0), tag(0), options(0), code(0)
-	{ }
-
-	void RawCopy(const RadTrig *other)
-	{
-		mx = other->mx; my = other->my;
-		rw = other->rw; rh = other->rh;
-		z1 = other->z1; z2 = other->z2;
-
-		name = other->name;
-		tag  = other->tag;
-		options = other->options;
-		code = other->code;
-	}
-
-	const char *Name() const;
-	const char *Code() const;
-
-	bool isSquare() const
-	{
-		return (options & RADF_Square) ? true : false;
-	}
-};
-
-
 typedef struct Vertex  *VPtr;
 typedef struct Thing   *TPtr;
 typedef struct LineDef *LDPtr;
@@ -319,14 +271,12 @@ extern std::vector<Vertex *>  Vertices;
 extern std::vector<Sector *>  Sectors;
 extern std::vector<SideDef *> SideDefs;
 extern std::vector<LineDef *> LineDefs;
-extern std::vector<RadTrig *> RadTrigs;
 
 #define NumThings     ((int)Things.size())
 #define NumVertices   ((int)Vertices.size())
 #define NumSectors    ((int)Sectors.size())
 #define NumSideDefs   ((int)SideDefs.size())
 #define NumLineDefs   ((int)LineDefs.size())
-#define NumRadTrigs   ((int)RadTrigs.size())
 
 extern int NumObjects(obj_type_e type);
 
@@ -335,7 +285,6 @@ extern int NumObjects(obj_type_e type);
 #define is_sector(n)   ((n) >= 0 && (n) < NumSectors )
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
-#define is_radtrig(n)  ((n) >= 0 && (n) < NumRadTrigs)
 
 
 /* BASIS API */

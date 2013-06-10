@@ -280,7 +280,6 @@ key_context_e M_ParseKeyContext(const char *str)
 	if (y_stricmp(str, "sector")  == 0) return KCTX_Sector;
 	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
 	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
-	if (y_stricmp(str, "radtrig") == 0) return KCTX_RadTrig;
 
 // TEMPORARY for compatibility
 	if (y_stricmp(str, "global")  == 0) return KCTX_General;
@@ -300,7 +299,6 @@ const char * M_KeyContextString(key_context_e context)
 		case KCTX_Sector:  return "sector";
 		case KCTX_Thing:   return "thing";
 		case KCTX_Vertex:  return "vertex";
-		case KCTX_RadTrig: return "radtrig";
 
 		default:
 			break;
@@ -971,7 +969,6 @@ key_context_e M_ModeToKeyContext(obj_type_e mode)
 		case OBJ_LINEDEFS: return KCTX_Line;
 		case OBJ_SECTORS:  return KCTX_Sector;
 		case OBJ_VERTICES: return KCTX_Vertex;
-		case OBJ_RADTRIGS: return KCTX_RadTrig;
 
 		default: break;
 	}

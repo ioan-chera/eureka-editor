@@ -227,9 +227,6 @@ void Editor_ChangeMode(char mode)
 {
 	obj_type_e prev_type = edit.obj_type;
 
-	if (mode == 'R')
-		mode = 'r';
-
 	// Set the object type according to the new mode.
 	switch (mode)
 	{
@@ -237,7 +234,6 @@ void Editor_ChangeMode(char mode)
 		case 'l': edit.obj_type = OBJ_LINEDEFS; break;
 		case 's': edit.obj_type = OBJ_SECTORS;  break;
 		case 'v': edit.obj_type = OBJ_VERTICES; break;
-		case 'r': edit.obj_type = OBJ_RADTRIGS; break;
 
 		default:
 			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
@@ -1156,7 +1152,6 @@ void Editor_WriteUser(FILE *fp)
 		case OBJ_LINEDEFS: fprintf(fp, "edit_mode l\n"); break;
 		case OBJ_SECTORS:  fprintf(fp, "edit_mode s\n"); break;
 		case OBJ_VERTICES: fprintf(fp, "edit_mode v\n"); break;
-		case OBJ_RADTRIGS: fprintf(fp, "edit_mode r\n"); break;
 
 		default: break;
 	}

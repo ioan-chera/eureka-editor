@@ -114,7 +114,6 @@ t : enter Thing mode
 l : enter Linedef mode 
 s : enter Sector mode 
 v : enter Vertex mode 
-R : enter RTS mode
 
 b : toggle the Browser on or off
 
