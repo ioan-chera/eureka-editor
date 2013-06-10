@@ -29,6 +29,8 @@
 #include "vm_local.h"
 
 
+static const char *pr_filename = "file";
+
 int			pr_source_line;
 
 char		*pr_file_p;
@@ -67,6 +69,8 @@ type_t	type_floatfield = {ev_field, NULL, &type_float};
 
 int		type_size[8] = {1,1,1,3,1,1,1,1};
 
+static type_t * custom_types;
+
 void PR_LexWhitespace (void);
 
 
@@ -94,7 +98,7 @@ Call at start of file and when *pr_file_p == '\n'
 */
 void PR_NewLine (void)
 {
-	qboolean	m;
+	bool	m;
 	
 	if (*pr_file_p == '\n')
 	{
@@ -254,7 +258,7 @@ void PR_LexPunctuation (void)
 {
 	int		i;
 	int		len;
-	char	*p;
+	const char	*p;
 	
 	pr_token_type = tt_punct;
 	
@@ -327,139 +331,6 @@ void PR_LexWhitespace (void)
 	}
 }
 
-//============================================================================
-
-#define	MAX_FRAMES	256
-
-char	pr_framemacros[MAX_FRAMES][32];
-int		pr_nummacros;
-
-void PR_ClearGrabMacros (void)
-{
-	pr_nummacros = 0;
-}
-
-// just parses text, returning false if an eol is reached
-static qboolean PR_SimpleGetToken (void)
-{
-	int		c;
-	int		i;
-	
-// skip whitespace
-	while ( (c = *pr_file_p) <= ' ')
-	{
-		if (c=='\n' || c == 0)
-			return false;
-		pr_file_p++;
-	}
-	
-	i = 0;
-	while ( (c = *pr_file_p) > ' ' && c != ',' && c != ';' && c != ']')
-	{
-		pr_token[i] = c;
-		i++;
-		pr_file_p++;
-	}
-	pr_token[i] = 0;
-	return true;
-}
-
-
-static void AddMacro(const char *macro)
-{
-	if (pr_nummacros >= MAX_FRAMES)
-		PR_ParseError("too many frame macros (exceeded limit of %d)", MAX_FRAMES);
-
-	strcpy(pr_framemacros[pr_nummacros], macro);
-
-	pr_nummacros++;
-}
-
-
-void PR_ParseFrame (void)
-{
-	int line = pr_source_line;
-	int first, last;
-
-	char *base;
-
-	if (pr_token_type != tt_name)
-		PR_ParseError("bad frame-name: %s\n", pr_token);
-
-	base = strdup(pr_token);
-
-	PR_Lex();
-
-	// only a single name?
-	if (pr_source_line > line)
-	{
-		AddMacro(base);
-		return;
-	}
-
-	if (pr_token_type != tt_immediate || pr_immediate_type != &type_float)
-		PR_ParseError("missing start for frame range, got %s", pr_token);
-
-	first = (int)pr_immediate._float;
-	PR_Lex();
-
-	if (pr_token_type != tt_immediate || pr_immediate_type != &type_float)
-		PR_ParseError("missing end for frame range, got %s", pr_token);
-
-	last = (int)pr_immediate._float;
-	PR_Lex();
-
-	for ( ; first <= last ; first++)
-	{
-		char buffer[64];
-
-		sprintf(buffer, "%s%d", base, first);
-
-		AddMacro(buffer);
-	}
-}
-
-/*
-==============
-PR_LexGrab
-
-Deals with counting sequence numbers and replacing frame macros
-==============
-*/
-void PR_LexGrab (void)
-{	
-	int  i;
-
-	pr_file_p++;	// skip the $
-
-	if (!PR_SimpleGetToken ())
-		PR_ParseError ("hanging $");
-
-	// leave certain $ keywords unchanged for PR_ParseDefs()
-	if (strcmp (pr_token, "frame") == 0)
-	{
-		strcpy(pr_token, "$frame");
-		pr_token_type = tt_name;
-		return;
-	}
-
-	// find the macro
-
-	for (i=0 ; i < pr_nummacros ; i++)
-	{
-		if (strcmp (pr_token, pr_framemacros[i]) == 0)
-		{
-			sprintf (pr_token, "%d", i);
-			pr_token_type = tt_immediate;
-			pr_immediate_type = &type_float;
-			pr_immediate._float = i;
-			return;
-		}
-	}
-
-	PR_ParseError ("unknown frame macro $%s", pr_token);
-}
-
 
 //============================================================================
 
@@ -522,12 +393,6 @@ void PR_Lex (void)
 		return;
 	}
 	
-	if (c == '$')
-	{
-		PR_LexGrab ();
-		return;
-	}
-	
 // parse symbol strings until a non-symbol is found
 	PR_LexPunctuation ();
 }
@@ -550,7 +415,7 @@ void PR_ParseError (const char *error, ...)
 	vsprintf (string,error,argptr);
 	va_end (argptr);
 
-	printf ("%s:%i: %s\n", mpr.strings + s_file, pr_source_line, string);
+	printf ("%s:%i: %s\n", pr_filename, pr_source_line, string);
 
 	longjmp (pr_parse_abort, 1);
 }
@@ -580,7 +445,7 @@ Returns true and gets the next token if the current token equals string
 Returns false and does nothing otherwise
 =============
 */
-qboolean PR_Check (const char *string)
+bool PR_Check (const char *string)
 {
 	if (strcmp (string, pr_token))
 		return false;
@@ -591,7 +456,7 @@ qboolean PR_Check (const char *string)
 
 
 // andrewj: check next token is a name followed by ':'
-qboolean PR_CheckNameColon (void)
+bool PR_CheckNameColon (void)
 {
 	char *p;
 
@@ -644,7 +509,7 @@ type_t *PR_FindType (type_t *type)
 	type_t	*check;
 	int		i;
 	
-	for (check = pr2.types ; check ; check = check->next)
+	for (check = custom_types ; check ; check = check->next)
 	{
 		if (check->kind != type->kind
 		|| check->aux_type != type->aux_type
@@ -658,12 +523,14 @@ type_t *PR_FindType (type_t *type)
 		if (i == type->num_parms)
 			return check;	
 	}
-	
+
 // allocate a new one
-	check = malloc (sizeof (*check));
+	check = new type_t;
+	
 	*check = *type;
-	check->next = pr2.types;
-	pr2.types = check;
+
+	check->next = custom_types;
+	custom_types = check;
 
 	return check;
 }
@@ -745,7 +612,7 @@ type_t *PR_ParseFieldType (void)
 }
 
 
-type_t * PR_ParseAltFuncType (qboolean seen_first_bracket)
+type_t * PR_ParseAltFuncType (bool seen_first_bracket)
 {
 	type_t	newbie;
 	type_t	*type;

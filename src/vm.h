@@ -44,9 +44,9 @@ void VM_Push_Int(int v);
 void VM_Push_Float(float v);
 void VM_Push_String(const char *s);
 
-int   VM_Return_Int();
-float VM_Return_Float();
-const char * VM_Return_String();
+int   VM_Result_Int();
+float VM_Result_Float();
+const char * VM_Result_String();
 
 
 #endif /* __VM_API_H__ */

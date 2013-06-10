@@ -32,9 +32,7 @@
 typedef int	func_t;
 typedef int	string_t;
 
-// FIXME !!!!
-typedef bool qboolean;
-typedef bool bool_t;
+class edict_t;
 
 
 typedef union
@@ -265,7 +263,7 @@ typedef enum
 } token_type_t;
 
 
-extern	qboolean	pr_dumpasm;
+extern	bool	pr_dumpasm;
 
 typedef union lex_eval_s
 {
@@ -284,22 +282,25 @@ extern	token_type_t	pr_token_type;
 extern	type_t		*pr_immediate_type;
 extern	lex_eval_t		pr_immediate;
 
+extern  char  pr_parm_names[MAX_PARMS][MAX_NAME];
+
 
 void PR_PrintStatement (dstatement_t *s);
 
-void PR_Lex (void);
 // reads the next token into pr_token and classifies its type
+void PR_Lex (void);
+
+void PR_NewLine (void);
+void PR_SkipToSemicolon (void);
 
 char *PR_ParseName (void);
 
 type_t *PR_ParseType (void);
 type_t *PR_ParseFieldType (void);
-type_t *PR_ParseAltFuncType (qboolean seen_first_bracket);
+type_t *PR_ParseAltFuncType (bool seen_first_bracket);
 
-void PR_ParseFrame (void);
-
-qboolean PR_Check (const char *string);
-qboolean PR_CheckNameColon (void);
+bool PR_Check (const char *string);
+bool PR_CheckNameColon (void);
 void PR_Expect (const char *string);
 void PR_ParseError (const char *error, ...);
 
@@ -307,8 +308,6 @@ void PR_ParseError (const char *error, ...);
 extern	jmp_buf		pr_parse_abort;		// longjump with this on parse error
 extern	int			pr_source_line;
 extern	char		*pr_file_p;
-
-void *PR_Malloc (int size);
 
 
 //=============================================================================
@@ -334,18 +333,6 @@ typedef struct
 
 	dfunction_t	functions[MAX_FUNCTIONS];
 	int			numfunctions;
-
-	char		precache_sounds[MAX_SOUNDS][MAX_DATA_PATH];
-	int			precache_sounds_block[MAX_SOUNDS];
-	int			numsounds;
-
-	char		precache_models[MAX_MODELS][MAX_DATA_PATH];
-	int			precache_models_block[MAX_SOUNDS];
-	int			nummodels;
-
-	char		precache_files[MAX_FILES][MAX_DATA_PATH];
-	int			precache_files_block[MAX_SOUNDS];
-	int			numfiles;
 
 	globaldef_t	globals[MAX_GLOBALS];
 	int			numglobaldefs;
@@ -392,7 +379,7 @@ typedef struct
 	int				entityfields;
 	int				edict_size;	// in bytes
 
-	bool_t  trace;
+	bool  trace;
 
 	int		argc;
 
@@ -417,6 +404,22 @@ extern prog_vm_t * pr;
 
 
 void PR_RunError (const char *error, ...);
+
+
+int          PR_Param_Int(int offset);
+float        PR_Param_Float(int offset);
+const char * PR_Param_String(int offset);
+void         PR_Param_Vector(int offset, float *vec);
+edict_t *    PR_Param_Entity(int offset);
+int          PR_Param_EdictNum(int offset);
+
+
+void PR_Return_Int(int val);
+void PR_Return_Float(float val);
+void PR_Return_Vector(float *val);
+void PR_Return_String(int offset);
+void PR_Return_Entity(edict_t * ent);
+
 
 #endif /* __VM_LOCAL_H__ */
 

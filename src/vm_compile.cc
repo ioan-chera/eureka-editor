@@ -29,18 +29,18 @@
 #include "vm_local.h"
 
 
-#define bool_t  bool
-
-
-pr_info_t	pr2;
-
 int			pr_edict_size;
+
+static def_t * all_defs;
+
+static int pr_error_count;
+
 
 //========================================
 
 dfunction_t	*pr_scope;		// the function being parsed, or NULL
 
-qboolean	pr_dumpasm;
+bool	pr_dumpasm;
 string_t	s_file;			// filename for function definition
 
 int		pr_local_ofs;
@@ -74,12 +74,80 @@ typedef struct
 
 //========================================
 
-static operator_t  unary_operators[];
-static operator_t binary_operators[];
+static operator_t unary_operators[] =
+{
+	{"!", OP_NOT_F,    5, "b",  &type_float,    &type_float},
+
+	{"!", OP_BOOL_V,   5, "bn", &type_vector,   &type_float},
+	{"!", OP_BOOL_S,   5, "bn", &type_string,   &type_float},
+	{"!", OP_BOOL_ENT, 5, "bn", &type_entity,   &type_float},
+	{"!", OP_BOOL_FNC, 5, "bn", &type_function, &type_float},
+
+	{"~", OP_BITNOT,   5, "",  &type_float,    &type_float},
+
+	{NULL}
+};
+
+
+static operator_t binary_operators[] =
+{
+	/* priority 1 is for function calls and field access */
+
+	{"^", OP_POWER,     2, "",  &type_float,  &type_float,  &type_float},
+
+	{"*", OP_MUL_F,     3, "",  &type_float,  &type_float,  &type_float},
+	{"*", OP_VEC_PROD,  3, "",  &type_vector, &type_vector, &type_float},
+	{"*", OP_VEC_MUL_F, 3, "",  &type_vector, &type_float,  &type_vector},
+	{"*", OP_VEC_MUL_F, 3, "w", &type_float,  &type_vector, &type_vector},
+ 
+	{"/", OP_DIV_F,     3, "", &type_float,  &type_float, &type_float},
+	{"/", OP_VEC_DIV_F, 3, "", &type_vector, &type_float, &type_vector},
+	{"%", OP_MOD_F,     3, "", &type_float,  &type_float, &type_float},
+
+	{"&",  OP_BITAND,  3, "", &type_float, &type_float, &type_float},
+	{"|",  OP_BITOR,   3, "", &type_float, &type_float, &type_float},
+	{"^^", OP_BITXOR,  3, "", &type_float, &type_float, &type_float},
+
+	{"+", OP_ADD_F,   4, "", &type_float, &type_float, &type_float},
+	{"+", OP_VEC_ADD, 4, "", &type_vector, &type_vector, &type_vector},
+  
+	{"-", OP_SUB_F,   4, "", &type_float, &type_float, &type_float},
+	{"-", OP_VEC_SUB, 4, "", &type_vector, &type_vector, &type_vector},
+
+	{"==", OP_EQ_F,   5, "b", &type_float, &type_float, &type_float},
+	{"==", OP_EQ_S,   5, "b", &type_string, &type_string, &type_float},
+	{"==", OP_EQ_ENT, 5, "b", &type_entity, &type_entity, &type_float},
+	{"==", OP_EQ_FNC, 5, "b", &type_function, &type_function, &type_float},
+	{"==", OP_VEC_EQ, 5, "b", &type_vector, &type_vector, &type_float},
+ 
+	{"!=", OP_EQ_F,   5, "bn", &type_float, &type_float, &type_float},
+	{"!=", OP_EQ_S,   5, "bn", &type_string, &type_string, &type_float},
+	{"!=", OP_EQ_ENT, 5, "bn", &type_entity, &type_entity, &type_float},
+	{"!=", OP_EQ_FNC, 5, "bn", &type_function, &type_function, &type_float},
+	{"!=", OP_VEC_EQ, 5, "bn", &type_vector, &type_vector, &type_float},
+ 
+	{"<",  OP_LT,  5, "b",  &type_float, &type_float, &type_float},
+	{">",  OP_GT,  5, "b",  &type_float, &type_float, &type_float},
+	{">=", OP_LT,  5, "bn", &type_float, &type_float, &type_float},
+	{"<=", OP_GT,  5, "bn", &type_float, &type_float, &type_float},
+
+	{"&&", FAKE_OP_AND, 6, "b", &type_float, &type_float, &type_float},
+	{"||", FAKE_OP_OR,  7, "b", &type_float, &type_float, &type_float},
+
+	/* priority 8 is for assignment */
+
+	/* priority 9 is for the ?: ternary operator */
+
+	{NULL}
+};
 
 #define ASSIGN_PRIORITY   8
 #define TERNARY_PRIORITY  9
 #define	TOP_PRIORITY	  9
+
+
+//===========================================================================
+
 
 static dstatement_t * PR_EmitOp(int opcode, int a, int b, int c);
 static void PR_PatchOp(dstatement_t *patch);
@@ -128,7 +196,7 @@ typedef struct eval_s
 
 
 static eval_t * EXP_Expression(int priority);
-static void CODEGEN_Eval(eval_t *ev, bool_t no_result);
+static void CODEGEN_Eval(eval_t *ev, bool no_result);
 static void CODEGEN_Boolean(eval_t *ev);
 static void PR_ParseStatement(void);
 static def_t *PR_GetDef (const char *name, type_t *type, dfunction_t *scope, int allocate);
@@ -136,13 +204,47 @@ static def_t *PR_GetDef (const char *name, type_t *type, dfunction_t *scope, int
 
 static eval_t * PR_AllocEval(int kind, type_t *type)
 {
-	eval_t * ev = malloc(sizeof(eval_t));
+	eval_t * ev = new eval_t;
+
 	memset(ev, 0, sizeof(eval_t));
 
 	ev->kind = kind;
 	ev->type = type;
 
 	return ev;
+}
+
+
+// CopyString returns an offset from the string heap
+static int	CopyString(const char *str)
+{
+	int index = mpr.strofs;
+
+	strcpy (mpr.strings + mpr.strofs, str);
+
+	mpr.strofs += strlen(str)+1;
+
+	if (mpr.strofs >= (int)sizeof(mpr.strings))
+		FatalError("Out of string space!\n");
+
+	return index;
+}
+
+
+// andrewj: added this, find existing string, or copy to string table
+static int	GlobalizeString(const char *str)
+{
+	int  i, len;
+	
+	for (i=129 ; i < mpr.strofs ; i += len)
+	{
+		len = strlen(mpr.strings + i) + 1;
+
+		if (strcmp(mpr.strings + i, str) == 0)
+			return i;
+	}
+
+	return CopyString(str);
 }
 
 
@@ -420,8 +522,6 @@ static eval_t * EXP_FunctionCall(eval_t *e1)
 		PR_ParseError("too few parameters (got %d, need %d)", got, call->num_parms);
 
 
-	// ???? precache_xxx handling
-
 	return call;
 }
 
@@ -554,7 +654,7 @@ static eval_t * EXP_Expression(int priority)
 	eval_t * e2;
 
 	const operator_t *op;
-	bool_t found;
+	bool found;
 
 
 	if (priority == 0)
@@ -657,7 +757,7 @@ static void CODEGEN_Literal(const kval_t * literal, type_t *type)
 	int count = (type->kind == ev_vector) ? 3 : 1;
 	int i;
 
-	bool_t is_float = false;
+	bool is_float = false;
 
 	if (type->kind == ev_float || type->kind == ev_vector)
 	{
@@ -695,7 +795,7 @@ static void CODEGEN_VarValue(eval_t * ev)
 }
 
 
-static void CODEGEN_FunctionCall(eval_t * ev, bool_t no_result)
+static void CODEGEN_FunctionCall(eval_t * ev, bool no_result)
 {
 	int i;
 
@@ -751,7 +851,7 @@ static void CODEGEN_FormatString(eval_t * ev)
 }
 
 
-static void CODEGEN_FieldAccess(eval_t * ev, bool_t load_it)
+static void CODEGEN_FieldAccess(eval_t * ev, bool load_it)
 {
 	int field_ofs;
 
@@ -774,7 +874,7 @@ static void CODEGEN_FieldAccess(eval_t * ev, bool_t load_it)
 }
 
 
-static void CODEGEN_Assignment(eval_t * ev, bool_t no_result)
+static void CODEGEN_Assignment(eval_t * ev, bool no_result)
 {
 	// get assigned value on the stack
 	CODEGEN_Eval(ev->args[1], false);
@@ -801,8 +901,10 @@ static void CODEGEN_Assignment(eval_t * ev, bool_t no_result)
 		else
 			PR_EmitOp(OP_STORE, 0, 0, 0);
 	}
-	else if (ev->args[0]->kind == EV_VARIABLE)
+	else
 	{
+		SYS_ASSERT(ev->args[0]->kind == EV_VARIABLE);
+
 		def_t * var = ev->args[0]->def;
 
 		if (var->scope)
@@ -820,8 +922,6 @@ static void CODEGEN_Assignment(eval_t * ev, bool_t no_result)
 				PR_EmitOp(OP_WRITE, var->ofs, 0, 0);
 		}
 	}
-	else
-		Error("internal error: CODEGEN_Assignment\n");
 }
 
 
@@ -916,7 +1016,7 @@ static void CODEGEN_TernaryOp(eval_t * ev)
 }
 
 
-static void CODEGEN_Eval(eval_t *ev, bool_t no_result)
+static void CODEGEN_Eval(eval_t *ev, bool no_result)
 {
 	if (no_result)
 	{
@@ -1003,7 +1103,7 @@ static void CODEGEN_Boolean(eval_t *ev)
 			break;
 
 		default:
-			Error("internal error: unknown type for CODEGEN_Boolean\n");
+			BugError("unknown type for CODEGEN_Boolean\n");
 			break;
 	}
 }
@@ -1012,75 +1112,6 @@ static void CODEGEN_Boolean(eval_t *ev)
 //========================================
 
 
-static operator_t unary_operators[] =
-{
-	{"!", OP_NOT_F,    5, "b",  &type_float,    &type_float},
-
-	{"!", OP_BOOL_V,   5, "bn", &type_vector,   &type_float},
-	{"!", OP_BOOL_S,   5, "bn", &type_string,   &type_float},
-	{"!", OP_BOOL_ENT, 5, "bn", &type_entity,   &type_float},
-	{"!", OP_BOOL_FNC, 5, "bn", &type_function, &type_float},
-
-	{"~", OP_BITNOT,   5, "",  &type_float,    &type_float},
-
-	{NULL}
-};
-
-
-static operator_t binary_operators[] =
-{
-	/* priority 1 is for function calls and field access */
-
-	{"^", OP_POWER,     2, "",  &type_float,  &type_float,  &type_float},
-
-	{"*", OP_MUL_F,     3, "",  &type_float,  &type_float,  &type_float},
-	{"*", OP_VEC_PROD,  3, "",  &type_vector, &type_vector, &type_float},
-	{"*", OP_VEC_MUL_F, 3, "",  &type_vector, &type_float,  &type_vector},
-	{"*", OP_VEC_MUL_F, 3, "w", &type_float,  &type_vector, &type_vector},
- 
-	{"/", OP_DIV_F,     3, "", &type_float,  &type_float, &type_float},
-	{"/", OP_VEC_DIV_F, 3, "", &type_vector, &type_float, &type_vector},
-	{"%", OP_MOD_F,     3, "", &type_float,  &type_float, &type_float},
-
-	{"&",  OP_BITAND,  3, "", &type_float, &type_float, &type_float},
-	{"|",  OP_BITOR,   3, "", &type_float, &type_float, &type_float},
-	{"^^", OP_BITXOR,  3, "", &type_float, &type_float, &type_float},
-
-	{"+", OP_ADD_F,   4, "", &type_float, &type_float, &type_float},
-	{"+", OP_VEC_ADD, 4, "", &type_vector, &type_vector, &type_vector},
-  
-	{"-", OP_SUB_F,   4, "", &type_float, &type_float, &type_float},
-	{"-", OP_VEC_SUB, 4, "", &type_vector, &type_vector, &type_vector},
-
-	{"==", OP_EQ_F,   5, "b", &type_float, &type_float, &type_float},
-	{"==", OP_EQ_S,   5, "b", &type_string, &type_string, &type_float},
-	{"==", OP_EQ_ENT, 5, "b", &type_entity, &type_entity, &type_float},
-	{"==", OP_EQ_FNC, 5, "b", &type_function, &type_function, &type_float},
-	{"==", OP_VEC_EQ, 5, "b", &type_vector, &type_vector, &type_float},
- 
-	{"!=", OP_EQ_F,   5, "bn", &type_float, &type_float, &type_float},
-	{"!=", OP_EQ_S,   5, "bn", &type_string, &type_string, &type_float},
-	{"!=", OP_EQ_ENT, 5, "bn", &type_entity, &type_entity, &type_float},
-	{"!=", OP_EQ_FNC, 5, "bn", &type_function, &type_function, &type_float},
-	{"!=", OP_VEC_EQ, 5, "bn", &type_vector, &type_vector, &type_float},
- 
-	{"<",  OP_LT,  5, "b",  &type_float, &type_float, &type_float},
-	{">",  OP_GT,  5, "b",  &type_float, &type_float, &type_float},
-	{">=", OP_LT,  5, "bn", &type_float, &type_float, &type_float},
-	{"<=", OP_GT,  5, "bn", &type_float, &type_float, &type_float},
-
-	{"&&", FAKE_OP_AND, 6, "b", &type_float, &type_float, &type_float},
-	{"||", FAKE_OP_OR,  7, "b", &type_float, &type_float, &type_float},
-
-	/* priority 8 is for assignment */
-
-	/* priority 9 is for the ?: ternary operator */
-
-	{NULL}
-};
-
-
-//===========================================================================
 
 
 static int trace_ops;
@@ -1113,81 +1144,6 @@ static void PR_PatchOp(dstatement_t *patch)
 {
 	patch->a = &mpr.statements[mpr.numstatements] - patch;
 }
-
-
-void PrecacheSound (def_t *e, int ch)
-{
-	char	*n;
-	int		i;
-	
-	if (!e->ofs)
-		return;
-	n = GG_STRING(e->ofs);
-	for (i=0 ; i<mpr.numsounds ; i++)
-		if (!strcmp(n, mpr.precache_sounds[i]))
-			return;
-	if (mpr.numsounds == MAX_SOUNDS)
-		Error ("PrecacheSound: numsounds == MAX_SOUNDS");
-	strcpy (mpr.precache_sounds[i], n);
-	if (ch >= '1'  && ch <= '9')
-		mpr.precache_sounds_block[i] = ch - '0';
-	else
-		mpr.precache_sounds_block[i] = 1;
-	mpr.numsounds++;
-}
-
-void PrecacheModel (def_t *e, int ch)
-{
-	char	*n;
-	int		i;
-	
-	if (!e->ofs)
-		return;
-	n = GG_STRING(e->ofs);
-	for (i=0 ; i<mpr.nummodels ; i++)
-		if (!strcmp(n, mpr.precache_models[i]))
-			return;
-	if (mpr.numsounds == MAX_SOUNDS)
-		Error ("PrecacheModels: numsounds == MAX_SOUNDS");
-	strcpy (mpr.precache_models[i], n);
-	if (ch >= '1'  && ch <= '9')
-		mpr.precache_models_block[i] = ch - '0';
-	else
-		mpr.precache_models_block[i] = 1;
-	mpr.nummodels++;
-}
-
-void PrecacheFile (def_t *e, int ch)
-{
-	char	*n;
-	int		i;
-	
-	if (!e->ofs)
-		return;
-	n = GG_STRING(e->ofs);
-	for (i=0 ; i<mpr.numfiles ; i++)
-		if (!strcmp(n, mpr.precache_files[i]))
-			return;
-	if (mpr.numfiles == MAX_FILES)
-		Error ("PrecacheFile: numfiles == MAX_FILES");
-	strcpy (mpr.precache_files[i], n);
-	if (ch >= '1'  && ch <= '9')
-		mpr.precache_files_block[i] = ch - '0';
-	else
-		mpr.precache_files_block[i] = 1;
-	mpr.numfiles++;
-}
-
-
-#if 0  //????
-			// save information for model and sound caching
-				if (!strncmp(func->name,"precache_sound", 14))
-					PrecacheSound (e, func->name[14]);
-				else if (!strncmp(func->name,"precache_model", 14))
-					PrecacheModel (e, func->name[14]);
-				else if (!strncmp(func->name,"precache_file", 13))
-					PrecacheFile (e, func->name[13]);
-#endif
 
 
 static void STAT_Return(void)
@@ -1368,8 +1324,7 @@ static void PR_ParseStatement (void)
 
 char * CalcNextStateName(const char * prev)
 {
-	if (prev[0] == 0)
-		Error("Internal error: empty func name");
+	SYS_ASSERT(prev[0]);
 
 	char buffer[256];
 
@@ -1464,7 +1419,7 @@ void PR_ParseState (void)
 PR_ParseFunctionBody
 ============
 */
-static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool_t is_extern, bool_t is_state)
+static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern, bool is_state)
 {
 	int			i;
 	def_t		*defs[MAX_PARMS];
@@ -1493,7 +1448,7 @@ static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool_t is_extern
 		df->parm_ofs[i] = defs[i]->ofs;
 
 		if (i > 0 && df->parm_ofs[i] < df->parm_ofs[i-1])
-			Error ("bad parm order");
+			BugError ("bad parm order");
 	}
 	
 	df->first_statement = mpr.numstatements;
@@ -1545,43 +1500,42 @@ If allocate is true, a new def will be allocated if it can't be found
 */
 static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, int allocate)
 {
-	def_t		*def, **old;
+	def_t	* def;
+
 	char element[MAX_NAME];
 
 // see if the name is already in use
-	old = &pr2.search;
-	for (def = *old ; def ; old=&def->search_next,def = *old)
-		if (!strcmp(def->name,name) )
-		{
-			if ( def->scope && def->scope != scope)
-				continue;		// in a different function
-			
-			if (type && def->type != type)
-				PR_ParseError ("Type mismatch on redeclaration of %s",name);
+	for (def = all_defs ; def ; def = def->next)
+	{
+		if (strcmp(def->name,name) != 0)
+			continue;
 
-			// move to head of list to find fast next time
-			*old = def->search_next;
-			def->search_next = pr2.search;
-			pr2.search = def;
-			return def;
-		}
-	
+		if ( def->scope && def->scope != scope)
+			continue;		// in a different function
+
+		if (type && def->type != type)
+			PR_ParseError ("Type mismatch on redeclaration of %s",name);
+
+//???			// move to head of list to find fast next time
+//???			*old = def->search_next;
+//???			def->search_next = pr2.search;
+//???			pr2.search = def;
+
+		return def;
+	}
+
 	if (!allocate)
 		return NULL;
 		
 // allocate a new def
-	def = malloc (sizeof(def_t));
+	def = new def_t;
+
 	memset (def, 0, sizeof(*def));
 
-	def->next = NULL;
-	pr2.def_tail->next = def;
-	pr2.def_tail = def;
+	def->next = all_defs;
+	all_defs  = def;
 
-	def->search_next = pr2.search;
-	pr2.search = def;
-
-	def->name = malloc (strlen(name)+1);
-	strcpy (def->name, name);
+	def->name = strdup(name);
 	def->type = type;
 
 	def->scope = scope;
@@ -1615,9 +1569,10 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 	else
 		mpr.numregisters += type_size[type->kind];
 
+
 	if (type->kind == ev_field)
 	{
-		GG_INT(def->ofs) = pr2.size_fields;
+		GG_INT(def->ofs) = 123; /// pr2.size_fields;
 
 		if (type->aux_type->kind == ev_vector)
 		{
@@ -1631,7 +1586,9 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 			PR_GetDef (element, &type_floatfield, scope, allocate);
 		}
 		else
-			pr2.size_fields += type_size[type->aux_type->kind];
+		{
+		//???	pr2.size_fields += type_size[type->aux_type->kind];
+		}
 	}
 
 //	if (pr_dumpasm)
@@ -1656,17 +1613,9 @@ void PR_ParseGlobals (void)
 
 	int			i;
 // int line;
-bool_t  is_forward;
-bool_t  is_extern;
-bool_t  is_state;
-
-	// frames
-
-	if (PR_Check("$frame"))
-	{
-		PR_ParseFrame();
-		return;
-	}
+bool  is_forward;
+bool  is_extern;
+bool  is_state;
 
 	// field definition ?
 
@@ -1839,13 +1788,8 @@ PR_CompileFile
 compiles the 0 terminated text, adding defintions to the pr2 structure
 ============
 */
-qboolean	PR_CompileFile (char *string, char *filename)
+bool PR_CompileFile (char *string, char *filename)
 {	
-	if (!pr2.memory)
-		Error ("PR_CompileFile: Didn't clear");
-
-	PR_ClearGrabMacros ();	// clear the frame macros
-
 	pr_file_p = string;
 	s_file = CopyString (filename);
 

@@ -28,10 +28,11 @@
 
 #include "vm_local.h"
 
-#include <assert.h>
+
+#define Con_Printf  printf
 
 
-cvar_t  pr_nilcheck = { "pr_nilcheck","1" };
+bool pr_nilcheck = true;
 
 
 const char *pr_opnames[] =
@@ -172,7 +173,7 @@ void PR_StackTrace (void)
 			Con_Printf ("<NO FUNCTION>\n");
 		}
 		else
-			Con_Printf ("%12s : %s\n", pr->strings + f->s_file, pr->strings + f->s_name);
+			Con_Printf ("%12s : %s\n", mpr.strings + f->s_file, mpr.strings + f->s_name);
 	}
 }
 
@@ -208,7 +209,7 @@ void PR_Profile_f (void)
 		if (best)
 		{
 			if (num < 10)
-				Con_Printf ("%7i %s\n", best->profile, pr->strings+best->s_name);
+				Con_Printf ("%7i %s\n", best->profile, mpr.strings+best->s_name);
 			num++;
 			best->profile = 0;
 		}
@@ -234,7 +235,7 @@ const char * PR_Param_String(int offset)
 {
 	kval_t *parms = &pr->stack[pr->frame];
 
-	return pr->strings + parms[offset]._string;
+	return mpr.strings + parms[offset]._string;
 }
 
 void PR_Param_Vector(int offset, float *vec)
@@ -308,11 +309,11 @@ void PR_RunError (const char *error, ...)
 	Con_Printf("Last statement:\n");
 	PR_PrintStatement (pr->x_ip);
 
-	Con_Printf ("QUAKE-C ERROR: %s\n", string);
-	
+	Con_Printf ("SCRIPT ERROR: %s\n", string);
+
 	pr->call_depth = 0;		// dump the stack so host_error can shutdown functions
 
-	Sys_Error ("Program error");  // was Host_Error...
+	FatalError ("Program error");
 }
 
 /*
@@ -418,7 +419,7 @@ static int PR_LeaveFunction (void)
 	// restore previous values of ip (etc)
 
 	if (pr->call_depth <= 0)
-		Sys_Error ("call stack underflow");
+		BugError ("call stack underflow");
 
 	pr->call_depth--;
 
@@ -474,7 +475,7 @@ void PR_ExecuteProgram (func_t fnum)
 
 	f = &mpr.functions[fnum];
 
-/// fprintf(stderr, "PR_ExecuteProgram : %s\n", pr->strings + f->s_name);
+/// fprintf(stderr, "PR_ExecuteProgram : %s\n", mpr.strings + f->s_name);
 
 	pr->trace = false;
 
@@ -578,7 +579,7 @@ void PR_ExecuteProgram (func_t fnum)
 			break;
 
 		case OP_BOOL_S:
-			STACK_F(0) = STACK(0)._string && pr->strings[STACK(0)._string];
+			STACK_F(0) = STACK(0)._string && mpr.strings[STACK(0)._string];
 			break;
 
 		case OP_BOOL_FNC:
@@ -596,7 +597,7 @@ void PR_ExecuteProgram (func_t fnum)
 			break;
 
 		case OP_EQ_S:
-			STACK_F(-1) = !strcmp(pr->strings + STACK(-1)._string, pr->strings + STACK(0)._string);
+			STACK_F(-1) = !strcmp(mpr.strings + STACK(-1)._string, mpr.strings + STACK(0)._string);
 			DROP(1);
 			break;
 
@@ -614,7 +615,7 @@ void PR_ExecuteProgram (func_t fnum)
 	//==================
 
 		case OP_ADDRESS:
-			if (pr_nilcheck.value)
+			if (pr_nilcheck)
 				if (STACK(0)._edict == 0)
 					PR_RunError ("nil entity access");
 
@@ -697,7 +698,7 @@ void PR_ExecuteProgram (func_t fnum)
 				newf = &mpr.functions[f];
 			}
 
-if (pr->trace) fprintf(stderr, "Calling : %s\n", pr->strings + newf->s_name);
+if (pr->trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
 
 			if (pr->next_frame < 0)
 				PR_RunError("PR_ExecuteProgram: no frame for OP_CALL");
@@ -721,7 +722,7 @@ if (pr->trace) fprintf(stderr, "Calling : %s\n", pr->strings + newf->s_name);
 
 			if (pr->call_depth == exit_depth)
 			{
-				assert(pr->stack_top == exit_stack);
+				SYS_ASSERT(pr->stack_top == exit_stack);
 
 if (pr->trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 				return;		// all done
@@ -902,7 +903,7 @@ void PR_ExecuteProgramByName (const char *name)
 
 	if (! func)
 	{
-		Sys_Error ("Can't find function in progs: %s\n", name);
+		FatalError ("Can't find function in progs: %s\n", name);
 	}
 
 	PR_ExecuteProgram (func - mpr.functions);
