@@ -108,7 +108,11 @@ public:
 		sum_x /= (double)things.size();
 		sum_y /= (double)things.size();
 
-		// find closest vertex to this point
+		*cx = I_ROUND(sum_x);
+		*cy = I_ROUND(sum_y);
+
+#if 0
+		// find closest thing to this point
 		double best_dist = 9e9;
 
 		for (unsigned int k = 0 ; k < things.size() ; k++)
@@ -126,6 +130,7 @@ public:
 				best_dist = dist;
 			}
 		}
+#endif
 	}
 
 	void CentreOfVertices(int *cx, int *cy)
@@ -147,6 +152,10 @@ public:
 		sum_x /= (double)verts.size();
 		sum_y /= (double)verts.size();
 
+		*cx = I_ROUND(sum_x);
+		*cy = I_ROUND(sum_y);
+
+#if 0
 		// find closest vertex to this point
 		double best_dist = 9e9;
 
@@ -165,6 +174,7 @@ public:
 				best_dist = dist;
 			}
 		}
+#endif
 	}
 
 	void CentreOfRadTrigs(int *cx, int *cy)
