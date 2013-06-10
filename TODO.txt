@@ -4,8 +4,6 @@ Eureka TODO / WISHLIST
 
 
 
-+  SEC_Light binding command (akin to SEC_Floor etc)
-
 
 ______________________________________________________________________
 
@@ -35,6 +33,9 @@ General
 +  Preferences:
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
+
+-  link with SHFOLDER.DLL (before SHELL32)
+   _but_ make sure program works OK on XP / Vista / Windows 7
 
 
 
@@ -133,6 +134,8 @@ General
 +  a dialog to view / load / prune backups.
 
 ?  Scripting language
+
+IDEA: ability to edit Lua code for OBLIGE prefabs
 
 WISH: support UDMF format
 
@@ -254,6 +257,8 @@ Editing
 
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
+
++  SEC_Light binding command (akin to SEC_Floor etc)
 
 +  scrollbars for the canvas
 
