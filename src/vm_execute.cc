@@ -721,7 +721,7 @@ if (exec.trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
 
 			if (exec.call_depth == exit_depth)
 			{
-				SYS_ASSERT(exec.stack_top == exit_stack);
+				SYS_ASSERT(exec.stack_top == exit_stack - 1);
 
 if (exec.trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 				return;		// all done

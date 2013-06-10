@@ -1352,6 +1352,18 @@ char * CalcNextStateName(const char * prev)
 }
 
 
+static int PR_ResolveBuiltin(const char *name)
+{
+	// very first builtin is a dummy -- skip it
+	for (int k = 1 ; all_builtins[k].name ; k++)
+		if (strcmp(name, all_builtins[k].name) == 0)
+			return k;
+
+	PR_ParseError("No such builtin: '%s'", name);
+	return 0;  /* NOT REACHED */
+}
+
+
 
 /*
 ============
@@ -1373,7 +1385,7 @@ static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern)
 		PR_Expect(";");
 
 		df->builtin = 1;
-		df->first_statement = -1;
+		df->first_statement = PR_ResolveBuiltin(df->def->name);
 		return;
 	}
 
