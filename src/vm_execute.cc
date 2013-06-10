@@ -27,12 +27,18 @@
 #include "main.h"
 
 #include "vm_local.h"
+#include "vm.h"
 
 
 #define Con_Printf  printf
 
 
 bool pr_nilcheck = true;
+
+
+mem_progs_t  mpr;
+
+execution_info_t  exec;
 
 
 const char *pr_opnames[] =
@@ -120,7 +126,7 @@ static void PR_PrintStatement(int ip)
 {
 	int  i;
 
-	const dstatement_t *s = pr->statements + ip;
+	const dstatement_t *s = mpr.statements + ip;
 	
 	if ( (unsigned)s->op < sizeof(pr_opnames) / sizeof(pr_opnames[0]))
 	{
@@ -156,17 +162,17 @@ void PR_StackTrace (void)
 	const dfunction_t	*f;
 	int			i;
 	
-	if (pr->call_depth == 0)
+	if (exec.call_depth == 0)
 	{
 		Con_Printf ("<NO STACK>\n");
 		return;
 	}
 	
-	pr->call_stack[pr->call_depth].func = pr->x_func;
+	exec.call_stack[exec.call_depth].func = exec.x_func;
 
-	for (i=pr->call_depth ; i>=0 ; i--)
+	for (i=exec.call_depth ; i>=0 ; i--)
 	{
-		f = pr->call_stack[i].func;
+		f = exec.call_stack[i].func;
 		
 		if (!f)
 		{
@@ -196,7 +202,7 @@ void PR_Profile_f (void)
 	{
 		max = 0;
 		best = NULL;
-		for (i=0 ; i < pr->numfunctions ; i++)
+		for (i=0 ; i < mpr.numfunctions ; i++)
 		{
 			// Intentional Const Override
 			f = (dfunction_t *)&mpr.functions[i];
@@ -219,28 +225,28 @@ void PR_Profile_f (void)
 
 int PR_Param_Int(int offset)
 {
-	kval_t *parms = &pr->stack[pr->frame];
+	kval_t *parms = &exec.stack[exec.frame];
 
 	return parms[offset]._int;
 }
 
 float PR_Param_Float(int offset)
 {
-	kval_t *parms = &pr->stack[pr->frame];
+	kval_t *parms = &exec.stack[exec.frame];
 
 	return parms[offset]._float;
 }
 
 const char * PR_Param_String(int offset)
 {
-	kval_t *parms = &pr->stack[pr->frame];
+	kval_t *parms = &exec.stack[exec.frame];
 
 	return mpr.strings + parms[offset]._string;
 }
 
 void PR_Param_Vector(int offset, float *vec)
 {
-	kval_t *parms = &pr->stack[pr->frame];
+	kval_t *parms = &exec.stack[exec.frame];
 
 	vec[0] = parms[offset + 0]._float;
 	vec[1] = parms[offset + 1]._float;
@@ -254,7 +260,7 @@ int PR_Param_EdictNum(int offset)
 
 edict_t * PR_Param_Entity(int offset)
 {
-	return EDICT_NUM(PR_Param_EdictNum(offset));
+	return NULL;
 }
 
 
@@ -283,7 +289,7 @@ void PR_Return_String(int offset)
 
 void PR_Return_Entity(edict_t * ent)
 {
-	PR_Return_Int(EDICT_TO_PROG(ent));
+	PR_Return_Int(1);  // dummy !!!
 }
 
 
@@ -307,11 +313,11 @@ void PR_RunError (const char *error, ...)
 	PR_StackTrace ();
 
 	Con_Printf("Last statement:\n");
-	PR_PrintStatement (pr->x_ip);
+	PR_PrintStatement (exec.x_ip);
 
 	Con_Printf ("SCRIPT ERROR: %s\n", string);
 
-	pr->call_depth = 0;		// dump the stack so host_error can shutdown functions
+	exec.call_depth = 0;		// dump the stack so host_error can shutdown functions
 
 	FatalError ("Program error");
 }
@@ -328,43 +334,43 @@ static void PR_CallBuiltin (const dfunction_t *f)
 {
 	// no need to save IP
 
-	const dfunction_t * saved_func = pr->x_func;
+	const dfunction_t * saved_func = exec.x_func;
 
-	int saved_frame = pr->frame;
+	int saved_frame = exec.frame;
 
-	pr->x_func     = f;
-	pr->frame      = pr->next_frame;
-	pr->next_frame = -1;
+	exec.x_func     = f;
+	exec.frame      = exec.next_frame;
+	exec.next_frame = -1;
 
 	{
-		pr->builtins[f->first_statement].func ();
+		exec.builtins[f->first_statement].func ();
 	}
 
-	pr->stack_top  = pr->frame;
-	pr->frame      = saved_frame;
-	pr->x_func     = saved_func;
+	exec.stack_top  = exec.frame;
+	exec.frame      = saved_frame;
+	exec.x_func     = saved_func;
 
 	// pop value stored by OP_FRAME instruction
-	pr->next_frame = pr->stack[-- pr->stack_top]._int;
+	exec.next_frame = exec.stack[-- exec.stack_top]._int;
 }
 
 
 static void PR_CallFormatter (void)
 {
-	int saved_frame = pr->frame;
+	int saved_frame = exec.frame;
 
-	pr->frame      = pr->next_frame;
-	pr->next_frame = -1;
+	exec.frame      = exec.next_frame;
+	exec.next_frame = -1;
 
 	{
 		PC_format_string();
 	}
 
-	pr->stack_top  = pr->frame;
-	pr->frame      = saved_frame;
+	exec.stack_top  = exec.frame;
+	exec.frame      = saved_frame;
 
 	// pop value stored by OP_FRAME instruction
-	pr->next_frame = pr->stack[-- pr->stack_top]._int;
+	exec.next_frame = exec.stack[-- exec.stack_top]._int;
 }
 
 
@@ -379,27 +385,27 @@ Returns the new program statement counter
 static int PR_EnterFunction (const dfunction_t *f)
 {
 	// save previous values of ip (etc)
-	pr->call_stack[pr->call_depth].ip    = pr->x_ip;
-	pr->call_stack[pr->call_depth].func  = pr->x_func;
-	pr->call_stack[pr->call_depth].frame = pr->frame;
+	exec.call_stack[exec.call_depth].ip    = exec.x_ip;
+	exec.call_stack[exec.call_depth].func  = exec.x_func;
+	exec.call_stack[exec.call_depth].frame = exec.frame;
 
-	pr->call_depth++;
+	exec.call_depth++;
 
-	if (pr->call_depth >= MAX_CALL_STACK)
+	if (exec.call_depth >= MAX_CALL_STACK)
 		PR_RunError ("call stack overflow\n");
 
-	if (pr->stack_top >= MAX_LOCAL_STACK)
+	if (exec.stack_top >= MAX_LOCAL_STACK)
 		PR_RunError ("stack overflow\n");
 
 
-	pr->x_func = f;
-	pr->x_ip   = f->first_statement;
+	exec.x_func = f;
+	exec.x_ip   = f->first_statement;
 
-	pr->frame      = pr->next_frame;
-	pr->next_frame = -1;
+	exec.frame      = exec.next_frame;
+	exec.next_frame = -1;
 
 
-	return pr->x_ip - 1;  // offset the ip++
+	return exec.x_ip - 1;  // offset the ip++
 }
 
 /*
@@ -409,38 +415,38 @@ PR_LeaveFunction
 */
 static int PR_LeaveFunction (void)
 {
-//	const dfunction_t *f = pr->x_func;
+//	const dfunction_t *f = exec.x_func;
 
 
-	pr->stack_top  = pr->frame;
-	pr->next_frame = pr->stack[-- pr->stack_top]._int;
+	exec.stack_top  = exec.frame;
+	exec.next_frame = exec.stack[-- exec.stack_top]._int;
 
 
 	// restore previous values of ip (etc)
 
-	if (pr->call_depth <= 0)
+	if (exec.call_depth <= 0)
 		BugError ("call stack underflow");
 
-	pr->call_depth--;
+	exec.call_depth--;
 
-	pr->x_ip   = pr->call_stack[pr->call_depth].ip;
-	pr->x_func = pr->call_stack[pr->call_depth].func;
-	pr->frame  = pr->call_stack[pr->call_depth].frame;
+	exec.x_ip   = exec.call_stack[exec.call_depth].ip;
+	exec.x_func = exec.call_stack[exec.call_depth].func;
+	exec.frame  = exec.call_stack[exec.call_depth].frame;
 
-	return pr->x_ip;
+	return exec.x_ip;
 }
 
 
 #define MAX_RUNAWAY  (1 << 30)
 
 
-#define STACK(ofs)		pr->stack[pr->stack_top + (ofs) - 1]
+#define STACK(ofs)		exec.stack[exec.stack_top + (ofs) - 1]
 #define STACK_F(ofs)	STACK(ofs)._float
 
-#define DROP(n)			pr->stack_top -= (n)
+#define DROP(n)			exec.stack_top -= (n)
 
-#define PUSH_F(x)		do { if (pr->stack_top >= MAX_LOCAL_STACK) PR_RunError("Stack overflow (push)"); \
-						pr->stack[pr->stack_top++]._float = (x); \
+#define PUSH_F(x)		do { if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("Stack overflow (push)"); \
+						exec.stack[exec.stack_top++]._float = (x); \
 						} while(0)
 
 
@@ -460,33 +466,29 @@ void PR_ExecuteProgram (func_t fnum)
 
 	int		runaway;
 	int		k;
-	edict_t	*ed;
 	int		exit_depth;
 	int		exit_stack;
 	kval_t	*ptr;
 
-	if (!fnum || fnum >= pr->numfunctions)
+	if (!fnum || fnum >= mpr.numfunctions)
 	{
-		if (pr->global_struct->self)
-			ED_Print (PROG_TO_EDICT(pr->global_struct->self));
-
-		Host_Error ("PR_ExecuteProgram: NULL function");
+		FatalError ("PR_ExecuteProgram: NULL function");
 	}
 
 	f = &mpr.functions[fnum];
 
 /// fprintf(stderr, "PR_ExecuteProgram : %s\n", mpr.strings + f->s_name);
 
-	pr->trace = false;
+	exec.trace = false;
 
 // make a stack frame
-	exit_depth = pr->call_depth;
-	exit_stack = pr->stack_top;
+	exit_depth = exec.call_depth;
+	exit_stack = exec.stack_top;
 
 
 	// do a fake OP_FRAME
-	pr->stack[pr->stack_top++]._int = pr->next_frame;
-	pr->next_frame = pr->stack_top;
+	exec.stack[exec.stack_top++]._int = exec.next_frame;
+	exec.next_frame = exec.stack_top;
 
 
 	ip = PR_EnterFunction(f);
@@ -494,16 +496,16 @@ void PR_ExecuteProgram (func_t fnum)
 
 	for (runaway = MAX_RUNAWAY ; runaway ; --runaway)
 	{
-		if (pr->stack_top < pr->frame)
+		if (exec.stack_top < exec.frame)
 			PR_RunError("Stack underflow");
 
 		ip++;	// next statement
 
-		pr->x_ip = ip;
+		exec.x_ip = ip;
 
-		st = &pr->statements[ip];
+		st = &mpr.statements[ip];
 
-		if (pr->trace)
+		if (exec.trace)
 			PR_PrintStatement(ip);
 			
 		switch (st->op)
@@ -615,10 +617,11 @@ void PR_ExecuteProgram (func_t fnum)
 	//==================
 
 		case OP_ADDRESS:
-			if (pr_nilcheck)
-				if (STACK(0)._edict == 0)
-					PR_RunError ("nil entity access");
+		///	if (pr_nilcheck)
+		///		if (STACK(0)._edict == 0)
+			PR_RunError ("nil entity access");
 
+#if 0
 			ed = PROG_TO_EDICT(STACK(0)._edict);
 			NUM_FOR_EDICT(ed);  // make sure it's in range
 
@@ -626,37 +629,38 @@ void PR_ExecuteProgram (func_t fnum)
 				int _pointer = (byte *)(EDICT_VARS(ed) + st->a) - (byte *)sv.edicts;
 				STACK(0)._int = _pointer;
 			}
+#endif
 			break;
 
 		case OP_LOAD:
-			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
+///!!!		ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
 			STACK(0) = *ptr;
 			break;
 
 		case OP_LOAD_V:
-			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
+///!!!			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
 			DROP(1);
 
-			if (pr->stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			pr->stack[pr->stack_top++] = ptr[0];
-			pr->stack[pr->stack_top++] = ptr[1];
-			pr->stack[pr->stack_top++] = ptr[2];
+			if (exec.stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			exec.stack[exec.stack_top++] = ptr[0];
+			exec.stack[exec.stack_top++] = ptr[1];
+			exec.stack[exec.stack_top++] = ptr[2];
 			break;
 			
 		case OP_STORE:
 			//!!!  FIXME: check for assignment to world entity
 			//!! if (ed == (edict_t *)sv.edicts && sv.state == ss_active)
 			//!!	PR_RunError ("assignment to world entity");
-			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
-			*ptr = STACK(-1);
+///!!!			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
+///!!!			*ptr = STACK(-1);
 			DROP(2);
 			break;
 
 		case OP_STORE_V:
-			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
-			ptr[0] = STACK(-3);
-			ptr[1] = STACK(-2);
-			ptr[2] = STACK(-1);
+///!!!			ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
+///!!!			ptr[0] = STACK(-3);
+///!!!			ptr[1] = STACK(-2);
+///!!!			ptr[2] = STACK(-1);
 			DROP(4);
 			break;
 
@@ -681,13 +685,13 @@ void PR_ExecuteProgram (func_t fnum)
 
 		case OP_FRAME:
 			// save the current next_frame value
-			pr->stack[pr->stack_top++]._int = pr->next_frame;
+			exec.stack[exec.stack_top++]._int = exec.next_frame;
 
-			pr->next_frame = pr->stack_top;
+			exec.next_frame = exec.stack_top;
 			break;
 
 		case OP_CALL:
-			pr->argc = st->a;
+			exec.argc = st->a;
 			{
 				func_t f = STACK(0)._func;
 				DROP(1);
@@ -698,9 +702,9 @@ void PR_ExecuteProgram (func_t fnum)
 				newf = &mpr.functions[f];
 			}
 
-if (pr->trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
+if (exec.trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
 
-			if (pr->next_frame < 0)
+			if (exec.next_frame < 0)
 				PR_RunError("PR_ExecuteProgram: no frame for OP_CALL");
 
 			if (newf->builtin)
@@ -710,7 +714,7 @@ if (pr->trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
 			break;
 
 		case OP_CALL_FORMAT:
-			if (pr->next_frame < 0)
+			if (exec.next_frame < 0)
 				PR_RunError("PR_ExecuteProgram: no frame for OP_CALL_FORMAT");
 
 			PR_CallFormatter();
@@ -720,29 +724,21 @@ if (pr->trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
 		case OP_RETURN:
 			ip = PR_LeaveFunction ();
 
-			if (pr->call_depth == exit_depth)
+			if (exec.call_depth == exit_depth)
 			{
-				SYS_ASSERT(pr->stack_top == exit_stack);
+				SYS_ASSERT(exec.stack_top == exit_stack);
 
-if (pr->trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
+if (exec.trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 				return;		// all done
 			}
-			break;
-
-		case OP_STATE:
-			ed = PROG_TO_EDICT(pr->global_struct->self);
-			ed->v.frame = st->a;
-			ed->v.think = STACK(0)._func;
-			ed->v.nextthink = pr->global_struct->time + st->b / 100.0;
-			DROP(1);
 			break;
 
 		// andrewj: new or transitional stuff....
 
 		case OP_DUP:
-			if (pr->stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			pr->stack[pr->stack_top] = pr->stack[pr->stack_top - st->a];
-			pr->stack_top++;
+			if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			exec.stack[exec.stack_top] = exec.stack[exec.stack_top - st->a];
+			exec.stack_top++;
 			break;
 
 		case OP_POP:
@@ -768,62 +764,62 @@ if (pr->trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 			break;
 
 		case OP_LITERAL:
-			if (pr->stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
 			// oh the humanity...
-			pr->stack[pr->stack_top++] = *(const kval_t *)&st->a;
+			exec.stack[exec.stack_top++] = *(const kval_t *)&st->a;
 			break;
 
 		case OP_READ:
-			if (pr->stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			pr->stack[pr->stack_top++] = mpr.registers[st->a];
+			if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			exec.stack[exec.stack_top++] = mpr.registers[st->a];
 			break;
 
 		case OP_READ_V:
-			if (pr->stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			pr->stack[pr->stack_top++] = mpr.registers[st->a + 0];
-			pr->stack[pr->stack_top++] = mpr.registers[st->a + 1];
-			pr->stack[pr->stack_top++] = mpr.registers[st->a + 2];
+			if (exec.stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			exec.stack[exec.stack_top++] = mpr.registers[st->a + 0];
+			exec.stack[exec.stack_top++] = mpr.registers[st->a + 1];
+			exec.stack[exec.stack_top++] = mpr.registers[st->a + 2];
 			break;
 
 		case OP_WRITE:
-			if (pr->stack_top <= pr->frame) PR_RunError("stack underflow");
-			mpr.registers[st->a] = pr->stack[-- pr->stack_top];
+			if (exec.stack_top <= exec.frame) PR_RunError("stack underflow");
+			mpr.registers[st->a] = exec.stack[-- exec.stack_top];
 			break;
 
 		case OP_WRITE_V:
-			if (pr->stack_top - 2 <= pr->frame) PR_RunError("stack underflow");
-			mpr.registers[st->a + 2] = pr->stack[-- pr->stack_top];
-			mpr.registers[st->a + 1] = pr->stack[-- pr->stack_top];
-			mpr.registers[st->a + 0] = pr->stack[-- pr->stack_top];
+			if (exec.stack_top - 2 <= exec.frame) PR_RunError("stack underflow");
+			mpr.registers[st->a + 2] = exec.stack[-- exec.stack_top];
+			mpr.registers[st->a + 1] = exec.stack[-- exec.stack_top];
+			mpr.registers[st->a + 0] = exec.stack[-- exec.stack_top];
 			break;
 
 
 		case OP_LOCAL_READ:
-			if (pr->stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			k = pr->frame + st->a;
-			pr->stack[pr->stack_top++] = pr->stack[k];
+			if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			k = exec.frame + st->a;
+			exec.stack[exec.stack_top++] = exec.stack[k];
 			break;
 
 		case OP_LOCAL_READ_V:
-			if (pr->stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			k = pr->frame + st->a;
-			pr->stack[pr->stack_top++] = pr->stack[k + 0];
-			pr->stack[pr->stack_top++] = pr->stack[k + 1];
-			pr->stack[pr->stack_top++] = pr->stack[k + 2];
+			if (exec.stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
+			k = exec.frame + st->a;
+			exec.stack[exec.stack_top++] = exec.stack[k + 0];
+			exec.stack[exec.stack_top++] = exec.stack[k + 1];
+			exec.stack[exec.stack_top++] = exec.stack[k + 2];
 			break;
 
 		case OP_LOCAL_WRITE:
-			if (pr->stack_top <= pr->frame) PR_RunError("stack underflow");
-			k = pr->frame + st->a;
-			pr->stack[k] = pr->stack[-- pr->stack_top];
+			if (exec.stack_top <= exec.frame) PR_RunError("stack underflow");
+			k = exec.frame + st->a;
+			exec.stack[k] = exec.stack[-- exec.stack_top];
 			break;
 
 		case OP_LOCAL_WRITE_V:
-			if (pr->stack_top - 2 <= pr->frame) PR_RunError("stack underflow");
-			k = pr->frame + st->a;
-			pr->stack[k + 2] = pr->stack[-- pr->stack_top];
-			pr->stack[k + 1] = pr->stack[-- pr->stack_top];
-			pr->stack[k + 0] = pr->stack[-- pr->stack_top];
+			if (exec.stack_top - 2 <= exec.frame) PR_RunError("stack underflow");
+			k = exec.frame + st->a;
+			exec.stack[k + 2] = exec.stack[-- exec.stack_top];
+			exec.stack[k + 1] = exec.stack[-- exec.stack_top];
+			exec.stack[k + 0] = exec.stack[-- exec.stack_top];
 			break;
 
 //------ Vector Ops --------//
@@ -895,18 +891,13 @@ if (pr->trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 }
 
 
-// andrewj: added this, find function by name and run it
-
-void PR_ExecuteProgramByName (const char *name)
+int VM_FindFunction (const char *name)
 {
-	const dfunction_t * func = PR_FindFunction(name);
+	for (int i=1 ; i < mpr.numfunctions ; i++)
+		if (strcmp(mpr.strings + mpr.functions[i].s_name, name) == 0)
+			return i;
 
-	if (! func)
-	{
-		FatalError ("Can't find function in progs: %s\n", name);
-	}
-
-	PR_ExecuteProgram (func - mpr.functions);
+	return VM_NIL;
 }
 
 

@@ -111,7 +111,6 @@ typedef enum
 	OP_CALL,
 	OP_CALL_FORMAT,
 	OP_RETURN,
-	OP_STATE,
 
 	OP_ADDRESS,
 	OP_LOAD,
@@ -347,6 +346,11 @@ mem_progs_t;
 
 extern  mem_progs_t  mpr;
 
+#define	G_FLOAT(o)    (mpr.registers[o]._float)
+#define	G_INT(o)      (mpr.registers[o]._int)
+#define	G_STRING(o)   (mpr.strings + mpr.registers[o]._string)
+#define	G_FUNCTION(o) (mpr.registers[o]._func)
+
 
 //============================================================================
 
@@ -376,9 +380,6 @@ typedef struct
 
 typedef struct
 {
-	int				entityfields;
-	int				edict_size;	// in bytes
-
 	bool  trace;
 
 	int		argc;
@@ -398,9 +399,10 @@ typedef struct
 	int		frame;  // start for current function
 	int     next_frame;  // start for about-to-be-called func
 
-} prog_vm_t;
+} execution_info_t;
 
-extern prog_vm_t * pr;
+
+extern execution_info_t  exec;
 
 
 void PR_RunError (const char *error, ...);

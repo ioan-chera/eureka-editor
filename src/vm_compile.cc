@@ -49,6 +49,7 @@ jmp_buf		pr_parse_abort;		// longjump with this on parse error
 
 static void PR_ParseLocal (void);
 
+
 extern const char *pr_opnames[];
 
 
@@ -859,7 +860,7 @@ static void CODEGEN_FieldAccess(eval_t * ev, bool load_it)
 	CODEGEN_Eval(ev->args[0], false);
 
 	// get offset -- assumed to be constant!
-	field_ofs = GG_INT(ev->def->ofs);
+	field_ofs = G_INT(ev->def->ofs);
 
 	// compute address of field
 	PR_EmitOp(OP_ADDRESS, field_ofs, 0, 0);
@@ -1351,75 +1352,13 @@ char * CalcNextStateName(const char * prev)
 }
 
 
-/*
-==============
-PR_ParseState
-
-States are special functions made for convenience.  They automatically
-set frame, nextthink (implicitly), and think (allowing forward definitions).
-
-// void() name = [framenum, nextthink] {code}
-// expands to:
-// function void name ()
-// {
-//		self.frame=framenum;
-//		self.nextthink = time + 0.1;
-//		self.think = nextthink
-//		<code>
-// };
-==============
-*/
-void PR_ParseState (void)
-{
-	char	*name;
-	int		delay;
-	int		frame_num;
-	def_t	*def;
-
-	// grab delay
-	if (pr_token_type != tt_immediate || pr_immediate_type != &type_float)
-		PR_ParseError ("state delay must be a number");
-
-	delay = (int)(100.0 * pr_immediate._float);
-
-	PR_Lex ();
-	PR_Expect (",");
-
-	// grab frame number
-	if (pr_token_type != tt_immediate || pr_immediate_type != &type_float)
-		PR_ParseError ("state frame must be a number");
-
-	frame_num = (int)pr_immediate._float;
-
-	PR_Lex ();
-
-	if (PR_Check (","))
-	{
-		name = PR_ParseName ();
-	}
-	else
-	{
-		name = CalcNextStateName(pr_scope->def->name);
-	}
-
-	def = PR_GetDef (name, &type_function, NULL, 1);
-
-	PR_Expect ("]");
-
-// andrewj: even though the function here is not variable, we need to
-//          use a 'def' (instead of storing function number in st->c)
-//          since it is often a forward declaration.
-
-	PR_EmitOp(OP_READ, def->ofs, 0, 0);
-	PR_EmitOp(OP_STATE, frame_num, delay, 0);
-}
 
 /*
 ============
 PR_ParseFunctionBody
 ============
 */
-static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern, bool is_state)
+static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern)
 {
 	int			i;
 	def_t		*defs[MAX_PARMS];
@@ -1453,31 +1392,12 @@ static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern, 
 	
 	df->first_statement = mpr.numstatements;
 
-//
-// check for a state opcode
-//
-	if (is_state)
-	{
-		PR_ParseState ();
-
-		// andrewj: allow semicolon for nothing
-		if (PR_Check (";"))
-			goto finished;
-
-		if (PR_Check ("{"))
-			goto brackety;
-
-		// andrewj: can be a single statement (don't need { })
-		PR_ParseStatement(/* FIXME: no locals */);
-		goto finished;
-	}
 
 //
 // parse regular statements
 //
 	PR_Expect ("{");
 
-brackety:
 	while (! PR_Check("}"))
 		PR_ParseStatement ();
 
@@ -1486,7 +1406,6 @@ brackety:
 
 
 // emit an end of statements opcode
-finished:
 	PR_EmitOp(OP_DONE, 0, 0, 0);
 }
 
@@ -1572,7 +1491,7 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 
 	if (type->kind == ev_field)
 	{
-		GG_INT(def->ofs) = 123; /// pr2.size_fields;
+		G_INT(def->ofs) = 123; /// pr2.size_fields;
 
 		if (type->aux_type->kind == ev_vector)
 		{
@@ -1615,7 +1534,6 @@ void PR_ParseGlobals (void)
 // int line;
 bool  is_forward;
 bool  is_extern;
-bool  is_state;
 
 	// field definition ?
 
@@ -1637,7 +1555,6 @@ bool  is_state;
 is_forward = PR_Check("forward");
 if (! is_forward)
 is_extern = PR_Check("extern");
-is_state  = false;
 
 
 	name = strdup(PR_ParseName());
@@ -1672,7 +1589,7 @@ is_state  = false;
 		PR_Expect(":");
 
 		if (PR_Check("["))
-			goto handle_state;
+			PR_ParseError("WTF state");
 
 		type = PR_ParseType();
 
@@ -1680,18 +1597,12 @@ is_state  = false;
 
 		PR_Expect (";");
 		return;
-
-handle_state:
-		is_state = true;
 	}
 
 	
 	// functions
 	
-	if (is_state)
-		type = &type_function;
-	else
-		type = PR_ParseAltFuncType(true /* seen_first_bracket */);
+	type = PR_ParseAltFuncType(true /* seen_first_bracket */);
 
 	def = PR_GetDef (name, type, NULL, 1);
 
@@ -1709,7 +1620,7 @@ handle_state:
 
 	// functions with bodies
 
-	GG_FUNCTION(def->ofs) = mpr.numfunctions;
+	G_FUNCTION(def->ofs) = mpr.numfunctions;
 
 	df = &mpr.functions[mpr.numfunctions++];
 
@@ -1730,7 +1641,7 @@ handle_state:
 	pr_scope = df;
 	pr_local_ofs = 0;
 	{
-		PR_ParseFunctionBody (df, type, is_extern, is_state);
+		PR_ParseFunctionBody (df, type, is_extern);
 	}
 	pr_scope = NULL;
 

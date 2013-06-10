@@ -28,6 +28,9 @@
 
 #include "vm_local.h"
 
+
+#define Con_Printf  printf
+
 /*
 ===============================================================================
 
@@ -36,23 +39,8 @@
 ===============================================================================
 */
 
-const char * PC_VarString (int first)
-{
-	int  i;
-	static char out[256];
-	
-	out[0] = 0;
 
-	for (i = first ; i < pr->argc ; i++)
-	{
-		strcat (out, PR_Param_String(i));
-	}
-
-	return out;
-}
-
-
-void PC_blah_blah (void)
+void PC_dprint (void)
 {
 	const char *s = PR_Param_String(0);
 
@@ -71,14 +59,12 @@ error(value)
 */
 void PC_error (void)
 {
-	const char	*s;
-
-	s = PC_VarString(0);
+	const char *s = PR_Param_String(0);
 
 	Con_Printf ("======SERVER ERROR in %s:\n%s\n",
-		 pr->strings + pr->x_func->s_name, s);
+		 mpr.strings + exec.x_func->s_name, s);
 
-	Host_Error ("Program error");
+	FatalError ("Program error");
 }
 
 
@@ -91,24 +77,23 @@ vector normalize(vector)
 */
 void PC_normalize (void)
 {
-	vec3_t	value1;
-	vec3_t	newvalue;
+	float	value1[3];
+	float	newvalue[3];
 
-	float	new;
+	float	len;
 
 	PR_Param_Vector(0, value1);
 
-	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
-	new = sqrt(new);
+	len = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
+	len = sqrt(len);
 	
-	if (new == 0)
+	if (len == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
 	else
 	{
-		new = 1/new;
-		newvalue[0] = value1[0] * new;
-		newvalue[1] = value1[1] * new;
-		newvalue[2] = value1[2] * new;
+		newvalue[0] = value1[0] / len;
+		newvalue[1] = value1[1] / len;
+		newvalue[2] = value1[2] / len;
 	}
 	
 	PR_Return_Vector(newvalue);
@@ -123,15 +108,15 @@ scalar vlen(vector)
 */
 void PC_vlen (void)
 {
-	vec3_t	value1;
-	float	new;
+	float	value1[3];
+	float	len;
 	
 	PR_Param_Vector(0, value1);
 
-	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
-	new = sqrt(new);
+	len = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
+	len = sqrt(len);
 
-	PR_Return_Float(new);
+	PR_Return_Float(len);
 }
 
 /*
@@ -143,7 +128,7 @@ float vectoyaw(vector)
 */
 void PC_vectoyaw (void)
 {
-	vec3_t	value1;
+	float	value1[3];
 	float	yaw;
 	
 	PR_Param_Vector(0, value1);
@@ -170,8 +155,8 @@ vector vectoangles(vector)
 */
 void PC_vectoangles (void)
 {
-	vec3_t	value1;
-	vec3_t	vec;
+	float	value1[3];
+	float	vec[3];
 
 	float	forward;
 	float	yaw, pitch;
@@ -221,64 +206,6 @@ void PC_random (void)
 }
 
 
-/*
-=================
-PC_break
-
-break()
-=================
-*/
-void PC_break (void)
-{
-	Con_Printf ("break statement\n");
-	*(int *)-4 = 0;	// dump to debugger
-//	PR_RunError ("break statement");
-}
-
-
-/*
-=================
-PC_cvar
-
-float cvar (string)
-=================
-*/
-void PC_cvar (void)
-{
-	const char *str = PR_Param_String(0);
-
-	PR_Return_Float(Cvar_VariableValue (str));
-}
-
-/*
-=================
-PC_cvar_set
-
-float cvar (string)
-=================
-*/
-void PC_cvar_set (void)
-{
-	const char *var, *val;
-	
-	var = PR_Param_String(0);
-	val = PR_Param_String(1);
-
-	Cvar_Set (var, val);
-}
-
-
-/*
-=========
-PC_dprint
-=========
-*/
-void PC_dprint (void)
-{
-fprintf(stderr, "%s", PC_VarString(0));
-//	Con_DPrintf ("%s",PC_VarString(0));
-}
-
 void PC_fabs (void)
 {
 	float	v;
@@ -294,20 +221,20 @@ void PC_ftos (void)
 	float v = PR_Param_Float(0);
 	
 	if (v == (int)v)
-		sprintf ((char *)pr->strings + 1, "%d",(int)v);
+		sprintf ((char *)mpr.strings + 1, "%d",(int)v);
 	else
-		sprintf ((char *)pr->strings + 1, "%5.1f",v);
+		sprintf ((char *)mpr.strings + 1, "%5.1f",v);
 	
 	PR_Return_String(1);
 }
 
 void PC_vtos (void)
 {
-	vec3_t val;
+	float val[3];
 
 	PR_Param_Vector(0, val);
 
-	sprintf ((char *)pr->strings + 1, "'%5.1f %5.1f %5.1f'", val[0], val[1], val[2]);
+	sprintf ((char *)mpr.strings + 1, "'%5.1f %5.1f %5.1f'", val[0], val[1], val[2]);
 
 	PR_Return_String(1);
 }
@@ -318,27 +245,22 @@ void PC_etos (void)
 
 	// Intentional Const Override
 	if (! num)
-		strcpy ((char *)pr->strings + 1, "nil");
+		strcpy ((char *)mpr.strings + 1, "nil");
 	else
-		sprintf ((char *)pr->strings + 1, "entity_%i", num);
+		sprintf ((char *)mpr.strings + 1, "entity_%i", num);
 
 	PR_Return_String(1);
 }
 
 
-void PC_coredump (void)
-{
-	ED_PrintEdicts ();
-}
-
 void PC_traceon (void)
 {
-	pr->trace = true;
+	exec.trace = true;
 }
 
 void PC_traceoff (void)
 {
-	pr->trace = false;
+	exec.trace = false;
 }
 
 
@@ -449,7 +371,7 @@ static const char * DecodeSpecifier(const char *fmt)
 static char * OutputSpecifier(char *p)
 {
 	char buf[256];
-	vec3_t vec;
+	float vec[3];
 	int len, spaces;
 	int num;
 
@@ -564,7 +486,7 @@ void PC_format_string (void)
 	*p = 0;
 	result[250] = 0;
 
-	strcpy((char *)pr->strings + 1, result);
+	strcpy((char *)mpr.strings + 1, result);
 
 	PR_Return_String(1);
 }
@@ -598,15 +520,9 @@ builtin_t  builtins[] =
 	{ "vtos",           PC_vtos },	// void(string s) vtos				= #27;
 	{ "etos",           PC_etos },
 
-	{ "blah",           PC_blah_blah },
-	{ "break",          PC_break },	// void() break						= #6;
-	{ "coredump",       PC_coredump },
-	{ "dprint",         PC_dprint },	// void(string s) dprint				= #25;
+	{ "dprint",         PC_dprint },
 	{ "traceon",        PC_traceon },
 	{ "traceoff",       PC_traceoff },
-
-	{ "cvar",           PC_cvar },
-	{ "cvar_set",       PC_cvar_set },
 
 	//======== OTHER ===========
 
