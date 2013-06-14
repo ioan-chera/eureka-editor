@@ -38,7 +38,7 @@ CXXFLAGS=$(OPTIMISE) -Wall -D$(OS) \
 LDFLAGS=
 
 LIBS=-lm $(FLTK_LIBS) $(ZLIB_LIBS) \
-     -mwindows -lshfolder -lshell32  \
+     -mwindows  -lshell32  \
      -lcomdlg32 -lole32 -luuid -lgdi32 \
      -lcomctl32 -lwsock32 -lsupc++
 
