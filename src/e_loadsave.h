@@ -35,8 +35,8 @@ void RemoveEditWad();
 
 void CMD_NewMap();
 bool CMD_OpenMap();
-void CMD_OpenRecentMap();
-void CMD_OpenGivenFile(const char *filename);
+void CMD_OpenFileMap(const char *filename, const char *map_name = NULL);
+
 void CMD_SaveMap();
 void CMD_ExportMap();
 

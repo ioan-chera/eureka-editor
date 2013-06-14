@@ -65,11 +65,6 @@ static void file_do_export(Fl_Widget *w, void * data)
 	CMD_ExportMap();
 }
 
-static void file_do_recent(Fl_Widget *w, void * data)
-{
-	CMD_OpenRecentMap();
-}
-
 static void file_do_manage_wads(Fl_Widget *w, void * data)
 {
 	Main_ProjectSetup();
@@ -95,13 +90,13 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 {
 	const char *filename = (const char *) data;
 
-	CMD_OpenGivenFile(filename);
+	CMD_OpenFileMap(filename);
 }
 
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
 {
-	// FIXME
+	M_OpenRecentFromMenu(data);
 }
 
 
@@ -504,30 +499,8 @@ void Menu_PopulateGivenFiles(Fl_Sys_Menu_Bar *bar)
 }
 
 
-void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar)
-{
-	int menu_pos = bar->find_index("&File/&Recent Files");
-
-	if (menu_pos < 0)  // [should not happen]
-		return;
-
-	bar->clear_submenu(menu_pos);
-
-	for (int i = 0 ; ; i++)
-	{
-		const char *name = M_GetRecent(i);
-
-		if (! name)  // end of list?
-			break;
-
-		bar->insert(menu_pos + i + 1, name, 0,
-					FCAL file_do_load_recent,
-					(void *)(long)i);
-	}
-
-	// this sub-menu may get updated later, so we never disable
-	// the menu entry (like we do for Given Files).
-}
+// this is now in m_files.cc
+extern void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb);
 
 
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
@@ -541,7 +514,7 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	bar->menu(menu_items);
 
 	Menu_PopulateGivenFiles(bar);
-	Menu_PopulateRecentFiles(bar);
+	Menu_PopulateRecentFiles(bar, FCAL file_do_load_recent);
 
 	return bar;
 }

@@ -38,7 +38,7 @@ static std::map<std::string, std::string> known_iwads;
 
 class RecentFiles_c
 {
-private:
+public:
 	int size;
 
 	// newest is at index [0]
@@ -66,8 +66,8 @@ public:
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-			StringFree(filenames[k]);
-			StringFree(map_names[k]);
+//!!!			StringFree(filenames[k]);
+//!!!			StringFree(map_names[k]);
 
 			filenames[k] = NULL;
 			map_names[k] = NULL;
@@ -97,8 +97,8 @@ public:
 
 	void erase(int index)
 	{
-		StringFree(filenames[index]);
-		StringFree(map_names[index]);
+//!!!		StringFree(filenames[index]);
+//!!!		StringFree(map_names[index]);
 
 		size--;
 
@@ -293,16 +293,57 @@ void M_SaveRecent()
 }
 
 
-const char * M_GetRecent(int index)
+class recent_file_data_c
 {
-	if (index >= recent_files.getSize())
-		return NULL;
+public:
+	const char *file;
+	const char *map;
 
-	char name_buf[256];
+public:
+	recent_file_data_c(const char *_file, const char *_map) :
+		file(_file), map(_map)
+	{ }
 
-	recent_files.Format(name_buf, index);
+	recent_file_data_c()
+	{ }
+};
 
-	return StringDup(name_buf);
+
+void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb)
+{
+	int menu_pos = bar->find_index("&File/&Recent Files");
+
+	if (menu_pos < 0)  // [should not happen]
+		return;
+
+	bar->clear_submenu(menu_pos);
+
+	for (int i = 0 ; i < recent_files.getSize() ; i++)
+	{
+		char name_buf[256];
+
+		recent_files.Format(name_buf, i);
+
+		recent_file_data_c *data = new recent_file_data_c(
+// FIXME: broken encapsulation
+			recent_files.filenames[i],
+			recent_files.map_names[i]);
+
+		bar->insert(menu_pos + i + 1, name_buf, 0, cb, (void *)data);
+	}
+
+	// this sub-menu may get updated later, so we never disable
+	// the menu entry (like we do for Given Files).
+}
+
+
+void M_OpenRecentFromMenu(void *priv_data)
+{
+	SYS_ASSERT(priv_data);
+
+	recent_file_data_c *data = (recent_file_data_c *)priv_data;
+
+	CMD_OpenFileMap(data->file, data->map);
 }
 
 

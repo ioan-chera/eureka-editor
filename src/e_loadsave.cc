@@ -626,6 +626,8 @@ bool CMD_OpenMap()
 }
 
 
+/* FIXME: REMOVE SOON...
+
 void CMD_OpenRecentMap()
 {
 	const char *filename = NULL;
@@ -691,9 +693,10 @@ void CMD_OpenRecentMap()
 
 	Replacer = false;
 }
+*/
 
 
-void CMD_OpenGivenFile(const char *filename)
+void CMD_OpenFileMap(const char *filename, const char *map_name)
 {
 	Wad_file *wad = NULL;
 
@@ -716,7 +719,25 @@ void CMD_OpenGivenFile(const char *filename)
 	}
 
 
-	int lev_idx = wad->FindFirstLevel();
+	int lev_idx = -1;
+
+	if (map_name)
+	{
+		lev_idx = wad->FindLevel(map_name);
+
+		if (lev_idx < 0)
+		{
+			// FIXME: WARN ??  ERROR ??
+		}
+	}
+
+	if (lev_idx < 0)
+	{
+		map_name = NULL;
+
+		lev_idx = wad->FindFirstLevel();
+	}
+
 	if (lev_idx < 0)
 	{
 		delete wad;
@@ -724,11 +745,6 @@ void CMD_OpenGivenFile(const char *filename)
 		Notify(-1, -1, "No levels found in that WAD.", NULL);
 		return;
 	}
-
-
-	Lump_c *lump = wad->GetLump(lev_idx);
-
-	const char *map_name = lump->Name();
 
 
 	if (wad->FindLump(EUREKA_LUMP))
@@ -752,6 +768,13 @@ void CMD_OpenGivenFile(const char *filename)
 
 	MasterDir_Add(edit_wad);
 
+
+	if (! map_name)
+	{
+		Lump_c *lump = wad->GetLump(lev_idx);
+
+		map_name = lump->Name();
+	}
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
