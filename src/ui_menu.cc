@@ -31,6 +31,7 @@
 #include "e_cutpaste.h"
 #include "e_path.h"
 #include "levels.h"
+#include "m_files.h"
 #include "r_grid.h"
 #include "x_mirror.h"
 
@@ -95,6 +96,12 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	const char *filename = (const char *) data;
 
 	CMD_OpenGivenFile(filename);
+}
+
+
+static void file_do_load_recent(Fl_Widget *w, void *data)
+{
+	// FIXME
 }
 
 
@@ -367,21 +374,26 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&New Map",   FL_COMMAND + 'n', FCAL file_do_new },
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
-		{ "&Save Map",  FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "Given Files", 0, 0, 0, FL_SUBMENU },
+		{ "&Given Files", 0, 0, 0, FL_SUBMENU },
 			{ 0 },
 
-		{ "&Recent Files ",  FL_COMMAND + 'r', FCAL file_do_recent },
-		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
-		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
+		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+
+		{ "&Recent Files", 0, 0, 0, FL_SUBMENU },
+			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
+		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
+		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
+		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 //TODO	{ "&Test Map",        FL_COMMAND + 't', FCAL file_do_test_map },
 
 		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
@@ -465,6 +477,59 @@ static Fl_Menu_Item menu_items[] =
 //------------------------------------------------------------------------
 
 
+void Menu_PopulateGivenFiles(Fl_Sys_Menu_Bar *bar)
+{
+	int menu_pos = bar->find_index("&File/&Given Files");
+
+	if (menu_pos < 0)  // [should not happen]
+		return;
+
+	if (Pwad_list.size() >= 2)
+	{
+		for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+		{
+			const char *short_name = fl_filename_name(Pwad_list[i]);
+
+			bar->insert(menu_pos + i + 1, short_name, 0,
+						FCAL file_do_load_given,
+						(void *) Pwad_list[i], 0);
+		}
+	}
+	else
+	{
+		// disable the whole sub-menu
+		bar->remove(menu_pos);
+		bar->insert(menu_pos, "&Given Files", 0, 0, 0, FL_MENU_INACTIVE);
+	}
+}
+
+
+void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar)
+{
+	int menu_pos = bar->find_index("&File/&Recent Files");
+
+	if (menu_pos < 0)  // [should not happen]
+		return;
+
+	bar->clear_submenu(menu_pos);
+
+	for (int i = 0 ; ; i++)
+	{
+		const char *name = M_GetRecent(i);
+
+		if (! name)  // end of list?
+			break;
+
+		bar->insert(menu_pos + i + 1, name, 0,
+					FCAL file_do_load_recent,
+					(void *)(long)i);
+	}
+
+	// this sub-menu may get updated later, so we never disable
+	// the menu entry (like we do for Given Files).
+}
+
+
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
@@ -475,20 +540,8 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 
 	bar->menu(menu_items);
 
-	// populate the "Given Files" submenu
-	int index = bar->find_index("&File/Given Files");
-
-	if (index > 0 && Pwad_list.size() >= 2)
-	{
-		for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-		{
-			const char *short_name = fl_filename_name(Pwad_list[i]);
-
-			bar->insert(index + i + 1, short_name, 0,
-						FCAL file_do_load_given,
-						(void *) Pwad_list[i], 0);
-		}
-	}
+	Menu_PopulateGivenFiles(bar);
+	Menu_PopulateRecentFiles(bar);
 
 	return bar;
 }

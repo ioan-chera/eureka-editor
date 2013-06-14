@@ -33,7 +33,7 @@
 static std::map<std::string, std::string> known_iwads;
 
 
-#define MAX_RECENT  8
+#define MAX_RECENT  12
 
 
 class RecentFiles_c
@@ -290,6 +290,19 @@ void M_SaveRecent()
 	}
 
 	fclose(fp);
+}
+
+
+const char * M_GetRecent(int index)
+{
+	if (index >= recent_files.getSize())
+		return NULL;
+
+	char name_buf[256];
+
+	recent_files.Format(name_buf, index);
+
+	return StringDup(name_buf);
 }
 
 

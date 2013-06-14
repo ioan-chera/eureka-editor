@@ -26,6 +26,8 @@ class Wad_file;
 void M_LoadRecent();
 void M_SaveRecent();
 
+const char * M_GetRecent(int index);
+
 void M_AddRecent(const char *filename, const char *map_name);
 void M_RecentDialog(const char ** file_v, const char ** map_v);
 
