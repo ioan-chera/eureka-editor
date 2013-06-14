@@ -966,11 +966,10 @@ int main(int argc, char *argv[])
 
 
 	// open a specified PWAD now
-	if (! Pwad_name && Pwad_list.size() > 0)
+	if (Pwad_list.size() > 0)
+	{
 		Pwad_name = Pwad_list[0];
 
-	if (Pwad_name)
-	{
 		if (! FileExists(Pwad_name))
 			FatalError("Given pwad does not exist: %s\n", Pwad_name);
 

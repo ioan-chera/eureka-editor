@@ -193,11 +193,11 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-		OPT_STRING,
+		OPT_STRING_LIST,
 		"",
-		"Patch wad file to edit",
-		"<file>",
-		&Pwad_name
+		"Patch wad file(s) to edit",
+		"<file>...",
+		&Pwad_list
 	},
 
 	{	"merge",
@@ -695,7 +695,7 @@ int M_ParseEnvironmentVars()
 
 #define MAX_PWAD_LIST  20
 
-static void add_loose_file(const char *filename)
+void M_AddPwadName(const char *filename)
 {
 	// silently ignore excess pwads
 
@@ -726,7 +726,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		{
 			// this is a loose file, handle it now
 			if (pass != 1)
-				add_loose_file(argv[0]);
+				M_AddPwadName(argv[0]);
 
 			argv++;
 			argc--;
