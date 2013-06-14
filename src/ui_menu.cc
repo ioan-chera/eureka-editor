@@ -90,6 +90,14 @@ static void file_do_test_map(Fl_Widget *w, void * data)
 }
 
 
+static void file_do_load_given(Fl_Widget *w, void *data)
+{
+	const char *filename = (const char *) data;
+
+	CMD_OpenGivenFile(filename);
+}
+
+
 //------------------------------------------------------------------------
 //  EDIT MENU
 //------------------------------------------------------------------------
@@ -364,19 +372,14 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "Given Files", 0, 0, 0, FL_SUBMENU },
+			{ 0 },
+
 		{ "&Recent Files ",  FL_COMMAND + 'r', FCAL file_do_recent },
 		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
 		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-#if 0
-		{ "&DDF", 0, 0, 0, FL_SUBMENU },
-			{ "Load DDF &File",    0, FCAL view_do_zoom_out },
-			{ "Load DDF &WAD",    0, FCAL view_do_zoom_out },
-
-			{ "&Import from WAD", 0, FCAL view_do_zoom_out },
-			{ 0 },
-#endif
 
 		{ "&Build Nodes  ",   FL_COMMAND + 'b', FCAL file_do_build_nodes },
 //TODO	{ "&Test Map",        FL_COMMAND + 't', FCAL file_do_test_map },
@@ -459,22 +462,36 @@ static Fl_Menu_Item menu_items[] =
 };
 
 
-#ifdef __APPLE__
+//------------------------------------------------------------------------
+
+
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
-	bar->menu(menu_items);
-	return bar;
-}
-#else
-Fl_Menu_Bar * Menu_Create(int x, int y, int w, int h)
-{
-	Fl_Menu_Bar *bar = new Fl_Menu_Bar(x, y, w, h);
+
+#ifndef __APPLE__
 	bar->textsize(KF_fonth);
+#endif
+
 	bar->menu(menu_items);
+
+	// populate the "Given Files" submenu
+	int index = bar->find_index("&File/Given Files");
+
+	if (index > 0 && Pwad_list.size() >= 2)
+	{
+		for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+		{
+			const char *short_name = fl_filename_name(Pwad_list[i]);
+
+			bar->insert(index + i + 1, short_name, 0,
+						FCAL file_do_load_given,
+						(void *) Pwad_list[i], 0);
+		}
+	}
+
 	return bar;
 }
-#endif
 
 
 //--- editor settings ---

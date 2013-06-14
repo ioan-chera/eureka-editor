@@ -693,11 +693,14 @@ int M_ParseEnvironmentVars()
 }
 
 
+#define MAX_PWAD_LIST  20
+
 static void add_loose_file(const char *filename)
 {
-	// too simplistic??
+	// silently ignore excess pwads
 
-	Pwad_name = StringDup(filename);
+	if (Pwad_list.size() < MAX_PWAD_LIST)
+		Pwad_list.push_back(StringDup(filename));
 }
 
 
@@ -722,7 +725,8 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		if (argv[0][0] != '-')
 		{
 			// this is a loose file, handle it now
-			add_loose_file(argv[0]);
+			if (pass != 1)
+				add_loose_file(argv[0]);
 
 			argv++;
 			argc--;
@@ -744,8 +748,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				break;
 		}
 
-		// If this option has the "1" flag but pass is not 1
-		// or it doesn't but pass is 1, ignore it.
+		// ignore options which are not meant for this pass
 		ignore = (strchr(o->flags, '1') != NULL) != (pass == 1);
 
 		switch (o->opt_type)

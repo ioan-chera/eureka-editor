@@ -171,6 +171,7 @@ extern const char *log_file;    // Name of log file, or NULL
 extern const char *Iwad_name; // Name of the iwad
 extern const char *Pwad_name;
 
+extern std::vector< const char * > Pwad_list;
 extern std::vector< const char * > ResourceWads;
 
 

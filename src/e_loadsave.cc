@@ -693,6 +693,74 @@ void CMD_OpenRecentMap()
 }
 
 
+void CMD_OpenGivenFile(const char *filename)
+{
+	Wad_file *wad = NULL;
+
+	// make sure the file exists [Open with 'a' would create it]
+
+	// TODO: perhaps check this when building the Pwad_list
+	//       [however, 'eureka foo.wad' should fatal error if no foo.wad]
+
+	if (FileExists(filename))
+	{
+		wad = Wad_file::Open(filename, 'a');
+	}
+
+	if (! wad)
+	{
+		// FIXME: get an error message, add it here
+
+		Notify(-1, -1, "Unable to open that WAD file.", NULL);
+		return;
+	}
+
+
+	int lev_idx = wad->FindFirstLevel();
+	if (lev_idx < 0)
+	{
+		delete wad;
+
+		Notify(-1, -1, "No levels found in that WAD.", NULL);
+		return;
+	}
+
+
+	Lump_c *lump = wad->GetLump(lev_idx);
+
+	const char *map_name = lump->Name();
+
+
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		if (! M_ParseEurekaLump(wad))
+			return;
+
+		Main_LoadResources();
+	}
+
+
+	// OK, open it
+
+
+	// this wad replaces the current PWAD
+
+	RemoveEditWad();
+
+	edit_wad = wad;
+	Pwad_name = edit_wad->PathName();
+
+	MasterDir_Add(edit_wad);
+
+
+	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
+
+	LoadLevel(wad, map_name);
+
+	Replacer = false;
+}
+
+
 //------------------------------------------------------------------------
 //  SAVING CODE
 //------------------------------------------------------------------------

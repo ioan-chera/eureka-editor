@@ -77,6 +77,7 @@ const char *cache_dir;
 const char *Iwad_name = NULL;
 const char *Pwad_name = NULL;
 
+std::vector< const char * > Pwad_list;
 std::vector< const char * > ResourceWads;
 
 const char *Game_name;
@@ -850,7 +851,7 @@ static void Test_VM()
 {
 	VM_Init();
 
-	if (VM_CompileFile("hello_world.ac") != 0)
+	if (VM_CompileFile("hello_world.up") != 0)
 	{
 		fprintf(stderr, "\n Test_VM: COMPILE FAILED\n");
 		return;
@@ -949,7 +950,7 @@ int main(int argc, char *argv[])
 	init_progress = 2;
 
 
-Test_VM();
+///Test_VM();
 
 
 	M_LoadRecent();
@@ -965,6 +966,9 @@ Test_VM();
 
 
 	// open a specified PWAD now
+	if (! Pwad_name && Pwad_list.size() > 0)
+		Pwad_name = Pwad_list[0];
+
 	if (Pwad_name)
 	{
 		if (! FileExists(Pwad_name))
