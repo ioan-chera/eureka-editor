@@ -229,6 +229,15 @@ static const opt_desc_t options[] =
 
 	/* ------------ Preferences ------------ */
 
+	{	"auto_load_recent",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"When no given files, load the most recent one saved",
+		NULL,
+		&auto_load_recent
+	},
+
 	{	"backup_max_files",
 		0,
 		OPT_INTEGER,

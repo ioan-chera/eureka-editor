@@ -31,6 +31,8 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
+extern bool auto_load_recent;
+
 extern bool digits_set_zoom;
 extern bool leave_offsets_alone;
 extern bool mouse_wheel_scrolls_map;

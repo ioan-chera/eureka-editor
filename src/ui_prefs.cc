@@ -258,6 +258,8 @@ public:
 	Fl_Button *apply_but;
 	Fl_Button *discard_but;
 
+	/* General panel */
+
 	Fl_Round_Button *theme_FLTK;
 	Fl_Round_Button *theme_GTK;
 	Fl_Round_Button *theme_plastic;
@@ -268,14 +270,10 @@ public:
 	Fl_Button *ig_colorbox;
 	Fl_Button *fg_colorbox;
 
-	Fl_Check_Button *grid_snap;
-	Fl_Choice *grid_mode;
-	Fl_Choice *grid_size;
-	Fl_Check_Button *gen_digitzoom;
-	Fl_Choice *gen_smallscroll;
-	Fl_Choice *gen_largescroll;
-	Fl_Check_Button *gen_wheelscroll;
+	Fl_Check_Button *gen_autoload;
 	Fl_Check_Button *gen_swapsides;
+
+	/* Edit panel */
 
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
@@ -284,9 +282,19 @@ public:
 	Fl_Choice *edit_modkey;
 	Fl_Int_Input *edit_sectorsize;
 
-	Fl_Check_Button *bsp_warn;
-	Fl_Check_Button *bsp_verbose;
-	Fl_Check_Button *bsp_fast;
+	/* Grid panel */
+
+	Fl_Check_Button *grid_snap;
+	Fl_Choice *grid_mode;
+	Fl_Choice *grid_size;
+
+	Fl_Check_Button *gen_digitzoom;
+	Fl_Choice *gen_smallscroll;
+	Fl_Choice *gen_largescroll;
+
+	Fl_Check_Button *gen_wheelscroll;
+
+	/* Keys panel */
 
 	Fl_Hold_Browser *key_list;
 	Fl_Button *key_group;
@@ -298,6 +306,12 @@ public:
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
 	Fl_Button *key_reset;
+
+	/* glBSP panel */
+
+	Fl_Check_Button *bsp_warn;
+	Fl_Check_Button *bsp_verbose;
+	Fl_Check_Button *bsp_fast;
 };
 
 
@@ -375,11 +389,14 @@ UI_Preferences::UI_Preferences() :
 		  }
 		  o->end();
 		}
-		{ Fl_Box* o = new Fl_Box(30, 340, 280, 35, "Other Stuff");
+		{ Fl_Box* o = new Fl_Box(30, 240, 280, 35, "Other Stuff");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ gen_swapsides = new Fl_Check_Button(50, 382, 300, 25, " swap upper and lower sidedefs in Linedef panel");
+		{ gen_autoload = new Fl_Check_Button(50, 280, 350, 25, " automatically open the most recent pwad");
+		  gen_autoload->down_box(FL_DOWN_BOX);
+		}
+		{ gen_swapsides = new Fl_Check_Button(50, 315, 350, 25, " swap upper and lower sidedefs in Linedef panel");
 		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
 		o->end();
@@ -835,6 +852,19 @@ void UI_Preferences::LoadValues()
 
 	/* General stuff */
 
+	gen_autoload   ->value(auto_load_recent ? 1 : 0);
+	gen_swapsides  ->value(swap_sidedefs ? 1 : 0);
+
+	/* Edit panel */
+
+	edit_sectorsize->value(Int_TmpStr(new_sector_size));
+	edit_newislands->value(new_islands_are_void ? 1 : 0);
+	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
+	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
+	edit_multiselect->value(multi_select_modifier ? 2 : 0);
+
+	/* Grid panel */
+
 	if (default_grid_mode < 0 || default_grid_mode > 2)
 		default_grid_mode = 1;
 
@@ -844,17 +874,8 @@ void UI_Preferences::LoadValues()
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
-	gen_swapsides  ->value(swap_sidedefs ? 1 : 0);
 
 	// TODO: smallscroll, largescroll
-
-	/* Edit panel */
-
-	edit_sectorsize->value(Int_TmpStr(new_sector_size));
-	edit_newislands->value(new_islands_are_void ? 1 : 0);
-	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
-	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
-	edit_multiselect->value(multi_select_modifier ? 2 : 0);
 
 	/* glBSP panel */
 
@@ -905,17 +926,10 @@ void UI_Preferences::SaveValues()
 		main_win->redraw();
 	}
 
-	/* General stuff */
+	/* General panel */
 
-	default_grid_snap = grid_snap->value() ? true : false;
-	default_grid_size = atoi(grid_size->mvalue()->text);
-	default_grid_mode = grid_mode->value();
-
-	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
-	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
+	auto_load_recent        = gen_autoload   ->value() ? true : false;
 	swap_sidedefs           = gen_swapsides  ->value() ? true : false;
-
-	// TODO: smallscroll, largescroll
 
 	/* Edit panel */
 
@@ -926,6 +940,17 @@ void UI_Preferences::SaveValues()
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
+
+	/* Grid panel */
+
+	default_grid_snap = grid_snap->value() ? true : false;
+	default_grid_size = atoi(grid_size->mvalue()->text);
+	default_grid_mode = grid_mode->value();
+
+	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
+	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
+
+	// TODO: smallscroll, largescroll
 
 	/* glBSP panel */
 
