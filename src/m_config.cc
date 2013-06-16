@@ -206,7 +206,7 @@ static const opt_desc_t options[] =
 		"",
 		"Resource file(s) to load",
 		"<file>...",
-		&ResourceWads
+		&Resource_list
 	},
 
 	{	"port",

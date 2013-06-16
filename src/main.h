@@ -172,7 +172,7 @@ extern const char *Iwad_name; // Name of the iwad
 extern const char *Pwad_name;
 
 extern std::vector< const char * > Pwad_list;
-extern std::vector< const char * > ResourceWads;
+extern std::vector< const char * > Resource_list;
 
 
 extern bool Replacer;     // the new map will destroy an existing one if saved

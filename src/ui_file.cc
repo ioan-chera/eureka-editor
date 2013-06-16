@@ -742,7 +742,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 
 	// Resource section
 
-	Fl_Box *res_title = new Fl_Box(15, by+110, 185, 35, "Resource Wads:");
+	Fl_Box *res_title = new Fl_Box(15, by+110, 185, 35, "Resource Files:");
 	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
@@ -859,9 +859,9 @@ void UI_ProjectSetup::Populate()
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
-		if (r < (int)ResourceWads.size())
+		if (r < (int)Resource_list.size())
 		{
-			res[r] = StringDup(ResourceWads[r]);
+			res[r] = StringDup(Resource_list[r]);
 
 			res_name[r]->value(fl_filename_name(res[r]));
 		}

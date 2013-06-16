@@ -78,7 +78,7 @@ const char *Iwad_name = NULL;
 const char *Pwad_name = NULL;
 
 std::vector< const char * > Pwad_list;
-std::vector< const char * > ResourceWads;
+std::vector< const char * > Resource_list;
 
 const char *Game_name;
 const char *Port_name;
@@ -706,20 +706,20 @@ void Main_LoadResources()
 
 
 	// Load all resource wads
-	for (int i = 0 ; i < (int)ResourceWads.size() ; i++)
+	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
-		if (! Wad_file::Validate(ResourceWads[i]))
-			FatalError("Resource does not exist: %s\n", ResourceWads[i]);
+		if (! Wad_file::Validate(Resource_list[i]))
+			FatalError("Resource does not exist: %s\n", Resource_list[i]);
 
-		Wad_file *wad = Wad_file::Open(ResourceWads[i], 'r');
+		Wad_file *wad = Wad_file::Open(Resource_list[i], 'r');
 
 		if (! wad)
-			FatalError("Cannot load resource: %s\n", ResourceWads[i]);
+			FatalError("Cannot load resource: %s\n", Resource_list[i]);
 
 		MasterDir_Add(wad);
 
 		// load corresponding mod file (if it exists)
-		const char *mod_name = DetermineMod(ResourceWads[i]);
+		const char *mod_name = DetermineMod(Resource_list[i]);
 		
 		if (CanLoadDefinitions("mods", mod_name))
 		{
@@ -764,12 +764,12 @@ bool Main_ProjectSetup(bool is_startup)
 		Iwad_name = StringDup(dialog->iwad);
 		Port_name = StringDup(dialog->port);
 
-		ResourceWads.clear();
+		Resource_list.clear();
 
 		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
 		{
 			if (dialog->res[i])
-				ResourceWads.push_back(StringDup(dialog->res[i]));
+				Resource_list.push_back(StringDup(dialog->res[i]));
 		}
 	}
 

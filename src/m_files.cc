@@ -861,7 +861,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 	if (new_iwad) Iwad_name = new_iwad;
 	if (new_port) Port_name = new_port;
 
-	ResourceWads.swap(new_resources);
+	Resource_list.swap(new_resources);
 
 	return true;
 }
@@ -889,8 +889,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (Port_name)
 		lump->Printf("port %s\n", Port_name);
 
-	for (unsigned int i = 0 ; i < ResourceWads.size() ; i++)
-		lump->Printf("resource %s\n", ResourceWads[i]);
+	for (unsigned int i = 0 ; i < Resource_list.size() ; i++)
+		lump->Printf("resource %s\n", Resource_list[i]);
 
 	lump->Finish();
 }
