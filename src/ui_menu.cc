@@ -477,6 +477,8 @@ static Fl_Menu_Item menu_items[] =
 //------------------------------------------------------------------------
 
 
+#define MAX_PWAD_LIST  20
+
 void Menu_PopulateGivenFiles(Fl_Sys_Menu_Bar *bar)
 {
 	int menu_pos = bar->find_index("&File/&Given Files");
@@ -486,7 +488,10 @@ void Menu_PopulateGivenFiles(Fl_Sys_Menu_Bar *bar)
 
 	if (Pwad_list.size() >= 2)
 	{
-		for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+		// silently ignore excess pwads
+		int count = MIN((int)Pwad_list.size(), MAX_PWAD_LIST);
+
+		for (int i = 0 ; i < count ; i++)
 		{
 			const char *short_name = fl_filename_name(Pwad_list[i]);
 

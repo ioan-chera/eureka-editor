@@ -693,14 +693,11 @@ int M_ParseEnvironmentVars()
 }
 
 
-#define MAX_PWAD_LIST  20
-
 void M_AddPwadName(const char *filename)
 {
-	// silently ignore excess pwads
+	// if (Pwad_list.size() > 0)  check exists
 
-	if (Pwad_list.size() < MAX_PWAD_LIST)
-		Pwad_list.push_back(StringDup(filename));
+	Pwad_list.push_back(StringDup(filename));
 }
 
 
