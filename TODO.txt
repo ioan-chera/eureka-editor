@@ -4,7 +4,6 @@ Eureka TODO / WISHLIST
 
 
 
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -22,20 +21,9 @@ General
    provide words for the buttons (like "Quit Without Saving").
    use fl_choice() code to bootstrap it.
 
-+  if multiple files are specified (by drag'n'drop or command line),
-   then remember them and have a choice widget in the Open Map dialog
-   which lets you select them.
-
-   Also have OpenNext / OpenPrev binding commands.
-
-   IDEA: include the recent files in there too
-
 +  Preferences:
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
-
--  link with SHFOLDER.DLL (before SHELL32)
-   _but_ make sure program works OK on XP / Vista / Windows 7
 
 
 
@@ -137,6 +125,10 @@ General
 
 IDEA: ability to edit Lua code for OBLIGE prefabs
 
+WISH: support Windows 95/98/ME
+
+      [running on Windows 98SE requires KernelEx]
+
 WISH: support UDMF format
 
 
@@ -204,9 +196,9 @@ IDEA: after inserting a new object, allow moving another object
 Documentation
 -------------
 
--  make a simple manpage for the debian package
++  add supported OSes -- e.g. Windows >= 2000
 
--  running on Windows 98SE requires KernelEx
+-  make a simple manpage for the debian package
 
 -  document texture browser (RIGHT click etc)
 
