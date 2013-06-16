@@ -90,6 +90,11 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 {
 	const char *filename = (const char *) data;
 
+	int given_idx = M_FindGivenFile(filename);
+
+	if (given_idx >= 0)
+		last_given_file = given_idx;
+
 	CMD_OpenFileMap(filename);
 }
 

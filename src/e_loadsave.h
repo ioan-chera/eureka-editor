@@ -40,6 +40,10 @@ void CMD_OpenFileMap(const char *filename, const char *map_name = NULL);
 void CMD_SaveMap();
 void CMD_ExportMap();
 
+extern int last_given_file;
+
+void CMD_GivenFile();
+
 class crc32_c;
 void BA_LevelChecksum(crc32_c& crc);
 

@@ -32,6 +32,7 @@
 #include "e_cutpaste.h"
 #include "r_grid.h"
 #include "e_linedef.h"
+#include "e_loadsave.h"
 #include "e_sector.h"
 #include "e_path.h"
 #include "e_vertex.h"
@@ -1019,6 +1020,8 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
+
+	M_RegisterCommand("GivenFile", &CMD_GivenFile);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);

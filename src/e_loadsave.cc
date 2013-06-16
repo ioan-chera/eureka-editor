@@ -40,6 +40,9 @@
 #include "ui_file.h"
 
 
+int last_given_file;
+
+
 static void ChecksumThing(crc32_c& crc, const Thing * T)
 {
 	crc += T->x;
@@ -711,6 +714,52 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	LoadLevel(wad, map_name);
 
 	Replacer = false;
+}
+
+
+void CMD_GivenFile()
+{
+	const char *mode = EXEC_Param[0];
+
+	int index = last_given_file;
+
+	if (! mode[0] || y_stricmp(mode, "current") == 0)
+	{
+		// index = index + 0;
+	}
+	else if (y_stricmp(mode, "next") == 0)
+	{
+		index = index + 1;
+	}
+	else if (y_stricmp(mode, "prev") == 0)
+	{
+		index = index - 1;
+	}
+	else if (y_stricmp(mode, "first") == 0)
+	{
+		index = 0;
+	}
+	else if (y_stricmp(mode, "last") == 0)
+	{
+		index = (int)Pwad_list.size() - 1;
+	}
+	else
+	{
+		Beep("GivenFile: unknown mode: %s", mode);
+		return;
+	}
+
+	if (index < 0 || index >= (int)Pwad_list.size())
+	{
+		Beep("No more files");
+		return;
+	}
+
+	last_given_file = index;
+
+	// TODO: remember last map visited in this wad
+
+	CMD_OpenFileMap(Pwad_list[index], NULL);
 }
 
 

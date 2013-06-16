@@ -422,6 +422,16 @@ const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
 }
 
 
+int M_FindGivenFile(const char *filename)
+{
+	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+		if (strcmp(Pwad_list[i], filename) == 0)
+			return i;
+	
+	return -1;  // Not Found
+}
+
+
 //------------------------------------------------------------------------
 //  EUREKA LUMP HANDLING
 //------------------------------------------------------------------------
