@@ -475,7 +475,7 @@ static eval_t * EXP_Term(void)
 		ev->literal[0]._float = 0;
 		return ev;
 	}
-	else if (PR_Check("va"))
+	else if (PR_Check("format"))
 	{
 		return EXP_FormatString();
 	}
@@ -1567,7 +1567,7 @@ bool  is_extern;
 
 is_forward = PR_Check("forward");
 if (! is_forward)
-is_extern = PR_Check("extern");
+is_extern = PR_Check("builtin");
 
 
 	name = strdup(PR_ParseName());
