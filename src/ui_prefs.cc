@@ -375,34 +375,6 @@ UI_Preferences::UI_Preferences() :
 		  }
 		  o->end();
 		}
-		{ Fl_Box* o = new Fl_Box(30, 195, 195, 25, "Map Grid and Scrolling");
-		  o->labelfont(1);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-		{ grid_snap = new Fl_Check_Button(50, 230, 235, 25, " default SNAP mode");
-		  grid_snap->down_box(FL_DOWN_BOX);
-		}
-		{ grid_mode = new Fl_Choice(435, 230, 95, 25, "default grid mode ");
-		  grid_mode->down_box(FL_BORDER_BOX);
-		  grid_mode->add("OFF|Normal|Simple");
-		}
-		{ grid_size = new Fl_Choice(435, 265, 95, 25, "default grid size ");
-		  grid_size->down_box(FL_BORDER_BOX);
-		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
-		}
-		{ gen_digitzoom = new Fl_Check_Button(50, 265, 240, 25, " digit keys zoom the map");
-		  gen_digitzoom->down_box(FL_DOWN_BOX);
-		}
-		{ gen_smallscroll = new Fl_Choice(435, 265, 95, 25, "small scroll step ");
-		  gen_smallscroll->down_box(FL_BORDER_BOX);
-		  gen_smallscroll->hide();
-		}
-		{ gen_largescroll = new Fl_Choice(435, 300, 95, 25, "large scroll step ");
-		  gen_largescroll->down_box(FL_BORDER_BOX);
-		}
-		{ gen_wheelscroll = new Fl_Check_Button(50, 300, 245, 25, " mouse wheel scrolls the map");
-		  gen_wheelscroll->down_box(FL_DOWN_BOX);
-		}
 		{ Fl_Box* o = new Fl_Box(30, 340, 280, 35, "Other Stuff");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
@@ -442,6 +414,43 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 80, 105, 25, "new sector size:");
 		  edit_sectorsize->type(2);
+		}
+		o->end();
+	  }
+
+	  /* ---- Grid Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Grid     ");
+		o->labelsize(16);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(25, 50, 355, 30, "Map Grid and Scrolling");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ grid_snap = new Fl_Check_Button(50, 230, 235, 25, " default SNAP mode");
+		  grid_snap->down_box(FL_DOWN_BOX);
+		}
+		{ grid_mode = new Fl_Choice(435, 230, 95, 25, "default grid mode ");
+		  grid_mode->down_box(FL_BORDER_BOX);
+		  grid_mode->add("OFF|Normal|Simple");
+		}
+		{ grid_size = new Fl_Choice(435, 265, 95, 25, "default grid size ");
+		  grid_size->down_box(FL_BORDER_BOX);
+		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
+		}
+		{ gen_digitzoom = new Fl_Check_Button(50, 265, 240, 25, " digit keys zoom the map");
+		  gen_digitzoom->down_box(FL_DOWN_BOX);
+		}
+		{ gen_smallscroll = new Fl_Choice(435, 265, 95, 25, "small scroll step ");
+		  gen_smallscroll->down_box(FL_BORDER_BOX);
+		  gen_smallscroll->hide();
+		}
+		{ gen_largescroll = new Fl_Choice(435, 300, 95, 25, "large scroll step ");
+		  gen_largescroll->down_box(FL_BORDER_BOX);
+		}
+		{ gen_wheelscroll = new Fl_Check_Button(50, 300, 245, 25, " mouse wheel scrolls the map");
+		  gen_wheelscroll->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
