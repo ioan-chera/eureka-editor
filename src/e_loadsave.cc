@@ -631,6 +631,10 @@ bool CMD_OpenMap()
 
 void CMD_OpenFileMap(const char *filename, const char *map_name)
 {
+	if (! Main_ConfirmQuit("open another map"))
+		return;
+
+
 	Wad_file *wad = NULL;
 
 	// make sure the file exists [Open with 'a' would create it]
