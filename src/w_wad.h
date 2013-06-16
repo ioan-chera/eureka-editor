@@ -144,6 +144,9 @@ public:
 	//   'w' opens the wad for writing (i.e. create it)
 	static Wad_file * Open(const char *filename, char mode = 'a');
 
+	// check the given wad file exists and is a WAD file
+	static bool Validate(const char *filename);
+
 	const char *PathName() const { return filename; }
 	bool IsReadOnly() const { return mode == 'r'; }
 

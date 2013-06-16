@@ -269,6 +269,35 @@ Wad_file * Wad_file::Create(const char *filename, char mode)
 }
 
 
+bool Wad_file::Validate(const char *filename)
+{
+	FILE *fp = fopen(filename, "rb");
+
+	if (! fp)
+		return false;
+
+	raw_wad_header_t header;
+
+	if (fread(&header, sizeof(header), 1, fp) != 1)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	if (! ( header.ident[1] == 'W' &&
+			header.ident[2] == 'A' &&
+			header.ident[3] == 'D'))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	fclose(fp);
+
+	return true;  // OK
+}
+
+
 static int WhatLevelPart(const char *name)
 {
 	if (y_stricmp(name, "THINGS")   == 0) return 1;
