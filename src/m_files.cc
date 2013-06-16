@@ -447,6 +447,56 @@ int M_FindGivenFile(const char *filename)
 //  EUREKA LUMP HANDLING
 //------------------------------------------------------------------------
 
+#ifdef WIN32
+#define PATH_SEPARATOR  ';'
+#else
+#define PATH_SEPARATOR  ':'
+#endif
+
+static bool ExtractOnePath(const char *paths, char *dir, int index)
+{
+	for (; index > 0 ; index--)
+	{
+		paths = strchr(paths, PATH_SEPARATOR);
+
+		if (! paths)
+			return false;
+
+		paths++;
+	}
+
+	// handle a trailing separator
+	if (! paths[0])
+		return NULL;
+
+
+	int len;
+
+	const char * sep_pos = strchr(paths, PATH_SEPARATOR);
+
+	if (sep_pos)
+		len = (int)(sep_pos - paths);
+	else
+		len = strlen(paths);
+
+	if (len > FL_PATH_MAX - 2)
+		len = FL_PATH_MAX - 2;
+
+
+	if (len == 0)  // ouch
+		return ".";
+
+	// remove trailing slash
+	while (len > 1 && paths[len - 1] == DIR_SEP_CH)
+		len--;
+
+	memcpy(dir, paths, len);
+
+	dir[len] = 0;
+
+	return dir;
+}
+
 
 static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 {
@@ -487,9 +537,23 @@ static const char * SearchForIWAD(const char *game)
 	if (path)
 		return path;
 
-	// 2. look in $DOOMWADDIR
+	// 2. look in $DOOMWADPATH
 
-	/* TODO: support $DOOMWADPATH */
+	const char *doomwadpath = getenv("DOOMWADPATH");
+	if (doomwadpath)
+	{
+		for (int i = 0 ; i < 999 ; i++)
+		{
+			if (! ExtractOnePath(doomwadpath, dir_name, i))
+				break;
+
+			path = SearchDirForIWAD(dir_name, game);
+			if (path)
+				return path;
+		}
+	}
+
+	// 3. look in $DOOMWADDIR
 
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
@@ -499,7 +563,7 @@ static const char * SearchForIWAD(const char *game)
 			return path;
 	}
 
-	// 3. look in various standard places
+	// 4. look in various standard places
 
 	/* WISH: check the Steam folder(s) for WIN32 */
 
@@ -525,7 +589,7 @@ static const char * SearchForIWAD(const char *game)
 			return path;
 	}
 
-	// 4. last resort : the current directory
+	// 5. last resort : the current directory
 
 	path = SearchDirForIWAD(".", game);
 	if (path)

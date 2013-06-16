@@ -146,8 +146,6 @@ WISH: support UDMF format
 
 ?  config system: OPT_KEY values
 
--  support DOOMWADPATH for finding iwads (see Chocolate Doom)
-
 -  make sure Load/Export wad filename not already in master_dir
 
 -  PRINT key to make a screenshot of map or 3D view
@@ -176,7 +174,7 @@ WISH: support UDMF format
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
 
-IDEA: if a given pwad (from command line) does not exist, ask to create it
+NO: if a given pwad (from command line) does not exist, ask to create it
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
@@ -454,14 +452,6 @@ WAD SEMANTICS
 (d) File/New Map needs to ask for a map name.
     If there is current PWAD and map already exists, warn user
 
-(e) WISH: File/Manage Wads...
-
-    - shows the IWAD, PWAD, resource wads (full path)
-    - can close current PWAD
-    - can create a new WAD
-
-(f) BIG WISH: File/Change IWAD
-    BIG WISH: File/Change Port
 
 
 GAME SEMANTICS
