@@ -35,10 +35,31 @@ static std::map<std::string, std::string> known_iwads;
 
 #define MAX_RECENT  12
 
+// this is for the 'File/Recent' menu
+class recent_file_data_c
+{
+public:
+	const char *file;
+	const char *map;
+
+public:
+	recent_file_data_c(const char *_file, const char *_map) :
+		file(_file), map(_map)
+	{ }
+
+	recent_file_data_c()
+	{ }
+};
+
+
+// recent filenames are never freed (atm), since they need to stay
+// around for the 'File/Recent' menu.
+#undef FREE_RECENT_FILES
+
 
 class RecentFiles_c
 {
-public:
+private:
 	int size;
 
 	// newest is at index [0]
@@ -62,12 +83,21 @@ public:
 		return size;
 	}
 
+	recent_file_data_c *getData(int index) const
+	{
+		SYS_ASSERT(0 <= index && index < size);
+
+		return new recent_file_data_c(filenames[index], map_names[index]);
+	}
+
 	void clear()
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-//!!!			StringFree(filenames[k]);
-//!!!			StringFree(map_names[k]);
+#ifdef FREE_RECENT_FILES 
+			StringFree(filenames[k]);
+			StringFree(map_names[k]);
+#endif
 
 			filenames[k] = NULL;
 			map_names[k] = NULL;
@@ -97,8 +127,10 @@ public:
 
 	void erase(int index)
 	{
-//!!!		StringFree(filenames[index]);
-//!!!		StringFree(map_names[index]);
+#ifdef FREE_RECENT_FILES 
+		StringFree(filenames[index]);
+		StringFree(map_names[index]);
+#endif
 
 		size--;
 
@@ -159,10 +191,10 @@ public:
 	{
 		SYS_ASSERT(index < size);
 
-		const char *file = fl_filename_name(filenames[index]);
-		const char *map  = map_names[index];
+		const char *name = fl_filename_name(filenames[index]);
+		// const char *map  = map_names[index];
 
-		sprintf(buffer, "%-.32s : %-.10s", file, map);
+		sprintf(buffer, "%-.42s", name);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
@@ -293,22 +325,6 @@ void M_SaveRecent()
 }
 
 
-class recent_file_data_c
-{
-public:
-	const char *file;
-	const char *map;
-
-public:
-	recent_file_data_c(const char *_file, const char *_map) :
-		file(_file), map(_map)
-	{ }
-
-	recent_file_data_c()
-	{ }
-};
-
-
 void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb)
 {
 	int menu_pos = bar->find_index("&File/&Recent Files");
@@ -324,10 +340,7 @@ void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb)
 
 		recent_files.Format(name_buf, i);
 
-		recent_file_data_c *data = new recent_file_data_c(
-// FIXME: broken encapsulation
-			recent_files.filenames[i],
-			recent_files.map_names[i]);
+		recent_file_data_c *data = recent_files.getData(i);
 
 		bar->insert(menu_pos + i + 1, name_buf, 0, cb, (void *)data);
 	}
