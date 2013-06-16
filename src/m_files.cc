@@ -246,14 +246,14 @@ static void ParseMiscConfig(FILE * fp)
 
 		if (strcmp(line, "recent") == 0)
 		{
-			if (FileExists(pos))
+			if (Wad_file::Validate(pos))
 				recent_files.insert(pos, map);
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
 		}
 		else if (strcmp(line, "known_iwad") == 0)
 		{
-			if (FileExists(pos))
+			if (Wad_file::Validate(pos))
 				known_iwads[map] = std::string(pos);
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
@@ -456,7 +456,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (FileExists(name_buf))
+	if (Wad_file::Validate(name_buf))
 		return StringDup(name_buf);
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
@@ -465,7 +465,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (FileExists(name_buf))
+	if (Wad_file::Validate(name_buf))
 		return StringDup(name_buf);
 
 	return NULL;
@@ -700,7 +700,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (! FileExists(res))
+			if (! Wad_file::Validate(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
 			
@@ -708,13 +708,13 @@ bool M_ParseEurekaLump(Wad_file *wad)
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (! FileExists(res) && new_iwad)
+			if (! Wad_file::Validate(res) && new_iwad)
 			{
 				res = FilenameReposition(pos, new_iwad);
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (FileExists(res))
+			if (Wad_file::Validate(res))
 				new_resources.push_back(StringDup(res));
 			else
 			{

@@ -412,8 +412,8 @@ static bool DetermineIWAD()
 		if (! HasExtension(Iwad_name))
 			Iwad_name = ReplaceExtension(Iwad_name, "wad");
 
-		if (! FileExists(Iwad_name))
-			FatalError("Given IWAD does not exist: %s\n", Iwad_name);
+		if (! Wad_file::Validate(Iwad_name))
+			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name);
 
 		const char *game = DetermineGame(Iwad_name);
 
@@ -704,7 +704,7 @@ void Main_LoadResources()
 	// Load all resource wads
 	for (int i = 0 ; i < (int)ResourceWads.size() ; i++)
 	{
-		if (! FileExists(ResourceWads[i]))
+		if (! Wad_file::Validate(ResourceWads[i]))
 			FatalError("Resource does not exist: %s\n", ResourceWads[i]);
 
 		Wad_file *wad = Wad_file::Open(ResourceWads[i], 'r');
