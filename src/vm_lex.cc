@@ -577,21 +577,17 @@ type_t *PR_ParseType (void)
 		type = &type_float;
 	else if (!strcmp (pr_token, "vector") )
 		type = &type_vector;
-	else if (!strcmp (pr_token, "float") )
-		type = &type_float;
 	else if (!strcmp (pr_token, "entity") )
 		type = &type_entity;
 	else if (!strcmp (pr_token, "string") )
 		type = &type_string;
-	else if (!strcmp (pr_token, "void") )
-		type = &type_void;
 	else
 	{
 		PR_ParseError ("\"%s\" is not a type", pr_token);
-		type = &type_float;	// shut up compiler warning
+		return NULL;	// shut up compiler warning
 	}
 	PR_Lex ();
-	
+
 	if (PR_Check("("))
 		PR_ParseError("WTF bad type syntax");
 
