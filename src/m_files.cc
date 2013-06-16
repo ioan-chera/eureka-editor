@@ -33,7 +33,84 @@
 static std::map<std::string, std::string> known_iwads;
 
 
+void M_AddKnownIWAD(const char *path)
+{
+	char absolute_name[FL_PATH_MAX];
+	fl_filename_absolute(absolute_name, path);
+
+	const char *game = DetermineGame(path);
+
+	known_iwads[game] = std::string(absolute_name);
+}
+
+
+const char * M_QueryKnownIWAD(const char *game)
+{
+	std::map<std::string, std::string>::iterator KI;
+
+	KI = known_iwads.find(game);
+
+	if (KI != known_iwads.end())
+		return KI->second.c_str();
+	else
+		return NULL;
+}
+
+
+const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
+{
+	exist_name = fl_filename_name(exist_name);
+
+	std::map<std::string, std::string>::iterator KI;
+
+	static char result[2000];
+	result[0] = 0;
+
+	int index = 0;
+
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
+	{
+		const char *name = KI->first.c_str();
+		
+		strcat(result, "|");
+		strcat(result, name);
+///		strcat(result, ".wad");
+
+		if (y_stricmp(fl_filename_name(KI->second.c_str()), exist_name) == 0)
+			*exist_val = index;
+	}
+
+	return StringDup(result + 1);
+}
+
+
+void M_ValidateGivenFiles()
+{
+	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+	{
+		if (! Wad_file::Validate(Pwad_list[i]))
+			FatalError("Given pwad does not exist or is invalid: %s\n",
+				Pwad_list[i]);
+	}
+}
+
+
+int M_FindGivenFile(const char *filename)
+{
+	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+		if (strcmp(Pwad_list[i], filename) == 0)
+			return i;
+	
+	return -1;  // Not Found
+}
+
+
+//------------------------------------------------------------------------
+//  RECENT FILE HANDLING
+//------------------------------------------------------------------------
+
 #define MAX_RECENT  12
+
 
 // this is for the 'File/Recent' menu
 class recent_file_data_c
@@ -368,78 +445,6 @@ void M_AddRecent(const char *filename, const char *map_name)
 	recent_files.insert(absolute_name, map_name);
 
 	M_SaveRecent();  // why wait?
-}
-
-
-void M_AddKnownIWAD(const char *path)
-{
-	char absolute_name[FL_PATH_MAX];
-	fl_filename_absolute(absolute_name, path);
-
-	const char *game = DetermineGame(path);
-
-	known_iwads[game] = std::string(absolute_name);
-}
-
-
-const char * M_QueryKnownIWAD(const char *game)
-{
-	std::map<std::string, std::string>::iterator KI;
-
-	KI = known_iwads.find(game);
-
-	if (KI != known_iwads.end())
-		return KI->second.c_str();
-	else
-		return NULL;
-}
-
-
-const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
-{
-	exist_name = fl_filename_name(exist_name);
-
-	std::map<std::string, std::string>::iterator KI;
-
-	static char result[2000];
-	result[0] = 0;
-
-	int index = 0;
-
-	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
-	{
-		const char *name = KI->first.c_str();
-		
-		strcat(result, "|");
-		strcat(result, name);
-///		strcat(result, ".wad");
-
-		if (y_stricmp(fl_filename_name(KI->second.c_str()), exist_name) == 0)
-			*exist_val = index;
-	}
-
-	return StringDup(result + 1);
-}
-
-
-void M_ValidateGivenFiles()
-{
-	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-	{
-		if (! Wad_file::Validate(Pwad_list[i]))
-			FatalError("Given pwad does not exist or is invalid: %s\n",
-				Pwad_list[i]);
-	}
-}
-
-
-int M_FindGivenFile(const char *filename)
-{
-	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-		if (strcmp(Pwad_list[i], filename) == 0)
-			return i;
-	
-	return -1;  // Not Found
 }
 
 
