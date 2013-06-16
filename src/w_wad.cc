@@ -445,6 +445,22 @@ short Wad_file::GetLevel(short index)
 }
 
 
+map_format_e Wad_file::LevelFormat(short lump_index)
+{
+	int start = lump_index;
+
+	if (start + LL_BEHAVIOR < (int)NumLumps())
+	{
+		const char *name = GetLump(start + LL_BEHAVIOR)->Name();
+
+		if (y_stricmp(name, "BEHAVIOR") == 0)
+			return MAPF_Hexen;
+	}
+
+	return MAPF_Doom;
+}
+
+
 Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 {
 	short k;

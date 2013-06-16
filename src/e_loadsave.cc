@@ -506,6 +506,9 @@ void LoadLevel(Wad_file *wad, const char *level)
 	if (loading_level < 0)
 		FatalError("No such map: %s\n", level);
 
+	if (load_wad->LevelFormat(loading_level) != MAPF_Doom)
+		FatalError("Hexen map format is not supported\n");
+
 	BA_ClearAll();
 
 	LoadThings  ();
@@ -680,6 +683,14 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 		delete wad;
 
 		Notify(-1, -1, "No levels found in that WAD.", NULL);
+		return;
+	}
+
+	if (wad->LevelFormat(lev_idx) != MAPF_Doom)
+	{
+		delete wad;
+
+		Notify(-1, -1, "Hexen map format is not supported.", NULL);
 		return;
 	}
 

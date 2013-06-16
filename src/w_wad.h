@@ -31,6 +31,16 @@ class Wad_file;
 class Texture_info;
 
 
+typedef enum
+{
+	MAPF_INVALID = 0,
+
+	MAPF_Doom,
+	MAPF_Hexen
+
+} map_format_e;
+
+
 class Lump_c
 {
 friend class Wad_file;
@@ -159,6 +169,8 @@ public:
 	Lump_c * FindLumpInLevel(const char *name, short level);
 
 	short FindLumpNum(const char *name);
+
+	// these all return a lump index
 	short FindLevel(const char *name);
 	short FindLevelByNumber(int number);
 	short FindFirstLevel();
@@ -168,6 +180,8 @@ public:
 	short NumLevels() const { return (short)levels.size(); }
 
 	short GetLevel(short index);
+
+	map_format_e LevelFormat(short lump_index);
 
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change

@@ -73,7 +73,7 @@
 
 
 /*
- *  Platform-independant types and formats.
+ *  Platform-independent stuff
  */
 void FatalError(const char *fmt, ...);
 
