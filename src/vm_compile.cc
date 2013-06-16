@@ -135,16 +135,17 @@ static operator_t binary_operators[] =
 	{"&&", FAKE_OP_AND, 6, "b", &type_float, &type_float, &type_float},
 	{"||", FAKE_OP_OR,  7, "b", &type_float, &type_float, &type_float},
 
-	/* priority 8 is for assignment */
+	/* priority 8 is for the ?: ternary operator */
 
-	/* priority 9 is for the ?: ternary operator */
+	/* priority 9 is for assignment */
 
 	{NULL}
 };
 
-#define ASSIGN_PRIORITY   8
-#define TERNARY_PRIORITY  9
-#define	TOP_PRIORITY	  9
+#define TERNARY_PRIORITY	8
+#define ASSIGN_PRIORITY		9
+
+#define TOP_PRIORITY		9
 
 
 //===========================================================================
