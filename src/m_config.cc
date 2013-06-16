@@ -695,8 +695,6 @@ int M_ParseEnvironmentVars()
 
 void M_AddPwadName(const char *filename)
 {
-	// if (Pwad_list.size() > 0)  check exists
-
 	Pwad_list.push_back(StringDup(filename));
 }
 

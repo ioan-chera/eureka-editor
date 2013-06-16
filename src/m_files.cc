@@ -422,6 +422,17 @@ const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
 }
 
 
+void M_ValidateGivenFiles()
+{
+	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+	{
+		if (! Wad_file::Validate(Pwad_list[i]))
+			FatalError("Given pwad does not exist or is invalid: %s\n",
+				Pwad_list[i]);
+	}
+}
+
+
 int M_FindGivenFile(const char *filename)
 {
 	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)

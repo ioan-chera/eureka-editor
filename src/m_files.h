@@ -35,7 +35,8 @@ const char * M_QueryKnownIWAD(const char *game);
 const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name);
 const char * M_PickDefaultIWAD();
 
-int M_FindGivenFile(const char *filename);
+void M_ValidateGivenFiles();
+int  M_FindGivenFile(const char *filename);
 
 bool M_ParseEurekaLump(Wad_file *wad);
 void M_WriteEurekaLump(Wad_file *wad);

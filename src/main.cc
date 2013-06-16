@@ -968,10 +968,9 @@ int main(int argc, char *argv[])
 	// open a specified PWAD now
 	if (Pwad_list.size() > 0)
 	{
-		Pwad_name = Pwad_list[0];
+		M_ValidateGivenFiles();
 
-		if (! FileExists(Pwad_name))
-			FatalError("Given pwad does not exist: %s\n", Pwad_name);
+		Pwad_name = Pwad_list[0];
 
 		edit_wad = Wad_file::Open(Pwad_name, 'a');
 
