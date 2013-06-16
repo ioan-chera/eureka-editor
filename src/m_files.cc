@@ -448,6 +448,53 @@ void M_AddRecent(const char *filename, const char *map_name)
 }
 
 
+bool M_TryOpenMostRecent()
+{
+	if (recent_files.getSize() == 0)
+		return false;
+
+	const char *filename;
+	const char *map_name;
+
+	recent_files.Lookup(0, &filename, &map_name);
+
+	// M_LoadRecent has already validated the filename, so this should
+	// normally work.
+
+	Wad_file *wad = Wad_file::Open(filename, 'a');
+
+	if (! wad)
+	{
+		LogPrintf("Failed to load most recent pwad: %s\n", filename);
+		return false;
+	}
+
+	// make sure at least one level can be loaded
+	if (wad->NumLevels() == 0)
+	{
+		LogPrintf("No levels in most recent pwad: %s\n", filename);
+
+		delete wad;
+		return false;
+	}
+
+	// -- OK --
+
+	if (wad->FindLevel(map_name) >= 0)
+		Level_name = map_name;
+	else
+		Level_name = NULL;
+
+	Pwad_name = filename;
+
+	edit_wad = wad;
+
+	MasterDir_Add(edit_wad);
+
+	return true;
+}
+
+
 //------------------------------------------------------------------------
 //  EUREKA LUMP HANDLING
 //------------------------------------------------------------------------

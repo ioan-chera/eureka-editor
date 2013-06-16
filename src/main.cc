@@ -95,6 +95,8 @@ int KF_fonth;
 
 
 // config items
+bool auto_load_recent = false;
+
 int scroll_less   = 10;
 int scroll_more   = 90;
 
@@ -456,9 +458,11 @@ static const char * DetermineMod(const char *res_name)
 
 static const char * DetermineLevel()
 {
+	// most of the logic here is to handle a numeric level number
+	// e.g. -warp 15
+
 	int level_number = 0;
 
-	// handle a numeric level number, e.g. -warp 15
 	if (Level_name && Level_name[0])
 	{
 		if (! isdigit(Level_name[0]))
@@ -980,6 +984,12 @@ int main(int argc, char *argv[])
 		// Note: the Main_LoadResources() call will ensure this gets
 		//       placed at the correct spot (at the end)
 		MasterDir_Add(edit_wad);
+
+		// the map is loaded later....
+	}
+	else if (auto_load_recent)
+	{
+		M_TryOpenMostRecent();
 	}
 
 

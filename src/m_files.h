@@ -28,6 +28,7 @@ void M_SaveRecent();
 
 void M_AddRecent(const char *filename, const char *map_name);
 void M_OpenRecentFromMenu(void *priv_data);
+bool M_TryOpenMostRecent();
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
