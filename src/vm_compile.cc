@@ -1148,25 +1148,34 @@ static void PR_PatchOp(dstatement_t *patch)
 }
 
 
-static void STAT_Return(void)
+static void STAT_Return(int ret_line)
 {
 	eval_t * ev;
 
 	type_t * res_type = pr_scope->def->type->aux_type;
 
-	if (PR_Check (";"))
+	if (res_type->kind == ev_void)
 	{
-		if (res_type->kind != ev_void)
-			PR_ParseError("return is missing a value");
+		PR_Check (";");
 
 		PR_EmitOp(OP_RETURN, 0, 0, 0);
 		return;
 	}
 
-	ev = EXP_Expression(TOP_PRIORITY);
+	// check for missing value
+    //
+    // Note: we require the value to start on the same line
+    //       (otherwise we may parse a func_call/assignment which
+    //        was not meant to be the return expression).
 
-	if (res_type->kind == ev_void)
-		PR_ParseError("return with value in void function");
+    if (pr_source_line > ret_line ||
+        pr_token[0] == ';' ||
+        pr_token[0] == '}')
+    {
+        PR_ParseError("return is missing a value");
+    }
+
+	ev = EXP_Expression(TOP_PRIORITY);
 
 	// FIXME: check type
 
@@ -1179,7 +1188,7 @@ static void STAT_Return(void)
 	
 	PR_EmitOp(OP_RETURN, 0, 0, 0);
 
-	PR_Expect(";");
+	PR_Check(";");
 }
 
 
@@ -1255,7 +1264,7 @@ static void STAT_RepeatUntil(void)
 	ev = EXP_Expression(TOP_PRIORITY);
 
 	PR_Expect (")");
-	PR_Expect (";");
+	PR_Check (";");
 
 	CODEGEN_Boolean(ev);
 
@@ -1282,9 +1291,11 @@ static void PR_ParseStatement (void)
 		return;
 	}
 
+	int cur_line = pr_source_line;
+
 	if (PR_Check("return"))
 	{
-		STAT_Return();
+		STAT_Return(cur_line);
 		return;
 	}
 
@@ -1317,7 +1328,7 @@ static void PR_ParseStatement (void)
 	{
 		eval_t * ev = EXP_Expression(TOP_PRIORITY);
 
-		PR_Expect(";");
+		PR_Check(";");
 
 		CODEGEN_Eval(ev, true /* no result */);
 	}
@@ -1383,7 +1394,7 @@ static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern)
 
 	if (is_extern)
 	{
-		PR_Expect(";");
+		PR_Check(";");
 
 		df->builtin = 1;
 		df->first_statement = PR_ResolveBuiltin(df->def->name);
@@ -1560,7 +1571,7 @@ bool  is_extern;
 
 		def = PR_GetDef (name, type, NULL, 1);
 
-		PR_Expect(";");
+		PR_Check(";");
 		return;
 	}
 
@@ -1590,7 +1601,7 @@ is_extern = PR_Check("builtin");
 
 		PR_Lex();
 
-		PR_Expect(";");
+		PR_Check(";");
 		return;
 	}
 
@@ -1601,14 +1612,11 @@ is_extern = PR_Check("builtin");
 	{
 		PR_Expect(":");
 
-		if (PR_Check("["))
-			PR_ParseError("WTF state");
-
 		type = PR_ParseType();
 
 		def = PR_GetDef (name, type, NULL, 1);
 
-		PR_Expect (";");
+		PR_Check (";");
 		return;
 	}
 
@@ -1623,7 +1631,7 @@ is_extern = PR_Check("builtin");
 // check for an initialization
 	if (is_forward)
 	{
-		PR_Expect(";");
+		PR_Check(";");
 		return;
 	}
 
@@ -1701,7 +1709,7 @@ static void PR_ParseLocal (void)
 		CODEGEN_Literal(literal, type);
 	}
 
-	PR_Expect (";");
+	PR_Check (";");
 }
 
 
