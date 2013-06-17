@@ -1,0 +1,67 @@
+---------------
+--  GRAMMER  --
+---------------
+
+file : { global_def }.
+
+global_def : constant | variable | field | [qualifier] function.
+
+
+constant : NAME ":=" LITERAL [";"].
+
+variable : NAME ":" type [";"].
+
+field : "." NAME ":" type [";"].
+
+type : "float" | "string" | "vector" | "entity" | func_type.
+
+func_type : "function" "(" [parameters] ")" [ ":" type ].
+
+
+qualifier : "builtin" | "forward".
+
+function : NAME "(" [parameters] ")" [ ":" type ] block [";"].
+
+parameters : param { "," param }.
+
+param : NAME ":" type.
+
+block : "{" { local | statement } "}".
+
+local : NAME ":" type [ "=" expression ] [";"].
+
+
+statement : block | return | if | while | repeat |
+            assignment | func_call.
+
+return : "return" [expression] [";"].
+
+if : "if" "(" expression ")" statement [ "else" statement ].
+
+while : "while" "(" expression ")" statement.
+ 
+repeat : "repeat" statement "until" "(" expression ")" [";"].
+
+
+expression : term | assignment | binary_op | ternary_op.
+
+term : LITERAL | NAME | "(" expression ")" | unary_op |
+       func_call | field_access.
+
+unary_op : UNOP term.
+
+binary_op : expression BINOP expression.
+
+ternary_op : expression "?" expression ":" expression.
+
+
+assignment : lvalue "=" expression.
+
+lvalue : NAME | field_access.
+
+field_access : term "." NAME.
+
+func_call : term "(" [actual_params] ")".
+
+actual_params : expression { "," expression }.
+
