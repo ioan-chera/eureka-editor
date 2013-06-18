@@ -159,7 +159,7 @@ typedef enum
 typedef struct statement_s
 {
 	unsigned short	op;
-	short	a,b,c;
+	short	a, b, c;
 	int  linenum;
 } dstatement_t;
 

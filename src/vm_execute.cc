@@ -762,8 +762,9 @@ if (exec.trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 
 		case OP_LITERAL:
 			if (exec.stack_top >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			// oh the humanity...
-			exec.stack[exec.stack_top++] = *(const kval_t *)&st->a;
+			// next dstatement is actually a kval_t
+			exec.stack[exec.stack_top++] = *(const kval_t *)(st + 1);
+			ip++;
 			break;
 
 		case OP_READ:
@@ -948,6 +949,8 @@ int VM_Call(int func_id)
 	// FIXME: try { } catch () ...
 
 	PR_ExecuteProgram(func_id);
+
+	VM_FreePotentiallyFreeables();
 
 	return 0;
 }

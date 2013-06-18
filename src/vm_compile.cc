@@ -152,6 +152,7 @@ static operator_t binary_operators[] =
 
 
 static dstatement_t * PR_EmitOp(int opcode, int a, int b, int c);
+static void PR_EmitKVal(kval_t val);
 static void PR_PatchOp(dstatement_t *patch);
 
 
@@ -191,8 +192,6 @@ typedef struct eval_s
 	const char *op_flags;
 
 	int  num_parms;  // for EV_FUNC_CALL, EV_FORMAT_STR
-
-	const char *format_str;
 
 } eval_t;
 
@@ -419,16 +418,16 @@ static eval_t * EXP_FormatString(void)
 
 	fmt = PR_AllocEval(EV_FORMAT_STR, &type_string);
 
-	fmt->format_str = strdup(pr_immediate_string);
+	fmt->literal[0]._string = GlobalizeString(pr_immediate_string);
+
+// determine number/type of parameters from string
+	num_parms = FormatStr_Decode(pr_immediate_string, types);
 
 	PR_Lex();
 
-// determine number/type of parameters from string
-	num_parms = FormatStr_Decode(fmt->format_str, types);
-
+// grab the other parameters
 	got = 0;
 
-// grab the other parameters
 	while (PR_Check(","))
 	{
 		eval_t *parm;
@@ -725,22 +724,6 @@ static eval_t * EXP_Expression(int priority)
 }
 
 
-static void CODEGEN_Integer(kval_t val)
-{
-	dstatement_t *st = PR_EmitOp(OP_LITERAL, 0, 0, 0);
-
-	// yes, this is horrible
-
-	*(kval_t *)&st->a = val;
-}
-
-
-static void CODEGEN_Float(kval_t val)
-{
-	CODEGEN_Integer(val);
-}
-
-
 #if 0
 static void CODEGEN_DropValue(type_t *type)
 {
@@ -763,22 +746,13 @@ static void CODEGEN_DropValue(type_t *type)
 
 static void CODEGEN_Literal(const kval_t * literal, type_t *type)
 {
+	PR_EmitOp(OP_LITERAL, 0, 0, 0);
+
 	int count = (type->kind == ev_vector) ? 3 : 1;
-	int i;
 
-	bool is_float = false;
-
-	if (type->kind == ev_float || type->kind == ev_vector)
+	for (int i = 0 ; i < count ; i++)
 	{
-		is_float = true;
-	}
-
-	for (i = 0 ; i < count ; i++)
-	{
-		if (is_float)
-			CODEGEN_Float(literal[i]);
-		else
-			CODEGEN_Integer(literal[i]);
+		PR_EmitKVal(literal[i]);
 	}
 }
 
@@ -844,9 +818,7 @@ static void CODEGEN_FormatString(eval_t * ev)
 	PR_EmitOp(OP_FRAME, 0, 0, 0);
 
 	// push parameters, same order as given
-	s._string = GlobalizeString(ev->format_str);
-
-	CODEGEN_Integer(s);
+	CODEGEN_Literal(ev->literal, ev->type);
 
 	for (i = 0 ; i < ev->num_parms ; i++)
 	{
@@ -1121,8 +1093,6 @@ static void CODEGEN_Boolean(eval_t *ev)
 //========================================
 
 
-
-
 static int trace_ops;
 
 
@@ -1134,9 +1104,7 @@ static dstatement_t * PR_EmitOp(int opcode, int a, int b, int c)
 	if (trace_ops)
 		fprintf(stdout, "%04X %s a:%d\n", mpr.numstatements, pr_opnames[opcode], a);
 
-	dstatement_t *st = &mpr.statements[mpr.numstatements];
-
-	mpr.numstatements++;
+	dstatement_t *st = &mpr.statements[mpr.numstatements++];
 
 	st->op = opcode;
 	st->a  = a;
@@ -1146,6 +1114,20 @@ static dstatement_t * PR_EmitOp(int opcode, int a, int b, int c)
 	st->linenum = pr_source_line;
 
 	return st;
+}
+
+
+static void PR_EmitKVal(kval_t val)
+{
+	if (mpr.numstatements >= MAX_STATEMENTS)
+		PR_ParseError("Instruction buffer overflow");
+
+	if (trace_ops)
+		fprintf(stdout, "%04X KVAL", mpr.numstatements);
+	
+	dstatement_t *st = &mpr.statements[mpr.numstatements++];
+
+	*(kval_t *)st = val;
 }
 
 

@@ -954,7 +954,7 @@ int main(int argc, char *argv[])
 	init_progress = 2;
 
 
-///Test_VM();
+Test_VM();
 
 
 	M_LoadRecent();
