@@ -1321,7 +1321,7 @@ char * CalcNextStateName(const char * prev)
 		sprintf(buffer + base_len, "%d", num + 1);
 	}
 
-	return strdup(buffer);
+	return StringDup(buffer);
 }
 
 
@@ -1439,7 +1439,7 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 	def->next = all_defs;
 	all_defs  = def;
 
-	def->name = strdup(name);
+	def->name = StringDup(name);
 	def->type = type;
 
 	def->scope = scope;
@@ -1502,108 +1502,62 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 }
 
 
-/*
-================
-PR_ParseGlobals
-
-Called at the outer layer
-================
-*/
-void PR_ParseGlobals (void)
+static void GLOB_Constant(const char *name)
 {
-	char		*name;
-	type_t		*type;
-	def_t		*def;
-	dfunction_t	*df;
+	def_t * def = PR_GetDef (name, pr_immediate_type, NULL, 1);
 
-	int			i;
+	if (def->initialized)
+		PR_ParseError ("%s redeclared", name);
 
-// field definition ?
+	def->initialized = 1;
 
-	if (PR_Check("."))
+	switch (pr_immediate_type->kind)
 	{
-		name = strdup(PR_ParseName());
+		case ev_float:
+			G_FLOAT(def->ofs) = pr_immediate_float[0];
+			break;
+		
+		case ev_vector:
+			G_FLOAT(def->ofs + 0) = pr_immediate_float[0];
+			G_FLOAT(def->ofs + 1) = pr_immediate_float[1];
+			G_FLOAT(def->ofs + 2) = pr_immediate_float[2];
+			break;
 
-		PR_Expect(":");
+		case ev_string:
+			G_STRING(def->ofs) = GlobalizeString(pr_immediate_string);
+			break;
 
-		type = PR_ParseFieldType ();
-
-		def = PR_GetDef (name, type, NULL, 1);
-
-		PR_Check(";");
-		return;
+		default:
+			PR_ParseError("weird value for constant");
+			/* NOT REACHED */
 	}
 
+	PR_Lex();
 
-	bool is_builtin = PR_Check("builtin");
-	bool is_forward = PR_Check("forward");
-
-
-	name = strdup(PR_ParseName());
+	PR_Check(";");
+}
 
 
-// constants
-	
-	if (PR_Check(":="))
-	{
-		def = PR_GetDef (name, pr_immediate_type, NULL, 1);
+static void GLOB_Variable(const char *name)
+{
+	type_t * type = PR_ParseType();
 
-		if (def->initialized)
-			PR_ParseError ("%s redeclared", name);
+	def_t * def = PR_GetDef (name, type, NULL, 1);
 
-		def->initialized = 1;
+	if (type->kind == ev_string)
+		G_STRING(def->ofs) = empty_str;
 
-		switch (pr_immediate_type->kind)
-		{
-			case ev_float:
-				G_FLOAT(def->ofs) = pr_immediate_float[0];
-				break;
-			
-			case ev_vector:
-				G_FLOAT(def->ofs + 0) = pr_immediate_float[0];
-				G_FLOAT(def->ofs + 1) = pr_immediate_float[1];
-				G_FLOAT(def->ofs + 2) = pr_immediate_float[2];
-				break;
+	// FIXME: if (PR_Check("=")) ...
 
-			case ev_string:
-				G_STRING(def->ofs) = GlobalizeString(pr_immediate_string);
-				break;
-
-			default:
-				PR_ParseError("weird value for constant");
-				/* NOT REACHED */
-		}
-
-		PR_Lex();
-
-		PR_Check(";");
-		return;
-	}
+	PR_Check (";");
+}
 
 
-// variables
+static void GLOB_Function(const char *name, bool is_forward, bool is_builtin)
+{
+	type_t * type = PR_ParseAltFuncType(true /* seen_first_bracket */);
 
-	if (! PR_Check("("))
-	{
-		PR_Expect(":");
-
-		type = PR_ParseType();
-
-		def = PR_GetDef (name, type, NULL, 1);
-
-		if (type->kind == ev_string)
-			G_STRING(def->ofs) = empty_str;
-
-		PR_Check (";");
-		return;
-	}
-
-	
-// functions
-	
-	type = PR_ParseAltFuncType(true /* seen_first_bracket */);
-
-	def = PR_GetDef (name, type, NULL, 1);
+	def_t * def = PR_GetDef (name, type, NULL, 1);
 
 
 // check for an initialization
@@ -1621,7 +1575,7 @@ void PR_ParseGlobals (void)
 
 	G_FUNCTION(def->ofs) = mpr.numfunctions;
 
-	df = &mpr.functions[mpr.numfunctions++];
+	dfunction_t	*df = &mpr.functions[mpr.numfunctions++];
 
 	df->def = def;
 
@@ -1630,7 +1584,7 @@ void PR_ParseGlobals (void)
 	df->parm_start = mpr.numregisters;
 	df->numparms = df->def->type->num_parms;
 
-	for (i=0 ; i < df->numparms ; i++)
+	for (int i = 0 ; i < df->numparms ; i++)
 		df->parm_size[i] = type_size[df->def->type->parm_types[i]->kind];
 
 	df->filename = StringDup(pr_source_file);
@@ -1650,23 +1604,58 @@ void PR_ParseGlobals (void)
 }
 
 
+/*
+================
+PR_ParseGlobals
+
+Called at the outer layer
+================
+*/
+void PR_ParseGlobals (void)
+{
+	bool is_builtin = PR_Check("builtin");
+	bool is_forward = PR_Check("forward");
+
+	const char *name = StringDup(PR_ParseName());
+
+// constants
+	if (PR_Check(":="))
+	{
+		GLOB_Constant(name);
+		return;
+	}
+
+// variables
+	if (PR_Check(":"))
+	{
+		GLOB_Variable(name);
+		return;
+	}
+
+// functions
+	if (PR_Check("("))
+	{
+		GLOB_Function(name, is_forward, is_builtin);
+		return;
+	}
+
+	PR_ParseError("expected a global var, constant or function");
+}
+
+
 static void PR_ParseLocal (void)
 {
-	char		*name;
-	type_t		*type;
-	def_t		*def;
-
-	name = PR_ParseName();
+	const char *name = PR_ParseName();
 
 	PR_Expect(":");
 
 
-	type = PR_ParseType ();
+	type_t * type = PR_ParseType ();
 
-	def = PR_GetDef (name, type, pr_scope, 1);
+	def_t * def = PR_GetDef (name, type, pr_scope, 1);
 
 
-	// generate code to set its value
+// generate code to set its value
 
 	if (PR_Check("="))
 	{
