@@ -71,35 +71,106 @@ object_ref_c::~object_ref_c()
 			break;
 
 		case K_STRING:
-			delete ptr.str;  ptr.str = NULL;
+			StringFree(ptr.str);  ptr.str = NULL;
 			break;
 
-		default:
+		case K_LINEDEF_SEL:
+		case K_SIDEDEF_SEL:
+		case K_SECTOR_SEL:
+		case K_THING_SEL:
+		case K_VERTEX_SEL:
 			delete ptr.sel;  ptr.sel = NULL;
 			break;
 	}
 }
 
 
-object_ref_c::AddRef()
+void object_ref_c::AddRef()
 {
 	if (count < PERMANENT_COUNT)
 		count++;
 }
 
 
-object_ref_c::RemoveRef()
+void object_ref_c::RemoveRef()
 {
 	SYS_ASSERT(count != 0);
 
-	if (count < PERMANENT_COUNT)
-		count--;
+	if (count == PERMANENT_COUNT)
+		return;
+
+	count--;
+
+	if (count == 0)
+		potentially_freeables[this] = 1;
+}
+
+
+void object_ref_c::TryFree()
+{
+	if (count == 0)
+		delete this;
+}
+
+
+object_ref_c * object_ref_c::NewString(const char *s)
+{
+	object_ref_c * ref = new object_ref_c();
+
+	ref->kind = K_STRING;
+	ref->ptr.str = StringDup(s);
+
+	return ref;
+}
+
+
+object_ref_c * object_ref_c::NewSelection(obj_type_e _type)
+{
+	object_ref_c * ref = new object_ref_c();
+
+	switch (_type)
+	{
+		case OBJ_LINEDEFS:
+			ref->kind = K_LINEDEF_SEL;
+			break;
+
+		case OBJ_SIDEDEFS:
+			ref->kind = K_SIDEDEF_SEL;
+			break;
+
+		case OBJ_SECTORS:
+			ref->kind = K_SECTOR_SEL;
+			break;
+
+		case OBJ_THINGS:
+			ref->kind = K_THING_SEL;
+			break;
+
+		case OBJ_VERTICES:
+			ref->kind = K_VERTEX_SEL;
+			break;
+
+		default:
+			BugError("INTERNAL ERROR: bad sel_type for object_ref_c::NewSelection\n");
+			break;
+	}
+
+	ref->ptr.sel = new selection_c(_type);
+
+	return ref;
 }
 
 
 void VM_FreePotentiallyFreeables()
 {
-	// TODO
+	std::map< object_ref_c *, int >::iterator IT;
+
+	for (IT = potentially_freeables.begin() ; IT != potentially_freeables.end() ; IT++)
+	{
+		IT->first->TryFree();
+	}
+
+	potentially_freeables.clear();
 }
 
 //--- editor settings ---

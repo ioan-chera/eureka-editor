@@ -32,17 +32,17 @@ public:
 	{
 		K_INVALID = 0,
 
-		K_String,
+		K_STRING,
 
-		K_VertexSel,
-		K_ThingSel,
-		K_LineDefSel,
-		K_SideDefSel,
-		K_SectorSel
+		K_LINEDEF_SEL,
+		K_SIDEDEF_SEL,
+		K_SECTOR_SEL,
+		K_THING_SEL,
+		K_VERTEX_SEL
 	};
 
 	short	kind;
-	short	ref_count;
+	short	count;
 
 	union
 	{
@@ -59,10 +59,12 @@ private:
 public:
 	static object_ref_c * NewString(const char *s);
 
-	static object_ref_c * NewSelection(int obj_type);
+	static object_ref_c * NewSelection(obj_type_e _type);
 
 	void AddRef();
 	void RemoveRef();
+
+	void TryFree();
 };
 
 
