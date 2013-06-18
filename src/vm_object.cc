@@ -113,6 +113,12 @@ void object_ref_c::TryFree()
 }
 
 
+void object_ref_c::MakePermanent()
+{
+	count = PERMANENT_COUNT;
+}
+
+
 object_ref_c * object_ref_c::NewString(const char *s)
 {
 	object_ref_c * ref = new object_ref_c();

@@ -65,6 +65,7 @@ public:
 	void RemoveRef();
 
 	void TryFree();
+	void MakePermanent();
 };
 
 
