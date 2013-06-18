@@ -108,6 +108,7 @@ OBJS = \
 	$(OBJ_DIR)/vm_builtin.o  \
 	$(OBJ_DIR)/vm_compile.o  \
 	$(OBJ_DIR)/vm_execute.o  \
+	$(OBJ_DIR)/vm_object.o  \
 	$(OBJ_DIR)/vm_lex.o  \
 	$(OBJ_DIR)/w_loadpic.o  \
 	$(OBJ_DIR)/w_flats.o  \
