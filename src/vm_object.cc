@@ -23,6 +23,39 @@
 #include "m_select.h"
 #include "vm_object.h"
 
+#include <map>
+
+
+/*
+	MEMORY MODEL
+
+	These objects have a reference count.  Whenever one is stored
+	in a global variable, the count is increased and the previous
+	object's count is decreased.
+
+	When the reference count reaches zero, the object is placed in
+	a "potentially freeable" list.  Once the script has finished
+	(from the VM_Call), then this list is scanned and objects which
+	still have a zero reference count can be freed.
+
+	Objects can exist on the stack, and may have a zero reference
+	count [the count does _not_ include the stack].  The logic above
+	is adequate for this VM, as the stack no longer exists after the
+	VM_Call() is complete.  But the above logic is not able to free
+	objects during script execution.
+
+	And of course reference counting is not adequate for objects
+	which can create cyclic references.  The current kind of objects
+	types do not enable creating cyclic structures.
+*/
+
+
+static std::map< object_ref_c *, int > potentially_freeables;
+
+
+// once the count reaches this, an object is never freed
+#define PERMANENT_COUNT  65535
+
 
 object_ref_c::object_ref_c() : kind(K_INVALID), count(0)
 {
@@ -50,13 +83,17 @@ object_ref_c::~object_ref_c()
 
 object_ref_c::AddRef()
 {
-	// TODO
+	if (count < PERMANENT_COUNT)
+		count++;
 }
 
 
 object_ref_c::RemoveRef()
 {
-	// TODO
+	SYS_ASSERT(count != 0);
+
+	if (count < PERMANENT_COUNT)
+		count--;
 }
 
 
