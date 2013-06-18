@@ -1677,6 +1677,14 @@ static void PR_ParseLocal (void)
 
 		CODEGEN_Eval(e, false);
 	}
+	else if (type->kind == ev_string)
+	{
+		kval_t  s;
+
+		s._string = empty_str;
+
+		CODEGEN_Literal(&s, type);
+	}
 	else
 	{
 		kval_t  literal[3];
