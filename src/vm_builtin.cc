@@ -64,8 +64,7 @@ void PC_error (void)
 {
 	const char *s = PR_Param_String(0);
 
-	Con_Printf ("======SERVER ERROR in %s:\n%s\n",
-		 mpr.strings + exec.x_func->s_name, s);
+	Con_Printf ("======SERVER ERROR in %s:\n%s\n", exec.x_func->def->name, s);
 
 	FatalError ("Program error");
 }

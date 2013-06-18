@@ -168,14 +168,12 @@ typedef struct
 	unsigned short	type;		// if DEF_SAVEGLOBAL bit is set
 								// the variable needs to be saved in savegames
 	unsigned short	ofs;
-	int			s_name;
 } globaldef_t;
 
 typedef struct
 {
 	unsigned short	type;
 	unsigned short	ofs;
-	int			s_name;
 } fielddef_t;
 
 #define	DEF_SAVEGLOBAL	(1<<15)
@@ -197,8 +195,7 @@ typedef struct
 	
 	int		profile;		// runtime
 	
-	int		s_name;
-	int		s_file;			// source file defined in
+	const char * filename;
 
 	int		numparms;
 	byte	parm_size[MAX_PARMS];
@@ -298,7 +295,10 @@ void PR_ParseError (const char *error, ...);
 
 
 extern	jmp_buf		pr_parse_abort;		// longjump with this on parse error
+
+extern  const char *pr_source_file;
 extern	int			pr_source_line;
+
 extern	char		*pr_file_p;
 
 
@@ -322,9 +322,6 @@ bool PR_CompileFile (char *string, const char *filename);
 
 typedef struct
 {
-	char		strings[MAX_STRINGS];
-	int			strofs;
-
 	dstatement_t	statements[MAX_STATEMENTS];
 	int			numstatements;
 

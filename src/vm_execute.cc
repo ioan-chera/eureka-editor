@@ -179,7 +179,7 @@ void PR_StackTrace (void)
 			Con_Printf ("<NO FUNCTION>\n");
 		}
 		else
-			Con_Printf ("%12s : %s\n", mpr.strings + f->s_file, mpr.strings + f->s_name);
+			Con_Printf ("%12s : %s\n", f->filename, f->def->name);
 	}
 }
 
@@ -215,7 +215,7 @@ void PR_Profile_f (void)
 		if (best)
 		{
 			if (num < 10)
-				Con_Printf ("%7i %s\n", best->profile, mpr.strings+best->s_name);
+				Con_Printf ("%7i %s\n", best->profile, best->def->name);
 			num++;
 			best->profile = 0;
 		}
@@ -479,7 +479,7 @@ void PR_ExecuteProgram (func_t fnum)
 
 	f = &mpr.functions[fnum];
 
-/// fprintf(stderr, "PR_ExecuteProgram : %s\n", mpr.strings + f->s_name);
+/// fprintf(stderr, "PR_ExecuteProgram : %s\n", f->def->name);
 
 	exec.trace = false;
 
@@ -699,7 +699,7 @@ void PR_ExecuteProgram (func_t fnum)
 				newf = &mpr.functions[f];
 			}
 
-if (exec.trace) fprintf(stderr, "Calling : %s\n", mpr.strings + newf->s_name);
+if (exec.trace) fprintf(stderr, "Calling : %s\n", newf->def->name);
 
 			if (exec.next_frame < 0)
 				PR_RunError("PR_ExecuteProgram: no frame for OP_CALL");
@@ -903,8 +903,6 @@ void VM_Init()
 
 	// #0 for these means "nil"
 	mpr.numfunctions  = 1;
-
-	mpr.strofs = 257;  // 0 = "", 1..256 = temp buf
 }
 
 
@@ -929,7 +927,7 @@ int VM_CompileFile(const char *filename)
 int VM_FindFunction(const char *name)
 {
 	for (int i=1 ; i < mpr.numfunctions ; i++)
-		if (strcmp(mpr.strings + mpr.functions[i].s_name, name) == 0)
+		if (strcmp(mpr.functions[i].def->name, name) == 0)
 			return i;
 
 	return VM_NIL;

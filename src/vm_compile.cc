@@ -41,7 +41,6 @@ static int pr_error_count;
 dfunction_t	*pr_scope;		// the function being parsed, or NULL
 
 bool	pr_dumpasm;
-string_t	s_file;			// filename for function definition
 
 int		pr_local_ofs;
 
@@ -215,24 +214,6 @@ static eval_t * PR_AllocEval(int kind, type_t *type)
 	return ev;
 }
 
-
-// CopyString returns an offset from the string heap
-static int	CopyString(const char *str)
-{
-	int index = mpr.strofs;
-
-	strcpy (mpr.strings + mpr.strofs, str);
-
-	mpr.strofs += strlen(str)+1;
-
-	if (mpr.strofs >= (int)sizeof(mpr.strings))
-		FatalError("Out of string space!\n");
-
-	return index;
-}
-
-
-// andrewj: added this, find existing string, or copy to string table
 
 static object_ref_c * empty_str;
 
@@ -811,16 +792,13 @@ static void CODEGEN_FunctionCall(eval_t * ev, bool no_result)
 
 static void CODEGEN_FormatString(eval_t * ev)
 {
-	int i;
-	kval_t s;
-
 	// mark beginning of function's stack frame
 	PR_EmitOp(OP_FRAME, 0, 0, 0);
 
 	// push parameters, same order as given
 	CODEGEN_Literal(ev->literal, ev->type);
 
-	for (i = 0 ; i < ev->num_parms ; i++)
+	for (int i = 0 ; i < ev->num_parms ; i++)
 	{
 		CODEGEN_Eval(ev->args[i], false);
 	}
@@ -1662,8 +1640,7 @@ is_extern = PR_Check("builtin");
 	for (i=0 ; i < df->numparms ; i++)
 		df->parm_size[i] = type_size[df->def->type->parm_types[i]->kind];
 
-	df->s_name = CopyString (df->def->name);
-	df->s_file = s_file;
+	df->filename = pr_source_file;
 
 
 	pr_scope = df;
@@ -1730,11 +1707,11 @@ compiles the 0 terminated text, adding defintions to the pr2 structure
 bool PR_CompileFile (char *string, const char *filename)
 {	
 	pr_file_p = string;
-	s_file = CopyString (filename);
 
+	pr_source_file = filename;
 	pr_source_line = 0;
 	pr_scope = NULL;
-	
+
 	PR_NewLine ();
 
 	PR_Lex ();	// read first token

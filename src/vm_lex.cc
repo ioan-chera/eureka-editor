@@ -29,8 +29,7 @@
 #include "vm_local.h"
 
 
-static const char *pr_filename = "file";
-
+const char *pr_source_file = "XXX";
 int			pr_source_line;
 
 char		*pr_file_p;
@@ -415,7 +414,7 @@ void PR_ParseError (const char *error, ...)
 	vsprintf (string,error,argptr);
 	va_end (argptr);
 
-	printf ("%s:%i: %s\n", pr_filename, pr_source_line, string);
+	printf ("%s:%i: %s\n", pr_source_file, pr_source_line, string);
 
 	longjmp (pr_parse_abort, 1);
 }
