@@ -29,6 +29,8 @@
 
 #include <setjmp.h>
 
+#include "vm_object.h"
+
 typedef int	func_t;
 typedef int	string_t;
 
@@ -37,11 +39,11 @@ class edict_t;
 
 typedef union
 {
-	float		_float;
-	int			_int;
-	string_t	_string;
-	func_t		_func;
-	int			_edict;
+	float			_float;
+	int				_int;
+	object_ref_c *	_string;
+	func_t			_func;
+	int				_edict;
 } kval_t;
 
 
@@ -344,7 +346,7 @@ extern  mem_progs_t  mpr;
 
 #define	G_FLOAT(o)    (mpr.registers[o]._float)
 #define	G_INT(o)      (mpr.registers[o]._int)
-#define	G_STRING(o)   (mpr.strings + mpr.registers[o]._string)
+#define	G_STRING(o)   (mpr.registers[o]._string)
 #define	G_FUNCTION(o) (mpr.registers[o]._func)
 
 
@@ -423,7 +425,7 @@ int          PR_Param_EdictNum(int offset);
 void PR_Return_Int(int val);
 void PR_Return_Float(float val);
 void PR_Return_Vector(float *val);
-void PR_Return_String(int offset);
+void PR_Return_String(const char *str);
 void PR_Return_Entity(edict_t * ent);
 
 

@@ -241,7 +241,7 @@ const char * PR_Param_String(int offset)
 {
 	kval_t *parms = &exec.stack[exec.frame];
 
-	return mpr.strings + parms[offset]._string;
+	return parms[offset]._string->ptr.str;
 }
 
 void PR_Param_Vector(int offset, float *vec)
@@ -282,9 +282,11 @@ void PR_Return_Vector(float *val)
 }
 
 
-void PR_Return_String(int offset)
+void PR_Return_String(const char *str)
 {
-	PR_Return_Int(offset);
+	// FIXME: check for 'empty_str'
+
+	G_STRING(OFS_RETURN) = object_ref_c::NewString(str);
 }
 
 void PR_Return_Entity(edict_t * ent)
@@ -576,7 +578,7 @@ void PR_ExecuteProgram (func_t fnum)
 			break;
 
 		case OP_BOOL_S:
-			STACK_F(0) = STACK(0)._string && mpr.strings[STACK(0)._string];
+			STACK_F(0) = STACK(0)._string->ptr.str[0] && 1;
 			break;
 
 		case OP_BOOL_FNC:
@@ -594,7 +596,7 @@ void PR_ExecuteProgram (func_t fnum)
 			break;
 
 		case OP_EQ_S:
-			STACK_F(-1) = !strcmp(mpr.strings + STACK(-1)._string, mpr.strings + STACK(0)._string);
+			STACK_F(-1) = !strcmp(STACK(-1)._string->ptr.str, STACK(0)._string->ptr.str);
 			DROP(1);
 			break;
 
@@ -979,7 +981,7 @@ float VM_Result_Float()
 
 const char * VM_Result_String()
 {
-	return G_STRING(OFS_RETURN);
+	return G_STRING(OFS_RETURN)->ptr.str;
 }
 
 

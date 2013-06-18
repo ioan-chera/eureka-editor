@@ -40,6 +40,9 @@
 */
 
 
+static char format_buffer[256];  // TODO: bigger
+
+
 void PC_dprint (void)
 {
 	const char *s = PR_Param_String(0);
@@ -221,11 +224,11 @@ void PC_ftos (void)
 	float v = PR_Param_Float(0);
 	
 	if (v == (int)v)
-		sprintf ((char *)mpr.strings + 1, "%d",(int)v);
+		sprintf (format_buffer, "%d",(int)v);
 	else
-		sprintf ((char *)mpr.strings + 1, "%5.1f",v);
+		sprintf (format_buffer, "%5.1f",v);
 	
-	PR_Return_String(1);
+	PR_Return_String(format_buffer);
 }
 
 void PC_vtos (void)
@@ -234,9 +237,9 @@ void PC_vtos (void)
 
 	PR_Param_Vector(0, val);
 
-	sprintf ((char *)mpr.strings + 1, "'%5.1f %5.1f %5.1f'", val[0], val[1], val[2]);
+	sprintf (format_buffer, "'%5.1f %5.1f %5.1f'", val[0], val[1], val[2]);
 
-	PR_Return_String(1);
+	PR_Return_String(format_buffer);
 }
 
 void PC_etos (void)
@@ -245,11 +248,11 @@ void PC_etos (void)
 
 	// Intentional Const Override
 	if (! num)
-		strcpy ((char *)mpr.strings + 1, "nil");
+		strcpy (format_buffer, "nil");
 	else
-		sprintf ((char *)mpr.strings + 1, "entity_%i", num);
+		sprintf (format_buffer, "entity_%i", num);
 
-	PR_Return_String(1);
+	PR_Return_String(format_buffer);
 }
 
 
@@ -486,9 +489,7 @@ void PC_format_string (void)
 	*p = 0;
 	result[250] = 0;
 
-	strcpy((char *)mpr.strings + 1, result);
-
-	PR_Return_String(1);
+	PR_Return_String(result);
 }
 
 

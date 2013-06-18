@@ -234,19 +234,26 @@ static int	CopyString(const char *str)
 
 
 // andrewj: added this, find existing string, or copy to string table
-static int	GlobalizeString(const char *str)
-{
-	int  i, len;
-	
-	for (i=129 ; i < mpr.strofs ; i += len)
-	{
-		len = strlen(mpr.strings + i) + 1;
 
-		if (strcmp(mpr.strings + i, str) == 0)
-			return i;
+static object_ref_c * empty_str;
+
+
+static object_ref_c * GlobalizeString(const char *str)
+{
+	if (! empty_str)
+	{
+		empty_str = object_ref_c::NewString("");
+		empty_str->MakePermanent();
 	}
 
-	return CopyString(str);
+	if (! str[0])
+		return empty_str;
+
+	object_ref_c * ref = object_ref_c::NewString(str);
+
+	ref->MakePermanent();
+
+	return ref;
 }
 
 
@@ -1599,17 +1606,17 @@ is_extern = PR_Check("builtin");
 		switch (pr_immediate_type->kind)
 		{
 			case ev_float:
-				mpr.registers[def->ofs]._float = pr_immediate_float[0];
+				G_FLOAT(def->ofs) = pr_immediate_float[0];
 				break;
 			
 			case ev_vector:
-				mpr.registers[def->ofs + 0]._float = pr_immediate_float[0];
-				mpr.registers[def->ofs + 1]._float = pr_immediate_float[1];
-				mpr.registers[def->ofs + 2]._float = pr_immediate_float[2];
+				G_FLOAT(def->ofs + 0) = pr_immediate_float[0];
+				G_FLOAT(def->ofs + 1) = pr_immediate_float[1];
+				G_FLOAT(def->ofs + 2) = pr_immediate_float[2];
 				break;
 
 			case ev_string:
-				mpr.registers[def->ofs + 0]._string = GlobalizeString(pr_immediate_string);
+				G_STRING(def->ofs) = GlobalizeString(pr_immediate_string);
 				break;
 
 			default:
