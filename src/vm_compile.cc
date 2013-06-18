@@ -220,12 +220,6 @@ static object_ref_c * empty_str;
 
 static object_ref_c * GlobalizeString(const char *str)
 {
-	if (! empty_str)
-	{
-		empty_str = object_ref_c::NewString("");
-		empty_str->MakePermanent();
-	}
-
 	if (! str[0])
 		return empty_str;
 
@@ -1349,7 +1343,7 @@ static int PR_ResolveBuiltin(const char *name)
 PR_ParseFunctionBody
 ============
 */
-static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern)
+static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_builtin)
 {
 	int			i;
 	def_t		*defs[MAX_PARMS];
@@ -1359,7 +1353,7 @@ static void PR_ParseFunctionBody(dfunction_t *df, type_t *type, bool is_extern)
 //
 	df->builtin = 0;
 
-	if (is_extern)
+	if (is_builtin)
 	{
 		PR_Check(";");
 
@@ -1523,11 +1517,8 @@ void PR_ParseGlobals (void)
 	dfunction_t	*df;
 
 	int			i;
-// int line;
-bool  is_forward;
-bool  is_extern;
 
-	// field definition ?
+// field definition ?
 
 	if (PR_Check("."))
 	{
@@ -1544,15 +1535,14 @@ bool  is_extern;
 	}
 
 
-is_forward = PR_Check("forward");
-if (! is_forward)
-is_extern = PR_Check("builtin");
+	bool is_builtin = PR_Check("builtin");
+	bool is_forward = PR_Check("forward");
 
 
 	name = strdup(PR_ParseName());
 
 
-	// constants
+// constants
 	
 	if (PR_Check(":="))
 	{
@@ -1591,7 +1581,7 @@ is_extern = PR_Check("builtin");
 	}
 
 
-	// variables
+// variables
 
 	if (! PR_Check("("))
 	{
@@ -1601,12 +1591,15 @@ is_extern = PR_Check("builtin");
 
 		def = PR_GetDef (name, type, NULL, 1);
 
+		if (type->kind == ev_string)
+			G_STRING(def->ofs) = empty_str;
+
 		PR_Check (";");
 		return;
 	}
 
 	
-	// functions
+// functions
 	
 	type = PR_ParseAltFuncType(true /* seen_first_bracket */);
 
@@ -1640,13 +1633,13 @@ is_extern = PR_Check("builtin");
 	for (i=0 ; i < df->numparms ; i++)
 		df->parm_size[i] = type_size[df->def->type->parm_types[i]->kind];
 
-	df->filename = pr_source_file;
+	df->filename = StringDup(pr_source_file);
 
 
 	pr_scope = df;
 	pr_local_ofs = 0;
 	{
-		PR_ParseFunctionBody (df, type, is_extern);
+		PR_ParseFunctionBody (df, type, is_builtin);
 	}
 	pr_scope = NULL;
 
@@ -1711,6 +1704,12 @@ bool PR_CompileFile (char *string, const char *filename)
 	pr_source_file = filename;
 	pr_source_line = 0;
 	pr_scope = NULL;
+
+	if (! empty_str)
+	{
+		empty_str = object_ref_c::NewString("");
+		empty_str->MakePermanent();
+	}
 
 	PR_NewLine ();
 
