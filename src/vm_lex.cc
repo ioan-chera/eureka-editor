@@ -59,12 +59,8 @@ type_t	type_string = {ev_string};
 type_t	type_float = {ev_float};
 type_t	type_vector = {ev_vector};
 type_t	type_entity = {ev_entity};
-type_t	type_field = {ev_field};
 type_t	type_function = {ev_function, NULL, &type_void};
-// type_function is a void() function used for state defs
 type_t	type_pointer = {ev_pointer};
-
-type_t	type_floatfield = {ev_field, NULL, &type_float};
 
 int		type_size[8] = {1,1,1,3,1,1,1,1};
 
@@ -592,18 +588,6 @@ type_t *PR_ParseType (void)
 
 	return type;
 
-}
-
-
-type_t *PR_ParseFieldType (void)
-{
-	type_t	newbie;
-	memset (&newbie, 0, sizeof(newbie));
-
-	newbie.kind = ev_field;
-	newbie.aux_type = PR_ParseType ();
-
-	return PR_FindType (&newbie);
 }
 
 

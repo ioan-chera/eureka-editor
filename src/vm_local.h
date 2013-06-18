@@ -54,7 +54,6 @@ typedef enum
 	ev_float,
 	ev_vector,
 	ev_entity,
-	ev_field,
 	ev_function,
 	ev_pointer
 
@@ -244,7 +243,7 @@ typedef struct def_s
 
 extern	int		type_size[8];
 
-extern	type_t	type_void, type_string, type_float, type_vector, type_entity, type_field, type_function, type_pointer, type_floatfield;
+extern	type_t	type_void, type_string, type_float, type_vector, type_entity, type_function, type_pointer;
 
 
 //============================================================================
@@ -285,7 +284,6 @@ void PR_SkipToSemicolon (void);
 char *PR_ParseName (void);
 
 type_t *PR_ParseType (void);
-type_t *PR_ParseFieldType (void);
 type_t *PR_ParseAltFuncType (bool seen_first_bracket);
 
 bool PR_Check (const char *string);
@@ -330,9 +328,6 @@ typedef struct
 
 	globaldef_t	globals[MAX_GLOBALS];
 	int			numglobaldefs;
-
-	fielddef_t	fields[MAX_FIELDS];
-	int			numfielddefs;
 
 	kval_t		registers[MAX_REGS];
 	int			numregisters;

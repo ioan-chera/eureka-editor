@@ -511,6 +511,10 @@ static eval_t * EXP_FunctionCall(eval_t *e1)
 
 static eval_t * EXP_FieldAccess(eval_t *e1)
 {
+	PR_ParseError("bad field access");
+	return NULL;  /* NOT REACHED */
+
+#if 0
 	def_t *d;
 	eval_t *acc;
 	const char *name;
@@ -533,6 +537,7 @@ static eval_t * EXP_FieldAccess(eval_t *e1)
 	acc->def = d;
 			
 	return acc;
+#endif
 }
 
 
@@ -1473,27 +1478,6 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 	else
 		mpr.numregisters += type_size[type->kind];
 
-
-	if (type->kind == ev_field)
-	{
-		G_INT(def->ofs) = 123; /// pr2.size_fields;
-
-		if (type->aux_type->kind == ev_vector)
-		{
-			sprintf (element, "%s_x",name);
-			PR_GetDef (element, &type_floatfield, scope, allocate);
-			
-			sprintf (element, "%s_y",name);
-			PR_GetDef (element, &type_floatfield, scope, allocate);
-			
-			sprintf (element, "%s_z",name);
-			PR_GetDef (element, &type_floatfield, scope, allocate);
-		}
-		else
-		{
-		//???	pr2.size_fields += type_size[type->aux_type->kind];
-		}
-	}
 
 //	if (pr_dumpasm)
 //		PR_PrintOfs (def->ofs);
