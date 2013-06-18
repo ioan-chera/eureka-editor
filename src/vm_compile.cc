@@ -256,9 +256,9 @@ static eval_t * EXP_Literal(void)
 
 	if (ev->type->kind == ev_vector)
 	{
-		ev->literal[0]._float = pr_immediate.vector[0];
-		ev->literal[1]._float = pr_immediate.vector[1];
-		ev->literal[2]._float = pr_immediate.vector[2];
+		ev->literal[0]._float = pr_immediate_float[0];
+		ev->literal[1]._float = pr_immediate_float[1];
+		ev->literal[2]._float = pr_immediate_float[2];
 	}
 	else if (ev->type->kind == ev_string)
 	{
@@ -266,7 +266,7 @@ static eval_t * EXP_Literal(void)
 	}
 	else  // ev_float
 	{
-		ev->literal[0]._float = pr_immediate._float;
+		ev->literal[0]._float = pr_immediate_float[0];
 	}
 
 	PR_Lex();
@@ -407,7 +407,7 @@ static eval_t * EXP_FormatString(void)
 	PR_Expect("(");
 
 // grab the format string
-	if (pr_token_type != tt_immediate || pr_immediate_type != &type_string)
+	if (pr_token_type != tt_immediate || pr_immediate_type->kind != ev_string)
 		PR_ParseError ("missing format string");
 
 	fmt = PR_AllocEval(EV_FORMAT_STR, &type_string);
@@ -1540,6 +1540,7 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 	return def;
 }
 
+
 /*
 ================
 PR_ParseGlobals
@@ -1594,9 +1595,26 @@ is_extern = PR_Check("builtin");
 			PR_ParseError ("%s redeclared", name);
 
 		def->initialized = 1;
+
+		switch (pr_immediate_type->kind)
 		{
-			int size = type_size[pr_immediate_type->kind] * sizeof(kval_t);
-			memcpy (mpr.registers + def->ofs, &pr_immediate, size);
+			case ev_float:
+				mpr.registers[def->ofs]._float = pr_immediate_float[0];
+				break;
+			
+			case ev_vector:
+				mpr.registers[def->ofs + 0]._float = pr_immediate_float[0];
+				mpr.registers[def->ofs + 1]._float = pr_immediate_float[1];
+				mpr.registers[def->ofs + 2]._float = pr_immediate_float[2];
+				break;
+
+			case ev_string:
+				mpr.registers[def->ofs + 0]._string = GlobalizeString(pr_immediate_string);
+				break;
+
+			default:
+				PR_ParseError("weird value for constant");
+				/* NOT REACHED */
 		}
 
 		PR_Lex();

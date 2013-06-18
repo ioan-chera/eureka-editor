@@ -264,22 +264,13 @@ typedef enum
 
 extern	bool	pr_dumpasm;
 
-typedef union lex_eval_s
-{
-	int					_int;
-	string_t			string;
-	float				_float;
-	float				vector[3];
-	func_t				function;
 
-} lex_eval_t;	
-
-extern	char	pr_immediate_string[2048];
-
-extern	char		pr_token[2048];
+extern	char			pr_token[2048];
 extern	token_type_t	pr_token_type;
+
 extern	type_t		*pr_immediate_type;
-extern	lex_eval_t		pr_immediate;
+extern  float		 pr_immediate_float[3];
+extern	char		 pr_immediate_string[2048];
 
 extern  char  pr_parm_names[MAX_PARMS][MAX_NAME];
 
