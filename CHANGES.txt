@@ -7,6 +7,8 @@ CHANGES IN Eureka
 -  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to next/previous file ('N' and 'P' keys)
 
+-  automatically open the most recent file (optional)
+
 -  support $DOOMWADPATH for finding IWADs
 
 -  fixed crash bug when loading or saving a map containing linedefs
