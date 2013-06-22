@@ -17,7 +17,8 @@ syn keyword upStatement		return
 syn keyword upRepeat		while repeat until for
 syn keyword upStruct		class
 syn keyword upStorage		forward builtin
-syn keyword upType			float vector string entity function void 
+syn keyword upType			float vector string function void
+syn keyword upType			linedef sidedef sector thing vertex set
 
 syn keyword upTodo contained	TODO FIXME DEBUG NOTE WISH OPTIMIZE OPTIMISE
 
