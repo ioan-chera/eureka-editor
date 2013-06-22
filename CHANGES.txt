@@ -18,3 +18,5 @@ CHANGES IN Eureka
 
 -  fixed the selection after a sector merge 
 
+-  fixed remembering 3D mode (the lack of it) for a map
+

@@ -1129,16 +1129,16 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (strcmp(tokens[0], "render_mode") == 0)
+	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
 	{
 		if (main_win)
-			main_win->canvas->ChangeRenderMode(1);
+			main_win->canvas->ChangeRenderMode(atoi(tokens[1]));
 		return true;
 	}
 
-	if (strcmp(tokens[0], "show_object_numbers") == 0)
+	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
 	{
-		edit.show_object_numbers = 1;
+		edit.show_object_numbers = atoi(tokens[1]);
 		edit.RedrawMap = 1;
 		return true;
 	}
@@ -1159,11 +1159,11 @@ void Editor_WriteUser(FILE *fp)
 		default: break;
 	}
 
-	if (main_win && main_win->canvas->isRenderActive())
-		fprintf(fp, "render_mode 1\n");
+	if (main_win)
+		fprintf(fp, "render_mode %d\n",
+			main_win->canvas->isRenderActive() ? 1 : 0);
 
-	if (edit.show_object_numbers)
-		fprintf(fp, "show_object_numbers 1\n");
+	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
 }
 
 
