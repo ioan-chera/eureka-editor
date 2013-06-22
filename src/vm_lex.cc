@@ -62,8 +62,6 @@ type_t	type_entity = {ev_entity};
 type_t	type_function = {ev_function, NULL, &type_void};
 type_t	type_pointer = {ev_pointer};
 
-int		type_size[8] = {1,1,1,3,1,1,1,1};
-
 static type_t * custom_types;
 
 void PR_LexWhitespace (void);

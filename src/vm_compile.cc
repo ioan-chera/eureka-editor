@@ -1474,9 +1474,9 @@ static def_t * PR_GetDef (const char *name, type_t *type, dfunction_t *scope, in
 		PR_GetDef (element, &type_float, scope, allocate);
 	}
 	else if (scope)
-		pr_local_ofs += type_size[type->kind];
+		pr_local_ofs += (type->kind == ev_vector) ? 3 : 1;
 	else
-		mpr.numregisters += type_size[type->kind];
+		mpr.numregisters += (type->kind == ev_vector) ? 3 : 1;
 
 
 //	if (pr_dumpasm)
@@ -1567,9 +1567,6 @@ static void GLOB_Function(const char *name, bool is_forward, bool is_builtin)
 // fill in the dfunction
 	df->parm_start = mpr.numregisters;
 	df->numparms = df->def->type->num_parms;
-
-	for (int i = 0 ; i < df->numparms ; i++)
-		df->parm_size[i] = type_size[df->def->type->parm_types[i]->kind];
 
 	df->filename = StringDup(pr_source_file);
 

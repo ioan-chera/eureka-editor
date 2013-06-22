@@ -197,7 +197,6 @@ typedef struct
 	const char * filename;
 
 	int		numparms;
-	byte	parm_size[MAX_PARMS];
 
 } dfunction_t;
 
@@ -240,8 +239,6 @@ typedef struct def_s
 
 #define	MAX_REGS		16384
 
-
-extern	int		type_size[8];
 
 extern	type_t	type_void, type_string, type_float, type_vector, type_entity, type_function, type_pointer;
 
