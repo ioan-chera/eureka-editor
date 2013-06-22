@@ -14,5 +14,7 @@ CHANGES IN Eureka
 -  fixed crash bug when loading or saving a map containing linedefs
    which have no right sidedef
 
+-  fixed key binding dialog: unable to remove a parameter
+
 -  fixed the selection after a sector merge 
 

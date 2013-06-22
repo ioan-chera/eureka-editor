@@ -890,6 +890,8 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	/* OK : change the binding function */
 
 	bind.cmd = cmd;
+	bind.param[0][0] = 0;
+	bind.param[1][0] = 0;
 
 	if (num_tok >= 2)
 		strncpy(bind.param[0], tokens[1], MAX_BIND_PARAM_LEN-1);
