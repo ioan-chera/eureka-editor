@@ -1059,23 +1059,23 @@ void Editor_RegisterCommands()
 
 	/* line */
 
-	M_RegisterCommand("LIN_Flip", &LIN_Flip, KCTX_Line);
-	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf, KCTX_Line);
-	M_RegisterCommand("LIN_SelectPath", &LIN_SelectPath, KCTX_Line);
+	M_RegisterCommand("LIN_Flip", &LIN_Flip);
+	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf);
+	M_RegisterCommand("LIN_SelectPath", &LIN_SelectPath);
 
-	M_RegisterCommand("LIN_AlignX", &LIN_AlignX, KCTX_Line);
-	M_RegisterCommand("LIN_AlignY", &LIN_AlignY, KCTX_Line);
+	M_RegisterCommand("LIN_AlignX", &LIN_AlignX);
+	M_RegisterCommand("LIN_AlignY", &LIN_AlignY);
 
 	/* sector */
 
-	M_RegisterCommand("SEC_Floor", &SEC_Floor, KCTX_Sector);
-	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil,  KCTX_Sector);
-	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup, KCTX_Sector);
-	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats, KCTX_Sector);
+	M_RegisterCommand("SEC_Floor", &SEC_Floor);
+	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil);
+	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup);
+	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats);
 
 	/* thing */
 
-	M_RegisterCommand("TH_Spin", &TH_SpinThings, KCTX_Thing);
+	M_RegisterCommand("TH_Spin", &TH_SpinThings);
 
 	/* vertex */
 

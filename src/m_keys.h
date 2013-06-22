@@ -82,8 +82,7 @@ keycode_t M_ParseKeyString(const char *str);
 const char * M_KeyToString(keycode_t key);
 
 
-void M_RegisterCommand(const char *name, command_func_t func,
-                       key_context_e req_context = KCTX_NONE);
+void M_RegisterCommand(const char *name, command_func_t func);
 
 void M_LoadBindings();
 void M_SaveBindings();

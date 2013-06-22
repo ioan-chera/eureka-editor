@@ -851,11 +851,19 @@ static void ShowTime()
 }
 
 
-static void Test_VM()
+static void M_LoadScripts()
 {
+	// FIXME
+
 	VM_Init();
 
-	if (VM_CompileFile("hello_world.up") != 0)
+	if (VM_CompileFile("builtins.up") != 0)
+	{
+// !!!!		FatalError("Failed to compile builtins.up\n");
+		return;
+	}
+
+	if (VM_CompileFile("bind_test.up") != 0)
 	{
 		fprintf(stderr, "\n Test_VM: COMPILE FAILED\n");
 		return;
@@ -867,13 +875,6 @@ static void Test_VM()
 	{
 		fprintf(stderr, "\n Test_VM: NO FUNCTION 'test'\n");
 		return;
-	}
-
-	VM_Frame();
-
-	if (VM_Call(func) != 0)
-	{
-		fprintf(stderr, "\n Test_VM: VM_CALL FAILED\n");
 	}
 }
 
@@ -954,17 +955,15 @@ int main(int argc, char *argv[])
 	init_progress = 2;
 
 
-Test_VM();
-
-
 	M_LoadRecent();
 	M_LookForIWADs();
 
 	Editor_Init();
 
-	M_LoadBindings();
-
 	InitFLTK();  // creates the main window
+
+	M_LoadScripts();
+	M_LoadBindings();
 
 	init_progress = 3;
 
