@@ -466,7 +466,9 @@ static eval_t * EXP_Term(void)
 	}
 	else if (PR_Check("nil"))
 	{
-		return PR_AllocEval(EV_LITERAL, &type_nil);
+		eval_t *ev = PR_AllocEval(EV_LITERAL, &type_nil);
+		ev->literal[0]._float = 0;
+		return ev;
 	}
 	else if (PR_Check("format"))
 	{
@@ -560,21 +562,29 @@ static eval_t * EXP_Assignment(eval_t *e1, eval_t *e2)
 	// check for a valid "lvalue"
 
 	if (! (e1->kind == EV_VARIABLE || e1->kind == EV_FIELD_ACCESS) ||
-	    e1->type->kind == ev_void)
+	    e1->type->kind == ev_void ||
+		e1->type->kind == ev_nil)
 	{
 		PR_ParseError("bad assignment (lhs not an lvalue)");
 	}
-
-	// check type
-	// FIXME: TypeMatch(...)
-	if (e1->type->kind != e2->type->kind)
-		PR_ParseError("type mismatch in assignment");
 
 	// check for constant
 	if (e1->kind == EV_VARIABLE && e1->def->initialized)
 		PR_ParseError("assignment to a constant");
 
-	assign = PR_AllocEval(EV_ASSIGNMENT, e2->type);
+	// check type
+	// FIXME: TypeMatch(...)
+	bool is_nil = false;
+
+	if (e2->type->kind == ev_nil)
+	{
+		// can assign 'nil' to anything
+		is_nil = true;
+	}
+	else if (e1->type->kind != e2->type->kind)
+		PR_ParseError("type mismatch in assignment");
+
+	assign = PR_AllocEval(EV_ASSIGNMENT, is_nil ? e1->type : e2->type);
 
 	assign->args[0] = e1;
 	assign->args[1] = e2;
@@ -736,13 +746,33 @@ static void CODEGEN_DropValue(type_t *type)
 
 static void CODEGEN_Literal(const kval_t * literal, type_t *type)
 {
-	PR_EmitOp(OP_LITERAL, 0, 0, 0);
-
 	int count = (type->kind == ev_vector) ? 3 : 1;
 
 	for (int i = 0 ; i < count ; i++)
 	{
+		PR_EmitOp(OP_LITERAL, 0, 0, 0);
 		PR_EmitKVal(literal[i]);
+	}
+}
+
+
+static void CODEGEN_Nil(type_t *type)
+{
+	if (type->kind == ev_string)
+	{
+		kval_t  s;
+
+		s._string = empty_str;
+
+		CODEGEN_Literal(&s, type);
+	}
+	else
+	{
+		kval_t  literal[3];
+
+		memset(literal, 0, sizeof(literal));
+
+		CODEGEN_Literal(literal, type);
 	}
 }
 
@@ -845,7 +875,11 @@ static void CODEGEN_FieldAccess(eval_t * ev, bool load_it)
 static void CODEGEN_Assignment(eval_t * ev, bool no_result)
 {
 	// get assigned value on the stack
-	CODEGEN_Eval(ev->args[1], false);
+
+	if (ev->args[1]->type->kind == ev_nil)
+		CODEGEN_Nil(ev->type);
+	else
+		CODEGEN_Eval(ev->args[1], false);
 
 	if (! no_result)
 	{
@@ -1657,21 +1691,9 @@ static void PR_ParseLocal (void)
 
 		CODEGEN_Eval(e, false);
 	}
-	else if (type->kind == ev_string)
-	{
-		kval_t  s;
-
-		s._string = empty_str;
-
-		CODEGEN_Literal(&s, type);
-	}
 	else
 	{
-		kval_t  literal[3];
-
-		memset(literal, 0, sizeof(literal));
-
-		CODEGEN_Literal(literal, type);
+		CODEGEN_Nil(type);
 	}
 
 	PR_Check (";");
@@ -1709,7 +1731,9 @@ bool PR_CompileFile (char *string, const char *filename)
 		{
 			if (++pr_error_count > MAX_ERRORS)
 				return false;
+			
 			PR_SkipToSemicolon ();
+
 			if (pr_token_type == tt_eof)
 				return false;		
 		}

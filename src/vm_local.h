@@ -261,6 +261,8 @@ extern	type_t	type_void, type_nil, type_string, type_float, type_vector, type_en
 typedef enum
 {
 	tt_eof,			// end of file reached
+	tt_error,       // a parsing error has occurred
+
 	tt_name, 		// an alphanumeric name token
 	tt_punct, 		// code punctuation
 	tt_immediate,	// string, float, vector
