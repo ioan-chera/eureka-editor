@@ -11,6 +11,8 @@ CHANGES IN Eureka
 
 -  support $DOOMWADPATH for finding IWADs
 
+-  remember the browser width for a saved map
+
 -  fixed crash bug when loading or saving a map containing linedefs
    which have no right sidedef
 

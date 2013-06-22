@@ -3,6 +3,7 @@ Eureka TODO / WISHLIST
 ======================
 
 
+VM: use exceptions, not setjmp/longjmp
 
 ______________________________________________________________________
 
@@ -13,9 +14,13 @@ ______________________________________________________________________
 General
 -------
 
++  configurable grid colors, 
+
+   IDEA: grid has separate color for 64x64 flat alignment
+
 +  CHECK screen  (see misc/Checks.txt for more info)
 
-+  Hexen support
++  a check/fix pass for LoadLevel()
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -24,6 +29,8 @@ General
 +  Preferences:
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
+
++  Hexen support
 
 
 
@@ -94,10 +101,6 @@ General
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
-+  configurable grid colors, 
-
-   IDEA: grid has separate color for 64x64 flat alignment
-
 +  File / Test Map
    +  make filenames absolute
    +  configurable stuff:
@@ -121,7 +124,7 @@ General
 
 +  a dialog to view / load / prune backups.
 
-?  Scripting language
++  Scripting language
 
 IDEA: ability to edit Lua code for OBLIGE prefabs
 
@@ -153,8 +156,6 @@ WISH: support UDMF format
 -  in EUREKA lump, if a path is under $HOME store it as "~/blah..."
    and expand that syntax on load.
 
--  a check/fix pass for LoadLevel()
-
 -  ability to use an external node builder
 
 -  LineDef panel: show "lower" etc in unset pics (low contrast)
@@ -180,8 +181,6 @@ IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
       and $DOOMWADDIR and $DOOMWADPATH.  Perhaps add places where
       the user opened a wad automatically (or ask?).
-
-IDEA: when no pwad given, load RECENT thing  [config item, default off]
 
 IDEA: allow ".ugh" files as resources
       (and perhaps even DDF files)
@@ -315,7 +314,7 @@ IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
       "best" quantization.
 
-IDEA: merge vertex and linedef modes
+NO: merge vertex and linedef modes
 
 IDEA: a config item to make the "simple" grid occur when grid-snapping
       and the "normal" grid occur in FREE mode.
@@ -378,8 +377,6 @@ Browser
 -  a "Used in map" category (sorted by usage)
 
 +  when opened by a click, jump to the texture/thing/etc clicked on
-
--  persist current width (in .dat cache file)
 
 -  can change the [max] size of the texture/flat previews
 
