@@ -166,7 +166,7 @@ void UI_MainWin::ShowBrowser(char kind)
 {
 	bool is_visible = browser->visible() ? true : false;
 
-	if (is_visible && kind == '/')
+	if (kind == '-' || (is_visible && kind == '/'))
 		kind = 0;
 
 	bool want_visible = (kind != 0) ? true : false;

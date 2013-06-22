@@ -1081,9 +1081,9 @@ void UI_Browser::WriteUser(FILE *fp)
 	fprintf(fp, "\n");
 
 	if (visible())
-	{
 		fprintf(fp, "open_browser %c\n", browsers[active]->GetKind());
-	}
+	else
+		fprintf(fp, "open_browser -\n");
 
 	for (int i = 0 ; i < 5 ; i++)
 	{
@@ -1095,8 +1095,14 @@ void UI_Browser::WriteUser(FILE *fp)
 bool Browser_ParseUser(const char ** tokens, int num_tok)
 {
 	if (main_win)
-		return main_win->browser->ParseUser(tokens, num_tok);
-	
+	{
+		if (main_win->tile->ParseUser(tokens, num_tok))
+			return true;
+
+		if (main_win->browser->ParseUser(tokens, num_tok))
+			return true;
+	}
+
 	return false;
 }
 
@@ -1104,7 +1110,10 @@ bool Browser_ParseUser(const char ** tokens, int num_tok)
 void Browser_WriteUser(FILE *fp)
 {
 	if (main_win)
-		return main_win->browser->WriteUser(fp);
+	{
+		main_win->tile   ->WriteUser(fp);
+		main_win->browser->WriteUser(fp);
+	}
 }
 
 

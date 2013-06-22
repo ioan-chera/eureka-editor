@@ -94,7 +94,7 @@ public:
 	void SetCursor(Fl_Cursor shape);
 
 	// show or hide the Browser panel.
-	// kind is 0 to hide, '/' to toggle, 'T' for textures, 'F' flats,
+	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
 	//         'O' for thing types, 'L' line types, 'S' sector types.
 	void ShowBrowser(char kind);
 

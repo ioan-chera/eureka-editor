@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -90,11 +90,7 @@ void UI_Tile::ShowRight()
 		return;
 
 	// determine the width of the browser
-	if (right_W > w() - 32)
-		right_W = w() - 32;
-
-	if (right_W < MIN_BROWSER_W)
-		right_W = MIN_BROWSER_W;
+	right_W = CLAMP(MIN_BROWSER_W, right_W, w() - 32);
 
 	add(right);
 
@@ -126,6 +122,33 @@ void UI_Tile::HideRight()
 
 	// widgets in our group (the window) got rearranged, tell FLTK
 	init_sizes();
+}
+
+
+bool UI_Tile::ParseUser(const char ** tokens, int num_tok)
+{
+	if (strcmp(tokens[0], "br_width") == 0 && num_tok >= 2)
+	{
+		bool was_visible = right->visible();
+
+		if (was_visible)
+			HideRight();
+
+		right_W = atoi(tokens[1]);
+
+		if (was_visible)
+			ShowRight();
+
+		return true;
+	}
+
+	return false;
+}
+
+
+void UI_Tile::WriteUser(FILE *fp)
+{
+	fprintf(fp, "br_width %d\n", right->visible() ? right->w() : right_W);
 }
 
 

@@ -49,6 +49,9 @@ public:
 public:
 	void ShowRight();
 	void HideRight();
+
+	bool ParseUser(const char ** tokens, int num_tok);
+	void WriteUser(FILE *fp);
 };
 
 
