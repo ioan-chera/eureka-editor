@@ -1121,63 +1121,8 @@ static const char *confirm_i2e (confirm_t internal)
 }
 
 
-#include <string>
-#include <vector>
-
-const size_t MAX_TOKENS = 10;
-
-/*
- *  word_splitting - perform word splitting on a string
- */
-int word_splitting (std::vector<std::string>& tokens, const char *string)
-{
-	size_t      ntokens     = 0;
-	const char *iptr        = string;
-	const char *token_start = 0;
-	bool        in_token    = false;
-	bool        quoted      = false;
-
-	/* break the line into whitespace-separated tokens.
-	   whitespace can be enclosed in double quotes. */
-	for (; ; iptr++)
-	{
-		if (*iptr == '\n' || *iptr == 0)
-			break;
-
-		else if (*iptr == '"')
-			quoted = ! quoted;
-
-		// "#" at the beginning of a token
-		else if (! in_token && ! quoted && *iptr == '#')
-			break;
-
-		// First character of token
-		else if (! in_token && (quoted || ! isspace (*iptr)))
-		{
-			ntokens++;
-			if (ntokens > MAX_TOKENS)
-				return 2;  // Too many tokens
-			in_token = true;
-		}
-
-		// First space between two tokens
-		else if (in_token && ! quoted && isspace (*iptr))
-		{
-			tokens.push_back (std::string (token_start, iptr - token_start));
-			in_token = false;
-		}
-	}
-
-	if (in_token)
-		tokens.push_back (std::string (token_start, iptr - token_start));
-
-	if (quoted)
-		return 1;  // Unmatched double quote
-
-	return 0;
-}
-
-
+//------------------------------------------------------------------------
+//   USER STATE HANDLING
 //------------------------------------------------------------------------
 
 
@@ -1286,6 +1231,9 @@ char * PersistFilename(const crc32_c& crc)
 
 	return filename;
 }
+
+
+#define MAX_TOKENS  10
 
 
 bool M_LoadUserState()
