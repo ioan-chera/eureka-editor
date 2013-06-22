@@ -150,6 +150,9 @@ typedef enum
 	OP_LOCAL_WRITE,
 	OP_LOCAL_WRITE_V,
 
+	OP_SET_READ,
+	OP_SET_WRITE,
+
 //--------- VECTOR OPS ----------//
 
     OP_VEC_ADD,     // add two vectors on stack

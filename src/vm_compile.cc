@@ -169,7 +169,8 @@ typedef enum
 
 	EV_FUNC_CALL,
 	EV_FORMAT_STR,
-	EV_FIELD_ACCESS
+	EV_FIELD_ACCESS,
+	EV_SET_ACCESS
 
 } eval_kind_e;
 
@@ -553,6 +554,51 @@ static eval_t * EXP_FieldAccess(eval_t *e1)
 }
 
 
+static eval_t * EXP_SetAccess(eval_t *e1)
+{
+	if (e1->type->kind != ev_set)
+	{
+		PR_ParseError("variable must be a set for []");
+		return NULL;
+	}
+
+
+	eval_t * e2 = EXP_Expression(ASSIGN_PRIORITY - 1);
+
+	PR_Expect("]");
+
+
+	// check types
+	if (e1->type->aux_type->kind != e2->type->kind)
+	{
+		PR_ParseError("type mismatch for set access");
+		return NULL;
+	}
+
+
+	eval_t * acc = PR_AllocEval(EV_SET_ACCESS, &type_float);
+
+	acc->args[0] = e1;
+	acc->args[1] = e2;
+
+	return acc;
+}
+
+
+static bool isLValue(const eval_t * e)
+{
+	if (e->type->kind == ev_void || e->type->kind == ev_nil)
+		return false;
+
+	if (e->kind == EV_VARIABLE ||
+	    e->kind == EV_FIELD_ACCESS ||
+	    e->kind == EV_SET_ACCESS)
+		return true;
+	
+	return false;
+}
+
+
 static eval_t * EXP_Assignment(eval_t *e1, eval_t *e2)
 {
 	// assigning e2 to e1
@@ -560,13 +606,8 @@ static eval_t * EXP_Assignment(eval_t *e1, eval_t *e2)
 	eval_t *assign;
 
 	// check for a valid "lvalue"
-
-	if (! (e1->kind == EV_VARIABLE || e1->kind == EV_FIELD_ACCESS) ||
-	    e1->type->kind == ev_void ||
-		e1->type->kind == ev_nil)
-	{
-		PR_ParseError("bad assignment (lhs not an lvalue)");
-	}
+	if (! isLValue(e1))
+		PR_ParseError("bad assignment (not an lvalue)");
 
 	// check for constant
 	if (e1->kind == EV_VARIABLE && e1->def->initialized)
@@ -682,6 +723,13 @@ static eval_t * EXP_Expression(int priority)
 		if (priority == 1 && PR_Check("."))
 		{
 			e1 = EXP_FieldAccess(e1);
+			found = true;
+			continue;
+		}
+
+		if (priority == 1 && PR_Check("["))
+		{
+			e1 = EXP_SetAccess(e1);
 			found = true;
 			continue;
 		}
@@ -872,6 +920,32 @@ static void CODEGEN_FieldAccess(eval_t * ev, bool load_it)
 }
 
 
+static void CODEGEN_SetRead(eval_t * ev)
+{
+	// push index obj
+	CODEGEN_Eval(ev->args[1], false);
+
+	// push selection obj
+	CODEGEN_Eval(ev->args[0], false);
+
+	PR_EmitOp(OP_SET_READ, 0, 0, 0);
+}
+
+
+static void CODEGEN_SetWrite(eval_t * ev)
+{
+	// value to write is already on stack
+
+	// push index obj
+	CODEGEN_Eval(ev->args[1], false);
+
+	// push selection obj
+	CODEGEN_Eval(ev->args[0], false);
+
+	PR_EmitOp(OP_SET_WRITE, 0, 0, 0);
+}
+
+
 static void CODEGEN_Assignment(eval_t * ev, bool no_result)
 {
 	// get assigned value on the stack
@@ -902,6 +976,10 @@ static void CODEGEN_Assignment(eval_t * ev, bool no_result)
 			PR_EmitOp(OP_STORE_V, 0, 0, 0);
 		else
 			PR_EmitOp(OP_STORE, 0, 0, 0);
+	}
+	else if (ev->args[0]->kind == EV_SET_ACCESS)
+	{
+		CODEGEN_SetWrite(ev->args[0]);
 	}
 	else
 	{
@@ -1061,6 +1139,10 @@ static void CODEGEN_Eval(eval_t *ev, bool no_result)
 
 		case EV_FIELD_ACCESS:
 			CODEGEN_FieldAccess(ev, true /* load_it */);
+			break;
+
+		case EV_SET_ACCESS:
+			CODEGEN_SetRead(ev);
 			break;
 
 		default:

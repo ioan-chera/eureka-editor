@@ -103,6 +103,9 @@ const char *pr_opnames[] =
 	"LOCAL_WRITE",
 	"LOCAL_WRITE_V",
 
+	"OP_SET_READ",
+	"OP_SET_WRITE",
+
     "OP_VEC_ADD",
     "OP_VEC_SUB",
     "OP_VEC_PROD",
@@ -818,6 +821,16 @@ if (exec.trace) fprintf(stderr, "PR_ExecuteProgram EXIT\n");
 			exec.stack[k + 2] = exec.stack[-- exec.stack_top];
 			exec.stack[k + 1] = exec.stack[-- exec.stack_top];
 			exec.stack[k + 0] = exec.stack[-- exec.stack_top];
+			break;
+
+//------ Set Ops --------//
+
+		case OP_SET_READ:
+			// FIXME !!!!!!
+			break;
+
+		case OP_SET_WRITE:
+			// FIXME !!!!!!
 			break;
 
 //------ Vector Ops --------//
