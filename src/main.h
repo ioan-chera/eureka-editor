@@ -212,11 +212,6 @@ const char * DetermineGame(const char *iwad_name);
 
 
 
-void Beep(const char *msg, ...);
-
-void Status_Set(const char *fmt, ...);
-void Status_Clear();
-
 
 int vertex_radius (double scale);
 
