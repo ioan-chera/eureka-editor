@@ -276,13 +276,21 @@ static eval_t * EXP_Name(void)
 		case ev_string:
 		case ev_entity:
 		case ev_function:
+
+		case ev_linedef:
+		case ev_sidedef:
+		case ev_sector:
+		case ev_thing:
+		case ev_vertex:
+
+		case ev_set:
 			// variable or constant
 			ev = PR_AllocEval(EV_VARIABLE, d->type);
 			ev->def = d;
 			return ev;
 
 		default:
-			PR_ParseError ("name terminal not supported (yet)");
+			PR_ParseError ("type not supported (yet) : %s", name);
 			return NULL;  /* not reached */
 	}
 }
@@ -456,12 +464,14 @@ static eval_t * EXP_Term(void)
 		ev->literal[0]._float = 0;
 		return ev;
 	}
+	else if (PR_Check("nil"))
+	{
+		return PR_AllocEval(EV_LITERAL, &type_nil);
+	}
 	else if (PR_Check("format"))
 	{
 		return EXP_FormatString();
 	}
-
-	// FIXME: handle 'nil' too
 
 	return EXP_Name();
 }

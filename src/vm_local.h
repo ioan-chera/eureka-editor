@@ -50,12 +50,22 @@ typedef union
 typedef enum
 {
 	ev_void,
+	ev_nil,
+
 	ev_string,
 	ev_float,
 	ev_vector,
 	ev_entity,
 	ev_function,
-	ev_pointer
+	ev_pointer,
+
+	ev_linedef,
+	ev_sidedef,
+	ev_sector,
+	ev_thing,
+	ev_vertex,
+
+	ev_set
 
 } etype_t;
 
@@ -210,11 +220,12 @@ typedef int	gofs_t;				// offset in global data block
 typedef struct type_s
 {
 	etype_t			kind;
-	struct type_s	*next;
 // function types are more complex
 	struct type_s	*aux_type;	// return type or field type
 	int				num_parms;	// -1 = variable args
 	struct type_s	*parm_types[MAX_PARMS];	// only [num_parms] allocated
+
+	struct type_s	*next;
 } type_t;
 
 typedef struct def_s
@@ -240,7 +251,7 @@ typedef struct def_s
 #define	MAX_REGS		16384
 
 
-extern	type_t	type_void, type_string, type_float, type_vector, type_entity, type_function, type_pointer;
+extern	type_t	type_void, type_nil, type_string, type_float, type_vector, type_entity, type_function, type_pointer;
 
 
 //============================================================================

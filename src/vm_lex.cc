@@ -54,13 +54,26 @@ const char	*pr_punctuation[] =
  NULL};
 
 // simple types.  function types are dynamically allocated
-type_t	type_void = {ev_void};
-type_t	type_string = {ev_string};
-type_t	type_float = {ev_float};
-type_t	type_vector = {ev_vector};
-type_t	type_entity = {ev_entity};
-type_t	type_function = {ev_function, NULL, &type_void};
-type_t	type_pointer = {ev_pointer};
+type_t	type_void = { ev_void };
+type_t	type_nil  = { ev_nil };
+type_t	type_string = { ev_string };
+type_t	type_float  = { ev_float };
+type_t	type_vector = { ev_vector };
+type_t	type_entity = { ev_entity };
+type_t	type_function = { ev_function, &type_void, 0 };
+type_t	type_pointer = { ev_pointer };
+
+type_t  type_linedef = { ev_linedef };
+type_t  type_sidedef = { ev_sidedef };
+type_t  type_sector  = { ev_sector };
+type_t  type_thing   = { ev_thing };
+type_t  type_vertex  = { ev_vertex };
+
+type_t  type_set_linedef = { ev_set, &type_linedef, 0 };
+type_t  type_set_sidedef = { ev_set, &type_sidedef, 0 };
+type_t  type_set_sector  = { ev_set, &type_sector,  0 };
+type_t  type_set_thing   = { ev_set, &type_thing,   0 };
+type_t  type_set_vertex  = { ev_set, &type_vertex,  0 };
 
 static type_t * custom_types;
 
@@ -547,6 +560,34 @@ void PR_SkipToSemicolon (void)
 }
 
 
+static type_t * PR_ParseSetType()
+{
+	PR_Expect("[");
+
+	type_t * result;
+
+	if (PR_Check("linedef"))
+		result = &type_set_linedef;
+	else if (PR_Check("sidedef"))
+		result = &type_set_sidedef;
+	else if (PR_Check("sector"))
+		result = &type_set_sector;
+	else if (PR_Check("thing"))
+		result = &type_set_thing;
+	else if (PR_Check("vertex"))
+		result = &type_set_vertex;
+	else
+	{
+		PR_ParseError ("invalid set type");
+		return NULL;
+	}
+
+	PR_Expect("]");
+
+	return result;
+}
+
+
 /*
 ============
 PR_ParseType
@@ -566,6 +607,9 @@ type_t *PR_ParseType (void)
 	if (PR_Check ("function"))
 		return PR_ParseAltFuncType(false);
 
+	if (PR_Check ("set"))
+		return PR_ParseSetType();
+
 	if (!strcmp (pr_token, "float") )
 		type = &type_float;
 	else if (!strcmp (pr_token, "vector") )
@@ -574,6 +618,17 @@ type_t *PR_ParseType (void)
 		type = &type_entity;
 	else if (!strcmp (pr_token, "string") )
 		type = &type_string;
+
+	else if (!strcmp (pr_token, "linedef") )
+		type = &type_linedef;
+	else if (!strcmp (pr_token, "sidedef") )
+		type = &type_sidedef;
+	else if (!strcmp (pr_token, "sector") )
+		type = &type_sector;
+	else if (!strcmp (pr_token, "thing") )
+		type = &type_thing;
+	else if (!strcmp (pr_token, "vertex") )
+		type = &type_vertex;
 	else
 	{
 		PR_ParseError ("\"%s\" is not a type", pr_token);
