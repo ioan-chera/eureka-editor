@@ -7,18 +7,18 @@ CHANGES IN Eureka
 -  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to next/previous file ('N' and 'P' keys)
 
+-  implemented SEC_Light() binding command
+
 -  automatically open the most recent file (optional)
-
--  support $DOOMWADPATH for finding IWADs
-
 -  remember the browser width for a saved map
+-  remember the 3D mode (the lack of it) for a map
+
+-  support Eureka config (.ugh) files as resource files
+-  support $DOOMWADPATH for finding IWADs
 
 -  fixed crash bug when loading or saving a map containing linedefs
    which have no right sidedef
 
 -  fixed key binding dialog: unable to remove a parameter
-
 -  fixed the selection after a sector merge 
-
--  fixed remembering 3D mode (the lack of it) for a map
 

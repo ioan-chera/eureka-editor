@@ -182,11 +182,12 @@ IDEA: a dialog to specify directories to find wads.
       and $DOOMWADDIR and $DOOMWADPATH.  Perhaps add places where
       the user opened a wad automatically (or ask?).
 
-IDEA: allow ".ugh" files as resources
-      (and perhaps even DDF files)
-
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
+
+WISH: support DDF as (or in) a resource file
+
+WISH: support DECORATE as (or in) a resource file
 
 
 
@@ -246,8 +247,6 @@ Editing
 
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
-
-+  SEC_Light binding command (akin to SEC_Floor etc)
 
 +  scrollbars for the canvas
 
