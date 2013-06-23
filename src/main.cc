@@ -370,7 +370,7 @@ static bool DetermineIWAD()
 		Iwad_name = StringDup(Iwad_name);
 		y_strlowr((char *)Iwad_name);
 
-		if (! CanLoadDefinitions("games", Iwad_name))
+		if (! M_CanLoadDefinitions("games", Iwad_name))
 			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
 
 		const char * path = M_QueryKnownIWAD(Iwad_name);
@@ -391,7 +391,7 @@ static bool DetermineIWAD()
 
 		const char *game = DetermineGame(Iwad_name);
 
-		if (! CanLoadDefinitions("games", game))
+		if (! M_CanLoadDefinitions("games", game))
 			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
 
 		M_AddKnownIWAD(Iwad_name);
@@ -639,19 +639,41 @@ void Main_Loop()
 }
 
 
+static void LoadResourceFile(const char *filename)
+{
+	if (! Wad_file::Validate(filename))
+		FatalError("Resource does not exist: %s\n", filename);
+
+	Wad_file *wad = Wad_file::Open(filename, 'r');
+
+	if (! wad)
+		FatalError("Cannot load resource: %s\n", filename);
+
+	MasterDir_Add(wad);
+
+	// load corresponding mod file (if it exists)
+	const char *mod_name = DetermineMod(filename);
+	
+	if (M_CanLoadDefinitions("mods", mod_name))
+	{
+		M_LoadDefinitions("mods", mod_name);
+	}
+}
+
+
 void Main_LoadResources()
 {
 	LogPrintf("----- Loading Resources -----\n");
 
 	// Load game definitions (*.ugh)
-	InitDefinitions();
+	M_InitDefinitions();
 
 	Game_name = DetermineGame(Iwad_name);
 
 	LogPrintf("IWAD name: '%s'\n", Iwad_name);
 	LogPrintf("Game name: '%s'\n", Game_name);
 
-	LoadDefinitions("games", Game_name);
+	M_LoadDefinitions("games", Game_name);
 
 	// normally the game definition will set a default port
 	if (! Port_name)
@@ -659,7 +681,7 @@ void Main_LoadResources()
 
 	LogPrintf("Port name: '%s'\n", Port_name);
 
-	LoadDefinitions("ports", Port_name);
+	M_LoadDefinitions("ports", Port_name);
 
 
 	// reset the master directory
@@ -680,23 +702,7 @@ void Main_LoadResources()
 	// Load all resource wads
 	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
-		if (! Wad_file::Validate(Resource_list[i]))
-			FatalError("Resource does not exist: %s\n", Resource_list[i]);
-
-		Wad_file *wad = Wad_file::Open(Resource_list[i], 'r');
-
-		if (! wad)
-			FatalError("Cannot load resource: %s\n", Resource_list[i]);
-
-		MasterDir_Add(wad);
-
-		// load corresponding mod file (if it exists)
-		const char *mod_name = DetermineMod(Resource_list[i]);
-		
-		if (CanLoadDefinitions("mods", mod_name))
-		{
-			LoadDefinitions("mods", mod_name);
-		}
+		LoadResourceFile(Resource_list[i]);
 	}
 
 

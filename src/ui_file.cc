@@ -943,7 +943,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 	const char *game = DetermineGame(chooser.filename());
 
-	if (! CanLoadDefinitions("games", game))
+	if (! M_CanLoadDefinitions("games", game))
 	{
 		Notify(-1, -1, "That game is not supported (no definition file).\n\n"
 		               "Please try again.", NULL);

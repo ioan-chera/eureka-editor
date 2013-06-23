@@ -116,12 +116,11 @@ extern int g_sky_color;
 extern std::string g_sky_flat;
 
 
-// FIXME: M_ prefix
-void InitDefinitions();
-void LoadDefinitions(const char *folder, const char *name,
-                     int include_level = 0);
-bool CanLoadDefinitions(const char *folder, const char *name);
-void FreeDefinitions();
+void M_InitDefinitions();
+void M_LoadDefinitions(const char *folder, const char *name,
+                       int include_level = 0);
+bool M_CanLoadDefinitions(const char *folder, const char *name);
+void M_FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 

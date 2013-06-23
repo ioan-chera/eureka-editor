@@ -788,7 +788,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 		if (strcmp(line, "game") == 0)
 		{
-			if (! CanLoadDefinitions("games", pos))
+			if (! M_CanLoadDefinitions("games", pos))
 			{
 				LogPrintf("  unknown game: %s\n", pos /* show full path */);
 
@@ -840,7 +840,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 		}
 		else if (strcmp(line, "port") == 0)
 		{
-			if (CanLoadDefinitions("ports", pos))
+			if (M_CanLoadDefinitions("ports", pos))
 				new_port = StringDup(pos);
 			else
 			{

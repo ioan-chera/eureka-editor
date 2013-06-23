@@ -61,7 +61,7 @@ int g_sky_color;
 /*
  *  Create empty lists for game definitions
  */
-void InitDefinitions()
+void M_InitDefinitions()
 {
 	// FIXME: delete the contents
 
@@ -109,7 +109,7 @@ DebugPrintf("  trying: %s\n", filename);
 }
 
 
-bool CanLoadDefinitions(const char *folder, const char *name)
+bool M_CanLoadDefinitions(const char *folder, const char *name)
 {
 	const char * filename;
 
@@ -130,7 +130,7 @@ bool CanLoadDefinitions(const char *folder, const char *name)
  *            "ports" + "edge"
  *            "mods"  + "qdoom"
  */
-void LoadDefinitions(const char *folder, const char *name, int include_level)
+void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 {
 	// this is for error messages & debugging
 	char basename[256];
@@ -258,7 +258,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			// TODO: validate filename
 
-			LoadDefinitions(folder, token[1], include_level + 1);
+			M_LoadDefinitions(folder, token[1], include_level + 1);
 		}
 
 		else if (y_stricmp(token[0], "level_name") == 0)
@@ -479,7 +479,7 @@ void LoadDefinitions(const char *folder, const char *name, int include_level)
 /*
  *  Free all memory allocated to game definitions
  */
-void FreeDefinitions()
+void M_FreeDefinitions()
 {
 }
 
