@@ -1,8 +1,8 @@
 
-Eureka 0.95 README
+Eureka 0.97 README
 ==================
 
-by Andrew Apted  <ajapted@users.sf.net>   Feb 2013
+by Andrew Apted  <ajapted@users.sf.net>   Jul 2013
 
 
 INTRODUCTION
@@ -129,6 +129,9 @@ HOME : move/zoom 2D viewport to show the whole map
 END  : move 2D viewport to camera location 
 ' (quote) : move 3D camera to position of mouse pointer
 
+N : load next file in list
+P : load previous file in list
+
 g : grid size adjustment : smaller 
 G : grid size adjustment : larger 
 h : grid mode toggle : on, simple, off 
@@ -139,7 +142,7 @@ j : jump to object (by its numberic id)
 
 o : copy and paste the selected objects
 c : copy properties from the selection to the highlighted object
-P : prune unused sectors, sidedefs and vertices
+p : prune unused sectors, sidedefs and vertices
 
 H : mirror objects horizontally 
 V : mirror objects vertically
