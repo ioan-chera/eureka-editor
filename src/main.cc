@@ -641,6 +641,13 @@ void Main_Loop()
 
 static void LoadResourceFile(const char *filename)
 {
+	// support loading "ugh" definitions
+	if (MatchExtension(filename, "ugh"))
+	{
+		M_ParseDefinitionFile(filename);
+		return;
+	}
+
 	if (! Wad_file::Validate(filename))
 		FatalError("Resource does not exist: %s\n", filename);
 

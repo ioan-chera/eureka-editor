@@ -120,6 +120,9 @@ void M_InitDefinitions();
 void M_LoadDefinitions(const char *folder, const char *name,
                        int include_level = 0);
 bool M_CanLoadDefinitions(const char *folder, const char *name);
+void M_ParseDefinitionFile(const char *filename, const char *folder = NULL,
+						   const char *basename = NULL,
+                           int include_level = 0);
 void M_FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);

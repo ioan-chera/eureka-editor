@@ -165,6 +165,20 @@ void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 	DebugPrintf("  found at: %s\n", filename);
 
 
+	M_ParseDefinitionFile(filename, folder, basename, include_level);
+}
+
+
+void M_ParseDefinitionFile(const char *filename, const char *folder,
+						   const char *basename, int include_level)
+{
+	if (! folder)
+		folder = "common";
+	
+	if (! basename)
+		basename = fl_filename_name(filename);
+
+
 #define YGD_BUF 200   /* max. line length + 2 */
 	char readbuf[YGD_BUF];    /* buffer the line is read into */
 
@@ -255,8 +269,6 @@ void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
 				FatalError("%s(%d): Too many includes (check for a loop)\n", basename, lineno);
-
-			// TODO: validate filename
 
 			M_LoadDefinitions(folder, token[1], include_level + 1);
 		}

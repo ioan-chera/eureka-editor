@@ -816,7 +816,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (! Wad_file::Validate(res))
+			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
 			
@@ -824,13 +824,13 @@ bool M_ParseEurekaLump(Wad_file *wad)
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (! Wad_file::Validate(res) && new_iwad)
+			if (! FileExists(res) && new_iwad)
 			{
 				res = FilenameReposition(pos, new_iwad);
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (Wad_file::Validate(res))
+			if (FileExists(res))
 				new_resources.push_back(StringDup(res));
 			else
 			{
