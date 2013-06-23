@@ -69,10 +69,21 @@ public:
 	int type;
 	int options;
 
-	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS };
+	// Hexen stuff
+	int z;
+	int tid;
+	int special;
+	int arg1, arg2, arg3, arg4, arg5;
+
+	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
+	       F_Z, F_TID, F_SPECIAL };
+
+	enum { F_ARGS = F_SPECIAL };  // use as: F_ARGS+1 .. F_ARGS+5
 
 public:
-	Thing() : x(0), y(0), angle(0), type(0), options(7)
+	Thing() : x(0), y(0), angle(0), type(0), options(7),
+			  z(0), tid(0), special(0),
+			  arg1(0), arg2(0), arg3(0), arg4(0), arg5(0)
 	{ }
 
 	void RawCopy(const Thing *other)
@@ -82,6 +93,16 @@ public:
 		angle = other->angle;
 		type = other->type;
 		options = other->options;
+
+		z = other->z;
+		tid = other->tid;
+		special = other->special;
+
+		arg1 = other->arg1;
+		arg2 = other->arg2;
+		arg3 = other->arg3;
+		arg4 = other->arg4;
+		arg5 = other->arg5;
 	}
 };
 
@@ -131,7 +152,7 @@ public:
 
 public:
 	Sector() : floorh(0), ceilh(0), floor_tex(0), ceil_tex(0),
-	           light(0), type(0), tag(0)
+			   light(0), type(0), tag(0)
 	{ }
 
 	void RawCopy(const Sector *other)
@@ -199,28 +220,43 @@ class LineDef
 public:
 	int start;
 	int end;
-	int flags;
-	int type;
-	int tag;
 	int right;
 	int left;
 
+	int flags;
+	int type;
+	int tag;
+
+	// Hexen stuff  [NOTE: tag is 'arg1']
+	int arg2;
+	int arg3;
+	int arg4;
+	int arg5;
+
 	enum { F_START, F_END, F_FLAGS, F_TYPE, F_TAG, F_RIGHT, F_LEFT };
 
+	enum { F_ARGS = F_TYPE };  // use as: F_ARGS+1 .. F_ARGS+5
+
 public:
-	LineDef() : start(0), end(0), flags(0), type(0), tag(0),
-				right(-1), left(-1)
+	LineDef() : start(0), end(0), right(-1), left(-1),
+				flags(0), type(0), tag(0),
+				arg2(0), arg3(0), arg4(0), arg5(0)
 	{ }
 
 	void RawCopy(const LineDef *other)
 	{
 		start = other->start;
 		end   = other->end;
-		flags = other->flags;
-		type  = other->type;
-		tag   = other->tag;
 		right = other->right;
 		left  = other->left;
+		flags = other->flags;
+
+		type  = other->type;
+		tag   = other->tag;   // arg1
+		arg2  = other->arg2;
+		arg3  = other->arg3;
+		arg4  = other->arg4;
+		arg5  = other->arg5;
 	}
 
 	Vertex *Start() const;
