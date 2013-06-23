@@ -110,6 +110,16 @@ side_ref_e;
 typedef std::vector< const char * > string_list_t;
 
 
+typedef enum
+{
+	MAPF_INVALID = 0,
+
+	MAPF_Doom,
+	MAPF_Hexen
+
+} map_format_e;
+
+
 /*
  *  Doom definitions
  *  Things about the Doom engine
@@ -164,6 +174,7 @@ extern const char *cache_dir;    // for caches and backups, can be same as home_
 extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
+extern map_format_e Level_format; // format of current map
 
 extern const char *config_file; // Name of the configuration file, or NULL
 extern const char *log_file;    // Name of log file, or NULL

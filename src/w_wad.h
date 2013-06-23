@@ -31,16 +31,6 @@ class Wad_file;
 class Texture_info;
 
 
-typedef enum
-{
-	MAPF_INVALID = 0,
-
-	MAPF_Doom,
-	MAPF_Hexen
-
-} map_format_e;
-
-
 class Lump_c
 {
 friend class Wad_file;

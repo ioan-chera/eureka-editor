@@ -84,6 +84,8 @@ const char *Game_name;
 const char *Port_name;
 const char *Level_name;
 
+map_format_e Level_format;
+
 
 int show_help     = 0;
 int show_version  = 0;
