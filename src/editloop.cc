@@ -1070,6 +1070,7 @@ void Editor_RegisterCommands()
 
 	M_RegisterCommand("SEC_Floor", &SEC_Floor);
 	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil);
+	M_RegisterCommand("SEC_Light", &SEC_Light);
 	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup);
 	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats);
 

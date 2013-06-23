@@ -136,6 +136,7 @@ static int light_add_delta(int level, int delta)
 	return CLAMP(0, level, 255);
 }
 
+
 void CMD_AdjustLight(int delta)
 {
 	selection_c list;
@@ -162,6 +163,20 @@ void CMD_AdjustLight(int delta)
 
 	main_win->sec_box->UpdateField(Sector::F_LIGHT);
 	MarkChanges();
+}
+
+
+void SEC_Light(void)
+{
+	int diff = atoi(EXEC_Param[0]);
+
+	if (diff == 0)
+	{
+		Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0]);
+		return;
+	}
+
+	CMD_AdjustLight(diff);
 }
 
 

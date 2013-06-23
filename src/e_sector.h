@@ -60,6 +60,7 @@ void SEC_Floor(void);
 void SEC_Ceil(void);
 
 void CMD_AdjustLight(int delta);
+void SEC_Light(void);
 
 void SEC_Merge(void);
 void SEC_SwapFlats(void);
