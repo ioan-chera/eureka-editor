@@ -76,9 +76,8 @@ public:
 	int arg1, arg2, arg3, arg4, arg5;
 
 	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
-	       F_Z, F_TID, F_SPECIAL };
-
-	enum { F_ARGS = F_SPECIAL };  // use as: F_ARGS+1 .. F_ARGS+5
+	       F_Z, F_TID, F_SPECIAL,
+		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
 	Thing() : x(0), y(0), angle(0), type(0), options(7),
@@ -233,9 +232,9 @@ public:
 	int arg4;
 	int arg5;
 
-	enum { F_START, F_END, F_FLAGS, F_TYPE, F_TAG, F_RIGHT, F_LEFT };
-
-	enum { F_ARGS = F_TYPE };  // use as: F_ARGS+1 .. F_ARGS+5
+	enum { F_START, F_END, F_RIGHT, F_LEFT,
+	       F_FLAGS, F_TYPE, F_TAG,
+		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
 	LineDef() : start(0), end(0), right(-1), left(-1),

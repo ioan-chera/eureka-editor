@@ -1158,6 +1158,15 @@ void TransferThingProperties(int src_thing, int dest_thing)
 	BA_ChangeTH(dest_thing, Thing::F_OPTIONS, T->options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
+	BA_ChangeTH(dest_thing, Thing::F_TID,     T->tid);
+	BA_ChangeTH(dest_thing, Thing::F_SPECIAL, T->special);
+
+	BA_ChangeTH(dest_thing, Thing::F_ARG1, T->arg1);
+	BA_ChangeTH(dest_thing, Thing::F_ARG2, T->arg2);
+	BA_ChangeTH(dest_thing, Thing::F_ARG3, T->arg3);
+	BA_ChangeTH(dest_thing, Thing::F_ARG4, T->arg4);
+	BA_ChangeTH(dest_thing, Thing::F_ARG5, T->arg5);
+
 	BA_End();
 }
 
@@ -1311,9 +1320,15 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		}
 	}
 
-	BA_ChangeLD(dest_line, LineDef::F_TYPE,  L1->type);
-	BA_ChangeLD(dest_line, LineDef::F_TAG,   L1->tag);
 	BA_ChangeLD(dest_line, LineDef::F_FLAGS, flags);
+
+	BA_ChangeLD(dest_line, LineDef::F_TYPE, L1->type);
+	BA_ChangeLD(dest_line, LineDef::F_TAG,  L1->tag);
+
+	BA_ChangeLD(dest_line, LineDef::F_ARG2, L1->arg2);
+	BA_ChangeLD(dest_line, LineDef::F_ARG3, L1->arg3);
+	BA_ChangeLD(dest_line, LineDef::F_ARG4, L1->arg4);
+	BA_ChangeLD(dest_line, LineDef::F_ARG5, L1->arg5);
 
 	BA_End();
 }
