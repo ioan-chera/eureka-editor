@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -111,20 +111,13 @@ double lineloop_c::TotalLength() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		const LineDef *L = LineDefs[k];
+		const LineDef *L = LineDefs[lines[k]];
 
-		int dx = L->Start()->x - L->End()->x;
-		int dy = L->Start()->y - L->End()->y;
-
-		result += ComputeDist(dx, dy);
+		result += L->CalcLength();
 	}
 
 	return result;
 }
-
-
-/* !!! FIXME: put in e_basis or e_linedef */
-
 
 
 bool lineloop_c::SameSector(int *sec_num) const
@@ -220,31 +213,6 @@ int lineloop_c::FacesSector() const
 
 	return -1;
 }
-
-
-/* TO BE REMOVED ??
-
-void lineloop_c::ToBitvec(bitvec_c& bv)
-{
-	bv.clear_all();
-
-	for (unsigned int i = 0 ; i < lines.size() ; i++)
-	{
-		bv.set(lines[i]);
-	}
-}
-
-
-void lineloop_c::ToSelection(selection_c& sel)
-{
-	sel.change_type(OBJ_LINEDEFS);
-
-	for (unsigned int i = 0 ; i < lines.size() ; i++)
-	{
-		sel.set(lines[i]);
-	}
-}
-*/
 
 
 /*
@@ -551,6 +519,24 @@ void lineloop_c::FindIslands()
 
 		if (! LookForIsland())
 			break;
+	}
+}
+
+
+void lineloop_c::Dump() const
+{
+	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
+	            this, lines.size(), islands.size());
+	
+	for (unsigned int i = 0 ; i < lines.size() ; i++)
+	{
+		const LineDef *L = LineDefs[lines[i]];
+
+		DebugPrintf("  %s of line #%d : (%d %d) --> (%d %d)\n",
+		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
+					lines[i],
+					L->Start()->x, L->Start()->y, 
+					L->End  ()->x, L->End  ()->y);
 	}
 }
 

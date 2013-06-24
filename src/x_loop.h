@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ public:
 	// This contains the linedefs in the line loop, beginning with
 	// the first line and going in order until the last line.  There
 	// will be at least 3 lines in the loop, and the same linedef
-	// cannot occur more than onces.
+	// cannot occur more than once.
 	std::vector< int > lines;
 
 	// This contains which side of the linedefs in 'lines'.
@@ -78,10 +78,7 @@ public:
 	// sector, returning the sector number if true, otherwise -1.
 	int FacesSector() const;
 
-#if 0
-	void ToBitvec(bitvec_c& bv);
-	void ToSelection(selection_c& sel);
-#endif
+	void Dump() const;
 
 public:
 	bool LookForIsland();
