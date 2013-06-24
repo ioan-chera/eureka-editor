@@ -107,10 +107,6 @@ texturegroup_t;
  *  Global variables that contain game definition data
  */
 
-typedef enum { YGLN__, YGLN_E1M10, YGLN_E1M1, YGLN_MAP01 } ygln_t;
-
-extern ygln_t yg_level_name;
-
 extern int g_sky_color;
 
 extern std::string g_sky_flat;

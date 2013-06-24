@@ -49,10 +49,6 @@ void CalculateLevelBounds();
 bool is_sky(const char *flat);
 
 
-int levelname2levelno (const char *name);
-int levelname2rank (const char *name);
-
-
 void MapStuff_NotifyBegin();
 void MapStuff_NotifyInsert(obj_type_e type, int objnum);
 void MapStuff_NotifyDelete(obj_type_e type, int objnum);

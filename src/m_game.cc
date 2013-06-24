@@ -51,8 +51,6 @@ std::map<std::string, char> texture_assigns;
 std::map<std::string, char> flat_assigns;
 
 
-ygln_t yg_level_name = YGLN__;
-
 std::string g_sky_flat;
 
 int g_sky_color;
@@ -278,15 +276,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (ntoks != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			if (! strcmp(token[1], "e1m1"))
-				yg_level_name = YGLN_E1M1;
-			else if (! strcmp(token[1], "e1m10"))
-				yg_level_name = YGLN_E1M10;
-			else if (! strcmp(token[1], "map01"))
-				yg_level_name = YGLN_MAP01;
-			else
-				FatalError("%s(%d): invalid argument \"%.32s\" (e1m1|e1m10|map01)\n",
-						   basename, lineno, token[1]);
+			/* ignored for backwards compability */
 		}
 
 		else if (y_stricmp(token[0], "sky_color") == 0)
@@ -480,11 +470,6 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 	}
 
 	fclose(fp);
-
-	/* Verify that all the mandatory directives are present. */
-
-	if (yg_level_name == YGLN__)
-		yg_level_name = YGLN_MAP01;
 }
 
 
