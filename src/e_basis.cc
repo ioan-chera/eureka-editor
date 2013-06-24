@@ -971,7 +971,7 @@ void BA_ClearAll()
 bool BA_ChangeTH(int thing, byte field, int value)
 {
 	SYS_ASSERT(is_thing(thing));
-	SYS_ASSERT(field <= Thing::F_OPTIONS);
+	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	return BA_Change(OBJ_THINGS, thing, field, value);
 }
@@ -1003,7 +1003,7 @@ bool BA_ChangeSD(int side, byte field, int value)
 bool BA_ChangeLD(int line, byte field, int value)
 {
 	SYS_ASSERT(is_linedef(line));
-	SYS_ASSERT(field <= LineDef::F_LEFT);
+	SYS_ASSERT(field <= LineDef::F_ARG5);
 
 	return BA_Change(OBJ_LINEDEFS, line, field, value);
 }
