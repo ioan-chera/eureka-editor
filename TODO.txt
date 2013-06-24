@@ -46,11 +46,6 @@ Documentation
 Editing
 -------
 
-+  added lines inside a void island, when connect then lose the void
-   (a sector is added which is not wanted).
-   --> pick one side to add sector, if loop lengths are different by
-       a good margin, pick smallest one, otherwise pick right side.
-
 +  grid drawing too slow when small step and zoomed out
    (since we render a huge number of dots)
 

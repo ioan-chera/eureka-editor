@@ -441,6 +441,9 @@ DebugPrintf(" LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_
 DebugPrintf("right_ok : %s\n", right_ok ? "yes" : "NO!");
 DebugPrintf(" left_ok : %s\n",  left_ok ? "yes" : "NO!");
 
+if (right_ok) DebugPrintf("right faces outward : %s\n", right_loop.faces_outward ? "YES!" : "no");
+if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward ? "YES!" : "no");
+
 	if (right_front >= 0 &&
 	    right_front == left_front &&
 	    (right_ok && !right_loop.faces_outward) &&
@@ -471,6 +474,8 @@ DebugPrintf(" left_ok : %s\n",  left_ok ? "yes" : "NO!");
 		double right_total = right_loop.TotalLength();
 		double  left_total =  left_loop.TotalLength();
 
+		DebugPrintf("Left total: %1.1f   Right total: %1.1f\n", left_total, right_total);
+
 		lineloop_c&  mod_loop = (left_total < right_total) ? left_loop : right_loop;
 		lineloop_c& keep_loop = (left_total < right_total) ? right_loop : left_loop;
 
@@ -483,6 +488,38 @@ DebugPrintf(" left_ok : %s\n",  left_ok ? "yes" : "NO!");
 
 		AssignSectorToLoop( mod_loop, new_sec,     flip);
 		AssignSectorToLoop(keep_loop, right_front, flip);
+		return;
+	}
+
+
+	// the SPLIT-VOID case....
+
+	if (right_ok && right_front < 0 && !right_loop.faces_outward &&
+		 left_ok &&  left_front < 0 && ! left_loop.faces_outward)
+	{
+		DebugPrintf("SPLITTING VOID...\n");
+
+		// pick which side gets the new sector
+
+		double right_total = right_loop.TotalLength();
+		double  left_total =  left_loop.TotalLength();
+
+		DebugPrintf("Left total: %1.1f   Right total: %1.1f\n", left_total, right_total);
+
+		lineloop_c& loop = (left_total < right_total) ? left_loop : right_loop;
+
+		loop.FindIslands();
+
+		int model = (left_total < right_total) ? left_back : right_back;
+
+		int new_sec = BA_New(OBJ_SECTORS);
+
+		if (model < 0)
+			Sectors[new_sec]->SetDefaults();
+		else
+			Sectors[new_sec]->RawCopy(Sectors[model]);
+
+		AssignSectorToLoop(loop, new_sec, flip);
 		return;
 	}
 
