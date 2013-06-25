@@ -211,22 +211,6 @@ line 126 t "WR Teleport /mon"
 line 127 s "S1 Stair Raise 16"
 
 
-# TODO: ports/xdoom.ugh
-#
-#line 300 d "SR Sliding door"  "SR  Sliding door [XDoom]"
-#line 320 - "-- Laser barrier" "--  Laser barrier [XDoom]"
-#line 321 - "SR Laser off mom" "SR  Switch laser barrier off momentarily [XDoom]"
-#line 322 - "G1 Laser off per" "G1  Switch laser barrier off permanently [XDoom]"
-#line 330 - "WR Trigger messg" "WR  Trigger communication device message [XDoom]"
-#line 331 - "W1 Trigger messg" "W1  Trigger communication device message [XDoom]"
-#line 332 - "S1 Activate tele" "S1  Activate teleporter with message [XDoom]"
-#line 333 - "S1 Deact. laser"  "S1  Deactivate laser with message [XDoom]"
-#line 334 - "M1 Trigger messg" "M1  Trigger communication device message [XDoom]"
-#line 350 d "W1 Silent door O" "W1  Open silent door by player (stays open) [XDoom]"
-#line 351 d "S1 Silent door O" "S1  Open silent door by player (stays open) [XDoom]"
-#line 352 d "M1 Silent door O" "M1  Open silent door by monster (stays open) [XDoom]"
-
-
 #------------------------------------------------------------------------
 
 

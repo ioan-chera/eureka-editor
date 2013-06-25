@@ -1,0 +1,44 @@
+#------------------------------------------------------------------------
+#  XDOOM  (a port by Udo Monk)
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C)      2013 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+
+#---- LINE TYPES ----------
+
+linegroup x "XDoom"
+
+line 300 x "SR XDOOM: Sliding door"
+line 320 x "-- XDOOM: Laser barrier"
+line 321 x "SR XDOOM: Laser off /temp"
+line 322 x "G1 XDOOM: Laser off"
+line 333 x "S1 XDOOM: Laser off /msg"
+line 330 x "WR XDOOM: Message"
+line 331 x "W1 XDOOM: Message"
+line 334 x "M1 XDOOM: Message"
+line 332 x "S1 XDOOM: Teleport /msg"
+line 350 x "W1 XDOOM: Silent door"
+line 351 x "S1 XDOOM: Silent door"
+line 352 x "M1 XDOOM: Silent door"
+
