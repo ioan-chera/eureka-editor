@@ -49,6 +49,10 @@ static void main_win_close_CB(Fl_Widget *w, void *data)
 }
 
 
+//!!!! FIXME
+UI_CanvasScroll *canv_scr;
+
+
 //
 // MainWin Constructor
 //
@@ -92,7 +96,7 @@ UI_MainWin::UI_MainWin() :
 	int cw = w() - panel_W - browser_W;
 	int ch = ey - cy;
 
-	UI_CanvasScroll *canv_scr = new UI_CanvasScroll(0, cy, cw, ch);
+	canv_scr = new UI_CanvasScroll(0, cy, cw, ch);
 
 	canvas = canv_scr->canvas;
 

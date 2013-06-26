@@ -42,6 +42,7 @@
 #include "w_texture.h"
 
 #include "editloop.h"
+#include "ui_window.h"
 
 
 #define REND_SEL_COL  196
@@ -1381,78 +1382,32 @@ static Thing *FindPlayer(int typenum)
 static Thing *player;
 
 
+UI_Render3D::UI_Render3D(int X, int Y, int W, int H) :
+	Fl_Widget(X, Y, W, H)
+{ }
 
-#if 0  /// OLD
-UI_RenderWin::UI_RenderWin(const char *title) :
-    Fl_Window( 640, 400, title ),
-    player(NULL)
+
+UI_Render3D::~UI_Render3D()
+{ }
+
+
+void UI_Render3D::draw()
 {
-  end(); // cancel begin() in Fl_Group constructor
-
-  size_range(640, 400, 640, 400);
-
-  color(FL_BLACK, FL_BLACK);
+	Render3D_Draw(x(), y(), w(), h());
 }
 
-UI_RenderWin::~UI_RenderWin()
+
+int UI_Render3D::handle(int event)
 {
+	// ouch big hack!!
+
+fprintf(stderr, "Render3D  handle %d\n", event);
+
+	if (main_win)
+		return main_win->canvas->handle(event);
+
+	return Fl_Widget::handle(event);
 }
-
-int UI_RenderWin::handle(int event)
-{
-  switch (event)
-  {
-    case FL_FOCUS:
-      return 1;
-
-    case FL_KEYDOWN:
-    case FL_SHORTCUT:
-    {
-//      int result = handle_key();
-//      handle_mouse();
-
-      int key   = Fl::event_key();
-      int state = Fl::event_state();
-
-      switch (key)
-      {
-        case 0:
-        case FL_Num_Lock:
-        case FL_Caps_Lock:
-
-        case FL_Shift_L: case FL_Control_L:
-        case FL_Shift_R: case FL_Control_R:
-        case FL_Meta_L:  case FL_Alt_L:
-        case FL_Meta_R:  case FL_Alt_R:
-
-          /* IGNORE */
-          return 1;
-
-        default:
-          /* OK */
-          break;
-      }
-
-      if (key < 127 && isalpha(key) && (state & FL_SHIFT))
-        key = toupper(key);
-
-      HandleKey(key);
-
-      return 1;
-    }
-
-    case FL_ENTER:
-      return 1;
-
-    case FL_LEAVE:
-      return 1;
-
-    default: break;
-  }
-
-  return 0;  // unused
-}
-#endif
 
 
 void Render3D_Setup()

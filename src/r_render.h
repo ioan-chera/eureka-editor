@@ -27,6 +27,19 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
+class UI_Render3D : public Fl_Widget
+{
+public:
+	UI_Render3D(int X, int Y, int W, int H);
+
+	virtual ~UI_Render3D();
+
+	// FLTK virtual methods for drawing / event handling
+	void draw();
+
+	int handle(int event);
+};
+
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 

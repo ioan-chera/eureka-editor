@@ -610,6 +610,10 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
+#include "ui_scroll.h"
+extern UI_CanvasScroll *canv_scr;
+
+
 void Main_Loop()
 {
 	UpdateHighlight();
@@ -635,6 +639,8 @@ void Main_Loop()
 
 		// TODO: handle this a better way
 		main_win->UpdateTitle(MadeChanges ? true : false);
+
+canv_scr->UpdateRenderMode();
     }
 }
 

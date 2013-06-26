@@ -79,11 +79,14 @@ private:
 
 
 class UI_Canvas;
+class UI_Render3D;
 
 class UI_CanvasScroll : public Fl_Group
 {
 public:
 	UI_Canvas * canvas;
+
+	UI_Render3D * render;
 
 private:
 	Fl_Scrollbar * horiz;
@@ -94,8 +97,8 @@ public:
 
 	virtual ~UI_CanvasScroll();
 
-	// FLTK virtual method for drawing
-	void draw();
+public:
+	void UpdateRenderMode();
 };
 
 

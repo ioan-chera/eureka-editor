@@ -274,11 +274,6 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	box(FL_NO_BOX);
 
 
-	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
-
-	resizable(canvas);
-
-
 	vert = new Fl_Scrollbar(X, Y, SBAR_W, H - SBAR_W, NULL);
 
 	vert->type(FL_VERTICAL);
@@ -297,6 +292,15 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 //	horiz->selection_color(SCRBAR_COL);
 //!!	horiz->callback(bar_callback, this);
 	horiz->value(0, vert->h(), 0, 4000);
+
+
+	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
+
+	resizable(canvas);
+
+
+	render = new UI_Render3D(X, Y, W, H);
+	render->hide();
 }
 
 
@@ -304,12 +308,28 @@ UI_CanvasScroll::~UI_CanvasScroll()
 { }
 
 
-void UI_CanvasScroll::draw()
+void UI_CanvasScroll::UpdateRenderMode()
 {
-	if (edit.render3d)
-		Render3D_Draw(x(), y(), w(), h());
-	else
-		Fl_Group::draw();
+	if (edit.render3d && ! render->visible())
+	{
+		render->show();
+
+		canvas->hide();
+		  vert->hide();
+		 horiz->hide();
+
+		redraw();
+	}
+	else if (! edit.render3d && render->visible())
+	{
+		canvas->hide();
+		  vert->hide();
+		 horiz->hide();
+
+		render->show();
+
+		redraw();
+	}
 }
 
 
