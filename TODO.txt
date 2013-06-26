@@ -20,8 +20,6 @@ General
 
 +  CHECK screen  (see misc/Checks.txt for more info)
 
-+  a check/fix pass for LoadLevel()
-
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
    use fl_choice() code to bootstrap it.
