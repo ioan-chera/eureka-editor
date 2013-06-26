@@ -361,7 +361,8 @@ void CMD_SetVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
-		main_win->canvas->ChangeRenderMode(bool_val);
+		edit.render3d = bool_val;
+		main_win->redraw();
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
@@ -403,7 +404,8 @@ void CMD_ToggleVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
-		main_win->canvas->ToggleRenderMode();
+		edit.render3d = ! edit.render3d;
+		main_win->redraw();
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
@@ -684,7 +686,7 @@ void CMD_GoToCamera(void)
 
 void CMD_PlaceCamera(void)
 {
-	if (main_win->canvas->isRenderActive())
+	if (edit.render3d)
 	{
 		Beep("Not supported in 3D view");
 		return;
@@ -705,7 +707,8 @@ void CMD_PlaceCamera(void)
 
 	if (isalpha(EXEC_Param[0][0]))  // open3d
 	{
-		main_win->canvas->ChangeRenderMode(1);
+		edit.render3d = 1;
+		main_win->redraw();
 	}
 
 	edit.RedrawMap = 1;
@@ -1092,6 +1095,8 @@ void Editor_Init()
 {
 	memset(&edit, 0, sizeof(edit));  /* Catch-all */
 
+	edit.render3d = false;
+
 	edit.move_speed = 20;
 	edit.extra_zoom = 0;
 	edit.obj_type   = OBJ_THINGS;
@@ -1132,8 +1137,8 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 
 	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
 	{
-		if (main_win)
-			main_win->canvas->ChangeRenderMode(atoi(tokens[1]));
+		edit.render3d = atoi(tokens[1]);
+		edit.RedrawMap = 1;
 		return true;
 	}
 
@@ -1160,10 +1165,7 @@ void Editor_WriteUser(FILE *fp)
 		default: break;
 	}
 
-	if (main_win)
-		fprintf(fp, "render_mode %d\n",
-			main_win->canvas->isRenderActive() ? 1 : 0);
-
+	fprintf(fp, "render_mode %d\n", edit.render3d ? 1 : 0);
 	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
 }
 

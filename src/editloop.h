@@ -33,6 +33,8 @@ typedef struct
 {
 	obj_type_e obj_type;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
+	bool render3d;    // 3D preview is active
+
 	int move_speed;   // Movement speed.
 	int extra_zoom;   // Act like the zoom was 4 times what it is
 

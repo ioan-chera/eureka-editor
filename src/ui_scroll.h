@@ -93,6 +93,9 @@ public:
 	UI_CanvasScroll(int X, int Y, int W, int H);
 
 	virtual ~UI_CanvasScroll();
+
+	// FLTK virtual method for drawing
+	void draw();
 };
 
 

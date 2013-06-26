@@ -31,8 +31,6 @@
 class UI_Canvas : public Fl_Widget
 {
 private:
-	bool render3d;
-
 	Objid highlight;
 
 	int split_ld;
@@ -96,19 +94,15 @@ public:
 	void ScaleUpdate(int map_x, int map_y, keycode_t mod);
 	void ScaleFinish(scale_param_t& param);
 
-	void ChangeRenderMode(int mode);
-	void ToggleRenderMode() { ChangeRenderMode(! render3d); }
-
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
 
-	bool isRenderActive() { return render3d; }
 	bool isSelboxActive() { return selbox_active; }
 	bool isDragActive()   { return drag_active; }
 	bool isScaleActive()  { return scale_active; }
 
 private:
-	// FLTK virtual method for drawing.
+	// FLTK virtual method for drawing
 	void draw();
 
 	void DrawMap();

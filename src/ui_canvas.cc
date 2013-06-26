@@ -45,7 +45,6 @@ extern int active_wmask;
 //
 UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) : 
     Fl_Widget(X, Y, W, H, label),
-    render3d(false),
 	highlight(), split_ld(-1),
 	selbox_active(false),
 	drag_active(false), drag_lines(),
@@ -77,10 +76,7 @@ void UI_Canvas::draw()
 	                (grid.Scale < 1.9) ? 14 : 18;
 	fl_font(FL_COURIER, font_size);
 
-	if (render3d)
-		Render3D_Draw(x(), y(), w(), h());
-	else
-		DrawEverything();
+	DrawEverything();
 
 	fl_pop_clip();
 }
@@ -162,7 +158,7 @@ int UI_Canvas::handle_key()
 	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
-	if (render3d && ExecuteKey(key, KCTX_Render))
+	if (edit.render3d && ExecuteKey(key, KCTX_Render))
 		return 1;
 
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
@@ -183,7 +179,7 @@ int UI_Canvas::handle_move(bool drag)
 {
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (render3d)
+	if (edit.render3d)
 	{ /* TODO */ }
 	else
 	{
@@ -210,7 +206,7 @@ int UI_Canvas::handle_push()
 	{
 		Editor_MiddlePress(mod);
 	}
-	else if (! render3d)
+	else if (! edit.render3d)
 	{
 		Editor_MousePress(mod);
 	}
@@ -229,7 +225,7 @@ int UI_Canvas::handle_release()
 
 	if (Fl::event_button() == 2)
 		Editor_MiddleRelease();
-	else if (! render3d)
+	else if (! edit.render3d)
 		Editor_MouseRelease();
 	return 1;
 }
@@ -242,7 +238,7 @@ int UI_Canvas::handle_wheel()
 
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (render3d)
+	if (edit.render3d)
 		Render3D_Wheel(0 - dy, mod);
 	else
 		Editor_Wheel(dx, dy, mod);
@@ -1555,14 +1551,6 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 }
 
 
-void UI_Canvas::ChangeRenderMode(int mode)
-{
-	render3d = mode ? true : false;
-
-	redraw();
-}
-
-
 void UI_Canvas::RightButtonScroll(int mode)
 {
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
@@ -1578,7 +1566,7 @@ void UI_Canvas::RightButtonScroll(int mode)
 		int dx = Fl::event_x() - rbscroll_x;
 		int dy = Fl::event_y() - rbscroll_y;
 
-		if (render3d)
+		if (edit.render3d)
 		{
 			Render3D_RBScroll(dx, dy, mod);
 		}

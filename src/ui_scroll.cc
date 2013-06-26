@@ -23,6 +23,7 @@
 
 #include "ui_scroll.h"
 #include "ui_canvas.h"
+#include "r_render.h"
 
 
 #define HUGE_DIST  (1 << 24)
@@ -301,6 +302,16 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 
 UI_CanvasScroll::~UI_CanvasScroll()
 { }
+
+
+void UI_CanvasScroll::draw()
+{
+	if (edit.render3d)
+		Render3D_Draw(x(), y(), w(), h());
+	else
+		Fl_Group::draw();
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
