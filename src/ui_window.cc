@@ -89,11 +89,16 @@ UI_MainWin::UI_MainWin() :
 
 	int browser_W = MIN_BROWSER_W + 56;
 
-	canvas = new UI_Canvas(0, cy, w() - panel_W - browser_W, ey - cy);
+	int cw = w() - panel_W - browser_W;
+	int ch = ey - cy;
+
+	UI_CanvasScroll *canv_scr = new UI_CanvasScroll(0, cy, cw, ch);
+
+	canvas = canv_scr->canvas;
 
 	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
 
-	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, canvas, browser);
+	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, canv_scr, browser);
 	add(tile);
 
 	resizable(tile);

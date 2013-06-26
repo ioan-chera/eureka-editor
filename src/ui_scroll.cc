@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,9 @@
 
 #include "main.h"
 #include "m_config.h"
+
 #include "ui_scroll.h"
+#include "ui_canvas.h"
 
 
 #define HUGE_DIST  (1 << 24)
@@ -261,6 +263,44 @@ void UI_Scroll::Line_size(int pixels)
 	scrollbar->linesize(pixels);
 }
 
+
+//------------------------------------------------------------------------
+
+
+UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
+	Fl_Group(X, Y, W, H)
+{
+	box(FL_NO_BOX);
+
+
+	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
+
+	resizable(canvas);
+
+
+	vert = new Fl_Scrollbar(X, Y, SBAR_W, H - SBAR_W, NULL);
+
+	vert->type(FL_VERTICAL);
+	vert->align(FL_ALIGN_LEFT);
+	vert->color(FL_DARK3, FL_DARK3);
+//	vert->selection_color(SCRBAR_COL);
+//!!	vert->callback(bar_callback, this);
+	vert->value(0, vert->h(), 0, 4000);
+
+
+	horiz = new Fl_Scrollbar(X + SBAR_W, Y + H - SBAR_W, W - SBAR_W, SBAR_W, NULL);
+
+	horiz->type(FL_HORIZONTAL);
+	horiz->align(FL_ALIGN_LEFT);
+	horiz->color(FL_DARK3, FL_DARK3);
+//	horiz->selection_color(SCRBAR_COL);
+//!!	horiz->callback(bar_callback, this);
+	horiz->value(0, vert->h(), 0, 4000);
+}
+
+
+UI_CanvasScroll::~UI_CanvasScroll()
+{ }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -72,6 +72,27 @@ private:
 	void reposition_all(int start_y);
 
 	static void bar_callback(Fl_Widget *, void *);
+};
+
+
+//------------------------------------------------------------------------
+
+
+class UI_Canvas;
+
+class UI_CanvasScroll : public Fl_Group
+{
+public:
+	UI_Canvas * canvas;
+
+private:
+	Fl_Scrollbar * horiz;
+	Fl_Scrollbar * vert;
+
+public:
+	UI_CanvasScroll(int X, int Y, int W, int H);
+
+	virtual ~UI_CanvasScroll();
 };
 
 
