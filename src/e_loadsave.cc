@@ -220,6 +220,12 @@ static Wad_file * load_wad;
 
 static short loading_level;
 
+static int bad_linedef_count;
+
+static int bad_sector_refs;
+static int bad_sidedef_refs;
+
+
 
 static void UpperCaseShortStr(char *buf, int max_len)
 {
@@ -314,6 +320,18 @@ static void LoadSectors()
 }
 
 
+static void CreateFallbackSector()
+{
+	LogPrintf("Creating a fallback sector.\n");
+
+	Sector *sec = new Sector;
+
+	sec->SetDefaults();
+
+	Sectors.push_back(sec);
+}
+
+
 static void LoadThings()
 {
 	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
@@ -333,7 +351,6 @@ static void LoadThings()
 	{
 		// Note: no error if no things exist, even though technically a map
 		// will be unplayable without the player starts.
-//!!!!		PrintWarn("Couldn't find any Things!\n");
 		return;
 	}
 
@@ -398,11 +415,34 @@ static void LoadSideDefs()
 
 		sd->sector = LE_U16(raw.sector);
 
-//!!!!!!		if (sd->sector >= NumSectors)  // FIXME warning
-//!!!!!!			sd->sector = 0;
+		if (sd->sector >= NumSectors)
+		{
+			LogPrintf("WARNING: sidedef #%d has bad sector ref (%d)\n",
+			          i, sd->sector);
+
+			bad_sector_refs++;
+
+			// ensure we have a valid sector
+			if (NumSectors == 0)
+				CreateFallbackSector();
+
+			sd->sector = 0;
+		}
 
 		SideDefs.push_back(sd);
 	}
+}
+
+
+static void CreateFallbackSideDef()
+{
+	LogPrintf("Creating a fallback sidedef.\n");
+
+	SideDef *sd = new SideDef;
+
+	sd->SetDefaults(false);
+
+	SideDefs.push_back(sd);
 }
 
 
@@ -424,6 +464,9 @@ static void LoadLineDefs()
 	if (count == 0)
 		FatalError("Couldn't find any Linedefs\n");
 
+	if (NumSideDefs < 2) CreateFallbackSideDef();
+	if (NumSideDefs < 2) CreateFallbackSideDef();
+
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_linedef_t raw;
@@ -436,6 +479,21 @@ static void LoadLineDefs()
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
 
+		// validate vertices
+		if (ld->start >= NumVertices || ld->end >= NumVertices ||
+		    ld->start == ld->end)
+		{
+			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
+			          ld->start, ld->end);
+
+			bad_linedef_count++;
+
+			// forget it
+			delete ld;
+
+			continue;
+		}
+
 		ld->flags = LE_U16(raw.flags);
 		ld->type  = LE_U16(raw.type);
 		ld->tag   = LE_S16(raw.tag);
@@ -443,17 +501,23 @@ static void LoadLineDefs()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		// FIXME vertex check
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		if (ld->right == 0xFFFF)
-			ld->right = -1;
-//!!!!!!		else if (ld->right >= NumSideDefs)
-//!!!!!!			ld->right = 0;  // FIXME warning
+		// validate sidedefs
+		if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+		{
+			LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
+			          ld->right, ld->left);
 
-		if (ld->left == 0xFFFF)
-			ld->left = -1;
-//!!!!!!		else if (ld->left >= NumSideDefs)
-//!!!!!!			ld->left = -1;  // FIXME warning
+			bad_sidedef_refs++;
+
+			if (ld->right >= NumSideDefs)
+				ld->right = 0;
+
+			if (ld->left >= NumSideDefs)
+				ld->left = 1;
+		}
 
 		LineDefs.push_back(ld);
 	}
@@ -494,6 +558,32 @@ static void RemoveUnusedVertices()
 }
 
 
+static void ShowLoadProblem()
+{
+	LogPrintf("Map load problems:\n");
+	LogPrintf("   %d linedefs with bad vertex refs (removed)\n", bad_linedef_count);
+	LogPrintf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
+	LogPrintf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
+
+	static char message[MSG_BUF_LEN];
+
+	if (bad_linedef_count > 0)
+	{
+		sprintf(message, "Found %d linedefs with bad vertex references.\n"
+		                 "These linedefs have been removed.",
+		        bad_linedef_count);
+	}
+	else
+	{
+		sprintf(message, "Found %d bad sector refs, %d bad sidedef refs.\n"
+		                 "These references have been replaced.",
+		        bad_sector_refs, bad_sidedef_refs);
+	}
+
+	Notify(-1, -1, "Map validation report:\n", message);
+}
+
+
 /*
    read in the level data
 */
@@ -511,14 +601,20 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	BA_ClearAll();
 
+	bad_linedef_count = 0;
+	bad_sector_refs   = 0;
+	bad_sidedef_refs  = 0;
+
 	LoadThings  ();
 	LoadVertices();
 	LoadSectors ();
 	LoadSideDefs();
 	LoadLineDefs();
 
-	// FIXME !!!!  check all references 
-
+	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
+	{
+		ShowLoadProblem();
+	}
 
 
 	// Node builders create a lot of new vertices for segs.
