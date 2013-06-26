@@ -45,6 +45,7 @@
 
 #include "ui_window.h"
 #include "ui_file.h"
+#include "r_render.h"
 
 #include "vm.h"
 
@@ -610,10 +611,6 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
-#include "ui_scroll.h"
-extern UI_CanvasScroll *canv_scr;
-
-
 void Main_Loop()
 {
 	UpdateHighlight();
@@ -624,7 +621,10 @@ void Main_Loop()
 
         if (edit.RedrawMap)
         {
-            main_win->canvas->redraw();
+			if (edit.render3d)
+				main_win->render->redraw();
+			else
+				main_win->canvas->redraw();
 
             edit.RedrawMap = 0;
         }
@@ -640,7 +640,8 @@ void Main_Loop()
 		// TODO: handle this a better way
 		main_win->UpdateTitle(MadeChanges ? true : false);
 
-canv_scr->UpdateRenderMode();
+// FIXME: TEMP
+main_win->scroll->UpdateRenderMode();
     }
 }
 

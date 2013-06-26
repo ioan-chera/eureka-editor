@@ -84,7 +84,7 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
+	     fprintf(stderr, "HANDLE EVENT %d\n", event);
 
 	switch (event)
 	{

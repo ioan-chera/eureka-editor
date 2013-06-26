@@ -1399,10 +1399,20 @@ void UI_Render3D::draw()
 
 int UI_Render3D::handle(int event)
 {
-	// ouch big hack!!
-
 fprintf(stderr, "Render3D  handle %d\n", event);
 
+	switch (event)
+	{
+		case FL_ENTER:
+			// we greedily grab the focus
+			if (Fl::focus() != this)
+				take_focus(); 
+
+		default:
+			break;  // pass it on
+	}
+
+	// ouch big hack!!
 	if (main_win)
 		return main_win->canvas->handle(event);
 

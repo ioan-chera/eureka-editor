@@ -49,10 +49,6 @@ static void main_win_close_CB(Fl_Widget *w, void *data)
 }
 
 
-//!!!! FIXME
-UI_CanvasScroll *canv_scr;
-
-
 //
 // MainWin Constructor
 //
@@ -96,13 +92,14 @@ UI_MainWin::UI_MainWin() :
 	int cw = w() - panel_W - browser_W;
 	int ch = ey - cy;
 
-	canv_scr = new UI_CanvasScroll(0, cy, cw, ch);
+	scroll = new UI_CanvasScroll(0, cy, cw, ch);
 
-	canvas = canv_scr->canvas;
+	canvas = scroll->canvas;
+	render = scroll->render;
 
 	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
 
-	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, canv_scr, browser);
+	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, scroll, browser);
 	add(tile);
 
 	resizable(tile);

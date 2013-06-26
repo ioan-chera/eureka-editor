@@ -322,11 +322,11 @@ void UI_CanvasScroll::UpdateRenderMode()
 	}
 	else if (! edit.render3d && render->visible())
 	{
-		canvas->hide();
-		  vert->hide();
-		 horiz->hide();
+		canvas->show();
+		  vert->show();
+		 horiz->show();
 
-		render->show();
+		render->hide();
 
 		redraw();
 	}
