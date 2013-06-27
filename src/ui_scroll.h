@@ -92,6 +92,8 @@ private:
 	Fl_Scrollbar * horiz;
 	Fl_Scrollbar * vert;
 
+	bool enable_bars;
+
 public:
 	UI_CanvasScroll(int X, int Y, int W, int H);
 

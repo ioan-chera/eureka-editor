@@ -269,7 +269,8 @@ void UI_Scroll::Line_size(int pixels)
 
 
 UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
-	Fl_Group(X, Y, W, H)
+	Fl_Group(X, Y, W, H),
+	enable_bars(true)
 {
 	box(FL_NO_BOX);
 
@@ -310,25 +311,47 @@ UI_CanvasScroll::~UI_CanvasScroll()
 
 void UI_CanvasScroll::UpdateRenderMode()
 {
-	if (edit.render3d && ! render->visible())
+	int old_3d = render->visible() ? 1 : 0;
+	int new_3d = edit.render3d     ? 1 : 0;
+
+	int old_bars = enable_bars     ? 1 : 0;
+	int new_bars = map_scroll_bars ? 1 : 0;
+
+	// nothing changed?
+	if (old_3d == new_3d && old_bars == new_bars)
+		return;
+
+	if (old_bars != new_bars)
+	{
+		int b = new_bars ? SBAR_W : 0;
+
+		canvas->resize(x() + b, y(), w() - b, h() - b);
+
+		init_sizes();
+
+		enable_bars = map_scroll_bars;
+	}
+
+	if (edit.render3d)
 	{
 		render->show();
-
 		canvas->hide();
+	}
+	else
+	{
+		render->hide();
+		canvas->show();
+	}
+
+	if (edit.render3d || ! enable_bars)
+	{
 		  vert->hide();
 		 horiz->hide();
-
-		redraw();
 	}
-	else if (! edit.render3d && render->visible())
+	else
 	{
-		canvas->show();
 		  vert->show();
 		 horiz->show();
-
-		render->hide();
-
-		redraw();
 	}
 }
 
