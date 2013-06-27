@@ -165,6 +165,7 @@ install: stripped
 	install -d $(INSTALL_DIR)/ports
 	install -d $(INSTALL_DIR)/mods
 	install -o root -m 644 misc/bindings.cfg $(INSTALL_DIR)/bindings.cfg
+	install -o root -m 644 misc/about_logo.png $(INSTALL_DIR)/about_logo.png
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
 	install -o root -m 644 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 644 ports/*.* $(INSTALL_DIR)/ports

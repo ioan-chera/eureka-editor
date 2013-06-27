@@ -23,10 +23,16 @@
 #include "ui_about.h"
 
 
+#define ABOUT_W  (440)   // matches logo image
+#define ABOUT_H  (230 + 270)
+
+
 class UI_About : public Fl_Window
 {
 private:
   static UI_About * _instance;
+
+  static Fl_RGB_Image *about_img;
 
   UI_About(int W, int H, const char *label = NULL);
 
@@ -35,16 +41,29 @@ private:
     // nothing needed
   }
 
+  static void LoadImage()
+  {
+    static char filename[FL_PATH_MAX];
+
+    snprintf(filename, sizeof(filename), "%s/about_logo.png", install_dir);
+    filename[FL_PATH_MAX-1] = 0;
+
+    if (FileExists(filename))
+    {
+      about_img = new Fl_PNG_Image(filename);
+    }
+  }
+
 public:
   static void Open()
   {
     if (_instance)  // already up?
       return;
 
-    int about_w = 326 + KF * 30;
-    int about_h = 330 + KF * 40;
+    if (! about_img)
+      LoadImage();
 
-    _instance = new UI_About(about_w, about_h, "About Eureka");
+    _instance = new UI_About(ABOUT_W, ABOUT_H, "About Eureka v" EUREKA_VERSION);
 
     _instance->show();
   }
@@ -80,7 +99,6 @@ private:
     }
   }
 
-  static const char *Logo;
   static const char *Text1;
   static const char *Text2;
   static const char *URL;
@@ -89,17 +107,17 @@ private:
 
 UI_About * UI_About::_instance;
 
+Fl_RGB_Image * UI_About::about_img;
 
-const char *UI_About::Logo = EUREKA_TITLE "\n v" EUREKA_VERSION;
 
 const char *UI_About::Text1 =
-  "EUREKA is a map editor for DOOM 1 and 2\n"
-  "EUREKA uses code from the Yadex editor.";
+  "EUREKA is a map editor for classic DOOM\n"
+  "EUREKA uses code from the Yadex editor";
 
 
 const char *UI_About::Text2 =
-  "Copyright (C) 2001-2013 Andrew Apted       \n"
-  "Copyright (C) 1997-2003 André Majorel et al\n"
+  "Copyright (C) 2001-2013 Andrew Apted        \n"
+  "Copyright (C) 1997-2003 André Majorel, et al\n"
   "\n"
   "This program is free software, and may be\n"
   "distributed and modified under the terms of\n"
@@ -122,17 +140,26 @@ UI_About::UI_About(int W, int H, const char *label) :
   size_range(W, H, W, H);
   callback(callback_Close, this);
 
-  int cy = 22;
 
+  // nice big logo image
 
-  // nice big logo text
-  Fl_Box *box = new Fl_Box(0, cy, W, 70, Logo);
+  Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, "");
   box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-  box->labelcolor(FL_BLUE);
-  box->labelsize(24);
+  box->color(FL_BLACK, FL_BLACK);
 
-  cy += box->h() + 10;
-  
+  if (about_img)
+    box->image(about_img);
+  else
+  {
+    box->box(FL_FLAT_BOX);
+    box->label("Eureka\nDoom Editor");
+    box->labelsize(40);
+    box->labelcolor(fl_rgb_color(255, 200, 100));
+  }
+
+
+  int cy = 238;
+
 
   // the very informative text
 
@@ -164,6 +191,9 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 
   // finally add an "OK" button
+
+  
+
   int bw = 60 + KF * 10;
   int bh = 30 + KF * 3;
 

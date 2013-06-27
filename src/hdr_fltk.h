@@ -42,6 +42,7 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Native_File_Chooser.H>
+#include <FL/Fl_PNG_Image.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Repeat_Button.H>
 #include <FL/Fl_Return_Button.H>

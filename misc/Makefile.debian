@@ -40,6 +40,7 @@ debbuild: debclean
 	install -o root -m 644 ports/*.* $(DEB_DIR)/ports
 #	install -o root -m 644 mods/*.*  $(INSTALL_DIR)/mods
 	install -o root -m 644 misc/bindings.cfg $(DEB_DIR)/bindings.cfg
+	install -o root -m 644 misc/about_logo.png $(DEB_DIR)/about_logo.png
 	#
 	install -o root -m 644 misc/debian/copyright $(DEB_DOCDIR)
 	install -o root -m 644 misc/debian/changelog $(DEB_DOCDIR)/changelog.Debian
