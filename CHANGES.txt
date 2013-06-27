@@ -12,6 +12,7 @@ CHANGES IN Eureka
 -  commands to go to next/previous file ('N' and 'P' keys)
 
 -  implemented SEC_Light() binding command
+-  incorporated Jason Johnston's logo in the About dialog
 
 -  automatically open the most recent file (optional)
 -  remember the browser width for a saved map
