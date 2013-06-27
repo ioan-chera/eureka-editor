@@ -32,10 +32,10 @@
 #include "e_things.h"
 
 
-extern int MapBound_lx;   /* minimum X value of map */
-extern int MapBound_ly;   /* minimum Y value of map */
-extern int MapBound_hx;   /* maximum X value of map */
-extern int MapBound_hy;   /* maximum Y value of map */
+extern int Map_bound_x1;   /* minimum X value of map */
+extern int Map_bound_y1;   /* minimum Y value of map */
+extern int Map_bound_x2;   /* maximum X value of map */
+extern int Map_bound_y2;   /* maximum Y value of map */
 
 extern int MadeChanges; // made changes?
                         // >= 2 means need to rebuild nodes

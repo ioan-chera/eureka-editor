@@ -641,8 +641,8 @@ void Main_Loop()
 		// TODO: handle this a better way
 		main_win->UpdateTitle(MadeChanges ? true : false);
 
-// FIXME: TEMP
-main_win->scroll->UpdateRenderMode();
+		// TODO: this too
+		main_win->scroll->UpdateRenderMode();
     }
 }
 

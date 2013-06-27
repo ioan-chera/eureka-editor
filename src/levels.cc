@@ -37,10 +37,10 @@
 #include "ui_window.h"
 
 
-int MapBound_hx = -32767;   /* maximum X value of map */
-int MapBound_hy = -32767;   /* maximum Y value of map */
-int MapBound_lx = 32767;    /* minimum X value of map */
-int MapBound_ly = 32767;    /* minimum Y value of map */
+int Map_bound_x1 =  32767;   /* minimum X value of map */
+int Map_bound_y1 =  32767;   /* minimum Y value of map */
+int Map_bound_x2 = -32767;   /* maximum X value of map */
+int Map_bound_y2 = -32767;   /* maximum Y value of map */
 
 int MadeChanges;   /* made changes? */
 
@@ -61,15 +61,15 @@ void MarkChanges(int scope)
 
 void UpdateLevelBounds(int start_vert)
 {
-	for (int i = start_vert; i < NumVertices; i++)
+	for (int i = start_vert ; i < NumVertices ; i++)
 	{
 		const Vertex * V = Vertices[i];
 
-		if (V->x < MapBound_lx) MapBound_lx = V->x;
-		if (V->y < MapBound_ly) MapBound_ly = V->y;
+		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
+		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
 
-		if (V->x > MapBound_hx) MapBound_hx = V->x;
-		if (V->y > MapBound_hy) MapBound_hy = V->y;
+		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
+		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
 	}
 }
 
@@ -77,13 +77,13 @@ void CalculateLevelBounds()
 {
 	if (NumVertices == 0)
 	{
-		MapBound_lx = MapBound_hx = 0;
-		MapBound_ly = MapBound_hy = 0;
+		Map_bound_x1 = Map_bound_x2 = 0;
+		Map_bound_y1 = Map_bound_y2 = 0;
 		return;
 	}
 
-	MapBound_lx = 999999; MapBound_hx = -999999;
-	MapBound_ly = 999999; MapBound_hy = -999999;
+	Map_bound_x1 = 999999; Map_bound_x2 = -999999;
+	Map_bound_y1 = 999999; Map_bound_y2 = -999999;
 
 	UpdateLevelBounds(0);
 }
@@ -123,11 +123,11 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 		const Vertex * V = Vertices[objnum];
 
-		if (V->x < MapBound_lx) MapBound_lx = V->x;
-		if (V->y < MapBound_ly) MapBound_ly = V->y;
+		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
+		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
 
-		if (V->x > MapBound_hx) MapBound_hx = V->x;
-		if (V->y > MapBound_hy) MapBound_hy = V->y;
+		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
+		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
 	}
 }
 

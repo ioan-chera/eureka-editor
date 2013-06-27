@@ -327,7 +327,7 @@ void UI_Canvas::DrawMap()
 	if (grid.shown)
 		DrawGrid();
 
-	if (false) // FIXME !!! DEBUG OPTION
+	if (Debugging)
 		DrawMapBounds();
 
 	DrawCamera();
@@ -476,11 +476,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	fl_color(FL_RED);
 
-	DrawMapLine(MapBound_lx, MapBound_ly, MapBound_hx, MapBound_ly);
-	DrawMapLine(MapBound_lx, MapBound_hy, MapBound_hx, MapBound_hy);
+	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x2, Map_bound_y1);
+	DrawMapLine(Map_bound_x1, Map_bound_y2, Map_bound_x2, Map_bound_y2);
 
-	DrawMapLine(MapBound_lx, MapBound_ly, MapBound_lx, MapBound_hy);
-	DrawMapLine(MapBound_hx, MapBound_ly, MapBound_hx, MapBound_hy);
+	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x1, Map_bound_y2);
+	DrawMapLine(Map_bound_x2, Map_bound_y1, Map_bound_x2, Map_bound_y2);
 }
 
 

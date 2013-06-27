@@ -77,15 +77,15 @@ static void zoom_fit()
 	int ScrMaxX = main_win->canvas->w();
 	int ScrMaxY = main_win->canvas->h();
 
-	if (MapBound_lx < MapBound_hx)
-		xzoom = ScrMaxX / (double)(MapBound_hx - MapBound_lx);
+	if (Map_bound_x1 < Map_bound_x2)
+		xzoom = ScrMaxX / (double)(Map_bound_x2 - Map_bound_x1);
 
-	if (MapBound_ly < MapBound_hy)
-		yzoom = ScrMaxY / (double)(MapBound_hy - MapBound_ly);
+	if (Map_bound_y1 < Map_bound_y2)
+		yzoom = ScrMaxY / (double)(Map_bound_y2 - Map_bound_y1);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
-	grid.CenterMapAt((MapBound_lx + MapBound_hx) / 2, (MapBound_ly + MapBound_hy) / 2);
+	grid.CenterMapAt((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
 }
 
 
