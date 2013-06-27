@@ -373,6 +373,15 @@ static const opt_desc_t options[] =
 		&leave_offsets_alone
 	},
 
+	{	"map_scroll_bars",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Enable scroll-bars for the map view",
+		NULL,
+		&map_scroll_bars
+	},
+
 	{	"mouse_wheel_scrolls_map",
 		0,
 		OPT_BOOLEAN,

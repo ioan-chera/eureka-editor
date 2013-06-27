@@ -32,6 +32,7 @@
 /* ==== CONFIG VARIABLES ==================== */
 
 extern bool auto_load_recent;
+extern bool map_scroll_bars;
 
 extern bool digits_set_zoom;
 extern bool leave_offsets_alone;

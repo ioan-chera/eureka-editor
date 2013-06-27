@@ -99,6 +99,7 @@ int KF_fonth;
 
 // config items
 bool auto_load_recent = false;
+bool map_scroll_bars  = false;
 
 int scroll_less   = 10;
 int scroll_more   = 90;

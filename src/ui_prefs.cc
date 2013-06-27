@@ -293,6 +293,7 @@ public:
 	Fl_Choice *gen_largescroll;
 
 	Fl_Check_Button *gen_wheelscroll;
+	Fl_Check_Button *gen_scrollbars;
 
 	/* Keys panel */
 
@@ -468,6 +469,9 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ gen_wheelscroll = new Fl_Check_Button(50, 300, 245, 25, " mouse wheel scrolls the map");
 		  gen_wheelscroll->down_box(FL_DOWN_BOX);
+		}
+		{ gen_scrollbars = new Fl_Check_Button(50, 345, 245, 25, " enable scroll-bars for map view");
+		  gen_scrollbars->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -874,6 +878,7 @@ void UI_Preferences::LoadValues()
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
+	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
 	// TODO: smallscroll, largescroll
 
@@ -949,6 +954,7 @@ void UI_Preferences::SaveValues()
 
 	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
+	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
 
 	// TODO: smallscroll, largescroll
 
