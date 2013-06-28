@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_config.h"
+#include "levels.h"
 
 #include "ui_scroll.h"
 #include "ui_canvas.h"
@@ -270,8 +271,14 @@ void UI_Scroll::Line_size(int pixels)
 
 UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H),
-	enable_bars(true)
+	enable_bars(true),
+	bound_x1(0), bound_x2(100),
+	bound_y1(0), bound_y2(100)
 {
+	for (int i = 0 ; i < 4 ; i++)
+		last_bounds[i] = 12345678;
+
+
 	box(FL_NO_BOX);
 
 
@@ -311,6 +318,9 @@ UI_CanvasScroll::~UI_CanvasScroll()
 
 void UI_CanvasScroll::UpdateRenderMode()
 {
+	UpdateBounds_X(); Adjust_X();
+	UpdateBounds_Y(); Adjust_Y();
+
 	int old_3d = render->visible() ? 1 : 0;
 	int new_3d = edit.render3d     ? 1 : 0;
 
@@ -353,6 +363,77 @@ void UI_CanvasScroll::UpdateRenderMode()
 		  vert->show();
 		 horiz->show();
 	}
+}
+
+
+void UI_CanvasScroll::UpdateBounds_X()
+{
+	if (last_bounds[0] == Map_bound_x1 &&
+		last_bounds[1] == Map_bound_x2)
+	{
+		return;
+	}
+
+	last_bounds[0] = Map_bound_x1;
+	last_bounds[1] = Map_bound_x2;
+
+	int expand = 512 + (Map_bound_x2 - Map_bound_x1) / 8;
+
+	bound_x1 = Map_bound_x1 - expand;
+	bound_x2 = Map_bound_x2 + expand;
+
+	Adjust_X();
+}
+
+
+void UI_CanvasScroll::UpdateBounds_Y()
+{
+	if (last_bounds[2] == Map_bound_y1 &&
+		last_bounds[3] == Map_bound_y2)
+	{
+		return;
+	}
+
+	last_bounds[2] = Map_bound_y1;
+	last_bounds[3] = Map_bound_y2;
+
+	int expand = 512 + (Map_bound_y2 - Map_bound_y1) / 8;
+
+	bound_y1 = Map_bound_y1 - expand;
+	bound_y2 = Map_bound_y2 + expand;
+
+	Adjust_Y();
+}
+
+
+void UI_CanvasScroll::Adjust_X()
+{
+	int cw = canvas->w();
+
+	int map_w = I_ROUND(cw / grid.Scale);
+	int map_x = grid.orig_x - map_w / 2;
+
+	if (map_x > bound_x2 - map_w) map_x = bound_x2 - map_w;
+	if (map_x < bound_x1) map_x = bound_x1;
+
+	horiz->value(map_x, map_w, bound_x1, bound_x2 - bound_x1);
+}
+
+
+void UI_CanvasScroll::Adjust_Y()
+{
+	int ch = canvas->h();
+
+	int map_h = I_ROUND(ch / grid.Scale);
+	int map_y = grid.orig_y - map_h / 2;
+
+	// invert, since screen coords are opposite polarity to map coords
+	map_y = bound_y2 - map_h - (map_y - bound_y1);
+
+	if (map_y > bound_y2 - map_h) map_y = bound_y2 - map_h;
+	if (map_y < bound_y1) map_y = bound_y1;
+
+	vert->value(map_y, map_h, bound_y1, bound_y2 - bound_y1);
 }
 
 

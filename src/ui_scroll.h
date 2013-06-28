@@ -94,6 +94,11 @@ private:
 
 	bool enable_bars;
 
+	int bound_x1, bound_x2;
+	int bound_y1, bound_y2;
+
+	int last_bounds[4];
+
 public:
 	UI_CanvasScroll(int X, int Y, int W, int H);
 
@@ -101,6 +106,13 @@ public:
 
 public:
 	void UpdateRenderMode();
+
+private:
+	void Adjust_X();
+	void Adjust_Y();
+
+	void UpdateBounds_X();
+	void UpdateBounds_Y();
 };
 
 
