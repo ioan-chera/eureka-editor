@@ -3,7 +3,14 @@ Eureka TODO / WISHLIST
 ======================
 
 
+-  fix hacks with UI_Render3D : especially event handling
+
+-  scrollbar colors for other schemes
+
 VM: use exceptions, not setjmp/longjmp
+
+BA_Abort()
+
 
 ______________________________________________________________________
 
@@ -195,31 +202,14 @@ Documentation
 
 -  built-in cheat sheet for mouse buttons and common keys
 
-??  command line arguments page
+NO:  command line arguments page  [instead: manpage]
 
-   --log : specify a log file to store messages
-
-   -d --debug : enable debugging messages
-                they go to log file if used, otherwise stderr
-
-   -q --quiet : don't send messages to stdout
-
-??  config file page
-   (a) ~/.eureka/config.cfg
-   (b) general syntax
-   (c) list of supported vars
+NO:  config file syntax
 
 
 
 Coding
 ------
-
-IDEA: BA_MarkDelete() : remember an object for deletion, but only
-      delete them when BA_End() is called.
-
-      probably need BA_IsDeleted() for testing if marked
-
-      possibly make this the ONLY way to delete stuff
 
 
 
