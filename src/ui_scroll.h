@@ -113,6 +113,11 @@ private:
 
 	void UpdateBounds_X();
 	void UpdateBounds_Y();
+
+	void Scroll_X();  // callback helpers
+	void Scroll_Y();
+
+	static void bar_callback(Fl_Widget *, void *);
 };
 
 

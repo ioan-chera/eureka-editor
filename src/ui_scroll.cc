@@ -288,8 +288,7 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	vert->align(FL_ALIGN_LEFT);
 	vert->color(FL_DARK3, FL_DARK3);
 //	vert->selection_color(SCRBAR_COL);
-//!!	vert->callback(bar_callback, this);
-	vert->value(0, vert->h(), 0, 4000);
+	vert->callback(bar_callback, this);
 
 
 	horiz = new Fl_Scrollbar(X + SBAR_W, Y + H - SBAR_W, W - SBAR_W, SBAR_W, NULL);
@@ -298,8 +297,7 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	horiz->align(FL_ALIGN_LEFT);
 	horiz->color(FL_DARK3, FL_DARK3);
 //	horiz->selection_color(SCRBAR_COL);
-//!!	horiz->callback(bar_callback, this);
-	horiz->value(0, vert->h(), 0, 4000);
+	horiz->callback(bar_callback, this);
 
 
 	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
@@ -434,6 +432,44 @@ void UI_CanvasScroll::Adjust_Y()
 	if (map_y < bound_y1) map_y = bound_y1;
 
 	vert->value(map_y, map_h, bound_y1, bound_y2 - bound_y1);
+}
+
+
+void UI_CanvasScroll::Scroll_X()
+{
+	int pos = horiz->value();
+
+	double map_w = canvas->w() / grid.Scale;
+
+	grid.orig_x = pos + map_w / 2.0;
+	edit.RedrawMap = 1;
+
+	Adjust_X();
+}
+
+
+void UI_CanvasScroll::Scroll_Y()
+{
+	int pos = vert->value();
+
+	double map_h = canvas->h() / grid.Scale;
+
+	grid.orig_y = bound_y2 - map_h / 2.0 - (pos - bound_y1);
+	edit.RedrawMap = 1;
+
+	Adjust_Y();
+}
+
+
+void UI_CanvasScroll::bar_callback(Fl_Widget *w, void *data)
+{
+	UI_CanvasScroll * that = (UI_CanvasScroll *)data;
+
+	if (w == that->horiz)
+		that->Scroll_X();
+
+	if (w == that->vert)
+		that->Scroll_Y();
 }
 
 
