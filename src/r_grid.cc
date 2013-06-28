@@ -84,16 +84,27 @@ void Grid_State_c::Init()
 }
 
 
-void Grid_State_c::CenterMapAt(int x, int y)
+void Grid_State_c::MoveTo(double x, double y)
 {
-	if ((int)orig_x != x || (int)orig_y != y)
-	{
-		orig_x = x;
-		orig_y = y;
+	// no change?
+	if (fabs(x - orig_x) < 0.01 &&
+	    fabs(y - orig_y) < 0.01)
+		return;
 
-		if (main_win)
-			main_win->canvas->redraw();
+	orig_x = x;
+	orig_y = y;
+
+	if (main_win)
+	{
+		main_win->canvas->redraw();
+		main_win->scroll->AdjustPos();
 	}
+}
+
+
+void Grid_State_c::Scroll(double delta_x, double delta_y)
+{
+	MoveTo(orig_x + delta_x, orig_y + delta_y);
 }
 
 
@@ -245,8 +256,8 @@ void Grid_State_c::ScaleFromWidget(int i)
 
 	Scale = scale_values[i];
 
-///---	if (_auto)
-///---		StepFromScale();
+	if (main_win)
+		main_win->scroll->AdjustPos();
 
 	edit.RedrawMap = 1;
 }
@@ -377,7 +388,10 @@ void Grid_State_c::AdjustScale(int delta)
 	ScaleFromWidget(result);
 
 	if (main_win)
+	{
 		main_win->info_bar->SetScale(result);
+		main_win->scroll->AdjustPos();
+	}
 }
 
 
@@ -393,6 +407,8 @@ void Grid_State_c::DoSetScale()
 		if (ratio > 0.99 && ratio < 1.01)
 		{
 			main_win->info_bar->SetScale(i);
+			main_win->scroll->AdjustPos();
+
 			return;
 		}
 	}
@@ -402,6 +418,7 @@ void Grid_State_c::DoSetScale()
 	Scale = scale_values[index];
 
 	main_win->info_bar->SetScale(index);
+	main_win->scroll->AdjustPos();
 }
 
 
@@ -513,7 +530,10 @@ void Grid_State_c::NearestScale(double want_scale)
 	ScaleFromWidget(result);
 
 	if (main_win)
+	{
 		main_win->info_bar->SetScale(result);
+		main_win->scroll->AdjustPos();
+	}
 }
 
 
@@ -527,7 +547,10 @@ void Grid_State_c::ScaleFromDigit(int digit)
 	ScaleFromWidget(result);
 
 	if (main_win)
+	{
 		main_win->info_bar->SetScale(result);
+		main_win->scroll->AdjustPos();
+	}
 }
 
 
@@ -549,8 +572,10 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "map_pos") == 0 && num_tok >= 4)
 	{
-		grid.orig_x = atof(tokens[1]);
-		grid.orig_y = atof(tokens[2]);
+		double x = atof(tokens[1]);
+		double y = atof(tokens[2]);
+
+		grid.MoveTo(x, y);
 
 		grid.Scale = atof(tokens[3]);
 

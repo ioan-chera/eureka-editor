@@ -316,9 +316,6 @@ UI_CanvasScroll::~UI_CanvasScroll()
 
 void UI_CanvasScroll::UpdateRenderMode()
 {
-	UpdateBounds_X(); Adjust_X();
-	UpdateBounds_Y(); Adjust_Y();
-
 	int old_3d = render->visible() ? 1 : 0;
 	int new_3d = edit.render3d     ? 1 : 0;
 
@@ -364,6 +361,13 @@ void UI_CanvasScroll::UpdateRenderMode()
 }
 
 
+void UI_CanvasScroll::UpdateBounds()
+{
+	UpdateBounds_X();
+	UpdateBounds_Y();
+}
+
+
 void UI_CanvasScroll::UpdateBounds_X()
 {
 	if (last_bounds[0] == Map_bound_x1 &&
@@ -404,6 +408,13 @@ void UI_CanvasScroll::UpdateBounds_Y()
 }
 
 
+void UI_CanvasScroll::AdjustPos()
+{
+	Adjust_X();
+	Adjust_Y();
+}
+
+
 void UI_CanvasScroll::Adjust_X()
 {
 	int cw = canvas->w();
@@ -425,7 +436,7 @@ void UI_CanvasScroll::Adjust_Y()
 	int map_h = I_ROUND(ch / grid.Scale);
 	int map_y = grid.orig_y - map_h / 2;
 
-	// invert, since screen coords are opposite polarity to map coords
+	// invert, since screen coords are the reverse of map coords
 	map_y = bound_y2 - map_h - (map_y - bound_y1);
 
 	if (map_y > bound_y2 - map_h) map_y = bound_y2 - map_h;
@@ -441,10 +452,9 @@ void UI_CanvasScroll::Scroll_X()
 
 	double map_w = canvas->w() / grid.Scale;
 
-	grid.orig_x = pos + map_w / 2.0;
-	edit.RedrawMap = 1;
+	double new_x = pos + map_w / 2.0;
 
-	Adjust_X();
+	grid.MoveTo(new_x, grid.orig_y);
 }
 
 
@@ -454,10 +464,9 @@ void UI_CanvasScroll::Scroll_Y()
 
 	double map_h = canvas->h() / grid.Scale;
 
-	grid.orig_y = bound_y2 - map_h / 2.0 - (pos - bound_y1);
-	edit.RedrawMap = 1;
+	double new_y = bound_y2 - map_h / 2.0 - (pos - bound_y1);
 
-	Adjust_Y();
+	grid.MoveTo(grid.orig_x, new_y);
 }
 
 

@@ -1579,10 +1579,10 @@ void UI_Canvas::RightButtonScroll(int mode)
 			else if (mod == MOD_COMMAND)
 				speed *= 2;
 
-			grid.orig_x -= ((double) dx * speed / 8.0 / grid.Scale);
-			grid.orig_y += ((double) dy * speed / 8.0 / grid.Scale);
+			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
+			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
 
-			redraw();
+			grid.Scroll(delta_x, delta_y);
 		}
 	}
 

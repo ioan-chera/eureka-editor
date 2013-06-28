@@ -503,15 +503,6 @@ void BR_Scroll(void)
 }
 
 
-void Editor_ScrollMap(int dx, int dy)
-{
-	grid.orig_x += dx;
-	grid.orig_y += dy;
-
-	edit.RedrawMap = 1;
-}
-
-
 void CMD_Scroll(void)
 {
 	// these are percentages
@@ -527,7 +518,7 @@ void CMD_Scroll(void)
 	delta_x = delta_x * main_win->canvas->w() / 100.0 / grid.Scale;
 	delta_y = delta_y * main_win->canvas->h() / 100.0 / grid.Scale;
 
-	Editor_ScrollMap(delta_x, delta_y);
+	grid.Scroll(delta_x, delta_y);
 }
 
 
@@ -744,8 +735,8 @@ void Editor_Wheel(int dx, int dy, keycode_t mod)
 		if (mod == MOD_SHIFT)
 			speed = MAX(1, speed / 3);
 
-		Editor_ScrollMap(  dx * (double) speed / grid.Scale,
-		                 - dy * (double) speed / grid.Scale);
+		grid.Scroll(  dx * (double) speed / grid.Scale,
+		            - dy * (double) speed / grid.Scale);
 	}
 	else
 	{

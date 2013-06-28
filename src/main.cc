@@ -638,11 +638,11 @@ void Main_Loop()
 			want_quit = false;
 		}
 
-		// TODO: handle this a better way
+		// TODO: handle these in a better way
 		main_win->UpdateTitle(MadeChanges ? true : false);
 
-		// TODO: this too
 		main_win->scroll->UpdateRenderMode();
+		main_win->scroll->UpdateBounds();
     }
 }
 

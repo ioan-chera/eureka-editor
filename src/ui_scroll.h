@@ -106,6 +106,9 @@ public:
 
 public:
 	void UpdateRenderMode();
+	void UpdateBounds();
+
+	void AdjustPos();
 
 private:
 	void Adjust_X();

@@ -56,9 +56,12 @@ public:
 		return shown;
 	}
 
+	void MoveTo(double new_x, double new_y);
+	void Scroll(double delta_x, double delta_y);
+
 	// change the view so that the map coordinates (x, y)
 	// appear at the centre of the window
-	void CenterMapAt(int x, int y);
+	void CenterMapAt(int x, int y) { MoveTo(x, y); }
 
 	// return X/Y coordinate snapped to grid
 	// (or unchanged is the 'snap' flag is off)
