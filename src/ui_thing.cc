@@ -262,7 +262,7 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y += 40;
 
 
-	sprite = new UI_Pic(X + (W-100)/2, Y, 100,100);
+	sprite = new UI_Pic(X + (W-100)/2, Y, 100,100, "Sprite");
 	sprite->callback(button_callback, this);
 
 	add(sprite);

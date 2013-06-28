@@ -34,8 +34,10 @@ private:
 
 	bool selected;
 
+	const char *what_text;
+
 public:
-	UI_Pic(int X, int Y, int W, int H);
+	UI_Pic(int X, int Y, int W, int H, const char *L = "");
 	virtual ~UI_Pic();
 
 	// FLTK virtual method for drawing.

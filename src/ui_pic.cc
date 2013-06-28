@@ -24,6 +24,7 @@
 
 #include "im_img.h"
 #include "im_color.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_things.h"
 #include "w_rawdef.h"
@@ -36,14 +37,21 @@
 //
 // UI_Pic Constructor
 //
-UI_Pic::UI_Pic(int X, int Y, int W, int H) :
+UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
     Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
     rgb(NULL), unknown(false), selected(false)
 {
 	color(FL_DARK2);
-	labelcolor(FL_LIGHT2);
 
-	align(FL_ALIGN_INSIDE);
+	what_text = StringDup(L);
+
+	Fl_Color lab_col = (gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
+
+	label(what_text);
+	labelcolor(lab_col);
+	labelsize(16);
+
+	align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
 }
 
 //
@@ -51,6 +59,8 @@ UI_Pic::UI_Pic(int X, int Y, int W, int H) :
 //
 UI_Pic::~UI_Pic()
 {
+	StringFree(what_text);
+	what_text = NULL;
 }
 
 
@@ -59,7 +69,9 @@ void UI_Pic::Clear()
 	if (rgb)
 	{
 		delete rgb; rgb = NULL;
-		label("");
+
+		label(what_text);
+
 		redraw();
 	}
 }
@@ -214,6 +226,9 @@ void UI_Pic::UploadRGB(const byte *buf, int depth)
 	//             the buffer, so that it will get freed properly
 	//             by the Fl_RGB_Image destructor.
 	rgb->alloc_array = true;
+
+	// remove label
+	label("");
 
 	redraw();
 }

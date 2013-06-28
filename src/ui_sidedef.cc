@@ -100,9 +100,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 		std::swap(LX, UX);
 
 
-	l_pic = new UI_Pic(LX, Y, 64, 64);
-	m_pic = new UI_Pic(MX, Y, 64, 64);
-	u_pic = new UI_Pic(UX, Y, 64, 64);
+	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
+	m_pic = new UI_Pic(MX, Y, 64, 64, "Mid");
+	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
 
 	l_pic->callback(tex_callback, this);
 	m_pic->callback(tex_callback, this);

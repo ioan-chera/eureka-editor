@@ -113,8 +113,8 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 14;
 
 
-	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
-	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);
+	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64, "Ceil");
+	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64, "Floor");
 
 	c_pic->callback(tex_callback, this);
 	f_pic->callback(tex_callback, this);
