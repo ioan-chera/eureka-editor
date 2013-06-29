@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -121,16 +121,29 @@ int gammatable[5][256] =
 };
 
 
+//------------------------------------------------------------------------
+
+
 // Holds the private data members
 class Img_priv
 {
 public:
-    Img_priv () { buf = 0; width = 0; height = 0; opaque = false; }
-    ~Img_priv () { if (buf != 0) delete[] buf; }
     img_pixel_t *buf;
+
     int    width;
     int    height;
-    bool         opaque;
+
+    bool   opaque;
+
+public:
+     Img_priv() : buf(NULL), width(0), height(0), opaque(false)
+	 { }
+
+    ~Img_priv()
+	{
+		if (buf)
+			delete[] buf;
+	}
 };
 
 
@@ -172,7 +185,7 @@ Img::~Img ()
  */
 bool Img::is_null () const
 {
-	return p->buf == 0;
+	return p->buf == NULL;
 }
 
 
@@ -225,8 +238,10 @@ img_pixel_t *Img::wbuf ()
  */
 void Img::clear ()
 {
-	if (p->buf != 0)
+	if (p->buf)
+	{
 		memset (p->buf, TRANS_PIXEL, p->width * p->height);
+	}
 }
 
 
@@ -251,10 +266,10 @@ void Img::resize (int width, int height)
 		return;
 
 	// Unallocate old buffer
-	if (p->buf != 0)
+	if (p->buf)
 	{
 		delete[] p->buf;
-		p->buf = 0;
+		p->buf = NULL;
 	}
 
 	// Is it a null image ?
@@ -268,7 +283,9 @@ void Img::resize (int width, int height)
 	// Allocate new buffer
 	p->width  = width;
 	p->height = height;
+	
 	p->buf = new img_pixel_t[width * height + 10];  // Some slack
+
 	clear ();
 }
 
@@ -291,10 +308,11 @@ Img * Img::spectrify() const
 	int H = height();
 
 	const img_pixel_t *src = buf();
-	img_pixel_t *dest = omg->wbuf ();
 
-	for (y = 0; y < H; y++)
-	for (x = 0; x < W; x++)
+	img_pixel_t *dest = omg->wbuf();
+
+	for (y = 0 ; y < H ; y++)
+	for (x = 0 ; x < W ; x++)
 	{
 		img_pixel_t pix = src[y * W + x];
 
@@ -331,15 +349,19 @@ Img * Img::spectrify() const
  *
  *  In the case of scale factors > 1, the algorithm is
  *  suboptimal.
+ *
+ *  andrewj: turned into a method, but untested...
  */
-void scale_img (const Img& img, double scale, Img& omg)
+Img * Img::scale_img (double scale)
 {
-	int iwidth  = img.width ();
-	int owidth  = (int) (img.width()  * scale + 0.5);
-	int oheight = (int) (img.height() * scale + 0.5);
-	omg.resize (owidth, oheight);
-	const img_pixel_t *const ibuf = img.buf ();
-	img_pixel_t       *const obuf = omg.wbuf ();
+	int iwidth  = width ();
+	int owidth  = (int) (width()  * scale + 0.5);
+	int oheight = (int) (height() * scale + 0.5);
+
+	Img *omg = new Img(owidth, oheight, p->opaque);
+
+	const img_pixel_t *const ibuf = buf ();
+	img_pixel_t       *const obuf = omg->wbuf ();
 
 	if (true)
 	{
@@ -357,6 +379,8 @@ void scale_img (const Img& img, double scale, Img& omg)
 		}
 		delete[] ix;
 	}
+
+	return omg;
 }
 
 //--- editor settings ---

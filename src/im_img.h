@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -40,10 +40,14 @@ const img_pixel_t TRANS_PIXEL = 247;
 
 class Img
 {
-  public :
+private:
+    Img_priv *p;
+
+public:
     Img ();
     Img (int width, int height, bool opaque);
     ~Img ();
+
     bool               is_null    () const; // Is it a null image ?
     int          width      () const; // Return the width
     int          height     () const; // Return the height
@@ -54,11 +58,11 @@ class Img
     void               resize     (int width, int height);
 
     Img * spectrify() const;
+	Img * scale_img(double scale);
 
-  private :
+private:
     Img            (const Img&);  // Too lazy to implement it
     Img& operator= (const Img&);  // Too lazy to implement it
-    Img_priv *p;
 };
 
 
