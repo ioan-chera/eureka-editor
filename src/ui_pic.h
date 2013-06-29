@@ -59,7 +59,7 @@ public:
 
 	void GetFlat(const char * fname);
 	void GetTex (const char * tname);
-	void GetSprite(int type);
+	void GetSprite(int type, Fl_Color back_color);
 
 	bool Selected() { return selected; }
 	void Selected(bool _val) { selected = _val; }

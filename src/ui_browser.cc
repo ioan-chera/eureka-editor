@@ -631,8 +631,7 @@ void UI_Browser_Box::Populate_Sprites()
 
 		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
 
-		pic->color(FL_BLACK);
-		pic->GetSprite(TI->first);
+		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
 		                                      full_desc, TI->first, info->group,

@@ -305,7 +305,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	const thingtype_t *info = M_GetThingType(new_type);
 
 	box->desc->value(info->desc);
-	box->sprite->GetSprite(new_type);
+	box->sprite->GetSprite(new_type, FL_DARK2);
 
 	selection_c list;
 	selection_iterator_c it;
@@ -566,7 +566,7 @@ void UI_ThingBox::UpdateField(int field)
 			const thingtype_t *info = M_GetThingType(Things[obj]->type);
 			desc->value(info->desc);
 			type->value(Int_TmpStr(Things[obj]->type));
-			sprite->GetSprite(Things[obj]->type);
+			sprite->GetSprite(Things[obj]->type, FL_DARK2);
 		}
 		else
 		{

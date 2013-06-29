@@ -131,7 +131,7 @@ void UI_Pic::GetTex(const char * tname)
 }
 
 
-void UI_Pic::GetSprite(int type)
+void UI_Pic::GetSprite(int type, Fl_Color back_color)
 {
 	//  color(FL_GRAY0 + 2);
 
@@ -156,7 +156,7 @@ void UI_Pic::GetSprite(int type)
 	}
 
 
-	u32_t back_col = Fl::get_color(color());
+	u32_t back = Fl::get_color(back_color);
 
 	int iw = img->width();
 	int ih = img->height();
@@ -172,14 +172,14 @@ void UI_Pic::GetSprite(int type)
 
 	uchar *buf = new uchar[nw * nh * 3];
 
-	for (int y = 0; y < nh; y++)
-	for (int x = 0; x < nw; x++)
+	for (int y = 0 ; y < nh ; y++)
+	for (int x = 0 ; x < nw ; x++)
 	{
 		int ix = x / scale - (nw / scale - iw) / 2;
 		//  int iy = (ih-1) - (nh-4 - y);
 		int iy = y / scale - (nh / scale - ih) / 2;
 
-		u32_t col = back_col;
+		u32_t col = back;
 
 		if (ix >= 0 && ix < iw && iy >= 0 && iy < ih)
 		{
