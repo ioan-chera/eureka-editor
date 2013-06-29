@@ -45,10 +45,6 @@ void MarkChanges(int scope = 1);
 void CalculateLevelBounds();
 
 
-// is this flat a sky?
-bool is_sky(const char *flat);
-
-
 void MapStuff_NotifyBegin();
 void MapStuff_NotifyInsert(obj_type_e type, int objnum);
 void MapStuff_NotifyDelete(obj_type_e type, int objnum);

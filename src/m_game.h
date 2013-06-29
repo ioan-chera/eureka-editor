@@ -107,9 +107,18 @@ texturegroup_t;
  *  Global variables that contain game definition data
  */
 
-extern int g_sky_color;
+typedef struct
+{
+	int sky_color;
+	std::string sky_flat;
 
-extern std::string g_sky_flat;
+	int missing_color;
+	int unknown_tex;
+	int unknown_flat;
+
+} game_info_t;
+
+extern game_info_t  game_info;
 
 
 void M_InitDefinitions();
@@ -124,6 +133,10 @@ void M_FreeDefinitions();
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
 const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name);
+
+
+// is this flat a sky?
+bool is_sky(const char *flat);
 
 
 const sectortype_t * M_GetSectorType(int type);

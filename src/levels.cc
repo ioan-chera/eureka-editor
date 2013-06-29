@@ -144,10 +144,5 @@ void MapStuff_NotifyEnd()
 }
 
 
-bool is_sky(const char *flat)
-{
-	return (y_stricmp(g_sky_flat.c_str(), flat) == 0);
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

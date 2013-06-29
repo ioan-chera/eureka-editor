@@ -51,9 +51,7 @@ std::map<std::string, char> texture_assigns;
 std::map<std::string, char> flat_assigns;
 
 
-std::string g_sky_flat;
-
-int g_sky_color;
+game_info_t  game_info;  // contains sky_color (etc)
 
 
 /*
@@ -284,7 +282,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (ntoks != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			g_sky_color = atoi(token[1]);
+			game_info.sky_color = atoi(token[1]);
 		}
 
 		else if (y_stricmp(token[0], "sky_flat") == 0)
@@ -292,7 +290,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (ntoks != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			g_sky_flat = token[1];
+			game_info.sky_flat = token[1];
 		}
 
 		else if (y_stricmp(token[0], "default_port") == 0)
@@ -582,6 +580,12 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 
 
 //------------------------------------------------------------------------
+
+
+bool is_sky(const char *flat)
+{
+	return (y_stricmp(game_info.sky_flat.c_str(), flat) == 0);
+}
 
 
 const sectortype_t * M_GetSectorType(int type)

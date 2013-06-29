@@ -24,7 +24,6 @@
 #include <map>
 #include <algorithm>
 
-#include "levels.h"
 #include "im_color.h"
 #include "im_img.h"
 #include "e_things.h"
@@ -436,7 +435,7 @@ public:
 			ceil.y_clip = DrawSurf::SOLID_ABOVE;
 
 			if (is_sky(front->CeilTex()))
-				ceil.col = g_sky_color;
+				ceil.col = game_info.sky_color;
 			else
 				ceil.FindFlat(front->CeilTex(), front);
 		}
@@ -450,7 +449,7 @@ public:
 			floor.y_clip = DrawSurf::SOLID_BELOW;
 
 			if (is_sky(front->FloorTex()))
-				floor.col = g_sky_color;
+				floor.col = game_info.sky_color;
 			else
 				floor.FindFlat(front->FloorTex(), front);
 		}
@@ -1056,7 +1055,7 @@ public:
 
 			*buf = surf.col;
 
-			if (view.lighting && surf.col != g_sky_color)
+			if (view.lighting && surf.col != game_info.sky_color)
 				*buf = view.DoomLightRemap(light, dist, 0x70);  //TODO: GAME CONFIG
 		}
 	}
