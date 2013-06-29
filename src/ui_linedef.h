@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -84,6 +84,8 @@ private:
 
 	void SetTexOnLine(int ld, int new_tex, int e_state,
 	                  int front_pics, int back_pics);
+
+	int SolidMask(int side);
 
 	static void   type_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);

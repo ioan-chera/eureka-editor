@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -24,12 +24,23 @@
 
 #define SETOBJ_NO_LINE  -2
 
+// solid_mask bits : when set, that part requires a texture
+enum
+{
+	SOLID_LOWER = (1 << 0),
+	SOLID_MID   = (1 << 1),
+	SOLID_UPPER = (1 << 2)
+
+};
+
 
 class UI_SideBox : public Fl_Group
 {
 private:
 	int  obj;
 	bool is_front;
+
+	int what_is_solid;
 
 public:
 	Fl_Int_Input *x_ofs;
@@ -54,7 +65,8 @@ public:
 public:
 	// this can be a sidedef number or -1 for none, or the special
 	// value SETOBJ_NO_LINE when there is no linedef at all.
-	void SetObj(int index);
+	// solid_mask is a bit field of parts which require a texture.
+	void SetObj(int index, int solid_mask);
 
 	// where is 'l' for lower / 'm' for middle / 'u' for upper
 	void SetTexture(const char *name, char where);

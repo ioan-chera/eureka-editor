@@ -121,6 +121,12 @@ void UI_Pic::GetFlat(const char * fname)
 
 void UI_Pic::GetTex(const char * tname)
 {
+	if (tname[0] == '-')
+	{
+		Clear();
+		return;
+	}
+
 	TiledImg(W_GetTexture(tname), true /* has_trans */);
 }
 

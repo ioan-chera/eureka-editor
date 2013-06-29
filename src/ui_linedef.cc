@@ -472,13 +472,15 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (is_linedef(obj))
 		{
-			front->SetObj(LineDefs[obj]->right);
-			 back->SetObj(LineDefs[obj]->left);
+			const LineDef *L = LineDefs[obj];
+
+			front->SetObj(L->right, SolidMask(SIDE_RIGHT));
+			 back->SetObj(L->left,  SolidMask(SIDE_LEFT));
 		}
 		else
 		{
-			front->SetObj(SETOBJ_NO_LINE);
-			 back->SetObj(SETOBJ_NO_LINE);
+			front->SetObj(SETOBJ_NO_LINE, 0);
+			 back->SetObj(SETOBJ_NO_LINE, 0);
 		}
 	}
 
@@ -602,6 +604,32 @@ void UI_LineBox::UpdateTotal()
 	which->SetTotal(NumLineDefs);
 }
 
+
+int UI_LineBox::SolidMask(int side)
+{
+	SYS_ASSERT(is_linedef(obj));
+
+	const LineDef *L = LineDefs[obj];
+
+	if (L->left < 0 && L->right < 0)
+		return 0;
+	
+	if (L->left < 0 || L->right < 0)
+		return SOLID_MID;
+
+	Sector *right = L->Right()->SecRef();
+	Sector * left = L->Left ()->SecRef();
+
+	if (side == SIDE_LEFT)
+		std::swap(left, right);
+
+	int mask = 0;
+
+	if (right->floorh < left->floorh) mask |= SOLID_LOWER;
+	if (right-> ceilh > left-> ceilh) mask |= SOLID_UPPER;
+
+	return mask;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

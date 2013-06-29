@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -428,9 +428,9 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_SideBox::SetObj(int index)
+void UI_SideBox::SetObj(int index, int solid_mask)
 {
-	if (obj == index)
+	if (obj == index && what_is_solid == solid_mask)
 		return;
 
 	if (obj < 0 && index >= 0)
@@ -439,6 +439,8 @@ void UI_SideBox::SetObj(int index)
 		UpdateHiding(true);
 
 	obj = index;
+
+	what_is_solid = solid_mask;
 
 	UpdateLabel();
 	UpdateAddDel();
@@ -455,17 +457,32 @@ void UI_SideBox::UpdateField()
 {
 	if (is_sidedef(obj))
 	{
-		x_ofs->value(Int_TmpStr(SideDefs[obj]->x_offset));
-		y_ofs->value(Int_TmpStr(SideDefs[obj]->y_offset));
-		sec->value(Int_TmpStr(SideDefs[obj]->sector));
+		const SideDef *sd = SideDefs[obj];
 
-		l_tex->value(SideDefs[obj]->LowerTex());
-		m_tex->value(SideDefs[obj]->MidTex());
-		u_tex->value(SideDefs[obj]->UpperTex());
+		const char *lower = sd->LowerTex();
+		const char *mid   = sd->MidTex();
+		const char *upper = sd->UpperTex();
 
-		l_pic->GetTex(SideDefs[obj]->LowerTex());
-		m_pic->GetTex(SideDefs[obj]->MidTex());
-		u_pic->GetTex(SideDefs[obj]->UpperTex());
+		x_ofs->value(Int_TmpStr(sd->x_offset));
+		y_ofs->value(Int_TmpStr(sd->y_offset));
+		sec->value(Int_TmpStr(sd->sector));
+
+		l_tex->value(lower);
+		m_tex->value(mid);
+		u_tex->value(upper);
+
+		l_pic->GetTex(sd->LowerTex());
+		m_pic->GetTex(sd->MidTex());
+		u_pic->GetTex(sd->UpperTex());
+
+		if ((what_is_solid & SOLID_LOWER) && (lower[0] == '-'))
+			l_pic->MarkMissing();
+
+		if ((what_is_solid & SOLID_MID) && (mid[0] == '-'))
+			m_pic->MarkMissing();
+
+		if ((what_is_solid & SOLID_UPPER) && (upper[0] == '-'))
+			u_pic->MarkMissing();
 	}
 	else
 	{
