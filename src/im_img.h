@@ -66,8 +66,8 @@ private:
 };
 
 
-// FIXME: methods of Img
-void scale_img (const Img& img, double scale, Img& omg);
+Img * IM_CreateUnknownTex(int bg, int fg);
+Img * IM_CreateMissingTex(int bg, int fg);
 
 
 #endif  /* __EUREKA_IM_IMG_H__*/
