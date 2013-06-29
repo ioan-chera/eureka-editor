@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -30,11 +30,19 @@ class UI_Pic : public Fl_Box
 private:
 	Fl_RGB_Image *rgb;
 
-	bool unknown;
+	enum
+	{
+		SP_None = 0,
+		SP_Unknown,   // texture name is not found
+		SP_Missing,   // texture is '-' but should be present
+	};
+
+	int special;
 
 	bool selected;
 
 	const char *what_text;
+	Fl_Color    what_color;
 
 public:
 	UI_Pic(int X, int Y, int W, int H, const char *L = "");
@@ -45,6 +53,9 @@ public:
 
 public:
 	void Clear();
+
+	void MarkUnknown();
+	void MarkMissing();
 
 	void GetFlat(const char * fname);
 	void GetTex (const char * tname);

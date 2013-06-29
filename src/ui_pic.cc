@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -39,16 +39,16 @@
 //
 UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
     Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-    rgb(NULL), unknown(false), selected(false)
+    rgb(NULL), special(SP_None), selected(false)
 {
 	color(FL_DARK2);
 
 	what_text = StringDup(L);
 
-	Fl_Color lab_col = (gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
+	what_color = (gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
 
 	label(what_text);
-	labelcolor(lab_col);
+	labelcolor(what_color);
 	labelsize(16);
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
@@ -66,14 +66,51 @@ UI_Pic::~UI_Pic()
 
 void UI_Pic::Clear()
 {
+	special = SP_None;
+
+	color(FL_DARK2);
+	labelcolor(what_color);
+	labelsize(16);
+
+	label(what_text);
+
 	if (rgb)
 	{
 		delete rgb; rgb = NULL;
-
-		label(what_text);
-
-		redraw();
 	}
+
+	redraw();
+}
+
+
+void UI_Pic::MarkUnknown()
+{
+	Clear();
+
+	special = SP_Unknown;
+
+	color(FL_CYAN);
+	labelcolor(FL_BLACK);
+	labelsize(40);
+
+	label("?");
+
+	redraw();
+}
+
+void UI_Pic::MarkMissing()
+{
+	Clear();
+
+	special = SP_Missing;
+
+	color(fl_rgb_color(255, 128, 0));
+	labelcolor(FL_BLACK);
+	labelsize(40);
+
+	label("!");
+
+	redraw();
 }
 
 
@@ -92,13 +129,15 @@ void UI_Pic::GetSprite(int type)
 {
 	//  color(FL_GRAY0 + 2);
 
-	if (rgb)
-		Clear();
+	Clear();
 
 	Img *img = W_GetSprite(type);
 
 	if (! img || img->width() < 1 || img->height() < 1)
+	{
+		MarkUnknown();
 		return;
+	}
 
 	const thingtype_t *info = M_GetThingType(type);
 
@@ -123,11 +162,6 @@ void UI_Pic::GetSprite(int type)
 
 	if (iw*3 < nw && ih*3 < nh)
 		scale = 2;
-
-	///---  if (iw*2 < nw+4 && ih*2 < nh+8)
-	///---    scale = 2;
-	///---  if (iw*4 < nw && ih*4 < nh)
-	///---    scale = 3;
 
 
 	uchar *buf = new uchar[nw * nh * 3];
@@ -171,11 +205,13 @@ void UI_Pic::TiledImg(Img *img, bool has_trans)
 {
 	color(FL_DARK2);
 
-	if (rgb)
-		Clear();
+	Clear();
 
 	if (! img || img->width() < 1 || img->height() < 1)
+	{
+		MarkUnknown();
 		return;
+	}
 
 
 	int iw = img->width();
@@ -229,6 +265,8 @@ void UI_Pic::UploadRGB(const byte *buf, int depth)
 
 	// remove label
 	label("");
+
+	special = SP_None;
 
 	redraw();
 }
