@@ -48,47 +48,55 @@
 #define REND_SEL_COL  196
 
 
+
 struct Y_View
 {
 public:
-   // player type and position.
-   int p_type, px, py;
+	// player type and position.
+	int p_type, px, py;
 
-   // view position.
-   float x, y; 
-   int z;
+	// view position.
+	float x, y; 
+	int z;
 
-   // standard height above the floor.
+	// standard height above the floor.
 #define EYE_HEIGHT  41
 
-   // view direction.  angle is in radians
-   float angle;
-   float Sin, Cos;
+	// view direction.  angle is in radians
+	float angle;
+	float Sin, Cos;
 
-   // screen image.
-   int sw, sh;
-   byte *screen;
+	// screen image.
+	int sw, sh;
+	byte *screen;
 
-   float aspect_sh;
-   float aspect_sw;  // sw * aspect_ratio
+	float aspect_sh;
+	float aspect_sw;  // sw * aspect_ratio
 
-   bool texturing;
-   bool sprites;
-   bool lighting;
-   bool low_detail;
+	bool texturing;
+	bool sprites;
+	bool lighting;
+	bool low_detail;
 
-   bool gravity;  // when true, walk on ground
+	bool gravity;  // when true, walk on ground
 
-   std::vector<int> thing_sectors;
-   int thsec_sector_num;
-   bool thsec_invalidated;
+	std::vector<int> thing_sectors;
+	int thsec_sector_num;
+	bool thsec_invalidated;
+
+	Img *missing_tex;  int missing_col;
+	Img *unknown_tex;  int unk_tex_col;
+	Img *unknown_flat; int unk_flat_col;
 
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
 			   low_detail(false), gravity(true),
 	           thing_sectors(),
-			   thsec_sector_num(0), thsec_invalidated(false)
+			   thsec_sector_num(0), thsec_invalidated(false),
+			   missing_tex(NULL),  missing_col(-1),
+			   unknown_tex(NULL),  unk_tex_col(-1),
+			   unknown_flat(NULL), unk_flat_col(-1)
 	{ }
 
 	void SetAngle(float new_ang)
@@ -165,6 +173,30 @@ public:
 
 		return raw_colormap[map][pixel];
 	}
+
+	void UpdateDummies()
+	{
+		if (missing_col != game_info.missing_color)
+		{
+			missing_col = game_info.missing_color;
+			if (missing_tex) delete missing_tex;
+			missing_tex = IM_CreateMissingTex(missing_col, 0);
+		}
+
+		if (unk_tex_col != game_info.unknown_tex)
+		{
+			unk_tex_col = game_info.unknown_tex;
+			if (unknown_tex) delete unknown_tex;
+			unknown_tex = IM_CreateUnknownTex(unk_tex_col, 0);
+		}
+
+		if (unk_flat_col != game_info.unknown_flat)
+		{
+			unk_flat_col = game_info.unknown_flat;
+			if (unknown_flat) delete unknown_flat;
+			unknown_flat = IM_CreateUnknownTex(unk_flat_col, 0);
+		}
+	}
 };
 
 
@@ -186,7 +218,7 @@ public:
 	int h1, h2, tex_h;
 
 	Img *img;
-	img_pixel_t col;  /* used if img is zero */
+	img_pixel_t col;  /* used when no image */
 
 	enum
 	{
@@ -211,8 +243,10 @@ public:
 		{
 			img = W_GetFlat(fname);
 
-			if (img)
-				return;
+			if (! img)
+				img = view.unknown_flat;
+
+			return;
 		}
 
 		col = 0x70 + ((fname[0]*13+fname[1]*41+fname[2]*11) % 48);
@@ -224,8 +258,10 @@ public:
 		{
 			img = W_GetTexture(tname);
 
-			if (img)
-				return;
+			if (! img)
+				img = view.unknown_tex;
+
+			return;
 		}
 
 		col = 0x30 + ((tname[0]*17+tname[1]*47+tname[2]*7) % 64);
@@ -1399,8 +1435,6 @@ void UI_Render3D::draw()
 
 int UI_Render3D::handle(int event)
 {
-fprintf(stderr, "Render3D  handle %d\n", event);
-
 	switch (event)
 	{
 		case FL_ENTER:
@@ -1543,6 +1577,8 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 	{
 		view.FindThingSectors();
 	}
+
+	view.UpdateDummies();
 
 	// in low detail mode, setup size so that expansion always covers
 	// our window (i.e. we draw a bit more than we need).
