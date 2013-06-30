@@ -18,10 +18,13 @@
 #
 #------------------------------------------------------------------------
 
-sky_color 207
+color sky  207
 
-missing_color  215
+color wall    79   55
+color floor  127  112
 
-unknown_tex_color   112
-unknown_flat_color  198
+color missing  215
+
+color unknown_tex   112
+color unknown_flat  198
 

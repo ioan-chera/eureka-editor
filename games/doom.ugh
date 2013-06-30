@@ -27,12 +27,12 @@
 level_name  e1m1
 
 sky_flat  F_SKY1
-sky_color   207
 
 default_port  boom
 default_textures  STARTAN3  FLOOR4_8  CEIL3_5
 default_thing  2014
 
+include "doom_colors"
 include "doom_things"
 include "doom_specials"
 include "doom_tex"

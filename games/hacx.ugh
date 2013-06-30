@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012 Andrew Apted
+#  Copyright (C) 2012-2013 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -21,12 +21,12 @@
 level_name  map01
 
 sky_flat  F_SKY1
-sky_color   207
 
 default_port  boom
 default_textures  MODWALL3  FLAT14  FLAT5_1
 default_thing  2014
 
+include "doom_colors"
 include "doom_specials"
 
 #---- THINGS ----------------
@@ -168,7 +168,9 @@ thing   79 n -  16 POB1   "Stalagmite 1"
 #---- TEXTURES ----------------
 
 ## FIXME: more categories
-texturegroup y "Cyberspace"
+texturegroup n "Natural"
+texturegroup u "Urban"
+texturegroup c "Cyberspace"
 texturegroup - "OTHER"
 
 ## FIXME: assign to categories
