@@ -105,7 +105,7 @@ int UI_Canvas::handle(int event)
 
 		case FL_KEYDOWN:
 		case FL_SHORTCUT:
-			return handle_key();
+			return Editor_RawKey(event);
 
 		case FL_DRAG:
 			if (Fl::event_button3())
@@ -132,46 +132,6 @@ int UI_Canvas::handle(int event)
 	}
 
 	return 0;  // unused
-}
-
-
-int UI_Canvas::handle_key()
-{
-	keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
-
-	if (key == 0)
-		return 0;
-
-#if 0  // DEBUG
-	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
-#endif
-
-	// keyboard propagation logic
-
-	// handle digits specially
-	if ('1' <= (key & FL_KEY_MASK) && (key & FL_KEY_MASK) <= '9')
-	{
-		Editor_DigitKey(key);
-		return 1;
-	}
-
-	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
-		return 1;
-
-	if (edit.render3d && ExecuteKey(key, KCTX_Render))
-		return 1;
-
-	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
-		return 1;
-	
-	if (ExecuteKey(key, KCTX_General))
-		return 1;
-
-
-	// NOTE: the key may still get handled by something (e.g. Menus)
-	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
-
-	return 0;
 }
 
 

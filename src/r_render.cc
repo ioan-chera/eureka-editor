@@ -1481,11 +1481,17 @@ int UI_Render3D::handle(int event)
 			if (Fl::focus() != this)
 				take_focus(); 
 
+			return 1;
+
+		case FL_KEYDOWN:
+		case FL_SHORTCUT:
+			return Editor_RawKey(event);
+
 		default:
 			break;  // pass it on
 	}
 
-	// ouch big hack!!
+	// ouch big hack!!  FIXME
 	if (main_win)
 		return main_win->canvas->handle(event);
 

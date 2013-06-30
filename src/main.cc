@@ -846,6 +846,8 @@ static void ShowTime()
 
 static void M_LoadScripts()
 {
+	LogPrintf("Loading VM scripts.....\n");
+
 	VM_Init();
 
 	// FIXME

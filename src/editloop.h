@@ -93,6 +93,8 @@ void UpdateHighlight();
 void Editor_ChangeMode(char mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
+int  Editor_RawKey(int event);
+
 /* commands */
 
 void CMD_SelectAll(void);

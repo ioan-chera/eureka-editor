@@ -344,8 +344,8 @@ void UI_CanvasScroll::UpdateRenderMode()
 	}
 	else
 	{
-		render->hide();
 		canvas->show();
+		render->hide();
 	}
 
 	if (edit.render3d || ! enable_bars)
