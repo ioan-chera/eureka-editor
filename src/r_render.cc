@@ -243,7 +243,7 @@ public:
 
 		hash ^= (hash >> 5);
 
-		int c1 = (cols[0] + cols[1]) / 2;
+		int c1 = cols[0];
 		int c2 = cols[1];
 
 		if (c1 > c2)
