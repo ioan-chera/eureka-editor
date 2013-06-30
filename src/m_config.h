@@ -58,6 +58,9 @@ extern int multi_select_modifier;
 extern int backup_max_files;
 extern int backup_max_space;
 
+extern bool render_missing_bright;
+extern bool render_unknown_bright;
+
 extern bool glbsp_fast;
 extern bool glbsp_verbose;
 extern bool glbsp_warn;

@@ -418,6 +418,24 @@ static const opt_desc_t options[] =
 		&new_sector_size
 	},
 
+	{	"render_missing_bright",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Render the missing texture as fullbright",
+		NULL,
+		&render_missing_bright
+	},
+
+	{	"render_unknown_bright",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Render the unknown texture as fullbright",
+		NULL,
+		&render_unknown_bright
+	},
+
 	{	"same_mode_clears_selection",
 		0,
 		OPT_BOOLEAN,

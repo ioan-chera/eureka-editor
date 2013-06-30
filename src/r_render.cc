@@ -47,6 +47,10 @@
 #define REND_SEL_COL  196
 
 
+// config items
+bool render_missing_bright = true;
+bool render_unknown_bright = true;
+
 
 struct Y_View
 {
@@ -275,7 +279,7 @@ public:
 			if (! img)
 			{
 				img = view.unknown_flat;
-				fullbright = true;  // FIXME CONFIG ITEM
+				fullbright = render_unknown_bright;
 			}
 
 			return;
@@ -293,7 +297,7 @@ public:
 			if (tname[0] == '-')
 			{
 				img = view.missing_tex;
-				fullbright = true;   // FIXME: CONFIG ITEM (diff from below)
+				fullbright = render_missing_bright;
 				return;
 			}
 
@@ -302,7 +306,7 @@ public:
 			if (! img)
 			{
 				img = view.unknown_tex;
-				fullbright = true;  // FIXME: CONFIG ITEM
+				fullbright = render_unknown_bright;
 			}
 
 			return;
