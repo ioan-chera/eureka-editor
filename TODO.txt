@@ -158,8 +158,6 @@ WISH: support UDMF format
 
 -  ability to use an external node builder
 
--  LineDef panel: show "lower" etc in unset pics (low contrast)
-
 ?  an auto-save feature (e.g. save every N minutes unless no
    changes occurred in the last N minutes).
    really needs the backup view/load/prune dialog too.
@@ -222,6 +220,12 @@ Editing
 
 +  support generalized BOOM line and sector types
 
++  support PNG (etc?) image formats [enabled by a port definition]
+   -->  feature png
+
+-  support TX_START / TX_END namespace for textures
+   -->  feature tx_start
+
 +  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
    that merging.
@@ -230,8 +234,6 @@ Editing
 
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
-
-+  scrollbars for the canvas
 
 +  View / Find
    (use GoToObject for first match, FindNext starts at selected + 1)
@@ -245,9 +247,6 @@ Editing
 -  assume texture names beginning with '#' are special
 
 -  View / Toggle skill mode
-
--  show missing (HOM-producing) textures in linedef panel with
-   a special picture, e.g. exclamation mark on a red background
 
 ?  when highlighting a sector, draw the things in the same color as
    the sector is highlighted, but not as bright.  Because many sector
