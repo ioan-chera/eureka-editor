@@ -29,12 +29,24 @@
 level_name  e1m1
 
 sky_flat  F_SKY1
-sky_color   197
 
 default_textures  SANDSQ2  FLOOR01  FLAT508
 
 # 10 = wand crystal
 default_thing  10
+
+
+#---- COLORS --------------------
+
+color sky  197
+
+color wall   111  131
+color floor  209  223
+
+color missing  244
+
+color unknown_tex   205
+color unknown_flat  223
 
 
 #---- THING TYPES ---------------
