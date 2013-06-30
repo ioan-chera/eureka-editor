@@ -846,13 +846,14 @@ static void ShowTime()
 
 static void M_LoadScripts()
 {
-	// FIXME
-
 	VM_Init();
 
-	if (VM_CompileFile("builtins.up") != 0)
+	// FIXME
+
+	if (VM_CompileFile("misc/core_defs.up") != 0)
 	{
-// !!!!		FatalError("Failed to compile builtins.up\n");
+		LogPrintf("Failed to compile core_defs.up\n");
+		LogPrintf("*** Script system is disabled ***\n");
 		return;
 	}
 
