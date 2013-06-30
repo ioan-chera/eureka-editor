@@ -7,11 +7,16 @@ CHANGES IN Eureka
 
 +  fixed splitting void islands
 
++  scroll-bars for the map view (optional)
+
 -  changed 'File/Recent Files' to be a sub-menu
 -  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to next/previous file ('N' and 'P' keys)
 
 -  implemented SEC_Light() binding command
+-  show unknown/missing textures in the LineDef panel
+-  show unknown/missing textures in the 3D preview
+
 -  incorporated Jason Johnston's logo in the About dialog
 
 -  automatically open the most recent file (optional)
