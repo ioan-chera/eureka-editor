@@ -1,0 +1,6 @@
+//
+//  Core definitions
+//
+
+builtin dprint(s : string)
+
