@@ -86,6 +86,31 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
+static void ParseColorDef(char ** argv, int argc)
+{
+	if (y_stricmp(argv[0], "sky") == 0)
+	{
+		game_info.sky_color = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "missing") == 0)
+	{
+		game_info.missing_color = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "unknown_tex") == 0)
+	{
+		game_info.unknown_tex = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "unknown_flat") == 0)
+	{
+		game_info.unknown_flat = atoi(argv[1]);
+	}
+	else
+	{
+		LogPrintf("unknown color keyword: '%s'\n", argv[0]);
+	}
+}
+
+
 static const char * FindDefinitionFile(
 	const char *base_dir, const char *folder, const char *name)
 {
@@ -253,6 +278,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		/* process the line */
 
+		int nargs = ntoks - 1;
+
 		if (ntoks == 0)
 		{
 			continue;
@@ -260,7 +287,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "include") == 0)
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
@@ -271,15 +298,15 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "level_name") == 0)
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			/* ignored for backwards compability */
 		}
 
-		else if (y_stricmp(token[0], "sky_color") == 0)
+		else if (y_stricmp(token[0], "sky_color") == 0)  // back compat
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			game_info.sky_color = atoi(token[1]);
@@ -287,15 +314,23 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "sky_flat") == 0)
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			game_info.sky_flat = token[1];
 		}
 
+		else if (y_stricmp(token[0], "color") == 0)
+		{
+			if (nargs < 2)
+				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+
+			ParseColorDef(token + 1, nargs);
+		}
+
 		else if (y_stricmp(token[0], "default_port") == 0)
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			if (! Port_name)
@@ -304,8 +339,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "default_textures") == 0)
 		{
-			if (ntoks != 4)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+			if (nargs != 3)
+				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
 			default_mid_tex		= token[1];
 			default_floor_tex	= token[2];
@@ -317,7 +352,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "default_thing") == 0)
 		{
-			if (ntoks != 2)
+			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
 			default_thing = atoi(token[1]);
@@ -325,7 +360,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "linegroup") == 0)
 		{
-			if (ntoks != 3)
+			if (nargs != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			linegroup_t * lg = new linegroup_t;
@@ -340,7 +375,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		{
 			linetype_t * info = new linetype_t;
 
-			if (ntoks != 4)
+			if (nargs != 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
 			int number = atoi(token[1]);
@@ -359,7 +394,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "sector") == 0)
 		{
-			if (ntoks != 3)
+			if (nargs != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			int number = atoi(token[1]);
@@ -373,7 +408,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "thinggroup") == 0)
 		{
-			if (ntoks != 4)
+			if (nargs != 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
 			thinggroup_t * tg = new thinggroup_t;
@@ -387,8 +422,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "thing") == 0)
 		{
-			if (ntoks != 7)
-				FatalError(bad_arg_count, basename, lineno, token[0], 7);
+			if (nargs != 6)
+				FatalError(bad_arg_count, basename, lineno, token[0], 6);
 
 			thingtype_t * info = new thingtype_t;
 
@@ -415,7 +450,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "texturegroup") == 0)
 		{
-			if (ntoks != 3)
+			if (nargs != 2)
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			texturegroup_t * tg = new texturegroup_t;
@@ -428,8 +463,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "texture") == 0)
 		{
-			if (ntoks != 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+			if (nargs != 2)
+				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
@@ -445,8 +480,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "flat") == 0)
 		{
-			if (ntoks != 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+			if (nargs != 2)
+				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
