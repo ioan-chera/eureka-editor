@@ -164,12 +164,15 @@ install: stripped
 	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
 	install -d $(INSTALL_DIR)/mods
+	install -d $(INSTALL_DIR)/ups
 	install -o root -m 644 misc/bindings.cfg $(INSTALL_DIR)/bindings.cfg
 	install -o root -m 644 misc/about_logo.png $(INSTALL_DIR)/about_logo.png
+	install -o root -m 644 misc/core_defs.up $(INSTALL_DIR)/core_defs.up
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
 	install -o root -m 644 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 644 ports/*.* $(INSTALL_DIR)/ports
 #	install -o root -m 644 mods/*.*  $(INSTALL_DIR)/mods
+#	install -o root -m 644 ups/*.*  $(INSTALL_DIR)/ups
 	xdg-desktop-menu  install --novendor misc/eureka.desktop
 	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 

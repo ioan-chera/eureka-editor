@@ -40,10 +40,14 @@ Section
   File Eureka.exe
   File *.txt
   File bindings.cfg
+  File about_logo.png
+  File core_defs.up
+
   File /r games
   File /r common
   File /r ports
   File /nonfatal /r mods
+  File /nonfatal /r ups
 
   ; Write the installation path into the registry
   WriteRegStr HKLM "Software\EurekaEditor" "Install_Dir" "$INSTDIR"
