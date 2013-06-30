@@ -979,7 +979,8 @@ int main(int argc, char *argv[])
 
 		// the map is loaded later....
 	}
-	else if (auto_load_recent)
+	else if (auto_load_recent &&
+	         ! (Iwad_name || Level_name))
 	{
 		M_TryOpenMostRecent();
 	}
