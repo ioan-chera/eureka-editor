@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -111,6 +111,9 @@ typedef struct
 {
 	int sky_color;
 	std::string sky_flat;
+
+	int wall_colors[2];
+	int floor_colors[2];
 
 	int missing_color;
 	int unknown_tex;

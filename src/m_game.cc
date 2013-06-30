@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -91,6 +91,25 @@ static void ParseColorDef(char ** argv, int argc)
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
 		game_info.sky_color = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "wall") == 0)
+	{
+		game_info.wall_colors[0] = atoi(argv[1]);
+
+		if (argc < 2)
+			game_info.wall_colors[1] = game_info.wall_colors[0];
+		else
+			game_info.wall_colors[1] = atoi(argv[2]);
+
+	}
+	else if (y_stricmp(argv[0], "floor") == 0)
+	{
+		game_info.floor_colors[0] = atoi(argv[1]);
+
+		if (argc < 2)
+			game_info.floor_colors[1] = game_info.floor_colors[0];
+		else
+			game_info.floor_colors[1] = atoi(argv[2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
