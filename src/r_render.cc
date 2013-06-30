@@ -229,8 +229,10 @@ public:
 	// highlight the surface?
 	img_pixel_t border_col;
 
+	bool fullbright;
+
 public:
-	DrawSurf() : kind(K_INVIS), img(NULL), border_col(0)
+	DrawSurf() : kind(K_INVIS), img(NULL), border_col(0), fullbright(false)
 	{ }
 
 	~DrawSurf()
@@ -257,12 +259,24 @@ public:
 
 	void FindFlat(const char * fname, Sector *sec)
 	{
+		fullbright = false;
+
+		if (is_sky(fname))
+		{
+			col = game_info.sky_color;
+			fullbright = true;
+			return;
+		}
+
 		if (view.texturing)
 		{
 			img = W_GetFlat(fname);
 
 			if (! img)
+			{
 				img = view.unknown_flat;
+				fullbright = true;  // FIXME CONFIG ITEM
+			}
 
 			return;
 		}
@@ -272,12 +286,17 @@ public:
 
 	void FindTex(const char * tname, LineDef *ld)
 	{
+		fullbright = false;
+
 		if (view.texturing)
 		{
 			img = W_GetTexture(tname);
 
 			if (! img)
+			{
 				img = view.unknown_tex;
+				fullbright = true;  // FIXME: CONFIG ITEM
+			}
 
 			return;
 		}
@@ -450,10 +469,7 @@ public:
 			ceil.tex_h = ceil.h1;
 			ceil.y_clip = DrawSurf::SOLID_ABOVE;
 
-			if (is_sky(front->CeilTex()))
-				ceil.col = game_info.sky_color;
-			else
-				ceil.FindFlat(front->CeilTex(), front);
+			ceil.FindFlat(front->CeilTex(), front);
 		}
 
 		if (front->floorh < view.z && ! self_ref)
@@ -464,10 +480,7 @@ public:
 			floor.tex_h = floor.h2;
 			floor.y_clip = DrawSurf::SOLID_BELOW;
 
-			if (is_sky(front->FloorTex()))
-				floor.col = game_info.sky_color;
-			else
-				floor.FindFlat(front->FloorTex(), front);
+			floor.FindFlat(front->FloorTex(), front);
 		}
 
 		if (! back)
@@ -1005,7 +1018,7 @@ public:
 
 			*buf = wbuf[ty * tw + tx];
 			
-			if (view.lighting)
+			if (view.lighting && ! surf.fullbright)
 				*buf = view.DoomLightRemap(light, dist, *buf);
 		}
 	}
@@ -1050,7 +1063,7 @@ public:
 			if (pix == TRANS_PIXEL)
 				continue;
 
-			if (view.lighting)
+			if (view.lighting && ! surf.fullbright)
 				*buf = view.DoomLightRemap(light, dist, pix);
 			else
 				*buf = pix;
@@ -1069,7 +1082,7 @@ public:
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			if (view.lighting && surf.col != game_info.sky_color)
+			if (view.lighting && ! surf.fullbright)
 				*buf = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
 			else
 				*buf = surf.col;
@@ -1087,7 +1100,7 @@ public:
 
 		for ( ; y1 <= y2 ; y1++, buf += view.sw)
 		{
-			if (view.lighting)
+			if (view.lighting && ! surf.fullbright)
 				*buf = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
 			else
 				*buf = surf.col;
