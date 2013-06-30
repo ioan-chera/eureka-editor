@@ -236,6 +236,25 @@ public:
 	~DrawSurf()
 	{ }
 
+	int hashed_color(const char *name, const int *cols)
+	{
+		int hash = name[0]*17 + name[2]*7  + name[4]*3 +
+		           name[5]*13 + name[6]*47 + name[7];
+
+		hash ^= (hash >> 5);
+
+		int c1 = (cols[0] + cols[1]) / 2;
+		int c2 = cols[1];
+
+		if (c1 > c2)
+			std::swap(c1, c2);
+
+		if (c1 == c2)
+			return c1;
+
+		return c1 + hash % (c2 - c1 + 1);
+	}
+
 	void FindFlat(const char * fname, Sector *sec)
 	{
 		if (view.texturing)
@@ -248,7 +267,7 @@ public:
 			return;
 		}
 
-		col = 0x70 + ((fname[0]*13+fname[1]*41+fname[2]*11) % 48);
+		col = hashed_color(fname, game_info.floor_colors);
 	}
 
 	void FindTex(const char * tname, LineDef *ld)
@@ -263,10 +282,7 @@ public:
 			return;
 		}
 
-		col = 0x30 + ((tname[0]*17+tname[1]*47+tname[2]*7) % 64);
-
-		if (col >= 0x60)
-			col += 0x70;
+		col = hashed_color(tname, game_info.wall_colors);
 	}
 };
 
@@ -1053,10 +1069,10 @@ public:
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			*buf = surf.col;
-
 			if (view.lighting && surf.col != game_info.sky_color)
-				*buf = view.DoomLightRemap(light, dist, 0x70);  //TODO: GAME CONFIG
+				*buf = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
+			else
+				*buf = surf.col;
 		}
 	}
 
@@ -1071,10 +1087,10 @@ public:
 
 		for ( ; y1 <= y2 ; y1++, buf += view.sw)
 		{
-			*buf = surf.col;
-
 			if (view.lighting)
-				*buf = view.DoomLightRemap(light, dist, 0x50); //TODO GAME CONFIG
+				*buf = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
+			else
+				*buf = surf.col;
 		}
 	}
 
