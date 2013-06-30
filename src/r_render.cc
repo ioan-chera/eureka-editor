@@ -290,6 +290,13 @@ public:
 
 		if (view.texturing)
 		{
+			if (tname[0] == '-')
+			{
+				img = view.missing_tex;
+				fullbright = true;   // FIXME: CONFIG ITEM (diff from below)
+				return;
+			}
+
 			img = W_GetTexture(tname);
 
 			if (! img)
