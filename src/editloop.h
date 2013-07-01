@@ -94,6 +94,7 @@ void Editor_ChangeMode(char mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 int  Editor_RawKey(int event);
+int  Editor_RawButton(int event);
 
 /* commands */
 

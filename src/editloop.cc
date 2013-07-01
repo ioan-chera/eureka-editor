@@ -726,6 +726,9 @@ void CMD_CopyAndPaste(void)
 
 int Editor_RawKey(int event)
 {
+	if (event == FL_KEYUP)
+		return 0;
+
 	keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
 
 	if (key == 0)
@@ -759,6 +762,14 @@ int Editor_RawKey(int event)
 
 	// NOTE: the key may still get handled by something (e.g. Menus)
 	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
+
+	return 0;
+}
+
+
+int  Editor_RawButton(int event)
+{
+	// TODO
 
 	return 0;
 }

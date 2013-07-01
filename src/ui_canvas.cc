@@ -104,6 +104,7 @@ int UI_Canvas::handle(int event)
 			return 1;
 
 		case FL_KEYDOWN:
+		case FL_KEYUP:
 		case FL_SHORTCUT:
 			return Editor_RawKey(event);
 
