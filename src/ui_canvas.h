@@ -130,11 +130,9 @@ private:
 
 	void DragDelta(int *dx, int *dy);
 
-	int handle_key();
 	int handle_move(bool drag);
 	int handle_push();
 	int handle_release();
-	int handle_wheel();
 
 	void RightButtonScroll(int mode);
 

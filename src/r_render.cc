@@ -1488,6 +1488,9 @@ int UI_Render3D::handle(int event)
 		case FL_SHORTCUT:
 			return Editor_RawKey(event);
 
+		case FL_MOUSEWHEEL:
+			return Editor_RawWheel(event);
+
 		default:
 			break;  // pass it on
 	}

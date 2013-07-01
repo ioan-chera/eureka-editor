@@ -93,8 +93,13 @@ void UpdateHighlight();
 void Editor_ChangeMode(char mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
+
+extern int wheel_dx;
+extern int wheel_dy;
+
 int  Editor_RawKey(int event);
 int  Editor_RawButton(int event);
+int  Editor_RawWheel(int event);
 
 /* commands */
 

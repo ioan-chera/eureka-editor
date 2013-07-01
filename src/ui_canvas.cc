@@ -126,7 +126,7 @@ int UI_Canvas::handle(int event)
 			return handle_release();
 
 		case FL_MOUSEWHEEL:
-			return handle_wheel();
+			return Editor_RawWheel(event);
 
 		default:
 			break;
@@ -188,22 +188,6 @@ int UI_Canvas::handle_release()
 		Editor_MiddleRelease();
 	else if (! edit.render3d)
 		Editor_MouseRelease();
-	return 1;
-}
-
-
-int UI_Canvas::handle_wheel()
-{
-	int dx = Fl::event_dx();
-	int dy = Fl::event_dy();
-
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (edit.render3d)
-		Render3D_Wheel(0 - dy, mod);
-	else
-		Editor_Wheel(dx, dy, mod);
-
 	return 1;
 }
 

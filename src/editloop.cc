@@ -723,6 +723,9 @@ void CMD_CopyAndPaste(void)
 
 //------------------------------------------------------------------------
 
+int wheel_dx;
+int wheel_dy;
+
 
 int Editor_RawKey(int event)
 {
@@ -733,6 +736,8 @@ int Editor_RawKey(int event)
 
 	if (key == 0)
 		return 0;
+
+	wheel_dx = wheel_dy = 0;
 
 #if 0  // DEBUG
 	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
@@ -767,13 +772,33 @@ int Editor_RawKey(int event)
 }
 
 
-int  Editor_RawButton(int event)
+int Editor_RawButton(int event)
 {
 	// TODO
 
 	return 0;
 }
 
+
+int Editor_RawWheel(int event)
+{
+	wheel_dx = Fl::event_dx();
+	wheel_dy = Fl::event_dy();
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	// TODO: DistributeKey(EU_Wheel | mod)
+
+	if (edit.render3d)
+		Render3D_Wheel(0 - wheel_dy, mod);
+	else
+		Editor_Wheel(wheel_dx, wheel_dy, mod);
+
+	return 0;
+}
+
+
+//------------------------------------------------------------------------
 
 void Editor_Wheel(int dx, int dy, keycode_t mod)
 {
