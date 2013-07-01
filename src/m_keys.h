@@ -52,6 +52,10 @@ typedef unsigned int keycode_t;
 #define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
 
 
+// special "key" for the mouse wheel
+#define FL_Wheel    0xEF99
+
+
 typedef enum
 {
 	KCTX_NONE = 0,  /* INVALID */
