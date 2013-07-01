@@ -363,7 +363,7 @@ typedef struct
 
 	const editor_command_t *cmd;
 
-	char param[2][MAX_BIND_PARAM_LEN];
+	char param[4][MAX_BIND_PARAM_LEN];
 
 	// this field ONLY used by M_DetectConflictingBinds()
 	bool is_duplicate;
@@ -398,7 +398,7 @@ static void ParseKeyBinding(const char ** tokens, int num_tok)
 {
 	key_binding_t temp;
 
-	// this ensures the parameters are NUL terminated
+	// this ensures all parameters are NUL terminated
 	memset(&temp, 0, sizeof(temp));
 
 	temp.key = M_ParseKeyString(tokens[1]);
@@ -445,11 +445,9 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 		return;
 	}
 
-	if (num_tok >= 4)
-		strncpy(temp.param[0], tokens[3], MAX_BIND_PARAM_LEN-1);
-
-	if (num_tok >= 5)
-		strncpy(temp.param[1], tokens[4], MAX_BIND_PARAM_LEN-1);
+	for (int i = 0 ; i < 4 ; i++)
+		if (num_tok >= 4 + i)
+			strncpy(temp.param[i], tokens[3 + i], MAX_BIND_PARAM_LEN-1);
 
 #if 0  // DEBUG
 fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
@@ -541,7 +539,9 @@ static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
 		if (! full_match ||
 			(bind.cmd == other.cmd &&
 			 strcmp(bind.param[0], other.param[0]) == 0 &&
-			 strcmp(bind.param[1], other.param[1]) == 0))
+			 strcmp(bind.param[1], other.param[1]) == 0 &&
+			 strcmp(bind.param[2], other.param[2]) == 0 &&
+			 strcmp(bind.param[3], other.param[3]) == 0))
 		{
 			return true;
 		}
@@ -606,6 +606,8 @@ void M_SaveBindings()
 
 			if (bind.param[0][0]) fprintf(fp, "\t%s", bind.param[0]);
 			if (bind.param[1][0]) fprintf(fp, "\t%s", bind.param[1]);
+			if (bind.param[2][0]) fprintf(fp, "\t%s", bind.param[2]);
+			if (bind.param[3][0]) fprintf(fp, "\t%s", bind.param[3]);
 
 			fprintf(fp, "\n");
 			count++;
@@ -700,9 +702,11 @@ public:
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
-		int param_cmp = y_stricmp(k1.param[0], k2.param[0]) * 2 +
-		                y_stricmp(k1.param[1], k2.param[1]);
-		
+		int param_cmp = y_stricmp(k1.param[0], k2.param[0]) * 1000 +
+		                y_stricmp(k1.param[1], k2.param[1]) * 100  +
+		                y_stricmp(k1.param[2], k2.param[2]) * 10   +
+		                y_stricmp(k1.param[3], k2.param[3]);
+
 		if (param_cmp != 0)
 			return param_cmp < 0;
 
@@ -774,7 +778,7 @@ const char * M_StringForFunc(int index)
 
 	bool saw_arg = false;
 
-	for (int k = 0 ; k < 2 ; k++)
+	for (int k = 0 ; k < 4 ; k++)
 	{
 		const char *param = bind.param[k];
 
@@ -890,14 +894,12 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	/* OK : change the binding function */
 
 	bind.cmd = cmd;
-	bind.param[0][0] = 0;
-	bind.param[1][0] = 0;
 
-	if (num_tok >= 2)
-		strncpy(bind.param[0], tokens[1], MAX_BIND_PARAM_LEN-1);
+	memset(&bind.param, 0, sizeof(bind.param));
 
-	if (num_tok >= 3)
-		strncpy(bind.param[1], tokens[2], MAX_BIND_PARAM_LEN-1);
+	for (int i = 0 ; i < 4 ; i++)
+		if (num_tok >= 2 + i)
+			strncpy(bind.param[i], tokens[1 + i], MAX_BIND_PARAM_LEN-1);
 
 	return NULL;
 }
@@ -1059,8 +1061,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 		if (bind.key == key && bind.context == context)
 		{
-			EXEC_Param[0] = bind.param[0];
-			EXEC_Param[1] = bind.param[1];
+			for (int k = 0 ; k < 4 ; k++)
+				EXEC_Param[k] = bind.param[k];
 
 			DoExecuteCommand(bind.cmd);
 
