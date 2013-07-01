@@ -123,7 +123,7 @@ int UI_Canvas::handle(int event)
 			break;
 	}
 
-	return 0;  // unused
+	return Fl_Widget::handle(event);
 }
 
 

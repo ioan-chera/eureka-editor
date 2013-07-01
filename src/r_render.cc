@@ -1476,6 +1476,9 @@ int UI_Render3D::handle(int event)
 {
 	switch (event)
 	{
+		case FL_FOCUS:
+			return 1;
+
 		case FL_ENTER:
 			// we greedily grab the focus
 			if (Fl::focus() != this)
