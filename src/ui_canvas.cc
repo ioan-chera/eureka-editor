@@ -109,21 +109,12 @@ int UI_Canvas::handle(int event)
 			return Editor_RawKey(event);
 
 		case FL_DRAG:
-			if (Fl::event_button3())
-			{
-				RightButtonScroll(2);
-				return 1;
-			}
-			/* FALL THROUGH... */
-
 		case FL_MOVE:
-			return handle_move(event == FL_DRAG);
+			return handle_move(event);
 
 		case FL_PUSH:
-			return handle_push();
-
 		case FL_RELEASE:
-			return handle_release();
+			return handle_button(event);
 
 		case FL_MOUSEWHEEL:
 			return Editor_RawWheel(event);
@@ -136,28 +127,46 @@ int UI_Canvas::handle(int event)
 }
 
 
-int UI_Canvas::handle_move(bool drag)
+int UI_Canvas::handle_move(int event)
 {
 	int mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (event == FL_DRAG && Fl::event_button3())
+	{
+		RightButtonScroll(2);
+		return 1;
+	}
 
 	if (edit.render3d)
 	{ /* TODO */ }
 	else
 	{
 		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
-				MAPX(Fl::event_x()), MAPY(Fl::event_y()), drag);
+				MAPX(Fl::event_x()), MAPY(Fl::event_y()),
+				event == FL_DRAG);
 	}
 
 	return 1;
 }
 
 
-int UI_Canvas::handle_push()
+int UI_Canvas::handle_button(int event)
 {
+	bool down = (event == FL_PUSH);
+
 	// FIXME: THIS IS REALLY SHIT
 	if (Fl::event_button() == 3)
 	{
-		RightButtonScroll(1);
+		RightButtonScroll(down ? 1 : 0);
+		return 1;
+	}
+
+	if (! down)
+	{
+		if (Fl::event_button() == 2)
+			Editor_MiddleRelease();
+		else if (! edit.render3d)
+			Editor_MouseRelease();
 		return 1;
 	}
 
@@ -176,20 +185,45 @@ int UI_Canvas::handle_push()
 }
 
 
-int UI_Canvas::handle_release()
+void UI_Canvas::RightButtonScroll(int mode)
 {
-	if (Fl::event_button() == 3)
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (mode == 0)
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
+
+	else if (mode == 1)
+		main_win->SetCursor(FL_CURSOR_HAND);
+
+	else if (mode == 2)
 	{
-		RightButtonScroll(0);
-		return 1;
+		int dx = Fl::event_x() - rbscroll_x;
+		int dy = Fl::event_y() - rbscroll_y;
+
+		if (edit.render3d)
+		{
+			Render3D_RBScroll(dx, dy, mod);
+		}
+		else
+		{
+			int speed = 8;  // FIXME: CONFIG OPTION
+
+			if (mod == MOD_SHIFT)
+				speed /= 2;
+			else if (mod == MOD_COMMAND)
+				speed *= 2;
+
+			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
+			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
+
+			grid.Scroll(delta_x, delta_y);
+		}
 	}
 
-	if (Fl::event_button() == 2)
-		Editor_MiddleRelease();
-	else if (! edit.render3d)
-		Editor_MouseRelease();
-	return 1;
+	rbscroll_x = Fl::event_x();
+	rbscroll_y = Fl::event_y();
 }
+
 
 
 int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
@@ -1495,45 +1529,6 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 	redraw();
 }
 
-
-void UI_Canvas::RightButtonScroll(int mode)
-{
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (mode == 0)
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
-
-	else if (mode == 1)
-		main_win->SetCursor(FL_CURSOR_HAND);
-
-	else if (mode == 2)
-	{
-		int dx = Fl::event_x() - rbscroll_x;
-		int dy = Fl::event_y() - rbscroll_y;
-
-		if (edit.render3d)
-		{
-			Render3D_RBScroll(dx, dy, mod);
-		}
-		else
-		{
-			int speed = 8;  // FIXME: CONFIG OPTION
-
-			if (mod == MOD_SHIFT)
-				speed /= 2;
-			else if (mod == MOD_COMMAND)
-				speed *= 2;
-
-			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
-			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
-
-			grid.Scroll(delta_x, delta_y);
-		}
-	}
-
-	rbscroll_x = Fl::event_x();
-	rbscroll_y = Fl::event_y();
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
