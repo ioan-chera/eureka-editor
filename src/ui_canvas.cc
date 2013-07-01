@@ -108,16 +108,16 @@ int UI_Canvas::handle(int event)
 		case FL_SHORTCUT:
 			return Editor_RawKey(event);
 
-		case FL_DRAG:
-		case FL_MOVE:
-			return handle_move(event);
-
 		case FL_PUSH:
 		case FL_RELEASE:
-			return handle_button(event);
+			return Editor_RawButton(event);
 
 		case FL_MOUSEWHEEL:
 			return Editor_RawWheel(event);
+
+		case FL_DRAG:
+		case FL_MOVE:
+			return Editor_RawMouse(event);
 
 		default:
 			break;
@@ -127,103 +127,11 @@ int UI_Canvas::handle(int event)
 }
 
 
-int UI_Canvas::handle_move(int event)
+void UI_Canvas::PointerPos(int *map_x, int *map_y)
 {
-	int mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (event == FL_DRAG && Fl::event_button3())
-	{
-		RightButtonScroll(2);
-		return 1;
-	}
-
-	if (edit.render3d)
-	{ /* TODO */ }
-	else
-	{
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
-				MAPX(Fl::event_x()), MAPY(Fl::event_y()),
-				event == FL_DRAG);
-	}
-
-	return 1;
+	*map_x = MAPX(Fl::event_x());
+	*map_y = MAPY(Fl::event_y());
 }
-
-
-int UI_Canvas::handle_button(int event)
-{
-	bool down = (event == FL_PUSH);
-
-	// FIXME: THIS IS REALLY SHIT
-	if (Fl::event_button() == 3)
-	{
-		RightButtonScroll(down ? 1 : 0);
-		return 1;
-	}
-
-	if (! down)
-	{
-		if (Fl::event_button() == 2)
-			Editor_MiddleRelease();
-		else if (! edit.render3d)
-			Editor_MouseRelease();
-		return 1;
-	}
-
-	int mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (Fl::event_button() == 2)
-	{
-		Editor_MiddlePress(mod);
-	}
-	else if (! edit.render3d)
-	{
-		Editor_MousePress(mod);
-	}
-
-	return 1;
-}
-
-
-void UI_Canvas::RightButtonScroll(int mode)
-{
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (mode == 0)
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
-
-	else if (mode == 1)
-		main_win->SetCursor(FL_CURSOR_HAND);
-
-	else if (mode == 2)
-	{
-		int dx = Fl::event_x() - rbscroll_x;
-		int dy = Fl::event_y() - rbscroll_y;
-
-		if (edit.render3d)
-		{
-			Render3D_RBScroll(dx, dy, mod);
-		}
-		else
-		{
-			int speed = 8;  // FIXME: CONFIG OPTION
-
-			if (mod == MOD_SHIFT)
-				speed /= 2;
-			else if (mod == MOD_COMMAND)
-				speed *= 2;
-
-			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
-			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
-
-			grid.Scroll(delta_x, delta_y);
-		}
-	}
-
-	rbscroll_x = Fl::event_x();
-	rbscroll_y = Fl::event_y();
-}
-
 
 
 int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)

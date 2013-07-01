@@ -772,14 +772,6 @@ int Editor_RawKey(int event)
 }
 
 
-int Editor_RawButton(int event)
-{
-	// TODO
-
-	return 0;
-}
-
-
 int Editor_RawWheel(int event)
 {
 	wheel_dx = Fl::event_dx();
@@ -795,6 +787,110 @@ int Editor_RawWheel(int event)
 		Editor_Wheel(wheel_dx, wheel_dy, mod);
 
 	return 0;
+}
+
+
+static void RightButtonScroll(int mode)
+{
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	static int rbscroll_x = 0;
+	static int rbscroll_y = 0;
+
+	if (mode == 0)
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
+
+	else if (mode == 1)
+		main_win->SetCursor(FL_CURSOR_HAND);
+
+	else if (mode == 2)
+	{
+		int dx = Fl::event_x() - rbscroll_x;
+		int dy = Fl::event_y() - rbscroll_y;
+
+		if (edit.render3d)
+		{
+			Render3D_RBScroll(dx, dy, mod);
+		}
+		else
+		{
+			int speed = 8;  // FIXME: CONFIG OPTION
+
+			if (mod == MOD_SHIFT)
+				speed /= 2;
+			else if (mod == MOD_COMMAND)
+				speed *= 2;
+
+			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
+			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
+
+			grid.Scroll(delta_x, delta_y);
+		}
+	}
+
+	rbscroll_x = Fl::event_x();
+	rbscroll_y = Fl::event_y();
+}
+
+
+int Editor_RawButton(int event)
+{
+	bool down = (event == FL_PUSH);
+
+	// FIXME: THIS IS REALLY SHIT
+	if (Fl::event_button() == 3)
+	{
+		RightButtonScroll(down ? 1 : 0);
+		return 1;
+	}
+
+	if (! down)
+	{
+		if (Fl::event_button() == 2)
+			Editor_MiddleRelease();
+		else if (! edit.render3d)
+			Editor_MouseRelease();
+		return 1;
+	}
+
+	int mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (Fl::event_button() == 2)
+	{
+		Editor_MiddlePress(mod);
+	}
+	else if (! edit.render3d)
+	{
+		Editor_MousePress(mod);
+	}
+
+	return 1;
+}
+
+
+int Editor_RawMouse(int event)
+{
+	int mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (event == FL_DRAG && Fl::event_button3())
+	{
+		RightButtonScroll(2);
+		return 1;
+	}
+
+	if (edit.render3d)
+	{ /* TODO */ }
+	else
+	{
+		int map_x, map_y;
+
+		main_win->canvas->PointerPos(&map_x, &map_y);
+
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
+						   map_x, map_y, event == FL_DRAG);
+	}
+
+	return 1;
 }
 
 

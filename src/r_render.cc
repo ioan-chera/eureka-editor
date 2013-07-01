@@ -1488,16 +1488,20 @@ int UI_Render3D::handle(int event)
 		case FL_SHORTCUT:
 			return Editor_RawKey(event);
 
+		case FL_PUSH:
+		case FL_RELEASE:
+			return Editor_RawButton(event);
+
 		case FL_MOUSEWHEEL:
 			return Editor_RawWheel(event);
+
+		case FL_DRAG:
+		case FL_MOVE:
+			return Editor_RawMouse(event);
 
 		default:
 			break;  // pass it on
 	}
-
-	// ouch big hack!!  FIXME
-	if (main_win)
-		return main_win->canvas->handle(event);
 
 	return Fl_Widget::handle(event);
 }

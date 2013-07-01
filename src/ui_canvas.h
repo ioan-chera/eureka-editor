@@ -94,6 +94,8 @@ public:
 	void ScaleUpdate(int map_x, int map_y, keycode_t mod);
 	void ScaleFinish(scale_param_t& param);
 
+	void PointerPos(int *map_x, int *map_y);
+
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
 
@@ -129,11 +131,6 @@ private:
 	void SelboxDraw();
 
 	void DragDelta(int *dx, int *dy);
-
-	int handle_move(int event);
-	int handle_button(int event);
-
-	void RightButtonScroll(int mode);
 
 	// convert screen coordinates to map coordinates
 	inline int MAPX(int sx) const { return I_ROUND(grid.orig_x + (sx - w()/2 - x()) / grid.Scale); }

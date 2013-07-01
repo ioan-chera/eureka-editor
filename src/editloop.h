@@ -100,6 +100,7 @@ extern int wheel_dy;
 int  Editor_RawKey(int event);
 int  Editor_RawButton(int event);
 int  Editor_RawWheel(int event);
+int  Editor_RawMouse(int event);
 
 /* commands */
 
