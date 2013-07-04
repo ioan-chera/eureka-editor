@@ -13,16 +13,16 @@ CHANGES IN Eureka
 -  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to next/previous file ('N' and 'P' keys)
 
--  implemented SEC_Light() binding command
--  show unknown/missing textures in the LineDef panel
--  show unknown/missing textures in the 3D preview
-
 -  incorporated Jason Johnston's logo in the About dialog
 
 -  automatically open the most recent file (optional)
 -  option to maximize the window when Eureka starts
 -  remember the browser width for a saved map
 -  remember the 3D mode (the lack of it) for a map
+
+-  implemented SEC_Light() binding command
+-  show unknown/missing textures in the LineDef panel
+-  show unknown/missing textures in the 3D preview
 
 -  support Eureka config (.ugh) files as resource files
 -  support $DOOMWADPATH for finding IWADs
