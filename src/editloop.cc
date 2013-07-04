@@ -786,7 +786,7 @@ int Editor_RawWheel(int event)
 	else
 		Editor_Wheel(wheel_dx, wheel_dy, mod);
 
-	return 0;
+	return 1;
 }
 
 
