@@ -208,6 +208,9 @@ public:
 };
 
 
+//------------------------------------------------------------------------
+
+
 class UI_Preferences : public Fl_Double_Window
 {
 private:
@@ -258,7 +261,7 @@ public:
 	Fl_Button *apply_but;
 	Fl_Button *discard_but;
 
-	/* General panel */
+	/* General Tab */
 
 	Fl_Round_Button *theme_FLTK;
 	Fl_Round_Button *theme_GTK;
@@ -274,7 +277,7 @@ public:
 	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
 
-	/* Edit panel */
+	/* Edit Tab */
 
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
@@ -283,7 +286,7 @@ public:
 	Fl_Choice *edit_modkey;
 	Fl_Int_Input *edit_sectorsize;
 
-	/* Grid panel */
+	/* Grid Tab */
 
 	Fl_Check_Button *grid_snap;
 	Fl_Choice *grid_mode;
@@ -296,7 +299,7 @@ public:
 	Fl_Check_Button *gen_wheelscroll;
 	Fl_Check_Button *gen_scrollbars;
 
-	/* Keys panel */
+	/* Keys Tab */
 
 	Fl_Hold_Browser *key_list;
 	Fl_Button *key_group;
@@ -309,12 +312,17 @@ public:
 	Fl_Button *key_delete;
 	Fl_Button *key_reset;
 
-	/* glBSP panel */
+	/* Mouse Tab */
+
+	/* Other Tab */
 
 	Fl_Check_Button *bsp_warn;
 	Fl_Check_Button *bsp_verbose;
 	Fl_Check_Button *bsp_fast;
 };
+
+
+#define R_SPACES  "   "
 
 
 UI_Preferences::UI_Preferences() :
@@ -331,7 +339,7 @@ UI_Preferences::UI_Preferences() :
 
 	  /* ---- General Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General     ");
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General" R_SPACES);
 		o->labelsize(16);
 		// o->hide();
 
@@ -409,7 +417,7 @@ UI_Preferences::UI_Preferences() :
 
 	  /* ---- Editing Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing     ");
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing" R_SPACES);
 		o->labelsize(16);
 		o->hide();
 
@@ -442,7 +450,7 @@ UI_Preferences::UI_Preferences() :
 
 	  /* ---- Grid Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Grid     ");
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Grid" R_SPACES);
 		o->labelsize(16);
 		o->hide();
 
@@ -482,7 +490,7 @@ UI_Preferences::UI_Preferences() :
 
 	  /* ---- Key bindings Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys     ");
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
 		o->labelsize(16);
 		o->hide();
 
@@ -529,9 +537,18 @@ UI_Preferences::UI_Preferences() :
 		o->end();
 	  }
 
-	  /* ---- glBSP Tab ---- */
+	  /* ---- Mouse Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " glBSP     ");
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Mouse" R_SPACES);
+		o->labelsize(16);
+		o->hide();
+	    
+		o->end();
+	  }
+
+	  /* ---- Other Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Other" R_SPACES);
 		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
 		o->hide();
@@ -858,13 +875,13 @@ void UI_Preferences::LoadValues()
 	ig_colorbox->color(gui_custom_ig);
 	fg_colorbox->color(gui_custom_fg);
 
-	/* General stuff */
+	/* General Tab */
 
 	gen_autoload   ->value(auto_load_recent ? 1 : 0);
 	gen_maximized  ->value(begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(swap_sidedefs    ? 1 : 0);
 
-	/* Edit panel */
+	/* Edit Tab */
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
@@ -872,7 +889,7 @@ void UI_Preferences::LoadValues()
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 	edit_multiselect->value(multi_select_modifier ? 2 : 0);
 
-	/* Grid panel */
+	/* Grid Tab */
 
 	if (default_grid_mode < 0 || default_grid_mode > 2)
 		default_grid_mode = 1;
@@ -887,7 +904,7 @@ void UI_Preferences::LoadValues()
 
 	// TODO: smallscroll, largescroll
 
-	/* glBSP panel */
+	/* Other Tab */
 
 	bsp_fast->value(glbsp_fast ? 1 : 0);
 	bsp_verbose->value(glbsp_verbose ? 1 : 0);
@@ -936,13 +953,13 @@ void UI_Preferences::SaveValues()
 		main_win->redraw();
 	}
 
-	/* General panel */
+	/* General Tab */
 
 	auto_load_recent  = gen_autoload   ->value() ? true : false;
 	begin_maximized   = gen_maximized  ->value() ? true : false;
 	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
-	/* Edit panel */
+	/* Edit Tab */
 
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(4, new_sector_size, 8192);
@@ -952,7 +969,7 @@ void UI_Preferences::SaveValues()
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
 
-	/* Grid panel */
+	/* Grid Tab */
 
 	default_grid_snap = grid_snap->value() ? true : false;
 	default_grid_size = atoi(grid_size->mvalue()->text);
@@ -964,7 +981,7 @@ void UI_Preferences::SaveValues()
 
 	// TODO: smallscroll, largescroll
 
-	/* glBSP panel */
+	/* Other Tab */
 
 	glbsp_fast = bsp_fast->value() ? true : false;
 	glbsp_verbose = bsp_verbose->value() ? true : false;
