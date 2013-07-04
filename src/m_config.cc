@@ -238,6 +238,15 @@ static const opt_desc_t options[] =
 		&auto_load_recent
 	},
 
+	{	"begin_maximized",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Maximize the window when Eureka starts",
+		NULL,
+		&begin_maximized
+	},
+
 	{	"backup_max_files",
 		0,
 		OPT_INTEGER,

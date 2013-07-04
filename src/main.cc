@@ -99,6 +99,7 @@ int KF_fonth;
 
 // config items
 bool auto_load_recent = false;
+bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
 int scroll_less   = 10;
@@ -577,6 +578,11 @@ static void InitFLTK()
 
 		main_win->image(NULL);
 	}
+
+	Fl::check();
+
+	if (begin_maximized)
+		main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
 

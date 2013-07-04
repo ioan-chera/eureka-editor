@@ -20,6 +20,7 @@ CHANGES IN Eureka
 -  incorporated Jason Johnston's logo in the About dialog
 
 -  automatically open the most recent file (optional)
+-  option to maximize the window when Eureka starts
 -  remember the browser width for a saved map
 -  remember the 3D mode (the lack of it) for a map
 
