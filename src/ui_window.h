@@ -90,6 +90,8 @@ public:
 	// add or remove the '*' in the title
 	void UpdateTitle(bool want_star);
 
+	void Maximize();
+
 	// mode can be 't', 'l', 's', 'v' or 'r'.   FIXME: ENUMERATE
 	void NewEditMode(char mode);
 

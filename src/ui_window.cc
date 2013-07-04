@@ -386,6 +386,46 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 }
 
 
+void UI_MainWin::Maximize()
+{
+#if defined(WIN32)
+	HWND hWnd = fl_xid(pWindow);
+
+	ShowWindow(hWnd, SW_MAXIMIZE);
+
+#elif defined(__APPLE__)
+	// FIXME : something like this... (AFAIK)
+	//
+	// Window handle = fl_xid(this);   // really an NSWindow *
+	//
+	// if (! [handle isZoomed])
+	//     [handle zoom:nil];
+
+#else  /* Linux + X11 */
+
+	Window xid = fl_xid(this);
+
+	Atom wm_state = XInternAtom(fl_display, "_NET_WM_STATE", False);
+	Atom vmax = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+	Atom hmax = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+
+	XEvent xev;
+	memset(&xev, 0, sizeof(xev));
+
+	xev.type = ClientMessage;
+	xev.xclient.window = xid;
+	xev.xclient.message_type = wm_state;
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = 2;
+	xev.xclient.data.l[1] = hmax;
+	xev.xclient.data.l[2] = vmax;
+
+	XSendEvent(fl_display, DefaultRootWindow(fl_display), False,
+			   SubstructureNotifyMask, &xev);
+#endif
+}
+
+
 //------------------------------------------------------------------------
 
 
