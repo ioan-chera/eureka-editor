@@ -212,7 +212,12 @@ void UI_Canvas::DrawMap()
 
 	// draw the grid first since it's in the background
 	if (grid.shown)
-		DrawGrid();
+	{
+		if (grid.mode == 0)
+			DrawGrid_Dotty();
+		else
+			DrawGrid_Normal();
+	}
 
 	if (Debugging)
 		DrawMapBounds();
@@ -235,7 +240,7 @@ void UI_Canvas::DrawMap()
 /*
  *  draw_grid - draw the grid in the background of the edit window
  */
-void UI_Canvas::DrawGrid()
+void UI_Canvas::DrawGrid_Normal()
 {
 	int grid_step_1 = 1 * grid.step;    // Map units between dots
 	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
@@ -252,50 +257,65 @@ void UI_Canvas::DrawGrid()
 	}
 
 
-	// alternate grid mode : simple squares
-	if (grid.mode == 1)
-	{
-		if (grid.step < 64)
-			fl_color(GRID_BRIGHT); // fl_rgb_color(160, 96, 96));
-		else
-			fl_color(fl_rgb_color(48, 96, 48));
+	if (grid.step < 64)
+		fl_color(GRID_BRIGHT); // fl_rgb_color(160, 96, 96));
+	else
+		fl_color(fl_rgb_color(48, 96, 48));
 
-		int flat_step = 64;
+	int flat_step = 64;
 
-		int gx = (map_lx / flat_step) * flat_step;
+	int gx = (map_lx / flat_step) * flat_step;
 
-		for (; gx <= map_hx; gx += flat_step)
+	for (; gx <= map_hx; gx += flat_step)
+		DrawMapLine(gx, map_ly, gx, map_hy);
+
+	int gy = (map_ly / flat_step) * flat_step;
+
+
+	for (; gy <= map_hy; gy += flat_step)
+		DrawMapLine(map_lx, gy, map_hx, gy);
+
+	if (grid.step < 64)
+		fl_color(fl_rgb_color(60, 60, 120));
+	else
+		fl_color(GRID_BRIGHT);
+
+	gx = (map_lx / grid_step_1) * grid_step_1;
+
+	for (; gx <= map_hx; gx += grid_step_1)
+		if (grid.step >= 64 || (gx & 63) != 0)
 			DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / flat_step) * flat_step;
+	gy = (map_ly / grid_step_1) * grid_step_1;
 
-		for (; gy <= map_hy; gy += flat_step)
+	for (; gy <= map_hy; gy += grid_step_1)
+		if (grid.step >= 64 || (gy & 63) != 0)
 			DrawMapLine(map_lx, gy, map_hx, gy);
 
-		if (grid.step < 64)
-			fl_color(fl_rgb_color(60, 60, 120));
-		else
-			fl_color(GRID_BRIGHT);
 
-		gx = (map_lx / grid_step_1) * grid_step_1;
+	fl_color(fl_rgb_color(0, 144, 255));
 
-		for (; gx <= map_hx; gx += grid_step_1)
-			if (grid.step >= 64 || (gx & 63) != 0)
-				DrawMapLine(gx, map_ly, gx, map_hy);
+	DrawMapLine(0, map_ly, 0, map_hy);
+	DrawMapLine(map_lx, 0, map_hx, 0);
+}
 
-		gy = (map_ly / grid_step_1) * grid_step_1;
 
-		for (; gy <= map_hy; gy += grid_step_1)
-			if (grid.step >= 64 || (gy & 63) != 0)
-				DrawMapLine(map_lx, gy, map_hx, gy);
+void UI_Canvas::DrawGrid_Dotty()
+{
+	int grid_step_1 = 1 * grid.step;    // Map units between dots
+	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
+	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
 
-		fl_color(fl_rgb_color(0, 144, 255));
+	float pixels_1 = grid.step * grid.Scale;
 
-		DrawMapLine(0, map_ly, 0, map_hy);
-		DrawMapLine(map_lx, 0, map_hx, 0);
 
+	if (pixels_1 < 0.99)
+	{
+		fl_color(GRID_DARK);
+		fl_rectf(x(), y(), w(), h());
 		return;
 	}
+
 
 
 	fl_color(GRID_BRIGHT);

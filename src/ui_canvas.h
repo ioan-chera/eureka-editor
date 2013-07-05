@@ -108,7 +108,9 @@ private:
 	void draw();
 
 	void DrawMap();
-	void DrawGrid();
+
+	void DrawGrid_Dotty();
+	void DrawGrid_Normal();
 
 	void DrawMapBounds();
 	void DrawVertices();
