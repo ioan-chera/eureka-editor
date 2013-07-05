@@ -3,13 +3,20 @@ Eureka TODO / WISHLIST
 ======================
 
 
--  fix hacks with UI_Render3D : especially event handling
+-  gravity mode : an option to NOT allow up/down movement
+
+!!  setting a texture does not update 3D view
 
 -  scrollbar colors for other schemes
 
 VM: use exceptions, not setjmp/longjmp
 
 BA_Abort()
+
+
+TEST: Maximize on startup in WIN32
+
+TALK: doing the Maximize feature on OS/X
 
 
 ______________________________________________________________________
@@ -21,9 +28,11 @@ ______________________________________________________________________
 General
 -------
 
-+  configurable grid colors, 
++  grid stuff: 
 
-   IDEA: grid has separate color for 64x64 flat alignment
+   +  scroll speed settings
+
+   +  automatically darken lines when close together
 
 +  CHECK screen  (see misc/Checks.txt for more info)
 
@@ -297,9 +306,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
 
 NO: merge vertex and linedef modes
 
-IDEA: a config item to make the "simple" grid occur when grid-snapping
-      and the "normal" grid occur in FREE mode.
-
 
 
 3D View
@@ -554,15 +560,4 @@ render_lighting  (false)
 map_highlight_color
 map_selection_color
 map_high_sel_color
-
-midmask_back_color
-
-
-GAME CONFIG NEEDED
-------------------
-
-untex_wall_colors   <low>  <high>
-untex_floor_colors  <low>  <high>
-
-error_color  <pixel>
 
