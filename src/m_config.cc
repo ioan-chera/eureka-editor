@@ -481,6 +481,42 @@ static const opt_desc_t options[] =
 		&new_sector_size
 	},
 
+	{	"normal_axis_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"axis color for the normal grid",
+		NULL,
+		&normal_axis_col
+	},
+
+	{	"normal_main_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"main color for the normal grid",
+		NULL,
+		&normal_main_col
+	},
+
+	{	"normal_flat_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"flat color for the normal grid",
+		NULL,
+		&normal_flat_col
+	},
+
+	{	"normal_small_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"small color for the normal grid",
+		NULL,
+		&normal_small_col
+	},
+
 	{	"render_missing_bright",
 		0,
 		OPT_BOOLEAN,

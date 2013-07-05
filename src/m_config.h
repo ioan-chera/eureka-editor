@@ -63,6 +63,10 @@ extern rgb_color_t dotty_major_col;
 extern rgb_color_t dotty_minor_col;
 extern rgb_color_t dotty_point_col;
 
+extern rgb_color_t normal_axis_col;
+extern rgb_color_t normal_main_col;
+extern rgb_color_t normal_flat_col;
+extern rgb_color_t normal_small_col;
 
 extern int backup_max_files;
 extern int backup_max_space;

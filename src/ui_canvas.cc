@@ -42,9 +42,14 @@ extern int active_wmask;
 
 // config items
 rgb_color_t dotty_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 0xEE);
-rgb_color_t dotty_minor_col = RGB_MAKE(0, 0, 0xBB);
+rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 238);
+rgb_color_t dotty_minor_col = RGB_MAKE(0, 0, 187);
 rgb_color_t dotty_point_col = RGB_MAKE(0, 0, 255);
+
+rgb_color_t normal_axis_col  = RGB_MAKE(0, 128, 255);
+rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
+rgb_color_t normal_flat_col  = RGB_MAKE(84, 96, 48);
+rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
 //
@@ -256,18 +261,20 @@ void UI_Canvas::DrawGrid_Normal()
 	float pixels_1 = grid.step * grid.Scale;
 
 
-	if (pixels_1 < 0.99)
+	if (pixels_1 < 1.6)
 	{
-		fl_color(GRID_DARK);
+		fl_color(DarkerColor(DarkerColor(normal_main_col)));
 		fl_rectf(x(), y(), w(), h());
+
+		DrawAxes(dotty_axis_col);
 		return;
 	}
 
 
 	if (grid.step < 64)
-		fl_color(GRID_BRIGHT); // fl_rgb_color(160, 96, 96));
+		fl_color(normal_main_col);
 	else
-		fl_color(fl_rgb_color(48, 96, 48));
+		fl_color(normal_flat_col);
 
 	int flat_step = 64;
 
@@ -278,14 +285,14 @@ void UI_Canvas::DrawGrid_Normal()
 
 	int gy = (map_ly / flat_step) * flat_step;
 
-
 	for (; gy <= map_hy; gy += flat_step)
 		DrawMapLine(map_lx, gy, map_hx, gy);
 
+
 	if (grid.step < 64)
-		fl_color(fl_rgb_color(60, 60, 120));
+		fl_color(normal_small_col);
 	else
-		fl_color(GRID_BRIGHT);
+		fl_color(normal_main_col);
 
 	gx = (map_lx / grid_step_1) * grid_step_1;
 
@@ -300,10 +307,7 @@ void UI_Canvas::DrawGrid_Normal()
 			DrawMapLine(map_lx, gy, map_hx, gy);
 
 
-	fl_color(fl_rgb_color(0, 144, 255));
-
-	DrawMapLine(0, map_ly, 0, map_hy);
-	DrawMapLine(map_lx, 0, map_hx, 0);
+	DrawAxes(normal_axis_col);
 }
 
 

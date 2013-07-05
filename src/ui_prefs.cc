@@ -309,6 +309,10 @@ public:
 	Fl_Button *dotty_minor;
 	Fl_Button *dotty_point;
 
+	Fl_Button *normal_axis;
+	Fl_Button *normal_main;
+	Fl_Button *normal_flat;
+	Fl_Button *normal_small;
 
 	/* Keys Tab */
 
@@ -505,31 +509,48 @@ UI_Preferences::UI_Preferences() :
 		  grid_hide_free->down_box(FL_DOWN_BOX);
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Normal Grid Colors");
+		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ Fl_Box* o = new Fl_Box(225, 270, 355, 30, "Dotty Grid Colors");
-		  o->labelfont(1);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		{ normal_axis = new Fl_Button(150 + 0*55, 300, 45, 25, "Normal Grid : ");
+		  normal_axis->box(FL_BORDER_BOX);
+		  normal_axis->align(FL_ALIGN_LEFT);
+		  normal_axis->callback((Fl_Callback*)color_callback, this);
 		}
-		{ dotty_axis = new Fl_Button(240, 300+0*30, 45, 25, "axis");
+		{ normal_main = new Fl_Button(150 + 1*55, 300, 45, 25, "");
+		  normal_main->box(FL_BORDER_BOX);
+		  normal_main->align(FL_ALIGN_RIGHT);
+		  normal_main->callback((Fl_Callback*)color_callback, this);
+		}
+		{ normal_flat = new Fl_Button(150 + 2*55, 300, 45, 25, "");
+		  normal_flat->box(FL_BORDER_BOX);
+		  normal_flat->align(FL_ALIGN_RIGHT);
+		  normal_flat->callback((Fl_Callback*)color_callback, this);
+		}
+		{ normal_small = new Fl_Button(150 + 3*55, 300, 45, 25, "");
+		  normal_small->box(FL_BORDER_BOX);
+		  normal_small->align(FL_ALIGN_RIGHT);
+		  normal_small->callback((Fl_Callback*)color_callback, this);
+		}
+
+		{ dotty_axis = new Fl_Button(150 + 0*55, 340, 45, 25, "Dotty Grid : ");
 		  dotty_axis->box(FL_BORDER_BOX);
-		  dotty_axis->align(FL_ALIGN_RIGHT);
+		  dotty_axis->align(FL_ALIGN_LEFT);
 		  dotty_axis->callback((Fl_Callback*)color_callback, this);
 		}
-		{ dotty_major = new Fl_Button(240, 300+1*30, 45, 25, "major");
+		{ dotty_major = new Fl_Button(150 + 1*55, 340, 45, 25, "");
 		  dotty_major->box(FL_BORDER_BOX);
 		  dotty_major->align(FL_ALIGN_RIGHT);
 		  dotty_major->callback((Fl_Callback*)color_callback, this);
 		}
-		{ dotty_minor = new Fl_Button(240, 300+2*30, 45, 25, "minor");
+		{ dotty_minor = new Fl_Button(150 + 2*55, 340, 45, 25, "");
 		  dotty_minor->box(FL_BORDER_BOX);
 		  dotty_minor->align(FL_ALIGN_RIGHT);
 		  dotty_minor->callback((Fl_Callback*)color_callback, this);
 		}
-		{ dotty_point = new Fl_Button(240, 300+3*30, 45, 25, "point");
+		{ dotty_point = new Fl_Button(150 + 3*55, 340, 45, 25, "");
 		  dotty_point->box(FL_BORDER_BOX);
 		  dotty_point->align(FL_ALIGN_RIGHT);
 		  dotty_point->callback((Fl_Callback*)color_callback, this);
@@ -962,6 +983,11 @@ void UI_Preferences::LoadValues()
 	dotty_minor->color(dotty_minor_col);
 	dotty_point->color(dotty_point_col);
 
+	normal_axis ->color(normal_axis_col);
+	normal_main ->color(normal_main_col);
+	normal_flat ->color(normal_flat_col);
+	normal_small->color(normal_small_col);
+
 	// TODO: smallscroll, largescroll
 
 	/* Other Tab */
@@ -1045,6 +1071,11 @@ void UI_Preferences::SaveValues()
 	dotty_major_col = (rgb_color_t) dotty_major->color();
 	dotty_minor_col = (rgb_color_t) dotty_minor->color();
 	dotty_point_col = (rgb_color_t) dotty_point->color();
+
+	normal_axis_col  = (rgb_color_t) normal_axis ->color();
+	normal_main_col  = (rgb_color_t) normal_main ->color();
+	normal_flat_col  = (rgb_color_t) normal_flat ->color();
+	normal_small_col = (rgb_color_t) normal_small->color();
 
 	// TODO: smallscroll, largescroll
 
