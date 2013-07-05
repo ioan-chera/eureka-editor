@@ -9,6 +9,8 @@ CHANGES IN Eureka
 
 +  scroll-bars for the map view (optional)
 
++  configurable grid colors
+
 -  changed 'File/Recent Files' to be a sub-menu
 -  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to next/previous file ('N' and 'P' keys)
@@ -20,12 +22,15 @@ CHANGES IN Eureka
 -  remember the browser width for a saved map
 -  remember the 3D mode (the lack of it) for a map
 
+-  support Eureka config (.ugh) files as resource files
+-  support $DOOMWADPATH for finding IWADs
+
 -  implemented SEC_Light() binding command
 -  show unknown/missing textures in the LineDef panel
 -  show unknown/missing textures in the 3D preview
 
--  support Eureka config (.ugh) files as resource files
--  support $DOOMWADPATH for finding IWADs
+-  option to limit grid toggle to a single kind
+-  option to show grid in SNAP mode, hide it in FREE mode
 
 -  fixed crash bug when loading or saving a map containing linedefs
    which have no right sidedef
