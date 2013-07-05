@@ -162,14 +162,8 @@ void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 {
 	Fl_Toggle_Button *grid_snap = (Fl_Toggle_Button *)w;
 
-	UI_InfoBar *bar = (UI_InfoBar *)data;
-
 	// update editor state
-	grid.snap = grid_snap->value() ? true : false;
-
-	bar->UpdateSnapText();
-
-	UpdateHighlight();
+	grid.SetSnap(grid_snap->value() ? true : false);
 }
 
 

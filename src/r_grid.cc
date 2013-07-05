@@ -35,7 +35,10 @@ Grid_State_c  grid;
 // config items
 int  default_grid_size = 64;
 bool default_grid_snap = true;
-int  default_grid_mode = 1;  // normal
+int  default_grid_mode = 2;  // normal
+
+int  grid_toggle_type = 0;  // both
+bool grid_hide_in_free_mode = false;
 
 
 Grid_State_c::Grid_State_c() :
@@ -281,6 +284,9 @@ void Grid_State_c::StepFromWidget(int i)
 
 		edit.RedrawMap = 1;
 	}
+
+	if (grid_hide_in_free_mode && snap != shown)
+		SetSnap(shown);
 }
 
 
@@ -450,7 +456,13 @@ void Grid_State_c::DoSetGrid()
 
 void Grid_State_c::SetShown(bool enable)
 {
+	if (grid_toggle_type > 0)
+		mode = grid_toggle_type - 1;
+
 	shown = enable;
+
+	if (grid_hide_in_free_mode && shown != snap)
+		SetSnap(shown);
 
 	edit.RedrawMap = 1;
 
@@ -459,9 +471,16 @@ void Grid_State_c::SetShown(bool enable)
 
 void Grid_State_c::ToggleShown()
 {
+	if (grid_toggle_type > 0)
+		mode = grid_toggle_type - 1;
+
 	if (! shown)
 	{
 		shown = true;
+	}
+	else if (grid_toggle_type > 0)
+	{
+		shown = false;
 	}
 	else if (mode == 1)
 	{
@@ -472,6 +491,9 @@ void Grid_State_c::ToggleShown()
 	{
 		mode = 1;
 	}
+
+	if (grid_hide_in_free_mode && shown != snap)
+		SetSnap(shown);
 
 	edit.RedrawMap = 1;
 
@@ -502,6 +524,9 @@ void Grid_State_c::ToggleMode()
 void Grid_State_c::SetSnap(bool enable)
 {
 	snap = enable;
+
+	if (grid_hide_in_free_mode && snap != shown)
+		SetShown(snap);
 
 	if (main_win)
 		main_win->info_bar->UpdateSnap();

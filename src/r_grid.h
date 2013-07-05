@@ -34,7 +34,7 @@ public:
 	// whether the grid is being displayed or not.
 	bool shown;
 
-	// the mode / style of grid : 0 is normal, 1 is simple.
+	// the mode / style of grid : 0 is dotty, 1 is normal.
 	int mode;
 
 	// map coordinates for centre of canvas

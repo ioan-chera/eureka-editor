@@ -266,9 +266,11 @@ public:
 	Fl_Round_Button *theme_FLTK;
 	Fl_Round_Button *theme_GTK;
 	Fl_Round_Button *theme_plastic;
+
 	Fl_Round_Button *cols_default;
 	Fl_Round_Button *cols_bright;
 	Fl_Round_Button *cols_custom;
+
 	Fl_Button *bg_colorbox;
 	Fl_Button *ig_colorbox;
 	Fl_Button *fg_colorbox;
@@ -288,8 +290,11 @@ public:
 
 	/* Grid Tab */
 
+	Fl_Check_Button *gen_scrollbars;
+
 	Fl_Check_Button *grid_snap;
 	Fl_Choice *grid_mode;
+	Fl_Choice *grid_toggle;
 	Fl_Choice *grid_size;
 
 	Fl_Check_Button *gen_digitzoom;
@@ -297,7 +302,7 @@ public:
 	Fl_Choice *gen_largescroll;
 
 	Fl_Check_Button *gen_wheelscroll;
-	Fl_Check_Button *gen_scrollbars;
+	Fl_Check_Button *grid_hide_free;
 
 	/* Keys Tab */
 
@@ -464,9 +469,9 @@ UI_Preferences::UI_Preferences() :
 		{ grid_snap = new Fl_Check_Button(50, 120, 235, 25, " default SNAP mode");
 		  grid_snap->down_box(FL_DOWN_BOX);
 		}
-		{ grid_mode = new Fl_Choice(435, 120, 95, 25, "default grid mode ");
+		{ grid_mode = new Fl_Choice(435, 120, 95, 25, "default grid type ");
 		  grid_mode->down_box(FL_BORDER_BOX);
-		  grid_mode->add("OFF|Normal|Simple");
+		  grid_mode->add("OFF|Dotty|Normal");
 		}
 		{ grid_size = new Fl_Choice(435, 155, 95, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
@@ -481,9 +486,17 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ gen_largescroll = new Fl_Choice(435, 190, 95, 25, "large scroll step ");
 		  gen_largescroll->down_box(FL_BORDER_BOX);
+		  gen_largescroll->hide();
 		}
 		{ gen_wheelscroll = new Fl_Check_Button(50, 190, 245, 25, " mouse wheel scrolls the map");
 		  gen_wheelscroll->down_box(FL_DOWN_BOX);
+		}
+		{ grid_toggle = new Fl_Choice(435, 230, 95, 25, "grid toggle type ");
+		  grid_toggle->down_box(FL_BORDER_BOX);
+		  grid_toggle->add("BOTH|Dotty|Normal");
+		}
+		{ grid_hide_free = new Fl_Check_Button(50, 230, 245, 25, " hide grid in FREE mode");
+		  grid_hide_free->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -892,13 +905,18 @@ void UI_Preferences::LoadValues()
 	/* Grid Tab */
 
 	if (default_grid_mode < 0 || default_grid_mode > 2)
-		default_grid_mode = 1;
+		default_grid_mode = 2;
+
+	if (grid_toggle_type < 0 || grid_toggle_type > 2)
+		grid_toggle_type = 0;
 
 	grid_snap->value(default_grid_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(default_grid_size));
 	grid_mode->value(default_grid_mode);
+	grid_toggle->value(grid_toggle_type);
 
 	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
+	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
@@ -974,8 +992,10 @@ void UI_Preferences::SaveValues()
 	default_grid_snap = grid_snap->value() ? true : false;
 	default_grid_size = atoi(grid_size->mvalue()->text);
 	default_grid_mode = grid_mode->value();
+	grid_toggle_type  = grid_toggle->value();
 
 	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
+	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
 	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
 

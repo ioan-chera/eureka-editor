@@ -296,7 +296,7 @@ static const opt_desc_t options[] =
 		0,
 		OPT_INTEGER,
 		"v",
-		"Default grid mode: 0 = OFF, 1 = normal, 2 = simple",
+		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
 		&default_grid_mode
 	},
@@ -326,6 +326,24 @@ static const opt_desc_t options[] =
 		"Digit keys set zoom factor (rather than grid size)",
 		NULL,
 		&digits_set_zoom
+	},
+
+	{	"grid_hide_in_free_mode",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"hide the grid in FREE mode",
+		NULL,
+		&grid_hide_in_free_mode
+	},
+
+	{	"grid_toggle_type",
+		0,
+		OPT_INTEGER,
+		"v",
+		"grid toggle type : 0 = BOTH, 1 = dotty, 2 = normal",
+		NULL,
+		&grid_toggle_type
 	},
 
 	{	"gui_scheme",

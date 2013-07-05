@@ -53,6 +53,8 @@ extern int new_sector_size;
 extern int  default_grid_size;
 extern bool default_grid_snap;
 extern int  default_grid_mode;
+extern bool grid_hide_in_free_mode;
+extern int  grid_toggle_type;
 
 extern int multi_select_modifier;
 
