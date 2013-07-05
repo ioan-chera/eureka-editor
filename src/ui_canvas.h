@@ -111,6 +111,7 @@ private:
 
 	void DrawGrid_Dotty();
 	void DrawGrid_Normal();
+	void DrawAxes(Fl_Color col);
 
 	void DrawMapBounds();
 	void DrawVertices();

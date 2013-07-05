@@ -328,6 +328,42 @@ static const opt_desc_t options[] =
 		&digits_set_zoom
 	},
 
+	{	"dotty_axis_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"axis color for the dotty style grid",
+		NULL,
+		&dotty_axis_col
+	},
+
+	{	"dotty_major_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"major color for the dotty style grid",
+		NULL,
+		&dotty_major_col
+	},
+
+	{	"dotty_minor_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"minor color for the dotty style grid",
+		NULL,
+		&dotty_minor_col
+	},
+
+	{	"dotty_point_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"point color for the dotty style grid",
+		NULL,
+		&dotty_point_col
+	},
+
 	{	"grid_hide_in_free_mode",
 		0,
 		OPT_BOOLEAN,

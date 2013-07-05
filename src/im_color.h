@@ -36,6 +36,8 @@ typedef u32_t rgb_color_t;
 #define RGB_GREEN(col)  ((col >> 16) & 255)
 #define RGB_BLUE(col)   ((col >>  8) & 255)
 
+#define RGB_MAKE(r, g, b)  (((r) << 24) | ((g) << 16) | ((b) << 8))
+
 
 extern int usegamma;
 

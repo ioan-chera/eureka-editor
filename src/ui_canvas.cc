@@ -40,6 +40,13 @@ extern int active_when;
 extern int active_wmask;
 
 
+// config items
+rgb_color_t dotty_axis_col  = RGB_MAKE(0, 128, 255);
+rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 0xEE);
+rgb_color_t dotty_minor_col = RGB_MAKE(0, 0, 0xBB);
+rgb_color_t dotty_point_col = RGB_MAKE(0, 0, 255);
+
+
 //
 // UI_Canvas Constructor
 //
@@ -309,16 +316,17 @@ void UI_Canvas::DrawGrid_Dotty()
 	float pixels_1 = grid.step * grid.Scale;
 
 
-	if (pixels_1 < 0.99)
+	if (pixels_1 < 1.6)
 	{
-		fl_color(GRID_DARK);
+		fl_color(DarkerColor(DarkerColor(dotty_point_col)));
 		fl_rectf(x(), y(), w(), h());
+
+		DrawAxes(dotty_axis_col);
 		return;
 	}
 
 
-
-	fl_color(GRID_BRIGHT);
+	fl_color(dotty_major_col);
 	{
 		int gx = (map_lx / grid_step_3) * grid_step_3;
 
@@ -332,7 +340,10 @@ void UI_Canvas::DrawGrid_Dotty()
 	}
 
 
-	fl_color(GRID_MEDIUM);
+	DrawAxes(dotty_axis_col);
+
+
+	fl_color(dotty_minor_col);
 	{
 		int gx = (map_lx / grid_step_2) * grid_step_2;
 
@@ -348,14 +359,10 @@ void UI_Canvas::DrawGrid_Dotty()
 	}
 
 
-	// POINTS
-
-	if (pixels_1 < 3.99)
-		fl_color(GRID_MEDIUM);
-	//??  else if (pixels_1 > 30.88)
-	//??    fl_color(GRID_BRIGHT);
+	if (pixels_1 < 4.02)
+		fl_color(DarkerColor(dotty_point_col));
 	else
-		fl_color(GRID_POINT);
+		fl_color(dotty_point_col);
 
 	{
 		int gx = (map_lx / grid_step_1) * grid_step_1;
@@ -367,15 +374,27 @@ void UI_Canvas::DrawGrid_Dotty()
 			int sx = SCREENX(nx);
 			int sy = SCREENY(ny);
 
-			if (pixels_1 < 30.99)
+			if (pixels_1 < 24.1)
 				fl_point(sx, sy);
 			else
 			{
-				fl_line(sx-0, sy, sx+1, sy);
-				fl_line(sx, sy-0, sx, sy+1);
+				fl_rect(sx, sy, 2, 2);
+				
+				// fl_line(sx-0, sy, sx+1, sy);
+				// fl_line(sx, sy-0, sx, sy+1);
 			}
 		}
 	}
+}
+
+
+void UI_Canvas::DrawAxes(Fl_Color col)
+{
+	fl_color(col);
+
+	DrawMapLine(0, map_ly, 0, map_hy);
+
+	DrawMapLine(map_lx, 0, map_hx, 0);
 }
 
 

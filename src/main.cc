@@ -108,9 +108,9 @@ int scroll_more   = 90;
 int gui_scheme    = 2;  // plastic
 int gui_color_set = 1;  // bright
 
-rgb_color_t gui_custom_bg = 0xCCD5DD00;
-rgb_color_t gui_custom_ig = 0xFFFFFF00;
-rgb_color_t gui_custom_fg = 0x00000000;
+rgb_color_t gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
+rgb_color_t gui_custom_ig = RGB_MAKE(255, 255, 255);
+rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 
 
 /*

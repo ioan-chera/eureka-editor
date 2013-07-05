@@ -304,6 +304,12 @@ public:
 	Fl_Check_Button *gen_wheelscroll;
 	Fl_Check_Button *grid_hide_free;
 
+	Fl_Button *dotty_axis;
+	Fl_Button *dotty_major;
+	Fl_Button *dotty_minor;
+	Fl_Button *dotty_point;
+
+
 	/* Keys Tab */
 
 	Fl_Hold_Browser *key_list;
@@ -498,6 +504,37 @@ UI_Preferences::UI_Preferences() :
 		{ grid_hide_free = new Fl_Check_Button(50, 230, 245, 25, " hide grid in FREE mode");
 		  grid_hide_free->down_box(FL_DOWN_BOX);
 		}
+
+		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Normal Grid Colors");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+
+		{ Fl_Box* o = new Fl_Box(225, 270, 355, 30, "Dotty Grid Colors");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ dotty_axis = new Fl_Button(240, 300+0*30, 45, 25, "axis");
+		  dotty_axis->box(FL_BORDER_BOX);
+		  dotty_axis->align(FL_ALIGN_RIGHT);
+		  dotty_axis->callback((Fl_Callback*)color_callback, this);
+		}
+		{ dotty_major = new Fl_Button(240, 300+1*30, 45, 25, "major");
+		  dotty_major->box(FL_BORDER_BOX);
+		  dotty_major->align(FL_ALIGN_RIGHT);
+		  dotty_major->callback((Fl_Callback*)color_callback, this);
+		}
+		{ dotty_minor = new Fl_Button(240, 300+2*30, 45, 25, "minor");
+		  dotty_minor->box(FL_BORDER_BOX);
+		  dotty_minor->align(FL_ALIGN_RIGHT);
+		  dotty_minor->callback((Fl_Callback*)color_callback, this);
+		}
+		{ dotty_point = new Fl_Button(240, 300+3*30, 45, 25, "point");
+		  dotty_point->box(FL_BORDER_BOX);
+		  dotty_point->align(FL_ALIGN_RIGHT);
+		  dotty_point->callback((Fl_Callback*)color_callback, this);
+		}
+
 		o->end();
 	  }
 
@@ -920,6 +957,11 @@ void UI_Preferences::LoadValues()
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
+	dotty_axis ->color(dotty_axis_col);
+	dotty_major->color(dotty_major_col);
+	dotty_minor->color(dotty_minor_col);
+	dotty_point->color(dotty_point_col);
+
 	// TODO: smallscroll, largescroll
 
 	/* Other Tab */
@@ -998,6 +1040,11 @@ void UI_Preferences::SaveValues()
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
 	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
+
+	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
+	dotty_major_col = (rgb_color_t) dotty_major->color();
+	dotty_minor_col = (rgb_color_t) dotty_minor->color();
+	dotty_point_col = (rgb_color_t) dotty_point->color();
 
 	// TODO: smallscroll, largescroll
 

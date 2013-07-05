@@ -48,6 +48,8 @@ extern rgb_color_t gui_custom_bg;
 extern rgb_color_t gui_custom_ig;
 extern rgb_color_t gui_custom_fg;
 
+extern int multi_select_modifier;
+
 extern int new_sector_size;
 
 extern int  default_grid_size;
@@ -56,7 +58,11 @@ extern int  default_grid_mode;
 extern bool grid_hide_in_free_mode;
 extern int  grid_toggle_type;
 
-extern int multi_select_modifier;
+extern rgb_color_t dotty_axis_col;
+extern rgb_color_t dotty_major_col;
+extern rgb_color_t dotty_minor_col;
+extern rgb_color_t dotty_point_col;
+
 
 extern int backup_max_files;
 extern int backup_max_space;
