@@ -168,8 +168,8 @@ public:
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
 	short NumLevels() const { return (short)levels.size(); }
-
 	short GetLevel(short index);
+	short FindLevel_Raw(const char *name);  // returns level index
 
 	map_format_e LevelFormat(short lump_index);
 

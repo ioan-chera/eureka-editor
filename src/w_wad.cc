@@ -384,7 +384,7 @@ Lump_c * Wad_file::FindLumpInLevel(const char *name, short level)
 }
 
 
-short Wad_file::FindLevel(const char *name)
+short Wad_file::FindLevel_Raw(const char *name)
 {
 	for (short k = 0 ; k < (int)levels.size() ; k++)
 	{
@@ -394,9 +394,20 @@ short Wad_file::FindLevel(const char *name)
 		SYS_ASSERT(directory[index]);
 
 		if (y_stricmp(directory[index]->name, name) == 0)
-			return index;
+			return k;
 	}
 
+	return -1;  // not found
+}
+
+
+short Wad_file::FindLevel(const char *name)
+{
+	short k = FindLevel_Raw(name);
+
+	if (k >= 0)
+		return levels[k];
+	
 	return -1;  // not found
 }
 
