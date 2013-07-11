@@ -1191,6 +1191,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
 	M_RegisterCommand("GivenFile", &CMD_GivenFile);
+	M_RegisterCommand("FlipMap",   &CMD_FlipMap);
 
 	M_RegisterCommand("SelectAll", &CMD_SelectAll);
 	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);

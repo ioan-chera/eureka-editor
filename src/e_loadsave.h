@@ -43,6 +43,7 @@ void CMD_ExportMap();
 extern int last_given_file;
 
 void CMD_GivenFile();
+void CMD_FlipMap();
 
 class crc32_c;
 void BA_LevelChecksum(crc32_c& crc);

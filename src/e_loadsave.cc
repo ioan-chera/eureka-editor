@@ -874,6 +874,93 @@ void CMD_GivenFile()
 }
 
 
+void CMD_FlipMap()
+{
+	const char *mode = EXEC_Param[0];
+
+	if (! mode[0])
+	{
+		Beep("FlipMap: missing mode");
+		return;
+	}
+
+
+	if (! Main_ConfirmQuit("open another map"))
+		return;
+
+
+	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+
+	int lev_idx = wad->FindLevel_Raw(Level_name);
+	int max_idx = wad->NumLevels() - 1;
+
+	if (max_idx < 0)
+	{
+		Beep("FlipMap: no maps ?!?");
+		return;
+	}
+
+	SYS_ASSERT(lev_idx >= 0);
+	SYS_ASSERT(lev_idx <= max_idx);
+
+
+	if (y_stricmp(mode, "next") == 0)
+	{
+		if (lev_idx < 0)
+			lev_idx = 0;
+		else if (lev_idx < max_idx)
+			lev_idx++;
+		else
+		{
+			Beep("No more maps");
+			return;
+		}
+	}
+	else if (y_stricmp(mode, "prev") == 0)
+	{
+		if (lev_idx < 0)
+			lev_idx = max_idx;
+		else if (lev_idx > 0)
+			lev_idx--;
+		else
+		{
+			Beep("No more maps");
+			return;
+		}
+	}
+	else if (y_stricmp(mode, "first") == 0)
+	{
+		lev_idx = 0;
+	}
+	else if (y_stricmp(mode, "last") == 0)
+	{
+		lev_idx = max_idx;
+	}
+	else
+	{
+		Beep("FlipMap: unknown mode: %s", mode);
+		return;
+	}
+
+	SYS_ASSERT(lev_idx >= 0);
+	SYS_ASSERT(lev_idx <= max_idx);
+
+
+	short lump_idx = wad->GetLevel(lev_idx);
+
+	Lump_c * lump = wad->GetLump(lump_idx);
+
+	const char *map_name = lump->Name();
+	
+
+	LogPrintf("Flipping Map to : %s\n", map_name);
+
+	LoadLevel(wad, map_name);
+
+	Replacer = false;
+}
+
+
 //------------------------------------------------------------------------
 //  SAVING CODE
 //------------------------------------------------------------------------
