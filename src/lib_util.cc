@@ -226,6 +226,19 @@ char * StringTidy(const char *str, const char *bad_chars)
 
 
 
+void TimeDelay(unsigned int millies)
+{
+	SYS_ASSERT(millies < 300000);
+
+#ifdef WIN32
+	::Sleep(millies);
+
+#else // LINUX or MacOSX
+
+	usleep(millies * 1000);
+#endif
+}
+
 
 unsigned int TimeGetMillies()
 {

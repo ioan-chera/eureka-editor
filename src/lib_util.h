@@ -45,6 +45,7 @@ char *StringTidy(const char *str, const char *bad_chars = "");
 
 void check_types ();
 
+void TimeDelay(unsigned int millies);
 unsigned int TimeGetMillies();
 
 unsigned ComputeAngle (int, int);
