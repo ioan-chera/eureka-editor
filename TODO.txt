@@ -2,16 +2,26 @@
 Eureka TODO / WISHLIST
 ======================
 
+-  ability to build nodes only in modified maps
 
--  gravity mode : an option to NOT allow up/down movement
+?  warn if quit Eureka and nodes not built in current map
+
+
+>>>  config var for default starting mode
+
 
 !!  setting a texture does not update 3D view
 
+
+-  grid : darked color when lines get very close
+
+
+-  "new tag" feature
+
+
+-  gravity mode : an option to NOT allow up/down movement
+
 -  scrollbar colors for other schemes
-
-VM: use exceptions, not setjmp/longjmp
-
-BA_Abort()
 
 
 TEST: Maximize on startup in WIN32
@@ -45,6 +55,8 @@ General
    -  ability to change mouse move/turn speed in 3D view
 
 +  Hexen support
+
++  BOOM Generalized line types / sectors
 
 
 
@@ -133,8 +145,6 @@ General
 
 +  a dialog to view / load / prune backups.
 
-+  Scripting language
-
 IDEA: ability to edit Lua code for OBLIGE prefabs
 
 WISH: support Windows 95/98/ME
@@ -146,6 +156,10 @@ WISH: support UDMF format
 
 -  File / Delete Map
 
+-  Scripting language
+
+-  File / Rename Map
+
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
    (perhaps prefix with MENU_xxx)
 
@@ -153,8 +167,6 @@ WISH: support UDMF format
    +  "Grab" button in UI_EditKey
    -  "Find" or "Match" button for function in UI_EditKey
    -  reverse ordering of KCTX_XXX values
-
--  config var for default starting mode
 
 ?  config system: OPT_KEY values
 
@@ -218,6 +230,10 @@ NO:  config file syntax
 Coding
 ------
 
+-  BA_Abort()
+
+-  VM: use exceptions instead of setjmp/longjmp
+
 
 
 Editing
@@ -226,8 +242,6 @@ Editing
 -  move 'k' split linedef to SPACE/INSERT, put vertex where mouse is
 
 +  a menu for inserting shapes, especially N-sided polygon
-
-+  support generalized BOOM line and sector types
 
 +  support PNG (etc?) image formats [enabled by a port definition]
    -->  feature png
