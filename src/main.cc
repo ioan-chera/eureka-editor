@@ -102,6 +102,10 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
+#define DEFAULT_PORT_NAME  "boom"
+
+const char *default_port = DEFAULT_PORT_NAME;
+
 int scroll_less   = 10;
 int scroll_more   = 90;
 
@@ -417,6 +421,32 @@ static bool DetermineIWAD()
 }
 
 
+static void DeterminePort()
+{
+	// user supplied value?
+	// an unknown name will error out during Main_LoadResources.
+	if (Port_name)
+		return;
+
+	SYS_ASSERT(default_port);
+
+	// ensure the 'default_port' value is OK
+	if (! default_port[0])
+	{
+		LogPrintf("WARNING: Default port is empty, resetting...\n");
+		default_port = DEFAULT_PORT_NAME;
+	}
+
+	if (! M_CanLoadDefinitions("ports", default_port))
+	{
+		LogPrintf("WARNING: Default port '%s' is unknown, resetting...\n");
+		default_port = DEFAULT_PORT_NAME;
+	}
+
+	Port_name = default_port;
+}
+
+
 static const char * DetermineMod(const char *res_name)
 {
 	static char mod_name[FL_PATH_MAX];
@@ -698,9 +728,7 @@ void Main_LoadResources()
 
 	M_LoadDefinitions("games", Game_name);
 
-	// normally the game definition will set a default port
-	if (! Port_name)
-		Port_name = "vanilla";
+	SYS_ASSERT(Port_name);
 
 	LogPrintf("Port name: '%s'\n", Port_name);
 
@@ -971,6 +999,8 @@ int main(int argc, char *argv[])
 
 	init_progress = 3;
 
+
+	DeterminePort();
 
 	// open a specified PWAD now
 	if (Pwad_list.size() > 0)

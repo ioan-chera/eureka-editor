@@ -281,6 +281,8 @@ public:
 
 	/* Edit Tab */
 
+	Fl_Input *edit_def_port;
+
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
@@ -440,24 +442,27 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ edit_newislands = new Fl_Check_Button(50, 80, 265, 30, " new islands have void interior");
+		{ edit_def_port = new Fl_Input(150, 80, 95, 25, "Default port: ");
+		  edit_def_port->align(FL_ALIGN_LEFT);
+		}
+		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
 		  edit_newislands->down_box(FL_DOWN_BOX);
 		}
-		{ edit_samemode = new Fl_Check_Button(50, 140, 270, 30, " same mode key will clear selection");
+		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		  edit_samemode->down_box(FL_DOWN_BOX);
 		}
-		{ edit_autoadjustX = new Fl_Check_Button(50, 110, 260, 30, " auto-adjust X offsets");
+		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
 		  edit_autoadjustX->down_box(FL_DOWN_BOX);
 		}
-		{ edit_multiselect = new Fl_Check_Button(50, 170, 275, 30, " multi-select requires a modifier key");
+		{ edit_multiselect = new Fl_Check_Button(50, 210, 275, 30, " multi-select requires a modifier key");
 		  edit_multiselect->down_box(FL_DOWN_BOX);
 		}
-		{ edit_modkey = new Fl_Choice(370, 170, 95, 30, "---->   ");
+		{ edit_modkey = new Fl_Choice(370, 210, 95, 30, "---->   ");
 		  edit_modkey->down_box(FL_BORDER_BOX);
 		  edit_modkey->add("CTRL");
 		  edit_modkey->value(0);
 		}
-		{ edit_sectorsize = new Fl_Int_Input(440, 80, 105, 25, "new sector size:");
+		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		  edit_sectorsize->type(2);
 		}
 		o->end();
@@ -954,6 +959,8 @@ void UI_Preferences::LoadValues()
 
 	/* Edit Tab */
 
+	edit_def_port->value(default_port);
+
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
@@ -1046,6 +1053,8 @@ void UI_Preferences::SaveValues()
 	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
+
+	default_port = StringDup(edit_def_port->value());
 
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(4, new_sector_size, 8192);

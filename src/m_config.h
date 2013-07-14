@@ -31,6 +31,8 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
+extern const char *default_port;
+
 extern bool auto_load_recent;
 extern bool begin_maximized;
 extern bool map_scroll_bars;

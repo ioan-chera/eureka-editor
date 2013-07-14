@@ -319,6 +319,15 @@ static const opt_desc_t options[] =
 		&default_grid_snap
 	},
 
+	{	"default_port",
+		0,
+		OPT_STRING,
+		"v",
+		"Default port (engine) name",
+		NULL,
+		&default_port
+	},
+
 	{	"digits_set_zoom",
 		0,
 		OPT_BOOLEAN,
