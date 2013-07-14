@@ -954,6 +954,20 @@ void Vertex_FindUnused(selection_c& sel)
 }
 
 
+void Vertex_RemoveUnused()
+{
+	selection_c sel;
+
+	Vertex_FindUnused(sel);
+
+	BA_Begin();
+	DeleteObjects(&sel);
+	BA_End();
+
+//??	Status_Set("Removed %d vertices", sel.count_obj());
+}
+
+
 //------------------------------------------------------------------------
 
 // the CHECK_xxx functions return the following values:
@@ -975,7 +989,6 @@ private:
 	bool user_did_stuff;
 
 	Fl_Group  *line_group;
-
 	Fl_Button *ok_but;
 
 	int cy;
@@ -995,7 +1008,7 @@ public:
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 
-		// TODO
+		Vertex_RemoveUnused();
 
 		dialog->user_did_stuff = true;
 	}
@@ -1017,7 +1030,7 @@ public:
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
 
-		cy += title->h() + 5;
+		cy = 45;
 
 		line_group = new Fl_Group(0, 0, w(), ey);
 		line_group->end();
@@ -1042,6 +1055,11 @@ public:
 
 	void Reset()
 	{
+		want_close = false;
+		user_did_stuff = false;
+
+		cy = 45;
+
 		line_group->clear();	
 
 		redraw();
