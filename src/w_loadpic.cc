@@ -107,7 +107,7 @@ static void DrawColumn(Img& img, const post_t *column, int x, int y)
  *  If img->is_null() is true, LoadPicture() sets the size of img
  *  to match that of the picture. This is useful in display_pic().
  *
- *  Return 0 on success, non-zero on failure.
+ *  Return true on success, false on failure.
  *
  *  If pic_x_offset == INT_MIN, the picture is centred horizontally.
  *  If pic_y_offset == INT_MIN, the picture is centred vertically.
@@ -147,12 +147,16 @@ bool LoadPicture(Img& img,      // image to load picture into
 	if (pic_y_offset == INT_MIN)
 		pic_y_offset = (img.height() - height) / 2;
 
-	for (int x=0; x < width; x++)
+	for (int x = 0 ; x < width ; x++)
 	{
 		int offset = LE_S32(pat->columnofs[x]);
 
 		if (offset < 0 || offset >= lump->Length())
-			FatalError("Bad image offset 0x%08x in patch [%s]\n", offset, pic_name);
+		{
+			LogPrintf("WARNING: bad image offset 0x%08x in patch [%s]\n",
+			          offset, pic_name);
+			return false;
+		}
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
