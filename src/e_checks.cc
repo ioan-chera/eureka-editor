@@ -26,6 +26,8 @@
 
 #include "main.h"
 
+#include <algorithm>
+
 #include "e_checks.h"
 #include "editloop.h"
 #include "m_dialog.h"
@@ -886,17 +888,69 @@ bool CheckStartingPos ()
 //------------------------------------------------------------------------
 
 
-void Vertex_FindOverlaps(selection_c& sel)  // FIXME !!!
+struct vertex_X_CMP_pred
+{
+	inline bool operator() (int A, int B) const
+	{
+		const Vertex *V1 = Vertices[A];
+		const Vertex *V2 = Vertices[B];
+
+		return V1->x < V2->x;
+	}
+};
+
+
+void Vertex_FindOverlaps(selection_c& sel)
 {
 	sel.change_type(OBJ_VERTICES);
 
-	sel.set(1);
+	if (NumVertices < 2)
+		return;
+
+	// sort the vertices into order of the 'X' value.
+	// hence any overlapping vertices will be near each other.
+
+	std::vector<int> sorted_list(NumVertices, 0);
+
+	for (int i = 0 ; i < NumVertices ; i++)
+		sorted_list[i] = i;
+
+	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
+
+#define VERT_K  Vertices[sorted_list[k]]
+#define VERT_N  Vertices[sorted_list[n]]
+
+	for (int k = 0 ; k < NumVertices ; k++)
+	{
+		for (int n = k + 1 ; n < NumVertices && VERT_N->x == VERT_K->x ; n++)
+		{
+			if (true || VERT_N->y == VERT_K->y)
+			{
+				sel.set(k);
+				sel.set(n);
+			}
+		}
+	}
+
+#undef VERT_K
+#undef VERT_N
 }
 
 
-void Vertex_FindUnused(selection_c& sel)  // FIXME !!!
+void Vertex_FindUnused(selection_c& sel)
 {
 	sel.change_type(OBJ_VERTICES);
+
+	if (NumVertices == 0)
+		return;
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		sel.set(LineDefs[i]->start);
+		sel.set(LineDefs[i]->end);
+	}
+
+	sel.frob_range(0, NumVertices - 1, BOP_TOGGLE);
 }
 
 
@@ -948,7 +1002,7 @@ public:
 
 public:
 	UI_Check_Vertices(bool all_mode) :
-		Fl_Double_Window(500, 186, "Check : Vertices"),
+		Fl_Double_Window(520, 186, "Check : Vertices"),
 		want_close(false), user_did_stuff(false),
 		worst_severity(0)
 	{
@@ -958,12 +1012,12 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex check results:");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex check results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
 
-		cy += title->h();
+		cy += title->h() + 5;
 
 		line_group = new Fl_Group(0, 0, w(), ey);
 		line_group->end();
@@ -1003,8 +1057,9 @@ public:
 		if (W < 0)
 			W = w() - 40;
 
-		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, msg);
+		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
 		box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+		box->copy_label(msg);
 
 		if (severity == 2)
 		{
@@ -1090,15 +1145,15 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 
 	for (;;)
 	{
-		// FIXME : PROPER TESTS...
-
 		Vertex_FindOverlaps(sel);
 
 		if (sel.empty())
 			dialog->AddLine("No overlapping vertices");
 		else
 		{
-			sprintf(check_message, "%d overlapping vertices", sel.count_obj());
+			int approx_num = sel.count_obj() / 2;
+
+			sprintf(check_message, "%d overlapping vertices", approx_num);
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Merge",   &UI_Check_Vertices::remove_unused_callback,
@@ -1115,7 +1170,7 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 		{
 			sprintf(check_message, "%d unused vertices", sel.count_obj());
 
-			dialog->AddLine(check_message, 1, 180,
+			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Vertices::remove_unused_callback);
 		}
 
