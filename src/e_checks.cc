@@ -881,17 +881,26 @@ bool CheckStartingPos ()
 
 
 //------------------------------------------------------------------------
-//
-// the CHECK_xxx functions return the worst_severity value:
-//    0 : no problem at all
-//    1 : only minor problems
-//    2 : major problems
-//
 
-class UI_CheckVertices : public Fl_Double_Window
+// the CHECK_xxx functions return the following values:
+typedef enum
+{
+	CKR_OK = 0,            // no issues at all
+	CKR_MinorProblem,      // only minor issues
+	CKR_MajorProblem,      // some major problems
+	CKR_Highlight,         // need to highlight stuff (skip further checks)
+	CKR_TookAction         // [internal use : user took some action]
+
+} check_result_e;
+
+
+class UI_Check_Vertices : public Fl_Double_Window
 {
 private:
 	bool want_close;
+	bool user_did_stuff;
+
+	Fl_Group  *line_group;
 
 	Fl_Button *ok_but;
 
@@ -903,35 +912,42 @@ public:
 public:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
-		UI_CheckVertices *dialog = (UI_CheckVertices *)data;
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 
 		dialog->want_close = true;
 	}
 
 	static void remove_unused_callback(Fl_Widget *w, void *data)
 	{
-		UI_CheckVertices *dialog = (UI_CheckVertices *)data;
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 
 		// TODO
 
-		w->hide();
+		dialog->user_did_stuff = true;
+		dialog->want_close = true;
 	}
 
 public:
-	UI_CheckVertices() :
+	UI_Check_Vertices() :
 		Fl_Double_Window(500, 236, "Check : Vertices"),
-		want_close(false), worst_severity(0)
+		want_close(false), user_did_stuff(false),
+		worst_severity(0)
 	{
 		cy = 10;
 
 		callback(close_callback, this);
 
-		{ Fl_Group *o = new Fl_Group(0, 170, 500, 66);
+		int ey = h() - 66;
+
+		line_group = new Fl_Group(0, 0, w(), ey);
+		line_group->end();
+
+		{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
 
 		  o->box(FL_FLAT_BOX);
 		  o->color(WINDOW_BG, WINDOW_BG);
 
-		  { ok_but = new Fl_Button(160, 184, 80, 35, "OK");
+		  { ok_but = new Fl_Button(210, 184, 80, 35, "OK");
 			ok_but->labelfont(1);
 			ok_but->callback(close_callback, this);
 		  }
@@ -939,6 +955,13 @@ public:
 		}
 
 		end();
+	}
+
+	void Reset()
+	{
+		line_group->clear();	
+
+		redraw();
 	}
 
 	void AddLine(const char *msg, int severity = 0, int W = -1,
@@ -965,16 +988,16 @@ public:
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 
-		add(box);
+		line_group->add(box);
 
 		cx += W;
 
 		if (button1)
 		{
 			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
-			but->callback(cb1);
+			but->callback(cb1, this);
 
-			add(but);
+			line_group->add(but);
 
 			cx += but->w() + 10;
 		}
@@ -982,9 +1005,9 @@ public:
 		if (button2)
 		{
 			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
-			but->callback(cb2);
+			but->callback(cb2, this);
 
-			add(but);
+			line_group->add(but);
 
 			cx += but->w() + 10;
 		}
@@ -992,9 +1015,9 @@ public:
 		if (button3)
 		{
 			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
-			but->callback(cb3);
+			but->callback(cb3, this);
 
-			add(but);
+			line_group->add(but);
 		}
 
 		cy = cy + 30;
@@ -1003,7 +1026,7 @@ public:
 			worst_severity = severity;
 	}
 
-	void Run()
+	check_result_e Run()
 	{
 		set_modal();
 
@@ -1011,64 +1034,87 @@ public:
 
 		while (! want_close)
 			Fl::wait(0.2);
+
+		if (user_did_stuff)
+			return CKR_TookAction;
+
+		switch (worst_severity)
+		{
+			case 0:  return CKR_OK;
+			case 1:  return CKR_MinorProblem;
+			default: return CKR_MajorProblem;
+		}
 	}
 };
 
 
-int CHECK_Vertices(bool all_mode = false)
+check_result_e CHECK_Vertices(bool all_mode = false)
 {
-	UI_CheckVertices *dialog = new UI_CheckVertices();
+	UI_Check_Vertices *dialog = new UI_Check_Vertices();
 
-	// FIXME
-
-	dialog->AddLine("No overlapping vertices");
-
-	dialog->AddLine("3 unused vertices", 1, 180,
-	                "Frob", &UI_CheckVertices::remove_unused_callback,
-	                "Remove", &UI_CheckVertices::remove_unused_callback);
-
-
-	int worst_severity = dialog->worst_severity;
-
-	// when checking "ALL" stuff, ignore any minor problems
-	if (! (all_mode && worst_severity < 2))
+	for (;;)
 	{
-		dialog->Run();
+		// FIXME : PROPER TESTS...
+
+		dialog->AddLine("No overlapping vertices");
+
+		dialog->AddLine("3 unused vertices", 1, 180,
+						"Frob",   &UI_Check_Vertices::remove_unused_callback,
+						"Remove", &UI_Check_Vertices::remove_unused_callback);
+
+		int worst_severity = dialog->worst_severity;
+
+		// when checking "ALL" stuff, ignore any minor problems
+		if (all_mode && worst_severity < 2)
+		{
+			delete dialog;
+
+			return CKR_OK;
+		}
+
+		check_result_e result = dialog->Run();
+
+		if (result == CKR_TookAction)
+		{
+			// repeat the tests
+			dialog->Reset();
+			continue;
+		}
 
 		delete dialog;
+
+		return result;
 	}
-
-	return worst_severity;
 }
 
 
 //------------------------------------------------------------------------
 
-int CHECK_Sectors(bool all_mode = false)
+check_result_e CHECK_Sectors(bool all_mode = false)
 {
 	// TODO
 
-	return true;
+	return CKR_OK;
 }
 
 
 //------------------------------------------------------------------------
 
-int CHECK_LineDefs(bool all_mode = false)
+check_result_e CHECK_LineDefs(bool all_mode = false)
 {
 	// TODO
 
-	return true;
+	return CKR_OK;
 }
 
 
 //------------------------------------------------------------------------
 
-int CHECK_Things(bool all_mode = false)
+check_result_e CHECK_Things(bool all_mode = false)
 {
 	// TODO
 
-	return true;
+	return CKR_OK;
 }
 
 
@@ -1078,10 +1124,23 @@ void CHECK_All()
 {
 	bool no_worries = true;
 
-	no_worries = (CHECK_Vertices(true) < 2) && no_worries;
-	no_worries = (CHECK_Sectors (true) < 2) && no_worries;
-	no_worries = (CHECK_LineDefs(true) < 2) && no_worries;
-	no_worries = (CHECK_Things  (true) < 2) && no_worries;
+	check_result_e result;
+
+	result = CHECK_Vertices(true);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
+
+	result = CHECK_Sectors(true);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
+
+	result = CHECK_LineDefs(true);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
+
+	result = CHECK_Things(true);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
 
 	if (no_worries)
 	{
