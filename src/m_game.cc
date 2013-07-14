@@ -317,9 +317,6 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "level_name") == 0)
 		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
-
 			/* ignored for backwards compability */
 		}
 
@@ -349,11 +346,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "default_port") == 0)
 		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
-
-			if (! Port_name)
-				Port_name = token[1];
+			/* ignored for backwards compability */
 		}
 
 		else if (y_stricmp(token[0], "default_textures") == 0)
