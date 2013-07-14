@@ -25,7 +25,9 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
 #include "e_checks.h"
+#include "editloop.h"
 #include "m_dialog.h"
 #include "levels.h"
 #include "objects.h"
@@ -943,6 +945,115 @@ bool CheckStartingPos ()
 			return false;
 	}
 	return true;
+}
+
+
+//------------------------------------------------------------------------
+
+// these CHECK_ functions return 'true' if everything was OK
+
+bool CHECK_Vertices(bool all_mode = false)
+{
+	// TODO
+
+	return true;
+}
+
+
+bool CHECK_Sectors(bool all_mode = false)
+{
+	// TODO
+
+	return true;
+}
+
+
+bool CHECK_LineDefs(bool all_mode = false)
+{
+	// TODO
+
+	return true;
+}
+
+
+bool CHECK_Things(bool all_mode = false)
+{
+	// TODO
+
+	return true;
+}
+
+
+void CHECK_All()
+{
+	if (CHECK_Vertices() && CHECK_Sectors() &&
+		CHECK_LineDefs() && CHECK_Things())
+	{
+		/* everything was Hunky Dory */
+
+		Notify(-1, -1, "No major problems.", NULL);
+	}
+}
+
+
+//------------------------------------------------------------------------
+
+
+void CMD_CheckMap()
+{
+	const char *what = EXEC_Param[0];
+
+	// TODO "textures" and "tags"
+
+	if (! what[0] || y_stricmp(what, "all") == 0)
+	{
+		CHECK_All();
+	}
+	else if (y_stricmp(what, "vertices") == 0)
+	{
+		CHECK_Vertices();
+	}
+	else if (y_stricmp(what, "sectors") == 0)
+	{
+		CHECK_Sectors();
+	}
+	else if (y_stricmp(what, "linedefs") == 0)
+	{
+		CHECK_LineDefs();
+	}
+	else if (y_stricmp(what, "things") == 0)
+	{
+		CHECK_Things();
+	}
+	else if (y_stricmp(what, "current") == 0)  // current editing mode
+	{
+		switch (edit.obj_type)
+		{
+			case OBJ_VERTICES:
+				CHECK_Vertices();
+				break;
+
+			case OBJ_SECTORS:
+				CHECK_Sectors();
+				break;
+
+			case OBJ_LINEDEFS:
+				CHECK_LineDefs();
+				break;
+
+			case OBJ_THINGS:
+				CHECK_Things();
+				break;
+
+			default:
+				Beep("Nothing to check");
+				break;
+		}
+	}
+	else
+	{
+		Beep("Check: unknown keyword '%s'\n", what);
+	}
 }
 
 

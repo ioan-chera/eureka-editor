@@ -27,15 +27,7 @@
 #ifndef __EUREKA_E_CHECKS_H__
 #define __EUREKA_E_CHECKS_H__
 
-void CheckLevel (int x0, int y0);
-void Statistics ();
-void CheckSectors ();
-void CheckCrossReferences ();
-void CheckTextures ();
-void CheckTextureNames ();
-
-void CheckLevel (int, int, int pulldown);
-bool CheckStartingPos (void);
+void CMD_CheckMap();
 
 #endif  /* __EUREKA_E_CHECKS_H__ */
 

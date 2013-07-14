@@ -1234,7 +1234,9 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
+	M_RegisterCommand("Check",     &CMD_CheckMap);
 	M_RegisterCommand("AwaitMeta", &CMD_AwaitMeta);
+
 	M_RegisterCommand("GivenFile", &CMD_GivenFile);
 	M_RegisterCommand("FlipMap",   &CMD_FlipMap);
 

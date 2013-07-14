@@ -354,6 +354,46 @@ static void browser_hide(Fl_Widget *w, void * data)
 
 
 //------------------------------------------------------------------------
+//  CHECK MENU
+//------------------------------------------------------------------------
+
+static void checks_do_all(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "all");
+}
+
+static void checks_do_vertices(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "vertices");
+}
+
+static void checks_do_sectors(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "sectors");
+}
+
+static void checks_do_linedefs(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "linedefs");
+}
+
+static void checks_do_things(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "things");
+}
+
+static void checks_do_textures(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "textures");
+}
+
+static void checks_do_tags(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "tags");
+}
+
+
+//------------------------------------------------------------------------
 //  HELP MENU
 //------------------------------------------------------------------------
 
@@ -464,6 +504,21 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "Hide",         0, FCAL browser_hide },
+		{ 0 },
+
+	{ "&Check", 0, 0, 0, FL_SUBMENU },
+
+		{ "&ALL",          0, FCAL checks_do_all },
+		{ "&Textures", 0, FCAL checks_do_textures },
+		{ "Tags", 0, FCAL checks_do_tags },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Vertices",     0, FCAL checks_do_vertices },
+		{ "&Sectors",      0, FCAL checks_do_sectors },
+		{ "&LineDefs",     0, FCAL checks_do_linedefs },
+		{ "&Things",       0, FCAL checks_do_things },
+
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
