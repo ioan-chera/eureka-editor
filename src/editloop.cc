@@ -437,6 +437,32 @@ void CMD_ToggleVar(void)
 }
 
 
+
+static void Editor_ClearMeta()
+{
+	if (edit.await_meta)
+	{
+		edit.await_meta = false;
+
+		Status_Clear();
+	}
+}
+
+
+void CMD_AwaitMeta(void)
+{
+	if (edit.await_meta)
+	{
+		Editor_ClearMeta();
+	}
+	else
+	{
+		edit.await_meta = true;
+		Status_Set("META-");
+	}
+}
+
+
 void CMD_BrowserMode(void)
 {
 	if (! EXEC_Param[0][0])
@@ -732,7 +758,21 @@ int Editor_RawKey(int event)
 	if (event == FL_KEYUP)
 		return 0;
 
-	keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+	bool convert_meta = edit.await_meta;
+
+	if (edit.await_meta)
+	{
+		edit.await_meta = false;
+		Status_Clear();
+	}
+
+	int raw_key   = Fl::event_key();
+	int raw_state = Fl::event_state();
+
+	if (convert_meta)
+		raw_state = MOD_META;
+
+	keycode_t key = M_TranslateKey(raw_key, raw_state);
 
 	if (key == 0)
 		return 0;
@@ -774,6 +814,8 @@ int Editor_RawKey(int event)
 
 int Editor_RawWheel(int event)
 {
+	Editor_ClearMeta();
+
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
 
@@ -835,6 +877,8 @@ static void RightButtonScroll(int mode)
 
 int Editor_RawButton(int event)
 {
+	Editor_ClearMeta();
+
 	bool down = (event == FL_PUSH);
 
 	// FIXME: THIS IS REALLY SHIT
@@ -1190,6 +1234,7 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
+	M_RegisterCommand("AwaitMeta", &CMD_AwaitMeta);
 	M_RegisterCommand("GivenFile", &CMD_GivenFile);
 	M_RegisterCommand("FlipMap",   &CMD_FlipMap);
 
@@ -1275,6 +1320,8 @@ void Editor_Init()
 	edit.button_down = 0;
 	edit.button_mod  = 0;
 	edit.clicked.clear();
+
+	edit.await_meta = false;
 
 	edit.highlighted.clear();
 	edit.split_line.clear();

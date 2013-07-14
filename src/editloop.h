@@ -49,9 +49,11 @@ typedef struct
 	int button_down;  // mouse button 1 to 3, or 0 for none,
 	keycode_t button_mod;  // modifier(s) used when button was pressed
 
+	bool await_meta;   // user pressed ';' -- waiting for next key
+
 	Objid clicked;		// The object that was under the pointer when
-						// the left click occurred. If clicked on
-						// empty space, == CANVAS.
+						// the left click occurred.
+
 	bool did_a_move;   // just moved stuff, clear the next selection
 
 	selection_c *Selected;    // all selected objects (usually empty)
@@ -59,7 +61,6 @@ typedef struct
 	bool error_mode;  // draw selection in red  (FIXME: have an enum)
 
 	Objid highlighted;   // The highlighted object
-
 	Objid split_line;  // linedef which would be split by a new vertex
 
 	int RedrawMap;   // set to 1 to force the map to be redrawn

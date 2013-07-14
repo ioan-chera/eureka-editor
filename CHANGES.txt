@@ -31,6 +31,8 @@ CHANGES IN Eureka
 -  show unknown/missing textures in the LineDef panel
 -  show unknown/missing textures in the 3D preview
 
+-  the ';' key waits for next key and makes it META
+
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
 
