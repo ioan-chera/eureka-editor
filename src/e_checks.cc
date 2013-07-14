@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -33,6 +33,7 @@
 #include "objects.h"
 #include "selectn.h"
 #include "w_rawdef.h"
+#include "ui_window.h"
 
 
 static void CheckingObjects ();
@@ -85,75 +86,6 @@ void CheckLevel (int x0, int y0)
 			CheckTextureNames ();
 			break;
 	}
-#endif
-}
-
-
-/*
-   display number of objects, etc.
-   */
-
-void Statistics ()
-{
-	// FIXME !!!
-#if 0
-	int height;
-	int width;
-	int out_x0;
-	int out_y0;
-	int text_x0;
-	int text_y0;
-
-	width  = 2 * BOX_BORDER + 2 * WIDE_HSPACING + 33 * FONTW;
-	height = 2 * BOX_BORDER + 2 * WIDE_VSPACING + 9 * FONTH;
-	out_x0 = (ScrMaxX + 1 - width) / 2;
-	out_y0 = (ScrMaxY + 1 - height) / 2;
-	text_x0 = out_x0 + BOX_BORDER + WIDE_HSPACING;
-	text_y0 = out_y0 + BOX_BORDER + WIDE_VSPACING;
-
-	DrawScreenBox3D (out_x0, out_y0, out_x0 + width - 1, out_y0 + height - 1);
-	set_colour (WHITE);
-	DrawScreenText (text_x0, text_y0, "Statistics");
-	DrawScreenText (-1, -1, "");
-
-	if (! Things)
-		set_colour (WINFG_DIM);
-	else
-		set_colour (WINFG);
-	DrawScreenText (-1, -1, "Number of things:   %4d (%lu K)", NumThings,
-			((unsigned long) NumThings * sizeof (struct Thing) + 512L) / 1024L);
-
-	if (! Vertices)
-		set_colour (WINFG_DIM);
-	else
-		set_colour (WINFG);
-	DrawScreenText (-1, -1, "Number of vertices: %4d (%lu K)", NumVertices,
-			((unsigned long) NumVertices * sizeof (struct Vertex) + 512L) / 1024L);
-
-	if (! LineDefs)
-		set_colour (WINFG_DIM);
-	else
-		set_colour (WINFG);
-	DrawScreenText (-1, -1, "Number of linedefs: %4d (%lu K)", NumLineDefs,
-			((unsigned long) NumLineDefs * sizeof (struct LineDef) + 512L) / 1024L);
-
-	if (! SideDefs)
-		set_colour (WINFG_DIM);
-	else
-		set_colour (WINFG);
-	DrawScreenText (-1, -1, "Number of sidedefs: %4d (%lu K)", NumSideDefs,
-			((unsigned long) NumSideDefs * sizeof (struct SideDef) + 512L) / 1024L);
-
-	if (! Sectors)
-		set_colour (WINFG_DIM);
-	else
-		set_colour (WINFG);
-	DrawScreenText (-1, -1, "Number of sectors:  %4d (%lu K)", NumSectors,
-			((unsigned long) NumSectors * sizeof (struct Sector) + 512L) / 1024L);
-
-	DrawScreenText (-1, -1, "");
-	set_colour (WINTITLE);
-	DrawScreenText (-1, -1, "Press any key to continue...");
 #endif
 }
 
@@ -950,15 +882,72 @@ bool CheckStartingPos ()
 
 //------------------------------------------------------------------------
 
-// these CHECK_ functions return 'true' if everything was OK
+// the CHECK_xxx functions return 'true' if everything was OK
+
+class UI_CheckVertices : public Fl_Double_Window
+{
+private:
+	bool want_close;
+
+	Fl_Button *ok_but;
+
+private:
+	static void close_callback(Fl_Widget *w, void *data)
+	{
+		UI_CheckVertices *dialog = (UI_CheckVertices *)data;
+
+		dialog->want_close = true;
+	}
+
+public:
+	UI_CheckVertices() :
+		Fl_Double_Window(400, 236, "Check : Vertices"),
+		want_close(false)
+	{
+		callback(close_callback, this);
+
+		{ Fl_Group *o = new Fl_Group(0, 170, 400, 66);
+
+		  o->box(FL_FLAT_BOX);
+		  o->color(WINDOW_BG, WINDOW_BG);
+
+		  { ok_but = new Fl_Button(295, 184, 80, 35, "OK");
+			ok_but->labelfont(1);
+			ok_but->callback(close_callback, this);
+		  }
+		  o->end();
+		}
+
+		end();
+	}
+
+	void Run()
+	{
+		set_modal();
+
+		show();
+
+		while (! want_close)
+			Fl::wait(0.2);
+	}
+};
+
 
 bool CHECK_Vertices(bool all_mode = false)
 {
 	// TODO
 
+	UI_CheckVertices *dialog = new UI_CheckVertices();
+
+	dialog->Run();
+
+	delete dialog;
+
 	return true;
 }
 
+
+//------------------------------------------------------------------------
 
 bool CHECK_Sectors(bool all_mode = false)
 {
@@ -968,6 +957,8 @@ bool CHECK_Sectors(bool all_mode = false)
 }
 
 
+//------------------------------------------------------------------------
+
 bool CHECK_LineDefs(bool all_mode = false)
 {
 	// TODO
@@ -976,6 +967,8 @@ bool CHECK_LineDefs(bool all_mode = false)
 }
 
 
+//------------------------------------------------------------------------
+
 bool CHECK_Things(bool all_mode = false)
 {
 	// TODO
@@ -983,6 +976,8 @@ bool CHECK_Things(bool all_mode = false)
 	return true;
 }
 
+
+//------------------------------------------------------------------------
 
 void CHECK_All()
 {
