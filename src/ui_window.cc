@@ -422,7 +422,20 @@ void UI_MainWin::Maximize()
 
 	XSendEvent(fl_display, DefaultRootWindow(fl_display), False,
 			   SubstructureNotifyMask, &xev);
+
+	Delay(3);
 #endif
+}
+
+
+void UI_MainWin::Delay(int steps)
+{
+	for (; steps > 0 ; steps--)
+	{
+		TimeDelay(100);
+
+		Fl::check();
+	}
 }
 
 

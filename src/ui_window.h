@@ -114,6 +114,8 @@ public:
 
 	void UnselectPics();
 
+	void Delay(int steps);  // each step is 1/10th second
+
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)
 	void BrowsedItem(char kind, int number, const char *name, int e_state);

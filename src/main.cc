@@ -592,6 +592,8 @@ static void InitFLTK()
 
 	main_win->ShowBrowser(0);
 	main_win->NewEditMode('t');
+
+	Fl::check();
 }
 
 
