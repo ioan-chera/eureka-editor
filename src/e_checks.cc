@@ -891,7 +891,9 @@ private:
 
 	Fl_Button *ok_but;
 
-private:
+	int cy;
+
+public:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
 		UI_CheckVertices *dialog = (UI_CheckVertices *)data;
@@ -899,19 +901,30 @@ private:
 		dialog->want_close = true;
 	}
 
+	static void remove_unused_callback(Fl_Widget *w, void *data)
+	{
+		UI_CheckVertices *dialog = (UI_CheckVertices *)data;
+
+		// TODO
+
+		w->hide();
+	}
+
 public:
 	UI_CheckVertices() :
-		Fl_Double_Window(400, 236, "Check : Vertices"),
+		Fl_Double_Window(500, 236, "Check : Vertices"),
 		want_close(false)
 	{
+		cy = 10;
+
 		callback(close_callback, this);
 
-		{ Fl_Group *o = new Fl_Group(0, 170, 400, 66);
+		{ Fl_Group *o = new Fl_Group(0, 170, 500, 66);
 
 		  o->box(FL_FLAT_BOX);
 		  o->color(WINDOW_BG, WINDOW_BG);
 
-		  { ok_but = new Fl_Button(295, 184, 80, 35, "OK");
+		  { ok_but = new Fl_Button(160, 184, 80, 35, "OK");
 			ok_but->labelfont(1);
 			ok_but->callback(close_callback, this);
 		  }
@@ -919,6 +932,65 @@ public:
 		}
 
 		end();
+	}
+
+	void AddLine(const char *msg, int severity = 0, int W = -1,
+	             const char *button1 = NULL, Fl_Callback *cb1 = NULL,
+	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
+	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
+	{
+		int cx = 10;
+
+		if (W < 0)
+			W = w() - 20;
+
+		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, msg);
+		box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+
+		if (severity == 2)
+		{
+			box->labelcolor(FL_RED);
+			box->labelfont(FL_HELVETICA_BOLD);
+		}
+		else if (severity == 1)
+		{
+			box->labelcolor(FL_BLUE);
+			box->labelfont(FL_HELVETICA_BOLD);
+		}
+
+		add(box);
+
+		cx += W;
+
+		if (button1)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
+			but->callback(cb1);
+
+			add(but);
+
+			cx += but->w() + 10;
+		}
+
+		if (button2)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
+			but->callback(cb2);
+
+			add(but);
+
+			cx += but->w() + 10;
+		}
+
+		if (button3)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
+			but->callback(cb3);
+
+			add(but);
+		}
+
+		cy = cy + 30;
 	}
 
 	void Run()
@@ -935,9 +1007,15 @@ public:
 
 bool CHECK_Vertices(bool all_mode = false)
 {
-	// TODO
-
 	UI_CheckVertices *dialog = new UI_CheckVertices();
+
+	// FIXME
+
+	dialog->AddLine("No overlapping vertices");
+
+	dialog->AddLine("3 unused vertices", 1, 180,
+	                "Frob", &UI_CheckVertices::remove_unused_callback,
+	                "Remove", &UI_CheckVertices::remove_unused_callback);
 
 	dialog->Run();
 
