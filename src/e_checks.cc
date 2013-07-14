@@ -36,6 +36,9 @@
 #include "ui_window.h"
 
 
+static char check_message[MSG_BUF_LEN];
+
+
 static void CheckingObjects ();
 
 // TODO: REMOVE THIS
@@ -882,6 +885,23 @@ bool CheckStartingPos ()
 
 //------------------------------------------------------------------------
 
+
+void Vertex_FindOverlaps(selection_c& sel)  // FIXME !!!
+{
+	sel.change_type(OBJ_VERTICES);
+
+	sel.set(1);
+}
+
+
+void Vertex_FindUnused(selection_c& sel)  // FIXME !!!
+{
+	sel.change_type(OBJ_VERTICES);
+}
+
+
+//------------------------------------------------------------------------
+
 // the CHECK_xxx functions return the following values:
 typedef enum
 {
@@ -924,12 +944,11 @@ public:
 		// TODO
 
 		dialog->user_did_stuff = true;
-		dialog->want_close = true;
 	}
 
 public:
-	UI_Check_Vertices() :
-		Fl_Double_Window(500, 236, "Check : Vertices"),
+	UI_Check_Vertices(bool all_mode) :
+		Fl_Double_Window(500, 186, "Check : Vertices"),
 		want_close(false), user_did_stuff(false),
 		worst_severity(0)
 	{
@@ -939,6 +958,13 @@ public:
 
 		int ey = h() - 66;
 
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex check results:");
+		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+		title->labelfont(FL_HELVETICA_BOLD);
+		title->labelsize(FL_NORMAL_SIZE + 2);
+
+		cy += title->h();
+
 		line_group = new Fl_Group(0, 0, w(), ey);
 		line_group->end();
 
@@ -947,7 +973,10 @@ public:
 		  o->box(FL_FLAT_BOX);
 		  o->color(WINDOW_BG, WINDOW_BG);
 
-		  { ok_but = new Fl_Button(210, 184, 80, 35, "OK");
+		  int but_W = all_mode ? 110 : 70;
+
+		  { ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
+		                           all_mode ? "Continue" : "OK");
 			ok_but->labelfont(1);
 			ok_but->callback(close_callback, this);
 		  }
@@ -969,10 +998,10 @@ public:
 	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
 	{
-		int cx = 10;
+		int cx = 25;
 
 		if (W < 0)
-			W = w() - 20;
+			W = w() - 40;
 
 		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, msg);
 		box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
@@ -1026,13 +1055,18 @@ public:
 			worst_severity = severity;
 	}
 
+	void AddGap(int H)
+	{
+		cy += H;
+	}
+
 	check_result_e Run()
 	{
 		set_modal();
 
 		show();
 
-		while (! want_close)
+		while (! (want_close || user_did_stuff))
 			Fl::wait(0.2);
 
 		if (user_did_stuff)
@@ -1050,17 +1084,41 @@ public:
 
 check_result_e CHECK_Vertices(bool all_mode = false)
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices();
+	UI_Check_Vertices *dialog = new UI_Check_Vertices(all_mode);
+
+	selection_c  sel;
 
 	for (;;)
 	{
 		// FIXME : PROPER TESTS...
 
-		dialog->AddLine("No overlapping vertices");
+		Vertex_FindOverlaps(sel);
 
-		dialog->AddLine("3 unused vertices", 1, 180,
-						"Frob",   &UI_Check_Vertices::remove_unused_callback,
-						"Remove", &UI_Check_Vertices::remove_unused_callback);
+		if (sel.empty())
+			dialog->AddLine("No overlapping vertices");
+		else
+		{
+			sprintf(check_message, "%d overlapping vertices", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 210,
+			                "Merge",   &UI_Check_Vertices::remove_unused_callback,
+			                "Disconn", &UI_Check_Vertices::remove_unused_callback,
+			                "Show",    &UI_Check_Vertices::remove_unused_callback);
+		}
+
+
+		Vertex_FindUnused(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unused vertices");
+		else
+		{
+			sprintf(check_message, "%d unused vertices", sel.count_obj());
+
+			dialog->AddLine(check_message, 1, 180,
+			                "Remove", &UI_Check_Vertices::remove_unused_callback);
+		}
+
 
 		int worst_severity = dialog->worst_severity;
 
