@@ -882,11 +882,10 @@ static void ShowTime()
 
 static void M_LoadScripts()
 {
-	LogPrintf("Loading VM scripts.....\n");
-
 	VM_Init();
 
-	// FIXME
+#if 0
+	LogPrintf("Loading VM scripts.....\n");
 
 	if (VM_CompileFile("misc/core_defs.up") != 0)
 	{
@@ -900,14 +899,7 @@ static void M_LoadScripts()
 		fprintf(stderr, "\n Test_VM: COMPILE FAILED\n");
 		return;
 	}
-
-	int func = VM_FindFunction("test");
-
-	if (func == VM_NIL)
-	{
-		fprintf(stderr, "\n Test_VM: NO FUNCTION 'test'\n");
-		return;
-	}
+#endif
 }
 
 
