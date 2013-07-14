@@ -32,6 +32,7 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted);
 void InsertPolygonVertices (int, int, int, int);
 
 int VertexHowManyLineDefs(int v_num);
+void Vertex_MergeList(selection_c *list);
 
 void VERT_Merge(void);
 void VERT_Disconnect(void);

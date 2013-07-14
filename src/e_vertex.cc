@@ -233,7 +233,43 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 }
 
 
-void VERT_Merge(void)
+void Vertex_MergeList(selection_c *list)
+{
+	if (list->count_obj() < 2)
+		return;
+
+	// the first vertex is kept (but moved to the middle coordinate),
+	// all the other vertices are removed.
+
+	int new_x, new_y;
+
+	Objs_CalcMiddle(list, &new_x, &new_y);
+
+	int v = list->find_first();
+
+	list->clear(v);
+
+	BA_Begin();
+
+	BA_ChangeVT(v, Vertex::F_X, new_x);
+	BA_ChangeVT(v, Vertex::F_Y, new_y);
+
+	selection_iterator_c it;
+
+	for (list->begin(&it) ; !it.at_end() ; ++it)
+	{
+		MergeVertex(*it, v, true /* v1_will_be_deleted */);
+	}
+
+	DeleteObjects(list);
+
+	BA_End();
+
+	list->clear_all();
+}
+
+
+void VERT_Merge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlighted())
 	{
@@ -246,34 +282,7 @@ void VERT_Merge(void)
 		return;
 	}
 
-	// the first vertex is kept (but moved to the middle coordinate),
-	// all the other vertices are removed.
-
-	int new_x, new_y;
-
-	Objs_CalcMiddle(edit.Selected, &new_x, &new_y);
-
-	int v = edit.Selected->find_first();
-
-	edit.Selected->clear(v);
-
-	BA_Begin();
-
-	BA_ChangeVT(v, Vertex::F_X, new_x);
-	BA_ChangeVT(v, Vertex::F_Y, new_y);
-
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
-	{
-		MergeVertex(*it, v, true /* v1_will_be_deleted */);
-	}
-
-	DeleteObjects(edit.Selected);
-
-	BA_End();
-
-	edit.Selected->clear_all();
+	Vertex_MergeList(edit.Selected);
 }
 
 

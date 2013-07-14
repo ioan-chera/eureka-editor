@@ -30,6 +30,7 @@
 
 #include "e_checks.h"
 #include "editloop.h"
+#include "e_vertex.h"
 #include "m_dialog.h"
 #include "levels.h"
 #include "objects.h"
@@ -900,8 +901,11 @@ struct vertex_X_CMP_pred
 };
 
 
-void Vertex_FindOverlaps(selection_c& sel)
+void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 {
+	// the 'one_coord' parameter limits the selection to a single
+	// vertex coordinate.
+
 	sel.change_type(OBJ_VERTICES);
 
 	if (NumVertices < 2)
@@ -917,6 +921,9 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
 
+	bool seen_one = false;
+	int last_y = 0;
+
 #define VERT_K  Vertices[sorted_list[k]]
 #define VERT_N  Vertices[sorted_list[n]]
 
@@ -924,16 +931,49 @@ void Vertex_FindOverlaps(selection_c& sel)
 	{
 		for (int n = k + 1 ; n < NumVertices && VERT_N->x == VERT_K->x ; n++)
 		{
-			if (true || VERT_N->y == VERT_K->y)
+			if (VERT_N->y == VERT_K->y)
 			{
-				sel.set(k);
-				sel.set(n);
+				if (one_coord && seen_one && VERT_K->y != last_y)
+					continue;
+
+				sel.set(sorted_list[k]);
+				sel.set(sorted_list[n]);
+
+				seen_one = true; last_y = VERT_K->y;
 			}
 		}
 	}
 
 #undef VERT_K
 #undef VERT_N
+}
+
+
+void Vertex_MergeOverlaps()
+{
+	for (;;)
+	{
+		selection_c sel;
+
+		Vertex_FindOverlaps(sel, true /* one_coord */);
+
+		if (sel.empty())
+			break;
+
+		Vertex_MergeList(&sel);
+	}
+}
+
+
+void Vertex_HighlightOverlaps()
+{
+	// FIXME: change edit mode if != OBJ_VERTICES
+
+	Vertex_FindOverlaps(*edit.Selected);
+
+	edit.error_mode = true;
+
+	edit.RedrawMap = 1;
 }
 
 
@@ -986,7 +1026,8 @@ class UI_Check_Vertices : public Fl_Double_Window
 {
 private:
 	bool want_close;
-	bool user_did_stuff;
+
+	check_result_e user_action;
 
 	Fl_Group  *line_group;
 	Fl_Button *ok_but;
@@ -1004,19 +1045,37 @@ public:
 		dialog->want_close = true;
 	}
 
-	static void remove_unused_callback(Fl_Widget *w, void *data)
+	static void action_merge(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+
+		Vertex_MergeOverlaps();
+
+		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_highlight(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+
+		Vertex_HighlightOverlaps();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 
 		Vertex_RemoveUnused();
 
-		dialog->user_did_stuff = true;
+		dialog->user_action = CKR_TookAction;
 	}
 
 public:
 	UI_Check_Vertices(bool all_mode) :
 		Fl_Double_Window(520, 186, "Check : Vertices"),
-		want_close(false), user_did_stuff(false),
+		want_close(false), user_action(CKR_OK),
 		worst_severity(0)
 	{
 		cy = 10;
@@ -1056,7 +1115,7 @@ public:
 	void Reset()
 	{
 		want_close = false;
-		user_did_stuff = false;
+		user_action = CKR_OK;
 
 		cy = 45;
 
@@ -1139,11 +1198,11 @@ public:
 
 		show();
 
-		while (! (want_close || user_did_stuff))
+		while (! (want_close || user_action != CKR_OK))
 			Fl::wait(0.2);
 
-		if (user_did_stuff)
-			return CKR_TookAction;
+		if (user_action != CKR_OK)
+			return user_action;
 
 		switch (worst_severity)
 		{
@@ -1174,9 +1233,8 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 			sprintf(check_message, "%d overlapping vertices", approx_num);
 
 			dialog->AddLine(check_message, 2, 210,
-			                "Merge",   &UI_Check_Vertices::remove_unused_callback,
-			                "Disconn", &UI_Check_Vertices::remove_unused_callback,
-			                "Show",    &UI_Check_Vertices::remove_unused_callback);
+			                "Merge", &UI_Check_Vertices::action_merge,
+			                "Show",  &UI_Check_Vertices::action_highlight);
 		}
 
 
@@ -1189,7 +1247,7 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 			sprintf(check_message, "%d unused vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
-			                "Remove", &UI_Check_Vertices::remove_unused_callback);
+			                "Remove", &UI_Check_Vertices::action_remove);
 		}
 
 
