@@ -28,7 +28,6 @@ level_name  map01
 
 sky_flat  F_SKY1
 
-default_port  boom
 default_textures  STARTAN3  FLOOR4_8  CEIL3_5
 default_thing  2014
 
