@@ -265,33 +265,6 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
-	{	"glbsp_fast",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: enable fast mode (may be lower quality)",
-		NULL,
-		&glbsp_fast
-	},
-
-	{	"glbsp_verbose",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: be verbose, show level information",
-		NULL,
-		&glbsp_verbose
-	},
-
-	{	"glbsp_warn",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: show all warning messages",
-		NULL,
-		&glbsp_warn
-	},
-
 	{	"default_grid_mode",
 		0,
 		OPT_INTEGER,
@@ -371,6 +344,33 @@ static const opt_desc_t options[] =
 		"point color for the dotty style grid",
 		NULL,
 		&dotty_point_col
+	},
+
+	{	"glbsp_fast",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: enable fast mode (may be lower quality)",
+		NULL,
+		&glbsp_fast
+	},
+
+	{	"glbsp_verbose",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: be verbose, show level information",
+		NULL,
+		&glbsp_verbose
+	},
+
+	{	"glbsp_warn",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: show all warning messages",
+		NULL,
+		&glbsp_warn
 	},
 
 	{	"grid_hide_in_free_mode",
@@ -723,6 +723,10 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		case OPT_STRING:
+			// handle empty string
+			if (strcmp(value, "''") == 0)
+				*value = 0;
+
 			*((char **) opt->data_ptr) = StringDup(value);
 			break;
 
@@ -1176,7 +1180,7 @@ int M_WriteConfigFile()
 			case OPT_STRING:
 			{
 				const char *str = *((const char **) o->data_ptr);
-				fprintf(fp, "%s", str ? str : "{}");
+				fprintf(fp, "%s", (str && str[0]) ? str : "''");
 				break;
 			}
 
