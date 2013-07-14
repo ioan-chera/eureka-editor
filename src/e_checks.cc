@@ -881,8 +881,12 @@ bool CheckStartingPos ()
 
 
 //------------------------------------------------------------------------
-
-// the CHECK_xxx functions return 'true' if everything was OK
+//
+// the CHECK_xxx functions return the worst_severity value:
+//    0 : no problem at all
+//    1 : only minor problems
+//    2 : major problems
+//
 
 class UI_CheckVertices : public Fl_Double_Window
 {
@@ -892,6 +896,9 @@ private:
 	Fl_Button *ok_but;
 
 	int cy;
+
+public:
+	int worst_severity;
 
 public:
 	static void close_callback(Fl_Widget *w, void *data)
@@ -913,7 +920,7 @@ public:
 public:
 	UI_CheckVertices() :
 		Fl_Double_Window(500, 236, "Check : Vertices"),
-		want_close(false)
+		want_close(false), worst_severity(0)
 	{
 		cy = 10;
 
@@ -991,6 +998,9 @@ public:
 		}
 
 		cy = cy + 30;
+
+		if (severity > worst_severity)
+			worst_severity = severity;
 	}
 
 	void Run()
@@ -1005,7 +1015,7 @@ public:
 };
 
 
-bool CHECK_Vertices(bool all_mode = false)
+int CHECK_Vertices(bool all_mode = false)
 {
 	UI_CheckVertices *dialog = new UI_CheckVertices();
 
@@ -1017,17 +1027,24 @@ bool CHECK_Vertices(bool all_mode = false)
 	                "Frob", &UI_CheckVertices::remove_unused_callback,
 	                "Remove", &UI_CheckVertices::remove_unused_callback);
 
-	dialog->Run();
 
-	delete dialog;
+	int worst_severity = dialog->worst_severity;
 
-	return true;
+	// when checking "ALL" stuff, ignore any minor problems
+	if (! (all_mode && worst_severity < 2))
+	{
+		dialog->Run();
+
+		delete dialog;
+	}
+
+	return worst_severity;
 }
 
 
 //------------------------------------------------------------------------
 
-bool CHECK_Sectors(bool all_mode = false)
+int CHECK_Sectors(bool all_mode = false)
 {
 	// TODO
 
@@ -1037,7 +1054,7 @@ bool CHECK_Sectors(bool all_mode = false)
 
 //------------------------------------------------------------------------
 
-bool CHECK_LineDefs(bool all_mode = false)
+int CHECK_LineDefs(bool all_mode = false)
 {
 	// TODO
 
@@ -1047,7 +1064,7 @@ bool CHECK_LineDefs(bool all_mode = false)
 
 //------------------------------------------------------------------------
 
-bool CHECK_Things(bool all_mode = false)
+int CHECK_Things(bool all_mode = false)
 {
 	// TODO
 
@@ -1059,11 +1076,15 @@ bool CHECK_Things(bool all_mode = false)
 
 void CHECK_All()
 {
-	if (CHECK_Vertices() && CHECK_Sectors() &&
-		CHECK_LineDefs() && CHECK_Things())
-	{
-		/* everything was Hunky Dory */
+	bool no_worries = true;
 
+	no_worries = (CHECK_Vertices(true) < 2) && no_worries;
+	no_worries = (CHECK_Sectors (true) < 2) && no_worries;
+	no_worries = (CHECK_LineDefs(true) < 2) && no_worries;
+	no_worries = (CHECK_Things  (true) < 2) && no_worries;
+
+	if (no_worries)
+	{
 		Notify(-1, -1, "No major problems.", NULL);
 	}
 }
