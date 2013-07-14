@@ -111,7 +111,7 @@ private:
 		// TODO: show a list of all commands
 	}
 
-	static void close_callback(Fl_Button *w, void *data)
+	static void close_callback(Fl_Widget *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
@@ -132,6 +132,8 @@ public:
 		want_close(false), cancelled(false), grab_active(false),
 		key(_key)
 	{
+		callback(close_callback, this);
+
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
 		  if (key)
 			  key_name->value(M_KeyToString(key));
