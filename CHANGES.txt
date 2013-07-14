@@ -11,9 +11,10 @@ CHANGES IN Eureka
 
 +  configurable grid colors
 
--  changed 'File/Recent Files' to be a sub-menu
 -  support multiple filenames, new 'File/Given Files' sub-menu
--  commands to go to next/previous file ('N' and 'P' keys)
+-  commands to go to the next or previous file
+-  commands to go to next/previous map ('N' and 'P' keys)
+-  changed 'File/Recent Files' to be a sub-menu
 
 -  incorporated Jason Johnston's logo in the About dialog
 
@@ -24,6 +25,7 @@ CHANGES IN Eureka
 
 -  support Eureka config (.ugh) files as resource files
 -  support $DOOMWADPATH for finding IWADs
+-  can change the default port in the preferences
 
 -  implemented SEC_Light() binding command
 -  show unknown/missing textures in the LineDef panel
