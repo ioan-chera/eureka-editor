@@ -509,8 +509,8 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
 		{ "&ALL",          0, FCAL checks_do_all },
-		{ "&Textures", 0, FCAL checks_do_textures },
-		{ "Tags", 0, FCAL checks_do_tags },
+		{ "Te&xtures", 0, FCAL checks_do_textures },
+		{ "Ta&gs", 0, FCAL checks_do_tags },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
