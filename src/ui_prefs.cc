@@ -442,7 +442,7 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ edit_def_port = new Fl_Input(150, 80, 95, 25, "Default port: ");
+		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "Default port: ");
 		  edit_def_port->align(FL_ALIGN_LEFT);
 		}
 		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
