@@ -1111,10 +1111,75 @@ void SideDefs_HighlightPacked()
 }
 
 
-void SideDefs_Unpack()
+static int Copy_SideDef(int num)
 {
-	// FIXME !!!
+	//....
+	return num;
+}
 
+
+static const char *unpack_confirm_message =
+	"This map contains shared sidedefs.  It it recommended to unpack\n"
+	"them, otherwise it may cause unexpected behavior during editing\n"
+	"(such as random walls changing their texture).\n\n"
+	"Unpack the sidedefs now?";
+
+
+void SideDefs_Unpack(bool confirm_it = false)
+{
+	selection_c sides;
+	selection_c lines;
+
+	SideDefs_FindPacking(sides, lines);
+
+	if (sides.empty())
+		return;
+
+	if (confirm_it)
+	{
+		if (! Confirm(-1, -1, unpack_confirm_message, NULL))
+			return;
+	}
+
+	BA_Begin();
+
+	for (int sd = 0 ; sd < NumSideDefs ; sd++)
+	{
+		if (! sides.get(sd))
+			continue;
+
+		// find the first linedef which uses this sidedef
+		int first;
+
+		for (first = 0 ; first < NumLineDefs ; first++)
+		{
+			const LineDef *F = LineDefs[first];
+
+			if (F->left == sd || F->right == sd)
+				break;
+		}
+
+		if (first >= NumLineDefs)
+			continue;
+
+		// handle it when first linedef uses sidedef on both sides
+		if (LineDefs[first]->left == LineDefs[first]->right)
+		{
+			BA_ChangeLD(first, LineDef::F_LEFT, Copy_SideDef(sd));
+		}
+
+		// duplicate any remaining references
+		for (int ld = first + 1 ; ld < NumLineDefs ; ld++)
+		{
+			if (LineDefs[ld]->left == sd)
+				BA_ChangeLD(ld, LineDef::F_LEFT, Copy_SideDef(sd));
+
+			if (LineDefs[ld]->right == sd)
+				BA_ChangeLD(ld, LineDef::F_RIGHT, Copy_SideDef(sd));
+		}
+	}
+
+	BA_End();
 }
 
 
@@ -1670,7 +1735,7 @@ public:
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
 
-		SideDefs_Unpack();
+		SideDefs_Unpack(true);
 
 		dialog->user_action = CKR_Highlight;
 	}
