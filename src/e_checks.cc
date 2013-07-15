@@ -1010,6 +1010,46 @@ void Vertex_RemoveUnused()
 
 //------------------------------------------------------------------------
 
+
+void Tags_UsedRange(int *min_tag, int *max_tag)
+{
+	int i;
+
+	*min_tag = +999999;
+	*max_tag = -999999;
+
+	for (i = 0 ; i < NumLineDefs ; i++)
+	{
+		int tag = LineDefs[i]->tag;
+
+		if (tag > 0)
+		{
+			*min_tag = MIN(*min_tag, tag);
+			*max_tag = MAX(*max_tag, tag);
+		}
+	}
+
+	for (i = 0 ; i < NumSectors ; i++)
+	{
+		int tag = Sectors[i]->tag;
+
+		if (tag > 0)
+		{
+			*min_tag = MIN(*min_tag, tag);
+			*max_tag = MAX(*max_tag, tag);
+		}
+	}
+
+	// none at all?
+	if (*min_tag > *max_tag)
+	{
+		*min_tag = *max_tag = 0;
+	}
+}
+
+
+//------------------------------------------------------------------------
+
 // the CHECK_xxx functions return the following values:
 typedef enum
 {
@@ -1309,6 +1349,212 @@ check_result_e CHECK_Things(bool all_mode = false)
 
 //------------------------------------------------------------------------
 
+class UI_Check_Tags : public Fl_Double_Window
+{
+private:
+	bool want_close;
+
+	check_result_e user_action;
+
+	Fl_Group  *line_group;
+	Fl_Button *ok_but;
+
+	int cy;
+
+public:
+	int worst_severity;
+
+public:
+	static void close_callback(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+
+		dialog->want_close = true;
+	}
+
+public:
+	UI_Check_Tags(bool all_mode) :
+		Fl_Double_Window(520, 226, "Check : Tags"),
+		want_close(false), user_action(CKR_OK),
+		worst_severity(0)
+	{
+		cy = 10;
+
+		callback(close_callback, this);
+
+		int ey = h() - 66;
+
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Tag check results");
+		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+		title->labelfont(FL_HELVETICA_BOLD);
+		title->labelsize(FL_NORMAL_SIZE + 2);
+
+		cy = 45;
+
+		line_group = new Fl_Group(0, 0, w(), ey);
+		line_group->end();
+
+		{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
+
+		  o->box(FL_FLAT_BOX);
+		  o->color(WINDOW_BG, WINDOW_BG);
+
+		  int but_W = all_mode ? 110 : 70;
+
+		  { ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
+		                           all_mode ? "Continue" : "OK");
+			ok_but->labelfont(1);
+			ok_but->callback(close_callback, this);
+		  }
+		  o->end();
+		}
+
+		end();
+	}
+
+	void Reset()
+	{
+		want_close = false;
+		user_action = CKR_OK;
+
+		cy = 45;
+
+		line_group->clear();	
+
+		redraw();
+	}
+
+	void AddLine(const char *msg, int severity = 0, int W = -1,
+	             const char *button1 = NULL, Fl_Callback *cb1 = NULL,
+	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
+	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
+	{
+		int cx = 25;
+
+		if (W < 0)
+			W = w() - 40;
+
+		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
+		box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+		box->copy_label(msg);
+
+		if (severity == 2)
+		{
+			box->labelcolor(FL_RED);
+			box->labelfont(FL_HELVETICA_BOLD);
+		}
+		else if (severity == 1)
+		{
+			box->labelcolor(FL_BLUE);
+			box->labelfont(FL_HELVETICA_BOLD);
+		}
+
+		line_group->add(box);
+
+		cx += W;
+
+		if (button1)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
+			but->callback(cb1, this);
+
+			line_group->add(but);
+
+			cx += but->w() + 10;
+		}
+
+		if (button2)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
+			but->callback(cb2, this);
+
+			line_group->add(but);
+
+			cx += but->w() + 10;
+		}
+
+		if (button3)
+		{
+			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
+			but->callback(cb3, this);
+
+			line_group->add(but);
+		}
+
+		cy = cy + 30;
+
+		if (severity > worst_severity)
+			worst_severity = severity;
+	}
+
+	void AddGap(int H)
+	{
+		cy += H;
+	}
+
+	check_result_e Run()
+	{
+		set_modal();
+
+		show();
+
+		while (! (want_close || user_action != CKR_OK))
+			Fl::wait(0.2);
+
+		if (user_action != CKR_OK)
+			return user_action;
+
+		switch (worst_severity)
+		{
+			case 0:  return CKR_OK;
+			case 1:  return CKR_MinorProblem;
+			default: return CKR_MajorProblem;
+		}
+	}
+};
+
+
+check_result_e CHECK_Tags()
+{
+	UI_Check_Tags *dialog = new UI_Check_Tags(false);
+
+	selection_c  sel;
+
+	for (;;)
+	{
+		int min_tag, max_tag;
+
+		Tags_UsedRange(&min_tag, &max_tag);
+
+		if (max_tag <= 0)
+			dialog->AddLine("No tags are in use");
+		else
+		{
+			sprintf(check_message, "Lowest  tag: %d", min_tag);
+			dialog->AddLine(check_message);
+
+			sprintf(check_message, "Highest tag: %d", max_tag);
+			dialog->AddLine(check_message);
+		}
+
+		check_result_e result = dialog->Run();
+
+		if (result == CKR_TookAction)
+		{
+			// repeat the tests
+			dialog->Reset();
+			continue;
+		}
+
+		delete dialog;
+
+		return result;
+	}
+}
+
+
+//------------------------------------------------------------------------
+
 void CHECK_All()
 {
 	bool no_worries = true;
@@ -1391,6 +1637,10 @@ void CMD_CheckMap()
 				Beep("Nothing to check");
 				break;
 		}
+	}
+	else if (y_stricmp(what, "tags") == 0)
+	{
+		CHECK_Tags();
 	}
 	else
 	{
