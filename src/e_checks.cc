@@ -1071,6 +1071,72 @@ void Tags_ApplyNewValue(int new_tag)
 }
 
 
+void CMD_ApplyTag()
+{
+	if (! (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
+	{
+		Beep("ApplyTag: wrong mode");
+		return;
+	}
+
+	bool do_last = false;
+
+	const char *mode = EXEC_Param[0];
+
+	if (mode[0] == 0 || y_stricmp(mode, "fresh") == 0)
+	{
+		// fresh tag
+	}
+	else if (y_stricmp(mode, "last") == 0)
+	{
+		do_last = true;
+	}
+	else
+	{
+		Beep("ApplyTag: unknown param '%s'\n", mode); 
+		return;
+	}
+
+
+	bool unselect = false;
+
+	if (edit.Selected->empty())
+	{
+		if (! edit.highlighted())
+		{
+			Beep("ApplyTag: nothing selected");
+			return;
+		}
+
+		edit.Selected->set(edit.highlighted.num);
+		unselect = true;
+	}
+
+
+	int min_tag, max_tag;
+
+	Tags_UsedRange(&min_tag, &max_tag);
+
+	int new_tag = max_tag + (do_last ? 0 : 1);
+
+	if (new_tag <= 0)
+	{
+		Beep("No last tag");
+		return;
+	}
+	else if (new_tag > 32767)
+	{
+		Beep("Out of tag numbers");
+		return;
+	}
+
+	Tags_ApplyNewValue(new_tag);
+
+	if (unselect)
+		edit.Selected->clear_all();
+}
+
+
 //------------------------------------------------------------------------
 
 // the CHECK_xxx functions return the following values:

@@ -1266,12 +1266,13 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Shrink",   &CMD_Shrink);
 
 	M_RegisterCommand("Disconnect", &CMD_Disconnect);
-	M_RegisterCommand("Merge", &CMD_Merge);
-	M_RegisterCommand("Quantize", &CMD_Quantize);
+	M_RegisterCommand("Merge",      &CMD_Merge);
+	M_RegisterCommand("Quantize",   &CMD_Quantize);
 
 	M_RegisterCommand("CopyAndPaste",   &CMD_CopyAndPaste);
 	M_RegisterCommand("CopyProperties", &CMD_CopyProperties);
 
+	M_RegisterCommand("ApplyTag",    &CMD_ApplyTag);
 	M_RegisterCommand("PruneUnused", &CMD_PruneUnused);
 
 	/* line */

@@ -27,7 +27,12 @@
 #ifndef __EUREKA_E_CHECKS_H__
 #define __EUREKA_E_CHECKS_H__
 
+void Tags_ApplyNewValue(int new_tag);
+
+
 void CMD_CheckMap();
+
+void CMD_ApplyTag();
 
 #endif  /* __EUREKA_E_CHECKS_H__ */
 
