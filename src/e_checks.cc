@@ -1128,7 +1128,7 @@ static const char *unpack_confirm_message =
 	"Unpack the sidedefs now?";
 
 
-void SideDefs_Unpack(bool confirm_it = false)
+void SideDefs_Unpack(bool confirm_it)
 {
 	selection_c sides;
 	selection_c lines;

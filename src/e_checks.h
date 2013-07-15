@@ -27,6 +27,8 @@
 #ifndef __EUREKA_E_CHECKS_H__
 #define __EUREKA_E_CHECKS_H__
 
+void SideDefs_Unpack(bool confirm_it = false);
+
 void Tags_ApplyNewValue(int new_tag);
 
 

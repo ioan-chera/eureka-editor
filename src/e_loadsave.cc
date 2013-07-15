@@ -28,6 +28,7 @@
 
 #include "e_basis.h"
 #include "e_loadsave.h"
+#include "e_checks.h"
 #include "levels.h"  // CalculateLevelBounds()
 #include "lib_adler.h"
 #include "m_config.h"
@@ -524,7 +525,7 @@ static void LoadLineDefs()
 }
 
 
-static void RemoveUnusedVertices()
+static void RemoveUnusedVerticesAtEnd()
 {
 	if (NumVertices == 0)
 		return;
@@ -619,7 +620,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	// Node builders create a lot of new vertices for segs.
 	// However they just get in the way for editing, so remove them.
-	RemoveUnusedVertices();
+	RemoveUnusedVerticesAtEnd();
 
 	CalculateLevelBounds();
 
@@ -645,6 +646,8 @@ void LoadLevel(Wad_file *wad, const char *level)
     edit.RedrawMap = 1;
 
 	MadeChanges = 0;
+
+	SideDefs_Unpack(true);
 }
 
 
