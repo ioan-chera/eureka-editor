@@ -29,8 +29,9 @@
 #include <algorithm>
 
 #include "e_checks.h"
-#include "editloop.h"
+#include "e_path.h"
 #include "e_vertex.h"
+#include "editloop.h"
 #include "m_dialog.h"
 #include "m_game.h"
 #include "levels.h"
@@ -972,6 +973,8 @@ void Vertex_HighlightOverlaps()
 
 	Vertex_FindOverlaps(*edit.Selected);
 
+	GoToSelection();
+
 	edit.error_mode = true;
 
 	edit.RedrawMap = 1;
@@ -1031,6 +1034,8 @@ void Things_HighlightUnknown()
 	// FIXME: change edit mode if != OBJ_VERTICES
 
 	Things_FindUnknown(*edit.Selected);
+
+	GoToSelection();
 
 	edit.error_mode = true;
 
