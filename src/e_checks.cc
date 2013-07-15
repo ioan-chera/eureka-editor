@@ -1043,6 +1043,34 @@ void Things_HighlightUnknown()
 }
 
 
+// this returns a bitmask : bits 0..3 for players 1..4
+int Things_FindStarts(int *dm_num)
+{
+	*dm_num = 0;
+
+	int mask = 0;
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing * T = Things[n];
+
+		// ideally, these type numbers would not be hard-coded....
+
+		switch (T->type)
+		{
+			case 1: mask |= (1 << 0); break;
+			case 2: mask |= (1 << 1); break;
+			case 3: mask |= (1 << 2); break;
+			case 4: mask |= (1 << 3); break;
+
+			case 11: *dm_num += 1; break;
+		}
+	}
+
+	return mask;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1655,6 +1683,36 @@ check_result_e CHECK_Things(bool all_mode = false)
 
 			dialog->AddLine(check_message, 1, 210,
 			                "Show",  &UI_Check_Things::action_show_unknown);
+		}
+
+
+		int dm_num, mask;
+
+		mask = Things_FindStarts(&dm_num);
+
+		if (! (mask & 1))
+			dialog->AddLine("Player 1 start is missing!", 2);
+		else if (! (mask & 2))
+			dialog->AddLine("Player 2 start is missing", 1);
+		else if (! (mask & 4))
+			dialog->AddLine("Player 3 start is missing", 1);
+		else if (! (mask & 8))
+			dialog->AddLine("Player 4 start is missing", 1);
+		else
+			dialog->AddLine("Player 1..4 starts are present");
+
+		if (dm_num == 0)
+			dialog->AddLine("Map is missing deathmatch starts", 1);
+		else if (dm_num < DOOM_MIN_DEATHMATCH_STARTS)
+		{
+			sprintf(check_message, "Map has only %d deathmatch starts -- need at least %d", dm_num,
+			        DOOM_MIN_DEATHMATCH_STARTS);
+			dialog->AddLine(check_message, 1);
+		}
+		else
+		{
+			sprintf(check_message, "Map has %d deathmatch starts", dm_num);
+			dialog->AddLine(check_message);
 		}
 
 
