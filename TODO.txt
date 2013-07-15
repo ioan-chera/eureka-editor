@@ -3,8 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
->>>  config var for default starting mode
-
 -  ability to show line lengths, especially a newly added line
 
 
@@ -12,10 +10,6 @@ Eureka TODO / WISHLIST
 
 
 -  grid : darked color when lines get very close
-
-
--  "new tag" feature
-
 
 -  gravity mode : an option to NOT allow up/down movement
 

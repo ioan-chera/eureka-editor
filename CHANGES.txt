@@ -35,6 +35,8 @@ CHANGES IN Eureka
 
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
+-  option to set the default editing mode
+-  commands for setting tags on linedefs/sectors
 
 -  fixed crash bug when loading or saving a map containing linedefs
    which have no right sidedef
