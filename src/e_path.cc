@@ -451,7 +451,7 @@ void CMD_JumpToObject(void)
 
 	int num = atoi(buf);
 
-	if (num < 0 || num >= NumObjects(edit.obj_type))
+	if (num < 0 || num >= NumObjects(edit.mode))
 	{
 		Beep("No such object: #%d", num);
 		return;
@@ -462,7 +462,7 @@ void CMD_JumpToObject(void)
 
 	// alternatively: focus_on_selection()
 
-	GoToObject(Objid(edit.obj_type, num));
+	GoToObject(Objid(edit.mode, num));
 }
 
 
@@ -476,7 +476,7 @@ void CMD_NextObject()
 
 	int num = edit.Selected->find_first();
 
-	if (num >= NumObjects(edit.obj_type))
+	if (num >= NumObjects(edit.mode))
 	{
 		Beep("Next: no more objects");
 		return;
@@ -487,7 +487,7 @@ void CMD_NextObject()
 	edit.Selected->clear_all();
 	edit.Selected->set(num);
 
-	GoToObject(Objid(edit.obj_type, num));
+	GoToObject(Objid(edit.mode, num));
 }
 
 
@@ -512,7 +512,7 @@ void CMD_PrevObject()
 	edit.Selected->clear_all();
 	edit.Selected->set(num);
 
-	GoToObject(Objid(edit.obj_type, num));
+	GoToObject(Objid(edit.mode, num));
 }
 
 
@@ -524,7 +524,7 @@ void CMD_FindObjectByType()
 		Objid find_obj;
 		int otype;
 		obj_no_t omax,onum;
-		find_obj.type = edit.highlighted () ? edit.highlighted.type : edit.obj_type;
+		find_obj.type = edit.highlighted () ? edit.highlighted.type : edit.mode;
 		onum = find_obj.num  = edit.highlighted () ? edit.highlighted.num  : 0;
 		omax = GetMaxObjectNum(find_obj.type);
 		switch (find_obj.type)

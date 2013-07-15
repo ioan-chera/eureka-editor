@@ -100,7 +100,7 @@ static void UpdateSplitLine(int drag_vert = -1)
 	// in vertex mode, see if there is a linedef which would be split by
 	// adding a new vertex
 
-	if (edit.obj_type == OBJ_VERTICES && edit.pointer_in_window &&
+	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
 	    edit.highlighted.is_nil())
 	{
 		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
@@ -120,7 +120,7 @@ static void UpdatePanel()
 {
 	// -AJA- I think the highlighted object is always the same type as
 	//       the current editing mode.  But do this check for safety.
-	if (edit.highlighted() && edit.highlighted.type != edit.obj_type)
+	if (edit.highlighted() && edit.highlighted.type != edit.mode)
 		return;
 
 
@@ -145,7 +145,7 @@ static void UpdatePanel()
 	}
 
 
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:
 			main_win->thing_box->SetObj(obj_idx, obj_count);
@@ -179,7 +179,7 @@ void UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (!dragging || edit.drag_single_vertex >= 0))
 	{
-		GetCurObject(edit.highlighted, edit.obj_type, edit.map_x, edit.map_y, grid.snap);
+		GetCurObject(edit.highlighted, edit.mode, edit.map_x, edit.map_y, grid.snap);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.drag_single_vertex >= 0 && edit.highlighted() &&
@@ -206,7 +206,7 @@ bool GetCurrentObjects(selection_c *list)
 {
 	// returns false when there are no objects at all
 
-	list->change_type(edit.obj_type);  // this also clears it
+	list->change_type(edit.mode);  // this also clears it
 
 	if (edit.Selected->notempty())
 	{
@@ -226,15 +226,15 @@ bool GetCurrentObjects(selection_c *list)
 
 void Editor_ChangeMode(char mode)
 {
-	obj_type_e prev_type = edit.obj_type;
+	obj_type_e prev_type = edit.mode;
 
 	// Set the object type according to the new mode.
 	switch (mode)
 	{
-		case 't': edit.obj_type = OBJ_THINGS;   break;
-		case 'l': edit.obj_type = OBJ_LINEDEFS; break;
-		case 's': edit.obj_type = OBJ_SECTORS;  break;
-		case 'v': edit.obj_type = OBJ_VERTICES; break;
+		case 't': edit.mode = OBJ_THINGS;   break;
+		case 'l': edit.mode = OBJ_LINEDEFS; break;
+		case 's': edit.mode = OBJ_SECTORS;  break;
+		case 'v': edit.mode = OBJ_VERTICES; break;
 
 		default:
 			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
@@ -245,13 +245,13 @@ void Editor_ChangeMode(char mode)
 	edit.split_line.clear();
 	edit.did_a_move = false;
 
-	if (prev_type != edit.obj_type)
+	if (prev_type != edit.mode)
 	{
 		main_win->NewEditMode(mode);
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.obj_type);
+		edit.Selected = new selection_c(edit.mode);
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -291,9 +291,9 @@ void CMD_EditMode(void)
 
 void CMD_SelectAll(void)
 {
-	int total = NumObjects(edit.obj_type);
+	int total = NumObjects(edit.mode);
 
-	edit.Selected->change_type(edit.obj_type);
+	edit.Selected->change_type(edit.mode);
 	edit.Selected->frob_range(0, total-1, BOP_ADD);
 	edit.RedrawMap = 1;
 
@@ -303,7 +303,7 @@ void CMD_SelectAll(void)
 
 void CMD_UnselectAll(void)
 {
-	edit.Selected->change_type(edit.obj_type);
+	edit.Selected->change_type(edit.mode);
 	edit.Selected->clear_all();
 	edit.RedrawMap = 1;
 
@@ -313,13 +313,13 @@ void CMD_UnselectAll(void)
 
 void CMD_InvertSelection(void)
 {
-	int total = NumObjects(edit.obj_type);
+	int total = NumObjects(edit.mode);
 
-	if (edit.Selected->what_type() != edit.obj_type)
+	if (edit.Selected->what_type() != edit.mode)
 	{
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.obj_type);
+		edit.Selected = new selection_c(edit.mode);
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -550,7 +550,7 @@ void CMD_Scroll(void)
 
 void CMD_Merge(void)
 {
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
 			VERT_Merge();
@@ -577,7 +577,7 @@ void CMD_Merge(void)
 
 void CMD_Disconnect(void)
 {
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
 			VERT_Disconnect();
@@ -798,7 +798,7 @@ int Editor_RawKey(int event)
 	if (edit.render3d && ExecuteKey(key, KCTX_Render))
 		return 1;
 
-	if (ExecuteKey(key, M_ModeToKeyContext(edit.obj_type)))
+	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
 		return 1;
 	
 	if (ExecuteKey(key, KCTX_General))
@@ -976,7 +976,7 @@ void Editor_MousePress(keycode_t mod)
 
 	Objid object;      // The object under the pointer
 
-	GetCurObject(object, edit.obj_type, edit.map_x, edit.map_y, grid.snap);
+	GetCurObject(object, edit.mode, edit.map_x, edit.map_y, grid.snap);
 
 	edit.clicked = object;
 
@@ -1044,7 +1044,7 @@ void Editor_MouseRelease()
 		if (x1 == x2 && y1 == y2)
 			CMD_UnselectAll();
 		else
-			SelectObjectsInBox(edit.Selected, edit.obj_type, x1, y1, x2, y2);
+			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 
 		UpdateHighlight();
 
@@ -1058,7 +1058,7 @@ void Editor_MouseRelease()
 
 	Objid object;      // object under the pointer
 
-	GetCurObject(object, edit.obj_type, edit.map_x, edit.map_y, grid.snap);
+	GetCurObject(object, edit.mode, edit.map_x, edit.map_y, grid.snap);
 
 	/* select the object if unselected, and vice versa.
 	 */
@@ -1201,7 +1201,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 		// check for a single vertex
 		edit.drag_single_vertex = -1;
 
-		if (edit.obj_type == OBJ_VERTICES && edit.Selected->find_second() < 0)
+		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
 		{
 			edit.drag_single_vertex = edit.Selected->find_first();
 			SYS_ASSERT(edit.drag_single_vertex >= 0);
@@ -1313,7 +1313,7 @@ void Editor_Init()
 
 	edit.move_speed = 20;
 	edit.extra_zoom = 0;
-	edit.obj_type   = OBJ_THINGS;
+	edit.mode   = OBJ_THINGS;
 
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;
@@ -1329,7 +1329,7 @@ void Editor_Init()
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 
-	edit.Selected = new selection_c(edit.obj_type);
+	edit.Selected = new selection_c(edit.mode);
 
 	edit.error_mode = false;
 	edit.did_a_move = false;
@@ -1371,7 +1371,7 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 
 void Editor_WriteUser(FILE *fp)
 {
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:   fprintf(fp, "edit_mode t\n"); break;
 		case OBJ_LINEDEFS: fprintf(fp, "edit_mode l\n"); break;

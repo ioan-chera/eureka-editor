@@ -1369,7 +1369,7 @@ void CMD_CheckMap()
 	}
 	else if (y_stricmp(what, "current") == 0)  // current editing mode
 	{
-		switch (edit.obj_type)
+		switch (edit.mode)
 		{
 			case OBJ_VERTICES:
 				CHECK_Vertices();

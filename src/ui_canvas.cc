@@ -182,7 +182,7 @@ void UI_Canvas::DrawEverything()
 	map_hy = MAPY(y());
 
 	// setup for drawing sector numbers
-	if (edit.show_object_numbers && edit.obj_type == OBJ_SECTORS)
+	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
 	{
 		if (seen_sectors.size() < NumSectors)
 			seen_sectors.resize(NumSectors);
@@ -236,15 +236,15 @@ void UI_Canvas::DrawMap()
 
 	DrawCamera();
 
-	if (edit.obj_type != OBJ_THINGS)
+	if (edit.mode != OBJ_THINGS)
 		DrawThings();
 
 	DrawLinedefs();
 
-	if (edit.obj_type == OBJ_VERTICES)
+	if (edit.mode == OBJ_VERTICES)
 		DrawVertices();
 
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 		DrawThings();
 }
 
@@ -508,7 +508,7 @@ void UI_Canvas::DrawLinedefs()
 		// was this:
 		// one_sided = (LineDefs[n]->flags & 1) ? true : false;
 
-		switch (edit.obj_type)
+		switch (edit.mode)
 		{
 			case OBJ_VERTICES:
 			{
@@ -624,7 +624,7 @@ void UI_Canvas::DrawLinedefs()
 	}
 
 	// draw the linedef numbers
-	if (edit.obj_type == OBJ_LINEDEFS && edit.show_object_numbers)
+	if (edit.mode == OBJ_LINEDEFS && edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -685,7 +685,7 @@ void UI_Canvas::DrawThings()
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		if (edit.obj_type == OBJ_THINGS)
+		if (edit.mode == OBJ_THINGS)
 		{
 			if (edit.error_mode)
 			{
@@ -712,7 +712,7 @@ void UI_Canvas::DrawThings()
 	}
 
 	// draw the thing numbers
-	if (edit.obj_type == OBJ_THINGS && edit.show_object_numbers)
+	if (edit.mode == OBJ_THINGS && edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < NumThings ; n++)
 		{
@@ -1356,7 +1356,7 @@ void UI_Canvas::DragBegin(int focus_x, int focus_y, int map_x, int map_y)
 	drag_cur_x = drag_start_x;
 	drag_cur_y = drag_start_y;
 
-	if (edit.obj_type == OBJ_VERTICES)
+	if (edit.mode == OBJ_VERTICES)
 	{
 		drag_lines.change_type(OBJ_LINEDEFS);
 
@@ -1419,7 +1419,7 @@ void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
 	scale_param.mid_x = middle_x;
 	scale_param.mid_y = middle_y;
 
-	if (edit.obj_type == OBJ_VERTICES)
+	if (edit.mode == OBJ_VERTICES)
 	{
 		scale_lines.change_type(OBJ_LINEDEFS);
 

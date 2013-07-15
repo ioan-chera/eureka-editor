@@ -68,7 +68,7 @@ void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != edit.obj_type)
+	if (type != edit.mode)
 		return;
 
 	if (objnum > main_win->GetPanelObjNum())
@@ -82,7 +82,7 @@ void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != edit.obj_type)
+	if (type != edit.mode)
 		return;
 
 	if (objnum > main_win->GetPanelObjNum())
@@ -94,7 +94,7 @@ void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
 
 void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field)
 {
-	if (type != edit.obj_type)
+	if (type != edit.mode)
 		return;
 
 	if (objnum != main_win->GetPanelObjNum())
@@ -842,7 +842,7 @@ static void Insert_Sector(bool force_new)
 
 void CMD_Insert(void)
 {
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:
 			Insert_Thing();
@@ -1144,7 +1144,7 @@ void CMD_MoveObjects(int delta_x, int delta_y)
 	BA_Begin();
 
 	// handle a single vertex merging onto an existing one
-	if (edit.obj_type == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
+	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
 	    edit.highlighted())
 	{
 		MergeVertex(edit.drag_single_vertex, edit.highlighted.num,
@@ -1158,7 +1158,7 @@ void CMD_MoveObjects(int delta_x, int delta_y)
 	}
 
 	// handle a single vertex splitting a linedef
-	if (edit.obj_type == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
+	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
 		edit.split_line())
 	{
 		SplitLineDefAtVertex(edit.split_line.num, edit.drag_single_vertex);
@@ -1169,7 +1169,7 @@ void CMD_MoveObjects(int delta_x, int delta_y)
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
 	// each thing is in).
-	if (edit.obj_type == OBJ_SECTORS)
+	if (edit.mode == OBJ_SECTORS)
 	{
 		selection_c thing_sel(OBJ_THINGS);
 
@@ -1398,7 +1398,7 @@ void CMD_CopyProperties(void)
 		return;
 
 
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_SECTORS:
 			TransferSectorProperties(source, target);
@@ -1505,7 +1505,7 @@ static void Drag_CountOnGrid(int *count, int *total)
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		Drag_CountOnGrid_Worker(edit.obj_type, *it, count, total);
+		Drag_CountOnGrid_Worker(edit.mode, *it, count, total);
 	}
 }
 
@@ -1605,7 +1605,7 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y)
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		Drag_UpdateObjectDist(edit.obj_type, *it, x, y, &best_dist,
+		Drag_UpdateObjectDist(edit.mode, *it, x, y, &best_dist,
 		                      map_x, map_y, only_grid);
 	}
 }

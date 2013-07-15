@@ -445,9 +445,9 @@ bool CMD_Copy()
 	if (clip_board)
 		delete clip_board;
 	
-	clip_board = new clipboard_data_c(edit.obj_type);
+	clip_board = new clipboard_data_c(edit.mode);
 
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:
 			for (list.begin(&it) ; !it.at_end() ; ++it)
@@ -608,7 +608,7 @@ static void ReselectGroup()
 	// this assumes all the new objects are at the end of their
 	// array (currently true, but not a guarantee of BA_New).
 
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		if (clip_board->mode == OBJ_THINGS ||
 		    clip_board->mode == OBJ_SECTORS)
@@ -625,9 +625,9 @@ static void ReselectGroup()
 			    	  clip_board->mode == OBJ_LINEDEFS ||
 					  clip_board->mode == OBJ_SECTORS);
 
-	bool is_mappy =  (edit.obj_type == OBJ_VERTICES ||
-			    	  edit.obj_type == OBJ_LINEDEFS ||
-					  edit.obj_type == OBJ_SECTORS);
+	bool is_mappy =  (edit.mode == OBJ_VERTICES ||
+			    	  edit.mode == OBJ_LINEDEFS ||
+					  edit.mode == OBJ_SECTORS);
 
 	if (! (was_mappy && is_mappy))
 		return;

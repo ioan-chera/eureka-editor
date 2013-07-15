@@ -31,7 +31,7 @@
 
 typedef struct
 {
-	obj_type_e obj_type;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+	obj_type_e  mode;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
 	bool render3d;    // 3D preview is active
 

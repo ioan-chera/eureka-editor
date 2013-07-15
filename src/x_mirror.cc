@@ -269,7 +269,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, int mid_x, int mid
 
 static void DoMirrorStuff(selection_c& list, bool is_vert, int mid_x, int mid_y)
 {
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		DoMirrorThings(list, is_vert, mid_x, mid_y);
 		return;
@@ -277,7 +277,7 @@ static void DoMirrorStuff(selection_c& list, bool is_vert, int mid_x, int mid_y)
 
 	// everything else just modifies the vertices
 
-	if (edit.obj_type == OBJ_SECTORS)
+	if (edit.mode == OBJ_SECTORS)
 	{
 		// handle things in Sectors mode too
 		selection_c things(OBJ_THINGS);
@@ -366,14 +366,14 @@ void CMD_Rotate90(void)
 	
 	BA_Begin();
 
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		DoRotate90Things(list, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (edit.obj_type == OBJ_SECTORS)
+		if (edit.mode == OBJ_SECTORS)
 		{
 			selection_c things(OBJ_THINGS);
 
@@ -464,14 +464,14 @@ void CMD_Enlarge(void)
 
 	BA_Begin();
 
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		DoEnlargeThings(list, mul, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (edit.obj_type == OBJ_SECTORS)
+		if (edit.mode == OBJ_SECTORS)
 		{
 			selection_c things(OBJ_THINGS);
 
@@ -554,14 +554,14 @@ void CMD_Shrink(void)
 
 	BA_Begin();
 
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		DoShrinkThings(list, div, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (edit.obj_type == OBJ_SECTORS)
+		if (edit.mode == OBJ_SECTORS)
 		{
 			selection_c things(OBJ_THINGS);
 
@@ -644,7 +644,7 @@ static void DoScaleTwoVertices(selection_c& list, scale_param_t& param)
 
 static void DoScaleTwoStuff(selection_c& list, scale_param_t& param)
 {
-	if (edit.obj_type == OBJ_THINGS)
+	if (edit.mode == OBJ_THINGS)
 	{
 		DoScaleTwoThings(list, param);
 		return;
@@ -652,7 +652,7 @@ static void DoScaleTwoStuff(selection_c& list, scale_param_t& param)
 
 	// everything else just modifies the vertices
 
-	if (edit.obj_type == OBJ_SECTORS)
+	if (edit.mode == OBJ_SECTORS)
 	{
 		// handle things in Sectors mode too
 		selection_c things(OBJ_THINGS);
@@ -788,7 +788,7 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 void CMD_ScaleObjects3(double scale_x, double scale_y, double scale_z,
                        int pos_x, int pos_y, int pos_z)
 {
-	SYS_ASSERT(edit.obj_type == OBJ_SECTORS);
+	SYS_ASSERT(edit.mode == OBJ_SECTORS);
 
 	scale_param_t param;
 
@@ -1015,7 +1015,7 @@ void CMD_Quantize(void)
 
 	BA_Begin();
 
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:
 			Quantize_Things(*edit.Selected);

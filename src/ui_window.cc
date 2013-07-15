@@ -208,7 +208,7 @@ void UI_MainWin::UpdateTotals()
 int UI_MainWin::GetPanelObjNum() const
 {
 	// FIXME: using 'edit' here feels like a hack or mis-design
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_THINGS:   return thing_box->GetObj();
 		case OBJ_VERTICES: return  vert_box->GetObj();
@@ -337,7 +337,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 
-	switch (edit.obj_type)
+	switch (edit.mode)
 	{
 		case OBJ_LINEDEFS:
 			if (kind == 'T')

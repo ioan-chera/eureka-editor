@@ -167,7 +167,7 @@ UI_ScaleDialog::~UI_ScaleDialog()
 
 void UI_ScaleDialog::Run()
 {
-	if (edit.obj_type != OBJ_SECTORS)
+	if (edit.mode != OBJ_SECTORS)
 	{
 		 scale_z->hide();
 		origin_z->hide();
@@ -241,7 +241,7 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_y = that->origin_y->value() - 1;
 	int pos_z = that->origin_z->value() - 1;
 
-	if (edit.obj_type == OBJ_SECTORS)
+	if (edit.mode == OBJ_SECTORS)
 		CMD_ScaleObjects3(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
 	else
 		CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);

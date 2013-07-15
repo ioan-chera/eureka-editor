@@ -255,7 +255,7 @@ void Selection_NotifyEnd()
 	if (invalidated_selection)
 	{
 		// this clears AND RESIZES the selection_c object
-		edit.Selected->change_type(edit.obj_type);
+		edit.Selected->change_type(edit.mode);
 	}
 }
 
