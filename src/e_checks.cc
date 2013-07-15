@@ -1063,6 +1063,61 @@ void SideDefs_RemoveUnused()
 }
 
 
+void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
+{
+	sides.change_type(OBJ_SIDEDEFS);
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (int k = 0 ; k < i ; k++)
+	{
+		const LineDef * A = LineDefs[i];
+		const LineDef * B = LineDefs[k];
+
+		bool AA = (A->left  >= 0 && A->left == A->right);
+
+		bool AL = (A->left  >= 0 && (A->left  == B->left || A->left  == B->right));
+		bool AR = (A->right >= 0 && (A->right == B->left || A->right == B->right));
+
+		if (AL || AA) sides.set(A->left);
+		if (AR)       sides.set(A->right);
+
+		if (AL || AR)
+		{
+			lines.set(i);
+			lines.set(k);
+		}
+		else if (AA)
+		{
+			lines.set(i);
+		}
+	}
+}
+
+
+void SideDefs_HighlightPacked()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	selection_c sides;
+
+	SideDefs_FindPacking(sides, *edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void SideDefs_Unpack()
+{
+	// FIXME !!!
+
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1611,6 +1666,24 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+	static void action_unpack(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		SideDefs_Unpack();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_packed(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		SideDefs_HighlightPacked();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
 public:
 	UI_Check_Sectors(bool all_mode) :
 		Fl_Double_Window(520, 286, "Check : Sectors"),
@@ -1757,7 +1830,7 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 {
 	UI_Check_Sectors *dialog = new UI_Check_Sectors(all_mode);
 
-	selection_c  sel;
+	selection_c  sel, lines;
 
 	for (;;)
 	{
@@ -1772,6 +1845,22 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 			dialog->AddLine(check_message, 2, 220,
 			                "Fix",  &UI_Check_Sectors::action_fix_ceil,
 			                "Show", &UI_Check_Sectors::action_show_ceil);
+		}
+
+
+		SideDefs_FindPacking(sel, lines);
+
+		if (sel.empty())
+			dialog->AddLine("No shared sidedefs");
+		else
+		{
+			int approx_num = sel.count_obj();
+
+			sprintf(check_message, "%d shared sidedefs", approx_num);
+
+			dialog->AddLine(check_message, 1, 200,
+			                "Unpack", &UI_Check_Sectors::action_unpack,
+			                "Show",   &UI_Check_Sectors::action_show_packed);
 		}
 
 
