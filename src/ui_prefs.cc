@@ -445,10 +445,10 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "Default port: ");
+		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "default port: ");
 		  edit_def_port->align(FL_ALIGN_LEFT);
 		}
-		{ edit_def_mode = new Fl_Choice(440, 85, 105, 25, "Default edit mode: ");
+		{ edit_def_mode = new Fl_Choice(440, 85, 105, 25, "default edit mode: ");
 		  edit_def_mode->align(FL_ALIGN_LEFT);
 		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
 		}
@@ -495,7 +495,11 @@ UI_Preferences::UI_Preferences() :
 		  grid_mode->down_box(FL_BORDER_BOX);
 		  grid_mode->add("OFF|Dotty|Normal");
 		}
-		{ grid_size = new Fl_Choice(435, 155, 95, 25, "default grid size ");
+		{ grid_toggle = new Fl_Choice(435, 155, 95, 25, "grid toggle types ");
+		  grid_toggle->down_box(FL_BORDER_BOX);
+		  grid_toggle->add("BOTH|Dotty|Normal");
+		}
+		{ grid_size = new Fl_Choice(435, 190, 95, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
 		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
 		}
@@ -512,10 +516,6 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ gen_wheelscroll = new Fl_Check_Button(50, 190, 245, 25, " mouse wheel scrolls the map");
 		  gen_wheelscroll->down_box(FL_DOWN_BOX);
-		}
-		{ grid_toggle = new Fl_Choice(435, 230, 95, 25, "grid toggle types ");
-		  grid_toggle->down_box(FL_BORDER_BOX);
-		  grid_toggle->add("BOTH|Dotty|Normal");
 		}
 		{ grid_hide_free = new Fl_Check_Button(50, 230, 245, 25, " hide grid in FREE mode");
 		  grid_hide_free->down_box(FL_DOWN_BOX);
