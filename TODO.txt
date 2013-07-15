@@ -2,12 +2,10 @@
 Eureka TODO / WISHLIST
 ======================
 
--  ability to build nodes only in modified maps
-
-?  warn if quit Eureka and nodes not built in current map
-
 
 >>>  config var for default starting mode
+
+-  ability to show line lengths, especially a newly added line
 
 
 !!  setting a texture does not update 3D view
@@ -118,6 +116,8 @@ ______________________________________________________________________
 
 General
 -------
+
++  ability to build nodes only in modified maps
 
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
