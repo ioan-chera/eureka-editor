@@ -618,7 +618,7 @@ void CMD_PruneUnused(void)
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
 
-	Status_Set("Pruned %d SEC, %d SID, %d VRT", num_secs, num_sides, num_verts);
+	Status_Set("Pruned %d SEC - %d Side - %d Vert", num_secs, num_sides, num_verts);
 
 	BA_End();
 }
