@@ -982,6 +982,39 @@ void Sectors_RemoveUnused()
 }
 
 
+void SideDefs_FindUnused(selection_c& sel)
+{
+	sel.change_type(OBJ_SIDEDEFS);
+
+	if (NumSideDefs == 0)
+		return;
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		const LineDef *L = LineDefs[i];
+
+		if (L->left  >= 0) sel.set(L->left);
+		if (L->right >= 0) sel.set(L->right);
+	}
+
+	sel.frob_range(0, NumSideDefs - 1, BOP_TOGGLE);
+}
+
+
+void SideDefs_RemoveUnused()
+{
+	selection_c sel;
+
+	SideDefs_FindUnused(sel);
+
+	BA_Begin();
+	DeleteObjects(&sel);
+	BA_End();
+
+//??	Status_Set("Removed %d vertices", sel.count_obj());
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1505,6 +1538,15 @@ public:
 		dialog->user_action = CKR_TookAction;
 	}
 
+	static void action_remove_sidedefs(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		SideDefs_RemoveUnused();
+
+		dialog->user_action = CKR_TookAction;
+	}
+
 public:
 	UI_Check_Sectors(bool all_mode) :
 		Fl_Double_Window(520, 186, "Check : Sectors"),
@@ -1665,6 +1707,19 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 
 			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Sectors::action_remove);
+		}
+
+
+		SideDefs_FindUnused(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unused sidedefs");
+		else
+		{
+			sprintf(check_message, "%d unused sidedefs", sel.count_obj());
+
+			dialog->AddLine(check_message, 1, 170,
+			                "Remove", &UI_Check_Sectors::action_remove_sidedefs);
 		}
 
 
