@@ -1144,7 +1144,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	Level_name = StringUpper(level);
 
-	Status_Set("Saved %s", Level_name);
+	Status_Set("Saved %s  --  NO NODES", Level_name);
 
 	if (main_win)
 	{
