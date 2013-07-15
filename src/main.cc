@@ -681,6 +681,9 @@ void Main_Loop()
 
 		main_win->scroll->UpdateRenderMode();
 		main_win->scroll->UpdateBounds();
+
+		if (edit.Selected->empty())
+			edit.error_mode = false;
     }
 }
 
