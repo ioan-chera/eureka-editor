@@ -907,7 +907,6 @@ void Vertex_HighlightOverlaps()
 	GoToSelection();
 
 	edit.error_mode = true;
-
 	edit.RedrawMap = 1;
 }
 
@@ -982,6 +981,55 @@ void Sectors_RemoveUnused()
 }
 
 
+void Sectors_FindBadCeil(selection_c& sel)
+{
+	sel.change_type(OBJ_SECTORS);
+
+	if (NumSectors == 0)
+		return;
+
+	for (int i = 0 ; i < NumSectors ; i++)
+	{
+		if (Sectors[i]->ceilh < Sectors[i]->floorh)
+			sel.set(i);
+	}
+}
+
+
+void Sectors_FixBadCeil()
+{
+	selection_c sel;
+
+	Sectors_FindBadCeil(sel);
+
+	BA_Begin();
+
+	for (int i = 0 ; i < NumSectors ; i++)
+	{
+		if (Sectors[i]->ceilh < Sectors[i]->floorh)
+		{
+			BA_ChangeSEC(i, Sector::F_CEILH, Sectors[i]->floorh);
+		}
+	}
+
+	BA_End();
+}
+
+
+void Sectors_HighlightBadCeil()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	Sectors_FindBadCeil(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
 void SideDefs_FindUnused(selection_c& sel)
 {
 	sel.change_type(OBJ_SIDEDEFS);
@@ -1042,7 +1090,6 @@ void Things_HighlightUnknown()
 	GoToSelection();
 
 	edit.error_mode = true;
-
 	edit.RedrawMap = 1;
 }
 
@@ -1101,7 +1148,6 @@ void Things_HighlightInVoid()
 	GoToSelection();
 
 	edit.error_mode = true;
-
 	edit.RedrawMap = 1;
 }
 
@@ -1547,9 +1593,27 @@ public:
 		dialog->user_action = CKR_TookAction;
 	}
 
+	static void action_fix_ceil(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		Sectors_FixBadCeil();
+
+		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_show_ceil(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		Sectors_HighlightBadCeil();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
 public:
 	UI_Check_Sectors(bool all_mode) :
-		Fl_Double_Window(520, 186, "Check : Sectors"),
+		Fl_Double_Window(520, 286, "Check : Sectors"),
 		want_close(false), user_action(CKR_OK),
 		worst_severity(0)
 	{
@@ -1697,6 +1761,20 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 
 	for (;;)
 	{
+		Sectors_FindBadCeil(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No sectors with ceil < floor");
+		else
+		{
+			sprintf(check_message, "%d sectors with ceil < floor", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 220,
+			                "Fix",  &UI_Check_Sectors::action_fix_ceil,
+			                "Show", &UI_Check_Sectors::action_show_ceil);
+		}
+
+
 		Sectors_FindUnused(sel);
 
 		if (sel.empty())
