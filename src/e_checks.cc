@@ -42,6 +42,10 @@
 #include "x_hover.h"
 
 
+#define   ERROR_MSG_COLOR	FL_RED
+#define WARNING_MSG_COLOR	FL_BLUE
+
+
 static char check_message[MSG_BUF_LEN];
 
 
@@ -1288,12 +1292,12 @@ public:
 
 		if (severity == 2)
 		{
-			box->labelcolor(FL_RED);
+			box->labelcolor(ERROR_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 		else if (severity == 1)
 		{
-			box->labelcolor(FL_BLUE);
+			box->labelcolor(WARNING_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 
@@ -1556,12 +1560,12 @@ public:
 
 		if (severity == 2)
 		{
-			box->labelcolor(FL_RED);
+			box->labelcolor(ERROR_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 		else if (severity == 1)
 		{
-			box->labelcolor(FL_BLUE);
+			box->labelcolor(WARNING_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 
@@ -1654,7 +1658,7 @@ check_result_e CHECK_Things(bool all_mode = false)
 		Things_FindUnknown(sel);
 
 		if (sel.empty())
-			dialog->AddLine("No unknown things");
+			dialog->AddLine("No unknown thing types");
 		else
 		{
 			sprintf(check_message, "%d unknown things", sel.count_obj());
@@ -1824,12 +1828,12 @@ public:
 
 		if (severity == 2)
 		{
-			box->labelcolor(FL_RED);
+			box->labelcolor(ERROR_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 		else if (severity == 1)
 		{
-			box->labelcolor(FL_BLUE);
+			box->labelcolor(WARNING_MSG_COLOR);
 			box->labelfont(FL_HELVETICA_BOLD);
 		}
 
