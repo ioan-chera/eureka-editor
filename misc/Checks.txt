@@ -17,6 +17,7 @@ Things
 
 +  things stuck in walls or each other
 -  things in the void
+-  unknown things
 +  no player 1 start
 -  no player 2/3/4 start  (merely show it)
 -  no deathmatch starts   (merely show it)
