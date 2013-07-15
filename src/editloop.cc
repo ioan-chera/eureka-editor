@@ -54,6 +54,8 @@ int active_wmask = 0;
 
 
 // config items
+int default_edit_mode = 0;  // Things
+
 bool digits_set_zoom = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
@@ -1314,7 +1316,14 @@ void Editor_Init()
 
 	edit.move_speed = 20;
 	edit.extra_zoom = 0;
-	edit.mode   = OBJ_THINGS;
+
+	switch (default_edit_mode)
+	{
+		case 1:  edit.mode = OBJ_LINEDEFS; break;
+		case 2:  edit.mode = OBJ_SECTORS;  break;
+		case 3:  edit.mode = OBJ_VERTICES; break;
+		default: edit.mode = OBJ_THINGS;   break;
+	}
 
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;

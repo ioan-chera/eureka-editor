@@ -32,6 +32,7 @@
 /* ==== CONFIG VARIABLES ==================== */
 
 extern const char *default_port;
+extern int default_edit_mode;
 
 extern bool auto_load_recent;
 extern bool begin_maximized;

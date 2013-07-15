@@ -525,7 +525,7 @@ int Main_key_handler(int event)
 }
 
 
-static void InitFLTK()
+static void Main_OpenWindow()
 {
 	/*
 	 *  Create the window
@@ -621,7 +621,16 @@ static void InitFLTK()
     Fl::add_handler(Main_key_handler);
 
 	main_win->ShowBrowser(0);
-	main_win->NewEditMode('t');
+
+	switch (edit.mode)
+	{
+		case OBJ_LINEDEFS: main_win->NewEditMode('l'); break;
+		case OBJ_SECTORS:  main_win->NewEditMode('s'); break;
+		case OBJ_VERTICES: main_win->NewEditMode('v'); break;
+		case OBJ_THINGS:   main_win->NewEditMode('t'); break;
+
+		default: break;
+	}
 
 	Fl::check();
 }
@@ -987,7 +996,7 @@ int main(int argc, char *argv[])
 
 	Editor_Init();
 
-	InitFLTK();  // creates the main window
+	Main_OpenWindow();
 
 	M_LoadScripts();
 	M_LoadBindings();

@@ -292,6 +292,15 @@ static const opt_desc_t options[] =
 		&default_grid_snap
 	},
 
+	{	"default_edit_mode",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
+		NULL,
+		&default_edit_mode
+	},
+
 	{	"default_port",
 		0,
 		OPT_STRING,

@@ -283,7 +283,8 @@ public:
 
 	/* Edit Tab */
 
-	Fl_Input *edit_def_port;
+	Fl_Input  *edit_def_port;
+	Fl_Choice *edit_def_mode;
 
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
@@ -447,6 +448,10 @@ UI_Preferences::UI_Preferences() :
 		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "Default port: ");
 		  edit_def_port->align(FL_ALIGN_LEFT);
 		}
+		{ edit_def_mode = new Fl_Choice(440, 85, 105, 25, "Default edit mode: ");
+		  edit_def_mode->align(FL_ALIGN_LEFT);
+		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
+		}
 		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
 		  edit_newislands->down_box(FL_DOWN_BOX);
 		}
@@ -508,7 +513,7 @@ UI_Preferences::UI_Preferences() :
 		{ gen_wheelscroll = new Fl_Check_Button(50, 190, 245, 25, " mouse wheel scrolls the map");
 		  gen_wheelscroll->down_box(FL_DOWN_BOX);
 		}
-		{ grid_toggle = new Fl_Choice(435, 230, 95, 25, "grid toggle type ");
+		{ grid_toggle = new Fl_Choice(435, 230, 95, 25, "grid toggle types ");
 		  grid_toggle->down_box(FL_BORDER_BOX);
 		  grid_toggle->add("BOTH|Dotty|Normal");
 		}
@@ -962,6 +967,7 @@ void UI_Preferences::LoadValues()
 	/* Edit Tab */
 
 	edit_def_port->value(default_port);
+	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
@@ -1057,6 +1063,7 @@ void UI_Preferences::SaveValues()
 	/* Edit Tab */
 
 	default_port = StringDup(edit_def_port->value());
+	default_edit_mode = edit_def_mode->value();
 
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(4, new_sector_size, 8192);
