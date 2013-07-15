@@ -1113,8 +1113,11 @@ void SideDefs_HighlightPacked()
 
 static int Copy_SideDef(int num)
 {
-	//....
-	return num;
+	int sd = BA_New(OBJ_SIDEDEFS);
+
+	SideDefs[sd]->RawCopy(SideDefs[num]);
+
+	return sd;
 }
 
 
