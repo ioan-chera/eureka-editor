@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "levels.h"
+#include "e_checks.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
@@ -439,21 +440,7 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 
 	new_tag = CLAMP(-32767, new_tag, 32767);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
-	{
-		BA_Begin();
-
-		for (list.begin(&it); !it.at_end(); ++it)
-		{
-			BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
-		}
-
-		BA_End();
-		MarkChanges();
-	}
+	Tags_ApplyNewValue(new_tag);
 }
 
 

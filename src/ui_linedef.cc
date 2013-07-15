@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "levels.h"
+#include "e_checks.h"
 #include "e_things.h"
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -370,19 +371,7 @@ void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 
 	int new_tag = atoi(box->tag->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
-	{
-		BA_Begin();
-
-		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
-
-		BA_End();
-		MarkChanges();
-	}
+	Tags_ApplyNewValue(new_tag);
 }
 
 
