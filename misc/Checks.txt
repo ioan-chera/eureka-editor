@@ -1,8 +1,5 @@
 
-Broken Geometry
-
-+  unclosed sectors
-+  sectors with ceil_h < floor_h
+LineDefs
 
 +  linedefs without a right side
 +  zero length linedefs
@@ -11,6 +8,21 @@ Broken Geometry
 +  linedefs which partially overlap / cross over  [ties in with unclosed logic]
 
 +  vertices at same location
+
+-  one-sided lines without IMPASS flag   [FIX]
+
+?  two-sided lines without 2S flag       [FIX]
+
+
+Sectors
+
++  unclosed sectors
++  sectors with ceil_h < floor_h
+
+-  sidedefs used on multiple lines (or same line twice)  [UNPACK]
+
+-  unused sectors   [REMOVE]
+-  unused sidedefs  [REMOVE]
 
 
 Things
@@ -23,25 +35,21 @@ Things
 -  no deathmatch starts   (merely show it)
 
 
-Texturing
-
--  missing textures on solid walls
--  mid-masked textures on solid walls
-
--  valid flat names in sectors
--  valid texture names in sidedefs
-
-
-Miscellaneous
-
--  one-sided lines without IMPASS flag   [FIX]
--  two-sided lines without 2S flag       [FIX]
+Vertices
 
 -  unused vertices  [REMOVE]
--  unused sidedefs  [REMOVE]
--  unused sectors   [REMOVE]
 
--  sidedefs used on multiple lines (or same line twice)  [UNPACK]
+
+Texturing
+
+-  missing textures on solid walls       [FIX]
+-  mid-masked textures on solid walls    [FIX]
+
+-  valid flat names in sectors       [FIX]
+-  valid texture names in sidedefs   [FIX]
+
+
+Tags
 
 ?  linedef with tag but no matching sector
 ?  sector with tag but no matching linedef
