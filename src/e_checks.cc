@@ -1048,6 +1048,29 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 }
 
 
+void Tags_ApplyNewValue(int new_tag)
+{
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it); !it.at_end(); ++it)
+		{
+			if (edit.mode == OBJ_LINEDEFS)
+				BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
+			else if (edit.mode == OBJ_SECTORS)
+				BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
+		}
+
+		BA_End();
+		MarkChanges();
+	}
+}
+
+
 //------------------------------------------------------------------------
 
 // the CHECK_xxx functions return the following values:
@@ -1363,11 +1386,22 @@ private:
 
 public:
 	int worst_severity;
+	int fresh_tag;
 
 public:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+
+		dialog->want_close = true;
+	}
+
+	static void action_fresh_tag(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+
+		// fresh_tag is set externally
+		Tags_ApplyNewValue(dialog->fresh_tag);
 
 		dialog->want_close = true;
 	}
@@ -1535,6 +1569,16 @@ check_result_e CHECK_Tags()
 
 			sprintf(check_message, "Highest tag: %d", max_tag);
 			dialog->AddLine(check_message);
+		}
+
+		if ((edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS) &&
+		    edit.Selected->notempty())
+		{
+			dialog->fresh_tag = max_tag + 1;
+
+			dialog->AddGap(10);
+			dialog->AddLine("Apply fresh tag to selection :", 0, 215, "Apply",
+			                &UI_Check_Tags::action_fresh_tag);
 		}
 
 		check_result_e result = dialog->Run();
