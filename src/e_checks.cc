@@ -39,6 +39,7 @@
 #include "selectn.h"
 #include "w_rawdef.h"
 #include "ui_window.h"
+#include "x_hover.h"
 
 
 static char check_message[MSG_BUF_LEN];
@@ -996,6 +997,36 @@ int Things_FindStarts(int *dm_num)
 }
 
 
+void Things_FindInVoid(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		Objid obj;
+
+		GetCurObject(obj, OBJ_SECTORS, Things[n]->x, Things[n]->y);
+
+		if (obj.is_nil())
+			list.set(n);
+	}
+}
+
+
+void Things_HighlightInVoid()
+{
+	// FIXME: change edit mode if != OBJ_VERTICES
+
+	Things_FindInVoid(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+
+	edit.RedrawMap = 1;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1448,6 +1479,15 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+	static void action_show_void(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+
+		Things_HighlightInVoid();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
 public:
 	UI_Check_Things(bool all_mode) :
 		Fl_Double_Window(520, 286, "Check : Things"),
@@ -1598,6 +1638,19 @@ check_result_e CHECK_Things(bool all_mode = false)
 
 	for (;;)
 	{
+		Things_FindInVoid(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No things in the void");
+		else
+		{
+			sprintf(check_message, "%d things in the void", sel.count_obj());
+
+			dialog->AddLine(check_message, 1, 200,
+			                "Show",  &UI_Check_Things::action_show_void);
+		}
+
+
 		Things_FindUnknown(sel);
 
 		if (sel.empty())
