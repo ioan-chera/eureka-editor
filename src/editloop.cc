@@ -228,7 +228,7 @@ bool GetCurrentObjects(selection_c *list)
 
 void Editor_ChangeMode(char mode)
 {
-	obj_type_e prev_type = edit.mode;
+	obj_type_e  prev_type = edit.mode;
 
 	// Set the object type according to the new mode.
 	switch (mode)

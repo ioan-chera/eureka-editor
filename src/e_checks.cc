@@ -899,7 +899,8 @@ void Vertex_MergeOverlaps()
 
 void Vertex_HighlightOverlaps()
 {
-	// FIXME: change edit mode if != OBJ_VERTICES
+	if (edit.mode != OBJ_VERTICES)
+		Editor_ChangeMode('v');
 
 	Vertex_FindOverlaps(*edit.Selected);
 
@@ -961,7 +962,8 @@ void Things_FindUnknown(selection_c& list)
 
 void Things_HighlightUnknown()
 {
-	// FIXME: change edit mode if != OBJ_VERTICES
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
 
 	Things_FindUnknown(*edit.Selected);
 
@@ -1019,7 +1021,8 @@ void Things_FindInVoid(selection_c& list)
 
 void Things_HighlightInVoid()
 {
-	// FIXME: change edit mode if != OBJ_VERTICES
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
 
 	Things_FindInVoid(*edit.Selected);
 
@@ -1642,6 +1645,10 @@ check_result_e CHECK_Things(bool all_mode = false)
 
 	for (;;)
 	{
+		// TODO: check for things stuck in walls / other things
+		//       [need a new 'non-solid' flag in the game definition files]
+
+
 		Things_FindInVoid(sel);
 
 		if (sel.empty())
