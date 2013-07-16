@@ -930,7 +930,7 @@ void Vertex_RemoveUnused()
 //------------------------------------------------------------------------
 
 
-void Sectors_FindMismatchVerts(selection_c& secs, selection_c& verts)
+void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 {
 	 secs.change_type(OBJ_SECTORS);
 	verts.change_type(OBJ_VERTICES);
@@ -990,7 +990,7 @@ void Sectors_FindMismatchVerts(selection_c& secs, selection_c& verts)
 }
 
 
-void Sectors_ShowMismatchVerts(obj_type_e what)
+void Sectors_ShowUnclosed(obj_type_e what)
 {
 	if (edit.mode != what)
 		Editor_ChangeMode((what == OBJ_SECTORS) ? 's' : 'v');
@@ -998,9 +998,81 @@ void Sectors_ShowMismatchVerts(obj_type_e what)
 	selection_c other;
 
 	if (what == OBJ_SECTORS)
-		Sectors_FindMismatchVerts(*edit.Selected, other);
+		Sectors_FindUnclosed(*edit.Selected, other);
 	else
-		Sectors_FindMismatchVerts(other, *edit.Selected);
+		Sectors_FindUnclosed(other, *edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
+{
+	/*
+	   Note from RQ:
+	   This is a very simple idea, but it works!  The first test (above)
+	   checks that all Sectors are closed.  But if a closed set of LineDefs
+	   is moved out of a Sector and has all its "external" SideDefs pointing
+	   to that Sector instead of the new one, then we need a second test.
+	   That's why I check if the SideDefs facing each other are bound to
+	   the same Sector.
+
+	   Other note from RQ:
+	   Nowadays, what makes the power of a good editor is its automatic tests.
+	   So, if you are writing another Doom editor, you will probably want
+	   to do the same kind of tests in your program.  Fine, but if you use
+	   these ideas, don't forget to credit DEU...  Just a reminder... :-)
+	*/
+
+	 secs.change_type(OBJ_SECTORS);
+	lines.change_type(OBJ_LINEDEFS);
+
+	if (NumLineDefs == 0 || NumSectors == 0)
+		return;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right >= 0)
+		{
+			int s = OppositeSector(n, SIDE_RIGHT);
+
+			if (s < 0 || L->Right()->sector != s)
+			{
+				 secs.set(L->Right()->sector);
+				lines.set(n);
+			}
+		}
+
+		if (L->left >= 0)
+		{
+			int s = OppositeSector(n, SIDE_LEFT);
+
+			if (s < 0 || L->Left()->sector != s)
+			{
+				 secs.set(L->Left()->sector);
+				lines.set(n);
+			}
+		}
+	}
+}
+
+
+void Sectors_ShowMismatches(obj_type_e what)
+{
+	if (edit.mode != what)
+		Editor_ChangeMode((what == OBJ_SECTORS) ? 's' : 'l');
+
+	selection_c other;
+
+	if (what == OBJ_SECTORS)
+		Sectors_FindMismatches(*edit.Selected, other);
+	else
+		Sectors_FindMismatches(other, *edit.Selected);
 
 	GoToSelection();
 
@@ -1765,78 +1837,76 @@ public:
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		Sectors_RemoveUnused();
-
 		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_remove_sidedefs(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		SideDefs_RemoveUnused();
-
 		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_fix_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		Sectors_FixBadCeil();
-
 		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_show_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		Sectors_ShowBadCeil();
-
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_unpack(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		SideDefs_Unpack(true);
-
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_show_packed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
 		SideDefs_ShowPacked();
-
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_show_unclosed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-
-		Sectors_ShowMismatchVerts(OBJ_SECTORS);
-
+		Sectors_ShowUnclosed(OBJ_SECTORS);
 		dialog->user_action = CKR_Highlight;
 	}
 
-	static void action_show_verts(Fl_Widget *w, void *data)
+	static void action_show_un_verts(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_ShowUnclosed(OBJ_VERTICES);
+		dialog->user_action = CKR_Highlight;
+	}
 
-		Sectors_ShowMismatchVerts(OBJ_VERTICES);
+	static void action_show_mismatch(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_ShowMismatches(OBJ_SECTORS);
+		dialog->user_action = CKR_Highlight;
+	}
 
+	static void action_show_mis_lines(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_ShowMismatches(OBJ_LINEDEFS);
 		dialog->user_action = CKR_Highlight;
 	}
 
 public:
 	UI_Check_Sectors(bool all_mode) :
-		Fl_Double_Window(520, 286, "Check : Sectors"),
+		Fl_Double_Window(520, 326, "Check : Sectors"),
 		want_close(false), user_action(CKR_OK),
 		worst_severity(0)
 	{
@@ -1984,7 +2054,7 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 
 	for (;;)
 	{
-		Sectors_FindMismatchVerts(sel, other);
+		Sectors_FindUnclosed(sel, other);
 
 		if (sel.empty())
 			dialog->AddLine("No unclosed sectors");
@@ -1992,9 +2062,23 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 		{
 			sprintf(check_message, "%d unclosed sectors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 200,
+			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Sectors::action_show_unclosed,
-			                "Verts", &UI_Check_Sectors::action_show_verts);
+			                "Verts", &UI_Check_Sectors::action_show_un_verts);
+		}
+
+
+		Sectors_FindMismatches(sel, other);
+
+		if (sel.empty())
+			dialog->AddLine("No mismatched sectors");
+		else
+		{
+			sprintf(check_message, "%d mismatched sectors", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 210,
+			                "Show",  &UI_Check_Sectors::action_show_mismatch,
+			                "Lines", &UI_Check_Sectors::action_show_mis_lines);
 		}
 
 
@@ -2010,6 +2094,8 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 			                "Fix",  &UI_Check_Sectors::action_fix_ceil,
 			                "Show", &UI_Check_Sectors::action_show_ceil);
 		}
+
+		dialog->AddGap(10);
 
 
 		SideDefs_FindPacking(sel, other);
