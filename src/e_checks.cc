@@ -1644,7 +1644,7 @@ public:
 	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
 	{
-		int cx = 25;
+		int cx = 30;
 
 		if (W < 0)
 			W = w() - 40;
@@ -1944,7 +1944,7 @@ public:
 	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
 	{
-		int cx = 25;
+		int cx = 30;
 
 		if (W < 0)
 			W = w() - 40;
@@ -2245,7 +2245,7 @@ public:
 	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
 	{
-		int cx = 25;
+		int cx = 30;
 
 		if (W < 0)
 			W = w() - 40;
@@ -2517,7 +2517,7 @@ public:
 	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
 	{
-		int cx = 25;
+		int cx = 30;
 
 		if (W < 0)
 			W = w() - 40;
