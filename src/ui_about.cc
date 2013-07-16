@@ -27,7 +27,7 @@
 #define ABOUT_H  (230 + 270)
 
 
-class UI_About : public Fl_Window
+class UI_About : public UI_Escapable_Window
 {
 private:
 	static UI_About * _instance;
@@ -68,29 +68,8 @@ public:
 		_instance->show();
 	}
 
-	// FLTK virtual method for handling input events.
-	int handle(int event)
-	{
-		if (event == FL_KEYDOWN || event == FL_SHORTCUT)
-		{
-			int key = Fl::event_key();
-
-			if (key == FL_Escape)
-			{
-				callback_Close(this, this);
-				return 1;
-			}
-
-			// eat all other function keys
-			if (FL_F+1 <= key && key <= FL_F+12)
-				return 1;
-		}
-
-		return Fl_Window::handle(event);
-	}
-
 private:
-	static void callback_Close(Fl_Widget *w, void *data)
+	static void close_callback(Fl_Widget *w, void *data)
 	{
 		if (_instance)
 		{
@@ -134,11 +113,12 @@ const char *UI_About::URL = "http://awwports.sf.net/eureka";
 // Constructor
 //
 UI_About::UI_About(int W, int H, const char *label) :
-    Fl_Window(W, H, label)
+    UI_Escapable_Window(W, H, label)
 {
 	// non-resizable
 	size_range(W, H, W, H);
-	callback(callback_Close, this);
+
+	callback(close_callback, this);
 
 
 	// nice big logo image
@@ -201,7 +181,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
 	button->color(but_color, but_color);
-	button->callback(callback_Close, this);
+	button->callback(close_callback, this);
 
 
 	end();

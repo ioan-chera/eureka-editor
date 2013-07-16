@@ -531,7 +531,7 @@ static Fl_Menu_Item menu_items[] =
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
-		{ "&About Eureka",   0,  FCAL help_do_about },
+		{ "&About Eureka...",   0,  FCAL help_do_about },
 		{ 0 },
 
 	{ 0 }
