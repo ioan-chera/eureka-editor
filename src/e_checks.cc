@@ -1599,7 +1599,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex test results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -1729,9 +1729,9 @@ public:
 };
 
 
-check_result_e CHECK_Vertices(bool all_mode = false)
+check_result_e CHECK_Vertices(int min_severity = 0)
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(all_mode);
+	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0);
 
 	selection_c  sel;
 
@@ -1766,10 +1766,8 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 		}
 
 
-		int worst_severity = dialog->worst_severity;
-
-		// when checking "ALL" stuff, ignore any minor problems
-		if (all_mode && worst_severity < 2)
+		// in "ALL" mode, just continue if not too severe
+		if (dialog->worst_severity < min_severity)
 		{
 			delete dialog;
 
@@ -1899,7 +1897,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Sector check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Sector test results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -2029,9 +2027,9 @@ public:
 };
 
 
-check_result_e CHECK_Sectors(bool all_mode = false)
+check_result_e CHECK_Sectors(int min_severity = 0)
 {
-	UI_Check_Sectors *dialog = new UI_Check_Sectors(all_mode);
+	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0);
 
 	selection_c  sel, other;
 
@@ -2123,10 +2121,8 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 		}
 
 
-		int worst_severity = dialog->worst_severity;
-
-		// when checking "ALL" stuff, ignore any minor problems
-		if (all_mode && worst_severity < 2)
+		// in "ALL" mode, just continue if not too severe
+		if (dialog->worst_severity < min_severity)
 		{
 			delete dialog;
 
@@ -2200,7 +2196,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Thing check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Thing test results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -2330,9 +2326,9 @@ public:
 };
 
 
-check_result_e CHECK_Things(bool all_mode = false)
+check_result_e CHECK_Things(int min_severity = 0)
 {
-	UI_Check_Things *dialog = new UI_Check_Things(all_mode);
+	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0);
 
 	selection_c  sel;
 
@@ -2398,10 +2394,8 @@ check_result_e CHECK_Things(bool all_mode = false)
 		}
 
 
-		int worst_severity = dialog->worst_severity;
-
-		// when checking "ALL" stuff, ignore any minor problems
-		if (all_mode && worst_severity < 2)
+		// in "ALL" mode, just continue if not too severe
+		if (dialog->worst_severity < min_severity)
 		{
 			delete dialog;
 
@@ -2472,7 +2466,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Tag check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Tag test results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -2602,9 +2596,9 @@ public:
 };
 
 
-check_result_e CHECK_Tags()
+check_result_e CHECK_Tags(int min_severity = 0)
 {
-	UI_Check_Tags *dialog = new UI_Check_Tags(false);
+	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0);
 
 	selection_c  sel;
 
@@ -2637,6 +2631,13 @@ check_result_e CHECK_Tags()
 
 		check_result_e result = dialog->Run();
 
+		if (dialog->worst_severity < min_severity)
+		{
+			delete dialog;
+
+			return CKR_OK;
+		}
+
 		if (result == CKR_TookAction)
 		{
 			// repeat the tests
@@ -2653,31 +2654,45 @@ check_result_e CHECK_Tags()
 
 //------------------------------------------------------------------------
 
-void CHECK_All()
+
+void CHECK_All(bool major_stuff)
 {
 	bool no_worries = true;
 
+	int min_severity = major_stuff ? 2 : 1;
+
 	check_result_e result;
 
-	result = CHECK_Vertices(true);
+
+	result = CHECK_Vertices(min_severity);
 	if (result == CKR_Highlight) return;
 	if (result != CKR_OK) no_worries = false;
 
-	result = CHECK_Sectors(true);
+	result = CHECK_Sectors(min_severity);
 	if (result == CKR_Highlight) return;
 	if (result != CKR_OK) no_worries = false;
 
-	result = CHECK_LineDefs(true);
+	result = CHECK_LineDefs(min_severity);
 	if (result == CKR_Highlight) return;
 	if (result != CKR_OK) no_worries = false;
 
-	result = CHECK_Things(true);
+	result = CHECK_Things(min_severity);
 	if (result == CKR_Highlight) return;
 	if (result != CKR_OK) no_worries = false;
+
+	result = CHECK_Textures(min_severity);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
+
+	result = CHECK_Tags(min_severity);
+	if (result == CKR_Highlight) return;
+	if (result != CKR_OK) no_worries = false;
+
 
 	if (no_worries)
 	{
-		Notify(-1, -1, "No major problems.", NULL);
+		Notify(-1, -1, major_stuff ? "No major problems." :
+		                             "All tests were successful.", NULL);
 	}
 }
 
@@ -2689,11 +2704,18 @@ void CMD_CheckMap()
 {
 	const char *what = EXEC_Param[0];
 
-	// TODO "textures" and "tags"
-
-	if (! what[0] || y_stricmp(what, "all") == 0)
+	if (! what[0])
 	{
-		CHECK_All();
+		Beep("Check: missing keyword");
+		return;
+	}
+	else if (y_stricmp(what, "all") == 0)
+	{
+		CHECK_All(false);
+	}
+	else if (y_stricmp(what, "major") == 0)
+	{
+		CHECK_All(true);
 	}
 	else if (y_stricmp(what, "vertices") == 0)
 	{
@@ -2736,13 +2758,17 @@ void CMD_CheckMap()
 				break;
 		}
 	}
+	else if (y_stricmp(what, "textures") == 0)
+	{
+		CHECK_Textures();
+	}
 	else if (y_stricmp(what, "tags") == 0)
 	{
 		CHECK_Tags();
 	}
 	else
 	{
-		Beep("Check: unknown keyword '%s'\n", what);
+		Beep("Check: unknown keyword: %s\n", what);
 	}
 }
 

@@ -362,6 +362,11 @@ static void checks_do_all(Fl_Widget *w, void * data)
 	ExecuteCommand("Check", "all");
 }
 
+static void checks_do_major(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Check", "major");
+}
+
 static void checks_do_vertices(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Check", "vertices");
@@ -509,8 +514,7 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
 		{ "&ALL",          0, FCAL checks_do_all },
-		{ "Te&xtures", 0, FCAL checks_do_textures },
-		{ "Ta&gs", 0, FCAL checks_do_tags },
+		{ "&Major stuff",  0, FCAL checks_do_major },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -518,6 +522,11 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Sectors",      0, FCAL checks_do_sectors },
 		{ "&LineDefs",     0, FCAL checks_do_linedefs },
 		{ "&Things",       0, FCAL checks_do_things },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "Te&xtures",     0, FCAL checks_do_textures },
+		{ "Ta&gs",         0, FCAL checks_do_tags },
 
 		{ 0 },
 

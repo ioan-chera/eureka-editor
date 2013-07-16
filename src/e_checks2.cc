@@ -479,7 +479,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "LineDef check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "LineDef test results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -609,9 +609,9 @@ public:
 };
 
 
-check_result_e CHECK_LineDefs(bool all_mode)
+check_result_e CHECK_LineDefs(int min_severity)
 {
-	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(all_mode);
+	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0);
 
 	selection_c  sel, other;
 
@@ -657,6 +657,8 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			                "Show", &UI_Check_LineDefs::action_show_crossing);
 		}
 
+		dialog->AddGap(10);
+
 
 		LineDefs_FindMissingRight(sel);
 
@@ -670,11 +672,8 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
 		}
 
-
-		int worst_severity = dialog->worst_severity;
-
-		// when checking "ALL" stuff, ignore any minor problems
-		if (all_mode && worst_severity < 2)
+		// in "ALL" mode, just continue if not too severe
+		if (dialog->worst_severity < min_severity)
 		{
 			delete dialog;
 
@@ -696,6 +695,16 @@ check_result_e CHECK_LineDefs(bool all_mode)
 	}
 }
 
+
+//------------------------------------------------------------------------
+
+
+check_result_e CHECK_Textures(int min_severity)
+{
+	// FIXME
+
+	return CKR_OK;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
