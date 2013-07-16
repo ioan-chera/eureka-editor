@@ -1748,8 +1748,8 @@ check_result_e CHECK_Vertices(bool all_mode = false)
 			sprintf(check_message, "%d overlapping vertices", approx_num);
 
 			dialog->AddLine(check_message, 2, 210,
-			                "Merge", &UI_Check_Vertices::action_merge,
-			                "Show",  &UI_Check_Vertices::action_highlight);
+			                "Show",  &UI_Check_Vertices::action_highlight,
+			                "Merge", &UI_Check_Vertices::action_merge);
 		}
 
 
@@ -2074,8 +2074,8 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 			sprintf(check_message, "%d sectors with ceil < floor", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
-			                "Fix",  &UI_Check_Sectors::action_fix_ceil,
-			                "Show", &UI_Check_Sectors::action_show_ceil);
+			                "Show", &UI_Check_Sectors::action_show_ceil,
+			                "Fix",  &UI_Check_Sectors::action_fix_ceil);
 		}
 
 		dialog->AddGap(10);
@@ -2092,8 +2092,8 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 			sprintf(check_message, "%d shared sidedefs", approx_num);
 
 			dialog->AddLine(check_message, 1, 200,
-			                "Unpack", &UI_Check_Sectors::action_unpack,
-			                "Show",   &UI_Check_Sectors::action_show_packed);
+			                "Show",   &UI_Check_Sectors::action_show_packed,
+			                "Unpack", &UI_Check_Sectors::action_unpack);
 		}
 
 
