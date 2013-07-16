@@ -49,11 +49,6 @@
 static char check_message[MSG_BUF_LEN];
 
 
-static void CheckingObjects ();
-
-// TODO: REMOVE THIS
-#define Expert  true
-
 
 /*
  *  CheckLevel
@@ -100,16 +95,6 @@ void CheckLevel (int x0, int y0)
 			break;
 	}
 #endif
-}
-
-
-/*
-   display a message while the user is waiting...
-   */
-
-static void CheckingObjects ()
-{
-	//DisplayMessage (-1, -1, "Grinding...");
 }
 
 
@@ -897,7 +882,7 @@ void Vertex_MergeOverlaps()
 }
 
 
-void Vertex_HighlightOverlaps()
+void Vertex_ShowOverlaps()
 {
 	if (edit.mode != OBJ_VERTICES)
 		Editor_ChangeMode('v');
@@ -943,6 +928,85 @@ void Vertex_RemoveUnused()
 
 
 //------------------------------------------------------------------------
+
+
+void Sectors_FindMismatchVerts(selection_c& secs, selection_c& verts)
+{
+	 secs.change_type(OBJ_SECTORS);
+	verts.change_type(OBJ_VERTICES);
+
+	if (NumVertices == 0 || NumSectors == 0)
+		return;
+
+	byte *ends = new byte[NumVertices];
+	int v;
+
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		// clear the "ends" array
+		for (v = 0 ; v < NumVertices ; v++)
+			ends[v] = 0;
+
+		// for each sidedef bound to the Sector, store a "1" in the "ends"
+		// array for its starting vertex, and a "2" for its ending vertex.
+		for (int i = 0 ; i < NumLineDefs ; i++)
+		{
+			const LineDef *L = LineDefs[i];
+
+			if (! L->TouchesSector(s))
+				continue;
+
+			// ignore lines with same sector on both sides
+			if (L->left >= 0 && L->right >= 0 &&
+			    L->Left()->sector == L->Right()->sector)
+				continue;
+
+			if (L->right >= 0 && L->Right()->sector == s)
+			{
+				ends[L->start] |= 1;
+				ends[L->end]   |= 2;
+			}
+
+			if (L->left >= 0 && L->Left()->sector == s)
+			{
+				ends[L->start] |= 2;
+				ends[L->end]   |= 1;
+			}
+		}
+
+		// every entry in the "ends" array should be 0 or 3
+
+		for (v = 0 ; v < NumVertices ; v++)
+		{
+			if (ends[v] == 1 || ends[v] == 2)
+			{
+				 secs.set(s);
+				verts.set(v);
+			}
+		}
+	}
+
+	delete[] ends;
+}
+
+
+void Sectors_ShowMismatchVerts(obj_type_e what)
+{
+	if (edit.mode != what)
+		Editor_ChangeMode((what == OBJ_SECTORS) ? 's' : 'v');
+
+	selection_c other;
+
+	if (what == OBJ_SECTORS)
+		Sectors_FindMismatchVerts(*edit.Selected, other);
+	else
+		Sectors_FindMismatchVerts(other, *edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
 
 
 void Sectors_FindUnused(selection_c& sel)
@@ -1016,7 +1080,7 @@ void Sectors_FixBadCeil()
 }
 
 
-void Sectors_HighlightBadCeil()
+void Sectors_ShowBadCeil()
 {
 	if (edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
@@ -1095,7 +1159,7 @@ void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
 }
 
 
-void SideDefs_HighlightPacked()
+void SideDefs_ShowPacked()
 {
 	if (edit.mode != OBJ_LINEDEFS)
 		Editor_ChangeMode('l');
@@ -1203,7 +1267,7 @@ void Things_FindUnknown(selection_c& list)
 }
 
 
-void Things_HighlightUnknown()
+void Things_ShowUnknown()
 {
 	if (edit.mode != OBJ_THINGS)
 		Editor_ChangeMode('t');
@@ -1261,7 +1325,7 @@ void Things_FindInVoid(selection_c& list)
 }
 
 
-void Things_HighlightInVoid()
+void Things_ShowInVoid()
 {
 	if (edit.mode != OBJ_THINGS)
 		Editor_ChangeMode('t');
@@ -1454,7 +1518,7 @@ public:
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 
-		Vertex_HighlightOverlaps();
+		Vertex_ShowOverlaps();
 
 		dialog->user_action = CKR_Highlight;
 	}
@@ -1729,7 +1793,7 @@ public:
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
 
-		Sectors_HighlightBadCeil();
+		Sectors_ShowBadCeil();
 
 		dialog->user_action = CKR_Highlight;
 	}
@@ -1747,7 +1811,25 @@ public:
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
 
-		SideDefs_HighlightPacked();
+		SideDefs_ShowPacked();
+
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_unclosed(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		Sectors_ShowMismatchVerts(OBJ_SECTORS);
+
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_verts(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+
+		Sectors_ShowMismatchVerts(OBJ_VERTICES);
 
 		dialog->user_action = CKR_Highlight;
 	}
@@ -1898,10 +1980,24 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 {
 	UI_Check_Sectors *dialog = new UI_Check_Sectors(all_mode);
 
-	selection_c  sel, lines;
+	selection_c  sel, other;
 
 	for (;;)
 	{
+		Sectors_FindMismatchVerts(sel, other);
+
+		if (sel.empty())
+			dialog->AddLine("No unclosed sectors");
+		else
+		{
+			sprintf(check_message, "%d unclosed sectors", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 200,
+			                "Show",  &UI_Check_Sectors::action_show_unclosed,
+			                "Verts", &UI_Check_Sectors::action_show_verts);
+		}
+
+
 		Sectors_FindBadCeil(sel);
 
 		if (sel.empty())
@@ -1916,7 +2012,7 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 		}
 
 
-		SideDefs_FindPacking(sel, lines);
+		SideDefs_FindPacking(sel, other);
 
 		if (sel.empty())
 			dialog->AddLine("No shared sidedefs");
@@ -2023,7 +2119,7 @@ public:
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 
-		Things_HighlightUnknown();
+		Things_ShowUnknown();
 
 		dialog->user_action = CKR_Highlight;
 	}
@@ -2032,7 +2128,7 @@ public:
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 
-		Things_HighlightInVoid();
+		Things_ShowInVoid();
 
 		dialog->user_action = CKR_Highlight;
 	}
