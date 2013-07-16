@@ -49,14 +49,51 @@
 static char check_buffer[MSG_BUF_LEN];
 
 
-struct linedef_X_CMP_pred
+static int linedef_pos_cmp(int A, int B)
+{
+	const LineDef *AL = LineDefs[A];
+	const LineDef *BL = LineDefs[B];
+
+	int A_x1 = AL->Start()->x;
+	int A_y1 = AL->Start()->y;
+	int A_x2 = AL->End()->x;
+	int A_y2 = AL->End()->y;
+
+	int B_x1 = BL->Start()->x;
+	int B_y1 = BL->Start()->y;
+	int B_x2 = BL->End()->x;
+	int B_y2 = BL->End()->y;
+
+	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
+	{
+		std::swap(A_x1, A_x2);
+		std::swap(A_y1, A_y2);
+	}
+
+	if (B_x1 > B_x2 || (B_x1 == B_x2 && B_y1 > B_y2))
+	{
+		std::swap(B_x1, B_x2);
+		std::swap(B_y1, B_y2);
+	}
+
+	// the "normalized" X1 coordinates is the most significant thing in
+	// this comparison function.
+
+	if (A_x1 != B_x1) return A_x1 - B_x1;
+	if (A_y1 != B_y1) return A_y1 - B_y1;
+
+	if (A_x2 != B_x2) return A_x2 - B_x2;
+	if (A_y2 != B_y2) return A_y2 - B_y2;
+
+	return 0;  // equal : lines are overlapping
+}
+
+
+struct linedef_pos_CMP_pred
 {
 	inline bool operator() (int A, int B) const
 	{
-		const Vertex *V1 = Vertices[A];
-		const Vertex *V2 = Vertices[B];
-
-		return V1->x < V2->x;
+		return linedef_pos_cmp(A, B) < 0;
 	}
 };
 
@@ -143,6 +180,52 @@ void LineDefs_ShowMissingRight()
 }
 
 
+void LineDefs_FindOverlaps(selection_c& lines)
+{
+	// we only find directly overlapping linedefs here
+
+	lines.change_type(OBJ_LINEDEFS);
+
+	if (NumLineDefs < 2)
+		return;
+
+	int n;
+
+	// sort linedefs by their position.  overlapping lines will end up
+	// adjacent to each other after the sort.
+	std::vector<int> sorted_list(NumLineDefs, 0);
+
+	for (n = 0 ; n < NumLineDefs ; n++)
+		sorted_list[n] = n;
+
+	std::sort(sorted_list.begin(), sorted_list.end(), linedef_pos_CMP_pred());
+
+	for (n = 0 ; n < NumLineDefs - 1 ; n++)
+	{
+		int ld1 = sorted_list[n];
+		int ld2 = sorted_list[n + 1];
+
+		// only the second (or third, etc) linedef is stored
+		if (linedef_pos_cmp(ld1, ld2) == 0)
+			lines.set(ld2);
+	}
+}
+
+
+void LineDefs_ShowOverlaps()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindOverlaps(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -190,9 +273,16 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+	static void action_show_overlap(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowOverlaps();
+		dialog->user_action = CKR_Highlight;
+	}
+
 public:
 	UI_Check_LineDefs(bool all_mode) :
-		Fl_Double_Window(520, 186, "Check : LineDefs"),
+		Fl_Double_Window(520, 386, "Check : LineDefs"),
 		want_close(false), user_action(CKR_OK),
 		worst_severity(0)
 	{
@@ -354,6 +444,19 @@ check_result_e CHECK_LineDefs(bool all_mode)
 		}
 
 
+		LineDefs_FindOverlaps(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No overlapping linedefs");
+		else
+		{
+			sprintf(check_buffer, "%d overlapping linedefs", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 200,
+			                "Show", &UI_Check_LineDefs::action_show_overlap);
+		}
+
+
 		LineDefs_FindMissingRight(sel);
 
 		if (sel.empty())
@@ -363,7 +466,7 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			sprintf(check_buffer, "%d linedefs without right side", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 250,
-			                "Show",   &UI_Check_LineDefs::action_show_mis_right);
+			                "Show", &UI_Check_LineDefs::action_show_mis_right);
 		}
 
 
