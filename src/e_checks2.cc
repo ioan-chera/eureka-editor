@@ -50,55 +50,6 @@
 static char check_buffer[MSG_BUF_LEN];
 
 
-static int linedef_pos_cmp(int A, int B)
-{
-	const LineDef *AL = LineDefs[A];
-	const LineDef *BL = LineDefs[B];
-
-	int A_x1 = AL->Start()->x;
-	int A_y1 = AL->Start()->y;
-	int A_x2 = AL->End()->x;
-	int A_y2 = AL->End()->y;
-
-	int B_x1 = BL->Start()->x;
-	int B_y1 = BL->Start()->y;
-	int B_x2 = BL->End()->x;
-	int B_y2 = BL->End()->y;
-
-	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
-	{
-		std::swap(A_x1, A_x2);
-		std::swap(A_y1, A_y2);
-	}
-
-	if (B_x1 > B_x2 || (B_x1 == B_x2 && B_y1 > B_y2))
-	{
-		std::swap(B_x1, B_x2);
-		std::swap(B_y1, B_y2);
-	}
-
-	// the "normalized" X1 coordinates is the most significant thing in
-	// this comparison function.
-
-	if (A_x1 != B_x1) return A_x1 - B_x1;
-	if (A_y1 != B_y1) return A_y1 - B_y1;
-
-	if (A_x2 != B_x2) return A_x2 - B_x2;
-	if (A_y2 != B_y2) return A_y2 - B_y2;
-
-	return 0;  // equal : lines are overlapping
-}
-
-
-struct linedef_pos_CMP_pred
-{
-	inline bool operator() (int A, int B) const
-	{
-		return linedef_pos_cmp(A, B) < 0;
-	}
-};
-
-
 void LineDefs_FindZeroLen(selection_c& lines)
 {
 	lines.change_type(OBJ_LINEDEFS);
@@ -179,6 +130,73 @@ void LineDefs_ShowMissingRight()
 	edit.error_mode = true;
 	edit.RedrawMap = 1;
 }
+
+
+//------------------------------------------------------------------------
+
+
+static int linedef_pos_cmp(int A, int B)
+{
+	const LineDef *AL = LineDefs[A];
+	const LineDef *BL = LineDefs[B];
+
+	int A_x1 = AL->Start()->x;
+	int A_y1 = AL->Start()->y;
+	int A_x2 = AL->End()->x;
+	int A_y2 = AL->End()->y;
+
+	int B_x1 = BL->Start()->x;
+	int B_y1 = BL->Start()->y;
+	int B_x2 = BL->End()->x;
+	int B_y2 = BL->End()->y;
+
+	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
+	{
+		std::swap(A_x1, A_x2);
+		std::swap(A_y1, A_y2);
+	}
+
+	if (B_x1 > B_x2 || (B_x1 == B_x2 && B_y1 > B_y2))
+	{
+		std::swap(B_x1, B_x2);
+		std::swap(B_y1, B_y2);
+	}
+
+	// the "normalized" X1 coordinates is the most significant thing in
+	// this comparison function.
+
+	if (A_x1 != B_x1) return A_x1 - B_x1;
+	if (A_y1 != B_y1) return A_y1 - B_y1;
+
+	if (A_x2 != B_x2) return A_x2 - B_x2;
+	if (A_y2 != B_y2) return A_y2 - B_y2;
+
+	return 0;  // equal : lines are overlapping
+}
+
+
+struct linedef_pos_CMP_pred
+{
+	inline bool operator() (int A, int B) const
+	{
+		return linedef_pos_cmp(A, B) < 0;
+	}
+};
+
+
+struct linedef_minx_CMP_pred
+{
+	inline bool operator() (int A, int B) const
+	{
+		const LineDef *AL = LineDefs[A];
+		const LineDef *BL = LineDefs[B];
+
+		int A_x1 = MIN(AL->Start()->x, AL->End()->x);
+		int B_x1 = MIN(BL->Start()->x, BL->End()->x);
+
+		return A_x1 < B_x1;
+	}
+};
 
 
 void LineDefs_FindOverlaps(selection_c& lines)
