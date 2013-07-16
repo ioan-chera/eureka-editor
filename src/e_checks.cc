@@ -2326,19 +2326,19 @@ check_result_e CHECK_Things(bool all_mode = false)
 		else if (! (mask & 8))
 			dialog->AddLine("Player 4 start is missing", 1);
 		else
-			dialog->AddLine("Player 1..4 starts are present");
+			dialog->AddLine("Found all 4 player starts");
 
 		if (dm_num == 0)
 			dialog->AddLine("Map is missing deathmatch starts", 1);
 		else if (dm_num < DOOM_MIN_DEATHMATCH_STARTS)
 		{
-			sprintf(check_message, "Map has only %d deathmatch starts -- need at least %d", dm_num,
+			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,
 			        DOOM_MIN_DEATHMATCH_STARTS);
 			dialog->AddLine(check_message, 1);
 		}
 		else
 		{
-			sprintf(check_message, "Map has %d deathmatch starts", dm_num);
+			sprintf(check_message, "Found %d deathmatch starts -- OK", dm_num);
 			dialog->AddLine(check_message);
 		}
 
