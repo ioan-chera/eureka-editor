@@ -128,7 +128,22 @@ extern UI_MainWin * main_win;
 //------------------------------------------------------------------------
 
 
-class UI_LogViewer : public Fl_Double_Window
+class UI_Escapable_Window : public Fl_Double_Window
+{
+public:
+	UI_Escapable_Window(int W, int H, const char *L = NULL);
+	virtual ~UI_Escapable_Window();
+
+public:
+	// FLTK event handling method
+	int handle(int event);
+};
+
+
+//------------------------------------------------------------------------
+
+
+class UI_LogViewer : public UI_Escapable_Window
 {
 private:
 	Fl_Browser * browser;

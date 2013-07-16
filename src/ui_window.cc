@@ -442,6 +442,30 @@ void UI_MainWin::Delay(int steps)
 //------------------------------------------------------------------------
 
 
+UI_Escapable_Window::UI_Escapable_Window(int W, int H, const char *L) :
+	Fl_Double_Window(W, H, L)
+{ }
+
+
+UI_Escapable_Window::~UI_Escapable_Window()
+{ }
+
+
+int UI_Escapable_Window::handle(int event)
+{
+	if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
+	{
+		do_callback();
+		return 1;
+	}
+
+	return Fl_Double_Window::handle(event);
+}
+
+
+//------------------------------------------------------------------------
+
+
 // TODO: config itme
 #define MAX_LOG_LINES  600
 
@@ -450,7 +474,7 @@ UI_LogViewer * log_viewer;
 
 
 UI_LogViewer::UI_LogViewer() :
-	Fl_Double_Window(600, 400, "Eureka Log Viewer")
+	UI_Escapable_Window(600, 400, "Eureka Log Viewer")
 {
 	box(FL_NO_BOX);
 
