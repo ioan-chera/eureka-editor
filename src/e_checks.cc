@@ -1412,6 +1412,170 @@ void Things_ShowInVoid()
 
 
 //------------------------------------------------------------------------
+//  BASE CLASS
+//------------------------------------------------------------------------
+
+void UI_Check_base::close_callback(Fl_Widget *w, void *data)
+{
+	UI_Check_base *dialog = (UI_Check_base *)data;
+
+	dialog->want_close = true;
+}
+
+
+UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
+                             const char *L, const char *header_txt) :
+	UI_Escapable_Window(W, H, L),
+	want_close(false), user_action(CKR_OK),
+	worst_severity(0)
+{
+	cy = 10;
+
+	callback(close_callback, this);
+
+	int ey = h() - 66;
+
+	Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, header_txt);
+	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	title->labelfont(FL_HELVETICA_BOLD);
+	title->labelsize(FL_NORMAL_SIZE + 2);
+
+	cy = 45;
+
+	line_group = new Fl_Group(0, 0, w(), ey);
+	line_group->end();
+
+	{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
+
+	  o->box(FL_FLAT_BOX);
+	  o->color(WINDOW_BG, WINDOW_BG);
+
+	  int but_W = all_mode ? 110 : 70;
+
+	  { Fl_Button *ok_but;
+
+	    ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
+							   all_mode ? "Continue" : "OK");
+		ok_but->labelfont(1);
+		ok_but->callback(close_callback, this);
+	  }
+	  o->end();
+	}
+
+	end();
+}
+
+
+UI_Check_base::~UI_Check_base()
+{ }
+
+
+void UI_Check_base::Reset()
+{
+	want_close = false;
+	user_action = CKR_OK;
+
+	cy = 45;
+
+	line_group->clear();	
+
+	redraw();
+}
+
+
+void UI_Check_base::AddGap(int H)
+{
+	cy += H;
+}
+
+
+void UI_Check_base::AddLine(
+		const char *msg, int severity, int W,
+		 const char *button1, Fl_Callback *cb1,
+		 const char *button2, Fl_Callback *cb2,
+		 const char *button3, Fl_Callback *cb3)
+{
+	int cx = 30;
+
+	if (W < 0)
+		W = w() - 40;
+
+	Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
+	box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+	box->copy_label(msg);
+
+	if (severity == 2)
+	{
+		box->labelcolor(ERROR_MSG_COLOR);
+		box->labelfont(FL_HELVETICA_BOLD);
+	}
+	else if (severity == 1)
+	{
+		box->labelcolor(WARNING_MSG_COLOR);
+		box->labelfont(FL_HELVETICA_BOLD);
+	}
+
+	line_group->add(box);
+
+	cx += W;
+
+	if (button1)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
+		but->callback(cb1, this);
+
+		line_group->add(but);
+
+		cx += but->w() + 10;
+	}
+
+	if (button2)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
+		but->callback(cb2, this);
+
+		line_group->add(but);
+
+		cx += but->w() + 10;
+	}
+
+	if (button3)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
+		but->callback(cb3, this);
+
+		line_group->add(but);
+	}
+
+	cy = cy + 30;
+
+	if (severity > worst_severity)
+		worst_severity = severity;
+}
+
+
+check_result_e UI_Check_base::Run()
+{
+	set_modal();
+
+	show();
+
+	while (! (want_close || user_action != CKR_OK))
+		Fl::wait(0.2);
+
+	if (user_action != CKR_OK)
+		return user_action;
+
+	switch (worst_severity)
+	{
+		case 0:  return CKR_OK;
+		case 1:  return CKR_MinorProblem;
+		default: return CKR_MajorProblem;
+	}
+}
+
+
+//------------------------------------------------------------------------
 
 
 class UI_Check_Vertices : public Fl_Double_Window

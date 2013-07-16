@@ -27,6 +27,9 @@
 #ifndef __EUREKA_E_CHECKS_H__
 #define __EUREKA_E_CHECKS_H__
 
+#include "ui_window.h"
+
+
 void SideDefs_Unpack(bool confirm_it = false);
 
 void Tags_ApplyNewValue(int new_tag);
@@ -36,6 +39,8 @@ void CMD_CheckMap();
 
 void CMD_ApplyTag();
 
+
+//------------------------------------------------------------------------
 
 // the CHECK_xxx functions return the following values:
 typedef enum
@@ -47,6 +52,40 @@ typedef enum
 	CKR_TookAction         // [internal use : user took some action]
 
 } check_result_e;
+
+
+class UI_Check_base : public UI_Escapable_Window
+{
+private:
+	bool want_close;
+
+	check_result_e  user_action;
+
+	Fl_Group * line_group;
+
+	int cy;
+	int worst_severity;
+
+private:
+	static void close_callback(Fl_Widget *, void *);
+
+public:
+	UI_Check_base(int W, int H, bool all_mode, const char *L,
+	              const char *header_txt);
+	virtual ~UI_Check_base();
+
+	void Reset();
+
+	void AddGap(int H);
+
+	void AddLine(const char *msg, int severity = 0, int W = -1,
+	             const char *button1 = NULL, Fl_Callback *cb1 = NULL,
+	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
+	             const char *button3 = NULL, Fl_Callback *cb3 = NULL);
+
+	check_result_e  Run();
+};
+
 
 check_result_e CHECK_LineDefs(int min_severity = 0);
 check_result_e CHECK_Textures(int min_severity = 0);
