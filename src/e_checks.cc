@@ -1542,17 +1542,6 @@ void CMD_ApplyTag()
 
 //------------------------------------------------------------------------
 
-// the CHECK_xxx functions return the following values:
-typedef enum
-{
-	CKR_OK = 0,            // no issues at all
-	CKR_MinorProblem,      // only minor issues
-	CKR_MajorProblem,      // some major problems
-	CKR_Highlight,         // need to highlight stuff (skip further checks)
-	CKR_TookAction         // [internal use : user took some action]
-
-} check_result_e;
-
 
 class UI_Check_Vertices : public Fl_Double_Window
 {
