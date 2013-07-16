@@ -40,6 +40,7 @@ int ClosestLine_CastingHoriz(int x, int y, int *side);
 int ClosestLine_CastingVert (int x, int y, int *side);
 
 int OppositeLineDef(int ld, int ld_side, int *result_side);
+int OppositeSector(int ld, int ld_side);
 
 bool PointOutsideOfMap(int x, int y);
 

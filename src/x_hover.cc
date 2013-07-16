@@ -293,6 +293,20 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 }
 
 
+int OppositeSector(int ld, int ld_side)
+{
+	int opp_side;
+
+	int opp = OppositeLineDef(ld, ld_side, &opp_side);
+
+	// can see the void?
+	if (opp < 0)
+		return -1;
+
+	return LineDefs[opp]->WhatSector(opp_side);
+}
+
+
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
 int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2)
 {
