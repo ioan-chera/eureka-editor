@@ -21,7 +21,7 @@
 #ifndef __EUREKA_UI_FILE_H__
 #define __EUREKA_UI_FILE_H__
 
-class UI_ChooseMap : public Fl_Double_Window
+class UI_ChooseMap : public UI_Escapable_Window
 {
 private:
 	Fl_Input *map_name;
@@ -57,7 +57,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_OpenMap : public Fl_Double_Window
+class UI_OpenMap : public UI_Escapable_Window
 {
 private:
 	Fl_Round_Button *look_iwad;
@@ -109,7 +109,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_ProjectSetup : public Fl_Double_Window
+class UI_ProjectSetup : public UI_Escapable_Window
 {
 public:
 	enum

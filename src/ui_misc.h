@@ -21,7 +21,7 @@
 #ifndef __EUREKA_UI_MISC_H__
 #define __EUREKA_UI_MISC_H__
 
-class UI_MoveDialog : public Fl_Double_Window
+class UI_MoveDialog : public UI_Escapable_Window
 {
 private:
 	Fl_Int_Input *delta_x;
@@ -48,7 +48,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_ScaleDialog : public Fl_Double_Window
+class UI_ScaleDialog : public UI_Escapable_Window
 {
 private:
 	Fl_Input *scale_x;
@@ -80,7 +80,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_RotateDialog : public Fl_Double_Window
+class UI_RotateDialog : public UI_Escapable_Window
 {
 private:
 	Fl_Float_Input *angle;

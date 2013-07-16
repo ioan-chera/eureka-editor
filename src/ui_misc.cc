@@ -25,7 +25,7 @@
 
 
 UI_MoveDialog::UI_MoveDialog() :
-	Fl_Double_Window(360, 180, "Move Objects"),
+	UI_Escapable_Window(360, 180, "Move Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
@@ -103,7 +103,7 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_ScaleDialog::UI_ScaleDialog() :
-	Fl_Double_Window(360, 270, "Scale Objects"),
+	UI_Escapable_Window(360, 270, "Scale Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
@@ -254,7 +254,7 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_RotateDialog::UI_RotateDialog() :
-	Fl_Double_Window(360, 200, "Rotate Objects"),
+	UI_Escapable_Window(360, 200, "Rotate Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter # of degrees to rotate objects:");

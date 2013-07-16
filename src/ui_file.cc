@@ -53,7 +53,7 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
-	Fl_Double_Window(420, 380, "Choose Map"),
+	UI_Escapable_Window(420, 380, "Choose Map"),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -238,7 +238,7 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap() :
-	Fl_Double_Window(420, 530, "Open Map"),
+	UI_Escapable_Window(420, 530, "Open Map"),
 	action(ACT_none),
 	result_wad(NULL), new_pwad(NULL)
 {
@@ -702,7 +702,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
-	Fl_Double_Window(400, is_startup ? 412 : 372, "Manage Wads"),
+	UI_Escapable_Window(400, is_startup ? 412 : 372, "Manage Wads"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {

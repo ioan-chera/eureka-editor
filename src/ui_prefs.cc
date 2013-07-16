@@ -37,7 +37,7 @@
 static int last_active_tab = 0;
 
 
-class UI_EditKey : public Fl_Double_Window
+class UI_EditKey : public UI_Escapable_Window
 {
 private:
 	bool want_close;
@@ -128,7 +128,7 @@ private:
 
 public:
 	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
-		Fl_Double_Window(400, 236, "Edit Key Binding"),
+		UI_Escapable_Window(400, 236, "Edit Key Binding"),
 		want_close(false), cancelled(false), grab_active(false),
 		key(_key)
 	{
