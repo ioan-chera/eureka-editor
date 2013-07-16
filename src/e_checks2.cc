@@ -262,6 +262,143 @@ void LineDefs_RemoveOverlaps()
 }
 
 
+static bool CheckLinesCross(int A, int B)
+{
+	SYS_ASSERT(A != B);
+
+	const LineDef *AL = LineDefs[A];
+	const LineDef *BL = LineDefs[B];
+
+	// ignore zero-length lines
+	if (AL->isZeroLength() || BL->isZeroLength())
+		return false;
+
+	// ignore lines connected at a vertex
+	// FIXME: check for sitting on top
+	if (AL->start == BL->start || AL->start == BL->end) return false;
+	if (AL->end   == BL->start || AL->end   == BL->end) return false;
+
+	// bbox test
+	//
+	// the algorithm in LineDefs_FindCrossings() ensures that A and B
+	// already overlap on the X axis.  hence only check Y axis here.
+
+	if (MIN(AL->Start()->y, AL->End()->y) >
+	    MAX(BL->Start()->y, BL->End()->y))
+	{
+		return false;
+	}
+
+	if (MIN(BL->Start()->y, BL->End()->y) >
+	    MAX(AL->Start()->y, AL->End()->y))
+	{
+		return false;
+	}
+
+	// precise (but slower) intersection test
+
+	int ax1 = AL->Start()->x;
+	int ay1 = AL->Start()->y;
+	int ax2 = AL->End()->x;
+	int ay2 = AL->End()->y;
+
+	int bx1 = BL->Start()->x;
+	int by1 = BL->Start()->y;
+	int bx2 = BL->End()->x;
+	int by2 = BL->End()->y;
+
+
+	const double DIST = 0.6;
+
+	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
+	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
+
+	if (c < -DIST && d < -DIST) return false;
+	if (c >  DIST && d >  DIST) return false;
+
+
+	double e = PerpDist(ax1, ay1,  bx1, by1, bx2, by2);
+	double f = PerpDist(ax2, ay2,  bx1, by1, bx2, by2);
+
+	if (e < -DIST && f < -DIST) return false;
+	if (e >  DIST && f >  DIST) return false;
+
+
+	// FIXME: lines are (roughly) co-linear, check for separation
+
+
+	return true;
+}
+
+
+void LineDefs_FindCrossings(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	if (NumLineDefs < 2)
+		return;
+
+	int n;
+
+	// sort linedefs by their position.  linedefs which cross will be
+	// near each other in this list.
+	std::vector<int> sorted_list(NumLineDefs, 0);
+
+	for (n = 0 ; n < NumLineDefs ; n++)
+		sorted_list[n] = n;
+
+	std::sort(sorted_list.begin(), sorted_list.end(), linedef_minx_CMP_pred());
+
+
+	for (n = 0 ; n < NumLineDefs ; n++)
+	{
+		int n2 = sorted_list[n];
+
+		const LineDef *L1 = LineDefs[n2];
+
+		int max_x = MAX(L1->Start()->x, L1->End()->x);
+
+		for (int k = n + 1 ; k < NumLineDefs ; k++)
+		{
+			int k2 = sorted_list[k];
+
+			const LineDef *L2 = LineDefs[k2];
+
+			int min_x = MIN(L2->Start()->x, L2->End()->x);
+
+			// stop when all remaining linedefs are to the right of L1
+			if (min_x > max_x)
+				break;
+
+			// ignore direct overlapping here
+			if (linedef_pos_cmp(n2, k2) == 0)
+				continue;
+
+			if (CheckLinesCross(n2, k2))
+			{
+				// only the second (or third, etc) linedef is stored
+				lines.set(k2);
+lines.set(n2);
+			}
+		}
+	}
+}
+
+
+void LineDefs_ShowCrossings()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindCrossings(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -320,6 +457,13 @@ public:
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 		LineDefs_ShowOverlaps();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_crossing(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowCrossings();
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -498,6 +642,19 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show",   &UI_Check_LineDefs::action_show_overlap,
 			                "Remove", &UI_Check_LineDefs::action_remove_overlap);
+		}
+
+
+		LineDefs_FindCrossings(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No criss-crossing linedefs");
+		else
+		{
+			sprintf(check_buffer, "%d criss-crossing linedefs", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 220,
+			                "Show", &UI_Check_LineDefs::action_show_crossing);
 		}
 
 
