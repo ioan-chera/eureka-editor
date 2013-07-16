@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -43,7 +43,6 @@ void  DeleteObjects (selection_c * list);
 
 
 bool LineCrossesBox (int, int, int, int, int);
-int GetOppositeSector (int, bool);
 int FindFreeTag (void);
 
 void GetDragFocus(int *x, int *y, int map_x, int map_y);

@@ -23,6 +23,7 @@
 
 #include "levels.h"
 #include "w_rawdef.h"
+#include "x_hover.h"
 #include "x_loop.h"
 
 
@@ -269,7 +270,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			continue;
 
 		// determine what sector to use
-		int new_sec = GetOppositeSector(*it, box->is_front);
+		int new_sec = OppositeSector(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
 
 		if (new_sec < 0)
 			new_sec = NumSectors - 1;
