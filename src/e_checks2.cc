@@ -107,10 +107,34 @@ void LineDefs_ShowZeroLen()
 		Editor_ChangeMode('v');
 
 	selection_c sel;
-	
+
 	LineDefs_FindZeroLen(sel);
 
 	ConvertSelection(&sel, edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void LineDefs_FindMissingRight(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+		if (LineDefs[n]->right < 0)
+			lines.set(n);
+}
+
+
+void LineDefs_ShowMissingRight()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindMissingRight(*edit.Selected);
 
 	GoToSelection();
 
@@ -157,6 +181,13 @@ public:
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 		LineDefs_RemoveZeroLen();
 		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_show_mis_right(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowMissingRight();
+		dialog->user_action = CKR_Highlight;
 	}
 
 public:
@@ -320,6 +351,19 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Remove", &UI_Check_LineDefs::action_remove_zero,
 			                "Show",   &UI_Check_LineDefs::action_show_zero);
+		}
+
+
+		LineDefs_FindMissingRight(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No linedefs without a right side");
+		else
+		{
+			sprintf(check_buffer, "%d linedefs without right side", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 250,
+			                "Show",   &UI_Check_LineDefs::action_show_mis_right);
 		}
 
 
