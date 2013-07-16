@@ -402,29 +402,15 @@ void LineDefs_ShowCrossings()
 //------------------------------------------------------------------------
 
 
-class UI_Check_LineDefs : public Fl_Double_Window
+class UI_Check_LineDefs : public UI_Check_base
 {
-private:
-	bool want_close;
-
-	check_result_e user_action;
-
-	Fl_Group  *line_group;
-	Fl_Button *ok_but;
-
-	int cy;
+public:
+	UI_Check_LineDefs(bool all_mode) :
+		UI_Check_base(520, 336, all_mode, "Check : LineDefs",
+		              "LineDef test results")
+	{ }
 
 public:
-	int worst_severity;
-
-public:
-	static void close_callback(Fl_Widget *w, void *data)
-	{
-		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-
-		dialog->want_close = true;
-	}
-
 	static void action_show_zero(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
@@ -465,146 +451,6 @@ public:
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 		LineDefs_ShowCrossings();
 		dialog->user_action = CKR_Highlight;
-	}
-
-public:
-	UI_Check_LineDefs(bool all_mode) :
-		Fl_Double_Window(520, 386, "Check : LineDefs"),
-		want_close(false), user_action(CKR_OK),
-		worst_severity(0)
-	{
-		cy = 10;
-
-		callback(close_callback, this);
-
-		int ey = h() - 66;
-
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "LineDef test results");
-		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-		title->labelfont(FL_HELVETICA_BOLD);
-		title->labelsize(FL_NORMAL_SIZE + 2);
-
-		cy = 45;
-
-		line_group = new Fl_Group(0, 0, w(), ey);
-		line_group->end();
-
-		{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
-
-		  o->box(FL_FLAT_BOX);
-		  o->color(WINDOW_BG, WINDOW_BG);
-
-		  int but_W = all_mode ? 110 : 70;
-
-		  { ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
-		                           all_mode ? "Continue" : "OK");
-			ok_but->labelfont(1);
-			ok_but->callback(close_callback, this);
-		  }
-		  o->end();
-		}
-
-		end();
-	}
-
-	void Reset()
-	{
-		want_close = false;
-		user_action = CKR_OK;
-
-		cy = 45;
-
-		line_group->clear();	
-
-		redraw();
-	}
-
-	void AddLine(const char *msg, int severity = 0, int W = -1,
-	             const char *button1 = NULL, Fl_Callback *cb1 = NULL,
-	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
-	             const char *button3 = NULL, Fl_Callback *cb3 = NULL)
-	{
-		int cx = 30;
-
-		if (W < 0)
-			W = w() - 40;
-
-		Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
-		box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-		box->copy_label(msg);
-
-		if (severity == 2)
-		{
-			box->labelcolor(ERROR_MSG_COLOR);
-			box->labelfont(FL_HELVETICA_BOLD);
-		}
-		else if (severity == 1)
-		{
-			box->labelcolor(WARNING_MSG_COLOR);
-			box->labelfont(FL_HELVETICA_BOLD);
-		}
-
-		line_group->add(box);
-
-		cx += W;
-
-		if (button1)
-		{
-			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
-			but->callback(cb1, this);
-
-			line_group->add(but);
-
-			cx += but->w() + 10;
-		}
-
-		if (button2)
-		{
-			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
-			but->callback(cb2, this);
-
-			line_group->add(but);
-
-			cx += but->w() + 10;
-		}
-
-		if (button3)
-		{
-			Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
-			but->callback(cb3, this);
-
-			line_group->add(but);
-		}
-
-		cy = cy + 30;
-
-		if (severity > worst_severity)
-			worst_severity = severity;
-	}
-
-	void AddGap(int H)
-	{
-		cy += H;
-	}
-
-	check_result_e Run()
-	{
-		set_modal();
-
-		show();
-
-		while (! (want_close || user_action != CKR_OK))
-			Fl::wait(0.2);
-
-		if (user_action != CKR_OK)
-			return user_action;
-
-		switch (worst_severity)
-		{
-			case 0:  return CKR_OK;
-			case 1:  return CKR_MinorProblem;
-			default: return CKR_MajorProblem;
-		}
 	}
 };
 
@@ -673,7 +519,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 		// in "ALL" mode, just continue if not too severe
-		if (dialog->worst_severity < min_severity)
+		if (dialog->WorstSeverity() < min_severity)
 		{
 			delete dialog;
 

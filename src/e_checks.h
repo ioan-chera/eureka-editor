@@ -56,7 +56,7 @@ typedef enum
 
 class UI_Check_base : public UI_Escapable_Window
 {
-private:
+protected:
 	bool want_close;
 
 	check_result_e  user_action;
@@ -84,6 +84,8 @@ public:
 	             const char *button3 = NULL, Fl_Callback *cb3 = NULL);
 
 	check_result_e  Run();
+
+	int WorstSeverity() const { return worst_severity; }
 };
 
 
