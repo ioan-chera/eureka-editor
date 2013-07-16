@@ -30,78 +30,78 @@
 class UI_About : public Fl_Window
 {
 private:
-  static UI_About * _instance;
+	static UI_About * _instance;
 
-  static Fl_RGB_Image *about_img;
+	static Fl_RGB_Image *about_img;
 
-  UI_About(int W, int H, const char *label = NULL);
+	UI_About(int W, int H, const char *label = NULL);
 
-  virtual ~UI_About()
-  {
-    // nothing needed
-  }
+	virtual ~UI_About()
+	{
+		// nothing needed
+	}
 
-  static void LoadImage()
-  {
-    static char filename[FL_PATH_MAX];
+	static void LoadImage()
+	{
+		static char filename[FL_PATH_MAX];
 
-    snprintf(filename, sizeof(filename), "%s/about_logo.png", install_dir);
-    filename[FL_PATH_MAX-1] = 0;
+		snprintf(filename, sizeof(filename), "%s/about_logo.png", install_dir);
+		filename[FL_PATH_MAX-1] = 0;
 
-    if (FileExists(filename))
-    {
-      about_img = new Fl_PNG_Image(filename);
-    }
-  }
+		if (FileExists(filename))
+		{
+			about_img = new Fl_PNG_Image(filename);
+		}
+	}
 
 public:
-  static void Open()
-  {
-    if (_instance)  // already up?
-      return;
+	static void Open()
+	{
+		if (_instance)  // already up?
+			return;
 
-    if (! about_img)
-      LoadImage();
+		if (! about_img)
+			LoadImage();
 
-    _instance = new UI_About(ABOUT_W, ABOUT_H, "About Eureka v" EUREKA_VERSION);
+		_instance = new UI_About(ABOUT_W, ABOUT_H, "About Eureka v" EUREKA_VERSION);
 
-    _instance->show();
-  }
+		_instance->show();
+	}
 
-  // FLTK virtual method for handling input events.
-  int handle(int event)
-  {
-    if (event == FL_KEYDOWN || event == FL_SHORTCUT)
-    {
-      int key = Fl::event_key();
+	// FLTK virtual method for handling input events.
+	int handle(int event)
+	{
+		if (event == FL_KEYDOWN || event == FL_SHORTCUT)
+		{
+			int key = Fl::event_key();
 
-      if (key == FL_Escape)
-      {
-        callback_Close(this, this);
-        return 1;
-      }
+			if (key == FL_Escape)
+			{
+				callback_Close(this, this);
+				return 1;
+			}
 
-      // eat all other function keys
-      if (FL_F+1 <= key && key <= FL_F+12)
-        return 1;
-    }
+			// eat all other function keys
+			if (FL_F+1 <= key && key <= FL_F+12)
+				return 1;
+		}
 
-    return Fl_Window::handle(event);
-  }
+		return Fl_Window::handle(event);
+	}
 
 private:
-  static void callback_Close(Fl_Widget *w, void *data)
-  {
-    if (_instance)
-    {
-      _instance->default_callback(_instance, data);
-      _instance = NULL;
-    }
-  }
+	static void callback_Close(Fl_Widget *w, void *data)
+	{
+		if (_instance)
+		{
+			_instance->default_callback(_instance, data);
+			_instance = NULL;
+		}
+	}
 
-  static const char *Text1;
-  static const char *Text2;
-  static const char *URL;
+	static const char *Text1;
+	static const char *Text2;
+	static const char *URL;
 };
 
 
@@ -111,20 +111,20 @@ Fl_RGB_Image * UI_About::about_img;
 
 
 const char *UI_About::Text1 =
-  "EUREKA is a map editor for classic DOOM\n"
-  "EUREKA uses code from the Yadex editor";
+	"EUREKA is a map editor for classic DOOM\n"
+	"EUREKA uses code from the Yadex editor";
 
 
 const char *UI_About::Text2 =
-  "Copyright (C) 2001-2013 Andrew Apted        \n"
-  "Copyright (C) 1997-2003 André Majorel, et al\n"
-  "\n"
-  "This program is free software, and may be\n"
-  "distributed and modified under the terms of\n"
-  "the GNU General Public License\n"
-  "\n"
-  "There is ABSOLUTELY NO WARRANTY\n"
-  "Use at your OWN RISK";
+	"Copyright (C) 2001-2013 Andrew Apted        \n"
+	"Copyright (C) 1997-2003 André Majorel, et al\n"
+	"\n"
+	"This program is free software, and may be\n"
+	"distributed and modified under the terms of\n"
+	"the GNU General Public License\n"
+	"\n"
+	"There is ABSOLUTELY NO WARRANTY\n"
+	"Use at your OWN RISK";
 
 
 const char *UI_About::URL = "http://awwports.sf.net/eureka";
@@ -136,85 +136,83 @@ const char *UI_About::URL = "http://awwports.sf.net/eureka";
 UI_About::UI_About(int W, int H, const char *label) :
     Fl_Window(W, H, label)
 {
-  // non-resizable
-  size_range(W, H, W, H);
-  callback(callback_Close, this);
+	// non-resizable
+	size_range(W, H, W, H);
+	callback(callback_Close, this);
 
 
-  // nice big logo image
+	// nice big logo image
 
-  Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, "");
-  box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-  box->color(FL_BLACK, FL_BLACK);
+	Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, "");
+	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+	box->color(FL_BLACK, FL_BLACK);
 
-  if (about_img)
-    box->image(about_img);
-  else
-  {
-    box->box(FL_FLAT_BOX);
-    box->label("Eureka\nDoom Editor");
-    box->labelsize(40);
-    box->labelcolor(fl_rgb_color(255, 200, 100));
-  }
-
-
-  int cy = 238;
+	if (about_img)
+		box->image(about_img);
+	else
+	{
+		box->box(FL_FLAT_BOX);
+		box->label("Eureka\nDoom Editor");
+		box->labelsize(40);
+		box->labelcolor(fl_rgb_color(255, 200, 100));
+	}
 
 
-  // the very informative text
-
-  int pad = 20 + KF * 6;
-
-  box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 42, Text1);
-  box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-  box->labelfont(FL_HELVETICA_BOLD);
-
-  cy += box->h();
+	int cy = 238;
 
 
-  box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 186, Text2);
-  box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-  box->labelfont(FL_HELVETICA);
+	// the very informative text
 
-  cy += box->h();
+	int pad = 20 + KF * 6;
+
+	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 42, Text1);
+	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+	box->labelfont(FL_HELVETICA_BOLD);
+
+	cy += box->h();
+
+
+	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 186, Text2);
+	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+	box->labelfont(FL_HELVETICA);
+
+	cy += box->h();
 
 
 #if 0
-  // website address
-  UI_HyperLink *link = new UI_HyperLink(10, cy, W-20, 30, URL, URL);
-  link->align(FL_ALIGN_CENTER);
-  link->labelsize(20);
-  link->color(color());
+	// website address
+	UI_HyperLink *link = new UI_HyperLink(10, cy, W-20, 30, URL, URL);
+	link->align(FL_ALIGN_CENTER);
+	link->labelsize(20);
+	link->color(color());
 
-  cy += link->h() + 16;
+	cy += link->h() + 16;
 #endif
 
 
-  // finally add an "OK" button
+	// finally add an "OK" button
 
-  
+	int bw = 60 + KF * 10;
+	int bh = 30 + KF * 3;
 
-  int bw = 60 + KF * 10;
-  int bh = 30 + KF * 3;
+	cy += (H - cy - bh) / 2 - 8;
 
-  cy += (H - cy - bh) / 2 - 8;
+	Fl_Color but_color = fl_rgb_color(128, 128, 255);
 
-  Fl_Color but_color = fl_rgb_color(128, 128, 255);
-
-  Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
-  button->color(but_color, but_color);
-  button->callback(callback_Close, this);
+	Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
+	button->color(but_color, but_color);
+	button->callback(callback_Close, this);
 
 
-  end();
+	end();
 }
 
 
 void DLG_AboutText(void)
 {
-  UI_About::Open();
+	UI_About::Open();
 }
 
 
 //--- editor settings ---
-// vi:ts=2:sw=2:expandtab
+// vi:ts=4:sw=4:noexpandtab
