@@ -1569,27 +1569,21 @@ public:
 	static void action_merge(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
 		Vertex_MergeOverlaps();
-
 		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_highlight(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
 		Vertex_ShowOverlaps();
-
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
 		Vertex_RemoveUnused();
-
 		dialog->user_action = CKR_TookAction;
 	}
 
@@ -2157,16 +2151,6 @@ check_result_e CHECK_Sectors(bool all_mode = false)
 
 //------------------------------------------------------------------------
 
-check_result_e CHECK_LineDefs(bool all_mode = false)
-{
-	// TODO
-
-	return CKR_OK;
-}
-
-
-//------------------------------------------------------------------------
-
 class UI_Check_Things : public Fl_Double_Window
 {
 private:
@@ -2193,18 +2177,14 @@ public:
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-
 		Things_ShowUnknown();
-
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_show_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-
 		Things_ShowInVoid();
-
 		dialog->user_action = CKR_Highlight;
 	}
 

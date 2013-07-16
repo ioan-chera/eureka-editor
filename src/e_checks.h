@@ -48,6 +48,8 @@ typedef enum
 
 } check_result_e;
 
+check_result_e CHECK_LineDefs(bool all_mode = false);
+
 #endif  /* __EUREKA_E_CHECKS_H__ */
 
 //--- editor settings ---

@@ -49,7 +49,7 @@
 static char check_buffer[MSG_BUF_LEN];
 
 
-struct vertex_X_CMP_pred
+struct linedef_X_CMP_pred
 {
 	inline bool operator() (int A, int B) const
 	{
@@ -61,76 +61,56 @@ struct vertex_X_CMP_pred
 };
 
 
-void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
+void LineDefs_FindZeroLen(selection_c& lines)
 {
-	// the 'one_coord' parameter limits the selection to a single
-	// vertex coordinate.
+	lines.change_type(OBJ_LINEDEFS);
 
-	sel.change_type(OBJ_VERTICES);
+	for (int n = 0 ; n < NumLineDefs ; n++)
+		if (LineDefs[n]->isZeroLength())
+			lines.set(n);
+}
 
-	if (NumVertices < 2)
-		return;
 
-	// sort the vertices into order of the 'X' value.
-	// hence any overlapping vertices will be near each other.
+void LineDefs_RemoveZeroLen()
+{
+	selection_c sel;
 
-	std::vector<int> sorted_list(NumVertices, 0);
+	BA_Begin();
 
-	for (int i = 0 ; i < NumVertices ; i++)
-		sorted_list[i] = i;
-
-	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
-
-	bool seen_one = false;
-	int last_y = 0;
-
-#define VERT_K  Vertices[sorted_list[k]]
-#define VERT_N  Vertices[sorted_list[n]]
-
-	for (int k = 0 ; k < NumVertices ; k++)
+	for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 	{
-		for (int n = k + 1 ; n < NumVertices && VERT_N->x == VERT_K->x ; n++)
+		const LineDef *L = LineDefs[n];
+
+		if (! L->isZeroLength())
+			continue;
+
+		// merge the vertices if possible
+
+		if (L->start == L->end)
 		{
-			if (VERT_N->y == VERT_K->y)
-			{
-				if (one_coord && seen_one && VERT_K->y != last_y)
-					continue;
-
-				sel.set(sorted_list[k]);
-				sel.set(sorted_list[n]);
-
-				seen_one = true; last_y = VERT_K->y;
-			}
+			BA_Delete(OBJ_LINEDEFS, n);
+		}
+		else
+		{
+			MergeVertex(L->start, L->end, true);
+			BA_Delete(OBJ_VERTICES, L->start);
 		}
 	}
 
-#undef VERT_K
-#undef VERT_N
+	BA_End();
 }
 
 
-void Vertex_MergeOverlaps()
-{
-	for (;;)
-	{
-		selection_c sel;
-
-		Vertex_FindOverlaps(sel, true /* one_coord */);
-
-		if (sel.empty())
-			break;
-
-		Vertex_MergeList(&sel);
-	}
-}
-
-
-void Vertex_ShowOverlaps()
+void LineDefs_ShowZeroLen()
 {
 	if (edit.mode != OBJ_VERTICES)
 		Editor_ChangeMode('v');
 
-	Vertex_FindOverlaps(*edit.Selected);
+	selection_c sel;
+	
+	LineDefs_FindZeroLen(sel);
+
+	ConvertSelection(&sel, edit.Selected);
 
 	GoToSelection();
 
@@ -139,41 +119,10 @@ void Vertex_ShowOverlaps()
 }
 
 
-void Vertex_FindUnused(selection_c& sel)
-{
-	sel.change_type(OBJ_VERTICES);
-
-	if (NumVertices == 0)
-		return;
-
-	for (int i = 0 ; i < NumLineDefs ; i++)
-	{
-		sel.set(LineDefs[i]->start);
-		sel.set(LineDefs[i]->end);
-	}
-
-	sel.frob_range(0, NumVertices - 1, BOP_TOGGLE);
-}
-
-
-void Vertex_RemoveUnused()
-{
-	selection_c sel;
-
-	Vertex_FindUnused(sel);
-
-	BA_Begin();
-	DeleteObjects(&sel);
-	BA_End();
-
-//??	Status_Set("Removed %d vertices", sel.count_obj());
-}
-
-
 //------------------------------------------------------------------------
 
 
-class UI_Check_Vertices : public Fl_Double_Window
+class UI_Check_LineDefs : public Fl_Double_Window
 {
 private:
 	bool want_close;
@@ -191,41 +140,28 @@ public:
 public:
 	static void close_callback(Fl_Widget *w, void *data)
 	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 
 		dialog->want_close = true;
 	}
 
-	static void action_merge(Fl_Widget *w, void *data)
+	static void action_show_zero(Fl_Widget *w, void *data)
 	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
-		Vertex_MergeOverlaps();
-
-		dialog->user_action = CKR_TookAction;
-	}
-
-	static void action_highlight(Fl_Widget *w, void *data)
-	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
-		Vertex_ShowOverlaps();
-
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowZeroLen();
 		dialog->user_action = CKR_Highlight;
 	}
 
-	static void action_remove(Fl_Widget *w, void *data)
+	static void action_remove_zero(Fl_Widget *w, void *data)
 	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-
-		Vertex_RemoveUnused();
-
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_RemoveZeroLen();
 		dialog->user_action = CKR_TookAction;
 	}
 
 public:
-	UI_Check_Vertices(bool all_mode) :
-		Fl_Double_Window(520, 186, "Check : Vertices"),
+	UI_Check_LineDefs(bool all_mode) :
+		Fl_Double_Window(520, 186, "Check : LineDefs"),
 		want_close(false), user_action(CKR_OK),
 		worst_severity(0)
 	{
@@ -235,7 +171,7 @@ public:
 
 		int ey = h() - 66;
 
-		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "Vertex check results");
+		Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, "LineDef check results");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelfont(FL_HELVETICA_BOLD);
 		title->labelsize(FL_NORMAL_SIZE + 2);
@@ -365,40 +301,25 @@ public:
 };
 
 
-check_result_e CHECK_Vertices(bool all_mode = false)
+check_result_e CHECK_LineDefs(bool all_mode)
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(all_mode);
+	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(all_mode);
 
-	selection_c  sel;
+	selection_c  sel, other;
 
 	for (;;)
 	{
-		Vertex_FindOverlaps(sel);
+		LineDefs_FindZeroLen(sel);
 
 		if (sel.empty())
-			dialog->AddLine("No overlapping vertices");
+			dialog->AddLine("No zero-length linedefs");
 		else
 		{
-			int approx_num = sel.count_obj() / 2;
+			sprintf(check_buffer, "%d zero-length linedefs", sel.count_obj());
 
-			sprintf(check_buffer, "%d overlapping vertices", approx_num);
-
-			dialog->AddLine(check_buffer, 2, 210,
-			                "Merge", &UI_Check_Vertices::action_merge,
-			                "Show",  &UI_Check_Vertices::action_highlight);
-		}
-
-
-		Vertex_FindUnused(sel);
-
-		if (sel.empty())
-			dialog->AddLine("No unused vertices");
-		else
-		{
-			sprintf(check_buffer, "%d unused vertices", sel.count_obj());
-
-			dialog->AddLine(check_buffer, 1, 170,
-			                "Remove", &UI_Check_Vertices::action_remove);
+			dialog->AddLine(check_buffer, 2, 220,
+			                "Remove", &UI_Check_LineDefs::action_remove_zero,
+			                "Show",   &UI_Check_LineDefs::action_show_zero);
 		}
 
 

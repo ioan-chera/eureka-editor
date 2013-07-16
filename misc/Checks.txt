@@ -7,8 +7,6 @@ LineDefs
 +  linedefs which directly overlap (share a pair of vertices)
 +  linedefs which partially overlap / cross over  [ties in with unclosed logic]
 
-+  linedefs with no right side
-
 -  one-sided lines without IMPASS flag   [FIX]
 
 ?  two-sided lines without 2S flag       [FIX]
