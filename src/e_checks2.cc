@@ -781,7 +781,7 @@ void CMD_ApplyTag()
 	}
 	else
 	{
-		Beep("ApplyTag: unknown param '%s'\n", mode); 
+		Beep("ApplyTag: unknown keyword: %s\n", mode); 
 		return;
 	}
 

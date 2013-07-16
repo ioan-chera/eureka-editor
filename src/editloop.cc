@@ -389,7 +389,7 @@ void CMD_SetVar(void)
 	}
 	else   // TODO: "skills"
 	{
-		Beep("Set: unknown var '%s'", var_name);
+		Beep("Set: unknown var: %s", var_name);
 	}
 }
 
@@ -434,7 +434,7 @@ void CMD_ToggleVar(void)
 	}
 	else
 	{
-		Beep("Toggle: unknown var '%s'", var_name);
+		Beep("Toggle: unknown var: %s", var_name);
 	}
 }
 

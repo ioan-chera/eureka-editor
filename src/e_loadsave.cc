@@ -859,7 +859,7 @@ void CMD_GivenFile()
 	}
 	else
 	{
-		Beep("GivenFile: unknown mode: %s", mode);
+		Beep("GivenFile: unknown keyword: %s", mode);
 		return;
 	}
 
@@ -883,7 +883,7 @@ void CMD_FlipMap()
 
 	if (! mode[0])
 	{
-		Beep("FlipMap: missing mode");
+		Beep("FlipMap: missing keyword");
 		return;
 	}
 
@@ -941,7 +941,7 @@ void CMD_FlipMap()
 	}
 	else
 	{
-		Beep("FlipMap: unknown mode: %s", mode);
+		Beep("FlipMap: unknown keyword: %s", mode);
 		return;
 	}
 
