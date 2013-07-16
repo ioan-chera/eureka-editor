@@ -31,6 +31,7 @@
 #include "e_checks.h"
 #include "e_path.h"
 #include "e_vertex.h"
+#include "e_cutpaste.h"
 #include "editloop.h"
 #include "m_dialog.h"
 #include "m_game.h"
@@ -226,6 +227,23 @@ void LineDefs_ShowOverlaps()
 }
 
 
+void LineDefs_RemoveOverlaps()
+{
+	selection_c lines, unused_verts;
+
+	LineDefs_FindOverlaps(lines);
+
+	UnusedVertices(&lines, &unused_verts);
+
+	BA_Begin();
+
+	DeleteObjects(&lines);
+	DeleteObjects(&unused_verts);
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -271,6 +289,13 @@ public:
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 		LineDefs_ShowMissingRight();
 		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove_overlap(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_RemoveOverlaps();
+		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_show_overlap(Fl_Widget *w, void *data)
@@ -439,8 +464,8 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			sprintf(check_buffer, "%d zero-length linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
-			                "Remove", &UI_Check_LineDefs::action_remove_zero,
-			                "Show",   &UI_Check_LineDefs::action_show_zero);
+			                "Show",   &UI_Check_LineDefs::action_show_zero,
+			                "Remove", &UI_Check_LineDefs::action_remove_zero);
 		}
 
 
@@ -453,7 +478,8 @@ check_result_e CHECK_LineDefs(bool all_mode)
 			sprintf(check_buffer, "%d overlapping linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 200,
-			                "Show", &UI_Check_LineDefs::action_show_overlap);
+			                "Show",   &UI_Check_LineDefs::action_show_overlap,
+			                "Remove", &UI_Check_LineDefs::action_remove_overlap);
 		}
 
 

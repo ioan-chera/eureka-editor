@@ -360,7 +360,7 @@ void selection_c::begin(selection_iterator_c *it) const
 	if (bv)
 	{
 		// for bit vector, need to find the first one bit
-		// FIXME: this is rather hacky
+		// Note: this logic is rather hacky
 		it->pos = -1;
 
 		++ (*it);
@@ -392,7 +392,7 @@ selection_iterator_c& selection_iterator_c::operator++ ()
 
 	if (sel->bv)
 	{
-		// FIXME: OPTIMISE THIS
+		// this could be optimised....
 		while (pos < sel->bv->size() && ! sel->bv->get(pos))
 			pos++;
 	}

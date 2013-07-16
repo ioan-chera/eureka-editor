@@ -154,6 +154,9 @@ void DeleteObjects(selection_c *list)
 	// in the selection.  Our selection iterator cannot give us
 	// what we need, hence put them into a vector for sorting.
 
+	if (list->empty())
+		return;
+
 	std::vector<int> objnums;
 
 	selection_iterator_c it;
