@@ -451,7 +451,7 @@ static void Editor_ClearMeta()
 }
 
 
-void CMD_AwaitMeta(void)
+void CMD_MetaKey(void)
 {
 	if (edit.await_meta)
 	{
@@ -460,7 +460,7 @@ void CMD_AwaitMeta(void)
 	else
 	{
 		edit.await_meta = true;
-		Status_Set("META-");
+		Status_Set("META...");
 	}
 }
 
@@ -1236,8 +1236,8 @@ void Editor_RegisterCommands()
 	M_RegisterCommand("Set",    &CMD_SetVar);
 	M_RegisterCommand("Toggle", &CMD_ToggleVar);
 
-	M_RegisterCommand("Check",     &CMD_CheckMap);
-	M_RegisterCommand("AwaitMeta", &CMD_AwaitMeta);
+	M_RegisterCommand("Check",   &CMD_CheckMap);
+	M_RegisterCommand("MetaKey", &CMD_MetaKey);
 
 	M_RegisterCommand("GivenFile", &CMD_GivenFile);
 	M_RegisterCommand("FlipMap",   &CMD_FlipMap);
