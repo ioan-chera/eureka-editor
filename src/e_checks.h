@@ -50,6 +50,7 @@ typedef enum
 
 check_result_e CHECK_LineDefs(int min_severity = 0);
 check_result_e CHECK_Textures(int min_severity = 0);
+check_result_e CHECK_Tags    (int min_severity = 0);
 
 #endif  /* __EUREKA_E_CHECKS_H__ */
 
