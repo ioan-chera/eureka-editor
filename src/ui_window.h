@@ -148,16 +148,24 @@ class UI_LogViewer : public UI_Escapable_Window
 private:
 	Fl_Multi_Browser * browser;
 
+	Fl_Button * copy_but;
+
 public:
 	UI_LogViewer();
 	virtual ~UI_LogViewer();
 
 	void Add(const char *line);
 
+	void Deselect();
+
 private:
-	static void    ok_callback(Fl_Widget *, void *);
-	static void clear_callback(Fl_Widget *, void *);
-	static void  save_callback(Fl_Widget *, void *);
+	int CountSelectedLines() const;
+
+	static void     ok_callback(Fl_Widget *, void *);
+	static void  clear_callback(Fl_Widget *, void *);
+	static void   save_callback(Fl_Widget *, void *);
+	static void select_callback(Fl_Widget *, void *);
+	static void   copy_callback(Fl_Widget *, void *);
 };
 
 

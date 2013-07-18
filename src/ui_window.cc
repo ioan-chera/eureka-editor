@@ -485,6 +485,7 @@ UI_LogViewer::UI_LogViewer() :
 
 	browser = new Fl_Multi_Browser(0, 0, w(), ey);
 	browser->textsize(16);
+	browser->callback(select_callback, this);
 
 	resizable(browser);
 
@@ -493,7 +494,7 @@ UI_LogViewer::UI_LogViewer() :
 		o->box(FL_FLAT_BOX);
 		o->color(fl_gray_ramp(4));
 		
-		int bx = w() - 95;
+		int bx  = w() - 95;
 		int bx2 = bx;
 		{
 			Fl_Button * but = new Fl_Button(bx, ey + 15, 65, 35, "OK");
@@ -509,21 +510,21 @@ UI_LogViewer::UI_LogViewer() :
 
 		bx += 105;
 		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Copy");
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
 			but->callback(clear_callback, this);
 		}
 
 		bx += 105;
 		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
-			but->callback(clear_callback, this);
+			copy_but = new Fl_Button(bx, ey + 15, 80, 35, "Copy");
+			copy_but->callback(copy_callback, this);
+			copy_but->deactivate();
 		}
 
 		bx += 80;
 
 		Fl_Group *resize_box = new Fl_Group(bx + 10, ey + 2, bx2 - bx - 20, h() - ey - 4);
-		resize_box->box(FL_FLAT_BOX);
-		resize_box->color(FL_BLUE, FL_BLUE);
+		resize_box->box(FL_NO_BOX);
 
 		o->resizable(resize_box);
 
@@ -536,6 +537,26 @@ UI_LogViewer::UI_LogViewer() :
 
 UI_LogViewer::~UI_LogViewer()
 { }
+
+
+void UI_LogViewer::Deselect()
+{
+	browser->deselect();
+
+	copy_but->deactivate();
+}
+
+
+int UI_LogViewer::CountSelectedLines() const
+{
+	int count = 0;
+
+	for (int i = 1 ; i <= browser->size() ; i++)
+		if (browser->selected(i))
+			count++;
+
+	return count;
+}
 
 
 void UI_LogViewer::Add(const char *line)
@@ -570,8 +591,29 @@ void UI_LogViewer::clear_callback(Fl_Widget *w, void *data)
 	UI_LogViewer *that = (UI_LogViewer *)data;
 
 	that->browser->clear();
+	that->copy_but->deactivate();
 
 	that->Add("");
+}
+
+
+void UI_LogViewer::select_callback(Fl_Widget *w, void *data)
+{
+	UI_LogViewer *that = (UI_LogViewer *)data;
+
+	// require 2 or more lines to activate Copy button
+	if (that->CountSelectedLines() >= 2)
+		that->copy_but->activate();
+	else
+		that->copy_but->deactivate();
+}
+
+
+void UI_LogViewer::copy_callback(Fl_Widget *w, void *data)
+{
+	UI_LogViewer *that = (UI_LogViewer *)data;
+
+	// FIXME
 }
 
 
@@ -588,10 +630,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	switch (chooser.show())
 	{
 		case -1:
-///??		LogPrintf("Log Viewer: error choosing file:\n");
-///??		LogPrintf("   %s\n", chooser.errmsg());
-
-			Notify(-1, -1, "Unable to save the file:",
+			Notify(-1, -1, "Unable to save the log file:\n",
 			       chooser.errmsg());
 			return;
 
@@ -605,13 +644,13 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 
 
 	// add an extension if missing
-	char filename[FL_PATH_MAX];
+	static char filename[FL_PATH_MAX];
 
 	strcpy(filename, chooser.filename());
 
 	if (! HasExtension(filename))
 		strcat(filename, ".txt");
-	
+
 
 	FILE *fp = fopen(filename, "w");
 
