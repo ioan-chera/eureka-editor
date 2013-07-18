@@ -495,24 +495,23 @@ UI_LogViewer::UI_LogViewer() :
 		{
 			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "OK");
 			but->labelfont(1);
-//!!!		but->callback(close_callback, this);
+			but->callback(ok_callback, this);
 		}
 
 		bx = bx - 110;
 		{
 			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
-//!!!		but->callback(close_callback, this);
+			but->callback(clear_callback, this);
 		}
 
 		bx = bx - 110;
 		{
 			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Save...");
-//!!!		but->callback(close_callback, this);
+			but->callback(save_callback, this);
 		}
 
 		Fl_Group *resize_box = new Fl_Group(4, ey + 2, 180, h() - ey - 4);
-		resize_box->box(FL_FLAT_BOX);
-		resize_box->color(FL_RED, FL_RED);
+		resize_box->box(FL_NO_BOX);
 
 		o->resizable(resize_box);
 
@@ -543,6 +542,32 @@ void LogViewer_AddLine(const char *str)
 {
 	if (log_viewer)
 		log_viewer->Add(str);
+}
+
+
+void UI_LogViewer::ok_callback(Fl_Widget *w, void *data)
+{
+	UI_LogViewer *that = (UI_LogViewer *)data;
+
+	that->do_callback();
+}
+
+
+void UI_LogViewer::clear_callback(Fl_Widget *w, void *data)
+{
+	UI_LogViewer *that = (UI_LogViewer *)data;
+
+	that->browser->clear();
+
+	that->Add("");
+}
+
+
+void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
+{
+	UI_LogViewer *that = (UI_LogViewer *)data;
+
+	// FIXME: save_callback
 }
 
 

@@ -153,6 +153,11 @@ public:
 	virtual ~UI_LogViewer();
 
 	void Add(const char *line);
+
+private:
+	static void    ok_callback(Fl_Widget *, void *);
+	static void clear_callback(Fl_Widget *, void *);
+	static void  save_callback(Fl_Widget *, void *);
 };
 
 
