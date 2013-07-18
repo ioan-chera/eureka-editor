@@ -132,6 +132,54 @@ void LineDefs_ShowMissingRight()
 }
 
 
+void LineDefs_FindLackImpass(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
+			lines.set(n);
+	}
+}
+
+
+void LineDefs_ShowLackImpass()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindLackImpass(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void LineDefs_FixLackImpass()
+{
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
+		{
+			int new_flags = L->flags | MLF_Blocking;
+
+			BA_ChangeLD(n, LineDef::F_FLAGS, new_flags);
+		}
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -406,7 +454,7 @@ class UI_Check_LineDefs : public UI_Check_base
 {
 public:
 	UI_Check_LineDefs(bool all_mode) :
-		UI_Check_base(520, 336, all_mode, "Check : LineDefs",
+		UI_Check_base(530, 336, all_mode, "Check : LineDefs",
 		              "LineDef test results")
 	{ }
 
@@ -431,6 +479,22 @@ public:
 		LineDefs_ShowMissingRight();
 		dialog->user_action = CKR_Highlight;
 	}
+
+
+	static void action_show_lack_impass(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowLackImpass();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_lack_impass(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_FixLackImpass();
+		dialog->user_action = CKR_TookAction;
+	}
+
 
 	static void action_remove_overlap(Fl_Widget *w, void *data)
 	{
@@ -517,6 +581,21 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine(check_buffer, 2, 250,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
 		}
+
+
+		LineDefs_FindLackImpass(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No non-blocking one-sided linedefs");
+		else
+		{
+			sprintf(check_buffer, "%d non-blocking one-sided linedefs", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 300,
+			                "Show", &UI_Check_LineDefs::action_show_lack_impass,
+			                "Fix",  &UI_Check_LineDefs::action_fix_lack_impass);
+		}
+
 
 		// in "ALL" mode, just continue if not too severe
 		if (dialog->WorstSeverity() < min_severity)
