@@ -232,7 +232,7 @@ typedef struct
 	float best_dist;
 
 public:
-	void Process(int n)
+	void ProcessLine(int n)
 	{
 		if (ld == n)  // ignore input line
 			return;
@@ -351,6 +351,9 @@ public:
 		int x1 = MIN(L->Start()->x, L->End()->x);
 		int x2 = MAX(L->Start()->x, L->End()->x);
 
+		// can ignore purely vertical lines
+		if (x1 == x2) return;
+
 		AddLine_X(ld, x1, x2);
 	}
 
@@ -382,13 +385,16 @@ public:
 		int y1 = MIN(L->Start()->y, L->End()->y);
 		int y2 = MAX(L->Start()->y, L->End()->y);
 
+		// can ignore purely horizonal lines
+		if (y1 == y2) return;
+
 		AddLine_Y(ld, y1, y2);
 	}
 
 	void Process(opp_test_state_t& test, float coord)
 	{
 		for (unsigned int k = 0 ; k < lines.size() ; k++)
-			test.Process(lines[k]);
+			test.ProcessLine(lines[k]);
 
 		if (! lo_child)
 			return;
@@ -430,8 +436,6 @@ void FastOpposite_Begin()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		// TODO: skip vertical lines in horiz tree ??  (and vice versa)
-
 		fastopp_X_tree->AddLine_X(n);
 		fastopp_Y_tree->AddLine_Y(n);
 	}
@@ -484,7 +488,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 		// normal way : test all linedefs
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
-			test.Process(n);
+			test.ProcessLine(n);
 	}
 
 	return test.best_match;
