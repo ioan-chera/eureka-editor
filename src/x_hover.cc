@@ -232,7 +232,7 @@ typedef struct
 	float best_dist;
 
 public:
-	void TestLine(int n)
+	void Process(int n)
 	{
 		int nx1 = LineDefs[n]->Start()->x;
 		int ny1 = LineDefs[n]->Start()->y;
@@ -382,6 +382,26 @@ public:
 		AddLine_Y(ld, y1, y2);
 	}
 
+	void Process(opp_test_state_t& test, float coord)
+	{
+		for (unsigned int k = 0 ; k < lines.size() ; k++)
+			test.Process(lines[k]);
+
+		if (! lo_child)
+			return;
+
+		// the AddLine() methods ensure that lines are not added
+		// into a child bucket unless the end points are completely
+		// inside it -- and one unit away from the extremes.
+		//
+		// hence we never need to recurse down BOTH sides here.
+
+		if (coord < mid)
+			lo_child->Process(test, coord);
+		else
+			hi_child->Process(test, coord);
+	}
+
 private:
 	void Subdivide()
 	{
@@ -449,7 +469,12 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 
 	if (fastopp_X_tree)
 	{
-		// FIXME
+		// fast way : use the binary tree
+
+		if (abs(test.dy) >= abs(test.dx))  // casting a horizontal ray
+			fastopp_Y_tree->Process(test, test.y);
+		else
+			fastopp_X_tree->Process(test, test.x);
 	}
 	else
 	{
@@ -457,7 +482,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 			if (ld != n)  // ignore input line
-				test.TestLine(n);
+				test.Process(n);
 	}
 
 	return test.best_match;
