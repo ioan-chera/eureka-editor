@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -212,8 +212,84 @@ bool PointOutsideOfMap(int x, int y)
 
 //------------------------------------------------------------------------
 
-
 #define FASTOPP_DIST  320
+
+
+typedef struct
+{
+	int ld;
+	int ld_side;
+
+	int * result_side;
+
+	int dx;
+	int dy;
+
+	float x;
+	float y;
+
+	int   best_match;
+	float best_dist;
+
+public:
+	void TestLine(int n)
+	{
+		int nx1 = LineDefs[n]->Start()->x;
+		int ny1 = LineDefs[n]->Start()->y;
+		int nx2 = LineDefs[n]->End()->x;
+		int ny2 = LineDefs[n]->End()->y;
+
+		if (abs(dy) >= abs(dx))  // casting a horizontal ray
+		{
+			if (MIN(ny1, ny2) >= y + 1 || MAX(ny1, ny2) <= y)
+				return;
+
+			float dist = nx1 - (x + 0.5) + (nx2 - nx1) * (y + 0.5 - ny1) / (float)(ny2 - ny1);
+
+			if ( (dy < 0) == (ld_side > 0) )
+				dist = -dist;
+
+			if (dist > 0.2 && dist < best_dist)
+			{
+				best_match = n;
+				best_dist  = dist;
+
+				if (result_side)
+				{
+					if ( (dy > 0) != (ny2 > ny1) )
+						*result_side = ld_side;
+					else
+						*result_side = -ld_side;
+				}
+			}
+		}
+		else  // casting a vertical ray
+		{
+			if (MIN(nx1, nx2) >= x + 1 || MAX(nx1, nx2) <= x)
+				return;
+
+			float dist = ny1 - (y + 0.5) + (ny2 - ny1) * (x + 0.5 - nx1) / (float)(nx2 - nx1);
+
+			if ( (dx > 0) == (ld_side > 0) )
+				dist = -dist;
+
+			if (dist > 0.2 && dist < best_dist)
+			{
+				best_match = n;
+				best_dist  = dist;
+
+				if (result_side)
+				{
+					if ( (dx > 0) != (nx2 > nx1) )
+						*result_side = ld_side;
+					else
+						*result_side = -ld_side;
+				}
+			}
+		}
+	}
+
+} opp_test_state_t;
 
 
 class fastopp_node_c
@@ -340,94 +416,45 @@ void FastOpposite_Finish()
 }
 
 
-static int Fast_OppositeLineDef(int ld, int ld_side, int *result_side)
-{
-}
-
-
 int OppositeLineDef(int ld, int ld_side, int *result_side)
 {
 	// ld_side is -1 for left, +1 for right.
 	// result_side uses the same values (never 0).
 
-	if (fastopp_X_tree)
-		return Fast_OppositeLineDef(ld, ld_side, result_side);
+	opp_test_state_t  test;
+
+	test.ld = ld;
+	test.ld_side = ld_side;
+	test.result_side = result_side;
 
 	const LineDef * L = LineDefs[ld];
 
-	int dx = L->End()->x - L->Start()->x;
-	int dy = L->End()->y - L->Start()->y;
+	test.dx = L->End()->x - L->Start()->x;
+	test.dy = L->End()->y - L->Start()->y;
 
-	if (dx == 0 && dy == 0)
+	if (test.dx == 0 && test.dy == 0)
 		return -1;
 
-	float x = L->Start()->x + dx / 2.0;
-	float y = L->Start()->y + dy / 2.0;
+	test.x = L->Start()->x + test.dx / 2.0;
+	test.y = L->Start()->y + test.dy / 2.0;
 
-	int   best_match = -1;
-	float best_dist  = 9e9;
+	test.best_match = -1;
+	test.best_dist  = 9e9;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	if (fastopp_X_tree)
 	{
-		if (ld == n)  // ignore input line
-			continue;
+		// FIXME
+	}
+	else
+	{
+		// normal way : test all linedefs
 
-		int nx1 = LineDefs[n]->Start()->x;
-		int ny1 = LineDefs[n]->Start()->y;
-		int nx2 = LineDefs[n]->End()->x;
-		int ny2 = LineDefs[n]->End()->y;
-
-		if (abs(dy) >= abs(dx))  // casting a horizontal ray
-		{
-			if (MIN(ny1, ny2) >= y + 1 || MAX(ny1, ny2) <= y)
-				continue;
-
-			float dist = nx1 - (x + 0.5) + (nx2 - nx1) * (y + 0.5 - ny1) / (float)(ny2 - ny1);
-
-			if ( (dy < 0) == (ld_side > 0) )
-				dist = -dist;
-
-			if (dist > 0.2 && dist < best_dist)
-			{
-				best_match = n;
-				best_dist  = dist;
-
-				if (result_side)
-				{
-					if ( (dy > 0) != (ny2 > ny1) )
-						*result_side = ld_side;
-					else
-						*result_side = -ld_side;
-				}
-			}
-		}
-		else  // casting a vertical ray
-		{
-			if (MIN(nx1, nx2) >= x + 1 || MAX(nx1, nx2) <= x)
-				continue;
-
-			float dist = ny1 - (y + 0.5) + (ny2 - ny1) * (x + 0.5 - nx1) / (float)(nx2 - nx1);
-
-			if ( (dx > 0) == (ld_side > 0) )
-				dist = -dist;
-
-			if (dist > 0.2 && dist < best_dist)
-			{
-				best_match = n;
-				best_dist  = dist;
-
-				if (result_side)
-				{
-					if ( (dx > 0) != (nx2 > nx1) )
-						*result_side = ld_side;
-					else
-						*result_side = -ld_side;
-				}
-			}
-		}
+		for (int n = 0 ; n < NumLineDefs ; n++)
+			if (ld != n)  // ignore input line
+				test.TestLine(n);
 	}
 
-	return best_match;
+	return test.best_match;
 }
 
 
