@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ui_window.h"
 #include "w_wad.h"
+#include "m_dialog.h"  // Notify()
 
 #ifndef WIN32
 #include <unistd.h>
@@ -474,15 +475,16 @@ UI_LogViewer * log_viewer;
 
 
 UI_LogViewer::UI_LogViewer() :
-	UI_Escapable_Window(550, 400, "Eureka Log Viewer")
+	UI_Escapable_Window(580, 400, "Eureka Log Viewer")
 {
 	box(FL_NO_BOX);
 
-	size_range(385, 200);
+	size_range(480, 200);
 
 	int ey = h() - 65;
 
-	browser = new Fl_Browser(0, 0, w(), ey);
+	browser = new Fl_Multi_Browser(0, 0, w(), ey);
+	browser->textsize(16);
 
 	resizable(browser);
 
@@ -491,27 +493,37 @@ UI_LogViewer::UI_LogViewer() :
 		o->box(FL_FLAT_BOX);
 		o->color(fl_gray_ramp(4));
 		
-		int bx = w() - 110;
+		int bx = w() - 95;
+		int bx2 = bx;
 		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "OK");
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 65, 35, "OK");
 			but->labelfont(1);
 			but->callback(ok_callback, this);
 		}
 
-		bx = bx - 110;
-		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
-			but->callback(clear_callback, this);
-		}
-
-		bx = bx - 110;
+		bx = 30;
 		{
 			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Save...");
 			but->callback(save_callback, this);
 		}
 
-		Fl_Group *resize_box = new Fl_Group(4, ey + 2, 180, h() - ey - 4);
-		resize_box->box(FL_NO_BOX);
+		bx += 105;
+		{
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Copy");
+			but->callback(clear_callback, this);
+		}
+
+		bx += 105;
+		{
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
+			but->callback(clear_callback, this);
+		}
+
+		bx += 80;
+
+		Fl_Group *resize_box = new Fl_Group(bx + 10, ey + 2, bx2 - bx - 20, h() - ey - 4);
+		resize_box->box(FL_FLAT_BOX);
+		resize_box->color(FL_BLUE, FL_BLUE);
 
 		o->resizable(resize_box);
 
@@ -567,7 +579,53 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 {
 	UI_LogViewer *that = (UI_LogViewer *)data;
 
-	// FIXME: save_callback
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to save to");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	chooser.filter("Text files\t*.txt");
+
+	switch (chooser.show())
+	{
+		case -1:
+///??		LogPrintf("Log Viewer: error choosing file:\n");
+///??		LogPrintf("   %s\n", chooser.errmsg());
+
+			Notify(-1, -1, "Unable to save the file:",
+			       chooser.errmsg());
+			return;
+
+		case 1:
+			// cancelled
+			return;
+
+		default:
+			break;  // OK
+	}
+
+
+	// add an extension if missing
+	char filename[FL_PATH_MAX];
+
+	strcpy(filename, chooser.filename());
+
+	if (! HasExtension(filename))
+		strcat(filename, ".txt");
+	
+
+	FILE *fp = fopen(filename, "w");
+
+	if (! fp)
+	{
+		sprintf(filename, "%s", strerror(errno));
+
+		Notify(-1, -1, "Unable to save the log file:\n", filename);
+		return;
+	}
+
+//!!!!	LogSaveTo(fp);
+
+	fclose(fp);
 }
 
 

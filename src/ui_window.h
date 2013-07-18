@@ -146,7 +146,7 @@ public:
 class UI_LogViewer : public UI_Escapable_Window
 {
 private:
-	Fl_Browser * browser;
+	Fl_Multi_Browser * browser;
 
 public:
 	UI_LogViewer();
