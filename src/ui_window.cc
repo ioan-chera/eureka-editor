@@ -662,8 +662,6 @@ void UI_LogViewer::copy_callback(Fl_Widget *w, void *data)
 
 void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 {
-	UI_LogViewer *that = (UI_LogViewer *)data;
-
 	Fl_Native_File_Chooser chooser;
 
 	chooser.title("Pick file to save to");
@@ -705,7 +703,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-//!!!!	LogSaveTo(fp);
+	LogSaveTo(fp);
 
 	fclose(fp);
 }

@@ -30,6 +30,8 @@ void LogOpenFile(const char *filename);
 void LogOpenWindow(void);
 void LogClose(void);
 
+void LogSaveTo(FILE *dest_fp);
+
 void LogPrintf(const char *str, ...);
 
 void DebugPrintf(const char *str, ...);

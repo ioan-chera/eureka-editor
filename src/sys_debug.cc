@@ -39,7 +39,7 @@ extern void LogViewer_AddLine(const char *str);
 
 void LogOpenFile(const char *filename)
 {
-	log_fp = fopen(filename, "w");
+	log_fp = fopen(filename, "w+");
 
 	if (! log_fp)
 		FatalError("Cannot open log file: %s\n", filename);
@@ -147,6 +147,37 @@ void DebugPrintf(const char *str, ...)
 		}
 	}
 }
+
+
+void LogSaveTo(FILE *dest_fp)
+{
+	byte buffer[256];
+
+	if (! log_fp)
+	{
+		fprintf(dest_fp, "No logs.\n");
+		return;
+	}
+
+	// copy the log file
+
+	rewind(log_fp);
+
+	while (true)
+	{
+		size_t rlen = fread(buffer, 1, sizeof(buffer), log_fp);
+
+		if (rlen <= 0)
+			break;
+
+		fwrite(buffer, 1, rlen, dest_fp);
+	}
+
+	// restore write position for the log file
+	
+	fseek(log_fp, 0L, SEEK_END);
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
