@@ -180,6 +180,56 @@ void LineDefs_FixLackImpass()
 }
 
 
+void LineDefs_FindBad2SFlag(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->OneSided() && (L->flags & MLF_TwoSided))
+			lines.set(n);
+
+		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
+			lines.set(n);
+	}
+}
+
+
+void LineDefs_ShowBad2SFlag()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindBad2SFlag(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void LineDefs_FixBad2SFlag()
+{
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->OneSided() && (L->flags & MLF_TwoSided))
+			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
+
+		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
+			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -496,6 +546,21 @@ public:
 	}
 
 
+	static void action_show_bad_2s_flag(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowBad2SFlag();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_bad_2s_flag(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_FixBad2SFlag();
+		dialog->user_action = CKR_TookAction;
+	}
+
+
 	static void action_remove_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
@@ -594,6 +659,20 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_lack_impass,
 			                "Fix",  &UI_Check_LineDefs::action_fix_lack_impass);
+		}
+
+
+		LineDefs_FindBad2SFlag(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No linedefs with wrong 2S flag");
+		else
+		{
+			sprintf(check_buffer, "%d linedefs with wrong 2S flag", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 300,
+			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
+			                "Fix",  &UI_Check_LineDefs::action_fix_bad_2s_flag);
 		}
 
 
