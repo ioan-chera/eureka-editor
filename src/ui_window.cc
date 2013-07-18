@@ -466,9 +466,7 @@ int UI_Escapable_Window::handle(int event)
 
 //------------------------------------------------------------------------
 
-
-// TODO: config item
-#define MAX_LOG_LINES  600
+#define MAX_LOG_LINES  1000
 
 
 UI_LogViewer * log_viewer;
@@ -494,10 +492,10 @@ UI_LogViewer::UI_LogViewer() :
 		o->box(FL_FLAT_BOX);
 		o->color(fl_gray_ramp(4));
 		
-		int bx  = w() - 95;
+		int bx  = w() - 110;
 		int bx2 = bx;
 		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 65, 35, "OK");
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Close");
 			but->labelfont(1);
 			but->callback(ok_callback, this);
 		}
@@ -518,6 +516,7 @@ UI_LogViewer::UI_LogViewer() :
 		{
 			copy_but = new Fl_Button(bx, ey + 15, 80, 35, "Copy");
 			copy_but->callback(copy_callback, this);
+			copy_but->shortcut(FL_CTRL + 'c');
 			copy_but->deactivate();
 		}
 
@@ -556,6 +555,43 @@ int UI_LogViewer::CountSelectedLines() const
 			count++;
 
 	return count;
+}
+
+
+char * UI_LogViewer::GetSelectedText() const
+{
+	char *buf = StringDup("");
+
+	for (int i = 1 ; i <= browser->size() ; i++)
+	{
+		if (! browser->selected(i))
+			continue;
+
+		const char *line_text = browser->text(i);
+		if (! line_text)
+			continue;
+
+		// append current line onto previous ones
+
+		int new_len = strlen(buf) + strlen(line_text);
+
+		char *new_buf = StringNew(new_len + 1 /* newline */ );
+
+		strcpy(new_buf, buf);
+		strcat(new_buf, line_text);
+
+		if (new_len > 0 && new_buf[new_len - 1] != '\n')
+		{
+			new_buf[new_len++] = '\n';
+			new_buf[new_len]   = 0;
+		}
+
+		StringFree(buf);
+
+		buf = new_buf;
+	}
+
+	return buf;
 }
 
 
@@ -613,7 +649,14 @@ void UI_LogViewer::copy_callback(Fl_Widget *w, void *data)
 {
 	UI_LogViewer *that = (UI_LogViewer *)data;
 
-	// FIXME
+	const char *text = that->GetSelectedText();
+
+	if (text[0])
+	{
+		Fl::copy(text, (int)strlen(text), 1);
+	}
+
+	StringFree(text);
 }
 
 
