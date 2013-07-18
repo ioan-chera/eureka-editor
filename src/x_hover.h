@@ -42,6 +42,9 @@ int ClosestLine_CastingVert (int x, int y, int *side);
 int OppositeLineDef(int ld, int ld_side, int *result_side);
 int OppositeSector(int ld, int ld_side);
 
+void FastOpposite_Begin();
+void FastOpposite_Finish();
+
 bool PointOutsideOfMap(int x, int y);
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line

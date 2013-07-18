@@ -210,10 +210,148 @@ bool PointOutsideOfMap(int x, int y)
 }
 
 
+//------------------------------------------------------------------------
+
+
+#define FASTOPP_DIST  320
+
+
+class fastopp_node_c
+{
+public:
+	int lo, hi;   // coordinate range
+	int mid;
+
+	fastopp_node_c * lo_child;
+	fastopp_node_c * hi_child;
+
+	std::vector< LineDef * > lines;
+
+public:
+	fastopp_node_c(int _low, int _high) :
+		lo(_low), hi(_high),
+		lo_child(NULL), hi_child(NULL),
+		lines()
+	{
+		mid = (lo + hi) / 2;
+
+		Subdivide();
+	}
+
+	~fastopp_node_c()
+	{
+		delete lo_child;
+		delete hi_child;
+	}
+
+	/* horizontal tree */
+
+	void AddLine_X(LineDef *L, int x1, int x2)
+	{
+		if (lo_child && (x1 > lo_child->lo) &&
+		                (x2 < lo_child->hi))
+		{
+			lo_child->AddLine_X(L, x1, x2);
+			return;
+		}
+
+		if (hi_child && (x1 > hi_child->lo) &&
+		                (x2 < hi_child->hi))
+		{
+			hi_child->AddLine_X(L, x1, x2);
+			return;
+		}
+
+		lines.push_back(L);
+	}
+
+	void AddLine_X(LineDef *L)
+	{
+		int x1 = MIN(L->Start()->x, L->End()->x);
+		int x2 = MAX(L->Start()->x, L->End()->x);
+
+		AddLine_X(L, x1, x2);
+	}
+
+	/* vertical tree */
+
+	void AddLine_Y(LineDef *L, int y1, int y2)
+	{
+		if (lo_child && (y1 > lo_child->lo) &&
+		                (y2 < lo_child->hi))
+		{
+			lo_child->AddLine_Y(L, y1, y2);
+			return;
+		}
+
+		if (hi_child && (y1 > hi_child->lo) &&
+		                (y2 < hi_child->hi))
+		{
+			hi_child->AddLine_Y(L, y1, y2);
+			return;
+		}
+
+		lines.push_back(L);
+	}
+
+	void AddLine_Y(LineDef *L)
+	{
+		int y1 = MIN(L->Start()->y, L->End()->y);
+		int y2 = MAX(L->Start()->y, L->End()->y);
+
+		AddLine_Y(L, y1, y2);
+	}
+
+private:
+	void Subdivide()
+	{
+		if (hi - lo <= FASTOPP_DIST)
+			return;
+
+		lo_child = new fastopp_node_c(lo, mid);
+		hi_child = new fastopp_node_c(mid, hi);
+	}
+};
+
+
+static fastopp_node_c * fastopp_X_tree;
+static fastopp_node_c * fastopp_Y_tree;
+
+
+void FastOpposite_Begin()
+{
+	CalculateLevelBounds();
+
+	fastopp_X_tree = new fastopp_node_c(Map_bound_x1 - 8, Map_bound_x2 + 8);
+	fastopp_Y_tree = new fastopp_node_c(Map_bound_y1 - 8, Map_bound_y2 + 8);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		fastopp_X_tree->AddLine_X(LineDefs[n]);
+		fastopp_X_tree->AddLine_Y(LineDefs[n]);
+	}
+}
+
+
+void FastOpposite_Finish()
+{
+	delete fastopp_X_tree;  fastopp_X_tree = NULL;
+	delete fastopp_Y_tree;  fastopp_Y_tree = NULL;
+}
+
+
+static int Fast_OppositeLineDef(int ld, int ld_side, int *result_side)
+{
+}
+
+
 int OppositeLineDef(int ld, int ld_side, int *result_side)
 {
 	// ld_side is -1 for left, +1 for right.
 	// result_side uses the same values (never 0).
+
+	if (fastopp_X_tree)
+		return Fast_OppositeLineDef(ld, ld_side, result_side);
 
 	const LineDef * L = LineDefs[ld];
 
@@ -317,6 +455,9 @@ int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2)
 
 	return (tmp < 0) ? -1 : (tmp > 0) ? +1 : 0;
 }
+
+
+//------------------------------------------------------------------------
 
 
 class Close_obj
