@@ -87,9 +87,10 @@ thingtype_t;
 
 typedef enum
 {
-	THINGDEF_INVIS   = (1 << 0),
-	THINGDEF_CEIL    = (1 << 1),
-	THINGDEF_LIT     = (1 << 2),
+	THINGDEF_INVIS   = (1 << 0),  // partially invisible
+	THINGDEF_CEIL    = (1 << 1),  // hangs from ceiling
+	THINGDEF_LIT     = (1 << 2),  // always bright
+	THINGDEF_PASS    = (1 << 3),  // non-solid
 }
 thingdef_flags_e;
 
