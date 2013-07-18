@@ -301,7 +301,7 @@ public:
 	fastopp_node_c * lo_child;
 	fastopp_node_c * hi_child;
 
-	std::vector< LineDef * > lines;
+	std::vector<int> lines;
 
 public:
 	fastopp_node_c(int _low, int _high) :
@@ -322,60 +322,64 @@ public:
 
 	/* horizontal tree */
 
-	void AddLine_X(LineDef *L, int x1, int x2)
+	void AddLine_X(int ld, int x1, int x2)
 	{
 		if (lo_child && (x1 > lo_child->lo) &&
 		                (x2 < lo_child->hi))
 		{
-			lo_child->AddLine_X(L, x1, x2);
+			lo_child->AddLine_X(ld, x1, x2);
 			return;
 		}
 
 		if (hi_child && (x1 > hi_child->lo) &&
 		                (x2 < hi_child->hi))
 		{
-			hi_child->AddLine_X(L, x1, x2);
+			hi_child->AddLine_X(ld, x1, x2);
 			return;
 		}
 
-		lines.push_back(L);
+		lines.push_back(ld);
 	}
 
-	void AddLine_X(LineDef *L)
+	void AddLine_X(int ld)
 	{
+		const LineDef *L = LineDefs[ld];
+
 		int x1 = MIN(L->Start()->x, L->End()->x);
 		int x2 = MAX(L->Start()->x, L->End()->x);
 
-		AddLine_X(L, x1, x2);
+		AddLine_X(ld, x1, x2);
 	}
 
 	/* vertical tree */
 
-	void AddLine_Y(LineDef *L, int y1, int y2)
+	void AddLine_Y(int ld, int y1, int y2)
 	{
 		if (lo_child && (y1 > lo_child->lo) &&
 		                (y2 < lo_child->hi))
 		{
-			lo_child->AddLine_Y(L, y1, y2);
+			lo_child->AddLine_Y(ld, y1, y2);
 			return;
 		}
 
 		if (hi_child && (y1 > hi_child->lo) &&
 		                (y2 < hi_child->hi))
 		{
-			hi_child->AddLine_Y(L, y1, y2);
+			hi_child->AddLine_Y(ld, y1, y2);
 			return;
 		}
 
-		lines.push_back(L);
+		lines.push_back(ld);
 	}
 
-	void AddLine_Y(LineDef *L)
+	void AddLine_Y(int ld)
 	{
+		const LineDef *L = LineDefs[ld];
+
 		int y1 = MIN(L->Start()->y, L->End()->y);
 		int y2 = MAX(L->Start()->y, L->End()->y);
 
-		AddLine_Y(L, y1, y2);
+		AddLine_Y(ld, y1, y2);
 	}
 
 private:
@@ -403,8 +407,10 @@ void FastOpposite_Begin()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		fastopp_X_tree->AddLine_X(LineDefs[n]);
-		fastopp_X_tree->AddLine_Y(LineDefs[n]);
+		// TODO: skip vertical lines in horiz tree ??  (and vice versa)
+
+		fastopp_X_tree->AddLine_X(n);
+		fastopp_X_tree->AddLine_Y(n);
 	}
 }
 
