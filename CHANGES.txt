@@ -27,6 +27,8 @@ CHANGES IN Eureka
 -  support $DOOMWADPATH for finding IWADs
 -  can change the default port in the preferences
 
+-  improved Log viewer, ability to save the logs to a file
+
 -  implemented SEC_Light() binding command
 -  show unknown/missing textures in the LineDef panel
 -  show unknown/missing textures in the 3D preview
