@@ -27,8 +27,8 @@
 
 #---- BOOM THINGS -------------
 
-thing 5001 - -  20 NULL  "BOOM: Point pusher"
-thing 5002 - -  20 NULL  "BOOM: Point puller"
+thing 5001 - n  20 NULL  "BOOM: Point pusher"
+thing 5002 - n  20 NULL  "BOOM: Point puller"
 
 
 #---- BOOM LINETYPES ----------

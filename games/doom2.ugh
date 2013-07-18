@@ -38,8 +38,8 @@ include "doom_tex"
 
 #---- DOOM 2 THINGS ----------------
 
-thing   82 w -  20 SGN2   "Super shotgun"
-thing   83 h l  20 MEGA   "Megasphere"
+thing   82 w n- 20 SGN2   "Super shotgun"
+thing   83 h nl 20 MEGA   "Megasphere"
 
 thing   84 m -  20 SSWV   "Wolf-SS"
 thing   65 m -  20 CPOS   "Chaingunner"
@@ -56,14 +56,14 @@ thing   75 g c  16 HDB3   "Hang torso looking down"
 thing   76 g c  16 HDB4   "Hang torso open skull"
 thing   77 g c  16 HDB5   "Hang torso looking up"
 thing   78 g c  16 HDB6   "Hang torso w/o brain"
-thing   79 g -  16 POB1   "Pool of blood 2"
-thing   80 g -  16 POB2   "Pool of blood 3"
-thing   81 g -  16 BRS1   "Pool of brains"
+thing   79 g n  16 POB1   "Pool of blood 2"
+thing   80 g n  16 POB2   "Pool of blood 3"
+thing   81 g n  16 BRS1   "Pool of brains"
 
 thing   85 l l  16 TLMP   "Tall mercury lamp"
 thing   86 l l  16 TLP2   "Short mercury lamp"
 
-thing   87 - l  16 FIREF  "Spawn spot"
+thing   87 - nl 16 FIREF  "Spawn spot"
 thing   88 - -  16 BBRN   "Boss brain"
 thing   89 - -  16 BOSFB  "Boss shooter"
 thing   72 - c  16 KEEN   "Commander Keen"
