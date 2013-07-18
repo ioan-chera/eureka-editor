@@ -466,7 +466,7 @@ int UI_Escapable_Window::handle(int event)
 //------------------------------------------------------------------------
 
 
-// TODO: config itme
+// TODO: config item
 #define MAX_LOG_LINES  600
 
 
@@ -474,18 +474,54 @@ UI_LogViewer * log_viewer;
 
 
 UI_LogViewer::UI_LogViewer() :
-	UI_Escapable_Window(600, 400, "Eureka Log Viewer")
+	UI_Escapable_Window(550, 400, "Eureka Log Viewer")
 {
 	box(FL_NO_BOX);
 
-	size_range(350, 123);
+	size_range(385, 200);
 
-	browser = new Fl_Browser(0, 0, w(), h());
+	int ey = h() - 65;
+
+	browser = new Fl_Browser(0, 0, w(), ey);
 
 	resizable(browser);
-	
+
+	{
+		Fl_Group *o = new Fl_Group(0, ey, w(), h() - ey);
+		o->box(FL_FLAT_BOX);
+		o->color(fl_gray_ramp(4));
+		
+		int bx = w() - 110;
+		{
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "OK");
+			but->labelfont(1);
+//!!!		but->callback(close_callback, this);
+		}
+
+		bx = bx - 110;
+		{
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Clear");
+//!!!		but->callback(close_callback, this);
+		}
+
+		bx = bx - 110;
+		{
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Save...");
+//!!!		but->callback(close_callback, this);
+		}
+
+		Fl_Group *resize_box = new Fl_Group(4, ey + 2, 180, h() - ey - 4);
+		resize_box->box(FL_FLAT_BOX);
+		resize_box->color(FL_RED, FL_RED);
+
+		o->resizable(resize_box);
+
+		o->end();
+	}
+
 	end();
 }
+
 
 UI_LogViewer::~UI_LogViewer()
 { }
