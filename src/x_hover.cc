@@ -234,6 +234,9 @@ typedef struct
 public:
 	void Process(int n)
 	{
+		if (ld == n)  // ignore input line
+			return;
+
 		int nx1 = LineDefs[n]->Start()->x;
 		int ny1 = LineDefs[n]->Start()->y;
 		int nx2 = LineDefs[n]->End()->x;
@@ -430,7 +433,7 @@ void FastOpposite_Begin()
 		// TODO: skip vertical lines in horiz tree ??  (and vice versa)
 
 		fastopp_X_tree->AddLine_X(n);
-		fastopp_X_tree->AddLine_Y(n);
+		fastopp_Y_tree->AddLine_Y(n);
 	}
 }
 
@@ -481,8 +484,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 		// normal way : test all linedefs
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
-			if (ld != n)  // ignore input line
-				test.Process(n);
+			test.Process(n);
 	}
 
 	return test.best_match;

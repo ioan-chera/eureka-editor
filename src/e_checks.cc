@@ -1033,6 +1033,8 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 	if (NumLineDefs == 0 || NumSectors == 0)
 		return;
 
+	FastOpposite_Begin();
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
@@ -1059,6 +1061,8 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 			}
 		}
 	}
+
+	FastOpposite_Finish();
 }
 
 

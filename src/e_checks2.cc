@@ -670,7 +670,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d linedefs with wrong 2S flag", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 300,
+			dialog->AddLine(check_buffer, 1, 285,
 			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
 			                "Fix",  &UI_Check_LineDefs::action_fix_bad_2s_flag);
 		}
