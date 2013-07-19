@@ -877,16 +877,8 @@ void Tags_FindUnmatchedLineDefs(selection_c& lines)
 
 		// TODO: handle special BOOM types (e.g. line-to-line teleporter)
 
-		if (L->type <= 0)  /* || L->type >= 8192 */
+		if (L->type <= 0)
 			continue;
-
-#if 0
-		// ignore specials which are 'D1', 'DR' or '--'
-		const linetype_t *info = M_GetLineType(L->type);
-
-		if (info->desc[0] == 'D' || info->desc[0] == '-')
-			continue;
-#endif
 
 		if (! SEC_tag_exists(L->tag))
 			lines.set(n);
@@ -914,6 +906,50 @@ void Tags_ShowUnmatchedLineDefs()
 		Editor_ChangeMode('l');
 
 	Tags_FindUnmatchedLineDefs(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void Tags_FindMissingTags(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->type <= 0)
+			continue;
+
+		if (L->tag > 0)
+			continue;
+
+		// use type description to determine if a tag is needed
+		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
+
+		// TODO: boom generalized manual doors (etc??)
+		const linetype_t *info = M_GetLineType(L->type);
+
+		char first = info->desc[0];
+
+		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
+			continue;
+
+		lines.set(n);
+	}
+}
+
+
+void Tags_ShowMissingTags()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Tags_FindMissingTags(*edit.Selected);
 
 	GoToSelection();
 
@@ -959,6 +995,13 @@ public:
 		Tags_ShowUnmatchedLineDefs();
 		dialog->user_action = CKR_Highlight;
 	}
+
+	static void action_show_missing_tag(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+		Tags_ShowMissingTags();
+		dialog->user_action = CKR_Highlight;
+	}
 };
 
 
@@ -970,15 +1013,28 @@ check_result_e CHECK_Tags(int min_severity)
 
 	for (;;)
 	{
+		Tags_FindMissingTags(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No linedefs missing a needed tag");
+		else
+		{
+			sprintf(check_buffer, "%d linedefs missing a needed tag", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 320,
+			                "Show", &UI_Check_Tags::action_show_missing_tag);
+		}
+
+
 		Tags_FindUnmatchedLineDefs(sel);
 
 		if (sel.empty())
-			dialog->AddLine("No tagged linedefs w/o matching sector");
+			dialog->AddLine("No tagged linedefs w/o a matching sector");
 		else
 		{
-			sprintf(check_buffer, "%d tagged linedefs w/o matching sector", sel.count_obj());
+			sprintf(check_buffer, "%d tagged linedefs w/o a matching sector", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 340,
+			dialog->AddLine(check_buffer, 2, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_line);
 		}
 
@@ -986,12 +1042,12 @@ check_result_e CHECK_Tags(int min_severity)
 		Tags_FindUnmatchedSectors(sel);
 
 		if (sel.empty())
-			dialog->AddLine("No tagged sectors w/o matching linedef");
+			dialog->AddLine("No tagged sectors w/o a matching linedef");
 		else
 		{
-			sprintf(check_buffer, "%d tagged sectors w/o matching linedef", sel.count_obj());
+			sprintf(check_buffer, "%d tagged sectors w/o a matching linedef", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 340,
+			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
 		}
 

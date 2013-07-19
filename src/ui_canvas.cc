@@ -541,12 +541,8 @@ void UI_Canvas::DrawLinedefs()
 				else
 					fl_color(LIGHTGREY);
 
-				// Signal errors by drawing the linedef in red. Needs work.
-				// Tag on a typeless linedef
-				if (LineDefs[n]->type == 0 && LineDefs[n]->tag != 0)
-					fl_color(RED);
-				// No first sidedef
-				else if (! LineDefs[n]->Right())
+				// no first sidedef?
+				if (! LineDefs[n]->Right())
 					fl_color(RED);
 
 				DrawKnobbyLine(x1, y1, x2, y2);
