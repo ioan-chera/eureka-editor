@@ -5,7 +5,7 @@
 #  Eureka DOOM Editor
 #
 #  Copyright (C)      2012 Wesley Johnson
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2013 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -28,8 +28,8 @@ include "boom"
 
 #---- DOOMLEGACY THINGS -------------
 
-thing 5003 - -  8 NULL "LEG: Camera"
-thing 5004 - - 16 NULL "LEG: Node"
+thing 5003 - n  8 NULL "LEG: Camera"
+thing 5004 - n 16 NULL "LEG: Node"
 
 # JDS group player starts
 thing 4001 p - 16 NULL "Player 5 start"

@@ -52,7 +52,7 @@ thinggroup - 0BD "OTHER"
 #    i  :  invisible
 #    c  :  on ceiling
 #    l  :  lit up
-#    n  :  non-solid
+#    n  :  non-blocking
 #
 
 thing    1 p -  16 PLAY   "Player 1 start"

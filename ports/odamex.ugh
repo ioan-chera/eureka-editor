@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2013 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -26,20 +26,20 @@ include "boom"
 thing 5080 p -  16 PLAYF1  "ODAMEX: Blue start"
 thing 5081 p -  16 PLAYF1  "ODAMEX: Red start"
 
-thing 5130 k -  16 BFLG   "ODAMEX: Blue flag"
-thing 5131 k -  16 RFLG   "ODAMEX: Red flag"
+thing 5130 k n  16 BFLG   "ODAMEX: Blue flag"
+thing 5131 k n  16 RFLG   "ODAMEX: Red flag"
 
-thing 9046 - -  16 NULL   "ODAMEX: Secret"
-thing 9045 - -  16 NULL   "ODAMEX: Water zone"
+thing 9046 - n  16 NULL   "ODAMEX: Secret"
+thing 9045 - n  16 NULL   "ODAMEX: Water zone"
 
-thing 9026 d -  16 NULL   "ODAMEX: Sparks"
-thing 9027 d -  16 NULL   "ODAMEX: Fountain 1"
-thing 9028 d -  16 NULL   "ODAMEX: Fountain 2"
-thing 9029 d -  16 NULL   "ODAMEX: Fountain 3"
-thing 9030 d -  16 NULL   "ODAMEX: Fountain 4"
-thing 9031 d -  16 NULL   "ODAMEX: Fountain 5"
-thing 9032 d -  16 NULL   "ODAMEX: Fountain 6"
-thing 9033 d -  16 NULL   "ODAMEX: Fountain 7"
+thing 9026 d n  16 NULL   "ODAMEX: Sparks"
+thing 9027 d n  16 NULL   "ODAMEX: Fountain 1"
+thing 9028 d n  16 NULL   "ODAMEX: Fountain 2"
+thing 9029 d n  16 NULL   "ODAMEX: Fountain 3"
+thing 9030 d n  16 NULL   "ODAMEX: Fountain 4"
+thing 9031 d n  16 NULL   "ODAMEX: Fountain 5"
+thing 9032 d n  16 NULL   "ODAMEX: Fountain 6"
+thing 9033 d n  16 NULL   "ODAMEX: Fountain 7"
 
 # not here (require Hexen format) :
 #   MT_CAMERA

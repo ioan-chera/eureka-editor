@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2013 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -29,22 +29,22 @@ include "boom"
 
 #---- EDGE THINGS ----------
 
-thing 7000 b -  20 NVSC   "EDGE: Night vision"
-thing 7020 b -  20 JPCK   "EDGE: Jetpack"
+thing 7000 b n  20 NVSC   "EDGE: Night vision"
+thing 7020 b n  20 JPCK   "EDGE: Jetpack"
 
-thing 7015 k l  20 YKEY   "EDGE: Green keycard"
-thing 7017 k l  20 YSKU   "EDGE: Green skull key"
+thing 7015 k nl 20 YKEY   "EDGE: Green keycard"
+thing 7017 k nl 20 YSKU   "EDGE: Green skull key"
 
-thing 7031 h l  20 ARM2   "EDGE: Purple armor"
-thing 7032 h l  20 ARM1   "EDGE: Yellow armor"
-thing 7033 h l  20 ARM1   "EDGE: Red armor"
+thing 7031 h nl 20 ARM2   "EDGE: Purple armor"
+thing 7032 h nl 20 ARM1   "EDGE: Yellow armor"
+thing 7033 h nl 20 ARM1   "EDGE: Red armor"
 
 thing 7010 d -  16 SMT2   "EDGE: Grey stub"
 thing 7011 d -  10 BEXP   "EDGE: Unstable barrel"
 
-thing 7041 - -  16 NULL   "EDGE: Green glow"
-thing 7042 - -  16 NULL   "EDGE: Red glow"
-thing 7043 - -  16 NULL   "EDGE: Blue glow"
+thing 7041 - n  16 NULL   "EDGE: Green glow"
+thing 7042 - n  16 NULL   "EDGE: Red glow"
+thing 7043 - n  16 NULL   "EDGE: Blue glow"
 
 
 thing  888 m -  16 SARGA3A7  "EDGE: Dog"
@@ -63,7 +63,7 @@ thing 4060 m i  20 SPOS   "EDGE: Stealth Sargeant"
 thing 4061 m i  20 POSS   "EDGE: Stealth Trooper"
 
 thing 7100 m -  20 SKELJ  "EDGE: Revenant mkII"
-thing 7101 m -  64 TFOGB  "EDGE: Imp spawner"
+thing 7101 m n  64 TFOGB  "EDGE: Imp spawner"
 thing 7102 m -  64 BSPIH  "EDGE: Arachnotron mkII"
 thing 7103 m -  48 FATTH  "EDGE: Mancubus mkII"
 
