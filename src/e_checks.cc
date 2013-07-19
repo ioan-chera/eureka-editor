@@ -1150,6 +1150,25 @@ static bool ThingStuckInBlocker(const Thing *T, int r, char group,
                                 std::vector<int>& blockers,
                                 std::vector<int>& sizes)
 {
+	/*
+	   andrewj: the DOOM movement code for monsters works by moving
+	   the actor by a stepping distance which is based on its 'speed'
+	   value.  The move is allowed when the *new position* has no
+	   blocking things or walls, which means that things can overlap
+	   a short distance and won't be stuck.
+	  
+	   Properly taking this into account requires knowing the speed of
+	   each individual monster, but we don't have that information here.
+	   Hence I've chosen a conservative value based on the speed of the
+	   slowest monster (8 units).
+	   
+	   TODO: make it either game config or user preference.
+	*/
+#define MONSTER_STEP_DIST  8
+
+	if (group == 'm')
+		r = MAX(1, r - MONSTER_STEP_DIST);
+
 	int x1 = T->x - r;
 	int y1 = T->y - r;
 	int x2 = T->x + r;
