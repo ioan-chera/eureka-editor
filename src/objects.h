@@ -42,8 +42,7 @@ void  HighlightObject (int, int, int);
 void  DeleteObjects (selection_c * list);
 
 
-bool LineCrossesBox (int, int, int, int, int);
-int FindFreeTag (void);
+bool LineTouchesBox (int, int, int, int, int);
 
 void GetDragFocus(int *x, int *y, int map_x, int map_y);
 

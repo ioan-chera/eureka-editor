@@ -877,7 +877,7 @@ void CMD_Insert(void)
 /*
    check if a (part of a) LineDef is inside a given box
 */
-bool LineCrossesBox (int ld, int x0, int y0, int x1, int y1)
+bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 {
 	int lx0 = LineDefs[ld]->Start()->x;
 	int ly0 = LineDefs[ld]->Start()->y;
@@ -1253,39 +1253,6 @@ void CMD_CopyProperties(void)
 	MarkChanges();
 
 	edit.RedrawMap = 1;
-}
-
-
-
-/*
-   find a free tag number
-   */
-int FindFreeTag ()
-{
-	int  tag, n;
-	bool ok;
-
-	tag = 1;
-	ok = false;
-	while (! ok)
-	{
-		ok = true;
-		for (n = 0 ; n < NumLineDefs ; n++)
-			if (LineDefs[n]->tag == tag)
-			{
-				ok = false;
-				break;
-			}
-		if (ok)
-			for (n = 0 ; n < NumSectors ; n++)
-				if (Sectors[n]->tag == tag)
-				{
-					ok = false;
-					break;
-				}
-		tag++;
-	}
-	return tag - 1;
 }
 
 
