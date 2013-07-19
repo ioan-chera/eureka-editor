@@ -875,16 +875,18 @@ void Tags_FindUnmatchedLineDefs(selection_c& lines)
 		if (L->tag <= 0)
 			continue;
 
-		// TODO: handle BOOM generalized linetypes
+		// TODO: handle special BOOM types (e.g. line-to-line teleporter)
 
-		if (L->type <= 0 || L->type >= 8192)
+		if (L->type <= 0)  /* || L->type >= 8192 */
 			continue;
 
+#if 0
 		// ignore specials which are 'D1', 'DR' or '--'
 		const linetype_t *info = M_GetLineType(L->type);
 
 		if (info->desc[0] == 'D' || info->desc[0] == '-')
 			continue;
+#endif
 
 		if (! SEC_tag_exists(L->tag))
 			lines.set(n);
@@ -929,7 +931,7 @@ public:
 
 public:
 	UI_Check_Tags(bool all_mode) :
-		UI_Check_base(520, 226, all_mode, "Check : Tags",
+		UI_Check_base(520, 286, all_mode, "Check : Tags",
 		              "Tag test results")
 	{ }
 
@@ -943,6 +945,20 @@ public:
 
 		dialog->want_close = true;
 	}
+
+	static void action_show_unmatch_sec(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+		Tags_ShowUnmatchedSectors();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_unmatch_line(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+		Tags_ShowUnmatchedLineDefs();
+		dialog->user_action = CKR_Highlight;
+	}
 };
 
 
@@ -954,6 +970,32 @@ check_result_e CHECK_Tags(int min_severity)
 
 	for (;;)
 	{
+		Tags_FindUnmatchedLineDefs(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No tagged linedefs w/o matching sector");
+		else
+		{
+			sprintf(check_buffer, "%d tagged linedefs w/o matching sector", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 340,
+			                "Show", &UI_Check_Tags::action_show_unmatch_line);
+		}
+
+
+		Tags_FindUnmatchedSectors(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No tagged sectors w/o matching linedef");
+		else
+		{
+			sprintf(check_buffer, "%d tagged sectors w/o matching linedef", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 340,
+			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
+		}
+
+
 		int min_tag, max_tag;
 
 		Tags_UsedRange(&min_tag, &max_tag);
@@ -962,10 +1004,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No tags are in use");
 		else
 		{
-			sprintf(check_buffer, "Lowest  tag: %d", min_tag);
-			dialog->AddLine(check_buffer);
-
-			sprintf(check_buffer, "Highest tag: %d", max_tag);
+			sprintf(check_buffer, "Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
 			dialog->AddLine(check_buffer);
 		}
 
