@@ -48,8 +48,6 @@
 
 static char check_message[MSG_BUF_LEN];
 
-
-
 /*
  *  CheckLevel
  *  check the level consistency
@@ -804,7 +802,170 @@ void CheckTextureNames ()
 
 
 //------------------------------------------------------------------------
+//  BASE CLASS
+//------------------------------------------------------------------------
 
+void UI_Check_base::close_callback(Fl_Widget *w, void *data)
+{
+	UI_Check_base *dialog = (UI_Check_base *)data;
+
+	dialog->want_close = true;
+}
+
+
+UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
+                             const char *L, const char *header_txt) :
+	UI_Escapable_Window(W, H, L),
+	want_close(false), user_action(CKR_OK),
+	worst_severity(0)
+{
+	cy = 10;
+
+	callback(close_callback, this);
+
+	int ey = h() - 66;
+
+	Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, header_txt);
+	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	title->labelfont(FL_HELVETICA_BOLD);
+	title->labelsize(FL_NORMAL_SIZE + 2);
+
+	cy = 45;
+
+	line_group = new Fl_Group(0, 0, w(), ey);
+	line_group->end();
+
+	{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
+
+	  o->box(FL_FLAT_BOX);
+	  o->color(WINDOW_BG, WINDOW_BG);
+
+	  int but_W = all_mode ? 110 : 70;
+
+	  { Fl_Button *ok_but;
+
+	    ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
+							   all_mode ? "Continue" : "OK");
+		ok_but->labelfont(1);
+		ok_but->callback(close_callback, this);
+	  }
+	  o->end();
+	}
+
+	end();
+}
+
+
+UI_Check_base::~UI_Check_base()
+{ }
+
+
+void UI_Check_base::Reset()
+{
+	want_close = false;
+	user_action = CKR_OK;
+
+	cy = 45;
+
+	line_group->clear();	
+
+	redraw();
+}
+
+
+void UI_Check_base::AddGap(int H)
+{
+	cy += H;
+}
+
+
+void UI_Check_base::AddLine(
+		const char *msg, int severity, int W,
+		 const char *button1, Fl_Callback *cb1,
+		 const char *button2, Fl_Callback *cb2,
+		 const char *button3, Fl_Callback *cb3)
+{
+	int cx = 30;
+
+	if (W < 0)
+		W = w() - 40;
+
+	Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
+	box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+	box->copy_label(msg);
+
+	if (severity == 2)
+	{
+		box->labelcolor(ERROR_MSG_COLOR);
+		box->labelfont(FL_HELVETICA_BOLD);
+	}
+	else if (severity == 1)
+	{
+		box->labelcolor(WARNING_MSG_COLOR);
+		box->labelfont(FL_HELVETICA_BOLD);
+	}
+
+	line_group->add(box);
+
+	cx += W;
+
+	if (button1)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
+		but->callback(cb1, this);
+
+		line_group->add(but);
+
+		cx += but->w() + 10;
+	}
+
+	if (button2)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
+		but->callback(cb2, this);
+
+		line_group->add(but);
+
+		cx += but->w() + 10;
+	}
+
+	if (button3)
+	{
+		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
+		but->callback(cb3, this);
+
+		line_group->add(but);
+	}
+
+	cy = cy + 30;
+
+	if (severity > worst_severity)
+		worst_severity = severity;
+}
+
+
+check_result_e UI_Check_base::Run()
+{
+	set_modal();
+
+	show();
+
+	while (! (want_close || user_action != CKR_OK))
+		Fl::wait(0.2);
+
+	if (user_action != CKR_OK)
+		return user_action;
+
+	switch (worst_severity)
+	{
+		case 0:  return CKR_OK;
+		case 1:  return CKR_MinorProblem;
+		default: return CKR_MajorProblem;
+	}
+}
+
+
+//------------------------------------------------------------------------
 
 struct vertex_X_CMP_pred
 {
@@ -929,6 +1090,100 @@ void Vertex_RemoveUnused()
 
 //------------------------------------------------------------------------
 
+class UI_Check_Vertices : public UI_Check_base
+{
+public:
+	UI_Check_Vertices(bool all_mode) :
+		UI_Check_base(520, 186, all_mode, "Check : Vertices",
+				      "Vertex test results")
+	{ }
+
+public:
+	static void action_merge(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		Vertex_MergeOverlaps();
+		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_highlight(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		Vertex_ShowOverlaps();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		Vertex_RemoveUnused();
+		dialog->user_action = CKR_TookAction;
+	}
+};
+
+
+check_result_e CHECK_Vertices(int min_severity = 0)
+{
+	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0);
+
+	selection_c  sel;
+
+	for (;;)
+	{
+		Vertex_FindOverlaps(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No overlapping vertices");
+		else
+		{
+			int approx_num = sel.count_obj() / 2;
+
+			sprintf(check_message, "%d overlapping vertices", approx_num);
+
+			dialog->AddLine(check_message, 2, 210,
+			                "Show",  &UI_Check_Vertices::action_highlight,
+			                "Merge", &UI_Check_Vertices::action_merge);
+		}
+
+
+		Vertex_FindUnused(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unused vertices");
+		else
+		{
+			sprintf(check_message, "%d unused vertices", sel.count_obj());
+
+			dialog->AddLine(check_message, 1, 170,
+			                "Remove", &UI_Check_Vertices::action_remove);
+		}
+
+
+		// in "ALL" mode, just continue if not too severe
+		if (dialog->WorstSeverity() < min_severity)
+		{
+			delete dialog;
+
+			return CKR_OK;
+		}
+
+		check_result_e result = dialog->Run();
+
+		if (result == CKR_TookAction)
+		{
+			// repeat the tests
+			dialog->Reset();
+			continue;
+		}
+
+		delete dialog;
+
+		return result;
+	}
+}
+
+
+//------------------------------------------------------------------------
 
 void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 {
@@ -1328,355 +1583,6 @@ void SideDefs_Unpack(bool confirm_it)
 
 //------------------------------------------------------------------------
 
-
-void Things_FindUnknown(selection_c& list)
-{
-	list.change_type(OBJ_THINGS);
-
-	for (int n = 0 ; n < NumThings ; n++)
-	{
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
-
-		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
-			list.set(n);
-	}
-}
-
-
-void Things_ShowUnknown()
-{
-	if (edit.mode != OBJ_THINGS)
-		Editor_ChangeMode('t');
-
-	Things_FindUnknown(*edit.Selected);
-
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
-}
-
-
-// this returns a bitmask : bits 0..3 for players 1..4
-int Things_FindStarts(int *dm_num)
-{
-	*dm_num = 0;
-
-	int mask = 0;
-
-	for (int n = 0 ; n < NumThings ; n++)
-	{
-		const Thing * T = Things[n];
-
-		// ideally, these type numbers would not be hard-coded....
-
-		switch (T->type)
-		{
-			case 1: mask |= (1 << 0); break;
-			case 2: mask |= (1 << 1); break;
-			case 3: mask |= (1 << 2); break;
-			case 4: mask |= (1 << 3); break;
-
-			case 11: *dm_num += 1; break;
-		}
-	}
-
-	return mask;
-}
-
-
-void Things_FindInVoid(selection_c& list)
-{
-	list.change_type(OBJ_THINGS);
-
-	for (int n = 0 ; n < NumThings ; n++)
-	{
-		Objid obj;
-
-		GetCurObject(obj, OBJ_SECTORS, Things[n]->x, Things[n]->y);
-
-		if (obj.is_nil())
-			list.set(n);
-	}
-}
-
-
-void Things_ShowInVoid()
-{
-	if (edit.mode != OBJ_THINGS)
-		Editor_ChangeMode('t');
-
-	Things_FindInVoid(*edit.Selected);
-
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
-}
-
-
-//------------------------------------------------------------------------
-//  BASE CLASS
-//------------------------------------------------------------------------
-
-void UI_Check_base::close_callback(Fl_Widget *w, void *data)
-{
-	UI_Check_base *dialog = (UI_Check_base *)data;
-
-	dialog->want_close = true;
-}
-
-
-UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
-                             const char *L, const char *header_txt) :
-	UI_Escapable_Window(W, H, L),
-	want_close(false), user_action(CKR_OK),
-	worst_severity(0)
-{
-	cy = 10;
-
-	callback(close_callback, this);
-
-	int ey = h() - 66;
-
-	Fl_Box *title = new Fl_Box(FL_NO_BOX, 10, cy, w() - 20, 30, header_txt);
-	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-	title->labelfont(FL_HELVETICA_BOLD);
-	title->labelsize(FL_NORMAL_SIZE + 2);
-
-	cy = 45;
-
-	line_group = new Fl_Group(0, 0, w(), ey);
-	line_group->end();
-
-	{ Fl_Group *o = new Fl_Group(0, ey, w(), 66);
-
-	  o->box(FL_FLAT_BOX);
-	  o->color(WINDOW_BG, WINDOW_BG);
-
-	  int but_W = all_mode ? 110 : 70;
-
-	  { Fl_Button *ok_but;
-
-	    ok_but = new Fl_Button(w()/2 - but_W/2, ey + 18, but_W, 34,
-							   all_mode ? "Continue" : "OK");
-		ok_but->labelfont(1);
-		ok_but->callback(close_callback, this);
-	  }
-	  o->end();
-	}
-
-	end();
-}
-
-
-UI_Check_base::~UI_Check_base()
-{ }
-
-
-void UI_Check_base::Reset()
-{
-	want_close = false;
-	user_action = CKR_OK;
-
-	cy = 45;
-
-	line_group->clear();	
-
-	redraw();
-}
-
-
-void UI_Check_base::AddGap(int H)
-{
-	cy += H;
-}
-
-
-void UI_Check_base::AddLine(
-		const char *msg, int severity, int W,
-		 const char *button1, Fl_Callback *cb1,
-		 const char *button2, Fl_Callback *cb2,
-		 const char *button3, Fl_Callback *cb3)
-{
-	int cx = 30;
-
-	if (W < 0)
-		W = w() - 40;
-
-	Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
-	box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-	box->copy_label(msg);
-
-	if (severity == 2)
-	{
-		box->labelcolor(ERROR_MSG_COLOR);
-		box->labelfont(FL_HELVETICA_BOLD);
-	}
-	else if (severity == 1)
-	{
-		box->labelcolor(WARNING_MSG_COLOR);
-		box->labelfont(FL_HELVETICA_BOLD);
-	}
-
-	line_group->add(box);
-
-	cx += W;
-
-	if (button1)
-	{
-		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button1);
-		but->callback(cb1, this);
-
-		line_group->add(but);
-
-		cx += but->w() + 10;
-	}
-
-	if (button2)
-	{
-		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button2);
-		but->callback(cb2, this);
-
-		line_group->add(but);
-
-		cx += but->w() + 10;
-	}
-
-	if (button3)
-	{
-		Fl_Button *but = new Fl_Button(cx, cy, 80, 25, button3);
-		but->callback(cb3, this);
-
-		line_group->add(but);
-	}
-
-	cy = cy + 30;
-
-	if (severity > worst_severity)
-		worst_severity = severity;
-}
-
-
-check_result_e UI_Check_base::Run()
-{
-	set_modal();
-
-	show();
-
-	while (! (want_close || user_action != CKR_OK))
-		Fl::wait(0.2);
-
-	if (user_action != CKR_OK)
-		return user_action;
-
-	switch (worst_severity)
-	{
-		case 0:  return CKR_OK;
-		case 1:  return CKR_MinorProblem;
-		default: return CKR_MajorProblem;
-	}
-}
-
-
-//------------------------------------------------------------------------
-
-
-class UI_Check_Vertices : public UI_Check_base
-{
-public:
-	UI_Check_Vertices(bool all_mode) :
-		UI_Check_base(520, 186, all_mode, "Check : Vertices",
-				      "Vertex test results")
-	{ }
-
-public:
-	static void action_merge(Fl_Widget *w, void *data)
-	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_MergeOverlaps();
-		dialog->user_action = CKR_TookAction;
-	}
-
-	static void action_highlight(Fl_Widget *w, void *data)
-	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowOverlaps();
-		dialog->user_action = CKR_Highlight;
-	}
-
-	static void action_remove(Fl_Widget *w, void *data)
-	{
-		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_RemoveUnused();
-		dialog->user_action = CKR_TookAction;
-	}
-};
-
-
-check_result_e CHECK_Vertices(int min_severity = 0)
-{
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0);
-
-	selection_c  sel;
-
-	for (;;)
-	{
-		Vertex_FindOverlaps(sel);
-
-		if (sel.empty())
-			dialog->AddLine("No overlapping vertices");
-		else
-		{
-			int approx_num = sel.count_obj() / 2;
-
-			sprintf(check_message, "%d overlapping vertices", approx_num);
-
-			dialog->AddLine(check_message, 2, 210,
-			                "Show",  &UI_Check_Vertices::action_highlight,
-			                "Merge", &UI_Check_Vertices::action_merge);
-		}
-
-
-		Vertex_FindUnused(sel);
-
-		if (sel.empty())
-			dialog->AddLine("No unused vertices");
-		else
-		{
-			sprintf(check_message, "%d unused vertices", sel.count_obj());
-
-			dialog->AddLine(check_message, 1, 170,
-			                "Remove", &UI_Check_Vertices::action_remove);
-		}
-
-
-		// in "ALL" mode, just continue if not too severe
-		if (dialog->WorstSeverity() < min_severity)
-		{
-			delete dialog;
-
-			return CKR_OK;
-		}
-
-		check_result_e result = dialog->Run();
-
-		if (result == CKR_TookAction)
-		{
-			// repeat the tests
-			dialog->Reset();
-			continue;
-		}
-
-		delete dialog;
-
-		return result;
-	}
-}
-
-
-//------------------------------------------------------------------------
-
 class UI_Check_Sectors : public UI_Check_base
 {
 public:
@@ -1877,6 +1783,94 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 
 		return result;
 	}
+}
+
+
+//------------------------------------------------------------------------
+
+void Things_FindUnknown(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+			list.set(n);
+	}
+}
+
+
+void Things_ShowUnknown()
+{
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
+
+	Things_FindUnknown(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+// this returns a bitmask : bits 0..3 for players 1..4
+int Things_FindStarts(int *dm_num)
+{
+	*dm_num = 0;
+
+	int mask = 0;
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing * T = Things[n];
+
+		// ideally, these type numbers would not be hard-coded....
+
+		switch (T->type)
+		{
+			case 1: mask |= (1 << 0); break;
+			case 2: mask |= (1 << 1); break;
+			case 3: mask |= (1 << 2); break;
+			case 4: mask |= (1 << 3); break;
+
+			case 11: *dm_num += 1; break;
+		}
+	}
+
+	return mask;
+}
+
+
+void Things_FindInVoid(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		Objid obj;
+
+		GetCurObject(obj, OBJ_SECTORS, Things[n]->x, Things[n]->y);
+
+		if (obj.is_nil())
+			list.set(n);
+	}
+}
+
+
+void Things_ShowInVoid()
+{
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
+
+	Things_FindInVoid(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
 }
 
 

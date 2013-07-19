@@ -499,7 +499,6 @@ void LineDefs_ShowCrossings()
 
 //------------------------------------------------------------------------
 
-
 class UI_Check_LineDefs : public UI_Check_base
 {
 public:
@@ -701,7 +700,6 @@ check_result_e CHECK_LineDefs(int min_severity)
 
 
 //------------------------------------------------------------------------
-
 
 void Tags_UsedRange(int *min_tag, int *max_tag)
 {
@@ -913,6 +911,8 @@ check_result_e CHECK_Tags(int min_severity)
 
 //------------------------------------------------------------------------
 
+
+//------------------------------------------------------------------------
 
 check_result_e CHECK_Textures(int min_severity)
 {

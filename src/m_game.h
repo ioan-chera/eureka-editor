@@ -90,7 +90,7 @@ typedef enum
 	THINGDEF_INVIS   = (1 << 0),  // partially invisible
 	THINGDEF_CEIL    = (1 << 1),  // hangs from ceiling
 	THINGDEF_LIT     = (1 << 2),  // always bright
-	THINGDEF_PASS    = (1 << 3),  // non-solid
+	THINGDEF_PASS    = (1 << 3),  // non-blocking
 }
 thingdef_flags_e;
 
