@@ -1167,7 +1167,7 @@ static bool ThingStuckInBlocker(const Thing *T, int r, char group,
 #define MONSTER_STEP_DIST  8
 
 	if (group == 'm')
-		r = MAX(1, r - MONSTER_STEP_DIST);
+		r = MAX(4, r - MONSTER_STEP_DIST);
 
 	int x1 = T->x - r;
 	int y1 = T->y - r;
@@ -1212,14 +1212,51 @@ static bool ThingStuckInBlocker(const Thing *T, int r, char group,
 }
 
 
-static bool ThingStuckInWall(const Thing *T, int r) 
+static inline bool LD_is_blocking(const LineDef *L)
 {
+#define MONSTER_HEIGHT  36
+
+	// ignore virtual linedefs
+	if (L->right < 0 && L->left < 0)
+		return false;
+	
+	if (L->right < 0 || L->left < 0)
+		return true;
+	
+	const Sector *S1 = L->Right()->SecRef();
+	const Sector *S2 = L-> Left()->SecRef();
+
+	int f_max = MAX(S1->floorh, S2->floorh);
+	int c_min = MIN(S1-> ceilh, S2-> ceilh);
+
+	return (c_min < f_max + MONSTER_HEIGHT);
+}
+
+
+static bool ThingStuckInWall(const Thing *T, int r, char group)
+{
+	if (group == 'm')
+		r = MAX(4, r - MONSTER_STEP_DIST);
+
+	// shrink a tiny bit, because we need to find lines which CROSS the
+	// bounding box, not just touch it.
+	r = r - 1;
+
 	int x1 = T->x - r;
 	int y1 = T->y - r;
 	int x2 = T->x + r;
 	int y2 = T->y + r;
 
-	// FIXME: ThingStuckInWall
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (! LD_is_blocking(L))
+			continue;
+
+		if (LineTouchesBox(n, x1, y1, x2, y2))
+			return true;
+	}
 
 	return false;
 }
@@ -1250,7 +1287,7 @@ void Things_FindStuckies(selection_c& list)
 			continue;
 
 		if (ThingStuckInBlocker(T, info->radius, info->group, blockers, sizes) ||
-			ThingStuckInWall   (T, info->radius))
+			ThingStuckInWall   (T, info->radius, info->group))
 		{
 			list.set(n);
 		}
