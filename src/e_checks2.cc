@@ -827,6 +827,99 @@ void CMD_ApplyTag()
 }
 
 
+static bool LD_tag_exists(int tag)
+{
+	for (int n = 0 ; n < NumLineDefs ; n++)
+		if (LineDefs[n]->tag == tag)
+			return true;
+	
+	return false;
+}
+
+
+static bool SEC_tag_exists(int tag)
+{
+	for (int s = 0 ; s < NumSectors ; s++)
+		if (Sectors[s]->tag == tag)
+			return true;
+
+	return false;
+}
+
+
+void Tags_FindUnmatchedSectors(selection_c& secs)
+{
+	secs.change_type(OBJ_SECTORS);
+
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		int tag = Sectors[s]->tag;
+
+		if (tag <= 0)
+			continue;
+
+		if (! LD_tag_exists(tag))
+			secs.set(s);
+	}
+}
+
+
+void Tags_FindUnmatchedLineDefs(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->tag <= 0)
+			continue;
+
+		// TODO: handle BOOM generalized linetypes
+
+		if (L->type <= 0 || L->type >= 8192)
+			continue;
+
+		// ignore specials which are 'D1', 'DR' or '--'
+		const linetype_t *info = M_GetLineType(L->type);
+
+		if (info->desc[0] == 'D' || info->desc[0] == '-')
+			continue;
+
+		if (! SEC_tag_exists(L->tag))
+			lines.set(n);
+	}
+}
+
+
+void Tags_ShowUnmatchedSectors()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	Tags_FindUnmatchedSectors(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void Tags_ShowUnmatchedLineDefs()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Tags_FindUnmatchedLineDefs(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Tags : public UI_Check_base
