@@ -1122,9 +1122,98 @@ void Things_ShowInVoid()
 }
 
 
+static void CollectBlockingThings(std::vector<int>& list,
+                                  std::vector<int>& sizes)
+{
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		const thingtype_t *info = M_GetThingType(T->type);
+
+		if (info->flags & THINGDEF_PASS)
+			continue;
+
+		// ignore unknown things
+		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+			continue;
+
+		// TODO: config option: treat ceiling things as non-blocking
+
+		 list.push_back(n);
+		sizes.push_back(info->radius);
+	}
+}
+
+
+static bool ThingStuckInBlocker(const Thing *T, int r, char group,
+                                std::vector<int>& blockers,
+                                std::vector<int>& sizes)
+{
+	int x1 = T->x - r;
+	int y1 = T->y - r;
+	int x2 = T->x + r;
+	int y2 = T->y + r;
+
+	for (unsigned int k = 0 ; k < blockers.size() ; k++)
+	{
+		const Thing *T2 = Things[blockers[k]];
+
+		if (T2 == T)
+			continue;
+
+		int r2 = sizes[k];
+
+		if (x1 >= T2->x + r2) continue;
+		if (y1 >= T2->y + r2) continue;
+
+		if (x2 <= T2->x - r2) continue;
+		if (y2 <= T2->y - r2) continue;
+
+		// check skill bits, except for players
+
+		if (group != 'p')
+		{
+			if (((T->options & T2->options) & 7) == 0)
+				continue;
+
+			// check game-mode bits  [FIXME for HEXEN]
+			if (((~T->options & ~T2->options) & 0x70) == 0)
+				continue;
+
+			// HEXEN TODO: check player-class bits
+			//
+			// if (((T->options & T2->options) & 0xE0) == 0) continue
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+static bool ThingStuckInWall(const Thing *T, int r) 
+{
+	int x1 = T->x - r;
+	int y1 = T->y - r;
+	int x2 = T->x + r;
+	int y2 = T->y + r;
+
+	// FIXME: ThingStuckInWall
+
+	return false;
+}
+
+
 void Things_FindStuckies(selection_c& list)
 {
 	list.change_type(OBJ_THINGS);
+
+	std::vector<int> blockers;
+	std::vector<int> sizes;
+
+	CollectBlockingThings(blockers, sizes);
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -1136,9 +1225,16 @@ void Things_FindStuckies(selection_c& list)
 		if (! (info->group == 'p' || info->group == 'm'))
 			continue;
 
-		// FIXME
+		// skip certain actors (e.g. deathmatch starts) which are often
+		// placed overlapping a normal player start.
+		if (info->flags & THINGDEF_PASS)
+			continue;
 
-		list.set(n);
+		if (ThingStuckInBlocker(T, info->radius, info->group, blockers, sizes) ||
+			ThingStuckInWall   (T, info->radius))
+		{
+			list.set(n);
+		}
 	}
 }
 
@@ -1202,10 +1298,10 @@ check_result_e CHECK_Things(int min_severity = 0)
 		Things_FindStuckies(sel);
 
 		if (sel.empty())
-			dialog->AddLine("No stuck things");
+			dialog->AddLine("No stuck actors");
 		else
 		{
-			sprintf(check_message, "%d stuck things", sel.count_obj());
+			sprintf(check_message, "%d stuck actors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 170,
 			                "Show",  &UI_Check_Things::action_show_stuck);
