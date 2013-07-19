@@ -95,8 +95,8 @@ line 151 c "WR BOOM: Ceiling up HEC"
 line 175 d "S1 BOOM: Close for 30s"
 line 196 d "SR BOOM: Close for 30s"
 
-line 197 e "G1 BOOM: Exit level"
-line 198 e "G1 BOOM: Secret exit"
+line 197 e "g1 BOOM: Exit level"
+line 198 e "g1 BOOM: Secret exit"
 
 line 159 f "S1 BOOM: Floor down LEF /NX"
 line 221 f "S1 BOOM: Floor down nlEF"
