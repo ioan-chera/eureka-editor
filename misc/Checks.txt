@@ -52,8 +52,14 @@ Texturing
 
 Tags
 
-?  linedef with tag but no matching sector
-?  sector with tag but no matching linedef
+-  linedef with tag but no matching sector
+-  sector with tag but no matching linedef
+
+-  linedef which requires but lacks a tag
+
+-  teleporter line with missing/multiple target thing.
+
+?  negative tag values
 
 ?  list of used tag numbers
 
