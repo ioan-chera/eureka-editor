@@ -886,14 +886,14 @@ check_result_e CHECK_Tags(int min_severity)
 			                &UI_Check_Tags::action_fresh_tag);
 		}
 
-		check_result_e result = dialog->Run();
-
 		if (dialog->WorstSeverity() < min_severity)
 		{
 			delete dialog;
 
 			return CKR_OK;
 		}
+
+		check_result_e result = dialog->Run();
 
 		if (result == CKR_TookAction)
 		{
