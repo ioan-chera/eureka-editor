@@ -1122,6 +1122,41 @@ void Things_ShowInVoid()
 }
 
 
+void Things_FindStuckies(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		const thingtype_t *info = M_GetThingType(T->type);
+
+		// only check players and monsters
+		if (! (info->group == 'p' || info->group == 'm'))
+			continue;
+
+		// FIXME
+
+		list.set(n);
+	}
+}
+
+
+void Things_ShowStuckies()
+{
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
+
+	Things_FindStuckies(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Things : public UI_Check_base
@@ -1146,6 +1181,13 @@ public:
 		Things_ShowInVoid();
 		dialog->user_action = CKR_Highlight;
 	}
+
+	static void action_show_stuck(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_ShowStuckies();
+		dialog->user_action = CKR_Highlight;
+	}
 };
 
 
@@ -1157,8 +1199,17 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 	for (;;)
 	{
-		// TODO: check for things stuck in walls / other things
-		//       [need a new 'non-solid' flag in the game definition files]
+		Things_FindStuckies(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No stuck things");
+		else
+		{
+			sprintf(check_message, "%d stuck things", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 170,
+			                "Show",  &UI_Check_Things::action_show_stuck);
+		}
 
 
 		Things_FindInVoid(sel);
@@ -1185,6 +1236,8 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine(check_message, 1, 210,
 			                "Show",  &UI_Check_Things::action_show_unknown);
 		}
+
+		dialog->AddGap(10);
 
 
 		int dm_num, mask;
