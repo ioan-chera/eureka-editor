@@ -1385,7 +1385,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		{
 			sprintf(check_message, "%d unknown things", sel.count_obj());
 
-			dialog->AddLine(check_message, 1, 210,
+			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Things::action_show_unknown);
 		}
 
