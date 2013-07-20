@@ -158,6 +158,9 @@ public:
 
 	void Deselect();
 
+	// ensure the very last line is visible
+	void JumpEnd();
+
 private:
 	int CountSelectedLines() const;
 
@@ -172,6 +175,8 @@ private:
 
 
 extern UI_LogViewer * log_viewer;
+
+void LogViewer_Open();
 
 
 #endif  /* __EUREKA_UI_WINDOW_H__ */

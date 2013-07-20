@@ -728,6 +728,7 @@ static void LoadResourceFile(const char *filename)
 
 void Main_LoadResources()
 {
+	LogPrintf("\n");
 	LogPrintf("----- Loading Resources -----\n");
 
 	// Load game definitions (*.ugh)
@@ -781,6 +782,9 @@ void Main_LoadResources()
 	W_LoadFlats();
 	W_LoadTextures();
 	W_ClearSprites();
+
+	LogPrintf("--- DONE ---\n");
+	LogPrintf("\n");
 
 	if (main_win)
 	{

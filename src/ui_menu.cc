@@ -243,11 +243,7 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 
 static void view_do_logs(Fl_Widget *w, void * data)
 {
-	if (! log_viewer->shown())
-	{
-		log_viewer->show();
-		log_viewer->Deselect();
-	}
+	LogViewer_Open();
 }
 
 static void view_do_zoom_in(Fl_Widget *w, void * data)

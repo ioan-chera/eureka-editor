@@ -546,6 +546,15 @@ void UI_LogViewer::Deselect()
 }
 
 
+void UI_LogViewer::JumpEnd()
+{
+	if (browser->size() > 0)
+	{
+		browser->bottomline(browser->size());
+	}
+}
+
+
 int UI_LogViewer::CountSelectedLines() const
 {
 	int count = 0;
@@ -706,6 +715,21 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	LogSaveTo(fp);
 
 	fclose(fp);
+}
+
+
+void LogViewer_Open()
+{
+	if (! log_viewer)
+		return;
+
+	if (! log_viewer->shown())
+	{
+		log_viewer->show();
+		log_viewer->Deselect();
+	}
+
+	log_viewer->JumpEnd();
 }
 
 
