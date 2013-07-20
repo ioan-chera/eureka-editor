@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2013 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -38,27 +38,61 @@ include "doom_tex"
 
 #---- DOOM 1 TEXTURES ----------------
 
-## TODO:
-#     ASHWALL
-#     BLODGR1   BLODGR2   BLODGR3   BLODGR4
-#     BRNBIGC   BRNBIGL   BRNBIGR   BRNPOIS2
-#     BROVINE   BROWNWEL  CEMPOIS
-#
-#     COMP2     COMPOHSO  COMPTILE
-#     COMPUTE1  COMPUTE2  COMPUTE3
-#     DOORHI    GRAYDANG
-#     ICKDOOR1  ICKWALL6
-#
-#     LITE2     LITE4     LITE96
-#     LITEBLU2  LITEBLU3
-#     LITEMET   LITERED   LITESTON
-#
-#     MIDVINE1  MIDVINE2
-#     NUKESLAD  PLANET1   REDWALL1
-#     SKINBORD  SKINTEK1  SKINTEK2
-#     SKULWAL3  SKULWALL
-#     SLADRIP1  SLADRIP2  SLADRIP3
-#     SP_DUDE3  SP_DUDE6  SP_ROCK2
-#     STARTAN1  STONGARG  STONPOIS
-#     TEKWALL2  TEKWALL3  TEKWALL5
-#     WOODSKUL
+texture h REDWALL1
+texture h SKINBORD
+texture h SKINTEK1
+texture h SKINTEK2
+texture h SKULWAL3
+texture h SKULWALL
+texture h SP_DUDE3
+texture h SP_DUDE6
+
+texture n ASHWALL
+texture n MIDVINE1
+texture n MIDVINE2
+texture n SP_ROCK2
+texture n SKY4
+
+texture t BLODGR1
+texture t BLODGR2
+texture t BLODGR3
+texture t BLODGR4
+texture t BRNBIGC
+texture t BRNBIGL
+texture t BRNBIGR
+texture t BRNPOIS2
+texture t BROVINE
+texture t BROWNWEL
+texture t COMP2
+texture t COMPOHSO
+texture t COMPTILE
+texture t COMPUTE1
+texture t COMPUTE2
+texture t COMPUTE3
+texture t DOORHI
+texture t GRAYDANG
+texture t ICKDOOR1
+texture t ICKWALL6
+texture t LITE2
+texture t LITE4
+texture t LITE96
+texture t LITEBLU2
+texture t LITEBLU3
+texture t LITEMET
+texture t LITERED
+texture t NUKESLAD
+texture t PLANET1
+texture t SLADRIP1
+texture t SLADRIP2
+texture t SLADRIP3
+texture t STARTAN1
+texture t TEKWALL2
+texture t TEKWALL3
+texture t TEKWALL5
+
+texture u CEMPOIS
+texture u LITESTON
+texture u STONGARG
+texture u STONPOIS
+texture u WOODSKUL
+
