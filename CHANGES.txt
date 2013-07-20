@@ -1,7 +1,8 @@
 
-CHANGES IN Eureka
-=================
+CHANGES IN Eureka 1.00
+======================
 
++  extensive map-checking functions
 
 +  validate map data when loading a level
 
@@ -16,7 +17,7 @@ CHANGES IN Eureka
 -  commands to go to next/previous map ('N' and 'P' keys)
 -  changed 'File/Recent Files' to be a sub-menu
 
--  incorporated Jason Johnston's logo in the About dialog
+-  incorporated Jason R. Johnston's logo in the About dialog
 
 -  automatically open the most recent file (optional)
 -  option to maximize the window when Eureka starts
@@ -34,6 +35,9 @@ CHANGES IN Eureka
 -  show unknown/missing textures in the 3D preview
 
 -  the ';' key waits for next key and makes it META
+
+-  better drawing of highlighted things and linedefs
+-  better drawing of selected sectors
 
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
