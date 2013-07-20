@@ -226,6 +226,17 @@ bool GetCurrentObjects(selection_c *list)
 }
 
 
+void Editor_ClearErrorMode()
+{
+	if (edit.error_mode)
+	{
+		edit.error_mode = false;
+		edit.Selected->clear_all();
+		edit.RedrawMap = 1;
+	}
+}
+
+
 void Editor_ChangeMode(char mode)
 {
 	obj_type_e  prev_type = edit.mode;
@@ -242,6 +253,8 @@ void Editor_ChangeMode(char mode)
 			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
 			return;
 	}
+
+	Editor_ClearErrorMode();
 
 	edit.highlighted.clear();
 	edit.split_line.clear();
@@ -293,6 +306,8 @@ void CMD_EditMode(void)
 
 void CMD_SelectAll(void)
 {
+	Editor_ClearErrorMode();
+
 	int total = NumObjects(edit.mode);
 
 	edit.Selected->change_type(edit.mode);
@@ -305,6 +320,8 @@ void CMD_SelectAll(void)
 
 void CMD_UnselectAll(void)
 {
+	Editor_ClearErrorMode();
+
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->clear_all();
 	edit.RedrawMap = 1;
@@ -315,6 +332,8 @@ void CMD_UnselectAll(void)
 
 void CMD_InvertSelection(void)
 {
+	Editor_ClearErrorMode();
+
 	int total = NumObjects(edit.mode);
 
 	if (edit.Selected->what_type() != edit.mode)
@@ -742,6 +761,8 @@ void CMD_CopyAndPaste(void)
 		return;
 	}
 
+	edit.error_mode = false;
+
 	if (CMD_Copy())
 	{
 		CMD_Paste();
@@ -1039,6 +1060,8 @@ void Editor_MouseRelease()
 	 */
 	if (main_win->canvas->isSelboxActive())
 	{
+		Editor_ClearErrorMode();
+
 		int x1, y1, x2, y2;
 		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
 
@@ -1066,6 +1089,8 @@ void Editor_MouseRelease()
 	 */
 	if (object() && object.num == click_obj.num)
 	{
+		Editor_ClearErrorMode();
+
 		edit.Selected->toggle(object.num);
 
 		edit.RedrawMap = 1;

@@ -210,6 +210,7 @@ static void CreateSquare(int model)
 	}
 
 	// select it
+	edit.error_mode = false;
 	edit.Selected->clear_all();
 	edit.Selected->set(new_sec);
 }
@@ -241,6 +242,7 @@ static void Insert_Thing()
 
 
 	// select it
+	edit.error_mode = false;
 	edit.Selected->clear_all();
 	edit.Selected->set(new_t);
 }
@@ -754,7 +756,9 @@ static void Insert_Vertex()
 	BA_End();
 
 	// select new vertex
+	edit.error_mode = false;
 	edit.Selected->clear_all();
+
 	if (reselect)
 		edit.Selected->set(new_v);
 }
@@ -838,6 +842,7 @@ static void Insert_Sector(bool force_new)
 	BA_End();
 
 
+	edit.error_mode = false;
 	edit.Selected->clear_all();
 	edit.Selected->set(new_sec);
 }

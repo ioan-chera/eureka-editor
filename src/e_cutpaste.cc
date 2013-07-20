@@ -615,6 +615,7 @@ static void ReselectGroup()
 		{
 			int count = (int)clip_board->things.size();
 
+			edit.error_mode = false;
 			edit.Selected->clear_all();
 			edit.Selected->frob_range(NumThings - count, NumThings-1, BOP_ADD);
 		}
@@ -656,7 +657,9 @@ static void ReselectGroup()
 		new_sel.frob_range(NumSectors - count, NumSectors-1, BOP_ADD);
 	}
 
+	edit.error_mode = false;
 	edit.Selected->clear_all();
+
 	ConvertSelection(&new_sel, edit.Selected);
 }
 
@@ -986,6 +989,7 @@ void CMD_Delete(void)
 	BA_End();
 
 success:
+	edit.error_mode = false;
 	edit.Selected->clear_all();
 	edit.highlighted.clear();
 	edit.split_line.clear();

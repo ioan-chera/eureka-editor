@@ -91,6 +91,7 @@ void Editor_WriteUser(FILE *fp);
 bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
+void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 

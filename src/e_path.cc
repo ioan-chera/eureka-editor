@@ -224,6 +224,8 @@ void LIN_SelectPath(void)
 	SelectLinesInHalfPath(start_L, LineDefs[start_L]->start, seen, match);
 	SelectLinesInHalfPath(start_L, LineDefs[start_L]->end,   seen, match);
 
+	Editor_ClearErrorMode();
+
 	if (! additive)
 		edit.Selected->clear_all();
 
@@ -358,6 +360,7 @@ void SEC_SelectGroup(void)
 		additive = false;
 	}
 
+
 	int start_sec = edit.highlighted.num;
 
 	bool unset_them = false;
@@ -369,10 +372,11 @@ void SEC_SelectGroup(void)
 
 	seen.set(start_sec);
 
-	// TODO: use a bitvec for 'seen' (should be much faster)
-
 	while (GrowContiguousSectors(seen, match))
 	{ }
+
+
+	Editor_ClearErrorMode();
 
 	if (! additive)
 		edit.Selected->clear_all();
@@ -433,6 +437,7 @@ void GoToSelection()
 */
 void GoToObject(const Objid& objid)
 {
+	edit.error_mode = false;
 	edit.Selected->clear_all();
 	edit.Selected->set(objid.num);
 
@@ -457,11 +462,6 @@ void CMD_JumpToObject(void)
 		return;
 	}
 
-	edit.Selected->clear_all();
-	edit.Selected->set(num);
-
-	// alternatively: focus_on_selection()
-
 	GoToObject(Objid(edit.mode, num));
 }
 
@@ -484,9 +484,6 @@ void CMD_NextObject()
 
 	num += 1;
 
-	edit.Selected->clear_all();
-	edit.Selected->set(num);
-
 	GoToObject(Objid(edit.mode, num));
 }
 
@@ -508,9 +505,6 @@ void CMD_PrevObject()
 	}
 
 	num -= 1;
-
-	edit.Selected->clear_all();
-	edit.Selected->set(num);
 
 	GoToObject(Objid(edit.mode, num));
 }
