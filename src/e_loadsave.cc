@@ -894,16 +894,16 @@ void CMD_FlipMap()
 
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
+	// the level might not be found (lev_idx < 0) -- that is OK
 	int lev_idx = wad->FindLevel_Raw(Level_name);
 	int max_idx = wad->NumLevels() - 1;
 
 	if (max_idx < 0)
 	{
-		Beep("FlipMap: no maps ?!?");
+		Beep("No maps ?!?");
 		return;
 	}
 
-	SYS_ASSERT(lev_idx >= 0);
 	SYS_ASSERT(lev_idx <= max_idx);
 
 
