@@ -97,9 +97,17 @@ Img * W_GetFlat(const char *name)
 	if (P != flats.end())
 		return P->second;
 
-	//???  flats[f_str] = NULL
-
 	return NULL;
+}
+
+
+bool W_FlatExists(const char *name)
+{
+	std::string f_str = name;
+
+	std::map<std::string, Img *>::iterator P = flats.find(f_str);
+
+	return (P != flats.end());
 }
 
 

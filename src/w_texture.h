@@ -31,9 +31,9 @@
 
 void W_LoadTextures();
 
-Img * W_GetTexture(const char *name);
+bool W_TextureExists(const char *name);
 
-// TODO  Img * W_PlaceholderTex()
+Img * W_GetTexture(const char *name);
 
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 

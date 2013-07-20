@@ -29,13 +29,11 @@
 
 #include "im_img.h"
 
-
 void W_LoadFlats();
 
+bool W_FlatExists(const char *name);
+
 Img * W_GetFlat(const char *name);
-
-// TODO  Img * W_PlaceholderFlat()
-
 
 #endif  /* __EUREKA_W_FLATS_H__ */
 

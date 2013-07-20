@@ -210,7 +210,7 @@ void W_LoadTextures()
 Img * W_GetTexture(const char *name)
 {
 	if (name[0] == 0 || name[0] == '-')
-		return 0;
+		return NULL;
 
 	std::string t_str = name;
 
@@ -220,6 +220,16 @@ Img * W_GetTexture(const char *name)
 		return P->second;
 
 	return NULL;
+}
+
+
+bool W_TextureExists(const char *name)
+{
+	std::string t_str = name;
+
+	std::map<std::string, Img *>::iterator P = textures.find(t_str);
+
+	return (P != textures.end());
 }
 
 
