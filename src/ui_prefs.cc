@@ -145,7 +145,7 @@ public:
 		  o->hide();  // TODO: IMPLEMENT THIS
 		}
 
-		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
+		{ context = new Fl_Choice(85, 65, 150, 25, "View:");
 		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|General");
 		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)validate_callback, this);
@@ -636,17 +636,22 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 50, 280, 30, "glBSP Node Building");
+		{ Fl_Box* o = new Fl_Box(25, 50, 280, 30, "3D Preview Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ bsp_warn = new Fl_Check_Button(60, 90, 220, 30, " Show all warning messages");
+
+		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ bsp_warn = new Fl_Check_Button(60, 290, 220, 30, " Show all warning messages");
 		  bsp_warn->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_verbose = new Fl_Check_Button(60, 120, 350, 30, " Verbose -- show information about each level");
+		{ bsp_verbose = new Fl_Check_Button(60, 320, 350, 30, " Verbose -- show information about each level");
 		  bsp_verbose->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_fast = new Fl_Check_Button(60, 150, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		{ bsp_fast = new Fl_Check_Button(60, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
 		  bsp_fast->down_box(FL_DOWN_BOX);
 		}
 		o->end();
