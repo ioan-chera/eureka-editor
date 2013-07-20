@@ -121,7 +121,7 @@ private:
 	void DrawMapPoint(int map_x, int map_y);
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawMapArrow(int map_x1, int map_y1, unsigned angle);
+	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
 	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);

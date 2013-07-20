@@ -254,9 +254,7 @@ void UI_Canvas::DrawMap()
  */
 void UI_Canvas::DrawGrid_Normal()
 {
-	int grid_step_1 = 1 * grid.step;    // Map units between dots
-	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
-	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
+	int grid_step_1 = 1 * grid.step;
 
 	float pixels_1 = grid.step * grid.Scale;
 
@@ -647,7 +645,7 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 
 	if (big_arrow)
 	{
-		DrawMapArrow(x, y, angle * 182);
+		DrawMapArrow(x, y, r * 2, angle);
 	}
 	else
 	{
@@ -887,7 +885,9 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 			if (edit.error_mode)
 				DrawThing(x, y, r, Things[objnum]->angle, false /* big_arrow */);
 
-			DrawThing(x, y, r * 3 / 2, Things[objnum]->angle, true);
+			r += r / 10 + 4;
+
+			DrawThing(x, y, r, Things[objnum]->angle, true);
 		}
 		break;
 
@@ -1185,59 +1185,59 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2)
  */
 void UI_Canvas::DrawMapVector (int map_x1, int map_y1, int map_x2, int map_y2)
 {
-	int scrx1 = SCREENX (map_x1);
-	int scry1 = SCREENY (map_y1);
-	int scrx2 = SCREENX (map_x2);
-	int scry2 = SCREENY (map_y2);
+	int x1 = SCREENX(map_x1);
+	int y1 = SCREENY(map_y1);
+	int x2 = SCREENX(map_x2);
+	int y2 = SCREENY(map_y2);
 
-	double r  = hypot((double) (scrx1 - scrx2), (double) (scry1 - scry2));
-#if 0
-	/* AYM 19980216 to avoid getting huge arrowheads when zooming in */
-	int    scrXoff = (r >= 1.0) ? (int) ((scrx1 - scrx2) * 8.0 / r * (Scale < 1 ? Scale : 1)) : 0;
-	int    scrYoff = (r >= 1.0) ? (int) ((scry1 - scry2) * 8.0 / r * (Scale < 1 ? Scale : 1)) : 0;
-#else
-	int scrXoff = (r >= 1.0) ? (int) ((scrx1 - scrx2) * 8.0 / r * (grid.Scale / 2)) : 0;
-	int scrYoff = (r >= 1.0) ? (int) ((scry1 - scry2) * 8.0 / r * (grid.Scale / 2)) : 0;
-#endif
+	fl_line(x1, y1, x2, y2);
 
-	fl_line(scrx1, scry1, scrx2, scry2);
+	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
-	scrx1 = scrx2 + 2 * scrXoff;
-	scry1 = scry2 + 2 * scrYoff;
+	if (r2 < 1.0)
+		return;
 
-	fl_line(scrx1 - scrYoff, scry1 + scrXoff, scrx2, scry2);
-	fl_line(scrx1 + scrYoff, scry1 - scrXoff, scrx2, scry2);
+	double scale = (grid.Scale > 1.0) ? sqrt(grid.Scale) : grid.Scale;
+
+	int dx = (int) ((x1 - x2) * 8.0 / r2 * scale);
+	int dy = (int) ((y1 - y2) * 8.0 / r2 * scale);
+
+	x1 = x2 + 2 * dx;
+	y1 = y2 + 2 * dy;
+
+	fl_line(x1 - dy, y1 + dx, x2, y2);
+	fl_line(x1 + dy, y1 - dx, x2, y2);
 }
 
 
 /*
  *  DrawMapArrow - draw an arrow on the screen from map coords and angle (0 - 65535)
  */
-void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, unsigned angle)
+void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
-	int map_x2 = map_x1 + (int) (50 * cos(angle / 10430.37835));
-	int map_y2 = map_y1 + (int) (50 * sin(angle / 10430.37835));
-	int scrx1 = SCREENX(map_x1);
-	int scry1 = SCREENY(map_y1);
-	int scrx2 = SCREENX(map_x2);
-	int scry2 = SCREENY(map_y2);
+	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);
+	int map_y2 = map_y1 + r * sin(angle * M_PI / 180.0);
 
-	double r = hypot(scrx1 - scrx2, scry1 - scry2);
-#if 0
-	int    scrXoff = (r >= 1.0) ? (int) ((scrx1 - scrx2) * 8.0 / r * (Scale < 1 ? Scale : 1)) : 0;
-	int    scrYoff = (r >= 1.0) ? (int) ((scry1 - scry2) * 8.0 / r * (Scale < 1 ? Scale : 1)) : 0;
-#else
-	int scrXoff = (r >= 1.0) ? (int) ((scrx1 - scrx2) * 8.0 / r * (grid.Scale / 2)) : 0;
-	int scrYoff = (r >= 1.0) ? (int) ((scry1 - scry2) * 8.0 / r * (grid.Scale / 2)) : 0;
-#endif
+	int x1 = SCREENX(map_x1);
+	int y1 = SCREENY(map_y1);
+	int x2 = SCREENX(map_x2);
+	int y2 = SCREENY(map_y2);
 
-	fl_line(scrx1, scry1, scrx2, scry2);
+	fl_line(x1, y1, x2, y2);
 
-	scrx1 = scrx2 + 2 * scrXoff;
-	scry1 = scry2 + 2 * scrYoff;
+	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
-	fl_line(scrx1 - scrYoff, scry1 + scrXoff, scrx2, scry2);
-	fl_line(scrx1 + scrYoff, scry1 - scrXoff, scrx2, scry2);
+	if (r2 < 1.0)
+		return;
+
+	int dx = (int) ((x1 - x2) * 12.0 / (double)r2 * (grid.Scale / 2));
+	int dy = (int) ((y1 - y2) * 12.0 / (double)r2 * (grid.Scale / 2));
+
+	x1 = x2 + 2 * dx;
+	y1 = y2 + 2 * dy;
+
+	fl_line(x1 - dy, y1 + dx, x2, y2);
+	fl_line(x1 + dy, y1 - dx, x2, y2);
 }
 
 
