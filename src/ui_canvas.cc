@@ -860,7 +860,7 @@ void UI_Canvas::SplitLineForget()
    highlight the selected object
 */
 void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
-                              bool do_tagged, int dx, int dy)
+                              bool do_tagged, bool skip_lines, int dx, int dy)
 {
 	fl_color(col);
 
@@ -964,18 +964,39 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				if (! LineDefs[n]->TouchesSector(objnum))
+				const LineDef *L = LineDefs[n];
+
+				if (! L->TouchesSector(objnum))
 					continue;
 
-				int x1 = dx + LineDefs[n]->Start()->x;
-				int y1 = dy + LineDefs[n]->Start()->y;
-				int x2 = dx + LineDefs[n]->End  ()->x;
-				int y2 = dy + LineDefs[n]->End  ()->y;
+				bool reverse = false;
+
+				// skip lines if both sides are in the selection
+				if (skip_lines && L->TwoSided())
+				{
+					int sec1 = L->Right()->sector;
+					int sec2 = L->Left ()->sector;
+
+					if ((sec1 == objnum || edit.Selected->get(sec1)) &&
+					    (sec2 == objnum || edit.Selected->get(sec2)))
+						continue;
+
+					if (sec1 != objnum)
+						reverse = true;
+				}
+
+				int x1 = dx + L->Start()->x;
+				int y1 = dy + L->Start()->y;
+				int x2 = dx + L->End  ()->x;
+				int y2 = dy + L->End  ()->y;
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
 
-				DrawMapLine(x1, y1, x2, y2);
+				if (skip_lines)
+					DrawKnobbyLine(x1, y1, x2, y2, reverse);
+				else
+					DrawMapLine(x1, y1, x2, y2);
 			}
 
 			fl_line_style(FL_SOLID);
@@ -1098,7 +1119,7 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 */
 void UI_Canvas::DrawSelection(selection_c * list)
 {
-	if (! list)
+	if (! list || list->empty())
 		return;
 
 	selection_iterator_c it;
@@ -1124,7 +1145,8 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		DrawHighlight(list->what_type(), *it, edit.error_mode ? FL_RED : SEL_COL,
-		              ! edit.error_mode /* do_tagged */, dx, dy);
+		              ! edit.error_mode /* do_tagged */,
+					  true /* skip_lines */, dx, dy);
 	}
 }
 
@@ -1150,12 +1172,19 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
-void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2)
+void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
+                               bool reverse)
 {
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
+
+	if (reverse)
+	{
+		std::swap(x1, x2);
+		std::swap(y1, y2);
+	}
 
     fl_line(x1, y1, x2, y2);
 

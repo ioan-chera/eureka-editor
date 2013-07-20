@@ -79,7 +79,8 @@ public:
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
-	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true, int dx=0, int dy=0);
+	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true,
+	                   bool skip_lines = false, int dx=0, int dy=0);
 	void DrawHighlightScaled(int objtype, int objnum, Fl_Color col);
 
 	void SelboxBegin(int map_x, int map_y);
@@ -122,7 +123,7 @@ private:
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
-	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2, bool reverse = false);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
 	void DrawCamera();
