@@ -3,22 +3,22 @@ Eureka TODO / WISHLIST
 ======================
 
 
->>>>  improve log window : buttons at bottom: SAVE  CLEAR  CLOSE
-
-
->>>  clear 'error_mode' when selecting objects (etc?)
-
-
--  ability to show line lengths, especially a newly added line
+!!  lump order problem on map save  [how to trigger??]
 
 
 !!  opening new map : LineDef count (SELECTION, etc) not updated
+    [can crash too]
 
 
 !!  setting a texture does not update 3D view
 
 
--  grid : darked color when lines get very close
+-  ability to show line lengths, especially a newly added line
+
+
++  grid : scroll speed preferences
+
++  grid : darker color when lines get very close
 
 -  gravity mode : an option to NOT allow up/down movement
 
@@ -41,13 +41,8 @@ ______________________________________________________________________
 General
 -------
 
-+  grid stuff: 
-
-   +  scroll speed settings
-
-   +  automatically darken lines when close together
-
-+  CHECK screen  (see misc/Checks.txt for more info)
++  CHECK screen
+   -  Texture checks
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -139,8 +134,6 @@ General
 
 +  check that current pwad has been externally modified
 
-+  ability to hide the right-side panel
-
 +  Preferences window:
    +  add backup_max_files / backup_max_space
    -  implement the scrolling sizes
@@ -159,11 +152,13 @@ WISH: support Windows 95/98/ME
 WISH: support UDMF format
 
 
+-  ability to hide the right-side panel
+
 -  File / Delete Map
 
--  Scripting language
-
 -  File / Rename Map
+
+-  Scripting language
 
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
    (perhaps prefix with MENU_xxx)
@@ -182,7 +177,7 @@ WISH: support UDMF format
 -  in EUREKA lump, if a path is under $HOME store it as "~/blah..."
    and expand that syntax on load.
 
--  ability to use an external node builder
+NO: ability to use an external node builder
 
 ?  an auto-save feature (e.g. save every N minutes unless no
    changes occurred in the last N minutes).
