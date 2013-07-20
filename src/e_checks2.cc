@@ -1099,14 +1099,201 @@ check_result_e CHECK_Tags(int min_severity)
 
 //------------------------------------------------------------------------
 
+void Textures_FindMissing(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (rand() & 127)
+			continue;
+
+		lines.set(n);
+	}
+}
+
+
+void Textures_ShowMissing()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Textures_FindMissing(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+
+void Textures_FixMissing()
+{
+	// FIXME
+}
+
+
+void Textures_FindUnknownTex(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (rand() & 127)
+			continue;
+
+		lines.set(n);
+	}
+}
+
+
+void Textures_FindUnknownFlat(selection_c& secs)
+{
+	secs.change_type(OBJ_SECTORS);
+
+	for (int n = 0 ; n < NumSectors ; n++)
+	{
+		const Sector *S = Sectors[n];
+
+		if (rand() & 63)
+			continue;
+
+		secs.set(n);
+	}
+}
+
 
 //------------------------------------------------------------------------
 
+class UI_Check_Textures : public UI_Check_base
+{
+public:
+	UI_Check_Textures(bool all_mode) :
+		UI_Check_base(520, 286, all_mode, "Check : Textures",
+		              "Texture test results")
+	{ }
+
+public:
+	static void action_show_unk_tex(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+//!!!		Textures_ShowMissing();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_unk_tex(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+//!!!		Textures_FixMissing();
+		dialog->user_action = CKR_TookAction;
+	}
+
+
+	static void action_show_unk_flat(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+//!!!		Textures_ShowMissing();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_unk_flat(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+//!!!		Textures_FixMissing();
+		dialog->user_action = CKR_TookAction;
+	}
+
+
+	static void action_show_missing(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_ShowMissing();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_missing(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_FixMissing();
+		dialog->user_action = CKR_TookAction;
+	}
+};
+
+
 check_result_e CHECK_Textures(int min_severity)
 {
-	// FIXME
+	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0);
 
-	return CKR_OK;
+	selection_c  sel, other;
+
+	for (;;)
+	{
+		Textures_FindUnknownTex(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unknown textures");
+		else
+		{
+			sprintf(check_buffer, "%d unknown textures", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 270,
+			                "Show", &UI_Check_Textures::action_show_unk_tex,
+			                "Fix",  &UI_Check_Textures::action_fix_unk_tex);
+		}
+
+
+		Textures_FindUnknownFlat(sel);
+
+		if (other.empty())
+			dialog->AddLine("No unknown flats");
+		else
+		{
+			sprintf(check_buffer, "%d unknown flats", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 270,
+			                "Show", &UI_Check_Textures::action_show_unk_flat,
+			                "Fix",  &UI_Check_Textures::action_fix_unk_flat);
+		}
+
+
+		Textures_FindMissing(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No missing textures on walls");
+		else
+		{
+			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 270,
+			                "Show", &UI_Check_Textures::action_show_missing,
+			                "Fix",  &UI_Check_Textures::action_fix_missing);
+		}
+
+
+		if (dialog->WorstSeverity() < min_severity)
+		{
+			delete dialog;
+
+			return CKR_OK;
+		}
+
+		check_result_e result = dialog->Run();
+
+		if (result == CKR_TookAction)
+		{
+			// repeat the tests
+			dialog->Reset();
+			continue;
+		}
+
+		delete dialog;
+
+		return result;
+	}
 }
 
 //--- editor settings ---
