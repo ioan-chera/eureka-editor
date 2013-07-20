@@ -39,6 +39,8 @@
 #include "objects.h"
 #include "selectn.h"
 #include "w_rawdef.h"
+#include "w_flats.h"
+#include "w_texture.h"
 #include "ui_window.h"
 #include "x_hover.h"
 
@@ -1141,12 +1143,32 @@ void Textures_FindUnknownTex(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
+		bool has_unknown = false;
+
 		const LineDef *L = LineDefs[n];
 
-		if (rand() & 127)
-			continue;
+		for (int side = 0 ; side < 2 ; side++)
+		{
+			const SideDef *SD = side ? L->Left() : L->Right();
 
-		lines.set(n);
+			if (! SD)
+				continue;
+
+			for (int part = 0 ; part < 3 ; part++)
+			{
+				const char *tex = (part == 0) ? SD->LowerTex() :
+								  (part == 1) ? SD->UpperTex() : SD->MidTex();
+
+				if (strcmp(tex, "-") == 0)
+					continue;
+
+				if (! W_TextureExists(tex))
+					has_unknown = true;
+			}
+		}
+
+		if (has_unknown)
+			lines.set(n);
 	}
 }
 
@@ -1155,15 +1177,43 @@ void Textures_FindUnknownFlat(selection_c& secs)
 {
 	secs.change_type(OBJ_SECTORS);
 
-	for (int n = 0 ; n < NumSectors ; n++)
+	for (int s = 0 ; s < NumSectors ; s++)
 	{
-		const Sector *S = Sectors[n];
+		const Sector *S = Sectors[s];
 
-		if (rand() & 63)
-			continue;
-
-		secs.set(n);
+		if (! W_FlatExists(S->FloorTex()) ||
+			! W_FlatExists(S->CeilTex()))
+		{
+			secs.set(s);
+		}
 	}
+}
+
+
+void Textures_ShowUnknownTex()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Textures_FindUnknownTex(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
+}
+
+void Textures_ShowUnknownFlat()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	Textures_FindUnknownFlat(*edit.Selected);
+
+	GoToSelection();
+
+	edit.error_mode = true;
+	edit.RedrawMap = 1;
 }
 
 
@@ -1173,7 +1223,7 @@ class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Textures",
+		UI_Check_base(520, 226, all_mode, "Check : Textures",
 		              "Texture test results")
 	{ }
 
@@ -1181,7 +1231,7 @@ public:
 	static void action_show_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-//!!!		Textures_ShowMissing();
+		Textures_ShowUnknownTex();
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1196,7 +1246,7 @@ public:
 	static void action_show_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-//!!!		Textures_ShowMissing();
+		Textures_ShowUnknownFlat();
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1228,7 +1278,7 @@ check_result_e CHECK_Textures(int min_severity)
 {
 	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0);
 
-	selection_c  sel, other;
+	selection_c  sel;
 
 	for (;;)
 	{
@@ -1248,7 +1298,7 @@ check_result_e CHECK_Textures(int min_severity)
 
 		Textures_FindUnknownFlat(sel);
 
-		if (other.empty())
+		if (sel.empty())
 			dialog->AddLine("No unknown flats");
 		else
 		{
