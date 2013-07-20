@@ -1137,9 +1137,26 @@ void Textures_FixMissing()
 }
 
 
-void Textures_FindUnknownTex(selection_c& lines)
+static void bump_unknown_name(std::map<std::string, int>& list,
+                              const char *name)
+{
+	std::string t_name = name;
+
+	int count = 0;
+
+	if (list.find(t_name) != list.end())
+		count = list[t_name];
+
+	list[t_name] = count + 1;
+}
+
+
+void Textures_FindUnknownTex(selection_c& lines,
+                             std::map<std::string, int>& names)
 {
 	lines.change_type(OBJ_LINEDEFS);
+
+	names.clear();
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1163,7 +1180,11 @@ void Textures_FindUnknownTex(selection_c& lines)
 					continue;
 
 				if (! W_TextureExists(tex))
+				{
+					bump_unknown_name(names, tex);
+
 					has_unknown = true;
+				}
 			}
 		}
 
@@ -1173,18 +1194,27 @@ void Textures_FindUnknownTex(selection_c& lines)
 }
 
 
-void Textures_FindUnknownFlat(selection_c& secs)
+void Textures_FindUnknownFlat(selection_c& secs, 
+                              std::map<std::string, int>& names)
 {
 	secs.change_type(OBJ_SECTORS);
+
+	names.clear();
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
 		const Sector *S = Sectors[s];
 
-		if (! W_FlatExists(S->FloorTex()) ||
-			! W_FlatExists(S->CeilTex()))
+		for (int part = 0 ; part < 2 ; part++)
 		{
-			secs.set(s);
+			const char *flat = part ? S->CeilTex() : S->FloorTex();
+
+			if (! W_FlatExists(flat))
+			{
+				bump_unknown_name(names, flat);
+
+				secs.set(s);
+			}
 		}
 	}
 }
@@ -1195,7 +1225,9 @@ void Textures_ShowUnknownTex()
 	if (edit.mode != OBJ_LINEDEFS)
 		Editor_ChangeMode('l');
 
-	Textures_FindUnknownTex(*edit.Selected);
+	std::map<std::string, int> names;
+
+	Textures_FindUnknownTex(*edit.Selected, names);
 
 	GoToSelection();
 
@@ -1203,17 +1235,45 @@ void Textures_ShowUnknownTex()
 	edit.RedrawMap = 1;
 }
 
+
 void Textures_ShowUnknownFlat()
 {
 	if (edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
 
-	Textures_FindUnknownFlat(*edit.Selected);
+	std::map<std::string, int> names;
+
+	Textures_FindUnknownFlat(*edit.Selected, names);
 
 	GoToSelection();
 
 	edit.error_mode = true;
 	edit.RedrawMap = 1;
+}
+
+
+void Textures_LogUnknown(bool do_flat)
+{
+	selection_c sel;
+
+	std::map<std::string, int> names;
+	std::map<std::string, int>::iterator IT;
+
+	if (do_flat)
+		Textures_FindUnknownFlat(sel, names);
+	else
+		Textures_FindUnknownTex(sel, names);
+
+	LogPrintf("\n");
+	LogPrintf("Unknown %s:\n", do_flat ? "Flats" : "Textures");
+	LogPrintf("{\n");
+
+	for (IT = names.begin() ; IT != names.end() ; IT++)
+		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
 }
 
 
@@ -1235,6 +1295,13 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+	static void action_log_unk_tex(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_LogUnknown(false);
+		dialog->user_action = CKR_Highlight;
+	}
+
 	static void action_fix_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
@@ -1247,6 +1314,13 @@ public:
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
 		Textures_ShowUnknownFlat();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_log_unk_flat(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_LogUnknown(true);
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1280,32 +1354,36 @@ check_result_e CHECK_Textures(int min_severity)
 
 	selection_c  sel;
 
+	std::map<std::string, int> names;
+
 	for (;;)
 	{
-		Textures_FindUnknownTex(sel);
+		Textures_FindUnknownTex(sel, names);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown textures");
 		else
 		{
-			sprintf(check_buffer, "%d unknown textures", sel.count_obj());
+			sprintf(check_buffer, "%u unknown textures", names.size());
 
-			dialog->AddLine(check_buffer, 2, 270,
+			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_tex,
+			                "Log",  &UI_Check_Textures::action_log_unk_tex,
 			                "Fix",  &UI_Check_Textures::action_fix_unk_tex);
 		}
 
 
-		Textures_FindUnknownFlat(sel);
+		Textures_FindUnknownFlat(sel, names);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown flats");
 		else
 		{
-			sprintf(check_buffer, "%d unknown flats", sel.count_obj());
+			sprintf(check_buffer, "%u unknown flats", names.size());
 
-			dialog->AddLine(check_buffer, 2, 270,
+			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_flat,
+			                "Log",  &UI_Check_Textures::action_log_unk_flat,
 			                "Fix",  &UI_Check_Textures::action_fix_unk_flat);
 		}
 
