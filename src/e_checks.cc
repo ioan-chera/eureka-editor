@@ -1036,8 +1036,21 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 
 //------------------------------------------------------------------------
 
-void Things_FindUnknown(selection_c& list)
+static void bump_unknown_type(std::map<int, int>& list, int type)
 {
+	int count = 0;
+
+	if (list.find(type) != list.end())
+		count = list[type];
+
+	list[type] = count + 1;
+}
+
+
+void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
+{
+	types.clear();
+
 	list.change_type(OBJ_THINGS);
 
 	for (int n = 0 ; n < NumThings ; n++)
@@ -1045,7 +1058,11 @@ void Things_FindUnknown(selection_c& list)
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
 		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		{
+			bump_unknown_type(types, Things[n]->type);
+
 			list.set(n);
+		}
 	}
 }
 
@@ -1055,13 +1072,39 @@ void Things_ShowUnknown()
 	if (edit.mode != OBJ_THINGS)
 		Editor_ChangeMode('t');
 
-	Things_FindUnknown(*edit.Selected);
+	std::map<int, int> types;
+
+	Things_FindUnknown(*edit.Selected, types);
 
 	GoToSelection();
 
 	edit.error_mode = true;
 	edit.RedrawMap = 1;
 }
+
+
+void Things_LogUnknown()
+{
+	selection_c sel;
+
+	std::map<int, int> types;
+	std::map<int, int>::iterator IT;
+
+	Things_FindUnknown(sel, types);
+
+	LogPrintf("\n");
+	LogPrintf("Unknown Things:\n");
+	LogPrintf("{\n");
+
+	for (IT = types.begin() ; IT != types.end() ; IT++)
+		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
+}
+
+
 
 
 // this returns a bitmask : bits 0..3 for players 1..4
@@ -1098,11 +1141,18 @@ void Things_FindInVoid(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
+		int x = Things[n]->x;
+		int y = Things[n]->y;
+
 		Objid obj;
 
-		GetCurObject(obj, OBJ_SECTORS, Things[n]->x, Things[n]->y);
+		GetCurObject(obj, OBJ_SECTORS, x, y);
 
-		if (obj.is_nil())
+		if (obj())
+			continue;
+
+		// FIXME: verify more coords
+
 			list.set(n);
 	}
 }
@@ -1327,6 +1377,21 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+	static void action_log_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_LogUnknown();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+//!!!!		Things_RemoveUnknown();
+		dialog->user_action = CKR_TookAction;
+	}
+
+
 	static void action_show_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
@@ -1349,8 +1414,27 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 	selection_c  sel;
 
+	std::map<int, int> types;
+
 	for (;;)
 	{
+		Things_FindUnknown(sel, types);
+
+		if (sel.empty())
+			dialog->AddLine("No unknown thing types");
+		else
+		{
+			sprintf(check_message, "%u unknown things", types.size());
+
+			dialog->AddLine(check_message, 2, 200,
+			                "Show",   &UI_Check_Things::action_show_unknown,
+			                "Log",    &UI_Check_Things::action_log_unknown,
+			                "Remove", &UI_Check_Things::action_remove_unknown);
+		}
+
+		dialog->AddGap(10);
+
+
 		Things_FindStuckies(sel);
 
 		if (sel.empty())
@@ -1374,22 +1458,8 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",  &UI_Check_Things::action_show_void);
+			// TODO: "Remove"
 		}
-
-
-		Things_FindUnknown(sel);
-
-		if (sel.empty())
-			dialog->AddLine("No unknown thing types");
-		else
-		{
-			sprintf(check_message, "%d unknown things", sel.count_obj());
-
-			dialog->AddLine(check_message, 2, 210,
-			                "Show",  &UI_Check_Things::action_show_unknown);
-		}
-
-		dialog->AddGap(10);
 
 
 		int dm_num, mask;
