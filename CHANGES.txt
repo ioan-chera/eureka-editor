@@ -8,11 +8,12 @@ CHANGES IN Eureka 1.00
 
 +  fixed splitting void islands
 
++  improved grid, with configurable colors
+
++  support multiple filenames: new 'File/Given Files' menu
+
 +  scroll-bars for the map view (optional)
 
-+  configurable grid colors
-
--  support multiple filenames, new 'File/Given Files' sub-menu
 -  commands to go to the next or previous file
 -  commands to go to next/previous map ('N' and 'P' keys)
 -  changed 'File/Recent Files' to be a sub-menu
@@ -36,8 +37,8 @@ CHANGES IN Eureka 1.00
 
 -  the ';' key waits for next key and makes it META
 
--  better drawing of highlighted things and linedefs
 -  better drawing of selected sectors
+-  better drawing of highlighted things and linedefs
 
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
