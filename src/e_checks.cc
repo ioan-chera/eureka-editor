@@ -331,8 +331,6 @@ void Vertex_RemoveUnused()
 	BA_Begin();
 	DeleteObjects(&sel);
 	BA_End();
-
-//??	Status_Set("Removed %d vertices", sel.count_obj());
 }
 
 
@@ -1105,6 +1103,18 @@ void Things_LogUnknown()
 }
 
 
+void Things_RemoveUnknown()
+{
+	selection_c sel;
+
+	std::map<int, int> types;
+
+	Things_FindUnknown(sel, types);
+
+	BA_Begin();
+	DeleteObjects(&sel);
+	BA_End();
+}
 
 
 // this returns a bitmask : bits 0..3 for players 1..4
@@ -1139,6 +1149,8 @@ void Things_FindInVoid(selection_c& list)
 {
 	list.change_type(OBJ_THINGS);
 
+	// TODO: allow certain thing types (especially sound emitters)
+
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -1151,8 +1163,21 @@ void Things_FindInVoid(selection_c& list)
 		if (obj())
 			continue;
 
-		// FIXME: verify more coords
+		// check more coords around the thing's centre, to be sure
+		int out_count = 0;
 
+		for (int corner = 0 ; corner < 4 ; corner++)
+		{
+			int x2 = x + ((corner & 1) ? -4 : +4);
+			int y2 = y + ((corner & 2) ? -4 : +4);
+
+			GetCurObject(obj, OBJ_SECTORS, x2, y2);
+
+			if (! obj())
+				out_count++;
+		}
+
+		if (out_count == 4)
 			list.set(n);
 	}
 }
@@ -1171,6 +1196,20 @@ void Things_ShowInVoid()
 	edit.RedrawMap = 1;
 }
 
+
+void Things_RemoveInVoid()
+{
+	selection_c sel;
+
+	Things_FindInVoid(sel);
+
+	BA_Begin();
+	DeleteObjects(&sel);
+	BA_End();
+}
+
+
+//------------------------------------------------------------------------
 
 static void CollectBlockingThings(std::vector<int>& list,
                                   std::vector<int>& sizes)
@@ -1387,7 +1426,7 @@ public:
 	static void action_remove_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-//!!!!		Things_RemoveUnknown();
+		Things_RemoveUnknown();
 		dialog->user_action = CKR_TookAction;
 	}
 
@@ -1396,6 +1435,13 @@ public:
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 		Things_ShowInVoid();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove_void(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_RemoveInVoid();
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1432,8 +1478,6 @@ check_result_e CHECK_Things(int min_severity = 0)
 			                "Remove", &UI_Check_Things::action_remove_unknown);
 		}
 
-		dialog->AddGap(10);
-
 
 		Things_FindStuckies(sel);
 
@@ -1457,9 +1501,12 @@ check_result_e CHECK_Things(int min_severity = 0)
 			sprintf(check_message, "%d things in the void", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 200,
-			                "Show",  &UI_Check_Things::action_show_void);
-			// TODO: "Remove"
+			                "Show",   &UI_Check_Things::action_show_void,
+			                "Remove", &UI_Check_Things::action_remove_void);
 		}
+
+
+		dialog->AddGap(10);
 
 
 		int dm_num, mask;
