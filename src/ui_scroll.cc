@@ -30,7 +30,8 @@
 #define HUGE_DIST  (1 << 24)
 
 
-#define SCRBAR_COL  (gui_scheme == 2 ? FL_GRAY0 : FL_LIGHT2)
+#define SCRBAR_BACK  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
+#define SCRBAR_COL   (gui_scheme == 2 ? FL_DARK1 : FL_BACKGROUND_COLOR)
 
 
 //
@@ -46,7 +47,7 @@ UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
 	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
 
 	scrollbar->align(FL_ALIGN_LEFT);
-	scrollbar->color(FL_DARK2, FL_DARK2);
+	scrollbar->color(SCRBAR_BACK, SCRBAR_BACK);
 	scrollbar->selection_color(SCRBAR_COL);
 	scrollbar->callback(bar_callback, this);
 
@@ -286,8 +287,8 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 
 	vert->type(FL_VERTICAL);
 	vert->align(FL_ALIGN_LEFT);
-	vert->color(FL_DARK3, FL_DARK3);
-//	vert->selection_color(SCRBAR_COL);
+	vert->color(SCRBAR_BACK, SCRBAR_BACK);
+	vert->selection_color(SCRBAR_COL);
 	vert->callback(bar_callback, this);
 
 
@@ -295,8 +296,8 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 
 	horiz->type(FL_HORIZONTAL);
 	horiz->align(FL_ALIGN_LEFT);
-	horiz->color(FL_DARK3, FL_DARK3);
-//	horiz->selection_color(SCRBAR_COL);
+	horiz->color(SCRBAR_BACK, SCRBAR_BACK);
+	horiz->selection_color(SCRBAR_COL);
 	horiz->callback(bar_callback, this);
 
 
