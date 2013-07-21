@@ -1448,7 +1448,7 @@ public:
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 		Things_RemoveInVoid();
-		dialog->user_action = CKR_Highlight;
+		dialog->user_action = CKR_TookAction;
 	}
 
 	static void action_show_stuck(Fl_Widget *w, void *data)
