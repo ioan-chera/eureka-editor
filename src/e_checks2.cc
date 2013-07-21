@@ -1135,6 +1135,10 @@ void Textures_FindMissing(selection_c& lines)
 			if (back->floorh < front->floorh && is_missing(L->Left()->LowerTex()))
 				lines.set(n);
 
+			// missing uppers are OK when between two sky ceilings
+			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+				continue;
+
 			if (front->ceilh > back->ceilh && is_missing(L->Right()->UpperTex()))
 				lines.set(n);
 
@@ -1189,6 +1193,10 @@ void Textures_FixMissing()
 
 			if (back->floorh < front->floorh && is_missing(L->Left()->LowerTex()))
 				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_lower);
+
+			// missing uppers are OK when between two sky ceilings
+			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+				continue;
 
 			if (front->ceilh > back->ceilh && is_missing(L->Right()->UpperTex()))
 				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_upper);
