@@ -1163,6 +1163,12 @@ void Things_FindInVoid(selection_c& list)
 		if (obj())
 			continue;
 
+		// allow certain things in the void (Heretic sounds)
+		const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+		if (info->flags & THINGDEF_VOID)
+			continue;
+
 		// check more coords around the thing's centre, to be sure
 		int out_count = 0;
 
@@ -1487,7 +1493,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		{
 			sprintf(check_message, "%d stuck actors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 170,
+			dialog->AddLine(check_message, 2, 200,
 			                "Show",  &UI_Check_Things::action_show_stuck);
 		}
 
