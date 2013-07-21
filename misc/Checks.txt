@@ -7,6 +7,7 @@ LineDefs
 +  linedefs which directly overlap (share a pair of vertices)
 +  linedefs which partially overlap / cross over  [ties in with unclosed logic]
 
+-  unknown specials
 
 -  one-sided lines without IMPASS flag   [FIX]
 
@@ -26,6 +27,8 @@ Sectors
 +  sectors with ceil_h < floor_h
 
 -  sidedefs used on multiple lines (or same line twice)  [UNPACK]
+
+-  unknown specials
 
 -  unused sectors   [REMOVE]
 -  unused sidedefs  [REMOVE]
