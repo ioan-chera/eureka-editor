@@ -1277,6 +1277,68 @@ void Textures_LogUnknown(bool do_flat)
 }
 
 
+void Textures_FixUnknownTex()
+{
+	int new_upper = BA_InternaliseString(default_upper_tex);
+	int new_mid   = BA_InternaliseString(default_mid_tex);
+	int new_lower = BA_InternaliseString(default_lower_tex);
+
+	int null_tex = BA_InternaliseString("-");
+
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		bool two_sided = L->TwoSided();
+
+		for (int side = 0 ; side < 2 ; side++)
+		{
+			int sd_num = side ? L->left : L->right;
+
+			if (sd_num < 0)
+				continue;
+
+			const SideDef *SD = SideDefs[sd_num];
+
+			if (! W_TextureExists(SD->LowerTex()))
+				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_lower);
+
+			if (! W_TextureExists(SD->UpperTex()))
+				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_upper);
+
+			if (! W_TextureExists(SD->MidTex()))
+				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_mid);
+		}
+	}
+
+	BA_End();
+}
+
+
+void Textures_FixUnknownFlat()
+{
+	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+
+	BA_Begin();
+
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		const Sector *S = Sectors[s];
+
+		if (! W_FlatExists(S->FloorTex()))
+			BA_ChangeSEC(s, Sector::F_FLOOR_TEX, new_floor);
+
+		if (! W_FlatExists(S->CeilTex()))
+			BA_ChangeSEC(s, Sector::F_CEIL_TEX, new_ceil);
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Textures : public UI_Check_base
@@ -1305,7 +1367,7 @@ public:
 	static void action_fix_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-//!!!		Textures_FixMissing();
+		Textures_FixUnknownTex();
 		dialog->user_action = CKR_TookAction;
 	}
 
@@ -1327,7 +1389,7 @@ public:
 	static void action_fix_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-//!!!		Textures_FixMissing();
+		Textures_FixUnknownFlat();
 		dialog->user_action = CKR_TookAction;
 	}
 
@@ -1396,7 +1458,7 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 270,
+			dialog->AddLine(check_buffer, 1, 260,
 			                "Show", &UI_Check_Textures::action_show_missing,
 			                "Fix",  &UI_Check_Textures::action_fix_missing);
 		}
