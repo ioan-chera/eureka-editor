@@ -22,8 +22,6 @@ Eureka TODO / WISHLIST
 
 -  gravity mode : an option to NOT allow up/down movement
 
--  scrollbar colors for other schemes
-
 
 TEST: Maximize on startup in WIN32
 
@@ -40,9 +38,6 @@ ______________________________________________________________________
 
 General
 -------
-
-+  CHECK screen
-   -  Texture checks
 
 +  decent dialogs: printf-style parameter, make message fit,
    provide words for the buttons (like "Quit Without Saving").
@@ -215,13 +210,13 @@ Documentation
 
 +  add supported OSes -- e.g. Windows >= 2000
 
--  make a simple manpage for the debian package
+-  make a manpage for the debian package, list cmdline options
 
 -  document texture browser (RIGHT click etc)
 
--  built-in cheat sheet for mouse buttons and common keys
+NO:  built-in cheat sheet for mouse buttons and common keys
 
-NO:  command line arguments page  [instead: manpage]
+?    command line arguments page
 
 NO:  config file syntax
 
