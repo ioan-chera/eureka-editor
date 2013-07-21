@@ -53,6 +53,7 @@ thinggroup - 0BD "OTHER"
 #    c  :  on ceiling
 #    l  :  lit up
 #    n  :  non-blocking
+#    v  :  can exist in void-space
 #
 
 thing    1 p -  16 PLAY   "Player 1 start"

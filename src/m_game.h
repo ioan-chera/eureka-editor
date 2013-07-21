@@ -91,6 +91,7 @@ typedef enum
 	THINGDEF_CEIL    = (1 << 1),  // hangs from ceiling
 	THINGDEF_LIT     = (1 << 2),  // always bright
 	THINGDEF_PASS    = (1 << 3),  // non-blocking
+	THINGDEF_VOID    = (1 << 4),  // can exist in the void
 }
 thingdef_flags_e;
 
