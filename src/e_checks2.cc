@@ -374,7 +374,7 @@ static bool CheckLinesCross(int A, int B)
 		return false;
 
 	// ignore lines connected at a vertex
-	// FIXME: check for sitting on top
+	// TODO: check for sitting on top
 	if (AL->start == BL->start || AL->start == BL->end) return false;
 	if (AL->end   == BL->start || AL->end   == BL->end) return false;
 
@@ -424,7 +424,7 @@ static bool CheckLinesCross(int A, int B)
 	if (e >  DIST && f >  DIST) return false;
 
 
-	// FIXME: lines are (roughly) co-linear, check for separation
+	// TODO: lines are (roughly) co-linear, check for separation
 
 
 	return true;
@@ -1101,6 +1101,13 @@ check_result_e CHECK_Tags(int min_severity)
 
 //------------------------------------------------------------------------
 
+
+static inline bool is_missing(const char *tex)
+{
+	return (tex[0] == '-');
+}
+
+
 void Textures_FindMissing(selection_c& lines)
 {
 	lines.change_type(OBJ_LINEDEFS);
@@ -1109,10 +1116,31 @@ void Textures_FindMissing(selection_c& lines)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (rand() & 127)
+		if (L->right < 0)
 			continue;
 
-		lines.set(n);
+		if (L->OneSided())
+		{
+			if (is_missing(L->Right()->MidTex()))
+				lines.set(n);
+		}
+		else  // Two Sided
+		{
+			const Sector *front = L->Right()->SecRef();
+			const Sector *back  = L->Left() ->SecRef();
+
+			if (front->floorh < back->floorh && is_missing(L->Right()->LowerTex()))
+				lines.set(n);
+
+			if (back->floorh < front->floorh && is_missing(L->Left()->LowerTex()))
+				lines.set(n);
+
+			if (front->ceilh > back->ceilh && is_missing(L->Right()->UpperTex()))
+				lines.set(n);
+
+			if (back->ceilh > front->ceilh && is_missing(L->Left()->UpperTex()))
+				lines.set(n);
+		}
 	}
 }
 
@@ -1133,7 +1161,44 @@ void Textures_ShowMissing()
 
 void Textures_FixMissing()
 {
-	// FIXME
+	int new_upper = BA_InternaliseString(default_upper_tex);
+	int new_mid   = BA_InternaliseString(default_mid_tex);
+	int new_lower = BA_InternaliseString(default_lower_tex);
+
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right < 0)
+			continue;
+
+		if (L->OneSided())
+		{
+			if (is_missing(L->Right()->MidTex()))
+				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_mid);
+		}
+		else  // Two Sided
+		{
+			const Sector *front = L->Right()->SecRef();
+			const Sector *back  = L->Left() ->SecRef();
+
+			if (front->floorh < back->floorh && is_missing(L->Right()->LowerTex()))
+				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_lower);
+
+			if (back->floorh < front->floorh && is_missing(L->Left()->LowerTex()))
+				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_lower);
+
+			if (front->ceilh > back->ceilh && is_missing(L->Right()->UpperTex()))
+				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_upper);
+
+			if (back->ceilh > front->ceilh && is_missing(L->Left()->UpperTex()))
+				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_upper);
+		}
+	}
+
+	BA_End();
 }
 
 
@@ -1160,8 +1225,6 @@ void Textures_FindUnknownTex(selection_c& lines,
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		bool has_unknown = false;
-
 		const LineDef *L = LineDefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
@@ -1183,13 +1246,10 @@ void Textures_FindUnknownTex(selection_c& lines,
 				{
 					bump_unknown_name(names, tex);
 
-					has_unknown = true;
+					lines.set(n);
 				}
 			}
 		}
-
-		if (has_unknown)
-			lines.set(n);
 	}
 }
 

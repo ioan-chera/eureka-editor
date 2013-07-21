@@ -1149,8 +1149,6 @@ void Things_FindInVoid(selection_c& list)
 {
 	list.change_type(OBJ_THINGS);
 
-	// TODO: allow certain thing types (especially sound emitters)
-
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
