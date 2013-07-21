@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2013 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -27,8 +27,8 @@
 
 #---- BOOM THINGS -------------
 
-thing 5001 - n  20 NULL  "BOOM: Point pusher"
-thing 5002 - n  20 NULL  "BOOM: Point puller"
+thing 5001 - nv  20 NULL  "BOOM: Point pusher"
+thing 5002 - nv  20 NULL  "BOOM: Point puller"
 
 
 #---- BOOM LINETYPES ----------
