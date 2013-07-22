@@ -102,27 +102,6 @@ bool Confirm (int x0, int y0, const char *prompt1, const char *prompt2)
 
 
 /*
- *  Confirm2 - ask for confirmation, in a smarter fashion
- *
- *  Return zero for "no", non-zero for "yes".
- */
-int Confirm2 (int x0, int y0, confirm_t *confirm_flag,
-   const char *prompt1, const char *prompt2)
-{
-	int r;
-
-	if (*confirm_flag == YC_YES)
-		return 1;
-	if (*confirm_flag == YC_NO)
-		return 0;
-	r = Confirm (x0, y0, prompt1, prompt2);
-	if (*confirm_flag == YC_ASK_ONCE)
-		*confirm_flag = r ? YC_YES : YC_NO;  // We won't ask again
-	return r;
-}
-
-
-/*
  *  Notify - notification dialog box
  *
  *  Display a notification and wait for a key (prompt2 may
@@ -172,16 +151,6 @@ void Notify (int x0, int y0, const char *prompt1, const char *prompt2)
 //###  DrawScreenText (text_x0, text_y1 - FONTH - 1, prompt3);
 //###  get_key_or_click ();
 //###  ShowMousePointer ();
-}
-
-
-
-/*
- *  NotImplemented - make the user angry...
- */
-void NotImplemented (void)
-{
-	Notify (-1, -1, "This function is not implemented... Yet!", NULL);
 }
 
 

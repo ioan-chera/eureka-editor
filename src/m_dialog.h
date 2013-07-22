@@ -28,10 +28,7 @@
 #define __EUREKA_M_DIALOG_H__
 
 bool Confirm (int, int, const char *, const char *);
-int Confirm2 (int x0, int y0, confirm_t *confirm_flag,
-   const char *prompt1, const char *prompt2);
 void Notify (int, int, const char *, const char *);
-void NotImplemented (void);
 
 #endif  /* __EUREKA_M_DIALOG_H__ */
 
