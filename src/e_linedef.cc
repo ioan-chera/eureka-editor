@@ -30,7 +30,6 @@
 #include "e_linedef.h"
 #include "editloop.h"
 #include "levels.h"
-#include "m_dialog.h"
 #include "objects.h"
 #include "selectn.h"
 #include "w_rawdef.h"

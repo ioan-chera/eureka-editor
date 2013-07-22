@@ -19,7 +19,6 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
-#include "m_dialog.h"
 #include "m_config.h"
 #include "m_files.h"
 #include "m_game.h"

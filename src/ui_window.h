@@ -23,7 +23,6 @@
 
 #include "ui_menu.h"
 #include "ui_canvas.h"
-#include "ui_dialog.h"
 #include "ui_infobar.h"
 #include "ui_hyper.h"
 #include "ui_nombre.h"

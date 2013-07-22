@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <string>
 
-#include "m_dialog.h"
 #include "m_game.h"      /* yg_picture_format */
 #include "levels.h"
 #include "w_loadpic.h"

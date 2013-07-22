@@ -32,7 +32,6 @@
 #include "im_color.h"
 #include "m_config.h"
 #include "editloop.h"
-#include "m_dialog.h"  /* for Confirm() */
 #include "m_game.h"
 #include "m_files.h"
 #include "levels.h"    /* Because of "viewtex" */

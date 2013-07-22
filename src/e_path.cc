@@ -27,7 +27,6 @@
 #include "main.h"
 
 #include "m_bitvec.h"
-#include "m_dialog.h"
 #include "editloop.h"
 #include "e_path.h"
 #include "levels.h"

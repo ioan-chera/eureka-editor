@@ -26,7 +26,6 @@
 
 #include "main.h"
 
-#include "m_dialog.h"
 #include "levels.h"
 #include "e_linedef.h"
 #include "e_sector.h"

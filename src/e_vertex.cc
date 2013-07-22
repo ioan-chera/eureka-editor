@@ -29,7 +29,6 @@
 #include "editloop.h"
 #include "e_linedef.h"
 #include "e_vertex.h"
-#include "m_dialog.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
 #include "levels.h"

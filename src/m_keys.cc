@@ -20,7 +20,6 @@
 
 #include "main.h"
 #include "m_config.h"
-#include "m_dialog.h"
 #include "vm.h"
 
 #include <algorithm>

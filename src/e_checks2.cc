@@ -33,7 +33,6 @@
 #include "e_vertex.h"
 #include "e_cutpaste.h"
 #include "editloop.h"
-#include "m_dialog.h"
 #include "m_game.h"
 #include "levels.h"
 #include "objects.h"

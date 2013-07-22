@@ -21,7 +21,6 @@
 #include "main.h"
 #include "levels.h"
 #include "e_loadsave.h"
-#include "m_dialog.h"
 #include "m_game.h"
 #include "w_wad.h"
 
