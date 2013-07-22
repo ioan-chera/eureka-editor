@@ -576,8 +576,8 @@ void M_SaveBindings()
 	{
 		LogPrintf("Failed to save key bindings to: %s\n", filename);
 
-		Notify(-1, -1, "Warning: failed to save key bindings\n"
-		               "(filename: %s)", filename);
+		DLG_Notify("Warning: failed to save key bindings\n"
+		           "(filename: %s)", filename);
 		return;
 	}
 

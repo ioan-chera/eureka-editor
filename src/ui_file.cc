@@ -640,8 +640,8 @@ void UI_OpenMap::LoadFile()
 			LogPrintf("Open Map: error choosing file:\n");
 			LogPrintf("   %s\n", chooser.errmsg());
 
-			Notify(-1, -1, "Unable to open the map:",
-					chooser.errmsg());
+			DLG_Notify("Unable to open the map:\n\n%s",
+					   chooser.errmsg());
 			return;
 
 		case 1:
@@ -659,15 +659,15 @@ void UI_OpenMap::LoadFile()
 	{
 		// FIXME: get an error message, add it here
 
-		Notify(-1, -1, "Unable to open the chosen WAD file.\n\n"
-				"Please try again.", NULL);
+		DLG_Notify("Unable to open the chosen WAD file.\n\n"
+				   "Please try again.");
 		return;
 	}
 
 	if (wad->FindFirstLevel() < 0)
 	{
-		Notify(-1, -1, "The chosen WAD contains no levels.\n\n"
-				"Please try again.", NULL);
+		DLG_Notify("The chosen WAD contains no levels.\n\n"
+				   "Please try again.");
 		return;
 	}
 
@@ -929,7 +929,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	switch (chooser.show())
 	{
 		case -1:  // error
-			Notify(-1, -1, "Unable to open that wad:", chooser.errmsg());
+			DLG_Notify("Unable to open that wad:\n\n%s", chooser.errmsg());
 			return;
 
 		case 1:  // cancelled
@@ -945,8 +945,8 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 
 	if (! M_CanLoadDefinitions("games", game))
 	{
-		Notify(-1, -1, "That game is not supported (no definition file).\n\n"
-		               "Please try again.", NULL);
+		DLG_Notify("That game is not supported (no definition file).\n\n"
+		           "Please try again.");
 		return;
 	}
 
@@ -981,7 +981,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	switch (chooser.show())
 	{
 		case -1:  // error
-			Notify(-1, -1, "Unable to open that wad:", chooser.errmsg());
+			DLG_Notify("Unable to open that wad:\n\n%s", chooser.errmsg());
 			return;
 
 		case 1:  // cancelled

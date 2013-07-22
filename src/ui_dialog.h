@@ -20,7 +20,6 @@
 #ifndef __DIALOG_HEADER__
 #define __DIALOG_HEADER__
 
-void DLG_ShowError(const char *msg, ...);
 
 #endif // __DIALOG_HEADER__
 

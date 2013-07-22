@@ -27,8 +27,6 @@
 #ifndef __EUREKA_M_DIALOG_H__
 #define __EUREKA_M_DIALOG_H__
 
-bool Confirm (int, int, const char *, const char *);
-void Notify (int, int, const char *, const char *);
 
 #endif  /* __EUREKA_M_DIALOG_H__ */
 

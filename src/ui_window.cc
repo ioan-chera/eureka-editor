@@ -21,7 +21,6 @@
 #include "main.h"
 #include "ui_window.h"
 #include "w_wad.h"
-#include "m_dialog.h"  // Notify()
 
 #ifndef WIN32
 #include <unistd.h>
@@ -680,8 +679,8 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	switch (chooser.show())
 	{
 		case -1:
-			Notify(-1, -1, "Unable to save the log file:\n",
-			       chooser.errmsg());
+			DLG_Notify("Unable to save the log file:\n\n%s",
+					   chooser.errmsg());
 			return;
 
 		case 1:
@@ -708,7 +707,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	{
 		sprintf(filename, "%s", strerror(errno));
 
-		Notify(-1, -1, "Unable to save the log file:\n", filename);
+		DLG_Notify("Unable to save the log file:\n\n%s", filename);
 		return;
 	}
 

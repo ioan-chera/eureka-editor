@@ -834,8 +834,8 @@ bool M_ParseEurekaLump(Wad_file *wad)
 				new_resources.push_back(StringDup(res));
 			else
 			{
-				Notify(-1, -1, "Warning: the pwad specifies a resource "
-				               "which cannot be found:\n", pos);
+				DLG_Notify("Warning: the pwad specifies a resource "
+				           "which cannot be found:\n\n%s", pos);
 			}
 		}
 		else if (strcmp(line, "port") == 0)
@@ -846,7 +846,7 @@ bool M_ParseEurekaLump(Wad_file *wad)
 			{
 				LogPrintf("  unknown port: %s\n", pos);
 
-				Notify(-1, -1, "Warning: the pwad specifies an unknown port:\n", pos);
+				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", pos);
 			}
 		}
 		else

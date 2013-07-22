@@ -581,7 +581,7 @@ static void ShowLoadProblem()
 		        bad_sector_refs, bad_sidedef_refs);
 	}
 
-	Notify(-1, -1, "Map validation report:\n", message);
+	DLG_Notify("Map validation report:\n\n%s", message);
 }
 
 
@@ -691,7 +691,7 @@ bool CMD_OpenMap()
 	// this shouldn't happen -- but just in case...
 	if (wad->FindLevel(map_name) < 0)
 	{
-		Notify(-1, -1, "Hmmmm, cannot find that map !?!", NULL);
+		DLG_Notify("Hmmmm, cannot find that map !?!");
 		return false;
 	}
 
@@ -753,7 +753,7 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	{
 		// FIXME: get an error message, add it here
 
-		Notify(-1, -1, "Unable to open that WAD file.", NULL);
+		DLG_Notify("Unable to open that WAD file.");
 		return;
 	}
 
@@ -781,7 +781,7 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	{
 		delete wad;
 
-		Notify(-1, -1, "No levels found in that WAD.", NULL);
+		DLG_Notify("No levels found in that WAD.");
 		return;
 	}
 
@@ -789,7 +789,7 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	{
 		delete wad;
 
-		Notify(-1, -1, "Hexen map format is not supported.", NULL);
+		DLG_Notify("Hexen map format is not supported.");
 		return;
 	}
 
@@ -1215,8 +1215,7 @@ void CMD_ExportMap()
 			LogPrintf("Export Map: error choosing file:\n");
 			LogPrintf("   %s\n", chooser.errmsg());
 
-			Notify(-1, -1, "Unable to export the map:",
-			       chooser.errmsg());
+			DLG_Notify("Unable to export the map:\n\n%s", chooser.errmsg());
 			return;
 
 		case 1:
@@ -1253,7 +1252,8 @@ void CMD_ExportMap()
 
 	if (! wad)
 	{
-		Notify(-1, -1, "Unable to export the map:", "Error creating output file");
+		DLG_Notify("Unable to export the map:\n\n%s",
+		           "Error creating output file");
 		return;
 	}
 

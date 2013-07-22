@@ -34,7 +34,7 @@ static void dialog_close_CB(Fl_Widget *w, void *data)
 #define ICON_W  40
 #define ICON_H  40
 
-#define FONT_SIZE  18
+#define FONT_SIZE  16
 
 static void DialogShowAndRun(const char *message, const char *title,
 		const char *link_title, const char *link_url)
@@ -192,6 +192,15 @@ void DLG_ShowError(const char *msg, ...)
 
 	DialogShowAndRun(buffer, "Eureka - Fatal Error", link_title, link_url);
 }
+
+
+void DLG_Notify(const char *msg, ...)
+{
+	// FIXME: TEMP STUFF
+
+	DLG_ShowError("%s", msg);
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

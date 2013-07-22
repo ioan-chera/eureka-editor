@@ -250,7 +250,7 @@ void CMD_BuildNodes()
 {
 	if (! edit_wad)
 	{
-		Notify(-1, -1, "Cannot build nodes unless you are editing a PWAD.", NULL);
+		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return;
 	}
 
@@ -259,7 +259,7 @@ void CMD_BuildNodes()
 		// TODO: ideally ask the question "save changes now?"
 		//       HOWEVER we need to know if that was successful (ouch)
 
-		Notify(-1, -1, "You have unsaved changes, please save them first.", NULL);
+		DLG_Notify("You have unsaved changes, please save them first.");
 		return;
 	}
 
@@ -269,7 +269,7 @@ void CMD_BuildNodes()
 
 	if (MatchExtension(old_name, "new"))
 	{
-		Notify(-1, -1, "Cannot build nodes on a pwad with .NEW extension.", NULL);
+		DLG_Notify("Cannot build nodes on a pwad with .NEW extension.");
 		return;
 	}
 
@@ -386,7 +386,7 @@ void CMD_TestMap()
 	// TODO: remove this restriction
 	if (! edit_wad)
 	{
-		Notify(-1, -1, "Cannot test the map unless you are editing a PWAD.", NULL);
+		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
 		return;
 	}
 
@@ -395,7 +395,7 @@ void CMD_TestMap()
 		// TODO: ideally ask the question "save changes now?"
 		//       HOWEVER we need to know if that was successful (ouch)
 
-		Notify(-1, -1, "You have unsaved changes, please save them first.", NULL);
+		DLG_Notify("You have unsaved changes, please save them first.");
 		return;
 	}
 

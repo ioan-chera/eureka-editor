@@ -763,8 +763,8 @@ static int Copy_SideDef(int num)
 
 
 static const char *unpack_confirm_message =
-	"This map contains shared sidedefs.  It it recommended to unpack\n"
-	"them, otherwise it may cause unexpected behavior during editing\n"
+	"This map contains shared sidedefs.  It it recommended to unpack "
+	"them, otherwise it may cause unexpected behavior during editing "
 	"(such as random walls changing their texture).\n\n"
 	"Unpack the sidedefs now?";
 
@@ -781,6 +781,7 @@ void SideDefs_Unpack(bool confirm_it)
 
 	if (confirm_it)
 	{
+DLG_ShowError(unpack_confirm_message);
 		if (! Confirm(-1, -1, unpack_confirm_message, NULL))
 			return;
 	}
@@ -1606,8 +1607,8 @@ void CHECK_All(bool major_stuff)
 
 	if (no_worries)
 	{
-		Notify(-1, -1, major_stuff ? "No major problems." :
-		                             "All tests were successful.", NULL);
+		DLG_Notify(major_stuff ? "No major problems." :
+		                         "All tests were successful.");
 	}
 }
 
