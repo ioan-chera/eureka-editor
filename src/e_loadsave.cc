@@ -165,7 +165,7 @@ extern void CMD_ZoomWholeMap();
 
 void CMD_NewMap()
 {
-	if (! Main_ConfirmQuit("begin a new map"))
+	if (! Main_ConfirmQuit("create a new map"))
 		return;
 
 	// if there is a current PWAD, the new map will go there
@@ -1158,6 +1158,13 @@ static void SaveLevel(Wad_file *wad, const char *level)
 }
 
 
+static const char * overwrite_message =
+	"The %s PWAD already contains this map.  "
+	"This operation will destroy that map (overwrite it)."
+	"\n\n"
+	"Are you sure you want to continue?";
+
+
 void CMD_SaveMap()
 {
 	// we require a wad file to save into.
@@ -1175,10 +1182,8 @@ void CMD_SaveMap()
 	{
 		// TODO: ideally have "Export" as an option
 
-		if (! Confirm(-1, -1, "The current PWAD already contains this map.\n"
-		                      "This operation will destroy that map (overwrite it).\n"
-							  "\n"
-		                      "Are you sure you want to continue?", NULL))
+		if (DLG_Confirm("Cancel|Overwrite",
+		                overwrite_message, "current") <= 0)
 		{
 			return;
 		}
@@ -1281,10 +1286,8 @@ void CMD_ExportMap()
 
 	if (exists && wad->FindLevel(map_name) >= 0)
 	{
-		if (! Confirm(-1, -1, "The selected WAD already contains this map.\n"
-		                      "This operation will destroy that map (overwrite it).\n"
-							  "\n"
-		                      "Are you sure you want to continue?", NULL))
+		if (DLG_Confirm("Cancel|Overwrite",
+		                overwrite_message, "selected") <= 0)
 		{
 			delete wad;
 			return;

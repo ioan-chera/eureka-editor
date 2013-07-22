@@ -646,13 +646,25 @@ bool Main_ConfirmQuit(const char *action)
 	if (! MadeChanges)
 		return true;
 
-	char buffer[200];
+	char buttons[200];
 
-	sprintf(buffer, "You have unsaved changes. "
-	                "Do you really want to %s?", action);
+	sprintf(buttons, "Cancel|%s", action);
 
-	if (Confirm(-1, -1, buffer, 0))
+	// convert action string like "open a new map" to a simple "Open"
+	// string for the yes choice.
+
+	buttons[7] = toupper(buttons[7]);
+
+	char *p = strchr(buttons, ' ');
+	if (p)
+		*p = 0;
+
+	if (DLG_Confirm(buttons, 
+	                "You have unsaved changes.  "
+	                "Do you really want to %s?", action) == 1)
+	{
 		return true;
+	}
 
 	return false;
 }

@@ -222,10 +222,9 @@ void Main_LoadResources();
 const char * DetermineGame(const char *iwad_name);
 
 
-bool Confirm (int, int, const char *, const char *);
-
 void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
+int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 
 int vertex_radius (double scale);

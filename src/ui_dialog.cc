@@ -202,5 +202,13 @@ void DLG_Notify(const char *msg, ...)
 }
 
 
+int DLG_Confirm(const char *buttons, const char *msg, ...)
+{
+	// FIXME: TEMP SHITE
+
+	return fl_ask("%s", msg);
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
