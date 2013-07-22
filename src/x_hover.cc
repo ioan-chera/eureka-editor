@@ -34,6 +34,9 @@
 #include "x_hover.h"
 
 
+extern int vertex_radius(double scale);
+
+
 float ApproxDistToLineDef(const LineDef * L, int x, int y)
 {
 	int x1 = L->Start()->x;

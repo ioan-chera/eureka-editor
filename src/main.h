@@ -35,10 +35,6 @@
 #define EUREKA_LUMP  "__EUREKA"
 
 
-#define Y_UNIX
-#define Y_SNPRINTF
-
-
 /*
  *  Standard headers
  */
@@ -73,39 +69,28 @@
 
 
 /*
- *  Platform-independent stuff
+ *  Commonly-used headers
  */
-void FatalError(const char *fmt, ...);
-
-#define BugError  FatalError
-
-
 #include "sys_type.h"
 #include "sys_macro.h"
 #include "sys_endian.h"
 #include "sys_debug.h"
 
-
 #include "objid.h"
-#include "m_bitvec.h"  /* bv_set, bv_clear, bv_toggle */
+#include "m_bitvec.h"
 #include "m_select.h"
 
 #include "lib_util.h"
 #include "lib_file.h"
 
-
-typedef enum
-{
-	SIDE_RIGHT = +1,
-	SIDE_LEFT  = -1
-}
-side_ref_e;
-
-
 #include "e_basis.h"
-
 #include "m_keys.h"
+#include "objects.h"
 
+
+/*
+ *  Miscellaneous
+ */
 
 typedef std::vector< const char * > string_list_t;
 
@@ -123,22 +108,12 @@ typedef enum
 /*
  *  Doom definitions
  *  Things about the Doom engine
- *  FIXME should move as much of this as possible to the ygd file...
+ *  FIXME should move as much of this as possible to the ugh file...
  *  FIXME Hexen has a different value for MIN_DEATHMATH_STARTS
  */
 const int DOOM_PLAYER_HEIGHT  = 56;
 const int DOOM_MIN_DEATHMATCH_STARTS = 4;
 const int DOOM_MAX_DEATHMATCH_STARTS = 10;
-
-
-/*
- *  More stuff
- */
-
-
-// Operations on the selection :
-
-#include "objects.h"
 
 
 // Confirmation options are stored internally this way :
@@ -150,14 +125,6 @@ typedef enum
    YC_ASK_ONCE = 'o'
 }
 confirm_t;
-
-
-/*
- *  Even more stuff ("the macros and constants")
- */
-
-// AYM 19980213: InputIntegerValue() uses this to mean that Esc was pressed
-#define IIV_CANCEL  INT_MIN
 
 
 /*
@@ -211,23 +178,24 @@ extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size
 
 
-
-int entryname_cmp (const char *entry1, const char *entry2);
-
+/*
+ *  Various global functions
+ */
 
 bool Main_ConfirmQuit(const char *action);
 bool Main_ProjectSetup(bool is_startup = false);
 void Main_LoadResources();
 
-const char * DetermineGame(const char *iwad_name);
+void FatalError(const char *fmt, ...);
+
+#define BugError  FatalError
 
 
 void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
-
-int vertex_radius (double scale);
+const char * DetermineGame(const char *iwad_name);
 
 
 #endif  /* __EUREKA_MAIN_H__ */

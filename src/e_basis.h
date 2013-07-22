@@ -47,6 +47,14 @@
 //
 
 
+typedef enum
+{
+	SIDE_RIGHT = +1,
+	SIDE_LEFT  = -1
+}
+side_ref_e;
+
+
 // Object types
 typedef enum
 {
