@@ -351,7 +351,11 @@ UI_Preferences::UI_Preferences() :
 	  key_sort_mode('c'), key_sort_rev(false),
 	  awaiting_line(0)
 {
-	color(fl_gray_ramp(4));
+	if (gui_color_set == 2)
+		color(fl_gray_ramp(4));
+	else
+		color(WINDOW_BG);
+
 	callback(close_callback, this);
 
 	{ tabs = new Fl_Tabs(0, 0, 585, 435);

@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
 #include "ui_window.h"
 #include "w_wad.h"
 
@@ -489,7 +490,11 @@ UI_LogViewer::UI_LogViewer() :
 	{
 		Fl_Group *o = new Fl_Group(0, ey, w(), h() - ey);
 		o->box(FL_FLAT_BOX);
-		o->color(fl_gray_ramp(4));
+
+		if (gui_color_set == 2)
+			o->color(fl_gray_ramp(4));
+		else
+			o->color(WINDOW_BG);
 		
 		int bx  = w() - 110;
 		int bx2 = bx;
