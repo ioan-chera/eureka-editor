@@ -494,7 +494,7 @@ static const char * DetermineLevel()
 		{
 			lev_idx = wad->FindFirstLevel();
 			if (lev_idx < 0)
-				FatalError("No levels found in %s!\n", (pass == 0) ? "PWAD" : "IWAD");
+				FatalError("No levels found in the %s!\n", (pass == 0) ? "PWAD" : "IWAD");
 		}
 
 		Lump_c *lump = wad->GetLump(lev_idx);

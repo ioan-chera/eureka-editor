@@ -23,7 +23,7 @@
 
 
 #define BUT_W  100
-#define BUT_H  30
+#define BUT_H  26
 
 #define ICON_W  40
 #define ICON_H  40
@@ -60,8 +60,8 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	if (mesg_W < 200)
 		mesg_W = 200;
 
-	if (mesg_H < 70)
-		mesg_H = 70;
+	if (mesg_H < 60)
+		mesg_H = 60;
 
 	// add a little wiggle room
 	mesg_W += 16;
@@ -73,7 +73,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	if (link_title)
 		total_H += FONT_SIZE + 8;
 
-	total_H += 10 + BUT_H + 10;
+	total_H += 12 + BUT_H + 12;
 
 
 	// create window...
@@ -84,22 +84,37 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// create the error icon...
-	Fl_Box *icon = new Fl_Box(10, 10, ICON_W, ICON_H, "!");
+	Fl_Box *icon = new Fl_Box(10, 10 + (10 + mesg_H - ICON_H) / 2, ICON_W, ICON_H, "");
 
 	icon->box(FL_OVAL_BOX);
 	icon->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	icon->labelfont(FL_HELVETICA_BOLD);
-	icon->labelsize(24);
+	icon->labelsize(26);
 
-	// FIXME
-	icon->color(FL_RED, FL_RED);
-	icon->labelcolor(FL_WHITE);
+	if (icon_type == '!')
+	{
+		icon->label("!");
+		icon->color(FL_RED, FL_RED);
+		icon->labelcolor(FL_WHITE);
+	}
+	else if (icon_type == '?')
+	{
+		icon->label("?");
+		icon->color(FL_GREEN, FL_GREEN);
+		icon->labelcolor(FL_BLACK);
+	}
+	else
+	{
+		icon->label("i");
+		icon->color(FL_BLUE, FL_BLUE);
+		icon->labelcolor(FL_WHITE);
+	}
 
 
 	// create the message area...
 	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message);
 
-	box->align(FL_ALIGN_LEFT | FL_ALIGN_TOP | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
+	box->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
 	box->labelfont(FL_HELVETICA);
 	box->labelsize(FONT_SIZE);
 
@@ -117,16 +132,19 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	}
 
 	// create buttons...
-	int GROUP_H = BUT_H + 20;
+	int GROUP_H = BUT_H + 12 * 2;
+
+	Fl_Button *focus_button = NULL;
 
 	Fl_Group *b_group = new Fl_Group(0, total_H - GROUP_H, total_W, GROUP_H);
 	b_group->box(FL_FLAT_BOX);
 	b_group->color(WINDOW_BG, WINDOW_BG);
+	b_group->end();
 
 	int but_count = labels ? (int)labels->size() : 1;
 
 	int but_x = total_W - 20;
-	int but_y = b_group->y() + 10;
+	int but_y = b_group->y() + 12;
 
 	for (int b = but_count - 1 ; b >= 0 ; b--)
 	{
@@ -140,10 +158,13 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 		button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 		button->callback((Fl_Callback *) dialog_button_callback, (void *)(long)b);
 
-		but_x = but_x - b_width - 20;
-	}
+		b_group->insert(*button, 0);
 
-	b_group->end();
+		but_x = but_x - b_width - 20;
+
+		// left-most button should get the focus
+		focus_button = button;
+	}
 
 	dialog->end();
 
@@ -154,6 +175,9 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 	if (icon_type == '!')
 		fl_beep();
+
+	if (focus_button)
+		Fl::focus(focus_button);
 
 	// run the GUI and let user make their choice
 	while (dialog_result < 0)
