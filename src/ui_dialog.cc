@@ -21,25 +21,34 @@
 #include "main.h"
 #include "ui_window.h"
 
-static int dialog_result;
 
-static void dialog_close_CB(Fl_Widget *w, void *data)
-{
-	dialog_result = 1;
-}
-
-#define BTN_W  100
-#define BTN_H  30
+#define BUT_W  100
+#define BUT_H  30
 
 #define ICON_W  40
 #define ICON_H  40
 
 #define FONT_SIZE  16
 
-static void DialogShowAndRun(const char *message, const char *title,
-		const char *link_title, const char *link_url)
+
+static int dialog_result;
+
+static void dialog_close_callback(Fl_Widget *w, void *data)
 {
 	dialog_result = 0;
+}
+
+static void dialog_button_callback(Fl_Widget *w, void *data)
+{
+	dialog_result = (long)data;
+}
+
+
+static int DialogShowAndRun(char icon_type, const char *message, const char *title,
+		const char *link_title = NULL, const char *link_url = NULL,
+		std::vector<std::string> *labels = NULL)
+{
+	dialog_result = -1;
 
 	// determine required size
 	int mesg_W = 480;  // NOTE: fl_measure will wrap to this!
@@ -51,37 +60,41 @@ static void DialogShowAndRun(const char *message, const char *title,
 	if (mesg_W < 200)
 		mesg_W = 200;
 
-	if (mesg_H < ICON_H)
-		mesg_H = ICON_H;
+	if (mesg_H < 70)
+		mesg_H = 70;
 
 	// add a little wiggle room
 	mesg_W += 16;
 	mesg_H += 8;
 
 	int total_W = 10 + ICON_W + 10 + mesg_W + 10;
-	int total_H = 10 + mesg_H + 10 + BTN_H  + 10;
+	int total_H = 10 + mesg_H + 10;
 
 	if (link_title)
 		total_H += FONT_SIZE + 8;
 
+	total_H += 10 + BUT_H + 10;
+
+
 	// create window...
 	Fl_Window *dialog = new Fl_Window(0, 0, total_W, total_H, title);
 
-	dialog->end();
 	dialog->size_range(total_W, total_H, total_W, total_H);
-	dialog->callback((Fl_Callback *) dialog_close_CB);
+	dialog->callback((Fl_Callback *) dialog_close_callback);
+
 
 	// create the error icon...
 	Fl_Box *icon = new Fl_Box(10, 10, ICON_W, ICON_H, "!");
 
 	icon->box(FL_OVAL_BOX);
 	icon->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-	icon->color(FL_RED, FL_RED);
 	icon->labelfont(FL_HELVETICA_BOLD);
 	icon->labelsize(24);
+
+	// FIXME
+	icon->color(FL_RED, FL_RED);
 	icon->labelcolor(FL_WHITE);
 
-	dialog->add(icon);
 
 	// create the message area...
 	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message);
@@ -90,7 +103,6 @@ static void DialogShowAndRun(const char *message, const char *title,
 	box->labelfont(FL_HELVETICA);
 	box->labelsize(FONT_SIZE);
 
-	dialog->add(box);
 
 	// create the hyperlink...
 	if (link_title)
@@ -102,35 +114,57 @@ static void DialogShowAndRun(const char *message, const char *title,
 		link->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 		link->labelfont(FL_HELVETICA);
 		link->labelsize(FONT_SIZE);
-
-		dialog->add(link);
 	}
 
-	// create button...
-	Fl_Button *button =
-		new Fl_Button(total_W - BTN_W - 20, total_H - BTN_H - 12,
-				BTN_W, BTN_H, "Close");
+	// create buttons...
+	int GROUP_H = BUT_H + 20;
 
-	button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-	button->callback((Fl_Callback *) dialog_close_CB);
-	//  button->labelsize(FONT_SIZE - 2);
+	Fl_Group *b_group = new Fl_Group(0, total_H - GROUP_H, total_W, GROUP_H);
+	b_group->box(FL_FLAT_BOX);
+	b_group->color(WINDOW_BG, WINDOW_BG);
 
-	dialog->add(button);
+	int but_count = labels ? (int)labels->size() : 1;
+
+	int but_x = total_W - 20;
+	int but_y = b_group->y() + 10;
+
+	for (int b = but_count - 1 ; b >= 0 ; b--)
+	{
+		const char *text = labels ? (*labels)[b].c_str() :
+		                   (icon_type == '?') ? "OK" : "Close";
+
+		int b_width = fl_width(text) + 20;
+
+		Fl_Button *button = new Fl_Button(but_x - b_width, but_y, b_width, BUT_H, text);
+
+		button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+		button->callback((Fl_Callback *) dialog_button_callback, (void *)(long)b);
+
+		but_x = but_x - b_width - 20;
+	}
+
+	b_group->end();
+
+	dialog->end();
+
 
 	// show time!
 	dialog->set_modal();
 	dialog->show();
 
-	fl_beep();
+	if (icon_type == '!')
+		fl_beep();
 
 	// run the GUI and let user make their choice
-	while (dialog_result == 0)
+	while (dialog_result < 0)
 	{
 		Fl::wait();
 	}
 
 	// delete window (automatically deletes child widgets)
 	delete dialog;
+
+	return dialog_result;
 }
 
 
@@ -172,41 +206,84 @@ static void ParseHyperLink(char *buffer, unsigned int buf_len,
 }
 
 
+static void ParseButtons(const char *buttons,
+                         std::vector<std::string>& labels)
+{
+	for (;;)
+	{
+		const char *p = strchr(buttons, '|');
+
+		if (! p)
+		{
+			labels.push_back(buttons);
+			return;
+		}
+
+		int len = (int)(p - buttons);
+		SYS_ASSERT(len > 0);
+
+		labels.push_back(std::string(buttons, len));
+
+		buttons = p + 1;
+	}
+}
+
+
+//------------------------------------------------------------------------
+
+static char dialog_buffer[MSG_BUF_LEN];
+
+
 void DLG_ShowError(const char *msg, ...)
 {
-	static char buffer[MSG_BUF_LEN];
-
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
-	vsnprintf (buffer, MSG_BUF_LEN, msg, arg_pt);
+	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
 	va_end (arg_pt);
 
-	buffer[MSG_BUF_LEN-1] = 0;
+	dialog_buffer[MSG_BUF_LEN-1] = 0;
 
 	const char *link_title = NULL;
 	const char *link_url   = NULL;
 
 	// handle error messages with a hyperlink at the end
-	ParseHyperLink(buffer, sizeof(buffer), &link_title, &link_url);
+	ParseHyperLink(dialog_buffer, sizeof(dialog_buffer), &link_title, &link_url);
 
-	DialogShowAndRun(buffer, "Eureka - Fatal Error", link_title, link_url);
+	DialogShowAndRun('!', dialog_buffer, "Eureka - Fatal Error", link_title, link_url);
 }
 
 
 void DLG_Notify(const char *msg, ...)
 {
-	// FIXME: TEMP STUFF
+	va_list arg_pt;
 
-	DLG_ShowError("%s", msg);
+	va_start (arg_pt, msg);
+	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
+	va_end (arg_pt);
+
+	dialog_buffer[MSG_BUF_LEN-1] = 0;
+
+	DialogShowAndRun('i', dialog_buffer, "Eureka - Notification");
 }
 
 
 int DLG_Confirm(const char *buttons, const char *msg, ...)
 {
-	// FIXME: TEMP SHITE
+	va_list arg_pt;
 
-	return fl_ask("%s", msg);
+	va_start (arg_pt, msg);
+	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
+	va_end (arg_pt);
+
+	dialog_buffer[MSG_BUF_LEN-1] = 0;
+
+	std::vector<std::string> labels;
+
+	ParseButtons(buttons, labels);
+
+	return DialogShowAndRun('?', dialog_buffer, "Eureka - Confirmation",
+							NULL, NULL, &labels);
 }
 
 
