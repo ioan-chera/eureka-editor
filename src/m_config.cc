@@ -56,10 +56,6 @@ typedef enum
 	// Receptacle is of type: bool
 	OPT_BOOLEAN,
 
-	// "yes", "no", "ask"
-	// Receptacle is of type: confirm_t
-	OPT_CONFIRM,
-
 	// Integer number,
 	// Receptacle is of type: int
 	OPT_INTEGER,
@@ -618,10 +614,7 @@ static const opt_desc_t options[] =
 };
 
 
-static confirm_t confirm_e2i (const char *external);
-static const char *confirm_i2e (confirm_t internal);
-
-
+//------------------------------------------------------------------------
 
 static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 {
@@ -717,10 +710,6 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			{
 				*((bool *) (opt->data_ptr)) = true;
 			}
-			break;
-
-		case OPT_CONFIRM:
-			*((confirm_t *) opt->data_ptr) = confirm_e2i (value);
 			break;
 
 		case OPT_INTEGER:
@@ -933,22 +922,6 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				}
 				break;
 
-			case OPT_CONFIRM:
-				if (argc < 2)
-				{
-					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
-				}
-
-				argv++;
-				argc--;
-
-				if (! ignore)
-				{
-					*((confirm_t *) o->data_ptr) = confirm_e2i (argv[0]);
-				}
-				break;
-
 			case OPT_INTEGER:
 				if (argc < 2)
 				{
@@ -1059,8 +1032,6 @@ void dump_parameters(FILE *fp)
 
 		if (o->opt_type == OPT_BOOLEAN)
 			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
-		else if (o->opt_type == OPT_CONFIRM)
-			fputs (confirm_i2e (*((confirm_t *) o->data_ptr)), fp);
 		else if (o->opt_type == OPT_INTEGER)
 			fprintf (fp, "%d", *((int *) o->data_ptr));
 		else if (o->opt_type == OPT_COLOR)
@@ -1133,7 +1104,6 @@ void dump_command_line_options(FILE *fp)
 		else switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
-			case OPT_CONFIRM:       fprintf (fp, "yes|no|ask  "); break;
 			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
 			case OPT_COLOR:         fprintf (fp, "<color>     "); break;
 
@@ -1182,10 +1152,6 @@ int M_WriteConfigFile()
 				fprintf(fp, "%s", *((bool *) o->data_ptr) ? "1" : "0");
 				break;
 
-			case OPT_CONFIRM:
-				fprintf(fp, "%s", confirm_i2e (*((confirm_t *) o->data_ptr)));
-				break;
-
 			case OPT_STRING:
 			{
 				const char *str = *((const char **) o->data_ptr);
@@ -1222,50 +1188,6 @@ int M_WriteConfigFile()
 	fclose(fp);
 
 	return 0;  // OK
-}
-
-
-/*
- *  confirm_e2i
- *  Convert the external representation of a confirmation
- *  flag ("yes", "no", "ask", "ask_once") to the internal
- *  representation (YC_YES, YC_NO, YC_ASK, YC_ASK_ONCE or
- *  0 if none).
- */
-static confirm_t confirm_e2i (const char *external)
-{
-	if (external != NULL)
-	{
-		if (! y_stricmp (external, "yes"))
-			return YC_YES;
-		if (! y_stricmp (external, "no"))
-			return YC_NO;
-		if (! y_stricmp (external, "ask"))
-			return YC_ASK;
-		if (! y_stricmp (external, "ask_once"))
-			return YC_ASK_ONCE;
-	}
-	return YC_ASK;
-}
-
-
-/*
- *  confirm_i2e
- *  Convert the internal representation of a confirmation
- *  flag (YC_YES, YC_NO, YC_ASK, YC_ASK_ONCE) to the external
- *  representation ("yes", "no", "ask", "ask_once" or "?").
- */
-static const char *confirm_i2e (confirm_t internal)
-{
-	if (internal == YC_YES)
-		return "yes";
-	if (internal == YC_NO)
-		return "no";
-	if (internal == YC_ASK)
-		return "ask";
-	if (internal == YC_ASK_ONCE)
-		return "ask_once";
-	return "?";
 }
 
 

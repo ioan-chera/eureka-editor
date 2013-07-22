@@ -116,17 +116,6 @@ const int DOOM_MIN_DEATHMATCH_STARTS = 4;
 const int DOOM_MAX_DEATHMATCH_STARTS = 10;
 
 
-// Confirmation options are stored internally this way :
-typedef enum
-{
-   YC_YES      = 'y',
-   YC_NO       = 'n',
-   YC_ASK      = 'a',
-   YC_ASK_ONCE = 'o'
-}
-confirm_t;
-
-
 /*
  *  Interfile global variables
  */
