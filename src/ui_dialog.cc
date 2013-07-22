@@ -143,7 +143,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 	int but_count = labels ? (int)labels->size() : 1;
 
-	int but_x = total_W - 20;
+	int but_x = total_W - 40;
 	int but_y = b_group->y() + 12;
 
 	for (int b = but_count - 1 ; b >= 0 ; b--)
@@ -160,7 +160,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 		b_group->insert(*button, 0);
 
-		but_x = but_x - b_width - 20;
+		but_x = but_x - b_width - 40;
 
 		// left-most button should get the focus
 		focus_button = button;
@@ -170,6 +170,9 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// show time!
+	if (focus_button)
+		dialog->hotspot(focus_button);
+
 	dialog->set_modal();
 	dialog->show();
 
@@ -178,6 +181,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 	if (focus_button)
 		Fl::focus(focus_button);
+
 
 	// run the GUI and let user make their choice
 	while (dialog_result < 0)
