@@ -385,8 +385,8 @@ void MakeLiftFromSector (int sector)
 		Sectors[sector]->floorh = maxh;
 
 	/* change the lift's ceiling height if necessary */
-	if (Sectors[sector]->ceilh < maxh + DOOM_PLAYER_HEIGHT)
-		Sectors[sector]->ceilh = maxh + DOOM_PLAYER_HEIGHT;
+	if (Sectors[sector]->ceilh < maxh + game_info.player_h)
+		Sectors[sector]->ceilh = maxh + game_info.player_h;
 
 	/* assign the new tag number to the lift */
 	Sectors[sector]->tag = tag;

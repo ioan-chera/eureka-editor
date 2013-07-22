@@ -1529,11 +1529,17 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 		if (dm_num == 0)
 			dialog->AddLine("Map is missing deathmatch starts", 1);
-		else if (dm_num < DOOM_MIN_DEATHMATCH_STARTS)
+		else if (dm_num < game_info.min_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,
-			        DOOM_MIN_DEATHMATCH_STARTS);
+			        game_info.min_dm_starts);
 			dialog->AddLine(check_message, 1);
+		}
+		else if (dm_num > game_info.max_dm_starts)
+		{
+			sprintf(check_message, "Found %d deathmatch starts -- maximum is %d", dm_num,
+			        game_info.max_dm_starts);
+			dialog->AddLine(check_message, 2);
 		}
 		else
 		{

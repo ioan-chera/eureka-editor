@@ -71,6 +71,11 @@ void M_InitDefinitions()
 	texture_groups.clear();
 	texture_assigns.clear();
 	flat_assigns.clear();
+
+	// FIXME: ability to parse from a game definition file
+	game_info.player_h = 56;
+	game_info.min_dm_starts = 4;
+	game_info.max_dm_starts = 10;
 }
 
 

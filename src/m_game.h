@@ -121,6 +121,10 @@ typedef struct
 	int unknown_tex;
 	int unknown_flat;
 
+	int player_h;
+	int min_dm_starts;
+	int max_dm_starts;
+
 } game_info_t;
 
 extern game_info_t  game_info;

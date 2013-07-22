@@ -106,17 +106,6 @@ typedef enum
 
 
 /*
- *  Doom definitions
- *  Things about the Doom engine
- *  FIXME should move as much of this as possible to the ugh file...
- *  FIXME Hexen has a different value for MIN_DEATHMATH_STARTS
- */
-const int DOOM_PLAYER_HEIGHT  = 56;
-const int DOOM_MIN_DEATHMATCH_STARTS = 4;
-const int DOOM_MAX_DEATHMATCH_STARTS = 10;
-
-
-/*
  *  Interfile global variables
  */
 

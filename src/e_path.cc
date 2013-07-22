@@ -30,6 +30,7 @@
 #include "editloop.h"
 #include "e_path.h"
 #include "levels.h"
+#include "m_game.h"
 #include "r_grid.h"
 #include "selectn.h"
 #include "w_rawdef.h"
@@ -291,7 +292,7 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 			int f_max = MAX(S1->floorh, S2->floorh);
 			int c_min = MIN(S1-> ceilh, S2-> ceilh);
 
-			if (c_min - f_max < DOOM_PLAYER_HEIGHT)
+			if (c_min - f_max < game_info.player_h)
 				continue;
 		}
 
