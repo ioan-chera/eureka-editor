@@ -780,7 +780,7 @@ void SideDefs_Unpack(bool confirm_it)
 
 	if (confirm_it)
 	{
-		if (DLG_Confirm("No Change|Unpack", unpack_confirm_message) <= 0)
+		if (DLG_Confirm("&No Change|&Unpack", unpack_confirm_message) <= 0)
 			return;
 	}
 

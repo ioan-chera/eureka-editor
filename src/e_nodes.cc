@@ -255,7 +255,7 @@ bool CMD_BuildNodes()
 
 	if (MadeChanges)
 	{
-		if (DLG_Confirm("Cancel|Save",
+		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
 						"and then build the nodes?") <= 0)
 		{

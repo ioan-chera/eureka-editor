@@ -1179,7 +1179,7 @@ bool CMD_SaveMap()
 
 	if (Replacer)
 	{
-		int choice = DLG_Confirm("Cancel|Export|Overwrite", overwrite_message, "current");
+		int choice = DLG_Confirm("Cancel|&Export|O&verwrite", overwrite_message, "current");
 
 		if (choice <= 0)
 			return false;
@@ -1289,7 +1289,7 @@ bool CMD_ExportMap()
 
 	if (exists && wad->FindLevel(map_name) >= 0)
 	{
-		if (DLG_Confirm("Cancel|Overwrite",
+		if (DLG_Confirm("Cancel|O&verwrite",
 		                overwrite_message, "selected") <= 0)
 		{
 			delete wad;
