@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -245,21 +245,25 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 }
 
 
-void CMD_BuildNodes()
+bool CMD_BuildNodes()
 {
 	if (! edit_wad)
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
-		return;
+		return false;
 	}
 
 	if (MadeChanges)
 	{
-		// TODO: ideally ask the question "save changes now?"
-		//       HOWEVER we need to know if that was successful (ouch)
+		if (DLG_Confirm("Cancel|Save",
+		                "You have unsaved changes, do you want to save them now "
+						"and then build the nodes?") <= 0)
+		{
+			return false;
+		}
 
-		DLG_Notify("You have unsaved changes, please save them first.");
-		return;
+		if (! CMD_SaveMap())
+			return false;
 	}
 
 
@@ -269,7 +273,7 @@ void CMD_BuildNodes()
 	if (MatchExtension(old_name, "new"))
 	{
 		DLG_Notify("Cannot build nodes on a pwad with .NEW extension.");
-		return;
+		return false;
 	}
 
 
@@ -374,6 +378,8 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		Replacer = false;
 		MadeChanges = 0;
 	}
+
+	return was_ok;
 }
 
 
