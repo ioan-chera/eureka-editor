@@ -549,7 +549,7 @@ void Wad_file::ReadDirectory()
 
 	dir_crc = checksum.raw;
 
-	LogPrintf("Loaded directory. crc = %08x\n", dir_crc);
+	DebugPrintf("Loaded directory. crc = %08x\n", dir_crc);
 }
 
 
@@ -1054,7 +1054,7 @@ void Wad_file::WriteDirectory()
 	dir_start = PositionForWrite();
 	dir_count = NumLumps();
 
-	LogPrintf("WriteDirectory...\n");
+	DebugPrintf("WriteDirectory...\n");
 	DebugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 
 	crc32_c checksum;
@@ -1198,7 +1198,7 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 void MasterDir_Add(Wad_file *wad)
 {
-	LogPrintf("MasterDir: adding '%s'\n", wad->PathName());
+	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName());
 
 	master_dir.push_back(wad);
 }
@@ -1206,7 +1206,7 @@ void MasterDir_Add(Wad_file *wad)
 
 void MasterDir_Remove(Wad_file *wad)
 {
-	LogPrintf("MasterDir: removing '%s'\n", wad->PathName());
+	DebugPrintf("MasterDir: removing '%s'\n", wad->PathName());
 
 	std::vector<Wad_file *>::iterator ENDP;
 
