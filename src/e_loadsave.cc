@@ -1139,10 +1139,10 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	EmptyLump("REJECT");
 	EmptyLump("BLOCKMAP");
 
-	M_WriteEurekaLump(save_wad);
-
 	// write out the new directory
 	save_wad->EndWrite();
+
+	M_WriteEurekaLump(save_wad);
 
 	Level_name = StringUpper(level);
 

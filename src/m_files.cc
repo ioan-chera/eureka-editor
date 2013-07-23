@@ -866,17 +866,15 @@ bool M_ParseEurekaLump(Wad_file *wad)
 }
 
 
-/* Note: this assumes that wad->BeginWrite() has already been called.
- */
 void M_WriteEurekaLump(Wad_file *wad)
 {
 	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
 
+	wad->BeginWrite();
+
 	int oldie = wad->FindLumpNum(EUREKA_LUMP);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
-	
-	wad->InsertPoint();  // at end
 
 	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
 
@@ -892,6 +890,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 		lump->Printf("resource %s\n", Resource_list[i]);
 
 	lump->Finish();
+
+	wad->EndWrite();
 }
 
 
