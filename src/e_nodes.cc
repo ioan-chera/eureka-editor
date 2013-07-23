@@ -247,7 +247,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 bool CMD_BuildNodes()
 {
-	if (! edit_wad)
+	if (! edit_wad && ! MadeChanges)
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return false;
@@ -265,6 +265,8 @@ bool CMD_BuildNodes()
 		if (! CMD_SaveMap())
 			return false;
 	}
+
+	SYS_ASSERT(edit_wad);
 
 
 	const char *old_name = StringDup(edit_wad->PathName());
