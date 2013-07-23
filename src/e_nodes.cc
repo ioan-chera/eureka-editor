@@ -391,7 +391,7 @@ fprintf(stderr, "new_name : %s\n", new_name);
 void CMD_TestMap()
 {
 	// TODO: remove this restriction
-	if (! edit_wad)
+	if (! edit_wad && ! MadeChanges)
 	{
 		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
 		return;
@@ -402,8 +402,21 @@ void CMD_TestMap()
 		// TODO: ideally ask the question "save changes now?"
 		//       HOWEVER we need to know if that was successful (ouch)
 
-		DLG_Notify("You have unsaved changes, please save them first.");
-		return;
+		if (DLG_Confirm("Cancel|&Save",
+		                "You have unsaved changes, do you want to save them now "
+						"and build the nodes?") <= 0)
+		{
+			return;
+		}
+
+		if (! CMD_BuildNodes())
+			return;
+	}
+	else
+	{
+		// FIXME:
+		// if (missing nodes)
+		//    DLG_Confirm(  "build the nodes now?")
 	}
 
 	char cmd_buffer[FL_PATH_MAX * 2];
