@@ -473,7 +473,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 		if (! required)
 			return false;
 
-		FatalError("Cannot open key bindings file:\n%s\n", filename);
+		FatalError("Cannot open key bindings file:\n\n%s\n", filename);
 	}
 
 	LogPrintf("Reading key bindings from: %s\n", filename);

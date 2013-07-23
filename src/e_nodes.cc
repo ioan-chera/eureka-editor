@@ -99,7 +99,7 @@ static void GB_FatalError(const char *str, ...)
 
 	message_buf[MSG_BUF_LEN-1] = 0;
 
-	FatalError("glBSP Failure:\n%s", message_buf);
+	FatalError("glBSP Failure:\n\n%s", message_buf);
 	/* NOT REACHED */
 }
 
