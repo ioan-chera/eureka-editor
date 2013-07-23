@@ -1180,11 +1180,14 @@ void CMD_SaveMap()
 
 	if (Replacer)
 	{
-		// TODO: ideally have "Export" as an option
+		int choice = DLG_Confirm("Cancel|Export|Overwrite", overwrite_message, "current");
 
-		if (DLG_Confirm("Cancel|Overwrite",
-		                overwrite_message, "current") <= 0)
+		if (choice <= 0)
+			return;
+
+		if (choice == 1)
 		{
+			CMD_ExportMap();
 			return;
 		}
 	}
