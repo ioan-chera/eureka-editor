@@ -208,7 +208,7 @@ void CMD_NewMap()
 
 	CMD_ZoomWholeMap();
 
-	MadeChanges = 0;
+	MadeChanges = 1;
 }
 
 
@@ -1165,15 +1165,14 @@ static const char * overwrite_message =
 	"Are you sure you want to continue?";
 
 
-void CMD_SaveMap()
+bool CMD_SaveMap()
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
 	if (! edit_wad)
 	{
-		CMD_ExportMap();
-		return;
+		return CMD_ExportMap();
 	}
 
 	// warn user if a fresh map would destroy an existing one
@@ -1183,12 +1182,11 @@ void CMD_SaveMap()
 		int choice = DLG_Confirm("Cancel|Export|Overwrite", overwrite_message, "current");
 
 		if (choice <= 0)
-			return;
+			return false;
 
 		if (choice == 1)
 		{
-			CMD_ExportMap();
-			return;
+			return CMD_ExportMap();
 		}
 	}
 
@@ -1202,10 +1200,12 @@ void CMD_SaveMap()
 
 	Replacer = false;
 	MadeChanges = 0;
+
+	return true;
 }
 
 
-void CMD_ExportMap()
+bool CMD_ExportMap()
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1223,11 +1223,11 @@ void CMD_ExportMap()
 			LogPrintf("   %s\n", chooser.errmsg());
 
 			DLG_Notify("Unable to export the map:\n\n%s", chooser.errmsg());
-			return;
+			return false;
 
 		case 1:
 			LogPrintf("Export Map: cancelled by user\n");
-			return;
+			return false;
 
 		default:
 			break;  // OK
@@ -1261,7 +1261,7 @@ void CMD_ExportMap()
 	{
 		DLG_Notify("Unable to export the map:\n\n%s",
 		           "Error creating output file");
-		return;
+		return false;
 	}
 
 
@@ -1280,7 +1280,7 @@ void CMD_ExportMap()
 	if (! map_name)
 	{
 		delete wad;
-		return;
+		return false;
 	}
 
 
@@ -1293,7 +1293,7 @@ void CMD_ExportMap()
 		                overwrite_message, "selected") <= 0)
 		{
 			delete wad;
-			return;
+			return false;
 		}
 	}
 
@@ -1327,6 +1327,8 @@ void CMD_ExportMap()
 
 	Replacer = false;
 	MadeChanges = 0;
+
+	return true;
 }
 
 
