@@ -122,6 +122,20 @@ rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 static void TermFLTK();
 
 
+static void RemoveSingleNewlines(char *buffer)
+{
+	for (char *p = buffer ; *p ; p++)
+	{
+		if (*p == '\n' && p[1] == '\n')
+			while (*p == '\n')
+				p++;
+
+		if (*p == '\n')
+			*p = ' ';
+	}
+}
+
+
 /*
  *  Show an error message and terminate the program
  */
@@ -149,6 +163,8 @@ void FatalError(const char *fmt, ...)
 
 	if (init_progress >= 3)
 	{
+		RemoveSingleNewlines(buffer);
+
 		DLG_ShowError("%s", buffer);
 
 		init_progress = 2;
