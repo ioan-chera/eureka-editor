@@ -77,7 +77,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// create window...
-	Fl_Window *dialog = new Fl_Window(0, 0, total_W, total_H, title);
+	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title);
 
 	dialog->size_range(total_W, total_H, total_W, total_H);
 	dialog->callback((Fl_Callback *) dialog_close_callback);
