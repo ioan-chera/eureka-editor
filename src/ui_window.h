@@ -86,8 +86,8 @@ public:
 public:
 	void SetTitle(const char *wad_name, const char *map_name);
 
-	// add or remove the '*' in the title
-	void UpdateTitle(bool want_star);
+	// add or remove the '*' (etc) in the title
+	void UpdateTitle(char want_prefix = 0);
 
 	void Maximize();
 

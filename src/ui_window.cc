@@ -285,31 +285,33 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name)
 }
 
 
-void UI_MainWin::UpdateTitle(bool want_star)
+void UI_MainWin::UpdateTitle(char want_prefix)
 {
 	if (! label())
 		return;
 
-	bool got_star = (label()[0] == '*');
+	char got_prefix = label()[0];
 
-	if (want_star == got_star)
+	if (! ispunct(got_prefix))
+		got_prefix = 0;
+
+	if (got_prefix == want_prefix)
 		return;
+
 
 	static char title_buf[FL_PATH_MAX];
 
-	if (got_star)
+	const char *src  = label() + (got_prefix ? 1 : 0);
+		  char *dest = title_buf;
+
+	if (want_prefix)
 	{
-		strcpy(title_buf, label() + 1);
+		*dest++ = want_prefix;
 	}
-	else
-	{
-		title_buf[0] = '*';
-		strcpy(title_buf + 1, label());
-	}
+
+	strcpy(dest, src);
 
 	copy_label(title_buf);
-
-//--	info_bar->SetMap(Level_name, want_star);
 }
 
 
