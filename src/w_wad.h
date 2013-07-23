@@ -130,7 +130,8 @@ private:
 	bool begun_write;
 	int  begun_max_size;
 
-	int  insert_point;
+	// when >= 0, the next added lump is placed _before_ this
+	int insert_point;
 
 	// constructor is private
 	Wad_file(const char *_name, char _mode, FILE * _fp);
@@ -205,7 +206,12 @@ public:
 	Lump_c * AddLevel(const char *name, int max_size = -1);
 
 	// set the insertion point -- the next lump will be added _before_
-	// this index.  A negative value (the default) means the end.
+	// this index, and it will be incremented so that a sequence of
+	// AddLump() calls produces lumps in the same order.
+	//
+	// passing a negative value or invalid index will reset the
+	// insertion point -- future lumps get added at the END.
+	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
 	void InsertPoint(short index = -1);
 
 private:

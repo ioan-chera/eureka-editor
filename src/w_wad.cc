@@ -770,6 +770,9 @@ void Wad_file::EndWrite()
 	begun_write = false;
 
 	WriteDirectory();
+
+	// reset the insertion point
+	insert_point = -1;
 }
 
 
@@ -796,6 +799,9 @@ void Wad_file::RemoveLumps(short index, short count)
 	FixGroup(patches, index, 0, count);
 	FixGroup(sprites, index, 0, count);
 	FixGroup(flats,   index, 0, count);
+
+	// reset the insertion point
+	insert_point = -1;
 }
 
 
@@ -861,7 +867,11 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 
 	Lump_c *lump = new Lump_c(this, name, start, 0);
 
-	if (insert_point >= 0 && insert_point < (int)directory.size())
+	// check if the insert_point is still valid
+	if (insert_point >= NumLumps())
+		insert_point = -1;
+
+	if (insert_point >= 0)
 	{
 		// fix various arrays containing lump indices
 		FixGroup(levels,  insert_point, 1, 0);
@@ -870,10 +880,13 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 		FixGroup(flats,   insert_point, 1, 0);
 
 		directory.insert(directory.begin() + insert_point, lump);
+
 		insert_point++;
 	}
-	else
+	else  // add to end
+	{
 		directory.push_back(lump);
+	}
 
 	return lump;
 }
@@ -883,7 +896,7 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 {
 	int actual_point = insert_point;
 
-	if (actual_point < 0 || actual_point >= (int)directory.size())
+	if (actual_point < 0 || actual_point > NumLumps())
 		actual_point = NumLumps();
 
 	Lump_c * lump = AddLump(name, max_size);
