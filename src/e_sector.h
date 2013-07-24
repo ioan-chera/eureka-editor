@@ -30,15 +30,6 @@
 #include "selectn.h"
 
 
-void MakeDoorFromSector (int);
-void MakeLiftFromSector (int);
-
-#if 0
-void MergeSectors (SelPtr *);
-void DeleteLineDefsJoinSectors (SelPtr *);
-#endif
-
-
 #if 0
 void DistributeSectorFloors (SelPtr);
 void DistributeSectorCeilings (SelPtr);
