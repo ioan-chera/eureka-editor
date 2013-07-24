@@ -9,11 +9,19 @@
 /* Begin PBXBuildFile section */
 		4F2181611755526A0053D99E /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2181601755526A0053D99E /* libfltk.a */; };
 		4F218163175553040053D99E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F218162175553040053D99E /* libz.a */; };
+		4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EB179FBF9300937B50 /* e_checks2.cc */; };
+		4FBD72F0179FBFE900937B50 /* vm_object.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EE179FBFE900937B50 /* vm_object.cc */; };
+		4FBD72F7179FC00400937B50 /* vm_builtin.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F1179FC00400937B50 /* vm_builtin.cc */; };
+		4FBD72F8179FC00400937B50 /* vm_compile.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F2179FC00400937B50 /* vm_compile.cc */; };
+		4FBD72F9179FC00400937B50 /* vm_execute.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F3179FC00400937B50 /* vm_execute.cc */; };
+		4FBD72FA179FC00400937B50 /* vm_lex.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F4179FC00400937B50 /* vm_lex.cc */; };
+		4FBD72FC179FC10100937B50 /* libfltk_images.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FB179FC10100937B50 /* libfltk_images.a */; };
+		4FBD72FE179FC14C00937B50 /* libpng15.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FD179FC14C00937B50 /* libpng15.a */; };
+		4FBD7300179FC18000937B50 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FF179FC18000937B50 /* libjpeg.a */; };
+		4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4FBD7301179FC5ED00937B50 /* about_logo.png */; };
 		FA1E04EE16689A2900ED41DC /* ui_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA1E04EC16689A2900ED41DC /* ui_misc.cc */; };
 		FA244640166CAA6100C68ED8 /* common in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463A166CAA6100C68ED8 /* common */; };
-		FA244641166CAA6100C68ED8 /* docs in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463B166CAA6100C68ED8 /* docs */; };
 		FA244642166CAA6100C68ED8 /* games in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463C166CAA6100C68ED8 /* games */; };
-		FA244643166CAA6100C68ED8 /* misc in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463D166CAA6100C68ED8 /* misc */; };
 		FA244644166CAA6100C68ED8 /* mods in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463E166CAA6100C68ED8 /* mods */; };
 		FA244645166CAA6100C68ED8 /* ports in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463F166CAA6100C68ED8 /* ports */; };
 		FA4433D116AD9CB800525112 /* m_keys.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA4433CF16AD9CB800525112 /* m_keys.cc */; };
@@ -51,7 +59,6 @@
 		FABBC10A165B90280080245F /* lib_util.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0A1165B90280080245F /* lib_util.cc */; };
 		FABBC10B165B90280080245F /* m_bitvec.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0A3165B90280080245F /* m_bitvec.cc */; };
 		FABBC10C165B90280080245F /* m_config.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0A5165B90280080245F /* m_config.cc */; };
-		FABBC10D165B90280080245F /* m_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0A7165B90280080245F /* m_dialog.cc */; };
 		FABBC10E165B90280080245F /* m_game.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0A9165B90280080245F /* m_game.cc */; };
 		FABBC10F165B90280080245F /* m_select.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0AB165B90280080245F /* m_select.cc */; };
 		FABBC110165B90280080245F /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0AD165B90280080245F /* m_strings.cc */; };
@@ -71,7 +78,6 @@
 		FABBC121165B90280080245F /* ui_nodes.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0D3165B90280080245F /* ui_nodes.cc */; };
 		FABBC122165B90280080245F /* ui_nombre.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0D5165B90280080245F /* ui_nombre.cc */; };
 		FABBC123165B90280080245F /* ui_pic.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0D7165B90280080245F /* ui_pic.cc */; };
-		FABBC124165B90280080245F /* ui_radius.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0D9165B90280080245F /* ui_radius.cc */; };
 		FABBC125165B90280080245F /* ui_scroll.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0DB165B90280080245F /* ui_scroll.cc */; };
 		FABBC126165B90280080245F /* ui_sector.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0DD165B90280080245F /* ui_sector.cc */; };
 		FABBC127165B90280080245F /* ui_sidedef.cc in Sources */ = {isa = PBXBuildFile; fileRef = FABBC0DF165B90280080245F /* ui_sidedef.cc */; };
@@ -127,10 +133,9 @@
 			dstSubfolderSpec = 1;
 			files = (
 				FA244640166CAA6100C68ED8 /* common in CopyFiles */,
-				FA244641166CAA6100C68ED8 /* docs in CopyFiles */,
 				FA244642166CAA6100C68ED8 /* games in CopyFiles */,
-				FA244643166CAA6100C68ED8 /* misc in CopyFiles */,
 				FA4433D316ADA2AF00525112 /* bindings.cfg in CopyFiles */,
+				4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */,
 				FA244644166CAA6100C68ED8 /* mods in CopyFiles */,
 				FA244645166CAA6100C68ED8 /* ports in CopyFiles */,
 			);
@@ -141,6 +146,19 @@
 /* Begin PBXFileReference section */
 		4F2181601755526A0053D99E /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = staticlib/libfltk.a; sourceTree = "<group>"; };
 		4F218162175553040053D99E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = staticlib/libz.a; sourceTree = "<group>"; };
+		4FBD72EB179FBF9300937B50 /* e_checks2.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = e_checks2.cc; path = ../../src/e_checks2.cc; sourceTree = "<group>"; };
+		4FBD72EE179FBFE900937B50 /* vm_object.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_object.cc; path = ../../src/vm_object.cc; sourceTree = "<group>"; };
+		4FBD72EF179FBFE900937B50 /* vm_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm_object.h; path = ../../src/vm_object.h; sourceTree = "<group>"; };
+		4FBD72F1179FC00400937B50 /* vm_builtin.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_builtin.cc; path = ../../src/vm_builtin.cc; sourceTree = "<group>"; };
+		4FBD72F2179FC00400937B50 /* vm_compile.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_compile.cc; path = ../../src/vm_compile.cc; sourceTree = "<group>"; };
+		4FBD72F3179FC00400937B50 /* vm_execute.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_execute.cc; path = ../../src/vm_execute.cc; sourceTree = "<group>"; };
+		4FBD72F4179FC00400937B50 /* vm_lex.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_lex.cc; path = ../../src/vm_lex.cc; sourceTree = "<group>"; };
+		4FBD72F5179FC00400937B50 /* vm_local.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm_local.h; path = ../../src/vm_local.h; sourceTree = "<group>"; };
+		4FBD72F6179FC00400937B50 /* vm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm.h; path = ../../src/vm.h; sourceTree = "<group>"; };
+		4FBD72FB179FC10100937B50 /* libfltk_images.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_images.a; path = staticlib/libfltk_images.a; sourceTree = "<group>"; };
+		4FBD72FD179FC14C00937B50 /* libpng15.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng15.a; path = staticlib/libpng15.a; sourceTree = "<group>"; };
+		4FBD72FF179FC18000937B50 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = staticlib/libjpeg.a; sourceTree = "<group>"; };
+		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = file; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; };
 		FA1E04ED16689A2900ED41DC /* ui_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_misc.h; path = ../../src/ui_misc.h; sourceTree = "<group>"; };
 		FA24463A166CAA6100C68ED8 /* common */ = {isa = PBXFileReference; lastKnownFileType = folder; name = common; path = ../common; sourceTree = "<group>"; };
@@ -218,8 +236,6 @@
 		FABBC0A4165B90280080245F /* m_bitvec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_bitvec.h; path = ../../src/m_bitvec.h; sourceTree = "<group>"; };
 		FABBC0A5165B90280080245F /* m_config.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_config.cc; path = ../../src/m_config.cc; sourceTree = "<group>"; };
 		FABBC0A6165B90280080245F /* m_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_config.h; path = ../../src/m_config.h; sourceTree = "<group>"; };
-		FABBC0A7165B90280080245F /* m_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_dialog.cc; path = ../../src/m_dialog.cc; sourceTree = "<group>"; };
-		FABBC0A8165B90280080245F /* m_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_dialog.h; path = ../../src/m_dialog.h; sourceTree = "<group>"; };
 		FABBC0A9165B90280080245F /* m_game.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_game.cc; path = ../../src/m_game.cc; sourceTree = "<group>"; };
 		FABBC0AA165B90280080245F /* m_game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_game.h; path = ../../src/m_game.h; sourceTree = "<group>"; };
 		FABBC0AB165B90280080245F /* m_select.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_select.cc; path = ../../src/m_select.cc; sourceTree = "<group>"; };
@@ -247,7 +263,6 @@
 		FABBC0C7165B90280080245F /* ui_canvas.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_canvas.cc; path = ../../src/ui_canvas.cc; sourceTree = "<group>"; };
 		FABBC0C8165B90280080245F /* ui_canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_canvas.h; path = ../../src/ui_canvas.h; sourceTree = "<group>"; };
 		FABBC0C9165B90280080245F /* ui_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_dialog.cc; path = ../../src/ui_dialog.cc; sourceTree = "<group>"; };
-		FABBC0CA165B90280080245F /* ui_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_dialog.h; path = ../../src/ui_dialog.h; sourceTree = "<group>"; };
 		FABBC0CB165B90280080245F /* ui_hyper.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_hyper.cc; path = ../../src/ui_hyper.cc; sourceTree = "<group>"; };
 		FABBC0CC165B90280080245F /* ui_hyper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_hyper.h; path = ../../src/ui_hyper.h; sourceTree = "<group>"; };
 		FABBC0CD165B90280080245F /* ui_infobar.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_infobar.cc; path = ../../src/ui_infobar.cc; sourceTree = "<group>"; };
@@ -262,8 +277,6 @@
 		FABBC0D6165B90280080245F /* ui_nombre.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_nombre.h; path = ../../src/ui_nombre.h; sourceTree = "<group>"; };
 		FABBC0D7165B90280080245F /* ui_pic.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_pic.cc; path = ../../src/ui_pic.cc; sourceTree = "<group>"; };
 		FABBC0D8165B90280080245F /* ui_pic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_pic.h; path = ../../src/ui_pic.h; sourceTree = "<group>"; };
-		FABBC0D9165B90280080245F /* ui_radius.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_radius.cc; path = ../../src/ui_radius.cc; sourceTree = "<group>"; };
-		FABBC0DA165B90280080245F /* ui_radius.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_radius.h; path = ../../src/ui_radius.h; sourceTree = "<group>"; };
 		FABBC0DB165B90280080245F /* ui_scroll.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_scroll.cc; path = ../../src/ui_scroll.cc; sourceTree = "<group>"; };
 		FABBC0DC165B90280080245F /* ui_scroll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_scroll.h; path = ../../src/ui_scroll.h; sourceTree = "<group>"; };
 		FABBC0DD165B90280080245F /* ui_sector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_sector.cc; path = ../../src/ui_sector.cc; sourceTree = "<group>"; };
@@ -327,6 +340,9 @@
 				FA5E2C2D165B8F860024D6A5 /* Cocoa.framework in Frameworks */,
 				4F2181611755526A0053D99E /* libfltk.a in Frameworks */,
 				4F218163175553040053D99E /* libz.a in Frameworks */,
+				4FBD72FC179FC10100937B50 /* libfltk_images.a in Frameworks */,
+				4FBD72FE179FC14C00937B50 /* libpng15.a in Frameworks */,
+				4FBD7300179FC18000937B50 /* libjpeg.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,9 +358,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4FBD72ED179FBFDA00937B50 /* vm_ */ = {
+			isa = PBXGroup;
+			children = (
+				4FBD72F1179FC00400937B50 /* vm_builtin.cc */,
+				4FBD72F2179FC00400937B50 /* vm_compile.cc */,
+				4FBD72F3179FC00400937B50 /* vm_execute.cc */,
+				4FBD72F4179FC00400937B50 /* vm_lex.cc */,
+				4FBD72F5179FC00400937B50 /* vm_local.h */,
+				4FBD72F6179FC00400937B50 /* vm.h */,
+				4FBD72EE179FBFE900937B50 /* vm_object.cc */,
+				4FBD72EF179FBFE900937B50 /* vm_object.h */,
+			);
+			name = vm_;
+			sourceTree = "<group>";
+		};
 		FA5E2C1D165B8F860024D6A5 = {
 			isa = PBXGroup;
 			children = (
+				4FBD7301179FC5ED00937B50 /* about_logo.png */,
 				FA4433D216ADA2AE00525112 /* bindings.cfg */,
 				FA24463A166CAA6100C68ED8 /* common */,
 				FA24463B166CAA6100C68ED8 /* docs */,
@@ -371,6 +403,9 @@
 		FA5E2C2B165B8F860024D6A5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4FBD72FF179FC18000937B50 /* libjpeg.a */,
+				4FBD72FD179FC14C00937B50 /* libpng15.a */,
+				4FBD72FB179FC10100937B50 /* libfltk_images.a */,
 				4F218162175553040053D99E /* libz.a */,
 				4F2181601755526A0053D99E /* libfltk.a */,
 				FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */,
@@ -393,7 +428,6 @@
 		FA5E2C32165B8F860024D6A5 /* EurekaApp */ = {
 			isa = PBXGroup;
 			children = (
-				FAF8A0D2165BE0FE009B4C14 /* Resource */,
 				FA5E2C60165B8F950024D6A5 /* Eureka */,
 				FAF8A0DF165BE342009B4C14 /* OSXPort */,
 				FA5E2C33165B8F860024D6A5 /* Supporting Files */,
@@ -436,6 +470,7 @@
 		FA5E2C60165B8F950024D6A5 /* Eureka */ = {
 			isa = PBXGroup;
 			children = (
+				4FBD72ED179FBFDA00937B50 /* vm_ */,
 				FA8DBCFA165D293600FCFB1A /* main.cc */,
 				FA8DBCFB165D293600FCFB1A /* main.h */,
 				FABBC23F165B990C0080245F /* glbsp_src */,
@@ -466,6 +501,7 @@
 			isa = PBXGroup;
 			children = (
 				FABBC135165B903E0080245F /* headers */,
+				4FBD72EB179FBF9300937B50 /* e_checks2.cc */,
 				FABBC080165B90280080245F /* e_basis.cc */,
 				FABBC082165B90280080245F /* e_checks.cc */,
 				FABBC084165B90280080245F /* e_cutpaste.cc */,
@@ -533,8 +569,6 @@
 				FABBC0A4165B90280080245F /* m_bitvec.h */,
 				FABBC0A5165B90280080245F /* m_config.cc */,
 				FABBC0A6165B90280080245F /* m_config.h */,
-				FABBC0A7165B90280080245F /* m_dialog.cc */,
-				FABBC0A8165B90280080245F /* m_dialog.h */,
 				FABBC0A9165B90280080245F /* m_game.cc */,
 				FABBC0AA165B90280080245F /* m_game.h */,
 				FABBC0AB165B90280080245F /* m_select.cc */,
@@ -584,7 +618,6 @@
 				FABBC0C7165B90280080245F /* ui_canvas.cc */,
 				FABBC0C8165B90280080245F /* ui_canvas.h */,
 				FABBC0C9165B90280080245F /* ui_dialog.cc */,
-				FABBC0CA165B90280080245F /* ui_dialog.h */,
 				FABBC0CB165B90280080245F /* ui_hyper.cc */,
 				FABBC0CC165B90280080245F /* ui_hyper.h */,
 				FABBC0CD165B90280080245F /* ui_infobar.cc */,
@@ -599,8 +632,6 @@
 				FABBC0D6165B90280080245F /* ui_nombre.h */,
 				FABBC0D7165B90280080245F /* ui_pic.cc */,
 				FABBC0D8165B90280080245F /* ui_pic.h */,
-				FABBC0D9165B90280080245F /* ui_radius.cc */,
-				FABBC0DA165B90280080245F /* ui_radius.h */,
 				FABBC0DB165B90280080245F /* ui_scroll.cc */,
 				FABBC0DC165B90280080245F /* ui_scroll.h */,
 				FABBC0DD165B90280080245F /* ui_sector.cc */,
@@ -677,13 +708,6 @@
 			);
 			name = glbsp_src;
 			path = ../../glbsp_src;
-			sourceTree = "<group>";
-		};
-		FAF8A0D2165BE0FE009B4C14 /* Resource */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Resource;
 			sourceTree = "<group>";
 		};
 		FAF8A0DF165BE342009B4C14 /* OSXPort */ = {
@@ -825,7 +849,6 @@
 				FABBC10A165B90280080245F /* lib_util.cc in Sources */,
 				FABBC10B165B90280080245F /* m_bitvec.cc in Sources */,
 				FABBC10C165B90280080245F /* m_config.cc in Sources */,
-				FABBC10D165B90280080245F /* m_dialog.cc in Sources */,
 				FABBC10E165B90280080245F /* m_game.cc in Sources */,
 				FABBC10F165B90280080245F /* m_select.cc in Sources */,
 				FABBC110165B90280080245F /* m_strings.cc in Sources */,
@@ -845,7 +868,6 @@
 				FABBC121165B90280080245F /* ui_nodes.cc in Sources */,
 				FABBC122165B90280080245F /* ui_nombre.cc in Sources */,
 				FABBC123165B90280080245F /* ui_pic.cc in Sources */,
-				FABBC124165B90280080245F /* ui_radius.cc in Sources */,
 				FABBC125165B90280080245F /* ui_scroll.cc in Sources */,
 				FABBC126165B90280080245F /* ui_sector.cc in Sources */,
 				FABBC127165B90280080245F /* ui_sidedef.cc in Sources */,
@@ -879,6 +901,12 @@
 				FA85EEEA16936A3A00CA6FC2 /* ui_prefs.cc in Sources */,
 				FA4433D116AD9CB800525112 /* m_keys.cc in Sources */,
 				FADB99F316B017D600A28204 /* AppDelegate.mm in Sources */,
+				4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */,
+				4FBD72F0179FBFE900937B50 /* vm_object.cc in Sources */,
+				4FBD72F7179FC00400937B50 /* vm_builtin.cc in Sources */,
+				4FBD72F8179FC00400937B50 /* vm_compile.cc in Sources */,
+				4FBD72F9179FC00400937B50 /* vm_execute.cc in Sources */,
+				4FBD72FA179FC00400937B50 /* vm_lex.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -958,6 +986,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -966,7 +995,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				LLVM_LTO = YES;
+				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -990,6 +1019,7 @@
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_STRICT_ALIASING = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1013,6 +1043,9 @@
 					"DEBUG=1",
 					"$(inherited)",
 					"main=main_ORIGINAL",
+					_THREAD_SAFE,
+					_REENTRANT,
+					"INLINE_G=inline",
 				);
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -1030,7 +1063,12 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EurekaApp/Eureka Doom Editor-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = "main=main_ORIGINAL";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"main=main_ORIGINAL",
+					_THREAD_SAFE,
+					_REENTRANT,
+					"INLINE_G=inline",
+				);
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
