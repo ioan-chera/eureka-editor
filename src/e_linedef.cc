@@ -909,24 +909,5 @@ void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex)
 #endif
 
 
-/*
- *  bv_vertices_of_linedefs
- *  Return a bit vector of all vertices used by the linedefs.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *bv_vertices_of_linedefs (bitvec_c *linedefs)
-{
-	bitvec_c *vertices = new bitvec_c (NumVertices);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (linedefs->get (n))
-		{
-			vertices->set (LineDefs[n]->start);
-			vertices->set (LineDefs[n]->end);
-		}
-	return vertices;
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

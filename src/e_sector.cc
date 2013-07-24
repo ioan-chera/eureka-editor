@@ -477,58 +477,6 @@ void MakeLiftFromSector (int sector)
 }
 
 
-
-/*
- *  linedefs_of_sector
- *  Return a bit vector of all linedefs used by the sector.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *linedefs_of_sector (obj_no_t s)
-{
-	bitvec_c *linedefs = new bitvec_c (NumLineDefs);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->TouchesSector(s))
-			linedefs->set (n);
-
-	return linedefs;
-}
-
-
-/*
- *  linedefs_of_sector
- *  Returns the number of linedefs that face sector <s>
- *  and, if that number is greater than zero, sets <array>
- *  to point on a newly allocated array filled with the
- *  numbers of those linedefs. It's up to the caller to
- *  delete[] the array after use.
- */
-int linedefs_of_sector (obj_no_t s, obj_no_t *&array)
-{
-	int count = 0;
-#if 0  // FIXME  linedefs_of_sector shit
-	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (   is_sidedef (LineDefs[n]->right)
-				&& SideDefs[LineDefs[n]->right].sector == s
-				|| is_sidedef (LineDefs[n]->left)
-				&& SideDefs[LineDefs[n]->left].sector == s)
-			count++;
-	if (count > 0)
-	{
-		array = new obj_no_t[count];
-		count = 0;
-		for (int n = 0 ; n < NumLineDefs ; n++)
-			if (   is_sidedef (LineDefs[n]->right)
-					&& SideDefs[LineDefs[n]->right].sector == s
-					|| is_sidedef (LineDefs[n]->left)
-					&& SideDefs[LineDefs[n]->left].sector == s)
-				array[count++] = n;
-	}
-#endif
-	return count;
-}
-
-
 void SEC_SwapFlats()
 {
 	selection_c list;
@@ -646,22 +594,6 @@ void SEC_Merge(void)
 	edit.Selected->set(source);
 
 	MarkChanges();
-}
-
-
-/*
- *  bv_vertices_of_sector
- *  Return a bit vector of all vertices used by a sector.
- *  It's up to the caller to delete the bit vector after use.
- */
-bitvec_c *bv_vertices_of_sector (obj_no_t s)
-{
-	bitvec_c *linedefs = linedefs_of_sector(s);
-
-	bitvec_c *vertices = bv_vertices_of_linedefs(linedefs);
-	delete linedefs;
-
-	return vertices;
 }
 
 
