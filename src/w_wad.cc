@@ -190,6 +190,8 @@ Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 
 Wad_file::~Wad_file()
 {
+	LogPrintf("Closing WAD file: %s\n", filename);
+
 	fclose(fp);
 
 	// free the directory

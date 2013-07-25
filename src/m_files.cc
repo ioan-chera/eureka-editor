@@ -791,9 +791,10 @@ bool M_ParseEurekaLump(Wad_file *wad)
 			{
 				LogPrintf("  unknown game: %s\n", pos /* show full path */);
 
-				int res = fl_choice("Warning: the pwad specifies an unsupported game:\n\n%s",
-				                    NULL, "IGNORE", "Cancel", pos);
-				if (res == 2)
+				int res = DLG_Confirm("&Ignore|&Cancel Load",
+				                      "Warning: the pwad specifies an unsupported "
+									  "game:\n\n          %s", pos);
+				if (res == 1)
 					return false;
 			}
 			else
@@ -802,9 +803,10 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 				if (! new_iwad)
 				{
-					int res = fl_choice("Warning: the pwad specifies an IWAD which cannot be found:\n\n%s.wad",
-				                        NULL, "IGNORE", "Cancel", pos);
-					if (res == 2)
+					int res = DLG_Confirm("&Ignore|&Cancel Load",
+					                      "Warning: the pwad specifies an IWAD "
+										  "which cannot be found:\n\n          %s.wad", pos);
+					if (res == 1)
 						return false;
 				}
 			}
