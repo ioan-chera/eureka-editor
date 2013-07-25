@@ -401,28 +401,14 @@ void M_SaveRecent()
 }
 
 
-void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb)
+int M_RecentCount()
 {
-	int menu_pos = bar->find_index("&File/&Recent Files");
+	return recent_files.getSize();
+}
 
-	if (menu_pos < 0)  // [should not happen]
-		return;
-
-	bar->clear_submenu(menu_pos);
-
-	for (int i = 0 ; i < recent_files.getSize() ; i++)
-	{
-		char name_buf[256];
-
-		recent_files.Format(name_buf, i);
-
-		recent_file_data_c *data = recent_files.getData(i);
-
-		bar->insert(menu_pos + i + 1, name_buf, 0, cb, (void *)data);
-	}
-
-	// this sub-menu may get updated later, so we never disable
-	// the menu entry (like we do for Given Files).
+void * M_RecentData(int index)
+{
+	return recent_files.getData(index);
 }
 
 

@@ -409,6 +409,10 @@ void help_do_about(Fl_Widget *w, void * data)
 
 //------------------------------------------------------------------------
 
+#define M_GIVEN_FILES	"&Given Files"
+#define M_RECENT_FILES	"&Recent Files"
+
+
 #undef FCAL
 #define FCAL  (Fl_Callback *)
 
@@ -419,7 +423,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&New Map",   FL_COMMAND + 'n', FCAL file_do_new },
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 
-		{ "&Given Files", 0, 0, 0, FL_SUBMENU },
+		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -427,7 +431,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 
-		{ "&Recent Files", 0, 0, 0, FL_SUBMENU },
+		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -542,38 +546,119 @@ static Fl_Menu_Item menu_items[] =
 
 #define MAX_PWAD_LIST  20
 
-void Menu_PopulateGivenFiles(Fl_Sys_Menu_Bar *bar)
+
+static int Menu_FindText(const Fl_Menu_Item *items, const char *text)
 {
-	int menu_pos = bar->find_index("&File/&Given Files");
+	int total = items[0].size();  // includes {0} at end
+
+	for (int i = 0 ; i < total ; i++)
+		if (y_stricmp(items[i].text, text) == 0)
+			return i;
+
+	return -1;  // not found
+}
+
+
+static void Menu_CopyItem(Fl_Menu_Item* &pos, const Fl_Menu_Item &orig)
+{
+	memcpy(pos, &orig, sizeof(orig));
+
+	pos++;
+}
+
+
+static void Menu_AddItem(Fl_Menu_Item* &pos, const char *text,
+						 Fl_Callback *cb, void *data, int flags)
+{
+	Fl_Menu_Item item;
+
+	memset(&item, 0, sizeof(item));
+
+	item.text = text;
+	item.flags = flags;
+	item.callback_ = cb;
+	item.user_data_ = data;
+
+	Menu_CopyItem(pos, item);
+}
+
+
+static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
+{
+	int count = (int)Pwad_list.size();
+
+	if (count < 2)
+		return items;
+
+	// silently ignore excess pwads
+	if (count > MAX_PWAD_LIST)
+		count = MAX_PWAD_LIST;
+
+
+	// find Given Files sub-menu and activate it
+	int menu_pos = Menu_FindText(items, M_GIVEN_FILES);
+
+	if (menu_pos < 0)  // [should not happen]
+		return items;
+
+	items[menu_pos++].activate();
+
+
+	// create new array
+	int total = items[0].size();  // includes {0} at end
+
+	Fl_Menu_Item * new_array = new Fl_Menu_Item[total + count];
+	Fl_Menu_Item * pos = new_array;
+
+	for (int i = 0 ; i < menu_pos ; i++)
+		Menu_CopyItem(pos, items[i]);
+
+	for (int k = 0 ; k < count ; k++)
+	{
+		const char *short_name = fl_filename_name(Pwad_list[k]);
+
+		Menu_AddItem(pos, short_name,
+					 FCAL file_do_load_given,
+					 (void *) Pwad_list[k], 0);
+	}
+
+	for ( ; menu_pos < total ; menu_pos++)
+		Menu_CopyItem(pos, items[menu_pos]);
+
+	return new_array;
+}
+
+
+static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
+{
+return items;
+
+/*
+	int count = M_RecentCount();
+
+	if (count < 1)
+		return items;
+
+	int menu_pos = Menu_FindText(items, M_RECENT_FILES);
 
 	if (menu_pos < 0)  // [should not happen]
 		return;
 
-	if (Pwad_list.size() >= 2)
-	{
-		// silently ignore excess pwads
-		int count = MIN((int)Pwad_list.size(), MAX_PWAD_LIST);
 
-		for (int i = 0 ; i < count ; i++)
-		{
-			const char *short_name = fl_filename_name(Pwad_list[i]);
+	bar->clear_submenu(menu_pos);
 
-			bar->insert(menu_pos + i + 1, short_name, 0,
-						FCAL file_do_load_given,
-						(void *) Pwad_list[i], 0);
-		}
-	}
-	else
+	for (int i = 0 ; i < recent_files.getSize() ; i++)
 	{
-		// disable the whole sub-menu
-		bar->remove(menu_pos);
-		bar->insert(menu_pos, "&Given Files", 0, 0, 0, FL_MENU_INACTIVE);
+		char name_buf[256];
+
+		recent_files.Format(name_buf, i);
+
+		recent_file_data_c *data = recent_files.getData(i);
+
+		bar->insert(menu_pos + i + 1, name_buf, 0, cb, (void *)data);
 	}
+*/
 }
-
-
-// this is now in m_files.cc
-extern void Menu_PopulateRecentFiles(Fl_Sys_Menu_Bar *bar, Fl_Callback *cb);
 
 
 Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
@@ -584,10 +669,12 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	bar->textsize(KF_fonth);
 #endif
 
-	bar->menu(menu_items);
+	Fl_Menu_Item *items = menu_items;
 
-	Menu_PopulateGivenFiles(bar);
-	Menu_PopulateRecentFiles(bar, FCAL file_do_load_recent);
+	items = Menu_PopulateGivenFiles(items);
+	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);
+
+	bar->menu(items);
 
 	return bar;
 }

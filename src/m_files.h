@@ -30,6 +30,10 @@ void M_AddRecent(const char *filename, const char *map_name);
 void M_OpenRecentFromMenu(void *priv_data);
 bool M_TryOpenMostRecent();
 
+// this only for menu code
+int    M_RecentCount();
+void * M_RecentData(int index);
+
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
 const char * M_QueryKnownIWAD(const char *game);
