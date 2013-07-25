@@ -457,12 +457,13 @@ void CMD_ToggleVar(void)
 }
 
 
-
 static void Editor_ClearMeta()
 {
-	if (edit.await_meta)
+// FIXME: more generic action-clearing
+
+	if (edit.action == ACT_WAIT_META)
 	{
-		edit.await_meta = false;
+		edit.action = ACT_NOTHING;
 
 		Status_Clear();
 	}
@@ -471,13 +472,16 @@ static void Editor_ClearMeta()
 
 void CMD_MetaKey(void)
 {
-	if (edit.await_meta)
+	if (edit.action == ACT_WAIT_META)
 	{
 		Editor_ClearMeta();
 	}
 	else
 	{
-		edit.await_meta = true;
+		// FIXME: clear any existing action
+
+		edit.action = ACT_WAIT_META;
+
 		Status_Set("META...");
 	}
 }
@@ -780,13 +784,9 @@ int Editor_RawKey(int event)
 	if (event == FL_KEYUP)
 		return 0;
 
-	bool convert_meta = edit.await_meta;
+	bool convert_meta = (edit.action == ACT_WAIT_META);
 
-	if (edit.await_meta)
-	{
-		edit.await_meta = false;
-		Status_Clear();
-	}
+	Editor_ClearMeta();
 
 	int raw_key   = Fl::event_key();
 	int raw_state = Fl::event_state();
@@ -797,7 +797,7 @@ int Editor_RawKey(int event)
 	keycode_t key = M_TranslateKey(raw_key, raw_state);
 
 	if (key == 0)
-		return 0;
+		return convert_meta ? 1 : 0;
 
 	wheel_dx = wheel_dy = 0;
 
@@ -830,7 +830,11 @@ int Editor_RawKey(int event)
 	// NOTE: the key may still get handled by something (e.g. Menus)
 	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
 
-	return 0;
+
+	// prevent a META-fied key from being sent elsewhere, because it
+	// won't really be META-fied anywhere else -- including the case
+	// of it being sent back to this function as a SHORTCUT event.
+	return convert_meta ? 1 : 0;
 }
 
 
@@ -1336,11 +1340,6 @@ void Editor_Init()
 {
 	memset(&edit, 0, sizeof(edit));  /* Catch-all */
 
-	edit.render3d = false;
-
-	edit.move_speed = 20;
-	edit.extra_zoom = 0;
-
 	switch (default_edit_mode)
 	{
 		case 1:  edit.mode = OBJ_LINEDEFS; break;
@@ -1348,6 +1347,11 @@ void Editor_Init()
 		case 3:  edit.mode = OBJ_VERTICES; break;
 		default: edit.mode = OBJ_THINGS;   break;
 	}
+
+	edit.action = ACT_NOTHING;
+
+	edit.render3d = false;
+	edit.error_mode = false;
 
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;
@@ -1357,15 +1361,12 @@ void Editor_Init()
 	edit.button_mod  = 0;
 	edit.clicked.clear();
 
-	edit.await_meta = false;
-
 	edit.highlighted.clear();
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 
 	edit.Selected = new selection_c(edit.mode);
 
-	edit.error_mode = false;
 	edit.did_a_move = false;
 
 	grid.Init();

@@ -27,16 +27,33 @@
 #ifndef __EUREKA_EDITLOOP_H__
 #define __EUREKA_EDITLOOP_H__
 
+
+typedef enum
+{
+	ACT_NOTHING = 0,
+
+	ACT_WAIT_META,		// user pressed ';' -- waiting for next key
+
+	ACT_SELBOX,			// user is outlining a selection box
+	ACT_DRAG,			// user is dragging some objects
+	ACT_SCALE,			// user is scaling (etc) some objects
+
+	ACT_SCROLL_MAP,		// user is scrolling the map (or moving in 3D view)
+	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
+
+} editor_action_e;
+
+
 /* this holds some miscellaneous editor state */
 
 typedef struct
 {
 	obj_type_e  mode;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
-	bool render3d;    // 3D preview is active
+	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
 
-	int move_speed;   // Movement speed.
-	int extra_zoom;   // Act like the zoom was 4 times what it is
+	bool render3d;    // 3D preview is active
+	bool error_mode;  // draw selection in red
 
 	bool show_object_numbers; // Whether the object numbers are shown
 	bool show_things_squares; // Whether the things squares are shown
@@ -49,16 +66,12 @@ typedef struct
 	int button_down;  // mouse button 1 to 3, or 0 for none,
 	keycode_t button_mod;  // modifier(s) used when button was pressed
 
-	bool await_meta;   // user pressed ';' -- waiting for next key
-
 	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred.
 
 	bool did_a_move;   // just moved stuff, clear the next selection
 
 	selection_c *Selected;    // all selected objects (usually empty)
-
-	bool error_mode;  // draw selection in red  (FIXME: have an enum)
 
 	Objid highlighted;   // The highlighted object
 	Objid split_line;  // linedef which would be split by a new vertex
