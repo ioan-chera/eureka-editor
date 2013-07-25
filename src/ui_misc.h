@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@ class UI_MoveDialog : public UI_Escapable_Window
 private:
 	Fl_Int_Input *delta_x;
 	Fl_Int_Input *delta_y;
+	Fl_Int_Input *delta_z;
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;

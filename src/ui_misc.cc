@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2013 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@
 
 
 UI_MoveDialog::UI_MoveDialog() :
-	UI_Escapable_Window(360, 180, "Move Objects"),
+	UI_Escapable_Window(360, 205, "Move Objects"),
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
@@ -33,19 +33,21 @@ UI_MoveDialog::UI_MoveDialog() :
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	delta_x = new Fl_Int_Input(95, 55, 65, 25,  "delta x:");
-	delta_y = new Fl_Int_Input(240, 55, 65, 25, "delta y:");
+	delta_y = new Fl_Int_Input(95, 85, 65, 25,  "delta y:");
+	delta_z = new Fl_Int_Input(240, 85, 65, 25, "delta z:");
 
 	delta_x->value("0");
 	delta_y->value("0");
+	delta_z->value("0");
 
-	Fl_Group * grp = new Fl_Group(0, 110, w(), h() - 110);
+	Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
 	grp->box(FL_FLAT_BOX);
 	grp->color(WINDOW_BG, WINDOW_BG);
 	{
-		cancel_but = new Fl_Button(30, 130, 95, 30, "Cancel");
+		cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
 	
-		ok_but = new Fl_Button(245, 130, 95, 30, "Move");
+		ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Move");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
@@ -67,6 +69,11 @@ UI_MoveDialog::~UI_MoveDialog()
 
 void UI_MoveDialog::Run()
 {
+	if (edit.mode != OBJ_SECTORS)
+	{
+		delta_z->hide();
+	}
+
 	set_modal();
 
 	show();
@@ -92,8 +99,9 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 
 	int delta_x = atoi(that->delta_x->value());
 	int delta_y = atoi(that->delta_y->value());
+	int delta_z = atoi(that->delta_z->value());
 
-	CMD_MoveObjects(delta_x, delta_y);
+	CMD_MoveObjects(delta_x, delta_y, delta_z);
 
 	that->want_close = true;
 }
@@ -274,14 +282,14 @@ UI_RotateDialog::UI_RotateDialog() :
 	            "Top Left|Top|Top Right");
 	origin->value(4);
 
-	Fl_Group * grp = new Fl_Group(0, 130, w(), h() - 130);
+	Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
 	grp->box(FL_FLAT_BOX);
 	grp->color(WINDOW_BG, WINDOW_BG);
 	{
-		cancel_but = new Fl_Button(30, 150, 95, 30, "Cancel");
+		cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
 	
-		ok_but = new Fl_Button(245, 150, 95, 30, "Rotate");
+		ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Rotate");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 

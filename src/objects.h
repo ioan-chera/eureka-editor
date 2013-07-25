@@ -51,7 +51,7 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y);
 
 void CMD_Insert(void);
 
-void CMD_MoveObjects(int delta_x, int delta_y);
+void CMD_MoveObjects(int delta_x, int delta_y, int delta_z = 0);
 
 void CMD_CopyProperties(void);
 

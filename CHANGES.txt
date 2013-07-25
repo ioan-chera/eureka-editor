@@ -23,6 +23,8 @@ CHANGES IN Eureka 1.00
 
 -  incorporated Jason R. Johnston's logo in the About dialog
 
+-  Edit / Move objects: implemented Z value for sectors
+
 -  automatically open the most recent file (optional)
 -  option to maximize the window when Eureka starts
 -  remember the browser width for a saved map

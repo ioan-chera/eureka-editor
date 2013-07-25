@@ -930,7 +930,7 @@ bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 
 
 
-static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
+static void DoMoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
 {
 	selection_iterator_c it;
 
@@ -939,7 +939,7 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
 		case OBJ_THINGS:
 			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
-				Thing * T = Things[*it];
+				const Thing * T = Things[*it];
 
 				BA_ChangeTH(*it, Thing::F_X, T->x + delta_x);
 				BA_ChangeTH(*it, Thing::F_Y, T->y + delta_y);
@@ -949,22 +949,32 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
 		case OBJ_VERTICES:
 			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
-				Vertex * V = Vertices[*it];
+				const Vertex * V = Vertices[*it];
 
 				BA_ChangeVT(*it, Vertex::F_X, V->x + delta_x);
 				BA_ChangeVT(*it, Vertex::F_Y, V->y + delta_y);
 			}
 			break;
 
-		// everything else just moves the vertices
-		case OBJ_LINEDEFS:
 		case OBJ_SECTORS:
+			// apply the Z delta first
+			for (list->begin(&it) ; !it.at_end() ; ++it)
+			{
+				const Sector * S = Sectors[*it];
+
+				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + delta_z);
+				BA_ChangeSEC(*it, Sector::F_CEILH,  S->ceilh  + delta_z);
+			}
+
+			/* FALL-THROUGH !! */
+
+		case OBJ_LINEDEFS:
 			{
 				selection_c verts(OBJ_VERTICES);
 
 				ConvertSelection(list, &verts);
 
-				DoMoveObjects(&verts, delta_x, delta_y);
+				DoMoveObjects(&verts, delta_x, delta_y, delta_z);
 			}
 			break;
 
@@ -974,7 +984,7 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y)
 }
 
 
-void CMD_MoveObjects(int delta_x, int delta_y)
+void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 {
 	if (edit.Selected->empty())
 		return;
@@ -1013,10 +1023,10 @@ void CMD_MoveObjects(int delta_x, int delta_y)
 
 		ConvertSelection(edit.Selected, &thing_sel);
 
-		DoMoveObjects(&thing_sel, delta_x, delta_y);
+		DoMoveObjects(&thing_sel, delta_x, delta_y, delta_z);
 	}
 
-	DoMoveObjects(edit.Selected, delta_x, delta_y);
+	DoMoveObjects(edit.Selected, delta_x, delta_y, delta_z);
 
 success:
 	BA_End();
