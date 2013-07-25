@@ -380,8 +380,8 @@ void UI_Canvas::DrawGrid_Dotty()
 				fl_point(sx, sy);
 			else
 			{
-				fl_rect(sx, sy, 2, 2);
-				
+				fl_rectf(sx, sy, 2, 2);
+
 				// fl_line(sx-0, sy, sx+1, sy);
 				// fl_line(sx, sy-0, sx, sy+1);
 			}
