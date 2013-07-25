@@ -406,6 +406,11 @@ int M_RecentCount()
 	return recent_files.getSize();
 }
 
+void M_RecentShortName(int index, char *name_buf)
+{
+	recent_files.Format(name_buf, index);
+}
+
 void * M_RecentData(int index)
 {
 	return recent_files.getData(index);

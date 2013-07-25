@@ -547,12 +547,12 @@ static Fl_Menu_Item menu_items[] =
 #define MAX_PWAD_LIST  20
 
 
-static int Menu_FindText(const Fl_Menu_Item *items, const char *text)
+static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
 	int total = items[0].size();  // includes {0} at end
 
 	for (int i = 0 ; i < total ; i++)
-		if (y_stricmp(items[i].text, text) == 0)
+		if (items[i].text && y_stricmp(items[i].text, text) == 0)
 			return i;
 
 	return -1;  // not found
@@ -596,7 +596,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 
 	// find Given Files sub-menu and activate it
-	int menu_pos = Menu_FindText(items, M_GIVEN_FILES);
+	int menu_pos = Menu_FindItem(items, M_GIVEN_FILES);
 
 	if (menu_pos < 0)  // [should not happen]
 		return items;
@@ -631,33 +631,45 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
 {
-return items;
-
-/*
 	int count = M_RecentCount();
 
 	if (count < 1)
 		return items;
 
-	int menu_pos = Menu_FindText(items, M_RECENT_FILES);
+
+	// find Recent Files sub-menu and activate it
+	int menu_pos = Menu_FindItem(items, M_RECENT_FILES);
 
 	if (menu_pos < 0)  // [should not happen]
-		return;
+		return items;
+
+	items[menu_pos++].activate();
 
 
-	bar->clear_submenu(menu_pos);
+	// create new array
+	int total = items[0].size();  // includes {0} at end
 
-	for (int i = 0 ; i < recent_files.getSize() ; i++)
+	Fl_Menu_Item * new_array = new Fl_Menu_Item[total + count];
+	Fl_Menu_Item * pos = new_array;
+
+	for (int i = 0 ; i < menu_pos ; i++)
+		Menu_CopyItem(pos, items[i]);
+
+	for (int k = 0 ; k < count ; k++)
 	{
 		char name_buf[256];
 
-		recent_files.Format(name_buf, i);
+		M_RecentShortName(k, name_buf);
 
-		recent_file_data_c *data = recent_files.getData(i);
+		void *data = M_RecentData(k);
 
-		bar->insert(menu_pos + i + 1, name_buf, 0, cb, (void *)data);
+		Menu_AddItem(pos, StringDup(name_buf), cb, data, 0);
 	}
-*/
+
+	for ( ; menu_pos < total ; menu_pos++)
+		Menu_CopyItem(pos, items[menu_pos]);
+
+	return new_array;
 }
 
 
