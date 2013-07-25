@@ -218,8 +218,6 @@ private:
 	bool want_quit;
 	bool want_discard;
 
-	int  changed_keys;
-
 	char key_sort_mode;
 	bool key_sort_rev;
 
@@ -234,7 +232,7 @@ private:
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  add_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
-	static void  restore_callback(Fl_Button *w, void *data);
+	static void    reset_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -347,7 +345,6 @@ public:
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
-	  changed_keys(0),
 	  key_sort_mode('c'), key_sort_rev(false),
 	  awaiting_line(0)
 {
@@ -617,8 +614,8 @@ UI_Preferences::UI_Preferences() :
 		  key_delete->callback((Fl_Callback*)del_key_callback, this);
 		  key_delete->shortcut(FL_Delete);
 		}
-		{ key_reset = new Fl_Button(470, 335, 90, 50, "Load\nDefaults");
-		  key_reset->callback((Fl_Callback*)restore_callback, this);
+		{ key_reset = new Fl_Button(470, 335, 90, 50, "Reset\nDefaults");
+		  key_reset->callback((Fl_Callback*)reset_callback, this);
 		}
 		o->end();
 	  }
@@ -800,8 +797,6 @@ void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
 
 	prefs->ReloadKeys();
 
-	prefs->changed_keys += 1;
-
 	bind_key_callback(w, data);
 }
 
@@ -839,8 +834,6 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	prefs->ReloadKeys();
 
-	prefs->changed_keys += 1;
-
 	Fl::focus(prefs->key_list);
 }
 
@@ -870,26 +863,26 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::restore_callback(Fl_Button *w, void *data)
+void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	if (prefs->changed_keys > 1)
+	if (true)
 	{
-		int res = fl_choice("You have made several changes to the key bindings.\n"
-		                    "These will be lost after loading the defaults.\n"
-							"\n"
-							"Are you sure you want to continue?",
-							NULL, "LOAD", "Cancel");
-		if (res != 1)
+		int res = DLG_Confirm("Cancel|Reset",
+		                      "You are about to reset all key bindings to their default "
+							  "values.  Pressing the preference window's \"Apply\" button "
+							  "will cause any changes you have made to be lost."
+							  "\n\n"
+							  "Are you sure you want to continue?");
+
+		if (res <= 0)
 			return;
 	}
 
 	M_CopyBindings(true /* from_defaults */);
 
 	prefs->LoadKeys();
-
-	prefs->changed_keys = 0;
 }
 
 
@@ -1166,8 +1159,6 @@ void UI_Preferences::SetBinding(keycode_t key)
 	int bind_idx = awaiting_line - 1;
 
 	M_ChangeBindingKey(bind_idx, key);
-
-	changed_keys += 1;
 
 	ClearWaiting();
 }
