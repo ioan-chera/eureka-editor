@@ -253,6 +253,7 @@ void Editor_ChangeMode(char mode)
 			return;
 	}
 
+	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
 	edit.highlighted.clear();
@@ -381,11 +382,15 @@ void CMD_SetVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
+		Editor_ClearAction();
+
 		edit.render3d = bool_val;
 		main_win->redraw();
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
+		Editor_ClearAction();
+
 		int want_vis   = bool_val ? 1 : 0;
 		int is_visible = main_win->browser->visible() ? 1 : 0;
 
@@ -424,11 +429,15 @@ void CMD_ToggleVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
+		Editor_ClearAction();
+
 		edit.render3d = ! edit.render3d;
 		main_win->redraw();
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
+		Editor_ClearAction();
+
 		main_win->ShowBrowser('/');
 	}
 	else if (y_stricmp(var_name, "grid") == 0)
@@ -457,33 +466,68 @@ void CMD_ToggleVar(void)
 }
 
 
-static void Editor_ClearMeta()
+static int mouse_last_x;
+static int mouse_last_y;
+
+
+void Editor_ClearAction()
 {
-// FIXME: more generic action-clearing
-
-	if (edit.action == ACT_WAIT_META)
+	switch (edit.action)
 	{
-		edit.action = ACT_NOTHING;
+		case ACT_NOTHING:
+			return;
 
-		Status_Clear();
+		case ACT_WAIT_META:
+			Status_Clear();
+			break;
+	
+		case ACT_SCROLL_MAP:
+		case ACT_ADJUST_OFS:
+			main_win->SetCursor(FL_CURSOR_DEFAULT);
+			break;
+
+		default:
+			/* no special for the rest */
+			break;
+	}
+
+	edit.action = ACT_NOTHING;
+}
+
+
+void Editor_SetAction(editor_action_e  new_action)
+{
+	Editor_ClearAction();
+
+	edit.action = new_action;
+
+	switch (edit.action)
+	{
+		case ACT_NOTHING:
+			return;
+
+		case ACT_WAIT_META:
+			Status_Set("META...");
+			break;
+
+		case ACT_SCROLL_MAP:
+		case ACT_ADJUST_OFS:
+			mouse_last_x = Fl::event_x();
+			mouse_last_y = Fl::event_y();
+
+			main_win->SetCursor(FL_CURSOR_HAND);
+			break;
+
+		default:
+			/* no special for the rest */
+			break;
 	}
 }
 
 
 void CMD_MetaKey(void)
 {
-	if (edit.action == ACT_WAIT_META)
-	{
-		Editor_ClearMeta();
-	}
-	else
-	{
-		// FIXME: clear any existing action
-
-		edit.action = ACT_WAIT_META;
-
-		Status_Set("META...");
-	}
+	Editor_SetAction(ACT_WAIT_META);
 }
 
 
@@ -775,6 +819,84 @@ void CMD_CopyAndPaste(void)
 
 //------------------------------------------------------------------------
 
+
+static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
+{
+	// started?
+	if (mode < 0)
+	{
+		Editor_SetAction(ACT_SCROLL_MAP);
+		return;
+	}
+
+	// finished?
+	if (mode > 0)
+	{
+		Editor_ClearAction();
+		return;
+	}
+
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (edit.render3d)
+	{
+		Render3D_RBScroll(dx, dy, mod);
+	}
+	else
+	{
+		int speed = 8;  // FIXME: CONFIG OPTION
+
+		if (mod == MOD_SHIFT)
+			speed /= 2;
+		else if (mod == MOD_COMMAND)
+			speed *= 2;
+
+		double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
+		double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
+
+		grid.Scroll(delta_x, delta_y);
+	}
+}
+
+
+// FIXME: move to r_render.cc 
+void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0)
+{
+	// started?
+	if (mode < 0)
+	{
+		Editor_SetAction(ACT_ADJUST_OFS);
+
+		// FIXME: find the line/sidedef to adjust
+		//        reset offset deltas to 0
+		return;
+	}
+
+	// finished?
+	if (mode > 0)
+	{
+		Editor_ClearAction();
+
+		// FIXME: apply the offset deltas
+		Render3D_AdjustOffsets(mode);
+
+		return;
+	}
+
+
+	if (dx == 0 && dy == 0)
+		return;
+
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	// FIXME: change current offset values, redraw
+}
+
+
+//------------------------------------------------------------------------
+
 int wheel_dx;
 int wheel_dy;
 
@@ -786,7 +908,8 @@ int Editor_RawKey(int event)
 
 	bool convert_meta = (edit.action == ACT_WAIT_META);
 
-	Editor_ClearMeta();
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
 
 	int raw_key   = Fl::event_key();
 	int raw_state = Fl::event_state();
@@ -840,7 +963,8 @@ int Editor_RawKey(int event)
 
 int Editor_RawWheel(int event)
 {
-	Editor_ClearMeta();
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
 
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
@@ -858,59 +982,26 @@ int Editor_RawWheel(int event)
 }
 
 
-static void RightButtonScroll(int mode)
-{
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	static int rbscroll_x = 0;
-	static int rbscroll_y = 0;
-
-	if (mode == 0)
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
-
-	else if (mode == 1)
-		main_win->SetCursor(FL_CURSOR_HAND);
-
-	else if (mode == 2)
-	{
-		int dx = Fl::event_x() - rbscroll_x;
-		int dy = Fl::event_y() - rbscroll_y;
-
-		if (edit.render3d)
-		{
-			Render3D_RBScroll(dx, dy, mod);
-		}
-		else
-		{
-			int speed = 8;  // FIXME: CONFIG OPTION
-
-			if (mod == MOD_SHIFT)
-				speed /= 2;
-			else if (mod == MOD_COMMAND)
-				speed *= 2;
-
-			double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
-			double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
-
-			grid.Scroll(delta_x, delta_y);
-		}
-	}
-
-	rbscroll_x = Fl::event_x();
-	rbscroll_y = Fl::event_y();
-}
-
-
 int Editor_RawButton(int event)
 {
-	Editor_ClearMeta();
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
+
+	int button = Fl::event_button();
 
 	bool down = (event == FL_PUSH);
 
-	// FIXME: THIS IS REALLY SHIT
-	if (Fl::event_button() == 3)
+	// start scrolling the map?  [or moving in 3D view]
+	if (button == 3)
 	{
-		RightButtonScroll(down ? 1 : 0);
+		Editor_ScrollMap(down ? -1 : +1);
+		return 1;
+	}
+
+	// adjust offsets on a sidedef?
+	if (edit.render3d && button == 2)
+	{
+		Render3D_AdjustOffsets(down ? -1 : +1);
 		return 1;
 	}
 
@@ -942,14 +1033,18 @@ int Editor_RawMouse(int event)
 {
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (event == FL_DRAG && Fl::event_button3())
-	{
-		RightButtonScroll(2);
-		return 1;
-	}
+	int dx = Fl::event_x() - mouse_last_x;
+	int dy = Fl::event_y() - mouse_last_y;
 
-	if (edit.render3d)
-	{ /* TODO */ }
+
+	if (edit.action == ACT_SCROLL_MAP)
+	{
+		Editor_ScrollMap(0, dx, dy);
+	}
+	else if (edit.action == ACT_ADJUST_OFS)
+	{
+		Render3D_AdjustOffsets(0, dx, dy);
+	}
 	else
 	{
 		int map_x, map_y;
@@ -959,6 +1054,9 @@ int Editor_RawMouse(int event)
 		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
 						   map_x, map_y, event == FL_DRAG);
 	}
+
+	mouse_last_x = Fl::event_x();
+	mouse_last_y = Fl::event_y();
 
 	return 1;
 }

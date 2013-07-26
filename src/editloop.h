@@ -98,6 +98,9 @@ void Editor_MiddlePress(keycode_t mod);
 void Editor_MiddleRelease();
 void Editor_LeaveWindow();
 
+void Editor_ClearAction();
+void Editor_SetAction(editor_action_e new_action);
+
 bool Editor_ParseUser(const char ** tokens, int num_tok);
 void Editor_WriteUser(FILE *fp);
 
@@ -108,6 +111,7 @@ void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
+/* raw input handling */
 
 extern int wheel_dx;
 extern int wheel_dy;
