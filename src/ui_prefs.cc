@@ -426,11 +426,12 @@ UI_Preferences::UI_Preferences() :
 		{ gen_autoload = new Fl_Check_Button(50, 280, 350, 25, " automatically open the most recent pwad");
 		  gen_autoload->down_box(FL_DOWN_BOX);
 		}
-		{ gen_maximized = new Fl_Check_Button(50, 315, 350, 25, " maximize the window when Eureka starts");
-		  gen_maximized->down_box(FL_DOWN_BOX);
-		}
-		{ gen_swapsides = new Fl_Check_Button(50, 350, 350, 25, " swap upper and lower sidedefs in Linedef panel");
+		{ gen_swapsides = new Fl_Check_Button(50, 315, 350, 25, " swap upper and lower sidedefs in Linedef panel");
 		  gen_swapsides->down_box(FL_DOWN_BOX);
+		}
+		{ gen_maximized = new Fl_Check_Button(50, 350, 350, 25, " maximize the window when Eureka starts");
+		  gen_maximized->down_box(FL_DOWN_BOX);
+		  gen_maximized->hide();  // DISABLED, PENDING REMOVAL
 		}
 		o->end();
 	  }
