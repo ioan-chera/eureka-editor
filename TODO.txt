@@ -3,7 +3,14 @@ Eureka TODO / WISHLIST
 ======================
 
 
-!!  lump order problem on map save  [how to trigger??]
+>>>  sidedef adjustment with mouse
+     -  need logic of pick X _or_ Y to change
+     -  when press button, remember the line and side
+     -  when release, apply the actualy offset (BA_Start...BA_End)
+     -  scale dx/dy based on distance, so seems really dragging
+     -  SHIFT for slower
+
+     ++  have a single "CUR_ACTION" state, can be Scaling/Dragging (etc)
 
 
 !!  opening new map : LineDef count (SELECTION, etc) not updated
@@ -39,13 +46,11 @@ ______________________________________________________________________
 General
 -------
 
-+  decent dialogs: printf-style parameter, make message fit,
-   provide words for the buttons (like "Quit Without Saving").
-   use fl_choice() code to bootstrap it.
-
 +  Preferences:
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
+
++  Restore last window position and maximize state
 
 +  Hexen support
 
@@ -73,17 +78,28 @@ Editing
 
 +  texture alignment feature
 
-   - 'x' and 'y' keys align the lower / middle (both sides)
-   - 'X' and 'Y' keys align the upper (both sides)
+   - 'x' and 'y' keys align the lower / middle (a visible side)
+   - 'X' and 'Y' keys align the upper (a visible sides)
 
    - unpeg flags are NOT set, but affect vertical alignment
 
-   - always need to pick an adjoining sidedef to align with:
+   - usually need to pick an adjoining sidedef to align with:
      -  main factor is matching texture on chosen part
-     -  prefer same one-sideness or two-sideness
-     -  perhaps prefer a sidedef in the selection ??
-     -  perhaps a cost for sharp angles?
-     -  prefer the "left" side (tie breaker)
+        - if left side matches, pick that
+        - if right side matches and NOT in selection, pick that
+        - if left side exists, pick that
+        - if right side exists, and NOT in selection, pick that
+        - otherwise: none
+
+     ?  prefer same one-sideness or two-sideness
+     ?  perhaps a cost for sharp angles?
+
+   - when no adjoining sidedef:
+      (1) either... set offset to zero
+      (2) or... leave offsets alone
+      (3) or... error message
+      
+      [may need config option]
 
    - when adjoining sidedef is in selection, need to process that
      one first.  But detect loops!
@@ -190,6 +206,8 @@ NO: ability to use an external node builder
        NOTE: probably needs integrating some of SDL's logic
 
 NO: if a given pwad (from command line) does not exist, ask to create it
+
+    perhaps: --create or --new option?
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
