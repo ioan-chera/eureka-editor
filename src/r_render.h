@@ -38,12 +38,14 @@ public:
 	void draw();
 
 	int handle(int event);
+
+private:
+	void BlitLores(int ox, int oy, int ow, int oh);
+	void BlitHires(int ox, int oy, int ow, int oh);
 };
 
 void Render3D_Setup();
 void Render3D_RegisterCommands();
-
-void Render3D_Draw(int ox, int oy, int ow, int oh);
 
 void Render3D_Wheel(int delta, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);

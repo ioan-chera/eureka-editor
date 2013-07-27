@@ -145,6 +145,28 @@ public:
 		aspect_sw = sw;
 	}
 
+	void UpdateScreen(int ow, int oh)
+	{
+		// in low detail mode, setup size so that expansion always covers
+		// our window (i.e. we draw a bit more than we need).
+
+		int new_sw = low_detail ? (ow + 1) / 2 : ow;
+		int new_sh = low_detail ? (oh + 1) / 2 : oh;
+
+		if (!screen || sw != new_sw || sh != new_sh)
+		{
+			sw = new_sw;
+			sh = new_sh;
+
+			if (screen)
+				delete[] screen;
+
+			screen = new byte [sw * sh];
+
+			CalcAspect();
+		}
+	}
+
 	void ClearScreen()
 	{
 		// color #0 is black (DOOM, Heretic, Hexen)
@@ -1511,7 +1533,93 @@ UI_Render3D::~UI_Render3D()
 
 void UI_Render3D::draw()
 {
-	Render3D_Draw(x(), y(), w(), h());
+	int ox = x();
+	int oy = y();
+	int ow = w();
+	int oh = h();
+
+	if (view.thsec_invalidated || !view.screen ||
+	    NumThings  != (int)view.thing_sectors.size() ||
+		NumSectors != view.thsec_sector_num)
+	{
+		view.FindThingSectors();
+	}
+
+	view.UpdateDummies();
+
+	view.UpdateScreen(ow, oh);
+
+	if (view.gravity)
+		view.CalcViewZ();
+
+	RendInfo rend;
+
+	rend.DoRender3D();
+
+	if (view.low_detail)
+		BlitLores(ox, oy, ow, oh);
+	else
+		BlitHires(ox, oy, ow, oh);
+}
+
+
+void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
+{
+	for (int ry = 0 ; ry < view.sh ; ry++)
+	{
+		u8_t line_rgb[view.sw * 3];
+
+		u8_t *dest = line_rgb;
+		u8_t *dest_end = line_rgb + view.sw * 3;
+
+		const byte *src = view.screen + ry * view.sw;
+
+		for ( ; dest < dest_end  ; dest += 3, src++)
+		{
+			u32_t col = palette[*src];
+
+			dest[0] = RGB_RED(col);
+			dest[1] = RGB_GREEN(col);
+			dest[2] = RGB_BLUE(col);
+		}
+
+		fl_draw_image(line_rgb, ox, oy+ry, view.sw, 1);
+	}
+}
+
+
+void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
+{
+	for (int ry = 0 ; ry < view.sh ; ry++)
+	{
+		const byte *src = view.screen + ry * view.sw;
+
+		// if destination width is odd, we store an extra pixel here
+		u8_t line_rgb[(ow + 1) * 3];
+
+		u8_t *dest = line_rgb;
+		u8_t *dest_end = line_rgb + ow * 3;
+
+		for (; dest < dest_end ; dest += 6, src++)
+		{
+			u32_t col = palette[*src];
+
+			dest[0] = RGB_RED(col);
+			dest[1] = RGB_GREEN(col);
+			dest[2] = RGB_BLUE(col);
+
+			dest[3] = dest[0];
+			dest[4] = dest[1];
+			dest[5] = dest[2];
+		}
+
+		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
+
+		if (ry * 2 + 1 < oh)
+		{
+			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
+		}
+	}
 }
 
 
@@ -1599,116 +1707,6 @@ void Render3D_Setup()
 	view.sprites    = true;
 	view.lighting   = true;
 	view.low_detail = true;
-}
-
-
-void Render3D_BlitHires(int ox, int oy, int ow, int oh)
-{
-	for (int ry = 0 ; ry < view.sh ; ry++)
-	{
-		u8_t line_rgb[view.sw * 3];
-
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + view.sw * 3;
-
-		const byte *src = view.screen + ry * view.sw;
-
-		for ( ; dest < dest_end  ; dest += 3, src++)
-		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
-		}
-
-		fl_draw_image(line_rgb, ox, oy+ry, view.sw, 1);
-	}
-
-}
-
-
-void Render3D_BlitLores(int ox, int oy, int ow, int oh)
-{
-	for (int ry = 0 ; ry < view.sh ; ry++)
-	{
-		const byte *src = view.screen + ry * view.sw;
-
-		// if destination width is odd, we store an extra pixel here
-		u8_t line_rgb[(ow + 1) * 3];
-
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + ow * 3;
-
-		for (; dest < dest_end ; dest += 6, src++)
-		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
-
-			dest[3] = dest[0];
-			dest[4] = dest[1];
-			dest[5] = dest[2];
-		}
-
-		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
-
-		if (ry * 2 + 1 < oh)
-		{
-			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
-		}
-	}
-
-}
-
-
-/*
- *  Render a 3D view from the player's position. 
- */
-
-void Render3D_Draw(int ox, int oy, int ow, int oh)
-{
-	if (view.thsec_invalidated || !view.screen ||
-	    NumThings  != (int)view.thing_sectors.size() ||
-		NumSectors != view.thsec_sector_num)
-	{
-		view.FindThingSectors();
-	}
-
-	view.UpdateDummies();
-
-	// in low detail mode, setup size so that expansion always covers
-	// our window (i.e. we draw a bit more than we need).
-
-	int new_sw = view.low_detail ? (ow + 1) / 2 : ow;
-	int new_sh = view.low_detail ? (oh + 1) / 2 : oh;
-
-	if (!view.screen || view.sw != new_sw || view.sh != new_sh)
-	{
-		view.sw = new_sw;
-		view.sh = new_sh;
-
-		if (view.screen)
-			delete[] view.screen;
-
-		view.screen = new byte [view.sw * view.sh];
-
-		view.CalcAspect();
-	}
-
-	if (view.gravity)
-		view.CalcViewZ();
-
-	RendInfo rend;
-
-	rend.DoRender3D();
-
-	if (view.low_detail)
-		Render3D_BlitLores(ox, oy, ow, oh);
-	else
-		Render3D_BlitHires(ox, oy, ow, oh);
 }
 
 
