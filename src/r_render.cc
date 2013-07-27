@@ -91,6 +91,15 @@ public:
 	Img *unknown_tex;  int unk_tex_col;
 	Img *unknown_flat; int unk_flat_col;
 
+	// state for adjusting offsets via the mouse
+	int   adjust_ld;
+	int   adjust_side;  // SIDE_XXX
+	SideDef *adjust_sd_ptr;
+
+	float adjust_dx;
+	float adjust_dy;
+	float adjust_factor;
+
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
@@ -99,7 +108,8 @@ public:
 			   thsec_sector_num(0), thsec_invalidated(false),
 			   missing_tex(NULL),  missing_col(-1),
 			   unknown_tex(NULL),  unk_tex_col(-1),
-			   unknown_flat(NULL), unk_flat_col(-1)
+			   unknown_flat(NULL), unk_flat_col(-1),
+			   adjust_ld(-1), adjust_sd_ptr(NULL)
 	{ }
 
 	void SetAngle(float new_ang)
@@ -606,6 +616,10 @@ public:
 
 #define Y_SLOPE  1.70
 
+	// saved offsets for mouse adjustment mode
+	int saved_x_offset;
+	int saved_y_offset;
+
 public:
 	static void DeleteWall(DrawWall *P)
 	{
@@ -625,6 +639,32 @@ public:
 		depth_x.resize(width);
 
 		std::fill_n(depth_x.begin(), width, 0);
+	}
+
+	void SaveOffsets()
+	{
+		if (view.adjust_ld < 0 || ! view.adjust_sd_ptr)
+			return;
+
+		SideDef *SD = view.adjust_sd_ptr;
+
+		saved_x_offset = SD->x_offset;
+		saved_y_offset = SD->y_offset;
+
+		// change it temporarily (just for the render)
+		SD->x_offset += (int)view.adjust_dx;
+		SD->y_offset += (int)view.adjust_dy;
+	}
+
+	void RestoreOffsets()
+	{
+		if (view.adjust_ld < 0 || ! view.adjust_sd_ptr)
+			return;
+
+		SideDef *SD = view.adjust_sd_ptr;
+
+		SD->x_offset = saved_x_offset;
+		SD->y_offset = saved_y_offset;
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -1424,18 +1464,22 @@ public:
 
 		InitDepthBuf(view.sw);
 
+		SaveOffsets();
+
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
 		if (view.sprites)
-			for (int j=0 ; j < NumThings ; j++)
-				AddThing(j);
+			for (int k=0 ; k < NumThings ; k++)
+				AddThing(k);
 
 		ClipSolids();
 
 		ComputeSurfaces();
 
 		RenderWalls();
+
+		RestoreOffsets();
 	}
 };
 
@@ -1751,6 +1795,66 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 
 		view.gravity = false;
 	}
+
+	edit.RedrawMap = 1;
+}
+
+
+void Render3D_AdjustOffsets(int mode, int dx, int dy)
+{
+	// started?
+	if (mode < 0)
+	{
+		// FIXME: find the line/sidedef to adjust
+		//        reset offset deltas to 0
+
+		// FIXME: TEMP CRUD
+		view.adjust_ld   = edit.Selected->find_first();
+		view.adjust_side = SIDE_RIGHT;
+		if (view.adjust_ld < 0)
+			return;
+		const LineDef *L = LineDefs[view.adjust_ld];
+		int sd_num = (view.adjust_side < 0) ? L->left : L->right;
+		if (sd_num < 0)
+			return;
+		view.adjust_sd_ptr = SideDefs[sd_num];
+
+		view.adjust_dx = 0;
+		view.adjust_dy = 0;
+		view.adjust_factor = 1.0;  // FIXME: BASED ON DISTANCE
+
+		Editor_SetAction(ACT_ADJUST_OFS);
+		return;
+	}
+
+	if (edit.action != ACT_ADJUST_OFS)
+		return;
+
+
+	// finished?
+	if (mode > 0)
+	{
+		Editor_ClearAction();
+
+		view.adjust_ld = -1;
+		view.adjust_sd_ptr = NULL;
+
+		// FIXME: apply the offset deltas
+
+		return;
+	}
+
+
+	if (dx == 0 && dy == 0)
+		return;
+
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	// TODO: faster / slow if SHIFT / CTRL key pressed
+
+	view.adjust_dx -= view.adjust_factor * dx;
+	view.adjust_dy -= view.adjust_factor * dy;
 
 	edit.RedrawMap = 1;
 }

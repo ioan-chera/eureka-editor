@@ -47,6 +47,7 @@ void Render3D_Draw(int ox, int oy, int ow, int oh);
 
 void Render3D_Wheel(int delta, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
+void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
 
 void Render3D_SetCameraPos(int new_x, int new_y);
 void Render3D_GetCameraPos(int *x, int *y, float *angle);

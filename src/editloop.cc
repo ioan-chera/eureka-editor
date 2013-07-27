@@ -860,41 +860,6 @@ static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
 }
 
 
-// FIXME: move to r_render.cc 
-void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0)
-{
-	// started?
-	if (mode < 0)
-	{
-		Editor_SetAction(ACT_ADJUST_OFS);
-
-		// FIXME: find the line/sidedef to adjust
-		//        reset offset deltas to 0
-		return;
-	}
-
-	// finished?
-	if (mode > 0)
-	{
-		Editor_ClearAction();
-
-		// FIXME: apply the offset deltas
-		Render3D_AdjustOffsets(mode);
-
-		return;
-	}
-
-
-	if (dx == 0 && dy == 0)
-		return;
-
-
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	// FIXME: change current offset values, redraw
-}
-
-
 //------------------------------------------------------------------------
 
 int wheel_dx;
