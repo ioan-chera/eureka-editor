@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -618,6 +618,7 @@ class edit_op_c
 {
 public:
 	char action;
+
 	byte objtype;
 	byte field;
 	byte _pad;
@@ -779,6 +780,28 @@ void BA_End()
 	}
 
 	cur_group = NULL;
+
+	DoProcessChangeStatus();
+}
+
+
+void BA_Abort(bool keep_changes)
+{
+	if (! cur_group)
+		BugError("BA_Abort called without a previous BA_Begin\n");
+
+	cur_group->End();
+
+	if (! keep_changes && ! cur_group->Empty())
+	{
+		cur_group->ReApply();
+	}
+
+	delete cur_group;
+	cur_group = NULL;
+
+	did_make_changes  = false;
+	wrecked_the_nodes = false;
 
 	DoProcessChangeStatus();
 }

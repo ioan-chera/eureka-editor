@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -41,9 +41,9 @@
 //
 // These structures are always ensured to have valid fields, e.g.
 // the LineDef vertex numbers are OK, the SideDef sector number is
-// valid, etc.  For LineDefs, either/both of side_L and side_R can
-// contain -1 to mean "no sidedef", but note that a missing right
-// sidedef can cause problems when playing the map in DOOM.
+// valid, etc.  For LineDefs, the left and right fields can contain
+// -1 to mean "no sidedef", but note that a missing right sidedef
+// can cause problems when playing the map in DOOM.
 //
 
 
@@ -341,6 +341,11 @@ void BA_Begin();
 // finish a group of operations.
 void BA_End();
 
+// abort the group of operations -- the undo/redo history is not
+// modified and any changes since BA_Begin() are undone except
+// when 'keep_changes' is true.
+void BA_Abort(bool keep_changes = false);
+
 // create a new object, returning its objnum.  It is safe to
 // directly set the new object's fields after calling BA_New().
 int BA_New(obj_type_e type);
@@ -369,7 +374,7 @@ int BA_InternaliseString(const char *str);
 int BA_InternaliseShortStr(const char *str, int max_len);
 
 // get the string from the basis string table.
-const char *BA_GetString(int offset);
+const char * BA_GetString(int offset);
 
 // clear everything (before loading a new level).
 void BA_ClearAll();
