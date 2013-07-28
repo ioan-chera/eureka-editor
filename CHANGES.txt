@@ -56,6 +56,8 @@ CHANGES IN Eureka 1.00
    which have no right sidedef
 
 -  fixed rare map saving problem (header lump in wrong position)
+-  fixed possible crash not clearing selection after loading a map
+-  fixed wrong linedef (etc) totals after loading another map
 -  fixed key binding dialog: unable to remove a parameter
 -  fixed the selection after a sector merge 
 

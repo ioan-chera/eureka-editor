@@ -643,10 +643,19 @@ void LoadLevel(Wad_file *wad, const char *level)
 	}
 
 	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
-
 //	SideDefs_NormalizeMiddles();
 
+	// reset various editor state
+
+	Editor_ClearAction();
+
+	edit.Selected->clear_all();
+	edit.highlighted.clear();
 	edit.RedrawMap = 1;
+
+	main_win->UpdateTotals();
+	main_win->InvalidatePanelObj();
+	main_win->redraw();
 
 	MadeChanges = 0;
 }

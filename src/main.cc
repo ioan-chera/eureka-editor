@@ -1092,8 +1092,6 @@ int main(int argc, char *argv[])
 
 	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
-	main_win->UpdateTotals();
-
 
 	Main_Loop();
 
