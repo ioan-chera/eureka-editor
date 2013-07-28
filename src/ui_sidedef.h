@@ -68,9 +68,6 @@ public:
 	// solid_mask is a bit field of parts which require a texture.
 	void SetObj(int index, int solid_mask);
 
-	// where is 'l' for lower / 'm' for middle / 'u' for upper
-	void SetTexture(const char *name, char where);
-
 	void UpdateField();
 
 	// returns a bitmask: 1 for lower, 2 for middle, 4 for upper

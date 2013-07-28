@@ -334,31 +334,6 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_SideBox::SetTexture(const char *name, char where)
-{
-	switch (where)
-	{
-		case 'l':
-			l_tex->value(name);
-			l_tex->do_callback();
-			break;
-
-		case 'm':
-			m_tex->value(name);
-			m_tex->do_callback();
-			break;
-
-		case 'u':
-			u_tex->value(name);
-			u_tex->do_callback();
-			break;
-
-		default:
-			break;
-	}
-}
-
-
 void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = (UI_SideBox *)data;
