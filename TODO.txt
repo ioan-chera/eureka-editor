@@ -10,17 +10,25 @@ Eureka TODO / WISHLIST
      -  scale dx/dy based on distance, so seems really dragging
      -  SHIFT for slower
 
-     ++  have a single "CUR_ACTION" state, can be Scaling/Dragging (etc)
+
+>>>  after load map and unpack sides, visit all 1S linedefs and
+     clear the upper and lower textures.
 
 
-!!  opening new map : LineDef count (SELECTION, etc) not updated
-    [can crash too]
+++  have a single "CUR_ACTION" state, can be Scaling/Dragging (etc)
+
+    -  ACT_SELBOX
+    -  ACT_DRAG
+    -  ACT_SCALE
 
 
 !!  setting a texture does not update 3D view
 
 
 -  ability to show line lengths, especially a newly added line
+
+
++  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
 
 +  grid : scroll speed preferences
@@ -30,11 +38,7 @@ Eureka TODO / WISHLIST
 -  gravity mode : an option to NOT allow up/down movement
 
 
-TEST: Maximize on startup in WIN32
-
 TEST: Logs / Save in WIN32
-
-TALK: doing the Maximize feature on OS/X
 
 
 ______________________________________________________________________
@@ -50,7 +54,7 @@ General
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
 
-+  Restore last window position and maximize state
++  Restore last window position and maximized state
 
 +  Hexen support
 
@@ -82,6 +86,7 @@ Editing
    - 'X' and 'Y' keys align the upper (a visible sides)
 
    - unpeg flags are NOT set, but affect vertical alignment
+     [ but perhaps if upper tex == lower tex, set unpeg flags ]
 
    - usually need to pick an adjoining sidedef to align with:
      -  main factor is matching texture on chosen part
@@ -95,10 +100,10 @@ Editing
      ?  perhaps a cost for sharp angles?
 
    - when no adjoining sidedef:
-      (1) either... set offset to zero
+      (1) either... set offset to zero  <-- THIS
       (2) or... leave offsets alone
       (3) or... error message
-      
+
       [may need config option]
 
    - when adjoining sidedef is in selection, need to process that
@@ -111,8 +116,6 @@ Editing
 
 3D View
 -------
-
-+  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
 
 Browser
@@ -242,6 +245,12 @@ NO:  config file syntax
 
 Coding
 ------
+
+-  rename code files:
+      selectn.cc/h  --> x_select.cc/h
+      objects.cc/h  --> x_object.cc/h
+
+      editloop.cc/h --> m_edit.cc/h
 
 -  BA_Abort()
 
