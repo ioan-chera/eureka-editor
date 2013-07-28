@@ -1855,6 +1855,17 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 		return;
 
 
+	bool force_one_dir = true;
+
+	if (force_one_dir)
+	{
+		if (abs(dx) >= abs(dy))
+			dy = 0;
+		else
+			dx = 0;
+	}
+
+
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
 	// TODO: faster / slow if SHIFT / CTRL key pressed
