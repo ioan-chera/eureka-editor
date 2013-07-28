@@ -1103,7 +1103,7 @@ check_result_e CHECK_Tags(int min_severity)
 
 static inline bool is_missing(const char *tex)
 {
-	return (tex[0] == '-');
+	return (tex[0] == 0 || tex[0] == '-');
 }
 
 
