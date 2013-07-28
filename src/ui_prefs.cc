@@ -224,8 +224,9 @@ private:
 	// normally zero (not waiting for a key)
 	int awaiting_line;
 
-	static void close_callback(Fl_Widget *w, void *data);
-	static void color_callback(Fl_Button *w, void *data);
+	static void  close_callback(Fl_Widget *w, void *data);
+	static void  color_callback(Fl_Button *w, void *data);
+	static void aspect_callback(Fl_Widget *w, void *data);
 
 	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
@@ -332,6 +333,9 @@ public:
 	/* Mouse Tab */
 
 	/* Other Tab */
+
+	Fl_Choice      *rend_aspect;
+	Fl_Float_Input *rend_asp_custom;
 
 	Fl_Check_Button *bsp_warn;
 	Fl_Check_Button *bsp_verbose;
@@ -471,7 +475,6 @@ UI_Preferences::UI_Preferences() :
 		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
-		  edit_sectorsize->type(2);
 		}
 		o->end();
 	  }
@@ -641,6 +644,14 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
+		{ rend_aspect = new Fl_Choice(155, 90, 105, 25, "Aspect ratio: ");
+		  rend_aspect->down_box(FL_BORDER_BOX);
+		  rend_aspect->add("    1:1|    4:3|  16:9|  16:10|  24:10|CUSTOM");
+		  rend_aspect->callback(aspect_callback, this);
+		}
+		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
+		  rend_asp_custom->deactivate();
+		}
 
 		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
 		  o->labelfont(1);
@@ -698,6 +709,45 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 	w->color(fl_rgb_color(r, g, b));
 
 	w->redraw();
+}
+
+
+void UI_Preferences::aspect_callback(Fl_Widget *w, void *data)
+{
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	float aspect = atof(prefs->rend_asp_custom->value());
+	bool  custom = false;
+
+	switch (prefs->rend_aspect->value())
+	{
+		case 0: aspect =  1.0 / 1.0;  break;
+		case 1: aspect =  4.0 / 3.0;  break;
+		case 2: aspect = 16.0 / 9.0;  break;
+		case 3: aspect = 16.0 / 10.0; break;
+		case 4: aspect = 24.0 / 10.0; break;
+
+		case 5: custom = true; break;
+	}
+
+	bool was_custom = (prefs->rend_asp_custom->active() ? true : false);
+
+	if (! custom)
+	{
+		char aspect_buf[64];
+		sprintf(aspect_buf, "%1.2f", aspect);
+		prefs->rend_asp_custom->value(aspect_buf);
+	}
+
+	if (custom != was_custom)
+	{
+		if (custom)
+			prefs->rend_asp_custom->activate();
+		else
+			prefs->rend_asp_custom->deactivate();
+
+		prefs->redraw();
+	}
 }
 
 
@@ -1009,6 +1059,26 @@ void UI_Preferences::LoadValues()
 
 	/* Other Tab */
 
+	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
+
+	char aspect_buf[64];
+	sprintf(aspect_buf, "%1.2f", render_aspect_ratio / 100.0);
+	rend_asp_custom->value(aspect_buf);
+
+	switch (render_aspect_ratio)
+	{
+		case  99: case 100: rend_aspect->value(0); break;
+		case 133: case 134: rend_aspect->value(1); break;
+		case 177: case 178: rend_aspect->value(2); break;
+		case 159: case 160: rend_aspect->value(3); break;
+		case 239: case 240: rend_aspect->value(4); break;
+
+		default:  /* Custom */
+			rend_aspect->value(5);
+			rend_asp_custom->activate();
+			break;
+	}
+
 	bsp_fast->value(glbsp_fast ? 1 : 0);
 	bsp_verbose->value(glbsp_verbose ? 1 : 0);
 	bsp_warn->value(glbsp_warn ? 1 : 0);
@@ -1100,6 +1170,9 @@ void UI_Preferences::SaveValues()
 	// TODO: smallscroll, largescroll
 
 	/* Other Tab */
+
+	render_aspect_ratio = (int)(100 * atof(rend_asp_custom->value()) + 0.2);
+	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
 
 	glbsp_fast = bsp_fast->value() ? true : false;
 	glbsp_verbose = bsp_verbose->value() ? true : false;
