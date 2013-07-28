@@ -161,9 +161,9 @@ public:
 				delete[] screen;
 
 			screen = new byte [sw * sh];
-
-			CalcAspect();
 		}
+
+		CalcAspect();
 	}
 
 	void ClearScreen()
