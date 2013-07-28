@@ -1010,6 +1010,10 @@ int Editor_RawMouse(int event)
 	{
 		Render3D_AdjustOffsets(0, dx, dy);
 	}
+	else if (edit.render3d)
+	{
+		// TODO: maybe highlight things/walls/sectors
+	}
 	else
 	{
 		int map_x, map_y;
