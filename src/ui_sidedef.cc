@@ -98,39 +98,41 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	    MX = MX-32;
 	
 	if (swap_sidedefs)
-		std::swap(LX, UX);
+	{
+		std::swap(UX, LX);
+	}
 
 
 	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
-	m_pic = new UI_Pic(MX, Y, 64, 64, "Mid");
-	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
+	u_pic = new UI_Pic(MX, Y, 64, 64, "Upper");
+	r_pic = new UI_Pic(UX, Y, 64, 64, "Rail");
 
 	l_pic->callback(tex_callback, this);
-	m_pic->callback(tex_callback, this);
 	u_pic->callback(tex_callback, this);
+	r_pic->callback(tex_callback, this);
 
 	Y += 65;
 
 
 	l_tex = new Fl_Input(LX-8, Y, 80, 20);
-	m_tex = new Fl_Input(MX-8, Y, 80, 20);
-	u_tex = new Fl_Input(UX-8, Y, 80, 20);
+	u_tex = new Fl_Input(MX-8, Y, 80, 20);
+	r_tex = new Fl_Input(UX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
-	m_tex->textsize(12);
 	u_tex->textsize(12);
+	r_tex->textsize(12);
 
 	l_tex->callback(tex_callback, this);
-	m_tex->callback(tex_callback, this);
 	u_tex->callback(tex_callback, this);
+	r_tex->callback(tex_callback, this);
 
 	l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	m_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	add(l_pic); add(m_pic); add(u_pic);
-	add(l_tex); add(m_tex); add(u_tex);
+	add(l_pic); add(u_pic); add(r_pic);
+	add(l_tex); add(u_tex); add(r_tex);
 
 
 	Y += 24;
@@ -158,8 +160,8 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 
 	if (w == box->l_pic ||
-	    w == box->m_pic ||
-		w == box->u_pic)
+	    w == box->u_pic ||
+		w == box->r_pic)
 	{
 		UI_Pic * pic = (UI_Pic *)w;
 
@@ -175,10 +177,10 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 	if (w == box->l_tex)
 		new_tex = box->TexFromWidget(box->l_tex);
-	else if (w == box->m_tex)
-		new_tex = box->TexFromWidget(box->m_tex);
-	else
+	else if (w == box->u_tex)
 		new_tex = box->TexFromWidget(box->u_tex);
+	else
+		new_tex = box->TexFromWidget(box->r_tex);
 
 	// iterate over selected linedefs
 	selection_c list;
@@ -196,12 +198,16 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 			if (is_sidedef(sd))
 			{
-				if (w == box->l_tex)
-					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
-				else if (w == box->m_tex)
-					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
-				else
-					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+				bool lower = (w == box->l_tex);
+				bool upper = (w == box->u_tex);
+				bool rail  = (w == box->r_tex);
+
+				if (L->OneSided())
+					std::swap(lower, rail);
+
+				if (lower) BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+				if (upper) BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+				if (rail)  BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
 			}
 		}
 
@@ -435,27 +441,27 @@ void UI_SideBox::UpdateField()
 	{
 		const SideDef *sd = SideDefs[obj];
 
-		const char *lower = sd->LowerTex();
-		const char *mid   = sd->MidTex();
-		const char *upper = sd->UpperTex();
-
 		x_ofs->value(Int_TmpStr(sd->x_offset));
 		y_ofs->value(Int_TmpStr(sd->y_offset));
-		sec->value(Int_TmpStr(sd->sector));
+		  sec->value(Int_TmpStr(sd->sector));
+
+		const char *lower = sd->LowerTex();
+		const char *rail  = sd->MidTex();
+		const char *upper = sd->UpperTex();
+
+		if (what_is_solid & SOLID_MID)
+			std::swap(lower, rail);
 
 		l_tex->value(lower);
-		m_tex->value(mid);
 		u_tex->value(upper);
+		r_tex->value(rail);
 
-		l_pic->GetTex(sd->LowerTex());
-		m_pic->GetTex(sd->MidTex());
-		u_pic->GetTex(sd->UpperTex());
+		l_pic->GetTex(lower);
+		u_pic->GetTex(upper);
+		r_pic->GetTex(rail);
 
-		if ((what_is_solid & SOLID_LOWER) && (lower[0] == '-'))
+		if ((what_is_solid & (SOLID_LOWER | SOLID_MID)) && (lower[0] == '-'))
 			l_pic->MarkMissing();
-
-		if ((what_is_solid & SOLID_MID) && (mid[0] == '-'))
-			m_pic->MarkMissing();
 
 		if ((what_is_solid & SOLID_UPPER) && (upper[0] == '-'))
 			u_pic->MarkMissing();
@@ -464,15 +470,15 @@ void UI_SideBox::UpdateField()
 	{
 		x_ofs->value("");
 		y_ofs->value("");
-		sec->value("");
+		  sec->value("");
 
 		l_tex->value("");
-		m_tex->value("");
 		u_tex->value("");
+		r_tex->value("");
 
 		l_pic->Clear();
-		m_pic->Clear();
 		u_pic->Clear();
+		r_pic->Clear();
 	}
 }
 
@@ -520,29 +526,29 @@ void UI_SideBox::UpdateHiding(bool hide)
 	{
 		x_ofs->hide();
 		y_ofs->hide();
-		sec->hide();
+		  sec->hide();
 
 		l_tex->hide();
-		m_tex->hide();
 		u_tex->hide();
+		r_tex->hide();
 
 		l_pic->hide();
-		m_pic->hide();
 		u_pic->hide();
+		r_pic->hide();
 	}
 	else
 	{
 		x_ofs->show();
 		y_ofs->show();
-		sec->show();
+		  sec->show();
 
 		l_tex->show();
-		m_tex->show();
 		u_tex->show();
+		r_tex->show();
 
 		l_pic->show();
-		m_pic->show();
 		u_pic->show();
+		r_pic->show();
 	}
 }
 
@@ -550,16 +556,16 @@ void UI_SideBox::UpdateHiding(bool hide)
 int UI_SideBox::GetSelectedPics() const
 {
 	return	(l_pic->Selected() ? 1 : 0) |
-			(m_pic->Selected() ? 2 : 0) |
-			(u_pic->Selected() ? 4 : 0);
+			(u_pic->Selected() ? 2 : 0) |
+			(r_pic->Selected() ? 4 : 0);
 }
 
 
 void UI_SideBox::UnselectPics()
 {
 	l_pic->Selected(false);
-	m_pic->Selected(false);
 	u_pic->Selected(false);
+	r_pic->Selected(false);
 }
 
 

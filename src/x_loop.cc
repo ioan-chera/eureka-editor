@@ -554,7 +554,7 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 
 	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
 
-	// FIXME: make this a global pseudo-constant
+	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
 
 	const SideDef *other = SideDefs[other_sd];
@@ -564,11 +564,8 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
 
-		if (! isalnum(other->LowerTex()[0]))
-			BA_ChangeSD(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-
-		if (! isalnum(other->UpperTex()[0]))
-			BA_ChangeSD(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+		BA_ChangeSD(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
+		BA_ChangeSD(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
 
 		BA_ChangeSD(other_sd, SideDef::F_MID_TEX, null_tex);
 	}
@@ -648,8 +645,6 @@ static void DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
 
 	if (sd_num >= 0)
 	{
-		// FIXME: if sidedef is shared, duplicate it
-
 		BA_ChangeSD(sd_num, SideDef::F_SECTOR, new_sec);
 		return;
 	}

@@ -48,12 +48,12 @@ public:
 	Fl_Int_Input *sec;
 
 	UI_Pic   *l_pic;
-	UI_Pic   *m_pic;
 	UI_Pic   *u_pic;
+	UI_Pic   *r_pic;
 
 	Fl_Input *l_tex;
-	Fl_Input *m_tex;
 	Fl_Input *u_tex;
+	Fl_Input *r_tex;
 
 	Fl_Button *add_button;
 	Fl_Button *del_button;
@@ -70,7 +70,7 @@ public:
 
 	void UpdateField();
 
-	// returns a bitmask: 1 for lower, 2 for middle, 4 for upper
+	// returns a bitmask: 1 for lower, 2 for upper, 4 for rail
 	int GetSelectedPics() const;
 
 	void UnselectPics();

@@ -1119,7 +1119,7 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 				BA_ChangeSD(L2->left,  SideDef::F_LOWER_TEX, tex);
 				BA_ChangeSD(L2->left,  SideDef::F_UPPER_TEX, tex);
 
-				// this is debatable....
+				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
 				flags |= MLF_UpperUnpegged;
 			}

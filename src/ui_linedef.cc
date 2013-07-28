@@ -227,20 +227,27 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state,
 	// handle the selected texture boxes
 	if (front_pics || back_pics)
 	{
+		if (L->OneSided())
+		{
+			if (front_pics & 1) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+
+			return;
+		}
+
 		if (L->Right())
 		{
 			if (front_pics & 1) BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (front_pics & 4) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (front_pics & 4) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left())
 		{
 			if (back_pics & 1) BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (back_pics & 2) BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
-			if (back_pics & 4) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (back_pics & 2) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (back_pics & 4) BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
-
 		return;
 	}
 
