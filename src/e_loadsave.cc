@@ -642,11 +642,13 @@ void LoadLevel(Wad_file *wad, const char *level)
 		}
 	}
 
-    edit.RedrawMap = 1;
+	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
+
+//	SideDefs_NormalizeMiddles();
+
+	edit.RedrawMap = 1;
 
 	MadeChanges = 0;
-
-	SideDefs_Unpack(true);
 }
 
 

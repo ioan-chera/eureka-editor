@@ -768,7 +768,7 @@ static const char *unpack_confirm_message =
 	"Unpack the sidedefs now?";
 
 
-void SideDefs_Unpack(bool confirm_it)
+void SideDefs_Unpack(bool no_history)
 {
 	selection_c sides;
 	selection_c lines;
@@ -778,11 +778,13 @@ void SideDefs_Unpack(bool confirm_it)
 	if (sides.empty())
 		return;
 
+/*
 	if (confirm_it)
 	{
 		if (DLG_Confirm("&No Change|&Unpack", unpack_confirm_message) <= 0)
 			return;
 	}
+*/
 
 	BA_Begin();
 
@@ -822,7 +824,10 @@ void SideDefs_Unpack(bool confirm_it)
 		}
 	}
 
-	BA_End();
+	if (no_history)
+		BA_Abort(true /* keep changes */);
+	else
+		BA_End();
 }
 
 
@@ -870,7 +875,7 @@ public:
 	static void action_unpack(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_Unpack(true);
+		SideDefs_Unpack();
 		dialog->user_action = CKR_Highlight;
 	}
 
