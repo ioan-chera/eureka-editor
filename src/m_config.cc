@@ -531,6 +531,15 @@ static const opt_desc_t options[] =
 		&normal_small_col
 	},
 
+	{	"render_aspect_ratio",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Aspect ratio for 3D view : 100 * width / height",
+		NULL,
+		&render_aspect_ratio
+	},
+
 	{	"render_missing_bright",
 		0,
 		OPT_BOOLEAN,

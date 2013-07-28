@@ -48,6 +48,7 @@
 
 
 // config items
+int  render_aspect_ratio = 177;   // 100 * width / height, default 16:9
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
 
@@ -137,11 +138,9 @@ public:
 
 	void CalcAspect()
 	{
-		float monitor_aspect = 4.0 / 3.0;  // FIXME: CONFIG THIS UP
-
 		float screen_aspect = float(sw) / float(sh);
 
-		aspect_sh = sh / monitor_aspect * screen_aspect;
+		aspect_sh = sh / (render_aspect_ratio / 100.0) * screen_aspect;
 		aspect_sw = sw;
 	}
 
