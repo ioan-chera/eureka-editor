@@ -61,8 +61,7 @@ const char * default_mid_tex	= "STARTAN3";
 const char * default_upper_tex	= "STARTAN3";
 
 
-bool did_make_changes;
-bool wrecked_the_nodes;
+static bool did_make_changes;
 
 
 string_table_c basis_strtab;
@@ -87,8 +86,7 @@ int NumObjects(obj_type_e type)
 
 static void DoClearChangeStatus()
 {
-	did_make_changes  = false;
-	wrecked_the_nodes = false;
+	did_make_changes = false;
 
 	Clipboard_NotifyBegin();
 	Selection_NotifyBegin();
@@ -98,10 +96,8 @@ static void DoClearChangeStatus()
 
 static void DoProcessChangeStatus()
 {
-	if (wrecked_the_nodes)
-		MarkChanges(2);
-	else if (did_make_changes)
-		MarkChanges(1);
+	if (did_make_changes)
+		MarkChanges();
 
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
@@ -381,7 +377,6 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 			break;
 
 		case OBJ_VERTICES:
-			wrecked_the_nodes = true;
 			RawInsertVertex(objnum, ptr);
 			break;
 
@@ -394,7 +389,6 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 			break;
 
 		case OBJ_LINEDEFS:
-			wrecked_the_nodes = true;
 			RawInsertLineDef(objnum, ptr);
 			break;
 
@@ -520,7 +514,6 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 			return RawDeleteThing(objnum);
 
 		case OBJ_VERTICES:
-			wrecked_the_nodes = true;
 			return RawDeleteVertex(objnum);
 
 		case OBJ_SECTORS:
@@ -530,7 +523,6 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 			return RawDeleteSideDef(objnum);
 		
 		case OBJ_LINEDEFS:
-			wrecked_the_nodes = true;
 			return RawDeleteLineDef(objnum);
 
 		default:
@@ -564,7 +556,6 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 	switch (objtype)
 	{
 		case OBJ_THINGS:
-			wrecked_the_nodes = true;
 			pos = (int*) Things[objnum];
 			break;
 
@@ -581,7 +572,6 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 			break;
 		
 		case OBJ_LINEDEFS:
-			wrecked_the_nodes = true;
 			pos = (int*) LineDefs[objnum];
 			break;
 
@@ -801,7 +791,6 @@ void BA_Abort(bool keep_changes)
 	cur_group = NULL;
 
 	did_make_changes  = false;
-	wrecked_the_nodes = false;
 
 	DoProcessChangeStatus();
 }
@@ -860,7 +849,7 @@ void BA_Delete(obj_type_e type, int objnum)
 	op.objtype = type;
 	op.objnum  = objnum;
 
-	// this must happen  _before_ doing the deletion (otherwise
+	// this must happen _before_ doing the deletion (otherwise
 	// when we undo, the insertion will mess up the references).
 	if (type == OBJ_SIDEDEFS)
 	{

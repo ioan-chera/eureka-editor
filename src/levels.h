@@ -37,8 +37,7 @@ extern int Map_bound_y1;   /* minimum Y value of map */
 extern int Map_bound_x2;   /* maximum X value of map */
 extern int Map_bound_y2;   /* maximum Y value of map */
 
-extern int MadeChanges; // made changes?
-                        // >= 2 means need to rebuild nodes
+extern int MadeChanges;
 
 void MarkChanges(int scope = 1);
 

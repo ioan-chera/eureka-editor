@@ -378,7 +378,6 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		Status_Set("Built nodes OK");
 
 		Replacer = false;
-		MadeChanges = 0;
 	}
 
 	return was_ok;

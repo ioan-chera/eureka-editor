@@ -41,7 +41,7 @@ int Map_bound_y1 =  32767;   /* minimum Y value of map */
 int Map_bound_x2 = -32767;   /* maximum X value of map */
 int Map_bound_y2 = -32767;   /* maximum Y value of map */
 
-int MadeChanges;   /* made changes? */
+int MadeChanges;
 
 static bool recalc_map_bounds;
 static int  new_vertex_minimum;
