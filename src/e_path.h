@@ -29,8 +29,9 @@
 
 /* find/next/prev stuff */
 
-void GoToSelection();
 void GoToObject(const Objid& objid);
+void GoToSelection();
+void GoToErrors();
 
 
 /* commands */

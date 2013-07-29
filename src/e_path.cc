@@ -429,6 +429,16 @@ void GoToSelection()
 
 		grid.AdjustScale(+1);
 	}
+
+	edit.RedrawMap = 1;
+}
+
+
+void GoToErrors()
+{
+	edit.error_mode = true;
+
+	GoToSelection();
 }
 
 

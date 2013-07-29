@@ -297,10 +297,7 @@ void Vertex_ShowOverlaps()
 
 	Vertex_FindOverlaps(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -502,10 +499,7 @@ void Sectors_ShowUnclosed(obj_type_e what)
 	else
 		Sectors_FindUnclosed(other, *edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -578,10 +572,7 @@ void Sectors_ShowMismatches(obj_type_e what)
 	else
 		Sectors_FindMismatches(other, *edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -663,10 +654,7 @@ void Sectors_ShowBadCeil()
 
 	Sectors_FindBadCeil(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -744,10 +732,7 @@ void SideDefs_ShowPacked()
 
 	SideDefs_FindPacking(sides, *edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1113,10 +1098,7 @@ void Things_ShowUnknown()
 
 	Things_FindUnknown(*edit.Selected, types);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1233,10 +1215,7 @@ void Things_ShowInVoid()
 
 	Things_FindInVoid(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1434,10 +1413,7 @@ void Things_ShowStuckies()
 
 	Things_FindStuckies(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 

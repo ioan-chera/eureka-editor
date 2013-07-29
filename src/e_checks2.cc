@@ -102,10 +102,7 @@ void LineDefs_ShowZeroLen()
 
 	ConvertSelection(&sel, edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -126,10 +123,7 @@ void LineDefs_ShowMissingRight()
 
 	LineDefs_FindMissingRight(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -154,10 +148,7 @@ void LineDefs_ShowLackImpass()
 
 	LineDefs_FindLackImpass(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -205,10 +196,7 @@ void LineDefs_ShowBad2SFlag()
 
 	LineDefs_FindBad2SFlag(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -337,10 +325,7 @@ void LineDefs_ShowOverlaps()
 
 	LineDefs_FindOverlaps(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -491,10 +476,7 @@ void LineDefs_ShowCrossings()
 
 	LineDefs_FindCrossings(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -757,7 +739,6 @@ void Tags_ApplyNewValue(int new_tag)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -894,10 +875,7 @@ void Tags_ShowUnmatchedSectors()
 
 	Tags_FindUnmatchedSectors(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -908,10 +886,7 @@ void Tags_ShowUnmatchedLineDefs()
 
 	Tags_FindUnmatchedLineDefs(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -952,10 +927,7 @@ void Tags_ShowMissingTags()
 
 	Tags_FindMissingTags(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1155,10 +1127,7 @@ void Textures_ShowMissing()
 
 	Textures_FindMissing(*edit.Selected);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1296,10 +1265,7 @@ void Textures_ShowUnknownTex()
 
 	Textures_FindUnknownTex(*edit.Selected, names);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
@@ -1312,10 +1278,7 @@ void Textures_ShowUnknownFlat()
 
 	Textures_FindUnknownFlat(*edit.Selected, names);
 
-	GoToSelection();
-
-	edit.error_mode = true;
-	edit.RedrawMap = 1;
+	GoToErrors();
 }
 
 
