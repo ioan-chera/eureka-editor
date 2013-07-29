@@ -212,7 +212,6 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -348,7 +347,6 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 
 	UpdateField();
@@ -408,7 +406,6 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 

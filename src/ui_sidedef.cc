@@ -212,7 +212,6 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 
 		box->UpdateField();
 	}
@@ -295,8 +294,6 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	BA_End();
 
-	MarkChanges();
-
 	main_win->line_box->UpdateField();
 	main_win->line_box->UpdateSides();
 }
@@ -332,8 +329,6 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	}
 
 	BA_End();
-
-	MarkChanges();
 
 	main_win->line_box->UpdateField();
 	main_win->line_box->UpdateSides();
@@ -371,7 +366,6 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -403,7 +397,6 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 

@@ -701,7 +701,6 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 			BA_ChangeVT(*it, Vertex::F_X, new_x);
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -722,7 +721,6 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 			BA_ChangeVT(*it, Vertex::F_Y, new_y);
 
 		BA_End();
-		MarkChanges();
 	}
 }
 

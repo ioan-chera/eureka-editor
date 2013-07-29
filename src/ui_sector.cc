@@ -250,7 +250,6 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 
 		box-> floor_h->value(Int_TmpStr(f_h));
 		box->  ceil_h->value(Int_TmpStr(c_h));
@@ -281,7 +280,6 @@ void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 
 		box->UpdateField();
 	}
@@ -329,7 +327,6 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 
 		box->UpdateField();
 	}
@@ -382,7 +379,6 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -427,7 +423,6 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-		MarkChanges();
 	}
 }
 

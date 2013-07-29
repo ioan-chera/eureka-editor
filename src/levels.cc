@@ -48,13 +48,13 @@ static int  new_vertex_minimum;
 static int  moved_vertex_count;
 
 
-void MarkChanges(int scope)
+void MarkChanges()
 {
-	MadeChanges |= scope;
-
-	main_win->canvas->redraw();
+	MadeChanges = 1;
 
 	UpdateHighlight();
+
+	edit.RedrawMap = 1;
 }
 
 

@@ -747,8 +747,6 @@ void CMD_ZoomSelection(void)
 	}
 
 	GoToSelection();
-
-	edit.RedrawMap = 1;
 }
 
 

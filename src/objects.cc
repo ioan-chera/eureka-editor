@@ -872,10 +872,6 @@ void CMD_Insert(void)
 			Beep("Cannot insert in this mode");
 			break;
 	}
-
-	UpdateHighlight();
-
-	edit.RedrawMap = 1;
 }
 
 
@@ -1264,10 +1260,6 @@ void CMD_CopyProperties(void)
 			Beep("No properties to copy");
 			return;
 	}
-
-	MarkChanges();
-
-	edit.RedrawMap = 1;
 }
 
 

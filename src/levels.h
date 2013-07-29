@@ -39,7 +39,7 @@ extern int Map_bound_y2;   /* maximum Y value of map */
 
 extern int MadeChanges;
 
-void MarkChanges(int scope = 1);
+void MarkChanges();
 
 void CalculateLevelBounds();
 

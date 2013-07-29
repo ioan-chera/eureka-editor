@@ -1041,10 +1041,7 @@ void CMD_Quantize(void)
 
 	BA_End();
 
-	UpdateHighlight();
-
 	edit.error_mode = true;
-	edit.RedrawMap = 1;
 }
 
 

@@ -320,8 +320,6 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-
-		MarkChanges();
 	}
 }
 
@@ -359,8 +357,6 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-
-		MarkChanges();
 	}
 }
 
@@ -382,7 +378,6 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_X, new_x);
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -403,7 +398,6 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_Y, new_y);
 
 		BA_End();
-		MarkChanges();
 	}
 }
 
@@ -434,8 +428,6 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 		}
 
 		BA_End();
-
-		MarkChanges();
 	}
 }
 
