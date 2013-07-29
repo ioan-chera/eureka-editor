@@ -96,9 +96,8 @@ public:
 	int   adjust_ld;
 	int   adjust_sd;
 
-	float adjust_dx;
-	float adjust_dy;
-	float adjust_factor;
+	float adjust_dx, adjust_dx_factor;
+	float adjust_dy, adjust_dy_factor;
 
 public:
 	Y_View() : p_type(0), screen(NULL),
@@ -1806,17 +1805,24 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 		// FIXME: TEMP CRUD
 		view.adjust_ld   = edit.Selected->find_first();
-		int side = SIDE_RIGHT;
 		if (view.adjust_ld < 0)
 			return;
 		const LineDef *L = LineDefs[view.adjust_ld];
+		int side = PointOnLineSide(view.x, view.y,
+			L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 		view.adjust_sd = (side < 0) ? L->left : L->right;
 		if (view.adjust_sd < 0)
 			return;
 
 		view.adjust_dx = 0;
 		view.adjust_dy = 0;
-		view.adjust_factor = 1.0;  // FIXME: BASED ON DISTANCE
+
+		float dist = ApproxDistToLineDef(L, view.x, view.y);
+		if (dist < 20) dist = 20;
+
+		// TODO: take perspective into account (reduce dx_factor)
+		view.adjust_dx_factor = dist / view.aspect_sw;
+		view.adjust_dy_factor = dist / view.aspect_sh / Y_SLOPE;
 
 		Editor_SetAction(ACT_ADJUST_OFS);
 		return;
@@ -1868,13 +1874,13 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	float factor = view.adjust_factor;
+	float factor = (mod == MOD_SHIFT) ? 0.25 : 1.0;
 
-	if (mod == MOD_SHIFT)
-		factor = factor / 4.0;
+	if (! view.low_detail)
+		factor = factor * 2.0;
 
-	view.adjust_dx -= dx * factor;
-	view.adjust_dy -= dy * factor;
+	view.adjust_dx -= dx * factor * view.adjust_dx_factor;
+	view.adjust_dy -= dy * factor * view.adjust_dy_factor;
 
 	edit.RedrawMap = 1;
 }
