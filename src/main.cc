@@ -713,7 +713,7 @@ void Main_Loop()
 		}
 
 		// TODO: handle these in a better way
-		main_win->UpdateTitle(Replacer ? '!' : MadeChanges ? '*' : 0);
+		main_win->UpdateTitle(MadeChanges ? '*' : 0);
 
 		main_win->scroll->UpdateRenderMode();
 		main_win->scroll->UpdateBounds();
