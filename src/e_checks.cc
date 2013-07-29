@@ -778,13 +778,12 @@ void SideDefs_Unpack(bool no_history)
 	if (sides.empty())
 		return;
 
-/*
-	if (confirm_it)
+	if (false /* confirm_it */)
 	{
 		if (DLG_Confirm("&No Change|&Unpack", unpack_confirm_message) <= 0)
 			return;
 	}
-*/
+
 
 	BA_Begin();
 
@@ -828,6 +827,42 @@ void SideDefs_Unpack(bool no_history)
 		BA_Abort(true /* keep changes */);
 	else
 		BA_End();
+}
+
+
+void SideDefs_NormalizeMiddles()
+{
+	// ensure each one-sided linedef has no texture in upper and lower.
+	// must only be called directly after level load, and after sidedefs
+	// are unpacked.  It is mainly to prevent one-sided lines seeming to
+	// have a "rail" texture.
+
+	selection_c sides(OBJ_SIDEDEFS);
+	selection_iterator_c it;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (! L->OneSided())
+			continue;
+
+		sides.set(L->right);
+	}
+
+	int null_tex = BA_InternaliseString("-");
+
+	for (sides.begin(&it) ; !it.at_end() ; ++it)
+	{
+		SideDef * SD = SideDefs[*it];
+
+		// ensure it has a middle texture
+		if (SD->MidTex()[0] == '-')
+			continue;
+
+		SD->lower_tex = null_tex;
+		SD->upper_tex = null_tex;
+	}
 }
 
 

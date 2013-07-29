@@ -643,7 +643,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	}
 
 	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
-//	SideDefs_NormalizeMiddles();
+	SideDefs_NormalizeMiddles();
 
 	// reset various editor state
 
