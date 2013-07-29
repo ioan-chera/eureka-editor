@@ -1868,10 +1868,13 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	// TODO: faster / slow if SHIFT / CTRL key pressed
+	float factor = view.adjust_factor;
 
-	view.adjust_dx -= view.adjust_factor * dx;
-	view.adjust_dy -= view.adjust_factor * dy;
+	if (mod == MOD_SHIFT)
+		factor = factor / 4.0;
+
+	view.adjust_dx -= dx * factor;
+	view.adjust_dy -= dy * factor;
 
 	edit.RedrawMap = 1;
 }
