@@ -812,6 +812,8 @@ void SideDefs_Unpack(bool no_history)
 		BA_Abort(true /* keep changes */);
 	else
 		BA_End();
+
+	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), NumSideDefs);
 }
 
 
