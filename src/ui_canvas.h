@@ -46,7 +46,6 @@ private:
 	selection_c drag_lines;
 
 	// scaling state
-	bool  scale_active;
 	int   scale_start_x,  scale_start_y;
 	scale_param_t scale_param;
 	selection_c scale_lines;
@@ -98,8 +97,6 @@ public:
 
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
-
-	bool isScaleActive()  { return scale_active; }
 
 private:
 	// FLTK virtual method for drawing

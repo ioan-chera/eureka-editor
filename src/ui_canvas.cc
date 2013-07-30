@@ -59,7 +59,7 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label),
 	highlight(), split_ld(-1),
 	drag_lines(),
-	scale_active(false), scale_lines(),
+	scale_lines(),
 	seen_sectors(8)
 { }
 
@@ -195,7 +195,7 @@ void UI_Canvas::DrawEverything()
 
 	if (edit.action == ACT_DRAG && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
-	else if (scale_active && ! scale_lines.empty())
+	else if (edit.action == ACT_SCALE && ! scale_lines.empty())
 		DrawSelection(&scale_lines);
 
 	if (highlight())
@@ -1123,7 +1123,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	selection_iterator_c it;
 
-	if (scale_active)
+	if (edit.action == ACT_SCALE)
 	{
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
@@ -1426,8 +1426,6 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 
 void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
 {
-	scale_active = true;
-
 	scale_start_x = map_x;
 	scale_start_y = map_y;
 
@@ -1446,8 +1444,6 @@ void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
 
 void UI_Canvas::ScaleFinish(scale_param_t& param)
 {
-	scale_active = false;
-
 	scale_lines.clear_all();
 
 	param = scale_param;

@@ -970,7 +970,7 @@ int Editor_RawButton(int event)
 
 	if (! down)
 	{
-		if (Fl::event_button() == 2)
+		if (button == 2)
 			Editor_MiddleRelease();
 		else if (! edit.render3d)
 			Editor_MouseRelease();
@@ -979,7 +979,7 @@ int Editor_RawButton(int event)
 
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (Fl::event_button() == 2)
+	if (button == 2)
 	{
 		Editor_MiddlePress(mod);
 	}
@@ -1130,8 +1130,8 @@ void Editor_MouseRelease()
 	 */
 	if (edit.action == ACT_SELBOX)
 	{
-		Editor_ClearErrorMode();
 		Editor_ClearAction();
+		Editor_ClearErrorMode();
 
 		int x1, y1, x2, y2;
 		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
@@ -1171,6 +1171,7 @@ void Editor_MouseRelease()
 
 void Editor_MiddlePress(keycode_t mod)
 {
+fprintf(stderr, "Editor_MiddlePress : button_down:%d mod:%04x\n", edit.button_down, mod);
 	if (edit.button_down & 1)  // allow 0 or 2
 		return;
 
@@ -1188,12 +1189,14 @@ void Editor_MiddlePress(keycode_t mod)
 		return;
 	}
 
-	edit.button_down = 2;
-	edit.button_mod  = mod;
-
 	int middle_x, middle_y;
 
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
+
+
+	Editor_SetAction(ACT_SCALE);
+
+	edit.button_mod = mod;
 
 	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
 }
@@ -1203,8 +1206,10 @@ void Editor_MiddleRelease()
 {
 	edit.button_down = 0;
 
-	if (main_win->canvas->isScaleActive())
+	if (edit.action == ACT_SCALE)
 	{
+		Editor_ClearAction();
+
 		scale_param_t param;
 
 		main_win->canvas->ScaleFinish(param);
@@ -1236,7 +1241,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 
 	// fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
-	if (edit.button_down == 2)
+	if (edit.action == ACT_SCALE)
 	{
 		main_win->canvas->ScaleUpdate(edit.map_x, edit.map_y, mod);
 		return;
