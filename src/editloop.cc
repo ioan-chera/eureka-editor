@@ -95,7 +95,7 @@ static void UpdateSplitLine(int drag_vert = -1)
 	edit.split_line.clear();
 
 	// usually disabled while dragging stuff
-	if (main_win->canvas->isDragActive() && edit.drag_single_vertex < 0)
+	if (edit.action == ACT_DRAG && edit.drag_single_vertex < 0)
 		return;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -171,7 +171,7 @@ static void UpdatePanel()
 
 void UpdateHighlight()
 {
-	bool dragging = main_win->canvas->isDragActive();
+	bool dragging = (edit.action == ACT_DRAG);
 
 
 	// find the object to highlight
@@ -1075,6 +1075,7 @@ void Editor_MousePress(keycode_t mod)
 
 	if (object.is_nil())
 	{
+		Editor_SetAction(ACT_SELBOX);
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
@@ -1092,9 +1093,10 @@ void Editor_MouseRelease()
 	edit.did_a_move = false;
 
 	/* Releasing the button while dragging : drop the selection. */
-	// FIXME : should call this automatically when switching tool
-	if (main_win->canvas->isDragActive())
+	if (edit.action == ACT_DRAG)
 	{
+		Editor_ClearAction();
+
 		int dx, dy;
 		main_win->canvas->DragFinish(&dx, &dy);
 
@@ -1126,9 +1128,10 @@ void Editor_MouseRelease()
 	/* Releasing the button while there was a selection box
 	   causes all the objects within the box to be selected.
 	 */
-	if (main_win->canvas->isSelboxActive())
+	if (edit.action == ACT_SELBOX)
 	{
 		Editor_ClearErrorMode();
+		Editor_ClearAction();
 
 		int x1, y1, x2, y2;
 		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
@@ -1140,7 +1143,6 @@ void Editor_MouseRelease()
 			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 
 		UpdateHighlight();
-
 		edit.RedrawMap = 1;
 		return;
 	}
@@ -1249,7 +1251,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 	   and a selection box exists : move the second
 	   corner of the selection box.
 	*/
-	else if (main_win->canvas->isSelboxActive())
+	else if (edit.action == ACT_SELBOX)
 	{
 		if (edit.did_a_move)
 			edit.Selected->clear_all();
@@ -1263,7 +1265,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 	   pressed when the button was pressed :
 	   drag the selection.
 	*/
-	if (main_win->canvas->isDragActive())
+	if (edit.action == ACT_DRAG)
 	{
 		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
 
@@ -1291,6 +1293,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 
 		GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
 
+		Editor_SetAction(ACT_DRAG);
 		main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
 
 		// check for a single vertex

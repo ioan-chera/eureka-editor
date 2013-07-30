@@ -58,8 +58,7 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) : 
     Fl_Widget(X, Y, W, H, label),
 	highlight(), split_ld(-1),
-	selbox_active(false),
-	drag_active(false), drag_lines(),
+	drag_lines(),
 	scale_active(false), scale_lines(),
 	seen_sectors(8)
 { }
@@ -194,7 +193,7 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(edit.Selected);
 
-	if (drag_active && ! drag_lines.empty())
+	if (edit.action == ACT_DRAG && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
 	else if (scale_active && ! scale_lines.empty())
 		DrawSelection(&scale_lines);
@@ -209,7 +208,7 @@ void UI_Canvas::DrawEverything()
 		DrawHighlight(highlight.type, highlight.num, hi_color);
 	}
 
-	if (selbox_active)
+	if (edit.action == ACT_SELBOX)
 		SelboxDraw();
 }
 
@@ -1137,7 +1136,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	int dx = 0;
 	int dy = 0;
 
-	if (drag_active)
+	if (edit.action == ACT_DRAG)
 	{
 		DragDelta(&dx, &dy);
 	}
@@ -1317,7 +1316,6 @@ void UI_Canvas::DrawCamera()
 
 void UI_Canvas::SelboxBegin(int map_x, int map_y)
 {
-	selbox_active = true;
 	selbox_x1 = selbox_x2 = map_x;
 	selbox_y1 = selbox_y2 = map_y;
 }
@@ -1332,8 +1330,6 @@ void UI_Canvas::SelboxUpdate(int map_x, int map_y)
 
 void UI_Canvas::SelboxFinish(int *x1, int *y1, int *x2, int *y2)
 {
-	selbox_active = false;
-
 	*x1 = MIN(selbox_x1, selbox_x2);
 	*y1 = MIN(selbox_y1, selbox_y2);
 
@@ -1370,8 +1366,6 @@ void UI_Canvas::SelboxDraw()
 
 void UI_Canvas::DragBegin(int focus_x, int focus_y, int map_x, int map_y)
 {
-	drag_active = true;
-
 	drag_start_x = map_x;
 	drag_start_y = map_y;
 
@@ -1391,8 +1385,6 @@ void UI_Canvas::DragBegin(int focus_x, int focus_y, int map_x, int map_y)
 
 void UI_Canvas::DragFinish(int *dx, int *dy)
 {
-	drag_active = false;
-
 	drag_lines.clear_all();
 
 	DragDelta(dx, dy);

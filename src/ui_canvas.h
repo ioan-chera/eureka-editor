@@ -35,22 +35,21 @@ private:
 
 	int split_ld;
 
-	bool selbox_active;
+	// sel-box state
 	int  selbox_x1, selbox_y1;  // map coords
 	int  selbox_x2, selbox_y2;
 
-	bool drag_active;
+	// dragging state
 	int  drag_start_x, drag_start_y;
 	int  drag_focus_x, drag_focus_y;
 	int  drag_cur_x,   drag_cur_y;
 	selection_c drag_lines;
 
+	// scaling state
 	bool  scale_active;
 	int   scale_start_x,  scale_start_y;
 	scale_param_t scale_param;
 	selection_c scale_lines;
-
-	int rbscroll_x, rbscroll_y;
 
 	// drawing state only
 	int map_lx, map_ly;
@@ -100,8 +99,6 @@ public:
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
 
-	bool isSelboxActive() { return selbox_active; }
-	bool isDragActive()   { return drag_active; }
 	bool isScaleActive()  { return scale_active; }
 
 private:
