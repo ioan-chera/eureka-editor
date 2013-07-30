@@ -176,6 +176,56 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 }
 
 
+int ClosestLine_CastAtAngle(int x, int y, float radians)
+{
+	int   best_match = -1;
+	float best_dist  = 9e9;
+
+	double x2 = x + 256 * cos(radians);
+	double y2 = y + 256 * sin(radians);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		float a = PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
+		float b = PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		                 
+		// completely on one side of the vector?
+		if (a > 0 && b > 0) continue;
+		if (a < 0 && b < 0) continue;
+
+		float c = AlongDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
+		float d = AlongDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+
+		float dist;
+
+		if (fabs(a) < 1 && fabs(b) < 1)
+			dist = MIN(c, d);
+		else if (fabs(a) < 1)
+			dist = c;
+		else if (fabs(b) < 1)
+			dist = d;
+		else
+		{
+			float factor = a / (a - b);
+			dist = c * (1 - factor) + d * factor;
+		}
+
+		// behind or touching the vector?
+		if (dist < 1) continue;
+
+		if (dist < best_dist)
+		{
+			best_match = n;
+			best_dist  = dist;
+		}
+	}
+
+	return best_match;
+}
+
+
 bool PointOutsideOfMap(int x, int y)
 {
 	// this keeps track of directions tested
