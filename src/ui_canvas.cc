@@ -244,7 +244,10 @@ void UI_Canvas::DrawMap()
 		DrawVertices();
 
 	if (edit.mode == OBJ_THINGS)
+	{
+		DrawThingBodies();
 		DrawThings();
+	}
 }
 
 
@@ -722,6 +725,35 @@ void UI_Canvas::DrawThings()
 
 			DrawObjNum(SCREENX(x), SCREENY(y) - 2, n);
 		}
+	}
+}
+
+
+void UI_Canvas::DrawThingBodies()
+{
+	if (edit.error_mode)
+		return;
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		int x = Things[n]->x;
+		int y = Things[n]->y;
+
+		if (! Vis(x, y, MAX_RADIUS))
+			continue;
+
+		const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+		int r = info->radius;
+
+		fl_color(DarkerColor(DarkerColor(info->color)));
+
+		int sx1 = SCREENX(x - r);
+		int sy1 = SCREENY(y + r);
+		int sx2 = SCREENX(x + r);
+		int sy2 = SCREENY(y - r);
+
+		fl_rectf(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
 	}
 }
 

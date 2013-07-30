@@ -112,6 +112,7 @@ private:
 	void DrawVertices();
 	void DrawLinedefs();
 	void DrawThings();
+	void DrawThingBodies();
 
 	void DrawMapPoint(int map_x, int map_y);
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);

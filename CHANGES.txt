@@ -37,8 +37,10 @@ CHANGES IN Eureka 1.00
 
 -  show unknown/missing textures in the LineDef panel
 -  show unknown/missing textures in the 3D preview
+
 -  better drawing of selected sectors
 -  better drawing of highlighted things and linedefs
+-  better drawing of things (in THING mode)
 
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
