@@ -621,7 +621,26 @@ void LoadLevel(Wad_file *wad, const char *level)
 	// However they just get in the way for editing, so remove them.
 	RemoveUnusedVerticesAtEnd();
 
+	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
+	SideDefs_NormalizeMiddles();
+
 	CalculateLevelBounds();
+
+
+	// reset various editor state
+
+	Editor_ClearAction();
+
+	edit.Selected->clear_all();
+	edit.highlighted.clear();
+	edit.RedrawMap = 1;
+
+	main_win->UpdateTotals();
+	main_win->InvalidatePanelObj();
+	main_win->redraw();
+
+	MadeChanges = 0;
+
 
 	Level_name = StringUpper(level);
 
@@ -641,23 +660,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 			M_DefaultUserState();
 		}
 	}
-
-	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
-	SideDefs_NormalizeMiddles();
-
-	// reset various editor state
-
-	Editor_ClearAction();
-
-	edit.Selected->clear_all();
-	edit.highlighted.clear();
-	edit.RedrawMap = 1;
-
-	main_win->UpdateTotals();
-	main_win->InvalidatePanelObj();
-	main_win->redraw();
-
-	MadeChanges = 0;
 }
 
 
