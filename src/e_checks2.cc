@@ -596,7 +596,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d overlapping linedefs", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 200,
+			dialog->AddLine(check_buffer, 2, 220,
 			                "Show",   &UI_Check_LineDefs::action_show_overlap,
 			                "Remove", &UI_Check_LineDefs::action_remove_overlap);
 		}
