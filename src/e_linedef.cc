@@ -490,42 +490,6 @@ void LIN_AlignY(void)
 }
 
 
-#if 0  // FIXME frob_linedefs_flags
-/*
- *  frob_linedefs_flags
- *  For all the linedefs in <list>, apply the operator <op>
- *  with the operand <operand> on the flags field.
- */
-void frob_linedefs_flags (SelPtr list, int op, int operand)
-{
-	SelPtr cur;
-	s16_t mask;
-
-	if (op == BOP_REMOVE || op == BOP_ADD || op == BOP_TOGGLE)
-		mask = 1 << operand;
-	else
-		mask = operand;
-
-	for (cur = list ; cur ; cur = cur->next)
-	{
-		if (op == BOP_REMOVE)
-			LineDefs[cur->objnum]->flags &= ~mask;
-		else if (op == BOP_ADD)
-			LineDefs[cur->objnum]->flags |= mask;
-		else if (op == BOP_TOGGLE)
-			LineDefs[cur->objnum]->flags ^= mask;
-		else
-		{
-			BugError("frob_linedef_flags: op=%02X", op);
-			return;
-		}
-	}
-	MarkChanges();
-}
-#endif
-
-
-
 void FlipLineDef(int ld)
 {
 	int old_start = LineDefs[ld]->start;
@@ -871,41 +835,6 @@ void MakeRectangularNook (SelPtr obj, int width, int depth, int convex)
 	....
 }
 
-#endif
-
-
-
-#if 0  // FIXME  SetLinedefLength
-/*
- *  SetLinedefLength
- *  Move either vertex to set length of linedef to desired value
- */
-void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex)
-{
-	SelPtr cur;
-
-	for (cur = obj ; cur ; cur = cur->next)
-	{
-		VPtr vertex1 = Vertices + LineDefs[cur->objnum]->start;
-		VPtr vertex2 = Vertices + LineDefs[cur->objnum]->end;
-		double angle = atan2 (vertex2->y - vertex1->y, vertex2->x - vertex1->x);
-		int dx       = (int) (length * cos (angle));
-		int dy       = (int) (length * sin (angle));
-
-		if (move_2nd_vertex)
-		{
-			vertex2->x = vertex1->x + dx;
-			vertex2->y = vertex1->y + dy;
-		}
-		else
-		{
-			vertex1->x = vertex2->x - dx;
-			vertex1->y = vertex2->y - dy;
-		}
-
-		MarkChanges(2);
-	}
-}
 #endif
 
 

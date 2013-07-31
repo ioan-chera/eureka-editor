@@ -34,6 +34,8 @@ void FlipLineDef(int ld);
 void FlipLineDefGroup(selection_c& flip);
 
 
+void LineDefs_SetLength(int new_len);
+
 bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, int x2, int y2);
 
@@ -43,14 +45,6 @@ int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
 
-
-void frob_linedefs_flags (selection_c * list, int op, int operand);
-
-
-#if 0
-void MakeRectangularNook (SelPtr obj, int width, int depth, int convex);
-void SetLinedefLength (SelPtr obj, int length, int move_2nd_vertex);
-#endif
 
 /* commands */
 
