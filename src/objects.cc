@@ -123,7 +123,7 @@ void ObjectBox_NotifyEnd()
 /*
    get the number of objects of a given type minus one
 */
-obj_no_t GetMaxObjectNum (int objtype)
+int GetMaxObjectNum (int objtype)
 {
 	switch (objtype)
 	{

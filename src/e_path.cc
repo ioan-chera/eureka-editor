@@ -527,7 +527,7 @@ void CMD_FindObjectByType()
 	{
 		Objid find_obj;
 		int otype;
-		obj_no_t omax,onum;
+		int omax,onum;
 		find_obj.type = edit.highlighted () ? edit.highlighted.type : edit.mode;
 		onum = find_obj.num  = edit.highlighted () ? edit.highlighted.num  : 0;
 		omax = GetMaxObjectNum(find_obj.type);

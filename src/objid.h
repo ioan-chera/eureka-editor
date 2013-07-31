@@ -31,21 +31,20 @@
 
 
 // Special object numbers
-typedef s16_t  obj_no_t;
-
 #define OBJ_NO_NONE    -1
 
 #define is_obj(n)  ((n) >= 0)
+
 
 class Objid
 {
 public:
 	obj_type_e type;
-	obj_no_t   num;
+	int num;
 
 	Objid() : type(OBJ_NONE), num(-1) { }
 	Objid(const Objid& other) : type(other.type), num(other.num) { } 
-	Objid(obj_type_e t, obj_no_t n) : type(t), num(n) { }
+	Objid(obj_type_e t, int n) : type(t), num(n) { }
 
 	void clear() { num = -1; type = OBJ_NONE; }
 
