@@ -182,42 +182,6 @@ void TH_SpinThings(void)
 }
 
 
-#if 0  // FIXME  frob_things_flags
-/*
- *  frob_things_flags - set/reset/toggle things flags
- *
- *  For all the things in <list>, apply the operator <op>
- *  with the operand <operand> on the flags field.
- */
-void frob_things_flags (SelPtr list, int op, int operand)
-{
-	SelPtr cur;
-	s16_t mask;
-
-	if (op == BOP_REMOVE || op == BOP_ADD || op == BOP_TOGGLE)
-		mask = 1 << operand;
-	else
-		mask = operand;
-
-	for (cur = list; cur; cur = cur->next)
-	{
-		if (op == BOP_REMOVE)
-			Things[cur->objnum]->options &= ~mask;
-		else if (op == BOP_ADD)
-			Things[cur->objnum]->options |= mask;
-		else if (op == BOP_TOGGLE)
-			Things[cur->objnum]->options ^= mask;
-		else
-		{
-			BugError("frob_things_flags: op=%02X", op);
-			return;
-		}
-	}
-	MarkChanges();
-}
-#endif
-
-
 bool ThingsOverlap(int th1, int th2)
 {
 	const Thing *T1 = Things[th1];

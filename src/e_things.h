@@ -56,8 +56,6 @@ inline int angle_to_direction (int angle)
 }
 
 
-void frob_things_flags (selection_c * list, int op, int operand);
-
 int calc_new_angle(int angle, int diff);
 
 
