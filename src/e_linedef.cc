@@ -476,17 +476,10 @@ void AlignTexturesX (SelPtr *sdlist)
 #endif
 
 
-void LIN_AlignX(void)
+void LIN_Align(void)
 {
 	// TODO
-	Beep("LIN_AlignX: not implemented");
-}
-
-
-void LIN_AlignY(void)
-{
-	// TODO
-	Beep("LIN_AlignY: not implemented");
+	Beep("LIN_Align: not implemented");
 }
 
 

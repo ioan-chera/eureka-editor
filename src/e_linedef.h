@@ -49,12 +49,9 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y);
 /* commands */
 
 void LIN_Flip(void);
-void LIN_SplitHalf(void);
-
-void LIN_AlignX(void);
-void LIN_AlignY(void);
-
+void LIN_Align(void);
 void LIN_MergeTwo(void);
+void LIN_SplitHalf(void);
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 
