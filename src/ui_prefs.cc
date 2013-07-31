@@ -337,7 +337,7 @@ public:
 	Fl_Choice      *rend_aspect;
 	Fl_Float_Input *rend_asp_custom;
 
-	Fl_Check_Button *rend_lock_gravity;
+	Fl_Check_Button *rend_lock_grav;
 
 	Fl_Check_Button *bsp_warn;
 	Fl_Check_Button *bsp_verbose;
@@ -654,8 +654,8 @@ UI_Preferences::UI_Preferences() :
 		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
 		  rend_asp_custom->deactivate();
 		}
-		{ rend_lock_gravity = new Fl_Check_Button(60, 125, 360, 30, " Locked gravity -- cannot move up or down");
-		  rend_lock_gravity->down_box(FL_DOWN_BOX);
+		{ rend_lock_grav = new Fl_Check_Button(60, 125, 360, 30, " Locked gravity -- cannot move up or down");
+		  rend_lock_grav->down_box(FL_DOWN_BOX);
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
@@ -1084,6 +1084,8 @@ void UI_Preferences::LoadValues()
 			break;
 	}
 
+	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
+
 	bsp_fast->value(glbsp_fast ? 1 : 0);
 	bsp_verbose->value(glbsp_verbose ? 1 : 0);
 	bsp_warn->value(glbsp_warn ? 1 : 0);
@@ -1178,6 +1180,8 @@ void UI_Preferences::SaveValues()
 
 	render_aspect_ratio = (int)(100 * atof(rend_asp_custom->value()) + 0.2);
 	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
+
+	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
 	glbsp_fast = bsp_fast->value() ? true : false;
 	glbsp_verbose = bsp_verbose->value() ? true : false;
