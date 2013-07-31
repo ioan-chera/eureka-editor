@@ -45,6 +45,8 @@ CHANGES IN Eureka 1.00
 -  display the lengths of the last few linedefs
 -  can modify the length of a line in the LineDef panel
 
+-  improved behavior of vertices when grid-snap is on
+
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
 -  option to set the default editing mode

@@ -623,21 +623,36 @@ static void Insert_Vertex()
 		return;
 	}
 
+
+	// the "nearby" vertex is usually the highlighted one (if any),
+	// but we substitute the vertex at the snapped coord when the
+	// highlight is empty and snapping is enabled.
+	int near_vert = -1;
+
+	if (edit.highlighted())
+		near_vert = edit.highlighted.num;
+
+	int new_x = grid.SnapX(edit.map_x);
+	int new_y = grid.SnapY(edit.map_y);
+
+	if (near_vert < 0 && grid.snap)
+		near_vert = Vertex_FindExact(new_x, new_y);
+
+
 	int first_sel  = edit.Selected->find_first();
 	int second_sel = edit.Selected->find_second();
 
 	// if a vertex is highlighted but none are selected, then merely
 	// select that vertex.  This is better than adding a new vertex at
 	// the same location as an existing one.
-	if (first_sel < 0 && edit.Selected->empty() && edit.highlighted())
+	if (edit.Selected->empty() && near_vert >= 0)
 	{
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(near_vert);
 		return;
 	}
 
 	// if highlighted vertex same as selected one, merely deselect it
-	if (second_sel < 0 && edit.highlighted() &&
-	    edit.highlighted.num == first_sel)
+	if (second_sel < 0 && near_vert >= 0 && near_vert == first_sel)
 	{
 		edit.Selected->clear(first_sel);
 		return;
@@ -645,9 +660,9 @@ static void Insert_Vertex()
 
 	// if only one is selected, but another is highlighted, use the
 	// highlighted one as the second vertex
-	if (second_sel < 0 && edit.highlighted())
+	if (second_sel < 0 && near_vert >= 0)
 	{
-		second_sel = edit.highlighted.num;
+		second_sel = near_vert;
 	}
 
 	// insert a new linedef between two existing vertices
@@ -685,8 +700,6 @@ static void Insert_Vertex()
 	}
 
 	// make sure we never create zero-length linedefs
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
 
 	if (first_sel >= 0)
 	{
@@ -872,6 +885,8 @@ void CMD_Insert(void)
 			Beep("Cannot insert in this mode");
 			break;
 	}
+
+	edit.RedrawMap = 1;
 }
 
 
