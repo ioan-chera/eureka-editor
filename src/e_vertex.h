@@ -33,6 +33,7 @@ void InsertPolygonVertices (int, int, int, int);
 
 int VertexHowManyLineDefs(int v_num);
 void Vertex_MergeList(selection_c *list);
+int Vertex_FindExact(int x, int y);
 
 void VERT_Merge(void);
 void VERT_Disconnect(void);

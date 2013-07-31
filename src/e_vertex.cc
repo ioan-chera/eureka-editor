@@ -38,6 +38,17 @@
 #include "x_mirror.h"
 
 
+int Vertex_FindExact(int x, int y)
+{
+	for (int i = 0 ; i < NumVertices ; i++)
+	{
+		if (Vertices[i]->x == x && Vertices[i]->y == y)
+			return i;
+	}
+
+	return -1;  // not found
+}
+
 
 // FIXME: InsertPolygonVertices
 #if 0
