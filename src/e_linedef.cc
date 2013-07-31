@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -812,6 +812,103 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 
 	*x = I_ROUND(new_x);
 	*y = I_ROUND(new_y);
+}
+
+
+static bool LineDefStartWillBeMoved(int ld, selection_c& list)
+{
+	int start = LineDefs[ld]->start;
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		if (*it == ld)
+			continue;
+
+		const LineDef *L = LineDefs[*it];
+
+		if (L->end == start)
+			return true;
+	}
+
+	return false;
+}
+
+
+static int PickLineDefToExtend(selection_c& list)
+{
+	// we want a line whose start is not going to be moved in the future
+	// (otherwise the length will be wrecked by the later change).
+	// however there could be loops, so need to always pick something.
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+		if (! LineDefStartWillBeMoved(*it, list))
+			return *it;
+
+	return list.find_first();
+}
+
+
+static void LD_SetLength(int ld, int new_len, int angle)
+{
+	const LineDef *L = LineDefs[ld];
+
+	double dx = new_len * cos(angle * M_PI / 32768.0);
+	double dy = new_len * sin(angle * M_PI / 32768.0);
+
+	int idx = I_ROUND(dx);
+	int idy = I_ROUND(dy);
+
+	if (idx == 0 && idy == 0)
+	{
+		if (dx < 0) idx = (int)floor(dx); else idx = (int)ceil(dx);
+		if (dy < 0) idy = (int)floor(dy); else idy = (int)ceil(dy);
+	}
+
+	if (idx == 0 && idy == 0)
+		idx = 1;
+
+	BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
+	BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+}
+
+
+void LineDefs_SetLength(int new_len)
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("No lines to extend");
+		return;
+	}
+
+	// remember angles
+	std::vector<int> angles(NumLineDefs);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		angles[n] = ComputeAngle(L->End()->x - L->Start()->x,
+								 L->End()->y - L->Start()->y);
+	}
+
+	BA_Begin();
+
+	while (! list.empty())
+	{
+		int ld = PickLineDefToExtend(list);
+
+		list.clear(ld);
+
+		LD_SetLength(ld, new_len, angles[ld]);
+	}
+
+	BA_End();
 }
 
 

@@ -35,7 +35,7 @@ public:
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
-	Fl_Output    *length;
+	Fl_Int_Input *length;
 	Fl_Int_Input *tag;
 	Fl_Int_Input *args[5];
 
@@ -90,6 +90,7 @@ private:
 	static void   type_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);
 	static void  flags_callback(Fl_Widget *, void *);
+	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 };
 

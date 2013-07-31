@@ -23,6 +23,7 @@
 
 #include "levels.h"
 #include "e_checks.h"
+#include "e_linedef.h"
 #include "e_things.h"
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -95,8 +96,10 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	length = new Fl_Output(X+58, Y, 64, 24, "Length: ");
+	length = new Fl_Int_Input(X+58, Y, 64, 24, "Length: ");
 	length->align(FL_ALIGN_LEFT);
+	length->callback(length_callback, this);
+	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
 	for (int a = 0 ; a < 5 ; a++)
@@ -407,6 +410,18 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 		BA_End();
 	}
+}
+
+
+void UI_LineBox::length_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+
+	int new_len = atoi(box->length->value());
+
+	new_len = CLAMP(1, new_len, 32768);
+
+	LineDefs_SetLength(new_len);
 }
 
 
