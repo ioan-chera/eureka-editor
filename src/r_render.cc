@@ -49,6 +49,8 @@
 
 // config items
 int  render_aspect_ratio = 177;   // 100 * width / height, default 16:9
+
+bool render_lock_gravity   = false;
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
 
@@ -1777,7 +1779,7 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 		view.SetAngle(view.angle - d_ang);
 	}
 
-	if (dy)
+	if (dy && ! (render_lock_gravity && view.gravity))
 	{
 		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
 
@@ -1930,6 +1932,12 @@ void R3D_Right(void)
 
 void R3D_Up(void)
 {
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
 	int dist = atoi(EXEC_Param[0]);
 
 	view.z += dist;
@@ -1940,6 +1948,12 @@ void R3D_Up(void)
 
 void R3D_Down(void)
 {
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
 	int dist = atoi(EXEC_Param[0]);
 
 	view.z -= dist;

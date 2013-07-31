@@ -540,6 +540,15 @@ static const opt_desc_t options[] =
 		&render_aspect_ratio
 	},
 
+	{	"render_lock_gravity",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Locked gravity in 3D view -- cannot move up or down",
+		NULL,
+		&render_lock_gravity
+	},
+
 	{	"render_missing_bright",
 		0,
 		OPT_BOOLEAN,

@@ -75,6 +75,7 @@ extern int backup_max_files;
 extern int backup_max_space;
 
 extern int  render_aspect_ratio;
+extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 

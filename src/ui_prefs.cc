@@ -337,6 +337,8 @@ public:
 	Fl_Choice      *rend_aspect;
 	Fl_Float_Input *rend_asp_custom;
 
+	Fl_Check_Button *rend_lock_gravity;
+
 	Fl_Check_Button *bsp_warn;
 	Fl_Check_Button *bsp_verbose;
 	Fl_Check_Button *bsp_fast;
@@ -651,6 +653,9 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
 		  rend_asp_custom->deactivate();
+		}
+		{ rend_lock_gravity = new Fl_Check_Button(60, 125, 360, 30, " Locked gravity -- cannot move up or down");
+		  rend_lock_gravity->down_box(FL_DOWN_BOX);
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
