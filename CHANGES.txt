@@ -42,10 +42,15 @@ CHANGES IN Eureka 1.00
 -  better drawing of highlighted things and linedefs
 -  better drawing of things (in THING mode)
 
+-  display the lengths of the last few linedefs
+-  can modify the length of a line in the LineDef panel
+
 -  option to limit grid toggle to a single kind
 -  option to show grid in SNAP mode, hide it in FREE mode
 -  option to set the default editing mode
 -  can change the default Port in the preferences
+
+-  option to prevent up/down moves in 3D view when gravity is on
 
 -  automatically unpack sidedefs when loading a map
 
