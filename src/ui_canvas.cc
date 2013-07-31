@@ -496,17 +496,17 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int x1 = LineDefs[n]->Start()->x;
-		int y1 = LineDefs[n]->Start()->y;
-		int x2 = LineDefs[n]->End  ()->x;
-		int y2 = LineDefs[n]->End  ()->y;
+		const LineDef *L = LineDefs[n];
+
+		int x1 = L->Start()->x;
+		int y1 = L->Start()->y;
+		int x2 = L->End  ()->x;
+		int y2 = L->End  ()->y;
 
 		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 			continue;
 
-		bool one_sided = (! LineDefs[n]->Left());
-		// was this:
-		// one_sided = (LineDefs[n]->flags & 1) ? true : false;
+		bool one_sided = (! L->Left());
 
 		switch (edit.mode)
 		{
@@ -514,7 +514,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (n == split_ld)
 					fl_color(HI_AND_SEL_COL);
-				else if (! LineDefs[n]->Right())
+				else if (L->right < 0)
 					fl_color(RED);
 				else if (one_sided)
 					fl_color(WHITE);
@@ -522,27 +522,32 @@ void UI_Canvas::DrawLinedefs()
 					fl_color(LIGHTGREY);
 
 				DrawKnobbyLine(x1, y1, x2, y2);
+
+				if (n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
+				{
+					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
+				}
 			}
 			break;
 
 			case OBJ_LINEDEFS:
 			{
-				if (LineDefs[n]->type != 0)
+				if (L->type != 0)
 				{
-					if (LineDefs[n]->tag != 0)
+					if (L->tag != 0)
 						fl_color(LIGHTMAGENTA);
 					else
 						fl_color(LIGHTGREEN);
 				}
 				else if (one_sided)
 					fl_color(WHITE);
-				else if (LineDefs[n]->flags & 1)
+				else if (L->flags & 1)
 					fl_color(FL_CYAN);
 				else
 					fl_color(LIGHTGREY);
 
 				// no first sidedef?
-				if (! LineDefs[n]->Right())
+				if (! L->Right())
 					fl_color(RED);
 
 				DrawKnobbyLine(x1, y1, x2, y2);
@@ -551,8 +556,8 @@ void UI_Canvas::DrawLinedefs()
 
 			case OBJ_SECTORS:
 			{
-				int sd1 = LineDefs[n]->right;
-				int sd2 = LineDefs[n]->left;
+				int sd1 = L->right;
+				int sd2 = L->left;
 				
 				int s1  = (sd1 < 0) ? OBJ_NO_NONE : SideDefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? OBJ_NO_NONE : SideDefs[sd2]->sector;
