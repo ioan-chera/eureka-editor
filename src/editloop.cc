@@ -937,7 +937,7 @@ int Editor_RawWheel(int event)
 	// TODO: DistributeKey(EU_Wheel | mod)
 
 	if (edit.render3d)
-		Render3D_Wheel(0 - wheel_dy, mod);
+		Render3D_Wheel(wheel_dx, 0 - wheel_dy, mod);
 	else
 		Editor_Wheel(wheel_dx, wheel_dy, mod);
 

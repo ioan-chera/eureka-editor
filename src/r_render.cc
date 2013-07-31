@@ -1710,19 +1710,17 @@ void Render3D_Setup()
 }
 
 
-void Render3D_Wheel(int delta, keycode_t mod)
+void Render3D_Wheel(int dx, int dy, keycode_t mod)
 {
-	int speed = 16;  // TODO: CONFIG ITEM
+	float speed = 48;  // TODO: CONFIG ITEM
 
 	if (mod == MOD_SHIFT)
 		speed = MAX(1, speed / 8);
 	else if (mod == MOD_COMMAND)
 		speed *= 4;
 
-	delta = delta * speed * 3;
-
-	view.x += view.Cos * delta;
-	view.y += view.Sin * delta;
+	view.x += speed * (view.Cos * dy + view.Sin * dx);
+	view.y += speed * (view.Sin * dy - view.Cos * dx);
 
 	edit.RedrawMap = 1;
 }
