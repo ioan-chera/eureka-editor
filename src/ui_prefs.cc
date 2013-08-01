@@ -369,7 +369,7 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		// o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 50, 145, 30, "GUI Appearance");
+		{ Fl_Box* o = new Fl_Box(25, 45, 145, 30, "GUI Appearance");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
@@ -432,10 +432,10 @@ UI_Preferences::UI_Preferences() :
 		{ gen_autoload = new Fl_Check_Button(50, 280, 350, 25, " automatically open the most recent pwad");
 		  gen_autoload->down_box(FL_DOWN_BOX);
 		}
-		{ gen_swapsides = new Fl_Check_Button(50, 315, 350, 25, " swap upper and lower sidedefs in Linedef panel");
+		{ gen_swapsides = new Fl_Check_Button(50, 310, 350, 25, " swap upper and lower sidedefs in Linedef panel");
 		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
-		{ gen_maximized = new Fl_Check_Button(50, 350, 350, 25, " maximize the window when Eureka starts");
+		{ gen_maximized = new Fl_Check_Button(50, 340, 350, 25, " maximize the window when Eureka starts");
 		  gen_maximized->down_box(FL_DOWN_BOX);
 		  gen_maximized->hide();  // DISABLED, PENDING REMOVAL
 		}
@@ -448,7 +448,7 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 50, 355, 30, "Editing Options");
+		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Editing Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
@@ -462,11 +462,11 @@ UI_Preferences::UI_Preferences() :
 		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
 		  edit_newislands->down_box(FL_DOWN_BOX);
 		}
-		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
-		  edit_samemode->down_box(FL_DOWN_BOX);
-		}
 		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
 		  edit_autoadjustX->down_box(FL_DOWN_BOX);
+		}
+		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
+		  edit_samemode->down_box(FL_DOWN_BOX);
 		}
 		{ edit_multiselect = new Fl_Check_Button(50, 210, 275, 30, " multi-select requires a modifier key");
 		  edit_multiselect->down_box(FL_DOWN_BOX);
@@ -487,43 +487,43 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 50, 355, 30, "Map Grid and Scrolling");
+		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Map Grid and Scrolling");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
 		  gen_scrollbars->down_box(FL_DOWN_BOX);
 		}
-		{ grid_snap = new Fl_Check_Button(50, 120, 235, 25, " default SNAP mode");
+		{ grid_snap = new Fl_Check_Button(50, 110, 235, 25, " default SNAP mode");
 		  grid_snap->down_box(FL_DOWN_BOX);
 		}
-		{ grid_mode = new Fl_Choice(435, 120, 95, 25, "default grid type ");
-		  grid_mode->down_box(FL_BORDER_BOX);
-		  grid_mode->add("OFF|Dotty|Normal");
-		}
-		{ grid_toggle = new Fl_Choice(435, 155, 95, 25, "grid toggle types ");
-		  grid_toggle->down_box(FL_BORDER_BOX);
-		  grid_toggle->add("BOTH|Dotty|Normal");
-		}
-		{ grid_size = new Fl_Choice(435, 190, 95, 25, "default grid size ");
+		{ grid_size = new Fl_Choice(435, 110, 95, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
 		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
 		}
-		{ gen_digitzoom = new Fl_Check_Button(50, 155, 240, 25, " digit keys zoom the map");
+		{ grid_mode = new Fl_Choice(435, 145, 95, 25, "default grid type ");
+		  grid_mode->down_box(FL_BORDER_BOX);
+		  grid_mode->add("OFF|Dotty|Normal");
+		}
+		{ grid_toggle = new Fl_Choice(435, 180, 95, 25, "grid toggle types ");
+		  grid_toggle->down_box(FL_BORDER_BOX);
+		  grid_toggle->add("BOTH|Dotty|Normal");
+		}
+		{ gen_digitzoom = new Fl_Check_Button(50, 140, 240, 25, " digit keys zoom the map");
 		  gen_digitzoom->down_box(FL_DOWN_BOX);
 		}
-		{ gen_smallscroll = new Fl_Choice(435, 155, 95, 25, "small scroll step ");
+		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
 		  gen_smallscroll->down_box(FL_BORDER_BOX);
 		  gen_smallscroll->hide();
 		}
-		{ gen_largescroll = new Fl_Choice(435, 190, 95, 25, "large scroll step ");
+		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
 		  gen_largescroll->down_box(FL_BORDER_BOX);
 		  gen_largescroll->hide();
 		}
-		{ gen_wheelscroll = new Fl_Check_Button(50, 190, 245, 25, " mouse wheel scrolls the map");
+		{ gen_wheelscroll = new Fl_Check_Button(50, 170, 245, 25, " mouse wheel scrolls the map");
 		  gen_wheelscroll->down_box(FL_DOWN_BOX);
 		}
-		{ grid_hide_free = new Fl_Check_Button(50, 230, 245, 25, " hide grid in FREE mode");
+		{ grid_hide_free = new Fl_Check_Button(50, 200, 245, 25, " hide grid in FREE mode");
 		  grid_hide_free->down_box(FL_DOWN_BOX);
 		}
 
@@ -583,7 +583,7 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(15, 50, 355, 30, "Key Bindings");
+		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
@@ -628,12 +628,14 @@ UI_Preferences::UI_Preferences() :
 
 	  /* ---- Mouse Tab ---- */
 
+#if 0
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Mouse" R_SPACES);
 		o->labelsize(16);
 		o->hide();
 	    
 		o->end();
 	  }
+#endif
 
 	  /* ---- Other Tab ---- */
 
@@ -642,7 +644,7 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 50, 280, 30, "3D Preview Options");
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D Preview Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
@@ -654,7 +656,7 @@ UI_Preferences::UI_Preferences() :
 		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
 		  rend_asp_custom->deactivate();
 		}
-		{ rend_lock_grav = new Fl_Check_Button(60, 125, 360, 30, " Locked gravity -- cannot move up or down");
+		{ rend_lock_grav = new Fl_Check_Button(50, 125, 360, 30, " Locked gravity -- cannot move up or down");
 		  rend_lock_grav->down_box(FL_DOWN_BOX);
 		}
 
@@ -662,13 +664,13 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ bsp_warn = new Fl_Check_Button(60, 290, 220, 30, " Show all warning messages");
+		{ bsp_warn = new Fl_Check_Button(50, 290, 220, 30, " Show all warning messages");
 		  bsp_warn->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_verbose = new Fl_Check_Button(60, 320, 350, 30, " Verbose -- show information about each level");
+		{ bsp_verbose = new Fl_Check_Button(50, 320, 350, 30, " Verbose -- show information about each level");
 		  bsp_verbose->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_fast = new Fl_Check_Button(60, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		{ bsp_fast = new Fl_Check_Button(50, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
 		  bsp_fast->down_box(FL_DOWN_BOX);
 		}
 		o->end();
