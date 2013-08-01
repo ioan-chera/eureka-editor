@@ -27,6 +27,17 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
+typedef enum
+{
+	QRP_Floor = -2,
+	QRP_Lower = -1,  // used for middle of 1S lines too
+	QRP_Rail  =  0,
+	QRP_Upper = +1,
+	QRP_Ceil  = +2,
+
+} query_part_e;
+
+
 class UI_Render3D : public Fl_Widget
 {
 public:
@@ -38,6 +49,13 @@ public:
 	void draw();
 
 	int handle(int event);
+
+	// perform a query to see what the mouse pointer is over.
+	// sx and sy are the screen coords to test.
+	// ld is the linedef hit, or -1 if none found.
+	// side will be either SIDE_LEFT or SIDE_RIGHT.
+	// part will distinguish between floor, lower/mid, upper, ceiling.
+	void query(int sx, int sy, int *ld, int *side, query_part_e *part);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);

@@ -231,6 +231,23 @@ public:
 			unknown_flat = IM_CreateUnknownTex(unk_flat_col, 0);
 		}
 	}
+
+	void PrepareToRender(int ow, int oh)
+	{
+		if (thsec_invalidated || !screen ||
+			NumThings  != (int)thing_sectors.size() ||
+			NumSectors != thsec_sector_num)
+		{
+			FindThingSectors();
+		}
+
+		UpdateDummies();
+
+		UpdateScreen(ow, oh);
+
+		if (gravity)
+			CalcViewZ();
+	}
 };
 
 
@@ -629,6 +646,11 @@ public:
 	// the walls list (no need to 'delete' any of them).
 	DrawWall::vec_t active;
 
+	// query state
+	int query_mode;  // 0 for normal render
+	int query_sx;
+	int query_sy;
+
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;  
 
@@ -641,11 +663,15 @@ public:
 	int saved_x_offset;
 	int saved_y_offset;
 
-public:
+private:
 	static void DeleteWall(DrawWall *P)
 	{
 		delete P;
 	}
+
+public:
+	RendInfo() : walls(), active(), query_mode(0), depth_x()
+	{ }
 
 	~RendInfo()
 	{
@@ -1538,19 +1564,7 @@ void UI_Render3D::draw()
 	int ow = w();
 	int oh = h();
 
-	if (view.thsec_invalidated || !view.screen ||
-	    NumThings  != (int)view.thing_sectors.size() ||
-		NumSectors != view.thsec_sector_num)
-	{
-		view.FindThingSectors();
-	}
-
-	view.UpdateDummies();
-
-	view.UpdateScreen(ow, oh);
-
-	if (view.gravity)
-		view.CalcViewZ();
+	view.PrepareToRender(ow, oh);
 
 	RendInfo rend;
 
@@ -1560,6 +1574,24 @@ void UI_Render3D::draw()
 		BlitLores(ox, oy, ow, oh);
 	else
 		BlitHires(ox, oy, ow, oh);
+}
+
+
+void UI_Render3D::query(int sx, int sy, int *ld, int *side,
+                        query_part_e *part)
+{
+	int ow = w();
+	int oh = h();
+
+	view.PrepareToRender(ow, oh);
+
+	RendInfo rend;
+
+	rend.query_mode = 1;
+	rend.query_sx   = sx;
+	rend.query_sy   = sy;
+
+	rend.DoRender3D();
 }
 
 
