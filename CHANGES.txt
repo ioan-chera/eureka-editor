@@ -8,6 +8,8 @@ CHANGES IN Eureka 1.00
 
 +  splitting void islands now works as expected
 
++  ability to adjust offsets in 3D view with MMB
+
 +  improved grid, with configurable colors
 
 +  scroll-bars for the map view (optional)
