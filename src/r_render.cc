@@ -378,7 +378,7 @@ public:
 	SideDef *sd;
 	Sector *sec;
 
-	// which side this wall faces (0 right, 1 left)  ;  FIXME use SIDE_XXX
+	// which side this wall faces (SIDE_LEFT or SIDE_RIGHT)
 	// for sprites: a copy of the thinginfo flags
 	int side;
 
@@ -512,7 +512,7 @@ public:
 		Sector *front = sec;
 		Sector *back  = NULL;
 
-		SideDef *back_sd = side ? ld->Right() : ld->Left();
+		SideDef *back_sd = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
 		if (back_sd)
 			back = Sectors[back_sd->sector];
 
@@ -842,18 +842,18 @@ public:
 		if (span < 0)
 			span += 2*M_PI;
 
-		int side = 0;
+		int side = SIDE_RIGHT;
 
 		if (span >= M_PI)
-			side = 1;
+			side = SIDE_LEFT;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = side ? ld->Left() : ld->Right();
+		SideDef *sd = (side == SIDE_LEFT) ? ld->Left() : ld->Right();
 
 		if (! sd)
 			return;
 
-		if (side == 1)
+		if (side == SIDE_LEFT)
 		{
 			float tmp = angle1;
 			angle1 = angle2;
@@ -915,7 +915,7 @@ public:
 		// compute normal of wall (translated coords)
 		float normal;
 
-		if (side == 1)
+		if (side == SIDE_LEFT)
 			normal = PointToAngle(ty2 - ty1, tx1 - tx2);
 		else
 			normal = PointToAngle(ty1 - ty2, tx2 - tx1);
