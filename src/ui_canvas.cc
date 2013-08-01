@@ -256,8 +256,6 @@ void UI_Canvas::DrawMap()
  */
 void UI_Canvas::DrawGrid_Normal()
 {
-	int grid_step_1 = 1 * grid.step;
-
 	float pixels_1 = grid.step * grid.Scale;
 
 
@@ -266,45 +264,62 @@ void UI_Canvas::DrawGrid_Normal()
 		fl_color(DarkerColor(DarkerColor(normal_main_col)));
 		fl_rectf(x(), y(), w(), h());
 
-		DrawAxes(dotty_axis_col);
+		DrawAxes(normal_axis_col);
 		return;
 	}
 
 
-	if (grid.step < 64)
-		fl_color(normal_main_col);
-	else
-		fl_color(normal_flat_col);
-
 	int flat_step = 64;
 
-	int gx = (map_lx / flat_step) * flat_step;
+	float pixels_2 = flat_step * grid.Scale;
 
-	for (; gx <= map_hx; gx += flat_step)
-		DrawMapLine(gx, map_ly, gx, map_hy);
+	Fl_Color flat_col = (grid.step < 64) ? normal_main_col : normal_flat_col;
 
-	int gy = (map_ly / flat_step) * flat_step;
+	if (pixels_2 < 2.2)
+		flat_col = DarkerColor(flat_col);
 
-	for (; gy <= map_hy; gy += flat_step)
-		DrawMapLine(map_lx, gy, map_hx, gy);
+	fl_color(flat_col);
 
-
-	if (grid.step < 64)
-		fl_color(normal_small_col);
+	if (pixels_2 < 1.6)
+	{
+		fl_rectf(x(), y(), w(), h());
+	}
 	else
-		fl_color(normal_main_col);
+	{
+		int gx = (map_lx / flat_step) * flat_step;
 
-	gx = (map_lx / grid_step_1) * grid_step_1;
-
-	for (; gx <= map_hx; gx += grid_step_1)
-		if (grid.step >= 64 || (gx & 63) != 0)
+		for (; gx <= map_hx; gx += flat_step)
 			DrawMapLine(gx, map_ly, gx, map_hy);
 
-	gy = (map_ly / grid_step_1) * grid_step_1;
+		int gy = (map_ly / flat_step) * flat_step;
 
-	for (; gy <= map_hy; gy += grid_step_1)
-		if (grid.step >= 64 || (gy & 63) != 0)
+		for (; gy <= map_hy; gy += flat_step)
 			DrawMapLine(map_lx, gy, map_hx, gy);
+	}
+
+
+	Fl_Color main_col = (grid.step < 64) ? normal_small_col : normal_main_col;
+
+	float pixels_3 = grid.step * grid.Scale;
+
+	if (pixels_3 < 4.2)
+		main_col = DarkerColor(main_col);
+
+	fl_color(main_col);
+
+	{
+		int gx = (map_lx / grid.step) * grid.step;
+
+		for (; gx <= map_hx; gx += grid.step)
+			if ((grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
+				DrawMapLine(gx, map_ly, gx, map_hy);
+
+		int gy = (map_ly / grid.step) * grid.step;
+
+		for (; gy <= map_hy; gy += grid.step)
+			if ((grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
+				DrawMapLine(map_lx, gy, map_hx, gy);
+	}
 
 
 	DrawAxes(normal_axis_col);
