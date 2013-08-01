@@ -476,11 +476,27 @@ void AlignTexturesX (SelPtr *sdlist)
 #endif
 
 
+/* Align textures on linedefs.
+ *
+ * Possible flags:
+ *    x : align X offset
+ *    y : align Y offset
+ *
+ *    u : upper only
+ *    l : lower / middle only
+ *
+ *    f : front side only
+ *    b : back side only
+ *
+ */
 void LIN_Align(void)
 {
 	// TODO
 	Beep("LIN_Align: not implemented");
 }
+
+
+//------------------------------------------------------------------------
 
 
 void FlipLineDef(int ld)
