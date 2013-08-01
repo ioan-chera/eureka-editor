@@ -378,7 +378,7 @@ public:
 	SideDef *sd;
 	Sector *sec;
 
-	// which side this wall faces (0 right, 1 left)
+	// which side this wall faces (0 right, 1 left)  ;  FIXME use SIDE_XXX
 	// for sprites: a copy of the thinginfo flags
 	int side;
 
@@ -651,6 +651,9 @@ public:
 	int query_sx;
 	int query_sy;
 
+	DrawWall     *query_wall;  // the hit wall
+	query_part_e  query_part;  // the part of the hit wall
+
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;  
 
@@ -893,6 +896,10 @@ public:
 		int sx2 = AngleToX(angle2) - 1;
 
 		if (sx1 > sx2)
+			return;
+
+		// optimisation for query mode
+		if (query_mode && (sx2 < query_sx || sx1 > query_sx))
 			return;
 
 		// compute distance from eye to wall
@@ -1216,7 +1223,8 @@ public:
 	}
 
 
-	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x)
+	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
+								  query_part_e part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1242,6 +1250,19 @@ public:
 		if (surf.y_clip & DrawSurf::SOLID_BELOW)
 			if (open_y2 > y1)
 				open_y2 = y1;
+
+		/* query mode : is mouse over this wall part? */
+
+		if (query_mode)
+		{
+			if (y1 <= query_sy && query_sy <= y2)
+			{
+				query_wall = dw;
+				query_part = part;
+			}
+
+			return;
+		}
 
 		/* highlight the wall, floor or sprite */
 
@@ -1459,6 +1480,10 @@ public:
 
 			UpdateActiveList(x);
 
+			// in query mode, only care about a single column
+			if (query_mode && x != query_sx)
+				continue;
+
 			// render, front to back
 
 			DrawWall::vec_t::iterator S, E, P;
@@ -1478,10 +1503,10 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x);
-				RenderWallSurface(dw, dw->floor, x);
-				RenderWallSurface(dw, dw->upper, x);
-				RenderWallSurface(dw, dw->lower, x);
+				RenderWallSurface(dw, dw->ceil,  x, QRP_Ceil);
+				RenderWallSurface(dw, dw->floor, x, QRP_Floor);
+				RenderWallSurface(dw, dw->upper, x, QRP_Upper);
+				RenderWallSurface(dw, dw->lower, x, QRP_Lower);
 
 				if (open_y1 >= open_y2)
 					break;
@@ -1516,7 +1541,7 @@ public:
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
-		if (view.sprites)
+		if (view.sprites && ! query_mode)
 			for (int k=0 ; k < NumThings ; k++)
 				AddThing(k);
 
@@ -1528,6 +1553,18 @@ public:
 
 		RestoreOffsets();
 	}
+
+	void DoQuery(int sx, int sy)
+	{
+		query_mode = 1;
+		query_sx   = sx;
+		query_sy   = sy;
+
+		query_wall = NULL;
+
+		DoRender3D();
+	}
+
 };
 
 
@@ -1587,11 +1624,9 @@ void UI_Render3D::query(int sx, int sy, int *ld, int *side,
 
 	RendInfo rend;
 
-	rend.query_mode = 1;
-	rend.query_sx   = sx;
-	rend.query_sy   = sy;
+	rend.DoQuery(sx, sy);
 
-	rend.DoRender3D();
+	// FIXME
 }
 
 
