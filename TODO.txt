@@ -3,68 +3,9 @@ Eureka TODO / WISHLIST
 ======================
 
 
->>>  adjustment offsets : properly determine linedef
-
-
--  ability to show line lengths, especially a newly added line
-
-
-+  problem with mid-masked textures (secret in E1M1, cage in E1M9)
-
-
-+  grid : scroll speed preferences
-
-+  grid : darker color when lines get very close
-
--  gravity mode : an option to NOT allow up/down movement
-
-
-TEST: Logs / Save in WIN32
-
-
-______________________________________________________________________
-
-  HIGH PRIORITY
-______________________________________________________________________
-
-
-General
--------
-
-+  Preferences:
-   -  ability to change what mouse buttons do
-   -  ability to change mouse move/turn speed in 3D view
-
-+  Restore last window position and maximized state
-
-+  Hexen support
-
-+  BOOM Generalized line types / sectors
-
-
-
-Documentation
--------------
-
-+  a tutorial for the basics
-
-+  information on each binding command, parameters etc..
-
-
-
-Editing
--------
-
-+  grid drawing too slow when small step and zoomed out
-   (since we render a huge number of dots)
-
-   --> create an in-memory image (e.g. 64x64) of the dotty grid 
-       and blast it repeatedly to the window
-
 +  texture alignment feature
 
-   - 'x' and 'y' keys align the lower / middle (a visible side)
-   - 'X' and 'Y' keys align the upper (a visible sides)
+   - 'x' and 'y' keys align X and Y offsets (visible sides)
 
    - unpeg flags are NOT set, but affect vertical alignment
      [ but perhaps if upper tex == lower tex, set unpeg flags ]
@@ -95,12 +36,62 @@ Editing
 
 
 
+TEST: Logs / Save in WIN32
+
+
+______________________________________________________________________
+
+  HIGH PRIORITY
+______________________________________________________________________
+
+
+General
+-------
+
++  Preferences:
+   -  ability to change what mouse buttons do
+   -  ability to change mouse move/turn speed in 3D view
+
++  Restore last window position and maximized state
+
++  grid : scroll speed preferences
+
++  Hexen support
+
++  BOOM Generalized line types / sectors
+
+
+
+Documentation
+-------------
+
++  a tutorial for the basics
+
++  information on each binding command, parameters etc..
+
+
+
+Editing
+-------
+
++  grid drawing too slow when small step and zoomed out
+   (since we render a huge number of dots)
+
+   --> create an in-memory image (e.g. 64x64) of the dotty grid 
+       and blast it repeatedly to the window
+
+
 3D View
 -------
+
++  problem with mid-masked textures (secret in E1M1, cage in E1M9)
 
 
 Browser
 -------
+
++  a "Recently used" category (sorted by time)
+   -  remember values in .dat cache
 
 
 ______________________________________________________________________
@@ -114,7 +105,9 @@ General
 
 +  ability to build nodes only in modified maps
 
-+  ENTER key pops up an "operation" menu, which provides all the
++  SHIFT + move mouse = keep current highlight
+
+?  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
 +  File / Test Map
@@ -155,6 +148,8 @@ WISH: support UDMF format
 
 -  Scripting language
 
+-  vertex/linedef mode: '[' and ']' to adjust length of current line
+
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
    (perhaps prefix with MENU_xxx)
 
@@ -177,8 +172,6 @@ NO: ability to use an external node builder
 ?  an auto-save feature (e.g. save every N minutes unless no
    changes occurred in the last N minutes).
    really needs the backup view/load/prune dialog too.
-
-?  SHIFT + move mouse = keep current highlight
 
 ?  a way to slow down fake mouse wheels?
 
@@ -231,9 +224,9 @@ Coding
       selectn.cc/h  --> x_select.cc/h
       objects.cc/h  --> x_object.cc/h
 
-      editloop.cc/h --> m_edit.cc/h
-
 -  have XXX_NotifyNewMap() functions
+
+-  replace usage(s) of fl_input
 
 -  VM: use exceptions instead of setjmp/longjmp
 
@@ -328,8 +321,6 @@ NO: merge vertex and linedef modes
 3D View
 -------
 
--  Render3D_Wheel: add 'dx' parameter, use it
-
 +  smooth movement via keyboard
    -  call a function in Main_Loop
    -  if did a move, Fl::wait(0) instead of 0.2
@@ -357,13 +348,13 @@ NO: merge vertex and linedef modes
 
 -  rotated sprites
 
-?  make it into a proper widget (occupy same space as Canvas)
++  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
 
-?  an info bar:  X  Y  Z  ANG
++  slopes
 
-?  ability to drag the camera (on 2D viewport)
+-  extrafloors
 
-?  slopes
+NO:  ability to drag the camera (on 2D viewport)
 
 IDEA: a key (or mouse button) to toggle "grab mouse" mode
 
@@ -374,9 +365,6 @@ IDEA: animation mode, render continuously and show any lighting
 
 Browser
 -------
-
-+  a "Recently used" category (sorted by time)
-   -  remember values in .dat cache
 
 -  a "Used in map" category (sorted by usage)
 
