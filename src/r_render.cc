@@ -1563,6 +1563,8 @@ public:
 		query_wall = NULL;
 
 		DoRender3D();
+
+		query_mode = 0;
 	}
 
 };
@@ -1614,19 +1616,39 @@ void UI_Render3D::draw()
 }
 
 
-void UI_Render3D::query(int sx, int sy, int *ld, int *side,
-                        query_part_e *part)
+int UI_Render3D::query(int *side, query_part_e *part)
 {
 	int ow = w();
 	int oh = h();
 
 	view.PrepareToRender(ow, oh);
 
+	int sx = Fl::event_x() - x();
+	int sy = Fl::event_y() - y();
+
+	if (view.low_detail)
+	{
+		sx = sx / 2;
+		sy = sy / 2;
+	}
+
 	RendInfo rend;
 
 	rend.DoQuery(sx, sy);
 
-	// FIXME
+	if (rend.query_wall)
+	{
+		*side = rend.query_wall->side;
+		*part = rend.query_part;
+
+		// ouch -- fix?
+		for (int n = 0 ; n < NumLineDefs ; n++)
+			if (rend.query_wall->ld == LineDefs[n])
+				return n;
+	}
+
+	// nothing was hit
+	return -1;
 }
 
 
@@ -1867,27 +1889,38 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	// started?
 	if (mode < 0)
 	{
-		// FIXME: find the line/sidedef to adjust
-		//        reset offset deltas to 0
+		// find the line / side to adjust
+		int ld;
+		int side;
+		query_part_e part;
 
-		// FIXME: TEMP CRUD
-		view.adjust_ld   = edit.Selected->find_first();
-		if (view.adjust_ld < 0)
-			return;
-		const LineDef *L = LineDefs[view.adjust_ld];
-		int side = PointOnLineSide(view.x, view.y,
-			L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		view.adjust_sd = (side < 0) ? L->left : L->right;
-		if (view.adjust_sd < 0)
+		ld = main_win->render->query(&side, &part);
+
+		if (ld < 0)
 			return;
 
+		if (part == QRP_Floor || part == QRP_Ceil)
+			return;
+
+		const LineDef *L = LineDefs[ld];
+
+		int sd = (side < 0) ? L->left : L->right;
+
+		if (sd < 0)  // WTF?
+			return;
+
+		// OK
+		view.adjust_ld = ld;
+		view.adjust_sd = sd;
+
+		// reset offset deltas to 0
 		view.adjust_dx = 0;
 		view.adjust_dy = 0;
 
 		float dist = ApproxDistToLineDef(L, view.x, view.y);
 		if (dist < 20) dist = 20;
 
-		// TODO: take perspective into account (reduce dx_factor)
+		// TODO: take perspective into account (angled wall --> reduce dx_factor)
 		view.adjust_dx_factor = dist / view.aspect_sw;
 		view.adjust_dy_factor = dist / view.aspect_sh / Y_SLOPE;
 
@@ -1895,8 +1928,11 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 		return;
 	}
 
+
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
+
+	SYS_ASSERT(view.adjust_ld >= 0);
 
 
 	// finished?

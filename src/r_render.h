@@ -51,11 +51,10 @@ public:
 	int handle(int event);
 
 	// perform a query to see what the mouse pointer is over.
-	// sx and sy are the screen coords to test.
-	// ld is the linedef hit, or -1 if none found.
+	// returns the linedef hit, or -1 if none found.
 	// side will be either SIDE_LEFT or SIDE_RIGHT.
-	// part will distinguish between floor, lower/mid, upper, ceiling.
-	void query(int sx, int sy, int *ld, int *side, query_part_e *part);
+	// part will distinguish between floor, lower, upper, ceiling.
+	int query(int *side, query_part_e *part);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);
