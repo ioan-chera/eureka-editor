@@ -1,5 +1,27 @@
+__________________
+
 REPOSITORY HISTORY
-==================
+__________________
+
+
+This file contains commit logs from three different repositories,
+in reverse chronological order (from newest to oldest).
+
+When I first created Eureka (forking from Yadex), I just made all
+the changes on my hard-drive -- without using any source control
+at all.  Hence there are no change logs from that period.
+
+After a while, I developed the code on the EDGE SVN repository,
+and later moved the code to the AwwPorts repository and continued
+developing it there.  Eventually I made a preview version available
+on the DoomWorld forums to see if there was any interest, and then
+registered a SourceForge project for it, and the code repository
+got moved yet again.
+
+
+====================================================
+    CURRENT DEVELOPMENT 
+====================================================
 
 ------------------------------------------------------------------------
 r932 | ajapted | 2013-02-24 15:30:07 +1100 (Sun, 24 Feb 2013) | 2 lines
