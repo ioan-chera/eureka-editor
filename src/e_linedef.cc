@@ -558,8 +558,7 @@ static bool WantToAlignSideDef(int ld, int side, const char *flags)
 }
 
 
-static int ScoreAdjoiner(const LineDef *L, int side, int sd,
-						 const LineDef *N, int adj_side,
+static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 						 const char *flags)
 {
 	return 1;
@@ -585,14 +584,17 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 {
 	// returns -1 for none
 
-	const LineDef *L = LineDefs[ld];
+	int best_adj   = -1;
+	int best_score = -1;
+
+	const LineDef *L = LineDefs[soal_ld(zz)];
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		if (n == ld)
-			continue;
-
 		const LineDef *N = LineDefs[n];
+
+		if (N == L)
+			continue;
 
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
 			continue;
@@ -601,28 +603,27 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 		{
 			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
 
-			int score = ScoreAdjoiner(L, side, sd,
-			                          N, adj_side, flags);
+			int adjoiner = soal_make(n, adj_side);
 
-			if (score >= 0)
+			int score = ScoreAdjoiner(zz, adjoiner, flags);
+
+			if (score > 0 && score > best_score)
 			{
-			// FIXME: choose best score
-				*adj_ld = n;
-				return (adj_side < 0) ? N->left : N->right;
+				best_adj   = adjoiner;
+				best_score = score;
 			}
 		}
 	}
 
-	return -1;
+	return best_adj;
 }
 
 
-static void DoAlignSideDef(int sd, int ld, int adjoiner, int adj_ld,
+static void DoAlignSideDef(side_on_a_line_t zz, side_on_a_line_t adj,
                            const char *flags, bool do_X, bool do_Y)
 {
-	const SideDef *SD = SideDefs[sd];
-	const LineDef *L  = LineDefs[ld];
-	const LineDef *N  = LineDefs[adj_ld];
+	const LineDef *L  = soal_LD_ptr(zz);
+	const SideDef *SD = soal_SD_ptr(zz);
 
 	bool only_U = strchr(flags, 'u') ? true : false;
 	bool only_L = strchr(flags, 'l') ? true : false;
@@ -640,10 +641,13 @@ static void DoAlignSideDef(int sd, int ld, int adjoiner, int adj_ld,
 		if (! only_L) new_flags |= MLF_LowerUnpegged;
 		if (! only_U) new_flags |= MLF_UpperUnpegged;
 
-		BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+		BA_ChangeLD(soal_ld(zz), LineDef::F_FLAGS, new_flags);
 	}
 
-	if (adjoiner < 0)
+	int sd = soal_sd(zz);
+
+	// no adjoiner case : simply clear the offset(s)
+	if (adj < 0)
 	{
 		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
 		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
@@ -651,13 +655,11 @@ static void DoAlignSideDef(int sd, int ld, int adjoiner, int adj_ld,
 		return;
 	}
 
-	SYS_ASSERT(adj_ld >= 0);
-
-	int adj_length = I_ROUND(LineDefs[adj_ld]->CalcLength());
+	int adj_length = I_ROUND(soal_LD_ptr(adj)->CalcLength());
 
 	// FIXME !!!
 
-	if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, SideDefs[adjoiner]->x_offset + adj_length);
+	if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, soal_SD_ptr(adj)->x_offset + adj_length);
 }
 
 
@@ -679,7 +681,9 @@ static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
 	// (since we need to process the adjoiner _before_ the sidedef).
 	// however there could be loops, so must pick something.
 
-	for (unsigned int k = 0 ; k < sides.size() ; k++)
+	unsigned int k;
+
+	for (k = 0 ; k < sides.size() ; k++)
 	{
 		if (sides[k] < 0)
 			continue;
@@ -692,11 +696,11 @@ static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
 		return (int)k;
 	}
 
-	for (sides.begin(&it) ; !it.at_end() ; ++it)
+	for (k = 0 ; k < sides.size() ; k++)
 		if (sides[k] >= 0)
 			return (int)k;
-	
-	BugError("INTERNAL ERROR: PickSideDefToAlign failed.\n");
+
+	return -1;  // none left
 }
 
 
@@ -727,6 +731,7 @@ void LIN_Align(void)
 	}
 
 	selection_c lines(OBJ_LINEDEFS);
+	selection_iterator_c it;
 
 	if (! GetCurrentObjects(&lines) || NumSideDefs == 0)
 	{
@@ -761,9 +766,12 @@ void LIN_Align(void)
 
 	BA_Begin();
 
-	for (unsigned int k = 0 ; k < sides.size() ; k++)
+	for (;;)
 	{
 		int index = PickSideDefToAlign(sides, adjoiners);
+
+		if (index < 0)
+			break;
 
 		sides[index] = -1;
 
