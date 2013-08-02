@@ -476,6 +476,67 @@ void AlignTexturesX (SelPtr *sdlist)
 #endif
 
 
+static bool WantToAlignSideDef(int ld, int side, const char *flags)
+{
+	const LineDef *L = LineDefs[ld];
+
+	int sd    = (side < 0) ? L->left : L->right;
+	int other = (side > 0) ? L->left : L->right;
+
+	if (sd < 0)
+		return false;
+
+	if (strchr(flags, 'f')) return (side > 0);
+	if (strchr(flags, 'b')) return (side < 0);
+
+	// always do single-sided lines
+	if (other < 0)
+		return true;
+
+	// FIXME: check for railing texture ??
+
+	// require something visible
+	// TODO: have a flag to not require this?
+	const Sector *front = SideDefs[sd]->SecRef();
+	const Sector *back  = SideDefs[other]->SecRef();
+
+	if (back->floorh > front->floorh) return true;
+	if (back->ceilh  < front->ceilh)  return true;
+
+	return false;
+}
+
+
+static int DetermineAdjoiner(int ld, int side, int sd, const char *flags)
+{
+	// returns a sidedef number, or -1 for none
+
+	// FIXME
+
+	return -1;
+}
+
+
+static int PickSideDefToAlign(selection_c& sides, std::vector<int>& adjoiners)
+{
+	// want a sidedef whose adjoiner is not in the sidedef list
+	// (since we need to process the adjoiner _before_ the sidedef).
+	// however there could be loops, so must pick something.
+
+	selection_iterator_c it;
+
+	for (sides.begin(&it) ; !it.at_end() ; ++it)
+	{
+		int adj = adjoiners[*it];
+
+		if (adj < 0 || ! sides.get(adj))
+			return *it;
+	}
+
+	return sides.find_first();
+}
+
+
 /* Align textures on linedefs.
  *
  * Possible flags:
@@ -491,8 +552,66 @@ void AlignTexturesX (SelPtr *sdlist)
  */
 void LIN_Align(void)
 {
-	// TODO
-	Beep("LIN_Align: not implemented");
+	const char *flags = EXEC_Param[0];
+
+	bool do_X = strchr(flags, 'x') ? true : false;
+	bool do_Y = strchr(flags, 'y') ? true : false;
+
+	if (! (do_X || do_Y))
+	{
+		Beep("LIN_Align: need x or y flag");
+		return;
+	}
+
+	selection_c lines;
+
+	if (! GetCurrentObjects(&lines) || NumSideDefs == 0)
+	{
+		Beep("No lines to align");
+		return;
+	}
+
+
+	/* collect sidedefs to align */
+
+	selection_c sides;
+	selection_iterator_c it;
+
+	std::vector<int> side_lines(NumSideDefs);
+	std::vector<int> adjoiners (NumSideDefs);
+
+	for (int k = 0 ; k < NumSideDefs ; k++)
+	{
+		side_lines[k] = -1;
+		adjoiners [k] = -1;
+	}
+
+	for (lines.begin(&it) ; !it.at_end() ; ++it)
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		int ld = *it;
+
+		if (WantToAlignSideDef(ld, pass ? SIDE_LEFT : SIDE_RIGHT, flags))
+		{
+			int sd = pass ? LineDefs[ld]->left : LineDefs[ld]->right;
+			SYS_ASSERT(sd >= 0);
+
+			sides.set(sd);
+
+			side_lines[sd] = ld;
+			adjoiners [sd] = DetermineAdjoiner(ld, pass ? SIDE_LEFT : SIDE_RIGHT, sd, flags);
+		}
+	}
+
+
+	/* process each sidedef */
+
+	while (! sides.empty())
+	{
+		int sd = PickSideDefToAlign(sides, adjoiners);
+
+		// FIXME
+	}
 }
 
 
