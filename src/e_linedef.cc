@@ -620,8 +620,13 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 			matched = true;
 	}
 
+	// require a texture match?
+	if (/* strchr(flags, 't') && */  ! matched)
+		return -1;
+
 	if (matched)
 		score = score + 20;
+
 
 	// prefer if adjoiner is "to the left" of this sidedef
 	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
@@ -733,6 +738,9 @@ static void DoAlignSideDef(side_on_a_line_t zz, side_on_a_line_t adj,
 		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
 		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
 
+		// DEBUG !!!
+		BA_ChangeSD(sd, SideDef::F_LOWER_TEX, BA_InternaliseString("BFALL1"));
+
 		return;
 	}
 
@@ -758,9 +766,7 @@ static int CheckSideInList(side_on_a_line_t zz,
 static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
 							  std::vector<side_on_a_line_t>& adjoiners)
 {
-	// want a sidedef whose adjoiner is not in the sidedef list
-	// (since we need to process the adjoiner _before_ the sidedef).
-	// however there could be loops, so must pick something.
+	// firstly, process any sidedefs without adjoiners
 
 	unsigned int k;
 
@@ -771,17 +777,51 @@ static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
 
 		side_on_a_line_t adj = adjoiners[k];
 
-		if (adj >= 0 && CheckSideInList(adj, sides))
-			continue;
-
-		return (int)k;
+		if (adj < 0)
+			return (int) k;
 	}
 
-	for (k = 0 ; k < sides.size() ; k++)
-		if (sides[k] >= 0)
-			return (int)k;
+	// now want a sidedef whose adjoiner is not in the sidedef list
+	// (since we need to process the adjoiner _before_ the sidedef).
+	// also prefer a "ready" adjoiner on the LEFT of sidedef.
 
-	return -1;  // none left
+	int best_index = -1;
+	int best_score = -1;
+
+	for (k = 0 ; k < sides.size() ; k++)
+	{
+		if (sides[k] < 0)
+			continue;
+
+		int score = 0;
+
+		side_on_a_line_t adj = adjoiners[k];
+		SYS_ASSERT(adj >= 0);
+
+		bool adj_ready = ! CheckSideInList(adj, sides);
+
+		if (adj_ready)
+			score += 2;
+
+		const LineDef *L = soal_LD_ptr(sides[k]);
+		const LineDef *N = soal_LD_ptr(adjoiners[k]);
+
+		bool on_left = N->TouchesVertex(soal_side(sides[k]) < 0 ? L->end : L->start);
+
+		if (on_left == adj_ready)
+			score += 1;
+
+		if (score == 3)
+			return (int) k;
+
+		if (score > best_score)
+		{
+			best_index = (int) k;
+			best_score = score;
+		}
+	}
+
+	return best_index;
 }
 
 
@@ -797,6 +837,7 @@ static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
  *    f : front side only
  *    b : back side only
  *
+ *    t : require a Texture match
  */
 void LIN_Align(void)
 {
@@ -854,8 +895,11 @@ void LIN_Align(void)
 	{
 		int index = PickSideDefToAlign(sides, adjoiners);
 
-		if (index < 0)
+		if (index < 0)  // none left
 			break;
+
+fprintf(stderr, "ALIGN sd#%d with #%d\n", soal_sd(sides[index]),
+soal_sd(adjoiners[index]));
 
 		DoAlignSideDef(sides[index], adjoiners[index], flags, do_X, do_Y);
 
