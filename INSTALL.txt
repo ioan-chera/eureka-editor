@@ -77,8 +77,8 @@ Places where Eureka looks for IWADs:
      (b) In Windows: C:\DOOM and C:\DOOM2
 
   3. If you run Eureka from the command line and have the DOOMWADDIR
-     environment variable set, then Eureka should find it in that
-     directory.
+     or DOOMWADPATH environment variables set, then Eureka should find
+     it the specified directory.
 
   4. If running from the command line, Eureka will look in the current
      directory for the IWAD.
