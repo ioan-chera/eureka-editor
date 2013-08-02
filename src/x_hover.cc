@@ -627,6 +627,9 @@ public :
 };
 
 
+extern int TestAdjoinerLineDef(int ld);
+
+
 /*
  *  get_cur_linedef - determine which linedef is under the pointer
  */
@@ -669,8 +672,16 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
 		closest.distance = dist;
 	}
 
-#if 0  // TESTING CRUD
+#if 1  // TESTING CRUD
 	if (closest.obj.type == OBJ_LINEDEFS)
+	{
+		closest.obj.num = TestAdjoinerLineDef(closest.obj.num);
+
+		if (closest.obj.num < 0)
+			closest.clear();
+	}
+
+	else if (closest.obj.type == OBJ_LINEDEFS)
 	{
 		closest.obj.num = OppositeLineDef(closest.obj.num, +1, NULL);
 

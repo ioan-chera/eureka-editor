@@ -627,6 +627,10 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
 
 	if (on_left)
+		score = score + 10;
+
+	// prefer both lines to have same sided-ness
+	if (L->OneSided() == N->OneSided())
 		score = score + 5;
 
 	// slight preference for same sector
@@ -676,6 +680,24 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 
 	return best_adj;
 }
+
+
+#if 1  // TEST CRUD
+int TestAdjoinerLineDef(int ld)
+{
+	side_on_a_line_t zz = soal_make(ld, SIDE_RIGHT);
+
+	if (soal_sd(zz) < 0)
+		return -1;
+
+	side_on_a_line_t result = DetermineAdjoiner(zz, "");
+
+	if (result >= 0)
+		return soal_ld(result);
+
+	return -1;
+}
+#endif
 
 
 static void DoAlignSideDef(side_on_a_line_t zz, side_on_a_line_t adj,
