@@ -104,8 +104,8 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 
 	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
-	u_pic = new UI_Pic(MX, Y, 64, 64, "Upper");
-	r_pic = new UI_Pic(UX, Y, 64, 64, "Rail");
+	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
+	r_pic = new UI_Pic(MX, Y, 64, 64, "Rail");
 
 	l_pic->callback(tex_callback, this);
 	u_pic->callback(tex_callback, this);
@@ -115,8 +115,8 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 
 	l_tex = new Fl_Input(LX-8, Y, 80, 20);
-	u_tex = new Fl_Input(MX-8, Y, 80, 20);
-	r_tex = new Fl_Input(UX-8, Y, 80, 20);
+	u_tex = new Fl_Input(UX-8, Y, 80, 20);
+	r_tex = new Fl_Input(MX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
 	u_tex->textsize(12);
