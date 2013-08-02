@@ -476,6 +476,22 @@ void AlignTexturesX (SelPtr *sdlist)
 #endif
 
 
+static int PartialTexCmp(const char *A, const char *B)
+{
+	// only compare the first 4 characters
+
+	char A2[64];
+	char B2[64];
+
+	strcpy(A2, A);
+	strcpy(B2, B);
+
+	A2[4] = B2[4] = 0;
+
+	return y_stricmp(A2, B2);
+}
+
+
 static bool WantToAlignSideDef(int ld, int side, const char *flags)
 {
 	const LineDef *L = LineDefs[ld];
@@ -507,13 +523,54 @@ static bool WantToAlignSideDef(int ld, int side, const char *flags)
 }
 
 
-static int DetermineAdjoiner(int ld, int side, int sd, const char *flags)
+static int DetermineAdjoiner(int *adj_ld, int ld, int side, int sd, const char *flags)
 {
-	// returns a sidedef number, or -1 for none
+	// returns a sidedef number (and sets adj_ld), or -1 for none
 
 	// FIXME
 
 	return -1;
+}
+
+
+static void DoAlignSideDef(int sd, int ld, int adjoiner, int adj_ld,
+                           const char *flags, bool do_X, bool do_Y)
+{
+	const SideDef *SD = SideDefs[sd];
+	const LineDef *L  = LineDefs[ld];
+
+	bool only_U = strchr(flags, 'u') ? true : false;
+	bool only_L = strchr(flags, 'l') ? true : false;
+
+	// unpeg flags....
+	if (do_Y && L->TwoSided() &&
+	    ! (L->flags & MLF_LowerUnpegged) &&
+	    ! (L->flags & MLF_UpperUnpegged) &&
+	    SD->MidTex()[0] == '-' &&
+	    SD->LowerTex()[0] != '-' &&
+	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0)
+	{
+		int new_flags = L->flags;
+
+		if (! only_L) new_flags |= MLF_LowerUnpegged;
+		if (! only_U) new_flags |= MLF_UpperUnpegged;
+
+		BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+	}
+
+	if (adjoiner < 0)
+	{
+		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+
+		return;
+	}
+
+	SYS_ASSERT(adj_ld >= 0);
+
+	int adj_length = I_ROUND(LineDefs[adj_ld]->CalcLength());
+
+	// FIXME
 }
 
 
@@ -579,6 +636,7 @@ void LIN_Align(void)
 
 	std::vector<int> side_lines(NumSideDefs);
 	std::vector<int> adjoiners (NumSideDefs);
+	std::vector<int> adj_lines (NumSideDefs);
 
 	for (int k = 0 ; k < NumSideDefs ; k++)
 	{
@@ -598,20 +656,30 @@ void LIN_Align(void)
 
 			sides.set(sd);
 
+			int adj_ld = -1;
+
 			side_lines[sd] = ld;
-			adjoiners [sd] = DetermineAdjoiner(ld, pass ? SIDE_LEFT : SIDE_RIGHT, sd, flags);
+			adjoiners [sd] = DetermineAdjoiner(&adj_ld, ld, pass ? SIDE_LEFT : SIDE_RIGHT, sd, flags);
+			adj_lines [sd] = adj_ld;
 		}
 	}
 
 
 	/* process each sidedef */
 
+	BA_Begin();
+
 	while (! sides.empty())
 	{
 		int sd = PickSideDefToAlign(sides, adjoiners);
 
-		// FIXME
+		sides.clear(sd);
+
+		DoAlignSideDef(sd, side_lines[sd], adjoiners[sd], adj_lines[sd],
+					   flags, do_X, do_Y);
 	}
+
+	BA_End();
 }
 
 
