@@ -230,6 +230,20 @@ int LineDef::WhatSector(int side) const
 }
 
 
+int LineDef::WhatSideDef(int side) const
+{
+	switch (side)
+	{
+		case SIDE_LEFT:  return left;
+		case SIDE_RIGHT: return right;
+
+		default:
+			BugError("bad side : %d\n", side);
+			return -1;
+	}
+}
+
+
 double LineDef::CalcLength() const
 {
 	int dx = Start()->x - End()->x;
