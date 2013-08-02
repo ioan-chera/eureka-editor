@@ -559,24 +559,81 @@ static bool WantToAlignSideDef(int ld, int side, const char *flags)
 
 
 static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
-						 const char *flags)
+						 const char *flags, bool only_U, bool only_L)
 {
-	return 1;
+	const LineDef *L = soal_LD_ptr(zz);
+	const LineDef *N = soal_LD_ptr(adj);
 
-/* FIXME
-		int touch_side = side;
+	const SideDef *LS = soal_SD_ptr(zz);
+	const SideDef *NS = soal_SD_ptr(adj);
 
-		if ((side == SIDE_RIGHT && N->start == conn_vert) ||
-			(side == sIDE_LEFT  && N->end   == conn_vert))
-		{
-			touch_side = - touch_side;
-		}
+	SYS_ASSERT(LS);
 
-		int touch_sd = (touch_side < 0) ? N->left : N->right;
+	// no sidedef on adjoining line?
+	if (! NS)
+		return -2;
 
-		if (touch_sd < 0)
-			continue;
-*/
+	// wrong side?
+	if (soal_side(zz) == soal_side(adj))
+	{
+		if (N->start == L->start) return -1;
+		if (N->end   == L->end)   return -1;
+	}
+	else
+	{
+		if (N->start == L->end)   return -1;
+		if (N->end   == L->start) return -1;
+	}
+
+
+	int score = 1;
+
+	// Main requirement is a matching texture.
+	// There are three cases depending on number of sides:
+	//
+	// (a) single <-> single : easy
+	//
+	// (b) double <-> double : compare lower/lower and upper/upper
+	//                         [only need one to match]
+	//
+	// (c) single <-> double : compare mid/lower and mid/upper
+	//
+	bool matched = false;
+
+	for (int part = 0 ; part < 2 ; part++)
+	{
+		if (part == 0 && only_U) continue;
+		if (part == 1 && only_L) continue;
+
+		const char *L_tex = (! L->TwoSided()) ? LS->MidTex() :
+							(part & 1)        ? LS->UpperTex() :
+							                    LS->LowerTex();
+
+		const char *N_tex = (! N->TwoSided()) ? NS->MidTex() :
+							(part & 1)        ? NS->UpperTex() :
+							                    NS->LowerTex();
+
+		if (L_tex[0] == '-') continue;
+		if (N_tex[0] == '-') continue;
+
+		if (PartialTexCmp(L_tex, N_tex) == 0)
+			matched = true;
+	}
+
+	if (matched)
+		score = score + 20;
+
+	// prefer if adjoiner is "to the left" of this sidedef
+	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
+
+	if (on_left)
+		score = score + 5;
+
+	// slight preference for same sector
+	if (LS->sector == NS->sector)
+		score = score + 1;
+
+	return score;
 }
 
 
@@ -587,7 +644,10 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 	int best_adj   = -1;
 	int best_score = -1;
 
-	const LineDef *L = LineDefs[soal_ld(zz)];
+	bool only_U = strchr(flags, 'u') ? true : false;
+	bool only_L = strchr(flags, 'l') ? true : false;
+
+	const LineDef *L = soal_LD_ptr(zz);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -602,10 +662,9 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
 			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
-
 			int adjoiner = soal_make(n, adj_side);
 
-			int score = ScoreAdjoiner(zz, adjoiner, flags);
+			int score = ScoreAdjoiner(zz, adjoiner, flags, only_U, only_L);
 
 			if (score > 0 && score > best_score)
 			{
@@ -746,18 +805,21 @@ void LIN_Align(void)
 	std::vector<side_on_a_line_t>  adjoiners;
 
 	for (lines.begin(&it) ; !it.at_end() ; ++it)
-	for (int pass = 0 ; pass < 2 ; pass++)
 	{
 		int ld = *it;
-		int side = pass ? SIDE_LEFT : SIDE_RIGHT;
 
-		if (WantToAlignSideDef(ld, pass ? SIDE_LEFT : SIDE_RIGHT, flags))
+		for (int pass = 0 ; pass < 2 ; pass++)
 		{
-			side_on_a_line_t zz = soal_make(ld, side);
+			int side = pass ? SIDE_LEFT : SIDE_RIGHT;
 
-			sides.push_back(zz);
+			if (WantToAlignSideDef(ld, pass ? SIDE_LEFT : SIDE_RIGHT, flags))
+			{
+				side_on_a_line_t zz = soal_make(ld, side);
 
-			adjoiners.push_back(DetermineAdjoiner(zz, flags));
+				sides.push_back(zz);
+
+				adjoiners.push_back(DetermineAdjoiner(zz, flags));
+			}
 		}
 	}
 
@@ -773,9 +835,9 @@ void LIN_Align(void)
 		if (index < 0)
 			break;
 
-		sides[index] = -1;
-
 		DoAlignSideDef(sides[index], adjoiners[index], flags, do_X, do_Y);
+
+		sides[index] = adjoiners[index] = -1;
 	}
 
 	BA_End();
