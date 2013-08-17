@@ -1381,7 +1381,6 @@ void Editor_RegisterCommands()
 	/* line */
 
 	M_RegisterCommand("LIN_Flip", &LIN_Flip);
-	M_RegisterCommand("LIN_Align", &LIN_Align);
 	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf);
 	M_RegisterCommand("LIN_SelectPath", &LIN_SelectPath);
 

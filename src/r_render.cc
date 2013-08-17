@@ -2198,6 +2198,12 @@ void R3D_Gamma(void)
 }
 
 
+void R3D_Align(void)
+{
+	Beep("3D_Align not yet implemented");
+}
+
+
 void Render3D_RegisterCommands()
 {
 	M_RegisterCommand("3D_Forward",  &R3D_Forward);
@@ -2213,6 +2219,7 @@ void Render3D_RegisterCommands()
 	M_RegisterCommand("3D_Gamma",  &R3D_Gamma);
 	M_RegisterCommand("3D_Set",    &R3D_Set);
 	M_RegisterCommand("3D_Toggle", &R3D_Toggle);
+	M_RegisterCommand("3D_Align",  &R3D_Align);
 }
 
 
