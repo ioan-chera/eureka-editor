@@ -2256,8 +2256,10 @@ void R3D_Align(void)
 	if (do_clear)
 	{
 		BA_Begin();
-		BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
-		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+		
+		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+
 		BA_End();
 
 		return;
