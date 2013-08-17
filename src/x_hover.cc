@@ -672,7 +672,7 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
 		closest.distance = dist;
 	}
 
-#if 1  // TESTING CRUD
+#if 0  // TESTING CRUD
 	if (closest.obj.type == OBJ_LINEDEFS)
 	{
 		closest.obj.num = TestAdjoinerLineDef(closest.obj.num);
