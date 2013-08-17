@@ -839,7 +839,7 @@ static int PickSideDefToAlign(std::vector<side_on_a_line_t>& sides,
  *
  *    t : require a Texture match
  */
-void LIN_Align(void)
+static void LIN_Align__OLD(void)
 {
 	const char *flags = EXEC_Param[0];
 

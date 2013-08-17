@@ -2198,8 +2198,71 @@ void R3D_Gamma(void)
 }
 
 
+/* Align texture on a sidedef
+ *
+ * Possible flags:
+ *    x : align X offset  \ one must be present
+ *    y : align Y offset  /
+ *
+ *    c : clear offset(s) instead of aligning
+ *
+ * ?? t : require a Texture match
+ */
 void R3D_Align(void)
 {
+	if (! edit.render3d)
+	{
+		Beep("3D mode required");
+		return;
+	}
+
+	// parse parameter
+	const char *flags = EXEC_Param[0];
+
+	bool do_X = strchr(flags, 'x') ? true : false;
+	bool do_Y = strchr(flags, 'y') ? true : false;
+
+	if (! (do_X || do_Y))
+	{
+		Beep("3D_Align: need x or y flag");
+		return;
+	}
+
+	bool do_clear = strchr(flags, 'c') ? true : false;
+
+	// find the line / side to align
+	int ld;
+	int side;
+	query_part_e part;
+
+	ld = main_win->render->query(&side, &part);
+
+	if (ld < 0 || part == QRP_Floor || part == QRP_Ceil)
+	{
+		Beep("No sidedef there!");
+		return;
+	}
+
+	const LineDef *L = LineDefs[ld];
+
+	int sd = (side < 0) ? L->left : L->right;
+
+	if (sd < 0)  // should NOT happen
+	{
+		Beep("No sidedef there!");
+		return;
+	}
+
+	if (do_clear)
+	{
+		BA_Begin();
+		BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+		BA_End();
+
+		return;
+	}
+
 	Beep("3D_Align not yet implemented");
 }
 
