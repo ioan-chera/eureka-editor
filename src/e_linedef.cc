@@ -586,6 +586,13 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 	}
 
 
+	// require adjoiner is "to the left" of this sidedef
+	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
+
+	if (! on_left)
+		return -2;
+
+
 	int score = 1;
 
 	// Main requirement is a matching texture.
@@ -620,26 +627,20 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 			matched = true;
 	}
 
-	// require a texture match?
-	if (/* strchr(flags, 't') && */  ! matched)
-		return -1;
+///---	// require a texture match?
+///---	if (/* strchr(flags, 't') && */  ! matched)
+///---		return -1;
 
 	if (matched)
 		score = score + 20;
 
 
-	// prefer if adjoiner is "to the left" of this sidedef
-	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
-
-	if (on_left)
-		score = score + 10;
-
-	// prefer both lines to have same sided-ness
-	if (L->OneSided() == N->OneSided())
+	// preference for same sector
+	if (LS->sector == NS->sector)
 		score = score + 5;
 
-	// slight preference for same sector
-	if (LS->sector == NS->sector)
+	// slightly prefer both lines to have same sided-ness
+	if (L->OneSided() == N->OneSided())
 		score = score + 1;
 
 	return score;
@@ -658,6 +659,8 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 
 	const LineDef *L = soal_LD_ptr(zz);
 
+	int side = soal_side(zz);
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *N = LineDefs[n];
@@ -665,7 +668,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 		if (N == L)
 			continue;
 
-		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
+		if (! N->TouchesVertex(L->start) || N->TouchesVertex(L->end))
 			continue;
 
 		for (int pass = 0 ; pass < 2 ; pass++)
@@ -687,7 +690,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 }
 
 
-#if 1  // TEST CRUD
+#if 0  // TEST CRUD
 int TestAdjoinerLineDef(int ld)
 {
 	side_on_a_line_t zz = soal_make(ld, SIDE_RIGHT);
@@ -905,6 +908,77 @@ soal_sd(adjoiners[index]));
 
 		sides[index] = adjoiners[index] = -1;
 	}
+
+	BA_End();
+}
+
+
+
+static void DoAlignX(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
+{
+	const LineDef *L  = soal_LD_ptr(zz);
+	const SideDef *SD = soal_SD_ptr(zz);
+
+	int adj_length = I_ROUND(soal_LD_ptr(adj)->CalcLength());
+
+	int new_offset = soal_SD_ptr(adj)->x_offset + adj_length;
+
+	if (new_offset > 0)
+		new_offset &= 1023;
+
+	BA_ChangeSD(soal_sd(zz), SideDef::F_X_OFFSET, new_offset);
+}
+
+
+static void DoAlignY(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
+{
+	const LineDef *L  = soal_LD_ptr(zz);
+	const SideDef *SD = soal_SD_ptr(zz);
+
+	// unpeg flags....
+	if (L->TwoSided() &&
+	    ! (L->flags & MLF_LowerUnpegged) &&
+	    ! (L->flags & MLF_UpperUnpegged) &&
+	    SD->MidTex()[0] == '-' &&
+	    SD->LowerTex()[0] != '-' &&
+	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0)
+	{
+		int new_flags = L->flags;
+
+		new_flags |= MLF_LowerUnpegged;
+		new_flags |= MLF_UpperUnpegged;
+
+		BA_ChangeLD(soal_ld(zz), LineDef::F_FLAGS, new_flags);
+	}
+
+	const SideDef *S2 = soal_SD_ptr(adj);
+
+	// FIXME !!!!
+	int new_offset = S2->y_offset;
+
+	BA_ChangeSD(soal_sd(zz), SideDef::F_Y_OFFSET, new_offset);
+}
+
+
+void LineDefs_Align(int ld, int side, int sd, const char *flags)
+{
+	bool do_X = strchr(flags, 'x') ? true : false;
+	bool do_Y = strchr(flags, 'y') ? true : false;
+
+	side_on_a_line_t zz = soal_make(ld, side);
+
+	side_on_a_line_t adj = DetermineAdjoiner(zz, flags);
+
+	if (adj < 0)
+	{
+		Beep("No nearby wall to align with");
+		return;
+	}
+
+	BA_Begin();
+
+	if (do_X) DoAlignX(zz, adj, flags);
+	if (do_Y) DoAlignY(zz, adj, flags);
 
 	BA_End();
 }

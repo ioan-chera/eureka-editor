@@ -45,6 +45,8 @@ int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
 
+void LineDefs_Align(int ld, int side, int sd, const char *flags);
+
 
 /* commands */
 

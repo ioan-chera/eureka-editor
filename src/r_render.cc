@@ -26,6 +26,7 @@
 
 #include "im_color.h"
 #include "im_img.h"
+#include "e_linedef.h"
 #include "e_things.h"
 #include "editloop.h"
 #include "m_game.h"
@@ -2265,7 +2266,7 @@ void R3D_Align(void)
 		return;
 	}
 
-	Beep("3D_Align not yet implemented");
+	LineDefs_Align(ld, side, sd, flags);
 }
 
 
