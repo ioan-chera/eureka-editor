@@ -913,6 +913,11 @@ soal_sd(adjoiners[index]));
 }
 
 
+static int GetTextureHeight(const char *name)
+{
+	return 128;  // FIXME !!!!
+}
+
 
 static void DoAlignX(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
 {
@@ -930,10 +935,79 @@ static void DoAlignX(side_on_a_line_t zz, side_on_a_line_t adj, const char *flag
 }
 
 
+static bool PartIsVisible(side_on_a_line_t zz, char part)
+{
+	const LineDef *L = soal_LD_ptr(zz);
+
+	if (! L->TwoSided())
+		return (part == 'l');
+	
+	const Sector *front = L->Right()->SecRef();
+	const Sector *back  = L->Left ()->SecRef();
+
+	if (soal_side(zz) == SIDE_LEFT)
+		std::swap(front, back);
+	
+	// FIXME: if part == 'u' && BOTH SKY --> return FALSE
+
+	// FIXME: check for '-' texture
+
+	if (part == 'l')
+		return back->floorh > front->floorh;
+	else
+		return back->ceilh < front->ceilh;
+}
+
+
+static int CalcTextureH(side_on_a_line_t zz, char part)
+{
+	const LineDef *L  = soal_LD_ptr(zz);
+	const SideDef *SD = soal_SD_ptr(zz);
+
+	if (! L->TwoSided())
+	{
+		if (! L->Right())
+			return 256;
+
+		const Sector *front = L->Right()->SecRef();
+
+		if (L->flags & MLF_LowerUnpegged)
+			return front->floorh + GetTextureHeight(SD->MidTex());
+
+		return front->ceilh;
+	}
+
+	const Sector *front = L->Right()->SecRef();
+	const Sector *back  = L->Left ()->SecRef();
+
+	if (soal_side(zz) == SIDE_LEFT)
+		std::swap(front, back);
+
+	if (part == 'l')
+	{
+		if (! (L->flags & MLF_LowerUnpegged))
+			return back->floorh;
+
+		return front->ceilh;
+	}
+	else
+	{
+		if (! (L->flags & MLF_UpperUnpegged))
+			return back->ceilh + GetTextureHeight(SD->UpperTex());
+
+		return front->ceilh;
+	}
+}
+
+
 static void DoAlignY(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
 {
 	const LineDef *L  = soal_LD_ptr(zz);
 	const SideDef *SD = soal_SD_ptr(zz);
+
+	const LineDef *adj_L  = soal_LD_ptr(adj);
+	const SideDef *adj_SD = soal_SD_ptr(adj);
+
 
 	// unpeg flags....
 	if (L->TwoSided() &&
@@ -945,16 +1019,37 @@ static void DoAlignY(side_on_a_line_t zz, side_on_a_line_t adj, const char *flag
 	{
 		int new_flags = L->flags;
 
-		new_flags |= MLF_LowerUnpegged;
-		new_flags |= MLF_UpperUnpegged;
+		if (PartIsVisible(zz, 'l')) new_flags |= MLF_LowerUnpegged;
+		if (PartIsVisible(zz, 'u')) new_flags |= MLF_UpperUnpegged;
 
 		BA_ChangeLD(soal_ld(zz), LineDef::F_FLAGS, new_flags);
 	}
 
-	const SideDef *S2 = soal_SD_ptr(adj);
+	// determine which parts (upper or lower) we will use for alignment
 
-	// FIXME !!!!
-	int new_offset = S2->y_offset;
+	char  zz_part = 'l';
+	char adj_part = 'l';
+
+	// FIXME !!!  HARD!!!
+
+	if (PartIsVisible(zz, 'u'))
+	{
+	}
+
+	// compute 'texture_h' for both parts
+
+	int  zz_texh = CalcTextureH( zz,  zz_part);
+	int adj_texh = CalcTextureH(adj, adj_part);
+
+	// compute new offset, require: adj_texh + adj_yo = cur_texh + cur_yo
+
+	int new_offset = adj_texh + adj_SD->y_offset - zz_texh;
+
+	// normalize value  [TODO: handle BOOM non-power-of-two heights]
+	if (new_offset < 0)
+		new_offset = - (-new_offset & 255);
+	else
+		new_offset &= 255;
 
 	BA_ChangeSD(soal_sd(zz), SideDef::F_Y_OFFSET, new_offset);
 }

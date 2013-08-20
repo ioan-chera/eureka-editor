@@ -570,7 +570,6 @@ public:
 			upper.kind = DrawSurf::K_TEXTURE;
 			upper.h1 = back->ceilh;
 			upper.h2 = front->ceilh;
-			upper.tex_h = upper.h2;
 			upper.y_clip = DrawSurf::SOLID_ABOVE;
 
 			upper.FindTex(sd->UpperTex(), ld);
