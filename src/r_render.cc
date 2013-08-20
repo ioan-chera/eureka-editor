@@ -2265,7 +2265,9 @@ void R3D_Align(void)
 		return;
 	}
 
-	LineDefs_Align(ld, side, sd, flags);
+	char part_c = (part == QRP_Upper) ? 'u' : 'l';
+
+	LineDefs_Align(ld, side, sd, part_c, flags);
 }
 
 

@@ -29,10 +29,13 @@
 #include "e_cutpaste.h"
 #include "e_linedef.h"
 #include "editloop.h"
+#include "im_img.h"
 #include "levels.h"
+#include "m_game.h"
 #include "objects.h"
 #include "selectn.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 // config items
@@ -647,7 +650,8 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 }
 
 
-static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags)
+static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
+                                          const char *flags)
 {
 	// returns -1 for none
 
@@ -657,9 +661,9 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 	bool only_U = strchr(flags, 'u') ? true : false;
 	bool only_L = strchr(flags, 'l') ? true : false;
 
-	const LineDef *L = soal_LD_ptr(zz);
+	const LineDef *L = soal_LD_ptr(cur);
 
-	int side = soal_side(zz);
+	int side = soal_side(cur);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -676,7 +680,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t zz, const char *flags
 			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
 			int adjoiner = soal_make(n, adj_side);
 
-			int score = ScoreAdjoiner(zz, adjoiner, flags, only_U, only_L);
+			int score = ScoreAdjoiner(cur, adjoiner, flags, only_U, only_L);
 
 			if (score > 0 && score > best_score)
 			{
@@ -884,7 +888,7 @@ static void LIN_Align__OLD(void)
 
 				sides.push_back(zz);
 
-				adjoiners.push_back(DetermineAdjoiner(zz, flags));
+				adjoiners.push_back(DetermineAdjoiner(zz, 0, flags));
 			}
 		}
 	}
@@ -915,29 +919,22 @@ soal_sd(adjoiners[index]));
 
 static int GetTextureHeight(const char *name)
 {
-	return 128;  // FIXME !!!!
-}
+	if (name[0] == '-')
+		return 128;
 
+	Img *img = W_GetTexture(name);
 
-static void DoAlignX(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
-{
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
+	if (! img)
+		return 128;
 
-	int adj_length = I_ROUND(soal_LD_ptr(adj)->CalcLength());
-
-	int new_offset = soal_SD_ptr(adj)->x_offset + adj_length;
-
-	if (new_offset > 0)
-		new_offset &= 1023;
-
-	BA_ChangeSD(soal_sd(zz), SideDef::F_X_OFFSET, new_offset);
+	return img->height();
 }
 
 
 static bool PartIsVisible(side_on_a_line_t zz, char part)
 {
-	const LineDef *L = soal_LD_ptr(zz);
+	const LineDef *L  = soal_LD_ptr(zz);
+	const SideDef *SD = soal_SD_ptr(zz);
 
 	if (! L->TwoSided())
 		return (part == 'l');
@@ -948,18 +945,112 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 	if (soal_side(zz) == SIDE_LEFT)
 		std::swap(front, back);
 	
-	// FIXME: if part == 'u' && BOTH SKY --> return FALSE
-
-	// FIXME: check for '-' texture
+	// ignore sky walls
+	if (part == 'u' && is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+		return false;
 
 	if (part == 'l')
+	{
+		if (SD->LowerTex()[0] == '-')
+			return false;
+
 		return back->floorh > front->floorh;
+	}
 	else
+	{
+		if (SD->UpperTex()[0] == '-')
+			return false;
+
 		return back->ceilh < front->ceilh;
+	}
 }
 
 
-static int CalcTextureH(side_on_a_line_t zz, char part)
+#if 0
+
+static char MatchWithOneSider(side_on_a_line_t one_p, side_on_a_line_t two_p)
+{
+	const LineDef *L1  = soal_LD_ptr(one_p);
+	const SideDef *SD1 = soal_SD_ptr(one_p);
+
+	const LineDef *L2  = soal_LD_ptr(two_p);
+	const SideDef *SD2 = soal_SD_ptr(two_p);
+
+	bool lower_vis = PartIsVisible(two_p, 'l');
+	bool upper_vis = PartIsVisible(two_p, 'u');
+
+	if (lower_vis != upper_vis)
+		return upper_vis ? 'u' : 'l';
+
+	if (! lower_vis)
+		return 'l';
+
+	const char *one_tex = SD1->MidTex();
+
+	bool lower_match = (PartialTexCmp(one_tex, SD2->LowerTex()) == 0);
+	bool upper_match = (PartialTexCmp(one_tex, SD2->UpperTex()) == 0);
+
+	if (lower_match != upper_match)
+		return upper_match ? 'u' : 'l';
+
+	// TODO: pick the largest part
+
+	return 'l';
+}
+
+
+static void MatchTwoSidedParts(char& cur_part, char &adj_part,
+                               side_on_a_line_t cur,
+							   side_on_a_line_t adj)
+{
+	const LineDef *L  = soal_LD_ptr(cur);
+	const SideDef *SD = soal_SD_ptr(cur);
+
+	const LineDef *adj_L  = soal_LD_ptr(adj);
+	const SideDef *adj_SD = soal_SD_ptr(adj);
+
+	bool lower_vis = PartIsVisible(cur, 'l') && PartIsVisible(adj, 'l');
+	bool upper_vis = PartIsVisible(cur, 'u') && PartIsVisible(adj, 'u');
+
+	if (lower_vis != upper_vis)
+		return upper_vis ? 'u' : 'l';
+
+	if (! lower_vis)
+		return 'l';
+
+	bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
+	bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
+	
+	if (lower_match != upper_match)
+		return upper_match ? 'u' : 'l';
+
+	// TODO: pick the largest part
+
+	return 'l';
+}
+
+#endif
+
+
+static char PickAdjoinerPart(side_on_a_line_t cur, char part,
+							 side_on_a_line_t adj, const char *flags)
+{
+	const LineDef *L  = soal_LD_ptr(cur);
+	const SideDef *SD = soal_SD_ptr(cur);
+
+	const LineDef *adj_L  = soal_LD_ptr(adj);
+	const SideDef *adj_SD = soal_SD_ptr(adj);
+
+	if (! adj_L->TwoSided())
+		return 'l';
+
+	// FIXME !!!! : PickAdjoinerPart
+
+	return part;
+}
+
+
+static int CalcReferenceH(side_on_a_line_t zz, char part)
 {
 	const LineDef *L  = soal_LD_ptr(zz);
 	const SideDef *SD = soal_SD_ptr(zz);
@@ -1000,50 +1091,80 @@ static int CalcTextureH(side_on_a_line_t zz, char part)
 }
 
 
-static void DoAlignY(side_on_a_line_t zz, side_on_a_line_t adj, const char *flags)
+static void DoAlignX(side_on_a_line_t cur, side_on_a_line_t adj,
+                     char part, const char *flags)
 {
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
+	const LineDef *L  = soal_LD_ptr(cur);
+	const SideDef *SD = soal_SD_ptr(cur);
+
+	int adj_length = I_ROUND(soal_LD_ptr(adj)->CalcLength());
+
+	int new_offset = soal_SD_ptr(adj)->x_offset + adj_length;
+
+	if (new_offset > 0)
+		new_offset &= 1023;
+
+	BA_ChangeSD(soal_sd(cur), SideDef::F_X_OFFSET, new_offset);
+}
+
+
+static void DoAlignY(side_on_a_line_t cur, side_on_a_line_t adj,
+                     char part, const char *flags)
+{
+	const LineDef *L  = soal_LD_ptr(cur);
+	const SideDef *SD = soal_SD_ptr(cur);
 
 	const LineDef *adj_L  = soal_LD_ptr(adj);
 	const SideDef *adj_SD = soal_SD_ptr(adj);
 
+	bool lower_vis = PartIsVisible(cur, 'l');
+	bool upper_vis = PartIsVisible(cur, 'u');
 
-	// unpeg flags....
+
+	// handle unpeg flags : check for windows
+
 	if (L->TwoSided() &&
-	    ! (L->flags & MLF_LowerUnpegged) &&
-	    ! (L->flags & MLF_UpperUnpegged) &&
-	    SD->MidTex()[0] == '-' &&
-	    SD->LowerTex()[0] != '-' &&
-	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0)
+	    (lower_vis && upper_vis) &&
+	    ((L->flags & MLF_LowerUnpegged) == 0) &&
+	    ((L->flags & MLF_UpperUnpegged) == 0) &&
+	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0 &&
+	    SD->MidTex()[0] == '-' /* no rail */)
 	{
 		int new_flags = L->flags;
 
-		if (PartIsVisible(zz, 'l')) new_flags |= MLF_LowerUnpegged;
-		if (PartIsVisible(zz, 'u')) new_flags |= MLF_UpperUnpegged;
+		if (lower_vis) new_flags |= MLF_LowerUnpegged;
+		if (upper_vis) new_flags |= MLF_UpperUnpegged;
 
-		BA_ChangeLD(soal_ld(zz), LineDef::F_FLAGS, new_flags);
+		BA_ChangeLD(soal_ld(cur), LineDef::F_FLAGS, new_flags);
 	}
 
 	// determine which parts (upper or lower) we will use for alignment
 
-	char  zz_part = 'l';
-	char adj_part = 'l';
+	char cur_part = part;
+	char adj_part = PickAdjoinerPart(cur, adj, part, flags);
 
-	// FIXME !!!  HARD!!!
+///##	bool cur_2S =     L->TwoSided();
+///##	bool adj_2S = adj_L->TwoSided();
+///##
+///##	if (cur_2S && adj_2S)
+///##	{
+///##		MatchTwoSidedParts(cur_part, adj_part, cur, adj);
+///##	}
+///##	else if (cur_2S)
+///##	{
+///##		cur_part = MatchWithOneSider(adj, cur);
+///##	}
+///##	else if (adj_2S)
+///##	{
+///##		adj_part = MatchWithOneSider(cur, adj);
+///##	}
 
-	if (PartIsVisible(zz, 'u'))
-	{
-	}
+	// requirement: adj_tex_h + adj_y_off = cur_tex_h + cur_y_off
 
-	// compute 'texture_h' for both parts
+	int cur_texh = CalcReferenceH(cur, cur_part);
+	int adj_texh = CalcReferenceH(adj, adj_part);
 
-	int  zz_texh = CalcTextureH( zz,  zz_part);
-	int adj_texh = CalcTextureH(adj, adj_part);
-
-	// compute new offset, require: adj_texh + adj_yo = cur_texh + cur_yo
-
-	int new_offset = adj_texh + adj_SD->y_offset - zz_texh;
+	int new_offset = adj_texh + adj_SD->y_offset - cur_texh;
 
 	// normalize value  [TODO: handle BOOM non-power-of-two heights]
 	if (new_offset < 0)
@@ -1051,18 +1172,18 @@ static void DoAlignY(side_on_a_line_t zz, side_on_a_line_t adj, const char *flag
 	else
 		new_offset &= 255;
 
-	BA_ChangeSD(soal_sd(zz), SideDef::F_Y_OFFSET, new_offset);
+	BA_ChangeSD(soal_sd(cur), SideDef::F_Y_OFFSET, new_offset);
 }
 
 
-void LineDefs_Align(int ld, int side, int sd, const char *flags)
+void LineDefs_Align(int ld, int side, int sd, char part, const char *flags)
 {
 	bool do_X = strchr(flags, 'x') ? true : false;
 	bool do_Y = strchr(flags, 'y') ? true : false;
 
-	side_on_a_line_t zz = soal_make(ld, side);
+	side_on_a_line_t cur = soal_make(ld, side);
 
-	side_on_a_line_t adj = DetermineAdjoiner(zz, flags);
+	side_on_a_line_t adj = DetermineAdjoiner(cur, part, flags);
 
 	if (adj < 0)
 	{
@@ -1072,8 +1193,8 @@ void LineDefs_Align(int ld, int side, int sd, const char *flags)
 
 	BA_Begin();
 
-	if (do_X) DoAlignX(zz, adj, flags);
-	if (do_Y) DoAlignY(zz, adj, flags);
+	if (do_X) DoAlignX(cur, adj, part, flags);
+	if (do_Y) DoAlignY(cur, adj, part, flags);
 
 	BA_End();
 }
