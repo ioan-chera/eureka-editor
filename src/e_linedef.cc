@@ -562,7 +562,7 @@ static bool WantToAlignSideDef(int ld, int side, const char *flags)
 
 
 static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
-						 const char *flags, bool only_U, bool only_L)
+						 char part, const char *flags)
 {
 	const LineDef *L = soal_LD_ptr(zz);
 	const LineDef *N = soal_LD_ptr(adj);
@@ -598,6 +598,8 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 
 	int score = 1;
 
+	// FIXME : take 'part' into account !!
+
 	// Main requirement is a matching texture.
 	// There are three cases depending on number of sides:
 	//
@@ -610,17 +612,17 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 	//
 	bool matched = false;
 
-	for (int part = 0 ; part < 2 ; part++)
+	for (int what = 0 ; what < 2 ; what++)
 	{
-		if (part == 0 && only_U) continue;
-		if (part == 1 && only_L) continue;
+//???		if (what == 0 && only_U) continue;
+//???		if (what == 1 && only_L) continue;
 
 		const char *L_tex = (! L->TwoSided()) ? LS->MidTex() :
-							(part & 1)        ? LS->UpperTex() :
+							(what & 1)        ? LS->UpperTex() :
 							                    LS->LowerTex();
 
 		const char *N_tex = (! N->TwoSided()) ? NS->MidTex() :
-							(part & 1)        ? NS->UpperTex() :
+							(what & 1)        ? NS->UpperTex() :
 							                    NS->LowerTex();
 
 		if (L_tex[0] == '-') continue;
@@ -658,12 +660,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 	int best_adj   = -1;
 	int best_score = -1;
 
-	bool only_U = strchr(flags, 'u') ? true : false;
-	bool only_L = strchr(flags, 'l') ? true : false;
-
 	const LineDef *L = soal_LD_ptr(cur);
-
-	int side = soal_side(cur);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -680,7 +677,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
 			int adjoiner = soal_make(n, adj_side);
 
-			int score = ScoreAdjoiner(cur, adjoiner, flags, only_U, only_L);
+			int score = ScoreAdjoiner(cur, adjoiner, part, flags);
 
 			if (score > 0 && score > best_score)
 			{
@@ -702,7 +699,7 @@ int TestAdjoinerLineDef(int ld)
 	if (soal_sd(zz) < 0)
 		return -1;
 
-	side_on_a_line_t result = DetermineAdjoiner(zz, "");
+	side_on_a_line_t result = DetermineAdjoiner(zz, 0, "");
 
 	if (result >= 0)
 		return soal_ld(result);
@@ -966,72 +963,6 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 }
 
 
-#if 0
-
-static char MatchWithOneSider(side_on_a_line_t one_p, side_on_a_line_t two_p)
-{
-	const LineDef *L1  = soal_LD_ptr(one_p);
-	const SideDef *SD1 = soal_SD_ptr(one_p);
-
-	const LineDef *L2  = soal_LD_ptr(two_p);
-	const SideDef *SD2 = soal_SD_ptr(two_p);
-
-	bool lower_vis = PartIsVisible(two_p, 'l');
-	bool upper_vis = PartIsVisible(two_p, 'u');
-
-	if (lower_vis != upper_vis)
-		return upper_vis ? 'u' : 'l';
-
-	if (! lower_vis)
-		return 'l';
-
-	const char *one_tex = SD1->MidTex();
-
-	bool lower_match = (PartialTexCmp(one_tex, SD2->LowerTex()) == 0);
-	bool upper_match = (PartialTexCmp(one_tex, SD2->UpperTex()) == 0);
-
-	if (lower_match != upper_match)
-		return upper_match ? 'u' : 'l';
-
-	// TODO: pick the largest part
-
-	return 'l';
-}
-
-
-static void MatchTwoSidedParts(char& cur_part, char &adj_part,
-                               side_on_a_line_t cur,
-							   side_on_a_line_t adj)
-{
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
-
-	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
-
-	bool lower_vis = PartIsVisible(cur, 'l') && PartIsVisible(adj, 'l');
-	bool upper_vis = PartIsVisible(cur, 'u') && PartIsVisible(adj, 'u');
-
-	if (lower_vis != upper_vis)
-		return upper_vis ? 'u' : 'l';
-
-	if (! lower_vis)
-		return 'l';
-
-	bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
-	bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
-	
-	if (lower_match != upper_match)
-		return upper_match ? 'u' : 'l';
-
-	// TODO: pick the largest part
-
-	return 'l';
-}
-
-#endif
-
-
 static char PickAdjoinerPart(side_on_a_line_t cur, char part,
 							 side_on_a_line_t adj, const char *flags)
 {
@@ -1044,7 +975,41 @@ static char PickAdjoinerPart(side_on_a_line_t cur, char part,
 	if (! adj_L->TwoSided())
 		return 'l';
 
-	// FIXME !!!! : PickAdjoinerPart
+	// the adjoiner part (upper or lower) should be visible
+
+	bool lower_vis = PartIsVisible(adj, 'l');
+	bool upper_vis = PartIsVisible(adj, 'u');
+
+	if (lower_vis != upper_vis)
+		return upper_vis ? 'u' : 'l';
+	else if (! lower_vis)
+		return 'l';
+
+	// check for a matching texture
+
+	if (L->TwoSided())
+	{
+		// TODO: this logic would be mean sometimes aligning an upper
+		//       against a lower (or vice versa).  It should only be done
+		//       when those parts are actually adjacent (on the Y axis).
+#if 0
+		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
+		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
+
+		if (lower_match != upper_match)
+			return upper_match ? 'u' : 'l';
+#endif
+
+		return part;
+	}
+	else
+	{
+		bool lower_match = (PartialTexCmp(SD->MidTex(), adj_SD->LowerTex()) == 0);
+		bool upper_match = (PartialTexCmp(SD->MidTex(), adj_SD->UpperTex()) == 0);
+
+		if (lower_match != upper_match)
+			return upper_match ? 'u' : 'l';
+	}
 
 	return part;
 }
@@ -1091,15 +1056,15 @@ static int CalcReferenceH(side_on_a_line_t zz, char part)
 }
 
 
-static void DoAlignX(side_on_a_line_t cur, side_on_a_line_t adj,
-                     char part, const char *flags)
+static void DoAlignX(side_on_a_line_t cur, char part,
+					 side_on_a_line_t adj, const char *flags)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
+	const LineDef *adj_L  = soal_LD_ptr(adj);
+	const SideDef *adj_SD = soal_SD_ptr(adj);
 
-	int adj_length = I_ROUND(soal_LD_ptr(adj)->CalcLength());
+	int adj_length = I_ROUND(adj_L->CalcLength());
 
-	int new_offset = soal_SD_ptr(adj)->x_offset + adj_length;
+	int new_offset = adj_SD->x_offset + adj_length;
 
 	if (new_offset > 0)
 		new_offset &= 1023;
@@ -1108,13 +1073,13 @@ static void DoAlignX(side_on_a_line_t cur, side_on_a_line_t adj,
 }
 
 
-static void DoAlignY(side_on_a_line_t cur, side_on_a_line_t adj,
-                     char part, const char *flags)
+static void DoAlignY(side_on_a_line_t cur, char part,
+					 side_on_a_line_t adj, const char *flags)
 {
 	const LineDef *L  = soal_LD_ptr(cur);
 	const SideDef *SD = soal_SD_ptr(cur);
 
-	const LineDef *adj_L  = soal_LD_ptr(adj);
+//	const LineDef *adj_L  = soal_LD_ptr(adj);
 	const SideDef *adj_SD = soal_SD_ptr(adj);
 
 	bool lower_vis = PartIsVisible(cur, 'l');
@@ -1141,23 +1106,7 @@ static void DoAlignY(side_on_a_line_t cur, side_on_a_line_t adj,
 	// determine which parts (upper or lower) we will use for alignment
 
 	char cur_part = part;
-	char adj_part = PickAdjoinerPart(cur, adj, part, flags);
-
-///##	bool cur_2S =     L->TwoSided();
-///##	bool adj_2S = adj_L->TwoSided();
-///##
-///##	if (cur_2S && adj_2S)
-///##	{
-///##		MatchTwoSidedParts(cur_part, adj_part, cur, adj);
-///##	}
-///##	else if (cur_2S)
-///##	{
-///##		cur_part = MatchWithOneSider(adj, cur);
-///##	}
-///##	else if (adj_2S)
-///##	{
-///##		adj_part = MatchWithOneSider(cur, adj);
-///##	}
+	char adj_part = PickAdjoinerPart(cur, part, adj, flags);
 
 	// requirement: adj_tex_h + adj_y_off = cur_tex_h + cur_y_off
 
@@ -1167,6 +1116,7 @@ static void DoAlignY(side_on_a_line_t cur, side_on_a_line_t adj,
 	int new_offset = adj_texh + adj_SD->y_offset - cur_texh;
 
 	// normalize value  [TODO: handle BOOM non-power-of-two heights]
+
 	if (new_offset < 0)
 		new_offset = - (-new_offset & 255);
 	else
@@ -1193,8 +1143,8 @@ void LineDefs_Align(int ld, int side, int sd, char part, const char *flags)
 
 	BA_Begin();
 
-	if (do_X) DoAlignX(cur, adj, part, flags);
-	if (do_Y) DoAlignY(cur, adj, part, flags);
+	if (do_X) DoAlignX(cur, part, adj, flags);
+	if (do_Y) DoAlignY(cur, part, adj, flags);
 
 	BA_End();
 }
