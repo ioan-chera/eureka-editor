@@ -202,7 +202,7 @@ static inline const SideDef * soal_SD_ptr(side_on_a_line_t zz)
 
 static int PartialTexCmp(const char *A, const char *B)
 {
-	// only compare the first 4 characters
+	// only compare the first 6 characters
 
 	char A2[64];
 	char B2[64];
@@ -210,7 +210,7 @@ static int PartialTexCmp(const char *A, const char *B)
 	strcpy(A2, A);
 	strcpy(B2, B);
 
-	A2[4] = B2[4] = 0;
+	A2[6] = B2[6] = 0;
 
 	return y_stricmp(A2, B2);
 }
@@ -245,11 +245,20 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 
 
 	// require adjoiner is "to the left" of this sidedef
+	// [or "to the right" if the 'r' flag is present]
+
 	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
 
-	if (! on_left)
-		return -2;
-
+	if (strchr(flags, 'r'))
+	{
+		if (on_left)
+			return -2;
+	}
+	else
+	{
+		if (! on_left)
+			return -2;
+	}
 
 	int score = 1;
 
@@ -297,11 +306,11 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 
 	// preference for same sector
 	if (LS->sector == NS->sector)
-		score = score + 5;
-
-	// slightly prefer both lines to have same sided-ness
-	if (L->OneSided() == N->OneSided())
 		score = score + 1;
+
+	// prefer both lines to have same sided-ness
+	if (L->OneSided() == N->OneSided())
+		score = score + 5;
 
 	return score;
 }
@@ -324,7 +333,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 		if (N == L)
 			continue;
 
-		if (! N->TouchesVertex(L->start) || N->TouchesVertex(L->end))
+		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
 			continue;
 
 		for (int pass = 0 ; pass < 2 ; pass++)
@@ -333,6 +342,8 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 			int adjoiner = soal_make(n, adj_side);
 
 			int score = ScoreAdjoiner(cur, adjoiner, part, flags);
+
+// fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
 
 			if (score > 0 && score > best_score)
 			{
@@ -439,9 +450,9 @@ static char PickAdjoinerPart(side_on_a_line_t cur, char part,
 
 	if (L->TwoSided())
 	{
-		// TODO: this logic would be mean sometimes aligning an upper
-		//       against a lower (or vice versa).  It should only be done
-		//       when those parts are actually adjacent (on the Y axis).
+		// TODO: this logic would mean sometimes aligning an upper with
+		//       a lower (or vice versa).  This should only be done when
+		//       those parts are actually adjacent (on the Y axis).
 #if 0
 		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
 		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
@@ -509,15 +520,33 @@ static int CalcReferenceH(side_on_a_line_t zz, char part)
 static void DoAlignX(side_on_a_line_t cur, char part,
 					 side_on_a_line_t adj, const char *flags)
 {
+	const LineDef *L  = soal_LD_ptr(cur);
+
 	const LineDef *adj_L  = soal_LD_ptr(adj);
 	const SideDef *adj_SD = soal_SD_ptr(adj);
 
-	int adj_length = I_ROUND(adj_L->CalcLength());
+	bool on_left = adj_L->TouchesVertex(soal_side(cur) < 0 ? L->end : L->start);
 
-	int new_offset = adj_SD->x_offset + adj_length;
+	int new_offset;
 
-	if (new_offset > 0)
-		new_offset &= 1023;
+	if (on_left)
+	{
+		int adj_length = I_ROUND(adj_L->CalcLength());
+
+		new_offset = adj_SD->x_offset + adj_length;
+
+		if (new_offset > 0)
+			new_offset &= 1023;
+	}
+	else
+	{
+		int length = I_ROUND(L->CalcLength());
+
+		new_offset = adj_SD->x_offset - length;
+
+		if (new_offset < 0)
+			new_offset = - (-new_offset & 1023);
+	}
 
 	BA_ChangeSD(soal_sd(cur), SideDef::F_X_OFFSET, new_offset);
 }
