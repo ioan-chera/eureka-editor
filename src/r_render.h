@@ -64,6 +64,7 @@ private:
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 
+void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag);
 void Render3D_Wheel(int dx, int dy, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);

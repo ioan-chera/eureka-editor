@@ -1799,6 +1799,12 @@ void Render3D_Setup()
 }
 
 
+void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag)
+{
+	// FIXME
+}
+
+
 void Render3D_Wheel(int dx, int dy, keycode_t mod)
 {
 	float speed = 48;  // TODO: CONFIG ITEM
@@ -1989,7 +1995,100 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 }
 
 
-/* commands... */
+void Render3D_Term()
+{
+	/* all done */
+
+	delete view.screen;
+	view.screen = NULL;
+}
+
+
+void Render3D_SetCameraPos(int new_x, int new_y)
+{
+	view.x = new_x;
+	view.y = new_y;
+
+	view.CalcViewZ();
+}
+
+
+void Render3D_GetCameraPos(int *x, int *y, float *angle)
+{
+	*x = view.x;
+	*y = view.y;
+
+	// convert angle from radians to degrees
+	*angle = view.angle * 180.0 / M_PI;
+}
+
+
+bool Render3D_ParseUser(const char ** tokens, int num_tok)
+{
+	if (strcmp(tokens[0], "camera") == 0 && num_tok >= 5)
+	{
+		view.x = atof(tokens[1]);
+		view.y = atof(tokens[2]);
+		view.z = atoi(tokens[3]);
+
+		view.SetAngle(atof(tokens[4]));
+
+		return true;
+	}
+
+	if (strcmp(tokens[0], "r_modes") == 0 && num_tok >= 4)
+	{
+		view.texturing = atoi(tokens[1]) ? true : false;
+		view.sprites   = atoi(tokens[2]) ? true : false;
+		view.lighting  = atoi(tokens[3]) ? true : false;
+
+		return true;
+	}
+
+	if (strcmp(tokens[0], "low_detail") == 0 && num_tok >= 2)
+	{
+		view.low_detail = atoi(tokens[1]) ? true : false;
+
+		return true;
+	}
+
+	if (strcmp(tokens[0], "gamma") == 0 && num_tok >= 2)
+	{
+		usegamma = MAX(0, atoi(tokens[1])) % 5;
+
+		W_UpdateGamma();
+
+		return true;
+	}
+
+	return false;
+}
+
+
+void Render3D_WriteUser(FILE *fp)
+{
+	fprintf(fp, "camera %1.2f %1.2f %d %1.2f\n",
+	        view.x,
+			view.y,
+			view.z,
+			view.angle);
+
+	fprintf(fp, "r_modes %d %d %d\n",
+	        view.texturing  ? 1 : 0,
+			view.sprites    ? 1 : 0,
+			view.lighting   ? 1 : 0);
+
+	fprintf(fp, "low_detail %d\n",
+	        view.low_detail ? 1 : 0);
+
+	fprintf(fp, "gamma %d\n",
+	        usegamma);
+}
+
+
+//------------------------------------------------------------------------
+//  COMMAND FUNCTIONS
+//------------------------------------------------------------------------
 
 void R3D_Forward(void)
 {
@@ -2287,97 +2386,6 @@ void Render3D_RegisterCommands()
 	M_RegisterCommand("3D_Set",    &R3D_Set);
 	M_RegisterCommand("3D_Toggle", &R3D_Toggle);
 	M_RegisterCommand("3D_Align",  &R3D_Align);
-}
-
-
-void Render3D_Term()
-{
-	/* all done */
-
-	delete view.screen;
-	view.screen = NULL;
-}
-
-
-void Render3D_SetCameraPos(int new_x, int new_y)
-{
-	view.x = new_x;
-	view.y = new_y;
-
-	view.CalcViewZ();
-}
-
-
-void Render3D_GetCameraPos(int *x, int *y, float *angle)
-{
-	*x = view.x;
-	*y = view.y;
-
-	// convert angle from radians to degrees
-	*angle = view.angle * 180.0 / M_PI;
-}
-
-
-bool Render3D_ParseUser(const char ** tokens, int num_tok)
-{
-	if (strcmp(tokens[0], "camera") == 0 && num_tok >= 5)
-	{
-		view.x = atof(tokens[1]);
-		view.y = atof(tokens[2]);
-		view.z = atoi(tokens[3]);
-
-		view.SetAngle(atof(tokens[4]));
-
-		return true;
-	}
-
-	if (strcmp(tokens[0], "r_modes") == 0 && num_tok >= 4)
-	{
-		view.texturing = atoi(tokens[1]) ? true : false;
-		view.sprites   = atoi(tokens[2]) ? true : false;
-		view.lighting  = atoi(tokens[3]) ? true : false;
-
-		return true;
-	}
-
-	if (strcmp(tokens[0], "low_detail") == 0 && num_tok >= 2)
-	{
-		view.low_detail = atoi(tokens[1]) ? true : false;
-
-		return true;
-	}
-
-	if (strcmp(tokens[0], "gamma") == 0 && num_tok >= 2)
-	{
-		usegamma = MAX(0, atoi(tokens[1])) % 5;
-
-		W_UpdateGamma();
-
-		return true;
-	}
-
-	return false;
-}
-
-
-void Render3D_WriteUser(FILE *fp)
-{
-	fprintf(fp, "camera %1.2f %1.2f %d %1.2f\n",
-	        view.x,
-			view.y,
-			view.z,
-			view.angle);
-
-	fprintf(fp, "r_modes %d %d %d\n",
-	        view.texturing  ? 1 : 0,
-			view.sprites    ? 1 : 0,
-			view.lighting   ? 1 : 0);
-
-	fprintf(fp, "low_detail %d\n",
-	        view.low_detail ? 1 : 0);
-
-	fprintf(fp, "gamma %d\n",
-	        usegamma);
 }
 
 

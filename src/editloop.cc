@@ -1010,7 +1010,7 @@ int Editor_RawMouse(int event)
 	}
 	else if (edit.render3d)
 	{
-		// TODO: maybe highlight things/walls/sectors
+		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, event == FL_DRAG);
 	}
 	else
 	{
