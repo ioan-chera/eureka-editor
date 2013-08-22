@@ -1662,6 +1662,8 @@ void UI_Render3D::draw()
 		BlitLores(ox, oy, ow, oh);
 	else
 		BlitHires(ox, oy, ow, oh);
+	
+	DrawHighlight();
 }
 
 
@@ -1758,6 +1760,17 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
 		}
 	}
+}
+
+
+void UI_Render3D::DrawHighlight()
+{
+	// TODO: support view.hl.sector
+
+	if (! is_linedef(view.hl.line))
+		return;
+
+	
 }
 
 
@@ -1955,27 +1968,21 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (mode < 0)
 	{
 		// find the line / side to adjust
-		int ld;
-		int side;
-		query_part_e part;
-
-		ld = main_win->render->query(&side, &part);
-
-		if (ld < 0)
+		if (! is_linedef(view.hl.line))
 			return;
 
-		if (part == QRP_Floor || part == QRP_Ceil)
+		if (view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
 			return;
 
-		const LineDef *L = LineDefs[ld];
+		const LineDef *L = LineDefs[view.hl.line];
 
-		int sd = (side < 0) ? L->left : L->right;
+		int sd = (view.hl.side < 0) ? L->left : L->right;
 
 		if (sd < 0)  // WTF?
 			return;
 
 		// OK
-		view.adjust_ld = ld;
+		view.adjust_ld = view.hl.line;
 		view.adjust_sd = sd;
 
 		// reset offset deltas to 0
@@ -2389,21 +2396,16 @@ void R3D_Align(void)
 	bool do_clear = strchr(flags, 'c') ? true : false;
 
 	// find the line / side to align
-	int ld;
-	int side;
-	query_part_e part;
-
-	ld = main_win->render->query(&side, &part);
-
-	if (ld < 0 || part == QRP_Floor || part == QRP_Ceil)
+	if (! is_linedef(view.hl.line) ||
+		view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
 	{
 		Beep("No sidedef there!");
 		return;
 	}
 
-	const LineDef *L = LineDefs[ld];
+	const LineDef *L = LineDefs[view.hl.line];
 
-	int sd = (side < 0) ? L->left : L->right;
+	int sd = (view.hl.side < 0) ? L->left : L->right;
 
 	if (sd < 0)  // should NOT happen
 	{
@@ -2423,9 +2425,9 @@ void R3D_Align(void)
 		return;
 	}
 
-	char part_c = (part == QRP_Upper) ? 'u' : 'l';
+	char part_c = (view.hl.part == QRP_Upper) ? 'u' : 'l';
 
-	LineDefs_Align(ld, side, sd, part_c, flags);
+	LineDefs_Align(view.hl.line, view.hl.side, sd, part_c, flags);
 }
 
 
