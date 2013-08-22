@@ -3,40 +3,16 @@ Eureka TODO / WISHLIST
 ======================
 
 
-+  texture alignment feature
+-  option to reverse mouse movement in 3D view
 
-   - 'x' and 'y' keys align X and Y offsets (visible sides)
++  create a 128x128 WIN32 icon
 
-   - unpeg flags are NOT set, but affect vertical alignment
-     [ but perhaps if upper tex == lower tex, set unpeg flags ]
-
-   - usually need to pick an adjoining sidedef to align with:
-     -  main factor is matching texture on chosen part
-        - if left side matches, pick that
-        - if right side matches and NOT in selection, pick that
-        - if left side exists, pick that
-        - if right side exists, and NOT in selection, pick that
-        - otherwise: none
-
-     ?  prefer same one-sideness or two-sideness
-     ?  perhaps a cost for sharp angles?
-
-   - when no adjoining sidedef:
-      (1) either... set offset to zero  <-- THIS
-      (2) or... leave offsets alone
-      (3) or... error message
-
-      [may need config option]
-
-   - when adjoining sidedef is in selection, need to process that
-     one first.  But detect loops!
-
-   - handle each side of linedef individually (i.e. do not process
-     one linedef at a time, process a SIDE at a time).
-
++  create a 32x32 (bigger?) icon for Linux
 
 
 TEST: Logs / Save in WIN32
+
+TEST: Drag multiple files in WIN32
 
 
 ______________________________________________________________________
@@ -223,6 +199,7 @@ Coding
 -  rename code files:
       selectn.cc/h  --> x_select.cc/h
       objects.cc/h  --> x_object.cc/h
+      editloop.cc/h --> m_editor.cc/h
 
 -  have XXX_NotifyNewMap() functions
 
