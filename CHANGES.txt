@@ -6,11 +6,9 @@ CHANGES IN Eureka 1.00
 
 +  validate map data when loading a level
 
-+  splitting void islands now works as expected
-
 +  texture alignment commands for 3D view
 
-+  ability to adjust offsets in 3D view with MMB
++  splitting void islands now works as expected
 
 +  improved grid, with configurable colors
 
@@ -21,12 +19,12 @@ CHANGES IN Eureka 1.00
 -  automatically unpack sidedefs when loading a map
 
 -  support multiple filenames: new 'File/Given Files' menu
--  commands to go to the next or previous file
--  commands to go to next/previous map ('N' and 'P' keys)
+-  commands to visit the next or previous file
+-  commands to open the next/previous map ('N' and 'P' keys)
 -  changed 'File/Recent Files' to be a sub-menu
--  automatically open the most recent file (optional)
+-  option to automatically open the most recent file
 
--  improved About dialog, added Jason R. Johnston's logo
+-  improved About dialog with Jason R. Johnston's logo
 -  improved Log viewer, ability to save the logs to a file
 -  improved dialog boxes
 
