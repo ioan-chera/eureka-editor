@@ -56,6 +56,39 @@ bool render_missing_bright = true;
 bool render_unknown_bright = true;
 
 
+struct highlight_3D_info_t
+{
+public:
+	int line;    // -1 for none
+	int sector;  // -1 for none
+	int side;    // SIDE_XXX, or -1=floor +1=ceiling
+	query_part_e part;
+
+public:
+	highlight_3D_info_t() : line(-1), sector(-1), side(0), part(QRP_Lower)
+	{ }
+
+	highlight_3D_info_t(const highlight_3D_info_t& other) :
+		line(other.line), sector(other.sector),
+		side(other.side),   part(other.part)
+	{ }
+
+	void Clear()
+	{
+		line = sector = -1;
+		side = 0;
+		part = QRP_Lower;
+	}
+
+	bool isSame(const highlight_3D_info_t& other) const
+	{
+		return	(line == other.line) && (sector == other.sector) &&
+				(side == other.side) && (part == other.part);
+	}
+
+};
+
+
 struct Y_View
 {
 public:
@@ -102,6 +135,9 @@ public:
 	float adjust_dx, adjust_dx_factor;
 	float adjust_dy, adjust_dy_factor;
 
+	// current highlighted wotsit
+	highlight_3D_info_t hl;
+
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
@@ -111,7 +147,8 @@ public:
 			   missing_tex(NULL),  missing_col(-1),
 			   unknown_tex(NULL),  unk_tex_col(-1),
 			   unknown_flat(NULL), unk_flat_col(-1),
-			   adjust_ld(-1), adjust_sd(-1)
+			   adjust_ld(-1), adjust_sd(-1),
+			   hl()
 	{ }
 
 	void SetAngle(float new_ang)
@@ -248,6 +285,18 @@ public:
 
 		if (gravity)
 			CalcViewZ();
+	}
+
+	void ClearHighlight()
+	{
+		hl.Clear();
+	}
+
+	void FindHighlight()
+	{
+		hl.sector = -1;  // TODO get sector
+
+		hl.line = main_win->render->query(&hl.side, &hl.part);
 	}
 };
 
@@ -1801,7 +1850,17 @@ void Render3D_Setup()
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag)
 {
-	// FIXME
+	highlight_3D_info_t old(view.hl);
+
+	view.FindHighlight();
+
+	if (old.isSame(view.hl))
+		return;
+
+fprintf(stderr, "3D HIGHLIGHT: line %d : side %d : part  %d\n",
+		view.hl.line, view.hl.side, (int) view.hl.part);
+
+	main_win->render->redraw();
 }
 
 
