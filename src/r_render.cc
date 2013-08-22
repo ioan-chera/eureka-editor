@@ -294,9 +294,15 @@ public:
 
 	void FindHighlight()
 	{
-		hl.sector = -1;  // TODO get sector
+		hl.sector = -1;
 
 		hl.line = main_win->render->query(&hl.side, &hl.part);
+
+		if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
+		{
+			// FIXME: get sector
+			hl.line = -1;
+		}
 	}
 };
 
@@ -328,13 +334,10 @@ public:
 	};
 	int y_clip;
 
-	// highlight the surface?
-	img_pixel_t border_col;
-
 	bool fullbright;
 
 public:
-	DrawSurf() : kind(K_INVIS), img(NULL), border_col(0), fullbright(false)
+	DrawSurf() : kind(K_INVIS), img(NULL), fullbright(false)
 	{ }
 
 	~DrawSurf()
@@ -444,7 +447,8 @@ public:
 	float normal;
 
 	// distance values (inverted, so they can be lerped)
-	double iz1, diz, cur_iz; 
+	double iz1, iz2;
+	double diz, cur_iz; 
 	double mid_iz;
 
 	// translate coord, for sprite
@@ -752,7 +756,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddHighliteLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
+	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
 	{
 		if (view.low_detail)
 		{
@@ -899,6 +903,9 @@ public:
 		if (! is_obj(ld->start) || ! is_obj(ld->end))
 			return;
 
+		if (! ld->Right())
+			return;
+
 		float x1 = ld->Start()->x - view.x;
 		float y1 = ld->Start()->y - view.y;
 		float x2 = ld->End()->x - view.x;
@@ -1031,6 +1038,7 @@ public:
 		dw->t_dist = tan(base_ang - normal) * dist;
 
 		dw->iz1 = iz1;
+		dw->iz2 = iz2;
 		dw->diz = diz;
 		dw->mid_iz = iz1 + (sx2 - sx1 + 1) * diz / 2;
 
@@ -1120,13 +1128,67 @@ public:
 		walls.push_back(dw);
 	}
 
+	void HighlightWall(DrawWall *dw)
+	{
+		if (dw->side != view.hl.side)
+			return;
+
+		int h1, h2;
+
+		if (! dw->ld->TwoSided())
+		{
+			h1 = dw->sd->SecRef()->floorh;
+			h2 = dw->sd->SecRef()->ceilh;
+		}
+		else
+		{
+			const Sector *front = dw->ld->Right()->SecRef();
+			const Sector *back  = dw->ld-> Left()->SecRef();
+
+			if (view.hl.part == QRP_Lower)
+			{
+				h1 = MIN(front->floorh, back->floorh);
+				h2 = MAX(front->floorh, back->floorh);
+			}
+			else /* part == QRP_Upper */
+			{
+				h1 = MIN(front->ceilh, back->ceilh);
+				h2 = MAX(front->ceilh, back->ceilh);
+			}
+		}
+
+		int x1 = dw->sx1 - 1;
+		int x2 = dw->sx2 + 1;
+
+		int ly1 = DistToY(dw->iz1, h2);
+		int ly2 = DistToY(dw->iz1, h1);
+
+		int ry1 = DistToY(dw->iz2, h2);
+		int ry2 = DistToY(dw->iz2, h1);
+
+		AddRenderLine(x1, ly1, x1, ly2, HI_COL); 
+		AddRenderLine(x2, ry1, x2, ry2, HI_COL); 
+		AddRenderLine(x1, ly1, x2, ry1, HI_COL);
+		AddRenderLine(x1, ly2, x2, ry2, HI_COL);
+	}
+
 	void ComputeSurfaces()
 	{
+		const LineDef *hl_linedef = is_linedef(view.hl.line) ?
+			LineDefs[view.hl.line] : NULL;
+
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
 			if ((*S)->ld)
+			{
 				(*S)->ComputeWallSurface();
+
+				if ((*S)->ld == hl_linedef)
+					HighlightWall(*S);
+			}
+		}
 	}
 
 	void ClipSolids()
@@ -1340,35 +1402,6 @@ public:
 			}
 
 			return;
-		}
-
-		/* highlight the wall, floor or sprite */
-
-		if (surf.border_col)
-		{
-			// FIXME: this logic doesn't work very well, it seems the
-			//        right column is prone to being overdrawn, and also
-			//        the top pixel for lower parts.
-
-			if (surf.kind == DrawSurf::K_TEXTURE &&
-  	  			((x == dw->sx1 && dw->sx1 > 0) ||
-  	  			 (x == dw->sx2 && dw->sx2 < view.sw-1)))
-			{
-				HighlightColumn(x, y1, y2, surf.border_col);
-				return;
-			}
-
-			if (y1 <= y2)
-			{
-				HighlightColumn(x, y1, y1, surf.border_col);
-				y1++;
-			}
-
-			if (y1 <= y2)
-			{
-				HighlightColumn(x, y2, y2, surf.border_col);
-				y2--;
-			}
 		}
 
 		/* fill pixels */
@@ -1893,9 +1926,6 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag)
 
 	if (old.isSame(view.hl))
 		return;
-
-fprintf(stderr, "3D HIGHLIGHT: line %d : side %d : part  %d\n",
-		view.hl.line, view.hl.side, (int) view.hl.part);
 
 	main_win->render->redraw();
 }
