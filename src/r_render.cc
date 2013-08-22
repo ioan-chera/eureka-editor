@@ -685,6 +685,14 @@ public:
 };
 
 
+struct RenderLine
+{
+	short sx1, sy1, sx2, sy2;
+
+	Fl_Color color;
+};
+
+
 struct RendInfo
 {
 public:
@@ -711,6 +719,9 @@ public:
 
 #define Y_SLOPE  1.70
 
+	// remembered lines for drawing highlight (etc)
+	std::vector<RenderLine> hl_lines;
+
 	// saved offsets for mouse adjustment mode
 	int saved_x_offset;
 	int saved_y_offset;
@@ -722,7 +733,8 @@ private:
 	}
 
 public:
-	RendInfo() : walls(), active(), query_mode(0), depth_x()
+	RendInfo() : walls(), active(), query_mode(0), depth_x(),
+				 hl_lines()
 	{ }
 
 	~RendInfo()
@@ -738,6 +750,23 @@ public:
 		depth_x.resize(width);
 
 		std::fill_n(depth_x.begin(), width, 0);
+	}
+
+	void AddHighliteLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
+	{
+		if (view.low_detail)
+		{
+			sx1 *= 2;  sy1 *= 2;
+			sx2 *= 2;  sy2 *= 2;
+		}
+
+		RenderLine new_line;
+
+		new_line.sx1 = sx1; new_line.sy1 = sy1;
+		new_line.sx2 = sx2; new_line.sy2 = sy2;
+		new_line.color = color;
+
+		hl_lines.push_back(new_line);
 	}
 
 	void SaveOffsets()
@@ -1615,7 +1644,6 @@ public:
 
 		query_mode = 0;
 	}
-
 };
 
 
@@ -1663,7 +1691,14 @@ void UI_Render3D::draw()
 	else
 		BlitHires(ox, oy, ow, oh);
 	
-	DrawHighlight();
+	// draw the highlight (etc)
+	for (unsigned int k = 0 ; k < rend.hl_lines.size() ; k++)
+	{
+		RenderLine& line = rend.hl_lines[k];
+
+		fl_color(line.color);
+		fl_line(ox + line.sx1, oy + line.sy1, ox + line.sx2, oy + line.sy2);
+	}
 }
 
 
@@ -1760,17 +1795,6 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
 		}
 	}
-}
-
-
-void UI_Render3D::DrawHighlight()
-{
-	// TODO: support view.hl.sector
-
-	if (! is_linedef(view.hl.line))
-		return;
-
-	
 }
 
 
