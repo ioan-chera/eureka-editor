@@ -1,6 +1,9 @@
 
-CHANGES IN Eureka 1.00
-======================
+CHANGES IN Eureka 1.00 (r1420)
+==============================
+
+(Changes since 0.95 version, r922)
+
 
 +  extensive map-checking functions
 

@@ -1,8 +1,8 @@
 
-Eureka 0.97 README
+Eureka 1.00 README
 ==================
 
-by Andrew Apted  <ajapted@users.sf.net>   Jul 2013
+by Andrew Apted  <ajapted@users.sf.net>   AUG 2013
 
 
 INTRODUCTION
