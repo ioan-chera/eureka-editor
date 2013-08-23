@@ -27,6 +27,7 @@ OS=WIN32
 
 FLTK_FLAGS=-I$(FLTK_DIR)
 FLTK_LIBS=$(FLTK_DIR)/mingw/lib/libfltk_images.a \
+          $(FLTK_DIR)/mingw/lib/libfltk_png.a \
           $(FLTK_DIR)/mingw/lib/libfltk.a
 
 ZLIB_FLAGS=-I$(ZLIB_DIR)
