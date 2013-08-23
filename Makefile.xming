@@ -172,19 +172,25 @@ nsis_build: nsis_clean stripped
 	mkdir $(NSIS_BUILD)/common
 	mkdir $(NSIS_BUILD)/ports
 	mkdir $(NSIS_BUILD)/mods
+	mkdir $(NSIS_BUILD)/ups
 	#
 	# executable
 	cp Eureka.exe $(NSIS_BUILD)
 	#
-	# config file
+	# important files
 	cp misc/bindings.cfg $(NSIS_BUILD)/bindings.cfg
+	cp misc/about_logo.png $(NSIS_BUILD)/about_logo.png
+	cp misc/core_defs.up $(NSIS_BUILD)/core_defs.up
 	todos $(NSIS_BUILD)/*.cfg
+	todos $(NSIS_BUILD)/*.up
 	#
 	# definition files
 	cp games/*.ugh  $(NSIS_BUILD)/games
 	cp common/*.ugh $(NSIS_BUILD)/common
 	cp ports/*.ugh  $(NSIS_BUILD)/ports
 	todos $(NSIS_BUILD)/*/*.ugh
+	#
+	# script files
 	#
 	# text documents
 	cp README.txt TODO.txt AUTHORS.txt GPL.txt $(NSIS_BUILD)
