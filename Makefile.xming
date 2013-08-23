@@ -44,6 +44,11 @@ LIBS=-lm $(FLTK_LIBS) $(ZLIB_LIBS) \
      -lcomctl32 -lwsock32 -lsupc++
 
 
+#--- main target ---
+
+all: stripped
+
+
 #----- Object files ----------------------------------------------
 
 OBJS = \
@@ -112,7 +117,12 @@ OBJS = \
 	$(OBJ_DIR)/w_wad.o   \
 	$(OBJ_DIR)/x_hover.o  \
 	$(OBJ_DIR)/x_loop.o  \
-	$(OBJ_DIR)/x_mirror.o
+	$(OBJ_DIR)/x_mirror.o \
+	\
+	$(OBJ_DIR)/eureka_res.o
+
+$(OBJ_DIR)/eureka_res.o: misc/eureka.rc
+	$(MINGW)windres -i $^ -o $@
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
@@ -140,8 +150,6 @@ $(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
 
 #----- Targets -----------------------------------------------
 
-all: stripped
-
 clean:
 	rm -f $(PROGRAM) $(OBJ_DIR)/*.*
 	rm -f $(OBJ_DIR)/glbsp/*.*
@@ -152,9 +160,6 @@ $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
 
 stripped: $(PROGRAM)
 	$(MINGW)strip --strip-unneeded $(PROGRAM)
-
-$(OBJ_DIR)/eureka_res.o: misc/eureka.rc
-	$(MINGW)windres $^ -o $@
 
 # we need to recreate the final directory structure
 # (since NSIS cannot convert unix text files to msdos format)
