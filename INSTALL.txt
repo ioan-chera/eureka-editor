@@ -17,6 +17,7 @@ Dependencies:
    You may also need: libxft-dev
                       libxinerama-dev
                       libjpeg-dev
+                      libpng-dev
 
 4. zlib
    website: http://www.zlib.net/
