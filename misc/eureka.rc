@@ -18,7 +18,7 @@ MAIN_MENU MENU DISCARDABLE
   }
 }
 
-//FIXME  MAIN_ICON ICON "./eureka.ico"
+MAIN_ICON ICON "misc/eureka.ico"
 
 1 VERSIONINFO
 FILEVERSION 4, 1, 0, 0
