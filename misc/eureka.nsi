@@ -4,6 +4,12 @@
 ;
 ;----------------------------------------------------------------
 
+; use the Modern UI
+!include "MUI2.nsh"
+
+
+;----------------------------------------------------------------
+
 ; The name of the installer
 Name "Eureka Setup"
 
@@ -20,14 +26,21 @@ InstallDirRegKey HKLM "Software\EurekaEditor" "Install_Dir"
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
 
-;--------------------------------
+
+;----------------------------------------------------------------
 
 ; Pages
 
-Page directory
-Page instfiles
+!define MUI_ABORTWARNING
 
-;--------------------------------
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+
+;----------------------------------------------------------------
 
 ; The stuff to install
 
