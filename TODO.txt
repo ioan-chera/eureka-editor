@@ -3,18 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
--  option to reverse mouse movement in 3D view
-
-+  create a 128x128 WIN32 icon
-
-+  create a 32x32 (bigger?) icon for Linux
-
-
-TEST: Logs / Save in WIN32
-
-TEST: Drag multiple files in WIN32
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -297,6 +285,8 @@ NO: merge vertex and linedef modes
 
 3D View
 -------
+
+-  option to reverse mouse movement
 
 +  smooth movement via keyboard
    -  call a function in Main_Loop
