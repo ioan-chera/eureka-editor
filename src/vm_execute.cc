@@ -634,7 +634,7 @@ void PR_ExecuteProgram (func_t fnum)
 
 		case OP_LOAD:
 ///!!!		ptr = (kval_t *)((byte *)sv.edicts + STACK(0)._int);
-			STACK(0) = *ptr;
+///!!!		STACK(0) = *ptr;
 			break;
 
 		case OP_LOAD_V:
@@ -642,9 +642,9 @@ void PR_ExecuteProgram (func_t fnum)
 			DROP(1);
 
 			if (exec.stack_top + 2 >= MAX_LOCAL_STACK) PR_RunError("stack overflow");
-			exec.stack[exec.stack_top++] = ptr[0];
-			exec.stack[exec.stack_top++] = ptr[1];
-			exec.stack[exec.stack_top++] = ptr[2];
+///!!!		exec.stack[exec.stack_top++] = ptr[0];
+///!!!		exec.stack[exec.stack_top++] = ptr[1];
+///!!!		exec.stack[exec.stack_top++] = ptr[2];
 			break;
 			
 		case OP_STORE:
