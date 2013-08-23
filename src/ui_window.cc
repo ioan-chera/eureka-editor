@@ -392,7 +392,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 void UI_MainWin::Maximize()
 {
 #if defined(WIN32)
-	HWND hWnd = fl_xid(pWindow);
+	HWND hWnd = fl_xid(this);
 
 	ShowWindow(hWnd, SW_MAXIMIZE);
 
