@@ -52,6 +52,10 @@
 #include <time.h>
 #endif
 
+// IOANCH: be able to call OSX specific routines (needed for ~/Library)
+#ifdef __APPLE__
+#include "OSXCalls.h"
+#endif
 
 /*
  *  Global variables
@@ -196,13 +200,14 @@ static void CreateHomeDirs()
 	static char dir_name[FL_PATH_MAX];
 
 #ifdef __APPLE__
-	fl_filename_expand(dir_name, "$HOME/Library");
+   // IOANCH 20130825: modified to use name-independent calls
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibDir, NULL));
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name, "$HOME/Library/Application Support");
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibAppSupportDir, NULL));
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name, "$HOME/Library/Caches");
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibCacheDir, NULL));
 	FileMakeDir(dir_name);
 #endif
 
@@ -256,12 +261,12 @@ static void Determine_HomeDir(const char *argv0)
 
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
+      
+   fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
+   home_dir = StringDup(path);
 
-	if (fl_filename_expand(path, "$HOME/Library/Application Support/eureka-editor"))
-		home_dir = StringDup(path);
-
-	if (fl_filename_expand(path, "$HOME/Library/Caches/eureka-editor"))
-		cache_dir = StringDup(path);
+   fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
+   cache_dir = StringDup(path);
 
 	StringFree(path);
 

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  OS X EDITOR APP DELEGATE INTERFACE
+//  MAC OS X NATIVE C-STYLE CALLS TO BE ACCESSED FROM THE MAIN PROGRAM
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÎl Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -28,8 +28,32 @@
 // Module by Ioan Chera
 //
 
-#import <Cocoa/Cocoa.h>
+#ifdef __APPLE__
 
-@interface AppDelegate : NSObject
+#ifndef __Eureka_Doom_Editor__OSXCalls__
+#define __Eureka_Doom_Editor__OSXCalls__
 
-@end
+//#ifdef __cplusplus__
+//extern "C"
+//{
+//#endif
+
+   // Currently used paths
+   enum
+   {
+      osx_LibDir,
+      osx_LibAppSupportDir,
+      osx_LibCacheDir,
+   };
+   typedef unsigned osx_dirtype;
+   
+   const char *OSX_UserDomainDirectory(osx_dirtype dirtype, const char *subdir);
+
+//#ifdef __cplusplus__
+//}
+//#endif
+
+#endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
+
+#endif
+

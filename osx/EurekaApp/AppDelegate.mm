@@ -4,7 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Ioan Chera
+//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 1997-2003 AndrÈ Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,6 +23,10 @@
 //  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
+
+//
+// Module by Ioan Chera
+//
 
 // Thanks to Darrell Walisser, Max Horn et al. for their SDLMain.m code -
 //   reliable base for cross-platform apps ported to OS X.
@@ -41,35 +46,6 @@ int main_ORIGINAL(int argc, char *argv[]);
 
 @implementation AppDelegate
 
-//
-// applicationDataDirectory
-//
-// Copied from Apple documentation
-//
-#if 0	// Not used for now…
-- (NSURL*)applicationDataDirectory
-{
-    NSFileManager* sharedFM = [NSFileManager defaultManager];
-    NSArray* possibleURLs = [sharedFM URLsForDirectory:NSApplicationSupportDirectory
-											 inDomains:NSUserDomainMask];
-    NSURL* appSupportDir = nil;
-    NSURL* appDirectory = nil;
-	
-    if ([possibleURLs count] >= 1) {
-        // Use the first directory (if multiple are returned)
-        appSupportDir = [possibleURLs objectAtIndex:0];
-    }
-	
-    // If a valid app support directory exists, add the
-    // app's bundle ID to it to specify the final directory.
-    if (appSupportDir) {
-        NSString* appBundleID = [[NSBundle mainBundle] bundleIdentifier];
-        appDirectory = [appSupportDir URLByAppendingPathComponent:appBundleID];
-    }
-	
-    return appDirectory;
-}
-#endif
 
 //
 // applicationDidFinishLaunching:

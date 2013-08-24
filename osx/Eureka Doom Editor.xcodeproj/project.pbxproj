@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4F2181611755526A0053D99E /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2181601755526A0053D99E /* libfltk.a */; };
 		4F218163175553040053D99E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F218162175553040053D99E /* libz.a */; };
+		4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */; };
 		4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EB179FBF9300937B50 /* e_checks2.cc */; };
 		4FBD72F0179FBFE900937B50 /* vm_object.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EE179FBFE900937B50 /* vm_object.cc */; };
 		4FBD72F7179FC00400937B50 /* vm_builtin.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F1179FC00400937B50 /* vm_builtin.cc */; };
@@ -146,6 +147,8 @@
 /* Begin PBXFileReference section */
 		4F2181601755526A0053D99E /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = staticlib/libfltk.a; sourceTree = "<group>"; };
 		4F218162175553040053D99E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = staticlib/libz.a; sourceTree = "<group>"; };
+		4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXCalls.mm; sourceTree = "<group>"; };
+		4F2D365317C96A7E003BEEE9 /* OSXCalls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXCalls.h; sourceTree = "<group>"; };
 		4FBD72EB179FBF9300937B50 /* e_checks2.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = e_checks2.cc; path = ../../src/e_checks2.cc; sourceTree = "<group>"; };
 		4FBD72EE179FBFE900937B50 /* vm_object.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_object.cc; path = ../../src/vm_object.cc; sourceTree = "<group>"; };
 		4FBD72EF179FBFE900937B50 /* vm_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm_object.h; path = ../../src/vm_object.h; sourceTree = "<group>"; };
@@ -158,7 +161,7 @@
 		4FBD72FB179FC10100937B50 /* libfltk_images.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_images.a; path = staticlib/libfltk_images.a; sourceTree = "<group>"; };
 		4FBD72FD179FC14C00937B50 /* libpng15.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng15.a; path = staticlib/libpng15.a; sourceTree = "<group>"; };
 		4FBD72FF179FC18000937B50 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = staticlib/libjpeg.a; sourceTree = "<group>"; };
-		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = file; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
+		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; };
 		FA1E04ED16689A2900ED41DC /* ui_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_misc.h; path = ../../src/ui_misc.h; sourceTree = "<group>"; };
 		FA24463A166CAA6100C68ED8 /* common */ = {isa = PBXFileReference; lastKnownFileType = folder; name = common; path = ../common; sourceTree = "<group>"; };
@@ -715,6 +718,8 @@
 			children = (
 				FA5E2C3E165B8F860024D6A5 /* AppDelegate.h */,
 				FADB99F216B017D600A28204 /* AppDelegate.mm */,
+				4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */,
+				4F2D365317C96A7E003BEEE9 /* OSXCalls.h */,
 			);
 			name = OSXPort;
 			sourceTree = "<group>";
@@ -907,6 +912,7 @@
 				4FBD72F8179FC00400937B50 /* vm_compile.cc in Sources */,
 				4FBD72F9179FC00400937B50 /* vm_execute.cc in Sources */,
 				4FBD72FA179FC00400937B50 /* vm_lex.cc in Sources */,
+				4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -968,7 +974,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -1006,7 +1012,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -1015,7 +1021,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
