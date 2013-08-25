@@ -24,6 +24,2720 @@ got moved yet again.
 ====================================================
 
 ------------------------------------------------------------------------
+r1422 | ajapted | 2013-08-25 15:20:46 +1000 (Sun, 25 Aug 2013) | 2 lines
+
+Pack-source script: handle the 'ups' folder (as per 'mods' etc).
+
+------------------------------------------------------------------------
+r1421 | ajapted | 2013-08-25 14:58:40 +1000 (Sun, 25 Aug 2013) | 2 lines
+
+README.txt : more updates to the keys list.
+
+------------------------------------------------------------------------
+r1420 | ajapted | 2013-08-25 14:48:04 +1000 (Sun, 25 Aug 2013) | 2 lines
+
+README.txt : updated key list for ';' and 3D view offset commands.
+
+------------------------------------------------------------------------
+r1419 | ajapted | 2013-08-25 14:36:09 +1000 (Sun, 25 Aug 2013) | 2 lines
+
+README.txt : simplified the INTRODUCTION section.
+
+------------------------------------------------------------------------
+r1418 | printz | 2013-08-25 09:18:26 +1000 (Sun, 25 Aug 2013) | 7 lines
+
+osx:
+* Added a new generic OSX call module, for interfacing OSX system calls with the main application C++ code
+* Prepared Xcode project for release
+* Corrected copyright in my modules to actually refer to the author(s) of Eureka in whole, not to the author of the module.
+* Removed dead code from AppDelegate.mm
+* Updated OSX icon
+* Fixed main.cc to use system-proof application data directories.
+
+------------------------------------------------------------------------
+r1417 | ajapted | 2013-08-23 21:52:21 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+INSTALL.txt tweak.
+
+------------------------------------------------------------------------
+r1416 | ajapted | 2013-08-23 21:44:10 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+CHANGELOG tweak for 1.00 release.
+
+------------------------------------------------------------------------
+r1415 | ajapted | 2013-08-23 21:34:00 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1414 | ajapted | 2013-08-23 15:33:43 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+NSIS install script : updated to use the Modern UI (MUI2.nsh).
+
+------------------------------------------------------------------------
+r1413 | ajapted | 2013-08-23 15:30:07 +1000 (Fri, 23 Aug 2013) | 3 lines
+
+Makefile.xming : updated 'nsis_build' target to add "ups" folder and to
+copy the "about_logo.png" and "core_defs.up" files.
+
+------------------------------------------------------------------------
+r1412 | ajapted | 2013-08-23 15:05:08 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Makefile.xming : properly include the Win32 resource stuff in the build.
+
+------------------------------------------------------------------------
+r1411 | ajapted | 2013-08-23 14:51:50 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Updated WIN32 "rc" file to include the ICON resource.
+
+------------------------------------------------------------------------
+r1410 | ajapted | 2013-08-23 14:51:17 +1000 (Fri, 23 Aug 2013) | 3 lines
+
+Fixed WIN32 icon file (eureka.ico) -- I accidentally committed the XCF
+version before.
+
+------------------------------------------------------------------------
+r1409 | ajapted | 2013-08-23 14:42:56 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Makefile.xming : added 'fltk_png.a' library to the build.
+
+------------------------------------------------------------------------
+r1408 | ajapted | 2013-08-23 14:39:37 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Fixed bug in WIN32-specific code.
+
+------------------------------------------------------------------------
+r1407 | ajapted | 2013-08-23 14:37:11 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Quieten some compiler warnings.
+
+------------------------------------------------------------------------
+r1406 | ajapted | 2013-08-23 14:24:38 +1000 (Fri, 23 Aug 2013) | 2 lines
+
+Created a 128x128 win32 icon and a 32x32 linux xpm from Jason's logo.
+
+------------------------------------------------------------------------
+r1405 | ajapted | 2013-08-22 22:32:34 +1000 (Thu, 22 Aug 2013) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r1404 | ajapted | 2013-08-22 21:48:25 +1000 (Thu, 22 Aug 2013) | 2 lines
+
+Version bump to 1.00, heading towards a release...
+
+------------------------------------------------------------------------
+r1403 | ajapted | 2013-08-22 21:42:42 +1000 (Thu, 22 Aug 2013) | 2 lines
+
+CHANGELOG: more tweakage.
+
+------------------------------------------------------------------------
+r1402 | ajapted | 2013-08-22 21:35:06 +1000 (Thu, 22 Aug 2013) | 6 lines
+
+3D View:
+1. implemented logic to determine coordinates for a highlighted wall
+   and then create the lines to draw.
+
+2. removed some old, non-working highlight code.
+
+------------------------------------------------------------------------
+r1401 | ajapted | 2013-08-22 16:30:35 +1000 (Thu, 22 Aug 2013) | 2 lines
+
+3D View: more work on logic to highlight walls....
+
+------------------------------------------------------------------------
+r1400 | ajapted | 2013-08-22 15:37:20 +1000 (Thu, 22 Aug 2013) | 3 lines
+
+3D View: use current highlight info for offset adjustment and alignment
+commands (rather than perform a redundant query).
+
+------------------------------------------------------------------------
+r1399 | ajapted | 2013-08-22 14:40:03 +1000 (Thu, 22 Aug 2013) | 3 lines
+
+3D View: added logic to keep track of a "highlighted" wotsit, and to only
+redraw the view when it changes.
+
+------------------------------------------------------------------------
+r1398 | ajapted | 2013-08-22 14:12:53 +1000 (Thu, 22 Aug 2013) | 4 lines
+
+3D View:
+1. began work on ability to highlight sidedef under the mouse
+2. moved some code around
+
+------------------------------------------------------------------------
+r1397 | ajapted | 2013-08-21 22:50:28 +1000 (Wed, 21 Aug 2013) | 2 lines
+
+CHANGELOG : update and tweakage.
+
+------------------------------------------------------------------------
+r1396 | ajapted | 2013-08-21 22:49:36 +1000 (Wed, 21 Aug 2013) | 2 lines
+
+Texture alignment: added 'X', 'Y', 'Z' key bindings.
+
+------------------------------------------------------------------------
+r1395 | ajapted | 2013-08-21 22:29:00 +1000 (Wed, 21 Aug 2013) | 5 lines
+
+Texture alignment:
+1. support for 'r' flag : align with wall "to the right"
+2. PartialTexCmp() now compares 6 letters, not 4
+3. tweaked scoring function for adjoiners
+
+------------------------------------------------------------------------
+r1394 | ajapted | 2013-08-21 19:02:58 +1000 (Wed, 21 Aug 2013) | 3 lines
+
+Texture alignment: dead code removal: (1) old DEU alignment stuff, and
+(2) my linedef-mode alignment logic.
+
+------------------------------------------------------------------------
+r1393 | ajapted | 2013-08-21 18:58:45 +1000 (Wed, 21 Aug 2013) | 3 lines
+
+Texture alignment: implemented PickAdjoinerPart(), tweaked some code,
+and removed some dead code.
+
+------------------------------------------------------------------------
+r1392 | ajapted | 2013-08-20 22:17:31 +1000 (Tue, 20 Aug 2013) | 4 lines
+
+Texture alignment: still banging away on this, e.g. pass the particular
+part (upper or lower) which the user clicked on to LineDefs_Align(),
+and wrote some logic for picking which adjoiner part of align with.
+
+------------------------------------------------------------------------
+r1391 | ajapted | 2013-08-20 15:20:57 +1000 (Tue, 20 Aug 2013) | 3 lines
+
+Texture alignment: fleshed out the logic for Y alignment, though it is
+not 100% finished yet....
+
+------------------------------------------------------------------------
+r1390 | ajapted | 2013-08-17 16:22:13 +1000 (Sat, 17 Aug 2013) | 5 lines
+
+3D_Align: more work on texture alignment:
+1. the chosen adjoiner is always on the LEFT to the chosen sidedef
+2. implemented DoAlignX()
+3. started work on DoAlignY(), but it needs proper calculation
+
+------------------------------------------------------------------------
+r1389 | ajapted | 2013-08-17 15:51:07 +1000 (Sat, 17 Aug 2013) | 3 lines
+
+3D_Align: for 'c' clear flag, properly handle different combinations of
+the 'x' and 'y' flags.
+
+------------------------------------------------------------------------
+r1388 | ajapted | 2013-08-17 14:55:19 +1000 (Sat, 17 Aug 2013) | 2 lines
+
+Texture alignment: implemented the 'c' (clear offsets) flag.
+
+------------------------------------------------------------------------
+r1387 | ajapted | 2013-08-17 14:37:07 +1000 (Sat, 17 Aug 2013) | 8 lines
+
+Texture aligning: began work on new method which is done in 3D Mode.
+
+This commit disables the 'LIN_Align' binding command, replacing it
+with '3D_Align' binding command (which does nothing yet).  Updated
+the default bindings too, with 'x', 'y', 'z' and 'c' keys.
+The 'c' key will clear the offsets, and 'z' aligns both X and Y
+(I would preferred 'a' do both, but it is used for WASD movement).
+
+------------------------------------------------------------------------
+r1386 | ajapted | 2013-08-17 14:31:30 +1000 (Sat, 17 Aug 2013) | 2 lines
+
+Disabled the Adjoiner test code....
+
+------------------------------------------------------------------------
+r1385 | ajapted | 2013-08-02 22:46:35 +1000 (Fri, 02 Aug 2013) | 2 lines
+
+minor update.
+
+------------------------------------------------------------------------
+r1384 | ajapted | 2013-08-02 21:23:52 +1000 (Fri, 02 Aug 2013) | 3 lines
+
+Texture alignment: try to pick the next sidedef a bit more intelligently,
+however I don't think this approach is really cutting the mustard....
+
+------------------------------------------------------------------------
+r1383 | ajapted | 2013-08-02 19:54:42 +1000 (Fri, 02 Aug 2013) | 4 lines
+
+Texture alignment:
+1. adjoiner scoring function: preference for same sided-ness of lines
+2. added testing code -- highlight the best adjoiner of a line
+
+------------------------------------------------------------------------
+r1382 | ajapted | 2013-08-02 19:32:03 +1000 (Fri, 02 Aug 2013) | 4 lines
+
+Texture alignment: implemented scoring logic for adjoiners, firstly
+making sure that the sidedefs are actually next to each other, and
+secondly giving a score based on texture matching (etc).
+
+------------------------------------------------------------------------
+r1381 | ajapted | 2013-08-02 17:22:04 +1000 (Fri, 02 Aug 2013) | 3 lines
+
+Texture alignment: updated remaining code for 'side_on_a_line_t' typedef
+and access functions.
+
+------------------------------------------------------------------------
+r1380 | ajapted | 2013-08-02 14:42:51 +1000 (Fri, 02 Aug 2013) | 4 lines
+
+Texture alignment: introduced a 'side_on_a_line_t' typedef to simplify
+passing around the LINE+SIDE references.  Partial work on the logic to
+determine the adjoiner for a side.
+
+------------------------------------------------------------------------
+r1379 | ajapted | 2013-08-02 14:18:53 +1000 (Fri, 02 Aug 2013) | 2 lines
+
+Basis : added LineDef::WhatSideDef() method.
+
+------------------------------------------------------------------------
+r1378 | ajapted | 2013-08-02 13:42:17 +1000 (Fri, 02 Aug 2013) | 3 lines
+
+Texture alignment: a bit more work, e.g. logic for handling the unpeg
+linedef flags, and added PartialTexCmp() function.
+
+------------------------------------------------------------------------
+r1377 | ajapted | 2013-08-02 12:33:09 +1000 (Fri, 02 Aug 2013) | 4 lines
+
+LineDef panel: reverted layout of sidedef textures to match previous
+versions (i.e. LOWER / RAIL / UPPER) -- although single-sided lines
+still use the LOWER spot for its texture.
+
+------------------------------------------------------------------------
+r1376 | ajapted | 2013-08-02 12:26:58 +1000 (Fri, 02 Aug 2013) | 5 lines
+
+Texture alignment: fleshed out more of the code, e.g. the logic for
+collecting which sidedefs to align, and logic to pick which sidedef
+to align next (ensuring we do an adjoiner _before_ that sidedef, if
+possible).
+
+------------------------------------------------------------------------
+r1375 | ajapted | 2013-08-01 22:54:29 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+History.txt : added a preface about the different repositories.
+
+------------------------------------------------------------------------
+r1374 | ajapted | 2013-08-01 21:25:14 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1373 | ajapted | 2013-08-01 21:12:07 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r1372 | ajapted | 2013-08-01 21:10:45 +1000 (Thu, 01 Aug 2013) | 3 lines
+
+Renderer: got the query() method working, and use it to determine which
+linedef / sidedef to adjust the offsets on.
+
+------------------------------------------------------------------------
+r1371 | ajapted | 2013-08-01 17:16:49 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+Renderer: use SIDE_LEFT / SIDE_RIGHT rather than 0/1.
+
+------------------------------------------------------------------------
+r1370 | ajapted | 2013-08-01 17:11:04 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+Renderer: more work on query() method....
+
+------------------------------------------------------------------------
+r1369 | ajapted | 2013-08-01 16:49:41 +1000 (Thu, 01 Aug 2013) | 4 lines
+
+Renderer: began work on a query() method which will determine what the
+mouse pointer is pointing at.  It will perform a limited rendering to
+determine which wall / floor under the pointer.
+
+------------------------------------------------------------------------
+r1368 | ajapted | 2013-08-01 16:47:17 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+Texture alignment: comment defining flags to LIN_Align().
+
+------------------------------------------------------------------------
+r1367 | ajapted | 2013-08-01 15:33:29 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+Preferences: tweaked layout in each panel for better consistency.
+
+------------------------------------------------------------------------
+r1366 | ajapted | 2013-08-01 13:55:28 +1000 (Thu, 01 Aug 2013) | 2 lines
+
+Improved normal grid drawing, darken colors when lines get close together.
+
+------------------------------------------------------------------------
+r1365 | ajapted | 2013-07-31 22:31:53 +1000 (Wed, 31 Jul 2013) | 4 lines
+
+Began work on texture alignment commands.  This commit merely replaces
+the two LIN_AlignX/Y functions into a single one 'LIN_Align', with
+updated key bindings file.
+
+------------------------------------------------------------------------
+r1364 | ajapted | 2013-07-31 22:22:00 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Version bump to 0.99
+
+------------------------------------------------------------------------
+r1363 | ajapted | 2013-07-31 21:07:37 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Preferences: fixed the 'render_lock_gravity' option.
+
+------------------------------------------------------------------------
+r1362 | ajapted | 2013-07-31 21:01:38 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Render3D_Wheel: added 'dx' parameter, use it to move left/right.
+
+------------------------------------------------------------------------
+r1361 | ajapted | 2013-07-31 20:40:43 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Removed obj_no_t typedef -- just use 'int' instead.
+
+------------------------------------------------------------------------
+r1360 | ajapted | 2013-07-31 20:12:29 +1000 (Wed, 31 Jul 2013) | 6 lines
+
+Improved highlight behavior of vertices when grid-snap is enabled.
+
+The previous method merely expanded the search range to find a vertex
+to highlight (get_cur_vertex) -- this made it too easy to accidently
+drag the wrong vertex.
+
+------------------------------------------------------------------------
+r1359 | ajapted | 2013-07-31 20:07:54 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Objid class: added a copy constructor.
+
+------------------------------------------------------------------------
+r1358 | ajapted | 2013-07-31 20:05:16 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Added Vertex_FindExact() utility function.
+
+------------------------------------------------------------------------
+r1357 | ajapted | 2013-07-31 16:03:40 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1356 | ajapted | 2013-07-31 16:01:16 +1000 (Wed, 31 Jul 2013) | 3 lines
+
+Implemented 'render_lock_gravity' config option, when enabled and gravity
+is ON then you cannot move up or down in the 3D view.
+
+------------------------------------------------------------------------
+r1355 | ajapted | 2013-07-31 14:34:17 +1000 (Wed, 31 Jul 2013) | 5 lines
+
+LineDef panel: the 'Length' widget is now an input box, and implemented
+ability to enter a new length value and change all selected linedefs.
+
+Doing this with all linedefs selected is a great way to wreck a map!
+
+------------------------------------------------------------------------
+r1354 | ajapted | 2013-07-31 14:22:11 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Check / linedefs: layout tweak.
+
+------------------------------------------------------------------------
+r1353 | ajapted | 2013-07-31 13:38:09 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Dead code removal : frob_things_flags().
+
+------------------------------------------------------------------------
+r1352 | ajapted | 2013-07-31 13:36:16 +1000 (Wed, 31 Jul 2013) | 2 lines
+
+Dead code removal : frob_linedefs_flags() etc...
+
+------------------------------------------------------------------------
+r1351 | ajapted | 2013-07-31 13:13:01 +1000 (Wed, 31 Jul 2013) | 3 lines
+
+In vertex mode, display length of last three linedefs (typically ones
+which the user just added).
+
+------------------------------------------------------------------------
+r1350 | ajapted | 2013-07-30 22:23:42 +1000 (Tue, 30 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1349 | ajapted | 2013-07-30 22:21:24 +1000 (Tue, 30 Jul 2013) | 3 lines
+
+Better drawing of things (in THINGS mode) -- fill in their body with a
+darker version of their color.
+
+------------------------------------------------------------------------
+r1348 | ajapted | 2013-07-30 21:59:08 +1000 (Tue, 30 Jul 2013) | 2 lines
+
+Implemented mouse scaling using new 'edit.action' mechanism.
+
+------------------------------------------------------------------------
+r1347 | ajapted | 2013-07-30 16:58:21 +1000 (Tue, 30 Jul 2013) | 2 lines
+
+Use the edit.action mechanism for dragging and the selection box.
+
+------------------------------------------------------------------------
+r1346 | ajapted | 2013-07-30 14:45:22 +1000 (Tue, 30 Jul 2013) | 3 lines
+
+Implemented ClosestLine_CastAtAngle() utility function which finds the
+closest linedef to a point casting at an arbitrary angle.
+
+------------------------------------------------------------------------
+r1345 | ajapted | 2013-07-30 14:34:26 +1000 (Tue, 30 Jul 2013) | 2 lines
+
+Print a log message after unpacking sidedefs.
+
+------------------------------------------------------------------------
+r1344 | ajapted | 2013-07-30 14:33:53 +1000 (Tue, 30 Jul 2013) | 2 lines
+
+LoadLevel: reset editor state _before_ loading the user state.
+
+------------------------------------------------------------------------
+r1343 | ajapted | 2013-07-29 22:38:52 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1342 | ajapted | 2013-07-29 22:38:00 +1000 (Mon, 29 Jul 2013) | 4 lines
+
+Adjust offsets: properly compute 'dx_factor' and 'dy_factor' values
+based on the distance of the linedef to the camera.  This makes it
+look like you are really dragging the texture around the wall.
+
+------------------------------------------------------------------------
+r1341 | ajapted | 2013-07-29 21:54:34 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+Adjust offsets: the SHIFT key makes the adjustment finer (slower).
+
+------------------------------------------------------------------------
+r1340 | ajapted | 2013-07-29 21:47:59 +1000 (Mon, 29 Jul 2013) | 4 lines
+
+Removed unnecessary MarkChanges() and 'edit.RedrawMap = 1' statements.
+
+Also fixed recent bug of texture changes not redrawing the 3D view.
+
+------------------------------------------------------------------------
+r1339 | ajapted | 2013-07-29 21:35:40 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+Dead code removal.
+
+------------------------------------------------------------------------
+r1338 | ajapted | 2013-07-29 21:29:02 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+Added GoToErrors() convenience function.
+
+------------------------------------------------------------------------
+r1337 | ajapted | 2013-07-29 21:18:08 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+Simplified handling of 'MadeChanges' global var.
+
+------------------------------------------------------------------------
+r1336 | ajapted | 2013-07-29 15:58:13 +1000 (Mon, 29 Jul 2013) | 2 lines
+
+Disabled '!' prefix in the window title -- was not useful after all.
+
+------------------------------------------------------------------------
+r1335 | ajapted | 2013-07-29 12:28:46 +1000 (Mon, 29 Jul 2013) | 4 lines
+
+Implemented SideDefs_NormalizeMiddles(), which is used after level load
+and ensures that one-sided linedefs do not have an "Upper" or "Rail"
+texture (as shown by the LineDef panel).
+
+------------------------------------------------------------------------
+r1334 | ajapted | 2013-07-28 20:05:32 +1000 (Sun, 28 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1333 | ajapted | 2013-07-28 20:01:41 +1000 (Sun, 28 Jul 2013) | 4 lines
+
+After loading a map, reset various editor state, especially clearing the
+selection and highlight (prevent a possible crash), and update the map
+totals (# of linedefs, etc) for the side panel.
+
+------------------------------------------------------------------------
+r1332 | ajapted | 2013-07-28 19:44:00 +1000 (Sun, 28 Jul 2013) | 2 lines
+
+CHANGELOG: added the new sidedef layout.
+
+------------------------------------------------------------------------
+r1331 | ajapted | 2013-07-28 19:43:25 +1000 (Sun, 28 Jul 2013) | 4 lines
+
+Adjust offsets: force mouse deltas to be either vertical or horizontal,
+which makes it easier to make large horizontal adjustments without it
+going up or down, and vice versa.
+
+------------------------------------------------------------------------
+r1330 | ajapted | 2013-07-28 19:27:02 +1000 (Sun, 28 Jul 2013) | 11 lines
+
+LideDef panel: changed layout of textures in each SideDef section.
+The default order is now LOWER / UPPER / RAIL.
+
+Also, single-sided linedefs show the texture in the "LOWER" position,
+since there is no longer a spot for a "middle" texture.
+
+The main benefit of this is when multiple linedefs are selected which
+is a mix of one-sided and two-sided lines, the user can safely change
+the "LOWER" (or LOWER + UPPER) on all the linedefs without ending up
+with unwanted railing textures.
+
+------------------------------------------------------------------------
+r1329 | ajapted | 2013-07-28 19:17:59 +1000 (Sun, 28 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1328 | ajapted | 2013-07-28 19:00:52 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+Automatically unpack sidedefs when loading a map, since the previous
+confirmation dialog was probably more of a nuisance than a help.
+
+------------------------------------------------------------------------
+r1327 | ajapted | 2013-07-28 18:45:49 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+Basis: added BA_Abort() function which discards the current group of
+operations and (optionally) undoes the changes since BA_Begin().
+
+------------------------------------------------------------------------
+r1326 | ajapted | 2013-07-28 18:10:50 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+3D View: changing the aspect ratio preference setting did not update the
+rendered view (unless user changed window size) -- fixed.
+
+------------------------------------------------------------------------
+r1325 | ajapted | 2013-07-28 15:43:51 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+Checks: updated missing texture detection to count "" (empty string) as a
+missing texture.
+
+------------------------------------------------------------------------
+r1324 | ajapted | 2013-07-28 15:27:49 +1000 (Sun, 28 Jul 2013) | 2 lines
+
+Dead code removal : UI_SideDef::SetTexture() method.
+
+------------------------------------------------------------------------
+r1323 | ajapted | 2013-07-28 14:12:49 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+Preferences: implemented setting for Aspect ratio in 3D view, supporting
+a "CUSTOM" choice allowing the user to enter arbitrary values.
+
+------------------------------------------------------------------------
+r1322 | ajapted | 2013-07-28 13:58:19 +1000 (Sun, 28 Jul 2013) | 3 lines
+
+3D View: added 'render_aspect_ratio' config variable, and use it when
+rendering a scene.  No preference setting yet....
+
+------------------------------------------------------------------------
+r1321 | ajapted | 2013-07-28 13:56:49 +1000 (Sun, 28 Jul 2013) | 2 lines
+
+Fixed recent bug of highlighting map stuff when 3D view is active.
+
+------------------------------------------------------------------------
+r1320 | ajapted | 2013-07-27 21:06:44 +1000 (Sat, 27 Jul 2013) | 3 lines
+
+Render3D: moved code around, namely UpdateScreen() method of 'view' and
+draw(), BlitLores() and BlitHires() methods in UI_Render3D class.
+
+------------------------------------------------------------------------
+r1319 | ajapted | 2013-07-27 17:41:55 +1000 (Sat, 27 Jul 2013) | 2 lines
+
+Adjusting offsets: apply the offsets when mouse button is released.
+
+------------------------------------------------------------------------
+r1318 | ajapted | 2013-07-27 17:29:21 +1000 (Sat, 27 Jul 2013) | 6 lines
+
+More work on adjusting X/Y offsets via the mouse.  Implemented the logic
+to save/change/restore the current offsets in the renderer (the real
+change only occurs when the user releases the button -- NYI).
+
+It does NOT pick the linedef/sidedef properly yet....
+
+------------------------------------------------------------------------
+r1317 | ajapted | 2013-07-26 22:23:11 +1000 (Fri, 26 Jul 2013) | 4 lines
+
+1. added Editor_ClearAction() and Editor_SetAction() functions
+2. re-implemented RMB map scrolling using the action system
+3. began implementation of sidedef adjustment via MMB
+
+------------------------------------------------------------------------
+r1316 | ajapted | 2013-07-26 11:08:17 +1000 (Fri, 26 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1315 | ajapted | 2013-07-26 11:07:54 +1000 (Fri, 26 Jul 2013) | 2 lines
+
+CHANGELOG : yet another rejig.
+
+------------------------------------------------------------------------
+r1314 | ajapted | 2013-07-26 11:01:26 +1000 (Fri, 26 Jul 2013) | 4 lines
+
+Preferences: disabled the "maximize on startup" option.  It is planned to
+replace it in a future release with code to remember the window position
+and maximized state.
+
+------------------------------------------------------------------------
+r1313 | ajapted | 2013-07-25 20:44:14 +1000 (Thu, 25 Jul 2013) | 3 lines
+
+Menu: rewrote code to populate the "Recent Files" sub-menu, using same
+basic method as for "Given Files" (recreating the Fl_Menu_Item array).
+
+------------------------------------------------------------------------
+r1312 | ajapted | 2013-07-25 20:30:26 +1000 (Thu, 25 Jul 2013) | 6 lines
+
+Menu: worked on reimplementing the way the "Given Files" and "Recent Files"
+sub-menus are populated, since previous way did not work under MacOS X.
+
+Instead of fiddling with the menu bar _after_ creating it, we fiddle with
+arrays of raw Fl_Menu_Items _before_ creating it.
+
+------------------------------------------------------------------------
+r1311 | ajapted | 2013-07-25 18:52:38 +1000 (Thu, 25 Jul 2013) | 12 lines
+
+1. removed unused 'move_speed', 'extra_zoom' fields from Editor_State_t
+
+2. added 'edit.action' field and a set of ACT_XXXXX enumerated values 
+   which will bring some sanity to the handling of temporal actions
+   like dragging objects, drawing a sel box, scrolling the map, etc...
+   
+3. handle the META-fier command using the 'edit.action' mechanism
+
+4. fixed bug with META-fying logic where an unrecogized META-fied key
+   would be sent on to other widgets, even coming back to be handled
+   as a normal key instead of being ignored.
+
+------------------------------------------------------------------------
+r1310 | ajapted | 2013-07-25 13:53:12 +1000 (Thu, 25 Jul 2013) | 2 lines
+
+M_ParseEurekaLump: use DLG_Confirm() instead of fl_choice.
+
+------------------------------------------------------------------------
+r1309 | ajapted | 2013-07-25 13:52:17 +1000 (Thu, 25 Jul 2013) | 3 lines
+
+Don't quit the program when the user cancels loading a wad during parsing
+of the EUREKA lump.
+
+------------------------------------------------------------------------
+r1308 | ajapted | 2013-07-25 13:37:56 +1000 (Thu, 25 Jul 2013) | 5 lines
+
+Preferences / Keys: renamed last button to "Reset Defaults" and _always_
+show the confirmation dialog, since it erases ALL the user's changes.
+
+Code-wise: use DLG_Confirm() instead of fl_choice() there.
+
+------------------------------------------------------------------------
+r1307 | ajapted | 2013-07-25 13:18:51 +1000 (Thu, 25 Jul 2013) | 6 lines
+
+Fixed "venetian blind" issue when drawing large dots for the grid.
+
+The real problem is with FLTK and how it clips non-filled rectangles.
+To workaround the FLTK bug, use filled rectangles instead -- it might
+even be faster.
+
+------------------------------------------------------------------------
+r1306 | ajapted | 2013-07-25 13:08:23 +1000 (Thu, 25 Jul 2013) | 2 lines
+
+Edit / Move objects: implemented 'Z' delta for sectors. 
+
+------------------------------------------------------------------------
+r1305 | ajapted | 2013-07-24 23:05:57 +1000 (Wed, 24 Jul 2013) | 2 lines
+
+Tweaked the single-line title + copyright message.
+
+------------------------------------------------------------------------
+r1304 | ajapted | 2013-07-24 22:35:40 +1000 (Wed, 24 Jul 2013) | 3 lines
+
+Dead code removal : MakeDoorFromSector and MakeLiftFromSector.
+(that functionality may return one day, in the form of a script).
+
+------------------------------------------------------------------------
+r1303 | ajapted | 2013-07-24 22:31:04 +1000 (Wed, 24 Jul 2013) | 2 lines
+
+Dead code removal : bv_vertices_of_xxx and linedefs_of_sector(s).
+
+------------------------------------------------------------------------
+r1302 | ajapted | 2013-07-24 22:27:18 +1000 (Wed, 24 Jul 2013) | 2 lines
+
+Dead code removal : Superimposed_ld class.
+
+------------------------------------------------------------------------
+r1301 | printz | 2013-07-24 19:22:04 +1000 (Wed, 24 Jul 2013) | 4 lines
+
+osx:
+* Updated Xcode project to Makefile's new specifications
+* Updated the info plist to the current version
+* Updated the icns file to the new logo. File is a bit too large now,
+  especially after I used a free tool called "Retina Icon Binder".
+  Thus the total package size is even bigger than the previous OSX Eureka
+  release, even if now I merely linked FLTK statically.
+  Might be the redundant lower-scale icons adding to the size.
+  I need a better ICNS tool that can safely delete the smaller icons.
+
+------------------------------------------------------------------------
+r1300 | ajapted | 2013-07-23 19:32:51 +1000 (Tue, 23 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1299 | ajapted | 2013-07-23 19:22:14 +1000 (Tue, 23 Jul 2013) | 2 lines
+
+M_WriteEurekaLump : it handles the BeginWrite/EndWrite itself now.
+
+------------------------------------------------------------------------
+r1298 | ajapted | 2013-07-23 19:21:18 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+Wad code: fixed potential issue with 'insert_point' handling which was
+probably responsible for the rare level-lumps-in-wrong-order problem.
+
+------------------------------------------------------------------------
+r1297 | ajapted | 2013-07-23 16:20:47 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+File / Test map: if changes have been made, ask user if they want to
+save the map and build the nodes.
+
+------------------------------------------------------------------------
+r1296 | ajapted | 2013-07-23 16:09:50 +1000 (Tue, 23 Jul 2013) | 2 lines
+
+Tweaks.
+
+------------------------------------------------------------------------
+r1295 | ajapted | 2013-07-23 16:06:33 +1000 (Tue, 23 Jul 2013) | 2 lines
+
+FatalError: replace single newlines with spaces for DLG_ShowError().
+
+------------------------------------------------------------------------
+r1294 | ajapted | 2013-07-23 14:59:54 +1000 (Tue, 23 Jul 2013) | 5 lines
+
+Dialogs: added keyboard shortcuts (via '&') for all buttons except Cancel.
+
+We don't do Cancel since "Create" button (from File / New Map) would
+conflict, plus the ESCAPE key already serves that function.
+
+------------------------------------------------------------------------
+r1293 | ajapted | 2013-07-23 14:44:30 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+Wad code: no need to LogPrintf() updates to the master directory or when
+reading/writing a directory from a wad -- they are now debug messages.
+
+------------------------------------------------------------------------
+r1292 | ajapted | 2013-07-23 14:43:03 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+File / Build nodes: better handle the case when there is no current pwad,
+but the user has made changes (e.g. an edited IWAD map, or a fresh map).
+
+------------------------------------------------------------------------
+r1291 | ajapted | 2013-07-23 14:35:28 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+Dialogs: use UI_Escapable_Window so that dialogs can be dismissed with
+the ESCAPE key.
+
+------------------------------------------------------------------------
+r1290 | ajapted | 2013-07-23 14:31:56 +1000 (Tue, 23 Jul 2013) | 4 lines
+
+File / Build nodes: when the map has unsaved changes, we now ask the user
+whether they want to save the map and then build the nodes.  (Previously
+it was just a notification dialog.)
+
+------------------------------------------------------------------------
+r1289 | ajapted | 2013-07-23 14:28:15 +1000 (Tue, 23 Jul 2013) | 10 lines
+
+Fixed bug causing a FatalError() when editing a pwad, creating a new map
+which is fresh (does not replace any existing map), and then attempting
+to build the nodes.  Since the new map was not saved, Eureka was unable
+to re-load the map from the node-enhanced wad.
+
+Hence creating a new map (CTRL-N) always sets the "Made Changes" flag.
+
+This commit also makes CMD_SaveMap() and CMD_ExportMap() return a bool
+indicating success or failure.
+
+------------------------------------------------------------------------
+r1288 | ajapted | 2013-07-23 14:01:08 +1000 (Tue, 23 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1287 | ajapted | 2013-07-23 13:55:44 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+Show an '!' symbol in the window title when a new map would replace an
+existing map in the current wad.
+
+------------------------------------------------------------------------
+r1286 | ajapted | 2013-07-23 13:41:28 +1000 (Tue, 23 Jul 2013) | 3 lines
+
+File / Save: if a new map would replace (overwrite) an existing map,
+give the user a third option: "Export" the map.
+
+------------------------------------------------------------------------
+r1285 | ajapted | 2013-07-22 22:20:54 +1000 (Mon, 22 Jul 2013) | 3 lines
+
+Improved look of Preferences and Log-viewer windows when not using the
+"Bright" color scheme -- the background at the bottom was too dark.
+
+------------------------------------------------------------------------
+r1284 | ajapted | 2013-07-22 21:38:47 +1000 (Mon, 22 Jul 2013) | 3 lines
+
+Dialogs: copy the fl_ask (etc) behavior and make the window's position
+dependent on where the mouse pointer is.
+
+------------------------------------------------------------------------
+r1283 | ajapted | 2013-07-22 21:15:40 +1000 (Mon, 22 Jul 2013) | 5 lines
+
+Dialogs:
+1. support the 'icon_type' to make different colored icons
+2. ensure the left-most button gets the focus
+3. fixed navigation problem (LEFT and RIGHT cursor keys)
+
+------------------------------------------------------------------------
+r1282 | ajapted | 2013-07-22 20:54:20 +1000 (Mon, 22 Jul 2013) | 4 lines
+
+Dialogs: worked to parse and create the buttons for DLG_Confirm(), and
+properly handle the var-args for DLG_Notify() and DLG_Confirm(), plus
+a few other tweaks.
+
+------------------------------------------------------------------------
+r1281 | ajapted | 2013-07-22 20:19:31 +1000 (Mon, 22 Jul 2013) | 5 lines
+
+1. Thing checker now detects if too many DM starts are present
+
+2. moved the DOOM_PLAYER_HEIGHT and DOOM_MIN/MAX_DEATHMATCH_STARTS to
+   be fields of the game_info_t structure.
+
+------------------------------------------------------------------------
+r1280 | ajapted | 2013-07-22 20:05:23 +1000 (Mon, 22 Jul 2013) | 3 lines
+
+Removed unused confirm_t type, and the OPT_CONFIRM stuff in the config
+loading and saving code.
+
+------------------------------------------------------------------------
+r1279 | ajapted | 2013-07-22 20:01:49 +1000 (Mon, 22 Jul 2013) | 2 lines
+
+Tidied up main.h
+
+------------------------------------------------------------------------
+r1278 | ajapted | 2013-07-22 16:40:24 +1000 (Mon, 22 Jul 2013) | 2 lines
+
+Removed code file: m_dialog.cc
+
+------------------------------------------------------------------------
+r1277 | ajapted | 2013-07-22 16:36:37 +1000 (Mon, 22 Jul 2013) | 5 lines
+
+Dialogs: renamed Confirm() --> DLG_Confirm(), and changed the parameters
+to take button names and use var-arg message.
+
+Note that the new DLG_Confirm() is not implemented yet.
+
+------------------------------------------------------------------------
+r1276 | ajapted | 2013-07-22 16:12:32 +1000 (Mon, 22 Jul 2013) | 2 lines
+
+Removed header files: m_dialog.h and ui_dialog.h
+
+------------------------------------------------------------------------
+r1275 | ajapted | 2013-07-22 16:05:23 +1000 (Mon, 22 Jul 2013) | 3 lines
+
+Began work on better dialog boxes.  This commit mainly renames 'Notify'
+function to 'DLG_Notify' and simplifies its parameters.
+
+------------------------------------------------------------------------
+r1274 | ajapted | 2013-07-22 15:17:27 +1000 (Mon, 22 Jul 2013) | 2 lines
+
+Dead code removal : NotImplemented() and Confirm2() functions.
+
+------------------------------------------------------------------------
+r1273 | ajapted | 2013-07-21 16:02:13 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1272 | ajapted | 2013-07-21 16:01:15 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+Improved scroll-bar colors.
+
+------------------------------------------------------------------------
+r1271 | ajapted | 2013-07-21 14:42:44 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+Check / textures: allow "-" on uppers when between two sky ceilings.
+
+------------------------------------------------------------------------
+r1270 | ajapted | 2013-07-21 14:29:51 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+CHANGELOG: minor rejig.
+
+------------------------------------------------------------------------
+r1269 | ajapted | 2013-07-21 14:23:17 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+Check / textures: wrote logic to detect and fix missing textures.
+
+------------------------------------------------------------------------
+r1268 | ajapted | 2013-07-21 14:00:38 +1000 (Sun, 21 Jul 2013) | 3 lines
+
+Check / things: fixed "Remove" button for things in void to not close
+the thing check dialog.
+
+------------------------------------------------------------------------
+r1267 | ajapted | 2013-07-21 13:59:29 +1000 (Sun, 21 Jul 2013) | 3 lines
+
+Check / textures: implemented "Fix" buttons for unknown textures and
+unknown flats.
+
+------------------------------------------------------------------------
+r1266 | ajapted | 2013-07-21 13:43:59 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+HERETIC: changed default floor to FLOOR00 (was FLOOR01).
+
+------------------------------------------------------------------------
+r1265 | ajapted | 2013-07-21 13:07:42 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+Ports / BOOM: added 'v' flag to point push/pull things.
+
+------------------------------------------------------------------------
+r1264 | ajapted | 2013-07-21 13:05:32 +1000 (Sun, 21 Jul 2013) | 3 lines
+
+Check / things: improved VOID testing to ignore things with the 'v' flag
+(such as Heretic's sound emitters).
+
+------------------------------------------------------------------------
+r1263 | ajapted | 2013-07-21 13:04:31 +1000 (Sun, 21 Jul 2013) | 3 lines
+
+Game defs: implemented new 'v' thing flag for things which may exist
+in the VOID, and use this flag for Heretic's sound emitters.
+
+------------------------------------------------------------------------
+r1262 | ajapted | 2013-07-21 12:39:40 +1000 (Sun, 21 Jul 2013) | 5 lines
+
+Check / things:
+1. implemented 'Remove' button for unknown things
+2. more accurate testing for "in the void" things
+3. added 'Remove' button for things in the void
+
+------------------------------------------------------------------------
+r1261 | ajapted | 2013-07-21 12:20:05 +1000 (Sun, 21 Jul 2013) | 2 lines
+
+foo
+
+------------------------------------------------------------------------
+r1260 | ajapted | 2013-07-21 12:13:33 +1000 (Sun, 21 Jul 2013) | 6 lines
+
+Check / things:
+1. implemented "Log" button for unknown things, which dumps all the
+   unknown id numbers to the log file (and opens the log viewer)
+
+2. moved the unknown thing results to the top.
+
+------------------------------------------------------------------------
+r1259 | ajapted | 2013-07-20 23:22:20 +1000 (Sat, 20 Jul 2013) | 4 lines
+
+Check / textures: implemented a "Log" button for unknown flats and textures,
+which prints the names (and usage count) into the log file, then opens up
+the log viewer.
+
+------------------------------------------------------------------------
+r1258 | ajapted | 2013-07-20 22:59:48 +1000 (Sat, 20 Jul 2013) | 3 lines
+
+Log viewer: have a function to open it, which now jumps to the end
+(i.e. ensures the last line is visible).
+
+------------------------------------------------------------------------
+r1257 | ajapted | 2013-07-20 22:25:26 +1000 (Sat, 20 Jul 2013) | 3 lines
+
+Check / textures: implemented detecting unknown flats and textures,
+and ability to show the sectors / lines (in the ERROR mode).
+
+------------------------------------------------------------------------
+r1256 | ajapted | 2013-07-20 22:01:19 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+Added W_TextureExists() and W_FlatExists() functions.
+
+------------------------------------------------------------------------
+r1255 | ajapted | 2013-07-20 21:49:28 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+Checks: began work on Texture checking functions....
+
+------------------------------------------------------------------------
+r1254 | ajapted | 2013-07-20 21:47:14 +1000 (Sat, 20 Jul 2013) | 3 lines
+
+Check / things: made unknown things a serious error, since vanilla DOOM
+will produce a fatal error for them.
+
+------------------------------------------------------------------------
+r1253 | ajapted | 2013-07-20 17:51:25 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+TODO: updated.
+
+------------------------------------------------------------------------
+r1252 | ajapted | 2013-07-20 17:38:10 +1000 (Sat, 20 Jul 2013) | 6 lines
+
+Clear the ERROR mode when necessary, such as when changing the edit mode
+or trying to select a new object, or certain operations that leave a
+certain object selected.
+
+For the Quantize command, we now _set_ the ERROR mode.
+
+------------------------------------------------------------------------
+r1251 | ajapted | 2013-07-20 14:33:28 +1000 (Sat, 20 Jul 2013) | 3 lines
+
+Preferences: reserve an area in 'Other' tab for "3D Preview Options".
+Nothing is there yet....
+
+------------------------------------------------------------------------
+r1250 | ajapted | 2013-07-20 14:24:50 +1000 (Sat, 20 Jul 2013) | 4 lines
+
+Fixed assertion when the 'FlipMap' command was used and the current level
+name cannot be found in the current wad (e.g. the IWAD was changed from
+DOOM 2 --> DOOM 1).
+
+------------------------------------------------------------------------
+r1249 | ajapted | 2013-07-20 14:17:15 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+DOOM 1: categorized the DOOM1-specific textures.
+
+------------------------------------------------------------------------
+r1248 | ajapted | 2013-07-20 14:06:27 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+DOOM: moved the DOOM2-only textures out of common/doom_tex.ugh
+
+------------------------------------------------------------------------
+r1247 | ajapted | 2013-07-20 13:41:59 +1000 (Sat, 20 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1246 | ajapted | 2013-07-20 13:31:55 +1000 (Sat, 20 Jul 2013) | 4 lines
+
+Map view: better drawing of selected sectors, draw knobbly lines where
+the knobs point inside the sectors, and skip lines that exist between
+two selected sectors.
+
+------------------------------------------------------------------------
+r1245 | ajapted | 2013-07-20 11:36:26 +1000 (Sat, 20 Jul 2013) | 5 lines
+
+Map view:
+1. smaller surrounding box for highlighted things
+2. improved arrow drawing for large highlighted things
+3. improved arrow drawing for highlighted linedefs
+
+------------------------------------------------------------------------
+r1244 | ajapted | 2013-07-19 20:36:21 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+HERETIC: apply same fix for exit-level linetypes.
+
+------------------------------------------------------------------------
+r1243 | ajapted | 2013-07-19 20:28:36 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+DOOM: updated exit specials to use "s1" instead of "S1", to prevent
+those lines showing up in the "linedefs missing a needed tag" check.
+
+------------------------------------------------------------------------
+r1242 | ajapted | 2013-07-19 20:24:54 +1000 (Fri, 19 Jul 2013) | 4 lines
+
+Check / tags: added new test for linedefs missing a needed tag.
+Needs some game definition changes to work properly, especially the
+exit level types to use "s1" instead of "S1".
+
+------------------------------------------------------------------------
+r1241 | ajapted | 2013-07-19 20:00:25 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+Check / tags: finished GUI parts of detecting unmatched tagged stuff.
+Also moved the Lowest/Highest values to occupy a single line.
+
+------------------------------------------------------------------------
+r1240 | ajapted | 2013-07-19 19:15:11 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+Check / tags: worked on detecting sectors with no tagged linedef and
+vice versa.  This commit has the detection logic.
+
+------------------------------------------------------------------------
+r1239 | ajapted | 2013-07-19 15:59:19 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Check / tags: fixed the "all_mode" handling.
+
+------------------------------------------------------------------------
+r1238 | ajapted | 2013-07-19 15:56:48 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Checks.txt : a few more tag-testing ideas...
+
+------------------------------------------------------------------------
+r1237 | ajapted | 2013-07-19 15:52:49 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+Check / things: implemented ThingStuckInWall() -- finishing the support
+for stuck thing detection.
+
+------------------------------------------------------------------------
+r1236 | ajapted | 2013-07-19 15:51:55 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Renamed LineCrossesBox() --> LineTouchesBox(), and removed some unused code.
+
+------------------------------------------------------------------------
+r1235 | ajapted | 2013-07-19 14:29:09 +1000 (Fri, 19 Jul 2013) | 5 lines
+
+Check / things: for monsters, allow a small (8 unit) leeway to overlap a
+solid thing before considering it as stuck.  That's because the monster
+movement code allows a monster to move a certain distance from its
+starting position.
+
+------------------------------------------------------------------------
+r1234 | ajapted | 2013-07-19 13:53:02 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Check / things: implemented detecting actors stuck in solid things.
+
+------------------------------------------------------------------------
+r1233 | ajapted | 2013-07-19 13:09:33 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+Check / things: began work on detecting players and monsters stuck in
+walls or other things.
+
+------------------------------------------------------------------------
+r1232 | ajapted | 2013-07-19 11:56:33 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+Checks: removed the previous checking code -- it was not used as-is,
+but some of that code or algorithms were used in the new functions.
+
+------------------------------------------------------------------------
+r1231 | ajapted | 2013-07-19 11:53:40 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Checks: just moved code around.
+
+------------------------------------------------------------------------
+r1230 | ajapted | 2013-07-19 11:37:36 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+Port definitions: updated with 'n' (non-blocking) thing flag.
+
+------------------------------------------------------------------------
+r1229 | ajapted | 2013-07-19 11:35:31 +1000 (Fri, 19 Jul 2013) | 2 lines
+
+HACX: updated thing defs with new 'n' (non-blocking) flag.
+
+------------------------------------------------------------------------
+r1228 | ajapted | 2013-07-19 11:31:05 +1000 (Fri, 19 Jul 2013) | 3 lines
+
+HERETIC: updated things, added missing 'l' (lit) and 'c' (ceiling) flags
+as well as the new 'n' (non-blocking) flag.
+
+------------------------------------------------------------------------
+r1227 | ajapted | 2013-07-18 22:47:55 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Game defs: updated DOOM 1 and 2 definitions to add the 'n' non-solid flag
+to all the things which need it.
+
+------------------------------------------------------------------------
+r1226 | ajapted | 2013-07-18 22:45:42 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Game defs: support a new thing flag 'n' : Non-Solid.  This will be used
+later for detecting things stuck in walls or other things.
+
+------------------------------------------------------------------------
+r1225 | ajapted | 2013-07-18 22:19:24 +1000 (Thu, 18 Jul 2013) | 2 lines
+
+TODO and CHANGELOG update.
+
+------------------------------------------------------------------------
+r1224 | ajapted | 2013-07-18 22:15:06 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Log viewer: finished the ability to "Save" the full logs to a file.
+The grunt-work is done by new LogSaveTo(FILE *) function.
+
+------------------------------------------------------------------------
+r1223 | ajapted | 2013-07-18 21:51:41 +1000 (Thu, 18 Jul 2013) | 5 lines
+
+Log viewer:
+1. implemented copying the selected lines to the clipboard
+2. made CTRL-C be a shortcut for the "Copy" button
+3. renamed the "OK" button to "Close"
+
+------------------------------------------------------------------------
+r1222 | ajapted | 2013-07-18 21:01:04 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Opposite finder: when building the binary trees, skip purely horizontal
+lines in the Y tree, similarly purely vertical lines in the X tree.
+
+------------------------------------------------------------------------
+r1221 | ajapted | 2013-07-18 20:45:30 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Log viewer: added logic to activate the "Copy" button when the user has
+selected two or more lines -- otherwise it stays deactivated.
+
+------------------------------------------------------------------------
+r1220 | ajapted | 2013-07-18 19:57:30 +1000 (Thu, 18 Jul 2013) | 6 lines
+
+Log viewer:
+1. partial work to implement "Save" button
+2. use a Fl_Multi_Browser, so user can select areas to copy/save
+3. added a "Copy" button to bottom area (not yet functional)
+4. in bottom area, place resizable gap between "OK" and other buttons
+
+------------------------------------------------------------------------
+r1219 | ajapted | 2013-07-18 19:08:16 +1000 (Thu, 18 Jul 2013) | 2 lines
+
+Log viewer: implemented the "OK" button (to close) and "Clear" button.
+
+------------------------------------------------------------------------
+r1218 | ajapted | 2013-07-18 18:55:33 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Log viewer: began work improving it, with a button area at the bottom
+which will contain three buttons: "Save", "Clear" and "OK".
+
+------------------------------------------------------------------------
+r1217 | ajapted | 2013-07-18 17:21:19 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Opposite finder: fixed some bugs, and actually use it to speed up the
+sector mismatch test.  The new logic is roughly 4-5 times faster.
+
+------------------------------------------------------------------------
+r1216 | ajapted | 2013-07-18 16:36:24 +1000 (Thu, 18 Jul 2013) | 2 lines
+
+Opposite finder: implemented the binary-tree testing logic.
+
+------------------------------------------------------------------------
+r1215 | ajapted | 2013-07-18 16:20:35 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Opposite finder: in fastopp nodes, store linedefs as integers rather than
+pointers.
+
+------------------------------------------------------------------------
+r1214 | ajapted | 2013-07-18 16:16:09 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Opposite finder: moved state into a 'opp_test_state_t' structure, and
+also moved the code to handle a single linedef there.
+
+------------------------------------------------------------------------
+r1213 | ajapted | 2013-07-18 15:58:10 +1000 (Thu, 18 Jul 2013) | 7 lines
+
+Began work on a faster version of OppositeLineDef() and OppositeSector(),
+mainly for the sector mismatch test.
+
+So far: written the logic for creating a quadtree-like structure and
+storing linedefs in it.  Unlike a quadtree, this is one-dimensional and
+there are two of them (for X and Y dimensions). 
+
+------------------------------------------------------------------------
+r1212 | ajapted | 2013-07-18 15:20:36 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Checks / linedefs: added test for linedefs with wrong 2S (TwoSided) flag,
+as well as actions to show and fix them.
+
+------------------------------------------------------------------------
+r1211 | ajapted | 2013-07-18 15:10:49 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Checks / linedefs: implemented test for one-sided lines without blocking
+flag, and actions to show and fix them.
+
+------------------------------------------------------------------------
+r1210 | ajapted | 2013-07-18 13:46:32 +1000 (Thu, 18 Jul 2013) | 3 lines
+
+Checks: use UI_Check_base as the base for remaining dialog classes,
+namely UI_Check_Sectors, UI_Check_Things and UI_Check_Tags.
+
+------------------------------------------------------------------------
+r1209 | ajapted | 2013-07-16 22:30:09 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1208 | ajapted | 2013-07-16 22:29:18 +1000 (Tue, 16 Jul 2013) | 3 lines
+
+Checks: converted UI_Check_Vertices and UI_Check_LineDefs classes to
+use the new base class.
+
+------------------------------------------------------------------------
+r1207 | ajapted | 2013-07-16 22:19:21 +1000 (Tue, 16 Jul 2013) | 3 lines
+
+Checks: created a base class for all the dialogs : UI_Check_base.
+Nothing uses it yet....
+
+------------------------------------------------------------------------
+r1206 | ajapted | 2013-07-16 21:16:28 +1000 (Tue, 16 Jul 2013) | 7 lines
+
+Use UI_Escapable_Window for most other dialogs with a "Cancel" button.
+
+Not used for UI_NodeDialog since it has special behavior (first ESC
+press cancels the build but keeps the window open).
+
+Not used with UI_Check_XXX yet, pending a superclass for them.
+
+------------------------------------------------------------------------
+r1205 | ajapted | 2013-07-16 21:02:26 +1000 (Tue, 16 Jul 2013) | 3 lines
+
+About dialog: subclass from UI_Escapable_Window, simplifying the code
+e.g. no longer need our own handle() method.
+
+------------------------------------------------------------------------
+r1204 | ajapted | 2013-07-16 21:01:08 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Added UI_Escapable_Window class -- a subclass of Fl_Double_Window.
+
+------------------------------------------------------------------------
+r1203 | ajapted | 2013-07-16 20:38:33 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Code: re-whitespaced ui_about.cc/h to be consistent.
+
+------------------------------------------------------------------------
+r1202 | ajapted | 2013-07-16 20:11:27 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+misc/Checks.txt : more twiddling...
+
+------------------------------------------------------------------------
+r1201 | ajapted | 2013-07-16 20:10:56 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Made some Beep() error messages more consistent.
+
+------------------------------------------------------------------------
+r1200 | ajapted | 2013-07-16 19:52:43 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Checks: moved code around, namely TAG stuff --> e_checks2.cc
+
+------------------------------------------------------------------------
+r1199 | ajapted | 2013-07-16 19:49:37 +1000 (Tue, 16 Jul 2013) | 10 lines
+
+Checks:
+1. rearranged 'Check' menu, added 'Major stuff' item which does all
+   the checks but ignores minor problems.
+
+2. made the 'Check / ALL' menu item perform the Texture and Tags
+   tests too (not just the Vert/Lin/Sec/Thing tests).
+
+3. Code-wise, pass 'min_severity' to each CHECK_xxx function,
+   instead of 'all_mode' boolean.
+
+------------------------------------------------------------------------
+r1198 | ajapted | 2013-07-16 19:06:16 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / linedefs: implemented test for criss-crossing linedefs.
+
+------------------------------------------------------------------------
+r1197 | ajapted | 2013-07-16 18:08:59 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / linedefs: moved code around, added linedef_minx_CMP_pred.
+
+------------------------------------------------------------------------
+r1196 | ajapted | 2013-07-16 17:10:27 +1000 (Tue, 16 Jul 2013) | 6 lines
+
+Checks: for tests which have a "Show" button and a map-modifying button,
+place the "Show" button on the left and other button on the right.
+
+That's because the first button is navigated to by FLTK, and hence it
+should ideally be a non-destructive action.
+
+------------------------------------------------------------------------
+r1195 | ajapted | 2013-07-16 17:06:58 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / linedefs: added 'Remove' feature for overlapping linedefs.
+
+------------------------------------------------------------------------
+r1194 | ajapted | 2013-07-16 16:46:27 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Checks: layout tweak.
+
+------------------------------------------------------------------------
+r1193 | ajapted | 2013-07-16 16:43:27 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / linedefs: detection logic for directly overlapping linedefs.
+
+------------------------------------------------------------------------
+r1192 | ajapted | 2013-07-16 14:53:14 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / linedefs: added test for linedefs without a right side.
+
+------------------------------------------------------------------------
+r1191 | ajapted | 2013-07-16 14:43:41 +1000 (Tue, 16 Jul 2013) | 3 lines
+
+Check / linedefs: implemented zero-length linedef test, with a button to
+show them (in vertex mode) and a button to remove them.
+
+------------------------------------------------------------------------
+r1190 | ajapted | 2013-07-16 13:58:52 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+New code file 'e_checks2.cc' -- it will contain linedef checking code.
+
+------------------------------------------------------------------------
+r1189 | ajapted | 2013-07-16 13:38:22 +1000 (Tue, 16 Jul 2013) | 4 lines
+
+Check / sectors: re-implemented the mismatched sectors test, based on
+the existing DEU code.  However it is quite slow, O(n^2) with number
+of linedefs.
+
+------------------------------------------------------------------------
+r1188 | ajapted | 2013-07-16 13:04:51 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Removed the now redundant GetOppositeSector() code.
+
+------------------------------------------------------------------------
+r1187 | ajapted | 2013-07-16 13:03:32 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Added OppositeSector() function which uses OppositeLineDef().
+
+------------------------------------------------------------------------
+r1186 | ajapted | 2013-07-16 12:45:28 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+Check / things: tweaked player start messages.
+
+------------------------------------------------------------------------
+r1185 | ajapted | 2013-07-16 12:38:32 +1000 (Tue, 16 Jul 2013) | 2 lines
+
+misc/Checks.txt updated.
+
+------------------------------------------------------------------------
+r1184 | ajapted | 2013-07-16 12:38:07 +1000 (Tue, 16 Jul 2013) | 5 lines
+
+Check / sectors: implemented detection of unclosed sectors (mismatches
+at vertices), with buttons to show the sectors and show the vertices.
+
+Renamed XXX_Highlight --> XXX_Show, and removed a bit of dead code.
+
+------------------------------------------------------------------------
+r1183 | ajapted | 2013-07-16 10:59:25 +1000 (Tue, 16 Jul 2013) | 4 lines
+
+Key bindings:
+1. renamed binding command: AwaitMeta --> MetaKey
+2. allow ';' to toggle the await_meta state on and off
+
+------------------------------------------------------------------------
+r1182 | ajapted | 2013-07-15 21:50:17 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+When loading a level, check for shared sidedefs and if exist ask user
+whether to unpack them or not.
+
+------------------------------------------------------------------------
+r1181 | ajapted | 2013-07-15 21:40:06 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Check / sectors: finished the sidedef unpacking algorithm.
+
+------------------------------------------------------------------------
+r1180 | ajapted | 2013-07-15 21:19:04 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Check / sectors: worked on algorithm to unpack sidedefs...
+
+------------------------------------------------------------------------
+r1179 | ajapted | 2013-07-15 20:49:59 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Check / sectors: implemented detection of shared sidedefs, and ability
+to show them in the error mode.  To-Do: ability to unpack them.
+
+------------------------------------------------------------------------
+r1178 | ajapted | 2013-07-15 20:08:11 +1000 (Mon, 15 Jul 2013) | 4 lines
+
+Check / sectors: added test for ceiling < floor height, with two action
+buttons: "Fix" will set ceiling same as floor, and "Show" to highlight
+them in the error_mode.
+
+------------------------------------------------------------------------
+r1177 | ajapted | 2013-07-15 19:56:46 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Check / sectors: count unused sidedefs, and ability to remove them.
+
+------------------------------------------------------------------------
+r1176 | ajapted | 2013-07-15 19:41:24 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks: began work on SECTOR checks...  So far only have unused count
+(with button to remove those unused sectors).
+
+------------------------------------------------------------------------
+r1175 | ajapted | 2013-07-15 19:40:15 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+tweaked Prune message.
+
+------------------------------------------------------------------------
+r1174 | ajapted | 2013-07-15 19:26:55 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Checks.txt : updated for current plans.
+
+------------------------------------------------------------------------
+r1173 | ajapted | 2013-07-15 19:11:54 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks: when highlighting error objects, ensure we change the editor mode
+when necessary.
+
+------------------------------------------------------------------------
+r1172 | ajapted | 2013-07-15 19:01:23 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Checks: tweakage.
+
+------------------------------------------------------------------------
+r1171 | ajapted | 2013-07-15 18:53:32 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Checks / things: added detection of things in void-space.
+
+------------------------------------------------------------------------
+r1170 | ajapted | 2013-07-15 18:41:25 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Dead code removal : CheckStartingPos()
+
+------------------------------------------------------------------------
+r1169 | ajapted | 2013-07-15 18:40:20 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Checks / things: added checks for missing player starts.
+
+------------------------------------------------------------------------
+r1168 | ajapted | 2013-07-15 16:59:05 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks: when highlighting error objects, use GoToSelection() to ensure
+the user will see them.
+
+------------------------------------------------------------------------
+r1167 | ajapted | 2013-07-15 16:56:07 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks: began work on THING checking.  So far: can count the number of
+unknown things, and highlight them in the error mode.
+
+------------------------------------------------------------------------
+r1166 | ajapted | 2013-07-15 16:31:55 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1165 | ajapted | 2013-07-15 16:22:19 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Prefs: layout tweaks.
+
+------------------------------------------------------------------------
+r1164 | ajapted | 2013-07-15 16:19:22 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Preferences: implemented a 'Default editing mode' setting.
+
+------------------------------------------------------------------------
+r1163 | ajapted | 2013-07-15 14:22:11 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+UI_Sector and UI_LineDef: use Tags_ApplyNewValue() in tag_callback.
+
+------------------------------------------------------------------------
+r1162 | ajapted | 2013-07-15 14:19:28 +1000 (Mon, 15 Jul 2013) | 6 lines
+
+Implemented new 'ApplyTag' key-binding command.  With the "fresh" param
+it sets the tags on selected objects to a fresh tag (max + 1), and with
+the "last" parameter it sets the tag to the last one (maximum).
+
+Current bindings are META-F and META-L.
+
+------------------------------------------------------------------------
+r1161 | ajapted | 2013-07-15 14:08:52 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Main loop: disable error_mode whenever selection becomes empty.
+
+------------------------------------------------------------------------
+r1160 | ajapted | 2013-07-15 13:35:16 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks / tags: added feature to assign a fresh tag value to the current
+selected linedefs or sectors.
+
+------------------------------------------------------------------------
+r1159 | ajapted | 2013-07-15 13:18:26 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Checks: implemented "TAG" dialog, which for now just shows the lowest and
+highest used tag numbers.
+
+------------------------------------------------------------------------
+r1158 | ajapted | 2013-07-15 13:02:04 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1157 | ajapted | 2013-07-15 12:27:08 +1000 (Mon, 15 Jul 2013) | 3 lines
+
+Save message : added "NO NODES" so the user knows that nodes have not
+been built.
+
+------------------------------------------------------------------------
+r1156 | ajapted | 2013-07-15 11:58:03 +1000 (Mon, 15 Jul 2013) | 2 lines
+
+Minor rename: edit.obj_type --> edit.mode
+
+------------------------------------------------------------------------
+r1155 | ajapted | 2013-07-14 22:57:21 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Check / vertices: implemented ability to merge overlapping vertices, or
+highlight them in the error selection [that part is not complete].
+
+------------------------------------------------------------------------
+r1154 | ajapted | 2013-07-14 22:19:41 +1000 (Sun, 14 Jul 2013) | 4 lines
+
+Checks / vertices:
+1. fixed some bugs in Reset() method [one was quite nasty]
+2. implemented Vertex_RemoveUnused() function
+
+------------------------------------------------------------------------
+r1153 | ajapted | 2013-07-14 22:05:20 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Checks / vertices: implemented Vertex_FindOverlaps() and FindUnused(),
+fixed AddLine() to copy the label, and tweaked a few things.
+
+------------------------------------------------------------------------
+r1152 | ajapted | 2013-07-14 21:29:21 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Checks / vertices: worked on performing proper tests, and improved the
+size and layout of the dialog window.
+
+------------------------------------------------------------------------
+r1151 | ajapted | 2013-07-14 20:32:35 +1000 (Sun, 14 Jul 2013) | 11 lines
+
+Check:
+1. use an enumeration for the result of CHECK_xxx functions
+
+2. support CHECK_xxx functions returning a value to indicate skipping
+   the rest of the checks in CHECK_All()
+
+3. ability to Reset() the UI dialog, so checks can be re-performed on
+   an existing dialog window
+         
+4. fixed not passing 'this' to the callback functions.
+
+------------------------------------------------------------------------
+r1150 | ajapted | 2013-07-14 19:57:20 +1000 (Sun, 14 Jul 2013) | 6 lines
+
+Checks:
+1. the CHECK_xxx functions now return a "severity" value (an int)
+2. keep track of 'worst_severity' in the UI_CheckXXX classes
+3. fixed logic in CHECK_All() -- it needs to keep going when one of the
+   CHECK_xxx() functions returns a non-zero severity
+
+------------------------------------------------------------------------
+r1149 | ajapted | 2013-07-14 19:40:29 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Checks: implemented an 'AddLine' method for the Vertex dialog, which
+supports upto three buttons for actions to take.
+
+------------------------------------------------------------------------
+r1148 | ajapted | 2013-07-14 19:03:33 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+Check Menu: fixed shortcuts.
+
+------------------------------------------------------------------------
+r1147 | ajapted | 2013-07-14 18:57:38 +1000 (Sun, 14 Jul 2013) | 4 lines
+
+Checks:
+1. added a bare-bones UI_CheckVertices dialog class
+2. removed some obsolete code
+
+------------------------------------------------------------------------
+r1146 | ajapted | 2013-07-14 18:55:03 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Preferences: fixed potential problem with UI_EditKey and the close button
+of the window manager.
+
+------------------------------------------------------------------------
+r1145 | ajapted | 2013-07-14 18:20:19 +1000 (Sun, 14 Jul 2013) | 6 lines
+
+Began work on map-checking functions.  Firstly have a 'Check' menu with
+various choices (like "Vertices", "Sectors", etc).  These are routed
+through a new 'CheckMap' binding command whose first parameter is the
+area to check.  Some special keywords are "current" for the current
+enditing mode, and "all" to check all the major stuff.
+
+------------------------------------------------------------------------
+r1144 | ajapted | 2013-07-14 18:10:59 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1143 | ajapted | 2013-07-14 15:20:28 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+VM: disabled the testing stuff in main.cc -- all the scripting stuff is
+very much on the back-burner now....
+
+------------------------------------------------------------------------
+r1142 | ajapted | 2013-07-14 15:15:08 +1000 (Sun, 14 Jul 2013) | 4 lines
+
+The ';' key waits for the next key, and makes it META (as if it had
+been pressed with the META modifier key).  This could be handy on
+computers with limited keyboards -- especially laptops.
+
+------------------------------------------------------------------------
+r1141 | ajapted | 2013-07-14 14:42:43 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+Prefs: tweak.
+
+------------------------------------------------------------------------
+r1140 | ajapted | 2013-07-14 14:36:15 +1000 (Sun, 14 Jul 2013) | 4 lines
+
+Config file:
+1. handle empty strings, write and parse as '' (two single quotes)
+2. moved the glbsp_xxx entries down
+
+------------------------------------------------------------------------
+r1139 | ajapted | 2013-07-14 14:23:06 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+Game defs: removed obsolete 'default_port' command.
+
+------------------------------------------------------------------------
+r1138 | ajapted | 2013-07-14 14:11:07 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1137 | ajapted | 2013-07-14 14:07:40 +1000 (Sun, 14 Jul 2013) | 6 lines
+
+Preferences: added 'Default Port' setting to the Editing tab.
+
+This affects general startup too, as previously the default port was a
+game definition setting.  Hence added DeterminePort() whose main job
+is to ensure the default_port value is valid [and reset it if not].
+
+------------------------------------------------------------------------
+r1136 | ajapted | 2013-07-14 14:03:11 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+Game (UGH) parser: disabled the 'default_port' command.
+
+------------------------------------------------------------------------
+r1135 | ajapted | 2013-07-14 13:24:22 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+the X11 UI_Window::Maximize() implementation now does a short delay, to
+allow the X message to get to the X server and back.
+
+------------------------------------------------------------------------
+r1134 | ajapted | 2013-07-14 13:11:41 +1000 (Sun, 14 Jul 2013) | 2 lines
+
+Utils: added TimeDelay() function.
+
+------------------------------------------------------------------------
+r1133 | ajapted | 2013-07-14 13:03:49 +1000 (Sun, 14 Jul 2013) | 3 lines
+
+Made patch image loading fail more gracefully: a bad offset now prints a
+warning to the log file instead of inducing a fatal error.
+
+------------------------------------------------------------------------
+r1132 | ajapted | 2013-07-11 19:08:38 +1000 (Thu, 11 Jul 2013) | 2 lines
+
+Version bump.
+
+------------------------------------------------------------------------
+r1131 | ajapted | 2013-07-11 18:58:15 +1000 (Thu, 11 Jul 2013) | 3 lines
+
+Key bindings: shifted 'N' and 'P' keys now have the FlipMap function,
+and moved the GivenFile functions to META-N and META-P.
+
+------------------------------------------------------------------------
+r1130 | ajapted | 2013-07-11 18:55:30 +1000 (Thu, 11 Jul 2013) | 4 lines
+
+Implemented new binding command 'FlipMap' which loads another map in the
+current wad.  The first param must be "next", "prev", "first" or "last".
+Very useful for browsing through a pwad with multiple maps.
+
+------------------------------------------------------------------------
+r1129 | ajapted | 2013-07-11 18:43:32 +1000 (Thu, 11 Jul 2013) | 3 lines
+
+Wad code: added FindLevel_Raw() method which returns a level index
+instead of a _lump_ index.
+
+------------------------------------------------------------------------
+r1128 | ajapted | 2013-07-05 21:34:57 +1000 (Fri, 05 Jul 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1127 | ajapted | 2013-07-05 20:28:47 +1000 (Fri, 05 Jul 2013) | 2 lines
+
+Removed obsolete GRID_XXX color defines.
+
+------------------------------------------------------------------------
+r1126 | ajapted | 2013-07-05 20:13:27 +1000 (Fri, 05 Jul 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1125 | ajapted | 2013-07-05 20:11:11 +1000 (Fri, 05 Jul 2013) | 2 lines
+
+Grid: implemented preference colors for the Normal grid.
+
+------------------------------------------------------------------------
+r1124 | ajapted | 2013-07-05 19:03:30 +1000 (Fri, 05 Jul 2013) | 4 lines
+
+Grid:
+1. added preference settings for the Dotty grid colors
+2. slightly better rendering of the Dotty grid
+
+------------------------------------------------------------------------
+r1123 | ajapted | 2013-07-05 16:33:33 +1000 (Fri, 05 Jul 2013) | 5 lines
+
+Grid:
+1. implemented option to limit grid toggle to a single kind
+2. added option to hide grid in FREE mode, show it in SNAP mode
+3. nomenclature: old grid is called "dotty", new grid "normal"
+
+------------------------------------------------------------------------
+r1122 | ajapted | 2013-07-05 16:28:36 +1000 (Fri, 05 Jul 2013) | 2 lines
+
+UI_Canvas: split DrawGrid() into two separate methods.
+
+------------------------------------------------------------------------
+r1121 | ajapted | 2013-07-04 20:19:47 +1000 (Thu, 04 Jul 2013) | 2 lines
+
+Preferences: a few more tweaks
+
+------------------------------------------------------------------------
+r1120 | ajapted | 2013-07-04 18:24:04 +1000 (Thu, 04 Jul 2013) | 4 lines
+
+Preferences:
+1. added a 'Mouse' tab, nothing in it yet
+2. renamed 'glBSP' tab --> 'Other', ready for some other stuff
+
+------------------------------------------------------------------------
+r1119 | ajapted | 2013-07-04 16:54:11 +1000 (Thu, 04 Jul 2013) | 4 lines
+
+Fixed recent bug with mousewheel zooming -- Editor_RawWheel() was not
+returning 1 and hence FLTK was sending the mousewheel event to the
+scrollbars which used it to scroll.
+
+------------------------------------------------------------------------
+r1118 | ajapted | 2013-07-04 16:28:06 +1000 (Thu, 04 Jul 2013) | 2 lines
+
+CHANGELOG rejigged.
+
+------------------------------------------------------------------------
+r1117 | ajapted | 2013-07-04 14:45:46 +1000 (Thu, 04 Jul 2013) | 2 lines
+
+Implemented new preference setting : maximize the window on start.
+
+------------------------------------------------------------------------
+r1116 | ajapted | 2013-07-04 14:36:43 +1000 (Thu, 04 Jul 2013) | 5 lines
+
+UI_Window: added Maximize() method, using OS-native code since FLTK does
+not provide the required functionality.  Only implemented for Win32 and
+Linux/X11 : the OSX implemented is commented out since it requires some
+Objective-C logic.
+
+------------------------------------------------------------------------
+r1115 | ajapted | 2013-07-01 15:49:13 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+event handling tweaks.
+
+------------------------------------------------------------------------
+r1114 | ajapted | 2013-07-01 13:11:44 +1000 (Mon, 01 Jul 2013) | 6 lines
+
+Moved the mouse button and movement logic out of UI_Canvas class and
+into Editor_RawButton() and Editor_RawMouse() functions.
+
+This fixes the hack in UI_Render3D class [calling the handle method of
+UI_Canvas, even though the widget was hidden].
+
+------------------------------------------------------------------------
+r1113 | ajapted | 2013-07-01 12:55:11 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+Minor refactoring of event handling in UI_Canvas class.
+
+------------------------------------------------------------------------
+r1112 | ajapted | 2013-07-01 11:59:37 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+Keys: added 'FL_Wheel' : pseudo key value for the mouse wheel.
+
+------------------------------------------------------------------------
+r1111 | ajapted | 2013-07-01 11:41:14 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+Moved handling of mouse wheel events to Editor_RawWheel() function.
+
+------------------------------------------------------------------------
+r1110 | ajapted | 2013-07-01 11:23:40 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+Key bindings: support 4 parameters to a binding (limit was 2 before).
+
+------------------------------------------------------------------------
+r1109 | ajapted | 2013-07-01 11:12:24 +1000 (Mon, 01 Jul 2013) | 2 lines
+
+handle the FL_KEYUP event in Editor_RawKey().
+
+------------------------------------------------------------------------
+r1108 | ajapted | 2013-06-30 17:16:34 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+Moved the raw keyboard event handling out of UI_Canvas class, instead
+have a global function: Editor_RawKey().
+
+------------------------------------------------------------------------
+r1107 | ajapted | 2013-06-30 16:47:14 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+VM: tweak
+
+------------------------------------------------------------------------
+r1106 | ajapted | 2013-06-30 16:39:56 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+Renamed directory: up_scripts --> ups
+
+------------------------------------------------------------------------
+r1105 | ajapted | 2013-06-30 16:38:40 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+Updated installation makefiles (etc) to create 'ups' folder and to
+install the 'core_defs.lua' file.
+
+------------------------------------------------------------------------
+r1104 | ajapted | 2013-06-30 16:31:54 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+VM: added file 'core_defs.up' -- will define all the builtins and any
+other needed stuff.
+
+------------------------------------------------------------------------
+r1103 | ajapted | 2013-06-30 15:44:13 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+Added top-level directory: 'up_scripts'
+
+------------------------------------------------------------------------
+r1102 | ajapted | 2013-06-30 13:41:42 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+TODO update (did some things, added some things).
+
+------------------------------------------------------------------------
+r1101 | ajapted | 2013-06-30 13:40:29 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1100 | ajapted | 2013-06-30 13:39:18 +1000 (Sun, 30 Jun 2013) | 5 lines
+
+Config: added 'render_missing_bright' and 'render_unknown_bright' vars,
+and handle them in the rendering code.
+
+Note: not present in the Preferences dialog (yet).
+
+------------------------------------------------------------------------
+r1099 | ajapted | 2013-06-30 13:29:42 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+3D preview: implemented missing textures (an '!' on an orange background).
+
+------------------------------------------------------------------------
+r1098 | ajapted | 2013-06-30 13:23:41 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+3D preview: show missing textures as fullbright, so they stand out in
+dark rooms.  
+
+------------------------------------------------------------------------
+r1097 | ajapted | 2013-06-30 12:58:35 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+3d preview: tweaked untextured color choice.
+
+------------------------------------------------------------------------
+r1096 | ajapted | 2013-06-30 12:57:38 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+Game defs / DOOM (etc) : updated color definitions.
+
+------------------------------------------------------------------------
+r1095 | ajapted | 2013-06-30 12:56:46 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+Auto-load recent map: don't do it when -iwad or -warp has been used on
+the command line.
+
+------------------------------------------------------------------------
+r1094 | ajapted | 2013-06-30 12:31:47 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+Game defs / HERETIC: updated with color definitions ('wall', 'missing' etc).
+
+------------------------------------------------------------------------
+r1093 | ajapted | 2013-06-30 12:25:19 +1000 (Sun, 30 Jun 2013) | 3 lines
+
+3D preview: use the game-specified wall and floor colors, rather than
+the hard-coded values which were DOOM specific.
+
+------------------------------------------------------------------------
+r1092 | ajapted | 2013-06-30 12:23:01 +1000 (Sun, 30 Jun 2013) | 2 lines
+
+Game def parser: support 'wall' and 'floor' color definitions.
+
+------------------------------------------------------------------------
+r1091 | ajapted | 2013-06-30 12:00:25 +1000 (Sun, 30 Jun 2013) | 4 lines
+
+Game def parser: implemented new 'color' command which takes a keyword
+and one or two numbers (palette indices).  The following keywords are
+currently supported: 'sky', 'missing', 'unknown_tex', 'unknown_flat'.
+
+------------------------------------------------------------------------
+r1090 | ajapted | 2013-06-29 22:19:26 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+1. moved g_sky_color and g_sky_flat into a new 'game_info' structure
+2. moved is_sky() function from levels.cc --> m_game.cc
+
+------------------------------------------------------------------------
+r1089 | ajapted | 2013-06-29 22:10:44 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+GAME DEFS: added common/doom_colors.ugh : color defs for games using
+the DOOM palette.
+
+------------------------------------------------------------------------
+r1088 | ajapted | 2013-06-29 22:03:59 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+3D Preview: implemented displaying a dummy texture for unknown flats or
+textures (a different one for flats vs textures).
+
+------------------------------------------------------------------------
+r1087 | ajapted | 2013-06-29 21:28:57 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+Img code: added functions to create dummy textures for the 3D renderer,
+one for missing (HOM) textures and one for unknown textures.
+
+------------------------------------------------------------------------
+r1086 | ajapted | 2013-06-29 21:14:25 +1000 (Sat, 29 Jun 2013) | 2 lines
+
+Img class: turned 'scale_img()' into a method, plus various tidying.
+
+------------------------------------------------------------------------
+r1085 | ajapted | 2013-06-29 20:38:51 +1000 (Sat, 29 Jun 2013) | 2 lines
+
+Fixed thing images in the browser to have a black background.
+
+------------------------------------------------------------------------
+r1084 | ajapted | 2013-06-29 20:28:42 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+LineDef panel: don't show an upper texture as missing if sky ceilings
+exist on both sides.
+
+------------------------------------------------------------------------
+r1083 | ajapted | 2013-06-29 20:18:27 +1000 (Sat, 29 Jun 2013) | 3 lines
+
+LineDef panel: implemented showing missing textures, for uppers and lowers
+this involves checking for a floor / ceiling difference.
+
+------------------------------------------------------------------------
+r1082 | ajapted | 2013-06-29 20:02:08 +1000 (Sat, 29 Jun 2013) | 4 lines
+
+UI_Pic : implemented ability to show "unknown" and "missing" textures,
+the former as a large '?' on a cyan background, the latter as '!' on an
+orange background.
+
+------------------------------------------------------------------------
+r1081 | ajapted | 2013-06-28 21:18:31 +1000 (Fri, 28 Jun 2013) | 3 lines
+
+UI: in sidedef panels, show low-contrast "Lower", "Mid" and "Upper" for
+unset textures.  Similarly for pics in sector and thing panels.
+
+------------------------------------------------------------------------
+r1080 | ajapted | 2013-06-28 19:51:32 +1000 (Fri, 28 Jun 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1079 | ajapted | 2013-06-28 19:35:54 +1000 (Fri, 28 Jun 2013) | 4 lines
+
+Scroll-bars: improved logic for adjusting the scroll bars after the
+canvas position has moved, having grid.MoveTo() and grid.Scroll()
+methods instead of directly modifying grid.orig_x/_y
+
+------------------------------------------------------------------------
+r1078 | ajapted | 2013-06-28 12:11:35 +1000 (Fri, 28 Jun 2013) | 4 lines
+
+Scroll-bars: implemented callbacks, i.e. dragging the knobs actually
+scrolls the map (and in turn, moves the knobs).  Hence the scroll-bar
+feature is mostly complete now.
+
+------------------------------------------------------------------------
+r1077 | ajapted | 2013-06-28 11:46:10 +1000 (Fri, 28 Jun 2013) | 3 lines
+
+Scroll-bars: implemented logic to compute the position/size of each bar
+based on the map bounds and the current view position and zoom level.
+
+------------------------------------------------------------------------
+r1076 | ajapted | 2013-06-27 22:46:27 +1000 (Thu, 27 Jun 2013) | 1 line
+
+CHANGELOG update
+------------------------------------------------------------------------
+r1075 | ajapted | 2013-06-27 22:45:07 +1000 (Thu, 27 Jun 2013) | 2 lines
+
+Minor coding rename: MapBound_[lh][xy] --> Map_bound_[xy][12]
+
+------------------------------------------------------------------------
+r1074 | ajapted | 2013-06-27 22:20:00 +1000 (Thu, 27 Jun 2013) | 3 lines
+
+Scroll-bars: implemented ability to hide/show the bars based on the
+user's preference setting.
+
+------------------------------------------------------------------------
+r1073 | ajapted | 2013-06-27 21:46:18 +1000 (Thu, 27 Jun 2013) | 3 lines
+
+Config: added 'map_scroll_bars' variable which will be used to enable or
+disable the scroll-bars for the map view.
+
+------------------------------------------------------------------------
+r1072 | ajapted | 2013-06-27 17:14:55 +1000 (Thu, 27 Jun 2013) | 2 lines
+
+Updated AUTHORS.txt to match website (Jason's contribution).
+
+------------------------------------------------------------------------
+r1071 | ajapted | 2013-06-27 17:10:53 +1000 (Thu, 27 Jun 2013) | 3 lines
+
+Reworked the About dialog to show the new logo, and have a fallback just
+in case we cannot open the file, plus tweaked the text.
+
+------------------------------------------------------------------------
+r1070 | ajapted | 2013-06-27 17:09:11 +1000 (Thu, 27 Jun 2013) | 2 lines
+
+Added 'about_logo.png' -- cropped and scaled from Jason's original.
+
+------------------------------------------------------------------------
+r1069 | ajapted | 2013-06-27 16:27:58 +1000 (Thu, 27 Jun 2013) | 2 lines
+
+Checked in Jason R Johnston's logo image, and removed the old cruddy one.
+
+------------------------------------------------------------------------
+r1068 | ajapted | 2013-06-26 22:17:47 +1000 (Wed, 26 Jun 2013) | 3 lines
+
+More work on having a proper widget for the 3D preview.  It seems to
+be working now, albeit with some ugly hacks.
+
+------------------------------------------------------------------------
+r1067 | ajapted | 2013-06-26 19:35:35 +1000 (Wed, 26 Jun 2013) | 4 lines
+
+Created a UI_Render3D class for the 3D preview.  The idea is to show
+this widget (and hide the canvas/sbars) when 3D mode is active, and do
+the reverse when not active -- but keyboard handling is now fubar....
+
+------------------------------------------------------------------------
+r1066 | ajapted | 2013-06-26 16:51:36 +1000 (Wed, 26 Jun 2013) | 4 lines
+
+Moved the 'render3d' field out of UI_Canvas and into Editor_State_t,
+since the canvas is no longer responsible for drawing the 3D preview
+(the new UI_CanvasScroll wrapper is).
+
+------------------------------------------------------------------------
+r1065 | ajapted | 2013-06-26 16:27:21 +1000 (Wed, 26 Jun 2013) | 3 lines
+
+Initial work on scrollbars for the map view.  This commit merely creates
+a container for the canvas + scrollbars : UI_CanvasScroll.
+
+------------------------------------------------------------------------
+r1064 | ajapted | 2013-06-26 14:17:56 +1000 (Wed, 26 Jun 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1063 | ajapted | 2013-06-26 14:02:15 +1000 (Wed, 26 Jun 2013) | 6 lines
+
+Improved handling of bad references when loading a level:
+
+If a linedef has a bad vertex, it is removed.  Bad sector or sidedef
+references are replaced with something valid.  Details are written to
+the log file, and a dialog is shown to the user when these happen.
+
+------------------------------------------------------------------------
+r1062 | ajapted | 2013-06-25 22:45:26 +1000 (Tue, 25 Jun 2013) | 2 lines
+
+Created a definition file for the XDoom source port (by Udo Monk).
+
+------------------------------------------------------------------------
+r1061 | ajapted | 2013-06-24 23:47:02 +1000 (Mon, 24 Jun 2013) | 3 lines
+
+Fixed splitting void islands : it was adding a sector in _both_ sides,
+but we only want one in a single side (the smallest).
+
+------------------------------------------------------------------------
+r1060 | ajapted | 2013-06-24 23:39:39 +1000 (Mon, 24 Jun 2013) | 4 lines
+
+Lineloop class:
+1. added a Dump() method to aid debugging
+2. fixed silly bug in TotalLength() method
+
+------------------------------------------------------------------------
+r1059 | ajapted | 2013-06-24 22:26:42 +1000 (Mon, 24 Jun 2013) | 3 lines
+
+Basis: fixed assertion checks in BA_ChangeTH() and BA_ChangeLD() to
+handle the new HEXEN fields.
+
+------------------------------------------------------------------------
+r1058 | ajapted | 2013-06-24 15:59:01 +1000 (Mon, 24 Jun 2013) | 4 lines
+
+Minor code tidying:
+1. removed unused levelname2xxx() functions
+2. removed unused yg_level_name variable
+
+------------------------------------------------------------------------
+r1057 | ajapted | 2013-06-23 14:24:06 +1000 (Sun, 23 Jun 2013) | 2 lines
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+r1056 | ajapted | 2013-06-23 14:21:03 +1000 (Sun, 23 Jun 2013) | 2 lines
+
+Support Eureka config (.ugh) files as resource files.
+
+------------------------------------------------------------------------
+r1055 | ajapted | 2013-06-23 13:38:00 +1000 (Sun, 23 Jun 2013) | 4 lines
+
+Minor code refactoring:
+1. use "M_" prefix on some m_game.cc functions
+2. have a LoadResourceFile() function in main.cc
+
+------------------------------------------------------------------------
+r1054 | ajapted | 2013-06-23 12:07:40 +1000 (Sun, 23 Jun 2013) | 2 lines
+
+Added 'Level_format' global variable.
+
+------------------------------------------------------------------------
+r1053 | ajapted | 2013-06-23 12:02:43 +1000 (Sun, 23 Jun 2013) | 4 lines
+
+Hexen:
+1. have proper F_ARG1..5 keywords for the argument fields
+2. updated the CopyProperties command to copy the Hexen fields
+
+------------------------------------------------------------------------
+r1052 | ajapted | 2013-06-23 11:49:44 +1000 (Sun, 23 Jun 2013) | 3 lines
+
+Basis: expanded Thing and LineDef structures with HEXEN fields.
+(Note: not actually used anywhere yet).
+
+------------------------------------------------------------------------
+r1051 | ajapted | 2013-06-23 11:33:22 +1000 (Sun, 23 Jun 2013) | 2 lines
+
+README: added the new 'N' / 'P' keys : next file / prev file.
+
+------------------------------------------------------------------------
+r1050 | ajapted | 2013-06-23 11:29:02 +1000 (Sun, 23 Jun 2013) | 3 lines
+
+Implemented SEC_Light() binding command for adjusting sector lighting.
+It takes a delta parameter as per the SEC_Floor() command.
+
+------------------------------------------------------------------------
+r1049 | ajapted | 2013-06-22 23:40:29 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+r1048 | ajapted | 2013-06-22 23:37:51 +1000 (Sat, 22 Jun 2013) | 4 lines
+
+Browser:
+1. remember the "off mode" properly in user state
+2. persist the browser width in the user state
+
+------------------------------------------------------------------------
+r1047 | ajapted | 2013-06-22 23:00:44 +1000 (Sat, 22 Jun 2013) | 4 lines
+
+VM: partial work on ability to read/write the members of a set.
+There are two new instructions, OP_SET_READ and OP_SET_WRITE, which
+are generated but their execution is not implemented yet.
+
+------------------------------------------------------------------------
+r1046 | ajapted | 2013-06-22 16:31:55 +1000 (Sat, 22 Jun 2013) | 4 lines
+
+VM:
+1. fixed bug when pushing vector literals onto the stack
+2. support assigning 'nil' values to any kind of variable
+
+------------------------------------------------------------------------
+r1045 | ajapted | 2013-06-22 16:04:02 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+VM: updated VIM syntax file for new types.
+
+------------------------------------------------------------------------
+r1044 | ajapted | 2013-06-22 15:58:44 +1000 (Sat, 22 Jun 2013) | 7 lines
+
+VM: added the following new types: linedef, sidedef, sector, thing and
+vertex, plus also set[xxx] where xxx is linedef (etc).  So far there
+is nothing which can be done with any of these types.
+
+Also support a "nil" keyword with its own ev_nil type.  It cannot be
+used anywhere yet.
+
+------------------------------------------------------------------------
+r1043 | ajapted | 2013-06-22 15:22:46 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+VM: removed type_size[] array.
+
+------------------------------------------------------------------------
+r1042 | ajapted | 2013-06-22 13:40:38 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+Fixed remembering 3D mode (actually the lack of it) for a map.
+
+------------------------------------------------------------------------
+r1041 | ajapted | 2013-06-22 13:33:33 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+Removed some unused code : word_splitting()
+
+------------------------------------------------------------------------
+r1040 | ajapted | 2013-06-22 13:19:26 +1000 (Sat, 22 Jun 2013) | 2 lines
+
+Moved code around: put Beep() function into m_keys.cc
+
+------------------------------------------------------------------------
+r1039 | ajapted | 2013-06-22 13:10:10 +1000 (Sat, 22 Jun 2013) | 3 lines
+
+Fixed the key binding dialog: unable to remove a parameter (when the
+binding already had a parameter).
+
+------------------------------------------------------------------------
+r1038 | ajapted | 2013-06-22 11:30:14 +1000 (Sat, 22 Jun 2013) | 8 lines
+
+1. when registering binding commands, determine the context automatically
+   from the name e.g. "LIN_xxxx" will be KCTX_Line.
+
+2. support finding a binding command as a script function (in the VM),
+   and execute that script function when the command is executed.  This
+   is bare-bones at the moment, numerous things (error handling, passing
+   parameters) are NOT done yet.
+
+------------------------------------------------------------------------
+r1037 | ajapted | 2013-06-21 22:36:31 +1000 (Fri, 21 Jun 2013) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1036 | ajapted | 2013-06-18 19:36:30 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM: removed more field-related stuff.
+
+------------------------------------------------------------------------
+r1035 | ajapted | 2013-06-18 19:18:08 +1000 (Tue, 18 Jun 2013) | 4 lines
+
+VM / compiler: tidied up code to parse global definitions.
+
+Also removed code to parse "fields" (won't be needed here).
+
+------------------------------------------------------------------------
+r1034 | ajapted | 2013-06-18 18:51:19 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM: ensure local string variables get a valid default (the empty string).
+
+------------------------------------------------------------------------
+r1033 | ajapted | 2013-06-18 18:48:46 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM: ensure global variables of type 'string' get a valid default.
+
+------------------------------------------------------------------------
+r1032 | ajapted | 2013-06-18 18:37:01 +1000 (Tue, 18 Jun 2013) | 3 lines
+
+VM: replaced 's_file' field of dfunction_t with a normal string ptr,
+replaced usages of 's_name' field, and removed mpr.strings[] table.
+
+------------------------------------------------------------------------
+r1031 | ajapted | 2013-06-18 18:26:13 +1000 (Tue, 18 Jun 2013) | 4 lines
+
+VM: changed OP_LITERAL instruction to store the kval_t value in the
+following instruction slot.  This is a bit cleaner than the previous
+way of storing the value inside the dstatement_t.
+
+------------------------------------------------------------------------
+r1030 | ajapted | 2013-06-18 15:55:03 +1000 (Tue, 18 Jun 2013) | 3 lines
+
+VM: changed representation of _string in kval_t, esp. on the stack, to
+use a pointer to object_ref_c instead of an offset into mpr.strings[].
+
+------------------------------------------------------------------------
+r1029 | ajapted | 2013-06-18 15:25:04 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+Makefiles: added vm_object.o to the build.
+
+------------------------------------------------------------------------
+r1028 | ajapted | 2013-06-18 15:24:24 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM / lex: removed lex_eval_t union -- for simpler code.
+
+------------------------------------------------------------------------
+r1027 | ajapted | 2013-06-18 15:21:23 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM / objects: added MakePermanent() method, will be needed for string literals.
+
+------------------------------------------------------------------------
+r1026 | ajapted | 2013-06-18 14:07:39 +1000 (Tue, 18 Jun 2013) | 3 lines
+
+VM / objects: fleshed out remaining methods, e.g. NewSelection(), and
+fixed various compiling issues.
+
+------------------------------------------------------------------------
+r1025 | ajapted | 2013-06-18 13:47:32 +1000 (Tue, 18 Jun 2013) | 2 lines
+
+VM / objects: description of the memory model.
+
+------------------------------------------------------------------------
+r1024 | ajapted | 2013-06-18 13:33:42 +1000 (Tue, 18 Jun 2013) | 4 lines
+
+VM: began work on some simple object management code for the VM.
+The objects so far are (1) strings and (2) selections for each map
+kind of map element.  Other objects may be added later.
+
+------------------------------------------------------------------------
+r1023 | ajapted | 2013-06-17 13:57:40 +1000 (Mon, 17 Jun 2013) | 2 lines
+
+VM: added grammar description, using EBNF notation.
+
+------------------------------------------------------------------------
+r1022 | ajapted | 2013-06-17 13:49:17 +1000 (Mon, 17 Jun 2013) | 2 lines
+
+VM: made all semicolons optional.
+
+------------------------------------------------------------------------
+r1021 | ajapted | 2013-06-16 23:46:45 +1000 (Sun, 16 Jun 2013) | 4 lines
+
+VM:
+1. removed redundant check on "float" in ParseType().
+2. removed "void" as a usable type.
+
+------------------------------------------------------------------------
+r1020 | ajapted | 2013-06-16 20:41:07 +1000 (Sun, 16 Jun 2013) | 4 lines
+
+VM:
+1. renamed 'extern' keyword --> 'builtin'
+2. renamed 'va' function --> 'format'
+
+------------------------------------------------------------------------
+r1019 | ajapted | 2013-06-16 20:27:58 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Detect HEXEN format maps, and prevent trying to load them -- instead we
+show an error message, which is better than crashing out.
+
+------------------------------------------------------------------------
+r1018 | ajapted | 2013-06-16 19:15:31 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+VM: fixed precedence of the '?:' ternary operator, which needs to be
+higher than assignment.
+
+------------------------------------------------------------------------
+r1017 | ajapted | 2013-06-16 19:01:24 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Minor rename: 'ResourceWads' --> 'Resource_list'
+
+------------------------------------------------------------------------
+r1016 | ajapted | 2013-06-16 18:35:32 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Preferences: added button for 'auto_load_recent' config var.
+
+------------------------------------------------------------------------
+r1015 | ajapted | 2013-06-16 18:22:33 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Preferences: added a new 'Grid' tab, and moved the griddy stuff there,
+though I expect to add more griddy stuff too (soon).
+
+------------------------------------------------------------------------
+r1014 | ajapted | 2013-06-16 16:26:32 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Implemented opening the most recently saved pwad on startup -- but only
+when Eureka is started without any pwad filenames.
+
+------------------------------------------------------------------------
+r1013 | ajapted | 2013-06-16 16:01:14 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Moved code around in m_files.cc
+
+------------------------------------------------------------------------
+r1012 | ajapted | 2013-06-16 15:51:11 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Support DOOMWADPATH for finding IWAD files.
+
+------------------------------------------------------------------------
+r1011 | ajapted | 2013-06-16 15:01:57 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1010 | ajapted | 2013-06-16 14:59:16 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Use Wad_file::Validate() instead of FileExists() where appropriate.
+
+------------------------------------------------------------------------
+r1009 | ajapted | 2013-06-16 14:43:26 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Validate all given pwad files (make sure they exist, etc).
+
+------------------------------------------------------------------------
+r1008 | ajapted | 2013-06-16 14:40:42 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Wad code: added Validate() static method to check if a wad exists and is
+indeed a WAD file.
+
+------------------------------------------------------------------------
+r1007 | ajapted | 2013-06-16 13:58:10 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Fixed CMD_OpenFileMap() to confirm with user when the current map has
+been modified.
+
+------------------------------------------------------------------------
+r1006 | ajapted | 2013-06-16 13:54:32 +1000 (Sun, 16 Jun 2013) | 3 lines
+
+Allow any number of given pwad files (in Pwad_list), only limit them when
+creating the 'Given Files' menu.
+
+------------------------------------------------------------------------
+r1005 | ajapted | 2013-06-16 13:45:44 +1000 (Sun, 16 Jun 2013) | 9 lines
+
+Implemented "GivenFile" command which supports loading the next / previous
+file in the given files list, with default bindings on 'N' and 'P' keys.
+This makes it easy to step through a large group of wads.
+
+The command also supports "first" and "last" keywords, but these are not
+bound to any keys by default.
+
+Also moved binding of PRUNE command from 'P' --> 'p' key.
+
+------------------------------------------------------------------------
+r1004 | ajapted | 2013-06-16 11:49:30 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Tidied up the latest 'Recent Files' handling code.
+
+------------------------------------------------------------------------
+r1003 | ajapted | 2013-06-16 11:35:29 +1000 (Sun, 16 Jun 2013) | 2 lines
+
+Dead code removal : CMD_OpenRecentMap() and UI_RecentFiles dialog.
+
+------------------------------------------------------------------------
+r1002 | ajapted | 2013-06-14 21:53:11 +1000 (Fri, 14 Jun 2013) | 3 lines
+
+More work on new 'File/Recent Files' sub-menu, which is working now,
+though the code needs some tidying up...
+
+------------------------------------------------------------------------
+r1001 | ajapted | 2013-06-14 21:02:25 +1000 (Fri, 14 Jun 2013) | 7 lines
+
+Partial work changing 'File/Recent Files' into a sub-menu which is
+populated at startup with the recent file list.  This commit has the
+code to populate the sub-menu.
+
+Also: disable (gray out) the 'Given Files' sub-menu when there is
+not multiple specified filenames.
+
+------------------------------------------------------------------------
+r1000 | ajapted | 2013-06-14 19:38:26 +1000 (Fri, 14 Jun 2013) | 3 lines
+
+Made -file option accept multiple filenames, adding them to Pwad_list
+as per loose filenames.
+
+------------------------------------------------------------------------
+r999 | ajapted | 2013-06-14 18:45:37 +1000 (Fri, 14 Jun 2013) | 3 lines
+
+Makefile.xming : removed -lshfolder from linkage [was only there to
+test a binary under Windows 95].
+
+------------------------------------------------------------------------
+r998 | ajapted | 2013-06-14 16:52:30 +1000 (Fri, 14 Jun 2013) | 3 lines
+
+Implemented a 'Given Files' sub-menu of the File menu, which is populated
+when Eureka is run with a list of wad files.
+
+------------------------------------------------------------------------
+r997 | ajapted | 2013-06-14 15:23:58 +1000 (Fri, 14 Jun 2013) | 2 lines
+
+VM: checked in a Vim syntax file for the scripting language.
+
+------------------------------------------------------------------------
+r996 | ajapted | 2013-06-14 15:23:01 +1000 (Fri, 14 Jun 2013) | 2 lines
+
+Makefiles: added VM code files to the build.
+
+------------------------------------------------------------------------
+r995 | ajapted | 2013-06-10 23:52:39 +1000 (Mon, 10 Jun 2013) | 2 lines
+
+VM: added missing code to resolve builtin functions.
+
+------------------------------------------------------------------------
+r994 | ajapted | 2013-06-10 23:40:45 +1000 (Mon, 10 Jun 2013) | 3 lines
+
+VM: worked on implementing the API functions, e.g. VM_CompileFile() and
+VM_Call(), and wrote some test code for loading / running a script.
+
+------------------------------------------------------------------------
+r993 | ajapted | 2013-06-10 22:00:38 +1000 (Mon, 10 Jun 2013) | 3 lines
+
+VM: more work integrating this code, it compiles now, but is still far
+away from being able to actually do anything....
+
+------------------------------------------------------------------------
+r992 | ajapted | 2013-06-10 19:21:52 +1000 (Mon, 10 Jun 2013) | 2 lines
+
+VM: various work to integrate the VM code into its new environment...
+
+------------------------------------------------------------------------
+r991 | ajapted | 2013-06-10 18:10:20 +1000 (Mon, 10 Jun 2013) | 4 lines
+
+Began work on a scripting system.  This commit contains code for a VM
+which I have been developing for a while now.  It was originally based
+on the QCC compiler and execution engine from Quake, by Id Software.
+
+------------------------------------------------------------------------
+r990 | ajapted | 2013-06-10 16:56:48 +1000 (Mon, 10 Jun 2013) | 5 lines
+
+Removed the unfinished support for Radius Triggers (RTS), which is a
+feature of the EDGE source port.  It would've required a lot more code
+to finish the RTS mode, not only parsing and re-creating the RSCRIPT
+lump, but also the ability to edit the scripts.
+
+------------------------------------------------------------------------
+r989 | ajapted | 2013-06-10 16:39:36 +1000 (Mon, 10 Jun 2013) | 1 line
+
+Version bump
+
+------------------------------------------------------------------------
+r988 | ajapted | 2013-06-10 15:27:13 +1000 (Mon, 10 Jun 2013) | 3 lines
+
+Changed PASTE behavior : place objects around their true centre, instead
+of around the thing or vertex which is closest to the centre.
+
+------------------------------------------------------------------------
+r987 | ajapted | 2013-06-10 15:18:36 +1000 (Mon, 10 Jun 2013) | 4 lines
+
+Added 'reselect_second_vertex' variable to control when adding a linedef
+onto an existing vertex (or line) if the second vertex will be selected.
+
+------------------------------------------------------------------------
+r986 | ajapted | 2013-06-10 15:13:28 +1000 (Mon, 10 Jun 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r985 | printz | 2013-05-29 07:23:50 +1000 (Wed, 29 May 2013) | 1 line
+
+osx: FLTK is now statically linked
+
+------------------------------------------------------------------------
+r984 | ajapted | 2013-05-07 22:30:00 +1000 (Tue, 07 May 2013) | 3 lines
+
+Tweaked BA_ChecksumLevel() to produce checksums the same as before,
+so that persistent data for previously edited maps gets found.
+
+------------------------------------------------------------------------
+r983 | ajapted | 2013-05-06 13:19:33 +1000 (Mon, 06 May 2013) | 3 lines
+
+Fixed crash bug in BA_ChecksumLevel(), used when loading and saving a
+map, occurring when a linedef was missing the right sidedef.
+
+------------------------------------------------------------------------
+r981 | ajapted | 2013-05-01 15:11:48 +1000 (Wed, 01 May 2013) | 2 lines
+
+Preferences: leave_offsets_alone now defaults to TRUE.
+
+------------------------------------------------------------------------
+r968 | ajapted | 2013-04-28 21:07:50 +1000 (Sun, 28 Apr 2013) | 2 lines
+
+TODO: minor update.
+
+------------------------------------------------------------------------
+r967 | ajapted | 2013-04-28 21:07:23 +1000 (Sun, 28 Apr 2013) | 2 lines
+
+More grid-color tweakage.
+
+------------------------------------------------------------------------
+r943 | ajapted | 2013-03-16 21:57:03 +1100 (Sat, 16 Mar 2013) | 2 lines
+
+Grid: color tweakage.
+
+------------------------------------------------------------------------
+r942 | ajapted | 2013-03-16 11:19:44 +1100 (Sat, 16 Mar 2013) | 2 lines
+
+Grid: improved the simple grid to show flat boundaries.
+
+------------------------------------------------------------------------
+r941 | ajapted | 2013-03-16 09:25:33 +1100 (Sat, 16 Mar 2013) | 3 lines
+
+Fixed the selection after a sector merge (the "gone away" sectors were
+still in the selection, preventing a subsequent merge).
+
+------------------------------------------------------------------------
+r940 | ajapted | 2013-03-16 09:17:33 +1100 (Sat, 16 Mar 2013) | 2 lines
+
+Version bump after 0.95 release.
+
+------------------------------------------------------------------------
+r939 | ajapted | 2013-03-16 09:16:08 +1100 (Sat, 16 Mar 2013) | 2 lines
+
+CHANGES.txt : added fresh one (post v0.95 release).
+
+------------------------------------------------------------------------
+r938 | ajapted | 2013-03-03 11:20:04 +1100 (Sun, 03 Mar 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r937 | ajapted | 2013-03-01 11:09:50 +1100 (Fri, 01 Mar 2013) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r936 | ajapted | 2013-02-25 10:20:28 +1100 (Mon, 25 Feb 2013) | 2 lines
+
+Moved CHANGES.txt --> changelog/095.txt  [after the 0.95 release]
+
+------------------------------------------------------------------------
+r935 | ajapted | 2013-02-25 10:17:39 +1100 (Mon, 25 Feb 2013) | 2 lines
+
+bindings.cfg : added SHIFT + cursor keys for scrolling in bigger steps.
+
+------------------------------------------------------------------------
+r934 | ajapted | 2013-02-24 15:44:50 +1100 (Sun, 24 Feb 2013) | 2 lines
+
+TODO : small addition.
+
+------------------------------------------------------------------------
+r933 | ajapted | 2013-02-24 15:36:11 +1100 (Sun, 24 Feb 2013) | 2 lines
+
+Updated doc/History.txt with SVN changes since last release.
+
+------------------------------------------------------------------------
 r932 | ajapted | 2013-02-24 15:30:07 +1100 (Sun, 24 Feb 2013) | 2 lines
 
 Pack-source script: copy the 'osx' directory too.
