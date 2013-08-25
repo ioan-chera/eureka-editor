@@ -62,6 +62,9 @@ cp -av $src/ports/*.* $dest/ports || true
 mkdir $dest/mods
 cp -av $src/mods/*.* $dest/mods || true
 
+mkdir $dest/ups
+cp -av $src/ups/*.* $dest/ups || true
+
 #
 #  Documentation
 #
