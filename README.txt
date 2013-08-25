@@ -103,6 +103,8 @@ wheel : zoom in or out
 
 TAB : toggle the 3D preview on or off
 
+; : make the next key pressed META
+
 t : enter Thing mode 
 l : enter Linedef mode 
 s : enter Sector mode 
@@ -207,8 +209,10 @@ E : select sectors with same floor texture
 (Cursor keys will move forward and back, turn left and right)
 (the WASD keys can also be used to move the camera)
 
-LMB : does not do anything yet 
+LMB : not implemented yet 
 RMB : turn or move the camera (by dragging the mouse)
+MMB : adjust sidedef offsets (drag the mouse)
+
 wheel : move camera forwards or backwards
 
 PGUP and PGDN : move camera up and down
@@ -221,6 +225,15 @@ o : toggle objects on or off
 
 F5  : toggle low detail / high detail
 F11 : increase brightness (gamma)
+
+c : clear offsets on highlighted sidedef
+x : align X offset with wall to the left
+y : align Y offset with wall to the left
+z : align both X + Y offsets
+
+X : align X offset with wall to the right
+Y : align Y offset with wall to the right
+Z : align both X + Y offsets
 
 
 
