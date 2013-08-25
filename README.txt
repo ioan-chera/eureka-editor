@@ -124,8 +124,11 @@ HOME : move/zoom 2D viewport to show the whole map
 END  : move 2D viewport to camera location 
 ' (quote) : move 3D camera to position of mouse pointer
 
-N : load next file in list
-P : load previous file in list
+META-N : load next file in given list
+META-P : load previous file in given list
+
+N : open next map in the current wad
+P : open previous map in the current wad
 
 g : grid size adjustment : smaller 
 G : grid size adjustment : larger 
@@ -143,6 +146,9 @@ H : mirror objects horizontally
 V : mirror objects vertically
 R : rotate objects 90 degrees clockwise 
 W : rotate objects 90 degrees anti-clockwise
+
+META-F : apply a fresh tag to the current objects
+META-L : apply the last (highest) tag to the current objects
 
 
 Things Mode
