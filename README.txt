@@ -11,18 +11,11 @@ Eureka is a cross-platform map editor for the classic DOOM games.
 The supported operating systems are Linux (and other Unix-likes),
 Windows and MacOS X.
 
-It started when I made a fork of the Yadex editor and attempted
-to make it use a proper GUI toolkit, namely FLTK.  I also wanted
-to implemented multiple Undo / Redo, which is something you greatly
-miss when it's not there.  These changes required rewriting large
-portions of the code, and the more I work on Eureka the more I
-replace (or at least rework) the existing code.
-
-While Eureka began as a fork of Yadex, it is NOT intended to be a
-continuation of it, nor to be compatible with its file formats,
-keyboard shortcuts, configuration items (etc).  Eureka is an
-indepedent program now, and it has a different workflow than
-Yadex or DEU.
+It started when I ported the Yadex editor to a proper GUI toolkit,
+namely FLTK, and implemented a system for multi-level Undo / Redo.
+These and other features have required rewriting large potions of
+the existing code, and adding lots of new code too.  Eureka is now
+an indepedent program with its own workflow and quirks :)
 
 
 FEATURES
