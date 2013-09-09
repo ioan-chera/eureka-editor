@@ -1491,7 +1491,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine("No unknown thing types");
 		else
 		{
-			sprintf(check_message, "%u unknown things", types.size());
+			sprintf(check_message, "%d unknown things", (int)types.size());
 
 			dialog->AddLine(check_message, 2, 200,
 			                "Show",   &UI_Check_Things::action_show_unknown,
