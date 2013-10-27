@@ -609,7 +609,7 @@ static void DoScaleTwoThings(selection_c& list, scale_param_t& param)
 
 		float rot1 = param.rotate / 8192.0;
 
-		int ang_diff = round(rot1) * 45.0;
+		int ang_diff = I_ROUND(rot1) * 45.0;
 
 		if (ang_diff)
 		{
@@ -814,7 +814,7 @@ void CMD_RotateObjects3(double deg, int pos_x, int pos_y)
 
 	param.Clear();
 
-	param.rotate = round(deg * 65536.0 / 360.0);
+	param.rotate = I_ROUND(deg * 65536.0 / 360.0);
 
 	DetermineOrigin(param, pos_x, pos_y);
 
