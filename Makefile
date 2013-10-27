@@ -7,7 +7,7 @@
 PROGRAM=eureka
 
 # prefix choices: /usr  /usr/local  /opt
-INSTALL_PREFIX=/usr/local
+PREFIX=/usr/local
 
 OBJ_DIR=obj_linux
 
@@ -19,7 +19,7 @@ OS=UNIX
 
 #--- Internal stuff from here -----------------------------------
 
-INSTALL_DIR=$(INSTALL_PREFIX)/share/eureka
+INSTALL_DIR=$(PREFIX)/share/eureka
 
 CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
          -Iglbsp_src  \
@@ -159,7 +159,7 @@ stripped: $(PROGRAM)
 	strip --strip-unneeded $(PROGRAM)
 
 install: stripped
-	install -o root -m 755 $(PROGRAM) $(INSTALL_PREFIX)/bin/
+	install -o root -m 755 $(PROGRAM) $(PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
 	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
@@ -177,7 +177,7 @@ install: stripped
 	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 
 uninstall:
-	rm -v $(INSTALL_PREFIX)/bin/$(PROGRAM)
+	rm -v $(PREFIX)/bin/$(PROGRAM)
 	rm -Rv $(INSTALL_DIR) 
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
