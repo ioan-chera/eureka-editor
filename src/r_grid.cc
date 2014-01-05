@@ -233,11 +233,11 @@ const int Grid_State_c::grid_values[] =
 {
 	-1 /* OFF */,
 
-	1024, 512, 256, 128, 64, 32, 16, 8, 4, 2
+	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2
 };
 
 #define NUM_SCALE_VALUES  17
-#define NUM_GRID_VALUES   11
+#define NUM_GRID_VALUES   12
 
 
 const char *Grid_State_c::scale_options()
@@ -249,7 +249,7 @@ const char *Grid_State_c::scale_options()
 
 const char *Grid_State_c::grid_options()
 {
-	return "OFF|1024|512|256|128| 64| 32| 16|  8|  4|  2";
+	return "OFF|1024|512|256|192|128| 64| 32| 16|  8|  4|  2";
 }
 
 
