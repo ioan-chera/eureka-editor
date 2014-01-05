@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -870,7 +870,7 @@ bool Main_ProjectSetup(bool is_startup)
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2013 Andrew Apted, et al ***\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2014 Andrew Apted, et al ***\n"
 			"\n");
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
 
 
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2013 Andrew Apted, et al ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2014 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
 
 	// Sanity checks (useful when porting).
