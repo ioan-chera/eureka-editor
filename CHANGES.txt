@@ -2,5 +2,5 @@
 CHANGES IN Eureka
 =================
 
-
+-  fixed bug not loading 'ASHWALL' texture for DOOM 1
 

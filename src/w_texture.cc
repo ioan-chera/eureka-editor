@@ -53,7 +53,8 @@ static void W_ClearTextures()
 }
 
 
-static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size)
+static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
+                            bool skip_first)
 {
 	// skip size word at front of PNAMES
 	pnames += 4;
@@ -77,7 +78,7 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size)
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
     //       usable (in the DOOM engine the #0 texture is not drawn).
 
-	for (int n = 1 ; n < num_tex ; n++)
+	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
 		int offset = LE_S32(tex_data_s32[1+n]);
 
@@ -198,10 +199,10 @@ void W_LoadTextures()
 		int pname_size = W_LoadLumpData(pnames, &pname_data);
 
 		if (texture1)
-			LoadTextureLump(texture1, pname_data, pname_size);
+			LoadTextureLump(texture1, pname_data, pname_size, true);
 
 		if (texture2)
-			LoadTextureLump(texture2, pname_data, pname_size);
+			LoadTextureLump(texture2, pname_data, pname_size, false);
 	}
 }
 
