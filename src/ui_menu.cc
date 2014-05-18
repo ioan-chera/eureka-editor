@@ -438,9 +438,10 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
 		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
-		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 //TODO	{ "&Test Map",        FL_COMMAND + 't', FCAL file_do_test_map },
 
