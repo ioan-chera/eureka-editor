@@ -123,7 +123,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 			if (map > 9)
 				continue;
 
-			sprintf(name_buf, "E%dM%d\n", epi, map);
+			sprintf(name_buf, "E%dM%d", epi, map);
 		}
 		else
 		{

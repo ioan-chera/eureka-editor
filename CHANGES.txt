@@ -4,3 +4,6 @@ CHANGES IN Eureka
 
 -  fixed bug not loading 'ASHWALL' texture for DOOM 1
 
+-  fixed bug when saving and using the 'ExMx' buttons
+   (an erroneous newline was added into the map's lump name)
+
