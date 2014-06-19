@@ -1012,9 +1012,18 @@ void CMD_FlipMap()
 static Wad_file *save_wad;
 
 
-static void SaveHeader()
+static void SaveHeader(const char *level)
 {
-	// FIXME !!!!
+	int size = (int)HeaderData.size();
+
+	Lump_c *lump = save_wad->AddLevel(level, size);
+
+	if (size > 0)
+	{
+		lump->Write(& HeaderData[0], size);
+	}
+
+	lump->Finish();
 }
 
 
@@ -1177,9 +1186,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	save_wad->InsertPoint(level_lump);
 
-	save_wad->AddLevel(level, 0)->Finish();
-
-	SaveHeader  ();
+	SaveHeader(level);
 
 	SaveThings  ();
 	SaveLineDefs();
