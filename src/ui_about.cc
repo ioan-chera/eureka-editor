@@ -90,7 +90,7 @@ Fl_RGB_Image * UI_About::about_img;
 
 
 const char *UI_About::Text1 =
-	"EUREKA is a map editor for classic DOOM\n"
+	"EUREKA " EUREKA_VERSION " is a map editor for classic DOOM\n"
 	"EUREKA uses code from the Yadex editor";
 
 
