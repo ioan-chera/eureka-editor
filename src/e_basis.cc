@@ -48,6 +48,9 @@ std::vector<Sector *>  Sectors;
 std::vector<SideDef *> SideDefs;
 std::vector<LineDef *> LineDefs;
 
+std::vector<byte>  HeaderData;
+std::vector<byte>  BehaviorData;
+
 
 int default_floor_h		=   0;
 int default_ceil_h		= 128;
@@ -981,6 +984,9 @@ void BA_ClearAll()
 	Sectors.clear();
 	SideDefs.clear();
 	LineDefs.clear();
+
+	HeaderData.clear();
+	BehaviorData.clear();
 
 	ClearUndoHistory();
 	ClearRedoFuture();

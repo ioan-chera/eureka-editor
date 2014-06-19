@@ -316,6 +316,10 @@ extern std::vector<Sector *>  Sectors;
 extern std::vector<SideDef *> SideDefs;
 extern std::vector<LineDef *> LineDefs;
 
+extern std::vector<byte>  HeaderData;
+extern std::vector<byte>  BehaviorData;
+
+
 #define NumThings     ((int)Things.size())
 #define NumVertices   ((int)Vertices.size())
 #define NumSectors    ((int)Sectors.size())

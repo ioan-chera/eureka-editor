@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -332,6 +332,31 @@ static void CreateFallbackSector()
 }
 
 
+static void LoadHeader()
+{
+	Lump_c *lump = load_wad->GetLump(loading_level);
+
+	int length = lump->Length();
+
+	if (length == 0)
+		return;
+
+	HeaderData.resize(length);
+
+	if (! lump->Seek())
+		FatalError("Error seeking to header lump!\n");
+
+	if (! lump->Read(& HeaderData[0], length))
+		FatalError("Error reading header lump.\n");
+}
+
+
+static void LoadBehavior()
+{
+	// TODO
+}
+
+
 static void LoadThings()
 {
 	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
@@ -605,11 +630,15 @@ void LoadLevel(Wad_file *wad, const char *level)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
+	LoadHeader  ();
+
 	LoadThings  ();
 	LoadVertices();
 	LoadSectors ();
 	LoadSideDefs();
 	LoadLineDefs();
+
+	LoadBehavior();
 
 	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
 	{
@@ -983,6 +1012,18 @@ void CMD_FlipMap()
 static Wad_file *save_wad;
 
 
+static void SaveHeader()
+{
+	// FIXME !!!!
+}
+
+
+static void SaveBehavior()
+{
+	// TODO
+}
+
+
 static void SaveVertices()
 {
 	int size = NumVertices * (int)sizeof(raw_vertex_t);
@@ -1138,6 +1179,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	save_wad->AddLevel(level, 0)->Finish();
 
+	SaveHeader  ();
+
 	SaveThings  ();
 	SaveLineDefs();
 	SaveSideDefs();
@@ -1151,6 +1194,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	EmptyLump("REJECT");
 	EmptyLump("BLOCKMAP");
+
+	SaveBehavior();
 
 	// write out the new directory
 	save_wad->EndWrite();
