@@ -2,10 +2,17 @@
 CHANGES IN Eureka
 =================
 
+-  added back the '192' grid size
+
 -  fixed bug not loading 'ASHWALL' texture for DOOM 1
 
 -  fixed bug when saving and using the 'ExMx' buttons
    (an erroneous newline was added into the map's lump name)
 
 -  support loading a read-only wad file
+
+-  support data in a map header lump (such as MAP01), make sure it
+   save it when saving the map (instead of removing it)
+
+-  show version _in_ the About box (not just the window title)
 
