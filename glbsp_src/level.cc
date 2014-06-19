@@ -1050,6 +1050,9 @@ void PutSubsecs(const char *name, int do_gl)
     raw_subsec_t raw;
     subsec_t *sub = subsecs[i];
 
+    if (sub->is_duplicate)
+      sub = sub->is_duplicate;
+
     raw.first = UINT16(sub->seg_list->index);
     raw.num   = UINT16(sub->seg_count);
 
@@ -1081,6 +1084,9 @@ void PutV3Subsecs(int do_v5)
   {
     raw_v3_subsec_t raw;
     subsec_t *sub = subsecs[i];
+
+    if (sub->is_duplicate)
+      sub = sub->is_duplicate;
 
     raw.first = UINT32(sub->seg_list->index);
     raw.num   = UINT32(sub->seg_count);
@@ -1284,9 +1290,15 @@ void PutZSubsecs(void)
     subsec_t *sub = subsecs[i];
     seg_t *seg;
 
+    if (sub->is_duplicate)
+      sub = sub->is_duplicate;
+
     raw_num = UINT32(sub->seg_count);
 
     ZLibAppendLump(&raw_num, 4);
+
+    if (sub->is_duplicate)
+      continue;
 
     // sanity check the seg index values
     count = 0;

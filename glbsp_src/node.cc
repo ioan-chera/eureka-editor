@@ -500,6 +500,9 @@ static void DetermineMiddle(subsec_t *sub)
   float_g mid_x=0, mid_y=0;
   int total=0;
 
+  if (sub->is_duplicate)
+    return;
+
   // compute middle coordinates
   for (cur=sub->seg_list; cur; cur=cur->next)
   {
@@ -868,6 +871,44 @@ static void DebugShowSegs(superblock_t *seg_list)
 }
 #endif
 
+
+static node_t * CreateDummyNode(superblock_t *seg_list)
+{
+  node_t *node;
+
+  seg_t *best;
+  
+  PrintMiniWarn("No nodes were produced, creating a dummy node...\n");
+
+  // first seg of the whole list will be our partition line
+  // (the choice is totally arbitrary)
+  best = seg_list->segs;
+
+  node = NewNode();
+
+  node->x  = best->linedef->start->x;
+  node->y  = best->linedef->start->y;
+  node->dx = best->linedef->end->x - node->x;
+  node->dy = best->linedef->end->y - node->y;
+
+  FindLimits(seg_list, &node->l.bounds);
+  FindLimits(seg_list, &node->r.bounds);
+
+  // the right side will have a normal subsector
+
+  node->r.subsec = CreateSubsec(seg_list);
+
+  // the left side gets a fake subsector
+
+  node->l.subsec = NewSubsec();
+
+  node->l.subsec->index = num_subsecs - 1;
+  node->l.subsec->is_duplicate = node->r.subsec;
+
+  return node;
+}
+
+
 //
 // BuildNodes
 //
@@ -907,7 +948,24 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
     PrintDebug("Build: CONVEX\n");
 #   endif
 
-    *S = CreateSubsec(seg_list);
+    if (depth == 0)
+    {
+      /* -AJA- welcome to Hack Central, hope you enjoy your stay.
+       *
+       * Vanilla DOOM (and some source ports) do not function when
+       * there are no nodes at all.  For this case we create a dummy
+       * node with a real subsector on one side and a duplicate on
+       * the other side.
+       *
+       * [ P.S. no need to set *S here ]
+       */
+      *N = CreateDummyNode(seg_list);
+    }
+    else
+    {
+      *S = CreateSubsec(seg_list);
+    }
+
     return GLBSP_E_OK;
   }
 
@@ -1021,6 +1079,9 @@ void ClockwiseBspTree(node_t *root)
   {
     subsec_t *sub = LookupSubsec(i);
 
+    if (sub->is_duplicate)
+      continue;
+
     ClockwiseOrder(sub);
     RenumberSubsecSegs(sub);
 
@@ -1035,6 +1096,9 @@ static void NormaliseSubsector(subsec_t *sub)
 {
   seg_t *new_head = NULL;
   seg_t *new_tail = NULL;
+
+  if (sub->is_duplicate)
+    return;
 
 # if DEBUG_SUBSEC
   PrintDebug("Subsec: Normalising %d\n", sub->index);
@@ -1113,6 +1177,9 @@ static void RoundOffSubsector(subsec_t *sub)
 
   int real_total  = 0;
   int degen_total = 0;
+
+  if (sub->is_duplicate)
+    return;
 
 # if DEBUG_SUBSEC
   PrintDebug("Subsec: Rounding off %d\n", sub->index);
