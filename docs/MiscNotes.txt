@@ -1,0 +1,125 @@
+
+WAD SEMANTICS
+=============
+
+(a) there is always an IWAD (given by -iwad or found somewhere).
+    maps are never saved into an IWAD (special command line option to do it)
+
+    ---> global: 'base_wad'
+
+(b) there is _usually_ a PWAD (given by -file).
+    it must be modifiable (e.g. not in /usr), CTRL-S saves into it.
+
+    when absent, user cannot File/Save, the File/Export function
+    is done instead.
+
+    ---> global: 'edit_wad'
+
+(c) when File/Export is successful, that becomes the new PWAD.
+    the existing PWAD goes away (or becomes a resource wad).
+
+(c) user can File/Load another map, but if it's in an uneditable
+    wad (especially the IWAD) then the previous PWAD goes away
+    (or becomes a resource wad).
+
+(d) File/New Map needs to ask for a map name.
+    If there is current PWAD and map already exists, warn user
+
+
+
+GAME SEMANTICS
+==============
+
+Remove the path and extension from the IWAD, and make the result
+lowercase, and that is the name of the "game".  There must be a
+config file called 'games/xxx.ugh' which defines everything for
+that game.
+
+
+
+SECTOR INSERT FUNCTIONS
+=======================
+
+(a) in an area without any sector, add a NEW sector there
+    (ideally copying values from a nearby sector)
+    ---> SPACE
+
+    [there cannot be a highlight]
+    [if a single sector is selected, copy values from it]
+    [if multiple selected sector -- ignore? beep? copy first?]
+
+    AFTER: this sector becomes selected
+
+(b) in an area with sectoring (broken or not), add a NEW sector
+    --->  CTRL + SPACE   [the CTRL forces a NEW sector to be made]
+
+    [if a single sector is selected, copy values from it -- overrides highlight]
+    [else if a sector is highlighted, copy that]
+    [else use logic from (a)]
+
+    AFTER: this sector becomes selected
+
+(c) in an area with broken sectoring, fix the sectoring using the
+    currently highlighted one.
+    ---> SPACE
+
+    The presence of a highlighted sector is what differentiates
+    case (c) from case (a).
+
+    [if sectors are selected -- ignore? beep?]
+
+    this sector DOES NOT get selected  [because it is NOT NEW]
+
+(d) copy properties from an existing sector (selected) to
+    the highlighted one.  Beep if invalid selection.
+    --> 'c' copy command
+
+    Hmmm, does it make more sense to select the TARGETs and
+    copy from the Highlight ??? ---- CONFIG ITEM!
+
+(e) in any area, change sector to an existing one [selected]
+    (i.e. grow that existing sector)
+    ---> 'm' merge command
+
+
+
+PointCanSeeVoid Algorithm
+-------------------------
+
+Basically use an angular occlusion buffer.  Process each linedef
+in the level and update the angle range in the buffer.  When
+finished, any gaps in the buffer means that the point can "see"
+to infinity.
+
+
+
+Quantization Function
+---------------------
+
+The selection contains the vertices to move (require vertex mode).
+
+Process each vertex in turn, if quantization works then unselect that
+vertex, otherwise keep it selected.  After all processed, BEEP if any
+vertices remain selected.
+
+Have a selection_c variable for ones already processed, and ones
+which moved successfully.
+
+A vertex that is already on the grid trivially succeeds.
+Otherwise try the FOUR nearby corners (TWO when the vertex is
+sitting on a grid line), checking nearest first.
+
+THE NEW POSITION MUST BE VACANT for the move to succeed.
+
+Also must prevent linedefs from crossing or overlapping.
+
+There may be a need for additional logic to keep the original
+orientation of linedefs (horizontal lines stay horizontal,
+vertical lines stay vertical, diagonal lines stay diagonal).
+
+However this is difficult to do in practice : perhaps do it by
+checking all lines in an initial pass, and mark vertices which
+are not allowed to "round up" to a nearby grid spot (vertices on a
+horizontal line are not allowed to round up vertically, and vice
+versa).
+
