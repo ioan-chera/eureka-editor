@@ -7,3 +7,5 @@ CHANGES IN Eureka
 -  fixed bug when saving and using the 'ExMx' buttons
    (an erroneous newline was added into the map's lump name)
 
+-  support loading a read-only wad file
+
