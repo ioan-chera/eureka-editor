@@ -878,7 +878,7 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
 
   seg_t *best;
   
-  PrintMiniWarn("No nodes were produced, creating a dummy node...\n");
+  PrintWarn("LEVEL TOO SIMPLE, creating a dummy node...\n");
 
   // first seg of the whole list will be our partition line
   // (the choice is totally arbitrary)
