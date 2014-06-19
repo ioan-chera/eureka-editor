@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -139,10 +139,16 @@ private:
 public:
 	~Wad_file();
 
+	// open a wad file.
+	//
 	// mode is similar to the fopen() function:
 	//   'r' opens the wad for reading ONLY
 	//   'a' opens the wad for appending (read and write)
 	//   'w' opens the wad for writing (i.e. create it)
+	//
+	// Note: if 'a' is used and the file is read-only, it will be
+	//       silently opened in 'r' mode instead.
+	//
 	static Wad_file * Open(const char *filename, char mode = 'a');
 
 	// check the given wad file exists and is a WAD file

@@ -263,14 +263,16 @@ void UI_MainWin::UnselectPics()
 }
 
 
-void UI_MainWin::SetTitle(const char *wad_name, const char *map_name)
+void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
+						  bool read_only)
 {
 	static char title_buf[FL_PATH_MAX];
 
 	if (wad_name)
 	{
 		wad_name = fl_filename_name(wad_name);
-		sprintf(title_buf, "%s (%s)", wad_name, Level_name);
+		sprintf(title_buf, "%s (%s)%s", wad_name, Level_name,
+				read_only ? " [Read-Only]" : "");
 	}
 	else
 	{
@@ -280,8 +282,6 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name)
 	strcat(title_buf, " - Eureka");
 
 	copy_label(title_buf);
-
-//--	info_bar->SetMap(Level_name);
 }
 
 

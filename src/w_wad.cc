@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -213,15 +213,27 @@ Wad_file * Wad_file::Open(const char *filename, char mode)
 
 	LogPrintf("Opening WAD file: %s\n", filename);
 
-	FILE *fp = fopen(filename, (mode == 'r' ? "rb" : "r+b"));
+	FILE *fp = NULL;
+
+retry:
+	fp = fopen(filename, (mode == 'r' ? "rb" : "r+b"));
+
 	if (! fp)
 	{
 		// mimic the fopen() semantics
 		if (mode == 'a' && errno == ENOENT)
 			return Create(filename, mode);
 
+		// if file is read-only, open in 'r' mode instead
+		if (mode == 'a' && (errno == EACCES || errno == EROFS))
+		{
+			LogPrintf("Open r/w failed, trying again in read mode...\n");
+			mode = 'r';
+			goto retry;
+		}
+
 		int what = errno;
-		LogPrintf("open failed: %s\n", strerror(what));
+		LogPrintf("Open failed: %s\n", what, strerror(what));
 		return NULL;
 	}
 

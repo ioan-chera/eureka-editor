@@ -84,7 +84,7 @@ public:
 	virtual ~UI_MainWin();
 
 public:
-	void SetTitle(const char *wad_name, const char *map_name);
+	void SetTitle(const char *wad_name, const char *map_name, bool read_only);
 
 	// add or remove the '*' (etc) in the title
 	void UpdateTitle(char want_prefix = 0);

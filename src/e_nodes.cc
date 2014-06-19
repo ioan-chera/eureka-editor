@@ -253,6 +253,12 @@ bool CMD_BuildNodes()
 		return false;
 	}
 
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot build nodes on a read-only file.");
+		return false;
+	}
+
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",

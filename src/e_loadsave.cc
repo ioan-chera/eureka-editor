@@ -195,11 +195,11 @@ void CMD_NewMap()
 
 		Level_name = StringUpper(map_name);
 
-		main_win->SetTitle(Pwad_name, Level_name);
+		main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
 	}
 	else
 	{
-		main_win->SetTitle(NULL, Level_name);
+		main_win->SetTitle(NULL, Level_name, false);
 	}
 
 	LogPrintf("Created NEW map : %s\n", Level_name);
@@ -648,7 +648,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level);
+		main_win->SetTitle(wad->PathName(), level, load_wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1163,7 +1163,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level);
+		main_win->SetTitle(wad->PathName(), level, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1186,6 +1186,18 @@ bool CMD_SaveMap()
 	if (! edit_wad)
 	{
 		return CMD_ExportMap();
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		if (DLG_Confirm("Cancel|&Export",
+		                "The current pwad is a READ-ONLY file. "
+						"Do you want to export this map into a new file?") <= 0)
+		{
+			return false;
+		}
+		else
+			return CMD_ExportMap();
 	}
 
 	// warn user if a fresh map would destroy an existing one
@@ -1264,6 +1276,14 @@ bool CMD_ExportMap()
 	if (exists)
 	{
 		wad = Wad_file::Open(filename, 'a');
+
+		if (wad && wad->IsReadOnly())
+		{
+			DLG_Notify("Cannot export the map into a READ-ONLY file.");
+
+			delete wad;
+			return false;
+		}
 	}
 	else
 	{
