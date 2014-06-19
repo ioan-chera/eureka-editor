@@ -92,16 +92,6 @@ General
 ?  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
-+  File / Test Map
-   +  make filenames absolute
-   +  configurable stuff:
-      -  directory to 'cd' into
-      -  program to invoke
-      -  arguments to use (-iwad, -file, -merge, -warp)
-   -  support resource wads
-   -  make sure the user built the nodes
-      (ideally invoke it automatically)
-
 +  check that current pwad has been externally modified
 
 +  Preferences window:
@@ -125,6 +115,16 @@ WISH: support UDMF format
 -  File / Delete Map
 
 -  File / Rename Map
+
+-  File / Test Map
+   +  make filenames absolute
+   +  configurable stuff:
+      -  directory to 'cd' into
+      -  program to invoke
+      -  arguments to use (-iwad, -file, -merge, -warp)
+   -  support resource wads
+   -  make sure the user built the nodes
+      (ideally invoke it automatically)
 
 ?  Scripting language
 
@@ -302,11 +302,11 @@ Editing
 
    if geometry is broken : special result.
 
-??  when one vertex of a linedef is moved (and not the other)
+NO: when one vertex of a linedef is moved (and not the other)
     update the X offset on the appropriate side (right side for start,
     left side for end vertex).
 
-?  SHIFT + SPACE = no auto create/split sectors
+NO:  SHIFT + SPACE = no auto create/split sectors
 
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
@@ -318,6 +318,8 @@ NO: merge vertex and linedef modes
 
 3D View
 -------
+
+++  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
 
 -  option to reverse mouse movement
 
@@ -347,8 +349,6 @@ NO: merge vertex and linedef modes
 -  View/Place Camera command, cursor turns into +
 
 -  rotated sprites
-
-+  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
 
 +  slopes
 
@@ -402,19 +402,6 @@ ______________________________________________________________________
 
   MISCELLANEOUS / IDEAS
 ______________________________________________________________________
-
-
-CONSOLE IDEA
-------------
-   toggle on/off with the F4 key
-   exists where map/render is (maybe half, above it)
-      (maybe translucent background)
-   turns off browser (and vice versa)
-   have cvars for config items, changeable in console
-   quake-like binding, e.g. "bind w swap-flats"
-   arguments beginning with '+' get executed as console commands
-
-
 
 
 USER CONFIG NEEDED

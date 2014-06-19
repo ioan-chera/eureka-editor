@@ -123,3 +123,16 @@ are not allowed to "round up" to a nearby grid spot (vertices on a
 horizontal line are not allowed to round up vertically, and vice
 versa).
 
+
+
+CONSOLE IDEA
+------------
+
+toggle on/off with the F4 key
+exists where map/render is (maybe half, above it)
+  (maybe translucent background)
+turns off browser (and vice versa)
+have cvars for config items, changeable in console
+quake-like binding, e.g. "bind w swap-flats"
+arguments beginning with '+' get executed as console commands
+
