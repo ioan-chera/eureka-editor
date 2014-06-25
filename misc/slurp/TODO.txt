@@ -1,7 +1,0 @@
-
-Slurp TODO
-==========
-
-+  an Appl_Printf() method  (#define announce Appl_Printf)
-
-
