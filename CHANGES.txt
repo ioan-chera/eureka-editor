@@ -16,3 +16,8 @@ CHANGES IN Eureka
 
 -  show version _in_ the About box (not just the window title)
 
+-  node builder : added work-around for "TOO SIMPLE" levels
+   (i.e. a single convex sector), creating a dummy node and an
+   extra subsector and seg for the back side
+
+
