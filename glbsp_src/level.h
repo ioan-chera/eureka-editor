@@ -291,9 +291,9 @@ typedef struct subsec_s
   float_g mid_x;
   float_g mid_y;
 
-  // this is normally NULL, only set for the "no nodes hack"
+  // this is normally FALSE, only set for the "no nodes hack"
   // [ see comments in the BuildNodes() function. ]
-  struct subsec_s * is_duplicate;
+  int is_dummy;
 }
 subsec_t;
 

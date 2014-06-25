@@ -500,7 +500,7 @@ static void DetermineMiddle(subsec_t *sub)
   float_g mid_x=0, mid_y=0;
   int total=0;
 
-  if (sub->is_duplicate)
+  if (sub->is_dummy)
     return;
 
   // compute middle coordinates
@@ -872,6 +872,24 @@ static void DebugShowSegs(superblock_t *seg_list)
 #endif
 
 
+static seg_t * CreateDummySeg(seg_t *orig)
+{
+  seg_t *dummy = NewSeg();
+
+  // copy most stuff from original seg
+  memcpy(dummy, orig, sizeof(seg_t));
+
+  dummy->next = NULL;
+  dummy->partner = NULL;
+  dummy->block = NULL;
+
+  dummy->index = num_complete_seg;
+  num_complete_seg++;
+
+  return dummy;
+}
+
+
 static node_t * CreateDummyNode(superblock_t *seg_list)
 {
   node_t *node;
@@ -902,8 +920,11 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
 
   node->l.subsec = NewSubsec();
 
+  node->l.subsec->seg_list = CreateDummySeg(best);
+  node->l.subsec->seg_count = 1;
+
   node->l.subsec->index = num_subsecs - 1;
-  node->l.subsec->is_duplicate = node->r.subsec;
+  node->l.subsec->is_dummy = TRUE;
 
   return node;
 }
@@ -954,8 +975,11 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
        *
        * Vanilla DOOM (and some source ports) do not function when
        * there are no nodes at all.  For this case we create a dummy
-       * node with a real subsector on one side and a duplicate on
-       * the other side.
+       * node with the real subsector on one side, and a fake-ish
+       * subsector (containing a copy of a seg) on the other side. 
+       *
+       * Tested in Chocolate Doom, PrBoom, Legacy and Odamex, with
+       * no problems. 
        *
        * [ P.S. no need to set *S here ]
        */
@@ -1079,7 +1103,7 @@ void ClockwiseBspTree(node_t *root)
   {
     subsec_t *sub = LookupSubsec(i);
 
-    if (sub->is_duplicate)
+    if (sub->is_dummy)
       continue;
 
     ClockwiseOrder(sub);
@@ -1097,7 +1121,7 @@ static void NormaliseSubsector(subsec_t *sub)
   seg_t *new_head = NULL;
   seg_t *new_tail = NULL;
 
-  if (sub->is_duplicate)
+  if (sub->is_dummy)
     return;
 
 # if DEBUG_SUBSEC
@@ -1178,7 +1202,7 @@ static void RoundOffSubsector(subsec_t *sub)
   int real_total  = 0;
   int degen_total = 0;
 
-  if (sub->is_duplicate)
+  if (sub->is_dummy)
     return;
 
 # if DEBUG_SUBSEC
