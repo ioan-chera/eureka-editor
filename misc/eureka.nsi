@@ -2,6 +2,8 @@
 ;
 ;  NSIS script for Eureka Level Editor
 ;
+;  ( NOT USED ANYMORE -- PROBABLY BOrKeN )
+;
 ;----------------------------------------------------------------
 
 ; use the Modern UI
