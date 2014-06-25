@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -133,6 +133,27 @@ static void ParseColorDef(char ** argv, int argc)
 	else
 	{
 		LogPrintf("unknown color keyword: '%s'\n", argv[0]);
+	}
+}
+
+
+static void ParseFeatureDef(char ** argv, int argc)
+{
+	if (y_stricmp(argv[0], "gen_types") == 0)
+	{
+		game_info.gen_types = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "img_png") == 0)
+	{
+		game_info.img_png = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "tx_start") == 0)
+	{
+		game_info.tx_start = atoi(argv[1]);
+	}
+	else
+	{
+		LogPrintf("unknown feature keyword: '%s'\n", argv[0]);
 	}
 }
 
@@ -349,6 +370,14 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			ParseColorDef(token + 1, nargs);
+		}
+
+		else if (y_stricmp(token[0], "feature") == 0)
+		{
+			if (nargs < 2)
+				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+
+			ParseFeatureDef(token + 1, nargs);
 		}
 
 		else if (y_stricmp(token[0], "default_port") == 0)

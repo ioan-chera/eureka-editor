@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2014 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -124,6 +124,14 @@ typedef struct
 	int player_h;
 	int min_dm_starts;
 	int max_dm_starts;
+
+	/* port features */
+
+	int gen_types;	// BOOM generalized linedefs and sectors
+
+	int	img_png;	// PNG format for various graphics
+
+	int tx_start;	// textures in TX_START .. TX_END
 
 } game_info_t;
 
