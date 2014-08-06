@@ -3,7 +3,15 @@ Eureka TODO / WISHLIST
 ======================
 
 
-glBSP : show an ERROR if no NODES were produced
+-  cannot Undo after building nodes
+   -  happens because we reload the map (because the current WAD file 
+      has been replaced by a new one)
+
+
+>>>>  -warp option : support two digits, match vanilla behavior
+
+
+when 'J' jump command, then zoom -- wrong focal point
 
 
 >>  sector mismatch bug
@@ -19,6 +27,11 @@ glBSP : show an ERROR if no NODES were produced
 
 
 -  allow running in Windows in "local" mode
+
+
+??  only show a single flag "sp" (or "dm") for Vanilla DOOM,
+    and not show the "friend" flag
+
 
 
 ______________________________________________________________________
