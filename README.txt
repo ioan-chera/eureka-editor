@@ -261,3 +261,10 @@ COPYRIGHT and LICENSE
   GNU General Public License for more details.
 
 
+
+CONTACT DETAILS
+
+  Web: http://eureka-editor.sourceforge.net/
+
+  Email: <ajapted@users.sf.net>
+
