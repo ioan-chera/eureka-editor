@@ -1292,13 +1292,14 @@ public:
 		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
+		hh += 0.2;
 
 		buf  += x + y1 * view.sw;
 		wbuf += tx;
 
 		for ( ; y1 <= y2 ; y1++, hh += dh, buf += view.sw)
 		{
-			int ty = int(hh) % th;
+			int ty = int(floor(hh)) % th;
 
 			// handle negative values (use % twice)
 			ty = (ty + th) % th;
