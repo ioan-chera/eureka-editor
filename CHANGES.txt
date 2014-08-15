@@ -20,4 +20,6 @@ CHANGES IN Eureka
    (i.e. a single convex sector), creating a dummy node and an
    extra subsector and seg for the back side
 
+-  3D view : fixed a vertical mis-alignment of textures (one pixel)
+   in certain circumstances
 
