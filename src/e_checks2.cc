@@ -1456,7 +1456,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No unknown textures");
 		else
 		{
-			sprintf(check_buffer, "%u unknown textures", names.size());
+			sprintf(check_buffer, "%lu unknown textures", names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_tex,
@@ -1471,7 +1471,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No unknown flats");
 		else
 		{
-			sprintf(check_buffer, "%u unknown flats", names.size());
+			sprintf(check_buffer, "%lu unknown flats", names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_flat,
