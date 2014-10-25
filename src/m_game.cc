@@ -72,6 +72,9 @@ void M_InitDefinitions()
 	texture_assigns.clear();
 	flat_assigns.clear();
 
+	// reset game information
+	memset(&game_info, 0, sizeof(game_info));
+
 	// FIXME: ability to parse from a game definition file
 	game_info.player_h = 56;
 	game_info.min_dm_starts = 4;
@@ -361,7 +364,10 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (nargs != 1)
 				FatalError(bad_arg_count, basename, lineno, token[0], 1);
 
-			game_info.sky_flat = token[1];
+			if (strlen(token[1]) >= sizeof(game_info.sky_flat))
+				FatalError("%s(%d): sky_flat name is too long\n", basename, lineno);
+
+			strcpy(game_info.sky_flat, token[1]);
 		}
 
 		else if (y_stricmp(token[0], "color") == 0)
@@ -667,7 +673,7 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 
 bool is_sky(const char *flat)
 {
-	return (y_stricmp(game_info.sky_flat.c_str(), flat) == 0);
+	return (y_stricmp(game_info.sky_flat, flat) == 0);
 }
 
 

@@ -112,7 +112,7 @@ texturegroup_t;
 typedef struct
 {
 	int sky_color;
-	std::string sky_flat;
+	char sky_flat[16];
 
 	int wall_colors[2];
 	int floor_colors[2];
@@ -129,7 +129,7 @@ typedef struct
 
 	int gen_types;	// BOOM generalized linedefs and sectors
 
-	int	img_png;	// PNG format for various graphics
+	int img_png;	// PNG format for various graphics
 
 	int tx_start;	// textures in TX_START .. TX_END
 
