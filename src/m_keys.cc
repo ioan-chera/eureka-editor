@@ -20,7 +20,6 @@
 
 #include "main.h"
 #include "m_config.h"
-#include "vm.h"
 
 #include <algorithm>
 
@@ -34,7 +33,6 @@ typedef struct
 {
 	const char *name;
 	command_func_t func;
-	int script_func;
 	key_context_e req_context;
 
 } editor_command_t;
@@ -63,20 +61,6 @@ void M_RegisterCommand(const char *name, command_func_t func)
 
 	cmd->name = name;
 	cmd->func = func;
-	cmd->script_func = VM_NIL;
-	cmd->req_context = ContextFromName(name);
-
-	all_commands.push_back(cmd);
-}
-
-
-void M_RegisterScriptFunc(const char *name, int func_id)
-{
-	editor_command_t *cmd = new editor_command_t;
-
-	cmd->name = name;
-	cmd->func = NULL;
-	cmd->script_func = func_id;
 	cmd->req_context = ContextFromName(name);
 
 	all_commands.push_back(cmd);
@@ -88,21 +72,6 @@ static const editor_command_t * FindEditorCommand(const char *name)
 	for (unsigned int i = 0 ; i < all_commands.size() ; i++)
 		if (y_stricmp(all_commands[i]->name, name) == 0)
 			return all_commands[i];
-
-	// look for a script function
-	if ('A' <= name[0] && name[0] <= 'Z')
-	{
-		int func_id = VM_FindFunction(name);
-
-		if (func_id != VM_NIL)
-		{
-			unsigned int i = all_commands.size();
-
-			M_RegisterScriptFunc(name, func_id);
-
-			return all_commands[i];
-		}
-	}
 
 	return NULL;
 }
@@ -1025,23 +994,7 @@ key_context_e M_ModeToKeyContext(obj_type_e mode)
 
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
-	if (cmd->script_func == VM_NIL)
-	{
-		(* cmd->func)();
-	}
-	else
-	{
-		VM_Frame();
-
-		// FIXME: parameters!
-
-		if (VM_Call(cmd->script_func) != 0)
-		{
-			// TODO: handle error ???
-
-			fprintf(stderr, "\n VM_CALL FAILED\n");
-		}
-	}
+	(* cmd->func)();
 }
 
 

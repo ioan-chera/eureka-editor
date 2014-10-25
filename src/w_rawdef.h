@@ -161,7 +161,7 @@ typedef struct raw_hexen_thing_s
 	u8_t special;    // special type
 	u8_t args[5];    // special arguments
 
-}  PACKEDATTR raw_hexen_thing_t;
+} PACKEDATTR raw_hexen_thing_t;
 
 
 /* ----- Graphical structures ---------------------- */

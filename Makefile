@@ -105,11 +105,6 @@ OBJS = \
 	$(OBJ_DIR)/ui_tile.o   \
 	$(OBJ_DIR)/ui_vertex.o  \
 	$(OBJ_DIR)/ui_window.o  \
-	$(OBJ_DIR)/vm_builtin.o  \
-	$(OBJ_DIR)/vm_compile.o  \
-	$(OBJ_DIR)/vm_execute.o  \
-	$(OBJ_DIR)/vm_object.o  \
-	$(OBJ_DIR)/vm_lex.o  \
 	$(OBJ_DIR)/w_loadpic.o  \
 	$(OBJ_DIR)/w_flats.o  \
 	$(OBJ_DIR)/w_sprite.o  \

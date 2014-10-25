@@ -46,8 +46,6 @@
 #include "ui_file.h"
 #include "r_render.h"
 
-#include "vm.h"
-
 #ifndef WIN32
 #include <time.h>
 #endif
@@ -928,29 +926,6 @@ static void ShowTime()
 }
 
 
-static void M_LoadScripts()
-{
-	VM_Init();
-
-#if 0
-	LogPrintf("Loading VM scripts.....\n");
-
-	if (VM_CompileFile("misc/core_defs.up") != 0)
-	{
-		LogPrintf("Failed to compile core_defs.up\n");
-		LogPrintf("*** Script system is disabled ***\n");
-		return;
-	}
-
-	if (VM_CompileFile("bind_test.up") != 0)
-	{
-		fprintf(stderr, "\n Test_VM: COMPILE FAILED\n");
-		return;
-	}
-#endif
-}
-
-
 /*
  *  the driving program
  */
@@ -1034,7 +1009,6 @@ int main(int argc, char *argv[])
 
 	Main_OpenWindow();
 
-	M_LoadScripts();
 	M_LoadBindings();
 
 	init_progress = 3;
