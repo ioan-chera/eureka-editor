@@ -133,6 +133,8 @@ typedef struct
 
 	int tx_start;	// textures in TX_START .. TX_END
 
+	int friend_flag;	// the MTF_FRIEND flag (from MBF)
+
 } game_info_t;
 
 extern game_info_t  game_info;
