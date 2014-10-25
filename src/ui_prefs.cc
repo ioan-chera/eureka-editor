@@ -499,7 +499,7 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ grid_size = new Fl_Choice(435, 110, 95, 25, "default grid size ");
 		  grid_size->down_box(FL_BORDER_BOX);
-		  grid_size->add("1024|512|256|128|64|32|16|8|4|2");
+		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
 		{ grid_mode = new Fl_Choice(435, 145, 95, 25, "default grid type ");
 		  grid_mode->down_box(FL_BORDER_BOX);
