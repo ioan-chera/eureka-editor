@@ -178,10 +178,9 @@ nsis_build: nsis_clean stripped
 	cp Eureka.exe $(NSIS_BUILD)
 	#
 	# important files
-	cp misc/bindings.cfg $(NSIS_BUILD)/bindings.cfg
+	cp bindings.cfg $(NSIS_BUILD)/bindings.cfg
 	cp misc/about_logo.png $(NSIS_BUILD)/about_logo.png
 	todos $(NSIS_BUILD)/*.cfg
-	todos $(NSIS_BUILD)/*.up
 	#
 	# definition files
 	cp games/*.ugh  $(NSIS_BUILD)/games
