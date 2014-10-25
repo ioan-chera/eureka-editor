@@ -180,7 +180,6 @@ nsis_build: nsis_clean stripped
 	# important files
 	cp misc/bindings.cfg $(NSIS_BUILD)/bindings.cfg
 	cp misc/about_logo.png $(NSIS_BUILD)/about_logo.png
-	cp misc/core_defs.up $(NSIS_BUILD)/core_defs.up
 	todos $(NSIS_BUILD)/*.cfg
 	todos $(NSIS_BUILD)/*.up
 	#
