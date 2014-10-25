@@ -118,6 +118,10 @@ public:
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
+
+	// this is called when game_info changes (in Main_LoadResources)
+	// and can enable / disable stuff in the panels.
+	void UpdateGameInfo();
 };
 
 

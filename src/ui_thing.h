@@ -82,6 +82,8 @@ public:
 
 	void SetThingType(int new_type);
 
+	void UpdateGameInfo();
+
 private:
 	static void      x_callback(Fl_Widget *w, void *data);
 	static void      y_callback(Fl_Widget *w, void *data);

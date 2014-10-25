@@ -584,5 +584,14 @@ void UI_ThingBox::UpdateTotal()
 }
 
 
+void UI_ThingBox::UpdateGameInfo()
+{
+	if (game_info.friend_flag)
+		o_friend->show();
+	else
+		o_friend->hide();
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

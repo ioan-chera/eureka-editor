@@ -442,6 +442,12 @@ void UI_MainWin::Delay(int steps)
 }
 
 
+void UI_MainWin::UpdateGameInfo()
+{
+	thing_box->UpdateGameInfo();
+}
+
+
 //------------------------------------------------------------------------
 
 

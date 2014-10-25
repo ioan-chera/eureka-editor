@@ -818,6 +818,8 @@ void Main_LoadResources()
 
 	if (main_win)
 	{
+		main_win->UpdateGameInfo();
+
 		main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
