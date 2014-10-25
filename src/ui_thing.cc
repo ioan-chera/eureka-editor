@@ -214,9 +214,15 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_coop   = new Fl_Check_Button(AX+12, AY, FW, 22, "coop");
 	o_dm     = new Fl_Check_Button(AX+12, BY, FW, 22, "dm");
 
+	// this is shown only for Vanilla DOOM (instead of the above three).
+	// it is also works differently, no negated like the above.
+	o_vanilla_dm = new Fl_Check_Button(AX+12, BY, FW, 22, "dm");
+
 	o_easy  ->value(1);  o_sp  ->value(1);
 	o_medium->value(1);  o_coop->value(1);
 	o_hard  ->value(1);  o_dm  ->value(1);
+
+	o_vanilla_dm->value(0);
 
 #if 0
 	o_easy  ->labelsize(12);  o_sp  ->labelsize(12);
@@ -232,8 +238,11 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_coop  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_COOP));
 	o_dm    ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_DM));
 
+	o_vanilla_dm->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_SP));
+
 	add(o_easy); add(o_medium); add(o_hard);
 	add(o_sp);   add(o_coop);   add(o_dm);
+	add(o_vanilla_dm);
 
 
 	// Hexen class flags
@@ -491,6 +500,8 @@ void UI_ThingBox::OptionsFromInt(int options)
 	o_coop->value((options & MTF_Not_COOP) ? 0 : 1);
 	o_dm  ->value((options & MTF_Not_DM)   ? 0 : 1);
 
+	o_vanilla_dm->value((options & MTF_Not_SP) ? 1 : 0);
+
 	o_ambush->value((options & MTF_Ambush) ? 1 : 0);
 	o_friend->value((options & MTF_Friend) ? 1 : 0);
 
@@ -509,9 +520,16 @@ int UI_ThingBox::CalcOptions() const
 	if (o_medium->value()) options |= MTF_Medium;
 	if (o_hard  ->value()) options |= MTF_Hard;
 
-	if (0 == o_sp  ->value()) options |= MTF_Not_SP;
-	if (0 == o_coop->value()) options |= MTF_Not_COOP;
-	if (0 == o_dm  ->value()) options |= MTF_Not_DM;
+	if (game_info.coop_dm_flags)
+	{
+		if (0 == o_sp  ->value()) options |= MTF_Not_SP;
+		if (0 == o_coop->value()) options |= MTF_Not_COOP;
+		if (0 == o_dm  ->value()) options |= MTF_Not_DM;
+	}
+	else
+	{
+		if (0 != o_vanilla_dm->value()) options |= MTF_Not_SP;
+	}
 
 	if (o_ambush->value()) options |= MTF_Ambush;
 	if (o_friend->value()) options |= MTF_Friend;
@@ -586,6 +604,23 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
+	if (game_info.coop_dm_flags)
+	{
+		o_sp  ->show();
+		o_coop->show();
+		o_dm  ->show();
+
+		o_vanilla_dm->hide();
+	}
+	else
+	{
+		o_vanilla_dm->show();
+
+		o_sp  ->hide();
+		o_coop->hide();
+		o_dm  ->hide();
+	}
+
 	if (game_info.friend_flag)
 		o_friend->show();
 	else

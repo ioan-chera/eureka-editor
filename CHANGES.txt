@@ -23,3 +23,5 @@ CHANGES IN Eureka
 -  3D view : fixed a vertical mis-alignment of textures (one pixel)
    in certain circumstances
 
+-  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
+

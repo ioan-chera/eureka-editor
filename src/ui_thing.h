@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2014 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -55,6 +55,7 @@ private:
 	Fl_Check_Button *o_sp;
 	Fl_Check_Button *o_coop;
 	Fl_Check_Button *o_dm;
+	Fl_Check_Button *o_vanilla_dm;
 
 	Fl_Check_Button *o_ambush;
 	Fl_Check_Button *o_friend;

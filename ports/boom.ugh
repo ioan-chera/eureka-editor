@@ -29,6 +29,8 @@
 
 feature gen_types 1
 
+feature coop_dm_flags 1
+
 # an MBF feature, but most "Boom Compatible" ports will support it
 feature friend_flag 1
 

@@ -154,6 +154,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.tx_start = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "coop_dm_flags") == 0)
+	{
+		game_info.coop_dm_flags = atoi(argv[1]);
+	}
 	else if (y_stricmp(argv[0], "friend_flag") == 0)
 	{
 		game_info.friend_flag = atoi(argv[1]);
