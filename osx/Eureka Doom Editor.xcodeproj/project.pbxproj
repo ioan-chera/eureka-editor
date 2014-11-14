@@ -8,15 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		4F0364D81958EDA70000AE65 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F0364D71958EDA70000AE65 /* libpng16.a */; };
+		4F13FF231A16C1E700B64656 /* bindings.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4F13FF211A16C19700B64656 /* bindings.cfg */; };
 		4F2181611755526A0053D99E /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2181601755526A0053D99E /* libfltk.a */; };
 		4F218163175553040053D99E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F218162175553040053D99E /* libz.a */; };
 		4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */; };
 		4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EB179FBF9300937B50 /* e_checks2.cc */; };
-		4FBD72F0179FBFE900937B50 /* vm_object.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EE179FBFE900937B50 /* vm_object.cc */; };
-		4FBD72F7179FC00400937B50 /* vm_builtin.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F1179FC00400937B50 /* vm_builtin.cc */; };
-		4FBD72F8179FC00400937B50 /* vm_compile.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F2179FC00400937B50 /* vm_compile.cc */; };
-		4FBD72F9179FC00400937B50 /* vm_execute.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F3179FC00400937B50 /* vm_execute.cc */; };
-		4FBD72FA179FC00400937B50 /* vm_lex.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72F4179FC00400937B50 /* vm_lex.cc */; };
 		4FBD72FC179FC10100937B50 /* libfltk_images.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FB179FC10100937B50 /* libfltk_images.a */; };
 		4FBD7300179FC18000937B50 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FF179FC18000937B50 /* libjpeg.a */; };
 		4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4FBD7301179FC5ED00937B50 /* about_logo.png */; };
@@ -26,15 +22,12 @@
 		FA244644166CAA6100C68ED8 /* mods in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463E166CAA6100C68ED8 /* mods */; };
 		FA244645166CAA6100C68ED8 /* ports in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463F166CAA6100C68ED8 /* ports */; };
 		FA4433D116AD9CB800525112 /* m_keys.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA4433CF16AD9CB800525112 /* m_keys.cc */; };
-		FA4433D316ADA2AF00525112 /* bindings.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA4433D216ADA2AE00525112 /* bindings.cfg */; };
 		FA5E2C2D165B8F860024D6A5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */; };
 		FA5E2C37165B8F860024D6A5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA5E2C35165B8F860024D6A5 /* InfoPlist.strings */; };
 		FA5E2C3D165B8F860024D6A5 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = FA5E2C3B165B8F860024D6A5 /* Credits.rtf */; };
 		FA5E2C43165B8F860024D6A5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = FA5E2C41165B8F860024D6A5 /* MainMenu.xib */; };
 		FA5E2C4B165B8F870024D6A5 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5E2C4A165B8F870024D6A5 /* SenTestingKit.framework */; };
 		FA5E2C4C165B8F870024D6A5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */; };
-		FA5E2C54165B8F870024D6A5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA5E2C52165B8F870024D6A5 /* InfoPlist.strings */; };
-		FA5E2C57165B8F870024D6A5 /* EurekaAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5E2C56165B8F870024D6A5 /* EurekaAppTests.m */; };
 		FA6ADC22165E75D400FB10D1 /* im_arrows.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA6ADC21165E75D400FB10D1 /* im_arrows.cc */; };
 		FA85EEE816936A3A00CA6FC2 /* m_files.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA85EEE216936A3A00CA6FC2 /* m_files.cc */; };
 		FA85EEE916936A3A00CA6FC2 /* ui_file.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA85EEE416936A3A00CA6FC2 /* ui_file.cc */; };
@@ -134,8 +127,8 @@
 			dstSubfolderSpec = 1;
 			files = (
 				FA244640166CAA6100C68ED8 /* common in CopyFiles */,
+				4F13FF231A16C1E700B64656 /* bindings.cfg in CopyFiles */,
 				FA244642166CAA6100C68ED8 /* games in CopyFiles */,
-				FA4433D316ADA2AF00525112 /* bindings.cfg in CopyFiles */,
 				4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */,
 				FA244644166CAA6100C68ED8 /* mods in CopyFiles */,
 				FA244645166CAA6100C68ED8 /* ports in CopyFiles */,
@@ -146,19 +139,12 @@
 
 /* Begin PBXFileReference section */
 		4F0364D71958EDA70000AE65 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = staticlib/libpng16.a; sourceTree = "<group>"; };
+		4F13FF211A16C19700B64656 /* bindings.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bindings.cfg; path = ../bindings.cfg; sourceTree = "<group>"; };
 		4F2181601755526A0053D99E /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = staticlib/libfltk.a; sourceTree = "<group>"; };
 		4F218162175553040053D99E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = staticlib/libz.a; sourceTree = "<group>"; };
 		4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXCalls.mm; sourceTree = "<group>"; };
 		4F2D365317C96A7E003BEEE9 /* OSXCalls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXCalls.h; sourceTree = "<group>"; };
 		4FBD72EB179FBF9300937B50 /* e_checks2.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = e_checks2.cc; path = ../../src/e_checks2.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72EE179FBFE900937B50 /* vm_object.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_object.cc; path = ../../src/vm_object.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72EF179FBFE900937B50 /* vm_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm_object.h; path = ../../src/vm_object.h; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F1179FC00400937B50 /* vm_builtin.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_builtin.cc; path = ../../src/vm_builtin.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F2179FC00400937B50 /* vm_compile.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_compile.cc; path = ../../src/vm_compile.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F3179FC00400937B50 /* vm_execute.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_execute.cc; path = ../../src/vm_execute.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F4179FC00400937B50 /* vm_lex.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vm_lex.cc; path = ../../src/vm_lex.cc; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F5179FC00400937B50 /* vm_local.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm_local.h; path = ../../src/vm_local.h; sourceTree = "<group>"; usesTabs = 1; };
-		4FBD72F6179FC00400937B50 /* vm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vm.h; path = ../../src/vm.h; sourceTree = "<group>"; usesTabs = 1; };
 		4FBD72FB179FC10100937B50 /* libfltk_images.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_images.a; path = staticlib/libfltk_images.a; sourceTree = "<group>"; };
 		4FBD72FF179FC18000937B50 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = staticlib/libjpeg.a; sourceTree = "<group>"; };
 		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
@@ -172,7 +158,6 @@
 		FA24463F166CAA6100C68ED8 /* ports */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ports; path = ../ports; sourceTree = "<group>"; };
 		FA4433CF16AD9CB800525112 /* m_keys.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_keys.cc; path = ../../src/m_keys.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA4433D016AD9CB800525112 /* m_keys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_keys.h; path = ../../src/m_keys.h; sourceTree = "<group>"; usesTabs = 1; };
-		FA4433D216ADA2AE00525112 /* bindings.cfg */ = {isa = PBXFileReference; lastKnownFileType = text; name = bindings.cfg; path = ../misc/bindings.cfg; sourceTree = "<group>"; };
 		FA5E2C28165B8F860024D6A5 /* Eureka Doom Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Eureka Doom Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		FA5E2C2F165B8F860024D6A5 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -186,10 +171,6 @@
 		FA5E2C42165B8F860024D6A5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		FA5E2C49165B8F870024D6A5 /* Eureka Doom EditorTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Eureka Doom EditorTests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA5E2C4A165B8F870024D6A5 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		FA5E2C51165B8F870024D6A5 /* Eureka Doom EditorTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Eureka Doom EditorTests-Info.plist"; sourceTree = "<group>"; };
-		FA5E2C53165B8F870024D6A5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		FA5E2C55165B8F870024D6A5 /* EurekaAppTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EurekaAppTests.h; sourceTree = "<group>"; };
-		FA5E2C56165B8F870024D6A5 /* EurekaAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EurekaAppTests.m; sourceTree = "<group>"; };
 		FA6ADC21165E75D400FB10D1 /* im_arrows.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = im_arrows.cc; path = ../../src/im_arrows.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA85EEE216936A3A00CA6FC2 /* m_files.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_files.cc; path = ../../src/m_files.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA85EEE316936A3A00CA6FC2 /* m_files.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_files.h; path = ../../src/m_files.h; sourceTree = "<group>"; usesTabs = 1; };
@@ -361,26 +342,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4FBD72ED179FBFDA00937B50 /* vm_ */ = {
-			isa = PBXGroup;
-			children = (
-				4FBD72F1179FC00400937B50 /* vm_builtin.cc */,
-				4FBD72F2179FC00400937B50 /* vm_compile.cc */,
-				4FBD72F3179FC00400937B50 /* vm_execute.cc */,
-				4FBD72F4179FC00400937B50 /* vm_lex.cc */,
-				4FBD72F5179FC00400937B50 /* vm_local.h */,
-				4FBD72F6179FC00400937B50 /* vm.h */,
-				4FBD72EE179FBFE900937B50 /* vm_object.cc */,
-				4FBD72EF179FBFE900937B50 /* vm_object.h */,
-			);
-			name = vm_;
-			sourceTree = "<group>";
-		};
 		FA5E2C1D165B8F860024D6A5 = {
 			isa = PBXGroup;
 			children = (
+				4F13FF211A16C19700B64656 /* bindings.cfg */,
 				4FBD7301179FC5ED00937B50 /* about_logo.png */,
-				FA4433D216ADA2AE00525112 /* bindings.cfg */,
 				FA24463A166CAA6100C68ED8 /* common */,
 				FA24463B166CAA6100C68ED8 /* docs */,
 				FA24463C166CAA6100C68ED8 /* games */,
@@ -388,7 +354,6 @@
 				FA24463E166CAA6100C68ED8 /* mods */,
 				FA24463F166CAA6100C68ED8 /* ports */,
 				FA5E2C32165B8F860024D6A5 /* EurekaApp */,
-				FA5E2C4F165B8F870024D6A5 /* EurekaAppTests */,
 				FA5E2C2B165B8F860024D6A5 /* Frameworks */,
 				FA5E2C29165B8F860024D6A5 /* Products */,
 			);
@@ -451,29 +416,9 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		FA5E2C4F165B8F870024D6A5 /* EurekaAppTests */ = {
-			isa = PBXGroup;
-			children = (
-				FA5E2C55165B8F870024D6A5 /* EurekaAppTests.h */,
-				FA5E2C56165B8F870024D6A5 /* EurekaAppTests.m */,
-				FA5E2C50165B8F870024D6A5 /* Supporting Files */,
-			);
-			path = EurekaAppTests;
-			sourceTree = "<group>";
-		};
-		FA5E2C50165B8F870024D6A5 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				FA5E2C51165B8F870024D6A5 /* Eureka Doom EditorTests-Info.plist */,
-				FA5E2C52165B8F870024D6A5 /* InfoPlist.strings */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		FA5E2C60165B8F950024D6A5 /* Eureka */ = {
 			isa = PBXGroup;
 			children = (
-				4FBD72ED179FBFDA00937B50 /* vm_ */,
 				FA8DBCFA165D293600FCFB1A /* main.cc */,
 				FA8DBCFB165D293600FCFB1A /* main.h */,
 				FABBC23F165B990C0080245F /* glbsp_src */,
@@ -763,7 +708,7 @@
 			name = "Eureka Doom EditorTests";
 			productName = EurekaAppTests;
 			productReference = FA5E2C49165B8F870024D6A5 /* Eureka Doom EditorTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productType = "com.apple.product-type.bundle.ocunit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -771,8 +716,8 @@
 		FA5E2C1F165B8F860024D6A5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastTestingUpgradeCheck = 0510;
-				LastUpgradeCheck = 0510;
+				LastTestingUpgradeCheck = 0610;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = ioan;
 			};
 			buildConfigurationList = FA5E2C22165B8F860024D6A5 /* Build configuration list for PBXProject "Eureka Doom Editor" */;
@@ -809,7 +754,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5E2C54165B8F870024D6A5 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -908,11 +852,6 @@
 				FA4433D116AD9CB800525112 /* m_keys.cc in Sources */,
 				FADB99F316B017D600A28204 /* AppDelegate.mm in Sources */,
 				4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */,
-				4FBD72F0179FBFE900937B50 /* vm_object.cc in Sources */,
-				4FBD72F7179FC00400937B50 /* vm_builtin.cc in Sources */,
-				4FBD72F8179FC00400937B50 /* vm_compile.cc in Sources */,
-				4FBD72F9179FC00400937B50 /* vm_execute.cc in Sources */,
-				4FBD72FA179FC00400937B50 /* vm_lex.cc in Sources */,
 				4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -921,7 +860,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5E2C57165B8F870024D6A5 /* EurekaAppTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -960,14 +898,6 @@
 			name = MainMenu.xib;
 			sourceTree = "<group>";
 		};
-		FA5E2C52165B8F870024D6A5 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				FA5E2C53165B8F870024D6A5 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -982,8 +912,10 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1022,9 +954,11 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
