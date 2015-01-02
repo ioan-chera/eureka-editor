@@ -139,7 +139,7 @@ static void CustomApplicationMain (int argc, char **argv)
 	
     // Create SDLMain and make it the app delegate
     delegate = [[AppDelegate alloc] init];
-    [NSApp setDelegate:delegate];
+    [[NSApplication sharedApplication] setDelegate:delegate];
 	
     // Start the main event loop
     [NSApp run];

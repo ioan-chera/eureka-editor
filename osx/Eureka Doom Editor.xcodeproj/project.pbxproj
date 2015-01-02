@@ -11,6 +11,8 @@
 		4F13FF231A16C1E700B64656 /* bindings.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4F13FF211A16C19700B64656 /* bindings.cfg */; };
 		4F2181611755526A0053D99E /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2181601755526A0053D99E /* libfltk.a */; };
 		4F218163175553040053D99E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F218162175553040053D99E /* libz.a */; };
+		4F288FC81A574B77000E03AD /* libfltk_forms.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F288FC61A574B77000E03AD /* libfltk_forms.a */; };
+		4F288FC91A574B77000E03AD /* libfltk_gl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F288FC71A574B77000E03AD /* libfltk_gl.a */; };
 		4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */; };
 		4FBD72EC179FBF9300937B50 /* e_checks2.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBD72EB179FBF9300937B50 /* e_checks2.cc */; };
 		4FBD72FC179FC10100937B50 /* libfltk_images.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBD72FB179FC10100937B50 /* libfltk_images.a */; };
@@ -142,6 +144,8 @@
 		4F13FF211A16C19700B64656 /* bindings.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bindings.cfg; path = ../bindings.cfg; sourceTree = "<group>"; };
 		4F2181601755526A0053D99E /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = staticlib/libfltk.a; sourceTree = "<group>"; };
 		4F218162175553040053D99E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = staticlib/libz.a; sourceTree = "<group>"; };
+		4F288FC61A574B77000E03AD /* libfltk_forms.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_forms.a; path = staticlib/libfltk_forms.a; sourceTree = "<group>"; };
+		4F288FC71A574B77000E03AD /* libfltk_gl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_gl.a; path = staticlib/libfltk_gl.a; sourceTree = "<group>"; };
 		4F2D365217C96A7E003BEEE9 /* OSXCalls.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXCalls.mm; sourceTree = "<group>"; };
 		4F2D365317C96A7E003BEEE9 /* OSXCalls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXCalls.h; sourceTree = "<group>"; };
 		4FBD72EB179FBF9300937B50 /* e_checks2.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = e_checks2.cc; path = ../../src/e_checks2.cc; sourceTree = "<group>"; usesTabs = 1; };
@@ -326,6 +330,8 @@
 				4F0364D81958EDA70000AE65 /* libpng16.a in Frameworks */,
 				4F218163175553040053D99E /* libz.a in Frameworks */,
 				4FBD72FC179FC10100937B50 /* libfltk_images.a in Frameworks */,
+				4F288FC91A574B77000E03AD /* libfltk_gl.a in Frameworks */,
+				4F288FC81A574B77000E03AD /* libfltk_forms.a in Frameworks */,
 				4FBD7300179FC18000937B50 /* libjpeg.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +377,8 @@
 		FA5E2C2B165B8F860024D6A5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4F288FC61A574B77000E03AD /* libfltk_forms.a */,
+				4F288FC71A574B77000E03AD /* libfltk_gl.a */,
 				4F0364D71958EDA70000AE65 /* libpng16.a */,
 				4FBD72FF179FC18000937B50 /* libjpeg.a */,
 				4FBD72FB179FC10100937B50 /* libfltk_images.a */,
