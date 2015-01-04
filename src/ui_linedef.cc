@@ -90,13 +90,13 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += desc->h() + 2;
 
 
-	tag = new Fl_Int_Input(X+W/2+52, Y, 64, 24, "Tag: ");
+	tag = new Fl_Int_Input(X+58, Y, 64, 24, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	length = new Fl_Int_Input(X+58, Y, 64, 24, "Length: ");
+	length = new Fl_Int_Input(X+W/2+58, Y, 64, 24, "Length: ");
 	length->align(FL_ALIGN_LEFT);
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
