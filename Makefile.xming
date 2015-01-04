@@ -19,6 +19,8 @@ ZLIB_DIR=$(LIB_LOC)/zlib-1.2.6
 
 OPTIMISE=-O2 -fno-strict-aliasing
 
+STRIP_FLAGS=--strip-unneeded
+
 # operating system choices: UNIX WIN32
 OS=WIN32
 
@@ -154,7 +156,7 @@ $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 stripped: $(PROGRAM)
-	$(MINGW)strip --strip-unneeded $(PROGRAM)
+	$(MINGW)strip $(STRIP_FLAGS) $(PROGRAM)
 
 .PHONY: all clean bin 
 

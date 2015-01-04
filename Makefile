@@ -13,6 +13,8 @@ OBJ_DIR=obj_linux
 
 OPTIMISE=-O0 -g3 -fno-strict-aliasing
 
+STRIP_FLAGS=--strip-unneeded
+
 # operating system choices: UNIX WIN32
 OS=UNIX
 
@@ -151,7 +153,7 @@ $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 stripped: $(PROGRAM)
-	strip --strip-unneeded $(PROGRAM)
+	strip $(STRIP_FLAGS) $(PROGRAM)
 
 install: stripped
 	install -o root -m 755 $(PROGRAM) $(PREFIX)/bin/
