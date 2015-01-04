@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -63,6 +63,16 @@ static void file_do_save(Fl_Widget *w, void * data)
 static void file_do_export(Fl_Widget *w, void * data)
 {
 	CMD_ExportMap();
+}
+
+static void file_do_rename(Fl_Widget *w, void * data)
+{
+	CMD_RenameMap();
+}
+
+static void file_do_delete(Fl_Widget *w, void * data)
+{
+	CMD_DeleteMap();
 }
 
 static void file_do_manage_wads(Fl_Widget *w, void * data)
@@ -426,26 +436,28 @@ static Fl_Menu_Item menu_items[] =
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
-
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
-		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
+		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
+		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+		{ "Rename Map",   0,                FCAL file_do_rename },
+		{ "Delete Map",   FL_COMMAND + 'd', FCAL file_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
+
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
-//TODO	{ "&Test Map",        FL_COMMAND + 't', FCAL file_do_test_map },
+//TODO	{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
 
-		{ "&Quit",      FL_COMMAND + 'q', FCAL file_do_quit },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
+		{ "&Quit",           FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },

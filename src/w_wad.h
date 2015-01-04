@@ -199,8 +199,8 @@ public:
 	// (previous results of FindLumpNum or GetLevel are invalidated).
 	void RemoveLumps(short index, short count = 1);
 
-	// this removes the level marker PLUS all associated level
-	// lumps which follow it.
+	// this removes the level marker PLUS all associated level lumps
+	// which follow it.  'index' is a lump number (e.g. from FindLevel)
 	void RemoveLevel(short index);
 
 	// insert a new lump.

@@ -2,37 +2,42 @@
 CHANGES IN Eureka
 =================
 
++  new 'File / Delete Map' command
+
 -  added back the '192' grid size
-
--  fixed bug not loading 'ASHWALL' texture for DOOM 1
-
--  fixed bug when saving and using the 'ExMx' buttons
-   (an erroneous newline was added into the map's lump name)
 
 -  support loading a read-only wad file
 
 -  support data in a map header lump (such as MAP01), make sure to
    save it when saving the map (instead of removing it)
 
--  show version _in_ the About box (not just the window title)
-
 -  node builder : added work-around for "TOO SIMPLE" levels
    (i.e. a single convex sector), creating a dummy node and an
    extra subsector and seg for the back side
 
--  3D view : fixed a vertical mis-alignment of textures (one pixel)
-   in certain circumstances
-
 -  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
 
--  in Linedef panel swapped the 'Tag' and 'Length' widgets
+-  in Linedef panel swapped the 'Tag' and 'Length' positions
 
 -  support -warp option being followed by two numeric arguments
    (episode and map number), compatible with vanilla DOOM
 
 -  the 'New Map' dialog now has a "New WAD File" radio button, when
    selected it disables the map selection and immediately asks for
-   a file to save (export) the new map into.
+   a file to save (export) the new map into
+
+-  show version _in_ the About box (not just the window title)
+
+
+Bug Fixes:
+
+-  fixed not loading 'ASHWALL' texture for DOOM 1
+
+-  fixed bug when saving and using the 'ExMx' buttons
+   (an erroneous newline was added into the map's lump name)
+
+-  3D view : fixed a vertical mis-alignment of textures (one pixel)
+   in certain circumstances
 
 -  fixed occasional false positives with sector mismatch test
 

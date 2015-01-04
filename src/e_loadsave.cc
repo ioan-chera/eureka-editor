@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2014 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1009,11 +1009,8 @@ void CMD_FlipMap()
 
 
 	short lump_idx = wad->GetLevel(lev_idx);
-
-	Lump_c * lump = wad->GetLump(lump_idx);
-
+	Lump_c * lump  = wad->GetLump(lump_idx);
 	const char *map_name = lump->Name();
-	
 
 	LogPrintf("Flipping Map to : %s\n", map_name);
 
@@ -1274,7 +1271,7 @@ bool CMD_SaveMap()
 
 	if (Replacer)
 	{
-		int choice = DLG_Confirm("Cancel|&Export|O&verwrite", overwrite_message, "current");
+		int choice = DLG_Confirm("Cancel|&Export|&Overwrite", overwrite_message, "current");
 
 		if (choice <= 0)
 			return false;
@@ -1392,7 +1389,7 @@ bool CMD_ExportMap()
 
 	if (exists && wad->FindLevel(map_name) >= 0)
 	{
-		if (DLG_Confirm("Cancel|O&verwrite",
+		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "selected") <= 0)
 		{
 			delete wad;
@@ -1434,6 +1431,100 @@ bool CMD_ExportMap()
 	return true;
 }
 
+
+//------------------------------------------------------------------------
+//  RENAME and DELETE
+//------------------------------------------------------------------------
+
+void CMD_RenameMap()
+{
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot rename a map unless editing a PWAD.");
+		return;
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot rename map : file is read-only.");
+		return;
+	}
+
+	// FIXME: handle 'Replacer' ??
+
+	// TODO
+
+	Beep("Rename not yet implemented");
+}
+
+
+void CMD_DeleteMap()
+{
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot delete a map unless editing a PWAD.");
+		return;
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot delete map : file is read-only.");
+		return;
+	}
+
+	if (edit_wad->NumLevels() < 2)
+	{
+		// perhaps ask either to Rename map, or Delete the file (and Eureka will shut down)
+
+		DLG_Notify("Cannot delete the last map in a PWAD.");
+		return;
+	}
+
+	// NOTE : we do not handle 'Replacer' here (i.e. a new map that would
+	//        replace an existing map) -- this dialog should be enough.
+
+	if (DLG_Confirm("Cancel|&Delete",
+	                "Are you sure you want to delete this map? "
+					"It will be permanently removed from the current PWAD.") <= 0)
+	{
+		return;
+	}
+
+	LogPrintf("Deleting Map : %s...\n", Level_name);
+
+	short level_lump = edit_wad->FindLevel(Level_name);
+	short level_idx  = edit_wad->FindLevel_Raw(Level_name);
+
+	if (level_lump < 0 || level_idx < 0)
+	{
+		Beep("No such map ?!?");
+		return;
+	}
+
+
+	edit_wad->BeginWrite();
+
+	edit_wad->RemoveLevel(level_lump);
+
+	edit_wad->EndWrite();
+
+
+	// choose a new level to load
+	{
+		if (level_idx >= edit_wad->NumLevels())
+			level_idx =  edit_wad->NumLevels() - 1;
+
+		short lump_idx = edit_wad->GetLevel(level_idx);
+		Lump_c * lump  = edit_wad->GetLump(lump_idx);
+		const char *map_name = lump->Name();
+
+		LogPrintf("OK.  Loading : %s....\n", map_name);
+
+		LoadLevel(edit_wad, map_name);
+
+		Replacer = false;
+	}
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
