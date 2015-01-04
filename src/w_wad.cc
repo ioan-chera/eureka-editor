@@ -48,9 +48,9 @@ Lump_c::Lump_c(Wad_file *_par, const char *_nam, int _start, int _len) :
 {
 	name = strdup(_nam);
 
-	// ensure lump name is uppercase
 	SYS_ASSERT(name);
 
+	// ensure lump name is uppercase
 	y_strupr((char *)name);
 }
 
@@ -84,6 +84,18 @@ void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 
 	entry->pos  = LE_U32(l_start);
 	entry->size = LE_U32(l_length);
+}
+
+
+void Lump_c::Rename(const char *new_name)
+{
+	free((void*)name);
+
+	name = strdup(new_name);
+	SYS_ASSERT(name);
+
+	// ensure lump name is uppercase
+	y_strupr((char *)name);
 }
 
 
@@ -787,6 +799,18 @@ void Wad_file::EndWrite()
 
 	// reset the insertion point
 	insert_point = -1;
+}
+
+
+void Wad_file::RenameLump(short index, const char *new_name)
+{
+	SYS_ASSERT(begun_write);
+	SYS_ASSERT(0 <= index && index < NumLumps());
+
+	Lump_c *lump = directory[index];
+	SYS_ASSERT(lump);
+
+	lump->Rename(new_name);
 }
 
 

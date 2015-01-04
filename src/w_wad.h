@@ -55,6 +55,9 @@ public:
 	const char *Name() const { return name; }
 	int Length() const { return l_length; }
 
+	// do not call this directly, use Wad_file::RenameLump()
+	void Rename(const char *new_name);
+
 	// attempt to seek to a position within the lump (default is
 	// the beginning).  Returns true if OK, false on error.
 	bool Seek(int offset = 0);
@@ -193,6 +196,9 @@ public:
 	// and EndWrite() methods.
 	void BeginWrite();
 	void EndWrite();
+
+	// change name of a lump (can be a level marker too)
+	void RenameLump(short index, const char *new_name);
 
 	// remove the given lump(s)
 	// this will change index numbers on existing lumps
