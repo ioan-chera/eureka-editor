@@ -25,3 +25,8 @@ CHANGES IN Eureka
 
 -  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
 
+-  in Linedef panel swapped the 'Tag' and 'Length' widgets
+
+-  the -warp option can now be followed by two numeric arguments
+   (episode and map number), compatible with vanilla DOOM
+
