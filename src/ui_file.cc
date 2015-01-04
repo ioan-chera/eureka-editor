@@ -51,8 +51,9 @@ bool ValidateMapName(const char *p)
 }
 
 
-UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
-	UI_Escapable_Window(420, 380, "Choose Map"),
+UI_ChooseMap::UI_ChooseMap(const char *initial_name, bool allow_new_file) :
+	UI_Escapable_Window(420, 385, "Choose Map"),
+	new_file_but(NULL),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -60,18 +61,26 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name) :
 	callback(close_callback, this);
 
 
-///---	Fl_Box *title = new Fl_Box(20, 18, 285, 32, "Enter the map slot:");
-///---	title->labelfont(FL_HELVETICA_BOLD);
-///---	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	if (allow_new_file)
+ 	{
+		new_file_but = new Fl_Check_Button(20, 10, 215, 25, "New File");
+		new_file_but->labelfont(FL_HELVETICA_BOLD);
+		new_file_but->callback(new_callback, this);
+	}
 
-	map_name = new Fl_Input(94, 25, 120, 25, "Map slot: ");
+	map_name = new Fl_Input(120, 35, 120, 25, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
 	map_name->value(initial_name);
 
+	Fl::focus(map_name);
+
+	map_buttons = new Fl_Group(x(), y() + 60, w(), y() + 320);
+	map_buttons->end();
+
 	{
-		int bottom_y = 315;
+		int bottom_y = 320;
 
 		Fl_Group* o = new Fl_Group(0, bottom_y, 420, 65);
 		o->box(FL_FLAT_BOX);
@@ -111,7 +120,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 	for (int row = 0 ; row < 8 ; row++)
 	{
 		int cx = x() + 30 + col * (but_W + but_W / 5);
-		int cy = y() + 75 + row * 24 + (row / 2) * 10;
+		int cy = y() + 80 + row * 24 + (row / 2) * 10;
 
 		char name_buf[20];
 
@@ -150,7 +159,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		else
 			but->color(FREE_COL);
 
-		add(but);
+		map_buttons->add(but);
 	}
 }
 
@@ -168,6 +177,9 @@ const char * UI_ChooseMap::Run()
 
 	if (action == ACT_CANCEL)
 		return NULL;
+
+	if (new_file_but && new_file_but->value())
+		return "new";
 
 	return StringUpper(map_name->value());
 }
@@ -207,6 +219,33 @@ void UI_ChooseMap::input_callback(Fl_Widget *w, void *data)
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
 	that->CheckMapName();
+}
+
+
+void UI_ChooseMap::new_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseMap * that = (UI_ChooseMap *)data;
+
+	Fl_Check_Button * but = (Fl_Check_Button *)w;
+
+	if (but->value())
+	{
+		that->map_name->deactivate();
+	}
+	else
+	{
+		that->map_name->activate();
+	}
+
+	for (int i = 0 ; i < that->map_buttons->children() ; i++)
+	{
+		Fl_Widget *ch = (Fl_Widget *) that->map_buttons->child(i);
+
+		if (but->value())
+			ch->deactivate();
+		else
+			ch->activate();
+	}
 }
 
 

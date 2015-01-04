@@ -162,6 +162,8 @@ static void FreshLevel()
 
 extern void CMD_ZoomWholeMap();
 
+void RemoveEditWad();
+
 
 void CMD_NewMap()
 {
@@ -175,7 +177,7 @@ void CMD_NewMap()
 
 	if (edit_wad)
 	{
-		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
+		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, true /* allow_new_file */);
 
 		dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
@@ -187,15 +189,24 @@ void CMD_NewMap()
 		if (! map_name)
 			return;
 
-		// would this replace an existing map?
-		if (edit_wad && edit_wad->FindLevel(map_name) >= 0)
+		if (strcmp(map_name, "new") == 0)
 		{
-			Replacer = true;
+			RemoveEditWad();
+
+			main_win->SetTitle(NULL, Level_name, false);
 		}
+		else
+		{
+			Level_name = StringUpper(map_name);
 
-		Level_name = StringUpper(map_name);
+			// would this replace an existing map?
+			if (edit_wad && edit_wad->FindLevel(Level_name) >= 0)
+			{
+				Replacer = true;
+			}
 
-		main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
+			main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
+		}
 	}
 	else
 	{
@@ -208,7 +219,7 @@ void CMD_NewMap()
 
 	CMD_ZoomWholeMap();
 
-	MadeChanges = 1;
+	MadeChanges = 0;
 }
 
 

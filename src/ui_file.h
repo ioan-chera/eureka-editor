@@ -25,6 +25,9 @@ class UI_ChooseMap : public UI_Escapable_Window
 {
 private:
 	Fl_Input *map_name;
+	Fl_Group *map_buttons;
+
+	Fl_Check_Button *new_file_but;
 
 	Fl_Return_Button *ok_but;
 
@@ -40,12 +43,13 @@ private:
 	void CheckMapName();
 
 public:
-	UI_ChooseMap(const char *initial_name = "");
+	UI_ChooseMap(const char *initial_name = "", bool allow_new_file = false);
 	virtual ~UI_ChooseMap();
 
 	// format is 'E' for ExMx, or 'M' for MAPxx
 	void PopulateButtons(char format, Wad_file *test_wad = NULL);
 
+	// returns NULL on cancel, or "new" keyword for a new file
 	const char * Run();
 
 private:
@@ -53,6 +57,7 @@ private:
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 	static void  input_callback(Fl_Widget *, void *);
+	static void    new_callback(Fl_Widget *, void *);
 };
 
 //------------------------------------------------------------------------

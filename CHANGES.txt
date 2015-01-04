@@ -11,7 +11,7 @@ CHANGES IN Eureka
 
 -  support loading a read-only wad file
 
--  support data in a map header lump (such as MAP01), make sure it
+-  support data in a map header lump (such as MAP01), make sure to
    save it when saving the map (instead of removing it)
 
 -  show version _in_ the About box (not just the window title)
@@ -29,4 +29,8 @@ CHANGES IN Eureka
 
 -  the -warp option can now be followed by two numeric arguments
    (episode and map number), compatible with vanilla DOOM
+
+-  the 'New Map' dialog now has a "New File" check button, when
+   selected it disabled the map selection and next save (CTRL-S)
+   will ask to export into a new file.
 
