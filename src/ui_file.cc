@@ -63,13 +63,27 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name, bool allow_new_file) :
 
 	if (allow_new_file)
  	{
-		new_file_but = new Fl_Check_Button(20, 10, 215, 25, "New File");
+		new_file_but = new Fl_Round_Button(20, 10, 210, 25, "New WAD File");
+		new_file_but->type(FL_RADIO_BUTTON);
 		new_file_but->labelfont(FL_HELVETICA_BOLD);
 		new_file_but->callback(new_callback, this);
+
+		Fl_Round_Button *
+		other_but = new Fl_Round_Button(20, 35, 210, 25, "Current WAD File");
+		other_but->type(FL_RADIO_BUTTON);
+		other_but->labelfont(FL_HELVETICA_BOLD);
+		other_but->callback(new_callback, this);
+
+		other_but->setonly();
+
+		map_name = new Fl_Input(260, 35, 120, 25, "Map: ");
+	}
+	else
+	{
+		map_name = new Fl_Input(120, 35, 120, 25, "Map slot: ");
+		map_name->labelfont(FL_HELVETICA_BOLD);
 	}
 
-	map_name = new Fl_Input(120, 35, 120, 25, "Map slot: ");
-	map_name->labelfont(FL_HELVETICA_BOLD);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
 	map_name->value(initial_name);
@@ -226,9 +240,18 @@ void UI_ChooseMap::new_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
-	Fl_Check_Button * but = (Fl_Check_Button *)w;
+	Fl_Round_Button * but = (Fl_Round_Button *)w;
 
-	if (but->value())
+	// this logic is a bit odd... FLTK is not sending a callback when a
+	// radio button goes off because another went on -- hence have this
+	// callback called by BOTH buttons and check which widget we got.
+
+	if (! but->value())
+		return;
+
+	bool want_deactivate = (but == that->new_file_but);
+
+	if (want_deactivate)
 	{
 		that->map_name->deactivate();
 	}
@@ -241,7 +264,7 @@ void UI_ChooseMap::new_callback(Fl_Widget *w, void *data)
 	{
 		Fl_Widget *ch = (Fl_Widget *) that->map_buttons->child(i);
 
-		if (but->value())
+		if (want_deactivate)
 			ch->deactivate();
 		else
 			ch->activate();

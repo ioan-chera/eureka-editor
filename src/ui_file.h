@@ -27,7 +27,7 @@ private:
 	Fl_Input *map_name;
 	Fl_Group *map_buttons;
 
-	Fl_Check_Button *new_file_but;
+	Fl_Round_Button *new_file_but;
 
 	Fl_Return_Button *ok_but;
 

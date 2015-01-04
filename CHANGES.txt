@@ -27,12 +27,12 @@ CHANGES IN Eureka
 
 -  in Linedef panel swapped the 'Tag' and 'Length' widgets
 
--  the -warp option can now be followed by two numeric arguments
+-  support -warp option being followed by two numeric arguments
    (episode and map number), compatible with vanilla DOOM
 
--  the 'New Map' dialog now has a "New File" check button, when
-   selected it disabled the map selection and next save (CTRL-S)
-   will ask to export into a new file.
+-  the 'New Map' dialog now has a "New WAD File" radio button, when
+   selected it disables the map selection and immediately asks for
+   a file to save (export) the new map into.
 
 -  fixed occasional false positives with sector mismatch test
 

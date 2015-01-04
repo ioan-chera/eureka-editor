@@ -175,6 +175,8 @@ void CMD_NewMap()
 
 	Replacer = false;
 
+	bool make_new_file = false;
+
 	if (edit_wad)
 	{
 		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, true /* allow_new_file */);
@@ -194,6 +196,8 @@ void CMD_NewMap()
 			RemoveEditWad();
 
 			main_win->SetTitle(NULL, Level_name, false);
+
+			make_new_file = true;
 		}
 		else
 		{
@@ -220,6 +224,9 @@ void CMD_NewMap()
 	CMD_ZoomWholeMap();
 
 	MadeChanges = 0;
+
+	if (make_new_file)
+		CMD_ExportMap();
 }
 
 
