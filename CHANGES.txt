@@ -34,3 +34,8 @@ CHANGES IN Eureka
    selected it disabled the map selection and next save (CTRL-S)
    will ask to export into a new file.
 
+-  fixed occasional false positives with sector mismatch test
+
+-  fixed wrong focal point when zooming immediately after the 'j'
+   (JumpToObject) command
+

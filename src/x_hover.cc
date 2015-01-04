@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -271,20 +271,50 @@ bool PointOutsideOfMap(int x, int y)
 typedef struct
 {
 	int ld;
-	int ld_side;
+	int ld_side;   // a SIDE_XXX value
 
 	int * result_side;
 
-	int dx;
-	int dy;
+	int dx, dy;
 
-	float x;
-	float y;
+	// origin of casting line
+	float x, y;
+
+	bool is_horizontal;
 
 	int   best_match;
 	float best_dist;
 
 public:
+	void ComputeCastOrigin()
+	{
+		// choose a coordinate on the source line near the middle, but make
+		// sure the casting line is not integral (i.e. lies between two lines
+		// on the unit grid) so that we never directly hit a vertex.
+
+		const LineDef * L = LineDefs[ld];
+
+		dx = L->End()->x - L->Start()->x;
+		dy = L->End()->y - L->Start()->y;
+
+		is_horizontal = abs(dy) >= abs(dx);
+
+		x = L->Start()->x + dx * 0.5;
+		y = L->Start()->y + dy * 0.5;
+
+		if (is_horizontal && (dy & 1) == 0 && abs(dy) > 0)
+		{
+			y = y + 0.5;
+			x = x + 0.5 * dx / (float)dy;
+		}
+
+		if (!is_horizontal && (dx & 1) == 0 && abs(dx) > 0)
+		{
+			x = x + 0.5;
+			y = y + 0.5 * dy / (float)dx;
+		}
+	}
+
 	void ProcessLine(int n)
 	{
 		if (ld == n)  // ignore input line
@@ -295,12 +325,15 @@ public:
 		int nx2 = LineDefs[n]->End()->x;
 		int ny2 = LineDefs[n]->End()->y;
 
-		if (abs(dy) >= abs(dx))  // casting a horizontal ray
+		if (is_horizontal)
 		{
-			if (MIN(ny1, ny2) >= y + 1 || MAX(ny1, ny2) <= y)
+			if (ny1 == ny2)
 				return;
 
-			float dist = nx1 - (x + 0.5) + (nx2 - nx1) * (y + 0.5 - ny1) / (float)(ny2 - ny1);
+			if (MIN(ny1, ny2) > y || MAX(ny1, ny2) < y)
+				return;
+
+			float dist = nx1 + (nx2 - nx1) * (y - ny1) / (float)(ny2 - ny1) - x;
 
 			if ( (dy < 0) == (ld_side > 0) )
 				dist = -dist;
@@ -321,10 +354,13 @@ public:
 		}
 		else  // casting a vertical ray
 		{
-			if (MIN(nx1, nx2) >= x + 1 || MAX(nx1, nx2) <= x)
+			if (nx1 == nx2)
 				return;
 
-			float dist = ny1 - (y + 0.5) + (ny2 - ny1) * (x + 0.5 - nx1) / (float)(nx2 - nx1);
+			if (MIN(nx1, nx2) > x || MAX(nx1, nx2) < x)
+				return;
+
+			float dist = ny1 + (ny2 - ny1) * (x - nx1) / (float)(nx2 - nx1) - y;
 
 			if ( (dx > 0) == (ld_side > 0) )
 				dist = -dist;
@@ -504,7 +540,7 @@ void FastOpposite_Finish()
 
 int OppositeLineDef(int ld, int ld_side, int *result_side)
 {
-	// ld_side is -1 for left, +1 for right.
+	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).
 
 	opp_test_state_t  test;
@@ -513,17 +549,11 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 	test.ld_side = ld_side;
 	test.result_side = result_side;
 
-	const LineDef * L = LineDefs[ld];
-
-	test.dx = L->End()->x - L->Start()->x;
-	test.dy = L->End()->y - L->Start()->y;
+	test.ComputeCastOrigin();
 
 	if (test.dx == 0 && test.dy == 0)
 		return -1;
-
-	test.x = L->Start()->x + test.dx / 2.0;
-	test.y = L->Start()->y + test.dy / 2.0;
-
+	
 	test.best_match = -1;
 	test.best_dist  = 9e9;
 
@@ -531,7 +561,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 	{
 		// fast way : use the binary tree
 
-		if (abs(test.dy) >= abs(test.dx))  // casting a horizontal ray
+		if (test.is_horizontal)
 			fastopp_Y_tree->Process(test, test.y);
 		else
 			fastopp_X_tree->Process(test, test.x);
