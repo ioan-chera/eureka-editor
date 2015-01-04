@@ -35,7 +35,7 @@
 // TODO: find a better home for this
 bool ValidateMapName(const char *p)
 {
-	int len = strlen(p);
+	size_t len = strlen(p);
 
 	if (len == 0 || len > 8)
 		return false;

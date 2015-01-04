@@ -594,7 +594,7 @@ char * UI_LogViewer::GetSelectedText() const
 
 		// append current line onto previous ones
 
-		int new_len = strlen(buf) + strlen(line_text);
+		int new_len = (int)strlen(buf) + (int)strlen(line_text);
 
 		char *new_buf = StringNew(new_len + 1 /* newline */ );
 

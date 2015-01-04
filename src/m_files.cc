@@ -519,7 +519,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 	if (sep_pos)
 		len = (int)(sep_pos - paths);
 	else
-		len = strlen(paths);
+		len = (int)strlen(paths);
 
 	if (len > FL_PATH_MAX - 2)
 		len = FL_PATH_MAX - 2;

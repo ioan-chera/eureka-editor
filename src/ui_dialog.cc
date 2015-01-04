@@ -40,7 +40,7 @@ static void dialog_close_callback(Fl_Widget *w, void *data)
 
 static void dialog_button_callback(Fl_Widget *w, void *data)
 {
-	dialog_result = (long)data;
+	dialog_result = (int)(long)data;
 }
 
 
