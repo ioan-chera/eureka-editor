@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2014 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -483,6 +483,9 @@ static const char * DetermineLevel()
 {
 	// most of the logic here is to handle a numeric level number
 	// e.g. -warp 15
+	//
+	// DOOM 1 level number is 10 * episode + map, e.g. 23 --> E2M3
+	// (there is logic in command-line parsing to handle two numbers after -warp)
 
 	int level_number = 0;
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -86,6 +86,7 @@ typedef struct
 	// 'f' : string is a filename
 	// '<' : print extra newline after this option (when dumping)
 	// 'v' : a real variable (preference setting)
+	// 'w' : warp hack -- accept two numeric args
 
 	const char *desc;   // Description of the option
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
@@ -217,7 +218,7 @@ static const opt_desc_t options[] =
 	{	"warp",
 		"w",
 		OPT_STRING,
-		"",
+		"w",
 		"Select level to edit",
 		"<map>",
 		&Level_name
@@ -986,6 +987,20 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				{
 					*((const char **) o->data_ptr) = StringDup(argv[0]);
 				}
+
+				// support two numeric values after -warp
+				if (strchr(o->flags, 'w') && isdigit(argv[0][0]) &&
+					argc > 1 && isdigit(argv[1][0]))
+				{
+					if (! ignore)
+					{
+						*((const char **) o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
+					}
+
+					argv++;
+					argc--;
+				}
+
 				break;
 
 			case OPT_STRING_LIST:
