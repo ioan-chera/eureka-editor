@@ -404,7 +404,6 @@ void GoToSelection()
 
 	grid.CenterMapAt(mid_x, mid_y);
 
-
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
@@ -430,6 +429,11 @@ void GoToSelection()
 		grid.AdjustScale(+1);
 	}
 
+	// FIXME: this is not completely right, we should check where mouse pointer is
+	//        and use the following as the fallback (when not pointer_in_window).
+	edit.map_x = mid_x;
+	edit.map_y = mid_y;
+
 	edit.RedrawMap = 1;
 }
 
@@ -448,6 +452,7 @@ void GoToErrors()
 void GoToObject(const Objid& objid)
 {
 	edit.error_mode = false;
+
 	edit.Selected->clear_all();
 	edit.Selected->set(objid.num);
 
