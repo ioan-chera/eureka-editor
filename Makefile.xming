@@ -7,15 +7,15 @@
 PROGRAM=Eureka.exe
 INSTALLER=Eureka_setup.exe
 
-MINGW=i586-mingw32msvc-
+CROSS=i686-w64-mingw32-
 
-CXX=$(MINGW)g++
+CXX=$(CROSS)g++
 
 LIB_LOC=lib_win32
 OBJ_DIR=obj_win32
 
 FLTK_DIR=$(LIB_LOC)/fltk-1.3.2
-ZLIB_DIR=$(LIB_LOC)/zlib-1.2.6
+ZLIB_DIR=$(LIB_LOC)/zlib-1.2.8
 
 OPTIMISE=-O2 -fno-strict-aliasing
 
@@ -119,7 +119,7 @@ OBJS = \
 	$(OBJ_DIR)/eureka_res.o
 
 $(OBJ_DIR)/eureka_res.o: misc/eureka.rc
-	$(MINGW)windres -i $^ -o $@
+	$(CROSS)windres -i $^ -o $@
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
@@ -156,7 +156,7 @@ $(PROGRAM): $(OBJS) $(GLBSP_OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 stripped: $(PROGRAM)
-	$(MINGW)strip $(STRIP_FLAGS) $(PROGRAM)
+	$(CROSS)strip $(STRIP_FLAGS) $(PROGRAM)
 
 .PHONY: all clean bin 
 
