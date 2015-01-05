@@ -1450,11 +1450,65 @@ void CMD_RenameMap()
 		return;
 	}
 
-	// FIXME: handle 'Replacer' ??
+	// NOTE : we do not need to handle 'Replacer' -- the map in the PWAD
+	//        and current Level_name will both be renamed to the new name
+	//        (so we simply leave Replacer as true).
 
-	// TODO
 
-	Beep("Rename not yet implemented");
+	// ask user for map name
+
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, false, edit_wad /* rename_wad */);
+
+	// pick level format from the IWAD
+	// [ user may be trying to rename map after changing the IWAD ]
+	char format = 'M';
+	{
+		short idx = game_wad->FindFirstLevel();
+
+		if (idx >= 0)
+		{
+			Lump_c * lump  = game_wad->GetLump(idx);
+			const char *name = lump->Name();
+			format = toupper(name[0]);
+		}
+	}
+
+	dialog->PopulateButtons(format, edit_wad);
+
+	const char *new_name = dialog->Run();
+
+	delete dialog;
+
+	// cancelled?
+	if (! new_name)
+		return;
+
+	// sanity check that the name is different
+	// (should be prevented by the choose-map dialog)
+	if (y_stricmp(new_name, Level_name) == 0)
+	{
+		Beep("Name is same!?!");
+		return;
+	}
+
+
+	// perform the rename
+	short level_lump = edit_wad->FindLevel(Level_name);
+
+	if (level_lump >= 0)
+	{
+		edit_wad->BeginWrite();
+
+		edit_wad->RenameLump(level_lump, new_name);
+
+		edit_wad->EndWrite();
+	}
+
+	Level_name = StringUpper(new_name);
+
+	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+
+	Status_Set("Renamed to %s", Level_name);
 }
 
 

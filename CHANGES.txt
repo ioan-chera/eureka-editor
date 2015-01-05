@@ -4,6 +4,8 @@ CHANGES IN Eureka
 
 +  new 'File / Delete Map' command
 
++  new 'File / Rename Map' command
+
 -  added back the '192' grid size
 
 -  support loading a read-only wad file

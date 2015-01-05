@@ -51,9 +51,11 @@ bool ValidateMapName(const char *p)
 }
 
 
-UI_ChooseMap::UI_ChooseMap(const char *initial_name, bool allow_new_file) :
+UI_ChooseMap::UI_ChooseMap(const char *initial_name, bool allow_new_file,
+						   Wad_file *_rename_wad) :
 	UI_Escapable_Window(420, 385, "Choose Map"),
 	new_file_but(NULL),
+	rename_wad(_rename_wad),
 	action(ACT_none)
 {
 	resizable(NULL);
@@ -169,7 +171,12 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		but->callback(button_callback, this);
 
 		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
-			but->color(USED_COL);
+		{
+			if (rename_wad)
+				but->deactivate();
+			else
+				but->color(USED_COL);
+		}
 		else
 			but->color(FREE_COL);
 
@@ -276,6 +283,12 @@ void UI_ChooseMap::CheckMapName()
 {
 	bool was_valid = ok_but->active();
 	bool  is_valid = ValidateMapName(map_name->value());
+
+	if (rename_wad && is_valid)
+	{
+		if (rename_wad->FindLevel(map_name->value()) >= 0)
+			is_valid = false;
+	}
 
 	if (was_valid == is_valid)
 		return;
