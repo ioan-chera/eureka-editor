@@ -685,6 +685,24 @@ public:
 		rail.kind = DrawSurf::K_TEXTURE;
 		rail.y_clip = 0;
 		rail.tex_h = rail.h2;
+
+		// clip railing, unless sectors on both sides are identical or
+		// we have a sky upper
+
+		if (! (sky_upper ||
+				(back->ceilh == front->ceilh &&
+				 back->ceil_tex == front->ceil_tex &&
+				 back->light == front->light)))
+		{
+			rail.h2 = MIN(c_h, rail.h2);
+		}
+
+		if (! (back->floorh == front->floorh &&
+			   back->floor_tex == front->floor_tex &&
+			   back->light == front->light))
+		{
+			rail.h1 = MAX(f_h, rail.h1);
+		}
 	}
 };
 

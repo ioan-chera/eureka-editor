@@ -46,3 +46,5 @@ Bug Fixes:
 -  fixed wrong focal point when zooming immediately after the 'j'
    (JumpToObject) command
 
+-  fixed clipping of mid-masked textures (e.g. the cage in E1M9)
+
