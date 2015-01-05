@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2014 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -265,6 +265,26 @@ private:
 	// deliberately don't implement these
 	Wad_file(const Wad_file& other);
 	Wad_file& operator= (const Wad_file& other);
+
+private:
+	// predicate for sorting the levels[] vector
+	struct level_name_CMP_pred
+	{
+	private:
+		Wad_file *wad;
+
+	public:
+		level_name_CMP_pred(Wad_file * _w) : wad(_w)
+		{ }
+
+		inline bool operator() (const short A, const short B) const
+		{
+			const Lump_c *L1 = wad->directory[A];
+			const Lump_c *L2 = wad->directory[B];
+
+			return (strcmp(L1->Name(), L2->Name()) < 0);
+		}
+	};
 };
 
 
