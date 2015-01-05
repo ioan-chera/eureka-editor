@@ -32,6 +32,7 @@
 
 #include "e_basis.h"
 #include "levels.h"
+#include "lib_adler.h"
 #include "m_strings.h"
 
 #include "m_game.h"  // g_default_xxx
@@ -1039,6 +1040,84 @@ bool BA_ChangeLD(int line, byte field, int value)
 
 	return BA_Change(OBJ_LINEDEFS, line, field, value);
 }
+
+
+//------------------------------------------------------------------------
+//   CHECKSUM LOGIC
+//------------------------------------------------------------------------
+
+static void ChecksumThing(crc32_c& crc, const Thing * T)
+{
+	crc += T->x;
+	crc += T->y;
+	crc += T->angle;
+	crc += T->type;
+	crc += T->options;
+}
+
+static void ChecksumVertex(crc32_c& crc, const Vertex * V)
+{
+	crc += V->x;
+	crc += V->y;
+}
+
+static void ChecksumSector(crc32_c& crc, const Sector * SEC)
+{
+	crc += SEC->floorh;
+	crc += SEC->ceilh;
+	crc += SEC->light;
+	crc += SEC->type;
+	crc += SEC->tag;
+
+	crc += SEC->FloorTex();
+	crc += SEC->CeilTex();
+}
+
+static void ChecksumSideDef(crc32_c& crc, const SideDef * S)
+{
+	crc += S->x_offset;
+	crc += S->y_offset;
+
+	crc += S->LowerTex();
+	crc += S->MidTex();
+	crc += S->UpperTex();
+
+	ChecksumSector(crc, S->SecRef());
+}
+
+static void ChecksumLineDef(crc32_c& crc, const LineDef * L)
+{
+	crc += L->flags;
+	crc += L->type;
+	crc += L->tag;
+
+	ChecksumVertex(crc, L->Start());
+	ChecksumVertex(crc, L->End());
+
+	if (L->Right())
+		ChecksumSideDef(crc, L->Right());
+
+	if (L->Left())
+		ChecksumSideDef(crc, L->Left());
+}
+
+
+void BA_LevelChecksum(crc32_c& crc)
+{
+	// the following method conveniently skips any unused vertices,
+	// sidedefs and sectors.  It also adds each sector umpteen times
+	// (for each line in the sector), but that should not affect the
+	// validity of the final checksum.
+
+	int i;
+
+	for (i = 0 ; i < NumThings ; i++)
+		ChecksumThing(crc, Things[i]);
+
+	for (i = 0 ; i < NumLineDefs ; i++)
+		ChecksumLineDef(crc, LineDefs[i]);
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

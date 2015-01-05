@@ -27,6 +27,8 @@
 #ifndef __EUREKA_E_BASIS_H__
 #define __EUREKA_E_BASIS_H__
 
+class crc32_c;
+
 
 //
 // DESIGN NOTES
@@ -383,6 +385,9 @@ const char * BA_GetString(int offset);
 
 // clear everything (before loading a new level).
 void BA_ClearAll();
+
+// compute a checksum for the current level
+void BA_LevelChecksum(crc32_c& crc);
 
 
 /* HELPERS */

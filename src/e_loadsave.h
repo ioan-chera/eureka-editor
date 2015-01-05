@@ -48,9 +48,6 @@ bool CMD_ExportMap();
 void CMD_RenameMap();
 void CMD_DeleteMap();
 
-class crc32_c;
-void BA_LevelChecksum(crc32_c& crc);
-
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
 //--- editor settings ---
