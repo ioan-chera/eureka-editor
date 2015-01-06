@@ -4,6 +4,7 @@ Eureka TODO / WISHLIST
 
 
 -  Bug: when loading new WAD, may have different TEXTURES (etc)
+   (i.e. master directory changes, but have not reloaded anything)
 
 
 ______________________________________________________________________
@@ -52,6 +53,8 @@ Editing
 ++  a Find/Replace dialog, especially for textures and flats
     but also for thing numbers, line/sector specials, etc...
 
+    [ an expression parser for e.g. sec.floor_tex == "FLAT2" || sec.ceil_tex == "TLITE3" ]
+
 
 
 3D View
@@ -61,9 +64,6 @@ Editing
 
 Browser
 -------
-
-+  a "Recently used" category (sorted by time)
-   -  remember values in .dat cache
 
 
 ______________________________________________________________________
@@ -93,8 +93,6 @@ General
    -  implement the scrolling sizes
    -  add more stuff (see USER CONFIG NEEDED, below)
 
-+  un-hard-code menu shortcuts? (how ??)
-
 +  a dialog to view / load / prune backups.
 
 IDEA: ability to edit Lua code for OBLIGE prefabs
@@ -115,8 +113,6 @@ WISH: support UDMF format
    -  support resource wads
    -  make sure the user built the nodes
       (ideally invoke it automatically)
-
-NO:  Scripting language
 
 ?  GUI buttons for NewTag / LastTag commands
 
@@ -146,8 +142,6 @@ NO:  Scripting language
    (e.g. MAPINFO, DECORATE, etc...)
 
 
-NO: ability to use an external node builder
-
 ?  an auto-save feature (e.g. save every N minutes unless no
    changes occurred in the last N minutes).
    really needs the backup view/load/prune dialog too.
@@ -160,10 +154,6 @@ NO: ability to use an external node builder
 ?  MacOSX:
    (c) handle the -psnXXX argument (see SDL_main.m)
        NOTE: probably needs integrating some of SDL's logic
-
-NO: if a given pwad (from command line) does not exist, ask to create it
-
-    perhaps: --create or --new option?
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
@@ -192,11 +182,7 @@ Documentation
 
 -  document texture browser (RIGHT click etc)
 
-NO:  built-in cheat sheet for mouse buttons and common keys
-
 ?    command line arguments page
-
-NO:  config file syntax
 
 
 
@@ -292,17 +278,9 @@ Editing
 
    if geometry is broken : special result.
 
-NO: when one vertex of a linedef is moved (and not the other)
-    update the X offset on the appropriate side (right side for start,
-    left side for end vertex).
-
-NO:  SHIFT + SPACE = no auto create/split sectors
-
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
       "best" quantization.
-
-NO: merge vertex and linedef modes
 
 
 
@@ -348,8 +326,6 @@ NO: merge vertex and linedef modes
 
 ?  extrafloors
 
-NO:  ability to drag the camera (on 2D viewport)
-
 IDEA: a key (or mouse button) to toggle "grab mouse" mode
 
 IDEA: animation mode, render continuously and show any lighting
@@ -372,6 +348,10 @@ Browser
 
 -  search box: ',' for AND, '/' for OR
 
+-  preference for # of RECENT items
+
+?  command to clear the recent lists
+
 
 
 Game / Port Definitions
@@ -390,6 +370,37 @@ Game / Port Definitions
 -  FreeDOOM: categorize the new textures
 
 -  a new category for BOOM's "property transfer" linetypes
+
+
+______________________________________________________________________
+
+  NOT-TO-DO
+______________________________________________________________________
+
+
+NO:  un-hard-code menu shortcuts?
+
+NO:  Scripting language
+
+NO:  ability to use an external node builder
+
+NO:  if a given pwad (from command line) does not exist, ask to create it
+
+     perhaps: --create or --new option?
+
+NO:  built-in cheat sheet for mouse buttons and common keys
+
+NO:  document the config file syntax
+
+NO:  when one vertex of a linedef is moved (and not the other)
+     update the X offset on the appropriate side (right side for start,
+     left side for end vertex).
+
+NO:  SHIFT + SPACE = no auto create/split sectors
+
+NO:  merge vertex and linedef modes
+
+NO:  ability to drag the camera (on 2D viewport)
 
 
 ______________________________________________________________________
