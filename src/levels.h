@@ -86,6 +86,7 @@ extern Recently_used  recent_textures;
 extern Recently_used  recent_flats;
 extern Recently_used  recent_things;
 
+void RecUsed_ClearAll();
 void RecUsed_WriteUser(FILE *fp);
 bool RecUsed_ParseUser(const char ** tokens, int num_tok);
 

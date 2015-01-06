@@ -267,6 +267,17 @@ void Recently_used::clear()
 }
 
 
+void RecUsed_ClearAll()
+{
+	recent_textures.clear();
+	recent_flats   .clear();
+	recent_things  .clear();
+
+	if (main_win)
+		main_win->browser->RecentUpdate();
+}
+
+
 /* --- Save and Restore --- */
 
 void Recently_used::WriteUser(FILE *fp, char letter)
@@ -296,10 +307,7 @@ bool RecUsed_ParseUser(const char ** tokens, int num_tok)
 
 	if (strcmp(tokens[1], "clear") == 0)
 	{
-		recent_textures.clear();
-		recent_flats   .clear();
-		recent_things  .clear();
-
+		RecUsed_ClearAll();
 		return true;
 	}
 

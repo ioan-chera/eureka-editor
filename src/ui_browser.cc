@@ -883,6 +883,29 @@ void UI_Browser_Box::RecentUpdate()
 }
 
 
+void UI_Browser_Box::ToggleRecent(bool force_recent)
+{
+	char cat = cat_letters[category->value()];
+
+	if (cat == '^' && force_recent)
+	{
+		Filter();
+		return;
+	}
+
+	// this logic assumes first category is ALL, second is RECENT
+
+	if (cat_letters[1] != '^')
+		return;
+
+	int new_cat = (cat == '^') ? 0 : 1;
+
+	category->value(new_cat);
+
+	Filter();
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1040,6 +1063,22 @@ void UI_Browser::RecentUpdate()
 ///		return;
 
 	box->RecentUpdate();
+}
+
+
+void UI_Browser::ToggleRecent()
+{
+	bool force_recent = false;
+
+	// show browser if hidden [ and then force the RECENT category ]
+	if (! visible())
+	{
+		main_win->ShowBrowser('/');
+
+		force_recent = true;
+	}
+
+	browsers[active]->ToggleRecent(force_recent);
 }
 
 

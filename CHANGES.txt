@@ -6,6 +6,9 @@ CHANGES IN Eureka
 
 +  new 'File / Rename Map' command
 
++  new 'RECENT' category for Texture/Flat/Thing browsers,
+   and rebound the '\' key to toggle this category on/off
+
 -  added back the '192' grid size
 
 -  support loading a read-only wad file

@@ -96,6 +96,7 @@ public:
 	void SetCategories(const char *cats, const char *letters);
 
 	void CycleCategory(int dir);
+	void ToggleRecent(bool force_recent);
 	void ClearSearchBox();
 	void Scroll(int delta);
 
@@ -160,6 +161,7 @@ public:
 
 	// dir is +1 or -1, or 0 to set the category to "ALL"
 	void CycleCategory(int dir);
+	void ToggleRecent();
 
 	void ClearSearchBox();
 

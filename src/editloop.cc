@@ -440,6 +440,10 @@ void CMD_ToggleVar(void)
 
 		main_win->ShowBrowser('/');
 	}
+	else if (y_stricmp(var_name, "recent") == 0)
+	{
+		main_win->browser->ToggleRecent();
+	}
 	else if (y_stricmp(var_name, "grid") == 0)
 	{
 		grid.ToggleShown();
