@@ -54,9 +54,11 @@ extern std::map<int, thingtype_t *>  thing_types;
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-	                       const char *_desc, int _num, char _category) :
+	                       const char *_desc, const char *_realname,
+						   int _num, char _category) :
 	Fl_Group(X, Y, W, H, ""),
-	desc(_desc), number(_num), category(_category),
+	desc(_desc), real_name(_realname),
+	number(_num), category(_category),
 	button(NULL), pic(NULL)
 {
 	end();
@@ -75,10 +77,12 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 /* image item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-						   const char * _desc, int _num, char _category,
+	                       const char *_desc, const char *_realname,
+						   int _num, char _category,
 						   int pic_w, int pic_h, UI_Pic *_pic) :
 	Fl_Group(X, Y, W, H, ""),
-	desc(_desc), number(_num), category(_category),
+	desc(_desc), real_name(_realname),
+	number(_num), category(_category),
 	button(NULL), pic(_pic)
 {
 	end();
@@ -383,11 +387,9 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 		if (cat == '^')
 			return RecentMatch(item);
 
-		{
-			if (! (cat == tolower(item->category) ||
-				   (cat == 'X' && isupper(item->category))))
-				return false;
-		}
+		if (! (cat == tolower(item->category) ||
+			   (cat == 'X' && isupper(item->category))))
+			return false;
 	}
 
 	if (search->size() == 0)
@@ -436,14 +438,14 @@ bool UI_Browser_Box::RecentMatch(Browser_Item *item) const
 	switch (kind)
 	{
 		case 'T':
-			return (recent_textures.find(item->desc.c_str()) >= 0);
-				
+			return (recent_textures.find(item->real_name.c_str()) >= 0);
+
 		case 'F':
-			return (recent_flats.find(item->desc.c_str()) >= 0);
-				
+			return (recent_flats.find(item->real_name.c_str()) >= 0);
+
 		case 'O':
 			return (recent_things.find_number(item->number) >= 0);
-				
+
 		default:
 			return false;
 	}
@@ -611,7 +613,8 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		}
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, 0 /* num */, category,
+		                                      full_desc, name,
+											  0 /* num */, category,
 		                                      pic_w, pic_h, pic);
 		scroll->Add(item);
 	}
@@ -659,7 +662,7 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, TI->first, info->group,
+		                                      full_desc, "", TI->first, info->group,
 		                                      pic_w, pic_h, pic);
 
 		pic->callback(Browser_Item::thing_callback, item);
@@ -686,7 +689,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
 
@@ -713,7 +716,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
 		         TidyLineDesc(info->desc));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
 
 		item->button->callback(Browser_Item::line_callback, item);
 
@@ -739,7 +742,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, TI->first, 0 /* cat */);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, 0 /* cat */);
 
 		item->button->callback(Browser_Item::sector_callback, item);
 
@@ -866,6 +869,17 @@ void UI_Browser_Box::ClearSearchBox()
 void UI_Browser_Box::Scroll(int delta)
 {
 	scroll->Scroll(delta);
+}
+
+
+void UI_Browser_Box::RecentUpdate()
+{
+	char cat = cat_letters[category->value()];
+
+	if (cat == '^')
+	{
+		Filter();
+	}
 }
 
 
@@ -1012,6 +1026,20 @@ void UI_Browser::ClearSearchBox()
 void UI_Browser::Scroll(int delta)
 {
 	browsers[active]->Scroll(delta);
+}
+
+
+void UI_Browser::RecentUpdate()
+{
+	if (! visible())
+		return;
+	
+	UI_Browser_Box *box = browsers[active];
+
+///	if (box->GetKind() != kind)
+///		return;
+
+	box->RecentUpdate();
 }
 
 

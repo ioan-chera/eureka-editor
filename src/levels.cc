@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -199,7 +199,7 @@ void Recently_used::insert(const char *name)
 
 	int idx = find(name);
 
-	// small optimisation
+	// optimisation
 	if (idx >= 0 && idx < keep_num/3)
 		return;
 
@@ -207,6 +207,10 @@ void Recently_used::insert(const char *name)
 		erase(idx);
 
 	push_front(name);
+
+	// update the browser
+	if (main_win)
+		main_win->browser->RecentUpdate();
 }
 
 void Recently_used::insert_number(int val)
@@ -253,6 +257,78 @@ void Recently_used::push_front(const char *name)
 
 	size++;
 }
+
+
+void Recently_used::clear()
+{
+	size = 0;
+
+	memset(&name_set, 0, sizeof(name_set));
+}
+
+
+/* --- Save and Restore --- */
+
+void Recently_used::WriteUser(FILE *fp, char letter)
+{
+	for (int i = 0 ; i < size ; i++)
+	{
+		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i]));
+	}
+}
+
+
+void RecUsed_WriteUser(FILE *fp)
+{
+	fprintf(fp, "\n");
+	fprintf(fp, "recent_used clear\n");
+
+	recent_textures.WriteUser(fp, 'T');
+	recent_flats   .WriteUser(fp, 'F');
+	recent_things  .WriteUser(fp, 'O');
+}
+
+
+bool RecUsed_ParseUser(const char ** tokens, int num_tok)
+{
+	if (strcmp(tokens[0], "recent_used") != 0 || num_tok < 2)
+		return false;
+
+	if (strcmp(tokens[1], "clear") == 0)
+	{
+		recent_textures.clear();
+		recent_flats   .clear();
+		recent_things  .clear();
+
+		return true;
+	}
+
+	// syntax is:  recent_used  <kind>  <name>
+	if (num_tok < 3)
+		return false;
+
+	switch (tokens[1][0])
+	{
+		case 'T':
+			recent_textures.insert(tokens[2]);
+			break;
+
+		case 'F':
+			recent_flats.insert(tokens[2]);
+			break;
+
+		case 'O':
+			recent_things.insert(tokens[2]);
+			break;
+
+		default:
+			// ignore it
+			break;
+	}
+
+	return true;
+}
+
 
 
 //--- editor settings ---

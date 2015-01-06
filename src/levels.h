@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -73,7 +73,9 @@ public:
 	void insert(const char *name);
 	void insert_number(int val);
 
-	// TODO : save and restore methods
+	void clear();
+
+	void WriteUser(FILE *fp, char letter);
 
 private:
 	void erase(int index);
@@ -83,6 +85,9 @@ private:
 extern Recently_used  recent_textures;
 extern Recently_used  recent_flats;
 extern Recently_used  recent_things;
+
+void RecUsed_WriteUser(FILE *fp);
+bool RecUsed_ParseUser(const char ** tokens, int num_tok);
 
 
 #endif  /* __EUREKA_LEVELS_H__ */

@@ -707,6 +707,8 @@ bool CMD_Paste()
 
 				T->x += pos_x - cx;
 				T->y += pos_y - cy;
+
+				recent_things.insert_number(T->type);
 			}
 			break;
 		}

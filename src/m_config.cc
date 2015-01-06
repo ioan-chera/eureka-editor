@@ -1386,7 +1386,8 @@ bool M_LoadUserState()
 		        Grid_ParseUser(tokens, num_tok) ||
 		    Render3D_ParseUser(tokens, num_tok) ||
 		     Browser_ParseUser(tokens, num_tok) ||
-		       Props_ParseUser(tokens, num_tok))
+		       Props_ParseUser(tokens, num_tok) ||
+		     RecUsed_ParseUser(tokens, num_tok))
 		{
 			// Ok
 		}
@@ -1428,6 +1429,7 @@ bool M_SaveUserState()
 	Render3D_WriteUser(fp);
 	 Browser_WriteUser(fp);
 	   Props_WriteUser(fp);
+	 RecUsed_WriteUser(fp);
 
 	fclose(fp);
 
