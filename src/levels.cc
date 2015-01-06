@@ -143,5 +143,117 @@ void MapStuff_NotifyEnd()
 }
 
 
+//------------------------------------------------------------------------
+//  RECENTLY USED TEXTURES (etc)
+//------------------------------------------------------------------------
+
+
+// the containers for the textures (etc)
+Recently_used  recent_textures;
+Recently_used  recent_flats;
+Recently_used  recent_things;
+
+
+Recently_used::Recently_used(int _keepnum) :
+	size(0),
+	keep_num(_keepnum)
+{
+	memset(&name_set, 0, sizeof(name_set));
+}
+
+
+Recently_used::~Recently_used()
+{
+	for (int i = 0 ; i < size ; i++)
+	{
+		StringFree(name_set[i]);
+		name_set[i] = NULL;
+	}
+}
+
+
+int Recently_used::find(const char *name)
+{
+	for (int k = 0 ; k < size ; k++)
+		if (y_stricmp(name_set[k], name) == 0)
+			return k;
+
+	return -1;	// not found
+}
+
+int Recently_used::find_number(int val)
+{
+	char buffer[64];
+
+	sprintf(buffer, "%d", val);
+
+	return find(buffer);
+}
+
+
+void Recently_used::insert(const char *name)
+{
+	// ignore '-' texture
+	if (name[0] == '-')
+		return;
+
+	int idx = find(name);
+
+	// small optimisation
+	if (idx >= 0 && idx < keep_num/3)
+		return;
+
+	if (idx >= 0)
+		erase(idx);
+
+	push_front(name);
+}
+
+void Recently_used::insert_number(int val)
+{
+	char buffer[64];
+
+	sprintf(buffer, "%d", val);
+
+	insert(buffer);
+}
+
+
+void Recently_used::erase(int index)
+{
+	SYS_ASSERT(0 <= index && index < size);
+
+	StringFree(name_set[index]);
+
+	size--;
+
+	for ( ; index < size ; index++)
+	{
+		name_set[index] = name_set[index + 1];
+	}
+
+	name_set[index] = NULL;
+}
+
+
+void Recently_used::push_front(const char *name)
+{
+	if (size >= keep_num)
+	{
+		erase(keep_num - 1);
+	}
+
+	// shift elements up
+	for (int k = size - 1 ; k >= 0 ; k--)
+	{
+		name_set[k + 1] = name_set[k];
+	}
+
+	name_set[0] = StringDup(name);
+
+	size++;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

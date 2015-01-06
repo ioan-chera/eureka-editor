@@ -205,9 +205,20 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 				if (L->OneSided())
 					std::swap(lower, rail);
 
-				if (lower) BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
-				if (upper) BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
-				if (rail)  BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+				if (lower)
+				{
+					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+				}
+
+				if (upper)
+				{
+					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+				}
+
+				if (rail)
+				{
+					BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+				}
 			}
 		}
 

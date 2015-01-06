@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -379,9 +379,15 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 	{
 		char cat = cat_letters[category->value()];
 
-		if (! (cat == tolower(item->category) ||
-		       (cat == 'X' && isupper(item->category))))
-			return false;
+		// special logic for RECENT category  [ignore search box]
+		if (cat == '^')
+			return RecentMatch(item);
+
+		{
+			if (! (cat == tolower(item->category) ||
+				   (cat == 'X' && isupper(item->category))))
+				return false;
+		}
 	}
 
 	if (search->size() == 0)
@@ -422,6 +428,25 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 	bool result = fl_filename_match(item->desc.c_str(), pattern) ? true : false;
 
 	return negated ? !result : result;
+}
+
+
+bool UI_Browser_Box::RecentMatch(Browser_Item *item) const
+{
+	switch (kind)
+	{
+		case 'T':
+			return (recent_textures.find(item->desc.c_str()) >= 0);
+				
+		case 'F':
+			return (recent_flats.find(item->desc.c_str()) >= 0);
+				
+		case 'O':
+			return (recent_things.find_number(item->number) >= 0);
+				
+		default:
+			return false;
+	}
 }
 
 

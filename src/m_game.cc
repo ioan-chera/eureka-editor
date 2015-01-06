@@ -809,9 +809,10 @@ const char *M_ThingCategoryString(char *letters)
 
 	int L_index = 0;
 
-	// the "ALL" category is always first
-	strcpy(buffer, "ALL");
+	// these common categories are always first
+	strcpy(buffer, "ALL|RECENT");
 	letters[L_index++] = '*';
+	letters[L_index++] = '^';
 
 	std::map<char, thinggroup_t *>::iterator IT;
 
@@ -845,9 +846,10 @@ const char *M_TextureCategoryString(char *letters)
 
 	int L_index = 0;
 
-	// the "ALL" category is always first
-	strcpy(buffer, "ALL");
+	// these common categories are always first
+	strcpy(buffer, "ALL|RECENT");
 	letters[L_index++] = '*';
+	letters[L_index++] = '^';
 
 	std::map<char, texturegroup_t *>::iterator IT;
 

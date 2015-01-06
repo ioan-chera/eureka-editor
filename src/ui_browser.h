@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -109,6 +109,7 @@ private:
 	void Sort();
 
 	bool SearchMatch(Browser_Item *item) const;
+	bool RecentMatch(Browser_Item *item) const;
 
 	void Populate_Images(std::map<std::string, Img *> & img_list);
 	void Populate_Sprites();

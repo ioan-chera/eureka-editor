@@ -51,6 +51,40 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field);
 void MapStuff_NotifyEnd();
 
 
+// handling of recently used textures, flats and things
+
+#define RECENTLY_USED_MAX	32
+
+class Recently_used
+{
+private:
+	int size;
+	int keep_num;
+
+	const char *name_set[RECENTLY_USED_MAX];
+
+public:
+	 Recently_used(int _keepnum = 12);
+	~Recently_used();
+
+	int find(const char *name); 
+	int find_number(int val); 
+
+	void insert(const char *name);
+	void insert_number(int val);
+
+	// TODO : save and restore methods
+
+private:
+	void erase(int index);
+	void push_front(const char *name);
+};
+
+extern Recently_used  recent_textures;
+extern Recently_used  recent_flats;
+extern Recently_used  recent_things;
+
+
 #endif  /* __EUREKA_LEVELS_H__ */
 
 //--- editor settings ---

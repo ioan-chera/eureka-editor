@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1006,6 +1006,9 @@ bool BA_ChangeTH(int thing, byte field, int value)
 	SYS_ASSERT(is_thing(thing));
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
+	if (field == Thing::F_TYPE)
+		recent_things.insert_number(value);
+
 	return BA_Change(OBJ_THINGS, thing, field, value);
 }
 
@@ -1022,6 +1025,12 @@ bool BA_ChangeSEC(int sec, byte field, int value)
 	SYS_ASSERT(is_sector(sec));
 	SYS_ASSERT(field <= Sector::F_TAG);
 
+	if (field == Sector::F_FLOOR_TEX ||
+		field == Sector::F_CEIL_TEX)
+	{
+		recent_flats.insert(BA_GetString(value));
+	}
+
 	return BA_Change(OBJ_SECTORS, sec, field, value);
 }
 
@@ -1029,6 +1038,13 @@ bool BA_ChangeSD(int side, byte field, int value)
 {
 	SYS_ASSERT(is_sidedef(side));
 	SYS_ASSERT(field <= SideDef::F_SECTOR);
+
+	if (field == SideDef::F_LOWER_TEX ||
+		field == SideDef::F_UPPER_TEX ||
+		field == SideDef::F_MID_TEX)
+	{
+		recent_textures.insert(BA_GetString(value));
+	}
 
 	return BA_Change(OBJ_SIDEDEFS, side, field, value);
 }
