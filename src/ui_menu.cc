@@ -444,7 +444,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 		{ "Rename Map",   0,                FCAL file_do_rename },
-		{ "Delete Map",   FL_COMMAND + 'd', FCAL file_do_delete },
+		{ "Delete Map",   0,                FCAL file_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
