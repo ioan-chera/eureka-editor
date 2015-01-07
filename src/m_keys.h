@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013 Andrew Apted
+//  Copyright (C) 2013-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -52,8 +52,9 @@ typedef unsigned int keycode_t;
 #define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
 
 
-// special "key" for the mouse wheel
-#define FL_Wheel    0xEF99
+// values to represent the mouse wheel
+#define FL_WheelUp	0xEF91
+#define FL_WheelDn	0xEF92
 
 
 typedef enum

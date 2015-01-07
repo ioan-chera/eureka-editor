@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013 Andrew Apted
+//  Copyright (C) 2013-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -130,6 +130,10 @@ static key_mapping_t key_map[] =
 	{ FL_Sleep,		"SLEEP" },
 	{ FL_Favorites,	"FAVORITES" },
 
+	// special stuff (not in FLTK)
+	{ FL_WheelUp,   "WHEEL_UP" },
+	{ FL_WheelDn,   "WHEEL_DN" },
+
 	// some synonyms for user input
 	{ ' ',			"SPC" },
 	{ FL_BackSpace,	"BACKSPACE" },
@@ -172,6 +176,9 @@ keycode_t M_ParseKeyString(const char *str)
 	if (y_strnicmp(str, "F", 1) == 0 && isdigit(str[1]))
 		return key | (FL_F + atoi(str + 1));
 
+	if (y_strnicmp(str, "MOUSE", 5) == 0 && isdigit(str[5]))
+		return key | (FL_Button + atoi(str + 5));
+
 	// find name in mapping table
 	for (int k = 0 ; key_map[k].name ; k++)
 		if (y_stricmp(str, key_map[k].name) == 0)
@@ -202,6 +209,12 @@ static const char * BareKeyName(keycode_t key)
 	if (FL_F < key && key <= FL_F_Last)
 	{
 		sprintf(buffer, "F%d", key - FL_F);
+		return buffer;
+	}
+
+	if (FL_Button < key && key <= FL_Button + 20)
+	{
+		sprintf(buffer, "MOUSE%d", key - FL_Button);
 		return buffer;
 	}
 
@@ -254,6 +267,14 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 
 	A &= FL_KEY_MASK;
 	B &= FL_KEY_MASK;
+
+	// make mouse buttons separate from everything else
+
+	if ((A >= FL_Button && A <= FL_Button + 20) || A == FL_WheelUp || A == FL_WheelDn)
+		A += 0x10000;
+
+	if ((B >= FL_Button && B <= FL_Button + 20) || B == FL_WheelUp || B == FL_WheelDn)
+		B += 0x10000;
 
 	// we want lower- and uppercase of a key together (e.g. a + A)
 
