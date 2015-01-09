@@ -946,6 +946,8 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 
 	levels.push_back(actual_point);
 
+	std::sort(levels.begin(), levels.end(), level_name_CMP_pred(this));
+
 	return lump;
 }
 
