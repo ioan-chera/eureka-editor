@@ -74,6 +74,8 @@ extern rgb_color_t normal_small_col;
 extern int backup_max_files;
 extern int backup_max_space;
 
+extern bool browser_small_tex;
+
 extern int  render_aspect_ratio;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;

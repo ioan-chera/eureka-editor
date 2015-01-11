@@ -9,7 +9,10 @@ CHANGES IN Eureka
 +  new 'RECENT' category for Texture/Flat/Thing browsers,
    and rebound the '\' key to toggle this category on/off
 
--  added back the '192' grid size
+>>  Find and Replace 
+
+
+-  a preference to show smaller textures in the browser
 
 -  support loading a read-only wad file
 
@@ -20,6 +23,8 @@ CHANGES IN Eureka
    lines are selected (allowing the back sides to be edited)
 
 -  in Linedef panel swapped the 'Tag' and 'Length' positions
+
+-  default properties now has its own panel
 
 
 -  node builder : added work-around for "TOO SIMPLE" levels
@@ -36,6 +41,8 @@ CHANGES IN Eureka
    a file to save (export) the new map into
 
 -  show version _in_ the About box (not just the window title)
+
+-  added back the '192' grid size
 
 
 Bug Fixes:

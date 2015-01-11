@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -291,6 +291,8 @@ public:
 	Fl_Choice *edit_modkey;
 	Fl_Int_Input *edit_sectorsize;
 
+	Fl_Check_Button *brow_smalltex;
+
 	/* Grid Tab */
 
 	Fl_Check_Button *gen_scrollbars;
@@ -477,6 +479,14 @@ UI_Preferences::UI_Preferences() :
 		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
+		}
+
+		{ Fl_Box* o = new Fl_Box(25, 265, 355, 30, "Browser Options");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ brow_smalltex = new Fl_Check_Button(50, 300, 265, 30, " smaller textures");
+		  brow_smalltex->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -1034,6 +1044,8 @@ void UI_Preferences::LoadValues()
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 	edit_multiselect->value(multi_select_modifier ? 2 : 0);
 
+	brow_smalltex->value(browser_small_tex ? 1 : 0);
+
 	/* Grid Tab */
 
 	if (default_grid_mode < 0 || default_grid_mode > 2)
@@ -1153,6 +1165,8 @@ void UI_Preferences::SaveValues()
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
+
+	browser_small_tex = brow_smalltex->value() ? true : false;
 
 	/* Grid Tab */
 

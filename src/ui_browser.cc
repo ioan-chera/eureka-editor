@@ -51,6 +51,10 @@ extern std::map<int, thingtype_t *>  thing_types;
 #define  BROWBACK_COL  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 
 
+// config items
+bool browser_small_tex = false;
+
+
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
@@ -587,8 +591,17 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
 		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
 
+		if (browser_small_tex && kind == 'T')
+		{
+			pic_w = 64;
+			pic_h = MIN(64, MAX(4, image->height()));
+		}
+
 		if (image->width() >= 256 && image->height() == 128)
+		{
+			pic_w = 128;
 			pic_h = 64;
+		}
 
 		int item_w = 8 + MAX(pic_w, 64) + 2;
 		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;

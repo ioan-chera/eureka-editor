@@ -262,6 +262,15 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
+	{	"browser_small_tex",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Show smaller (more compact) textures in the browser",
+		NULL,
+		&browser_small_tex
+	},
+
 	{	"default_grid_mode",
 		0,
 		OPT_INTEGER,
