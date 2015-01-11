@@ -89,6 +89,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_about.o  \
 	$(OBJ_DIR)/ui_browser.o  \
 	$(OBJ_DIR)/ui_canvas.o  \
+	$(OBJ_DIR)/ui_default.o  \
 	$(OBJ_DIR)/ui_dialog.o  \
 	$(OBJ_DIR)/ui_file.o  \
 	$(OBJ_DIR)/ui_hyper.o  \

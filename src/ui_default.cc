@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Vertex Panel + Default Props
+//  Default Properties
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,36 +26,6 @@
 #include "w_rawdef.h"
 
 
-class UI_DefaultProps : public Fl_Group
-{
-private:
-	Fl_Toggle_Button *toggle;
-
-	Fl_Group *sub_grp;
-
-	UI_Pic   *l_pic;
-	UI_Pic   *m_pic;
-	UI_Pic   *u_pic;
-
-	Fl_Input *l_tex;
-	Fl_Input *m_tex;
-	Fl_Input *u_tex;
-
-	Fl_Int_Input *ceil_h;
-	Fl_Int_Input *light;
-	Fl_Int_Input *floor_h;
-
-	Fl_Button *ce_down, *ce_up;
-	Fl_Button *fl_down, *fl_up;
-
-	Fl_Input *c_tex;
-	UI_Pic   *c_pic;
-
-	Fl_Input *f_tex;
-	UI_Pic   *f_pic;
-
-	Fl_Int_Input *thing;
-	Fl_Output    *th_desc;
 
 private:
 	void rawSetShown(int value)
@@ -602,177 +572,6 @@ void Props_LoadValues()
 {
 	if (main_win)
 		main_win->vert_box->idefs->LoadValues();
-}
-
-
-//------------------------------------------------------------------------
-
-//
-// UI_VertexBox Constructor
-//
-UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) : 
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0)
-{
-	box(FL_FLAT_BOX);
-
-	color(WINDOW_BG, WINDOW_BG);
-
-
-	int top_h = 112;
-
-	idefs = new UI_DefaultProps(X, Y + top_h + 4, W, H - top_h - 4);
-
-//	resizable(idefs);
-
-
-	Fl_Group *top_bit = new Fl_Group(X, Y, W, top_h);
-
-	top_bit->box(FL_FLAT_BOX);
-
-	resizable(top_bit);
-
-
-	Fl_Box *rs_box = new Fl_Box(FL_FLAT_BOX, X + 10, Y + top_h - 16, W - 20, 12, NULL);
-	/// rs_box->color(FL_RED);
-
-	top_bit->resizable(rs_box);
-
-
-	X += 6;
-	Y += 5;
-
-	W -= 12;
-	H -= 10;
-
-	int MX = X + W/2;
-
-
-	which = new UI_Nombre(X, Y, W-10, 28, "Vertex");
-
-	Y += which->h() + 4;
-
-
-	pos_x = new Fl_Int_Input(X +28, Y, 80, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX +28, Y, 80, 24, "y: ");
-
-	pos_x->align(FL_ALIGN_LEFT);
-	pos_y->align(FL_ALIGN_LEFT);
-
-	pos_x->callback(x_callback, this);
-	pos_y->callback(y_callback, this);
-
-	Y += pos_y->h() + 4;
-
-	top_bit->end();
-
-	end();
-}
-
-
-//
-// UI_VertexBox Destructor
-//
-UI_VertexBox::~UI_VertexBox()
-{
-}
-
-
-int UI_VertexBox::handle(int event)
-{
-	return Fl_Group::handle(event);
-}
-
-
-void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
-{
-	UI_VertexBox *box = (UI_VertexBox *)data;
-
-	int new_x = atoi(box->pos_x->value());
-
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
-	{
-		BA_Begin();
-		
-		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeVT(*it, Vertex::F_X, new_x);
-
-		BA_End();
-	}
-}
-
-void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
-{
-	UI_VertexBox *box = (UI_VertexBox *)data;
-
-	int new_y = atoi(box->pos_y->value());
-
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
-	{
-		BA_Begin();
-		
-		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeVT(*it, Vertex::F_Y, new_y);
-
-		BA_End();
-	}
-}
-
-
-//------------------------------------------------------------------------
-
-void UI_VertexBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	redraw();
-}
-
-void UI_VertexBox::UpdateField()
-{
-	if (is_vertex(obj))
-	{
-		pos_x->value(Int_TmpStr(Vertices[obj]->x));
-		pos_y->value(Int_TmpStr(Vertices[obj]->y));
-	}
-	else
-	{
-		pos_x->value("");
-		pos_y->value("");
-	}
-}
-
-
-void UI_VertexBox::UpdateTotal()
-{
-	which->SetTotal(NumVertices);
-}
-
-
-void UI_VertexBox::BrowsedItem(char kind, int number, const char *name, int e_state)
-{
-	idefs->BrowsedItem(kind, number, name, e_state);
-}
-
-
-void UI_VertexBox::UnselectPics()
-{
-	idefs->UnselectPics();
 }
 
 

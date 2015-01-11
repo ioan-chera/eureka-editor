@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Vertex Panel + Default Props
+//  Vertex Panel
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,13 +20,6 @@
 
 #ifndef __EUREKA_UI_VERTEX_H__
 #define __EUREKA_UI_VERTEX_H__
-
-class UI_ThingInfo;
-class UI_LineInfo;
-class UI_SectorInfo;
-class UI_VertexInfo;
-
-class UI_DefaultProps;
 
 
 class UI_VertexBox : public Fl_Group
@@ -70,10 +63,6 @@ private:
 	static void y_callback(Fl_Widget *, void *);
 };
 
-
-bool Props_ParseUser(const char ** tokens, int num_tok);
-void Props_WriteUser(FILE *fp);
-void Props_LoadValues();
 
 #endif  /* __EUREKA_UI_VERTEX_H__ */
 

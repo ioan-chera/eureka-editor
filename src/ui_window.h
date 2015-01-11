@@ -26,10 +26,12 @@
 #include "ui_infobar.h"
 #include "ui_hyper.h"
 #include "ui_nombre.h"
+
 #include "ui_pic.h"
 #include "ui_scroll.h"
 #include "ui_tile.h"
 #include "ui_browser.h"
+#include "ui_default.h"
 
 #include "ui_thing.h"
 #include "ui_sector.h"

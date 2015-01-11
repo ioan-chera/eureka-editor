@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  Vertex Panel + Default Props
+//  Default Properties
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,56 +18,48 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_VERTEX_H__
-#define __EUREKA_UI_VERTEX_H__
-
-class UI_ThingInfo;
-class UI_LineInfo;
-class UI_SectorInfo;
-class UI_VertexInfo;
-
-class UI_DefaultProps;
+#ifndef __EUREKA_UI_DEFAULT_H__
+#define __EUREKA_UI_DEFAULT_H__
 
 
-class UI_VertexBox : public Fl_Group
+class UI_DefaultProps : public Fl_Group
 {
 private:
-	int obj;
-	int count;
+	Fl_Toggle_Button *toggle;
+
+	Fl_Group *sub_grp;
+
+	UI_Pic   *l_pic;
+	UI_Pic   *m_pic;
+	UI_Pic   *u_pic;
+
+	Fl_Input *l_tex;
+	Fl_Input *m_tex;
+	Fl_Input *u_tex;
+
+	Fl_Int_Input *ceil_h;
+	Fl_Int_Input *light;
+	Fl_Int_Input *floor_h;
+
+	Fl_Button *ce_down, *ce_up;
+	Fl_Button *fl_down, *fl_up;
+
+	Fl_Input *c_tex;
+	UI_Pic   *c_pic;
+
+	Fl_Input *f_tex;
+	UI_Pic   *f_pic;
+
+	Fl_Int_Input *thing;
+	Fl_Output    *th_desc;
 
 public:
-	UI_Nombre *which;
-
-	Fl_Int_Input *pos_x;
-	Fl_Int_Input *pos_y;
-
-	UI_DefaultProps * idefs;
-
-public:
-	UI_VertexBox(int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_VertexBox();
-
-public:
-	int handle(int event);
-	// FLTK virtual method for handling input events.
-
-public:
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
-	// call this if the vertex was externally changed.
-	void UpdateField();
-
-	void UpdateTotal();
+	UI_DefaultProps(int X, int Y, int W, int H);
+	virtual ~UI_DefaultProps();
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();
-
-private:
-	static void x_callback(Fl_Widget *, void *);
-	static void y_callback(Fl_Widget *, void *);
 };
 
 
@@ -75,7 +67,7 @@ bool Props_ParseUser(const char ** tokens, int num_tok);
 void Props_WriteUser(FILE *fp);
 void Props_LoadValues();
 
-#endif  /* __EUREKA_UI_VERTEX_H__ */
+#endif  /* __EUREKA_UI_DEFAULT_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
