@@ -60,6 +60,30 @@ public:
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();
+
+	void LoadValues();
+
+	bool isShown() const;
+	void setShown(int value);
+
+private:
+	void rawSetShown(int value);
+	void SetIntVal(Fl_Int_Input *w, int value);
+	void UpdateThingDesc();
+
+	void SetTexture(const char *name, int e_state);
+	void SetFlat(const char *name, int e_state);
+	void SetThing(int number);
+	void UnselectPicSet(char what /* 'f' or 't' */);
+
+	static const char * NormalizeTex_and_Dup(Fl_Input *w);
+
+	static void    tex_callback(Fl_Widget *w, void *data);
+	static void   flat_callback(Fl_Widget *w, void *data);
+	static void button_callback(Fl_Widget *w, void *data);
+	static void height_callback(Fl_Widget *w, void *data);
+	static void  thing_callback(Fl_Widget *w, void *data);
+	static void toggle_callback(Fl_Widget *w, void *data);
 };
 
 
