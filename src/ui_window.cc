@@ -383,6 +383,12 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 
+	if (props_box->visible())
+	{
+		props_box->BrowsedItem(kind, number, name, e_state);
+		return;
+	}
+
 	switch (edit.mode)
 	{
 		case OBJ_LINEDEFS:
@@ -418,11 +424,6 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 				return;
 			}
 			break;
-
-		case OBJ_VERTICES:
-			// pass through for Default Props
-//!!!!			vert_box->BrowsedItem(kind, number, name, e_state);
-			return;
 
 		default:
 			break;
