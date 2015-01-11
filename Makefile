@@ -101,6 +101,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_nodes.o  \
 	$(OBJ_DIR)/ui_pic.o  \
 	$(OBJ_DIR)/ui_prefs.o  \
+	$(OBJ_DIR)/ui_replace.o  \
 	$(OBJ_DIR)/ui_sector.o  \
 	$(OBJ_DIR)/ui_scroll.o  \
 	$(OBJ_DIR)/ui_sidedef.o  \
