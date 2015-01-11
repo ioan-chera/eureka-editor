@@ -119,6 +119,8 @@ public:
 
 	void UnselectPics();
 
+	void HideSpecialPanel();
+
 	bool isSpecialPanelShown()
 	{
 		return props_box->visible();

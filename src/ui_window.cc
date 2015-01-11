@@ -202,8 +202,33 @@ void UI_MainWin::ShowBrowser(char kind)
 }
 
 
+void UI_MainWin::HideSpecialPanel()
+{
+	props_box->hide();
+
+	switch (edit.mode)
+	{
+		case OBJ_THINGS:   thing_box->show(); break;
+		case OBJ_LINEDEFS:  line_box->show(); break;
+		case OBJ_VERTICES:  vert_box->show(); break;
+		case OBJ_SECTORS:    sec_box->show(); break;
+
+		default: break;
+	}
+
+	redraw();
+}
+
+
 void UI_MainWin::ShowDefaultProps()
 {
+	// already shown?
+	if (props_box->visible())
+	{
+		HideSpecialPanel();
+		return;
+	}
+
 	thing_box->hide();
 	 line_box->hide();
 	  sec_box->hide();
