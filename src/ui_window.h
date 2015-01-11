@@ -126,7 +126,7 @@ public:
 
 	bool isSpecialPanelShown()
 	{
-		return props_box->visible();
+		return props_box->visible() || find_box->visible();
 	}
 
 	void Delay(int steps);  // each step is 1/10th second

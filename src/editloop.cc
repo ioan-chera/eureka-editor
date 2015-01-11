@@ -264,7 +264,7 @@ void Editor_ChangeMode(char mode)
 	edit.split_line.clear();
 	edit.did_a_move = false;
 
-	if (prev_type != edit.mode || main_win->isSpecialPanelShown())
+	if (prev_type != edit.mode)
 	{
 		main_win->NewEditMode(mode);
 
@@ -274,6 +274,11 @@ void Editor_ChangeMode(char mode)
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
+	}
+	else if (main_win->isSpecialPanelShown())
+	{
+		// same mode, but this removes the special panel
+		main_win->NewEditMode(mode);
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.
