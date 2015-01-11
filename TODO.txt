@@ -3,6 +3,43 @@ Eureka TODO / WISHLIST
 ======================
 
 
+preference for "bindable mouse wheel (disable normal behavior)"
+
+convert RIGHT BUTTON (scroll) to use KEY system
+
+convert button stuff in 3D render to use KEY system
+
+convert MIDDLE button logic for KEY system
+
+convert LEFT BUTTON for KEY system
+
+
+browser_small_tex : REPOPULATE BROWSER IF CHANGED
+
+
+Default Props : more spacious
+
+
+Find and Replace:
+
+  -  EVERYTHING
+
+
++  View / Find
+   (use GoToObject for first match, FindNext starts at selected + 1)
+
+   -  VERTEX mode : useful ??
+   -  THING mode : match on type (possibly on flags, TID for hexen)
+   -  SECTOR mode: match on type / desc / tag / flat
+   -  LINEDEF mode: match on type / desc / tag / texture
+
+++  a Find/Replace dialog, especially for textures and flats
+    but also for thing numbers, line/sector specials, etc...
+
+    [ an expression parser for e.g. sec.floor_tex == "FLAT2" || sec.ceil_tex == "TLITE3" ]
+
+
+
 -  Bug: when loading new WAD, may have different TEXTURES (etc)
    (i.e. master directory changes, but have not reloaded anything)
 
@@ -50,20 +87,19 @@ Documentation
 Editing
 -------
 
-++  a Find/Replace dialog, especially for textures and flats
-    but also for thing numbers, line/sector specials, etc...
-
-    [ an expression parser for e.g. sec.floor_tex == "FLAT2" || sec.ceil_tex == "TLITE3" ]
-
 
 
 3D View
 -------
 
++  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
+
 
 
 Browser
 -------
+
++  when opened by a click, jump to the texture/thing/etc clicked on
 
 
 ______________________________________________________________________
@@ -75,18 +111,24 @@ ______________________________________________________________________
 General
 -------
 
-+  a toolbar
+-  a toolbar
 
 +  ability to hide the right-side panel
 
-+  ability to build nodes only in modified maps
++  View/Place Camera command, cursor turns into +
 
-+  SHIFT + move mouse = keep current highlight
+-  ability to build nodes only in current map
 
-?  ENTER key pops up an "operation" menu, which provides all the
+-  SHIFT + move mouse = keep current highlight
+   (issue: SHIFT + mouse press could be bound to something different)
+   
+   also useful if another modifier could disable all highlighting
+   (same issue when user presses a mouse button, e.g. to drag a sel-box)
+
++  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
-+  check that current pwad has been externally modified
+-  check that current pwad has been externally modified
 
 +  Preferences window:
    +  add backup_max_files / backup_max_space
@@ -94,8 +136,6 @@ General
    -  add more stuff (see USER CONFIG NEEDED, below)
 
 +  a dialog to view / load / prune backups.
-
-IDEA: ability to edit Lua code for OBLIGE prefabs
 
 WISH: support Windows 95/98/ME
 
@@ -148,13 +188,6 @@ WISH: support UDMF format
 
 ?  a way to slow down fake mouse wheels?
 
-?  nicer way to select map, render a small 2D version of each map
-   and present them in a scrolling list.
-
-?  MacOSX:
-   (c) handle the -psnXXX argument (see SDL_main.m)
-       NOTE: probably needs integrating some of SDL's logic
-
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
       and $DOOMWADDIR and $DOOMWADPATH.  Perhaps add places where
@@ -203,9 +236,15 @@ Coding
 Editing
 -------
 
--  move 'k' split linedef to SPACE/INSERT, put vertex where mouse is
++  for the "Edit -> Paste" menu, turn the cursor into crosshairs
+   and wait until the user selects a spot to paste to.
+
+-  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
+   split the line and put vertex where mouse is
 
 +  a menu for inserting shapes, especially N-sided polygon
+
+   --> NO, instead have a function to "circularize" a selection of vertices
 
 +  support PNG (etc?) image formats [enabled by a port definition]
    -->  feature png
@@ -218,17 +257,6 @@ Editing
    that merging.
 
 !!  handle self-referencing linedefs in auto create/split sector
-
-+  for the "Edit -> Paste" menu, turn the cursor into crosshairs
-   and wait until the user selects a spot to paste to.
-
-+  View / Find
-   (use GoToObject for first match, FindNext starts at selected + 1)
-
-   -  VERTEX mode : useful ??
-   -  THING mode : match on type (possibly on flags, TID for hexen)
-   -  SECTOR mode: match on type / desc / tag / flat
-   -  LINEDEF mode: match on type / desc / tag / texture
 
 +  grid drawing too slow when small step and zoomed out
    (since we render a huge number of dots)
@@ -267,8 +295,6 @@ Editing
 
 ?  disconnect sectors : include islands (perhaps with 'D')
 
-?  when moving a sector and the camera is inside it, move camera too
-
 ?  fix PointOutsideOfMap() code to handle places where the point
    cannot "see" the surrounding void space.
    
@@ -286,8 +312,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
 
 3D View
 -------
-
-++  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
 
 -  option to reverse mouse movement
 
@@ -314,8 +338,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
    - move vertices?
    + shift textures?
 
--  View/Place Camera command, cursor turns into +
-
 -  rotated sprites
 
 +  slopes
@@ -338,13 +360,11 @@ Browser
 
 -  a "Used in map" category (sorted by usage)
 
-+  when opened by a click, jump to the texture/thing/etc clicked on
-
 -  can change the [max] size of the texture/flat previews
 
 -  scroll speed (i.e. linesize) is configurable
 
--  no-pic mode for textures and flats
+?  no-pic mode for textures and flats
 
 -  search box: ',' for AND, '/' for OR
 
@@ -359,13 +379,13 @@ Game / Port Definitions
 
 -  game-def setting: view_height
 
-+  ability to "remove line 271" (etc)
+-  ability to "remove line 271" (etc)
 
-+  finish HacX support -- categorize the textures
+-  finish HacX support -- categorize the textures
 
 +  support Harmony
 
--  support Chex Quest 1 and 2
+?  support Chex Quest 1 and 2
 
 -  FreeDOOM: categorize the new textures
 
@@ -392,6 +412,7 @@ NO:  built-in cheat sheet for mouse buttons and common keys
 
 NO:  document the config file syntax
 
+
 NO:  when one vertex of a linedef is moved (and not the other)
      update the X offset on the appropriate side (right side for start,
      left side for end vertex).
@@ -400,7 +421,14 @@ NO:  SHIFT + SPACE = no auto create/split sectors
 
 NO:  merge vertex and linedef modes
 
+NO:  nicer way to select map, render a small 2D version of each map
+     and present them in a scrolling list.
+
 NO:  ability to drag the camera (on 2D viewport)
+
+NO:  when moving a sector and the camera is inside it, move camera too
+
+NO:  ability to edit Lua code for OBLIGE prefabs
 
 
 ______________________________________________________________________
