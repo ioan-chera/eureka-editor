@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_FIND_H__
-#define __EUREKA_UI_FIND_H__
+#ifndef __EUREKA_UI_REPLACE_H__
+#define __EUREKA_UI_REPLACE_H__
 
 
 class UI_FindAndReplace : public Fl_Group
@@ -67,11 +67,15 @@ public:
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:
-	static void button_callback(Fl_Widget *w, void *data);
+	void rawShowReplace(int value);
+	void rawShowFilter(int value);
+
+	static void    rep_toggle_callback(Fl_Widget *w, void *data);
+	static void filter_toggle_callback(Fl_Widget *w, void *data);
 };
 
 
-#endif  /* __EUREKA_UI_FIND_H__ */
+#endif  /* __EUREKA_UI_REPLACE_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
