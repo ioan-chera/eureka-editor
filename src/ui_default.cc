@@ -61,9 +61,9 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	Y += line_tit->h() + 2;
 
 
-	l_pic = new UI_Pic(X+8,      Y, 64, 64);
-	m_pic = new UI_Pic(MX-32,    Y, 64, 64);
-	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
+	l_pic = new UI_Pic(X+8,      Y, 64, 64, "Lower");
+	m_pic = new UI_Pic(MX-32,    Y, 64, 64, "Mid");
+	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64, "Upper");
 
 	l_pic->callback(tex_callback, this);
 	m_pic->callback(tex_callback, this);
