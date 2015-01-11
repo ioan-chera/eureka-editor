@@ -127,6 +127,10 @@ UI_MainWin::UI_MainWin() :
 	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
 	props_box->hide();
 	add(props_box);
+
+	find_box = new UI_FindAndReplace(w() - panel_W, BY, panel_W, BH);
+	find_box->hide();
+	add(find_box);
 }
 
 //
@@ -145,6 +149,7 @@ void UI_MainWin::NewEditMode(char mode)
 	  sec_box->hide();
 	 vert_box->hide();
 	props_box->hide();
+	 find_box->hide();
 
 	switch (mode)
 	{
@@ -205,6 +210,7 @@ void UI_MainWin::ShowBrowser(char kind)
 void UI_MainWin::HideSpecialPanel()
 {
 	props_box->hide();
+	 find_box->hide();
 
 	switch (edit.mode)
 	{
@@ -233,8 +239,30 @@ void UI_MainWin::ShowDefaultProps()
 	 line_box->hide();
 	  sec_box->hide();
 	 vert_box->hide();
+	 find_box->hide();
 
 	props_box->show();
+
+	redraw();
+}
+
+
+void UI_MainWin::ShowFindAndReplace()
+{
+	// already shown?
+	if (find_box->visible())
+	{
+		HideSpecialPanel();
+		return;
+	}
+
+	thing_box->hide();
+	 line_box->hide();
+	  sec_box->hide();
+	 vert_box->hide();
+	props_box->hide();
+
+	 find_box->show();
 
 	redraw();
 }
@@ -388,6 +416,8 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 		props_box->BrowsedItem(kind, number, name, e_state);
 		return;
 	}
+
+	// TODO : find_box
 
 	switch (edit.mode)
 	{

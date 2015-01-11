@@ -32,6 +32,7 @@
 #include "ui_tile.h"
 #include "ui_browser.h"
 #include "ui_default.h"
+#include "ui_replace.h"
 
 #include "ui_thing.h"
 #include "ui_sector.h"
@@ -74,7 +75,8 @@ public:
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
 
-	UI_DefaultProps *props_box;
+	UI_DefaultProps   *props_box;
+	UI_FindAndReplace *find_box;
 
 private:
 	Fl_Cursor cursor_shape;
@@ -109,6 +111,7 @@ public:
 	void ShowBrowser(char kind);
 
 	void ShowDefaultProps();
+	void ShowFindAndReplace();
 
 	void UpdateTotals();
 

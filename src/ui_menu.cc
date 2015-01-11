@@ -296,24 +296,12 @@ static void view_do_grid_type(Fl_Widget *w, void * data)
 	grid.ToggleMode();
 }
 
-
-//------------------------------------------------------------------------
-//  SEARCH MENU
-//------------------------------------------------------------------------
-
-static void search_do_find(Fl_Widget *w, void * data)
+static void view_do_find(Fl_Widget *w, void * data)
 {
-	// TODO: CMD_FindObject()
-	Beep("Find: not implemented");
+	main_win->ShowFindAndReplace();
 }
 
-static void search_do_find_next(Fl_Widget *w, void * data)
-{
-	// CMD_FindObject();
-	Beep("Find: not implemented");
-}
-
-static void search_do_jump(Fl_Widget *w, void * data)
+static void view_do_jump(Fl_Widget *w, void * data)
 {
 	CMD_JumpToObject();
 }
@@ -516,9 +504,8 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-//TODO		{ "&Find Object",  FL_COMMAND + 'f', FCAL search_do_find },
-//TODO		{ "Find &Next",    FL_COMMAND + 'g', FCAL search_do_find_next },
-		{ "&Jump to Object",   0, FCAL search_do_jump },
+		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
+		{ "&Jump to Object",   0, FCAL view_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
