@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -257,6 +257,30 @@ void Selection_NotifyEnd()
 		// this clears AND RESIZES the selection_c object
 		edit.Selected->change_type(edit.mode);
 	}
+}
+
+
+//
+// Return the line to show in the LineDef panel from the selection.
+// When the selection is a mix of one-sided and two-sided lines, then
+// we want the first TWO-SIDED line.
+//
+// NOTE: this is slow, as it may need to search the whole list.
+//
+int Selection_FirstLine(selection_c *list)
+{
+	selection_iterator_c it;
+
+	for (list->begin(&it); ! it.at_end(); ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+
+		if (L->TwoSided())
+			return *it;
+	}
+
+	// return first entry (a one-sided line)
+	return list->find_first();
 }
 
 

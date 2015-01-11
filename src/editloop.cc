@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -142,7 +142,11 @@ static void UpdatePanel()
 	}
 	else if (obj_count > 0)
 	{
-		obj_idx = edit.Selected->find_first();
+		// in linedef mode, we want a two-sided linedef to show
+		if (edit.mode == OBJ_LINEDEFS && obj_count > 1)
+			obj_idx = Selection_FirstLine(edit.Selected);
+		else
+			obj_idx = edit.Selected->find_first();
 	}
 
 

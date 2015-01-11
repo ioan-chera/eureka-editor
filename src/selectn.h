@@ -46,6 +46,8 @@ void Selection_NotifyDelete(obj_type_e type, int objnum);
 void Selection_NotifyChange(obj_type_e type, int objnum, int field);
 void Selection_NotifyEnd();
 
+int Selection_FirstLine(selection_c *list);
+
 #endif  /* __EUREKA_SELECTN_H__ */
 
 //--- editor settings ---

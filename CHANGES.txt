@@ -16,13 +16,17 @@ CHANGES IN Eureka
 -  support data in a map header lump (such as MAP01), make sure to
    save it when saving the map (instead of removing it)
 
+-  always show a two-sided line in the LineDef panel when multiple
+   lines are selected (allowing the back sides to be edited)
+
+-  in Linedef panel swapped the 'Tag' and 'Length' positions
+
+
 -  node builder : added work-around for "TOO SIMPLE" levels
    (i.e. a single convex sector), creating a dummy node and an
    extra subsector and seg for the back side
 
 -  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
-
--  in Linedef panel swapped the 'Tag' and 'Length' positions
 
 -  support -warp option being followed by two numeric arguments
    (episode and map number), compatible with vanilla DOOM
