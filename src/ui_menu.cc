@@ -301,6 +301,11 @@ static void view_do_find(Fl_Widget *w, void * data)
 	main_win->ShowFindAndReplace();
 }
 
+static void view_do_next(Fl_Widget *w, void * data)
+{
+	Beep("Not implemented");
+}
+
 static void view_do_jump(Fl_Widget *w, void * data)
 {
 	CMD_JumpToObject();
@@ -500,11 +505,12 @@ static Fl_Menu_Item menu_items[] =
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },
 		{ "&Whole Map",    0, FCAL view_do_whole_map },
 		{ "Whole &Selection", 0, FCAL view_do_whole_selection },
-		{ "Go to &Camera", 0, FCAL view_do_camera_pos },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
+		{ "&Go to next",       FL_COMMAND + 'g', FCAL view_do_next },
+		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
 		{ "&Jump to Object",   0, FCAL view_do_jump },
 		{ 0 },
 
