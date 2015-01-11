@@ -527,7 +527,7 @@ void Props_WriteUser(FILE *fp)
 void Props_LoadValues()
 {
 	if (main_win)
-		main_win->vert_box->idefs->LoadValues();
+		main_win->props_box->LoadValues();
 }
 
 

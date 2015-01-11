@@ -35,28 +35,6 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 {
 	box(FL_FLAT_BOX);
 
-	color(WINDOW_BG, WINDOW_BG);
-
-
-	int top_h = 112;
-
-	idefs = new UI_DefaultProps(X, Y + top_h + 4, W, H - top_h - 4);
-
-//	resizable(idefs);
-
-
-	Fl_Group *top_bit = new Fl_Group(X, Y, W, top_h);
-
-	top_bit->box(FL_FLAT_BOX);
-
-	resizable(top_bit);
-
-
-	Fl_Box *rs_box = new Fl_Box(FL_FLAT_BOX, X + 10, Y + top_h - 16, W - 20, 12, NULL);
-	/// rs_box->color(FL_RED);
-
-	top_bit->resizable(rs_box);
-
 
 	X += 6;
 	Y += 5;
@@ -83,7 +61,8 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 
 	Y += pos_y->h() + 4;
 
-	top_bit->end();
+
+	resizable(NULL);
 
 	end();
 }
@@ -180,18 +159,6 @@ void UI_VertexBox::UpdateField()
 void UI_VertexBox::UpdateTotal()
 {
 	which->SetTotal(NumVertices);
-}
-
-
-void UI_VertexBox::BrowsedItem(char kind, int number, const char *name, int e_state)
-{
-	idefs->BrowsedItem(kind, number, name, e_state);
-}
-
-
-void UI_VertexBox::UnselectPics()
-{
-	idefs->UnselectPics();
 }
 
 

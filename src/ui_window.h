@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2013 Andrew Apted
+//  Copyright (C) 2006-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -74,6 +74,8 @@ public:
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
 
+	UI_DefaultProps *props_box;
+
 private:
 	Fl_Cursor cursor_shape;
 
@@ -106,6 +108,8 @@ public:
 	//         'O' for thing types, 'L' line types, 'S' sector types.
 	void ShowBrowser(char kind);
 
+	void ShowDefaultProps();
+
 	void UpdateTotals();
 
 	int GetPanelObjNum() const;
@@ -114,6 +118,11 @@ public:
 	void UpdatePanelObj();
 
 	void UnselectPics();
+
+	bool isSpecialPanelShown()
+	{
+		return props_box->visible();
+	}
 
 	void Delay(int steps);  // each step is 1/10th second
 

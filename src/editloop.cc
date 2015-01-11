@@ -264,7 +264,7 @@ void Editor_ChangeMode(char mode)
 	edit.split_line.clear();
 	edit.did_a_move = false;
 
-	if (prev_type != edit.mode)
+	if (prev_type != edit.mode || main_win->isSpecialPanelShown())
 	{
 		main_win->NewEditMode(mode);
 

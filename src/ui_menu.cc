@@ -80,6 +80,11 @@ static void file_do_manage_wads(Fl_Widget *w, void * data)
 	Main_ProjectSetup();
 }
 
+static void file_do_default_props(Fl_Widget *w, void * data)
+{
+	main_win->ShowDefaultProps();
+}
+
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
 	CMD_Preferences();
@@ -456,8 +461,9 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Preferences",    FL_COMMAND + 'p', FCAL file_do_prefs },
-		{ "&Quit",           FL_COMMAND + 'q', FCAL file_do_quit },
+		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL file_do_default_props },
+		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
+		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },

@@ -34,8 +34,6 @@ public:
 	Fl_Int_Input *pos_x;
 	Fl_Int_Input *pos_y;
 
-	UI_DefaultProps * idefs;
-
 public:
 	UI_VertexBox(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_VertexBox();
@@ -53,10 +51,6 @@ public:
 	void UpdateField();
 
 	void UpdateTotal();
-
-	void BrowsedItem(char kind, int number, const char *name, int e_state);
-
-	void UnselectPics();
 
 private:
 	static void x_callback(Fl_Widget *, void *);

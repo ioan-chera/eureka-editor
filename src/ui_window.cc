@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2013 Andrew Apted
+//  Copyright (C) 2006-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -123,6 +123,10 @@ UI_MainWin::UI_MainWin() :
 	vert_box = new UI_VertexBox(w() - panel_W, BY, panel_W, BH);
 	vert_box->hide();
 	add(vert_box);
+
+	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
+	props_box->hide();
+	add(props_box);
 }
 
 //
@@ -140,6 +144,7 @@ void UI_MainWin::NewEditMode(char mode)
 	 line_box->hide();
 	  sec_box->hide();
 	 vert_box->hide();
+	props_box->hide();
 
 	switch (mode)
 	{
@@ -194,6 +199,19 @@ void UI_MainWin::ShowBrowser(char kind)
 	{
 		browser->ChangeMode(kind);
 	}
+}
+
+
+void UI_MainWin::ShowDefaultProps()
+{
+	thing_box->hide();
+	 line_box->hide();
+	  sec_box->hide();
+	 vert_box->hide();
+
+	props_box->show();
+
+	redraw();
 }
 
 
@@ -257,9 +275,9 @@ void UI_MainWin::UpdatePanelObj()
 
 void UI_MainWin::UnselectPics()
 {
-	line_box->UnselectPics();
-	 sec_box->UnselectPics();
-	vert_box->UnselectPics();
+	 line_box->UnselectPics();
+	  sec_box->UnselectPics();
+	props_box->UnselectPics();
 }
 
 
@@ -378,7 +396,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 
 		case OBJ_VERTICES:
 			// pass through for Default Props
-			vert_box->BrowsedItem(kind, number, name, e_state);
+//!!!!			vert_box->BrowsedItem(kind, number, name, e_state);
 			return;
 
 		default:
