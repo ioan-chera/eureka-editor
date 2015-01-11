@@ -25,10 +25,6 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
-	Fl_Toggle_Button *toggle;
-
-	Fl_Group *sub_grp;
-
 	UI_Pic   *l_pic;
 	UI_Pic   *m_pic;
 	UI_Pic   *u_pic;
@@ -63,11 +59,7 @@ public:
 
 	void LoadValues();
 
-	bool isShown() const;
-	void setShown(int value);
-
 private:
-	void rawSetShown(int value);
 	void SetIntVal(Fl_Int_Input *w, int value);
 	void UpdateThingDesc();
 
@@ -83,7 +75,6 @@ private:
 	static void button_callback(Fl_Widget *w, void *data);
 	static void height_callback(Fl_Widget *w, void *data);
 	static void  thing_callback(Fl_Widget *w, void *data);
-	static void toggle_callback(Fl_Widget *w, void *data);
 };
 
 

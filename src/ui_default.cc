@@ -32,20 +32,12 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	box(FL_FLAT_BOX);
 
 
-	toggle = new Fl_Toggle_Button(X + 10, Y + 10, 28, 28, "v");
-	toggle->value(0);
-	toggle->color(FL_DARK3, FL_DARK3);
-	toggle->callback(toggle_callback, this);
-	toggle->clear_visible_focus();
-
 	Fl_Box *title = new Fl_Box(X + 50, Y + 10, W - 60, 30, "Default Properties");
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	title->labelsize(18+KF*4);
 
 	Y += 50;
 	H -= 50;
-
-	sub_grp = new Fl_Group(X, Y, W, H);
 
 	X += 6;
 	W -= 12;
@@ -182,9 +174,6 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 144, 24);
 
 
-	sub_grp->end();
-	sub_grp->hide();
-
 	resizable(NULL);
 
 	end();
@@ -194,21 +183,6 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 UI_DefaultProps::~UI_DefaultProps()
 { }
 
-
-void UI_DefaultProps::rawSetShown(int value)
-{
-	if (value)
-	{
-		sub_grp->show();
-		toggle->label("^");
-	}
-	else
-	{
-		sub_grp->hide();
-		toggle->label("v");
-		UnselectPics();
-	}
-}
 
 void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 {
@@ -434,14 +408,6 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 	box->UpdateThingDesc();
 }
 
-void UI_DefaultProps::toggle_callback(Fl_Widget *w, void *data)
-{
-	UI_DefaultProps *box = (UI_DefaultProps *)data;
-	
-	box->rawSetShown(box->toggle->value());
-}
-
-
 void UI_DefaultProps::LoadValues()
 {
 	l_tex->value(default_lower_tex);
@@ -469,7 +435,7 @@ void UI_DefaultProps::LoadValues()
 
 void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
-	if (! sub_grp->visible())
+	if (! visible())
 	{
 		fl_beep();
 		return;
@@ -495,19 +461,6 @@ void UI_DefaultProps::UnselectPics()
 }
 
 
-bool UI_DefaultProps::isShown() const
-{
-	return sub_grp->visible();
-}
-
-void UI_DefaultProps::setShown(int value)
-{
-	toggle->value(value);
-
-	rawSetShown(value);
-}
-
-
 //------------------------------------------------------------------------
 
 
@@ -521,7 +474,7 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 		return false;
 
 	if (strcmp(tokens[1], "is_shown") == 0)
-		main_win->vert_box->idefs->setShown(atoi(tokens[2]));
+	{ /* ignored for backwards compat */ }
 
 	if (strcmp(tokens[1], "floor_h") == 0)
 		default_floor_h = atoi(tokens[2]);
@@ -557,8 +510,6 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 void Props_WriteUser(FILE *fp)
 {
 	fprintf(fp, "\n");
-
-	fprintf(fp, "default is_shown %d\n", main_win->vert_box->idefs->isShown());
 
 	fprintf(fp, "default floor_h %d\n", default_floor_h);
 	fprintf(fp, "default ceil_h %d\n",  default_ceil_h);
