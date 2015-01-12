@@ -47,15 +47,20 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- LINEDEF TEXTURES ------------
 
-	Fl_Box *line_tit = new Fl_Box(X, Y, W, 30, "Wall textures:");
-	line_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	Fl_Box *lower_tit = new Fl_Box(X + 5,      Y, 70, 30, "Lower");
+	Fl_Box *  mid_tit = new Fl_Box(MX - 35,    Y, 70, 30, "Mid (1S)");
+	Fl_Box *upper_tit = new Fl_Box(X + W - 75, Y, 70, 30, "Upper");
 
-	Y += line_tit->h() + 2;
+	lower_tit->labelcolor(fl_gray_ramp(2));
+	  mid_tit->labelcolor(fl_gray_ramp(2));
+	upper_tit->labelcolor(fl_gray_ramp(2));
+
+	Y += 32;
 
 
-	l_pic = new UI_Pic(X+8,      Y, 64, 64, "Lower");
-	m_pic = new UI_Pic(MX-32,    Y, 64, 64, "Mid");
-	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64, "Upper");
+	l_pic = new UI_Pic(X+8,      Y, 64, 64);
+	m_pic = new UI_Pic(MX-32,    Y, 64, 64);
+	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
 
 	l_pic->callback(tex_callback, this);
 	m_pic->callback(tex_callback, this);
@@ -80,7 +85,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	m_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += l_tex->h() + 8;
+	Y += l_tex->h() + 34;
 
 
 	// ---- SECTOR PROPS --------------
@@ -161,7 +166,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	light->callback(height_callback, this);
 	light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += light->h() + 18;
+	Y += light->h() + 40;
 
 
 	// ---- THING PROPS --------------
