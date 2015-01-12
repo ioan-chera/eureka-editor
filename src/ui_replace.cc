@@ -48,6 +48,19 @@ public:
 		size = 0;
 	}
 
+	bool is_single() const
+	{
+		return (size == 1) && (ranges[0][0] == ranges[0][1]);
+	}
+
+	int grab_first() const
+	{
+		if (size == 0)
+			return 0;
+
+		return ranges[0][0];
+	}
+
 	void insert(int low, int high)
 	{
 		// overflow is silently ignored
@@ -127,7 +140,9 @@ public:
 				return true;  // OK //
 
 			// valid separator?
-			if (! (*str == ',' || *str == '/' || *str == '|'))
+			if (*str == ',' || *str == '/' || *str == '|')
+				str++;
+			else
 				return false;
 		}
 	}
@@ -138,7 +153,8 @@ public:
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
-	cur_obj(OBJ_THINGS, -1)
+	cur_obj(OBJ_THINGS, -1),
+	nums_to_match(new number_group_c)
 {
 	box(FL_FLAT_BOX);
 
@@ -474,25 +490,23 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
 	if (what->value() == 1 || what->value() == 2)
 		return true;
 
-	/* decide what to show in description */
+	// for numeric types, parse the number(s) and/or ranges
+	
+	nums_to_match->clear();
 
-	// wildcard match?
-	if (strchr(w->value(), '*') || strchr(w->value(), '?') ||
-		strchr(w->value(), '[') || strchr(w->value(), '{'))
+	if (! nums_to_match->ParseString(w->value()))
 	{
-		desc->value("(wildcard match)");
+		desc->value("(parse error)");
+		return false;
+	}
+
+	if (! nums_to_match->is_single())
+	{
+		desc->value("(multi-match)");
 		return true;
 	}
 
-	// valid integer?
-	char *endptr;
-	int type_num = (int)strtol(w->value(), &endptr, 0 /* allow 0x etc */);
-
-	if (*endptr != 0)
-	{
-		desc->value("(bad number)");
-		return false;
-	}
+	int type_num = nums_to_match->grab_first();
 
 	switch (what->value())
 	{
@@ -535,6 +549,18 @@ void UI_FindAndReplace::FindNext()
 		return;
 	}
 
+	if (cur_obj.type != edit.mode)
+	{
+		Editor_ChangeMode_Raw(cur_obj.type);
+
+		// this clears the selection
+		edit.Selected->change_type(edit.mode);
+	}
+	else
+	{
+		edit.Selected->clear_all();
+	}
+
 	bool is_first = (cur_obj.num < 0);
 
 	int start_at = (cur_obj.num < 0) ? 0 : (cur_obj.num + 1);
@@ -546,18 +572,12 @@ void UI_FindAndReplace::FindNext()
 		{
 			cur_obj.num = idx;
 
-			if (cur_obj.type != edit.mode)
-			{
-				Editor_ChangeMode_Raw(cur_obj.type);
-
-				// this clears the selection
-				edit.Selected->change_type(edit.mode);
-			}
-
 			if (is_first)
 				find_but->label("Next");
 
 			GoToObject(cur_obj);
+
+			Status_Set("Found #%d", idx);
 			return;
 		}
 	}
@@ -572,6 +592,8 @@ void UI_FindAndReplace::FindNext()
 		Beep("Nothing found");
 	else
 		Beep("No more found");
+
+	edit.RedrawMap = 1;
 }
 
 
@@ -676,12 +698,10 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 {
 	const Thing *T = Things[idx];
 
-	// FIXME : handle wildcards
+	if (! nums_to_match->get(T->type))
+		return false;
 
-	if (T->type == atoi(find_match->value()))
-		return true;
-
-	return false;
+	return true;
 }
 
 

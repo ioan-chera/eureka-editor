@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_REPLACE_H__
 #define __EUREKA_UI_REPLACE_H__
 
+class number_group_c;
+
 
 class UI_FindAndReplace : public Fl_Group
 {
@@ -62,6 +64,9 @@ private:
 
 	// current object
 	Objid cur_obj;
+
+	// for numeric types, this contains the number(s) to match
+	number_group_c *nums_to_match;
 
 public:
 	UI_FindAndReplace(int X, int Y, int W, int H);
