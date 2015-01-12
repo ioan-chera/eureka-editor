@@ -918,7 +918,7 @@ public:
 	{
 		LineDef *ld = LineDefs[ld_index];
 
-		if (! is_obj(ld->start) || ! is_obj(ld->end))
+		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
 
 		if (! ld->Right())
@@ -1226,7 +1226,7 @@ public:
 			if (! dw)
 				continue;
 
-			int one_sided = dw->ld && ! is_obj(dw->ld->left);
+			int one_sided = dw->ld && ! dw->ld->Left();
 			int vis_count = dw->sx2 - dw->sx1 + 1;
 
 			for (int x = dw->sx1 ; x <= dw->sx2 ; x++)

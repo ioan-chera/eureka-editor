@@ -352,8 +352,6 @@ int selection_c::find_second() const
 
 void selection_c::begin(selection_iterator_c *it) const
 {
-	SYS_ASSERT(type != OBJ_NONE);
-
 	it->sel = this;
 	it->pos = 0;
 	

@@ -558,8 +558,8 @@ static void Insert_Vertex()
 	// highlight is empty and snapping is enabled.
 	int near_vert = -1;
 
-	if (edit.highlighted())
-		near_vert = edit.highlighted.num;
+	if (edit.highlight.valid())
+		near_vert = edit.highlight.num;
 
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
@@ -645,7 +645,7 @@ static void Insert_Vertex()
 	// handle case of splitting a line where the first selected vertex
 	// matches an endpoint of that line -- we just want to split the
 	// line then (NOT insert a new linedef)
-	if (first_sel >= 0 && edit.split_line() &&
+	if (first_sel >= 0 && edit.split_line.valid() &&
 	    (first_sel == LineDefs[edit.split_line.num]->start ||
 		 first_sel == LineDefs[edit.split_line.num]->end))
 	{
@@ -671,7 +671,7 @@ static void Insert_Vertex()
 	V->y = new_y;
 
 	// split an existing linedef?
-	if (edit.split_line())
+	if (edit.split_line.valid())
 	{
 		// in FREE mode, ensure the new vertex is directly on the linedef
 		if (! grid.snap)
@@ -744,7 +744,7 @@ static void Insert_Sector(bool force_new)
 	}
 
 	// if a sector is highlighted, merely correct it (unless CTRL is pressed)
-	if (edit.highlighted() && ! force_new)
+	if (edit.highlight.valid() && ! force_new)
 	{
 		// must not be any selection
 		if (sel_count > 0)
@@ -753,7 +753,7 @@ static void Insert_Sector(bool force_new)
 			return;
 		}
 
-		Correct_Sector(edit.highlighted.num);
+		Correct_Sector(edit.highlight.num);
 		return;
 	}
 
@@ -764,8 +764,8 @@ static void Insert_Sector(bool force_new)
 
 	if (sel_count > 0)
 		model = edit.Selected->find_first();
-	else if (edit.highlighted())
-		model = edit.highlighted.num;
+	else if (edit.highlight.valid())
+		model = edit.highlight.num;
 	else
 		model = -1;  // look for a neighbor to copy
 
@@ -933,9 +933,9 @@ void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 
 	// handle a single vertex merging onto an existing one
 	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
-	    edit.highlighted())
+	    edit.highlight.valid())
 	{
-		MergeVertex(edit.drag_single_vertex, edit.highlighted.num,
+		MergeVertex(edit.drag_single_vertex, edit.highlight.num,
 		            true /* v1_will_be_deleted */);
 
 		BA_Delete(OBJ_VERTICES, edit.drag_single_vertex);
@@ -947,7 +947,7 @@ void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 
 	// handle a single vertex splitting a linedef
 	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
-		edit.split_line())
+		edit.split_line.valid())
 	{
 		SplitLineDefAtVertex(edit.split_line.num, edit.drag_single_vertex);
 
@@ -1161,7 +1161,7 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 void CMD_CopyProperties(void)
 {
-	if (! edit.highlighted())
+	if (edit.highlight.is_nil())
 	{
 		Beep("No target for CopyProperties");
 		return;
@@ -1179,7 +1179,7 @@ void CMD_CopyProperties(void)
 
 
 	int source = edit.Selected->find_first();
-	int target = edit.highlighted.num;
+	int target = edit.highlight.num;
 
 	// silently allow copying onto self
 	if (source == target)

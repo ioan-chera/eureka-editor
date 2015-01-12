@@ -604,7 +604,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	Editor_ClearAction();
 
 	edit.Selected->clear_all();
-	edit.highlighted.clear();
+	edit.highlight.clear();
 	edit.RedrawMap = 1;
 
 	main_win->UpdateTotals();

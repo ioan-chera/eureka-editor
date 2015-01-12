@@ -280,9 +280,9 @@ void Vertex_MergeList(selection_c *list)
 
 void VERT_Merge()
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	if (edit.Selected->count_obj() < 2)
@@ -299,13 +299,13 @@ void VERT_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
-		if (! edit.highlighted())
+		if (edit.highlight.is_nil())
 		{
 			Beep("Nothing to disconnect");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	bool seen_one = false;
@@ -407,13 +407,13 @@ void LIN_Disconnect(void)
 
 	if (edit.Selected->empty())
 	{
-		if (! edit.highlighted())
+		if (edit.highlight.is_nil())
 		{
 			Beep("Nothing to disconnect");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 		unselect = true;
 	}
 
@@ -608,13 +608,13 @@ void SEC_Disconnect(void)
 
 	if (edit.Selected->empty())
 	{
-		if (! edit.highlighted())
+		if (edit.highlight.is_nil())
 		{
 			Beep("No sectors to disconnect");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 		unselect = true;
 	}
 

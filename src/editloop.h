@@ -73,7 +73,7 @@ typedef struct
 
 	selection_c *Selected;    // all selected objects (usually empty)
 
-	Objid highlighted;   // The highlighted object
+	Objid highlight;   // The highlighted object
 	Objid split_line;  // linedef which would be split by a new vertex
 
 	int RedrawMap;   // set to 1 to force the map to be redrawn

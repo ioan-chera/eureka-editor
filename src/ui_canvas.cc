@@ -197,7 +197,7 @@ void UI_Canvas::DrawEverything()
 	else if (edit.action == ACT_SCALE && ! scale_lines.empty())
 		DrawSelection(&scale_lines);
 
-	if (highlight())
+	if (highlight.valid())
 	{
 		Fl_Color hi_color = HI_COL;
 
@@ -573,8 +573,8 @@ void UI_Canvas::DrawLinedefs()
 				int sd1 = L->right;
 				int sd2 = L->left;
 				
-				int s1  = (sd1 < 0) ? OBJ_NO_NONE : SideDefs[sd1]->sector;
-				int s2  = (sd2 < 0) ? OBJ_NO_NONE : SideDefs[sd2]->sector;
+				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
+				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
 
 				if (sd1 < 0)
 				{
@@ -615,10 +615,10 @@ void UI_Canvas::DrawLinedefs()
 
 				if (edit.show_object_numbers)
 				{
-					if (s1 != OBJ_NO_NONE)
+					if (s1 != NIL_OBJ)
 						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
 
-					if (s2 != OBJ_NO_NONE)
+					if (s2 != NIL_OBJ)
 						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
 				}
 			}

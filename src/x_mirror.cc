@@ -1003,13 +1003,13 @@ void CMD_Quantize(void)
 {
 	if (edit.Selected->empty())
 	{
-		if (edit.highlighted.is_nil())
+		if (edit.highlight.is_nil())
 		{
 			Beep("Nothing to quantize");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	BA_Begin();

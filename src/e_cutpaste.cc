@@ -992,7 +992,7 @@ void CMD_Delete(void)
 success:
 	edit.error_mode = false;
 	edit.Selected->clear_all();
-	edit.highlighted.clear();
+	edit.highlight.clear();
 	edit.split_line.clear();
 
 	UpdateHighlight();

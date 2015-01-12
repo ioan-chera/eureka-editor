@@ -101,7 +101,7 @@ static void UpdateSplitLine(int drag_vert = -1)
 	// adding a new vertex
 
 	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
-	    edit.highlighted.is_nil())
+	    edit.highlight.is_nil())
 	{
 		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
 
@@ -109,7 +109,7 @@ static void UpdateSplitLine(int drag_vert = -1)
 		//       (that case is handled by Insert_Vertex)
 	}
 
-	if (edit.split_line())
+	if (edit.split_line.valid())
 		main_win->canvas->SplitLineSet(edit.split_line.num);
 	else
 		main_win->canvas->SplitLineForget();
@@ -120,7 +120,8 @@ static void UpdatePanel()
 {
 	// -AJA- I think the highlighted object is always the same type as
 	//       the current editing mode.  But do this check for safety.
-	if (edit.highlighted() && edit.highlighted.type != edit.mode)
+	if (edit.highlight.valid() &&
+		edit.highlight.type != edit.mode)
 		return;
 
 
@@ -131,7 +132,7 @@ static void UpdatePanel()
 	// It's a little more complicated since highlight may or may not
 	// be part of the selection.
 
-	int obj_idx   = edit.highlighted.num;
+	int obj_idx   = edit.highlight.num;
 	int obj_count = edit.Selected->count_obj();
 
 	if (obj_idx >= 0)
@@ -178,24 +179,24 @@ void UpdateHighlight()
 
 
 	// find the object to highlight
-	edit.highlighted.clear();
+	edit.highlight.clear();
 
 	if (edit.pointer_in_window &&
 	    (!dragging || edit.drag_single_vertex >= 0))
 	{
-		GetCurObject(edit.highlighted, edit.mode, edit.map_x, edit.map_y);
+		GetCurObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.drag_single_vertex >= 0 && edit.highlighted() &&
-			edit.drag_single_vertex == edit.highlighted.num)
+		if (edit.drag_single_vertex >= 0 && edit.highlight.valid() &&
+			edit.drag_single_vertex == edit.highlight.num)
 		{
-			edit.highlighted.clear();
+			edit.highlight.clear();
 		}
 	}
 
 
-	if (edit.highlighted())
-		main_win->canvas->HighlightSet(edit.highlighted);
+	if (edit.highlight.valid())
+		main_win->canvas->HighlightSet(edit.highlight);
 	else
 		main_win->canvas->HighlightForget();
 
@@ -218,9 +219,9 @@ bool GetCurrentObjects(selection_c *list)
 		return true;
 	}
 
-	if (edit.highlighted())
+	if (edit.highlight.valid())
 	{
-		list->set(edit.highlighted.num);
+		list->set(edit.highlight.num);
 		return true;
 	}
 
@@ -246,7 +247,7 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
-	edit.highlighted.clear();
+	edit.highlight.clear();
 	edit.split_line.clear();
 	edit.did_a_move = false;
 }
@@ -818,7 +819,7 @@ void CMD_PlaceCamera(void)
 
 void CMD_CopyAndPaste(void)
 {
-	if (! (edit.Selected || edit.highlighted()))
+	if (edit.Selected->empty() || edit.highlight.is_nil())
 	{
 		Beep("Nothing to copy and paste");
 		return;
@@ -1138,7 +1139,7 @@ void Editor_MouseRelease()
 		was_did_move = true;
 	}
 
-	if (click_obj() && was_did_move)
+	if (click_obj.valid() && was_did_move)
 	{
 		edit.Selected->clear_all();
 	}
@@ -1166,7 +1167,7 @@ void Editor_MouseRelease()
 	}
 
 
-	if (! click_obj())
+	if (click_obj.is_nil())
 		return;
 
 	Objid object;      // object under the pointer
@@ -1175,7 +1176,7 @@ void Editor_MouseRelease()
 
 	/* select the object if unselected, and vice versa.
 	 */
-	if (object() && object.num == click_obj.num)
+	if (object == click_obj)
 	{
 		Editor_ClearErrorMode();
 
@@ -1301,7 +1302,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 	   begin dragging?
 	   TODO: require pixel dist from click point to be >= THRESHHOLD
 	 */
-	if (edit.button_down == 1 && edit.clicked())
+	if (edit.button_down == 1 && edit.clicked.valid())
 	{
 		if (! edit.Selected->get(edit.clicked.num))
 		{
@@ -1329,7 +1330,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 		}
 
 		// forget the highlight
-		edit.highlighted.clear();
+		edit.highlight.clear();
 		main_win->canvas->HighlightForget();
 		return;
 	}
@@ -1449,7 +1450,7 @@ void Editor_Init()
 	edit.button_mod  = 0;
 	edit.clicked.clear();
 
-	edit.highlighted.clear();
+	edit.highlight.clear();
 	edit.split_line.clear();
 	edit.drag_single_vertex = -1;
 

@@ -973,7 +973,7 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 	// the same coordinate as the start or end of the linedef.
 	// (I tried a bbox test here, but it's bad for axis-aligned lines)
 
-	if (o() && grid.snap)
+	if (o.valid() && grid.snap)
 	{
 		int snap_x = grid.SnapX(x);
 		int snap_y = grid.SnapY(y);

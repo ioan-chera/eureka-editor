@@ -522,7 +522,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
 void UI_FindAndReplace::FindNext()
 {
 	// this can happen via CTRL-G shortcut (View / Go to next)
-	if (cur_obj.type == OBJ_NONE || strlen(find_match->value()) == 0)
+	if (cur_obj.is_nil() || strlen(find_match->value()) == 0)
 	{
 		Beep("No find active!");
 		return;
@@ -631,7 +631,7 @@ void UI_FindAndReplace::ApplyReplace(int idx)
 
 void UI_FindAndReplace::DoAll(bool replace)
 {
-	if (cur_obj.type == OBJ_NONE)
+	if (cur_obj.is_nil())
 	{
 		Beep("No find active!");
 		return;

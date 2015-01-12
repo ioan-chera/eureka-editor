@@ -241,9 +241,9 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 void SEC_Merge(void)
 {
 	// need a selection
-	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	if (edit.Selected->count_obj() < 2)

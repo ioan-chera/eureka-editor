@@ -244,13 +244,13 @@ void TH_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
-		if (! edit.highlighted())
+		if (edit.highlight.is_nil())
 		{
 			Beep("No vertices to disconnect");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	BA_Begin();
@@ -291,9 +291,9 @@ void TH_Disconnect(void)
 /* place all selected things at same location */
 void TH_Merge(void)
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	if (edit.Selected->count_obj() < 2)

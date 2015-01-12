@@ -122,7 +122,7 @@ void DeleteLineDefs(selection_c *lines)
 int GetTextureRefHeight (int sidedef)
 {
 	int l, sector;
-	int otherside = OBJ_NO_NONE;
+	int otherside = NIL_OBJ;
 
 	/* find the sidedef on the other side of the LineDef, if any */
 
@@ -859,9 +859,9 @@ void LD_MergedSecondSideDef(int ld)
 
 void LIN_MergeTwo(void)
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlighted())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 	}
 
 	if (edit.Selected->count_obj() != 2)

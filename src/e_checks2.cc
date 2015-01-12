@@ -773,13 +773,13 @@ void CMD_ApplyTag()
 
 	if (edit.Selected->empty())
 	{
-		if (! edit.highlighted())
+		if (edit.highlight.is_nil())
 		{
 			Beep("ApplyTag: nothing selected");
 			return;
 		}
 
-		edit.Selected->set(edit.highlighted.num);
+		edit.Selected->set(edit.highlight.num);
 		unselect = true;
 	}
 

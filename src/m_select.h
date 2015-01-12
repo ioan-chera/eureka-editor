@@ -53,7 +53,7 @@ private:
 	int first_obj;
 
 public:
-	 selection_c(obj_type_e _type = OBJ_NONE);
+	 selection_c(obj_type_e _type = OBJ_THINGS);
 	~selection_c();
 
 	obj_type_e what_type() const { return type; }

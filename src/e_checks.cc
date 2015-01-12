@@ -1180,7 +1180,7 @@ void Things_FindInVoid(selection_c& list)
 
 		GetCurObject(obj, OBJ_SECTORS, x, y);
 
-		if (obj())
+		if (! obj.is_nil())
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
@@ -1199,7 +1199,7 @@ void Things_FindInVoid(selection_c& list)
 
 			GetCurObject(obj, OBJ_SECTORS, x2, y2);
 
-			if (! obj())
+			if (obj.is_nil())
 				out_count++;
 		}
 

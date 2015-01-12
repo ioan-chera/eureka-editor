@@ -57,17 +57,7 @@ typedef enum
 side_ref_e;
 
 
-// Object types
-typedef enum
-{
-	OBJ_NONE,
-	OBJ_THINGS,
-	OBJ_LINEDEFS,
-	OBJ_SIDEDEFS,
-	OBJ_VERTICES,
-	OBJ_SECTORS,
-}
-obj_type_e;
+// See objid.h for obj_type_e (OBJ_THINGS etc)
 
 
 class Thing

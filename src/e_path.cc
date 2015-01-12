@@ -184,7 +184,7 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 void LIN_SelectPath(void)
 {
 	// determine starting linedef
-	if (edit.highlighted.is_nil())
+	if (edit.highlight.is_nil())
 	{
 		Beep("No highlighted line");
 		return;
@@ -206,7 +206,7 @@ void LIN_SelectPath(void)
 	}
 
 
-	int start_L = edit.highlighted.num;
+	int start_L = edit.highlight.num;
 
 	if ((match & SLP_OneSided) && ! LineDefs[start_L]->OneSided())
 		return;
@@ -347,7 +347,7 @@ void SEC_SelectGroup(void)
 	bool additive = strchr(match, 'a') ? true : false;
 
 	// determine starting sector
-	if (edit.highlighted.is_nil())
+	if (edit.highlight.is_nil())
 	{
 		Beep("No highlighted sector");
 		return;
@@ -360,7 +360,7 @@ void SEC_SelectGroup(void)
 	}
 
 
-	int start_sec = edit.highlighted.num;
+	int start_sec = edit.highlight.num;
 
 	bool unset_them = false;
 
@@ -527,7 +527,7 @@ void CMD_PrevObject()
 void CMD_FindObjectByType()
 {
 #if 0
-	else if (key == 'f' && ( edit.highlighted ())) 
+	else if (key == 'f' && ( edit.highlight ())) 
 	{
 		Objid find_obj;
 		int otype;

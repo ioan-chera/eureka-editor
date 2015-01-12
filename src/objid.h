@@ -27,34 +27,48 @@
 #ifndef __EUREKA_OBJ_ID_H__
 #define __EUREKA_OBJ_ID_H__
 
-#include "e_basis.h"
+
+// main kinds of objects
+typedef enum
+{
+	OBJ_THINGS,
+	OBJ_LINEDEFS,
+	OBJ_SIDEDEFS,
+	OBJ_VERTICES,
+	OBJ_SECTORS,
+}
+obj_type_e;
 
 
-// Special object numbers
-#define OBJ_NO_NONE    -1
-
-#define is_obj(n)  ((n) >= 0)
+// special object number for "NONE"
+#define NIL_OBJ		-1
 
 
 class Objid
 {
 public:
 	obj_type_e type;
+
 	int num;
 
-	Objid() : type(OBJ_NONE), num(-1) { }
-	Objid(const Objid& other) : type(other.type), num(other.num) { } 
+public:
+	Objid() : type(OBJ_THINGS), num(NIL_OBJ) { }
 	Objid(obj_type_e t, int n) : type(t), num(n) { }
+	Objid(const Objid& other) : type(other.type), num(other.num) { } 
 
-	void clear() { num = -1; type = OBJ_NONE; }
+	void clear()
+	{
+		type = OBJ_THINGS;
+		num  = NIL_OBJ;
+	}
 
 	bool operator== (const Objid& other) const
 	{
 		return (other.type == type) && (other.num == num);
 	}
 
-	bool is_nil     () const { return num <  0 || type == OBJ_NONE; }
-	bool operator() () const { return num >= 0 && type != OBJ_NONE; } 
+	bool valid()  const { return num >= 0; }
+	bool is_nil() const { return num <  0; }
 };
 
 #endif  /* __EUREKA_OBJ_ID_H__ */
