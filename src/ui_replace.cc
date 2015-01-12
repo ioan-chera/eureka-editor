@@ -658,24 +658,28 @@ void UI_FindAndReplace::DoAll(bool replace)
 		return;
 	}
 
+	if (cur_obj.type != edit.mode)
+		Editor_ChangeMode_Raw(cur_obj.type);
+
 	if (replace)
 	{
 		BA_Begin();
 	}
 	else
 	{
-		Editor_ChangeMode_Raw(cur_obj.type);
-
 		// this clears the selection
 		edit.Selected->change_type(edit.mode);
 	}
 
 	int total = NumObjects(cur_obj.type);
+	int count = 0;
 
 	for (int idx = 0 ; idx < total ; idx++)
 	{
 		if (! MatchesObject(idx))
 			continue;
+
+		count++;
 
 		if (replace)
 			ApplyReplace(idx);
@@ -683,10 +687,22 @@ void UI_FindAndReplace::DoAll(bool replace)
 			edit.Selected->set(idx);
 	}
 
+	if (count == 0)
+		Beep("Nothing found");
+	else
+		Status_Set("Found %d objects", count);
+
 	if (replace)
 	{
 		BA_End();
 	}
+	else
+	{
+		if (count > 0)
+			GoToSelection();
+	}
+
+	edit.RedrawMap = 1;
 }
 
 
