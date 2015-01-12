@@ -171,7 +171,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		title->labelsize(18+KF*4);
 
 
-		what = new Fl_Choice(X+60, Y+45, W - 90, 35);
+		what = new Fl_Choice(X+60, Y+46, W - 120, 33);
 		what->textsize(17);
 		what->add("Things|Line Textures|Sector Flats|Lines by Type|Sectors by Type");
 		what->value(0);
