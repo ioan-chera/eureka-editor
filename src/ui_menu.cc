@@ -286,6 +286,14 @@ static void view_do_camera_pos(Fl_Widget *w, void * data)
 	CMD_GoToCamera();
 }
 
+static void view_do_toggle_3d(Fl_Widget *w, void * data)
+{
+	Editor_ClearAction();
+
+	edit.render3d = ! edit.render3d;
+	main_win->redraw();
+}
+
 static void view_do_object_nums(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Toggle", "obj_nums");
@@ -497,6 +505,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "Logs....",   0, FCAL view_do_logs },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "Toggle 3D View",      0, FCAL view_do_toggle_3d },
 		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
 		{ "Toggle Grid Type",    0, FCAL view_do_grid_type },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
