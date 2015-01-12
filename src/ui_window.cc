@@ -262,7 +262,7 @@ void UI_MainWin::ShowFindAndReplace()
 	 vert_box->hide();
 	props_box->hide();
 
-	 find_box->show();
+	 find_box->Open();
 
 	redraw();
 }
@@ -417,7 +417,11 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 		return;
 	}
 
-	// TODO : find_box
+	if (find_box->visible())
+	{
+		find_box->BrowsedItem(kind, number, name, e_state);
+		return;
+	}
 
 	switch (edit.mode)
 	{

@@ -60,18 +60,32 @@ private:
 
 	Fl_Input *tag_match;
 
+	// current object
+	Objid cur_obj;
+
 public:
 	UI_FindAndReplace(int X, int Y, int W, int H);
 	virtual ~UI_FindAndReplace();
 
+	void Open();
+
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:
+	void Clear();
+
 	void rawShowReplace(int value);
 	void rawShowFilter(int value);
 
+	static void     what_kind_callback(Fl_Widget *w, void *data);
 	static void    rep_toggle_callback(Fl_Widget *w, void *data);
 	static void filter_toggle_callback(Fl_Widget *w, void *data);
+
+	static void  find_but_callback(Fl_Widget *w, void *data);
+	static void apply_but_callback(Fl_Widget *w, void *data);
+
+	static void  select_all_callback(Fl_Widget *w, void *data);
+	static void replace_all_callback(Fl_Widget *w, void *data);
 };
 
 

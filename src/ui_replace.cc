@@ -23,7 +23,8 @@
 
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
-	Fl_Group(X, Y, W, H, NULL)
+	Fl_Group(X, Y, W, H, NULL),
+	cur_obj()
 {
 	box(FL_FLAT_BOX);
 
@@ -42,8 +43,9 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		what = new Fl_Choice(X+60, Y+45, W - 70, 35);
 		what->textsize(18);
-		what->add("Things|LineDefs|Line by Type|Sectors|Sec by Type");
+		what->add("Things|LineDefs|Sectors|Line by Type|Sec by Type");
 		what->value(0);
+		what->callback(what_kind_callback, this);
 
 
 		find_match = new Fl_Input(X+70, Y+95, 127, 25, "Match: ");
@@ -54,8 +56,10 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		find_but = new Fl_Button(X+50, Y+165, 80, 30, "Find");
 		find_but->labelfont(FL_HELVETICA_BOLD);
+		find_but->callback(find_but_callback, this);
 
 		select_all_but = new Fl_Button(X+165, Y+165, 93, 30, "Select All");
+		select_all_but->callback(select_all_callback, this);
 	}
 	grp1->end();
 
@@ -86,8 +90,10 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 			apply_but = new Fl_Button(X+50, Y+325, 80, 30, "Apply");
 			apply_but->labelfont(FL_HELVETICA_BOLD);
+			apply_but->callback(apply_but_callback, this);
 
 			replace_all_but = new Fl_Button(X+160, Y+325, 105, 30, "Replace All");
+			replace_all_but->callback(replace_all_callback, this);
 		}
 		rep_group->end();
 	}
@@ -167,20 +173,79 @@ void UI_FindAndReplace::rawShowFilter(int value)
 
 void UI_FindAndReplace::rep_toggle_callback(Fl_Widget *w, void *data)
 {
-		UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-		Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
+	Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
 		
-		box->rawShowReplace(toggle->value());
+	box->rawShowReplace(toggle->value());
 }
 
 void UI_FindAndReplace::filter_toggle_callback(Fl_Widget *w, void *data)
 {
-		UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 		
-		Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
+	Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
 
-		box->rawShowFilter(toggle->value());
+	box->rawShowFilter(toggle->value());
+}
+
+
+void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	box->Clear();
+}
+
+
+void UI_FindAndReplace::Open()
+{
+	show();
+
+	Clear();
+}
+
+
+void UI_FindAndReplace::Clear()
+{
+	cur_obj.clear();
+
+	find_match->value("");
+	find_but->label("Find");
+
+	rep_value->value("");
+
+	rawShowFilter(0);
+}
+
+
+void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::find_but_callback(Fl_Widget *w, void *data)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::select_all_callback(Fl_Widget *w, void *data)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::apply_but_callback(Fl_Widget *w, void *data)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::replace_all_callback(Fl_Widget *w, void *data)
+{
+	// TODO
 }
 
 
