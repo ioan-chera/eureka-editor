@@ -195,6 +195,17 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
 	box->Clear();
+
+	switch (box->what->value())
+	{
+		case 0: box->cur_obj.type = OBJ_THINGS; break;
+		case 1: box->cur_obj.type = OBJ_LINEDEFS; break;
+		case 2: box->cur_obj.type = OBJ_SECTORS; break;
+		case 3: box->cur_obj.type = OBJ_LINEDEFS; break;
+		case 4: box->cur_obj.type = OBJ_SECTORS; break;
+
+		default: break;
+	}
 }
 
 
@@ -215,7 +226,41 @@ void UI_FindAndReplace::Clear()
 
 	rep_value->value("");
 
+	find_but->deactivate();
+	select_all_but->deactivate();
+
+	apply_but->deactivate();
+	replace_all_but->deactivate();
+
 	rawShowFilter(0);
+}
+
+
+bool UI_FindAndReplace::WhatFromEditMode()
+{
+	switch (edit.mode)
+	{
+		case OBJ_THINGS:   what->value(0); return true;
+		case OBJ_LINEDEFS: what->value(1); return true;
+		case OBJ_SECTORS:  what->value(2); return true;
+
+		default: return false;
+	}
+}
+
+
+char UI_FindAndReplace::GetKind()
+{
+	// these letters are same as the Browser uses
+
+	int v = what->value();
+
+	if (v < 0 || v >= 5)
+		return '?';
+
+	const char *kinds = "OTFLS";
+
+	return kinds[v];
 }
 
 
@@ -227,13 +272,17 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 
 void UI_FindAndReplace::find_but_callback(Fl_Widget *w, void *data)
 {
-	// TODO
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	box->FindNext();
 }
 
 
 void UI_FindAndReplace::select_all_callback(Fl_Widget *w, void *data)
 {
-	// TODO
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	box->DoAll(false /* replace */);
 }
 
 
@@ -245,7 +294,100 @@ void UI_FindAndReplace::apply_but_callback(Fl_Widget *w, void *data)
 
 void UI_FindAndReplace::replace_all_callback(Fl_Widget *w, void *data)
 {
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	box->DoAll(true /* replace */);
+}
+
+
+//------------------------------------------------------------------------
+
+
+void UI_FindAndReplace::FindNext()
+{
+	// this can happen via CTRL-G shortcut (View / Go to next)
+	if (cur_obj.type == OBJ_NONE || strlen(find_match->value()) == 0)
+	{
+		Beep("No find active!");
+		return;
+	}
+
+	bool is_first = (cur_obj.num < 0);
+
+	int start_at = (cur_obj.num < 0) ? 0 : (cur_obj.num + 1);
+	int total    = NumObjects(cur_obj.type);
+
+	for (int idx = start_at ; idx < total ; idx++)
+	{
+		if (MatchesObject(idx))
+		{
+			// FIXME
+
+			return;
+		}
+	}
+
+	// nothing (else) was found
+
+	find_but->label("Find");
+
+	if (is_first)
+		Beep("Nothing found");
+	else
+		Beep("No more found");
+}
+
+
+bool UI_FindAndReplace::MatchesObject(int idx)
+{
+	// FIXME !!!
+
+	return false;
+}
+
+
+void UI_FindAndReplace::ApplyReplace(int idx)
+{
 	// TODO
+}
+
+
+void UI_FindAndReplace::DoAll(bool replace)
+{
+	if (cur_obj.type == OBJ_NONE)
+	{
+		Beep("No find active!");
+		return;
+	}
+
+	if (replace)
+	{
+		BA_Begin();
+	}
+	else
+	{
+		// FIXME : CHANGE EDIT MODE  [ but not panel !! ]
+
+		// FIXME : clear selection
+	}
+
+	int total = NumObjects(cur_obj.type);
+
+	for (int idx = 0 ; idx < total ; idx++)
+	{
+		if (! MatchesObject(idx))
+			continue;
+
+		if (replace)
+			ApplyReplace(idx);
+		else
+			edit.Selected->set(idx);
+	}
+
+	if (replace)
+	{
+		BA_End();
+	}
 }
 
 

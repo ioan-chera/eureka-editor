@@ -69,13 +69,25 @@ public:
 
 	void Open();
 
+	char GetKind();	 // same as browser : 'O' 'T' 'F' 'L' 'S'
+
+	// called by "Find" button in here, or CTRL-G shortcut
+	void FindNext();
+
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:
 	void Clear();
 
+	bool WhatFromEditMode();
+
 	void rawShowReplace(int value);
 	void rawShowFilter(int value);
+
+	bool MatchesObject(int idx);
+	void ApplyReplace (int idx);
+
+	void DoAll(bool replace);
 
 	static void     what_kind_callback(Fl_Widget *w, void *data);
 	static void    rep_toggle_callback(Fl_Widget *w, void *data);
