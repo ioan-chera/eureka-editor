@@ -36,8 +36,8 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	title->labelsize(18+KF*4);
 
-	Y += 50;
-	H -= 50;
+	Y += 55;
+	H -= 55;
 
 	X += 6;
 	W -= 12;
