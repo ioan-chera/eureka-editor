@@ -431,15 +431,20 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ gen_autoload = new Fl_Check_Button(50, 280, 350, 25, " automatically open the most recent pwad");
+		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
 		  gen_autoload->down_box(FL_DOWN_BOX);
 		}
-		{ gen_swapsides = new Fl_Check_Button(50, 310, 350, 25, " swap upper and lower sidedefs in Linedef panel");
+		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
 		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
-		{ gen_maximized = new Fl_Check_Button(50, 340, 350, 25, " maximize the window when Eureka starts");
+		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
 		  gen_maximized->down_box(FL_DOWN_BOX);
-		  gen_maximized->hide();  // DISABLED, PENDING REMOVAL
+		  // not supported on MacOS X
+		  // (on that platform we should restore last window position, but I don't
+		  //  know how to code that)
+#ifdef __APPLE__
+		  gen_maximized->hide();
+#endif
 		}
 		o->end();
 	  }
