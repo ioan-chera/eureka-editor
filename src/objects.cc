@@ -36,7 +36,6 @@
 #include "levels.h"
 #include "objects.h"
 #include "r_grid.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
 #include "x_loop.h"
@@ -48,76 +47,6 @@
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
 bool reselect_second_vertex = false;
-
-
-static bool invalidated_totals;
-static bool invalidated_panel_obj;
-static bool changed_panel_obj;
-
-
-
-void ObjectBox_NotifyBegin()
-{
-	invalidated_totals = false;
-	invalidated_panel_obj = false;
-	changed_panel_obj = false;
-}
-
-
-void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
-{
-	invalidated_totals = true;
-
-	if (type != edit.mode)
-		return;
-
-	if (objnum > main_win->GetPanelObjNum())
-		return;
-	
-	invalidated_panel_obj = true;
-}
-
-
-void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
-{
-	invalidated_totals = true;
-
-	if (type != edit.mode)
-		return;
-
-	if (objnum > main_win->GetPanelObjNum())
-		return;
-	
-	invalidated_panel_obj = true;
-}
-
-
-void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field)
-{
-	if (type != edit.mode)
-		return;
-
-	if (objnum != main_win->GetPanelObjNum())
-		return;
-
-	changed_panel_obj = true;
-}
-
-
-void ObjectBox_NotifyEnd()
-{
-	if (invalidated_totals)
-		main_win->UpdateTotals();
-
-	if (invalidated_panel_obj)
-	{
-		main_win->InvalidatePanelObj();
-	}
-	else if (changed_panel_obj)
-	{
-		main_win->UpdatePanelObj();
-	}
-}
 
 
 /*

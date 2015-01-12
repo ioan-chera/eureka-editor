@@ -33,7 +33,6 @@
 #include "r_grid.h"
 #include "levels.h"
 #include "objects.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "x_mirror.h"
 

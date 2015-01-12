@@ -27,8 +27,6 @@
 #ifndef __EUREKA_E_SECTOR_H__
 #define __EUREKA_E_SECTOR_H__
 
-#include "selectn.h"
-
 
 #if 0
 void DistributeSectorFloors (SelPtr);

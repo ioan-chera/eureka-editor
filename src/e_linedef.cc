@@ -33,7 +33,6 @@
 #include "levels.h"
 #include "m_game.h"
 #include "objects.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 

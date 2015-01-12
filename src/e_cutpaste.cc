@@ -30,7 +30,6 @@
 #include "levels.h"
 #include "objects.h"
 #include "r_grid.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "x_loop.h"
 

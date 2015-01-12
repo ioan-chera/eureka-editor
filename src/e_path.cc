@@ -32,7 +32,6 @@
 #include "levels.h"
 #include "m_game.h"
 #include "r_grid.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "x_mirror.h"
 

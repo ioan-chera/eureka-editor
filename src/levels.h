@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  LEVEL LOADING ETC
+//  LEVEL MISC STUFF
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -49,6 +49,28 @@ void MapStuff_NotifyInsert(obj_type_e type, int objnum);
 void MapStuff_NotifyDelete(obj_type_e type, int objnum);
 void MapStuff_NotifyChange(obj_type_e type, int objnum, int field);
 void MapStuff_NotifyEnd();
+
+
+void ObjectBox_NotifyBegin();
+void ObjectBox_NotifyInsert(obj_type_e type, int objnum);
+void ObjectBox_NotifyDelete(obj_type_e type, int objnum);
+void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field);
+void ObjectBox_NotifyEnd();
+
+
+void Selection_NotifyBegin();
+void Selection_NotifyInsert(obj_type_e type, int objnum);
+void Selection_NotifyDelete(obj_type_e type, int objnum);
+void Selection_NotifyChange(obj_type_e type, int objnum, int field);
+void Selection_NotifyEnd();
+
+
+void DumpSelection (selection_c * list);
+
+void ConvertSelection(selection_c * src, selection_c * dest);
+
+int Selection_FirstLine(selection_c *list);
+
 
 
 // handling of recently used textures, flats and things

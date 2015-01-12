@@ -28,7 +28,6 @@
 #define __EUREKA_E_LINEDEF_H__
 
 class bitvec_c;
-#include "selectn.h"
 
 void FlipLineDef(int ld);
 void FlipLineDefGroup(selection_c& flip);

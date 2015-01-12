@@ -32,7 +32,6 @@
 #include "editloop.h"
 #include "m_bitvec.h"
 #include "objects.h"
-#include "selectn.h"
 #include "x_loop.h"
 
 #include "ui_window.h"

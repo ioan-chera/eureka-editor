@@ -35,7 +35,6 @@
 #include "m_game.h"
 #include "levels.h"
 #include "objects.h"
-#include "selectn.h"
 #include "w_rawdef.h"
 #include "ui_window.h"
 #include "x_hover.h"

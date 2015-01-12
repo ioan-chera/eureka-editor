@@ -30,7 +30,6 @@
 #include "im_color.h"
 #include "levels.h"
 #include "r_render.h"
-#include "selectn.h"
 
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)

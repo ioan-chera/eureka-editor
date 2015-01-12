@@ -40,7 +40,6 @@
 // need these for the XXX_Notify() prototypes
 #include "e_cutpaste.h"
 #include "objects.h"
-#include "selectn.h"
 
 
 std::vector<Thing *>   Things;

@@ -30,7 +30,6 @@
 #include "e_things.h"
 #include "editloop.h"
 #include "levels.h"
-#include "selectn.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
 

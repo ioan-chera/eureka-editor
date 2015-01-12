@@ -38,7 +38,6 @@
 #include "m_game.h"
 #include "m_select.h"
 #include "r_grid.h"
-#include "selectn.h"
 #include "x_mirror.h"
 
 

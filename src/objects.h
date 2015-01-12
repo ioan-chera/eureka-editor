@@ -28,13 +28,6 @@
 #define __EUREKA_OBJECTS_H__
 
 
-void ObjectBox_NotifyBegin();
-void ObjectBox_NotifyInsert(obj_type_e type, int objnum);
-void ObjectBox_NotifyDelete(obj_type_e type, int objnum);
-void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field);
-void ObjectBox_NotifyEnd();
-
-
 int GetMaxObjectNum (int objtype);
 void  SelectObjectsInBox (selection_c *list, int, int, int, int, int);
 void  HighlightObject (int, int, int);

@@ -29,7 +29,6 @@
 #include <map>
 
 #include "levels.h"
-#include "selectn.h"
 #include "objects.h"
 #include "m_bitvec.h"
 #include "e_linedef.h"
