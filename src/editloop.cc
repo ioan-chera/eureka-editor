@@ -240,22 +240,9 @@ void Editor_ClearErrorMode()
 }
 
 
-void Editor_ChangeMode(char mode)
+void Editor_ChangeMode_Raw(obj_type_e new_mode)
 {
-	obj_type_e  prev_type = edit.mode;
-
-	// Set the object type according to the new mode.
-	switch (mode)
-	{
-		case 't': edit.mode = OBJ_THINGS;   break;
-		case 'l': edit.mode = OBJ_LINEDEFS; break;
-		case 's': edit.mode = OBJ_SECTORS;  break;
-		case 'v': edit.mode = OBJ_VERTICES; break;
-
-		default:
-			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
-			return;
-	}
+	edit.mode = new_mode;
 
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
@@ -263,6 +250,25 @@ void Editor_ChangeMode(char mode)
 	edit.highlighted.clear();
 	edit.split_line.clear();
 	edit.did_a_move = false;
+}
+
+
+void Editor_ChangeMode(char mode)
+{
+	obj_type_e  prev_type = edit.mode;
+
+	// Set the object type according to the new mode.
+	switch (mode)
+	{
+		case 't': Editor_ChangeMode_Raw(OBJ_THINGS);   break;
+		case 'l': Editor_ChangeMode_Raw(OBJ_LINEDEFS); break;
+		case 's': Editor_ChangeMode_Raw(OBJ_SECTORS);  break;
+		case 'v': Editor_ChangeMode_Raw(OBJ_VERTICES); break;
+
+		default:
+			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
+			return;
+	}
 
 	if (prev_type != edit.mode)
 	{

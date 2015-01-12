@@ -109,6 +109,7 @@ void UpdateHighlight();
 
 void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
+void Editor_ChangeMode_Raw(obj_type_e new_mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 /* raw input handling */
