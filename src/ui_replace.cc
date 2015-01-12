@@ -27,7 +27,7 @@
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
-	cur_obj()
+	cur_obj(OBJ_THINGS, -1)
 {
 	box(FL_FLAT_BOX);
 
@@ -232,7 +232,10 @@ void UI_FindAndReplace::Open()
 {
 	show();
 
-	Clear();
+	WhatFromEditMode();
+
+	// this will do a Clear() for us
+	what->do_callback();
 
 	Fl::focus(find_match);
 }
@@ -328,7 +331,7 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
 	bool  is_valid = box->CheckInput(box->find_match, box->find_desc);
-	bool was_valid = (box->find_but->active());
+///	bool was_valid = (box->find_but->active());
 
 	if (is_valid)
 	{
@@ -440,6 +443,9 @@ void UI_FindAndReplace::FindNext()
 				edit.Selected->change_type(edit.mode);
 			}
 
+			if (is_first)
+				find_but->label("Next");
+
 			GoToObject(cur_obj);
 			return;
 		}
@@ -460,15 +466,54 @@ void UI_FindAndReplace::FindNext()
 
 bool UI_FindAndReplace::MatchesObject(int idx)
 {
-	// FIXME !!!
+	switch (what->value())
+	{
+		case 0: // Things
+			return Match_Thing(idx) && Filter_Thing(idx);
 
-	return false;
+		case 1: // LineDefs (texturing)
+			return Match_LineDef(idx) && Filter_LineDef(idx);
+
+		case 2: // Sectors (texturing)
+			return Match_Sector(idx) && Filter_Sector(idx);
+
+		case 3: // Lines by Type
+			return Match_LineType(idx) && Filter_LineDef(idx);
+
+		case 4: // Sectors by Type
+			return Match_SectorType(idx) && Filter_Sector(idx);
+
+		default: return false;
+	}
 }
 
 
 void UI_FindAndReplace::ApplyReplace(int idx)
 {
-	// TODO
+	switch (what->value())
+	{
+		case 0: // Things
+			Replace_Thing(idx);
+			break;
+
+		case 1: // LineDefs (texturing)
+			Replace_LineDef(idx);
+			break;
+
+		case 2: // Sectors (texturing)
+			Replace_Sector(idx);
+			break;
+
+		case 3: // Lines by Type
+			Replace_LineType(idx);
+			break;
+
+		case 4: // Sectors by Type
+			Replace_SectorType(idx);
+			break;
+
+		default: break;
+	}
 }
 
 
@@ -511,6 +556,107 @@ void UI_FindAndReplace::DoAll(bool replace)
 	}
 }
 
+
+//------------------------------------------------------------------------
+//    MATCHING METHODS
+//------------------------------------------------------------------------
+
+bool UI_FindAndReplace::Match_Thing(int idx)
+{
+	const Thing *T = Things[idx];
+
+	// FIXME : handle wildcards
+
+	if (T->type == atoi(find_match->value()))
+		return true;
+
+	return false;
+}
+
+
+bool UI_FindAndReplace::Match_LineDef(int idx)
+{
+	// TODO
+	return false;
+}
+
+
+bool UI_FindAndReplace::Match_LineType(int idx)
+{
+	// TODO
+	return false;
+}
+
+
+bool UI_FindAndReplace::Match_Sector(int idx)
+{
+	// TODO
+	return false;
+}
+
+
+bool UI_FindAndReplace::Match_SectorType(int idx)
+{
+	// TODO
+	return false;
+}
+
+
+
+
+bool UI_FindAndReplace::Filter_Thing(int idx)
+{
+	// TODO
+	return true;
+}
+
+
+bool UI_FindAndReplace::Filter_LineDef(int idx)
+{
+	// TODO
+	return true;
+}
+
+
+bool UI_FindAndReplace::Filter_Sector(int idx)
+{
+	// TODO
+	return true;
+}
+
+
+//------------------------------------------------------------------------
+//    REPLACE METHODS
+//------------------------------------------------------------------------
+
+void UI_FindAndReplace::Replace_Thing(int idx)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::Replace_LineDef(int idx)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::Replace_LineType(int idx)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::Replace_Sector(int idx)
+{
+	// TODO
+}
+
+
+void UI_FindAndReplace::Replace_SectorType(int idx)
+{
+	// TODO
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

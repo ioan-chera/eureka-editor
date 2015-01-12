@@ -91,6 +91,25 @@ private:
 
 	bool CheckInput(Fl_Input *w, Fl_Output *desc);
 
+	// specialized functions for each search modality
+
+	bool Match_Thing(int idx);
+	bool Match_LineDef(int idx);
+	bool Match_LineType(int idx);
+	bool Match_Sector(int idx);
+	bool Match_SectorType(int idx);
+
+	bool Filter_Thing(int idx);
+	bool Filter_LineDef(int idx);
+	bool Filter_Sector(int idx);
+
+	void Replace_Thing(int idx);
+	void Replace_LineDef(int idx);
+	void Replace_LineType(int idx);
+	void Replace_Sector(int idx);
+	void Replace_SectorType(int idx);
+
+private:
 	static void     what_kind_callback(Fl_Widget *w, void *data);
 	static void    rep_toggle_callback(Fl_Widget *w, void *data);
 	static void filter_toggle_callback(Fl_Widget *w, void *data);

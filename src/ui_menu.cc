@@ -311,7 +311,7 @@ static void view_do_find(Fl_Widget *w, void * data)
 
 static void view_do_next(Fl_Widget *w, void * data)
 {
-	Beep("Not implemented");
+	main_win->find_box->FindNext();
 }
 
 static void view_do_jump(Fl_Widget *w, void * data)
