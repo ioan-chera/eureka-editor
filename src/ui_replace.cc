@@ -25,6 +25,117 @@
 #include "m_game.h"
 
 
+class number_group_c
+{
+	// This represents a small group of numbers and number ranges,
+	// which the user can type into the Match input box.
+#define NUMBER_GROUP_MAX	40
+
+private:
+	int size;
+
+	int ranges[NUMBER_GROUP_MAX][2];
+
+public:
+	number_group_c() : size(0)
+	{ }
+
+	~number_group_c()
+	{ }
+
+	void clear()
+	{
+		size = 0;
+	}
+
+	void insert(int low, int high)
+	{
+		// overflow is silently ignored
+		if (size >= NUMBER_GROUP_MAX)
+			return;
+
+		// TODO : try to merge with existing range
+
+		ranges[size][0] = low;
+		ranges[size][1] = high;
+
+		size++;
+	}
+
+	bool get(int num) const
+	{
+		for (int i = 0 ; i < size ; i++)
+		{
+			if (ranges[i][0] <= num && num <= ranges[i][1])
+				return true;
+		}
+
+		return false;
+	}
+
+	//
+	// Parse a string like "1,3-5,9" and add the numbers (or ranges)
+	// to this group.  Returns false for malformed strings.
+	// An empty string is considered invalid.
+	//
+	bool ParseString(const char *str)
+	{
+		char *endptr;
+
+		for (;;)
+		{
+			while (isspace(*str))
+				str++;
+
+			int low  = (int)strtol(str, &endptr, 0 /* allow hex */);
+			int high = low;
+
+			if (endptr == str)
+				return false;
+
+			str = endptr;
+
+			while (isspace(*str))
+				str++;
+
+			// check for range
+			if (*str == '-' || (str[0] == '.' && str[1] == '.'))
+			{
+				str += (*str == '-') ? 1 : 2;
+
+				while (isspace(*str))
+					str++;
+
+				high = (int)strtol(str, &endptr, 0 /* allow hex */);
+
+				if (endptr == str)
+					return false;
+
+				str = endptr;
+
+				// valid range?
+				if (high < low)
+					return false;
+
+				while (isspace(*str))
+					str++;
+			}
+
+			insert(low, high);
+
+			if (*str == 0)
+				return true;  // OK //
+
+			// valid separator?
+			if (! (*str == ',' || *str == '/' || *str == '|'))
+				return false;
+		}
+	}
+};
+
+
+//------------------------------------------------------------------------
+
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
 	cur_obj(OBJ_THINGS, -1)
