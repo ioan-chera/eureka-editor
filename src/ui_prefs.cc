@@ -1166,7 +1166,13 @@ void UI_Preferences::SaveValues()
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
 
-	browser_small_tex = brow_smalltex->value() ? true : false;
+	// changing this requires re-populating the browser
+	bool new_small_tex = brow_smalltex->value() ? true : false;
+	if (new_small_tex != browser_small_tex)
+	{
+		browser_small_tex = new_small_tex;
+		main_win->browser->Populate();
+	}
 
 	/* Grid Tab */
 
