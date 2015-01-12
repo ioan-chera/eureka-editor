@@ -171,14 +171,16 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		title->labelsize(18+KF*4);
 
 
-		what = new Fl_Choice(X+60, Y+45, W - 70, 35);
-		what->textsize(18);
-		what->add("Things|LineDefs|Sectors|Line by Type|Sec by Type");
+		what = new Fl_Choice(X+60, Y+45, W - 90, 35);
+		what->textsize(17);
+		what->add("Things|Line Textures|Sector Flats|Lines by Type|Sectors by Type");
 		what->value(0);
 		what->callback(what_kind_callback, this);
 
+		UpdateWhatColor();
 
-		find_match = new Fl_Input(X+70, Y+95, 127, 25, "Match: ");
+
+		find_match = new Fl_Input(X+70, Y+95, 125, 25, "Match: ");
 		find_match->callback(find_match_callback, this);
 		find_match->when(FL_WHEN_CHANGED);
 
@@ -198,65 +200,50 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 	/* ---- REPLACE AREA ---- */
 
-	Fl_Group *grp2 = new Fl_Group(X, Y + 214, W, 156);
+	Fl_Group *grp2 = new Fl_Group(X, Y + 214, W, 132);
 	grp2->box(FL_UP_BOX);
 	{
-		rep_toggle = new Fl_Toggle_Button(X+15, Y+220, 30, 30, "^");
-		rep_toggle->labelsize(16);
-		rep_toggle->color(FL_DARK3, FL_DARK3);
-		rep_toggle->value(1);
-		rep_toggle->callback(rep_toggle_callback, this);
-		rep_toggle->clear_visible_focus();
+		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "Replace: ");
+		rep_value->when(FL_WHEN_CHANGED);
 
-		Fl_Box * r_text = new Fl_Box(X+60, Y+220, 200, 30, "Replace Info");
-		r_text->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-		r_text->labelsize(16);
+		rep_choose = new Fl_Button(X+210, Y+230, 70, 25, "Choose");
 
-		rep_group = new Fl_Group(X, Y+260, W, 100);
-		{
-			rep_value = new Fl_Output(X+70, Y+260, 127, 25, "New: ");
-			rep_value->when(FL_WHEN_CHANGED);
+		rep_desc = new Fl_Output(X+80, Y+260, 200, 25, "Desc: ");
 
-			rep_choose = new Fl_Button(X+210, Y+260, 70, 25, "Choose");
+		apply_but = new Fl_Button(X+50, Y+300, 80, 30, "Apply");
+		apply_but->labelfont(FL_HELVETICA_BOLD);
+		apply_but->callback(apply_but_callback, this);
 
-			rep_desc = new Fl_Output(X+70, Y+290, 210, 25, "Desc: ");
-
-			apply_but = new Fl_Button(X+50, Y+325, 80, 30, "Apply");
-			apply_but->labelfont(FL_HELVETICA_BOLD);
-			apply_but->callback(apply_but_callback, this);
-
-			replace_all_but = new Fl_Button(X+160, Y+325, 105, 30, "Replace All");
-			replace_all_but->callback(replace_all_callback, this);
-		}
-		rep_group->end();
+		replace_all_but = new Fl_Button(X+160, Y+300, 105, 30, "Replace All");
+		replace_all_but->callback(replace_all_callback, this);
 	}
 	grp2->end();
 
 
 	/* ---- FILTER AREA ---- */
 
-	Fl_Group *grp3 = new Fl_Group(X, Y + 374, W, H - 374);
+	Fl_Group *grp3 = new Fl_Group(X, Y + 350, W, H - 350);
 	grp3->box(FL_UP_BOX);
 	{
-		filter_toggle = new Fl_Toggle_Button(X+15, Y+380, 30, 30, "v");
+		filter_toggle = new Fl_Toggle_Button(X+15, Y+356, 30, 30, "v");
 		filter_toggle->labelsize(16);
 		filter_toggle->color(FL_DARK3, FL_DARK3);
 		filter_toggle->callback(filter_toggle_callback, this);
 		filter_toggle->clear_visible_focus();
 
-		Fl_Box *f_text = new Fl_Box(X+60, Y+380, 200, 30, "Search Filters");
+		Fl_Box *f_text = new Fl_Box(X+60, Y+356, 200, 30, "Search Filters");
 		f_text->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		f_text->labelsize(16);
 
-		filter_group = new Fl_Group(X, Y+415, W, H-415);
+		filter_group = new Fl_Group(X, Y+391, W, H-415);
 		{
-			only_floors = new Fl_Round_Button(X+35, Y+415, 145, 25, " Only Floors");
+			only_floors = new Fl_Round_Button(X+35, Y+391, 145, 25, " Only Floors");
 			only_floors->down_box(FL_ROUND_DOWN_BOX);
 
-			only_ceilings = new Fl_Round_Button(X+35, Y+435, 165, 30, " Only Ceilings");
+			only_ceilings = new Fl_Round_Button(X+35, Y+411, 165, 30, " Only Ceilings");
 			only_ceilings->down_box(FL_ROUND_DOWN_BOX);
 
-			tag_match = new Fl_Input(X+105, Y+466, 130, 24, "Tag Match:");
+			tag_match = new Fl_Input(X+105, Y+442, 130, 24, "Tag Match:");
 		}
 		filter_group->end();
 		filter_group->hide();
@@ -275,19 +262,18 @@ UI_FindAndReplace::~UI_FindAndReplace()
 { }
 
 
-void UI_FindAndReplace::rawShowReplace(int value)
+void UI_FindAndReplace::UpdateWhatColor()
 {
-	if (value)
+	switch (what->value())
 	{
-		rep_toggle->label("^");
-		rep_group->show();
-	}
-	else
-	{
-		rep_toggle->label("v");
-		rep_group->hide();
+		case 0: /* Things      */ what->color(FL_MAGENTA); break;
+		case 1: /* Line Tex    */ what->color(fl_rgb_color(0,128,255)); break;
+		case 2: /* Sector Flat */ what->color(FL_YELLOW); break;
+		case 3: /* Line Type   */ what->color(FL_GREEN); break;
+		case 4: /* Sector Type */ what->color(fl_rgb_color(255,144,0)); break;
 	}
 }
+
 
 void UI_FindAndReplace::rawShowFilter(int value)
 {
@@ -303,15 +289,6 @@ void UI_FindAndReplace::rawShowFilter(int value)
 	}
 }
 
-
-void UI_FindAndReplace::rep_toggle_callback(Fl_Widget *w, void *data)
-{
-	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
-
-	Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
-		
-	box->rawShowReplace(toggle->value());
-}
 
 void UI_FindAndReplace::filter_toggle_callback(Fl_Widget *w, void *data)
 {
@@ -341,6 +318,8 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 
 		default: break;
 	}
+
+	box->UpdateWhatColor();
 
 	if (want_descs)
 	{

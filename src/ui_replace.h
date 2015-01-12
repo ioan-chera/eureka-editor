@@ -40,10 +40,7 @@ private:
 
 	// --- REPLACE AREA ---
 
-	Fl_Toggle_Button *rep_toggle;
-	Fl_Group *rep_group;
-
-	Fl_Output *rep_value;
+	Fl_Input  *rep_value;
 	Fl_Button *rep_choose;
 	Fl_Output *rep_desc;
 	Fl_Button *apply_but;
@@ -86,7 +83,8 @@ private:
 
 	bool WhatFromEditMode();
 
-	void rawShowReplace(int value);
+	void UpdateWhatColor();
+
 	void rawShowFilter(int value);
 
 	bool MatchesObject(int idx);
@@ -116,7 +114,6 @@ private:
 
 private:
 	static void     what_kind_callback(Fl_Widget *w, void *data);
-	static void    rep_toggle_callback(Fl_Widget *w, void *data);
 	static void filter_toggle_callback(Fl_Widget *w, void *data);
 
 	static void   find_but_callback(Fl_Widget *w, void *data);
