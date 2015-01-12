@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_path.h"  // GoToObject
+#include "m_game.h"
 
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
@@ -371,7 +372,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
 
 	// valid integer?
 	char *endptr;
-	int id_num = (int)strtol(w->value(), &endptr, 0 /* allow 0x etc */);
+	int type_num = (int)strtol(w->value(), &endptr, 0 /* allow 0x etc */);
 
 	if (*endptr != 0)
 	{
@@ -379,7 +380,31 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
 		return false;
 	}
 
-	desc->value("(unknown type)");
+	switch (what->value())
+	{
+		case 0: // Things
+		{
+			const thingtype_t *info = M_GetThingType(type_num);
+			desc->value(info->desc);
+			break;
+		}
+
+		case 3: // Lines by Type
+		{
+			const linetype_t *info = M_GetLineType(type_num);
+			desc->value(info->desc);
+			break;
+		}
+
+		case 4: // Lines by Type
+		{
+			const sectortype_t * info = M_GetSectorType(type_num);
+			desc->value(info->desc);
+			break;
+		}
+
+		default: break;
+	}
 
 	return true;
 }
