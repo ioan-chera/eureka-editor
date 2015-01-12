@@ -860,7 +860,7 @@ void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 	fl_draw(buffer, x,     y + 1);
 	fl_draw(buffer, x,     y - 1);
 
-	fl_color(OBJ_NUM_COL);
+	fl_color(OBJECT_NUM_COL);
 
 	fl_draw(buffer, x, y);
 }

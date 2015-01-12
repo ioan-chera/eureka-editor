@@ -88,7 +88,7 @@ rgb_color_t ParseColor(const char *str);
 #define LIGHTRED        fl_rgb_color(255,128,128)
 #define LIGHTMAGENTA    fl_rgb_color(255,128,255)
 
-#define OBJ_NUM_COL     fl_rgb_color(0x44, 0xdd, 0xff)
+#define OBJECT_NUM_COL  fl_rgb_color(0x44, 0xdd, 0xff)
 #define CLR_ERROR       fl_rgb_color(0xff, 0,    0)
 
 #define SECTOR_TAG      fl_rgb_color(0x00, 0xff, 0x00)
