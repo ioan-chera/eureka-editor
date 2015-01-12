@@ -524,62 +524,6 @@ void CMD_PrevObject()
 }
 
 
-void CMD_FindObjectByType()
-{
-#if 0
-	else if (key == 'f' && ( edit.highlight ())) 
-	{
-		Objid find_obj;
-		int otype;
-		int omax,onum;
-		find_obj.type = edit.highlighted () ? edit.highlighted.type : edit.mode;
-		onum = find_obj.num  = edit.highlighted () ? edit.highlighted.num  : 0;
-		omax = GetMaxObjectNum(find_obj.type);
-		switch (find_obj.type)
-		{
-			case OBJ_SECTORS:
-				if ( ! InputSectorType( 84, 21, &otype))
-				{
-					for (onum = edit.highlighted () ? onum + 1 : onum; onum <= omax; onum++)
-						if (Sectors[onum]->type == otype)
-						{
-							find_obj.num = onum;
-							GoToObject(find_obj);
-							break;
-						}
-				}
-				break;
-			case OBJ_THINGS:
-				if ( ! InputThingType( 42, 21, &otype))
-				{
-					for (onum = edit.highlighted () ? onum + 1 : onum; onum <= omax; onum++)
-						if (Things[onum]->type == (wad_ttype_t) otype)
-						{
-							find_obj.num = onum;
-							GoToObject(find_obj);
-							break;
-						}
-				}
-				break;
-			case OBJ_LINEDEFS:
-				if ( ! InputLinedefType( 0, 21, &otype))
-				{
-					for (onum = edit.highlighted () ? onum + 1 : onum; onum <= omax; onum++)
-						if (LineDefs[onum]->type == otype)
-						{
-							find_obj.num = onum;
-							GoToObject(find_obj);
-							break;
-						}
-				}
-				break;
-		}
-		edit.RedrawMap = 1;
-	}
-#endif
-}
-
-
 void CMD_PruneUnused(void)
 {
 	selection_c used_secs (OBJ_SECTORS);
