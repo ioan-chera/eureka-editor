@@ -27,15 +27,6 @@
 #ifndef __EUREKA_SELECTN_H__
 #define __EUREKA_SELECTN_H__
 
-
-#define IsSelected(list, num)  ((list)->get(num))
-
-#define ForgetSelection(list)  ((list)->clear_all())
-
-#define SelectObject(list, num)  ((list)->set(num))
-#define UnSelectObject(list, num)  ((list)->clear(num))
-#define ToggleObject(list, num)  ((list)->toggle(num))
-
 void DumpSelection (selection_c * list);
 
 void ConvertSelection(selection_c * src, selection_c * dest);
