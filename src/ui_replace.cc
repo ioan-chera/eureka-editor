@@ -21,6 +21,8 @@
 #include "main.h"
 #include "ui_window.h"
 
+#include "e_path.h"  // GoToObject
+
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
@@ -49,6 +51,8 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 
 		find_match = new Fl_Input(X+70, Y+95, 127, 25, "Match: ");
+		find_match->callback(find_match_callback, this);
+		find_match->when(FL_WHEN_CHANGED);
 
 		find_choose = new Fl_Button(X+210, Y+95, 70, 25, "Choose");
 
@@ -83,6 +87,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		rep_group = new Fl_Group(X, Y+260, W, 100);
 		{
 			rep_value = new Fl_Output(X+70, Y+260, 127, 25, "New: ");
+			rep_value->when(FL_WHEN_CHANGED);
 
 			rep_choose = new Fl_Button(X+210, Y+260, 70, 25, "Choose");
 
@@ -196,15 +201,28 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 
 	box->Clear();
 
+	bool want_descs = true;
+
 	switch (box->what->value())
 	{
 		case 0: box->cur_obj.type = OBJ_THINGS; break;
-		case 1: box->cur_obj.type = OBJ_LINEDEFS; break;
-		case 2: box->cur_obj.type = OBJ_SECTORS; break;
+		case 1: box->cur_obj.type = OBJ_LINEDEFS; want_descs = false; break;
+		case 2: box->cur_obj.type = OBJ_SECTORS;  want_descs = false; break;
 		case 3: box->cur_obj.type = OBJ_LINEDEFS; break;
 		case 4: box->cur_obj.type = OBJ_SECTORS; break;
 
 		default: break;
+	}
+
+	if (want_descs)
+	{
+		box->find_desc->activate();
+		box-> rep_desc->activate();
+	}
+	else
+	{
+		box->find_desc->deactivate();
+		box-> rep_desc->deactivate();
 	}
 }
 
@@ -214,6 +232,8 @@ void UI_FindAndReplace::Open()
 	show();
 
 	Clear();
+
+	Fl::focus(find_match);
 }
 
 
@@ -222,9 +242,11 @@ void UI_FindAndReplace::Clear()
 	cur_obj.clear();
 
 	find_match->value("");
+	find_desc->value("");
 	find_but->label("Find");
 
 	rep_value->value("");
+	rep_desc->value("");
 
 	find_but->deactivate();
 	select_all_but->deactivate();
@@ -300,6 +322,68 @@ void UI_FindAndReplace::replace_all_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	bool  is_valid = box->CheckInput(box->find_match, box->find_desc);
+	bool was_valid = (box->find_but->active());
+
+	if (is_valid)
+	{
+		box->find_but->activate();
+		box->select_all_but->activate();
+
+		box->find_match->textcolor(FL_FOREGROUND_COLOR);
+		box->find_match->redraw();
+	}
+	else
+	{
+		box->find_but->deactivate();
+		box->select_all_but->deactivate();
+
+		box->find_match->textcolor(FL_RED);
+		box->find_match->redraw();
+	}
+}
+
+
+bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
+{
+	if (strlen(w->value()) == 0)
+	{
+		desc->value("");
+		return false;
+	}
+
+	if (what->value() == 1 || what->value() == 2)
+		return true;
+
+	/* decide what to show in description */
+
+	// wildcard match?
+	if (strchr(w->value(), '*') || strchr(w->value(), '?') ||
+		strchr(w->value(), '[') || strchr(w->value(), '{'))
+	{
+		desc->value("(wildcard match)");
+		return true;
+	}
+
+	// valid integer?
+	char *endptr;
+	int id_num = (int)strtol(w->value(), &endptr, 0 /* allow 0x etc */);
+
+	if (*endptr != 0)
+	{
+		desc->value("(bad number)");
+		return false;
+	}
+
+	desc->value("(unknown type)");
+
+	return true;
+}
+
 //------------------------------------------------------------------------
 
 
@@ -321,13 +405,24 @@ void UI_FindAndReplace::FindNext()
 	{
 		if (MatchesObject(idx))
 		{
-			// FIXME
+			cur_obj.num = idx;
 
+			if (cur_obj.type != edit.mode)
+			{
+				Editor_ChangeMode_Raw(cur_obj.type);
+
+				// this clears the selection
+				edit.Selected->change_type(edit.mode);
+			}
+
+			GoToObject(cur_obj);
 			return;
 		}
 	}
 
 	// nothing (else) was found
+
+	cur_obj.num = -1;
 
 	find_but->label("Find");
 
@@ -366,9 +461,10 @@ void UI_FindAndReplace::DoAll(bool replace)
 	}
 	else
 	{
-		// FIXME : CHANGE EDIT MODE  [ but not panel !! ]
+		Editor_ChangeMode_Raw(cur_obj.type);
 
-		// FIXME : clear selection
+		// this clears the selection
+		edit.Selected->change_type(edit.mode);
 	}
 
 	int total = NumObjects(cur_obj.type);
