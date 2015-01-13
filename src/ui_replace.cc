@@ -97,7 +97,7 @@ public:
 
 		for (;;)
 		{
-			// support asterix to mean everything
+			// support an asterix to mean everything
 			// (useful when using filters)
 			if (*str == '*')
 			{
@@ -186,8 +186,8 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 
 		find_match = new Fl_Input(X+70, Y+95, 125, 25, "Match: ");
-		find_match->callback(find_match_callback, this);
 		find_match->when(FL_WHEN_CHANGED);
+		find_match->callback(find_match_callback, this);
 
 		find_choose = new Fl_Button(X+210, Y+95, 70, 25, "Choose");
 
@@ -210,6 +210,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	{
 		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "Replace: ");
 		rep_value->when(FL_WHEN_CHANGED);
+		rep_value->callback(rep_value_callback, this);
 
 		rep_choose = new Fl_Button(X+210, Y+230, 70, 25, "Choose");
 
@@ -441,8 +442,7 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool  is_valid = box->CheckInput(box->find_match, box->find_desc);
-///	bool was_valid = (box->find_but->active());
+	bool is_valid = box->CheckInput(box->find_match, box->find_desc, box->nums_to_match);
 
 	if (is_valid)
 	{
@@ -460,10 +460,45 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 		box->find_match->textcolor(FL_RED);
 		box->find_match->redraw();
 	}
+
+	// update Replace section too
+	box->rep_value->do_callback();
+}
+
+void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc);
+
+	if (is_valid)
+	{
+		box->rep_value->textcolor(FL_FOREGROUND_COLOR);
+		box->rep_value->redraw();
+	}
+	else
+	{
+		box->rep_value->textcolor(FL_RED);
+		box->rep_value->redraw();
+	}
+
+	bool is_usable = (is_valid && box->find_but->active());
+
+	if (is_usable)
+	{
+		box->apply_but->activate();
+		box->replace_all_but->activate();
+	}
+	else
+	{
+		box->apply_but->deactivate();
+		box->replace_all_but->deactivate();
+	}
 }
 
 
-bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
+
+bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp)
 {
 	if (strlen(w->value()) == 0)
 	{
@@ -474,23 +509,43 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc)
 	if (what->value() == 1 || what->value() == 2)
 		return true;
 
+
 	// for numeric types, parse the number(s) and/or ranges
-	
-	nums_to_match->clear();
 
-	if (! nums_to_match->ParseString(w->value()))
+	int type_num;
+
+	if (! num_grp)
 	{
-		desc->value("(parse error)");
-		return false;
+		// just check the number is valid
+		char *endptr;
+
+		type_num = strtol(w->value(), &endptr, 0 /* allow hex */);
+
+		if (*endptr != 0)
+		{
+			desc->value("(parse error)");
+			return false;
+		}
+	}
+	else
+	{
+		num_grp->clear();
+
+		if (! num_grp->ParseString(w->value()))
+		{
+			desc->value("(parse error)");
+			return false;
+		}
+
+		if (! num_grp->is_single())
+		{
+			desc->value("(multi-match)");
+			return true;
+		}
+
+		type_num = num_grp->grab_first();
 	}
 
-	if (! nums_to_match->is_single())
-	{
-		desc->value("(multi-match)");
-		return true;
-	}
-
-	int type_num = nums_to_match->grab_first();
 
 	switch (what->value())
 	{

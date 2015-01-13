@@ -92,7 +92,7 @@ private:
 
 	void DoAll(bool replace);
 
-	bool CheckInput(Fl_Input *w, Fl_Output *desc);
+	bool CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp = NULL);
 
 	// specialized functions for each search modality
 
@@ -113,16 +113,19 @@ private:
 	void Replace_SectorType(int idx);
 
 private:
-	static void     what_kind_callback(Fl_Widget *w, void *data);
-	static void filter_toggle_callback(Fl_Widget *w, void *data);
+	static void what_kind_callback(Fl_Widget *w, void *data);
 
-	static void   find_but_callback(Fl_Widget *w, void *data);
-	static void find_match_callback(Fl_Widget *w, void *data);
-	static void select_all_callback(Fl_Widget *w, void *data);
+	static void  find_match_callback(Fl_Widget *w, void *data);
+	static void find_choose_callback(Fl_Widget *w, void *data);
+	static void    find_but_callback(Fl_Widget *w, void *data);
+	static void  select_all_callback(Fl_Widget *w, void *data);
 
+	static void   rep_value_callback(Fl_Widget *w, void *data);
+	static void  rep_choose_callback(Fl_Widget *w, void *data);
 	static void   apply_but_callback(Fl_Widget *w, void *data);
-	static void   rep_match_callback(Fl_Widget *w, void *data);
 	static void replace_all_callback(Fl_Widget *w, void *data);
+
+	static void filter_toggle_callback(Fl_Widget *w, void *data);
 };
 
 
