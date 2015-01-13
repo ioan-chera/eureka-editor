@@ -868,30 +868,19 @@ static void Reshape_Line()
 	const Vertex *V1 = Vertices[along_list.front().vert_num];
 	const Vertex *V2 = Vertices[along_list. back().vert_num];
 
-	if (false)
+	double along1 = along_list.front().along;
+	double along2 = along_list. back().along;
+
+	if (true /* don't move first and last vertices */)
 	{
 		ax = V1->x;
 		ay = V1->y;
 
 		bx = V2->x;
 		by = V2->y;
-
-		double unit_x = (bx - ax);
-		double unit_y = (by - ay);
-
-		double unit_len = hypot(unit_x, unit_y);
-
-		if (unit_len < 2)
-		{
-			Beep("Cannot determine line");
-			return;
-		}
 	}
 	else
 	{
-		double along1 = along_list.front().along;
-		double along2 = along_list. back().along;
-
 		bx = ax + along2 * unit_x;
 		by = ay + along2 * unit_y;
 
@@ -902,30 +891,23 @@ static void Reshape_Line()
 
 	BA_Begin();
 
-	int new_t = BA_New(OBJ_THINGS);
-
-	Things[new_t]->type = 601;
-	Things[new_t]->x = I_ROUND(ax);
-	Things[new_t]->y = I_ROUND(ay);
-
-	new_t = BA_New(OBJ_THINGS);
-
-	Things[new_t]->type = 602;
-	Things[new_t]->x = I_ROUND(bx);
-	Things[new_t]->y = I_ROUND(by);
-
-#if 0
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
-		double 
+		double frac;
+		
+		if (true /* regular spacing */)
+			frac = i / (double)(along_list.size() - 1);
+		else
+			frac = (along_list[i].along - along1) / (along2 - along1);
 
-		int new_t = BA_New(OBJ_THINGS);
+		// ANOTHER OPTION: use distances between neighbor verts...
 
-		Things[new_t]->type = 601;
-		Things[new_t]->x = I_ROUND(nx);
-		Things[new_t]->y = I_ROUND(ny);
+		double nx = ax + (bx - ax) * frac;
+		double ny = ay + (by - ay) * frac;
+
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, I_ROUND(nx));
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, I_ROUND(ny));
 	}
-#endif
 
 	BA_End();
 }
