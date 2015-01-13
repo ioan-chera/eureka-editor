@@ -712,5 +712,134 @@ void SEC_Disconnect(void)
 }
 
 
+//------------------------------------------------------------------------
+
+
+static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x2, int y2,
+							  int width, int height, int side)
+{
+	double dist;
+	double extent;
+
+	if (width >= height)
+	{
+		dist = (side < 0) ? (V->x - x1) : (x2 - V->x);
+		extent = width;
+	}
+	else
+	{
+		dist = (side < 0) ? (V->y - y1) : (y2 - V->y);
+		extent = height;
+	}
+
+	if (dist > extent * 0.66)
+		return 0;
+
+	if (dist > extent * 0.33)
+		return 0.25;
+	
+	return 1.0;
+}
+
+
+static void Reshape_Line()
+{
+	// determine orientation and position of the line
+
+	int x1, y1, x2, y2;
+
+	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+
+	int width  = x2 - x1;
+	int height = y2 - y1;
+
+	if (width < 4 && height < 4)
+	{
+		Beep("Too small");
+		return;
+	}
+
+	// The method here is where split the vertices into two groups and
+	// use the center of each group to form the infinite line.  I have
+	// modified that a bit, the vertices in a band near the middle all
+	// participate in the sum but at 0.25 weighting.  -AJA-
+
+	double ax = 0;
+	double ay = 0;
+	double a_total = 0;
+
+	double bx = 0;
+	double by = 0;
+	double b_total = 0;
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Vertex *V = Vertices[*it];
+
+		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
+
+		if (weight > 0)
+		{
+			ax += V->x * weight;
+			ay += V->y * weight;
+
+			a_total += weight;
+		}
+
+		weight = WeightForVertex(V, x1,y1, x2,y2, width,height, +1);
+
+		if (weight > 0)
+		{
+			bx += V->x * weight;
+			by += V->y * weight;
+
+			b_total += weight;
+		}
+	}
+
+	SYS_ASSERT(a_total > 0);
+	SYS_ASSERT(b_total > 0);
+
+	ax /= a_total;
+	ay /= a_total;
+
+	bx /= b_total;
+	by /= b_total;
+
+
+	BA_Begin();
+
+	int new_t = BA_New(OBJ_THINGS);
+
+	Things[new_t]->type = 601;
+	Things[new_t]->x = I_ROUND(ax);
+	Things[new_t]->y = I_ROUND(ay);
+
+	new_t = BA_New(OBJ_THINGS);
+
+	Things[new_t]->type = 602;
+	Things[new_t]->x = I_ROUND(bx);
+	Things[new_t]->y = I_ROUND(by);
+
+	BA_End();
+}
+
+
+void VERT_Reshape()
+{
+	if (edit.Selected->count_obj() < 3)
+	{
+		Beep("Need 3 or more vertices to shape");
+		return;
+	}
+
+	// FIXME : check parameter for keyword "line" (etc)
+
+	Reshape_Line();
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
