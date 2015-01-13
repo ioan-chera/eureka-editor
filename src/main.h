@@ -176,6 +176,12 @@ int  DLG_Confirm(const char *buttons, const char *msg, ...);
 const char * DetermineGame(const char *iwad_name);
 
 
+void Beep(const char *msg, ...);
+
+void Status_Set(const char *fmt, ...);
+void Status_Clear();
+
+
 #endif  /* __EUREKA_MAIN_H__ */
 
 //--- editor settings ---

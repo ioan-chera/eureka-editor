@@ -130,11 +130,6 @@ extern const char * EXEC_Param[4];
 // result from command function, 0 is OK
 extern int EXEC_Errno;
 
-void Status_Set(const char *fmt, ...);
-void Status_Clear();
-
-void Beep(const char *msg, ...);
-
 bool ExecuteKey(keycode_t key, key_context_e context);
 
 bool ExecuteCommand(const char *name, const char *param1 = "",
