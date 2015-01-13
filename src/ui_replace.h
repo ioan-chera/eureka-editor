@@ -74,7 +74,7 @@ public:
 	char GetKind();	 // same as browser : 'O' 'T' 'F' 'L' 'S'
 
 	// called by "Find" button in here, or CTRL-G shortcut
-	void FindNext();
+	bool FindNext();
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
@@ -90,6 +90,7 @@ private:
 	bool MatchesObject(int idx);
 	void ApplyReplace (int idx);
 
+	void DoReplace();
 	void DoAll(bool replace);
 
 	bool CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp = NULL);

@@ -208,7 +208,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group *grp2 = new Fl_Group(X, Y + 214, W, 132);
 	grp2->box(FL_UP_BOX);
 	{
-		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "Replace: ");
+		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "New val: ");
 		rep_value->when(FL_WHEN_CHANGED);
 		rep_value->callback(rep_value_callback, this);
 
@@ -216,7 +216,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		rep_desc = new Fl_Output(X+80, Y+260, 200, 25, "Desc: ");
 
-		apply_but = new Fl_Button(X+50, Y+300, 80, 30, "Apply");
+		apply_but = new Fl_Button(X+45, Y+300, 90, 30, "Replace");
 		apply_but->labelfont(FL_HELVETICA_BOLD);
 		apply_but->callback(apply_but_callback, this);
 
@@ -426,7 +426,9 @@ void UI_FindAndReplace::select_all_callback(Fl_Widget *w, void *data)
 
 void UI_FindAndReplace::apply_but_callback(Fl_Widget *w, void *data)
 {
-	// TODO
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	box->DoReplace();
 }
 
 
@@ -485,17 +487,20 @@ void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 	bool is_usable = (is_valid && box->find_but->active());
 
 	if (is_usable)
-	{
-		box->apply_but->activate();
 		box->replace_all_but->activate();
-	}
 	else
-	{
-		box->apply_but->deactivate();
 		box->replace_all_but->deactivate();
-	}
-}
 
+	// require an found object too before 'Replace' button can be used
+
+	if (box->cur_obj.is_nil())
+		is_usable = false;
+
+	if (is_usable)
+		box->apply_but->activate();
+	else
+		box->apply_but->deactivate();
+}
 
 
 bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp)
@@ -576,16 +581,17 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 	return true;
 }
 
+
 //------------------------------------------------------------------------
 
 
-void UI_FindAndReplace::FindNext()
+bool UI_FindAndReplace::FindNext()
 {
 	// this can happen via CTRL-G shortcut (View / Go to next)
 	if (strlen(find_match->value()) == 0)
 	{
 		Beep("No find active!");
-		return;
+		return false;
 	}
 
 	if (cur_obj.type != edit.mode)
@@ -600,9 +606,12 @@ void UI_FindAndReplace::FindNext()
 		edit.Selected->clear_all();
 	}
 
-	bool is_first = (cur_obj.num < 0);
+	edit.RedrawMap = 1;
 
-	int start_at = (cur_obj.num < 0) ? 0 : (cur_obj.num + 1);
+
+	bool is_first = cur_obj.is_nil();
+
+	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
 	int total    = NumObjects(cur_obj.type);
 
 	for (int idx = start_at ; idx < total ; idx++)
@@ -612,27 +621,59 @@ void UI_FindAndReplace::FindNext()
 			cur_obj.num = idx;
 
 			if (is_first)
+			{
 				find_but->label("Next");
+				rep_value->do_callback();
+			}
 
 			GoToObject(cur_obj);
 
 			Status_Set("Found #%d", idx);
-			return;
+			return true;
 		}
 	}
 
 	// nothing (else) was found
 
-	cur_obj.num = -1;
+	cur_obj.clear();
 
 	find_but->label("Find");
+	rep_value->do_callback();
 
 	if (is_first)
 		Beep("Nothing found");
 	else
 		Beep("No more found");
 
-	edit.RedrawMap = 1;
+	return false;
+}
+
+
+void UI_FindAndReplace::DoReplace()
+{
+	// sanity check  [ should never happen ]
+	if (strlen(find_match->value()) == 0 ||
+		strlen( rep_value->value()) == 0)
+	{
+		Beep("Bad replace");
+		return;
+	}
+
+	// this generally can't happen either
+	if (cur_obj.is_nil())
+	{
+		Beep("No object to replace");
+		return;
+	}
+
+	BA_Begin();
+
+	ApplyReplace(cur_obj.num);
+
+	BA_End();
+
+	// move onto next object
+	FindNext();
 }
 
 
@@ -662,6 +703,8 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 
 void UI_FindAndReplace::ApplyReplace(int idx)
 {
+	SYS_ASSERT(idx >= 0);
+
 	switch (what->value())
 	{
 		case 0: // Things
@@ -741,6 +784,12 @@ void UI_FindAndReplace::DoAll(bool replace)
 			GoToSelection();
 	}
 
+	if (replace)
+	{
+		cur_obj.clear();
+		rep_value->do_callback();
+	}
+
 	edit.RedrawMap = 1;
 }
 
@@ -817,7 +866,9 @@ bool UI_FindAndReplace::Filter_Sector(int idx)
 
 void UI_FindAndReplace::Replace_Thing(int idx)
 {
-	// TODO
+	int new_type = atoi(rep_value->value());
+
+	BA_ChangeTH(idx, Thing::F_TYPE, new_type);
 }
 
 
