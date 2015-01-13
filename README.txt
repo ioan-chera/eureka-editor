@@ -147,6 +147,8 @@ V : mirror objects vertically
 R : rotate objects 90 degrees clockwise 
 W : rotate objects 90 degrees anti-clockwise
 
+\ : toggle the RECENT category in the Browser
+
 META-F : apply a fresh tag to the current objects
 META-L : apply the last (highest) tag to the current objects
 
