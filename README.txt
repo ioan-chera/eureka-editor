@@ -117,8 +117,8 @@ CTRL-Y : redo (i.e. undo the previous undo)
 
 CTRL-A : select all 
 CTRL-I : invert the selection 
-CTRL-U : clear the selection 
-` (backquote) : clear the selection
+CTRL-U : unselect all
+` (backquote) : unselect all
 
 HOME : move/zoom 2D viewport to show the whole map 
 END  : move 2D viewport to camera location 
@@ -172,6 +172,11 @@ SPACE
 
 d : disconnect all linedefs at the selected vertices
 m : merge selected vertices into a single one
+
+I : reshape selected vertices into a line
+O : reshape selected vertices into a circle
+D : reshape selected vertices into a half-circle
+C : reshape selected vertices into a 90-degree arc
 
 
 Linedef Mode

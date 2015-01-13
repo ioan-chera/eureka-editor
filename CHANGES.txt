@@ -2,14 +2,20 @@
 CHANGES IN Eureka
 =================
 
-+  new 'File / Delete Map' command
-
-+  new 'File / Rename Map' command
+>>  Find and Replace 
 
 +  new 'RECENT' category for Texture/Flat/Thing browsers,
    and rebound the '\' key to toggle this category on/off
 
->>  Find and Replace 
++  new 'File / Delete Map' command
+
++  new 'File / Rename Map' command
+
++  vertex reshaping commands:
+   -  'I' moves selected vertices onto a line
+   -  'O' moves them into a circle shape
+   -  'D' moves them into a half-circle
+   -  'C' moves then into a 90-degree arc
 
 
 -  a preference to show smaller textures in the browser
