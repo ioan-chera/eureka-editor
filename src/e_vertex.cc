@@ -913,6 +913,110 @@ static void Reshape_Line()
 }
 
 
+static double EvaluateCircle(double mid_x, double mid_y, double r,
+							 std::vector< vert_along_t > &along_list,
+							 double ang_offset /* radians */,
+							 bool move_vertices = false)
+{
+	// TODO
+
+	return 0;
+}
+
+
+static void Reshape_Circle()
+{
+	// determine middle point for circle
+	// TODO : average of all vertices might be better...
+
+	int x1, y1, x2, y2;
+
+	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+
+	int width  = x2 - x1;
+	int height = y2 - y1;
+
+	if (width < 4 && height < 4)
+	{
+		Beep("Too small");
+		return;
+	}
+
+	double mid_x = (x1 + x2) * 0.5;
+	double mid_y = (y1 + y2) * 0.5;
+
+	double r = 0;
+
+	// collect all vertices and determine their angle (in radians),
+	// and sort them.
+	//
+	// also determine radius of circle -- average of distances between
+	// the computed mid-point and each vertex.
+
+	std::vector< vert_along_t > along_list;
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Vertex *V = Vertices[*it];
+
+		double dx = V->x - mid_x;
+		double dy = V->y - mid_y;
+
+		double dist = hypot(dx, dy);
+
+		if (dist < 4)
+		{
+			Beep("Strange shape");
+			return;
+		}
+
+		r += dist;
+
+		double angle = atan2(dy, dx);
+
+		vert_along_t ALONG(*it, angle);
+
+		along_list.push_back(ALONG);
+	}
+
+	r /= (double)along_list.size();
+
+	std::sort(along_list.begin(), along_list.end(), vert_along_t::CMP());
+
+
+	// find the best orientation, the one that minimises the distances
+	// which vertices move.  We try 1000 possibilities.
+
+	double best_offset = 0;
+	double best_cost   = 1e30;
+
+	for (int pos = 0 ; pos < 1000 ; pos++)
+	{
+		double ang_offset = pos * M_PI * 2.0 / 1000.0;
+
+		double cost = EvaluateCircle(mid_x, mid_y, r, along_list,
+									 ang_offset);
+
+		if (cost < best_cost)
+		{
+			best_offset = ang_offset;
+			best_cost   = cost;
+		}
+	}
+
+	// actually move stuff now
+
+	BA_Begin();
+
+	EvaluateCircle(mid_x, mid_y, r, along_list,
+				   best_offset, true);
+
+	BA_End();
+}
+
+
 void VERT_Reshape()
 {
 	if (edit.Selected->count_obj() < 3)
@@ -923,7 +1027,7 @@ void VERT_Reshape()
 
 	// FIXME : check parameter for keyword "line" (etc)
 
-	Reshape_Line();
+	Reshape_Circle();
 }
 
 
