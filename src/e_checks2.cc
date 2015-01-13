@@ -1217,6 +1217,10 @@ void Textures_FindUnknownTex(selection_c& lines,
 				if (strcmp(tex, "-") == 0)
 					continue;
 
+				// textures beginning with '#' are special
+				if (tex[0] == '#')
+					continue;
+
 				if (! W_TextureExists(tex))
 				{
 					bump_unknown_name(names, tex);
