@@ -36,6 +36,8 @@
 #include "w_rawdef.h"
 #include "x_mirror.h"
 
+#include <algorithm>
+
 
 int Vertex_FindExact(int x, int y)
 {
@@ -742,6 +744,26 @@ static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x
 }
 
 
+struct vert_along_t
+{
+	int vert_num;
+
+	double along;
+
+public:
+	vert_along_t(int num, double _along) : vert_num(num), along(_along)
+	{ }
+
+	struct CMP
+	{
+		inline bool operator() (const vert_along_t &A, const vert_along_t& B) const
+		{
+			return A.along < B.along;
+		}
+	};
+};
+
+
 static void Reshape_Line()
 {
 	// determine orientation and position of the line
@@ -809,6 +831,75 @@ static void Reshape_Line()
 	by /= b_total;
 
 
+	// check the two end points are not too close
+	double unit_x = (bx - ax);
+	double unit_y = (by - ay);
+
+	double unit_len = hypot(unit_x, unit_y);
+
+	if (unit_len < 2)
+	{
+		Beep("Cannot determine line");
+		return;
+	}
+
+	unit_x /= unit_len;
+	unit_y /= unit_len;
+
+
+	// collect all vertices and determine where along the line they are,
+	// then sort them based on their along value.
+
+	std::vector< vert_along_t > along_list;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Vertex *V = Vertices[*it];
+
+		vert_along_t ALONG(*it, AlongDist(V->x, V->y, ax,ay, bx,by));
+
+		along_list.push_back(ALONG);
+	}
+
+	std::sort(along_list.begin(), along_list.end(), vert_along_t::CMP());
+
+
+	// compute proper positions for start and end of the line
+	const Vertex *V1 = Vertices[along_list.front().vert_num];
+	const Vertex *V2 = Vertices[along_list. back().vert_num];
+
+	if (false)
+	{
+		ax = V1->x;
+		ay = V1->y;
+
+		bx = V2->x;
+		by = V2->y;
+
+		double unit_x = (bx - ax);
+		double unit_y = (by - ay);
+
+		double unit_len = hypot(unit_x, unit_y);
+
+		if (unit_len < 2)
+		{
+			Beep("Cannot determine line");
+			return;
+		}
+	}
+	else
+	{
+		double along1 = along_list.front().along;
+		double along2 = along_list. back().along;
+
+		bx = ax + along2 * unit_x;
+		by = ay + along2 * unit_y;
+
+		ax = ax + along1 * unit_x;
+		ay = ay + along1 * unit_y;
+	}
+
+
 	BA_Begin();
 
 	int new_t = BA_New(OBJ_THINGS);
@@ -822,6 +913,19 @@ static void Reshape_Line()
 	Things[new_t]->type = 602;
 	Things[new_t]->x = I_ROUND(bx);
 	Things[new_t]->y = I_ROUND(by);
+
+#if 0
+	for (unsigned int i = 0 ; i < along_list.size() ; i++)
+	{
+		double 
+
+		int new_t = BA_New(OBJ_THINGS);
+
+		Things[new_t]->type = 601;
+		Things[new_t]->x = I_ROUND(nx);
+		Things[new_t]->y = I_ROUND(ny);
+	}
+#endif
 
 	BA_End();
 }
