@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -715,6 +715,8 @@ void SEC_Disconnect(void)
 
 
 //------------------------------------------------------------------------
+//   RESHAPING STUFF
+//------------------------------------------------------------------------
 
 
 static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x2, int y2,
@@ -913,8 +915,46 @@ static void Reshape_Line()
 }
 
 
+static double BiggestGapAngle(std::vector< vert_along_t > &along_list,
+							  unsigned int *start_idx)
+{
+	double best_diff = 0;
+	double best_low  = 0;
+
+	*start_idx = 0;
+
+	for (unsigned int i = 0 ; i < along_list.size() ; i++)
+	{
+		unsigned int k = i + 1;
+
+		if (k >= along_list.size())
+			k = 0;
+
+		double low  = along_list[i].along;
+		double high = along_list[k].along;
+
+		if (high < low)
+			high = high + M_PI * 2.0;
+
+		double ang_diff = high - low;
+
+		if (ang_diff > best_diff)
+		{
+			best_diff  = ang_diff;
+			best_low   = low;
+			*start_idx = k;
+		}
+	}
+
+	double best = best_low + best_diff * 0.5;
+
+	return best;
+}
+
+
 static double EvaluateCircle(double mid_x, double mid_y, double r,
 							 std::vector< vert_along_t > &along_list,
+							 unsigned int start_idx, double arc_size,
 							 double ang_offset /* radians */,
 							 bool move_vertices = false)
 {
@@ -922,19 +962,21 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
-		const Vertex *V = Vertices[along_list[i].vert_num];
+		unsigned int k = (start_idx + i) % along_list.size();
+
+		const Vertex *V = Vertices[along_list[k].vert_num];
 
 		double frac = i / (double)along_list.size();
 
-		double ang = M_PI * 2.0 * frac + ang_offset;
+		double ang = arc_size * frac + ang_offset;
 
 		double new_x = mid_x + cos(ang) * r;
 		double new_y = mid_y + sin(ang) * r;
 
 		if (move_vertices)
 		{
-			BA_ChangeVT(along_list[i].vert_num, Thing::F_X, I_ROUND(new_x));
-			BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, I_ROUND(new_y));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, I_ROUND(new_x));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, I_ROUND(new_y));
 		}
 		else
 		{
@@ -1011,6 +1053,37 @@ static void Reshape_Circle()
 	std::sort(along_list.begin(), along_list.end(), vert_along_t::CMP());
 
 
+	// where is the biggest gap?
+	unsigned int start_idx;
+
+	double gap_angle = BiggestGapAngle(along_list, &start_idx);
+
+	double gap_dx = cos(gap_angle);
+	double gap_dy = sin(gap_angle);
+
+
+	double arc_size = M_PI * 2.0;
+
+	if (false /* 180 degrees */)
+	{
+		arc_size = M_PI;
+
+		mid_x = mid_x + r * 0.85 * gap_dx;
+		mid_y = mid_y + r * 0.85 * gap_dy;
+
+		r = r * 1.37;
+	}
+	else if (true /* 105 degrees */)
+	{
+		arc_size = M_PI * 0.6;
+
+		mid_x = mid_x + r * 1.65 * gap_dx;
+		mid_y = mid_y + r * 1.65 * gap_dy;
+
+		r = r * 2.15;
+	}
+
+
 	// find the best orientation, the one that minimises the distances
 	// which vertices move.  We try 1000 possibilities.
 
@@ -1022,7 +1095,7 @@ static void Reshape_Circle()
 		double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
 		double cost = EvaluateCircle(mid_x, mid_y, r, along_list,
-									 ang_offset);
+									 start_idx, arc_size, ang_offset);
 
 		if (cost < best_cost)
 		{
@@ -1035,7 +1108,7 @@ static void Reshape_Circle()
 
 	BA_Begin();
 
-	EvaluateCircle(mid_x, mid_y, r, along_list,
+	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_size,
 				   best_offset, true);
 
 	BA_End();
