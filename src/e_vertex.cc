@@ -918,9 +918,34 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 							 double ang_offset /* radians */,
 							 bool move_vertices = false)
 {
-	// TODO
+	double cost = 0;
 
-	return 0;
+	for (unsigned int i = 0 ; i < along_list.size() ; i++)
+	{
+		const Vertex *V = Vertices[along_list[i].vert_num];
+
+		double frac = i / (double)along_list.size();
+
+		double ang = M_PI * 2.0 * frac + ang_offset;
+
+		double new_x = mid_x + cos(ang) * r;
+		double new_y = mid_y + sin(ang) * r;
+
+		if (move_vertices)
+		{
+			BA_ChangeVT(along_list[i].vert_num, Thing::F_X, I_ROUND(new_x));
+			BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, I_ROUND(new_y));
+		}
+		else
+		{
+			double dx = new_x - V->x;
+			double dy = new_y - V->y;
+
+			cost = cost + (dx*dx + dy*dy);
+		}
+	}
+
+	return cost;
 }
 
 
