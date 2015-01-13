@@ -991,8 +991,16 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-static void Reshape_Circle()
+static void Reshape_Circle(char mode)
 {
+	//
+	// The 'mode' parameter can be :
+	//   'O' : full circle (360 degrees)
+	//   'D' : half circle (180 degrees)
+	//   'C' : quarter circle (90 degrees)
+	//
+
+
 	// determine middle point for circle
 	// TODO : average of all vertices might be better...
 
@@ -1064,23 +1072,24 @@ static void Reshape_Circle()
 
 	double arc_size = M_PI * 2.0;
 
-	if (false /* 180 degrees */)
+	if (mode == 'D')
 	{
 		arc_size = M_PI;
 
+		// these constants were derived from trial-and-error
 		mid_x = mid_x + r * 0.85 * gap_dx;
 		mid_y = mid_y + r * 0.85 * gap_dy;
 
 		r = r * 1.37;
 	}
-	else if (true /* 105 degrees */)
+	else if (mode == 'C')
 	{
 		arc_size = M_PI * 0.6;
 
 		mid_x = mid_x + r * 1.65 * gap_dx;
 		mid_y = mid_y + r * 1.65 * gap_dy;
 
-		r = r * 2.15;
+		r = r * 2.10;
 	}
 
 
@@ -1117,15 +1126,32 @@ static void Reshape_Circle()
 
 void VERT_Reshape()
 {
+	const char *kind = EXEC_Param[0];
+
+	if (! kind[0])
+	{
+		Beep("VERT_Reshape: missing kind name");
+		return;
+	}
+
 	if (edit.Selected->count_obj() < 3)
 	{
 		Beep("Need 3 or more vertices to shape");
 		return;
 	}
 
-	// FIXME : check parameter for keyword "line" (etc)
-
-	Reshape_Circle();
+	if (y_stricmp(kind, "line") == 0)
+		Reshape_Line();
+	else if (y_stricmp(kind, "circle") == 0)
+		Reshape_Circle('O');
+	else if (y_stricmp(kind, "arc180") == 0)
+		Reshape_Circle('D');
+	else if (y_stricmp(kind, "arc90") == 0)
+		Reshape_Circle('C');
+	else
+	{
+		Beep("VERT_Reshape: unknown kind: %s", kind);
+	}
 }
 
 

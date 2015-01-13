@@ -1417,6 +1417,8 @@ void Editor_RegisterCommands()
 
 	/* vertex */
 
+	M_RegisterCommand("VERT_Reshape", &VERT_Reshape);
+
 	/* browser */
 
 	M_RegisterCommand("BR_CycleCategory", &BR_CycleCategory);
