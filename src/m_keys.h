@@ -120,12 +120,14 @@ void M_DeleteLocalBinding(int index);
 
 /* --- command execution stuff --- */
 
+#define MAX_EXEC_PARAM	16
+
 keycode_t M_TranslateKey(int key, int state);
 
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 // parameter(s) for command function -- must be valid strings
-extern const char * EXEC_Param[4];
+extern const char * EXEC_Param[MAX_EXEC_PARAM];
 
 // result from command function, 0 is OK
 extern int EXEC_Errno;

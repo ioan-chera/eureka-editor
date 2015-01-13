@@ -24,7 +24,7 @@
 #include <algorithm>
 
 
-const char * EXEC_Param[4];
+const char * EXEC_Param[MAX_EXEC_PARAM];
 
 int EXEC_Errno;
 
@@ -342,7 +342,7 @@ const char * M_KeyContextString(key_context_e context)
 
 //------------------------------------------------------------------------
 
-#define MAX_BIND_PARAM_LEN  16
+#define MAX_BIND_LENGTH  32
 
 typedef struct
 {
@@ -352,7 +352,7 @@ typedef struct
 
 	const editor_command_t *cmd;
 
-	char param[4][MAX_BIND_PARAM_LEN];
+	char param[MAX_EXEC_PARAM][MAX_BIND_LENGTH];
 
 	// this field ONLY used by M_DetectConflictingBinds()
 	bool is_duplicate;
@@ -434,9 +434,9 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 		return;
 	}
 
-	for (int i = 0 ; i < 4 ; i++)
-		if (num_tok >= 4 + i)
-			strncpy(temp.param[i], tokens[3 + i], MAX_BIND_PARAM_LEN-1);
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		if (num_tok >= 4 + p)
+			strncpy(temp.param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
 
 #if 0  // DEBUG
 fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
@@ -448,7 +448,7 @@ fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
 }
 
 
-#define MAX_TOKENS  8
+#define MAX_TOKENS  (MAX_EXEC_PARAM + 8)
 
 static bool LoadBindingsFromPath(const char *path, bool required)
 {
@@ -525,15 +525,25 @@ static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
 		if (bind.context != other.context)
 			continue;
 
-		if (! full_match ||
-			(bind.cmd == other.cmd &&
-			 strcmp(bind.param[0], other.param[0]) == 0 &&
-			 strcmp(bind.param[1], other.param[1]) == 0 &&
-			 strcmp(bind.param[2], other.param[2]) == 0 &&
-			 strcmp(bind.param[3], other.param[3]) == 0))
-		{
+		if (! full_match)
 			return true;
+
+		if (bind.cmd != other.cmd)
+			continue;
+
+		bool same_params = true;
+
+		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		{
+			if (strcmp(bind.param[p], other.param[p]) != 0)
+			{
+				same_params = false;
+				break;
+			}
 		}
+
+		if (same_params)
+			return true;
 	}
 
 	return false;
@@ -593,10 +603,11 @@ void M_SaveBindings()
 			fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
 					M_KeyToString(bind.key), bind.cmd->name);
 
-			if (bind.param[0][0]) fprintf(fp, "\t%s", bind.param[0]);
-			if (bind.param[1][0]) fprintf(fp, "\t%s", bind.param[1]);
-			if (bind.param[2][0]) fprintf(fp, "\t%s", bind.param[2]);
-			if (bind.param[3][0]) fprintf(fp, "\t%s", bind.param[3]);
+			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+			{
+				if (bind.param[p][0])
+					fprintf(fp, "\t%s", bind.param[p]);
+			}
 
 			fprintf(fp, "\n");
 			count++;
@@ -691,13 +702,13 @@ public:
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
-		int param_cmp = y_stricmp(k1.param[0], k2.param[0]) * 1000 +
-		                y_stricmp(k1.param[1], k2.param[1]) * 100  +
-		                y_stricmp(k1.param[2], k2.param[2]) * 10   +
-		                y_stricmp(k1.param[3], k2.param[3]);
+		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		{
+			int cmp = y_stricmp(k1.param[p], k2.param[p]);
 
-		if (param_cmp != 0)
-			return param_cmp < 0;
+			if (cmp != 0)
+				return cmp < 0;
+		}
 
 		if (column == 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
@@ -767,7 +778,7 @@ const char * M_StringForFunc(int index)
 
 	bool saw_arg = false;
 
-	for (int k = 0 ; k < 4 ; k++)
+	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
 		const char *param = bind.param[k];
 
@@ -886,9 +897,9 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	memset(&bind.param, 0, sizeof(bind.param));
 
-	for (int i = 0 ; i < 4 ; i++)
-		if (num_tok >= 2 + i)
-			strncpy(bind.param[i], tokens[1 + i], MAX_BIND_PARAM_LEN-1);
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		if (num_tok >= 2 + p)
+			strncpy(bind.param[p], tokens[1 + p], MAX_BIND_LENGTH-1);
 
 	return NULL;
 }
@@ -1023,8 +1034,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 {
 	Status_Clear();
 
-	EXEC_Param[0] = EXEC_Param[1] = "";
-	EXEC_Param[2] = EXEC_Param[3] = "";
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		EXEC_Param[p] = "";
 
 	EXEC_Errno = 0;
 
@@ -1034,8 +1045,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 		if (bind.key == key && bind.context == context)
 		{
-			for (int k = 0 ; k < 4 ; k++)
-				EXEC_Param[k] = bind.param[k];
+			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+				EXEC_Param[p] = bind.param[p];
 
 			DoExecuteCommand(bind.cmd);
 
@@ -1060,7 +1071,9 @@ bool ExecuteCommand(const char *name, const char *param1,
 	EXEC_Param[0] = param1;
 	EXEC_Param[1] = param2;
 	EXEC_Param[2] = param3;
-	EXEC_Param[3] = "";
+
+	for (int p = 3 ; p < MAX_EXEC_PARAM ; p++)
+		EXEC_Param[p] = "";
 
 	EXEC_Errno = 0;
 
