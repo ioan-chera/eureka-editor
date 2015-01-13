@@ -815,6 +815,8 @@ void BA_Abort(bool keep_changes)
 
 int BA_New(obj_type_e type)
 {
+	SYS_ASSERT(cur_group);
+
 	edit_op_c op;
 
 	op.action  = OP_INSERT;
@@ -860,6 +862,8 @@ int BA_New(obj_type_e type)
 
 void BA_Delete(obj_type_e type, int objnum)
 {
+	SYS_ASSERT(cur_group);
+
 	edit_op_c op;
 
 	op.action  = OP_DELETE;
