@@ -608,49 +608,93 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 	if (Fl::focus() == rep_value || Fl::focus() == rep_desc)
 		is_replace = true;
 
-	// we want to append if the current find string ends with ',' (or similar).
-	// also never append if user has selected some/all of the input
-	bool append = false;
+	char append = 0;
 
+	// never append if user has selected some/all of the input
 	if (! is_replace &&
 		find_match->position() == find_match->mark())
 	{
-		const char *str = find_match->value();
-
-		int p = strlen(str) - 1;
-
-		while (p >= 0 && isspace(str[p]))
-			p--;
-
-		if (p >= 0 && str[p] != '_' && ispunct(str[p]))
-			append = true;
+		append = ',';
 	}
 
-	switch (kind)
+	// insert the chosen item
+
+	Fl_Input *inp = is_replace ? rep_value : find_match;
+
+	if (kind == 'T' || kind == 'F')
+		InsertName(inp, append, name);
+	else
 	{
-		case 'O':  // Things
-			break;
+		// already present?
+		if (! is_replace && nums_to_match->get(number))
+			return;
 
-		// FIXME
-
-		default: break;
+		InsertNumber(inp, append, number);
 	}
 }
 
 
-void UI_FindAndReplace::InsertName(bool is_replace, bool append, const char *name)
+void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const char *name)
 {
-	// FIXME
+	if (append)
+	{
+		int len = inp->size();
+
+		// insert a separator, unless user has already put one there
+		if (NeedSeparator(inp))
+		{
+			char buf[4];
+			buf[0] = append;
+			buf[1] = 0;
+
+			inp->replace(len, len, buf);
+			len += 1;
+		}
+
+		inp->replace(len, len, name);
+	}
+	else
+	{
+		inp->value(name);
+	}
+
+	inp->do_callback();
+
+	Fl::focus(inp);
+	inp->redraw();
 }
 
-
-void UI_FindAndReplace::InsertNumber(bool is_replace, bool append, int number)
+void UI_FindAndReplace::InsertNumber(Fl_Input *inp, char append, int number)
 {
 	char buf[256];
 
 	sprintf(buf, "%d", number);
 
-	InsertName(is_replace, append, buf);
+	InsertName(inp, append, buf);
+}
+
+
+bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
+{
+	const char *str = inp->value();
+
+	// nothing but whitespace?  --> no need
+	while (isspace(*str))
+		str++;
+
+	if (str[0] == 0)
+		return false;
+
+	// ends with a punctuation symbol?  --> no need
+	int p = (int)strlen(str) - 1;
+
+	while (p >= 0 && isspace(str[p]))
+		p--;
+
+	if (p >= 0 && str[p] != '_' && ispunct(str[p]))
+		return false;
+	
+	return true;
 }
 
 
