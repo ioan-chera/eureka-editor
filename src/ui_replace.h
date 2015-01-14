@@ -66,9 +66,9 @@ private:
 	UI_TripleCheckButton *o_medium;
 	UI_TripleCheckButton *o_hard;
 
-	Fl_Check_Button *o_sp;
-	Fl_Check_Button *o_coop;  // doubles as "not dm" in vanilla mode
-	Fl_Check_Button *o_dm;
+	UI_TripleCheckButton *o_sp;
+	UI_TripleCheckButton *o_coop;
+	UI_TripleCheckButton *o_dm;
 
 	int flags_mask;
 	int flags_value;

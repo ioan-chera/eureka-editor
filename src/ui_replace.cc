@@ -23,6 +23,7 @@
 
 #include "e_path.h"  // GoToObject
 #include "m_game.h"
+#include "w_rawdef.h"
 
 
 class number_group_c
@@ -171,7 +172,7 @@ class UI_TripleCheckButton : public Fl_Group
 	   check against a boolean value:
 
 	     1. want value to be FALSE   (show with red 'X')
-	     2. want value to be TRUE    (show with green circle)
+	     2. want value to be TRUE    (show with green tick)
 	     3. don't care about value   (show with black '?')
 	*/
 
@@ -223,17 +224,18 @@ public:
 			box->align(FL_ALIGN_LEFT);
 		}
 
-		false_but = new Fl_Button(X, Y, W, H, "@+11+");
+		false_but = new Fl_Button(X, Y, W, H, "N");
 		false_but->labelcolor(FL_RED);
-		false_but->labelsize(H/2);
+		false_but->labelsize(H*2/3);
 		false_but->callback(button_callback, this);
 
-		true_but = new Fl_Button(X, Y, W, H, "@+2+");
-		true_but->labelcolor(fl_rgb_color(0, 160, 255));
-		true_but->labelsize(H/2);
+		true_but = new Fl_Button(X, Y, W, H, "Y");
+		true_but->labelfont(FL_HELVETICA_BOLD);
+		true_but->labelcolor(fl_rgb_color(0, 176, 0));
+		true_but->labelsize(H*2/3);
 		true_but->callback(button_callback, this);
 
-		other_but = new Fl_Button(X, Y, W, H, "?");
+		other_but = new Fl_Button(X, Y, W, H, "-");
 		other_but->labelsize(H*3/4);
 		other_but->callback(button_callback, this);
 
@@ -354,13 +356,13 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
 
 			// thing stuff
-			o_easy   = new UI_TripleCheckButton(X+125, Y+418, 26, 26, "easy: ");
-			o_medium = new UI_TripleCheckButton(X+125, Y+448, 26, 26, "medium: ");
-			o_hard   = new UI_TripleCheckButton(X+125, Y+478, 26, 26, "hard: ");
+			o_easy   = new UI_TripleCheckButton(X+105, Y+414, 28, 26, "easy: ");
+			o_medium = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "medium: ");
+			o_hard   = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "hard: ");
 
-			o_sp     = new Fl_Check_Button(X+165, Y+418, 60, 22, " sp");
-			o_coop   = new Fl_Check_Button(X+165, Y+440, 60, 22, " coop");
-			o_dm     = new Fl_Check_Button(X+165, Y+462, 60, 22, " dm");
+			o_sp     = new UI_TripleCheckButton(X+220, Y+414, 28, 26, "sp: ");
+			o_coop   = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "coop: ");
+			o_dm     = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "dm: ");
 
 			// sector stuff
 			o_floors   = new Fl_Check_Button(X+45, Y+418, 80, 22, " floors");
@@ -446,12 +448,12 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	if (game_info.coop_dm_flags)
 	{
 		o_sp->show();
-		o_coop->label(" coop");
+		o_coop->show();
 	}
 	else   // vanilla DOOM
 	{
 		o_sp->hide();
-		o_coop->label(" not dm");
+		o_coop->hide();
 	}
 }
 
@@ -1183,8 +1185,30 @@ void UI_FindAndReplace::ComputeFlagMask()
 		return;
 	}
 
-///	if (game_info.coop_dm_flags)
-	// TODO
+#define FLAG_FROM_WIDGET(w, mul, flag)  \
+	if ((w)->value() != 0)  \
+	{  \
+		flags_mask |= (flag);  \
+		if ((w)->value() * (mul) > 0)  \
+			flags_value |= (flag);  \
+	}
+
+	FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy);
+	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
+	FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
+
+	if (game_info.coop_dm_flags)
+	{
+		FLAG_FROM_WIDGET(  o_sp, -1, MTF_Not_SP);
+		FLAG_FROM_WIDGET(o_coop, -1, MTF_Not_COOP);
+		FLAG_FROM_WIDGET(  o_dm, -1, MTF_Not_DM);
+	}
+	else	// vanilla DOOM
+	{
+		FLAG_FROM_WIDGET(o_dm, 1, MTF_Not_SP);
+	}
+
+#undef FLAG_FROM_WIDGET
 }
 
 
