@@ -167,8 +167,9 @@ public:
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
-	cur_obj(OBJ_THINGS, -1),
-	nums_to_match(new number_group_c)
+	find_numbers(new number_group_c),
+	 tag_numbers(new number_group_c),
+	cur_obj(OBJ_THINGS, -1)
 {
 	box(FL_FLAT_BOX);
 
@@ -252,15 +253,31 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		f_text->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		f_text->labelsize(16);
 
-		filter_group = new Fl_Group(X, Y+391, W, H-415);
+		filter_group = new Fl_Group(X, Y+391, W, H-391);
 		{
-			only_floors = new Fl_Round_Button(X+35, Y+391, 145, 25, " Only Floors");
-			only_floors->down_box(FL_ROUND_DOWN_BOX);
+			// common stuff
+			tag_input = new Fl_Input(X+105, Y+472, 130, 24, "Tag Match:");
 
-			only_ceilings = new Fl_Round_Button(X+35, Y+411, 165, 30, " Only Ceilings");
-			only_ceilings->down_box(FL_ROUND_DOWN_BOX);
+			// thing stuff
+			o_easy   = new Fl_Check_Button(X+32, Y+391, 60, 22, "easy");
+			o_medium = new Fl_Check_Button(X+32, Y+416, 60, 22, "medium");
+			o_hard   = new Fl_Check_Button(X+32, Y+441, 60, 22, "hard");
 
-			tag_match = new Fl_Input(X+105, Y+442, 130, 24, "Tag Match:");
+			o_sp     = new Fl_Check_Button(X+152, Y+391, 60, 22, "sp");
+			o_coop   = new Fl_Check_Button(X+152, Y+416, 60, 22, "coop");
+			o_dm     = new Fl_Check_Button(X+152, Y+441, 60, 22, "dm");
+
+			// sector stuff
+			o_floors   = new Fl_Check_Button(X+35, Y+391, 145, 25, "floors");
+			o_ceilings = new Fl_Check_Button(X+35, Y+411, 165, 30, "ceilings");
+
+			// linedef stuff
+			o_lowers  = new Fl_Check_Button(X+32, Y+391, 60, 22, "lowers");
+			o_uppers  = new Fl_Check_Button(X+32, Y+416, 60, 22, "uppers");
+			o_rail    = new Fl_Check_Button(X+32, Y+441, 60, 22, "rail");
+
+			o_one_sided = new Fl_Check_Button(X+152, Y+391, 60, 22, "one-sided");
+			o_two_sided = new Fl_Check_Button(X+152, Y+416, 60, 22, "two-sided");
 		}
 		filter_group->end();
 		filter_group->hide();
@@ -434,7 +451,7 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool is_valid = box->CheckInput(box->find_match, box->find_desc, box->nums_to_match);
+	bool is_valid = box->CheckInput(box->find_match, box->find_desc, box->find_numbers);
 
 	if (is_valid)
 	{
@@ -626,7 +643,7 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 	else
 	{
 		// already present?
-		if (! is_replace && nums_to_match->get(number))
+		if (! is_replace && find_numbers->get(number))
 			return;
 
 		InsertNumber(inp, append, number);
@@ -942,7 +959,7 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 {
 	const Thing *T = Things[idx];
 
-	if (! nums_to_match->get(T->type))
+	if (! find_numbers->get(T->type))
 		return false;
 
 	return true;
@@ -967,7 +984,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 {
 	const LineDef *L = LineDefs[idx];
 
-	if (! nums_to_match->get(L->type))
+	if (! find_numbers->get(L->type))
 		return false;
 
 	return true;
@@ -978,7 +995,7 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const Sector *SEC = Sectors[idx];
 
-	if (! nums_to_match->get(SEC->type))
+	if (! find_numbers->get(SEC->type))
 		return false;
 
 	return true;

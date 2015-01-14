@@ -38,6 +38,9 @@ private:
 	Fl_Button *find_but;
 	Fl_Button *select_all_but;
 
+	// for numeric types, this contains the number(s) to match
+	number_group_c *find_numbers;
+
 	// --- REPLACE AREA ---
 
 	Fl_Input  *rep_value;
@@ -46,24 +49,43 @@ private:
 	Fl_Button *apply_but;
 	Fl_Button *replace_all_but;
 
+	// TODO : replace_number
+
 	// --- FILTER AREA ---
 
 	Fl_Toggle_Button *filter_toggle;
 	Fl_Group *filter_group;
 
-	// FIXME: stuff for Things, LineDefs
+	// common stuff
+	Fl_Input * tag_input;
+	number_group_c * tag_numbers;
+
+	// thing stuff
+	Fl_Check_Button *o_easy;
+	Fl_Check_Button *o_medium;
+	Fl_Check_Button *o_hard;
+
+	Fl_Check_Button *o_sp;
+	Fl_Check_Button *o_coop;  // doubles as "not dm" in vanilla mode
+	Fl_Check_Button *o_dm;
+
+	int flags_mask;
+	int flags_value;
 
 	// sector filters
-	Fl_Round_Button *only_floors;
-	Fl_Round_Button *only_ceilings;
+	Fl_Check_Button *o_floors;
+	Fl_Check_Button *o_ceilings;
 
-	Fl_Input *tag_match;
+	// linedef filters
+	Fl_Check_Button *o_lowers;
+	Fl_Check_Button *o_uppers;
+	Fl_Check_Button *o_rail;
 
-	// current object
+	Fl_Check_Button *o_one_sided;
+	Fl_Check_Button *o_two_sided;
+
+	// current (found) object
 	Objid cur_obj;
-
-	// for numeric types, this contains the number(s) to match
-	number_group_c *nums_to_match;
 
 public:
 	UI_FindAndReplace(int X, int Y, int W, int H);
