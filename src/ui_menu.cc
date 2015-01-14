@@ -474,16 +474,18 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Cu&t",    FL_COMMAND + 'x',  FCAL edit_do_cut },
-		{ "&Copy",   FL_COMMAND + 'c',  FCAL edit_do_copy },
-		{ "&Paste",  FL_COMMAND + 'v',  FCAL edit_do_paste },
-		{ "Delete",  FL_Delete,         FCAL edit_do_delete },
+		{ "Cu&t",     FL_COMMAND + 'x', FCAL edit_do_cut },
+		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
+		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
+		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
+		{ "Prune Unused", 0,            FCAL edit_do_prune_unused },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
 		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
 		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
+//		{ "&Last Selection",   0, FCAL edit_do_invert_sel },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -493,7 +495,6 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Prune Unused Objs",    0, FCAL edit_do_prune_unused },
 		{ "Mirror &Horizontally",  0, FCAL edit_do_mirror_horiz },
 		{ "Mirror &Vertically",    0, FCAL edit_do_mirror_vert },
 
@@ -502,12 +503,12 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
-		{ "Logs....",   0, FCAL view_do_logs },
+		{ "&Logs....",   0, FCAL view_do_logs },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Toggle 3D View",      0, FCAL view_do_toggle_3d },
-		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
-		{ "Toggle Grid Type",    0, FCAL view_do_grid_type },
+		{ "Toggle &3D View",     0, FCAL view_do_toggle_3d },
+		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
+		{ "&Toggle Grid Type",   0, FCAL view_do_grid_type },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
@@ -525,14 +526,14 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 	
-		{ "Textures",     0, FCAL browser_do_textures },
-		{ "Flats",        0, FCAL browser_do_flats },
-		{ "Thing Types",  0, FCAL browser_do_things },
-		{ "Line Types",   0, FCAL browser_do_lines },
-		{ "Sector Types", 0, FCAL browser_do_sectors },
+		{ "Te&xtures",     0, FCAL browser_do_textures },
+		{ "&Flats",        0, FCAL browser_do_flats },
+		{ "&Thing Types",  0, FCAL browser_do_things },
+		{ "&Line Types",   0, FCAL browser_do_lines },
+		{ "&Sector Types", 0, FCAL browser_do_sectors },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "Hide",         0, FCAL browser_hide },
+		{ "&Hide",         0, FCAL browser_hide },
 		{ 0 },
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
