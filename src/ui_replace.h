@@ -70,8 +70,8 @@ private:
 	UI_TripleCheckButton *o_coop;
 	UI_TripleCheckButton *o_dm;
 
-	int flags_mask;
-	int flags_value;
+	int options_mask;
+	int options_value;
 
 	// sector filters
 	Fl_Check_Button *o_floors;
@@ -125,6 +125,8 @@ private:
 
 	bool CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp = NULL);
 
+	bool CheckNumberInput(Fl_Input *w, number_group_c *num_grp);
+
 	// specialized functions for each search modality
 
 	bool Match_Thing(int idx);
@@ -133,9 +135,8 @@ private:
 	bool Match_Sector(int idx);
 	bool Match_SectorType(int idx);
 
-	bool Filter_Thing(int idx);
-	bool Filter_LineDef(int idx);
-	bool Filter_Sector(int idx);
+	// return 'true' for pass, 'false' to reject
+	bool Filter_Tag(int tag);
 
 	void Replace_Thing(int idx);
 	void Replace_LineDef(int idx);
@@ -157,6 +158,7 @@ private:
 	static void replace_all_callback(Fl_Widget *w, void *data);
 
 	static void filter_toggle_callback(Fl_Widget *w, void *data);
+	static void     tag_input_callback(Fl_Widget *w, void *data);
 };
 
 

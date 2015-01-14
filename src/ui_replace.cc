@@ -354,6 +354,8 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		{
 			// common stuff
 			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
+			tag_input->when(FL_WHEN_CHANGED);
+			tag_input->callback(tag_input_callback, this);
 
 			// thing stuff
 			o_easy   = new UI_TripleCheckButton(X+105, Y+414, 28, 26, "easy: ");
@@ -445,14 +447,10 @@ void UI_FindAndReplace::UpdateWhatFilters()
 
 #undef SHOW_WIDGET_IF
 
-	if (game_info.coop_dm_flags)
+	// vanilla DOOM : always hide SP and COOP flags
+	if (x == 0 && ! game_info.coop_dm_flags)
 	{
-		o_sp->show();
-		o_coop->show();
-	}
-	else   // vanilla DOOM
-	{
-		o_sp->hide();
+		  o_sp->hide();
 		o_coop->hide();
 	}
 }
@@ -744,6 +742,46 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 }
 
 
+void UI_FindAndReplace::tag_input_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	bool is_valid = box->CheckNumberInput(box->tag_input, box->tag_numbers);
+
+	if (is_valid)
+	{
+		box->tag_input->textcolor(FL_FOREGROUND_COLOR);
+		box->tag_input->redraw();
+	}
+	else
+	{
+		// uhhh, cannot disable all the search buttons [ too hard ]
+		// so..... showing red is the all we can do....
+
+		box->tag_input->textcolor(FL_RED);
+		box->tag_input->redraw();
+	}
+}
+
+
+bool UI_FindAndReplace::CheckNumberInput(Fl_Input *w, number_group_c *num_grp)
+{
+	num_grp->clear();
+
+	// here empty string means match everything
+	if (strlen(w->value()) == 0)
+	{
+		num_grp->ParseString("*");
+		return true;
+	}
+
+	if (num_grp->ParseString(w->value()))
+		return true;
+
+	return false;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -900,6 +938,8 @@ bool UI_FindAndReplace::FindNext()
 		return false;
 	}
 
+	ComputeFlagMask();
+
 	if (cur_obj.type != edit.mode)
 	{
 		Editor_ChangeMode_Raw(cur_obj.type);
@@ -988,19 +1028,19 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 	switch (what->value())
 	{
 		case 0: // Things
-			return Match_Thing(idx) && Filter_Thing(idx);
+			return Match_Thing(idx);
 
 		case 1: // LineDefs (texturing)
-			return Match_LineDef(idx) && Filter_LineDef(idx);
+			return Match_LineDef(idx);
 
 		case 2: // Sectors (texturing)
-			return Match_Sector(idx) && Filter_Sector(idx);
+			return Match_Sector(idx);
 
 		case 3: // Lines by Type
-			return Match_LineType(idx) && Filter_LineDef(idx);
+			return Match_LineType(idx);
 
 		case 4: // Sectors by Type
-			return Match_SectorType(idx) && Filter_Sector(idx);
+			return Match_SectorType(idx);
 
 		default: return false;
 	}
@@ -1045,6 +1085,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 		Beep("No find active!");
 		return;
 	}
+
+	ComputeFlagMask();
 
 	if (cur_obj.type != edit.mode)
 		Editor_ChangeMode_Raw(cur_obj.type);
@@ -1112,12 +1154,21 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 	if (! find_numbers->get(T->type))
 		return false;
 
+	// skill/mode flag filter
+	if ((T->options & options_mask) != options_value)
+		return false;
+
 	return true;
 }
 
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
+	const LineDef *L = LineDefs[idx];
+
+	if (! Filter_Tag(L->tag))
+		return false;
+
 	// TODO
 	return false;
 }
@@ -1125,6 +1176,11 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
+	const Sector *SEC = Sectors[idx];
+
+	if (! Filter_Tag(SEC->tag))
+		return false;
+
 	// TODO
 	return false;
 }
@@ -1135,6 +1191,9 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 	const LineDef *L = LineDefs[idx];
 
 	if (! find_numbers->get(L->type))
+		return false;
+
+	if (! Filter_Tag(L->tag))
 		return false;
 
 	return true;
@@ -1148,49 +1207,39 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 	if (! find_numbers->get(SEC->type))
 		return false;
 
+	if (! Filter_Tag(SEC->tag))
+		return false;
+
 	return true;
 }
 
 
-bool UI_FindAndReplace::Filter_Thing(int idx)
+bool UI_FindAndReplace::Filter_Tag(int tag)
 {
-	// TODO
-	return true;
-}
-
-
-bool UI_FindAndReplace::Filter_LineDef(int idx)
-{
-	// TODO
-	return true;
-}
-
-
-bool UI_FindAndReplace::Filter_Sector(int idx)
-{
-	// TODO
-	return true;
+	if (! filter_toggle->value())
+		return true;
+	
+	return tag_numbers->get(tag);
 }
 
 
 void UI_FindAndReplace::ComputeFlagMask()
 {
-	flags_mask = 0;
+	options_mask  = 0;
+	options_value = 0;
 
 	if (! filter_toggle->value())
 	{
 		// this will always succeed
-		flags_mask  = 0;
-		flags_value = 0;
 		return;
 	}
 
 #define FLAG_FROM_WIDGET(w, mul, flag)  \
 	if ((w)->value() != 0)  \
 	{  \
-		flags_mask |= (flag);  \
+		options_mask |= (flag);  \
 		if ((w)->value() * (mul) > 0)  \
-			flags_value |= (flag);  \
+			options_value |= (flag);  \
 	}
 
 	FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy);
