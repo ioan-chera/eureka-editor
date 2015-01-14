@@ -56,11 +56,7 @@ public:
 	Objid(obj_type_e t, int n) : type(t), num(n) { }
 	Objid(const Objid& other) : type(other.type), num(other.num) { } 
 
-	void clear()
-	{
-		type = OBJ_THINGS;
-		num  = NIL_OBJ;
-	}
+	void clear() { num = NIL_OBJ; }
 
 	bool operator== (const Objid& other) const
 	{
