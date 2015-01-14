@@ -85,6 +85,9 @@ private:
 
 	void UpdateWhatColor();
 
+	void InsertName  (bool is_replace, bool append, const char *name);
+	void InsertNumber(bool is_replace, bool append, int number);
+
 	void rawShowFilter(int value);
 
 	bool MatchesObject(int idx);

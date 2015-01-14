@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-/  FIND AND REPLACE
+//  FIND AND REPLACE
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -199,6 +199,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		find_match->callback(find_match_callback, this);
 
 		find_choose = new Fl_Button(X+210, Y+95, 70, 25, "Choose");
+		find_choose->callback(find_choose_callback, this);
 
 		find_desc = new Fl_Output(X+70, Y+125, 210, 25, "Desc: ");
 
@@ -222,6 +223,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		rep_value->callback(rep_value_callback, this);
 
 		rep_choose = new Fl_Button(X+210, Y+230, 70, 25, "Choose");
+		rep_choose->callback(rep_choose_callback, this);
 
 		rep_desc = new Fl_Output(X+80, Y+260, 200, 25, "Desc: ");
 
@@ -393,27 +395,6 @@ bool UI_FindAndReplace::WhatFromEditMode()
 
 		default: return false;
 	}
-}
-
-
-char UI_FindAndReplace::GetKind()
-{
-	// these letters are same as the Browser uses
-
-	int v = what->value();
-
-	if (v < 0 || v >= 5)
-		return '?';
-
-	const char *kinds = "OTFLS";
-
-	return kinds[v];
-}
-
-
-void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
-{
-	// TODO
 }
 
 
@@ -596,18 +577,103 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 }
 
 
+//------------------------------------------------------------------------
+
+
+char UI_FindAndReplace::GetKind()
+{
+	// these letters are same as the Browser uses
+
+	int v = what->value();
+
+	if (v < 0 || v >= 5)
+		return '?';
+
+	const char *kinds = "OTFLS";
+
+	return kinds[v];
+}
+
+
+void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind != GetKind())
+	{
+		fl_beep();
+		return;
+	}
+
+	bool is_replace = false;
+
+	if (Fl::focus() == rep_value || Fl::focus() == rep_desc)
+		is_replace = true;
+
+	// we want to append if the current find string ends with ',' (or similar).
+	// also never append if user has selected some/all of the input
+	bool append = false;
+
+	if (! is_replace &&
+		find_match->position() == find_match->mark())
+	{
+		const char *str = find_match->value();
+
+		int p = strlen(str) - 1;
+
+		while (p >= 0 && isspace(str[p]))
+			p--;
+
+		if (p >= 0 && str[p] != '_' && ispunct(str[p]))
+			append = true;
+	}
+
+	switch (kind)
+	{
+		case 'O':  // Things
+			break;
+
+		// FIXME
+
+		default: break;
+	}
+}
+
+
+void UI_FindAndReplace::InsertName(bool is_replace, bool append, const char *name)
+{
+	// FIXME
+}
+
+
+void UI_FindAndReplace::InsertNumber(bool is_replace, bool append, int number)
+{
+	char buf[256];
+
+	sprintf(buf, "%d", number);
+
+	InsertName(is_replace, append, buf);
+}
+
+
 void UI_FindAndReplace::find_choose_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	// FIXME
+	main_win->ShowBrowser(box->GetKind());
+
+	// ensure Match input widget has the focus
+	Fl::focus(box->find_match);
+	box->find_match->redraw();
 }
 
 void UI_FindAndReplace::rep_choose_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	// FIXME
+	main_win->ShowBrowser(box->GetKind());
+
+	// ensure 'New val' input widget has the focus
+	Fl::focus(box->rep_value);
+	box->rep_value->redraw();
 }
 
 
