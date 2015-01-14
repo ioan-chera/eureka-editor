@@ -747,11 +747,12 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		BA_Begin();
 	}
-	else
-	{
-		// this clears the selection
-		edit.Selected->change_type(edit.mode);
-	}
+
+	// we select objects even in REPLACE mode
+	// (gives the user a visual indication that stuff was done)
+
+	// this clears the selection
+	edit.Selected->change_type(edit.mode);
 
 	int total = NumObjects(cur_obj.type);
 	int count = 0;
@@ -765,8 +766,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 		if (replace)
 			ApplyReplace(idx);
-		else
-			edit.Selected->set(idx);
+
+		edit.Selected->set(idx);
 	}
 
 	if (count == 0)
@@ -778,11 +779,9 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		BA_End();
 	}
-	else
-	{
-		if (count > 0)
-			GoToSelection();
-	}
+
+	if (count > 0)
+		GoToSelection();
 
 	if (replace)
 	{
