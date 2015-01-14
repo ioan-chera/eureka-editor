@@ -165,6 +165,101 @@ public:
 
 //------------------------------------------------------------------------
 
+class UI_TripleCheckButton : public Fl_Group
+{
+	/* this button has three states to represent how a search should
+	   check against a boolean value:
+
+	     1. want value to be FALSE   (show with red 'X')
+	     2. want value to be TRUE    (show with green circle)
+	     3. don't care about value   (show with black '?')
+	*/
+
+private:
+	int _value;	  // -1, 0, +1
+
+	Fl_Button * false_but;
+	Fl_Button *  true_but;
+	Fl_Button * other_but;
+
+	void Update()
+	{
+		false_but->hide();
+		 true_but->hide();
+		other_but->hide();
+
+		if (_value < 0)
+			false_but->show();
+		else if (_value > 0)
+			true_but->show();
+		else
+			other_but->show();
+
+		redraw();
+	}
+
+	void BumpValue()
+	{
+		_value = (_value  < 0) ? 0 : (_value == 0) ? 1 : -1;
+		Update();
+	}
+
+	static void button_callback(Fl_Widget *w, void *data)
+	{
+		UI_TripleCheckButton *G = (UI_TripleCheckButton *)data;
+
+		G->BumpValue();
+		G->do_callback();
+	}
+
+public:
+	UI_TripleCheckButton(int X, int Y, int W, int H, const char *label = NULL) :
+		Fl_Group(X, Y, W, H),
+		_value(0)
+	{
+		if (label)
+		{
+			Fl_Box *box = new Fl_Box(FL_NO_BOX, X, Y, W, H, label);
+			box->align(FL_ALIGN_LEFT);
+		}
+
+		false_but = new Fl_Button(X, Y, W, H, "@+11+");
+		false_but->labelcolor(FL_RED);
+		false_but->labelsize(H/2);
+		false_but->callback(button_callback, this);
+
+		true_but = new Fl_Button(X, Y, W, H, "@+2+");
+		true_but->labelcolor(fl_rgb_color(0, 160, 255));
+		true_but->labelsize(H/2);
+		true_but->callback(button_callback, this);
+
+		other_but = new Fl_Button(X, Y, W, H, "?");
+		other_but->labelsize(H*3/4);
+		other_but->callback(button_callback, this);
+
+		end();
+
+		resizable(NULL);
+
+		Update();
+	}
+
+	virtual ~UI_TripleCheckButton()
+	{ }
+
+public:
+	int value() const { return _value; }
+
+	void value(int new_value)
+	{
+		_value = new_value;
+		Update();
+	}
+};
+
+
+//------------------------------------------------------------------------
+
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
 	find_numbers(new number_group_c),
@@ -259,9 +354,9 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
 
 			// thing stuff
-			o_easy   = new Fl_Check_Button(X+45, Y+418, 60, 22, " easy");
-			o_medium = new Fl_Check_Button(X+45, Y+440, 60, 22, " medium");
-			o_hard   = new Fl_Check_Button(X+45, Y+462, 60, 22, " hard");
+			o_easy   = new UI_TripleCheckButton(X+125, Y+418, 26, 26, "easy: ");
+			o_medium = new UI_TripleCheckButton(X+125, Y+448, 26, 26, "medium: ");
+			o_hard   = new UI_TripleCheckButton(X+125, Y+478, 26, 26, "hard: ");
 
 			o_sp     = new Fl_Check_Button(X+165, Y+418, 60, 22, " sp");
 			o_coop   = new Fl_Check_Button(X+165, Y+440, 60, 22, " coop");
@@ -347,6 +442,17 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	SHOW_WIDGET_IF(o_two_sided, x == 1 || x == 3);
 
 #undef SHOW_WIDGET_IF
+
+	if (game_info.coop_dm_flags)
+	{
+		o_sp->show();
+		o_coop->label(" coop");
+	}
+	else   // vanilla DOOM
+	{
+		o_sp->hide();
+		o_coop->label(" not dm");
+	}
 }
 
 
@@ -1062,6 +1168,23 @@ bool UI_FindAndReplace::Filter_Sector(int idx)
 {
 	// TODO
 	return true;
+}
+
+
+void UI_FindAndReplace::ComputeFlagMask()
+{
+	flags_mask = 0;
+
+	if (! filter_toggle->value())
+	{
+		// this will always succeed
+		flags_mask  = 0;
+		flags_value = 0;
+		return;
+	}
+
+///	if (game_info.coop_dm_flags)
+	// TODO
 }
 
 

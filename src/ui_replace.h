@@ -22,6 +22,7 @@
 #define __EUREKA_UI_REPLACE_H__
 
 class number_group_c;
+class UI_TripleCheckButton;
 
 
 class UI_FindAndReplace : public Fl_Group
@@ -61,9 +62,9 @@ private:
 	number_group_c * tag_numbers;
 
 	// thing stuff
-	Fl_Check_Button *o_easy;
-	Fl_Check_Button *o_medium;
-	Fl_Check_Button *o_hard;
+	UI_TripleCheckButton *o_easy;
+	UI_TripleCheckButton *o_medium;
+	UI_TripleCheckButton *o_hard;
 
 	Fl_Check_Button *o_sp;
 	Fl_Check_Button *o_coop;  // doubles as "not dm" in vanilla mode
@@ -107,6 +108,7 @@ private:
 
 	void UpdateWhatColor();
 	void UpdateWhatFilters();
+	void ComputeFlagMask();
 
 	void InsertName  (Fl_Input *inp, char append, const char *name);
 	void InsertNumber(Fl_Input *inp, char append, int number);
