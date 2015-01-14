@@ -816,13 +816,6 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 }
 
 
-bool UI_FindAndReplace::Match_LineType(int idx)
-{
-	// TODO
-	return false;
-}
-
-
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
 	// TODO
@@ -830,13 +823,26 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 }
 
 
-bool UI_FindAndReplace::Match_SectorType(int idx)
+bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	// TODO
-	return false;
+	const LineDef *L = LineDefs[idx];
+
+	if (! nums_to_match->get(L->type))
+		return false;
+
+	return true;
 }
 
 
+bool UI_FindAndReplace::Match_SectorType(int idx)
+{
+	const Sector *SEC = Sectors[idx];
+
+	if (! nums_to_match->get(SEC->type))
+		return false;
+
+	return true;
+}
 
 
 bool UI_FindAndReplace::Filter_Thing(int idx)
@@ -878,21 +884,25 @@ void UI_FindAndReplace::Replace_LineDef(int idx)
 }
 
 
-void UI_FindAndReplace::Replace_LineType(int idx)
-{
-	// TODO
-}
-
-
 void UI_FindAndReplace::Replace_Sector(int idx)
 {
 	// TODO
 }
 
 
+void UI_FindAndReplace::Replace_LineType(int idx)
+{
+	int new_type = atoi(rep_value->value());
+
+	BA_ChangeLD(idx, LineDef::F_TYPE, new_type);
+}
+
+
 void UI_FindAndReplace::Replace_SectorType(int idx)
 {
-	// TODO
+	int new_type = atoi(rep_value->value());
+
+	BA_ChangeSEC(idx, Sector::F_TYPE, new_type);
 }
 
 //--- editor settings ---
