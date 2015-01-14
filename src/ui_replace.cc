@@ -422,7 +422,10 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	if (x != 0)
 		tag_input->activate();
 	else
+	{
 		tag_input->deactivate();
+		tag_input->value("");
+	}
 
 	// thing stuff
 	SHOW_WIDGET_IF(o_easy,   x == 0);
@@ -768,12 +771,9 @@ bool UI_FindAndReplace::CheckNumberInput(Fl_Input *w, number_group_c *num_grp)
 {
 	num_grp->clear();
 
-	// here empty string means match everything
-	if (strlen(w->value()) == 0)
-	{
-		num_grp->ParseString("*");
+	// an empty string will mean match everything
+	if (w->size() == 0)
 		return true;
-	}
 
 	if (num_grp->ParseString(w->value()))
 		return true;
@@ -1166,7 +1166,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 {
 	const LineDef *L = LineDefs[idx];
 
-	if (! Filter_Tag(L->tag))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
 
 	// TODO
@@ -1193,7 +1193,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 	if (! find_numbers->get(L->type))
 		return false;
 
-	if (! Filter_Tag(L->tag))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
 
 	return true;
@@ -1219,7 +1219,26 @@ bool UI_FindAndReplace::Filter_Tag(int tag)
 	if (! filter_toggle->value())
 		return true;
 	
+	// an empty string means everything (same as '*')
+	if (tag_input->size() == 0)
+		return true;
+
 	return tag_numbers->get(tag);
+}
+
+
+bool UI_FindAndReplace::Filter_Sides(const LineDef *L)
+{
+	if (filter_toggle->value())
+	{
+		if (! o_one_sided->value() && L->OneSided())
+			return false;
+
+		if (! o_two_sided->value() && L->TwoSided())
+			return false;
+	}
+
+	return true;
 }
 
 

@@ -137,6 +137,7 @@ private:
 
 	// return 'true' for pass, 'false' to reject
 	bool Filter_Tag(int tag);
+	bool Filter_Sides(const LineDef *L);
 
 	void Replace_Thing(int idx);
 	void Replace_LineDef(int idx);
