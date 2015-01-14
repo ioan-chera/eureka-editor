@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  FIND AND REPLACE
+/  FIND AND REPLACE
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -36,8 +36,10 @@ private:
 
 	int ranges[NUMBER_GROUP_MAX][2];
 
+	bool everything;
+
 public:
-	number_group_c() : size(0)
+	number_group_c() : size(0), everything(false)
 	{ }
 
 	~number_group_c()
@@ -46,11 +48,17 @@ public:
 	void clear()
 	{
 		size = 0;
+		everything = false;
 	}
 
 	bool is_single() const
 	{
 		return (size == 1) && (ranges[0][0] == ranges[0][1]);
+	}
+
+	bool is_everything() const
+	{
+		return everything;
 	}
 
 	int grab_first() const
@@ -102,6 +110,7 @@ public:
 			if (*str == '*')
 			{
 				insert(INT_MIN, INT_MAX);
+				everything = true;
 				return true;
 			}
 
@@ -542,7 +551,12 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 			return false;
 		}
 
-		if (! num_grp->is_single())
+		if (num_grp->is_everything())
+		{
+			desc->value("(everything)");
+			return true;
+		}
+		else if (! num_grp->is_single())
 		{
 			desc->value("(multi-match)");
 			return true;
@@ -579,6 +593,21 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 	}
 
 	return true;
+}
+
+
+void UI_FindAndReplace::find_choose_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	// FIXME
+}
+
+void UI_FindAndReplace::rep_choose_callback(Fl_Widget *w, void *data)
+{
+	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
+
+	// FIXME
 }
 
 
@@ -787,6 +816,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		cur_obj.clear();
 		rep_value->do_callback();
+
+		edit.error_mode = true;
 	}
 
 	edit.RedrawMap = 1;
