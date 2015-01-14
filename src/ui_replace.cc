@@ -256,31 +256,33 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		filter_group = new Fl_Group(X, Y+391, W, H-391);
 		{
 			// common stuff
-			tag_input = new Fl_Input(X+105, Y+472, 130, 24, "Tag Match:");
+			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
 
 			// thing stuff
-			o_easy   = new Fl_Check_Button(X+32, Y+391, 60, 22, "easy");
-			o_medium = new Fl_Check_Button(X+32, Y+416, 60, 22, "medium");
-			o_hard   = new Fl_Check_Button(X+32, Y+441, 60, 22, "hard");
+			o_easy   = new Fl_Check_Button(X+45, Y+418, 60, 22, " easy");
+			o_medium = new Fl_Check_Button(X+45, Y+440, 60, 22, " medium");
+			o_hard   = new Fl_Check_Button(X+45, Y+462, 60, 22, " hard");
 
-			o_sp     = new Fl_Check_Button(X+152, Y+391, 60, 22, "sp");
-			o_coop   = new Fl_Check_Button(X+152, Y+416, 60, 22, "coop");
-			o_dm     = new Fl_Check_Button(X+152, Y+441, 60, 22, "dm");
+			o_sp     = new Fl_Check_Button(X+165, Y+418, 60, 22, " sp");
+			o_coop   = new Fl_Check_Button(X+165, Y+440, 60, 22, " coop");
+			o_dm     = new Fl_Check_Button(X+165, Y+462, 60, 22, " dm");
 
 			// sector stuff
-			o_floors   = new Fl_Check_Button(X+35, Y+391, 145, 25, "floors");
-			o_ceilings = new Fl_Check_Button(X+35, Y+411, 165, 30, "ceilings");
+			o_floors   = new Fl_Check_Button(X+45, Y+418, 80, 22, " floors");
+			o_ceilings = new Fl_Check_Button(X+45, Y+440, 80, 22, " ceilings");
 
 			// linedef stuff
-			o_lowers  = new Fl_Check_Button(X+32, Y+391, 60, 22, "lowers");
-			o_uppers  = new Fl_Check_Button(X+32, Y+416, 60, 22, "uppers");
-			o_rail    = new Fl_Check_Button(X+32, Y+441, 60, 22, "rail");
+			o_lowers  = new Fl_Check_Button(X+45, Y+418, 80, 22, " lowers");
+			o_uppers  = new Fl_Check_Button(X+45, Y+440, 80, 22, " uppers");
+			o_rail    = new Fl_Check_Button(X+45, Y+462, 80, 22, " rail");
 
-			o_one_sided = new Fl_Check_Button(X+152, Y+391, 60, 22, "one-sided");
-			o_two_sided = new Fl_Check_Button(X+152, Y+416, 60, 22, "two-sided");
+			o_one_sided = new Fl_Check_Button(X+155, Y+418, 80, 22, " one-sided");
+			o_two_sided = new Fl_Check_Button(X+155, Y+440, 80, 22, " two-sided");
 		}
 		filter_group->end();
 		filter_group->hide();
+
+		UpdateWhatFilters();
 	}
 	grp3->end();
 
@@ -306,6 +308,45 @@ void UI_FindAndReplace::UpdateWhatColor()
 		case 3: /* Line Type   */ what->color(FL_GREEN); break;
 		case 4: /* Sector Type */ what->color(fl_rgb_color(255,144,0)); break;
 	}
+}
+
+
+
+void UI_FindAndReplace::UpdateWhatFilters()
+{
+	int x = what->value();
+
+#define SHOW_WIDGET_IF(w, test)  \
+	if (test) (w)->show(); else (w)->hide();
+
+	// common stuff
+	if (x != 0)
+		tag_input->activate();
+	else
+		tag_input->deactivate();
+
+	// thing stuff
+	SHOW_WIDGET_IF(o_easy,   x == 0);
+	SHOW_WIDGET_IF(o_medium, x == 0);
+	SHOW_WIDGET_IF(o_hard,   x == 0);
+
+	SHOW_WIDGET_IF(o_sp,     x == 0);
+	SHOW_WIDGET_IF(o_coop,   x == 0);
+	SHOW_WIDGET_IF(o_dm,     x == 0);
+
+	// sector stuff
+	SHOW_WIDGET_IF(o_floors,   x == 2);
+	SHOW_WIDGET_IF(o_ceilings, x == 2);
+
+	// linedef stuff
+	SHOW_WIDGET_IF(o_lowers, x == 1);
+	SHOW_WIDGET_IF(o_uppers, x == 1);
+	SHOW_WIDGET_IF(o_rail,   x == 1);
+
+	SHOW_WIDGET_IF(o_one_sided, x == 1 || x == 3);
+	SHOW_WIDGET_IF(o_two_sided, x == 1 || x == 3);
+
+#undef SHOW_WIDGET_IF
 }
 
 
@@ -354,6 +395,7 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 	}
 
 	box->UpdateWhatColor();
+	box->UpdateWhatFilters();
 
 	if (want_descs)
 	{

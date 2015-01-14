@@ -106,6 +106,7 @@ private:
 	bool WhatFromEditMode();
 
 	void UpdateWhatColor();
+	void UpdateWhatFilters();
 
 	void InsertName  (Fl_Input *inp, char append, const char *name);
 	void InsertNumber(Fl_Input *inp, char append, int number);
