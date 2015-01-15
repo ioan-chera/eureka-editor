@@ -172,7 +172,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	int cx = X + 80 + KF * 8;
 	int cy = Y + 4;
 
-	Fl_Box *title = new Fl_Box(X + 40, cy, W - 62, 22+KF*4, label);
+	Fl_Box *title = new Fl_Box(X + 34, cy, W - 90, 22+KF*4, label);
 	title->labelsize(20+KF*4);
 	add(title);
 
@@ -935,10 +935,10 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 
 	const char *mode_titles[5] =
 	{
-		"Texture List",
-		"Flat List",
-		"Thing Types",
-		"Linedef Types",
+		"Textures",
+		"Flats",
+		"Things",
+		"Line Types",
 		"Sector Types"
 	};
 
