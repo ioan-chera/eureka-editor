@@ -31,6 +31,8 @@
 
 bitvec_c::bitvec_c(int n_elements) : num_elem(n_elements)
 {
+	SYS_ASSERT(n_elements > 0);
+
 	int total = (num_elem / 8) + 1;
 
 	d = new byte[total];
@@ -47,12 +49,16 @@ bitvec_c::~bitvec_c()
 
 void bitvec_c::resize(int n_elements)
 {
+	SYS_ASSERT(n_elements > 0);
+
 	int old_elem  = num_elem;
 	int old_total = (num_elem / 8) + 1;
 	int new_total = (n_elements / 8) + 1;
 
-	// don't bother re-allocating when shrinking
-	if (n_elements < num_elem)
+	byte * old_d = d;
+
+	// don't bother re-allocating unless shrinking by a large amount
+	if (num_elem/2 < n_elements && n_elements < num_elem)
 	{
 		num_elem = n_elements;
 		return;
@@ -60,10 +66,10 @@ void bitvec_c::resize(int n_elements)
 
 	num_elem = n_elements;
 
-	byte * old_d = d;
-
 	d = new byte[new_total];
-	memcpy(d, old_d, old_total);
+
+	// copy existing values
+	memcpy(d, old_d, MIN(old_total, new_total));
 
 	delete[] old_d;
 
@@ -71,41 +77,75 @@ void bitvec_c::resize(int n_elements)
 		memset(d+old_total, 0, new_total - old_total);
 
 	// make sure the bits near the old top are clear
-	for (int i = 0; i < 8; i++)
+	for (int i = 0 ; i < 8 ; i++)
 	{
 		if (old_elem + i < num_elem)
-			clear(old_elem + i);
+			raw_clear(old_elem + i);
 	}
 }
 
 
 bool bitvec_c::get(int n) const
 {
-	return (d[n >> 3] & (1 << (n & 7))) ? true : false;
+	SYS_ASSERT(n >= 0);
+
+	if (n >= num_elem)
+		return 0;
+
+	return raw_get(n);
 }
 
 
 void bitvec_c::set(int n)
 {
-	d[n >> 3] |= (1 << (n & 7));
+	SYS_ASSERT(n >= 0);
+
+	if (n >= num_elem)
+		resize(n + 32);
+
+	raw_set(n);
 }
 
 
 void bitvec_c::clear(int n)
 {
-	d[n >> 3] &= ~(1 << (n & 7));
+	SYS_ASSERT(n >= 0);
+
+	if (n >= num_elem)
+		return;
+
+	raw_clear(n);
 }
 
 
 void bitvec_c::toggle(int n)
 {
-	d[n >> 3] ^= (1 << (n & 7));
+	SYS_ASSERT(n >= 0);
+
+	if (n >= num_elem)
+		resize(n + 32);
+
+	raw_toggle(n);
+}
+
+
+void bitvec_c::frob(int n, sel_op_e op)
+{
+	switch (op)
+	{
+		case BOP_ADD: set(n); break;
+		case BOP_REMOVE: clear(n); break;
+		default: toggle(n); break;
+	}
 }
 
 
 void bitvec_c::set_all()
 {
 	int total = (num_elem / 8) + 1;
+
+	// Note: this will set some extra bits (over num_elem).
+	//       the get() functions (etc) make sure to never use them.
 
 	memset(d, 0xFF, total);
 }
@@ -128,17 +168,6 @@ void bitvec_c::toggle_all()
 
 	while (pos < p_end)
 		*pos++ ^= 0xFF;
-}
-
-
-void bitvec_c::frob(int n, sel_op_e op)
-{
-	switch (op)
-	{
-		case BOP_ADD: set(n); break;
-		case BOP_REMOVE: clear(n); break;
-		default: toggle(n); break;
-	}
 }
 
 

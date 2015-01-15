@@ -39,13 +39,19 @@ sel_op_e;
 
 class bitvec_c
 {
+	//
+	// Although this bit-vector has a current size, it acts as though it
+	// was infinitely sized and all bits past the end are zero.  When
+	// setting a bit past the end, it will automatically resize itself.
+	//
+
 private:
 	int num_elem;
 
 	byte *d;
 
 public:
-	 bitvec_c(int n_elements);
+	 bitvec_c(int n_elements = 64);
 	~bitvec_c();
 
 	inline int size() const
@@ -56,17 +62,40 @@ public:
 	// this preserves existing elements
 	void resize(int n_elements);
 
-	bool get(int n) const;  // Get bit <n>
+	bool get(int n) const;	// Get bit <n>
 
-	void set(int n);    // Set bit <n> to 1
-	void clear(int n);  // Set bit <n> to 0
-	void toggle(int n); // Toggle bit <n>
+	void set(int n);		// Set bit <n> to 1
+	void clear(int n);		// Set bit <n> to 0
+	void toggle(int n);		// Toggle bit <n>
+
+	void frob(int n, sel_op_e op);
 
 	void set_all();
 	void clear_all();
 	void toggle_all();
 
-	void frob(int n, sel_op_e op);
+private:
+	/* NOTE : these functions do no range checking! */
+
+	inline bool raw_get(int n) const
+	{
+		return (d[n >> 3] & (1 << (n & 7))) ? true : false;
+	}
+
+	inline void raw_set(int n)
+	{
+		d[n >> 3] |= (1 << (n & 7));
+	}
+
+	inline void raw_clear(int n)
+	{
+		d[n >> 3] &= ~(1 << (n & 7));
+	}
+
+	inline void raw_toggle(int n)
+	{
+		d[n >> 3] ^= (1 << (n & 7));
+	}
 };
 
 
