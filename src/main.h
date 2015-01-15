@@ -164,6 +164,9 @@ bool Main_ConfirmQuit(const char *action);
 bool Main_ProjectSetup(bool is_startup = false);
 void Main_LoadResources();
 
+#ifdef __GNUC__
+__attribute__((noreturn))
+#endif
 void FatalError(const char *fmt, ...);
 
 #define BugError  FatalError
