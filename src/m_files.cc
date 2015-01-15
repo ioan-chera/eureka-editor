@@ -208,9 +208,9 @@ public:
 		StringFree(map_names[index]);
 #endif
 
-		SYS_ASSERT(size < MAX_RECENT);
-
 		size--;
+
+		SYS_ASSERT(size < MAX_RECENT);
 
 		for ( ; index < size ; index++)
 		{
