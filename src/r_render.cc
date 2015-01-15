@@ -45,7 +45,7 @@
 #include "ui_window.h"
 
 
-#define REND_SEL_COL  196
+#define INFO_BAR_H	30
 
 
 // config items
@@ -1728,9 +1728,9 @@ UI_Render3D::~UI_Render3D()
 void UI_Render3D::draw()
 {
 	int ox = x();
-	int oy = y();
+	int oy = y() + INFO_BAR_H;
 	int ow = w();
-	int oh = h();
+	int oh = h() - INFO_BAR_H;
 
 	view.PrepareToRender(ow, oh);
 
@@ -1751,6 +1751,8 @@ void UI_Render3D::draw()
 		fl_color(line.color);
 		fl_line(ox + line.sx1, oy + line.sy1, ox + line.sx2, oy + line.sy2);
 	}
+
+	DrawInfoBar();
 }
 
 
@@ -1847,6 +1849,29 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
 		}
 	}
+}
+
+
+void UI_Render3D::DrawInfoBar()
+{
+	int cx = x();
+	int cy = y();
+	
+	fl_push_clip(x(), cy, w(), INFO_BAR_H);
+
+	fl_color(FL_BLACK);
+	fl_rectf(x(), cy, w(), INFO_BAR_H);
+
+	fl_color(fl_rgb_color(192,192,192));
+
+	cx += 10;
+	cy += 20;
+
+	fl_font(FL_COURIER, 16);
+
+	fl_draw("x:+12345 y:-99999 z:+00005 ang:000 grav:ON", cx, cy);
+
+	fl_pop_clip();
 }
 
 

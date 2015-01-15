@@ -59,6 +59,8 @@ public:
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);
 	void BlitHires(int ox, int oy, int ow, int oh);
+	
+	void DrawInfoBar();
 };
 
 void Render3D_Setup();
