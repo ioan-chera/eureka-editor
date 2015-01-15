@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2013 Andrew Apted
+//  Copyright (C) 2006-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1362,6 +1362,36 @@ void UI_Canvas::DrawCamera()
 }
 
 
+void UI_Canvas::DrawSnapMarker()
+{
+	// show where the closest snap position is
+	// [ Not currently used ]
+
+	if (! grid.snap)
+		return;
+
+	int map_x = grid.SnapX(edit.map_x);
+	int map_y = grid.SnapX(edit.map_y);
+
+	if (! Vis(map_x, map_y, 20))
+		return;
+
+	int size = 8;
+
+	int scr_x = SCREENX(map_x);
+	int scr_y = SCREENY(map_y);
+
+	fl_color(fl_rgb_color(160,80,160));
+
+	fl_pie(scr_x - size/2, scr_y - size/2, size, size, 0, 360);
+
+	int scr_x2 = SCREENX(edit.map_x);
+	int scr_y2 = SCREENY(edit.map_y);
+
+	fl_line(scr_x, scr_y, scr_x2, scr_y2);
+}
+
+
 void UI_Canvas::SelboxBegin(int map_x, int map_y)
 {
 	selbox_x1 = selbox_x2 = map_x;
@@ -1467,7 +1497,7 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 		int focus_y = drag_focus_y + *dy;
 
 		*dx = grid.SnapX(focus_x) - drag_focus_x;
-		*dy = grid.SnapX(focus_y) - drag_focus_y;
+		*dy = grid.SnapY(focus_y) - drag_focus_y;
 	}
 }
 

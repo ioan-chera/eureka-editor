@@ -126,6 +126,7 @@ private:
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawObjNum(int x, int y, int num, bool center = false);
+	void DrawSnapMarker();
 
 	void SelboxDraw();
 
