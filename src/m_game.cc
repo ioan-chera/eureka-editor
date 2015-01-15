@@ -794,7 +794,7 @@ const char *M_LineCategoryString(char *letters)
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|OTHER");
+	strcat(buffer, "|Other");
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
@@ -831,7 +831,7 @@ const char *M_ThingCategoryString(char *letters)
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|OTHER");
+	strcat(buffer, "|Other");
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
@@ -868,7 +868,7 @@ const char *M_TextureCategoryString(char *letters)
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|OTHER");
+	strcat(buffer, "|Other");
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
