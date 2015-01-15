@@ -77,6 +77,7 @@ extern int backup_max_space;
 extern bool browser_small_tex;
 
 extern int  render_aspect_ratio;
+extern bool render_high_detail;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;

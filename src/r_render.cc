@@ -54,6 +54,7 @@
 // config items
 int  render_aspect_ratio = 177;   // 100 * width / height, default 16:9
 
+bool render_high_detail    = false;
 bool render_lock_gravity   = false;
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
@@ -119,7 +120,6 @@ public:
 	bool texturing;
 	bool sprites;
 	bool lighting;
-	bool low_detail;
 
 	bool gravity;  // when true, walk on ground
 
@@ -144,7 +144,7 @@ public:
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
-			   low_detail(false), gravity(true),
+			   gravity(true),
 	           thing_sectors(),
 			   thsec_sector_num(0), thsec_invalidated(false),
 			   missing_tex(NULL),  missing_col(-1),
@@ -191,8 +191,8 @@ public:
 		// in low detail mode, setup size so that expansion always covers
 		// our window (i.e. we draw a bit more than we need).
 
-		int new_sw = low_detail ? (ow + 1) / 2 : ow;
-		int new_sh = low_detail ? (oh + 1) / 2 : oh;
+		int new_sw = render_high_detail ? ow : (ow + 1) / 2;
+		int new_sh = render_high_detail ? oh : (oh + 1) / 2;
 
 		if (!screen || sw != new_sw || sh != new_sh)
 		{
@@ -779,7 +779,7 @@ public:
 
 	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
 	{
-		if (view.low_detail)
+		if (! render_high_detail)
 		{
 			sx1 *= 2;  sy1 *= 2;
 			sx2 *= 2;  sy2 *= 2;
@@ -1741,10 +1741,10 @@ void UI_Render3D::draw()
 
 	rend.DoRender3D();
 
-	if (view.low_detail)
-		BlitLores(ox, oy, ow, oh);
-	else
+	if (render_high_detail)
 		BlitHires(ox, oy, ow, oh);
+	else
+		BlitLores(ox, oy, ow, oh);
 	
 	// draw the highlight (etc)
 	for (unsigned int k = 0 ; k < rend.hl_lines.size() ; k++)
@@ -1769,7 +1769,7 @@ int UI_Render3D::query(int *side, query_part_e *part)
 	int sx = Fl::event_x() - x();
 	int sy = Fl::event_y() - y();
 
-	if (view.low_detail)
+	if (! render_high_detail)
 	{
 		sx = sx / 2;
 		sy = sy / 2;
@@ -2006,10 +2006,9 @@ void Render3D_Setup()
 	view.sw = -1;
 	view.sh = -1;
 
-	view.texturing  = true;   // TODO: CONFIG ITEMS
+	view.texturing  = true;
 	view.sprites    = true;
 	view.lighting   = true;
-	view.low_detail = true;
 }
 
 
@@ -2200,7 +2199,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	float factor = (mod == MOD_SHIFT) ? 0.25 : 1.0;
 
-	if (! view.low_detail)
+	if (render_high_detail)
 		factor = factor * 2.0;
 
 	view.adjust_dx -= dx * factor * view.adjust_dx_factor;
@@ -2262,8 +2261,7 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 
 	if (strcmp(tokens[0], "low_detail") == 0 && num_tok >= 2)
 	{
-		view.low_detail = atoi(tokens[1]) ? true : false;
-
+		// ignored for compatibility
 		return true;
 	}
 
@@ -2292,9 +2290,6 @@ void Render3D_WriteUser(FILE *fp)
 	        view.texturing  ? 1 : 0,
 			view.sprites    ? 1 : 0,
 			view.lighting   ? 1 : 0);
-
-	fprintf(fp, "low_detail %d\n",
-	        view.low_detail ? 1 : 0);
 
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
@@ -2443,10 +2438,6 @@ void R3D_Set(void)
 	{
 		view.gravity = bool_val;
 	}
-	else if (y_stricmp(var_name, "detail") == 0)
-	{
-		view.low_detail = bool_val;
-	}
 	else
 	{
 		Beep("3D_Set: unknown var: %s", var_name);
@@ -2483,10 +2474,6 @@ void R3D_Toggle(void)
 	else if (y_stricmp(var_name, "grav") == 0)
 	{
 		view.gravity = ! view.gravity;
-	}
-	else if (y_stricmp(var_name, "detail") == 0)
-	{
-		view.low_detail = ! view.low_detail;
 	}
 	else
 	{

@@ -339,6 +339,7 @@ public:
 	Fl_Choice      *rend_aspect;
 	Fl_Float_Input *rend_asp_custom;
 
+	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
 
 	Fl_Check_Button *bsp_warn;
@@ -486,11 +487,11 @@ UI_Preferences::UI_Preferences() :
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 265, 355, 30, "Browser Options");
+		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ brow_smalltex = new Fl_Check_Button(50, 300, 265, 30, " smaller textures");
+		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
 		  brow_smalltex->down_box(FL_DOWN_BOX);
 		}
 		o->end();
@@ -671,7 +672,10 @@ UI_Preferences::UI_Preferences() :
 		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
 		  rend_asp_custom->deactivate();
 		}
-		{ rend_lock_grav = new Fl_Check_Button(50, 125, 360, 30, " Locked gravity -- cannot move up or down");
+		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
+		  rend_high_detail->down_box(FL_DOWN_BOX);
+		}
+		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
 		  rend_lock_grav->down_box(FL_DOWN_BOX);
 		}
 
@@ -1103,6 +1107,7 @@ void UI_Preferences::LoadValues()
 			break;
 	}
 
+	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
 	bsp_fast->value(glbsp_fast ? 1 : 0);
@@ -1208,6 +1213,7 @@ void UI_Preferences::SaveValues()
 	render_aspect_ratio = (int)(100 * atof(rend_asp_custom->value()) + 0.2);
 	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
 
+	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
 	glbsp_fast = bsp_fast->value() ? true : false;

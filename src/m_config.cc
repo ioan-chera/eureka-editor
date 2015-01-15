@@ -550,6 +550,15 @@ static const opt_desc_t options[] =
 		&render_aspect_ratio
 	},
 
+	{	"render_high_detail",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Use highest detail when rendering the 3D view",
+		NULL,
+		&render_high_detail
+	},
+
 	{	"render_lock_gravity",
 		0,
 		OPT_BOOLEAN,
