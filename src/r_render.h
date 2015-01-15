@@ -61,6 +61,8 @@ private:
 	void BlitHires(int ox, int oy, int ow, int oh);
 	
 	void DrawInfoBar();
+	void DrawNumber(int& cx, int& cy, const char *label, int value, int size);
+	void DrawFlag  (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
 };
 
 void Render3D_Setup();

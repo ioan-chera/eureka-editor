@@ -47,6 +47,9 @@
 
 #define INFO_BAR_H	30
 
+#define INFO_TEXT_COL	fl_rgb_color(192, 192, 192)
+#define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
+
 
 // config items
 int  render_aspect_ratio = 177;   // 100 * width / height, default 16:9
@@ -1862,16 +1865,63 @@ void UI_Render3D::DrawInfoBar()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), cy, w(), INFO_BAR_H);
 
-	fl_color(fl_rgb_color(192,192,192));
+	fl_color(INFO_TEXT_COL);
 
 	cx += 10;
 	cy += 20;
 
 	fl_font(FL_COURIER, 16);
 
-	fl_draw("x:+12345 y:-99999 z:+00005 ang:000 grav:ON", cx, cy);
+	DrawNumber(cx, cy, "x", I_ROUND(view.x), -5);
+	DrawNumber(cx, cy, "y", I_ROUND(view.y), -5);
+	DrawNumber(cx, cy, "z",         view.z,  -5);
+
+	int ang = I_ROUND(view.angle * 180 / M_PI);
+	if (ang < 0) ang += 360;
+
+	DrawNumber(cx, cy, "ang", ang, 3);
+
+	cx += 12;
+
+	DrawFlag(cx, cy, view.gravity, "GRAVITY", "gravity");
+
+	DrawFlag(cx, cy, view.texturing, "Tex", "tex");
+	DrawFlag(cx, cy, view.lighting,  "Lit", "lit");
+	DrawFlag(cx, cy, view.sprites,   "Obj", "obj");
+
+
+	fl_color(INFO_TEXT_COL);
+
+	DrawNumber(cx, cy, "gamma", usegamma, 1);
 
 	fl_pop_clip();
+}
+
+
+void UI_Render3D::DrawNumber(int& cx, int& cy, const char *label, int value, int size)
+{
+	char buffer[256];
+
+	// negative size means we require a sign
+	if (size < 0)
+		sprintf(buffer, "%s:%-+*d ", label, -size + 1, value);
+	else
+		sprintf(buffer, "%s:%-*d ", label, size, value);
+
+	fl_draw(buffer, cx, cy);
+
+	cx = cx + fl_width(buffer);
+}
+
+void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+{
+	const char *label = value ? label_on : label_off;
+
+	fl_color(value ? INFO_TEXT_COL : INFO_DIM_COL);
+
+	fl_draw(label, cx, cy);
+
+	cx = cx + fl_width(label) + 20;
 }
 
 
