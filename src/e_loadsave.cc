@@ -497,17 +497,17 @@ static void RemoveUnusedVerticesAtEnd()
 	if (NumVertices == 0)
 		return;
 
-	bitvec_c *used_verts = new bitvec_c(NumVertices);
+	bitvec_c used_verts(NumVertices);
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		used_verts->set(LineDefs[i]->start);
-		used_verts->set(LineDefs[i]->end);
+		used_verts.set(LineDefs[i]->start);
+		used_verts.set(LineDefs[i]->end);
 	}
 
 	int new_count = NumVertices;
 
-	while (new_count > 2 && !used_verts->get(new_count-1))
+	while (new_count > 2 && !used_verts.get(new_count-1))
 		new_count--;
 
 	// we directly modify the vertex array here (which is not
@@ -521,8 +521,6 @@ static void RemoveUnusedVerticesAtEnd()
 
 		Vertices.resize(new_count);
 	}
-
-	delete used_verts;
 }
 
 

@@ -443,6 +443,8 @@ void LIN_Disconnect(void)
 
 static void VerticesOfDetachableSectors(selection_c &verts)
 {
+	SYS_ASSERT(NumVertices > 0);
+
 	bitvec_c  in_verts(NumVertices);
 	bitvec_c out_verts(NumVertices);
 

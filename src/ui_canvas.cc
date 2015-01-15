@@ -59,7 +59,7 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 	highlight(), split_ld(-1),
 	drag_lines(),
 	scale_lines(),
-	seen_sectors(8)
+	seen_sectors()
 { }
 
 //
@@ -182,9 +182,6 @@ void UI_Canvas::DrawEverything()
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
 	{
-		if (seen_sectors.size() < NumSectors)
-			seen_sectors.resize(NumSectors);
-
 		seen_sectors.clear_all();
 	}
 
