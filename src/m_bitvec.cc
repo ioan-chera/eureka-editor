@@ -100,8 +100,10 @@ void bitvec_c::set(int n)
 {
 	SYS_ASSERT(n >= 0);
 
-	if (n >= num_elem)
-		resize(n + 32);
+	while (n >= num_elem)
+	{
+		resize(num_elem * 3 / 2 + 16);
+	}
 
 	raw_set(n);
 }
@@ -120,12 +122,10 @@ void bitvec_c::clear(int n)
 
 void bitvec_c::toggle(int n)
 {
-	SYS_ASSERT(n >= 0);
-
-	if (n >= num_elem)
-		resize(n + 32);
-
-	raw_toggle(n);
+	if (get(n))
+		clear(n);
+	else
+		set(n);
 }
 
 
