@@ -1874,7 +1874,7 @@ void UI_Render3D::DrawInfoBar()
 
 	DrawNumber(cx, cy, "x", I_ROUND(view.x), -5);
 	DrawNumber(cx, cy, "y", I_ROUND(view.y), -5);
-	DrawNumber(cx, cy, "z",         view.z,  -5);
+	DrawNumber(cx, cy, "z",         view.z,  -4);
 
 	int ang = I_ROUND(view.angle * 180 / M_PI);
 	if (ang < 0) ang += 360;
@@ -1885,14 +1885,15 @@ void UI_Render3D::DrawInfoBar()
 
 	DrawFlag(cx, cy, view.gravity, "GRAVITY", "gravity");
 
-	DrawFlag(cx, cy, view.texturing, "Tex", "tex");
-	DrawFlag(cx, cy, view.lighting,  "Lit", "lit");
-	DrawFlag(cx, cy, view.sprites,   "Obj", "obj");
-
-
 	fl_color(INFO_TEXT_COL);
 
-	DrawNumber(cx, cy, "gamma", usegamma, 1);
+	DrawNumber(cx, cy, "gam", usegamma, 1);
+
+	cx += 10;
+
+	DrawFlag(cx, cy, !view.texturing, "!Tx", "tex");
+	DrawFlag(cx, cy, !view.lighting,  "!Lt", "lit");
+	DrawFlag(cx, cy, !view.sprites,   "!Ob", "obj");
 
 	fl_pop_clip();
 }
