@@ -145,10 +145,8 @@ private:
 public:
 	RecentFiles_c() : size(0)
 	{
-		for (int k = 0 ; k < MAX_RECENT ; k++)
-		{
-			filenames[k] = map_names[k] = NULL;
-		}
+		memset(filenames, 0, sizeof(filenames));
+		memset(filenames, 0, sizeof(map_names));
 	}
 
 	~RecentFiles_c()
@@ -203,10 +201,14 @@ public:
 
 	void erase(int index)
 	{
+		SYS_ASSERT(0 <= index && index < MAX_RECENT);
+
 #ifdef FREE_RECENT_FILES 
 		StringFree(filenames[index]);
 		StringFree(map_names[index]);
 #endif
+
+		SYS_ASSERT(size < MAX_RECENT);
 
 		size--;
 
