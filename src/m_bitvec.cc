@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -38,10 +38,12 @@ bitvec_c::bitvec_c(int n_elements) : num_elem(n_elements)
 	clear_all();
 }
 
+
 bitvec_c::~bitvec_c()
 {
 	delete[] d;
 }
+
 
 void bitvec_c::resize(int n_elements)
 {
@@ -76,25 +78,30 @@ void bitvec_c::resize(int n_elements)
 	}
 }
 
+
 bool bitvec_c::get(int n) const
 {
 	return (d[n >> 3] & (1 << (n & 7))) ? true : false;
 }
+
 
 void bitvec_c::set(int n)
 {
 	d[n >> 3] |= (1 << (n & 7));
 }
 
+
 void bitvec_c::clear(int n)
 {
 	d[n >> 3] &= ~(1 << (n & 7));
 }
 
+
 void bitvec_c::toggle(int n)
 {
 	d[n >> 3] ^= (1 << (n & 7));
 }
+
 
 void bitvec_c::set_all()
 {
@@ -103,12 +110,14 @@ void bitvec_c::set_all()
 	memset(d, 0xFF, total);
 }
 
+
 void bitvec_c::clear_all()
 {
 	int total = (num_elem / 8) + 1;
 
 	memset(d, 0, total);
 }
+
 
 void bitvec_c::toggle_all()
 {
@@ -121,6 +130,7 @@ void bitvec_c::toggle_all()
 		*pos++ ^= 0xFF;
 }
 
+
 void bitvec_c::frob(int n, sel_op_e op)
 {
 	switch (op)
@@ -129,21 +139,6 @@ void bitvec_c::frob(int n, sel_op_e op)
 		case BOP_REMOVE: clear(n); break;
 		default: toggle(n); break;
 	}
-}
-
-void bitvec_c::merge(const bitvec_c& other)
-{
-	SYS_ASSERT(other.size() == size());
-
-	int total = (num_elem / 8) + 1;
-
-	const byte *src   = other.d;
-	const byte *s_end = other.d + total;
-
-	byte *dest = d;
-
-	while (src < s_end)
-		*dest++ |= *src++;
 }
 
 
