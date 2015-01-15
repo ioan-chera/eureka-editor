@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -77,12 +77,7 @@ int selection_c::count_obj() const
 bool selection_c::get(int n) const
 {
 	if (bv)
-	{
-		if (n >= bv->size())
-			return false;
-
 		return bv->get(n);
-	}
 
 	for (int i = 0 ; i < count ; i++)
 		if (objs[i] == n)
@@ -110,12 +105,6 @@ void selection_c::set(int n)
 
 	if (bv)
 	{
-		// the bitvector is too small, grow it
-		while (n >= bv->size())
-		{
-			bv->resize(bv->size() * 2);
-		}
-
 		bv->set(n);
 		b_count++;
 		return;
@@ -129,9 +118,6 @@ void selection_c::clear(int n)
 {
 	if (bv)
 	{
-		if (n >= bv->size())
-			return;
-
 		if (! get(n))
 			return;
 

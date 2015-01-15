@@ -115,7 +115,7 @@ friend class selection_c;
 private:
 	const selection_c *sel;
 
-	// this is the position in the objs[] array when there is no
+	// this is position in the objs[] array when there is no
 	// bit vector, otherwise it is the object number itself
 	// (and the corresponding bit will be one).
 	int pos;
