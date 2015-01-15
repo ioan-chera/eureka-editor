@@ -73,8 +73,6 @@ typedef enum
 
 } key_context_e;
 
-typedef void (* command_func_t)(void);
-
 
 /* --- general manipulation --- */
 
@@ -87,12 +85,9 @@ keycode_t M_ParseKeyString(const char *str);
 const char * M_KeyToString(keycode_t key);
 
 
-void M_RegisterCommand(const char *name, command_func_t func);
+keycode_t M_TranslateKey(int key, int state);
 
-void M_LoadBindings();
-void M_SaveBindings();
-
-void M_RemoveBinding(keycode_t key, key_context_e context);
+key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 
 /* --- preferences dialog stuff --- */
@@ -118,15 +113,34 @@ const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
 void M_DeleteLocalBinding(int index);
 
 
+void M_LoadBindings();
+void M_SaveBindings();
+
+void M_RemoveBinding(keycode_t key, key_context_e context);
+
+
 /* --- command execution stuff --- */
 
-#define MAX_EXEC_PARAM	16
+typedef void (* command_func_t)(void);
 
-keycode_t M_TranslateKey(int key, int state);
+typedef struct
+{
+	const char *name;
 
-key_context_e M_ModeToKeyContext(obj_type_e mode);
+	command_func_t func;
+
+	// this value is computed when registering
+	key_context_e req_context;
+
+} editor_command_t;
+
+
+void M_RegisterCommandList(editor_command_t * list);
+
 
 // parameter(s) for command function -- must be valid strings
+#define MAX_EXEC_PARAM	16
+
 extern const char * EXEC_Param[MAX_EXEC_PARAM];
 
 // result from command function, 0 is OK

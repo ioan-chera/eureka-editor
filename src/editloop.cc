@@ -1341,87 +1341,223 @@ void Editor_Resize(int is_width, int is_height)
 }
 
 
+//------------------------------------------------------------------------
+
+
+static editor_command_t  command_table[] =
+{
+	/* ------ interface stuff ------ */
+
+	{	"Nothing",
+		&CMD_Nothing
+	},
+
+	{	"Quit",
+		&CMD_Quit
+	},
+
+	{	"EditMode",
+		&CMD_EditMode
+	},
+
+ 	{	"BrowserMode",
+		&CMD_BrowserMode
+	},
+
+	{	"Set",
+		&CMD_SetVar
+	},
+
+	{	"Toggle",
+		&CMD_ToggleVar
+	},
+
+	{	"Check",
+		&CMD_CheckMap
+	},
+
+	{	"MetaKey",
+		&CMD_MetaKey
+	},
+
+	{	"GivenFile",
+		&CMD_GivenFile
+	},
+
+	{	"FlipMap",
+		&CMD_FlipMap
+	},
+
+	{	"SelectAll",
+		&CMD_SelectAll
+	},
+
+	{	"UnselectAll",
+		&CMD_UnselectAll
+	},
+
+	{	"InvertSelection",
+		&CMD_InvertSelection
+	},
+
+	{	"Scroll",
+		&CMD_Scroll
+	},
+
+	{	"GoToCamera",
+		&CMD_GoToCamera
+	},
+
+	{	"PlaceCamera",
+		&CMD_PlaceCamera
+	},
+
+	{	"JumpToObject",
+		&CMD_JumpToObject
+	},
+
+	{	"Zoom",
+		&CMD_Zoom
+	},
+
+	{	"ZoomWholeMap",
+		&CMD_ZoomWholeMap
+	},
+
+	{	"ZoomSelection",
+		&CMD_ZoomSelection
+	},
+
+	{	"GRID_Step",
+		&GRID_Step
+	},
+
+
+	/* ----- general map stuff ----- */
+
+	{	"Insert",
+		&CMD_Insert
+	},
+
+	{	"Delete",
+		&CMD_Delete
+	},
+
+	{	"Mirror",
+		&CMD_Mirror
+	},
+
+	{	"Rotate90",
+		&CMD_Rotate90
+	},
+
+	{	"Enlarge",
+		&CMD_Enlarge
+	},
+
+	{	"Shrink",
+		&CMD_Shrink
+	},
+
+	{	"Disconnect",
+		&CMD_Disconnect
+	},
+
+	{	"Merge",
+		&CMD_Merge
+	},
+
+	{	"Quantize",
+		&CMD_Quantize
+	},
+
+	{	"CopyAndPaste",
+		&CMD_CopyAndPaste
+	},
+
+	{	"CopyProperties",
+		&CMD_CopyProperties
+	},
+
+	{	"ApplyTag",
+		&CMD_ApplyTag
+	},
+
+	{	"PruneUnused",
+		&CMD_PruneUnused
+	},
+
+
+	/* -------- linedef -------- */
+
+	{	"LIN_Flip",
+		&LIN_Flip
+	},
+
+	{	"LIN_SplitHalf",
+		&LIN_SplitHalf
+	},
+
+	{	"LIN_SelectPath",
+		&LIN_SelectPath
+	},
+
+	/* -------- sector -------- */
+
+	{	"SEC_Floor",
+		&SEC_Floor
+	},
+
+	{	"SEC_Ceil",
+		&SEC_Ceil
+	},
+
+	{	"SEC_Light",
+		&SEC_Light
+	},
+
+	{	"SEC_SelectGroup",
+		&SEC_SelectGroup
+	},
+
+	{	"SEC_SwapFlats",
+		&SEC_SwapFlats
+	},
+
+	/* -------- thing -------- */
+
+	{	"TH_Spin",
+		&TH_SpinThings
+	},
+
+	/* -------- vertex -------- */
+
+	{	"VERT_Reshape",
+		&VERT_Reshape
+	},
+
+	/* -------- browser -------- */
+
+	{	"BR_CycleCategory",
+		&BR_CycleCategory
+	},
+
+	{	"BR_ClearSearch",
+		&BR_ClearSearch
+	},
+
+	{	"BR_Scroll",
+		&BR_Scroll
+	},
+
+	// end of command list
+	{	NULL, NULL	}
+};
+
+
 void Editor_RegisterCommands()
 {
-	/* global | interface stuff */
-
-	M_RegisterCommand("Nothing", &CMD_Nothing);
-
-	M_RegisterCommand("Quit", &CMD_Quit);
-	M_RegisterCommand("EditMode", &CMD_EditMode);
- 	M_RegisterCommand("BrowserMode", &CMD_BrowserMode);
-
-	M_RegisterCommand("Set",    &CMD_SetVar);
-	M_RegisterCommand("Toggle", &CMD_ToggleVar);
-
-	M_RegisterCommand("Check",   &CMD_CheckMap);
-	M_RegisterCommand("MetaKey", &CMD_MetaKey);
-
-	M_RegisterCommand("GivenFile", &CMD_GivenFile);
-	M_RegisterCommand("FlipMap",   &CMD_FlipMap);
-
-	M_RegisterCommand("SelectAll", &CMD_SelectAll);
-	M_RegisterCommand("UnselectAll", &CMD_UnselectAll);
-	M_RegisterCommand("InvertSelection", &CMD_InvertSelection);
-
-	M_RegisterCommand("Scroll", &CMD_Scroll);
-	M_RegisterCommand("GoToCamera",  &CMD_GoToCamera);
-	M_RegisterCommand("PlaceCamera", &CMD_PlaceCamera);
-	M_RegisterCommand("JumpToObject", &CMD_JumpToObject);
-
-	M_RegisterCommand("Zoom",          &CMD_Zoom);
-	M_RegisterCommand("ZoomWholeMap",  &CMD_ZoomWholeMap);
-	M_RegisterCommand("ZoomSelection", &CMD_ZoomSelection);
-
-	M_RegisterCommand("GRID_Step", &GRID_Step);
-
-	/* global | map stuff */
-
-	M_RegisterCommand("Insert", &CMD_Insert);
-	M_RegisterCommand("Delete", &CMD_Delete);
-
-	M_RegisterCommand("Mirror",   &CMD_Mirror);
-	M_RegisterCommand("Rotate90", &CMD_Rotate90);
-	M_RegisterCommand("Enlarge",  &CMD_Enlarge);
-	M_RegisterCommand("Shrink",   &CMD_Shrink);
-
-	M_RegisterCommand("Disconnect", &CMD_Disconnect);
-	M_RegisterCommand("Merge",      &CMD_Merge);
-	M_RegisterCommand("Quantize",   &CMD_Quantize);
-
-	M_RegisterCommand("CopyAndPaste",   &CMD_CopyAndPaste);
-	M_RegisterCommand("CopyProperties", &CMD_CopyProperties);
-
-	M_RegisterCommand("ApplyTag",    &CMD_ApplyTag);
-	M_RegisterCommand("PruneUnused", &CMD_PruneUnused);
-
-	/* line */
-
-	M_RegisterCommand("LIN_Flip", &LIN_Flip);
-	M_RegisterCommand("LIN_SplitHalf", &LIN_SplitHalf);
-	M_RegisterCommand("LIN_SelectPath", &LIN_SelectPath);
-
-	/* sector */
-
-	M_RegisterCommand("SEC_Floor", &SEC_Floor);
-	M_RegisterCommand("SEC_Ceil",  &SEC_Ceil);
-	M_RegisterCommand("SEC_Light", &SEC_Light);
-	M_RegisterCommand("SEC_SelectGroup", &SEC_SelectGroup);
-	M_RegisterCommand("SEC_SwapFlats", &SEC_SwapFlats);
-
-	/* thing */
-
-	M_RegisterCommand("TH_Spin", &TH_SpinThings);
-
-	/* vertex */
-
-	M_RegisterCommand("VERT_Reshape", &VERT_Reshape);
-
-	/* browser */
-
-	M_RegisterCommand("BR_CycleCategory", &BR_CycleCategory);
-	M_RegisterCommand("BR_ClearSearch", &BR_ClearSearch);
-	M_RegisterCommand("BR_Scroll", &BR_Scroll);
+	M_RegisterCommandList(command_table);
 }
 
 

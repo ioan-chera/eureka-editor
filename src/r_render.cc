@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -2504,22 +2504,67 @@ void R3D_Align(void)
 }
 
 
+//------------------------------------------------------------------------
+
+
+static editor_command_t  render_commands[] =
+{
+	{	"3D_Forward",
+		&R3D_Forward
+	},
+
+	{	"3D_Backward",
+		&R3D_Backward
+	},
+
+	{	"3D_Left",
+		&R3D_Left
+	},
+
+	{	"3D_Right",
+		&R3D_Right
+	},
+
+	{	"3D_Up",
+		&R3D_Up
+	},
+
+	{	"3D_Down",
+		&R3D_Down
+	},
+
+	{	"3D_Turn",
+		&R3D_Turn
+	},
+
+	{	"3D_DropToFloor",
+		&R3D_DropToFloor
+	},
+
+	{	"3D_Gamma",
+		&R3D_Gamma
+	},
+
+	{	"3D_Set",
+		&R3D_Set
+	},
+
+	{	"3D_Toggle",
+		&R3D_Toggle
+	},
+
+	{	"3D_Align",
+		&R3D_Align
+	},
+
+	// end of command list
+	{	NULL, NULL	}
+};
+
+
 void Render3D_RegisterCommands()
 {
-	M_RegisterCommand("3D_Forward",  &R3D_Forward);
-	M_RegisterCommand("3D_Backward", &R3D_Backward);
-	M_RegisterCommand("3D_Left",     &R3D_Left);
-	M_RegisterCommand("3D_Right",    &R3D_Right);
-
-	M_RegisterCommand("3D_Up",       &R3D_Up);
-	M_RegisterCommand("3D_Down",     &R3D_Down);
-	M_RegisterCommand("3D_Turn",     &R3D_Turn);
-	M_RegisterCommand("3D_DropToFloor", &R3D_DropToFloor);
-
-	M_RegisterCommand("3D_Gamma",  &R3D_Gamma);
-	M_RegisterCommand("3D_Set",    &R3D_Set);
-	M_RegisterCommand("3D_Toggle", &R3D_Toggle);
-	M_RegisterCommand("3D_Align",  &R3D_Align);
+	M_RegisterCommandList(render_commands);
 }
 
 

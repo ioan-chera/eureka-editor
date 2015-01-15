@@ -29,15 +29,6 @@ const char * EXEC_Param[MAX_EXEC_PARAM];
 int EXEC_Errno;
 
 
-typedef struct
-{
-	const char *name;
-	command_func_t func;
-	key_context_e req_context;
-
-} editor_command_t;
-
-
 static std::vector< editor_command_t * > all_commands;
 
 
@@ -64,6 +55,19 @@ void M_RegisterCommand(const char *name, command_func_t func)
 	cmd->req_context = ContextFromName(name);
 
 	all_commands.push_back(cmd);
+}
+
+
+void M_RegisterCommandList(editor_command_t * list)
+{
+	// the structures are used directly
+
+	for ( ; list->name ; list++)
+	{
+		list->req_context = ContextFromName(list->name);
+
+		all_commands.push_back(list);
+	}
 }
 
 
