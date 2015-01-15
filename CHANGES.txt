@@ -7,9 +7,7 @@ CHANGES IN Eureka
 +  new 'RECENT' category for Texture/Flat/Thing browsers,
    and rebound the '\' key to toggle this category on/off
 
-+  new 'File / Delete Map' command
-
-+  new 'File / Rename Map' command
++  new 'Rename Map' and 'Delete Map' commands in FILE menu
 
 +  vertex reshaping commands:
    -  'I' moves selected vertices onto a line
@@ -32,6 +30,10 @@ CHANGES IN Eureka
 -  new preference to maximize window on start (Linux, WIN32 only)
 
 -  the Default Properties now has its own panel
+
+-  better way to show how a linedef will be split (esp. when snapping)
+
+-  added info bar for 3D view, shows current position, angle, etc...
 
 -  added 'Toggle 3D View' command to View menu
 
