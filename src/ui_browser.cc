@@ -666,8 +666,8 @@ void UI_Browser_Box::Populate_Sprites()
 		else
 			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
 
-		int pic_w = 80;
-		int pic_h = 80;
+		int pic_w = 64;
+		int pic_h = 72;
 
 		int item_w = 8 + MAX(pic_w, 64) + 2;
 		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
