@@ -110,7 +110,16 @@ static void UpdateSplitLine(int drag_vert = -1)
 	}
 
 	if (edit.split_line.valid())
-		main_win->canvas->SplitLineSet(edit.split_line.num);
+	{
+		int new_x = grid.SnapX(edit.map_x);
+		int new_y = grid.SnapY(edit.map_y);
+
+		// match logic in Insert_Vertex
+		if (! grid.snap)
+			MoveCoordOntoLineDef(edit.split_line.num, &new_x, &new_y);
+
+		main_win->canvas->SplitLineSet(edit.split_line.num, new_x, new_y);
+	}
 	else
 		main_win->canvas->SplitLineForget();
 }

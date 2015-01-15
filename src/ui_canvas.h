@@ -34,6 +34,8 @@ private:
 	Objid highlight;
 
 	int split_ld;
+	int split_x;
+	int split_y;
 
 	// sel-box state
 	int  selbox_x1, selbox_y1;  // map coords
@@ -73,7 +75,7 @@ public:
 	void HighlightSet(Objid& obj);
 	void HighlightForget();
 
-	void SplitLineSet(int ld);
+	void SplitLineSet(int ld, int new_x, int new_y);
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
@@ -118,7 +120,9 @@ private:
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
+
 	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2, bool reverse = false);
+	void DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
 	void DrawCamera();

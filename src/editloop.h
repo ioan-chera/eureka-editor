@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -44,7 +44,7 @@ typedef enum
 } editor_action_e;
 
 
-/* this holds some miscellaneous editor state */
+/* this holds some important editor state */
 
 typedef struct
 {

@@ -532,7 +532,10 @@ void UI_Canvas::DrawLinedefs()
 				else
 					fl_color(LIGHTGREY);
 
-				DrawKnobbyLine(x1, y1, x2, y2);
+				if (n == split_ld)
+					DrawSplitLine(x1, y1, x2, y2);
+				else
+					DrawKnobbyLine(x1, y1, x2, y2);
 
 				if (n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
 				{
@@ -882,12 +885,15 @@ void UI_Canvas::HighlightForget()
 }
 
 
-void UI_Canvas::SplitLineSet(int ld)
+void UI_Canvas::SplitLineSet(int ld, int new_x, int new_y)
 {
-	if (split_ld == ld)
+	if (split_ld == ld && split_x == new_x && split_y == new_y)
 		return;
 	
 	split_ld = ld;
+	split_x  = new_x;
+	split_y  = new_y;
+
 	redraw();
 }
 
@@ -1256,6 +1262,27 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
 }
 
 
+void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
+{
+	// show how and where the line will be split
+
+	int scr_x1 = SCREENX(map_x1);
+	int scr_y1 = SCREENY(map_y1);
+	int scr_x2 = SCREENX(map_x2);
+	int scr_y2 = SCREENY(map_y2);
+
+	int scr_mx = SCREENX(split_x);
+	int scr_my = SCREENY(split_y);
+
+	fl_line(scr_x1, scr_y1, scr_mx, scr_my);
+	fl_line(scr_x2, scr_y2, scr_mx, scr_my);
+
+	int size = 7;
+
+	fl_pie(scr_mx - size/2, scr_my - size/2, size, size, 0, 360);
+}
+
+
 /*
  *  DrawMapVector - draw an arrow on the screen from map coords
  */
@@ -1371,7 +1398,7 @@ void UI_Canvas::DrawSnapMarker()
 		return;
 
 	int map_x = grid.SnapX(edit.map_x);
-	int map_y = grid.SnapX(edit.map_y);
+	int map_y = grid.SnapY(edit.map_y);
 
 	if (! Vis(map_x, map_y, 20))
 		return;
