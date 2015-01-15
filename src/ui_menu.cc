@@ -526,9 +526,9 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 	
+		{ "&Things",       0, FCAL browser_do_things },
 		{ "Te&xtures",     0, FCAL browser_do_textures },
 		{ "&Flats",        0, FCAL browser_do_flats },
-		{ "&Things",       0, FCAL browser_do_things },
 		{ "&Line Types",   0, FCAL browser_do_lines },
 		{ "&Sector Types", 0, FCAL browser_do_sectors },
 
