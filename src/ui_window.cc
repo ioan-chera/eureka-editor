@@ -350,7 +350,10 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
 		sprintf(title_buf, "Unsaved %s", Level_name);
 	}
 
+	// this just seems like visual noise, disabled for now
+#if 0
 	strcat(title_buf, " - Eureka");
+#endif
 
 	copy_label(title_buf);
 }
