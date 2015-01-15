@@ -745,6 +745,8 @@ bool CMD_Paste()
 
 	BA_End();
 
+	edit.error_mode = false;
+
 	if (reselect)
 		ReselectGroup();
 

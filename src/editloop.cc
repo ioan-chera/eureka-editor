@@ -819,13 +819,11 @@ void CMD_PlaceCamera(void)
 
 void CMD_CopyAndPaste(void)
 {
-	if (edit.Selected->empty() || edit.highlight.is_nil())
+	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
 		Beep("Nothing to copy and paste");
 		return;
 	}
-
-	edit.error_mode = false;
 
 	if (CMD_Copy())
 	{
