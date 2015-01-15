@@ -72,9 +72,9 @@ private:
 	char kind;
 
 	Fl_Choice *category;
-	Fl_Choice *sortm;
- 
 	Fl_Input  *search;
+
+	Fl_Check_Button *alpha;
 	Fl_Check_Button *pics;
 
 	UI_Scroll *scroll;

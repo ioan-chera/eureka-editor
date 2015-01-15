@@ -194,53 +194,55 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	add(category);
 
-	cy += category->h() + 6;
+	cy += category->h() + 9;
 
 
-	sortm = NULL;
-
-	if (strchr("OSL", kind))
-	{
-		sortm = new Fl_Choice(cx, cy, 160, 22, "Sort:");
-		sortm->align(FL_ALIGN_LEFT);
-		sortm->add("Alphabetical|Numeric");
-		sortm->value((kind == 'O') ? 0 : 1);
-		sortm->labelsize(KF_fonth);
-		sortm->textsize(KF_fonth);
-
-		// things need to repopulate (in picture mode anyway)
-		if (kind == 'O')
-			sortm->callback(repop_callback, this);
-		else
-			sortm->callback(sort_callback, this);
-
-		add(sortm);
-
-		cy += sortm->h() + 6;
-	}
-
-
-	search = new Fl_Input(cx, cy, 100, 22, "Match:");
+	search = new Fl_Input(cx, cy, 120, 22, "Match:");
 	search->align(FL_ALIGN_LEFT);
 	search->callback(filter_callback, this);
 	search->when(FL_WHEN_CHANGED);
 
 	add(search);
 
+	cy += search->h() + 6;
+
+
+	alpha = NULL;
+
+	if (strchr("OSL", kind))
+	{
+		alpha = new Fl_Check_Button(cx, cy, 75, 22, " Alpha");
+
+		// things need to repopulate (in picture mode anyway)
+		if (kind == 'O')
+			alpha->callback(repop_callback, this);
+		else
+			alpha->callback(sort_callback, this);
+ 
+		// things usually show pics (with sprite name), so want alpha
+		if (kind == 'O')
+			alpha->value(1);
+
+		add(alpha);
+	}
+
 
 	pics = NULL;
 
-	if (strchr("O", kind))  // TODO: non-pic mode for textures / flats
+	if (strchr("O", kind))
 	{
-		pics = new Fl_Check_Button(X+202, cy, 20, 22, "Pics");
-		pics->align(FL_ALIGN_RIGHT);
+		pics = new Fl_Check_Button(X+172, cy, 64, 22, " Pics");
 		pics->value(1);
 		pics->callback(repop_callback, this);
 
 		add(pics);
 	}
 
-	cy += search->h() + 12;
+
+	if (strchr("OSL", kind))
+	{
+		cy += 30;
+	}
 
 
 	int top_H = cy - Y;
@@ -511,7 +513,7 @@ void UI_Browser_Box::Sort()
 		scroll->Remove_first();
 	}
 
-	int method = sortm ? sortm->value() : 0;
+	int method = alpha ? (1 - alpha->value()) : 0;
 
 	if (method == 0 && kind == 'L')
 		method = 2;
@@ -659,7 +661,7 @@ void UI_Browser_Box::Populate_Sprites()
 		if (y_stricmp(info->sprite, "NULL") == 0)
 			continue;
 
-		if (sortm->value() & 1)
+		if (alpha->value() == 0)
 			sprintf(full_desc, "%d", TI->first);
 		else
 			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
@@ -1120,9 +1122,9 @@ bool UI_Browser_Box::ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (strcmp(tokens[0], "sort") == 0 && num_tok >= 2 && sortm)
+	if (strcmp(tokens[0], "sort") == 0 && num_tok >= 2 && alpha)
 	{
-		sortm->value(atoi(tokens[1]) ? 1 : 0);
+		alpha->value(atoi(tokens[1]) ? 0 : 1);
 		Sort();
 		return true;
 	}
@@ -1152,8 +1154,8 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 	if (isprint(cat))
 		fprintf(fp, "browser %c cat %c\n", kind, cat);
 
-	if (sortm)
-		fprintf(fp, "browser %c sort %d\n", kind, sortm->value());
+	if (alpha)
+		fprintf(fp, "browser %c sort %d\n", kind, 1 - alpha->value());
 
 	fprintf(fp, "browser %c search \"%s\"\n", kind, StringTidy(search->value(), "\""));
 
