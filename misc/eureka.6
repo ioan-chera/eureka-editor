@@ -76,6 +76,14 @@ The following options blah...... FIXME
 <file>       Config file to load / save
 .SH FILES
 .TP
+.I "$PREFIX/share/eureka/
+The installation directory for Eureka.
+PREFIX is typically /usr or /usr/local,
+depending on how Eureka was installed.
+This directory contains the standard key bindings,
+plus all the definition files (with .ugh extension)
+for the supported games, ports and mods.
+.TP
 .I "~/.eureka/config.cfg"
 Contains user settings
 .TP
@@ -84,7 +92,7 @@ Contains user key bindings
 .TP
 .I "~/.eureka/logs.txt"
 The logs from the previous session of Eureka,
-or the current one if Eureka is currently running
+or the current one if Eureka is currently running.
 .TP
 .I "~/.eureka/backups"
 Whenever a file is saved, Eureka makes a backup of the existing file
