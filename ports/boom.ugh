@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2014 Andrew Apted
+#  Copyright (C) 2001-2015 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -39,6 +39,9 @@ feature friend_flag 1
 
 thing 5001 - nv  20 NULL  "BOOM: Point pusher"
 thing 5002 - nv  20 NULL  "BOOM: Point puller"
+
+# an MBF feature, but some "Boom Compatible" ports support it
+thing  888 - -  12 DOGS   "Dog (MBF)"
 
 
 #---- BOOM LINETYPES ----------

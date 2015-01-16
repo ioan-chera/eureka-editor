@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2015 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -60,7 +60,6 @@ thing    1 p -  16 PLAY   "Player 1 start"
 thing    2 p -  16 PLAY   "Player 2 start"
 thing    3 p -  16 PLAY   "Player 3 start"
 thing    4 p -  16 PLAY   "Player 4 start"
-thing  888 p -  12 DOGS   "Dog (MBF)"
 thing   11 p n  16 PLAYF1 "Deathmatch start"
 thing   14 p -  16 TFOG   "Teleport exit"
 
