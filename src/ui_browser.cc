@@ -833,15 +833,23 @@ void UI_Browser_Box::CycleCategory(int dir)
 	if (total_cats <= 1)
 		return;
 
-	int new_cat = 0;
+	int new_cat = category->value();
 
-	if (dir > 0)
+	for (int loop = 0 ; loop < 2 ; loop++)
 	{
-		new_cat = (category->value() + 1) % total_cats;
-	}
-	else if (dir < 0)
-	{
-		new_cat = (category->value() + total_cats - 1) % total_cats;
+		if (dir > 0)
+		{
+			new_cat = (new_cat + 1) % total_cats;
+		}
+		else if (dir < 0)
+		{
+			new_cat = (new_cat + total_cats - 1) % total_cats;
+		}
+
+		// skip the RECENT category
+		// TODO : controllable via a /xxx flag
+		if (new_cat != 1)
+			break;
 	}
 
 	if (category->value(new_cat))
