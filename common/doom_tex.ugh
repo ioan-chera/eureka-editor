@@ -228,9 +228,6 @@ texture n SP_ROCK1
 texture n STONE
 texture n SW1STON6
 texture n SW2STON6
-texture n SKY1
-texture n SKY2
-texture n SKY3
 
 texture t BIGDOOR1
 texture t BLAKWAL1
