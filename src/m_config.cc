@@ -1146,7 +1146,7 @@ void dump_command_line_options(FILE *fp)
 			fprintf (fp, "       ");
 
 		if (o->long_name)
-			fprintf (fp, "-%-*s   ", name_maxlen, o->long_name);
+			fprintf (fp, "--%-*s   ", name_maxlen, o->long_name);
 		else
 			fprintf (fp, "%*s  ", name_maxlen + 2, "");
 
