@@ -881,7 +881,7 @@ static void ShowHelp()
 			"Home page: http://eureka-editor.sf.net/\n"
 			"\n");
 
-	printf( "USAGE: eureka [options...] [FILE]\n"
+	printf( "USAGE: eureka [options...] [FILE...]\n"
 			"\n"
 			"Available options are:\n");
 

@@ -102,43 +102,6 @@ static const opt_desc_t options[] =
 	// A few options must be handled in an early pass
 	//
 
-	{	"help",
-		"h",
-		OPT_BOOLEAN,
-		"1",
-		"Show usage summary",
-		NULL,
-		&show_help
-	},
-
-	{	"version",
-		"v",
-		OPT_BOOLEAN,
-		"1",
-		"Show version info",
-		NULL,
-		&show_version
-	},
-
-	{	"debug",
-		"d",
-		OPT_BOOLEAN,
-		"1",
-		"Enable debugging messages",
-		NULL,
-		&Debugging
-	},
-
-	{	"quiet",
-		"q",
-		OPT_BOOLEAN,
-		"1<",
-		"Quiet mode (no messages on stdout)",
-		NULL,
-		&Quiet
-	},
-
-
 	{	"home",
 		0,
 		OPT_STRING,
@@ -175,18 +138,45 @@ static const opt_desc_t options[] =
 		&config_file
 	},
 
+	{	"help",
+		"h",
+		OPT_BOOLEAN,
+		"1",
+		"Show usage summary",
+		NULL,
+		&show_help
+	},
+
+	{	"version",
+		"v",
+		OPT_BOOLEAN,
+		"1",
+		"Show version info",
+		NULL,
+		&show_version
+	},
+
+	{	"debug",
+		"d",
+		OPT_BOOLEAN,
+		"1",
+		"Enable debugging messages",
+		NULL,
+		&Debugging
+	},
+
+	{	"quiet",
+		"q",
+		OPT_BOOLEAN,
+		"1",
+		"Quiet mode (no messages on stdout)",
+		NULL,
+		&Quiet
+	},
+
 	//
 	// Normal options from here on....
 	//
-
-	{	"iwad",
-		"i",
-		OPT_STRING,
-		"",
-		"The name of the IWAD (game data)",
-		"<file>",
-		&Iwad_name
-	},
 
 	{	"file",
 		"f",
@@ -206,6 +196,15 @@ static const opt_desc_t options[] =
 		&Resource_list
 	},
 
+	{	"iwad",
+		"i",
+		OPT_STRING,
+		"",
+		"The name of the IWAD (game data)",
+		"<file>",
+		&Iwad_name
+	},
+
 	{	"port",
 		"p",
 		OPT_STRING,
@@ -218,7 +217,7 @@ static const opt_desc_t options[] =
 	{	"warp",
 		"w",
 		OPT_STRING,
-		"w",
+		"w<",
 		"Select level to edit",
 		"<map>",
 		&Level_name
@@ -1135,9 +1134,13 @@ void dump_command_line_options(FILE *fp)
 		}
 	}
 
+	for (int pass = 0 ; pass < 2 ; pass++)
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
 		if (strchr(o->flags, 'v'))
+			continue;
+
+		if ((strchr(o->flags, '1') ? 1 : 0) != pass)
 			continue;
 
 		if (o->short_name)
