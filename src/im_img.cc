@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -297,7 +297,6 @@ Img * Img::spectrify() const
 {
 	Img *omg = new Img(width(), height(), p->opaque);
 
-	int x,y;
 	byte grey = 104;
 
 	// FIXME GAME CONFIG ITEM
@@ -311,8 +310,8 @@ Img * Img::spectrify() const
 
 	img_pixel_t *dest = omg->wbuf();
 
-	for (y = 0 ; y < H ; y++)
-	for (x = 0 ; x < W ; x++)
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
 	{
 		img_pixel_t pix = src[y * W + x];
 
@@ -378,6 +377,44 @@ Img * Img::scale_img (double scale)
 				*orow++ = irow[*i];
 		}
 		delete[] ix;
+	}
+
+	return omg;
+}
+
+
+/*
+ *  Copy the image, but remap pixels in the range 'src1..src2' to the
+ *  range 'targ1..targ2'.
+ */
+Img * Img::color_remap(int src1, int src2, int targ1, int targ2) const
+{
+	SYS_ASSERT( src1 <=  src2);
+	SYS_ASSERT(targ1 <= targ2);
+
+	Img *omg = new Img(width(), height(), p->opaque);
+
+	int W = width();
+	int H = height();
+
+	const img_pixel_t *src = buf();
+
+	img_pixel_t *dest = omg->wbuf();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		img_pixel_t pix = src[y * W + x];
+
+		if (src1 <= pix && pix <= src2)
+		{
+			if (targ1 == targ2)
+				pix = targ1;
+			else
+				pix = targ1 + ((int)pix - src1) * (targ2 - targ1 + 1) / (src2 - src1 + 1);
+		}
+
+		dest[y * W + x] = pix;
 	}
 
 	return omg;
