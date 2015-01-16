@@ -20,7 +20,8 @@ and low system requirements (e.g. a 3D card is
 required).
 .SH OPTIONS
 Note that long options are shown with two dashes, but may also be
-used with a single dash for compatibility with DOOM ports.
+used with a single dash for compatibility with the original DOOM
+binary and various source ports.
 .TP
 .BI "\-f, \-file" " <file>..."
 Wad file(s) to edit.
@@ -61,6 +62,7 @@ Enable debugging messages
 Quiet mode (no messages on stdout)
 .SH CONFIGURATION
 The following options blah...... FIXME
+.TP
 \fB\-home\fR
 <dir>        Home directory
 .TP
@@ -72,3 +74,41 @@ The following options blah...... FIXME
 .TP
 \fB\-config\fR
 <file>       Config file to load / save
+.SH FILES
+.TP
+.I "~/.eureka/config.cfg"
+Contains user settings
+.TP
+.I "~/.eureka/bindings.cfg"
+Contains user key bindings
+.TP
+.I "~/.eureka/logs.txt"
+The logs from the previous session of Eureka,
+or the current one if Eureka is currently running
+.TP
+.I "~/.eureka/backups"
+Whenever a file is saved, Eureka makes a backup of the existing file
+and stores it here, in a directory based on the filename.
+Multiple backups are made, upto a certain limit on number and size of
+the files (the 'backup_max_files' and 'backup_max_space' config variables).
+If something goes awry with your wad, look here!
+.TP
+.I "~/.eureka/iwads"
+IWAD files can be placed here and Eureka will find them automatically
+.SH "ENVIRONMENT"
+.TP
+.BI DOOMWADDIR
+If set, contains a single directory where Eureka will look for IWADs.
+.TP
+.BI DOOMWADPATH
+If set, contains a colon-separated list of directories where Eureka will
+look for IWADs.
+.SH "SEE ALSO"
+.BR glbsp (6),
+.BR prboom (6),
+.BR deutex (6),
+.BR xwadtools (6)
+.PP
+Eureka site:
+http://eureka-editor.sourceforge.net/
+
