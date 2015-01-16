@@ -19,6 +19,34 @@ and low system requirements (e.g. a 3D card is
 .I not
 required).
 .SH OPTIONS
+Note that long options are shown with two dashes, but may also be
+used with a single dash for compatibility with DOOM ports.
+.TP
+.BI "\-f, \-file" " <file>..."
+Wad file(s) to edit.
+When no file is specified, Eureka will open the first map in the
+IWAD (game wad).
+.TP
+.BI "\-w, \-warp" " <map>"
+Level to edit.
+This can be the full map name, e.g. "MAP12" or "E3M7",
+but can also be a single number like "12" or "37",
+or two separate numbers like "3 7" for compatibility with DOOM 1 and
+Ultimate DOOM.
+.TP
+.BI "\-i, \-iwad" " <file>"
+The name of the IWAD (game data).
+This also determines which game the map is for, e.g. "doom.wad" will
+mean the map is for DOOM 1, whereas "heretic.wad" will mean we are
+editing for the game Heretic.
+.TP
+.BI "\-m, \-merge" " <file>..."
+Resource file(s) to load
+.TP
+.BI "\-p, \-port" " <name>"
+Port (engine) name.  The default port is "boom", but some other
+supported ports are "vanilla" (the original EXE), "odamex", "edge"
+and "legacy".
 .TP
 \fB\-h\fR   \fB\-help\fR
 Show usage summary
@@ -31,7 +59,8 @@ Enable debugging messages
 .TP
 \fB\-q\fR   \fB\-quiet\fR
 Quiet mode (no messages on stdout)
-.TP
+.SH CONFIGURATION
+The following options blah...... FIXME
 \fB\-home\fR
 <dir>        Home directory
 .TP
@@ -43,18 +72,3 @@ Quiet mode (no messages on stdout)
 .TP
 \fB\-config\fR
 <file>       Config file to load / save
-.TP
-\fB\-i\fR   \fB\-iwad\fR
-<file>       The name of the IWAD (game data)
-.TP
-\fB\-f\fR   \fB\-file\fR
-<file>       Patch wad file to edit
-.TP
-\fB\-m\fR   \fB\-merge\fR
-<file>...    Resource file(s) to load
-.TP
-\fB\-p\fR   \fB\-port\fR
-<name>       Port (engine) name
-.TP
-\fB\-w\fR   \fB\-warp\fR
-<map>        Select level to edit
