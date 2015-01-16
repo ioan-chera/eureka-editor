@@ -41,30 +41,52 @@ const img_pixel_t TRANS_PIXEL = 247;
 class Img
 {
 private:
-    Img_priv *p;
+	img_pixel_t *pixels;
+
+	int  w;  // Width
+	int  h;  // Height
 
 public:
-     Img();
-     Img(int width, int height, bool opaque);
-    ~Img();
+	 Img();
+	 Img(int width, int height, bool _dummy = false);
+	~Img();
 
-    bool               is_null    () const; // Is it a null image ?
-    int          width      () const; // Return the width
-    int          height     () const; // Return the height
-    const img_pixel_t *buf        () const; // Return pointer on buffer
-    img_pixel_t       *wbuf       ();   // Return pointer on buffer
-    void               clear      ();
-    void               set_opaque (bool opaque);
-    void               resize     (int width, int height);
+	bool is_null() const
+	{
+		return (! pixels);
+	}
+	
+	int width() const
+	{
+		return w;
+	}
 
-    Img * spectrify() const;
-	Img * scale_img(double scale);
+	int height() const
+	{
+		return h;
+	}
+
+	// read access
+	const img_pixel_t *buf() const;
+
+	// read/write access
+	img_pixel_t *wbuf();
+
+public:
+	// set all pixels to TRANS_PIXEL
+	void clear();
+
+	void resize(int new_width, int new_height);
+
+	Img * spectrify() const;
+
+	Img * scale_img(double scale) const;
 
 	Img * color_remap(int src1, int src2, int targ1, int targ2) const;
 
 private:
-    Img            (const Img&);  // Too lazy to implement it
-    Img& operator= (const Img&);  // Too lazy to implement it
+	Img            (const Img&);  // Too lazy to implement it
+	Img& operator= (const Img&);  // Too lazy to implement it
 };
 
 
