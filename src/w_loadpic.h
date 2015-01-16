@@ -31,7 +31,7 @@
 #include "w_wad.h"
 
 
-bool LoadPicture(Img& img,
+bool LoadPicture(Img_c& img,
 	Lump_c *lump,           /* Lump containing picture */
 	const char *pic_name,   /* Picture name, for messages */
 	int pic_x_offset,    /* Coordinates of top left corner of picture */

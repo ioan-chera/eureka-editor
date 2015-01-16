@@ -117,7 +117,7 @@ private:
 	bool SearchMatch(Browser_Item *item) const;
 	bool RecentMatch(Browser_Item *item) const;
 
-	void Populate_Images(std::map<std::string, Img *> & img_list);
+	void Populate_Images(std::map<std::string, Img_c *> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();

@@ -33,7 +33,7 @@ void W_LoadTextures();
 
 bool W_TextureExists(const char *name);
 
-Img * W_GetTexture(const char *name);
+Img_c * W_GetTexture(const char *name);
 
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 

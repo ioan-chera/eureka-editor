@@ -29,16 +29,14 @@
 
 typedef byte  img_pixel_t;
 
-class Img_priv;
 
-
-/* The colour number used to represent transparent pixels in an Img.
+/* The colour number used to represent transparent pixels in an Img_c.
    Any value will do but zero is probably best performance-wise.
  */
 const img_pixel_t TRANS_PIXEL = 247;
 
 
-class Img
+class Img_c
 {
 private:
 	img_pixel_t *pixels;
@@ -47,9 +45,9 @@ private:
 	int  h;  // Height
 
 public:
-	 Img();
-	 Img(int width, int height, bool _dummy = false);
-	~Img();
+	 Img_c();
+	 Img_c(int width, int height, bool _dummy = false);
+	~Img_c();
 
 	bool is_null() const
 	{
@@ -78,20 +76,20 @@ public:
 
 	void resize(int new_width, int new_height);
 
-	Img * spectrify() const;
+	Img_c * spectrify() const;
 
-	Img * scale_img(double scale) const;
+	Img_c * scale_img(double scale) const;
 
-	Img * color_remap(int src1, int src2, int targ1, int targ2) const;
+	Img_c * color_remap(int src1, int src2, int targ1, int targ2) const;
 
 private:
-	Img            (const Img&);  // Too lazy to implement it
-	Img& operator= (const Img&);  // Too lazy to implement it
+	Img_c            (const Img_c&);  // Too lazy to implement it
+	Img_c& operator= (const Img_c&);  // Too lazy to implement it
 };
 
 
-Img * IM_CreateUnknownTex(int bg, int fg);
-Img * IM_CreateMissingTex(int bg, int fg);
+Img_c * IM_CreateUnknownTex(int bg, int fg);
+Img_c * IM_CreateMissingTex(int bg, int fg);
 
 
 #endif  /* __EUREKA_IM_IMG_H__*/

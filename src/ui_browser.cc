@@ -37,8 +37,8 @@
 #include "levels.h"
 
 
-extern std::map<std::string, Img *> flats;
-extern std::map<std::string, Img *> textures;
+extern std::map<std::string, Img_c *> flats;
+extern std::map<std::string, Img_c *> textures;
 
 extern std::map<char, linegroup_t *>  line_groups;
 extern std::map<char, thinggroup_t *> thing_groups;
@@ -561,7 +561,7 @@ const char * TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
+void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -571,7 +571,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<std::string, Img *>::iterator TI;
+	std::map<std::string, Img_c *>::iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -582,7 +582,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img *> & img_list)
 	{
 		const char *name = TI->first.c_str();
 
-		Img *image = TI->second;
+		Img_c *image = TI->second;
 
 		if (false) /* NO PICS */
 			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name,

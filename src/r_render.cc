@@ -127,9 +127,9 @@ public:
 	int thsec_sector_num;
 	bool thsec_invalidated;
 
-	Img *missing_tex;  int missing_col;
-	Img *unknown_tex;  int unk_tex_col;
-	Img *unknown_flat; int unk_flat_col;
+	Img_c *missing_tex;  int missing_col;
+	Img_c *unknown_tex;  int unk_tex_col;
+	Img_c *unknown_flat; int unk_flat_col;
 
 	// state for adjusting offsets via the mouse
 	int   adjust_ld;
@@ -327,7 +327,7 @@ public:
 	// heights for the surface (h1 is below h2)
 	int h1, h2, tex_h;
 
-	Img *img;
+	Img_c *img;
 	img_pixel_t col;  /* used when no image */
 
 	enum
@@ -1085,7 +1085,7 @@ public:
 		if (ty < 4)
 			return;
 
-		Img *sprite = W_GetSprite(th->type);
+		Img_c *sprite = W_GetSprite(th->type);
 		if (! sprite)  // TODO: show a question mark (same color as on 2D map)
 			return;
 

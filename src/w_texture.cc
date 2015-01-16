@@ -37,10 +37,10 @@
 #include "w_texture.h"
 
 
-std::map<std::string, Img *> textures;
+std::map<std::string, Img_c *> textures;
 
 
-static void DeleteTex(const std::map<std::string, Img *>::value_type& P)
+static void DeleteTex(const std::map<std::string, Img_c *>::value_type& P)
 {
 	delete P.second;
 }
@@ -94,7 +94,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 		if (width == 0 || height == 0)
 			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
 
-		Img *img = new Img(width, height, false);
+		Img_c *img = new Img_c(width, height, false);
 
 		// apply all the patches
 		int num_patches = LE_S16(raw->patch_count);
@@ -157,7 +157,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 {
-	Img *img = new Img();
+	Img_c *img = new Img_c();
 
 	if (! LoadPicture(*img, lump, name, 0, 0))
 	{
@@ -207,14 +207,14 @@ void W_LoadTextures()
 }
 
 
-Img * W_GetTexture(const char *name)
+Img_c * W_GetTexture(const char *name)
 {
 	if (name[0] == 0 || name[0] == '-')
 		return NULL;
 
 	std::string t_str = name;
 
-	std::map<std::string, Img *>::iterator P = textures.find(t_str);
+	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
 	if (P != textures.end())
 		return P->second;
@@ -227,7 +227,7 @@ bool W_TextureExists(const char *name)
 {
 	std::string t_str = name;
 
-	std::map<std::string, Img *>::iterator P = textures.find(t_str);
+	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
 	return (P != textures.end());
 }

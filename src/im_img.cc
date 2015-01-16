@@ -125,20 +125,20 @@ int gammatable[5][256] =
 
 
 /*
- *  Img::Img - default constructor
+ *  Img_c::Img_c - default constructor
  *
  *  The new image is a null image.
  */
-Img::Img() : pixels(NULL), w(0), h(0)
+Img_c::Img_c() : pixels(NULL), w(0), h(0)
 { }
 
 
 /*
- *  Img::Img - constructor with dimensions
+ *  Img_c::Img_c - constructor with dimensions
  *
  *  The new image is set to the specified dimensions.
  */
-Img::Img(int width, int height, bool _dummy) :
+Img_c::Img_c(int width, int height, bool _dummy) :
 	pixels(NULL), w(0), h(0)
 {
 	resize(width, height);
@@ -146,40 +146,40 @@ Img::Img(int width, int height, bool _dummy) :
 
 
 /*
- *  Img::~Img - destructor
+ *  Img_c::~Img_c - destructor
  */
-Img::~Img()
+Img_c::~Img_c()
 {
 	delete pixels;
 }
 
 
 /*
- *  Img::buf - return a const pointer on the buffer
+ *  Img_c::buf - return a const pointer on the buffer
  *
  *  If the image is null, return a null pointer.
  */
-const img_pixel_t *Img::buf() const
+const img_pixel_t *Img_c::buf() const
 {
 	return pixels;
 }
 
 
 /*
- *  Img::wbuf - return a writable pointer on the buffer
+ *  Img_c::wbuf - return a writable pointer on the buffer
  *
  *  If the image is null, return a null pointer.
  */
-img_pixel_t *Img::wbuf()
+img_pixel_t *Img_c::wbuf()
 {
 	return pixels;
 }
 
 
 /*
- *  Img::clear - clear the image
+ *  Img_c::clear - clear the image
  */
-void Img::clear()
+void Img_c::clear()
 {
 	if (pixels)
 	{
@@ -189,12 +189,12 @@ void Img::clear()
 
 
 /*
- *  Img::resize - resize the image
+ *  Img_c::resize - resize the image
  *
  *  If either dimension is zero, the image becomes a null
  *  image.
  */
-void Img::resize(int new_width, int new_height)
+void Img_c::resize(int new_width, int new_height)
 {
 	if (new_width == w && new_height == h)
 		return;
@@ -226,9 +226,9 @@ void Img::resize(int new_width, int new_height)
 /*
  *  spectrify_img - make a game image look vaguely like a spectre
  */
-Img * Img::spectrify() const
+Img_c * Img_c::spectrify() const
 {
-	Img *omg = new Img(width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
 	byte grey = 104;
 
@@ -268,8 +268,8 @@ Img * Img::spectrify() const
  *
  *  Example:
  *
- *    Img raw;
- *    Img scaled;
+ *    Img_c raw;
+ *    Img_c scaled;
  *    LoadPicture (raw, ...);
  *    scale_img (raw, 2, scaled);
  *    display_img (scaled, ...);
@@ -284,13 +284,13 @@ Img * Img::spectrify() const
  *
  *  andrewj: turned into a method, but untested...
  */
-Img * Img::scale_img(double scale) const
+Img_c * Img_c::scale_img(double scale) const
 {
 	int iwidth  = width();
 	int owidth  = (int) (width()  * scale + 0.5);
 	int oheight = (int) (height() * scale + 0.5);
 
-	Img *omg = new Img(owidth, oheight);
+	Img_c *omg = new Img_c(owidth, oheight);
 
 	const img_pixel_t *const ibuf = buf();
 	img_pixel_t       *const obuf = omg->wbuf();
@@ -320,12 +320,12 @@ Img * Img::scale_img(double scale) const
  *  Copy the image, but remap pixels in the range 'src1..src2' to the
  *  range 'targ1..targ2'.
  */
-Img * Img::color_remap(int src1, int src2, int targ1, int targ2) const
+Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img *omg = new Img(width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
 	int W = width();
 	int H = height();
@@ -399,9 +399,9 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img * IM_DummyTex(const byte *data, int bg, int fg)
+static Img_c * IM_DummyTex(const byte *data, int bg, int fg)
 {
-	Img *omg = new Img(32, 32, true);
+	Img_c *omg = new Img_c(32, 32, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
@@ -415,13 +415,13 @@ static Img * IM_DummyTex(const byte *data, int bg, int fg)
 }
 
 
-Img * IM_CreateUnknownTex(int bg, int fg)
+Img_c * IM_CreateUnknownTex(int bg, int fg)
 {
 	return IM_DummyTex(unknown_graphic, bg, fg);
 }
 
 
-Img * IM_CreateMissingTex(int bg, int fg)
+Img_c * IM_CreateMissingTex(int bg, int fg)
 {
 	return IM_DummyTex(missing_graphic, bg, fg);
 }

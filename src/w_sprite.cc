@@ -38,7 +38,7 @@
 
 
 // maps type number to an image
-typedef std::map<int, Img *> sprite_map_t;
+typedef std::map<int, Img_c *> sprite_map_t;
 
 static sprite_map_t sprites;
 
@@ -87,7 +87,7 @@ Lump_c * Sprite_loc_by_root (const char *name)
 }
 
 
-Img * W_GetSprite(int type)
+Img_c * W_GetSprite(int type)
 {
 	sprite_map_t::iterator P = sprites.find(type);
 
@@ -98,7 +98,7 @@ Img * W_GetSprite(int type)
 
 	const thingtype_t *info = M_GetThingType(type);
 
-	Img *result = NULL;
+	Img_c *result = NULL;
 
 	if (y_stricmp(info->sprite, "NULL") != 0)
 	{
@@ -109,7 +109,7 @@ Img * W_GetSprite(int type)
 		}
 		else
 		{
-			result = new Img ();
+			result = new Img_c ();
 
 			if (! LoadPicture(*result, lump, info->sprite, 0, 0))
 			{

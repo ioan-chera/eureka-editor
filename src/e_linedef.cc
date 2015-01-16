@@ -379,7 +379,7 @@ static int GetTextureHeight(const char *name)
 	if (name[0] == '-')
 		return 128;
 
-	Img *img = W_GetTexture(name);
+	Img_c *img = W_GetTexture(name);
 
 	if (! img)
 		return 128;

@@ -31,7 +31,7 @@
 
 void W_ClearSprites();
 
-Img * W_GetSprite(int type);
+Img_c * W_GetSprite(int type);
 
 #endif  /* __EUREKA_W_SPRITE_H__ */
 

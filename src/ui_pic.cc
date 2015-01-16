@@ -137,7 +137,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	Clear();
 
-	Img *img = W_GetSprite(type);
+	Img_c *img = W_GetSprite(type);
 
 	if (! img || img->width() < 1 || img->height() < 1)
 	{
@@ -207,7 +207,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 }
 
 
-void UI_Pic::TiledImg(Img *img, bool has_trans)
+void UI_Pic::TiledImg(Img_c *img, bool has_trans)
 {
 	color(FL_DARK2);
 

@@ -38,10 +38,10 @@
 #include "w_wad.h"
 
 
-std::map<std::string, Img *> flats;
+std::map<std::string, Img_c *> flats;
 
 
-static void DeleteFlat(const std::map<std::string, Img *>::value_type& P)
+static void DeleteFlat(const std::map<std::string, Img_c *>::value_type& P)
 {
 	delete P.second;
 }
@@ -73,7 +73,7 @@ void W_LoadFlats()
 
 			// TODO: check size == 64*64
 
-			Img *img = new Img(64, 64, false);
+			Img_c *img = new Img_c(64, 64, false);
 			
 			if (! lump->Seek() ||
 				! lump->Read(img->wbuf(), 64*64))
@@ -87,11 +87,11 @@ void W_LoadFlats()
 }
 
 
-Img * W_GetFlat(const char *name)
+Img_c * W_GetFlat(const char *name)
 {
 	std::string f_str = name;
 
-	std::map<std::string, Img *>::iterator P = flats.find(f_str);
+	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
 
 	if (P != flats.end())
 		return P->second;
@@ -104,7 +104,7 @@ bool W_FlatExists(const char *name)
 {
 	std::string f_str = name;
 
-	std::map<std::string, Img *>::iterator P = flats.find(f_str);
+	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
 
 	return (P != flats.end());
 }

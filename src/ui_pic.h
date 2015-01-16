@@ -22,7 +22,7 @@
 #define __EUREKA_UI_PIC_H__
 
 
-class Img;
+class Img_c;
 
 
 class UI_Pic : public Fl_Box
@@ -72,7 +72,7 @@ private:
 
 	void UploadRGB(const byte *buf, int depth);
 
-	void TiledImg(Img *img, bool has_trans);
+	void TiledImg(Img_c *img, bool has_trans);
 };
 
 
