@@ -776,7 +776,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 412 : 372, "Manage Wads"),
+	UI_Escapable_Window(400, is_startup ? 412 : 372, "Manage Project"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {

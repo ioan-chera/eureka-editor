@@ -75,7 +75,7 @@ static void file_do_delete(Fl_Widget *w, void * data)
 	CMD_DeleteMap();
 }
 
-static void file_do_manage_wads(Fl_Widget *w, void * data)
+static void file_do_manage_project(Fl_Widget *w, void * data)
 {
 	Main_ProjectSetup();
 }
@@ -454,7 +454,7 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Manage Wads  ",  FL_COMMAND + 'm', FCAL file_do_manage_wads },
+		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
 
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
