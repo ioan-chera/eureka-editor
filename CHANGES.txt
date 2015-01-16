@@ -31,7 +31,21 @@ CHANGES IN Eureka
 
 -  the Default Properties now has its own panel
 
+
+-  browser: changed two key-bindings: 'T' now opens to Things and 'X' is
+   used to open it to Textures (matching the menu shortcuts)
+
+-  browser: changed key-binding for BR_CycleCategory to '|'
+
+-  browser: the 'Sort' menu has been replaced with an 'Alpha' checkbox
+
+-  browser: made sprites a bit smaller, can now show three columns when
+   the browser is at minimum width
+
 -  better way to show how a linedef will be split (esp. when snapping)
+
+-  3D view: the low/high detail flag is now a preference setting
+   (no longer toggleable with the F5 key)
 
 -  added info bar for 3D view, shows current position, angle, etc...
 
@@ -48,6 +62,8 @@ CHANGES IN Eureka
 -  node builder : added work-around for "TOO SIMPLE" levels
    (i.e. a single convex sector), creating a dummy node and an
    extra subsector and seg for the back side
+
+-  wrote a Unix man page 
 
 -  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
 
