@@ -31,6 +31,8 @@ CHANGES IN Eureka
 
 -  the Default Properties now has its own panel
 
+-  added back the '192' grid size
+
 
 -  browser: changed two key-bindings: 'T' now opens to Things and 'X' is
    used to open it to Textures (matching the menu shortcuts)
@@ -44,14 +46,14 @@ CHANGES IN Eureka
 
 -  better way to show how a linedef will be split (esp. when snapping)
 
+-  co-op player starts are now colored as in DOOM
+
 -  3D view: the low/high detail flag is now a preference setting
    (no longer toggleable with the F5 key)
 
 -  added info bar for 3D view, shows current position, angle, etc...
 
 -  added 'Toggle 3D View' command to View menu
-
--  added back the '192' grid size
 
 
 -  support loading a read-only wad file

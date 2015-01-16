@@ -341,10 +341,9 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 
 		if (src1 <= pix && pix <= src2)
 		{
-			if (targ1 == targ2)
-				pix = targ1;
-			else
-				pix = targ1 + ((int)pix - src1) * (targ2 - targ1 + 1) / (src2 - src1 + 1);
+			int diff = pix - src1;
+
+			pix = targ1 + diff * (targ2 - targ1 + 1) / (src2 - src1 + 1);
 		}
 
 		dest[y * W + x] = pix;

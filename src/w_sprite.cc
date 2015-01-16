@@ -119,6 +119,32 @@ Img_c * W_GetSprite(int type)
 		}
 	}
 
+	// player color remapping
+	// [ FIXME : put colors into game definition file ]
+	// [ TODO  : support types 4001..4004 ]
+	if (result && type >= 2 && type <= 4)
+	{
+		Img_c *old_img = result;
+
+		switch (type)
+		{
+			case 2:
+				result = old_img->color_remap(0x70, 0x7f, 0x60, 0x6f);
+				break;
+
+			case 3:
+				result = old_img->color_remap(0x70, 0x7f, 0x40, 0x4f);
+				break;
+
+			case 4:
+			default:
+				result = old_img->color_remap(0x70, 0x7f, 0x20, 0x2f);
+				break;
+		}
+
+		delete old_img;
+	}
+
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
