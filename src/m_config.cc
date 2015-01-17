@@ -151,7 +151,7 @@ static const opt_desc_t options[] =
 		"v",
 		OPT_BOOLEAN,
 		"1",
-		"Show version info",
+		"Show the version",
 		NULL,
 		&show_version
 	},
