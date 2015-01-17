@@ -49,31 +49,47 @@ Port (engine) name.  The default port is "boom", but some other
 supported ports are "vanilla" (the original EXE), "odamex", "edge"
 and "legacy".
 .TP
-\fB\-h\fR   \fB\-help\fR
+.B \-h, \-help
 Show usage summary
 .TP
-\fB\-v\fR   \fB\-version\fR
+.B \-v, \-version
 Show version info
 .TP
-\fB\-d\fR   \fB\-debug\fR
+.B \-d, \-debug
 Enable debugging messages
 .TP
-\fB\-q\fR   \fB\-quiet\fR
+.B \-q, \-quiet
 Quiet mode (no messages on stdout)
-.SH CONFIGURATION
-The following options blah...... FIXME
+.SH CONFIGURATION OPTIONS
+The following options control how Eureka finds some important files
+and directories.  They are not particular useful per se, but may be
+needed for special circumstances.
 .TP
-\fB\-home\fR
-<dir>        Home directory
+.BI "\-install" " <dir>"
+The installation directory where game definition files, default key
+bindings, etc are stored.
+This defaults to
+.I $PREFIX/share/eureka
+(see FILES section below...)
+
+Specifying "." for the current directory is useful when testing a
+locally compiled version without doing "make install",
+in fact Eureka will automatically try it when it cannot find its
+normal installation directory).
 .TP
-\fB\-install\fR
-<dir>        Installation directory
+.BI "\-home" " <dir>"
+The home directory where user settings, backups, etc are stored.
+This defaults to the
+.I "~/.eureka" directory.
 .TP
-\fB\-log\fR
-<file>       Log messages to specified file
+.BI "\-log" " <file>"
+File where all log messages are written.
+Defaults to "logs.txt" under the home directory.
 .TP
-\fB\-config\fR
-<file>       Config file to load / save
+.BI "\-config" " <file>"
+The config file storing the general user settings (but not key bindings).
+This file will loaded during startup, and also saved to when the user
+uses the Preferences dialog.
 .SH FILES
 .TP
 .I "$PREFIX/share/eureka/
