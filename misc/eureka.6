@@ -19,53 +19,53 @@ and low system requirements (e.g. a 3D card is
 .I not
 required).
 .SH OPTIONS
-Note that long options are shown with two dashes, but may also be
-used with a single dash for compatibility with the original DOOM
-binary and various source ports.
+Note that long options are shown here with two dashes,
+but may also be used with a single dash for compatibility
+with the original DOOM binary and various source ports.
 .TP
-.BI "\-f, \-file" " <file>..."
+.BI "\-f, \-\-file" " <file>..."
 Wad file(s) to edit.
 When no file is specified, Eureka will open the first map in the
 IWAD (game wad).
 .TP
-.BI "\-w, \-warp" " <map>"
+.BI "\-w, \-\-warp" " <map>"
 Level to edit.
 This can be the full map name, e.g. "MAP12" or "E3M7",
 but can also be a single number like "12" or "37",
 or two separate numbers like "3 7" for compatibility with DOOM 1 and
 Ultimate DOOM.
 .TP
-.BI "\-i, \-iwad" " <file>"
+.BI "\-i, \-\-iwad" " <file>"
 The name of the IWAD (game data).
 This also determines which game the map is for, e.g. "doom.wad" will
 mean the map is for DOOM 1, whereas "heretic.wad" will mean we are
 editing for the game Heretic.
 .TP
-.BI "\-m, \-merge" " <file>..."
+.BI "\-m, \-\-merge" " <file>..."
 Resource file(s) to load
 .TP
-.BI "\-p, \-port" " <name>"
+.BI "\-p, \-\-port" " <name>"
 Port (engine) name.  The default port is "boom", but some other
 supported ports are "vanilla" (the original EXE), "odamex", "edge"
 and "legacy".
 .TP
-.B \-h, \-help
+.B \-h, \-\-help
 Show usage summary
 .TP
-.B \-v, \-version
+.B \-v, \-\-version
 Show version info
 .TP
-.B \-d, \-debug
+.B \-d, \-\-debug
 Enable debugging messages
 .TP
-.B \-q, \-quiet
+.B \-q, \-\-quiet
 Quiet mode (no messages on stdout)
 .SH CONFIGURATION OPTIONS
 The following options control how Eureka finds some important files
 and directories.  They are not particular useful per se, but may be
 needed for special circumstances.
 .TP
-.BI "\-install" " <dir>"
+.BI "\-\-install" " <dir>"
 The installation directory where game definition files, default key
 bindings, etc are stored.
 This defaults to
@@ -77,17 +77,17 @@ locally compiled version without doing "make install",
 in fact Eureka will automatically try it when it cannot find its
 normal installation directory).
 .TP
-.BI "\-home" " <dir>"
+.BI "\-\-home" " <dir>"
 The home directory where user settings, backups, etc are stored.
 This defaults to the
 .I "~/.eureka" directory.
 .TP
-.BI "\-log" " <file>"
+.BI "\-\-log" " <file>"
 File where all log messages are written.
 Defaults to "logs.txt" under the home directory.
 .TP
-.BI "\-config" " <file>"
-The config file storing the general user settings (but not key bindings).
+.BI "\-\-config" " <file>"
+The config file which stores the general user settings (but not key bindings).
 This file will loaded during startup, and also saved to when the user
 uses the Preferences dialog.
 .SH FILES
