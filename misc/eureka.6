@@ -4,8 +4,8 @@
 Eureka \- a DOOM map editor
 .SH SYNOPSIS
 .B eureka
-.RI "[" OPTION "...]"
 .RI "[" FILE "...]"
+.RI "[" OPTION "...]"
 .SH DESCRIPTION
 Eureka is a cross-platform map editor for the classic DOOM games.
 
@@ -25,6 +25,10 @@ with the original DOOM binary and various source ports.
 .TP
 .BI "\-f, \-\-file" " <file>..."
 Wad file(s) to edit.
+This is mainly for compatibility with DOOM command-line syntax,
+since filenames are more easily provided without this option
+(i.e. directly after the program name).
+
 When no file is specified, Eureka will open the first map in the
 IWAD (game wad).
 .TP
@@ -34,6 +38,8 @@ This can be the full map name, e.g. "MAP12" or "E3M7",
 but can also be a single number like "12" or "37",
 or two separate numbers like "3 7" for compatibility with DOOM 1 and
 Ultimate DOOM.
+
+When absent, the first level found in the edited wad is used.
 .TP
 .BI "\-i, \-\-iwad" " <file>"
 The name of the IWAD (game data).
@@ -42,7 +48,9 @@ mean the map is for DOOM 1, whereas "heretic.wad" will mean we are
 editing for the game Heretic.
 .TP
 .BI "\-m, \-\-merge" " <file>..."
-Resource file(s) to load
+Resource file(s) to load.
+These can be wad files containing textures, flats, sprites (etc)
+but can also be Eureka definitions files (with ".ugh" extension).
 .TP
 .BI "\-p, \-\-port" " <name>"
 Port (engine) name.  The default port is "boom", but some other
@@ -53,7 +61,7 @@ and "legacy".
 Show usage summary
 .TP
 .B \-v, \-\-version
-Show version info
+Show the version
 .TP
 .B \-d, \-\-debug
 Enable debugging messages
@@ -73,14 +81,15 @@ This defaults to
 (see FILES section below...)
 
 Specifying "." for the current directory is useful when testing a
-locally compiled version without doing "make install",
-in fact Eureka will automatically try it when it cannot find its
-normal installation directory).
+locally compiled version without doing "make install".
+In fact Eureka will try it automatically when it cannot find its
+normal installation directory.
 .TP
 .BI "\-\-home" " <dir>"
 The home directory where user settings, backups, etc are stored.
 This defaults to the
-.I "~/.eureka" directory.
+.I "~/.eureka"
+directory.
 .TP
 .BI "\-\-log" " <file>"
 File where all log messages are written.
@@ -113,8 +122,9 @@ or the current one if Eureka is currently running.
 .I "~/.eureka/backups"
 Whenever a file is saved, Eureka makes a backup of the existing file
 and stores it here, in a directory based on the filename.
-Multiple backups are made, upto a certain limit on number and size of
-the files (the 'backup_max_files' and 'backup_max_space' config variables).
+Multiple backups are made, upto a configurable limit on number and 
+total size of the files.
+
 If something goes awry with your wad, look here!
 .TP
 .I "~/.eureka/iwads"
@@ -122,7 +132,7 @@ IWAD files can be placed here and Eureka will find them automatically
 .SH "ENVIRONMENT"
 .TP
 .BI DOOMWADDIR
-If set, contains a single directory where Eureka will look for IWADs.
+If set, contains a single directory name where Eureka will look for IWADs.
 .TP
 .BI DOOMWADPATH
 If set, contains a colon-separated list of directories where Eureka will
