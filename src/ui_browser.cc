@@ -55,6 +55,16 @@ extern std::map<int, thingtype_t *>  thing_types;
 bool browser_small_tex = false;
 
 
+// sort methods
+typedef enum
+{
+	SOM_Numeric = 0,
+	SOM_Alpha,
+	SOM_AlphaSkip	// skip the S1, WR (etc) of linedef descriptions
+
+} sort_method_e;
+
+
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
@@ -458,12 +468,12 @@ bool UI_Browser_Box::RecentMatch(Browser_Item *item) const
 }
 
 
-static int SortCmp(const Browser_Item *A, const Browser_Item *B, int method)
+static int SortCmp(const Browser_Item *A, const Browser_Item *B, sort_method_e method)
 {
 	const char *sa = A->desc.c_str();
 	const char *sb = B->desc.c_str();
 
-	if (method == 1)  // 1 = Numeric
+	if (method == SOM_Numeric)
 	{
 		return (A->number - B->number);
 	}
@@ -471,8 +481,8 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, int method)
 	if (strchr(sa, '/')) sa = strchr(sa, '/') + 1;
 	if (strchr(sb, '/')) sb = strchr(sb, '/') + 1;
 
-	// 2 = Alphabetical in LINEDEF mode, skip trigger type (SR etc)
-	if (method == 2)
+	// Alphabetical in LINEDEF mode, skip trigger type (SR etc)
+	if (method == SOM_AlphaSkip)
 	{
 		while (isspace(*sa)) sa++;
 		while (isspace(*sb)) sb++;
@@ -484,7 +494,7 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, int method)
 	return strcmp(sa, sb);
 }
 
-static void SortPass(std::vector< Browser_Item * >& ARR, int gap, int total, int method)
+static void SortPass(std::vector< Browser_Item * >& ARR, int gap, int total, sort_method_e method)
 {
 	int i, k;
 
@@ -513,10 +523,12 @@ void UI_Browser_Box::Sort()
 		scroll->Remove_first();
 	}
 
-	int method = alpha ? (1 - alpha->value()) : 0;
+	sort_method_e method = SOM_Alpha;
 
-	if (method == 0 && kind == 'L')
-		method = 2;
+	if (alpha && ! alpha->value())
+		method = SOM_Numeric;
+	else if (kind == 'L')
+		method = SOM_AlphaSkip;
 
 	// shell sort
 	SortPass(ARR, 9, total, method);
