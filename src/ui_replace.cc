@@ -1129,14 +1129,15 @@ void UI_FindAndReplace::DoAll(bool replace)
 	}
 
 	if (count > 0)
+	{
 		GoToSelection();
+		edit.error_mode = true;
+	}
 
 	if (replace)
 	{
 		cur_obj.clear();
 		rep_value->do_callback();
-
-		edit.error_mode = true;
 	}
 
 	edit.RedrawMap = 1;
