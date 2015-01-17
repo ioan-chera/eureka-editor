@@ -455,14 +455,12 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
-
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 //TODO	{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL file_do_default_props },
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
@@ -485,7 +483,6 @@ static Fl_Menu_Item menu_items[] =
 		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
 		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
 		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
-//		{ "&Last Selection",   0, FCAL edit_do_invert_sel },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -504,17 +501,23 @@ static Fl_Menu_Item menu_items[] =
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
 		{ "&Logs....",   0, FCAL view_do_logs },
+
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Toggle &3D View",     0, FCAL view_do_toggle_3d },
 		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
 		{ "&Toggle Grid Type",   0, FCAL view_do_grid_type },
+
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },
 		{ "&Whole Map",    0, FCAL view_do_whole_map },
 		{ "Whole &Selection", 0, FCAL view_do_whole_selection },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL file_do_default_props },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -533,6 +536,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Sector Types", 0, FCAL browser_do_sectors },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Hide",         0, FCAL browser_hide },
 		{ 0 },
 
