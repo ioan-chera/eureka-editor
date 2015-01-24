@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -213,6 +213,90 @@ void LineDefs_FixBad2SFlag()
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
 			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
 	}
+
+	BA_End();
+}
+
+
+static void bung_unknown_type(std::map<int, int>& t_map, int type)
+{
+	int count = 0;
+
+	if (t_map.find(type) != t_map.end())
+		count = t_map[type];
+
+	t_map[type] = count + 1;
+}
+
+
+void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
+{
+	types.clear();
+
+	list.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const linetype_t *info = M_GetLineType(LineDefs[n]->type);
+
+		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		{
+			bung_unknown_type(types, LineDefs[n]->type);
+
+			list.set(n);
+		}
+	}
+}
+
+
+void LineDefs_ShowUnknown()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	std::map<int, int> types;
+
+	LineDefs_FindUnknown(*edit.Selected, types);
+
+	GoToErrors();
+}
+
+
+void LineDefs_LogUnknown()
+{
+	selection_c sel;
+
+	std::map<int, int> types;
+	std::map<int, int>::iterator IT;
+
+	LineDefs_FindUnknown(sel, types);
+
+	LogPrintf("\n");
+	LogPrintf("Unknown Line Types:\n");
+	LogPrintf("{\n");
+
+	for (IT = types.begin() ; IT != types.end() ; IT++)
+		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
+}
+
+
+void LineDefs_ClearUnknown()
+{
+	selection_c sel;
+	std::map<int, int> types;
+
+	LineDefs_FindUnknown(sel, types);
+
+	selection_iterator_c it;
+
+	BA_Begin();
+
+	for (sel.begin(&it) ; !it.at_end() ; ++it)
+		BA_ChangeLD(*it, LineDef::F_TYPE, 0);
 
 	BA_End();
 }
@@ -485,7 +569,7 @@ class UI_Check_LineDefs : public UI_Check_base
 {
 public:
 	UI_Check_LineDefs(bool all_mode) :
-		UI_Check_base(530, 336, all_mode, "Check : LineDefs",
+		UI_Check_base(530, 350, all_mode, "Check : LineDefs",
 		              "LineDef test results")
 	{ }
 
@@ -542,6 +626,28 @@ public:
 	}
 
 
+	static void action_show_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowUnknown();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_log_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_LogUnknown();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_clear_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ClearUnknown();
+		dialog->user_action = CKR_TookAction;
+	}
+
+
 	static void action_remove_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
@@ -570,6 +676,8 @@ check_result_e CHECK_LineDefs(int min_severity)
 	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0);
 
 	selection_c  sel, other;
+
+	std::map<int, int> types;
 
 	for (;;)
 	{
@@ -614,6 +722,21 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 		dialog->AddGap(10);
+
+
+		LineDefs_FindUnknown(sel, types);
+
+		if (sel.empty())
+			dialog->AddLine("No unknown line types");
+		else
+		{
+			sprintf(check_buffer, "%d unknown line types", (int)types.size());
+
+			dialog->AddLine(check_buffer, 1, 210,
+			                "Show",   &UI_Check_LineDefs::action_show_unknown,
+			                "Log",    &UI_Check_LineDefs::action_log_unknown,
+			                "Clear",  &UI_Check_LineDefs::action_clear_unknown);
+		}
 
 
 		LineDefs_FindMissingRight(sel);

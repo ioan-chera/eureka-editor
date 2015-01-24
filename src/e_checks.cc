@@ -1096,6 +1096,8 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			                "Fix",  &UI_Check_Sectors::action_fix_ceil);
 		}
 
+		dialog->AddGap(10);
+
 
 		Sectors_FindUnknown(sel, types);
 
@@ -1110,8 +1112,6 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			                "Log",    &UI_Check_Sectors::action_log_unknown,
 			                "Clear",  &UI_Check_Sectors::action_clear_unknown);
 		}
-
-		dialog->AddGap(10);
 
 
 		SideDefs_FindPacking(sel, other);
