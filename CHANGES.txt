@@ -20,10 +20,13 @@ CHANGES IN Eureka
 
 -  map checker can find unknown linedef and sector types
 
--  in Linedef panel swapped the 'Tag' and 'Length' positions
+-  Linedef panel: swapped the 'Tag' and 'Length' positions
 
--  always show a two-sided line in the LineDef panel when multiple
-   lines are selected (allowing the back sides to be edited)
+-  Linedef panel: always show a two-sided line panel when multiple
+   lines are selected (allowing all texture parts to be edited)
+
+-  Linedef panel: don't show rail/upper tex for one-sided lines
+   (can be disabled with the 'show_full_one_sided' config var)
 
 -  the 'New Map' dialog now has a "New WAD File" radio button, when
    selected it disables the map selection and immediately asks for
