@@ -612,6 +612,15 @@ static const opt_desc_t options[] =
 		&scroll_more
 	},
 
+	{	"show_full_one_sided",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Show all textures on one-sided lines in the Linedef panel",
+		NULL,
+		&show_full_one_sided
+	},
+
 	{	"swap_sidedefs",
 		0,
 		OPT_BOOLEAN,

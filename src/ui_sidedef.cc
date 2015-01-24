@@ -29,6 +29,7 @@
 
 // config item
 bool swap_sidedefs;
+bool show_full_one_sided;
 
 //
 // Constructor
@@ -551,8 +552,7 @@ void UI_SideBox::UpdateHiding()
 		l_tex->show();
 		l_pic->show();
 
-		// FIXME : configurable !!
-		if (on_2S_line || false)
+		if (on_2S_line || show_full_one_sided)
 		{
 			u_tex->show();
 			r_tex->show();
