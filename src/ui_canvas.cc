@@ -201,7 +201,8 @@ void UI_Canvas::DrawEverything()
 		if (edit.Selected->get(highlight.num))
 			hi_color = HI_AND_SEL_COL;
 
-		DrawHighlight(highlight.type, highlight.num, hi_color);
+		DrawHighlight(highlight.type, highlight.num, hi_color,
+		              ! edit.error_mode /* do_tagged */);
 	}
 
 	if (edit.action == ACT_SELBOX)
