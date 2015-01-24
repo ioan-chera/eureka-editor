@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -35,7 +35,8 @@ bool swap_sidedefs;
 //
 UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) : 
     Fl_Group(X, Y, W, H),
-    obj(SETOBJ_NO_LINE), is_front(_side == 0)
+    obj(SETOBJ_NO_LINE), is_front(_side == 0),
+	on_2S_line(false)
 {
 	end();  // cancel begin() in Fl_Group constructor
 
@@ -138,7 +139,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += 24;
 
 
-	UpdateHiding(true);
+	UpdateHiding();
 	UpdateLabel();
 	UpdateAddDel();
 }
@@ -414,19 +415,20 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_SideBox::SetObj(int index, int solid_mask)
+void UI_SideBox::SetObj(int index, int solid_mask, bool two_sided)
 {
-	if (obj == index && what_is_solid == solid_mask)
+	if (obj == index && what_is_solid == solid_mask && on_2S_line == two_sided)
 		return;
 
-	if (obj < 0 && index >= 0)
-		UpdateHiding(false);
-	else if (obj >= 0 && index < 0)
-		UpdateHiding(true);
+	bool hide_change = !(obj == index && on_2S_line == two_sided);
 
 	obj = index;
 
 	what_is_solid = solid_mask;
+	on_2S_line    = two_sided;
+
+	if (hide_change)
+		UpdateHiding();
 
 	UpdateLabel();
 	UpdateAddDel();
@@ -524,9 +526,9 @@ void UI_SideBox::UpdateAddDel()
 }
 
 
-void UI_SideBox::UpdateHiding(bool hide)
+void UI_SideBox::UpdateHiding()
 {
-	if (hide)
+	if (obj < 0)
 	{
 		x_ofs->hide();
 		y_ofs->hide();
@@ -547,12 +549,25 @@ void UI_SideBox::UpdateHiding(bool hide)
 		  sec->show();
 
 		l_tex->show();
-		u_tex->show();
-		r_tex->show();
-
 		l_pic->show();
-		u_pic->show();
-		r_pic->show();
+
+		// FIXME : configurable !!
+		if (on_2S_line || false)
+		{
+			u_tex->show();
+			r_tex->show();
+
+			u_pic->show();
+			r_pic->show();
+		}
+		else
+		{
+			u_tex->hide();
+			r_tex->hide();
+
+			u_pic->hide();
+			r_pic->hide();
+		}
 	}
 }
 

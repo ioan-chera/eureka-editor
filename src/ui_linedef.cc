@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -482,13 +482,13 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const LineDef *L = LineDefs[obj];
 
-			front->SetObj(L->right, SolidMask(SIDE_RIGHT));
-			 back->SetObj(L->left,  SolidMask(SIDE_LEFT));
+			front->SetObj(L->right, SolidMask(SIDE_RIGHT), L->TwoSided());
+			 back->SetObj(L->left,  SolidMask(SIDE_LEFT),  L->TwoSided());
 		}
 		else
 		{
-			front->SetObj(SETOBJ_NO_LINE, 0);
-			 back->SetObj(SETOBJ_NO_LINE, 0);
+			front->SetObj(SETOBJ_NO_LINE, 0, false);
+			 back->SetObj(SETOBJ_NO_LINE, 0, false);
 		}
 	}
 

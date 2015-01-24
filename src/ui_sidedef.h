@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -41,6 +41,7 @@ private:
 	bool is_front;
 
 	int what_is_solid;
+	bool on_2S_line;
 
 public:
 	Fl_Int_Input *x_ofs;
@@ -66,7 +67,8 @@ public:
 	// this can be a sidedef number or -1 for none, or the special
 	// value SETOBJ_NO_LINE when there is no linedef at all.
 	// solid_mask is a bit field of parts which require a texture.
-	void SetObj(int index, int solid_mask);
+	// two_sided is from the linedef, will show all parts if true.
+	void SetObj(int index, int solid_mask, bool two_sided);
 
 	void UpdateField();
 
@@ -77,7 +79,7 @@ public:
 
 private:
 	void UpdateLabel();
-	void UpdateHiding(bool hide);
+	void UpdateHiding();
 	void UpdateAddDel();
 
 	int TexFromWidget(Fl_Input *w);
