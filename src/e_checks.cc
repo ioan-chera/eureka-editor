@@ -575,6 +575,90 @@ void Sectors_ShowMismatches(obj_type_e what)
 }
 
 
+static void bump_unknown_type(std::map<int, int>& t_map, int type)
+{
+	int count = 0;
+
+	if (t_map.find(type) != t_map.end())
+		count = t_map[type];
+
+	t_map[type] = count + 1;
+}
+
+
+void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
+{
+	types.clear();
+
+	list.change_type(OBJ_SECTORS);
+
+	for (int n = 0 ; n < NumSectors ; n++)
+	{
+		const sectortype_t *info = M_GetSectorType(Sectors[n]->type);
+
+		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		{
+			bump_unknown_type(types, Sectors[n]->type);
+
+			list.set(n);
+		}
+	}
+}
+
+
+void Sectors_ShowUnknown()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	std::map<int, int> types;
+
+	Sectors_FindUnknown(*edit.Selected, types);
+
+	GoToErrors();
+}
+
+
+void Sectors_LogUnknown()
+{
+	selection_c sel;
+
+	std::map<int, int> types;
+	std::map<int, int>::iterator IT;
+
+	Sectors_FindUnknown(sel, types);
+
+	LogPrintf("\n");
+	LogPrintf("Unknown Sector Types:\n");
+	LogPrintf("{\n");
+
+	for (IT = types.begin() ; IT != types.end() ; IT++)
+		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
+}
+
+
+void Sectors_ClearUnknown()
+{
+	selection_c sel;
+	std::map<int, int> types;
+
+	Sectors_FindUnknown(sel, types);
+
+	selection_iterator_c it;
+
+	BA_Begin();
+
+	for (sel.begin(&it) ; !it.at_end() ; ++it)
+		BA_ChangeSEC(*it, Sector::F_TYPE, 0);
+
+	BA_End();
+}
+
+
 void Sectors_FindUnused(selection_c& sel)
 {
 	sel.change_type(OBJ_SECTORS);
@@ -858,7 +942,7 @@ class UI_Check_Sectors : public UI_Check_base
 {
 public:
 	UI_Check_Sectors(bool all_mode) :
-		UI_Check_base(520, 326, all_mode, "Check : Sectors",
+		UI_Check_base(530, 346, all_mode, "Check : Sectors",
 				      "Sector test results")
 	{ }
 
@@ -936,6 +1020,28 @@ public:
 		Sectors_ShowMismatches(OBJ_LINEDEFS);
 		dialog->user_action = CKR_Highlight;
 	}
+
+
+	static void action_show_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_ShowUnknown();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_log_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_LogUnknown();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_clear_unknown(Fl_Widget *w, void *data)
+	{
+		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
+		Sectors_ClearUnknown();
+		dialog->user_action = CKR_TookAction;
+	}
 };
 
 
@@ -944,6 +1050,8 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0);
 
 	selection_c  sel, other;
+
+	std::map<int, int> types;
 
 	for (;;)
 	{
@@ -986,6 +1094,21 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine(check_message, 2, 220,
 			                "Show", &UI_Check_Sectors::action_show_ceil,
 			                "Fix",  &UI_Check_Sectors::action_fix_ceil);
+		}
+
+
+		Sectors_FindUnknown(sel, types);
+
+		if (sel.empty())
+			dialog->AddLine("No unknown sector types");
+		else
+		{
+			sprintf(check_message, "%d unknown sector types", (int)types.size());
+
+			dialog->AddLine(check_message, 2, 220,
+			                "Show",   &UI_Check_Sectors::action_show_unknown,
+			                "Log",    &UI_Check_Sectors::action_log_unknown,
+			                "Clear",  &UI_Check_Sectors::action_clear_unknown);
 		}
 
 		dialog->AddGap(10);
@@ -1058,17 +1181,6 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 
 
 //------------------------------------------------------------------------
-
-static void bump_unknown_type(std::map<int, int>& list, int type)
-{
-	int count = 0;
-
-	if (list.find(type) != list.end())
-		count = list[type];
-
-	list[type] = count + 1;
-}
-
 
 void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 {
