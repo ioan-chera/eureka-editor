@@ -525,6 +525,8 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (n == split_ld)
 					fl_color(HI_AND_SEL_COL);
+				else if (edit.error_mode)
+					fl_color(LIGHTGREY);
 				else if (L->right < 0)
 					fl_color(RED);
 				else if (one_sided)
@@ -546,7 +548,12 @@ void UI_Canvas::DrawLinedefs()
 
 			case OBJ_LINEDEFS:
 			{
-				if (L->type != 0)
+				if (edit.error_mode)
+					fl_color(LIGHTGREY);
+				// no first sidedef?
+				else if (! L->Right())
+					fl_color(RED);
+				else if (L->type != 0)
 				{
 					if (L->tag != 0)
 						fl_color(LIGHTMAGENTA);
@@ -560,10 +567,6 @@ void UI_Canvas::DrawLinedefs()
 				else
 					fl_color(LIGHTGREY);
 
-				// no first sidedef?
-				if (! L->Right())
-					fl_color(RED);
-
 				DrawKnobbyLine(x1, y1, x2, y2);
 			}
 			break;
@@ -576,10 +579,10 @@ void UI_Canvas::DrawLinedefs()
 				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
 
-				if (sd1 < 0)
-				{
+				if (edit.error_mode)
+					fl_color(LIGHTGREY);
+				else if (sd1 < 0)
 					fl_color(RED);
-				}
 				else
 				{
 					bool have_tag  = false;
@@ -627,7 +630,7 @@ void UI_Canvas::DrawLinedefs()
 			// OBJ_THINGS
 			default:
 			{
-				if (one_sided)
+				if (one_sided && ! edit.error_mode)
 					fl_color(WHITE);
 				else
 					fl_color(LIGHTGREY);
