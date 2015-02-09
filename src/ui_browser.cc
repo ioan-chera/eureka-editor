@@ -408,44 +408,17 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 			return false;
 	}
 
+	// here an empty pattern matches EVERYTHING
+	// [ different to Texture_MatchPattern semantics ]
 	if (search->size() == 0)
 		return true;
 
-	// add '*' to the start and end of the pattern
-	// (unless it uses the ^ or $ anchors)
+	const char *pattern = search->value();
 
-	const char *search_pat = search->value();
+	if (kind == 'T' || kind == 'F')
+		return Texture_MatchPattern(item->real_name.c_str(), pattern);
 
-	bool negated = false;
-	if (search_pat[0] == '!')
-	{
-		search_pat++;
-		negated = true;
-	}
-
-	char pattern[256];
-	pattern[0] = 0;
-
-	if (search_pat[0] == '^')
-		search_pat++;
-	else
-		strcpy(pattern, "*");
-	
-	strcat(pattern, search_pat);
-
-	size_t len = strlen(pattern);
-
-	if (len == 0)
-		return true;
-
-	if (pattern[len-1] == '$')
-		pattern[len-1] = 0;
-	else
-		strcat(pattern, "*");
-
-	bool result = fl_filename_match(item->desc.c_str(), pattern) ? true : false;
-
-	return negated ? !result : result;
+	return Texture_MatchPattern(item->desc.c_str(), pattern);
 }
 
 

@@ -70,7 +70,7 @@ CHANGES IN Eureka
 -  support data in a map header lump (such as MAP01), make sure to
    save it when saving the map (instead of removing it)
 
--  node builder : added work-around for "TOO SIMPLE" levels
+-  node builder: added work-around for "TOO SIMPLE" levels
    (i.e. a single convex sector), creating a dummy node and an
    extra subsector and seg for the back side
 
@@ -93,7 +93,7 @@ Bug Fixes:
 -  fixed bug when saving and using the 'ExMx' buttons
    (an erroneous newline was added into the map's lump name)
 
--  3D view : fixed a vertical mis-alignment of textures (one pixel)
+-  3D view: fixed a vertical mis-alignment of textures (one pixel)
    in certain circumstances
 
 -  fixed occasional false positives with sector mismatch test
@@ -106,4 +106,6 @@ Bug Fixes:
 -  fixed clipping of mid-masked textures (e.g. the cage in E1M9)
 
 -  fixed not reloading textures (etc) when opening a new wad file
+
+-  browser: fixed patterns like '4$' not working properly
 
