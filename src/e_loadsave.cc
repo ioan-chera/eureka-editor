@@ -682,8 +682,6 @@ bool CMD_OpenMap()
 	{
 		if (! M_ParseEurekaLump(wad))
 			return false;
-
-		Main_LoadResources();
 	}
 
 
@@ -700,6 +698,8 @@ bool CMD_OpenMap()
 		Pwad_name = edit_wad->PathName();
 
 		MasterDir_Add(edit_wad);
+
+		Main_LoadResources();
 	}
 
 
@@ -780,8 +780,6 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	{
 		if (! M_ParseEurekaLump(wad))
 			return;
-
-		Main_LoadResources();
 	}
 
 
@@ -796,6 +794,8 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
+
+	Main_LoadResources();
 
 
 	if (! map_name)

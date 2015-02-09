@@ -105,3 +105,5 @@ Bug Fixes:
 
 -  fixed clipping of mid-masked textures (e.g. the cage in E1M9)
 
+-  fixed not reloading textures (etc) when opening a new wad file
+
