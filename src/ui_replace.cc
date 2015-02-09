@@ -1018,9 +1018,11 @@ void UI_FindAndReplace::DoReplace()
 		return;
 	}
 
+	int replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+
 	BA_Begin();
 
-	ApplyReplace(cur_obj.num);
+	ApplyReplace(cur_obj.num, replace_tex_id);
 
 	BA_End();
 
@@ -1053,7 +1055,7 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 }
 
 
-void UI_FindAndReplace::ApplyReplace(int idx)
+void UI_FindAndReplace::ApplyReplace(int idx, int new_tex)
 {
 	SYS_ASSERT(idx >= 0);
 
@@ -1064,11 +1066,11 @@ void UI_FindAndReplace::ApplyReplace(int idx)
 			break;
 
 		case 1: // LineDefs (texturing)
-			Replace_LineDef(idx);
+			Replace_LineDef(idx, new_tex);
 			break;
 
 		case 2: // Sectors (texturing)
-			Replace_Sector(idx);
+			Replace_Sector(idx, new_tex);
 			break;
 
 		case 3: // Lines by Type
@@ -1097,8 +1099,12 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (cur_obj.type != edit.mode)
 		Editor_ChangeMode_Raw(cur_obj.type);
 
+	int replace_tex_id = 0;
+
 	if (replace)
 	{
+		replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+
 		BA_Begin();
 	}
 
@@ -1119,7 +1125,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		count++;
 
 		if (replace)
-			ApplyReplace(idx);
+			ApplyReplace(idx, replace_tex_id);
 
 		edit.Selected->set(idx);
 	}
@@ -1183,8 +1189,8 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 	if (pattern[0] == '!')
 	{
-		pattern++;
 		negated = true;
+		pattern++;
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -1238,8 +1244,8 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 	if (pattern[0] == '!')
 	{
-		pattern++;
 		negated = true;
+		pattern++;
 	}
 
 	if (!filter_toggle->value() || o_floors->value())
@@ -1397,15 +1403,33 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 }
 
 
-void UI_FindAndReplace::Replace_LineDef(int idx)
+void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 {
 	// TODO
 }
 
 
-void UI_FindAndReplace::Replace_Sector(int idx)
+void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 {
-	// TODO
+	const Sector *SEC = Sectors[idx];
+
+	bool want_result = 1;
+
+	const char *pattern = find_match->value();
+
+	if (pattern[0] == '!')
+	{
+		want_result = 0;
+		pattern++;
+	}
+
+	if (!filter_toggle->value() || o_floors->value())
+		if ((Pattern_Match(SEC->FloorTex(), pattern) ? 1 : 0) == want_result)
+			BA_ChangeSEC(idx, Sector::F_FLOOR_TEX, new_tex);
+
+	if (!filter_toggle->value() || o_ceilings->value())
+		if ((Pattern_Match(SEC->CeilTex(), pattern) ? 1 : 0) == want_result)
+			BA_ChangeSEC(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
 
