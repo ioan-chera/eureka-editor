@@ -956,11 +956,13 @@ static double BiggestGapAngle(std::vector< vert_along_t > &along_list,
 
 static double EvaluateCircle(double mid_x, double mid_y, double r,
 							 std::vector< vert_along_t > &along_list,
-							 unsigned int start_idx, double arc_size,
+							 unsigned int start_idx, double arc_rad,
 							 double ang_offset /* radians */,
 							 bool move_vertices = false)
 {
 	double cost = 0;
+
+	bool partial_circle = (arc_rad < M_PI * 1.9);
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
@@ -968,9 +970,9 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 		const Vertex *V = Vertices[along_list[k].vert_num];
 
-		double frac = i / (double)along_list.size();
+		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
-		double ang = arc_size * frac + ang_offset;
+		double ang = arc_rad * frac + ang_offset;
 
 		double new_x = mid_x + cos(ang) * r;
 		double new_y = mid_y + sin(ang) * r;
@@ -993,19 +995,12 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-static void Reshape_Circle(char mode)
+static void Reshape_Circle(int arc_deg)
 {
-	//
-	// The 'mode' parameter can be :
-	//   'O' : full circle (360 degrees)
-	//   'D' : half circle (180 degrees)
-	//   'C' : quarter circle (90 degrees)
-	//
+	double arc_rad = arc_deg * M_PI / 180.0;
 
 
 	// determine middle point for circle
-	// TODO : average of all vertices might be better...
-
 	int x1, y1, x2, y2;
 
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
@@ -1022,13 +1017,14 @@ static void Reshape_Circle(char mode)
 	double mid_x = (x1 + x2) * 0.5;
 	double mid_y = (y1 + y2) * 0.5;
 
-	double r = 0;
 
 	// collect all vertices and determine their angle (in radians),
 	// and sort them.
 	//
 	// also determine radius of circle -- average of distances between
 	// the computed mid-point and each vertex.
+
+	double r = 0;
 
 	std::vector< vert_along_t > along_list;
 
@@ -1065,6 +1061,7 @@ static void Reshape_Circle(char mode)
 
 	// where is the biggest gap?
 	unsigned int start_idx;
+	unsigned int end_idx;
 
 	double gap_angle = BiggestGapAngle(along_list, &start_idx);
 
@@ -1072,54 +1069,81 @@ static void Reshape_Circle(char mode)
 	double gap_dy = sin(gap_angle);
 
 
-	double arc_size = M_PI * 2.0;
+	if (start_idx > 0)
+		end_idx = start_idx - 1;
+	else
+		end_idx = along_list.size() - 1;
 
-	if (mode == 'D')
+	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
+	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];
+
+	double start_end_dist = hypot(end_V->x - start_V->x, end_V->y - start_V->y);
+
+
+	// compute new mid-point and radius (except for a full circle)
+
+	if (arc_deg < 360)
 	{
-		arc_size = M_PI;
+		mid_x = (start_V->x + end_V->x) * 0.5;
+		mid_y = (start_V->y + end_V->y) * 0.5;
 
-		// these constants were derived from trial-and-error
-		mid_x = mid_x + r * 0.85 * gap_dx;
-		mid_y = mid_y + r * 0.85 * gap_dy;
+		r = start_end_dist * 0.5;
 
-		r = r * 1.37;
+		double dx = gap_dx;
+		double dy = gap_dy;
+
+		if (arc_deg < 180)
+		{
+			dx = -dx;
+			dy = -dy;
+		}
+
+		double theta = fabs(arc_rad - M_PI) / 2.0;
+
+		double away = r * tan(theta);
+
+		mid_x += dx * away;
+		mid_y += dy * away;
+
+		r = hypot(r, away);
 	}
-	else if (mode == 'C')
-	{
-		arc_size = M_PI * 0.6;
-
-		mid_x = mid_x + r * 1.65 * gap_dx;
-		mid_y = mid_y + r * 1.65 * gap_dy;
-
-		r = r * 2.10;
-	}
 
 
-	// find the best orientation, the one that minimises the distances
-	// which vertices move.  We try 1000 possibilities.
+	// compute starting angle
 
 	double best_offset = 0;
 	double best_cost   = 1e30;
 
-	for (int pos = 0 ; pos < 1000 ; pos++)
+	if (arc_deg < 360)
 	{
-		double ang_offset = pos * M_PI * 2.0 / 1000.0;
+		best_offset = atan2(start_V->y - mid_y, start_V->x - mid_x);
+	}
+	else
+	{
+		// find the best orientation, the one that minimises the distances
+		// which vertices move.  We try 1000 possibilities.
 
-		double cost = EvaluateCircle(mid_x, mid_y, r, along_list,
-									 start_idx, arc_size, ang_offset);
-
-		if (cost < best_cost)
+		for (int pos = 0 ; pos < 1000 ; pos++)
 		{
-			best_offset = ang_offset;
-			best_cost   = cost;
+			double ang_offset = pos * M_PI * 2.0 / 1000.0;
+
+			double cost = EvaluateCircle(mid_x, mid_y, r, along_list,
+										 start_idx, arc_rad, ang_offset, false);
+
+			if (cost < best_cost)
+			{
+				best_offset = ang_offset;
+				best_cost   = cost;
+			}
 		}
 	}
+
 
 	// actually move stuff now
 
 	BA_Begin();
 
-	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_size,
+	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 
 	BA_End();
@@ -1145,11 +1169,13 @@ void VERT_Reshape()
 	if (y_stricmp(kind, "line") == 0)
 		Reshape_Line();
 	else if (y_stricmp(kind, "circle") == 0)
-		Reshape_Circle('O');
+		Reshape_Circle(360);
+	else if (y_stricmp(kind, "arc270") == 0)
+		Reshape_Circle(270);
 	else if (y_stricmp(kind, "arc180") == 0)
-		Reshape_Circle('D');
+		Reshape_Circle(180);
 	else if (y_stricmp(kind, "arc90") == 0)
-		Reshape_Circle('C');
+		Reshape_Circle(90);
 	else
 	{
 		Beep("VERT_Reshape: unknown kind: %s", kind);
