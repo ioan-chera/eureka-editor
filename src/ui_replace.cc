@@ -1182,16 +1182,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
 
-	bool found = false;
-	bool negated = false;
-
 	const char *pattern = find_match->value();
-
-	if (pattern[0] == '!')
-	{
-		negated = true;
-		pattern++;
-	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
@@ -1212,21 +1203,18 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex && Pattern_Match(L_tex, pattern))
-				found = true;
+				return true;
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex && Pattern_Match(U_tex, pattern))
-				found = true;
+				return true;
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex && Pattern_Match(R_tex, pattern))
-				found = true;
+				return true;
 	}
 
-	if (negated)
-		return ! found;
-
-	return found;
+	return false;
 }
 
 
@@ -1237,29 +1225,17 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 	if (! Filter_Tag(SEC->tag))
 		return false;
 
-	bool found = false;
-	bool negated = false;
-
 	const char *pattern = find_match->value();
-
-	if (pattern[0] == '!')
-	{
-		negated = true;
-		pattern++;
-	}
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(SEC->FloorTex(), pattern))
-			found = true;
+			return true;
 
 	if (!filter_toggle->value() || o_ceilings->value())
 		if (Pattern_Match(SEC->CeilTex(), pattern))
-			found = true;
+			return true;
 
-	if (negated)
-		return ! found;
-
-	return found;
+	return false;
 }
 
 
@@ -1413,22 +1389,14 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 {
 	const Sector *SEC = Sectors[idx];
 
-	bool want_result = 1;
-
 	const char *pattern = find_match->value();
 
-	if (pattern[0] == '!')
-	{
-		want_result = 0;
-		pattern++;
-	}
-
 	if (!filter_toggle->value() || o_floors->value())
-		if ((Pattern_Match(SEC->FloorTex(), pattern) ? 1 : 0) == want_result)
+		if (Pattern_Match(SEC->FloorTex(), pattern))
 			BA_ChangeSEC(idx, Sector::F_FLOOR_TEX, new_tex);
 
 	if (!filter_toggle->value() || o_ceilings->value())
-		if ((Pattern_Match(SEC->CeilTex(), pattern) ? 1 : 0) == want_result)
+		if (Pattern_Match(SEC->CeilTex(), pattern))
 			BA_ChangeSEC(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
