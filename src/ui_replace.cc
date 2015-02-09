@@ -896,9 +896,15 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 	while (p >= 0 && isspace(str[p]))
 		p--;
 
-	if (p >= 0 && str[p] != '_' && ispunct(str[p]))
-		return false;
-	
+	if (p >= 0)
+	{
+		if (str[p] == '_') return true;
+		if (str[p] == '*') return true;
+
+		if (ispunct(str[p]))
+			return false;
+	}
+
 	return true;
 }
 
@@ -1312,7 +1318,7 @@ bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern)
 
 	for (;;)
 	{
-		if (*pattern == 0 || *pattern == ',')
+		if (*pattern == 0 || *pattern == ',' || *pattern == '/' || *pattern == '|')
 		{
 			local_pat[ofs] = 0;
 
