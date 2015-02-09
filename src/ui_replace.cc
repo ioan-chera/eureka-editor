@@ -373,7 +373,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 			// linedef stuff
 			o_lowers  = new Fl_Check_Button(X+45, Y+418, 80, 22, " lowers");
 			o_uppers  = new Fl_Check_Button(X+45, Y+440, 80, 22, " uppers");
-			o_rail    = new Fl_Check_Button(X+45, Y+462, 80, 22, " rail");
+			o_rails   = new Fl_Check_Button(X+45, Y+462, 80, 22, " rail");
 
 			o_one_sided = new Fl_Check_Button(X+155, Y+418, 80, 22, " one-sided");
 			o_two_sided = new Fl_Check_Button(X+155, Y+440, 80, 22, " two-sided");
@@ -443,7 +443,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	// linedef stuff
 	SHOW_WIDGET_IF(o_lowers, x == 1);
 	SHOW_WIDGET_IF(o_uppers, x == 1);
-	SHOW_WIDGET_IF(o_rail,   x == 1);
+	SHOW_WIDGET_IF(o_rails,  x == 1);
 
 	SHOW_WIDGET_IF(o_one_sided, x == 1 || x == 3);
 	SHOW_WIDGET_IF(o_two_sided, x == 1 || x == 3);
@@ -1176,8 +1176,51 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
 
-	// TODO
-	return false;
+	bool found = false;
+	bool negated = false;
+
+	const char *pattern = find_match->value();
+
+	if (pattern[0] == '!')
+	{
+		pattern++;
+		negated = true;
+	}
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		const SideDef *SD = (pass == 0) ? L->Right() : L->Left();
+
+		if (! SD)
+			continue;
+
+		const char *L_tex = SD->LowerTex();
+		const char *U_tex = SD->UpperTex();
+		const char *R_tex = SD->MidTex();
+
+		if (! L->TwoSided())
+		{
+			L_tex = R_tex;
+			R_tex = U_tex = NULL;
+		}
+
+		if (!filter_toggle->value() || o_lowers->value())
+			if (L_tex && Pattern_Match(L_tex, pattern))
+				found = true;
+
+		if (!filter_toggle->value() || o_uppers->value())
+			if (U_tex && Pattern_Match(U_tex, pattern))
+				found = true;
+
+		if (!filter_toggle->value() || o_rails->value())
+			if (R_tex && Pattern_Match(R_tex, pattern))
+				found = true;
+	}
+
+	if (negated)
+		return ! found;
+
+	return found;
 }
 
 

@@ -80,7 +80,7 @@ private:
 	// linedef filters
 	Fl_Check_Button *o_lowers;
 	Fl_Check_Button *o_uppers;
-	Fl_Check_Button *o_rail;
+	Fl_Check_Button *o_rails;
 
 	Fl_Check_Button *o_one_sided;
 	Fl_Check_Button *o_two_sided;
