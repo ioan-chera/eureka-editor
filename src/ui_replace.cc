@@ -1381,7 +1381,44 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 
 void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 {
-	// TODO
+	const LineDef *L = LineDefs[idx];
+
+	const char *pattern = find_match->value();
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		int sd_num = (pass == 0) ? L->right : L->left;
+
+		const SideDef *SD = (pass == 0) ? L->Right() : L->Left();
+
+		if (! SD)
+			continue;
+
+		const char *L_tex = SD->LowerTex();
+		const char *U_tex = SD->UpperTex();
+		const char *R_tex = SD->MidTex();
+
+		if (! L->TwoSided())
+		{
+			if (!filter_toggle->value() || o_lowers->value())
+				if (R_tex && Pattern_Match(R_tex, pattern))
+					BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
+
+			continue;
+		}
+
+		if (!filter_toggle->value() || o_lowers->value())
+			if (L_tex && Pattern_Match(L_tex, pattern))
+				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_tex);
+
+		if (!filter_toggle->value() || o_uppers->value())
+			if (U_tex && Pattern_Match(U_tex, pattern))
+				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_tex);
+
+		if (!filter_toggle->value() || o_rails->value())
+			if (R_tex && Pattern_Match(R_tex, pattern))
+				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
+	}
 }
 
 
