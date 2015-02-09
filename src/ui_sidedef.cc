@@ -178,11 +178,11 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	int new_tex;
 
 	if (w == box->l_tex)
-		new_tex = box->TexFromWidget(box->l_tex);
+		new_tex = TexFromWidget(box->l_tex);
 	else if (w == box->u_tex)
-		new_tex = box->TexFromWidget(box->u_tex);
+		new_tex = TexFromWidget(box->u_tex);
 	else
-		new_tex = box->TexFromWidget(box->r_tex);
+		new_tex = TexFromWidget(box->r_tex);
 
 	// iterate over selected linedefs
 	selection_c list;
@@ -598,9 +598,6 @@ int UI_SideBox::TexFromWidget(Fl_Input *w)
 
 	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
 		name[i] = toupper(name[i]);
-
-//??	if (name[0] == 0)
-//??		strcpy(name, "-");
 
 	return BA_InternaliseString(name);
 }

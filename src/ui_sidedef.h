@@ -77,12 +77,12 @@ public:
 
 	void UnselectPics();
 
+	static int TexFromWidget(Fl_Input *w);
+
 private:
 	void UpdateLabel();
 	void UpdateHiding();
 	void UpdateAddDel();
-
-	int TexFromWidget(Fl_Input *w);
 
 	static void    tex_callback(Fl_Widget *, void *);
 	static void offset_callback(Fl_Widget *, void *);

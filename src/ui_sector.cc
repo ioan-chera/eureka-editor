@@ -307,9 +307,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 	int new_tex;
 	if (w == box->f_tex)
-		new_tex = box->FlatFromWidget(box->f_tex);
+		new_tex = FlatFromWidget(box->f_tex);
 	else
-		new_tex = box->FlatFromWidget(box->c_tex);
+		new_tex = FlatFromWidget(box->c_tex);
 
 	selection_c list;
 	selection_iterator_c it;
@@ -653,9 +653,6 @@ int UI_SectorBox::FlatFromWidget(Fl_Input *w)
 
 	for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
 		name[i] = toupper(name[i]);
-
-//??	if (name[0] == 0)
-//??		strcpy(name, "-");
 
 	return BA_InternaliseString(name);
 }

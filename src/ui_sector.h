@@ -76,13 +76,13 @@ public:
 
 	void UnselectPics();
 
+	// this truncates the name and makes it uppercase, then returns
+	// the internalised string.
+	static int FlatFromWidget(Fl_Input *w);
+
 private:
 	void AdjustHeight(s16_t *h, int delta);
 	void AdjustLight (s16_t *L, int delta);
-
-	// this truncates the name and makes it uppercase, then returns
-	// the internalised string.
-	int FlatFromWidget(Fl_Input *w);
 
 	static void height_callback(Fl_Widget *, void *);
 	static void   room_callback(Fl_Widget *, void *);
