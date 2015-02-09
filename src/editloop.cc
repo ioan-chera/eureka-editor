@@ -251,6 +251,10 @@ void Editor_ClearErrorMode()
 
 void Editor_ChangeMode_Raw(obj_type_e new_mode)
 {
+	// keep selection after a "Find All" and user dismisses panel
+	if (new_mode == edit.mode && main_win->isSpecialPanelShown())
+		edit.error_mode = false;
+
 	edit.mode = new_mode;
 
 	Editor_ClearAction();
