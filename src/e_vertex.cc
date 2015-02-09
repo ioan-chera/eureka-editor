@@ -1081,6 +1081,10 @@ static void Reshape_Circle(int arc_deg)
 
 
 	// compute new mid-point and radius (except for a full circle)
+	// and also compute starting angle.
+
+	double best_offset = 0;
+	double best_cost = 1e30;
 
 	if (arc_deg < 360)
 	{
@@ -1092,7 +1096,7 @@ static void Reshape_Circle(int arc_deg)
 		double dx = gap_dx;
 		double dy = gap_dy;
 
-		if (arc_deg < 180)
+		if (arc_deg > 180)
 		{
 			dx = -dx;
 			dy = -dy;
@@ -1106,16 +1110,7 @@ static void Reshape_Circle(int arc_deg)
 		mid_y += dy * away;
 
 		r = hypot(r, away);
-	}
 
-
-	// compute starting angle
-
-	double best_offset = 0;
-	double best_cost   = 1e30;
-
-	if (arc_deg < 360)
-	{
 		best_offset = atan2(start_V->y - mid_y, start_V->x - mid_x);
 	}
 	else
@@ -1168,14 +1163,18 @@ void VERT_Reshape()
 
 	if (y_stricmp(kind, "line") == 0)
 		Reshape_Line();
-	else if (y_stricmp(kind, "circle") == 0)
-		Reshape_Circle(360);
-	else if (y_stricmp(kind, "arc270") == 0)
-		Reshape_Circle(270);
-	else if (y_stricmp(kind, "arc180") == 0)
-		Reshape_Circle(180);
-	else if (y_stricmp(kind, "arc90") == 0)
-		Reshape_Circle(90);
+	else if (isdigit(kind[0]))
+	{
+		int arc = atoi(kind);
+
+		if (arc < 30 || arc > 360)
+		{
+			Beep("VERT_Reshape: bad angle: %s", kind);
+			return;
+		}
+
+		Reshape_Circle(arc);
+	}
 	else
 	{
 		Beep("VERT_Reshape: unknown kind: %s", kind);
