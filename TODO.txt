@@ -3,6 +3,28 @@ Eureka TODO / WISHLIST
 ======================
 
 
+rejig binding/execute system so that any command can have "flags"
+(where flags begin with '/', a la DOS)
+
+   -  LIN_SelectPath
+   -  SEC_SelectGroup
+   -  3D_Align
+
+   ( backwards compat on these: )
+   -  Insert  :  /new
+   -  Delete  :  /new
+   -  Merge   :  /keep
+   -  (check for other stuff)
+
+The 'Execute' functions should place all flags into a new EXEC_Flags[]
+array.
+
+Be nice to show available flags when binding a key.
+
+
+------
+
+
 preference for "bindable mouse wheel (disable normal behavior)"
 
 convert RIGHT BUTTON (scroll) to use KEY system
@@ -14,34 +36,35 @@ convert MIDDLE button logic for KEY system
 convert LEFT BUTTON for KEY system
 
 
-browser_small_tex : REPOPULATE BROWSER IF CHANGED
-
-
-Default Props : more spacious
+------
 
 
 Find and Replace:
 
-  -  EVERYTHING
+  -  don't Clear() if active and same edit mode
 
+  -  ClearFilters()   [ actually SET the 'floors' and 'lowers' (etc) checkboxes ]
 
-+  View / Find
-   (use GoToObject for first match, FindNext starts at selected + 1)
+  -  Line texture finding  /  replacing
 
-   -  VERTEX mode : useful ??
-   -  THING mode : match on type (possibly on flags, TID for hexen)
-   -  SECTOR mode: match on type / desc / tag / flat
-   -  LINEDEF mode: match on type / desc / tag / texture
+  -  Sector flat finding   /   replacing
 
-++  a Find/Replace dialog, especially for textures and flats
-    but also for thing numbers, line/sector specials, etc...
+Done:  Filter working for THINGS
 
-    [ an expression parser for e.g. sec.floor_tex == "FLAT2" || sec.ceil_tex == "TLITE3" ]
+Done:  one-sided / two-sided filters for LINES
 
 
 
--  Bug: when loading new WAD, may have different TEXTURES (etc)
-   (i.e. master directory changes, but have not reloaded anything)
++  Bug: when loading new WAD, may have different TEXTURES (etc)
+   [ i.e. master directory changes, but we don't reload anything ]
+
+
+'C' and 'D' reshaper : keep current position of vertices around gap
+                       (a) distance between them determines size of circle
+                       (b) still need to try 1000 positions??
+
+
+Makefile : restore optimisation
 
 
 ______________________________________________________________________
@@ -58,10 +81,6 @@ General
 +  Preferences:
    -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
-
-+  Restore last window position and maximized state
-
-+  grid : scroll speed preferences
 
 +  Hexen support
 
@@ -87,12 +106,15 @@ Documentation
 Editing
 -------
 
++  ENTER key pops up an "operation" menu, which provides all the
+   commands that can be done via the keyboard (e.g. flip linedefs)
+
+   (could also be bound to right mouse button)
+
 
 
 3D View
 -------
-
-+  an info bar:  X  Y  Z  ANG  GRAVITY  TEX/LIT/OBJ
 
 
 
@@ -111,11 +133,13 @@ ______________________________________________________________________
 General
 -------
 
--  a toolbar
-
 +  ability to hide the right-side panel
 
-+  View/Place Camera command, cursor turns into +
+?  a toolbar
+
++  shift-C to copy properties from defaults, META-C copy TO defaults
+
+-  View/Place Camera command, cursor turns into +
 
 -  ability to build nodes only in current map
 
@@ -125,10 +149,7 @@ General
    also useful if another modifier could disable all highlighting
    (same issue when user presses a mouse button, e.g. to drag a sel-box)
 
-+  ENTER key pops up an "operation" menu, which provides all the
-   commands that can be done via the keyboard (e.g. flip linedefs)
-
--  check that current pwad has been externally modified
+?  check that current pwad has been externally modified
 
 +  Preferences window:
    +  add backup_max_files / backup_max_space
@@ -137,22 +158,28 @@ General
 
 +  a dialog to view / load / prune backups.
 
+IDEA: edit.last_Sel : saves previous non-empty selection when current
+      selection is cleared, can bring back with CTRL-L or menu
+
 WISH: support Windows 95/98/ME
 
       [running on Windows 98SE requires KernelEx]
 
-WISH: support UDMF format
+WISH: can import UDMF format maps
 
 
 -  File / Test Map
    +  make filenames absolute
-   +  configurable stuff:
+   +  configurable stuff [ for each PORT ]
       -  directory to 'cd' into
       -  program to invoke
-      -  arguments to use (-iwad, -file, -merge, -warp)
+      -  arguments to use (-iwad, -file, -merge, -warp)  ===>  PORT .UGH
    -  support resource wads
    -  make sure the user built the nodes
-      (ideally invoke it automatically)
+      (option to invoke it automatically, or not check at all)
+
+   -  each map (via .dat?) can specify _override_ config
+
 
 ?  GUI buttons for NewTag / LastTag commands
 
@@ -172,19 +199,12 @@ WISH: support UDMF format
 
 -  PRINT key to make a screenshot of map or 3D view
 
--  in EUREKA lump, if a path is under $HOME store it as "~/blah..."
-   and expand that syntax on load.
-
 -  ability to view (perhaps edit) a map header lump
    (for FraggleScript etc...)
 
 -  ability to create / view / edit / import arbitrary lumps
    (e.g. MAPINFO, DECORATE, etc...)
 
-
-?  an auto-save feature (e.g. save every N minutes unless no
-   changes occurred in the last N minutes).
-   really needs the backup view/load/prune dialog too.
 
 ?  a way to slow down fake mouse wheels?
 
@@ -223,9 +243,8 @@ Coding
 ------
 
 -  rename code files:
-      selectn.cc/h  --> x_select.cc/h
-      objects.cc/h  --> x_object.cc/h
-      editloop.cc/h --> m_editor.cc/h
+
+      editloop.cc/h --> m_editor.cc/h  ???
 
 -  have XXX_NotifyNewMap() functions
 
@@ -239,13 +258,6 @@ Editing
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
--  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
-   split the line and put vertex where mouse is
-
-+  a menu for inserting shapes, especially N-sided polygon
-
-   --> NO, instead have a function to "circularize" a selection of vertices
-
 +  support PNG (etc?) image formats [enabled by a port definition]
    -->  feature png
 
@@ -258,7 +270,7 @@ Editing
 
 !!  handle self-referencing linedefs in auto create/split sector
 
-+  grid drawing too slow when small step and zoomed out
+-  grid drawing too slow when small step and zoomed out
    (since we render a huge number of dots)
 
    --> create an in-memory image (e.g. 64x64) of the dotty grid 
@@ -266,8 +278,7 @@ Editing
 
 
 -  assume texture names beginning with '#' are special
-
--  View / Toggle skill mode
+   (The texture checker ignores them -- what else is needed ??)
 
 ?  when highlighting a sector, draw the things in the same color as
    the sector is highlighted, but not as bright.  Because many sector
@@ -283,8 +294,6 @@ Editing
             AND: similarly if a new linedef passes through an
                  existing vertex -- create two instead.
 
-   __IDEA__ the 'c' key in linedef mode to fix crossing / overlaps
-
 -  quantization function: prevent linedefs from overlapping / crossing
 
 -  Multi-select : if CTRL is pressed, don't clear selection after drag
@@ -293,16 +302,9 @@ Editing
 
 -  some port-specific line/thing flags
 
+IDEA:  in Find/Replace panel, can filter things by CATEGORY
+
 ?  disconnect sectors : include islands (perhaps with 'D')
-
-?  fix PointOutsideOfMap() code to handle places where the point
-   cannot "see" the surrounding void space.
-   
-   TraceLineLoop on the linedef to the right, if faces_outward
-   then test upto 32 lines (OppositeLineDef) to see if any can
-   see the void.
-
-   if geometry is broken : special result.
 
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
@@ -319,8 +321,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
    -  call a function in Main_Loop
    -  if did a move, Fl::wait(0) instead of 0.2
    -  handle key up/down events in UI_Canvas::handle()
-
--  handle very tall/thin window : letter box with black
 
 -  closed sectors have a see-through gap (gets bigger further away)
 
@@ -358,15 +358,19 @@ IDEA: animation mode, render continuously and show any lighting
 Browser
 -------
 
--  a "Used in map" category (sorted by usage)
+-  "USED" category
+   [ cannot be a SORT method, nor a new check-button ]
+
++  ability to shrink categories, i.e. say that for things the
+   'b' (bonus) and 'k' categories should become a single one
+
+-  don't show categories which are empty
 
 -  can change the [max] size of the texture/flat previews
 
 -  scroll speed (i.e. linesize) is configurable
 
-?  no-pic mode for textures and flats
-
--  search box: ',' for AND, '/' for OR
+-  search box: ',' for OR
 
 -  preference for # of RECENT items
 
@@ -379,7 +383,7 @@ Game / Port Definitions
 
 -  game-def setting: view_height
 
--  ability to "remove line 271" (etc)
+-  ability to "remove line 271" (etc), remove thing 888 (in vanilla)
 
 -  finish HacX support -- categorize the textures
 
@@ -391,12 +395,16 @@ Game / Port Definitions
 
 -  a new category for BOOM's "property transfer" linetypes
 
+-  make player things bright ??
+
 
 ______________________________________________________________________
 
   NOT-TO-DO
 ______________________________________________________________________
 
+
+NO:  Restore last window position and maximized state
 
 NO:  un-hard-code menu shortcuts?
 
@@ -417,6 +425,10 @@ NO:  when one vertex of a linedef is moved (and not the other)
      update the X offset on the appropriate side (right side for start,
      left side for end vertex).
 
+NO:  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
+     split the line and put vertex where mouse is
+     [ can do this in vertex mode easily enough ]
+
 NO:  SHIFT + SPACE = no auto create/split sectors
 
 NO:  merge vertex and linedef modes
@@ -429,6 +441,14 @@ NO:  ability to drag the camera (on 2D viewport)
 NO:  when moving a sector and the camera is inside it, move camera too
 
 NO:  ability to edit Lua code for OBLIGE prefabs
+
+
+NO:  3D view: handle very tall/thin window, letter box with black
+
+NO:  an auto-save feature (e.g. save every N minutes unless no
+     changes occurred in the last N minutes).
+
+NO:  no-pic mode for textures and flats
 
 
 ______________________________________________________________________
@@ -451,8 +471,6 @@ floor_bump_large   (64)
 render_forward_speed  (16)
 render_turn_speed     (16)
 render_updown_speed   (16)
-
-map_mousescroll_speed  (16)
 
 paste_reselects  (true)
 
