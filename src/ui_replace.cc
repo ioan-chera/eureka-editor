@@ -1182,8 +1182,29 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 	if (! Filter_Tag(SEC->tag))
 		return false;
 
-	// TODO
-	return false;
+	bool found = false;
+	bool negated = false;
+
+	const char *pattern = find_match->value();
+
+	if (pattern[0] == '!')
+	{
+		pattern++;
+		negated = true;
+	}
+
+	if (!filter_toggle->value() || o_floors->value())
+		if (Pattern_Match(SEC->FloorTex(), pattern))
+			found = true;
+
+	if (!filter_toggle->value() || o_ceilings->value())
+		if (Pattern_Match(SEC->CeilTex(), pattern))
+			found = true;
+
+	if (negated)
+		return ! found;
+
+	return found;
 }
 
 
@@ -1278,6 +1299,40 @@ void UI_FindAndReplace::ComputeFlagMask()
 	}
 
 #undef FLAG_FROM_WIDGET
+}
+
+
+bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern)
+{
+	// allow multiple names (simple patterns) separated by commas.
+	// they can include '*' as a wildcard.
+
+	char local_pat[256];
+	int ofs = 0;
+
+	for (;;)
+	{
+		if (*pattern == 0 || *pattern == ',')
+		{
+			local_pat[ofs] = 0;
+
+			if (fl_filename_match(tex, local_pat))
+				return true;
+
+			if (*pattern == 0)
+				return false;
+
+			// begin new part, skip comma
+			ofs = 0;
+			pattern++;
+		}
+
+		// prevent overflow of the local buffer
+		if (ofs + 4 > (int)sizeof(local_pat))
+			return false;
+
+		local_pat[ofs++] = *pattern++;
+	}
 }
 
 

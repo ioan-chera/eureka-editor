@@ -127,6 +127,8 @@ private:
 
 	bool CheckNumberInput(Fl_Input *w, number_group_c *num_grp);
 
+	bool Pattern_Match(const char *tex, const char *pattern);
+
 	// specialized functions for each search modality
 
 	bool Match_Thing(int idx);
