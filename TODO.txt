@@ -55,15 +55,6 @@ Done:  one-sided / two-sided filters for LINES
 
 
 
-+  Bug: when loading new WAD, may have different TEXTURES (etc)
-   [ i.e. master directory changes, but we don't reload anything ]
-
-
-'C' and 'D' reshaper : keep current position of vertices around gap
-                       (a) distance between them determines size of circle
-                       (b) still need to try 1000 positions??
-
-
 Makefile : restore optimisation
 
 
