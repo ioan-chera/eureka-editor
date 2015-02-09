@@ -360,7 +360,8 @@ void CMD_UnselectAll(void)
 
 void CMD_InvertSelection(void)
 {
-	Editor_ClearErrorMode();
+	// do not clear selection when in error mode
+	edit.error_mode = false;
 
 	int total = NumObjects(edit.mode);
 
