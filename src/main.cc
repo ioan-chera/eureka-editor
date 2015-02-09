@@ -1019,9 +1019,9 @@ int main(int argc, char *argv[])
 	init_progress = 3;
 
 
-	DeterminePort();
-
 	// open a specified PWAD now
+	// [ the map is loaded later.... ]
+
 	if (Pwad_list.size() > 0)
 	{
 		M_ValidateGivenFiles();
@@ -1036,8 +1036,6 @@ int main(int argc, char *argv[])
 		// Note: the Main_LoadResources() call will ensure this gets
 		//       placed at the correct spot (at the end)
 		MasterDir_Add(edit_wad);
-
-		// the map is loaded later....
 	}
 	else if (auto_load_recent &&
 	         ! (Iwad_name || Level_name))
@@ -1046,19 +1044,24 @@ int main(int argc, char *argv[])
 	}
 
 
-	// handle the '__EUREKA' lump.  It is almost equivalent to using the
+	// Handle the '__EUREKA' lump.  It is almost equivalent to using the
 	// -iwad, -merge and -port command line options, but with extra
 	// checks (to allow editing a wad containing dud information).
+	//
+	// Note: there is logic in M_ParseEurekaLump() to ensure that command
+	// line arguments can override the EUREKA_LUMP values.
 
 	if (edit_wad)
 	{
-		if (! M_ParseEurekaLump(edit_wad))
+		if (! M_ParseEurekaLump(edit_wad, true /* keep_cmd_line_args */))
 		{
 			// user cancelled the load
 			RemoveEditWad();
 		}
 	}
 
+
+	DeterminePort();
 
 	// determine which IWAD to use
 	if (! DetermineIWAD())

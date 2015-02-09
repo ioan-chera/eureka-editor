@@ -32,6 +32,10 @@ CHANGES IN Eureka
    selected it disables the map selection and immediately asks for
    a file to save (export) the new map into
 
+-  when loading a wad specified on the command line, and it contains
+   settings for the iwad, port and/or resources, then allow command
+   line arguments to override those values (and _add_ new resources)
+
 -  new preference to maximize window on start (Linux, WIN32 only)
 
 -  the Default Properties now has its own panel

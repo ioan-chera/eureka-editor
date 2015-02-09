@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -731,9 +731,25 @@ const char * M_PickDefaultIWAD()
 }
 
 
+static void M_AddResource_Unique(const char * filename)
+{
+	// check if base filename (without path) already exists
+	for (unsigned int k = 0 ; k < Resource_list.size() ; k++)
+	{
+		const char *A = fl_filename_name(filename);
+		const char *B = fl_filename_name(Resource_list[k]);
+
+		if (y_stricmp(A, B) == 0)
+			return;		// found it
+	}
+
+	Resource_list.push_back(filename);
+}
+
+
 /* returns false if user wanted to cancel the load */
 
-bool M_ParseEurekaLump(Wad_file *wad)
+bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -852,10 +868,32 @@ bool M_ParseEurekaLump(Wad_file *wad)
 
 	/* OK */
 
-	if (new_iwad) Iwad_name = new_iwad;
-	if (new_port) Port_name = new_port;
+	// When 'keep_cmd_line_args' is true, we do not override any value which
+	// has been set via command line arguments.  In other words, cmd line
+	// arguments will override the EUREKA_LUMP.
+	//
+	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
+	// supplied on the command line, ensuring that we don't get any duplicates.
 
-	Resource_list.swap(new_resources);
+	if (new_iwad)
+	{
+		if (! (keep_cmd_line_args && Iwad_name))
+			Iwad_name = new_iwad;
+	}
+	
+	if (new_port)
+	{
+		if (! (keep_cmd_line_args && Port_name))
+			Port_name = new_port;
+	}
+
+	if (! keep_cmd_line_args)
+		Resource_list.clear();
+
+	for (unsigned int i = 0 ; i < new_resources.size() ; i++)
+	{
+		M_AddResource_Unique(new_resources[i]);
+	}
 
 	return true;
 }
