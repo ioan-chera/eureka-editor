@@ -1252,7 +1252,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 				return true;
 
 		if (!filter_toggle->value() || o_rails->value())
-			if (R_tex && Pattern_Match(R_tex, pattern))
+			if (R_tex && Pattern_Match(R_tex, pattern, true /* is_rail */))
 				return true;
 	}
 
@@ -1375,7 +1375,7 @@ void UI_FindAndReplace::ComputeFlagMask()
 }
 
 
-bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern)
+bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern, bool is_rail)
 {
 	// allow multiple names (simple patterns) separated by commas.
 	// they can include '*' as a wildcard.
@@ -1389,8 +1389,18 @@ bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern)
 		{
 			local_pat[ofs] = 0;
 
-			if (fl_filename_match(tex, local_pat))
-				return true;
+			// do not match the empty rail texture against the "*" wildcard.
+			// [ this is debatable, but I think this prevents making changes
+			//   which the user really didn't want or expect ]
+			if (is_rail && tex[0] == '-' && local_pat[0] == '*')
+			{
+				// no match
+			}
+			else
+			{
+				if (fl_filename_match(tex, local_pat))
+					return true;
+			}
 
 			if (*pattern == 0)
 				return false;
@@ -1458,7 +1468,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
-			if (R_tex && Pattern_Match(R_tex, pattern))
+			if (R_tex && Pattern_Match(R_tex, pattern, true /* is_rail */))
 				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }

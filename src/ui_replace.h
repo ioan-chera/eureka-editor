@@ -128,7 +128,7 @@ private:
 
 	bool CheckNumberInput(Fl_Input *w, number_group_c *num_grp);
 
-	bool Pattern_Match(const char *tex, const char *pattern);
+	bool Pattern_Match(const char *tex, const char *pattern, bool is_rail = false);
 
 	// specialized functions for each search modality
 
