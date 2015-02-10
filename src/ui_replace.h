@@ -103,6 +103,7 @@ public:
 
 private:
 	void Clear();
+	void ResetFilters();
 
 	bool WhatFromEditMode();
 

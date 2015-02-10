@@ -550,6 +550,38 @@ void UI_FindAndReplace::Clear()
 	replace_all_but->deactivate();
 
 	rawShowFilter(0);
+
+	ResetFilters();
+}
+
+
+void UI_FindAndReplace::ResetFilters()
+{
+	tag_input->value("");
+	tag_numbers->clear();
+
+	// thing filters
+	o_easy  ->value(0);
+	o_medium->value(0);
+	o_hard  ->value(0);
+
+	o_sp  ->value(0);
+	o_coop->value(0);
+	o_dm  ->value(0);
+
+	ComputeFlagMask();
+
+	// sector filters
+	o_floors  ->value(1);
+	o_ceilings->value(1);
+
+	// linedef filters
+	o_lowers->value(1);
+	o_uppers->value(1);
+	o_rails ->value(1);
+
+	o_one_sided->value(1);
+	o_two_sided->value(1);
 }
 
 
