@@ -178,8 +178,8 @@ m : merge selected vertices into a single one
 I : reshape selected vertices into a line
 O : reshape selected vertices into a circle
 D : reshape selected vertices into a half-circle
-C : reshape selected vertices into a 90-degree arc
-Q : reshape selected vertices into a 270-degree arc
+C : reshape selected vertices into a 120-degree arc
+Q : reshape selected vertices into a 240-degree arc
 
 
 Linedef Mode

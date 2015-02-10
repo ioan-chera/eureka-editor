@@ -13,7 +13,8 @@ CHANGES IN Eureka
    -  'I' moves selected vertices onto a line
    -  'O' moves them into a circle shape
    -  'D' moves them into a half-circle
-   -  'C' moves then into a 90-degree arc
+   -  'C' moves them into a 120-degree arc
+   -  'Q' moves them into a 240-degree arc
 
 
 -  a preference to show smaller textures in the browser
