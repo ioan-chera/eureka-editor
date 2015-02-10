@@ -39,22 +39,6 @@ convert LEFT BUTTON for KEY system
 ------
 
 
-Find and Replace:
-
-  -  don't Clear() if active and same edit mode
-
-  -  ClearFilters()   [ actually SET the 'floors' and 'lowers' (etc) checkboxes ]
-
-  -  Line texture finding  /  replacing
-
-  -  Sector flat finding   /   replacing
-
-Done:  Filter working for THINGS
-
-Done:  one-sided / two-sided filters for LINES
-
-
-
 Makefile : restore optimisation
 
 
