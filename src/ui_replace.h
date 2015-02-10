@@ -76,6 +76,7 @@ private:
 	// sector filters
 	Fl_Check_Button *o_floors;
 	Fl_Check_Button *o_ceilings;
+	Fl_Check_Button *o_skies;
 
 	// linedef filters
 	Fl_Check_Button *o_lowers;

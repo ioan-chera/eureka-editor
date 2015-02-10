@@ -369,6 +369,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 			// sector stuff
 			o_floors   = new Fl_Check_Button(X+45, Y+418, 80, 22, " floors");
 			o_ceilings = new Fl_Check_Button(X+45, Y+440, 80, 22, " ceilings");
+			o_skies    = new Fl_Check_Button(X+45, Y+462, 80, 22, " skies");
 
 			// linedef stuff
 			o_lowers  = new Fl_Check_Button(X+45, Y+418, 80, 22, " lowers");
@@ -442,6 +443,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	// sector stuff
 	SHOW_WIDGET_IF(o_floors,   x == 2);
 	SHOW_WIDGET_IF(o_ceilings, x == 2);
+	SHOW_WIDGET_IF(o_skies,    x == 2);
 
 	// linedef stuff
 	SHOW_WIDGET_IF(o_lowers, x == 1);
@@ -584,6 +586,7 @@ void UI_FindAndReplace::ResetFilters()
 	// sector filters
 	o_floors  ->value(1);
 	o_ceilings->value(1);
+	o_skies   ->value(1);
 
 	// linedef filters
 	o_lowers->value(1);
@@ -1273,8 +1276,11 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 		if (Pattern_Match(SEC->FloorTex(), pattern))
 			return true;
 
-	if (!filter_toggle->value() || o_ceilings->value())
-		if (Pattern_Match(SEC->CeilTex(), pattern))
+	const char *ceil_tex = SEC->CeilTex();
+
+	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
+								|| ( is_sky(ceil_tex) && o_skies->value()) )
+		if (Pattern_Match(ceil_tex, pattern))
 			return true;
 
 	return false;
@@ -1484,8 +1490,11 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 		if (Pattern_Match(SEC->FloorTex(), pattern))
 			BA_ChangeSEC(idx, Sector::F_FLOOR_TEX, new_tex);
 
-	if (!filter_toggle->value() || o_ceilings->value())
-		if (Pattern_Match(SEC->CeilTex(), pattern))
+	const char *ceil_tex = SEC->CeilTex();
+
+	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
+								|| ( is_sky(ceil_tex) && o_skies->value()) )
+		if (Pattern_Match(ceil_tex, pattern))
 			BA_ChangeSEC(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
