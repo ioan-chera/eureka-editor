@@ -558,7 +558,8 @@ void UI_FindAndReplace::Clear()
 	apply_but->deactivate();
 	replace_all_but->deactivate();
 
-	rawShowFilter(0);
+	filter_toggle->value(0);
+	filter_toggle->do_callback();
 
 	ResetFilters();
 }
