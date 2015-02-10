@@ -390,6 +390,9 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	resizable(grp3);
 
 	end();
+
+
+	Clear();
 }
 
 
@@ -488,7 +491,7 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	box->Clear();
+	obj_type_e prev_type = box->cur_obj.type;
 
 	bool want_descs = true;
 
@@ -501,6 +504,12 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 		case 4: box->cur_obj.type = OBJ_SECTORS; break;
 
 		default: break;
+	}
+
+	// only clear everything when type changes
+	if (prev_type != box->cur_obj.type)
+	{
+		box->Clear();
 	}
 
 	box->UpdateWhatColor();
