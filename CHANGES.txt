@@ -108,5 +108,8 @@ Bug Fixes:
 
 -  fixed not reloading textures (etc) when opening a new wad file
 
+-  fixed crash when trying to build nodes on an IWAD map which has
+   some changes made to it, but has not been saved (exported) yet
+
 -  browser: fixed patterns like '4$' not working properly
 

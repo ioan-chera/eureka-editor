@@ -247,18 +247,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 bool CMD_BuildNodes()
 {
-	if (! edit_wad && ! MadeChanges)
-	{
-		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
-		return false;
-	}
-
-	if (edit_wad->IsReadOnly())
-	{
-		DLG_Notify("Cannot build nodes on a read-only file.");
-		return false;
-	}
-
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
@@ -270,6 +258,18 @@ bool CMD_BuildNodes()
 
 		if (! CMD_SaveMap())
 			return false;
+	}
+
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
+		return false;
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot build nodes on a read-only file.");
+		return false;
 	}
 
 	SYS_ASSERT(edit_wad);
@@ -395,18 +395,8 @@ fprintf(stderr, "new_name : %s\n", new_name);
 
 void CMD_TestMap()
 {
-	// TODO: remove this restriction
-	if (! edit_wad && ! MadeChanges)
-	{
-		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
-		return;
-	}
-
 	if (MadeChanges)
 	{
-		// TODO: ideally ask the question "save changes now?"
-		//       HOWEVER we need to know if that was successful (ouch)
-
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
 						"and build the nodes?") <= 0)
@@ -417,12 +407,18 @@ void CMD_TestMap()
 		if (! CMD_BuildNodes())
 			return;
 	}
-	else
+
+	if (! edit_wad)
 	{
-		// FIXME:
-		// if (missing nodes)
-		//    DLG_Confirm(  "build the nodes now?")
+		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
+		return;
 	}
+
+	
+	// FIXME:
+	// if (missing nodes)
+	//    DLG_Confirm(  "build the nodes now?")
+
 
 	char cmd_buffer[FL_PATH_MAX * 2];
 
