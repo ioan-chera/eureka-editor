@@ -216,7 +216,7 @@ static int PartialTexCmp(const char *A, const char *B)
 
 
 static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
-						 char part, const char *flags)
+						 char part, int align_flags)
 {
 	const LineDef *L = soal_LD_ptr(zz);
 	const LineDef *N = soal_LD_ptr(adj);
@@ -248,7 +248,7 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 
 	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
 
-	if (strchr(flags, 'r'))
+	if (align_flags & LINALIGN_Right)
 	{
 		if (on_left)
 			return -2;
@@ -316,7 +316,7 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 
 
 static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
-                                          const char *flags)
+                                          int align_flags)
 {
 	// returns -1 for none
 
@@ -340,7 +340,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
 			int adjoiner = soal_make(n, adj_side);
 
-			int score = ScoreAdjoiner(cur, adjoiner, part, flags);
+			int score = ScoreAdjoiner(cur, adjoiner, part, align_flags);
 
 // fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
 
@@ -364,7 +364,7 @@ int TestAdjoinerLineDef(int ld)
 	if (soal_sd(zz) < 0)
 		return -1;
 
-	side_on_a_line_t result = DetermineAdjoiner(zz, 0, "");
+	side_on_a_line_t result = DetermineAdjoiner(zz, 0, 0);
 
 	if (result >= 0)
 		return soal_ld(result);
@@ -424,7 +424,7 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 
 
 static char PickAdjoinerPart(side_on_a_line_t cur, char part,
-							 side_on_a_line_t adj, const char *flags)
+							 side_on_a_line_t adj, int align_flags)
 {
 	const LineDef *L  = soal_LD_ptr(cur);
 	const SideDef *SD = soal_SD_ptr(cur);
@@ -517,7 +517,7 @@ static int CalcReferenceH(side_on_a_line_t zz, char part)
 
 
 static void DoAlignX(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, const char *flags)
+					 side_on_a_line_t adj, int align_flags)
 {
 	const LineDef *L  = soal_LD_ptr(cur);
 
@@ -552,7 +552,7 @@ static void DoAlignX(side_on_a_line_t cur, char part,
 
 
 static void DoAlignY(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, const char *flags)
+					 side_on_a_line_t adj, int align_flags)
 {
 	const LineDef *L  = soal_LD_ptr(cur);
 	const SideDef *SD = soal_SD_ptr(cur);
@@ -584,7 +584,7 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	// determine which parts (upper or lower) we will use for alignment
 
 	char cur_part = part;
-	char adj_part = PickAdjoinerPart(cur, part, adj, flags);
+	char adj_part = PickAdjoinerPart(cur, part, adj, align_flags);
 
 	// requirement: adj_tex_h + adj_y_off = cur_tex_h + cur_y_off
 
@@ -604,14 +604,11 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 }
 
 
-void LineDefs_Align(int ld, int side, int sd, char part, const char *flags)
+void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
 {
-	bool do_X = strchr(flags, 'x') ? true : false;
-	bool do_Y = strchr(flags, 'y') ? true : false;
-
 	side_on_a_line_t cur = soal_make(ld, side);
 
-	side_on_a_line_t adj = DetermineAdjoiner(cur, part, flags);
+	side_on_a_line_t adj = DetermineAdjoiner(cur, part, align_flags);
 
 	if (adj < 0)
 	{
@@ -621,8 +618,11 @@ void LineDefs_Align(int ld, int side, int sd, char part, const char *flags)
 
 	BA_Begin();
 
-	if (do_X) DoAlignX(cur, part, adj, flags);
-	if (do_Y) DoAlignY(cur, part, adj, flags);
+	if (align_flags & LINALIGN_X)
+		DoAlignX(cur, part, adj, align_flags);
+
+	if (align_flags & LINALIGN_Y)
+		DoAlignY(cur, part, adj, align_flags);
 
 	BA_End();
 }

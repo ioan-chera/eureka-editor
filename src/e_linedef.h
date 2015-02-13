@@ -42,7 +42,18 @@ int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
 
-void LineDefs_Align(int ld, int side, int sd, char part, const char *flags);
+
+typedef enum
+{
+	LINALIGN_X		= (1 << 0),		// align the X offset
+	LINALIGN_Y		= (1 << 1),		// align the Y offset
+
+	LINALIGN_Left	= 0,			// align with line to the left of this one
+	LINALIGN_Right	= (1 << 4)		// align with line to the right of this one
+}
+linedef_align_flag_e;
+
+void LineDefs_Align(int ld, int side, int sd, char part, int align_flags);
 
 
 /* commands */

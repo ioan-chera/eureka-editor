@@ -2508,6 +2508,7 @@ void R3D_Gamma(void)
  *
  * Flags:
  *    /clear : clear offset(s) instead of aligning
+ *    /right : align to line on the right of this one (instead of left)
  */
 void R3D_Align(void)
 {
@@ -2518,10 +2519,10 @@ void R3D_Align(void)
 	}
 
 	// parse parameter
-	const char *flags = EXEC_Param[0];
+	const char *param = EXEC_Param[0];
 
-	bool do_X = strchr(flags, 'x') ? true : false;
-	bool do_Y = strchr(flags, 'y') ? true : false;
+	bool do_X = strchr(param, 'x') ? true : false;
+	bool do_Y = strchr(param, 'y') ? true : false;
 
 	if (! (do_X || do_Y))
 	{
@@ -2529,7 +2530,7 @@ void R3D_Align(void)
 		return;
 	}
 
-	bool do_clear = strchr(flags, 'c') ? true : false;
+	bool do_clear = Exec_HasFlag("/clear");
 
 	// find the line / side to align
 	if (! is_linedef(view.hl.line) ||
@@ -2563,7 +2564,15 @@ void R3D_Align(void)
 
 	char part_c = (view.hl.part == QRP_Upper) ? 'u' : 'l';
 
-	LineDefs_Align(view.hl.line, view.hl.side, sd, part_c, flags);
+	int align_flags = 0;
+
+	if (do_X) align_flags = align_flags | LINALIGN_X;
+	if (do_Y) align_flags = align_flags | LINALIGN_Y;
+
+	if (Exec_HasFlag("/right"))
+		align_flags |= LINALIGN_Right;
+
+	LineDefs_Align(view.hl.line, view.hl.side, sd, part_c, align_flags);
 }
 
 
