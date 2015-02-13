@@ -2501,13 +2501,13 @@ void R3D_Gamma(void)
 
 /* Align texture on a sidedef
  *
- * Possible flags:
- *    x : align X offset  \ one must be present
- *    y : align Y offset  /
+ * Parameter:
+ *     x : align X offset
+ *     y : align Y offset
+ *    xy : align both X and Y
  *
- *    c : clear offset(s) instead of aligning
- *
- * ?? t : require a Texture match
+ * Flags:
+ *    /clear : clear offset(s) instead of aligning
  */
 void R3D_Align(void)
 {
@@ -2609,15 +2609,20 @@ static editor_command_t  render_commands[] =
 	},
 
 	{	"3D_Set",
-		&R3D_Set
+		&R3D_Set,
+		/* flags */ NULL,
+		/* keywords */ "gamma tex obj light grav"
 	},
 
 	{	"3D_Toggle",
-		&R3D_Toggle
+		&R3D_Toggle,
+		/* flags */ NULL,
+		/* keywords */ "tex obj light grav"
 	},
 
 	{	"3D_Align",
-		&R3D_Align
+		&R3D_Align,
+		/* flags */ "/right /clear"
 	},
 
 	// end of command list

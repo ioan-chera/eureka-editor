@@ -52,9 +52,12 @@ private:
 
 	Fl_Choice *context;
 	Fl_Choice *func;
-
 	Fl_Input  *params;
-	Fl_Input  *flags;
+
+	const editor_command_t *cur_cmd;
+
+	Fl_Menu_Button *keyword_menu;
+	Fl_Menu_Button *flag_menu;
 
 	Fl_Button *cancel;
 	Fl_Button *ok_but;
@@ -94,12 +97,18 @@ private:
 		// add sorted names to menu, and find the current function
 		int result = 0;
 
+		cur_cmd = NULL;
+
 		for (unsigned int k = 0 ; k < name_list.size() ; k++)
 		{
 			func->add(name_list[k]);
 
 			if (strcmp(name_list[k], find_name) == 0)
+			{
 				result = (int)k;
+
+				cur_cmd = FindEditorCommand(find_name);
+			}
 		}
 
 		return result;
@@ -123,31 +132,16 @@ private:
 
 		func->value(PopulateFuncMenu(ctx, func_buf));
 
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
+
 		if (*str == ':')
 			str++;
 
-		// tokenize 
-		const char * tokens[32];
+		while (isspace(*str))
+			str++;
 
-		int num_tok = M_ParseLine(str, tokens, 32, true /* do_strings */);
-
-		if (num_tok < 0)
-			num_tok = 0;
-
-		for (int i = 0 ; i < num_tok ; i++)
-		{
-			Fl_Input *dest = params;
-
-			if (tokens[i][0] == '/')
-				dest = flags;
-
-			if (dest->size() > 0)
-				dest->insert(" ");
-
-			dest->insert(tokens[i]);
-		}
-
-		M_FreeLine(tokens, num_tok);
+		params->value(str);
 	}
 
 	const char * Encode()
@@ -162,17 +156,41 @@ private:
 
 		strcpy(buffer, cmd->name);
 
-		if (strlen(buffer) + strlen(params->value()) + strlen(flags->value()) + 10 >= sizeof(buffer))
+		if (strlen(buffer) + strlen(params->value()) + 10 >= sizeof(buffer))
 			return "OVERFLOW";
 
 		strcat(buffer, ": ");
 		strcat(buffer, params->value());
-		strcat(buffer, " ");
-
-		// FIXME : tokenize, ensure flags start with '/'
-		strcat(buffer, flags->value());
 
 		return buffer;
+	}
+
+	void PopulateMenuList(Fl_Menu_Button *menu, const char *list)
+	{
+		menu->clear();
+
+		if (! list || ! list[0])
+		{
+			menu->deactivate();
+			return;
+		}
+
+		const char * tokens[32];
+
+		int num_tok = M_ParseLine(list, tokens, 32, false);
+
+		if (num_tok < 1)	// shouldn't happen
+		{
+			menu->deactivate();
+			return;
+		}
+
+		for (int i = 0 ; i < num_tok ; i++)
+			menu->add(tokens[i]);
+
+		M_FreeLine(tokens, num_tok);
+
+		menu->activate();
 	}
 
 	bool ValidateKey()
@@ -265,21 +283,16 @@ public:
 		  context->callback((Fl_Callback*)validate_callback, this);
 		}
 
-		{ func = new Fl_Choice(85, 100, 150, 25, "Function:");
+		{ func = new Fl_Choice(85, 105, 150, 25, "Function:");
 		}
-		{ params = new Fl_Input(85, 130, 210, 25, "Params:");
+		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
 		  params->value("");
 		  params->when(FL_WHEN_CHANGED);
 //		  params->callback((Fl_Callback*)validate_callback, this);
 		}
-		{ flags = new Fl_Input(85, 160, 210, 25, "Flags:");
-		  flags->value("");
-		  flags->when(FL_WHEN_CHANGED);
-//		  flags->callback((Fl_Callback*)validate_callback, this);
+		{ keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
 		}
-		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
-		  o->callback((Fl_Callback*)find_func_callback, this);
-		  o->hide();  // TODO: IMPLEMENT THIS
+		{ flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
 		}
 
 		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
@@ -300,7 +313,7 @@ public:
 
 		end();
 
-		// parse line into function name, parameters and flags
+		// parse line into function name and parameters
 		Decode(ctx, _func);
 	}
 

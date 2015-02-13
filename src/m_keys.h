@@ -129,6 +129,9 @@ typedef struct
 
 	command_func_t func;
 
+	const char *flag_list;
+	const char *keyword_list;
+
 	// this value is computed when registering
 	key_context_e req_context;
 
@@ -137,6 +140,7 @@ typedef struct
 
 void M_RegisterCommandList(editor_command_t * list);
 
+const editor_command_t *   FindEditorCommand(const char *name);
 const editor_command_t * LookupEditorCommand(int index);
 
 

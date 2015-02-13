@@ -53,12 +53,15 @@ void M_RegisterCommand(const char *name, command_func_t func)
 
 	cmd->name = name;
 	cmd->func = func;
+	cmd->flag_list = NULL;
+	cmd->keyword_list = NULL;
 	cmd->req_context = ContextFromName(name);
 
 	all_commands.push_back(cmd);
 }
 
 
+/* this should only be called during startup */
 void M_RegisterCommandList(editor_command_t * list)
 {
 	// the structures are used directly
@@ -72,7 +75,7 @@ void M_RegisterCommandList(editor_command_t * list)
 }
 
 
-static const editor_command_t * FindEditorCommand(const char *name)
+const editor_command_t * FindEditorCommand(const char *name)
 {
 	for (unsigned int i = 0 ; i < all_commands.size() ; i++)
 		if (y_stricmp(all_commands[i]->name, name) == 0)
