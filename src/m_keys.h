@@ -149,9 +149,12 @@ const editor_command_t * LookupEditorCommand(int index);
 #define MAX_EXEC_PARAM	16
 
 extern const char * EXEC_Param[MAX_EXEC_PARAM];
+extern const char * EXEC_Flags[MAX_EXEC_PARAM];
 
 // result from command function, 0 is OK
 extern int EXEC_Errno;
+
+bool Exec_HasFlag(const char *flag);
 
 bool ExecuteKey(keycode_t key, key_context_e context);
 

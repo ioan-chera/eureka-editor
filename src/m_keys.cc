@@ -25,6 +25,7 @@
 
 
 const char * EXEC_Param[MAX_EXEC_PARAM];
+const char * EXEC_Flags[MAX_EXEC_PARAM];
 
 int EXEC_Errno;
 
@@ -1029,6 +1030,23 @@ key_context_e M_ModeToKeyContext(obj_type_e mode)
 }
 
 
+bool Exec_HasFlag(const char *flag)
+{
+	// the parameter should include a leading '/'
+
+	for (int i = 0 ; i < MAX_EXEC_PARAM ; i++)
+	{
+		if (! EXEC_Flags[i][0])
+			break;
+
+		if (y_stricmp(EXEC_Flags[i], flag) == 0)
+			return true;
+	}
+
+	return false;
+}
+
+
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
 	(* cmd->func)();
@@ -1040,7 +1058,10 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	Status_Clear();
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+	{
 		EXEC_Param[p] = "";
+		EXEC_Flags[p] = "";
+	}
 
 	EXEC_Errno = 0;
 
@@ -1050,8 +1071,20 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 		if (bind.key == key && bind.context == context)
 		{
+			int p_idx = 0;
+			int f_idx = 0;
+
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-				EXEC_Param[p] = bind.param[p];
+			{
+				if (! bind.param[p][0])
+					break;
+
+				// separate flags from normal parameters
+				if (bind.param[p][0] == '/')
+					EXEC_Param[f_idx++] = bind.param[p];
+				else
+					EXEC_Param[p_idx++] = bind.param[p];
+			}
 
 			DoExecuteCommand(bind.cmd);
 
@@ -1073,12 +1106,15 @@ bool ExecuteCommand(const char *name, const char *param1,
 	
 	Status_Clear();
 
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+	{
+		EXEC_Param[p] = "";
+		EXEC_Flags[p] = "";
+	}
+
 	EXEC_Param[0] = param1;
 	EXEC_Param[1] = param2;
 	EXEC_Param[2] = param3;
-
-	for (int p = 3 ; p < MAX_EXEC_PARAM ; p++)
-		EXEC_Param[p] = "";
 
 	EXEC_Errno = 0;
 
