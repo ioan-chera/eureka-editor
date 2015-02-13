@@ -6,20 +6,34 @@ Eureka TODO / WISHLIST
 >>  rejig binding/execute system so that any command can have "flags"
 (where flags begin with '/', a la DOS)
 
-   -  LIN_SelectPath
-   -  SEC_SelectGroup
-   -  3D_Align
+   +  LIN_SelectPath
 
-   ( backwards compat on these: )
-   -  Insert  :  /new
-   -  Delete  :  /new
+   +  SEC_SelectGroup
+
+   +  ApplyTag  /fresh  /last
+
+   -  Insert  :  /new     [ backward compat ]
+   -  Delete  :  /keep    [ backward compat ]
    -  Merge   :  /keep
-   -  (check for other stuff)
 
-The 'Execute' functions should place all flags into a new EXEC_Flags[]
-array.
+   +  Rotate90 : use a keyword : cw  /  acw
+
+
+VERT_Reshape : use '0' instead of "line" ??
+
+
+-->  UPDATE  bindings.cfg
+
 
 Be nice to show available flags when binding a key.
+
+
+key bindings : if press "Bind" (etc?) and selected item is off window,
+               scroll to make it visible.
+
+
+Test :
+-  3D_Align functions
 
 
 ------

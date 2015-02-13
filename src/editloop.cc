@@ -821,7 +821,7 @@ void CMD_PlaceCamera(void)
 
 	Render3D_SetCameraPos(x, y);
 
-	if (isalpha(EXEC_Param[0][0]))  // open3d
+	if (Exec_HasFlag("/open3d"))
 	{
 		edit.render3d = 1;
 		main_win->redraw();
@@ -1371,23 +1371,33 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"EditMode",
-		&CMD_EditMode
+		&CMD_EditMode,
+		/* flags */ NULL,
+		/* keywords */ "thing line sector vertex"
 	},
 
  	{	"BrowserMode",
-		&CMD_BrowserMode
+		&CMD_BrowserMode,
+		/* flags */ NULL,
+		/* keywords */ "obj tex flat line sec"
 	},
 
 	{	"Set",
-		&CMD_SetVar
+		&CMD_SetVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums snap"
 	},
 
 	{	"Toggle",
-		&CMD_ToggleVar
+		&CMD_ToggleVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums snap recent"
 	},
 
 	{	"Check",
-		&CMD_CheckMap
+		&CMD_CheckMap,
+		/* flags */ NULL,
+		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
 
 	{	"MetaKey",
@@ -1395,11 +1405,15 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"GivenFile",
-		&CMD_GivenFile
+		&CMD_GivenFile,
+		/* flags */ NULL,
+		/* keywords */ "next prev first last current"
 	},
 
 	{	"FlipMap",
-		&CMD_FlipMap
+		&CMD_FlipMap,
+		/* flags */ NULL,
+		/* keywords */ "next prev first last"
 	},
 
 	{	"SelectAll",
@@ -1423,7 +1437,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"PlaceCamera",
-		&CMD_PlaceCamera
+		&CMD_PlaceCamera,
+		/* flags */ "/open3d"
 	},
 
 	{	"JumpToObject",
@@ -1450,19 +1465,25 @@ static editor_command_t  command_table[] =
 	/* ----- general map stuff ----- */
 
 	{	"Insert",
-		&CMD_Insert
+		&CMD_Insert,
+		/* flags */ "/new"
 	},
 
 	{	"Delete",
-		&CMD_Delete
+		&CMD_Delete,
+		/* flags */ "/keep"
 	},
 
 	{	"Mirror",
-		&CMD_Mirror
+		&CMD_Mirror,
+		/* flags */ NULL,
+		/* keywords */ "horiz vert"
 	},
 
 	{	"Rotate90",
-		&CMD_Rotate90
+		&CMD_Rotate90,
+		/* flags */ NULL,
+		/* keywords */ "cw acw"
 	},
 
 	{	"Enlarge",
@@ -1478,7 +1499,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"Merge",
-		&CMD_Merge
+		&CMD_Merge,
+		/* flags */ "/keep"
 	},
 
 	{	"Quantize",
@@ -1494,7 +1516,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"ApplyTag",
-		&CMD_ApplyTag
+		&CMD_ApplyTag,
+		/* flags */ "/fresh /last"
 	},
 
 	{	"PruneUnused",
