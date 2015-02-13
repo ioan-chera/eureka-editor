@@ -37,9 +37,10 @@ static key_context_e ContextFromName(const char *name)
 	if (strncmp(name, "LIN_", 4) == 0) return KCTX_Line;
 	if (strncmp(name, "SEC_", 4) == 0) return KCTX_Sector;
 	if (strncmp(name, "TH_",  3) == 0) return KCTX_Thing;
-	if (strncmp(name, "VER_", 4) == 0) return KCTX_Vertex;
+	if (strncmp(name, "VERT_",5) == 0) return KCTX_Vertex;
+	if (strncmp(name, "3D_",  3) == 0) return KCTX_Render;
 
-	// we don't need anything for KCTX_Browser or KCTX_Render
+	// we don't need anything for KCTX_Browser
 
 	return KCTX_NONE;
 }
@@ -78,6 +79,15 @@ static const editor_command_t * FindEditorCommand(const char *name)
 			return all_commands[i];
 
 	return NULL;
+}
+
+
+const editor_command_t * LookupEditorCommand(int idx)
+{
+	if (idx >= (int)all_commands.size())
+		return NULL;
+	
+	return all_commands[idx];
 }
 
 
@@ -780,8 +790,6 @@ const char * M_StringForFunc(int index)
 
 	char *pos = buffer;
 
-	bool saw_arg = false;
-
 	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
 		const char *param = bind.param[k];
@@ -789,25 +797,15 @@ const char * M_StringForFunc(int index)
 		if (! param[0])
 			break;
 
-		if (! saw_arg)
-		{
-			strcat(buffer, "(");
-			saw_arg = true;
-		}
-
 		pos = buffer + strlen(buffer);
 
-		if (k > 0)
-		{
-			*pos++ = ',';
-			*pos++ = ' ';
-		}
+		if (k == 0)
+			*pos++ = ':';
+
+		*pos++ = ' ';
 
 		sprintf(pos, "%.30s", param);
 	}
-
-	if (saw_arg)
-		strcat(buffer, ")");
 
 	return buffer;
 }
@@ -862,7 +860,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	buffer[sizeof(buffer) - 1] = 0;
 
 	for (unsigned int k = 0 ; buffer[k] ; k++)
-		if (buffer[k] == '(' || buffer[k] == ')' || buffer[k] == ',')
+		if (buffer[k] == ',' || buffer[k] == ':')
 			buffer[k] = ' ';
 
 	const char * tokens[MAX_TOKENS];

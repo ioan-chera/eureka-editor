@@ -104,6 +104,7 @@ void dump_command_line_options (FILE *fp);
 // returns number of tokens, zero for comment, negative on error
 int M_ParseLine(const char *line, const char ** tokens, int max_tok,
                 bool do_strings);
+void M_FreeLine(const char ** tokens, int num_tok);
 
 // user state persistence (stuff like camera pos, grid settings, ...)
 bool M_LoadUserState();

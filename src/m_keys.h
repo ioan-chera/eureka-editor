@@ -137,6 +137,9 @@ typedef struct
 
 void M_RegisterCommandList(editor_command_t * list);
 
+const editor_command_t * LookupEditorCommand(int index);
+
+
 
 // parameter(s) for command function -- must be valid strings
 #define MAX_EXEC_PARAM	16

@@ -21,6 +21,8 @@
 #include "main.h"
 #include "m_config.h"
 
+#include <algorithm>
+
 #include "ui_window.h"
 #include "ui_prefs.h"
 
@@ -47,13 +49,132 @@ private:
 	keycode_t key;
 
 	Fl_Input  *key_name;
+
 	Fl_Choice *context;
-	Fl_Input  *func_name;
+	Fl_Choice *func;
+
+	Fl_Input  *params;
+	Fl_Input  *flags;
 
 	Fl_Button *cancel;
 	Fl_Button *ok_but;
 
 private:
+	struct name_CMP_pred
+	{
+		inline bool operator() (const char * A, const char * B) const
+		{
+			return (strcmp(A, B) < 0);
+		}
+	};
+
+	int PopulateFuncMenu(key_context_e ctx, const char *find_name)
+	{
+		if (ctx == KCTX_Browser || ctx == KCTX_General)
+			ctx = KCTX_NONE;
+
+		func->clear();
+
+		// collect all names so we can sort them alphabetically
+		std::vector< const char * > name_list;
+
+		for (int i = 0 ; ; i++)
+		{
+			const editor_command_t *cmd = LookupEditorCommand(i);
+
+			if (! cmd)
+				break;
+
+			if (cmd->req_context == ctx)
+				name_list.push_back(cmd->name);
+		}
+
+		std::sort(name_list.begin(), name_list.end(), name_CMP_pred());
+
+		// add sorted names to menu, and find the current function
+		int result = 0;
+
+		for (unsigned int k = 0 ; k < name_list.size() ; k++)
+		{
+			func->add(name_list[k]);
+
+			if (strcmp(name_list[k], find_name) == 0)
+				result = (int)k;
+		}
+
+		return result;
+	}
+
+	void Decode(key_context_e ctx, const char *str)
+	{
+		while (isspace(*str))
+			str++;
+
+		char func_buf[100];
+		unsigned int pos = 0;
+
+		while (*str && ! (isspace(*str) || *str == ':' || *str == '/') &&
+			   pos + 4 < sizeof(func_buf))
+		{
+			func_buf[pos++] = *str++;
+		}
+
+		func_buf[pos] = 0;
+
+		func->value(PopulateFuncMenu(ctx, func_buf));
+
+		if (*str == ':')
+			str++;
+
+		// tokenize 
+		const char * tokens[32];
+
+		int num_tok = M_ParseLine(str, tokens, 32, true /* do_strings */);
+
+		if (num_tok < 0)
+			num_tok = 0;
+
+		for (int i = 0 ; i < num_tok ; i++)
+		{
+			Fl_Input *dest = params;
+
+			if (tokens[i][0] == '/')
+				dest = flags;
+
+			if (dest->size() > 0)
+				dest->insert(" ");
+
+			dest->insert(tokens[i]);
+		}
+
+		M_FreeLine(tokens, num_tok);
+	}
+
+	const char * Encode()
+	{
+		static char buffer[1024];
+
+		const editor_command_t *cmd = LookupEditorCommand(func->value());
+
+		// should not happen
+		if (! cmd)
+			return "ERROR";
+
+		strcpy(buffer, cmd->name);
+
+		if (strlen(buffer) + strlen(params->value()) + strlen(flags->value()) + 10 >= sizeof(buffer))
+			return "OVERFLOW";
+
+		strcat(buffer, ": ");
+		strcat(buffer, params->value());
+		strcat(buffer, " ");
+
+		// FIXME : tokenize, ensure flags start with '/'
+		strcat(buffer, flags->value());
+
+		return buffer;
+	}
+
 	bool ValidateKey()
 	{
 		keycode_t new_key = M_ParseKeyString(key_name->value());
@@ -69,15 +190,9 @@ private:
 
 	bool ValidateFunc()
 	{
-		// check for matching brackets
-		const char *p = strchr(func_name->value(), '(');
-
-		if (p && ! strchr(p, ')'))
-			return false;
-
 		key_context_e ctx = (key_context_e)(1 + context->value());
 
-		return M_IsBindingFuncValid(ctx, func_name->value());
+		return true; //!!!! M_IsBindingFuncValid(ctx, func_name->value());
 	}
 
 	static void validate_callback(Fl_Widget *w, void *data)
@@ -88,11 +203,11 @@ private:
 		bool valid_func = dialog->ValidateFunc();
 
 		dialog-> key_name->textcolor(valid_key  ? FL_FOREGROUND_COLOR : FL_RED);
-		dialog->func_name->textcolor(valid_func ? FL_FOREGROUND_COLOR : FL_RED);
+//!!!		dialog->func_name->textcolor(valid_func ? FL_FOREGROUND_COLOR : FL_RED);
 
 		// need to redraw the input boxes (otherwise get a mix of colors)
 		dialog-> key_name->redraw();
-		dialog->func_name->redraw();
+//!!!	dialog->func_name->redraw();
 
 		if (valid_key && valid_func)
 			dialog->ok_but->activate();
@@ -127,7 +242,7 @@ private:
 
 public:
 	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
-		UI_Escapable_Window(400, 236, "Edit Key Binding"),
+		UI_Escapable_Window(400, 306, "Edit Key Binding"),
 		want_close(false), cancelled(false), grab_active(false),
 		key(_key)
 	{
@@ -150,25 +265,32 @@ public:
 		  context->callback((Fl_Callback*)validate_callback, this);
 		}
 
-		{ func_name = new Fl_Input(85, 105, 210, 25, "Function:");
-		  func_name->value(_func);
-		  func_name->when(FL_WHEN_CHANGED);
-		  func_name->callback((Fl_Callback*)validate_callback, this);
+		{ func = new Fl_Choice(85, 100, 150, 25, "Function:");
+		}
+		{ params = new Fl_Input(85, 130, 210, 25, "Params:");
+		  params->value("");
+		  params->when(FL_WHEN_CHANGED);
+//		  params->callback((Fl_Callback*)validate_callback, this);
+		}
+		{ flags = new Fl_Input(85, 160, 210, 25, "Flags:");
+		  flags->value("");
+		  flags->when(FL_WHEN_CHANGED);
+//		  flags->callback((Fl_Callback*)validate_callback, this);
 		}
 		{ Fl_Button *o = new Fl_Button(310, 105, 75, 25, "Find");
 		  o->callback((Fl_Callback*)find_func_callback, this);
 		  o->hide();  // TODO: IMPLEMENT THIS
 		}
 
-		{ Fl_Group *o = new Fl_Group(0, 170, 400, 66);
+		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
 
 		  o->box(FL_FLAT_BOX);
 		  o->color(WINDOW_BG, WINDOW_BG);
 
-		  { cancel = new Fl_Button(170, 184, 80, 35, "Cancel");
+		  { cancel = new Fl_Button(170, 254, 80, 35, "Cancel");
 			cancel->callback((Fl_Callback*)close_callback, this);
 		  }
-		  { ok_but = new Fl_Button(295, 184, 80, 35, "OK");
+		  { ok_but = new Fl_Button(295, 254, 80, 35, "OK");
 			ok_but->labelfont(1);
 			ok_but->callback((Fl_Callback*)ok_callback, this);
 			ok_but->deactivate();
@@ -177,6 +299,9 @@ public:
 		}
 
 		end();
+
+		// parse line into function name, parameters and flags
+		Decode(ctx, _func);
 	}
 
 	bool Run(keycode_t *key_v, key_context_e *ctx_v, const char **func_v)
@@ -192,17 +317,17 @@ public:
 
 		show();
 
-		Fl::focus(func_name);
+		Fl::focus(params);
 
 		while (! want_close)
 			Fl::wait(0.2);
 
-		if (cancelled)
+//!!!!		if (cancelled)
 			return false;
 
 		*key_v  = key;
 		*ctx_v  = (key_context_e)(1 + context->value());
-		*func_v = StringDup(func_name->value());
+		*func_v = Encode();
 
 		return true;
 	}
