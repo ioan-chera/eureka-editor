@@ -3,7 +3,7 @@ Eureka TODO / WISHLIST
 ======================
 
 
-rejig binding/execute system so that any command can have "flags"
+>>  rejig binding/execute system so that any command can have "flags"
 (where flags begin with '/', a la DOS)
 
    -  LIN_SelectPath
@@ -25,18 +25,7 @@ Be nice to show available flags when binding a key.
 ------
 
 
-preference for "bindable mouse wheel (disable normal behavior)"
-
-convert RIGHT BUTTON (scroll) to use KEY system
-
-convert button stuff in 3D render to use KEY system
-
-convert MIDDLE button logic for KEY system
-
-convert LEFT BUTTON for KEY system
-
-
-------
++  WIN32 : ditch the installer, use "unpack" method
 
 
 Makefile : restore optimisation
@@ -51,10 +40,14 @@ ______________________________________________________________________
 General
 -------
 
-+  WIN32 : ditch the installer, use "unpack" method
++  Key binding system for mouse buttons
+   -  convert MIDDLE button (insert/resize/rotate) for KEY system
+   -  convert RIGHT BUTTON (scroll) to use KEY system
+   -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
+   -  convert button stuff in 3D render to use KEY system
+   -  preference for "bindable mouse wheel (disable normal behavior)"
 
 +  Preferences:
-   -  ability to change what mouse buttons do
    -  ability to change mouse move/turn speed in 3D view
 
 +  Hexen support
