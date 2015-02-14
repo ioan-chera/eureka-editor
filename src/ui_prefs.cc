@@ -278,7 +278,7 @@ public:
 		}
 
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
-		  context->add("Browser|Render|Linedef|Sector|Thing|Vertex|General");
+		  context->add("Browser|Render|Vertex|Thing|Sector|Linedef|General");
 		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)validate_callback, this);
 		}
