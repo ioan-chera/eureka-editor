@@ -4,6 +4,8 @@ CHANGES IN Eureka
 
 >>  Find and Replace 
 
+>>  key binding improvement, support "flags", etc...
+
 +  new 'RECENT' category for Texture/Flat/Thing browsers,
    and rebound the '\' key to toggle this category on/off
 
@@ -110,6 +112,9 @@ Bug Fixes:
 
 -  fixed crash when trying to build nodes on an IWAD map which has
    some changes made to it, but has not been saved (exported) yet
+
+-  fixed key binding list so that pressing 'Bind', 'Copy' etc on a
+   non-visible line to scroll to that line (make it visible)
 
 -  browser: fixed patterns like '4$' not working properly
 

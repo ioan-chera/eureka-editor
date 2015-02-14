@@ -369,7 +369,7 @@ private:
 	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
-	static void  add_key_callback(Fl_Button *w, void *data);
+	static void copy_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
 	static void    reset_callback(Fl_Button *w, void *data);
 
@@ -392,6 +392,7 @@ public:
 	void ClearWaiting();
 	void SetBinding(keycode_t key);
 
+	void EnsureKeyVisible(int line);
 
 public:
 	Fl_Tabs *tabs;
@@ -765,7 +766,7 @@ UI_Preferences::UI_Preferences() :
 		  key_bind->shortcut(FL_Enter);
 		}
 		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
-		  key_copy->callback((Fl_Callback*)add_key_callback, this);
+		  key_copy->callback((Fl_Callback*)copy_key_callback, this);
 		}
 		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
@@ -926,6 +927,9 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 		return;
 	}
 
+	prefs->EnsureKeyVisible(line);
+
+
 	int bind_idx = line - 1;
 
 	// show we're ready to accept a new key
@@ -982,7 +986,7 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::add_key_callback(Fl_Button *w, void *data)
+void UI_Preferences::copy_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
@@ -1026,6 +1030,9 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		fl_beep();
 		return;
 	}
+
+	prefs->EnsureKeyVisible(line);
+
 
 	int bind_idx = line - 1;
 
@@ -1388,6 +1395,15 @@ void UI_Preferences::ReloadKeys()
 		const char *str = M_StringForBinding(i);
 
 		key_list->text(i + 1, str);
+	}
+}
+
+
+void UI_Preferences::EnsureKeyVisible(int line)
+{
+	if (! key_list->displayed(line))
+	{
+		key_list->middleline(line);
 	}
 }
 
