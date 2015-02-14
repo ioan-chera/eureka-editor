@@ -38,7 +38,7 @@ static key_context_e ContextFromName(const char *name)
 	if (strncmp(name, "LIN_", 4) == 0) return KCTX_Line;
 	if (strncmp(name, "SEC_", 4) == 0) return KCTX_Sector;
 	if (strncmp(name, "TH_",  3) == 0) return KCTX_Thing;
-	if (strncmp(name, "VERT_",5) == 0) return KCTX_Vertex;
+	if (strncmp(name, "VT_",  3) == 0) return KCTX_Vertex;
 	if (strncmp(name, "3D_",  3) == 0) return KCTX_Render;
 
 	// we don't need anything for KCTX_Browser

@@ -35,14 +35,14 @@ int VertexHowManyLineDefs(int v_num);
 void Vertex_MergeList(selection_c *list);
 int Vertex_FindExact(int x, int y);
 
-void VERT_Merge(void);
-void VERT_Disconnect(void);
+void VT_Merge(void);
+void VT_Disconnect(void);
 
 void LIN_Disconnect(void);
 void SEC_Disconnect(void);
 
-void VERT_ReshapeLine(void);
-void VERT_ReshapeArc (void);
+void VT_ShapeLine(void);
+void VT_ShapeArc (void);
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 

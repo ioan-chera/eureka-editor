@@ -654,7 +654,7 @@ void CMD_Merge(void)
 	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
-			VERT_Merge();
+			VT_Merge();
 			break;
 
 		case OBJ_LINEDEFS:
@@ -681,7 +681,7 @@ void CMD_Disconnect(void)
 	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
-			VERT_Disconnect();
+			VT_Disconnect();
 			break;
 
 		case OBJ_LINEDEFS:
@@ -1572,12 +1572,12 @@ static editor_command_t  command_table[] =
 
 	/* -------- vertex -------- */
 
-	{	"VERT_ReshapeLine",
-		&VERT_ReshapeLine
+	{	"VT_ShapeLine",
+		&VT_ShapeLine
 	},
 
-	{	"VERT_ReshapeArc",
-		&VERT_ReshapeArc
+	{	"VT_ShapeArc",
+		&VT_ShapeArc
 	},
 
 	/* -------- browser -------- */

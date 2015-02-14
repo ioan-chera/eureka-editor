@@ -280,7 +280,7 @@ void Vertex_MergeList(selection_c *list)
 }
 
 
-void VERT_Merge()
+void VT_Merge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -297,7 +297,7 @@ void VERT_Merge()
 }
 
 
-void VERT_Disconnect(void)
+void VT_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
@@ -399,9 +399,9 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 void LIN_Disconnect(void)
 {
 	// Note: the logic here is significantly different than the logic
-	//       in VERT_Disconnect, since we want to keep linedefs
-	//       in the selection connected, and only disconnect from
-	//       linedefs NOT in the selection.
+	//       in VT_Disconnect, since we want to keep linedefs in the
+	//       selection connected, and only disconnect from linedefs
+	//       NOT in the selection.
 	//
 	// Hence need separate code for this.
 
@@ -768,7 +768,7 @@ public:
 };
 
 
-void VERT_ReshapeLine(void)
+void VT_ShapeLine(void)
 {
 	if (edit.Selected->count_obj() < 3)
 	{
@@ -1001,11 +1001,11 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void VERT_ReshapeArc(void)
+void VT_ShapeArc(void)
 {
 	if (! EXEC_Param[0][0])
 	{
-		Beep("VERT_ReshapeArc: missing angle parameter");
+		Beep("VT_ShapeArc: missing angle parameter");
 		return;
 	}
 
@@ -1013,7 +1013,7 @@ void VERT_ReshapeArc(void)
 
 	if (arc_deg < 30 || arc_deg > 360)
 	{
-		Beep("VERT_ReshapeArc: bad angle: %s", EXEC_Param[0]);
+		Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0]);
 		return;
 	}
 
