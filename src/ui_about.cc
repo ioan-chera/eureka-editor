@@ -90,8 +90,8 @@ Fl_RGB_Image * UI_About::about_img;
 
 
 const char *UI_About::Text1 =
-	"EUREKA " EUREKA_VERSION " is a map editor for classic DOOM\n"
-	"EUREKA uses code from the Yadex editor";
+	"EUREKA is a map editor for classic DOOM\n"
+	"It uses code from the Yadex editor";
 
 
 const char *UI_About::Text2 =
@@ -123,16 +123,26 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	// nice big logo image
 
-	Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, "");
+	Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, NULL);
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-	box->color(FL_BLACK, FL_BLACK);
+	box->color(FL_RED, FL_RED);
 
 	if (about_img)
+	{
 		box->image(about_img);
+
+		// overlay a small version number in bottom right corner
+		Fl_Box *v_box = new Fl_Box(FL_NO_BOX, 0, 0, W - 2, 228, "");
+
+		v_box->label("v" EUREKA_VERSION);
+		v_box->labelsize(20);
+		v_box->labelcolor(fl_rgb_color(160, 255, 128));
+		v_box->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT | FL_ALIGN_BOTTOM);
+	}
 	else
 	{
 		box->box(FL_FLAT_BOX);
-		box->label("Eureka\nDoom Editor");
+		box->label("EUREKA\nDoom Editor\nv" EUREKA_VERSION);
 		box->labelsize(40);
 		box->labelcolor(fl_rgb_color(255, 200, 100));
 	}
