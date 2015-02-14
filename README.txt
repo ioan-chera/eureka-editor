@@ -1,8 +1,10 @@
 
-Eureka 1.00 README
+Eureka 1.05 README
 ==================
 
-by Andrew Apted  <ajapted@users.sf.net>   AUG 2013
+by Andrew Apted  <ajapted@users.sf.net>
+
+February 2015
 
 
 INTRODUCTION
@@ -47,7 +49,7 @@ REQUIREMENTS
 -  the data (iwad) file from a supported game
 
 
-COMPILING / SETTING UP
+COMPILATION
 
 See the INSTALL.txt document (in source code)
 
