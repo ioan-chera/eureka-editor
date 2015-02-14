@@ -231,24 +231,25 @@ void LIN_SelectPath(void)
 
 //------------------------------------------------------------------------
 
+#define PLAYER_STEP_H	24
 
-static bool GrowContiguousSectors(selection_c &seen, const char *match)
+static bool GrowContiguousSectors(selection_c &seen, bool additive)
 {
-	// returns TRUE when a new sector got added
+	// returns TRUE when some new sectors got added
 
 	bool changed = false;
 
-	bool allow_doors = strchr(match, 'd') ? true : false;
-	bool walk_test   = strchr(match, 'w') ? true : false;
+	bool can_walk    = Exec_HasFlag("/can_walk");
+	bool allow_doors = Exec_HasFlag("/doors");
 
-	bool do_floor_h   = strchr(match, 'f') ? true : false;
-	bool do_floor_tex = strchr(match, 'F') ? true : false;
-	bool do_ceil_h    = strchr(match, 'c') ? true : false;
-	bool do_ceil_tex  = strchr(match, 'C') ? true : false;
+	bool do_floor_h   = Exec_HasFlag("/floor_h");
+	bool do_floor_tex = Exec_HasFlag("/floor_tex");
+	bool do_ceil_h    = Exec_HasFlag("/ceil_h");
+	bool do_ceil_tex  = Exec_HasFlag("/ceil_tex");
 
-	bool do_light   = strchr(match, 'l') ? true : false;
-	bool do_tag     = strchr(match, 't') ? true : false;
-	bool do_special = strchr(match, 's') ? true : false;
+	bool do_light   = Exec_HasFlag("/light");
+	bool do_tag     = Exec_HasFlag("/tag");
+	bool do_special = Exec_HasFlag("/special");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -270,13 +271,13 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
 			continue;
 
-		if (walk_test)
+		if (can_walk)
 		{
 			if (L->flags & MLF_Blocking)
 				continue;
 
 			// too big a step?
-			if (abs(S1->floorh - S2->floorh) > 24)
+			if (abs(S1->floorh - S2->floorh) > PLAYER_STEP_H)
 				continue;
 
 			// player wouldn't fit vertically?
@@ -284,7 +285,11 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 			int c_min = MIN(S1-> ceilh, S2-> ceilh);
 
 			if (c_min - f_max < game_info.player_h)
-				continue;
+			{
+				// ... but allow doors
+				if (! (allow_doors && (S1->floorh == S1->ceilh || S2->floorh == S2->ceilh)))
+					continue;
+			}
 		}
 
 		/* perform match */
@@ -300,7 +305,7 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 		if (do_special && (S1->type  != S2->type))  continue;
 
 		// check if only one of the sectors is part of current set
-		// (doing this _AFTER_ the match since this can be a bit slow)
+		// (doing this _AFTER_ the matches since this can be a bit slow)
 		bool got1 = seen.get(sec1);
 		bool got2 = seen.get(sec2);
 
@@ -317,33 +322,17 @@ static bool GrowContiguousSectors(selection_c &seen, const char *match)
 
 
 /* Select/unselect a contiguous group of sectors.
- *
- * Possible flags:
- *    a : additive
- *    d : pass through doors (closed sectors)
- *    w : walk check
- *    
- *    f : match floor height
- *    F : match floor texture
- *    c : match ceiling height
- *    C : match ceiling texture
- *
- *    l : match lighting
- *    t : match tag
- *    s : match special
  */
 void SEC_SelectGroup(void)
 {
-	const char *match = EXEC_Param[0];
-
-	bool additive = strchr(match, 'a') ? true : false;
-
 	// determine starting sector
 	if (edit.highlight.is_nil())
 	{
 		Beep("No highlighted sector");
 		return;
 	}
+
+	bool additive = Exec_HasFlag("/add");
 
 	if (edit.did_a_move)
 	{
@@ -363,7 +352,7 @@ void SEC_SelectGroup(void)
 
 	seen.set(start_sec);
 
-	while (GrowContiguousSectors(seen, match))
+	while (GrowContiguousSectors(seen, additive))
 	{ }
 
 

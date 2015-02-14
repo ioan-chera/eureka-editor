@@ -1556,7 +1556,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"SEC_SelectGroup",
-		&SEC_SelectGroup
+		&SEC_SelectGroup,
+		/* flags */ "/add /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
 	{	"SEC_SwapFlats",
