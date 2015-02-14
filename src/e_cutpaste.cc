@@ -911,11 +911,8 @@ void CMD_Delete(void)
 		return;
 	}
 
-	bool keep = (tolower(EXEC_Param[0][0]) == 'k');
-
-	// TODO: decide how to differentiate these (if at all)
-	bool keep_things = keep;
-	bool keep_unused = keep;
+	bool keep_things = Exec_HasFlag("/keep_things");
+	bool keep_unused = Exec_HasFlag("/keep_unused");
 
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);

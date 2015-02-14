@@ -1471,7 +1471,7 @@ static editor_command_t  command_table[] =
 
 	{	"Delete",
 		&CMD_Delete,
-		/* flags */ "/keep"
+		/* flags */ "/keep_things /keep_unused"
 	},
 
 	{	"Mirror",

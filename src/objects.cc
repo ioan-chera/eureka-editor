@@ -804,7 +804,7 @@ void CMD_Insert(void)
 
 		case OBJ_SECTORS:
 			{
-				bool force_new = (tolower(EXEC_Param[0][0]) == 'n');
+				bool force_new = Exec_HasFlag("/new");
 
 				Insert_Sector(force_new);
 			}

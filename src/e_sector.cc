@@ -252,10 +252,7 @@ void SEC_Merge(void)
 		return;
 	}
 
-	bool keep_common_lines = false;
-
-	if (tolower(EXEC_Param[0][0]) == 'k')
-		keep_common_lines = true;
+	bool keep_common_lines = Exec_HasFlag("/keep");
 
 	int source = edit.Selected->find_first();
 
