@@ -1537,7 +1537,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"LIN_SelectPath",
-		&LIN_SelectPath
+		&LIN_SelectPath,
+		/* flags */ "/add /onesided /sametex"
 	},
 
 	/* -------- sector -------- */

@@ -174,12 +174,6 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 
 
 /* Select/unselect all linedefs in non-forked path.
- *
- * Possible flags:
- *    1 : one-sided only
- *    a : additive
- *    s : same texture
- *
  */
 void LIN_SelectPath(void)
 {
@@ -190,14 +184,12 @@ void LIN_SelectPath(void)
 		return;
 	}
 
-	const char *flags = EXEC_Param[0];
-
-	bool additive = strchr(flags, 'a') ? true : false;
+	bool additive = Exec_HasFlag("/add");
 
 	int match = 0;
 
-	if (strchr(flags, '1')) match |= SLP_OneSided;
-	if (strchr(flags, 's')) match |= SLP_SameTex;
+	if (Exec_HasFlag("/onesided")) match |= SLP_OneSided;
+	if (Exec_HasFlag("/sametex"))  match |= SLP_SameTex;
 
 	if (edit.did_a_move)
 	{
