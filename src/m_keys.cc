@@ -1081,7 +1081,7 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 				// separate flags from normal parameters
 				if (bind.param[p][0] == '/')
-					EXEC_Param[f_idx++] = bind.param[p];
+					EXEC_Flags[f_idx++] = bind.param[p];
 				else
 					EXEC_Param[p_idx++] = bind.param[p];
 			}
