@@ -348,7 +348,13 @@ static void DoRotate90Things(selection_c& list, bool anti_clockwise, int mid_x, 
 
 void CMD_Rotate90(void)
 {
-	bool anti_clockwise = atoi(EXEC_Param[0]) >= 0;
+	if (EXEC_Param[0] == 0)
+	{
+		Beep("Rotate90: missing keyword");
+		return;
+	}
+
+	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
 	selection_c list;
 	selection_iterator_c it;

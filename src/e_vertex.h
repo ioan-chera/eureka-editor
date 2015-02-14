@@ -41,7 +41,8 @@ void VERT_Disconnect(void);
 void LIN_Disconnect(void);
 void SEC_Disconnect(void);
 
-void VERT_Reshape(void);
+void VERT_ReshapeLine(void);
+void VERT_ReshapeArc (void);
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 

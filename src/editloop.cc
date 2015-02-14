@@ -1517,7 +1517,8 @@ static editor_command_t  command_table[] =
 
 	{	"ApplyTag",
 		&CMD_ApplyTag,
-		/* flags */ "/fresh /last"
+		/* flags */ NULL,
+		/* keywords */ "fresh last"
 	},
 
 	{	"PruneUnused",
@@ -1569,8 +1570,12 @@ static editor_command_t  command_table[] =
 
 	/* -------- vertex -------- */
 
-	{	"VERT_Reshape",
-		&VERT_Reshape
+	{	"VERT_ReshapeLine",
+		&VERT_ReshapeLine
+	},
+
+	{	"VERT_ReshapeArc",
+		&VERT_ReshapeArc
 	},
 
 	/* -------- browser -------- */

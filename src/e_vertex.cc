@@ -768,8 +768,14 @@ public:
 };
 
 
-static void Reshape_Line()
+void VERT_ReshapeLine(void)
 {
+	if (edit.Selected->count_obj() < 3)
+	{
+		Beep("Need 3 or more vertices to shape");
+		return;
+	}
+
 	// determine orientation and position of the line
 
 	int x1, y1, x2, y2;
@@ -995,8 +1001,22 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-static void Reshape_Circle(int arc_deg)
+void VERT_ReshapeArc(void)
 {
+	if (! EXEC_Param[0][0])
+	{
+		Beep("VERT_ReshapeArc: missing angle parameter");
+		return;
+	}
+
+	int arc_deg = atoi(EXEC_Param[0]);
+
+	if (arc_deg < 30 || arc_deg > 360)
+	{
+		Beep("VERT_ReshapeArc: bad angle: %s", EXEC_Param[0]);
+		return;
+	}
+
 	double arc_rad = arc_deg * M_PI / 180.0;
 
 
@@ -1142,43 +1162,6 @@ static void Reshape_Circle(int arc_deg)
 				   best_offset, true);
 
 	BA_End();
-}
-
-
-void VERT_Reshape()
-{
-	const char *kind = EXEC_Param[0];
-
-	if (! kind[0])
-	{
-		Beep("VERT_Reshape: missing kind name");
-		return;
-	}
-
-	if (edit.Selected->count_obj() < 3)
-	{
-		Beep("Need 3 or more vertices to shape");
-		return;
-	}
-
-	if (y_stricmp(kind, "line") == 0)
-		Reshape_Line();
-	else if (isdigit(kind[0]))
-	{
-		int arc = atoi(kind);
-
-		if (arc < 30 || arc > 360)
-		{
-			Beep("VERT_Reshape: bad angle: %s", kind);
-			return;
-		}
-
-		Reshape_Circle(arc);
-	}
-	else
-	{
-		Beep("VERT_Reshape: unknown kind: %s", kind);
-	}
 }
 
 
