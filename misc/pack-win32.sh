@@ -29,10 +29,11 @@ svn export mods   $dest/mods
 #  Documentation
 #
 cp -av *.txt $dest
+rm $dest/INSTALL.txt
 
 #
 # all done
 #
 echo "------------------------------------"
-echo "All done."
-
+echo "zip -l -r eureka-XXX-win.zip Eureka-X.XX"
+echo ""
