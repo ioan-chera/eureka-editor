@@ -908,7 +908,6 @@ int main(int argc, char *argv[])
 
 	init_progress = 1;
 
-
 	LogPrintf("\n");
 	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2015 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
@@ -951,7 +950,6 @@ int main(int argc, char *argv[])
 
 	init_progress = 2;
 
-
 	M_LoadRecent();
 	M_LookForIWADs();
 
@@ -959,9 +957,10 @@ int main(int argc, char *argv[])
 
 	Main_OpenWindow();
 
-	M_LoadBindings();
 
 	init_progress = 3;
+
+	M_LoadBindings();
 
 
 	// open a specified PWAD now
