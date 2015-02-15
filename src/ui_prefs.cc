@@ -147,13 +147,11 @@ private:
 	{
 		static char buffer[1024];
 
-		const editor_command_t *cmd = LookupEditorCommand(func->value());
-
 		// should not happen
-		if (! cmd)
+		if (! cur_cmd)
 			return "ERROR";
 
-		strcpy(buffer, cmd->name);
+		strcpy(buffer, cur_cmd->name);
 
 		if (strlen(buffer) + strlen(params->value()) + 10 >= sizeof(buffer))
 			return "OVERFLOW";
