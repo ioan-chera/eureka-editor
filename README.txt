@@ -1,5 +1,5 @@
 
-Eureka 1.05 README
+Eureka 1.07 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>

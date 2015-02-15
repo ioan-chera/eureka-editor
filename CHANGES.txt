@@ -1,15 +1,28 @@
 
-CHANGES IN Eureka
-=================
+CHANGES IN Eureka 1.07 (r????)
+==============================
 
->>  Find and Replace 
+(Changes since 1.00 version, r1416)
 
->>  key binding improvement, support "flags", etc...
+
++  implemented Find and Replace (as a panel), with support for stepping
+   though each item or selecting them all, and filters to control which
+   items to visit or ignore
+
++  added 'File / New Project' command as the proper way to create a
+   brand new WAD file.  The 'New Map' command requires a current pwad,
+   and will save the fresh map immediately into it
 
 +  new 'RECENT' category for Texture/Flat/Thing browsers,
    and rebound the '\' key to toggle this category on/off
 
 +  new 'Rename Map' and 'Delete Map' commands in FILE menu
+
+>>>  improvement to key binding system, support for "flags" which are
+   parameters beginning with a forward slash, such as "/new" and "/clear".
+   The 'EditKey' dialog is now much easier to use too
+
+>>>  Windows package no longer uses an installer
 
 +  vertex reshaping commands:
    -  'I' moves selected vertices onto a line
@@ -30,10 +43,6 @@ CHANGES IN Eureka
 
 -  Linedef panel: don't show rail/upper tex for one-sided lines
    (can be disabled with the 'show_full_one_sided' config var)
-
--  the 'New Map' dialog now has a "New WAD File" radio button, when
-   selected it disables the map selection and immediately asks for
-   a file to save (export) the new map into
 
 -  when loading a wad specified on the command line, and it contains
    settings for the iwad, port and/or resources, then allow command
@@ -114,7 +123,7 @@ Bug Fixes:
    some changes made to it, but has not been saved (exported) yet
 
 -  fixed key binding list so that pressing 'Bind', 'Copy' etc on a
-   non-visible line to scroll to that line (make it visible)
+   non-visible line will scroll to that line (make it visible)
 
 -  browser: fixed patterns like '4$' not working properly
 
