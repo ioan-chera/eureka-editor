@@ -3,40 +3,7 @@ Eureka TODO / WISHLIST
 ======================
 
 
->>  rejig binding/execute system so that any command can have "flags"
-(where flags begin with '/', a la DOS)
-
-   +  LIN_SelectPath
-
-   +  SEC_SelectGroup
-
-   +  ApplyTag  /fresh  /last
-
-   -  Insert  :  /new     [ backward compat ]
-   -  Delete  :  /keep    [ backward compat ]
-   -  Merge   :  /keep
-
-   +  Rotate90 : use a keyword : cw  /  acw
-
-
-VERT_Reshape : use '0' instead of "line" ??
-
-
--->  UPDATE  bindings.cfg
-
-
-Be nice to show available flags when binding a key.
-
-
-key bindings : if press "Bind" (etc?) and selected item is off window,
-               scroll to make it visible.
-
-
-Test :
--  3D_Align functions
-
-
-------
+!!!  UI_EditKey  dialog
 
 
 +  WIN32 : ditch the installer, use "unpack" method
@@ -127,9 +94,11 @@ General
 
 -  SHIFT + move mouse = keep current highlight
    (issue: SHIFT + mouse press could be bound to something different)
+   IDEA: a key to "hold" the current highlight  [yet another mode though]
+   IDEA 2: if multiple objects selected, can cycle through which is shown in panel
    
    also useful if another modifier could disable all highlighting
-   (same issue when user presses a mouse button, e.g. to drag a sel-box)
+   (Hmmm : mainly useful to drag-select : have a binding/flag for it)
 
 ?  check that current pwad has been externally modified
 
@@ -250,7 +219,7 @@ Editing
    vertices and linedefs which would get merged, and implement
    that merging.
 
-!!  handle self-referencing linedefs in auto create/split sector
+Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
 -  grid drawing too slow when small step and zoomed out
    (since we render a huge number of dots)
@@ -365,7 +334,7 @@ Game / Port Definitions
 
 -  game-def setting: view_height
 
--  ability to "remove line 271" (etc), remove thing 888 (in vanilla)
+-  ability to "remove line 271" (etc)
 
 -  finish HacX support -- categorize the textures
 
