@@ -287,6 +287,8 @@ void CMD_NewMap()
 	}
 
 
+	M_BackupWad(edit_wad);
+
 	LogPrintf("Created NEW map : %s\n", map_name);
 
 	FreshLevel();
