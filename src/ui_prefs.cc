@@ -206,28 +206,18 @@ private:
 		return false;
 	}
 
-	bool ValidateFunc()
-	{
-		key_context_e ctx = (key_context_e)(1 + context->value());
-
-		return true; //!!!! M_IsBindingFuncValid(ctx, func_name->value());
-	}
-
 	static void validate_callback(Fl_Widget *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
-		bool valid_key  = dialog->ValidateKey();
-		bool valid_func = dialog->ValidateFunc();
+		bool valid_key = dialog->ValidateKey();
 
-		dialog-> key_name->textcolor(valid_key  ? FL_FOREGROUND_COLOR : FL_RED);
-//!!!		dialog->func_name->textcolor(valid_func ? FL_FOREGROUND_COLOR : FL_RED);
+		dialog->key_name->textcolor(valid_key ? FL_FOREGROUND_COLOR : FL_RED);
 
-		// need to redraw the input boxes (otherwise get a mix of colors)
-		dialog-> key_name->redraw();
-//!!!	dialog->func_name->redraw();
+		// need to redraw the input box (otherwise get a mix of colors)
+		dialog->key_name->redraw();
 
-		if (valid_key && valid_func)
+		if (valid_key)
 			dialog->ok_but->activate();
 		else
 			dialog->ok_but->deactivate();
@@ -236,11 +226,6 @@ private:
 	static void grab_key_callback(Fl_Button *w, void *data)
 	{
 		// FIXME
-	}
-
-	static void find_func_callback(Fl_Button *w, void *data)
-	{
-		// TODO: show a list of all commands
 	}
 
 	static void close_callback(Fl_Widget *w, void *data)
@@ -256,6 +241,46 @@ private:
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
 		dialog->want_close = true;
+	}
+
+	void ReplaceKeyword(const char *new_word)
+	{
+		// delete existing keyword, if any
+		if (isalnum(params->value()[0]))
+		{
+			const char *str = params->value();
+
+			int len = 0;
+
+			while (str[len] && (isalnum(str[len]) || str[len] == '_'))
+				len++;
+
+			while (str[len] && isspace(str[len]))
+				len++;
+
+			params->replace(0, len, NULL);
+		}
+
+		params->replace(0, 0, " ");
+		params->replace(0, 0, new_word);
+	}
+
+	void ReplaceFlag(const char *new_flag)
+	{
+	}
+
+	static void keyword_callback(Fl_Menu_Button *w, void *data)
+	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->ReplaceKeyword(w->text());
+	}
+
+	static void flag_callback(Fl_Menu_Button *w, void *data)
+	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->ReplaceFlag(w->text());
 	}
 
 public:
@@ -291,8 +316,10 @@ public:
 //		  params->callback((Fl_Callback*)validate_callback, this);
 		}
 		{ keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
+		  keyword_menu->callback((Fl_Callback*) keyword_callback, this);
 		}
 		{ flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
+		  flag_menu->callback((Fl_Callback*) flag_callback, this);
 		}
 
 		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
@@ -335,7 +362,7 @@ public:
 		while (! want_close)
 			Fl::wait(0.2);
 
-//!!!!		if (cancelled)
+		if (cancelled)
 			return false;
 
 		*key_v  = key;
