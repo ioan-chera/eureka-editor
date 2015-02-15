@@ -3,9 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
-!!!  UI_EditKey  dialog
-
-
 +  WIN32 : ditch the installer, use "unpack" method
 
 
