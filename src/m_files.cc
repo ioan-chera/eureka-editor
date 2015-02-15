@@ -272,7 +272,7 @@ public:
 		const char *name = fl_filename_name(filenames[index]);
 		// const char *map  = map_names[index];
 
-		sprintf(buffer, "%-.42s", name);
+		sprintf(buffer, "%s%d. %-.42s", (index < 9) ? "&" : "", 1+index, name);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
