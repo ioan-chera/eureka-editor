@@ -265,7 +265,7 @@ void CMD_NewMap()
 
 	if (edit_wad)
 	{
-		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, true /* allow_new_file */);
+		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
 
 		dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
@@ -277,24 +277,15 @@ void CMD_NewMap()
 		if (! map_name)
 			return;
 
-		if (strcmp(map_name, "new") == 0)   //@@@@
+		Level_name = StringUpper(map_name);
+
+		// would this replace an existing map?
+		if (edit_wad && edit_wad->FindLevel(Level_name) >= 0)
 		{
-			RemoveEditWad();
-
-			main_win->SetTitle(NULL, Level_name, false);
+			Replacer = true;
 		}
-		else
-		{
-			Level_name = StringUpper(map_name);
 
-			// would this replace an existing map?
-			if (edit_wad && edit_wad->FindLevel(Level_name) >= 0)
-			{
-				Replacer = true;
-			}
-
-			main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
-		}
+		main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
 	}
 	else
 	{
@@ -306,6 +297,8 @@ void CMD_NewMap()
 	FreshLevel();
 
 	CMD_ZoomWholeMap();
+
+	///!!!  SaveLevel(edit_wad, Level_name);
 
 	MadeChanges = 0;
 }
@@ -1536,7 +1529,7 @@ void CMD_RenameMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, false, edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, edit_wad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]

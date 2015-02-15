@@ -105,11 +105,6 @@ UI_ChooseMap::~UI_ChooseMap()
 
 void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 {
-///---	Fl_Box * heading = new Fl_Box(FL_NO_BOX, 20, 104, 285, 32, "Or select via these cool buttons:");
-///---	heading->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-///---	heading->labelfont(FL_HELVETICA_BOLD);
-///---	add(heading);
-
 	int but_W = 60;
 
 	for (int col = 0 ; col < 5 ; col++)
