@@ -90,8 +90,134 @@ extern void CMD_ZoomWholeMap();
 void RemoveEditWad();
 
 
+static bool Project_New()
+{
+	SYS_ASSERT(! edit_wad);
+
+	// determine map name (same as first level in the IWAD)
+	const char *map_name = "MAP01";
+
+	short idx = game_wad->FindFirstLevel();
+
+	if (idx >= 0)
+	{
+		Lump_c * lump  = game_wad->GetLump(idx);
+		map_name = lump->Name();
+	}
+
+
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to create");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
+	chooser.filter("Wads\t*.wad");
+
+	//??  chooser.directory("xxx");
+
+	// Show native chooser
+	switch (chooser.show())
+	{
+		case -1:
+			LogPrintf("New Project: error choosing file:\n");
+			LogPrintf("   %s\n", chooser.errmsg());
+
+			DLG_Notify("Unable to create a new project:\n\n%s", chooser.errmsg());
+			return false;
+
+		case 1:
+			LogPrintf("New Project: cancelled by user\n");
+			return false;
+
+		default:
+			break;  // OK
+	}
+
+	// if extension is missing then add ".wad"
+	char filename[FL_PATH_MAX];
+
+	strcpy(filename, chooser.filename());
+
+	char *pos = (char *)fl_filename_ext(filename);
+	if (! *pos)
+		strcat(filename, ".wad");
+
+
+	// delete the file if it already exists
+	// (the file chooser should have asked the user for confirmation)
+
+	if (FileExists(filename) && ! FileDelete(filename))
+	{
+		DLG_Notify("Unable to overwrite the existing file.");
+		return false;
+	}
+
+//!!!!!!
+{ return false; }
+
+
+#if 0
+
+
+	// we will write into the chosen wad.
+	// however if the level already exists, get confirmation first
+
+	if (exists && wad->FindLevel(map_name) >= 0)
+	{
+		if (DLG_Confirm("Cancel|&Overwrite",
+		                overwrite_message, "selected") <= 0)
+		{
+			delete wad;
+			return false;
+		}
+	}
+
+	// back-up an existing wad
+	if (exists)
+	{
+		M_BackupWad(wad);
+	}
+
+
+	LogPrintf("Exporting Map : %s of %s\n", map_name, wad->PathName());
+
+	SaveLevel(wad, map_name);
+
+	M_AddRecent(wad->PathName(), map_name);
+
+
+	// the new wad replaces the current PWAD
+
+	if (edit_wad)
+	{
+		MasterDir_Remove(edit_wad);
+
+		delete edit_wad;
+	}
+
+	edit_wad = wad;
+	Pwad_name = edit_wad->PathName();
+
+	MasterDir_Add(edit_wad);
+
+	Replacer = false;
+	MadeChanges = 0;
+
+#endif
+
+	return true;
+}
+
+
 bool ProjectSetup(bool new_project, bool is_startup)
 {
+	if (new_project)
+	{
+		if (! Main_ConfirmQuit("create a new project"))
+			return false;
+	}
+
+
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(new_project, is_startup);
 
 	bool ok = dialog->Run();
@@ -120,10 +246,21 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	if (! ok)
 		return false;
 
-	if (! is_startup)
+	if (is_startup)
+		return true;
+	
+	if (! new_project)
+	{
 		Main_LoadResources();
+		return true;
+	}
 
-	return true;
+
+	RemoveEditWad();
+
+	Main_LoadResources();
+
+	return Project_New();
 }
 
 
@@ -1291,7 +1428,7 @@ bool CMD_ExportMap()
 			break;  // OK
 	}
 
-	/// if extension is missing then add ".wad"
+	// if extension is missing then add ".wad"
 	char filename[FL_PATH_MAX];
 
 	strcpy(filename, chooser.filename());
