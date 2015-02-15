@@ -162,51 +162,5 @@ stripped: $(PROGRAM)
 .PHONY: all clean bin 
 
 
-#----- OLD CRUD -----------------------------------------------
-
-# we need to recreate the final directory structure
-# (since NSIS cannot convert unix text files to msdos format)
-NSIS_BUILD=obj_win32/nsis
-
-nsis_build: nsis_clean stripped
-	# folders
-	mkdir $(NSIS_BUILD)
-	mkdir $(NSIS_BUILD)/games
-	mkdir $(NSIS_BUILD)/common
-	mkdir $(NSIS_BUILD)/ports
-	mkdir $(NSIS_BUILD)/mods
-	mkdir $(NSIS_BUILD)/ups
-	#
-	# executable
-	cp Eureka.exe $(NSIS_BUILD)
-	#
-	# important files
-	cp bindings.cfg $(NSIS_BUILD)/bindings.cfg
-	cp misc/about_logo.png $(NSIS_BUILD)/about_logo.png
-	todos $(NSIS_BUILD)/*.cfg
-	#
-	# definition files
-	cp games/*.ugh  $(NSIS_BUILD)/games
-	cp common/*.ugh $(NSIS_BUILD)/common
-	cp ports/*.ugh  $(NSIS_BUILD)/ports
-	todos $(NSIS_BUILD)/*/*.ugh
-	#
-	# script files
-	#
-	# text documents
-	cp README.txt TODO.txt AUTHORS.txt GPL.txt $(NSIS_BUILD)
-	todos $(NSIS_BUILD)/*.txt
-	#
-	# run the MAKENSIS program
-	cp misc/eureka.nsi $(NSIS_BUILD)/eureka.nsi
-	makensis $(NSIS_BUILD)/eureka.nsi
-	#
-	mv $(NSIS_BUILD)/Eureka*.exe .
-
-nsis_clean:
-	rm -Rf $(NSIS_BUILD)
-
-.PHONY: nsis_build nsis_clean
-
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
