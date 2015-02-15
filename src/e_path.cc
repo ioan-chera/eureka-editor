@@ -60,14 +60,12 @@ static bool MatchingTextures(int index1, int index2)
 	// determine texture to match from first line
 	int texture = 0;
 
-	if (L1->OneSided())
+	if (! L1->TwoSided())
 	{
 		texture = L1->Right()->mid_tex;
 	}
 	else
 	{
-		SYS_ASSERT(L1->TwoSided());
-
 		int f_diff = L1->Left()->SecRef()->floorh - L1->Right()->SecRef()->floorh;
 		int c_diff = L1->Left()->SecRef()->ceilh  - L1->Right()->SecRef()->ceilh;
 
@@ -79,14 +77,12 @@ static bool MatchingTextures(int index1, int index2)
 
 	// match texture with other line
 
-	if (L2->OneSided())
+	if (! L2->TwoSided())
 	{
 		return (L2->Right()->mid_tex == texture);
 	}
 	else
 	{
-		SYS_ASSERT(L2->TwoSided());
-
 		int f_diff = L2->Left()->SecRef()->floorh - L2->Right()->SecRef()->floorh;
 		int c_diff = L2->Left()->SecRef()->ceilh  - L2->Right()->SecRef()->ceilh;
 
