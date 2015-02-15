@@ -45,6 +45,12 @@ int last_given_file;
 
 static void SaveLevel(Wad_file *wad, const char *level);
 
+static const char * overwrite_message =
+	"The %s PWAD already contains this map.  "
+	"This operation will destroy that map (overwrite it)."
+	"\n\n"
+	"Are you sure you want to continue?";
+
 
 static void FreshLevel()
 {
@@ -185,7 +191,6 @@ static bool Project_New()
 
 	M_AddRecent(edit_wad->PathName(), Level_name);
 
-	Replacer = false;
 	MadeChanges = 0;
 
 	return true;
@@ -252,53 +257,46 @@ void CMD_NewMap()
 	if (! Main_ConfirmQuit("create a new map"))
 		return;
 
-	if (! edit_wad)
+	if (! edit_wad || edit_wad->IsReadOnly())
 	{
 		ProjectSetup(true /* new_project */);
 		return;
 	}
 
-	// if there is a current PWAD, the new map will go there
-	// (and need to determine where).  Otherwise no need to ask.
 
-	Replacer = false;
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
 
-	if (edit_wad)
+	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+
+	const char *map_name = dialog->Run();
+
+	delete dialog;
+
+	// cancelled?
+	if (! map_name)
+		return;
+
+	// would this replace an existing map?
+	if (edit_wad->FindLevel(map_name) >= 0)
 	{
-		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
-
-		dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
-
-		const char *map_name = dialog->Run();
-
-		delete dialog;
-
-		// cancelled?
-		if (! map_name)
-			return;
-
-		Level_name = StringUpper(map_name);
-
-		// would this replace an existing map?
-		if (edit_wad && edit_wad->FindLevel(Level_name) >= 0)
+		if (DLG_Confirm("Cancel|&Overwrite",
+		                overwrite_message, "current") <= 0)
 		{
-			Replacer = true;
+			return;
 		}
-
-		main_win->SetTitle(Pwad_name, Level_name, edit_wad->IsReadOnly());
-	}
-	else
-	{
-		main_win->SetTitle(NULL, Level_name, false);
 	}
 
-	LogPrintf("Created NEW map : %s\n", Level_name);
+
+	LogPrintf("Created NEW map : %s\n", map_name);
 
 	FreshLevel();
 
 	CMD_ZoomWholeMap();
 
-	///!!!  SaveLevel(edit_wad, Level_name);
+	// save it now : sets Level_name and window title
+	SaveLevel(edit_wad, map_name);
+
+	M_AddRecent(edit_wad->PathName(), Level_name);
 
 	MadeChanges = 0;
 }
@@ -792,8 +790,6 @@ void RemoveEditWad()
 
 	edit_wad = NULL;
 	Pwad_name = NULL;
-
-	Replacer = false;
 }
 
 
@@ -855,8 +851,6 @@ bool CMD_OpenMap()
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
 	LoadLevel(wad, map_name);
-
-	Replacer = false;
 
 	return true;
 }
@@ -957,8 +951,6 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
 	LoadLevel(wad, map_name);
-
-	Replacer = false;
 }
 
 
@@ -1087,8 +1079,6 @@ void CMD_FlipMap()
 	LogPrintf("Flipping Map to : %s\n", map_name);
 
 	LoadLevel(wad, map_name);
-
-	Replacer = false;
 }
 
 
@@ -1310,13 +1300,6 @@ static void SaveLevel(Wad_file *wad, const char *level)
 }
 
 
-static const char * overwrite_message =
-	"The %s PWAD already contains this map.  "
-	"This operation will destroy that map (overwrite it)."
-	"\n\n"
-	"Are you sure you want to continue?";
-
-
 bool CMD_SaveMap()
 {
 	// we require a wad file to save into.
@@ -1339,20 +1322,6 @@ bool CMD_SaveMap()
 			return CMD_ExportMap();
 	}
 
-	// warn user if a fresh map would destroy an existing one
-
-	if (Replacer)
-	{
-		int choice = DLG_Confirm("Cancel|&Export|&Overwrite", overwrite_message, "current");
-
-		if (choice <= 0)
-			return false;
-
-		if (choice == 1)
-		{
-			return CMD_ExportMap();
-		}
-	}
 
 	M_BackupWad(edit_wad);
 
@@ -1362,7 +1331,6 @@ bool CMD_SaveMap()
 
 	M_AddRecent(edit_wad->PathName(), Level_name);
 
-	Replacer = false;
 	MadeChanges = 0;
 
 	return true;
@@ -1497,7 +1465,6 @@ bool CMD_ExportMap()
 
 	MasterDir_Add(edit_wad);
 
-	Replacer = false;
 	MadeChanges = 0;
 
 	return true;
@@ -1521,10 +1488,6 @@ void CMD_RenameMap()
 		DLG_Notify("Cannot rename map : file is read-only.");
 		return;
 	}
-
-	// NOTE : we do not need to handle 'Replacer' -- the map in the PWAD
-	//        and current Level_name will both be renamed to the new name
-	//        (so we simply leave Replacer as true).
 
 
 	// ask user for map name
@@ -1606,9 +1569,6 @@ void CMD_DeleteMap()
 		return;
 	}
 
-	// NOTE : we do not handle 'Replacer' here (i.e. a new map that would
-	//        replace an existing map) -- this dialog should be enough.
-
 	if (DLG_Confirm("Cancel|&Delete",
 	                "Are you sure you want to delete this map? "
 					"It will be permanently removed from the current PWAD.") <= 0)
@@ -1647,8 +1607,6 @@ void CMD_DeleteMap()
 		LogPrintf("OK.  Loading : %s....\n", map_name);
 
 		LoadLevel(edit_wad, map_name);
-
-		Replacer = false;
 	}
 }
 

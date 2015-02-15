@@ -131,8 +131,6 @@ extern std::vector< const char * > Pwad_list;
 extern std::vector< const char * > Resource_list;
 
 
-extern bool Replacer;     // the new map will destroy an existing one if saved
-
 extern int	default_floor_h;
 extern int	default_ceil_h;
 extern int	default_light_level;

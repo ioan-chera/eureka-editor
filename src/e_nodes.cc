@@ -382,8 +382,6 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		LoadLevel(edit_wad, Level_name);
 
 		Status_Set("Built nodes OK");
-
-		Replacer = false;
 	}
 
 	return was_ok;

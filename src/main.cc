@@ -92,8 +92,6 @@ map_format_e Level_format;
 int show_help     = 0;
 int show_version  = 0;
 
-bool Replacer = false;
-
 int KF;
 int KF_fonth;
 
