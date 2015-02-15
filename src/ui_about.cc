@@ -132,7 +132,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 		box->image(about_img);
 
 		// overlay a small version number in bottom right corner
-		Fl_Box *v_box = new Fl_Box(FL_NO_BOX, 0, 0, W - 2, 228, "");
+		Fl_Box *v_box = new Fl_Box(FL_NO_BOX, 0, 0, W - 2, 230, "");
 
 		v_box->label("v" EUREKA_VERSION);
 		v_box->labelsize(20);
