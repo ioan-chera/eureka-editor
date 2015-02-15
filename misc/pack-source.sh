@@ -30,6 +30,8 @@ mkdir $dest/obj_win32/glbsp
 #
 #  Data files
 #
+cp -av *.cfg $dest
+
 svn export common $dest/common
 svn export games  $dest/games
 svn export ports  $dest/ports
