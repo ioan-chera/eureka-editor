@@ -182,7 +182,7 @@ static const opt_desc_t options[] =
 		"f",
 		OPT_STRING_LIST,
 		"",
-		"Patch wad file(s) to edit",
+		"Wad file(s) to edit",
 		"<file>...",
 		&Pwad_list
 	},
