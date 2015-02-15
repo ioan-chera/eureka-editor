@@ -33,6 +33,8 @@ void LoadLevel(Wad_file *wad, const char *level);
 
 void RemoveEditWad();
 
+bool ProjectSetup(bool new_project = false, bool is_startup = false);
+
 void CMD_NewMap();
 bool CMD_OpenMap();
 void CMD_OpenFileMap(const char *filename, const char *map_name = NULL);

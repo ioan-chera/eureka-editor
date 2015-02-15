@@ -75,9 +75,14 @@ static void file_do_delete(Fl_Widget *w, void * data)
 	CMD_DeleteMap();
 }
 
+static void file_do_new_project(Fl_Widget *w, void * data)
+{
+	ProjectSetup(true /* new_project */);
+}
+
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	Main_ProjectSetup();
+	ProjectSetup();
 }
 
 static void file_do_default_props(Fl_Widget *w, void * data)
@@ -436,7 +441,11 @@ static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
-		{ "&New Map",   FL_COMMAND + 'n', FCAL file_do_new },
+		{ "&New Project   ",  FL_COMMAND + 'n', FCAL file_do_new_project },
+		{ "New Map",   FL_COMMAND + FL_SHIFT + 'n', FCAL file_do_new },
+		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
@@ -449,16 +458,14 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "Rename Map",   0,                FCAL file_do_rename },
 		{ "Delete Map",   0,                FCAL file_do_delete },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 //TODO	{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
-
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },

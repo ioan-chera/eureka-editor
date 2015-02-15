@@ -90,10 +90,53 @@ extern void CMD_ZoomWholeMap();
 void RemoveEditWad();
 
 
+bool ProjectSetup(bool new_project, bool is_startup)
+{
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(new_project, is_startup);
+
+	bool ok = dialog->Run();
+
+	if (ok)
+	{
+		// grab new information
+
+		Iwad_name = StringDup(dialog->iwad);
+		Port_name = StringDup(dialog->port);
+
+		Resource_list.clear();
+
+		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
+		{
+			if (dialog->res[i])
+				Resource_list.push_back(StringDup(dialog->res[i]));
+		}
+	}
+
+	delete dialog;
+
+	Fl::wait(0.1);
+	Fl::wait(0.1);
+
+	if (! ok)
+		return false;
+
+	if (! is_startup)
+		Main_LoadResources();
+
+	return true;
+}
+
+
 void CMD_NewMap()
 {
 	if (! Main_ConfirmQuit("create a new map"))
 		return;
+
+	if (! edit_wad)
+	{
+		ProjectSetup(true /* new_project */);
+		return;
+	}
 
 	// if there is a current PWAD, the new map will go there
 	// (and need to determine where).  Otherwise no need to ask.

@@ -775,8 +775,8 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 #define STARTUP_MSG  "No IWADs could be found."
 
 
-UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 412 : 372, "Manage Project"),
+UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
+	UI_Escapable_Window(400, is_startup ? 412 : 372, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {
@@ -787,7 +787,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool is_startup) :
 	_instance = this;  // meh, hacky
 
 	int by = 0;
-	
+
 	if (is_startup)
 	{
 		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 10, 370, 46, STARTUP_MSG);

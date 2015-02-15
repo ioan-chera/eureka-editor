@@ -168,7 +168,7 @@ public:
 	const char * res[RES_NUM];
 
 public:
-	UI_ProjectSetup(bool is_startup = false);
+	UI_ProjectSetup(bool new_project = false, bool is_startup = false);
 	virtual ~UI_ProjectSetup();
 
 	// returns true if something changed

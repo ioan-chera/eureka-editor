@@ -430,7 +430,7 @@ static bool DetermineIWAD()
 			Iwad_name = StringDup(Iwad_name);
 		else
 		{
-			if (! Main_ProjectSetup(true))
+			if (! ProjectSetup(false /* new_project */, true /* is_startup */))
 				return false;
 		}
 	}
@@ -828,43 +828,6 @@ void Main_LoadResources()
 		// TODO: only call this when the IWAD has changed
 		Props_LoadValues();
 	}
-}
-
-
-bool Main_ProjectSetup(bool is_startup)
-{
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(is_startup);
-
-	bool ok = dialog->Run();
-
-	if (ok)
-	{
-		// grab new information
-
-		Iwad_name = StringDup(dialog->iwad);
-		Port_name = StringDup(dialog->port);
-
-		Resource_list.clear();
-
-		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
-		{
-			if (dialog->res[i])
-				Resource_list.push_back(StringDup(dialog->res[i]));
-		}
-	}
-
-	delete dialog;
-
-	Fl::wait(0.1);
-	Fl::wait(0.1);
-
-	if (! ok)
-		return false;
-
-	if (! is_startup)
-		Main_LoadResources();
-
-	return true;
 }
 
 
