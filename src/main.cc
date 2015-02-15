@@ -213,8 +213,12 @@ static void CreateHomeDirs()
 
 	static const char *const subdirs[] =
 	{
+		// these under $cache_dir
 		"cache", "backups",
+
+		// these under $home_dir
 		"iwads", "games", "ports", "mods",
+
 		NULL
 	};
 
@@ -235,16 +239,22 @@ static void Determine_HomeDir(const char *argv0)
 	{
 #if defined(WIN32)
 	// get the %APPDATA% location
-	// FIXME: have a fallback e.g. EXE path + "/local"
+	// if that fails, use a folder at the EXE location
 
 	TCHAR * path = StringNew(MAX_PATH);
 
-	if (! SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
-		FatalError("Failed to read %%APPDATA%% location");
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
+	{
+		strcat(path, "\\EurekaEditor");
 
-	strcat(path, "\\EurekaEditor");
+		home_dir = StringDup(path);
+	}
+	else
+	{
+		SYS_ASSERT(install_dir);
 
-	home_dir = StringDup(path);
+		home_dir = StringPrintf("%s\\app_data", install_dir);
+	}
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
 	{
@@ -909,8 +919,8 @@ int main(int argc, char *argv[])
 	ShowTime();
 
 
-	Determine_HomeDir(argv[0]);
 	Determine_InstallPath(argv[0]);
+	Determine_HomeDir(argv[0]);
 
 
 	LogOpenFile(log_file);
