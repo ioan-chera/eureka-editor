@@ -261,12 +261,42 @@ private:
 			params->replace(0, len, NULL);
 		}
 
-		params->replace(0, 0, " ");
+		if (params->size() > 0)
+			params->replace(0, 0, " ");
+
 		params->replace(0, 0, new_word);
 	}
 
 	void ReplaceFlag(const char *new_flag)
 	{
+		const char *str = params->value();
+
+		// if flag is already present, remove it
+		const char *pos = strstr(str, new_flag);
+
+		if (pos)
+		{
+			int a = (int)(pos - str);
+			int b = a + (int)strlen(new_flag);
+
+			while (str[b] && isspace(str[b]))
+				b++;
+
+			params->replace(a, b, NULL);
+
+			return;
+		}
+
+		// append the flag, adding a space if necessary
+		int a = params->size();
+
+		if (a > 0 && !isspace(str[a-1]))
+		{
+			params->replace(a, a, " ");
+			a += 1;
+		}
+
+		params->replace(a, a, new_flag);
 	}
 
 	static void keyword_callback(Fl_Menu_Button *w, void *data)
