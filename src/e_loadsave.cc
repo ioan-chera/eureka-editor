@@ -43,6 +43,9 @@
 int last_given_file;
 
 
+static void SaveLevel(Wad_file *wad, const char *level);
+
+
 static void FreshLevel()
 {
 	BA_ClearAll();
@@ -146,53 +149,26 @@ static bool Project_New()
 	// delete the file if it already exists
 	// (the file chooser should have asked the user for confirmation)
 
-	if (FileExists(filename) && ! FileDelete(filename))
+	if (FileExists(filename))
 	{
-		DLG_Notify("Unable to overwrite the existing file.");
-		return false;
-	}
+		// TODO M_BackupWad(wad);
 
-//!!!!!!
-{ return false; }
-
-
-#if 0
-
-
-	// we will write into the chosen wad.
-	// however if the level already exists, get confirmation first
-
-	if (exists && wad->FindLevel(map_name) >= 0)
-	{
-		if (DLG_Confirm("Cancel|&Overwrite",
-		                overwrite_message, "selected") <= 0)
+		if (! FileDelete(filename))
 		{
-			delete wad;
+			DLG_Notify("Unable to delete the existing file.");
 			return false;
 		}
 	}
 
-	// back-up an existing wad
-	if (exists)
+
+	LogPrintf("Creating New File : %s of %s\n", map_name, filename);
+
+	Wad_file * wad = Wad_file::Open(filename, 'w');
+
+	if (! wad)
 	{
-		M_BackupWad(wad);
-	}
-
-
-	LogPrintf("Exporting Map : %s of %s\n", map_name, wad->PathName());
-
-	SaveLevel(wad, map_name);
-
-	M_AddRecent(wad->PathName(), map_name);
-
-
-	// the new wad replaces the current PWAD
-
-	if (edit_wad)
-	{
-		MasterDir_Remove(edit_wad);
-
-		delete edit_wad;
+		DLG_Notify("Unable to create the new WAD file.");
+		return false;
 	}
 
 	edit_wad = wad;
@@ -200,10 +176,17 @@ static bool Project_New()
 
 	MasterDir_Add(edit_wad);
 
+
+	FreshLevel();
+
+	CMD_ZoomWholeMap();
+
+	SaveLevel(edit_wad, map_name);
+
+	M_AddRecent(edit_wad->PathName(), Level_name);
+
 	Replacer = false;
 	MadeChanges = 0;
-
-#endif
 
 	return true;
 }
@@ -280,8 +263,6 @@ void CMD_NewMap()
 
 	Replacer = false;
 
-	bool make_new_file = false;
-
 	if (edit_wad)
 	{
 		UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, true /* allow_new_file */);
@@ -296,13 +277,11 @@ void CMD_NewMap()
 		if (! map_name)
 			return;
 
-		if (strcmp(map_name, "new") == 0)
+		if (strcmp(map_name, "new") == 0)   //@@@@
 		{
 			RemoveEditWad();
 
 			main_win->SetTitle(NULL, Level_name, false);
-
-			make_new_file = true;
 		}
 		else
 		{
@@ -329,9 +308,6 @@ void CMD_NewMap()
 	CMD_ZoomWholeMap();
 
 	MadeChanges = 0;
-
-	if (make_new_file)
-		CMD_ExportMap();
 }
 
 
