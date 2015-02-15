@@ -71,7 +71,7 @@ private:
 		}
 	};
 
-	int PopulateFuncMenu(key_context_e ctx, const char *find_name)
+	int PopulateFuncMenu(key_context_e ctx, const char *find_name = NULL)
 	{
 		if (ctx == KCTX_Browser || ctx == KCTX_General)
 			ctx = KCTX_NONE;
@@ -103,7 +103,7 @@ private:
 		{
 			func->add(name_list[k]);
 
-			if (strcmp(name_list[k], find_name) == 0)
+			if (find_name && strcmp(name_list[k], find_name) == 0)
 			{
 				result = (int)k;
 
@@ -248,6 +248,18 @@ private:
 		dialog->want_close = true;
 	}
 
+	static void context_callback(Fl_Choice *w, void *data)
+	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		key_context_e ctx = (key_context_e)(1 + w->value());
+
+		const char *cur_func = dialog->cur_cmd ? dialog->cur_cmd->name : NULL;
+
+		dialog->func->value(dialog->PopulateFuncMenu(ctx, cur_func));
+		dialog->func->do_callback();
+	}
+
 	static void func_callback(Fl_Choice *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
@@ -336,6 +348,9 @@ public:
 		want_close(false), cancelled(false), grab_active(false),
 		key(_key)
 	{
+		if (ctx == KCTX_NONE)
+			ctx = KCTX_General;
+
 		callback(close_callback, this);
 
 		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
@@ -352,7 +367,7 @@ public:
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
 		  context->add("Browser|Render|Vertex|Thing|Sector|Linedef|General");
 		  context->value((int)ctx - 1);
-		  context->callback((Fl_Callback*)validate_callback, this);
+		  context->callback((Fl_Callback*)context_callback, this);
 		}
 
 		{ func = new Fl_Choice(85, 105, 150, 25, "Function:");
