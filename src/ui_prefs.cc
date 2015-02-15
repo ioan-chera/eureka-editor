@@ -132,8 +132,7 @@ private:
 
 		func->value(PopulateFuncMenu(ctx, func_buf));
 
-		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
-		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
+		PopulateMenus();
 
 		if (*str == ':')
 			str++;
@@ -193,6 +192,12 @@ private:
 		menu->activate();
 	}
 
+	void PopulateMenus()
+	{
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
+	}
+
 	bool ValidateKey()
 	{
 		keycode_t new_key = M_ParseKeyString(key_name->value());
@@ -241,6 +246,18 @@ private:
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
 		dialog->want_close = true;
+	}
+
+	static void func_callback(Fl_Choice *w, void *data)
+	{
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		const char * name = w->mvalue()->text;
+		SYS_ASSERT(name);
+
+		dialog->cur_cmd = FindEditorCommand(name);
+
+		dialog->PopulateMenus();
 	}
 
 	void ReplaceKeyword(const char *new_word)
@@ -339,6 +356,7 @@ public:
 		}
 
 		{ func = new Fl_Choice(85, 105, 150, 25, "Function:");
+		  func->callback((Fl_Callback*) func_callback, this);
 		}
 		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
 		  params->value("");
