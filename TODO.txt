@@ -18,19 +18,19 @@ ______________________________________________________________________
 General
 -------
 
++  Hexen support
+
++  Preferences:
+   -  ability to change mouse move/turn speed in 3D view
+
++  BOOM Generalized line types / sectors
+
 +  Key binding system for mouse buttons
    -  convert MIDDLE button (insert/resize/rotate) for KEY system
    -  convert RIGHT BUTTON (scroll) to use KEY system
    -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
    -  convert button stuff in 3D render to use KEY system
    -  preference for "bindable mouse wheel (disable normal behavior)"
-
-+  Preferences:
-   -  ability to change mouse move/turn speed in 3D view
-
-+  Hexen support
-
-+  BOOM Generalized line types / sectors
 
 
 
@@ -42,10 +42,6 @@ Documentation
    - especially drawing lines in VERTEX mode
 
 +  information on each binding command, parameters etc..
-
-+  cannot Undo after building nodes
-   -  happens because we reload the map (because the current WAD file 
-      has been replaced by a new one)
 
 
 
@@ -177,6 +173,10 @@ WISH: support DECORATE as (or in) a resource file
 Documentation
 -------------
 
++  cannot Undo after building nodes
+   -  happens because we reload the map (because the current WAD file 
+      has been replaced by a new one)
+
 +  add supported OSes -- e.g. Windows >= 2000
 
 -  make a manpage for the debian package, list cmdline options
@@ -190,13 +190,10 @@ Documentation
 Coding
 ------
 
--  rename code files:
-
-      editloop.cc/h --> m_editor.cc/h  ???
-
 -  have XXX_NotifyNewMap() functions
 
 -  replace usage(s) of fl_input
+   [ currently just the 'JumpToObject' command ]
 
 
 
