@@ -8,39 +8,19 @@ fi
 
 echo "Creating source package for Eureka..."
 
-cd ..
-
-topdir=$PWD
-
-src=eureka
-dest=PACK-SRC
+dest="eureka-X.XX-source"
 
 mkdir $dest
 
 #
 #  Source code
 #
-mkdir $dest/src
-cp -av $src/src/*.[chr]* $dest/src
-cp -av $src/Makefile* $dest/
-# cp -av $src/src/*.ico $dest/src
+cp -av Makefile* $dest/
 
-rm -f ~/osx.tar
-cd $src
-tar cf ~/osx.tar --exclude-vcs osx
-cd $topdir
-cd $dest
-tar xf ~/osx.tar
-cd $topdir
-rm -f ~/osx.tar
-
-mkdir $dest/glbsp_src
-cp -av $src/glbsp_src/*.[chr]* $dest/glbsp_src
-
-mkdir $dest/misc
-cp -av $src/misc/*.* $dest/misc
-mkdir $dest/misc/debian
-cp -av $src/misc/debian/* $dest/misc/debian
+svn export src $dest/src
+svn export osx $dest/osx
+svn export glbsp_src $dest/glbsp_src
+svn export misc $dest/misc
 
 mkdir $dest/obj_linux
 mkdir $dest/obj_linux/glbsp
@@ -50,31 +30,19 @@ mkdir $dest/obj_win32/glbsp
 #
 #  Data files
 #
-mkdir $dest/common
-cp -av $src/common/*.* $dest/common || true
+svn export common $dest/common
+svn export games  $dest/games
+svn export ports  $dest/ports
+svn export mods   $dest/mods
 
-mkdir $dest/games
-cp -av $src/games/*.* $dest/games || true
-
-mkdir $dest/ports
-cp -av $src/ports/*.* $dest/ports || true
-
-mkdir $dest/mods
-cp -av $src/mods/*.* $dest/mods || true
-
-mkdir $dest/ups
-cp -av $src/ups/*.* $dest/ups || true
 
 #
 #  Documentation
 #
-cp -av $src/*.txt $dest
+cp -av *.txt $dest
 
-mkdir $dest/docs
-cp -av $src/docs/*.* $dest/docs
-
-mkdir $dest/changelogs
-cp -av $src/changelogs/*.* $dest/changelogs
+svn export docs $dest/docs
+svn export changelogs $dest/changelogs
 
 #
 # all done
