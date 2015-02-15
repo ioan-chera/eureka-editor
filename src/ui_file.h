@@ -27,8 +27,6 @@ private:
 	Fl_Input *map_name;
 	Fl_Group *map_buttons;
 
-	Fl_Round_Button *new_file_but;
-
 	Fl_Return_Button *ok_but;
 
 	// normally NULL, when present will prevent using an existing level name
@@ -46,14 +44,14 @@ private:
 	void CheckMapName();
 
 public:
-	UI_ChooseMap(const char *initial_name = "", bool allow_new_file = false,
+	UI_ChooseMap(const char *initial_name = "",
 			     Wad_file *_rename_wad = NULL);
 	virtual ~UI_ChooseMap();
 
 	// format is 'E' for ExMx, or 'M' for MAPxx
 	void PopulateButtons(char format, Wad_file *test_wad = NULL);
 
-	// returns NULL on cancel, or "new" keyword for a new file
+	// returns map name on success, NULL on cancel
 	const char * Run();
 
 private:
@@ -63,6 +61,7 @@ private:
 	static void  input_callback(Fl_Widget *, void *);
 	static void    new_callback(Fl_Widget *, void *);
 };
+
 
 //------------------------------------------------------------------------
 
@@ -115,6 +114,7 @@ private:
 	static void  input_callback(Fl_Widget *, void *);
 	static void   load_callback(Fl_Widget *, void *);
 };
+
 
 //------------------------------------------------------------------------
 
