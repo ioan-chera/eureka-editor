@@ -4,6 +4,7 @@ CHANGES IN Eureka 0.81 (r186)
 
 (Changes since 0.74 version)
 
+
 +  support a proper unix-style installation
   
 +  made a proper web-site (using PmWiki)

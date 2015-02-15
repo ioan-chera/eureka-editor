@@ -4,6 +4,7 @@ CHANGES IN Eureka 0.84 (r304)
 
 (Changes since 0.81 version, r186)
 
+
 +  multi-select : LMB toggles each object (no need for CTRL key)
 
 +  can click on a texture in the LineDef or Sector panels, it becomes

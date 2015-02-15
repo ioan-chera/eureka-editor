@@ -4,13 +4,14 @@ CHANGES IN Eureka 0.88c (r605)
 
 (Changes since 0.84 version, r304)
 
+
 +  large overhaul of file handling:
-   +  'Manage Wads' dialog allows setting the IWAD, port and resource wads  
-   +  'Open Map' dialog, with buttons for easy map selection
-   +  'Recent Files' dialog (CTRL-R or File menu)
-   +  the iwad/port/resource settings are saved in the PWAD
-   +  better 'Export Map' dialog 
-   +  IWADs found by the user are remembered
+   -  'Manage Wads' dialog allows setting the IWAD, port and resource wads  
+   -  'Open Map' dialog, with buttons for easy map selection
+   -  'Recent Files' dialog (CTRL-R or File menu)
+   -  the iwad/port/resource settings are saved in the PWAD
+   -  better 'Export Map' dialog 
+   -  IWADs found by the user are remembered
 
 +  new Default Properties panel (shown in vertex mode)
 +  implemented picture mode for Thing browser

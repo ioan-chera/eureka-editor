@@ -1,6 +1,6 @@
 
-CHANGES IN Eureka 0.74 (r1421)
-==============================
+CHANGES IN Eureka 0.74
+======================
 
 (Main changes since 0.72 version)
 

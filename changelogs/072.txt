@@ -1,8 +1,8 @@
 
-CHANGES IN Eureka 0.72 (r1330)
-==============================
+CHANGES IN Eureka 0.72
+======================
 
-(Main changes since 0.64 version, r824)
+(Main changes since 0.64 version)
 
 
 ++  the File menu is fully operational (albeit a bit clunky)
