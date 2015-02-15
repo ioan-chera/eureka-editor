@@ -297,32 +297,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (! install_dir)
 	{
 #ifdef WIN32
-	// read the registry key which the installer created
-	HKEY key;
-
-	if (! SUCCEEDED(RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software\\EurekaEditor", 
-	                              0, KEY_QUERY_VALUE, &key)))
-		FatalError("Broken installation (missing registry key)\n");
-
-	DWORD type;
-	DWORD len = (DWORD)FL_PATH_MAX;
-
-	char *reg_string = StringNew(FL_PATH_MAX + 100);
-
-	if (! SUCCEEDED(RegQueryValueExA(key, "Install_Dir", 0L,
-	                                 &type, (BYTE*)reg_string, &len)))
-		FatalError("Broken installation (missing registry value)\n");
-
-	if (type != REG_SZ)
-		FatalError("Broken installation (registry value is not a string)\n");
-
-	// ensure string is NUL-terminated
-	reg_string[len] = 0;
-
-	install_dir = StringDup(reg_string);
-	StringFree(reg_string);
-
-	RegCloseKey(key);
+	install_dir = GetExecutablePath(argv0);
 
 #else
 	static const char *prefixes[] =
@@ -863,7 +838,6 @@ static void ShowVersion()
 static void ShowTime()
 {
 #ifdef WIN32
-
 	SYSTEMTIME sys_time;
 
 	GetSystemTime(&sys_time);
