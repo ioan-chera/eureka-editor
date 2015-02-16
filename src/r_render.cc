@@ -52,7 +52,7 @@
 
 
 // config items
-int  render_aspect_ratio = 177;   // 100 * width / height, default 16:9
+int  render_aspect_ratio = 133;   // 100 * width / height
 
 bool render_high_detail    = false;
 bool render_lock_gravity   = false;
