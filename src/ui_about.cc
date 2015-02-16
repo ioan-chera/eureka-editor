@@ -125,7 +125,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	Fl_Box *box = new Fl_Box(FL_NO_BOX, 0, 0, W, 230, NULL);
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-	box->color(FL_RED, FL_RED);
+	box->color(FL_BLACK, FL_BLACK);
 
 	if (about_img)
 	{

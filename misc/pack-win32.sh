@@ -21,6 +21,7 @@ cp -av Eureka.exe $dest
 #  Data files
 #
 cp -av *.cfg $dest
+cp -av misc/about_logo.png $dest
 
 svn export common $dest/common
 svn export games  $dest/games
