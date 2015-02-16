@@ -25,13 +25,8 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
-	UI_Pic   *l_pic;
-	UI_Pic   *m_pic;
-	UI_Pic   *u_pic;
-
-	Fl_Input *l_tex;
-	Fl_Input *m_tex;
-	Fl_Input *u_tex;
+	UI_Pic   *w_pic;
+	Fl_Input *w_tex;
 
 	Fl_Int_Input *ceil_h;
 	Fl_Int_Input *light;
@@ -48,6 +43,7 @@ private:
 
 	Fl_Int_Input *thing;
 	Fl_Output    *th_desc;
+	UI_Pic		 *th_sprite;
 
 public:
 	UI_DefaultProps(int X, int Y, int W, int H);

@@ -36,8 +36,8 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	title->labelsize(18+KF*4);
 
-	Y += 55;
-	H -= 55;
+	Y += 35;
+	H -= 35;
 
 	X += 6;
 	W -= 12;
@@ -47,55 +47,21 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- LINEDEF TEXTURES ------------
 
-	Fl_Box *lower_tit = new Fl_Box(X + 5,      Y, 70, 30, "Lower");
-	Fl_Box *  mid_tit = new Fl_Box(MX - 35,    Y, 70, 30, "Mid (1S)");
-	Fl_Box *upper_tit = new Fl_Box(X + W - 75, Y, 70, 30, "Upper");
-
-	lower_tit->labelcolor(fl_gray_ramp(2));
-	  mid_tit->labelcolor(fl_gray_ramp(2));
-	upper_tit->labelcolor(fl_gray_ramp(2));
-
 	Y += 32;
 
+	w_pic = new UI_Pic(X+W-76,   Y, 64, 64);
+	w_pic->callback(tex_callback, this);
 
-	l_pic = new UI_Pic(X+8,      Y, 64, 64);
-	m_pic = new UI_Pic(MX-32,    Y, 64, 64);
-	u_pic = new UI_Pic(X+W-64-8, Y, 64, 64);
+	Y += 20;
 
-	l_pic->callback(tex_callback, this);
-	m_pic->callback(tex_callback, this);
-	u_pic->callback(tex_callback, this);
+	w_tex = new Fl_Input(X+68,   Y, 108, 24, "Wall: ");
+	w_tex->callback(tex_callback, this);
+	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += 65;
-
-
-	l_tex = new Fl_Input(X,      Y, 80, 20);
-	m_tex = new Fl_Input(MX-40,  Y, 80, 20);
-	u_tex = new Fl_Input(X+W-80, Y, 80, 20);
-
-	l_tex->textsize(12);
-	m_tex->textsize(12);
-	u_tex->textsize(12);
-
-	l_tex->callback(tex_callback, this);
-	m_tex->callback(tex_callback, this);
-	u_tex->callback(tex_callback, this);
-
-	l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	m_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	Y += l_tex->h() + 34;
+	Y += w_tex->h() + 44;
 
 
 	// ---- SECTOR PROPS --------------
-
-#if 0
-	Fl_Box *sec_tit = new Fl_Box(X, Y, W, 30, "Sector props:");
-	sec_tit->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-
-	Y += sec_tit->h() + 2;
-#endif
 
 	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
 	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);
@@ -205,38 +171,8 @@ void UI_DefaultProps::UpdateThingDesc()
 
 void UI_DefaultProps::SetTexture(const char *name, int e_state)
 {
-	int sel_pics =	(l_pic->Selected() ? 1 : 0) |
-					(m_pic->Selected() ? 2 : 0) |
-					(u_pic->Selected() ? 4 : 0);
-
-	if (sel_pics == 0)
-	{
-//??		bool low_mid_same = (strcmp(default_lower_tex, default_mid_tex) == 0);
-//??		bool low_upp_same = (strcmp(default_lower_tex, default_upper_tex) == 0);
-
-		if (e_state & FL_BUTTON2)
-			sel_pics = 2;
-		else if (e_state & FL_BUTTON3)
-			sel_pics = 4;
-		else
-			sel_pics = 1;  //??  | (low_mid_same ? 2 : 0) | (low_upp_same ? 4 : 0);
-	}
-
-	if (sel_pics & 1)
-	{
-		l_tex->value(name);
-		l_tex->do_callback();
-	}
-	if (sel_pics & 2)
-	{
-		m_tex->value(name);
-		m_tex->do_callback();
-	}
-	if (sel_pics & 4)
-	{
-		u_tex->value(name);
-		u_tex->do_callback();
-	}
+	w_tex->value(name);
+	w_tex->do_callback();
 }
 
 void UI_DefaultProps::SetFlat(const char *name, int e_state)
@@ -280,9 +216,7 @@ void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 
 	if (what == 't')
 	{
-		l_pic->Selected(false);
-		m_pic->Selected(false);
-		u_pic->Selected(false);
+		w_pic->Selected(false);
 	}
 }
 
@@ -308,9 +242,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
 
-	if (w == box->l_pic ||
-		w == box->m_pic ||
-		w == box->u_pic)
+	if (w == box->w_pic)
 	{
 		UI_Pic * pic = (UI_Pic *) w;
 
@@ -325,18 +257,14 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	if (w == box->l_tex)
-		default_lower_tex = NormalizeTex_and_Dup(box->l_tex);
+	if (w == box->w_tex)
+	{
+		default_lower_tex = NormalizeTex_and_Dup(box->w_tex);
+		default_mid_tex   = default_lower_tex;
+		default_upper_tex = default_lower_tex;
+	}
 
-	if (w == box->m_tex)
-		default_mid_tex = NormalizeTex_and_Dup(box->m_tex);
-
-	if (w == box->u_tex)
-		default_upper_tex = NormalizeTex_and_Dup(box->u_tex);
-
-	box->l_pic->GetTex(box->l_tex->value());
-	box->m_pic->GetTex(box->m_tex->value());
-	box->u_pic->GetTex(box->u_tex->value());
+	box->w_pic->GetTex(box->w_tex->value());
 }
 
 void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
@@ -415,17 +343,11 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	l_tex->value(default_lower_tex);
-	m_tex->value(default_mid_tex);
-	u_tex->value(default_upper_tex);
-
-	l_pic->GetTex(l_tex->value());
-	m_pic->GetTex(m_tex->value());
-	u_pic->GetTex(u_tex->value());
-
+	w_tex->value(default_lower_tex);
 	f_tex->value(default_floor_tex);
 	c_tex->value(default_ceil_tex);
 
+	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
 	c_pic->GetFlat(c_tex->value());
 
