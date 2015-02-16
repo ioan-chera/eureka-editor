@@ -257,7 +257,7 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright (C) 2001-2013 Andrew Apted
+  Copyright (C) 2001-2015 Andrew Apted
   Copyright (C) 1997-2003 Andre Majorel et al
 
   Eureka is free software; you can redistribute it and/or modify
