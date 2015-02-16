@@ -1,5 +1,5 @@
 
-CHANGES IN Eureka 1.07 (r????)
+CHANGES IN Eureka 1.07 (r1716)
 ==============================
 
 (Changes since 1.00 version, r1416)
