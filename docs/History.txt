@@ -24,6 +24,1722 @@ got moved yet again.
 ====================================================
 
 ------------------------------------------------------------------------
+r1716 | ajapted | 2015-02-16 15:41:50 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+CHANGELOG and TODO updated for the release.
+
+------------------------------------------------------------------------
+r1715 | ajapted | 2015-02-16 15:41:00 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+Makefile : re-enable optimisation for the upcoming release.
+
+------------------------------------------------------------------------
+r1714 | ajapted | 2015-02-16 15:31:38 +1100 (Mon, 16 Feb 2015) | 3 lines
+
+Default Props : implemented showing sprite for default thing, and clicking
+on it opens the Thing browser.
+
+------------------------------------------------------------------------
+r1713 | ajapted | 2015-02-16 15:06:41 +1100 (Mon, 16 Feb 2015) | 3 lines
+
+Default Properties : only show a single "wall" texture (instead of having
+three of them, which was rather unwieldy).
+
+------------------------------------------------------------------------
+r1712 | ajapted | 2015-02-16 12:38:52 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+Makefile.xming : updated to FLTK 1.3.3
+
+------------------------------------------------------------------------
+r1711 | ajapted | 2015-02-16 12:38:03 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+FLTK tweak : add FL_DOUBLE flag to Fl::visual() call.
+
+------------------------------------------------------------------------
+r1710 | ajapted | 2015-02-16 12:35:31 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+README.txt : update (c) year.
+
+------------------------------------------------------------------------
+r1709 | ajapted | 2015-02-16 00:21:28 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+pack scripts : added missing "bindings.cfg" to them (Esp. the Win32 package)
+
+------------------------------------------------------------------------
+r1708 | ajapted | 2015-02-16 00:10:20 +1100 (Mon, 16 Feb 2015) | 3 lines
+
+Show error dialog when the standard "bindings.cfg" file cannot be loaded
+(call M_LoadBindings _after_ bumping init_progress to 3).
+
+------------------------------------------------------------------------
+r1707 | ajapted | 2015-02-15 23:14:15 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+pack-win32 script : small improvements.
+
+------------------------------------------------------------------------
+r1706 | ajapted | 2015-02-15 23:10:27 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Win32 : created 'pack-win32.sh' shell script for creating a package.
+
+------------------------------------------------------------------------
+r1705 | ajapted | 2015-02-15 22:56:42 +1100 (Sun, 15 Feb 2015) | 3 lines
+
+pack-source script : rewrote it, removed "cd ..", removed "$src" variable,
+use "svn export" for copying directory contents.
+
+------------------------------------------------------------------------
+r1704 | ajapted | 2015-02-15 22:31:25 +1100 (Sun, 15 Feb 2015) | 7 lines
+
+Win32 : implement a fallback for $home_dir when the %APPDATA% folder
+cannot be determined.
+
+We also now call Determine_InstallPath() _before_ Determine_HomeDir(),
+needed by the above change, and I'm 99% sure that this is perfectly fine
+for all platforms.
+
+------------------------------------------------------------------------
+r1703 | ajapted | 2015-02-15 22:15:14 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Makefile.xming : more tidying.
+
+------------------------------------------------------------------------
+r1702 | ajapted | 2015-02-15 22:14:10 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Makefile.xming : removed obsolete NSIS stuff.
+
+------------------------------------------------------------------------
+r1701 | ajapted | 2015-02-15 22:13:05 +1100 (Sun, 15 Feb 2015) | 3 lines
+
+Win32 : as we no longer use an installer, removed code which queries the
+registry for the installation folder.  Use GetExecutablePath() instead.
+
+------------------------------------------------------------------------
+r1700 | ajapted | 2015-02-15 22:11:05 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+code tweak.
+
+------------------------------------------------------------------------
+r1699 | ajapted | 2015-02-15 22:10:04 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+hdr_fltk.h : added missing #include for Fl_Menu_Button.
+
+------------------------------------------------------------------------
+r1698 | ajapted | 2015-02-15 21:36:23 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+code tweak.
+
+------------------------------------------------------------------------
+r1697 | ajapted | 2015-02-15 21:28:27 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Config : tweak to description of --file option.
+
+------------------------------------------------------------------------
+r1696 | ajapted | 2015-02-15 21:20:06 +1100 (Sun, 15 Feb 2015) | 3 lines
+
+misc : removed NSIS script "eureka.nsi" -- I plan on a simpler method of
+packaging binaries for the Windows platform.
+
+------------------------------------------------------------------------
+r1695 | ajapted | 2015-02-15 21:17:52 +1100 (Sun, 15 Feb 2015) | 6 lines
+
+misc : removed the 'Makefile.debian' and control files in misc/debian,
+partly so as not to confuse that stuff with the official Debian package,
+but also because I plan to explore a more distribution-neutral method
+for packaging Linux binaries.
+
+------------------------------------------------------------------------
+r1694 | ajapted | 2015-02-15 21:10:00 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+eureka.rc : updated version for next release.
+
+------------------------------------------------------------------------
+r1693 | ajapted | 2015-02-15 21:09:21 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+TODO.txt tidying
+
+------------------------------------------------------------------------
+r1692 | ajapted | 2015-02-15 19:28:57 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1691 | ajapted | 2015-02-15 19:28:36 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+UI_EditKey dialog : fixed wrong function name in Encode() method.
+
+------------------------------------------------------------------------
+r1690 | ajapted | 2015-02-15 18:44:17 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+UI_EditKey dialog : changing the context re-populates the Function choices.
+
+------------------------------------------------------------------------
+r1689 | ajapted | 2015-02-15 18:30:38 +1100 (Sun, 15 Feb 2015) | 3 lines
+
+UI_EditKey dialog : re-populate the 'Keywords' and 'Flags' menus when the
+function choice has been changed.
+
+------------------------------------------------------------------------
+r1688 | ajapted | 2015-02-15 18:16:30 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+UI_EditKey dialog : implemented the 'Flags...' menu.
+
+------------------------------------------------------------------------
+r1687 | ajapted | 2015-02-15 18:06:54 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+UI_EditKey dialog : implemented the 'Keywords...' menu.
+
+------------------------------------------------------------------------
+r1686 | ajapted | 2015-02-15 16:59:35 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Various tidying in changelogs/*.txt
+
+------------------------------------------------------------------------
+r1685 | ajapted | 2015-02-15 16:37:02 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+TODO.txt updated
+
+------------------------------------------------------------------------
+r1684 | ajapted | 2015-02-15 16:36:42 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+CHANGELOG update and version bump.
+
+------------------------------------------------------------------------
+r1683 | ajapted | 2015-02-15 16:28:45 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+About box : yet another tweak.
+
+------------------------------------------------------------------------
+r1682 | ajapted | 2015-02-15 16:22:00 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+CMD_NewMap : backup the current pwad before saving.
+
+------------------------------------------------------------------------
+r1681 | ajapted | 2015-02-15 16:15:31 +1100 (Sun, 15 Feb 2015) | 5 lines
+
+The 'New Map' command (in File menu) now saves the fresh map into the
+current pwad, asking for confirmation if it already exists.
+
+Hence removed 'Replacer' global and the overwrite test in CMD_SaveMap.
+
+------------------------------------------------------------------------
+r1680 | ajapted | 2015-02-15 15:41:12 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+(part of last commit) -- removed 'new_file' stuff from UI_ChooseMap.
+
+------------------------------------------------------------------------
+r1679 | ajapted | 2015-02-15 15:22:32 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+UI_ChooseMap : removed the 'new_file' stuff -- obsolete now.
+
+------------------------------------------------------------------------
+r1678 | ajapted | 2015-02-15 15:03:25 +1100 (Sun, 15 Feb 2015) | 2 lines
+
+Finished implementing the 'New Project' command (in File menu).
+
+------------------------------------------------------------------------
+r1677 | ajapted | 2015-02-15 14:44:24 +1100 (Sun, 15 Feb 2015) | 3 lines
+
+More work on 'File / New Project' command, implemented the file chooser and
+logic to determine the initial map name.
+
+------------------------------------------------------------------------
+r1676 | ajapted | 2015-02-15 14:02:28 +1100 (Sun, 15 Feb 2015) | 4 lines
+
+Partial work on a 'File / New Project' command, which feels like a better way
+of handling create new files from scratch (rather than a radio button in the
+New Map dialog).
+
+------------------------------------------------------------------------
+r1675 | ajapted | 2015-02-15 11:41:53 +1100 (Sun, 15 Feb 2015) | 4 lines
+
+For the File / Recent and File / Given-files menus, add a number to the
+beginning of each entry and make it the shortcut key (e.g. pressing '4' can
+be used to select the fourth entry while the menu is shown).
+
+------------------------------------------------------------------------
+r1674 | ajapted | 2015-02-14 22:57:35 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+About box : overlay a small version number on top of the logo (in bottom
+right corner), and tweaked a few things.
+
+------------------------------------------------------------------------
+r1673 | ajapted | 2015-02-14 21:16:13 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+Renamed prefix for vertex commands from 'VERT_' --> 'VT_', and renamed
+vertex reshaping commands to 'VT_ShapeArc' and 'VT_ShapeLine'.
+
+------------------------------------------------------------------------
+r1672 | ajapted | 2015-02-14 21:01:42 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+Key bind dialog : fixed wrong context strings (seems to have gotten out of
+sync with the KCTX_xxx values).
+
+------------------------------------------------------------------------
+r1671 | ajapted | 2015-02-14 20:31:49 +1100 (Sat, 14 Feb 2015) | 2 lines
+
+README.txt : minor updates.
+
+------------------------------------------------------------------------
+r1670 | ajapted | 2015-02-14 19:11:37 +1100 (Sat, 14 Feb 2015) | 4 lines
+
+Fixed the key binding list so that pressing 'Bind', 'Copy' etc on a
+non-visible line will scroll to that line (make it visible).
+
+------------------------------------------------------------------------
+r1669 | ajapted | 2015-02-14 16:49:06 +1100 (Sat, 14 Feb 2015) | 2 lines
+
+Reworked SEC_SelectGroup command to use the new flag system.
+
+------------------------------------------------------------------------
+r1668 | ajapted | 2015-02-14 16:07:01 +1100 (Sat, 14 Feb 2015) | 2 lines
+
+Updated LIN_SelectPath command to use new flag system.
+
+------------------------------------------------------------------------
+r1667 | ajapted | 2015-02-14 15:43:31 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+Fixed damn silly bug in ExecuteKey() not storing flag parameters, which begin
+with a slash '/', into the EXEC_Flags[] array.
+
+------------------------------------------------------------------------
+r1666 | ajapted | 2015-02-14 15:17:42 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+For "Delete" command support two flags: /keep_unused and /keep_things
+(the latter only useful in sectors mode).
+
+------------------------------------------------------------------------
+r1665 | ajapted | 2015-02-14 14:50:13 +1100 (Sat, 14 Feb 2015) | 3 lines
+
+1. updated CMD_Rotate90 to take a keyword ("cw" for clockwise, "acw" for anti-clockwise)
+2. split VERT_Reshape into two commands : VERT_ReshapeLine and VERT_ReshapeArc
+
+------------------------------------------------------------------------
+r1664 | ajapted | 2015-02-13 22:11:54 +1100 (Fri, 13 Feb 2015) | 3 lines
+
+Added 'flag_list' and 'keyword_list' to every editor_command_t that needs
+them.  [ Note that most commands do not support their flags yet.... ]
+
+------------------------------------------------------------------------
+r1663 | ajapted | 2015-02-13 19:59:42 +1100 (Fri, 13 Feb 2015) | 4 lines
+
+Reworked LineDef_Align() function to take 'flags' as a integer bitmask
+instead of a string.  Updated the 3D_Align implementation for this, and to
+use the new Exec_HasFlag() mechanism to check for "/clear" and "/right".
+
+------------------------------------------------------------------------
+r1662 | ajapted | 2015-02-13 19:39:23 +1100 (Fri, 13 Feb 2015) | 4 lines
+
+Added EXEC_Flags[] global which is similar to EXEC_Param[] but stores "flags"
+(paremeters beginning with '/').  Implemented adding such flags into that
+array (from a key binding), and added Exec_HasFlag() utility function.
+
+------------------------------------------------------------------------
+r1661 | ajapted | 2015-02-13 16:50:31 +1100 (Fri, 13 Feb 2015) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1660 | ajapted | 2015-02-13 16:42:23 +1100 (Fri, 13 Feb 2015) | 5 lines
+
+Added 'flag_list' and 'keyword_list' fields to editor_command_t.
+
+Use these in the UI_EditKey dialog to populate a 'Keywords' and/or 'Flags'
+menus.  These menus don't actually do anything yet....
+
+------------------------------------------------------------------------
+r1659 | ajapted | 2015-02-13 13:51:28 +1100 (Fri, 13 Feb 2015) | 4 lines
+
+Began work on some improvements to key binding system.  This commit works
+on the UI_EditKey dialog, the 'Function' widget is now a choice menu that
+contains all the possible functions for the current context.
+
+------------------------------------------------------------------------
+r1658 | ajapted | 2015-02-10 15:35:17 +1100 (Tue, 10 Feb 2015) | 4 lines
+
+Fixed crash when trying to build nodes (via File menu) on an IWAD map
+which has had some changes made to it, but has not been saved yet (and
+hence 'edit_wad' was NULL).
+
+------------------------------------------------------------------------
+r1657 | ajapted | 2015-02-10 15:15:44 +1100 (Tue, 10 Feb 2015) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1656 | ajapted | 2015-02-10 15:14:59 +1100 (Tue, 10 Feb 2015) | 3 lines
+
+Key bindings : changed vertex reshapers 'C' to be 120 degrees and 'Q' to 240
+degrees -- I think these will be more useful than 90/270 in practice.
+
+------------------------------------------------------------------------
+r1655 | ajapted | 2015-02-10 15:13:17 +1100 (Tue, 10 Feb 2015) | 2 lines
+
+Version bump, in honor of Find/Replace feature fully implemented.
+
+------------------------------------------------------------------------
+r1654 | ajapted | 2015-02-10 15:07:37 +1100 (Tue, 10 Feb 2015) | 3 lines
+
+Find/Replace : added 'skies' checkbox to the Sector filters.  This can be
+used to prevent matches from affecting sky ceilings.
+
+------------------------------------------------------------------------
+r1653 | ajapted | 2015-02-10 14:52:20 +1100 (Tue, 10 Feb 2015) | 3 lines
+
+Find/Replace : prevent matching the empty rail texture ('-') against a "*"
+wildcard pattern -- especially pertinent when doing a Replace All operation.
+
+------------------------------------------------------------------------
+r1652 | ajapted | 2015-02-10 13:22:11 +1100 (Tue, 10 Feb 2015) | 2 lines
+
+Find/Replace : fixed the filter toggle button being out-of-sync.
+
+------------------------------------------------------------------------
+r1651 | ajapted | 2015-02-10 13:15:58 +1100 (Tue, 10 Feb 2015) | 3 lines
+
+Find/Replace : only clear everything when the type changes (i.e. keep the
+existing match text, filters, etc... while edit mode stays the same).
+
+------------------------------------------------------------------------
+r1650 | ajapted | 2015-02-10 13:00:58 +1100 (Tue, 10 Feb 2015) | 2 lines
+
+Find/Replace : code to reset the filters section.
+
+------------------------------------------------------------------------
+r1649 | ajapted | 2015-02-09 22:22:33 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+Find/Replace : implemented replacement for LineDef textures.
+
+------------------------------------------------------------------------
+r1648 | ajapted | 2015-02-09 22:11:55 +1100 (Mon, 09 Feb 2015) | 8 lines
+
+Find/Replace : decided to remove handling of negative matches ('!' prefix)
+for textures and flats -- primarily because the semantics of find is quite
+different for semantics of replace (with find, user wants to see all sectors
+where BOTH flats match the negative pattern, but with replace user wants to
+visit sectors where EITHER flat match the negative pattern).
+
+Hence opting for K.I.S.S.
+
+------------------------------------------------------------------------
+r1647 | ajapted | 2015-02-09 21:48:58 +1100 (Mon, 09 Feb 2015) | 4 lines
+
+Invert selection command : do not clear the selection when 'error_mode' is
+active -- firstly because it all we get is the same as Select All command,
+and using CTRL-I (twice) to keep the error selection can be useful.
+
+------------------------------------------------------------------------
+r1646 | ajapted | 2015-02-09 21:32:37 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+Find/Replace : implemented replacement for sector flats.
+
+------------------------------------------------------------------------
+r1645 | ajapted | 2015-02-09 21:30:23 +1100 (Mon, 09 Feb 2015) | 3 lines
+
+UI : made TexFromWidget() and FlatFromWidget() be static functions since
+they do not use or require any fields or methods of their class.
+
+------------------------------------------------------------------------
+r1644 | ajapted | 2015-02-09 20:54:06 +1100 (Mon, 09 Feb 2015) | 4 lines
+
+Find/Replace : Allow user to dismiss the Find/Replace panel without losing
+the current selection (it was being cleared because it now uses the error
+mode).
+
+------------------------------------------------------------------------
+r1643 | ajapted | 2015-02-09 20:18:48 +1100 (Mon, 09 Feb 2015) | 3 lines
+
+Find/Replace : implemented Match_LineDef(), logic for matching textures
+on the sidedefs.
+
+------------------------------------------------------------------------
+r1642 | ajapted | 2015-02-09 19:35:46 +1100 (Mon, 09 Feb 2015) | 4 lines
+
+Find/Replace : allow '/' and '|' as separators for textures (consistent
+with numeric searches), and when adding a texture from the browser add a
+comma separator if current match ends with '*'.
+
+------------------------------------------------------------------------
+r1641 | ajapted | 2015-02-09 19:19:22 +1100 (Mon, 09 Feb 2015) | 6 lines
+
+Find/Replace : implemented Pattern_Match() method for matching texture names,
+supporting a list of names (simple patterns) separated by commas.
+
+Use this to implement Match_Sector() logic, and support initial '!' character
+in the pattern to negate the results.
+
+------------------------------------------------------------------------
+r1640 | ajapted | 2015-02-09 18:25:34 +1100 (Mon, 09 Feb 2015) | 6 lines
+
+Factored out code to match texture names (etc) --> Texture_MatchPattern(),
+now in the objects.cc/h file.
+
+Also fixed bug in browser where patterns like '4$' would not match some
+flats or textures, like 'CEIL3_4', due to spaces (padding) on the end.
+
+------------------------------------------------------------------------
+r1639 | ajapted | 2015-02-09 17:09:22 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1638 | ajapted | 2015-02-09 17:02:57 +1100 (Mon, 09 Feb 2015) | 4 lines
+
+Vertex Reshaping : finished logic for arbitrary arc angles, updating the
+key bindings for O/C/D/Q to specify the angle directly.  Document new 'Q'
+binding (270 degrees) in the README.
+
+------------------------------------------------------------------------
+r1637 | ajapted | 2015-02-09 16:43:05 +1100 (Mon, 09 Feb 2015) | 3 lines
+
+Vertex Reshaping : worked to support arbitrary arc sizes (angles), and to
+keep the start and end vertices of the arc in the same location....
+
+------------------------------------------------------------------------
+r1636 | ajapted | 2015-02-09 15:55:17 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+sys_macro.h : #define M_SQRT2 if not already defined.
+
+------------------------------------------------------------------------
+r1635 | ajapted | 2015-02-09 15:19:40 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+Fixed not reloading textures (etc) when opening a new wad file.
+
+------------------------------------------------------------------------
+r1634 | ajapted | 2015-02-09 14:37:11 +1100 (Mon, 09 Feb 2015) | 2 lines
+
+TODO.txt : update and tidy up.
+
+------------------------------------------------------------------------
+r1633 | ajapted | 2015-02-09 14:33:55 +1100 (Mon, 09 Feb 2015) | 5 lines
+
+When loading a wad specified on the command line, and it contains settings
+for the iwad, port and/or resources in an EUREKA_LUMP, then allow command
+line arguments to override those values (and _add_ new resources).
+
+------------------------------------------------------------------------
+r1632 | ajapted | 2015-02-09 13:01:55 +1100 (Mon, 09 Feb 2015) | 4 lines
+
+Makefile.xming : link with -static-libgcc and -static-libstdc++ so that
+the Windows executable actually works on Windows (and not complain about
+a missing DLL).
+
+------------------------------------------------------------------------
+r1631 | ajapted | 2015-01-24 16:29:41 +1100 (Sat, 24 Jan 2015) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1630 | ajapted | 2015-01-24 16:28:30 +1100 (Sat, 24 Jan 2015) | 3 lines
+
+Config : added 'show_full_one_sided' config variable, enables showing
+the rail / upper textures for one-sided lines in the LineDef panel.
+
+------------------------------------------------------------------------
+r1629 | ajapted | 2015-01-24 15:45:39 +1100 (Sat, 24 Jan 2015) | 3 lines
+
+Linedef panel : for one-sided lines, don't show upper and rail texture
+(since editing them generally does nothing).
+
+------------------------------------------------------------------------
+r1628 | ajapted | 2015-01-24 15:15:15 +1100 (Sat, 24 Jan 2015) | 3 lines
+
+Canvas : tweak to error mode, when active don't highlight the tagged sector(s)
+of the currently highlighted linedef.
+
+------------------------------------------------------------------------
+r1627 | ajapted | 2015-01-24 15:11:43 +1100 (Sat, 24 Jan 2015) | 3 lines
+
+Canvas : in the error mode, draw most linedefs as LIGHTGREY so the selected
+objects stand out more.
+
+------------------------------------------------------------------------
+r1626 | ajapted | 2015-01-24 14:57:17 +1100 (Sat, 24 Jan 2015) | 2 lines
+
+Linedef checker : implemented detection of unknown line types.
+
+------------------------------------------------------------------------
+r1625 | ajapted | 2015-01-24 14:18:05 +1100 (Sat, 24 Jan 2015) | 3 lines
+
+Sector checker : detect unknown sector types.  They are shown in red since
+in vanilla DOOM they will cause a fatal error.
+
+------------------------------------------------------------------------
+r1624 | printz | 2015-01-19 18:43:48 +1100 (Mon, 19 Jan 2015) | 1 line
+
+osx: updated Xcode project
+------------------------------------------------------------------------
+r1623 | ajapted | 2015-01-18 22:40:46 +1100 (Sun, 18 Jan 2015) | 6 lines
+
+Game definitions :
+1. fixed category of linetype #68 (should be a raising floor)
+
+2. changed category letter of raising floors to 'g', so they appear near
+   the lowering floors in the Browser.
+
+------------------------------------------------------------------------
+r1622 | ajapted | 2015-01-17 22:10:09 +1100 (Sat, 17 Jan 2015) | 3 lines
+
+Find/Replace : make 'Select All' button use the error mode, i.e. show all
+matches in bright red and everything else in a rather dim gray.
+
+------------------------------------------------------------------------
+r1621 | ajapted | 2015-01-17 21:30:21 +1100 (Sat, 17 Jan 2015) | 2 lines
+
+tweak the --help text
+
+------------------------------------------------------------------------
+r1620 | ajapted | 2015-01-17 21:29:41 +1100 (Sat, 17 Jan 2015) | 2 lines
+
+Man page : bit more fleshing out + lots of polishing.
+
+------------------------------------------------------------------------
+r1619 | ajapted | 2015-01-17 17:30:54 +1100 (Sat, 17 Jan 2015) | 2 lines
+
+Man page : fixed long options to have two dashes, plus some tweaks.
+
+------------------------------------------------------------------------
+r1618 | ajapted | 2015-01-17 17:26:21 +1100 (Sat, 17 Jan 2015) | 2 lines
+
+Man page : finished describing the remaining options.
+
+------------------------------------------------------------------------
+r1617 | ajapted | 2015-01-17 16:14:03 +1100 (Sat, 17 Jan 2015) | 3 lines
+
+Browser : tidied up some code with 'sort_method_e' typedef (instead of
+using 0/1/2 with special meanings).
+
+------------------------------------------------------------------------
+r1616 | ajapted | 2015-01-17 15:56:21 +1100 (Sat, 17 Jan 2015) | 4 lines
+
+Menus : the 'Default Properties' command did not belong in FILE menu, so
+moved it into the VIEW menu (the EDIT menu might make more sense, but is
+rather full right now).
+
+------------------------------------------------------------------------
+r1615 | ajapted | 2015-01-16 22:19:49 +1100 (Fri, 16 Jan 2015) | 4 lines
+
+DOOM defs : moved 'SKY1/2/3' textures from NATURAL --> OTHER category,
+since they looked out of place there (they have little utility when used
+on walls, so "Other" category seems the most appropiate).
+
+------------------------------------------------------------------------
+r1614 | ajapted | 2015-01-16 22:16:27 +1100 (Fri, 16 Jan 2015) | 4 lines
+
+Game defs : moved the MBF dog thing --> Boom definition (ports/boom.ugh),
+which at least prevents it appearing in "vanilla" mode.  Also changed its
+category from Player --> Other.
+
+------------------------------------------------------------------------
+r1613 | ajapted | 2015-01-16 22:13:53 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Renamed 'Manage Wads' command --> 'Manage Project'
+
+------------------------------------------------------------------------
+r1612 | ajapted | 2015-01-16 21:35:14 +1100 (Fri, 16 Jan 2015) | 3 lines
+
+Recolor the co-op player starts to match DOOM, i.e. type 2 start is gray,
+type 3 start is brown, type 4 start is red.
+
+------------------------------------------------------------------------
+r1611 | ajapted | 2015-01-16 20:50:00 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Code : minor rename, Img class --> Img_c
+
+------------------------------------------------------------------------
+r1610 | ajapted | 2015-01-16 20:40:03 +1100 (Fri, 16 Jan 2015) | 4 lines
+
+Img class : removed the Img_priv class, just have the fields in the
+private area of 'Img' class (renamed since they clashed with access
+methods).  Also reformatted code to use tabs, plus various tidying.
+
+------------------------------------------------------------------------
+r1609 | ajapted | 2015-01-16 20:14:12 +1100 (Fri, 16 Jan 2015) | 3 lines
+
+Img class : implemented color_remap() method, like spectrify() but remaps a
+source color range into a target color range.
+
+------------------------------------------------------------------------
+r1608 | ajapted | 2015-01-16 19:59:08 +1100 (Fri, 16 Jan 2015) | 6 lines
+
+Browser : the BR_CycleCategory command now skips the 'RECENT' category.
+
+Rationale is that another key toggles between RECENT category and the ALL
+category, so when the user uses this function they are probably not after
+the special RECENT category.
+
+------------------------------------------------------------------------
+r1607 | ajapted | 2015-01-16 17:17:54 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1606 | ajapted | 2015-01-16 15:47:39 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Man page : describe '$PREFIX/share/eureka' in FILES section.
+
+------------------------------------------------------------------------
+r1605 | ajapted | 2015-01-16 15:27:59 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Man page : added "FILES", "ENVIRONMENT" and "SEE ALSO" sections
+
+------------------------------------------------------------------------
+r1604 | ajapted | 2015-01-16 15:15:54 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Removed "ups" from the directories created in the $home_dir.
+
+------------------------------------------------------------------------
+r1603 | ajapted | 2015-01-16 14:22:20 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Man page : documented the main options, --file, --warp, --iwad, etc....
+
+------------------------------------------------------------------------
+r1602 | ajapted | 2015-01-16 12:48:03 +1100 (Fri, 16 Jan 2015) | 3 lines
+
+Manual page : created a DESCRIPTION section, listing some of Eureka's
+features, and reworked other parts at top of file (SYNOPSIS, etc).
+
+------------------------------------------------------------------------
+r1601 | ajapted | 2015-01-16 12:45:54 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Added 'misc/eureka.6' -- a skeletal manual page, courtesy Fabian Greffrath.
+
+------------------------------------------------------------------------
+r1600 | ajapted | 2015-01-16 12:26:12 +1100 (Fri, 16 Jan 2015) | 3 lines
+
+For --help text, change order of command-line options to show the most
+important ones first (like --file and --iwad).
+
+------------------------------------------------------------------------
+r1599 | ajapted | 2015-01-16 11:38:10 +1100 (Fri, 16 Jan 2015) | 3 lines
+
+For the --help text, show long options with two dashes ('--') since I will
+use double dashes in the manpage.
+
+------------------------------------------------------------------------
+r1598 | ajapted | 2015-01-16 11:26:56 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Updated AUTHORS.txt
+
+------------------------------------------------------------------------
+r1597 | ajapted | 2015-01-16 10:59:37 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Code : fixed previous commit (SYS_ASSERT in the wrong place)
+
+------------------------------------------------------------------------
+r1596 | ajapted | 2015-01-16 10:50:33 +1100 (Fri, 16 Jan 2015) | 4 lines
+
+Code : added some SYS_ASSERT() checks to erase() method of RecentFiles_c.
+Perhaps this will silence the bogus warnings about out-of-bounds access
+which older GNU compilers generate.
+
+------------------------------------------------------------------------
+r1595 | ajapted | 2015-01-16 10:43:54 +1100 (Fri, 16 Jan 2015) | 2 lines
+
+Code : added __attribute((noreturn)) to the FatalError() prototype.
+
+------------------------------------------------------------------------
+r1594 | ajapted | 2015-01-16 00:03:40 +1100 (Fri, 16 Jan 2015) | 4 lines
+
+Browser : reduced size of sprites in Thing browser --> 64x72 (from 80x80)
+which works better horizontally (three columns at minimum size) and can
+generally see more things, albeit a few more things are cut off now.
+
+------------------------------------------------------------------------
+r1593 | ajapted | 2015-01-15 23:57:33 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Browser : tweaked name of "Other" category.
+
+------------------------------------------------------------------------
+r1592 | ajapted | 2015-01-15 23:56:49 +1100 (Thu, 15 Jan 2015) | 4 lines
+
+Browser : replaced the "Sort" choice widget with a "Alpha" checkbox, and
+moved the "Match" widget up.  This makes the Things (etc) browsers more
+consistent looking with Flats and Textures, and a bit easier to use.
+
+------------------------------------------------------------------------
+r1591 | ajapted | 2015-01-15 23:44:44 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Browser : made the minimum width a bit narrower (10 units).
+
+------------------------------------------------------------------------
+r1590 | ajapted | 2015-01-15 23:28:43 +1100 (Thu, 15 Jan 2015) | 4 lines
+
+In main window's title, disabled the program name "Eureka" tacked on
+the end -- just seems like visual noise, especially with a [Read-Only]
+in the title.
+
+------------------------------------------------------------------------
+r1589 | ajapted | 2015-01-15 23:06:42 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Bindings : added '|' (SHIFT + '\') as the BR_CycleCategory function.
+
+------------------------------------------------------------------------
+r1588 | ajapted | 2015-01-15 22:50:15 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Game defs : tweaked name of "Health & Ammo" category.
+
+------------------------------------------------------------------------
+r1587 | ajapted | 2015-01-15 22:23:38 +1100 (Thu, 15 Jan 2015) | 4 lines
+
+Bindings : make 'T' (shift + t) open the browser to things, and 'X'
+(shift + x) open the browser to textures -- for consistency with the
+shortcuts in the BROWSER menu.
+
+------------------------------------------------------------------------
+r1586 | ajapted | 2015-01-15 22:12:10 +1100 (Thu, 15 Jan 2015) | 3 lines
+
+Menus : in Browser menu, moved 'Things' to first position, matching the
+order in the MODE choice on info-bar and the Find/Replace dialog.
+
+------------------------------------------------------------------------
+r1585 | ajapted | 2015-01-15 21:54:33 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Browser : tweaked title names and positioning.
+
+------------------------------------------------------------------------
+r1584 | ajapted | 2015-01-15 21:30:55 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Version bump.
+
+------------------------------------------------------------------------
+r1583 | ajapted | 2015-01-15 21:18:32 +1100 (Thu, 15 Jan 2015) | 3 lines
+
+3D View : changed the low_detail/high_detail flag into a preference setting
+(instead of being toggleable with the F5 key).
+
+------------------------------------------------------------------------
+r1582 | ajapted | 2015-01-15 20:42:32 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1581 | ajapted | 2015-01-15 20:41:12 +1100 (Thu, 15 Jan 2015) | 4 lines
+
+3D View : tweaked the info bar, move gamma to just after gravity, and made
+the Tex/Lit/Obj indicators be highlighted when NOT in effect (so under
+normal circumstances they remain dim).
+
+------------------------------------------------------------------------
+r1580 | ajapted | 2015-01-15 20:34:56 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+3D View : finished the info-bar implementation.
+
+------------------------------------------------------------------------
+r1579 | ajapted | 2015-01-15 19:54:14 +1100 (Thu, 15 Jan 2015) | 3 lines
+
+3D View : began work on an Information bar at top of render, showing the
+camera position, angle and various state.
+
+------------------------------------------------------------------------
+r1578 | ajapted | 2015-01-15 19:15:15 +1100 (Thu, 15 Jan 2015) | 3 lines
+
+Canvas : when drawing the "split line", show how and where the line will
+be split, with two new lines in orange and a small disc at new vertex.
+
+------------------------------------------------------------------------
+r1577 | ajapted | 2015-01-15 18:29:03 +1100 (Thu, 15 Jan 2015) | 4 lines
+
+Canvas : experimented with drawing a solid circle where the closest snap
+position to the mouse is (when SNAP is enabled), with a line going to
+the current mouse position....  Seems too weird to be useful.
+
+------------------------------------------------------------------------
+r1576 | ajapted | 2015-01-15 17:55:03 +1100 (Thu, 15 Jan 2015) | 5 lines
+
+Command system : registering commands is now done by passing a list of
+structures (instead of calling a function for each command).  This will
+allow extra fields in the future, e.g. description of the command and
+what parameters it takes.
+
+------------------------------------------------------------------------
+r1575 | ajapted | 2015-01-15 16:52:49 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+The 'CopyAndPaste' command broke recently -- fixed it.
+
+------------------------------------------------------------------------
+r1574 | ajapted | 2015-01-15 12:22:50 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Simplified some code using the bit-vector class.
+
+------------------------------------------------------------------------
+r1573 | ajapted | 2015-01-15 12:22:03 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Selection class : no need to check/grow the bit-vector, as it grows itself now.
+
+------------------------------------------------------------------------
+r1572 | ajapted | 2015-01-15 12:14:52 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Bitvec class : improved way vector is grown in set() method.
+
+------------------------------------------------------------------------
+r1571 | ajapted | 2015-01-15 11:58:20 +1100 (Thu, 15 Jan 2015) | 7 lines
+
+Bitvec class : added raw_get(), raw_set(), etc... as inline methods which
+do no range checking, and the normal get(), set(), etc... methods now
+check the position and will automatically resize the vector when needed.
+
+Also made resize() allow shrinking the vector when reduced by a large
+amount.
+
+------------------------------------------------------------------------
+r1570 | ajapted | 2015-01-15 11:33:58 +1100 (Thu, 15 Jan 2015) | 2 lines
+
+Bitvec class : removed unused 'merge()' method.
+
+------------------------------------------------------------------------
+r1569 | ajapted | 2015-01-14 23:25:36 +1100 (Wed, 14 Jan 2015) | 7 lines
+
+Menus :
+1. added shortcuts to numerous menu items that lacked them
+   (especially the Browser menu)
+
+2. moved 'Prune unused' to below Delete, and removed its shortcut
+   since the 'P' shortcut is already used by Paste.
+
+------------------------------------------------------------------------
+r1568 | ajapted | 2015-01-14 22:39:16 +1100 (Wed, 14 Jan 2015) | 3 lines
+
+Find/Replace : implemented linedef filtering based on sidedness, and fixed
+some issues with the tag filtering logic.
+
+------------------------------------------------------------------------
+r1567 | ajapted | 2015-01-14 22:18:41 +1100 (Wed, 14 Jan 2015) | 4 lines
+
+Find/Replace :
+1. got the skill and mode filters for Things working
+2. got the tag-number filter for Line/Sector searches working
+
+------------------------------------------------------------------------
+r1566 | ajapted | 2015-01-14 21:30:02 +1100 (Wed, 14 Jan 2015) | 4 lines
+
+Find/Replace : got the UI_TripleCheckButton working quite well, for both the
+skill flags and the mode flags, and implemented logic to compute the mask
+and compare value from those widgets.
+
+------------------------------------------------------------------------
+r1565 | ajapted | 2015-01-14 20:37:40 +1100 (Wed, 14 Jan 2015) | 3 lines
+
+Find/Replace : created a UI_TripleCheckButton() which is used to represent
+the search state for a boolean flag (YES, NO, DontCare).
+
+------------------------------------------------------------------------
+r1564 | ajapted | 2015-01-14 19:21:04 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+CHANGELOG : yet another reorganisation...
+
+------------------------------------------------------------------------
+r1563 | ajapted | 2015-01-14 19:17:05 +1100 (Wed, 14 Jan 2015) | 3 lines
+
+Find/Replace : added code to show/hide the filter widgets based on the
+current mode (Things, LineDefs, etc).  Also improved widget positions.
+
+------------------------------------------------------------------------
+r1562 | ajapted | 2015-01-14 18:50:42 +1100 (Wed, 14 Jan 2015) | 3 lines
+
+Find/Replace : began work on Filters -- this commit merely creates all the
+widgets we will need.
+
+------------------------------------------------------------------------
+r1561 | ajapted | 2015-01-14 16:53:11 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+Find/Replace : finished 'Choose' button and browser interaction logic.
+
+------------------------------------------------------------------------
+r1560 | ajapted | 2015-01-14 15:29:34 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+Find/Replace : worked on 'Choose' button and interaction with the Browser...
+
+------------------------------------------------------------------------
+r1559 | ajapted | 2015-01-14 15:01:19 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+Find/Replace : when '*' is used, show "(everything)" as the description.
+
+------------------------------------------------------------------------
+r1558 | ajapted | 2015-01-14 14:51:58 +1100 (Wed, 14 Jan 2015) | 3 lines
+
+Find/Replace : when 'Replace All', select all the objects which were modified
+and goto this selection at the end -- lets the user see what was affected.
+
+------------------------------------------------------------------------
+r1557 | ajapted | 2015-01-14 14:47:43 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+Find/Replace : support for finding and replacing Line-Types and Sector-Types.
+
+------------------------------------------------------------------------
+r1556 | ajapted | 2015-01-14 14:46:43 +1100 (Wed, 14 Jan 2015) | 2 lines
+
+Objid : the clear() method now only changes the 'num', leaves 'type' alone.
+
+------------------------------------------------------------------------
+r1555 | ajapted | 2015-01-13 21:59:34 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+README.txt : document the '\' key (toggle RECENT category).
+
+------------------------------------------------------------------------
+r1554 | ajapted | 2015-01-13 21:51:24 +1100 (Tue, 13 Jan 2015) | 5 lines
+
+Find/Replace :
+1. renamed 'Apply' button --> 'Replace'
+2. only activate 'Replace' button when something has been found
+3. implemented Replace_Thing() method
+
+------------------------------------------------------------------------
+r1553 | ajapted | 2015-01-13 21:30:53 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Texture checker : assume textures beginning with '#' are special, do not
+treat them as unknown textures.
+
+------------------------------------------------------------------------
+r1552 | ajapted | 2015-01-13 21:15:14 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertex Reshaping : added bindings for them, and document them in the README
+and CHANGELOG.
+
+------------------------------------------------------------------------
+r1551 | ajapted | 2015-01-13 21:13:20 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertex Reshaping : register its command, and properly check the parameter
+to call the correct function (e.g. "line" vs "circle" vs "arc180").
+
+------------------------------------------------------------------------
+r1550 | ajapted | 2015-01-13 20:48:05 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertices : support for shaping vertices into a half-circle (180 degrees)
+or a quarter circle (90 degrees).
+
+------------------------------------------------------------------------
+r1549 | ajapted | 2015-01-13 18:54:52 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertices : implemented the EvalCircle() function -- the circle reshaping code
+is working now.
+
+------------------------------------------------------------------------
+r1548 | ajapted | 2015-01-13 18:27:27 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+Vertices : partial work on command to reshape vertices into a pure circle.
+
+------------------------------------------------------------------------
+r1547 | ajapted | 2015-01-13 17:44:12 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+Vertices : got the Reshape_Line() code working.
+
+------------------------------------------------------------------------
+r1546 | ajapted | 2015-01-13 17:07:24 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertices : further work on straight line reshaper, collect all vertices and
+sort them along the line, and then determine the end-points we need.
+
+------------------------------------------------------------------------
+r1545 | ajapted | 2015-01-13 16:30:52 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Vertices : worked on code to move all selected vertices onto a straight line
+(some experimental stuff...)
+
+------------------------------------------------------------------------
+r1544 | ajapted | 2015-01-13 16:29:12 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+Basis : ensure BA_Begin() has been called for BA_New() and BA_Delete() functions.
+
+------------------------------------------------------------------------
+r1543 | ajapted | 2015-01-13 15:19:59 +1100 (Tue, 13 Jan 2015) | 3 lines
+
+Key bindings : increased maximum parameters of a binding from 4 --> 16, and
+increased the maximum length of a parameter from 16 --> 32.
+
+------------------------------------------------------------------------
+r1542 | ajapted | 2015-01-13 14:56:52 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+Code : moved prototypes for Status_xxx() and Beep() functions --> main.h
+
+------------------------------------------------------------------------
+r1541 | ajapted | 2015-01-13 12:22:42 +1100 (Tue, 13 Jan 2015) | 4 lines
+
+Find/Replace : implemented rep_value_callback(), ensuring the 'Apply' and
+'Replace All' buttons are only active when both the rep_value is valid and
+the find_match is valid.
+
+------------------------------------------------------------------------
+r1540 | ajapted | 2015-01-13 11:58:40 +1100 (Tue, 13 Jan 2015) | 2 lines
+
+Find/Replace : support '*' wildcard in number_group_c
+
+------------------------------------------------------------------------
+r1539 | ajapted | 2015-01-12 23:17:13 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Code tweak : consistent capitalization for top-of-file descriptions.
+
+------------------------------------------------------------------------
+r1538 | ajapted | 2015-01-12 23:04:23 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Code : removed commented-out code for CMD_FindObjectByType() -- the new
+Find/Replace panel implements equivalent functionality.
+
+------------------------------------------------------------------------
+r1537 | ajapted | 2015-01-12 23:01:48 +1100 (Mon, 12 Jan 2015) | 9 lines
+
+Objid rework:
+1. moved obj_type_e definition --> objid.h
+2. removed 'OBJ_NONE' as a member of obj_type_e enumeration
+3. renamed 'OBJ_NO_NONE' constant --> 'NIL_OBJ'
+4. in Objid class, replaced '()' operator with 'valid()' method
+5. removed the barely used is_obj() macro
+6. renamed 'edit.highlighted' --> 'edit.highlight'
+
+------------------------------------------------------------------------
+r1536 | ajapted | 2015-01-12 21:00:51 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Find/Replace : tweaked size of 'what' choice widget.
+
+------------------------------------------------------------------------
+r1535 | ajapted | 2015-01-12 20:58:23 +1100 (Mon, 12 Jan 2015) | 7 lines
+
+Find/Replace :
+1. remove the toggle button for the Replace section, was rather unnecessary,
+   and now there is more room for the Filters section.
+
+2. made the 'what' choice (Things, Line Textures, etc) be colored, using
+   colors that match the mode colors in infobar widget.
+
+------------------------------------------------------------------------
+r1534 | ajapted | 2015-01-12 19:50:23 +1100 (Mon, 12 Jan 2015) | 4 lines
+
+Find/Replace : better handling of 'Select All' button, e.g. beep with
+"nothing found" message if nothing was found, and if some stuff _was_
+found then use GoToSelection() to move/zoom in to it.
+
+------------------------------------------------------------------------
+r1533 | ajapted | 2015-01-12 19:38:54 +1100 (Mon, 12 Jan 2015) | 4 lines
+
+Find/Replace :
+1. Got the 'number_group_c' class working, can find things with it now.
+2. Make sure selection is cleared after nothing is found
+
+------------------------------------------------------------------------
+r1532 | ajapted | 2015-01-12 18:55:59 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Find/Replace : created a 'number_group_c' class for storing a small group
+of numbers or number ranges.  Also implemented its ParseString() method.
+
+------------------------------------------------------------------------
+r1531 | ajapted | 2015-01-12 18:19:44 +1100 (Mon, 12 Jan 2015) | 4 lines
+
+Removed the 'selectn.cc/h' code files -- merged the code into levels.cc/h
+
+Also moved some code from objects.cc/h --> levels.cc/h (notification stuff)
+
+------------------------------------------------------------------------
+r1530 | ajapted | 2015-01-12 18:09:13 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Find/Replace : bit more work, got basic Thing matching working.
+
+------------------------------------------------------------------------
+r1529 | ajapted | 2015-01-12 16:53:31 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Find/Replace : properly set the description for a thing type (etc).
+
+------------------------------------------------------------------------
+r1528 | ajapted | 2015-01-12 16:46:27 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Find/Replace : implemented find_match callback, e.g. validate that the
+string is numeric (for Things or for line/sector types).
+
+------------------------------------------------------------------------
+r1527 | ajapted | 2015-01-12 15:57:04 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Added Editor_ChangeMode_Raw() function.
+
+------------------------------------------------------------------------
+r1526 | ajapted | 2015-01-12 15:18:32 +1100 (Mon, 12 Jan 2015) | 4 lines
+
+Find/Replace : worked on outer logic for finding the first/next object, and
+for selecting everything or doing a replace on all matches.  The inner logic
+(MatchObject or ApplyReplace methods) are not started yet....
+
+------------------------------------------------------------------------
+r1525 | ajapted | 2015-01-12 15:10:04 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+minor rename
+
+------------------------------------------------------------------------
+r1524 | ajapted | 2015-01-12 14:57:11 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Coding : removed unused macros (IsSelected, SelectObject, etc) from selectn.h
+
+------------------------------------------------------------------------
+r1523 | ajapted | 2015-01-12 14:24:54 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Find/Replace : bit more work, added Clear() method, added several more
+callback functions (skeletal atm), call BrowsedItem() from UI_MainWin.
+
+------------------------------------------------------------------------
+r1522 | ajapted | 2015-01-12 12:13:05 +1100 (Mon, 12 Jan 2015) | 4 lines
+
+Preferences : enabled the 'Maximize on start-up' option, except for MacOS X
+platform.  This is instead of restoring the last window position and maximized
+state, which is non-trivial (especially on Linux), but better than nothing.
+
+------------------------------------------------------------------------
+r1521 | ajapted | 2015-01-12 11:56:19 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Added 'Toggle 3D View' command to the VIEW menu.
+
+------------------------------------------------------------------------
+r1520 | ajapted | 2015-01-12 11:45:49 +1100 (Mon, 12 Jan 2015) | 2 lines
+
+Default probs : layout tweak.
+
+------------------------------------------------------------------------
+r1519 | ajapted | 2015-01-12 11:42:16 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Default props : added labels above the textures, and spaced the three groups
+out some more.
+
+------------------------------------------------------------------------
+r1518 | ajapted | 2015-01-12 11:13:05 +1100 (Mon, 12 Jan 2015) | 3 lines
+
+Preferences : when the 'browser_small_tex' value is changed, re-populate
+the browser (to show the resized textures).
+
+------------------------------------------------------------------------
+r1517 | ajapted | 2015-01-11 23:16:17 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+TODO.txt updated (lots of WIP stuff...)
+
+------------------------------------------------------------------------
+r1516 | ajapted | 2015-01-11 22:56:55 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Implemented new 'browser_small_tex' option to show smaller textures in
+the texture browser.  Includes addition to the Preferences dialog.
+
+------------------------------------------------------------------------
+r1515 | ajapted | 2015-01-11 21:35:26 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Find/Replace : implemented the toggle buttons showing/hiding their group.
+
+------------------------------------------------------------------------
+r1514 | ajapted | 2015-01-11 21:02:47 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Find/Replace : fixed dismissing the panel by pressing the key for the
+current mode, e.g. 'v' for vertices.
+
+------------------------------------------------------------------------
+r1513 | ajapted | 2015-01-11 20:51:35 +1100 (Sun, 11 Jan 2015) | 4 lines
+
+Find/Replace : worked on layout some more, grouping the three sub-panels into
+their own group (leaving a think BG_COLOR border between each panel).  Also
+tidied up the code (the output from fluid).
+
+------------------------------------------------------------------------
+r1512 | ajapted | 2015-01-11 20:21:21 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Find/Replace : created main UI for this (done in Fluid, code reformatted
+and pasted here).  Nothing works yet....
+
+------------------------------------------------------------------------
+r1511 | ajapted | 2015-01-11 17:13:10 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Find/Replace : added 'Go to next' to View menu (not implemented yet....)
+
+------------------------------------------------------------------------
+r1510 | ajapted | 2015-01-11 17:03:54 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Find/Replace : add widget to main window, and added menu item for it.
+
+------------------------------------------------------------------------
+r1509 | ajapted | 2015-01-11 17:02:31 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Makefiles : added 'ui_replace.o' into the build.
+
+------------------------------------------------------------------------
+r1508 | ajapted | 2015-01-11 15:53:41 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Added new files 'ui_replace.cc/h' -- will contain the Find and Replace panel
+(only contains minimal code at the moment).
+
+------------------------------------------------------------------------
+r1507 | ajapted | 2015-01-11 15:45:16 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Default props : fixed using the Browser to set stuff (textures etc).
+
+------------------------------------------------------------------------
+r1506 | ajapted | 2015-01-11 15:28:07 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Default props : hide it when press CTRL-D and already shown.
+
+------------------------------------------------------------------------
+r1505 | ajapted | 2015-01-11 15:15:27 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Default props : added command in File/ menu to show it, and various fixes.
+
+------------------------------------------------------------------------
+r1504 | ajapted | 2015-01-11 14:52:55 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Default props : removed toggle button and related code.
+
+------------------------------------------------------------------------
+r1503 | ajapted | 2015-01-11 14:45:51 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+Default props : added "Lower" (etc) names to the wall texture pics.
+
+------------------------------------------------------------------------
+r1502 | ajapted | 2015-01-11 14:07:15 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Finished separating UI_DefaultProps code, splitting the implementation into
+header file + code file definitions.
+
+------------------------------------------------------------------------
+r1501 | ajapted | 2015-01-11 13:57:04 +1100 (Sun, 11 Jan 2015) | 2 lines
+
+(forgot 'Makefile' in previous commit)
+
+------------------------------------------------------------------------
+r1500 | ajapted | 2015-01-11 13:45:05 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+More work to separate UI_DefaultProps code -- mainly deleting the relevant
+parts from ui_vertex.* and ui_default.* -- but also updated the Makefiles.
+
+------------------------------------------------------------------------
+r1499 | ajapted | 2015-01-11 13:35:17 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Began work to separate code for the 'Default Properties' panel into its own
+code files --> ui_default.cc/h.   This commit merely copies the new files.
+
+------------------------------------------------------------------------
+r1498 | ajapted | 2015-01-11 13:31:07 +1100 (Sun, 11 Jan 2015) | 3 lines
+
+Always show a two-sided line in LineDef panel when multiple lines are selected
+(and are a mix of one-sided and two-sided lines).
+
+------------------------------------------------------------------------
+r1497 | ajapted | 2015-01-09 14:30:00 +1100 (Fri, 09 Jan 2015) | 2 lines
+
+Wad code : re-sort the levels[] array after adding a new level.
+
+------------------------------------------------------------------------
+r1496 | ajapted | 2015-01-07 13:32:52 +1100 (Wed, 07 Jan 2015) | 3 lines
+
+Keys : convert FL_Button+n values <--> "MOUSE##" string, and FL_WheelUp/Dn
+values <--> "WHEEL_UP/DN" strings.
+
+------------------------------------------------------------------------
+r1495 | ajapted | 2015-01-06 16:01:31 +1100 (Tue, 06 Jan 2015) | 2 lines
+
+TODO.txt : moved the 'NO:' stuff to a separate NOT-TO-DO section.
+
+------------------------------------------------------------------------
+r1494 | ajapted | 2015-01-06 15:55:59 +1100 (Tue, 06 Jan 2015) | 3 lines
+
+Finished support for RECENT browser category, with new binding for '\' key
+which toggles between the ALL and RECENT categories.
+
+------------------------------------------------------------------------
+r1493 | ajapted | 2015-01-06 13:57:11 +1100 (Tue, 06 Jan 2015) | 4 lines
+
+More work on new "RECENT" category for Texture (etc) browsers.
+Implemented ability to save/restore them from the .dat cache file,
+and fixed a few issues.
+
+------------------------------------------------------------------------
+r1492 | ajapted | 2015-01-06 13:55:15 +1100 (Tue, 06 Jan 2015) | 3 lines
+
+Menu : removed short-cut from 'File/Delete Map' command, as it likely will
+be used rarely and it's not something you want to hit accidentally.
+
+------------------------------------------------------------------------
+r1491 | ajapted | 2015-01-06 11:05:17 +1100 (Tue, 06 Jan 2015) | 2 lines
+
+Partial work on a "RECENT" category for the Texture, Flat and Thing browsers.
+
+------------------------------------------------------------------------
+r1490 | ajapted | 2015-01-05 19:31:27 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Updated some copyright messages (e.g. About box) for 2015.
+
+------------------------------------------------------------------------
+r1489 | ajapted | 2015-01-05 19:30:50 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Version bump.
+
+------------------------------------------------------------------------
+r1488 | ajapted | 2015-01-05 19:14:57 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Render : fixed clipping of mid-masked textures (e.g. the cage in E1M9)
+
+------------------------------------------------------------------------
+r1487 | ajapted | 2015-01-05 11:55:34 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Moved the BA_LevelChecksum() code from e_loadsave --> e_basis
+
+------------------------------------------------------------------------
+r1486 | ajapted | 2015-01-05 11:54:31 +1100 (Mon, 05 Jan 2015) | 3 lines
+
+Wad code : sort the levels alphabetically in the levels[] vector (mainly for
+the next-map and prev-map commands).
+
+------------------------------------------------------------------------
+r1485 | ajapted | 2015-01-05 11:10:08 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Implemented the 'File / Rename Map' command (no shortcut key).
+
+------------------------------------------------------------------------
+r1484 | ajapted | 2015-01-05 10:21:10 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Wad code : implemented 'RenameLump()' method.
+
+------------------------------------------------------------------------
+r1483 | ajapted | 2015-01-05 10:07:04 +1100 (Mon, 05 Jan 2015) | 2 lines
+
+Implemented new 'File / Delete Map' command (bound to CTRL-d key).
+
+------------------------------------------------------------------------
+r1482 | ajapted | 2015-01-04 20:50:46 +1100 (Sun, 04 Jan 2015) | 5 lines
+
+Reworked the way "New WAD File" button in the 'New Map' command works, it is
+now a radio button with another choice "Current WAD File", and when chosen
+then we immediately try to save (export) the new map -- which feels more
+like what the user would expect.
+
+------------------------------------------------------------------------
+r1481 | ajapted | 2015-01-04 20:10:14 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1480 | ajapted | 2015-01-04 20:06:35 +1100 (Sun, 04 Jan 2015) | 3 lines
+
+Fixed the occasional false positives with the sector mismatch test
+(caused by poor logic in OppositeLineDef and OppositeSector functions).
+
+------------------------------------------------------------------------
+r1479 | ajapted | 2015-01-04 20:04:46 +1100 (Sun, 04 Jan 2015) | 3 lines
+
+Fixed zooming after doing a command, like 'j' JumpToObject, which moves the
+map origin to focus on some selected object(s).
+
+------------------------------------------------------------------------
+r1478 | ajapted | 2015-01-04 16:48:05 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+Makefile.xming : updated to use 'mingw-w64' cross compiler and zlib 1.2.8
+
+------------------------------------------------------------------------
+r1477 | ajapted | 2015-01-04 16:34:56 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+Removed 'slurp' directory from obj_linux/ and obj_win32/
+
+------------------------------------------------------------------------
+r1476 | ajapted | 2015-01-04 16:32:14 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+Makefiles : added 'STRIP_FLAGS' variable (for "stripped" target).
+
+------------------------------------------------------------------------
+r1475 | ajapted | 2015-01-04 16:01:35 +1100 (Sun, 04 Jan 2015) | 4 lines
+
+For 'New Map' dialog, added a "New File" check button which means the wad
+will be saved into a new file (disables the map selection, since that is
+done by the export map dialog).
+
+------------------------------------------------------------------------
+r1474 | ajapted | 2015-01-04 11:55:08 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1473 | ajapted | 2015-01-04 11:54:26 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+Support two numeric values after -warp, compatible with vanilla DOOM.
+
+------------------------------------------------------------------------
+r1472 | ajapted | 2015-01-04 11:30:20 +1100 (Sun, 04 Jan 2015) | 3 lines
+
+Linedef panel : swapped 'Tag' and 'Length' widgets(so Tag is now on left
+(like the Sector panel).
+
+------------------------------------------------------------------------
+r1471 | ajapted | 2015-01-04 11:25:27 +1100 (Sun, 04 Jan 2015) | 2 lines
+
+Code : silence some compiler warnings about integer conversions.
+
+------------------------------------------------------------------------
+r1470 | printz | 2015-01-03 09:01:20 +1100 (Sat, 03 Jan 2015) | 3 lines
+
+osx:
+* Fixed type warnings on the app delegate because I didn't set it to conform to the NSApplicationDelegate protocol
+* Added other .a files to the dependency list, because I was getting linker errors.
+------------------------------------------------------------------------
+r1469 | printz | 2014-11-15 10:06:48 +1100 (Sat, 15 Nov 2014) | 2 lines
+
+* Updated Xcode project to work
+* Removed a personal file
+------------------------------------------------------------------------
+r1468 | ajapted | 2014-10-25 22:34:34 +1100 (Sat, 25 Oct 2014) | 4 lines
+
+Support 'coop_dm_flags' feature in game definitions, and when not enabled
+then show a vanilla DOOM compatible "dm" thing flag (instead of the normal
+three sp/coop/dm flags).
+
+------------------------------------------------------------------------
+r1467 | ajapted | 2014-10-25 22:00:21 +1100 (Sat, 25 Oct 2014) | 2 lines
+
+Fixed makefile "install" targets for r1459 (moved "bindings.cfg" to top level)
+
+------------------------------------------------------------------------
+r1466 | ajapted | 2014-10-25 21:54:50 +1100 (Sat, 25 Oct 2014) | 3 lines
+
+UI_Window : added UpdateGameInfo() method, and use it for THING panel to
+show or hide the "friend" checkbox depending on game_info.friend_flag
+
+------------------------------------------------------------------------
+r1465 | ajapted | 2014-10-25 21:53:26 +1100 (Sat, 25 Oct 2014) | 2 lines
+
+Added 'friend_flag' field to game_info_t and parse it from definition files.
+
+------------------------------------------------------------------------
+r1464 | ajapted | 2014-10-25 21:52:16 +1100 (Sat, 25 Oct 2014) | 2 lines
+
+Ports / BOOM : added "feature friend_flag 1"
+
+------------------------------------------------------------------------
+r1463 | ajapted | 2014-10-25 21:27:26 +1100 (Sat, 25 Oct 2014) | 3 lines
+
+Use simple char[] for 'sky_flat' member of game_info, so we can memset() the
+whole structure to zero in M_InitDefinitions().
+
+------------------------------------------------------------------------
+r1462 | ajapted | 2014-10-25 20:11:57 +1100 (Sat, 25 Oct 2014) | 4 lines
+
+(part of VM removal) : removed 'misc/core_defs.up' script file, which was
+never used and barely had anything in it.  Updated 'make install' targets
+in the Makefiles too.
+
+------------------------------------------------------------------------
+r1461 | ajapted | 2014-10-25 20:07:13 +1100 (Sat, 25 Oct 2014) | 3 lines
+
+Removed all the VM code (vm.h + vm_*.cc) -- this was never used and was a
+long way from becoming usable.  Lua would be a better choice anyway.
+
+------------------------------------------------------------------------
+r1460 | ajapted | 2014-10-25 19:52:30 +1100 (Sat, 25 Oct 2014) | 2 lines
+
+Preferences : added '192' to list of possible default grid sizes.
+
+------------------------------------------------------------------------
+r1459 | ajapted | 2014-09-12 20:29:11 +1000 (Fri, 12 Sep 2014) | 3 lines
+
+Moved 'bindings.cfg' to top level in repository, so that running Eureka after a
+compilation (without installing it) works.
+
+------------------------------------------------------------------------
+r1458 | ajapted | 2014-09-12 20:22:51 +1000 (Fri, 12 Sep 2014) | 2 lines
+
+silence a compiler warning.
+
+------------------------------------------------------------------------
+r1457 | ajapted | 2014-08-15 15:28:58 +1000 (Fri, 15 Aug 2014) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1456 | ajapted | 2014-08-15 13:45:35 +1000 (Fri, 15 Aug 2014) | 5 lines
+
+3D View : fixed texturing issue, textures could be vertically off by a
+pixel (due to the way casting float --> int will round towards zero).
+
+This closes ticket #3.  Bug reported by 'umbrakun'.
+
+------------------------------------------------------------------------
+r1455 | ajapted | 2014-08-06 16:14:06 +1000 (Wed, 06 Aug 2014) | 2 lines
+
+README.txt : added contact details at the end.
+
+------------------------------------------------------------------------
+r1454 | ajapted | 2014-08-06 15:49:34 +1000 (Wed, 06 Aug 2014) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1453 | ajapted | 2014-06-25 22:05:45 +1000 (Wed, 25 Jun 2014) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1452 | ajapted | 2014-06-25 22:04:01 +1000 (Wed, 25 Jun 2014) | 8 lines
+
+glBSP library : improved method of creating a dummy node, we now
+create a real subsector and a real seg for the back side of the
+partition line (though the seg is a carbon copy of an existing one).
+
+This method should be more robust, since the created structures are
+all real (instead of re-using an index number).  Tested in various
+software rendered ports without any problem.
+
+------------------------------------------------------------------------
+r1451 | ajapted | 2014-06-25 21:32:11 +1000 (Wed, 25 Jun 2014) | 3 lines
+
+Removed misc/slurp -- (a) it does not belong here, and (b) I do not
+plan to finish or release it.
+
+------------------------------------------------------------------------
+r1450 | ajapted | 2014-06-25 21:15:11 +1000 (Wed, 25 Jun 2014) | 2 lines
+
+Comment the NSIS makefile and 'nsi' file as OLD / OBSOLETE.
+
+------------------------------------------------------------------------
+r1449 | ajapted | 2014-06-25 19:53:59 +1000 (Wed, 25 Jun 2014) | 3 lines
+
+Ports / BOOM : added "feature gen_types 1" -- this will (in the future)
+enable support for generalized linedefs and sectors.
+
+------------------------------------------------------------------------
+r1448 | ajapted | 2014-06-25 19:51:55 +1000 (Wed, 25 Jun 2014) | 6 lines
+
+Game definition parser : support "feature" keyword which is used to
+activate (or de-activate) certain game- or port-related features.
+
+So far three feature names are _parsed_, but there is no actual
+support for those features yet.
+
+------------------------------------------------------------------------
+r1447 | printz | 2014-06-25 17:27:19 +1000 (Wed, 25 Jun 2014) | 3 lines
+
+Xcode project:
+* Updated library references
+* Made it so all source files (at least from the C++ group) will have real tabs instead of groups of spaces
+------------------------------------------------------------------------
+r1446 | ajapted | 2014-06-19 22:31:53 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+glBSP library : more dramatic warning when creating a dummy node.
+
+------------------------------------------------------------------------
+r1445 | ajapted | 2014-06-19 22:14:18 +1000 (Thu, 19 Jun 2014) | 6 lines
+
+glBSP library : implemented a hack for the case when no nodes are
+generated (i.e. when the whole level is a single convex sector).
+
+This hack involves creating a dummy node with the real subsector
+on one side, and a dummy one on the other.
+
+------------------------------------------------------------------------
+r1444 | ajapted | 2014-06-19 20:38:08 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+TODO.txt : moved more stuff --> doc/MiscNotes.txt
+
+------------------------------------------------------------------------
+r1443 | ajapted | 2014-06-19 19:20:55 +1000 (Thu, 19 Jun 2014) | 3 lines
+
+TODO.txt : updated various entries, and moved some of the notes to a
+new file --> docs/MiscNotes.txt
+
+------------------------------------------------------------------------
+r1442 | ajapted | 2014-06-19 19:05:47 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1441 | ajapted | 2014-06-19 19:01:17 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+About box : show version number _in_ the text (not just window title).
+
+------------------------------------------------------------------------
+r1440 | ajapted | 2014-06-19 18:47:45 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+When saving the map, save any header data too (for FraggleScript etc).
+
+------------------------------------------------------------------------
+r1439 | ajapted | 2014-06-19 18:27:28 +1000 (Thu, 19 Jun 2014) | 3 lines
+
+When loading a map, load any data in the header lump, especially the
+FraggleScript and level-info data used by DOOM Legacy.
+
+------------------------------------------------------------------------
+r1438 | ajapted | 2014-06-19 17:45:39 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+Makefile.xming (WIN32) : update to FLTK 1.3.2 and zlib 1.2.6
+
+------------------------------------------------------------------------
+r1437 | ajapted | 2014-06-19 13:07:06 +1000 (Thu, 19 Jun 2014) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1436 | ajapted | 2014-06-19 13:05:54 +1000 (Thu, 19 Jun 2014) | 8 lines
+
+Support loading a pwad which is READ-ONLY.
+
+This will cause the 'Save' action to ask whether to export to a file,
+and the 'Build Nodes' action will show a fail message.  The window
+title will also show the read-only state of the current file.
+
+This closes bug ticket #2.
+
+------------------------------------------------------------------------
+r1435 | ajapted | 2014-05-18 16:59:56 +1000 (Sun, 18 May 2014) | 2 lines
+
+File menu : tweaked position of Build Nodes entry.
+
+------------------------------------------------------------------------
+r1434 | ajapted | 2014-05-18 16:54:44 +1000 (Sun, 18 May 2014) | 4 lines
+
+Fixed bug when saving a map and using the "ExMx" buttons -- there was
+an erroneous newline added to the lump name, preventing the game from
+accessing the map.  Thanks to ettingrinder for the bug report.
+
+------------------------------------------------------------------------
+r1433 | ajapted | 2014-01-26 00:16:36 +1100 (Sun, 26 Jan 2014) | 3 lines
+
+Fixed bug not loading 'ASHWALL' texture for DOOM 1, which occurred
+because we erroneously skipped the first entry of TEXTURE2 lump.
+
+------------------------------------------------------------------------
+r1432 | ajapted | 2014-01-26 00:14:51 +1100 (Sun, 26 Jan 2014) | 2 lines
+
+Began fresh CHANGES.txt document (after 1.00 release)
+
+------------------------------------------------------------------------
+r1431 | ajapted | 2014-01-26 00:13:52 +1100 (Sun, 26 Jan 2014) | 2 lines
+
+Moved version 1.00 CHANGELOG --> changelogs/100.txt
+
+------------------------------------------------------------------------
+r1430 | ajapted | 2014-01-09 10:26:25 +1100 (Thu, 09 Jan 2014) | 2 lines
+
+Post-release version bump.
+
+------------------------------------------------------------------------
+r1429 | ajapted | 2014-01-05 22:31:54 +1100 (Sun, 05 Jan 2014) | 2 lines
+
+Updated some copyright years (e.g. in About box) for 2014.
+
+------------------------------------------------------------------------
+r1428 | ajapted | 2014-01-05 21:26:00 +1100 (Sun, 05 Jan 2014) | 2 lines
+
+Re-instated the '192' grid size (reverted revision 628).
+
+------------------------------------------------------------------------
+r1427 | ajapted | 2013-12-27 10:22:24 +1100 (Fri, 27 Dec 2013) | 2 lines
+
+Updated GPL.txt -- the GNU General Public License (version 2).
+
+------------------------------------------------------------------------
+r1426 | ajapted | 2013-10-27 14:21:34 +1100 (Sun, 27 Oct 2013) | 2 lines
+
+Makefile : renamed INSTALL_PREFIX --> PREFIX
+
+------------------------------------------------------------------------
+r1425 | ajapted | 2013-10-27 13:49:10 +1100 (Sun, 27 Oct 2013) | 2 lines
+
+Use I_ROUND() macro instead of round() standard library call.
+
+------------------------------------------------------------------------
+r1424 | ajapted | 2013-09-09 20:02:55 +1000 (Mon, 09 Sep 2013) | 2 lines
+
+Workaround a compiler warning.
+
+------------------------------------------------------------------------
+r1423 | ajapted | 2013-08-25 15:26:16 +1000 (Sun, 25 Aug 2013) | 2 lines
+
+History.txt : resync for the 1.00 release.
+
+------------------------------------------------------------------------
 r1422 | ajapted | 2013-08-25 15:20:46 +1000 (Sun, 25 Aug 2013) | 2 lines
 
 Pack-source script: handle the 'ups' folder (as per 'mods' etc).
