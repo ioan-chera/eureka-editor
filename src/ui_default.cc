@@ -42,8 +42,6 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	X += 6;
 	W -= 12;
 
-	int MX = X + W/2;
-
 
 	// ---- LINEDEF TEXTURES ------------
 
@@ -58,7 +56,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	w_tex->callback(tex_callback, this);
 	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += w_tex->h() + 44;
+	Y += w_tex->h() + 50;
 
 
 	// ---- SECTOR PROPS --------------
@@ -137,12 +135,15 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- THING PROPS --------------
 
-	thing = new Fl_Int_Input(X+54, Y, 64, 24, "Thing: ");
+	thing = new Fl_Int_Input(X+60, Y+20, 64, 24, "Thing: ");
 	thing->align(FL_ALIGN_LEFT);
 	thing->callback(thing_callback, this);
 	thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	th_desc = new Fl_Output(thing->x() + thing->w() + 10, Y, 144, 24);
+	th_desc = new Fl_Output(X+60, Y+80-26, 122, 24);
+
+	th_sprite = new UI_Pic(X+W-90, Y, 80,80, "Sprite");
+	th_sprite->callback(thing_callback, this);
 
 
 	resizable(NULL);
@@ -167,6 +168,7 @@ void UI_DefaultProps::UpdateThingDesc()
 	const thingtype_t *info = M_GetThingType(default_thing);
 
 	th_desc->value(info->desc);
+	th_sprite->GetSprite(default_thing, FL_DARK2);
 }
 
 void UI_DefaultProps::SetTexture(const char *name, int e_state)
@@ -335,6 +337,12 @@ void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+	if (w == box->th_sprite)
+	{
+		main_win->ShowBrowser('O');
+		return;
+	}
 
 	default_thing = atoi(box->thing->value());
 
