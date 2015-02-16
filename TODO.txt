@@ -3,12 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
-+  WIN32 : ditch the installer, use "unpack" method
-
-
-Makefile : restore optimisation
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -53,11 +47,15 @@ Editing
 
    (could also be bound to right mouse button)
 
++  an 'X' close button for Default Props and Find/Replace panels
+
 
 
 3D View
 -------
 
++  change 'aspect ratio' setting, it should be a pixel aspect ratio
+   instead of a screen or monitor aspect ratio.
 
 
 Browser

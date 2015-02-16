@@ -18,11 +18,11 @@ CHANGES IN Eureka 1.07 (r????)
 
 +  new 'Rename Map' and 'Delete Map' commands in FILE menu
 
->>>  improvement to key binding system, support for "flags" which are
++  improvement to key binding system, support for "flags" which are
    parameters beginning with a forward slash, such as "/new" and "/clear".
    The 'EditKey' dialog is now much easier to use too
 
->>>  Windows package no longer uses an installer
++  Windows package no longer uses an installer
 
 +  vertex reshaping commands:
    -  'I' moves selected vertices onto a line
@@ -51,6 +51,9 @@ CHANGES IN Eureka 1.07 (r????)
 -  new preference to maximize window on start (Linux, WIN32 only)
 
 -  the Default Properties now has its own panel
+
+-  Default Props: only a single wall texture now, and shows a sprite
+   for the default thing which opens the browser when clicked on
 
 -  added back the '192' grid size
 
