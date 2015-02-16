@@ -534,7 +534,7 @@ static void Main_OpenWindow()
 	/*
 	 *  Create the window
 	 */
-	Fl::visual(FL_RGB);
+	Fl::visual(FL_DOUBLE | FL_RGB);
 
 
 	if (gui_color_set == 0)
@@ -577,7 +577,7 @@ static void Main_OpenWindow()
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
 
-	DebugPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
+	LogPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
 
 	KF = 1;
 #if 0  // TODO
