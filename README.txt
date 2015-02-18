@@ -239,7 +239,6 @@ l : toggle lighting on or off
 t : toggle texturing on or off
 o : toggle objects on or off
 
-F5  : toggle low detail / high detail
 F11 : increase brightness (gamma)
 
 c : clear offsets on highlighted sidedef
