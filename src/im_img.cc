@@ -353,6 +353,24 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 }
 
 
+bool Img_c::has_transparent() const
+{
+	int W = width();
+	int H = height();
+
+	const img_pixel_t *src = buf();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		if (src[y * W + x] == TRANS_PIXEL)
+			return true;
+	}
+
+	return false;
+}
+
+
 //------------------------------------------------------------------------
 
 

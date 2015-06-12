@@ -82,6 +82,8 @@ public:
 
 	Img_c * color_remap(int src1, int src2, int targ1, int targ2) const;
 
+	bool has_transparent() const;
+
 private:
 	Img_c            (const Img_c&);  // Too lazy to implement it
 	Img_c& operator= (const Img_c&);  // Too lazy to implement it
