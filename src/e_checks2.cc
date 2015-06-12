@@ -1195,6 +1195,20 @@ check_result_e CHECK_Tags(int min_severity)
 //------------------------------------------------------------------------
 
 
+static void bump_unknown_name(std::map<std::string, int>& list,
+                              const char *name)
+{
+	std::string t_name = name;
+
+	int count = 0;
+
+	if (list.find(t_name) != list.end())
+		count = list[t_name];
+
+	list[t_name] = count + 1;
+}
+
+
 static inline bool is_missing(const char *tex)
 {
 	return (tex[0] == 0 || tex[0] == '-');
@@ -1300,18 +1314,142 @@ void Textures_FixMissing()
 }
 
 
-static void bump_unknown_name(std::map<std::string, int>& list,
-                              const char *name)
+static bool is_transparent(const char *tex)
 {
-	std::string t_name = name;
+	// ignore lack of texture here
+	if (tex[0] == 0 || tex[0] == '-')
+		return false;
 
-	int count = 0;
+	Img_c *img = W_GetTexture(tex);
+	if (! img)
+		return false;
 
-	if (list.find(t_name) != list.end())
-		count = list[t_name];
-
-	list[t_name] = count + 1;
+	// note : this is slow
+	return img->has_transparent();
 }
+
+
+static int check_transparent(const char *tex,
+                             std::map<std::string, int>& names)
+{
+	if (is_transparent(tex))
+	{
+		bump_unknown_name(names, tex);
+		return 1;
+	}
+
+	return 0;
+}
+
+
+void Textures_FindTransparent(selection_c& lines,
+                              std::map<std::string, int>& names)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	names.clear();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right < 0)
+			continue;
+
+		if (L->OneSided())
+		{
+			if (check_transparent(L->Right()->MidTex(), names))
+				lines.set(n);
+		}
+		else  // Two Sided
+		{
+			// note : plain OR operator here to check all parts (do NOT want short-circuit)
+			if (check_transparent(L->Right()->LowerTex(), names) |
+				check_transparent(L->Right()->UpperTex(), names) |
+				check_transparent(L-> Left()->LowerTex(), names) |
+				check_transparent(L-> Left()->UpperTex(), names))
+			{
+				lines.set(n);
+			}
+		}
+	}
+}
+
+
+void Textures_ShowTransparent()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	std::map<std::string, int> names;
+
+	Textures_FindTransparent(*edit.Selected, names);
+
+	GoToErrors();
+}
+
+
+void Textures_FixTransparent()
+{
+	int new_upper = BA_InternaliseString(default_upper_tex);
+	int new_mid   = BA_InternaliseString(default_mid_tex);
+	int new_lower = BA_InternaliseString(default_lower_tex);
+
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right < 0)
+			continue;
+
+		if (L->OneSided())
+		{
+			if (is_transparent(L->Right()->MidTex()))
+				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_mid);
+		}
+		else  // Two Sided
+		{
+			if (is_transparent(L->Left()->LowerTex()))
+				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_lower);
+
+			if (is_transparent(L->Left()->UpperTex()))
+				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_upper);
+
+			if (is_transparent(L->Right()->LowerTex()))
+				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_lower);
+
+			if (is_transparent(L->Right()->UpperTex()))
+				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_upper);
+		}
+	}
+
+	BA_End();
+}
+
+
+void Textures_LogTransparent()
+{
+	selection_c sel;
+
+	std::map<std::string, int> names;
+	std::map<std::string, int>::iterator IT;
+
+	Textures_FindTransparent(sel, names);
+
+	LogPrintf("\n");
+	LogPrintf("Transparent textures on solid walls:\n");
+	LogPrintf("{\n");
+
+	for (IT = names.begin() ; IT != names.end() ; IT++)
+		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
+}
+
 
 
 void Textures_FindUnknownTex(selection_c& lines,
@@ -1501,7 +1639,7 @@ class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode) :
-		UI_Check_base(520, 226, all_mode, "Check : Textures",
+		UI_Check_base(565, 256, all_mode, "Check : Textures",
 		              "Texture test results")
 	{ }
 
@@ -1563,6 +1701,29 @@ public:
 		Textures_FixMissing();
 		dialog->user_action = CKR_TookAction;
 	}
+
+
+	static void action_show_transparent(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_ShowTransparent();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_transparent(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_FixTransparent();
+		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_log_transparent(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_LogTransparent();
+		dialog->user_action = CKR_Highlight;
+	}
+
 };
 
 
@@ -1605,6 +1766,8 @@ check_result_e CHECK_Textures(int min_severity)
 			                "Fix",  &UI_Check_Textures::action_fix_unk_flat);
 		}
 
+		dialog->AddGap(10);
+
 
 		Textures_FindMissing(sel);
 
@@ -1614,9 +1777,24 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 260,
+			dialog->AddLine(check_buffer, 1, 270,
 			                "Show", &UI_Check_Textures::action_show_missing,
 			                "Fix",  &UI_Check_Textures::action_fix_missing);
+		}
+
+
+		Textures_FindTransparent(sel, names);
+
+		if (sel.empty())
+			dialog->AddLine("No transparent textures on solids");
+		else
+		{
+			sprintf(check_buffer, "%d transparent textures on solids", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 270,
+			                "Show", &UI_Check_Textures::action_show_transparent,
+			                "Fix",  &UI_Check_Textures::action_fix_transparent,
+			                "Log",  &UI_Check_Textures::action_log_transparent);
 		}
 
 
