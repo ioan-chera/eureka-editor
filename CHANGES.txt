@@ -1,0 +1,8 @@
+
+CHANGES Eureka x.xx
+===================
+
+
+-  texture checking for the Medusa Effect on 2S lines
+-  texture checking for transparent tex on solid walls
+
