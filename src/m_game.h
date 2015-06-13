@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2014 Andrew Apted
+//  Copyright (C) 2001-2015 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -135,6 +135,8 @@ typedef struct
 
 	int coop_dm_flags;	// MTF_NOT_COOP and MTF_NOT_DM for things
 	int friend_flag;	// the MTF_FRIEND flag (from MBF)
+
+	int medusa_bug;		// used for Vanilla, prone to the Medusa Effect
 
 } game_info_t;
 
