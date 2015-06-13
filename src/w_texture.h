@@ -35,6 +35,8 @@ bool W_TextureExists(const char *name);
 
 Img_c * W_GetTexture(const char *name);
 
+bool W_TextureCausesMedusa(const char *name);
+
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 
 //--- editor settings ---

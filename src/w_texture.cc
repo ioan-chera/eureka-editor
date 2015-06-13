@@ -39,6 +39,9 @@
 
 std::map<std::string, Img_c *> textures;
 
+// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+static std::map<std::string, int> medusa_textures;
+
 
 static void DeleteTex(const std::map<std::string, Img_c *>::value_type& P)
 {
@@ -50,6 +53,8 @@ static void W_ClearTextures()
 	std::for_each(textures.begin(), textures.end(), DeleteTex);
 
 	textures.clear();
+
+	medusa_textures.clear();
 }
 
 
@@ -95,6 +100,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
 
 		Img_c *img = new Img_c(width, height, false);
+		bool is_medusa = false;
 
 		// apply all the patches
 		int num_patches = LE_S16(raw->patch_count);
@@ -102,6 +108,13 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 			FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
 
 		const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
+
+		// andrewj: this is not strictly correct, the Medusa Effect is only
+		//          triggered when multiple patches occupy a single column of
+		//          the texture.  But checking for that is a major pain since
+		//          we don't know the width of each patch here....
+		if (num_patches >= 2)
+			is_medusa = true;
 
 		for (int j = 0 ; j < num_patches ; j++, patdef++)
 		{
@@ -149,6 +162,9 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 		// FIXME: free any existing one with same name
 
 		textures[t_str] = img;
+
+		if (is_medusa)
+			medusa_textures[t_str] = 1;
 	}
 
 	W_FreeLumpData(&tex_data);
@@ -230,6 +246,16 @@ bool W_TextureExists(const char *name)
 	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
 	return (P != textures.end());
+}
+
+
+bool W_TextureCausesMedusa(const char *name)
+{
+	std::string t_str = name;
+
+	std::map<std::string, int>::iterator P = medusa_textures.find(t_str);
+
+	return (P != medusa_textures.end());
 }
 
 
