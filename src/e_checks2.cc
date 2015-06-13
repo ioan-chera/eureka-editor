@@ -1451,6 +1451,119 @@ void Textures_LogTransparent()
 }
 
 
+static bool is_medusa(const char *tex)
+{
+	// ignore lack of texture here
+	if (tex[0] == 0 || tex[0] == '-')
+		return false;
+
+	return W_TextureCausesMedusa(tex);
+}
+
+
+static int check_medusa(const char *tex,
+                        std::map<std::string, int>& names)
+{
+	if (is_medusa(tex))
+	{
+		bump_unknown_name(names, tex);
+		return 1;
+	}
+
+	return 0;
+}
+
+
+void Textures_FindMedusa(selection_c& lines,
+                         std::map<std::string, int>& names)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	names.clear();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right < 0 || L->left < 0)
+			continue;
+
+		if (check_medusa(L->Right()->MidTex(), names) |  /* plain OR */
+			check_medusa(L-> Left()->MidTex(), names))
+		{
+			lines.set(n);
+		}
+	}
+}
+
+
+void Textures_ShowMedusa()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	std::map<std::string, int> names;
+
+	Textures_FindMedusa(*edit.Selected, names);
+
+	GoToErrors();
+}
+
+
+void Textures_RemoveMedusa()
+{
+	int null_tex = BA_InternaliseString("-");
+
+	std::map<std::string, int> names;
+
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->right < 0 || L->left < 0)
+			continue;
+
+		if (check_medusa(L->Right()->MidTex(), names))
+		{
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+		}
+
+		if (check_medusa(L-> Left()->MidTex(), names))
+		{
+			BA_ChangeSD(L->left, SideDef::F_MID_TEX, null_tex);
+		}
+	}
+
+	BA_End();
+}
+
+
+void Textures_LogMedusa()
+{
+	selection_c sel;
+
+	std::map<std::string, int> names;
+	std::map<std::string, int>::iterator IT;
+
+	Textures_FindMedusa(sel, names);
+
+	LogPrintf("\n");
+	LogPrintf("Medusa effect textures:\n");
+	LogPrintf("{\n");
+
+	for (IT = names.begin() ; IT != names.end() ; IT++)
+		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+
+	LogPrintf("}\n");
+
+	LogViewer_Open();
+}
+
+
+// FIXME:  is_unknown_tex   (allow '-' and '#....')
+
 
 void Textures_FindUnknownTex(selection_c& lines,
                              std::map<std::string, int>& names)
@@ -1639,7 +1752,7 @@ class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode) :
-		UI_Check_base(565, 256, all_mode, "Check : Textures",
+		UI_Check_base(565, 286, all_mode, "Check : Textures",
 		              "Texture test results")
 	{ }
 
@@ -1724,6 +1837,27 @@ public:
 		dialog->user_action = CKR_Highlight;
 	}
 
+
+	static void action_show_medusa(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_ShowMedusa();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_remove_medusa(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_RemoveMedusa();
+		dialog->user_action = CKR_TookAction;
+	}
+
+	static void action_log_medusa(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_LogMedusa();
+		dialog->user_action = CKR_Highlight;
+	}
 };
 
 
@@ -1764,6 +1898,24 @@ check_result_e CHECK_Textures(int min_severity)
 			                "Show", &UI_Check_Textures::action_show_unk_flat,
 			                "Log",  &UI_Check_Textures::action_log_unk_flat,
 			                "Fix",  &UI_Check_Textures::action_fix_unk_flat);
+		}
+
+
+		if (game_info.medusa_bug)
+		{
+			Textures_FindMedusa(sel, names);
+
+			if (sel.empty())
+				dialog->AddLine("No textures causing Medusa Effect");
+			else
+			{
+				sprintf(check_buffer, "%d Medusa textures", (int)names.size());
+
+				dialog->AddLine(check_buffer, 2, 200,
+								"Show", &UI_Check_Textures::action_show_medusa,
+								"Log",  &UI_Check_Textures::action_log_medusa,
+								"Fix",  &UI_Check_Textures::action_remove_medusa);
+			}
 		}
 
 		dialog->AddGap(10);
