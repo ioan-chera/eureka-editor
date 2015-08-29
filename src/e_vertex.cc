@@ -73,7 +73,39 @@ void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
  */
 static void MergeConnectedLines(int ld1, int ld2, int v)
 {
-	// TODO: review if we should e.g. muck around with sidedefs
+	// fix sidedefs
+
+	// flip ld1 so it would be parallel (after merging the other endpoints)
+	// with ld2 but going the opposite direction.
+	if ((LineDefs[ld2]->end == v) == (LineDefs[ld1]->end == v))
+	{
+		FlipLineDef(ld1);
+	}
+
+	bool same_left  = (LineDefs[ld2]->WhatSector(SIDE_LEFT)  == LineDefs[ld1]->WhatSector(SIDE_LEFT));
+	bool same_right = (LineDefs[ld2]->WhatSector(SIDE_RIGHT) == LineDefs[ld1]->WhatSector(SIDE_RIGHT));
+
+	if (same_left && same_right)
+	{
+		// delete other line too
+		// [ MUST do the highest numbered first ]
+		if (ld2 < ld1)
+			std::swap(ld1, ld2);
+
+		BA_Delete(OBJ_LINEDEFS, ld2);
+	}
+	else if (same_left)
+	{
+		BA_ChangeLD(ld2, LineDef::F_LEFT, LineDefs[ld1]->right);
+	}
+	else if (same_right)
+	{
+		BA_ChangeLD(ld2, LineDef::F_RIGHT, LineDefs[ld1]->left);
+	}
+	else
+	{
+		// geometry was broken / unclosed sector(s)
+	}
 
 	BA_Delete(OBJ_LINEDEFS, ld1);
 }

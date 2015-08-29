@@ -3,6 +3,8 @@ CHANGES Eureka x.xx
 ===================
 
 
+-  better handle merging two linedefs when dragging a vertex
+
 -  texture checking for the Medusa Effect on 2S lines
 -  texture checking for transparent tex on solid walls
 
