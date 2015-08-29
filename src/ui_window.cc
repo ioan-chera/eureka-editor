@@ -88,7 +88,7 @@ UI_MainWin::UI_MainWin() :
 	ey = ey - info_bar->h();
 
 
-	int browser_W = MIN_BROWSER_W + 56;
+	int browser_W = MIN_BROWSER_W + 66;
 
 	int cw = w() - panel_W - browser_W;
 	int ch = ey - cy;
