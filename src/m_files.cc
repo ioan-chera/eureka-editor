@@ -707,9 +707,16 @@ const char * M_PickDefaultIWAD()
 	if (result)
 		return result;
 
-	DebugPrintf("pick default iwad, trying: 'freedoom'\n");
+	// try FreeDoom
 
-	result = StringDup(M_QueryKnownIWAD("freedoom"));
+	if (strcmp(default_game, "doom") == 0)
+		default_game = "freedoom1";
+	else
+		default_game = "freedoom2";
+
+	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
+
+	result = StringDup(M_QueryKnownIWAD(default_game));
 	if (result)
 		return result;
 
