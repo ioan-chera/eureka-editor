@@ -331,7 +331,10 @@ static void ParseMiscConfig(FILE * fp)
 		}
 		else if (strcmp(line, "known_iwad") == 0)
 		{
-			if (Wad_file::Validate(pos))
+			// ignore plain freedoom.wad (backwards compatibility)
+			if (y_stricmp(map, "freedoom") == 0)
+				LogPrintf("  ignoring for compatibility: %s\n", pos);
+			else if (Wad_file::Validate(pos))
 				known_iwads[map] = std::string(pos);
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
