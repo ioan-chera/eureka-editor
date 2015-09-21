@@ -2,9 +2,11 @@
 Name=Eureka DOOM Editor
 GenericName=DOOM Editor
 Comment=Edit maps for the game DOOM
-Exec=eureka
+Exec=eureka %f
 Icon=eureka
 Terminal=false
 Type=Application
-Categories=Game;X-DoomEditor;
+Categories=Game;ActionGame;
 StartupNotify=false
+MimeType=application/x-doom-wad;
+Keywords=doom;heretic;level;map;wad;editor;builder;yadex;
