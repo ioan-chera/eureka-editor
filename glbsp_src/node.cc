@@ -969,6 +969,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
     PrintDebug("Build: CONVEX\n");
 #   endif
 
+#if 0  // turns out this was bogus -- AJA nov/2015
     if (depth == 0)
     {
       /* -AJA- welcome to Hack Central, hope you enjoy your stay.
@@ -986,6 +987,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
       *N = CreateDummyNode(seg_list);
     }
     else
+#endif
     {
       *S = CreateSubsec(seg_list);
     }
