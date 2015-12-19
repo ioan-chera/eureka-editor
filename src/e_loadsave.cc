@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C)      2015 Ioan Chera
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -445,7 +446,23 @@ static void LoadHeader()
 
 static void LoadBehavior()
 {
-	// TODO
+	// IOANCH 9/2015: support Hexen maps
+	Lump_c *lump = load_wad->FindLumpInLevel("BEHAVIOR", loading_level);
+	if (! lump)
+		FatalError("No BEHAVIOR lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to BEHAVIOR lump!\n");
+
+	int length = lump->Length();
+
+	BehaviorData.resize(length);
+
+	if (length == 0)
+		return;
+
+	if (! lump->Read(& BehaviorData[0], length))
+		FatalError("Error reading BEHAVIOR.\n");
 }
 
 
@@ -486,6 +503,59 @@ static void LoadThings()
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
+
+		Things.push_back(th);
+	}
+}
+
+
+// IOANCH 9/2015
+static void LoadThings_Hexen()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
+	if (! lump)
+		FatalError("No things lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to things lump!\n");
+
+	int count = lump->Length() / sizeof(raw_hexen_thing_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetThings: num = %d\n", count);
+# endif
+
+	if (count == 0)
+	{
+		// Note: no error if no things exist, even though technically a map
+		// will be unplayable without the player starts.
+		return;
+	}
+
+	for (int i = 0; i < count; ++i)
+	{
+		raw_hexen_thing_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading things.\n");
+
+		Thing *th = new Thing;
+
+		th->tid = LE_S16(raw.tid);
+		th->x = LE_S16(raw.x);
+		th->y = LE_S16(raw.y);
+		th->z = LE_S16(raw.height);
+
+		th->angle = LE_U16(raw.angle);
+		th->type = LE_U16(raw.type);
+		th->options = LE_U16(raw.options);
+
+		th->special = raw.special;
+		th->arg1 = raw.args[0];
+		th->arg2 = raw.args[1];
+		th->arg3 = raw.args[2];
+		th->arg4 = raw.args[3];
+		th->arg5 = raw.args[4];
 
 		Things.push_back(th);
 	}
@@ -641,6 +711,89 @@ static void LoadLineDefs()
 }
 
 
+// IOANCH 9/2015
+static void LoadLineDefs_Hexen()
+{
+	Lump_c *lump = load_wad->FindLumpInLevel("LINEDEFS", loading_level);
+	if (! lump)
+		FatalError("No linedefs lump!\n");
+
+	if (! lump->Seek())
+		FatalError("Error seeking to linedefs lump!\n");
+
+	int count = lump->Length() / sizeof(raw_hexen_linedef_t);
+
+# if DEBUG_LOAD
+	PrintDebug("GetLinedefs: num = %d\n", count);
+# endif
+
+	if (count == 0)
+		FatalError("Couldn't find any Linedefs\n");
+
+	if (NumSideDefs < 2) CreateFallbackSideDef();
+	if (NumSideDefs < 2) CreateFallbackSideDef();
+
+	for (int i = 0 ; i < count ; i++)
+	{
+		raw_hexen_linedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading linedefs.\n");
+
+		LineDef *ld = new LineDef;
+
+		ld->start = LE_U16(raw.start);
+		ld->end   = LE_U16(raw.end);
+
+		// validate vertices
+		if (ld->start >= NumVertices || ld->end >= NumVertices ||
+			ld->start == ld->end)
+		{
+			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
+					  ld->start, ld->end);
+
+			bad_linedef_count++;
+
+			// forget it
+			delete ld;
+
+			continue;
+		}
+
+		ld->flags = LE_U16(raw.flags);
+		ld->type = raw.type;
+		ld->tag  = raw.args[0];
+		ld->arg2 = raw.args[1];
+		ld->arg3 = raw.args[2];
+		ld->arg4 = raw.args[3];
+		ld->arg5 = raw.args[4];
+
+		ld->right = LE_U16(raw.right);
+		ld->left  = LE_U16(raw.left);
+
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
+
+		// validate sidedefs
+		if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+		{
+			LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
+					  ld->right, ld->left);
+
+			bad_sidedef_refs++;
+
+			if (ld->right >= NumSideDefs)
+				ld->right = 0;
+
+			if (ld->left >= NumSideDefs)
+				ld->left = 1;
+		}
+
+		LineDefs.push_back(ld);
+	}
+}
+
+
 static void RemoveUnusedVerticesAtEnd()
 {
 	if (NumVertices == 0)
@@ -711,8 +864,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	if (loading_level < 0)
 		FatalError("No such map: %s\n", level);
 
-	if (load_wad->LevelFormat(loading_level) != MAPF_Doom)
-		FatalError("Hexen map format is not supported\n");
+	Level_format = load_wad->LevelFormat(loading_level);
 
 	BA_ClearAll();
 
@@ -720,15 +872,26 @@ void LoadLevel(Wad_file *wad, const char *level)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader  ();
+	LoadHeader();
 
-	LoadThings  ();
+	if (Level_format == MAPF_Hexen)
+		LoadThings_Hexen();
+	else
+		LoadThings();
+
 	LoadVertices();
-	LoadSectors ();
+	LoadSectors();
 	LoadSideDefs();
-	LoadLineDefs();
 
-	LoadBehavior();
+	if (Level_format == MAPF_Hexen)
+	{
+		LoadLineDefs_Hexen();
+		LoadBehavior();
+	}
+	else
+	{
+		LoadLineDefs();
+	}
 
 	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
 	{
@@ -912,14 +1075,7 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 		return;
 	}
 
-	if (wad->LevelFormat(lev_idx) != MAPF_Doom)
-	{
-		delete wad;
-
-		DLG_Notify("Hexen map format is not supported.");
-		return;
-	}
-
+	// IOANCH 9/2015: support Hexen, too
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
@@ -1108,7 +1264,16 @@ static void SaveHeader(const char *level)
 
 static void SaveBehavior()
 {
-	// TODO
+	int size = (int)BehaviorData.size();
+
+	Lump_c *lump = save_wad->AddLump("BEHAVIOR", size);
+
+	if (size > 0)
+	{
+		lump->Write(& BehaviorData[0], size);
+	}
+
+	lump->Finish();
 }
 
 
@@ -1189,6 +1354,43 @@ static void SaveThings()
 }
 
 
+// IOANCH 9/2015
+static void SaveThings_Hexen()
+{
+	int size = NumThings * (int)sizeof(raw_hexen_thing_t);
+
+	Lump_c *lump = save_wad->AddLump("THINGS", size);
+
+	for (int i = 0 ; i < NumThings ; i++)
+	{
+		Thing *th = Things[i];
+
+		raw_hexen_thing_t raw;
+
+		raw.tid = LE_S16(th->tid);
+
+		raw.x = LE_S16(th->x);
+		raw.y = LE_S16(th->y);
+		raw.height = LE_S16(th->z);
+
+		raw.angle   = LE_U16(th->angle);
+		raw.type    = LE_U16(th->type);
+		raw.options = LE_U16(th->options);
+
+		raw.special = th->special;
+		raw.args[0] = th->arg1;
+		raw.args[1] = th->arg2;
+		raw.args[2] = th->arg3;
+		raw.args[3] = th->arg4;
+		raw.args[4] = th->arg5;
+
+		lump->Write(&raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
 static void SaveSideDefs()
 {
 	int size = NumSideDefs * (int)sizeof(raw_sidedef_t);
@@ -1246,6 +1448,41 @@ static void SaveLineDefs()
 }
 
 
+// IOANCH 9/2015
+static void SaveLineDefs_Hexen()
+{
+	int size = NumLineDefs * (int)sizeof(raw_hexen_linedef_t);
+
+	Lump_c *lump = save_wad->AddLump("LINEDEFS", size);
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		LineDef *ld = LineDefs[i];
+
+		raw_hexen_linedef_t raw;
+
+		raw.start = LE_U16(ld->start);
+		raw.end   = LE_U16(ld->end);
+
+		raw.flags = LE_U16(ld->flags);
+		raw.type  = ld->type;
+
+		raw.args[0] = ld->tag;
+		raw.args[1] = ld->arg2;
+		raw.args[2] = ld->arg3;
+		raw.args[3] = ld->arg4;
+		raw.args[4] = ld->arg5;
+
+		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
+		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
+
+		lump->Write(&raw, sizeof(raw));
+	}
+
+	lump->Finish();
+}
+
+
 static void EmptyLump(const char *name)
 {
 	save_wad->AddLump(name)->Finish();
@@ -1267,8 +1504,18 @@ static void SaveLevel(Wad_file *wad, const char *level)
 
 	SaveHeader(level);
 
-	SaveThings  ();
-	SaveLineDefs();
+	// IOANCH 9/2015: save Hexen format maps
+	if (Level_format == MAPF_Hexen)
+	{
+		SaveThings_Hexen();
+		SaveLineDefs_Hexen();
+	}
+	else
+	{
+		SaveThings();
+		SaveLineDefs();
+	}
+
 	SaveSideDefs();
 	SaveVertices();
 
@@ -1281,7 +1528,8 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	EmptyLump("REJECT");
 	EmptyLump("BLOCKMAP");
 
-	SaveBehavior();
+	if (Level_format == MAPF_Hexen)
+		SaveBehavior();
 
 	// write out the new directory
 	save_wad->EndWrite();
