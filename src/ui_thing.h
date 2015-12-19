@@ -4,7 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2014 Andrew Apted
+//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -48,6 +49,7 @@ private:
 
 	Fl_Int_Input *pos_x;
 	Fl_Int_Input *pos_y;
+	Fl_Int_Input *pos_z;
 
 	// Options
 	Fl_Check_Button *o_easy;
@@ -91,6 +93,7 @@ public:
 private:
 	static void      x_callback(Fl_Widget *w, void *data);
 	static void      y_callback(Fl_Widget *w, void *data);
+	static void      z_callback(Fl_Widget *w, void *data);
 	static void   type_callback(Fl_Widget *w, void *data);
 	static void  angle_callback(Fl_Widget *w, void *data);
 	static void    tid_callback(Fl_Widget *w, void *data);

@@ -1112,12 +1112,13 @@ public:
 
 		if (info && (info->flags & THINGDEF_CEIL))
 		{
-			h2 = is_sector(thsec) ? Sectors[thsec]->ceilh : 192;
+			// IOANCH 9/2015: also add z
+			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
 			h1 = h2 - sprite->height();
 		}
 		else
 		{
-			h1 = is_sector(thsec) ? Sectors[thsec]->floorh : 0;
+			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
 			h2 = h1 + sprite->height();
 		}
 

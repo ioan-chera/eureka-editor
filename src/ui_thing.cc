@@ -113,21 +113,26 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y += desc->h() + 3;
 
 
-	pos_x = new Fl_Int_Input(X +70, Y, 70, 24, "x: ");
+	pos_x = new Fl_Int_Input(X+70, Y, 70, 24, "x: ");
 	pos_y = new Fl_Int_Input(MX+38, Y, 70, 24, "y: ");
+	pos_z = new Fl_Int_Input(X+70, Y + 28, 70, 24, "z: ");
+	pos_z->hide();
 
 	pos_x->align(FL_ALIGN_LEFT);
 	pos_y->align(FL_ALIGN_LEFT);
+	pos_z->align(FL_ALIGN_LEFT);
 
 	pos_x->callback(x_callback, this);
 	pos_y->callback(y_callback, this);
+	pos_z->callback(z_callback, this);
 
 	pos_x->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	pos_z->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(pos_x); add(pos_y);
+	add(pos_x); add(pos_y); add(pos_z);
 
-	Y += pos_x->h() + 4;
+	Y += (pos_x->h() + 4) * 2;
 
 
 
@@ -156,6 +161,7 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 		add(ang_buts[i]);
 	}
+
 
 	// IOANCH 9/2015: TID
 	int tmpY = Y;
@@ -199,9 +205,9 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 #endif
 
 
-	Y += 40;
+	Y += 42;
 
-	Fl_Box *opt_lab = new Fl_Box(X, Y, W, 22, "Options:");
+	Fl_Box *opt_lab = new Fl_Box(X+15, Y, W, 22, "Options:");
 	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 	add(opt_lab);
@@ -445,6 +451,26 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 	}
 }
 
+void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	int new_z = atoi(box->pos_z->value());
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it); !it.at_end(); ++it)
+			BA_ChangeTH(*it, Thing::F_Z, new_z);
+
+		BA_End();
+	}
+}
+
 
 void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 {
@@ -582,17 +608,20 @@ int UI_ThingBox::CalcOptions() const
 
 void UI_ThingBox::UpdateField(int field)
 {
-	if (field < 0 || field == Thing::F_X || field == Thing::F_Y)
+	if (field < 0 || field == Thing::F_X || field == Thing::F_Y
+		|| field == Thing::F_Z)
 	{
 		if (is_thing(obj))
 		{
 			pos_x->value(Int_TmpStr(Things[obj]->x));
 			pos_y->value(Int_TmpStr(Things[obj]->y));
+			pos_z->value(Int_TmpStr(Things[obj]->z));
 		}
 		else
 		{
 			pos_x->value("");
 			pos_y->value("");
+			pos_z->value("");
 		}
 	}
 
@@ -675,9 +704,17 @@ void UI_ThingBox::UpdateGameInfo()
 void UI_ThingBox::UpdateMapFormatInfo()
 {
 	if (Level_format == MAPF_Hexen)
+	{
+		pos_z->show();
+
 		tid->show();
+	}
 	else
+	{
+		pos_z->hide();
+
 		tid->hide();
+	}
 }
 
 
