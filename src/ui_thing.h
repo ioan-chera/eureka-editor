@@ -40,6 +40,8 @@ private:
 	Fl_Int_Input *angle;
 	Fl_Button    *ang_buts[8];
 
+	Fl_Int_Input *tid;
+
 	Fl_Int_Input *exfloor;
 	Fl_Button    *efl_down;
 	Fl_Button    *efl_up;
@@ -84,12 +86,14 @@ public:
 	void SetThingType(int new_type);
 
 	void UpdateGameInfo();
+	void UpdateMapFormatInfo();
 
 private:
 	static void      x_callback(Fl_Widget *w, void *data);
 	static void      y_callback(Fl_Widget *w, void *data);
 	static void   type_callback(Fl_Widget *w, void *data);
 	static void  angle_callback(Fl_Widget *w, void *data);
+	static void    tid_callback(Fl_Widget *w, void *data);
 	static void option_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);
 

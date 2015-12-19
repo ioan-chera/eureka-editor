@@ -138,6 +138,9 @@ public:
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.
 	void UpdateGameInfo();
+
+	// IOANCH 9/2015: similar, but for the map format
+	void UpdateMapFormatInfo();
 };
 
 

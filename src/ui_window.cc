@@ -529,6 +529,13 @@ void UI_MainWin::UpdateGameInfo()
 }
 
 
+// IOANCH 9/2015
+void UI_MainWin::UpdateMapFormatInfo()
+{
+	thing_box->UpdateMapFormatInfo();
+}
+
+
 //------------------------------------------------------------------------
 
 

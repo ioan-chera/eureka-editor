@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -156,8 +157,18 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 		add(ang_buts[i]);
 	}
 
+	// IOANCH 9/2015: TID
+	int tmpY = Y;
+	Y += angle->h() + 4;
 
-	Y += 30;
+	tid = new Fl_Int_Input(X+70, Y, 64, 24, "TID: ");
+	tid->align(FL_ALIGN_LEFT);
+	tid->callback(tid_callback, this);
+	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	add(tid);
+
+	Y = tmpY + 30;
 
 	exfloor = new Fl_Int_Input(X+70, Y, 64, 24, "ExFloor: ");
 	exfloor->align(FL_ALIGN_LEFT);
@@ -370,6 +381,30 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 }
 
 
+// IOANCH 9/2015
+void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	int new_tid = atoi(box->tid->value());
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it); !it.at_end(); ++it)
+		{
+			BA_ChangeTH(*it, Thing::F_TID, new_tid);
+		}
+
+		BA_End();
+	}
+}
+
+
 void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
@@ -569,6 +604,15 @@ void UI_ThingBox::UpdateField(int field)
 			angle->value("");
 	}
 
+	// IOANCH 9/2015
+	if (field < 0 || field == Thing::F_TID)
+	{
+		if (is_thing(obj))
+			tid->value(Int_TmpStr(Things[obj]->tid));
+		else
+			tid->value("");
+	}
+
 	if (field < 0 || field == Thing::F_TYPE)
 	{
 		if (is_thing(obj))
@@ -625,6 +669,15 @@ void UI_ThingBox::UpdateGameInfo()
 		o_friend->show();
 	else
 		o_friend->hide();
+}
+
+
+void UI_ThingBox::UpdateMapFormatInfo()
+{
+	if (Level_format == MAPF_Hexen)
+		tid->show();
+	else
+		tid->hide();
 }
 
 
