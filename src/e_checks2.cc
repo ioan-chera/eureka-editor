@@ -126,6 +126,68 @@ void LineDefs_ShowMissingRight()
 }
 
 
+void LineDefs_FindManualDoors(selection_c& lines)
+{
+	// find D1/DR manual doors on one-sided linedefs
+
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->type <= 0)
+			continue;
+
+		if (L->left >= 0)
+			continue;
+
+		const linetype_t *info = M_GetLineType(L->type);
+		
+		if (info->desc[0] == 'D' &&
+			(info->desc[1] == '1' || info->desc[1] == 'R'))
+		{
+			lines.set(n);
+		}
+	}
+}
+
+
+void LineDefs_ShowManualDoors()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	LineDefs_FindManualDoors(*edit.Selected);
+
+	GoToErrors();
+}
+
+
+void LineDefs_FixManualDoors()
+{
+	BA_Begin();
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->type <= 0 || L->left >= 0)
+			continue;
+
+		const linetype_t *info = M_GetLineType(L->type);
+
+		if (info->desc[0] == 'D' &&
+			(info->desc[1] == '1' || info->desc[1] == 'R'))
+		{
+			BA_ChangeLD(n, LineDef::F_TYPE, 0);
+		}
+	}
+
+	BA_End();
+}
+
+
 void LineDefs_FindLackImpass(selection_c& lines)
 {
 	lines.change_type(OBJ_LINEDEFS);
@@ -569,7 +631,7 @@ class UI_Check_LineDefs : public UI_Check_base
 {
 public:
 	UI_Check_LineDefs(bool all_mode) :
-		UI_Check_base(530, 350, all_mode, "Check : LineDefs",
+		UI_Check_base(530, 370, all_mode, "Check : LineDefs",
 		              "LineDef test results")
 	{ }
 
@@ -593,6 +655,21 @@ public:
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
 		LineDefs_ShowMissingRight();
 		dialog->user_action = CKR_Highlight;
+	}
+
+
+	static void action_show_manual_doors(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_ShowManualDoors();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_manual_doors(Fl_Widget *w, void *data)
+	{
+		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
+		LineDefs_FixManualDoors();
+		dialog->user_action = CKR_TookAction;
 	}
 
 
@@ -749,6 +826,20 @@ check_result_e CHECK_LineDefs(int min_severity)
 
 			dialog->AddLine(check_buffer, 2, 250,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
+		}
+
+
+		LineDefs_FindManualDoors(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No manual doors on 1S linedefs");
+		else
+		{
+			sprintf(check_buffer, "%d manual doors on 1S linedefs", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 2, 250,
+			                "Show", &UI_Check_LineDefs::action_show_manual_doors,
+			                "Fix",  &UI_Check_LineDefs::action_fix_manual_doors);
 		}
 
 
