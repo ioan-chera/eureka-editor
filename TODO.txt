@@ -3,6 +3,33 @@ Eureka TODO / WISHLIST
 ======================
 
 
++  Hexen support
+   +  linedef types (with activation in flags)
+   -  linedef args
+
+   +  thing flags
+   -  thing special + args
+
+   +  flesh out Hexen game definitions
+   -  do not default to BOOM port
+
+   +  conversion from Hexen --> DOOM format
+   +  conversion from DOOM --> Hexen format
+
+
++  BOOM Generalized line types / sectors
+
+
+glBSP : when NODES (etc) overflow, use the X-NOD uncompressed zdoom nodes.
+[ ticket #11 ]
+
+
+store _absolute_ pathnames for resource files (in EUREKA lump)
+
+
+fatal error if load a map with NO vertices?
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -12,12 +39,8 @@ ______________________________________________________________________
 General
 -------
 
-+  Hexen support
-
 +  Preferences:
    -  ability to change mouse move/turn speed in 3D view
-
-+  BOOM Generalized line types / sectors
 
 +  Key binding system for mouse buttons
    -  convert MIDDLE button (insert/resize/rotate) for KEY system
@@ -126,6 +149,8 @@ WISH: can import UDMF format maps
 ?  GUI buttons for NewTag / LastTag commands
 
 -  vertex/linedef mode: '[' and ']' to adjust length of current line
+
+-  tag checking: check for valid usage of special 666 / 667 tags.
 
 -  binding functions for all menu stuff (NewMap, OpenMap, etc....)
    (perhaps prefix with MENU_xxx)
