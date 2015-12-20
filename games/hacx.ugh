@@ -18,8 +18,6 @@
 #
 #------------------------------------------------------------------------
 
-level_name  map01
-
 sky_flat  F_SKY1
 
 default_textures  MODWALL3  FLAT14  FLAT5_1
