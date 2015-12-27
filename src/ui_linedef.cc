@@ -31,7 +31,7 @@
 
 
 #define MLF_ALL_AUTOMAP  \
-	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_Translucent
+	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
 
 
 class line_flag_CB_data_c
@@ -159,7 +159,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	f_passthru = new Fl_Check_Button(X+12, Y+2, FW, 20, "pass thru");
 	f_passthru->labelsize(12);
-	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_PassThru));
+	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
 
 
 	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block sound");
@@ -572,7 +572,7 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 
 	f_upper   ->value((lineflags & MLF_UpperUnpegged) ? 1 : 0);
 	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
-	f_passthru->value((lineflags & MLF_PassThru)      ? 1 : 0);
+	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
 
 	f_walk ->value((lineflags & MLF_Blocking)      ? 1 : 0);
 	f_mons ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
@@ -597,7 +597,7 @@ int UI_LineBox::CalcFlags() const
 
 	if (f_upper->value())    lineflags |= MLF_UpperUnpegged;
 	if (f_lower->value())    lineflags |= MLF_LowerUnpegged;
-	if (f_passthru->value()) lineflags |= MLF_PassThru;
+	if (f_passthru->value()) lineflags |= MLF_Boom_PassThru;
 
 	if (f_walk->value())  lineflags |= MLF_Blocking;
 	if (f_mons->value())  lineflags |= MLF_BlockMonsters;

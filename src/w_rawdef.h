@@ -267,14 +267,41 @@ typedef enum
 
   // -AJA- this one is from Boom. Allows multiple lines to
   //       be pushed simultaneously.
-  MLF_PassThru = 0x0200,
+  MLF_Boom_PassThru = 0x0200,
 
   // -AJA- these three are from XDoom
-  MLF_Translucent = 0x0400,
-  MLF_ShootBlock  = 0x0800,
-  MLF_SightBlock  = 0x1000,
+  MLF_XDoom_Translucent = 0x0400,
+  MLF_XDoom_ShootBlock  = 0x0800,
+  MLF_XDoom_SightBlock  = 0x1000,
 }
 lineflag_e;
+
+
+typedef enum
+{
+	// flags 0x001 .. 0x200 are same as DOOM above
+
+	MLF_Repeatable = 0x0200,
+	MLF_Activation = 0x1c00,
+
+	// these are supported by ZDoom (and derived ports)
+	MLF_ZDoom_MonCanActivate  = 0x2000,
+	MLF_ZDoom_BlockPlayers    = 0x4000,
+	MLF_ZDoom_BlockEverything = 0x8000,
+}
+hexen_lineflag_e;
+
+
+typedef enum
+{
+	SPAC_Cross   = 0,	// when line is crossed (W1 / WR)
+	SPAC_Use     = 1,	// when line is used    (S1 / SR)
+	SPAC_Monster = 2,	// when monster walks over line
+	SPAC_Impact  = 3,	// when bullet/projectile hits line (G1 / GR)
+	SPAC_Push    = 4,	// when line is bumped (player is stopped)
+	SPAC_PCross  = 5,	// when projectile crosses the line
+}
+hexen_activation_e;
 
 
 //
