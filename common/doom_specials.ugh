@@ -28,8 +28,6 @@
 #	Definition of linedef groups
 #	Format is : linegroup <letter> <description>
 #
-#	<description> should not exceed 24 characters
-#
 
 linegroup a "Animated"
 linegroup c "Ceiling"
@@ -50,8 +48,6 @@ linegroup - "OTHER"
 #
 #	Definition of linedef types
 #	Format is : line <number> <group> <flags> <description>
-#
-#	<desc> should not exceed 24 characters.
 #
 
 line   0 - "-- NOTHING"
@@ -217,8 +213,6 @@ line 127 s "S1 Stair Raise 16"
 #
 #	Definition of sector types
 #	Format is : sector <number> <description>
-#
-#	<description> should not exceed 24 characters.
 #
 
 sector  0 "NOTHING"

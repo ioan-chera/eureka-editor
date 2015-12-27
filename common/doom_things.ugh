@@ -45,7 +45,6 @@ thinggroup - 0BD "OTHER"
 #	Definition of things
 #	Format is : thing <number> <group> <flags> <radius> <sprite> <desc>
 #
-#	<desc> should not exceed 24 characters.
 #	<sprite> should be NULL for things without any sprite
 #
 # <flags> can contain these letters:
