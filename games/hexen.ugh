@@ -328,3 +328,59 @@ thing 10501 - nl 20 FFSM "Flame Small"
 thing 10502 - nl 20 FFLG "Flame Large /temp"
 thing 10503 - nl 20 FFLG "Flame Large"
 
+
+#---- SECTOR TYPES ---------------
+
+sector   0 "NOTHING"
+sector   1 "  Phased light"     # "light phased"           # FIXME
+sector   2 "  Light start"     # "lightsequencestart"     # FIXME
+sector   3 "  Light specl1"     # "lightsequencespecial1"  # FIXME
+sector   4 "  Light specl2"     # "lightsequencespecial2"  # FIXME
+sector   9 "Secret Area"
+
+sector  26 "Next Stair 1"
+sector  27 "Next Stair 2"
+
+sector  40 "Wind E /slow"
+sector  41 "Wind E /med"
+sector  42 "Wind E /fast"
+sector  43 "Wind N /slow"
+sector  44 "Wind N /med"
+sector  45 "Wind N /fast"
+sector  46 "Wind S /slow"
+sector  47 "Wind S /med"
+sector  48 "Wind S /fast"
+sector  49 "Wind W /slow"
+sector  50 "Wind W /med"
+sector  51 "Wind W /fast"
+
+sector 198 "Lightning /strong"
+sector 199 "Lightning /weak"
+
+sector 200 "Alternate Sky"
+
+sector 201 "Scroll N /slow"
+sector 202 "Scroll N /med"
+sector 203 "Scroll N /fast"
+sector 204 "Scroll E /slow"
+sector 205 "Scroll E /med"
+sector 206 "Scroll E /fast"
+sector 207 "Scroll S /slow"
+sector 208 "Scroll S /med"
+sector 209 "Scroll S /fast"
+sector 210 "Scroll W /slow"
+sector 211 "Scroll W /med"
+sector 212 "Scroll W /fast"
+sector 213 "Scroll NW /slow"
+sector 214 "Scroll NW /med"
+sector 215 "Scroll NW /fast"
+sector 216 "Scroll NE /slow"
+sector 217 "Scroll NE /med"
+sector 218 "Scroll NE /fast"
+sector 219 "Scroll SE /slow"
+sector 220 "Scroll SE /med"
+sector 221 "Scroll SE /fast"
+sector 222 "Scroll SW /slow"
+sector 223 "Scroll SW /med"
+sector 224 "Scroll SW /fast"
+
