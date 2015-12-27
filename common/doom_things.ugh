@@ -54,14 +54,15 @@ thinggroup - 0BD "OTHER"
 #    l  :  lit up
 #    n  :  non-blocking
 #    v  :  can exist in void-space
+#    t  :  teleport dest (can overlap certain things)
 #
 
 thing    1 p -  16 PLAY   "Player 1 start"
 thing    2 p -  16 PLAY   "Player 2 start"
 thing    3 p -  16 PLAY   "Player 3 start"
 thing    4 p -  16 PLAY   "Player 4 start"
-thing   11 p n  16 PLAYF1 "Deathmatch start"
-thing   14 p -  16 TFOG   "Teleport exit"
+thing   11 p t  16 PLAYF1 "Deathmatch start"
+thing   14 p t  16 TFOG   "Teleport exit"
 
 thing 2005 w n  20 CSAW   "Chainsaw"
 thing 2001 w n  20 SHOT   "Shotgun"

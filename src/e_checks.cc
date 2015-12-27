@@ -1370,69 +1370,75 @@ static void CollectBlockingThings(std::vector<int>& list,
 }
 
 
-static bool ThingStuckInBlocker(const Thing *T, int r, char group,
-                                std::vector<int>& blockers,
-                                std::vector<int>& sizes)
-{
-	/*
-	   andrewj: the DOOM movement code for monsters works by moving
-	   the actor by a stepping distance which is based on its 'speed'
-	   value.  The move is allowed when the *new position* has no
-	   blocking things or walls, which means that things can overlap
-	   a short distance and won't be stuck.
-	  
-	   Properly taking this into account requires knowing the speed of
-	   each individual monster, but we don't have that information here.
-	   Hence I've chosen a conservative value based on the speed of the
-	   slowest monster (8 units).
-	   
-	   TODO: make it either game config or user preference.
-	*/
+/*
+   andrewj: the DOOM movement code for monsters works by moving
+   the actor by a stepping distance which is based on its 'speed'
+   value.  The move is allowed when the *new position* has no
+   blocking things or walls, which means that things can overlap
+   a short distance and won't be stuck.
+  
+   Properly taking this into account requires knowing the speed of
+   each individual monster, but we don't have that information here.
+   Hence I've chosen a conservative value based on the speed of the
+   slowest monster (8 units).
+   
+   TODO: make it either game config or user preference.
+*/
 #define MONSTER_STEP_DIST  8
 
-	if (group == 'm')
-		r = MAX(4, r - MONSTER_STEP_DIST);
 
-	int x1 = T->x - r;
-	int y1 = T->y - r;
-	int x2 = T->x + r;
-	int y2 = T->y + r;
+static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
+							  const Thing *T2, const thingtype_t *info2)
+{
+	SYS_ASSERT(T1 != T2);
 
-	for (unsigned int k = 0 ; k < blockers.size() ; k++)
-	{
-		const Thing *T2 = Things[blockers[k]];
+	// require one thing to be a monster or player
+	bool is_actor1 = (info1->group == 'm' || info1->group == 'p');
+	bool is_actor2 = (info2->group == 'm' || info2->group == 'p');
 
-		if (T2 == T)
-			continue;
+	if (! (is_actor1 || is_actor2))
+		return false;
 
-		int r2 = sizes[k];
+	// check if T1 is stuck in T2
+	int r1 = info1->radius;
+	int r2 = info2->radius;
 
-		if (x1 >= T2->x + r2) continue;
-		if (y1 >= T2->y + r2) continue;
+	if (info1->group == 'm' && info2->group != 'p')
+		r1 = MAX(4, r1 - MONSTER_STEP_DIST);
 
-		if (x2 <= T2->x - r2) continue;
-		if (y2 <= T2->y - r2) continue;
+	else if (info2->group == 'm' && info1->group != 'p')
+		r2 = MAX(4, r2 - MONSTER_STEP_DIST);
 
-		// check skill bits, except for players
+	if (T1->x - r1 >= T2->x + r2) return false;
+	if (T1->y - r1 >= T2->y + r2) return false;
 
-		if (group != 'p')
-		{
-			if (((T->options & T2->options) & 7) == 0)
-				continue;
+	if (T1->x + r1 <= T2->x - r2) return false;
+	if (T1->y + r1 <= T2->y - r2) return false;
 
-			// check game-mode bits  [FIXME for HEXEN]
-			if (((~T->options & ~T2->options) & 0x70) == 0)
-				continue;
+	// teleporters and DM starts can safely overlap moving actors
+	if ((info1->flags & THINGDEF_TELEPT) && is_actor2) return false;
+	if ((info2->flags & THINGDEF_TELEPT) && is_actor1) return false;
 
-			// HEXEN TODO: check player-class bits
-			//
-			// if (((T->options & T2->options) & 0xE0) == 0) continue
-		}
+	// check skill bits, except for players
+	int opt1 = T1->options;
+	int opt2 = T2->options;
 
-		return true;
-	}
+	// invert game-mode bits (MTF_Not_COOP etc)
+	opt1 ^= 0x70;
+	opt2 ^= 0x70;
 
-	return false;
+	if (info1->group == 'p') opt1 |= 0x77;
+	if (info2->group == 'p') opt2 |= 0x77;
+
+	// [FIXME for HEXEN]
+	if ((opt1 & opt2 & 0x77) == 0)
+		return false;
+
+	// HEXEN TODO: check player-class bits
+	//
+	// if ((opt1 & opt2 & 0xE0) == 0) return false;
+
+	return true;
 }
 
 
@@ -1459,6 +1465,10 @@ static inline bool LD_is_blocking(const LineDef *L)
 
 static bool ThingStuckInWall(const Thing *T, int r, char group)
 {
+	// only check players and monsters
+	if (! (group == 'p' || group == 'm'))
+		return false;
+
 	if (group == 'm')
 		r = MAX(4, r - MONSTER_STEP_DIST);
 
@@ -1495,25 +1505,23 @@ void Things_FindStuckies(selection_c& list)
 
 	CollectBlockingThings(blockers, sizes);
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = Things[n];
+		const Thing *T = Things[blockers[n]];
 
 		const thingtype_t *info = M_GetThingType(T->type);
 
-		// only check players and monsters
-		if (! (info->group == 'p' || info->group == 'm'))
-			continue;
+		if (ThingStuckInWall(T, info->radius, info->group))
+			list.set(blockers[n]);
 
-		// skip certain actors (e.g. deathmatch starts) which are often
-		// placed overlapping a normal player start.
-		if (info->flags & THINGDEF_PASS)
-			continue;
-
-		if (ThingStuckInBlocker(T, info->radius, info->group, blockers, sizes) ||
-			ThingStuckInWall   (T, info->radius, info->group))
+		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			list.set(n);
+			const Thing *T2 = Things[blockers[n2]];
+
+			const thingtype_t *info2 = M_GetThingType(T2->type);
+
+			if (ThingStuckInThing(T, info, T2, info2))
+				list.set(blockers[n]);
 		}
 	}
 }

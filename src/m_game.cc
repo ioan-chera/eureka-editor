@@ -91,6 +91,7 @@ static short ParseThingdefFlags(const char *s)
 	if (strchr(s, 'l')) flags |= THINGDEF_LIT;
 	if (strchr(s, 'n')) flags |= THINGDEF_PASS;
 	if (strchr(s, 'v')) flags |= THINGDEF_VOID;
+	if (strchr(s, 't')) flags |= THINGDEF_TELEPT;
 
 	return flags;
 }

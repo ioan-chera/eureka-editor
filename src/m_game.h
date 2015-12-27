@@ -92,6 +92,7 @@ typedef enum
 	THINGDEF_LIT     = (1 << 2),  // always bright
 	THINGDEF_PASS    = (1 << 3),  // non-blocking
 	THINGDEF_VOID    = (1 << 4),  // can exist in the void
+	THINGDEF_TELEPT  = (1 << 5),  // teleport dest, can overlap certain things
 }
 thingdef_flags_e;
 
