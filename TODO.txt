@@ -130,6 +130,8 @@ WISH: support Windows 95/98/ME
 
       [running on Windows 98SE requires KernelEx]
 
+WISH: can import DWD (DoomEd) format maps
+
 WISH: can import UDMF format maps
 
 
