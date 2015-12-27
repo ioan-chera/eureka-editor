@@ -332,11 +332,12 @@ thing 10503 - nl 20 FFLG "Flame Large"
 #---- SECTOR TYPES ---------------
 
 sector   0 "NOTHING"
-sector   1 "  Phased light"     # "light phased"           # FIXME
-sector   2 "  Light start"     # "lightsequencestart"     # FIXME
-sector   3 "  Light specl1"     # "lightsequencespecial1"  # FIXME
-sector   4 "  Light specl2"     # "lightsequencespecial2"  # FIXME
 sector   9 "Secret Area"
+
+sector   1 "Phased Light"
+sector   2 "Light Seq Start"
+sector   3 "Light Seq Next 1"
+sector   4 "Light Seq Next 2"
 
 sector  26 "Next Stair 1"
 sector  27 "Next Stair 2"
@@ -354,8 +355,8 @@ sector  49 "Wind W /slow"
 sector  50 "Wind W /med"
 sector  51 "Wind W /fast"
 
-sector 198 "Lightning /strong"
-sector 199 "Lightning /weak"
+sector 198 "Indoor Lightning /64"
+sector 199 "Indoor Lightning /32"
 
 sector 200 "Alternate Sky"
 
