@@ -533,6 +533,7 @@ void UI_MainWin::UpdateGameInfo()
 void UI_MainWin::UpdateMapFormatInfo()
 {
 	thing_box->UpdateMapFormatInfo();
+	 line_box->UpdateMapFormatInfo();
 }
 
 

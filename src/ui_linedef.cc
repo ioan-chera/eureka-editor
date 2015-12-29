@@ -105,10 +105,11 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		args[a] = new Fl_Int_Input(X+58+43*a, Y, 39, 24);
+		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->hide();
 	}
 
-	args[0]->label("Args:");
+	args[0]->label("Args: ");
 
 
 	Y += tag->h() + 2;
@@ -184,6 +185,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	resizable(NULL);
 }
+
 
 //
 // UI_LineBox Destructor
@@ -406,6 +408,32 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
 			BA_ChangeLD(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+		}
+
+		BA_End();
+	}
+}
+
+
+void UI_LineBox::args_callback(Fl_Widget *w, void *data)
+{
+	line_flag_CB_data_c *l_f_c = (line_flag_CB_data_c *)data;
+
+	UI_LineBox *box = l_f_c->parent;
+
+	int arg_idx = l_f_c->mask;
+	int new_value = atoi(box->args[arg_idx]->value());
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+	
+		for (list.begin(&it); !it.at_end(); ++it)
+		{
+			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
 		BA_End();
@@ -643,6 +671,29 @@ int UI_LineBox::SolidMask(int side)
 		mask |= SOLID_UPPER;
 
 	return mask;
+}
+
+
+void UI_LineBox::UpdateMapFormatInfo()
+{
+	if (Level_format == MAPF_Hexen)
+	{
+		tag->hide();
+		length->hide();
+	}
+	else
+	{
+		tag->show();
+		length->show();
+	}
+
+	for (int a = 0 ; a < 5 ; a++)
+	{
+		if (Level_format == MAPF_Hexen)
+			args[a]->show();
+		else
+			args[a]->hide();
+	}
 }
 
 //--- editor settings ---

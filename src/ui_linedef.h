@@ -76,6 +76,8 @@ public:
 
 	void UnselectPics();
 
+	void UpdateMapFormatInfo();
+
 private:
 	void CalcLength();
 
@@ -90,6 +92,7 @@ private:
 	static void   type_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);
 	static void  flags_callback(Fl_Widget *, void *);
+	static void   args_callback(Fl_Widget *, void *);
 	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 };
