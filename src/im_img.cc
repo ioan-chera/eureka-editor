@@ -443,5 +443,37 @@ Img_c * IM_CreateMissingTex(int bg, int fg)
 	return IM_DummyTex(missing_graphic, bg, fg);
 }
 
+
+Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size)
+{
+	Img_c *result = new Img_c(W, H);
+
+	result->clear();
+
+	// translate colors to current palette
+	byte *conv_palette = new byte[pal_size];
+
+	for (int c = 0 ; c < pal_size ; c++)
+		conv_palette[c] = W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		int ch = text[y][x] & 0x7f;
+
+		if (ch == ' ')
+			continue;  // leave transparent
+
+		if (ch < 'a' || ch >= 'a' + pal_size)
+			BugError("Bad character (dec #%d) in built-in image.\n", ch);
+
+		result->wbuf() [y * W + x] = conv_palette[ch - 'a'];
+	}
+
+	delete[] conv_palette;
+
+	return result;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

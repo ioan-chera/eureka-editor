@@ -27,6 +27,8 @@
 #ifndef __EUREKA_IM_IMG_H__
 #define __EUREKA_IM_IMG_H__
 
+#include "im_color.h"
+
 typedef byte  img_pixel_t;
 
 
@@ -92,6 +94,8 @@ private:
 
 Img_c * IM_CreateUnknownTex(int bg, int fg);
 Img_c * IM_CreateMissingTex(int bg, int fg);
+
+Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 
 
 #endif  /* __EUREKA_IM_IMG_H__*/
