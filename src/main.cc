@@ -101,7 +101,7 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
-#define DEFAULT_PORT_NAME  "boom"
+#define DEFAULT_PORT_NAME  "vanilla"
 
 const char *default_port = DEFAULT_PORT_NAME;
 
