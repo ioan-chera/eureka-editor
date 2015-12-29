@@ -930,7 +930,12 @@ void M_WriteEurekaLump(Wad_file *wad)
 		lump->Printf("port %s\n", Port_name);
 
 	for (unsigned int i = 0 ; i < Resource_list.size() ; i++)
-		lump->Printf("resource %s\n", Resource_list[i]);
+	{
+		char absolute_name[FL_PATH_MAX];
+		fl_filename_absolute(absolute_name, Resource_list[i]);
+
+		lump->Printf("resource %s\n", absolute_name);
+	}
 
 	lump->Finish();
 
