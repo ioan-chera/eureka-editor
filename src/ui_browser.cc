@@ -460,8 +460,11 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, sort_method_e m
 		while (isspace(*sa)) sa++;
 		while (isspace(*sb)) sb++;
 
-		while (! isspace(*sa)) sa++;
-		while (! isspace(*sb)) sb++;
+		if (sa[0] && sa[1] && sa[2] == ' ')
+			while (! isspace(*sa)) sa++;
+
+		if (sb[0] && sb[1] && sb[2] == ' ')
+			while (! isspace(*sb)) sb++;
 	}
 
 	return strcmp(sa, sb);
