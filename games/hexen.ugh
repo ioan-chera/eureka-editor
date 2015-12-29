@@ -486,6 +486,8 @@ line 93 p "Polyobj_Move *8 /OR"  po  speed  angle  dist
 
 # Miscellaneous
 
+line 0  - "NOTHING"
+
 line 80 - "ACS_Execute"       script  map  s_arg1  s_arg2  s_arg3
 line 83 - "ACS_Execute /lock" script  map  s_arg1  s_arg2  lock
 line 81 - "ACS_Suspend"       script  map 
