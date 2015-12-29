@@ -45,11 +45,12 @@ typedef struct
 linegroup_t;
 
 
-// line <number> <group> <shortdesc> <longdesc>
+// line <number> <group> <description>  [ arg1 .. arg5 ]
 typedef struct
 {
 	char group;
 	const char *desc;
+	const char *args[5];
 }
 linetype_t;
 

@@ -266,7 +266,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 #define YGD_BUF 200   /* max. line length + 2 */
 	char readbuf[YGD_BUF];    /* buffer the line is read into */
 
-#define MAX_TOKENS 10   /* tokens per line */
+#define MAX_TOKENS 16   /* tokens per line */
 	int lineno;     /* current line of file */
 
 #define MAX_INCLUDE_LEVEL  10
@@ -440,15 +440,25 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "line") == 0)
 		{
+			if (nargs < 3)
+				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+
 			linetype_t * info = new linetype_t;
 
-			if (nargs != 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+			memset(info->args, 0, sizeof(info->args));
 
 			int number = atoi(token[1]);
 
-			 info->group = token[2][0];
-			 info->desc  = token[3];
+			info->group = token[2][0];
+			info->desc  = token[3];
+
+			int arg_count = MIN(nargs - 3, 5);
+
+			for (int i = 0 ; i < arg_count ; i++)
+			{
+				if (token[4 + i][0] != '-')
+					info->args[i] = token[4 + i];
+			}
 
 			if (line_groups.find( info->group) == line_groups.end())
 			{
