@@ -397,114 +397,114 @@ linegroup - "OTHER"
 
 # Floors and lifts
 
-line 20 f "Floor_LowerByValue" / tag / speed / height 
-line 21 f "Floor_LowerToLowest" / tag / speed 
-line 22 f "Floor_LowerToNearest" / tag / speed 
-line 23 f "Floor_RaiseByValue" / tag / speed / height 
-line 24 f "Floor_RaiseToHighest" / tag / speed 
-line 25 f "Floor_RaiseToNearest" / tag / speed 
-line 28 f "Floor_RaiseAndCrush" / tag / speed / crush 
-line 35 f "Floor_RaiseByValueTimes8" / tag / speed / height 
-line 36 f "Floor_LowerByValueTimes8" / tag / speed / height 
-line 46 f "Floor_CrushStop" / tag 
-line 66 f "Floor_LowerInstant" / tag / arg2 / height 
-line 67 f "Floor_RaiseInstant" / tag / arg2 / height 
-line 68 f "Floor_MoveToValueTimes8" / tag / speed / height / negative 
+line 20 f "Floor_Lower"          tag  speed  height 
+line 21 f "Floor_Lower /lowest"  tag  speed 
+line 22 f "Floor_Lower /nearest" tag  speed 
+line 23 f "Floor_Raise"          tag  speed  height 
+line 24 f "Floor_Raise /highest" tag  speed 
+line 25 f "Floor_Raise /nearest" tag  speed 
+line 28 f "Floor_Raise /crush"   tag  speed  crush?
+line 35 f "Floor_Raise *8"       tag  speed  heightx8
+line 36 f "Floor_Lower *8"       tag  speed  heightx8
+line 66 f "Floor_Lower /inst"    tag  -  height 
+line 67 f "Floor_Raise /inst"    tag  -  height 
+line 68 f "Floor_MoveTo *8"      tag  speed  heightx8  negate?
+line 46 f "Floor_CrushStop"      tag 
 
-line 26 f "Stairs_BuildDown" / tag / speed / height / delay / reset
-line 27 f "Stairs_BuildUp" / tag / speed / height / delay / reset
-line 31 f "Stairs_BuildDownSync" / tag / speed / height / reset 
-line 32 f "Stairs_BuildUpSync" / tag / speed / height / reset 
+line 26 f "Stairs_Down"        tag  speed  height  delay  reset
+line 27 f "Stairs_Up"          tag  speed  height  delay  reset
+line 31 f "Stairs_Down /sync"  tag  speed  height  reset 
+line 32 f "Stairs_Up   /sync"  tag  speed  height  reset 
 
-line 29 f "Pillar_Build" / tag / speed / height 
-line 30 f "Pillar_Open" / tag / speed / f_height / c_height 
-line 94 f "Pillar_BuildAndCrush" / tag / speed / height / crush 
+line 29 f "Pillar_Build"  tag  speed  height 
+line 30 f "Pillar_Open"   tag  speed  f_height  c_height 
+line 94 f "Pillar_Crush"  tag  speed  height  crush?
 
-line 60 f "Plat_PerpetualRaise" / tag / speed / delay 
-line 61 f "Plat_Stop" / tag 
-line 62 f "Plat_DownWaitUpStay" / tag / speed / delay 
-line 63 f "Plat_DownByValue" / tag / speed / delay / height 
-line 64 f "Plat_UpWaitDownStay" / tag / speed / delay 
-line 65 f "Plat_UpByValue" / tag / speed / delay / height 
+line 62 f "Plat_DownWaitUp"  tag  speed  delay 
+line 63 f "Plat_Down"        tag  speed  delay  height 
+line 64 f "Plat_UpWaitDown"  tag  speed  delay 
+line 65 f "Plat_Up"          tag  speed  delay  height 
+line 60 f "Plat_Perpetual"   tag  speed  delay 
+line 61 f "Plat_Stop"        tag
 
 # Ceiling and doors
 
-line 40 c "Ceiling_LowerByValue" / tag / speed / height 
-line 41 c "Ceiling_RaiseByValue" / tag / speed / height 
-line 42 c "Ceiling_CrushAndRaise" / tag / speed / crush 
-line 43 c "Ceiling_LowerAndCrush" / tag / speed / crush 
-line 44 c "Ceiling_CrushStop" / tag 
-line 45 c "Ceiling_CrushRaiseAndStay" / tag / speed / crush 
-line 69 c "Ceiling_MoveToValueTimes8" / tag / speed / height / negative 
+line 40 c "Ceiling_Lower"  tag  speed  height 
+line 41 c "Ceiling_Raise"  tag  speed  height 
+line 42 c "Ceiling_CrushAndRaise"  tag  speed  crush 
+line 43 c "Ceiling_Lower /crush"   tag  speed  crush 
+line 44 c "Ceiling_CrushStop"  tag 
+line 45 c "Ceiling_CrushRaiseAndStay"  tag  speed  crush 
+line 69 c "Ceiling_MoveTo *8"  tag  speed  height  negative 
 
-line 10 c "Door_Close" / tag / speed 
-line 11 c "Door_Open" / tag / speed 
-line 12 c "Door_Raise" / tag / speed / delay 
-line 13 c "Door_LockedRaise" / tag / speed / delay / lock 
+line 10 c "Door_Close"   tag  speed 
+line 11 c "Door_Open"    tag  speed 
+line 12 c "Door_Raise"   tag  speed  delay 
+line 13 c "Door_Locked"  tag  speed  delay  lock 
 
 # Lighting
 
-line 110 l "Light_RaiseByValue" / tag / value 
-line 111 l "Light_LowerByValue" / tag / value 
-line 112 l "Light_ChangeToValue" / tag / value 
-line 113 l "Light_Fade" / tag / value / tics 
-line 114 l "Light_Glow" / tag / upper / lower / tics 
-line 115 l "Light_Flicker" / tag / upper / lower 
-line 116 l "Light_Strobe" / tag / upper / lower / u-tics / l-tics
+line 110 l "Light_Raise"   tag  light 
+line 111 l "Light_Lower"   tag  light 
+line 112 l "Light_Set"     tag  light 
+line 113 l "Light_Fade"    tag  light  time 
+line 114 l "Light_Glow"    tag  high  low  time 
+line 115 l "Light_Flicker" tag  high  low 
+line 116 l "Light_Strobe"  tag  high  low  hightime  lowtime
 
 # Thing specials
 
-line 72 t "Thing_Thrust" / angle / distance 
-line 73 t "Thing_Damage" / damage 
+line 72 t "Push Thing"    angle  distance 
+line 73 t "Damage Thing"  damage 
 
-line 130 t "Thing_Activate" / tid 
-line 131 t "Thing_Deactivate" / tid 
-line 132 t "Thing_Remove" / tid 
-line 133 t "Thing_Destroy" / tid 
-line 134 t "Thing_Projectile" / tid / type / angle / speed / vspeed
-line 136 t "Thing_ProjectileGravity" / tid / type / angle / speed / vspeed
-line 135 t "Thing_Spawn" / tid / type / angle 
-line 137 t "Thing_SpawnNoFog" / tid / type / angle 
+line 130 t "Thing_Activate"      tid 
+line 131 t "Thing_Deactivate"    tid 
+line 132 t "Thing_Remove"        tid 
+line 133 t "Thing_Destroy"       tid 
+line 134 t "Thing_Shoot"         tid  type  angle  speed  vspeed
+line 136 t "Thing_Shoot /grav"   tid  type  angle  speed  vspeed
+line 135 t "Thing_Spawn"         tid  type  angle 
+line 137 t "Thing_Spawn /silent" tid  type  angle 
 
 # Polyobj specials
 
-line 1 p "Polyobj_StartLine" / po / mirror / sound 
-line 2 p "Polyobj_RotLeft" / po / speed / angle 
-line 3 p "Polyobj_RotRight" / po / speed / angle 
-line 4 p "Polyobj_Move" / po / speed / angle / distance 
-line 5 p "Polyobj_ExplicitLine" / po / order / mirror / sound 
-line 6 p "Polyobj_MoveTimes8" / po / speed / angle / distance 
-line 7 p "Polyobj_DoorSwing" / po / speed / angle / delay 
-line 8 p "Polyobj_DoorSlide" / po / speed / angle / distance / delay
+line 1 p "Polyobj_StartLine"   po  mirror?  sound 
+line 2 p "Polyobj_RotateL"     po  speed  angle 
+line 3 p "Polyobj_RotateR"     po  speed  angle 
+line 4 p "Polyobj_Move"        po  speed  angle  distance 
+line 5 p "Polyobj_Explicit"    po  order  mirror?  sound 
+line 6 p "Polyobj_Move *8"     po  speed  angle  distance 
+line 7 p "Polyobj_DoorSwing"   po  speed  angle  delay 
+line 8 p "Polyobj_DoorSlide"   po  speed  angle  distance  delay
 
-line 90 p "Polyobj_RotLeft / OR" / po / speed / angle 
-line 91 p "Polyobj_RotRight / OR" / po / speed / angle 
-line 92 p "Polyobj_Move / OR" / po / speed / angle / distance 
-line 93 p "Polyobj_MoveTimes8 / OR" / po / speed / angle / distance 
+line 90 p "Polyobj_RotateL /OR"  po  speed  angle 
+line 91 p "Polyobj_RotateR /OR"  po  speed  angle 
+line 92 p "Polyobj_Move /OR"     po  speed  angle  distance 
+line 93 p "Polyobj_Move *8 /OR"  po  speed  angle  distance 
 
 # Miscellaneous Specials
 
-line 80 - "ACS_Execute" / script / map / s_arg1 / s_arg2 / s_arg3
-line 81 - "ACS_Suspend" / script / map 
-line 82 - "ACS_Terminate" / script / map 
-line 83 - "ACS_LockedExecute" / script / map / s_arg1 / s_arg2 / lock
+line 80 - "ACS_Execute"       script  map  s_arg1  s_arg2  s_arg3
+line 81 - "ACS_Suspend"       script  map 
+line 82 - "ACS_Terminate"     script  map 
+line 83 - "ACS_Execute /lock" script  map  s_arg1  s_arg2  lock
 
-line 95 - "Elevator_LowerByValue" / tag / speed / height 
-line 96 - "Elevator_RaiseByValue" / tag / speed / height 
+line 95 - "Elevator_Lower"    tag  speed  height 
+line 96 - "Elevator_Raise"    tag  speed  height 
 
-line 121 - "Line_SetId" / line 
+line 121 - "Line_SetIdent"  line 
 
-line 100 - "Scroll_Texture_Left" / speed 
-line 101 - "Scroll_Texture_Right" / speed 
-line 102 - "Scroll_Texture_Up" / speed 
-line 103 - "Scroll_Texture_Down" / speed 
+line 100 - "Scroll_Left"   speed 
+line 101 - "Scroll_Right"  speed 
+line 102 - "Scroll_Up"     speed 
+line 103 - "Scroll_Down"   speed 
 
-line 129 - "UsePuzzleItem" / item / script / s_arg1 / s_arg2 / s_arg3
-line 140 - "Sec_ChangeSound" / tag / sound 
-line 120 - "Earthquake" / intensity / duration / damrad / tremrad / tid
+line 129 - "UsePuzzleItem"  item  script  s_arg1  s_arg2  s_arg3
+line 140 - "Sec_ChangeSound"  tag  sound 
+line 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 
-line 74 - "Game_NewMap" / map / position 
+line 74 - "Game_NewMap"  map  position 
 line 75 - "Game_End" 
-line 70 - "Teleport" / tid 
-line 71 - "Teleport /silent" / tid 
+line 70 - "Teleport"  tid 
+line 71 - "Teleport /silent"  tid 
 
