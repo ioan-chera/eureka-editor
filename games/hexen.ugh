@@ -411,6 +411,8 @@ line 67 f "Floor_Raise /instant" tag  -  dist
 line 68 f "Floor_MoveTo *8"      tag  speed  value_x8  negate?
 line 46 f "Floor_CrushStop"      tag 
 
+line 138 f "Floor_Waggle"        tag  amp  speed  offset  time
+
 line 26 f "Stairs_Down"        tag  speed  dist  delay  reset
 line 27 f "Stairs_Up"          tag  speed  dist  delay  reset
 line 31 f "Stairs_Down /sync"  tag  speed  dist  reset 
@@ -452,6 +454,8 @@ line 113 l "Light_Fade"    tag  light  time
 line 114 l "Light_Glow"    tag  high  low  time 
 line 115 l "Light_Flicker" tag  high  low 
 line 116 l "Light_Strobe"  tag  high  low  hightime  lowtime
+
+line 109 l "Force Lightning"  mode
 
 # Thing specials
 
@@ -504,7 +508,7 @@ line 102 - "Scroll_Up"     speed
 line 103 - "Scroll_Down"   speed 
 
 line 129 - "UsePuzzleItem"  item  script  s_arg1  s_arg2  s_arg3
-line 140 - "Sec_ChangeSound"  tag  sound 
+line 140 - "Change Sound"  tag  sound 
 line 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 
 line 70 - "Teleport"          tid 
