@@ -30,8 +30,6 @@
 
 typedef u32_t rgb_color_t;
 
-#define RGB_INVALID  0xffffffff  /* an "impossible" color */
-
 #define RGB_RED(col)    ((col >> 24) & 255)
 #define RGB_GREEN(col)  ((col >> 16) & 255)
 #define RGB_BLUE(col)   ((col >>  8) & 255)
