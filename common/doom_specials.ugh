@@ -47,7 +47,7 @@ linegroup - "OTHER"
 
 #
 #	Definition of linedef types
-#	Format is : line <number> <group> <flags> <description>
+#	Format is : line <number> <group> <description>
 #
 
 line   0 - "-- NOTHING"
