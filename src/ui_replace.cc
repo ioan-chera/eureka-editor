@@ -423,12 +423,14 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	if (test) (w)->show(); else (w)->hide();
 
 	// common stuff
-	if (x != 0)
-		tag_input->activate();
-	else
+	if (x == 0 && Level_format != MAPF_Hexen)
 	{
 		tag_input->deactivate();
 		tag_input->value("");
+	}
+	else
+	{
+		tag_input->activate();
 	}
 
 	// thing stuff
@@ -1214,6 +1216,9 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 	// skill/mode flag filter
 	if ((T->options & options_mask) != options_value)
+		return false;
+
+	if (Level_format == MAPF_Hexen && ! Filter_Tag(T->tid))
 		return false;
 
 	return true;
