@@ -385,3 +385,122 @@ sector 222 "Scroll SW /slow"
 sector 223 "Scroll SW /med"
 sector 224 "Scroll SW /fast"
 
+
+#---- LINE/THING SPECIALS ---------------
+
+linegroup f "Floor"
+linegroup c "Ceiling"
+linegroup l "Light"
+linegroup t "Thing"
+linegroup p "Polyobj"
+linegroup - "OTHER"
+
+line 20:Floor_LowerByValue / tag / speed / height / arg4 / arg5
+line 21:Floor_LowerToLowest / tag / speed / arg3 / arg4 / arg5
+line 22:Floor_LowerToNearest / tag / speed / arg3 / arg4 / arg5
+line 23:Floor_RaiseByValue / tag / speed / height / arg4 / arg5
+line 24:Floor_RaiseToHighest / tag / speed / arg3 / arg4 / arg5
+line 25:Floor_RaiseToNearest / tag / speed / arg3 / arg4 / arg5
+line 28:Floor_RaiseAndCrush / tag / speed / crush / arg4 / arg5
+line 35:Floor_RaiseByValueTimes8 / tag / speed / height / arg4 / arg5
+line 36:Floor_LowerByValueTimes8 / tag / speed / height / arg4 / arg5
+line 46:Floor_CrushStop / tag / arg2 / arg3 / arg4 / arg5
+line 66:Floor_LowerInstant / tag / arg2 / height / arg4 / arg5
+line 67:Floor_RaiseInstant / tag / arg2 / height / arg4 / arg5
+line 68:Floor_MoveToValueTimes8 / tag / speed / height / negative / arg5
+
+line 26:Stairs_BuildDown / tag / speed / height / delay / reset
+line 27:Stairs_BuildUp / tag / speed / height / delay / reset
+line 31:Stairs_BuildDownSync / tag / speed / height / reset / arg5
+line 32:Stairs_BuildUpSync / tag / speed / height / reset / arg5
+
+line 29:Pillar_Build / tag / speed / height / arg4 / arg5
+line 30:Pillar_Open / tag / speed / f_height / c_height / arg5
+line 94:Pillar_BuildAndCrush / tag / speed / height / crush / arg5
+
+line 60:Plat_PerpetualRaise / tag / speed / delay / arg4 / arg5
+line 61:Plat_Stop / tag / arg2 / arg3 / arg4 / arg5
+line 62:Plat_DownWaitUpStay / tag / speed / delay / arg4 / arg5
+line 63:Plat_DownByValue / tag / speed / delay / height / arg5
+line 64:Plat_UpWaitDownStay / tag / speed / delay / arg4 / arg5
+line 65:Plat_UpByValue / tag / speed / delay / height / arg5
+
+# ceiling
+
+line 40:Ceiling_LowerByValue / tag / speed / height / arg4 / arg5
+line 41:Ceiling_RaiseByValue / tag / speed / height / arg4 /arg5
+line 42:Ceiling_CrushAndRaise / tag / speed / crush / arg4 / arg5
+line 43:Ceiling_LowerAndCrush / tag / speed / crush / arg4 / arg5
+line 44:Ceiling_CrushStop / tag / arg2 / arg3 / arg4 / arg5
+line 45:Ceiling_CrushRaiseAndStay / tag / speed / crush / arg4 / arg5
+line 69:Ceiling_MoveToValueTimes8 / tag / speed / height / negative / arg5
+
+line 95:FloorAndCeiling_LowerByValue / tag / speed / height / arg4 / arg5
+line 96:FloorAndCeiling_RaiseByValue / tag / speed / height / arg4 / arg5
+
+line 10:Door_Close / tag / speed / arg3 / arg4 / arg5
+line 11:Door_Open / tag / speed / arg3 / arg4 / arg5
+line 12:Door_Raise / tag / speed / delay / arg4 / arg5
+line 13:Door_LockedRaise / tag / speed / delay / lock / arg5
+
+line 110:Light_RaiseByValue / tag / value / arg3 / arg4 / arg5
+line 111:Light_LowerByValue / tag / value / arg3 / arg4 / arg5
+line 112:Light_ChangeToValue / tag / value / arg3 / arg4 / arg5
+line 113:Light_Fade / tag / value / tics / arg4 / arg5
+line 114:Light_Glow / tag / upper / lower / tics / arg5
+line 115:Light_Flicker / tag / upper / lower / arg4 / arg5
+line 116:Light_Strobe / tag / upper / lower / u-tics / l-tics
+
+#Miscellaneous Specials
+
+line 80:ACS_Execute / script / map / s_arg1 / s_arg2 / s_arg3
+line 81:ACS_Suspend / script / map / arg3 / arg4 / arg5
+line 82:ACS_Terminate / script / map / arg3 / arg4 / arg5
+line 83:ACS_LockedExecute / script / map / s_arg1 / s_arg2 / lock
+
+line 121:Line_SetIdentification / line / arg2 / arg3 / arg4 / arg5
+
+line 100:Scroll_Texture_Left / speed / arg2 / arg3 / arg4 / arg5
+line 101:Scroll_Texture_Right / speed / arg2 / arg3 / arg4 / arg5
+line 102:Scroll_Texture_Up / speed / arg2 / arg3 / arg4 / arg5
+line 103:Scroll_Texture_Down / speed / arg2 / arg3 / arg4 / arg5
+
+line 129:UsePuzzleItem / item / script / s_arg1 / s_arg2 / s_arg3
+
+line 140:Sector_ChangeSound / tag / sound / arg3 / arg4 /  arg5
+
+line 120:Earthquake / intensity / duration / damrad / tremrad / tid
+
+line 74:Teleport_NewMap / map / position / arg3 / arg4 / arg5
+line 75:Teleport_EndGame / arg1 / arg2 / arg3 / arg4 / arg5
+
+line 70:Teleport / tid / arg2 / arg3 / arg4 / arg5
+line 71:Teleport_NoFog / tid / arg2 / arg3 / arg4 / arg5
+
+#Thing Specials
+
+line 72:ThrustThing / angle / distance / arg3 / arg4 / arg5
+line 73:DamageThing / damage / arg2 / arg3 / arg4 / arg5
+line 130:Thing_Activate / tid / arg2 / arg3 / arg4 / arg5
+line 131:Thing_Deactivate / tid / arg2 / arg3 / arg4 / arg5
+line 132:Thing_Remove / tid / arg2 / arg3 / arg4 / arg5
+line 133:Thing_Destroy / tid / arg2 / arg3 / arg4 / arg5
+line 134:Thing_Projectile / tid / type / angle / speed / vspeed
+line 136:Thing_ProjectileGravity / tid / type / angle / speed / vspeed
+line 135:Thing_Spawn / tid / type / angle / arg4 / arg5
+line 137:Thing_SpawnNoFog / tid / type / angle / arg4 / arg5
+
+line 1:Polyobj_StartLine / po / mirror / sound / arg4 / arg5
+line 2:Polyobj_RotateLeft / po / speed / angle / arg4 / arg5
+line 3:Polyobj_RotateRight / po / speed / angle / arg4 / arg5
+line 4:Polyobj_Move / po / speed / angle / distance / arg5
+line 5:Polyobj_ExplicitLine / po / order / mirror / sound / arg5
+line 6:Polyobj_MoveTimes8 / po / speed / angle / distance / arg5
+line 7:Polyobj_DoorSwing / po / speed / angle / delay / arg5
+line 8:Polyobj_DoorSlide / po / speed / angle / distance / delay
+
+line 90:Polyobj_OR_RotateLeft / po / speed / angle / arg4 / arg5
+line 91:Polyobj_OR_RotateRight / po / speed / angle / arg4 / arg5
+line 92:Polyobj_OR_Move / po / speed / angle / distance / arg5
+line 93:Polyobj_OR_MoveTimes8 / po / speed / angle / distance / arg5
+
