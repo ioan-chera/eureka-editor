@@ -424,6 +424,8 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = l_f_c->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
+	new_value = CLAMP(0, new_value, 255);
+
 	selection_c list;
 	selection_iterator_c it;
 
@@ -489,13 +491,33 @@ void UI_LineBox::SetObj(int _index, int _count)
 
 void UI_LineBox::UpdateField(int field)
 {
-	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END ||
-	    field == LineDef::F_TAG)
+	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
 	{
 		if (is_linedef(obj))
-		{
 			CalcLength();
+		else
+			length->value("");
+	}
+
+	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG2))
+	{
+		for (int a = 0 ; a < 5 ; a++)
+			args[a]->value("");
+
+		if (is_linedef(obj))
+		{
+			const LineDef *L = LineDefs[obj];
+
 			tag->value(Int_TmpStr(LineDefs[obj]->tag));
+
+			if (Level_format == MAPF_Hexen)
+			{
+				if (L->tag ) args[0]->value(Int_TmpStr(L->tag));
+				if (L->arg2) args[1]->value(Int_TmpStr(L->arg2));
+				if (L->arg3) args[2]->value(Int_TmpStr(L->arg3));
+				if (L->arg4) args[3]->value(Int_TmpStr(L->arg4));
+				if (L->arg5) args[4]->value(Int_TmpStr(L->arg5));
+			}
 		}
 		else
 		{
