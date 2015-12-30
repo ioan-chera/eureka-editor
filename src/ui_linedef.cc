@@ -94,7 +94,8 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	actkind = new Fl_Choice(X+58, Y, 52, 24);
 	// this order must match the SPAC_XXX constants
 	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
-	actkind->value(0);
+	actkind->value(12);
+	actkind->deactivate();
 	actkind->hide();
 
 	Y += desc->h() + 2;
@@ -571,11 +572,17 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (is_linedef(obj))
 		{
+			actkind->activate();
+
 			FlagsFromInt(LineDefs[obj]->flags);
 		}
 		else
 		{
 			FlagsFromInt(0);
+
+fprintf(stderr, "setting actkind to 12...\n");
+			actkind->value(12);  // show as "??"
+			actkind->deactivate();
 		}
 	}
 }
@@ -618,9 +625,19 @@ void UI_LineBox::CalcLength()
 
 void UI_LineBox::FlagsFromInt(int lineflags)
 {
-///--	if (lineflags & MLF_Translucent)
-///--		f_automap->value(4);
-///--	else
+	// compute activation
+	if (Level_format == MAPF_Hexen)
+	{
+		int new_act = (lineflags & MLF_Activation) >> 9;
+
+		new_act |= (lineflags & MLF_Repeatable) ? 1 : 0;
+
+		// show "??" for unknown values
+		if (new_act > 12) new_act = 12;
+
+		actkind->value(new_act);
+	}
+
 	if (lineflags & MLF_Secret)
 		f_automap->value(3);
 	else if (lineflags & MLF_DontDraw)
@@ -715,6 +732,8 @@ void UI_LineBox::UpdateMapFormatInfo()
 
 		actkind->show();
 		desc->resize(type->x() + 60, desc->y(), w()-78-60, desc->h());
+
+		f_passthru->hide();
 	}
 	else
 	{
@@ -723,6 +742,8 @@ void UI_LineBox::UpdateMapFormatInfo()
 
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
+
+		f_passthru->show();
 	}
 
 	for (int a = 0 ; a < 5 ; a++)
