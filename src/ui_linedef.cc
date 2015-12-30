@@ -84,8 +84,18 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += type->h() + 2;
 
 
-	desc = new Fl_Output(X+58, Y, W-66, 24, "Desc: ");
+	new Fl_Box(FL_NO_BOX, X+10, Y, 48, 24, "Desc:");
+
+
+	desc = new Fl_Output(X+58, Y, W-66, 24);
 	desc->align(FL_ALIGN_LEFT);
+
+
+	actkind = new Fl_Choice(X+58, Y, 52, 24);
+	// this order must match the SPAC_XXX constants
+	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
+	actkind->value(0);
+	actkind->hide();
 
 	Y += desc->h() + 2;
 
@@ -702,11 +712,17 @@ void UI_LineBox::UpdateMapFormatInfo()
 	{
 		tag->hide();
 		length->hide();
+
+		actkind->show();
+		desc->resize(type->x() + 60, desc->y(), w()-78-60, desc->h());
 	}
 	else
 	{
 		tag->show();
 		length->show();
+
+		actkind->hide();
+		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 	}
 
 	for (int a = 0 ; a < 5 ; a++)
@@ -716,6 +732,8 @@ void UI_LineBox::UpdateMapFormatInfo()
 		else
 			args[a]->hide();
 	}
+
+	redraw();
 }
 
 //--- editor settings ---
