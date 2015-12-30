@@ -144,15 +144,15 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	add(angle);
 
 
-	int ang_mx = X + W - 70;
-	int ang_my = Y + 40;
+	int ang_mx = X + W - 90;
+	int ang_my = Y + 16;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
 		int x = ang_mx + 30 * cos(i * 45 * M_PI / 180.0);
 		int y = ang_my - 30 * sin(i * 45 * M_PI / 180.0);
 
-		ang_buts[i] = new Fl_Button(x - 9, y - 9, 20, 20, 0);
+		ang_buts[i] = new Fl_Button(x - 9, y - 9, 24, 24, 0);
 
 		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
 		ang_buts[i]->align(FL_ALIGN_CENTER);
