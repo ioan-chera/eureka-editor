@@ -37,11 +37,8 @@
 
 UI_MainWin *main_win;
 
-#define MAIN_WINDOW_W  (800-32+KF*60)
-#define MAIN_WINDOW_H  (600-98+KF*40)
-
-#define MAX_WINDOW_W  MAIN_WINDOW_W
-#define MAX_WINDOW_H  MAIN_WINDOW_H
+#define MAIN_WINDOW_W  (800 - 32)
+#define MAIN_WINDOW_H  (600 - 40)
 
 
 static void main_win_close_CB(Fl_Widget *w, void *data)
@@ -69,7 +66,7 @@ UI_MainWin::UI_MainWin() :
 	int cy = 0;
 	int ey = h();
 
-	panel_W = 260 + KF * 32;
+	panel_W = 276 + KF * 32;
 
 	/* ---- Menu bar ---- */
 	{
