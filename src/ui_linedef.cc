@@ -95,6 +95,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	// this order must match the SPAC_XXX constants
 	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
 	actkind->value(12);
+	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
 
@@ -580,7 +581,6 @@ void UI_LineBox::UpdateField(int field)
 		{
 			FlagsFromInt(0);
 
-fprintf(stderr, "setting actkind to 12...\n");
 			actkind->value(12);  // show as "??"
 			actkind->deactivate();
 		}
@@ -659,8 +659,6 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 
 int UI_LineBox::CalcFlags() const
 {
-	// ASSERT(is_linedef(obj))
-
 	int lineflags = 0;
 
 	switch (f_automap->value())
@@ -669,16 +667,26 @@ int UI_LineBox::CalcFlags() const
 		case 1: /* Invisible */ lineflags |= MLF_DontDraw; break;
 		case 2: /* Mapped    */ lineflags |= MLF_Mapped; break;
 		case 3: /* Secret    */ lineflags |= MLF_Secret; break;
-///--		case 4: /* Transluce */ lineflags |= MLF_Translucent; break;
 	}
 
 	if (f_upper->value())    lineflags |= MLF_UpperUnpegged;
 	if (f_lower->value())    lineflags |= MLF_LowerUnpegged;
-	if (f_passthru->value()) lineflags |= MLF_Boom_PassThru;
 
 	if (f_walk->value())  lineflags |= MLF_Blocking;
 	if (f_mons->value())  lineflags |= MLF_BlockMonsters;
 	if (f_sound->value()) lineflags |= MLF_SoundBlock;
+
+	if (Level_format == MAPF_Hexen)
+	{
+		int actval = actkind->value();
+		if (actval >= 12) actval = 0;
+
+		lineflags |= (actval << 9);
+	}
+	else
+	{
+		if (f_passthru->value()) lineflags |= MLF_Boom_PassThru;
+	}
 
 	return lineflags;
 }
