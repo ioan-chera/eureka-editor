@@ -344,9 +344,6 @@ static void LoadVertices()
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	if (count == 0)
-		FatalError("Couldn't find any Vertices\n");
-
 	Vertices.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
@@ -380,9 +377,6 @@ static void LoadSectors()
 # if DEBUG_LOAD
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
-
-	if (count == 0)
-		FatalError("Couldn't find any Sectors\n");
 
 	Sectors.reserve(count);
 
@@ -481,13 +475,6 @@ static void LoadThings()
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
 
-	if (count == 0)
-	{
-		// Note: no error if no things exist, even though technically a map
-		// will be unplayable without the player starts.
-		return;
-	}
-
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_thing_t raw;
@@ -524,13 +511,6 @@ static void LoadThings_Hexen()
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
-
-	if (count == 0)
-	{
-		// Note: no error if no things exist, even though technically a map
-		// will be unplayable without the player starts.
-		return;
-	}
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -576,9 +556,6 @@ static void LoadSideDefs()
 # if DEBUG_LOAD
 	PrintDebug("GetSidedefs: num = %d\n", count);
 # endif
-
-	if (count == 0)
-		FatalError("Couldn't find any Sidedefs\n");
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -633,6 +610,28 @@ static void CreateFallbackSideDef()
 }
 
 
+static void ValidateSidedefs(LineDef * ld)
+{
+	if (ld->right == 0xFFFF) ld->right = -1;
+	if (ld-> left == 0xFFFF) ld-> left = -1;
+
+	// validate sidedefs
+	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+	{
+		LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
+				  ld->right, ld->left);
+
+		bad_sidedef_refs++;
+
+		if (ld->right >= NumSideDefs)
+			ld->right = (ld->left == 0) ? 1 : 0;
+
+		if (ld->left >= NumSideDefs)
+			ld->left = (ld->right == 1) ? 0 : 1;
+	}
+}
+
+
 static void LoadLineDefs()
 {
 	Lump_c *lump = load_wad->FindLumpInLevel("LINEDEFS", loading_level);
@@ -649,7 +648,7 @@ static void LoadLineDefs()
 # endif
 
 	if (count == 0)
-		FatalError("Couldn't find any Linedefs\n");
+		return;
 
 	if (NumSideDefs < 2) CreateFallbackSideDef();
 	if (NumSideDefs < 2) CreateFallbackSideDef();
@@ -688,23 +687,7 @@ static void LoadLineDefs()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		if (ld->right == 0xFFFF) ld->right = -1;
-		if (ld-> left == 0xFFFF) ld-> left = -1;
-
-		// validate sidedefs
-		if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
-		{
-			LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
-			          ld->right, ld->left);
-
-			bad_sidedef_refs++;
-
-			if (ld->right >= NumSideDefs)
-				ld->right = 0;
-
-			if (ld->left >= NumSideDefs)
-				ld->left = 1;
-		}
+		ValidateSidedefs(ld);
 
 		LineDefs.push_back(ld);
 	}
@@ -728,7 +711,7 @@ static void LoadLineDefs_Hexen()
 # endif
 
 	if (count == 0)
-		FatalError("Couldn't find any Linedefs\n");
+		return;
 
 	if (NumSideDefs < 2) CreateFallbackSideDef();
 	if (NumSideDefs < 2) CreateFallbackSideDef();
@@ -771,23 +754,7 @@ static void LoadLineDefs_Hexen()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		if (ld->right == 0xFFFF) ld->right = -1;
-		if (ld-> left == 0xFFFF) ld-> left = -1;
-
-		// validate sidedefs
-		if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
-		{
-			LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
-					  ld->right, ld->left);
-
-			bad_sidedef_refs++;
-
-			if (ld->right >= NumSideDefs)
-				ld->right = 0;
-
-			if (ld->left >= NumSideDefs)
-				ld->left = 1;
-		}
+		ValidateSidedefs(ld);
 
 		LineDefs.push_back(ld);
 	}
