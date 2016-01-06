@@ -162,6 +162,7 @@ install: stripped
 	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
 	install -d $(INSTALL_DIR)/mods
+	rm -f $(INSTALL_DIR)/games/freedoom.ugh
 	install -o root -m 644 bindings.cfg $(INSTALL_DIR)/bindings.cfg
 	install -o root -m 644 misc/about_logo.png $(INSTALL_DIR)/about_logo.png
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
