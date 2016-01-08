@@ -270,6 +270,15 @@ static const opt_desc_t options[] =
 		&browser_small_tex
 	},
 
+	{	"default_gamma",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default gamma for images and 3D view (0..4)",
+		NULL,
+		&usegamma
+	},
+
 	{	"default_grid_mode",
 		0,
 		OPT_INTEGER,

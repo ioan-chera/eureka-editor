@@ -39,6 +39,7 @@ byte raw_palette[256][3];
 byte raw_colormap[32][256];
 
 
+// config item
 int usegamma = 2;
 
 extern int gammatable[5][256];
