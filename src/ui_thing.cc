@@ -478,11 +478,11 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 {
-	thing_opt_CB_data_c *o_c_b = (thing_opt_CB_data_c *)data;
+	thing_opt_CB_data_c *ocb = (thing_opt_CB_data_c *)data;
 
-	UI_ThingBox *box = o_c_b->parent;
+	UI_ThingBox *box = ocb->parent;
 
-	int mask = o_c_b->mask;
+	int mask = ocb->mask;
 	int new_opts = box->CalcOptions();
 
 	selection_c list;
@@ -549,9 +549,9 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 	else
 		exfloor->value("");
 
-	thing_opt_CB_data_c o_c_b(this, MTF_EXFLOOR_MASK);
+	thing_opt_CB_data_c ocb(this, MTF_EXFLOOR_MASK);
 
-	option_callback(this, &o_c_b);
+	option_callback(this, &ocb);
 }
 
 
@@ -716,7 +716,6 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
-
 	if (game_info.coop_dm_flags || Level_format == MAPF_Hexen)
 	{
 		o_sp  ->show();
@@ -743,6 +742,8 @@ void UI_ThingBox::UpdateGameInfo()
 
 void UI_ThingBox::UpdateMapFormatInfo()
 {
+	thing_opt_CB_data_c *ocb;
+
 	// update SP/COOP/DM buttons
 	UpdateGameInfo();
 
@@ -755,6 +756,11 @@ void UI_ThingBox::UpdateMapFormatInfo()
 		o_fight ->show();
 		o_cleric->show();
 		o_mage  ->show();
+
+		// fix the masks for SP/COOP/DM
+		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Hexen_SP;
+		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Hexen_COOP;
+		ocb = (thing_opt_CB_data_c *) o_dm  ->user_data(); ocb->mask = MTF_Hexen_DM;
 	}
 	else
 	{
@@ -765,6 +771,11 @@ void UI_ThingBox::UpdateMapFormatInfo()
 		o_fight ->hide();
 		o_cleric->hide();
 		o_mage  ->hide();
+
+		// fix the masks for SP/COOP/DM
+		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Not_SP;
+		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Not_COOP;
+		ocb = (thing_opt_CB_data_c *) o_dm  ->user_data(); ocb->mask = MTF_Not_DM;
 	}
 }
 
