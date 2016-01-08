@@ -458,7 +458,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! game_info.coop_dm_flags)
+	if (x == 0 && ! game_info.coop_dm_flags && Level_format != MAPF_Hexen)
 	{
 		  o_sp->hide();
 		o_coop->hide();

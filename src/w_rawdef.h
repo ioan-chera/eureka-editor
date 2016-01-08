@@ -330,22 +330,37 @@ sectorflag_e;
 
 typedef enum
 {
-  MTF_Easy      = 1,
-  MTF_Medium    = 2,
-  MTF_Hard      = 4,
-  MTF_Ambush    = 8,
+	// these four used in Hexen too
+	MTF_Easy      = 1,
+	MTF_Medium    = 2,
+	MTF_Hard      = 4,
+	MTF_Ambush    = 8,
 
-  MTF_Not_SP    = 16,
-  MTF_Not_DM    = 32,
-  MTF_Not_COOP  = 64,
+	MTF_Not_SP    = 16,
+	MTF_Not_DM    = 32,
+	MTF_Not_COOP  = 64,
 
-  MTF_Friend    = 128,
-  MTF_Reserved  = 256,
+	MTF_Friend    = 128,
+	MTF_Reserved  = 256,
 }
 thing_option_e;
 
 #define MTF_EXFLOOR_MASK    0x3C00
 #define MTF_EXFLOOR_SHIFT   10
+
+typedef enum
+{
+	MTF_Hexen_Dormant	= 16,
+
+	MTF_Hexen_Fighter	= 32,
+	MTF_Hexen_Cleric	= 64,
+	MTF_Hexen_Mage		= 128,
+
+	MTF_Hexen_SP		= 256,
+	MTF_Hexen_COOP		= 512,
+	MTF_Hexen_DM		= 1024,
+}
+hexen_option_e;
 
 #endif  /* __EUREKA_W_RAWDEF_H__ */
 

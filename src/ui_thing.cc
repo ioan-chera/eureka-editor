@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
@@ -557,11 +557,24 @@ void UI_ThingBox::OptionsFromInt(int options)
 	o_medium->value((options & MTF_Medium) ? 1 : 0);
 	o_hard  ->value((options & MTF_Hard)   ? 1 : 0);
 
-	o_sp  ->value((options & MTF_Not_SP)   ? 0 : 1);
-	o_coop->value((options & MTF_Not_COOP) ? 0 : 1);
-	o_dm  ->value((options & MTF_Not_DM)   ? 0 : 1);
+	if (Level_format == MAPF_Hexen)
+	{
+		o_sp  ->value((options & MTF_Not_SP)   ? 0 : 1);
+		o_coop->value((options & MTF_Not_COOP) ? 0 : 1);
+		o_dm  ->value((options & MTF_Not_DM)   ? 0 : 1);
 
-	o_vanilla_dm->value((options & MTF_Not_SP) ? 1 : 0);
+		o_vanilla_dm->value((options & MTF_Not_SP) ? 1 : 0);
+	}
+	else
+	{
+		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
+		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
+		o_dm  ->value((options & MTF_Hexen_DM)   ? 1 : 0);
+		
+		// TODO : MTF_Hexen_Dormant
+
+		// TODO : class bits
+	}
 
 	o_ambush->value((options & MTF_Ambush) ? 1 : 0);
 	o_friend->value((options & MTF_Friend) ? 1 : 0);
@@ -581,7 +594,17 @@ int UI_ThingBox::CalcOptions() const
 	if (o_medium->value()) options |= MTF_Medium;
 	if (o_hard  ->value()) options |= MTF_Hard;
 
-	if (game_info.coop_dm_flags)
+	if (Level_format == MAPF_Hexen)
+	{
+		// TODO : MTF_Hexen_Dormant
+
+		if (o_sp  ->value()) options |= MTF_Hexen_SP;
+		if (o_coop->value()) options |= MTF_Hexen_COOP;
+		if (o_dm  ->value()) options |= MTF_Hexen_DM;
+
+		// TODO : class bits
+	}
+	else if (game_info.coop_dm_flags)
 	{
 		if (0 == o_sp  ->value()) options |= MTF_Not_SP;
 		if (0 == o_coop->value()) options |= MTF_Not_COOP;
@@ -589,7 +612,7 @@ int UI_ThingBox::CalcOptions() const
 	}
 	else
 	{
-		if (0 != o_vanilla_dm->value()) options |= MTF_Not_SP;
+		if (o_vanilla_dm->value()) options |= MTF_Not_SP;
 	}
 
 	if (o_ambush->value()) options |= MTF_Ambush;
@@ -677,13 +700,19 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
-	if (game_info.coop_dm_flags)
-	{
-		o_sp  ->show();
-		o_coop->show();
-		o_dm  ->show();
+	o_sp  ->show();
+	o_coop->show();
+	o_dm  ->show();
 
-		o_vanilla_dm->hide();
+	o_vanilla_dm->hide();
+
+	if (Level_format == MAPF_Hexen)
+	{
+		// TODO
+	}
+	else if (game_info.coop_dm_flags)
+	{
+		// OK
 	}
 	else
 	{
@@ -703,6 +732,8 @@ void UI_ThingBox::UpdateGameInfo()
 
 void UI_ThingBox::UpdateMapFormatInfo()
 {
+	UpdateGameInfo();
+
 	if (Level_format == MAPF_Hexen)
 	{
 		pos_z->show();
