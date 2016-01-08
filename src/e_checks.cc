@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1423,20 +1423,34 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 	int opt1 = T1->options;
 	int opt2 = T2->options;
 
-	// invert game-mode bits (MTF_Not_COOP etc)
-	opt1 ^= 0x70;
-	opt2 ^= 0x70;
+	if (Level_format == MAPF_Hexen)
+	{
+		if (info1->group == 'p') opt1 |= 0x7E7;
+		if (info2->group == 'p') opt2 |= 0x7E7;
 
-	if (info1->group == 'p') opt1 |= 0x77;
-	if (info2->group == 'p') opt2 |= 0x77;
+		// check skill bits
+		if ((opt1 & opt2 & 0x07) == 0) return false;
 
-	// [FIXME for HEXEN]
-	if ((opt1 & opt2 & 0x77) == 0)
-		return false;
+		// check class bits
+		if ((opt1 & opt2 & 0xE0) == 0) return false;
 
-	// HEXEN TODO: check player-class bits
-	//
-	// if ((opt1 & opt2 & 0xE0) == 0) return false;
+		// check game mode
+		if ((opt1 & opt2 & 0x700) == 0) return false;
+	}
+	else
+	{
+		// invert game-mode bits (MTF_Not_COOP etc)
+		opt1 ^= 0x70; opt2 ^= 0x70;
+
+		if (info1->group == 'p') opt1 |= 0x77;
+		if (info2->group == 'p') opt2 |= 0x77;
+
+		// check skill bits
+		if ((opt1 & opt2 & 0x07) == 0) return false;
+
+		// check game mode
+		if ((opt1 & opt2 & 0x70) == 0) return false;
+	}
 
 	return true;
 }
