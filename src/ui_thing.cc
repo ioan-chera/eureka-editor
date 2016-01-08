@@ -281,13 +281,17 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y = BY + 35;
 
 
-	o_ambush = new Fl_Check_Button( X+28, Y, FW, 22, "ambush");
-	o_friend = new Fl_Check_Button(AX+28, Y, FW, 22, "friend");
+	o_ambush  = new Fl_Check_Button( X+28, Y, FW, 22, "ambush");
+	o_friend  = new Fl_Check_Button(AX+28, Y, FW, 22, "friend");
+	o_dormant = new Fl_Check_Button(BX+28, Y, FW, 22, "dormant");
 
-	o_ambush->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Ambush));
-	o_friend->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Friend));
+	o_ambush ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Ambush));
+	o_friend ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Friend));
+	o_dormant->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Dormant));
 
-	add(o_ambush); add(o_friend);
+	add(o_ambush); add(o_friend); add(o_dormant);
+
+//	o_dormant->hide();
 
 	Y += 40;
 
@@ -565,8 +569,6 @@ void UI_ThingBox::OptionsFromInt(int options)
 
 	if (Level_format == MAPF_Hexen)
 	{
-		// TODO : MTF_Hexen_Dormant
-
 		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
 		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
 		o_dm  ->value((options & MTF_Hexen_DM)   ? 1 : 0);
@@ -574,6 +576,8 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_fight ->value((options & MTF_Hexen_Fighter) ? 1 : 0);
 		o_cleric->value((options & MTF_Hexen_Cleric)  ? 1 : 0);
 		o_mage  ->value((options & MTF_Hexen_Mage)    ? 1 : 0);
+
+		o_dormant->value((options & MTF_Hexen_Dormant) ? 1 : 0);
 	}
 	else
 	{
@@ -608,8 +612,6 @@ int UI_ThingBox::CalcOptions() const
 
 	if (Level_format == MAPF_Hexen)
 	{
-		// TODO : MTF_Hexen_Dormant
-
 		if (o_sp  ->value()) options |= MTF_Hexen_SP;
 		if (o_coop->value()) options |= MTF_Hexen_COOP;
 		if (o_dm  ->value()) options |= MTF_Hexen_DM;
@@ -617,6 +619,8 @@ int UI_ThingBox::CalcOptions() const
 		if (o_fight ->value()) options |= MTF_Hexen_Fighter;
 		if (o_cleric->value()) options |= MTF_Hexen_Cleric;
 		if (o_mage  ->value()) options |= MTF_Hexen_Mage;
+
+		if (o_dormant->value()) options |= MTF_Hexen_Dormant;
 	}
 	else if (game_info.coop_dm_flags)
 	{
@@ -757,6 +761,8 @@ void UI_ThingBox::UpdateMapFormatInfo()
 		o_cleric->show();
 		o_mage  ->show();
 
+		o_dormant->show();
+
 		// fix the masks for SP/COOP/DM
 		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Hexen_SP;
 		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Hexen_COOP;
@@ -771,6 +777,8 @@ void UI_ThingBox::UpdateMapFormatInfo()
 		o_fight ->hide();
 		o_cleric->hide();
 		o_mage  ->hide();
+
+		o_dormant->hide();
 
 		// fix the masks for SP/COOP/DM
 		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Not_SP;
