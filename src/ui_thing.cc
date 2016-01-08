@@ -78,12 +78,10 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	W -= 12;
 	H -= 10;
 
-	int MX = X + W/2;
-
 
 	which = new UI_Nombre(X, Y, W-10, 28, "Thing");
 
-	Y += which->h() + 4;
+	Y = Y + which->h() + 4;
 
 
 	type = new Fl_Int_Input(X+70, Y, 64, 24, "Type: ");
@@ -94,18 +92,23 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
-
-	Y += type->h() + 3;
+	Y = Y + type->h() + 3;
 
 	desc = new Fl_Output(X+70, Y, W-76, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
 
-	Y += desc->h() + 3;
+	Y = Y + desc->h() + 3;
 
+
+	sprite = new UI_Pic(X + W - 120, Y + 10, 100,100, "Sprite");
+	sprite->callback(button_callback, this);
+
+
+	Y = Y + 10;
 
 	pos_x = new Fl_Int_Input(X+70, Y, 70, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX+38, Y, 70, 24, "y: ");
-	pos_z = new Fl_Int_Input(X+70, Y + 28, 70, 24, "z: ");
+	pos_y = new Fl_Int_Input(X+70, Y + 28, 70, 24, "y: ");
+	pos_z = new Fl_Int_Input(X+70, Y + 28*2, 70, 24, "z: ");
 	pos_z->hide();
 
 	pos_x->align(FL_ALIGN_LEFT);
@@ -120,8 +123,16 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	pos_z->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += (pos_x->h() + 4) * 2;
+	Y = Y + 105;
 
+
+	// IOANCH 9/2015: TID
+	tid = new Fl_Int_Input(X+70, Y, 64, 24, "TID: ");
+	tid->align(FL_ALIGN_LEFT);
+	tid->callback(tid_callback, this);
+	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	Y = Y + tid->h() + 4;
 
 
 	angle = new Fl_Int_Input(X+70, Y, 64, 24, "Angle: ");
@@ -130,8 +141,8 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	angle->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	int ang_mx = X + W - 90;
-	int ang_my = Y + 16;
+	int ang_mx = X + W - 75;
+	int ang_my = Y + 15;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
@@ -146,50 +157,13 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
      	ang_buts[i]->callback(button_callback, this);
 	}
 
+	Y = Y + 50;
 
-	// IOANCH 9/2015: TID
-	int tmpY = Y;
-	Y += angle->h() + 4;
-
-	tid = new Fl_Int_Input(X+70, Y, 64, 24, "TID: ");
-	tid->align(FL_ALIGN_LEFT);
-	tid->callback(tid_callback, this);
-	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-
-	Y = tmpY + 30;
-
-	exfloor = new Fl_Int_Input(X+70, Y, 64, 24, "ExFloor: ");
-	exfloor->align(FL_ALIGN_LEFT);
-	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
-	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	efl_down = new Fl_Button(X+W-100, Y+1, 30, 22, "-");
-	efl_up   = new Fl_Button(X+W- 60, Y+1, 30, 22, "+");
-
-	efl_down->labelfont(FL_HELVETICA_BOLD);
-	efl_up  ->labelfont(FL_HELVETICA_BOLD);
-	efl_down->labelsize(16);
-	efl_up  ->labelsize(16);
-
-	efl_down->callback(button_callback, this);
-	efl_up  ->callback(button_callback, this);
-
-#if 0	
-	Y += exfloor->h() + 10;
-#else
-	exfloor->hide();
-	efl_down->hide();
-	efl_up->hide();
-#endif
-
-
-	Y += 42;
 
 	Fl_Box *opt_lab = new Fl_Box(X+10, Y, W, 22, "Options Flags:");
 	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
-	Y += opt_lab->h() + 2;
+	Y = Y + opt_lab->h() + 2;
 
 
 	// when appear: two rows of three on/off buttons
@@ -262,13 +236,32 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	o_dormant->hide();
 
-	Y += 40;
+	Y = Y + 45;
 
 
-	sprite = new UI_Pic(X + (W-120)/2, Y, 120,120, "Sprite");
-	sprite->callback(button_callback, this);
+	exfloor = new Fl_Int_Input(X+84, Y, 64, 24, "3D Floor: ");
+	exfloor->align(FL_ALIGN_LEFT);
+	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
+	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += 146;
+	efl_down = new Fl_Button(X+165, Y+1, 30, 22, "-");
+	efl_up   = new Fl_Button(X+210, Y+1, 30, 22, "+");
+
+	efl_down->labelfont(FL_HELVETICA_BOLD);
+	efl_up  ->labelfont(FL_HELVETICA_BOLD);
+	efl_down->labelsize(16);
+	efl_up  ->labelsize(16);
+
+	efl_down->callback(button_callback, this);
+	efl_up  ->callback(button_callback, this);
+
+#if 0
+	Y = Y + exfloor->h() + 10;
+#else
+  	exfloor->hide();
+  	efl_down->hide();
+  	efl_up->hide();
+#endif
 
 
 	// Hexen thing specials
@@ -283,13 +276,13 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 //	spec_choose->callback(button_callback, this);
 	spec_choose->hide();
 
-	Y += spec_type->h() + 2;
+	Y = Y + spec_type->h() + 2;
 
 	spec_desc = new Fl_Output(X+74, Y, W-86, 24, "Desc: ");
 	spec_desc->align(FL_ALIGN_LEFT);
 	spec_desc->hide();
 
-	Y += spec_desc->h() + 2;
+	Y = Y + spec_desc->h() + 2;
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
