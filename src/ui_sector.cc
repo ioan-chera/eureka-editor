@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,6 +28,11 @@
 #include "m_game.h"
 #include "w_rawdef.h"
 
+
+// config items
+int floor_bump_small  = 1;
+int floor_bump_medium = 8;
+int floor_bump_large  = 64;
 
 //
 // UI_SectorBox Constructor
@@ -449,12 +454,14 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
+	int diff;
 
-	int diff = 8;
 	if (Fl::event_shift())
-		diff = 1;
+		diff = floor_bump_small;
 	else if (Fl::event_ctrl())
-		diff = 64;
+		diff = floor_bump_large;
+	else
+		diff = floor_bump_medium;
 
 	if (w == box->lt_up)
 	{

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -77,6 +77,10 @@ extern int backup_max_files;
 extern int backup_max_space;
 
 extern bool browser_small_tex;
+
+extern int floor_bump_small;
+extern int floor_bump_medium;
+extern int floor_bump_large;
 
 extern int  render_aspect_ratio;
 extern bool render_high_detail;

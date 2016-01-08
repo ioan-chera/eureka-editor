@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -360,6 +360,33 @@ static const opt_desc_t options[] =
 		&dotty_point_col
 	},
 
+	{	"floor_bump_small",
+		0,
+		OPT_INTEGER,
+		"v",
+		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
+		NULL,
+		&floor_bump_small
+	},
+
+	{	"floor_bump_medium",
+		0,
+		OPT_INTEGER,
+		"v",
+		"distance for '+' and '-' buttons in sector panel without any modifier keys",
+		NULL,
+		&floor_bump_medium
+	},
+
+	{	"floor_bump_large",
+		0,
+		OPT_INTEGER,
+		"v",
+		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
+		NULL,
+		&floor_bump_large
+	},
+
 	{	"glbsp_fast",
 		0,
 		OPT_BOOLEAN,
@@ -629,20 +656,6 @@ static const opt_desc_t options[] =
 		NULL,
 		&swap_sidedefs
 	},
-
-// -AJA- this may be better done with a 'mouse_button_order' string,
-//       where the default is "123", and user could have "321"
-//       or "132" or any other combination.
-#if 0
-	{	"swap_buttons",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Swap mouse buttons",
-		NULL,
-		&swap_buttons
-	},
-#endif
 
 	//
 	// That's all there is
