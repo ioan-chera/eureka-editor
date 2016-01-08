@@ -61,12 +61,12 @@ private:
 	Fl_Check_Button *o_dm;
 	Fl_Check_Button *o_vanilla_dm;
 
-	Fl_Check_Button *o_ambush;
-	Fl_Check_Button *o_friend;
-
-	Fl_Check_Button *o_fighter;  // Hexen
+	Fl_Check_Button *o_fight;  // Hexen
 	Fl_Check_Button *o_cleric;
 	Fl_Check_Button *o_mage;
+
+	Fl_Check_Button *o_ambush;
+	Fl_Check_Button *o_friend;
 
 	UI_Pic *sprite;
 
