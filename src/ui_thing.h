@@ -71,6 +71,12 @@ private:
 
 	UI_Pic *sprite;
 
+	// more Hexen stuff
+	Fl_Int_Input *spec_type;
+	Fl_Button    *spec_choose;
+	Fl_Output    *spec_desc;
+	Fl_Int_Input *args[5];
+
 public:
 	UI_ThingBox(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_ThingBox();

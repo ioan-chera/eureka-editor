@@ -70,8 +70,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
-	end();  // cancel begin() in Fl_Group constructor
-
 	box(FL_FLAT_BOX);
 
 	X += 6;
@@ -85,8 +83,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	which = new UI_Nombre(X, Y, W-10, 28, "Thing");
 
-	add(which);
-
 	Y += which->h() + 4;
 
 
@@ -95,20 +91,14 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(type);
-
 	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
-
-	add(choose);
 
 
 	Y += type->h() + 3;
 
 	desc = new Fl_Output(X+70, Y, W-76, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
-
-	add(desc);
 
 	Y += desc->h() + 3;
 
@@ -130,8 +120,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	pos_z->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(pos_x); add(pos_y); add(pos_z);
-
 	Y += (pos_x->h() + 4) * 2;
 
 
@@ -140,8 +128,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	angle->align(FL_ALIGN_LEFT);
 	angle->callback(angle_callback, this);
 	angle->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	add(angle);
 
 
 	int ang_mx = X + W - 90;
@@ -158,8 +144,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 		ang_buts[i]->align(FL_ALIGN_CENTER);
 		ang_buts[i]->clear_visible_focus();
      	ang_buts[i]->callback(button_callback, this);
-
-		add(ang_buts[i]);
 	}
 
 
@@ -172,7 +156,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	tid->callback(tid_callback, this);
 	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(tid);
 
 	Y = tmpY + 30;
 
@@ -180,8 +163,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	exfloor->align(FL_ALIGN_LEFT);
 	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
 	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	add(exfloor);
 
 	efl_down = new Fl_Button(X+W-100, Y+1, 30, 22, "-");
 	efl_up   = new Fl_Button(X+W- 60, Y+1, 30, 22, "+");
@@ -193,8 +174,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	efl_down->callback(button_callback, this);
 	efl_up  ->callback(button_callback, this);
-
-	add(efl_down); add(efl_up);
 
 #if 0	
 	Y += exfloor->h() + 10;
@@ -209,8 +188,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	Fl_Box *opt_lab = new Fl_Box(X+10, Y, W, 22, "Options Flags:");
 	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-
-	add(opt_lab);
 
 	Y += opt_lab->h() + 2;
 
@@ -257,10 +234,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	o_vanilla_dm->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_SP));
 
-	add(o_easy); add(o_medium); add(o_hard);
-	add(o_sp);   add(o_coop);   add(o_dm);
-	add(o_vanilla_dm);
-
 
 	// Hexen class flags
 	o_fight   = new Fl_Check_Button(BX+28,  Y, FW, 22, "Fighter");
@@ -270,8 +243,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_fight ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Fighter));
 	o_cleric->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Cleric));
 	o_mage  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Mage));
-
-	add(o_fight); add(o_cleric); add(o_mage);
 
 	o_fight ->hide();
 	o_cleric->hide();
@@ -289,9 +260,7 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_friend ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Friend));
 	o_dormant->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Dormant));
 
-	add(o_ambush); add(o_friend); add(o_dormant);
-
-//	o_dormant->hide();
+	o_dormant->hide();
 
 	Y += 40;
 
@@ -299,8 +268,40 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	sprite = new UI_Pic(X + (W-120)/2, Y, 120,120, "Sprite");
 	sprite->callback(button_callback, this);
 
-	add(sprite);
+	Y += 146;
 
+
+	// Hexen thing specials
+
+	spec_type = new Fl_Int_Input(X+74, Y, 64, 24, "Special: ");
+	spec_type->align(FL_ALIGN_LEFT);
+//	spec_type->callback(type_callback, this);
+//	spec_type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	spec_type->hide();
+
+	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
+//	spec_choose->callback(button_callback, this);
+	spec_choose->hide();
+
+	Y += spec_type->h() + 2;
+
+	spec_desc = new Fl_Output(X+74, Y, W-86, 24, "Desc: ");
+	spec_desc->align(FL_ALIGN_LEFT);
+	spec_desc->hide();
+
+	Y += spec_desc->h() + 2;
+
+	for (int a = 0 ; a < 5 ; a++)
+	{
+		args[a] = new Fl_Int_Input(X+74+43*a, Y, 39, 24);
+///		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+		args[a]->hide();
+	}
+
+	args[0]->label("Args: ");
+
+
+	end();
 
 	resizable(NULL);
 }
@@ -763,6 +764,13 @@ void UI_ThingBox::UpdateMapFormatInfo()
 
 		o_dormant->show();
 
+		spec_type  ->show();
+		spec_choose->show();
+		spec_desc  ->show();
+
+		for (int a = 0 ; a < 5 ; a++)
+			args[a]->show();
+
 		// fix the masks for SP/COOP/DM
 		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Hexen_SP;
 		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Hexen_COOP;
@@ -779,6 +787,13 @@ void UI_ThingBox::UpdateMapFormatInfo()
 		o_mage  ->hide();
 
 		o_dormant->hide();
+
+		spec_type  ->hide();
+		spec_choose->hide();
+		spec_desc  ->hide();
+
+		for (int a = 0 ; a < 5 ; a++)
+			args[a]->hide();
 
 		// fix the masks for SP/COOP/DM
 		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Not_SP;
