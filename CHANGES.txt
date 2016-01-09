@@ -5,16 +5,17 @@ CHANGES Eureka x.xx
 +  Hexen support
    (thanks to printz for doing some of the heavy lifting)
 
++  treat Freedoom Phase 1 and Phase 2 as separate games
+
 +  added Eternity port definition, thanks to printz
 
 -  changed default port from Boom --> Vanilla
--  treat Freedoom Phase 1 and Phase 2 as separate games
 -  better merging of linedefs when dragging a vertex
+-  allow loading a map with no vertices, no linedefs (etc)
 
 -  improved eureka.desktop file, courtesy Fabian Greffrath
 -  have a fallback sprite for the MBF dog thing (id 888)
 -  use absolute paths for resource filenames in __EUREKA lump
--  allow loading a map with no vertices, no linedefs (etc)
 
 -  map checks: detect the Medusa Effect on 2S lines
 -  map checks: detect transparent tex on solid walls
