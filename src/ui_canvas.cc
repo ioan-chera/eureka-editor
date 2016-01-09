@@ -220,10 +220,10 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-/*
+#if 0
 if (NumSectors > 41)
 RenderSector(40);
-*/
+#endif
 
 	// draw the grid first since it's in the background
 	if (grid.shown)
@@ -1613,9 +1613,6 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 //------------------------------------------------------------------------
 
 
-static short render_sector_y;
-
-
 // this represents a segment of a linedef bounding a sector.
 struct sector_edge_t
 {
@@ -1634,9 +1631,12 @@ struct sector_edge_t
 	// clipped vertical range, inclusive
 	short y1, y2;
 
-	inline float CalcX(short y) const
+	// computed X value
+	float x;
+
+	void CalcX(short y)
 	{
-		return scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
+		x = scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
 	}
 
 	struct CMP_Y
@@ -1659,7 +1659,7 @@ struct sector_edge_t
 			if (A == NULL)
 				return true;
 
-			return A->CalcX(render_sector_y) < B->CalcX(render_sector_y);
+			return A->x < B->x;
 		}
 	};
 };
@@ -1667,7 +1667,7 @@ struct sector_edge_t
 
 void UI_Canvas::RenderSector(int num)
 {
-// fprintf(stderr, "RenderSector %d\n", num);
+fprintf(stderr, "RenderSector %d\n", num);
 
 	std::vector<sector_edge_t> edgelist;
 
@@ -1718,6 +1718,13 @@ void UI_Canvas::RenderSector(int num)
 		if (edge.y1 > edge.y2)
 			continue;
 
+		// compute side
+		bool is_right = (L->WhatSector(SIDE_LEFT) == num);
+
+		if (edge.flipped) is_right = !is_right;
+
+		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
+
 /*
 fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
 n, edge.scr_x1, edge.scr_y1, edge.scr_x2, edge.scr_y2, edge.flipped,
@@ -1746,12 +1753,12 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 	std::vector<sector_edge_t *> active_edges;
 
+	unsigned int i;
+
 	for (short y = min_y1 ; y <= max_y1 ; y++)
 	{
-		render_sector_y = y;
-
 		// remove old edges from active list
-		for (unsigned int i = 0 ; i < active_edges.size() ; i++)
+		for (i = 0 ; i < active_edges.size() ; i++)
 		{
 			if (y > active_edges[i]->scr_y2)
 				active_edges[i] = NULL;
@@ -1763,11 +1770,19 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			active_edges.push_back(&edgelist[next_edge]);
 		}
 
+/// fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
+
 		if (active_edges.empty())
 			continue;
 
 		// sort active edges by X value
 		// [ also puts NULL entries at end, making easy to remove them ]
+
+		for (i = 0 ; i < active_edges.size() ; i++)
+		{
+			if (active_edges[i])
+				active_edges[i]->CalcX(y);
+		}
 
 		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
 
@@ -1776,7 +1791,25 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 		// compute spans
 		
-		// FIXME
+		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
+		{
+			const sector_edge_t * E1 = active_edges[i - 1];
+			const sector_edge_t * E2 = active_edges[i];
+
+// fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
+// E1->x, E1->side, E2->x, E2->side);
+
+			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
+				continue;
+
+			int x1 = floor(E1->x);
+			int x2 = floor(E2->x);
+
+			// this probably cannot happen....
+			if (x2 < x1) continue;
+
+// fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
+		}
 	}
 }
 
