@@ -512,7 +512,7 @@ void UI_LineBox::UpdateField(int field)
 			length->value("");
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG2))
+	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG5))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 			args[a]->value("");

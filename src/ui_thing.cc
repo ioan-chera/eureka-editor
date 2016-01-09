@@ -268,8 +268,8 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	spec_type = new Fl_Int_Input(X+74, Y, 64, 24, "Special: ");
 	spec_type->align(FL_ALIGN_LEFT);
-//	spec_type->callback(type_callback, this);
-//	spec_type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	spec_type->callback(spec_callback, this);
+	spec_type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	spec_type->hide();
 
 	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
@@ -346,6 +346,36 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
+		}
+
+		BA_End();
+	}
+}
+
+
+void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	int new_type = atoi(box->spec_type->value());
+
+	const linetype_t *info = M_GetLineType(new_type);
+
+	if (new_type == 0)
+		box->spec_desc->value("");
+	else
+		box->spec_desc->value(info->desc);
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+	
+		for (list.begin(&it) ; !it.at_end() ; ++it)
+		{
+			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
 		}
 
 		BA_End();
@@ -694,9 +724,6 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_X || field == Thing::F_Y
 		|| field == Thing::F_Z)
 	{
-		for (int a = 0 ; a < 5 ; a++)
-			args[a]->value("");
-
 		if (is_thing(obj))
 		{
 			const Thing *T = Things[obj];
@@ -705,14 +732,6 @@ void UI_ThingBox::UpdateField(int field)
 			pos_y->value(Int_TmpStr(T->y));
 			pos_z->value(Int_TmpStr(T->z));
 
-			if (Level_format == MAPF_Hexen)
-			{
-				if (T->arg1) args[0]->value(Int_TmpStr(T->arg1));
-				if (T->arg2) args[1]->value(Int_TmpStr(T->arg2));
-				if (T->arg3) args[2]->value(Int_TmpStr(T->arg3));
-				if (T->arg4) args[3]->value(Int_TmpStr(T->arg4));
-				if (T->arg5) args[4]->value(Int_TmpStr(T->arg5));
-			}
 		}
 		else
 		{
@@ -762,6 +781,41 @@ void UI_ThingBox::UpdateField(int field)
 			OptionsFromInt(Things[obj]->options);
 		else
 			OptionsFromInt(0);
+	}
+
+	if (Level_format != MAPF_Hexen)
+		return;
+
+	if (field < 0 || field == Thing::F_SPECIAL)
+	{
+		if (is_thing(obj) && Things[obj]->special)
+		{
+			const linetype_t *info = M_GetLineType(Things[obj]->special);
+			spec_desc->value(info->desc);
+			spec_type->value(Int_TmpStr(Things[obj]->special));
+		}
+		else
+		{
+			spec_type->value("");
+			spec_desc->value("");
+		}
+	}
+
+	if (field < 0 || (field >= Thing::F_ARG1 && field <= Thing::F_ARG5))
+	{
+		for (int a = 0 ; a < 5 ; a++)
+			args[a]->value("");
+
+		if (is_thing(obj))
+		{
+			const Thing *T = Things[obj];
+
+			if (T->arg1) args[0]->value(Int_TmpStr(T->arg1));
+			if (T->arg2) args[1]->value(Int_TmpStr(T->arg2));
+			if (T->arg3) args[2]->value(Int_TmpStr(T->arg3));
+			if (T->arg4) args[3]->value(Int_TmpStr(T->arg4));
+			if (T->arg5) args[4]->value(Int_TmpStr(T->arg5));
+		}
 	}
 }
 
