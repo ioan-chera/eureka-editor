@@ -222,7 +222,7 @@ void UI_Canvas::DrawMap()
 
 #if 0
 if (NumSectors > 41)
-RenderSector(40);
+RenderSector(0);
 #endif
 
 	// draw the grid first since it's in the background
@@ -1653,10 +1653,10 @@ struct sector_edge_t
 		{
 			// NULL is always > than a valid pointer
 
-			if (B == NULL)
+			if (A == NULL)
 				return false;
 
-			if (A == NULL)
+			if (B == NULL)
 				return true;
 
 			return A->x < B->x;
@@ -1667,7 +1667,7 @@ struct sector_edge_t
 
 void UI_Canvas::RenderSector(int num)
 {
-fprintf(stderr, "RenderSector %d\n", num);
+///  fprintf(stderr, "RenderSector %d\n", num);
 
 	std::vector<sector_edge_t> edgelist;
 
@@ -1797,6 +1797,10 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 		{
 			const sector_edge_t * E1 = active_edges[i - 1];
 			const sector_edge_t * E2 = active_edges[i];
+#if 1
+			if (E1 == NULL || E2 == NULL)
+				BugError("RenderSector: did not delete NULLs properly!");
+#endif
 
 ///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 ///  E1->x, E1->side, E2->x, E2->side);
