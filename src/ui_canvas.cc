@@ -31,6 +31,8 @@
 #include "levels.h"
 #include "r_render.h"
 
+#include <algorithm>
+
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
 
@@ -217,6 +219,11 @@ void UI_Canvas::DrawMap()
 {
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
+
+/*
+if (NumSectors > 41)
+RenderSector(40);
+*/
 
 	// draw the grid first since it's in the background
 	if (grid.shown)
@@ -1606,8 +1613,11 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 //------------------------------------------------------------------------
 
 
+static short render_sector_y;
+
+
 // this represents a segment of a linedef bounding a sector.
-typedef struct
+struct sector_edge_t
 {
 	const LineDef * line;
 
@@ -1618,14 +1628,47 @@ typedef struct
 	// has the line been flipped (coordinates were swapped) ?
 	short flipped;
 
-	// clipped vertical range
+	// what side this edge faces (SIDE_LEFT or SIDE_RIGHT)
+	short side;
+
+	// clipped vertical range, inclusive
 	short y1, y2;
 
-} sector_edge_t;
+	inline float CalcX(short y) const
+	{
+		return scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
+	}
+
+	struct CMP_Y
+	{
+		inline bool operator() (const sector_edge_t &A, const sector_edge_t& B) const
+		{
+			return A.scr_y1 < B.scr_y1;
+		}
+	};
+
+	struct CMP_X
+	{
+		inline bool operator() (const sector_edge_t *A, const sector_edge_t *B) const
+		{
+			// NULL is always > than a valid pointer
+
+			if (B == NULL)
+				return false;
+
+			if (A == NULL)
+				return true;
+
+			return A->CalcX(render_sector_y) < B->CalcX(render_sector_y);
+		}
+	};
+};
 
 
 void UI_Canvas::RenderSector(int num)
 {
+// fprintf(stderr, "RenderSector %d\n", num);
+
 	std::vector<sector_edge_t> edgelist;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
@@ -1675,13 +1718,66 @@ void UI_Canvas::RenderSector(int num)
 		if (edge.y1 > edge.y2)
 			continue;
 
+/*
+fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
+n, edge.scr_x1, edge.scr_y1, edge.scr_x2, edge.scr_y2, edge.flipped,
+L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
+*/
+
 		// add the edge
 		edge.line = L;
 
 		edgelist.push_back(edge);
 	}
 
-	// TODO
+	if (edgelist.empty())
+		return;
+
+	unsigned int next_edge = 0;
+
+	// sort edges into vertical order (i.e. by scr_y1)
+
+	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
+
+	short min_y1 = edgelist[0].scr_y1;
+	short max_y1 = y() + h() - 1;   // TODO
+
+	// visit each line
+
+	std::vector<sector_edge_t *> active_edges;
+
+	for (short y = min_y1 ; y <= max_y1 ; y++)
+	{
+		render_sector_y = y;
+
+		// remove old edges from active list
+		for (unsigned int i = 0 ; i < active_edges.size() ; i++)
+		{
+			if (y > active_edges[i]->scr_y2)
+				active_edges[i] = NULL;
+		}
+
+		// add new edges from active list
+		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].scr_y1 ; next_edge++)
+		{
+			active_edges.push_back(&edgelist[next_edge]);
+		}
+
+		if (active_edges.empty())
+			continue;
+
+		// sort active edges by X value
+		// [ also puts NULL entries at end, making easy to remove them ]
+
+		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
+
+		while (active_edges.size() > 0 && active_edges.back() == NULL)
+			active_edges.pop_back();
+
+		// compute spans
+		
+		// FIXME
+	}
 }
 
 //--- editor settings ---
