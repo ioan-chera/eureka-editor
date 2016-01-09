@@ -118,6 +118,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	{
 		args[a] = new Fl_Int_Input(X+58+43*a, Y, 39, 24);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
 	}
 

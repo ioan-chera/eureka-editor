@@ -106,6 +106,8 @@ private:
 	static void    tid_callback(Fl_Widget *w, void *data);
 	static void option_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);
+	static void   spec_callback(Fl_Widget *w, void *data);
+	static void   args_callback(Fl_Widget *w, void *data);
 
 	void AdjustExtraFloor(int dir);
 

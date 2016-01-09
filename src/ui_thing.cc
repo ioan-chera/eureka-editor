@@ -287,7 +287,8 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		args[a] = new Fl_Int_Input(X+74+43*a, Y, 39, 24);
-///		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+		args[a]->callback(args_callback, new thing_opt_CB_data_c(this, a));
+		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
 	}
 
@@ -534,6 +535,34 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
+{
+	thing_opt_CB_data_c *ocb = (thing_opt_CB_data_c *)data;
+
+	UI_ThingBox *box = ocb->parent;
+
+	int arg_idx = ocb->mask;
+	int new_value = atoi(box->args[arg_idx]->value());
+
+	new_value = CLAMP(0, new_value, 255);
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+	
+		for (list.begin(&it); !it.at_end(); ++it)
+		{
+			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
+		}
+
+		BA_End();
+	}
+}
+
+
 void UI_ThingBox::AdjustExtraFloor(int dir)
 {
 	if (! is_thing(obj))
@@ -648,11 +677,25 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_X || field == Thing::F_Y
 		|| field == Thing::F_Z)
 	{
+		for (int a = 0 ; a < 5 ; a++)
+			args[a]->value("");
+
 		if (is_thing(obj))
 		{
-			pos_x->value(Int_TmpStr(Things[obj]->x));
-			pos_y->value(Int_TmpStr(Things[obj]->y));
-			pos_z->value(Int_TmpStr(Things[obj]->z));
+			const Thing *T = Things[obj];
+
+			pos_x->value(Int_TmpStr(T->x));
+			pos_y->value(Int_TmpStr(T->y));
+			pos_z->value(Int_TmpStr(T->z));
+
+			if (Level_format == MAPF_Hexen)
+			{
+				if (T->arg1) args[0]->value(Int_TmpStr(T->arg1));
+				if (T->arg2) args[1]->value(Int_TmpStr(T->arg2));
+				if (T->arg3) args[2]->value(Int_TmpStr(T->arg3));
+				if (T->arg4) args[3]->value(Int_TmpStr(T->arg4));
+				if (T->arg5) args[4]->value(Int_TmpStr(T->arg5));
+			}
 		}
 		else
 		{
