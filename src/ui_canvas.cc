@@ -1671,6 +1671,8 @@ fprintf(stderr, "RenderSector %d\n", num);
 
 	std::vector<sector_edge_t> edgelist;
 
+	fl_color(fl_rgb_color(255,128,32));
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
@@ -1770,7 +1772,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			active_edges.push_back(&edgelist[next_edge]);
 		}
 
-/// fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
+///  fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
 
 		if (active_edges.empty())
 			continue;
@@ -1796,8 +1798,8 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			const sector_edge_t * E1 = active_edges[i - 1];
 			const sector_edge_t * E2 = active_edges[i];
 
-// fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-// E1->x, E1->side, E2->x, E2->side);
+///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
+///  E1->x, E1->side, E2->x, E2->side);
 
 			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
 				continue;
@@ -1805,10 +1807,20 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			int x1 = floor(E1->x);
 			int x2 = floor(E2->x);
 
+			// completely off the screen?
+			if (x2 < x() || x1 >= x() + w())
+				continue;
+
+			// clip span to screen
+			x1 = MAX(x1, x());
+			x2 = MIN(x2, x() + w() - 1);
+
 			// this probably cannot happen....
 			if (x2 < x1) continue;
 
-// fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
+///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
+
+			fl_rectf(x1, y, x2 - x1 + 1, 1);
 		}
 	}
 }
