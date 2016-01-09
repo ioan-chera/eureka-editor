@@ -4,30 +4,9 @@ Eureka TODO / WISHLIST
 
 
 +  Hexen support
-   +  linedef types (with activation in flags)
-   -  linedef args
+   +  linedef flags
 
-   +  thing flags
-   -  thing special + args
-
-   +  flesh out Hexen game definitions
-   -  do not default to BOOM port
-
-   +  conversion from Hexen --> DOOM format
-   +  conversion from DOOM --> Hexen format
-
-
-+  BOOM Generalized line types / sectors
-
-
-glBSP : when NODES (etc) overflow, use the X-NOD uncompressed zdoom nodes.
-[ ticket #11 ]
-
-
-store _absolute_ pathnames for resource files (in EUREKA lump)
-
-
-fatal error if load a map with NO vertices?
+   -  args : use tooltip to show what ARG is
 
 
 ______________________________________________________________________
@@ -39,8 +18,11 @@ ______________________________________________________________________
 General
 -------
 
++  BOOM Generalized line types / sectors
+
 +  Preferences:
    -  ability to change mouse move/turn speed in 3D view
+   -  floor_bump_xxx values
 
 +  Key binding system for mouse buttons
    -  convert MIDDLE button (insert/resize/rotate) for KEY system
@@ -101,6 +83,8 @@ General
 ?  a toolbar
 
 +  shift-C to copy properties from defaults, META-C copy TO defaults
+
+-  conversion between Hexen <--> DOOM formats
 
 -  View/Place Camera command, cursor turns into +
 
@@ -432,21 +416,11 @@ USER CONFIG NEEDED
 
 reselect_second_vertex
 
-default_gamma
-
-floor_bump_small   (2)
-floor_bump_medium  (16)
-floor_bump_large   (64)
-
 render_forward_speed  (16)
 render_turn_speed     (16)
 render_updown_speed   (16)
 
 paste_reselects  (true)
-
-render_textures  (true)
-render_sprites   (true)
-render_lighting  (false)
 
 map_highlight_color
 map_selection_color
