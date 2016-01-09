@@ -132,6 +132,8 @@ private:
 	void DrawObjNum(int x, int y, int num, bool center = false);
 	void DrawSnapMarker();
 
+	void RenderSector(int num);
+
 	void SelboxDraw();
 
 	void DragDelta(int *dx, int *dy);

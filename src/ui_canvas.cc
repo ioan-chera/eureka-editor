@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2015 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1602,6 +1602,87 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 	redraw();
 }
 
+
+//------------------------------------------------------------------------
+
+
+// this represents a segment of a linedef bounding a sector.
+typedef struct
+{
+	const LineDef * line;
+
+	// coordinates mapped to screen space, not clipped
+	int scr_x1, scr_y1;
+	int scr_x2, scr_y2;
+
+	// has the line been flipped (coordinates were swapped) ?
+	short flipped;
+
+	// clipped vertical range
+	short y1, y2;
+
+} sector_edge_t;
+
+
+void UI_Canvas::RenderSector(int num)
+{
+	std::vector<sector_edge_t> edgelist;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (! L->TouchesSector(num))
+			continue;
+
+		// ignore 2S lines with same sector on both sides
+		if (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT))
+			continue;
+
+		sector_edge_t edge;
+
+		edge.scr_x1 = SCREENX(L->Start()->x);
+		edge.scr_y1 = SCREENY(L->Start()->y);
+		edge.scr_x2 = SCREENX(L->End()->x);
+		edge.scr_y2 = SCREENY(L->End()->y);
+
+		// completely above or below the screen?
+		if (MAX(edge.scr_y1, edge.scr_y2) < y())
+			continue;
+
+		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
+			continue;
+				
+		// skip horizontal lines
+		if (edge.scr_y1 == edge.scr_y2)
+			continue;
+
+		edge.flipped = 0;
+
+		if (edge.scr_y1 > edge.scr_y2)
+		{
+			std::swap(edge.scr_x1, edge.scr_x2);
+			std::swap(edge.scr_y1, edge.scr_y2);
+
+			edge.flipped = 1;
+		}
+
+		// compute usable range, clipping to screen
+		edge.y1 = MAX(edge.scr_y1, y());
+		edge.y2 = MIN(edge.scr_y2, y() + h() - 1);
+
+		// this probably cannot happen....
+		if (edge.y1 > edge.y2)
+			continue;
+
+		// add the edge
+		edge.line = L;
+
+		edgelist.push_back(edge);
+	}
+
+	// TODO
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
