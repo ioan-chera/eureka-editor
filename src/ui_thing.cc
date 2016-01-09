@@ -273,7 +273,7 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	spec_type->hide();
 
 	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
-//	spec_choose->callback(button_callback, this);
+	spec_choose->callback(button_callback, this);
 	spec_choose->hide();
 
 	Y = Y + spec_type->h() + 2;
@@ -364,6 +364,20 @@ void UI_ThingBox::SetThingType(int new_type)
 
 	type->value(buffer);
 	type->do_callback();
+}
+
+
+void UI_ThingBox::SetSpecialType(int new_type)
+{
+	if (obj < 0)
+		return;
+
+	char buffer[64];
+
+	sprintf(buffer, "%d", new_type);
+
+	spec_type->value(buffer);
+	spec_type->do_callback();
 }
 
 
@@ -517,6 +531,9 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose || w == box->sprite)
 		main_win->ShowBrowser('O');
+
+	if (w == box->spec_choose)
+		main_win->ShowBrowser('L');
 
 	// check for the angle buttons
 	for (int i = 0 ; i < 8 ; i++)

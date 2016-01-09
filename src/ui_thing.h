@@ -93,6 +93,7 @@ public:
 	void UpdateTotal();
 
 	void SetThingType(int new_type);
+	void SetSpecialType(int new_type);
 
 	void UpdateGameInfo();
 	void UpdateMapFormatInfo();

@@ -457,6 +457,11 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 				thing_box->SetThingType(number);
 				return;
 			}
+			if (kind == 'L' && Level_format == MAPF_Hexen)
+			{
+				thing_box->SetSpecialType(number);
+				return;
+			}
 			break;
 
 		default:
