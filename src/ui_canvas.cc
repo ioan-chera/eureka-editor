@@ -1687,6 +1687,8 @@ void UI_Canvas::RenderSector(int num)
 	int tw = img ? img->width()  : 0;
 	int th = img ? img->height() : 0;
 
+	// FIXME : verify size is at least 64x64
+
 
 	/*** Part 1 : visit linedefs and create edges ***/
 
@@ -1853,7 +1855,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 ///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
 
-			if (false /* SOLID */)  // TODO
+			if (! img)
 			{
 				fl_rectf(x1, y, x2 - x1 + 1, 1);
 				continue;
@@ -1865,16 +1867,18 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
+			int ty = (0 - MAPY(y)) & 63;
+
 			for (; dest < dest_end ; dest += 3, x++)
 			{
-				int tx = x % tw;
-				int ty = y % th;
+				// todo : be nice to optimize the next line
+				int tx = MAPX(x) & 63;
 
 				rgb_color_t col = palette[wbuf[ty * tw + tx]];
 
-				dest[0] = RGB_RED(col)   ;// * RGB_RED(light_col)) >> 8;
-				dest[1] = RGB_GREEN(col) ;// * RGB_RED(light_col)) >> 8;
-				dest[2] = RGB_BLUE(col)  ;// * RGB_RED(light_col)) >> 8;
+				dest[0] = RGB_RED(col);
+				dest[1] = RGB_GREEN(col);
+				dest[2] = RGB_BLUE(col);
 			}
 
 			fl_draw_image(line_rgb, x1, y, span_w, 1);
