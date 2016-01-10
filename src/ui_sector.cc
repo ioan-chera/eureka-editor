@@ -106,6 +106,8 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	c_pic->callback(tex_callback, this);
 	f_pic->callback(tex_callback, this);
 
+	Y += 16;
+
 
 	c_tex = new Fl_Input(X+70, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
@@ -120,8 +122,8 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	ceil_h->callback(height_callback, this);
 	ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	ce_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-	ce_up   = new Fl_Button(X+70+68, Y+1, 30, 22, "+");
+	ce_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
+	ce_up   = new Fl_Button(X+145, Y+1, 30, 22, "+");
 
 	ce_down->labelfont(FL_HELVETICA_BOLD);
 	ce_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -131,15 +133,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	ce_down->callback(button_callback, this);
 	ce_up  ->callback(button_callback, this);
 
-	Y += ceil_h->h() + 8;
-
-
-	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
-	headroom->align(FL_ALIGN_LEFT);
-	headroom->callback(room_callback, this);
-	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	Y += headroom->h() + 8;
+	Y += ceil_h->h() + 10;
 
 
 	floor_h = new Fl_Int_Input(X+70, Y, 64, 24, "");
@@ -147,8 +141,8 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	floor_h->callback(height_callback, this);
 	floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	fl_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-	fl_up   = new Fl_Button(X+70+68, Y+1, 30, 22, "+");
+	fl_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
+	fl_up   = new Fl_Button(X+145, Y+1, 30, 22, "+");
 
 	fl_down->labelfont(FL_HELVETICA_BOLD);
 	fl_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -166,7 +160,15 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	f_tex->callback(tex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += f_tex->h() + 22;
+	Y += f_tex->h() + 14;
+
+
+	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
+	headroom->align(FL_ALIGN_LEFT);
+	headroom->callback(room_callback, this);
+	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	Y += headroom->h() + 22;
 
 
 	end();
