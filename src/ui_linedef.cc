@@ -142,7 +142,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	int FW = 110;
 
-	f_upper = new Fl_Check_Button(X+12, Y+2, FW, 20, "upper unpeg");
+	f_upper = new Fl_Check_Button(X+28, Y+2, FW, 20, "upper unpeg");
 	f_upper->labelsize(12);
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
@@ -155,7 +155,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += 19;
 
 
-	f_lower = new Fl_Check_Button(X+12, Y+2, FW, 20, "lower unpeg");
+	f_lower = new Fl_Check_Button(X+28, Y+2, FW, 20, "lower unpeg");
 	f_lower->labelsize(12);
 	f_lower->callback(flags_callback, new line_flag_CB_data_c(this, MLF_LowerUnpegged));
 
@@ -168,7 +168,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += 19;
 
 
-	f_passthru = new Fl_Check_Button(X+12, Y+2, FW, 20, "pass thru");
+	f_passthru = new Fl_Check_Button(X+28, Y+2, FW, 20, "pass thru");
 	f_passthru->labelsize(12);
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
 
