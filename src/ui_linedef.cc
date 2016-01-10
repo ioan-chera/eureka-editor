@@ -171,6 +171,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_passthru = new Fl_Check_Button(X+28, Y+2, FW, 20, "pass thru");
 	f_passthru->labelsize(12);
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
+	f_passthru->hide();
 
 
 	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block sound");
@@ -739,7 +740,7 @@ int UI_LineBox::SolidMask(int side)
 }
 
 
-void UI_LineBox::UpdateMapFormatInfo()
+void UI_LineBox::UpdateGameInfo()
 {
 	if (Level_format == MAPF_Hexen)
 	{

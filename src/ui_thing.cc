@@ -859,15 +859,11 @@ void UI_ThingBox::UpdateGameInfo()
 		o_friend->show();
 	else
 		o_friend->hide();
-}
 
 
-void UI_ThingBox::UpdateMapFormatInfo()
-{
+	/* map format stuff */
+
 	thing_opt_CB_data_c *ocb;
-
-	// update SP/COOP/DM buttons
-	UpdateGameInfo();
 
 	if (Level_format == MAPF_Hexen)
 	{

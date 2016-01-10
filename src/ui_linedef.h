@@ -78,7 +78,7 @@ public:
 
 	void UnselectPics();
 
-	void UpdateMapFormatInfo();
+	void UpdateGameInfo();
 
 private:
 	void CalcLength();

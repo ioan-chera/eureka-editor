@@ -885,7 +885,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	edit.RedrawMap = 1;
 
 	main_win->UpdateTotals();
-	main_win->UpdateMapFormatInfo();
+	main_win->UpdateGameInfo();
 	main_win->InvalidatePanelObj();
 	main_win->redraw();
 

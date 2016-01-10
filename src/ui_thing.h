@@ -96,7 +96,6 @@ public:
 	void SetSpecialType(int new_type);
 
 	void UpdateGameInfo();
-	void UpdateMapFormatInfo();
 
 private:
 	static void      x_callback(Fl_Widget *w, void *data);

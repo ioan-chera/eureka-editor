@@ -528,14 +528,7 @@ void UI_MainWin::Delay(int steps)
 void UI_MainWin::UpdateGameInfo()
 {
 	thing_box->UpdateGameInfo();
-}
-
-
-// IOANCH 9/2015
-void UI_MainWin::UpdateMapFormatInfo()
-{
-	thing_box->UpdateMapFormatInfo();
-	 line_box->UpdateMapFormatInfo();
+	 line_box->UpdateGameInfo();
 }
 
 
