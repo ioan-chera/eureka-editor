@@ -28,10 +28,9 @@
 
 include "boom"
 
+feature 3d_midtex 1
 
 #TODO:  thing flag 512 "Dormant" - like in Hexen
-
-#TODO:  line flag 1024 "3D MidTex" feature
 
 
 #---- THINGS ------------

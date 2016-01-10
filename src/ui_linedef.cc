@@ -124,7 +124,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	args[0]->label("Args: ");
 
 
-	Y += tag->h() + 14;
+	Y += tag->h() + 10;
 
 
 	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
@@ -174,17 +174,26 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_passthru->hide();
 
 
-	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block sound");
+	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "sound block");
 	f_sound->labelsize(12);
 	f_sound->callback(flags_callback, new line_flag_CB_data_c(this, MLF_SoundBlock));
 
 
-	Y += 36;
+	Y += 19;
+
+
+	f_3dmidtex = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "3D MidTex");
+	f_3dmidtex->labelsize(12);
+	f_3dmidtex->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Eternity_3DMidTex));
+	f_3dmidtex->hide();
+
+
+	Y += 24;
 
 
 	front = new UI_SideBox(x(), Y, w(), 140, 0);
 
-	Y += front->h() + 18;
+	Y += front->h() + 16;
 
 
 	back = new UI_SideBox(x(), Y, w(), 140, 1);
@@ -659,6 +668,7 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	f_upper   ->value((lineflags & MLF_UpperUnpegged) ? 1 : 0);
 	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
 	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
+	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
 
 	f_walk ->value((lineflags & MLF_Blocking)      ? 1 : 0);
 	f_mons ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
@@ -696,6 +706,9 @@ int UI_LineBox::CalcFlags() const
 	{
 		if (game_info.pass_through && f_passthru->value())
 			lineflags |= MLF_Boom_PassThru;
+
+		if (game_info.midtex_3d && f_3dmidtex->value())
+			lineflags |= MLF_Eternity_3DMidTex;
 	}
 
 	return lineflags;
@@ -752,6 +765,7 @@ void UI_LineBox::UpdateGameInfo()
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 
 		f_passthru->hide();
+		f_3dmidtex->hide();
 	}
 	else
 	{
@@ -765,6 +779,11 @@ void UI_LineBox::UpdateGameInfo()
 			f_passthru->show();
 		else
 			f_passthru->hide();
+
+		if (game_info.midtex_3d)
+			f_3dmidtex->show();
+		else
+			f_3dmidtex->hide();
 	}
 
 	for (int a = 0 ; a < 5 ; a++)

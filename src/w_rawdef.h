@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2008 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -52,21 +52,22 @@ typedef struct raw_wad_entry_s
 
 // Lump order in a map WAD: each map needs a couple of lumps
 // to provide a complete scene geometry description.
-enum
+typedef enum
 {
-   LL_LABEL=0,   // A separator name, ExMx or MAPxx
-   LL_THINGS,    // Monsters, items..
-   LL_LINEDEFS,  // LineDefs, from editing
-   LL_SIDEDEFS,  // SideDefs, from editing
-   LL_VERTEXES,  // Vertices, edited and BSP splits generated
-   LL_SEGS,      // LineSegs, from LineDefs split by BSP
-   LL_SSECTORS,  // SubSectors, list of LineSegs
-   LL_NODES,     // BSP nodes
-   LL_SECTORS,   // Sectors, from editing
-   LL_REJECT,    // LUT, sector-sector visibility 
-   LL_BLOCKMAP,  // LUT, motion clipping, walls/grid element
-   LL_BEHAVIOR   // Hexen scripting stuff
-};
+	LL_LABEL=0,   // A separator name, ExMx or MAPxx
+	LL_THINGS,    // Monsters, items..
+	LL_LINEDEFS,  // LineDefs, from editing
+	LL_SIDEDEFS,  // SideDefs, from editing
+	LL_VERTEXES,  // Vertices, edited and BSP splits generated
+	LL_SEGS,      // LineSegs, from LineDefs split by BSP
+	LL_SSECTORS,  // SubSectors, list of LineSegs
+	LL_NODES,     // BSP nodes
+	LL_SECTORS,   // Sectors, from editing
+	LL_REJECT,    // LUT, sector-sector visibility 
+	LL_BLOCKMAP,  // LUT, motion clipping, walls/grid element
+	LL_BEHAVIOR   // Hexen scripting stuff
+}
+lump_order_e;
 
 
 /* ----- The level structures ---------------------- */
@@ -228,53 +229,65 @@ typedef struct patch_s
 
 typedef enum
 {
-  // solid, is an obstacle
-  MLF_Blocking = 0x0001,
+	// solid, is an obstacle
+	MLF_Blocking = 0x0001,
 
-  // blocks monsters only
-  MLF_BlockMonsters = 0x0002,
+	// blocks monsters only
+	MLF_BlockMonsters = 0x0002,
 
-  // backside will not be present at all if not two sided
-  MLF_TwoSided = 0x0004,
+	// backside will not be present at all if not two sided
+	MLF_TwoSided = 0x0004,
 
-  // If a texture is pegged, the texture will have
-  // the end exposed to air held constant at the
-  // top or bottom of the texture (stairs or pulled
-  // down things) and will move with a height change
-  // of one of the neighbor sectors.
-  //
-  // Unpegged textures allways have the first row of
-  // the texture at the top pixel of the line for both
-  // top and bottom textures (use next to windows).
+	// If a texture is pegged, the texture will have
+	// the end exposed to air held constant at the
+	// top or bottom of the texture (stairs or pulled
+	// down things) and will move with a height change
+	// of one of the neighbor sectors.
+	//
+	// Unpegged textures allways have the first row of
+	// the texture at the top pixel of the line for both
+	// top and bottom textures (use next to windows).
 
-  // upper texture unpegged
-  MLF_UpperUnpegged = 0x0008,
+	// upper texture unpegged
+	MLF_UpperUnpegged = 0x0008,
 
-  // lower texture unpegged
-  MLF_LowerUnpegged = 0x0010,
+	// lower texture unpegged
+	MLF_LowerUnpegged = 0x0010,
 
-  // in AutoMap: don't map as two sided: IT'S A SECRET!
-  MLF_Secret = 0x0020,
+	// in AutoMap: don't map as two sided: IT'S A SECRET!
+	MLF_Secret = 0x0020,
 
-  // sound rendering: don't let sound cross two of these
-  MLF_SoundBlock = 0x0040,
+	// sound rendering: don't let sound cross two of these
+	MLF_SoundBlock = 0x0040,
 
-  // don't draw on the automap at all
-  MLF_DontDraw = 0x0080,
+	// don't draw on the automap at all
+	MLF_DontDraw = 0x0080,
 
-  // set as if already seen, thus drawn in automap
-  MLF_Mapped = 0x0100,
+	// set as if already seen, thus drawn in automap
+	MLF_Mapped = 0x0100,
 
-  // -AJA- this one is from Boom. Allows multiple lines to
-  //       be pushed simultaneously.
-  MLF_Boom_PassThru = 0x0200,
-
-  // -AJA- these three are from XDoom
-  MLF_XDoom_Translucent = 0x0400,
-  MLF_XDoom_ShootBlock  = 0x0800,
-  MLF_XDoom_SightBlock  = 0x1000,
+	// -AJA- this one is from Boom. Allows multiple lines to
+	//       be pushed simultaneously.
+	MLF_Boom_PassThru = 0x0200,
 }
 lineflag_e;
+
+
+typedef enum
+{
+	MLF_Eternity_3DMidTex = 0x0400,
+}
+eternity_lineflag_e;
+
+
+typedef enum
+{
+	// -AJA- these three are from XDoom
+	MLF_XDoom_Translucent = 0x0400,
+	MLF_XDoom_ShootBlock  = 0x0800,
+	MLF_XDoom_SightBlock  = 0x1000,
+}
+xdoom_lineflag_e;
 
 
 typedef enum
@@ -283,13 +296,18 @@ typedef enum
 
 	MLF_Repeatable = 0x0200,
 	MLF_Activation = 0x1c00,
+}
+hexen_lineflag_e;
 
+
+typedef enum
+{
 	// these are supported by ZDoom (and derived ports)
 	MLF_ZDoom_MonCanActivate  = 0x2000,
 	MLF_ZDoom_BlockPlayers    = 0x4000,
 	MLF_ZDoom_BlockEverything = 0x8000,
 }
-hexen_lineflag_e;
+zdoom_lineflag_e;
 
 
 typedef enum
