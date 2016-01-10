@@ -62,8 +62,6 @@ UI_NodeDialog::UI_NodeDialog() :
 		want_cancel(false),
 		want_close(false)
 {
-	end(); // cancel begin() in Fl_Group constructor
-
 	size_range(w(), h());
 
 	callback((Fl_Callback *) close_callback, this);
@@ -73,12 +71,8 @@ UI_NodeDialog::UI_NodeDialog() :
 
 	browser = new Fl_Browser(0, 0, w(), h() - 100);
 
-	add(browser);
-
 
 	Fl_Box * ptext = new Fl_Box(FL_NO_BOX, 10, h() - 80, 80, 20, "Progress:");
-
-	add(ptext);
 
 
 	progress = new Fl_Progress(100, h() - 80, w() - 120, 20);
@@ -90,14 +84,12 @@ UI_NodeDialog::UI_NodeDialog() :
 	progress->maximum(100.0);
 	progress->value(0.0);
 
-	add(progress);
-
 
 	button = new Fl_Button(w() - 100, h() - 46, 80, 30, "Cancel");
 	button->callback(button_callback, this);
 
-	add(button);
 
+	end();
 
 	resizable(browser);
 }
