@@ -523,13 +523,15 @@ void UI_LineBox::UpdateField(int field)
 
 			tag->value(Int_TmpStr(LineDefs[obj]->tag));
 
+			const linetype_t *info = M_GetLineType(L->type);
+
 			if (Level_format == MAPF_Hexen)
 			{
-				if (L->tag ) args[0]->value(Int_TmpStr(L->tag));
-				if (L->arg2) args[1]->value(Int_TmpStr(L->arg2));
-				if (L->arg3) args[2]->value(Int_TmpStr(L->arg3));
-				if (L->arg4) args[3]->value(Int_TmpStr(L->arg4));
-				if (L->arg5) args[4]->value(Int_TmpStr(L->arg5));
+				if (L->tag  || info->args[0]) args[0]->value(Int_TmpStr(L->tag));
+				if (L->arg2 || info->args[1]) args[1]->value(Int_TmpStr(L->arg2));
+				if (L->arg3 || info->args[2]) args[2]->value(Int_TmpStr(L->arg3));
+				if (L->arg4 || info->args[3]) args[3]->value(Int_TmpStr(L->arg4));
+				if (L->arg5 || info->args[4]) args[4]->value(Int_TmpStr(L->arg5));
 			}
 		}
 		else
