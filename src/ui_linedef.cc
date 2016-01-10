@@ -62,13 +62,13 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 
 	X += 6;
-	Y += 5;
+	Y += 6;
 
 	W -= 12;
 	H -= 10;
 
 
-	which = new UI_Nombre(X, Y, W-10, 28, "Linedef");
+	which = new UI_Nombre(X+6, Y, W-12, 28, "Linedef");
 
 	Y += which->h() + 4;
 

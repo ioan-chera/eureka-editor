@@ -47,13 +47,13 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 
 	X += 6;
-	Y += 5;
+	Y += 6;
 
 	W -= 12;
 	H -= 10;
 
 
-	which = new UI_Nombre(X, Y, W-10, 28, "Sector");
+	which = new UI_Nombre(X+6, Y, W-12, 28, "Sector");
 
 	add(which);
 

@@ -37,7 +37,7 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 
 
 	X += 6;
-	Y += 5;
+	Y += 6;
 
 	W -= 12;
 	H -= 10;
@@ -45,13 +45,13 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	int MX = X + W/2;
 
 
-	which = new UI_Nombre(X, Y, W-10, 28, "Vertex");
+	which = new UI_Nombre(X+6, Y, W-12, 28, "Vertex");
 
 	Y += which->h() + 4;
 
 
-	pos_x = new Fl_Int_Input(X +28, Y, 80, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX +28, Y, 80, 24, "y: ");
+	pos_x = new Fl_Int_Input(X  + 44, Y, 75, 24, "x: ");
+	pos_y = new Fl_Int_Input(MX + 14, Y, 75, 24, "y: ");
 
 	pos_x->align(FL_ALIGN_LEFT);
 	pos_y->align(FL_ALIGN_LEFT);

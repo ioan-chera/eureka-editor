@@ -73,13 +73,13 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	box(FL_FLAT_BOX);
 
 	X += 6;
-	Y += 5;
+	Y += 6;
 
 	W -= 12;
 	H -= 10;
 
 
-	which = new UI_Nombre(X, Y, W-10, 28, "Thing");
+	which = new UI_Nombre(X+6, Y, W-12, 28, "Thing");
 
 	Y = Y + which->h() + 4;
 
