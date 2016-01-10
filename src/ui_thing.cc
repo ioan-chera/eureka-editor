@@ -92,12 +92,12 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
-	Y = Y + type->h() + 3;
+	Y = Y + type->h() + 4;
 
-	desc = new Fl_Output(X+70, Y, W-76, 24, "Desc: ");
+	desc = new Fl_Output(X+70, Y, W-78, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
 
-	Y = Y + desc->h() + 3;
+	Y = Y + desc->h() + 4;
 
 
 	sprite = new UI_Pic(X + W - 120, Y + 10, 100,100, "Sprite");

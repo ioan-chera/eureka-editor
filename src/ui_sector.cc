@@ -60,7 +60,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+58, Y, 64, 24, "Type: ");
+	type = new Fl_Int_Input(X+70, Y, 64, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -72,36 +72,36 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 	add(choose);
 
-	Y += type->h() + 3;
+	Y += type->h() + 4;
 
 
-	desc = new Fl_Output(X+58, Y, W-64, 24, "Desc: ");
+	desc = new Fl_Output(X+70, Y, W-78, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
 
 	add(desc);
 
-	Y += desc->h() + 3;
+	Y += desc->h() + 14;
 
 
-	tag = new Fl_Int_Input(X+58, Y, 64, 24, "Tag: ");
+	tag = new Fl_Int_Input(X+70, Y, 64, 24, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	add(tag);
 
-	Y += tag->h() + 3;
+	Y += tag->h() + 4;
 
 
-	light = new Fl_Int_Input(X+58, Y, 64, 24, "Light: ");
+	light = new Fl_Int_Input(X+70, Y, 64, 24, "Light: ");
 	light->align(FL_ALIGN_LEFT);
 	light->callback(light_callback, this);
 	light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	add(light);
 
-	lt_down = new Fl_Button(X+W/2+20, Y+1, 30, 22, "-");
-	lt_up   = new Fl_Button(X+W/2+60, Y+1, 30, 22, "+");
+	lt_down = new Fl_Button(light->x() + light->w() + 20, Y+1, 30, 22, "-");
+	lt_up   = new Fl_Button(light->x() + light->w() + 60, Y+1, 30, 22, "+");
 
 	lt_down->labelfont(FL_HELVETICA_BOLD);
 	lt_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -114,9 +114,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	add(lt_down); add(lt_up);
 
 
-	Y += light->h() + 3;
-
-	Y += 14;
+	Y += light->h() + 22;
 
 
 	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64, "Ceil");
@@ -129,7 +127,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	add(c_pic);
 
 
-	c_tex = new Fl_Input(X+68, Y, 108, 24, "Ceiling: ");
+	c_tex = new Fl_Input(X+70, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(tex_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -139,7 +137,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += c_tex->h() + 3;
 
 
-	ceil_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
+	ceil_h = new Fl_Int_Input(X+70, Y, 64, 24, "");
 	ceil_h->align(FL_ALIGN_LEFT);
 	ceil_h->callback(height_callback, this);
 	ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -148,7 +146,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 
 	ce_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-	ce_up   = new Fl_Button(X+68+68, Y+1, 30, 22, "+");
+	ce_up   = new Fl_Button(X+70+68, Y+1, 30, 22, "+");
 
 	ce_down->labelfont(FL_HELVETICA_BOLD);
 	ce_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -178,7 +176,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 5;
 
 
-	floor_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
+	floor_h = new Fl_Int_Input(X+70, Y, 64, 24, "");
 	floor_h->align(FL_ALIGN_LEFT);
 	floor_h->callback(height_callback, this);
 	floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -187,7 +185,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 
 	fl_down = new Fl_Button(X+24,    Y+1, 30, 22, "-");
-	fl_up   = new Fl_Button(X+68+68, Y+1, 30, 22, "+");
+	fl_up   = new Fl_Button(X+70+68, Y+1, 30, 22, "+");
 
 	fl_down->labelfont(FL_HELVETICA_BOLD);
 	fl_up  ->labelfont(FL_HELVETICA_BOLD);
@@ -203,7 +201,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new Fl_Input(X+68, Y, 108, 24, "Floor:   ");
+	f_tex = new Fl_Input(X+70, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(tex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
