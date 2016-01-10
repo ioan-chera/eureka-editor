@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
 
 
 #define ABOUT_W  (440)   // matches logo image
-#define ABOUT_H  (230 + 270)
+#define ABOUT_H  (230 + 290)
 
 
 class UI_About : public UI_Escapable_Window
@@ -95,7 +95,8 @@ const char *UI_About::Text1 =
 
 
 const char *UI_About::Text2 =
-	"Copyright (C) 2001-2015 Andrew Apted, et al\n"
+	"Copyright (C) 2001-2016 Andrew Apted, et al\n"
+	"Copyright (C) 2014-2015 Ioan Chera                \n"
 	"Copyright (C) 1997-2003 André Majorel, et al\n"
 	"\n"
 	"This program is free software, and may be\n"
@@ -148,14 +149,14 @@ UI_About::UI_About(int W, int H, const char *label) :
 	}
 
 
-	int cy = 238;
+	int cy = 240;
 
 
 	// the very informative text
 
 	int pad = 20 + KF * 6;
 
-	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 42, Text1);
+	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 44, Text1);
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
 	box->labelfont(FL_HELVETICA_BOLD);
 
@@ -185,7 +186,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 	int bw = 60 + KF * 10;
 	int bh = 30 + KF * 3;
 
-	cy += (H - cy - bh) / 2 - 8;
+	cy += (H - cy - bh) / 2 - 6;
 
 	Fl_Color but_color = fl_rgb_color(128, 128, 255);
 
