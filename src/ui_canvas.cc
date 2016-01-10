@@ -203,10 +203,6 @@ void UI_Canvas::DrawEverything()
 		if (edit.Selected->get(highlight.num))
 			hi_color = HI_AND_SEL_COL;
 
-		// FIXME : TEST CRUD
-		if (highlight.type == OBJ_SECTORS)
-			RenderSector(highlight.num);
-
 		DrawHighlight(highlight.type, highlight.num, hi_color,
 		              ! edit.error_mode /* do_tagged */);
 	}
@@ -224,11 +220,6 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-#if 0
-if (NumSectors > 41)
-RenderSector(0);
-#endif
-
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
@@ -237,6 +228,11 @@ RenderSector(0);
 		else
 			DrawGrid_Normal();
 	}
+
+#if 1
+	for (int n = 0 ; n < NumSectors ; n++)
+		RenderSector(n);
+#endif
 
 	if (Debugging)
 		DrawMapBounds();
@@ -1678,7 +1674,7 @@ void UI_Canvas::RenderSector(int num)
 	short min_y = 32767;
 	short max_y = 0;
 
-	fl_color(fl_rgb_color(255,128,32));
+	fl_color(SectorLightColor(Sectors[num]->light));
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
