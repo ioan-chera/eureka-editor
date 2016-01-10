@@ -1669,12 +1669,19 @@ void UI_Canvas::RenderSector(int num)
 {
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
+	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
+
+	fl_color(light_col); 
+
+
+	/*** Part 1 : visit linedefs and create edges ***/
+
+
 	std::vector<sector_edge_t> edgelist;
 
 	short min_y = 32767;
 	short max_y = 0;
 
-	fl_color(SectorLightColor(Sectors[num]->light));
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1748,20 +1755,23 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 	if (edgelist.empty())
 		return;
 
-///  fprintf(stderr, "  range %d..%d\n", min_y, max_y);
-
-	unsigned int next_edge = 0;
-
 	// sort edges into vertical order (i.e. by scr_y1)
 
 	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
 
-	// visit each line
+
+	/*** Part 2 : traverse edge list and render spans ***/
+
+
+	unsigned int next_edge = 0;
+
+	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
 
 	std::vector<sector_edge_t *> active_edges;
 
 	unsigned int i;
 
+	// visit each screen row
 	for (short y = min_y ; y <= max_y ; y++)
 	{
 		// remove old edges from active list
@@ -1829,9 +1839,30 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 ///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
 
-			fl_rectf(x1, y, x2 - x1 + 1, 1);
+			if (false /* SOLID */)  // TODO
+			{
+				fl_rectf(x1, y, x2 - x1 + 1, 1);
+				continue;
+			}
+
+			int x = x1;
+			int span_w = x2 - x1 + 1;
+
+			u8_t *dest = line_rgb;
+			u8_t *dest_end = line_rgb + span_w * 3;
+
+			for (; dest < dest_end ; dest += 3, x++)
+			{
+				dest[0] = x & 255;
+				dest[1] = y & 255;
+				dest[2] = (x2 / 8) & 255;
+			}
+
+			fl_draw_image(line_rgb, x1, y, span_w, 1);
 		}
 	}
+
+	delete[] line_rgb;
 }
 
 //--- editor settings ---
