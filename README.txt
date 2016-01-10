@@ -1,10 +1,10 @@
 
-Eureka 1.07 README
+Eureka 1.10 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>
 
-February 2015
+January 2016
 
 
 INTRODUCTION
@@ -39,6 +39,7 @@ SUPPORTED GAMES
 -  FreeDoom
 -  HacX
 -  Heretic
+-  Hexen
 
 
 REQUIREMENTS
@@ -256,7 +257,8 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright (C) 2001-2015 Andrew Apted
+  Copyright (C) 2001-2016 Andrew Apted, et al
+  Copyright (C) 2014-2015 Ioan Chera
   Copyright (C) 1997-2003 Andre Majorel et al
 
   Eureka is free software; you can redistribute it and/or modify
