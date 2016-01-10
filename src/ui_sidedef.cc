@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -39,8 +39,6 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
     obj(SETOBJ_NO_LINE), is_front(_side == 0),
 	on_2S_line(false)
 {
-	end();  // cancel begin() in Fl_Group constructor
-
 	box(FL_FLAT_BOX); // FL_UP_BOX
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_TOP | FL_ALIGN_LEFT);
@@ -55,14 +53,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	add_button->labelcolor(labelcolor());
 	add_button->callback(add_callback, this);
 
-	add(add_button);
-
-
-	del_button = new Fl_Button(X + W - 60, Y, 50, 20, "DEL");
+	del_button = new Fl_Button(X + W - 65, Y, 50, 20, "DEL");
 	del_button->labelcolor(labelcolor());
 	del_button->callback(delete_callback, this);
-
-	add(del_button);
 
 
 	X += 6;
@@ -74,9 +67,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	int MX = X + W/2;
 
 
-	x_ofs = new Fl_Int_Input(X+20,   Y, 52, 24, "x:");
+	x_ofs = new Fl_Int_Input(X+28,   Y, 52, 24, "x:");
 	y_ofs = new Fl_Int_Input(MX-20,  Y, 52, 24, "y:");
-	sec = new Fl_Int_Input(X+W-54, Y, 52, 24, "sec:");
+	sec = new Fl_Int_Input(X+W-59, Y, 52, 24, "sec:");
 
 	x_ofs->align(FL_ALIGN_LEFT);
 	y_ofs->align(FL_ALIGN_LEFT);
@@ -90,13 +83,11 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	y_ofs->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	sec  ->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	add(x_ofs); add(y_ofs); add(sec);
 
+	Y += x_ofs->h() + 6;
 
-	Y += x_ofs->h() + 4;
-
-	int LX = X+8;
-	int UX = X+W-64-8;
+	int LX = X+16;
+	int UX = X+W-64-16;
 	    MX = MX-32;
 	
 	if (swap_sidedefs)
@@ -133,11 +124,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	add(l_pic); add(u_pic); add(r_pic);
-	add(l_tex); add(u_tex); add(r_tex);
-
-
-	Y += 24;
+	end();
 
 
 	UpdateHiding();
@@ -494,13 +481,13 @@ void UI_SideBox::UpdateLabel()
 {
 	if (! is_sidedef(obj))
 	{
-		label(is_front ? " No Front Sidedef" : " No Back Sidedef");
+		label(is_front ? "   No Front Sidedef" : "   No Back Sidedef");
 		return;
 	}
 
 	char buffer[200];
 
-	sprintf(buffer, " %s Sidedef: #%d\n",
+	sprintf(buffer, "   %s Sidedef: #%d\n",
 			is_front ? "Front" : "Back", obj);
 
 	copy_label(buffer);

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -86,12 +86,11 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	new Fl_Box(FL_NO_BOX, X+10, Y, 48, 24, "Desc:");
 
-
-	desc = new Fl_Output(X+58, Y, W-66, 24);
+	desc = new Fl_Output(type->x(), Y, W-66, 24);
 	desc->align(FL_ALIGN_LEFT);
 
 
-	actkind = new Fl_Choice(X+58, Y, 52, 24);
+	actkind = new Fl_Choice(X+58, Y, 57, 24);
 	// this order must match the SPAC_XXX constants
 	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
 	actkind->value(12);
@@ -125,16 +124,14 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	args[0]->label("Args: ");
 
 
-	Y += tag->h() + 2;
-
-	Y += 3;
+	Y += tag->h() + 14;
 
 
-	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X, Y, 64, 24, "Flags: ");
+	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
 	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-	f_automap = new Fl_Choice(X+W-104, Y, 104, 22);
+	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
 	f_automap->add("Normal|Invisible|Mapped|Secret");
 	f_automap->value(0);
 	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
@@ -186,7 +183,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 
 	front = new UI_SideBox(x(), Y, w(), 140, 0);
 
-	Y += front->h() + 10;
+	Y += front->h() + 18;
 
 
 	back = new UI_SideBox(x(), Y, w(), 140, 1);
@@ -750,7 +747,7 @@ void UI_LineBox::UpdateMapFormatInfo()
 		length->hide();
 
 		actkind->show();
-		desc->resize(type->x() + 60, desc->y(), w()-78-60, desc->h());
+		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 
 		f_passthru->hide();
 	}
