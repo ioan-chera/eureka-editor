@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -208,6 +208,18 @@ rgb_color_t ParseColor(const char *str)
 
 		return fl_rgb_color(r*17, g*17, b*17);
 	}
+}
+
+
+rgb_color_t SectorLightColor(int light)
+{
+	float lt = CLAMP(0, (light | 15), 256) / 256.0;
+
+	lt = pow(lt, 1.5);
+
+	light = CLAMP(48, (int)(lt * 256), 255);
+
+	return RGB_MAKE(light, light, light);
 }
 
 

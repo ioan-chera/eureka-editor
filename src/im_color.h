@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -62,6 +62,8 @@ void W_CreateBrightMap();
 rgb_color_t DarkerColor(rgb_color_t col);
 
 rgb_color_t ParseColor(const char *str);
+
+rgb_color_t SectorLightColor(int light);
 
 
 //------------------------------------------------------------//
