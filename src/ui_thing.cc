@@ -705,14 +705,17 @@ int UI_ThingBox::CalcOptions() const
 
 	if (Level_format != MAPF_Hexen)
 	{
-		if (o_friend->value()) options |= MTF_Friend;
+		if (game_info.friend_flag && o_friend->value())
+			options |= MTF_Friend;
 
+#if 0
 		int exfl_num = atoi(exfloor->value());
 
 		if (exfl_num > 0)
 		{
 			options |= (exfl_num << MTF_EXFLOOR_SHIFT) & MTF_EXFLOOR_MASK;
 		}
+#endif
 	}
 
 	return options;
@@ -913,6 +916,8 @@ void UI_ThingBox::UpdateGameInfo()
 		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Not_COOP;
 		ocb = (thing_opt_CB_data_c *) o_dm  ->user_data(); ocb->mask = MTF_Not_DM;
 	}
+
+	redraw();
 }
 
 

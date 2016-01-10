@@ -694,7 +694,8 @@ int UI_LineBox::CalcFlags() const
 	}
 	else
 	{
-		if (f_passthru->value()) lineflags |= MLF_Boom_PassThru;
+		if (game_info.pass_through && f_passthru->value())
+			lineflags |= MLF_Boom_PassThru;
 	}
 
 	return lineflags;
@@ -760,7 +761,10 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		f_passthru->show();
+		if (game_info.pass_through)
+			f_passthru->show();
+		else
+			f_passthru->hide();
 	}
 
 	for (int a = 0 ; a < 5 ; a++)

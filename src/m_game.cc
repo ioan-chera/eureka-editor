@@ -163,6 +163,14 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.friend_flag = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "pass_through") == 0)
+	{
+		game_info.pass_through = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "3d_midtex") == 0)
+	{
+		game_info.midtex_3d = atoi(argv[1]);
+	}
 	else if (y_stricmp(argv[0], "medusa_bug") == 0)
 	{
 		game_info.medusa_bug = atoi(argv[1]);

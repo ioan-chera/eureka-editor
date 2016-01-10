@@ -132,11 +132,13 @@ typedef struct
 	int gen_types;	// BOOM generalized linedefs and sectors
 
 	int img_png;	// PNG format for various graphics
-
 	int tx_start;	// textures in TX_START .. TX_END
 
 	int coop_dm_flags;	// MTF_NOT_COOP and MTF_NOT_DM for things
-	int friend_flag;	// the MTF_FRIEND flag (from MBF)
+	int friend_flag;	// MTF_FRIEND thing flag from MBF
+
+	int pass_through;	// Boom's MTF_PASSTHRU line flag
+	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
 
 	int medusa_bug;		// used for Vanilla, prone to the Medusa Effect
 
