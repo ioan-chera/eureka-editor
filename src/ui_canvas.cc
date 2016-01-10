@@ -203,6 +203,10 @@ void UI_Canvas::DrawEverything()
 		if (edit.Selected->get(highlight.num))
 			hi_color = HI_AND_SEL_COL;
 
+		// FIXME : TEST CRUD
+		if (highlight.type == OBJ_SECTORS)
+			RenderSector(highlight.num);
+
 		DrawHighlight(highlight.type, highlight.num, hi_color,
 		              ! edit.error_mode /* do_tagged */);
 	}
@@ -1671,6 +1675,9 @@ void UI_Canvas::RenderSector(int num)
 
 	std::vector<sector_edge_t> edgelist;
 
+	short min_y = 32767;
+	short max_y = 0;
+
 	fl_color(fl_rgb_color(255,128,32));
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
@@ -1717,8 +1724,11 @@ void UI_Canvas::RenderSector(int num)
 		edge.y2 = MIN(edge.scr_y2, y() + h() - 1);
 
 		// this probably cannot happen....
-		if (edge.y1 > edge.y2)
+		if (edge.y2 < edge.y1)
 			continue;
+
+		min_y = MIN(min_y, edge.y1);
+		max_y = MAX(max_y, edge.y2);
 
 		// compute side
 		bool is_right = (L->WhatSector(SIDE_LEFT) == num);
@@ -1742,14 +1752,13 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 	if (edgelist.empty())
 		return;
 
+///  fprintf(stderr, "  range %d..%d\n", min_y, max_y);
+
 	unsigned int next_edge = 0;
 
 	// sort edges into vertical order (i.e. by scr_y1)
 
 	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
-
-	short min_y1 = edgelist[0].scr_y1;
-	short max_y1 = y() + h() - 1;   // TODO
 
 	// visit each line
 
@@ -1757,17 +1766,17 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 	unsigned int i;
 
-	for (short y = min_y1 ; y <= max_y1 ; y++)
+	for (short y = min_y ; y <= max_y ; y++)
 	{
 		// remove old edges from active list
 		for (i = 0 ; i < active_edges.size() ; i++)
 		{
-			if (y > active_edges[i]->scr_y2)
+			if (y > active_edges[i]->y2)
 				active_edges[i] = NULL;
 		}
 
 		// add new edges from active list
-		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].scr_y1 ; next_edge++)
+		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].y1 ; next_edge++)
 		{
 			active_edges.push_back(&edgelist[next_edge]);
 		}
