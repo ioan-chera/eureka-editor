@@ -28,8 +28,10 @@
 #include "m_game.h"
 #include "r_grid.h"
 #include "im_color.h"
+#include "im_img.h"
 #include "levels.h"
 #include "r_render.h"
+#include "w_flats.h"
 
 #include <algorithm>
 
@@ -1673,6 +1675,18 @@ void UI_Canvas::RenderSector(int num)
 
 	fl_color(light_col); 
 
+	
+	const char * fname = Sectors[num]->FloorTex();
+
+	Img_c * img = W_GetFlat(fname);
+
+	if (! img) return;  // FIXME
+
+	img_pixel_t *wbuf = img ? img->wbuf() : NULL;
+
+	int tw = img ? img->width()  : 0;
+	int th = img ? img->height() : 0;
+
 
 	/*** Part 1 : visit linedefs and create edges ***/
 
@@ -1853,9 +1867,14 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
-				dest[0] = x & 255;
-				dest[1] = y & 255;
-				dest[2] = (x2 / 8) & 255;
+				int tx = x % tw;
+				int ty = y % th;
+
+				rgb_color_t col = palette[wbuf[ty * tw + tx]];
+
+				dest[0] = RGB_RED(col)   ;// * RGB_RED(light_col)) >> 8;
+				dest[1] = RGB_GREEN(col) ;// * RGB_RED(light_col)) >> 8;
+				dest[2] = RGB_BLUE(col)  ;// * RGB_RED(light_col)) >> 8;
 			}
 
 			fl_draw_image(line_rgb, x1, y, span_w, 1);
