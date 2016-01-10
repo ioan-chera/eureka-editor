@@ -25,6 +25,10 @@
 #------------------------------------------------------------------------
 
 
+exclude_game heretic
+exclude_game hexen
+
+
 #---- BOOM FEATURES -------------
 
 feature gen_types 1

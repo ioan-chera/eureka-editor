@@ -580,6 +580,22 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				flat_assigns[name] = group;
 		}
 
+		else if (y_stricmp(token[0], "exclude_game") == 0)
+		{
+			if (nargs != 1)
+				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+
+			if (Game_name && y_stricmp(token[1], Game_name) == 0)
+			{
+				LogPrintf("WARNING: skipping %s -- not compatible with %s\n",
+						  basename, Game_name);
+
+				// do not process any more of the file
+				fclose(fp);
+				return;
+			}
+		}
+
 		else
 		{
 			FatalError("%s(%d): unknown directive: %.32s\n",
