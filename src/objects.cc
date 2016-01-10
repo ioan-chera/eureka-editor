@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -46,7 +46,6 @@
 // config items
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
-bool reselect_second_vertex = false;
 
 
 /*
@@ -542,7 +541,7 @@ static void Insert_LineDef(int v1, int v2)
 }
 
 
-static void Insert_Vertex()
+static void Insert_Vertex(bool force_select)
 {
 	int reselect = true;
 
@@ -611,8 +610,7 @@ static void Insert_Vertex()
 			return;
 		}
 
-	    // TODO: CONFIG ITEM to always reselect second
-		if (!reselect_second_vertex && VertexHowManyLineDefs(second_sel) > 0)
+		if (!force_select && VertexHowManyLineDefs(second_sel) > 0)
 			reselect = false;
 
 		BA_Begin();
@@ -685,7 +683,7 @@ static void Insert_Vertex()
 		SplitLineDefAtVertex(edit.split_line.num, new_v);
 
 		// CONFIG ITEM
-		if (!reselect_second_vertex && first_sel >= 0)
+		if (!force_select && first_sel >= 0)
 			reselect = false;
 	}
 
@@ -792,6 +790,9 @@ static void Insert_Sector(bool force_new)
 
 void CMD_Insert(void)
 {
+	bool force_new;
+	bool force_select;
+
 	switch (edit.mode)
 	{
 		case OBJ_THINGS:
@@ -799,15 +800,13 @@ void CMD_Insert(void)
 			break;
 
 		case OBJ_VERTICES:
-			Insert_Vertex();
+			force_select = Exec_HasFlag("/select");
+			Insert_Vertex(force_select);
 			break;
 
 		case OBJ_SECTORS:
-			{
-				bool force_new = Exec_HasFlag("/new");
-
-				Insert_Sector(force_new);
-			}
+			force_new = Exec_HasFlag("/new");
+			Insert_Sector(force_new);
 			break;
 
 		default:
