@@ -496,8 +496,8 @@ line 29 - "Pillar_Build"  tag  speed  dist
 line 30 - "Pillar_Open"   tag  speed  f_dist  c_dist 
 line 94 - "Pillar_Crush"  tag  speed  dist  damage
 
-line 80 - "ACS_Execute"       script  map  s_arg1  s_arg2  s_arg3
-line 83 - "ACS_Execute /lock" script  map  s_arg1  s_arg2  lock
+line 80 - "ACS_Execute"       script  map  param1  param2  param3
+line 83 - "ACS_Execute /lock" script  map  param1  param2  lock
 line 81 - "ACS_Suspend"       script  map 
 line 82 - "ACS_Terminate"     script  map 
 
@@ -511,7 +511,7 @@ line 101 a "Scroll_Right"  speed
 line 102 a "Scroll_Up"     speed 
 line 103 a "Scroll_Down"   speed 
 
-line 129 - "UsePuzzleItem"  item  script  s_arg1  s_arg2  s_arg3
+line 129 - "UsePuzzleItem"  item  script  param1  param2  param3
 line 140 - "Change Sound"  tag  sound 
 line 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 

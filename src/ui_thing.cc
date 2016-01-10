@@ -804,7 +804,10 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || (field >= Thing::F_ARG1 && field <= Thing::F_ARG5))
 	{
 		for (int a = 0 ; a < 5 ; a++)
+		{
 			args[a]->value("");
+			args[a]->tooltip(NULL);
+		}
 
 		if (is_thing(obj))
 		{
@@ -817,6 +820,11 @@ void UI_ThingBox::UpdateField(int field)
 			if (T->arg3 || info->args[2]) args[2]->value(Int_TmpStr(T->arg3));
 			if (T->arg4 || info->args[3]) args[3]->value(Int_TmpStr(T->arg4));
 			if (T->arg5 || info->args[4]) args[4]->value(Int_TmpStr(T->arg5));
+
+			// set tooltips
+			for (int a = 0 ; a < 5 ; a++)
+				if (info->args[a])
+					args[a]->copy_tooltip(info->args[a]);
 		}
 	}
 }

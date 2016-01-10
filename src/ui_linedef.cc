@@ -515,7 +515,10 @@ void UI_LineBox::UpdateField(int field)
 	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG5))
 	{
 		for (int a = 0 ; a < 5 ; a++)
+		{
 			args[a]->value("");
+			args[a]->tooltip(NULL);
+		}
 
 		if (is_linedef(obj))
 		{
@@ -532,6 +535,11 @@ void UI_LineBox::UpdateField(int field)
 				if (L->arg3 || info->args[2]) args[2]->value(Int_TmpStr(L->arg3));
 				if (L->arg4 || info->args[3]) args[3]->value(Int_TmpStr(L->arg4));
 				if (L->arg5 || info->args[4]) args[4]->value(Int_TmpStr(L->arg5));
+
+				// set tooltips
+				for (int a = 0 ; a < 5 ; a++)
+					if (info->args[a])
+						args[a]->copy_tooltip(info->args[a]);
 			}
 		}
 		else
