@@ -3,10 +3,9 @@ Eureka TODO / WISHLIST
 ======================
 
 
-+  Hexen support
-   +  linedef flags
+>>>  RenderSector
 
-   -  args : use tooltip to show what ARG is
+   -  drawing flats
 
 
 ______________________________________________________________________
@@ -17,6 +16,8 @@ ______________________________________________________________________
 
 General
 -------
+
++  Large font mode, more readable on 1920x1080 monitors
 
 +  BOOM Generalized line types / sectors
 
@@ -30,6 +31,12 @@ General
    -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
    -  convert button stuff in 3D render to use KEY system
    -  preference for "bindable mouse wheel (disable normal behavior)"
+
++  Proper system to specify which ports can be used with each game.
+
+   Ideally it would group games into classes (e.g. most of the current
+   games would be "doom" class).  Then each port can specify which
+   classes of games it supports.
 
 
 
@@ -413,8 +420,6 @@ ______________________________________________________________________
 
 USER CONFIG NEEDED
 -------------------
-
-reselect_second_vertex
 
 render_forward_speed  (16)
 render_turn_speed     (16)
