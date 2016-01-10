@@ -41,10 +41,6 @@
 #define MAX_RADIUS  128
 
 
-const char *GetAngleName (int);
-const char *GetWhenName (int);
-
-
 /*
  *  angle_to_direction - convert angle to direction (0-7)
  *
