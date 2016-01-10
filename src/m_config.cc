@@ -495,6 +495,33 @@ static const opt_desc_t options[] =
 		&leave_offsets_alone
 	},
 
+	{	"light_bump_small",
+		0,
+		OPT_INTEGER,
+		"v",
+		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
+		NULL,
+		&light_bump_small
+	},
+
+	{	"light_bump_medium",
+		0,
+		OPT_INTEGER,
+		"v",
+		"light step for '+' and '-' buttons in sector panel without any modifier keys",
+		NULL,
+		&light_bump_medium
+	},
+
+	{	"light_bump_large",
+		0,
+		OPT_INTEGER,
+		"v",
+		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
+		NULL,
+		&light_bump_large
+	},
+
 	{	"map_scroll_bars",
 		0,
 		OPT_BOOLEAN,

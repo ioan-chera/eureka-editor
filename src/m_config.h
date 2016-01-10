@@ -82,6 +82,10 @@ extern int floor_bump_small;
 extern int floor_bump_medium;
 extern int floor_bump_large;
 
+extern int light_bump_small;
+extern int light_bump_medium;
+extern int light_bump_large;
+
 extern int  render_aspect_ratio;
 extern bool render_high_detail;
 extern bool render_lock_gravity;

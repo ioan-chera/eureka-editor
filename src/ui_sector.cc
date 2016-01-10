@@ -34,6 +34,10 @@ int floor_bump_small  = 1;
 int floor_bump_medium = 8;
 int floor_bump_large  = 64;
 
+int light_bump_small  = 4;
+int light_bump_medium = 16;
+int light_bump_large  = 64;
+
 //
 // UI_SectorBox Constructor
 //
@@ -412,48 +416,57 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int diff;
+	int lt_step;
 
 	if (Fl::event_shift())
-		diff = floor_bump_small;
+		lt_step = light_bump_small;
 	else if (Fl::event_ctrl())
-		diff = floor_bump_large;
+		lt_step = light_bump_large;
 	else
-		diff = floor_bump_medium;
+		lt_step = light_bump_medium;
 
 	if (w == box->lt_up)
 	{
-		CMD_AdjustLight(+diff);
+		CMD_AdjustLight(+lt_step);
 		return;
 	}
 	else if (w == box->lt_down)
 	{
-		CMD_AdjustLight(-diff);
+		CMD_AdjustLight(-lt_step);
 		return;
 	}
 
+	int mv_step;
+
+	if (Fl::event_shift())
+		mv_step = floor_bump_small;
+	else if (Fl::event_ctrl())
+		mv_step = floor_bump_large;
+	else
+		mv_step = floor_bump_medium;
+
 	if (w == box->ce_up)
 	{
-		EXEC_Param[0] = Int_TmpStr(+diff);
+		EXEC_Param[0] = Int_TmpStr(+mv_step);
 		SEC_Ceil();
 		return;
 	}
 	else if (w == box->ce_down)
 	{
-		EXEC_Param[0] = Int_TmpStr(-diff);
+		EXEC_Param[0] = Int_TmpStr(-mv_step);
 		SEC_Ceil();
 		return;
 	}
 
 	if (w == box->fl_up)
 	{
-		EXEC_Param[0] = Int_TmpStr(+diff);
+		EXEC_Param[0] = Int_TmpStr(+mv_step);
 		SEC_Floor();
 		return;
 	}
 	else if (w == box->fl_down)
 	{
-		EXEC_Param[0] = Int_TmpStr(-diff);
+		EXEC_Param[0] = Int_TmpStr(-mv_step);
 		SEC_Floor();
 		return;
 	}
