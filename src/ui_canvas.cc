@@ -1673,21 +1673,48 @@ void UI_Canvas::RenderSector(int num)
 
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
 
-	fl_color(light_col); 
+	const char * tex_name = NULL;
 
-	
-	const char * fname = Sectors[num]->FloorTex();
+	Img_c * img = NULL;
 
-	Img_c * img = W_GetFlat(fname);
+	if (false /* LIGHT mode : FIXME */)
+	{
+		fl_color(light_col); 
+	}
+	else
+	{
+		if (false /* FLOOR mode : FIXME */)
+			tex_name = Sectors[num]->FloorTex();
+		else
+			tex_name = Sectors[num]->CeilTex();
 
-	if (! img) return;  // FIXME
+		if (is_sky(tex_name))
+		{
+			fl_color(palette[game_info.sky_color]);
+		}
+		else
+		{
+			img = W_GetFlat(tex_name);
+
+			if (! img)
+			{
+				fl_color(palette[game_info.unknown_flat]);
+			}
+		}
+	}
 
 	img_pixel_t *wbuf = img ? img->wbuf() : NULL;
 
-	int tw = img ? img->width()  : 0;
-	int th = img ? img->height() : 0;
+	int tw = img ? img->width()  : 1;
+	int th = img ? img->height() : 1;
 
-	// FIXME : verify size is at least 64x64
+	// verify size is at least 64x64
+	if (img && (tw < 64 || th < 64))
+	{
+		fl_color(palette[game_info.missing_color]);
+
+		img = NULL;
+	}
 
 
 	/*** Part 1 : visit linedefs and create edges ***/
@@ -1855,6 +1882,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 ///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
 
+			// solid color?
 			if (! img)
 			{
 				fl_rectf(x1, y, x2 - x1 + 1, 1);
@@ -1871,7 +1899,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
-				// todo : be nice to optimize the next line
+				// TODO : be nice to optimize the next line
 				int tx = MAPX(x) & 63;
 
 				rgb_color_t col = palette[wbuf[ty * tw + tx]];
