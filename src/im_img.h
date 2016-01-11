@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -32,10 +32,8 @@
 typedef byte  img_pixel_t;
 
 
-/* The colour number used to represent transparent pixels in an Img_c.
-   Any value will do but zero is probably best performance-wise.
- */
-const img_pixel_t TRANS_PIXEL = 247;
+// the color number used to represent transparent pixels in an Img_c.
+const img_pixel_t TRANS_PIXEL = 255;
 
 
 class Img_c

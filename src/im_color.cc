@@ -110,6 +110,14 @@ void W_LoadColormap()
 		LogPrintf("COLORMAP: read error\n");
 		return;
 	}
+
+	// ensure colormap does not transparent pixel
+	for (int i = 0 ; i < 32  ; i++)
+	for (int c = 0 ; c < 256 ; c++)
+	{
+		if (raw_colormap[i][c] == TRANS_PIXEL)
+			raw_colormap[i][c] = trans_replace;
+	}
 }
 
 
