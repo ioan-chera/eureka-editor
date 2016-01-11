@@ -5,7 +5,7 @@
 #  Eureka DOOM Editor
 #
 #  Copyright (C)      2015 Ioan Chera
-#  Copyright (C)      2015 Andrew Apted
+#  Copyright (C) 2015-2016 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -33,15 +33,15 @@ default_thing 81  # healing vial
 
 #---- COLORS --------------------
 
-color sky  153  # evening blue
+color sky  219
 
-color wall   63  47
-color floor  81  95
+color wall   6  32
+color floor  81 96
 
 color missing  227
 
-color unknown_tex   212
-color unknown_flat  218
+color unknown_tex   223
+color unknown_flat  213
 
 
 #---- THING TYPES ---------------

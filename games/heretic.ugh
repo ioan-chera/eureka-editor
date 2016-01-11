@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012-2013 Andrew Apted
+#  Copyright (C) 2012-2016 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -36,15 +36,15 @@ default_thing  10
 
 #---- COLORS --------------------
 
-color sky  197
+color sky  199
 
-color wall   111  131
-color floor  209  223
+color wall   6   35
+color floor  68  94
 
 color missing  244
 
 color unknown_tex   205
-color unknown_flat  223
+color unknown_flat  222
 
 
 #---- THING TYPES ---------------
