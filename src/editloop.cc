@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -831,6 +831,20 @@ void CMD_PlaceCamera(void)
 }
 
 
+void CMD_Gamma(void)
+{
+	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
+
+	usegamma = (usegamma + delta + 5) % 5;
+
+	W_UpdateGamma();
+
+	Status_Set("Gamma level %d", usegamma);
+
+	edit.RedrawMap = 1;
+}
+
+
 void CMD_CopyAndPaste(void)
 {
 	if (edit.Selected->empty() && edit.highlight.is_nil())
@@ -1505,6 +1519,10 @@ static editor_command_t  command_table[] =
 
 	{	"Quantize",
 		&CMD_Quantize
+	},
+
+	{	"Gamma",
+		&CMD_Gamma
 	},
 
 	{	"CopyAndPaste",

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -2486,20 +2486,6 @@ void R3D_Toggle(void)
 }
 
 
-void R3D_Gamma(void)
-{
-	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
-
-	usegamma = (usegamma + delta + 5) % 5;
-
-	W_UpdateGamma();
-
-	Status_Set("Gamma level %d", usegamma);
-
-	edit.RedrawMap = 1;
-}
-
-
 /* Align texture on a sidedef
  *
  * Parameter:
@@ -2612,10 +2598,6 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_DropToFloor",
 		&R3D_DropToFloor
-	},
-
-	{	"3D_Gamma",
-		&R3D_Gamma
 	},
 
 	{	"3D_Set",
