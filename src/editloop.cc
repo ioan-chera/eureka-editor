@@ -1682,6 +1682,13 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
+	if (strcmp(tokens[0], "sector_render_mode") == 0 && num_tok >= 2)
+	{
+		edit.sector_render_mode = atoi(tokens[1]);
+		edit.RedrawMap = 1;
+		return true;
+	}
+
 	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
 	{
 		edit.show_object_numbers = atoi(tokens[1]);
@@ -1706,6 +1713,7 @@ void Editor_WriteUser(FILE *fp)
 	}
 
 	fprintf(fp, "render_mode %d\n", edit.render3d ? 1 : 0);
+	fprintf(fp, "sector_render_mode %d\n", edit.sector_render_mode);
 	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
 }
 
