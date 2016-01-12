@@ -1718,7 +1718,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (! img)
 			{
-				fl_color(palette[game_info.unknown_flat]);
+				img = IM_UnknownFlat();
 			}
 		}
 	}
