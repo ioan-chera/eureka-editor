@@ -91,6 +91,8 @@ void W_LoadPalette()
 	W_UpdateGamma();
 
 	W_CreateBrightMap();
+
+	IM_ResetDummyTextures();
 }
 
 

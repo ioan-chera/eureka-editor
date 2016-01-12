@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "im_img.h"
+#include "m_game.h"
 
 
 // Now where did these came from?
@@ -374,6 +375,23 @@ bool Img_c::has_transparent() const
 //------------------------------------------------------------------------
 
 
+static int missing_tex_color;
+static int unknown_tex_color;
+static int unknown_flat_color;
+
+static Img_c * missing_tex_image;
+static Img_c * unknown_tex_image;
+static Img_c * unknown_flat_image;
+
+
+void IM_ResetDummyTextures()
+{
+	missing_tex_color  = -1;
+	unknown_tex_color  = -1;
+	unknown_flat_color = -1;
+}
+
+
 static const byte unknown_graphic[16 * 16] =
 {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -416,31 +434,67 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img_c * IM_DummyTex(const byte *data, int bg, int fg)
+static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(32, 32, true);
+	Img_c *omg = new Img_c(64, 64, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
-	for (int y = 0 ; y < 32 ; y++)
-	for (int x = 0 ; x < 32 ; x++)
+	for (int y = 0 ; y < 64 ; y++)
+	for (int x = 0 ; x < 64 ; x++)
 	{
-		obuf[y * 32 + x] = data[(y/2) * 16 + (x/2)] ? fg : bg;
+		obuf[y * 64 + x] = data[((y/2) & 15 ) * 16 + ((x/2) & 15)] ? fg : bg;
 	}
 
 	return omg;
 }
 
 
-Img_c * IM_CreateUnknownTex(int bg, int fg)
+Img_c * IM_MissingTex()
 {
-	return IM_DummyTex(unknown_graphic, bg, fg);
+	if (! missing_tex_image || missing_tex_color != game_info.missing_color)
+	{
+		missing_tex_color = game_info.missing_color;
+
+		if (missing_tex_image)
+			delete missing_tex_image;
+
+		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
+	}
+
+	return missing_tex_image;
 }
 
 
-Img_c * IM_CreateMissingTex(int bg, int fg)
+Img_c * IM_UnknownTex()
 {
-	return IM_DummyTex(missing_graphic, bg, fg);
+	if (! unknown_tex_image || unknown_tex_color != game_info.unknown_tex)
+	{
+		unknown_tex_color = game_info.unknown_tex;
+
+		if (unknown_tex_image)
+			delete unknown_tex_image;
+
+		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
+	}
+
+	return unknown_tex_image;
+}
+
+
+Img_c * IM_UnknownFlat()
+{
+	if (! unknown_flat_image || unknown_flat_color != game_info.unknown_flat)
+	{
+		unknown_flat_color = game_info.unknown_flat;
+
+		if (unknown_flat_image)
+			delete unknown_flat_image;
+
+		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
+	}
+
+	return unknown_flat_image;
 }
 
 

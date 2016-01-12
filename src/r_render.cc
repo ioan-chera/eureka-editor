@@ -127,10 +127,6 @@ public:
 	int thsec_sector_num;
 	bool thsec_invalidated;
 
-	Img_c *missing_tex;  int missing_col;
-	Img_c *unknown_tex;  int unk_tex_col;
-	Img_c *unknown_flat; int unk_flat_col;
-
 	// state for adjusting offsets via the mouse
 	int   adjust_ld;
 	int   adjust_sd;
@@ -146,10 +142,8 @@ public:
 			   texturing(false), sprites(false), lighting(false),
 			   gravity(true),
 	           thing_sectors(),
-			   thsec_sector_num(0), thsec_invalidated(false),
-			   missing_tex(NULL),  missing_col(-1),
-			   unknown_tex(NULL),  unk_tex_col(-1),
-			   unknown_flat(NULL), unk_flat_col(-1),
+			   thsec_sector_num(0),
+			   thsec_invalidated(false),
 			   adjust_ld(-1), adjust_sd(-1),
 			   hl()
 	{ }
@@ -249,30 +243,6 @@ public:
 		return raw_colormap[map][pixel];
 	}
 
-	void UpdateDummies()
-	{
-		if (missing_col != game_info.missing_color)
-		{
-			missing_col = game_info.missing_color;
-			if (missing_tex) delete missing_tex;
-			missing_tex = IM_CreateMissingTex(missing_col, 0);
-		}
-
-		if (unk_tex_col != game_info.unknown_tex)
-		{
-			unk_tex_col = game_info.unknown_tex;
-			if (unknown_tex) delete unknown_tex;
-			unknown_tex = IM_CreateUnknownTex(unk_tex_col, 0);
-		}
-
-		if (unk_flat_col != game_info.unknown_flat)
-		{
-			unk_flat_col = game_info.unknown_flat;
-			if (unknown_flat) delete unknown_flat;
-			unknown_flat = IM_CreateUnknownTex(unk_flat_col, 0);
-		}
-	}
-
 	void PrepareToRender(int ow, int oh)
 	{
 		if (thsec_invalidated || !screen ||
@@ -281,8 +251,6 @@ public:
 		{
 			FindThingSectors();
 		}
-
-		UpdateDummies();
 
 		UpdateScreen(ow, oh);
 
@@ -382,7 +350,7 @@ public:
 
 			if (! img)
 			{
-				img = view.unknown_flat;
+				img = IM_UnknownFlat();
 				fullbright = render_unknown_bright;
 			}
 
@@ -400,7 +368,7 @@ public:
 		{
 			if (tname[0] == '-')
 			{
-				img = view.missing_tex;
+				img = IM_MissingTex();
 				fullbright = render_missing_bright;
 				return;
 			}
@@ -409,7 +377,7 @@ public:
 
 			if (! img)
 			{
-				img = view.unknown_tex;
+				img = IM_UnknownTex();
 				fullbright = render_unknown_bright;
 			}
 
