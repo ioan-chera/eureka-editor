@@ -5,15 +5,18 @@ CHANGES Eureka x.xx
 +  Hexen support
    (thanks to printz for doing some of the heavy lifting)
 
++  rendering of sector flats/lighting in the 2D window
+
 +  treat Freedoom Phase 1 and Phase 2 as separate games
 
 +  added Eternity port definition, thanks to printz
 
 -  inserting vertices with SHIFT always selects the new vertex
--  changed default port from Boom --> Vanilla
 -  better merging of linedefs when dragging a vertex
 -  allow loading a map with no vertices, no linedefs (etc)
+-  various layout tweaks to the editing panels
 
+-  changed default port from Boom --> Vanilla
 -  improved eureka.desktop file, courtesy Fabian Greffrath
 -  have a fallback sprite for the MBF dog thing (id 888)
 -  use absolute paths for resource filenames in __EUREKA lump
