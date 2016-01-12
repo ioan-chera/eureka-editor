@@ -255,6 +255,14 @@ void UI_Canvas::DrawMap()
 		DrawThingBodies();
 		DrawThings();
 	}
+
+	if (edit.mode == OBJ_VERTICES && edit.drawing_from.valid())
+	{
+		const Vertex * v = Vertices[edit.drawing_from.num];
+
+		fl_color(RED);
+		DrawKnobbyLine(v->x, v->y, edit.map_x, edit.map_y);
+	}
 }
 
 

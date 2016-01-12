@@ -33,6 +33,7 @@ class UI_Canvas : public Fl_Widget
 private:
 	Objid highlight;
 
+	// split-able line state
 	int split_ld;
 	int split_x;
 	int split_y;

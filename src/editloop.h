@@ -88,6 +88,8 @@ typedef struct
 	Objid highlight;   // The highlighted object
 	Objid split_line;  // linedef which would be split by a new vertex
 
+	Objid drawing_from;	 // if set, we are drawing a new line from this vertex
+
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 
 	int RedrawMap;   // set to force the map to be redrawn

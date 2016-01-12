@@ -682,7 +682,6 @@ static void Insert_Vertex(bool force_select)
 
 		SplitLineDefAtVertex(edit.split_line.num, new_v);
 
-		// CONFIG ITEM
 		if (!force_select && first_sel >= 0)
 			reselect = false;
 	}
@@ -700,7 +699,12 @@ static void Insert_Vertex(bool force_select)
 	edit.Selected->clear_all();
 
 	if (reselect)
+	{
 		edit.Selected->set(new_v);
+
+		edit.drawing_from = Objid(OBJ_VERTICES, new_v);
+		edit.RedrawMap = 1;
+	}
 }
 
 
