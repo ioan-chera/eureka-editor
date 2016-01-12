@@ -1640,6 +1640,8 @@ void Editor_Init()
 	edit.render3d = false;
 	edit.error_mode = false;
 
+	edit.sector_render_mode = SREND_Floor;
+
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;
 	edit.show_things_sprites = true;

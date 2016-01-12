@@ -222,6 +222,12 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
+	if (edit.sector_render_mode && (! grid.shown || grid.mode == 0))
+	{
+		for (int n = 0 ; n < NumSectors ; n++)
+			RenderSector(n);
+	}
+
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
@@ -230,11 +236,6 @@ void UI_Canvas::DrawMap()
 		else
 			DrawGrid_Normal();
 	}
-
-#if 1
-	for (int n = 0 ; n < NumSectors ; n++)
-		RenderSector(n);
-#endif
 
 	if (Debugging)
 		DrawMapBounds();
@@ -1677,16 +1678,16 @@ void UI_Canvas::RenderSector(int num)
 
 	Img_c * img = NULL;
 
-	if (false /* LIGHT mode : FIXME */)
+	if (edit.sector_render_mode == SREND_Lighting)
 	{
 		fl_color(light_col); 
 	}
 	else
 	{
-		if (false /* FLOOR mode : FIXME */)
-			tex_name = Sectors[num]->FloorTex();
-		else
+		if (edit.sector_render_mode == SREND_Ceiling)
 			tex_name = Sectors[num]->CeilTex();
+		else
+			tex_name = Sectors[num]->FloorTex();
 
 		if (is_sky(tex_name))
 		{

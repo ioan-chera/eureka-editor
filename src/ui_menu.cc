@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -309,6 +309,22 @@ static void view_do_grid_type(Fl_Widget *w, void * data)
 	grid.ToggleMode();
 }
 
+static void view_do_sector_render(Fl_Widget *w, void * data)
+{
+	const Fl_Menu_Item *item = ((Fl_Menu_*)w)->mvalue();
+
+	if (strcmp(item->text, "Floors") == 0)
+		edit.sector_render_mode = SREND_Floor;
+	else if (strcmp(item->text, "Ceilings") == 0)
+		edit.sector_render_mode = SREND_Ceiling;
+	else if (strcmp(item->text, "Lighting") == 0)
+		edit.sector_render_mode = SREND_Lighting;
+	else
+		edit.sector_render_mode = SREND_Nothing;
+
+	main_win->redraw();
+}
+
 static void view_do_find(Fl_Widget *w, void * data)
 {
 	main_win->ShowFindAndReplace();
@@ -511,9 +527,18 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Toggle &3D View",     0, FCAL view_do_toggle_3d },
+		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
 		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
-		{ "&Toggle Grid Type",   0, FCAL view_do_grid_type },
+		{ "&Toggle Grid Type",    0, FCAL view_do_grid_type },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "Sector Rendering", 0, 0, 0, FL_SUBMENU },
+			{ "Nothing",   0, FCAL view_do_sector_render },
+			{ "Floors",    0, FCAL view_do_sector_render },
+			{ "Ceilings",  0, FCAL view_do_sector_render },
+			{ "Lighting",  0, FCAL view_do_sector_render },
+			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

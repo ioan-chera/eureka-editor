@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -44,6 +44,16 @@ typedef enum
 } editor_action_e;
 
 
+typedef enum
+{
+	SREND_Nothing = 0,
+	SREND_Floor,
+	SREND_Ceiling,
+	SREND_Lighting
+
+} sector_rendering_mode_e;
+
+
 /* this holds some important editor state */
 
 typedef struct
@@ -54,6 +64,8 @@ typedef struct
 
 	bool render3d;    // 3D preview is active
 	bool error_mode;  // draw selection in red
+
+	int  sector_render_mode;	// one of the SREND_XXX values
 
 	bool show_object_numbers; // Whether the object numbers are shown
 	bool show_things_squares; // Whether the things squares are shown
@@ -76,9 +88,9 @@ typedef struct
 	Objid highlight;   // The highlighted object
 	Objid split_line;  // linedef which would be split by a new vertex
 
-	int RedrawMap;   // set to 1 to force the map to be redrawn
-
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
+
+	int RedrawMap;   // set to force the map to be redrawn
 
 } Editor_State_t;
 
