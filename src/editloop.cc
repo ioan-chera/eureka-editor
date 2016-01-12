@@ -974,6 +974,9 @@ int Editor_RawWheel(int event)
 	if (edit.action == ACT_WAIT_META)
 		Editor_ClearAction();
 
+	// ensure we zoom from correct place
+	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
+
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
 
