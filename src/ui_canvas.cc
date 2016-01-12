@@ -55,6 +55,9 @@ rgb_color_t normal_flat_col  = RGB_MAKE(84, 96, 48);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
+int vertex_radius(double scale);
+
+
 //
 // UI_Canvas Constructor
 //
@@ -258,10 +261,18 @@ void UI_Canvas::DrawMap()
 
 	if (edit.mode == OBJ_VERTICES && edit.drawing_from.valid())
 	{
+		int new_x = grid.SnapX(edit.map_x);
+		int new_y = grid.SnapY(edit.map_y);
+
+		fl_color(FL_GREEN);
+
+		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
+
 		const Vertex * v = Vertices[edit.drawing_from.num];
 
 		fl_color(RED);
-		DrawKnobbyLine(v->x, v->y, edit.map_x, edit.map_y);
+
+		DrawKnobbyLine(v->x, v->y, new_x, new_y);
 	}
 }
 
