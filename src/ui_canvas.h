@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2008-2012 Andrew Apted
+//  Copyright (C) 2008-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -132,6 +132,7 @@ private:
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawObjNum(int x, int y, int num, bool center = false);
 	void DrawSnapMarker();
+	void DrawCurrentLine();
 
 	void RenderSector(int num);
 

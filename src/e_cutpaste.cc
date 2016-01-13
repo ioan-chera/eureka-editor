@@ -993,7 +993,7 @@ success:
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 	edit.split_line.clear();
-	edit.drawing_from.clear();
+	edit.drawing_from = -1;
 
 	UpdateHighlight();
 }

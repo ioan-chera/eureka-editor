@@ -214,6 +214,9 @@ void UI_Canvas::DrawEverything()
 
 	if (edit.action == ACT_SELBOX)
 		SelboxDraw();
+
+	if (edit.action == ACT_DRAW_LINE)
+		DrawCurrentLine();
 }
 
 
@@ -257,22 +260,6 @@ void UI_Canvas::DrawMap()
 	{
 		DrawThingBodies();
 		DrawThings();
-	}
-
-	if (edit.mode == OBJ_VERTICES && edit.drawing_from.valid())
-	{
-		int new_x = grid.SnapX(edit.map_x);
-		int new_y = grid.SnapY(edit.map_y);
-
-		fl_color(FL_GREEN);
-
-		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
-
-		const Vertex * v = Vertices[edit.drawing_from.num];
-
-		fl_color(RED);
-
-		DrawKnobbyLine(v->x, v->y, new_x, new_y);
 	}
 }
 
@@ -1419,6 +1406,25 @@ void UI_Canvas::DrawCamera()
 
 	fl_line(scr_x, scr_y, scr_x + hy - hx, scr_y - hx - hy);
 	fl_line(scr_x, scr_y, scr_x - hy - hx, scr_y + hx - hy);
+}
+
+
+void UI_Canvas::DrawCurrentLine()
+{
+//	if (! edit.drawing_from.valid()) return;
+
+	int new_x = grid.SnapX(edit.map_x);
+	int new_y = grid.SnapY(edit.map_y);
+
+	fl_color(FL_GREEN);
+
+	DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
+
+	const Vertex * v = Vertices[edit.drawing_from.num];
+
+	fl_color(RED);
+
+	DrawKnobbyLine(v->x, v->y, new_x, new_y);
 }
 
 

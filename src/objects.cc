@@ -576,7 +576,9 @@ static void Insert_Vertex(bool force_select)
 	if (edit.Selected->empty() && near_vert >= 0)
 	{
 		edit.Selected->set(near_vert);
-		edit.drawing_from = Objid(OBJ_VERTICES, near_vert);
+
+		Editor_SetAction(ACT_DRAW_LINE);
+		edit.drawing_from = near_vert;
 		return;
 	}
 
@@ -584,7 +586,7 @@ static void Insert_Vertex(bool force_select)
 	if (second_sel < 0 && near_vert >= 0 && near_vert == first_sel)
 	{
 		edit.Selected->clear(first_sel);
-		edit.drawing_from.clear();
+		Editor_ClearAction();
 		return;
 	}
 
@@ -603,7 +605,7 @@ static void Insert_Vertex(bool force_select)
 			edit.Selected->clear(first_sel);
 			edit.Selected->set  (second_sel);
 
-			edit.drawing_from.clear();
+			Editor_ClearAction();
 			return;
 		}
 
@@ -624,11 +626,10 @@ static void Insert_Vertex(bool force_select)
 		BA_End();
 
 		edit.Selected->clear_all();
-		edit.drawing_from.clear();
-
 		if (reselect)
 			edit.Selected->set(second_sel);
 
+		Editor_ClearAction();
 		return;
 	}
 
@@ -641,7 +642,7 @@ static void Insert_Vertex(bool force_select)
 		if (V->Matches(new_x, new_y))
 		{
 			edit.Selected->clear_all();
-			edit.drawing_from.clear();
+			Editor_ClearAction();
 			return;
 		}
 	}
@@ -704,15 +705,17 @@ static void Insert_Vertex(bool force_select)
 	// select new vertex
 	edit.error_mode = false;
 	edit.Selected->clear_all();
-	edit.drawing_from.clear();
 
 	if (reselect)
 	{
 		edit.Selected->set(new_v);
-
-		edit.drawing_from = Objid(OBJ_VERTICES, new_v);
 		edit.RedrawMap = 1;
+
+		if (edit.action == ACT_DRAW_LINE)
+			edit.drawing_from = new_v;
 	}
+	else
+		Editor_ClearAction();
 }
 
 

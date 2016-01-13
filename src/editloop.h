@@ -40,6 +40,7 @@ typedef enum
 
 	ACT_SCROLL_MAP,		// user is scrolling the map (or moving in 3D view)
 	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
+	ACT_DRAW_LINE,		// user is drawing a new line
 
 } editor_action_e;
 
@@ -88,7 +89,7 @@ typedef struct
 	Objid highlight;   // The highlighted object
 	Objid split_line;  // linedef which would be split by a new vertex
 
-	Objid drawing_from;	 // if set, we are drawing a new line from this vertex
+	int drawing_from;	 // for ACT_DRAW_LINE, the vertex we are drawing a line from
 
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 

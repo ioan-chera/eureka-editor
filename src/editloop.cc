@@ -262,7 +262,6 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 	edit.highlight.clear();
 	edit.split_line.clear();
-	edit.drawing_from.clear();
 	edit.did_a_move = false;
 }
 
@@ -1111,7 +1110,7 @@ void Editor_MousePress(keycode_t mod)
 	if (edit.button_down >= 2)
 		return;
 
-	if (edit.split_line.valid() || edit.drawing_from.valid())
+	if (edit.action == ACT_DRAW_LINE || edit.split_line.valid())
 	{
 		EXEC_Param[0] = "";
 		CMD_Insert();
@@ -1283,8 +1282,9 @@ void Editor_LeaveWindow()
 	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
-	edit.drawing_from.clear();
-	
+	if (edit.action == ACT_DRAW_LINE)
+		Editor_ClearAction();
+
 	UpdateHighlight();
 }
 
@@ -1306,17 +1306,17 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 		return;
 	}
 
-	if (! drag)
+	if (edit.action == ACT_DRAW_LINE)
 	{
 		UpdateHighlight();
-	}
-
-	if (edit.drawing_from.valid())
-	{
 		main_win->canvas->redraw();
 		return;
 	}
 
+	if (! drag)
+	{
+		UpdateHighlight();
+	}
 	/* Moving the pointer with the left button pressed
 	   and a selection box exists : move the second
 	   corner of the selection box.
@@ -1672,7 +1672,7 @@ void Editor_Init()
 
 	edit.highlight.clear();
 	edit.split_line.clear();
-	edit.drawing_from.clear();
+	edit.drawing_from = -1;
 	edit.drag_single_vertex = -1;
 
 	edit.Selected = new selection_c(edit.mode);
