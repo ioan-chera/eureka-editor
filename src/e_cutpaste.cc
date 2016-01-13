@@ -989,11 +989,13 @@ void CMD_Delete(void)
 	BA_End();
 
 success:
+	Editor_ClearAction();
+
 	edit.error_mode = false;
+
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 	edit.split_line.clear();
-	edit.drawing_from = -1;
 
 	UpdateHighlight();
 }

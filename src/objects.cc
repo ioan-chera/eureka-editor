@@ -711,8 +711,8 @@ static void Insert_Vertex(bool force_select)
 		edit.Selected->set(new_v);
 		edit.RedrawMap = 1;
 
-		if (edit.action == ACT_DRAW_LINE)
-			edit.drawing_from = new_v;
+		Editor_SetAction(ACT_DRAW_LINE);
+		edit.drawing_from = new_v;
 	}
 	else
 		Editor_ClearAction();

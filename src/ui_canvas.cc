@@ -1411,18 +1411,28 @@ void UI_Canvas::DrawCamera()
 
 void UI_Canvas::DrawCurrentLine()
 {
-//	if (! edit.drawing_from.valid()) return;
+	if (edit.drawing_from < 0)
+		return;
 
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
 
-	fl_color(FL_GREEN);
+	// should draw a vertex?
+	if (highlight.valid())
+	{
+		new_x = Vertices[highlight.num]->x;
+		new_y = Vertices[highlight.num]->y;
+	}
+	else if (split_ld < 0)
+	{
+		fl_color(FL_GREEN);
 
-	DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
-
-	const Vertex * v = Vertices[edit.drawing_from.num];
+		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
+	}
 
 	fl_color(RED);
+
+	const Vertex * v = Vertices[edit.drawing_from];
 
 	DrawKnobbyLine(v->x, v->y, new_x, new_y);
 }
