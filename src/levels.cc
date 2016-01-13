@@ -55,7 +55,7 @@ void MarkChanges()
 
 	UpdateHighlight();
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 

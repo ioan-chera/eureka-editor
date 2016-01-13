@@ -221,7 +221,7 @@ void LIN_SelectPath(void)
 	else
 		edit.Selected->merge(seen);
 
-	 edit.RedrawMap = 1;
+	 RedrawMap();
 }
 
 
@@ -362,7 +362,7 @@ void SEC_SelectGroup(void)
 	else
 		edit.Selected->merge(seen);
 
-	 edit.RedrawMap = 1;
+	 RedrawMap();
 }
 
 
@@ -410,7 +410,7 @@ void GoToSelection()
 	edit.map_x = mid_x;
 	edit.map_y = mid_y;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 

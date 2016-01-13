@@ -2006,7 +2006,7 @@ void Render3D_Wheel(int dx, int dy, keycode_t mod)
 	view.x += speed * (view.Cos * dy + view.Sin * dx);
 	view.y += speed * (view.Sin * dy - view.Cos * dx);
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2075,7 +2075,7 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 		view.gravity = false;
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2174,7 +2174,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	view.adjust_dx -= dx * factor * view.adjust_dx_factor;
 	view.adjust_dy -= dy * factor * view.adjust_dy_factor;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2276,7 +2276,7 @@ void R3D_Forward(void)
 	view.x += view.Cos * dist;
 	view.y += view.Sin * dist;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_Backward(void)
@@ -2286,7 +2286,7 @@ void R3D_Backward(void)
 	view.x -= view.Cos * dist;
 	view.y -= view.Sin * dist;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_Left(void)
@@ -2296,7 +2296,7 @@ void R3D_Left(void)
 	view.x -= view.Sin * dist;
 	view.y += view.Cos * dist;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_Right(void)
@@ -2306,7 +2306,7 @@ void R3D_Right(void)
 	view.x += view.Sin * dist;
 	view.y -= view.Cos * dist;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_Up(void)
@@ -2322,7 +2322,7 @@ void R3D_Up(void)
 	view.z += dist;
 	view.gravity = false;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_Down(void)
@@ -2338,7 +2338,7 @@ void R3D_Down(void)
 	view.z -= dist;
 	view.gravity = false;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2351,14 +2351,14 @@ void R3D_Turn(void)
 
 	view.SetAngle(view.angle + angle);
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 void R3D_DropToFloor(void)
 {
 	view.CalcViewZ();
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2413,7 +2413,7 @@ void R3D_Set(void)
 		return;
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -2450,7 +2450,7 @@ void R3D_Toggle(void)
 		return;
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 

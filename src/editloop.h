@@ -96,8 +96,6 @@ typedef struct
 
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 
-	int RedrawMap;   // set to force the map to be redrawn
-
 } Editor_State_t;
 
 
@@ -122,13 +120,15 @@ void Editor_SetAction(editor_action_e new_action);
 bool Editor_ParseUser(const char ** tokens, int num_tok);
 void Editor_WriteUser(FILE *fp);
 
-bool GetCurrentObjects(selection_c *list);
-void UpdateHighlight();
-
 void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
 void Editor_ChangeMode_Raw(obj_type_e new_mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
+
+bool GetCurrentObjects(selection_c *list);
+void UpdateHighlight();
+
+void RedrawMap();
 
 /* raw input handling */
 

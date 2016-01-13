@@ -1005,7 +1005,7 @@ bool UI_FindAndReplace::FindNext()
 		edit.Selected->clear_all();
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 
 
 	bool is_first = cur_obj.is_nil();
@@ -1199,7 +1199,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		rep_value->do_callback();
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 

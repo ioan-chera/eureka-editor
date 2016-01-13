@@ -262,7 +262,7 @@ void Grid_State_c::ScaleFromWidget(int i)
 	if (main_win)
 		main_win->scroll->AdjustPos();
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -273,20 +273,18 @@ void Grid_State_c::StepFromWidget(int i)
 	if (i == 0)  /* OFF */
 	{
 		shown = false;
-
-		edit.RedrawMap = 1;
 	}
 	else
 	{
 		shown = true;
 
 		step = grid_values[i];
-
-		edit.RedrawMap = 1;
 	}
 
 	if (grid_hide_in_free_mode && snap != shown)
 		SetSnap(shown);
+
+	RedrawMap();
 }
 
 
@@ -464,9 +462,9 @@ void Grid_State_c::SetShown(bool enable)
 	if (grid_hide_in_free_mode && shown != snap)
 		SetSnap(shown);
 
-	edit.RedrawMap = 1;
-
 	DoSetGrid();
+
+	RedrawMap();
 }
 
 void Grid_State_c::ToggleShown()
@@ -495,9 +493,9 @@ void Grid_State_c::ToggleShown()
 	if (grid_hide_in_free_mode && shown != snap)
 		SetSnap(shown);
 
-	edit.RedrawMap = 1;
-
 	DoSetGrid();
+
+	RedrawMap();
 }
 
 
@@ -505,9 +503,9 @@ void Grid_State_c::SetMode(int new_mode)
 {
 	mode = new_mode;
 
-	edit.RedrawMap = 1;
-
 	DoSetGrid();
+
+	RedrawMap();
 }
 
 void Grid_State_c::ToggleMode()
@@ -606,7 +604,7 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		grid.DoSetScale();
 
-		edit.RedrawMap = 1;
+		RedrawMap();
 
 		return true;
 	}
@@ -622,7 +620,7 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		grid.DoSetGrid();
 
-		edit.RedrawMap = 1;
+		RedrawMap();
 
 		return true;
 	}

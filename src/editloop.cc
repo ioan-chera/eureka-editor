@@ -89,6 +89,18 @@ static void zoom_fit()
 }
 
 
+void RedrawMap()
+{
+	if (! main_win)
+		return;
+
+	if (edit.render3d)
+		main_win->render->redraw();
+	else
+		main_win->canvas->redraw();
+}
+
+
 static void UpdateSplitLine(int drag_vert = -1)
 {
 	edit.split_line.clear();
@@ -244,7 +256,7 @@ void Editor_ClearErrorMode()
 	{
 		edit.error_mode = false;
 		edit.Selected->clear_all();
-		edit.RedrawMap = 1;
+		RedrawMap();
 	}
 }
 
@@ -307,8 +319,7 @@ void Editor_ChangeMode(char mode)
 	}
 
 	UpdateHighlight();
-
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -340,9 +351,9 @@ void CMD_SelectAll(void)
 
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->frob_range(0, total-1, BOP_ADD);
-	edit.RedrawMap = 1;
 
 	UpdateHighlight();
+	RedrawMap();
 }
 
 
@@ -352,9 +363,9 @@ void CMD_UnselectAll(void)
 
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->clear_all();
-	edit.RedrawMap = 1;
 
 	UpdateHighlight();
+	RedrawMap();
 }
 
 
@@ -376,9 +387,9 @@ void CMD_InvertSelection(void)
 	}
 
 	edit.Selected->frob_range(0, total-1, BOP_TOGGLE);
-	edit.RedrawMap = 1;
 
 	UpdateHighlight();
+	RedrawMap();
 }
 
 
@@ -437,7 +448,7 @@ void CMD_SetVar(void)
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = bool_val;
-		edit.RedrawMap = 1;
+		RedrawMap();
 	}
 	else   // TODO: "skills"
 	{
@@ -484,13 +495,13 @@ void CMD_ToggleVar(void)
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
-		edit.RedrawMap = 1;
+		RedrawMap();
 	}
 	else if (y_stricmp(var_name, "skills") == 0)
 	{
 		active_wmask ^= 1;
 		active_when = active_wmask;
-		edit.RedrawMap = 1;
+		RedrawMap();
 	}
 	else
 	{
@@ -767,7 +778,7 @@ void CMD_ZoomWholeMap(void)
 
 	zoom_fit();
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -796,7 +807,7 @@ void CMD_GoToCamera(void)
 	edit.map_x = x;
 	edit.map_y = y;
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -827,7 +838,7 @@ void CMD_PlaceCamera(void)
 		main_win->redraw();
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -841,7 +852,7 @@ void CMD_Gamma(void)
 
 	Status_Set("Gamma level %d", usegamma);
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -1166,7 +1177,7 @@ void Editor_MouseRelease()
 		}
 
 		edit.drag_single_vertex = -1;
-		edit.RedrawMap = 1;
+		RedrawMap();
 		return;
 	}
 
@@ -1200,7 +1211,7 @@ void Editor_MouseRelease()
 			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 
 		UpdateHighlight();
-		edit.RedrawMap = 1;
+		RedrawMap();
 		return;
 	}
 
@@ -1221,7 +1232,7 @@ void Editor_MouseRelease()
 		bool was_empty = edit.Selected->empty();
 
 		edit.Selected->toggle(object.num);
-		edit.RedrawMap = 1;
+		RedrawMap();
 
 		// begin drawing mode (unless a modifier was pressed)
 		if (was_empty && edit.button_mod == 0)
@@ -1282,7 +1293,7 @@ void Editor_MiddleRelease()
 
 		CMD_ScaleObjects2(param);
 
-		edit.RedrawMap = 1;
+		RedrawMap();
 	}
 }
 
@@ -1396,7 +1407,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 
 void Editor_Resize(int is_width, int is_height)
 {
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 
@@ -1710,21 +1721,21 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
 	{
 		edit.render3d = atoi(tokens[1]);
-		edit.RedrawMap = 1;
+		RedrawMap();
 		return true;
 	}
 
 	if (strcmp(tokens[0], "sector_render_mode") == 0 && num_tok >= 2)
 	{
 		edit.sector_render_mode = atoi(tokens[1]);
-		edit.RedrawMap = 1;
+		RedrawMap();
 		return true;
 	}
 
 	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
 	{
 		edit.show_object_numbers = atoi(tokens[1]);
-		edit.RedrawMap = 1;
+		RedrawMap();
 		return true;
 	}
 

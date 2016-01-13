@@ -683,16 +683,6 @@ void Main_Loop()
     {
         Fl::wait(0.2);
 
-        if (edit.RedrawMap)
-        {
-			if (edit.render3d)
-				main_win->render->redraw();
-			else
-				main_win->canvas->redraw();
-
-            edit.RedrawMap = 0;
-        }
-
 		if (want_quit)
 		{
 			if (Main_ConfirmQuit("quit"))

@@ -703,13 +703,16 @@ static void Insert_Vertex(bool force_select)
 	if (reselect)
 	{
 		edit.Selected->set(new_v);
-		edit.RedrawMap = 1;
 
 		Editor_SetAction(ACT_DRAW_LINE);
 		edit.drawing_from = new_v;
 	}
 	else
+	{
 		Editor_ClearAction();
+	}
+
+	RedrawMap();
 }
 
 
@@ -823,7 +826,7 @@ void CMD_Insert(void)
 			break;
 	}
 
-	edit.RedrawMap = 1;
+	RedrawMap();
 }
 
 

@@ -882,7 +882,8 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();
-	edit.RedrawMap = 1;
+
+	RedrawMap();
 
 	main_win->UpdateTotals();
 	main_win->UpdateGameInfo();
