@@ -1134,6 +1134,8 @@ void Editor_MousePress(keycode_t mod)
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
+
+	// drawing mode is activated on RELEASE...
 }
 
 
@@ -1216,9 +1218,18 @@ void Editor_MouseRelease()
 	{
 		Editor_ClearErrorMode();
 
-		edit.Selected->toggle(object.num);
+		bool was_empty = edit.Selected->empty();
 
+		edit.Selected->toggle(object.num);
 		edit.RedrawMap = 1;
+
+		// begin drawing mode (unless a modifier was pressed)
+		if (was_empty && edit.button_mod == 0)
+		{
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = object.num;
+		}
+
 		return;
 	}
 }
@@ -1306,7 +1317,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 		return;
 	}
 
-	if (edit.action == ACT_DRAW_LINE)
+	if (edit.action == ACT_DRAW_LINE && edit.button_down == 0)
 	{
 		UpdateHighlight();
 		main_win->canvas->redraw();
