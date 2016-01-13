@@ -87,7 +87,10 @@ typedef struct
 	selection_c *Selected;    // all selected objects (usually empty)
 
 	Objid highlight;   // The highlighted object
+
 	Objid split_line;  // linedef which would be split by a new vertex
+	int split_x;
+	int split_y;
 
 	int drawing_from;	 // for ACT_DRAW_LINE, the vertex we are drawing a line from
 

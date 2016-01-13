@@ -679,14 +679,8 @@ static void Insert_Vertex(bool force_select)
 	// split an existing linedef?
 	if (edit.split_line.valid())
 	{
-		// in FREE mode, ensure the new vertex is directly on the linedef
-		if (! grid.snap)
-		{
-			MoveCoordOntoLineDef(edit.split_line.num, &new_x, &new_y);
-
-			V->x = new_x;
-			V->y = new_y;
-		}
+		V->x = edit.split_x;
+		V->y = edit.split_y;
 
 		SplitLineDefAtVertex(edit.split_line.num, new_v);
 
