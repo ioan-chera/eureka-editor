@@ -361,6 +361,12 @@ void CMD_UnselectAll(void)
 {
 	Editor_ClearErrorMode();
 
+	if (edit.action == ACT_DRAW_LINE ||
+		edit.action == ACT_SCALE)
+	{
+		Editor_ClearAction();
+	}
+
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->clear_all();
 
