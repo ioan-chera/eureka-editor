@@ -1420,6 +1420,8 @@ void UI_Canvas::DrawCurrentLine()
 	// should draw a vertex?
 	if (highlight.valid())
 	{
+		SYS_ASSERT(highlight.type == OBJ_VERTICES);
+
 		new_x = Vertices[highlight.num]->x;
 		new_y = Vertices[highlight.num]->y;
 	}

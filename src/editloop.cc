@@ -1235,7 +1235,7 @@ void Editor_MouseRelease()
 		RedrawMap();
 
 		// begin drawing mode (unless a modifier was pressed)
-		if (was_empty && edit.button_mod == 0)
+		if (edit.mode == OBJ_VERTICES && was_empty && edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = object.num;
