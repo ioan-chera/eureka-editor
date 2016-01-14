@@ -419,8 +419,18 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 
 		Sectors[new_sec]->RawCopy(Sectors[right_front]);
 
-		AssignSectorToLoop( mod_loop, new_sec,     flip);
-		AssignSectorToLoop(keep_loop, right_front, flip);
+		// ensure the new linedef usually ends at v2 (the final vertex)
+		if (left_total < right_total)
+		{
+			AssignSectorToLoop(keep_loop, right_front, flip);
+			AssignSectorToLoop( mod_loop, new_sec,     flip);
+		}
+		else
+		{
+			AssignSectorToLoop( mod_loop, new_sec,     flip);
+			AssignSectorToLoop(keep_loop, right_front, flip);
+		}
+
 		return;
 	}
 
