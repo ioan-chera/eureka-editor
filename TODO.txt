@@ -3,11 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
->>>  RenderSector
-
-   -  drawing flats
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -16,8 +11,6 @@ ______________________________________________________________________
 
 General
 -------
-
-+  Large font mode, more readable on 1920x1080 monitors
 
 +  BOOM Generalized line types / sectors
 
@@ -45,6 +38,8 @@ Documentation
 
 +  a tutorial for the basics
    
+   - describe the four modes V/L/S/T
+
    - especially drawing lines in VERTEX mode
 
 +  information on each binding command, parameters etc..
@@ -84,6 +79,8 @@ ______________________________________________________________________
 
 General
 -------
+
++  Large font mode, more readable on 1920x1080 monitors
 
 +  ability to hide the right-side panel
 
@@ -389,8 +386,6 @@ NO:  when one vertex of a linedef is moved (and not the other)
 NO:  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
      split the line and put vertex where mouse is
      [ can do this in vertex mode easily enough ]
-
-NO:  SHIFT + SPACE = no auto create/split sectors
 
 NO:  merge vertex and linedef modes
 
