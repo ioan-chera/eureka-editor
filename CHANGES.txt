@@ -1,27 +1,28 @@
 
-CHANGES Eureka x.xx
+CHANGES Eureka 1.10
 ===================
 
-+  Hexen support
++  Hexen support!
    (thanks to printz for doing some of the heavy lifting)
 
 +  rendering of sector flats/lighting in the 2D window
+
++  a more intuitive "drawing mode" for adding vertices
 
 +  treat Freedoom Phase 1 and Phase 2 as separate games
 
 +  added Eternity port definition, thanks to printz
 
-??  inserting vertices with SHIFT always selects the new vertex
-
+-  inserting vertices with SHIFT always selects the new vertex
+-  inserting vertices with CTRL inhibits creation of sectors
 -  better merging of linedefs when dragging a vertex
 -  when a line splits a sector, use a consistent orientation
 
 -  right-click on a sidedef or sector texture sets it to default
-
 -  allow loading a map with no vertices, no linedefs (etc)
 -  various layout tweaks to the editing panels
-
 -  changed default port from Boom --> Vanilla
+
 -  improved eureka.desktop file, courtesy Fabian Greffrath
 -  have a fallback sprite for the MBF dog thing (id 888)
 -  use absolute paths for resource filenames in __EUREKA lump
