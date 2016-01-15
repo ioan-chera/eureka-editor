@@ -260,7 +260,8 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	if (w == box->f_pic || w == box->c_pic)
+	if (Fl::event_button() != 3 &&
+		(w == box->f_pic || w == box->c_pic))
 	{
 		UI_Pic * pic = (UI_Pic *) w;
 
@@ -273,10 +274,22 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	}
 
 	int new_tex;
-	if (w == box->f_tex)
-		new_tex = FlatFromWidget(box->f_tex);
+
+	// right click sets to default value
+	if (Fl::event_button() == 3)
+	{
+		if (w == box->f_pic)
+			new_tex = BA_InternaliseString(default_floor_tex);
+		else
+			new_tex = BA_InternaliseString(default_ceil_tex);
+	}
 	else
-		new_tex = FlatFromWidget(box->c_tex);
+	{
+		if (w == box->f_tex)
+			new_tex = FlatFromWidget(box->f_tex);
+		else
+			new_tex = FlatFromWidget(box->c_tex);
+	}
 
 	selection_c list;
 	selection_iterator_c it;
@@ -287,7 +300,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
-			if (w == box->f_tex)
+			if (w == box->f_tex || w == box->f_pic)
 				BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
 			else
 				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
