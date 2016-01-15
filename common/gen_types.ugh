@@ -17,8 +17,12 @@
 #  GNU General Public License for more details.
 #
 #------------------------------------------------------------------------
+#
+#  This information comes from the "BOOM reference v1.3" document.
+#  
+#------------------------------------------------------------------------
 
-gen_line f 0x6000 0x2000 "Floor"
+gen_line f 0x6000 0x2000 "FLOOR"
 
 gen_field 3 0x0007 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
 gen_field 2 0x0018 3  "Speed"      slow normal fast turbo
@@ -29,21 +33,41 @@ gen_field 2 0x0c00 10 "Change"     none tex+zero texture tex+type
 gen_field 1 0x1000 12 "Crush"      no yes
 
 
-gen_line c 0x4000 0x2000 "Ceiling"
+gen_line c 0x4000 0x2000 "CEILING"
+
+gen_field 3 0x0007 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 0x0018 3  "Speed"      slow normal fast turbo
+gen_field 1 0x0020 5  "Model"      trigger numeric
+gen_field 1 0x0040 6  "Direction"  down up
+gen_field 3 0x0380 7  "Target"     HnC LnC NnC HnF F sT 24 32
+gen_field 2 0x0c00 10 "Change"     none tex+zero texture tex+type
+gen_field 1 0x1000 12 "Crush"      no yes
 
 
-gen_line d 0x3c00 0x0400 "Door"
+gen_line d 0x3c00 0x0400 "DOOR"
+
+gen_field 3 0x0007 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 0x0018 3  "Speed"      slow normal fast turbo
+gen_field 2 0x0060 5  "Kind"       normal stay_open close_open close
+gen_field 1 0x0080 7  "Monsters"   no yes
+gen_field 2 0x0300 8  "Delay"      1_sec 4_sec 9_sec 30_sec
 
 
-gen_line k 0x3800 0x0400 "Key Door"
+gen_line k 0x3800 0x0400 "KEY DOOR"
+
+gen_field 3 0x0007 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 0x0018 3  "Speed"      slow normal fast turbo
+gen_field 1 0x0020 5  "Stay Open"  no yes 
+gen_field 3 0x01c0 6  "Keys"       any red_card blue_card yel_card red_skull blue_skull yel_skull ALL
+gen_field 1 0x0200 9  "skul=card"  no yes
 
 
-gen_line l 0x3400 0x0400 "Lift"
+gen_line l 0x3400 0x0400 "LIFT"
 
 
-gen_line s 0x3000 0x0400 "Stair"
+gen_line s 0x3000 0x0400 "STAIR"
 
 
-gen_line r 0x2f80 0x0080 "Crusher"
+gen_line r 0x2f80 0x0080 "CRUSHER"
 
 
