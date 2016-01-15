@@ -1,0 +1,49 @@
+#------------------------------------------------------------------------
+#  BOOM GENERALIZED TYPES
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2016 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+gen_line f 0x6000 0x2000 "Floor"
+
+gen_field 3 0x0007 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 0x0018 3  "Speed"      slow normal fast turbo
+gen_field 1 0x0020 5  "Model"      trigger numeric
+gen_field 1 0x0040 6  "Direction"  down up
+gen_field 3 0x0380 7  "Target"     HnF LnF NnF LnC C sT 24 32
+gen_field 2 0x0c00 10 "Change"     none tex+zero texture tex+type
+gen_field 1 0x1000 12 "Crush"      no yes
+
+
+gen_line c 0x4000 0x2000 "Ceiling"
+
+
+gen_line d 0x3c00 0x0400 "Door"
+
+
+gen_line k 0x3800 0x0400 "Key Door"
+
+
+gen_line l 0x3400 0x0400 "Lift"
+
+
+gen_line s 0x3000 0x0400 "Stair"
+
+
+gen_line r 0x2f80 0x0080 "Crusher"
+
+
