@@ -11,8 +11,13 @@ CHANGES Eureka x.xx
 
 +  added Eternity port definition, thanks to printz
 
--  inserting vertices with SHIFT always selects the new vertex
+??  inserting vertices with SHIFT always selects the new vertex
+
 -  better merging of linedefs when dragging a vertex
+-  when a line splits a sector, use a consistent orientation
+
+-  right-click on a sidedef or sector texture sets it to default
+
 -  allow loading a map with no vertices, no linedefs (etc)
 -  various layout tweaks to the editing panels
 
