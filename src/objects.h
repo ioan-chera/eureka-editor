@@ -41,6 +41,8 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y);
 
 bool Texture_MatchPattern(const char *tex, const char *pattern);
 
+void Insert_Vertex(bool force_select, bool no_fill);
+
 
 /* commands */
 

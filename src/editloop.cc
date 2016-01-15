@@ -1129,8 +1129,10 @@ void Editor_MousePress(keycode_t mod)
 
 	if (edit.action == ACT_DRAW_LINE || edit.split_line.valid())
 	{
-		EXEC_Param[0] = "";
-		CMD_Insert();
+		bool force_select = (mod == MOD_SHIFT);
+		bool no_fill      = (mod == MOD_COMMAND);
+
+		Insert_Vertex(force_select, no_fill);
 		return;
 	}
 
@@ -1262,6 +1264,8 @@ fprintf(stderr, "Editor_MiddlePress : button_down:%d mod:%04x\n", edit.button_do
 	if (mod == 0)
 	{
 		EXEC_Param[0] = "";
+		EXEC_Flags[0] = "";
+
 		CMD_Insert();
 		return;
 	}
