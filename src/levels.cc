@@ -110,6 +110,12 @@ void MapStuff_NotifyDelete(obj_type_e type, int objnum)
 	if (type == OBJ_VERTICES)
 	{
 		recalc_map_bounds = true;
+
+		if (edit.action == ACT_DRAW_LINE &&
+			edit.drawing_from == objnum)
+		{
+			Editor_ClearAction();
+		}
 	}
 }
 
