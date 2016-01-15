@@ -66,6 +66,7 @@ private:
 
 	static const char * NormalizeTex_and_Dup(Fl_Input *w);
 
+	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    tex_callback(Fl_Widget *w, void *data);
 	static void   flat_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);

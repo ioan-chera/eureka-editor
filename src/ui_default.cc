@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,8 +22,12 @@
 #include "ui_window.h"
 
 #include "levels.h"
+#include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"
+
+
+#define HIDE_BG  (gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
 
 UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
@@ -32,7 +36,13 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	box(FL_FLAT_BOX);
 
 
-	Fl_Box *title = new Fl_Box(X + 50, Y + 10, W - 60, 30, "Default Properties");
+	Fl_Button *hide_button = new Fl_Button(X + 14, Y + 14, 22, 22, "X");
+	hide_button->color(HIDE_BG, HIDE_BG);
+	hide_button->labelsize(14);
+	hide_button->callback(hide_callback, this);
+
+
+	Fl_Box *title = new Fl_Box(X + 60, Y + 10, W - 70, 30, "Default Properties");
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	title->labelsize(18+KF*4);
 
@@ -154,6 +164,12 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 UI_DefaultProps::~UI_DefaultProps()
 { }
+
+
+void UI_DefaultProps::hide_callback(Fl_Widget *w, void *data)
+{
+	main_win->HideSpecialPanel();
+}
 
 
 void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
