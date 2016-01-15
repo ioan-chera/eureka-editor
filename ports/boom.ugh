@@ -203,3 +203,8 @@ line 269 t "WR BOOM: Teleport /mon"
 line 271 - "-- MBF: Transfer sky"
 line 272 - "-- MBF: Mirror sky"
 
+
+#---- GENERALIZED LINETYPES ----------
+
+include "gen_types"
+
