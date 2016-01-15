@@ -89,6 +89,7 @@ All Modes
 
 LMB
 * select an object, drag to move the object(s)
+* begin line drawing (in vertex mode) from selected vertex
 * click in an empty area to clear the selection
 * click in an empty area and drag to select a group of objects
 
@@ -172,8 +173,10 @@ Vertex Mode
 -----------
 
 SPACE
-* add a new vertex
+* add a new vertex (begin drawing mode)
 * if a vertex is already selected, adds a new linedef too
+* with SHIFT key: continue in drawing mode
+* with CTRL key: inhibit creation of sectors
 
 d : disconnect all linedefs at the selected vertices
 m : merge selected vertices into a single one
