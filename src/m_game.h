@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -146,6 +146,48 @@ typedef struct
 
 extern game_info_t  game_info;
 
+
+/* Boom generalized types */
+
+#define MAX_GEN_FIELD_BITS	4
+#define MAX_GEN_FIELD_KEYWORDS	(1 << MAX_GEN_FIELD_BITS)
+
+#define MAX_GEN_NUM_FIELDS	16
+#define MAX_GEN_NUM_TYPES	16
+
+typedef struct
+{
+	int	bits;	//
+	int mask;	//	the bit-field info
+	int shift;	//
+
+	const char *name;
+
+	const char *keywords[MAX_GEN_FIELD_KEYWORDS];
+}
+generalized_field_t;
+
+
+typedef struct
+{
+	char key;
+
+	int	base;
+	int length;
+
+	const char *name;
+
+	generalized_field_t fields[MAX_GEN_NUM_FIELDS];
+	int num_fields;
+}
+generalized_linetype_t;
+
+
+extern generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
+extern int num_gen_linetypes;
+
+
+//------------------------------------------------------------------------
 
 void M_InitDefinitions();
 void M_LoadDefinitions(const char *folder, const char *name,

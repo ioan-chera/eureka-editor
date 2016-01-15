@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -54,6 +54,11 @@ std::map<std::string, char> flat_assigns;
 game_info_t  game_info;  // contains sky_color (etc)
 
 
+generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
+
+int num_gen_linetypes;
+
+
 /*
  *  Create empty lists for game definitions
  */
@@ -79,6 +84,10 @@ void M_InitDefinitions()
 	game_info.player_h = 56;
 	game_info.min_dm_starts = 4;
 	game_info.max_dm_starts = 10;
+
+	// reset generalized types
+	memset(&gen_linetypes, 0, sizeof(gen_linetypes));
+	num_gen_linetypes = 0;
 }
 
 
