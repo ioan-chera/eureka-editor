@@ -148,9 +148,8 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	if (w == box->l_pic ||
-	    w == box->u_pic ||
-		w == box->r_pic)
+	if (Fl::event_button() != 3 &&
+		(w == box->l_pic || w == box->u_pic || w == box->r_pic))
 	{
 		UI_Pic * pic = (UI_Pic *)w;
 
@@ -164,12 +163,23 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 	int new_tex;
 
-	if (w == box->l_tex)
-		new_tex = TexFromWidget(box->l_tex);
-	else if (w == box->u_tex)
-		new_tex = TexFromWidget(box->u_tex);
+	// right click sets to default value, "-" for rail
+	if (Fl::event_button() == 3)
+	{
+		if (w == box->r_pic)
+			new_tex = BA_InternaliseString("-");
+		else
+			new_tex = BA_InternaliseString(default_lower_tex);
+	}
 	else
-		new_tex = TexFromWidget(box->r_tex);
+	{
+		if (w == box->l_tex)
+			new_tex = TexFromWidget(box->l_tex);
+		else if (w == box->u_tex)
+			new_tex = TexFromWidget(box->u_tex);
+		else
+			new_tex = TexFromWidget(box->r_tex);
+	}
 
 	// iterate over selected linedefs
 	selection_c list;
@@ -187,9 +197,9 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 			if (is_sidedef(sd))
 			{
-				bool lower = (w == box->l_tex);
-				bool upper = (w == box->u_tex);
-				bool rail  = (w == box->r_tex);
+				bool lower = (w == box->l_tex || w == box->l_pic);
+				bool upper = (w == box->u_tex || w == box->u_pic);
+				bool rail  = (w == box->r_tex || w == box->r_pic);
 
 				if (L->OneSided())
 					std::swap(lower, rail);
