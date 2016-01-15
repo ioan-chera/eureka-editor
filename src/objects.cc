@@ -577,9 +577,6 @@ static void Insert_Vertex(bool force_select)
 		near_vert = Vertex_FindExact(new_x, new_y);
 
 
-	int first_sel  = edit.Selected->find_first();
-	int second_sel = edit.Selected->find_second();
-
 	// if a vertex is highlighted but none are selected, then merely
 	// select that vertex.  This is better than adding a new vertex at
 	// the same location as an existing one.
@@ -591,6 +588,10 @@ static void Insert_Vertex(bool force_select)
 		edit.drawing_from = near_vert;
 		return;
 	}
+
+
+	int first_sel  = edit.Selected->find_first();
+	int second_sel = edit.Selected->find_second();
 
 	// if highlighted vertex same as selected one, merely deselect it
 	if (second_sel < 0 && near_vert >= 0 && near_vert == first_sel)
@@ -612,8 +613,8 @@ static void Insert_Vertex(bool force_select)
 	{
 		if (LineDefAlreadyExists(first_sel, second_sel))
 		{
-			edit.Selected->clear(first_sel);
-			edit.Selected->set  (second_sel);
+			edit.Selected->set(first_sel);
+			edit.Selected->set(second_sel);
 
 			Editor_ClearAction();
 			return;
