@@ -517,7 +517,7 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 }
 
 
-static void Insert_LineDef(int v1, int v2)
+void Insert_LineDef(int v1, int v2, bool no_fill = false)
 {
 	int new_ld = BA_New(OBJ_LINEDEFS);
 
@@ -526,6 +526,9 @@ static void Insert_LineDef(int v1, int v2)
 	L->start = v1;
 	L->end   = v2;
 	L->flags = MLF_Blocking;
+
+	if (no_fill)
+		return;
 
 	selection_c flip(OBJ_LINEDEFS);
 
@@ -551,7 +554,7 @@ static void Insert_LineDef(int v1, int v2)
 }
 
 
-static void Insert_Vertex(bool force_select)
+void Insert_Vertex(bool force_select, bool no_fill)
 {
 	int reselect = true;
 
@@ -632,7 +635,7 @@ static void Insert_Vertex(bool force_select)
 
 		BA_Begin();
 
-		Insert_LineDef(first_sel, second_sel);
+		Insert_LineDef(first_sel, second_sel, no_fill);
 
 		BA_End();
 
@@ -702,7 +705,7 @@ static void Insert_Vertex(bool force_select)
 	// add a new linedef?
 	if (first_sel >= 0)
 	{
-		Insert_LineDef(first_sel, new_v);
+		Insert_LineDef(first_sel, new_v, no_fill);
 	}
 
 	BA_End();
@@ -815,6 +818,7 @@ void CMD_Insert(void)
 {
 	bool force_new;
 	bool force_select;
+	bool no_fill;
 
 	switch (edit.mode)
 	{
@@ -824,7 +828,8 @@ void CMD_Insert(void)
 
 		case OBJ_VERTICES:
 			force_select = Exec_HasFlag("/select");
-			Insert_Vertex(force_select);
+			no_fill      = Exec_HasFlag("/nofill");
+			Insert_Vertex(force_select, no_fill);
 			break;
 
 		case OBJ_SECTORS:
