@@ -280,13 +280,16 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		basename = fl_filename_name(filename);
 
 
-#define YGD_BUF 200   /* max. line length + 2 */
+#define YGD_BUF  512   /* max. line length + 2 */
 	char readbuf[YGD_BUF];    /* buffer the line is read into */
 
-#define MAX_TOKENS 16   /* tokens per line */
+#define MAX_TOKENS  30   /* tokens per line */
 	int lineno;     /* current line of file */
 
 #define MAX_INCLUDE_LEVEL  10
+
+	int current_gen_line = -1;
+
 
 
 	FILE *fp = fopen(filename, "r");
@@ -587,6 +590,61 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			}
 			else
 				flat_assigns[name] = group;
+		}
+
+		else if (y_stricmp(token[0], "gen_line") == 0)
+		{
+			if (nargs != 4)
+				FatalError(bad_arg_count, basename, lineno, token[0], 4);
+
+			current_gen_line = num_gen_linetypes;
+			num_gen_linetypes++;
+
+			if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
+				FatalError("%s(%d): too many gen_line definitions\n", basename, lineno);
+
+			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
+
+			def->key = token[1][0];
+	
+			// use strtol() to support "0x" notation
+			def->base   = strtol(token[2], NULL, 0);
+			def->length = strtol(token[3], NULL, 0);
+
+			def->name = token[4];
+			def->num_fields = 0;
+		}
+
+		else if (y_stricmp(token[0], "gen_field") == 0)
+		{
+			if (nargs < 5)
+				FatalError(bad_arg_count, basename, lineno, token[0], 5);
+
+			if (current_gen_line < 0)
+				FatalError("%s(%d): gen_field used outside of a gen_line definition\n", basename, lineno);
+			
+			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
+
+			generalized_field_t *field = &def->fields[def->num_fields];
+
+			def->num_fields++;
+			if (def->num_fields > MAX_GEN_NUM_FIELDS)
+				FatalError("%s(%d): too many fields in gen_line definition\n", basename, lineno);
+
+			// use strtol() to support "0x" notation
+			field->bits  = strtol(token[1], NULL, 0);
+			field->mask  = strtol(token[2], NULL, 0);
+			field->shift = strtol(token[3], NULL, 0);
+
+			field->name = token[4];
+
+			// grab the keywords
+			field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+
+			for (int i = 0 ; i < field->num_keywords ; i++)
+			{
+				field->keywords[i] = token[5 + i]; 
+			}
 		}
 
 		else if (y_stricmp(token[0], "exclude_game") == 0)

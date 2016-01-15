@@ -157,13 +157,14 @@ extern game_info_t  game_info;
 
 typedef struct
 {
-	int	bits;	//
+	int bits;	//
 	int mask;	//	the bit-field info
 	int shift;	//
 
 	const char *name;
 
 	const char *keywords[MAX_GEN_FIELD_KEYWORDS];
+	int num_keywords;
 }
 generalized_field_t;
 
@@ -172,7 +173,7 @@ typedef struct
 {
 	char key;
 
-	int	base;
+	int base;
 	int length;
 
 	const char *name;
