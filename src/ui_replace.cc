@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2015 Andrew Apted
+//  Copyright (C) 2015-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_path.h"  // GoToObject
+#include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"
 
@@ -262,6 +263,10 @@ public:
 
 //------------------------------------------------------------------------
 
+
+#define HIDE_BG  (gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
+
+
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
 	find_numbers(new number_group_c),
@@ -278,7 +283,13 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group *grp1 = new Fl_Group(X, Y, W, 210);
 	grp1->box(FL_UP_BOX);
 	{
-		Fl_Box *title = new Fl_Box(X + 50, Y + 10, W - 60, 30, "Find and Replace");
+		Fl_Button *hide_button = new Fl_Button(X + 8, Y + 12, 22, 22, "X");
+		hide_button->color(HIDE_BG, HIDE_BG);
+		hide_button->labelsize(14);
+		hide_button->callback(hide_callback, this);
+
+
+		Fl_Box *title = new Fl_Box(X + 60, Y + 10, W - 70, 30, "Find and Replace");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 		title->labelsize(18+KF*4);
 
@@ -399,6 +410,12 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 UI_FindAndReplace::~UI_FindAndReplace()
 { }
+
+
+void UI_FindAndReplace::hide_callback(Fl_Widget *w, void *data)
+{
+	main_win->HideSpecialPanel();
+}
 
 
 void UI_FindAndReplace::UpdateWhatColor()

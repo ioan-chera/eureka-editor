@@ -150,6 +150,7 @@ private:
 	void Replace_SectorType(int idx);
 
 private:
+	static void      hide_callback(Fl_Widget *w, void *data);
 	static void what_kind_callback(Fl_Widget *w, void *data);
 
 	static void  find_match_callback(Fl_Widget *w, void *data);
