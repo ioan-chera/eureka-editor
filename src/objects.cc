@@ -559,6 +559,8 @@ void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 	if (LineDefAlreadyExists(v1, v2))
 		return;
 
+fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
+
 	// Find a linedef which this new line would cross, and if it exists
 	// add a vertex there and create TWO lines.  Also handle a vertex
 	// that this line crosses (sits on) similarly.
@@ -702,12 +704,14 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	}
 
 
+#if 0
 	// prevent adding a linedef that would overlap an existing one
 	if (first_sel >= 0 && LineDefWouldOverlap(first_sel, new_x, new_y))
 	{
 		Beep("New linedef would overlap another");
 		return;
 	}
+#endif
 
 
 	BA_Begin();
