@@ -3,6 +3,31 @@ Eureka TODO / WISHLIST
 ======================
 
 
+-  allow a new line (in drawing mode) to cross vertices and lines
+   and automatically split the new lines properly
+
+
+>>>  delete a vertex but when the two lines become one they overlap an
+     existing linedef
+
+
+-  MMB on sidedef/sector tex : open RECENT browser
+
+-  configure # of items in RECENT 
+
+
++  BOOM Generalized line types / sectors
+   -  "Gen" button in linedef panel
+   -  generate desc (trigger + "GEN" + category)
+   -  IDEA: show full info in tooltip of desc
+   +  have a special "browser" window for generalized lines
+   -  for sectors, have checkboxes at bottom of panel
+
+
++  change 'aspect ratio' setting, it should be a pixel aspect ratio
+   instead of a screen or monitor aspect ratio.
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -11,8 +36,6 @@ ______________________________________________________________________
 
 General
 -------
-
-+  BOOM Generalized line types / sectors
 
 +  Preferences:
    -  ability to change mouse move/turn speed in 3D view
@@ -49,20 +72,17 @@ Documentation
 Editing
 -------
 
++  automatically build nodes on save (only for that map)
+
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
    (could also be bound to right mouse button)
 
-+  an 'X' close button for Default Props and Find/Replace panels
-
 
 
 3D View
 -------
-
-+  change 'aspect ratio' setting, it should be a pixel aspect ratio
-   instead of a screen or monitor aspect ratio.
 
 
 Browser
@@ -82,11 +102,13 @@ General
 
 +  Large font mode, more readable on 1920x1080 monitors
 
++  sprite rendering in the 2D canvas
+
 +  ability to hide the right-side panel
 
 ?  a toolbar
 
-+  shift-C to copy properties from defaults, META-C copy TO defaults
++  shift-C to copy properties TO defaults
 
 -  conversion between Hexen <--> DOOM formats
 
@@ -97,7 +119,6 @@ General
 -  SHIFT + move mouse = keep current highlight
    (issue: SHIFT + mouse press could be bound to something different)
    IDEA: a key to "hold" the current highlight  [yet another mode though]
-   IDEA 2: if multiple objects selected, can cycle through which is shown in panel
    
    also useful if another modifier could disable all highlighting
    (Hmmm : mainly useful to drag-select : have a binding/flag for it)
@@ -173,8 +194,6 @@ IDEA: a dialog to specify directories to find wads.
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
 
-WISH: flat drawing in the 2D editing modes
-
 WISH: support ZDoom PK3 for textures (etc)
 
 WISH: support DDF as (or in) a resource file
@@ -196,7 +215,7 @@ Documentation
 
 -  document texture browser (RIGHT click etc)
 
-?    command line arguments page
+?  command line arguments page
 
 
 
@@ -339,21 +358,23 @@ Browser
 Game / Port Definitions
 -----------------------
 
--  game-def setting: view_height
-
--  ability to "remove line 271" (etc)
-
--  finish HacX support -- categorize the textures
-
 +  support Harmony
 
 ?  support Chex Quest 1 and 2
 
--  FreeDOOM: categorize the new textures
+-  game-def setting: view_height
+
+-  ability to "remove line 271" (etc)
 
 -  a new category for BOOM's "property transfer" linetypes
 
--  make player things bright ??
+-  Hexen : categorize the textures/flats
+
+-  Heretic : categorize the textures/flats
+
+-  FreeDOOM : categorize all the new textures
+
+-  HacX : categorize the textures
 
 
 ______________________________________________________________________

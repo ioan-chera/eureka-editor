@@ -13,8 +13,9 @@ CHANGES Eureka 1.10
 
 +  added Eternity port definition, thanks to printz
 
--  inserting vertices with SHIFT always selects the new vertex
--  inserting vertices with CTRL inhibits creation of sectors
+-  auto-splitting when inserting new linedefs
+-  inserting a vertex with SHIFT continues the drawing mode
+-  inserting a vertex with CTRL inhibits creation of sectors
 -  better merging of linedefs when dragging a vertex
 -  when a line splits a sector, use a consistent orientation
 
