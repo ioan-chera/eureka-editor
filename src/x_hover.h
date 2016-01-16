@@ -52,6 +52,18 @@ bool PointOutsideOfMap(int x, int y);
 int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2);
 
 
+typedef struct
+{
+	int vert;	// >= 0 when we hit a vertex
+	int line;   // >= 0 when we hit a linedef instead
+
+	int x, y;	// coordinate of line split point
+}
+cross_state_t;
+
+bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross);
+
+
 #endif  /* __EUREKA_X_HOVER_H__ */
 
 //--- editor settings ---

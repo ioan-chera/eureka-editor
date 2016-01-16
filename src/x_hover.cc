@@ -988,5 +988,13 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 	}
 }
 
+
+bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
+{
+	// FIXME
+
+	return false;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

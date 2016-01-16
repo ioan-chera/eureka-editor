@@ -554,6 +554,42 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 }
 
 
+void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
+{
+	if (LineDefAlreadyExists(v1, v2))
+		return;
+
+	// Find a linedef which this new line would cross, and if it exists
+	// add a vertex there and create TWO lines.  Also handle a vertex
+	// that this line crosses (sits on) similarly.
+
+	cross_state_t cross;
+
+	if (! FindClosestCrossPoint(v1, v2, &cross))
+	{
+		Insert_LineDef(v1, v2, no_fill);
+		return;
+	}
+
+	if (cross.line >= 0)
+	{
+		cross.vert = BA_New(OBJ_VERTICES);
+
+		Vertex *V = Vertices[cross.vert];
+
+		V->x = cross.x;
+		V->y = cross.y;
+
+		SplitLineDefAtVertex(cross.line, cross.vert);
+	}
+
+	// recursively handle both sides
+	
+	Insert_LineDef_autosplit(v1, cross.vert, no_fill);
+	Insert_LineDef_autosplit(cross.vert, v2, no_fill);
+}
+
+
 void Insert_Vertex(bool force_select, bool no_fill)
 {
 	int reselect = true;
@@ -623,19 +659,12 @@ void Insert_Vertex(bool force_select, bool no_fill)
 			return;
 		}
 
-		if (LineDefWouldOverlap(first_sel, Vertices[second_sel]->x, Vertices[second_sel]->y) ||
-		    Vertices[first_sel]->Matches(Vertices[second_sel]))
-		{
-			Beep("New linedef would overlap another");
-			return;
-		}
-
 		if (!force_select && VertexHowManyLineDefs(second_sel) > 0)
 			reselect = false;
 
 		BA_Begin();
 
-		Insert_LineDef(first_sel, second_sel, no_fill);
+		Insert_LineDef_autosplit(first_sel, second_sel, no_fill);
 
 		BA_End();
 
@@ -705,7 +734,7 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	// add a new linedef?
 	if (first_sel >= 0)
 	{
-		Insert_LineDef(first_sel, new_v, no_fill);
+		Insert_LineDef_autosplit(first_sel, new_v, no_fill);
 	}
 
 	BA_End();
