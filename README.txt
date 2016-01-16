@@ -97,8 +97,8 @@ RMB
 * scroll the map around (by dragging)
 
 MMB
-* insert an object (same as SPACE or INSERT key)
-* with SHIFT key: scale the selected objects
+* scale the selected objects
+* with SHIFT key: allow changing aspect (stretching)
 * with CTRL key: rotate objects
 
 wheel : zoom in or out

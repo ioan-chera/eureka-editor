@@ -1256,10 +1256,10 @@ void Editor_MouseRelease()
 
 void Editor_MiddlePress(keycode_t mod)
 {
-fprintf(stderr, "Editor_MiddlePress : button_down:%d mod:%04x\n", edit.button_down, mod);
 	if (edit.button_down & 1)  // allow 0 or 2
 		return;
 
+#if 0
 	// ability to insert stuff via the mouse
 	if (mod == 0)
 	{
@@ -1269,6 +1269,7 @@ fprintf(stderr, "Editor_MiddlePress : button_down:%d mod:%04x\n", edit.button_do
 		CMD_Insert();
 		return;
 	}
+#endif
 
 	if (edit.Selected->empty())
 	{
