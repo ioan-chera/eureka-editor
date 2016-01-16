@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -60,7 +60,8 @@ typedef enum
 {
 	SOM_Numeric = 0,
 	SOM_Alpha,
-	SOM_AlphaSkip	// skip the S1, WR (etc) of linedef descriptions
+	SOM_AlphaSkip,  // skip the S1, WR (etc) of linedef descriptions
+	SOM_Recent
 
 } sort_method_e;
 
@@ -73,6 +74,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
 	number(_num), category(_category),
+	recent_idx(-2),
 	button(NULL), pic(NULL)
 {
 	end();
@@ -97,6 +99,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
 	number(_num), category(_category),
+	recent_idx(-2),
 	button(NULL), pic(_pic)
 {
 	end();
@@ -325,8 +328,6 @@ void UI_Browser_Box::sort_callback(Fl_Widget *w, void *data)
 
 bool UI_Browser_Box::Filter(bool force_update)
 {
-//!!!!	pack->scroll_to(0, 0);
-
 	bool changes = false;
 
 	int left_X  = scroll->x() + SBAR_W;
@@ -401,7 +402,7 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 
 		// special logic for RECENT category  [ignore search box]
 		if (cat == '^')
-			return RecentMatch(item);
+			return (item->recent_idx >= 0);
 
 		if (! (cat == tolower(item->category) ||
 			   (cat == 'X' && isupper(item->category))))
@@ -422,22 +423,35 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 }
 
 
-bool UI_Browser_Box::RecentMatch(Browser_Item *item) const
+bool UI_Browser_Box::Recent_UpdateItem(Browser_Item *item)
 {
+	// returns true if the index changed
+
+	int new_idx = -1;
+
 	switch (kind)
 	{
 		case 'T':
-			return (recent_textures.find(item->real_name.c_str()) >= 0);
+			new_idx = recent_textures.find(item->real_name.c_str());
+			break;
 
 		case 'F':
-			return (recent_flats.find(item->real_name.c_str()) >= 0);
+			new_idx = recent_flats.find(item->real_name.c_str());
+			break;
 
 		case 'O':
-			return (recent_things.find_number(item->number) >= 0);
+			new_idx = recent_things.find_number(item->number);
+			break;
 
 		default:
 			return false;
 	}
+
+	if (item->recent_idx == new_idx)
+		return false;
+
+	item->recent_idx = new_idx;
+	return true;
 }
 
 
@@ -449,6 +463,10 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, sort_method_e m
 	if (method == SOM_Numeric)
 	{
 		return (A->number - B->number);
+	}
+	else if (method == SOM_Recent)
+	{
+		return (A->recent_idx - B->recent_idx);
 	}
 
 	if (strchr(sa, '/')) sa = strchr(sa, '/') + 1;
@@ -499,9 +517,13 @@ void UI_Browser_Box::Sort()
 		scroll->Remove_first();
 	}
 
+	char cat = cat_letters[category->value()];
+
 	sort_method_e method = SOM_Alpha;
 
-	if (alpha && ! alpha->value())
+	if (cat == '^')
+		method = SOM_Recent;
+	else if (alpha && ! alpha->value())
 		method = SOM_Numeric;
 	else if (kind == 'L')
 		method = SOM_AlphaSkip;
@@ -795,6 +817,8 @@ void UI_Browser_Box::Populate()
 			break;
 	}
 
+	RecentUpdate();
+
 	// this calls Filter to reposition the widgets
 	Sort();
 }
@@ -885,12 +909,18 @@ void UI_Browser_Box::Scroll(int delta)
 
 void UI_Browser_Box::RecentUpdate()
 {
-	char cat = cat_letters[category->value()];
+	bool changes = false;
 
-	if (cat == '^')
+	for (int i = 0 ; i < scroll->Children() ; i++)
 	{
-		Filter();
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		if (Recent_UpdateItem(item))
+			changes = true;
 	}
+
+	if (changes)
+		Sort();
 }
 
 
@@ -997,6 +1027,7 @@ void UI_Browser::SetActive(int new_active)
 	active = new_active;
 
 	browsers[active]->show();
+	browsers[active]->RecentUpdate();
 }
 
 
@@ -1065,13 +1096,7 @@ void UI_Browser::Scroll(int delta)
 
 void UI_Browser::RecentUpdate()
 {
-	if (! visible())
-		return;
-	
 	UI_Browser_Box *box = browsers[active];
-
-///	if (box->GetKind() != kind)
-///		return;
 
 	box->RecentUpdate();
 }

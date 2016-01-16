@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -36,6 +36,8 @@ public:
 	int number;
 
 	char category;
+
+	int recent_idx;
 
 	Fl_Repeat_Button * button;
 
@@ -115,7 +117,6 @@ private:
 	void Sort();
 
 	bool SearchMatch(Browser_Item *item) const;
-	bool RecentMatch(Browser_Item *item) const;
 
 	void Populate_Images(std::map<std::string, Img_c *> & img_list);
 	void Populate_Sprites();
@@ -123,6 +124,8 @@ private:
 	void Populate_ThingTypes();
 	void Populate_LineTypes();
 	void Populate_SectorTypes();
+
+	bool Recent_UpdateItem(Browser_Item *item);
 
 	bool CategoryByLetter(char letter);
 
