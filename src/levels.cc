@@ -157,6 +157,7 @@ void MapStuff_NotifyEnd()
 static bool invalidated_totals;
 static bool invalidated_panel_obj;
 static bool changed_panel_obj;
+static bool changed_recent_list;
 
 
 void ObjectBox_NotifyBegin()
@@ -164,6 +165,7 @@ void ObjectBox_NotifyBegin()
 	invalidated_totals = false;
 	invalidated_panel_obj = false;
 	changed_panel_obj = false;
+	changed_recent_list = false;
 }
 
 
@@ -220,6 +222,9 @@ void ObjectBox_NotifyEnd()
 	{
 		main_win->UpdatePanelObj();
 	}
+
+	if (changed_recent_list)
+		main_win->browser->RecentUpdate();
 }
 
 
@@ -641,9 +646,10 @@ void Recently_used::insert(const char *name)
 
 	push_front(name);
 
-	// update the browser
-	if (main_win)
-		main_win->browser->RecentUpdate();
+	// mark browser for later update
+	// [ this method may be called very often by basis, too expensive to
+	//   update the browser here ]
+	changed_recent_list = true;
 }
 
 void Recently_used::insert_number(int val)
@@ -766,6 +772,9 @@ bool RecUsed_ParseUser(const char ** tokens, int num_tok)
 			// ignore it
 			break;
 	}
+
+	if (main_win)
+		main_win->browser->RecentUpdate();
 
 	return true;
 }
