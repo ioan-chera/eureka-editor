@@ -166,6 +166,8 @@ static void Insert_Thing()
 	T->x = grid.SnapX(edit.map_x);
 	T->y = grid.SnapY(edit.map_y);
 
+	recent_things.insert_number(T->type);
+
 	BA_End();
 
 
