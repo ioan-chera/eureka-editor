@@ -1013,12 +1013,12 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 	double length = sqrt(dx*dx + dy*dy);
 
-	double epsilon = 0.2;
-	double close_dist = 1.5;  // TODO : depend on grid.Scale
+	double epsilon = 0.3;
+	double close_dist = 0.9;
 
 	double best_dist = 9e9;
 
-	// try all vertices
+	/* try all vertices */
 	
 	for (int v = 0 ; v < NumVertices ; v++)
 	{
@@ -1031,17 +1031,31 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		if (VC->x == VA->x && VC->y == VA->y) continue;
 		if (VC->x == VB->x && VC->y == VB->y) continue;
 
-		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+		// is this vertex sitting on the line?
+		if (x1 == x2)
+		{
+			if (VC->x != x1)
+				continue;
+		}
+		else if (y1 == y2)
+		{
+			if (VC->y != y1)
+				continue;
+		}
+		else
+		{
+			double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
 
-		if (fabs(perp) > close_dist)
-			continue;
+			if (fabs(perp) > close_dist)
+				continue;
+		}
 
 		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
 
 		if (along < epsilon || along > length - epsilon)
 			continue;
 
-		// OK, vertex is on the line
+		// yes it is
 
 		if (along < best_dist)
 		{
@@ -1056,11 +1070,38 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 	}
 
 
-	// try all linedefs
+	/* try all linedefs */
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
 		const LineDef * L = LineDefs[ld];
+
+		// only need to handle cases where this linedef distinctly crosses
+		// the new line (i.e. start and end are clearly on opposite sides).
+
+		double lx1 = L->Start()->x;
+		double ly1 = L->Start()->y;
+		double lx2 = L->End()->x;
+		double ly2 = L->End()->y;
+
+		double a = PerpDist(lx1,ly1, x1,y1, x2,y2);
+		double b = PerpDist(lx2,ly2, x1,y1, x2,y2);
+
+		if (! ((a < -epsilon && b > epsilon) || (a > epsilon && b < -epsilon)))
+			continue;
+
+		// compute intersection point
+		double l_along = a / (a - b); 
+
+		double ix = lx1 + l_along * (lx2 - lx1);
+		double iy = ly1 + l_along * (ly2 - ly1);
+
+		double along = AlongDist(ix, iy,  x1,y1, x2,y2);
+
+		if (along < epsilon || along > length - epsilon)
+			continue;
+
+fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, iy, along);
 
 		// TODO
 
