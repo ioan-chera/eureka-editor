@@ -458,7 +458,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			line_groups[lg->group] = lg;
 		}
 
-		else if (y_stricmp(token[0], "line") == 0)
+		else if (y_stricmp(token[0], "line") == 0 ||
+				 y_stricmp(token[0], "special") == 0)
 		{
 			if (nargs < 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
@@ -479,6 +480,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				if (token[4 + i][0] != '-')
 					info->args[i] = token[4 + i];
 			}
+
+			// FIXME : have separate tables for "special"
 
 			if (line_groups.find( info->group) == line_groups.end())
 			{

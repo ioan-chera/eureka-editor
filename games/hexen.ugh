@@ -401,123 +401,123 @@ linegroup - "OTHER"
 
 # Floors and lifts
 
-line 20 f "Floor_Lower"          tag  speed  dist 
-line 21 f "Floor_Lower /lowest"  tag  speed 
-line 22 f "Floor_Lower /nearest" tag  speed 
-line 23 f "Floor_Raise"          tag  speed  dist 
-line 24 f "Floor_Raise /highest" tag  speed 
-line 25 f "Floor_Raise /nearest" tag  speed 
-line 28 f "Floor_Raise /crush"   tag  speed  damage
-line 35 f "Floor_Raise x8"       tag  speed  dist_x8
-line 36 f "Floor_Lower x8"       tag  speed  dist_x8
-line 66 f "Floor_Lower /instant" tag  -  dist 
-line 67 f "Floor_Raise /instant" tag  -  dist 
-line 68 f "Floor_MoveTo x8"      tag  speed  height_x8  negate?
-line 46 f "Floor_CrushStop"      tag 
+special 20 f "Floor_Lower"          tag  speed  dist 
+special 21 f "Floor_Lower /lowest"  tag  speed 
+special 22 f "Floor_Lower /nearest" tag  speed 
+special 23 f "Floor_Raise"          tag  speed  dist 
+special 24 f "Floor_Raise /highest" tag  speed 
+special 25 f "Floor_Raise /nearest" tag  speed 
+special 28 f "Floor_Raise /crush"   tag  speed  damage
+special 35 f "Floor_Raise x8"       tag  speed  dist_x8
+special 36 f "Floor_Lower x8"       tag  speed  dist_x8
+special 66 f "Floor_Lower /instant" tag  -  dist 
+special 67 f "Floor_Raise /instant" tag  -  dist 
+special 68 f "Floor_MoveTo x8"      tag  speed  height_x8  negate?
+special 46 f "Floor_CrushStop"      tag 
 
-line 138 f "Floor_Waggle"        tag  amp  speed  offset  time
+special 138 f "Floor_Waggle"        tag  amp  speed  offset  time
 
-line 62 g "Plat_DownWaitUp"  tag  speed  delay 
-line 63 g "Plat_Down"        tag  speed  delay  dist 
-line 64 g "Plat_UpWaitDown"  tag  speed  delay 
-line 65 g "Plat_Up"          tag  speed  delay  dist 
-line 60 g "Plat_Perpetual"   tag  speed  delay 
-line 61 g "Plat_Stop"        tag
+special 62 g "Plat_DownWaitUp"  tag  speed  delay 
+special 63 g "Plat_Down"        tag  speed  delay  dist 
+special 64 g "Plat_UpWaitDown"  tag  speed  delay 
+special 65 g "Plat_Up"          tag  speed  delay  dist 
+special 60 g "Plat_Perpetual"   tag  speed  delay 
+special 61 g "Plat_Stop"        tag
 
-line 26 s "Stairs_Down"        tag  speed  dist  delay  reset
-line 27 s "Stairs_Up"          tag  speed  dist  delay  reset
-line 31 s "Stairs_Down /sync"  tag  speed  dist  reset 
-line 32 s "Stairs_Up   /sync"  tag  speed  dist  reset 
+special 26 s "Stairs_Down"        tag  speed  dist  delay  reset
+special 27 s "Stairs_Up"          tag  speed  dist  delay  reset
+special 31 s "Stairs_Down /sync"  tag  speed  dist  reset 
+special 32 s "Stairs_Up   /sync"  tag  speed  dist  reset 
 
 # Ceiling and doors
 
-line 40 c "Ceiling_Lower"      tag  speed  dist 
-line 41 c "Ceiling_Raise"      tag  speed  dist 
-line 69 c "Ceiling_MoveTo x8"  tag  speed  height_x8  negate?
+special 40 c "Ceiling_Lower"      tag  speed  dist 
+special 41 c "Ceiling_Raise"      tag  speed  dist 
+special 69 c "Ceiling_MoveTo x8"  tag  speed  height_x8  negate?
 
-line 42 c "Ceiling_Crush /perpet"  tag  speed  damage
-line 43 c "Ceiling_Crush "         tag  speed  damage
-line 45 c "Ceiling_CrushAndUp"     tag  speed  damage
-line 44 c "Ceiling_CrushStop"      tag 
+special 42 c "Ceiling_Crush /perpet"  tag  speed  damage
+special 43 c "Ceiling_Crush "         tag  speed  damage
+special 45 c "Ceiling_CrushAndUp"     tag  speed  damage
+special 44 c "Ceiling_CrushStop"      tag 
 
-line 10 d "Door_Close"   tag  speed 
-line 11 d "Door_Open"    tag  speed 
-line 12 d "Door_Raise"   tag  speed  delay 
-line 13 d "Door_Locked"  tag  speed  delay  lock 
+special 10 d "Door_Close"   tag  speed 
+special 11 d "Door_Open"    tag  speed 
+special 12 d "Door_Raise"   tag  speed  delay 
+special 13 d "Door_Locked"  tag  speed  delay  lock 
 
 # Lighting
 
-line 110 l "Light_Raise"   tag  light 
-line 111 l "Light_Lower"   tag  light 
-line 112 l "Light_Set"     tag  light 
-line 113 l "Light_Fade"    tag  light  time 
-line 114 l "Light_Glow"    tag  high  low  time 
-line 115 l "Light_Flicker" tag  high  low 
-line 116 l "Light_Strobe"  tag  high  low  hightime  lowtime
+special 110 l "Light_Raise"   tag  light 
+special 111 l "Light_Lower"   tag  light 
+special 112 l "Light_Set"     tag  light 
+special 113 l "Light_Fade"    tag  light  time 
+special 114 l "Light_Glow"    tag  high  low  time 
+special 115 l "Light_Flicker" tag  high  low 
+special 116 l "Light_Strobe"  tag  high  low  hightime  lowtime
 
-line 109 l "Force Lightning"  mode
+special 109 l "Force Lightning"  mode
 
 # Thing specials
 
-line 72 t "Push Thing"    angle  dist 
-line 73 t "Damage Thing"  damage 
+special 72 t "Push Thing"    angle  dist 
+special 73 t "Damage Thing"  damage 
 
-line 130 t "Thing_Activate"      tid 
-line 131 t "Thing_Deactivate"    tid 
-line 132 t "Thing_Remove"        tid 
-line 133 t "Thing_Destroy"       tid 
-line 134 t "Thing_Launch"        tid  type  angle  speed  vspeed
-line 136 t "Thing_Launch /grav"  tid  type  angle  speed  vspeed
-line 135 t "Thing_Spawn"         tid  type  angle 
-line 137 t "Thing_Spawn /silent" tid  type  angle 
+special 130 t "Thing_Activate"      tid 
+special 131 t "Thing_Deactivate"    tid 
+special 132 t "Thing_Remove"        tid 
+special 133 t "Thing_Destroy"       tid 
+special 134 t "Thing_Launch"        tid  type  angle  speed  vspeed
+special 136 t "Thing_Launch /grav"  tid  type  angle  speed  vspeed
+special 135 t "Thing_Spawn"         tid  type  angle 
+special 137 t "Thing_Spawn /silent" tid  type  angle 
 
 # Polyobj specials
 
-line 1 p "Polyobj_Start"       po  mirror  sound 
-line 5 p "Polyobj_Explicit"    po  order  mirror  sound 
+special 1 p "Polyobj_Start"       po  mirror  sound 
+special 5 p "Polyobj_Explicit"    po  order  mirror  sound 
 
-line 2 p "Polyobj_RotateL"     po  speed  angle 
-line 3 p "Polyobj_RotateR"     po  speed  angle 
-line 4 p "Polyobj_Move"        po  speed  angle  dist 
-line 6 p "Polyobj_Move x8"     po  speed  angle  dist 
-line 7 p "Polyobj_DoorSwing"   po  speed  angle  delay 
-line 8 p "Polyobj_DoorSlide"   po  speed  angle  dist  delay
+special 2 p "Polyobj_RotateL"     po  speed  angle 
+special 3 p "Polyobj_RotateR"     po  speed  angle 
+special 4 p "Polyobj_Move"        po  speed  angle  dist 
+special 6 p "Polyobj_Move x8"     po  speed  angle  dist 
+special 7 p "Polyobj_DoorSwing"   po  speed  angle  delay 
+special 8 p "Polyobj_DoorSlide"   po  speed  angle  dist  delay
 
-line 90 p "Polyobj_RotateL /OR"  po  speed  angle 
-line 91 p "Polyobj_RotateR /OR"  po  speed  angle 
-line 92 p "Polyobj_Move /OR"     po  speed  angle  dist 
-line 93 p "Polyobj_Move x8 /OR"  po  speed  angle  dist 
+special 90 p "Polyobj_RotateL /OR"  po  speed  angle 
+special 91 p "Polyobj_RotateR /OR"  po  speed  angle 
+special 92 p "Polyobj_Move /OR"     po  speed  angle  dist 
+special 93 p "Polyobj_Move x8 /OR"  po  speed  angle  dist 
 
 # Miscellaneous
 
-line 0  - "NOTHING"
+special 0  - "NOTHING"
 
-line 29 - "Pillar_Build"  tag  speed  dist 
-line 30 - "Pillar_Open"   tag  speed  f_dist  c_dist 
-line 94 - "Pillar_Crush"  tag  speed  dist  damage
+special 29 - "Pillar_Build"  tag  speed  dist 
+special 30 - "Pillar_Open"   tag  speed  f_dist  c_dist 
+special 94 - "Pillar_Crush"  tag  speed  dist  damage
 
-line 80 - "ACS_Execute"       script  map  param1  param2  param3
-line 83 - "ACS_Execute /lock" script  map  param1  param2  lock
-line 81 - "ACS_Suspend"       script  map 
-line 82 - "ACS_Terminate"     script  map 
+special 80 - "ACS_Execute"       script  map  param1  param2  param3
+special 83 - "ACS_Execute /lock" script  map  param1  param2  lock
+special 81 - "ACS_Suspend"       script  map 
+special 82 - "ACS_Terminate"     script  map 
 
-line 95 - "Elevator_Lower"    tag  speed  dist 
-line 96 - "Elevator_Raise"    tag  speed  dist 
+special 95 - "Elevator_Lower"    tag  speed  dist 
+special 96 - "Elevator_Raise"    tag  speed  dist 
 
-line 121 - "Set Line ID"  id_number
+special 121 - "Set Line ID"  id_number
 
-line 100 a "Scroll_Left"   speed 
-line 101 a "Scroll_Right"  speed 
-line 102 a "Scroll_Up"     speed 
-line 103 a "Scroll_Down"   speed 
+special 100 a "Scroll_Left"   speed 
+special 101 a "Scroll_Right"  speed 
+special 102 a "Scroll_Up"     speed 
+special 103 a "Scroll_Down"   speed 
 
-line 129 - "UsePuzzleItem"  item  script  param1  param2  param3
-line 140 - "Change Sound"  tag  sound 
-line 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
+special 129 - "UsePuzzleItem"  item  script  param1  param2  param3
+special 140 - "Change Sound"  tag  sound 
+special 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 
-line 70 - "Teleport"          tid 
-line 71 - "Teleport /silent"  tid 
+special 70 - "Teleport"          tid 
+special 71 - "Teleport /silent"  tid 
 
-line 74 - "Game_NewMap"  map  position
-line 75 - "Game_End" 
+special 74 - "Game_NewMap"  map  position
+special 75 - "Game_End" 
 
