@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1012,9 +1012,9 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		return false;
 
 	double length = sqrt(dx*dx + dy*dy);
-	double epsilon = 0.1;
 
-	int hits = 0;
+	double epsilon = 0.2;
+	double close_dist = 1.5;  // TODO : depend on grid.Scale
 
 	double best_dist = 9e9;
 
@@ -1031,9 +1031,9 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		if (VC->x == VA->x && VC->y == VA->y) continue;
 		if (VC->x == VB->x && VC->y == VB->y) continue;
 
-		// FIXME
-#if 0
-		if (! is_vertex_sitting_on_line)
+		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+
+		if (fabs(perp) > close_dist)
 			continue;
 
 		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
@@ -1042,8 +1042,6 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 			continue;
 
 		// OK, vertex is on the line
-
-		hits++;
 
 		if (along < best_dist)
 		{
@@ -1055,7 +1053,6 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 			cross->x = VC->x;
 			cross->y = VC->y;
 		}
-#endif
 	}
 
 
@@ -1069,8 +1066,6 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 #if 0
 		// OK, this linedef crosses it
-
-		hits++;
 
 		if (along < best_dist)
 		{
