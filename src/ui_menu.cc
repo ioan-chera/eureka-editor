@@ -371,6 +371,25 @@ static void browser_do_sectors(Fl_Widget *w, void * data)
 }
 
 
+static void browser_do_recent_things(Fl_Widget *w, void * data)
+{
+	main_win->ShowBrowser('O');
+	main_win->browser->ToggleRecent(true /* force */);
+}
+
+static void browser_do_recent_tex(Fl_Widget *w, void * data)
+{
+	main_win->ShowBrowser('T');
+	main_win->browser->ToggleRecent(true /* force */);
+}
+
+static void browser_do_recent_flats(Fl_Widget *w, void * data)
+{
+	main_win->ShowBrowser('F');
+	main_win->browser->ToggleRecent(true /* force */);
+}
+
+
 #if 0
 static void browser_go_wide(Fl_Widget *w, void * data)
 {
@@ -566,6 +585,12 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Flats",        0, FCAL browser_do_flats },
 		{ "&Line Types",   0, FCAL browser_do_lines },
 		{ "&Sector Types", 0, FCAL browser_do_sectors },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Recent Textures", 0, FCAL browser_do_recent_tex },
+		{ "Recent Flats",     0, FCAL browser_do_recent_flats },
+		{ "Recent Things",    0, FCAL browser_do_recent_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

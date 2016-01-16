@@ -20,6 +20,7 @@ CHANGES Eureka 1.10
 -  when a line splits a sector, use a consistent orientation
 
 -  right-click on a sidedef or sector texture sets it to default
+-  added "Recent Textures" command (etc) to Browser menu
 -  allow loading a map with no vertices, no linedefs (etc)
 -  various layout tweaks to the editing panels
 -  changed default port from Boom --> Vanilla

@@ -161,7 +161,7 @@ public:
 
 	// dir is +1 or -1, or 0 to set the category to "ALL"
 	void CycleCategory(int dir);
-	void ToggleRecent();
+	void ToggleRecent(bool force_recent = false);
 
 	void ClearSearchBox();
 

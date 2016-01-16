@@ -1077,10 +1077,8 @@ void UI_Browser::RecentUpdate()
 }
 
 
-void UI_Browser::ToggleRecent()
+void UI_Browser::ToggleRecent(bool force_recent)
 {
-	bool force_recent = false;
-
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
