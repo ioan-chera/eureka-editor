@@ -86,7 +86,7 @@ private:
 	const char *name_set[RECENTLY_USED_MAX];
 
 public:
-	 Recently_used(int _keepnum = 12);
+	 Recently_used();
 	~Recently_used();
 
 	int find(const char *name); 

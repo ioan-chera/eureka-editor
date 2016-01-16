@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -587,9 +587,9 @@ Recently_used  recent_flats;
 Recently_used  recent_things;
 
 
-Recently_used::Recently_used(int _keepnum) :
+Recently_used::Recently_used() :
 	size(0),
-	keep_num(_keepnum)
+	keep_num(RECENTLY_USED_MAX - 2)
 {
 	memset(&name_set, 0, sizeof(name_set));
 }
@@ -633,7 +633,7 @@ void Recently_used::insert(const char *name)
 	int idx = find(name);
 
 	// optimisation
-	if (idx >= 0 && idx < keep_num/3)
+	if (idx >= 0 && idx < 4)
 		return;
 
 	if (idx >= 0)
