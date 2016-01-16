@@ -991,9 +991,102 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 {
-	// FIXME
+	SYS_ASSERT(v1 != v2);
 
-	return false;
+	cross->vert = -1;
+	cross->line = -1;
+
+	const Vertex *VA = Vertices[v1];
+	const Vertex *VB = Vertices[v2];
+
+	int x1 = VA->x;
+	int y1 = VA->y;
+	int x2 = VB->x;
+	int y2 = VB->y;
+
+	int dx = x2 - x1;
+	int dy = y2 - y1;
+
+	// same coords?  (generally should not happen, handle it anyway)
+	if (dx == 0 && dy == 0)
+		return false;
+
+	double length = sqrt(dx*dx + dy*dy);
+	double epsilon = 0.1;
+
+	int hits = 0;
+
+	double best_dist = 9e9;
+
+	// try all vertices
+	
+	for (int v = 0 ; v < NumVertices ; v++)
+	{
+		if (v == v1 || v == v2)
+			continue;
+
+		const Vertex * VC = Vertices[v];
+
+		// ignore vertices ar same coordinates as v1 or v2
+		if (VC->x == VA->x && VC->y == VA->y) continue;
+		if (VC->x == VB->x && VC->y == VB->y) continue;
+
+		// FIXME
+#if 0
+		if (! is_vertex_sitting_on_line)
+			continue;
+
+		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
+
+		if (along < epsilon || along > length - epsilon)
+			continue;
+
+		// OK, vertex is on the line
+
+		hits++;
+
+		if (along < best_dist)
+		{
+			best_dist = along;
+
+			cross->vert = v;
+			cross->line = -1;
+
+			cross->x = VC->x;
+			cross->y = VC->y;
+		}
+#endif
+	}
+
+
+	// try all linedefs
+
+	for (int ld = 0 ; ld < NumLineDefs ; ld++)
+	{
+		const LineDef * L = LineDefs[ld];
+
+		// TODO
+
+#if 0
+		// OK, this linedef crosses it
+
+		hits++;
+
+		if (along < best_dist)
+		{
+			best_dist = along;
+
+			cross->vert = -1;
+			cross->line = ld;
+
+			cross->x = foo;
+			cross->y = bar;
+		}
+#endif
+	}
+
+
+	return (cross->vert >= 0) || (cross->line >= 0);
 }
 
 //--- editor settings ---
