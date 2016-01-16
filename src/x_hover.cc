@@ -1096,17 +1096,21 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		double ix = lx1 + l_along * (lx2 - lx1);
 		double iy = ly1 + l_along * (ly2 - ly1);
 
-		double along = AlongDist(ix, iy,  x1,y1, x2,y2);
+		int new_x = I_ROUND(ix);
+		int new_y = I_ROUND(iy);
+
+		// ensure new vertex does not match the start or end points
+		if (new_x == x1 && new_y == y1) continue;
+		if (new_x == x2 && new_y == y2) continue;
+
+		double along = AlongDist(new_x, new_y,  x1,y1, x2,y2);
 
 		if (along < epsilon || along > length - epsilon)
 			continue;
 
-fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, iy, along);
-
-		// TODO
-
-#if 0
 		// OK, this linedef crosses it
+
+fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, iy, along);
 
 		if (along < best_dist)
 		{
@@ -1115,10 +1119,9 @@ fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, i
 			cross->vert = -1;
 			cross->line = ld;
 
-			cross->x = foo;
-			cross->y = bar;
+			cross->x = new_x;
+			cross->y = new_y;
 		}
-#endif
 	}
 
 
