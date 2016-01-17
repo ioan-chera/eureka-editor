@@ -136,6 +136,22 @@ private:
 };
 
 
+class UI_Generalized_Box : public Fl_Group
+{
+private:
+	Fl_Choice * model;
+
+public:
+	UI_Generalized_Box(int X, int Y, int W, int H, const char *label);
+	virtual ~UI_Generalized_Box();
+
+private:
+	static void   hide_callback(Fl_Widget *w, void *data);
+	static void  value_callback(Fl_Widget *w, void *data);
+	static void    use_callback(Fl_Widget *w, void *data);
+};
+
+
 class UI_Browser : public Fl_Group
 {
 	/* this widget basically just contains all the browser boxes,
@@ -143,9 +159,14 @@ class UI_Browser : public Fl_Group
 	 */
 
 private:
-//	Fl_Choice *mode;
-
 	UI_Browser_Box *browsers[5];
+
+	UI_Generalized_Box *gen_box;
+
+	enum
+	{
+		ACTIVE_GENERALIZED = 5
+	};
  
  	// currently active browser box (may be hidden though)
 	int active;

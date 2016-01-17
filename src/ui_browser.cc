@@ -174,7 +174,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 {
 	end(); // cancel begin() in Fl_Group constructor
 
-	box(FL_FLAT_BOX);  // box(FL_DOWN_BOX);
+	box(FL_FLAT_BOX);
 
 	color(BROWBACK_COL, BROWBACK_COL);
 
@@ -277,6 +277,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 UI_Browser_Box::~UI_Browser_Box()
 {
+	// nothing needed
 }
 
 
@@ -950,13 +951,52 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 //------------------------------------------------------------------------
 
 
+UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
+    Fl_Group(X, Y, W, H, NULL),
+	model(NULL)
+{
+	box(FL_FLAT_BOX);
+
+	color(BROWBACK_COL, BROWBACK_COL);
+
+
+	int cx = X + 80 + KF * 8;
+	int cy = Y + 4;
+
+	Fl_Box *title = new Fl_Box(X + 44, cy, W - 54, 22+KF*4, label);
+	title->labelsize(18+KF*4);
+
+
+	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X");
+	hide_button->callback(hide_callback, this);
+	hide_button->labelsize(14);
+
+	cy += title->h() + 6;
+
+
+	end();
+}
+
+
+UI_Generalized_Box::~UI_Generalized_Box()
+{
+	// nothing needed
+}
+
+
+void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
+{
+	main_win->ShowBrowser(0);
+}
+
+
+//------------------------------------------------------------------------
+
+
 UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
 	active(2)
 {
-	end(); // cancel begin() in Fl_Group constructor
-
-
 	// create each browser box
 
 	const char *mode_letters = "TFOLS";
@@ -974,16 +1014,20 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 	{
 		browsers[i] = new UI_Browser_Box(X, Y, W, H, mode_titles[i], mode_letters[i]);
 
-		add(browsers[i]);
-
-		if (i != active)
+//!!!!		if (i != active)
 			browsers[i]->hide();
 	}
+
+	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized Types");
+
+
+	end();
 }
 
 
 UI_Browser::~UI_Browser()
 {
+	// nothing needed
 }
 
 
@@ -1033,6 +1077,8 @@ void UI_Browser::SetActive(int new_active)
 
 void UI_Browser::ChangeMode(char new_mode)
 {
+return; // FIXME
+
 	switch (new_mode)
 	{
 		case 'T': SetActive(0); break;  // TEXTURES
@@ -1040,6 +1086,8 @@ void UI_Browser::ChangeMode(char new_mode)
 		case 'O': SetActive(2); break;  // THINGS (Objects)
 		case 'L': SetActive(3); break;  // LINE TYPES
 		case 'S': SetActive(4); break;  // SECTOR TYPES
+
+		// case 'G' ....
 
 		default:
 			return;
@@ -1054,7 +1102,7 @@ void UI_Browser::NewEditMode(char edit_mode)
 		case 'l':
 			// if on LINE TYPES, stay there
 			// otherwise go to TEXTURES
-			if (active != 3)
+			if (! (active == 3 || active == ACTIVE_GENERALIZED))
 				SetActive(0);
 			break;
 
