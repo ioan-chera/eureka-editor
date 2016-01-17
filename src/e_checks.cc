@@ -329,6 +329,17 @@ void Vertex_RemoveUnused()
 }
 
 
+void Vertex_ShowUnused()
+{
+	if (edit.mode != OBJ_VERTICES)
+		Editor_ChangeMode('v');
+
+	Vertex_FindUnused(*edit.Selected);
+
+	GoToErrors();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Vertices : public UI_Check_base
@@ -351,6 +362,13 @@ public:
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
 		Vertex_ShowOverlaps();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_unused(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		Vertex_ShowUnused();
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -396,6 +414,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			sprintf(check_message, "%d unused vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
+			                "Show",   &UI_Check_Vertices::action_show_unused,
 			                "Remove", &UI_Check_Vertices::action_remove);
 		}
 

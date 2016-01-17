@@ -20,7 +20,7 @@ CHANGES Eureka 1.10
 
 -  better merging of linedefs when dragging a vertex
 
--  fixed overlapping lines when deleting 3rd vertex of a triangle
+-  prevent overlapping lines when deleting 3rd vertex of a triangle
 
 -  right-click on a sidedef or sector texture sets it to default
 -  added "Recent Textures" command (etc) to Browser menu
@@ -38,4 +38,5 @@ CHANGES Eureka 1.10
 -  map checks: detect transparent tex on solid walls
 -  map checks: find manual doors on 1S lines
 -  map checks: don't consider teleport dests as "stuck" in monsters
+-  map checks: ability to SHOW unused vertices
 
