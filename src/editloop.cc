@@ -1583,7 +1583,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"CopyProperties",
-		&CMD_CopyProperties
+		&CMD_CopyProperties,
+		/* flags */ "/reverse"
 	},
 
 	{	"ApplyTag",

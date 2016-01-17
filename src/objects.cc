@@ -1035,11 +1035,9 @@ success:
 }
 
 
-void TransferThingProperties(int src_thing, int dest_thing)
+static void TransferThingProperties(int src_thing, int dest_thing)
 {
 	const Thing * T = Things[src_thing];
-
-	BA_Begin();
 
 	BA_ChangeTH(dest_thing, Thing::F_TYPE,    T->type);
 	BA_ChangeTH(dest_thing, Thing::F_OPTIONS, T->options);
@@ -1053,16 +1051,12 @@ void TransferThingProperties(int src_thing, int dest_thing)
 	BA_ChangeTH(dest_thing, Thing::F_ARG3, T->arg3);
 	BA_ChangeTH(dest_thing, Thing::F_ARG4, T->arg4);
 	BA_ChangeTH(dest_thing, Thing::F_ARG5, T->arg5);
-
-	BA_End();
 }
 
 
-void TransferSectorProperties(int src_sec, int dest_sec)
+static void TransferSectorProperties(int src_sec, int dest_sec)
 {
 	const Sector * SEC = Sectors[src_sec];
-
-	BA_Begin();
 
 	BA_ChangeSEC(dest_sec, Sector::F_FLOORH,    SEC->floorh);
 	BA_ChangeSEC(dest_sec, Sector::F_FLOOR_TEX, SEC->floor_tex);
@@ -1072,14 +1066,12 @@ void TransferSectorProperties(int src_sec, int dest_sec)
 	BA_ChangeSEC(dest_sec, Sector::F_LIGHT,  SEC->light);
 	BA_ChangeSEC(dest_sec, Sector::F_TYPE,   SEC->type);
 	BA_ChangeSEC(dest_sec, Sector::F_TAG,    SEC->tag);
-
-	BA_End();
 }
 
 
 #define LINEDEF_FLAG_KEEP  (MLF_Blocking + MLF_TwoSided)
 
-void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
+static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 {
 	const LineDef * L1 = LineDefs[src_line];
 	const LineDef * L2 = LineDefs[dest_line];
@@ -1087,8 +1079,6 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 	// don't transfer certain flags
 	int flags = LineDefs[dest_line]->flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
-
-	BA_Begin();
 
 	// handle textures
 	if (do_tex && L1->Right() && L2->Right())
@@ -1216,8 +1206,6 @@ void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 	BA_ChangeLD(dest_line, LineDef::F_ARG3, L1->arg3);
 	BA_ChangeLD(dest_line, LineDef::F_ARG4, L1->arg4);
 	BA_ChangeLD(dest_line, LineDef::F_ARG5, L1->arg5);
-
-	BA_End();
 }
 
 
@@ -1233,38 +1221,90 @@ void CMD_CopyProperties(void)
 		Beep("No source for CopyProperties");
 		return;
 	}
-	else if (edit.Selected->count_obj() != 1)
+	else if (edit.mode == OBJ_VERTICES)
 	{
-		Beep("Too many sources for CopyProperties");
+		Beep("No properties to copy");
 		return;
 	}
 
 
-	int source = edit.Selected->find_first();
-	int target = edit.highlight.num;
+	/* normal mode, SEL --> HILITE */
 
-	// silently allow copying onto self
-	if (source == target)
-		return;
-
-
-	switch (edit.mode)
+	if (! Exec_HasFlag("/reverse"))
 	{
-		case OBJ_SECTORS:
-			TransferSectorProperties(source, target);
-			break;
-
-		case OBJ_THINGS:
-			TransferThingProperties(source, target);
-			break;
-
-		case OBJ_LINEDEFS:
-			TransferLinedefProperties(source, target, true /* do_tex */);
-			break;
-
-		default:
-			Beep("No properties to copy");
+		if (edit.Selected->count_obj() != 1)
+		{
+			Beep("Too many sources for CopyProperties");
 			return;
+		}
+
+		int source = edit.Selected->find_first();
+		int target = edit.highlight.num;
+
+		// silently allow copying onto self
+		if (source == target)
+			return;
+
+		BA_Begin();
+
+		switch (edit.mode)
+		{
+			case OBJ_SECTORS:
+				TransferSectorProperties(source, target);
+				break;
+
+			case OBJ_THINGS:
+				TransferThingProperties(source, target);
+				break;
+
+			case OBJ_LINEDEFS:
+				TransferLinedefProperties(source, target, true /* do_tex */);
+				break;
+
+			default: break;
+		}
+
+		BA_End();
+
+	}
+	else  /* reverse mode, HILITE --> SEL */
+	{
+		if (edit.Selected->count_obj() == 1 && edit.Selected->find_first() == edit.highlight.num)
+		{
+			Beep("No selection for CopyProperties");
+			return;
+		}
+
+		int source = edit.highlight.num;
+
+		selection_iterator_c it;
+
+		BA_Begin();
+
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			if (*it == source)
+				continue;
+
+			switch (edit.mode)
+			{
+				case OBJ_SECTORS:
+					TransferSectorProperties(source, *it);
+					break;
+
+				case OBJ_THINGS:
+					TransferThingProperties(source, *it);
+					break;
+
+				case OBJ_LINEDEFS:
+					TransferLinedefProperties(source, *it, true /* do_tex */);
+					break;
+
+				default: break;  // fuck you, compiler
+			}
+		}
+
+		BA_End();
 	}
 }
 
