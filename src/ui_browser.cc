@@ -1014,11 +1014,12 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 	{
 		browsers[i] = new UI_Browser_Box(X, Y, W, H, mode_titles[i], mode_letters[i]);
 
-//!!!!		if (i != active)
+		if (i != active)
 			browsers[i]->hide();
 	}
 
 	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized Line");
+	gen_box->hide();
 
 
 	end();
@@ -1066,19 +1067,27 @@ void UI_Browser::SetActive(int new_active)
 	if (new_active == active)
 		return;
 
-	browsers[active]->hide();
+	if (active < ACTIVE_GENERALIZED)
+		browsers[active]->hide();
+	else
+		gen_box->hide();
 
 	active = new_active;
 
-	browsers[active]->show();
-	browsers[active]->RecentUpdate();
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->show();
+		browsers[active]->RecentUpdate();
+	}
+	else
+	{
+		gen_box->show();
+	}
 }
 
 
 void UI_Browser::ChangeMode(char new_mode)
 {
-return; // FIXME
-
 	switch (new_mode)
 	{
 		case 'T': SetActive(0); break;  // TEXTURES
@@ -1087,10 +1096,9 @@ return; // FIXME
 		case 'L': SetActive(3); break;  // LINE TYPES
 		case 'S': SetActive(4); break;  // SECTOR TYPES
 
-		// case 'G' ....
+		case 'G': SetActive(ACTIVE_GENERALIZED); break;
 
-		default:
-			return;
+		default: break;
 	}
 }
 
@@ -1126,27 +1134,43 @@ void UI_Browser::NewEditMode(char edit_mode)
 
 void UI_Browser::CycleCategory(int dir)
 {
-	browsers[active]->CycleCategory(dir);
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->CycleCategory(dir);
+	}
+
+	//TODO  else  gen_box->CycleCategory(dir);
 }
 
 
 void UI_Browser::ClearSearchBox()
 {
-	browsers[active]->ClearSearchBox();
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->ClearSearchBox();
+	}
+
+	// idea : reset generalized info
 }
 
 
 void UI_Browser::Scroll(int delta)
 {
-	browsers[active]->Scroll(delta);
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->Scroll(delta);
+	}
 }
 
 
 void UI_Browser::RecentUpdate()
 {
-	UI_Browser_Box *box = browsers[active];
+	if (active < ACTIVE_GENERALIZED)
+	{
+		UI_Browser_Box *box = browsers[active];
 
-	box->RecentUpdate();
+		box->RecentUpdate();
+	}
 }
 
 
@@ -1160,7 +1184,10 @@ void UI_Browser::ToggleRecent(bool force_recent)
 		force_recent = true;
 	}
 
-	browsers[active]->ToggleRecent(force_recent);
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->ToggleRecent(force_recent);
+	}
 }
 
 
@@ -1253,15 +1280,17 @@ void UI_Browser::WriteUser(FILE *fp)
 {
 	fprintf(fp, "\n");
 
-	if (visible())
-		fprintf(fp, "open_browser %c\n", browsers[active]->GetKind());
-	else
-		fprintf(fp, "open_browser -\n");
+	fprintf(fp, "open_browser %c\n",
+		(! visible()) ? '-' :
+		(active >= ACTIVE_GENERALIZED) ? 'G' :
+		browsers[active]->GetKind());
 
 	for (int i = 0 ; i < 5 ; i++)
 	{
 		browsers[i]->WriteUser(fp);
 	}
+
+	// generalized box is not saved (not needed)
 }
 
 
