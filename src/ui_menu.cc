@@ -370,6 +370,11 @@ static void browser_do_sectors(Fl_Widget *w, void * data)
 	main_win->ShowBrowser('S');
 }
 
+static void browser_do_generalized_line(Fl_Widget *w, void * data)
+{
+	main_win->ShowBrowser('G');
+}
+
 
 static void browser_do_recent_things(Fl_Widget *w, void * data)
 {
@@ -585,6 +590,10 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Flats",        0, FCAL browser_do_flats },
 		{ "&Line Types",   0, FCAL browser_do_lines },
 		{ "&Sector Types", 0, FCAL browser_do_sectors },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Generalized Line", 0, FCAL browser_do_generalized_line },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

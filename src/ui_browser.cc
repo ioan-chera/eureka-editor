@@ -1018,7 +1018,7 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 			browsers[i]->hide();
 	}
 
-	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized Types");
+	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized Line");
 
 
 	end();
