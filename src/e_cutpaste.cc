@@ -31,6 +31,7 @@
 #include "objects.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
+#include "x_hover.h"
 #include "x_loop.h"
 
 
@@ -826,10 +827,41 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (! (lines->get(n) || verts->get(L->start) || verts->get(L->end)))
+		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
+			continue;
+
+		for (int pass = 0 ; pass < 2 ; pass++)
 		{
-			if (L->WhatSector(SIDE_LEFT ) >= 0) result->clear(L->WhatSector(SIDE_LEFT ));
-			if (L->WhatSector(SIDE_RIGHT) >= 0) result->clear(L->WhatSector(SIDE_RIGHT));
+			int what_side = pass ? SIDE_LEFT : SIDE_RIGHT;
+			
+			int sec_num = L->WhatSector(what_side);
+
+			if (sec_num < 0)
+				continue;
+
+			// if already clear, skip it (prevent expensive tests below)
+			if (! result->get(sec_num))
+				continue;
+
+			// check if the linedef opposite this is being deleted, which
+			// means this linedef will get mucked up.  When all remaining
+			// lines are like this, we should consider the sector "unused"
+			// and let it be removed.
+
+			int opp_side;
+			int opp_ld = OppositeLineDef(n, what_side, &opp_side);
+
+			if (opp_ld >= 0)
+			{
+				const LineDef *L2 = LineDefs[opp_ld];
+
+				if ((L2->WhatSector(opp_side) == sec_num) &&
+					(L2->WhatSector(SIDE_LEFT) != L2->WhatSector(SIDE_RIGHT)) &&
+					(lines->get(opp_ld) || verts->get(L2->start) || verts->get(L2->end)))
+				continue;
+			}
+
+			result->clear(sec_num);
 		}
 	}
 }
