@@ -592,7 +592,7 @@ void CMD_BrowserMode(void)
 	char mode = toupper(EXEC_Param[0][0]);
 
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
-	       mode == 'T' || mode == 'F'))
+	       mode == 'T' || mode == 'F' || mode == 'G'))
 	{
 		Beep("Unknown browser mode: %s", EXEC_Param[0]);
 		return;
@@ -1446,7 +1446,7 @@ static editor_command_t  command_table[] =
  	{	"BrowserMode",
 		&CMD_BrowserMode,
 		/* flags */ NULL,
-		/* keywords */ "obj tex flat line sec"
+		/* keywords */ "obj tex flat line sec genline"
 	},
 
 	{	"Set",
