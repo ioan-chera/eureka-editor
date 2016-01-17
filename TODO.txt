@@ -3,19 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
--  allow a new line (in drawing mode) to cross vertices and lines
-   and automatically split the new lines properly
-
-
->>>  delete a vertex but when the two lines become one they overlap an
-     existing linedef
-
-
--  MMB on sidedef/sector tex : open RECENT browser
-
--  configure # of items in RECENT 
-
-
 +  BOOM Generalized line types / sectors
    -  "Gen" button in linedef panel
    -  generate desc (trigger + "GEN" + category)
@@ -85,6 +72,7 @@ Editing
 -------
 
 
+
 Browser
 -------
 
@@ -131,6 +119,8 @@ General
    -  add more stuff (see USER CONFIG NEEDED, below)
 
 +  a dialog to view / load / prune backups.
+
+IDEA:  MMB on sidedef/sector tex : open RECENT browser
 
 IDEA: edit.last_Sel : saves previous non-empty selection when current
       selection is cleared, can bring back with CTRL-L or menu
