@@ -52,7 +52,7 @@
 
 
 // config items
-int  render_aspect_ratio = 133;   // 100 * width / height
+int  render_pixel_aspect = 100;   // 100 * width / height
 
 bool render_high_detail    = false;
 bool render_lock_gravity   = false;
@@ -174,10 +174,11 @@ public:
 
 	void CalcAspect()
 	{
-		float screen_aspect = float(sw) / float(sh);
+		float window_aspect = float(sw) / float(sh);
 
-		aspect_sh = sh / (render_aspect_ratio / 100.0) * screen_aspect;
-		aspect_sw = sw;
+		aspect_sh = sh * window_aspect * (render_pixel_aspect / 133.0);
+
+		aspect_sw = sw;	 // things break if these are different
 	}
 
 	void UpdateScreen(int ow, int oh)

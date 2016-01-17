@@ -34,6 +34,9 @@ CHANGES Eureka 1.10
 -  have a fallback sprite for the MBF dog thing (id 888)
 -  use absolute paths for resource filenames in __EUREKA lump
 
+-  added /reverse flag for CopyProperties command
+-  replaced "Aspect ratio" pref with "Pixel aspect ratio"
+
 -  map checks: detect the Medusa Effect on 2S lines
 -  map checks: detect transparent tex on solid walls
 -  map checks: find manual doors on 1S lines

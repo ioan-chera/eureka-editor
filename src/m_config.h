@@ -86,7 +86,7 @@ extern int light_bump_small;
 extern int light_bump_medium;
 extern int light_bump_large;
 
-extern int  render_aspect_ratio;
+extern int  render_pixel_aspect;
 extern bool render_high_detail;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;

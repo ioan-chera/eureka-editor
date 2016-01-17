@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2015 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -452,7 +452,6 @@ private:
 
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
-	static void aspect_callback(Fl_Widget *w, void *data);
 
 	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
@@ -563,8 +562,7 @@ public:
 
 	/* Other Tab */
 
-	Fl_Choice      *rend_aspect;
-	Fl_Float_Input *rend_asp_custom;
+	Fl_Float_Input  *rend_aspect;;
 
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
@@ -891,13 +889,7 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ rend_aspect = new Fl_Choice(155, 90, 105, 25, "Aspect ratio: ");
-		  rend_aspect->down_box(FL_BORDER_BOX);
-		  rend_aspect->add("    1:1|    4:3|  16:9|  16:10|  24:10|CUSTOM");
-		  rend_aspect->callback(aspect_callback, this);
-		}
-		{ rend_asp_custom = new Fl_Float_Input(315, 90, 95, 25, "---->  ");
-		  rend_asp_custom->deactivate();
+		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
 		}
 		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
 		  rend_high_detail->down_box(FL_DOWN_BOX);
@@ -962,45 +954,6 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 	w->color(fl_rgb_color(r, g, b));
 
 	w->redraw();
-}
-
-
-void UI_Preferences::aspect_callback(Fl_Widget *w, void *data)
-{
-	UI_Preferences *prefs = (UI_Preferences *)data;
-
-	float aspect = atof(prefs->rend_asp_custom->value());
-	bool  custom = false;
-
-	switch (prefs->rend_aspect->value())
-	{
-		case 0: aspect =  1.0 / 1.0;  break;
-		case 1: aspect =  4.0 / 3.0;  break;
-		case 2: aspect = 16.0 / 9.0;  break;
-		case 3: aspect = 16.0 / 10.0; break;
-		case 4: aspect = 24.0 / 10.0; break;
-
-		case 5: custom = true; break;
-	}
-
-	bool was_custom = (prefs->rend_asp_custom->active() ? true : false);
-
-	if (! custom)
-	{
-		char aspect_buf[64];
-		sprintf(aspect_buf, "%1.2f", aspect);
-		prefs->rend_asp_custom->value(aspect_buf);
-	}
-
-	if (custom != was_custom)
-	{
-		if (custom)
-			prefs->rend_asp_custom->activate();
-		else
-			prefs->rend_asp_custom->deactivate();
-
-		prefs->redraw();
-	}
 }
 
 
@@ -1320,25 +1273,11 @@ void UI_Preferences::LoadValues()
 
 	/* Other Tab */
 
-	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
+	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
 
 	char aspect_buf[64];
-	sprintf(aspect_buf, "%1.2f", render_aspect_ratio / 100.0);
-	rend_asp_custom->value(aspect_buf);
-
-	switch (render_aspect_ratio)
-	{
-		case  99: case 100: rend_aspect->value(0); break;
-		case 133: case 134: rend_aspect->value(1); break;
-		case 177: case 178: rend_aspect->value(2); break;
-		case 159: case 160: rend_aspect->value(3); break;
-		case 239: case 240: rend_aspect->value(4); break;
-
-		default:  /* Custom */
-			rend_aspect->value(5);
-			rend_asp_custom->activate();
-			break;
-	}
+	sprintf(aspect_buf, "%1.2f", render_pixel_aspect / 100.0);
+	rend_aspect->value(aspect_buf);
 
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
@@ -1443,8 +1382,8 @@ void UI_Preferences::SaveValues()
 
 	/* Other Tab */
 
-	render_aspect_ratio = (int)(100 * atof(rend_asp_custom->value()) + 0.2);
-	render_aspect_ratio = CLAMP(10, render_aspect_ratio, 999);
+	render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
+	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
 
 	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
