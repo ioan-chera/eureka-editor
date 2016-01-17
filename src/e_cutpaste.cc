@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2009-2012 Andrew Apted
+//  Copyright (C) 2009-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -852,8 +852,11 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 }
 
 
-static void DeleteVertex_MergeLineDefs(int v_num)
+static bool DeleteVertex_MergeLineDefs(int v_num)
 {
+	// returns true if OK, false if would create an overlapping linedef
+	// [ meaning the vertex should be deleted normally ]
+
 	// find the linedefs
 	int ld1 = -1;
 	int ld2 = -1;
@@ -879,25 +882,36 @@ static void DeleteVertex_MergeLineDefs(int v_num)
 	LineDef *L1 = LineDefs[ld1];
 	LineDef *L2 = LineDefs[ld2];
 
-	// TODO: if (Length(ld1) < Length(ld2)) std::swap(ld1, ld2);
+	// we merge L2 into L1, unless L1 is significantly shorter
+	if (L1->CalcLength() < L2->CalcLength() * 0.7)
+	{
+		std::swap(ld1, ld2);
+		std::swap(L1,  L2);
+	}
 
-	// determine the other remaining vertex
-	int v_other;
+	// determine the remaining vertices
+	int v1 = (L1->start == v_num) ? L1->end : L1->start;
+	int v2 = (L2->start == v_num) ? L2->end : L2->start;
 
-	if (L2->start == v_num)
-		v_other = L2->end;
-	else
-		v_other = L2->start;
+	// ensure we don't create two directly overlapping linedefs
+	if (LineDefAlreadyExists(v1, v2))
+		return false;
+
+	BA_Begin();
 
 	if (L1->start == v_num)
-		BA_ChangeLD(ld1, LineDef::F_START, v_other);
+		BA_ChangeLD(ld1, LineDef::F_START, v2);
 	else
-		BA_ChangeLD(ld1, LineDef::F_END, v_other);
+		BA_ChangeLD(ld1, LineDef::F_END, v2);
 
-	// FIXME: update X offsets on existing linedef
+	// NOT-DO: update X offsets on existing linedef
 
 	BA_Delete(OBJ_LINEDEFS, ld2);
 	BA_Delete(OBJ_VERTICES, v_num);
+
+	BA_End();
+
+	return true;
 }
 
 
@@ -927,13 +941,10 @@ void CMD_Delete(void)
 
 		if (VertexHowManyLineDefs(v_num) == 2)
 		{
-			BA_Begin();
+			if (DeleteVertex_MergeLineDefs(v_num))
+				goto success;
 
-			DeleteVertex_MergeLineDefs(v_num);
-
-			BA_End();
-
-			goto success;
+			// delete vertex normally
 		}
 	}
 

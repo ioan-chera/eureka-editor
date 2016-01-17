@@ -16,11 +16,16 @@ CHANGES Eureka 1.10
 -  auto-splitting when inserting new linedefs
 -  inserting a vertex with SHIFT continues the drawing mode
 -  inserting a vertex with CTRL inhibits creation of sectors
--  better merging of linedefs when dragging a vertex
 -  when a line splits a sector, use a consistent orientation
+
+-  better merging of linedefs when dragging a vertex
+
+-  fixed overlapping lines when deleting 3rd vertex of a triangle
 
 -  right-click on a sidedef or sector texture sets it to default
 -  added "Recent Textures" command (etc) to Browser menu
+-  fixed RECENT category to show most recent items at the top
+
 -  allow loading a map with no vertices, no linedefs (etc)
 -  various layout tweaks to the editing panels
 -  changed default port from Boom --> Vanilla
