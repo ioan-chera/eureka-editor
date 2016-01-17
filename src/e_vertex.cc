@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -73,17 +73,21 @@ void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
  */
 static void MergeConnectedLines(int ld1, int ld2, int v)
 {
-	// fix sidedefs
+	LineDef *L1 = LineDefs[ld1];
+	LineDef *L2 = LineDefs[ld2];
+
+	bool ld1_onesided = L1->OneSided();
+	bool ld2_onesided = L2->OneSided();
 
 	// flip ld1 so it would be parallel (after merging the other endpoints)
 	// with ld2 but going the opposite direction.
-	if ((LineDefs[ld2]->end == v) == (LineDefs[ld1]->end == v))
+	if ((L2->end == v) == (L1->end == v))
 	{
 		FlipLineDef(ld1);
 	}
 
-	bool same_left  = (LineDefs[ld2]->WhatSector(SIDE_LEFT)  == LineDefs[ld1]->WhatSector(SIDE_LEFT));
-	bool same_right = (LineDefs[ld2]->WhatSector(SIDE_RIGHT) == LineDefs[ld1]->WhatSector(SIDE_RIGHT));
+	bool same_left  = (L2->WhatSector(SIDE_LEFT)  == L1->WhatSector(SIDE_LEFT));
+	bool same_right = (L2->WhatSector(SIDE_RIGHT) == L1->WhatSector(SIDE_RIGHT));
 
 	if (same_left && same_right)
 	{
@@ -93,18 +97,36 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 			std::swap(ld1, ld2);
 
 		BA_Delete(OBJ_LINEDEFS, ld2);
+		BA_Delete(OBJ_LINEDEFS, ld1);
+		return;
 	}
-	else if (same_left)
+
+	if (! ld2_onesided)
 	{
-		BA_ChangeLD(ld2, LineDef::F_LEFT, LineDefs[ld1]->right);
+		if (same_left)
+		{
+			BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+
+			if (ld1_onesided)
+				BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
+		}
+		else if (same_right)
+		{
+			BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
+
+			if (ld1_onesided)
+				BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+		}
+		else
+		{
+			// geometry was broken / unclosed sector(s)
+		}
 	}
-	else if (same_right)
+
+	// fix orientation of remaining linedef if needed
+	if (L2->Left() && ! L2->Right())
 	{
-		BA_ChangeLD(ld2, LineDef::F_RIGHT, LineDefs[ld1]->left);
-	}
-	else
-	{
-		// geometry was broken / unclosed sector(s)
+		FlipLineDef(ld2);
 	}
 
 	BA_Delete(OBJ_LINEDEFS, ld1);
