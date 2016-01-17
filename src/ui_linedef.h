@@ -33,6 +33,7 @@ public:
 
 	Fl_Int_Input *type;
 	Fl_Button    *choose;
+	Fl_Button    *gen;
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
