@@ -79,6 +79,9 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
+	int new_mid_tex = (ld1_onesided) ? L1->Right()->mid_tex :
+					  (ld2_onesided) ? L2->Right()->mid_tex : 0;
+
 	// flip ld1 so it would be parallel (after merging the other endpoints)
 	// with ld2 but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
@@ -101,26 +104,17 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 		return;
 	}
 
-	if (! ld2_onesided)
+	if (same_left)
 	{
-		if (same_left)
-		{
-			BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
-
-			if (ld1_onesided)
-				BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
-		}
-		else if (same_right)
-		{
-			BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
-
-			if (ld1_onesided)
-				BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
-		}
-		else
-		{
-			// geometry was broken / unclosed sector(s)
-		}
+		BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+	}
+	else if (same_right)
+	{
+		BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
+	}
+	else
+	{
+		// geometry was broken / unclosed sector(s)
 	}
 
 	// fix orientation of remaining linedef if needed
@@ -128,6 +122,12 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 	{
 		FlipLineDef(ld2);
 	}
+
+	if (L2->OneSided() && new_mid_tex > 0)
+	{
+		BA_ChangeSD(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+	}
+
 
 	BA_Delete(OBJ_LINEDEFS, ld1);
 }
@@ -167,8 +167,9 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 
 		if (found >= 0)
 		{
-			// this deletes linedef [n]
+			// this deletes linedef [n], and maybe the other too
 			MergeConnectedLines(n, found, v3);
+			break;
 		}
 	}
 
