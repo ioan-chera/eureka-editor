@@ -975,9 +975,9 @@ void CMD_Delete(void)
 
 	// special case for a single vertex connected to two linedef,
 	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
+	if (edit.mode == OBJ_VERTICES && vert_sel.count_obj() == 1)
 	{
-		int v_num = list.find_first();
+		int v_num = vert_sel.find_first();
 		SYS_ASSERT(v_num >= 0);
 
 		if (VertexHowManyLineDefs(v_num) == 2)
@@ -1003,7 +1003,12 @@ void CMD_Delete(void)
 	if (!keep_unused && edit.mode == OBJ_LINEDEFS)
 	{
 		UnusedVertices(&line_sel, &vert_sel);
+	}
+
+	if (edit.mode == OBJ_VERTICES || edit.mode == OBJ_LINEDEFS)
+	{
 		UnusedSideDefs(&line_sel, &side_sel);
+		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
 	}
 
 	BA_Begin();
@@ -1027,9 +1032,10 @@ void CMD_Delete(void)
 		// skip lines which will get deleted
 		fixups.unmerge(line_sel);
 
-		FixupLineDefs(&fixups, &list);
+		FixupLineDefs(&fixups, &sec_sel);
 	}
 
+	// actually delete stuff, in the correct order
 	DeleteObjects(&line_sel);
 	DeleteObjects(&side_sel);
 	DeleteObjects(&vert_sel);
