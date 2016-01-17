@@ -620,8 +620,8 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		else if (y_stricmp(token[0], "gen_field") == 0)
 		{
-			if (nargs < 5)
-				FatalError(bad_arg_count, basename, lineno, token[0], 5);
+			if (nargs < 4)
+				FatalError(bad_arg_count, basename, lineno, token[0], 4);
 
 			if (current_gen_line < 0)
 				FatalError("%s(%d): gen_field used outside of a gen_line definition\n", basename, lineno);
@@ -636,17 +636,18 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 			// use strtol() to support "0x" notation
 			field->bits  = strtol(token[1], NULL, 0);
-			field->mask  = strtol(token[2], NULL, 0);
-			field->shift = strtol(token[3], NULL, 0);
+			field->shift = strtol(token[2], NULL, 0);
 
-			field->name = token[4];
+			field->mask  = ((1 << field->bits) - 1) << field->shift;
+
+			field->name = token[3];
 
 			// grab the keywords
-			field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+			field->num_keywords = MIN(nargs - 3, MAX_GEN_FIELD_KEYWORDS);
 
 			for (int i = 0 ; i < field->num_keywords ; i++)
 			{
-				field->keywords[i] = token[5 + i]; 
+				field->keywords[i] = token[4 + i]; 
 			}
 		}
 
