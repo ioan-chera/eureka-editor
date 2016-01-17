@@ -757,7 +757,7 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 		// we are interested in the lines we are NOT deleting
 		if (lines->get(n))
 			continue;
-	
+
 		const LineDef *L = LineDefs[n];
 
 		result->clear(L->start);
@@ -776,7 +776,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *result)
 		// we are interested in the lines we are NOT deleting
 		if (lines->get(n))
 			continue;
-	
+
 		const LineDef *L = LineDefs[n];
 
 		if (L->Right()) result->clear(L->right);
@@ -802,6 +802,34 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 		if (MAX(right_m, left_m) == 0)
 		{
 			result->set(n);
+		}
+	}
+}
+
+void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
+{
+	SYS_ASSERT(verts->what_type() == OBJ_VERTICES);
+	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
+		{
+			if (L->WhatSector(SIDE_LEFT ) >= 0) result->set(L->WhatSector(SIDE_LEFT ));
+			if (L->WhatSector(SIDE_RIGHT) >= 0) result->set(L->WhatSector(SIDE_RIGHT));
+		}
+	}
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (! (lines->get(n) || verts->get(L->start) || verts->get(L->end)))
+		{
+			if (L->WhatSector(SIDE_LEFT ) >= 0) result->clear(L->WhatSector(SIDE_LEFT ));
+			if (L->WhatSector(SIDE_RIGHT) >= 0) result->clear(L->WhatSector(SIDE_RIGHT));
 		}
 	}
 }
@@ -921,10 +949,33 @@ void CMD_Delete(void)
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
 	selection_c line_sel(OBJ_LINEDEFS);
+	selection_c  sec_sel(OBJ_SECTORS);
+
+	switch (edit.mode)
+	{
+		case OBJ_VERTICES:
+			vert_sel.merge(list);
+			break;
+
+		case OBJ_LINEDEFS:
+			line_sel.merge(list);
+			break;
+
+		case OBJ_SECTORS:
+			sec_sel.merge(list);
+			break;
+
+		default: /* OBJ_THINGS */
+			BA_Begin();
+			DeleteObjects(&list);
+			BA_End();
+
+			goto success;
+	}
 
 	// special case for a single vertex connected to two linedef,
 	// we delete the vertex but merge the two linedefs.
-	if (list.what_type() == OBJ_VERTICES && list.count_obj() == 1)
+	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
 	{
 		int v_num = list.find_first();
 		SYS_ASSERT(v_num >= 0);
@@ -938,21 +989,9 @@ void CMD_Delete(void)
 		}
 	}
 
-	BA_Begin();
-
-	// delete things from each deleted sector
-	if (!keep_things && list.what_type() == OBJ_SECTORS)
+	if (!keep_unused && edit.mode == OBJ_SECTORS)
 	{
-		selection_c thing_sel(OBJ_THINGS);
-
-		ConvertSelection(&list, &thing_sel);
-
-		DeleteObjects(&thing_sel);
-	}
-
-	if (!keep_unused && list.what_type() == OBJ_SECTORS)
-	{
-		UnusedLineDefs(&list, &line_sel);
+		UnusedLineDefs(&sec_sel, &line_sel);
 
 		if (line_sel.notempty())
 		{
@@ -961,12 +1000,29 @@ void CMD_Delete(void)
 		}
 	}
 
-	// perform linedef fixups here
-	if (list.what_type() == OBJ_SECTORS)
+	if (!keep_unused && edit.mode == OBJ_LINEDEFS)
+	{
+		UnusedVertices(&line_sel, &vert_sel);
+		UnusedSideDefs(&line_sel, &side_sel);
+	}
+
+	BA_Begin();
+
+	// delete things from each deleted sector
+	if (!keep_things && sec_sel.notempty())
+	{
+		selection_c thing_sel(OBJ_THINGS);
+
+		ConvertSelection(&sec_sel, &thing_sel);
+		DeleteObjects(&thing_sel);
+	}
+
+	// perform linedef fixups here (when sectors get removed)
+	if (sec_sel.notempty())
 	{
 		selection_c fixups(OBJ_LINEDEFS);
 
-		ConvertSelection(&list, &fixups);
+		ConvertSelection(&sec_sel, &fixups);
 
 		// skip lines which will get deleted
 		fixups.unmerge(line_sel);
@@ -974,18 +1030,10 @@ void CMD_Delete(void)
 		FixupLineDefs(&fixups, &list);
 	}
 
-	if (!keep_unused && list.what_type() == OBJ_LINEDEFS)
-	{
-		UnusedVertices(&list, &vert_sel);
-		UnusedSideDefs(&list, &side_sel);
-	}
-
-	DeleteObjects(&side_sel);
-
-	DeleteObjects(&list);
-
 	DeleteObjects(&line_sel);
+	DeleteObjects(&side_sel);
 	DeleteObjects(&vert_sel);
+	DeleteObjects( &sec_sel);
 
 	BA_End();
 
