@@ -4,15 +4,21 @@ Eureka TODO / WISHLIST
 
 
 +  BOOM Generalized line types / sectors
-   -  "Gen" button in linedef panel
    -  generate desc (trigger + "GEN" + category)
    -  IDEA: show full info in tooltip of desc
-   +  have a special "browser" window for generalized lines
    -  for sectors, have checkboxes at bottom of panel
 
+   >>>  "Gen" button in linedef panel
+        -  hide it when "gameinfo.gen_types" is false
 
-+  change 'aspect ratio' setting, it should be a pixel aspect ratio
-   instead of a screen or monitor aspect ratio.
+   >>>  have a special "browser" window for generalized lines
+        -  fix resize behavior
+        +  Category choice (populated by gen_linetypes[] entries)
+           -  NOTHING choice when "gameinfo.gen_types" is zero
+        +  sub-groups for each category  (a new class)  
+        -  reset when game/port changes
+        
+        Q/ directly update line(s) on changes, or have an APPLY button?
 
 
 ______________________________________________________________________
@@ -37,7 +43,7 @@ General
 
 +  Proper system to specify which ports can be used with each game.
 
-   Ideally it would group games into classes (e.g. most of the current
+   Perhaps it would group games into classes (e.g. most of the current
    games would be "doom" class).  Then each port can specify which
    classes of games it supports.
 
@@ -47,10 +53,22 @@ Documentation
 -------------
 
 +  a tutorial for the basics
-   
-   - describe the four modes V/L/S/T
 
-   - especially drawing lines in VERTEX mode
+   - describe what a wad file is, PWAD vs IWAD, how to play it,
+     what nodes are, how wad files can contain more than maps,
+     different games and source ports
+
+   - describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
+
+   - describe the four modes V/L/S/T, and their panels
+
+     hilighting stuff, selecting stuff, dragging stuff
+
+   - drawing lines in VERTEX mode
+
+   - using the browser
+   
+   - common pitfalls (vertices sitting on a linedef or another vertex)
 
 +  information on each binding command, parameters etc..
 
@@ -70,6 +88,8 @@ Editing
 
 3D View
 -------
+
++  fix warping of walls, out of sync with floors
 
 
 
@@ -96,7 +116,7 @@ General
 
 ?  a toolbar
 
-+  shift-C to copy properties TO defaults
+?  shift-C to copy properties TO defaults
 
 -  conversion between Hexen <--> DOOM formats
 
