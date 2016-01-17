@@ -1013,8 +1013,13 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 	double length = sqrt(dx*dx + dy*dy);
 
-	double epsilon = 0.3;
-	double close_dist = 0.9;
+	double epsilon = 0.4;
+
+	// when zooming out, make it easier to hit a vertex
+	double sk = 1.0 / grid.Scale;
+	double close_dist = 8 * sqrt(sk);
+
+	close_dist = CLAMP(1.2, close_dist, 24.0);
 
 	double best_dist = 9e9;
 
@@ -1032,6 +1037,7 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		if (VC->x == VB->x && VC->y == VB->y) continue;
 
 		// is this vertex sitting on the line?
+#if 0
 		if (x1 == x2)
 		{
 			if (VC->x != x1)
@@ -1043,6 +1049,7 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 				continue;
 		}
 		else
+#endif
 		{
 			double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
 
@@ -1111,6 +1118,9 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		// OK, this linedef crosses it
 
 fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, iy, along);
+
+		// allow vertices to win over a nearby linedef
+		along += close_dist * 2;
 
 		if (along < best_dist)
 		{
