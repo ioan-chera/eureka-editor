@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -41,6 +41,8 @@ void DeleteLineDefs(selection_c *lines);
 int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
+
+void LD_FixForLostSide(int ld);
 
 
 typedef enum

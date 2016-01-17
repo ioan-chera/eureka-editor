@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1053,27 +1053,23 @@ void LineDefs_SetLength(int new_len)
 }
 
 
-#if 0  // FIXME: MakeRectangularNook
-
-/*
- *  MakeRectangularNook - Make a nook or boss in a wall
- *  
- *  Before :    After :
- *                                  ^--->
- *                                  |   |
- *  +----------------->     +------->   v------->
- *      1st sidedef             1st sidedef
- *
- *  The length of the sides of the nook is sidelen.
- *  This is true when convex is false. If convex is true, the nook
- *  is actually a bump when viewed from the 1st sidedef.
- */
-void MakeRectangularNook (SelPtr obj, int width, int depth, int convex)
+void LD_FixForLostSide(int ld)
 {
-	....
-}
+	LineDef * L = LineDefs[ld];
 
-#endif
+	SYS_ASSERT(L->Right());
+
+	int tex;
+
+	if (L->Right()->LowerTex()[0] != '-')
+		tex = L->Right()->lower_tex;
+	else if (L->Right()->UpperTex()[0] != '-')
+		tex = L->Right()->upper_tex;
+	else
+		tex = BA_InternaliseString(default_mid_tex);
+
+	BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
+}
 
 
 //--- editor settings ---

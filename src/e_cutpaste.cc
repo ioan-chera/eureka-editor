@@ -481,6 +481,7 @@ bool CMD_Copy()
 
 //------------------------------------------------------------------------
 
+
 static void PasteGroupOfObjects(int pos_x, int pos_y)
 {
 	int cx, cy;
@@ -575,18 +576,7 @@ static void PasteGroupOfObjects(int pos_x, int pos_y)
 
 		// if the linedef lost a side, fix texturing
 		if (L->OneSided() && L->Right()->MidTex()[0] == '-')
-		{
-			int tex;
-
-			if (L->Right()->LowerTex()[0] != '-')
-				tex = L->Right()->lower_tex;
-			else if (L->Right()->UpperTex()[0] != '-')
-				tex = L->Right()->upper_tex;
-			else
-				tex = BA_InternaliseString(default_mid_tex);
-
-			BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
-		}
+			LD_FixForLostSide(new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
