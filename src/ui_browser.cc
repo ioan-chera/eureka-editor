@@ -972,12 +972,15 @@ public:
 class UI_Generalized_Page : public Fl_Group
 {
 public:
+	int base;
+
 	UI_Generalized_Item * items[MAX_GEN_NUM_FIELDS];
 
 public:
 	UI_Generalized_Page(int X, int Y, int W, int H,
 						const generalized_linetype_t *info) :
-		Fl_Group(X, Y, W, H)
+		Fl_Group(X, Y, W, H),
+		base(info->base)
 	{
 		memset(items, 0, sizeof(items));
 
@@ -991,6 +994,14 @@ color(FL_RED, FL_RED);
 
 	~UI_Generalized_Page()
 	{ }
+
+
+	int ComputeType() const
+	{
+		// FIXME
+
+		return base;
+	}
 };
 
 
@@ -1141,6 +1152,14 @@ void UI_Generalized_Box::CreatePages()
 }
 
 
+int UI_Generalized_Box::ComputeType() const
+{
+	int cur_page = category->value();
+
+	return pages[cur_page]->ComputeType();
+}
+
+
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
 	main_win->ShowBrowser(0);
@@ -1165,7 +1184,14 @@ void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
 
 void UI_Generalized_Box::apply_callback(Fl_Widget *w, void *data)
 {
-	// TODO
+	UI_Generalized_Box *box = (UI_Generalized_Box *)data;
+
+	if (box->no_boom->visible() || box->num_pages == 0)
+		return;
+
+	int line_type = box->ComputeType();
+
+	main_win->BrowsedItem('L', line_type, "", 0);
 }
 
 

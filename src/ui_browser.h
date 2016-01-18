@@ -170,6 +170,8 @@ public:
 private:
 	void CreatePages();
 
+	int ComputeType() const;
+
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    cat_callback(Fl_Widget *w, void *data);
 	static void  apply_callback(Fl_Widget *w, void *data);
