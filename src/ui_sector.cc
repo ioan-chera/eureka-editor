@@ -183,14 +183,17 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
 	{
 		int hx = (i < 2) ? (X + 170 + i * 60) : (X + 50 + (i-2) * 60);
-		int hy = Y + 26 * ((i < 2) ? 0 : 1);
+		int hy = Y + 28 * ((i < 2) ? 0 : 1);
 
 		hd_buttons[i] = new Fl_Button(hx, hy+1, 45, 22);
 		hd_buttons[i]->copy_label(Int_TmpStr(headroom_presets[i]));
-//		hd_buttons[i]->callback(room_callback, this);
+		hd_buttons[i]->callback(room_callback, this);
 	}
 
 	Y += headroom->h() + 40;
+
+
+	// TODO generalized sector stuff
 
 
 	end();
@@ -247,6 +250,15 @@ void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
 	int room = atoi(box->headroom->value());
+
+	// handle the shortcut buttons
+	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
+	{
+		if (w == box->hd_buttons[i])
+		{
+			room = atoi(w->label());
+		}
+	}
 
 	selection_c list;
 	selection_iterator_c it;
