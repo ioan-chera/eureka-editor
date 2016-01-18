@@ -82,7 +82,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	desc = new Fl_Output(X+70, Y, W-78, 24, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
 
-	Y += desc->h() + 14;
+	Y += desc->h() + 12;
 
 
 	tag = new Fl_Int_Input(X+70, Y, 64, 24, "Tag: ");
@@ -109,16 +109,16 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	lt_down->callback(button_callback, this);
 	lt_up  ->callback(button_callback, this);
 
-	Y += light->h() + 22;
+	Y += light->h() + 20;
 
 
-	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64, "Ceil");
-	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64, "Floor");
+	c_pic = new UI_Pic(X+W-82, Y-2,  64, 64, "Ceil");
+	f_pic = new UI_Pic(X+W-82, Y+74, 64, 64, "Floor");
 
 	c_pic->callback(tex_callback, this);
 	f_pic->callback(tex_callback, this);
 
-	Y += 16;
+	Y += 10;
 
 
 	c_tex = new Fl_Input(X+70, Y, 108, 24, "Ceiling: ");
@@ -172,7 +172,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	f_tex->callback(tex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += f_tex->h() + 30;
+	Y += f_tex->h() + 28;
 
 
 	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
@@ -190,10 +190,28 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 		hd_buttons[i]->callback(room_callback, this);
 	}
 
-	Y += headroom->h() + 40;
+	Y += headroom->h() + 50;
 
 
-	// TODO generalized sector stuff
+	// generalized sector stuff
+
+	bm_title = new Fl_Box(FL_NO_BOX, X+10, Y, 100, 24, "Boom flags:");
+	bm_title->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+
+	Y += 28;
+
+	bm_damage = new Fl_Choice(X+W - 95, Y, 80, 24, "Damage: ");
+	bm_damage->add("NONE|5 hp|10 hp|20 hp");
+	bm_damage->value(0);
+
+	bm_secret = new Fl_Check_Button(X+28, Y, 94, 20, "Secret");
+	bm_secret->labelsize(12);
+
+	bm_friction = new Fl_Check_Button(X+28, Y+20, 94, 20, "Friction");
+	bm_friction->labelsize(12);
+
+	bm_wind = new Fl_Check_Button(X+28, Y+40, 94, 20, "Wind");
+	bm_wind->labelsize(12);
 
 
 	end();
@@ -684,6 +702,30 @@ void UI_SectorBox::UpdateTotal()
 	which->SetTotal(NumSectors);
 }
 
+
+void UI_SectorBox::UpdateGameInfo()
+{
+	if (game_info.gen_types)
+	{
+		bm_title->show();
+
+		bm_damage->show();
+		bm_secret->show();
+		bm_friction->show();
+		bm_wind->show();
+	}
+	else
+	{
+		bm_title->hide();
+
+		bm_damage->hide();
+		bm_secret->hide();
+		bm_friction->hide();
+		bm_wind->hide();
+	}
+
+	redraw();
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

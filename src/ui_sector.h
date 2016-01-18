@@ -61,6 +61,15 @@ public:
 
 	Fl_Button * hd_buttons[HEADROOM_BUTTONS];
 
+	// Boom generalized sectors
+
+	Fl_Box    * bm_title;
+	Fl_Choice * bm_damage;
+
+	Fl_Check_Button * bm_secret;
+	Fl_Check_Button * bm_friction;
+	Fl_Check_Button * bm_wind;
+
 public:
 	UI_SectorBox(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_SectorBox();
@@ -75,6 +84,8 @@ public:
 	void UpdateField(int field = -1);
 
 	void UpdateTotal();
+
+	void UpdateGameInfo();
 
 	void SetFlat(const char *name, int e_state);
 	void SetSectorType(int new_type);

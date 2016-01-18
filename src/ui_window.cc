@@ -529,6 +529,7 @@ void UI_MainWin::UpdateGameInfo()
 {
 	thing_box->UpdateGameInfo();
 	 line_box->UpdateGameInfo();
+	  sec_box->UpdateGameInfo();
 }
 
 
