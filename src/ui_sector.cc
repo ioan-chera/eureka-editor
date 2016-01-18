@@ -203,15 +203,19 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	bm_damage = new Fl_Choice(X+W - 95, Y, 80, 24, "Damage: ");
 	bm_damage->add("NONE|5 hp|10 hp|20 hp");
 	bm_damage->value(0);
+	bm_damage->callback(type_callback, this);
 
 	bm_secret = new Fl_Check_Button(X+28, Y, 94, 20, "Secret");
 	bm_secret->labelsize(12);
+	bm_secret->callback(type_callback, this);
 
 	bm_friction = new Fl_Check_Button(X+28, Y+20, 94, 20, "Friction");
 	bm_friction->labelsize(12);
+	bm_friction->callback(type_callback, this);
 
 	bm_wind = new Fl_Check_Button(X+28, Y+40, 94, 20, "Wind");
 	bm_wind->labelsize(12);
+	bm_wind->callback(type_callback, this);
 
 
 	end();
@@ -389,10 +393,41 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
-	int new_type = atoi(box->type->value());
+	int mask  = 65535;
+	int value = atoi(box->type->value());
 
-	const sectortype_t * info = M_GetSectorType(new_type);
-	box->desc->value(info->desc);
+	if (game_info.gen_types)
+	{
+		// Boom generalized sectors
+
+		if (w == box->bm_damage)
+		{
+			mask = 0x60;
+			value = box->bm_damage->value() << 5;
+		}
+		else if (w == box->bm_secret)
+		{
+			mask = 0x80;
+			value = box->bm_secret->value() << 7;
+		}
+		else if (w == box->bm_friction)
+		{
+			mask = 0x100;
+			value = box->bm_friction->value() << 8;
+		}
+		else if (w == box->bm_wind)
+		{
+			mask = 0x200;
+			value = box->bm_wind->value() << 9;
+		}
+		else
+		{
+			mask  = 31;
+			// already got the value
+		}
+	}
+
+	value &= mask;
 
 	selection_c list;
 	selection_iterator_c it;
@@ -403,11 +438,17 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
-			BA_ChangeSEC(*it, Sector::F_TYPE, new_type);
+			int old_type = Sectors[*it]->type;
+
+			BA_ChangeSEC(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
 
 		BA_End();
 	}
+
+	// update the description
+	const sectortype_t * info = M_GetSectorType(atoi(box->type->value()));
+	box->desc->value(info->desc);
 }
 
 
@@ -595,12 +636,29 @@ void UI_SectorBox::UpdateField(int field)
 
 	if (field < 0 || field == Sector::F_TYPE)
 	{
+		bm_damage->value(0);
+		bm_secret->value(0);
+		bm_friction->value(0);
+		bm_wind->value(0);
+
 		if (is_sector(obj))
 		{
-			const sectortype_t *info = M_GetSectorType(Sectors[obj]->type);
+			int value = Sectors[obj]->type;
+			int mask  = game_info.gen_types ? 31 : 65535;
 
-			type->value(Int_TmpStr(Sectors[obj]->type));
+			type->value(Int_TmpStr(value & mask));
+
+			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
+
+			if (game_info.gen_types)
+			{
+				bm_damage->value((value >> 5) & 3);
+				bm_secret->value((value >> 7) & 1);
+
+				bm_friction->value((value >> 8) & 1);
+				bm_wind    ->value((value >> 9) & 1);
+			}
 		}
 		else
 		{
@@ -723,6 +781,8 @@ void UI_SectorBox::UpdateGameInfo()
 		bm_friction->hide();
 		bm_wind->hide();
 	}
+
+	UpdateField();
 
 	redraw();
 }
