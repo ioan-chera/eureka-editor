@@ -157,13 +157,15 @@ private:
 
 	Fl_Button * apply;
 
-	int cur_page;
+	int num_pages;
 
 public:
 	UI_Generalized_Box(int X, int Y, int W, int H, const char *label);
 	virtual ~UI_Generalized_Box();
 
 	void Populate();
+
+	void CycleCategory(int dir);
 
 private:
 	void CreatePages();

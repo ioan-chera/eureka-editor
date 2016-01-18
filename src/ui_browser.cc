@@ -996,7 +996,7 @@ color(FL_RED, FL_RED);
 
 UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, NULL),
-	cur_page(0)
+	num_pages(0)
 {
 	box(FL_FLAT_BOX);
 
@@ -1035,7 +1035,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	category = new Fl_Choice(X + 40, Y, 170, 30);
 	category->callback(cat_callback, this);
-	category->textsize(18);
+	category->textsize(16);
 
 
 	Y = Y + 370;
@@ -1070,10 +1070,8 @@ void UI_Generalized_Box::Populate()
 		category->hide();
 		apply->hide();
 
-		for (int i = 0 ; i < MAX_PAGES ; i++)
-			if (pages[i])
-				pages[i]->hide();
-
+		for (int i = 0 ; i < num_pages ; i++)
+			pages[i]->hide();
 	}
 	else
 	{
@@ -1088,12 +1086,28 @@ void UI_Generalized_Box::Populate()
 		category->show();
 		apply->show();
 
-		for (int i = 0 ; i < MAX_PAGES ; i++)
-			if (pages[i])
-				pages[i]->show();
+		for (int i = 0 ; i < num_pages ; i++)
+			pages[i]->show();
 	}
 
 	redraw();
+}
+
+
+void UI_Generalized_Box::CycleCategory(int dir)
+{
+	if (no_boom->visible() || num_pages < 2)
+		return;
+
+	int new_page = category->value() + dir;
+
+	if (new_page < 0)
+		new_page = num_pages - 1;
+	else if (new_page >= num_pages)
+		new_page = 0;
+
+	category->value(new_page);
+	category->do_callback();
 }
 
 
@@ -1101,8 +1115,9 @@ void UI_Generalized_Box::CreatePages()
 {
 	memset(pages, 0, sizeof(pages));
 
-	if (cur_page >= num_gen_linetypes)
-		cur_page = 0;
+	num_pages = 0;
+
+	category->clear();
 
 	int X = x() + (w() - MIN_BROWSER_W);
 
@@ -1110,10 +1125,19 @@ void UI_Generalized_Box::CreatePages()
 	{
 		const generalized_linetype_t *info = &gen_linetypes[i];
 
+		category->add(info->name);
+
 		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
 
+		if (i > 0)
+			pages[i]->hide();
+
 		add(pages[i]);
+
+		num_pages += 1;
 	}
+
+	category->value(0);
 }
 
 
@@ -1124,7 +1148,19 @@ void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
 {
-	// TODO
+	UI_Generalized_Box *box = (UI_Generalized_Box *)data;
+
+	int new_page = box->category->value();
+
+	for (int i = 0 ; i < box->num_pages ; i++)
+	{
+		if (i == new_page)
+			box->pages[i]->show();
+		else
+			box->pages[i]->hide();
+	}
+
+	box->redraw();
 }
 
 void UI_Generalized_Box::apply_callback(Fl_Widget *w, void *data)
@@ -1283,8 +1319,10 @@ void UI_Browser::CycleCategory(int dir)
 	{
 		browsers[active]->CycleCategory(dir);
 	}
-
-	//TODO  else  gen_box->CycleCategory(dir);
+	else
+	{
+		gen_box->CycleCategory(dir);
+	}
 }
 
 
