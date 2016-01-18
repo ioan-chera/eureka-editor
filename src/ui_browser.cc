@@ -961,10 +961,10 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 
 	int cx = X + 80 + KF * 8;
-	int cy = Y + 4;
+	int cy = Y + 10;
 
-	Fl_Box *title = new Fl_Box(X + 44, cy, W - 54, 22+KF*4, label);
-	title->labelsize(18+KF*4);
+	Fl_Box *title = new Fl_Box(X + 30, cy, W - 94, 22+KF*4, label);
+	title->labelsize(20+KF*4);
 
 
 	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X");
@@ -975,6 +975,13 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 
 	end();
+
+
+	// resize box
+
+	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, X + W - 10, Y + H - 10, 8, 8, NULL);
+
+	resizable(rs_box);
 }
 
 
