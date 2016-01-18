@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -31,8 +31,16 @@ private:
 public:
 	UI_Nombre *which;
 
+	Fl_Int_Input *type;
+	Fl_Output    *desc;
+	Fl_Button    *choose;
+
+	Fl_Int_Input *light;
+	Fl_Int_Input *tag;
+
+	Fl_Button *lt_down, *lt_up;
+
 	Fl_Int_Input *ceil_h;
-	Fl_Int_Input *headroom;
 	Fl_Int_Input *floor_h;
 
 	Fl_Button *ce_down, *ce_up;
@@ -44,14 +52,14 @@ public:
 	Fl_Input *f_tex;
 	UI_Pic   *f_pic;
 
-	Fl_Int_Input *type;
-	Fl_Output    *desc;
-	Fl_Button    *choose;
+	Fl_Int_Input *headroom;
 
-	Fl_Int_Input *light;
-	Fl_Int_Input *tag;
+	enum
+	{
+		HEADROOM_BUTTONS = 6
+	};
 
-	Fl_Button *lt_down, *lt_up;
+	Fl_Button * hd_buttons[HEADROOM_BUTTONS];
 
 public:
 	UI_SectorBox(int X, int Y, int W, int H, const char *label = NULL);

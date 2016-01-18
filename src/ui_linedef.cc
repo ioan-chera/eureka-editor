@@ -87,7 +87,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += type->h() + 2;
 
 
-	new Fl_Box(FL_NO_BOX, X+10, Y, 48, 24, "Desc:");
+	new Fl_Box(FL_NO_BOX, X+10, Y, 48, 24, "Desc: ");
 
 	desc = new Fl_Output(type->x(), Y, W-66, 24);
 	desc->align(FL_ALIGN_LEFT);

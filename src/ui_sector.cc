@@ -38,6 +38,14 @@ int light_bump_small  = 4;
 int light_bump_medium = 16;
 int light_bump_large  = 64;
 
+
+//TODO make these configurable
+int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
+{
+	0, 72, 96, 128, 192, 256
+};
+
+
 //
 // UI_SectorBox Constructor
 //
@@ -164,7 +172,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	f_tex->callback(tex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += f_tex->h() + 14;
+	Y += f_tex->h() + 30;
 
 
 	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
@@ -172,7 +180,17 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	headroom->callback(room_callback, this);
 	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += headroom->h() + 22;
+	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
+	{
+		int hx = (i < 2) ? (X + 170 + i * 60) : (X + 50 + (i-2) * 60);
+		int hy = Y + 26 * ((i < 2) ? 0 : 1);
+
+		hd_buttons[i] = new Fl_Button(hx, hy+1, 45, 22);
+		hd_buttons[i]->copy_label(Int_TmpStr(headroom_presets[i]));
+//		hd_buttons[i]->callback(room_callback, this);
+	}
+
+	Y += headroom->h() + 40;
 
 
 	end();
