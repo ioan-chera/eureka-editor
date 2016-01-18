@@ -4,21 +4,15 @@ Eureka TODO / WISHLIST
 
 
 +  BOOM Generalized line types / sectors
-   -  generate desc (trigger + "GEN" + category)
-   -  IDEA: show full info in tooltip of desc
-   -  for sectors, have checkboxes at bottom of panel
-
-   >>>  "Gen" button in linedef panel
-        -  hide it when "gameinfo.gen_types" is false
 
    >>>  have a special "browser" window for generalized lines
-        -  fix resize behavior
-        +  Category choice (populated by gen_linetypes[] entries)
-           -  NOTHING choice when "gameinfo.gen_types" is zero
-        +  sub-groups for each category  (a new class)  
-        -  reset when game/port changes
-        
-        Q/ directly update line(s) on changes, or have an APPLY button?
+
+        -  shrink browser to minimum W when Generalized is picked
+
+        +  "pages" for each category
+           -  create the items from each field
+           -  ComputeType()
+           -  handle the Model/Monsters duality (two widgets?)
 
 
 ______________________________________________________________________
@@ -195,6 +189,8 @@ WISH: can import UDMF format maps
 
 
 ?  a way to slow down fake mouse wheels?
+
+IDEA: for generalized lies, show more info in tooltip of desc
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
