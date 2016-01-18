@@ -951,7 +951,47 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 //------------------------------------------------------------------------
 
 
-/// class UI_Generalized_Page;
+class UI_Generalized_Item : public Fl_Choice
+{
+public:
+
+public:
+	UI_Generalized_Item(int X, int Y, int W, int H,
+						const generalized_field_t *field) :
+		Fl_Choice(X, Y, W, H, "")
+	{
+		// TODO
+	}
+
+	~UI_Generalized_Item()
+	{ }
+
+};
+
+
+class UI_Generalized_Page : public Fl_Group
+{
+public:
+	UI_Generalized_Item * items[MAX_GEN_NUM_FIELDS];
+
+public:
+	UI_Generalized_Page(int X, int Y, int W, int H,
+						const generalized_linetype_t *info) :
+		Fl_Group(X, Y, W, H)
+	{
+		memset(items, 0, sizeof(items));
+
+box(FL_FLAT_BOX);
+color(FL_RED, FL_RED);
+
+		// TODO
+
+		end();
+	}
+
+	~UI_Generalized_Page()
+	{ }
+};
 
 
 UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
@@ -964,6 +1004,11 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 
 	memset(pages, 0, sizeof(pages));
+
+
+	int orig_X = X;
+
+	X = X + (W - MIN_BROWSER_W);
 
 
 	Y += 10;
@@ -986,10 +1031,17 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 	no_boom->align(FL_ALIGN_INSIDE);
 
 
-//	category = new Fl_Choice();
+	Y += 10;
+
+	category = new Fl_Choice(X + 40, Y, 170, 30);
+	category->callback(cat_callback, this);
+	category->textsize(18);
 
 
-//  apply = new Fl_Button();
+	Y = Y + 370;
+
+	apply = new Fl_Button(X + 160, Y, 60, 30, "APPLY");
+	apply->callback(apply_callback, this);
 
 
 	end();
@@ -997,7 +1049,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	// resize box
 
-	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, X + W - 10, Y + H - 10, 8, 8, NULL);
+	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, orig_X /*+ W - 10*/, Y + H - 10, 8, 8, NULL);
 
 	resizable(rs_box);
 }
@@ -1011,13 +1063,73 @@ UI_Generalized_Box::~UI_Generalized_Box()
 
 void UI_Generalized_Box::Populate()
 {
-	// TODO
+	if (! game_info.gen_types)
+	{
+		no_boom->show();
+
+		category->hide();
+		apply->hide();
+
+		for (int i = 0 ; i < MAX_PAGES ; i++)
+			if (pages[i])
+				pages[i]->hide();
+
+	}
+	else
+	{
+		// we only create the pages once
+		// [ not strictly correct, but the generalized types never change ]
+
+		if (! pages[0])
+			CreatePages();
+
+		no_boom->hide();
+
+		category->show();
+		apply->show();
+
+		for (int i = 0 ; i < MAX_PAGES ; i++)
+			if (pages[i])
+				pages[i]->show();
+	}
+
+	redraw();
+}
+
+
+void UI_Generalized_Box::CreatePages()
+{
+	memset(pages, 0, sizeof(pages));
+
+	if (cur_page >= num_gen_linetypes)
+		cur_page = 0;
+
+	int X = x() + (w() - MIN_BROWSER_W);
+
+	for (int i = 0 ; i < num_gen_linetypes ; i++)
+	{
+		const generalized_linetype_t *info = &gen_linetypes[i];
+
+		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
+
+		add(pages[i]);
+	}
 }
 
 
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
 	main_win->ShowBrowser(0);
+}
+
+void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
+{
+	// TODO
+}
+
+void UI_Generalized_Box::apply_callback(Fl_Widget *w, void *data)
+{
+	// TODO
 }
 
 
