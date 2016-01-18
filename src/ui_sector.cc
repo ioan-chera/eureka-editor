@@ -396,7 +396,12 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	if (game_info.gen_types)
+	if (w == box->type && value >= 32)
+	{
+		// when user enters a large value into type box, store it as-is
+		// in sectors.  The panel will show the Boom interpretation.
+	}
+	else if (game_info.gen_types)
 	{
 		// Boom generalized sectors
 
@@ -444,8 +449,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	}
 
 	// update the description
-	const sectortype_t * info = M_GetSectorType(atoi(box->type->value()));
-	box->desc->value(info->desc);
+	box->UpdateField(Sector::F_TYPE);
 }
 
 
