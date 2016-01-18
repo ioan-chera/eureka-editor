@@ -136,19 +136,40 @@ private:
 };
 
 
+class UI_Generalized_Page;
+
+
 class UI_Generalized_Box : public Fl_Group
 {
 private:
-	Fl_Choice * model;
+	// overall kind of line (DOOR, LIFT, etc...)
+	Fl_Choice * category;
+
+	// this is shown when not in Boom mode
+	Fl_Box * no_boom;
+
+	enum
+	{
+		MAX_PAGES = 16
+	};
+
+	UI_Generalized_Page * pages[MAX_PAGES];
+
+	Fl_Button * apply;
+
+	int cur_page;
 
 public:
 	UI_Generalized_Box(int X, int Y, int W, int H, const char *label);
 	virtual ~UI_Generalized_Box();
 
+	void Populate();
+
 private:
+
 	static void   hide_callback(Fl_Widget *w, void *data);
-	static void  value_callback(Fl_Widget *w, void *data);
-	static void    use_callback(Fl_Widget *w, void *data);
+	static void    cat_callback(Fl_Widget *w, void *data);
+	static void  apply_callback(Fl_Widget *w, void *data);
 };
 
 

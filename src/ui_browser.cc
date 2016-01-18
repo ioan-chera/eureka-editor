@@ -951,27 +951,45 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 //------------------------------------------------------------------------
 
 
+/// class UI_Generalized_Page;
+
+
 UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, NULL),
-	model(NULL)
+	cur_page(0)
 {
 	box(FL_FLAT_BOX);
 
 	color(BROWBACK_COL, BROWBACK_COL);
 
 
-	int cx = X + 80 + KF * 8;
-	int cy = Y + 10;
+	memset(pages, 0, sizeof(pages));
 
-	Fl_Box *title = new Fl_Box(X + 30, cy, W - 94, 22+KF*4, label);
+
+	Y += 10;
+
+	Fl_Box *title = new Fl_Box(X + 30, Y, W - 94, 22+KF*4, label);
 	title->labelsize(20+KF*4);
 
 
-	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X");
+	Fl_Button *hide_button = new Fl_Button(X + 8, Y+2, 22, 22, "X");
 	hide_button->callback(hide_callback, this);
 	hide_button->labelsize(14);
 
-	cy += title->h() + 6;
+	Y += title->h() + 6;
+
+
+	no_boom = new Fl_Box(FL_NO_BOX, X + 2, Y + 40, W - 60, 60,
+						 "This requires BOOM\n(or a compatible port)");
+	no_boom->labelsize(18);
+	no_boom->labelcolor(FL_BLUE);
+	no_boom->align(FL_ALIGN_INSIDE);
+
+
+//	category = new Fl_Choice();
+
+
+//  apply = new Fl_Button();
 
 
 	end();
@@ -988,6 +1006,12 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 UI_Generalized_Box::~UI_Generalized_Box()
 {
 	// nothing needed
+}
+
+
+void UI_Generalized_Box::Populate()
+{
+	// TODO
 }
 
 
@@ -1045,6 +1069,8 @@ void UI_Browser::Populate()
 	{
 		browsers[i]->Populate();
 	}
+
+	gen_box->Populate();
 
 	// setup the categories
 
