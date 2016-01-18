@@ -769,6 +769,7 @@ void UI_LineBox::UpdateGameInfo()
 	{
 		tag->hide();
 		length->hide();
+		gen->hide();
 
 		actkind->show();
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
@@ -793,6 +794,11 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
+
+		if (game_info.gen_types)
+			gen->show();
+		else
+			gen->hide();
 	}
 
 	for (int a = 0 ; a < 5 ; a++)
