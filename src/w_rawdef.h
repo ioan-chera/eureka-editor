@@ -328,16 +328,16 @@ hexen_activation_e;
 
 typedef enum
 {
-	MSF_TypeMask   = 0x001F,
-	MSF_DamageMask = 0x0060,
+	BoomSF_TypeMask   = 0x001F,
+	BoomSF_DamageMask = 0x0060,
 
-	MSF_Secret     = 0x0080,
-	MSF_Friction   = 0x0100,
-	MSF_Push       = 0x0200,
-	MSF_NoSounds   = 0x0400,
-	MSF_QuietPlane = 0x0800
+	BoomSF_Secret     = 0x0080,
+	BoomSF_Friction   = 0x0100,
+	BoomSF_Wind       = 0x0200,
+	BoomSF_NoSounds   = 0x0400,
+	BoomSF_QuietPlane = 0x0800
 }
-sectorflag_e;
+boom_sectorflag_e;
 
 #define MSF_BoomFlags  0x0FE0
 

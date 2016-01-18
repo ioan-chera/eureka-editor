@@ -400,30 +400,27 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	{
 		// Boom generalized sectors
 
+		mask = BoomSF_TypeMask;
+
 		if (w == box->bm_damage)
 		{
-			mask = 0x60;
+			mask  = BoomSF_DamageMask;
 			value = box->bm_damage->value() << 5;
 		}
 		else if (w == box->bm_secret)
 		{
-			mask = 0x80;
+			mask  = BoomSF_Secret;
 			value = box->bm_secret->value() << 7;
 		}
 		else if (w == box->bm_friction)
 		{
-			mask = 0x100;
+			mask  = BoomSF_Friction;
 			value = box->bm_friction->value() << 8;
 		}
 		else if (w == box->bm_wind)
 		{
-			mask = 0x200;
+			mask  = BoomSF_Wind;
 			value = box->bm_wind->value() << 9;
-		}
-		else
-		{
-			mask  = 31;
-			// already got the value
 		}
 	}
 
