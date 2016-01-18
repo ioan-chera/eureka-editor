@@ -1,0 +1,10 @@
+lib_win32
+
+eureka
+Eureka.exe
+
+obj_linux/*.o
+obj_linux/glbsp/*.o
+obj_win32/*.o
+obj_win32/glbsp/*.o
+
