@@ -224,9 +224,6 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->type->value());
 
-	const linetype_t *info = M_GetLineType(new_type);
-	box->desc->value(info->desc);
-
 	selection_c list;
 	selection_iterator_c it;
 
@@ -241,6 +238,9 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 		BA_End();
 	}
+
+	// update description
+	box->UpdateField(LineDef::F_TYPE);
 }
 
 
@@ -585,9 +585,21 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (is_linedef(obj))
 		{
-			const linetype_t *info = M_GetLineType(LineDefs[obj]->type);
-			desc->value(info->desc);
-			type->value(Int_TmpStr(LineDefs[obj]->type));
+			int type_num = LineDefs[obj]->type;
+
+			type->value(Int_TmpStr(type_num));
+
+			const char *gen_desc = GeneralizedDesc(type_num);
+
+			if (gen_desc)
+			{
+				desc->value(gen_desc);
+			}
+			else
+			{
+				const linetype_t *info = M_GetLineType(type_num);
+				desc->value(info->desc);
+			}
 		}
 		else
 		{
@@ -810,6 +822,34 @@ void UI_LineBox::UpdateGameInfo()
 	}
 
 	redraw();
+}
+
+
+const char * UI_LineBox::GeneralizedDesc(int type_num)
+{
+	if (! game_info.gen_types)
+		return NULL;
+
+	static char desc_buffer[256];
+
+	for (int i = 0 ; i < num_gen_linetypes ; i++)
+	{
+		const generalized_linetype_t *info = &gen_linetypes[i];
+
+		if (type_num >= info->base && type_num < (info->base + info->length))
+		{
+			// grab trigger name (we assume it is first field)
+			if (info->num_fields < 1 || info->fields[0].num_keywords < 8)
+				return NULL;
+
+			const char *trigger = info->fields[0].keywords[type_num & 7];
+
+			sprintf(desc_buffer, "%s GENERALIZED %s", trigger, info->name);
+			return desc_buffer;
+		}
+	}
+
+	return NULL;  // not a generalized linetype
 }
 
 //--- editor settings ---

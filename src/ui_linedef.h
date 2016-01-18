@@ -93,6 +93,8 @@ private:
 
 	int SolidMask(int side);
 
+	const char *GeneralizedDesc(int type_num);
+
 	static void   type_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);
 	static void  flags_callback(Fl_Widget *, void *);
