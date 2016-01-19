@@ -827,8 +827,8 @@ void UI_Browser_Box::Populate()
 
 void UI_Browser_Box::SetCategories(const char *cats, const char *letters)
 {
-	// FIXME: possible buffer overflow
-	strcpy(cat_letters, letters);
+	strncpy(cat_letters, letters, sizeof(cat_letters));
+	cat_letters[sizeof(cat_letters) - 1] = 0;
 
 	category->clear();
 	category->add(cats);
@@ -1250,17 +1250,16 @@ void UI_Browser::Populate()
 
 	char letters[64];
 
-	const char *tex_cats = M_TextureCategoryString(letters);
-
+	const char *tex_cats = M_TextureCategoryString(letters, false);
 	browsers[0]->SetCategories(tex_cats, letters);
-	browsers[1]->SetCategories(tex_cats, letters);
+
+	const char *flat_cats = M_TextureCategoryString(letters, true);
+	browsers[1]->SetCategories(flat_cats, letters);
 
 	const char *thing_cats = M_ThingCategoryString(letters);
-
 	browsers[2]->SetCategories(thing_cats, letters);
 
 	const char *line_cats = M_LineCategoryString(letters);
-
 	browsers[3]->SetCategories(line_cats, letters);
 
 	// TODO: sector_cats

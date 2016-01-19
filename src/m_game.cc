@@ -877,6 +877,60 @@ char M_GetFlatType(const char *name)
 }
 
 
+static bool LineCategory_IsUsed(char group)
+{
+	std::map<int, linetype_t *>::iterator IT;
+
+	for (IT = line_types.begin() ; IT != line_types.end() ; IT++)
+	{
+		linetype_t *info = IT->second;
+		if (info->group == group)
+			return true;
+	}
+
+	return false;
+}
+
+
+static bool ThingCategory_IsUsed(char group)
+{
+	std::map<int, thingtype_t *>::iterator IT;
+
+	for (IT = thing_types.begin() ; IT != thing_types.end() ; IT++)
+	{
+		thingtype_t *info = IT->second;
+		if (info->group == group)
+			return true;
+	}
+
+	return false;
+}
+
+
+static bool TextureCategory_IsUsed(char group)
+{
+	std::map<std::string, char>::iterator IT;
+
+	for (IT = texture_assigns.begin() ; IT != texture_assigns.end() ; IT++)
+		if (IT->second == group)
+			return true;
+
+	return false;
+}
+
+
+static bool FlatCategory_IsUsed(char group)
+{
+	std::map<std::string, char>::iterator IT;
+
+	for (IT = flat_assigns.begin() ; IT != flat_assigns.end() ; IT++)
+		if (IT->second == group)
+			return true;
+
+	return false;
+}
+
+
 const char *M_LineCategoryString(char *letters)
 {
 	static char buffer[2000];
@@ -895,6 +949,9 @@ const char *M_LineCategoryString(char *letters)
 
 		// the "Other" category is always at the end
 		if (G->group == '-')
+			continue;
+
+		if (! LineCategory_IsUsed(G->group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
@@ -934,6 +991,9 @@ const char *M_ThingCategoryString(char *letters)
 		if (G->group == '-')
 			continue;
 
+		if (! ThingCategory_IsUsed(G->group))
+			continue;
+
 		// FIXME: potential for buffer overflow here
 		strcat(buffer, "|");
 		strcat(buffer, G->desc);
@@ -950,7 +1010,7 @@ const char *M_ThingCategoryString(char *letters)
 }
 
 
-const char *M_TextureCategoryString(char *letters)
+const char *M_TextureCategoryString(char *letters, bool do_flats)
 {
 	static char buffer[2000];
 
@@ -969,6 +1029,12 @@ const char *M_TextureCategoryString(char *letters)
 
 		// the "Other" category is always at the end
 		if (G->group == '-')
+			continue;
+
+		if (do_flats && !FlatCategory_IsUsed(G->group))
+			continue;
+
+		if (!do_flats && !TextureCategory_IsUsed(G->group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
