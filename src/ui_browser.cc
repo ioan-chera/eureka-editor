@@ -1024,7 +1024,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	Y += 10;
 
-	Fl_Box *title = new Fl_Box(X + 30, Y, W - 94, 22+KF*4, label);
+	Fl_Box *title = new Fl_Box(X + 30, Y, W - 114, 22+KF*4, label);
 	title->labelsize(20+KF*4);
 
 
@@ -1223,7 +1223,7 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 			browsers[i]->hide();
 	}
 
-	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized Line");
+	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized");
 	gen_box->hide();
 
 
@@ -1289,6 +1289,9 @@ void UI_Browser::SetActive(int new_active)
 	{
 		gen_box->show();
 	}
+
+	if (new_active == ACTIVE_GENERALIZED)
+		main_win->tile->MinimiseRight();
 }
 
 

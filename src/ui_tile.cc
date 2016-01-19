@@ -84,6 +84,19 @@ void UI_Tile::resize(int X, int Y, int W, int H)
 }
 
 
+void UI_Tile::ResizeBoth()
+{
+	right->resize(x() + w() - right_W, y(), right_W, h());
+	right->show();
+	right->redraw();
+
+	left->resize(x(), y(), w() - right_W, h());
+	left->redraw();
+
+	init_sizes();
+}
+
+
 void UI_Tile::ShowRight()
 {
 	if (find(right) < children())
@@ -94,14 +107,7 @@ void UI_Tile::ShowRight()
 
 	add(right);
 
-	right->resize(x() + w() - right_W, y(), right_W, h());
-	right->show();
-	right->redraw();
-
-	left->resize(x(), y(), w() - right_W, h());
-	left->redraw();
-
-	init_sizes();
+	ResizeBoth();
 }
 
 
@@ -122,6 +128,28 @@ void UI_Tile::HideRight()
 
 	// widgets in our group (the window) got rearranged, tell FLTK
 	init_sizes();
+}
+
+
+void UI_Tile::MinimiseRight()
+{
+	if (find(right) >= children())
+		return;
+
+	right_W = MIN_BROWSER_W;
+
+	ResizeBoth();
+}
+
+
+void UI_Tile::MaximiseRight()
+{
+	if (find(right) >= children())
+		return;
+
+	right_W = w() - 32;
+
+	ResizeBoth();
 }
 
 

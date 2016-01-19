@@ -50,8 +50,14 @@ public:
 	void ShowRight();
 	void HideRight();
 
+	void MinimiseRight();
+	void MaximiseRight();
+
 	bool ParseUser(const char ** tokens, int num_tok);
 	void WriteUser(FILE *fp);
+
+private:
+	void ResizeBoth();
 };
 
 
