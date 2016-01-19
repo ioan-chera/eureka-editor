@@ -161,6 +161,8 @@ typedef struct
 	int mask;	//	the bit-field info
 	int shift;	//
 
+	int default_val;
+
 	const char *name;
 
 	const char *keywords[MAX_GEN_FIELD_KEYWORDS];

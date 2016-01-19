@@ -24,67 +24,67 @@
 
 gen_line d 0x3c00 0x0400 "DOOR"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 2 5  "Kind"       Normal "Open only" "Close+Open" "Close only"
-gen_field 2 8  "Delay"      1_sec 4_sec 9_sec 30_sec
-gen_field 1 7  "Monsters"   no yes
+gen_field 3 0 7  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3 1  "Speed"      SLOW Medium Fast Turbo
+gen_field 2 5 0  "Kind"       Normal "Open only" "Close+Open" "Close only"
+gen_field 2 8 1  "Delay"      "1 sec" "4 secs" "9 secs" "30 secs"
+gen_field 1 7 0  "Monsters"   no MONSTERS
 
 
 gen_line k 0x3800 0x0400 "KEYED DOOR"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 3 6  "Keys"       any red_card blue_card yel_card red_skull blue_skull yel_skull ALL
-gen_field 1 9  "skul=card"  no yes
-gen_field 1 5  "Stay Open"  no yes 
+gen_field 3 0 6  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3 1  "Speed"      SLOW Medium Fast Turbo
+gen_field 3 6 1  "Keys"       any red_card blue_card yel_card red_skull blue_skull yel_skull ALL
+gen_field 1 9 1  "Matching"   Precise skul=card
+gen_field 1 5 0  "Stay Mode"  Closes STAY 
 
 
 gen_line f 0x6000 0x2000 "FLOOR"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 1 6  "Direction"  Down UP
-gen_field 3 7  "Target"     HnF LnF NnF LnC C sT 24 32
-gen_field 2 10 "Change"     NONE tex+zero texture tex+type
-gen_field 1 5  "Model"      trigger numeric
-gen_field 1 12 "Crush"      no yes
+gen_field 3 0  0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3  1  "Speed"      SLOW Medium Fast Turbo
+gen_field 1 6  0  "Direction"  Down UP
+gen_field 3 7  1  "Target"     HnF LnF NnF LnC C sT 24 32
+gen_field 2 10 0  "Change"     NONE tex+zero texture tex+type
+gen_field 1 5  0  "Model"      Trigger Numeric
+gen_field 1 12 0  "Crush"      no CRUSH
 
 
 gen_line c 0x4000 0x2000 "CEILING"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 1 6  "Direction"  Down UP
-gen_field 3 7  "Target"     HnC LnC NnC HnF F sT 24 32
-gen_field 2 10 "Change"     NONE tex+zero texture tex+type
-gen_field 1 5  "Model"      trigger numeric
-gen_field 1 12 "Crush"      no yes
+gen_field 3 0  0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3  1  "Speed"      SLOW Medium Fast Turbo
+gen_field 1 6  1  "Direction"  Down UP
+gen_field 3 7  0  "Target"     HnC LnC NnC HnF F sT 24 32
+gen_field 2 10 0  "Change"     NONE tex+zero texture tex+type
+gen_field 1 5  0  "Model"      Trigger Numeric
+gen_field 1 12 0  "Crush"      no CRUSH
 
 
 gen_line l 0x3400 0x0400 "LIFT"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 2 8  "Target"     LnF NnF LnC perpetual
-gen_field 2 6  "Delay"      1_sec 3_sec 5_sec 10_sec
-gen_field 1 5  "Monsters"   no yes
+gen_field 3 0 1  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3 1  "Speed"      SLOW Medium Fast Turbo
+gen_field 2 8 0  "Target"     LnF NnF LnC PERPETUAL
+gen_field 2 6 1  "Delay"      "1 sec" "3 secs" "5 secs" "10 secs"
+gen_field 1 5 0  "Monsters"   no MONSTERS
 
 
 gen_line s 0x3000 0x0400 "STAIR"
 
-gen_field 3 0  "Trigger"      W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"        SLOW Medium Fast Turbo
-gen_field 1 8  "Direction"    Down UP
-gen_field 2 6  "Step"         4 8 16 24
-gen_field 1 5  "Monsters"     no yes
-gen_field 1 9  "Any Texture"  no yes
+gen_field 3 0 2  "Trigger"      W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3 1  "Speed"        SLOW Medium Fast Turbo
+gen_field 1 8 1  "Direction"    Down UP
+gen_field 2 6 1  "Step"         4 8 16 24
+gen_field 1 5 0  "Monsters"     no MONSTERS
+gen_field 1 9 0  "Tex Match"    "Same tex" "ANY TEX"
 
 
 gen_line r 0x2f80 0x0080 "CRUSHER"
 
-gen_field 3 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 3  "Speed"      SLOW Medium Fast Turbo
-gen_field 1 5  "Monsters"   no yes
-gen_field 1 6  "Silent"     no yes
+gen_field 3 0 0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
+gen_field 2 3 0  "Speed"      SLOW Medium Fast Turbo
+gen_field 1 5 0  "Monsters"   no MONSTERS
+gen_field 1 6 0  "Silent"     no SILENT
 
