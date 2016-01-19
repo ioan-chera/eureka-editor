@@ -3,16 +3,26 @@ Eureka TODO / WISHLIST
 ======================
 
 
-+  BOOM Generalized line types / sectors
+change Choose button to Edit if in range?
 
-   >>>  have a special "browser" window for generalized lines
 
-        -  shrink browser to minimum W when Generalized is picked
+!!!  browser jumping when click on a texture
 
-        +  "pages" for each category
-           -  create the items from each field
-           -  ComputeType()
-           -  handle the Model/Monsters duality (two widgets?)
+
++  Vertex checker : "dangling" vertices (only one line)
+   
+   [ draw them as purple ]
+
+
+IDEA: edit.last_Sel : saves previous non-empty selection when current
+      selection is cleared, can bring back with CTRL-L or menu
+
+
+Generalized line browser :
+
+   +  the information should directly mirror the "type" value in panel
+      
+   >>>  when user changes anything in browser, update type of sel'd objects
 
 
 ______________________________________________________________________
@@ -56,7 +66,7 @@ Documentation
 
    - describe the four modes V/L/S/T, and their panels
 
-     hilighting stuff, selecting stuff, dragging stuff
+   - hilighting stuff, selecting stuff, dragging stuff
 
    - drawing lines in VERTEX mode
 
@@ -116,8 +126,6 @@ General
 
 -  View/Place Camera command, cursor turns into +
 
--  ability to build nodes only in current map
-
 -  SHIFT + move mouse = keep current highlight
    (issue: SHIFT + mouse press could be bound to something different)
    IDEA: a key to "hold" the current highlight  [yet another mode though]
@@ -134,10 +142,7 @@ General
 
 +  a dialog to view / load / prune backups.
 
-IDEA:  MMB on sidedef/sector tex : open RECENT browser
-
-IDEA: edit.last_Sel : saves previous non-empty selection when current
-      selection is cleared, can bring back with CTRL-L or menu
+IDEA: MMB on sidedef/sector tex : open RECENT browser
 
 WISH: support Windows 95/98/ME
 
@@ -190,7 +195,7 @@ WISH: can import UDMF format maps
 
 ?  a way to slow down fake mouse wheels?
 
-IDEA: for generalized lies, show more info in tooltip of desc
+IDEA: for generalized lines, show more info in tooltip of desc
 
 IDEA: a dialog to specify directories to find wads.
       Initially populate it with the currently hard-coded places
@@ -267,23 +272,13 @@ Q/ how to handle self-referencing linedefs in auto create/split sector ??
    the sector is highlighted, but not as bright.  Because many sector
    functions will affect things too -- make it obvious to the user.
 
--  disallow insert of new linedef if it would overlap or cross
-   an existing linedef (or touch an existing vertex).
-   [overridden when SHIFT is pressed, but no auto sectoring then]
-
-   THIS --> if new linedef would cross an existing one, then just
-            create a new vertex at the intersection point.
-
-            AND: similarly if a new linedef passes through an
-                 existing vertex -- create two instead.
-
 -  quantization function: prevent linedefs from overlapping / crossing
 
--  Multi-select : if CTRL is pressed, don't clear selection after drag
+?  Multi-select : if CTRL is pressed, don't clear selection after drag
 
 -  exchange object numbers
 
--  some port-specific line/thing flags
+-  more port-specific line/thing flags
 
 IDEA:  in Find/Replace panel, can filter things by CATEGORY
 
@@ -347,8 +342,6 @@ Browser
 +  ability to shrink categories, i.e. say that for things the
    'b' (bonus) and 'k' categories should become a single one
 
--  don't show categories which are empty
-
 -  can change the [max] size of the texture/flat previews
 
 -  scroll speed (i.e. linesize) is configurable
@@ -374,13 +367,11 @@ Game / Port Definitions
 
 -  a new category for BOOM's "property transfer" linetypes
 
--  Hexen : categorize the textures/flats
-
--  Heretic : categorize the textures/flats
-
 -  FreeDOOM : categorize all the new textures
 
 -  HacX : categorize the textures
+
+IDEA: for DOOM have "Switch", "Grating", "Door" categories
 
 
 ______________________________________________________________________
