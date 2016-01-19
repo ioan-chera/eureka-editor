@@ -983,6 +983,11 @@ public:
 	{
 		return (value() << field->shift) & field->mask;
 	}
+
+	void Decode(int line_type)
+	{
+		value((line_type & field->mask) >> field->shift);
+	}
 };
 
 
@@ -1001,9 +1006,9 @@ public:
 private:
 	static void change_callback(Fl_Widget *w, void *data)
 	{
-		UI_Generalized_Box *box = (UI_Generalized_Box *)data;
+		UI_Generalized_Page *page = (UI_Generalized_Page *)data;
 
-		// FIXME
+		page->UpdateChange();
 	}
 
 public:
@@ -1053,6 +1058,23 @@ public:
 	~UI_Generalized_Page()
 	{ }
 
+	void UpdateChange()
+	{
+		if (change_index < 0)
+			return;
+
+		if (items[change_index]->value() == 0)
+		{
+			items[change_index+1]->deactivate();
+			items[change_index+2]->  activate();
+		}
+		else
+		{
+			items[change_index+1]->  activate();
+			items[change_index+2]->deactivate();
+		}
+	}
+
 	int ComputeType() const
 	{
 		int value = 0;
@@ -1068,7 +1090,14 @@ public:
 
 	void DecodeType(int line_type)
 	{
-		// FIXME !!
+		line_type -= t_base;
+
+		for (int i = 0 ; i < num_items ; i++)
+		{
+			items[i]->Decode(line_type);
+		}
+
+		UpdateChange();
 	}
 };
 
