@@ -973,7 +973,7 @@ public:
 			add(field->keywords[i]);
 		}
 
-		value(0);
+		Reset();
 	}
 
 	~UI_Generalized_Item()
@@ -987,6 +987,13 @@ public:
 	void Decode(int line_type)
 	{
 		value((line_type & field->mask) >> field->shift);
+	}
+
+	void Reset()
+	{
+		int def_val = CLAMP(0, field->default_val, field->num_keywords - 1);
+
+		value(def_val);
 	}
 };
 
@@ -1098,6 +1105,14 @@ public:
 		}
 
 		UpdateChange();
+	}
+
+	void ResetFields()
+	{
+		for (int i = 0 ; i < num_items ; i++)
+		{
+			items[i]->Reset();
+		}
 	}
 };
 
@@ -1282,6 +1297,9 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 
 	if (new_page < 0)
 	{
+		for (int k = 0 ; k < num_pages ; k++)
+			pages[k]->ResetFields();
+
 		if (category->value() != 0)
 		{
 			category->value(0);
@@ -1310,7 +1328,7 @@ void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
 {
 	UI_Generalized_Box *box = (UI_Generalized_Box *)data;
 
-	int new_page = box->category->value();
+	int new_page = box->category->value() - 1;
 
 	for (int i = 0 ; i < box->num_pages ; i++)
 	{
