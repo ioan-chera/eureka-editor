@@ -954,18 +954,35 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 class UI_Generalized_Item : public Fl_Choice
 {
 public:
+	const generalized_field_t * field;
 
 public:
 	UI_Generalized_Item(int X, int Y, int W, int H,
-						const generalized_field_t *field) :
-		Fl_Choice(X, Y, W, H, "")
+						const generalized_field_t *_field) :
+		Fl_Choice(X, Y, W, H, ""),
+		field(_field)
 	{
-		// TODO
+		char label_buf[256];
+
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name);
+
+		copy_label(label_buf);
+
+		for (int i = 0 ; i < field->num_keywords ; i++)
+		{
+			add(field->keywords[i]);
+		}
+
+		value(0);
 	}
 
 	~UI_Generalized_Item()
 	{ }
 
+	int Compute() const
+	{
+		return (value() << field->shift) & field->mask;
+	}
 };
 
 
@@ -975,19 +992,30 @@ public:
 	int base;
 
 	UI_Generalized_Item * items[MAX_GEN_NUM_FIELDS];
+	int num_items;
 
 public:
 	UI_Generalized_Page(int X, int Y, int W, int H,
 						const generalized_linetype_t *info) :
 		Fl_Group(X, Y, W, H),
-		base(info->base)
+		base(info->base),
+		num_items(0)
 	{
+///box(FL_FLAT_BOX);
+///color(FL_RED, FL_RED);
+
 		memset(items, 0, sizeof(items));
 
-box(FL_FLAT_BOX);
-color(FL_RED, FL_RED);
+		num_items = info->num_fields;
 
-		// TODO
+		Y += 5;
+
+		for (int i = 0 ; i < num_items ; i++)
+		{
+			items[i] = new UI_Generalized_Item(X + 100, Y, 100, 22, &info->fields[i]);
+
+			Y += 30;
+		}
 
 		end();
 	}
@@ -995,12 +1023,14 @@ color(FL_RED, FL_RED);
 	~UI_Generalized_Page()
 	{ }
 
-
 	int ComputeType() const
 	{
-		// FIXME
+		int value = 0;
+		
+		for (int i = 0 ; i < num_items ; i++)
+			value = value + items[i]->Compute();
 
-		return base;
+		return base + value;
 	}
 };
 
@@ -1049,9 +1079,9 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 	category->textsize(16);
 
 
-	Y = Y + 370;
+	Y = Y + 300;
 
-	apply = new Fl_Button(X + 160, Y, 60, 30, "APPLY");
+	apply = new Fl_Button(X + 160, Y, 50, 30, "SET");
 	apply->callback(apply_callback, this);
 
 
@@ -1098,7 +1128,10 @@ void UI_Generalized_Box::Populate()
 		apply->show();
 
 		for (int i = 0 ; i < num_pages ; i++)
-			pages[i]->show();
+			pages[i]->hide();
+
+		if (num_pages > 0)
+			pages[category->value()]->show();
 	}
 
 	redraw();
@@ -1138,10 +1171,7 @@ void UI_Generalized_Box::CreatePages()
 
 		category->add(info->name);
 
-		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
-
-		if (i > 0)
-			pages[i]->hide();
+		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 230, info);
 
 		add(pages[i]);
 

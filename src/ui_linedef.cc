@@ -387,7 +387,10 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 void UI_LineBox::SetLineType(int new_type)
 {
 	if (obj < 0)
+	{
+		Beep("No lines selected");
 		return;
+	}
 
 	char buffer[64];
 
