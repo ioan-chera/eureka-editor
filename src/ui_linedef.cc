@@ -78,7 +78,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	choose = new Fl_Button(X+W/2- 5, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2+15, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	gen = new Fl_Button(X+W-60, Y, 50, 24, "Gen");
@@ -487,6 +487,15 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
+		int cur_type = atoi(box->type->value());
+
+		if ((cur_type >= 0x2f80 && cur_type <= 0x7fff) ||
+			Fl::event_button() == 3)
+		{
+			main_win->ShowBrowser('G');
+			return;
+		}
+
 		main_win->ShowBrowser('L');
 		return;
 	}
@@ -813,10 +822,11 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
-
+#if 0
 		if (game_info.gen_types)
 			gen->show();
 		else
+#endif
 			gen->hide();
 	}
 
@@ -851,7 +861,7 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 
 			const char *trigger = info->fields[0].keywords[type_num & 7];
 
-			sprintf(desc_buffer, "%s GENERALIZED %s", trigger, info->name);
+			sprintf(desc_buffer, "%s GENTYPE: %s", trigger, info->name);
 			return desc_buffer;
 		}
 	}
