@@ -1019,7 +1019,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	int orig_X = X;
 
-	X = X + (W - MIN_BROWSER_W);
+///  X = X + (W - MIN_BROWSER_W);
 
 
 	Y += 10;
@@ -1060,7 +1060,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	// resize box
 
-	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, orig_X /*+ W - 10*/, Y + H - 10, 8, 8, NULL);
+	Fl_Box * rs_box = new Fl_Box(FL_NO_BOX, orig_X + W - 10, Y + H - 10, 8, 8, NULL);
 
 	resizable(rs_box);
 }
@@ -1130,7 +1130,7 @@ void UI_Generalized_Box::CreatePages()
 
 	category->clear();
 
-	int X = x() + (w() - MIN_BROWSER_W);
+	int X = x();  /// + (w() - MIN_BROWSER_W);
 
 	for (int i = 0 ; i < num_gen_linetypes ; i++)
 	{
