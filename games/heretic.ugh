@@ -356,3 +356,196 @@ sector 49 "Wind: West (weak)"
 sector 50 "Wind: West (normal)"
 sector 51 "Wind: West (strong)"
 
+
+#---- TEXTURE CATEGORIES -----------
+
+texturegroup c "Castle"
+texturegroup d "Door && Metal"
+texturegroup g "Grating"
+texturegroup l "Liquid"
+texturegroup v "Village"
+texturegroup - "OTHER"
+
+texture c BANNER1
+texture c BANNER2
+texture c BANNER3
+texture c BANNER4
+texture c BANNER5
+texture c BANNER6
+texture c BANNER7
+texture c BANNER8
+
+texture c CHAINSD
+texture c CSTLMOSS
+texture c CSTLRCK
+texture c GRNBLOK1
+texture c GRNBLOK2
+texture c GRNBLOK3
+texture c GRNBLOK4
+texture c GRSTNPB
+texture c GRSTNPBV
+texture c GRSTNPBW
+
+texture c LOOSERCK
+texture c MOSSRCK1
+texture c ORNGRAY
+texture c REDWALL
+texture c SANDSQ2
+texture c SNDBLCKS
+texture c SNDCHNKS
+texture c SNDPLAIN
+texture c SPINE1
+texture c SPINE2
+texture c SQPEB1
+texture c SQPEB2
+texture c TRISTON1
+texture c TRISTON2
+texture c WOODWL
+
+texture d CHAINMAN
+texture d DMNMSK
+texture d DOORWOOD
+texture d DOOREXIT
+texture d DOORSTON
+texture d GRSKULL1
+texture d GRSKULL2
+texture d GRSKULL3
+texture d HORSES1
+texture d SKULLSB1
+texture d SKULLSB2
+
+texture d SAINT1
+texture d METL1
+texture d METL2
+texture d SW1OFF
+texture d SW1ON
+texture d SW2OFF
+texture d SW2ON
+
+texture g GATMETL
+texture g GATMETL2
+texture g GATMETL3
+texture g GATMETL4
+texture g GATMETL5
+texture g WDGAT64
+texture g WEB1_B
+texture g WEB1_F
+texture g WEB2_B
+texture g WEB2_F
+texture g WEB3_M
+texture g STNGLS1
+texture g STNGLS2
+texture g STNGLS3
+
+texture l LAVA1
+texture l LAVAFL1
+texture l LAVAFL2
+texture l LAVAFL3
+texture l WATRWAL1
+texture l WATRWAL2
+texture l WATRWAL3
+
+texture v BRWNRCKS
+texture v CELTIC
+texture v CTYSTCI1
+texture v CTYSTCI2
+texture v CTYSTCI4
+texture v CTYSTUC1
+texture v CTYSTUC2
+texture v CTYSTUC3
+texture v CTYSTUC4
+texture v CTYSTUC5
+
+texture v DRIPWALL
+texture v RCKSNMUD
+texture v ROOTWALL
+texture v TMBSTON1
+texture v TMBSTON2
+
+texture v BLUEFRAG
+texture v MOSAIC1
+texture v MOSAIC2
+texture v MOSAIC3
+texture v MOSAIC4
+texture v MOSAIC5
+
+texture - OLDSKY2
+texture - OLDSKY3
+texture - SKY1
+texture - SKY2
+texture - SKY3
+texture - SKY5
+
+flat c FLAT500
+flat c FLAT503
+flat c FLAT504
+flat c FLAT520
+flat c FLAT521
+flat c FLAT522
+flat c FLAT523
+flat c FLOOR00
+flat c FLOOR01
+flat c FLOOR03
+flat c FLOOR06
+flat c FLOOR07
+flat c FLOOR09
+flat c FLOOR18
+flat c FLOOR19
+flat c FLOOR20
+
+flat l FLATHUH1
+flat l FLATHUH2
+flat l FLATHUH3
+flat l FLATHUH4
+flat l FLTFLWW1
+flat l FLTFLWW2
+flat l FLTFLWW3
+flat l FLTLAVA1
+flat l FLTLAVA2
+flat l FLTLAVA3
+flat l FLTLAVA4
+flat l FLTSLUD1
+flat l FLTSLUD2
+flat l FLTSLUD3
+flat l FLTWAWA1
+flat l FLTWAWA2
+flat l FLTWAWA3
+flat l FLAT517
+
+flat v FLAT502
+flat v FLAT506
+flat v FLAT507
+flat v FLAT508
+flat v FLAT509
+flat v FLAT510
+flat v FLAT512
+flat v FLAT513
+flat v FLAT516
+
+flat v FLOOR04
+flat v FLOOR05
+flat v FLOOR10
+flat v FLOOR11
+flat v FLOOR12
+flat v FLOOR16
+flat v FLOOR17
+flat v FLOOR25
+flat v FLOOR27
+
+flat m FLTTELE1
+flat m FLTTELE2
+flat m FLTTELE3
+flat m FLTTELE4
+
+flat - F_SKY1
+
+flat - FLOOR08
+flat - FLOOR21
+flat - FLOOR22
+flat - FLOOR23
+flat - FLOOR24
+flat - FLOOR26
+flat - FLOOR28
+flat - FLOOR29
+flat - FLOOR30
+
