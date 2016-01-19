@@ -47,7 +47,7 @@ gen_line f 0x6000 0x2000 "FLOOR"
 
 gen_field 3 0  0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
 gen_field 1 6  0  "Direction"  Down UP
-gen_field 3 7  1  "Target"     "HnF" "LnF" "NnF" "LnC" "CEILING" "By tex" "24 units" "32 units"
+gen_field 3 7  1  "Target"     "Highest Floor" "Lowest Floor" "Next Floor" "Lowest CEIL" "CEILING" "By texture" "24 units" "32 units"
 gen_field 2 3  1  "Speed"      SLOW Medium Fast Turbo
 
 gen_field 2 10 0  "Change"     "NONE" "Tex+zero" "Texture" "Tex+type"
@@ -60,7 +60,7 @@ gen_line c 0x4000 0x2000 "CEILING"
 
 gen_field 3 0  0  "Trigger"    W1 WR S1 SR G1 GR D1 DR
 gen_field 1 6  1  "Direction"  Down UP
-gen_field 3 7  0  "Target"     "HnC" "LnC" "NnC" "HnF" "FLOOR" "By tex" "24 units" "32 units"
+gen_field 3 7  0  "Target"     "Highest Ceil" "Lowest Ceil" "Next Ceil" "Highest Floor" "FLOOR" "By texture" "24 units" "32 units"
 gen_field 2 3  1  "Speed"      SLOW Medium Fast Turbo
 
 gen_field 2 10 0  "Change"     "NONE" "Tex+zero" "Texture" "Tex+type"
@@ -72,7 +72,7 @@ gen_field 1 12 0  "Crush"      no CRUSH
 gen_line l 0x3400 0x0400 "LIFT"
 
 gen_field 3 0 1  "Trigger"    W1 WR S1 SR G1 GR D1 DR
-gen_field 2 8 0  "Target"     "LnF" "NnF" "LnC" "PERPETUAL"
+gen_field 2 8 0  "Target"     "Lowest Floor" "Next Floor" "Lowest CEIL" "PERPETUAL"
 gen_field 2 3 1  "Speed"      SLOW Medium Fast Turbo
 gen_field 2 6 1  "Delay"      "1 sec" "3 secs" "5 secs" "10 secs"
 gen_field 1 5 0  "Monsters"   no MONSTER
