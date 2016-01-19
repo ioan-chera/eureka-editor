@@ -989,7 +989,8 @@ public:
 class UI_Generalized_Page : public Fl_Group
 {
 public:
-	int base;
+	int t_base;
+	int t_length;
 
 	UI_Generalized_Item * items[MAX_GEN_NUM_FIELDS];
 	int num_items;
@@ -1009,7 +1010,7 @@ public:
 	UI_Generalized_Page(int X, int Y, int W, int H,
 						const generalized_linetype_t *info) :
 		Fl_Group(X, Y, W, H),
-		base(info->base),
+		t_base(info->base), t_length(info->length),
 		num_items(0),
 		change_index(-1)
 	{
@@ -1062,14 +1063,20 @@ public:
 				value = value | items[i]->Compute();
 		}
 
-		return base + value;
+		return t_base + value;
+	}
+
+	void DecodeType(int line_type)
+	{
+		// FIXME !!
 	}
 };
 
 
 UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, NULL),
-	num_pages(0)
+	num_pages(0),
+	in_update(false)
 {
 	box(FL_FLAT_BOX);
 
@@ -1111,17 +1118,6 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 	category->textsize(16);
 
 
-	Y = Y + 315;
-
-	Fl_Button *
-	reset = new Fl_Button(X + 20, Y, 70, 30, "Reset");
-	// reset->callback(apply_callback, this);
-
-	apply = new Fl_Button(X + 165, Y, 70, 30, "Apply");
-	apply->labelfont(FL_HELVETICA_BOLD);
-	apply->callback(apply_callback, this);
-
-
 	end();
 
 
@@ -1146,7 +1142,6 @@ void UI_Generalized_Box::Populate()
 		no_boom->show();
 
 		category->hide();
-		apply->hide();
 
 		for (int i = 0 ; i < num_pages ; i++)
 			pages[i]->hide();
@@ -1162,13 +1157,14 @@ void UI_Generalized_Box::Populate()
 		no_boom->hide();
 
 		category->show();
-		apply->show();
 
 		for (int i = 0 ; i < num_pages ; i++)
-			pages[i]->hide();
-
-		if (num_pages > 0)
-			pages[category->value()]->show();
+		{
+			if (i == category->value() - 1)
+				pages[i]->show();
+			else
+				pages[i]->hide();
+		}
 	}
 
 	redraw();
@@ -1177,6 +1173,8 @@ void UI_Generalized_Box::Populate()
 
 void UI_Generalized_Box::CycleCategory(int dir)
 {
+#if 0  // NOT SURE IF THIS MAKES SENSE
+
 	if (no_boom->visible() || num_pages < 2)
 		return;
 
@@ -1189,6 +1187,8 @@ void UI_Generalized_Box::CycleCategory(int dir)
 
 	category->value(new_page);
 	category->do_callback();
+
+#endif
 }
 
 
@@ -1200,7 +1200,7 @@ void UI_Generalized_Box::CreatePages()
 
 	category->clear();
 
-	category->add("NOTHING");
+	category->add("NONE");
 
 	int X = x();  /// + (w() - MIN_BROWSER_W);
 
@@ -1210,7 +1210,7 @@ void UI_Generalized_Box::CreatePages()
 
 		category->add(info->name);
 
-		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 255, info);
+		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
 
 		add(pages[i]);
 
@@ -1225,7 +1225,50 @@ int UI_Generalized_Box::ComputeType() const
 {
 	int cur_page = category->value();
 
-	return pages[cur_page]->ComputeType();
+	if (cur_page == 0)
+		return 0;
+
+	return pages[cur_page - 1]->ComputeType();
+}
+
+
+void UI_Generalized_Box::UpdateGenType(int line_type)
+{
+	if (in_update)
+		return;
+
+	if (no_boom->visible() || num_pages == 0)
+		return;
+
+	int new_page = -1;
+
+	for (int i = 0 ; i < num_pages ; i++)
+	{
+		if (pages[i]->t_base <= line_type && line_type < pages[i]->t_base + pages[i]->t_length)
+		{
+			new_page = i;
+			break;
+		}
+	}
+
+	if (new_page < 0)
+	{
+		if (category->value() != 0)
+		{
+			category->value(0);
+			Populate();
+		}
+
+		return;
+	}
+
+	if (category->value() != new_page + 1)
+	{
+		category->value(new_page + 1);
+		Populate();
+	}
+
+	pages[new_page]->DecodeType(line_type);
 }
 
 
@@ -1248,19 +1291,28 @@ void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
 			box->pages[i]->hide();
 	}
 
+	value_callback(w, (void *)box);
+
 	box->redraw();
 }
 
-void UI_Generalized_Box::apply_callback(Fl_Widget *w, void *data)
+void UI_Generalized_Box::value_callback(Fl_Widget *w, void *data)
 {
 	UI_Generalized_Box *box = (UI_Generalized_Box *)data;
 
 	if (box->no_boom->visible() || box->num_pages == 0)
 		return;
 
-	int line_type = box->ComputeType();
+	if (box->category->value() == 0)
+		return;
 
-	main_win->BrowsedItem('L', line_type, "", 0);
+	box->in_update = true;  // prevent some useless work
+	{
+		int line_type = box->ComputeType();
+
+		main_win->BrowsedItem('L', line_type, "", 0);
+	}
+	box->in_update = false;
 }
 
 
@@ -1468,6 +1520,12 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	{
 		browsers[active]->ToggleRecent(force_recent);
 	}
+}
+
+
+void UI_Browser::UpdateGenType(int line_type)
+{
+	gen_box->UpdateGenType(line_type);
 }
 
 

@@ -155,15 +155,17 @@ private:
 
 	UI_Generalized_Page * pages[MAX_PAGES];
 
-	Fl_Button * apply;
-
 	int num_pages;
+
+	int in_update;
 
 public:
 	UI_Generalized_Box(int X, int Y, int W, int H, const char *label);
 	virtual ~UI_Generalized_Box();
 
 	void Populate();
+
+	void UpdateGenType(int line_type);
 
 	void CycleCategory(int dir);
 
@@ -172,9 +174,9 @@ private:
 
 	int ComputeType() const;
 
-	static void   hide_callback(Fl_Widget *w, void *data);
-	static void    cat_callback(Fl_Widget *w, void *data);
-	static void  apply_callback(Fl_Widget *w, void *data);
+	static void  hide_callback(Fl_Widget *w, void *data);
+	static void   cat_callback(Fl_Widget *w, void *data);
+	static void value_callback(Fl_Widget *w, void *data);
 };
 
 
@@ -219,6 +221,9 @@ public:
 
 	// recently used textures (etc) has changed
 	void RecentUpdate();
+
+	// for the generalized box
+	void UpdateGenType(int line_type);
 
 	bool ParseUser(const char ** tokens, int num_tok);
 	void WriteUser(FILE *fp);

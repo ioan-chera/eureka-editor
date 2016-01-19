@@ -388,7 +388,7 @@ void UI_LineBox::SetLineType(int new_type)
 {
 	if (obj < 0)
 	{
-		Beep("No lines selected");
+///		Beep("No lines selected");
 		return;
 	}
 
@@ -603,11 +603,15 @@ void UI_LineBox::UpdateField(int field)
 				const linetype_t *info = M_GetLineType(type_num);
 				desc->value(info->desc);
 			}
+
+			main_win->browser->UpdateGenType(type_num);
 		}
 		else
 		{
 			type->value("");
 			desc->value("");
+
+			//??  main_win->browser->UpdateGenType(0);
 		}
 	}
 
