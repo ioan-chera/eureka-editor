@@ -994,15 +994,29 @@ public:
 	UI_Generalized_Item * items[MAX_GEN_NUM_FIELDS];
 	int num_items;
 
+	// index for the "Change", "Model", "Monster" triplet, usually -1
+	int change_index;
+
+private:
+	static void change_callback(Fl_Widget *w, void *data)
+	{
+		UI_Generalized_Box *box = (UI_Generalized_Box *)data;
+
+		// FIXME
+	}
+
 public:
 	UI_Generalized_Page(int X, int Y, int W, int H,
 						const generalized_linetype_t *info) :
 		Fl_Group(X, Y, W, H),
 		base(info->base),
-		num_items(0)
+		num_items(0),
+		change_index(-1)
 	{
-///box(FL_FLAT_BOX);
-///color(FL_RED, FL_RED);
+#if 0
+		box(FL_FLAT_BOX);
+		color(FL_BLUE, FL_BLUE);
+#endif
 
 		memset(items, 0, sizeof(items));
 
@@ -1012,7 +1026,22 @@ public:
 
 		for (int i = 0 ; i < num_items ; i++)
 		{
+			bool is_change = (y_stricmp(info->fields[i].name, "Change") == 0);
+
+			if (is_change)
+				Y += 10;
+
 			items[i] = new UI_Generalized_Item(X + 100, Y, 110, 22, &info->fields[i]);
+
+			if (is_change && (i+2) < num_items)
+			{
+				change_index = i;
+
+				items[i]->callback(change_callback, this);
+			}
+
+			if (change_index >= 0 && i == change_index+1)
+				items[i]->deactivate();
 
 			Y += 30;
 		}
@@ -1028,7 +1057,10 @@ public:
 		int value = 0;
 		
 		for (int i = 0 ; i < num_items ; i++)
-			value = value + items[i]->Compute();
+		{
+			if (items[i]->visible())
+				value = value | items[i]->Compute();
+		}
 
 		return base + value;
 	}
@@ -1079,9 +1111,14 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 	category->textsize(16);
 
 
-	Y = Y + 300;
+	Y = Y + 315;
 
-	apply = new Fl_Button(X + 165, Y, 55, 30, "SET");
+	Fl_Button *
+	reset = new Fl_Button(X + 20, Y, 70, 30, "Reset");
+	// reset->callback(apply_callback, this);
+
+	apply = new Fl_Button(X + 165, Y, 70, 30, "Apply");
+	apply->labelfont(FL_HELVETICA_BOLD);
 	apply->callback(apply_callback, this);
 
 
@@ -1163,6 +1200,8 @@ void UI_Generalized_Box::CreatePages()
 
 	category->clear();
 
+	category->add("NOTHING");
+
 	int X = x();  /// + (w() - MIN_BROWSER_W);
 
 	for (int i = 0 ; i < num_gen_linetypes ; i++)
@@ -1171,7 +1210,7 @@ void UI_Generalized_Box::CreatePages()
 
 		category->add(info->name);
 
-		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 230, info);
+		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 255, info);
 
 		add(pages[i]);
 
