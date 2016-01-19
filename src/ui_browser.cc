@@ -1044,7 +1044,7 @@ public:
 			if (is_change)
 				Y += 10;
 
-			items[i] = new UI_Generalized_Item(X + 100, Y, 110, 22, &info->fields[i]);
+			items[i] = new UI_Generalized_Item(X + 100, Y, 120, 22, &info->fields[i]);
 
 			if (is_change && (i+2) < num_items)
 			{
@@ -1157,7 +1157,7 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	Y += 10;
 
-	category = new Fl_Choice(X + 40, Y, 180, 30);
+	category = new Fl_Choice(X + 40, Y, 170, 30);
 	category->callback(cat_callback, this);
 	category->textsize(16);
 
