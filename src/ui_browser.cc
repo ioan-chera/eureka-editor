@@ -1012,7 +1012,7 @@ public:
 
 		for (int i = 0 ; i < num_items ; i++)
 		{
-			items[i] = new UI_Generalized_Item(X + 100, Y, 100, 22, &info->fields[i]);
+			items[i] = new UI_Generalized_Item(X + 100, Y, 110, 22, &info->fields[i]);
 
 			Y += 30;
 		}
@@ -1074,14 +1074,14 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	Y += 10;
 
-	category = new Fl_Choice(X + 40, Y, 170, 30);
+	category = new Fl_Choice(X + 40, Y, 180, 30);
 	category->callback(cat_callback, this);
 	category->textsize(16);
 
 
 	Y = Y + 300;
 
-	apply = new Fl_Button(X + 160, Y, 50, 30, "SET");
+	apply = new Fl_Button(X + 165, Y, 55, 30, "SET");
 	apply->callback(apply_callback, this);
 
 
