@@ -3,19 +3,10 @@ Eureka TODO / WISHLIST
 ======================
 
 
-change Choose button to Edit if in range?
-
-
-!!!  browser jumping when click on a texture
-
-
-+  Vertex checker : "dangling" vertices (only one line)
-   
-   [ draw them as purple ]
-
-
-IDEA: edit.last_Sel : saves previous non-empty selection when current
-      selection is cleared, can bring back with CTRL-L or menu
++  CMD_Insert on a highlighted vertex (and no drawing mode)
+       AND vertex is dangling
+       AND vertex is sitting on a line
+       THEN split that line and merge the two vertices
 
 
 Generalized line browser :
