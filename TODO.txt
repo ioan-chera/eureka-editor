@@ -3,10 +3,37 @@ Eureka TODO / WISHLIST
 ======================
 
 
+The "old" drawing way was that there was a single vertex highlighted
+and when you press SPACE it created a new vertex and a line between
+the two, and the new vertex becomes the next start point.
+
+THE SELECTION IS SIGNIFICANT
+
+------
+
+The "new" drawing way is: LMB on a vertex or splittable-line will
+begin drawing mode (splitting that line), clicking in empty space
+will create new vertex and continue drawing there, clicking on an
+existing vertex (or splittable line) will finish drawing mode
+(unless SHIFT key is pressed).
+
+THE SELECTION IS NOT USED
+
+
+
++  line drawing is active AND snap mode on --> easy to place a new vertex
+   "ON" a line without it splitting it there)
+
+   (similarly "ON" a vertex
+
+
++  LMB to split a line AND hold button down (drag) --> SHOULD DRAG NEW VERTEX
+
+
 +  CMD_Insert on a highlighted vertex (and no drawing mode)
        AND vertex is dangling
        AND vertex is sitting on a line
-       THEN split that line and merge the two vertices
+   ------> split that line and merge the two vertices
 
 
 Generalized line browser :
@@ -246,6 +273,10 @@ Editing
 +  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
    that merging.
+
+-  a proper "curve" tool for making a circle arc or bezier curve,
+   and new vertices would be constrained to that curve, and you can
+   move existing vertices onto the curve.
 
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 

@@ -10,14 +10,19 @@ CHANGES Eureka 1.10
 +  rendering of sector flats/lighting in the 2D window
 
 
-+  a more intuitive "drawing mode" for adding vertices
++  a more intuitive "drawing mode" for adding vertices,
+   e.g. automatically split crossed lines.
 
 +  treat Freedoom Phase 1 and Phase 2 as separate games
 
 +  added Eternity port definition, thanks to printz
 
 
+/  new "Last Selection" command, undo an accidentally clearing
+
 /  sector panel: buttons for quickly setting the headroom
+
+/  status bar lets you see full message via a tooltip
 
 -  auto-splitting when inserting new linedefs
 -  inserting a vertex with SHIFT continues the drawing mode
@@ -45,6 +50,7 @@ CHANGES Eureka 1.10
 -  added /reverse flag for CopyProperties command
 -  replaced "Aspect ratio" pref with "Pixel aspect ratio"
 
+-  map checks: find "dangling" vertices
 -  map checks: detect the Medusa Effect on 2S lines
 -  map checks: detect transparent tex on solid walls
 -  map checks: find manual doors on 1S lines
