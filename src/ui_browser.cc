@@ -860,7 +860,6 @@ void UI_Browser_Box::CycleCategory(int dir)
 		}
 
 		// skip the RECENT category
-		// TODO : controllable via a /xxx flag
 		if (new_cat != 1)
 			break;
 	}
@@ -920,7 +919,9 @@ void UI_Browser_Box::RecentUpdate()
 			changes = true;
 	}
 
-	if (changes)
+	char cat = cat_letters[category->value()];
+
+	if (changes && cat == '^')
 		Sort();
 }
 
@@ -944,7 +945,7 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 
 	category->value(new_cat);
 
-	Filter();
+	Sort();
 }
 
 
