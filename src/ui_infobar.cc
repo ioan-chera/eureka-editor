@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -212,6 +212,11 @@ void UI_InfoBar::SetMouse(double mx, double my)
 void UI_InfoBar::SetStatus(const char *str)
 {
 	status->copy_label(str);
+
+	if (!str || !str[0])
+		status->tooltip(NULL);
+	else
+		status->copy_tooltip(str);
 }
 
 
