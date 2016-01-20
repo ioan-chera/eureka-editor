@@ -48,6 +48,8 @@ static bool recalc_map_bounds;
 static int  new_vertex_minimum;
 static int  moved_vertex_count;
 
+static selection_c * last_Sel;
+
 
 void MarkChanges()
 {
@@ -582,13 +584,26 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 
 void Selection_InvalidateLast()
 {
-	// TODO
+	delete last_Sel;
 }
 
 
 void Selection_Push()
 {
-	// TODO
+	if (edit.Selected->empty())
+		return;
+
+	if (last_Sel && last_Sel->test_equal(*edit.Selected))
+		return;
+
+	// OK copy it
+
+	if (last_Sel)
+		delete last_Sel;
+
+	last_Sel = edit.Selected;
+
+	edit.Selected = new selection_c(edit.mode);
 }
 
 
@@ -608,6 +623,16 @@ void Selection_Clear(bool no_save)
 
 void CMD_LastSelection(void)
 {
+	if (! last_Sel)
+	{
+		Beep("No last selection");
+		return;
+	}
+
+	std::swap(last_Sel, edit.Selected);
+
+	UpdateHighlight();
+	RedrawMap();
 }
 
 
