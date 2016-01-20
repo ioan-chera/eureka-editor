@@ -213,6 +213,47 @@ check_result_e UI_Check_base::Run()
 
 //------------------------------------------------------------------------
 
+void Vertex_FindDanglers(selection_c& sel)
+{
+	sel.change_type(OBJ_VERTICES);
+
+	if (NumVertices == 0 || NumLineDefs == 0)
+		return;
+
+	byte * line_counts = new byte[NumVertices];
+
+	memset(line_counts, 0, NumVertices);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		int v1 = LineDefs[n]->start;
+		int v2 = LineDefs[n]->end;
+
+		if (line_counts[v1] < 2) line_counts[v1] += 1;
+		if (line_counts[v2] < 2) line_counts[v2] += 1;
+	}
+
+	for (int k = 0 ; k < NumVertices ; k++)
+	{
+		if (line_counts[k] == 1)
+			sel.set(k);
+	}
+
+	delete[] line_counts;
+}
+
+
+void Vertex_ShowDanglers()
+{
+	if (edit.mode != OBJ_VERTICES)
+		Editor_ChangeMode('v');
+
+	Vertex_FindDanglers(*edit.Selected);
+
+	GoToErrors();
+}
+
+
 struct vertex_X_CMP_pred
 {
 	inline bool operator() (int A, int B) const
@@ -346,7 +387,7 @@ class UI_Check_Vertices : public UI_Check_base
 {
 public:
 	UI_Check_Vertices(bool all_mode) :
-		UI_Check_base(520, 186, all_mode, "Check : Vertices",
+		UI_Check_base(520, 224, all_mode, "Check : Vertices",
 				      "Vertex test results")
 	{ }
 
@@ -378,6 +419,14 @@ public:
 		Vertex_RemoveUnused();
 		dialog->user_action = CKR_TookAction;
 	}
+
+	static void action_show_danglers(Fl_Widget *w, void *data)
+	{
+		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
+		Vertex_ShowDanglers();
+		dialog->user_action = CKR_Highlight;
+	}
+
 };
 
 
@@ -389,6 +438,19 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 
 	for (;;)
 	{
+		Vertex_FindDanglers(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No dangling vertices");
+		else
+		{
+			sprintf(check_message, "%d dangling vertices", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 210,
+			                "Show",  &UI_Check_Vertices::action_show_danglers);
+		}
+
+
 		Vertex_FindOverlaps(sel);
 
 		if (sel.empty())
