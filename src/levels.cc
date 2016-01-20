@@ -30,6 +30,7 @@
 #include "m_game.h"
 #include "editloop.h"
 #include "levels.h"
+#include "e_path.h"
 #include "e_things.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
@@ -629,7 +630,18 @@ void CMD_LastSelection(void)
 		return;
 	}
 
+	bool changed_mode = false;
+
+	if (last_Sel->what_type() != edit.mode)
+	{
+		changed_mode = true;
+		Editor_ChangeMode_Raw(last_Sel->what_type());
+	}
+
 	std::swap(last_Sel, edit.Selected);
+
+	if (changed_mode)
+		GoToSelection();
 
 	UpdateHighlight();
 	RedrawMap();
