@@ -282,8 +282,8 @@ void SEC_Merge(void)
 	BA_End();
 
 	// re-select the final sector
-	edit.error_mode = false;
-	edit.Selected->clear_all();
+	Selection_Clear(true);
+
 	edit.Selected->set(source);
 }
 

@@ -778,7 +778,7 @@ void LIN_SplitHalf(void)
 
 	// clear current selection, since the size needs to grow due to
 	// new linedefs being added to the map.
-	edit.Selected->clear_all();
+	Selection_Clear(true);
 
 	int new_first = NumLineDefs;
 	int new_count = 0;
@@ -884,7 +884,7 @@ void LIN_MergeTwo(void)
 		return;
 	}
 
-	edit.Selected->clear_all();
+	Selection_Clear(true);
 
 
 	BA_Begin();

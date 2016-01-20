@@ -391,7 +391,7 @@ void VT_Disconnect(void)
 
 	BA_End();
 
-	edit.Selected->clear_all();
+	Selection_Clear(true);
 }
 
 
@@ -492,7 +492,7 @@ void LIN_Disconnect(void)
 		Beep("Nothing was disconnected");
 
 	if (unselect)
-		edit.Selected->clear_all();
+		Selection_Clear(true /* no save */);
 }
 
 
@@ -767,7 +767,7 @@ void SEC_Disconnect(void)
 	BA_End();
 
 	if (unselect)
-		edit.Selected->clear_all();
+		Selection_Clear(true);
 }
 
 

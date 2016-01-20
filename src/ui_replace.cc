@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_path.h"  // GoToObject
+#include "levels.h"  // Selection_Clear
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -1013,16 +1014,9 @@ bool UI_FindAndReplace::FindNext()
 	if (cur_obj.type != edit.mode)
 	{
 		Editor_ChangeMode_Raw(cur_obj.type);
-
-		// this clears the selection
-		edit.Selected->change_type(edit.mode);
-	}
-	else
-	{
-		edit.Selected->clear_all();
 	}
 
-	RedrawMap();
+	Selection_Clear();
 
 
 	bool is_first = cur_obj.is_nil();

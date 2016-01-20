@@ -275,11 +275,10 @@ void Selection_NotifyEnd()
 }
 
 
-/*
- *  DumpSelection - list the contents of a selection
- *
- */
-void DumpSelection (selection_c * list)
+//
+//  list the contents of a selection (for debugging)
+//
+void DumpSelection(selection_c * list)
 {
 	SYS_ASSERT(list);
 
@@ -577,6 +576,38 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 			break;
 		}
 	}
+}
+
+
+
+void Selection_InvalidateLast()
+{
+	// TODO
+}
+
+
+void Selection_Push()
+{
+	// TODO
+}
+
+
+void Selection_Clear(bool no_save)
+{
+	if (! no_save)
+		Selection_Push();
+
+	// this always clear it
+	edit.Selected->change_type(edit.mode);
+
+	edit.error_mode = false;
+
+	RedrawMap();
+}
+
+
+void CMD_LastSelection(void)
+{
 }
 
 

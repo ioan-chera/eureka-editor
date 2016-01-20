@@ -195,6 +195,11 @@ static void edit_do_invert_sel(Fl_Widget *w, void * data)
 	CMD_InvertSelection();
 }
 
+static void edit_do_last_sel(Fl_Widget *w, void * data)
+{
+	CMD_LastSelection();
+}
+
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
@@ -530,6 +535,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
 		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
 		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
+		{ "&Last Selection",   FL_COMMAND + 'l', FCAL edit_do_last_sel },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

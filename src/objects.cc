@@ -138,8 +138,8 @@ static void CreateSquare(int model)
 	}
 
 	// select it
-	edit.error_mode = false;
-	edit.Selected->clear_all();
+	Selection_Clear();
+
 	edit.Selected->set(new_sec);
 }
 
@@ -172,8 +172,8 @@ static void Insert_Thing()
 
 
 	// select it
-	edit.error_mode = false;
-	edit.Selected->clear_all();
+	Selection_Clear();
+
 	edit.Selected->set(new_t);
 }
 
@@ -672,11 +672,13 @@ void Insert_Vertex(bool force_select, bool no_fill)
 
 		BA_End();
 
-		edit.Selected->clear_all();
+		Selection_Clear();
+		Editor_ClearAction();
+
+		// FIXME : should re-enable drawing mode too ??
 		if (reselect)
 			edit.Selected->set(second_sel);
 
-		Editor_ClearAction();
 		return;
 	}
 
@@ -688,7 +690,7 @@ void Insert_Vertex(bool force_select, bool no_fill)
 
 		if (V->Matches(new_x, new_y))
 		{
-			edit.Selected->clear_all();
+			Selection_Clear();
 			Editor_ClearAction();
 			return;
 		}
@@ -746,8 +748,7 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	BA_End();
 
 	// select new vertex
-	edit.error_mode = false;
-	edit.Selected->clear_all();
+	Selection_Clear();
 
 	if (reselect)
 	{
@@ -797,8 +798,6 @@ static void Insert_Sector(bool force_new)
 
 		BA_End();
 
-		edit.Selected->clear_all();
-		edit.Selected->set(NumSectors - 1);
 		return;
 	}
 
@@ -843,8 +842,8 @@ static void Insert_Sector(bool force_new)
 	BA_End();
 
 
-	edit.error_mode = false;
-	edit.Selected->clear_all();
+	Selection_Clear();
+
 	edit.Selected->set(new_sec);
 }
 

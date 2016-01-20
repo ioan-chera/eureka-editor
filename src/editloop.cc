@@ -254,9 +254,7 @@ void Editor_ClearErrorMode()
 {
 	if (edit.error_mode)
 	{
-		edit.error_mode = false;
-		edit.Selected->clear_all();
-		RedrawMap();
+		Selection_Clear();
 	}
 }
 
@@ -315,7 +313,7 @@ void Editor_ChangeMode(char mode)
 	//       change.  We optionally emulate that behavior here.
 	else if (same_mode_clears_selection)
 	{
-		edit.Selected->clear_all();
+		Selection_Clear();
 	}
 
 	UpdateHighlight();
@@ -349,6 +347,8 @@ void CMD_SelectAll(void)
 
 	int total = NumObjects(edit.mode);
 
+	Selection_Push();
+
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->frob_range(0, total-1, BOP_ADD);
 
@@ -367,8 +367,7 @@ void CMD_UnselectAll(void)
 		Editor_ClearAction();
 	}
 
-	edit.Selected->change_type(edit.mode);
-	edit.Selected->clear_all();
+	Selection_Clear();
 
 	UpdateHighlight();
 	RedrawMap();
@@ -1198,7 +1197,7 @@ void Editor_MouseRelease()
 
 	if (click_obj.valid() && was_did_move)
 	{
-		edit.Selected->clear_all();
+		Selection_Clear();
 	}
 
 	/* Releasing the button while there was a selection box
@@ -1357,7 +1356,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 	else if (edit.action == ACT_SELBOX)
 	{
 		if (edit.did_a_move)
-			edit.Selected->clear_all();
+			Selection_Clear();
 
 		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
 		return;
@@ -1386,7 +1385,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 		if (! edit.Selected->get(edit.clicked.num))
 		{
 			if (edit.did_a_move)
-				edit.Selected->clear_all();
+				Selection_Clear();
 
 			edit.Selected->set(edit.clicked.num);
 			edit.did_a_move = false;
@@ -1493,6 +1492,10 @@ static editor_command_t  command_table[] =
 
 	{	"InvertSelection",
 		&CMD_InvertSelection
+	},
+
+	{	"LastSelection",
+		&CMD_LastSelection
 	},
 
 	{	"Scroll",

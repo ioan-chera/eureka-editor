@@ -1018,7 +1018,7 @@ void CMD_ApplyTag()
 	Tags_ApplyNewValue(new_tag);
 
 	if (unselect)
-		edit.Selected->clear_all();
+		Selection_Clear(true);
 }
 
 

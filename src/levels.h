@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -70,6 +70,10 @@ void DumpSelection (selection_c * list);
 void ConvertSelection(selection_c * src, selection_c * dest);
 
 int Selection_FirstLine(selection_c *list);
+
+void Selection_Clear(bool no_save = false);
+void Selection_Push();
+void Selection_InvalidateLast();
 
 
 

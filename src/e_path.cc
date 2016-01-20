@@ -214,7 +214,7 @@ void LIN_SelectPath(void)
 	Editor_ClearErrorMode();
 
 	if (! additive)
-		edit.Selected->clear_all();
+		Selection_Clear();
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
@@ -355,7 +355,7 @@ void SEC_SelectGroup(void)
 	Editor_ClearErrorMode();
 
 	if (! additive)
-		edit.Selected->clear_all();
+		Selection_Clear();
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
@@ -427,9 +427,8 @@ void GoToErrors()
 */
 void GoToObject(const Objid& objid)
 {
-	edit.error_mode = false;
+	Selection_Clear();
 
-	edit.Selected->clear_all();
 	edit.Selected->set(objid.num);
 
 	GoToSelection();

@@ -1039,7 +1039,7 @@ void CMD_Quantize(void)
 
 			Quantize_Vertices(verts);
 
-			edit.Selected->clear_all();
+			Selection_Clear();
 			break;
 		}
 	}

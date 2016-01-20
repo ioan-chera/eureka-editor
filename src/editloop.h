@@ -145,6 +145,7 @@ int  Editor_RawMouse(int event);
 void CMD_SelectAll(void);
 void CMD_UnselectAll(void);
 void CMD_InvertSelection(void);
+void CMD_LastSelection(void);
 
 void CMD_Quit(void);
 
