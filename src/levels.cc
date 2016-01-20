@@ -604,7 +604,7 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 
 void Selection_InvalidateLast()
 {
-	delete last_Sel;
+	delete last_Sel; last_Sel = NULL;
 }
 
 
