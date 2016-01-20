@@ -28,11 +28,10 @@
 #define __EUREKA_OBJECTS_H__
 
 
-int GetMaxObjectNum (int objtype);
-void  SelectObjectsInBox (selection_c *list, int, int, int, int, int);
-void  HighlightObject (int, int, int);
+void SelectObjectsInBox (selection_c *list, int, int, int, int, int);
+void HighlightObject (int, int, int);
 
-void  DeleteObjects (selection_c * list);
+void DeleteObjects (selection_c * list);
 
 
 bool LineTouchesBox (int, int, int, int, int);

@@ -49,29 +49,6 @@ int  new_sector_size = 128;
 
 
 /*
-   get the number of objects of a given type minus one
-*/
-int GetMaxObjectNum (int objtype)
-{
-	switch (objtype)
-	{
-		case OBJ_THINGS:
-			return NumThings - 1;
-		case OBJ_LINEDEFS:
-			return NumLineDefs - 1;
-		case OBJ_SIDEDEFS:
-			return NumSideDefs - 1;
-		case OBJ_VERTICES:
-			return NumVertices - 1;
-		case OBJ_SECTORS:
-			return NumSectors - 1;
-	}
-	return -1;
-}
-
-
-
-/*
    delete a group of objects.
    The selection is no longer valid after this!
 */
