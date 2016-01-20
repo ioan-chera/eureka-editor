@@ -641,6 +641,19 @@ void Selection_Clear(bool no_save)
 }
 
 
+void Selection_Validate()
+{
+	int num_obj = NumObjects(edit.mode);
+
+	if (edit.Selected->max_obj() >= num_obj)
+	{
+		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BOP_REMOVE);
+
+		Beep("BUG: invalid selection");
+	}
+}
+
+
 void CMD_LastSelection(void)
 {
 	if (! last_Sel)
@@ -659,6 +672,9 @@ void CMD_LastSelection(void)
 	}
 
 	std::swap(last_Sel, edit.Selected);
+
+	// ensure everything is kosher
+	Selection_Validate();
 
 	if (changed_mode)
 		GoToSelection();
