@@ -236,11 +236,13 @@ void ObjectBox_NotifyEnd()
 //------------------------------------------------------------------------
 
 static bool invalidated_selection;
+static bool invalidated_last_sel;
 
 
 void Selection_NotifyBegin()
 {
 	invalidated_selection = false;
+	invalidated_last_sel  = false;
 }
 
 
@@ -250,6 +252,11 @@ void Selection_NotifyInsert(obj_type_e type, int objnum)
 	{
 		invalidated_selection = true;
 	}
+
+	if (last_Sel && objnum <= last_Sel->max_obj())
+	{
+		invalidated_last_sel = true;
+	}
 }
 
 
@@ -258,6 +265,11 @@ void Selection_NotifyDelete(obj_type_e type, int objnum)
 	if (objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
+	}
+
+	if (last_Sel && objnum <= last_Sel->max_obj())
+	{
+		invalidated_last_sel = true;
 	}
 }
 
@@ -275,6 +287,9 @@ void Selection_NotifyEnd()
 		// this clears AND RESIZES the selection_c object
 		edit.Selected->change_type(edit.mode);
 	}
+
+	if (invalidated_last_sel)
+		Selection_InvalidateLast();
 }
 
 
@@ -626,7 +641,7 @@ void CMD_LastSelection(void)
 {
 	if (! last_Sel)
 	{
-		Beep("No last selection");
+		Beep("No last selection (or was invalidated)");
 		return;
 	}
 
