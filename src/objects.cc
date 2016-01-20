@@ -675,9 +675,13 @@ void Insert_Vertex(bool force_select, bool no_fill)
 		Selection_Clear();
 		Editor_ClearAction();
 
-		// FIXME : should re-enable drawing mode too ??
 		if (reselect)
+		{
 			edit.Selected->set(second_sel);
+
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = second_sel;
+		}
 
 		return;
 	}
@@ -749,6 +753,7 @@ void Insert_Vertex(bool force_select, bool no_fill)
 
 	// select new vertex
 	Selection_Clear();
+	Editor_ClearAction();
 
 	if (reselect)
 	{
@@ -756,10 +761,6 @@ void Insert_Vertex(bool force_select, bool no_fill)
 
 		Editor_SetAction(ACT_DRAW_LINE);
 		edit.drawing_from = new_v;
-	}
-	else
-	{
-		Editor_ClearAction();
 	}
 
 	RedrawMap();
