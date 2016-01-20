@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -243,6 +243,29 @@ void selection_c::intersect(const selection_c& other)
 	for (int i = 0 ; i < cur_size ; i++)
 		if (get(i) != other.get(i))
 			clear(i);
+}
+
+
+bool selection_c::test_equal(const selection_c& other)
+{
+	if (type != other.type)
+		return false;
+
+	if (maxobj != other.maxobj)
+		return false;
+
+	if (count_obj() != other.count_obj())
+		return false;
+
+	// the quick tests have passed, now perform the expensive one
+
+	selection_iterator_c it;
+
+	for (begin(&it) ; !it.at_end() ; ++it)
+		if (! other.get(*it))
+			return false;
+
+	return true;
 }
 
 
