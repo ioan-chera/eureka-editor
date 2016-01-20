@@ -1133,6 +1133,10 @@ void Editor_MousePress(keycode_t mod)
 		bool force_select = (mod == MOD_SHIFT);
 		bool no_fill      = (mod == MOD_COMMAND);
 
+		// prevent adding a linedef when not in drawing mode
+		if (edit.action != ACT_DRAW_LINE)
+			Selection_Clear();
+
 		Insert_Vertex(force_select, no_fill);
 		return;
 	}
