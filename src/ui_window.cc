@@ -137,7 +137,7 @@ UI_MainWin::~UI_MainWin()
 { }
 
 
-void UI_MainWin::NewEditMode(char mode)
+void UI_MainWin::NewEditMode(obj_type_e mode)
 {
 	UnselectPics();
 
@@ -150,10 +150,10 @@ void UI_MainWin::NewEditMode(char mode)
 
 	switch (mode)
 	{
-		case 't': thing_box->show(); break;
-		case 'l':  line_box->show(); break;
-		case 's':   sec_box->show(); break;
-		case 'v':  vert_box->show(); break;
+		case OBJ_THINGS:  thing_box->show(); break;
+		case OBJ_LINEDEFS: line_box->show(); break;
+		case OBJ_SECTORS:   sec_box->show(); break;
+		case OBJ_VERTICES: vert_box->show(); break;
 
 		default: break;
 	}

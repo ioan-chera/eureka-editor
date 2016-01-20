@@ -48,7 +48,7 @@ public:
 public:
 	void SetStatus(const char *str);
 
-	void NewEditMode(char _mode);
+	void NewEditMode(obj_type_e new_mode);
 
 	void SetMouse(double mx, double my);
 

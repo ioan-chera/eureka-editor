@@ -253,7 +253,9 @@ void Selection_NotifyInsert(obj_type_e type, int objnum)
 		invalidated_selection = true;
 	}
 
-	if (last_Sel && objnum <= last_Sel->max_obj())
+	if (last_Sel &&
+		type == last_Sel->what_type() &&
+		objnum <= last_Sel->max_obj())
 	{
 		invalidated_last_sel = true;
 	}
@@ -267,7 +269,9 @@ void Selection_NotifyDelete(obj_type_e type, int objnum)
 		invalidated_selection = true;
 	}
 
-	if (last_Sel && objnum <= last_Sel->max_obj())
+	if (last_Sel &&
+		type == last_Sel->what_type() &&
+		objnum <= last_Sel->max_obj())
 	{
 		invalidated_last_sel = true;
 	}
@@ -617,9 +621,9 @@ void Selection_Push()
 	if (last_Sel)
 		delete last_Sel;
 
-	last_Sel = edit.Selected;
+	last_Sel = new selection_c(edit.Selected->what_type());
 
-	edit.Selected = new selection_c(edit.mode);
+	last_Sel->merge(*edit.Selected);
 }
 
 
@@ -651,6 +655,7 @@ void CMD_LastSelection(void)
 	{
 		changed_mode = true;
 		Editor_ChangeMode_Raw(last_Sel->what_type());
+		main_win->NewEditMode(edit.mode);
 	}
 
 	std::swap(last_Sel, edit.Selected);

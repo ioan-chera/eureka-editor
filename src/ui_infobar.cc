@@ -49,7 +49,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	mode->value(0);
 	mode->callback(mode_callback, this);
 	mode->labelsize(KF_fonth);
-	mode->textsize(KF_fonth);
+	mode->textsize(KF_fonth - 2);
 
 	X = mode->x() + mode->w() + 10;
 
@@ -170,15 +170,14 @@ void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_InfoBar::NewEditMode(char edit_mode)
+void UI_InfoBar::NewEditMode(obj_type_e new_mode)
 {
-	switch (edit_mode)
+	switch (new_mode)
 	{
-		case 't': mode->value(0); break;
-		case 'l': mode->value(1); break;
-		case 's': mode->value(2); break;
-		case 'v': mode->value(3); break;
-		case 'r': mode->value(4); break;
+		case OBJ_THINGS:   mode->value(0); break;
+		case OBJ_LINEDEFS: mode->value(1); break;
+		case OBJ_SECTORS:  mode->value(2); break;
+		case OBJ_VERTICES: mode->value(3); break;
 
 		default: break;
 	}

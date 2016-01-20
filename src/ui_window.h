@@ -97,8 +97,7 @@ public:
 
 	void Maximize();
 
-	// mode can be 't', 'l', 's', 'v' or 'r'.   FIXME: ENUMERATE
-	void NewEditMode(char mode);
+	void NewEditMode(obj_type_e mode);
 
 	// this is a wrapper around the FLTK cursor() method which
 	// prevents the possibly expensive call when the shape hasn't

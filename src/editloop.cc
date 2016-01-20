@@ -276,12 +276,12 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 }
 
 
-void Editor_ChangeMode(char mode)
+void Editor_ChangeMode(char mode_char)
 {
 	obj_type_e  prev_type = edit.mode;
 
 	// Set the object type according to the new mode.
-	switch (mode)
+	switch (mode_char)
 	{
 		case 't': Editor_ChangeMode_Raw(OBJ_THINGS);   break;
 		case 'l': Editor_ChangeMode_Raw(OBJ_LINEDEFS); break;
@@ -289,13 +289,15 @@ void Editor_ChangeMode(char mode)
 		case 'v': Editor_ChangeMode_Raw(OBJ_VERTICES); break;
 
 		default:
-			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode);
+			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode_char);
 			return;
 	}
 
 	if (prev_type != edit.mode)
 	{
-		main_win->NewEditMode(mode);
+		Selection_Push();
+
+		main_win->NewEditMode(edit.mode);
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
@@ -307,7 +309,7 @@ void Editor_ChangeMode(char mode)
 	else if (main_win->isSpecialPanelShown())
 	{
 		// same mode, but this removes the special panel
-		main_win->NewEditMode(mode);
+		main_win->NewEditMode(edit.mode);
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.

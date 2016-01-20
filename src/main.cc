@@ -626,15 +626,7 @@ static void Main_OpenWindow()
 
 	main_win->ShowBrowser(0);
 
-	switch (edit.mode)
-	{
-		case OBJ_LINEDEFS: main_win->NewEditMode('l'); break;
-		case OBJ_SECTORS:  main_win->NewEditMode('s'); break;
-		case OBJ_VERTICES: main_win->NewEditMode('v'); break;
-		case OBJ_THINGS:   main_win->NewEditMode('t'); break;
-
-		default: break;
-	}
+	main_win->NewEditMode(edit.mode);
 
 	Fl::check();
 }

@@ -209,7 +209,7 @@ public:
 	void SetActive(int new_active);
 
 	void ChangeMode(char new_mode);
-	void NewEditMode(char edit_mode);
+	void NewEditMode(obj_type_e edit_mode);
 
 	// dir is +1 or -1, or 0 to set the category to "ALL"
 	void CycleCategory(int dir);
