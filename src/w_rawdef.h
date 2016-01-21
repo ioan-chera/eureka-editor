@@ -310,6 +310,12 @@ typedef enum
 zdoom_lineflag_e;
 
 
+#define BOOM_GENLINE_FIRST	0x2f80
+#define BOOM_GENLINE_LAST	0x7fff
+
+#define is_genline(tp)  ((tp) >= BOOM_GENLINE_FIRST && (tp) <= BOOM_GENLINE_LAST)
+
+
 typedef enum
 {
 	SPAC_Cross   = 0,	// when line is crossed (W1 / WR)

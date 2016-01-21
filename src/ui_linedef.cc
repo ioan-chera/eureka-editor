@@ -489,7 +489,7 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 	{
 		int cur_type = atoi(box->type->value());
 
-		if ((game_info.gen_types && cur_type >= 0x2f80 && cur_type <= 0x7fff) ||
+		if ((game_info.gen_types && is_genline(cur_type)) ||
 			Fl::event_button() == 3)
 		{
 			main_win->ShowBrowser('G');

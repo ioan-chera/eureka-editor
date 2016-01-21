@@ -299,11 +299,17 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const linetype_t *info = M_GetLineType(LineDefs[n]->type);
+		int type_num = LineDefs[n]->type;
+
+		const linetype_t *info = M_GetLineType(type_num);
+
+		// Boom generalized line type?
+		if (game_info.gen_types && is_genline(type_num))
+			continue;
 
 		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
 		{
-			bung_unknown_type(types, LineDefs[n]->type);
+			bung_unknown_type(types, type_num);
 
 			list.set(n);
 		}
