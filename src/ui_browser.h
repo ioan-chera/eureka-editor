@@ -174,9 +174,9 @@ private:
 
 	int ComputeType() const;
 
-	static void  hide_callback(Fl_Widget *w, void *data);
-	static void   cat_callback(Fl_Widget *w, void *data);
-	static void value_callback(Fl_Widget *w, void *data);
+	static void hide_callback(Fl_Widget *w, void *data);
+	static void  cat_callback(Fl_Widget *w, void *data);
+	static void edit_callback(Fl_Widget *w, void *data);
 };
 
 

@@ -1011,12 +1011,17 @@ public:
 	// index for the "Change", "Model", "Monster" triplet, usually -1
 	int change_index;
 
+	UI_Generalized_Item *change_widget;
+
 private:
-	static void change_callback(Fl_Widget *w, void *data)
+	static void item_callback(Fl_Widget *w, void *data)
 	{
 		UI_Generalized_Page *page = (UI_Generalized_Page *)data;
 
-		page->UpdateChange();
+		if (w == page->change_widget)
+			page->UpdateChange();
+
+		page->do_callback();
 	}
 
 public:
@@ -1025,7 +1030,8 @@ public:
 		Fl_Group(X, Y, W, H),
 		t_base(info->base), t_length(info->length),
 		num_items(0),
-		change_index(-1)
+		change_index(-1),
+		change_widget(NULL)
 	{
 #if 0
 		box(FL_FLAT_BOX);
@@ -1046,12 +1052,12 @@ public:
 				Y += 10;
 
 			items[i] = new UI_Generalized_Item(X + 100, Y, 120, 22, &info->fields[i]);
+			items[i]->callback(item_callback, this);
 
 			if (is_change && (i+2) < num_items)
 			{
-				change_index = i;
-
-				items[i]->callback(change_callback, this);
+				change_index  = i;
+				change_widget = items[i];
 			}
 
 			if (change_index >= 0 && i == change_index+1)
@@ -1089,7 +1095,7 @@ public:
 		
 		for (int i = 0 ; i < num_items ; i++)
 		{
-			if (items[i]->visible())
+			if (items[i]->active())
 				value = value | items[i]->Compute();
 		}
 
@@ -1256,6 +1262,7 @@ void UI_Generalized_Box::CreatePages()
 		category->add(info->name);
 
 		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
+		pages[i]->callback(edit_callback, this);
 
 		add(pages[i]);
 
@@ -1339,20 +1346,17 @@ void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
 			box->pages[i]->hide();
 	}
 
-	value_callback(w, (void *)box);
+	edit_callback(w, (void *)box);
 
 	box->redraw();
 }
 
-void UI_Generalized_Box::value_callback(Fl_Widget *w, void *data)
+void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 {
 	UI_Generalized_Box *box = (UI_Generalized_Box *)data;
 
 	if (box->no_boom->visible() || box->num_pages == 0)
 		return;
-
-///	if (box->category->value() == 0)
-///		return;
 
 	box->in_update = true;  // prevent some useless work
 	{
