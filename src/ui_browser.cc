@@ -1351,8 +1351,8 @@ void UI_Generalized_Box::value_callback(Fl_Widget *w, void *data)
 	if (box->no_boom->visible() || box->num_pages == 0)
 		return;
 
-	if (box->category->value() == 0)
-		return;
+///	if (box->category->value() == 0)
+///		return;
 
 	box->in_update = true;  // prevent some useless work
 	{
