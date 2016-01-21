@@ -606,11 +606,13 @@ void UI_LineBox::UpdateField(int field)
 			if (gen_desc)
 			{
 				desc->value(gen_desc);
+				choose->label("Edit");
 			}
 			else
 			{
 				const linetype_t *info = M_GetLineType(type_num);
 				desc->value(info->desc);
+				choose->label("Choose");
 			}
 
 			main_win->browser->UpdateGenType(type_num);
@@ -619,8 +621,9 @@ void UI_LineBox::UpdateField(int field)
 		{
 			type->value("");
 			desc->value("");
+			choose->label("Choose");
 
-			//??  main_win->browser->UpdateGenType(0);
+			main_win->browser->UpdateGenType(0);
 		}
 	}
 
@@ -793,6 +796,8 @@ int UI_LineBox::SolidMask(int side)
 
 void UI_LineBox::UpdateGameInfo()
 {
+	choose->label("Choose");
+
 	if (Level_format == MAPF_Hexen)
 	{
 		tag->hide();
