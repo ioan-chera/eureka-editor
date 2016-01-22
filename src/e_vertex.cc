@@ -305,14 +305,18 @@ void Vertex_MergeList(selection_c *list)
 	if (list->count_obj() < 2)
 		return;
 
-	// the first vertex is kept (but moved to the middle coordinate),
-	// all the other vertices are removed.
+	// the first vertex is kept, all the other vertices are removed.
+
+	int v = list->find_first();
 
 	int new_x, new_y;
 
+#if 0
 	Objs_CalcMiddle(list, &new_x, &new_y);
-
-	int v = list->find_first();
+#else
+	new_x = Vertices[v]->x;
+	new_y = Vertices[v]->y;
+#endif
 
 	list->clear(v);
 
@@ -350,6 +354,8 @@ void VT_Merge()
 	}
 
 	Vertex_MergeList(edit.Selected);
+
+	Editor_ClearAction();
 }
 
 
