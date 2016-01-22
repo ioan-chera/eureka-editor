@@ -675,12 +675,24 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
-		const sectortype_t *info = M_GetSectorType(Sectors[n]->type);
+		int type_num = Sectors[n]->type;
+
+		if (type_num < 0 || type_num >= 2048)
+		{
+			bump_unknown_type(types, type_num);
+			list.set(n);
+			continue;
+		}
+
+		// Boom generalized sectors
+		if (game_info.gen_types)
+			type_num &= 31;
+
+		const sectortype_t *info = M_GetSectorType(type_num);
 
 		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
 		{
-			bump_unknown_type(types, Sectors[n]->type);
-
+			bump_unknown_type(types, type_num);
 			list.set(n);
 		}
 	}
