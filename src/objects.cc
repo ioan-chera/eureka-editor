@@ -607,9 +607,8 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	{
 		if (Vertex_TryFixDangler(near_vert))
 		{
-			// FIXME : a vertex was deleted, selection/highlight is now invalid
-
-			Beep("Fixed dangling vertex");
+			// a vertex was deleted, selection/highlight is now invalid
+			Beep("Merged a dangling vertex");
 			return;
 		}
 	}
@@ -743,6 +742,9 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 		if (!force_select && first_sel >= 0)
 			reselect = false;
+
+		// allow this vertex to be dragged
+		edit.clicked = Objid(OBJ_VERTICES, new_v);
 	}
 
 	// add a new linedef?

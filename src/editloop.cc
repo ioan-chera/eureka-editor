@@ -1131,6 +1131,9 @@ void Editor_MousePress(keycode_t mod)
 	if (edit.button_down >= 2)
 		return;
 
+	edit.button_down = 1;
+	edit.button_mod  = mod;
+
 	if (edit.action == ACT_DRAW_LINE ||
 		(easier_drawing_mode && edit.split_line.valid()))
 	{
@@ -1144,9 +1147,6 @@ void Editor_MousePress(keycode_t mod)
 		Insert_Vertex(force_select, no_fill, true /* is_button */);
 		return;
 	}
-
-	edit.button_down = 1;
-	edit.button_mod  = mod;
 
 	Objid object;      // The object under the pointer
 
