@@ -540,6 +540,15 @@ static const opt_desc_t options[] =
 		&map_scroll_bars
 	},
 
+	{	"minimum_drag_pixels",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Minimum distance to move mouse to drag an object (in pixels)",
+		NULL,
+		&minimum_drag_pixels
+	},
+
 	{	"mouse_wheel_scrolls_map",
 		0,
 		OPT_BOOLEAN,

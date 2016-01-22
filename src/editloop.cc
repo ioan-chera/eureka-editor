@@ -59,7 +59,7 @@ bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
 int multi_select_modifier = 0;
-int minimum_drag_distance = 60;	// pixels
+int minimum_drag_pixels = 5;
 
 
 extern bool easier_drawing_mode;
@@ -1411,7 +1411,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
 	if (edit.button_down == 1 && edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_distance)
+		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
 	{
 		if (! edit.Selected->get(edit.clicked.num))
 		{
