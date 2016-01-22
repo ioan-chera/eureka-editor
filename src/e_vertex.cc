@@ -396,10 +396,37 @@ void VT_Disconnect(void)
 }
 
 
-void Vertex_TryFixDangler(int v_num)
+bool Vertex_TryFixDangler(int v_num)
 {
+	// see if this vertex is sitting on another one (or very close to it)
+	int other_vert = -1;
+	int max_dist = 3;
+
+	for (int i = 0 ; i < NumVertices ; i++)
+	{
+		if (i == v_num)
+			continue;
+
+		int dx = Vertices[v_num]->x - Vertices[i]->x;
+		int dy = Vertices[v_num]->y - Vertices[i]->y;
+
+		if (abs(dx) <= max_dist && abs(dy) <= max_dist)
+		{
+			other_vert = i;
+			break;
+		}
+	}
+
+	if (other_vert >= 0)
+	{
+		// FIXME
+		return false;
+	}
+
+
 	if (VertexHowManyLineDefs(v_num) != 1)
-		return;
+		return false;
+
 
 	// find the line joined to this vertex
 	int joined_ld = -1;
@@ -415,35 +442,16 @@ void Vertex_TryFixDangler(int v_num)
 
 	SYS_ASSERT(joined_ld >= 0);
 
-	// see if this vertex is sitting on another one (or very close to it)
-	int sit_vert = -1;
-	int max_dist = 3;
-
-	for (int i = 0 ; i < NumVertices ; i++)
-	{
-		if (i == v_num)
-			continue;
-
-		int dx = Vertices[v_num]->x - Vertices[i]->x;
-		int dy = Vertices[v_num]->y - Vertices[i]->y;
-
-		if (abs(dx) <= max_dist && abs(dy) <= max_dist)
-		{
-			sit_vert = i;
-			break;
-		}
-	}
-
-	if (sit_vert)
+	if (other_vert >= 0)
 	{
 		selection_c sel(OBJ_VERTICES);
 
-		sel.set(sit_vert);
+		sel.set(other_vert);
 		sel.set(v_num);
 
-fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, sit_vert);
+fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_vert);
 		Vertex_MergeList(&sel);
-		return;
+		return true;
 	}
 
 	// see if vertex is sitting on a line
@@ -456,8 +464,10 @@ fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, sit_ver
 	{
 fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
 		SplitLineDefAtVertex(line_ob.num, v_num);
-		return;
+		return true;
 	}
+
+	return false;
 }
 
 

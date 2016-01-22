@@ -602,18 +602,25 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 		near_vert = Vertex_FindExact(new_x, new_y);
 
 
+	// attempt to fix a dangling vertex (CMD_Insert only)
+	if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
+	{
+		if (Vertex_TryFixDangler(near_vert))
+		{
+			// FIXME : a vertex was deleted, selection/highlight is now invalid
+
+			Beep("Fixed dangling vertex");
+			return;
+		}
+	}
+
+
 	// if a vertex is highlighted but none are selected, then merely
 	// select that vertex.  This is better than adding a new vertex at
 	// the same location as an existing one.
 	if (edit.Selected->empty() && near_vert >= 0)
 	{
 		edit.Selected->set(near_vert);
-
-		// also attempt to fix a dangling vertex (CMD_Insert only)
-		if (! is_button)
-		{
-			Vertex_TryFixDangler(near_vert);
-		}
 
 		if (easier_drawing_mode)
 		{

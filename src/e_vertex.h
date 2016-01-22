@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@ void InsertPolygonVertices (int, int, int, int);
 int Vertex_FindExact(int x, int y);
 int VertexHowManyLineDefs(int v_num);
 void Vertex_MergeList(selection_c *list);
-void Vertex_TryFixDangler(int v_num);
+bool Vertex_TryFixDangler(int v_num);
 
 void VT_Merge(void);
 void VT_Disconnect(void);
