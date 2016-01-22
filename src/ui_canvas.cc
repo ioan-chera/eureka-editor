@@ -1297,7 +1297,7 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 	fl_line(scr_x1, scr_y1, scr_mx, scr_my);
 	fl_line(scr_x2, scr_y2, scr_mx, scr_my);
 
-	int size = 7;
+	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
 
 	fl_pie(scr_mx - size/2, scr_my - size/2, size, size, 0, 360);
 }
