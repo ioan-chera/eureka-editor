@@ -9,20 +9,22 @@ CHANGES Eureka 1.10
 
 +  rendering of sector flats/lighting in the 2D window
 
-
-+  a more intuitive "drawing mode" for adding vertices,
-   e.g. automatically split crossed lines.
++  an easier vertex "drawing mode" using the LMB
 
 +  treat Freedoom Phase 1 and Phase 2 as separate games
 
 +  added Eternity port definition, thanks to printz
 
 
+/  when adding lines, automatically split crossed lines
+
 /  new "Last Selection" command, undo an accidentally clearing
 
 /  sector panel: buttons for quickly setting the headroom
 
 /  status bar lets you see full message via a tooltip
+
+/  much less chance to accidentally drag an object
 
 -  auto-splitting when inserting new linedefs
 -  inserting a vertex with SHIFT continues the drawing mode

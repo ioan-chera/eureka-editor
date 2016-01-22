@@ -3,11 +3,31 @@ Eureka TODO / WISHLIST
 ======================
 
 
+OMG!!!  scroll map (RMB) cancels drawing mode
+
+
+
+IDEA: continue drawing unless we FILLED (or would fill) or SPLIT a sector
+      (i.e. dont stop if nothing happened)
+
+
+
+>>>  GetSplitLine : if snapped split point is FAR from true split point
+                    (compared to line length), SKIP IT
+
+                    and/or check angle of bends : require <= 30 degree
+
+
+(todo : save this explanation somewhere)
+
+
 The "old" drawing way was that there was a single vertex highlighted
 and when you press SPACE it created a new vertex and a line between
 the two, and the new vertex becomes the next start point.
 
 THE SELECTION IS SIGNIFICANT
+
+(cannot add vertices or split lines via LMB)
 
 ------
 
@@ -17,30 +37,33 @@ will create new vertex and continue drawing there, clicking on an
 existing vertex (or splittable line) will finish drawing mode
 (unless SHIFT key is pressed).
 
-THE SELECTION IS NOT USED
+THE SELECTION IS NOT USED   [ but we select each vertex ]
+
+SPACE key is like pressing LMB, with one exception: it can
+insert a new vertex "in space" (and begin drawing from it).
 
 
 
-+  line drawing is active AND snap mode on --> easy to place a new vertex
-   "ON" a line without it splitting it there)
 
-   (similarly "ON" a vertex
-
-
-+  LMB to split a line AND hold button down (drag) --> SHOULD DRAG NEW VERTEX
+!!  line drawing is active AND snap mode on --> easy to place a new vertex
+    "ON" a line/vertex without it splitting/joining there
 
 
-+  CMD_Insert on a highlighted vertex (and no drawing mode)
++  Danger Fix: CMD_Insert on a highlighted vertex (and no drawing mode)
        AND vertex is dangling
        AND vertex is sitting on a line
    ------> split that line and merge the two vertices
+   [ Note : does not care what is selected! ]
+
+   PROBLEM : highlighted vertex may be non-dangling one at same coord
+
+   BIG PROBLEM : merging vertices invalidates selection / highlight / etc
 
 
-Generalized line browser :
+LIN_Flip : how to handle 1S lines??
+           ----> assume it is to fix something, so keep right sidedef on right
 
-   +  the information should directly mirror the "type" value in panel
-      
-   >>>  when user changes anything in browser, update type of sel'd objects
+LIN_Flip : /raw mode, do not swap sidedefs, META-w
 
 
 ______________________________________________________________________
