@@ -164,7 +164,7 @@ static void UpdatePanel()
 }
 
 
-static void UpdateSplitLine()
+static void UpdateSplitLine(int map_x, int map_y)
 {
 	edit.split_line.clear();
 
@@ -178,7 +178,7 @@ static void UpdateSplitLine()
 	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
 	    edit.highlight.is_nil())
 	{
-		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
+		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_vertex);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -186,8 +186,8 @@ static void UpdateSplitLine()
 
 	if (edit.split_line.valid())
 	{
-		edit.split_x = grid.SnapX(edit.map_x);
-		edit.split_y = grid.SnapY(edit.map_y);
+		edit.split_x = grid.SnapX(map_x);
+		edit.split_y = grid.SnapY(map_y);
 
 		// in FREE mode, ensure the new vertex is directly on the linedef
 		if (! grid.snap)
@@ -222,13 +222,35 @@ void UpdateHighlight()
 	}
 
 
+	UpdateSplitLine(edit.map_x, edit.map_y);
+
+
+	// in drawing mode, highlight extends to a vertex at the snap position
+	if (edit.mode == OBJ_VERTICES && grid.snap &&
+		edit.action == ACT_DRAW_LINE &&
+		edit.highlight.is_nil() && edit.split_line.is_nil())
+	{
+		int new_x = grid.SnapX(edit.map_x);
+		int new_y = grid.SnapY(edit.map_y);
+
+		int near_vert = Vertex_FindExact(new_x, new_y);
+
+		if (near_vert >= 0)
+		{
+			edit.highlight = Objid(OBJ_VERTICES, near_vert);
+		}
+		else
+		{
+			UpdateSplitLine(new_x, new_y);
+		}
+	}
+
+
 	if (edit.highlight.valid())
 		main_win->canvas->HighlightSet(edit.highlight);
 	else
 		main_win->canvas->HighlightForget();
 
-
-	UpdateSplitLine();
 
 	UpdatePanel();
 }
