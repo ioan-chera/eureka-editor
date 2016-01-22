@@ -1383,7 +1383,7 @@ void Things_FindInVoid(selection_c& list)
 
 		Objid obj;
 
-		GetCurObject(obj, OBJ_SECTORS, x, y);
+		GetNearObject(obj, OBJ_SECTORS, x, y);
 
 		if (! obj.is_nil())
 			continue;
@@ -1402,7 +1402,7 @@ void Things_FindInVoid(selection_c& list)
 			int x2 = x + ((corner & 1) ? -4 : +4);
 			int y2 = y + ((corner & 2) ? -4 : +4);
 
-			GetCurObject(obj, OBJ_SECTORS, x2, y2);
+			GetNearObject(obj, OBJ_SECTORS, x2, y2);
 
 			if (obj.is_nil())
 				out_count++;

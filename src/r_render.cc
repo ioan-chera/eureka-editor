@@ -164,7 +164,7 @@ public:
 	void CalcViewZ()
 	{
 		Objid o;
-		GetCurObject(o, OBJ_SECTORS, int(x), int(y));
+		GetNearObject(o, OBJ_SECTORS, int(x), int(y));
 
 		int secnum = o.num;
 
@@ -217,7 +217,7 @@ public:
 		{
 			Objid obj;
 
-			GetCurObject(obj, OBJ_SECTORS, Things[i]->x, Things[i]->y);
+			GetNearObject(obj, OBJ_SECTORS, Things[i]->x, Things[i]->y);
 
 			thing_sectors[i] = obj.num;
 		}

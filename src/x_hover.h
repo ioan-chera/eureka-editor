@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@
 
 class Objid;
 
-void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap = false);
+void GetNearObject(Objid& o, obj_type_e objtype, int x, int y);
 
 void GetSplitLineDef(Objid& o, int x, int y, int drag_vert = -1);
 void GetSplitLineForDangler(Objid& o, int v_num);

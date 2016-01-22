@@ -875,14 +875,11 @@ static void get_cur_thing(Close_obj& closest, int x, int y)
 /*
  *  get_cur_vertex - determine which vertex is under the pointer
  */
-static void get_cur_vertex(Close_obj& closest, int x, int y, bool snap)
+static void get_cur_vertex(Close_obj& closest, int x, int y)
 {
 	const int screen_pix = vertex_radius(grid.Scale);
 
 	int mapslack = 1 + (int)ceil((4 + screen_pix) / grid.Scale);
-
-	if (snap)
-		mapslack = grid.step / 2 + 1;
 
 	int lx = x - mapslack;
 	int ly = y - mapslack;
@@ -913,13 +910,13 @@ static void get_cur_vertex(Close_obj& closest, int x, int y, bool snap)
 
 
 /*
- *  GetCurObject - determine which object is under the pointer
+ *  GetNearObject - determine which object is under the pointer
  * 
  *  Set <o> to point to the object under the pointer (map
  *  coordinates (<x>, <y>). If several objects are close
  *  enough to the pointer, the smallest object is chosen.
  */
-void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap)
+void GetNearObject(Objid& o, obj_type_e objtype, int x, int y)
 {
 	Close_obj closest;
 
@@ -934,7 +931,7 @@ void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap)
 
 		case OBJ_VERTICES:
 		{
-			get_cur_vertex(closest, x, y, snap);
+			get_cur_vertex(closest, x, y);
 			o = closest.obj;
 			break;
 		}
@@ -954,7 +951,7 @@ void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap)
 		}
 
 		default:
-			BugError("GetCurObject: bad objtype %d", (int) objtype);
+			BugError("GetNearObject: bad objtype %d", (int) objtype);
 			break; /* NOT REACHED */
 	}
 }

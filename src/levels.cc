@@ -335,7 +335,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
 			//    continue;
 
-			Objid obj;  GetCurObject(obj, OBJ_SECTORS, T->x, T->y);
+			Objid obj;  GetNearObject(obj, OBJ_SECTORS, T->x, T->y);
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{

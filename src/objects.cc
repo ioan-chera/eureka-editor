@@ -580,7 +580,7 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 	int reselect = true;
 
-	if (edit.Selected->count_obj() > 2)
+	if (!easier_drawing_mode && edit.Selected->count_obj() > 2)
 	{
 		Beep("Too many vertices to add a linedef");
 		return;

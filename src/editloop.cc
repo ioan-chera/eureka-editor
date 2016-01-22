@@ -211,7 +211,7 @@ void UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (!dragging || edit.drag_single_vertex >= 0))
 	{
-		GetCurObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
+		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.drag_single_vertex >= 0 && edit.highlight.valid() &&
@@ -1163,7 +1163,7 @@ void Editor_MousePress(keycode_t mod)
 
 	Objid object;      // The object under the pointer
 
-	GetCurObject(object, edit.mode, edit.map_x, edit.map_y);
+	GetNearObject(object, edit.mode, edit.map_x, edit.map_y);
 
 	edit.clicked = object;
 
@@ -1251,7 +1251,7 @@ void Editor_MouseRelease()
 
 	Objid object;      // object under the pointer
 
-	GetCurObject(object, edit.mode, edit.map_x, edit.map_y);
+	GetNearObject(object, edit.mode, edit.map_x, edit.map_y);
 
 	/* select the object if unselected, and vice versa.
 	 */
