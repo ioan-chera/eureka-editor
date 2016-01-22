@@ -107,42 +107,6 @@ void RedrawMap()
 }
 
 
-static void UpdateSplitLine(int drag_vert = -1)
-{
-	edit.split_line.clear();
-
-	// usually disabled while dragging stuff
-	if (edit.action == ACT_DRAG && edit.drag_single_vertex < 0)
-		return;
-
-	// in vertex mode, see if there is a linedef which would be split by
-	// adding a new vertex
-
-	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
-	    edit.highlight.is_nil())
-	{
-		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
-
-		// NOTE: OK if the split line has one of its vertices selected
-		//       (that case is handled by Insert_Vertex)
-	}
-
-	if (edit.split_line.valid())
-	{
-		edit.split_x = grid.SnapX(edit.map_x);
-		edit.split_y = grid.SnapY(edit.map_y);
-
-		// in FREE mode, ensure the new vertex is directly on the linedef
-		if (! grid.snap)
-			MoveCoordOntoLineDef(edit.split_line.num, &edit.split_x, &edit.split_y);
-
-		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
-	}
-	else
-		main_win->canvas->SplitLineForget();
-}
-
-
 static void UpdatePanel()
 {
 	// -AJA- I think the highlighted object is always the same type as
@@ -197,6 +161,42 @@ static void UpdatePanel()
 
 		default: break;
 	}
+}
+
+
+static void UpdateSplitLine()
+{
+	edit.split_line.clear();
+
+	// usually disabled while dragging stuff
+	if (edit.action == ACT_DRAG && edit.drag_single_vertex < 0)
+		return;
+
+	// in vertex mode, see if there is a linedef which would be split by
+	// adding a new vertex
+
+	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
+	    edit.highlight.is_nil())
+	{
+		GetSplitLineDef(edit.split_line, edit.map_x, edit.map_y, edit.drag_single_vertex);
+
+		// NOTE: OK if the split line has one of its vertices selected
+		//       (that case is handled by Insert_Vertex)
+	}
+
+	if (edit.split_line.valid())
+	{
+		edit.split_x = grid.SnapX(edit.map_x);
+		edit.split_y = grid.SnapY(edit.map_y);
+
+		// in FREE mode, ensure the new vertex is directly on the linedef
+		if (! grid.snap)
+			MoveCoordOntoLineDef(edit.split_line.num, &edit.split_x, &edit.split_y);
+
+		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
+	}
+	else
+		main_win->canvas->SplitLineForget();
 }
 
 
