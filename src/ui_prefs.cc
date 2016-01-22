@@ -514,8 +514,9 @@ public:
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
 	Fl_Check_Button *edit_multiselect;
-	Fl_Choice *edit_modkey;
-	Fl_Int_Input *edit_sectorsize;
+	Fl_Choice       *edit_modkey;
+	Fl_Int_Input    *edit_sectorsize;
+	Fl_Check_Button *edit_drawingmode;
 
 	Fl_Check_Button *brow_smalltex;
 
@@ -710,6 +711,9 @@ UI_Preferences::UI_Preferences() :
 		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
+		}
+		{ edit_drawingmode = new Fl_Check_Button(50, 240, 270, 30, " easier line drawing using the LMB");
+		  edit_drawingmode->down_box(FL_DOWN_BOX);
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
@@ -1238,6 +1242,7 @@ void UI_Preferences::LoadValues()
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 	edit_multiselect->value(multi_select_modifier ? 2 : 0);
+	edit_drawingmode->value(easier_drawing_mode ? 1 : 0);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
 
@@ -1347,6 +1352,7 @@ void UI_Preferences::SaveValues()
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
+	easier_drawing_mode = edit_drawingmode->value() ? true : false;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;

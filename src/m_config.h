@@ -53,9 +53,9 @@ extern rgb_color_t gui_custom_bg;
 extern rgb_color_t gui_custom_ig;
 extern rgb_color_t gui_custom_fg;
 
-extern int multi_select_modifier;
-
-extern int new_sector_size;
+extern int  multi_select_modifier;
+extern int  new_sector_size;
+extern bool easier_drawing_mode;
 
 extern int  default_grid_size;
 extern bool default_grid_snap;

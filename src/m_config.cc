@@ -261,6 +261,15 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
+	{	"easier_drawing_mode",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Easier line drawing using the LMB",
+		NULL,
+		&easier_drawing_mode
+	},
+
 	{	"browser_small_tex",
 		0,
 		OPT_BOOLEAN,

@@ -47,6 +47,8 @@
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
 
+bool easier_drawing_mode = true;
+
 
 /*
    delete a group of objects.
@@ -604,8 +606,11 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	{
 		edit.Selected->set(near_vert);
 
-		Editor_SetAction(ACT_DRAW_LINE);
-		edit.drawing_from = near_vert;
+		if (easier_drawing_mode)
+		{
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = near_vert;
+		}
 		return;
 	}
 
@@ -656,8 +661,11 @@ void Insert_Vertex(bool force_select, bool no_fill)
 		{
 			edit.Selected->set(second_sel);
 
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = second_sel;
+			if (easier_drawing_mode)
+			{
+				Editor_SetAction(ACT_DRAW_LINE);
+				edit.drawing_from = second_sel;
+			}
 		}
 
 		return;
@@ -736,8 +744,11 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	{
 		edit.Selected->set(new_v);
 
-		Editor_SetAction(ACT_DRAW_LINE);
-		edit.drawing_from = new_v;
+		if (easier_drawing_mode)
+		{
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = new_v;
+		}
 	}
 
 	RedrawMap();

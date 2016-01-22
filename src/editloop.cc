@@ -61,6 +61,9 @@ bool same_mode_clears_selection = false;
 int multi_select_modifier = 0;
 
 
+extern bool easier_drawing_mode;
+
+
 /*
  *  zoom_fit - adjust zoom factor to make level fit in window
  *
@@ -1128,7 +1131,8 @@ void Editor_MousePress(keycode_t mod)
 	if (edit.button_down >= 2)
 		return;
 
-	if (edit.action == ACT_DRAW_LINE || edit.split_line.valid())
+	if (edit.action == ACT_DRAW_LINE ||
+		(easier_drawing_mode && edit.split_line.valid()))
 	{
 		bool force_select = (mod == MOD_SHIFT);
 		bool no_fill      = (mod == MOD_COMMAND);
@@ -1248,7 +1252,8 @@ void Editor_MouseRelease()
 		RedrawMap();
 
 		// begin drawing mode (unless a modifier was pressed)
-		if (edit.mode == OBJ_VERTICES && was_empty && edit.button_mod == 0)
+		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
+			was_empty && edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = object.num;
