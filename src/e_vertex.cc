@@ -34,6 +34,7 @@
 #include "levels.h"
 #include "objects.h"
 #include "w_rawdef.h"
+#include "x_hover.h"
 #include "x_mirror.h"
 
 #include <algorithm>
@@ -392,6 +393,71 @@ void VT_Disconnect(void)
 	BA_End();
 
 	Selection_Clear(true);
+}
+
+
+void Vertex_TryFixDangler(int v_num)
+{
+	if (VertexHowManyLineDefs(v_num) != 1)
+		return;
+
+	// find the line joined to this vertex
+	int joined_ld = -1;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (LineDefs[n]->TouchesVertex(v_num))
+		{
+			joined_ld = n;
+			break;
+		}
+	}
+
+	SYS_ASSERT(joined_ld >= 0);
+
+	// see if this vertex is sitting on another one (or very close to it)
+	int sit_vert = -1;
+	int max_dist = 3;
+
+	for (int i = 0 ; i < NumVertices ; i++)
+	{
+		if (i == v_num)
+			continue;
+
+		int dx = Vertices[v_num]->x - Vertices[i]->x;
+		int dy = Vertices[v_num]->y - Vertices[i]->y;
+
+		if (abs(dx) <= max_dist && abs(dy) <= max_dist)
+		{
+			sit_vert = i;
+			break;
+		}
+	}
+
+	if (sit_vert)
+	{
+		selection_c sel(OBJ_VERTICES);
+
+		sel.set(sit_vert);
+		sel.set(v_num);
+
+fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, sit_vert);
+		Vertex_MergeList(&sel);
+		return;
+	}
+
+	// see if vertex is sitting on a line
+
+	Objid line_ob;
+
+	GetSplitLineForDangler(line_ob, v_num);
+
+	if (line_ob.valid())
+	{
+fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+		SplitLineDefAtVertex(line_ob.num, v_num);
+		return;
+	}
 }
 
 

@@ -33,6 +33,7 @@ class Objid;
 void GetCurObject(Objid& o, obj_type_e objtype, int x, int y, bool snap = false);
 
 void GetSplitLineDef(Objid& o, int x, int y, int drag_vert = -1);
+void GetSplitLineForDangler(Objid& o, int v_num);
 
 float ApproxDistToLineDef(const LineDef * L, int x, int y);
 

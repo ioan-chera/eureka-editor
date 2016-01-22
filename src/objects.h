@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -40,7 +40,7 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y);
 
 bool Texture_MatchPattern(const char *tex, const char *pattern);
 
-void Insert_Vertex(bool force_select, bool no_fill);
+void Insert_Vertex(bool force_select, bool no_fill, bool is_button = false);
 
 
 /* commands */

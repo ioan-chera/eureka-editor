@@ -726,7 +726,7 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
  *  get_split_linedef - determine which linedef would be split if a
  *                      new vertex was added to the given point.
  */
-static void get_split_linedef(Close_obj& closest, int x, int y, int drag_vert)
+static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
 {
 	// slack in map units
 	int mapslack = 1 + (int)ceil(8.0f / grid.Scale);
@@ -740,8 +740,7 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int drag_vert)
 	{
 		LineDef *L = LineDefs[n];
 
-		// ignore the dragging vertex (drag_vert can be -1 for none)
-		if (L->start == drag_vert || L->end == drag_vert)
+		if (L->start == ignore_vert || L->end == ignore_vert)
 			continue;
 
 		int x1 = L->Start()->x;
@@ -971,7 +970,7 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 	// don't highlight the line if the new vertex would snap onto
 	// the same coordinate as the start or end of the linedef.
-	// (I tried a bbox test here, but it's bad for axis-aligned lines)
+	// [ I tried a bbox test here, but it's bad for axis-aligned lines ]
 
 	if (o.valid() && grid.snap)
 	{
@@ -986,6 +985,16 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 			o.clear();
 		}
 	}
+}
+
+
+void GetSplitLineForDangler(Objid& o, int v_num)
+{
+	Close_obj closest;
+
+	get_split_linedef(closest, Vertices[v_num]->x, Vertices[v_num]->y, v_num);
+
+	o = closest.obj;
 }
 
 

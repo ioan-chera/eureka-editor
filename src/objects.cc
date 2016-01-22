@@ -573,8 +573,11 @@ fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 }
 
 
-void Insert_Vertex(bool force_select, bool no_fill)
+void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 {
+	// Note: force_select ensures a *new* vertex will be selected
+	// (has no effect for an existing vertex).
+
 	int reselect = true;
 
 	if (edit.Selected->count_obj() > 2)
@@ -606,6 +609,12 @@ void Insert_Vertex(bool force_select, bool no_fill)
 	{
 		edit.Selected->set(near_vert);
 
+		// also attempt to fix a dangling vertex (CMD_Insert only)
+		if (! is_button)
+		{
+			Vertex_TryFixDangler(near_vert);
+		}
+
 		if (easier_drawing_mode)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
@@ -626,6 +635,7 @@ void Insert_Vertex(bool force_select, bool no_fill)
 		return;
 	}
 
+	// FIXME : only do this in non-drawing-mode
 	// if only one is selected, but another is highlighted, use the
 	// highlighted one as the second vertex
 	if (second_sel < 0 && near_vert >= 0)

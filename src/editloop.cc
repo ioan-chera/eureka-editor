@@ -1141,7 +1141,7 @@ void Editor_MousePress(keycode_t mod)
 		if (edit.action != ACT_DRAW_LINE)
 			Selection_Clear();
 
-		Insert_Vertex(force_select, no_fill);
+		Insert_Vertex(force_select, no_fill, true /* is_button */);
 		return;
 	}
 
