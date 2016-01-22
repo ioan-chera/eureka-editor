@@ -1281,18 +1281,21 @@ void Editor_MouseRelease()
 	{
 		Editor_ClearErrorMode();
 
-		bool was_empty = edit.Selected->empty();
-
-		edit.Selected->toggle(object.num);
 		RedrawMap();
 
 		// begin drawing mode (unless a modifier was pressed)
 		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty && !was_did_move && edit.button_mod == 0)
+			/* was_empty && */
+			!was_did_move && edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = object.num;
+			return;
 		}
+
+		bool was_empty = edit.Selected->empty();
+
+		edit.Selected->toggle(object.num);
 
 		return;
 	}

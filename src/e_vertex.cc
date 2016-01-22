@@ -457,6 +457,8 @@ bool Vertex_TryFixDangler(int v_num)
 
 fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_vert);
 		Vertex_MergeList(&sel);
+
+		Status_Set("Merged a dangling vertex");
 		return true;
 	}
 
@@ -470,6 +472,8 @@ fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_v
 	{
 fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
 		SplitLineDefAtVertex(line_ob.num, v_num);
+
+		Status_Set("Fixed a dangling vertex");
 		return true;
 	}
 

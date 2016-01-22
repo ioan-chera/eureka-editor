@@ -580,16 +580,11 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 	int reselect = true;
 
-	if (!easier_drawing_mode && edit.Selected->count_obj() > 2)
-	{
-		Beep("Too many vertices to add a linedef");
-		return;
-	}
+	int from_vert = -1;
+	int   to_vert = -1;
 
 
-	// the "nearby" vertex is usually the highlighted one (if any),
-	// but we substitute the vertex at the snapped coord when the
-	// highlight is empty and snapping is enabled.
+	// the "nearby" vertex is usually the highlighted one.
 	int near_vert = -1;
 
 	if (edit.highlight.valid())
@@ -598,27 +593,49 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
 
-	if (near_vert < 0 && grid.snap)
-		near_vert = Vertex_FindExact(new_x, new_y);
 
-
-	// attempt to fix a dangling vertex (CMD_Insert only)
-	if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
+	if (easier_drawing_mode)
 	{
-		if (Vertex_TryFixDangler(near_vert))
+		if (edit.action == ACT_DRAW_LINE)
+			from_vert = edit.drawing_from;
+	}
+	else
+	{
+		if (edit.Selected->count_obj() > 2)
 		{
-			// a vertex was deleted, selection/highlight is now invalid
-			Beep("Merged a dangling vertex");
+			Beep("Too many vertices to add a linedef");
 			return;
 		}
+
+		from_vert = edit.Selected->find_first();
+		  to_vert = edit.Selected->find_second();
 	}
 
 
-	// if a vertex is highlighted but none are selected, then merely
-	// select that vertex.  This is better than adding a new vertex at
-	// the same location as an existing one.
-	if (edit.Selected->empty() && near_vert >= 0)
+	// in the old mode, if there is no highlight then look for a vertex
+	// at snapped coordinate.
+	// [ in new mode, highlight snaps while drawing  FIXME : but what if not drawing?? ]
+	// [ Must do this *before* the NEXT THING  WHY? FIXME ]
+	if (! easier_drawing_mode && near_vert < 0 && grid.snap)
 	{
+		near_vert = Vertex_FindExact(new_x, new_y);
+	}
+
+
+	// a vertex is highlighted but we have no source... just select it
+
+	if (from_vert < 0 && near_vert >= 0)
+	{
+		// attempt to fix a dangling vertex (CMD_Insert only)
+		if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
+		{
+			if (Vertex_TryFixDangler(near_vert))
+			{
+				// a vertex was deleted, selection/highlight is now invalid
+				return;
+			}
+		}
+
 		edit.Selected->set(near_vert);
 
 		if (easier_drawing_mode)
@@ -630,68 +647,60 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	}
 
 
-	int first_sel  = edit.Selected->find_first();
-	int second_sel = edit.Selected->find_second();
-
-	// if highlighted vertex same as selected one, merely deselect it
-	if (second_sel < 0 && near_vert >= 0 && near_vert == first_sel)
+	// if highlighted vertex same as selected one, merely unselect it
+	// or turn off drawing mode.
+	if (to_vert < 0 && near_vert >= 0 && near_vert == from_vert)
 	{
-		edit.Selected->clear(first_sel);
+		edit.Selected->clear(from_vert);
 		Editor_ClearAction();
 		return;
 	}
 
-	// FIXME : only do this in non-drawing-mode
-	// if only one is selected, but another is highlighted, use the
-	// highlighted one as the second vertex
-	if (second_sel < 0 && near_vert >= 0)
+
+	// if we have no explicit destination, use the highlight
+	// [ in drawing mode we never have an explicit destination ]
+	// [[ near_vert is not used after this... ]]
+
+	if (to_vert < 0 && near_vert >= 0)
 	{
-		second_sel = near_vert;
+		to_vert = near_vert;
 	}
 
-	// insert a new linedef between two existing vertices
-	if (first_sel >= 0 && second_sel >= 0)
+
+	if (from_vert >= 0 && to_vert >= 0)
 	{
-		if (LineDefAlreadyExists(first_sel, second_sel))
+		/* ------ adding a linedef, no new vertex ------ */
+
+
+		if (LineDefAlreadyExists(from_vert, to_vert))
 		{
-			edit.Selected->set(first_sel);
-			edit.Selected->set(second_sel);
+			edit.Selected->set(from_vert);
+			edit.Selected->set(to_vert);
 
 			Editor_ClearAction();
 			return;
 		}
 
-		if (!force_select && VertexHowManyLineDefs(second_sel) > 0)
+		if (!force_select && VertexHowManyLineDefs(to_vert) > 0)
 			reselect = false;
 
 		BA_Begin();
 
-		Insert_LineDef_autosplit(first_sel, second_sel, no_fill);
+		Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
 
 		BA_End();
-
-		Selection_Clear();
-		Editor_ClearAction();
-
-		if (reselect)
-		{
-			edit.Selected->set(second_sel);
-
-			if (easier_drawing_mode)
-			{
-				Editor_SetAction(ACT_DRAW_LINE);
-				edit.drawing_from = second_sel;
-			}
-		}
-
-		return;
 	}
-
-	// make sure we never create zero-length linedefs
-
-	if (first_sel >= 0)
+	else
 	{
-		Vertex *V = Vertices[first_sel];
+
+		/* ------ creating a new vertex ------ */
+
+
+/* FIXME FIXME REVIEW THIS SOON
+	// make sure we never create zero-length linedefs
+	if (from_vert >= 0)
+	{
+		Vertex *V = Vertices[from_vert];
 
 		if (V->Matches(new_x, new_y))
 		{
@@ -700,73 +709,71 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 			return;
 		}
 	}
+*/
 
 
-	// handle case of splitting a line where the first selected vertex
-	// matches an endpoint of that line -- we just want to split the
-	// line then (NOT insert a new linedef)
-	if (first_sel >= 0 && edit.split_line.valid() &&
-	    (first_sel == LineDefs[edit.split_line.num]->start ||
-		 first_sel == LineDefs[edit.split_line.num]->end))
-	{
-		first_sel = -1;
+/* FIXME FIXME  REVIEW THIS NOW!!!!!
+
+		// handle case of splitting a line where the first selected vertex
+		// matches an endpoint of that line -- we just want to split the
+		// line then (NOT insert a new linedef)
+		if (from_vert >= 0 && edit.split_line.valid() &&
+			(from_vert == LineDefs[edit.split_line.num]->start ||
+			 from_vert == LineDefs[edit.split_line.num]->end))
+		{
+			from_vert = -1;
+		}
+*/
+
+
+		BA_Begin();
+
+		to_vert = BA_New(OBJ_VERTICES);
+
+		Vertex *V = Vertices[to_vert];
+
+		V->x = new_x;
+		V->y = new_y;
+
+		// split an existing linedef?
+		if (edit.split_line.valid())
+		{
+			V->x = edit.split_x;
+			V->y = edit.split_y;
+
+			SplitLineDefAtVertex(edit.split_line.num, to_vert);
+
+			if (!force_select && from_vert >= 0)
+				reselect = false;
+
+			// allow this vertex to be dragged
+			edit.clicked = Objid(OBJ_VERTICES, to_vert);
+		}
+
+		// add a new linedef?
+		if (from_vert >= 0)
+		{
+			Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
+		}
+
+		BA_End();
 	}
 
 
-#if 0
-	// prevent adding a linedef that would overlap an existing one
-	if (first_sel >= 0 && LineDefWouldOverlap(first_sel, new_x, new_y))
-	{
-		Beep("New linedef would overlap another");
-		return;
-	}
-#endif
+	if (! easier_drawing_mode)
+		Selection_Clear();
 
-
-	BA_Begin();
-
-	int new_v = BA_New(OBJ_VERTICES);
-
-	Vertex *V = Vertices[new_v];
-
-	V->x = new_x;
-	V->y = new_y;
-
-	// split an existing linedef?
-	if (edit.split_line.valid())
-	{
-		V->x = edit.split_x;
-		V->y = edit.split_y;
-
-		SplitLineDefAtVertex(edit.split_line.num, new_v);
-
-		if (!force_select && first_sel >= 0)
-			reselect = false;
-
-		// allow this vertex to be dragged
-		edit.clicked = Objid(OBJ_VERTICES, new_v);
-	}
-
-	// add a new linedef?
-	if (first_sel >= 0)
-	{
-		Insert_LineDef_autosplit(first_sel, new_v, no_fill);
-	}
-
-	BA_End();
-
-	// select new vertex
-	Selection_Clear();
 	Editor_ClearAction();
 
+	// select new vertex
 	if (reselect)
 	{
-		edit.Selected->set(new_v);
+		edit.Selected->set(to_vert);
 
 		if (easier_drawing_mode)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = new_v;
+			edit.drawing_from = to_vert;
 		}
 	}
 
