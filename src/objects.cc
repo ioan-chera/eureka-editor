@@ -621,56 +621,60 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 		near_vert = Vertex_FindExact(new_x, new_y);
 	}
 
-
-	// a vertex is highlighted but we have no source... just select it
-
-	if (from_vert < 0 && near_vert >= 0)
+	
+	//
+	// handle a highlighted vertex
+	// [ an explicit destination overrides any highlight ]
+	//
+	if (near_vert >= 0 && to_vert < 0)
 	{
-		// attempt to fix a dangling vertex (CMD_Insert only)
-		if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
+		// the simple "select it" case, as we have no explicit source
+		if (from_vert < 0)
 		{
-			if (Vertex_TryFixDangler(near_vert))
+			// attempt to fix a dangling vertex (CMD_Insert only)
+			if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
 			{
-				// a vertex was deleted, selection/highlight is now invalid
-				return;
+				if (Vertex_TryFixDangler(near_vert))
+				{
+					// a vertex was deleted, selection/highlight is now invalid
+					return;
+				}
 			}
+
+			edit.Selected->set(near_vert);
+
+			if (easier_drawing_mode)
+			{
+				Editor_SetAction(ACT_DRAW_LINE);
+				edit.drawing_from = near_vert;
+			}
+
+			return;
 		}
 
-		edit.Selected->set(near_vert);
-
-		if (easier_drawing_mode)
+		
+		// the simple "unselect it" case
+		if (near_vert == from_vert)
 		{
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = near_vert;
+			edit.Selected->clear(from_vert);
+			Editor_ClearAction();
+			return;
 		}
-		return;
-	}
 
 
-	// if highlighted vertex same as selected one, merely unselect it
-	// or turn off drawing mode.
-	if (to_vert < 0 && near_vert >= 0 && near_vert == from_vert)
-	{
-		edit.Selected->clear(from_vert);
-		Editor_ClearAction();
-		return;
-	}
+		// we have no explicit destination, so use the highlight
+		// [ in drawing mode we never have an explicit destination ]
 
-
-	// if we have no explicit destination, use the highlight
-	// [ in drawing mode we never have an explicit destination ]
-	// [[ near_vert is not used after this... ]]
-
-	if (to_vert < 0 && near_vert >= 0)
-	{
 		to_vert = near_vert;
+
+
+		// 'near_vert' is no longer used...
 	}
 
 
 	if (from_vert >= 0 && to_vert >= 0)
 	{
 		/* ------ adding a linedef, no new vertex ------ */
-
 
 		if (LineDefAlreadyExists(from_vert, to_vert))
 		{
@@ -692,7 +696,6 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	}
 	else
 	{
-
 		/* ------ creating a new vertex ------ */
 
 
