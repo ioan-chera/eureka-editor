@@ -594,6 +594,10 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	int new_y = grid.SnapY(edit.map_y);
 
 
+	// a linedef which we are splitting (usually none)
+	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
+
+
 	if (easier_drawing_mode)
 	{
 		if (edit.action == ACT_DRAW_LINE)
@@ -620,6 +624,9 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	{
 		near_vert = Vertex_FindExact(new_x, new_y);
 	}
+
+
+	// FIXME FIXME : REVIEW NEXT BIT FOR SPLIT-LINE HANDLING
 
 	
 	//
@@ -715,18 +722,15 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 */
 
 
-/* FIXME FIXME  REVIEW THIS NOW!!!!!
+		// do not create a new line when we are splitting a line and
+		// the source vertex is an endpoint of that line (otherwise
+		// we would get two overlapping lines).
 
-		// handle case of splitting a line where the first selected vertex
-		// matches an endpoint of that line -- we just want to split the
-		// line then (NOT insert a new linedef)
-		if (from_vert >= 0 && edit.split_line.valid() &&
-			(from_vert == LineDefs[edit.split_line.num]->start ||
-			 from_vert == LineDefs[edit.split_line.num]->end))
+		if (from_vert >= 0 && split_ld >= 0 &&
+			LineDefs[split_ld]->TouchesVertex(from_vert))
 		{
 			from_vert = -1;
 		}
-*/
 
 
 		BA_Begin();
@@ -739,17 +743,18 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 		V->y = new_y;
 
 		// split an existing linedef?
-		if (edit.split_line.valid())
+		if (split_ld >= 0)
 		{
 			V->x = edit.split_x;
 			V->y = edit.split_y;
 
-			SplitLineDefAtVertex(edit.split_line.num, to_vert);
+			SplitLineDefAtVertex(split_ld, to_vert);
 
 			if (!force_select && from_vert >= 0)
 				reselect = false;
 
 			// allow this vertex to be dragged
+			// FIXME : ALWAYS ???
 			edit.clicked = Objid(OBJ_VERTICES, to_vert);
 		}
 
