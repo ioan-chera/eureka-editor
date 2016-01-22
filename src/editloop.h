@@ -109,7 +109,6 @@ void Editor_DigitKey(keycode_t key);
 void Editor_Wheel(int dx, int dy, keycode_t mod);
 void Editor_MousePress(keycode_t mod);
 void Editor_MouseRelease();
-void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool drag);
 void Editor_MiddlePress(keycode_t mod);
 void Editor_MiddleRelease();
 void Editor_LeaveWindow();

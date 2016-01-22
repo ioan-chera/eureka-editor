@@ -59,9 +59,12 @@ bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false; 
 
 int multi_select_modifier = 0;
+int minimum_drag_distance = 60;	// pixels
 
 
 extern bool easier_drawing_mode;
+
+void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag);
 
 
 /*
@@ -522,6 +525,14 @@ void CMD_ToggleVar(void)
 
 static int mouse_last_x;
 static int mouse_last_y;
+
+// screen position when LMB was pressed
+static int mouse_button1_x;
+static int mouse_button1_y;
+
+// map location when LMB was pressed
+static int button1_map_x;
+static int button1_map_y;
 
 
 void Editor_ClearAction()
@@ -1083,12 +1094,7 @@ int Editor_RawMouse(int event)
 	}
 	else
 	{
-		int map_x, map_y;
-
-		main_win->canvas->PointerPos(&map_x, &map_y);
-
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod,
-						   map_x, map_y, event == FL_DRAG);
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, event == FL_DRAG);
 	}
 
 	mouse_last_x = Fl::event_x();
@@ -1133,6 +1139,13 @@ void Editor_MousePress(keycode_t mod)
 
 	edit.button_down = 1;
 	edit.button_mod  = mod;
+
+	// remember some state (for dragging)
+	mouse_button1_x = Fl::event_x();
+	mouse_button1_y = Fl::event_y();
+
+	button1_map_x = edit.map_x;
+	button1_map_y = edit.map_y;
 
 	if (edit.action == ACT_DRAW_LINE ||
 		(easier_drawing_mode && edit.split_line.valid()))
@@ -1253,7 +1266,7 @@ void Editor_MouseRelease()
 
 		// begin drawing mode (unless a modifier was pressed)
 		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty && edit.button_mod == 0)
+			was_empty && !was_did_move && edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = object.num;
@@ -1332,8 +1345,12 @@ void Editor_LeaveWindow()
 }
 
 
-void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool drag)
+void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 {
+	int map_x, map_y;
+
+	main_win->canvas->PointerPos(&map_x, &map_y);
+
 	edit.map_x = map_x;
 	edit.map_y = map_y;
 	edit.pointer_in_window = true; // FIXME
@@ -1389,9 +1406,12 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 
 	/*
 	   begin dragging?
-	   TODO: require pixel dist from click point to be >= THRESHHOLD
 	 */
-	if (edit.button_down == 1 && edit.clicked.valid())
+	int pixel_dx = Fl::event_x() - mouse_button1_x;
+	int pixel_dy = Fl::event_y() - mouse_button1_y;
+
+	if (edit.button_down == 1 && edit.clicked.valid() &&
+		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_distance)
 	{
 		if (! edit.Selected->get(edit.clicked.num))
 		{
@@ -1404,10 +1424,10 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int map_x, int map_y, bool 
 
 		int focus_x, focus_y;
 
-		GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
 
 		Editor_SetAction(ACT_DRAG);
-		main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
+		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
 
 		// check for a single vertex
 		edit.drag_single_vertex = -1;

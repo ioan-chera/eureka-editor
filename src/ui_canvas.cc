@@ -1529,15 +1529,15 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 	*dx = drag_cur_x - drag_start_x;
 	*dy = drag_cur_y - drag_start_y;
 
-	// no real dragging until mouse distance has moved
-	int scr_dx = SCREENX(drag_cur_x) - SCREENX(drag_start_x);
-	int scr_dy = SCREENY(drag_cur_y) - SCREENY(drag_start_y);
-
-	if (abs(scr_dx) < 6 && abs(scr_dy) < 6)  // TODO: CONFIG ITEM
-	{
-		*dx = *dy = 0;
-		return;
-	}
+///---	// no real dragging until mouse distance has moved
+///---	int scr_dx = SCREENX(drag_cur_x) - SCREENX(drag_start_x);
+///---	int scr_dy = SCREENY(drag_cur_y) - SCREENY(drag_start_y);
+///---
+///---	if (abs(scr_dx) < 6 && abs(scr_dy) < 6)  // TODO: CONFIG ITEM
+///---	{
+///---		*dx = *dy = 0;
+///---		return;
+///---	}
 
 	if (grid.snap)
 	{
