@@ -406,7 +406,7 @@ bool Vertex_TryFixDangler(int v_num)
 {
 	// see if this vertex is sitting on another one (or very close to it)
 	int other_vert = -1;
-	int max_dist = 3;
+	int max_dist = 2;
 
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
@@ -423,17 +423,33 @@ bool Vertex_TryFixDangler(int v_num)
 		}
 	}
 
-	if (other_vert >= 0)
+
+	// check for a dangling vertex
+	if (VertexHowManyLineDefs(v_num) != 1)
 	{
-		// FIXME
-		return false;
+		if (other_vert >= 0 && VertexHowManyLineDefs(other_vert) == 1)
+			std::swap(v_num, other_vert);
+		else
+			return false;
 	}
 
 
-	if (VertexHowManyLineDefs(v_num) != 1)
-		return false;
+	if (other_vert >= 0)
+	{
+		selection_c sel(OBJ_VERTICES);
+
+		sel.set(other_vert);
+		sel.set(v_num);
+
+fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_vert);
+		Vertex_MergeList(&sel);
+
+		Beep("Merged a dangling vertex");
+		return true;
+	}
 
 
+#if 0
 	// find the line joined to this vertex
 	int joined_ld = -1;
 
@@ -447,20 +463,8 @@ bool Vertex_TryFixDangler(int v_num)
 	}
 
 	SYS_ASSERT(joined_ld >= 0);
+#endif
 
-	if (other_vert >= 0)
-	{
-		selection_c sel(OBJ_VERTICES);
-
-		sel.set(other_vert);
-		sel.set(v_num);
-
-fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_vert);
-		Vertex_MergeList(&sel);
-
-		Status_Set("Merged a dangling vertex");
-		return true;
-	}
 
 	// see if vertex is sitting on a line
 
@@ -468,15 +472,17 @@ fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_v
 
 	GetSplitLineForDangler(line_ob, v_num);
 
-	if (line_ob.valid())
-	{
+	if (! line_ob.valid())
+		return false;
+
 fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
-		SplitLineDefAtVertex(line_ob.num, v_num);
+	BA_Begin();
 
-		Status_Set("Fixed a dangling vertex");
-		return true;
-	}
+	SplitLineDefAtVertex(line_ob.num, v_num);
 
+	BA_End();
+
+	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;
 }
 

@@ -475,7 +475,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 		{
 			sprintf(check_message, "%d unused vertices", sel.count_obj());
 
-			dialog->AddLine(check_message, 1, 170,
+			dialog->AddLine(check_message, 1, 210,
 			                "Show",   &UI_Check_Vertices::action_show_unused,
 			                "Remove", &UI_Check_Vertices::action_remove);
 		}
