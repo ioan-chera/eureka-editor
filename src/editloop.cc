@@ -1056,6 +1056,14 @@ int Editor_RawButton(int event)
 
 	bool down = (event == FL_PUSH);
 
+	// Hack Alert : this is required to support pressing two buttons at the
+	// same time.  Without this, FLTK does not send us the second button
+	// release event, because when the first button is released the "pushed"
+	// widget becomes NULL.
+
+	if (Fl::event_buttons() != 0)
+		Fl::pushed(main_win->canvas);
+
 	// start scrolling the map?  [or moving in 3D view]
 	if (button == 3)
 	{
