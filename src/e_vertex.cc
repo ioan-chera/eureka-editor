@@ -136,6 +136,8 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 
 void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 {
+	/* merge v1 into v2 */
+
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
 
@@ -405,7 +407,7 @@ void VT_Disconnect(void)
 bool Vertex_TryFixDangler(int v_num)
 {
 	// see if this vertex is sitting on another one (or very close to it)
-	int other_vert = -1;
+	int v_other  = -1;
 	int max_dist = 2;
 
 	for (int i = 0 ; i < NumVertices ; i++)
@@ -416,9 +418,10 @@ bool Vertex_TryFixDangler(int v_num)
 		int dx = Vertices[v_num]->x - Vertices[i]->x;
 		int dy = Vertices[v_num]->y - Vertices[i]->y;
 
-		if (abs(dx) <= max_dist && abs(dy) <= max_dist)
+		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
+			! LineDefAlreadyExists(v_num, v_other))
 		{
-			other_vert = i;
+			v_other = i;
 			break;
 		}
 	}
@@ -427,22 +430,34 @@ bool Vertex_TryFixDangler(int v_num)
 	// check for a dangling vertex
 	if (VertexHowManyLineDefs(v_num) != 1)
 	{
-		if (other_vert >= 0 && VertexHowManyLineDefs(other_vert) == 1)
-			std::swap(v_num, other_vert);
+		if (v_other >= 0 && VertexHowManyLineDefs(v_other) == 1)
+			std::swap(v_num, v_other);
 		else
 			return false;
 	}
 
 
-	if (other_vert >= 0)
+	if (v_other >= 0)
 	{
-		selection_c sel(OBJ_VERTICES);
+		Selection_Clear(true /* no_save */);
 
-		sel.set(other_vert);
-		sel.set(v_num);
+		// delete highest numbered one  [ so the other index remains valid ]
+		if (v_num < v_other)
+			std::swap(v_num, v_other);
 
-fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, other_vert);
-		Vertex_MergeList(&sel);
+fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
+		BA_Begin();
+
+		MergeVertex(v_num, v_other, true /* v1_will_be_deleted */);
+
+		selection_c list(OBJ_VERTICES);
+		list.set(v_num);
+
+		DeleteObjects(&list);
+
+		BA_End();
+
+		edit.Selected->set(v_other);
 
 		Beep("Merged a dangling vertex");
 		return true;
