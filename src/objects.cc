@@ -613,27 +613,28 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 		from_vert = edit.Selected->find_first();
 		  to_vert = edit.Selected->find_second();
+
+		if (from_vert >= 0 && to_vert >= 0 && split_ld >= 0)
+		{
+			Beep("Too many vertices to split a linedef");
+			return;
+		}
 	}
 
 
-	// in the old mode, if there is no highlight then look for a vertex
-	// at snapped coordinate.
-	// [ in new mode, highlight snaps while drawing  FIXME : but what if not drawing?? ]
-	// [ Must do this *before* the NEXT THING  WHY? FIXME ]
-	if (! easier_drawing_mode && near_vert < 0 && grid.snap)
+	// if no highlight, look for a vertex at snapped coord
+	if (! (edit.action == ACT_DRAW_LINE) && near_vert < 0 && grid.snap)
 	{
 		near_vert = Vertex_FindExact(new_x, new_y);
 	}
 
 
-	// FIXME FIXME : REVIEW NEXT BIT FOR SPLIT-LINE HANDLING
-
-	
 	//
 	// handle a highlighted vertex
 	// [ an explicit destination overrides any highlight ]
+	// [ a splittable line also overrides ]
 	//
-	if (near_vert >= 0 && to_vert < 0)
+	if (near_vert >= 0 && to_vert < 0 && split_ld < 0)
 	{
 		// the simple "select it" case, as we have no explicit source
 		if (from_vert < 0)
@@ -773,7 +774,7 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 	Editor_ClearAction();
 
-	// select new vertex
+	// select new vertex / continue drawing
 	if (reselect)
 	{
 		edit.Selected->set(to_vert);
