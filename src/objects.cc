@@ -639,8 +639,8 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 		// the simple "select it" case, as we have no explicit source
 		if (from_vert < 0)
 		{
-			// attempt to fix a dangling vertex (CMD_Insert only)
-			if (! is_button && near_vert >= 0 && edit.action != ACT_NOTHING)
+			// a plain INSERT will attempt to fix a dangling vertex
+			if (!is_button && edit.action == ACT_NOTHING)
 			{
 				if (Vertex_TryFixDangler(near_vert))
 				{
@@ -706,23 +706,6 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 	{
 		/* ------ creating a new vertex ------ */
 
-
-/* FIXME FIXME REVIEW THIS SOON
-	// make sure we never create zero-length linedefs
-	if (from_vert >= 0)
-	{
-		Vertex *V = Vertices[from_vert];
-
-		if (V->Matches(new_x, new_y))
-		{
-			Selection_Clear();
-			Editor_ClearAction();
-			return;
-		}
-	}
-*/
-
-
 		// do not create a new line when we are splitting a line and
 		// the source vertex is an endpoint of that line (otherwise
 		// we would get two overlapping lines).
@@ -731,6 +714,16 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 			LineDefs[split_ld]->TouchesVertex(from_vert))
 		{
 			from_vert = -1;
+		}
+
+
+		// the following should not happen, but just in case...
+		if (from_vert >= 0 && split_ld < 0 &&
+			Vertices[from_vert]->x == new_x &&
+			Vertices[from_vert]->y == new_y)
+		{
+			Beep("Bug detected (creation of zero-length line)");
+			return;
 		}
 
 
