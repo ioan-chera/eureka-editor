@@ -1982,7 +1982,7 @@ void Render3D_Setup()
 }
 
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag)
+void Render3D_MouseMotion(int x, int y, keycode_t mod)
 {
 	highlight_3D_info_t old(view.hl);
 

@@ -64,7 +64,7 @@ int minimum_drag_pixels = 5;
 
 extern bool easier_drawing_mode;
 
-void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag);
+void Editor_MouseMotion(int x, int y, keycode_t mod);
 
 
 /*
@@ -1112,11 +1112,11 @@ int Editor_RawMouse(int event)
 	}
 	else if (edit.render3d)
 	{
-		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, event == FL_DRAG);
+		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
 	}
 	else
 	{
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, event == FL_DRAG);
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
 	}
 
 	mouse_last_x = Fl::event_x();
@@ -1370,7 +1370,7 @@ void Editor_LeaveWindow()
 }
 
 
-void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
+void Editor_MouseMotion(int x, int y, keycode_t mod)
 {
 	int map_x, map_y;
 
@@ -1383,7 +1383,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 	if (edit.pointer_in_window)
 		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
-	   fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
 	if (edit.action == ACT_SCALE)
 	{
@@ -1398,15 +1398,11 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 		return;
 	}
 
-	if (! drag)
-	{
-		UpdateHighlight();
-	}
 	/* Moving the pointer with the left button pressed
 	   and a selection box exists : move the second
 	   corner of the selection box.
 	*/
-	else if (edit.action == ACT_SELBOX)
+	if (edit.action == ACT_SELBOX)
 	{
 		if (edit.did_a_move)
 			Selection_Clear();
@@ -1468,6 +1464,11 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 		main_win->canvas->HighlightForget();
 		return;
 	}
+
+
+	// in general, just update the highlight, split-line (etc)
+
+	UpdateHighlight();
 }
 
 

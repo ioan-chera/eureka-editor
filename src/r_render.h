@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -68,7 +68,7 @@ private:
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod, bool drag);
+void Render3D_MouseMotion(int x, int y, keycode_t mod);
 void Render3D_Wheel(int dx, int dy, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
