@@ -38,7 +38,6 @@ typedef enum
 	ACT_DRAG,			// user is dragging some objects
 	ACT_SCALE,			// user is scaling (etc) some objects
 
-	ACT_SCROLL_MAP,		// user is scrolling the map (or moving in 3D view)
 	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
 	ACT_DRAW_LINE,		// user is drawing a new line
 
@@ -62,6 +61,8 @@ typedef struct
 	obj_type_e  mode;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
 	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
+
+	bool is_scrolling;	// user is scrolling the map (or moving in 3D view)
 
 	bool render3d;    // 3D preview is active
 	bool error_mode;  // draw selection in red

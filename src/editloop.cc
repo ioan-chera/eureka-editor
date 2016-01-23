@@ -568,7 +568,6 @@ void Editor_ClearAction()
 			Status_Clear();
 			break;
 	
-		case ACT_SCROLL_MAP:
 		case ACT_ADJUST_OFS:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
@@ -597,7 +596,6 @@ void Editor_SetAction(editor_action_e  new_action)
 			Status_Set("META...");
 			break;
 
-		case ACT_SCROLL_MAP:
 		case ACT_ADJUST_OFS:
 			mouse_last_x = Fl::event_x();
 			mouse_last_y = Fl::event_y();
@@ -922,14 +920,16 @@ static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
 	// started?
 	if (mode < 0)
 	{
-		Editor_SetAction(ACT_SCROLL_MAP);
+		edit.is_scrolling = true;
+		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
 
 	// finished?
 	if (mode > 0)
 	{
-		Editor_ClearAction();
+		edit.is_scrolling = false;
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
@@ -1102,7 +1102,7 @@ int Editor_RawMouse(int event)
 	int dy = Fl::event_y() - mouse_last_y;
 
 
-	if (edit.action == ACT_SCROLL_MAP)
+	if (edit.is_scrolling)
 	{
 		Editor_ScrollMap(0, dx, dy);
 	}
@@ -1383,7 +1383,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, bool drag)
 	if (edit.pointer_in_window)
 		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
-	// fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+	   fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
 	if (edit.action == ACT_SCALE)
 	{
@@ -1749,6 +1749,7 @@ void Editor_Init()
 	}
 
 	edit.action = ACT_NOTHING;
+	edit.is_scrolling = false;
 
 	edit.render3d = false;
 	edit.error_mode = false;
