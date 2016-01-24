@@ -1273,7 +1273,9 @@ public:
 
 		/* compute texture X coord */
 
-		int tx = int(dw->t_dist - tan(dw->cur_ang - dw->normal) * dw->dist);
+		float cur_ang = dw->ang1 - (XToAngle(x) - XToAngle(dw->sx1));
+
+		int tx = int(dw->t_dist - tan(cur_ang - dw->normal) * dw->dist);
 
 		tx = (dw->sd->x_offset + tx) & (tw - 1);
 
