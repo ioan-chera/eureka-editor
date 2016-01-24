@@ -167,8 +167,6 @@ public:
 
 	void UpdateGenType(int line_type);
 
-	void CycleCategory(int dir);
-
 private:
 	void CreatePages();
 

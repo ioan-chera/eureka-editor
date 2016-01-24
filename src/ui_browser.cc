@@ -1222,27 +1222,6 @@ void UI_Generalized_Box::Populate()
 }
 
 
-void UI_Generalized_Box::CycleCategory(int dir)
-{
-#if 0  // NOT SURE IF THIS MAKES SENSE
-
-	if (no_boom->visible() || num_pages < 2)
-		return;
-
-	int new_page = category->value() + dir;
-
-	if (new_page < 0)
-		new_page = num_pages - 1;
-	else if (new_page >= num_pages)
-		new_page = 0;
-
-	category->value(new_page);
-	category->do_callback();
-
-#endif
-}
-
-
 void UI_Generalized_Box::CreatePages()
 {
 	memset(pages, 0, sizeof(pages));
@@ -1519,10 +1498,6 @@ void UI_Browser::CycleCategory(int dir)
 	if (active < ACTIVE_GENERALIZED)
 	{
 		browsers[active]->CycleCategory(dir);
-	}
-	else
-	{
-		gen_box->CycleCategory(dir);
 	}
 }
 
