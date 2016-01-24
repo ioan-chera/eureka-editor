@@ -698,6 +698,15 @@ void CMD_Scroll(void)
 	delta_y = delta_y * main_win->canvas->h() / 100.0 / grid.Scale;
 
 	grid.Scroll(delta_x, delta_y);
+
+	// certain actions need to be updated
+	if (edit.action == ACT_SELBOX || edit.action == ACT_DRAW_LINE ||
+		edit.action == ACT_DRAG)
+	{
+		int mod = Fl::event_state() & MOD_ALL_MASK;
+
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+	}
 }
 
 
