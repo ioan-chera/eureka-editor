@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -46,10 +46,6 @@ public:
 
 void Objs_CalcMiddle(selection_c * list, int *x, int *y);
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
-
-#if 0
-int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust);
-#endif
 
 
 /* commands */

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1048,83 +1048,6 @@ void CMD_Quantize(void)
 
 	edit.error_mode = true;
 }
-
-
-#if 0  // FIXME exchange_objects_numbers
-/*
- *  exchange_objects_numbers
- *  Exchange the numbers of two objects
- *
- *  Return 0 on success, non-zero on failure.
- */
-int exchange_objects_numbers (int obj_type, SelPtr list, bool adjust)
-{
-	int n1, n2;
-
-	// Must have exactly two objects in the selection
-	if (list == 0 || list->next == 0 || (list->next)->next != 0)
-	{
-		BugError("exchange_object_numbers: wrong objects count.");
-		return 1;
-	}
-	n1 = list->objnum;
-	n2 = (list->next)->objnum;
-
-	if (obj_type == OBJ_LINEDEFS)
-	{
-		struct LineDef swap_buf;
-		swap_buf = LineDefs[n1];
-		LineDefs[n1] = LineDefs[n2];
-		LineDefs[n2] = swap_buf;
-	}
-	else if (obj_type == OBJ_SECTORS)
-	{
-		struct Sector swap_buf;
-		swap_buf = Sectors[n1];
-		Sectors[n1] = Sectors[n2];
-		Sectors[n2] = swap_buf;
-		if (adjust)
-		{
-			for (int n = 0 ; n < NumSideDefs ; n++)
-			{
-				if (SideDefs[n].sector == n1)
-					SideDefs[n].sector = n2;
-				else if (SideDefs[n].sector == n2)
-					SideDefs[n].sector = n1;
-			}
-		}
-	}
-	else if (obj_type == OBJ_THINGS)
-	{
-		struct Thing swap_buf;
-		swap_buf = Things[n1];
-		Things[n1] = Things[n2];
-		Things[n2] = swap_buf;
-	}
-	else if (obj_type == OBJ_VERTICES)
-	{
-		struct Vertex swap_buf;
-		swap_buf = Vertices[n1];
-		Vertices[n1] = Vertices[n2];
-		Vertices[n2] = swap_buf;
-		if (adjust)
-		{
-			for (int n = 0 ; n < NumLineDefs ; n++)
-			{
-				if (LineDefs[n].start == n1)
-					LineDefs[n].start = n2;
-				else if (LineDefs[n].start == n2)
-					LineDefs[n].start = n1;
-				if (LineDefs[n].end == n1)
-					LineDefs[n].end = n2;
-				else if (LineDefs[n].end == n2)
-					LineDefs[n].end = n1;
-			}
-		}
-	}
-	return 0;
-}
-#endif
 
 
 //--- editor settings ---
