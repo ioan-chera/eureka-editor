@@ -651,6 +651,8 @@ void M_SaveBindings()
 		if (count > 0)
 			fprintf(fp, "\n");
 	}
+
+	fclose(fp);
 }
 
 
