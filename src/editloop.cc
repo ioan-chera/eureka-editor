@@ -1177,15 +1177,21 @@ void Editor_MousePress(keycode_t mod)
 	button1_map_x = edit.map_x;
 	button1_map_y = edit.map_y;
 
-	if (edit.action == ACT_DRAW_LINE ||
-		(easier_drawing_mode && edit.split_line.valid()))
+	// this is a special case, since we want to allow the new vertex
+	// from a split-line (when in in drawing mode) to be draggable.
+	// [ that is achieved by setting edit.clicked ]
+
+	if (easier_drawing_mode && edit.split_line.valid() &&
+		edit.action != ACT_DRAW_LINE)
+	{
+		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
+		return;
+	}
+
+	if (edit.action == ACT_DRAW_LINE)
 	{
 		bool force_cont = (mod == MOD_SHIFT);
 		bool no_fill    = (mod == MOD_COMMAND);
-
-		// prevent adding a linedef when not in drawing mode
-		if (edit.action != ACT_DRAW_LINE)
-			Selection_Clear();
 
 		Insert_Vertex(force_cont, no_fill, true /* is_button */);
 		return;
@@ -1285,6 +1291,8 @@ void Editor_MouseRelease()
 	{
 		bool was_empty = edit.Selected->empty();
 
+		Editor_ClearErrorMode();
+
 		if (was_did_move)
 			Selection_Clear();
 
@@ -1298,8 +1306,7 @@ void Editor_MouseRelease()
 
 		// begin drawing mode (unless a modifier was pressed)
 		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty /* && !was_did_move */ &&
-			edit.button_mod == 0)
+			was_empty && edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = click_obj.num;

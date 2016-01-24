@@ -576,7 +576,6 @@ fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 {
 	bool do_continue = true;
-	bool allow_drag  = false;
 
 	int from_vert = -1;
 	int   to_vert = -1;
@@ -699,8 +698,6 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
 
 		BA_End();
-
-		allow_drag = false;
 	}
 	else
 	{
@@ -746,17 +743,12 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 			if (!force_continue && from_vert >= 0)
 				do_continue = false;
-
-			// allow this vertex to be dragged
-			allow_drag = true;
 		}
 
 		// add a new linedef?
 		if (from_vert >= 0)
 		{
 			Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
-
-			// TODO set allow_drag if autosplit created a vertex
 		}
 
 		BA_End();
@@ -776,14 +768,6 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = to_vert;
 		}
-	}
-
-	if (allow_drag)
-	{
-		edit.clicked = Objid(OBJ_VERTICES, to_vert);
-
-		// prevent the mouse release code from entering drawing mode again
-		edit.Selected->set(to_vert);
 	}
 
 	RedrawMap();
@@ -869,6 +853,30 @@ static void Insert_Sector(bool force_new)
 	Selection_Clear();
 
 	edit.Selected->set(new_sec);
+}
+
+
+void Insert_Vertex_split(int split_ld, int new_x, int new_y)
+{
+	BA_Begin();
+
+	int new_vert = BA_New(OBJ_VERTICES);
+
+	Vertex *V = Vertices[new_vert];
+
+	V->x = new_x;
+	V->y = new_y;
+
+	SplitLineDefAtVertex(split_ld, new_vert);
+
+	BA_End();
+
+	Selection_Clear();
+	Editor_ClearAction();
+
+	edit.clicked = Objid(OBJ_VERTICES, new_vert);
+
+	RedrawMap();
 }
 
 
