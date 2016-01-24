@@ -28,13 +28,6 @@
 #define __EUREKA_E_SECTOR_H__
 
 
-#if 0
-void DistributeSectorFloors (SelPtr);
-void DistributeSectorCeilings (SelPtr);
-void RaiseOrLowerSectors (SelPtr obj);
-void BrightenOrDarkenSectors (SelPtr obj);
-#endif
-
 /* commands */
 
 void SEC_Floor(void);
