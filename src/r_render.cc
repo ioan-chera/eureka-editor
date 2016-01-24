@@ -411,8 +411,8 @@ public:
 	int wall_light;
 
 	// clipped angles
-	float ang1, dang, cur_ang;
-	float base_ang;
+	float ang1;
+	float delta_ang;
 
 	// line constants
 	float dist, t_dist;
@@ -1019,9 +1019,8 @@ public:
 		else if (ld->Start()->y == ld->End()->y)
 			dw->wall_light -= 16;
 
-		dw->base_ang = base_ang;
 		dw->ang1 = angle1;
-		dw->dang = (angle2 - angle1) / MAX(1, sx2 - sx1);
+		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
 
 		dw->dist = dist;
 		dw->normal = normal;
@@ -1104,7 +1103,7 @@ public:
 
 		dw->spr_tx1 = tx1;
 
-		dw->ang1 = dw->dang = 0;
+		dw->ang1 = 0;
 
 		dw->iz1 = dw->mid_iz = iz;
 		dw->diz = 0;
@@ -1273,9 +1272,9 @@ public:
 
 		/* compute texture X coord */
 
-		float cur_ang = dw->ang1 - (XToAngle(x) - XToAngle(dw->sx1));
+		float cur_ang = dw->delta_ang - XToAngle(x);
 
-		int tx = int(dw->t_dist - tan(cur_ang - dw->normal) * dw->dist);
+		int tx = int(dw->t_dist - tan(cur_ang) * dw->dist);
 
 		tx = (dw->sd->x_offset + tx) & (tw - 1);
 
@@ -1556,8 +1555,6 @@ public:
 
 			if (P != S && (*(P-1))->cur_iz < dw->cur_iz + IZ_EPSILON)
 				changes = true;
-
-			dw->cur_ang = dw->ang1 + dw->dang * (x - dw->sx1);
 		}
 
 		// if there are changes, re-sort the active list...
