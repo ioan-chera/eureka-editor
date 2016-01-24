@@ -61,6 +61,7 @@ Editing
 -------
 
 +  automatically build nodes on save (only for that map)
+   (need to more tightly integrate a node builder into the code)
 
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
@@ -97,20 +98,11 @@ General
 
 ?  a toolbar
 
-?  shift-C to copy properties TO defaults
+-  a key to copy properties TO defaults (e.g. shift-C)
 
 -  conversion between Hexen <--> DOOM formats
 
 -  View/Place Camera command, cursor turns into +
-
--  SHIFT + move mouse = keep current highlight
-   (issue: SHIFT + mouse press could be bound to something different)
-   IDEA: a key to "hold" the current highlight  [yet another mode though]
-   
-   also useful if another modifier could disable all highlighting
-   (Hmmm : mainly useful to drag-select : have a binding/flag for it)
-
-?  check that current pwad has been externally modified
 
 +  Preferences window:
    +  add backup_max_files / backup_max_space
@@ -163,21 +155,16 @@ WISH: can import UDMF format maps
 
 -  PRINT key to make a screenshot of map or 3D view
 
--  ability to view (perhaps edit) a map header lump
+?  ability to view (perhaps edit) a map header lump
    (for FraggleScript etc...)
 
--  ability to create / view / edit / import arbitrary lumps
+?  ability to create / view / edit / import arbitrary lumps
    (e.g. MAPINFO, DECORATE, etc...)
 
 
 ?  a way to slow down fake mouse wheels?
 
 IDEA: for generalized lines, show more info in tooltip of desc
-
-IDEA: a dialog to specify directories to find wads.
-      Initially populate it with the currently hard-coded places
-      and $DOOMWADDIR and $DOOMWADPATH.  Perhaps add places where
-      the user opened a wad automatically (or ask?).
 
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
@@ -197,20 +184,18 @@ Documentation
    -  happens because we reload the map (because the current WAD file 
       has been replaced by a new one)
 
-+  add supported OSes -- e.g. Windows >= 2000
-
--  make a manpage for the debian package, list cmdline options
++  add supported OSes -- e.g. Windows >= XP
 
 -  document texture browser (RIGHT click etc)
 
-?  command line arguments page
+-  make a manpage for the debian package, list cmdline options
+
+-  command line arguments page
 
 
 
 Coding
 ------
-
--  have XXX_NotifyNewMap() functions
 
 -  replace usage(s) of fl_input
    [ currently just the 'JumpToObject' command ]
@@ -239,25 +224,15 @@ Editing
 
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
--  grid drawing too slow when small step and zoomed out
-   (since we render a huge number of dots)
-
-   --> create an in-memory image (e.g. 64x64) of the dotty grid 
-       and blast it repeatedly to the window
+?  grid drawing too slow when small step and zoomed out
 
 
 -  assume texture names beginning with '#' are special
    (The texture checker ignores them -- what else is needed ??)
 
-?  when highlighting a sector, draw the things in the same color as
-   the sector is highlighted, but not as bright.  Because many sector
-   functions will affect things too -- make it obvious to the user.
-
--  quantization function: prevent linedefs from overlapping / crossing
+?  quantization function: prevent linedefs from overlapping / crossing
 
 ?  Multi-select : if CTRL is pressed, don't clear selection after drag
-
--  exchange object numbers
 
 -  more port-specific line/thing flags
 
@@ -287,7 +262,7 @@ IDEA: for quantizing a group of objects, try about 9 delta
    - things
    - floors
    - ceilings
-   - sidedef uppers and lowers
+   - sidedef textures
 
 -  moving up/down with RMB should not disable gravity when change
    is small
@@ -317,9 +292,6 @@ IDEA: animation mode, render continuously and show any lighting
 Browser
 -------
 
--  "USED" category
-   [ cannot be a SORT method, nor a new check-button ]
-
 +  ability to shrink categories, i.e. say that for things the
    'b' (bonus) and 'k' categories should become a single one
 
@@ -340,13 +312,7 @@ Game / Port Definitions
 
 +  support Harmony
 
-?  support Chex Quest 1 and 2
-
 -  game-def setting: view_height
-
--  ability to "remove line 271" (etc)
-
--  a new category for BOOM's "property transfer" linetypes
 
 -  FreeDOOM : categorize all the new textures
 
@@ -404,6 +370,20 @@ NO:  an auto-save feature (e.g. save every N minutes unless no
      changes occurred in the last N minutes).
 
 NO:  no-pic mode for textures and flats
+
+NO:  exchange object numbers
+
+NO:  check that current pwad has been externally modified
+
+NO:  when highlighting a sector, draw the things in the same color
+     but diimer, to show sector operators will affect things too
+
+NO:  support Chex Quest 1 and 2
+
+NO:  ability to "remove line 271" (etc) in port definitions
+
+NO:  "USED" category for the browser
+
 
 
 ______________________________________________________________________
