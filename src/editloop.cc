@@ -1191,22 +1191,21 @@ void Editor_MousePress(keycode_t mod)
 		return;
 	}
 
-	Objid object;      // The object under the pointer
+	// find the object under the pointer
 
-	GetNearObject(object, edit.mode, edit.map_x, edit.map_y);
-
-	edit.clicked = object;
+	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box.
 
-	if (object.is_nil())
+	if (edit.clicked.is_nil())
 	{
 		Editor_SetAction(ACT_SELBOX);
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
 
-	// drawing mode is activated on RELEASE...
+	// Note: drawing mode is activated on RELEASE...
+	//       (as the user may be trying to drag the vertex
 }
 
 
@@ -1272,41 +1271,43 @@ void Editor_MouseRelease()
 		was_did_move = true;
 	}
 
-	if (click_obj.valid() && was_did_move)
+
+	// handle a clicked-on object
+	// e.g. select the object if unselected, and vice versa.
+
+	if (click_obj.valid())
 	{
-		Selection_Clear();
-	}
+		if (was_did_move)
+			Selection_Clear();
 
-	if (click_obj.is_nil())
-		return;
 
-	Objid object;      // object under the pointer
+		// check if mouse is pointing at some one
+		Objid near_obj;
 
-	GetNearObject(object, edit.mode, edit.map_x, edit.map_y);
+		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
 
-	/* select the object if unselected, and vice versa.
-	 */
-	if (object == click_obj)
-	{
-		Editor_ClearErrorMode();
-
-		RedrawMap();
-
-		bool was_empty = edit.Selected->empty();
-
-		// begin drawing mode (unless a modifier was pressed)
-		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty /* && !was_did_move */ &&
-			edit.button_mod == 0)
+		if (near_obj == click_obj)
 		{
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = object.num;
-			edit.Selected->set(object.num);
+			Editor_ClearErrorMode();
+
+			RedrawMap();
+
+			bool was_empty = edit.Selected->empty();
+
+			// begin drawing mode (unless a modifier was pressed)
+			if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
+				was_empty /* && !was_did_move */ &&
+				edit.button_mod == 0)
+			{
+				Editor_SetAction(ACT_DRAW_LINE);
+				edit.drawing_from = click_obj.num;
+				edit.Selected->set(click_obj.num);
+				return;
+			}
+
+			edit.Selected->toggle(click_obj.num);
 			return;
 		}
-
-		edit.Selected->toggle(object.num);
-		return;
 	}
 }
 
@@ -1400,7 +1401,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		return;
 	}
 
-	if (edit.action == ACT_DRAW_LINE && edit.button_down == 0)
+	if (edit.action == ACT_DRAW_LINE)
 	{
 		UpdateHighlight();
 		main_win->canvas->redraw();
