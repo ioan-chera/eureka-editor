@@ -52,7 +52,7 @@ int Vertex_FindExact(int x, int y)
 }
 
 
-// FIXME: InsertPolygonVertices
+// TODO: InsertPolygonVertices
 #if 0
 
 /*

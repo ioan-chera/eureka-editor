@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2012 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -145,7 +145,7 @@ int Grid_State_c::SnapY(int map_y) const
 }
 
 
-int Grid_State_c::QuantSnapX(int map_x, int furthest, int *dir) const
+int Grid_State_c::QuantSnapX(int map_x, bool want_furthest, int *dir) const
 {
 	if (OnGridX(map_x))
 	{
@@ -164,7 +164,7 @@ int Grid_State_c::QuantSnapX(int map_x, int furthest, int *dir) const
 			*dir = +1;
 	}
 
-	if (! furthest)
+	if (! want_furthest)
 		return new_x;
 
 	if (new_x < map_x)
@@ -173,10 +173,11 @@ int Grid_State_c::QuantSnapX(int map_x, int furthest, int *dir) const
 		return ForceSnapX(map_x - (step - 1));
 }
 
-int Grid_State_c::QuantSnapY(int map_y, int furthest, int *dir) const
+int Grid_State_c::QuantSnapY(int map_y, bool want_furthest, int *dir) const
 {
-	// FIXME
-	return QuantSnapX(map_y, furthest, dir);
+	// this is sufficient since the grid is always square
+
+	return QuantSnapX(map_y, want_furthest, dir);
 }
 
 

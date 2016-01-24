@@ -50,8 +50,6 @@ private:
 	Fl_Button *apply_but;
 	Fl_Button *replace_all_but;
 
-	// TODO : replace_number
-
 	// --- FILTER AREA ---
 
 	Fl_Toggle_Button *filter_toggle;

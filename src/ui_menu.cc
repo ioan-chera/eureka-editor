@@ -100,10 +100,12 @@ static void file_do_build_nodes(Fl_Widget *w, void * data)
 	CMD_BuildNodes();
 }
 
+#if 0
 static void file_do_test_map(Fl_Widget *w, void * data)
 {
 	CMD_TestMap();
 }
+#endif
 
 
 static void file_do_load_given(Fl_Widget *w, void *data)
@@ -509,9 +511,10 @@ static Fl_Menu_Item menu_items[] =
 		{ "Delete Map",   0,                FCAL file_do_delete },
 
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
-
-//TODO	{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+#if 0
+		{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
+#endif
 
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },

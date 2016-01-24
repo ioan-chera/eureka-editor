@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2012 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -72,9 +72,9 @@ public:
 	int ForceSnapX(int map_x) const;
 	int ForceSnapY(int map_y) const;
 
-	// quantization snap : FIXME
-	int QuantSnapX(int map_x, int furthest, int *dir = NULL) const;
-	int QuantSnapY(int map_y, int furthest, int *dir = NULL) const;
+	// quantization snap, can pick coordinate on other side
+	int QuantSnapX(int map_x, bool want_furthest, int *dir = NULL) const;
+	int QuantSnapY(int map_y, bool want_furthest, int *dir = NULL) const;
 
 	// check if the X/Y coordinate is on a grid point
 	bool OnGridX(int map_x) const;

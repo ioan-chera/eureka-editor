@@ -333,7 +333,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		if (sd < 0)
 			continue;
 
-		// !!! Note: sidedef itself is not deleted
+		// NOTE WELL: the actual sidedef is not deleted (it might be shared)
 
 		LD_RemoveSideDef(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
 	}

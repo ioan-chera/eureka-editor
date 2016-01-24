@@ -356,24 +356,6 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 }
 
 
-#if 0  // TEST CRUD
-int TestAdjoinerLineDef(int ld)
-{
-	side_on_a_line_t zz = soal_make(ld, SIDE_RIGHT);
-
-	if (soal_sd(zz) < 0)
-		return -1;
-
-	side_on_a_line_t result = DetermineAdjoiner(zz, 0, 0);
-
-	if (result >= 0)
-		return soal_ld(result);
-
-	return -1;
-}
-#endif
-
-
 static int GetTextureHeight(const char *name)
 {
 	if (name[0] == '-')
@@ -861,7 +843,7 @@ void LD_MergedSecondSideDef(int ld)
 
 	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
 
-	// FIXME: make this a global pseudo-constant
+	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
 
 	// determine textures for each side

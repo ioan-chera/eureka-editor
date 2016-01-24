@@ -73,6 +73,7 @@ UI_NodeDialog::UI_NodeDialog() :
 
 
 	Fl_Box * ptext = new Fl_Box(FL_NO_BOX, 10, h() - 80, 80, 20, "Progress:");
+	(void) ptext;
 
 
 	progress = new Fl_Progress(100, h() - 80, w() - 120, 20);

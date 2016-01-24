@@ -110,7 +110,10 @@ Img_c * W_GetSprite(int type)
 		{
 			LogPrintf("Sprite not found: '%s'\n", info->sprite);
 
-			// FUCK DOCUMENT SHIT
+			// for the MBF dog, create our own sprite for it, since
+			// it is defined in the Boom definition file and the
+			// missing sprite looks ugly in the thing browser.
+
 			if (y_stricmp(info->sprite, "DOGS") == 0)
 				result = CreateDogSprite();
 		}

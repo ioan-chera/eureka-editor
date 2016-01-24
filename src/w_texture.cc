@@ -171,6 +171,7 @@ DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 }
 
 
+#if 0
 static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 {
 	Img_c *img = new Img_c();
@@ -187,6 +188,7 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 
 	textures[t_str] = img;
 }
+#endif
 
 
 void W_LoadTextures()

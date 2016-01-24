@@ -192,12 +192,6 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	o_vanilla_dm->value(0);
 
-#if 0
-	o_easy  ->labelsize(12);  o_sp  ->labelsize(12);
-	o_medium->labelsize(12);  o_coop->labelsize(12);
-	o_hard  ->labelsize(12);  o_dm  ->labelsize(12);
-#endif
-
 	o_easy  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Easy));
 	o_medium->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Medium));
 	o_hard  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hard));
