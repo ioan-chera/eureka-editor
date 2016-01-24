@@ -981,6 +981,17 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 		{
 			o.clear();
 		}
+
+		// also require snap coordinate be not TOO FAR from the line
+		double len = L->CalcLength();
+
+		double along = AlongDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		double  perp =  PerpDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+
+		if (along < len * 0.1 || along > len * 0.9 || fabs(perp) > len * 0.2)
+		{
+			o.clear();
+		}
 	}
 }
 
