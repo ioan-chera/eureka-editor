@@ -72,8 +72,6 @@ Editing
 3D View
 -------
 
-+  fix warping of walls, out of sync with floors
-
 
 
 Browser
