@@ -3,10 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
--  scrolling via keyboard should update a SelBox, DrawLine (etc)
-   [ zooming too? ]
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
