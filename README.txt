@@ -1,5 +1,5 @@
 
-Eureka 1.10 README
+Eureka 1.11 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>

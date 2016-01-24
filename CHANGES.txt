@@ -1,6 +1,8 @@
 
-CHANGES Eureka 1.10
+CHANGES Eureka 1.11
 ===================
+
+(Changes since 1.07 version)
 
 
 Games and Ports:
@@ -29,6 +31,7 @@ Editing:
 -  inserting a vertex with SHIFT continues the drawing mode
 -  inserting a vertex with CTRL inhibits creation of sectors
 
+-  SHIFT + LMB in sectors mode always opens a selection box
 -  better merging of linedefs when dragging a vertex
 -  prevent overlapping lines when deleting 3rd vertex of a triangle
 
