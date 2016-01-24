@@ -248,7 +248,8 @@ void Selection_NotifyBegin()
 
 void Selection_NotifyInsert(obj_type_e type, int objnum)
 {
-	if (objnum <= edit.Selected->max_obj())
+	if (type == edit.Selected->what_type() &&
+		objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
