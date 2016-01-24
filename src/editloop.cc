@@ -1192,20 +1192,21 @@ void Editor_MousePress(keycode_t mod)
 	}
 
 	// find the object under the pointer
-
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box.
-
 	if (edit.clicked.is_nil())
 	{
+		if (edit.did_a_move)
+			Selection_Clear();
+
 		Editor_SetAction(ACT_SELBOX);
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
 
 	// Note: drawing mode is activated on RELEASE...
-	//       (as the user may be trying to drag the vertex
+	//       (as the user may be trying to drag the vertex)
 }
 
 
@@ -1408,24 +1409,12 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		return;
 	}
 
-	/* Moving the pointer with the left button pressed
-	   and a selection box exists : move the second
-	   corner of the selection box.
-	*/
 	if (edit.action == ACT_SELBOX)
 	{
-		if (edit.did_a_move)
-			Selection_Clear();
-
 		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
 		return;
 	}
 
-	/* Moving the pointer with the left button pressed
-	   but no selection box exists and [Ctrl] was not
-	   pressed when the button was pressed :
-	   drag the selection.
-	*/
 	if (edit.action == ACT_DRAG)
 	{
 		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
@@ -1435,9 +1424,9 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		return;
 	}
 
-	/*
-	   begin dragging?
-	 */
+	//
+	// begin dragging?
+	//
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
@@ -1469,9 +1458,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 			SYS_ASSERT(edit.drag_single_vertex >= 0);
 		}
 
-		// forget the highlight
-		edit.highlight.clear();
-		main_win->canvas->HighlightForget();
+		UpdateHighlight();
 		return;
 	}
 
