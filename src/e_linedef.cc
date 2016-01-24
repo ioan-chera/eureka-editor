@@ -631,19 +631,41 @@ void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
 //------------------------------------------------------------------------
 
 
-void FlipLineDef(int ld)
+static void FlipLine_verts(int ld)
 {
 	int old_start = LineDefs[ld]->start;
 	int old_end   = LineDefs[ld]->end;
 
 	BA_ChangeLD(ld, LineDef::F_START, old_end);
 	BA_ChangeLD(ld, LineDef::F_END, old_start);
+}
 
+
+static void FlipLine_sides(int ld)
+{
 	int old_right = LineDefs[ld]->right;
 	int old_left  = LineDefs[ld]->left;
 
 	BA_ChangeLD(ld, LineDef::F_RIGHT, old_left);
 	BA_ChangeLD(ld, LineDef::F_LEFT, old_right);
+}
+
+
+void FlipLineDef(int ld)
+{
+	FlipLine_verts(ld);
+	FlipLine_sides(ld);
+}
+
+
+void FlipLineDef_safe(int ld)
+{
+	// this avoids creating a linedef with only a left side (no right)
+
+	FlipLine_verts(ld);
+
+	if (! LineDefs[ld]->OneSided())
+		FlipLine_sides(ld);
 }
 
 
@@ -673,7 +695,23 @@ void LIN_Flip(void)
 
 	BA_Begin();
 
-	FlipLineDefGroup(list);
+	bool do_verts = Exec_HasFlag("/verts");
+	bool do_sides = Exec_HasFlag("/sides");
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		if (! do_verts && ! do_sides)
+		{
+			FlipLineDef_safe(*it);
+		}
+		else
+		{
+			if (do_verts) FlipLine_verts(*it);
+			if (do_sides) FlipLine_sides(*it);
+		}
+	}
 
 	BA_End();
 }

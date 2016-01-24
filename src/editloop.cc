@@ -1668,7 +1668,8 @@ static editor_command_t  command_table[] =
 	/* -------- linedef -------- */
 
 	{	"LIN_Flip",
-		&LIN_Flip
+		&LIN_Flip,
+		/* flags */ "/verts /sides"
 	},
 
 	{	"LIN_SplitHalf",

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -702,10 +702,6 @@ void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip)
 //
 // "sector" here really means a bunch of sidedefs that all face
 // inward to the current area under the mouse cursor.
-//
-// the 'new_sec' parameter is either a valid sector number (all the
-// sidedefs are changed to it), or it is the negated number of a
-// model sector and a new sector with the same properties is created.
 //
 void AssignSectorToSpace(int map_x, int map_y, int new_sec,
                          bool model_from_neighbor)
