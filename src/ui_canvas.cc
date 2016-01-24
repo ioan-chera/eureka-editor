@@ -1864,6 +1864,10 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
 				continue;
 
+			// treat lines without a right side as dead
+			if (E1->line->right < 0) continue;
+			if (E2->line->right < 0) continue;
+
 			int x1 = floor(E1->x);
 			int x2 = floor(E2->x);
 
