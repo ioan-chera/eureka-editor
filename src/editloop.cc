@@ -1206,8 +1206,15 @@ void Editor_MousePress(keycode_t mod)
 		return;
 	}
 
-	// find the object under the pointer
+	// find the object under the pointer.
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
+
+	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
+	// opening a selection box in places which are otherwise impossible.
+	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
+	{
+		edit.clicked.clear();
+	}
 
 	// clicking on an empty space starts a new selection box.
 	if (edit.clicked.is_nil())
