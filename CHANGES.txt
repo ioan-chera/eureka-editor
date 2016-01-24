@@ -2,60 +2,76 @@
 CHANGES Eureka 1.10
 ===================
 
+
+Games and Ports:
+
 +  Hexen support!
    (thanks to printz for doing some of the heavy lifting)
 
 +  Boom generalized lines and sectors
 
-+  rendering of sector flats/lighting in the 2D window
-
-+  an easier vertex "drawing mode" using the LMB
-
 +  treat Freedoom Phase 1 and Phase 2 as separate games
 
 +  added Eternity port definition, thanks to printz
 
+-  Heretic: categorized the textures and flats
+-  changed default port from Boom --> Vanilla
 
-/  when adding lines, automatically split crossed lines
 
-/  new "Last Selection" command, undo an accidentally clearing
+Editing:
 
-/  sector panel: buttons for quickly setting the headroom
++  rendering of sector flats/lighting in the 2D window
 
-/  status bar lets you see full message via a tooltip
++  easier vertex "drawing mode" using the LMB
 
-/  much less chance to accidentally drag an object
++  when adding lines, automatically split crossed lines
 
--  auto-splitting when inserting new linedefs
 -  inserting a vertex with SHIFT continues the drawing mode
 -  inserting a vertex with CTRL inhibits creation of sectors
+
+-  better merging of linedefs when dragging a vertex
+-  prevent overlapping lines when deleting 3rd vertex of a triangle
+
+-  much less chance to accidentally drag an object
 -  when a line splits a sector, use a consistent orientation
+-  allow loading a map with no vertices, no linedefs (etc)
 
-/  better merging of linedefs when dragging a vertex
 
-/  prevent overlapping lines when deleting 3rd vertex of a triangle
+UI:
 
-/  Heretic: categorized the textures and flats
++  fixed texture warping in 3D preview
 
+-  sector panel: buttons for quickly setting the headroom
 -  right-click on a sidedef or sector texture sets it to default
+-  various layout tweaks to the editing panels
+
 -  added "Recent Textures" command (etc) to Browser menu
 -  fixed RECENT category to show most recent items at the top
+-  status bar lets you see full message via a tooltip
 
--  allow loading a map with no vertices, no linedefs (etc)
--  various layout tweaks to the editing panels
--  changed default port from Boom --> Vanilla
+
+Commands:
+
+-  new "Last Selection" command, undo an accidental clearing
+-  added /reverse flag for CopyProperties command
+-  extended LIN_Flip command, avoid making lines with no right side
+
+
+Map checking:
+
+-  find "dangling" vertices
+-  detect the Medusa Effect on 2S lines
+-  detect transparent tex on solid walls
+
+-  find manual doors on 1S lines
+-  don't consider teleport things to be stuck in monsters
+-  ability to SHOW unused vertices
+
+
+Miscellaneous:
 
 -  improved eureka.desktop file, courtesy Fabian Greffrath
 -  have a fallback sprite for the MBF dog thing (id 888)
+-  replaced "Aspect ratio" with "Pixel aspect ratio" in prefs
 -  use absolute paths for resource filenames in __EUREKA lump
-
--  added /reverse flag for CopyProperties command
--  replaced "Aspect ratio" pref with "Pixel aspect ratio"
-
--  map checks: find "dangling" vertices
--  map checks: detect the Medusa Effect on 2S lines
--  map checks: detect transparent tex on solid walls
--  map checks: find manual doors on 1S lines
--  map checks: don't consider teleport dests as "stuck" in monsters
--  map checks: ability to SHOW unused vertices
 
