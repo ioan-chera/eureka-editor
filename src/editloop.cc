@@ -1265,6 +1265,11 @@ void Editor_MouseRelease()
 	}
 
 
+	// nothing needed while in drawing mode
+	if (edit.action == ACT_DRAW_LINE)
+		return;
+
+
 	// optional multi-select : require a certain modifier key
 	if (multi_select_modifier &&
 		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
@@ -1278,37 +1283,35 @@ void Editor_MouseRelease()
 
 	if (click_obj.valid())
 	{
+		bool was_empty = edit.Selected->empty();
+
 		if (was_did_move)
 			Selection_Clear();
 
-
-		// check if mouse is pointing at some one
+		// check if pointing at the same object as before
 		Objid near_obj;
 
 		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
 
-		if (near_obj == click_obj)
+		if (near_obj != click_obj)
+			return;
+
+		// begin drawing mode (unless a modifier was pressed)
+		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
+			was_empty /* && !was_did_move */ &&
+			edit.button_mod == 0)
 		{
-			Editor_ClearErrorMode();
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = click_obj.num;
+			edit.Selected->set(click_obj.num);
 
 			RedrawMap();
-
-			bool was_empty = edit.Selected->empty();
-
-			// begin drawing mode (unless a modifier was pressed)
-			if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-				was_empty /* && !was_did_move */ &&
-				edit.button_mod == 0)
-			{
-				Editor_SetAction(ACT_DRAW_LINE);
-				edit.drawing_from = click_obj.num;
-				edit.Selected->set(click_obj.num);
-				return;
-			}
-
-			edit.Selected->toggle(click_obj.num);
 			return;
 		}
+
+		edit.Selected->toggle(click_obj.num);
+		RedrawMap();
+		return;
 	}
 }
 
