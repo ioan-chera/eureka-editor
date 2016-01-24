@@ -573,12 +573,10 @@ fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 }
 
 
-void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
+void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 {
-	// Note: force_select ensures a *new* vertex will be selected
-	// (has no effect for an existing vertex).
-
-	int reselect = true;
+	bool do_continue = true;
+	bool allow_drag  = false;
 
 	int from_vert = -1;
 	int   to_vert = -1;
@@ -693,14 +691,16 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 			return;
 		}
 
-		if (!force_select && VertexHowManyLineDefs(to_vert) > 0)
-			reselect = false;
+		if (!force_continue && VertexHowManyLineDefs(to_vert) > 0)
+			do_continue = false;
 
 		BA_Begin();
 
 		Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
 
 		BA_End();
+
+		allow_drag = false;
 	}
 	else
 	{
@@ -744,31 +744,30 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 
 			SplitLineDefAtVertex(split_ld, to_vert);
 
-			if (!force_select && from_vert >= 0)
-				reselect = false;
+			if (!force_continue && from_vert >= 0)
+				do_continue = false;
 
 			// allow this vertex to be dragged
-			// FIXME : ALWAYS ???
-			edit.clicked = Objid(OBJ_VERTICES, to_vert);
+			allow_drag = true;
 		}
 
 		// add a new linedef?
 		if (from_vert >= 0)
 		{
 			Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
+
+			// TODO set allow_drag if autosplit created a vertex
 		}
 
 		BA_End();
 	}
 
 
-	if (! easier_drawing_mode)
-		Selection_Clear();
-
+	Selection_Clear();
 	Editor_ClearAction();
 
-	// select new vertex / continue drawing
-	if (reselect)
+	// continue drawing / select new vertex
+	if (do_continue)
 	{
 		edit.Selected->set(to_vert);
 
@@ -777,6 +776,14 @@ void Insert_Vertex(bool force_select, bool no_fill, bool is_button)
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = to_vert;
 		}
+	}
+
+	if (allow_drag)
+	{
+		edit.clicked = Objid(OBJ_VERTICES, to_vert);
+
+		// prevent the mouse release code from entering drawing mode again
+		edit.Selected->set(to_vert);
 	}
 
 	RedrawMap();
@@ -868,7 +875,7 @@ static void Insert_Sector(bool force_new)
 void CMD_Insert(void)
 {
 	bool force_new;
-	bool force_select;
+	bool force_cont;
 	bool no_fill;
 
 	switch (edit.mode)
@@ -878,9 +885,9 @@ void CMD_Insert(void)
 			break;
 
 		case OBJ_VERTICES:
-			force_select = Exec_HasFlag("/select");
-			no_fill      = Exec_HasFlag("/nofill");
-			Insert_Vertex(force_select, no_fill);
+			force_cont = Exec_HasFlag("/continue");
+			no_fill    = Exec_HasFlag("/nofill");
+			Insert_Vertex(force_cont, no_fill);
 			break;
 
 		case OBJ_SECTORS:

@@ -1180,14 +1180,14 @@ void Editor_MousePress(keycode_t mod)
 	if (edit.action == ACT_DRAW_LINE ||
 		(easier_drawing_mode && edit.split_line.valid()))
 	{
-		bool force_select = (mod == MOD_SHIFT);
-		bool no_fill      = (mod == MOD_COMMAND);
+		bool force_cont = (mod == MOD_SHIFT);
+		bool no_fill    = (mod == MOD_COMMAND);
 
 		// prevent adding a linedef when not in drawing mode
 		if (edit.action != ACT_DRAW_LINE)
 			Selection_Clear();
 
-		Insert_Vertex(force_select, no_fill, true /* is_button */);
+		Insert_Vertex(force_cont, no_fill, true /* is_button */);
 		return;
 	}
 
@@ -1291,20 +1291,20 @@ void Editor_MouseRelease()
 
 		RedrawMap();
 
+		bool was_empty = edit.Selected->empty();
+
 		// begin drawing mode (unless a modifier was pressed)
 		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			/* was_empty && */
-			!was_did_move && edit.button_mod == 0)
+			was_empty /* && !was_did_move */ &&
+			edit.button_mod == 0)
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = object.num;
+			edit.Selected->set(object.num);
 			return;
 		}
 
-		bool was_empty = edit.Selected->empty();
-
 		edit.Selected->toggle(object.num);
-
 		return;
 	}
 }
@@ -1601,7 +1601,7 @@ static editor_command_t  command_table[] =
 
 	{	"Insert",
 		&CMD_Insert,
-		/* flags */ "/new /select /nofill"
+		/* flags */ "/new /continue /nofill"
 	},
 
 	{	"Delete",
