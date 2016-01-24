@@ -1220,7 +1220,8 @@ void Editor_MouseRelease()
 	bool was_did_move = edit.did_a_move;
 	edit.did_a_move = false;
 
-	/* Releasing the button while dragging : drop the selection. */
+	// releasing the button while dragging : drop the selection.
+
 	if (edit.action == ACT_DRAG)
 	{
 		Editor_ClearAction();
@@ -1241,21 +1242,9 @@ void Editor_MouseRelease()
 		return;
 	}
 
-	// optional multi-select : require a certain modifier key
-	if (multi_select_modifier &&
-		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
-	{
-		was_did_move = true;
-	}
+	// releasing the button while there was a selection box
+	// causes all the objects within the box to be selected.
 
-	if (click_obj.valid() && was_did_move)
-	{
-		Selection_Clear();
-	}
-
-	/* Releasing the button while there was a selection box
-	   causes all the objects within the box to be selected.
-	 */
 	if (edit.action == ACT_SELBOX)
 	{
 		Editor_ClearAction();
@@ -1275,6 +1264,18 @@ void Editor_MouseRelease()
 		return;
 	}
 
+
+	// optional multi-select : require a certain modifier key
+	if (multi_select_modifier &&
+		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
+	{
+		was_did_move = true;
+	}
+
+	if (click_obj.valid() && was_did_move)
+	{
+		Selection_Clear();
+	}
 
 	if (click_obj.is_nil())
 		return;
