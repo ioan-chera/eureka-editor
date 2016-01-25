@@ -469,6 +469,11 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 //  HELP MENU
 //------------------------------------------------------------------------
 
+void help_do_online_docs(Fl_Widget *w, void * data)
+{
+	fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+}
+
 void help_do_about(Fl_Widget *w, void * data)
 {
 	DLG_AboutText();
@@ -484,7 +489,7 @@ void help_do_about(Fl_Widget *w, void * data)
 #undef FCAL
 #define FCAL  (Fl_Callback *)
 
-static Fl_Menu_Item menu_items[] = 
+static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
@@ -593,7 +598,7 @@ static Fl_Menu_Item menu_items[] =
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
-	
+
 		{ "&Things",       0, FCAL browser_do_things },
 		{ "Te&xtures",     0, FCAL browser_do_textures },
 		{ "&Flats",        0, FCAL browser_do_flats },
@@ -635,6 +640,10 @@ static Fl_Menu_Item menu_items[] =
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
+		{ "&Online Docs...",    0,  FCAL help_do_online_docs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&About Eureka...",   0,  FCAL help_do_about },
 		{ 0 },
 
