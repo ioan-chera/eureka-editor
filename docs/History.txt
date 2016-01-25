@@ -27,83 +27,83 @@ repository (still on SourceForge though).
 ====================================================
 
 ------------------------------------------------------------------------
-fa4b5a27193e | Andrew Apted | Sun Jan 24 22:31:59 2016 +1100
+fa4b5a27193e | Andrew Apted | 2016-01-24 22:31:59 +1100
 
 README and CHANGELOG : small update.
 
 ------------------------------------------------------------------------
-283db5159c29 | Andrew Apted | Sun Jan 24 22:29:09 2016 +1100
+283db5159c29 | Andrew Apted | 2016-01-24 22:29:09 +1100
 
 TODO : went through and re-evaluated most items, moved several to the
 "NOT-TO-DO" section.
 
 ------------------------------------------------------------------------
-bb89fd036ef2 | Andrew Apted | Sun Jan 24 22:13:26 2016 +1100
+bb89fd036ef2 | Andrew Apted | 2016-01-24 22:13:26 +1100
 
 Editing : SHIFT + LMB in sector/linedef mode forces the opening of a
 selection box -- handy for places were it is otherwise impossible.
 
 ------------------------------------------------------------------------
-6f1fb5073c59 | Andrew Apted | Sun Jan 24 21:44:31 2016 +1100
+6f1fb5073c59 | Andrew Apted | 2016-01-24 21:44:31 +1100
 
 Code tidying, miscellaneous stuff here and there.
 
 ------------------------------------------------------------------------
-2ef2708b2f39 | Andrew Apted | Sun Jan 24 21:43:46 2016 +1100
+2ef2708b2f39 | Andrew Apted | 2016-01-24 21:43:46 +1100
 
 Browser : removed CycleCategory method from generalized line editor.
 
 ------------------------------------------------------------------------
-23fc3cf6eb24 | Andrew Apted | Sun Jan 24 21:39:57 2016 +1100
+23fc3cf6eb24 | Andrew Apted | 2016-01-24 21:39:57 +1100
 
 Code tidying : removed the unused exchange_object_numbers() which is
 legacy code that would require major surgery to get working again but
 has very little utility.
 
 ------------------------------------------------------------------------
-df4b2b95b474 | Andrew Apted | Sun Jan 24 21:30:34 2016 +1100
+df4b2b95b474 | Andrew Apted | 2016-01-24 21:30:34 +1100
 
 Code tidying : removed some unused code in e_sector.cc
 
 ------------------------------------------------------------------------
-e6214230a578 | Andrew Apted | Sun Jan 24 21:03:17 2016 +1100
+e6214230a578 | Andrew Apted | 2016-01-24 21:03:17 +1100
 
 Version bumped,
 
 ------------------------------------------------------------------------
-bafc1cc78a17 | Andrew Apted | Sun Jan 24 20:59:15 2016 +1100
+bafc1cc78a17 | Andrew Apted | 2016-01-24 20:59:15 +1100
 
 CHANGELOG : re-organized into sections like "Editing" etc.
 
 ------------------------------------------------------------------------
-595b8a63f540 | Andrew Apted | Sun Jan 24 20:41:24 2016 +1100
+595b8a63f540 | Andrew Apted | 2016-01-24 20:41:24 +1100
 
 3D Preview : small optimisation of the texture-warp fix.
 
 ------------------------------------------------------------------------
-e45cf71fb832 | Andrew Apted | Sun Jan 24 19:38:31 2016 +1100
+e45cf71fb832 | Andrew Apted | 2016-01-24 19:38:31 +1100
 
 3D Preview : fixed the texture warping issue, caused by interpolating the
 angles across the wall (not the correct method).
 
 ------------------------------------------------------------------------
-917fd68cb3a4 | Andrew Apted | Sun Jan 24 18:15:06 2016 +1100
+917fd68cb3a4 | Andrew Apted | 2016-01-24 18:15:06 +1100
 
 TODO updated.
 
 ------------------------------------------------------------------------
-48bc72ceb2e1 | Andrew Apted | Sun Jan 24 18:12:41 2016 +1100
+48bc72ceb2e1 | Andrew Apted | 2016-01-24 18:12:41 +1100
 
 When scrolling via keyboard, ensure certain actions (esp. drawing mode)
 get updated properly.
 
 ------------------------------------------------------------------------
-502373e63c25 | Andrew Apted | Sun Jan 24 17:37:43 2016 +1100
+502373e63c25 | Andrew Apted | 2016-01-24 17:37:43 +1100
 
 TODO update.
 
 ------------------------------------------------------------------------
-eb171c92d11c | Andrew Apted | Sun Jan 24 16:28:10 2016 +1100
+eb171c92d11c | Andrew Apted | 2016-01-24 16:28:10 +1100
 
 LIN_Flip :
 1. default behavior on 1S lines is to NOT makes lines without a right side
@@ -111,132 +111,132 @@ LIN_Flip :
 3. support /sides flag which only swaps the sidedefs
 
 ------------------------------------------------------------------------
-be11e914ff48 | Andrew Apted | Sun Jan 24 16:27:29 2016 +1100
+be11e914ff48 | Andrew Apted | 2016-01-24 16:27:29 +1100
 
 Fixed bug saving the key bindings (file handle was not closed).
 
 ------------------------------------------------------------------------
-d9344de9a581 | Andrew Apted | Sun Jan 24 16:22:08 2016 +1100
+d9344de9a581 | Andrew Apted | 2016-01-24 16:22:08 +1100
 
 Canvas sector rendering : treat lines missing a right side as broken
 (i.e. do not create spans even when the left side is valid).
 
 ------------------------------------------------------------------------
-4c62d990849a | Andrew Apted | Sun Jan 24 15:44:18 2016 +1100
+4c62d990849a | Andrew Apted | 2016-01-24 15:44:18 +1100
 
 Improved split-line detection when grid snapping -- prevent the split
 point from being far away from the line.
 
 ------------------------------------------------------------------------
-a46432dcaa8b | Andrew Apted | Sun Jan 24 14:58:32 2016 +1100
+a46432dcaa8b | Andrew Apted | 2016-01-24 14:58:32 +1100
 
 Drawing mode : added special case for splitting a line via mouse button
 (and not in drawing mode) to allow the new vertex to be dragged.
 [ this was not possible in the normal Insert_Vertex code-path ]
 
 ------------------------------------------------------------------------
-d8715a09ddfc | Andrew Apted | Sun Jan 24 13:54:13 2016 +1100
+d8715a09ddfc | Andrew Apted | 2016-01-24 13:54:13 +1100
 
 code : futher tidying in Editor_MouseRelease().
 
 ------------------------------------------------------------------------
-12134d210757 | Andrew Apted | Sun Jan 24 13:53:07 2016 +1100
+12134d210757 | Andrew Apted | 2016-01-24 13:53:07 +1100
 
 Implemented "!=" operator for the Objid class.
 
 ------------------------------------------------------------------------
-ecde28798c7f | Andrew Apted | Sun Jan 24 13:44:03 2016 +1100
+ecde28798c7f | Andrew Apted | 2016-01-24 13:44:03 +1100
 
 code : various tidying in Editor_MouseMotion().
 
 ------------------------------------------------------------------------
-ff44e9660b02 | Andrew Apted | Sun Jan 24 13:35:09 2016 +1100
+ff44e9660b02 | Andrew Apted | 2016-01-24 13:35:09 +1100
 
 code : some refactoring in Editor_MouseRelease().
 
 ------------------------------------------------------------------------
-97b340a84f1d | Andrew Apted | Sun Jan 24 13:23:16 2016 +1100
+97b340a84f1d | Andrew Apted | 2016-01-24 13:23:16 +1100
 
 minor code rejig in Editor_MouseRelease().
 
 ------------------------------------------------------------------------
-6b6d6101db2e | Andrew Apted | Sun Jan 24 13:09:53 2016 +1100
+6b6d6101db2e | Andrew Apted | 2016-01-24 13:09:53 +1100
 
 Drawing mode : worked on fixing drawing mode erroneously beginning again
 after closing a sector via splitting a line.  Still not correct, ugh...
 
 ------------------------------------------------------------------------
-7a7e8cefea7f | Andrew Apted | Sun Jan 24 11:39:08 2016 +1100
+7a7e8cefea7f | Andrew Apted | 2016-01-24 11:39:08 +1100
 
 Fixed Selection_NotifyInsert() to not clear a vertex selection when a
 new linedef or sector is created.
 
 ------------------------------------------------------------------------
-0340593de210 | Andrew Apted | Sat Jan 23 23:25:47 2016 +1100
+0340593de210 | Andrew Apted | 2016-01-23 23:25:47 +1100
 
 Added workaround in Editor_RawButton() for FLTK not sending us a button
 release event after another mouse button was released (i.e. when two
 buttons were being held down simultaneously).
 
 ------------------------------------------------------------------------
-a106d2019868 | Andrew Apted | Sat Jan 23 22:57:04 2016 +1100
+a106d2019868 | Andrew Apted | 2016-01-23 22:57:04 +1100
 
 fix for previous commit: do not check for FL_DRAG event when calling
 Editor_MouseMotion, since it won't be set after scrolling via RMB.
 
 ------------------------------------------------------------------------
-701606bbb8f1 | Andrew Apted | Sat Jan 23 22:49:07 2016 +1100
+701606bbb8f1 | Andrew Apted | 2016-01-23 22:49:07 +1100
 
 Changed the way map scrolling via RMB is done, no longer an action state
 (ACT_XXX value) because that prevents scrolling and line drawing being
 used together [ a scroll would disable the current line ].
 
 ------------------------------------------------------------------------
-d1b3b2a4744e | Andrew Apted | Sat Jan 23 21:12:37 2016 +1100
+d1b3b2a4744e | Andrew Apted | 2016-01-23 21:12:37 +1100
 
 For dangling vertex fixer, when merging two vertices make the final
 vertex selected (and nothing else).
 
 ------------------------------------------------------------------------
-025c5161c1f1 | Andrew Apted | Sat Jan 23 21:01:05 2016 +1100
+025c5161c1f1 | Andrew Apted | 2016-01-23 21:01:05 +1100
 
 Fixed the logic for fixing a dangling vertex.
 
 ------------------------------------------------------------------------
-9ad68d2fb07e | Andrew Apted | Sat Jan 23 20:29:42 2016 +1100
+9ad68d2fb07e | Andrew Apted | 2016-01-23 20:29:42 +1100
 
 Insert_Vertex : added back the check preventing the creation of a zero
 length linedef -- it displays a "Bug detected" message as I am quite
 sure that it should never happen.
 
 ------------------------------------------------------------------------
-f2015147a513 | Andrew Apted | Sat Jan 23 20:08:29 2016 +1100
+f2015147a513 | Andrew Apted | 2016-01-23 20:08:29 +1100
 
 Insert_Vertex : fixed a few cases involving a split-line.
 
 ------------------------------------------------------------------------
-d96639336041 | Andrew Apted | Fri Jan 22 22:49:25 2016 +1100
+d96639336041 | Andrew Apted | 2016-01-22 22:49:25 +1100
 
 CHANGELOG and TODO update.
 
 ------------------------------------------------------------------------
-770427e0583e | Andrew Apted | Fri Jan 22 22:48:04 2016 +1100
+770427e0583e | Andrew Apted | 2016-01-22 22:48:04 +1100
 
 Insert_Vertex : bit more work, e.g. split-line handling.
 
 ------------------------------------------------------------------------
-0d24939ea117 | Andrew Apted | Fri Jan 22 22:37:25 2016 +1100
+0d24939ea117 | Andrew Apted | 2016-01-22 22:37:25 +1100
 
 Insert_Vertex : tidied up the highlight handling code.
 
 ------------------------------------------------------------------------
-ef8079ded2eb | Andrew Apted | Fri Jan 22 22:27:57 2016 +1100
+ef8079ded2eb | Andrew Apted | 2016-01-22 22:27:57 +1100
 
 Began some major surgery to Insert_Vertex() to better manage all the
 possible cases (e.g. easier_drawing_mode either ON or OFF).
 
 ------------------------------------------------------------------------
-cb1ada9985dc | Andrew Apted | Fri Jan 22 19:40:09 2016 +1100
+cb1ada9985dc | Andrew Apted | 2016-01-22 19:40:09 +1100
 
 Drawing mode : when drawing a line AND grid snapping, allow the highlight
 and split-line to move onto the snapped position (when they would otherwise
@@ -246,52 +246,52 @@ This prevents creating a vertex which inadvertently sits on top of another
 vertex or sits on a line (due to the coordinate being snapped).
 
 ------------------------------------------------------------------------
-9b45589532ba | Andrew Apted | Fri Jan 22 19:38:38 2016 +1100
+9b45589532ba | Andrew Apted | 2016-01-22 19:38:38 +1100
 
 Canvas : draw the split-line orange ball larger when zoomed in (closer
 to the size of the vertices).
 
 ------------------------------------------------------------------------
-94e30ea2dfe2 | Andrew Apted | Fri Jan 22 19:10:19 2016 +1100
+94e30ea2dfe2 | Andrew Apted | 2016-01-22 19:10:19 +1100
 
 Code : merely moved some code around in editloop.cc
 
 ------------------------------------------------------------------------
-6309684a23b5 | Andrew Apted | Fri Jan 22 19:07:15 2016 +1100
+6309684a23b5 | Andrew Apted | 2016-01-22 19:07:15 +1100
 
 Code : renamed GetCurobject --> GetNearObject, removed unused "snap" param.
 
 ------------------------------------------------------------------------
-7effd83d2359 | Andrew Apted | Fri Jan 22 18:24:08 2016 +1100
+7effd83d2359 | Andrew Apted | 2016-01-22 18:24:08 +1100
 
 Added config file variable "minimum_drag_pixels".
 
 ------------------------------------------------------------------------
-1e410deea699 | Andrew Apted | Fri Jan 22 18:12:57 2016 +1100
+1e410deea699 | Andrew Apted | 2016-01-22 18:12:57 +1100
 
 Improved dragging: only begin dragging if cursor has moved a minimum # of
 pixels away from the click point.  This prevents the problem where you
 only wanted to select a vertex, but instead you "dragged" it.
 
 ------------------------------------------------------------------------
-0cab70de706f | Andrew Apted | Fri Jan 22 16:43:16 2016 +1100
+0cab70de706f | Andrew Apted | 2016-01-22 16:43:16 +1100
 
 Drawing mode : allow a vertex created by spliting a line to be dragged.
 
 ------------------------------------------------------------------------
-7fd666632eb1 | Andrew Apted | Fri Jan 22 15:14:42 2016 +1100
+7fd666632eb1 | Andrew Apted | 2016-01-22 15:14:42 +1100
 
 When merging vertices, simply keep the coordinates of the first vertex
 (the one not delete).  The previous way of computing the middle coord
 was not working well with grid-snapped vertices.
 
 ------------------------------------------------------------------------
-51c91df163bc | Andrew Apted | Fri Jan 22 13:57:51 2016 +1100
+51c91df163bc | Andrew Apted | 2016-01-22 13:57:51 +1100
 
 More work on dangling vert fixer, but the logic is still not right...
 
 ------------------------------------------------------------------------
-0f2b97fef84a | Andrew Apted | Fri Jan 22 13:39:43 2016 +1100
+0f2b97fef84a | Andrew Apted | 2016-01-22 13:39:43 +1100
 
 Implemented code to try to fix a dangling vertex -- if it sits on another
 vertex, merge into that one, or if it sits on a line then split the line
@@ -300,181 +300,181 @@ with it.
 Also when using CMD_Insert on a vertex, try to fix it if dangling.
 
 ------------------------------------------------------------------------
-e017b4dc494e | Andrew Apted | Fri Jan 22 12:49:27 2016 +1100
+e017b4dc494e | Andrew Apted | 2016-01-22 12:49:27 +1100
 
 Code tidying : removed unused/obsolete DrawSnapMarker() method.
 
 ------------------------------------------------------------------------
-fc5e6a76bf2a | Andrew Apted | Fri Jan 22 11:49:32 2016 +1100
+fc5e6a76bf2a | Andrew Apted | 2016-01-22 11:49:32 +1100
 
 Checks : fixed sector checker for Boom generalized types.
 
 ------------------------------------------------------------------------
-f7eadbbeda47 | Andrew Apted | Fri Jan 22 11:42:47 2016 +1100
+f7eadbbeda47 | Andrew Apted | 2016-01-22 11:42:47 +1100
 
 Added preference setting to disable the "easier line drawing" mode.
 
 ------------------------------------------------------------------------
-ae42eb238506 | Andrew Apted | Fri Jan 22 10:54:51 2016 +1100
+ae42eb238506 | Andrew Apted | 2016-01-22 10:54:51 +1100
 
 Generalized browser : changing fields will now update the line's type value.
 
 This commit marks the completion of BOOM generalized type support :)
 
 ------------------------------------------------------------------------
-768bea808584 | Andrew Apted | Fri Jan 22 10:41:04 2016 +1100
+768bea808584 | Andrew Apted | 2016-01-22 10:41:04 +1100
 
 Generalized browser : allow "NONE" category to clear the line's type.
 
 ------------------------------------------------------------------------
-cb81af656fcf | Andrew Apted | Fri Jan 22 10:40:07 2016 +1100
+cb81af656fcf | Andrew Apted | 2016-01-22 10:40:07 +1100
 
 LineDef panel : change "Choose" button to "Edit" for generalized types.
 
 ------------------------------------------------------------------------
-2b58a571e419 | Andrew Apted | Fri Jan 22 10:26:12 2016 +1100
+2b58a571e419 | Andrew Apted | 2016-01-22 10:26:12 +1100
 
 Checks : fixed unknown line-type checker to accept Boom generalized types
 when the current port is boom-compatible.
 
 ------------------------------------------------------------------------
-c17e1a147d37 | Andrew Apted | Wed Jan 20 22:05:13 2016 +1100
+c17e1a147d37 | Andrew Apted | 2016-01-20 22:05:13 +1100
 
 CHANGELOG and TODO updated.
 
 ------------------------------------------------------------------------
-8e8f1884ba13 | Andrew Apted | Wed Jan 20 21:51:20 2016 +1100
+8e8f1884ba13 | Andrew Apted | 2016-01-20 21:51:20 +1100
 
 Drawing mode : prevent LMB from adding linedefs when not in drawing mode
 (this was happening when splitting a linedef with LMB and another vertex
 was selected).
 
 ------------------------------------------------------------------------
-16edc3c8a418 | Andrew Apted | Wed Jan 20 19:12:06 2016 +1100
+16edc3c8a418 | Andrew Apted | 2016-01-20 19:12:06 +1100
 
 CMD_LastSelection : tweak invalidation logic.
 
 ------------------------------------------------------------------------
-5518ba839444 | Andrew Apted | Wed Jan 20 18:45:10 2016 +1100
+5518ba839444 | Andrew Apted | 2016-01-20 18:45:10 +1100
 
 TODO update.
 
 ------------------------------------------------------------------------
-2f83b1983fb5 | Andrew Apted | Wed Jan 20 18:43:52 2016 +1100
+2f83b1983fb5 | Andrew Apted | 2016-01-20 18:43:52 +1100
 
 Checks / vertex : added new test for "dangling" vertices (one which are
 only connected to a single line).
 
 ------------------------------------------------------------------------
-a38e3a4a24ba | Andrew Apted | Wed Jan 20 17:18:04 2016 +1100
+a38e3a4a24ba | Andrew Apted | 2016-01-20 17:18:04 +1100
 
 .gitignore : added "_work" and various MacOS-X crud.
 
 ------------------------------------------------------------------------
-8da24b1c39ad | Andrew Apted | Wed Jan 20 17:09:22 2016 +1100
+8da24b1c39ad | Andrew Apted | 2016-01-20 17:09:22 +1100
 
 Browser : fixed recent bug causing the browser to jump to top of list
 when clicking on an entry (such as a texture).
 
 ------------------------------------------------------------------------
-ac2bc6f8bbf6 | Andrew Apted | Wed Jan 20 16:45:18 2016 +1100
+ac2bc6f8bbf6 | Andrew Apted | 2016-01-20 16:45:18 +1100
 
 Code tidying : removed obsolete GetMaxObjectNum() function.
 
 ------------------------------------------------------------------------
-ca58ba967f23 | Andrew Apted | Wed Jan 20 16:43:35 2016 +1100
+ca58ba967f23 | Andrew Apted | 2016-01-20 16:43:35 +1100
 
 CMD_LastSelection : validate the new selection (i.e. don't crash if there
 turns out to be a bug in the normal invalidation logic).
 
 ------------------------------------------------------------------------
-cc93a8f9c43a | Andrew Apted | Wed Jan 20 16:27:27 2016 +1100
+cc93a8f9c43a | Andrew Apted | 2016-01-20 16:27:27 +1100
 
 A few fixes for "LastSelection" command, which involved changing the
 "mode" parameter of the NewEditMode() methods from char --> obj_type_e
 (which is much more sensible).
 
 ------------------------------------------------------------------------
-cc9db892869d | Andrew Apted | Wed Jan 20 15:59:11 2016 +1100
+cc9db892869d | Andrew Apted | 2016-01-20 15:59:11 +1100
 
 CMD_LastSelection : properly invalidate the last selection if an editing
 operation inserts or deletes objects in its range.
 
 ------------------------------------------------------------------------
-d8a8633063ca | Andrew Apted | Wed Jan 20 15:51:35 2016 +1100
+d8a8633063ca | Andrew Apted | 22016-01-20 15:51:35 +1100
 
 Info bar : give the status widget a tooltip with the same message, for
 cases when the message is too long to fit on-screen.
 
 ------------------------------------------------------------------------
-37fd31d0f80b | Andrew Apted | Wed Jan 20 15:41:30 2016 +1100
+37fd31d0f80b | Andrew Apted | 2016-01-20 15:41:30 +1100
 
 CMD_LastSelection : change editor mode if different than the last
 selection (and zoom into the selection, which helps make the mode
 change more obvious).
 
 ------------------------------------------------------------------------
-55c50ce52c87 | Andrew Apted | Wed Jan 20 15:34:43 2016 +1100
+55c50ce52c87 | Andrew Apted | 2016-01-20 15:34:43 +1100
 
 CMD_LastSelection : got the basic functionality working.
 
 ------------------------------------------------------------------------
-f9f4f2cda77e | Andrew Apted | Wed Jan 20 15:06:45 2016 +1100
+f9f4f2cda77e | Andrew Apted | 2016-01-20 15:06:45 +1100
 
 Drawing mode : fixed handling of SHIFT + LMB (continue drawing) when
 the line connected to an existing used vertex.
 
 ------------------------------------------------------------------------
-cd3a8b697bfd | Andrew Apted | Wed Jan 20 15:01:59 2016 +1100
+cd3a8b697bfd | Andrew Apted | 2016-01-20 15:01:59 +1100
 
 Replaced "edit.Selected->clear_all()" code --> Selection_Clear().
 
 Also began work on ability to restore the last selection (when possible).
 
 ------------------------------------------------------------------------
-29320c1f53c2 | Andrew Apted | Wed Jan 20 14:15:10 2016 +1100
+29320c1f53c2 | Andrew Apted | 2016-01-20 14:15:10 +1100
 
 Selection class : implemented new "test_equal()" method, checks if two
 selections are the same.
 
 ------------------------------------------------------------------------
-f40a855324eb | Andrew Apted | Tue Jan 19 22:00:53 2016 +1100
+f40a855324eb | Andrew Apted | 2016-01-19 22:00:53 +1100
 
 TODO update.
 
 ------------------------------------------------------------------------
-4ab4adfac0dc | Andrew Apted | Tue Jan 19 22:00:14 2016 +1100
+4ab4adfac0dc | Andrew Apted | 2016-01-19 22:00:14 +1100
 
 CHANGELOG updated.
 
 ------------------------------------------------------------------------
-ff1b2c5d2b6a | Andrew Apted | Tue Jan 19 21:55:37 2016 +1100
+ff1b2c5d2b6a | Andrew Apted | 2016-01-19 21:55:37 +1100
 
 Generalized browser : made choice widgets a bit wider.
 
 ------------------------------------------------------------------------
-b6b47b8ca0e5 | Andrew Apted | Tue Jan 19 21:54:39 2016 +1100
+b6b47b8ca0e5 | Andrew Apted | 2016-01-19 21:54:39 +1100
 
 gen_types.ugh : expanded "HnF", "LnC" (etc) --> "Highest Floor", "Lowest Ceil" (etc).
 
 ------------------------------------------------------------------------
-cc97e49d0309 | Andrew Apted | Tue Jan 19 21:38:44 2016 +1100
+cc97e49d0309 | Andrew Apted | 2016-01-19 21:38:44 +1100
 
 gen_types.ugh : improved various keywords, e.g. target names.
 
 ------------------------------------------------------------------------
-c5bc0c49356a | Andrew Apted | Tue Jan 19 21:25:02 2016 +1100
+c5bc0c49356a | Andrew Apted | 2016-01-19 21:25:02 +1100
 
 Generalized browser : ability to reset all fields to default values, and
 fixed bug showing the wrong page.
 
 ------------------------------------------------------------------------
-dbc53c8454c5 | Andrew Apted | Tue Jan 19 21:00:42 2016 +1100
+dbc53c8454c5 | Andrew Apted | 2016-01-19 21:00:42 +1100
 
 Generalized browser : small improvement to previous commit.
 
 ------------------------------------------------------------------------
-833a5654cff6 | Andrew Apted | Tue Jan 19 20:53:47 2016 +1100
+833a5654cff6 | Andrew Apted | 2016-01-19 20:53:47 +1100
 
 Generalized browser : removed the "Gen" button, too much clutter.
 
@@ -483,12 +483,12 @@ generalized browser, also by right clicking that button.  Plus it can
 be opened via the menus.
 
 ------------------------------------------------------------------------
-5085fac14cc2 | Andrew Apted | Tue Jan 19 20:45:45 2016 +1100
+5085fac14cc2 | Andrew Apted | 2016-01-19 20:45:45 +1100
 
 Generalized browser : implemented decoding the line_type.
 
 ------------------------------------------------------------------------
-91680fa56b9c | Andrew Apted | Tue Jan 19 20:18:41 2016 +1100
+91680fa56b9c | Andrew Apted | 2016-01-19 20:18:41 +1100
 
 Generalized browser : worked on UpdateGenType() for setting the page and
 all the field widgets to match the current linedef type.
@@ -497,169 +497,169 @@ Also removed the "SET" button -- changes will take effect immediately
 (just like everything else in the LineDef panel).
 
 ------------------------------------------------------------------------
-040d3c6ebbdc | Andrew Apted | Tue Jan 19 19:15:33 2016 +1100
+040d3c6ebbdc | Andrew Apted | 2016-01-19 19:15:33 +1100
 
 Generalized browser : tweaked layout for extra line in FLOOR/CEILING
 categories, and some other stuff for the Model/Monsters duality...
 
 ------------------------------------------------------------------------
-f793fde39431 | Andrew Apted | Tue Jan 19 18:19:20 2016 +1100
+f793fde39431 | Andrew Apted | 2016-01-19 18:19:20 +1100
 
 gen_types.ugh : moved "Speed" field lower (underneath Target field), and
 for FLOOR and CEILING added a "Monsters" field (having same bit position
 as the "Model" field -- will need code to handle that properly).
 
 ------------------------------------------------------------------------
-1086a2117b04 | Andrew Apted | Tue Jan 19 17:21:10 2016 +1100
+1086a2117b04 | Andrew Apted | 2016-01-19 17:21:10 +1100
 
 gen_types.ugh : added a default value in each "gen_field" line, and
 tweaked some more field names / keywords.
 
 ------------------------------------------------------------------------
-ba4e660499b8 | Andrew Apted | Tue Jan 19 17:05:12 2016 +1100
+ba4e660499b8 | Andrew Apted | 2016-01-19 17:05:12 +1100
 
 gen_types.ugh : changed order so that "DOOR" is first, and capitalized
 various of the keywords and tweaked a few others.
 
 ------------------------------------------------------------------------
-603c1d5fcc36 | Andrew Apted | Tue Jan 19 17:03:45 2016 +1100
+603c1d5fcc36 | Andrew Apted | 2016-01-19 17:03:45 +1100
 
 Generalized browser : layout tweak.
 
 ------------------------------------------------------------------------
-df23936ec62b | Andrew Apted | Tue Jan 19 16:41:48 2016 +1100
+df23936ec62b | Andrew Apted | 2016-01-19 16:41:48 +1100
 
 Generalized browser : implemented creating the choice buttons in each
 page, and computing a type value, and fixed a few bugs.
 
 ------------------------------------------------------------------------
-a30790a7fae3 | Andrew Apted | Tue Jan 19 16:02:49 2016 +1100
+a30790a7fae3 | Andrew Apted | 2016-01-19 16:02:49 +1100
 
 Generalized browser : changed resize behavior again, match what the other
 browsers do (everything follows the left edge).
 
 ------------------------------------------------------------------------
-cc1f97a5491c | Andrew Apted | Tue Jan 19 15:57:58 2016 +1100
+cc1f97a5491c | Andrew Apted | 2016-01-19 15:57:58 +1100
 
 Generalized browser : minimise it whenever we change to the GEN browser
 (since it looks quite bad otherwise).
 
 ------------------------------------------------------------------------
-0dba3322afe3 | Andrew Apted | Tue Jan 19 14:50:05 2016 +1100
+0dba3322afe3 | Andrew Apted | 2016-01-19 14:50:05 +1100
 
 Heretic config : categorized all the flats and textures.
 
 ------------------------------------------------------------------------
-b541f4c70e5c | Andrew Apted | Tue Jan 19 14:13:46 2016 +1100
+b541f4c70e5c | Andrew Apted | 2016-01-19 14:13:46 +1100
 
 Hexen config tweak.
 
 ------------------------------------------------------------------------
-6922aca68c73 | Andrew Apted | Tue Jan 19 14:10:09 2016 +1100
+6922aca68c73 | Andrew Apted | 2016-01-19 14:10:09 +1100
 
 Hexen config : categorized all the textures and flats.
 
 ------------------------------------------------------------------------
-e5c78e090cc6 | Andrew Apted | Tue Jan 19 13:01:42 2016 +1100
+e5c78e090cc6 | Andrew Apted | 2016-01-19 13:01:42 +1100
 
 Browser : only populate the Category widget with non-empty categories.
 
 ------------------------------------------------------------------------
-419c132ca180 | Andrew Apted | Mon Jan 18 23:08:47 2016 +1100
+419c132ca180 | Andrew Apted | 2016-01-18 23:08:47 +1100
 
 TODO updated.
 
 ------------------------------------------------------------------------
-4372deb33d8e | Andrew Apted | Mon Jan 18 23:03:35 2016 +1100
+4372deb33d8e | Andrew Apted | 2016-01-18 23:03:35 +1100
 
 Generalized browser : implemented apply_callback().
 
 ------------------------------------------------------------------------
-95fad8495f84 | Andrew Apted | Mon Jan 18 22:49:17 2016 +1100
+95fad8495f84 | Andrew Apted | 2016-01-18 22:49:17 +1100
 
 Generalized browser : implemented category callback which shows the
 corresponding page (hiding the rest), and support cycling through the
 categories.
 
 ------------------------------------------------------------------------
-c89c229084a8 | Andrew Apted | Mon Jan 18 22:20:37 2016 +1100
+c89c229084a8 | Andrew Apted | 2016-01-18 22:20:37 +1100
 
 Generalized browser : create the category and apply widgets, create all
 the pages (albeit just empty rects), and handle changes to game_info.
 
 ------------------------------------------------------------------------
-048c6e57bef6 | Andrew Apted | Mon Jan 18 21:18:37 2016 +1100
+048c6e57bef6 | Andrew Apted | 2016-01-18 21:18:37 +1100
 
 Generalized browser : fleshed out structure of UI_Generalized_Box class,
 added a message box to show when not in BOOM mode.
 
 ------------------------------------------------------------------------
-90bbb8850446 | Andrew Apted | Mon Jan 18 20:54:44 2016 +1100
+90bbb8850446 | Andrew Apted | 2016-01-18 20:54:44 +1100
 
 Generalized browser : fixed resize behavior, tweaked title.
 
 ------------------------------------------------------------------------
-206d7e8464a1 | Andrew Apted | Mon Jan 18 20:34:04 2016 +1100
+206d7e8464a1 | Andrew Apted | 2016-01-18 20:34:04 +1100
 
 Generalized type : in LineDef panel, show a basic description for a gen
 line, currently it is the trigger + "GENERALIZED" + category name.
 
 ------------------------------------------------------------------------
-e400500674fe | Andrew Apted | Mon Jan 18 19:59:46 2016 +1100
+e400500674fe | Andrew Apted | 2016-01-18 19:59:46 +1100
 
 Sector panel : when user enters a large value into type box, store it
 directly in sectors -- the panel will show the Boom interpretation.
 
 ------------------------------------------------------------------------
-7d1b2dc12219 | Andrew Apted | Mon Jan 18 19:38:09 2016 +1100
+7d1b2dc12219 | Andrew Apted | 2016-01-18 19:38:09 +1100
 
 Sector panel : use "BoomSF_XXX" constants for generalized masks.
 
 ------------------------------------------------------------------------
-60d57d7d9945 | Andrew Apted | Mon Jan 18 19:25:57 2016 +1100
+60d57d7d9945 | Andrew Apted | 2016-01-18 19:25:57 +1100
 
 Sector panel : the Boom flag widgets now show values for current sector,
 and reworked type_callback() to allow setting these values too.
 
 ------------------------------------------------------------------------
-e96dc17a0625 | Andrew Apted | Mon Jan 18 18:22:19 2016 +1100
+e96dc17a0625 | Andrew Apted | 2016-01-18 18:22:19 +1100
 
 Sector panel : added widgets at bottom for Boom generalized sector types,
 and enable/disable them based on the game_info.  They do not work yet...
 
 ------------------------------------------------------------------------
-282819b660af | Andrew Apted | Mon Jan 18 16:04:35 2016 +1100
+282819b660af | Andrew Apted | 2016-01-18 16:04:35 +1100
 
 Sector panel : got the headroom shortcut buttons working.
 
 ------------------------------------------------------------------------
-2b8bbdbc19cb | Andrew Apted | Mon Jan 18 15:58:51 2016 +1100
+2b8bbdbc19cb | Andrew Apted | 2016-01-18 15:58:51 +1100
 
 Sector panel : began work on buttons for setting headroom...
 
 ------------------------------------------------------------------------
-bbceb92effdb | Andrew Apted | Mon Jan 18 15:30:07 2016 +1100
+bbceb92effdb | Andrew Apted | 2016-01-18 15:30:07 +1100
 
 Generalized types : hide or show "Gen" button depending on game_info.
 
 ------------------------------------------------------------------------
-fa5b620d1365 | Andrew Apted | Mon Jan 18 15:08:24 2016 +1100
+fa5b620d1365 | Andrew Apted | 2016-01-18 15:08:24 +1100
 
 Added a .gitignore file, ignore objects (*.o) and executables.
 
 ------------------------------------------------------------------------
-cb6a39ba1ebb | Andrew Apted | Mon Jan 18 15:03:41 2016 +1100
+cb6a39ba1ebb | Andrew Apted | 2016-01-18 15:03:41 +1100
 
 Create obj_linux/ and obj_win32/ folders, which were lost after the
 conversion from SVN, and added .gitignore files in them.
 
 ------------------------------------------------------------------------
-0b46a7d4032f | Andrew Apted | Sun Jan 17 13:11:33 2016 +0000
+0b46a7d4032f | Andrew Apted | 2016-01-17 13:11:33 +0000
 
 TODO update.
 
 ------------------------------------------------------------------------
-9af1f2337766 | Andrew Apted | Sun Jan 17 13:10:22 2016 +0000
+9af1f2337766 | Andrew Apted | 2016-01-17 13:10:22 +0000
 
 Generalized types : added "Gen" button to LineDef panel.
 
