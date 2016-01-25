@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -62,20 +62,13 @@ static void FreshLevel()
 
 	sec->SetDefaults();
 
-	Thing *th = new Thing;
-	Things.push_back(th);
-
-	th->x = 512;
-	th->y = 512;
-	th->type = 1;
-
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		Vertex *v = new Vertex;
 		Vertices.push_back(v);
 
-		v->x = (i >= 2) ? 768 : 256;
-		v->y = (i==1 || i==2) ? 768 : 256;
+		v->x = (i >= 2) ? 256 : -256;
+		v->y = (i==1 || i==2) ? 256 :-256;
 
 		SideDef *sd = new SideDef;
 		SideDefs.push_back(sd);
@@ -89,6 +82,17 @@ static void FreshLevel()
 		ld->end   = (i+1) % 4;
 		ld->flags = MLF_Blocking;
 		ld->right = i;
+	}
+
+	for (int pl = 1 ; pl <= 4 ; pl++)
+	{
+		Thing *th = new Thing;
+		Things.push_back(th);
+
+		th->type  = pl;
+		th->angle = 90;
+		th->x = (pl == 1) ? 0 : (pl - 3) * 48;
+		th->y = (pl == 1) ? 48 : (pl == 3) ? -48 : 0;
 	}
 
 	CalculateLevelBounds();
