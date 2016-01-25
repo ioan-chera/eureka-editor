@@ -312,8 +312,13 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	if (Fl::event_button() != 3 &&
-		(w == box->f_pic || w == box->c_pic))
+	bool is_pic   = (w == box->f_pic || w == box->c_pic);
+	bool is_floor = (w == box->f_pic || w == box->f_tex);
+
+	int new_tex;
+
+	// LMB on the flat image just selects/unselects it (red border)
+	if (is_pic && Fl::event_button() != 3)
 	{
 		UI_Pic * pic = (UI_Pic *) w;
 
@@ -325,22 +330,15 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int new_tex;
-
 	// right click sets to default value
-	if (Fl::event_button() == 3)
+	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
+	if (is_pic && Fl::event_button() == 3)
 	{
-		if (w == box->f_pic)
-			new_tex = BA_InternaliseString(default_floor_tex);
-		else
-			new_tex = BA_InternaliseString(default_ceil_tex);
+		new_tex = BA_InternaliseString(is_floor ? default_floor_tex : default_ceil_tex);
 	}
 	else
 	{
-		if (w == box->f_tex)
-			new_tex = FlatFromWidget(box->f_tex);
-		else
-			new_tex = FlatFromWidget(box->c_tex);
+		new_tex = FlatFromWidget(is_floor ? box->f_tex : box->c_tex);
 	}
 
 	selection_c list;
@@ -350,9 +348,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	{
 		BA_Begin();
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (w == box->f_tex || w == box->f_pic)
+			if (is_floor)
 				BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
 			else
 				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
