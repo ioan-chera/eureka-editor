@@ -110,6 +110,8 @@ General
 
 +  a dialog to view / load / prune backups.
 
+IDEA: integrate Visplane Explorer
+
 IDEA: MMB on sidedef/sector tex : open RECENT browser
 
 WISH: support Windows 95/98/ME
@@ -329,6 +331,16 @@ IDEA: for DOOM have "Switch", "Grating", "Door" categories
 WISH: conversion from Boom --> vanilla DOOM
 
 
+Possible user config
+--------------------
+
+render_forward_speed  (16)
+render_turn_speed     (16)
+render_updown_speed   (16)
+
+paste_reselects  (true)
+
+
 ______________________________________________________________________
 
   NOT-TO-DO
@@ -393,25 +405,4 @@ NO:  ability to "remove line 271" (etc) in port definitions
 NO:  "USED" category for the browser
 
 NO:  speed up grid drawing when step is small and zoomed out
-
-
-
-______________________________________________________________________
-
-  MISCELLANEOUS / IDEAS
-______________________________________________________________________
-
-
-USER CONFIG NEEDED
--------------------
-
-render_forward_speed  (16)
-render_turn_speed     (16)
-render_updown_speed   (16)
-
-paste_reselects  (true)
-
-map_highlight_color
-map_selection_color
-map_high_sel_color
 
