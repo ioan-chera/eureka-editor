@@ -100,8 +100,6 @@ General
 
 -  a key to copy properties TO defaults (e.g. shift-C)
 
--  conversion between Hexen <--> DOOM formats
-
 -  View/Place Camera command, cursor turns into +
 
 +  Preferences window:
@@ -134,7 +132,6 @@ WISH: can import UDMF format maps
 
    -  each map (via .dat?) can specify _override_ config
 
-
 ?  GUI buttons for NewTag / LastTag commands
 
 -  vertex/linedef mode: '[' and ']' to adjust length of current line
@@ -149,18 +146,18 @@ WISH: can import UDMF format maps
    -  "Find" or "Match" button for function in UI_EditKey
    -  reverse ordering of KCTX_XXX values
 
-?  config system: OPT_KEY values
-
 -  make sure Load/Export wad filename not already in master_dir
 
 -  PRINT key to make a screenshot of map or 3D view
+
+
+?  config system: OPT_KEY values
 
 ?  ability to view (perhaps edit) a map header lump
    (for FraggleScript etc...)
 
 ?  ability to create / view / edit / import arbitrary lumps
    (e.g. MAPINFO, DECORATE, etc...)
-
 
 ?  a way to slow down fake mouse wheels?
 
@@ -222,11 +219,6 @@ Editing
    and new vertices would be constrained to that curve, and you can
    move existing vertices onto the curve.
 
-Q/ how to handle self-referencing linedefs in auto create/split sector ??
-
-?  grid drawing too slow when small step and zoomed out
-
-
 -  assume texture names beginning with '#' are special
    (The texture checker ignores them -- what else is needed ??)
 
@@ -236,9 +228,12 @@ Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
 -  more port-specific line/thing flags
 
-IDEA:  in Find/Replace panel, can filter things by CATEGORY
 
-?  disconnect sectors : include islands (perhaps with 'D')
+Q/ how to handle self-referencing linedefs in auto create/split sector ??
+
+Q/  disconnect sectors : include islands (perhaps with 'D')
+
+IDEA:  in Find/Replace panel, can filter things by CATEGORY
 
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
@@ -248,6 +243,8 @@ IDEA: for quantizing a group of objects, try about 9 delta
 
 3D View
 -------
+
++  draw the sky (optionally)
 
 -  option to reverse mouse movement
 
@@ -312,6 +309,12 @@ Game / Port Definitions
 
 +  support Harmony
 
++  a ZDoom configuration
+
+-  support Doom-in-Hexen mapping
+
+-  conversion between Hexen <--> DOOM formats
+
 -  game-def setting: view_height
 
 -  FreeDOOM : categorize all the new textures
@@ -319,6 +322,8 @@ Game / Port Definitions
 -  HacX : categorize the textures
 
 IDEA: for DOOM have "Switch", "Grating", "Door" categories
+
+WISH: conversion from Boom --> vanilla DOOM
 
 
 ______________________________________________________________________
@@ -383,6 +388,8 @@ NO:  support Chex Quest 1 and 2
 NO:  ability to "remove line 271" (etc) in port definitions
 
 NO:  "USED" category for the browser
+
+NO:  speed up grid drawing when step is small and zoomed out
 
 
 
