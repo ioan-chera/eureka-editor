@@ -45,6 +45,7 @@ UI:
 +  fixed texture warping in 3D preview
 
 -  sector panel: buttons for quickly setting the headroom
+-  sector panel: MMB on the ceiling flat sets it to sky
 -  right-click on a sidedef or sector texture sets it to default
 -  various layout tweaks to the editing panels
 

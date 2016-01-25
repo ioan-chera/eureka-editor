@@ -317,6 +317,14 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 	int new_tex;
 
+	// MMB on ceiling flat image sets to sky
+	if (w == box->c_pic && Fl::event_button() == 2)
+	{
+		new_tex = BA_InternaliseString(game_info.sky_flat);
+
+		goto change_it;
+	}
+
 	// LMB on the flat image just selects/unselects it (red border)
 	if (is_pic && Fl::event_button() != 3)
 	{
@@ -341,6 +349,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		new_tex = FlatFromWidget(is_floor ? box->f_tex : box->c_tex);
 	}
 
+change_it:
 	selection_c list;
 	selection_iterator_c it;
 
