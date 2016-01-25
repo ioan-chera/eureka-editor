@@ -679,7 +679,7 @@ static const opt_desc_t options[] =
 		0,
 		OPT_INTEGER,
 		"v",
-		"Amp. of scrolling (% of screen size)",
+		"Amplitude of scrolling (% of screen size)",
 		NULL,
 		&scroll_less
 	},
@@ -688,9 +688,18 @@ static const opt_desc_t options[] =
 		0,
 		OPT_INTEGER,
 		"v",
-		"Amp. of scrolling (% of screen size)",
+		"Amplitude of scrolling (% of screen size)",
 		NULL,
 		&scroll_more
+	},
+
+	{	"sector_render_default",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
+		NULL,
+		&sector_render_default
 	},
 
 	{	"show_full_one_sided",

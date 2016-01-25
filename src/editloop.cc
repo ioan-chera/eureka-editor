@@ -61,6 +61,8 @@ bool same_mode_clears_selection = false;
 int multi_select_modifier = 0;
 int minimum_drag_pixels = 5;
 
+int sector_render_default = (int)SREND_Floor;
+
 
 extern bool easier_drawing_mode;
 
@@ -1779,7 +1781,7 @@ void Editor_Init()
 	edit.render3d = false;
 	edit.error_mode = false;
 
-	edit.sector_render_mode = SREND_Floor;
+	edit.sector_render_mode = sector_render_default;
 
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;
