@@ -18,10 +18,1772 @@ on the DoomWorld forums to see if there was any interest, and then
 registered a SourceForge project for it, and the code repository
 got moved yet again.
 
+In January 2016 the SVN repository was converted into a GIT
+repository (still on SourceForge).
+
 
 ====================================================
-    CURRENT DEVELOPMENT 
+    CURRENT DEVELOPMENT (GIT)
 ====================================================
+
+------------------------------------------------------------------------
+fa4b5a27193e | Andrew Apted | Sun Jan 24 22:31:59 2016 +1100
+
+README and CHANGELOG : small update.
+
+------------------------------------------------------------------------
+283db5159c29 | Andrew Apted | Sun Jan 24 22:29:09 2016 +1100
+
+TODO : went through and re-evaluated most items, moved several to the
+"NOT-TO-DO" section.
+
+------------------------------------------------------------------------
+bb89fd036ef2 | Andrew Apted | Sun Jan 24 22:13:26 2016 +1100
+
+Editing : SHIFT + LMB in sector/linedef mode forces the opening of a
+selection box -- handy for places were it is otherwise impossible.
+
+------------------------------------------------------------------------
+6f1fb5073c59 | Andrew Apted | Sun Jan 24 21:44:31 2016 +1100
+
+Code tidying, miscellaneous stuff here and there.
+
+------------------------------------------------------------------------
+2ef2708b2f39 | Andrew Apted | Sun Jan 24 21:43:46 2016 +1100
+
+Browser : removed CycleCategory method from generalized line editor.
+
+------------------------------------------------------------------------
+23fc3cf6eb24 | Andrew Apted | Sun Jan 24 21:39:57 2016 +1100
+
+Code tidying : removed the unused exchange_object_numbers() which is
+legacy code that would require major surgery to get working again but
+has very little utility.
+
+------------------------------------------------------------------------
+df4b2b95b474 | Andrew Apted | Sun Jan 24 21:30:34 2016 +1100
+
+Code tidying : removed some unused code in e_sector.cc
+
+------------------------------------------------------------------------
+e6214230a578 | Andrew Apted | Sun Jan 24 21:03:17 2016 +1100
+
+Version bumped,
+
+------------------------------------------------------------------------
+bafc1cc78a17 | Andrew Apted | Sun Jan 24 20:59:15 2016 +1100
+
+CHANGELOG : re-organized into sections like "Editing" etc.
+
+------------------------------------------------------------------------
+595b8a63f540 | Andrew Apted | Sun Jan 24 20:41:24 2016 +1100
+
+3D Preview : small optimisation of the texture-warp fix.
+
+------------------------------------------------------------------------
+e45cf71fb832 | Andrew Apted | Sun Jan 24 19:38:31 2016 +1100
+
+3D Preview : fixed the texture warping issue, caused by interpolating the
+angles across the wall (not the correct method).
+
+------------------------------------------------------------------------
+917fd68cb3a4 | Andrew Apted | Sun Jan 24 18:15:06 2016 +1100
+
+TODO updated.
+
+------------------------------------------------------------------------
+48bc72ceb2e1 | Andrew Apted | Sun Jan 24 18:12:41 2016 +1100
+
+When scrolling via keyboard, ensure certain actions (esp. drawing mode)
+get updated properly.
+
+------------------------------------------------------------------------
+502373e63c25 | Andrew Apted | Sun Jan 24 17:37:43 2016 +1100
+
+TODO update.
+
+------------------------------------------------------------------------
+eb171c92d11c | Andrew Apted | Sun Jan 24 16:28:10 2016 +1100
+
+LIN_Flip :
+1. default behavior on 1S lines is to NOT makes lines without a right side
+2. support /verts flag which only swaps the vertices
+3. support /sides flag which only swaps the sidedefs
+
+------------------------------------------------------------------------
+be11e914ff48 | Andrew Apted | Sun Jan 24 16:27:29 2016 +1100
+
+Fixed bug saving the key bindings (file handle was not closed).
+
+------------------------------------------------------------------------
+d9344de9a581 | Andrew Apted | Sun Jan 24 16:22:08 2016 +1100
+
+Canvas sector rendering : treat lines missing a right side as broken
+(i.e. do not create spans even when the left side is valid).
+
+------------------------------------------------------------------------
+4c62d990849a | Andrew Apted | Sun Jan 24 15:44:18 2016 +1100
+
+Improved split-line detection when grid snapping -- prevent the split
+point from being far away from the line.
+
+------------------------------------------------------------------------
+a46432dcaa8b | Andrew Apted | Sun Jan 24 14:58:32 2016 +1100
+
+Drawing mode : added special case for splitting a line via mouse button
+(and not in drawing mode) to allow the new vertex to be dragged.
+[ this was not possible in the normal Insert_Vertex code-path ]
+
+------------------------------------------------------------------------
+d8715a09ddfc | Andrew Apted | Sun Jan 24 13:54:13 2016 +1100
+
+code : futher tidying in Editor_MouseRelease().
+
+------------------------------------------------------------------------
+12134d210757 | Andrew Apted | Sun Jan 24 13:53:07 2016 +1100
+
+Implemented "!=" operator for the Objid class.
+
+------------------------------------------------------------------------
+ecde28798c7f | Andrew Apted | Sun Jan 24 13:44:03 2016 +1100
+
+code : various tidying in Editor_MouseMotion().
+
+------------------------------------------------------------------------
+ff44e9660b02 | Andrew Apted | Sun Jan 24 13:35:09 2016 +1100
+
+code : some refactoring in Editor_MouseRelease().
+
+------------------------------------------------------------------------
+97b340a84f1d | Andrew Apted | Sun Jan 24 13:23:16 2016 +1100
+
+minor code rejig in Editor_MouseRelease().
+
+------------------------------------------------------------------------
+6b6d6101db2e | Andrew Apted | Sun Jan 24 13:09:53 2016 +1100
+
+Drawing mode : worked on fixing drawing mode erroneously beginning again
+after closing a sector via splitting a line.  Still not correct, ugh...
+
+------------------------------------------------------------------------
+7a7e8cefea7f | Andrew Apted | Sun Jan 24 11:39:08 2016 +1100
+
+Fixed Selection_NotifyInsert() to not clear a vertex selection when a
+new linedef or sector is created.
+
+------------------------------------------------------------------------
+0340593de210 | Andrew Apted | Sat Jan 23 23:25:47 2016 +1100
+
+Added workaround in Editor_RawButton() for FLTK not sending us a button
+release event after another mouse button was released (i.e. when two
+buttons were being held down simultaneously).
+
+------------------------------------------------------------------------
+a106d2019868 | Andrew Apted | Sat Jan 23 22:57:04 2016 +1100
+
+fix for previous commit: do not check for FL_DRAG event when calling
+Editor_MouseMotion, since it won't be set after scrolling via RMB.
+
+------------------------------------------------------------------------
+701606bbb8f1 | Andrew Apted | Sat Jan 23 22:49:07 2016 +1100
+
+Changed the way map scrolling via RMB is done, no longer an action state
+(ACT_XXX value) because that prevents scrolling and line drawing being
+used together [ a scroll would disable the current line ].
+
+------------------------------------------------------------------------
+d1b3b2a4744e | Andrew Apted | Sat Jan 23 21:12:37 2016 +1100
+
+For dangling vertex fixer, when merging two vertices make the final
+vertex selected (and nothing else).
+
+------------------------------------------------------------------------
+025c5161c1f1 | Andrew Apted | Sat Jan 23 21:01:05 2016 +1100
+
+Fixed the logic for fixing a dangling vertex.
+
+------------------------------------------------------------------------
+9ad68d2fb07e | Andrew Apted | Sat Jan 23 20:29:42 2016 +1100
+
+Insert_Vertex : added back the check preventing the creation of a zero
+length linedef -- it displays a "Bug detected" message as I am quite
+sure that it should never happen.
+
+------------------------------------------------------------------------
+f2015147a513 | Andrew Apted | Sat Jan 23 20:08:29 2016 +1100
+
+Insert_Vertex : fixed a few cases involving a split-line.
+
+------------------------------------------------------------------------
+d96639336041 | Andrew Apted | Fri Jan 22 22:49:25 2016 +1100
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+770427e0583e | Andrew Apted | Fri Jan 22 22:48:04 2016 +1100
+
+Insert_Vertex : bit more work, e.g. split-line handling.
+
+------------------------------------------------------------------------
+0d24939ea117 | Andrew Apted | Fri Jan 22 22:37:25 2016 +1100
+
+Insert_Vertex : tidied up the highlight handling code.
+
+------------------------------------------------------------------------
+ef8079ded2eb | Andrew Apted | Fri Jan 22 22:27:57 2016 +1100
+
+Began some major surgery to Insert_Vertex() to better manage all the
+possible cases (e.g. easier_drawing_mode either ON or OFF).
+
+------------------------------------------------------------------------
+cb1ada9985dc | Andrew Apted | Fri Jan 22 19:40:09 2016 +1100
+
+Drawing mode : when drawing a line AND grid snapping, allow the highlight
+and split-line to move onto the snapped position (when they would otherwise
+not show anything).
+
+This prevents creating a vertex which inadvertently sits on top of another
+vertex or sits on a line (due to the coordinate being snapped).
+
+------------------------------------------------------------------------
+9b45589532ba | Andrew Apted | Fri Jan 22 19:38:38 2016 +1100
+
+Canvas : draw the split-line orange ball larger when zoomed in (closer
+to the size of the vertices).
+
+------------------------------------------------------------------------
+94e30ea2dfe2 | Andrew Apted | Fri Jan 22 19:10:19 2016 +1100
+
+Code : merely moved some code around in editloop.cc
+
+------------------------------------------------------------------------
+6309684a23b5 | Andrew Apted | Fri Jan 22 19:07:15 2016 +1100
+
+Code : renamed GetCurobject --> GetNearObject, removed unused "snap" param.
+
+------------------------------------------------------------------------
+7effd83d2359 | Andrew Apted | Fri Jan 22 18:24:08 2016 +1100
+
+Added config file variable "minimum_drag_pixels".
+
+------------------------------------------------------------------------
+1e410deea699 | Andrew Apted | Fri Jan 22 18:12:57 2016 +1100
+
+Improved dragging: only begin dragging if cursor has moved a minimum # of
+pixels away from the click point.  This prevents the problem where you
+only wanted to select a vertex, but instead you "dragged" it.
+
+------------------------------------------------------------------------
+0cab70de706f | Andrew Apted | Fri Jan 22 16:43:16 2016 +1100
+
+Drawing mode : allow a vertex created by spliting a line to be dragged.
+
+------------------------------------------------------------------------
+7fd666632eb1 | Andrew Apted | Fri Jan 22 15:14:42 2016 +1100
+
+When merging vertices, simply keep the coordinates of the first vertex
+(the one not delete).  The previous way of computing the middle coord
+was not working well with grid-snapped vertices.
+
+------------------------------------------------------------------------
+51c91df163bc | Andrew Apted | Fri Jan 22 13:57:51 2016 +1100
+
+More work on dangling vert fixer, but the logic is still not right...
+
+------------------------------------------------------------------------
+0f2b97fef84a | Andrew Apted | Fri Jan 22 13:39:43 2016 +1100
+
+Implemented code to try to fix a dangling vertex -- if it sits on another
+vertex, merge into that one, or if it sits on a line then split the line
+with it.
+
+Also when using CMD_Insert on a vertex, try to fix it if dangling.
+
+------------------------------------------------------------------------
+e017b4dc494e | Andrew Apted | Fri Jan 22 12:49:27 2016 +1100
+
+Code tidying : removed unused/obsolete DrawSnapMarker() method.
+
+------------------------------------------------------------------------
+fc5e6a76bf2a | Andrew Apted | Fri Jan 22 11:49:32 2016 +1100
+
+Checks : fixed sector checker for Boom generalized types.
+
+------------------------------------------------------------------------
+f7eadbbeda47 | Andrew Apted | Fri Jan 22 11:42:47 2016 +1100
+
+Added preference setting to disable the "easier line drawing" mode.
+
+------------------------------------------------------------------------
+ae42eb238506 | Andrew Apted | Fri Jan 22 10:54:51 2016 +1100
+
+Generalized browser : changing fields will now update the line's type value.
+
+This commit marks the completion of BOOM generalized type support :)
+
+------------------------------------------------------------------------
+768bea808584 | Andrew Apted | Fri Jan 22 10:41:04 2016 +1100
+
+Generalized browser : allow "NONE" category to clear the line's type.
+
+------------------------------------------------------------------------
+cb81af656fcf | Andrew Apted | Fri Jan 22 10:40:07 2016 +1100
+
+LineDef panel : change "Choose" button to "Edit" for generalized types.
+
+------------------------------------------------------------------------
+2b58a571e419 | Andrew Apted | Fri Jan 22 10:26:12 2016 +1100
+
+Checks : fixed unknown line-type checker to accept Boom generalized types
+when the current port is boom-compatible.
+
+------------------------------------------------------------------------
+c17e1a147d37 | Andrew Apted | Wed Jan 20 22:05:13 2016 +1100
+
+CHANGELOG and TODO updated.
+
+------------------------------------------------------------------------
+8e8f1884ba13 | Andrew Apted | Wed Jan 20 21:51:20 2016 +1100
+
+Drawing mode : prevent LMB from adding linedefs when not in drawing mode
+(this was happening when splitting a linedef with LMB and another vertex
+was selected).
+
+------------------------------------------------------------------------
+16edc3c8a418 | Andrew Apted | Wed Jan 20 19:12:06 2016 +1100
+
+CMD_LastSelection : tweak invalidation logic.
+
+------------------------------------------------------------------------
+5518ba839444 | Andrew Apted | Wed Jan 20 18:45:10 2016 +1100
+
+TODO update.
+
+------------------------------------------------------------------------
+2f83b1983fb5 | Andrew Apted | Wed Jan 20 18:43:52 2016 +1100
+
+Checks / vertex : added new test for "dangling" vertices (one which are
+only connected to a single line).
+
+------------------------------------------------------------------------
+a38e3a4a24ba | Andrew Apted | Wed Jan 20 17:18:04 2016 +1100
+
+.gitignore : added "_work" and various MacOS-X crud.
+
+------------------------------------------------------------------------
+8da24b1c39ad | Andrew Apted | Wed Jan 20 17:09:22 2016 +1100
+
+Browser : fixed recent bug causing the browser to jump to top of list
+when clicking on an entry (such as a texture).
+
+------------------------------------------------------------------------
+ac2bc6f8bbf6 | Andrew Apted | Wed Jan 20 16:45:18 2016 +1100
+
+Code tidying : removed obsolete GetMaxObjectNum() function.
+
+------------------------------------------------------------------------
+ca58ba967f23 | Andrew Apted | Wed Jan 20 16:43:35 2016 +1100
+
+CMD_LastSelection : validate the new selection (i.e. don't crash if there
+turns out to be a bug in the normal invalidation logic).
+
+------------------------------------------------------------------------
+cc93a8f9c43a | Andrew Apted | Wed Jan 20 16:27:27 2016 +1100
+
+A few fixes for "LastSelection" command, which involved changing the
+"mode" parameter of the NewEditMode() methods from char --> obj_type_e
+(which is much more sensible).
+
+------------------------------------------------------------------------
+cc9db892869d | Andrew Apted | Wed Jan 20 15:59:11 2016 +1100
+
+CMD_LastSelection : properly invalidate the last selection if an editing
+operation inserts or deletes objects in its range.
+
+------------------------------------------------------------------------
+d8a8633063ca | Andrew Apted | Wed Jan 20 15:51:35 2016 +1100
+
+Info bar : give the status widget a tooltip with the same message, for
+cases when the message is too long to fit on-screen.
+
+------------------------------------------------------------------------
+37fd31d0f80b | Andrew Apted | Wed Jan 20 15:41:30 2016 +1100
+
+CMD_LastSelection : change editor mode if different than the last
+selection (and zoom into the selection, which helps make the mode
+change more obvious).
+
+------------------------------------------------------------------------
+55c50ce52c87 | Andrew Apted | Wed Jan 20 15:34:43 2016 +1100
+
+CMD_LastSelection : got the basic functionality working.
+
+------------------------------------------------------------------------
+f9f4f2cda77e | Andrew Apted | Wed Jan 20 15:06:45 2016 +1100
+
+Drawing mode : fixed handling of SHIFT + LMB (continue drawing) when
+the line connected to an existing used vertex.
+
+------------------------------------------------------------------------
+cd3a8b697bfd | Andrew Apted | Wed Jan 20 15:01:59 2016 +1100
+
+Replaced "edit.Selected->clear_all()" code --> Selection_Clear().
+
+Also began work on ability to restore the last selection (when possible).
+
+------------------------------------------------------------------------
+29320c1f53c2 | Andrew Apted | Wed Jan 20 14:15:10 2016 +1100
+
+Selection class : implemented new "test_equal()" method, checks if two
+selections are the same.
+
+------------------------------------------------------------------------
+f40a855324eb | Andrew Apted | Tue Jan 19 22:00:53 2016 +1100
+
+TODO update.
+
+------------------------------------------------------------------------
+4ab4adfac0dc | Andrew Apted | Tue Jan 19 22:00:14 2016 +1100
+
+CHANGELOG updated.
+
+------------------------------------------------------------------------
+ff1b2c5d2b6a | Andrew Apted | Tue Jan 19 21:55:37 2016 +1100
+
+Generalized browser : made choice widgets a bit wider.
+
+------------------------------------------------------------------------
+b6b47b8ca0e5 | Andrew Apted | Tue Jan 19 21:54:39 2016 +1100
+
+gen_types.ugh : expanded "HnF", "LnC" (etc) --> "Highest Floor", "Lowest Ceil" (etc).
+
+------------------------------------------------------------------------
+cc97e49d0309 | Andrew Apted | Tue Jan 19 21:38:44 2016 +1100
+
+gen_types.ugh : improved various keywords, e.g. target names.
+
+------------------------------------------------------------------------
+c5bc0c49356a | Andrew Apted | Tue Jan 19 21:25:02 2016 +1100
+
+Generalized browser : ability to reset all fields to default values, and
+fixed bug showing the wrong page.
+
+------------------------------------------------------------------------
+dbc53c8454c5 | Andrew Apted | Tue Jan 19 21:00:42 2016 +1100
+
+Generalized browser : small improvement to previous commit.
+
+------------------------------------------------------------------------
+833a5654cff6 | Andrew Apted | Tue Jan 19 20:53:47 2016 +1100
+
+Generalized browser : removed the "Gen" button, too much clutter.
+
+Instead: clicking "Choose" when the type is in range will open the
+generalized browser, also by right clicking that button.  Plus it can
+be opened via the menus.
+
+------------------------------------------------------------------------
+5085fac14cc2 | Andrew Apted | Tue Jan 19 20:45:45 2016 +1100
+
+Generalized browser : implemented decoding the line_type.
+
+------------------------------------------------------------------------
+91680fa56b9c | Andrew Apted | Tue Jan 19 20:18:41 2016 +1100
+
+Generalized browser : worked on UpdateGenType() for setting the page and
+all the field widgets to match the current linedef type.
+
+Also removed the "SET" button -- changes will take effect immediately
+(just like everything else in the LineDef panel).
+
+------------------------------------------------------------------------
+040d3c6ebbdc | Andrew Apted | Tue Jan 19 19:15:33 2016 +1100
+
+Generalized browser : tweaked layout for extra line in FLOOR/CEILING
+categories, and some other stuff for the Model/Monsters duality...
+
+------------------------------------------------------------------------
+f793fde39431 | Andrew Apted | Tue Jan 19 18:19:20 2016 +1100
+
+gen_types.ugh : moved "Speed" field lower (underneath Target field), and
+for FLOOR and CEILING added a "Monsters" field (having same bit position
+as the "Model" field -- will need code to handle that properly).
+
+------------------------------------------------------------------------
+1086a2117b04 | Andrew Apted | Tue Jan 19 17:21:10 2016 +1100
+
+gen_types.ugh : added a default value in each "gen_field" line, and
+tweaked some more field names / keywords.
+
+------------------------------------------------------------------------
+ba4e660499b8 | Andrew Apted | Tue Jan 19 17:05:12 2016 +1100
+
+gen_types.ugh : changed order so that "DOOR" is first, and capitalized
+various of the keywords and tweaked a few others.
+
+------------------------------------------------------------------------
+603c1d5fcc36 | Andrew Apted | Tue Jan 19 17:03:45 2016 +1100
+
+Generalized browser : layout tweak.
+
+------------------------------------------------------------------------
+df23936ec62b | Andrew Apted | Tue Jan 19 16:41:48 2016 +1100
+
+Generalized browser : implemented creating the choice buttons in each
+page, and computing a type value, and fixed a few bugs.
+
+------------------------------------------------------------------------
+a30790a7fae3 | Andrew Apted | Tue Jan 19 16:02:49 2016 +1100
+
+Generalized browser : changed resize behavior again, match what the other
+browsers do (everything follows the left edge).
+
+------------------------------------------------------------------------
+cc1f97a5491c | Andrew Apted | Tue Jan 19 15:57:58 2016 +1100
+
+Generalized browser : minimise it whenever we change to the GEN browser
+(since it looks quite bad otherwise).
+
+------------------------------------------------------------------------
+0dba3322afe3 | Andrew Apted | Tue Jan 19 14:50:05 2016 +1100
+
+Heretic config : categorized all the flats and textures.
+
+------------------------------------------------------------------------
+b541f4c70e5c | Andrew Apted | Tue Jan 19 14:13:46 2016 +1100
+
+Hexen config tweak.
+
+------------------------------------------------------------------------
+6922aca68c73 | Andrew Apted | Tue Jan 19 14:10:09 2016 +1100
+
+Hexen config : categorized all the textures and flats.
+
+------------------------------------------------------------------------
+e5c78e090cc6 | Andrew Apted | Tue Jan 19 13:01:42 2016 +1100
+
+Browser : only populate the Category widget with non-empty categories.
+
+------------------------------------------------------------------------
+419c132ca180 | Andrew Apted | Mon Jan 18 23:08:47 2016 +1100
+
+TODO updated.
+
+------------------------------------------------------------------------
+4372deb33d8e | Andrew Apted | Mon Jan 18 23:03:35 2016 +1100
+
+Generalized browser : implemented apply_callback().
+
+------------------------------------------------------------------------
+95fad8495f84 | Andrew Apted | Mon Jan 18 22:49:17 2016 +1100
+
+Generalized browser : implemented category callback which shows the
+corresponding page (hiding the rest), and support cycling through the
+categories.
+
+------------------------------------------------------------------------
+c89c229084a8 | Andrew Apted | Mon Jan 18 22:20:37 2016 +1100
+
+Generalized browser : create the category and apply widgets, create all
+the pages (albeit just empty rects), and handle changes to game_info.
+
+------------------------------------------------------------------------
+048c6e57bef6 | Andrew Apted | Mon Jan 18 21:18:37 2016 +1100
+
+Generalized browser : fleshed out structure of UI_Generalized_Box class,
+added a message box to show when not in BOOM mode.
+
+------------------------------------------------------------------------
+90bbb8850446 | Andrew Apted | Mon Jan 18 20:54:44 2016 +1100
+
+Generalized browser : fixed resize behavior, tweaked title.
+
+------------------------------------------------------------------------
+206d7e8464a1 | Andrew Apted | Mon Jan 18 20:34:04 2016 +1100
+
+Generalized type : in LineDef panel, show a basic description for a gen
+line, currently it is the trigger + "GENERALIZED" + category name.
+
+------------------------------------------------------------------------
+e400500674fe | Andrew Apted | Mon Jan 18 19:59:46 2016 +1100
+
+Sector panel : when user enters a large value into type box, store it
+directly in sectors -- the panel will show the Boom interpretation.
+
+------------------------------------------------------------------------
+7d1b2dc12219 | Andrew Apted | Mon Jan 18 19:38:09 2016 +1100
+
+Sector panel : use "BoomSF_XXX" constants for generalized masks.
+
+------------------------------------------------------------------------
+60d57d7d9945 | Andrew Apted | Mon Jan 18 19:25:57 2016 +1100
+
+Sector panel : the Boom flag widgets now show values for current sector,
+and reworked type_callback() to allow setting these values too.
+
+------------------------------------------------------------------------
+e96dc17a0625 | Andrew Apted | Mon Jan 18 18:22:19 2016 +1100
+
+Sector panel : added widgets at bottom for Boom generalized sector types,
+and enable/disable them based on the game_info.  They do not work yet...
+
+------------------------------------------------------------------------
+282819b660af | Andrew Apted | Mon Jan 18 16:04:35 2016 +1100
+
+Sector panel : got the headroom shortcut buttons working.
+
+------------------------------------------------------------------------
+2b8bbdbc19cb | Andrew Apted | Mon Jan 18 15:58:51 2016 +1100
+
+Sector panel : began work on buttons for setting headroom...
+
+------------------------------------------------------------------------
+bbceb92effdb | Andrew Apted | Mon Jan 18 15:30:07 2016 +1100
+
+Generalized types : hide or show "Gen" button depending on game_info.
+
+------------------------------------------------------------------------
+fa5b620d1365 | Andrew Apted | Mon Jan 18 15:08:24 2016 +1100
+
+Added a .gitignore file, ignore objects (*.o) and executables.
+
+------------------------------------------------------------------------
+cb6a39ba1ebb | Andrew Apted | Mon Jan 18 15:03:41 2016 +1100
+
+Create obj_linux/ and obj_win32/ folders, which were lost after the
+conversion from SVN, and added .gitignore files in them.
+
+------------------------------------------------------------------------
+0b46a7d4032f | Andrew Apted | Sun Jan 17 13:11:33 2016 +0000
+
+TODO update.
+
+------------------------------------------------------------------------
+9af1f2337766 | Andrew Apted | Sun Jan 17 13:10:22 2016 +0000
+
+Generalized types : added "Gen" button to LineDef panel.
+
+
+
+====================================================
+    DEVELOPMENT IN SVN REPOSITORY
+====================================================
+
+------------------------------------------------------------------------
+r1909 | ajapted | 2016-01-17 23:44:49 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+Generalized types : in the Browser, support ACTIVE_GENERALIZED as the
+special value for "active" member, support 'G' in ChangeMode() method.
+
+------------------------------------------------------------------------
+r1908 | ajapted | 2016-01-17 23:20:25 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+CMD_BrowserMode : support a "genline" keyword.
+
+------------------------------------------------------------------------
+r1907 | ajapted | 2016-01-17 23:18:21 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Menu : added "Generalized Line" command to Browser menu.
+
+------------------------------------------------------------------------
+r1906 | ajapted | 2016-01-17 23:13:56 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+Generalized types : began work on a special browser box for displaying
+and editing a generalized type (via new UI_Generalized_Box class).
+
+------------------------------------------------------------------------
+r1905 | ajapted | 2016-01-17 23:00:16 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+gen_types.ugh : removed the mask values, we simply compute it from the
+bits and shift values.
+
+------------------------------------------------------------------------
+r1904 | ajapted | 2016-01-17 21:51:04 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+Replaced "Aspect ratio" preference with "Pixel aspect ratio", now just
+a simple number input box.  The config variable was also renamed.
+
+------------------------------------------------------------------------
+r1903 | ajapted | 2016-01-17 21:07:11 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+CMD_CopyProperties : implemented /reverse flag which copies from the
+highlighted object to the selected object(s).
+
+------------------------------------------------------------------------
+r1902 | ajapted | 2016-01-17 18:55:36 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+TODO.txt updated.
+
+------------------------------------------------------------------------
+r1901 | ajapted | 2016-01-17 18:52:10 +1100 (Sun, 17 Jan 2016) | 9 lines
+
+CMD_Delete : allow sectors to be considered "unused" (and hence removed)
+if were are deleting linedefs (or verts) and the only linedefs remaining
+will not have a valid sector reference opposite them.
+
+This change was prompted by the case of removing the 3rd vertex in a
+triangle poking out from other geometry, which would delete the two
+linedefs but leave the one opposite the vertex with broken geometry
+(still two sided, with a sidedef facing the now defunct sector).
+
+------------------------------------------------------------------------
+r1900 | ajapted | 2016-01-17 18:36:56 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Check / vertices : ability to SHOW unused vertices.
+
+------------------------------------------------------------------------
+r1899 | ajapted | 2016-01-17 18:10:22 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+CMD_Delete : remove unused sectors in vertex/linedef mode, fixed some bugs.
+
+------------------------------------------------------------------------
+r1898 | ajapted | 2016-01-17 17:54:25 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Improved the code in CMD_Delete().
+
+------------------------------------------------------------------------
+r1897 | ajapted | 2016-01-17 16:00:12 +1100 (Sun, 17 Jan 2016) | 4 lines
+
+Improved FindClosestCrossPoint() to treat vertices as quite large, the
+exact size depending on the current zoom factor.  This makes it easier
+for the user to draw a line through a vertex and have it autosplit.
+
+------------------------------------------------------------------------
+r1896 | ajapted | 2016-01-17 15:21:30 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Proper fix for previous commit (that commit was causing unclosed sectors).
+
+------------------------------------------------------------------------
+r1895 | ajapted | 2016-01-17 14:53:14 +1100 (Sun, 17 Jan 2016) | 4 lines
+
+When merging two connected linedefs (by dragging a vertex),fixed the
+handling when one of the lines is one-sided -- caused bad orientation
+of the merged line and/or missing middle texture.
+
+------------------------------------------------------------------------
+r1894 | ajapted | 2016-01-17 14:19:48 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Factored out a linedef utility function: LD_FixForLostSide()
+
+------------------------------------------------------------------------
+r1893 | ajapted | 2016-01-17 13:45:16 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+Fixed creating overlapping lines when deleting 3rd vertex of a triangle
+(caused by merging the two linedefs connected at that vertex).
+
+------------------------------------------------------------------------
+r1892 | ajapted | 2016-01-17 00:45:42 +1100 (Sun, 17 Jan 2016) | 4 lines
+
+Added common/xlat_doom.cfg and common/xlat_hexen.cfg files.  These are not
+used yet, but later will contain directives for converting between the two
+supported map formats (Doom and Hexen).
+
+------------------------------------------------------------------------
+r1891 | ajapted | 2016-01-17 00:13:51 +1100 (Sun, 17 Jan 2016) | 2 lines
+
+Browser : fixed things inserted by SPACE not appearing in RECENT category.
+
+------------------------------------------------------------------------
+r1890 | ajapted | 2016-01-17 00:03:49 +1100 (Sun, 17 Jan 2016) | 3 lines
+
+Browser : improved the RECENT category, properly sort items so that the
+most recent ones are near the top.
+
+------------------------------------------------------------------------
+r1889 | ajapted | 2016-01-16 21:42:55 +1100 (Sat, 16 Jan 2016) | 4 lines
+
+Browser : don't call RecentUpdate() directly from the insert() method of
+the recently used lists, since RecentUpdate() might be very expensive
+(e.g. needing to sort the whole texture list).
+
+------------------------------------------------------------------------
+r1888 | ajapted | 2016-01-16 20:53:28 +1100 (Sat, 16 Jan 2016) | 3 lines
+
+Disabled the MMB doing an "Insert" command, that functionality has been
+superceded by the new drawing mode.
+
+------------------------------------------------------------------------
+r1887 | ajapted | 2016-01-16 20:46:13 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+Menu : added "Recent Textures" (etc) commands to the Browser menu.
+
+------------------------------------------------------------------------
+r1886 | ajapted | 2016-01-16 20:44:13 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+Browser : increased size of RECENT category to 30 (was 11).
+
+------------------------------------------------------------------------
+r1885 | ajapted | 2016-01-16 18:45:53 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+r1884 | ajapted | 2016-01-16 18:34:21 +1100 (Sat, 16 Jan 2016) | 3 lines
+
+Disable a check for potential linedef overlaps -- not needed with the new
+autosplit logic.
+
+------------------------------------------------------------------------
+r1883 | ajapted | 2016-01-16 18:33:22 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+FindClosestCrossPoint : finished the implementation.
+
+------------------------------------------------------------------------
+r1882 | ajapted | 2016-01-16 18:21:42 +1100 (Sat, 16 Jan 2016) | 3 lines
+
+FindClosestCrossPoint : tweak vertex check, worked on the linedef check
+(e.g. the intersection calculation, which seems to be working).
+
+------------------------------------------------------------------------
+r1881 | ajapted | 2016-01-16 15:52:16 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+Detect vertex crossing in FindClosestCrossPoint().
+
+------------------------------------------------------------------------
+r1880 | ajapted | 2016-01-16 14:11:33 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+Began work on new FindClosestCrossPoint() function....
+
+------------------------------------------------------------------------
+r1879 | ajapted | 2016-01-16 13:35:43 +1100 (Sat, 16 Jan 2016) | 4 lines
+
+Implemented high-level logic for Insert_LineDef_autosplit(), which will
+check if the new line crosses any existing lines or vertices and if so
+automatically create splits and multiple new linedefs (as needed).
+
+------------------------------------------------------------------------
+r1878 | ajapted | 2016-01-16 13:10:33 +1100 (Sat, 16 Jan 2016) | 5 lines
+
+Hexen : use "special" instead of "line" in the game definition file.
+
+In the code, temporarily made "special" synonymous with "line", though
+later they will need to be separate tables.
+
+------------------------------------------------------------------------
+r1877 | ajapted | 2016-01-16 12:16:33 +1100 (Sat, 16 Jan 2016) | 2 lines
+
+LineDef panel : made the Hexen arg boxes a bit wider.
+
+------------------------------------------------------------------------
+r1876 | ajapted | 2016-01-15 23:19:20 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+Ports : include "gen_types" from the BOOM definition file.
+
+------------------------------------------------------------------------
+r1875 | ajapted | 2016-01-15 23:14:43 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Generalized types : implemented parsing of "gen_line" and "gen_field"
+commands (in the gen_types.ugh file).
+
+------------------------------------------------------------------------
+r1874 | ajapted | 2016-01-15 22:42:58 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Generalized types : define the structures that the parsing code will
+store the information into.
+
+------------------------------------------------------------------------
+r1873 | ajapted | 2016-01-15 22:25:14 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+gen_types.ugh : fleshed out remaining types (LIFT, STAIR, CRUSHER) and
+tweaked a few other things.
+
+------------------------------------------------------------------------
+r1872 | ajapted | 2016-01-15 22:08:23 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+gen_types.ugh : added fields for CEILING, DOOR and KEY DOOR.
+
+------------------------------------------------------------------------
+r1871 | ajapted | 2016-01-15 21:53:24 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Began work on 'common/gen_types.ugh' file which defines all the BOOM
+generalized line types.  [ it will require new code too... ]
+
+------------------------------------------------------------------------
+r1870 | ajapted | 2016-01-15 20:54:59 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+Find and Replace : added 'X' button to hide the panel.
+
+------------------------------------------------------------------------
+r1869 | ajapted | 2016-01-15 20:51:09 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+Default Props : added an 'X' button to hide the panel.
+
+------------------------------------------------------------------------
+r1868 | ajapted | 2016-01-15 20:17:30 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+TODO updated.
+
+------------------------------------------------------------------------
+r1867 | ajapted | 2016-01-15 20:16:54 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+README : updated some key combos (e.g. SPACE + SHIFT)
+
+------------------------------------------------------------------------
+r1866 | ajapted | 2016-01-15 20:11:16 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Bindings : added /nofill flag to CMD-SPACE and CMD-INSERT, so that they
+behave the same as the hard-coded behavior of the LMB.
+
+------------------------------------------------------------------------
+r1865 | ajapted | 2016-01-15 20:08:30 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1864 | ajapted | 2016-01-15 20:03:36 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Drawing mode : LMB + SHIFT now continues drawing mode (in cases where it
+normally stops) and LMB + CTRL now inhibits the creation of new sectors.
+
+------------------------------------------------------------------------
+r1863 | ajapted | 2016-01-15 19:54:09 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+Implemented /nofill flag for CMD_Insert command, in vertex mode it prevents
+creating any new sectors.
+
+------------------------------------------------------------------------
+r1862 | ajapted | 2016-01-15 18:28:21 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+Drawing mode : cancel drawing mode if the source vertex is deleted.
+
+------------------------------------------------------------------------
+r1861 | ajapted | 2016-01-15 17:47:22 +1100 (Fri, 15 Jan 2016) | 4 lines
+
+Drawing mode : if second vertex is on a line connected to first one,
+merely select them both.  This allows to select numerous vertices even
+when drawing mode begins at first one.
+
+------------------------------------------------------------------------
+r1860 | ajapted | 2016-01-15 17:14:37 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+r1859 | ajapted | 2016-01-15 17:11:33 +1100 (Fri, 15 Jan 2016) | 2 lines
+
+Sector panel : right click on floor/ceiling flat sets it to default.
+
+------------------------------------------------------------------------
+r1858 | ajapted | 2016-01-15 17:06:42 +1100 (Fri, 15 Jan 2016) | 3 lines
+
+LineDef panel : right-clicking on a texture sets it to the default, or "-"
+for the rail textures.
+
+------------------------------------------------------------------------
+r1857 | ajapted | 2016-01-15 00:57:18 +1100 (Fri, 15 Jan 2016) | 4 lines
+
+When inserting a linedef which splits a sector, ensure the line faces a
+consistent way (in other words, make the line's end vertex be the second
+one selected or created).
+
+------------------------------------------------------------------------
+r1856 | ajapted | 2016-01-13 20:31:44 +1100 (Wed, 13 Jan 2016) | 2 lines
+
+Drawing mode : exit drawing mode on the "Unselect All" command.
+
+------------------------------------------------------------------------
+r1855 | ajapted | 2016-01-13 20:11:04 +1100 (Wed, 13 Jan 2016) | 2 lines
+
+Drawing mode : fixed bug beginning to draw when edit mode != VERTEX.
+
+------------------------------------------------------------------------
+r1854 | ajapted | 2016-01-13 20:01:18 +1100 (Wed, 13 Jan 2016) | 2 lines
+
+Replaced "edit.RedrawMap = 1" with a function call: RedrawMap()
+
+------------------------------------------------------------------------
+r1853 | ajapted | 2016-01-13 19:47:58 +1100 (Wed, 13 Jan 2016) | 5 lines
+
+Drawing mode : begin drawing on mouse release after clicking on a vertex
+and not dragging it, and when no other vertices were selected.
+
+This is now working as a user would expect.
+
+------------------------------------------------------------------------
+r1852 | ajapted | 2016-01-13 19:01:08 +1100 (Wed, 13 Jan 2016) | 3 lines
+
+When showing a split-line, store X/Y coordinate in the editor state
+(instead of recomputing them in Vertex_Insert).
+
+------------------------------------------------------------------------
+r1851 | ajapted | 2016-01-13 18:35:55 +1100 (Wed, 13 Jan 2016) | 4 lines
+
+Drawing mode : don't draw a vertex when another vertex is highlighted,
+or when split-line is active.  If another vertex is highlighted, "snap"
+the line onto it (since inserting will use it as the new endpoint).
+
+------------------------------------------------------------------------
+r1850 | ajapted | 2016-01-13 18:15:17 +1100 (Wed, 13 Jan 2016) | 2 lines
+
+Drawing mode : worked on making it a proper action: ACT_DRAW_LINE.
+
+------------------------------------------------------------------------
+r1849 | ajapted | 2016-01-12 21:42:11 +1100 (Tue, 12 Jan 2016) | 2 lines
+
+Sector rendering : use the dummy image for unknown flats.
+
+------------------------------------------------------------------------
+r1848 | ajapted | 2016-01-12 21:38:25 +1100 (Tue, 12 Jan 2016) | 4 lines
+
+Reworked code for creating dummy textures, they are now cached by functions
+in im_img.cc (IM_MissingTex etc) instead of r_render.cc, and increased the
+size from 32x32 --> 64x64.
+
+------------------------------------------------------------------------
+r1847 | ajapted | 2016-01-12 19:15:03 +1100 (Tue, 12 Jan 2016) | 4 lines
+
+Vertex drawing : draw a vertex too (as well as the red line) and handle
+grid-snapping properly.  Fixed several issues when inserting (generally
+turning off the drawing mode).
+
+------------------------------------------------------------------------
+r1846 | ajapted | 2016-01-12 18:42:20 +1100 (Tue, 12 Jan 2016) | 4 lines
+
+Began work on a "drawing mode", after inserting a vertex we continuously
+draw a red line from it to where the next vertex will go, and allow a
+simple left click to insert the next vertex.  Quite buggy atm...
+
+------------------------------------------------------------------------
+r1845 | ajapted | 2016-01-12 16:52:14 +1100 (Tue, 12 Jan 2016) | 2 lines
+
+Fixed mouse-wheel zooming around wrong spot after loading a new map.
+
+------------------------------------------------------------------------
+r1844 | ajapted | 2016-01-12 16:39:52 +1100 (Tue, 12 Jan 2016) | 2 lines
+
+Sector rendering : save/restore the state to the cache .dat file.
+
+------------------------------------------------------------------------
+r1843 | ajapted | 2016-01-12 16:30:30 +1100 (Tue, 12 Jan 2016) | 2 lines
+
+CHANGELOG updated.
+
+------------------------------------------------------------------------
+r1842 | ajapted | 2016-01-12 16:29:00 +1100 (Tue, 12 Jan 2016) | 3 lines
+
+Menu : added "Sector Rendering" choice to the View menu, implemented via
+new 'sector_render_mode' field in the editor_state structure.
+
+------------------------------------------------------------------------
+r1841 | ajapted | 2016-01-11 14:06:12 +1100 (Mon, 11 Jan 2016) | 7 lines
+
+ALL GAMES : reworked color definitions:
+* sky is now a fairly light blue
+* unknown_tex is as close to bright cyan as possible
+* unknown_flat is a fairly bright green
+* wall colors are grayscale
+* floor colors are a light brown
+
+------------------------------------------------------------------------
+r1840 | ajapted | 2016-01-11 13:44:02 +1100 (Mon, 11 Jan 2016) | 3 lines
+
+Replaced "R3D_Gamma" command with "Gamma" command so it can be used in
+general scope, and fixed the F11 key in the bindings.cfg file.
+
+------------------------------------------------------------------------
+r1839 | ajapted | 2016-01-11 13:33:50 +1100 (Mon, 11 Jan 2016) | 6 lines
+
+Changed TRANS_PIXEL from 247 --> 255, which is more friendly to Heretic
+and Hexen games.
+
+Also updated COLORMAP loader to replace any TRANS_PIXEL values, just in
+case some code uses it when creating an Img_c.
+
+------------------------------------------------------------------------
+r1838 | ajapted | 2016-01-11 11:33:58 +1100 (Mon, 11 Jan 2016) | 3 lines
+
+Canvas : fleshed out support for different modes in RenderSector(), e.g.
+solid rendering for an unknown texture using the game specific color.
+
+------------------------------------------------------------------------
+r1837 | ajapted | 2016-01-10 20:48:36 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas : compute proper texture coords for rendering sector flats.
+
+------------------------------------------------------------------------
+r1836 | ajapted | 2016-01-10 20:33:47 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Canvas : rendering sector flats is working, albeit not scaled or translated
+properly yet....
+
+------------------------------------------------------------------------
+r1835 | ajapted | 2016-01-10 20:20:31 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas : partial work on rendering sectors with a flat texture...
+
+------------------------------------------------------------------------
+r1834 | ajapted | 2016-01-10 20:06:20 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas : ability to render sectors as solid, showing their light levels.
+
+------------------------------------------------------------------------
+r1833 | ajapted | 2016-01-10 19:34:40 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Added config file variables: light_bump_small, _medium, _large.
+The default for non-modifier light button is 16 units (up or down).
+
+------------------------------------------------------------------------
+r1832 | ajapted | 2016-01-10 19:26:21 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Added SectorLightColor() utility function.
+
+------------------------------------------------------------------------
+r1831 | ajapted | 2016-01-10 18:40:08 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+README : some updates.
+
+------------------------------------------------------------------------
+r1830 | ajapted | 2016-01-10 18:37:36 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+TODO update.
+
+------------------------------------------------------------------------
+r1829 | ajapted | 2016-01-10 18:31:57 +1100 (Sun, 10 Jan 2016) | 7 lines
+
+Added workaround for loading BOOM definitions with games that are not
+supported by BOOM (Heretic and Hexen) -- we skip parsing the boom.ugh
+config file for certain games (done via new "exclude_game" directive).
+
+A better system for specifying which game + port combinations are
+usable is definitely needed -- something to be tackled later on.
+
+------------------------------------------------------------------------
+r1828 | ajapted | 2016-01-10 18:10:47 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Version bump and updated printf'd copyright year for 2016.
+
+------------------------------------------------------------------------
+r1827 | ajapted | 2016-01-10 18:09:32 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+About window : credit Ioan Chera in the copyright lines.
+
+------------------------------------------------------------------------
+r1826 | ajapted | 2016-01-10 17:09:59 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Eternity support : added a "3D MidTex" checkbox to the LineDef panel.
+
+------------------------------------------------------------------------
+r1825 | ajapted | 2016-01-10 16:54:23 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+code : removed unused GetAngleName() and GetWhenName() functions.
+
+------------------------------------------------------------------------
+r1824 | ajapted | 2016-01-10 16:51:01 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Only show the "passthru" linedef flag when the game/port supports it.
+Added "feature pass_through 1" to the BOOM definition file.
+
+------------------------------------------------------------------------
+r1823 | ajapted | 2016-01-10 16:39:06 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Hexen (etc) : removed UpdateMapFormatInfo() methods, use UpdateGameInfo()
+for map format stuff too.
+
+------------------------------------------------------------------------
+r1822 | ajapted | 2016-01-10 16:08:23 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+UI : in Sector panel, moved the "Headroom" widget below the rest, with a
+few other tweaks to the layout.
+
+------------------------------------------------------------------------
+r1821 | ajapted | 2016-01-10 15:25:23 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+UI : code tidying -- remove explicit add() calls in UI_Sector and
+UI_NodeDialog constructors.
+
+------------------------------------------------------------------------
+r1820 | ajapted | 2016-01-10 15:18:30 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+UI : improved layout of Sector panel, more roomy.
+
+------------------------------------------------------------------------
+r1819 | ajapted | 2016-01-10 15:09:26 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+UI : tweaked position of UI_Nombre in each editing panel.
+
+------------------------------------------------------------------------
+r1818 | ajapted | 2016-01-10 14:54:23 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+UI : offset the first column of flags in the LineDef panel.
+
+------------------------------------------------------------------------
+r1817 | ajapted | 2016-01-10 14:49:24 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+UI : tweaked layout in the LineDef panel, bit more vertical spacing.
+
+------------------------------------------------------------------------
+r1816 | ajapted | 2016-01-10 13:27:01 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Hexen : use tooltips to show what arguments of a line/thing special do.
+
+------------------------------------------------------------------------
+r1815 | ajapted | 2016-01-10 13:16:50 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Hexen : when showing args in LineDef / Thing panels, show a zero instead
+of a blank when the special for the line/thing actually uses that arg.
+
+------------------------------------------------------------------------
+r1814 | ajapted | 2016-01-10 12:26:49 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Inserting vertices with SHIFT always selects the new vertex.
+This is achieved via new "/select" flag for the Insert key command.
+
+------------------------------------------------------------------------
+r1813 | ajapted | 2016-01-10 11:02:06 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas : fixed some bugs in 2D sector rendering (e.g. min_y/max_y calcs).
+
+------------------------------------------------------------------------
+r1812 | ajapted | 2016-01-10 01:10:37 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas / RenderSector : fixed CMP_X to place NULLs at end of list.
+
+------------------------------------------------------------------------
+r1811 | ajapted | 2016-01-10 01:01:36 +1100 (Sun, 10 Jan 2016) | 3 lines
+
+Canvas : got solid rendering of a rectangular sector working.  The next
+step will be to render flats....
+
+------------------------------------------------------------------------
+r1810 | ajapted | 2016-01-10 00:52:18 +1100 (Sun, 10 Jan 2016) | 4 lines
+
+Canvas : for 2D sector rendering, compute the "side" field, added "x"
+field for the computed X values, and implemented finding the spans.
+
+------------------------------------------------------------------------
+r1809 | ajapted | 2016-01-10 00:30:14 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+TODO.txt updated.
+
+------------------------------------------------------------------------
+r1808 | ajapted | 2016-01-10 00:25:23 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+CHANGELOG : minor rearrange.
+
+------------------------------------------------------------------------
+r1807 | ajapted | 2016-01-10 00:14:01 +1100 (Sun, 10 Jan 2016) | 2 lines
+
+Canvas : more work on experimental 2D sector rendering....
+
+------------------------------------------------------------------------
+r1806 | ajapted | 2016-01-09 21:19:26 +1100 (Sat, 09 Jan 2016) | 2 lines
+
+Hexen : fully support the special type in the Thing panel.
+
+------------------------------------------------------------------------
+r1805 | ajapted | 2016-01-09 21:04:17 +1100 (Sat, 09 Jan 2016) | 3 lines
+
+Hexen : implemented the Thing special "Choose" button, and allow a click
+on a browser item to set the special type.
+
+------------------------------------------------------------------------
+r1804 | ajapted | 2016-01-09 20:52:13 +1100 (Sat, 09 Jan 2016) | 2 lines
+
+Canvas : began work on experimental RenderSector() method....
+
+------------------------------------------------------------------------
+r1803 | ajapted | 2016-01-09 20:05:36 +1100 (Sat, 09 Jan 2016) | 2 lines
+
+Hexen : support showing and editing arguments in the Thing panel.
+
+------------------------------------------------------------------------
+r1802 | ajapted | 2016-01-08 19:43:59 +1100 (Fri, 08 Jan 2016) | 6 lines
+
+Thing panel : reorganized it e.g. moved sprite above the arrow circle
+(closer to the Type / Desc widgets), and a few other tweaks.
+
+This was prompted by a need for all the new Hexen stuff to fit in the
+minimum window size (which it now does).
+
+------------------------------------------------------------------------
+r1801 | ajapted | 2016-01-08 18:45:50 +1100 (Fri, 08 Jan 2016) | 3 lines
+
+Hexen : added "Special", "Args" (etc) widgets in the Thing panel.
+They are not implemented yet....
+
+------------------------------------------------------------------------
+r1800 | ajapted | 2016-01-08 18:22:52 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Hexen : implemented "dormant" flag in the Thing panel.
+
+------------------------------------------------------------------------
+r1799 | ajapted | 2016-01-08 18:11:33 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Hexen : fixed wrong "mask" values for SP/COOP/DM buttons (used by callback function).
+
+------------------------------------------------------------------------
+r1798 | ajapted | 2016-01-08 17:10:03 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Hexen : support the class flags (Fighter/Cleric/Magic) in Thing panel.
+
+------------------------------------------------------------------------
+r1797 | ajapted | 2016-01-08 16:46:35 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Hexen : support game mode flags (SP, COOP, DM) in the Things panel.
+
+------------------------------------------------------------------------
+r1796 | ajapted | 2016-01-08 16:31:15 +1100 (Fri, 08 Jan 2016) | 3 lines
+
+Check things : updated stuck-things detection to handle HEXEN flags,
+especially the class bits.
+
+------------------------------------------------------------------------
+r1795 | ajapted | 2016-01-08 16:24:10 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Fixed a bug recently introduced in the stuck-thing detection.
+
+------------------------------------------------------------------------
+r1794 | ajapted | 2016-01-08 16:18:24 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Added config file variable: default_gamma
+
+------------------------------------------------------------------------
+r1793 | ajapted | 2016-01-08 15:08:53 +1100 (Fri, 08 Jan 2016) | 2 lines
+
+Added config file variables: floor_bump_small, _medium, _large.
+
+------------------------------------------------------------------------
+r1792 | ajapted | 2016-01-06 14:49:05 +1100 (Wed, 06 Jan 2016) | 4 lines
+
+Makefile : the install target now deletes the old "freedoom.ugh" config,
+preventing it from appearing in the Manage Project dialog (along with
+freedoom1 and freedoom2, which is confusing).
+
+------------------------------------------------------------------------
+r1791 | ajapted | 2015-12-31 14:31:48 +1100 (Thu, 31 Dec 2015) | 3 lines
+
+CHANGELOG : brought the changelog completely up-to-date, and reorganised
+with most important elements at the top.
+
+------------------------------------------------------------------------
+r1790 | ajapted | 2015-12-30 12:45:23 +1100 (Wed, 30 Dec 2015) | 3 lines
+
+Hexen : in Linedef panel, support setting new Activation values via the
+choice button.
+
+------------------------------------------------------------------------
+r1789 | ajapted | 2015-12-30 12:35:29 +1100 (Wed, 30 Dec 2015) | 2 lines
+
+Hexen : properly update the Activation choice when selecting/hilighting lines.
+
+------------------------------------------------------------------------
+r1788 | ajapted | 2015-12-30 12:14:47 +1100 (Wed, 30 Dec 2015) | 2 lines
+
+Thing panel : moved the arrow circle (up and left) and made the buttons bigger.
+
+------------------------------------------------------------------------
+r1787 | ajapted | 2015-12-30 12:10:41 +1100 (Wed, 30 Dec 2015) | 2 lines
+
+UI : made the right panel slightly wider.
+
+------------------------------------------------------------------------
+r1786 | ajapted | 2015-12-30 12:06:21 +1100 (Wed, 30 Dec 2015) | 3 lines
+
+Hexen : in LineDef panel added a choice widget for the activation mode of
+the linedef -- with choices such as W1, SR, G1 (etc....)
+
+------------------------------------------------------------------------
+r1785 | ajapted | 2015-12-30 11:30:21 +1100 (Wed, 30 Dec 2015) | 3 lines
+
+Map loading : allow loading a map with no vertices, no linedefs (etc...)
+Also factored out some common code in linedef loaders: ValidateSidedefs()
+
+------------------------------------------------------------------------
+r1784 | ajapted | 2015-12-29 23:27:54 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+Hexen : made the Linedef panel actually show the 5 arguments.
+
+------------------------------------------------------------------------
+r1783 | ajapted | 2015-12-29 23:13:56 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+Hexen : in Linedef panel show the five "Args:" boxes when in Hexen mode,
+and implemented args_callback() which can set new values.
+
+------------------------------------------------------------------------
+r1782 | ajapted | 2015-12-29 22:51:03 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+Find / Replace : support the "tag" filter for Hexen things (TID).
+
+------------------------------------------------------------------------
+r1781 | ajapted | 2015-12-29 19:43:14 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+Changed DEFAULT_PORT to be "vanilla" instead of "boom", because Boom is
+only a DOOM engine and does not support Heretic or Hexen.
+
+------------------------------------------------------------------------
+r1780 | ajapted | 2015-12-29 19:36:23 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+HEXEN conf : added four linegroups: Animated, Door, Lift, Stairs.
+
+------------------------------------------------------------------------
+r1779 | ajapted | 2015-12-29 19:20:09 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+DOOM conf : minor comment fix (syntax of "line" command).
+
+------------------------------------------------------------------------
+r1778 | ajapted | 2015-12-29 19:15:57 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+Browser : fixed alpha sorting of line specials for Hexen (it did not handle
+the lack of a S1/WR/etc action name at beginning of the description).
+
+------------------------------------------------------------------------
+r1777 | ajapted | 2015-12-29 19:05:15 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+HEXEN conf : added two missing specials: 138 "Floor_Waggle" and 109 "Force_Lightning".
+
+------------------------------------------------------------------------
+r1776 | ajapted | 2015-12-29 18:58:34 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+HEXEN conf : added missing line/thing special 0 ("NOTHING").
+
+------------------------------------------------------------------------
+r1775 | ajapted | 2015-12-29 18:48:31 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+Game def parser : support arg1..arg5 names in "line" commands (for Hexen).
+
+------------------------------------------------------------------------
+r1774 | ajapted | 2015-12-29 18:38:29 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+HEXEN conf : finished the line/thing specials.
+
+------------------------------------------------------------------------
+r1773 | ajapted | 2015-12-29 18:20:15 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+HEXEN conf : more work on line/thing specials, simplifying and/or abbreviating
+some names and renamed a few argument names.
+
+------------------------------------------------------------------------
+r1772 | ajapted | 2015-12-29 17:19:27 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+HEXEN conf : more work on the specials, put all types into an appropriate
+category and renamed a few specials.
+
+------------------------------------------------------------------------
+r1771 | ajapted | 2015-12-29 17:06:36 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+HEXEN config : began work to define all the line/thing specials, based
+on the Unofficial Hexen Specifications.
+
+------------------------------------------------------------------------
+r1770 | ajapted | 2015-12-29 14:55:02 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+Use absolute paths for resource filenames in __EUREKA lump, since that is
+more robust (allows moving the wad to another folder).
+
+------------------------------------------------------------------------
+r1769 | ajapted | 2015-12-29 14:42:04 +1100 (Tue, 29 Dec 2015) | 8 lines
+
+Added a built-in "DOGS" sprite for when port is Boom (or compatible), as
+that sprite is generally not available in the IWADs and showing a missing
+sprite in the browser was quite ugly / distracting.
+
+This dog sprite was sourced from the OpenGameArt.org website.
+Authors are 'Benalene' and 'qudobup' (users on the OGA site).
+License is CC-BY 3.0 (Creative Commons Attribution license).
+
+------------------------------------------------------------------------
+r1768 | ajapted | 2015-12-29 14:33:02 +1100 (Tue, 29 Dec 2015) | 3 lines
+
+Image class : added IM_CreateFromText() function which can generate an Img_c
+from some builtin strings and palette [ not unlike XPM ].
+
+------------------------------------------------------------------------
+r1767 | ajapted | 2015-12-29 14:04:29 +1100 (Tue, 29 Dec 2015) | 2 lines
+
+Removed RGB_INVALID constant -- not used anywhere.
+
+------------------------------------------------------------------------
+r1766 | ajapted | 2015-12-27 21:29:19 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+Configs : updated comments to remove "should not exceed 24 characters" advice.
+
+------------------------------------------------------------------------
+r1765 | ajapted | 2015-12-27 21:24:32 +1100 (Sun, 27 Dec 2015) | 3 lines
+
+Hexen : define the new linedef flags (MLF_Repeatable, MLF_Activation)
+plus some ZDoom flags.  Also define the activation values (SPAC_XXX).
+
+------------------------------------------------------------------------
+r1764 | ajapted | 2015-12-27 19:23:52 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : finished sector types.
+
+------------------------------------------------------------------------
+r1763 | ajapted | 2015-12-27 19:13:12 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN conf : worked on adding all the Sector specials...
+
+------------------------------------------------------------------------
+r1762 | ajapted | 2015-12-27 18:09:37 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : a few fixes (e.g. Cauldron sprites).
+
+------------------------------------------------------------------------
+r1761 | ajapted | 2015-12-27 18:07:25 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : finished improving the names of things.
+
+------------------------------------------------------------------------
+r1760 | ajapted | 2015-12-27 17:54:22 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN conf : worked on improving names of decorative things...
+
+------------------------------------------------------------------------
+r1759 | ajapted | 2015-12-27 17:17:35 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : split decorations by adding new "Natural" category.
+
+------------------------------------------------------------------------
+r1758 | ajapted | 2015-12-27 17:06:56 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : added all remaining thing types (though names need fixing...)
+
+------------------------------------------------------------------------
+r1757 | ajapted | 2015-12-27 16:49:46 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+Hexen config : added thing types 10500-10503 and 8500-8509.
+
+------------------------------------------------------------------------
+r1756 | ajapted | 2015-12-27 16:41:03 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : added the puzzle-piece items (plus a new category for them).
+
+------------------------------------------------------------------------
+r1755 | ajapted | 2015-12-27 16:36:23 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : id numbers for 'Flechette' and 'Disc of Repulsion' were reversed, fixed.
+
+------------------------------------------------------------------------
+r1754 | ajapted | 2015-12-27 15:03:45 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN config : added player starts 5-8 and the soundtype markers (things 1400-1409).
+
+------------------------------------------------------------------------
+r1753 | ajapted | 2015-12-27 14:48:40 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+HEXEN : added whitespace to align columns (for Things).
+
+------------------------------------------------------------------------
+r1752 | ajapted | 2015-12-27 12:09:48 +1100 (Sun, 27 Dec 2015) | 2 lines
+
+TODO : minor update
+
+------------------------------------------------------------------------
+r1751 | ajapted | 2015-12-27 12:05:35 +1100 (Sun, 27 Dec 2015) | 7 lines
+
+In game definitions support 't' flag for things like teleport destination
+which can safely overlap moving actors (players and monsters) but not
+decorative things.
+
+Reworked thing stuck checking code to handle it (and also to only check
+each pair of blocking things ONCE).
+
+------------------------------------------------------------------------
+r1750 | ajapted | 2015-12-20 12:42:05 +1100 (Sun, 20 Dec 2015) | 2 lines
+
+Removed top-level "ups" folder -- not used for anything.
+
+------------------------------------------------------------------------
+r1749 | ajapted | 2015-12-20 12:38:40 +1100 (Sun, 20 Dec 2015) | 2 lines
+
+TODO.txt : updated.
+
+------------------------------------------------------------------------
+r1748 | ajapted | 2015-12-20 12:35:17 +1100 (Sun, 20 Dec 2015) | 3 lines
+
+GAME definitions : removed "level_name XXX" lines, which are not used
+(they were simply ignored by the UGH file parser).
+
+------------------------------------------------------------------------
+r1747 | ajapted | 2015-12-19 23:48:41 +1100 (Sat, 19 Dec 2015) | 4 lines
+
+Hexen support : added "z" widget to the Thing panel (only visible when
+editing a hexen format map).  Also apply the Z value when rendering
+things in the 3D preview.  These changes by Ioan Chera.
+
+------------------------------------------------------------------------
+r1746 | ajapted | 2015-12-19 23:21:37 +1100 (Sat, 19 Dec 2015) | 3 lines
+
+Hexen support : added "TID" widget to the Thing panel when the current
+map format is Hexen (and hide it otherwise).  This code by Ioan Chera.
+
+------------------------------------------------------------------------
+r1745 | ajapted | 2015-12-19 23:08:56 +1100 (Sat, 19 Dec 2015) | 4 lines
+
+Hexen support : code for reading and writing Hexen format maps, including
+handling the BEHAVIOR lump.  This code originally by Ioan Chera (printz)
+with a few tweaks by me.
+
+------------------------------------------------------------------------
+r1744 | ajapted | 2015-12-19 22:13:01 +1100 (Sat, 19 Dec 2015) | 2 lines
+
+GAMES : added partial Hexen config (ugh) file -- thanks to printz.
+
+------------------------------------------------------------------------
+r1743 | ajapted | 2015-12-19 21:29:24 +1100 (Sat, 19 Dec 2015) | 6 lines
+
+Check lines : detect manual (D1,DR) doors on one-sided linedefs, with
+options to show or fix them (we "fix" them by clearing the special).
+Reason for this check is that such doors can crash vanilla DOOM.
+
+This closes ticket #16.
+
+------------------------------------------------------------------------
+r1742 | ajapted | 2015-12-19 20:58:19 +1100 (Sat, 19 Dec 2015) | 3 lines
+
+HERETIC: renamed two monsters: "Gargoyle Leader" --> "Fire Gargoyle",
+and "Golem Leader" --> "Nitro Golem" (more consistent with the game).
+
+------------------------------------------------------------------------
+r1741 | ajapted | 2015-11-27 12:56:56 +1100 (Fri, 27 Nov 2015) | 3 lines
+
+glBSP library : disabled the "no nodes" hack which created a dummy node and
+subsector -- turns out that vanilla DOOM copes with no nodes just fine.
+
+------------------------------------------------------------------------
+r1740 | ajapted | 2015-09-21 19:40:23 +1000 (Mon, 21 Sep 2015) | 9 lines
+
+Updated eureka.desktop file with:
+1. %f on Exec line and a MimeType line, so can handle wad files from
+   file-system exploring/navigation programs
+2. replaced "X-DoomEditor" category with "ActionGame"
+3. added Keywords line
+
+Thanks to Fabian Greffrath for the patch (ticket #17).
+I tweaked the set of keywords (e.g. added "heretic").
+
+------------------------------------------------------------------------
+r1739 | ajapted | 2015-09-09 13:54:40 +1000 (Wed, 09 Sep 2015) | 4 lines
+
+Another fix for the freedoom1/freedoom2 distinction -- when loading known iwads,
+ignore the plain "freedoom" entry (so it won't appear as a choice in the Manage
+Project dialog).
+
+------------------------------------------------------------------------
+r1738 | ajapted | 2015-09-08 21:37:46 +1000 (Tue, 08 Sep 2015) | 5 lines
+
+Fixed problem when looking for 'freedoom' as an emergency IWAD to use,
+since there are now separate config files for Phase 1 and Phase 2, namely
+'freedoom1.ugh' and 'freedoom2.ugh', hence the code should check these
+instead of plain 'freedoom'.
+
+------------------------------------------------------------------------
+r1737 | ajapted | 2015-09-07 22:02:51 +1000 (Mon, 07 Sep 2015) | 4 lines
+
+Ports / Eternity : added "EE:" prefix to all linetype descriptions, removed
+the 'x', 'w' and 'u' categories, various tweaks to the descriptions e.g.
+added /f and /c to designate types that use/affect a floor or ceiling.
+
+------------------------------------------------------------------------
+r1736 | ajapted | 2015-09-07 21:43:05 +1000 (Mon, 07 Sep 2015) | 3 lines
+
+Checked in definition file for the 'Eternity' source port, courtesy printz
+(with some editing by me).
+
+------------------------------------------------------------------------
+r1735 | ajapted | 2015-08-29 22:53:08 +1000 (Sat, 29 Aug 2015) | 2 lines
+
+Browser: increased default width by 10 pixels (show 4 columns of sprites).
+
+------------------------------------------------------------------------
+r1734 | ajapted | 2015-08-29 22:51:38 +1000 (Sat, 29 Aug 2015) | 4 lines
+
+Better handle the case when merging linedefs after dragging a vertex
+(check the sectors on each side and decide if need to change a sidedef
+on the linedef which remains, or even delete the other linedef).
+
+------------------------------------------------------------------------
+r1733 | printz | 2015-08-23 18:58:37 +1000 (Sun, 23 Aug 2015) | 3 lines
+
+Eureka for OSX is now code-signed
+
+* Also updated recommended project settings.
+------------------------------------------------------------------------
+r1732 | ajapted | 2015-06-13 16:43:15 +1000 (Sat, 13 Jun 2015) | 2 lines
+
+Created new CHANGES.txt after the previous release.
+
+------------------------------------------------------------------------
+r1731 | ajapted | 2015-06-13 16:40:15 +1000 (Sat, 13 Jun 2015) | 2 lines
+
+Moved CHANGES.txt --> changelogs/107.txt
+
+------------------------------------------------------------------------
+r1730 | ajapted | 2015-06-13 16:36:33 +1000 (Sat, 13 Jun 2015) | 3 lines
+
+Check / textures : implemented checking for the Medusa Effect, but only when
+the game or port specifies the "medusa_bug" feature.
+
+------------------------------------------------------------------------
+r1729 | ajapted | 2015-06-13 14:21:01 +1000 (Sat, 13 Jun 2015) | 2 lines
+
+Ports / vanilla : added "feature medusa_bug 1"
+
+------------------------------------------------------------------------
+r1728 | ajapted | 2015-06-13 14:20:18 +1000 (Sat, 13 Jun 2015) | 3 lines
+
+Support 'medusa_bug' feature in game definitions (mainly needed by Vanilla
+to indicate that it is prone to the Medusa Effect).
+
+------------------------------------------------------------------------
+r1727 | ajapted | 2015-06-13 14:14:16 +1000 (Sat, 13 Jun 2015) | 3 lines
+
+Texture loader : check for textures which potentially cause the Medusa Effect
+when used as a mid-masked texture on a 2S line.
+
+------------------------------------------------------------------------
+r1726 | ajapted | 2015-06-12 14:57:04 +1000 (Fri, 12 Jun 2015) | 4 lines
+
+Check / textures : implemented test for transparent textures used on solid
+parts of walls, including "Log" button to list them and "Fix" button to
+automatically set them to the default wall texture.
+
+------------------------------------------------------------------------
+r1725 | ajapted | 2015-06-12 14:34:19 +1000 (Fri, 12 Jun 2015) | 2 lines
+
+Image class : added has_transparent() method.
+
+------------------------------------------------------------------------
+r1724 | ajapted | 2015-03-03 19:47:41 +1100 (Tue, 03 Mar 2015) | 2 lines
+
+GAME DEFS : minor comment changes in freedoom2.ugh
+
+------------------------------------------------------------------------
+r1723 | ajapted | 2015-03-03 19:46:24 +1100 (Tue, 03 Mar 2015) | 4 lines
+
+GAME DEFS : better support for latest FreeDoom release:
+1. renamed freedoom.ugh --> freedoom2.ugh
+2. added freedoom1.ugh which simply includes "doom"
+
+------------------------------------------------------------------------
+r1722 | ajapted | 2015-02-18 18:22:05 +1100 (Wed, 18 Feb 2015) | 2 lines
+
+README.txt : removed 'F5' key description.
+
+------------------------------------------------------------------------
+r1721 | printz | 2015-02-17 18:30:38 +1100 (Tue, 17 Feb 2015) | 1 line
+
+osx: Bumped info.plist version
+
+------------------------------------------------------------------------
+r1720 | ajapted | 2015-02-16 18:24:43 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+Changed default of 'render_aspect_ratio' config var --> 133.
+
+------------------------------------------------------------------------
+r1719 | ajapted | 2015-02-16 18:21:57 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+Win32 package : fixed missing logo image.
+
+------------------------------------------------------------------------
+r1718 | ajapted | 2015-02-16 16:58:48 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+CHANGELOG : added current revision.
+
+------------------------------------------------------------------------
+r1717 | ajapted | 2015-02-16 16:47:13 +1100 (Mon, 16 Feb 2015) | 2 lines
+
+docs/History : re-sync with SVN repository logs (ready fo release).
 
 ------------------------------------------------------------------------
 r1716 | ajapted | 2015-02-16 15:41:50 +1100 (Mon, 16 Feb 2015) | 2 lines
