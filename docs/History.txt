@@ -4,7 +4,7 @@ REPOSITORY HISTORY
 __________________
 
 
-This file contains commit logs from three different repositories,
+This file contains commit logs from several different repositories,
 in reverse chronological order (from newest to oldest).
 
 When I first created Eureka (forking from Yadex), I just made all
@@ -19,7 +19,7 @@ registered a SourceForge project for it, and the code repository
 got moved yet again.
 
 In January 2016 the SVN repository was converted into a GIT
-repository (still on SourceForge).
+repository (still on SourceForge though).
 
 
 ====================================================
