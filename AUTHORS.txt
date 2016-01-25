@@ -26,10 +26,10 @@ Wesley Johnson
 
 EARLIER WORK:
 
-André Majorel -- created the Yadex editor.  Eureka began as a fork of
-Yadex, version 1.7.0 to be precise.
+André Majorel created the Yadex editor.  Eureka began as a fork of
+this editor, version 1.7.0 to be precise.
 
-Raphael Quinet and Brendon Wyber -- created DEU 5.21, which Yadex was
+Raphael Quinet and Brendon Wyber created DEU 5.21, which Yadex was
 derived from.
 
 Both Yadex and DEU had many contributors, a comprehensive list of them
