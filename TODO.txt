@@ -13,6 +13,7 @@ General
 -------
 
 +  Preferences:
+   -  sector_render_default
    -  headroom button values
    -  ability to change mouse move/turn speed in 3D view
    -  floor_bump_xxx values
@@ -165,6 +166,8 @@ IDEA: for generalized lines, show more info in tooltip of desc
 
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
+
+IDEA: "fix" missing coop starts, place them near player #1
 
 WISH: support ZDoom PK3 for textures (etc)
 

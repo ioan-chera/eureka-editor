@@ -37,6 +37,7 @@ Editing:
 
 -  much less chance to accidentally drag an object
 -  when a line splits a sector, use a consistent orientation
+-  when creating a fresh map, add all four player starts
 -  allow loading a map with no vertices, no linedefs (etc)
 
 
