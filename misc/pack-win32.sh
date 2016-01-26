@@ -20,13 +20,14 @@ cp -av Eureka.exe $dest
 #
 #  Data files
 #
-cp -av *.cfg $dest
-cp -av misc/about_logo.png $dest
+cp -av common $dest/common
+cp -av games  $dest/games
+cp -av ports  $dest/ports
+cp -av mods   $dest/mods
 
-svn export common $dest/common
-svn export games  $dest/games
-svn export ports  $dest/ports
-svn export mods   $dest/mods
+cp -av bindings.cfg $dest
+
+cp -av misc/about_logo.png $dest/common
 
 #
 #  Documentation

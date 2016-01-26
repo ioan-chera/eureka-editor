@@ -17,10 +17,10 @@ mkdir $dest
 #
 cp -av Makefile* $dest/
 
-svn export src $dest/src
-svn export osx $dest/osx
-svn export glbsp_src $dest/glbsp_src
-svn export misc $dest/misc
+cp -av src $dest/src
+cp -av osx $dest/osx
+cp -av glbsp_src $dest/glbsp_src
+cp -av misc $dest/misc
 
 mkdir $dest/obj_linux
 mkdir $dest/obj_linux/glbsp
@@ -30,21 +30,20 @@ mkdir $dest/obj_win32/glbsp
 #
 #  Data files
 #
-cp -av *.cfg $dest
+cp -av bindings.cfg $dest
 
-svn export common $dest/common
-svn export games  $dest/games
-svn export ports  $dest/ports
-svn export mods   $dest/mods
-
+cp -av common $dest/common
+cp -av games  $dest/games
+cp -av ports  $dest/ports
+cp -av mods   $dest/mods
 
 #
 #  Documentation
 #
 cp -av *.txt $dest
 
-svn export docs $dest/docs
-svn export changelogs $dest/changelogs
+cp -av docs $dest/docs
+cp -av changelogs $dest/changelogs
 
 #
 # all done
