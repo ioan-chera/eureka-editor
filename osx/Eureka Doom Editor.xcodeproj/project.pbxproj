@@ -23,7 +23,6 @@
 		FA1E04EE16689A2900ED41DC /* ui_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA1E04EC16689A2900ED41DC /* ui_misc.cc */; };
 		FA244640166CAA6100C68ED8 /* common in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463A166CAA6100C68ED8 /* common */; };
 		FA244642166CAA6100C68ED8 /* games in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463C166CAA6100C68ED8 /* games */; };
-		FA244644166CAA6100C68ED8 /* mods in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463E166CAA6100C68ED8 /* mods */; };
 		FA244645166CAA6100C68ED8 /* ports in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463F166CAA6100C68ED8 /* ports */; };
 		FA4433D116AD9CB800525112 /* m_keys.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA4433CF16AD9CB800525112 /* m_keys.cc */; };
 		FA5E2C2D165B8F860024D6A5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5E2C2C165B8F860024D6A5 /* Cocoa.framework */; };
@@ -133,7 +132,6 @@
 				4F13FF231A16C1E700B64656 /* bindings.cfg in CopyFiles */,
 				FA244642166CAA6100C68ED8 /* games in CopyFiles */,
 				4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */,
-				FA244644166CAA6100C68ED8 /* mods in CopyFiles */,
 				FA244645166CAA6100C68ED8 /* ports in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -163,7 +161,6 @@
 		FA24463B166CAA6100C68ED8 /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = docs; path = ../docs; sourceTree = "<group>"; };
 		FA24463C166CAA6100C68ED8 /* games */ = {isa = PBXFileReference; lastKnownFileType = folder; name = games; path = ../games; sourceTree = "<group>"; };
 		FA24463D166CAA6100C68ED8 /* misc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = misc; path = ../misc; sourceTree = "<group>"; };
-		FA24463E166CAA6100C68ED8 /* mods */ = {isa = PBXFileReference; lastKnownFileType = folder; name = mods; path = ../mods; sourceTree = "<group>"; };
 		FA24463F166CAA6100C68ED8 /* ports */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ports; path = ../ports; sourceTree = "<group>"; };
 		FA4433CF16AD9CB800525112 /* m_keys.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_keys.cc; path = ../../src/m_keys.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA4433D016AD9CB800525112 /* m_keys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_keys.h; path = ../../src/m_keys.h; sourceTree = "<group>"; usesTabs = 1; };
@@ -360,7 +357,6 @@
 				FA24463B166CAA6100C68ED8 /* docs */,
 				FA24463C166CAA6100C68ED8 /* games */,
 				FA24463D166CAA6100C68ED8 /* misc */,
-				FA24463E166CAA6100C68ED8 /* mods */,
 				FA24463F166CAA6100C68ED8 /* ports */,
 				FA5E2C32165B8F860024D6A5 /* EurekaApp */,
 				FA5E2C2B165B8F860024D6A5 /* Frameworks */,
@@ -729,7 +725,7 @@
 		FA5E2C1F165B8F860024D6A5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastTestingUpgradeCheck = 0640;
+				LastTestingUpgradeCheck = 0710;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = ioan;
 				TargetAttributes = {
