@@ -9,4 +9,4 @@ Type=Application
 Categories=Game;ActionGame;
 StartupNotify=false
 MimeType=application/x-doom-wad;
-Keywords=doom;heretic;level;map;wad;editor;builder;yadex;
+Keywords=doom;heretic;hexen;level;map;wad;editor;builder;yadex;
