@@ -226,8 +226,18 @@ void Vertex_FindDanglers(selection_c& sel)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int v1 = LineDefs[n]->start;
-		int v2 = LineDefs[n]->end;
+		const LineDef *L = LineDefs[n];
+
+		int v1 = L->start;
+		int v2 = L->end;
+
+		// dangling vertices are fine for lines setting inside a sector
+		// (i.e. with same sector on both sides)
+		if (L->TwoSided() && (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT)))
+		{
+			line_counts[v1] = line_counts[v2] = 2;
+			continue;
+		}
 
 		if (line_counts[v1] < 2) line_counts[v1] += 1;
 		if (line_counts[v2] < 2) line_counts[v2] += 1;
