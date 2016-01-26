@@ -1696,7 +1696,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (! img)
 			{
-				img = IM_UnknownFlat();
+				img = IM_UnknownTex();
 			}
 		}
 	}
