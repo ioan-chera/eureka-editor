@@ -35,7 +35,7 @@ cp -av bindings.cfg $dest
 cp -av common $dest/common
 cp -av games  $dest/games
 cp -av ports  $dest/ports
-cp -av mods   $dest/mods
+mkdir         $dest/mods
 
 #
 #  Documentation
