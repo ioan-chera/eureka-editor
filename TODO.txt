@@ -3,6 +3,14 @@ Eureka TODO / WISHLIST
 ======================
 
 
+Bug: drawing mode crossing lines sometimes mucks up
+     e.g. drawing over the stairs in MAP01
+
+A way to set uppers/lowers on 1S for certain linetypes (e.g. MBF sky transfer)
+
+Q/ keep the ADD/DEL sidedef buttons? [ probably as an option ]
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
