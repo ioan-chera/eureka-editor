@@ -592,7 +592,10 @@ void PutBlockmap(void)
   // of shorts for the actual line lists.
  
   if (block_count > cur_info->block_limit)
-    TruncateBlockmap();
+  {
+    MarkSoftFailure(LIMIT_BLOCKMAP);
+    block_overflowed = TRUE;
+  }
 
   // initial phase: create internal blockmap containing the index of
   // all lines in each block.
