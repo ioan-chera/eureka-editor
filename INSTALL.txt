@@ -16,6 +16,7 @@ Dependencies:
 
    You may also need: libxft-dev
                       libxinerama-dev
+                      libfontconfig-dev
                       libjpeg-dev
                       libpng-dev
 
