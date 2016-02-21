@@ -32,6 +32,7 @@
 #include "m_bitvec.h"
 #include "r_grid.h"
 #include "levels.h"
+#include "m_game.h"
 #include "objects.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
@@ -705,9 +706,9 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 
 	const SideDef * SD = SideDefs[L1->right];
 
-	if (isalnum(SD->LowerTex()[0]))
+	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
-	else if (isalnum(SD->UpperTex()[0]))
+	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
 	BA_ChangeSD(L1->right, SideDef::F_MID_TEX, tex);
@@ -717,9 +718,9 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 
 	SD = SideDefs[lost_sd];
 
-	if (isalnum(SD->LowerTex()[0]))
+	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
-	else if (isalnum(SD->UpperTex()[0]))
+	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
 	BA_ChangeSD(lost_sd, SideDef::F_MID_TEX, tex);

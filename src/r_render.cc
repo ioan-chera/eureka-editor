@@ -629,7 +629,7 @@ public:
 		if (! view.texturing)
 			return;
 
-		if (! isalnum(sd->MidTex()[0]))
+		if (! is_null_tex(sd->MidTex()))
 			return;
 
 		rail.FindTex(sd->MidTex(), ld);

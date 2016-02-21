@@ -845,7 +845,7 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 
 	const SideDef *other = SideDefs[other_sd];
 
-	if (isalnum(other->MidTex()[0]))
+	if (! is_null_tex(other->MidTex()))
 	{
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
@@ -885,10 +885,10 @@ void LD_MergedSecondSideDef(int ld)
 	int  left_tex = 0;
 	int right_tex = 0;
 
-	if (isalnum(L->Left()->MidTex()[0]))
+	if (! is_null_tex(L->Left()->MidTex()))
 		left_tex = L->Left()->mid_tex;
 
-	if (isalnum(L->Right()->MidTex()[0]))
+	if (! is_null_tex(L->Right()->MidTex()))
 		right_tex = L->Right()->mid_tex;
 	
 	if (! left_tex)  left_tex = right_tex;
@@ -948,17 +948,17 @@ void LD_RemoveSideDef(int ld, int ld_side)
 	int new_tex = BA_InternaliseString(default_mid_tex);
 
 	// grab new texture from lower or upper if possible
-	if (isalnum(SD->LowerTex()[0]))
+	if (! is_null_tex(SD->LowerTex()))
 		new_tex = SD->lower_tex;
-	else if (isalnum(SD->UpperTex()[0]))
+	else if (! is_null_tex(SD->UpperTex()))
 		new_tex = SD->upper_tex;
 	else if (gone_sd >= 0)
 	{
 		SD = SideDefs[gone_sd];
 
-		if (isalnum(SD->LowerTex()[0]))
+		if (! is_null_tex(SD->LowerTex()))
 			new_tex = SD->lower_tex;
-		else if (isalnum(SD->UpperTex()[0]))
+		else if (! is_null_tex(SD->UpperTex()))
 			new_tex = SD->upper_tex;
 	}
 
