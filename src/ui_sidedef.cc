@@ -28,8 +28,9 @@
 
 
 // config item
-bool swap_sidedefs;
-bool show_full_one_sided;
+bool swap_sidedefs = false;
+bool show_full_one_sided = false;
+bool sidedef_add_del_buttons = false;
 
 //
 // Constructor
@@ -506,7 +507,7 @@ void UI_SideBox::UpdateLabel()
 
 void UI_SideBox::UpdateAddDel()
 {
-	if (obj == SETOBJ_NO_LINE)
+	if (obj == SETOBJ_NO_LINE || ! sidedef_add_del_buttons)
 	{
 		add_button->hide();
 		del_button->hide();

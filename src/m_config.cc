@@ -711,6 +711,15 @@ static const opt_desc_t options[] =
 		&show_full_one_sided
 	},
 
+	{	"sidedef_add_del_buttons",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Show the ADD and DEL buttons in Sidedef panels",
+		NULL,
+		&sidedef_add_del_buttons
+	},
+
 	{	"swap_sidedefs",
 		0,
 		OPT_BOOLEAN,
