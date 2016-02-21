@@ -94,9 +94,6 @@ void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip);
 
 double AngleBetweenLines(int A, int B, int C);
 
-void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
-void LD_RemoveSideDef(int ld, int ld_side);
-
 
 #endif  /* __EUREKA_X_LOOP_H__ */
 
