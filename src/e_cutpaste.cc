@@ -28,6 +28,7 @@
 #include "e_vertex.h"
 #include "editloop.h"
 #include "levels.h"
+#include "m_game.h"
 #include "objects.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
@@ -576,7 +577,7 @@ static void PasteGroupOfObjects(int pos_x, int pos_y)
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && L->Right()->MidTex()[0] == '-')
+		if (L->OneSided() && is_null_tex(L->Right()->MidTex()))
 			LD_FixForLostSide(new_l);
 	}
 

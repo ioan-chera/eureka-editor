@@ -288,8 +288,8 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 							(what & 1)        ? NS->UpperTex() :
 							                    NS->LowerTex();
 
-		if (L_tex[0] == '-') continue;
-		if (N_tex[0] == '-') continue;
+		if (is_null_tex(L_tex)) continue;
+		if (is_null_tex(N_tex)) continue;
 
 		if (PartialTexCmp(L_tex, N_tex) == 0)
 			matched = true;
@@ -358,7 +358,7 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 
 static int GetTextureHeight(const char *name)
 {
-	if (name[0] == '-')
+	if (is_missing_tex(name))
 		return 128;
 
 	Img_c *img = W_GetTexture(name);
@@ -390,14 +390,14 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 
 	if (part == 'l')
 	{
-		if (SD->LowerTex()[0] == '-')
+		if (is_null_tex(SD->LowerTex()))
 			return false;
 
 		return back->floorh > front->floorh;
 	}
 	else
 	{
-		if (SD->UpperTex()[0] == '-')
+		if (is_null_tex(SD->UpperTex()))
 			return false;
 
 		return back->ceilh < front->ceilh;
@@ -553,7 +553,7 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	    ((L->flags & MLF_LowerUnpegged) == 0) &&
 	    ((L->flags & MLF_UpperUnpegged) == 0) &&
 	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0 &&
-	    SD->MidTex()[0] == '-' /* no rail */)
+	    is_null_tex(SD->MidTex()) /* no rail */)
 	{
 		int new_flags = L->flags;
 
@@ -1170,9 +1170,9 @@ void LD_FixForLostSide(int ld)
 
 	int tex;
 
-	if (L->Right()->LowerTex()[0] != '-')
+	if (! is_null_tex(L->Right()->LowerTex()))
 		tex = L->Right()->lower_tex;
-	else if (L->Right()->UpperTex()[0] != '-')
+	else if (! is_null_tex(L->Right()->UpperTex()))
 		tex = L->Right()->upper_tex;
 	else
 		tex = BA_InternaliseString(default_mid_tex);

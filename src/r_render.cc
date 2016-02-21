@@ -367,7 +367,7 @@ public:
 
 		if (view.texturing)
 		{
-			if (tname[0] == '-')
+			if (is_null_tex(tname))
 			{
 				img = IM_MissingTex();
 				fullbright = render_missing_bright;

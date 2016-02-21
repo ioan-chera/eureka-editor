@@ -285,9 +285,9 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state,
 			return;
 
 		// convenience: set lower unpeg on first change
-		if (! (L->flags & MLF_LowerUnpegged) &&
-		    L->Right()->MidTex()[0] == '-' &&
-		    L-> Left()->MidTex()[0] == '-')
+		if (! (L->flags & MLF_LowerUnpegged)  &&
+		    is_null_tex(L->Right()->MidTex()) &&
+		    is_null_tex(L-> Left()->MidTex()) )
 		{
 			BA_ChangeLD(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
@@ -787,7 +787,7 @@ int UI_LineBox::SolidMask(int side)
 	// upper texture of '-' is OK between two skies
 	bool two_skies = is_sky(right->CeilTex()) && is_sky(left->CeilTex());
 
-	if (right-> ceilh > left-> ceilh && ! two_skies)
+	if (right-> ceilh > left-> ceilh && !two_skies)
 		mask |= SOLID_UPPER;
 
 	return mask;

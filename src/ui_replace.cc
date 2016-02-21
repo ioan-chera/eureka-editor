@@ -1414,7 +1414,7 @@ bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern, bool
 			// do not match the empty rail texture against the "*" wildcard.
 			// [ this is debatable, but I think this prevents making changes
 			//   which the user really didn't want or expect ]
-			if (is_rail && tex[0] == '-' && local_pat[0] == '*')
+			if (is_rail && is_null_tex(tex) && local_pat[0] == '*')
 			{
 				// no match
 			}

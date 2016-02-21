@@ -227,7 +227,7 @@ void W_LoadTextures()
 
 Img_c * W_GetTexture(const char *name)
 {
-	if (name[0] == 0 || name[0] == '-')
+	if (is_missing_tex(name))
 		return NULL;
 
 	std::string t_str = name;

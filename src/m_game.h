@@ -209,6 +209,9 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 // is this flat a sky?
 bool is_sky(const char *flat);
 
+bool is_null_tex(const char *tex);
+bool is_missing_tex(const char *tex);
+
 
 const sectortype_t * M_GetSectorType(int type);
 const linetype_t   * M_GetLineType(int type);

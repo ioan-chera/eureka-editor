@@ -1030,7 +1030,7 @@ void SideDefs_NormalizeMiddles()
 		SideDef * SD = SideDefs[*it];
 
 		// ensure it has a middle texture
-		if (SD->MidTex()[0] == '-')
+		if (is_null_tex(SD->MidTex()))
 			continue;
 
 		SD->lower_tex = null_tex;

@@ -121,7 +121,7 @@ void UI_Pic::GetFlat(const char * fname)
 
 void UI_Pic::GetTex(const char * tname)
 {
-	if (tname[0] == '-')
+	if (is_null_tex(tname))
 	{
 		Clear();
 		return;

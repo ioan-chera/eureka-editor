@@ -23,6 +23,7 @@
 
 #include "e_linedef.h"
 #include "levels.h"
+#include "m_game.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
 
@@ -465,10 +466,10 @@ void UI_SideBox::UpdateField()
 		u_pic->GetTex(upper);
 		r_pic->GetTex(rail);
 
-		if ((what_is_solid & (SOLID_LOWER | SOLID_MID)) && (lower[0] == '-'))
+		if ((what_is_solid & (SOLID_LOWER | SOLID_MID)) && is_null_tex(lower))
 			l_pic->MarkMissing();
 
-		if ((what_is_solid & SOLID_UPPER) && (upper[0] == '-'))
+		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
 			u_pic->MarkMissing();
 	}
 	else

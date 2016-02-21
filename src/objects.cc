@@ -34,6 +34,7 @@
 #include "e_vertex.h"
 #include "editloop.h"
 #include "levels.h"
+#include "m_game.h"
 #include "objects.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
@@ -1160,10 +1161,10 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 			int b_u = L1-> Left()->upper_tex;
 
 			// ignore missing textures
-			if (BA_GetString(f_l)[0] == '-') f_l = 0;
-			if (BA_GetString(f_u)[0] == '-') f_u = 0;
-			if (BA_GetString(b_l)[0] == '-') b_l = 0;
-			if (BA_GetString(b_u)[0] == '-') b_u = 0;
+			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
+			if (is_null_tex(BA_GetString(f_u))) f_u = 0;
+			if (is_null_tex(BA_GetString(b_l))) b_l = 0;
+			if (is_null_tex(BA_GetString(b_u))) b_u = 0;
 
 			// try hard to find a usable texture
 			int tex = -1;

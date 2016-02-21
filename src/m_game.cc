@@ -795,6 +795,17 @@ bool is_sky(const char *flat)
 	return (y_stricmp(game_info.sky_flat, flat) == 0);
 }
 
+bool is_null_tex(const char *tex)
+{
+	return tex[0] == '-';
+}
+
+bool is_missing_tex(const char *tex)
+{
+	return (tex[0] == 0 || tex[0] == '-');
+}
+
+
 
 const sectortype_t * M_GetSectorType(int type)
 {
