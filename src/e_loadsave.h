@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -47,6 +47,7 @@ void CMD_FlipMap();
 bool CMD_SaveMap();
 bool CMD_ExportMap();
 
+void CMD_CopyMap();
 void CMD_RenameMap();
 void CMD_DeleteMap();
 

@@ -65,6 +65,11 @@ static void file_do_export(Fl_Widget *w, void * data)
 	CMD_ExportMap();
 }
 
+static void file_do_copy_map(Fl_Widget *w, void * data)
+{
+	CMD_CopyMap();
+}
+
 static void file_do_rename(Fl_Widget *w, void * data)
 {
 	CMD_RenameMap();
@@ -510,10 +515,11 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+		{ "&Copy Map",    0,  FCAL file_do_copy_map },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Rename Map",   0,                FCAL file_do_rename },
-		{ "Delete Map",   0,                FCAL file_do_delete },
+		{ "Rename Map",   0,  FCAL file_do_rename },
+		{ "Delete Map",   0,  FCAL file_do_delete },
 
 		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },

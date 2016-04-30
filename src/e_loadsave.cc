@@ -1697,8 +1697,62 @@ bool CMD_ExportMap()
 
 
 //------------------------------------------------------------------------
-//  RENAME and DELETE
+//  COPY, RENAME and DELETE MAP
 //------------------------------------------------------------------------
+
+void CMD_CopyMap()
+{
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot copy a map unless editing a PWAD.");
+		return;
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot copy map : file is read-only.");
+		return;
+	}
+
+	// ask user for map name
+
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, edit_wad);
+
+	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+
+	const char *new_name = dialog->Run();
+
+	delete dialog;
+
+	// cancelled?
+	if (! new_name)
+		return;
+
+	// sanity check that the name is different
+	// (should be prevented by the choose-map dialog)
+	if (y_stricmp(new_name, Level_name) == 0)
+	{
+		Beep("Name is same!?!");
+		return;
+	}
+
+	// perform the copy (just a save)
+	LogPrintf("Copying Map : %s --> %s\n", Level_name, new_name);
+
+	SaveLevel(edit_wad, new_name);
+
+	M_AddRecent(edit_wad->PathName(), new_name);
+
+	MadeChanges = 0;
+
+	// make current map be the new one
+	Level_name = StringUpper(new_name);
+
+	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+
+	Status_Set("Copied to %s", Level_name);
+}
+
 
 void CMD_RenameMap()
 {
