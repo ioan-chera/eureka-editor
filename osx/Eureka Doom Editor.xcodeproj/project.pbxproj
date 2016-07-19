@@ -725,8 +725,8 @@
 		FA5E2C1F165B8F860024D6A5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastTestingUpgradeCheck = 0710;
-				LastUpgradeCheck = 0640;
+				LastTestingUpgradeCheck = 0730;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = ioan;
 				TargetAttributes = {
 					FA5E2C27165B8F860024D6A5 = {
@@ -931,6 +931,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1016,6 +1017,7 @@
 					"\"$(SRCROOT)/staticlib\"",
 					"$(PROJECT_DIR)/staticlib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1040,6 +1042,7 @@
 					"\"$(SRCROOT)/staticlib\"",
 					"$(PROJECT_DIR)/staticlib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1054,6 +1057,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EurekaApp/EurekaApp-Prefix.pch";
 				INFOPLIST_FILE = "EurekaAppTests/Eureka Doom EditorTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom EditorTests";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = octest;
@@ -1069,6 +1073,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EurekaApp/EurekaApp-Prefix.pch";
 				INFOPLIST_FILE = "EurekaAppTests/Eureka Doom EditorTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom EditorTests";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = octest;
