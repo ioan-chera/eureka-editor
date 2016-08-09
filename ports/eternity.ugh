@@ -382,7 +382,8 @@ line 277 r "S1 EE: Exec Script"
 line 278 r "GR EE: Exec Script"
 line 279 r "G1 EE: Exec Script"
 
-line 270 - "-- EE: ExtraData"
+line 270 - "-- EE: ExtraData linedef"
+line 401 - "-- EE: ExtraData sector"
 
 line 281 - "-- EE: 3D Midtex /f"
 line 282 - "-- EE: 3D Midtex /c"
