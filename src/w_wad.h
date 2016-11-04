@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@
 #define __EUREKA_W_WAD_H__
 
 class Wad_file;
-class Texture_info;
 
 
 class Lump_c
@@ -127,8 +126,7 @@ private:
 	std::vector<short> patches;
 	std::vector<short> sprites;
 	std::vector<short> flats;
-
-	Texture_info *tex_info;
+	std::vector<short> tx_tex;
 
 	bool begun_write;
 	int  begun_max_size;

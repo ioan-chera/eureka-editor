@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -193,9 +193,8 @@ Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 	mode(_mode), fp(_fp), kind('P'),
 	total_size(0), directory(),
 	dir_start(0), dir_count(0), dir_crc(0),
-	levels(), patches(), sprites(), flats(),
-	tex_info(NULL), begun_write(false),
-	insert_point(-1)
+	levels(), patches(), sprites(), flats(), tx_tex(),
+	begun_write(false), insert_point(-1)
 {
 	filename = strdup(_name);
 }
@@ -254,7 +253,7 @@ retry:
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
 		FatalError("Error determining WAD size.\n");
-	
+
 	w->total_size = (int)ftell(fp);
 
 	DebugPrintf("total_size = %d\n", w->total_size);
@@ -433,7 +432,7 @@ short Wad_file::FindLevel(const char *name)
 
 	if (k >= 0)
 		return levels[k];
-	
+
 	return -1;  // not found
 }
 
@@ -631,7 +630,7 @@ static bool IsDummyMarker(const char *name)
 
 	if (! strchr("PSF", toupper(name[0])))
 		return false;
-	
+
 	if (! isdigit(name[1]))
 		return false;
 
@@ -659,7 +658,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active && active != 'P')
 				LogPrintf("WARNING: missing %c_END marker.\n", active);
-			
+
 			active = 'P';
 			continue;
 		}
@@ -667,7 +666,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active != 'P')
 				LogPrintf("WARNING: stray P_END marker found.\n");
-			
+
 			active = 0;
 			continue;
 		}
@@ -676,7 +675,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active && active != 'S')
 				LogPrintf("WARNING: missing %c_END marker.\n", active);
-			
+
 			active = 'S';
 			continue;
 		}
@@ -684,7 +683,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active != 'S')
 				LogPrintf("WARNING: stray S_END marker found.\n");
-			
+
 			active = 0;
 			continue;
 		}
@@ -693,7 +692,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active && active != 'F')
 				LogPrintf("WARNING: missing %c_END marker.\n", active);
-			
+
 			active = 'F';
 			continue;
 		}
@@ -701,7 +700,24 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (active != 'F')
 				LogPrintf("WARNING: stray F_END marker found.\n");
-			
+
+			active = 0;
+			continue;
+		}
+
+		if (y_stricmp(name, "TX_START") == 0)
+		{
+			if (active && active != 'T')
+				LogPrintf("WARNING: missing %c_END marker.\n", active);
+
+			active = 'T';
+			continue;
+		}
+		else if (y_stricmp(name, "TX_END") == 0)
+		{
+			if (active != 'T')
+				LogPrintf("WARNING: stray TX_END marker found.\n");
+
 			active = 0;
 			continue;
 		}
@@ -722,6 +738,7 @@ void Wad_file::ProcessNamespaces()
 				case 'P': patches.push_back(k); break;
 				case 'S': sprites.push_back(k); break;
 				case 'F': flats.  push_back(k); break;
+				case 'T': tx_tex. push_back(k); break;
 
 				default:
 					BugError("ProcessNamespaces: active = 0x%02x\n", (int)active);
@@ -842,6 +859,7 @@ void Wad_file::RemoveLumps(short index, short count)
 	FixGroup(patches, index, 0, count);
 	FixGroup(sprites, index, 0, count);
 	FixGroup(flats,   index, 0, count);
+	FixGroup(tx_tex,  index, 0, count);
 
 	// reset the insertion point
 	insert_point = -1;
@@ -921,6 +939,7 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 		FixGroup(patches, insert_point, 1, 0);
 		FixGroup(sprites, insert_point, 1, 0);
 		FixGroup(flats,   insert_point, 1, 0);
+		FixGroup(tx_tex,  insert_point, 1, 0);
 
 		directory.insert(directory.begin() + insert_point, lump);
 
@@ -1143,9 +1162,9 @@ void Wad_file::WriteDirectory()
 
 	if (total_size < 0)
 		FatalError("Error determining WAD size.\n");
-	
+
 	// update header at start of file
-	
+
 	rewind(fp);
 
 	raw_wad_header_t header;
