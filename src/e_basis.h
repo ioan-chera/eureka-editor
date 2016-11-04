@@ -318,13 +318,15 @@ extern std::vector<byte>  BehaviorData;
 #define NumSideDefs   ((int)SideDefs.size())
 #define NumLineDefs   ((int)LineDefs.size())
 
-extern int NumObjects(obj_type_e type);
+int NumObjects(obj_type_e type);
 
 #define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
 #define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
 #define is_sector(n)   ((n) >= 0 && (n) < NumSectors )
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
+
+const char * NameForObjectType(obj_type_e type, bool plural = false);
 
 
 /* BASIS API */
@@ -346,6 +348,8 @@ void BA_Abort(bool keep_changes = false);
 // assign a message to the current operation.
 // this can be called multiple times.
 void BA_Message(const char *msg = NULL, ...);
+
+void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix = "");
 
 // create a new object, returning its objnum.  It is safe to
 // directly set the new object's fields after calling BA_New().

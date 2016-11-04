@@ -87,6 +87,23 @@ int NumObjects(obj_type_e type)
 }
 
 
+const char * NameForObjectType(obj_type_e type, bool plural)
+{
+	switch (type)
+	{
+		case OBJ_THINGS:   return plural ? "things"   : "thing";
+		case OBJ_LINEDEFS: return plural ? "linedefs" : "linedef";
+		case OBJ_SIDEDEFS: return plural ? "sidedefs" : "sidedef";
+		case OBJ_VERTICES: return plural ? "vertices" : "vertex";
+		case OBJ_SECTORS:  return plural ? "sectors"  : "sector";
+
+		default:
+			BugError("NameForObjectType: bad type: %d\n", (int)type);
+			return "XXX"; /* NOT REACHED */
+	}
+}
+
+
 static void DoClearChangeStatus()
 {
 	did_make_changes = false;
@@ -696,7 +713,7 @@ private:
 public:
 	undo_group_c() : ops(), dir(+1)
 	{
-		strcpy(message, "unknown operation");
+		strcpy(message, "[something]");
 	}
 
 	~undo_group_c()
@@ -847,6 +864,26 @@ void BA_Message(const char *msg, ...)
 	buffer[MAX_UNDO_MESSAGE-1] = 0;
 
 	cur_group->SetMsg(buffer);
+}
+
+
+void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix)
+{
+	// utility for creating messages like "moved 3 things"
+
+	int total = list->count_obj();
+
+	if (total < 1)  // oops
+		return;
+
+	if (total == 1)
+	{
+		BA_Message("%s %s #%d%s", verb, NameForObjectType(list->what_type()), list->find_first(), suffix);
+	}
+	else
+	{
+		BA_Message("%s %d %s%s", verb, total, NameForObjectType(list->what_type(), true /* plural */), suffix);
+	}
 }
 
 
