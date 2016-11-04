@@ -236,6 +236,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_TYPE, new_type);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 
@@ -374,6 +375,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 	}
 
@@ -436,6 +438,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
 
+		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -464,6 +467,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
+		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }

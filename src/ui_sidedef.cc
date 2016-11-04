@@ -210,19 +210,18 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 				{
 					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
 				}
-
-				if (upper)
+				else if (upper)
 				{
 					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
 				}
-
-				if (rail)
+				else if (rail)
 				{
 					BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
 				}
 			}
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 
 		box->UpdateField();
@@ -304,6 +303,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			LD_AddSecondSideDef(*it, sd, other);
 	}
 
+	BA_MessageForSel("added sidedef to", edit.Selected);
 	BA_End();
 
 	main_win->line_box->UpdateField();
@@ -340,6 +340,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		LD_RemoveSideDef(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
 	}
 
+	BA_MessageForSel("deleted sidedef from", edit.Selected);
 	BA_End();
 
 	main_win->line_box->UpdateField();
@@ -377,6 +378,11 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 			}
 		}
 
+		if (w == box->x_ofs)
+			BA_MessageForSel("edited X offset on", &list);
+		else
+			BA_MessageForSel("edited Y offset on", &list);
+
 		BA_End();
 	}
 }
@@ -408,6 +414,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 				BA_ChangeSD(sd, SideDef::F_SECTOR, new_sec);
 		}
 
+		BA_MessageForSel("edited sector-ref on", &list);
 		BA_End();
 	}
 }

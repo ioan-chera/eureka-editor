@@ -177,7 +177,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
 	headroom->align(FL_ALIGN_LEFT);
-	headroom->callback(room_callback, this);
+	headroom->callback(headroom_callback, this);
 	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
@@ -187,7 +187,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 		hd_buttons[i] = new Fl_Button(hx, hy+1, 45, 22);
 		hd_buttons[i]->copy_label(Int_TmpStr(headroom_presets[i]));
-		hd_buttons[i]->callback(room_callback, this);
+		hd_buttons[i]->callback(headroom_callback, this);
 	}
 
 	Y += headroom->h() + 50;
@@ -259,6 +259,11 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 				BA_ChangeSEC(*it, Sector::F_CEILH, c_h);
 		}
 
+		if (w == box->floor_h)
+			BA_MessageForSel("edited floor of", &list);
+		else
+			BA_MessageForSel("edited ceiling of", &list);
+
 		BA_End();
 
 		box-> floor_h->value(Int_TmpStr(f_h));
@@ -267,7 +272,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	}
 }
 
-void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
+void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
@@ -298,6 +303,7 @@ void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
 		}
 
+		BA_MessageForSel("edited headroom of", &list);
 		BA_End();
 
 		box->UpdateField();
@@ -365,6 +371,7 @@ change_it:
 				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 
 		box->UpdateField();
@@ -452,6 +459,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 
@@ -499,6 +507,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 		}
 
+		BA_MessageForSel("edited light of", &list);
 		BA_End();
 	}
 }

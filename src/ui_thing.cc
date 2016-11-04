@@ -342,6 +342,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 }
@@ -372,6 +373,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
 		}
 
+		BA_MessageForSel("edited special of", &list);
 		BA_End();
 	}
 }
@@ -423,6 +425,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
 		}
 
+		BA_MessageForSel("edited angle of", &list);
 		BA_End();
 	}
 }
@@ -447,6 +450,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_TID, new_tid);
 		}
 
+		BA_MessageForSel("edited TID of", &list);
 		BA_End();
 	}
 }
@@ -468,6 +472,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_X, new_x);
 
+		BA_MessageForSel("edited X of", &list);
 		BA_End();
 	}
 }
@@ -488,6 +493,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Y, new_y);
 
+		BA_MessageForSel("edited Y of", &list);
 		BA_End();
 	}
 }
@@ -508,6 +514,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Z, new_z);
 
+		BA_MessageForSel("edited Z of", &list);
 		BA_End();
 	}
 }
@@ -538,6 +545,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 
+		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -599,6 +607,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}
 
+		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }
