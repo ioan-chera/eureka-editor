@@ -475,7 +475,8 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 
 	int new_len = atoi(box->length->value());
 
-	new_len = CLAMP(1, new_len, 32768);
+	// negative values are allowed, it moves the start vertex
+	new_len = CLAMP(-32768, new_len, 32768);
 
 	LineDefs_SetLength(new_len);
 }

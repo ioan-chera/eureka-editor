@@ -1065,20 +1065,15 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 }
 
 
-static bool LineDefStartWillBeMoved(int ld, selection_c& list)
+static bool LD_StartWillBeMoved(int ld, selection_c& list)
 {
-	int start = LineDefs[ld]->start;
-
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		if (*it == ld)
-			continue;
-
 		const LineDef *L = LineDefs[*it];
 
-		if (L->end == start)
+		if (*it != ld && L->end == LineDefs[ld]->start)
 			return true;
 	}
 
@@ -1086,17 +1081,42 @@ static bool LineDefStartWillBeMoved(int ld, selection_c& list)
 }
 
 
-static int PickLineDefToExtend(selection_c& list)
+static bool LD_EndWillBeMoved(int ld, selection_c& list)
 {
-	// we want a line whose start is not going to be moved in the future
-	// (otherwise the length will be wrecked by the later change).
-	// however there could be loops, so need to always pick something.
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+
+		if (*it != ld && L->start == LineDefs[ld]->end)
+			return true;
+	}
+
+	return false;
+}
+
+
+static int PickLineDefToExtend(selection_c& list, bool moving_start)
+{
+	// We want a line whose new length is not going to be wrecked
+	// by a change to a later linedef.  However we must handle loops!
 
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
-		if (! LineDefStartWillBeMoved(*it, list))
-			return *it;
+	{
+		if (moving_start)
+		{
+			if (! LD_EndWillBeMoved(*it, list))
+				return *it;
+		}
+		else
+		{
+			if (! LD_StartWillBeMoved(*it, list))
+				return *it;
+		}
+	}
 
 	return list.find_first();
 }
@@ -1104,10 +1124,13 @@ static int PickLineDefToExtend(selection_c& list)
 
 static void LD_SetLength(int ld, int new_len, int angle)
 {
+	// the 'new_len' parameter can be negative, which means move
+	// the start vertex instead of the end vertex.
+
 	const LineDef *L = LineDefs[ld];
 
-	double dx = new_len * cos(angle * M_PI / 32768.0);
-	double dy = new_len * sin(angle * M_PI / 32768.0);
+	double dx = abs(new_len) * cos(angle * M_PI / 32768.0);
+	double dy = abs(new_len) * sin(angle * M_PI / 32768.0);
 
 	int idx = I_ROUND(dx);
 	int idy = I_ROUND(dy);
@@ -1121,8 +1144,16 @@ static void LD_SetLength(int ld, int new_len, int angle)
 	if (idx == 0 && idy == 0)
 		idx = 1;
 
-	BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
-	BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+	if (new_len < 0)
+	{
+		BA_ChangeVT(L->start, Vertex::F_X, L->End()->x - idx);
+		BA_ChangeVT(L->start, Vertex::F_Y, L->End()->y - idy);
+	}
+	else
+	{
+		BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
+		BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+	}
 }
 
 
@@ -1151,7 +1182,7 @@ void LineDefs_SetLength(int new_len)
 
 	while (! list.empty())
 	{
-		int ld = PickLineDefToExtend(list);
+		int ld = PickLineDefToExtend(list, new_len < 0 /* moving_start */);
 
 		list.clear(ld);
 
