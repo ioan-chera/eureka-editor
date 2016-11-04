@@ -8,3 +8,8 @@ CHANGES IN Eureka 1.12
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
 
+-  new 'File/Copy Map' command
+
+-  LineDef panel : entering a negative "Length" moves the start vertex
+   instead of the end vertex
+
