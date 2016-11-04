@@ -792,26 +792,10 @@ void BA_Begin()
 }
 
 
-void BA_End(const char *msg, ...)
+void BA_End()
 {
 	if (! cur_group)
 		BugError("BA_End called without a previous BA_Begin\n");
-
-	if (msg)
-	{
-		// grab the message
-		va_list arg_ptr;
-
-		char buffer[MAX_UNDO_MESSAGE];
-
-		va_start(arg_ptr, msg);
-		vsnprintf(buffer, MAX_UNDO_MESSAGE, msg, arg_ptr);
-		va_end(arg_ptr);
-
-		buffer[MAX_UNDO_MESSAGE-1] = 0;
-
-		cur_group->SetMsg(buffer);
-	}
 
 	cur_group->End();
 
@@ -844,6 +828,25 @@ void BA_Abort(bool keep_changes)
 	did_make_changes  = false;
 
 	DoProcessChangeStatus();
+}
+
+
+void BA_Message(const char *msg, ...)
+{
+	SYS_ASSERT(msg);
+	SYS_ASSERT(cur_group);
+
+	va_list arg_ptr;
+
+	char buffer[MAX_UNDO_MESSAGE];
+
+	va_start(arg_ptr, msg);
+	vsnprintf(buffer, MAX_UNDO_MESSAGE, msg, arg_ptr);
+	va_end(arg_ptr);
+
+	buffer[MAX_UNDO_MESSAGE-1] = 0;
+
+	cur_group->SetMsg(buffer);
 }
 
 

@@ -330,19 +330,22 @@ extern int NumObjects(obj_type_e type);
 /* BASIS API */
 
 // begin a group of operations that will become a single undo/redo
-// step.  All stored _redo_ steps will be removed.  The BA_New,
-// BA_Delete and BA_Change calls must only be called between
-// BA_Begin() and BA_End() pairs.
+// step.  Any stored _redo_ steps will be forgotten.  The BA_New,
+// BA_Delete, BA_Change and BA_Message functions must only be called
+// between BA_Begin() and BA_End() pairs.
 void BA_Begin();
 
 // finish a group of operations.
-// you should supply a status message for it.
-void BA_End(const char *msg = NULL, ...);
+void BA_End();
 
 // abort the group of operations -- the undo/redo history is not
 // modified and any changes since BA_Begin() are undone except
 // when 'keep_changes' is true.
 void BA_Abort(bool keep_changes = false);
+
+// assign a message to the current operation.
+// this can be called multiple times.
+void BA_Message(const char *msg = NULL, ...);
 
 // create a new object, returning its objnum.  It is safe to
 // directly set the new object's fields after calling BA_New().
