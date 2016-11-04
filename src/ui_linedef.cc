@@ -670,12 +670,7 @@ void UI_LineBox::CalcLength()
 
 	char buffer[300];
 
-	if (int(len_f) >= 10000)
-		sprintf(buffer, "%1.0f", len_f);
-	else if (int(len_f) >= 100)
-		sprintf(buffer, "%1.1f", len_f);
-	else
-		sprintf(buffer, "%1.2f", len_f);
+	sprintf(buffer, "%1.0f", len_f);
 
 	length->value(buffer);
 }
