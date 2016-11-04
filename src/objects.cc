@@ -148,6 +148,8 @@ static void Insert_Thing()
 
 	recent_things.insert_number(T->type);
 
+	BA_Message("added thing #%d", new_t);
+
 	BA_End();
 
 
@@ -698,6 +700,8 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 		Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
 
+		BA_Message("added linedef");
+
 		BA_End();
 	}
 	else
@@ -729,6 +733,9 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 		to_vert = BA_New(OBJ_VERTICES);
 
+		BA_Message("added vertex #%d", to_vert);
+
+
 		Vertex *V = Vertices[to_vert];
 
 		V->x = new_x;
@@ -740,6 +747,8 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 			V->x = edit.split_x;
 			V->y = edit.split_y;
 
+			BA_Message("split linedef #%d", split_ld);
+
 			SplitLineDefAtVertex(split_ld, to_vert);
 
 			if (!force_continue && from_vert >= 0)
@@ -750,6 +759,8 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		if (from_vert >= 0)
 		{
 			Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
+
+			BA_Message("added linedef");
 		}
 
 		BA_End();
@@ -781,6 +792,8 @@ static void Correct_Sector(int sec_num)
 
 	AssignSectorToSpace(edit.map_x, edit.map_y, sec_num);
 
+	BA_Message("corrected sector");
+
 	BA_End();
 }
 
@@ -804,6 +817,8 @@ static void Insert_Sector(bool force_new)
 			model = edit.Selected->find_first();
 
 		CreateSquare(model);
+
+		BA_Message("added sector (outside map)");
 
 		BA_End();
 
@@ -848,6 +863,8 @@ static void Insert_Sector(bool force_new)
 
 	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec, model < 0);
 
+	BA_Message("added sector #%d", new_sec);
+
 	BA_End();
 
 
@@ -860,6 +877,8 @@ static void Insert_Sector(bool force_new)
 void Insert_Vertex_split(int split_ld, int new_x, int new_y)
 {
 	BA_Begin();
+
+	BA_Message("split linedef #%d", split_ld);
 
 	int new_vert = BA_New(OBJ_VERTICES);
 
@@ -1023,12 +1042,16 @@ void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 	if (edit.Selected->empty())
 		return;
 
+	int did_split_line = -1;
+
 	BA_Begin();
 
 	// handle a single vertex merging onto an existing one
 	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
 	    edit.highlight.valid())
 	{
+		BA_Message("merge vertex #%d", edit.drag_single_vertex);
+
 		MergeVertex(edit.drag_single_vertex, edit.highlight.num,
 		            true /* v1_will_be_deleted */);
 
@@ -1036,13 +1059,16 @@ void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 
 		edit.drag_single_vertex = -1;
 
-		goto success;
+		BA_End();
+		return;
 	}
 
 	// handle a single vertex splitting a linedef
 	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
 		edit.split_line.valid())
 	{
+		did_split_line = edit.split_line.num;
+
 		SplitLineDefAtVertex(edit.split_line.num, edit.drag_single_vertex);
 
 		// now move the vertex!
@@ -1062,7 +1088,11 @@ void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
 
 	DoMoveObjects(edit.Selected, delta_x, delta_y, delta_z);
 
-success:
+	if (did_split_line >= 0)
+		BA_Message("split linedef #%d", did_split_line);
+	else
+		BA_MessageForSel("moved", edit.Selected);
+
 	BA_End();
 }
 
@@ -1296,6 +1326,8 @@ void CMD_CopyProperties(void)
 			default: break;
 		}
 
+		BA_Message("copied properties");
+
 		BA_End();
 
 	}
@@ -1335,6 +1367,8 @@ void CMD_CopyProperties(void)
 				default: break;  // fuck you, compiler
 			}
 		}
+
+		BA_Message("copied properties");
 
 		BA_End();
 	}
