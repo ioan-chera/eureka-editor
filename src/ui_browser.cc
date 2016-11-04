@@ -203,7 +203,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	category->value(0);
 	category->labelsize(KF_fonth);
 	category->textsize(KF_fonth);
-	category->callback(filter_callback, this);
+	category->callback(category_callback, this);
 
 	add(category);
 
@@ -212,7 +212,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	search = new Fl_Input(cx, cy, 120, 22, "Match:");
 	search->align(FL_ALIGN_LEFT);
-	search->callback(filter_callback, this);
+	search->callback(search_callback, this);
 	search->when(FL_WHEN_CHANGED);
 
 	add(search);
@@ -297,7 +297,17 @@ void UI_Browser_Box::resize(int X, int Y, int W, int H)
 }
 
 
-void UI_Browser_Box::filter_callback(Fl_Widget *w, void *data)
+void UI_Browser_Box::category_callback(Fl_Widget *w, void *data)
+{
+	UI_Browser_Box *that = (UI_Browser_Box *)data;
+
+	that->ClearSearchBox();
+
+	that->Filter();
+}
+
+
+void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 {
 	UI_Browser_Box *that = (UI_Browser_Box *)data;
 

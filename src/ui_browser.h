@@ -129,7 +129,9 @@ private:
 
 	bool CategoryByLetter(char letter);
 
-	static void filter_callback(Fl_Widget *w, void *data);
+	static void category_callback(Fl_Widget *w, void *data);
+	static void   search_callback(Fl_Widget *w, void *data);
+
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void  repop_callback(Fl_Widget *w, void *data);
 	static void   sort_callback(Fl_Widget *w, void *data);
