@@ -1082,6 +1082,8 @@ void UI_FindAndReplace::DoReplace()
 
 	ApplyReplace(cur_obj.num, replace_tex_id);
 
+	BA_Message("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+
 	BA_End();
 
 	// move onto next object
@@ -1195,6 +1197,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
+		BA_MessageForSel("replacement in", edit.Selected);
+
 		BA_End();
 	}
 
