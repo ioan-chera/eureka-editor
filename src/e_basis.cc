@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -682,6 +682,8 @@ public:
 };
 
 
+#define MAX_UNDO_MESSAGE  200
+
 class undo_group_c
 {
 private:
@@ -689,9 +691,13 @@ private:
 
 	int dir;
 
+	char message[MAX_UNDO_MESSAGE];
+
 public:
 	undo_group_c() : ops(), dir(+1)
-	{ }
+	{
+		strcpy(message, "unknown operation");
+	}
 
 	~undo_group_c()
 	{
@@ -731,6 +737,17 @@ public:
 
 		// reverse the order for next time
 		dir = -dir;
+	}
+
+	void SetMsg(const char *buf)
+	{
+		strncpy(message, buf, sizeof(message));
+		message[sizeof(message) - 1] = 0;
+	}
+
+	const char *GetMsg() const
+	{
+		return message;
 	}
 };
 
@@ -774,10 +791,27 @@ void BA_Begin()
 	DoClearChangeStatus();
 }
 
-void BA_End()
+
+void BA_End(const char *msg, ...)
 {
 	if (! cur_group)
 		BugError("BA_End called without a previous BA_Begin\n");
+
+	if (msg)
+	{
+		// grab the message
+		va_list arg_ptr;
+
+		char buffer[MAX_UNDO_MESSAGE];
+
+		va_start(arg_ptr, msg);
+		vsnprintf(buffer, MAX_UNDO_MESSAGE, msg, arg_ptr);
+		va_end(arg_ptr);
+
+		buffer[MAX_UNDO_MESSAGE-1] = 0;
+
+		cur_group->SetMsg(buffer);
+	}
 
 	cur_group->End();
 
@@ -946,6 +980,8 @@ bool BA_Undo()
 	undo_group_c * grp = undo_history.front();
 	undo_history.pop_front();
 
+	Status_Set("Undo: %s", grp->GetMsg());
+
 	grp->ReApply();
 
 	redo_future.push_front(grp);
@@ -963,6 +999,8 @@ bool BA_Redo()
 
 	undo_group_c * grp = redo_future.front();
 	redo_future.pop_front();
+
+	Status_Set("Redo: %s", grp->GetMsg());
 
 	grp->ReApply();
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -45,7 +45,7 @@ class crc32_c;
 // the LineDef vertex numbers are OK, the SideDef sector number is
 // valid, etc.  For LineDefs, the left and right fields can contain
 // -1 to mean "no sidedef", but note that a missing right sidedef
-// can cause problems when playing the map in DOOM.
+// can cause problems or crashes when playing the map in DOOM.
 //
 
 
@@ -336,7 +336,8 @@ extern int NumObjects(obj_type_e type);
 void BA_Begin();
 
 // finish a group of operations.
-void BA_End();
+// you should supply a status message for it.
+void BA_End(const char *msg = NULL, ...);
 
 // abort the group of operations -- the undo/redo history is not
 // modified and any changes since BA_Begin() are undone except
