@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  3D RENDERING 
+//  3D RENDERING
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -236,7 +236,7 @@ public:
 		/* result is colormap index (0 bright .. 31 dark) */
 		return CLAMP(min_L, index, 31);
 	}
-	
+
 	byte DoomLightRemap(int light, float dist, byte pixel)
 	{
 		int map = R_DoomLightingEquation(light >> 2, dist);
@@ -1075,7 +1075,7 @@ public:
 			return;
 
 		int thsec = view.thing_sectors[th_index];
-		
+
 		int h1, h2;
 
 		if (info && (info->flags & THINGDEF_CEIL))
@@ -1252,7 +1252,7 @@ public:
 			int ty = int(-view.y + t_cos * dist) & (th - 1);
 
 			*buf = wbuf[ty * tw + tx];
-			
+
 			if (view.lighting && ! surf.fullbright)
 				*buf = view.DoomLightRemap(light, dist, *buf);
 		}
@@ -1474,7 +1474,7 @@ public:
 				*buf = raw_colormap[14][*buf];
 				continue;
 			}
-			
+
 			*buf = pix;
 
 			if (view.lighting && ! (dw->side & THINGDEF_LIT))
@@ -1714,7 +1714,7 @@ void UI_Render3D::draw()
 		BlitHires(ox, oy, ow, oh);
 	else
 		BlitLores(ox, oy, ow, oh);
-	
+
 	// draw the highlight (etc)
 	for (unsigned int k = 0 ; k < rend.hl_lines.size() ; k++)
 	{
@@ -1828,7 +1828,7 @@ void UI_Render3D::DrawInfoBar()
 {
 	int cx = x();
 	int cy = y();
-	
+
 	fl_push_clip(x(), cy, w(), INFO_BAR_H);
 
 	fl_color(FL_BLACK);
@@ -2136,8 +2136,12 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 			const SideDef * SD = SideDefs[view.adjust_sd];
 
 			BA_Begin();
+
 			BA_ChangeSD(view.adjust_sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
 			BA_ChangeSD(view.adjust_sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+
+			BA_Message("adjusted offsets on line #%d", view.adjust_ld);
+
 			BA_End();
 		}
 
@@ -2508,9 +2512,11 @@ void R3D_Align(void)
 	if (do_clear)
 	{
 		BA_Begin();
-		
+
 		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
 		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+
+		BA_Message("aligned offsets on line #%d", view.hl.line);
 
 		BA_End();
 
