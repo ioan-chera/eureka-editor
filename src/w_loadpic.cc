@@ -193,8 +193,39 @@ char W_DetectImageFormat(Lump_c *lump)
 		return 'p';
 	}
 
-	// FIXME : check other common image formats....
+	// exclude some other common image formats....
 
+	if (header[0] == 0xFF &&
+		header[1] == 0xD8)
+	{
+		/* JPEG */
+		return 0;
+	}
+
+	if (header[0] == 'G' &&
+		header[1] == 'I' &&
+		header[2] == 'F' &&
+		header[3] == '8')
+	{
+		/* GIF */
+		return 0;
+	}
+
+	if (header[0] == 'B' &&
+		header[1] == 'M')
+	{
+		/* BMP */
+		return 0;
+	}
+
+	if (header[0] == 'D' &&
+		header[1] == 'D' &&
+		header[2] == 'S' &&
+		header[3] == 0x20)
+	{
+		/* DDS (DirectDraw Surface) */
+		return 0;
+	}
 
 	// TGA (Targa) is not clearly marked, but better than Doom patches,
 	// so check it next.
