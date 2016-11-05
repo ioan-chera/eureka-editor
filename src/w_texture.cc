@@ -266,7 +266,10 @@ void W_LoadTextures()
 				LoadTextureLump(texture2, pname_data, pname_size, false);
 		}
 
-		W_LoadTextures_TX_START(master_dir[i]);
+		if (game_info.tx_start)
+		{
+			W_LoadTextures_TX_START(master_dir[i]);
+		}
 	}
 }
 
