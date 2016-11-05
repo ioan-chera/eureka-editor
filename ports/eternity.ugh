@@ -30,6 +30,8 @@ include "boom"
 
 feature 3d_midtex 1
 
+feature tx_start 1
+
 #TODO:  thing flag 512 "Dormant" - like in Hexen
 
 
