@@ -26,7 +26,7 @@
 
 sky_flat  F_SKY1
 
-default_textures  STARTAN3  FLOOR4_8  CEIL3_5
+default_textures  GRAY1  FLAT1  FLAT1
 default_thing  2014
 
 include "doom_colors"
