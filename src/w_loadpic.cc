@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -165,6 +165,72 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 
 	W_FreeLumpData(&raw_data);
 	return true;
+}
+
+
+char W_DetectImageFormat(Lump_c *lump)
+{
+	byte header[20];
+
+	int length = lump->Length();
+
+	if (length < (int)sizeof(header))
+		return 0;
+
+	if (! lump->Seek())
+		return 0;
+
+	if (! lump->Read(header, (int)sizeof(header)))
+		return 0;
+
+	// PNG is clearly marked in the header, so check it first.
+
+	if (header[0] == 0x89 &&
+		header[1] == 'P'  &&
+		header[2] == 'N'  &&
+		header[3] == 'G')
+	{
+		return 'p';
+	}
+
+	// FIXME : check other common image formats....
+
+
+	// TGA (Targa) is not clearly marked, but better than Doom patches,
+	// so check it next.
+
+	int  width = (int)header[12] + (int)(header[13] << 8);
+	int height = (int)header[14] + (int)(header[15] << 8);
+
+	byte cmap_type = header[1];
+	byte img_type  = header[2];
+	byte depth     = header[17];
+
+	if (width  > 0 && width  <= 2048 &&
+		height > 0 && height <= 2048 &&
+		(cmap_type == 0 || cmap_type == 1) &&
+		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
+		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
+	{
+		return 't';
+	}
+
+	// check Doom patches last
+
+	 width = (int)header[0] + (int)(header[1] << 8);
+	height = (int)header[2] + (int)(header[3] << 8);
+
+	int ofs_x = (int)header[4] + (int)(header[5] << 8);
+	int ofs_y = (int)header[6] + (int)(header[7] << 8);
+
+	if (width  > 0 && width  <= 2048 && abs(ofs_x) <= 2048 &&
+		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+		length > width * 4 /* columnofs */)
+	{
+		return 'd';
+	}
+
+	return 0;	// unknown!
 }
 
 
