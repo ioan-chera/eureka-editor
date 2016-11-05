@@ -58,6 +58,29 @@ static void W_ClearTextures()
 }
 
 
+static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
+{
+	// free any existing one with the same name
+
+	std::string tex_str = name;
+
+	std::map<std::string, Img_c *>::iterator P = textures.find(tex_str);
+
+	if (P != textures.end())
+	{
+		delete P->second;
+
+		P->second = img;
+	}
+	else
+	{
+		textures[tex_str] = img;
+	}
+
+	medusa_textures[tex_str] = is_medusa ? 1 : 0;
+}
+
+
 static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
                             bool skip_first)
 {
@@ -158,14 +181,7 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
 		memcpy(namebuf, raw->name, 8);
 		namebuf[8] = 0;
 
-		std::string t_str(namebuf);
-
-		// FIXME: free any existing one with same name
-
-		textures[t_str] = img;
-
-		if (is_medusa)
-			medusa_textures[t_str] = 1;
+		W_AddTexture(namebuf, img, is_medusa);
 	}
 
 	W_FreeLumpData(&tex_data);
@@ -275,7 +291,7 @@ bool W_TextureCausesMedusa(const char *name)
 
 	std::map<std::string, int>::iterator P = medusa_textures.find(t_str);
 
-	return (P != medusa_textures.end());
+	return (P != medusa_textures.end() && P->second > 0);
 }
 
 
