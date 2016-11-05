@@ -958,7 +958,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 	BA_Begin();
 
-	BA_Message("deleted vertex #%d (merged lines)\n", v_num);
+	BA_Message("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
 		BA_ChangeLD(ld1, LineDef::F_START, v2);
