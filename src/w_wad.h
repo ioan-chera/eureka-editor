@@ -100,6 +100,7 @@ class Wad_file
 {
 friend class Lump_c;
 friend void W_LoadFlats();
+friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
 	const char *filename;

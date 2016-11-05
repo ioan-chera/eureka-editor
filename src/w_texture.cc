@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -94,7 +94,8 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
 		// create the new Img
 		int width  = LE_U16(raw->width);
 		int height = LE_U16(raw->height);
-DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+
+		DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 		if (width == 0 || height == 0)
 			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
@@ -191,6 +192,21 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 #endif
 
 
+void W_LoadTextures_TX_START(Wad_file *wf)
+{
+	for (int k = 0 ; k < (int)wf->tx_tex.size() ; k++)
+	{
+		Lump_c *lump = wf->GetLump(wf->tx_tex[k]);
+
+		char img_fmt = W_DetectImageFormat(lump);
+
+		DebugPrintf("TX_TEX %d : '%s' type=%c\n", k, lump->Name(), img_fmt ? img_fmt : '?');
+
+		// FIXME
+	}
+}
+
+
 void W_LoadTextures()
 {
 	W_ClearTextures();
@@ -210,17 +226,19 @@ void W_LoadTextures()
 		// error-prone (using the wrong IWAD will break it),
 		// so I think supporting it is a bad idea.  -- AJA
 
-		if (!pnames)
-			continue;
-		
-		byte *pname_data;
-		int pname_size = W_LoadLumpData(pnames, &pname_data);
+		if (pnames)
+		{
+			byte *pname_data;
+			int pname_size = W_LoadLumpData(pnames, &pname_data);
 
-		if (texture1)
-			LoadTextureLump(texture1, pname_data, pname_size, true);
+			if (texture1)
+				LoadTextureLump(texture1, pname_data, pname_size, true);
 
-		if (texture2)
-			LoadTextureLump(texture2, pname_data, pname_size, false);
+			if (texture2)
+				LoadTextureLump(texture2, pname_data, pname_size, false);
+		}
+
+		W_LoadTextures_TX_START(master_dir[i]);
 	}
 }
 
