@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------
-#  DOOMLEGACY 1.44 definitions
+#  LEGACY 1.44 definitions
 #------------------------------------------------------------------------
 #
 #  Eureka DOOM Editor
@@ -26,7 +26,7 @@
 
 include "boom"
 
-#---- DOOMLEGACY THINGS -------------
+#---- LEGACY THINGS -------------
 
 thing 5003 - n  8 NULL "LEG: Camera"
 thing 5004 - n 16 NULL "LEG: Node"
@@ -62,7 +62,7 @@ thing 4027 p - 16 NULL "Player 31 start"
 thing 4028 p - 16 NULL "Player 32 start"
 
 
-#---- DOOMLEGACY LINETYPES ----------
+#---- LEGACY LINETYPES ----------
 
 linegroup x "LEG: Extrafloor"
 linegroup y "LEG: Effects"
