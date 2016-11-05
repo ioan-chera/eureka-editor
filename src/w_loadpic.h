@@ -46,7 +46,13 @@ bool LoadPicture(Img_c& img,
 //    'p'  : PNG format
 //    't'  : TGA (Targa) format
 //    'd'  : Doom patch
-//    \0   : unrecognized, or a format we don't support
+//
+//    'j'  : JPEG
+//    'g'  : GIF
+//    'b'  : BMP
+//    's'  : DDS
+//
+//    NUL  : unrecognized
 //
 char W_DetectImageFormat(Lump_c *lump);
 

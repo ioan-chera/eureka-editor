@@ -190,16 +190,15 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[2] == 'N'  &&
 		header[3] == 'G')
 	{
-		return 'p';
+		return 'p'; /* PNG */
 	}
 
-	// exclude some other common image formats....
+	// check some other common image formats....
 
 	if (header[0] == 0xFF &&
 		header[1] == 0xD8)
 	{
-		/* JPEG */
-		return 0;
+		return 'j'; /* JPEG */
 	}
 
 	if (header[0] == 'G' &&
@@ -207,15 +206,13 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[2] == 'F' &&
 		header[3] == '8')
 	{
-		/* GIF */
-		return 0;
+		return 'g'; /* GIF */
 	}
 
 	if (header[0] == 'B' &&
 		header[1] == 'M')
 	{
-		/* BMP */
-		return 0;
+		return 'b'; /* BMP */
 	}
 
 	if (header[0] == 'D' &&
@@ -223,8 +220,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[2] == 'S' &&
 		header[3] == 0x20)
 	{
-		/* DDS (DirectDraw Surface) */
-		return 0;
+		return 's'; /* DDS (DirectDraw Surface) */
 	}
 
 	// TGA (Targa) is not clearly marked, but better than Doom patches,
@@ -243,10 +239,10 @@ char W_DetectImageFormat(Lump_c *lump)
 		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
 		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
 	{
-		return 't';
+		return 't'; /* TGA */
 	}
 
-	// check Doom patches last
+	// check for raw patches last
 
 	 width = (int)header[0] + (int)(header[1] << 8);
 	height = (int)header[2] + (int)(header[3] << 8);
@@ -258,7 +254,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
 		length > width * 4 /* columnofs */)
 	{
-		return 'd';
+		return 'd'; /* Doom patch */
 	}
 
 	return 0;	// unknown!
