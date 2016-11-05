@@ -188,7 +188,6 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
 }
 
 
-#if 0
 static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 {
 	Img_c *img = new Img_c();
@@ -196,16 +195,12 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 	if (! LoadPicture(*img, lump, name, 0, 0))
 	{
 		delete img;
+
 		return;
 	}
 
-	std::string t_str(name);
-
-	// FIXME: free any existing one with same name
-
-	textures[t_str] = img;
+	W_AddTexture(name, img, false /* is_medusa */);
 }
-#endif
 
 
 void W_LoadTextures_TX_START(Wad_file *wf)
@@ -218,7 +213,24 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 
 		DebugPrintf("TX_TEX %d : '%s' type=%c\n", k, lump->Name(), img_fmt ? img_fmt : '?');
 
-		// FIXME
+		switch (img_fmt)
+		{
+			case 'd': /* Doom patch */
+				LoadTexture_SinglePatch(lump->Name(), lump);
+				break;
+
+			// TODO : case 'p': /* PNG */
+
+			// TODO : case 't': /* TGA */
+
+			case 0:
+				LogPrintf("Unknown texture format in '%s' lump\n", lump->Name());
+				break;
+
+			default:
+				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name());
+				break;
+		}
 	}
 }
 
