@@ -321,12 +321,15 @@ void Vertex_MergeList(selection_c *list)
 	new_y = Vertices[v]->y;
 #endif
 
-	list->clear(v);
-
 	BA_Begin();
+
+	BA_MessageForSel("merged", list);
 
 	BA_ChangeVT(v, Vertex::F_X, new_x);
 	BA_ChangeVT(v, Vertex::F_Y, new_y);
+
+
+	list->clear(v);
 
 	selection_iterator_c it;
 
@@ -378,6 +381,8 @@ void VT_Disconnect(void)
 	bool seen_one = false;
 
 	BA_Begin();
+
+	BA_MessageForSel("disconnected", edit.Selected);
 
 	selection_iterator_c it;
 
@@ -456,6 +461,8 @@ fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other
 
 		DeleteObjects(&list);
 
+		BA_Message("merged dangling vertex #%d\n", v_num);
+
 		BA_End();
 
 		edit.Selected->set(v_other);
@@ -495,6 +502,8 @@ fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_o
 	BA_Begin();
 
 	SplitLineDefAtVertex(line_ob.num, v_num);
+
+	BA_Message("split linedef #%d\n", line_ob.num);
 
 	BA_End();
 
@@ -594,6 +603,8 @@ void LIN_Disconnect(void)
 		DoDisconnectLineDef(*it, 1, &seen_one);
 	}
 
+	BA_MessageForSel("disconnected", edit.Selected);
+
 	BA_End();
 
 	if (! seen_one)
@@ -615,14 +626,19 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 	{
 		const LineDef * L = LineDefs[n];
 
+		// only process lines which touch a selected sector
+		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
+		bool right_in = L->Right() && edit.Selected->get(L->Right()->sector);
+
+		if (! (left_in || right_in))
+			continue;
+
 		bool innie = false;
 		bool outie = false;
 
-		// TODO: what about no-sided lines??
-
 		if (L->Right())
 		{
-			if (edit.Selected->get(L->Right()->sector))
+			if (right_in)
 				innie = true;
 			else
 				outie = true;
@@ -630,7 +646,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 
 		if (L->Left())
 		{
-			if (edit.Selected->get(L->Left()->sector))
+			if (left_in)
 				innie = true;
 			else
 				outie = true;
@@ -806,6 +822,8 @@ void SEC_Disconnect(void)
 
 
 	BA_Begin();
+
+	BA_MessageForSel("disconnected", edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
@@ -1064,6 +1082,8 @@ void VT_ShapeLine(void)
 
 	BA_Begin();
 
+	BA_Message("shaped %d vertices", (int)along_list.size());
+
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
 		double frac;
@@ -1320,6 +1340,8 @@ void VT_ShapeArc(void)
 	// actually move stuff now
 
 	BA_Begin();
+
+	BA_Message("shaped %d vertices", (int)along_list.size());
 
 	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);

@@ -2516,7 +2516,7 @@ void R3D_Align(void)
 		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
 		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
 
-		BA_Message("aligned offsets on line #%d", view.hl.line);
+		BA_Message("cleared offsets on line #%d", view.hl.line);
 
 		BA_End();
 

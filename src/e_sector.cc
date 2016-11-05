@@ -69,6 +69,8 @@ void SEC_Floor(void)
 		BA_ChangeSEC(*it, Sector::F_FLOORH, new_h);
 	}
 
+	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", &list);
+
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
@@ -105,6 +107,8 @@ void SEC_Ceil(void)
 
 		BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
 	}
+
+	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", &list);
 
 	BA_End();
 
@@ -155,6 +159,8 @@ void CMD_AdjustLight(int delta)
 		BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 	}
 
+	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", &list);
+
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_LIGHT);
@@ -198,6 +204,8 @@ void SEC_SwapFlats()
 		BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, ceil_tex);
 		BA_ChangeSEC(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
+
+	BA_MessageForSel("swapped flats in", &list);
 
 	BA_End();
 
@@ -260,6 +268,8 @@ void SEC_Merge(void)
 	selection_iterator_c it;
 
 	BA_Begin();
+
+	BA_MessageForSel("merged", edit.Selected);
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{

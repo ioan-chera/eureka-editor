@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -74,6 +74,8 @@ void TH_SpinThings(void)
 
 		BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
+
+	BA_MessageForSel("spun", &list);
 
 	BA_End();
 
@@ -155,6 +157,8 @@ void TH_Disconnect(void)
 
 	BA_Begin();
 
+	BA_MessageForSel("disconnected", edit.Selected);
+
 	while (! edit.Selected->empty())
 	{
 		selection_c overlaps(OBJ_THINGS);
@@ -207,6 +211,8 @@ void TH_Merge(void)
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	BA_Begin();
+
+	BA_MessageForSel("merged", edit.Selected);
 
 	selection_iterator_c it;
 

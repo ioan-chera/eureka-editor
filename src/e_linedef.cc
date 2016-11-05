@@ -606,6 +606,8 @@ void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
 	if (align_flags & LINALIGN_Y)
 		DoAlignY(cur, part, adj, align_flags);
 
+	BA_Message("aligned linedef #%d", ld);
+
 	BA_End();
 }
 
@@ -694,6 +696,8 @@ void LIN_Flip(void)
 			if (do_sides) FlipLine_sides(*it);
 		}
 	}
+
+	BA_MessageForSel("flipped", &list);
 
 	BA_End();
 }
@@ -810,6 +814,8 @@ void LIN_SplitHalf(void)
 		if (DoSplitLineDef(*it))
 			new_count++;
 	}
+
+	BA_MessageForSel("halved", &list);
 
 	BA_End();
 
@@ -1033,6 +1039,8 @@ void LIN_MergeTwo(void)
 
 	DeleteLineDefs(&del_line);
 
+	BA_Message("merged two linedefs");
+
 	BA_End();
 }
 
@@ -1179,6 +1187,8 @@ void LineDefs_SetLength(int new_len)
 	}
 
 	BA_Begin();
+
+	BA_MessageForSel("set length of", &list);
 
 	while (! list.empty())
 	{
