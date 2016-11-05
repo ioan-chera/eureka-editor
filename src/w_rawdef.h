@@ -179,6 +179,15 @@ typedef struct
 } PACKEDATTR raw_patchdef_t;
 
 
+typedef struct
+{
+	s16_t x_origin;
+	s16_t y_origin;
+	u16_t pname;    // index into PNAMES
+
+} PACKEDATTR raw_strife_patchdef_t;
+
+
 // Texture definition.
 //
 // Each texture is composed of one or more patches,
@@ -197,6 +206,20 @@ typedef struct
 	raw_patchdef_t patches[1];
 
 } PACKEDATTR raw_texture_t;
+
+
+typedef struct
+{
+	char name[8];
+
+	u32_t masked;      // NOT USED
+	u16_t width;
+	u16_t height;
+	u16_t patch_count;
+
+	raw_strife_patchdef_t patches[1];
+
+} PACKEDATTR raw_strife_texture_t;
 
 
 // Patches.

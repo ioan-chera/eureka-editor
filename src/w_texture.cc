@@ -81,9 +81,107 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 }
 
 
-static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
-                            bool skip_first)
+static void LoadTextures_Strife(Lump_c *lump, byte *pnames, int pname_size,
+                                bool skip_first)
 {
+	// skip size word at front of PNAMES
+	pnames += 4;
+
+	pname_size /= 8;
+
+	// load TEXTUREx data into memory for easier processing
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	// shut up, compiler
+	(void) tex_length;
+
+	// at the front of the TEXTUREx lump are some 4-byte integers
+	s32_t *tex_data_s32 = (s32_t *)tex_data;
+
+	int num_tex = LE_S32(tex_data_s32[0]);
+
+	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
+	{
+		int offset = LE_S32(tex_data_s32[1+n]);
+
+		// FIXME: validate offset
+
+		const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
+
+		// create the new image
+		int width  = LE_U16(raw->width);
+		int height = LE_U16(raw->height);
+
+		DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+
+		if (width == 0 || height == 0)
+			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
+
+		Img_c *img = new Img_c(width, height, false);
+		bool is_medusa = false;
+
+		// apply all the patches
+		int num_patches = LE_S16(raw->patch_count);
+		if (! num_patches)
+			FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
+
+		const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
+
+		if (num_patches >= 2)
+			is_medusa = true;
+
+		for (int j = 0 ; j < num_patches ; j++, patdef++)
+		{
+			int xofs = LE_S16(patdef->x_origin);
+			int yofs = LE_S16(patdef->y_origin);
+			int pname_idx = LE_U16(patdef->pname);
+
+			if (yofs < 0)
+				yofs = 0;
+
+			if (pname_idx >= pname_size)
+			{
+				LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
+				continue;
+			}
+
+			char picname[16];
+			memcpy(picname, pnames + 8*pname_idx, 8);
+			picname[8] = 0;
+
+			Lump_c *lump = W_FindPatchLump(picname);
+
+			if (! lump ||
+				! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
+			{
+				LogPrintf("texture '%.8s': patch '%.8s' not found.\n",
+						  raw->name, picname);
+			}
+		}
+
+		// store the new texture
+		char namebuf[16];
+		memcpy(namebuf, raw->name, 8);
+		namebuf[8] = 0;
+
+		W_AddTexture(namebuf, img, is_medusa);
+	}
+
+	W_FreeLumpData(&tex_data);
+}
+
+
+static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
+                             bool skip_first)
+{
+	// FIXME GAME CONFIG ITEM
+	if (strcmp(Game_name, "strife") == 0)
+	{
+		LoadTextures_Strife(lump, pnames, pname_size, skip_first);
+		return;
+	}
+
 	// skip size word at front of PNAMES
 	pnames += 4;
 
@@ -114,7 +212,7 @@ static void LoadTextureLump(Lump_c *lump, byte *pnames, int pname_size,
 
 		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
-		// create the new Img
+		// create the new image
 		int width  = LE_U16(raw->width);
 		int height = LE_U16(raw->height);
 
@@ -260,10 +358,10 @@ void W_LoadTextures()
 			int pname_size = W_LoadLumpData(pnames, &pname_data);
 
 			if (texture1)
-				LoadTextureLump(texture1, pname_data, pname_size, true);
+				LoadTexturesLump(texture1, pname_data, pname_size, true);
 
 			if (texture2)
-				LoadTextureLump(texture2, pname_data, pname_size, false);
+				LoadTexturesLump(texture2, pname_data, pname_size, false);
 		}
 
 		if (game_info.tx_start)
