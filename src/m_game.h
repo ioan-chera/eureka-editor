@@ -129,10 +129,10 @@ typedef struct
 
 	/* port features */
 
-	int gen_types;	// BOOM generalized linedefs and sectors
+	int gen_types;		// BOOM generalized linedefs and sectors
 
-	int img_png;	// PNG format for various graphics
-	int tx_start;	// textures in TX_START .. TX_END
+	int tx_start;		// textures in TX_START .. TX_END
+	int img_png;		// PNG format for various graphics
 
 	int coop_dm_flags;	// MTF_NOT_COOP and MTF_NOT_DM for things
 	int friend_flag;	// MTF_FRIEND thing flag from MBF
