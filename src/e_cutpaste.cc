@@ -88,6 +88,13 @@ public:
 		for (i = 0 ; i < lines.size()    ; i++) delete lines[i];
 	}
 
+	int TotalSize() const
+	{
+		size_t num = things.size() + verts.size() + sectors.size() + sides.size() + lines.size();
+
+		return (int)num;
+	}
+
 	void CentreOfThings(int *cx, int *cy)
 	{
 		*cx = *cy = 0;
@@ -679,6 +686,8 @@ bool CMD_Paste()
 
 	BA_Begin();
 
+	BA_Message("pasted %d objects", clip_board->TotalSize());
+
 	clip_doing_paste = true;
 
 	switch (clip_board->mode)
@@ -949,6 +958,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 	BA_Begin();
 
+	BA_Message("deleted vertex #%d (merged lines)\n", v_num);
+
 	if (L1->start == v_num)
 		BA_ChangeLD(ld1, LineDef::F_START, v2);
 	else
@@ -999,7 +1010,10 @@ void CMD_Delete(void)
 
 		default: /* OBJ_THINGS */
 			BA_Begin();
+			BA_MessageForSel("deleted", &list);
+
 			DeleteObjects(&list);
+
 			BA_End();
 
 			goto success;
@@ -1044,6 +1058,8 @@ void CMD_Delete(void)
 	}
 
 	BA_Begin();
+
+	BA_MessageForSel("deleted", &list);
 
 	// delete things from each deleted sector
 	if (!keep_things && sec_sel.notempty())

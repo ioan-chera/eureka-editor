@@ -311,6 +311,8 @@ void CMD_Mirror(void)
 	
 	BA_Begin();
 
+	BA_MessageForSel("mirrored", &list, is_vert ? " vertically" : " horizontally");
+
 	DoMirrorStuff(list, is_vert, mid_x, mid_y);
 
 	BA_End();
@@ -370,6 +372,8 @@ void CMD_Rotate90(void)
 	Objs_CalcMiddle(&list, &mid_x, &mid_y);
 	
 	BA_Begin();
+
+	BA_MessageForSel("rotated", &list, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -469,6 +473,8 @@ void CMD_Enlarge(void)
 
 	BA_Begin();
 
+	BA_MessageForSel("enlarged", &list);
+
 	if (edit.mode == OBJ_THINGS)
 	{
 		DoEnlargeThings(list, mul, mid_x, mid_y);
@@ -558,6 +564,8 @@ void CMD_Shrink(void)
 	}
 
 	BA_Begin();
+
+	BA_MessageForSel("shrunk", &list);
 
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -679,6 +687,8 @@ void CMD_ScaleObjects2(scale_param_t& param)
 
 	BA_Begin();
 
+	BA_MessageForSel("scaled", edit.Selected);
+
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
@@ -742,6 +752,7 @@ void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 	DetermineOrigin(param, pos_x, pos_y);
 
 	BA_Begin();
+	BA_MessageForSel("scaled", edit.Selected);
 	{
 		DoScaleTwoStuff(*edit.Selected, param);
 	}
@@ -790,7 +801,7 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 	}
 }
 
-void CMD_ScaleObjects3(double scale_x, double scale_y, double scale_z,
+void CMD_ScaleObjects4(double scale_x, double scale_y, double scale_z,
                        int pos_x, int pos_y, int pos_z)
 {
 	SYS_ASSERT(edit.mode == OBJ_SECTORS);
@@ -805,6 +816,7 @@ void CMD_ScaleObjects3(double scale_x, double scale_y, double scale_z,
 	DetermineOrigin(param, pos_x, pos_y);
 
 	BA_Begin();
+	BA_MessageForSel("scaled", edit.Selected);
 	{
 		DoScaleTwoStuff(*edit.Selected, param);
 		DoScaleSectorHeights(*edit.Selected, scale_z, pos_z);
@@ -824,6 +836,7 @@ void CMD_RotateObjects3(double deg, int pos_x, int pos_y)
 	DetermineOrigin(param, pos_x, pos_y);
 
 	BA_Begin();
+	BA_MessageForSel("rotated", edit.Selected);
 	{
 		DoScaleTwoStuff(*edit.Selected, param);
 	}
@@ -1019,6 +1032,8 @@ void CMD_Quantize(void)
 	}
 
 	BA_Begin();
+
+	BA_MessageForSel("quantized", edit.Selected);
 
 	switch (edit.mode)
 	{

@@ -375,7 +375,10 @@ void Vertex_RemoveUnused()
 	Vertex_FindUnused(sel);
 
 	BA_Begin();
+	BA_Message("removed unused vertices");
+
 	DeleteObjects(&sel);
+
 	BA_End();
 }
 
@@ -754,6 +757,7 @@ void Sectors_ClearUnknown()
 	selection_iterator_c it;
 
 	BA_Begin();
+	BA_Message("cleared unknown sector types");
 
 	for (sel.begin(&it) ; !it.at_end() ; ++it)
 		BA_ChangeSEC(*it, Sector::F_TYPE, 0);
@@ -791,7 +795,10 @@ void Sectors_RemoveUnused()
 	Sectors_FindUnused(sel);
 
 	BA_Begin();
+	BA_Message("removed unused sectors");
+
 	DeleteObjects(&sel);
+
 	BA_End();
 
 //??	Status_Set("Removed %d vertices", sel.count_obj());
@@ -820,6 +827,7 @@ void Sectors_FixBadCeil()
 	Sectors_FindBadCeil(sel);
 
 	BA_Begin();
+	BA_Message("fixed bad sector heights");
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
@@ -870,7 +878,10 @@ void SideDefs_RemoveUnused()
 	SideDefs_FindUnused(sel);
 
 	BA_Begin();
+	BA_Message("removed unused sidedefs");
+
 	DeleteObjects(&sel);
+
 	BA_End();
 
 //??	Status_Set("Removed %d vertices", sel.count_obj());
@@ -997,7 +1008,10 @@ void SideDefs_Unpack(bool no_history)
 	if (no_history)
 		BA_Abort(true /* keep changes */);
 	else
+	{
+		BA_Message("unpacked all sidedefs");
 		BA_End();
+	}
 
 	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), NumSideDefs);
 }
@@ -1349,7 +1363,10 @@ void Things_RemoveUnknown()
 	Things_FindUnknown(sel, types);
 
 	BA_Begin();
+	BA_Message("removed unknown things");
+
 	DeleteObjects(&sel);
+
 	BA_End();
 }
 
@@ -1442,7 +1459,10 @@ void Things_RemoveInVoid()
 	Things_FindInVoid(sel);
 
 	BA_Begin();
+	BA_Message("removed things in the void");
+
 	DeleteObjects(&sel);
+
 	BA_End();
 }
 

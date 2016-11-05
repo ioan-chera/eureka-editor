@@ -65,6 +65,7 @@ void LineDefs_RemoveZeroLen()
 	selection_c sel;
 
 	BA_Begin();
+	BA_Message("removed zero-len linedefs");
 
 	for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 	{
@@ -167,6 +168,7 @@ void LineDefs_ShowManualDoors()
 void LineDefs_FixManualDoors()
 {
 	BA_Begin();
+	BA_Message("fixed manual doors");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -216,6 +218,7 @@ void LineDefs_ShowLackImpass()
 void LineDefs_FixLackImpass()
 {
 	BA_Begin();
+	BA_Message("fixed impassible flags");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -264,6 +267,7 @@ void LineDefs_ShowBad2SFlag()
 void LineDefs_FixBad2SFlag()
 {
 	BA_Begin();
+	BA_Message("fixed two-sided flags");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -362,6 +366,7 @@ void LineDefs_ClearUnknown()
 	selection_iterator_c it;
 
 	BA_Begin();
+	BA_Message("cleared unknown line types");
 
 	for (sel.begin(&it) ; !it.at_end() ; ++it)
 		BA_ChangeLD(*it, LineDef::F_TYPE, 0);
@@ -489,6 +494,7 @@ void LineDefs_RemoveOverlaps()
 	UnusedVertices(&lines, &unused_verts);
 
 	BA_Begin();
+	BA_Message("removed overlapping lines");
 
 	DeleteObjects(&lines);
 	DeleteObjects(&unused_verts);
@@ -949,6 +955,8 @@ void Tags_ApplyNewValue(int new_tag)
 	{
 		BA_Begin();
 
+		BA_MessageForSel("new tag for", &list);
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			if (edit.mode == OBJ_LINEDEFS)
@@ -1365,6 +1373,7 @@ void Textures_FixMissing()
 	int new_lower = BA_InternaliseString(default_lower_tex);
 
 	BA_Begin();
+	BA_Message("fixed missing textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1487,6 +1496,7 @@ void Textures_FixTransparent()
 	int new_lower = BA_InternaliseString(default_lower_tex);
 
 	BA_Begin();
+	BA_Message("fixed transparent textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1608,6 +1618,7 @@ void Textures_RemoveMedusa()
 	std::map<std::string, int> names;
 
 	BA_Begin();
+	BA_Message("fixed medusa textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1784,6 +1795,7 @@ void Textures_FixUnknownTex()
 	int null_tex = BA_InternaliseString("-");
 
 	BA_Begin();
+	BA_Message("fixed unknown textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1821,6 +1833,7 @@ void Textures_FixUnknownFlat()
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
 	BA_Begin();
+	BA_Message("fixed unknown flats");
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{

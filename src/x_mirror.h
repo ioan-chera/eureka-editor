@@ -59,7 +59,7 @@ void CMD_Quantize(void);
 void CMD_ScaleObjects2(scale_param_t& param);
 
 void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
-void CMD_ScaleObjects3(double scale_x, double scale_y, double scale_z,
+void CMD_ScaleObjects4(double scale_x, double scale_y, double scale_z,
                        int pos_x, int pos_y, int pos_z);
 
 void CMD_RotateObjects3(double deg, int pos_x, int pos_y);

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -545,6 +545,8 @@ void CMD_PruneUnused(void)
 	DeleteObjects(&used_sides);
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
+
+	BA_Message("pruned %d objects", num_secs + num_sides + num_verts);
 
 	Status_Set("Pruned %d SEC - %d Side - %d Vert", num_secs, num_sides, num_verts);
 
