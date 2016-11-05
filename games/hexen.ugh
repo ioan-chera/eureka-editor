@@ -27,7 +27,7 @@
 
 sky_flat F_SKY
 
-default_textures CASTLE07 F_009 F_020
+default_textures CASTLE07 F_009 F_013
 default_thing 81  # healing vial
 
 

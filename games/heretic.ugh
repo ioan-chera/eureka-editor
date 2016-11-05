@@ -28,7 +28,7 @@
 
 sky_flat  F_SKY1
 
-default_textures  SANDSQ2  FLOOR00  FLAT508
+default_textures  SANDSQ2  FLOOR00  FLOOR30
 
 # 10 = wand crystal
 default_thing  10
