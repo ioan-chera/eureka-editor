@@ -1,0 +1,88 @@
+#------------------------------------------------------------------------
+#  STRIFE DEFINITIONS
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2016 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+sky_flat F_SKY001
+
+default_textures BRKBRN02 F_TECH01 F_TECH01
+
+default_thing  1  # FIXME
+
+
+#---- COLORS --------------------
+
+color sky  250
+
+color wall     6  28
+color floor  164 184
+
+color missing  231
+
+color unknown_tex   150
+color unknown_flat  105
+
+
+#---- THING TYPES ---------------
+
+thinggroup p 4F4 "Player"
+thinggroup m F00 "Monster"
+thinggroup w FA0 "Weapon"
+thinggroup a 850 "Ammunition"
+thinggroup h 280 "Health && Armor"
+thinggroup b 280 "Bonus"
+thinggroup k F0F "Key"
+thinggroup j F0F "Puzzle Piece"
+thinggroup d 66C "Decoration"
+thinggroup n 66C "Natural"
+thinggroup s DAD "Sounds"
+thinggroup - 0BD "OTHER"
+
+thing 1  p - 16 PLAY "Player 1 start"
+thing 2  p - 16 PLAY "Player 2 start"
+thing 3  p - 16 PLAY "Player 3 start"
+thing 4  p - 16 PLAY "Player 4 start"
+
+thing 11 p t 16 PLAYF3 "Deathmatch start"
+thing 14 p t 16 TFOGC0 "Teleport exit"
+
+
+
+#---- SECTOR TYPES ---------------
+
+sector   0 "NOTHING"
+sector   9 "Secret Area"
+
+
+
+#---- LINE TYPES ---------------
+
+linegroup a "Animated"
+linegroup f "Floor"
+linegroup g "Lift"
+linegroup c "Ceiling"
+linegroup d "Door"
+linegroup l "Light"
+linegroup s "Stairs"
+linegroup t "Thing"
+linegroup p "Polyobj"
+linegroup - "OTHER"
+
+
+#---- TEXTURES CATEGORIES ----------------
+
