@@ -20,8 +20,9 @@
 
 include "boom"
 
-feature tx_start 1
+map_formats DOOM HEXEN
 
+feature tx_start 1
 
 
 #---- THINGS ------------
