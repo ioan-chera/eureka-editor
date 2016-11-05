@@ -175,8 +175,8 @@ static void LoadTextures_Strife(Lump_c *lump, byte *pnames, int pname_size,
 static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
                              bool skip_first)
 {
-	// FIXME GAME CONFIG ITEM
-	if (strcmp(Game_name, "strife") == 0)
+	// FIXME : do this better [ though hard to autodetect based on lump contents ]
+	if (strcmp(Game_name, "strife1") == 0)
 	{
 		LoadTextures_Strife(lump, pnames, pname_size, skip_first);
 		return;
