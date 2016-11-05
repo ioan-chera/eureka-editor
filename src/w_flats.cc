@@ -55,6 +55,27 @@ static void W_ClearFlats()
 }
 
 
+static void W_AddFlat(const char *name, Img_c *img)
+{
+	// find any existing one with same name, and free it
+
+	std::string flat_str = name;
+
+	std::map<std::string, Img_c *>::iterator P = flats.find(flat_str);
+
+	if (P != flats.end())
+	{
+		delete P->second;
+
+		P->second = img;
+	}
+	else
+	{
+		flats[flat_str] = img;
+	}
+}
+
+
 void W_LoadFlats()
 {
 	W_ClearFlats();
@@ -79,9 +100,7 @@ void W_LoadFlats()
 				! lump->Read(img->wbuf(), 64*64))
 				FatalError("Error reading flat from WAD.\n");
 
-			// FIXME: free any existing one with same name
-
-			flats[std::string(lump->Name())] = img;
+			W_AddFlat(lump->Name(), img);
 		}
 	}
 }
