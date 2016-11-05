@@ -718,7 +718,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 
 	// fix the first line's textures
 
-	int tex = BA_InternaliseString(default_mid_tex);
+	int tex = BA_InternaliseString(default_wall_tex);
 
 	const SideDef * SD = SideDefs[L1->right];
 

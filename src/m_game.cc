@@ -429,12 +429,9 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (nargs != 3)
 				FatalError(bad_arg_count, basename, lineno, token[0], 3);
 
-			default_mid_tex		= token[1];
+			default_wall_tex	= token[1];
 			default_floor_tex	= token[2];
 			default_ceil_tex	= token[3];
-
-			default_upper_tex = default_mid_tex;
-			default_lower_tex = default_mid_tex;
 		}
 
 		else if (y_stricmp(token[0], "default_thing") == 0)

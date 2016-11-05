@@ -57,11 +57,9 @@ int default_ceil_h		= 128;
 int default_light_level	= 176;
 int default_thing		= 2001;
 
+const char * default_wall_tex	= "GRAY1";
 const char * default_floor_tex	= "FLAT1";
 const char * default_ceil_tex	= "FLAT1";
-const char * default_lower_tex	= "STARTAN3";
-const char * default_mid_tex	= "STARTAN3";
-const char * default_upper_tex	= "STARTAN3";
 
 
 static bool did_make_changes;
@@ -185,13 +183,13 @@ const char * SideDef::LowerTex() const
 
 void SideDef::SetDefaults(bool two_sided)
 {
-	lower_tex = BA_InternaliseString(default_lower_tex);
-	upper_tex = BA_InternaliseString(default_upper_tex);
+	lower_tex = BA_InternaliseString(default_wall_tex);
+	upper_tex = BA_InternaliseString(default_wall_tex);
 
 	if (two_sided)
 		mid_tex = BA_InternaliseString("-");
 	else
-		mid_tex = BA_InternaliseString(default_mid_tex);
+		mid_tex = BA_InternaliseString(default_wall_tex);
 }
 
 

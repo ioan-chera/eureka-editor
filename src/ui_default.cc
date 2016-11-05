@@ -277,9 +277,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 	if (w == box->w_tex)
 	{
-		default_lower_tex = NormalizeTex_and_Dup(box->w_tex);
-		default_mid_tex   = default_lower_tex;
-		default_upper_tex = default_lower_tex;
+		default_wall_tex = NormalizeTex_and_Dup(box->w_tex);
 	}
 
 	box->w_pic->GetTex(box->w_tex->value());
@@ -367,7 +365,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	w_tex->value(default_lower_tex);
+	w_tex->value(default_wall_tex);
 	f_tex->value(default_floor_tex);
 	c_tex->value(default_ceil_tex);
 
@@ -424,9 +422,6 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "default") != 0)
 		return false;
 
-	if (strcmp(tokens[1], "is_shown") == 0)
-	{ /* ignored for backwards compat */ }
-
 	if (strcmp(tokens[1], "floor_h") == 0)
 		default_floor_h = atoi(tokens[2]);
 
@@ -445,14 +440,8 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[1], "ceil_tex") == 0)
 		default_ceil_tex = StringDup(tokens[2]);
 
-	if (strcmp(tokens[1], "lower_tex") == 0)
-		default_lower_tex = StringDup(tokens[2]);
-
 	if (strcmp(tokens[1], "mid_tex") == 0)
-		default_mid_tex = StringDup(tokens[2]);
-
-	if (strcmp(tokens[1], "upper_tex") == 0)
-		default_upper_tex = StringDup(tokens[2]);
+		default_wall_tex = StringDup(tokens[2]);
 
 	return true;
 }
@@ -467,11 +456,9 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default light_level %d\n",  default_light_level);
 	fprintf(fp, "default thing %d\n",  default_thing);
 
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\""));
 	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
 	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
-	fprintf(fp, "default lower_tex \"%s\"\n", StringTidy(default_lower_tex, "\""));
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_mid_tex,   "\""));
-	fprintf(fp, "default upper_tex \"%s\"\n", StringTidy(default_upper_tex, "\""));
 }
 
 

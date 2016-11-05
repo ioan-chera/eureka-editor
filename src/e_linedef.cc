@@ -903,7 +903,7 @@ void LD_MergedSecondSideDef(int ld)
 	// use default texture if both sides are empty
 	if (! left_tex)
 	{
-		 left_tex = BA_InternaliseString(default_mid_tex);
+		 left_tex = BA_InternaliseString(default_wall_tex);
 		right_tex = left_tex;
 	}
 
@@ -951,7 +951,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 
 	const SideDef *SD = SideDefs[other_sd];
 
-	int new_tex = BA_InternaliseString(default_mid_tex);
+	int new_tex = BA_InternaliseString(default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1216,7 +1216,7 @@ void LD_FixForLostSide(int ld)
 	else if (! is_null_tex(L->Right()->UpperTex()))
 		tex = L->Right()->upper_tex;
 	else
-		tex = BA_InternaliseString(default_mid_tex);
+		tex = BA_InternaliseString(default_wall_tex);
 
 	BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
 }

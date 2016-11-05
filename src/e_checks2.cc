@@ -1368,9 +1368,7 @@ void Textures_ShowMissing()
 
 void Textures_FixMissing()
 {
-	int new_upper = BA_InternaliseString(default_upper_tex);
-	int new_mid   = BA_InternaliseString(default_mid_tex);
-	int new_lower = BA_InternaliseString(default_lower_tex);
+	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	BA_Begin();
 	BA_Message("fixed missing textures");
@@ -1385,7 +1383,7 @@ void Textures_FixMissing()
 		if (L->OneSided())
 		{
 			if (is_missing_tex(L->Right()->MidTex()))
-				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_mid);
+				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
@@ -1393,20 +1391,20 @@ void Textures_FixMissing()
 			const Sector *back  = L->Left() ->SecRef();
 
 			if (front->floorh < back->floorh && is_missing_tex(L->Right()->LowerTex()))
-				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_lower);
+				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (back->floorh < front->floorh && is_missing_tex(L->Left()->LowerTex()))
-				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_lower);
+				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_missing_tex(L->Right()->UpperTex()))
-				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_upper);
+				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
 
 			if (back->ceilh > front->ceilh && is_missing_tex(L->Left()->UpperTex()))
-				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_upper);
+				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
@@ -1491,9 +1489,7 @@ void Textures_ShowTransparent()
 
 void Textures_FixTransparent()
 {
-	int new_upper = BA_InternaliseString(default_upper_tex);
-	int new_mid   = BA_InternaliseString(default_mid_tex);
-	int new_lower = BA_InternaliseString(default_lower_tex);
+	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	BA_Begin();
 	BA_Message("fixed transparent textures");
@@ -1508,21 +1504,21 @@ void Textures_FixTransparent()
 		if (L->OneSided())
 		{
 			if (is_transparent(L->Right()->MidTex()))
-				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_mid);
+				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
 			if (is_transparent(L->Left()->LowerTex()))
-				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_lower);
+				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(L->Left()->UpperTex()))
-				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_upper);
+				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_wall);
 
 			if (is_transparent(L->Right()->LowerTex()))
-				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_lower);
+				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(L->Right()->UpperTex()))
-				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_upper);
+				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
@@ -1788,9 +1784,7 @@ void Textures_LogUnknown(bool do_flat)
 
 void Textures_FixUnknownTex()
 {
-	int new_upper = BA_InternaliseString(default_upper_tex);
-	int new_mid   = BA_InternaliseString(default_mid_tex);
-	int new_lower = BA_InternaliseString(default_lower_tex);
+	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	int null_tex = BA_InternaliseString("-");
 
@@ -1813,13 +1807,13 @@ void Textures_FixUnknownTex()
 			const SideDef *SD = SideDefs[sd_num];
 
 			if (! W_TextureExists(SD->LowerTex()))
-				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_lower);
+				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (! W_TextureExists(SD->UpperTex()))
-				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_upper);
+				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (! W_TextureExists(SD->MidTex()))
-				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_mid);
+				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 
