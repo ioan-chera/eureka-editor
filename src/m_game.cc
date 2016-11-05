@@ -80,6 +80,8 @@ void M_InitDefinitions()
 	// reset game information
 	memset(&game_info, 0, sizeof(game_info));
 
+	game_info.doom_format = true;
+
 	// FIXME: ability to parse from a game definition file
 	game_info.player_h = 56;
 	game_info.min_dm_starts = 4;
@@ -146,6 +148,26 @@ static void ParseColorDef(char ** argv, int argc)
 	else
 	{
 		LogPrintf("unknown color keyword: '%s'\n", argv[0]);
+	}
+}
+
+
+static void ParseMapFormats(char ** argv, int argc)
+{
+	// reset currently supported ones
+	game_info. doom_format = false;
+	game_info.hexen_format = false;
+
+	for ( ; argc > 0 ; argv++, argc--)
+	{
+		if (y_stricmp(argv[0], "DOOM") == 0)
+			game_info.doom_format = true;
+
+		else if (y_stricmp(argv[0], "HEXEN") == 0)
+			game_info.hexen_format = true;
+
+		else
+			FatalError("Unknown map format '%s' in definition file.\n", argv[0]);
 	}
 }
 
@@ -409,6 +431,14 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			ParseColorDef(token + 1, nargs);
+		}
+
+		else if (y_stricmp(token[0], "map_formats") == 0)
+		{
+			if (nargs < 1)
+				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+
+			ParseMapFormats(token + 1, nargs);
 		}
 
 		else if (y_stricmp(token[0], "feature") == 0)

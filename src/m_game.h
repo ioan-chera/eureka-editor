@@ -127,6 +127,10 @@ typedef struct
 	int min_dm_starts;
 	int max_dm_starts;
 
+	// supported map formats
+	bool doom_format;
+	bool hexen_format;
+
 	/* port features */
 
 	int gen_types;		// BOOM generalized linedefs and sectors
