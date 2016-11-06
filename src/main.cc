@@ -697,10 +697,10 @@ void Main_Loop()
 
 static void LoadResourceFile(const char *filename)
 {
-	// support loading "ugh" definitions
+	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(filename);
+		M_ParseDefinitionFile(PURPOSE_Resource, filename);
 		return;
 	}
 
@@ -714,7 +714,7 @@ static void LoadResourceFile(const char *filename)
 
 	MasterDir_Add(wad);
 
-	// load corresponding mod file (if it exists)
+	// load corresponding mod file if it exists
 	const char *mod_name = DetermineMod(filename);
 	
 	if (M_CanLoadDefinitions("mods", mod_name))

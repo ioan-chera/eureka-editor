@@ -127,10 +127,6 @@ typedef struct
 	int min_dm_starts;
 	int max_dm_starts;
 
-	// supported map formats
-	bool doom_format;
-	bool hexen_format;
-
 	/* port features */
 
 	int gen_types;		// BOOM generalized linedefs and sectors
@@ -197,11 +193,37 @@ extern int num_gen_linetypes;
 //------------------------------------------------------------------------
 
 void M_InitDefinitions();
-void M_LoadDefinitions(const char *folder, const char *name,
-                       int include_level = 0);
+void M_LoadDefinitions(const char *folder, const char *name);
 bool M_CanLoadDefinitions(const char *folder, const char *name);
-void M_ParseDefinitionFile(const char *filename, const char *folder = NULL,
+
+typedef enum
+{
+	PURPOSE_Normal = 0,		// normal loading
+	PURPOSE_Resource,		// as a resource file
+	PURPOSE_GameCheck,		// check game's variant name and map formats
+	PURPOSE_PortCheck,		// check if port supports game
+
+} parse_purpose_e;
+
+typedef struct
+{
+	// set when "map_formats" is found, otherwise left unchanged
+	map_format_bitset_t formats;
+
+	// set when "variant_of" is found, otherwise left unchanged
+	char variant_name[256];
+
+	// when "supported_games" is found, check if variant_name is in
+	// the list and set this to 0 or 1, otherwise left unchanged
+	int supports_game;
+
+} parse_check_info_t;
+
+void M_ParseDefinitionFile(parse_purpose_e purpose,
+						   const char *filename,
+						   const char *folder = NULL,
 						   const char *basename = NULL,
+						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
 void M_FreeDefinitions();
 

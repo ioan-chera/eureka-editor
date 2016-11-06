@@ -80,8 +80,6 @@ void M_InitDefinitions()
 	// reset game information
 	memset(&game_info, 0, sizeof(game_info));
 
-	game_info.doom_format = true;
-
 	// FIXME: ability to parse from a game definition file
 	game_info.player_h = 56;
 	game_info.min_dm_starts = 4;
@@ -152,23 +150,23 @@ static void ParseColorDef(char ** argv, int argc)
 }
 
 
-static void ParseMapFormats(char ** argv, int argc)
+static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 {
-	// reset currently supported ones
-	game_info. doom_format = false;
-	game_info.hexen_format = false;
+	map_format_bitset_t result = 0;
 
 	for ( ; argc > 0 ; argv++, argc--)
 	{
 		if (y_stricmp(argv[0], "DOOM") == 0)
-			game_info.doom_format = true;
+			result |= (1 << MAPF_Doom);
 
 		else if (y_stricmp(argv[0], "HEXEN") == 0)
-			game_info.hexen_format = true;
+			result |= (1 << MAPF_Hexen);
 
 		else
 			FatalError("Unknown map format '%s' in definition file.\n", argv[0]);
 	}
+
+	return result;
 }
 
 
@@ -252,7 +250,7 @@ bool M_CanLoadDefinitions(const char *folder, const char *name)
  *            "ports" + "edge"
  *            "mods"  + "qdoom"
  */
-void M_LoadDefinitions(const char *folder, const char *name, int include_level)
+void M_LoadDefinitions(const char *folder, const char *name)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
@@ -261,7 +259,6 @@ void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
-
 	const char * filename = FindDefinitionFile(folder, name);
 
 	if (! filename)
@@ -269,12 +266,19 @@ void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 
 	DebugPrintf("  found at: %s\n", filename);
 
-	M_ParseDefinitionFile(filename, folder, prettyname, include_level);
+	if (strcmp(folder, "mods") == 0)
+		M_ParseDefinitionFile(PURPOSE_Resource, filename, folder, prettyname);
+	else
+		M_ParseDefinitionFile(PURPOSE_Normal, filename, folder, prettyname);
 }
 
 
-void M_ParseDefinitionFile(const char *filename, const char *folder,
-						   const char *prettyname, int include_level)
+void M_ParseDefinitionFile(parse_purpose_e purpose,
+						   const char *filename,
+						   const char *folder,
+						   const char *prettyname,
+						   parse_check_info_t * check_info,
+						   int include_level)
 {
 	if (! folder)
 		folder = "common";
@@ -366,12 +370,14 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 		int nargs = ntoks - 1;
 
+		// skip empty lines
 		if (ntoks == 0)
 		{
 			continue;
 		}
 
-		else if (y_stricmp(token[0], "include") == 0)
+		// handle includes
+		if (y_stricmp(token[0], "include") == 0)
 		{
 			if (nargs != 1)
 				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
@@ -392,14 +398,67 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (! new_name)
 				FatalError("%s(%d): Cannot find include file: %s.ugh\n", prettyname, lineno, token[1]);
 
-			M_ParseDefinitionFile(new_name, new_folder, NULL /* prettyname */, include_level + 1);
+			M_ParseDefinitionFile(purpose, new_name, new_folder,
+								  NULL /* prettyname */,
+								  check_info, include_level + 1);
+			continue;
 		}
 
-		else if (y_stricmp(token[0], "variant_of") == 0 ||
-				 y_stricmp(token[0], "supported_games") == 0 ||
-				 y_stricmp(token[0], "map_formats") == 0)
+		// handle a game-checking parse
+		if (purpose == PURPOSE_GameCheck)
 		{
-			/* these are handled elsewhere */
+			SYS_ASSERT(check_info);
+
+			if (y_stricmp(token[0], "supported_game") == 0)
+				FatalError("%s(%d): supported_game can only be used in port definitions\n", prettyname, lineno);
+
+			else if (y_stricmp(token[0], "variant_of") == 0)
+			{
+				// TODO
+			}
+
+			else if (y_stricmp(token[0], "map_formats") == 0)
+			{
+				if (nargs < 1)
+					FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
+
+				check_info->formats = ParseMapFormats(token + 1, nargs);
+			}
+
+			continue;
+		}
+
+		// handle a port-checking parse
+		if (purpose == PURPOSE_PortCheck)
+		{
+			SYS_ASSERT(check_info);
+
+			if (y_stricmp(token[0], "variant_of") == 0)
+				FatalError("%s(%d): variant_of can only be used in game definitions\n", prettyname, lineno);
+
+			else if (y_stricmp(token[0], "supported_game") == 0)
+			{
+				// TODO
+			}
+
+			else if (y_stricmp(token[0], "map_formats") == 0)
+			{
+				if (nargs < 1)
+					FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
+
+				check_info->formats = ParseMapFormats(token + 1, nargs);
+			}
+
+			continue;
+		}
+
+		// handle a normal parse
+
+		if (y_stricmp(token[0], "variant_of") == 0 ||
+			y_stricmp(token[0], "supported_games") == 0 ||
+			y_stricmp(token[0], "map_formats") == 0)
+		{
+			/* these are handled above, ignored in a normal parse */
 		}
 
 		else if (y_stricmp(token[0], "level_name") == 0)

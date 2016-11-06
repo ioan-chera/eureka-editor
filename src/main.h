@@ -105,6 +105,10 @@ typedef enum
 } map_format_e;
 
 
+// for this, set/clear/test bits using (1 << MAPF_xxx)
+typedef int map_format_bitset_t;
+
+
 /*
  *  Interfile global variables
  */
