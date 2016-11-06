@@ -213,33 +213,32 @@ static void ParseFeatureDef(char ** argv, int argc)
 }
 
 
-static const char * FindDefinitionFile(
-	const char *base_dir, const char *folder, const char *name)
+static const char * FindDefinitionFile(const char *folder, const char *name)
 {
 	static char filename[FL_PATH_MAX];
 
-	if (! base_dir)
-		return NULL;
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		const char *base_dir = (pass == 0) ? home_dir : install_dir;
 
-	sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
+		if (! base_dir)
+			continue;
 
-DebugPrintf("  trying: %s\n", filename);
+		sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
 
-	if (FileExists(filename))
-		return filename;
-	
+		DebugPrintf("  trying: %s\n", filename);
+
+		if (FileExists(filename))
+			return filename;
+	}
+
 	return NULL;
 }
 
 
 bool M_CanLoadDefinitions(const char *folder, const char *name)
 {
-	const char * filename;
-
-	filename = FindDefinitionFile(home_dir, folder, name);
-
-	if (! filename)
-		filename = FindDefinitionFile(install_dir, folder, name);
+	const char * filename = FindDefinitionFile(folder, name);
 
 	return (filename != NULL);
 }
@@ -256,50 +255,42 @@ bool M_CanLoadDefinitions(const char *folder, const char *name)
 void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 {
 	// this is for error messages & debugging
-	char basename[256];
+	char prettyname[256];
 
-	sprintf(basename, "%s/%s.ugh", folder, name);
+	sprintf(prettyname, "%s/%s.ugh", folder, name);
 
-	LogPrintf("Loading Definitions : %s\n", basename);
+	LogPrintf("Loading Definitions : %s\n", prettyname);
 
 
 	const char * filename;
 
-	filename = FindDefinitionFile(home_dir, folder, name);
-
-	if (! filename)
-		filename = FindDefinitionFile(install_dir, folder, name);
+	filename = FindDefinitionFile(folder, name);
 
 	// look in common/ folder as last resort
-	if (! filename && strcmp(folder, "common") != 0)
+	if (! filename && include_level > 0 && strcmp(folder, "common") != 0)
 	{
 		folder = "common";
 
-		filename = FindDefinitionFile(home_dir, folder, name);
-
-		if (! filename)
-			filename = FindDefinitionFile(install_dir, folder, name);
+		filename = FindDefinitionFile(folder, name);
 	}
 
 	if (! filename)
-		FatalError("Cannot find definition file: %s\n", basename);
-
+		FatalError("Cannot find definition file: %s\n", prettyname);
 
 	DebugPrintf("  found at: %s\n", filename);
 
-
-	M_ParseDefinitionFile(filename, folder, basename, include_level);
+	M_ParseDefinitionFile(filename, folder, prettyname, include_level);
 }
 
 
 void M_ParseDefinitionFile(const char *filename, const char *folder,
-						   const char *basename, int include_level)
+						   const char *prettyname, int include_level)
 {
 	if (! folder)
 		folder = "common";
 	
-	if (! basename)
-		basename = fl_filename_name(filename);
+	if (! prettyname)
+		prettyname = fl_filename_name(filename);
 
 
 #define YGD_BUF  512   /* max. line length + 2 */
@@ -359,7 +350,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			{
 				if (ntoks >= (int) (sizeof token / sizeof *token))
 					FatalError("%s(%d): more than %d tokens\n",
-							basename, lineno, sizeof token / sizeof *token);
+							prettyname, lineno, sizeof token / sizeof *token);
 				token[ntoks] = optr;
 				ntoks++;
 				in_token = 1;
@@ -379,7 +370,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		}
 
 		if (quoted)
-			FatalError("%s(%d): unmatched double quote\n", basename, lineno);
+			FatalError("%s(%d): unmatched double quote\n", prettyname, lineno);
 
 		/* process the line */
 
@@ -393,10 +384,10 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "include") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
-				FatalError("%s(%d): Too many includes (check for a loop)\n", basename, lineno);
+				FatalError("%s(%d): Too many includes (check for a loop)\n", prettyname, lineno);
 
 			M_LoadDefinitions(folder, token[1], include_level + 1);
 		}
@@ -416,7 +407,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "sky_color") == 0)  // back compat
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
 
 			game_info.sky_color = atoi(token[1]);
 		}
@@ -424,10 +415,10 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "sky_flat") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
 
 			if (strlen(token[1]) >= sizeof(game_info.sky_flat))
-				FatalError("%s(%d): sky_flat name is too long\n", basename, lineno);
+				FatalError("%s(%d): sky_flat name is too long\n", prettyname, lineno);
 
 			strcpy(game_info.sky_flat, token[1]);
 		}
@@ -435,7 +426,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "color") == 0)
 		{
 			if (nargs < 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			ParseColorDef(token + 1, nargs);
 		}
@@ -443,7 +434,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "feature") == 0)
 		{
 			if (nargs < 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			ParseFeatureDef(token + 1, nargs);
 		}
@@ -456,7 +447,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "default_textures") == 0)
 		{
 			if (nargs != 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
 
 			default_wall_tex	= token[1];
 			default_floor_tex	= token[2];
@@ -466,7 +457,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "default_thing") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
 
 			default_thing = atoi(token[1]);
 		}
@@ -474,7 +465,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "linegroup") == 0)
 		{
 			if (nargs != 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			linegroup_t * lg = new linegroup_t;
 
@@ -488,7 +479,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				 y_stricmp(token[0], "special") == 0)
 		{
 			if (nargs < 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
 
 			linetype_t * info = new linetype_t;
 
@@ -512,7 +503,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (line_groups.find( info->group) == line_groups.end())
 			{
 				LogPrintf("%s(%d): unknown line group '%c'\n",
-						basename, lineno,  info->group);
+						prettyname, lineno,  info->group);
 			}
 			else
 				line_types[number] = info;
@@ -521,7 +512,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "sector") == 0)
 		{
 			if (nargs != 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			int number = atoi(token[1]);
 
@@ -535,7 +526,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "thinggroup") == 0)
 		{
 			if (nargs != 3)
-				FatalError(bad_arg_count, basename, lineno, token[0], 3);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
 
 			thinggroup_t * tg = new thinggroup_t;
 
@@ -549,7 +540,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "thing") == 0)
 		{
 			if (nargs != 6)
-				FatalError(bad_arg_count, basename, lineno, token[0], 6);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 6);
 
 			thingtype_t * info = new thingtype_t;
 
@@ -564,7 +555,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (thing_groups.find(info->group) == thing_groups.end())
 			{
 				LogPrintf("%s(%d): unknown thing group '%c'\n",
-						basename, lineno, info->group);
+						prettyname, lineno, info->group);
 			}
 			else
 			{	
@@ -577,7 +568,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "texturegroup") == 0)
 		{
 			if (nargs != 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			texturegroup_t * tg = new texturegroup_t;
 
@@ -590,7 +581,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "texture") == 0)
 		{
 			if (nargs != 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
@@ -598,7 +589,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
 				LogPrintf("%s(%d): unknown texture group '%c'\n",
-						  basename, lineno, group);
+						  prettyname, lineno, group);
 			}
 			else
 				texture_assigns[name] = group;
@@ -607,7 +598,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "flat") == 0)
 		{
 			if (nargs != 2)
-				FatalError(bad_arg_count, basename, lineno, token[0], 2);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
 
 			char group = token[1][0];
 			std::string name = std::string(token[2]);
@@ -615,7 +606,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (texture_groups.find(tolower(group)) == texture_groups.end())
 			{
 				LogPrintf("%s(%d): unknown texture group '%c'\n",
-						basename, lineno, group);
+						prettyname, lineno, group);
 			}
 			else
 				flat_assigns[name] = group;
@@ -624,13 +615,13 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "gen_line") == 0)
 		{
 			if (nargs != 4)
-				FatalError(bad_arg_count, basename, lineno, token[0], 4);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 4);
 
 			current_gen_line = num_gen_linetypes;
 			num_gen_linetypes++;
 
 			if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
-				FatalError("%s(%d): too many gen_line definitions\n", basename, lineno);
+				FatalError("%s(%d): too many gen_line definitions\n", prettyname, lineno);
 
 			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
 
@@ -647,10 +638,10 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "gen_field") == 0)
 		{
 			if (nargs < 5)
-				FatalError(bad_arg_count, basename, lineno, token[0], 5);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 5);
 
 			if (current_gen_line < 0)
-				FatalError("%s(%d): gen_field used outside of a gen_line definition\n", basename, lineno);
+				FatalError("%s(%d): gen_field used outside of a gen_line definition\n", prettyname, lineno);
 			
 			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
 
@@ -658,7 +649,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 
 			def->num_fields++;
 			if (def->num_fields > MAX_GEN_NUM_FIELDS)
-				FatalError("%s(%d): too many fields in gen_line definition\n", basename, lineno);
+				FatalError("%s(%d): too many fields in gen_line definition\n", prettyname, lineno);
 
 			field->bits  = atoi(token[1]);
 			field->shift = atoi(token[2]);
@@ -681,12 +672,12 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else if (y_stricmp(token[0], "exclude_game") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
 
 			if (Game_name && y_stricmp(token[1], Game_name) == 0)
 			{
 				LogPrintf("WARNING: skipping %s -- not compatible with %s\n",
-						  basename, Game_name);
+						  prettyname, Game_name);
 
 				// do not process any more of the file
 				fclose(fp);
@@ -697,7 +688,7 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 		else
 		{
 			FatalError("%s(%d): unknown directive: %.32s\n",
-					   basename, lineno, token[0]);
+					   prettyname, lineno, token[0]);
 		}
 	}
 
