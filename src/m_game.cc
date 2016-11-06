@@ -150,6 +150,18 @@ static void ParseColorDef(char ** argv, int argc)
 }
 
 
+static void ParseSupportedGame(parse_check_info_t *check, char ** argv, int argc)
+{
+	check->supports_game = 0;
+
+	for ( ; argc > 0 ; argv++, argc--)
+	{
+		if (y_stricmp(check->variant_name, *argv) == 0)
+			check->supports_game = 1;
+	}
+}
+
+
 static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 {
 	map_format_bitset_t result = 0;
@@ -414,7 +426,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 			else if (y_stricmp(token[0], "variant_of") == 0)
 			{
-				// TODO
+				snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", token[1]);
 			}
 
 			else if (y_stricmp(token[0], "map_formats") == 0)
@@ -438,7 +450,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 			else if (y_stricmp(token[0], "supported_game") == 0)
 			{
-				// TODO
+				ParseSupportedGame(check_info, token + 1, nargs);
 			}
 
 			else if (y_stricmp(token[0], "map_formats") == 0)
