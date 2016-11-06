@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2015 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -712,7 +712,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 412 : 372, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(400, is_startup ? 440 : 400, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
 	iwad(NULL), port(NULL)
 {
@@ -735,24 +735,31 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		by += 40;
 	}
 	
-	iwad_choice = new Fl_Choice(120, by+25, 170, 29, "Game IWAD: ");
+	iwad_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
 	iwad_choice->labelfont(FL_HELVETICA_BOLD);
 	iwad_choice->down_box(FL_BORDER_BOX);
 	iwad_choice->callback((Fl_Callback*)iwad_callback, this);
-
-	port_choice = new Fl_Choice(120, by+60, 170, 29, "Port: ");
-	port_choice->labelfont(FL_HELVETICA_BOLD);
-	port_choice->down_box(FL_BORDER_BOX);
-	port_choice->callback((Fl_Callback*)port_callback, this);
 
 	{
 		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
 		o->callback((Fl_Callback*)browse_callback, this);
 	}
 
+	port_choice = new Fl_Choice(140, by+60, 150, 29, "Source Port: ");
+	port_choice->labelfont(FL_HELVETICA_BOLD);
+	port_choice->down_box(FL_BORDER_BOX);
+	port_choice->callback((Fl_Callback*)port_callback, this);
+
+	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
+	format_choice->labelfont(FL_HELVETICA_BOLD);
+	format_choice->down_box(FL_BORDER_BOX);
+	format_choice->callback((Fl_Callback*)format_callback, this);
+	format_choice->add("Doom Format|Hexen Format");
+	format_choice->value(0);
+
 	// Resource section
 
-	Fl_Box *res_title = new Fl_Box(15, by+110, 185, 35, "Resource Files:");
+	Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
 	res_title->labelfont(FL_HELVETICA_BOLD);
 	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
@@ -760,7 +767,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	{
 		res[r] = NULL;
 
-		int cy = by + 145 + r * 35;
+		int cy = by + 172 + r * 35;
 
 		char res_label[64];
 		sprintf(res_label, "%d. ", 1 + r);
@@ -778,18 +785,18 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	// bottom buttons
 	{
-		Fl_Group *o = new Fl_Group(0, by+312, 400, 60);
-		o->box(FL_FLAT_BOX);
-		o->color(WINDOW_BG, WINDOW_BG);
+		Fl_Group *g = new Fl_Group(0, by+340, 400, 60);
+		g->box(FL_FLAT_BOX);
+		g->color(WINDOW_BG, WINDOW_BG);
 
-		cancel = new Fl_Button(165, o->y() + 14, 80, 35, is_startup ? "Quit" : "Cancel");
+		cancel = new Fl_Button(165, g->y() + 14, 80, 35, is_startup ? "Quit" : "Cancel");
 		cancel->callback((Fl_Callback*)close_callback, this);
 
-		ok_but = new Fl_Button(290, o->y() + 14, 80, 35, "Use");
+		ok_but = new Fl_Button(290, g->y() + 14, 80, 35, "Use");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
-		o->end();
+		g->end();
 	}
 
 	end();
@@ -804,7 +811,10 @@ UI_ProjectSetup::~UI_ProjectSetup()
 
 bool UI_ProjectSetup::Run()
 {
-	Populate();
+	PopulateIWADs(Iwad_name);
+	PopulatePort();
+	PopulateMapFormat();
+	PopulateResources();
 
 	set_modal();
 
@@ -821,6 +831,8 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 {
+	iwad = NULL;
+
 	const char *iwad_string;
 	int iwad_val = 0;
 
@@ -835,19 +847,16 @@ void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 
 		iwad = M_QueryKnownIWAD(iwad_choice->mvalue()->text);
 	}
+
+	if (iwad)
+		ok_but->deactivate();
+	else
+		ok_but->deactivate();
 }
 
 
-void UI_ProjectSetup::Populate()
+void UI_ProjectSetup::PopulatePort()
 {
-	iwad = NULL;
-
-	PopulateIWADs(Iwad_name);
-
-	if (! iwad)
-		ok_but->deactivate();
-
-
 	port = NULL;
 
 	const char *port_string;
@@ -862,8 +871,22 @@ void UI_ProjectSetup::Populate()
 
 		port = port_choice->mvalue()->text;
 	}
+}
 
 
+void UI_ProjectSetup::PopulateMapFormat()
+{
+	// FIXME : temp crud
+	map_format = (Level_format == MAPF_Hexen) ? MAPF_Hexen : MAPF_Doom;
+
+	usable_formats = (1 << map_format);
+
+	// FIXME : reconstruct the menu
+}
+
+
+void UI_ProjectSetup::PopulateResources()
+{
 	// Note: these resource wads may be invalid (not exist) during startup.
 	//       This is probably NOT the place to validate them...
 
@@ -911,6 +934,9 @@ void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
 
 		fl_beep();
 	}
+
+	that->PopulatePort();
+	that->PopulateMapFormat();
 }
 
 
@@ -921,6 +947,21 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 	const char * name = w->mvalue()->text;
 
 	that->port = StringDup(name);
+
+	that->PopulateMapFormat();
+}
+
+
+void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	const char * fmt_str = w->mvalue()->text;
+
+	if (strstr(fmt_str, "Doom"))
+		that->map_format = MAPF_Doom;
+	else
+		that->map_format = MAPF_Hexen;
 }
 
 
@@ -967,6 +1008,8 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	that->iwad = StringDup(chooser.filename());
 
 	that->PopulateIWADs(that->iwad);
+	that->PopulatePort();
+	that->PopulateMapFormat();
 
 	that->ok_but->activate();
 }

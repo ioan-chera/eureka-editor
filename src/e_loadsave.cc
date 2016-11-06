@@ -104,7 +104,7 @@ extern void CMD_ZoomWholeMap();
 void RemoveEditWad();
 
 
-static bool Project_New()
+static bool Project_New(map_format_e new_fmt)
 {
 	SYS_ASSERT(! edit_wad);
 
@@ -188,6 +188,8 @@ static bool Project_New()
 	MasterDir_Add(edit_wad);
 
 
+	Level_format = new_fmt;
+
 	FreshLevel();
 
 	CMD_ZoomWholeMap();
@@ -215,12 +217,17 @@ bool ProjectSetup(bool new_project, bool is_startup)
 
 	bool ok = dialog->Run();
 
+	map_format_e new_fmt = MAPF_INVALID;
+
 	if (ok)
 	{
 		// grab new information
 
 		Iwad_name = StringDup(dialog->iwad);
 		Port_name = StringDup(dialog->port);
+
+		new_fmt = dialog->map_format;
+		SYS_ASSERT(new_fmt != MAPF_INVALID);
 
 		Resource_list.clear();
 
@@ -253,7 +260,7 @@ bool ProjectSetup(bool new_project, bool is_startup)
 
 	Main_LoadResources();
 
-	return Project_New();
+	return Project_New(new_fmt);
 }
 
 

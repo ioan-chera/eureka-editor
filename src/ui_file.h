@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -129,11 +129,14 @@ public:
 private:
 	Fl_Choice *iwad_choice;
 	Fl_Choice *port_choice;
+	Fl_Choice *format_choice;
 
 	Fl_Output *res_name[RES_NUM];
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel;
+
+	map_format_bitset_t usable_formats;
 
 	enum
 	{
@@ -148,6 +151,7 @@ private:
 
 	static void   iwad_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
+	static void format_callback(Fl_Choice*, void*);
 	static void browse_callback(Fl_Button*, void*);
 
 	static void  kill_callback(Fl_Button*, void*);
@@ -156,8 +160,10 @@ private:
 	static void close_callback(Fl_Widget*, void*);
 	static void   use_callback(Fl_Button*, void*);
 
-	void Populate();
 	void PopulateIWADs(const char *curr_iwad);
+	void PopulatePort();
+	void PopulateMapFormat();
+	void PopulateResources();
 
 public:
 	/*
@@ -165,6 +171,9 @@ public:
 	 */
 	const char * iwad;
 	const char * port;
+
+	map_format_e map_format;
+
 	const char * res[RES_NUM];
 
 public:
