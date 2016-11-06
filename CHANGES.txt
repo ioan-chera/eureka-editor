@@ -13,3 +13,7 @@ CHANGES IN Eureka 1.12
 -  LineDef panel : entering a negative "Length" moves the start vertex
    instead of the end vertex
 
+-  Browser : changing categories clears the search box
+
+-  undo, redo : show what was (un)done in status area
+
