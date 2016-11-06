@@ -823,6 +823,70 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 }
 
 
+const char * M_VariantForGame(const char *game)
+{
+	// static so we can return the char[] inside it
+	static parse_check_info_t info;
+
+	// when no "variant_of" lines exist, result is just input name
+	strcpy(info.variant_name, game);
+
+	const char * filename = FindDefinitionFile("games", game);
+	SYS_ASSERT(filename);
+
+	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
+						  NULL /* prettyname */, &info);
+
+	SYS_ASSERT(info.variant_name[0]);
+
+	return info.variant_name;
+}
+
+
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
+{
+	parse_check_info_t info;
+
+	info.formats = (1 << MAPF_Doom);
+
+	const char * filename = FindDefinitionFile("games", game);
+	SYS_ASSERT(filename);
+
+	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
+						  NULL /* prettyname */, &info);
+
+	filename = FindDefinitionFile("ports", port);
+	SYS_ASSERT(filename);
+
+	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
+						  NULL /* prettyname */, &info);
+
+	return info.formats;
+}
+
+
+static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
+{
+	parse_check_info_t info;
+
+	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
+
+	info.supports_game = 0;
+
+	const char *filename = FindDefinitionFile("ports", port);
+
+	if (! filename)
+		return false;
+
+	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
+						  NULL /* prettyname */, &info);
+
+	return (info.supports_game > 0);
+}
+
+
+// find all the ports which support the given game variant.
+//
 // result will be '|' separated (ready for Fl_Choice::add)
 // returns the empty string when nothing found.
 // The result should be freed with StringFree().
@@ -830,11 +894,11 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name)
+const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name)
 {
 	std::vector<const char *> list;
 
-	M_CollectKnownDefs(folder, list);
+	M_CollectKnownDefs("ports", list);
 
 	if (list.empty())
 		return StringDup("");
@@ -851,6 +915,9 @@ const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
+		if (! M_CheckPortSupportsGame(var_game, list[i]))
+			continue;
+
 		strcat(result, list[i]);
 
 		if (i + 1 < list.size())

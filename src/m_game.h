@@ -222,14 +222,18 @@ typedef struct
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder = NULL,
-						   const char *basename = NULL,
+						   const char *prettyname = NULL,
 						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
 void M_FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
-const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name);
+const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
+
+const char * M_VariantForGame(const char *game);
+
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 
 // is this flat a sky?
