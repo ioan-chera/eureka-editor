@@ -312,7 +312,7 @@ UI_OpenMap::UI_OpenMap() :
 
 
 	// all the map buttons go into this group
-	
+
 	button_grp = new Fl_Group(0, 235, w(), 230, "\n\nNone Found");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
@@ -734,7 +734,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 		by += 40;
 	}
-	
+
 	iwad_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
 	iwad_choice->labelfont(FL_HELVETICA_BOLD);
 	iwad_choice->down_box(FL_BORDER_BOX);
@@ -754,8 +754,6 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	format_choice->labelfont(FL_HELVETICA_BOLD);
 	format_choice->down_box(FL_BORDER_BOX);
 	format_choice->callback((Fl_Callback*)format_callback, this);
-	format_choice->add("Doom Format|Hexen Format");
-	format_choice->value(0);
 
 	// Resource section
 
@@ -833,23 +831,24 @@ void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 {
 	iwad = NULL;
 
-	const char *iwad_string;
-	int iwad_val = 0;
-
-	iwad_string = M_KnownIWADsForMenu(&iwad_val, curr_iwad ? curr_iwad : "xxx");
-
 	iwad_choice->clear();
 
-	if (iwad_string[0])
+	const char *menu_string;
+	int menu_value = 0;
+
+	menu_string = M_KnownIWADsForMenu(&menu_value, curr_iwad ? curr_iwad : "xxx");
+
+	if (menu_string[0])
 	{
-		iwad_choice->add(iwad_string);
-		iwad_choice->value(iwad_val);
+		iwad_choice->add(menu_string);
+		iwad_choice->value(menu_value);
 
 		iwad = M_QueryKnownIWAD(iwad_choice->mvalue()->text);
+fprintf(stderr, "PopulateIWADs : iwad = %s\n", iwad);
 	}
 
 	if (iwad)
-		ok_but->deactivate();
+		ok_but->activate();
 	else
 		ok_but->deactivate();
 }
@@ -857,9 +856,20 @@ void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 
 void UI_ProjectSetup::PopulatePort()
 {
-	port = NULL;
+	const char *prev_port = Port_name;
 
-	// if no iwad, then no port either
+	if (port_choice->mvalue())
+		prev_port = port_choice->mvalue()->text;
+
+	if (! Port_name)
+		prev_port = "vanilla";
+
+
+	port = "vanilla";
+
+	port_choice->clear();
+
+	// if no iwad, then port don't matter
 	if (! iwad)
 		return;
 
@@ -875,26 +885,15 @@ void UI_ProjectSetup::PopulatePort()
 		var_game = "doom2";
 
 
-	const char *prev_port = Port_name;
+	const char *menu_string;
+	int menu_value = 0;
 
-	if (port_choice->mvalue())
-		prev_port = port_choice->mvalue()->text;
+	menu_string = M_CollectPortsForMenu(var_game, &menu_value, prev_port);
 
-	if (! Port_name)
-		prev_port = "vanilla";
-
-
-	const char *port_string;
-	int port_val = 0;
-
-	port_string = M_CollectPortsForMenu(var_game, &port_val, prev_port);
-
-	port_choice->clear();
-
-	if (port_string[0])
+	if (menu_string[0])
 	{
-		port_choice->add  (port_string);
-		port_choice->value(port_val);
+		port_choice->add  (menu_string);
+		port_choice->value(menu_value);
 
 		port = port_choice->mvalue()->text;
 	}
@@ -903,12 +902,78 @@ void UI_ProjectSetup::PopulatePort()
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	// FIXME : temp crud
-	map_format = (Level_format == MAPF_Hexen) ? MAPF_Hexen : MAPF_Doom;
+	map_format_e prev_fmt = MAPF_INVALID;
 
-	usable_formats = (1 << map_format);
+	if (format_choice->mvalue())
+	{
+		if (strstr(format_choice->mvalue()->text, "Hexen"))
+			prev_fmt = MAPF_Hexen;
+		else
+			prev_fmt = MAPF_Doom;
+	}
 
-	// FIXME : reconstruct the menu
+
+	map_format = MAPF_Doom;
+
+	format_choice->clear();
+
+	// if no iwad, then format don't matter
+	if (! iwad)
+		return;
+
+
+	// determine the usable formats, from current game and port
+	const char *c_game = "doom2";
+	const char *c_port = "vanilla";
+
+	if (iwad_choice->mvalue())
+		c_game = iwad_choice->mvalue()->text;
+
+	if (port_choice->mvalue())
+		c_port = port_choice->mvalue()->text;
+
+	usable_formats = M_DetermineMapFormats(c_game, c_port);
+
+	SYS_ASSERT(usable_formats != 0);
+
+
+	// reconstruct the menu
+	char menu_string[256];
+	int  menu_value = 0;
+
+	menu_string[0] = 0;
+
+	int entry_id = 0;
+
+	if (usable_formats & (1 << MAPF_Doom))
+	{
+		strcat(menu_string, "Doom Format");
+		entry_id++;
+	}
+
+	if (usable_formats & (1 << MAPF_Hexen))
+	{
+		if (prev_fmt == MAPF_Hexen)
+			menu_value = entry_id;
+
+		if (menu_string[0])
+			strcat(menu_string, "|");
+
+		strcat(menu_string, "Hexen Format");
+		entry_id++;
+	}
+
+	format_choice->add  (menu_string);
+	format_choice->value(menu_value);
+
+	if (usable_formats & (1 << MAPF_Hexen))
+	{
+		if (prev_fmt == MAPF_Hexen ||
+			(usable_formats & (1 << MAPF_Doom)) == 0)
+		{
+			map_format = MAPF_Hexen;
+		}
+	}
 }
 
 
@@ -1037,8 +1102,6 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	that->PopulateIWADs(that->iwad);
 	that->PopulatePort();
 	that->PopulateMapFormat();
-
-	that->ok_but->activate();
 }
 
 

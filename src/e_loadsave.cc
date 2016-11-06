@@ -217,7 +217,7 @@ bool ProjectSetup(bool new_project, bool is_startup)
 
 	bool ok = dialog->Run();
 
-	map_format_e new_fmt = MAPF_INVALID;
+	map_format_e new_fmt = dialog->map_format;
 
 	if (ok)
 	{
@@ -226,7 +226,6 @@ bool ProjectSetup(bool new_project, bool is_startup)
 		Iwad_name = StringDup(dialog->iwad);
 		Port_name = StringDup(dialog->port);
 
-		new_fmt = dialog->map_format;
 		SYS_ASSERT(new_fmt != MAPF_INVALID);
 
 		Resource_list.clear();
