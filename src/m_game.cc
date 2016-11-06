@@ -401,6 +401,13 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			M_LoadDefinitions(folder, token[1], include_level + 1);
 		}
 
+		else if (y_stricmp(token[0], "variant_of") == 0 ||
+				 y_stricmp(token[0], "supported_games") == 0 ||
+				 y_stricmp(token[0], "map_formats") == 0)
+		{
+			/* these are handled elsewhere */
+		}
+
 		else if (y_stricmp(token[0], "level_name") == 0)
 		{
 			/* ignored for backwards compability */
@@ -431,14 +438,6 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 				FatalError(bad_arg_count, basename, lineno, token[0], 2);
 
 			ParseColorDef(token + 1, nargs);
-		}
-
-		else if (y_stricmp(token[0], "map_formats") == 0)
-		{
-			if (nargs < 1)
-				FatalError(bad_arg_count, basename, lineno, token[0], 1);
-
-			ParseMapFormats(token + 1, nargs);
 		}
 
 		else if (y_stricmp(token[0], "feature") == 0)
