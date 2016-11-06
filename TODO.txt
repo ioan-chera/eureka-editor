@@ -3,14 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
-Bug: drawing mode crossing lines sometimes mucks up
-     e.g. drawing over the stairs in MAP01
-
-A way to set uppers/lowers on 1S for certain linetypes (e.g. MBF sky transfer)
-
-Q/ keep the ADD/DEL sidedef buttons? [ probably as an option ]
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -35,9 +27,13 @@ General
 
 +  Proper system to specify which ports can be used with each game.
 
-   Perhaps it would group games into classes (e.g. most of the current
-   games would be "doom" class).  Then each port can specify which
-   classes of games it supports.
+   (a) each port specifies the games it supports
+       e.g. "supported_games X Y Z"
+
+   (b) each game can say "I am a variation of game XXX"
+       e.g. tnt,plutonia,freedoom2 are variation of "doom2"
+
+       if a port supports XXX, then it supports this game too
 
 
 
@@ -81,6 +77,11 @@ Editing
 
 3D View
 -------
+
++  smooth movement via keyboard
+   -  call a function in Main_Loop
+   -  if did a move, Fl::wait(0) instead of 0.2
+   -  handle key up/down events in UI_Canvas::handle()
 
 
 
@@ -260,11 +261,6 @@ IDEA: for quantizing a group of objects, try about 9 delta
 +  draw the sky (optionally)
 
 -  option to reverse mouse movement
-
-+  smooth movement via keyboard
-   -  call a function in Main_Loop
-   -  if did a move, Fl::wait(0) instead of 0.2
-   -  handle key up/down events in UI_Canvas::handle()
 
 -  closed sectors have a see-through gap (gets bigger further away)
 
