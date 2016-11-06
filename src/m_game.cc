@@ -883,8 +883,14 @@ static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 
 	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
 
-	// default is NO!
+	// default is to support "doom" and "doom2"
 	info.supports_game = 0;
+
+	if (y_stricmp(var_game, "doom")  == 0 ||
+	    y_stricmp(var_game, "doom2") == 0)
+	{
+		info.supports_game = 1;
+	}
 
 	const char *filename = FindDefinitionFile("ports", port);
 
