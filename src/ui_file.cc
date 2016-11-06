@@ -875,6 +875,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	port_string = M_CollectPortsForMenu(var_game, &port_val, Port_name ? Port_name : "xxx");
 
+	port_choice->clear();
+
 	if (port_string[0])
 	{
 		port_choice->add  (port_string);

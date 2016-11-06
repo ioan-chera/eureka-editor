@@ -421,7 +421,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		{
 			SYS_ASSERT(check_info);
 
-			if (y_stricmp(token[0], "supported_game") == 0)
+			if (y_stricmp(token[0], "supported_games") == 0)
 				FatalError("%s(%d): supported_game can only be used in port definitions\n", prettyname, lineno);
 
 			else if (y_stricmp(token[0], "variant_of") == 0)
@@ -448,7 +448,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			if (y_stricmp(token[0], "variant_of") == 0)
 				FatalError("%s(%d): variant_of can only be used in game definitions\n", prettyname, lineno);
 
-			else if (y_stricmp(token[0], "supported_game") == 0)
+			else if (y_stricmp(token[0], "supported_games") == 0)
 			{
 				ParseSupportedGame(check_info, token + 1, nargs);
 			}
@@ -883,6 +883,7 @@ static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 
 	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
 
+	// default is NO!
 	info.supports_game = 0;
 
 	const char *filename = FindDefinitionFile("ports", port);
@@ -925,6 +926,8 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 	char * result = StringNew(length);
 	result[0] = 0;
 
+	int entry_id = 0;
+
 	for (i = 0 ; i < list.size() ; i++)
 	{
 		if (! M_CheckPortSupportsGame(var_game, list[i]))
@@ -936,7 +939,9 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 			strcat(result, "|");
 
 		if (y_stricmp(list[i], exist_name) == 0)
-			*exist_val = i;
+			*exist_val = entry_id;
+
+		entry_id++;
 	}
 
 //	DebugPrintf( "RESULT = '%s'\n", result);
