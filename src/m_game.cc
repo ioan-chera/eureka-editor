@@ -262,17 +262,7 @@ void M_LoadDefinitions(const char *folder, const char *name, int include_level)
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
 
-	const char * filename;
-
-	filename = FindDefinitionFile(folder, name);
-
-	// look in common/ folder as last resort
-	if (! filename && include_level > 0 && strcmp(folder, "common") != 0)
-	{
-		folder = "common";
-
-		filename = FindDefinitionFile(folder, name);
-	}
+	const char * filename = FindDefinitionFile(folder, name);
 
 	if (! filename)
 		FatalError("Cannot find definition file: %s\n", prettyname);
@@ -389,7 +379,20 @@ void M_ParseDefinitionFile(const char *filename, const char *folder,
 			if (include_level >= MAX_INCLUDE_LEVEL)
 				FatalError("%s(%d): Too many includes (check for a loop)\n", prettyname, lineno);
 
-			M_LoadDefinitions(folder, token[1], include_level + 1);
+			const char * new_folder = folder;
+			const char * new_name = FindDefinitionFile(new_folder, token[1]);
+
+			// if not found, check the common/ folder
+			if (! new_name && strcmp(folder, "common") != 0)
+			{
+				new_folder = "common";
+				new_name = FindDefinitionFile(new_folder, token[1]);
+			}
+
+			if (! new_name)
+				FatalError("%s(%d): Cannot find include file: %s.ugh\n", prettyname, lineno, token[1]);
+
+			M_ParseDefinitionFile(new_name, new_folder, NULL /* prettyname */, include_level + 1);
 		}
 
 		else if (y_stricmp(token[0], "variant_of") == 0 ||
