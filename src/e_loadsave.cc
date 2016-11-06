@@ -887,7 +887,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 	RemoveUnusedVerticesAtEnd();
 
 	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
-	SideDefs_NormalizeMiddles();
 
 	CalculateLevelBounds();
 
