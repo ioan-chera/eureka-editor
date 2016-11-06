@@ -104,7 +104,7 @@ extern void CMD_ZoomWholeMap();
 void RemoveEditWad();
 
 
-static bool Project_New(map_format_e new_fmt)
+static bool Project_New()
 {
 	SYS_ASSERT(! edit_wad);
 
@@ -188,8 +188,6 @@ static bool Project_New(map_format_e new_fmt)
 	MasterDir_Add(edit_wad);
 
 
-	Level_format = new_fmt;
-
 	FreshLevel();
 
 	CMD_ZoomWholeMap();
@@ -253,16 +251,21 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	
 	if (! new_project)
 	{
+		Level_format = new_fmt;
+
 		Main_LoadResources();
+
 		return true;
 	}
 
 
 	RemoveEditWad();
 
+	Level_format = new_fmt;
+
 	Main_LoadResources();
 
-	return Project_New(new_fmt);
+	return Project_New();
 }
 
 
