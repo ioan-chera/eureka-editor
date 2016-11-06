@@ -857,23 +857,37 @@ void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
 
 void UI_ProjectSetup::PopulatePort()
 {
-	const char *var_game = NULL;
-
 	port = NULL;
 
-
+	// if no iwad, then no port either
 	if (! iwad)
 		return;
 
-	var_game = M_VariantForGame(iwad_choice->mvalue()->text);
 
-	SYS_ASSERT(var_game);
+	const char *var_game = NULL;
+
+	if (iwad_choice->mvalue())
+		var_game = M_VariantForGame(iwad_choice->mvalue()->text);
+	else if (Game_name)
+		var_game = M_VariantForGame(Game_name);
+
+	if (! var_game)
+		var_game = "doom2";
+
+
+	const char *prev_port = Port_name;
+
+	if (port_choice->mvalue())
+		prev_port = port_choice->mvalue()->text;
+
+	if (! Port_name)
+		prev_port = "vanilla";
 
 
 	const char *port_string;
 	int port_val = 0;
 
-	port_string = M_CollectPortsForMenu(var_game, &port_val, Port_name ? Port_name : "xxx");
+	port_string = M_CollectPortsForMenu(var_game, &port_val, prev_port);
 
 	port_choice->clear();
 
