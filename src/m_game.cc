@@ -939,10 +939,10 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 		if (! M_CheckPortSupportsGame(var_game, list[i]))
 			continue;
 
-		strcat(result, list[i]);
-
-		if (i + 1 < list.size())
+		if (result[0])
 			strcat(result, "|");
+
+		strcat(result, list[i]);
 
 		if (y_stricmp(list[i], exist_name) == 0)
 			*exist_val = entry_id;

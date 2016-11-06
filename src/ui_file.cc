@@ -829,19 +829,19 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::PopulateIWADs()
 {
-	const char *prev_game = Game_name;
+	const char *prev_game = NULL;
 
 	if (game_choice->mvalue())
-		prev_game = game_choice->mvalue()->text;
+		prev_game = StringDup(game_choice->mvalue()->text);
 
-	// this probably can't happen, but no biggie if it does
-	if (! prev_game)
-		prev_game = "doom2";
+	if (! prev_game) prev_game = Game_name;
+	if (! prev_game) prev_game = "doom2";
 
 
 	game = NULL;
 
 	game_choice->clear();
+
 
 	const char *menu_string;
 	int menu_value = 0;
@@ -853,7 +853,7 @@ void UI_ProjectSetup::PopulateIWADs()
 		game_choice->add(menu_string);
 		game_choice->value(menu_value);
 
-		game = game_choice->mvalue()->text;
+		game = StringDup(game_choice->mvalue()->text);
 	}
 
 	if (game)
@@ -865,13 +865,13 @@ void UI_ProjectSetup::PopulateIWADs()
 
 void UI_ProjectSetup::PopulatePort()
 {
-	const char *prev_port = Port_name;
+	const char *prev_port = NULL;
 
 	if (port_choice->mvalue())
-		prev_port = port_choice->mvalue()->text;
+		prev_port = StringDup(port_choice->mvalue()->text);
 
-	if (! prev_port)
-		prev_port = "vanilla";
+	if (! prev_port) prev_port = Port_name;
+	if (! prev_port) prev_port = "vanilla";
 
 
 	port = "vanilla";
@@ -904,14 +904,14 @@ void UI_ProjectSetup::PopulatePort()
 		port_choice->add  (menu_string);
 		port_choice->value(menu_value);
 
-		port = port_choice->mvalue()->text;
+		port = StringDup(port_choice->mvalue()->text);
 	}
 }
 
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	map_format_e prev_fmt = MAPF_INVALID;
+	map_format_e prev_fmt = Level_format;
 
 	if (format_choice->mvalue())
 	{
@@ -1027,7 +1027,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	if (M_QueryKnownIWAD(name))
 	{
-		that->game = name;
+		that->game = StringDup(name);
 		that->ok_but->activate();
 	}
 	else
@@ -1061,10 +1061,10 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 
 	const char * fmt_str = w->mvalue()->text;
 
-	if (strstr(fmt_str, "Doom"))
-		that->map_format = MAPF_Doom;
-	else
+	if (strstr(fmt_str, "Hexen"))
 		that->map_format = MAPF_Hexen;
+	else
+		that->map_format = MAPF_Doom;
 }
 
 
