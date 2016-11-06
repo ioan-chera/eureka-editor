@@ -9,6 +9,7 @@ obj_win32/*.o
 obj_win32/glbsp/*.o
 
 _work
+WIP.txt
 
 # OS X stuff
 .DS_Store
