@@ -17,6 +17,11 @@
 #  GNU General Public License for more details.
 #
 #------------------------------------------------------------------------
+#
+#  Most of this file is based on the Strife configuration files
+#  of SLADE, a map and resource editor by Simon Judd.
+#
+#------------------------------------------------------------------------
 
 sky_flat F_SKY001
 
@@ -47,9 +52,9 @@ thinggroup a 850 "Ammunition"
 thinggroup h 280 "Health && Armor"
 thinggroup b 280 "Bonus"
 thinggroup k F0F "Key"
-thinggroup j F0F "Puzzle Piece"
 thinggroup d 66C "Decoration"
 thinggroup n 66C "Natural"
+thinggroup q CC6 "Quest Items"
 thinggroup s DAD "Sounds"
 thinggroup - 0BD "OTHER"
 
@@ -57,10 +62,105 @@ thing 1  p - 16 PLAY "Player 1 start"
 thing 2  p - 16 PLAY "Player 2 start"
 thing 3  p - 16 PLAY "Player 3 start"
 thing 4  p - 16 PLAY "Player 4 start"
+thing 5  p - 16 PLAY "Player 5 start"
+thing 6  p - 16 PLAY "Player 6 start"
+thing 7  p - 16 PLAY "Player 7 start"
+thing 8  p - 16 PLAY "Player 8 start"
 
 thing 11 p t 16 PLAYF3 "Deathmatch start"
-thing 14 p t 16 TFOGC0 "Teleport exit"
 
+thing 14 p t 16 TFOGC0 "Teleport exit"
+thing 23 p t 16 TELPA  "Teleport swirl"
+
+# FIXME : are these for hubs?
+thing  118 p t 16 TFOGA "Teleport Map Spot 1"
+thing  119 p t 16 TFOGA "Teleport Map Spot 2"
+thing  120 p t 16 TFOGA "Teleport Map Spot 3"
+thing  121 p t 16 TFOGA "Teleport Map Spot 4"
+thing  122 p t 16 TFOGA "Teleport Map Spot 5"
+thing  123 p t 16 TFOGA "Teleport Map Spot 6"
+thing  124 p t 16 TFOGA "Teleport Map Spot 7"
+thing  125 p t 16 TFOGA "Teleport Map Spot 8"
+thing  126 p t 16 TFOGA "Teleport Map Spot 9"
+thing  127 p t 16 TFOGA "Teleport Map Spot 10"
+
+thing   83 h - 20 FULLA "Surgery Kit"
+thing 2011 h - 20 STMPA "Med Patch"
+thing 2012 h - 20 MDKTA "Medical Kit"
+thing 2018 h - 20 ARM2A "Leather Armor"
+thing 2019 h - 20 ARM1A "Metal Armour"
+
+thing   17 a - 20 CPACA "Energy Pack"
+thing   84 a - 20 GASGA "Gas Grenade (teaser)"
+thing  114 a - 20 XQRLA "Electric Bolts"
+thing  115 a - 20 PQRLA "Poison Arrows"
+thing  152 a - 20 GRN1A "HE Grenades"
+thing  153 a - 20 GRN2A "Phosphorous Grenades"
+thing  183 a - 20 BKPKA "Ammo Satchel"
+thing 2007 a - 20 BLITA "Clip of Bullets"
+thing 2010 a - 20 MSSLA "Missiles"
+thing 2046 a - 20 ROKTA "Crate of Missiles"
+thing 2047 a - 20 BRY1A "Energy Pod"
+thing 2048 a - 20 BBOXA "Box of Bullets"
+
+thing   13 k - 20 CRD2A "ID Card"
+thing   38 k - 20 KY2SA "Silver Key"
+thing   39 k - 20 KY3BA "Brass Key"
+thing   40 k - 20 KY1GA "Gold Key"
+thing   61 k - 20 ORACA "Oracle Key"
+thing   86 k - 20 FUBRA "Order Key"
+thing   91 k - 20 HANDA "Severed Hand"
+thing  166 k - 20 WAREA "Warehouse Key"
+thing  184 k - 20 CRD1A "ID Badge"
+thing  185 k - 20 TPASA "Passcard"
+thing  192 k - 20 RCRYA "Red Crystal Key"
+thing  193 k - 20 BCRYA "Blue Crystal Key"
+thing  195 k - 20 CHAPA "Chapel Key"
+thing  230 k - 20 FUSLA "Base Key (front)"
+thing  233 k - 20 BLTKA "Mauler Key"
+thing  234 k - 20 PROCA "Factory Key"
+thing  235 k - 20 MINEA "Mine Key"
+thing  236 k - 20 GOIDA "Core Key"
+
+# TODO : check these I_SGLx sprite names
+thing   77 w - 20 I_SGL1 "Sigil 1 (Lightning)"
+thing   78 w - 20 I_SGL2 "Sigil 2 (Rail)"
+thing   79 w - 20 I_SGL3 "Sigil 3 (Spread)"
+thing   80 w - 20 I_SGL4 "Sigil 4 (Column)"
+thing   81 w - 20 I_SGL5 "Sigil 5 (Blast)"
+
+thing  154 w - 20 GRNDA "Grenade Launcher"
+thing 2001 w - 20 CBOWA "Crossbow"
+thing 2002 w - 20 RIFLA "Assault Gun"
+thing 2003 w - 20 MMSLA "Mini-Missile Launcher"
+thing 2004 w - 20 TRPDA "Mauler"
+thing 2005 w - 20 FLAMA "Flame Thrower"
+thing 2006 w - 20 RIFLB "Assault Gun Standing"
+
+thing   10 b - 16 BEACA "Teleport Beacon"
+thing   59 b - 16 XPRKA "Degnin Ore"
+thing  207 b - 20 TARGA "Targeter"
+thing 2024 b - 20 SHD1A "Shadow Armor"
+thing 2025 b - 20 MASKA "Enviro Suit"
+thing 2026 b - 20 PMAPA "Map"
+thing 2027 b - 20 PMUPA "Scanner"
+
+thing   25 q - 10 BNG2I "Force Field Guard"
+thing   45 q - 20 PSTNA "Gate Piston"
+thing   52 q - 20 OFICA "Officer Uniform"
+thing   90 q - 20 UNIFA "Guard Uniform"
+thing   92 q - 20 CRYSA "Power Crystal"
+thing   93 q - 20 COINA "Gold Coin"
+thing  138 q - 20 CREDA "10 Gold"
+thing  139 q - 20 SACKA "25 Gold"
+thing  140 q - 20 CHSTA "50 Gold"
+thing  182 q - 26 SECRA "Computer"
+thing  205 q - 10 RELCA "Offering Chalice"
+thing  206 q - 20 COMMA "Communicator"
+thing  220 q - 17 COUPA "Power Coupling"
+thing  226 q - 16 COUPC "Broken Coupling"
+
+# TODO : check things 9001-9010, called "Unimplemented spot X" in slade
 
 
 #---- SECTOR TYPES ---------------
