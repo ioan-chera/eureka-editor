@@ -712,7 +712,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 440 : 400, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
 	game(NULL), port(NULL), map_format(MAPF_INVALID)
 {
@@ -726,13 +726,13 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	if (is_startup)
 	{
-		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 10, 370, 46, STARTUP_MSG);
+		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 15, 370, 46, STARTUP_MSG);
 		message->align(FL_ALIGN_INSIDE);
 		message->color(FL_RED, FL_RED);
 		message->labelcolor(FL_YELLOW);
 		message->labelsize(18);
 
-		by += 40;
+		by += 60;
 	}
 
 	game_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
@@ -755,15 +755,27 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	format_choice->down_box(FL_BORDER_BOX);
 	format_choice->callback((Fl_Callback*)format_callback, this);
 
+	if (is_startup)
+	{
+		  port_choice->hide();
+		format_choice->hide();
+	}
+
 	// Resource section
 
-	Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
-	res_title->labelfont(FL_HELVETICA_BOLD);
-	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	if (! is_startup)
+	{
+		Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
+		res_title->labelfont(FL_HELVETICA_BOLD);
+		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	}
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
 		res[r] = NULL;
+
+		if (is_startup)
+			continue;
 
 		int cy = by + 172 + r * 35;
 
@@ -783,14 +795,20 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	// bottom buttons
 	{
-		Fl_Group *g = new Fl_Group(0, by+340, 400, 60);
+		by += is_startup ? 80 : 340;
+
+		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
 		g->box(FL_FLAT_BOX);
 		g->color(WINDOW_BG, WINDOW_BG);
 
-		cancel = new Fl_Button(165, g->y() + 14, 80, 35, is_startup ? "Quit" : "Cancel");
+		const char *cancel_text = is_startup ? "Quit" : "Cancel";
+
+		cancel = new Fl_Button(90, g->y() + 14, 80, 35, cancel_text);
 		cancel->callback((Fl_Callback*)close_callback, this);
 
-		ok_but = new Fl_Button(290, g->y() + 14, 80, 35, "Use");
+		const char *ok_text = (is_startup | new_project) ? "OK" : "Use";
+
+		ok_but = new Fl_Button(240, g->y() + 14, 80, 35, ok_text);
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
@@ -993,6 +1011,10 @@ void UI_ProjectSetup::PopulateResources()
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
+		// the resource widgets are not created for the missing-iwad dialog
+		if (! res_name[r])
+			continue;
+
 		if (r < (int)Resource_list.size())
 		{
 			res[r] = StringDup(Resource_list[r]);
