@@ -223,9 +223,12 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	{
 		// grab new information
 
-		Iwad_name = StringDup(dialog->iwad);
+		Game_name = StringDup(dialog->game);
 		Port_name = StringDup(dialog->port);
 
+		Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
+
+		SYS_ASSERT(Iwad_name);
 		SYS_ASSERT(new_fmt != MAPF_INVALID);
 
 		Resource_list.clear();

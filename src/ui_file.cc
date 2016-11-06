@@ -714,7 +714,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 440 : 400, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	iwad(NULL), port(NULL)
+	game(NULL), port(NULL), map_format(MAPF_INVALID)
 {
 	callback(close_callback, this);
 
@@ -735,10 +735,10 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		by += 40;
 	}
 
-	iwad_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
-	iwad_choice->labelfont(FL_HELVETICA_BOLD);
-	iwad_choice->down_box(FL_BORDER_BOX);
-	iwad_choice->callback((Fl_Callback*)iwad_callback, this);
+	game_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
+	game_choice->labelfont(FL_HELVETICA_BOLD);
+	game_choice->down_box(FL_BORDER_BOX);
+	game_choice->callback((Fl_Callback*)game_callback, this);
 
 	{
 		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
@@ -809,7 +809,7 @@ UI_ProjectSetup::~UI_ProjectSetup()
 
 bool UI_ProjectSetup::Run()
 {
-	PopulateIWADs(Iwad_name);
+	PopulateIWADs();
 	PopulatePort();
 	PopulateMapFormat();
 	PopulateResources();
@@ -827,27 +827,36 @@ bool UI_ProjectSetup::Run()
 }
 
 
-void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
+void UI_ProjectSetup::PopulateIWADs()
 {
-	iwad = NULL;
+	const char *prev_game = Game_name;
 
-	iwad_choice->clear();
+	if (game_choice->mvalue())
+		prev_game = game_choice->mvalue()->text;
+
+	// this probably can't happen, but no biggie if it does
+	if (! prev_game)
+		prev_game = "doom2";
+
+
+	game = NULL;
+
+	game_choice->clear();
 
 	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_KnownIWADsForMenu(&menu_value, curr_iwad ? curr_iwad : "xxx");
+	menu_string = M_CollectGamesForMenu(&menu_value, prev_game);
 
 	if (menu_string[0])
 	{
-		iwad_choice->add(menu_string);
-		iwad_choice->value(menu_value);
+		game_choice->add(menu_string);
+		game_choice->value(menu_value);
 
-		iwad = M_QueryKnownIWAD(iwad_choice->mvalue()->text);
-fprintf(stderr, "PopulateIWADs : iwad = %s\n", iwad);
+		game = game_choice->mvalue()->text;
 	}
 
-	if (iwad)
+	if (game)
 		ok_but->activate();
 	else
 		ok_but->deactivate();
@@ -861,7 +870,7 @@ void UI_ProjectSetup::PopulatePort()
 	if (port_choice->mvalue())
 		prev_port = port_choice->mvalue()->text;
 
-	if (! Port_name)
+	if (! prev_port)
 		prev_port = "vanilla";
 
 
@@ -869,15 +878,15 @@ void UI_ProjectSetup::PopulatePort()
 
 	port_choice->clear();
 
-	// if no iwad, then port don't matter
-	if (! iwad)
+	// if no game, port doesn't matter
+	if (! game)
 		return;
 
 
 	const char *var_game = NULL;
 
-	if (iwad_choice->mvalue())
-		var_game = M_VariantForGame(iwad_choice->mvalue()->text);
+	if (game_choice->mvalue())
+		var_game = M_VariantForGame(game_choice->mvalue()->text);
 	else if (Game_name)
 		var_game = M_VariantForGame(Game_name);
 
@@ -917,8 +926,8 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 	format_choice->clear();
 
-	// if no iwad, then format don't matter
-	if (! iwad)
+	// if no game, format doesn't matter
+	if (! game)
 		return;
 
 
@@ -926,8 +935,8 @@ void UI_ProjectSetup::PopulateMapFormat()
 	const char *c_game = "doom2";
 	const char *c_port = "vanilla";
 
-	if (iwad_choice->mvalue())
-		c_game = iwad_choice->mvalue()->text;
+	if (game_choice->mvalue())
+		c_game = game_choice->mvalue()->text;
 
 	if (port_choice->mvalue())
 		c_port = port_choice->mvalue()->text;
@@ -1010,18 +1019,20 @@ void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
+void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	const char * name = w->mvalue()->text;
 
-	that->iwad = StringDup(M_QueryKnownIWAD(name));
-
-	if (that->iwad)
+	if (M_QueryKnownIWAD(name))
+	{
+		that->game = name;
 		that->ok_but->activate();
+	}
 	else
 	{
+		that->game = NULL;
 		that->ok_but->deactivate();
 
 		fl_beep();
@@ -1097,9 +1108,9 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	M_AddKnownIWAD(chooser.filename());
 	M_SaveRecent();
 
-	that->iwad = StringDup(chooser.filename());
+	that->game = StringDup(game);
 
-	that->PopulateIWADs(that->iwad);
+	that->PopulateIWADs();
 	that->PopulatePort();
 	that->PopulateMapFormat();
 }

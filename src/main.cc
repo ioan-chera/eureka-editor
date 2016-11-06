@@ -734,8 +734,8 @@ void Main_LoadResources()
 
 	Game_name = DetermineGame(Iwad_name);
 
-	LogPrintf("IWAD name: '%s'\n", Iwad_name);
 	LogPrintf("Game name: '%s'\n", Game_name);
+	LogPrintf("IWAD file: '%s'\n", Iwad_name);
 
 	M_LoadDefinitions("games", Game_name);
 

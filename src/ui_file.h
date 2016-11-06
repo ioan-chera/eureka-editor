@@ -127,7 +127,7 @@ public:
 	};
 
 private:
-	Fl_Choice *iwad_choice;
+	Fl_Choice *game_choice;
 	Fl_Choice *port_choice;
 	Fl_Choice *format_choice;
 
@@ -149,7 +149,7 @@ private:
 
 	static UI_ProjectSetup * _instance;  // meh!
 
-	static void   iwad_callback(Fl_Choice*, void*);
+	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
 	static void format_callback(Fl_Choice*, void*);
 	static void browse_callback(Fl_Button*, void*);
@@ -160,7 +160,7 @@ private:
 	static void close_callback(Fl_Widget*, void*);
 	static void   use_callback(Fl_Button*, void*);
 
-	void PopulateIWADs(const char *curr_iwad);
+	void PopulateIWADs();
 	void PopulatePort();
 	void PopulateMapFormat();
 	void PopulateResources();
@@ -169,7 +169,7 @@ public:
 	/*
 	 * current state
 	 */
-	const char * iwad;
+	const char * game;
 	const char * port;
 
 	map_format_e map_format;
