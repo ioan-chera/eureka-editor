@@ -378,6 +378,32 @@ bool Img_c::has_transparent() const
 }
 
 
+void Img_c::test_make_RGB()
+{
+	int W = width();
+	int H = height();
+
+	img_pixel_t *src = wbuf();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		img_pixel_t pix = src[y * W + x];
+
+		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
+		{
+			const rgb_color_t col = palette[pix];
+
+			byte r = RGB_RED(col)   >> 3;
+			byte g = RGB_GREEN(col) >> 3;
+			byte b = RGB_BLUE(col)  >> 3;
+
+			src[y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+	}
+}
+
+
 //------------------------------------------------------------------------
 
 
