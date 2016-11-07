@@ -238,7 +238,24 @@ public:
 	{
 		int map = R_DoomLightingEquation(light >> 2, dist);
 
-		return raw_colormap[map][pixel];
+		if (pixel & IS_RGB_PIXEL)
+		{
+			map = (map ^ 31) + 1;
+
+			int r = IMG_PIXEL_RED(pixel);
+			int g = IMG_PIXEL_GREEN(pixel);
+			int b = IMG_PIXEL_BLUE(pixel);
+
+			r = (r * map) >> 5;
+			g = (g * map) >> 5;
+			b = (b * map) >> 5;
+
+			return IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+		else
+		{
+			return raw_colormap[map][pixel];
+		}
 	}
 
 	void PrepareToRender(int ow, int oh)
@@ -1225,7 +1242,7 @@ public:
 	void RenderFlatColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *buf  = view.screen;
 		img_pixel_t *wbuf = surf.img->wbuf ();
 
 		int tw = surf.img->width();
@@ -1258,7 +1275,7 @@ public:
 	void RenderTexColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *buf  = view.screen;
 		img_pixel_t *wbuf = surf.img->wbuf ();
 
 		int tw = surf.img->width();
@@ -1431,7 +1448,7 @@ public:
 
 		/* fill pixels */
 
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *buf  = view.screen;
 		img_pixel_t *wbuf = dw->ceil.img->wbuf ();
 
 		int tw = dw->ceil.img->width();
@@ -1468,7 +1485,10 @@ public:
 
 			if (dw->side & THINGDEF_INVIS)
 			{
-				*buf = raw_colormap[14][*buf];
+				if (*buf & IS_RGB_PIXEL)
+					*buf = IS_RGB_PIXEL | ((*buf & 0x7dbe) >> 1);
+				else
+					*buf = raw_colormap[14][*buf];
 				continue;
 			}
 
@@ -1774,11 +1794,7 @@ void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, view.sw, 1);
@@ -1800,15 +1816,8 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
-
-			dest[3] = dest[0];
-			dest[4] = dest[1];
-			dest[5] = dest[2];
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
