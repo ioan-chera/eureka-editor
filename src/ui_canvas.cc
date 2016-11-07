@@ -1904,11 +1904,9 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				// TODO : be nice to optimize the next line
 				int tx = MAPX(x) & 63;
 
-				rgb_color_t col = palette[src_pix[ty * tw + tx]];
+				img_pixel_t pix = src_pix[ty * tw + tx];
 
-				dest[0] = RGB_RED(col);
-				dest[1] = RGB_GREEN(col);
-				dest[2] = RGB_BLUE(col);
+				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 
 			fl_draw_image(line_rgb, x1, y, span_w, 1);
