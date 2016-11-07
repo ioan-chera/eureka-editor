@@ -410,10 +410,14 @@ static bool DetermineIWAD()
 		Iwad_name = M_PickDefaultIWAD();
 
 		if (Iwad_name)
+		{
 			Iwad_name = StringDup(Iwad_name);
+		}
 		else
 		{
-			if (! ProjectSetup(false /* new_project */, true /* is_startup */))
+			// show the "Missing IWAD!" dialog.
+			// if user cancels it, we have no choice but to quit.
+			if (! MissingIWAD_Dialog())
 				return false;
 		}
 	}

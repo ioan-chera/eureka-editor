@@ -87,7 +87,7 @@ static void file_do_new_project(Fl_Widget *w, void * data)
 
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	ProjectSetup();
+	ProjectSetup(false /* new_project */);
 }
 
 static void file_do_default_props(Fl_Widget *w, void * data)

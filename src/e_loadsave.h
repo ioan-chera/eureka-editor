@@ -33,7 +33,9 @@ void LoadLevel(Wad_file *wad, const char *level);
 
 void RemoveEditWad();
 
-bool ProjectSetup(bool new_project = false, bool is_startup = false);
+bool ProjectSetup(bool new_project = false);
+
+bool MissingIWAD_Dialog();
 
 void CMD_NewMap();
 bool CMD_OpenMap();

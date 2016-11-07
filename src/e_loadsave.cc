@@ -104,21 +104,9 @@ extern void CMD_ZoomWholeMap();
 void RemoveEditWad();
 
 
-static bool Project_New()
+static bool Project_AskFile(char *filename)
 {
-	SYS_ASSERT(! edit_wad);
-
-	// determine map name (same as first level in the IWAD)
-	const char *map_name = "MAP01";
-
-	short idx = game_wad->FindFirstLevel();
-
-	if (idx >= 0)
-	{
-		Lump_c * lump  = game_wad->GetLump(idx);
-		map_name = lump->Name();
-	}
-
+	// this returns false if user cancelled
 
 	Fl_Native_File_Chooser chooser;
 
@@ -147,14 +135,27 @@ static bool Project_New()
 			break;  // OK
 	}
 
-	// if extension is missing then add ".wad"
-	char filename[FL_PATH_MAX];
+	// if extension is missing, add ".wad"
 
 	strcpy(filename, chooser.filename());
 
 	char *pos = (char *)fl_filename_ext(filename);
 	if (! *pos)
 		strcat(filename, ".wad");
+
+	return true;
+}
+
+
+static bool Project_New()
+{
+	SYS_ASSERT(! edit_wad);
+
+	char filename[FL_PATH_MAX];
+
+	if (! Project_AskFile(filename))
+		return false;
+
 
 
 	// delete the file if it already exists
@@ -169,6 +170,18 @@ static bool Project_New()
 			DLG_Notify("Unable to delete the existing file.");
 			return false;
 		}
+	}
+
+
+	// determine map name (same as first level in the IWAD)
+	const char *map_name = "MAP01";
+
+	short idx = game_wad->FindFirstLevel();
+
+	if (idx >= 0)
+	{
+		Lump_c * lump = game_wad->GetLump(idx);
+		map_name = lump->Name();
 	}
 
 
@@ -202,8 +215,10 @@ static bool Project_New()
 }
 
 
-bool ProjectSetup(bool new_project, bool is_startup)
+bool ProjectSetup(bool new_project)
 {
+	// new_project: true for "New Project", false for "Manage Project"
+
 	if (new_project)
 	{
 		if (! Main_ConfirmQuit("create a new project"))
@@ -211,16 +226,23 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	}
 
 
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(new_project, is_startup);
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(new_project, false);
 
 	bool ok = dialog->Run();
 
+	if (! ok)
+	{
+		delete dialog;
+
+		return false;
+	}
+
+
+	// grab new information
+
 	map_format_e new_fmt = dialog->map_format;
 
-	if (ok)
 	{
-		// grab new information
-
 		Game_name = StringDup(dialog->game);
 		Port_name = StringDup(dialog->port);
 
@@ -243,12 +265,6 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 
-	if (! ok)
-		return false;
-
-	if (is_startup)
-		return true;
-	
 	if (! new_project)
 	{
 		Level_format = new_fmt;
@@ -266,6 +282,27 @@ bool ProjectSetup(bool new_project, bool is_startup)
 	Main_LoadResources();
 
 	return Project_New();
+}
+
+
+bool MissingIWAD_Dialog()
+{
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, true /* is_startup */);
+
+	bool ok = dialog->Run();
+
+	if (ok)
+	{
+		Game_name = StringDup(dialog->game);
+		SYS_ASSERT(Game_name);
+
+		Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
+		SYS_ASSERT(Iwad_name);
+	}
+
+	delete dialog;
+
+	return ok;
 }
 
 
@@ -1296,7 +1333,7 @@ static void SaveSectors()
 		Sector *sec = Sectors[i];
 
 		raw_sector_t raw;
-		
+
 		raw.floorh = LE_S16(sec->floorh);
 		raw.ceilh  = LE_S16(sec->ceilh);
 
@@ -1325,7 +1362,7 @@ static void SaveThings()
 		Thing *th = Things[i];
 
 		raw_thing_t raw;
-		
+
 		raw.x = LE_S16(th->x);
 		raw.y = LE_S16(th->y);
 
@@ -1388,7 +1425,7 @@ static void SaveSideDefs()
 		SideDef *side = SideDefs[i];
 
 		raw_sidedef_t raw;
-		
+
 		raw.x_offset = LE_S16(side->x_offset);
 		raw.y_offset = LE_S16(side->y_offset);
 
@@ -1416,7 +1453,7 @@ static void SaveLineDefs()
 		LineDef *ld = LineDefs[i];
 
 		raw_linedef_t raw;
-		
+
 		raw.start = LE_U16(ld->start);
 		raw.end   = LE_U16(ld->end);
 
