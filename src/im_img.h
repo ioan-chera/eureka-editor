@@ -116,6 +116,10 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 Img_c * IM_FromRGBImage(Fl_RGB_Image *src);
 
 
+// Note: IM_PixelToRGB() does not apply gamma (safe to convert back)
+//
+//       IM_DecodePixel() *does* apply gamma
+
 inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 {
 	if (p & IS_RGB_PIXEL)
@@ -128,17 +132,22 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 	}
 	else
 	{
-		return palette[p];
+		byte r = raw_palette[p][0];
+		byte g = raw_palette[p][1];
+		byte b = raw_palette[p][2];
+
+		return RGB_MAKE(r, g, b);
 	}
 }
+
 
 inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
 {
 	if (p & IS_RGB_PIXEL)
 	{
-		r = IMG_PIXEL_RED(p)   << 3;
-		g = IMG_PIXEL_GREEN(p) << 3;
-		b = IMG_PIXEL_BLUE(p)  << 3;
+		r = rgb555_gamma[IMG_PIXEL_RED(p)];
+		g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
+		b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
 	}
 	else
 	{

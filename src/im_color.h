@@ -39,14 +39,18 @@ typedef u32_t rgb_color_t;
 
 extern int usegamma;
 
+// the palette color closest to what TRANS_PIXEL really is
+extern int trans_replace;
+
+
+// this palette has the gamma setting applied
 extern rgb_color_t palette[256];
 
-// palette color closest to palette[TRANS_PIXEL]
-extern int trans_replace;
+extern byte raw_palette[256][3];
 
 extern byte raw_colormap[32][256];
 
-extern byte bright_map[256];
+extern byte rgb555_gamma[32];
 
 
 void W_UpdateGamma();
