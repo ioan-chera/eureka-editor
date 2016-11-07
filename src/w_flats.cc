@@ -76,6 +76,30 @@ static void W_AddFlat(const char *name, Img_c *img)
 }
 
 
+static Img_c * LoadFlatImage(const char *name, Lump_c *lump)
+{
+	// TODO: check size == 64*64
+
+	Img_c *img = new Img_c(64, 64, false);
+
+	int size = 64 * 64;
+
+	byte *raw = new byte[size];
+
+	if (! (lump->Seek() && lump->Read(raw, size)))
+		FatalError("Error reading flat from WAD.\n");
+
+	// TODO : handle TRANS_PIXEL
+
+	for (int i = 0 ; i < size ; i++)
+		img->wbuf() [i] = raw[i];
+
+	delete[] raw;
+
+	return img;
+}
+
+
 void W_LoadFlats()
 {
 	W_ClearFlats();
@@ -92,15 +116,10 @@ void W_LoadFlats()
 
 			DebugPrintf("  Flat %d : '%s'\n", k, lump->Name());
 
-			// TODO: check size == 64*64
+			Img_c * img = LoadFlatImage(lump->Name(), lump);
 
-			Img_c *img = new Img_c(64, 64, false);
-			
-			if (! lump->Seek() ||
-				! lump->Read(img->wbuf(), 64*64))
-				FatalError("Error reading flat from WAD.\n");
-
-			W_AddFlat(lump->Name(), img);
+			if (img)
+				W_AddFlat(lump->Name(), img);
 		}
 	}
 }
