@@ -103,9 +103,6 @@ public:
 	float x, y; 
 	int z;
 
-	// standard height above the floor.
-#define EYE_HEIGHT  41
-
 	// view direction.  angle is in radians
 	float angle;
 	float Sin, Cos;
@@ -169,7 +166,7 @@ public:
 		int secnum = o.num;
 
 		if (secnum >= 0)
-			z = Sectors[secnum]->floorh + EYE_HEIGHT;
+			z = Sectors[secnum]->floorh + game_info.view_height;
 	}
 
 	void CalcAspect()

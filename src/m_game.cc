@@ -80,8 +80,10 @@ void M_InitDefinitions()
 	// reset game information
 	memset(&game_info, 0, sizeof(game_info));
 
-	// FIXME: ability to parse from a game definition file
+	game_info.player_r = 16;
 	game_info.player_h = 56;
+	game_info.view_height = 41;
+
 	game_info.min_dm_starts = 4;
 	game_info.max_dm_starts = 10;
 
@@ -476,6 +478,16 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		else if (y_stricmp(token[0], "level_name") == 0)
 		{
 			/* ignored for backwards compability */
+		}
+
+		else if (y_stricmp(token[0], "player_size") == 0)
+		{
+			if (nargs != 3)
+				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
+
+			game_info.player_r    = atoi(token[1]);
+			game_info.player_h    = atoi(token[2]);
+			game_info.view_height = atoi(token[3]);
 		}
 
 		else if (y_stricmp(token[0], "sky_color") == 0)  // back compat
