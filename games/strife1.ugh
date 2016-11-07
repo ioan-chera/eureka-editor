@@ -64,7 +64,7 @@ thinggroup l 66C "Light Source"
 thinggroup n 66C "Natural"
 thinggroup - 0BD "OTHER"
 
-thing 1  p i 18 PLAY "Player 1 start"
+thing 1  p - 18 PLAY "Player 1 start"
 thing 2  p - 18 PLAY "Player 2 start"
 thing 3  p - 18 PLAY "Player 3 start"
 thing 4  p - 18 PLAY "Player 4 start"
