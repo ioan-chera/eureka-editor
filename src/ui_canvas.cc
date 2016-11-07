@@ -1701,7 +1701,7 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
-	img_pixel_t *wbuf = img ? img->wbuf() : NULL;
+	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
@@ -1904,7 +1904,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				// TODO : be nice to optimize the next line
 				int tx = MAPX(x) & 63;
 
-				rgb_color_t col = palette[wbuf[ty * tw + tx]];
+				rgb_color_t col = palette[src_pix[ty * tw + tx]];
 
 				dest[0] = RGB_RED(col);
 				dest[1] = RGB_GREEN(col);
