@@ -98,6 +98,8 @@ Img_c * IM_UnknownFlat();
 
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 
+Img_c * IM_FromRGBImage(Fl_RGB_Image *src);
+
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

@@ -217,7 +217,7 @@ void Img_c::resize(int new_width, int new_height)
 	// Allocate new buffer
 	w = new_width;
 	h = new_height;
-	
+
 	pixels = new img_pixel_t[w * h + 10];  // Some slack
 
 	clear();
@@ -527,6 +527,47 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 	delete[] conv_palette;
 
 	return result;
+}
+
+
+Img_c * IM_FromRGBImage(Fl_RGB_Image *src)
+{
+	int W  = src->w();
+	int H  = src->h();
+	int D  = src->d();
+	int LD = src->ld();
+
+	LD += W;
+
+	const byte * data = (const byte *) src->array;
+
+	if (! data)
+		return NULL;
+
+	if (! (D == 3 || D == 4))
+		return NULL;
+
+	Img_c *img = new Img_c(W, H);
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		const byte *src_pix = data + (y * LD + x) * D;
+
+		int r = src_pix[0];
+		int g = src_pix[1];
+		int b = src_pix[2];
+		int a = (D == 3) ? 255 : src_pix[3];
+
+		byte dest_pix = TRANS_PIXEL;
+
+		if (a & 128)
+			dest_pix = W_FindPaletteColor(r, g, b);
+
+		img->wbuf() [ y * W + x ] = dest_pix;
+	}
+
+	return img;
 }
 
 //--- editor settings ---
