@@ -31,7 +31,7 @@ player_size 16 64 48
 
 sky_flat F_SKY
 
-default_textures CASTLE07 F_009 F_013
+default_textures CASTLE07 F_009 F_082
 default_thing 81  # healing vial
 
 
