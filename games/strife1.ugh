@@ -23,6 +23,8 @@
 #
 #------------------------------------------------------------------------
 
+player_size 18 56 41
+
 sky_flat F_SKY001
 
 default_textures BRKBRN02 F_TECH01 F_TECH01
@@ -61,31 +63,31 @@ thinggroup l 66C "Light Source"
 thinggroup n 66C "Natural"
 thinggroup - 0BD "OTHER"
 
-thing 1  p - 16 PLAY "Player 1 start"
-thing 2  p - 16 PLAY "Player 2 start"
-thing 3  p - 16 PLAY "Player 3 start"
-thing 4  p - 16 PLAY "Player 4 start"
-thing 5  p - 16 PLAY "Player 5 start"
-thing 6  p - 16 PLAY "Player 6 start"
-thing 7  p - 16 PLAY "Player 7 start"
-thing 8  p - 16 PLAY "Player 8 start"
+thing 1  p - 18 PLAY "Player 1 start"
+thing 2  p - 18 PLAY "Player 2 start"
+thing 3  p - 18 PLAY "Player 3 start"
+thing 4  p - 18 PLAY "Player 4 start"
+thing 5  p - 18 PLAY "Player 5 start"
+thing 6  p - 18 PLAY "Player 6 start"
+thing 7  p - 18 PLAY "Player 7 start"
+thing 8  p - 18 PLAY "Player 8 start"
 
-thing 11 p t 16 PLAYF3 "Deathmatch start"
+thing 11 p t 18 PLAYF3 "Deathmatch start"
 
-thing 14 p t 16 TFOGC0 "Teleport exit"
-thing 23 p t 16 TELPA  "Teleport swirl"
+thing 14 p t 20 TFOGC0 "Teleport exit"
+thing 23 p t 20 TELPA  "Teleport swirl"
 
 # andrewj: I presume these are for hubs
-thing  118 p t 16 TFOGA "Hub Spot 1"
-thing  119 p t 16 TFOGA "Hub Spot 2"
-thing  120 p t 16 TFOGA "Hub Spot 3"
-thing  121 p t 16 TFOGA "Hub Spot 4"
-thing  122 p t 16 TFOGA "Hub Spot 5"
-thing  123 p t 16 TFOGA "Hub Spot 6"
-thing  124 p t 16 TFOGA "Hub Spot 7"
-thing  125 p t 16 TFOGA "Hub Spot 8"
-thing  126 p t 16 TFOGA "Hub Spot 9"
-thing  127 p t 16 TFOGA "Hub Spot 10"
+thing  118 p t 18 TFOGA "Hub Spot 1"
+thing  119 p t 18 TFOGA "Hub Spot 2"
+thing  120 p t 18 TFOGA "Hub Spot 3"
+thing  121 p t 18 TFOGA "Hub Spot 4"
+thing  122 p t 18 TFOGA "Hub Spot 5"
+thing  123 p t 18 TFOGA "Hub Spot 6"
+thing  124 p t 18 TFOGA "Hub Spot 7"
+thing  125 p t 18 TFOGA "Hub Spot 8"
+thing  126 p t 18 TFOGA "Hub Spot 9"
+thing  127 p t 18 TFOGA "Hub Spot 10"
 
 thing   83 h n 20 FULLA "Surgery Kit"
 thing 2011 h n 20 STMPA "Med Patch"
