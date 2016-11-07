@@ -96,6 +96,8 @@ static void FreshLevel()
 	}
 
 	CalculateLevelBounds();
+
+	CMD_ZoomWholeMap();
 }
 
 
@@ -201,6 +203,16 @@ bool CMD_NewProject()
 		return false;
 
 
+	/* first, ask for the output file */
+
+	char filename[FL_PATH_MAX];
+
+	if (! Project_AskFile(filename))
+		return false;
+
+
+	/* second, query what Game, Port and Resources to use */
+
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(true /* new_project */, false /* is_startup */);
 
 	bool ok = dialog->Run();
@@ -213,36 +225,33 @@ bool CMD_NewProject()
 	}
 
 
-	Project_ApplyChanges(dialog);
-
-	delete dialog;
-
-
-	RemoveEditWad();
-
-	SYS_ASSERT(! edit_wad);
-
-
-	char filename[FL_PATH_MAX];
-
-	if (! Project_AskFile(filename))
-		return false;
-
-
-
-	// delete the file if it already exists
-	// (the file chooser should have asked the user for confirmation)
+	/* third, delete file if it already exists
+	   [ the file chooser should have asked for confirmation ]
+	 */
 
 	if (FileExists(filename))
 	{
-		// TODO M_BackupWad(wad);
+		// TODO??  M_BackupWad(wad);
 
 		if (! FileDelete(filename))
 		{
 			DLG_Notify("Unable to delete the existing file.");
+
+			delete dialog;
+
 			return false;
 		}
+
+		Fl::wait(0.1);
+		Fl::wait(0.1);
 	}
+
+
+	RemoveEditWad();
+
+	Project_ApplyChanges(dialog);
+
+	delete dialog;
 
 
 	// determine map name (same as first level in the IWAD)
@@ -256,8 +265,8 @@ bool CMD_NewProject()
 		map_name = lump->Name();
 	}
 
-
 	LogPrintf("Creating New File : %s of %s\n", map_name, filename);
+
 
 	Wad_file * wad = Wad_file::Open(filename, 'w');
 
@@ -275,13 +284,8 @@ bool CMD_NewProject()
 
 	FreshLevel();
 
-	CMD_ZoomWholeMap();
-
+	// save it now : sets Level_name and window title
 	SaveLevel(edit_wad, map_name);
-
-	M_AddRecent(edit_wad->PathName(), Level_name);
-
-	MadeChanges = 0;
 
 	return true;
 }
@@ -349,14 +353,8 @@ void CMD_NewMap()
 
 	FreshLevel();
 
-	CMD_ZoomWholeMap();
-
 	// save it now : sets Level_name and window title
 	SaveLevel(edit_wad, map_name);
-
-	M_AddRecent(edit_wad->PathName(), Level_name);
-
-	MadeChanges = 0;
 }
 
 
@@ -1559,19 +1557,24 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	// write out the new directory
 	save_wad->EndWrite();
 
-	M_WriteEurekaLump(save_wad);
 
 	Level_name = StringUpper(level);
+
+	M_WriteEurekaLump(save_wad);
+
+	M_AddRecent(wad->PathName(), Level_name);
 
 	Status_Set("Saved %s  --  NO NODES", Level_name);
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, false);
+		main_win->SetTitle(wad->PathName(), Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
 	}
+
+	MadeChanges = 0;
 }
 
 
@@ -1603,10 +1606,6 @@ bool CMD_SaveMap()
 	LogPrintf("Saving Map : %s of %s\n", Level_name, edit_wad->PathName());
 
 	SaveLevel(edit_wad, Level_name);
-
-	M_AddRecent(edit_wad->PathName(), Level_name);
-
-	MadeChanges = 0;
 
 	return true;
 }
@@ -1723,8 +1722,6 @@ bool CMD_ExportMap()
 
 	SaveLevel(wad, map_name);
 
-	M_AddRecent(wad->PathName(), map_name);
-
 
 	// the new wad replaces the current PWAD
 
@@ -1739,8 +1736,6 @@ bool CMD_ExportMap()
 	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
-
-	MadeChanges = 0;
 
 	return true;
 }
@@ -1790,15 +1785,6 @@ void CMD_CopyMap()
 	LogPrintf("Copying Map : %s --> %s\n", Level_name, new_name);
 
 	SaveLevel(edit_wad, new_name);
-
-	M_AddRecent(edit_wad->PathName(), new_name);
-
-	MadeChanges = 0;
-
-	// make current map be the new one
-	Level_name = StringUpper(new_name);
-
-	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 
 	Status_Set("Copied to %s", Level_name);
 }
