@@ -21,8 +21,8 @@ MAIN_MENU MENU DISCARDABLE
 MAIN_ICON ICON "misc/eureka.ico"
 
 1 VERSIONINFO
-FILEVERSION 4, 1, 12, 0
-PRODUCTVERSION 4, 1, 12, 0
+FILEVERSION 4, 1, 14, 0
+PRODUCTVERSION 4, 1, 14, 0
 FILEFLAGSMASK 0x0
 FILEOS 0x40004 // VOS_NT_WINDOWS32
 FILETYPE 1     // VFT_APP
@@ -35,12 +35,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "Andrew Apted\0"
       VALUE "FileDescription",  "Eureka DOOM Editor\0"
-      VALUE "FileVersion",      "1.12\0"
+      VALUE "FileVersion",      "1.14\0"
       VALUE "InternalName",     "Eureka\0"
       VALUE "LegalCopyright",   "\251 Andrew Apted, GNU General Public License\0"
       VALUE "OriginalFilename", "Eureka.EXE\0"
       VALUE "ProductName",      "Eureka\0"
-      VALUE "ProductVersion",   "1.12\0"
+      VALUE "ProductVersion",   "1.14\0"
     END
   END
   BLOCK "VarFileInfo"
