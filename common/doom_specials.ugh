@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2016 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -55,34 +55,34 @@ line   9 - "S1 Donut (raise outer, lower inner)"
 line  78 - "SR Floor Transfer /NXP"
 line  48 a "-- Scroll Wall Left"
 
+line  77 h "WR Crusher"
 line   6 h "W1 Crusher /fast"
 line  25 h "W1 Crusher /slow"
-line  57 h "W1& Stop crusher"
-line  73 h "WR& Crusher /slow"
-line  77 h "WR& Crusher"
-line  74 h "WR& Stop crusher"
-line 141 h "W1& Crusher /silent"
+line  73 h "WR Crusher /slow"
+line 141 h "W1 Crusher /silent"
+line  57 h "W1 Stop crusher"
+line  74 h "WR Stop crusher"
 
 line  24 g "G1 Floor up LIC"
 line  47 g "G1 Floor up nhEF /TX"
 line 101 g "S1 Floor up LIC"
 line  55 g "S1 Floor up LIC-8 /cr"
 line  18 g "S1 Floor up nhEF"
-line  15 g "S1& Floor up 24 /TX"
-line  14 g "S1& Floor up 32 /TX"
-line  20 g "S1& Floor up nhEF /TX"
+line  15 g "S1 Floor up 24 /TX"
+line  14 g "S1 Floor up 32 /TX"
+line  20 g "S1 Floor up nhEF /TX"
 line  64 g "SR Floor up LIC"
 line  65 g "SR Floor up LIC-8 /cr"
 line  69 g "SR Floor up nhEF"
-line  66 g "SR& Floor up 24 /TX"
-line  67 g "SR& Floor up 32 /TX"
-line  68 g "SR& Floor up nhEF /TX"
+line  66 g "SR Floor up 24 /TX"
+line  67 g "SR Floor up 32 /TX"
+line  68 g "SR Floor up nhEF /TX"
 line  59 g "W1 Floor up 24 /TXP"
 line  58 g "W1 Floor up 24"
 line   5 g "W1 Floor up LIC"
 line  30 g "W1 Floor up lowest tex"
-line  56 g "W1& Floor up LIC-8 /cr"
-line  22 g "W1& Floor up nhEF /TX"
+line  56 g "W1 Floor up LIC-8 /cr"
+line  22 g "W1 Floor up nhEF /TX"
 line  93 g "WR Floor up 24 /TXP"
 line  92 g "WR Floor up 24"
 line  91 g "WR Floor up LIC"
