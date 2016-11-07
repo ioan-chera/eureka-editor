@@ -231,7 +231,7 @@ Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(width(), height());
 
-	byte grey = 104;
+	img_pixel_t grey = 104;
 
 	// FIXME GAME CONFIG ITEM
 	if (strcmp(Game_name, "heretic") == 0)
@@ -559,7 +559,7 @@ Img_c * IM_FromRGBImage(Fl_RGB_Image *src)
 		int b = src_pix[2];
 		int a = (D == 3) ? 255 : src_pix[3];
 
-		byte dest_pix = TRANS_PIXEL;
+		img_pixel_t dest_pix = TRANS_PIXEL;
 
 		if (a & 128)
 			dest_pix = W_FindPaletteColor(r, g, b);

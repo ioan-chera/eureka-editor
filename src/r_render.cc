@@ -109,7 +109,7 @@ public:
 
 	// screen image.
 	int sw, sh;
-	byte *screen;
+	img_pixel_t *screen;
 
 	float aspect_sh;
 	float aspect_sw;  // sw * aspect_ratio
@@ -194,7 +194,7 @@ public:
 			if (screen)
 				delete[] screen;
 
-			screen = new byte [sw * sh];
+			screen = new img_pixel_t [sw * sh];
 		}
 
 		CalcAspect();
@@ -234,7 +234,7 @@ public:
 		return CLAMP(min_L, index, 31);
 	}
 
-	byte DoomLightRemap(int light, float dist, byte pixel)
+	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
 	{
 		int map = R_DoomLightingEquation(light >> 2, dist);
 
@@ -1342,7 +1342,7 @@ public:
 		}
 	}
 
-	void HighlightColumn(int x, int y1, int y2, byte col)
+	void HighlightColumn(int x, int y1, int y2, img_pixel_t col)
 	{
 		img_pixel_t *buf = view.screen;
 
@@ -1770,7 +1770,7 @@ void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
 		u8_t *dest = line_rgb;
 		u8_t *dest_end = line_rgb + view.sw * 3;
 
-		const byte *src = view.screen + ry * view.sw;
+		const img_pixel_t *src = view.screen + ry * view.sw;
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
@@ -1790,7 +1790,7 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 {
 	for (int ry = 0 ; ry < view.sh ; ry++)
 	{
-		const byte *src = view.screen + ry * view.sw;
+		const img_pixel_t *src = view.screen + ry * view.sw;
 
 		// if destination width is odd, we store an extra pixel here
 		u8_t line_rgb[(ow + 1) * 3];
