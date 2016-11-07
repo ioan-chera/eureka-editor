@@ -147,9 +147,81 @@ static bool Project_AskFile(char *filename)
 }
 
 
-static bool Project_New()
+void Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
+	// grab the new information
+
+	Game_name = StringDup(dialog->game);
+	Port_name = StringDup(dialog->port);
+
+	SYS_ASSERT(Game_name);
+
+	Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
+	SYS_ASSERT(Iwad_name);
+
+	Level_format = dialog->map_format;
+	SYS_ASSERT(Level_format != MAPF_INVALID);
+
+	Resource_list.clear();
+
+	for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
+	{
+		if (dialog->res[i])
+			Resource_list.push_back(StringDup(dialog->res[i]));
+	}
+
+	Fl::wait(0.1);
+
+	Main_LoadResources();
+
+	Fl::wait(0.1);
+}
+
+
+bool CMD_ManageProject()
+{
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, false /* is_startup */);
+
+	bool ok = dialog->Run();
+
+	if (ok)
+	{
+		Project_ApplyChanges(dialog);
+	}
+
+	delete dialog;
+
+	return ok;
+}
+
+
+bool CMD_NewProject()
+{
+	if (! Main_ConfirmQuit("create a new project"))
+		return false;
+
+
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(true /* new_project */, false /* is_startup */);
+
+	bool ok = dialog->Run();
+
+	if (! ok)
+	{
+		delete dialog;
+
+		return false;
+	}
+
+
+	Project_ApplyChanges(dialog);
+
+	delete dialog;
+
+
+	RemoveEditWad();
+
 	SYS_ASSERT(! edit_wad);
+
 
 	char filename[FL_PATH_MAX];
 
@@ -215,76 +287,6 @@ static bool Project_New()
 }
 
 
-bool ProjectSetup(bool new_project)
-{
-	// new_project: true for "New Project", false for "Manage Project"
-
-	if (new_project)
-	{
-		if (! Main_ConfirmQuit("create a new project"))
-			return false;
-	}
-
-
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(new_project, false);
-
-	bool ok = dialog->Run();
-
-	if (! ok)
-	{
-		delete dialog;
-
-		return false;
-	}
-
-
-	// grab new information
-
-	map_format_e new_fmt = dialog->map_format;
-
-	{
-		Game_name = StringDup(dialog->game);
-		Port_name = StringDup(dialog->port);
-
-		Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
-
-		SYS_ASSERT(Iwad_name);
-		SYS_ASSERT(new_fmt != MAPF_INVALID);
-
-		Resource_list.clear();
-
-		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
-		{
-			if (dialog->res[i])
-				Resource_list.push_back(StringDup(dialog->res[i]));
-		}
-	}
-
-	delete dialog;
-
-	Fl::wait(0.1);
-	Fl::wait(0.1);
-
-	if (! new_project)
-	{
-		Level_format = new_fmt;
-
-		Main_LoadResources();
-
-		return true;
-	}
-
-
-	RemoveEditWad();
-
-	Level_format = new_fmt;
-
-	Main_LoadResources();
-
-	return Project_New();
-}
-
-
 bool MissingIWAD_Dialog()
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, true /* is_startup */);
@@ -313,7 +315,7 @@ void CMD_NewMap()
 
 	if (! edit_wad || edit_wad->IsReadOnly())
 	{
-		ProjectSetup(true /* new_project */);
+		CMD_NewProject();
 		return;
 	}
 

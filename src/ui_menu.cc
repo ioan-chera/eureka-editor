@@ -82,12 +82,12 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_new_project(Fl_Widget *w, void * data)
 {
-	ProjectSetup(true /* new_project */);
+	CMD_NewProject();
 }
 
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	ProjectSetup(false /* new_project */);
+	CMD_ManageProject();
 }
 
 static void file_do_default_props(Fl_Widget *w, void * data)
