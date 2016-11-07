@@ -184,7 +184,11 @@ void Img_c::clear()
 {
 	if (pixels)
 	{
-		memset(pixels, TRANS_PIXEL, w * h);
+		img_pixel_t *dest = pixels;
+		img_pixel_t *dest_end = dest + (w * h);
+
+		for ( ; dest < dest_end ; dest++)
+			*dest = TRANS_PIXEL;
 	}
 }
 
