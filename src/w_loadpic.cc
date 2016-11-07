@@ -67,7 +67,8 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 		int count = column->length;
 
 		byte *src = (byte *) column + 3;
-		byte *dest = img.wbuf() + x;
+
+		img_pixel_t *dest = img.wbuf() + x;
 
 		if (top < 0)
 		{
