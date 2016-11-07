@@ -89,10 +89,15 @@ static Img_c * LoadFlatImage(const char *name, Lump_c *lump)
 	if (! (lump->Seek() && lump->Read(raw, size)))
 		FatalError("Error reading flat from WAD.\n");
 
-	// TODO : handle TRANS_PIXEL
-
 	for (int i = 0 ; i < size ; i++)
-		img->wbuf() [i] = raw[i];
+	{
+		img_pixel_t pix = raw[i];
+
+		if (pix == TRANS_PIXEL)
+			pix = trans_replace;
+
+		img->wbuf() [i] = pix;
+	}
 
 	delete[] raw;
 
