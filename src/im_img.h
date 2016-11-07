@@ -29,7 +29,19 @@
 
 #include "im_color.h"
 
-typedef byte  img_pixel_t;
+// this is a 16-bit value:
+//   - when high bit is clear, it is a palette index 0-255
+//     (value 255 is used to represent fully transparent).
+//   - when high bit is set, the remainder is 5:5:5 RGB
+typedef unsigned short  img_pixel_t;
+
+const img_pixel_t IS_RGB_PIXEL = 0x8000;
+
+#define IMG_PIXEL_RED(col)    (((col) >> 10) & 31)
+#define IMG_PIXEL_GREEN(col)  (((col) >>  5) & 31)
+#define IMG_PIXEL_BLUE(col)   (((col)      ) & 31)
+
+#define IMG_PIXEL_MAKE_RGB(r, g, b)  (IS_RGB_PIXEL | ((r) << 10) | ((g) << 5) | (b))
 
 
 // the color number used to represent transparent pixels in an Img_c.
@@ -53,7 +65,7 @@ public:
 	{
 		return (! pixels);
 	}
-	
+
 	int width() const
 	{
 		return w;
@@ -99,6 +111,41 @@ Img_c * IM_UnknownFlat();
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 
 Img_c * IM_FromRGBImage(Fl_RGB_Image *src);
+
+
+inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		byte r = IMG_PIXEL_RED(p)   << 3;
+		byte g = IMG_PIXEL_GREEN(p) << 3;
+		byte b = IMG_PIXEL_BLUE(p)  << 3;
+
+		return RGB_MAKE(r, g, b);
+	}
+	else
+	{
+		return palette[p];
+	}
+}
+
+inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		r = IMG_PIXEL_RED(p)   << 3;
+		g = IMG_PIXEL_GREEN(p) << 3;
+		b = IMG_PIXEL_BLUE(p)  << 3;
+	}
+	else
+	{
+		const rgb_color_t col = palette[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
 
 
 #endif  /* __EUREKA_IM_IMG_H__*/

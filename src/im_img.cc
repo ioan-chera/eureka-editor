@@ -324,6 +324,8 @@ Img_c * Img_c::scale_img(double scale) const
 /*
  *  Copy the image, but remap pixels in the range 'src1..src2' to the
  *  range 'targ1..targ2'.
+ *
+ *  TODO : make it work with RGB pixels (find nearest in palette).
  */
 Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
@@ -566,7 +568,12 @@ Img_c * IM_FromRGBImage(Fl_RGB_Image *src)
 		img_pixel_t dest_pix = TRANS_PIXEL;
 
 		if (a & 128)
-			dest_pix = W_FindPaletteColor(r, g, b);
+		{
+			// TODO : a preference to palettize it
+			// dest_pix = W_FindPaletteColor(r, g, b);
+
+			dest_pix = IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3);
+		}
 
 		img->wbuf() [ y * W + x ] = dest_pix;
 	}
