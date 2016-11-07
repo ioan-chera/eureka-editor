@@ -20,6 +20,8 @@
 
 variant_of doom2
 
+player_size 16 56 41
+
 sky_flat  F_SKY1
 
 default_textures  MODWALL3  FLAT14  FLAT5_1

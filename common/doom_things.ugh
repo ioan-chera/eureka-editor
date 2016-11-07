@@ -24,6 +24,8 @@
 #
 #------------------------------------------------------------------------
 
+player_size 16 56 41
+
 #
 #	Definition of thing groups
 #	Format is : thinggroup <letter> <colour> <description>

@@ -26,6 +26,8 @@
 #
 #------------------------------------------------------------------------
 
+player_size 16 56 41
+
 sky_flat  F_SKY1
 
 default_textures  SANDSQ2  FLOOR00  FLOOR30
