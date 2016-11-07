@@ -113,11 +113,12 @@ texturegroup_t;
 
 typedef struct
 {
-	int sky_color;
+	int  sky_color;
 	char sky_flat[16];
 
-	int wall_colors[2];
+	int  wall_colors[2];
 	int floor_colors[2];
+	int invis_colors[2];
 
 	int missing_color;
 	int unknown_tex;

@@ -117,21 +117,17 @@ static void ParseColorDef(char ** argv, int argc)
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
 		game_info.wall_colors[0] = atoi(argv[1]);
-
-		if (argc < 2)
-			game_info.wall_colors[1] = game_info.wall_colors[0];
-		else
-			game_info.wall_colors[1] = atoi(argv[2]);
-
+		game_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
 		game_info.floor_colors[0] = atoi(argv[1]);
-
-		if (argc < 2)
-			game_info.floor_colors[1] = game_info.floor_colors[0];
-		else
-			game_info.floor_colors[1] = atoi(argv[2]);
+		game_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+	}
+	else if (y_stricmp(argv[0], "invis") == 0)
+	{
+		game_info.invis_colors[0] = atoi(argv[1]);
+		game_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{

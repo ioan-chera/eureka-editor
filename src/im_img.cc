@@ -231,11 +231,11 @@ Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(width(), height());
 
-	img_pixel_t grey = 104;
+	int invis_start = game_info.invis_colors[0];
+	int invis_len   = game_info.invis_colors[1] - invis_start + 1;
 
-	// FIXME GAME CONFIG ITEM
-	if (strcmp(Game_name, "heretic") == 0)
-		grey = 8;
+	if (invis_len < 1)
+		invis_len = 1;
 
 	int W = width();
 	int H = height();
@@ -250,7 +250,7 @@ Img_c * Img_c::spectrify() const
 		img_pixel_t pix = src[y * W + x];
 
 		if (pix != TRANS_PIXEL)
-			pix = grey + (rand () >> 6) % 7;  // FIXME more kludgery
+			pix = invis_start + (rand() >> 4) % invis_len;
 
 		dest[y * W + x] = pix;
 	}

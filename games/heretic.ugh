@@ -42,6 +42,7 @@ color sky  199
 
 color wall   6   35
 color floor  68  94
+color invis  2   12
 
 color missing  244
 

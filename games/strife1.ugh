@@ -38,6 +38,7 @@ color sky  250
 
 color wall     6  28
 color floor  164 184
+color invis   21  31
 
 color missing  231
 
@@ -63,7 +64,7 @@ thinggroup l 66C "Light Source"
 thinggroup n 66C "Natural"
 thinggroup - 0BD "OTHER"
 
-thing 1  p - 18 PLAY "Player 1 start"
+thing 1  p i 18 PLAY "Player 1 start"
 thing 2  p - 18 PLAY "Player 2 start"
 thing 3  p - 18 PLAY "Player 3 start"
 thing 4  p - 18 PLAY "Player 4 start"
@@ -256,10 +257,10 @@ thing   22 g n 20 ROB2P "Dead Crusader"
 thing  212 g n 20 SACRA "Sacrificed Guy"
 
 thing  113 g cl 20 HERTA "Hearts in Tank"
-thing  209 g c 20 TNK1C "Tank 1 (skeleton)"
+thing  209 g c 20 TNK1C "Tank 1"
 thing  210 g c 20 TNK2C "Tank 2"
 thing  211 g c 20 TNK3C "Tank 3"
-thing  213 g c 20 TNK4C "Tank 4 (organs)"
+thing  213 g c 20 TNK4C "Tank 4 (skeleton)"
 thing  214 g c 20 TNK5C "Tank 5 (acolyte)"
 thing  229 g c 20 TNK6C "Tank 6 (spectre)"
 
