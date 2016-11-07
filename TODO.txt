@@ -318,13 +318,9 @@ Game / Port Definitions
 
 +  support Harmony
 
-+  a ZDoom configuration
-
--  support Doom-in-Hexen mapping
++  flesh out the ZDoom configuration
 
 -  conversion between Hexen <--> DOOM formats
-
--  game-def setting: view_height
 
 -  FreeDOOM : categorize all the new textures
 
