@@ -203,7 +203,7 @@ public:
 	void ClearScreen()
 	{
 		// color #0 is black (DOOM, Heretic, Hexen)
-		memset(screen, 0, sw * sh);
+		memset(screen, 0, sw * sh * sizeof(screen[0]));
 	}
 
 	void FindThingSectors()
