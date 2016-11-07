@@ -1486,7 +1486,7 @@ public:
 			if (dw->side & THINGDEF_INVIS)
 			{
 				if (*buf & IS_RGB_PIXEL)
-					*buf = IS_RGB_PIXEL | ((*buf & 0x7dbe) >> 1);
+					*buf = IS_RGB_PIXEL | ((*buf & 0x7bde) >> 1);
 				else
 					*buf = raw_colormap[14][*buf];
 				continue;
