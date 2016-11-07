@@ -742,7 +742,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	{
 		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
-		o->callback((Fl_Callback*)browse_callback, this);
+		o->callback((Fl_Callback*)find_callback, this);
 	}
 
 	port_choice = new Fl_Choice(140, by+60, 150, 29, "Source Port: ");
@@ -847,10 +847,11 @@ bool UI_ProjectSetup::Run()
 
 void UI_ProjectSetup::PopulateIWADs()
 {
-	const char *prev_game = NULL;
+	// This is called (a) when dialog is first opened, or (b) when
+	// the user has found a new iwad.  For the latter case, we want
+	// to show the newly found game.
 
-	if (game_choice->mvalue())
-		prev_game = StringDup(game_choice->mvalue()->text);
+	const char *prev_game = game;
 
 	if (! prev_game) prev_game = Game_name;
 	if (! prev_game) prev_game = "doom2";
@@ -1090,7 +1091,7 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 }
 
 
-void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
+void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 

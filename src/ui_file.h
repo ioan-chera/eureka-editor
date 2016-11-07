@@ -152,7 +152,7 @@ private:
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
 	static void format_callback(Fl_Choice*, void*);
-	static void browse_callback(Fl_Button*, void*);
+	static void   find_callback(Fl_Button*, void*);
 
 	static void  kill_callback(Fl_Button*, void*);
 	static void  load_callback(Fl_Button*, void*);
