@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -72,7 +72,7 @@ private:
 
 	void UploadRGB(const byte *buf, int depth);
 
-	void TiledImg(Img_c *img, bool has_trans);
+	void TiledImg(Img_c *img);
 };
 
 

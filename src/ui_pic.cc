@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -116,7 +116,7 @@ void UI_Pic::MarkMissing()
 
 void UI_Pic::GetFlat(const char * fname)
 {
-	TiledImg(W_GetFlat(fname), false /* has_trans */);
+	TiledImg(W_GetFlat(fname));
 }
 
 void UI_Pic::GetTex(const char * tname)
@@ -127,7 +127,7 @@ void UI_Pic::GetTex(const char * tname)
 		return;
 	}
 
-	TiledImg(W_GetTexture(tname), true /* has_trans */);
+	TiledImg(W_GetTexture(tname));
 }
 
 
@@ -175,29 +175,38 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
 	{
+		byte *dest = buf + ((y * nw + x) * 3);
+
+		// black border
+		if (x == 0 || x == nw-1 || y == 0 || y == nh-1)
+		{
+			dest[0] = 0;
+			dest[1] = 0;
+			dest[2] = 0;
+			continue;
+		}
+
 		int ix = x / scale - (nw / scale - iw) / 2;
 		//  int iy = (ih-1) - (nh-4 - y);
 		int iy = y / scale - (nh / scale - ih) / 2;
 
-		u32_t col = back;
+		img_pixel_t pix = TRANS_PIXEL;
 
 		if (ix >= 0 && ix < iw && iy >= 0 && iy < ih)
 		{
-			img_pixel_t pix = img->buf() [iy*iw+ix];
-
-			if (pix != TRANS_PIXEL)
-				col = palette[pix];
+			pix = img->buf() [iy * iw + ix];
 		}
 
-		// Black border
-		if (x == 0 || x == nw-1 || y == 0 || y == nh-1)
-			col = 0;
-
-		byte *dest = buf + ((y*nw+x) * 3);
-
-		dest[0] = RGB_RED(col);
-		dest[1] = RGB_GREEN(col);
-		dest[2] = RGB_BLUE(col);
+		if (pix == TRANS_PIXEL)
+		{
+			dest[0] = RGB_RED(back);
+			dest[1] = RGB_GREEN(back);
+			dest[2] = RGB_BLUE(back);
+		}
+		else
+		{
+			IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+		}
 	}
 
 	UploadRGB(buf, 3);
@@ -207,7 +216,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 }
 
 
-void UI_Pic::TiledImg(Img_c *img, bool has_trans)
+void UI_Pic::TiledImg(Img_c *img)
 {
 	color(FL_DARK2);
 
@@ -232,7 +241,8 @@ void UI_Pic::TiledImg(Img_c *img, bool has_trans)
 		scale = scale * 2;
 
 
-	const u32_t back_col = 0x00FFFF00; // CYAN
+	const u32_t back = RGB_MAKE(255, 255, 255);  // CYAN
+
 
 	uchar *buf = new uchar[nw * nh * 3];
 
@@ -244,16 +254,18 @@ void UI_Pic::TiledImg(Img_c *img, bool has_trans)
 
 		img_pixel_t pix = img->buf() [iy*iw+ix];
 
-		u32_t col = back_col;
+		byte *dest = buf + ((y * nw + x) * 3);
 
-		if (! (has_trans && pix == TRANS_PIXEL))
-			col = palette[pix];
-
-		byte *dest = buf + ((y*nw+x) * 3);
-
-		dest[0] = RGB_RED(col);
-		dest[1] = RGB_GREEN(col);
-		dest[2] = RGB_BLUE(col);
+		if (pix == TRANS_PIXEL)
+		{
+			dest[0] = RGB_RED(back);
+			dest[1] = RGB_GREEN(back);
+			dest[2] = RGB_BLUE(back);
+		}
+		else
+		{
+			IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+		}
 	}
 
 	UploadRGB(buf, 3);
