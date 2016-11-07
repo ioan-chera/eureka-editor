@@ -1242,8 +1242,9 @@ public:
 	void RenderFlatColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf  = view.screen;
-		img_pixel_t *wbuf = surf.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = surf.img->buf();
 
 		int tw = surf.img->width();
 		int th = surf.img->height();
@@ -1254,29 +1255,30 @@ public:
 		float t_cos = cos(M_PI + -view.angle + ang) / modv;
 		float t_sin = sin(M_PI + -view.angle + ang) / modv;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
 			int tx = int( view.x - t_sin * dist) & (tw - 1);
 			int ty = int(-view.y + t_cos * dist) & (th - 1);
 
-			*buf = wbuf[ty * tw + tx];
+			*dest = src[ty * tw + tx];
 
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, *buf);
+				*dest = view.DoomLightRemap(light, dist, *dest);
 		}
 	}
 
 	void RenderTexColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf  = view.screen;
-		img_pixel_t *wbuf = surf.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = surf.img->buf();
 
 		int tw = surf.img->width();
 		int th = surf.img->height();
@@ -1300,44 +1302,44 @@ public:
 		dh = (dh - hh) / MAX(1, y2 - y1);
 		hh += 0.2;
 
-		buf  += x + y1 * view.sw;
-		wbuf += tx;
+		src  += tx;
+		dest += x + y1 * view.sw;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
 		{
 			int ty = int(floor(hh)) % th;
 
 			// handle negative values (use % twice)
 			ty = (ty + th) % th;
 
-			img_pixel_t pix = wbuf[ty * tw];
+			img_pixel_t pix = src[ty * tw];
 
 			if (pix == TRANS_PIXEL)
 				continue;
 
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, pix);
+				*dest = view.DoomLightRemap(light, dist, pix);
 			else
-				*buf = pix;
+				*dest = pix;
 		}
 	}
 
 	void SolidFlatColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *dest = view.screen;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
+				*dest = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
 			else
-				*buf = surf.col;
+				*dest = surf.col;
 		}
 	}
 
@@ -1346,27 +1348,27 @@ public:
 		int  light = dw->wall_light;
 		float dist = 1.0 / dw->cur_iz;
 
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *dest = view.screen;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
+				*dest = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
 			else
-				*buf = surf.col;
+				*dest = surf.col;
 		}
 	}
 
 	void HighlightColumn(int x, int y1, int y2, img_pixel_t col)
 	{
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *dest = view.screen;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
-			*buf = col;
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
+			*dest = col;
 	}
 
 
@@ -1448,8 +1450,9 @@ public:
 
 		/* fill pixels */
 
-		img_pixel_t *buf  = view.screen;
-		img_pixel_t *wbuf = dw->ceil.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = dw->ceil.img->buf();
 
 		int tw = dw->ceil.img->width();
 		int th = dw->ceil.img->height();
@@ -1464,38 +1467,38 @@ public:
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
-		buf  += x + y1 * view.sw;
-		wbuf += tx;
+		src  += tx;
+		dest += x + y1 * view.sw;
 
 		int thsec = view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
 		float dist = 1.0 / dw->cur_iz;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
 		{
 			int ty = int(hh);
 
 			if (ty < 0 || ty >= th)
 				continue;
 
-			img_pixel_t pix = wbuf[ty * tw];
+			img_pixel_t pix = src[ty * tw];
 
 			if (pix == TRANS_PIXEL)
 				continue;
 
 			if (dw->side & THINGDEF_INVIS)
 			{
-				if (*buf & IS_RGB_PIXEL)
-					*buf = IS_RGB_PIXEL | ((*buf & 0x7bde) >> 1);
+				if (*dest & IS_RGB_PIXEL)
+					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
 				else
-					*buf = raw_colormap[14][*buf];
+					*dest = raw_colormap[14][*dest];
 				continue;
 			}
 
-			*buf = pix;
+			*dest = pix;
 
 			if (view.lighting && ! (dw->side & THINGDEF_LIT))
-				*buf = view.DoomLightRemap(light, dist, *buf);
+				*dest = view.DoomLightRemap(light, dist, *dest);
 		}
 	}
 
