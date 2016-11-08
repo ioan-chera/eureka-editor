@@ -365,31 +365,35 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		filter_group = new Fl_Group(X, Y+391, W, H-391);
 		{
 			// common stuff
-			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
+			restrict_to_sel = new Fl_Check_Button(X+10, Y+390, 80, 22, " Restrict to Selection");
+
+			previous_sel = new selection_c();
+
+			tag_input = new Fl_Input(X+117, Y+417, 130, 24, "Tag match:");
 			tag_input->when(FL_WHEN_CHANGED);
 			tag_input->callback(tag_input_callback, this);
 
 			// thing stuff
-			o_easy   = new UI_TripleCheckButton(X+105, Y+414, 28, 26, "easy: ");
-			o_medium = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "medium: ");
-			o_hard   = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "hard: ");
+			o_easy   = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "easy: ");
+			o_medium = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "medium: ");
+			o_hard   = new UI_TripleCheckButton(X+105, Y+504, 28, 26, "hard: ");
 
-			o_sp     = new UI_TripleCheckButton(X+220, Y+414, 28, 26, "sp: ");
-			o_coop   = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "coop: ");
-			o_dm     = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "dm: ");
+			o_sp     = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "sp: ");
+			o_coop   = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "coop: ");
+			o_dm     = new UI_TripleCheckButton(X+220, Y+504, 28, 26, "dm: ");
 
 			// sector stuff
-			o_floors   = new Fl_Check_Button(X+45, Y+418, 80, 22, " floors");
-			o_ceilings = new Fl_Check_Button(X+45, Y+440, 80, 22, " ceilings");
-			o_skies    = new Fl_Check_Button(X+45, Y+462, 80, 22, " skies");
+			o_floors   = new Fl_Check_Button(X+45, Y+448, 80, 22, " floors");
+			o_ceilings = new Fl_Check_Button(X+45, Y+470, 80, 22, " ceilings");
+			o_skies    = new Fl_Check_Button(X+45, Y+492, 80, 22, " skies");
 
 			// linedef stuff
-			o_lowers  = new Fl_Check_Button(X+45, Y+418, 80, 22, " lowers");
-			o_uppers  = new Fl_Check_Button(X+45, Y+440, 80, 22, " uppers");
-			o_rails   = new Fl_Check_Button(X+45, Y+462, 80, 22, " rail");
+			o_lowers  = new Fl_Check_Button(X+45, Y+448, 80, 22, " lowers");
+			o_uppers  = new Fl_Check_Button(X+45, Y+470, 80, 22, " uppers");
+			o_rails   = new Fl_Check_Button(X+45, Y+492, 80, 22, " rail");
 
-			o_one_sided = new Fl_Check_Button(X+155, Y+418, 80, 22, " one-sided");
-			o_two_sided = new Fl_Check_Button(X+155, Y+440, 80, 22, " two-sided");
+			o_one_sided = new Fl_Check_Button(X+155, Y+448, 80, 22, " one-sided");
+			o_two_sided = new Fl_Check_Button(X+155, Y+470, 80, 22, " two-sided");
 		}
 		filter_group->end();
 		filter_group->hide();
@@ -597,6 +601,8 @@ void UI_FindAndReplace::ResetFilters()
 {
 	tag_input->value("");
 	tag_numbers->clear();
+
+	restrict_to_sel->value(0);
 
 	// thing filters
 	o_easy  ->value(0);
@@ -1072,17 +1078,31 @@ bool UI_FindAndReplace::FindNext()
 		Editor_ChangeMode_Raw(cur_obj.type);
 	}
 
-	Selection_Clear();
-
 
 	bool is_first = cur_obj.is_nil();
+
+	// grab the selection *once*, on the first find
+	if (is_first)
+	{
+		previous_sel->change_type(edit.mode);
+		previous_sel->merge(*edit.Selected);
+	}
+
+	Selection_Clear();
+
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
 	int total    = NumObjects(cur_obj.type);
 
 	for (int idx = start_at ; idx < total ; idx++)
 	{
-		if (MatchesObject(idx))
+		if (! MatchesObject(idx))
+			continue;
+
+		if (! Filter_PrevSel(idx))
+			continue;
+
+		// found!
 		{
 			cur_obj.num = idx;
 
@@ -1227,6 +1247,9 @@ void UI_FindAndReplace::DoAll(bool replace)
 	// we select objects even in REPLACE mode
 	// (gives the user a visual indication that stuff was done)
 
+	previous_sel->change_type(edit.mode);
+	previous_sel->merge(*edit.Selected);
+
 	// this clears the selection
 	edit.Selected->change_type(edit.mode);
 
@@ -1236,6 +1259,9 @@ void UI_FindAndReplace::DoAll(bool replace)
 	for (int idx = 0 ; idx < total ; idx++)
 	{
 		if (! MatchesObject(idx))
+			continue;
+
+		if (! Filter_PrevSel(idx))
 			continue;
 
 		count++;
@@ -1388,6 +1414,18 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 		return false;
 
 	return true;
+}
+
+
+bool UI_FindAndReplace::Filter_PrevSel(int idx)
+{
+	if (! filter_toggle->value())
+		return true;
+
+	if (! restrict_to_sel->value())
+		return true;
+
+	return previous_sel->get(idx);
 }
 
 

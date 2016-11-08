@@ -19,3 +19,7 @@ CHANGES IN Eureka 1.XX
 
 +  support editing STRIFE maps
 
+-  Find/Replace : added a "Restrict to Selection" filter
+
+-  Find/Replace : better way to choose textures/things
+

@@ -59,6 +59,10 @@ private:
 	Fl_Input * tag_input;
 	number_group_c * tag_numbers;
 
+	Fl_Check_Button *restrict_to_sel;
+
+	selection_c *previous_sel;
+
 	// thing stuff
 	UI_TripleCheckButton *o_easy;
 	UI_TripleCheckButton *o_medium;
@@ -144,6 +148,7 @@ private:
 	// return 'true' for pass, 'false' to reject
 	bool Filter_Tag(int tag);
 	bool Filter_Sides(const LineDef *L);
+	bool Filter_PrevSel(int idx);
 
 	void Replace_Thing(int idx);
 	void Replace_LineDef(int idx, int new_tex);
