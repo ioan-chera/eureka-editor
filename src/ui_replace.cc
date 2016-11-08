@@ -673,7 +673,8 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool is_valid = box->CheckInput(box->find_match, box->find_desc, box->find_numbers);
+	bool is_valid = box->CheckInput(box->find_match, box->find_desc,
+									box->find_pic, box->find_numbers);
 
 	if (is_valid)
 	{
@@ -682,17 +683,6 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 
 		box->find_match->textcolor(FL_FOREGROUND_COLOR);
 		box->find_match->redraw();
-
-		switch (box->GetKind())
-		{
-			case 'T':
-				box->find_pic->GetTex(box->find_match->value());
-				break;
-
-			case 'F':
-				box->find_pic->GetFlat(box->find_match->value());
-				break;
-		}
 	}
 	else
 	{
@@ -701,8 +691,6 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 
 		box->find_match->textcolor(FL_RED);
 		box->find_match->redraw();
-
-		box->find_pic->Clear();
 	}
 
 	// update Replace section too
@@ -713,32 +701,17 @@ void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc);
-
-	box->rep_pic->Clear();
+	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc, box->rep_pic);
 
 	if (is_valid)
 	{
 		box->rep_value->textcolor(FL_FOREGROUND_COLOR);
 		box->rep_value->redraw();
-
-		switch (box->GetKind())
-		{
-			case 'T':
-				box->rep_pic->GetTex(box->rep_value->value());
-				break;
-
-			case 'F':
-				box->rep_pic->GetFlat(box->rep_value->value());
-				break;
-		}
 	}
 	else
 	{
 		box->rep_value->textcolor(FL_RED);
 		box->rep_value->redraw();
-
-		box->rep_pic->Clear();
 	}
 
 	bool is_usable = (is_valid && box->find_but->active());
@@ -760,29 +733,43 @@ void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 }
 
 
-bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp)
+bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, number_group_c *num_grp)
 {
-	if (strlen(w->value()) == 0)
+	const char *inp_text = w->value();
+
+	if (strlen(inp_text) == 0)
 	{
 		desc->value("");
+		 pic->Clear();
 		return false;
 	}
 
-	if (what->value() == 1 || what->value() == 2)
+
+	// Line Textures   [ TODO probably should upper-case the text ]
+	if (what->value() == 1)
+	{
+		pic->GetTex(inp_text);
 		return true;
+	}
+
+	// Sector Flats
+	if (what->value() == 2)
+	{
+		pic->GetFlat(inp_text);
+		return true;
+	}
 
 
 	// for numeric types, parse the number(s) and/or ranges
 
-	int type_num;
+	int type_num = 0;
 
 	if (! num_grp)
 	{
-		// just check the number is valid
 		char *endptr;
+		type_num = strtol(inp_text, &endptr, 0 /* allow hex */);
 
-		type_num = strtol(w->value(), &endptr, 0 /* allow hex */);
-
+		// just check the number is valid
 		if (*endptr != 0)
 		{
 			desc->value("(parse error)");
@@ -793,7 +780,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 	{
 		num_grp->clear();
 
-		if (! num_grp->ParseString(w->value()))
+		if (! num_grp->ParseString(inp_text))
 		{
 			desc->value("(parse error)");
 			return false;
@@ -820,6 +807,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 		{
 			const thingtype_t *info = M_GetThingType(type_num);
 			desc->value(info->desc);
+			 pic->GetSprite(type_num, FL_DARK2);
 			break;
 		}
 

@@ -125,8 +125,10 @@ private:
 	void DoReplace();
 	void DoAll(bool replace);
 
-	bool CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp = NULL);
+	// validate input and update desc and the picture
+	bool CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, number_group_c *num_grp = NULL);
 
+	// this used for Tag number
 	bool CheckNumberInput(Fl_Input *w, number_group_c *num_grp);
 
 	bool Pattern_Match(const char *tex, const char *pattern, bool is_rail = false);
