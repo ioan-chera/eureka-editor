@@ -265,7 +265,6 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
 
 		if (pic->Selected())
 		{
@@ -293,7 +292,6 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
 
 		if (pic->Selected())
 		{

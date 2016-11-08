@@ -337,7 +337,6 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
 
 		if (pic->Selected())
 			main_win->ShowBrowser('F');

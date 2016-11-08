@@ -62,7 +62,7 @@ public:
 	void GetSprite(int type, Fl_Color back_color);
 
 	bool Selected() { return selected; }
-	void Selected(bool _val) { selected = _val; }
+	void Selected(bool _val);
 
 private:
 	// FLTK virtual method for drawing.

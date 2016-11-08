@@ -342,5 +342,14 @@ void UI_Pic::draw_selected()
 }
 
 
+void UI_Pic::Selected(bool _val)
+{
+	if (selected != _val)
+		redraw();
+
+	selected = _val;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
