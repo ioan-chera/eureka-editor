@@ -37,6 +37,13 @@ typedef u32_t rgb_color_t;
 #define RGB_MAKE(r, g, b)  (((r) << 24) | ((g) << 16) | ((b) << 8))
 
 
+// this is a version of rgb_color_t with an alpha channel
+// [ currently only used by the TGA loading code ]
+typedef u32_t rgba_color_t;
+#define RGBA_ALPHA(col)   ((col) & 255)
+#define RGBA_MAKE(r, g, b, a)  (((r) << 24) | ((g) << 16) | ((b) << 8) | (a))
+
+
 extern int usegamma;
 
 // the palette color closest to what TRANS_PIXEL really is
