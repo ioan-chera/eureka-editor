@@ -278,7 +278,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 	color(WINDOW_BG, WINDOW_BG);
 
-	
+
 	/* ---- FIND AREA ---- */
 
 	Fl_Group *grp1 = new Fl_Group(X, Y, W, 210);
@@ -502,7 +502,7 @@ void UI_FindAndReplace::rawShowFilter(int value)
 void UI_FindAndReplace::filter_toggle_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
-		
+
 	Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
 
 	box->rawShowFilter(toggle->value());
@@ -682,6 +682,17 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 
 		box->find_match->textcolor(FL_FOREGROUND_COLOR);
 		box->find_match->redraw();
+
+		switch (box->GetKind())
+		{
+			case 'T':
+				box->find_pic->GetTex(box->find_match->value());
+				break;
+
+			case 'F':
+				box->find_pic->GetFlat(box->find_match->value());
+				break;
+		}
 	}
 	else
 	{
@@ -690,6 +701,8 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 
 		box->find_match->textcolor(FL_RED);
 		box->find_match->redraw();
+
+		box->find_pic->Clear();
 	}
 
 	// update Replace section too
@@ -702,15 +715,30 @@ void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 
 	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc);
 
+	box->rep_pic->Clear();
+
 	if (is_valid)
 	{
 		box->rep_value->textcolor(FL_FOREGROUND_COLOR);
 		box->rep_value->redraw();
+
+		switch (box->GetKind())
+		{
+			case 'T':
+				box->rep_pic->GetTex(box->rep_value->value());
+				break;
+
+			case 'F':
+				box->rep_pic->GetFlat(box->rep_value->value());
+				break;
+		}
 	}
 	else
 	{
 		box->rep_value->textcolor(FL_RED);
 		box->rep_value->redraw();
+
+		box->rep_pic->Clear();
 	}
 
 	bool is_usable = (is_valid && box->find_but->active());
@@ -879,16 +907,29 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 		return;
 	}
 
-	bool is_replace = false;
+	// determine which box the user intended
+	int sel_pics =	find_pic->Selected() ? 1 :
+					 rep_pic->Selected() ? 2 : 0;
 
-	if (Fl::focus() == rep_value || Fl::focus() == rep_desc)
-		is_replace = true;
+	if (sel_pics == 0)
+	{
+		sel_pics =	(Fl::focus() == find_match || Fl::focus() == find_desc) ? 1 :
+					(Fl::focus() ==  rep_value || Fl::focus() ==  rep_desc) ? 2 : 0;
+	}
+
+	if (sel_pics == 0)
+	{
+		fl_beep();
+		return;
+	}
+
+	bool is_replace = (sel_pics == 2);
+
 
 	char append = 0;
 
-	// never append if user has selected some/all of the input
-	if (! is_replace &&
-		find_match->position() == find_match->mark())
+	// only append when SHIFT key was pressed
+	if ((e_state & FL_SHIFT) && !is_replace)
 	{
 		append = ',';
 	}
@@ -898,7 +939,9 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
 	if (kind == 'T' || kind == 'F')
+	{
 		InsertName(inp, append, name);
+	}
 	else
 	{
 		// already present?
@@ -1364,7 +1407,7 @@ bool UI_FindAndReplace::Filter_Tag(int tag)
 {
 	if (! filter_toggle->value())
 		return true;
-	
+
 	// an empty string means everything (same as '*')
 	if (tag_input->size() == 0)
 		return true;
