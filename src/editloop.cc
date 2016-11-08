@@ -177,7 +177,8 @@ static void UpdateSplitLine(int map_x, int map_y)
 	// in vertex mode, see if there is a linedef which would be split by
 	// adding a new vertex
 
-	if (edit.mode == OBJ_VERTICES && edit.pointer_in_window &&
+	if (edit.mode == OBJ_VERTICES &&
+		edit.pointer_in_window && !edit.render3d &&
 	    edit.highlight.is_nil())
 	{
 		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_vertex);
@@ -210,7 +211,7 @@ void UpdateHighlight()
 	// find the object to highlight
 	edit.highlight.clear();
 
-	if (edit.pointer_in_window &&
+	if (edit.pointer_in_window && !edit.render3d &&
 	    (!dragging || edit.drag_single_vertex >= 0))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
