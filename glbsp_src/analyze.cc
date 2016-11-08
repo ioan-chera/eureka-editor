@@ -854,6 +854,10 @@ void TestForWindowEffect(linedef_t *L)
       back_line, back_dist, back_open ? "OPEN" : "CLOSED");
   PrintDebug("front line: %d  front dist: %1.1f  front_open: %s\n",
       front_line, front_dist, front_open ? "OPEN" : "CLOSED");
+#else
+  // shut up the compiler warning
+  (void)  back_line;
+  (void) front_line;
 #endif
 
   if (back_open && front_open && L->right->sector == front_open)
