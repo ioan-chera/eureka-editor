@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2015 Andrew Apted
+//  Copyright (C) 2015-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@ private:
 	// --- FIND AREA ---
 
 	Fl_Input  *find_match;
-	Fl_Button *find_choose;
+	UI_Pic    *find_pic;
 	Fl_Output *find_desc;
 	Fl_Button *find_but;
 	Fl_Button *select_all_but;
@@ -45,7 +45,7 @@ private:
 	// --- REPLACE AREA ---
 
 	Fl_Input  *rep_value;
-	Fl_Button *rep_choose;
+	UI_Pic    *rep_pic;
 	Fl_Output *rep_desc;
 	Fl_Button *apply_but;
 	Fl_Button *replace_all_but;
@@ -110,6 +110,8 @@ private:
 	void UpdateWhatFilters();
 	void ComputeFlagMask();
 
+	void UnselectPics();
+
 	void InsertName  (Fl_Input *inp, char append, const char *name);
 	void InsertNumber(Fl_Input *inp, char append, int number);
 
@@ -150,14 +152,13 @@ private:
 private:
 	static void      hide_callback(Fl_Widget *w, void *data);
 	static void what_kind_callback(Fl_Widget *w, void *data);
+	static void    choose_callback(UI_Pic    *w, void *data);
 
 	static void  find_match_callback(Fl_Widget *w, void *data);
-	static void find_choose_callback(Fl_Widget *w, void *data);
 	static void    find_but_callback(Fl_Widget *w, void *data);
 	static void  select_all_callback(Fl_Widget *w, void *data);
 
 	static void   rep_value_callback(Fl_Widget *w, void *data);
-	static void  rep_choose_callback(Fl_Widget *w, void *data);
 	static void   apply_but_callback(Fl_Widget *w, void *data);
 	static void replace_all_callback(Fl_Widget *w, void *data);
 

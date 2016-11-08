@@ -304,20 +304,20 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		UpdateWhatColor();
 
 
-		find_match = new Fl_Input(X+70, Y+95, 125, 25, "Match: ");
+		find_match = new Fl_Input(X+75, Y+95, 135, 25, "Match: ");
 		find_match->when(FL_WHEN_CHANGED);
 		find_match->callback(find_match_callback, this);
 
-		find_choose = new Fl_Button(X+210, Y+95, 70, 25, "Choose");
-		find_choose->callback(find_choose_callback, this);
+		find_desc = new Fl_Output(X+75, Y+125, 135, 25, "Desc: ");
 
-		find_desc = new Fl_Output(X+70, Y+125, 210, 25, "Desc: ");
+		find_pic = new UI_Pic(X+225, Y+95, 64, 64, "Choose");
+		find_pic->callback((Fl_Callback *)choose_callback, this);
 
-		find_but = new Fl_Button(X+50, Y+165, 80, 30, "Find");
+		find_but = new Fl_Button(X+50, Y+165, 90, 30, "Find");
 		find_but->labelfont(FL_HELVETICA_BOLD);
 		find_but->callback(find_but_callback, this);
 
-		select_all_but = new Fl_Button(X+165, Y+165, 93, 30, "Select All");
+		select_all_but = new Fl_Button(X+160, Y+165, 105, 30, "Select All");
 		select_all_but->callback(select_all_callback, this);
 	}
 	grp1->end();
@@ -328,14 +328,14 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group *grp2 = new Fl_Group(X, Y + 214, W, 132);
 	grp2->box(FL_UP_BOX);
 	{
-		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "New val: ");
+		rep_value = new Fl_Input(X+75, Y+230, 135, 25, "New: ");
 		rep_value->when(FL_WHEN_CHANGED);
 		rep_value->callback(rep_value_callback, this);
 
-		rep_choose = new Fl_Button(X+210, Y+230, 70, 25, "Choose");
-		rep_choose->callback(rep_choose_callback, this);
+		rep_desc = new Fl_Output(X+75, Y+260, 135, 25, "Desc: ");
 
-		rep_desc = new Fl_Output(X+80, Y+260, 200, 25, "Desc: ");
+		rep_pic = new UI_Pic(X+225, Y+230, 64, 64, "Choose");
+		rep_pic->callback((Fl_Callback *)choose_callback, this);
 
 		apply_but = new Fl_Button(X+45, Y+300, 90, 30, "Replace");
 		apply_but->labelfont(FL_HELVETICA_BOLD);
@@ -560,6 +560,8 @@ void UI_FindAndReplace::Open()
 	what->do_callback();
 
 	Fl::focus(find_match);
+
+	UnselectPics();
 }
 
 
@@ -570,9 +572,13 @@ void UI_FindAndReplace::Clear()
 	find_match->value("");
 	find_desc->value("");
 	find_but->label("Find");
+	find_pic->Clear();
 
 	rep_value->value("");
 	rep_desc->value("");
+	rep_pic->Clear();
+
+	UnselectPics();
 
 	find_but->deactivate();
 	select_all_but->deactivate();
@@ -974,26 +980,45 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 }
 
 
-void UI_FindAndReplace::find_choose_callback(Fl_Widget *w, void *data)
+void UI_FindAndReplace::UnselectPics()
 {
-	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
-
-	main_win->ShowBrowser(box->GetKind());
-
-	// ensure Match input widget has the focus
-	Fl::focus(box->find_match);
-	box->find_match->redraw();
+	find_pic->Selected(false);
+	 rep_pic->Selected(false);
 }
 
-void UI_FindAndReplace::rep_choose_callback(Fl_Widget *w, void *data)
+
+void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	main_win->ShowBrowser(box->GetKind());
+	// ensure corresponding input widget has the focus
 
-	// ensure 'New val' input widget has the focus
-	Fl::focus(box->rep_value);
-	box->rep_value->redraw();
+	if (w == box->find_pic)
+	{
+		Fl::focus(box->find_match);
+		box->find_match->redraw();
+
+		box->find_pic->Selected(! box->find_pic->Selected());
+
+		if (box->find_pic->Selected())
+		{
+			box->rep_pic->Selected(false);
+		}
+	}
+	else
+	{
+		Fl::focus(box->rep_value);
+		box->rep_value->redraw();
+
+		box->rep_pic->Selected(! box->rep_pic->Selected());
+
+		if (box->rep_pic->Selected())
+		{
+			box->find_pic->Selected(false);
+		}
+	}
+
+	main_win->ShowBrowser(box->GetKind());
 }
 
 
