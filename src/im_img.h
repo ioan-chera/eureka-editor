@@ -113,7 +113,8 @@ Img_c * IM_UnknownFlat();
 
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 
-Img_c * IM_FromRGBImage(Fl_RGB_Image *src);
+Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
+Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
 
 
 // Note: IM_PixelToRGB() does not apply gamma (safe to convert back)

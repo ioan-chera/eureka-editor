@@ -467,7 +467,7 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 }
 
 
-Img_c * IM_FromRGBImage(Fl_RGB_Image *src)
+Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src)
 {
 	int W  = src->w();
 	int H  = src->h();
@@ -507,6 +507,32 @@ Img_c * IM_FromRGBImage(Fl_RGB_Image *src)
 		}
 
 		img->wbuf() [ y * W + x ] = dest_pix;
+	}
+
+	return img;
+}
+
+
+Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+{
+	Img_c *img = new Img_c(W, H);
+
+	img_pixel_t *dest = img->wbuf();
+
+	for (int i = W * H ; i > 0 ; i--, data++, dest++)
+	{
+		if (RGBA_ALPHA(*data) & 128)
+		{
+			byte r = RGB_RED(  *data) >> 3;
+			byte g = RGB_GREEN(*data) >> 3;
+			byte b = RGB_BLUE( *data) >> 3;
+
+			*dest = IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+		else
+		{
+			*dest = TRANS_PIXEL;
+		}
 	}
 
 	return img;
