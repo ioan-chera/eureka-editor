@@ -23,3 +23,6 @@ CHANGES IN Eureka 1.XX
 
 -  Find/Replace : better way to choose textures/things
 
+-  bug fix : panel staying on a highlighted object when going
+   into 3D mode
+

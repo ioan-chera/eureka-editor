@@ -460,10 +460,7 @@ void CMD_SetVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
-		Editor_ClearAction();
-
-		edit.render3d = bool_val;
-		main_win->redraw();
+		Render3D_Enable(bool_val);
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
@@ -507,10 +504,7 @@ void CMD_ToggleVar(void)
 
 	if (y_stricmp(var_name, "3d") == 0)
 	{
-		Editor_ClearAction();
-
-		edit.render3d = ! edit.render3d;
-		main_win->redraw();
+		Render3D_Enable(! edit.render3d);
 	}
 	else if (y_stricmp(var_name, "browser") == 0)
 	{
@@ -887,8 +881,7 @@ void CMD_PlaceCamera(void)
 
 	if (Exec_HasFlag("/open3d"))
 	{
-		edit.render3d = 1;
-		main_win->redraw();
+		Render3D_Enable(true);
 	}
 
 	RedrawMap();
@@ -1821,6 +1814,7 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
 	{
 		edit.render3d = atoi(tokens[1]);
+		UpdateHighlight();
 		RedrawMap();
 		return true;
 	}

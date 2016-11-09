@@ -1990,6 +1990,21 @@ void Render3D_Setup()
 }
 
 
+void Render3D_Enable(bool _enable)
+{
+	Editor_ClearAction();
+
+	edit.render3d = _enable;
+
+	// FIXME : this is a workaround, when coming out of the 3D mode
+	// the UpdateHighlight() code will use stale mouse coordinates.
+	edit.pointer_in_window = false;
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+
 void Render3D_MouseMotion(int x, int y, keycode_t mod)
 {
 	highlight_3D_info_t old(view.hl);

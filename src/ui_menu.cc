@@ -33,6 +33,7 @@
 #include "levels.h"
 #include "m_files.h"
 #include "r_grid.h"
+#include "r_render.h"
 #include "x_mirror.h"
 
 
@@ -305,10 +306,7 @@ static void view_do_camera_pos(Fl_Widget *w, void * data)
 
 static void view_do_toggle_3d(Fl_Widget *w, void * data)
 {
-	Editor_ClearAction();
-
-	edit.render3d = ! edit.render3d;
-	main_win->redraw();
+	Render3D_Enable(! edit.render3d);
 }
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
