@@ -1790,7 +1790,9 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 		mask = Things_FindStarts(&dm_num);
 
-		if (! (mask & 1))
+		if (game_info.no_need_players)
+			dialog->AddLine("Player starts not needed, no check done");
+		else if (! (mask & 1))
 			dialog->AddLine("Player 1 start is missing!", 2);
 		else if (! (mask & 2))
 			dialog->AddLine("Player 2 start is missing", 1);
@@ -1801,8 +1803,14 @@ check_result_e CHECK_Things(int min_severity = 0)
 		else
 			dialog->AddLine("Found all 4 player starts");
 
-		if (dm_num == 0)
+		if (game_info.no_need_players)
+		{
+			// leave a blank space
+		}
+		else if (dm_num == 0)
+		{
 			dialog->AddLine("Map is missing deathmatch starts", 1);
+		}
 		else if (dm_num < game_info.min_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,

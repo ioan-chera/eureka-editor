@@ -146,6 +146,8 @@ typedef struct
 
 	int medusa_bug;		// used for Vanilla, prone to the Medusa Effect
 
+	int no_need_players;	// having no players is OK (Things checker)
+
 } game_info_t;
 
 extern game_info_t  game_info;
