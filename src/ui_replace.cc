@@ -1032,30 +1032,32 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 
 	if (w == box->find_pic)
 	{
-		Fl::focus(box->find_match);
-		box->find_match->redraw();
-
 		box->find_pic->Selected(! box->find_pic->Selected());
 
 		if (box->find_pic->Selected())
 		{
+			main_win->ShowBrowser(box->GetKind());
+
+			Fl::focus(box->find_match);
+			box->find_match->redraw();
+
 			box->rep_pic->Selected(false);
 		}
 	}
 	else
 	{
-		Fl::focus(box->rep_value);
-		box->rep_value->redraw();
-
 		box->rep_pic->Selected(! box->rep_pic->Selected());
 
 		if (box->rep_pic->Selected())
 		{
+			main_win->ShowBrowser(box->GetKind());
+
+			Fl::focus(box->rep_value);
+			box->rep_value->redraw();
+
 			box->find_pic->Selected(false);
 		}
 	}
-
-	main_win->ShowBrowser(box->GetKind());
 }
 
 
