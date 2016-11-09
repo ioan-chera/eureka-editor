@@ -1086,6 +1086,14 @@ bool UI_FindAndReplace::FindNext()
 	{
 		previous_sel->change_type(edit.mode);
 		previous_sel->merge(*edit.Selected);
+
+		// catch a common user mistake
+		if (filter_toggle->value() && restrict_to_sel->value() &&
+			edit.Selected->empty())
+		{
+			Beep("EMPTY SELECTION!");
+			return false;
+		}
 	}
 
 	Selection_Clear();
@@ -1148,7 +1156,7 @@ void UI_FindAndReplace::DoReplace()
 	// this generally can't happen either
 	if (cur_obj.is_nil())
 	{
-		Beep("No object to replace");
+		Beep("No object to replace!");
 		return;
 	}
 
@@ -1227,6 +1235,14 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (strlen(find_match->value()) == 0)
 	{
 		Beep("No find active!");
+		return;
+	}
+
+	// catch a common user mistake
+	if (filter_toggle->value() && restrict_to_sel->value() &&
+		edit.Selected->empty())
+	{
+		Beep("EMPTY SELECTION!");
 		return;
 	}
 
