@@ -326,6 +326,7 @@ typedef struct
 
 	// state for handling if/else/endif
 	parsing_cond_state_e cond;
+	int cond_lineno;
 
 	// BOOM generalized linedef stuff
 	int current_gen_line;
@@ -781,6 +782,17 @@ static void M_ParsePortCheckLine(parser_state_t *pst, parse_check_info_t *check_
 }
 
 
+static bool M_ParseConditional(parser_state_t *pst)
+{
+	// returns the result of the "IF" test, true or false.
+
+	// FIXME : ParseConditional
+
+	FatalError("Conditionals not yet implemented.\n");
+	return false;
+}
+
+
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
@@ -799,16 +811,12 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 	memset(&parser_state, 0, sizeof(parser_state));
 
-	// this is a bit silly, but makes it easier to move code
+	// this is a bit silly, but makes it easier to move code around
 	parser_state_t *pst = &parser_state;
 
-
 	pst->fname = prettyname;
-
 	pst->current_gen_line = -1;
-
 	pst->cond = PCOND_NONE;
-
 
 
 	// read the definition file, line by line
@@ -828,6 +836,40 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 
 		int nargs = pst->argc - 1;
+
+
+		// handle conditionals: if...else...endif
+
+		if (y_stricmp(pst->argv[0], "if") == 0)
+		{
+			if (pst->cond != PCOND_NONE)
+				FatalError("%s(%d,%d): cannot nest if/endif\n", pst->fname, pst->cond_lineno, pst->lineno);
+
+			pst->cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
+			pst->cond_lineno = pst->lineno;
+			continue;
+		}
+		else if (y_stricmp(pst->argv[0], "else") == 0)
+		{
+			if (pst->cond == PCOND_NONE)
+				FatalError("%s(%d): else without if\n", pst->fname, pst->lineno);
+
+			// toggle the mode
+			pst->cond = (pst->cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
+			continue;
+		}
+		else if (y_stricmp(pst->argv[0], "endif") == 0)
+		{
+			if (pst->cond == PCOND_NONE)
+				FatalError("%s(%d): endif without if\n", pst->fname, pst->lineno);
+
+			pst->cond = PCOND_NONE;
+			continue;
+		}
+
+
+		if (pst->cond == PCOND_Skipping)
+			continue;
 
 
 		// handle includes
@@ -860,9 +902,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		}
 
 
-		// TODO : handle if/else/endif
-
-
 		// all other lines are handled by a purpose-orientated function
 
 		switch (purpose)
@@ -879,6 +918,12 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 				M_ParseNormalLine(pst);
 				break;
 		}
+	}
+
+	// check for an unterminated conditional
+	if (pst->cond != PCOND_NONE)
+	{
+		FatalError("%s(%d): Missing endif statement\n", pst->fname, pst->cond_lineno);
 	}
 
 	fclose(fp);
