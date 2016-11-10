@@ -302,32 +302,57 @@ typedef enum
 	PCOND_Reading	= 1,
 	PCOND_Skipping	= 2
 
-} process_cond_state_e;
+} parsing_cond_state_e;
 
 
 #define MAX_TOKENS  30   /* tokens per line */
 
 #define MAX_INCLUDE_LEVEL  10
 
-static int parser_lineno;
-static const char *parser_filename;
-
-
-static int M_TokenizeLine(const char *readbuf, char **token, int max_tok)
+typedef struct
 {
-	int			ntoks = 0;
+	// current line number
+	int lineno;
+
+	// filename (generally without any directories)
+	const char *fname;
+
+	// buffer containing the raw line
+	char readbuf[512];
+
+	// the line parsed into tokens
+	int    argc;
+	char * argv[MAX_TOKENS];
+
+	// state for handling if/else/endif
+	parsing_cond_state_e cond;
+
+	// BOOM generalized linedef stuff
+	int current_gen_line;
+
+} parser_state_t;
+
+
+static const char *const bad_arg_count =
+		"%s(%d): directive \"%s\" takes %d parameters\n";
+
+
+static void M_TokenizeLine(parser_state_t *pst)
+{
+	// break the line into whitespace-separated tokens.
+	// whitespace can be enclosed in double quotes.
 
 	bool		in_token = false;
 	bool		quoted   = false;
 
 	// create a buffer to contain the tokens [ FIXME: never freed ]
-	char *buf = StringNew((int)strlen(readbuf) + 1);
+	char *buf = StringNew((int)strlen(pst->readbuf) + 1);
 
-	const char	*src  = readbuf;
+	const char	*src  = pst->readbuf;
 	char		*dest = buf;
 
-	// break the line into whitespace-separated tokens.
-	// whitespace can be enclosed in double quotes.
+	pst->argc = 0;
+
 	for ( ; ; src++)
 	{
 		if (*src == 0 || *src == '\n')
@@ -350,13 +375,13 @@ static int M_TokenizeLine(const char *readbuf, char **token, int max_tok)
 		// beginning a new token?
 		if (!in_token && (quoted || !isspace(*src)))
 		{
-			if (ntoks >= max_tok)
+			if (pst->argc >= MAX_TOKENS)
 				FatalError("%s(%d): more than %d tokens on the line\n",
-							parser_filename, parser_lineno, max_tok);
+							pst->fname, pst->lineno, MAX_TOKENS);
 
 			in_token = true;
 
-			token[ntoks++] = dest;
+			pst->argv[pst->argc++] = dest;
 
 			*dest++ = *src;
 			continue;
@@ -376,14 +401,383 @@ static int M_TokenizeLine(const char *readbuf, char **token, int max_tok)
 	}
 
 	if (quoted)
-		FatalError("%s(%d): unmatched double quote\n", parser_filename, parser_lineno);
-
-	return ntoks;
+		FatalError("%s(%d): unmatched double quote\n", pst->fname, pst->lineno);
 }
 
 
-static void M_ParseDef_Line()
+static void M_ParseNormalLine(parser_state_t *pst)
 {
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+
+	// these are handled by other passes (like PURPOSE_GameCheck)
+	if (y_stricmp(argv[0], "variant_of") == 0 ||
+		y_stricmp(argv[0], "supported_games") == 0 ||
+		y_stricmp(argv[0], "map_formats") == 0)
+	{
+		return;
+	}
+
+
+	// FIXME : get rid of this
+	if (y_stricmp(argv[0], "exclude_game") == 0)
+	{
+#if 0
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		if (Game_name && y_stricmp(argv[1], Game_name) == 0)
+		{
+			LogPrintf("WARNING: skipping %s -- not compatible with %s\n",
+					  pst->fname, Game_name);
+
+			// do not process any more of the file
+			fclose(fp);
+			return;
+		}
+#endif
+		return;
+	}
+
+
+
+	if (y_stricmp(argv[0], "player_size") == 0)
+	{
+		if (nargs != 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		game_info.player_r    = atoi(argv[1]);
+		game_info.player_h    = atoi(argv[2]);
+		game_info.view_height = atoi(argv[3]);
+	}
+
+	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		game_info.sky_color = atoi(argv[1]);
+	}
+
+	else if (y_stricmp(argv[0], "sky_flat") == 0)
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		if (strlen(argv[1]) >= sizeof(game_info.sky_flat))
+			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
+
+		strcpy(game_info.sky_flat, argv[1]);
+	}
+
+	else if (y_stricmp(argv[0], "color") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseColorDef(pst->argv + 1, nargs);
+	}
+
+	else if (y_stricmp(argv[0], "feature") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseFeatureDef(pst->argv + 1, nargs);
+	}
+
+	else if (y_stricmp(argv[0], "default_port") == 0)
+	{
+		/* ignored for backwards compability */
+	}
+
+	else if (y_stricmp(argv[0], "default_textures") == 0)
+	{
+		if (nargs != 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+
+		default_wall_tex	= argv[1];
+		default_floor_tex	= argv[2];
+		default_ceil_tex	= argv[3];
+	}
+
+	else if (y_stricmp(argv[0], "default_thing") == 0)
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		default_thing = atoi(argv[1]);
+	}
+
+	else if (y_stricmp(argv[0], "linegroup") == 0)
+	{
+		if (nargs != 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		linegroup_t * lg = new linegroup_t;
+
+		lg->group = argv[1][0];
+		lg->desc  = argv[2];
+
+		line_groups[lg->group] = lg;
+	}
+
+	else if (y_stricmp(argv[0], "line") == 0 ||
+			 y_stricmp(argv[0], "special") == 0)
+	{
+		if (nargs < 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+
+		linetype_t * info = new linetype_t;
+
+		memset(info->args, 0, sizeof(info->args));
+
+		int number = atoi(argv[1]);
+
+		info->group = argv[2][0];
+		info->desc  = argv[3];
+
+		int arg_count = MIN(nargs - 3, 5);
+
+		for (int i = 0 ; i < arg_count ; i++)
+		{
+			if (argv[4 + i][0] != '-')
+				info->args[i] = argv[4 + i];
+		}
+
+		// FIXME : have separate tables for "special"
+
+		if (line_groups.find( info->group) == line_groups.end())
+		{
+			LogPrintf("%s(%d): unknown line group '%c'\n",
+					pst->fname, pst->lineno,  info->group);
+		}
+		else
+			line_types[number] = info;
+	}
+
+	else if (y_stricmp(argv[0], "sector") == 0)
+	{
+		if (nargs != 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		int number = atoi(argv[1]);
+
+		sectortype_t *info = new sectortype_t;
+
+		info->desc = argv[2];
+
+		sector_types[number] = info;
+	}
+
+	else if (y_stricmp(argv[0], "thinggroup") == 0)
+	{
+		if (nargs != 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+
+		thinggroup_t * tg = new thinggroup_t;
+
+		tg->group = argv[1][0];
+		tg->color = ParseColor(argv[2]);
+		tg->desc  = argv[3];
+
+		thing_groups[tg->group] = tg;
+	}
+
+	else if (y_stricmp(argv[0], "thing") == 0)
+	{
+		if (nargs != 6)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 6);
+
+		thingtype_t * info = new thingtype_t;
+
+		int number = atoi(argv[1]);
+
+		info->group  = argv[2][0];
+		info->flags  = ParseThingdefFlags(argv[3]);
+		info->radius = atoi(argv[4]);
+		info->sprite = argv[5];
+		info->desc   = argv[6];
+
+		if (thing_groups.find(info->group) == thing_groups.end())
+		{
+			LogPrintf("%s(%d): unknown thing group '%c'\n",
+					pst->fname, pst->lineno, info->group);
+		}
+		else
+		{
+			info->color = thing_groups[info->group]->color;
+
+			thing_types[number] = info;
+		}
+	}
+
+	else if (y_stricmp(argv[0], "texturegroup") == 0)
+	{
+		if (nargs != 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		texturegroup_t * tg = new texturegroup_t;
+
+		tg->group = argv[1][0];
+		tg->desc  = argv[2];
+
+		texture_groups[tg->group] = tg;
+	}
+
+	else if (y_stricmp(argv[0], "texture") == 0)
+	{
+		if (nargs != 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		char group = argv[1][0];
+		std::string name = std::string(argv[2]);
+
+		if (texture_groups.find(tolower(group)) == texture_groups.end())
+		{
+			LogPrintf("%s(%d): unknown texture group '%c'\n",
+					  pst->fname, pst->lineno, group);
+		}
+		else
+			texture_assigns[name] = group;
+	}
+
+	else if (y_stricmp(argv[0], "flat") == 0)
+	{
+		if (nargs != 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		char group = argv[1][0];
+		std::string name = std::string(argv[2]);
+
+		if (texture_groups.find(tolower(group)) == texture_groups.end())
+		{
+			LogPrintf("%s(%d): unknown texture group '%c'\n",
+						pst->fname, pst->lineno, group);
+		}
+		else
+			flat_assigns[name] = group;
+	}
+
+	else if (y_stricmp(argv[0], "gen_line") == 0)
+	{
+		if (nargs != 4)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 4);
+
+		pst->current_gen_line = num_gen_linetypes;
+		num_gen_linetypes++;
+
+		if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
+			FatalError("%s(%d): too many gen_line definitions\n", pst->fname, pst->lineno);
+
+		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
+
+		def->key = argv[1][0];
+
+		// use strtol() to support "0x" notation
+		def->base   = strtol(argv[2], NULL, 0);
+		def->length = strtol(argv[3], NULL, 0);
+
+		def->name = argv[4];
+		def->num_fields = 0;
+	}
+
+	else if (y_stricmp(argv[0], "gen_field") == 0)
+	{
+		if (nargs < 5)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 5);
+
+		if (pst->current_gen_line < 0)
+			FatalError("%s(%d): gen_field used outside of a gen_line definition\n", pst->fname, pst->lineno);
+
+		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
+
+		generalized_field_t *field = &def->fields[def->num_fields];
+
+		def->num_fields++;
+		if (def->num_fields > MAX_GEN_NUM_FIELDS)
+			FatalError("%s(%d): too many fields in gen_line definition\n", pst->fname, pst->lineno);
+
+		field->bits  = atoi(argv[1]);
+		field->shift = atoi(argv[2]);
+
+		field->mask  = ((1 << field->bits) - 1) << field->shift;
+
+		field->default_val = atoi(argv[3]);
+
+		field->name = argv[4];
+
+		// grab the keywords
+		field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+
+		for (int i = 0 ; i < field->num_keywords ; i++)
+		{
+			field->keywords[i] = argv[5 + i];
+		}
+	}
+
+	// these are ignored for backwards compability
+	else if (y_stricmp(argv[0], "level_name") == 0)
+	{
+		return;
+	}
+
+	else
+	{
+		FatalError("%s(%d): unknown directive: %.32s\n",
+				   pst->fname, pst->lineno, argv[0]);
+	}
+}
+
+
+static void M_ParseGameCheckLine(parser_state_t *pst, parse_check_info_t *check_info)
+{
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+	SYS_ASSERT(check_info);
+
+	if (y_stricmp(argv[0], "supported_games") == 0)
+		FatalError("%s(%d): supported_game can only be used in port definitions\n", pst->fname, pst->lineno);
+
+	else if (y_stricmp(argv[0], "variant_of") == 0)
+	{
+		snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", pst->argv[1]);
+	}
+
+	else if (y_stricmp(argv[0], "map_formats") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		check_info->formats = ParseMapFormats(argv + 1, nargs);
+	}
+}
+
+
+static void M_ParsePortCheckLine(parser_state_t *pst, parse_check_info_t *check_info)
+{
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+	SYS_ASSERT(check_info);
+
+	if (y_stricmp(argv[0], "variant_of") == 0)
+		FatalError("%s(%d): variant_of can only be used in game definitions\n", pst->fname, pst->lineno);
+
+	else if (y_stricmp(argv[0], "supported_games") == 0)
+	{
+		ParseSupportedGame(check_info, argv + 1, nargs);
+	}
+
+	else if (y_stricmp(argv[0], "map_formats") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		check_info->formats = ParseMapFormats(argv + 1, nargs);
+	}
 }
 
 
@@ -396,71 +790,68 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 {
 	if (! folder)
 		folder = "common";
-	
+
 	if (! prettyname)
 		prettyname = fl_filename_name(filename);
 
-	parser_filename = prettyname;
+
+	parser_state_t parser_state;
+
+	memset(&parser_state, 0, sizeof(parser_state));
+
+	// this is a bit silly, but makes it easier to move code
+	parser_state_t *pst = &parser_state;
 
 
-	char readbuf[512];    /* buffer the line is read into */
+	pst->fname = prettyname;
 
-	int lineno;
+	pst->current_gen_line = -1;
 
-	int current_gen_line = -1;
-
-	process_cond_state_e cond_state = PCOND_NONE;
+	pst->cond = PCOND_NONE;
 
 
+
+	// read the definition file, line by line
 
 	FILE *fp = fopen(filename, "r");
 	if (! fp)
 		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
 
-	/* Read the game definition file, line by line. */
-
-	const char *const bad_arg_count =
-		"%s(%d): directive \"%s\" takes %d parameters\n";
-
-	for (lineno = 2 ; fgets(readbuf, sizeof(readbuf), fp) ; lineno++)
+	while (fgets(pst->readbuf, sizeof(pst->readbuf), fp))
 	{
-		parser_lineno = lineno;
+		pst->lineno += 1;
 
-		/* process the line */
+		M_TokenizeLine(pst);
 
-		char * token[MAX_TOKENS];
-
-		int ntoks = M_TokenizeLine(readbuf, token, MAX_TOKENS);
-
-		// skip empty lines
-		if (ntoks == 0)
-		{
+		// skip empty lines and comments
+		if (pst->argc == 0)
 			continue;
-		}
 
-		int nargs = ntoks - 1;
+		int nargs = pst->argc - 1;
+
 
 		// handle includes
-		if (y_stricmp(token[0], "include") == 0)
+		if (y_stricmp(pst->argv[0], "include") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
+				FatalError(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
-				FatalError("%s(%d): Too many includes (check for a loop)\n", prettyname, lineno);
+				FatalError("%s(%d): Too many includes (check for a loop)\n", pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
-			const char * new_name = FindDefinitionFile(new_folder, token[1]);
+			const char * new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (! new_name && strcmp(folder, "common") != 0)
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(new_folder, token[1]);
+				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 			}
 
 			if (! new_name)
-				FatalError("%s(%d): Cannot find include file: %s.ugh\n", prettyname, lineno, token[1]);
+				FatalError("%s(%d): Cannot find include file: %s.ugh\n",
+							pst->fname, pst->lineno, pst->argv[1]);
 
 			M_ParseDefinitionFile(purpose, new_name, new_folder,
 								  NULL /* prettyname */,
@@ -468,363 +859,25 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 		}
 
-		// handle a game-checking parse
-		if (purpose == PURPOSE_GameCheck)
+
+		// TODO : handle if/else/endif
+
+
+		// all other lines are handled by a purpose-orientated function
+
+		switch (purpose)
 		{
-			SYS_ASSERT(check_info);
-
-			if (y_stricmp(token[0], "supported_games") == 0)
-				FatalError("%s(%d): supported_game can only be used in port definitions\n", prettyname, lineno);
-
-			else if (y_stricmp(token[0], "variant_of") == 0)
-			{
-				snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", token[1]);
-			}
-
-			else if (y_stricmp(token[0], "map_formats") == 0)
-			{
-				if (nargs < 1)
-					FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-				check_info->formats = ParseMapFormats(token + 1, nargs);
-			}
-
-			continue;
-		}
-
-		// handle a port-checking parse
-		if (purpose == PURPOSE_PortCheck)
-		{
-			SYS_ASSERT(check_info);
-
-			if (y_stricmp(token[0], "variant_of") == 0)
-				FatalError("%s(%d): variant_of can only be used in game definitions\n", prettyname, lineno);
-
-			else if (y_stricmp(token[0], "supported_games") == 0)
-			{
-				ParseSupportedGame(check_info, token + 1, nargs);
-			}
-
-			else if (y_stricmp(token[0], "map_formats") == 0)
-			{
-				if (nargs < 1)
-					FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-				check_info->formats = ParseMapFormats(token + 1, nargs);
-			}
-
-			continue;
-		}
-
-		// handle a normal parse
-
-		if (y_stricmp(token[0], "variant_of") == 0 ||
-			y_stricmp(token[0], "supported_games") == 0 ||
-			y_stricmp(token[0], "map_formats") == 0)
-		{
-			/* these are handled above, ignored in a normal parse */
-		}
-
-		else if (y_stricmp(token[0], "level_name") == 0)
-		{
-			/* ignored for backwards compability */
-		}
-
-		else if (y_stricmp(token[0], "player_size") == 0)
-		{
-			if (nargs != 3)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-			game_info.player_r    = atoi(token[1]);
-			game_info.player_h    = atoi(token[2]);
-			game_info.view_height = atoi(token[3]);
-		}
-
-		else if (y_stricmp(token[0], "sky_color") == 0)  // back compat
-		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-			game_info.sky_color = atoi(token[1]);
-		}
-
-		else if (y_stricmp(token[0], "sky_flat") == 0)
-		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-			if (strlen(token[1]) >= sizeof(game_info.sky_flat))
-				FatalError("%s(%d): sky_flat name is too long\n", prettyname, lineno);
-
-			strcpy(game_info.sky_flat, token[1]);
-		}
-
-		else if (y_stricmp(token[0], "color") == 0)
-		{
-			if (nargs < 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			ParseColorDef(token + 1, nargs);
-		}
-
-		else if (y_stricmp(token[0], "feature") == 0)
-		{
-			if (nargs < 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			ParseFeatureDef(token + 1, nargs);
-		}
-
-		else if (y_stricmp(token[0], "default_port") == 0)
-		{
-			/* ignored for backwards compability */
-		}
-
-		else if (y_stricmp(token[0], "default_textures") == 0)
-		{
-			if (nargs != 3)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
-
-			default_wall_tex	= token[1];
-			default_floor_tex	= token[2];
-			default_ceil_tex	= token[3];
-		}
-
-		else if (y_stricmp(token[0], "default_thing") == 0)
-		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-			default_thing = atoi(token[1]);
-		}
-
-		else if (y_stricmp(token[0], "linegroup") == 0)
-		{
-			if (nargs != 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			linegroup_t * lg = new linegroup_t;
-
-			lg->group = token[1][0];
-			lg->desc  = token[2];
-
-			line_groups[lg->group] = lg;
-		}
-
-		else if (y_stricmp(token[0], "line") == 0 ||
-				 y_stricmp(token[0], "special") == 0)
-		{
-			if (nargs < 3)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
-
-			linetype_t * info = new linetype_t;
-
-			memset(info->args, 0, sizeof(info->args));
-
-			int number = atoi(token[1]);
-
-			info->group = token[2][0];
-			info->desc  = token[3];
-
-			int arg_count = MIN(nargs - 3, 5);
-
-			for (int i = 0 ; i < arg_count ; i++)
-			{
-				if (token[4 + i][0] != '-')
-					info->args[i] = token[4 + i];
-			}
-
-			// FIXME : have separate tables for "special"
-
-			if (line_groups.find( info->group) == line_groups.end())
-			{
-				LogPrintf("%s(%d): unknown line group '%c'\n",
-						prettyname, lineno,  info->group);
-			}
-			else
-				line_types[number] = info;
-		}
-
-		else if (y_stricmp(token[0], "sector") == 0)
-		{
-			if (nargs != 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			int number = atoi(token[1]);
-
-			sectortype_t *info = new sectortype_t;
-
-			info->desc = token[2];
-
-			sector_types[number] = info;
-		}
-
-		else if (y_stricmp(token[0], "thinggroup") == 0)
-		{
-			if (nargs != 3)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 3);
-
-			thinggroup_t * tg = new thinggroup_t;
-
-			tg->group = token[1][0];
-			tg->color = ParseColor(token[2]);
-			tg->desc  = token[3];
-
-			thing_groups[tg->group] = tg;
-		}
-
-		else if (y_stricmp(token[0], "thing") == 0)
-		{
-			if (nargs != 6)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 6);
-
-			thingtype_t * info = new thingtype_t;
-
-			int number = atoi(token[1]);
-
-			info->group  = token[2][0];
-			info->flags  = ParseThingdefFlags(token[3]);
-			info->radius = atoi(token[4]);
-			info->sprite = token[5];
-			info->desc   = token[6];
-
-			if (thing_groups.find(info->group) == thing_groups.end())
-			{
-				LogPrintf("%s(%d): unknown thing group '%c'\n",
-						prettyname, lineno, info->group);
-			}
-			else
-			{	
-				info->color = thing_groups[info->group]->color;
-
-				thing_types[number] = info;
-			}
-		}
-
-		else if (y_stricmp(token[0], "texturegroup") == 0)
-		{
-			if (nargs != 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			texturegroup_t * tg = new texturegroup_t;
-
-			tg->group = token[1][0];
-			tg->desc  = token[2];
-
-			texture_groups[tg->group] = tg;
-		}
-
-		else if (y_stricmp(token[0], "texture") == 0)
-		{
-			if (nargs != 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			char group = token[1][0];
-			std::string name = std::string(token[2]);
-
-			if (texture_groups.find(tolower(group)) == texture_groups.end())
-			{
-				LogPrintf("%s(%d): unknown texture group '%c'\n",
-						  prettyname, lineno, group);
-			}
-			else
-				texture_assigns[name] = group;
-		}
-
-		else if (y_stricmp(token[0], "flat") == 0)
-		{
-			if (nargs != 2)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 2);
-
-			char group = token[1][0];
-			std::string name = std::string(token[2]);
-
-			if (texture_groups.find(tolower(group)) == texture_groups.end())
-			{
-				LogPrintf("%s(%d): unknown texture group '%c'\n",
-						prettyname, lineno, group);
-			}
-			else
-				flat_assigns[name] = group;
-		}
-
-		else if (y_stricmp(token[0], "gen_line") == 0)
-		{
-			if (nargs != 4)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 4);
-
-			current_gen_line = num_gen_linetypes;
-			num_gen_linetypes++;
-
-			if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
-				FatalError("%s(%d): too many gen_line definitions\n", prettyname, lineno);
-
-			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
-
-			def->key = token[1][0];
-	
-			// use strtol() to support "0x" notation
-			def->base   = strtol(token[2], NULL, 0);
-			def->length = strtol(token[3], NULL, 0);
-
-			def->name = token[4];
-			def->num_fields = 0;
-		}
-
-		else if (y_stricmp(token[0], "gen_field") == 0)
-		{
-			if (nargs < 5)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 5);
-
-			if (current_gen_line < 0)
-				FatalError("%s(%d): gen_field used outside of a gen_line definition\n", prettyname, lineno);
-			
-			generalized_linetype_t *def = &gen_linetypes[current_gen_line];
-
-			generalized_field_t *field = &def->fields[def->num_fields];
-
-			def->num_fields++;
-			if (def->num_fields > MAX_GEN_NUM_FIELDS)
-				FatalError("%s(%d): too many fields in gen_line definition\n", prettyname, lineno);
-
-			field->bits  = atoi(token[1]);
-			field->shift = atoi(token[2]);
-
-			field->mask  = ((1 << field->bits) - 1) << field->shift;
-
-			field->default_val = atoi(token[3]);
-
-			field->name = token[4];
-
-			// grab the keywords
-			field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
-
-			for (int i = 0 ; i < field->num_keywords ; i++)
-			{
-				field->keywords[i] = token[5 + i]; 
-			}
-		}
-
-		else if (y_stricmp(token[0], "exclude_game") == 0)
-		{
-			if (nargs != 1)
-				FatalError(bad_arg_count, prettyname, lineno, token[0], 1);
-
-			if (Game_name && y_stricmp(token[1], Game_name) == 0)
-			{
-				LogPrintf("WARNING: skipping %s -- not compatible with %s\n",
-						  prettyname, Game_name);
-
-				// do not process any more of the file
-				fclose(fp);
-				return;
-			}
-		}
-
-		else
-		{
-			FatalError("%s(%d): unknown directive: %.32s\n",
-					   prettyname, lineno, token[0]);
+			case PURPOSE_GameCheck:
+				M_ParseGameCheckLine(pst, check_info);
+				break;
+
+			case PURPOSE_PortCheck:
+				M_ParsePortCheckLine(pst, check_info);
+				break;
+
+			default:
+				M_ParseNormalLine(pst);
+				break;
 		}
 	}
 
