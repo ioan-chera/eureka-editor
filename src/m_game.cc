@@ -157,18 +157,6 @@ static void ParseColorDef(char ** argv, int argc)
 }
 
 
-static void ParseSupportedGame(parse_check_info_t *check, char ** argv, int argc)
-{
-	check->supports_game = 0;
-
-	for ( ; argc > 0 ; argv++, argc--)
-	{
-		if (y_stricmp(check->variant_name, *argv) == 0)
-			check->supports_game = 1;
-	}
-}
-
-
 static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 {
 	map_format_bitset_t result = 0;
@@ -769,7 +757,15 @@ static void M_ParsePortCheckLine(parser_state_t *pst, parse_check_info_t *check_
 
 	else if (y_stricmp(argv[0], "supported_games") == 0)
 	{
-		ParseSupportedGame(check_info, argv + 1, nargs);
+		argv++;
+
+		check_info->supports_game = 0;
+
+		for ( ; nargs > 0 ; argv++, nargs--)
+		{
+			if (y_stricmp(check_info->variant_name, *argv) == 0)
+				check_info->supports_game = 1;
+		}
 	}
 
 	else if (y_stricmp(argv[0], "map_formats") == 0)
