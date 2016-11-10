@@ -93,6 +93,15 @@ void M_InitDefinitions()
 }
 
 
+/*
+ *  Free all memory allocated to game definitions
+ */
+void M_FreeDefinitions()
+{
+	// TODO ??
+}
+
+
 static short ParseThingdefFlags(const char *s)
 {
 	short flags = 0;
@@ -287,6 +296,97 @@ void M_LoadDefinitions(const char *folder, const char *name)
 }
 
 
+typedef enum
+{
+	PCOND_NONE		= 0,
+	PCOND_Reading	= 1,
+	PCOND_Skipping	= 2
+
+} process_cond_state_e;
+
+
+#define MAX_TOKENS  30   /* tokens per line */
+
+#define MAX_INCLUDE_LEVEL  10
+
+static int parser_lineno;
+static const char *parser_filename;
+
+
+static int M_TokenizeLine(const char *readbuf, char **token, int max_tok)
+{
+	int			ntoks = 0;
+
+	bool		in_token = false;
+	bool		quoted   = false;
+
+	// create a buffer to contain the tokens [ FIXME: never freed ]
+	char *buf = StringNew((int)strlen(readbuf) + 1);
+
+	const char	*src  = readbuf;
+	char		*dest = buf;
+
+	// break the line into whitespace-separated tokens.
+	// whitespace can be enclosed in double quotes.
+	for ( ; ; src++)
+	{
+		if (*src == 0 || *src == '\n')
+		{
+			if (in_token)
+				*dest = 0;
+			break;
+		}
+
+		if (*src == '"')
+		{
+			quoted = !quoted;
+			continue;
+		}
+
+		// found a comment?   [ we allow # in the middle of a token ]
+		if (*src == '#' && !in_token && !quoted)
+			break;
+
+		// beginning a new token?
+		if (!in_token && (quoted || !isspace(*src)))
+		{
+			if (ntoks >= max_tok)
+				FatalError("%s(%d): more than %d tokens on the line\n",
+							parser_filename, parser_lineno, max_tok);
+
+			in_token = true;
+
+			token[ntoks++] = dest;
+
+			*dest++ = *src;
+			continue;
+		}
+
+		// whitespace will end a token (unless quoted)
+		if (isspace(*src) && in_token && !quoted)
+		{
+			in_token = false;
+			*dest++  = 0;
+			continue;
+		}
+
+		// normal token character?
+		if (in_token)
+			*dest++ = *src;
+	}
+
+	if (quoted)
+		FatalError("%s(%d): unmatched double quote\n", parser_filename, parser_lineno);
+
+	return ntoks;
+}
+
+
+static void M_ParseDef_Line()
+{
+}
+
+
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
@@ -300,16 +400,16 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	if (! prettyname)
 		prettyname = fl_filename_name(filename);
 
+	parser_filename = prettyname;
 
-#define YGD_BUF  512   /* max. line length + 2 */
-	char readbuf[YGD_BUF];    /* buffer the line is read into */
 
-#define MAX_TOKENS  30   /* tokens per line */
-	int lineno;     /* current line of file */
+	char readbuf[512];    /* buffer the line is read into */
 
-#define MAX_INCLUDE_LEVEL  10
+	int lineno;
 
 	int current_gen_line = -1;
+
+	process_cond_state_e cond_state = PCOND_NONE;
 
 
 
@@ -319,76 +419,26 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 	/* Read the game definition file, line by line. */
 
-	for (lineno = 2 ; fgets(readbuf, sizeof readbuf, fp) ; lineno++)
+	const char *const bad_arg_count =
+		"%s(%d): directive \"%s\" takes %d parameters\n";
+
+	for (lineno = 2 ; fgets(readbuf, sizeof(readbuf), fp) ; lineno++)
 	{
-		int         ntoks;
-		char       *token[MAX_TOKENS];
-		int         quoted;
-		int         in_token;
-		const char *iptr;
-		char       *optr;
-		char       *buf;
-
-		const char *const bad_arg_count =
-			"%s(%d): directive \"%s\" takes %d parameters\n";
-
-		// create a buffer to contain the tokens [Note: never freed]
-		buf = StringNew((int)strlen(readbuf) + 1);
-
-		/* break the line into whitespace-separated tokens.
-		   whitespace can be enclosed in double quotes. */
-		for (in_token = 0, quoted = 0, iptr = readbuf, optr = buf, ntoks = 0 ; ; iptr++)
-		{
-			if (*iptr == '\n' || *iptr == '\0')
-			{
-				if (in_token)
-					*optr = '\0';
-				break;
-			}
-
-			else if (*iptr == '"')
-				quoted ^= 1;
-
-			// "#" at the beginning of a token
-			else if (! in_token && ! quoted && *iptr == '#')
-				break;
-
-			// First character of token
-			else if (! in_token && (quoted || ! isspace(*iptr)))
-			{
-				if (ntoks >= (int) (sizeof token / sizeof *token))
-					FatalError("%s(%d): more than %d tokens\n",
-							prettyname, lineno, sizeof token / sizeof *token);
-				token[ntoks] = optr;
-				ntoks++;
-				in_token = 1;
-				*optr++ = *iptr;
-			}
-
-			// First space between two tokens
-			else if (in_token && ! quoted && isspace(*iptr))
-			{
-				*optr++ = '\0';
-				in_token = 0;
-			}
-
-			// Character in the middle of a token
-			else if (in_token)
-				*optr++ = *iptr;
-		}
-
-		if (quoted)
-			FatalError("%s(%d): unmatched double quote\n", prettyname, lineno);
+		parser_lineno = lineno;
 
 		/* process the line */
 
-		int nargs = ntoks - 1;
+		char * token[MAX_TOKENS];
+
+		int ntoks = M_TokenizeLine(readbuf, token, MAX_TOKENS);
 
 		// skip empty lines
 		if (ntoks == 0)
 		{
 			continue;
 		}
+
+		int nargs = ntoks - 1;
 
 		// handle includes
 		if (y_stricmp(token[0], "include") == 0)
@@ -782,12 +832,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 }
 
 
-/*
- *  Free all memory allocated to game definitions
- */
-void M_FreeDefinitions()
-{
-}
+//------------------------------------------------------------------------
 
 
 static void scanner_add_file(const char *name, int flags, void *priv_dat)
