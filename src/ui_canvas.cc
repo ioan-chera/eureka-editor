@@ -1437,6 +1437,16 @@ void UI_Canvas::DrawCurrentLine()
 	const Vertex * v = Vertices[edit.drawing_from];
 
 	DrawKnobbyLine(v->x, v->y, new_x, new_y);
+
+	int dx = v->x - new_x;
+	int dy = v->y - new_y;
+
+	if (dx || dy)
+	{
+		float length = sqrt(dx * dx + dy * dy);
+
+		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
+	}
 }
 
 
