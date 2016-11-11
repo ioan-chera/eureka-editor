@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -106,14 +106,14 @@ static void GB_Ticker(void)
 {
 	if (dialog->WantCancel())
 	{
-		nb_comms.cancelled = TRUE;
+		nb_comms.cancelled = true;
 	}
 }
 
-static glbsp::boolean_g GB_DisplayOpen(glbsp::displaytype_e type)
+static bool GB_DisplayOpen(glbsp::displaytype_e type)
 {
 	display_mode = type;
-	return TRUE;
+	return true;
 }
 
 static void GB_DisplaySetTitle(const char *str)
@@ -202,12 +202,12 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.input_file  = glbsp::GlbspStrDup(in_name);
 	nb_info.output_file = glbsp::GlbspStrDup(out_name);
 
-	nb_info.fast          = glbsp_fast ? TRUE : FALSE;
-	nb_info.quiet         = glbsp_verbose ? FALSE : TRUE;
-	nb_info.mini_warnings = glbsp_warn ? TRUE : FALSE;
+	nb_info.fast          = glbsp_fast ? true : false;
+	nb_info.quiet         = glbsp_verbose ? false : true;
+	nb_info.mini_warnings = glbsp_warn ? true : false;
 
-	nb_info.pack_sides = FALSE;
-	nb_info.force_normal = TRUE;
+	nb_info.pack_sides = false;
+	nb_info.force_normal = true;
 
 	glbsp::glbsp_ret_e  ret;
 

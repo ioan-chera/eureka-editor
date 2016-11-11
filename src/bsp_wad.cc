@@ -76,10 +76,10 @@ static int CheckMagic(const char type[4])
   if ((type[0] == 'I' || type[0] == 'P') && 
        type[1] == 'W' && type[2] == 'A' && type[3] == 'D')
   {
-    return TRUE;
+    return true;
   }
   
-  return FALSE;
+  return false;
 }
 
 
@@ -93,10 +93,10 @@ static int CheckLevelName(const char *name)
   for (n=0; n < wad.num_level_names; n++)
   {
     if (strcmp(wad.level_names[n], name) == 0)
-      return TRUE;
+      return true;
   }
 
-  return FALSE;
+  return false;
 }
 
 
@@ -131,12 +131,12 @@ static int CheckGLLumpName(const char *name)
   int i;
 
   if (name[0] != 'G' || name[1] != 'L' || name[2] != '_')
-    return FALSE;
+    return false;
 
   for (i=0; i < NUM_GL_LUMPS; i++)
   {
     if (strcmp(name, gl_lumps[i]) == 0)
-      return TRUE;
+      return true;
   }
   
   return CheckLevelName(name+3);
@@ -241,7 +241,7 @@ static void FreeLump(lump_t *lump)
 //
 // ReadHeader
 //
-// Returns TRUE if successful, or FALSE if there was a problem (in
+// Returns true if successful, or false if there was a problem (in
 // which case the error message as been setup).
 //
 static int ReadHeader(const char *filename)
@@ -256,7 +256,7 @@ static int ReadHeader(const char *filename)
     SetErrorMsg("Trouble reading wad header for %s [%s]", 
       filename, strerror(errno));
 
-    return FALSE;
+    return false;
   }
 
   if (! CheckMagic(header.type))
@@ -264,7 +264,7 @@ static int ReadHeader(const char *filename)
     SetErrorMsg("%s does not appear to be a wad file (bad magic)", 
         filename);
 
-    return FALSE;
+    return false;
   }
 
   wad.kind = (header.type[0] == 'I') ? IWAD : PWAD;
@@ -279,7 +279,7 @@ static int ReadHeader(const char *filename)
   wad.level_names = NULL;
   wad.num_level_names = 0;
 
-  return TRUE;
+  return true;
 }
 
 
@@ -669,7 +669,7 @@ lump_t *CreateGLMarker(void)
   lump_t *cur;
 
   char name_buf[32];
-  boolean_g long_name = FALSE;
+  bool long_name = false;
 
   if (strlen(level->name) <= 5)
   {
@@ -679,7 +679,7 @@ lump_t *CreateGLMarker(void)
   {
     // support for level names longer than 5 letters
     strcpy(name_buf, "GL_LEVEL");
-    long_name = TRUE;
+    long_name = true;
   }
 
   cur = NewLump(UtilStrDup(name_buf));
@@ -979,10 +979,10 @@ int UtilCheckExtension(const char *filename, const char *ext)
   for (; B >= 0; B--, A--)
   {
     if (A < 0)
-      return FALSE;
+      return false;
     
     if (toupper(filename[A]) != toupper(ext[B]))
-      return FALSE;
+      return false;
   }
 
   return (A >= 1) && (filename[A] == '.');
@@ -1230,17 +1230,17 @@ int CheckLevelLumpZero(lump_t *lump)
   int i;
   
   if (lump->length == 0)
-    return TRUE;
+    return true;
   
   // ASSERT(lump->data)
 
   for (i=0; i < lump->length; i++)
   {
     if (((u8_t *)lump->data)[i])
-      return FALSE;
+      return false;
   }
 
-  return TRUE;
+  return true;
 }
 
 //
@@ -1547,7 +1547,7 @@ void MarkZDSwitch(void)
 //
 // ReportOneOverflow(
 //
-void ReportOneOverflow(const lump_t *lump, int limit, boolean_g hard)
+void ReportOneOverflow(const lump_t *lump, int limit, bool hard)
 {
   const char *msg = hard ? "overflowed the absolute limit" :
     "overflowed the original limit";
@@ -1581,7 +1581,7 @@ void ReportOneOverflow(const lump_t *lump, int limit, boolean_g hard)
 
 // ReportOverflows
 //
-void ReportOverflows(boolean_g hard)
+void ReportOverflows(bool hard)
 {
   lump_t *cur;
 
@@ -1629,7 +1629,7 @@ void ReportV5Switches(void)
 {
   lump_t *cur;
 
-  int saw_zdbsp = FALSE;
+  int saw_zdbsp = false;
 
   PrintMsg(
     "V5 FORMAT UPGRADES.  The following levels require a Doom port\n"
@@ -1649,7 +1649,7 @@ void ReportV5Switches(void)
     if ((lev->v5_switch & LIMIT_ZDBSP) && ! saw_zdbsp)
     {
       PrintMsg("ZDBSP FORMAT has also been used for regular nodes.\n\n");
-      saw_zdbsp = TRUE;
+      saw_zdbsp = true;
     }
 
     if (lev->v5_switch & LIMIT_VERTEXES)
@@ -1676,7 +1676,7 @@ void ReportFailedLevels(void)
   int fail_hard = 0;
   int fail_v5   = 0;
 
-  boolean_g need_spacer = FALSE;
+  bool need_spacer = false;
  
   for (cur=wad.dir_head; cur; cur=cur->next)
   {
@@ -1702,8 +1702,8 @@ void ReportFailedLevels(void)
 
   if (fail_soft > 0)
   {
-    ReportOverflows(FALSE);
-    need_spacer = TRUE;
+    ReportOverflows(false);
+    need_spacer = true;
   }
 
   if (fail_v5 > 0)
@@ -1712,7 +1712,7 @@ void ReportFailedLevels(void)
       PrintMsg("\n");
 
     ReportV5Switches();
-    need_spacer = TRUE;
+    need_spacer = true;
   }
 
   if (fail_hard > 0)
@@ -1720,7 +1720,7 @@ void ReportFailedLevels(void)
     if (need_spacer)
       PrintMsg("\n");
 
-    ReportOverflows(TRUE);
+    ReportOverflows(true);
   }
 
   PrintMsg("\nEnd of problem report.\n");

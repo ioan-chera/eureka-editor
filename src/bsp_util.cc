@@ -517,10 +517,10 @@ int UtilFileExists(const char *filename)
   if (fp)
   {
     fclose(fp);
-    return TRUE;
+    return true;
   }
 
-  return FALSE;
+  return false;
 }
 
 //
@@ -625,7 +625,7 @@ extern linedef_t ** lev_linedefs;
 extern sidedef_t ** lev_sidedefs;
 extern sector_t  ** lev_sectors;
 
-extern boolean_g lev_doing_normal;
+extern bool lev_doing_normal;
 
 
 /* ----- polyobj handling ----------------------------- */
@@ -648,7 +648,7 @@ static void MarkPolyobjSector(sector_t *sector)
   /* mark all lines of this sector as precious, to prevent the sector
    * from being split.
    */ 
-  sector->has_polyobj = TRUE;
+  sector->has_polyobj = true;
 
   for (i = 0; i < num_linedefs; i++)
   {
@@ -657,7 +657,7 @@ static void MarkPolyobjSector(sector_t *sector)
     if ((L->right && L->right->sector == sector) ||
         (L->left && L->left->sector == sector))
     {
-      L->is_precious = TRUE;
+      L->is_precious = true;
     }
   }
 }
@@ -822,7 +822,7 @@ void DetectPolyobjSectors(void)
   }
 
   // -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
-  hexen_style = TRUE;
+  hexen_style = true;
   
   for (i = 0; i < num_things; i++)
   {
@@ -831,7 +831,7 @@ void DetectPolyobjSectors(void)
     if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
     {
       // -JL- A ZDoom style polyobj thing found
-      hexen_style = FALSE;
+      hexen_style = false;
       break;
     }
   }
@@ -1345,7 +1345,7 @@ void TestForWindowEffect(linedef_t *L)
     linedef_t *N = lev_linedefs[i];
 
     double dist;
-    boolean_g is_front;
+    bool is_front;
     sidedef_t *hit_side;
 
     double dx2, dy2;
@@ -1367,7 +1367,7 @@ void TestForWindowEffect(linedef_t *L)
 
       dist = (N->start->x + (my - N->start->y) * dx2 / dy2) - mx;
 
-      is_front = ((dy > 0) == (dist > 0)) ? TRUE : FALSE;
+      is_front = ((dy > 0) == (dist > 0)) ? true : false;
 
       dist = fabs(dist);
       if (dist < DIST_EPSILON)  // too close (overlapping lines ?)
@@ -1389,7 +1389,7 @@ void TestForWindowEffect(linedef_t *L)
 
       dist = (N->start->y + (mx - N->start->x) * dy2 / dx2) - my;
 
-      is_front = ((dx > 0) != (dist > 0)) ? TRUE : FALSE;
+      is_front = ((dx > 0) != (dist > 0)) ? true : false;
 
       dist = fabs(dist);
 
@@ -1702,7 +1702,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
   }
  
   InternalError("Vertex %d has no tips !", vert->index);
-  return FALSE;
+  return NULL;
 }
 
 

@@ -53,16 +53,6 @@ namespace glbsp
 
 typedef double angle_g;  // degrees, 0 is E, 90 is N
 
-// boolean type
-typedef int boolean_g;
-
-#ifndef FALSE
-#define FALSE  0
-#endif
-#ifndef TRUE
-#define TRUE   1
-#endif
-
 
 /* ----- complex types --------------------------- */
 
@@ -86,33 +76,33 @@ typedef struct nodebuildinfo_s
 
   int factor;
 
-  boolean_g no_reject;
-  boolean_g no_progress;
-  boolean_g quiet;
-  boolean_g mini_warnings;
-  boolean_g force_hexen;
-  boolean_g pack_sides;
-  boolean_g fast;
+  bool no_reject;
+  bool no_progress;
+  bool quiet;
+  bool mini_warnings;
+  bool force_hexen;
+  bool pack_sides;
+  bool fast;
 
   int spec_version;  // 1, 2, 3 or 5
 
-  boolean_g load_all;
-  boolean_g no_normal;
-  boolean_g force_normal;
-  boolean_g gwa_mode;  
-  boolean_g prune_sect;
-  boolean_g no_prune;
-  boolean_g merge_vert;
-  boolean_g skip_self_ref;
-  boolean_g window_fx;
+  bool load_all;
+  bool no_normal;
+  bool force_normal;
+  bool gwa_mode;  
+  bool prune_sect;
+  bool no_prune;
+  bool merge_vert;
+  bool skip_self_ref;
+  bool window_fx;
 
   int block_limit;
 
   // private stuff -- values computed in GlbspParseArgs or
   // GlbspCheckInfo that need to be passed to GlbspBuildNodes.
 
-  boolean_g missing_output;
-  boolean_g same_filenames;
+  bool missing_output;
+  bool same_filenames;
 }
 nodebuildinfo_t;
 
@@ -126,7 +116,7 @@ typedef struct nodebuildcomms_s
   const char *message;
 
   // the GUI can set this to tell the node builder to stop
-  boolean_g cancelled;
+  bool cancelled;
 
   // from here on, various bits of internal state
   int total_small_warn, total_big_warn;
@@ -175,10 +165,10 @@ typedef struct nodebuildfuncs_s
  
   // Display_open is called at the beginning, and 'type' holds the
   // type of progress (and determines how many bars to display).
-  // Returns TRUE if all went well, or FALSE if it failed (in which
+  // Returns true if all went well, or false if it failed (in which
   // case the other routines should do nothing when called).
   // 
-  boolean_g (* display_open)(displaytype_e type);
+  bool (* display_open)(displaytype_e type);
 
   // For GUI versions this can be used to set the title of the
   // progress window.  OK to ignore it (e.g. command line version).
@@ -1064,9 +1054,9 @@ typedef struct subsec_s
   double mid_x;
   double mid_y;
 
-  // this is normally FALSE, only set for the "no nodes hack"
+  // this is normally false, only set for the "no nodes hack"
   // [ see comments in the BuildNodes() function. ]
-  int is_dummy;
+  bool is_dummy;
 }
 subsec_t;
 
@@ -1315,8 +1305,8 @@ typedef struct intersection_s
   // in the opposite direction.
   double along_dist;
 
-  // TRUE if this intersection was on a self-referencing linedef
-  boolean_g self_ref;
+  // true if this intersection was on a self-referencing linedef
+  bool self_ref;
 
   // sector on each side of the vertex (along the partition),
   // or NULL when that direction isn't OPEN.

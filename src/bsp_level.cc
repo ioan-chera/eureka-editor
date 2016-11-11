@@ -69,7 +69,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     if (y1 > ymax)
     {
       if (y2 > ymax)
-        return FALSE;
+        return false;
         
       x1 = x1 + (int) ((x2-x1) * (double)(ymax-y1) / (double)(y2-y1));
       y1 = ymax;
@@ -81,7 +81,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     if (y1 < ymin)
     {
       if (y2 < ymin)
-        return FALSE;
+        return false;
       
       x1 = x1 + (int) ((x2-x1) * (double)(ymin-y1) / (double)(y2-y1));
       y1 = ymin;
@@ -93,7 +93,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     if (x1 > xmax)
     {
       if (x2 > xmax)
-        return FALSE;
+        return false;
         
       y1 = y1 + (int) ((y2-y1) * (double)(xmax-x1) / (double)(x2-x1));
       x1 = xmax;
@@ -105,7 +105,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     if (x1 < xmin)
     {
       if (x2 < xmin)
-        return FALSE;
+        return false;
         
       y1 = y1 + (int) ((y2-y1) * (double)(xmin-x1) / (double)(x2-x1));
       x1 = xmin;
@@ -125,7 +125,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
   }
 
   /* linedef touches block */
-  return TRUE;
+  return true;
 }
 
 
@@ -372,7 +372,7 @@ static void CompressBlockmap(void)
   if (cur_offset > 65535)
   {
     MarkSoftFailure(LIMIT_BLOCKMAP);
-    block_overflowed = TRUE;
+    block_overflowed = true;
     return;
   }
 
@@ -569,7 +569,7 @@ void InitBlockmap(void)
 //
 void PutBlockmap(void)
 {
-  block_overflowed = FALSE;
+  block_overflowed = false;
 
   // truncate blockmap if too large.  We're limiting the number of
   // blocks to around 16000 (user changeable), this leaves about 48K
@@ -578,7 +578,7 @@ void PutBlockmap(void)
   if (block_count > cur_info->block_limit)
   {
     MarkSoftFailure(LIMIT_BLOCKMAP);
-    block_overflowed = TRUE;
+    block_overflowed = true;
   }
 
   // initial phase: create internal blockmap containing the index of
@@ -850,11 +850,11 @@ namespace glbsp
 
 // per-level variables
 
-boolean_g lev_doing_normal;
-boolean_g lev_doing_hexen;
+bool lev_doing_normal;
+bool lev_doing_hexen;
 
-static boolean_g lev_force_v3;
-static boolean_g lev_force_v5;
+static bool lev_force_v3;
+static bool lev_force_v5;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -1009,19 +1009,19 @@ int CheckForNormalNodes(void)
   
   /* Note: an empty NODES lump can be valid */
   if (FindLevelLump("NODES") == NULL)
-    return FALSE;
+    return false;
  
   lump = FindLevelLump("SEGS");
   
   if (! lump || lump->length == 0 || CheckLevelLumpZero(lump))
-    return FALSE;
+    return false;
 
   lump = FindLevelLump("SSECTORS");
   
   if (! lump || lump->length == 0 || CheckLevelLumpZero(lump))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 //
@@ -1100,7 +1100,7 @@ void GetSectors(void)
     sector->tag = SINT16(raw->tag);
 
     sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
-        TRUE : FALSE;
+        true : false;
 
     /* sector indices never change */
     sector->index = i;
@@ -1297,9 +1297,9 @@ void GetLinedefs(void)
     line->type = UINT16(raw->type);
     line->tag  = SINT16(raw->tag);
 
-    line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? TRUE : FALSE;
+    line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
     line->is_precious = (line->tag >= 900 && line->tag < 1000) ? 
-        TRUE : FALSE;
+        true : false;
 
     line->right = SafeLookupSidedef(UINT16(raw->sidedef1));
     line->left  = SafeLookupSidedef(UINT16(raw->sidedef2));
@@ -1374,7 +1374,7 @@ void GetLinedefsHexen(void)
       line->specials[j] = UINT8(raw->specials[j]);
 
     // -JL- Added missing twosided flag handling that caused a broken reject
-    line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? TRUE : FALSE;
+    line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
 
     line->right = SafeLookupSidedef(UINT16(raw->sidedef1));
     line->left  = SafeLookupSidedef(UINT16(raw->sidedef2));
@@ -2260,7 +2260,7 @@ void LoadLevel(void)
 
   const char *level_name = GetLevelName();
 
-  boolean_g normal_exists = CheckForNormalNodes();
+  bool normal_exists = CheckForNormalNodes();
 
   lev_doing_normal = !cur_info->gwa_mode && (cur_info->force_normal || 
     (!cur_info->no_normal && !normal_exists));
@@ -2414,8 +2414,8 @@ void PutGLChecksum(void)
 //
 void SaveLevel(node_t *root_node)
 {
-  lev_force_v3 = (cur_info->spec_version == 3) ? TRUE : FALSE;
-  lev_force_v5 = (cur_info->spec_version == 5) ? TRUE : FALSE;
+  lev_force_v3 = (cur_info->spec_version == 3) ? true : false;
+  lev_force_v5 = (cur_info->spec_version == 5) ? true : false;
   
   // Note: RoundOffBspTree will convert the GL vertices in segs to
   // their normal counterparts (pointer change: use normal_dup).
@@ -2429,7 +2429,7 @@ void SaveLevel(node_t *root_node)
     {
       if (cur_info->spec_version < 3)
       {
-        lev_force_v5 = TRUE;
+        lev_force_v5 = true;
         MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
       }
     }
@@ -2438,7 +2438,7 @@ void SaveLevel(node_t *root_node)
     {
       if (cur_info->spec_version < 3)
       {
-        lev_force_v5 = TRUE;
+        lev_force_v5 = true;
         MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
       }
     }
@@ -2447,13 +2447,13 @@ void SaveLevel(node_t *root_node)
     {
       if (cur_info->spec_version < 5)
       {
-        lev_force_v5 = TRUE;
+        lev_force_v5 = true;
         MarkV5Switch(LIMIT_GL_NODES);
       }
     }
 
     if (cur_info->spec_version == 1)
-      PutVertices("GL_VERT", TRUE);
+      PutVertices("GL_VERT", true);
     else
       PutV2Vertices(lev_force_v5);
 
@@ -2465,9 +2465,9 @@ void SaveLevel(node_t *root_node)
     if (lev_force_v3 || lev_force_v5)
       PutV3Subsecs(lev_force_v5);
     else
-      PutSubsecs("GL_SSECT", TRUE);
+      PutSubsecs("GL_SSECT", true);
 
-    PutNodes("GL_NODES", TRUE, lev_force_v5, root_node);
+    PutNodes("GL_NODES", true, lev_force_v5, root_node);
 
     // -JL- Add empty PVS lump
     CreateGLLump("GL_PVS");
@@ -2480,7 +2480,7 @@ void SaveLevel(node_t *root_node)
  
     NormaliseBspTree(root_node);
 
-    PutVertices("VERTEXES", FALSE);
+    PutVertices("VERTEXES", false);
     PutSectors();
     PutSidedefs();
 
@@ -2500,8 +2500,8 @@ void SaveLevel(node_t *root_node)
     else
     {
       PutSegs();
-      PutSubsecs("SSECTORS", FALSE);
-      PutNodes("NODES", FALSE, FALSE, root_node);
+      PutSubsecs("SSECTORS", false);
+      PutNodes("NODES", false, false, root_node);
     }
 
     // -JL- Don't touch blockmap and reject if not doing normal nodes
@@ -2568,36 +2568,36 @@ const nodebuildinfo_t default_buildinfo =
 
   DEFAULT_FACTOR,  // factor
 
-  FALSE,   // no_reject
-  FALSE,   // no_progress
-  FALSE,   // quiet
-  FALSE,   // mini_warnings
-  FALSE,   // force_hexen
-  FALSE,   // pack_sides
-  FALSE,   // fast
+  false,   // no_reject
+  false,   // no_progress
+  false,   // quiet
+  false,   // mini_warnings
+  false,   // force_hexen
+  false,   // pack_sides
+  false,   // fast
 
   2,   // spec_version
 
-  FALSE,   // load_all
-  FALSE,   // no_normal
-  FALSE,   // force_normal
-  FALSE,   // gwa_mode
-  FALSE,   // prune_sect
-  FALSE,   // no_prune
-  FALSE,   // merge_vert
-  FALSE,   // skip_self_ref
-  FALSE,   // window_fx
+  false,   // load_all
+  false,   // no_normal
+  false,   // force_normal
+  false,   // gwa_mode
+  false,   // prune_sect
+  false,   // no_prune
+  false,   // merge_vert
+  false,   // skip_self_ref
+  false,   // window_fx
 
   DEFAULT_BLOCK_LIMIT,   // block_limit
 
-  FALSE,   // missing_output
-  FALSE    // same_filenames
+  false,   // missing_output
+  false    // same_filenames
 };
 
 const nodebuildcomms_t default_buildcomms =
 {
   NULL,    // message
-  FALSE,   // cancelled
+  false,   // cancelled
 
   0, 0,    // total warnings
   0, 0     // build and file positions
@@ -2642,7 +2642,7 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
 #define HANDLE_BOOLEAN(name, field)  \
     if (UtilStrCaseCmp(opt_str, name) == 0)  \
     {  \
-      info->field = TRUE;  \
+      info->field = true;  \
       argv++; argc--;  \
       continue;  \
     }
@@ -2657,7 +2657,7 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 {
   const char *opt_str;
   int num_files = 0;
-  int got_output = FALSE;
+  int got_output = false;
 
   cur_comms = comms;
   SetErrorMsg("(Unknown Problem)");
@@ -2732,7 +2732,7 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
       GlbspFree(info->output_file);
       info->output_file = GlbspStrDup(argv[1]);
 
-      got_output = TRUE;
+      got_output = true;
 
       argv += 2; argc -= 2;
       continue;
@@ -2832,8 +2832,8 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
   cur_comms = comms;
   SetErrorMsg("(Unknown Problem)");
 
-  info->same_filenames = FALSE;
-  info->missing_output = FALSE;
+  info->same_filenames = false;
+  info->missing_output = false;
 
   if (!info->input_file || info->input_file[0] == 0)
   {
@@ -2853,38 +2853,38 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
     info->output_file = GlbspStrDup(UtilReplaceExtension(
           info->input_file, "gwa"));
 
-    info->gwa_mode = TRUE;
-    info->missing_output = TRUE;
+    info->gwa_mode = true;
+    info->missing_output = true;
   }
   else  /* has output filename */
   {
     if (UtilCheckExtension(info->output_file, "gwa"))
-      info->gwa_mode = TRUE;
+      info->gwa_mode = true;
   }
 
   if (UtilStrCaseCmp(info->input_file, info->output_file) == 0)
   {
-    info->load_all = TRUE;
-    info->same_filenames = TRUE;
+    info->load_all = true;
+    info->same_filenames = true;
   }
 
   if (info->no_prune && info->pack_sides)
   {
-    info->pack_sides = FALSE;
+    info->pack_sides = false;
     SetErrorMsg("-noprune and -packsides cannot be used together");
     return GLBSP_E_BadInfoFixed;
   }
 
   if (info->gwa_mode && info->force_normal)
   {
-    info->force_normal = FALSE;
+    info->force_normal = false;
     SetErrorMsg("-forcenormal used, but GWA files don't have normal nodes");
     return GLBSP_E_BadInfoFixed;
   }
  
   if (info->no_normal && info->force_normal)
   {
-    info->force_normal = FALSE;
+    info->force_normal = false;
     SetErrorMsg("-forcenormal and -nonormal cannot be used together");
     return GLBSP_E_BadInfoFixed;
   }
@@ -3012,7 +3012,7 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
   cur_comms->total_small_warn = 0;
 
   // clear cancelled flag
-  comms->cancelled = FALSE;
+  comms->cancelled = false;
 
   // sanity check
   if (!cur_info->input_file  || cur_info->input_file[0] == 0 ||

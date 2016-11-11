@@ -265,7 +265,7 @@ static inline void ComputeIntersection(seg_t *cur, seg_t *part,
 // AddIntersection
 //
 static void AddIntersection(intersection_t ** cut_list,
-    vertex_t *vert, seg_t *part, boolean_g self_ref)
+    vertex_t *vert, seg_t *part, bool self_ref)
 {
   intersection_t *cut;
   intersection_t *after;
@@ -319,7 +319,7 @@ static void AddIntersection(intersection_t ** cut_list,
 //
 // EvalPartitionWorker
 //
-// Returns TRUE if a "bad seg" was found early.
+// Returns true if a "bad seg" was found early.
 //
 static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part, 
     int best_cost, eval_info_t *info)
@@ -346,7 +346,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
     info->real_left += seg_list->real_num;
     info->mini_left += seg_list->mini_num;
 
-    return FALSE;
+    return false;
   }
   else if (num > 0)
   {
@@ -355,7 +355,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
     info->real_right += seg_list->real_num;
     info->mini_right += seg_list->mini_num;
     
-    return FALSE;
+    return false;
   }
 
 # define ADD_LEFT()  \
@@ -378,7 +378,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
     // bad segs early on. Killough
 
     if (info->cost > best_cost)
-      return TRUE;
+      return true;
 
     /* get state of lines' relation to each other */
     if (check->source_line == part->source_line)
@@ -517,11 +517,11 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
       continue;
 
     if (EvalPartitionWorker(seg_list->subs[num], part, best_cost, info))
-      return TRUE;
+      return true;
   }
 
   /* no "bad seg" was found */
-  return FALSE;
+  return false;
 }
 
 //
@@ -679,7 +679,7 @@ static seg_t *FindFastSeg(superblock_t *seg_list, const bbox_t *bbox)
 }
 
 
-/* returns FALSE if cancelled */
+/* returns false if cancelled */
 static int PickNodeWorker(superblock_t *part_list, 
     superblock_t *seg_list, seg_t ** best, int *best_cost,
     int *progress, int prog_step)
@@ -693,7 +693,7 @@ static int PickNodeWorker(superblock_t *part_list,
   for (part=part_list->segs; part; part = part->next)
   {
     if (cur_comms->cancelled)
-      return FALSE;
+      return false;
 
 #   if DEBUG_PICKNODE
     PrintDebug("PickNode:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
@@ -740,7 +740,7 @@ static int PickNodeWorker(superblock_t *part_list,
         progress, prog_step);
   }
 
-  return TRUE;
+  return true;
 }
 
 //
@@ -813,7 +813,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
     }
   }
 
-  if (FALSE == PickNodeWorker(seg_list, seg_list, &best, &best_cost, 
+  if (false == PickNodeWorker(seg_list, seg_list, &best, &best_cost, 
       &progress, prog_step))
   {
     /* hack here : BuildNodes will detect the cancellation */
@@ -863,7 +863,7 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
   double a = UtilPerpDist(part, cur->psx, cur->psy);
   double b = UtilPerpDist(part, cur->pex, cur->pey);
 
-  boolean_g self_ref = cur->linedef ? cur->linedef->self_ref : FALSE;
+  bool self_ref = cur->linedef ? cur->linedef->self_ref : false;
 
   if (cur->source_line == part->source_line)
     a = b = 0;
@@ -1097,7 +1097,7 @@ void AddMinisegs(seg_t *part,
       if (cur->after && next->after)
         cur->after = next->after;
 
-      cur->self_ref = FALSE;
+      cur->self_ref = false;
     }
 
     if (!cur->before && next->before)
@@ -2135,7 +2135,7 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
   node->l.subsec->seg_count = 1;
 
   node->l.subsec->index = num_subsecs - 1;
-  node->l.subsec->is_dummy = TRUE;
+  node->l.subsec->is_dummy = true;
 
   return node;
 }
