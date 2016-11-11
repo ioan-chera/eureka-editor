@@ -38,24 +38,6 @@ static int cpu_big_endian = 0;
 
 static char message_buf[SYS_MSG_BUFLEN];
 
-#if DEBUG_ENABLED
-static FILE *debug_fp = NULL;
-#endif
-
-
-//
-// FatalError
-//
-void FatalError(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-	(* cur_funcs->fatal_error)("\nError: *** %s ***\n\n", message_buf);
-}
 
 //
 // PrintMsg
