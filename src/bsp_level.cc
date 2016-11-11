@@ -2512,7 +2512,7 @@ void SaveLevel(node_t *root_node)
 	}
 
 	// keyword support (v5.0 of the specs)
-	AddGLTextLine("BUILDER", "glBSP " GLBSP_VER);
+	AddGLTextLine("BUILDER", "Eureka " EUREKA_VERSION);
 	PutGLOptions();
 	{
 		char *time_str = UtilTimeString();
