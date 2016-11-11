@@ -2544,62 +2544,6 @@ void RoundOffBspTree(node_t *root)
 }
 
 
-//---------------------------------------------------------------------------
-//
-//    This message has been taken, complete, from OBJECTS.C in DEU5beta
-//    source.  It outlines the method used here to pick the nodelines.
-//
-// IF YOU ARE WRITING A DOOM EDITOR, PLEASE READ THIS:
-//
-// I spent a lot of time writing the Nodes builder.  There are some bugs in
-// it, but most of the code is OK.  If you steal any ideas from this program,
-// put a prominent message in your own editor to make it CLEAR that some
-// original ideas were taken from DEU.  Thanks.
-//
-// While everyone was talking about LineDefs, I had the idea of taking only
-// the Segs into account, and creating the Segs directly from the SideDefs.
-// Also, dividing the list of Segs in two after each call to CreateNodes makes
-// the algorithm faster.  I use several other tricks, such as looking at the
-// two ends of a Seg to see on which side of the nodeline it lies or if it
-// should be split in two.  I took me a lot of time and efforts to do this.
-//
-// I give this algorithm to whoever wants to use it, but with this condition:
-// if your program uses some of the ideas from DEU or the whole algorithm, you
-// MUST tell it to the user.  And if you post a message with all or parts of
-// this algorithm in it, please post this notice also.  I don't want to speak
-// legalese; I hope that you understand me...  I kindly give the sources of my
-// program to you: please be kind with me...
-//
-// If you need more information about this, here is my E-mail address:
-// Raphael.Quinet@eed.ericsson.se (Raphael Quinet).
-//
-// Short description of the algorithm:
-//   1 - Create one Seg for each SideDef: pick each LineDef in turn.  If it
-//       has a "first" SideDef, then create a normal Seg.  If it has a
-//       "second" SideDef, then create a flipped Seg.
-//   2 - Call CreateNodes with the current list of Segs.  The list of Segs is
-//       the only argument to CreateNodes.
-//   3 - Save the Nodes, Segs and SSectors to disk.  Start with the leaves of
-//       the Nodes tree and continue up to the root (last Node).
-//
-// CreateNodes does the following:
-//   1 - Pick a nodeline amongst the Segs (minimize the number of splits and
-//       keep the tree as balanced as possible).
-//   2 - Move all Segs on the right of the nodeline in a list (segs1) and do
-//       the same for all Segs on the left of the nodeline (in segs2).
-//   3 - If the first list (segs1) contains references to more than one
-//       Sector or if the angle between two adjacent Segs is greater than
-//       180 degrees, then call CreateNodes with this (smaller) list.
-//       Else, create a SubSector with all these Segs.
-//   4 - Do the same for the second list (segs2).
-//   5 - Return the new node (its two children are already OK).
-//
-// Each time CreateSSector is called, the Segs are put in a global list.
-// When there is no more Seg in CreateNodes' list, then they are all in the
-// global list and ready to be saved to disk.
-//
-
-
 }  // namespace glbsp
 
 //--- editor settings ---
