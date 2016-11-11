@@ -1707,3 +1707,6 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 
 
 }  // namespace glbsp
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

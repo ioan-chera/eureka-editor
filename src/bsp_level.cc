@@ -3109,3 +3109,6 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 
 
 }  // namespace glbsp
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

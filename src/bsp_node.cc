@@ -2601,3 +2601,6 @@ void RoundOffBspTree(node_t *root)
 
 
 }  // namespace glbsp
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

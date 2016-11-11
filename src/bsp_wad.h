@@ -251,3 +251,6 @@ void ReportFailedLevels(void);
 }  // namespace glbsp
 
 #endif /* __GLBSP_WAD_H__ */
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab
