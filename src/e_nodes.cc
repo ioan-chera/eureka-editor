@@ -26,8 +26,7 @@
 #include "ui_window.h"
 #include "ui_nodes.h"
 
-
-#include "glbsp.h"
+#include "bsp.h"
 
 
 // config items

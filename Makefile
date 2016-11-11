@@ -24,7 +24,6 @@ OS=UNIX
 INSTALL_DIR=$(PREFIX)/share/eureka
 
 CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
-         -Iglbsp_src  \
          -D_THREAD_SAFE -D_REENTRANT
 
 LDFLAGS=-L/usr/X11R6/lib
@@ -116,30 +115,15 @@ OBJS = \
 	$(OBJ_DIR)/w_wad.o   \
 	$(OBJ_DIR)/x_hover.o  \
 	$(OBJ_DIR)/x_loop.o  \
-	$(OBJ_DIR)/x_mirror.o
+	$(OBJ_DIR)/x_mirror.o \
+	\
+	$(OBJ_DIR)/bsp_level.o \
+	$(OBJ_DIR)/bsp_node.o \
+	$(OBJ_DIR)/bsp_util.o \
+	$(OBJ_DIR)/bsp_wad.o
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-
-#----- glBSP Objects ------------------------------------------------
-
-GLBSP_OBJS= \
-	$(OBJ_DIR)/glbsp/analyze.o  \
-	$(OBJ_DIR)/glbsp/blockmap.o \
-	$(OBJ_DIR)/glbsp/glbsp.o    \
-	$(OBJ_DIR)/glbsp/level.o    \
-	$(OBJ_DIR)/glbsp/node.o     \
-	$(OBJ_DIR)/glbsp/reject.o   \
-	$(OBJ_DIR)/glbsp/seg.o      \
-	$(OBJ_DIR)/glbsp/system.o   \
-	$(OBJ_DIR)/glbsp/util.o     \
-	$(OBJ_DIR)/glbsp/wad.o
-
-GLBSP_CXXFLAGS=$(OPTIMISE) -Wall -DINLINE_G=inline
-
-$(OBJ_DIR)/glbsp/%.o: glbsp_src/%.cc
-	$(CXX) $(GLBSP_CXXFLAGS) -o $@ -c $< 
 
 
 #----- Targets -----------------------------------------------
@@ -148,10 +132,9 @@ all: $(PROGRAM)
 
 clean:
 	rm -f $(PROGRAM) $(OBJ_DIR)/*.* core core.*
-	rm -f $(OBJ_DIR)/glbsp/*.*
 	rm -f ERRS LOG.txt update.log
 
-$(PROGRAM): $(OBJS) $(GLBSP_OBJS)
+$(PROGRAM): $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 stripped: $(PROGRAM)
