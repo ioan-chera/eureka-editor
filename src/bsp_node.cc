@@ -242,7 +242,7 @@ static seg_t *SplitSeg(seg_t *old_seg, float_g x, float_g y)
 //       and the partitioning seg, and takes advantage of some common
 //       situations like horizontal/vertical lines.
 //
-static INLINE_G void ComputeIntersection(seg_t *cur, seg_t *part,
+static inline void ComputeIntersection(seg_t *cur, seg_t *part,
   float_g perp_c, float_g perp_d, float_g *x, float_g *y)
 {
   double ds;

@@ -1296,7 +1296,7 @@ void GetSidedefs(void)
   }
 }
 
-static INLINE_G sidedef_t *SafeLookupSidedef(uint16_g num)
+static inline sidedef_t *SafeLookupSidedef(uint16_g num)
 {
   if (num == 0xFFFF)
     return NULL;
@@ -1456,7 +1456,7 @@ void GetLinedefsHexen(void)
 }
 
 
-static INLINE_G int TransformSegDist(const seg_t *seg)
+static inline int TransformSegDist(const seg_t *seg)
 {
   float_g sx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
   float_g sy = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
@@ -1464,7 +1464,7 @@ static INLINE_G int TransformSegDist(const seg_t *seg)
   return (int) ceil(UtilComputeDist(seg->start->x - sx, seg->start->y - sy));
 }
 
-static INLINE_G int TransformAngle(angle_g angle)
+static inline int TransformAngle(angle_g angle)
 {
   int result;
   
@@ -1702,7 +1702,7 @@ void PutLinedefsHexen(void)
     MarkSoftFailure(LIMIT_LINEDEFS);
 }
 
-static INLINE_G uint16_g VertexIndex16Bit(const vertex_t *v)
+static inline uint16_g VertexIndex16Bit(const vertex_t *v)
 {
   if (v->index & IS_GL_VERTEX)
     return (uint16_g) ((v->index & ~IS_GL_VERTEX) | 0x8000U);
@@ -1710,7 +1710,7 @@ static INLINE_G uint16_g VertexIndex16Bit(const vertex_t *v)
   return (uint16_g) v->index;
 }
 
-static INLINE_G uint32_g VertexIndex32BitV5(const vertex_t *v)
+static inline uint32_g VertexIndex32BitV5(const vertex_t *v)
 {
   if (v->index & IS_GL_VERTEX)
     return (uint32_g) ((v->index & ~IS_GL_VERTEX) | 0x80000000U);

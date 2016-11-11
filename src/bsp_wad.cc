@@ -162,7 +162,7 @@ static int CheckGLLumpName(const char *name)
 //
 // Level name helper
 //
-static INLINE_G void AddLevelName(const char *name)
+static inline void AddLevelName(const char *name)
 {
   if ((wad.num_level_names % LEVNAME_BUNCH) == 0)
   {

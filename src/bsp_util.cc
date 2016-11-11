@@ -1238,7 +1238,7 @@ void PruneSectors(void)
     FatalError("Couldn't find any Sectors");
 }
 
-static INLINE_G int LineVertexLowest(const linedef_t *L)
+static inline int LineVertexLowest(const linedef_t *L)
 {
   // returns the "lowest" vertex (normally the left-most, but if the
   // line is vertical, then the bottom-most) => 0 for start, 1 for end.

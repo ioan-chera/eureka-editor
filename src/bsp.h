@@ -580,12 +580,6 @@ raw_v5_node_t;
 namespace glbsp
 {
 
-// use this for inlining.  Usually defined in the makefile.
-#ifndef INLINE_G
-#define INLINE_G  /* nothing */
-#endif
-
-
 // internal storage of node building parameters
 
 extern const nodebuildinfo_t *cur_info;
