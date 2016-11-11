@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __GLBSP_GLBSP_H__
-#define __GLBSP_GLBSP_H__
+#ifndef __EUREKA_BSP_H__
+#define __EUREKA_BSP_H__
 
 // FIXME !!!
 #include <assert.h>
@@ -40,13 +40,6 @@ namespace glbsp
 #else
 #define GCCATTR(xyz)  /* nothing */
 #endif
-
-
-/** OBLIGE change: assume C++ **/
-
-// #ifdef __cplusplus
-// extern "C" {
-// #endif // __cplusplus
 
 
 /* ----- basic types --------------------------- */
@@ -275,7 +268,7 @@ void GlbspFree(const char *str);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_GLBSP_H__ */
+
 //------------------------------------------------------------------------
 // STRUCT : Doom structures, raw on-disk layout
 //------------------------------------------------------------------------
@@ -295,9 +288,6 @@ void GlbspFree(const char *str);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_STRUCTS_H__
-#define __GLBSP_STRUCTS_H__
 
 
 namespace glbsp
@@ -531,7 +521,7 @@ raw_v5_node_t;
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_STRUCTS_H__ */
+
 //------------------------------------------------------------------------
 // SYSTEM : Bridging code
 //------------------------------------------------------------------------
@@ -551,9 +541,6 @@ raw_v5_node_t;
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_SYSTEM_H__
-#define __GLBSP_SYSTEM_H__
 
 
 namespace glbsp
@@ -603,7 +590,7 @@ void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_SYSTEM_H__ */
+
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
@@ -623,9 +610,6 @@ void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_UTIL_H__
-#define __GLBSP_UTIL_H__
 
 namespace glbsp
 {
@@ -684,7 +668,7 @@ void Adler32_Finish(u32_t *crc);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_UTIL_H__ */
+
 //------------------------------------------------------------------------
 // BLOCKMAP : Generate the blockmap
 //------------------------------------------------------------------------
@@ -704,9 +688,6 @@ void Adler32_Finish(u32_t *crc);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_BLOCKMAP_H__
-#define __GLBSP_BLOCKMAP_H__
 
 namespace glbsp
 {
@@ -729,7 +710,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_BLOCKMAP_H__ */
+
 //------------------------------------------------------------------------
 // REJECT : Generate the reject table
 //------------------------------------------------------------------------
@@ -750,9 +731,6 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 //
 //------------------------------------------------------------------------
 
-#ifndef __GLBSP_REJECT_H__
-#define __GLBSP_REJECT_H__
-
 namespace glbsp
 {
 
@@ -761,7 +739,7 @@ void PutReject(void);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_REJECT_H__ */
+
 //------------------------------------------------------------------------
 // LEVEL : Level structures & read/write functions.
 //------------------------------------------------------------------------
@@ -781,9 +759,6 @@ void PutReject(void);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_LEVEL_H__
-#define __GLBSP_LEVEL_H__
 
 // FIXME !!!
 #include "bsp_wad.h"
@@ -1184,7 +1159,7 @@ void SaveLevel(node_t *root_node);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_LEVEL_H__ */
+
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
@@ -1204,9 +1179,6 @@ void SaveLevel(node_t *root_node);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_ANALYZE_H__
-#define __GLBSP_ANALYZE_H__
 
 namespace glbsp
 {
@@ -1247,7 +1219,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_ANALYZE_H__ */
+
 //------------------------------------------------------------------------
 // SEG : Choose the best Seg to use for a node line.
 //------------------------------------------------------------------------
@@ -1267,9 +1239,6 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_SEG_H__
-#define __GLBSP_SEG_H__
 
 namespace glbsp
 {
@@ -1362,7 +1331,7 @@ void FreeQuickAllocCuts(void);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_SEG_H__ */
+
 //------------------------------------------------------------------------
 // NODE : Recursively create nodes and return the pointers.
 //------------------------------------------------------------------------
@@ -1382,9 +1351,6 @@ void FreeQuickAllocCuts(void);
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#ifndef __GLBSP_NODE_H__
-#define __GLBSP_NODE_H__
 
 namespace glbsp
 {
@@ -1449,7 +1415,7 @@ void FreeQuickAllocSupers(void);
 
 }  // namespace glbsp
 
-#endif /* __GLBSP_NODE_H__ */
+#endif /* __EUREKA_BSP_H__ */
 
 
 //--- editor settings ---
