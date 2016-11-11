@@ -85,7 +85,7 @@ static void GB_PrintMsg(const char *str, ...)
 
 	dialog->Print(message_buf);
 
-	LogPrintf("GLBSP: %s", message_buf);
+	LogPrintf("BSP: %s", message_buf);
 }
 
 static void GB_FatalError(const char *str, ...)
@@ -98,7 +98,7 @@ static void GB_FatalError(const char *str, ...)
 
 	message_buf[MSG_BUF_LEN-1] = 0;
 
-	FatalError("glBSP Failure:\n\n%s", message_buf);
+	FatalError("BSP Failure:\n\n%s", message_buf);
 	/* NOT REACHED */
 }
 

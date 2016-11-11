@@ -902,7 +902,7 @@ UI_Preferences::UI_Preferences() :
 		  rend_lock_grav->down_box(FL_DOWN_BOX);
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
+		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "Node Building");
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
