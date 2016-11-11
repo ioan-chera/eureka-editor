@@ -21,6 +21,8 @@
 #ifndef __GLBSP_GLBSP_H__
 #define __GLBSP_GLBSP_H__
 
+// FIXME !!!
+#include <assert.h>
 
 /** Eureka change: namespacing */
 
@@ -316,8 +318,6 @@ void GlbspFree(const char *str);
 #ifndef __GLBSP_STRUCTS_H__
 #define __GLBSP_STRUCTS_H__
 
-#include "system.h"
-
 
 namespace glbsp
 {
@@ -574,8 +574,6 @@ raw_v5_node_t;
 #ifndef __GLBSP_SYSTEM_H__
 #define __GLBSP_SYSTEM_H__
 
-#include "glbsp.h"
-
 
 namespace glbsp
 {
@@ -751,9 +749,6 @@ void Adler32_Finish(uint32_g *crc);
 #ifndef __GLBSP_BLOCKMAP_H__
 #define __GLBSP_BLOCKMAP_H__
 
-#include "structs.h"
-#include "level.h"
-
 namespace glbsp
 {
 
@@ -799,9 +794,6 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 #ifndef __GLBSP_REJECT_H__
 #define __GLBSP_REJECT_H__
 
-#include "structs.h"
-#include "level.h"
-
 namespace glbsp
 {
 
@@ -834,9 +826,8 @@ void PutReject(void);
 #ifndef __GLBSP_LEVEL_H__
 #define __GLBSP_LEVEL_H__
 
-#include "structs.h"
-#include "wad.h"
-
+// FIXME !!!
+#include "bsp_wad.h"
 
 namespace glbsp
 {
@@ -1258,9 +1249,6 @@ void SaveLevel(node_t *root_node);
 #ifndef __GLBSP_ANALYZE_H__
 #define __GLBSP_ANALYZE_H__
 
-#include "structs.h"
-#include "level.h"
-
 namespace glbsp
 {
 
@@ -1323,9 +1311,6 @@ sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy);
 
 #ifndef __GLBSP_SEG_H__
 #define __GLBSP_SEG_H__
-
-#include "structs.h"
-
 
 namespace glbsp
 {
@@ -1441,8 +1426,6 @@ void FreeQuickAllocCuts(void);
 
 #ifndef __GLBSP_NODE_H__
 #define __GLBSP_NODE_H__
-
-#include "structs.h"
 
 namespace glbsp
 {

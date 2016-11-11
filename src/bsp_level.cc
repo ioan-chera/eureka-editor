@@ -18,24 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
+#include "main.h"
+#include "bsp.h"
 
 
 namespace glbsp
@@ -643,25 +627,6 @@ void PutBlockmap(void)
 //
 //------------------------------------------------------------------------
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "reject.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
-
 
 namespace glbsp
 {
@@ -872,27 +837,6 @@ void PutReject(void)
 //  ZDBSP format support based on code (C) 2002,2003 Randy Heit
 // 
 //------------------------------------------------------------------------
-
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "analyze.h"
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "reject.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
 
 
 namespace glbsp
@@ -2607,25 +2551,6 @@ void SaveLevel(node_t *root_node)
 //
 //------------------------------------------------------------------------
  
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
-
 
 namespace glbsp
 {

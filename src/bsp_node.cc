@@ -35,25 +35,8 @@
 // Rewritten again by Andrew Apted (-AJA-), 1999-2000.
 //
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "analyze.h"
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
+#include "main.h"
+#include "bsp.h"
 
 
 namespace glbsp
@@ -1280,26 +1263,6 @@ void AddMinisegs(seg_t *part,
 //
 // Rewritten by Andrew Apted (-AJA-), 1999-2000.
 //
-
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "analyze.h"
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
 
 
 namespace glbsp

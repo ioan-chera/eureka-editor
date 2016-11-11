@@ -21,10 +21,6 @@
 #ifndef __GLBSP_WAD_H__
 #define __GLBSP_WAD_H__
 
-#include "structs.h"
-#include "system.h"
-
-
 namespace glbsp
 {
 

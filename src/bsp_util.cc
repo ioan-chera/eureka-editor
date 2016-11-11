@@ -18,16 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
+#include "main.h"
+#include "bsp.h"
 
 
 namespace glbsp
@@ -333,22 +325,7 @@ uint32_g Endian_U32(uint32_g x)
 //
 //------------------------------------------------------------------------
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "util.h"
-
-#ifdef WIN32
-#include <windows.h>
-#else
+#ifndef WIN32
 #include <time.h>
 #endif
 
@@ -631,27 +608,6 @@ void Adler32_Finish(uint32_g *crc)
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <assert.h>
-
-#include "analyze.h"
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "reject.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
 
 
 namespace glbsp

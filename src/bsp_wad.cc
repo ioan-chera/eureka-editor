@@ -18,26 +18,10 @@
 //
 //------------------------------------------------------------------------
 
-#include "system.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
-#include <errno.h>
+#include "main.h"
+#include "bsp.h"
 
 #include <zlib.h>
-
-#include "blockmap.h"
-#include "level.h"
-#include "node.h"
-#include "seg.h"
-#include "structs.h"
-#include "util.h"
-#include "wad.h"
 
 
 namespace glbsp
