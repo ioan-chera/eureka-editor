@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-// SEG : Choose the best Seg to use for a node line.
-//------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
+//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted
+//          Copyright (C) 1994-1998  Colin Reed
+//          Copyright (C) 1997-1998  Lee Killough
 //
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Originally based on the program 'BSP', version 2.3.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -17,6 +17,8 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
+
+
 //
 // To be able to divide the nodes down, this routine must decide which
 // is the best Seg to use as a nodeline. It does this by selecting the
@@ -39,7 +41,7 @@
 #include "bsp.h"
 
 
-namespace glbsp
+namespace ajbsp
 {
 
 #define PRECIOUS_MULTIPLY  100
@@ -1228,26 +1230,11 @@ void AddMinisegs(seg_t *part,
 }
 
 
-}  // namespace glbsp
 //------------------------------------------------------------------------
 // NODE : Recursively create nodes and return the pointers.
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
+
+
 //
 // Split a list of segs into two using the method described at bottom
 // of the file, this was taken from OBJECTS.C in the DEU5beta source.
@@ -1264,9 +1251,6 @@ void AddMinisegs(seg_t *part,
 // Rewritten by Andrew Apted (-AJA-), 1999-2000.
 //
 
-
-namespace glbsp
-{
 
 #define DEBUG_BUILDER  0
 #define DEBUG_SORTER   0
@@ -2544,7 +2528,7 @@ void RoundOffBspTree(node_t *root)
 }
 
 
-}  // namespace glbsp
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

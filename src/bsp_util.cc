@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-// SYSTEM : System specific code
-//------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
+//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted
+//          Copyright (C) 1994-1998  Colin Reed
+//          Copyright (C) 1997-1998  Lee Killough
 //
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Originally based on the program 'BSP', version 2.3.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@
 #include "bsp.h"
 
 
-namespace glbsp
+namespace ajbsp
 {
 
 #define DEBUG_ENABLED   0
@@ -304,34 +304,14 @@ u32_t Endian_U32(u32_t x)
 }
 
 
-}  // namespace glbsp
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
-//------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
 //------------------------------------------------------------------------
 
 #ifndef WIN32
 #include <time.h>
 #endif
 
-
-namespace glbsp
-{
 
 //
 // UtilCalloc
@@ -588,30 +568,10 @@ void Adler32_Finish(u32_t *crc)
 }
 
 
-}  // namespace glbsp
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-
-namespace glbsp
-{
 
 #define DEBUG_WALLTIPS   0
 #define DEBUG_POLYOBJ    0
@@ -1706,7 +1666,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 }
 
 
-}  // namespace glbsp
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-// WAD : WAD read/write functions.
-//------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
+//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted
+//          Copyright (C) 1994-1998  Colin Reed
+//          Copyright (C) 1997-1998  Lee Killough
 //
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Originally based on the program 'BSP', version 2.3.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
 #include <zlib.h>
 
 
-namespace glbsp
+namespace ajbsp
 {
 
 static FILE *in_file = NULL;
@@ -1727,7 +1727,7 @@ void ReportFailedLevels(void)
 }
 
 
-}  // namespace glbsp
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

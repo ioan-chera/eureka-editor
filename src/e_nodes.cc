@@ -35,10 +35,10 @@ bool glbsp_verbose = false;
 bool glbsp_warn    = false;
 
 
-static glbsp::nodebuildinfo_t nb_info;
-static volatile glbsp::nodebuildcomms_t nb_comms;
+static ajbsp::nodebuildinfo_t nb_info;
+static volatile ajbsp::nodebuildcomms_t nb_comms;
 
-static int display_mode = glbsp::DIS_INVALID;
+static int display_mode = ajbsp::DIS_INVALID;
 static int progress_limit;
 
 static char message_buf[MSG_BUF_LEN];
@@ -46,27 +46,27 @@ static char message_buf[MSG_BUF_LEN];
 static UI_NodeDialog * dialog;
 
 
-static const char *glbsp_ErrorString(glbsp::glbsp_ret_e ret)
+static const char *glbsp_ErrorString(ajbsp::glbsp_ret_e ret)
 {
 	switch (ret)
 	{
-		case glbsp::GLBSP_E_OK: return "OK";
+		case ajbsp::GLBSP_E_OK: return "OK";
 
 		 // the arguments were bad/inconsistent.
-		case glbsp::GLBSP_E_BadArgs: return "Bad Arguments";
+		case ajbsp::GLBSP_E_BadArgs: return "Bad Arguments";
 
 		// the info was bad/inconsistent, but has been fixed
-		case glbsp::GLBSP_E_BadInfoFixed: return "Bad Args (fixed)";
+		case ajbsp::GLBSP_E_BadInfoFixed: return "Bad Args (fixed)";
 
 		// file errors
-		case glbsp::GLBSP_E_ReadError:  return "Read Error";
-		case glbsp::GLBSP_E_WriteError: return "Write Error";
+		case ajbsp::GLBSP_E_ReadError:  return "Read Error";
+		case ajbsp::GLBSP_E_WriteError: return "Write Error";
 
 		// building was cancelled
-		case glbsp::GLBSP_E_Cancelled: return "Cancelled by User";
+		case ajbsp::GLBSP_E_Cancelled: return "Cancelled by User";
 
 		// an unknown error occurred (this is the catch-all value)
-		case glbsp::GLBSP_E_Unknown:
+		case ajbsp::GLBSP_E_Unknown:
 
 		default: return "Unknown Error";
 	}
@@ -110,7 +110,7 @@ static void GB_Ticker(void)
 	}
 }
 
-static bool GB_DisplayOpen(glbsp::displaytype_e type)
+static bool GB_DisplayOpen(ajbsp::displaytype_e type)
 {
 	display_mode = type;
 	return true;
@@ -123,7 +123,7 @@ static void GB_DisplaySetTitle(const char *str)
 
 static void GB_DisplaySetBarText(int barnum, const char *str)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 1)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
 		dialog->SetStatus(str);
 
@@ -154,7 +154,7 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 
 static void GB_DisplaySetBarLimit(int barnum, int limit)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		progress_limit = MAX(1, limit);
 	}
@@ -162,7 +162,7 @@ static void GB_DisplaySetBarLimit(int barnum, int limit)
 
 static void GB_DisplaySetBar(int barnum, int count)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		int perc = count * 100.0 / progress_limit;
 
@@ -175,7 +175,7 @@ static void GB_DisplayClose(void)
 	/* does nothing */
 }
 
-static const glbsp::nodebuildfuncs_t  build_funcs =
+static const ajbsp::nodebuildfuncs_t  build_funcs =
 {
 	GB_FatalError,
 	GB_PrintMsg,
@@ -194,13 +194,13 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 {
 	LogPrintf("\n");
 
-	display_mode = glbsp::DIS_INVALID;
+	display_mode = ajbsp::DIS_INVALID;
 
-	memcpy(&nb_info,  &glbsp::default_buildinfo,  sizeof(glbsp::default_buildinfo));
-	memcpy((void*)&nb_comms, &glbsp::default_buildcomms, sizeof(glbsp::nodebuildcomms_t));
+	memcpy(&nb_info,  &ajbsp::default_buildinfo,  sizeof(ajbsp::default_buildinfo));
+	memcpy((void*)&nb_comms, &ajbsp::default_buildcomms, sizeof(ajbsp::nodebuildcomms_t));
 
-	nb_info.input_file  = glbsp::GlbspStrDup(in_name);
-	nb_info.output_file = glbsp::GlbspStrDup(out_name);
+	nb_info.input_file  = ajbsp::GlbspStrDup(in_name);
+	nb_info.output_file = ajbsp::GlbspStrDup(out_name);
 
 	nb_info.fast          = glbsp_fast ? true : false;
 	nb_info.quiet         = glbsp_verbose ? false : true;
@@ -209,11 +209,11 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.pack_sides = false;
 	nb_info.force_normal = true;
 
-	glbsp::glbsp_ret_e  ret;
+	ajbsp::glbsp_ret_e  ret;
 
-	ret = glbsp::CheckInfo(&nb_info, &nb_comms);
+	ret = ajbsp::CheckInfo(&nb_info, &nb_comms);
 
-	if (ret != glbsp::GLBSP_E_OK)
+	if (ret != ajbsp::GLBSP_E_OK)
 	{
 		// check info failure (unlikely to happen)
 		GB_PrintMsg("\n");
@@ -222,16 +222,16 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		return false;
 	}
 
-	ret = glbsp::BuildNodes(&nb_info, &build_funcs, &nb_comms);
+	ret = ajbsp::BuildNodes(&nb_info, &build_funcs, &nb_comms);
 
-	if (ret == glbsp::GLBSP_E_Cancelled)
+	if (ret == ajbsp::GLBSP_E_Cancelled)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
 		return false;
 	}
 
-	if (ret != glbsp::GLBSP_E_OK)
+	if (ret != ajbsp::GLBSP_E_OK)
 	{
 		// build nodes failed
 		GB_PrintMsg("\n");

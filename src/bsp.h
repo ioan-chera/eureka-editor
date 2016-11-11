@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-// GLBSP.H : Interface to Node Builder
-//------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
+//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted
+//          Copyright (C) 1994-1998  Colin Reed
+//          Copyright (C) 1997-1998  Lee Killough
 //
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Originally based on the program 'BSP', version 2.3.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@
 
 /** Eureka change: namespacing */
 
-namespace glbsp
+namespace ajbsp
 {
 
 
@@ -260,32 +260,11 @@ const char *GlbspStrDup(const char *str);
 void GlbspFree(const char *str);
 
 
-}  // namespace glbsp
-
-
 //------------------------------------------------------------------------
 // STRUCT : Doom structures, raw on-disk layout
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
 
-namespace glbsp
-{
 
 /* ----- The wad structures ---------------------- */
 
@@ -513,32 +492,11 @@ typedef struct raw_v5_node_s
 raw_v5_node_t;
 
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // SYSTEM : Bridging code
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-
-namespace glbsp
-{
 
 // internal storage of node building parameters
 
@@ -582,31 +540,11 @@ void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 #define DisplayTicker      (* cur_funcs->ticker)
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-namespace glbsp
-{
 
 /* ----- function prototypes ---------------------------- */
 
@@ -660,31 +598,10 @@ void Adler32_Begin(u32_t *crc);
 void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
 void Adler32_Finish(u32_t *crc);
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // BLOCKMAP : Generate the blockmap
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
-
-namespace glbsp
-{
 
 #define DEFAULT_BLOCK_LIMIT  16000
 
@@ -702,63 +619,22 @@ void GetBlockmapBounds(int *x, int *y, int *w, int *h);
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     int x1, int y1, int x2, int y2);
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // REJECT : Generate the reject table
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
-
-namespace glbsp
-{
 
 // build the reject table and write it into the REJECT lump
 void PutReject(void);
-
-}  // namespace glbsp
 
 
 //------------------------------------------------------------------------
 // LEVEL : Level structures & read/write functions.
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
 // FIXME !!!
 #include "bsp_wad.h"
 
-namespace glbsp
-{
 
 struct node_s;
 struct sector_s;
@@ -1151,31 +1027,11 @@ void FreeLevel(void);
 // save the newly computed NODE info etc..
 void SaveLevel(node_t *root_node);
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-namespace glbsp
-{
 
 // detection routines
 void DetectDuplicateVertices(void);
@@ -1211,31 +1067,11 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 //
 sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // SEG : Choose the best Seg to use for a node line.
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-namespace glbsp
-{
 
 #define DEFAULT_FACTOR  11
 
@@ -1323,31 +1159,11 @@ void AddMinisegs(seg_t *part,
 // free the quick allocation cut list
 void FreeQuickAllocCuts(void);
 
-}  // namespace glbsp
-
 
 //------------------------------------------------------------------------
 // NODE : Recursively create nodes and return the pointers.
 //------------------------------------------------------------------------
-//
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
-//
-//  This program is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2
-//  of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//------------------------------------------------------------------------
 
-namespace glbsp
-{
 
 // check the relationship between the given box and the partition
 // line.  Returns -1 if box is on left side, +1 if box is on right
@@ -1407,7 +1223,7 @@ void RoundOffBspTree(node_t *root);
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);
 
-}  // namespace glbsp
+}  // namespace ajbsp
 
 #endif /* __EUREKA_BSP_H__ */
 

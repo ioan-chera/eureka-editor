@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-// WAD : WAD read/write functions.
-//------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
+//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted
+//          Copyright (C) 1994-1998  Colin Reed
+//          Copyright (C) 1997-1998  Lee Killough
 //
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Originally based on the program 'BSP', version 2.3.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,9 +20,6 @@
 
 #ifndef __GLBSP_WAD_H__
 #define __GLBSP_WAD_H__
-
-namespace glbsp
-{
 
 struct lump_s;
 
@@ -247,8 +244,6 @@ void ReportFailedLevels(void);
 
 #define SINT16(x)  ((s16_t) Endian_U16((u16_t) (x)))
 #define SINT32(x)  ((s32_t) Endian_U32((u32_t) (x)))
-
-}  // namespace glbsp
 
 #endif /* __GLBSP_WAD_H__ */
 
