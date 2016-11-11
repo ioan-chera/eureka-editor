@@ -509,7 +509,6 @@ extern volatile nodebuildcomms_t *cur_comms;
 
 // fatal error messages (these don't return)
 void FatalError(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-void InternalError(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 // display normal messages & warnings to the screen
 void PrintMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));

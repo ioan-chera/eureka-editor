@@ -58,20 +58,6 @@ void FatalError(const char *str, ...)
 }
 
 //
-// InternalError
-//
-void InternalError(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-	(* cur_funcs->fatal_error)("\nINTERNAL ERROR: *** %s ***\n\n", message_buf);
-}
-
-//
 // PrintMsg
 //
 void PrintMsg(const char *str, ...)
@@ -296,7 +282,7 @@ void *UtilRealloc(void *old, int size)
 void UtilFree(void *data)
 {
 	if (data == NULL)
-		InternalError("Trying to free a NULL pointer");
+		BugError("Trying to free a NULL pointer");
 
 	free(data);
 }
@@ -980,7 +966,7 @@ void PruneVertices(void)
 		vertex_t *V = lev_vertices[i];
 
 		if (V->ref_count < 0)
-			InternalError("Vertex %d ref_count is %d", i, V->ref_count);
+			BugError("Vertex %d ref_count is %d", i, V->ref_count);
 
 		if (V->ref_count == 0)
 		{
@@ -1029,7 +1015,7 @@ void PruneSidedefs(void)
 		sidedef_t *S = lev_sidedefs[i];
 
 		if (S->ref_count < 0)
-			InternalError("Sidedef %d ref_count is %d", i, S->ref_count);
+			BugError("Sidedef %d ref_count is %d", i, S->ref_count);
 
 		if (S->ref_count == 0)
 		{
@@ -1077,7 +1063,7 @@ void PruneSectors(void)
 		sector_t *S = lev_sectors[i];
 
 		if (S->ref_count < 0)
-			InternalError("Sector %d ref_count is %d", i, S->ref_count);
+			BugError("Sector %d ref_count is %d", i, S->ref_count);
 
 		if (S->ref_count == 0)
 		{
@@ -1547,7 +1533,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	vert->y = start->x;
 
 	if (dlen == 0)
-		InternalError("NewVertexDegenerate: bad delta !");
+		BugError("NewVertexDegenerate: bad delta !");
 
 	dx /= dlen;
 	dy /= dlen;
@@ -1606,7 +1592,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		}
 	}
 
-	InternalError("Vertex %d has no tips !", vert->index);
+	BugError("Vertex %d has no tips !", vert->index);
 	return NULL;
 }
 

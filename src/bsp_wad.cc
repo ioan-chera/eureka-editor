@@ -1204,7 +1204,7 @@ int FindNextLevel(void)
 const char *GetLevelName(void)
 {
   if (!wad.current_level)
-    InternalError("GetLevelName: no current level");
+    BugError("GetLevelName: no current level");
     
   return wad.current_level->name;
 }
@@ -1296,7 +1296,7 @@ glbsp_ret_e ReadWadFile(const char *filename)
   check = ReadAllLumps();
 
   if (check != wad.num_entries)
-    InternalError("Read directory count consistency failure (%d,%d)",
+    BugError("Read directory count consistency failure (%d,%d)",
       check, wad.num_entries);
   
   wad.current_level = NULL;
@@ -1358,7 +1358,7 @@ glbsp_ret_e WriteWadFile(const char *filename)
   check2 = WriteDirectory();
 
   if (check1 != wad.num_entries || check2 != wad.num_entries)
-    InternalError("Write directory count consistency failure (%d,%d,%d)",
+    BugError("Write directory count consistency failure (%d,%d,%d)",
       check1, check2, wad.num_entries);
 
   return GLBSP_E_OK;
@@ -1575,7 +1575,7 @@ void ReportOneOverflow(const lump_t *lump, int limit, bool hard)
     case LIMIT_BLOCKMAP:   PrintMsg("Blockmap lump %s.\n", msg); break;
 
     default:
-      InternalError("UNKNOWN LIMIT BIT: 0x%06x", limit);
+      BugError("UNKNOWN LIMIT BIT: 0x%06x", limit);
   }
 }
 
