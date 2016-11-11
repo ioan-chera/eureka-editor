@@ -409,28 +409,6 @@ static void M_ParseNormalLine(parser_state_t *pst)
 	}
 
 
-	// FIXME : get rid of this
-	if (y_stricmp(argv[0], "exclude_game") == 0)
-	{
-#if 0
-		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		if (Game_name && y_stricmp(argv[1], Game_name) == 0)
-		{
-			LogPrintf("WARNING: skipping %s -- not compatible with %s\n",
-					  pst->fname, Game_name);
-
-			// do not process any more of the file
-			fclose(fp);
-			return;
-		}
-#endif
-		return;
-	}
-
-
-
 	if (y_stricmp(argv[0], "player_size") == 0)
 	{
 		if (nargs != 3)
@@ -707,7 +685,8 @@ static void M_ParseNormalLine(parser_state_t *pst)
 	}
 
 	// these are ignored for backwards compability
-	else if (y_stricmp(argv[0], "level_name") == 0)
+	else if (y_stricmp(argv[0], "level_name") == 0 ||
+			 y_stricmp(argv[0], "exclude_game") == 0)
 	{
 		return;
 	}
