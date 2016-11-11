@@ -649,28 +649,6 @@ void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 namespace glbsp
 {
 
-/* ----- useful macros ---------------------------- */
-
-#ifndef M_PI
-#define M_PI  3.14159265358979323846
-#endif
-
-#ifndef MAX
-#define MAX(x,y)  ((x) > (y) ? (x) : (y))
-#endif
-
-#ifndef MIN
-#define MIN(x,y)  ((x) < (y) ? (x) : (y))
-#endif
-
-#ifndef ABS
-#define ABS(x)  ((x) >= 0 ? (x) : -(x))
-#endif
-
-#ifndef I_ROUND
-#define I_ROUND(x)  ((int) (((x) < 0.0f) ? ((x) - 0.5f) : ((x) + 0.5f)))
-#endif
-
 /* ----- function prototypes ---------------------------- */
 
 // allocate and clear some memory.  guaranteed not to fail.
