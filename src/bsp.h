@@ -65,44 +65,44 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // 
 typedef struct nodebuildinfo_s
 {
-  const char *input_file;
-  const char *output_file;
+	const char *input_file;
+	const char *output_file;
 
-  // pointer to a NULL terminated array of strings containing extra
-  // input filenames.  Normally this field is NULL.  When there are
-  // extra filenames, 'output_file' will be NULL -- also the build
-  // mode will be GWA.
-  const char **extra_files;
+	// pointer to a NULL terminated array of strings containing extra
+	// input filenames.  Normally this field is NULL.  When there are
+	// extra filenames, 'output_file' will be NULL -- also the build
+	// mode will be GWA.
+	const char **extra_files;
 
-  int factor;
+	int factor;
 
-  bool no_reject;
-  bool no_progress;
-  bool quiet;
-  bool mini_warnings;
-  bool force_hexen;
-  bool pack_sides;
-  bool fast;
+	bool no_reject;
+	bool no_progress;
+	bool quiet;
+	bool mini_warnings;
+	bool force_hexen;
+	bool pack_sides;
+	bool fast;
 
-  int spec_version;  // 1, 2, 3 or 5
+	int spec_version;  // 1, 2, 3 or 5
 
-  bool load_all;
-  bool no_normal;
-  bool force_normal;
-  bool gwa_mode;  
-  bool prune_sect;
-  bool no_prune;
-  bool merge_vert;
-  bool skip_self_ref;
-  bool window_fx;
+	bool load_all;
+	bool no_normal;
+	bool force_normal;
+	bool gwa_mode;  
+	bool prune_sect;
+	bool no_prune;
+	bool merge_vert;
+	bool skip_self_ref;
+	bool window_fx;
 
-  int block_limit;
+	int block_limit;
 
-  // private stuff -- values computed in GlbspParseArgs or
-  // GlbspCheckInfo that need to be passed to GlbspBuildNodes.
+	// private stuff -- values computed in GlbspParseArgs or
+	// GlbspCheckInfo that need to be passed to GlbspBuildNodes.
 
-  bool missing_output;
-  bool same_filenames;
+	bool missing_output;
+	bool same_filenames;
 }
 nodebuildinfo_t;
 
@@ -112,15 +112,15 @@ nodebuildinfo_t;
 //
 typedef struct nodebuildcomms_s
 {
-  // if the node builder failed, this will contain the error
-  const char *message;
+	// if the node builder failed, this will contain the error
+	const char *message;
 
-  // the GUI can set this to tell the node builder to stop
-  bool cancelled;
+	// the GUI can set this to tell the node builder to stop
+	bool cancelled;
 
-  // from here on, various bits of internal state
-  int total_small_warn, total_big_warn;
-  int build_pos, file_pos;
+	// from here on, various bits of internal state
+	int total_small_warn, total_big_warn;
+	int build_pos, file_pos;
 }
 nodebuildcomms_t;
 
@@ -128,67 +128,67 @@ nodebuildcomms_t;
 // Display Prototypes
 typedef enum
 {
-  DIS_INVALID,        // Nonsense value is always useful
-  DIS_BUILDPROGRESS,  // Build Box, has 2 bars
-  DIS_FILEPROGRESS,   // File Box, has 1 bar
-  NUMOFGUITYPES
+	DIS_INVALID,        // Nonsense value is always useful
+	DIS_BUILDPROGRESS,  // Build Box, has 2 bars
+	DIS_FILEPROGRESS,   // File Box, has 1 bar
+	NUMOFGUITYPES
 }
 displaytype_e;
 
 // Callback functions
 typedef struct nodebuildfuncs_s
 {
-  // Fatal errors are called as a last resort when something serious
-  // goes wrong, e.g. out of memory.  This routine should show the
-  // error to the user and abort the program.
-  // 
-  void (* fatal_error)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
+	// Fatal errors are called as a last resort when something serious
+	// goes wrong, e.g. out of memory.  This routine should show the
+	// error to the user and abort the program.
+	// 
+	void (* fatal_error)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
-  // The print_msg routine is used to display the various messages
-  // that occur, e.g. "Building GL nodes on MAP01" and that kind of
-  // thing.
-  // 
-  void (* print_msg)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
+	// The print_msg routine is used to display the various messages
+	// that occur, e.g. "Building GL nodes on MAP01" and that kind of
+	// thing.
+	// 
+	void (* print_msg)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
-  // This routine is called frequently whilst building the nodes, and
-  // can be used to keep a GUI responsive to user input.  Many
-  // toolkits have a "do iteration" or "check events" type of function
-  // that this can call.  Avoid anything that sleeps though, or it'll
-  // slow down the build process unnecessarily.
-  //
-  void (* ticker)(void);
+	// This routine is called frequently whilst building the nodes, and
+	// can be used to keep a GUI responsive to user input.  Many
+	// toolkits have a "do iteration" or "check events" type of function
+	// that this can call.  Avoid anything that sleeps though, or it'll
+	// slow down the build process unnecessarily.
+	//
+	void (* ticker)(void);
 
-  // These display routines is used for tasks that can show a progress
-  // bar, namely: building nodes, loading the wad, and saving the wad.
-  // The command line version could show a percentage value, or even
-  // draw a bar using characters.
- 
-  // Display_open is called at the beginning, and 'type' holds the
-  // type of progress (and determines how many bars to display).
-  // Returns true if all went well, or false if it failed (in which
-  // case the other routines should do nothing when called).
-  // 
-  bool (* display_open)(displaytype_e type);
+	// These display routines is used for tasks that can show a progress
+	// bar, namely: building nodes, loading the wad, and saving the wad.
+	// The command line version could show a percentage value, or even
+	// draw a bar using characters.
 
-  // For GUI versions this can be used to set the title of the
-  // progress window.  OK to ignore it (e.g. command line version).
-  //
-  void (* display_setTitle)(const char *str);
+	// Display_open is called at the beginning, and 'type' holds the
+	// type of progress (and determines how many bars to display).
+	// Returns true if all went well, or false if it failed (in which
+	// case the other routines should do nothing when called).
+	// 
+	bool (* display_open)(displaytype_e type);
 
-  // The next three routines control the appearance of each progress
-  // bar.  Display_setBarText is called to change the message above
-  // the bar.  Display_setBarLimit sets the integer limit of the
-  // progress (the target value), and display_setBar sets the current
-  // value (which will count up from 0 to the limit, inclusive).
-  // 
-  void (* display_setBar)(int barnum, int count);
-  void (* display_setBarLimit)(int barnum, int limit);
-  void (* display_setBarText)(int barnum, const char *str);
+	// For GUI versions this can be used to set the title of the
+	// progress window.  OK to ignore it (e.g. command line version).
+	//
+	void (* display_setTitle)(const char *str);
 
-  // The display_close routine is called when the task is finished,
-  // and should remove the progress indicator/window from the screen.
-  //
-  void (* display_close)(void);
+	// The next three routines control the appearance of each progress
+	// bar.  Display_setBarText is called to change the message above
+	// the bar.  Display_setBarLimit sets the integer limit of the
+	// progress (the target value), and display_setBar sets the current
+	// value (which will count up from 0 to the limit, inclusive).
+	// 
+	void (* display_setBar)(int barnum, int count);
+	void (* display_setBarLimit)(int barnum, int limit);
+	void (* display_setBarText)(int barnum, const char *str);
+
+	// The display_close routine is called when the task is finished,
+	// and should remove the progress indicator/window from the screen.
+	//
+	void (* display_close)(void);
 }
 nodebuildfuncs_t;
 
@@ -201,24 +201,24 @@ extern const nodebuildcomms_t default_buildcomms;
 
 typedef enum
 {
-  // everything went peachy keen
-  GLBSP_E_OK = 0,
+	// everything went peachy keen
+	GLBSP_E_OK = 0,
 
-  // an unknown error occurred (this is the catch-all value)
-  GLBSP_E_Unknown,
+	// an unknown error occurred (this is the catch-all value)
+	GLBSP_E_Unknown,
 
-  // the arguments were bad/inconsistent.
-  GLBSP_E_BadArgs,
+	// the arguments were bad/inconsistent.
+	GLBSP_E_BadArgs,
 
-  // the info was bad/inconsistent, but has been fixed
-  GLBSP_E_BadInfoFixed,
+	// the info was bad/inconsistent, but has been fixed
+	GLBSP_E_BadInfoFixed,
 
-  // file errors
-  GLBSP_E_ReadError,
-  GLBSP_E_WriteError,
+	// file errors
+	GLBSP_E_ReadError,
+	GLBSP_E_WriteError,
 
-  // building was cancelled
-  GLBSP_E_Cancelled
+	// building was cancelled
+	GLBSP_E_Cancelled
 }
 glbsp_ret_e;
 
@@ -309,10 +309,10 @@ namespace glbsp
 
 typedef struct raw_wad_header_s
 {
-  char type[4];
+	char type[4];
 
-  u32_t num_entries;
-  u32_t dir_start;
+	u32_t num_entries;
+	u32_t dir_start;
 }
 raw_wad_header_t;
 
@@ -321,10 +321,10 @@ raw_wad_header_t;
 
 typedef struct raw_wad_entry_s
 {
-  u32_t start;
-  u32_t length;
+	u32_t start;
+	u32_t length;
 
-  char name[8];
+	char name[8];
 }
 raw_wad_entry_t;
 
@@ -333,8 +333,8 @@ raw_wad_entry_t;
 
 typedef struct raw_blockmap_header_s
 {
-  s16_t x_origin, y_origin;
-  s16_t x_blocks, y_blocks;
+	s16_t x_origin, y_origin;
+	s16_t x_blocks, y_blocks;
 }
 raw_blockmap_header_t;
 
@@ -343,38 +343,38 @@ raw_blockmap_header_t;
 
 typedef struct raw_vertex_s
 {
-  s16_t x, y;
+	s16_t x, y;
 }
 raw_vertex_t;
 
 typedef struct raw_v2_vertex_s
 {
-  s32_t x, y;
+	s32_t x, y;
 }
 raw_v2_vertex_t;
 
 
 typedef struct raw_linedef_s
 {
-  u16_t start;     // from this vertex...
-  u16_t end;       // ... to this vertex
-  u16_t flags;     // linedef flags (impassible, etc)
-  u16_t type;      // linedef type (0 for none, 97 for teleporter, etc)
-  s16_t tag;       // this linedef activates the sector with same tag
-  u16_t sidedef1;  // right sidedef
-  u16_t sidedef2;  // left sidedef (only if this line adjoins 2 sectors)
+	u16_t start;     // from this vertex...
+	u16_t end;       // ... to this vertex
+	u16_t flags;     // linedef flags (impassible, etc)
+	u16_t type;      // linedef type (0 for none, 97 for teleporter, etc)
+	s16_t tag;       // this linedef activates the sector with same tag
+	u16_t sidedef1;  // right sidedef
+	u16_t sidedef2;  // left sidedef (only if this line adjoins 2 sectors)
 }
 raw_linedef_t;
 
 typedef struct raw_hexen_linedef_s
 {
-  u16_t start;        // from this vertex...
-  u16_t end;          // ... to this vertex
-  u16_t flags;        // linedef flags (impassible, etc)
-  u8_t  type;         // linedef type
-  u8_t  specials[5];  // hexen specials
-  u16_t sidedef1;     // right sidedef
-  u16_t sidedef2;     // left sidedef
+	u16_t start;        // from this vertex...
+	u16_t end;          // ... to this vertex
+	u16_t flags;        // linedef flags (impassible, etc)
+	u8_t  type;         // linedef type
+	u8_t  specials[5];  // hexen specials
+	u16_t sidedef1;     // right sidedef
+	u16_t sidedef2;     // left sidedef
 }
 raw_hexen_linedef_t;
 
@@ -386,39 +386,39 @@ raw_hexen_linedef_t;
 
 typedef struct raw_sidedef_s
 {
-  s16_t x_offset;  // X offset for texture
-  s16_t y_offset;  // Y offset for texture
+	s16_t x_offset;  // X offset for texture
+	s16_t y_offset;  // Y offset for texture
 
-  char upper_tex[8];  // texture name for the part above
-  char lower_tex[8];  // texture name for the part below
-  char mid_tex[8];    // texture name for the regular part
+	char upper_tex[8];  // texture name for the part above
+	char lower_tex[8];  // texture name for the part below
+	char mid_tex[8];    // texture name for the regular part
 
-  u16_t sector;    // adjacent sector
+	u16_t sector;    // adjacent sector
 }
 raw_sidedef_t;
 
 
 typedef struct raw_sector_s
 {
-  s16_t floor_h;   // floor height
-  s16_t ceil_h;    // ceiling height
+	s16_t floor_h;   // floor height
+	s16_t ceil_h;    // ceiling height
 
-  char floor_tex[8];  // floor texture
-  char ceil_tex[8];   // ceiling texture
+	char floor_tex[8];  // floor texture
+	char ceil_tex[8];   // ceiling texture
 
-  u16_t light;     // light level (0-255)
-  u16_t special;   // special behaviour (0 = normal, 9 = secret, ...)
-  s16_t tag;       // sector activated by a linedef with same tag
+	u16_t light;     // light level (0-255)
+	u16_t special;   // special behaviour (0 = normal, 9 = secret, ...)
+	s16_t tag;       // sector activated by a linedef with same tag
 }
 raw_sector_t;
 
 
 typedef struct raw_thing_s
 {
-  s16_t x, y;      // position of thing
-  s16_t angle;     // angle thing faces (degrees)
-  u16_t type;      // type of thing
-  u16_t options;   // when appears, deaf, etc..
+	s16_t x, y;      // position of thing
+	s16_t angle;     // angle thing faces (degrees)
+	u16_t type;      // type of thing
+	u16_t options;   // when appears, deaf, etc..
 }
 raw_thing_t;
 
@@ -426,15 +426,15 @@ raw_thing_t;
 // -JL- Hexen thing definition
 typedef struct raw_hexen_thing_s
 {
-  s16_t tid;       // thing tag id (for scripts/specials)
-  s16_t x, y;      // position
-  s16_t height;    // start height above floor
-  s16_t angle;     // angle thing faces
-  u16_t type;      // type of thing
-  u16_t options;   // when appears, deaf, dormant, etc..
+	s16_t tid;       // thing tag id (for scripts/specials)
+	s16_t x, y;      // position
+	s16_t height;    // start height above floor
+	s16_t angle;     // angle thing faces
+	u16_t type;      // type of thing
+	u16_t options;   // when appears, deaf, dormant, etc..
 
-  u8_t special;    // special type
-  u8_t arg[5];     // special arguments
+	u8_t special;    // special type
+	u8_t arg[5];     // special arguments
 } 
 raw_hexen_thing_t;
 
@@ -453,78 +453,78 @@ raw_hexen_thing_t;
 
 typedef struct raw_seg_s
 {
-  u16_t start;     // from this vertex...
-  u16_t end;       // ... to this vertex
-  u16_t angle;     // angle (0 = east, 16384 = north, ...)
-  u16_t linedef;   // linedef that this seg goes along
-  u16_t flip;      // true if not the same direction as linedef
-  u16_t dist;      // distance from starting point
+	u16_t start;     // from this vertex...
+	u16_t end;       // ... to this vertex
+	u16_t angle;     // angle (0 = east, 16384 = north, ...)
+	u16_t linedef;   // linedef that this seg goes along
+	u16_t flip;      // true if not the same direction as linedef
+	u16_t dist;      // distance from starting point
 }
 raw_seg_t;
 
 
 typedef struct raw_gl_seg_s
 {
-  u16_t start;      // from this vertex...
-  u16_t end;        // ... to this vertex
-  u16_t linedef;    // linedef that this seg goes along, or -1
-  u16_t side;       // 0 if on right of linedef, 1 if on left
-  u16_t partner;    // partner seg number, or -1
+	u16_t start;      // from this vertex...
+	u16_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u16_t partner;    // partner seg number, or -1
 }
 raw_gl_seg_t;
 
 
 typedef struct raw_v3_seg_s
 {
-  u32_t start;      // from this vertex...
-  u32_t end;        // ... to this vertex
-  u16_t linedef;    // linedef that this seg goes along, or -1
-  u16_t side;       // 0 if on right of linedef, 1 if on left
-  u32_t partner;    // partner seg number, or -1
+	u32_t start;      // from this vertex...
+	u32_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u32_t partner;    // partner seg number, or -1
 }
 raw_v3_seg_t;
 
 
 typedef struct raw_bbox_s
 {
-  s16_t maxy, miny;
-  s16_t minx, maxx;
+	s16_t maxy, miny;
+	s16_t minx, maxx;
 }
 raw_bbox_t;
 
 
 typedef struct raw_node_s
 {
-  s16_t x, y;         // starting point
-  s16_t dx, dy;       // offset to ending point
-  raw_bbox_t b1, b2;     // bounding rectangles
-  u16_t right, left;  // children: Node or SSector (if high bit is set)
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;     // bounding rectangles
+	u16_t right, left;  // children: Node or SSector (if high bit is set)
 }
 raw_node_t;
 
 
 typedef struct raw_subsec_s
 {
-  u16_t num;     // number of Segs in this Sub-Sector
-  u16_t first;   // first Seg
+	u16_t num;     // number of Segs in this Sub-Sector
+	u16_t first;   // first Seg
 }
 raw_subsec_t;
 
 
 typedef struct raw_v3_subsec_s
 {
-  u32_t num;     // number of Segs in this Sub-Sector
-  u32_t first;   // first Seg
+	u32_t num;     // number of Segs in this Sub-Sector
+	u32_t first;   // first Seg
 }
 raw_v3_subsec_t;
 
 
 typedef struct raw_v5_node_s
 {
-  s16_t x, y;         // starting point
-  s16_t dx, dy;       // offset to ending point
-  raw_bbox_t b1, b2;     // bounding rectangles
-  u32_t right, left;  // children: Node or SSector (if high bit is set)
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;     // bounding rectangles
+	u32_t right, left;  // children: Node or SSector (if high bit is set)
 }
 raw_v5_node_t;
 
@@ -799,47 +799,47 @@ struct superblock_s;
 // a wall_tip is where a wall meets a vertex
 typedef struct wall_tip_s
 {
-  // link in list.  List is kept in ANTI-clockwise order.
-  struct wall_tip_s *next;
-  struct wall_tip_s *prev;
-  
-  // angle that line makes at vertex (degrees).
-  angle_g angle;
+	// link in list.  List is kept in ANTI-clockwise order.
+	struct wall_tip_s *next;
+	struct wall_tip_s *prev;
 
-  // sectors on each side of wall.  Left is the side of increasing
-  // angles, right is the side of decreasing angles.  Either can be
-  // NULL for one sided walls.
-  struct sector_s *left;
-  struct sector_s *right;
+	// angle that line makes at vertex (degrees).
+	angle_g angle;
+
+	// sectors on each side of wall.  Left is the side of increasing
+	// angles, right is the side of decreasing angles.  Either can be
+	// NULL for one sided walls.
+	struct sector_s *left;
+	struct sector_s *right;
 }
 wall_tip_t;
 
 
 typedef struct vertex_s
 {
-  // coordinates
-  double x, y;
+	// coordinates
+	double x, y;
 
-  // vertex index.  Always valid after loading and pruning of unused
-  // vertices has occurred.  For GL vertices, bit 30 will be set.
-  int index;
+	// vertex index.  Always valid after loading and pruning of unused
+	// vertices has occurred.  For GL vertices, bit 30 will be set.
+	int index;
 
-  // reference count.  When building normal node info, unused vertices
-  // will be pruned.
-  int ref_count;
+	// reference count.  When building normal node info, unused vertices
+	// will be pruned.
+	int ref_count;
 
-  // usually NULL, unless this vertex occupies the same location as a
-  // previous vertex.  Only used during the pruning phase.
-  struct vertex_s *equiv;
+	// usually NULL, unless this vertex occupies the same location as a
+	// previous vertex.  Only used during the pruning phase.
+	struct vertex_s *equiv;
 
-  // set of wall_tips
-  wall_tip_t *tip_set;
+	// set of wall_tips
+	wall_tip_t *tip_set;
 
-  // contains a duplicate vertex, needed when both normal and V2 GL
-  // nodes are being built at the same time (this is the vertex used
-  // for the normal segs).  Normally NULL.  Note: the wall tips on
-  // this vertex are not created.
-  struct vertex_s *normal_dup;
+	// contains a duplicate vertex, needed when both normal and V2 GL
+	// nodes are being built at the same time (this is the vertex used
+	// for the normal segs).  Normally NULL.  Note: the wall tips on
+	// this vertex are not created.
+	struct vertex_s *normal_dup;
 }
 vertex_t;
 
@@ -848,282 +848,282 @@ vertex_t;
 
 typedef struct sector_s
 {
-  // sector index.  Always valid after loading & pruning.
-  int index;
+	// sector index.  Always valid after loading & pruning.
+	int index;
 
-  // allow segs from other sectors to coexist in a subsector.
-  char coalesce;
+	// allow segs from other sectors to coexist in a subsector.
+	char coalesce;
 
-  // -JL- non-zero if this sector contains a polyobj.
-  int has_polyobj;
+	// -JL- non-zero if this sector contains a polyobj.
+	int has_polyobj;
 
-  // reference count.  When building normal nodes, unused sectors will
-  // be pruned.
-  int ref_count;
+	// reference count.  When building normal nodes, unused sectors will
+	// be pruned.
+	int ref_count;
 
-  // heights
-  int floor_h, ceil_h;
+	// heights
+	int floor_h, ceil_h;
 
-  // textures
-  char floor_tex[8];
-  char ceil_tex[8];
+	// textures
+	char floor_tex[8];
+	char ceil_tex[8];
 
-  // attributes
-  int light;
-  int special;
-  int tag;
+	// attributes
+	int light;
+	int special;
+	int tag;
 
-  // used when building REJECT table.  Each set of sectors that are
-  // isolated from other sectors will have a different group number.
-  // Thus: on every 2-sided linedef, the sectors on both sides will be
-  // in the same group.  The rej_next, rej_prev fields are a link in a
-  // RING, containing all sectors of the same group.
-  int rej_group;
+	// used when building REJECT table.  Each set of sectors that are
+	// isolated from other sectors will have a different group number.
+	// Thus: on every 2-sided linedef, the sectors on both sides will be
+	// in the same group.  The rej_next, rej_prev fields are a link in a
+	// RING, containing all sectors of the same group.
+	int rej_group;
 
-  struct sector_s *rej_next;
-  struct sector_s *rej_prev;
+	struct sector_s *rej_next;
+	struct sector_s *rej_prev;
 
-  // suppress superfluous mini warnings
-  int warned_facing;
-  char warned_unclosed;
+	// suppress superfluous mini warnings
+	int warned_facing;
+	char warned_unclosed;
 }
 sector_t;
 
 
 typedef struct sidedef_s
 {
-  // adjacent sector.  Can be NULL (invalid sidedef)
-  sector_t *sector;
+	// adjacent sector.  Can be NULL (invalid sidedef)
+	sector_t *sector;
 
-  // offset values
-  int x_offset, y_offset;
+	// offset values
+	int x_offset, y_offset;
 
-  // texture names
-  char upper_tex[8];
-  char lower_tex[8];
-  char mid_tex[8];
-  
-  // sidedef index.  Always valid after loading & pruning.
-  int index;
+	// texture names
+	char upper_tex[8];
+	char lower_tex[8];
+	char mid_tex[8];
 
-  // reference count.  When building normal nodes, unused sidedefs will
-  // be pruned.
-  int ref_count;
+	// sidedef index.  Always valid after loading & pruning.
+	int index;
 
-  // usually NULL, unless this sidedef is exactly the same as a
-  // previous one.  Only used during the pruning phase.
-  struct sidedef_s *equiv;
+	// reference count.  When building normal nodes, unused sidedefs will
+	// be pruned.
+	int ref_count;
 
-  // this is true if the sidedef is on a special line.  We don't merge
-  // these sidedefs together, as they might scroll, or change texture
-  // when a switch is pressed.
-  int on_special;
+	// usually NULL, unless this sidedef is exactly the same as a
+	// previous one.  Only used during the pruning phase.
+	struct sidedef_s *equiv;
+
+	// this is true if the sidedef is on a special line.  We don't merge
+	// these sidedefs together, as they might scroll, or change texture
+	// when a switch is pressed.
+	int on_special;
 }
 sidedef_t;
 
 
 typedef struct linedef_s
 {
-  // link for list
-  struct linedef_s *next;
+	// link for list
+	struct linedef_s *next;
 
-  vertex_t *start;    // from this vertex...
-  vertex_t *end;      // ... to this vertex
+	vertex_t *start;    // from this vertex...
+	vertex_t *end;      // ... to this vertex
 
-  sidedef_t *right;   // right sidedef
-  sidedef_t *left;    // left sidede, or NULL if none
+	sidedef_t *right;   // right sidedef
+	sidedef_t *left;    // left sidede, or NULL if none
 
-  // line is marked two-sided
-  char two_sided;
+	// line is marked two-sided
+	char two_sided;
 
-  // prefer not to split
-  char is_precious;
+	// prefer not to split
+	char is_precious;
 
-  // zero length (line should be totally ignored)
-  char zero_len;
+	// zero length (line should be totally ignored)
+	char zero_len;
 
-  // sector is the same on both sides
-  char self_ref;
+	// sector is the same on both sides
+	char self_ref;
 
-  // one-sided linedef used for a special effect (windows).
-  // The value refers to the opposite sector on the back side.
-  sector_t * window_effect;
+	// one-sided linedef used for a special effect (windows).
+	// The value refers to the opposite sector on the back side.
+	sector_t * window_effect;
 
-  int flags;
-  int type;
-  int tag;
+	int flags;
+	int type;
+	int tag;
 
-  // Hexen support
-  int specials[5];
-  
-  // normally NULL, except when this linedef directly overlaps an earlier
-  // one (a rarely-used trick to create higher mid-masked textures).
-  // No segs should be created for these overlapping linedefs.
-  struct linedef_s *overlap;
+	// Hexen support
+	int specials[5];
 
-  // linedef index.  Always valid after loading & pruning of zero
-  // length lines has occurred.
-  int index;
+	// normally NULL, except when this linedef directly overlaps an earlier
+	// one (a rarely-used trick to create higher mid-masked textures).
+	// No segs should be created for these overlapping linedefs.
+	struct linedef_s *overlap;
+
+	// linedef index.  Always valid after loading & pruning of zero
+	// length lines has occurred.
+	int index;
 }
 linedef_t;
 
 
 typedef struct thing_s
 {
-  int x, y;
-  int type;
-  int options;
+	int x, y;
+	int type;
+	int options;
 
-  // other info (angle, and hexen stuff) omitted.  We don't need to
-  // write the THING lump, only read it.
+	// other info (angle, and hexen stuff) omitted.  We don't need to
+	// write the THING lump, only read it.
 
-  // Always valid (thing indices never change).
-  int index;
+	// Always valid (thing indices never change).
+	int index;
 }
 thing_t;
 
 
 typedef struct seg_s
 {
-  // link for list
-  struct seg_s *next;
+	// link for list
+	struct seg_s *next;
 
-  vertex_t *start;   // from this vertex...
-  vertex_t *end;     // ... to this vertex
+	vertex_t *start;   // from this vertex...
+	vertex_t *end;     // ... to this vertex
 
-  // linedef that this seg goes along, or NULL if miniseg
-  linedef_t *linedef;
+	// linedef that this seg goes along, or NULL if miniseg
+	linedef_t *linedef;
 
-  // adjacent sector, or NULL if invalid sidedef or miniseg
-  sector_t *sector;
+	// adjacent sector, or NULL if invalid sidedef or miniseg
+	sector_t *sector;
 
-  // 0 for right, 1 for left
-  int side;
+	// 0 for right, 1 for left
+	int side;
 
-  // seg on other side, or NULL if one-sided.  This relationship is
-  // always one-to-one -- if one of the segs is split, the partner seg
-  // must also be split.
-  struct seg_s *partner;
+	// seg on other side, or NULL if one-sided.  This relationship is
+	// always one-to-one -- if one of the segs is split, the partner seg
+	// must also be split.
+	struct seg_s *partner;
 
-  // seg index.  Only valid once the seg has been added to a
-  // subsector.  A negative value means it is invalid -- there
-  // shouldn't be any of these once the BSP tree has been built.
-  int index;
+	// seg index.  Only valid once the seg has been added to a
+	// subsector.  A negative value means it is invalid -- there
+	// shouldn't be any of these once the BSP tree has been built.
+	int index;
 
-  // when 1, this seg has become zero length (integer rounding of the
-  // start and end vertices produces the same location).  It should be
-  // ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
-  // won't be any of these when writing the V2 GL_SEGS lump].
-  int degenerate;
- 
-  // the superblock that contains this seg, or NULL if the seg is no
-  // longer in any superblock (e.g. now in a subsector).
-  struct superblock_s *block;
+	// when 1, this seg has become zero length (integer rounding of the
+	// start and end vertices produces the same location).  It should be
+	// ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
+	// won't be any of these when writing the V2 GL_SEGS lump].
+	int degenerate;
 
-  // precomputed data for faster calculations
-  double psx, psy;
-  double pex, pey;
-  double pdx, pdy;
+	// the superblock that contains this seg, or NULL if the seg is no
+	// longer in any superblock (e.g. now in a subsector).
+	struct superblock_s *block;
 
-  double p_length;
-  double p_angle;
-  double p_para;
-  double p_perp;
+	// precomputed data for faster calculations
+	double psx, psy;
+	double pex, pey;
+	double pdx, pdy;
 
-  // linedef that this seg initially comes from.  For "real" segs,
-  // this is just the same as the 'linedef' field above.  For
-  // "minisegs", this is the linedef of the partition line.
-  linedef_t *source_line;
+	double p_length;
+	double p_angle;
+	double p_para;
+	double p_perp;
+
+	// linedef that this seg initially comes from.  For "real" segs,
+	// this is just the same as the 'linedef' field above.  For
+	// "minisegs", this is the linedef of the partition line.
+	linedef_t *source_line;
 }
 seg_t;
 
 
 typedef struct subsec_s
 {
-  // list of segs
-  seg_t *seg_list;
+	// list of segs
+	seg_t *seg_list;
 
-  // count of segs
-  int seg_count;
+	// count of segs
+	int seg_count;
 
-  // subsector index.  Always valid, set when the subsector is
-  // initially created.
-  int index;
+	// subsector index.  Always valid, set when the subsector is
+	// initially created.
+	int index;
 
-  // approximate middle point
-  double mid_x;
-  double mid_y;
+	// approximate middle point
+	double mid_x;
+	double mid_y;
 
-  // this is normally false, only set for the "no nodes hack"
-  // [ see comments in the BuildNodes() function. ]
-  bool is_dummy;
+	// this is normally false, only set for the "no nodes hack"
+	// [ see comments in the BuildNodes() function. ]
+	bool is_dummy;
 }
 subsec_t;
 
 
 typedef struct bbox_s
 {
-  int minx, miny;
-  int maxx, maxy;
+	int minx, miny;
+	int maxx, maxy;
 }
 bbox_t;
 
 
 typedef struct child_s
 {
-  // child node or subsector (one must be NULL)
-  struct node_s *node;
-  subsec_t *subsec;
+	// child node or subsector (one must be NULL)
+	struct node_s *node;
+	subsec_t *subsec;
 
-  // child bounding box
-  bbox_t bounds;
+	// child bounding box
+	bbox_t bounds;
 }
 child_t;
 
 
 typedef struct node_s
 {
-  int x, y;     // starting point
-  int dx, dy;   // offset to ending point
+	int x, y;     // starting point
+	int dx, dy;   // offset to ending point
 
-  // right & left children
-  child_t r;
-  child_t l;
+	// right & left children
+	child_t r;
+	child_t l;
 
-  // node index.  Only valid once the NODES or GL_NODES lump has been
-  // created.
-  int index;
+	// node index.  Only valid once the NODES or GL_NODES lump has been
+	// created.
+	int index;
 
-  // the node is too long, and the (dx,dy) values should be halved
-  // when writing into the NODES lump.
-  int too_long;
+	// the node is too long, and the (dx,dy) values should be halved
+	// when writing into the NODES lump.
+	int too_long;
 }
 node_t;
 
 
 typedef struct superblock_s
 {
-  // parent of this block, or NULL for a top-level block
-  struct superblock_s *parent;
+	// parent of this block, or NULL for a top-level block
+	struct superblock_s *parent;
 
-  // coordinates on map for this block, from lower-left corner to
-  // upper-right corner.  Pseudo-inclusive, i.e (x,y) is inside block
-  // if and only if x1 <= x < x2 and y1 <= y < y2.
-  int x1, y1;
-  int x2, y2;
+	// coordinates on map for this block, from lower-left corner to
+	// upper-right corner.  Pseudo-inclusive, i.e (x,y) is inside block
+	// if and only if x1 <= x < x2 and y1 <= y < y2.
+	int x1, y1;
+	int x2, y2;
 
-  // sub-blocks.  NULL when empty.  [0] has the lower coordinates, and
-  // [1] has the higher coordinates.  Division of a square always
-  // occurs horizontally (e.g. 512x512 -> 256x512 -> 256x256).
-  struct superblock_s *subs[2];
+	// sub-blocks.  NULL when empty.  [0] has the lower coordinates, and
+	// [1] has the higher coordinates.  Division of a square always
+	// occurs horizontally (e.g. 512x512 -> 256x512 -> 256x256).
+	struct superblock_s *subs[2];
 
-  // number of real segs and minisegs contained by this block
-  // (including all sub-blocks below it).
-  int real_num;
-  int mini_num;
+	// number of real segs and minisegs contained by this block
+	// (including all sub-blocks below it).
+	int real_num;
+	int mini_num;
 
-  // list of segs completely contained by this block.
-  seg_t *segs;
+	// list of segs completely contained by this block.
+	seg_t *segs;
 }
 superblock_t;
 
@@ -1291,27 +1291,27 @@ namespace glbsp
 
 typedef struct intersection_s
 {
-  // link in list.  The intersection list is kept sorted by
-  // along_dist, in ascending order.
-  struct intersection_s *next;
-  struct intersection_s *prev;
+	// link in list.  The intersection list is kept sorted by
+	// along_dist, in ascending order.
+	struct intersection_s *next;
+	struct intersection_s *prev;
 
-  // vertex in question
-  vertex_t *vertex;
+	// vertex in question
+	vertex_t *vertex;
 
-  // how far along the partition line the vertex is.  Zero is at the
-  // partition seg's start point, positive values move in the same
-  // direction as the partition's direction, and negative values move
-  // in the opposite direction.
-  double along_dist;
+	// how far along the partition line the vertex is.  Zero is at the
+	// partition seg's start point, positive values move in the same
+	// direction as the partition's direction, and negative values move
+	// in the opposite direction.
+	double along_dist;
 
-  // true if this intersection was on a self-referencing linedef
-  bool self_ref;
+	// true if this intersection was on a self-referencing linedef
+	bool self_ref;
 
-  // sector on each side of the vertex (along the partition),
-  // or NULL when that direction isn't OPEN.
-  sector_t *before;
-  sector_t *after;
+	// sector on each side of the vertex (along the partition),
+	// or NULL when that direction isn't OPEN.
+	sector_t *before;
+	sector_t *after;
 }
 intersection_t;
 
@@ -1450,3 +1450,7 @@ void FreeQuickAllocSupers(void);
 }  // namespace glbsp
 
 #endif /* __GLBSP_NODE_H__ */
+
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab
