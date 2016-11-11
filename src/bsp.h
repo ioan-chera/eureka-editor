@@ -21,9 +21,6 @@
 #ifndef __EUREKA_BSP_H__
 #define __EUREKA_BSP_H__
 
-// FIXME !!!
-#include <assert.h>
-
 /** Eureka change: namespacing */
 
 namespace glbsp

@@ -2238,7 +2238,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 
   *N = node = NewNode();
 
-  assert(best->linedef);
+  SYS_ASSERT(best->linedef);
 
   if (best->side == 0)
   {
