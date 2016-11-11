@@ -189,7 +189,7 @@ static void BlockAddLine(linedef_t *L)
 	int line_index = L->index;
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index, 
+	PrintDebug("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
 			x1, y1, x2, y2);
 # endif
 
@@ -342,7 +342,7 @@ static void CompressBlockmap(void)
 		// duplicate ?  Only the very last one of a sequence of duplicates
 		// will update the current offset value.
 
-		if (i+1 < block_count && 
+		if (i+1 < block_count &&
 				BlockCompare(block_dups + i, block_dups + i+1) == 0)
 		{
 			block_ptrs[blk_num] = cur_offset;
@@ -377,7 +377,7 @@ static void CompressBlockmap(void)
 	}
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("Blockmap: Last ptr = %d  duplicates = %d\n", 
+	PrintDebug("Blockmap: Last ptr = %d  duplicates = %d\n",
 			cur_offset, dup_count);
 # endif
 
@@ -638,7 +638,7 @@ namespace glbsp
 // InitReject
 //
 // Puts each sector into individual groups.
-// 
+//
 static void InitReject(void)
 {
 	int i;
@@ -710,7 +710,7 @@ static void GroupSectors(void)
 		sec1->rej_next->rej_prev = sec2;
 		sec2->rej_next->rej_prev = sec1;
 
-		tmp = sec1->rej_next; 
+		tmp = sec1->rej_next;
 		sec1->rej_next = sec2->rej_next;
 		sec2->rej_next = tmp;
 	}
@@ -835,7 +835,7 @@ void PutReject(void)
 //------------------------------------------------------------------------
 //
 //  ZDBSP format support based on code (C) 2002,2003 Randy Heit
-// 
+//
 //------------------------------------------------------------------------
 
 
@@ -977,22 +977,22 @@ vertex_t *LookupVertex(int index)
 
 linedef_t *LookupLinedef(int index)
 	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
-  
+
 sidedef_t *LookupSidedef(int index)
 	LOOKERUPPER(lev_sidedefs, num_sidedefs, "sidedef")
-  
+
 sector_t *LookupSector(int index)
 	LOOKERUPPER(lev_sectors, num_sectors, "sector")
-  
+
 thing_t *LookupThing(int index)
 	LOOKERUPPER(lev_things, num_things, "thing")
-  
+
 seg_t *LookupSeg(int index)
 	LOOKERUPPER(segs, num_segs, "seg")
-  
+
 subsec_t *LookupSubsec(int index)
 	LOOKERUPPER(subsecs, num_subsecs, "subsector")
-  
+
 node_t *LookupNode(int index)
 	LOOKERUPPER(nodes, num_nodes, "node")
 
@@ -1290,7 +1290,7 @@ void GetLinedefs(void)
 		line->end   = end;
 
 		/* check for zero-length line */
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && 
+		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
 		line->flags = UINT16(raw->flags);
@@ -1298,7 +1298,7 @@ void GetLinedefs(void)
 		line->tag  = SINT16(raw->tag);
 
 		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
-		line->is_precious = (line->tag >= 900 && line->tag < 1000) ? 
+		line->is_precious = (line->tag >= 900 && line->tag < 1000) ?
 			true : false;
 
 		line->right = SafeLookupSidedef(UINT16(raw->sidedef1));
@@ -1362,7 +1362,7 @@ void GetLinedefsHexen(void)
 		line->end   = end;
 
 		// check for zero-length line
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && 
+		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
 		line->flags = UINT16(raw->flags);
@@ -1695,8 +1695,8 @@ void PutSegs(void)
 #   if DEBUG_BSP
 		PrintDebug("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
 				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
-				UINT16(raw.start), UINT16(raw.end), UINT16(raw.linedef), 
-				seg->side ? "L" : "R", UINT16(raw.angle), 
+				UINT16(raw.start), UINT16(raw.end), UINT16(raw.linedef),
+				seg->side ? "L" : "R", UINT16(raw.angle),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
 	}
@@ -1750,7 +1750,7 @@ void PutGLSegs(void)
 
 #   if DEBUG_BSP
 		PrintDebug("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef), 
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
 				seg->side ? "L" : "R", UINT16(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
@@ -1817,7 +1817,7 @@ void PutV3Segs(int do_v5)
 
 #   if DEBUG_BSP
 		PrintDebug("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef), 
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
 				seg->side ? "L" : "R", UINT32(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
@@ -2262,7 +2262,7 @@ void LoadLevel(void)
 
 	bool normal_exists = CheckForNormalNodes();
 
-	lev_doing_normal = !cur_info->gwa_mode && (cur_info->force_normal || 
+	lev_doing_normal = !cur_info->gwa_mode && (cur_info->force_normal ||
 			(!cur_info->no_normal && !normal_exists));
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
@@ -2300,7 +2300,7 @@ void LoadLevel(void)
 		GetThings();
 	}
 
-	PrintVerbose("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", 
+	PrintVerbose("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
 			num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
 
 	if (lev_doing_normal)
@@ -2550,7 +2550,7 @@ void SaveLevel(node_t *root_node)
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
- 
+
 
 namespace glbsp
 {
@@ -2651,7 +2651,7 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
 	HANDLE_BOOLEAN(abbrev, field)  \
 HANDLE_BOOLEAN(name, field)
 
-glbsp_ret_e ParseArgs(nodebuildinfo_t *info, 
+glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 		volatile nodebuildcomms_t *comms,
 		const char ** argv, int argc)
 {

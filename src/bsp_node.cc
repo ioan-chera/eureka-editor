@@ -142,7 +142,7 @@ void RecomputeSeg(seg_t *seg)
 //       NOTE WELL: the new piece of the partner seg is inserted into
 //       the same list as the partner seg (and after it) -- thus ALL
 //       segs (except the one we are currently splitting) must exist
-//       on a singly-linked list somewhere. 
+//       on a singly-linked list somewhere.
 //
 // Note: we must update the count values of any superblock that
 //       contains the seg (and/or partner), so that future processing
@@ -292,7 +292,7 @@ static void AddIntersection(intersection_t ** cut_list,
 	for (after=(*cut_list); after && after->next; after=after->next)
 	{ }
 
-	while (after && cut->along_dist < after->along_dist) 
+	while (after && cut->along_dist < after->along_dist)
 		after = after->prev;
 
 	/* link it in */
@@ -321,7 +321,7 @@ static void AddIntersection(intersection_t ** cut_list,
 //
 // Returns true if a "bad seg" was found early.
 //
-static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part, 
+static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 		int best_cost, eval_info_t *info)
 {
 	seg_t *check;
@@ -373,7 +373,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 	/* check partition against all Segs */
 
 	for (check=seg_list->segs; check; check=check->next)
-	{ 
+	{
 		// This is the heart of my pruning idea - it catches
 		// bad segs early on. Killough
 
@@ -534,7 +534,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-static int EvalPartition(superblock_t *seg_list, seg_t *part, 
+static int EvalPartition(superblock_t *seg_list, seg_t *part,
 		int best_cost)
 {
 	eval_info_t info;
@@ -557,8 +557,8 @@ static int EvalPartition(superblock_t *seg_list, seg_t *part,
 	if (info.real_left == 0 || info.real_right == 0)
 	{
 #   if DEBUG_PICKNODE
-		PrintDebug("Eval : No real segs on %s%sside\n", 
-				info.real_left  ? "" : "left ", 
+		PrintDebug("Eval : No real segs on %s%sside\n",
+				info.real_left  ? "" : "left ",
 				info.real_right ? "" : "right ");
 #   endif
 
@@ -582,8 +582,8 @@ static int EvalPartition(superblock_t *seg_list, seg_t *part,
 
 # if DEBUG_PICKNODE
 	PrintDebug("Eval %p: splits=%d iffy=%d near=%d left=%d+%d right=%d+%d "
-			"cost=%d.%02d\n", part, info.splits, info.iffy, info.near_miss, 
-			info.real_left, info.mini_left, info.real_right, info.mini_right, 
+			"cost=%d.%02d\n", part, info.splits, info.iffy, info.near_miss,
+			info.real_left, info.mini_left, info.real_right, info.mini_right,
 			info.cost / 100, info.cost % 100);
 # endif
 
@@ -680,7 +680,7 @@ static seg_t *FindFastSeg(superblock_t *seg_list, const bbox_t *bbox)
 
 
 /* returns false if cancelled */
-static int PickNodeWorker(superblock_t *part_list, 
+static int PickNodeWorker(superblock_t *part_list,
 		superblock_t *seg_list, seg_t ** best, int *best_cost,
 		int *progress, int prog_step)
 {
@@ -697,7 +697,7 @@ static int PickNodeWorker(superblock_t *part_list,
 
 #   if DEBUG_PICKNODE
 		PrintDebug("PickNode:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				part->linedef ? "" : "MINI", part, 
+				part->linedef ? "" : "MINI", part,
 				part->sector ? part->sector->index : -1,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
@@ -813,7 +813,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		}
 	}
 
-	if (false == PickNodeWorker(seg_list, seg_list, &best, &best_cost, 
+	if (false == PickNodeWorker(seg_list, seg_list, &best, &best_cost,
 				&progress, prog_step))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
@@ -827,7 +827,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 	}
 	else
 	{
-		PrintDebug("PickNode: Best has score %d.%02d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", 
+		PrintDebug("PickNode: Best has score %d.%02d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				best_cost / 100, best_cost % 100, best->start->x, best->start->y,
 				best->end->x, best->end->y);
 	}
@@ -851,7 +851,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-void DivideOneSeg(seg_t *cur, seg_t *part, 
+void DivideOneSeg(seg_t *cur, seg_t *part,
 		superblock_t *left_list, superblock_t *right_list,
 		intersection_t ** cut_list)
 {
@@ -1024,8 +1024,8 @@ void FindLimits(superblock_t *seg_list, bbox_t *bbox)
 //
 // AddMinisegs
 //
-void AddMinisegs(seg_t *part, 
-		superblock_t *left_list, superblock_t *right_list, 
+void AddMinisegs(seg_t *part,
+		superblock_t *left_list, superblock_t *right_list,
 		intersection_t *cut_list)
 {
 	intersection_t *cur, *next;
@@ -1041,7 +1041,7 @@ void AddMinisegs(seg_t *part,
 
 	for (cur=cut_list; cur; cur=cur->next)
 	{
-		PrintDebug("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n", 
+		PrintDebug("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
 				cur->vertex->index, cur->vertex->x, cur->vertex->y,
 				cur->along_dist,
 				cur->before ? cur->before->index : -1,
@@ -1207,11 +1207,11 @@ void AddMinisegs(seg_t *part,
 
 #   if DEBUG_CUTLIST
 		PrintDebug("AddMiniseg: %p RIGHT  sector %d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				seg, seg->sector ? seg->sector->index : -1, 
+				seg, seg->sector ? seg->sector->index : -1,
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 
 		PrintDebug("AddMiniseg: %p LEFT   sector %d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				buddy, buddy->sector ? buddy->sector->index : -1, 
+				buddy, buddy->sector ? buddy->sector->index : -1,
 				buddy->start->x, buddy->start->y, buddy->end->x, buddy->end->y);
 #   endif
 	}
@@ -1400,7 +1400,7 @@ void FreeSuper(superblock_t *block)
 	{
 		if (block->subs[num])
 			FreeSuper(block->subs[num]);
-	} 
+	}
 
 	// add block to quick-alloc list.  Note that subs[0] is used for
 	// linking the blocks together.
@@ -1867,7 +1867,7 @@ static void SanityCheckClosed(subsec_t *sub)
 	if (gaps > 0)
 	{
 		PrintMiniWarn("Subsector #%d near (%1.1f,%1.1f) is not closed "
-				"(%d gaps, %d segs)\n", sub->index, 
+				"(%d gaps, %d segs)\n", sub->index,
 				sub->mid_x, sub->mid_y, gaps, total);
 
 #   if DEBUG_SUBSEC
@@ -2144,7 +2144,7 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
 //
 // BuildNodes
 //
-glbsp_ret_e BuildNodes(superblock_t *seg_list, 
+glbsp_ret_e BuildNodes(superblock_t *seg_list,
 		node_t ** N, subsec_t ** S, int depth, const bbox_t *bbox)
 {
 	node_t *node;
@@ -2188,10 +2188,10 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 			 * Vanilla DOOM (and some source ports) do not function when
 			 * there are no nodes at all.  For this case we create a dummy
 			 * node with the real subsector on one side, and a fake-ish
-			 * subsector (containing a copy of a seg) on the other side. 
+			 * subsector (containing a copy of a seg) on the other side.
 			 *
 			 * Tested in Chocolate Doom, PrBoom, Legacy and Odamex, with
-			 * no problems. 
+			 * no problems.
 			 *
 			 * [ P.S. no need to set *S here ]
 			 */
@@ -2261,7 +2261,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
 		{
 			PrintMiniWarn("Loss of accuracy on VERY long node: "
-					"(%d,%d) -> (%d,%d)\n", node->x, node->y, 
+					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
 					node->x + node->dx, node->y + node->dy);
 		}
 
@@ -2462,7 +2462,7 @@ static void RoundOffSubsector(subsec_t *sub)
 					sub->index);
 
 #   if DEBUG_SUBSEC
-		PrintDebug("Degenerate before: (%1.2f,%1.2f) -> (%1.2f,%1.2f)\n", 
+		PrintDebug("Degenerate before: (%1.2f,%1.2f) -> (%1.2f,%1.2f)\n",
 				last_real_degen->start->x, last_real_degen->start->y,
 				last_real_degen->end->x, last_real_degen->end->y);
 #   endif
@@ -2472,7 +2472,7 @@ static void RoundOffSubsector(subsec_t *sub)
 				last_real_degen->end);
 
 #   if DEBUG_SUBSEC
-		PrintDebug("Degenerate after:  (%d,%d) -> (%d,%d)\n", 
+		PrintDebug("Degenerate after:  (%d,%d) -> (%d,%d)\n",
 				I_ROUND(last_real_degen->start->x),
 				I_ROUND(last_real_degen->start->y),
 				I_ROUND(last_real_degen->end->x),

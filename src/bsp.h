@@ -43,13 +43,13 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 /* ----- complex types --------------------------- */
 
-// Node Build Information Structure 
+// Node Build Information Structure
 //
 // Memory note: when changing the string values here (and in
 // nodebuildcomms_t) they should be freed using GlbspFree() and
 // allocated with GlbspStrDup().  The application has the final
 // responsibility to free the strings in here.
-// 
+//
 typedef struct nodebuildinfo_s
 {
 	const char *input_file;
@@ -76,7 +76,7 @@ typedef struct nodebuildinfo_s
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
-	bool gwa_mode;  
+	bool gwa_mode;
 	bool prune_sect;
 	bool no_prune;
 	bool merge_vert;
@@ -128,13 +128,13 @@ typedef struct nodebuildfuncs_s
 	// Fatal errors are called as a last resort when something serious
 	// goes wrong, e.g. out of memory.  This routine should show the
 	// error to the user and abort the program.
-	// 
+	//
 	void (* fatal_error)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 	// The print_msg routine is used to display the various messages
 	// that occur, e.g. "Building GL nodes on MAP01" and that kind of
 	// thing.
-	// 
+	//
 	void (* print_msg)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 	// This routine is called frequently whilst building the nodes, and
@@ -154,7 +154,7 @@ typedef struct nodebuildfuncs_s
 	// type of progress (and determines how many bars to display).
 	// Returns true if all went well, or false if it failed (in which
 	// case the other routines should do nothing when called).
-	// 
+	//
 	bool (* display_open)(displaytype_e type);
 
 	// For GUI versions this can be used to set the title of the
@@ -167,7 +167,7 @@ typedef struct nodebuildfuncs_s
 	// the bar.  Display_setBarLimit sets the integer limit of the
 	// progress (the target value), and display_setBar sets the current
 	// value (which will count up from 0 to the limit, inclusive).
-	// 
+	//
 	void (* display_setBar)(int barnum, int count);
 	void (* display_setBarLimit)(int barnum, int limit);
 	void (* display_setBarText)(int barnum, const char *str);
@@ -249,7 +249,7 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
 // comms->message field usually contains a string describing it.
 //
 glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
-    const nodebuildfuncs_t *funcs, 
+    const nodebuildfuncs_t *funcs,
     volatile nodebuildcomms_t *comms);
 
 // string memory routines.  These should be used for all strings
@@ -419,7 +419,7 @@ typedef struct raw_hexen_thing_s
 
 	u8_t special;    // special type
 	u8_t arg[5];     // special arguments
-} 
+}
 raw_hexen_thing_t;
 
 // -JL- Hexen polyobj thing types
@@ -1286,7 +1286,7 @@ intersection_t;
 // The 'depth' parameter is the current depth in the tree, used for
 // computing  the current progress.
 //
-seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox); 
+seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
 void FindLimits(superblock_t *seg_list, bbox_t *bbox);
@@ -1300,7 +1300,7 @@ void RecomputeSeg(seg_t *seg);
 // well.  Updates the intersection list if the seg lies on or crosses
 // the partition line.
 //
-void DivideOneSeg(seg_t *cur, seg_t *part, 
+void DivideOneSeg(seg_t *cur, seg_t *part,
     superblock_t *left_list, superblock_t *right_list,
     intersection_t ** cut_list);
 
@@ -1316,8 +1316,8 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 // given seg lists (one miniseg on each side).  All the intersection
 // structures will be freed back into a quick-alloc list.
 //
-void AddMinisegs(seg_t *part, 
-    superblock_t *left_list, superblock_t *right_list, 
+void AddMinisegs(seg_t *part,
+    superblock_t *left_list, superblock_t *right_list,
     intersection_t *cut_list);
 
 // free the quick allocation cut list

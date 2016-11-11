@@ -240,15 +240,15 @@ void InitEndian(void)
 	/* sanity-check type sizes */
 
 	if (sizeof(u8_t) != 1)
-		FatalError("Sanity check failed: sizeof(u8_t) = %d", 
+		FatalError("Sanity check failed: sizeof(u8_t) = %d",
 				(int)sizeof(u8_t));
 
 	if (sizeof(u16_t) != 2)
-		FatalError("Sanity check failed: sizeof(u16_t) = %d", 
+		FatalError("Sanity check failed: sizeof(u16_t) = %d",
 				(int)sizeof(u16_t));
 
 	if (sizeof(u32_t) != 4)
-		FatalError("Sanity check failed: sizeof(u32_t) = %d", 
+		FatalError("Sanity check failed: sizeof(u32_t) = %d",
 				(int)sizeof(u32_t));
 
 	/* check endianness */
@@ -272,10 +272,10 @@ void InitEndian(void)
 # if DEBUG_ENDIAN
 	PrintDebug("Endianness = %s\n", cpu_big_endian ? "BIG" : "LITTLE");
 
-	PrintDebug("Endianness check: 0x1234 --> 0x%04x\n", 
+	PrintDebug("Endianness check: 0x1234 --> 0x%04x\n",
 			(int) Endian_U16(0x1234));
 
-	PrintDebug("Endianness check: 0x11223344 --> 0x%08x\n", 
+	PrintDebug("Endianness check: 0x11223344 --> 0x%08x\n",
 			Endian_U32(0x11223344));
 # endif
 }
@@ -500,7 +500,7 @@ angle_g UtilComputeAngle(double dx, double dy)
 
 	angle = atan2((double) dy, (double) dx) * 180.0 / M_PI;
 
-	if (angle < 0) 
+	if (angle < 0)
 		angle += 360.0;
 
 	return angle;
@@ -556,7 +556,7 @@ char *UtilTimeString(void)
 			calend_time->tm_mday,
 			calend_time->tm_hour, calend_time->tm_min,
 			calend_time->tm_sec,  0);
-#endif  
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -647,7 +647,7 @@ static void MarkPolyobjSector(sector_t *sector)
 
 	/* mark all lines of this sector as precious, to prevent the sector
 	 * from being split.
-	 */ 
+	 */
 	sector->has_polyobj = true;
 
 	for (i = 0; i < num_linedefs; i++)
@@ -727,7 +727,7 @@ static void MarkPolyobjPoint(double x, double y)
 		if (fabs(y2 - y1) < DIST_EPSILON)
 			continue;
 
-		if ((y > (y1 + DIST_EPSILON) && y > (y2 + DIST_EPSILON)) || 
+		if ((y > (y1 + DIST_EPSILON) && y > (y2 + DIST_EPSILON)) ||
 				(y < (y1 - DIST_EPSILON) && y < (y2 - DIST_EPSILON)))
 			continue;
 
@@ -774,7 +774,7 @@ static void MarkPolyobjPoint(double x, double y)
 		sector = best_match->left ? best_match->left->sector : NULL;
 
 # if DEBUG_POLYOBJ
-	PrintDebug("  Sector %d contains the polyobj.\n", 
+	PrintDebug("  Sector %d contains the polyobj.\n",
 			sector ? sector->index : -1);
 # endif
 
@@ -884,7 +884,7 @@ static int VertexCompare(const void *p1, const void *p2)
 		return 0;
 
 	if ((int)A->x != (int)B->x)
-		return (int)A->x - (int)B->x; 
+		return (int)A->x - (int)B->x;
 
 	return (int)A->y - (int)B->y;
 }
@@ -1200,7 +1200,7 @@ static inline int LineVertexLowest(const linedef_t *L)
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
 	return ((int)L->start->x < (int)L->end->x ||
-			((int)L->start->x == (int)L->end->x && 
+			((int)L->start->x == (int)L->end->x &&
 			 (int)L->start->y <  (int)L->end->y)) ? 0 : 1;
 }
 
@@ -1223,7 +1223,7 @@ static int LineStartCompare(const void *p1, const void *p2)
 	D = LineVertexLowest(B) ? B->end : B->start;
 
 	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x; 
+		return (int)C->x - (int)D->x;
 
 	return (int)C->y - (int)D->y;
 }
@@ -1247,7 +1247,7 @@ static int LineEndCompare(const void *p1, const void *p2)
 	D = LineVertexLowest(B) ? B->start : B->end;
 
 	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x; 
+		return (int)C->x - (int)D->x;
 
 	return (int)C->y - (int)D->y;
 }
@@ -1497,7 +1497,7 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 	for (after=vert->tip_set; after && after->next; after=after->next)
 	{ }
 
-	while (after && tip->angle + ANG_EPSILON < after->angle) 
+	while (after && tip->angle + ANG_EPSILON < after->angle)
 		after = after->prev;
 
 	// link it in
@@ -1588,7 +1588,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	// compute wall_tip info
 
-	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, seg->sector, 
+	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, seg->sector,
 			seg->partner ? seg->partner->sector : NULL);
 
 	VertexAddWallTip(vert, seg->pdx, seg->pdy,
@@ -1647,8 +1647,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	dx /= dlen;
 	dy /= dlen;
 
-	while (I_ROUND(vert->x) == I_ROUND(start->x) && 
-			I_ROUND(vert->y) == I_ROUND(start->y))
+	while (I_ROUND(vert->x) == I_ROUND(start->x) &&
+		   I_ROUND(vert->y) == I_ROUND(start->y))
 	{
 		vert->x += dx;
 		vert->y += dy;
