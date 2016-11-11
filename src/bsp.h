@@ -525,11 +525,6 @@ void InitEndian(void);
 u16_t Endian_U16(u16_t);
 u32_t Endian_U32(u32_t);
 
-// these are only used for debugging
-void InitDebug(void);
-void TermDebug(void);
-void PrintDebug(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-
 // macros for the display stuff
 #define DisplayOpen        (* cur_funcs->display_open)
 #define DisplaySetTitle    (* cur_funcs->display_setTitle)

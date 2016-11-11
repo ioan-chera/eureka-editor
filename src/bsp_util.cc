@@ -85,7 +85,7 @@ void PrintMsg(const char *str, ...)
 	(* cur_funcs->print_msg)("%s", message_buf);
 
 #if DEBUG_ENABLED
-	PrintDebug(">>> %s", message_buf);
+	DebugPrintf(">>> %s", message_buf);
 #endif
 }
 
@@ -104,7 +104,7 @@ void PrintVerbose(const char *str, ...)
 		(* cur_funcs->print_msg)("%s", message_buf);
 
 #if DEBUG_ENABLED
-	PrintDebug(">>> %s", message_buf);
+	DebugPrintf(">>> %s", message_buf);
 #endif
 }
 
@@ -124,7 +124,7 @@ void PrintWarn(const char *str, ...)
 	cur_comms->total_big_warn++;
 
 #if DEBUG_ENABLED
-	PrintDebug("Warning: %s", message_buf);
+	DebugPrintf("Warning: %s", message_buf);
 #endif
 }
 
@@ -145,7 +145,7 @@ void PrintMiniWarn(const char *str, ...)
 	cur_comms->total_small_warn++;
 
 #if DEBUG_ENABLED
-	PrintDebug("MiniWarn: %s", message_buf);
+	DebugPrintf("MiniWarn: %s", message_buf);
 #endif
 }
 
@@ -163,61 +163,6 @@ void SetErrorMsg(const char *str, ...)
 	GlbspFree(cur_comms->message);
 
 	cur_comms->message = GlbspStrDup(message_buf);
-}
-
-
-/* -------- debugging code ----------------------------- */
-
-//
-// InitDebug
-//
-void InitDebug(void)
-{
-#if DEBUG_ENABLED
-	debug_fp = fopen(DEBUGGING_FILE, "w");
-
-	if (! debug_fp)
-		PrintWarn("Unable to open DEBUG FILE: %s\n", DEBUGGING_FILE);
-
-	PrintDebug("=== START OF DEBUG FILE ===\n");
-#endif
-}
-
-//
-// TermDebug
-//
-void TermDebug(void)
-{
-#if DEBUG_ENABLED
-	if (debug_fp)
-	{
-		PrintDebug("=== END OF DEBUG FILE ===\n");
-
-		fclose(debug_fp);
-		debug_fp = NULL;
-	}
-#endif
-}
-
-//
-// PrintDebug
-//
-void PrintDebug(const char *str, ...)
-{
-#if DEBUG_ENABLED
-	if (debug_fp)
-	{
-		va_list args;
-
-		va_start(args, str);
-		vfprintf(debug_fp, str, args);
-		va_end(args);
-
-		fflush(debug_fp);
-	}
-#else
-	(void) str;
-#endif
 }
 
 
@@ -259,7 +204,7 @@ void InitEndian(void)
 	u.mem[2] = 0x72;  u.mem[3] = 0x73;
 
 # if DEBUG_ENDIAN
-	PrintDebug("Endianness magic value: 0x%08x\n", u.val);
+	DebugPrintf("Endianness magic value: 0x%08x\n", u.val);
 # endif
 
 	if (u.val == 0x70717273)
@@ -270,12 +215,12 @@ void InitEndian(void)
 		FatalError("Sanity check failed: weird endianness (0x%08x)", u.val);
 
 # if DEBUG_ENDIAN
-	PrintDebug("Endianness = %s\n", cpu_big_endian ? "BIG" : "LITTLE");
+	DebugPrintf("Endianness = %s\n", cpu_big_endian ? "BIG" : "LITTLE");
 
-	PrintDebug("Endianness check: 0x1234 --> 0x%04x\n",
+	DebugPrintf("Endianness check: 0x1234 --> 0x%04x\n",
 			(int) Endian_U16(0x1234));
 
-	PrintDebug("Endianness check: 0x11223344 --> 0x%08x\n",
+	DebugPrintf("Endianness check: 0x11223344 --> 0x%08x\n",
 			Endian_U32(0x11223344));
 # endif
 }
@@ -598,7 +543,7 @@ static void MarkPolyobjSector(sector_t *sector)
 		return;
 
 # if DEBUG_POLYOBJ
-	PrintDebug("  Marking SECTOR %d\n", sector->index);
+	DebugPrintf("  Marking SECTOR %d\n", sector->index);
 # endif
 
 	/* already marked ? */
@@ -652,7 +597,7 @@ static void MarkPolyobjPoint(double x, double y)
 					(int) L->end->x, (int) L->end->y))
 		{
 #     if DEBUG_POLYOBJ
-			PrintDebug("  Touching line was %d\n", L->index);
+			DebugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left)
@@ -712,7 +657,7 @@ static void MarkPolyobjPoint(double x, double y)
 	y2 = best_match->end->y;
 
 # if DEBUG_POLYOBJ
-	PrintDebug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
+	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
 			best_match->index, y1, y2, best_dist);
 # endif
 
@@ -720,7 +665,7 @@ static void MarkPolyobjPoint(double x, double y)
 # if DEBUG_POLYOBJ
 	if (fabs(best_dist) < DIST_EPSILON)
 	{
-		PrintDebug("  Polyobj FAILURE: directly on the line (%d)\n",
+		DebugPrintf("  Polyobj FAILURE: directly on the line (%d)\n",
 				best_match->index);
 	}
 # endif
@@ -734,7 +679,7 @@ static void MarkPolyobjPoint(double x, double y)
 		sector = best_match->left ? best_match->left->sector : NULL;
 
 # if DEBUG_POLYOBJ
-	PrintDebug("  Sector %d contains the polyobj.\n",
+	DebugPrintf("  Sector %d contains the polyobj.\n",
 			sector ? sector->index : -1);
 # endif
 
@@ -797,7 +742,7 @@ void DetectPolyobjSectors(void)
 	}
 
 # if DEBUG_POLYOBJ
-	PrintDebug("Using %s style polyobj things\n",
+	DebugPrintf("Using %s style polyobj things\n",
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
@@ -823,7 +768,7 @@ void DetectPolyobjSectors(void)
 		}
 
 #   if DEBUG_POLYOBJ
-		PrintDebug("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+		DebugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #   endif
 
 		MarkPolyobjPoint(x, y);
@@ -1380,9 +1325,9 @@ void TestForWindowEffect(linedef_t *L)
 	}
 
 #if DEBUG_WINDOW_FX
-	PrintDebug("back line: %d  back dist: %1.1f  back_open: %s\n",
+	DebugPrintf("back line: %d  back dist: %1.1f  back_open: %s\n",
 			back_line, back_dist, back_open ? "OPEN" : "CLOSED");
-	PrintDebug("front line: %d  front dist: %1.1f  front_open: %s\n",
+	DebugPrintf("front line: %d  front dist: %1.1f  front_open: %s\n",
 			front_line, front_dist, front_open ? "OPEN" : "CLOSED");
 #else
 	// shut up the compiler warning
@@ -1420,7 +1365,7 @@ void DetectWindowEffects(void)
 		if ((one_siders % 2) == 1 && (one_siders + two_siders) > 1)
 		{
 #if DEBUG_WINDOW_FX
-			PrintDebug("FUNNY LINE %d : start vertex %d has odd number of one-siders\n",
+			DebugPrintf("FUNNY LINE %d : start vertex %d has odd number of one-siders\n",
 					i, L->start->index);
 #endif
 			TestForWindowEffect(L);
@@ -1432,7 +1377,7 @@ void DetectWindowEffects(void)
 		if ((one_siders % 2) == 1 && (one_siders + two_siders) > 1)
 		{
 #if DEBUG_WINDOW_FX
-			PrintDebug("FUNNY LINE %d : end vertex %d has odd number of one-siders\n",
+			DebugPrintf("FUNNY LINE %d : end vertex %d has odd number of one-siders\n",
 					i, L->end->index);
 #endif
 			TestForWindowEffect(L);
@@ -1511,11 +1456,11 @@ void CalculateWallTips(void)
 		vertex_t *vert = LookupVertex(i);
 		wall_tip_t *tip;
 
-		PrintDebug("WallTips for vertex %d:\n", i);
+		DebugPrintf("WallTips for vertex %d:\n", i);
 
 		for (tip=vert->tip_set; tip; tip=tip->next)
 		{
-			PrintDebug("  Angle=%1.1f left=%d right=%d\n", tip->angle,
+			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
 					tip->left ? tip->left->index : -1,
 					tip->right ? tip->right->index : -1);
 		}

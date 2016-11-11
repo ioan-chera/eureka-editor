@@ -143,7 +143,7 @@ static void BlockAdd(int blk_num, int line_index)
 	u16_t *cur = block_lines[blk_num];
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("Block %d has line %d\n", blk_num, line_index);
+	DebugPrintf("Block %d has line %d\n", blk_num, line_index);
 # endif
 
 	if (blk_num < 0 || blk_num >= block_count)
@@ -189,7 +189,7 @@ static void BlockAddLine(linedef_t *L)
 	int line_index = L->index;
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
+	DebugPrintf("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
 			x1, y1, x2, y2);
 # endif
 
@@ -377,7 +377,7 @@ static void CompressBlockmap(void)
 	}
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("Blockmap: Last ptr = %d  duplicates = %d\n",
+	DebugPrintf("Blockmap: Last ptr = %d  duplicates = %d\n",
 			cur_offset, dup_count);
 # endif
 
@@ -511,7 +511,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 	}
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
+	DebugPrintf("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
 # endif
 }
 
@@ -538,7 +538,7 @@ static void TruncateBlockmap(void)
 	block_y = block_mid_y - block_h * 64;
 
 # if DEBUG_BLOCKMAP
-	PrintDebug("New blockmap origin: (%d,%d)\n", block_x, block_y);
+	DebugPrintf("New blockmap origin: (%d,%d)\n", block_x, block_y);
 # endif
 }
 
@@ -723,7 +723,7 @@ static void CountGroups(void)
 			num++;
 		}
 
-		PrintDebug("Group %d  Sectors %d\n", group, num);
+		DebugPrintf("Group %d  Sectors %d\n", group, num);
 	}
 }
 #endif
@@ -998,7 +998,7 @@ void GetVertices(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetVertices: num = %d\n", count);
+	DebugPrintf("GetVertices: num = %d\n", count);
 # endif
 
 	if (!lump || count == 0)
@@ -1039,7 +1039,7 @@ void GetSectors(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetSectors: num = %d\n", count);
+	DebugPrintf("GetSectors: num = %d\n", count);
 # endif
 
 	raw = (raw_sector_t *) lump->data;
@@ -1093,7 +1093,7 @@ void GetThings(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetThings: num = %d\n", count);
+	DebugPrintf("GetThings: num = %d\n", count);
 # endif
 
 	raw = (raw_thing_t *) lump->data;
@@ -1135,7 +1135,7 @@ void GetThingsHexen(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetThingsHexen: num = %d\n", count);
+	DebugPrintf("GetThingsHexen: num = %d\n", count);
 # endif
 
 	raw = (raw_hexen_thing_t *) lump->data;
@@ -1172,7 +1172,7 @@ void GetSidedefs(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetSidedefs: num = %d\n", count);
+	DebugPrintf("GetSidedefs: num = %d\n", count);
 # endif
 
 	raw = (raw_sidedef_t *) lump->data;
@@ -1228,7 +1228,7 @@ void GetLinedefs(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetLinedefs: num = %d\n", count);
+	DebugPrintf("GetLinedefs: num = %d\n", count);
 # endif
 
 	raw = (raw_linedef_t *) lump->data;
@@ -1300,7 +1300,7 @@ void GetLinedefsHexen(void)
 	DisplayTicker();
 
 # if DEBUG_LOAD
-	PrintDebug("GetLinedefsHexen: num = %d\n", count);
+	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
 # endif
 
 	raw = (raw_hexen_linedef_t *) lump->data;
@@ -1652,7 +1652,7 @@ void PutSegs(void)
 		count++;
 
 #   if DEBUG_BSP
-		PrintDebug("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
+		DebugPrintf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
 				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
 				UINT16(raw.start), UINT16(raw.end), UINT16(raw.linedef),
 				seg->side ? "L" : "R", UINT16(raw.angle),
@@ -1708,7 +1708,7 @@ void PutGLSegs(void)
 		count++;
 
 #   if DEBUG_BSP
-		PrintDebug("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
+		DebugPrintf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
 				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
 				seg->side ? "L" : "R", UINT16(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
@@ -1775,7 +1775,7 @@ void PutV3Segs(int do_v5)
 		count++;
 
 #   if DEBUG_BSP
-		PrintDebug("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
+		DebugPrintf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
 				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
 				seg->side ? "L" : "R", UINT32(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
@@ -1810,7 +1810,7 @@ void PutSubsecs(const char *name, int do_gl)
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
 #   if DEBUG_BSP
-		PrintDebug("PUT SUBSEC %04X  First %04X  Num %04X\n",
+		DebugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
 				sub->index, UINT16(raw.first), UINT16(raw.num));
 #   endif
 	}
@@ -1842,7 +1842,7 @@ void PutV3Subsecs(int do_v5)
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
 #   if DEBUG_BSP
-		PrintDebug("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
+		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
 				sub->index, UINT32(raw.first), UINT32(raw.num));
 #   endif
 	}
@@ -1897,7 +1897,7 @@ static void PutOneNode(node_t *node, lump_t *lump)
 	AppendLevelLump(lump, &raw, sizeof(raw));
 
 # if DEBUG_BSP
-	PrintDebug("PUT NODE %04X  Left %04X  Right %04X  "
+	DebugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, UINT16(raw.left),
 			UINT16(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
@@ -1948,7 +1948,7 @@ static void PutOneV5Node(node_t *node, lump_t *lump)
 	AppendLevelLump(lump, &raw, sizeof(raw));
 
 # if DEBUG_BSP
-	PrintDebug("PUT V5 NODE %08X  Left %08X  Right %08X  "
+	DebugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, UINT32(raw.left),
 			UINT32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
@@ -2161,7 +2161,7 @@ static void PutOneZNode(node_t *node)
 	ZLibAppendLump(&raw.left,  4);
 
 # if DEBUG_BSP
-	PrintDebug("PUT Z NODE %08X  Left %08X  Right %08X  "
+	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, UINT32(raw.left),
 			UINT32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
@@ -2961,7 +2961,6 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 		return GLBSP_E_BadArgs;
 	}
 
-	InitDebug();
 	InitEndian();
 
 	if (info->missing_output)
@@ -2975,14 +2974,12 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 
 	if (ret != GLBSP_E_OK)
 	{
-		TermDebug();
 		return ret;
 	}
 
 	if (CountLevels() <= 0)
 	{
 		CloseWads();
-		TermDebug();
 
 		SetErrorMsg("No levels found in wad !");
 		return GLBSP_E_Unknown;
@@ -3036,8 +3033,6 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 
 	// close wads and free memory
 	CloseWads();
-
-	TermDebug();
 
 	cur_info  = NULL;
 	cur_comms = NULL;
