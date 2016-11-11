@@ -51,15 +51,6 @@ namespace glbsp
 
 /* ----- basic types --------------------------- */
 
-typedef signed char  sint8_g;
-typedef signed short sint16_g;
-typedef signed int   sint32_g;
-   
-typedef unsigned char  uint8_g;
-typedef unsigned short uint16_g;
-typedef unsigned int   uint32_g;
-
-typedef double float_g;
 typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 // boolean type
@@ -330,8 +321,8 @@ typedef struct raw_wad_header_s
 {
   char type[4];
 
-  uint32_g num_entries;
-  uint32_g dir_start;
+  u32_t num_entries;
+  u32_t dir_start;
 }
 raw_wad_header_t;
 
@@ -340,8 +331,8 @@ raw_wad_header_t;
 
 typedef struct raw_wad_entry_s
 {
-  uint32_g start;
-  uint32_g length;
+  u32_t start;
+  u32_t length;
 
   char name[8];
 }
@@ -352,8 +343,8 @@ raw_wad_entry_t;
 
 typedef struct raw_blockmap_header_s
 {
-  sint16_g x_origin, y_origin;
-  sint16_g x_blocks, y_blocks;
+  s16_t x_origin, y_origin;
+  s16_t x_blocks, y_blocks;
 }
 raw_blockmap_header_t;
 
@@ -362,38 +353,38 @@ raw_blockmap_header_t;
 
 typedef struct raw_vertex_s
 {
-  sint16_g x, y;
+  s16_t x, y;
 }
 raw_vertex_t;
 
 typedef struct raw_v2_vertex_s
 {
-  sint32_g x, y;
+  s32_t x, y;
 }
 raw_v2_vertex_t;
 
 
 typedef struct raw_linedef_s
 {
-  uint16_g start;     // from this vertex...
-  uint16_g end;       // ... to this vertex
-  uint16_g flags;     // linedef flags (impassible, etc)
-  uint16_g type;      // linedef type (0 for none, 97 for teleporter, etc)
-  sint16_g tag;       // this linedef activates the sector with same tag
-  uint16_g sidedef1;  // right sidedef
-  uint16_g sidedef2;  // left sidedef (only if this line adjoins 2 sectors)
+  u16_t start;     // from this vertex...
+  u16_t end;       // ... to this vertex
+  u16_t flags;     // linedef flags (impassible, etc)
+  u16_t type;      // linedef type (0 for none, 97 for teleporter, etc)
+  s16_t tag;       // this linedef activates the sector with same tag
+  u16_t sidedef1;  // right sidedef
+  u16_t sidedef2;  // left sidedef (only if this line adjoins 2 sectors)
 }
 raw_linedef_t;
 
 typedef struct raw_hexen_linedef_s
 {
-  uint16_g start;        // from this vertex...
-  uint16_g end;          // ... to this vertex
-  uint16_g flags;        // linedef flags (impassible, etc)
-  uint8_g  type;         // linedef type
-  uint8_g  specials[5];  // hexen specials
-  uint16_g sidedef1;     // right sidedef
-  uint16_g sidedef2;     // left sidedef
+  u16_t start;        // from this vertex...
+  u16_t end;          // ... to this vertex
+  u16_t flags;        // linedef flags (impassible, etc)
+  u8_t  type;         // linedef type
+  u8_t  specials[5];  // hexen specials
+  u16_t sidedef1;     // right sidedef
+  u16_t sidedef2;     // left sidedef
 }
 raw_hexen_linedef_t;
 
@@ -405,39 +396,39 @@ raw_hexen_linedef_t;
 
 typedef struct raw_sidedef_s
 {
-  sint16_g x_offset;  // X offset for texture
-  sint16_g y_offset;  // Y offset for texture
+  s16_t x_offset;  // X offset for texture
+  s16_t y_offset;  // Y offset for texture
 
   char upper_tex[8];  // texture name for the part above
   char lower_tex[8];  // texture name for the part below
   char mid_tex[8];    // texture name for the regular part
 
-  uint16_g sector;    // adjacent sector
+  u16_t sector;    // adjacent sector
 }
 raw_sidedef_t;
 
 
 typedef struct raw_sector_s
 {
-  sint16_g floor_h;   // floor height
-  sint16_g ceil_h;    // ceiling height
+  s16_t floor_h;   // floor height
+  s16_t ceil_h;    // ceiling height
 
   char floor_tex[8];  // floor texture
   char ceil_tex[8];   // ceiling texture
 
-  uint16_g light;     // light level (0-255)
-  uint16_g special;   // special behaviour (0 = normal, 9 = secret, ...)
-  sint16_g tag;       // sector activated by a linedef with same tag
+  u16_t light;     // light level (0-255)
+  u16_t special;   // special behaviour (0 = normal, 9 = secret, ...)
+  s16_t tag;       // sector activated by a linedef with same tag
 }
 raw_sector_t;
 
 
 typedef struct raw_thing_s
 {
-  sint16_g x, y;      // position of thing
-  sint16_g angle;     // angle thing faces (degrees)
-  uint16_g type;      // type of thing
-  uint16_g options;   // when appears, deaf, etc..
+  s16_t x, y;      // position of thing
+  s16_t angle;     // angle thing faces (degrees)
+  u16_t type;      // type of thing
+  u16_t options;   // when appears, deaf, etc..
 }
 raw_thing_t;
 
@@ -445,15 +436,15 @@ raw_thing_t;
 // -JL- Hexen thing definition
 typedef struct raw_hexen_thing_s
 {
-  sint16_g tid;       // thing tag id (for scripts/specials)
-  sint16_g x, y;      // position
-  sint16_g height;    // start height above floor
-  sint16_g angle;     // angle thing faces
-  uint16_g type;      // type of thing
-  uint16_g options;   // when appears, deaf, dormant, etc..
+  s16_t tid;       // thing tag id (for scripts/specials)
+  s16_t x, y;      // position
+  s16_t height;    // start height above floor
+  s16_t angle;     // angle thing faces
+  u16_t type;      // type of thing
+  u16_t options;   // when appears, deaf, dormant, etc..
 
-  uint8_g special;    // special type
-  uint8_g arg[5];     // special arguments
+  u8_t special;    // special type
+  u8_t arg[5];     // special arguments
 } 
 raw_hexen_thing_t;
 
@@ -472,78 +463,78 @@ raw_hexen_thing_t;
 
 typedef struct raw_seg_s
 {
-  uint16_g start;     // from this vertex...
-  uint16_g end;       // ... to this vertex
-  uint16_g angle;     // angle (0 = east, 16384 = north, ...)
-  uint16_g linedef;   // linedef that this seg goes along
-  uint16_g flip;      // true if not the same direction as linedef
-  uint16_g dist;      // distance from starting point
+  u16_t start;     // from this vertex...
+  u16_t end;       // ... to this vertex
+  u16_t angle;     // angle (0 = east, 16384 = north, ...)
+  u16_t linedef;   // linedef that this seg goes along
+  u16_t flip;      // true if not the same direction as linedef
+  u16_t dist;      // distance from starting point
 }
 raw_seg_t;
 
 
 typedef struct raw_gl_seg_s
 {
-  uint16_g start;      // from this vertex...
-  uint16_g end;        // ... to this vertex
-  uint16_g linedef;    // linedef that this seg goes along, or -1
-  uint16_g side;       // 0 if on right of linedef, 1 if on left
-  uint16_g partner;    // partner seg number, or -1
+  u16_t start;      // from this vertex...
+  u16_t end;        // ... to this vertex
+  u16_t linedef;    // linedef that this seg goes along, or -1
+  u16_t side;       // 0 if on right of linedef, 1 if on left
+  u16_t partner;    // partner seg number, or -1
 }
 raw_gl_seg_t;
 
 
 typedef struct raw_v3_seg_s
 {
-  uint32_g start;      // from this vertex...
-  uint32_g end;        // ... to this vertex
-  uint16_g linedef;    // linedef that this seg goes along, or -1
-  uint16_g side;       // 0 if on right of linedef, 1 if on left
-  uint32_g partner;    // partner seg number, or -1
+  u32_t start;      // from this vertex...
+  u32_t end;        // ... to this vertex
+  u16_t linedef;    // linedef that this seg goes along, or -1
+  u16_t side;       // 0 if on right of linedef, 1 if on left
+  u32_t partner;    // partner seg number, or -1
 }
 raw_v3_seg_t;
 
 
 typedef struct raw_bbox_s
 {
-  sint16_g maxy, miny;
-  sint16_g minx, maxx;
+  s16_t maxy, miny;
+  s16_t minx, maxx;
 }
 raw_bbox_t;
 
 
 typedef struct raw_node_s
 {
-  sint16_g x, y;         // starting point
-  sint16_g dx, dy;       // offset to ending point
+  s16_t x, y;         // starting point
+  s16_t dx, dy;       // offset to ending point
   raw_bbox_t b1, b2;     // bounding rectangles
-  uint16_g right, left;  // children: Node or SSector (if high bit is set)
+  u16_t right, left;  // children: Node or SSector (if high bit is set)
 }
 raw_node_t;
 
 
 typedef struct raw_subsec_s
 {
-  uint16_g num;     // number of Segs in this Sub-Sector
-  uint16_g first;   // first Seg
+  u16_t num;     // number of Segs in this Sub-Sector
+  u16_t first;   // first Seg
 }
 raw_subsec_t;
 
 
 typedef struct raw_v3_subsec_s
 {
-  uint32_g num;     // number of Segs in this Sub-Sector
-  uint32_g first;   // first Seg
+  u32_t num;     // number of Segs in this Sub-Sector
+  u32_t first;   // first Seg
 }
 raw_v3_subsec_t;
 
 
 typedef struct raw_v5_node_s
 {
-  sint16_g x, y;         // starting point
-  sint16_g dx, dy;       // offset to ending point
+  s16_t x, y;         // starting point
+  s16_t dx, dy;       // offset to ending point
   raw_bbox_t b1, b2;     // bounding rectangles
-  uint32_g right, left;  // children: Node or SSector (if high bit is set)
+  u32_t right, left;  // children: Node or SSector (if high bit is set)
 }
 raw_v5_node_t;
 
@@ -602,8 +593,8 @@ void SetErrorMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 // endian handling
 void InitEndian(void);
-uint16_g Endian_U16(uint16_g);
-uint32_g Endian_U32(uint32_g);
+u16_t Endian_U16(u16_t);
+u32_t Endian_U32(u32_t);
 
 // these are only used for debugging
 void InitDebug(void);
@@ -679,7 +670,7 @@ char *UtilTimeString(void);
 int UtilRoundPOW2(int x);
 
 // compute angle & distance from (0,0) to (dx,dy)
-angle_g UtilComputeAngle(float_g dx, float_g dy);
+angle_g UtilComputeAngle(double dx, double dy);
 #define UtilComputeDist(dx,dy)  sqrt((dx) * (dx) + (dy) * (dy))
 
 // compute the parallel and perpendicular distances from a partition
@@ -697,9 +688,9 @@ angle_g UtilComputeAngle(float_g dx, float_g dy);
 int UtilFileExists(const char *filename);
 
 // checksum functions
-void Adler32_Begin(uint32_g *crc);
-void Adler32_AddBlock(uint32_g *crc, const uint8_g *data, int length);
-void Adler32_Finish(uint32_g *crc);
+void Adler32_Begin(u32_t *crc);
+void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
+void Adler32_Finish(u32_t *crc);
 
 }  // namespace glbsp
 
@@ -837,7 +828,7 @@ wall_tip_t;
 typedef struct vertex_s
 {
   // coordinates
-  float_g x, y;
+  double x, y;
 
   // vertex index.  Always valid after loading and pruning of unused
   // vertices has occurred.  For GL vertices, bit 30 will be set.
@@ -1040,14 +1031,14 @@ typedef struct seg_s
   struct superblock_s *block;
 
   // precomputed data for faster calculations
-  float_g psx, psy;
-  float_g pex, pey;
-  float_g pdx, pdy;
+  double psx, psy;
+  double pex, pey;
+  double pdx, pdy;
 
-  float_g p_length;
-  float_g p_angle;
-  float_g p_para;
-  float_g p_perp;
+  double p_length;
+  double p_angle;
+  double p_para;
+  double p_perp;
 
   // linedef that this seg initially comes from.  For "real" segs,
   // this is just the same as the 'linedef' field above.  For
@@ -1070,8 +1061,8 @@ typedef struct subsec_s
   int index;
 
   // approximate middle point
-  float_g mid_x;
-  float_g mid_y;
+  double mid_x;
+  double mid_y;
 
   // this is normally FALSE, only set for the "no nodes hack"
   // [ see comments in the BuildNodes() function. ]
@@ -1249,7 +1240,7 @@ void CalculateWallTips(void);
 // return a new vertex (with correct wall_tip info) for the split that
 // happens along the given seg at the given location.
 //
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, float_g x, float_g y);
+vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
 
 // return a new end vertex to compensate for a seg that would end up
 // being zero-length (after integer rounding).  Doesn't compute the
@@ -1262,7 +1253,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 // at this vertex is open.  Returns a sector reference if it's open,
 // or NULL if closed (void space or directly along a linedef).
 //
-sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy);
+sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
 
 }  // namespace glbsp
 
@@ -1322,7 +1313,7 @@ typedef struct intersection_s
   // partition seg's start point, positive values move in the same
   // direction as the partition's direction, and negative values move
   // in the opposite direction.
-  float_g along_dist;
+  double along_dist;
 
   // TRUE if this intersection was on a self-referencing linedef
   boolean_g self_ref;

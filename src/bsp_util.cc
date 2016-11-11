@@ -232,28 +232,28 @@ void InitEndian(void)
 {
   volatile union
   {
-    uint8_g mem[32];
-    uint32_g val;
+    u8_t mem[32];
+    u32_t val;
   }
   u;
  
   /* sanity-check type sizes */
 
-  if (sizeof(uint8_g) != 1)
-    FatalError("Sanity check failed: sizeof(uint8_g) = %d", 
-        (int)sizeof(uint8_g));
+  if (sizeof(u8_t) != 1)
+    FatalError("Sanity check failed: sizeof(u8_t) = %d", 
+        (int)sizeof(u8_t));
 
-  if (sizeof(uint16_g) != 2)
-    FatalError("Sanity check failed: sizeof(uint16_g) = %d", 
-        (int)sizeof(uint16_g));
+  if (sizeof(u16_t) != 2)
+    FatalError("Sanity check failed: sizeof(u16_t) = %d", 
+        (int)sizeof(u16_t));
 
-  if (sizeof(uint32_g) != 4)
-    FatalError("Sanity check failed: sizeof(uint32_g) = %d", 
-        (int)sizeof(uint32_g));
+  if (sizeof(u32_t) != 4)
+    FatalError("Sanity check failed: sizeof(u32_t) = %d", 
+        (int)sizeof(u32_t));
 
   /* check endianness */
 
-  memset((uint32_g *) u.mem, 0, sizeof(u.mem));
+  memset((u32_t *) u.mem, 0, sizeof(u.mem));
 
   u.mem[0] = 0x70;  u.mem[1] = 0x71;
   u.mem[2] = 0x72;  u.mem[3] = 0x73;
@@ -283,7 +283,7 @@ void InitEndian(void)
 //
 // Endian_U16
 //
-uint16_g Endian_U16(uint16_g x)
+u16_t Endian_U16(u16_t x)
 {
   if (cpu_big_endian)
     return (x >> 8) | (x << 8);
@@ -294,7 +294,7 @@ uint16_g Endian_U16(uint16_g x)
 //
 // Endian_U32
 //
-uint32_g Endian_U32(uint32_g x)
+u32_t Endian_U32(u32_t x)
 {
   if (cpu_big_endian)
     return (x >> 24) | ((x >> 8) & 0xff00) |
@@ -491,7 +491,7 @@ int UtilRoundPOW2(int x)
 //
 // Translate (dx, dy) into an angle value (degrees)
 //
-angle_g UtilComputeAngle(float_g dx, float_g dy)
+angle_g UtilComputeAngle(double dx, double dy)
 {
   double angle;
 
@@ -563,15 +563,15 @@ char *UtilTimeString(void)
 //  Adler-32 CHECKSUM Code
 //------------------------------------------------------------------------
 
-void Adler32_Begin(uint32_g *crc)
+void Adler32_Begin(u32_t *crc)
 {
   *crc = 1;
 }
 
-void Adler32_AddBlock(uint32_g *crc, const uint8_g *data, int length)
+void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length)
 {
-    uint32_g s1 = (*crc) & 0xFFFF;
-    uint32_g s2 = ((*crc) >> 16) & 0xFFFF;
+    u32_t s1 = (*crc) & 0xFFFF;
+    u32_t s2 = ((*crc) >> 16) & 0xFFFF;
 
     for (; length > 0; data++, length--)
     {
@@ -582,7 +582,7 @@ void Adler32_AddBlock(uint32_g *crc, const uint8_g *data, int length)
     *crc = (s2 << 16) | s1;
 }
 
-void Adler32_Finish(uint32_g *crc)
+void Adler32_Finish(u32_t *crc)
 {
   /* nothing to do */
 }
@@ -662,17 +662,17 @@ static void MarkPolyobjSector(sector_t *sector)
   }
 }
 
-static void MarkPolyobjPoint(float_g x, float_g y)
+static void MarkPolyobjPoint(double x, double y)
 {
   int i;
   int inside_count = 0;
  
-  float_g best_dist = 999999;
+  double best_dist = 999999;
   linedef_t *best_match = NULL;
   sector_t *sector = NULL;
 
-  float_g x1, y1;
-  float_g x2, y2;
+  double x1, y1;
+  double x2, y2;
 
   // -AJA- First we handle the "awkward" cases where the polyobj sits
   //       directly on a linedef or even a vertex.  We check all lines
@@ -718,7 +718,7 @@ static void MarkPolyobjPoint(float_g x, float_g y)
   {
     linedef_t *L = lev_linedefs[i];
 
-    float_g x_cut;
+    double x_cut;
 
     x1 = L->start->x;  y1 = L->start->y;
     x2 = L->end->x;    y2 = L->end->y;
@@ -845,8 +845,8 @@ void DetectPolyobjSectors(void)
   {
     thing_t *T = LookupThing(i);
 
-    float_g x = (float_g) T->x;
-    float_g y = (float_g) T->y;
+    double x = (double) T->x;
+    double y = (double) T->y;
 
     // ignore everything except polyobj start spots
     if (hexen_style)
@@ -874,8 +874,8 @@ void DetectPolyobjSectors(void)
 
 static int VertexCompare(const void *p1, const void *p2)
 {
-  int vert1 = ((const uint16_g *) p1)[0];
-  int vert2 = ((const uint16_g *) p2)[0];
+  int vert1 = ((const u16_t *) p1)[0];
+  int vert2 = ((const u16_t *) p2)[0];
 
   vertex_t *A = lev_vertices[vert1];
   vertex_t *B = lev_vertices[vert2];
@@ -893,8 +893,8 @@ static int SidedefCompare(const void *p1, const void *p2)
 {
   int comp;
 
-  int side1 = ((const uint16_g *) p1)[0];
-  int side2 = ((const uint16_g *) p2)[0];
+  int side1 = ((const u16_t *) p1)[0];
+  int side2 = ((const u16_t *) p2)[0];
 
   sidedef_t *A = lev_sidedefs[side1];
   sidedef_t *B = lev_sidedefs[side2];
@@ -938,7 +938,7 @@ static int SidedefCompare(const void *p1, const void *p2)
 void DetectDuplicateVertices(void)
 {
   int i;
-  uint16_g *array = (uint16_g *)UtilCalloc(num_vertices * sizeof(uint16_g));
+  u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
 
   DisplayTicker();
 
@@ -946,7 +946,7 @@ void DetectDuplicateVertices(void)
   for (i=0; i < num_vertices; i++)
     array[i] = i;
   
-  qsort(array, num_vertices, sizeof(uint16_g), VertexCompare);
+  qsort(array, num_vertices, sizeof(u16_t), VertexCompare);
 
   // now mark them off
   for (i=0; i < num_vertices - 1; i++)
@@ -968,7 +968,7 @@ void DetectDuplicateVertices(void)
 void DetectDuplicateSidedefs(void)
 {
   int i;
-  uint16_g *array = (uint16_g *)UtilCalloc(num_sidedefs * sizeof(uint16_g));
+  u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
 
   DisplayTicker();
 
@@ -976,7 +976,7 @@ void DetectDuplicateSidedefs(void)
   for (i=0; i < num_sidedefs; i++)
     array[i] = i;
   
-  qsort(array, num_sidedefs, sizeof(uint16_g), SidedefCompare);
+  qsort(array, num_sidedefs, sizeof(u16_t), SidedefCompare);
 
   // now mark them off
   for (i=0; i < num_sidedefs - 1; i++)
@@ -1324,19 +1324,19 @@ void TestForWindowEffect(linedef_t *L)
 
   int i;
 
-  float_g mx = (L->start->x + L->end->x) / 2.0;
-  float_g my = (L->start->y + L->end->y) / 2.0;
+  double mx = (L->start->x + L->end->x) / 2.0;
+  double my = (L->start->y + L->end->y) / 2.0;
 
-  float_g dx = L->end->x - L->start->x;
-  float_g dy = L->end->y - L->start->y;
+  double dx = L->end->x - L->start->x;
+  double dy = L->end->y - L->start->y;
 
   int cast_horiz = fabs(dx) < fabs(dy) ? 1 : 0;
 
-  float_g back_dist = 999999.0;
+  double back_dist = 999999.0;
   sector_t * back_open = NULL;
   int back_line = -1;
 
-  float_g front_dist = 999999.0;
+  double front_dist = 999999.0;
   sector_t * front_open = NULL;
   int front_line = -1;
 
@@ -1344,11 +1344,11 @@ void TestForWindowEffect(linedef_t *L)
   {
     linedef_t *N = lev_linedefs[i];
 
-    float_g dist;
+    double dist;
     boolean_g is_front;
     sidedef_t *hit_side;
 
-    float_g dx2, dy2;
+    double dx2, dy2;
 
     if (N == L || N->zero_len || N->overlap)
       continue;
@@ -1483,7 +1483,7 @@ void DetectWindowEffects(void)
 
 /* ----- vertex routines ------------------------------- */
 
-static void VertexAddWallTip(vertex_t *vert, float_g dx, float_g dy,
+static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
   sector_t *left, sector_t *right)
 {
   wall_tip_t *tip = NewWallTip();
@@ -1533,10 +1533,10 @@ void CalculateWallTips(void)
     if (line->self_ref && cur_info->skip_self_ref)
       continue;
 
-    float_g x1 = line->start->x;
-    float_g y1 = line->start->y;
-    float_g x2 = line->end->x;
-    float_g y2 = line->end->y;
+    double x1 = line->start->x;
+    double y1 = line->start->y;
+    double x2 = line->end->x;
+    double y2 = line->end->y;
 
     sector_t *left  = (line->left)  ? line->left->sector  : NULL;
     sector_t *right = (line->right) ? line->right->sector : NULL;
@@ -1566,7 +1566,7 @@ void CalculateWallTips(void)
 //
 // NewVertexFromSplitSeg
 //
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, float_g x, float_g y)
+vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 {
   vertex_t *vert = NewVertex();
 
@@ -1616,10 +1616,10 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, float_g x, float_g y)
 //
 vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 {
-  float_g dx = end->x - start->x;
-  float_g dy = end->y - start->y;
+  double dx = end->x - start->x;
+  double dy = end->y - start->y;
 
-  float_g dlen = UtilComputeDist(dx, dy);
+  double dlen = UtilComputeDist(dx, dy);
 
   vertex_t *vert = NewVertex();
 
@@ -1660,7 +1660,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 //
 // VertexCheckOpen
 //
-sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy)
+sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
   wall_tip_t *tip;
 

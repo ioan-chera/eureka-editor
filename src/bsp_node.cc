@@ -148,7 +148,7 @@ void RecomputeSeg(seg_t *seg)
 //       contains the seg (and/or partner), so that future processing
 //       is not fucked up by incorrect counts.
 //
-static seg_t *SplitSeg(seg_t *old_seg, float_g x, float_g y)
+static seg_t *SplitSeg(seg_t *old_seg, double x, double y)
 {
   seg_t *new_seg;
   vertex_t *new_vert;
@@ -226,7 +226,7 @@ static seg_t *SplitSeg(seg_t *old_seg, float_g x, float_g y)
 //       situations like horizontal/vertical lines.
 //
 static inline void ComputeIntersection(seg_t *cur, seg_t *part,
-  float_g perp_c, float_g perp_d, float_g *x, float_g *y)
+  double perp_c, double perp_d, double *x, double *y)
 {
   double ds;
 
@@ -326,8 +326,8 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 {
   seg_t *check;
 
-  float_g qnty;
-  float_g a, b, fa, fb;
+  double qnty;
+  double a, b, fa, fb;
 
   int num;
   int factor = cur_info->factor;
@@ -857,11 +857,11 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
 {
   seg_t *new_seg;
 
-  float_g x, y;
+  double x, y;
 
   /* get state of lines' relation to each other */
-  float_g a = UtilPerpDist(part, cur->psx, cur->psy);
-  float_g b = UtilPerpDist(part, cur->pex, cur->pey);
+  double a = UtilPerpDist(part, cur->psx, cur->psy);
+  double b = UtilPerpDist(part, cur->pex, cur->pey);
 
   boolean_g self_ref = cur->linedef ? cur->linedef->self_ref : FALSE;
 
@@ -981,10 +981,10 @@ static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 
   for (cur=block->segs; cur; cur=cur->next)
   {
-    float_g x1 = cur->start->x;
-    float_g y1 = cur->start->y;
-    float_g x2 = cur->end->x;
-    float_g y2 = cur->end->y;
+    double x1 = cur->start->x;
+    double y1 = cur->start->y;
+    double x2 = cur->end->x;
+    double y2 = cur->end->y;
 
     int lx = (int) floor(MIN(x1, x2));
     int ly = (int) floor(MIN(y1, y2));
@@ -1057,7 +1057,7 @@ void AddMinisegs(seg_t *part,
 
   while (cur && next)
   {
-    float_g len = next->along_dist - cur->along_dist;
+    double len = next->along_dist - cur->along_dist;
 
     if (len < -0.1)
       InternalError("Bad order in intersect list: %1.3f > %1.3f\n",
@@ -1281,9 +1281,9 @@ static superblock_t *quick_alloc_supers = NULL;
 //
 // Returns -1 for left, +1 for right, or 0 for intersect.
 //
-static int PointOnLineSide(seg_t *part, float_g x, float_g y)
+static int PointOnLineSide(seg_t *part, double x, double y)
 {
-  float_g perp = UtilPerpDist(part, x, y);
+  double perp = UtilPerpDist(part, x, y);
   
   if (fabs(perp) <= DIST_EPSILON)
     return 0;
@@ -1296,10 +1296,10 @@ static int PointOnLineSide(seg_t *part, float_g x, float_g y)
 //
 int BoxOnLineSide(superblock_t *box, seg_t *part)
 {
-  float_g x1 = (float_g)box->x1 - IFFY_LEN * 1.5;
-  float_g y1 = (float_g)box->y1 - IFFY_LEN * 1.5;
-  float_g x2 = (float_g)box->x2 + IFFY_LEN * 1.5;
-  float_g y2 = (float_g)box->y2 + IFFY_LEN * 1.5;
+  double x1 = (double)box->x1 - IFFY_LEN * 1.5;
+  double y1 = (double)box->y1 - IFFY_LEN * 1.5;
+  double x2 = (double)box->x2 + IFFY_LEN * 1.5;
+  double y2 = (double)box->y2 + IFFY_LEN * 1.5;
 
   int p1, p2;
 
@@ -1708,7 +1708,7 @@ static void DetermineMiddle(subsec_t *sub)
 {
   seg_t *cur;
 
-  float_g mid_x=0, mid_y=0;
+  double mid_x=0, mid_y=0;
   int total=0;
 
   if (sub->is_dummy)
