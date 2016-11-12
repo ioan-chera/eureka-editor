@@ -269,8 +269,8 @@ static int ReadHeader(const char *filename)
 
   wad.kind = (header.type[0] == 'I') ? IWAD : PWAD;
   
-  wad.num_entries = UINT32(header.num_entries);
-  wad.dir_start   = UINT32(header.dir_start);
+  wad.num_entries = LE_U32(header.num_entries);
+  wad.dir_start   = LE_U32(header.dir_start);
 
   // initialise stuff
   wad.dir_head = NULL;
@@ -301,8 +301,8 @@ static void ReadDirEntry(void)
 
   lump = NewLump(UtilStrNDup(entry.name, 8));
 
-  lump->start  = UINT32(entry.start);
-  lump->length = UINT32(entry.length);
+  lump->start  = LE_U32(entry.start);
+  lump->length = LE_U32(entry.length);
 
 # if DEBUG_DIR
   DebugPrintf("Read dir... %s\n", lump->name);
@@ -650,8 +650,8 @@ static void WriteHeader(void)
       break;
   }
 
-  header.num_entries = UINT32(wad.num_entries);
-  header.dir_start   = UINT32(wad.dir_start);
+  header.num_entries = LE_U32(wad.num_entries);
+  header.dir_start   = LE_U32(wad.dir_start);
 
   len = fwrite(&header, sizeof(header), 1, out_file);
 
@@ -903,8 +903,8 @@ static void WriteDirEntry(lump_t *lump)
 
   strncpy(entry.name, lump->name, 8);
 
-  entry.start  = UINT32(lump->new_start);
-  entry.length = UINT32(lump->length);
+  entry.start  = LE_U32(lump->new_start);
+  entry.length = LE_U32(lump->length);
 
   len = fwrite(&entry, sizeof(entry), 1, out_file);
 

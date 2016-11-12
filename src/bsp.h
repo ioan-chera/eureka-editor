@@ -459,11 +459,6 @@ void PrintMiniWarn(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 // set message for certain errors
 void SetErrorMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
-// endian handling
-void InitEndian(void);
-u16_t Endian_U16(u16_t);
-u32_t Endian_U32(u32_t);
-
 
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions

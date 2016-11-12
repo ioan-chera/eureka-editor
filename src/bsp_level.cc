@@ -169,7 +169,7 @@ static void BlockAdd(int blk_num, int line_index)
 	// compute new checksum
 	cur[BK_XOR] = ((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index;
 
-	cur[BK_FIRST + cur[BK_NUM]] = UINT16(line_index);
+	cur[BK_FIRST + cur[BK_NUM]] = LE_U16(line_index);
 	cur[BK_NUM]++;
 }
 
@@ -406,17 +406,17 @@ static void WriteBlockmap(void)
 		return;
 
 	// fill in header
-	header.x_origin = UINT16(block_x);
-	header.y_origin = UINT16(block_y);
-	header.x_blocks = UINT16(block_w);
-	header.y_blocks = UINT16(block_h);
+	header.x_origin = LE_U16(block_x);
+	header.y_origin = LE_U16(block_y);
+	header.x_blocks = LE_U16(block_w);
+	header.y_blocks = LE_U16(block_h);
 
 	AppendLevelLump(lump, &header, sizeof(header));
 
 	// handle pointers
 	for (i=0; i < block_count; i++)
 	{
-		u16_t ptr = UINT16(block_ptrs[i]);
+		u16_t ptr = LE_U16(block_ptrs[i]);
 
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.", i);
@@ -1010,8 +1010,8 @@ void GetVertices(void)
 	{
 		vertex_t *vert = NewVertex();
 
-		vert->x = (double) SINT16(raw->x);
-		vert->y = (double) SINT16(raw->y);
+		vert->x = (double) LE_S16(raw->x);
+		vert->y = (double) LE_S16(raw->y);
 
 		vert->index = i;
 	}
@@ -1048,15 +1048,15 @@ void GetSectors(void)
 	{
 		sector_t *sector = NewSector();
 
-		sector->floor_h = SINT16(raw->floor_h);
-		sector->ceil_h  = SINT16(raw->ceil_h);
+		sector->floor_h = LE_S16(raw->floor_h);
+		sector->ceil_h  = LE_S16(raw->ceil_h);
 
 		memcpy(sector->floor_tex, raw->floor_tex, sizeof(sector->floor_tex));
 		memcpy(sector->ceil_tex,  raw->ceil_tex,  sizeof(sector->ceil_tex));
 
-		sector->light = UINT16(raw->light);
-		sector->special = UINT16(raw->special);
-		sector->tag = SINT16(raw->tag);
+		sector->light = LE_U16(raw->light);
+		sector->special = LE_U16(raw->special);
+		sector->tag = LE_S16(raw->tag);
 
 		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
 			true : false;
@@ -1102,11 +1102,11 @@ void GetThings(void)
 	{
 		thing_t *thing = NewThing();
 
-		thing->x = SINT16(raw->x);
-		thing->y = SINT16(raw->y);
+		thing->x = LE_S16(raw->x);
+		thing->y = LE_S16(raw->y);
 
-		thing->type = UINT16(raw->type);
-		thing->options = UINT16(raw->options);
+		thing->type = LE_U16(raw->type);
+		thing->options = LE_U16(raw->options);
 
 		thing->index = i;
 	}
@@ -1144,11 +1144,11 @@ void GetThingsHexen(void)
 	{
 		thing_t *thing = NewThing();
 
-		thing->x = SINT16(raw->x);
-		thing->y = SINT16(raw->y);
+		thing->x = LE_S16(raw->x);
+		thing->y = LE_S16(raw->y);
 
-		thing->type = UINT16(raw->type);
-		thing->options = UINT16(raw->options);
+		thing->type = LE_U16(raw->type);
+		thing->options = LE_U16(raw->options);
 
 		thing->index = i;
 	}
@@ -1181,14 +1181,14 @@ void GetSidedefs(void)
 	{
 		sidedef_t *side = NewSidedef();
 
-		side->sector = (SINT16(raw->sector) == -1) ? NULL :
-			LookupSector(UINT16(raw->sector));
+		side->sector = (LE_S16(raw->sector) == -1) ? NULL :
+			LookupSector(LE_U16(raw->sector));
 
 		if (side->sector)
 			side->sector->ref_count++;
 
-		side->x_offset = SINT16(raw->x_offset);
-		side->y_offset = SINT16(raw->y_offset);
+		side->x_offset = LE_S16(raw->x_offset);
+		side->y_offset = LE_S16(raw->y_offset);
 
 		memcpy(side->upper_tex, raw->upper_tex, sizeof(side->upper_tex));
 		memcpy(side->lower_tex, raw->lower_tex, sizeof(side->lower_tex));
@@ -1237,8 +1237,8 @@ void GetLinedefs(void)
 	{
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(UINT16(raw->start));
-		vertex_t *end   = LookupVertex(UINT16(raw->end));
+		vertex_t *start = LookupVertex(LE_U16(raw->start));
+		vertex_t *end   = LookupVertex(LE_U16(raw->end));
 
 		start->ref_count++;
 		end->ref_count++;
@@ -1252,16 +1252,16 @@ void GetLinedefs(void)
 		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = UINT16(raw->flags);
-		line->type = UINT16(raw->type);
-		line->tag  = SINT16(raw->tag);
+		line->flags = LE_U16(raw->flags);
+		line->type = LE_U16(raw->type);
+		line->tag  = LE_S16(raw->tag);
 
 		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
 		line->is_precious = (line->tag >= 900 && line->tag < 1000) ?
 			true : false;
 
-		line->right = SafeLookupSidedef(UINT16(raw->sidedef1));
-		line->left  = SafeLookupSidedef(UINT16(raw->sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw->sidedef1));
+		line->left  = SafeLookupSidedef(LE_U16(raw->sidedef2));
 
 		if (line->right)
 		{
@@ -1309,8 +1309,8 @@ void GetLinedefsHexen(void)
 	{
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(UINT16(raw->start));
-		vertex_t *end   = LookupVertex(UINT16(raw->end));
+		vertex_t *start = LookupVertex(LE_U16(raw->start));
+		vertex_t *end   = LookupVertex(LE_U16(raw->end));
 
 		start->ref_count++;
 		end->ref_count++;
@@ -1324,19 +1324,19 @@ void GetLinedefsHexen(void)
 		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = UINT16(raw->flags);
-		line->type = UINT8(raw->type);
+		line->flags = LE_U16(raw->flags);
+		line->type = (u8_t)(raw->type);
 		line->tag  = 0;
 
 		/* read specials */
 		for (j=0; j < 5; j++)
-			line->specials[j] = UINT8(raw->specials[j]);
+			line->specials[j] = (u8_t)(raw->specials[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
 		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
 
-		line->right = SafeLookupSidedef(UINT16(raw->sidedef1));
-		line->left  = SafeLookupSidedef(UINT16(raw->sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw->sidedef1));
+		line->left  = SafeLookupSidedef(LE_U16(raw->sidedef2));
 
 		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
 		if (line->right)
@@ -1422,8 +1422,8 @@ void PutVertices(const char *name, int do_gl)
 			continue;
 		}
 
-		raw.x = SINT16(I_ROUND(vert->x));
-		raw.y = SINT16(I_ROUND(vert->y));
+		raw.x = LE_S16(I_ROUND(vert->x));
+		raw.y = LE_S16(I_ROUND(vert->y));
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
@@ -1462,8 +1462,8 @@ void PutV2Vertices(int do_v5)
 		if (! (vert->index & IS_GL_VERTEX))
 			continue;
 
-		raw.x = SINT32((int)(vert->x * 65536.0));
-		raw.y = SINT32((int)(vert->y * 65536.0));
+		raw.x = LE_S32((int)(vert->x * 65536.0));
+		raw.y = LE_S32((int)(vert->y * 65536.0));
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
@@ -1490,15 +1490,15 @@ void PutSectors(void)
 		raw_sector_t raw;
 		sector_t *sector = lev_sectors[i];
 
-		raw.floor_h = SINT16(sector->floor_h);
-		raw.ceil_h  = SINT16(sector->ceil_h);
+		raw.floor_h = LE_S16(sector->floor_h);
+		raw.ceil_h  = LE_S16(sector->ceil_h);
 
 		memcpy(raw.floor_tex, sector->floor_tex, sizeof(raw.floor_tex));
 		memcpy(raw.ceil_tex,  sector->ceil_tex,  sizeof(raw.ceil_tex));
 
-		raw.light = UINT16(sector->light);
-		raw.special = UINT16(sector->special);
-		raw.tag   = SINT16(sector->tag);
+		raw.light = LE_U16(sector->light);
+		raw.special = LE_U16(sector->special);
+		raw.tag   = LE_S16(sector->tag);
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 	}
@@ -1521,11 +1521,11 @@ void PutSidedefs(void)
 		raw_sidedef_t raw;
 		sidedef_t *side = lev_sidedefs[i];
 
-		raw.sector = (side->sector == NULL) ? SINT16(-1) :
-			UINT16(side->sector->index);
+		raw.sector = (side->sector == NULL) ? LE_S16(-1) :
+			LE_U16(side->sector->index);
 
-		raw.x_offset = SINT16(side->x_offset);
-		raw.y_offset = SINT16(side->y_offset);
+		raw.x_offset = LE_S16(side->x_offset);
+		raw.y_offset = LE_S16(side->y_offset);
 
 		memcpy(raw.upper_tex, side->upper_tex, sizeof(raw.upper_tex));
 		memcpy(raw.lower_tex, side->lower_tex, sizeof(raw.lower_tex));
@@ -1552,15 +1552,15 @@ void PutLinedefs(void)
 		raw_linedef_t raw;
 		linedef_t *line = lev_linedefs[i];
 
-		raw.start = UINT16(line->start->index);
-		raw.end   = UINT16(line->end->index);
+		raw.start = LE_U16(line->start->index);
+		raw.end   = LE_U16(line->end->index);
 
-		raw.flags = UINT16(line->flags);
-		raw.type  = UINT16(line->type);
-		raw.tag   = SINT16(line->tag);
+		raw.flags = LE_U16(line->flags);
+		raw.type  = LE_U16(line->type);
+		raw.tag   = LE_S16(line->tag);
 
-		raw.sidedef1 = line->right ? UINT16(line->right->index) : 0xFFFF;
-		raw.sidedef2 = line->left  ? UINT16(line->left->index)  : 0xFFFF;
+		raw.sidedef1 = line->right ? LE_U16(line->right->index) : 0xFFFF;
+		raw.sidedef2 = line->left  ? LE_U16(line->left->index)  : 0xFFFF;
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 	}
@@ -1583,18 +1583,18 @@ void PutLinedefsHexen(void)
 		raw_hexen_linedef_t raw;
 		linedef_t *line = lev_linedefs[i];
 
-		raw.start = UINT16(line->start->index);
-		raw.end   = UINT16(line->end->index);
+		raw.start = LE_U16(line->start->index);
+		raw.end   = LE_U16(line->end->index);
 
-		raw.flags = UINT16(line->flags);
-		raw.type  = UINT8(line->type);
+		raw.flags = LE_U16(line->flags);
+		raw.type  = (u8_t)(line->type);
 
 		// write specials
 		for (j=0; j < 5; j++)
-			raw.specials[j] = UINT8(line->specials[j]);
+			raw.specials[j] = (u8_t)(line->specials[j]);
 
-		raw.sidedef1 = line->right ? UINT16(line->right->index) : 0xFFFF;
-		raw.sidedef2 = line->left  ? UINT16(line->left->index)  : 0xFFFF;
+		raw.sidedef1 = line->right ? LE_U16(line->right->index) : 0xFFFF;
+		raw.sidedef2 = line->left  ? LE_U16(line->left->index)  : 0xFFFF;
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 	}
@@ -1640,12 +1640,12 @@ void PutSegs(void)
 		if (! seg->linedef || seg->degenerate)
 			continue;
 
-		raw.start   = UINT16(VertexIndex16Bit(seg->start));
-		raw.end     = UINT16(VertexIndex16Bit(seg->end));
-		raw.angle   = UINT16(TransformAngle(seg->p_angle));
-		raw.linedef = UINT16(seg->linedef->index);
-		raw.flip    = UINT16(seg->side);
-		raw.dist    = UINT16(TransformSegDist(seg));
+		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
+		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
+		raw.angle   = LE_U16(TransformAngle(seg->p_angle));
+		raw.linedef = LE_U16(seg->linedef->index);
+		raw.flip    = LE_U16(seg->side);
+		raw.dist    = LE_U16(TransformSegDist(seg));
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
@@ -1654,8 +1654,8 @@ void PutSegs(void)
 #   if DEBUG_BSP
 		DebugPrintf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
 				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
-				UINT16(raw.start), UINT16(raw.end), UINT16(raw.linedef),
-				seg->side ? "L" : "R", UINT16(raw.angle),
+				LE_U16(raw.start), LE_U16(raw.end), LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U16(raw.angle),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
 	}
@@ -1689,19 +1689,19 @@ void PutGLSegs(void)
 		if (seg->degenerate)
 			continue;
 
-		raw.start = UINT16(VertexIndex16Bit(seg->start));
-		raw.end   = UINT16(VertexIndex16Bit(seg->end));
-		raw.side  = UINT16(seg->side);
+		raw.start = LE_U16(VertexIndex16Bit(seg->start));
+		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
+		raw.side  = LE_U16(seg->side);
 
 		if (seg->linedef)
-			raw.linedef = UINT16(seg->linedef->index);
+			raw.linedef = LE_U16(seg->linedef->index);
 		else
-			raw.linedef = UINT16(0xFFFF);
+			raw.linedef = LE_U16(0xFFFF);
 
 		if (seg->partner)
-			raw.partner = UINT16(seg->partner->index);
+			raw.partner = LE_U16(seg->partner->index);
 		else
-			raw.partner = UINT16(0xFFFF);
+			raw.partner = LE_U16(0xFFFF);
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
@@ -1709,8 +1709,8 @@ void PutGLSegs(void)
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
-				seg->side ? "L" : "R", UINT16(raw.partner),
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U16(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
 	}
@@ -1749,26 +1749,26 @@ void PutV3Segs(int do_v5)
 
 		if (do_v5)
 		{
-			raw.start = UINT32(VertexIndex32BitV5(seg->start));
-			raw.end   = UINT32(VertexIndex32BitV5(seg->end));
+			raw.start = LE_U32(VertexIndex32BitV5(seg->start));
+			raw.end   = LE_U32(VertexIndex32BitV5(seg->end));
 		}
 		else
 		{
-			raw.start = UINT32(seg->start->index);
-			raw.end   = UINT32(seg->end->index);
+			raw.start = LE_U32(seg->start->index);
+			raw.end   = LE_U32(seg->end->index);
 		}
 
-		raw.side  = UINT16(seg->side);
+		raw.side  = LE_U16(seg->side);
 
 		if (seg->linedef)
-			raw.linedef = UINT16(seg->linedef->index);
+			raw.linedef = LE_U16(seg->linedef->index);
 		else
-			raw.linedef = UINT16(0xFFFF);
+			raw.linedef = LE_U16(0xFFFF);
 
 		if (seg->partner)
-			raw.partner = UINT32(seg->partner->index);
+			raw.partner = LE_U32(seg->partner->index);
 		else
-			raw.partner = UINT32(0xFFFFFFFF);
+			raw.partner = LE_U32(0xFFFFFFFF);
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
@@ -1776,8 +1776,8 @@ void PutV3Segs(int do_v5)
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, UINT16(raw.linedef),
-				seg->side ? "L" : "R", UINT32(raw.partner),
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U32(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #   endif
 	}
@@ -1804,14 +1804,14 @@ void PutSubsecs(const char *name, int do_gl)
 		raw_subsec_t raw;
 		subsec_t *sub = subsecs[i];
 
-		raw.first = UINT16(sub->seg_list->index);
-		raw.num   = UINT16(sub->seg_count);
+		raw.first = LE_U16(sub->seg_list->index);
+		raw.num   = LE_U16(sub->seg_count);
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
-				sub->index, UINT16(raw.first), UINT16(raw.num));
+				sub->index, LE_U16(raw.first), LE_U16(raw.num));
 #   endif
 	}
 
@@ -1836,14 +1836,14 @@ void PutV3Subsecs(int do_v5)
 		raw_v3_subsec_t raw;
 		subsec_t *sub = subsecs[i];
 
-		raw.first = UINT32(sub->seg_list->index);
-		raw.num   = UINT32(sub->seg_count);
+		raw.first = LE_U32(sub->seg_list->index);
+		raw.num   = LE_U32(sub->seg_count);
 
 		AppendLevelLump(lump, &raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
-				sub->index, UINT32(raw.first), UINT32(raw.num));
+				sub->index, LE_U32(raw.first), LE_U32(raw.num));
 #   endif
 	}
 
@@ -1865,32 +1865,32 @@ static void PutOneNode(node_t *node, lump_t *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = SINT16(node->x);
-	raw.y  = SINT16(node->y);
-	raw.dx = SINT16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = SINT16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(node->x);
+	raw.y  = LE_S16(node->y);
+	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
+	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
 
-	raw.b1.minx = SINT16(node->r.bounds.minx);
-	raw.b1.miny = SINT16(node->r.bounds.miny);
-	raw.b1.maxx = SINT16(node->r.bounds.maxx);
-	raw.b1.maxy = SINT16(node->r.bounds.maxy);
+	raw.b1.minx = LE_S16(node->r.bounds.minx);
+	raw.b1.miny = LE_S16(node->r.bounds.miny);
+	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
+	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
 
-	raw.b2.minx = SINT16(node->l.bounds.minx);
-	raw.b2.miny = SINT16(node->l.bounds.miny);
-	raw.b2.maxx = SINT16(node->l.bounds.maxx);
-	raw.b2.maxy = SINT16(node->l.bounds.maxy);
+	raw.b2.minx = LE_S16(node->l.bounds.minx);
+	raw.b2.miny = LE_S16(node->l.bounds.miny);
+	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
+	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
 	if (node->r.node)
-		raw.right = UINT16(node->r.node->index);
+		raw.right = LE_U16(node->r.node->index);
 	else if (node->r.subsec)
-		raw.right = UINT16(node->r.subsec->index | 0x8000);
+		raw.right = LE_U16(node->r.subsec->index | 0x8000);
 	else
 		BugError("Bad right child in node %d", node->index);
 
 	if (node->l.node)
-		raw.left = UINT16(node->l.node->index);
+		raw.left = LE_U16(node->l.node->index);
 	else if (node->l.subsec)
-		raw.left = UINT16(node->l.subsec->index | 0x8000);
+		raw.left = LE_U16(node->l.subsec->index | 0x8000);
 	else
 		BugError("Bad left child in node %d", node->index);
 
@@ -1898,8 +1898,8 @@ static void PutOneNode(node_t *node, lump_t *lump)
 
 # if DEBUG_BSP
 	DebugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
-			"(%d,%d) -> (%d,%d)\n", node->index, UINT16(raw.left),
-			UINT16(raw.right), node->x, node->y,
+			"(%d,%d) -> (%d,%d)\n", node->index, LE_U16(raw.left),
+			LE_U16(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
 # endif
 }
@@ -1916,32 +1916,32 @@ static void PutOneV5Node(node_t *node, lump_t *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = SINT16(node->x);
-	raw.y  = SINT16(node->y);
-	raw.dx = SINT16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = SINT16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(node->x);
+	raw.y  = LE_S16(node->y);
+	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
+	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
 
-	raw.b1.minx = SINT16(node->r.bounds.minx);
-	raw.b1.miny = SINT16(node->r.bounds.miny);
-	raw.b1.maxx = SINT16(node->r.bounds.maxx);
-	raw.b1.maxy = SINT16(node->r.bounds.maxy);
+	raw.b1.minx = LE_S16(node->r.bounds.minx);
+	raw.b1.miny = LE_S16(node->r.bounds.miny);
+	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
+	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
 
-	raw.b2.minx = SINT16(node->l.bounds.minx);
-	raw.b2.miny = SINT16(node->l.bounds.miny);
-	raw.b2.maxx = SINT16(node->l.bounds.maxx);
-	raw.b2.maxy = SINT16(node->l.bounds.maxy);
+	raw.b2.minx = LE_S16(node->l.bounds.minx);
+	raw.b2.miny = LE_S16(node->l.bounds.miny);
+	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
+	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
 	if (node->r.node)
-		raw.right = UINT32(node->r.node->index);
+		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
-		raw.right = UINT32(node->r.subsec->index | 0x80000000U);
+		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
 		BugError("Bad right child in V5 node %d", node->index);
 
 	if (node->l.node)
-		raw.left = UINT32(node->l.node->index);
+		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
-		raw.left = UINT32(node->l.subsec->index | 0x80000000U);
+		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
 		BugError("Bad left child in V5 node %d", node->index);
 
@@ -1949,8 +1949,8 @@ static void PutOneV5Node(node_t *node, lump_t *lump)
 
 # if DEBUG_BSP
 	DebugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
-			"(%d,%d) -> (%d,%d)\n", node->index, UINT32(raw.left),
-			UINT32(raw.right), node->x, node->y,
+			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
+			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
 # endif
 }
@@ -1993,8 +1993,8 @@ void PutZVertices(void)
 {
 	int count, i;
 
-	u32_t orgverts = UINT32(num_normal_vert);
-	u32_t newverts = UINT32(num_gl_vert);
+	u32_t orgverts = LE_U32(num_normal_vert);
+	u32_t newverts = LE_U32(num_gl_vert);
 
 	ZLibAppendLump(&orgverts, 4);
 	ZLibAppendLump(&newverts, 4);
@@ -2009,8 +2009,8 @@ void PutZVertices(void)
 		if (! (vert->index & IS_GL_VERTEX))
 			continue;
 
-		raw.x = SINT32((int)(vert->x * 65536.0));
-		raw.y = SINT32((int)(vert->y * 65536.0));
+		raw.x = LE_S32((int)(vert->x * 65536.0));
+		raw.y = LE_S32((int)(vert->y * 65536.0));
 
 		ZLibAppendLump(&raw, sizeof(raw));
 
@@ -2026,7 +2026,7 @@ void PutZSubsecs(void)
 {
 	int i;
 	int count;
-	u32_t raw_num = UINT32(num_subsecs);
+	u32_t raw_num = LE_U32(num_subsecs);
 
 	int cur_seg_index = 0;
 
@@ -2038,7 +2038,7 @@ void PutZSubsecs(void)
 		subsec_t *sub = subsecs[i];
 		seg_t *seg;
 
-		raw_num = UINT32(sub->seg_count);
+		raw_num = LE_U32(sub->seg_count);
 
 		ZLibAppendLump(&raw_num, 4);
 
@@ -2070,7 +2070,7 @@ void PutZSubsecs(void)
 void PutZSegs(void)
 {
 	int i, count;
-	u32_t raw_num = UINT32(num_complete_seg);
+	u32_t raw_num = LE_U32(num_complete_seg);
 
 	ZLibAppendLump(&raw_num, 4);
 	GB_DisplayTicker();
@@ -2088,10 +2088,10 @@ void PutZSegs(void)
 					count, seg->index);
 
 		{
-			u32_t v1 = UINT32(VertexIndex32BitV5(seg->start));
-			u32_t v2 = UINT32(VertexIndex32BitV5(seg->end));
+			u32_t v1 = LE_U32(VertexIndex32BitV5(seg->start));
+			u32_t v2 = LE_U32(VertexIndex32BitV5(seg->end));
 
-			u16_t line = UINT16(seg->linedef->index);
+			u16_t line = LE_U16(seg->linedef->index);
 			u8_t  side = seg->side;
 
 			ZLibAppendLump(&v1,   4);
@@ -2120,40 +2120,40 @@ static void PutOneZNode(node_t *node)
 
 	node->index = node_cur_index++;
 
-	raw.x  = SINT16(node->x);
-	raw.y  = SINT16(node->y);
-	raw.dx = SINT16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = SINT16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(node->x);
+	raw.y  = LE_S16(node->y);
+	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
+	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
 
 	ZLibAppendLump(&raw.x,  2);
 	ZLibAppendLump(&raw.y,  2);
 	ZLibAppendLump(&raw.dx, 2);
 	ZLibAppendLump(&raw.dy, 2);
 
-	raw.b1.minx = SINT16(node->r.bounds.minx);
-	raw.b1.miny = SINT16(node->r.bounds.miny);
-	raw.b1.maxx = SINT16(node->r.bounds.maxx);
-	raw.b1.maxy = SINT16(node->r.bounds.maxy);
+	raw.b1.minx = LE_S16(node->r.bounds.minx);
+	raw.b1.miny = LE_S16(node->r.bounds.miny);
+	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
+	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
 
-	raw.b2.minx = SINT16(node->l.bounds.minx);
-	raw.b2.miny = SINT16(node->l.bounds.miny);
-	raw.b2.maxx = SINT16(node->l.bounds.maxx);
-	raw.b2.maxy = SINT16(node->l.bounds.maxy);
+	raw.b2.minx = LE_S16(node->l.bounds.minx);
+	raw.b2.miny = LE_S16(node->l.bounds.miny);
+	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
+	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
 	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
 	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
-		raw.right = UINT32(node->r.node->index);
+		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
-		raw.right = UINT32(node->r.subsec->index | 0x80000000U);
+		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
 		BugError("Bad right child in V5 node %d", node->index);
 
 	if (node->l.node)
-		raw.left = UINT32(node->l.node->index);
+		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
-		raw.left = UINT32(node->l.subsec->index | 0x80000000U);
+		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
 		BugError("Bad left child in V5 node %d", node->index);
 
@@ -2162,15 +2162,15 @@ static void PutOneZNode(node_t *node)
 
 # if DEBUG_BSP
 	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
-			"(%d,%d) -> (%d,%d)\n", node->index, UINT32(raw.left),
-			UINT32(raw.right), node->x, node->y,
+			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
+			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
 # endif
 }
 
 void PutZNodes(node_t *root)
 {
-	u32_t raw_num = UINT32(num_nodes);
+	u32_t raw_num = LE_U32(num_nodes);
 
 	ZLibAppendLump(&raw_num, 4);
 	GB_DisplayTicker();
@@ -2891,8 +2891,6 @@ build_result_e BuildNodes(nodebuildinfo_t *info)
 		SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
 		return BUILD_BadArgs;
 	}
-
-	InitEndian();
 
 	if (info->missing_output)
 		PrintMsg("* No output file specified. Using: %s\n\n", info->output_file);

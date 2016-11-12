@@ -234,17 +234,6 @@ void MarkZDSwitch(void);
 void ReportFailedLevels(void);
 
 
-/* ----- conversion macros ----------------------- */
-
-#define UINT8(x)   ((u8_t) (x))
-#define SINT8(x)   ((s8_t) (x))
-
-#define UINT16(x)  Endian_U16(x)
-#define UINT32(x)  Endian_U32(x)
-
-#define SINT16(x)  ((s16_t) Endian_U16((u16_t) (x)))
-#define SINT32(x)  ((s32_t) Endian_U32((u32_t) (x)))
-
 #endif /* __GLBSP_WAD_H__ */
 
 //--- editor settings ---
