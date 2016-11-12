@@ -249,7 +249,7 @@ static void CreateBlockmap(void)
 
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_linedefs; i++)
 	{
@@ -302,7 +302,7 @@ static void CompressBlockmap(void)
 	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
 	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort duplicate-detecting array.  After the sort, all duplicates
 	// will be next to each other.  The duplicate array gives the order
@@ -320,7 +320,7 @@ static void CompressBlockmap(void)
 	orig_size = 4 + block_count;
 	new_size  = cur_offset;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < block_count; i++)
 	{
@@ -769,7 +769,7 @@ void PutReject(void)
 	u8_t *matrix;
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	InitReject();
 	GroupSectors();
@@ -995,7 +995,7 @@ void GetVertices(void)
 	if (lump)
 		count = lump->length / sizeof(raw_vertex_t);
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetVertices: num = %d\n", count);
@@ -1036,7 +1036,7 @@ void GetSectors(void)
 	if (!lump || count == 0)
 		FatalError("Couldn't find any Sectors");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSectors: num = %d\n", count);
@@ -1090,7 +1090,7 @@ void GetThings(void)
 		return;
 	}
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThings: num = %d\n", count);
@@ -1132,7 +1132,7 @@ void GetThingsHexen(void)
 		return;
 	}
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThingsHexen: num = %d\n", count);
@@ -1169,7 +1169,7 @@ void GetSidedefs(void)
 	if (!lump || count == 0)
 		FatalError("Couldn't find any Sidedefs");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSidedefs: num = %d\n", count);
@@ -1225,7 +1225,7 @@ void GetLinedefs(void)
 	if (!lump || count == 0)
 		FatalError("Couldn't find any Linedefs");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefs: num = %d\n", count);
@@ -1297,7 +1297,7 @@ void GetLinedefsHexen(void)
 	if (!lump || count == 0)
 		FatalError("Couldn't find any Linedefs");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
@@ -1405,7 +1405,7 @@ void PutVertices(const char *name, int do_gl)
 	int count, i;
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	if (do_gl)
 		lump = CreateGLLump(name);
@@ -1445,7 +1445,7 @@ void PutV2Vertices(int do_v5)
 	int count, i;
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	lump = CreateGLLump("GL_VERT");
 
@@ -1483,7 +1483,7 @@ void PutSectors(void)
 	int i;
 	lump_t *lump = CreateLevelLump("SECTORS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_sectors; i++)
 	{
@@ -1514,7 +1514,7 @@ void PutSidedefs(void)
 	int i;
 	lump_t *lump = CreateLevelLump("SIDEDEFS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_sidedefs; i++)
 	{
@@ -1545,7 +1545,7 @@ void PutLinedefs(void)
 	int i;
 	lump_t *lump = CreateLevelLump("LINEDEFS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_linedefs; i++)
 	{
@@ -1576,7 +1576,7 @@ void PutLinedefsHexen(void)
 	int i, j;
 	lump_t *lump = CreateLevelLump("LINEDEFS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_linedefs; i++)
 	{
@@ -1626,7 +1626,7 @@ void PutSegs(void)
 	int i, count;
 	lump_t *lump = CreateLevelLump("SEGS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1675,7 +1675,7 @@ void PutGLSegs(void)
 	int i, count;
 	lump_t *lump = CreateGLLump("GL_SEGS");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1733,7 +1733,7 @@ void PutV3Segs(int do_v5)
 	if (! do_v5)
 		AppendLevelLump(lump, lev_v3_magic, 4);
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1792,7 +1792,7 @@ void PutSubsecs(const char *name, int do_gl)
 	int i;
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	if (do_gl)
 		lump = CreateGLLump(name);
@@ -1824,7 +1824,7 @@ void PutV3Subsecs(int do_v5)
 	int i;
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	lump = CreateGLLump("GL_SSECT");
 
@@ -1959,7 +1959,7 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 {
 	lump_t *lump;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	if (do_gl)
 		lump = CreateGLLump(name);
@@ -1999,7 +1999,7 @@ void PutZVertices(void)
 	ZLibAppendLump(&orgverts, 4);
 	ZLibAppendLump(&newverts, 4);
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0, count=0; i < num_vertices; i++)
 	{
@@ -2031,7 +2031,7 @@ void PutZSubsecs(void)
 	int cur_seg_index = 0;
 
 	ZLibAppendLump(&raw_num, 4);
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_subsecs; i++)
 	{
@@ -2073,7 +2073,7 @@ void PutZSegs(void)
 	u32_t raw_num = UINT32(num_complete_seg);
 
 	ZLibAppendLump(&raw_num, 4);
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0, count=0; i < num_segs; i++)
 	{
@@ -2173,7 +2173,7 @@ void PutZNodes(node_t *root)
 	u32_t raw_num = UINT32(num_nodes);
 
 	ZLibAppendLump(&raw_num, 4);
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	node_cur_index = 0;
 
@@ -2236,7 +2236,7 @@ void LoadLevel(void)
 
 	lev_doing_hexen |= cur_info->force_hexen;
 
-	DisplaySetBarText(1, message);
+	GB_DisplaySetBarText(1, message);
 
 	PrintVerbose("\n\n");
 	PrintMsg("%s\n", message);
@@ -2495,7 +2495,6 @@ void SaveLevel(node_t *root_node)
 
 
 const nodebuildinfo_t *cur_info = NULL;
-const nodebuildfuncs_t *cur_funcs = NULL;
 volatile nodebuildcomms_t *cur_comms = NULL;
 
 
@@ -2893,8 +2892,8 @@ static glbsp_ret_e HandleLevel(void)
 	if (cur_comms->cancelled)
 		return GLBSP_E_Cancelled;
 
-	DisplaySetBarLimit(1, 1000);
-	DisplaySetBar(1, 0);
+	GB_DisplaySetBarLimit(1, 1000);
+	GB_DisplaySetBar(1, 0);
 
 	cur_comms->build_pos = 0;
 
@@ -2937,14 +2936,13 @@ static glbsp_ret_e HandleLevel(void)
 /* ----- main routine -------------------------------------- */
 
 glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
-		const nodebuildfuncs_t *funcs, volatile nodebuildcomms_t *comms)
+		volatile nodebuildcomms_t *comms)
 {
 	char *file_msg;
 
 	glbsp_ret_e ret = GLBSP_E_OK;
 
 	cur_info  = info;
-	cur_funcs = funcs;
 	cur_comms = comms;
 
 	cur_comms->total_big_warn = 0;
@@ -2988,14 +2986,14 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 	PrintMsg("\n");
 	PrintVerbose("Creating nodes using tunable factor of %d\n", info->factor);
 
-	DisplayOpen(DIS_BUILDPROGRESS);
-	DisplaySetTitle("glBSP Build Progress");
+	GB_DisplayOpen(DIS_BUILDPROGRESS);
+	GB_DisplaySetTitle("glBSP Build Progress");
 
 	file_msg = UtilFormat("File: %s", cur_info->input_file);
 
-	DisplaySetBarText(2, file_msg);
-	DisplaySetBarLimit(2, CountLevels() * 10);
-	DisplaySetBar(2, 0);
+	GB_DisplaySetBarText(2, file_msg);
+	GB_DisplaySetBarLimit(2, CountLevels() * 10);
+	GB_DisplaySetBar(2, 0);
 
 	UtilFree(file_msg);
 
@@ -3010,10 +3008,10 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 			break;
 
 		cur_comms->file_pos += 10;
-		DisplaySetBar(2, cur_comms->file_pos);
+		GB_DisplaySetBar(2, cur_comms->file_pos);
 	}
 
-	DisplayClose();
+	GB_DisplayClose();
 
 	// writes all the lumps to the output wad
 	if (ret == GLBSP_E_OK)
@@ -3036,7 +3034,6 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 
 	cur_info  = NULL;
 	cur_comms = NULL;
-	cur_funcs = NULL;
 
 	return ret;
 }

@@ -710,8 +710,8 @@ static int PickNodeWorker(superblock_t *part_list,
 		if ((*progress % prog_step) == 0)
 		{
 			cur_comms->build_pos++;
-			DisplaySetBar(1, cur_comms->build_pos);
-			DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			GB_DisplaySetBar(1, cur_comms->build_pos);
+			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
 		}
 
 		/* ignore minisegs as partition candidates */
@@ -731,7 +731,7 @@ static int PickNodeWorker(superblock_t *part_list,
 		(*best) = part;
 	}
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	/* recursively handle sub-blocks */
 
@@ -779,12 +779,12 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 			cur_comms->build_pos += build_step - total / prog_step;
 			build_step = total / prog_step;
 
-			DisplaySetBar(1, cur_comms->build_pos);
-			DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			GB_DisplaySetBar(1, cur_comms->build_pos);
+			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
 		}
 	}
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	/* -AJA- another (optional) optimisation, when building just the GL
 	 *       nodes.  We assume that the original nodes are reasonably
@@ -803,8 +803,8 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		{
 			/* update progress */
 			cur_comms->build_pos += build_step;
-			DisplaySetBar(1, cur_comms->build_pos);
-			DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			GB_DisplaySetBar(1, cur_comms->build_pos);
+			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
 
 #     if DEBUG_PICKNODE
 			DebugPrintf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
@@ -1594,7 +1594,7 @@ superblock_t *CreateSegs(void)
 
 	// step through linedefs and get side numbers
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_linedefs; i++)
 	{
@@ -2216,7 +2216,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 	if (lefts->real_num + lefts->mini_num == 0)
 		BugError("Separated seg-list has no LEFT side");
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	AddMinisegs(best, lefts, rights, cut_list);
 
@@ -2294,7 +2294,7 @@ void ClockwiseBspTree(node_t *root)
 
 	(void) root;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_subsecs; i++)
 	{
@@ -2373,7 +2373,7 @@ void NormaliseBspTree(node_t *root)
 
 	(void) root;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// unlink all minisegs from each subsector:
 
@@ -2516,7 +2516,7 @@ void RoundOffBspTree(node_t *root)
 
 	num_complete_seg = 0;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_subsecs; i++)
 	{

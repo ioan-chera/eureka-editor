@@ -292,7 +292,7 @@ static void ReadDirEntry(void)
   raw_wad_entry_t entry;
   lump_t *lump;
   
-  DisplayTicker();
+  GB_DisplayTicker();
 
   len = fread(&entry, sizeof(entry), 1, in_file);
 
@@ -375,7 +375,7 @@ static void DetermineLevelNames(void)
 //
 static void ProcessDirEntry(lump_t *lump)
 {
-  DisplayTicker();
+  GB_DisplayTicker();
 
   // ignore previous GL lump info
   if (CheckGLLumpName(lump->name))
@@ -537,8 +537,8 @@ static void ReadLumpData(lump_t *lump)
   size_t len;
 
   cur_comms->file_pos++;
-  DisplaySetBar(1, cur_comms->file_pos);
-  DisplayTicker();
+  GB_DisplaySetBar(1, cur_comms->file_pos);
+  GB_DisplayTicker();
 
 # if DEBUG_LUMP
   DebugPrintf("Reading... %s (%d)\n", lump->name, lump->length);
@@ -809,8 +809,8 @@ static void WriteLumpData(lump_t *lump)
   int align_size;
 
   cur_comms->file_pos++;
-  DisplaySetBar(1, cur_comms->file_pos);
-  DisplayTicker();
+  GB_DisplaySetBar(1, cur_comms->file_pos);
+  GB_DisplayTicker();
 
 # if DEBUG_LUMP
   if (lump->flags & LUMP_COPY_ME)
@@ -899,7 +899,7 @@ static void WriteDirEntry(lump_t *lump)
   size_t len;
   raw_wad_entry_t entry;
 
-  DisplayTicker();
+  GB_DisplayTicker();
 
   strncpy(entry.name, lump->name, 8);
 
@@ -1279,14 +1279,14 @@ glbsp_ret_e ReadWadFile(const char *filename)
   // read directory
   ReadDirectory();
 
-  DisplayOpen(DIS_FILEPROGRESS);
-  DisplaySetTitle("glBSP Reading Wad");
+  GB_DisplayOpen(DIS_FILEPROGRESS);
+  GB_DisplaySetTitle("glBSP Reading Wad");
   
   read_msg = UtilFormat("Reading: %s", filename);
 
-  DisplaySetBarText(1, read_msg);
-  DisplaySetBarLimit(1, CountLumpTypes(LUMP_READ_ME, LUMP_READ_ME));
-  DisplaySetBar(1, 0);
+  GB_DisplaySetBarText(1, read_msg);
+  GB_DisplaySetBarLimit(1, CountLumpTypes(LUMP_READ_ME, LUMP_READ_ME));
+  GB_DisplaySetBar(1, 0);
 
   UtilFree(read_msg);
 
@@ -1301,7 +1301,7 @@ glbsp_ret_e ReadWadFile(const char *filename)
   
   wad.current_level = NULL;
 
-  DisplayClose();
+  GB_DisplayClose();
 
   return GLBSP_E_OK;
 }
@@ -1336,14 +1336,14 @@ glbsp_ret_e WriteWadFile(const char *filename)
 
   WriteHeader();
 
-  DisplayOpen(DIS_FILEPROGRESS);
-  DisplaySetTitle("glBSP Writing Wad");
+  GB_DisplayOpen(DIS_FILEPROGRESS);
+  GB_DisplaySetTitle("glBSP Writing Wad");
   
   write_msg = UtilFormat("Writing: %s", filename);
 
-  DisplaySetBarText(1, write_msg);
-  DisplaySetBarLimit(1, CountLumpTypes(LUMP_IGNORE_ME, 0));
-  DisplaySetBar(1, 0);
+  GB_DisplaySetBarText(1, write_msg);
+  GB_DisplaySetBarLimit(1, CountLumpTypes(LUMP_IGNORE_ME, 0));
+  GB_DisplaySetBar(1, 0);
 
   UtilFree(write_msg);
 
@@ -1352,7 +1352,7 @@ glbsp_ret_e WriteWadFile(const char *filename)
   // now write all the lumps to the output wad
   check1 = WriteAllLumps();
 
-  DisplayClose();
+  GB_DisplayClose();
 
   // finally, write out the directory
   check2 = WriteDirectory();

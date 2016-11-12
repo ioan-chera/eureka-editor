@@ -73,7 +73,7 @@ static const char *glbsp_ErrorString(ajbsp::glbsp_ret_e ret)
 }
 
 
-static void GB_PrintMsg(const char *str, ...)
+void GB_PrintMsg(const char *str, ...)
 {
 	va_list args;
 
@@ -88,21 +88,7 @@ static void GB_PrintMsg(const char *str, ...)
 	LogPrintf("BSP: %s", message_buf);
 }
 
-static void GB_FatalError(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, MSG_BUF_LEN, str, args);
-	va_end(args);
-
-	message_buf[MSG_BUF_LEN-1] = 0;
-
-	FatalError("BSP Failure:\n\n%s", message_buf);
-	/* NOT REACHED */
-}
-
-static void GB_Ticker(void)
+void GB_DisplayTicker(void)
 {
 	if (dialog->WantCancel())
 	{
@@ -110,18 +96,18 @@ static void GB_Ticker(void)
 	}
 }
 
-static bool GB_DisplayOpen(ajbsp::displaytype_e type)
+bool GB_DisplayOpen(ajbsp::displaytype_e type)
 {
 	display_mode = type;
 	return true;
 }
 
-static void GB_DisplaySetTitle(const char *str)
+void GB_DisplaySetTitle(const char *str)
 {
 	/* does nothing */
 }
 
-static void GB_DisplaySetBarText(int barnum, const char *str)
+void GB_DisplaySetBarText(int barnum, const char *str)
 {
 	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
@@ -152,7 +138,7 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 	}
 }
 
-static void GB_DisplaySetBarLimit(int barnum, int limit)
+void GB_DisplaySetBarLimit(int barnum, int limit)
 {
 	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
@@ -160,7 +146,7 @@ static void GB_DisplaySetBarLimit(int barnum, int limit)
 	}
 }
 
-static void GB_DisplaySetBar(int barnum, int count)
+void GB_DisplaySetBar(int barnum, int count)
 {
 	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
@@ -170,24 +156,11 @@ static void GB_DisplaySetBar(int barnum, int count)
 	}
 }
 
-static void GB_DisplayClose(void)
+
+void GB_DisplayClose(void)
 {
 	/* does nothing */
 }
-
-static const ajbsp::nodebuildfuncs_t  build_funcs =
-{
-	GB_FatalError,
-	GB_PrintMsg,
-	GB_Ticker,
-
-	GB_DisplayOpen,
-	GB_DisplaySetTitle,
-	GB_DisplaySetBar,
-	GB_DisplaySetBarLimit,
-	GB_DisplaySetBarText,
-	GB_DisplayClose
-};
 
 
 static bool DM_BuildNodes(const char *in_name, const char *out_name)
@@ -222,7 +195,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		return false;
 	}
 
-	ret = ajbsp::BuildNodes(&nb_info, &build_funcs, &nb_comms);
+	ret = ajbsp::BuildNodes(&nb_info, &nb_comms);
 
 	if (ret == ajbsp::GLBSP_E_Cancelled)
 	{

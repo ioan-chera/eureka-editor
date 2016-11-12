@@ -122,62 +122,6 @@ typedef enum
 }
 displaytype_e;
 
-// Callback functions
-typedef struct nodebuildfuncs_s
-{
-	// Fatal errors are called as a last resort when something serious
-	// goes wrong, e.g. out of memory.  This routine should show the
-	// error to the user and abort the program.
-	//
-	void (* fatal_error)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-
-	// The print_msg routine is used to display the various messages
-	// that occur, e.g. "Building GL nodes on MAP01" and that kind of
-	// thing.
-	//
-	void (* print_msg)(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-
-	// This routine is called frequently whilst building the nodes, and
-	// can be used to keep a GUI responsive to user input.  Many
-	// toolkits have a "do iteration" or "check events" type of function
-	// that this can call.  Avoid anything that sleeps though, or it'll
-	// slow down the build process unnecessarily.
-	//
-	void (* ticker)(void);
-
-	// These display routines is used for tasks that can show a progress
-	// bar, namely: building nodes, loading the wad, and saving the wad.
-	// The command line version could show a percentage value, or even
-	// draw a bar using characters.
-
-	// Display_open is called at the beginning, and 'type' holds the
-	// type of progress (and determines how many bars to display).
-	// Returns true if all went well, or false if it failed (in which
-	// case the other routines should do nothing when called).
-	//
-	bool (* display_open)(displaytype_e type);
-
-	// For GUI versions this can be used to set the title of the
-	// progress window.  OK to ignore it (e.g. command line version).
-	//
-	void (* display_setTitle)(const char *str);
-
-	// The next three routines control the appearance of each progress
-	// bar.  Display_setBarText is called to change the message above
-	// the bar.  Display_setBarLimit sets the integer limit of the
-	// progress (the target value), and display_setBar sets the current
-	// value (which will count up from 0 to the limit, inclusive).
-	//
-	void (* display_setBar)(int barnum, int count);
-	void (* display_setBarLimit)(int barnum, int limit);
-	void (* display_setBarText)(int barnum, const char *str);
-
-	// The display_close routine is called when the task is finished,
-	// and should remove the progress indicator/window from the screen.
-	//
-	void (* display_close)(void);
-}
-nodebuildfuncs_t;
 
 // Default build info and comms
 extern const nodebuildinfo_t default_buildinfo;
@@ -249,7 +193,6 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
 // comms->message field usually contains a string describing it.
 //
 glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
-    const nodebuildfuncs_t *funcs,
     volatile nodebuildcomms_t *comms);
 
 // string memory routines.  These should be used for all strings
@@ -263,7 +206,6 @@ void GlbspFree(const char *str);
 //------------------------------------------------------------------------
 // STRUCT : Doom structures, raw on-disk layout
 //------------------------------------------------------------------------
-
 
 
 /* ----- The wad structures ---------------------- */
@@ -501,7 +443,6 @@ raw_v5_node_t;
 // internal storage of node building parameters
 
 extern const nodebuildinfo_t *cur_info;
-extern const nodebuildfuncs_t *cur_funcs;
 extern volatile nodebuildcomms_t *cur_comms;
 
 
@@ -520,16 +461,6 @@ void SetErrorMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 void InitEndian(void);
 u16_t Endian_U16(u16_t);
 u32_t Endian_U32(u32_t);
-
-// macros for the display stuff
-#define DisplayOpen        (* cur_funcs->display_open)
-#define DisplaySetTitle    (* cur_funcs->display_setTitle)
-#define DisplaySetBar      (* cur_funcs->display_setBar)
-#define DisplaySetBarLimit (* cur_funcs->display_setBarLimit)
-#define DisplaySetBarText  (* cur_funcs->display_setBarText)
-#define DisplayClose       (* cur_funcs->display_close)
-
-#define DisplayTicker      (* cur_funcs->ticker)
 
 
 //------------------------------------------------------------------------
@@ -1215,6 +1146,21 @@ void RoundOffBspTree(node_t *root);
 void FreeQuickAllocSupers(void);
 
 }  // namespace ajbsp
+
+
+/* external funcs */
+
+void GB_PrintMsg(const char *str, ...);
+
+void GB_DisplayTicker(void);
+
+bool GB_DisplayOpen(ajbsp::displaytype_e type);
+void GB_DisplaySetTitle(const char *str);
+void GB_DisplaySetBarText(int barnum, const char *str);
+void GB_DisplaySetBarLimit(int barnum, int limit);
+void GB_DisplaySetBar(int barnum, int count);
+void GB_DisplayClose(void);
+
 
 #endif /* __EUREKA_BSP_H__ */
 

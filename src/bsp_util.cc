@@ -39,9 +39,6 @@ static int cpu_big_endian = 0;
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-//
-// PrintMsg
-//
 void PrintMsg(const char *str, ...)
 {
 	va_list args;
@@ -50,16 +47,14 @@ void PrintMsg(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	(* cur_funcs->print_msg)("%s", message_buf);
+	GB_PrintMsg("%s", message_buf);
 
 #if DEBUG_ENABLED
 	DebugPrintf(">>> %s", message_buf);
 #endif
 }
 
-//
-// PrintVerbose
-//
+
 void PrintVerbose(const char *str, ...)
 {
 	va_list args;
@@ -69,16 +64,14 @@ void PrintVerbose(const char *str, ...)
 	va_end(args);
 
 	if (! cur_info->quiet)
-		(* cur_funcs->print_msg)("%s", message_buf);
+		GB_PrintMsg("%s", message_buf);
 
 #if DEBUG_ENABLED
 	DebugPrintf(">>> %s", message_buf);
 #endif
 }
 
-//
-// PrintWarn
-//
+
 void PrintWarn(const char *str, ...)
 {
 	va_list args;
@@ -87,7 +80,7 @@ void PrintWarn(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	(* cur_funcs->print_msg)("Warning: %s", message_buf);
+	GB_PrintMsg("Warning: %s", message_buf);
 
 	cur_comms->total_big_warn++;
 
@@ -96,9 +89,7 @@ void PrintWarn(const char *str, ...)
 #endif
 }
 
-//
-// PrintMiniWarn
-//
+
 void PrintMiniWarn(const char *str, ...)
 {
 	va_list args;
@@ -108,7 +99,7 @@ void PrintMiniWarn(const char *str, ...)
 	va_end(args);
 
 	if (cur_info->mini_warnings)
-		(* cur_funcs->print_msg)("Warning: %s", message_buf);
+		GB_PrintMsg("Warning: %s", message_buf);
 
 	cur_comms->total_small_warn++;
 
@@ -117,9 +108,7 @@ void PrintMiniWarn(const char *str, ...)
 #endif
 }
 
-//
-// SetErrorMsg
-//
+
 void SetErrorMsg(const char *str, ...)
 {
 	va_list args;
@@ -813,7 +802,7 @@ void DetectDuplicateVertices(void)
 	int i;
 	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort array of indices
 	for (i=0; i < num_vertices; i++)
@@ -843,7 +832,7 @@ void DetectDuplicateSidedefs(void)
 	int i;
 	u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort array of indices
 	for (i=0; i < num_sidedefs; i++)
@@ -873,7 +862,7 @@ void PruneLinedefs(void)
 	int i;
 	int new_num;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// scan all linedefs
 	for (i=0, new_num=0; i < num_linedefs; i++)
@@ -940,7 +929,7 @@ void PruneVertices(void)
 	int new_num;
 	int unused = 0;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// scan all vertices
 	for (i=0, new_num=0; i < num_vertices; i++)
@@ -989,7 +978,7 @@ void PruneSidedefs(void)
 	int new_num;
 	int unused = 0;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// scan all sidedefs
 	for (i=0, new_num=0; i < num_sidedefs; i++)
@@ -1037,7 +1026,7 @@ void PruneSectors(void)
 	int i;
 	int new_num;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// scan all sectors
 	for (i=0, new_num=0; i < num_sectors; i++)
@@ -1136,7 +1125,7 @@ void DetectOverlappingLines(void)
 	int *array = (int *)UtilCalloc(num_linedefs * sizeof(int));
 	int count = 0;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	// sort array of indices
 	for (i=0; i < num_linedefs; i++)
@@ -1397,7 +1386,7 @@ void CalculateWallTips(void)
 {
 	int i;
 
-	DisplayTicker();
+	GB_DisplayTicker();
 
 	for (i=0; i < num_linedefs; i++)
 	{
