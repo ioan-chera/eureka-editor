@@ -46,7 +46,7 @@ static char message_buf[MSG_BUF_LEN];
 static UI_NodeDialog * dialog;
 
 
-static const char *glbsp_ErrorString(ajbsp::build_result_e ret)
+static const char *build_ErrorString(ajbsp::build_result_e ret)
 {
 	switch (ret)
 	{
@@ -190,7 +190,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	{
 		// check info failure (unlikely to happen)
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Param Check FAILED: %s\n", glbsp_ErrorString(ret));
+		GB_PrintMsg("Param Check FAILED: %s\n", build_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
 		return false;
 	}
@@ -208,7 +208,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	{
 		// build nodes failed
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Building FAILED: %s\n", glbsp_ErrorString(ret));
+		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
 		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
 		return false;
 	}
