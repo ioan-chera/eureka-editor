@@ -1246,7 +1246,7 @@ int CheckLevelLumpZero(lump_t *lump)
 //
 // ReadWadFile
 //
-glbsp_ret_e ReadWadFile(const char *filename)
+build_result_e ReadWadFile(const char *filename)
 {
   int check;
   char *read_msg;
@@ -1262,13 +1262,13 @@ glbsp_ret_e ReadWadFile(const char *filename)
       SetErrorMsg("Cannot open WAD file: %s [%s]", filename, 
           strerror(errno));
 
-    return GLBSP_E_ReadError;
+    return BUILD_ReadError;
   }
   
   if (! ReadHeader(filename))
   {
     fclose(in_file);
-    return GLBSP_E_ReadError;
+    return BUILD_ReadError;
   }
 
   PrintMsg("Opened %cWAD file : %s\n", (wad.kind == IWAD) ? 'I' : 'P', 
@@ -1303,14 +1303,14 @@ glbsp_ret_e ReadWadFile(const char *filename)
 
   GB_DisplayClose();
 
-  return GLBSP_E_OK;
+  return BUILD_OK;
 }
 
 
 //
 // WriteWadFile
 //
-glbsp_ret_e WriteWadFile(const char *filename)
+build_result_e WriteWadFile(const char *filename)
 {
   int check1, check2;
   char *write_msg;
@@ -1331,7 +1331,7 @@ glbsp_ret_e WriteWadFile(const char *filename)
     SetErrorMsg("Cannot create WAD file: %s [%s]", filename,
         strerror(errno));
 
-    return GLBSP_E_WriteError;
+    return BUILD_WriteError;
   }
 
   WriteHeader();
@@ -1361,7 +1361,7 @@ glbsp_ret_e WriteWadFile(const char *filename)
     BugError("Write directory count consistency failure (%d,%d,%d)",
       check1, check2, wad.num_entries);
 
-  return GLBSP_E_OK;
+  return BUILD_OK;
 }
 
 

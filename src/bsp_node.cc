@@ -2128,7 +2128,7 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
 //
 // BuildNodes
 //
-glbsp_ret_e BuildNodes(superblock_t *seg_list,
+build_result_e BuildNodes(superblock_t *seg_list,
 		node_t ** N, subsec_t ** S, int depth, const bbox_t *bbox)
 {
 	node_t *node;
@@ -2139,13 +2139,13 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 
 	intersection_t *cut_list;
 
-	glbsp_ret_e ret;
+	build_result_e ret;
 
 	*N = NULL;
 	*S = NULL;
 
 	if (cur_comms->cancelled)
-		return GLBSP_E_Cancelled;
+		return BUILD_Cancelled;
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: BEGUN @ %d\n", depth);
@@ -2158,7 +2158,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 	if (best == NULL)
 	{
 		if (cur_comms->cancelled)
-			return GLBSP_E_Cancelled;
+			return BUILD_Cancelled;
 
 #   if DEBUG_BUILDER
 		DebugPrintf("Build: CONVEX\n");
@@ -2187,7 +2187,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 			*S = CreateSubsec(seg_list);
 		}
 
-		return GLBSP_E_OK;
+		return BUILD_OK;
 	}
 
 # if DEBUG_BUILDER
@@ -2264,7 +2264,7 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
 			&node->l.bounds);
 	FreeSuper(lefts);
 
-	if (ret != GLBSP_E_OK)
+	if (ret != BUILD_OK)
 	{
 		FreeSuper(rights);
 		return ret;

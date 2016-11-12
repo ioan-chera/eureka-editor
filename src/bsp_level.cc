@@ -2589,7 +2589,7 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
 	HANDLE_BOOLEAN(abbrev, field)  \
 HANDLE_BOOLEAN(name, field)
 
-glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
+build_result_e ParseArgs(nodebuildinfo_t *info,
 		volatile nodebuildcomms_t *comms,
 		const char ** argv, int argc)
 {
@@ -2610,14 +2610,14 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 			{
 				SetErrorMsg("Input filenames must precede the -o option");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			if (UtilCheckExtension(argv[0], "gwa"))
 			{
 				SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			if (num_files >= 1)
@@ -2650,21 +2650,21 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 			{
 				SetErrorMsg("The -o option cannot be used more than once");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			if (num_files >= 2)
 			{
 				SetErrorMsg("Cannot use -o with multiple input files.");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			if (argc < 2 || argv[1][0] == '-')
 			{
 				SetErrorMsg("Missing filename for the -o option");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			GlbspFree(info->output_file);
@@ -2683,7 +2683,7 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 			{
 				SetErrorMsg("Missing factor value");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			info->factor = (int) strtol(argv[1], NULL, 10);
@@ -2707,7 +2707,7 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 			{
 				SetErrorMsg("Missing maxblock value");
 				cur_comms = NULL;
-				return GLBSP_E_BadArgs;
+				return BUILD_BadArgs;
 			}
 
 			info->block_limit = (int) strtol(argv[1], NULL, 10);
@@ -2757,14 +2757,14 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 			SetErrorMsg("Unknown option: %s", argv[0]);
 
 		cur_comms = NULL;
-		return GLBSP_E_BadArgs;
+		return BUILD_BadArgs;
 	}
 
 	cur_comms = NULL;
-	return GLBSP_E_OK;
+	return BUILD_OK;
 }
 
-glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
+build_result_e CheckInfo(nodebuildinfo_t *info,
 		volatile nodebuildcomms_t *comms)
 {
 	cur_comms = comms;
@@ -2776,13 +2776,13 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
 	if (!info->input_file || info->input_file[0] == 0)
 	{
 		SetErrorMsg("Missing input filename !");
-		return GLBSP_E_BadArgs;
+		return BUILD_BadArgs;
 	}
 
 	if (UtilCheckExtension(info->input_file, "gwa"))
 	{
 		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
-		return GLBSP_E_BadArgs;
+		return BUILD_BadArgs;
 	}
 
 	if (!info->output_file || info->output_file[0] == 0)
@@ -2810,51 +2810,51 @@ glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
 	{
 		info->pack_sides = false;
 		SetErrorMsg("-noprune and -packsides cannot be used together");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
 	if (info->gwa_mode && info->force_normal)
 	{
 		info->force_normal = false;
 		SetErrorMsg("-forcenormal used, but GWA files don't have normal nodes");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
 	if (info->no_normal && info->force_normal)
 	{
 		info->force_normal = false;
 		SetErrorMsg("-forcenormal and -nonormal cannot be used together");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
 	if (info->factor <= 0 || info->factor > 32)
 	{
 		info->factor = DEFAULT_FACTOR;
 		SetErrorMsg("Bad factor value !");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
 	if (info->spec_version <= 0 || info->spec_version > 5)
 	{
 		info->spec_version = 2;
 		SetErrorMsg("Bad GL-Nodes version number !");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 	else if (info->spec_version == 4)
 	{
 		info->spec_version = 5;
 		SetErrorMsg("V4 GL-Nodes is not supported");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
 	if (info->block_limit < 1000 || info->block_limit > 64000)
 	{
 		info->block_limit = DEFAULT_BLOCK_LIMIT;
 		SetErrorMsg("Bad blocklimit value !");
-		return GLBSP_E_BadInfoFixed;
+		return BUILD_BadInfoFixed;
 	}
 
-	return GLBSP_E_OK;
+	return BUILD_OK;
 }
 
 
@@ -2879,7 +2879,7 @@ void GlbspFree(const char *str)
 
 /* ----- build nodes for a single level --------------------------- */
 
-static glbsp_ret_e HandleLevel(void)
+static build_result_e HandleLevel(void)
 {
 	superblock_t *seg_list;
 	bbox_t seg_bbox;
@@ -2887,10 +2887,10 @@ static glbsp_ret_e HandleLevel(void)
 	node_t *root_node;
 	subsec_t *root_sub;
 
-	glbsp_ret_e ret;
+	build_result_e ret;
 
 	if (cur_comms->cancelled)
-		return GLBSP_E_Cancelled;
+		return BUILD_Cancelled;
 
 	GB_DisplaySetBarLimit(1, 1000);
 	GB_DisplaySetBar(1, 0);
@@ -2910,7 +2910,7 @@ static glbsp_ret_e HandleLevel(void)
 	ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
 	FreeSuper(seg_list);
 
-	if (ret == GLBSP_E_OK)
+	if (ret == BUILD_OK)
 	{
 		ClockwiseBspTree(root_node);
 
@@ -2935,12 +2935,12 @@ static glbsp_ret_e HandleLevel(void)
 
 /* ----- main routine -------------------------------------- */
 
-glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
+build_result_e BuildNodes(const nodebuildinfo_t *info,
 		volatile nodebuildcomms_t *comms)
 {
 	char *file_msg;
 
-	glbsp_ret_e ret = GLBSP_E_OK;
+	build_result_e ret = BUILD_OK;
 
 	cur_info  = info;
 	cur_comms = comms;
@@ -2956,7 +2956,7 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 			!cur_info->output_file || cur_info->output_file[0] == 0)
 	{
 		SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
-		return GLBSP_E_BadArgs;
+		return BUILD_BadArgs;
 	}
 
 	InitEndian();
@@ -2970,7 +2970,7 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 	// opens and reads directory from the input wad
 	ret = ReadWadFile(cur_info->input_file);
 
-	if (ret != GLBSP_E_OK)
+	if (ret != BUILD_OK)
 	{
 		return ret;
 	}
@@ -2980,7 +2980,7 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 		CloseWads();
 
 		SetErrorMsg("No levels found in wad !");
-		return GLBSP_E_Unknown;
+		return BUILD_Unknown;
 	}
 
 	PrintMsg("\n");
@@ -3004,7 +3004,7 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 	{
 		ret = HandleLevel();
 
-		if (ret != GLBSP_E_OK)
+		if (ret != BUILD_OK)
 			break;
 
 		cur_comms->file_pos += 10;
@@ -3014,12 +3014,12 @@ glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
 	GB_DisplayClose();
 
 	// writes all the lumps to the output wad
-	if (ret == GLBSP_E_OK)
+	if (ret == BUILD_OK)
 	{
 		ret = WriteWadFile(cur_info->output_file);
 
 		// when modifying the original wad, any GWA companion must be deleted
-		if (ret == GLBSP_E_OK && cur_info->same_filenames)
+		if (ret == BUILD_OK && cur_info->same_filenames)
 			DeleteGwaFile(cur_info->output_file);
 
 		PrintMsg("\n");

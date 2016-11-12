@@ -46,27 +46,27 @@ static char message_buf[MSG_BUF_LEN];
 static UI_NodeDialog * dialog;
 
 
-static const char *glbsp_ErrorString(ajbsp::glbsp_ret_e ret)
+static const char *glbsp_ErrorString(ajbsp::build_result_e ret)
 {
 	switch (ret)
 	{
-		case ajbsp::GLBSP_E_OK: return "OK";
+		case ajbsp::BUILD_OK: return "OK";
 
 		 // the arguments were bad/inconsistent.
-		case ajbsp::GLBSP_E_BadArgs: return "Bad Arguments";
+		case ajbsp::BUILD_BadArgs: return "Bad Arguments";
 
 		// the info was bad/inconsistent, but has been fixed
-		case ajbsp::GLBSP_E_BadInfoFixed: return "Bad Args (fixed)";
+		case ajbsp::BUILD_BadInfoFixed: return "Bad Args (fixed)";
 
 		// file errors
-		case ajbsp::GLBSP_E_ReadError:  return "Read Error";
-		case ajbsp::GLBSP_E_WriteError: return "Write Error";
+		case ajbsp::BUILD_ReadError:  return "Read Error";
+		case ajbsp::BUILD_WriteError: return "Write Error";
 
 		// building was cancelled
-		case ajbsp::GLBSP_E_Cancelled: return "Cancelled by User";
+		case ajbsp::BUILD_Cancelled: return "Cancelled by User";
 
 		// an unknown error occurred (this is the catch-all value)
-		case ajbsp::GLBSP_E_Unknown:
+		case ajbsp::BUILD_Unknown:
 
 		default: return "Unknown Error";
 	}
@@ -182,11 +182,11 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info.pack_sides = false;
 	nb_info.force_normal = true;
 
-	ajbsp::glbsp_ret_e  ret;
+	ajbsp::build_result_e  ret;
 
 	ret = ajbsp::CheckInfo(&nb_info, &nb_comms);
 
-	if (ret != ajbsp::GLBSP_E_OK)
+	if (ret != ajbsp::BUILD_OK)
 	{
 		// check info failure (unlikely to happen)
 		GB_PrintMsg("\n");
@@ -197,14 +197,14 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 	ret = ajbsp::BuildNodes(&nb_info, &nb_comms);
 
-	if (ret == ajbsp::GLBSP_E_Cancelled)
+	if (ret == ajbsp::BUILD_Cancelled)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
 		return false;
 	}
 
-	if (ret != ajbsp::GLBSP_E_OK)
+	if (ret != ajbsp::BUILD_OK)
 	{
 		// build nodes failed
 		GB_PrintMsg("\n");

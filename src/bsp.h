@@ -133,47 +133,48 @@ extern const nodebuildcomms_t default_buildcomms;
 typedef enum
 {
 	// everything went peachy keen
-	GLBSP_E_OK = 0,
+	BUILD_OK = 0,
 
 	// an unknown error occurred (this is the catch-all value)
-	GLBSP_E_Unknown,
+	BUILD_Unknown,
 
 	// the arguments were bad/inconsistent.
-	GLBSP_E_BadArgs,
+	BUILD_BadArgs,
 
 	// the info was bad/inconsistent, but has been fixed
-	GLBSP_E_BadInfoFixed,
+	BUILD_BadInfoFixed,
 
 	// file errors
-	GLBSP_E_ReadError,
-	GLBSP_E_WriteError,
+	BUILD_ReadError,
+	BUILD_WriteError,
 
 	// building was cancelled
-	GLBSP_E_Cancelled
+	BUILD_Cancelled
 }
-glbsp_ret_e;
+build_result_e;
+
 
 // parses the arguments, modifying the 'info' structure accordingly.
-// Returns GLBSP_E_OK if all went well, otherwise another error code.
+// Returns BUILD_OK if all went well, otherwise another error code.
 // Upon error, comms->message may be set to an string describing the
 // error.  Typical errors are unrecognised options and invalid option
 // values.  Calling this routine is not compulsory.  Note that the set
 // of arguments does not include the program's name.
 //
-glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
+build_result_e ParseArgs(nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms,
     const char ** argv, int argc);
 
 // checks the node building parameters in 'info'.  If they are valid,
-// returns GLBSP_E_OK, otherwise an error code is returned.  This
+// returns BUILD_OK, otherwise an error code is returned.  This
 // routine should always be called shortly before GlbspBuildNodes().
 // Note that when 'output_file' is NULL, this routine will silently
 // update it to the correct GWA filename (and set the gwa_mode flag).
 //
-// If the GLBSP_E_BadInfoFixed error code is returned, the parameter
+// If the BUILD_BadInfoFixed error code is returned, the parameter
 // causing the problem has been changed.  You could either treat it as
 // a fatal error, or alternatively keep calling the routine in a loop
-// until something different than GLBSP_E_BadInfoFixed is returned,
+// until something different than BUILD_BadInfoFixed is returned,
 // showing the user the returned messages (e.g. as warnings or in
 // pop-up dialog boxes).
 //
@@ -181,18 +182,18 @@ glbsp_ret_e ParseArgs(nodebuildinfo_t *info,
 // routine should be called once for each input file, setting the
 // 'output_file' field to NULL each time.
 //
-glbsp_ret_e CheckInfo(nodebuildinfo_t *info,
+build_result_e CheckInfo(nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms);
 
 // main routine, this will build the nodes (GL and/or normal) for the
 // given input wad file out to the given output file.  Returns
-// GLBSP_E_OK if everything went well, otherwise another error code.
+// BUILD_OK if everything went well, otherwise another error code.
 // Typical errors are fubar parameters (like input_file == NULL),
 // problems reading/writing files, or cancellation by another thread
 // (esp. the GUI) using the comms->cancelled flag.  Upon errors, the
 // comms->message field usually contains a string describing it.
 //
-glbsp_ret_e BuildNodes(const nodebuildinfo_t *info,
+build_result_e BuildNodes(const nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms);
 
 // string memory routines.  These should be used for all strings
@@ -1114,9 +1115,9 @@ void FreeSuper(superblock_t *block);
 // (and '*N' is set to NULL).  Otherwise the seg list is divided into
 // two halves, a node is created by calling this routine recursively,
 // and '*N' is the new node (and '*S' is set to NULL).  Normally
-// returns GLBSP_E_OK, or GLBSP_E_Cancelled if user stopped it.
+// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 //
-glbsp_ret_e BuildNodes(superblock_t *seg_list,
+build_result_e BuildNodes(superblock_t *seg_list,
     node_t ** N, subsec_t ** S, int depth, const bbox_t *bbox);
 
 // compute the height of the bsp tree, starting at 'node'.
