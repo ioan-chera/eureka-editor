@@ -30,9 +30,9 @@
 
 
 // config items
-bool glbsp_fast    = false;
-bool glbsp_verbose = false;
-bool glbsp_warn    = false;
+bool bsp_fast    = false;
+bool bsp_verbose = false;
+bool bsp_warn    = false;
 
 
 static ajbsp::nodebuildinfo_t * nb_info;
@@ -173,9 +173,9 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info->input_file  = StringDup(in_name);
 	nb_info->output_file = StringDup(out_name);
 
-	nb_info->fast          = glbsp_fast ? true : false;
-	nb_info->quiet         = glbsp_verbose ? false : true;
-	nb_info->mini_warnings = glbsp_warn ? true : false;
+	nb_info->fast          = bsp_fast ? true : false;
+	nb_info->quiet         = bsp_verbose ? false : true;
+	nb_info->mini_warnings = bsp_warn ? true : false;
 
 	nb_info->pack_sides = false;
 	nb_info->force_normal = true;

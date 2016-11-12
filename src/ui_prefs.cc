@@ -568,9 +568,9 @@ public:
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
 
-	Fl_Check_Button *bsp_warn;
-	Fl_Check_Button *bsp_verbose;
-	Fl_Check_Button *bsp_fast;
+	Fl_Check_Button *nod_warn;
+	Fl_Check_Button *nod_verbose;
+	Fl_Check_Button *nod_fast;
 };
 
 
@@ -906,14 +906,14 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ bsp_warn = new Fl_Check_Button(50, 290, 220, 30, " Show all warning messages");
-		  bsp_warn->down_box(FL_DOWN_BOX);
+		{ nod_warn = new Fl_Check_Button(50, 290, 220, 30, " Show all warning messages");
+		  nod_warn->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_verbose = new Fl_Check_Button(50, 320, 350, 30, " Verbose -- show information about each level");
-		  bsp_verbose->down_box(FL_DOWN_BOX);
+		{ nod_verbose = new Fl_Check_Button(50, 320, 350, 30, " Verbose -- show information about each level");
+		  nod_verbose->down_box(FL_DOWN_BOX);
 		}
-		{ bsp_fast = new Fl_Check_Button(50, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
-		  bsp_fast->down_box(FL_DOWN_BOX);
+		{ nod_fast = new Fl_Check_Button(50, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		  nod_fast->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -1287,9 +1287,9 @@ void UI_Preferences::LoadValues()
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
-	bsp_fast->value(glbsp_fast ? 1 : 0);
-	bsp_verbose->value(glbsp_verbose ? 1 : 0);
-	bsp_warn->value(glbsp_warn ? 1 : 0);
+	nod_fast->value(bsp_fast ? 1 : 0);
+	nod_verbose->value(bsp_verbose ? 1 : 0);
+	nod_warn->value(bsp_warn ? 1 : 0);
 }
 
 
@@ -1394,9 +1394,9 @@ void UI_Preferences::SaveValues()
 	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
-	glbsp_fast = bsp_fast->value() ? true : false;
-	glbsp_verbose = bsp_verbose->value() ? true : false;
-	glbsp_warn = bsp_warn->value() ? true : false;
+	bsp_fast = nod_fast->value() ? true : false;
+	bsp_verbose = nod_verbose->value() ? true : false;
+	bsp_warn = nod_warn->value() ? true : false;
 }
 
 

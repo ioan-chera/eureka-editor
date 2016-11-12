@@ -405,31 +405,31 @@ static const opt_desc_t options[] =
 		&floor_bump_large
 	},
 
-	{	"glbsp_fast",
+	{	"bsp_fast",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
-		&glbsp_fast
+		&bsp_fast
 	},
 
-	{	"glbsp_verbose",
+	{	"bsp_verbose",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: be verbose, show level information",
 		NULL,
-		&glbsp_verbose
+		&bsp_verbose
 	},
 
-	{	"glbsp_warn",
+	{	"bsp_warn",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: show all warning messages",
 		NULL,
-		&glbsp_warn
+		&bsp_warn
 	},
 
 	{	"grid_hide_in_free_mode",
