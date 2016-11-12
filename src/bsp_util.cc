@@ -774,74 +774,11 @@ void DetectDuplicateSidedefs(void)
 	UtilFree(array);
 }
 
-void PruneLinedefs(void)
-{
-	int i;
-	int new_num;
-
-	GB_DisplayTicker();
-
-	// scan all linedefs
-	for (i=0, new_num=0; i < num_linedefs; i++)
-	{
-		linedef_t *L = lev_linedefs[i];
-
-		// handle duplicated vertices
-		while (L->start->equiv)
-		{
-			L->start->ref_count--;
-			L->start = L->start->equiv;
-			L->start->ref_count++;
-		}
-
-		while (L->end->equiv)
-		{
-			L->end->ref_count--;
-			L->end = L->end->equiv;
-			L->end->ref_count++;
-		}
-
-		// handle duplicated sidedefs
-		while (L->right && L->right->equiv)
-		{
-			L->right->ref_count--;
-			L->right = L->right->equiv;
-			L->right->ref_count++;
-		}
-
-		while (L->left && L->left->equiv)
-		{
-			L->left->ref_count--;
-			L->left = L->left->equiv;
-			L->left->ref_count++;
-		}
-
-		// remove zero length lines
-		if (L->zero_len)
-		{
-			L->start->ref_count--;
-			L->end->ref_count--;
-
-			UtilFree(L);
-			continue;
-		}
-
-		L->index = new_num;
-		lev_linedefs[new_num++] = L;
-	}
-
-	if (new_num < num_linedefs)
-	{
-		PrintVerbose("Pruned %d zero-length linedefs\n", num_linedefs - new_num);
-		num_linedefs = new_num;
-	}
-
-	if (new_num == 0)
-		FatalError("Couldn't find any Linedefs");
-}
 
 void PruneVertices(void)
 {
+	// FIXME : PruneVertices : ONLY REMOVE FROM END
+
 	int i;
 	int new_num;
 	int unused = 0;
@@ -889,89 +826,6 @@ void PruneVertices(void)
 	num_normal_vert = num_vertices;
 }
 
-void PruneSidedefs(void)
-{
-	int i;
-	int new_num;
-	int unused = 0;
-
-	GB_DisplayTicker();
-
-	// scan all sidedefs
-	for (i=0, new_num=0; i < num_sidedefs; i++)
-	{
-		sidedef_t *S = lev_sidedefs[i];
-
-		if (S->ref_count < 0)
-			BugError("Sidedef %d ref_count is %d", i, S->ref_count);
-
-		if (S->ref_count == 0)
-		{
-			if (S->sector)
-				S->sector->ref_count--;
-
-			if (S->equiv == NULL)
-				unused++;
-
-			UtilFree(S);
-			continue;
-		}
-
-		S->index = new_num;
-		lev_sidedefs[new_num++] = S;
-	}
-
-	if (new_num < num_sidedefs)
-	{
-		int dup_num = num_sidedefs - new_num - unused;
-
-		if (unused > 0)
-			PrintVerbose("Pruned %d unused sidedefs\n", unused);
-
-		if (dup_num > 0)
-			PrintVerbose("Pruned %d duplicate sidedefs\n", dup_num);
-
-		num_sidedefs = new_num;
-	}
-
-	if (new_num == 0)
-		FatalError("Couldn't find any Sidedefs");
-}
-
-void PruneSectors(void)
-{
-	int i;
-	int new_num;
-
-	GB_DisplayTicker();
-
-	// scan all sectors
-	for (i=0, new_num=0; i < num_sectors; i++)
-	{
-		sector_t *S = lev_sectors[i];
-
-		if (S->ref_count < 0)
-			BugError("Sector %d ref_count is %d", i, S->ref_count);
-
-		if (S->ref_count == 0)
-		{
-			UtilFree(S);
-			continue;
-		}
-
-		S->index = new_num;
-		lev_sectors[new_num++] = S;
-	}
-
-	if (new_num < num_sectors)
-	{
-		PrintVerbose("Pruned %d unused sectors\n", num_sectors - new_num);
-		num_sectors = new_num;
-	}
-
-	if (new_num == 0)
-		FatalError("Couldn't find any Sectors");
-}
 
 static inline int LineVertexLowest(const linedef_t *L)
 {

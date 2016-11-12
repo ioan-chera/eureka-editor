@@ -74,8 +74,6 @@ public:
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
-	bool prune_sect;
-	bool no_prune;
 	bool merge_vert;
 	bool skip_self_ref;
 	bool window_fx;
@@ -123,8 +121,6 @@ public:
 		load_all(false),
 		no_normal(false),
 		force_normal(false),
-		prune_sect(false),
-		no_prune(false),
 		merge_vert(false),
 		skip_self_ref(false),
 		window_fx(false),

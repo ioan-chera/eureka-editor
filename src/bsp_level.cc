@@ -2210,9 +2210,6 @@ void SaveZDFormat(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-//
-// LoadLevel
-//
 void LoadLevel(void)
 {
 	char *message;
@@ -2272,18 +2269,9 @@ void LoadLevel(void)
 		if (cur_info->merge_vert)
 			DetectDuplicateVertices();
 
-		if (!cur_info->no_prune)
-			PruneLinedefs();
-
 		// always prune vertices (ignore -noprune), otherwise all the
 		// unused vertices from seg splits would keep accumulating.
 		PruneVertices();
-
-		if (!cur_info->no_prune)
-			PruneSidedefs();
-
-		if (cur_info->prune_sect)
-			PruneSectors();
 	}
 
 	CalculateWallTips();
@@ -2300,9 +2288,7 @@ void LoadLevel(void)
 		DetectWindowEffects();
 }
 
-//
-// FreeLevel
-//
+
 void FreeLevel(void)
 {
 	FreeVertices();
@@ -2316,33 +2302,22 @@ void FreeLevel(void)
 	FreeWallTips();
 }
 
-//
-// PutGLOptions
-//
+
 void PutGLOptions(void)
 {
 	char option_buf[128];
 
-	sprintf(option_buf, "-v%d -factor %d", cur_info->spec_version, cur_info->factor);
+	// FIXME FOR AJ-BSP / EUREKA
+	sprintf(option_buf, "-factor %d", cur_info->factor);
 
-	if (cur_info->fast         ) strcat(option_buf, " -f");
-	if (cur_info->force_normal ) strcat(option_buf, " -n");
-	if (cur_info->merge_vert   ) strcat(option_buf, " -m");
-	if (cur_info->pack_sides   ) strcat(option_buf, " -p");
-	if (cur_info->prune_sect   ) strcat(option_buf, " -u");
-	if (cur_info->skip_self_ref) strcat(option_buf, " -s");
-	if (cur_info->window_fx    ) strcat(option_buf, " -y");
-
-	if (cur_info->no_normal) strcat(option_buf, " -xn");
-	if (cur_info->no_reject) strcat(option_buf, " -xr");
-	if (cur_info->no_prune ) strcat(option_buf, " -xu");
+#if 0
+	if (cur_info->fast)   strcat(option_buf, " -f");
+#endif
 
 	AddGLTextLine("OPTIONS", option_buf);
 }
 
-//
-// PutGLChecksum
-//
+
 void PutGLChecksum(void)
 {
 	u32_t crc;
@@ -2534,13 +2509,6 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 	{
 		info->load_all = true;
 		info->same_filenames = true;
-	}
-
-	if (info->no_prune && info->pack_sides)
-	{
-		info->pack_sides = false;
-		SetErrorMsg("-noprune and -packsides cannot be used together");
-		return BUILD_BadInfoFixed;
 	}
 
 	if (info->no_normal && info->force_normal)
