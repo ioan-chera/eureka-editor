@@ -195,25 +195,6 @@ typedef enum
 build_result_e;
 
 
-// checks the node building parameters in 'info'.  If they are valid,
-// returns BUILD_OK, otherwise an error code is returned.  This
-// routine should always be called shortly before GlbspBuildNodes().
-// Note that when 'output_file' is NULL, this routine will silently
-// update it to the correct GWA filename (and set the gwa_mode flag).
-//
-// If the BUILD_BadInfoFixed error code is returned, the parameter
-// causing the problem has been changed.  You could either treat it as
-// a fatal error, or alternatively keep calling the routine in a loop
-// until something different than BUILD_BadInfoFixed is returned,
-// showing the user the returned messages (e.g. as warnings or in
-// pop-up dialog boxes).
-//
-// If there are multiple input files (extra_files is non-NULL), this
-// routine should be called once for each input file, setting the
-// 'output_file' field to NULL each time.
-//
-build_result_e CheckInfo(nodebuildinfo_t *info);
-
 // main routine, this will build the nodes (GL and/or normal) for the
 // given input wad file out to the given output file.  Returns
 // BUILD_OK if everything went well, otherwise another error code.

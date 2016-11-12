@@ -2712,7 +2712,8 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 }
 #endif
 
-build_result_e CheckInfo(nodebuildinfo_t *info)
+
+static build_result_e CheckInfo(nodebuildinfo_t *info)
 {
 	cur_info = info;
 
@@ -2868,7 +2869,12 @@ build_result_e BuildNodes(nodebuildinfo_t *info)
 {
 	char *file_msg;
 
-	build_result_e ret = BUILD_OK;
+	build_result_e ret;
+
+	ret = CheckInfo(info);
+
+	if (ret != BUILD_OK)
+		return ret;
 
 	cur_info  = info;
 

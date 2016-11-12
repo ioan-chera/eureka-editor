@@ -182,17 +182,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 	ajbsp::build_result_e  ret;
 
-	ret = ajbsp::CheckInfo(nb_info);
-
-	if (ret != ajbsp::BUILD_OK)
-	{
-		// check info failure (unlikely to happen)
-		GB_PrintMsg("\n");
-		GB_PrintMsg("Param Check FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
-		return false;
-	}
-
 	ret = ajbsp::BuildNodes(nb_info);
 
 	if (ret == ajbsp::BUILD_Cancelled)
