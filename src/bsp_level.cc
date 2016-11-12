@@ -2809,7 +2809,7 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 
 /* ----- build nodes for a single level --------------------------- */
 
-static build_result_e HandleLevel(void)
+build_result_e BuildNodesForLevel(lump_t * LEV)
 {
 	superblock_t *seg_list;
 	bbox_t seg_bbox;
@@ -2838,6 +2838,7 @@ static build_result_e HandleLevel(void)
 
 	// recursively create nodes
 	ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
+
 	FreeSuper(seg_list);
 
 	if (ret == BUILD_OK)
@@ -2931,14 +2932,17 @@ build_result_e BuildNodes(nodebuildinfo_t *info)
 	cur_info->file_pos = 0;
 
 	// loop over each level in the wad
-	while (FindNextLevel())
+	lump_t *LEV;
+
+	while ( (LEV = FindNextLevel()) )
 	{
-		ret = HandleLevel();
+		ret = BuildNodesForLevel(LEV);
 
 		if (ret != BUILD_OK)
 			break;
 
 		cur_info->file_pos += 10;
+
 		GB_DisplaySetBar(2, cur_info->file_pos);
 	}
 

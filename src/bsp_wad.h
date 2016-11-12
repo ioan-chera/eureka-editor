@@ -184,12 +184,10 @@ void DeleteGwaFile(const char *base_wad_name);
 // returns the number of levels found in the wad.
 int CountLevels(void);
 
-// find the next level lump in the wad directory, and store the
-// reference in 'wad.current_level'.  Call this straight after
-// ReadWadFile() to get the first level.  Returns 1 if found,
-// otherwise 0 if there are no more levels in the wad.
+// find the next level lump in the wad directory, and return the
+// lump reference, or NULL if no more.
 //
-int FindNextLevel(void);
+lump_t * FindNextLevel(void);
 
 // return the current level name
 const char *GetLevelName(void);

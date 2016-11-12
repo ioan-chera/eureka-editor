@@ -1181,7 +1181,7 @@ int CountLevels(void)
 //
 // FindNextLevel
 //
-int FindNextLevel(void)
+lump_t * FindNextLevel(void)
 {
   lump_t *cur;
   
@@ -1195,7 +1195,7 @@ int FindNextLevel(void)
 
   wad.current_level = cur;
 
-  return (cur != NULL);
+  return wad.current_level;
 }
 
 //
