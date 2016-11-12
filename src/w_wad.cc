@@ -46,7 +46,7 @@ std::vector<Wad_file *> master_dir;
 Lump_c::Lump_c(Wad_file *_par, const char *_nam, int _start, int _len) :
 	parent(_par), l_start(_start), l_length(_len)
 {
-	name = strdup(_nam);
+	name = StringDup(_nam);
 
 	SYS_ASSERT(name);
 
@@ -63,7 +63,7 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	strncpy(buffer, entry->name, 8);
 	buffer[8] = 0;
 
-	name = strdup(buffer);
+	name = StringDup(buffer);
 
 	l_start  = LE_U32(entry->pos);
 	l_length = LE_U32(entry->size);
@@ -74,7 +74,7 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 
 Lump_c::~Lump_c()
 {
-	free((void*)name);
+	StringFree(name);
 }
 
 
@@ -89,9 +89,9 @@ void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 
 void Lump_c::Rename(const char *new_name)
 {
-	free((void*)name);
+	StringFree(name);
 
-	name = strdup(new_name);
+	name = StringDup(new_name);
 	SYS_ASSERT(name);
 
 	// ensure lump name is uppercase
@@ -196,7 +196,7 @@ Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 	levels(), patches(), sprites(), flats(), tx_tex(),
 	begun_write(false), insert_point(-1)
 {
-	filename = strdup(_name);
+	filename = StringDup(_name);
 }
 
 Wad_file::~Wad_file()
@@ -211,7 +211,7 @@ Wad_file::~Wad_file()
 
 	directory.clear();
 
-	free((char *)filename);
+	StringFree(filename);
 }
 
 

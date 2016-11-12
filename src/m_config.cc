@@ -1417,7 +1417,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 		tokenbuf[tokenlen] = 0;
 		tokenlen = -1;
 
-		tokens[num_tok++] = strdup(tokenbuf);
+		tokens[num_tok++] = StringDup(tokenbuf);
 
 		// end of line?  if yes, break out of for loop
 		if (ch == 0 || ch == '\n')
@@ -1432,7 +1432,7 @@ void M_FreeLine(const char ** tokens, int num_tok)
 {
 	for (int i = 0 ; i < num_tok ; i++)
 	{
-		free((void *) tokens[i]);
+		StringFree(tokens[i]);
 
 		tokens[i] = NULL;
 	}
