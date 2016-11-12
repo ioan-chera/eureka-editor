@@ -74,7 +74,6 @@ public:
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
-	bool merge_vert;
 	bool skip_self_ref;
 	bool window_fx;
 
@@ -121,7 +120,6 @@ public:
 		load_all(false),
 		no_normal(false),
 		force_normal(false),
-		merge_vert(false),
 		skip_self_ref(false),
 		window_fx(false),
 
