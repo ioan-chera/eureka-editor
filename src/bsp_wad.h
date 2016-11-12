@@ -176,11 +176,6 @@ build_result_e WriteWadFile(const char *filename);
 // close all wad files and free any memory.
 void CloseWads(void);
 
-// delete the GWA file that is associated with the given normal
-// wad file.  It doesn't have to exist.
-//
-void DeleteGwaFile(const char *base_wad_name);
-
 // returns the number of levels found in the wad.
 int CountLevels(void);
 

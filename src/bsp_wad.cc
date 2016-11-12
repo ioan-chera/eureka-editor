@@ -390,10 +390,6 @@ static void ProcessDirEntry(lump_t *lump)
     return;
   }
 
-  // mark the lump as 'ignorable' when in GWA mode.
-  if (cur_info->gwa_mode)
-    lump->flags |= LUMP_IGNORE_ME;
-
   // --- LEVEL MARKERS ---
 
   if (CheckLevelName(lump->name))
@@ -1318,9 +1314,6 @@ build_result_e WriteWadFile(const char *filename)
   PrintMsg("\n");
   PrintMsg("Saving WAD as %s\n", filename);
 
-  if (cur_info->gwa_mode)
-    wad.kind = PWAD;
-
   RecomputeDirectory();
 
   // create output wad file & write the header
@@ -1362,20 +1355,6 @@ build_result_e WriteWadFile(const char *filename)
       check1, check2, wad.num_entries);
 
   return BUILD_OK;
-}
-
-
-//
-// DeleteGwaFile
-//
-void DeleteGwaFile(const char *base_wad_name)
-{
-  char *gwa_file = UtilReplaceExtension(base_wad_name, "gwa");
-
-  if (remove(gwa_file) == 0)
-    PrintMsg("Deleted GWA file: %s\n", gwa_file);
- 
-  UtilFree(gwa_file);
 }
 
 

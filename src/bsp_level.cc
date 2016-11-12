@@ -2221,7 +2221,7 @@ void LoadLevel(void)
 
 	bool normal_exists = CheckForNormalNodes();
 
-	lev_doing_normal = !cur_info->gwa_mode && (cur_info->force_normal ||
+	lev_doing_normal = (cur_info->force_normal ||
 			(!cur_info->no_normal && !normal_exists));
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
@@ -2512,25 +2512,22 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 		return BUILD_BadArgs;
 	}
 
+	if (!info->output_file || info->output_file[0] == 0)
+	{
+		SetErrorMsg("Missing output filename !");
+		return BUILD_BadArgs;
+	}
+
 	if (UtilCheckExtension(info->input_file, "gwa"))
 	{
 		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
 		return BUILD_BadArgs;
 	}
 
-	if (!info->output_file || info->output_file[0] == 0)
+	if (UtilCheckExtension(info->output_file, "gwa"))
 	{
-		StringFree(info->output_file);
-		info->output_file = StringDup(UtilReplaceExtension(
-					info->input_file, "gwa"));
-
-		info->gwa_mode = true;
-		info->missing_output = true;
-	}
-	else  /* has output filename */
-	{
-		if (UtilCheckExtension(info->output_file, "gwa"))
-			info->gwa_mode = true;
+		SetErrorMsg("Output file cannot be GWA");
+		return BUILD_BadArgs;
 	}
 
 	if (UtilStrCaseCmp(info->input_file, info->output_file) == 0)
@@ -2543,13 +2540,6 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 	{
 		info->pack_sides = false;
 		SetErrorMsg("-noprune and -packsides cannot be used together");
-		return BUILD_BadInfoFixed;
-	}
-
-	if (info->gwa_mode && info->force_normal)
-	{
-		info->force_normal = false;
-		SetErrorMsg("-forcenormal used, but GWA files don't have normal nodes");
 		return BUILD_BadInfoFixed;
 	}
 
@@ -2736,10 +2726,6 @@ build_result_e BuildNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		ret = WriteWadFile(cur_info->output_file);
-
-		// when modifying the original wad, any GWA companion must be deleted
-		if (ret == BUILD_OK && cur_info->same_filenames)
-			DeleteGwaFile(cur_info->output_file);
 
 		PrintMsg("\n");
 		PrintMsg("Total serious warnings: %d\n", cur_info->total_big_warn);

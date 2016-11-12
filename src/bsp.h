@@ -59,12 +59,6 @@ public:
 	const char *input_file;
 	const char *output_file;
 
-	// pointer to a NULL terminated array of strings containing extra
-	// input filenames.  Normally this field is NULL.  When there are
-	// extra filenames, 'output_file' will be NULL -- also the build
-	// mode will be GWA.
-	const char **extra_files;
-
 	int factor;
 
 	bool no_reject;
@@ -80,7 +74,6 @@ public:
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
-	bool gwa_mode;
 	bool prune_sect;
 	bool no_prune;
 	bool merge_vert;
@@ -114,7 +107,6 @@ public:
 	nodebuildinfo_t() :
 		input_file(NULL),
 		output_file(NULL),
-		extra_files(NULL),
 
 		factor(DEFAULT_FACTOR),
 
@@ -131,7 +123,6 @@ public:
 		load_all(false),
 		no_normal(false),
 		force_normal(false),
-		gwa_mode(false),
 		prune_sect(false),
 		no_prune(false),
 		merge_vert(false),
