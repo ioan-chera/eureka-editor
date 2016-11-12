@@ -117,9 +117,9 @@ void SetErrorMsg(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	GlbspFree(cur_comms->message);
+	StringFree(cur_comms->message);
 
-	cur_comms->message = GlbspStrDup(message_buf);
+	cur_comms->message = StringDup(message_buf);
 }
 
 

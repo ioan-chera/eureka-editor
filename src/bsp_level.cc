@@ -2622,12 +2622,12 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 
 			if (num_files >= 1)
 			{
-				AddExtraFile(info, GlbspStrDup(argv[0]));
+				AddExtraFile(info, StringDup(argv[0]));
 			}
 			else
 			{
-				GlbspFree(info->input_file);
-				info->input_file = GlbspStrDup(argv[0]);
+				StringFree(info->input_file);
+				info->input_file = StringDup(argv[0]);
 			}
 
 			num_files++;
@@ -2667,8 +2667,8 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 				return BUILD_BadArgs;
 			}
 
-			GlbspFree(info->output_file);
-			info->output_file = GlbspStrDup(argv[1]);
+			StringFree(info->output_file);
+			info->output_file = StringDup(argv[1]);
 
 			got_output = true;
 
@@ -2787,8 +2787,8 @@ build_result_e CheckInfo(nodebuildinfo_t *info,
 
 	if (!info->output_file || info->output_file[0] == 0)
 	{
-		GlbspFree(info->output_file);
-		info->output_file = GlbspStrDup(UtilReplaceExtension(
+		StringFree(info->output_file);
+		info->output_file = StringDup(UtilReplaceExtension(
 					info->input_file, "gwa"));
 
 		info->gwa_mode = true;
@@ -2855,25 +2855,6 @@ build_result_e CheckInfo(nodebuildinfo_t *info,
 	}
 
 	return BUILD_OK;
-}
-
-
-/* ----- memory functions --------------------------- */
-
-const char *GlbspStrDup(const char *str)
-{
-	if (! str)
-		return NULL;
-
-	return UtilStrDup(str);
-}
-
-void GlbspFree(const char *str)
-{
-	if (! str)
-		return;
-
-	UtilFree((char *) str);
 }
 
 

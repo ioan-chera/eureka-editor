@@ -172,8 +172,8 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	memcpy(&nb_info,  &ajbsp::default_buildinfo,  sizeof(ajbsp::default_buildinfo));
 	memcpy((void*)&nb_comms, &ajbsp::default_buildcomms, sizeof(ajbsp::nodebuildcomms_t));
 
-	nb_info.input_file  = ajbsp::GlbspStrDup(in_name);
-	nb_info.output_file = ajbsp::GlbspStrDup(out_name);
+	nb_info.input_file  = StringDup(in_name);
+	nb_info.output_file = StringDup(out_name);
 
 	nb_info.fast          = glbsp_fast ? true : false;
 	nb_info.quiet         = glbsp_verbose ? false : true;

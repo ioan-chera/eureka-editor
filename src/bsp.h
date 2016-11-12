@@ -46,8 +46,8 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // Node Build Information Structure
 //
 // Memory note: when changing the string values here (and in
-// nodebuildcomms_t) they should be freed using GlbspFree() and
-// allocated with GlbspStrDup().  The application has the final
+// nodebuildcomms_t) they should be freed using StringFree() and
+// allocated with StringDup().  The application has the final
 // responsibility to free the strings in here.
 //
 typedef struct nodebuildinfo_s
@@ -195,13 +195,6 @@ build_result_e CheckInfo(nodebuildinfo_t *info,
 //
 build_result_e BuildNodes(const nodebuildinfo_t *info,
     volatile nodebuildcomms_t *comms);
-
-// string memory routines.  These should be used for all strings
-// shared between the main glBSP code and the UI code (including code
-// using glBSP as a plug-in).  They accept NULL pointers.
-//
-const char *GlbspStrDup(const char *str);
-void GlbspFree(const char *str);
 
 
 //------------------------------------------------------------------------
