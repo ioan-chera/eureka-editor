@@ -50,8 +50,12 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // allocated with StringDup().  The application has the final
 // responsibility to free the strings in here.
 //
-typedef struct nodebuildinfo_s
+#define DEFAULT_FACTOR  11
+#define DEFAULT_BLOCK_LIMIT  16000
+
+class nodebuildinfo_t
 {
+public:
 	const char *input_file;
 	const char *output_file;
 
@@ -90,15 +94,11 @@ typedef struct nodebuildinfo_s
 
 	bool missing_output;
 	bool same_filenames;
-}
-nodebuildinfo_t;
 
-// This is for two-way communication (esp. with the GUI).
-// Should be flagged 'volatile' since multiple threads (real or
-// otherwise, e.g. signals) may read or change the values.
-//
-typedef struct nodebuildcomms_s
-{
+	// This is for two-way communication (esp. with the GUI).
+	// Should be flagged 'volatile' since multiple threads (real or
+	// otherwise, e.g. signals) may read or change the values.
+
 	// if the node builder failed, this will contain the error
 	const char *message;
 
@@ -108,8 +108,54 @@ typedef struct nodebuildcomms_s
 	// from here on, various bits of internal state
 	int total_small_warn, total_big_warn;
 	int build_pos, file_pos;
-}
-nodebuildcomms_t;
+
+
+public:
+	nodebuildinfo_t() :
+		input_file(NULL),
+		output_file(NULL),
+		extra_files(NULL),
+
+		factor(DEFAULT_FACTOR),
+
+		no_reject(false),
+		no_progress(false),
+		quiet(false),
+		mini_warnings(false),
+		force_hexen(false),
+		pack_sides(false),
+		fast(false),
+
+		spec_version(2),
+
+		load_all(false),
+		no_normal(false),
+		force_normal(false),
+		gwa_mode(false),
+		prune_sect(false),
+		no_prune(false),
+		merge_vert(false),
+		skip_self_ref(false),
+		window_fx(false),
+
+		block_limit(DEFAULT_BLOCK_LIMIT),
+
+		missing_output(false),
+		same_filenames(false),
+
+		message(NULL),
+		cancelled(false),
+		total_small_warn(0),
+		total_big_warn(0),
+		build_pos(0),
+		file_pos(0)
+	{ }
+
+	~nodebuildinfo_t()
+	{
+		// FIXME : free strings
+	}
+};
 
 
 // Display Prototypes
@@ -121,11 +167,6 @@ typedef enum
 	NUMOFGUITYPES
 }
 displaytype_e;
-
-
-// Default build info and comms
-extern const nodebuildinfo_t default_buildinfo;
-extern const nodebuildcomms_t default_buildcomms;
 
 
 /* -------- engine prototypes ----------------------- */
@@ -154,17 +195,6 @@ typedef enum
 build_result_e;
 
 
-// parses the arguments, modifying the 'info' structure accordingly.
-// Returns BUILD_OK if all went well, otherwise another error code.
-// Upon error, comms->message may be set to an string describing the
-// error.  Typical errors are unrecognised options and invalid option
-// values.  Calling this routine is not compulsory.  Note that the set
-// of arguments does not include the program's name.
-//
-build_result_e ParseArgs(nodebuildinfo_t *info,
-    volatile nodebuildcomms_t *comms,
-    const char ** argv, int argc);
-
 // checks the node building parameters in 'info'.  If they are valid,
 // returns BUILD_OK, otherwise an error code is returned.  This
 // routine should always be called shortly before GlbspBuildNodes().
@@ -182,8 +212,7 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 // routine should be called once for each input file, setting the
 // 'output_file' field to NULL each time.
 //
-build_result_e CheckInfo(nodebuildinfo_t *info,
-    volatile nodebuildcomms_t *comms);
+build_result_e CheckInfo(nodebuildinfo_t *info);
 
 // main routine, this will build the nodes (GL and/or normal) for the
 // given input wad file out to the given output file.  Returns
@@ -193,8 +222,7 @@ build_result_e CheckInfo(nodebuildinfo_t *info,
 // (esp. the GUI) using the comms->cancelled flag.  Upon errors, the
 // comms->message field usually contains a string describing it.
 //
-build_result_e BuildNodes(const nodebuildinfo_t *info,
-    volatile nodebuildcomms_t *comms);
+build_result_e BuildNodes(nodebuildinfo_t *info);
 
 
 //------------------------------------------------------------------------
@@ -436,8 +464,7 @@ raw_v5_node_t;
 
 // internal storage of node building parameters
 
-extern const nodebuildinfo_t *cur_info;
-extern volatile nodebuildcomms_t *cur_comms;
+extern nodebuildinfo_t * cur_info;
 
 
 /* ----- function prototypes ---------------------------- */
@@ -518,8 +545,6 @@ void Adler32_Finish(u32_t *crc);
 //------------------------------------------------------------------------
 // BLOCKMAP : Generate the blockmap
 //------------------------------------------------------------------------
-
-#define DEFAULT_BLOCK_LIMIT  16000
 
 // compute blockmap origin & size (the block_x/y/w/h variables)
 // based on the set of loaded linedefs.
@@ -988,8 +1013,6 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
 // SEG : Choose the best Seg to use for a node line.
 //------------------------------------------------------------------------
 
-
-#define DEFAULT_FACTOR  11
 
 #define IFFY_LEN  4.0
 

@@ -694,7 +694,7 @@ static int PickNodeWorker(superblock_t *part_list,
 	/* use each Seg as partition */
 	for (part=part_list->segs; part; part = part->next)
 	{
-		if (cur_comms->cancelled)
+		if (cur_info->cancelled)
 			return false;
 
 #   if DEBUG_PICKNODE
@@ -709,9 +709,9 @@ static int PickNodeWorker(superblock_t *part_list,
 
 		if ((*progress % prog_step) == 0)
 		{
-			cur_comms->build_pos++;
-			GB_DisplaySetBar(1, cur_comms->build_pos);
-			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			cur_info->build_pos++;
+			GB_DisplaySetBar(1, cur_info->build_pos);
+			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
 		}
 
 		/* ignore minisegs as partition candidates */
@@ -776,11 +776,11 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 
 		if (total / prog_step < build_step)
 		{
-			cur_comms->build_pos += build_step - total / prog_step;
+			cur_info->build_pos += build_step - total / prog_step;
 			build_step = total / prog_step;
 
-			GB_DisplaySetBar(1, cur_comms->build_pos);
-			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			GB_DisplaySetBar(1, cur_info->build_pos);
+			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
 		}
 	}
 
@@ -802,9 +802,9 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		if (best)
 		{
 			/* update progress */
-			cur_comms->build_pos += build_step;
-			GB_DisplaySetBar(1, cur_comms->build_pos);
-			GB_DisplaySetBar(2, cur_comms->file_pos + cur_comms->build_pos / 100);
+			cur_info->build_pos += build_step;
+			GB_DisplaySetBar(1, cur_info->build_pos);
+			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
 
 #     if DEBUG_PICKNODE
 			DebugPrintf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
@@ -2144,7 +2144,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	*N = NULL;
 	*S = NULL;
 
-	if (cur_comms->cancelled)
+	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
 # if DEBUG_BUILDER
@@ -2157,7 +2157,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 	if (best == NULL)
 	{
-		if (cur_comms->cancelled)
+		if (cur_info->cancelled)
 			return BUILD_Cancelled;
 
 #   if DEBUG_BUILDER

@@ -536,8 +536,8 @@ static void ReadLumpData(lump_t *lump)
 {
   size_t len;
 
-  cur_comms->file_pos++;
-  GB_DisplaySetBar(1, cur_comms->file_pos);
+  cur_info->file_pos++;
+  GB_DisplaySetBar(1, cur_info->file_pos);
   GB_DisplayTicker();
 
 # if DEBUG_LUMP
@@ -808,8 +808,8 @@ static void WriteLumpData(lump_t *lump)
   size_t len;
   int align_size;
 
-  cur_comms->file_pos++;
-  GB_DisplaySetBar(1, cur_comms->file_pos);
+  cur_info->file_pos++;
+  GB_DisplaySetBar(1, cur_info->file_pos);
   GB_DisplayTicker();
 
 # if DEBUG_LUMP
@@ -1290,7 +1290,7 @@ build_result_e ReadWadFile(const char *filename)
 
   UtilFree(read_msg);
 
-  cur_comms->file_pos = 0;
+  cur_info->file_pos = 0;
 
   // now read lumps
   check = ReadAllLumps();
@@ -1347,7 +1347,7 @@ build_result_e WriteWadFile(const char *filename)
 
   UtilFree(write_msg);
 
-  cur_comms->file_pos = 0;
+  cur_info->file_pos = 0;
 
   // now write all the lumps to the output wad
   check1 = WriteAllLumps();

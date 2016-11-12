@@ -2494,52 +2494,7 @@ void SaveLevel(node_t *root_node)
 //------------------------------------------------------------------------
 
 
-const nodebuildinfo_t *cur_info = NULL;
-volatile nodebuildcomms_t *cur_comms = NULL;
-
-
-const nodebuildinfo_t default_buildinfo =
-{
-	NULL,    // input_file
-	NULL,    // output_file
-	NULL,    // extra_files
-
-	DEFAULT_FACTOR,  // factor
-
-	false,   // no_reject
-	false,   // no_progress
-	false,   // quiet
-	false,   // mini_warnings
-	false,   // force_hexen
-	false,   // pack_sides
-	false,   // fast
-
-	2,   // spec_version
-
-	false,   // load_all
-	false,   // no_normal
-	false,   // force_normal
-	false,   // gwa_mode
-	false,   // prune_sect
-	false,   // no_prune
-	false,   // merge_vert
-	false,   // skip_self_ref
-	false,   // window_fx
-
-	DEFAULT_BLOCK_LIMIT,   // block_limit
-
-	false,   // missing_output
-	false    // same_filenames
-};
-
-const nodebuildcomms_t default_buildcomms =
-{
-	NULL,    // message
-	false,   // cancelled
-
-	0, 0,    // total warnings
-	0, 0     // build and file positions
-};
+nodebuildinfo_t * cur_info = NULL;
 
 
 /* ----- option parsing ----------------------------- */
@@ -2577,6 +2532,9 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
 	info->extra_files[count+1] = NULL;
 }
 
+
+#if 0
+
 #define HANDLE_BOOLEAN(name, field)  \
 	if (UtilStrCaseCmp(opt_str, name) == 0)  \
 {  \
@@ -2590,14 +2548,12 @@ static void AddExtraFile(nodebuildinfo_t *info, const char *str)
 HANDLE_BOOLEAN(name, field)
 
 build_result_e ParseArgs(nodebuildinfo_t *info,
-		volatile nodebuildcomms_t *comms,
 		const char ** argv, int argc)
 {
 	const char *opt_str;
 	int num_files = 0;
 	int got_output = false;
 
-	cur_comms = comms;
 	SetErrorMsg("(Unknown Problem)");
 
 	while (argc > 0)
@@ -2609,14 +2565,12 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 			if (got_output)
 			{
 				SetErrorMsg("Input filenames must precede the -o option");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
 			if (UtilCheckExtension(argv[0], "gwa"))
 			{
 				SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
@@ -2649,21 +2603,18 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 			if (got_output)
 			{
 				SetErrorMsg("The -o option cannot be used more than once");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
 			if (num_files >= 2)
 			{
 				SetErrorMsg("Cannot use -o with multiple input files.");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
 			if (argc < 2 || argv[1][0] == '-')
 			{
 				SetErrorMsg("Missing filename for the -o option");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
@@ -2682,7 +2633,6 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 			if (argc < 2)
 			{
 				SetErrorMsg("Missing factor value");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
@@ -2706,7 +2656,6 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 			if (argc < 2)
 			{
 				SetErrorMsg("Missing maxblock value");
-				cur_comms = NULL;
 				return BUILD_BadArgs;
 			}
 
@@ -2756,18 +2705,17 @@ build_result_e ParseArgs(nodebuildinfo_t *info,
 
 			SetErrorMsg("Unknown option: %s", argv[0]);
 
-		cur_comms = NULL;
 		return BUILD_BadArgs;
 	}
 
-	cur_comms = NULL;
 	return BUILD_OK;
 }
+#endif
 
-build_result_e CheckInfo(nodebuildinfo_t *info,
-		volatile nodebuildcomms_t *comms)
+build_result_e CheckInfo(nodebuildinfo_t *info)
 {
-	cur_comms = comms;
+	cur_info = info;
+
 	SetErrorMsg("(Unknown Problem)");
 
 	info->same_filenames = false;
@@ -2870,13 +2818,13 @@ static build_result_e HandleLevel(void)
 
 	build_result_e ret;
 
-	if (cur_comms->cancelled)
+	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
 	GB_DisplaySetBarLimit(1, 1000);
 	GB_DisplaySetBar(1, 0);
 
-	cur_comms->build_pos = 0;
+	cur_info->build_pos = 0;
 
 	LoadLevel();
 
@@ -2916,21 +2864,19 @@ static build_result_e HandleLevel(void)
 
 /* ----- main routine -------------------------------------- */
 
-build_result_e BuildNodes(const nodebuildinfo_t *info,
-		volatile nodebuildcomms_t *comms)
+build_result_e BuildNodes(nodebuildinfo_t *info)
 {
 	char *file_msg;
 
 	build_result_e ret = BUILD_OK;
 
 	cur_info  = info;
-	cur_comms = comms;
 
-	cur_comms->total_big_warn = 0;
-	cur_comms->total_small_warn = 0;
+	cur_info->total_big_warn = 0;
+	cur_info->total_small_warn = 0;
 
 	// clear cancelled flag
-	comms->cancelled = false;
+	cur_info->cancelled = false;
 
 	// sanity check
 	if (!cur_info->input_file  || cur_info->input_file[0] == 0 ||
@@ -2978,7 +2924,7 @@ build_result_e BuildNodes(const nodebuildinfo_t *info,
 
 	UtilFree(file_msg);
 
-	cur_comms->file_pos = 0;
+	cur_info->file_pos = 0;
 
 	// loop over each level in the wad
 	while (FindNextLevel())
@@ -2988,8 +2934,8 @@ build_result_e BuildNodes(const nodebuildinfo_t *info,
 		if (ret != BUILD_OK)
 			break;
 
-		cur_comms->file_pos += 10;
-		GB_DisplaySetBar(2, cur_comms->file_pos);
+		cur_info->file_pos += 10;
+		GB_DisplaySetBar(2, cur_info->file_pos);
 	}
 
 	GB_DisplayClose();
@@ -3004,8 +2950,8 @@ build_result_e BuildNodes(const nodebuildinfo_t *info,
 			DeleteGwaFile(cur_info->output_file);
 
 		PrintMsg("\n");
-		PrintMsg("Total serious warnings: %d\n", cur_comms->total_big_warn);
-		PrintMsg("Total minor warnings: %d\n", cur_comms->total_small_warn);
+		PrintMsg("Total serious warnings: %d\n", cur_info->total_big_warn);
+		PrintMsg("Total minor warnings: %d\n", cur_info->total_small_warn);
 
 		ReportFailedLevels();
 	}
@@ -3013,8 +2959,7 @@ build_result_e BuildNodes(const nodebuildinfo_t *info,
 	// close wads and free memory
 	CloseWads();
 
-	cur_info  = NULL;
-	cur_comms = NULL;
+	cur_info = NULL;
 
 	return ret;
 }

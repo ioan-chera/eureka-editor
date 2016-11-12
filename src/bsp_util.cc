@@ -82,7 +82,7 @@ void PrintWarn(const char *str, ...)
 
 	GB_PrintMsg("Warning: %s", message_buf);
 
-	cur_comms->total_big_warn++;
+	cur_info->total_big_warn++;
 
 #if DEBUG_ENABLED
 	DebugPrintf("Warning: %s", message_buf);
@@ -101,7 +101,7 @@ void PrintMiniWarn(const char *str, ...)
 	if (cur_info->mini_warnings)
 		GB_PrintMsg("Warning: %s", message_buf);
 
-	cur_comms->total_small_warn++;
+	cur_info->total_small_warn++;
 
 #if DEBUG_ENABLED
 	DebugPrintf("MiniWarn: %s", message_buf);
@@ -117,9 +117,9 @@ void SetErrorMsg(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	StringFree(cur_comms->message);
+	StringFree(cur_info->message);
 
-	cur_comms->message = StringDup(message_buf);
+	cur_info->message = StringDup(message_buf);
 }
 
 

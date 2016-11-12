@@ -35,8 +35,7 @@ bool glbsp_verbose = false;
 bool glbsp_warn    = false;
 
 
-static ajbsp::nodebuildinfo_t nb_info;
-static volatile ajbsp::nodebuildcomms_t nb_comms;
+static ajbsp::nodebuildinfo_t * nb_info;
 
 static int display_mode = ajbsp::DIS_INVALID;
 static int progress_limit;
@@ -92,7 +91,7 @@ void GB_DisplayTicker(void)
 {
 	if (dialog->WantCancel())
 	{
-		nb_comms.cancelled = true;
+		nb_info->cancelled = true;
 	}
 }
 
@@ -169,38 +168,40 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 	display_mode = ajbsp::DIS_INVALID;
 
-	memcpy(&nb_info,  &ajbsp::default_buildinfo,  sizeof(ajbsp::default_buildinfo));
-	memcpy((void*)&nb_comms, &ajbsp::default_buildcomms, sizeof(ajbsp::nodebuildcomms_t));
+	nb_info = new ajbsp::nodebuildinfo_t;
 
-	nb_info.input_file  = StringDup(in_name);
-	nb_info.output_file = StringDup(out_name);
+	nb_info->input_file  = StringDup(in_name);
+	nb_info->output_file = StringDup(out_name);
 
-	nb_info.fast          = glbsp_fast ? true : false;
-	nb_info.quiet         = glbsp_verbose ? false : true;
-	nb_info.mini_warnings = glbsp_warn ? true : false;
+	nb_info->fast          = glbsp_fast ? true : false;
+	nb_info->quiet         = glbsp_verbose ? false : true;
+	nb_info->mini_warnings = glbsp_warn ? true : false;
 
-	nb_info.pack_sides = false;
-	nb_info.force_normal = true;
+	nb_info->pack_sides = false;
+	nb_info->force_normal = true;
 
 	ajbsp::build_result_e  ret;
 
-	ret = ajbsp::CheckInfo(&nb_info, &nb_comms);
+	ret = ajbsp::CheckInfo(nb_info);
 
 	if (ret != ajbsp::BUILD_OK)
 	{
 		// check info failure (unlikely to happen)
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Param Check FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
+		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
 		return false;
 	}
 
-	ret = ajbsp::BuildNodes(&nb_info, &nb_comms);
+	ret = ajbsp::BuildNodes(nb_info);
 
 	if (ret == ajbsp::BUILD_Cancelled)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
+
+		delete nb_info;
+
 		return false;
 	}
 
@@ -209,9 +210,14 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		// build nodes failed
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
+		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
+
+		delete nb_info;
+
 		return false;
 	}
+
+	delete nb_info;
 
 	return true;
 }
@@ -314,7 +320,7 @@ fprintf(stderr, "new_name : %s\n", new_name);
 	{
 		dialog->Finish_OK();
 	}
-	else if (nb_comms.cancelled)
+	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
 
