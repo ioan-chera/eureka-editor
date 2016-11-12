@@ -945,10 +945,7 @@ void DetectOverlappingLines(void);
 void DetectWindowEffects(void);
 
 // pruning routines
-void PruneLinedefs(void);
-void PruneVertices(void);
-void PruneSidedefs(void);
-void PruneSectors(void);
+void PruneVerticesAtEnd(void);
 
 // computes the wall tips for all of the vertices
 void CalculateWallTips(void);

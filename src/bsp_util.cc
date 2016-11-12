@@ -775,53 +775,36 @@ void DetectDuplicateSidedefs(void)
 }
 
 
-void PruneVertices(void)
+void PruneVerticesAtEnd(void)
 {
-	// FIXME : PruneVertices : ONLY REMOVE FROM END
+	int new_num = num_vertices;
 
-	int i;
-	int new_num;
-	int unused = 0;
+	// scan all vertices.
+	// only remove from the end, so stop when hit a used one.
 
-	GB_DisplayTicker();
-
-	// scan all vertices
-	for (i=0, new_num=0; i < num_vertices; i++)
+	for (int i = num_vertices - 1 ; i >= 0 ; i--)
 	{
 		vertex_t *V = lev_vertices[i];
 
 		if (V->ref_count < 0)
 			BugError("Vertex %d ref_count is %d", i, V->ref_count);
 
-		if (V->ref_count == 0)
-		{
-			if (V->equiv == NULL)
-				unused++;
+		if (V->ref_count > 0)
+			break;
 
-			UtilFree(V);
-			continue;
-		}
+		UtilFree(V);
 
-		V->index = new_num;
-		lev_vertices[new_num++] = V;
+		new_num -= 1;
 	}
 
 	if (new_num < num_vertices)
 	{
-		int dup_num = num_vertices - new_num - unused;
+		int unused = num_vertices - new_num;
 
-		if (unused > 0)
-			PrintVerbose("Pruned %d unused vertices "
-					"(this is normal if the nodes were built before)\n", unused);
-
-		if (dup_num > 0)
-			PrintVerbose("Pruned %d duplicate vertices\n", dup_num);
+		PrintVerbose("Pruned %d unused vertices at end\n", unused);
 
 		num_vertices = new_num;
 	}
-
-	if (new_num == 0)
-		FatalError("Couldn't find any Vertices");
 
 	num_normal_vert = num_vertices;
 }

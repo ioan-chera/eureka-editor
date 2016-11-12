@@ -2269,9 +2269,9 @@ void LoadLevel(void)
 		if (cur_info->merge_vert)
 			DetectDuplicateVertices();
 
-		// always prune vertices (ignore -noprune), otherwise all the
+		// always prune vertices at end of lump, otherwise all the
 		// unused vertices from seg splits would keep accumulating.
-		PruneVertices();
+		PruneVerticesAtEnd();
 	}
 
 	CalculateWallTips();
