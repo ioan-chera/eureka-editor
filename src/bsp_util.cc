@@ -931,7 +931,7 @@ void CalculateWallTips(void)
 	{
 		linedef_t *L = lev_linedefs[i];
 
-		if (L->overlap)
+		if (L->overlap || L->zero_len)
 			continue;
 
 		double x1 = L->start->x;
