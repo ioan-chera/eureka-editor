@@ -177,6 +177,13 @@ typedef enum
 build_result_e;
 
 
+// FIXME remove this
+build_result_e CheckInfo(nodebuildinfo_t *info);
+
+
+build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx);
+
+
 // main routine, this will build the nodes (GL and/or normal) for the
 // given input wad file out to the given output file.  Returns
 // BUILD_OK if everything went well, otherwise another error code.
@@ -185,7 +192,7 @@ build_result_e;
 // (esp. the GUI) using the comms->cancelled flag.  Upon errors, the
 // comms->message field usually contains a string describing it.
 //
-build_result_e BuildNodes(nodebuildinfo_t *info);
+///---  build_result_e BuildNodes(nodebuildinfo_t *info);
 
 
 //------------------------------------------------------------------------
@@ -918,13 +925,13 @@ node_t *LookupNode(int index);
 int CheckForNormalNodes(void);
 
 // load all level data for the current level
-void LoadLevel(void);
+void LoadLevel(short lev_idx);
 
 // free all level data
 void FreeLevel(void);
 
 // save the newly computed NODE info etc..
-void SaveLevel(node_t *root_node);
+void SaveLevel(short lev_idx, node_t *root_node);
 
 
 //------------------------------------------------------------------------

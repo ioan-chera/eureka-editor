@@ -21,6 +21,10 @@
 #include "main.h"
 #include "bsp.h"
 
+#include "w_wad.h"
+
+#include <zlib.h>
+
 
 namespace ajbsp
 {
@@ -965,28 +969,6 @@ node_t *LookupNode(int index)
 
 
 /* ----- reading routines ------------------------------ */
-
-
-int CheckForNormalNodes(void)
-{
-	lump_t *lump;
-
-	/* Note: an empty NODES lump can be valid */
-	if (FindLevelLump("NODES") == NULL)
-		return false;
-
-	lump = FindLevelLump("SEGS");
-
-	if (! lump || lump->length == 0 || CheckLevelLumpZero(lump))
-		return false;
-
-	lump = FindLevelLump("SSECTORS");
-
-	if (! lump || lump->length == 0 || CheckLevelLumpZero(lump))
-		return false;
-
-	return true;
-}
 
 
 void GetVertices(void)
@@ -2070,11 +2052,13 @@ void SaveZDFormat(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-void LoadLevel(void)
+void LoadLevel(short lev_idx)
 {
 	char *message;
 
-	const char *level_name = GetLevelName();
+	Lump_c *LEV = edit_wad->GetLump(edit_wad->GetLevel(lev_idx));
+
+	const char *level_name = LEV->Name();
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
@@ -2180,13 +2164,15 @@ void PutGLChecksum(void)
 }
 
 
-void SaveLevel(node_t *root_node)
+void SaveLevel(short lev_idx, node_t *root_node)
 {
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
 
 	// Note: RoundOffBspTree will convert the GL vertices in segs to
 	// their normal counterparts (pointer change: use normal_dup).
+
+	// check for overflows...
 
 	// FIXME : verify this is correct for XNOD format
 
@@ -2304,6 +2290,378 @@ void SaveLevel(node_t *root_node)
 }
 
 
+//----------------------------------------------------------------------
+
+
+static lump_t  *zout_lump;
+static z_stream zout_stream;
+static Bytef    zout_buffer[1024];
+
+
+void ZLibBeginLump(lump_t *lump)
+{
+	zout_lump = lump;
+
+	zout_stream.zalloc = (alloc_func)0;
+	zout_stream.zfree  = (free_func)0;
+	zout_stream.opaque = (voidpf)0;
+
+	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
+		FatalError("Trouble setting up zlib compression");
+
+	zout_stream.next_out  = zout_buffer;
+	zout_stream.avail_out = sizeof(zout_buffer);
+}
+
+
+void ZLibAppendLump(const void *data, int length)
+{
+	// ASSERT(zout_lump)
+	// ASSERT(length > 0)
+
+	zout_stream.next_in  = (Bytef*)data;   // const override
+	zout_stream.avail_in = length;
+
+	while (zout_stream.avail_in > 0)
+	{
+		int err = deflate(&zout_stream, Z_NO_FLUSH);
+
+		if (err != Z_OK)
+			FatalError("Trouble compressing %d bytes (zlib)\n", length);
+
+		if (zout_stream.avail_out == 0)
+		{
+			AppendLevelLump(zout_lump, zout_buffer, sizeof(zout_buffer));
+
+			zout_stream.next_out  = zout_buffer;
+			zout_stream.avail_out = sizeof(zout_buffer);
+		}
+	}
+}
+
+
+void ZLibFinishLump(void)
+{
+	int left_over;
+
+	// ASSERT(zout_stream.avail_out > 0)
+
+	zout_stream.next_in  = Z_NULL;
+	zout_stream.avail_in = 0;
+
+	for (;;)
+	{
+		int err = deflate(&zout_stream, Z_FINISH);
+
+		if (err == Z_STREAM_END)
+			break;
+
+		if (err != Z_OK)
+			FatalError("Trouble finishing compression (zlib)\n");
+
+		if (zout_stream.avail_out == 0)
+		{
+			AppendLevelLump(zout_lump, zout_buffer, sizeof(zout_buffer));
+
+			zout_stream.next_out  = zout_buffer;
+			zout_stream.avail_out = sizeof(zout_buffer);
+		}
+	}
+
+	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
+
+	if (left_over > 0)
+		AppendLevelLump(zout_lump, zout_buffer, left_over);
+
+	deflateEnd(&zout_stream);
+	zout_lump = NULL;
+}
+
+
+/* ---------------------------------------------------------------- */
+
+
+//
+// Mark failure routines
+//
+void MarkSoftFailure(int soft)
+{
+//TODO  wad.current_level->lev_info->soft_limit |= soft;
+}
+
+void MarkHardFailure(int hard)
+{
+//TODO  wad.current_level->lev_info->hard_limit |= hard;
+}
+
+void MarkV5Switch(int v5)
+{
+//TODO  wad.current_level->lev_info->v5_switch |= v5;
+}
+
+void MarkZDSwitch(void)
+{
+#if 0  // TODO
+  level_t *lev = wad.current_level->lev_info;
+
+  lev->v5_switch |= LIMIT_ZDBSP;
+
+  lev->soft_limit &= ~ (LIMIT_VERTEXES);
+  lev->hard_limit &= ~ (LIMIT_VERTEXES);
+#endif
+}
+
+
+void ReportOneOverflow(const lump_t *lump, int limit, bool hard)
+{
+	const char *msg = hard ? "overflowed the absolute limit" :
+		"overflowed the original limit";
+
+	PrintMsg("%-8s: ", lump->name);
+
+	switch (limit)
+	{
+		case LIMIT_VERTEXES: PrintMsg("Number of Vertices %s.\n", msg); break;
+		case LIMIT_SECTORS:  PrintMsg("Number of Sectors %s.\n", msg); break;
+		case LIMIT_SIDEDEFS: PrintMsg("Number of Sidedefs %s\n", msg); break;
+		case LIMIT_LINEDEFS: PrintMsg("Number of Linedefs %s\n", msg); break;
+
+		case LIMIT_SEGS:     PrintMsg("Number of Segs %s.\n", msg); break;
+		case LIMIT_SSECTORS: PrintMsg("Number of Subsectors %s.\n", msg); break;
+		case LIMIT_NODES:    PrintMsg("Number of Nodes %s.\n", msg); break;
+
+		case LIMIT_GL_VERT:  PrintMsg("Number of GL vertices %s.\n", msg); break;
+		case LIMIT_GL_SEGS:  PrintMsg("Number of GL segs %s.\n", msg); break;
+		case LIMIT_GL_SSECT: PrintMsg("Number of GL subsectors %s.\n", msg); break;
+		case LIMIT_GL_NODES: PrintMsg("Number of GL nodes %s.\n", msg); break;
+
+		case LIMIT_BAD_SIDE:   PrintMsg("One or more linedefs has a bad sidedef.\n"); break;
+		case LIMIT_BMAP_TRUNC: PrintMsg("Blockmap area was too big - truncated.\n"); break;
+		case LIMIT_BLOCKMAP:   PrintMsg("Blockmap lump %s.\n", msg); break;
+
+		default:
+			BugError("UNKNOWN LIMIT BIT: 0x%06x", limit);
+	}
+}
+
+
+void ReportOverflows(bool hard)
+{
+#if 0
+	lump_t *cur;
+
+	if (hard)
+	{
+		PrintMsg(
+				"ERRORS.  The following levels failed to be built, and won't\n"
+				"work in any Doom port (and may even crash it).\n\n"
+				);
+	}
+	else  // soft
+	{
+		PrintMsg(
+				"POTENTIAL FAILURES.  The following levels should work in a\n"
+				"modern Doom port, but may fail (or even crash) in older ports.\n\n"
+				);
+	}
+
+	for (cur=wad.dir_head; cur; cur=cur->next)
+	{
+		level_t *lev = cur->lev_info;
+
+		int limits, one_lim;
+
+		if (! (lev && ! (lev->flags & LEVEL_IS_GL)))
+			continue;
+
+		limits = hard ? lev->hard_limit : lev->soft_limit;
+
+		if (limits == 0)
+			continue;
+
+		for (one_lim = (1<<20); one_lim; one_lim >>= 1)
+		{
+			if (limits & one_lim)
+				ReportOneOverflow(cur, one_lim, hard);
+		}
+	}
+#endif
+}
+
+
+void ReportV5Switches(void)
+{
+#if 0
+	lump_t *cur;
+
+	int saw_zdbsp = false;
+
+	PrintMsg(
+			"V5 FORMAT UPGRADES.  The following levels require a Doom port\n"
+			"which supports V5 GL-Nodes, otherwise they will fail (or crash).\n\n"
+			);
+
+	for (cur=wad.dir_head; cur; cur=cur->next)
+	{
+		level_t *lev = cur->lev_info;
+
+		if (! (lev && ! (lev->flags & LEVEL_IS_GL)))
+			continue;
+
+		if (lev->v5_switch == 0)
+			continue;
+
+		if ((lev->v5_switch & LIMIT_ZDBSP) && ! saw_zdbsp)
+		{
+			PrintMsg("ZDBSP FORMAT has also been used for regular nodes.\n\n");
+			saw_zdbsp = true;
+		}
+
+		if (lev->v5_switch & LIMIT_VERTEXES)
+		{
+			PrintMsg("%-8s: Number of Vertices overflowed the limit.\n", cur->name);
+		}
+
+		if (lev->v5_switch & LIMIT_GL_SSECT)
+		{
+			PrintMsg("%-8s: Number of GL segs overflowed the limit.\n", cur->name);
+		}
+	}
+#endif
+}
+
+
+void ReportFailedLevels(void)
+{
+	PrintMsg("*** Problem Report ***\n\n");
+
+#if 0
+	lump_t *cur;
+	int lev_count = 0;
+
+	int fail_soft = 0;
+	int fail_hard = 0;
+	int fail_v5   = 0;
+
+	bool need_spacer = false;
+
+	for (cur=wad.dir_head; cur; cur=cur->next)
+	{
+		if (! (cur->lev_info && ! (cur->lev_info->flags & LEVEL_IS_GL)))
+			continue;
+
+		lev_count++;
+
+		if (cur->lev_info->soft_limit != 0) fail_soft++;
+		if (cur->lev_info->hard_limit != 0) fail_hard++;
+		if (cur->lev_info->v5_switch  != 0) fail_v5++;
+	}
+
+	PrintMsg("\n");
+
+	if (fail_soft + fail_hard + fail_v5 == 0)
+	{
+		PrintMsg("All levels were built successfully.\n");
+		return;
+	}
+
+	if (fail_soft > 0)
+	{
+		ReportOverflows(false);
+		need_spacer = true;
+	}
+
+	if (fail_v5 > 0)
+	{
+		if (need_spacer)
+			PrintMsg("\n");
+
+		ReportV5Switches();
+		need_spacer = true;
+	}
+
+	if (fail_hard > 0)
+	{
+		if (need_spacer)
+			PrintMsg("\n");
+
+		ReportOverflows(true);
+	}
+
+#endif
+	PrintMsg("\nEnd of problem report.\n");
+}
+
+
+// FIXME
+extern wad_t wad;
+
+lump_t *CreateGLMarker(void)
+{
+	lump_t *level = wad.current_level;
+	lump_t *cur;
+
+	char name_buf[32];
+	bool long_name = false;
+
+	if (strlen(level->name) <= 5)
+	{
+		sprintf(name_buf, "GL_%s", level->name);
+	}
+	else
+	{
+		// support for level names longer than 5 letters
+		strcpy(name_buf, "GL_LEVEL");
+		long_name = true;
+	}
+
+// FIXME !!!!
+#if 0
+	cur = NewLump(UtilStrDup(name_buf));
+	cur->lev_info = NewLevel(LEVEL_IS_GL);
+#endif
+
+	// link it in
+	cur->next = level->next;
+	cur->prev = level;
+
+	if (cur->next)
+		cur->next->prev = cur;
+
+	level->next = cur;
+	level->lev_info->buddy = cur;
+
+	if (long_name)
+	{
+		AddGLTextLine("LEVEL", level->name);
+	}
+
+	return cur;
+}
+
+
+void AddGLTextLine(const char *keyword, const char *value)
+{
+	lump_t *gl_level;
+
+	// create GL level marker if necessary
+	if (! wad.current_level->lev_info->buddy)
+		CreateGLMarker();
+
+	gl_level = wad.current_level->lev_info->buddy;
+
+# if DEBUG_KEYS
+	DebugPrintf("[%s] Adding: %s=%s\n", gl_level->name, keyword, value);
+# endif
+
+	AppendLevelLump(gl_level, keyword, (int)strlen(keyword));
+	AppendLevelLump(gl_level, "=", 1);
+
+	AppendLevelLump(gl_level, value, (int)strlen(value));
+	AppendLevelLump(gl_level, "\n", 1);
+}
+
+
 //------------------------------------------------------------------------
 // MAIN STUFF
 //------------------------------------------------------------------------
@@ -2312,7 +2670,7 @@ void SaveLevel(node_t *root_node)
 nodebuildinfo_t * cur_info = NULL;
 
 
-static build_result_e CheckInfo(nodebuildinfo_t *info)
+build_result_e CheckInfo(nodebuildinfo_t *info)
 {
 	cur_info = info;
 
@@ -2333,13 +2691,13 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 		return BUILD_BadArgs;
 	}
 
-	if (UtilCheckExtension(info->input_file, "gwa"))
+	if (MatchExtension(info->input_file, "gwa"))
 	{
 		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
 		return BUILD_BadArgs;
 	}
 
-	if (UtilCheckExtension(info->output_file, "gwa"))
+	if (MatchExtension(info->output_file, "gwa"))
 	{
 		SetErrorMsg("Output file cannot be GWA");
 		return BUILD_BadArgs;
@@ -2371,8 +2729,10 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 
 /* ----- build nodes for a single level --------------------------- */
 
-build_result_e BuildNodesForLevel(lump_t * LEV)
+build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 {
+	cur_info = info;
+
 	superblock_t *seg_list;
 	bbox_t seg_bbox;
 
@@ -2389,7 +2749,7 @@ build_result_e BuildNodesForLevel(lump_t * LEV)
 
 	cur_info->build_pos = 0;
 
-	LoadLevel();
+	LoadLevel(lev_idx);
 
 	InitBlockmap();
 
@@ -2415,7 +2775,7 @@ build_result_e BuildNodesForLevel(lump_t * LEV)
 					ComputeBspHeight(root_node->r.node),
 					ComputeBspHeight(root_node->l.node));
 
-		SaveLevel(root_node);
+		SaveLevel(lev_idx, root_node);
 	}
 
 	FreeLevel();
@@ -2428,107 +2788,6 @@ build_result_e BuildNodesForLevel(lump_t * LEV)
 
 /* ----- main routine -------------------------------------- */
 
-build_result_e BuildNodes(nodebuildinfo_t *info)
-{
-	char *file_msg;
-
-	build_result_e ret;
-
-	ret = CheckInfo(info);
-
-	if (ret != BUILD_OK)
-		return ret;
-
-	cur_info  = info;
-
-	cur_info->total_big_warn = 0;
-	cur_info->total_small_warn = 0;
-
-	// clear cancelled flag
-	cur_info->cancelled = false;
-
-	// sanity check
-	if (!cur_info->input_file  || cur_info->input_file[0] == 0 ||
-			!cur_info->output_file || cur_info->output_file[0] == 0)
-	{
-		SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
-		return BUILD_BadArgs;
-	}
-
-	if (info->missing_output)
-		PrintMsg("* No output file specified. Using: %s\n\n", info->output_file);
-
-	if (info->same_filenames)
-		PrintMsg("* Output file is same as input file. Using -loadall\n\n");
-
-	// opens and reads directory from the input wad
-	ret = ReadWadFile(cur_info->input_file);
-
-	if (ret != BUILD_OK)
-	{
-		return ret;
-	}
-
-	if (CountLevels() <= 0)
-	{
-		CloseWads();
-
-		SetErrorMsg("No levels found in wad !");
-		return BUILD_Unknown;
-	}
-
-	PrintMsg("\n");
-	PrintVerbose("Creating nodes using tunable factor of %d\n", info->factor);
-
-	GB_DisplayOpen(DIS_BUILDPROGRESS);
-	GB_DisplaySetTitle("glBSP Build Progress");
-
-	file_msg = UtilFormat("File: %s", cur_info->input_file);
-
-	GB_DisplaySetBarText(2, file_msg);
-	GB_DisplaySetBarLimit(2, CountLevels() * 10);
-	GB_DisplaySetBar(2, 0);
-
-	UtilFree(file_msg);
-
-	cur_info->file_pos = 0;
-
-	// loop over each level in the wad
-	lump_t *LEV;
-
-	while ( (LEV = FindNextLevel()) )
-	{
-		ret = BuildNodesForLevel(LEV);
-
-		if (ret != BUILD_OK)
-			break;
-
-		cur_info->file_pos += 10;
-
-		GB_DisplaySetBar(2, cur_info->file_pos);
-	}
-
-	GB_DisplayClose();
-
-	// writes all the lumps to the output wad
-	if (ret == BUILD_OK)
-	{
-		ret = WriteWadFile(cur_info->output_file);
-
-		PrintMsg("\n");
-		PrintMsg("Total serious warnings: %d\n", cur_info->total_big_warn);
-		PrintMsg("Total minor warnings: %d\n", cur_info->total_small_warn);
-
-		ReportFailedLevels();
-	}
-
-	// close wads and free memory
-	CloseWads();
-
-	cur_info = NULL;
-
-	return ret;
-}
 
 
 }  // namespace ajbsp

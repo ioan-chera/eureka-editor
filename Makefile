@@ -119,8 +119,7 @@ OBJS = \
 	\
 	$(OBJ_DIR)/bsp_level.o \
 	$(OBJ_DIR)/bsp_node.o \
-	$(OBJ_DIR)/bsp_util.o \
-	$(OBJ_DIR)/bsp_wad.o
+	$(OBJ_DIR)/bsp_util.o
 
 $(OBJ_DIR)/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
@@ -158,7 +157,7 @@ install: stripped
 
 uninstall:
 	rm -v $(PREFIX)/bin/$(PROGRAM)
-	rm -Rv $(INSTALL_DIR) 
+	rm -Rv $(INSTALL_DIR)
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
 

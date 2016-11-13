@@ -117,6 +117,8 @@ void SetErrorMsg(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
+SYS_ASSERT(cur_info);
+
 	StringFree(cur_info->message);
 
 	cur_info->message = StringDup(message_buf);

@@ -162,6 +162,90 @@ void GB_DisplayClose(void)
 }
 
 
+static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
+{
+	char *file_msg;
+
+	ajbsp::build_result_e ret;
+
+	ret = ajbsp::CheckInfo(info);
+
+	if (ret != ajbsp::BUILD_OK)
+		return ret;
+
+	info->total_big_warn = 0;
+	info->total_small_warn = 0;
+
+	// clear cancelled flag
+	info->cancelled = false;
+
+	// sanity check
+	if (!info->input_file  || info->input_file[0] == 0 ||
+		!info->output_file || info->output_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+///???	if (info->missing_output)
+///???		PrintMsg("* No output file specified. Using: %s\n\n", info->output_file);
+///???
+///???	if (info->same_filenames)
+///???		PrintMsg("* Output file is same as input file. Using -loadall\n\n");
+
+	int num_levels = edit_wad->NumLevels();
+
+	if (num_levels <= 0)
+	{
+		ajbsp::SetErrorMsg("No levels found in wad !");
+		return ajbsp::BUILD_Unknown;
+	}
+
+	GB_PrintMsg("\n");
+//	PrintVerbose("Creating nodes using tunable factor of %d\n", info->factor);
+
+	GB_DisplayOpen(ajbsp::DIS_BUILDPROGRESS);
+	GB_DisplaySetTitle("glBSP Build Progress");
+
+	file_msg = StringPrintf("File: %s", info->input_file);
+
+	GB_DisplaySetBarText(2, file_msg);
+	GB_DisplaySetBarLimit(2, num_levels * 10);
+	GB_DisplaySetBar(2, 0);
+
+	StringFree(file_msg);
+
+	info->file_pos = 0;
+
+	// loop over each level in the wad
+	for (int n = 0 ; n < num_levels ; n++)
+	{
+		ret = ajbsp::BuildNodesForLevel(info, n);
+
+		if (ret != ajbsp::BUILD_OK)
+			break;
+
+		info->file_pos += 10;
+
+		GB_DisplaySetBar(2, info->file_pos);
+	}
+
+	GB_DisplayClose();
+
+	// writes all the lumps to the output wad
+	if (ret == ajbsp::BUILD_OK)
+	{
+		GB_PrintMsg("\n");
+		GB_PrintMsg("Total serious warnings: %d\n", info->total_big_warn);
+		GB_PrintMsg("Total minor warnings: %d\n", info->total_small_warn);
+
+//!!!		ReportFailedLevels();
+	}
+
+	return ret;
+}
+
+
 static bool DM_BuildNodes(const char *in_name, const char *out_name)
 {
 	LogPrintf("\n");
@@ -179,7 +263,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 
 	ajbsp::build_result_e  ret;
 
-	ret = ajbsp::BuildNodes(nb_info);
+	ret = BuildAllNodes(nb_info);
 
 	if (ret == ajbsp::BUILD_Cancelled)
 	{
