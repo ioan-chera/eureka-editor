@@ -950,7 +950,7 @@ static const char *unpack_confirm_message =
 	"Unpack the sidedefs now?";
 
 
-void SideDefs_Unpack(bool no_history)
+void SideDefs_Unpack(bool is_after_load)
 {
 	selection_c sides;
 	selection_c lines;
@@ -1005,7 +1005,7 @@ void SideDefs_Unpack(bool no_history)
 		}
 	}
 
-	if (no_history)
+	if (is_after_load)
 		BA_Abort(true /* keep changes */);
 	else
 	{
