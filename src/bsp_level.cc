@@ -1406,6 +1406,7 @@ static int SegCompare(const void *p1, const void *p2)
 static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
+
 void PutVertices(const char *name, int do_gl)
 {
 	int count, i;
@@ -1417,6 +1418,7 @@ void PutVertices(const char *name, int do_gl)
 	for (i=0, count=0; i < num_vertices; i++)
 	{
 		raw_vertex_t raw;
+
 		vertex_t *vert = lev_vertices[i];
 
 		if ((do_gl ? 1 : 0) != ((vert->index & IS_GL_VERTEX) ? 1 : 0))
@@ -1458,6 +1460,7 @@ void PutGLVertices(int do_v5)
 	for (i=0, count=0; i < num_vertices; i++)
 	{
 		raw_v2_vertex_t raw;
+
 		vertex_t *vert = lev_vertices[i];
 
 		if (! (vert->index & IS_GL_VERTEX))
@@ -1533,6 +1536,7 @@ void PutSegs(void)
 	for (i=0, count=0; i < num_segs; i++)
 	{
 		raw_seg_t raw;
+
 		seg_t *seg = segs[i];
 
 		// ignore minisegs and degenerate segs
@@ -1583,6 +1587,7 @@ void PutGLSegs(void)
 	for (i=0, count=0; i < num_segs; i++)
 	{
 		raw_gl_seg_t raw;
+
 		seg_t *seg = segs[i];
 
 		// ignore degenerate segs
@@ -1639,6 +1644,7 @@ void PutGLSegs_V5()
 	for (i=0, count=0; i < num_segs; i++)
 	{
 		raw_v5_seg_t raw;
+
 		seg_t *seg = segs[i];
 
 		// ignore degenerate segs
@@ -1689,6 +1695,7 @@ void PutSubsecs(const char *name, int do_gl)
 	for (i=0; i < num_subsecs; i++)
 	{
 		raw_subsec_t raw;
+
 		subsec_t *sub = subsecs[i];
 
 		raw.first = LE_U16(sub->seg_list->index);
@@ -1718,6 +1725,7 @@ void PutGLSubsecs_V5()
 	for (i=0; i < num_subsecs; i++)
 	{
 		raw_v5_subsec_t raw;
+
 		subsec_t *sub = subsecs[i];
 
 		raw.first = LE_U32(sub->seg_list->index);
@@ -1879,6 +1887,7 @@ void PutZVertices(void)
 	for (i=0, count=0; i < num_vertices; i++)
 	{
 		raw_v2_vertex_t raw;
+
 		vertex_t *vert = lev_vertices[i];
 
 		if (! (vert->index & IS_GL_VERTEX))
@@ -2165,12 +2174,28 @@ static u32_t CalcGLChecksum(void)
 	Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump && lump->Length() > 0)
-		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->Length());
+	{
+		u8_t *data = new u8_t[lump->Length()];
+
+		if (! lump->Read(data, lump->Length()))
+			FatalError("Error reading vertices (for checksum).\n");
+
+		Adler32_AddBlock(&crc, data, lump->Length());
+		delete[] data;
+	}
 
 	lump = FindLevelLump("LINEDEFS");
 
 	if (lump && lump->Length() > 0)
-		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->Length());
+	{
+		u8_t *data = new u8_t[lump->Length()];
+
+		if (! lump->Read(data, lump->Length()))
+			FatalError("Error reading linedefs (for checksum).\n");
+
+		Adler32_AddBlock(&crc, data, lump->Length());
+		delete[] data;
+	}
 
 	Adler32_Finish(&crc);
 
