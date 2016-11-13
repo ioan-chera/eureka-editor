@@ -39,6 +39,9 @@ Wad_file * edit_wad;
 std::vector<Wad_file *> master_dir;
 
 
+#define MAX_LUMPS_IN_A_LEVEL	21
+
+
 //------------------------------------------------------------------------
 //  LUMP Handling
 //------------------------------------------------------------------------
@@ -423,6 +426,24 @@ short Wad_file::FindLevel_Raw(const char *name)
 	}
 
 	return -1;  // not found
+}
+
+
+short Wad_file::LastLevelLump(short index)
+{
+	short start = GetLevel(index);
+
+	int count = 1;
+
+	while (count < MAX_LUMPS_IN_A_LEVEL &&
+		   start+count < NumLumps() &&
+		   (IsLevelLump(directory[start+count]->name) ||
+		    IsGLNodeLump(directory[start+count]->name)) )
+	{
+		count++;
+	}
+
+	return start + count - 1;
 }
 
 
@@ -875,7 +896,8 @@ void Wad_file::RemoveLevel(short index)
 
 	// collect associated lumps (THINGS, VERTEXES etc)
 	// this will stop when it hits a non-level lump
-	while (count < 21 && index+count < NumLumps() &&
+	while (count < MAX_LUMPS_IN_A_LEVEL &&
+		   index + count < NumLumps() &&
 		   (IsLevelLump(directory[index+count]->name) ||
 		    IsGLNodeLump(directory[index+count]->name)) )
 	{
