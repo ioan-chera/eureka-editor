@@ -668,6 +668,7 @@ static int VertexCompare(const void *p1, const void *p2)
 	return (int)A->y - (int)B->y;
 }
 
+
 void DetectDuplicateVertices(void)
 {
 	int i;
@@ -696,6 +697,28 @@ void DetectDuplicateVertices(void)
 	}
 
 	UtilFree(array);
+
+	// update the linedefs
+
+	// update all in-memory linedefs.
+	// DOES NOT affect the on-disk linedefs.
+	// this is mainly to help the miniseg creation code.
+
+	for (i=0 ; i < num_linedefs ; i++)
+	{
+		linedef_t *L = lev_linedefs[i];
+
+		// handle duplicated vertices
+		while (L->start->equiv)
+		{
+			L->start = L->start->equiv;
+		}
+
+		while (L->end->equiv)
+		{
+			L->end = L->end->equiv;
+		}
+	}
 }
 
 
@@ -822,10 +845,11 @@ void DetectOverlappingLines(void)
 
 			if (LineEndCompare(array + i, array + j) == 0)
 			{
+				// found an overlap !
+
 				linedef_t *A = lev_linedefs[array[i]];
 				linedef_t *B = lev_linedefs[array[j]];
 
-				// found an overlap !
 				B->overlap = A->overlap ? A->overlap : A;
 
 				count++;

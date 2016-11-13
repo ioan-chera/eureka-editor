@@ -2143,6 +2143,9 @@ void LoadLevel(void)
 		PruneVerticesAtEnd();
 	}
 
+	DetectDuplicateVertices();
+	DetectOverlappingLines();
+
 	CalculateWallTips();
 
 	if (lev_doing_hexen)
@@ -2150,8 +2153,6 @@ void LoadLevel(void)
 		// -JL- Find sectors containing polyobjs
 		DetectPolyobjSectors();
 	}
-
-	DetectOverlappingLines();
 }
 
 
