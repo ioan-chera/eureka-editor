@@ -404,8 +404,6 @@ extern linedef_t ** lev_linedefs;
 extern sidedef_t ** lev_sidedefs;
 extern sector_t  ** lev_sectors;
 
-extern bool lev_doing_normal;
-
 
 /* ----- polyobj handling ----------------------------- */
 
@@ -962,9 +960,7 @@ void CalculateWallTips(void)
 # endif
 }
 
-//
-// NewVertexFromSplitSeg
-//
+
 vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 {
 	vertex_t *vert = NewVertex();
@@ -987,9 +983,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	VertexAddWallTip(vert, seg->pdx, seg->pdy,
 			seg->partner ? seg->partner->sector : NULL, seg->sector);
 
-	// create a duplex vertex if needed
-
-	if (lev_doing_normal)
+	// create a duplex vertex for the normal nodes
 	{
 		vert->normal_dup = NewVertex();
 
@@ -1004,11 +998,13 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	return vert;
 }
 
-//
-// NewVertexDegenerate
-//
+
 vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 {
+	// this is only called when rounding off the BSP tree and
+	// all the segs are degenerate (zero length), hence we need
+	// to create at least one seg which won't be zero length.
+
 	double dx = end->x - start->x;
 	double dy = end->y - start->y;
 
@@ -1018,16 +1014,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vert->ref_count = start->ref_count;
 
-	if (lev_doing_normal)
-	{
-		vert->index = num_normal_vert;
-		num_normal_vert++;
-	}
-	else
-	{
-		vert->index = num_gl_vert | IS_GL_VERTEX;
-		num_gl_vert++;
-	}
+	vert->index = num_normal_vert;
+	num_normal_vert++;
 
 	// compute new coordinates
 
@@ -1050,9 +1038,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	return vert;
 }
 
-//
-// VertexCheckOpen
-//
+
 sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
 	wall_tip_t *tip;

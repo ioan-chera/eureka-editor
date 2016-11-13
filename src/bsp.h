@@ -68,8 +68,6 @@ public:
 	bool fast;
 
 	bool load_all;
-	bool no_normal;
-	bool force_normal;
 
 	bool force_v5;
 	bool force_xnod;
@@ -110,8 +108,6 @@ public:
 		fast(false),
 
 		load_all(false),
-		no_normal(false),
-		force_normal(false),
 
 		force_v5(false),
 

@@ -809,7 +809,6 @@ void PutReject(void)
 
 // per-level variables
 
-bool lev_doing_normal;
 bool lev_doing_hexen;
 
 static bool lev_force_v5;
@@ -1406,7 +1405,7 @@ void PutVertices(const char *name, int do_gl)
 		BugError("PutVertices miscounted (%d != %d)", count,
 				do_gl ? num_gl_vert : num_normal_vert);
 
-	if (lev_doing_normal && ! do_gl && count > 65534)
+	if (! do_gl && count > 65534)
 		MarkHardFailure(LIMIT_VERTEXES);
 	else if (count > 32767)
 		MarkSoftFailure(do_gl ? LIMIT_GL_VERT : LIMIT_VERTEXES);
@@ -2068,20 +2067,11 @@ void LoadLevel(void)
 
 	const char *level_name = GetLevelName();
 
-	bool normal_exists = CheckForNormalNodes();
-
-	lev_doing_normal = (cur_info->force_normal ||
-			(!cur_info->no_normal && !normal_exists));
-
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
 
-	if (lev_doing_normal)
-		message = UtilFormat("Building normal and GL nodes on %s%s",
-				level_name, lev_doing_hexen ? " (Hexen)" : "");
-	else
-		message = UtilFormat("Building GL nodes on %s%s",
-				level_name, lev_doing_hexen ? " (Hexen)" : "");
+	message = UtilFormat("Building nodes on %s%s",
+			level_name, lev_doing_hexen ? " (Hexen)" : "");
 
 	GB_DisplaySetBarText(1, message);
 
@@ -2109,12 +2099,9 @@ void LoadLevel(void)
 	PrintVerbose("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
 			num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
 
-	if (lev_doing_normal)
-	{
-		// always prune vertices at end of lump, otherwise all the
-		// unused vertices from seg splits would keep accumulating.
-		PruneVerticesAtEnd();
-	}
+	// always prune vertices at end of lump, otherwise all the
+	// unused vertices from seg splits would keep accumulating.
+	PruneVerticesAtEnd();
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
@@ -2260,7 +2247,7 @@ void SaveLevel(node_t *root_node)
 		CreateGLLump("GL_PVS");
 	}
 
-	if (lev_doing_normal)
+	// normal nodes
 	{
 		RoundOffBspTree(root_node);
 
@@ -2355,13 +2342,6 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 	{
 		info->load_all = true;
 		info->same_filenames = true;
-	}
-
-	if (info->no_normal && info->force_normal)
-	{
-		info->force_normal = false;
-		SetErrorMsg("-forcenormal and -nonormal cannot be used together");
-		return BUILD_BadInfoFixed;
 	}
 
 	if (info->factor <= 0 || info->factor > 32)

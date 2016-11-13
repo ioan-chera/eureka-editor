@@ -2360,9 +2360,7 @@ static void NormaliseSubsector(subsec_t *sub)
 	sub->seg_list = new_head;
 }
 
-//
-// NormaliseBspTree
-//
+
 void NormaliseBspTree(node_t *root)
 {
 	int i;
@@ -2383,6 +2381,7 @@ void NormaliseBspTree(node_t *root)
 		RenumberSubsecSegs(sub);
 	}
 }
+
 
 static void RoundOffSubsector(subsec_t *sub)
 {
@@ -2414,7 +2413,7 @@ static void RoundOffSubsector(subsec_t *sub)
 
 		// is the seg degenerate ?
 		if (I_ROUND(cur->start->x) == I_ROUND(cur->end->x) &&
-				I_ROUND(cur->start->y) == I_ROUND(cur->end->y))
+			I_ROUND(cur->start->y) == I_ROUND(cur->end->y))
 		{
 			cur->degenerate = 1;
 
@@ -2501,9 +2500,7 @@ static void RoundOffSubsector(subsec_t *sub)
 	sub->seg_list = new_head;
 }
 
-//
-// RoundOffBspTree
-//
+
 void RoundOffBspTree(node_t *root)
 {
 	int i;

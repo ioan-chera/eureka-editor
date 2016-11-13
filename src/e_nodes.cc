@@ -177,8 +177,6 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info->quiet         = bsp_verbose ? false : true;
 	nb_info->mini_warnings = bsp_warn ? true : false;
 
-	nb_info->force_normal = true;
-
 	ajbsp::build_result_e  ret;
 
 	ret = ajbsp::BuildNodes(nb_info);
