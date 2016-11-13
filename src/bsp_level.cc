@@ -2261,11 +2261,6 @@ void LoadLevel(void)
 
 	if (lev_doing_normal)
 	{
-		// NOTE: order here is critical
-
-		if (cur_info->pack_sides)
-			DetectDuplicateSidedefs();
-
 		// always prune vertices at end of lump, otherwise all the
 		// unused vertices from seg splits would keep accumulating.
 		PruneVerticesAtEnd();

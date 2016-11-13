@@ -66,7 +66,6 @@ public:
 	bool quiet;
 	bool mini_warnings;
 	bool force_hexen;
-	bool pack_sides;
 	bool fast;
 
 	int spec_version;  // 1, 2, 3 or 5
@@ -112,7 +111,6 @@ public:
 		quiet(false),
 		mini_warnings(false),
 		force_hexen(false),
-		pack_sides(false),
 		fast(false),
 
 		spec_version(2),
@@ -937,7 +935,6 @@ void SaveLevel(node_t *root_node);
 
 // detection routines
 void DetectDuplicateVertices(void);
-void DetectDuplicateSidedefs(void);
 void DetectPolyobjSectors(void);
 void DetectOverlappingLines(void);
 void DetectWindowEffects(void);
