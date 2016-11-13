@@ -929,29 +929,31 @@ void CalculateWallTips(void)
 
 	for (i=0; i < num_linedefs; i++)
 	{
-		linedef_t *line = lev_linedefs[i];
+		linedef_t *L = lev_linedefs[i];
 
-		double x1 = line->start->x;
-		double y1 = line->start->y;
-		double x2 = line->end->x;
-		double y2 = line->end->y;
+		if (L->overlap)
+			continue;
 
-		sector_t *left  = (line->left)  ? line->left->sector  : NULL;
-		sector_t *right = (line->right) ? line->right->sector : NULL;
+		double x1 = L->start->x;
+		double y1 = L->start->y;
+		double x2 = L->end->x;
+		double y2 = L->end->y;
 
-		VertexAddWallTip(line->start, x2-x1, y2-y1, left, right);
-		VertexAddWallTip(line->end,   x1-x2, y1-y2, right, left);
+		sector_t *left  = (L->left)  ? L->left->sector  : NULL;
+		sector_t *right = (L->right) ? L->right->sector : NULL;
+
+		VertexAddWallTip(L->start, x2-x1, y2-y1, left, right);
+		VertexAddWallTip(L->end,   x1-x2, y1-y2, right, left);
 	}
 
 # if DEBUG_WALLTIPS
 	for (i=0; i < num_vertices; i++)
 	{
-		vertex_t *vert = LookupVertex(i);
-		wall_tip_t *tip;
+		vertex_t *V = LookupVertex(i);
 
 		DebugPrintf("WallTips for vertex %d:\n", i);
 
-		for (tip=vert->tip_set; tip; tip=tip->next)
+		for (wall_tip_t *tip = V->tip_set ; tip ; tip = tip->next)
 		{
 			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
 					tip->left ? tip->left->index : -1,
