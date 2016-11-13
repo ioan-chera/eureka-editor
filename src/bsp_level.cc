@@ -415,7 +415,7 @@ static void WriteBlockmap(void)
 	header.x_blocks = LE_U16(block_w);
 	header.y_blocks = LE_U16(block_h);
 
-	AppendLevelLump(lump, &header, sizeof(header));
+	lump->Write(&header, sizeof(header));
 
 	// handle pointers
 	for (i=0; i < block_count; i++)
@@ -425,11 +425,11 @@ static void WriteBlockmap(void)
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.", i);
 
-		AppendLevelLump(lump, &ptr, sizeof(u16_t));
+		lump->Write(&ptr, sizeof(u16_t));
 	}
 
 	// add the null block which _all_ empty blocks will use
-	AppendLevelLump(lump, null_block, sizeof(null_block));
+	lump->Write(null_block, sizeof(null_block));
 
 	// handle each block list
 	for (i=0; i < block_count; i++)
@@ -446,9 +446,9 @@ static void WriteBlockmap(void)
 		if (blk == NULL)
 			BugError("WriteBlockmap: block %d is NULL !", i);
 
-		AppendLevelLump(lump, &m_zero, sizeof(u16_t));
-		AppendLevelLump(lump, blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		AppendLevelLump(lump, &m_neg1, sizeof(u16_t));
+		lump->Write(&m_zero, sizeof(u16_t));
+		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
+		lump->Write(&m_neg1, sizeof(u16_t));
 	}
 }
 
@@ -798,7 +798,7 @@ void PutReject(void)
 
 	lump = CreateLevelLump("REJECT");
 
-	AppendLevelLump(lump, matrix, reject_size);
+	lump->Write(matrix, reject_size);
 
 	PrintVerbose("Added simple reject lump\n");
 
@@ -825,6 +825,7 @@ void PutReject(void)
 const char *lev_current_name;
 
 short lev_current_idx;
+short lev_current_start;
 
 bool lev_doing_hexen;
 
@@ -1396,7 +1397,7 @@ void PutVertices(const char *name, int do_gl)
 		raw.x = LE_S16(I_ROUND(vert->x));
 		raw.y = LE_S16(I_ROUND(vert->y));
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1420,9 +1421,9 @@ void PutGLVertices(int do_v5)
 	Lump_c *lump = CreateLevelLump("GL_VERT");
 
 	if (do_v5)
-		AppendLevelLump(lump, lev_v5_magic, 4);
+		lump->Write(lev_v5_magic, 4);
 	else
-		AppendLevelLump(lump, lev_v2_magic, 4);
+		lump->Write(lev_v2_magic, 4);
 
 	for (i=0, count=0; i < num_vertices; i++)
 	{
@@ -1435,7 +1436,7 @@ void PutGLVertices(int do_v5)
 		raw.x = LE_S32((int)(vert->x * 65536.0));
 		raw.y = LE_S32((int)(vert->y * 65536.0));
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1515,7 +1516,7 @@ void PutSegs(void)
 		raw.flip    = LE_U16(seg->side);
 		raw.dist    = LE_U16(TransformSegDist(seg));
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1572,7 +1573,7 @@ void PutGLSegs(void)
 		else
 			raw.partner = LE_U16(0xFFFF);
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1629,7 +1630,7 @@ void PutGLSegs_V5()
 		else
 			raw.partner = LE_U32(0xFFFFFFFF);
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1663,7 +1664,7 @@ void PutSubsecs(const char *name, int do_gl)
 		raw.first = LE_U16(sub->seg_list->index);
 		raw.num   = LE_U16(sub->seg_count);
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
@@ -1692,7 +1693,7 @@ void PutGLSubsecs_V5()
 		raw.first = LE_U32(sub->seg_list->index);
 		raw.num   = LE_U32(sub->seg_count);
 
-		AppendLevelLump(lump, &raw, sizeof(raw));
+		lump->Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
@@ -1744,7 +1745,7 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 	else
 		BugError("Bad left child in node %d", node->index);
 
-	AppendLevelLump(lump, &raw, sizeof(raw));
+	lump->Write(&raw, sizeof(raw));
 
 # if DEBUG_BSP
 	DebugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
@@ -1795,7 +1796,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 	else
 		BugError("Bad left child in V5 node %d", node->index);
 
-	AppendLevelLump(lump, &raw, sizeof(raw));
+	lump->Write(&raw, sizeof(raw));
 
 # if DEBUG_BSP
 	DebugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
@@ -2053,13 +2054,11 @@ void SaveZDFormat(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-void LoadLevel(short lev_idx)
+void LoadLevel()
 {
-	lev_current_idx = lev_idx;
-
 	char *message;
 
-	Lump_c *LEV = edit_wad->GetLump(edit_wad->GetLevel(lev_idx));
+	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
 
@@ -2189,10 +2188,8 @@ void UpdateGLMarker(Lump_c *marker)
 }
 
 
-void SaveLevel(short lev_idx, node_t *root_node)
+void SaveLevel(node_t *root_node)
 {
-	lev_current_idx = lev_idx;
-
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
 
@@ -2628,10 +2625,16 @@ void ReportFailedLevels(void)
 }
 
 
+Lump_c * FindLevelLump(const char *name)
+{
+	return edit_wad->FindLumpInLevel(name, lev_current_start);
+}
+
+
 Lump_c * CreateLevelLump(const char *name, int max_size)
 {
 	// look for existing one
-	Lump_c *lump = edit_wad->FindLumpInLevel(name, edit_wad->GetLevel(lev_current_idx));
+	Lump_c *lump = FindLevelLump(name);
 
 	if (lump)
 	{
@@ -2761,7 +2764,10 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	cur_info->build_pos = 0;
 
-	LoadLevel(lev_idx);
+	lev_current_idx   = lev_idx;
+	lev_current_start = edit_wad->GetLevel(lev_idx);
+
+	LoadLevel();
 
 	InitBlockmap();
 
@@ -2787,7 +2793,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 					ComputeBspHeight(root_node->r.node),
 					ComputeBspHeight(root_node->l.node));
 
-		SaveLevel(lev_idx, root_node);
+		SaveLevel(root_node);
 	}
 
 	FreeLevel();

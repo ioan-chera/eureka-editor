@@ -919,21 +919,9 @@ seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);
 
-// check whether the current level already has normal nodes
-int CheckForNormalNodes(void);
-
-// load all level data for the current level
-void LoadLevel(short lev_idx);
-
-// free all level data
-void FreeLevel(void);
-
-// save the newly computed NODE info etc..
-void SaveLevel(short lev_idx, node_t *root_node);
-
 Lump_c * CreateGLMarker();
-
 Lump_c * CreateLevelLump(const char *name, int max_size = -1);
+Lump_c * FindLevelLump(const char *name);
 
 // Zlib compression support
 void ZLibBeginLump(Lump_c *lump);
