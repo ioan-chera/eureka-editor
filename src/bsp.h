@@ -569,8 +569,8 @@ typedef struct vertex_s
 	int ref_count;
 
 	// usually NULL, unless this vertex occupies the same location as a
-	// previous vertex.  Only used during the pruning phase.
-	struct vertex_s *equiv;
+	// previous vertex.
+	struct vertex_s *overlap;
 
 	// set of wall_tips
 	wall_tip_t *tip_set;
@@ -929,9 +929,9 @@ void SaveLevel(node_t *root_node);
 
 
 // detection routines
-void DetectDuplicateVertices(void);
-void DetectPolyobjSectors(void);
+void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
+void DetectPolyobjSectors(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);

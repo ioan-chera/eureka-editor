@@ -669,7 +669,7 @@ static int VertexCompare(const void *p1, const void *p2)
 }
 
 
-void DetectDuplicateVertices(void)
+void DetectOverlappingVertices(void)
 {
 	int i;
 	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
@@ -692,7 +692,7 @@ void DetectDuplicateVertices(void)
 			vertex_t *B = lev_vertices[array[i+1]];
 
 			// found a duplicate !
-			B->equiv = A->equiv ? A->equiv : A;
+			B->overlap = A->overlap ? A->overlap : A;
 		}
 	}
 
@@ -708,15 +708,14 @@ void DetectDuplicateVertices(void)
 	{
 		linedef_t *L = lev_linedefs[i];
 
-		// handle duplicated vertices
-		while (L->start->equiv)
+		while (L->start->overlap)
 		{
-			L->start = L->start->equiv;
+			L->start = L->start->overlap;
 		}
 
-		while (L->end->equiv)
+		while (L->end->overlap)
 		{
-			L->end = L->end->equiv;
+			L->end = L->end->overlap;
 		}
 	}
 }

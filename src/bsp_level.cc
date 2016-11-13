@@ -2143,7 +2143,7 @@ void LoadLevel(void)
 		PruneVerticesAtEnd();
 	}
 
-	DetectDuplicateVertices();
+	DetectOverlappingVertices();
 	DetectOverlappingLines();
 
 	CalculateWallTips();
