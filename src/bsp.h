@@ -21,6 +21,8 @@
 #ifndef __EUREKA_BSP_H__
 #define __EUREKA_BSP_H__
 
+class Lump_c;
+
 /** Eureka change: namespacing */
 
 namespace ajbsp
@@ -932,6 +934,8 @@ void FreeLevel(void);
 
 // save the newly computed NODE info etc..
 void SaveLevel(short lev_idx, node_t *root_node);
+
+Lump_c * CreateGLMarker();
 
 
 //------------------------------------------------------------------------

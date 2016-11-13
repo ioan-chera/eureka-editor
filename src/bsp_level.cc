@@ -822,12 +822,14 @@ void PutReject(void)
 
 // per-level variables
 
+const char *lev_current_name;
+
 bool lev_doing_hexen;
 
-static bool lev_force_v5;
-static bool lev_force_xnod;
+bool lev_force_v5;
+bool lev_force_xnod;
 
-static bool lev_long_name;
+bool lev_long_name;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -2060,13 +2062,14 @@ void LoadLevel(short lev_idx)
 
 	Lump_c *LEV = edit_wad->GetLump(edit_wad->GetLevel(lev_idx));
 
-	const char *level_name = LEV->Name();
+	lev_current_name = LEV->Name();
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
 
-	message = UtilFormat("Building nodes on %s%s",
-			level_name, lev_doing_hexen ? " (Hexen)" : "");
+	// FIXME StringPrintf()
+	message = UtilFormat("Building nodes on %s%s", lev_current_name,
+						lev_doing_hexen ? " (Hexen)" : "");
 
 	GB_DisplaySetBarText(1, message);
 
@@ -2148,61 +2151,43 @@ static u32_t CalcGLChecksum(void)
 }
 
 
-static void AddGLTextLine(const char *keyword, const char *value)
+static const char *CalcOptionsString()
 {
-	lump_t *gl_level;
+	static char buffer[256];
 
-//FIXME!!!	gl_level = wad.current_level->lev_info->buddy;
+	// FIXME FOR AJ-BSP / EUREKA
+	sprintf(buffer, "--factor %d", cur_info->factor);
 
-#if DEBUG_KEYS
-	DebugPrintf("[%s] Adding: %s=%s\n", gl_level->name, keyword, value);
-#endif
+	if (cur_info->fast) strcat(buffer, "--fast");
 
-	AppendLevelLump(gl_level, keyword, (int)strlen(keyword));
-	AppendLevelLump(gl_level, "=", 1);
-
-	AppendLevelLump(gl_level, value, (int)strlen(value));
-	AppendLevelLump(gl_level, "\n", 1);
+	return buffer;
 }
 
 
-void UpdateGLMarker(void)
+void UpdateGLMarker(Lump_c *marker)
 {
-	// FIXME : use edit_wad->RecreateLump() on the GL header lump
-
+	edit_wad->RecreateLump(marker);
 
 	if (lev_long_name)
 	{
-//FIXME !!!!		AddGLTextLine("LEVEL", level->name);
+		marker->Printf("LEVEL=%s\n", lev_current_name);
 	}
 
-	AddGLTextLine("BUILDER", "Eureka " EUREKA_VERSION);
+	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
 
-	// create a list of options
-	char buffer[256];
-
-	// FIXME FOR AJ-BSP / EUREKA
-	sprintf(buffer, "-factor %d", cur_info->factor);
-
-#if 0
-	if (cur_info->fast)   strcat(buffer, " -f");
-#endif
-
-	AddGLTextLine("OPTIONS", buffer);
+	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
 
 	char *time_str = UtilTimeString();
 
 	if (time_str)
 	{
-		AddGLTextLine("TIME", time_str);
+		marker->Printf("TIME=%s\n", time_str);
 		StringFree(time_str);
 	}
 
-	u32_t crc = CalcGLChecksum();
+	marker->Printf("CHECKSUM=0x%08x\n", CalcGLChecksum());
 
-	sprintf(buffer, "0x%08x", crc);
-
-	AddGLTextLine("CHECKSUM", buffer);
+	marker->Finish();
 }
 
 
@@ -2210,6 +2195,8 @@ void SaveLevel(short lev_idx, node_t *root_node)
 {
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
+
+	Lump_c * gl_marker = NULL;
 
 	// Note: RoundOffBspTree will convert the GL vertices in segs to
 	// their normal counterparts (pointer change: use normal_dup).
@@ -2266,6 +2253,12 @@ void SaveLevel(short lev_idx, node_t *root_node)
 	// GL Nodes
 	if (cur_info->gl_nodes)
 	{
+		// FIXME : insert_point
+
+		// create empty marker now, flesh it out later
+		// FIXME !!!!  use CreateGLMarker
+		gl_marker = CreateGLMarker();
+
 		PutGLVertices(lev_force_v5);
 
 		if (lev_force_v5)
@@ -2284,7 +2277,7 @@ void SaveLevel(short lev_idx, node_t *root_node)
 		CreateGLLump("GL_PVS");
 	}
 
-	// normal nodes
+	// normal nodes   [ always added ]
 	{
 		RoundOffBspTree(root_node);
 
@@ -2313,9 +2306,12 @@ void SaveLevel(short lev_idx, node_t *root_node)
 		PutReject();
 	}
 
-	// keyword support (v5.0 of the specs)
-	// must be done *after* doing normal nodes, for proper checksum
-	UpdateGLMarker();
+	// keyword support (v5.0 of the specs).
+	// must be done *after* doing normal nodes, for proper checksum.
+	if (gl_marker)
+	{
+		UpdateGLMarker(gl_marker);
+	}
 }
 
 
@@ -2622,21 +2618,15 @@ void ReportFailedLevels(void)
 }
 
 
-// FIXME
-extern wad_t wad;
-
-lump_t *CreateGLMarker(void)
+Lump_c * CreateGLMarker()
 {
-	lump_t *level = wad.current_level;
-	lump_t *cur;
+	char name_buf[64];
 
-	char name_buf[32];
-
-	lev_long_name = false;
-
-	if (strlen(level->name) <= 5)
+	if (strlen(lev_current_name) <= 5)
 	{
-		sprintf(name_buf, "GL_%s", level->name);
+		sprintf(name_buf, "GL_%s", lev_current_name);
+
+		lev_long_name = false;
 	}
 	else
 	{
@@ -2646,23 +2636,11 @@ lump_t *CreateGLMarker(void)
 		lev_long_name = true;
 	}
 
-// FIXME !!!!
-#if 0
-	cur = NewLump(UtilStrDup(name_buf));
-	cur->lev_info = NewLevel(LEVEL_IS_GL);
-#endif
+	Lump_c *marker = edit_wad->AddLump(name_buf);
 
-	// link it in
-	cur->next = level->next;
-	cur->prev = level;
+	marker->Finish();
 
-	if (cur->next)
-		cur->next->prev = cur;
-
-	level->next = cur;
-	level->lev_info->buddy = cur;
-
-	return cur;
+	return marker;
 }
 
 
