@@ -65,7 +65,6 @@ public:
 	bool no_progress;
 	bool quiet;
 	bool mini_warnings;
-	bool force_hexen;
 	bool fast;
 
 	int spec_version;  // 1, 2, 3 or 5
@@ -110,7 +109,6 @@ public:
 		no_progress(false),
 		quiet(false),
 		mini_warnings(false),
-		force_hexen(false),
 		fast(false),
 
 		spec_version(2),

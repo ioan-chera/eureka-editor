@@ -2231,8 +2231,6 @@ void LoadLevel(void)
 		message = UtilFormat("Building GL nodes on %s%s",
 				level_name, lev_doing_hexen ? " (Hexen)" : "");
 
-	lev_doing_hexen |= cur_info->force_hexen;
-
 	GB_DisplaySetBarText(1, message);
 
 	PrintVerbose("\n\n");
