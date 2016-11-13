@@ -132,12 +132,13 @@ WISH: can import DWD (DoomEd) format maps
 WISH: can import UDMF format maps
 
 
--  File / Test Map
++  File / Test Map
    +  make filenames absolute
-   +  configurable stuff [ for each PORT ]
-      -  directory to 'cd' into
+   +  configurable stuff FOR EACH PORT  [ EACH GAME for "vanilla" ]
+      -  folder to 'cd' into
       -  program to invoke
-      -  arguments to use (-iwad, -file, -merge, -warp)  ===>  PORT .UGH
+      -  arguments to use (-iwad, -file, -merge, -warp)
+         [ configured in the port's UGH file [ game for "vanilla" ]]
    -  support resource wads
    -  make sure the user built the nodes
       (option to invoke it automatically, or not check at all)
