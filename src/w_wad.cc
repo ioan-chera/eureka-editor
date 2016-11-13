@@ -391,7 +391,7 @@ Lump_c * Wad_file::FindLumpInLevel(const char *name, short level)
 	SYS_ASSERT(0 <= level && level < NumLumps());
 
 	// determine how far past the level marker (MAP01 etc) to search
-	short last = level + 14;
+	short last = level + MAX_LUMPS_IN_A_LEVEL;
 
 	if (last >= NumLumps())
 		last = NumLumps() - 1;
@@ -400,12 +400,12 @@ Lump_c * Wad_file::FindLumpInLevel(const char *name, short level)
 	{
 		SYS_ASSERT(0 <= k && k < NumLumps());
 
-		if (! IsLevelLump(directory[k]->name))
+		if (! IsLevelLump(directory[k]->name) &&
+			! IsGLNodeLump(directory[k]->name))
 			break;
 
 		if (y_stricmp(directory[k]->name, name) == 0)
 			return directory[k];
-
 	}
 
 	return NULL;  // not found
