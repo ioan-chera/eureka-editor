@@ -959,9 +959,6 @@ node_t *LookupNode(int index)
 /* ----- reading routines ------------------------------ */
 
 
-//
-// CheckForNormalNodes
-//
 int CheckForNormalNodes(void)
 {
 	lump_t *lump;
@@ -983,9 +980,7 @@ int CheckForNormalNodes(void)
 	return true;
 }
 
-//
-// GetVertices
-//
+
 void GetVertices(void)
 {
 	int i, count=-1;
@@ -1002,7 +997,7 @@ void GetVertices(void)
 # endif
 
 	if (!lump || count == 0)
-		FatalError("Couldn't find any Vertices");
+		return;
 
 	raw = (raw_vertex_t *) lump->data;
 
@@ -1021,9 +1016,7 @@ void GetVertices(void)
 	num_complete_seg = 0;
 }
 
-//
-// GetSectors
-//
+
 void GetSectors(void)
 {
 	int i, count=-1;
@@ -1034,7 +1027,7 @@ void GetSectors(void)
 		count = lump->length / sizeof(raw_sector_t);
 
 	if (!lump || count == 0)
-		FatalError("Couldn't find any Sectors");
+		return;
 
 	GB_DisplayTicker();
 
@@ -1070,9 +1063,7 @@ void GetSectors(void)
 	}
 }
 
-//
-// GetThings
-//
+
 void GetThings(void)
 {
 	int i, count=-1;
@@ -1083,12 +1074,7 @@ void GetThings(void)
 		count = lump->length / sizeof(raw_thing_t);
 
 	if (!lump || count == 0)
-	{
-		// Note: no error if no things exist, even though technically a map
-		// will be unplayable without the player starts.
-		PrintWarn("Couldn't find any Things!\n");
 		return;
-	}
 
 	GB_DisplayTicker();
 
@@ -1112,9 +1098,7 @@ void GetThings(void)
 	}
 }
 
-//
-// GetThingsHexen
-//
+
 void GetThingsHexen(void)
 {
 	int i, count=-1;
@@ -1125,12 +1109,7 @@ void GetThingsHexen(void)
 		count = lump->length / sizeof(raw_hexen_thing_t);
 
 	if (!lump || count == 0)
-	{
-		// Note: no error if no things exist, even though technically a map
-		// will be unplayable without the player starts.
-		PrintWarn("Couldn't find any Things!\n");
 		return;
-	}
 
 	GB_DisplayTicker();
 
@@ -1154,9 +1133,7 @@ void GetThingsHexen(void)
 	}
 }
 
-//
-// GetSidedefs
-//
+
 void GetSidedefs(void)
 {
 	int i, count=-1;
@@ -1167,7 +1144,7 @@ void GetSidedefs(void)
 		count = lump->length / sizeof(raw_sidedef_t);
 
 	if (!lump || count == 0)
-		FatalError("Couldn't find any Sidedefs");
+		return;
 
 	GB_DisplayTicker();
 
@@ -1210,9 +1187,7 @@ static inline sidedef_t *SafeLookupSidedef(u16_t num)
 	return LookupSidedef(num);
 }
 
-//
-// GetLinedefs
-//
+
 void GetLinedefs(void)
 {
 	int i, count=-1;
@@ -1223,7 +1198,7 @@ void GetLinedefs(void)
 		count = lump->length / sizeof(raw_linedef_t);
 
 	if (!lump || count == 0)
-		FatalError("Couldn't find any Linedefs");
+		return;
 
 	GB_DisplayTicker();
 
@@ -1282,9 +1257,7 @@ void GetLinedefs(void)
 	}
 }
 
-//
-// GetLinedefsHexen
-//
+
 void GetLinedefsHexen(void)
 {
 	int i, j, count=-1;
@@ -1295,7 +1268,7 @@ void GetLinedefsHexen(void)
 		count = lump->length / sizeof(raw_hexen_linedef_t);
 
 	if (!lump || count == 0)
-		FatalError("Couldn't find any Linedefs");
+		return;
 
 	GB_DisplayTicker();
 
