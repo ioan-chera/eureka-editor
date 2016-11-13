@@ -210,7 +210,7 @@ void AppendLevelLump(lump_t *lump, const void *data, int length);
 
 // for the current GL lump, add a keyword/value pair into the
 // level marker lump.
-void AddGLTextLine(const char *keyword, const char *value);
+// void AddGLTextLine(const char *keyword, const char *value);
 
 // Zlib compression support
 void ZLibBeginLump(lump_t *lump);

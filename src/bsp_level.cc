@@ -827,6 +827,8 @@ bool lev_doing_hexen;
 static bool lev_force_v5;
 static bool lev_force_xnod;
 
+static bool lev_long_name;
+
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
     TYPE ** BASEVAR = NULL;  \
@@ -2123,26 +2125,10 @@ void FreeLevel(void)
 }
 
 
-void PutGLOptions(void)
-{
-	char option_buf[128];
-
-	// FIXME FOR AJ-BSP / EUREKA
-	sprintf(option_buf, "-factor %d", cur_info->factor);
-
-#if 0
-	if (cur_info->fast)   strcat(option_buf, " -f");
-#endif
-
-	AddGLTextLine("OPTIONS", option_buf);
-}
-
-
-void PutGLChecksum(void)
+static u32_t CalcGLChecksum(void)
 {
 	u32_t crc;
 	lump_t *lump;
-	char num_buf[64];
 
 	Adler32_Begin(&crc);
 
@@ -2158,9 +2144,65 @@ void PutGLChecksum(void)
 
 	Adler32_Finish(&crc);
 
-	sprintf(num_buf, "0x%08x", crc);
+	return crc;
+}
 
-	AddGLTextLine("CHECKSUM", num_buf);
+
+static void AddGLTextLine(const char *keyword, const char *value)
+{
+	lump_t *gl_level;
+
+//FIXME!!!	gl_level = wad.current_level->lev_info->buddy;
+
+#if DEBUG_KEYS
+	DebugPrintf("[%s] Adding: %s=%s\n", gl_level->name, keyword, value);
+#endif
+
+	AppendLevelLump(gl_level, keyword, (int)strlen(keyword));
+	AppendLevelLump(gl_level, "=", 1);
+
+	AppendLevelLump(gl_level, value, (int)strlen(value));
+	AppendLevelLump(gl_level, "\n", 1);
+}
+
+
+void UpdateGLMarker(void)
+{
+	// FIXME : use edit_wad->RecreateLump() on the GL header lump
+
+
+	if (lev_long_name)
+	{
+//FIXME !!!!		AddGLTextLine("LEVEL", level->name);
+	}
+
+	AddGLTextLine("BUILDER", "Eureka " EUREKA_VERSION);
+
+	// create a list of options
+	char buffer[256];
+
+	// FIXME FOR AJ-BSP / EUREKA
+	sprintf(buffer, "-factor %d", cur_info->factor);
+
+#if 0
+	if (cur_info->fast)   strcat(buffer, " -f");
+#endif
+
+	AddGLTextLine("OPTIONS", buffer);
+
+	char *time_str = UtilTimeString();
+
+	if (time_str)
+	{
+		AddGLTextLine("TIME", time_str);
+		StringFree(time_str);
+	}
+
+	u32_t crc = CalcGLChecksum();
+
+	sprintf(buffer, "0x%08x", crc);
+
+	AddGLTextLine("CHECKSUM", buffer);
 }
 
 
@@ -2272,21 +2314,8 @@ void SaveLevel(short lev_idx, node_t *root_node)
 	}
 
 	// keyword support (v5.0 of the specs)
-	AddGLTextLine("BUILDER", "Eureka " EUREKA_VERSION);
-	PutGLOptions();
-	{
-		char *time_str = UtilTimeString();
-
-		if (time_str)
-		{
-			AddGLTextLine("TIME", time_str);
-			UtilFree(time_str);
-		}
-	}
-
-	// this must be done _after_ the normal nodes have been built,
-	// so that we use the new VERTEXES lump in the checksum.
-	PutGLChecksum();
+	// must be done *after* doing normal nodes, for proper checksum
+	UpdateGLMarker();
 }
 
 
@@ -2602,7 +2631,8 @@ lump_t *CreateGLMarker(void)
 	lump_t *cur;
 
 	char name_buf[32];
-	bool long_name = false;
+
+	lev_long_name = false;
 
 	if (strlen(level->name) <= 5)
 	{
@@ -2612,7 +2642,8 @@ lump_t *CreateGLMarker(void)
 	{
 		// support for level names longer than 5 letters
 		strcpy(name_buf, "GL_LEVEL");
-		long_name = true;
+
+		lev_long_name = true;
 	}
 
 // FIXME !!!!
@@ -2631,34 +2662,7 @@ lump_t *CreateGLMarker(void)
 	level->next = cur;
 	level->lev_info->buddy = cur;
 
-	if (long_name)
-	{
-		AddGLTextLine("LEVEL", level->name);
-	}
-
 	return cur;
-}
-
-
-void AddGLTextLine(const char *keyword, const char *value)
-{
-	lump_t *gl_level;
-
-	// create GL level marker if necessary
-	if (! wad.current_level->lev_info->buddy)
-		CreateGLMarker();
-
-	gl_level = wad.current_level->lev_info->buddy;
-
-# if DEBUG_KEYS
-	DebugPrintf("[%s] Adding: %s=%s\n", gl_level->name, keyword, value);
-# endif
-
-	AppendLevelLump(gl_level, keyword, (int)strlen(keyword));
-	AppendLevelLump(gl_level, "=", 1);
-
-	AppendLevelLump(gl_level, value, (int)strlen(value));
-	AppendLevelLump(gl_level, "\n", 1);
 }
 
 
