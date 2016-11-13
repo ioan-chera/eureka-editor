@@ -50,18 +50,13 @@ static int block_overflowed;
 #define DUMMY_DUP  0xFFFF
 
 
-//
-// GetBlockmapBounds
-//
 void GetBlockmapBounds(int *x, int *y, int *w, int *h)
 {
 	*x = block_x; *y = block_y;
 	*w = block_w; *h = block_h;
 }
 
-//
-// CheckLinedefInsideBox
-//
+
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 		int x1, int y1, int x2, int y2)
 {
@@ -981,12 +976,11 @@ node_t *LookupNode(int index)
 void GetVertices(void)
 {
 	int i, count=-1;
-	raw_vertex_t *raw;
 
 	Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump)
-		count = lump->length / sizeof(raw_vertex_t);
+		count = lump->Length() / sizeof(raw_vertex_t);
 
 	GB_DisplayTicker();
 
@@ -997,14 +991,20 @@ void GetVertices(void)
 	if (!lump || count == 0)
 		return;
 
-	raw = (raw_vertex_t *) lump->data;
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_vertex_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading vertices.\n");
+
 		vertex_t *vert = NewVertex();
 
-		vert->x = (double) LE_S16(raw->x);
-		vert->y = (double) LE_S16(raw->y);
+		vert->x = (double) LE_S16(raw.x);
+		vert->y = (double) LE_S16(raw.y);
 
 		vert->index = i;
 	}
@@ -1018,15 +1018,17 @@ void GetVertices(void)
 void GetSectors(void)
 {
 	int i, count=-1;
-	raw_sector_t *raw;
 
 	Lump_c *lump = FindLevelLump("SECTORS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_sector_t);
+		count = lump->Length() / sizeof(raw_sector_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1034,21 +1036,24 @@ void GetSectors(void)
 	DebugPrintf("GetSectors: num = %d\n", count);
 # endif
 
-	raw = (raw_sector_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_sector_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading sectors.\n");
+
 		sector_t *sector = NewSector();
 
-		sector->floor_h = LE_S16(raw->floor_h);
-		sector->ceil_h  = LE_S16(raw->ceil_h);
+		sector->floor_h = LE_S16(raw.floor_h);
+		sector->ceil_h  = LE_S16(raw.ceil_h);
 
-		memcpy(sector->floor_tex, raw->floor_tex, sizeof(sector->floor_tex));
-		memcpy(sector->ceil_tex,  raw->ceil_tex,  sizeof(sector->ceil_tex));
+		memcpy(sector->floor_tex, raw.floor_tex, sizeof(sector->floor_tex));
+		memcpy(sector->ceil_tex,  raw.ceil_tex,  sizeof(sector->ceil_tex));
 
-		sector->light = LE_U16(raw->light);
-		sector->special = LE_U16(raw->special);
-		sector->tag = LE_S16(raw->tag);
+		sector->light = LE_U16(raw.light);
+		sector->special = LE_U16(raw.special);
+		sector->tag = LE_S16(raw.tag);
 
 		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
 			true : false;
@@ -1066,15 +1071,17 @@ void GetSectors(void)
 void GetThings(void)
 {
 	int i, count=-1;
-	raw_thing_t *raw;
 
 	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_thing_t);
+		count = lump->Length() / sizeof(raw_thing_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1082,17 +1089,20 @@ void GetThings(void)
 	DebugPrintf("GetThings: num = %d\n", count);
 # endif
 
-	raw = (raw_thing_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_thing_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading things.\n");
+
 		thing_t *thing = NewThing();
 
-		thing->x = LE_S16(raw->x);
-		thing->y = LE_S16(raw->y);
+		thing->x = LE_S16(raw.x);
+		thing->y = LE_S16(raw.y);
 
-		thing->type = LE_U16(raw->type);
-		thing->options = LE_U16(raw->options);
+		thing->type = LE_U16(raw.type);
+		thing->options = LE_U16(raw.options);
 
 		thing->index = i;
 	}
@@ -1102,15 +1112,17 @@ void GetThings(void)
 void GetThingsHexen(void)
 {
 	int i, count=-1;
-	raw_hexen_thing_t *raw;
 
 	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_hexen_thing_t);
+		count = lump->Length() / sizeof(raw_hexen_thing_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1118,17 +1130,20 @@ void GetThingsHexen(void)
 	DebugPrintf("GetThingsHexen: num = %d\n", count);
 # endif
 
-	raw = (raw_hexen_thing_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_hexen_thing_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading things.\n");
+
 		thing_t *thing = NewThing();
 
-		thing->x = LE_S16(raw->x);
-		thing->y = LE_S16(raw->y);
+		thing->x = LE_S16(raw.x);
+		thing->y = LE_S16(raw.y);
 
-		thing->type = LE_U16(raw->type);
-		thing->options = LE_U16(raw->options);
+		thing->type = LE_U16(raw.type);
+		thing->options = LE_U16(raw.options);
 
 		thing->index = i;
 	}
@@ -1138,15 +1153,17 @@ void GetThingsHexen(void)
 void GetSidedefs(void)
 {
 	int i, count=-1;
-	raw_sidedef_t *raw;
 
 	Lump_c *lump = FindLevelLump("SIDEDEFS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_sidedef_t);
+		count = lump->Length() / sizeof(raw_sidedef_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1154,24 +1171,27 @@ void GetSidedefs(void)
 	DebugPrintf("GetSidedefs: num = %d\n", count);
 # endif
 
-	raw = (raw_sidedef_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_sidedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading sidedefs.\n");
+
 		sidedef_t *side = NewSidedef();
 
-		side->sector = (LE_S16(raw->sector) == -1) ? NULL :
-			LookupSector(LE_U16(raw->sector));
+		side->sector = (LE_S16(raw.sector) == -1) ? NULL :
+			LookupSector(LE_U16(raw.sector));
 
 		if (side->sector)
 			side->sector->ref_count++;
 
-		side->x_offset = LE_S16(raw->x_offset);
-		side->y_offset = LE_S16(raw->y_offset);
+		side->x_offset = LE_S16(raw.x_offset);
+		side->y_offset = LE_S16(raw.y_offset);
 
-		memcpy(side->upper_tex, raw->upper_tex, sizeof(side->upper_tex));
-		memcpy(side->lower_tex, raw->lower_tex, sizeof(side->lower_tex));
-		memcpy(side->mid_tex,   raw->mid_tex,   sizeof(side->mid_tex));
+		memcpy(side->upper_tex, raw.upper_tex, sizeof(side->upper_tex));
+		memcpy(side->lower_tex, raw.lower_tex, sizeof(side->lower_tex));
+		memcpy(side->mid_tex,   raw.mid_tex,   sizeof(side->mid_tex));
 
 		/* sidedef indices never change */
 		side->index = i;
@@ -1193,15 +1213,17 @@ static inline sidedef_t *SafeLookupSidedef(u16_t num)
 void GetLinedefs(void)
 {
 	int i, count=-1;
-	raw_linedef_t *raw;
 
 	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_linedef_t);
+		count = lump->Length() / sizeof(raw_linedef_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1209,14 +1231,17 @@ void GetLinedefs(void)
 	DebugPrintf("GetLinedefs: num = %d\n", count);
 # endif
 
-	raw = (raw_linedef_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_linedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading linedefs.\n");
+
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(LE_U16(raw->start));
-		vertex_t *end   = LookupVertex(LE_U16(raw->end));
+		vertex_t *start = LookupVertex(LE_U16(raw.start));
+		vertex_t *end   = LookupVertex(LE_U16(raw.end));
 
 		start->ref_count++;
 		end->ref_count++;
@@ -1230,16 +1255,16 @@ void GetLinedefs(void)
 		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = LE_U16(raw->flags);
-		line->type = LE_U16(raw->type);
-		line->tag  = LE_S16(raw->tag);
+		line->flags = LE_U16(raw.flags);
+		line->type = LE_U16(raw.type);
+		line->tag  = LE_S16(raw.tag);
 
 		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
 		line->is_precious = (line->tag >= 900 && line->tag < 1000) ?
 			true : false;
 
-		line->right = SafeLookupSidedef(LE_U16(raw->sidedef1));
-		line->left  = SafeLookupSidedef(LE_U16(raw->sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw.sidedef1));
+		line->left  = SafeLookupSidedef(LE_U16(raw.sidedef2));
 
 		if (line->right)
 		{
@@ -1264,15 +1289,17 @@ void GetLinedefs(void)
 void GetLinedefsHexen(void)
 {
 	int i, j, count=-1;
-	raw_hexen_linedef_t *raw;
 
 	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
-		count = lump->length / sizeof(raw_hexen_linedef_t);
+		count = lump->Length() / sizeof(raw_hexen_linedef_t);
 
 	if (!lump || count == 0)
 		return;
+
+	if (! lump->Seek())
+		FatalError("Error seeking to a lump\n");
 
 	GB_DisplayTicker();
 
@@ -1280,14 +1307,17 @@ void GetLinedefsHexen(void)
 	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
 # endif
 
-	raw = (raw_hexen_linedef_t *) lump->data;
-
-	for (i=0; i < count; i++, raw++)
+	for (i = 0 ; i < count ; i++)
 	{
+		raw_hexen_linedef_t raw;
+
+		if (! lump->Read(&raw, sizeof(raw)))
+			FatalError("Error reading linedefs.\n");
+
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(LE_U16(raw->start));
-		vertex_t *end   = LookupVertex(LE_U16(raw->end));
+		vertex_t *start = LookupVertex(LE_U16(raw.start));
+		vertex_t *end   = LookupVertex(LE_U16(raw.end));
 
 		start->ref_count++;
 		end->ref_count++;
@@ -1301,19 +1331,19 @@ void GetLinedefsHexen(void)
 		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = LE_U16(raw->flags);
-		line->type = (u8_t)(raw->type);
+		line->flags = LE_U16(raw.flags);
+		line->type = (u8_t)(raw.type);
 		line->tag  = 0;
 
 		/* read specials */
 		for (j=0; j < 5; j++)
-			line->specials[j] = (u8_t)(raw->specials[j]);
+			line->specials[j] = (u8_t)(raw.specials[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
 		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
 
-		line->right = SafeLookupSidedef(LE_U16(raw->sidedef1));
-		line->left  = SafeLookupSidedef(LE_U16(raw->sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw.sidedef1));
+		line->left  = SafeLookupSidedef(LE_U16(raw.sidedef2));
 
 		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
 		if (line->right)
@@ -2134,13 +2164,13 @@ static u32_t CalcGLChecksum(void)
 
 	Lump_c *lump = FindLevelLump("VERTEXES");
 
-	if (lump && lump->length > 0)
-		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->length);
+	if (lump && lump->Length() > 0)
+		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->Length());
 
 	lump = FindLevelLump("LINEDEFS");
 
-	if (lump && lump->length > 0)
-		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->length);
+	if (lump && lump->Length() > 0)
+		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->Length());
 
 	Adler32_Finish(&crc);
 
