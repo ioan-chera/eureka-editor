@@ -61,16 +61,19 @@ public:
 
 	int factor;
 
-	bool no_reject;
+	bool gl_nodes;
+	bool do_blockmap;
+	bool do_reject;
+
+	bool force_v5;
+	bool force_xnod;
+
 	bool no_progress;
 	bool quiet;
 	bool mini_warnings;
 	bool fast;
 
 	bool load_all;
-
-	bool force_v5;
-	bool force_xnod;
 
 	int block_limit;
 
@@ -101,15 +104,19 @@ public:
 
 		factor(DEFAULT_FACTOR),
 
-		no_reject(false),
+		gl_nodes(true),
+		do_blockmap(true),
+		do_reject  (true),
+
+		force_v5(false),
+		force_xnod(false),
+
 		no_progress(false),
 		quiet(false),
 		mini_warnings(false),
 		fast(false),
 
 		load_all(false),
-
-		force_v5(false),
 
 		block_limit(DEFAULT_BLOCK_LIMIT),
 

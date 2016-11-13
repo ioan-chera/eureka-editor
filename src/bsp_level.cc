@@ -515,9 +515,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 # endif
 }
 
-//
-// TruncateBlockmap
-//
+
 static void TruncateBlockmap(void)
 {
 	while (block_w * block_h > cur_info->block_limit)
@@ -542,9 +540,7 @@ static void TruncateBlockmap(void)
 # endif
 }
 
-//
-// InitBlockmap
-//
+
 void InitBlockmap(void)
 {
 	bbox_t map_bbox;
@@ -564,11 +560,16 @@ void InitBlockmap(void)
 
 }
 
-//
-// PutBlockmap
-//
+
 void PutBlockmap(void)
 {
+	if (! cur_info->do_blockmap)
+	{
+		// just create an empty blockmap lump
+		CreateLevelLump("BLOCKMAP");
+		return;
+	}
+
 	block_overflowed = false;
 
 	// truncate blockmap if too large.  We're limiting the number of
@@ -728,14 +729,13 @@ static void CountGroups(void)
 }
 #endif
 
-//
-// CreateReject
-//
+
 static void CreateReject(u8_t *matrix)
 {
 	int view, target;
 
 	for (view=0; view < num_sectors; view++)
+	{
 		for (target=0; target < view; target++)
 		{
 			sector_t *view_sec = LookupSector(view);
@@ -754,7 +754,9 @@ static void CreateReject(u8_t *matrix)
 			matrix[p1 >> 3] |= (1 << (p1 & 7));
 			matrix[p2 >> 3] |= (1 << (p2 & 7));
 		}
+	}
 }
+
 
 //
 // PutReject
@@ -768,6 +770,13 @@ void PutReject(void)
 	int reject_size;
 	u8_t *matrix;
 	lump_t *lump;
+
+	if (! cur_info->do_reject)
+	{
+		// just create an empty reject lump
+		CreateLevelLump("REJECT");
+		return;
+	}
 
 	GB_DisplayTicker();
 
@@ -1697,7 +1706,7 @@ void PutGLSubsecs_V5()
 
 #   if DEBUG_BSP
 		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
-				sub->index, LE_U32(raw.first), LE_U32(raw.num));
+					sub->index, LE_U32(raw.first), LE_U32(raw.num));
 #   endif
 	}
 }
@@ -2183,7 +2192,7 @@ void SaveLevel(node_t *root_node)
 
 	if (num_normal_vert > 32767 || num_gl_vert > 32767)
 	{
-		if (! cur_info->force_v5)
+		if (cur_info->gl_nodes && !cur_info->force_v5)
 		{
 			lev_force_v5 = true;
 			MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
@@ -2198,7 +2207,7 @@ void SaveLevel(node_t *root_node)
 
 	if (num_segs > 65534)
 	{
-		if (! cur_info->force_v5)
+		if (cur_info->gl_nodes && !cur_info->force_v5)
 		{
 			lev_force_v5 = true;
 			MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
@@ -2213,7 +2222,7 @@ void SaveLevel(node_t *root_node)
 
 	if (num_nodes > 32767)
 	{
-		if (! cur_info->force_v5)
+		if (cur_info->gl_nodes && !cur_info->force_v5)
 		{
 			lev_force_v5 = true;
 			MarkV5Switch(LIMIT_GL_NODES);
@@ -2227,7 +2236,7 @@ void SaveLevel(node_t *root_node)
 	}
 
 	// GL Nodes
-	// FIXME if (cur_info->do_GL)
+	if (cur_info->gl_nodes)
 	{
 		PutGLVertices(lev_force_v5);
 
@@ -2273,9 +2282,7 @@ void SaveLevel(node_t *root_node)
 
 		// -JL- Don't touch blockmap and reject if not doing normal nodes
 		PutBlockmap();
-
-		if (!cur_info->no_reject || !FindLevelLump("REJECT"))
-			PutReject();
+		PutReject();
 	}
 
 	// keyword support (v5.0 of the specs)
