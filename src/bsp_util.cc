@@ -949,12 +949,6 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	vert->ref_count = seg->partner ? 4 : 2;
 
-	if (lev_doing_normal && cur_info->spec_version == 1)
-	{
-		vert->index = num_normal_vert;
-		num_normal_vert++;
-	}
-	else
 	{
 		vert->index = num_gl_vert | IS_GL_VERTEX;
 		num_gl_vert++;
@@ -970,7 +964,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	// create a duplex vertex if needed
 
-	if (lev_doing_normal && cur_info->spec_version != 1)
+	if (lev_doing_normal)
 	{
 		vert->normal_dup = NewVertex();
 

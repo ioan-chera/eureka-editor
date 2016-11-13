@@ -67,11 +67,11 @@ public:
 	bool mini_warnings;
 	bool fast;
 
-	int spec_version;  // 1, 2, 3 or 5
-
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
+
+	bool force_v5;
 
 	int block_limit;
 
@@ -109,11 +109,11 @@ public:
 		mini_warnings(false),
 		fast(false),
 
-		spec_version(2),
-
 		load_all(false),
 		no_normal(false),
 		force_normal(false),
+
+		force_v5(false),
 
 		block_limit(DEFAULT_BLOCK_LIMIT),
 
@@ -359,7 +359,7 @@ typedef struct raw_gl_seg_s
 raw_gl_seg_t;
 
 
-typedef struct raw_v3_seg_s
+typedef struct raw_v5_seg_s
 {
 	u32_t start;      // from this vertex...
 	u32_t end;        // ... to this vertex
@@ -367,7 +367,7 @@ typedef struct raw_v3_seg_s
 	u16_t side;       // 0 if on right of linedef, 1 if on left
 	u32_t partner;    // partner seg number, or -1
 }
-raw_v3_seg_t;
+raw_v5_seg_t;
 
 
 typedef struct raw_bbox_s
@@ -396,12 +396,12 @@ typedef struct raw_subsec_s
 raw_subsec_t;
 
 
-typedef struct raw_v3_subsec_s
+typedef struct raw_v5_subsec_s
 {
 	u32_t num;     // number of Segs in this Sub-Sector
 	u32_t first;   // first Seg
 }
-raw_v3_subsec_t;
+raw_v5_subsec_t;
 
 
 typedef struct raw_v5_node_s

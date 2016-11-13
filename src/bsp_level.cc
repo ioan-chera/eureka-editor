@@ -812,7 +812,6 @@ void PutReject(void)
 bool lev_doing_normal;
 bool lev_doing_hexen;
 
-static bool lev_force_v3;
 static bool lev_force_v5;
 
 
@@ -1397,7 +1396,6 @@ static int SegCompare(const void *p1, const void *p2)
 /* ----- writing routines ------------------------------ */
 
 static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
-static const u8_t *lev_v3_magic = (u8_t *) "gNd3";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 void PutVertices(const char *name, int do_gl)
@@ -1440,7 +1438,7 @@ void PutVertices(const char *name, int do_gl)
 		MarkSoftFailure(do_gl ? LIMIT_GL_VERT : LIMIT_VERTEXES);
 }
 
-void PutV2Vertices(int do_v5)
+void PutGLVertices(int do_v5)
 {
 	int count, i;
 	lump_t *lump;
@@ -1471,7 +1469,7 @@ void PutV2Vertices(int do_v5)
 	}
 
 	if (count != num_gl_vert)
-		BugError("PutV2Vertices miscounted (%d != %d)", count,
+		BugError("PutGLVertices miscounted (%d != %d)", count,
 				num_gl_vert);
 
 	if (count > 32767)
@@ -1622,13 +1620,10 @@ void PutGLSegs(void)
 		MarkSoftFailure(LIMIT_GL_SEGS);
 }
 
-void PutV3Segs(int do_v5)
+void PutGLSegs_V5()
 {
 	int i, count;
 	lump_t *lump = CreateGLLump("GL_SEGS");
-
-	if (! do_v5)
-		AppendLevelLump(lump, lev_v3_magic, 4);
 
 	GB_DisplayTicker();
 
@@ -1637,23 +1632,15 @@ void PutV3Segs(int do_v5)
 
 	for (i=0, count=0; i < num_segs; i++)
 	{
-		raw_v3_seg_t raw;
+		raw_v5_seg_t raw;
 		seg_t *seg = segs[i];
 
 		// ignore degenerate segs
 		if (seg->degenerate)
 			continue;
 
-		if (do_v5)
-		{
-			raw.start = LE_U32(VertexIndex32BitV5(seg->start));
-			raw.end   = LE_U32(VertexIndex32BitV5(seg->end));
-		}
-		else
-		{
-			raw.start = LE_U32(seg->start->index);
-			raw.end   = LE_U32(seg->end->index);
-		}
+		raw.start = LE_U32(VertexIndex32BitV5(seg->start));
+		raw.end   = LE_U32(VertexIndex32BitV5(seg->end));
 
 		raw.side  = LE_U16(seg->side);
 
@@ -1716,7 +1703,7 @@ void PutSubsecs(const char *name, int do_gl)
 		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 }
 
-void PutV3Subsecs(int do_v5)
+void PutGLSubsecs_V5()
 {
 	int i;
 	lump_t *lump;
@@ -1725,12 +1712,9 @@ void PutV3Subsecs(int do_v5)
 
 	lump = CreateGLLump("GL_SSECT");
 
-	if (! do_v5)
-		AppendLevelLump(lump, lev_v3_magic, 4);
-
 	for (i=0; i < num_subsecs; i++)
 	{
-		raw_v3_subsec_t raw;
+		raw_v5_subsec_t raw;
 		subsec_t *sub = subsecs[i];
 
 		raw.first = LE_U32(sub->seg_list->index);
@@ -1743,9 +1727,6 @@ void PutV3Subsecs(int do_v5)
 				sub->index, LE_U32(raw.first), LE_U32(raw.num));
 #   endif
 	}
-
-	if (!do_v5 && num_subsecs > 32767)
-		MarkHardFailure(LIMIT_GL_SSECT);
 }
 
 static int node_cur_index;
@@ -1801,15 +1782,15 @@ static void PutOneNode(node_t *node, lump_t *lump)
 # endif
 }
 
-static void PutOneV5Node(node_t *node, lump_t *lump)
+static void PutOneNode_V5(node_t *node, lump_t *lump)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneV5Node(node->r.node, lump);
+		PutOneNode_V5(node->r.node, lump);
 
 	if (node->l.node)
-		PutOneV5Node(node->l.node, lump);
+		PutOneNode_V5(node->l.node, lump);
 
 	node->index = node_cur_index++;
 
@@ -1868,7 +1849,7 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 	if (root)
 	{
 		if (do_v5)
-			PutOneV5Node(root, lump);
+			PutOneNode_V5(root, lump);
 		else
 			PutOneNode(root, lump);
 	}
@@ -2232,20 +2213,16 @@ void PutGLChecksum(void)
 //
 void SaveLevel(node_t *root_node)
 {
-	lev_force_v3 = (cur_info->spec_version == 3) ? true : false;
-	lev_force_v5 = (cur_info->spec_version == 5) ? true : false;
+	lev_force_v5 = cur_info->force_v5;
 
 	// Note: RoundOffBspTree will convert the GL vertices in segs to
 	// their normal counterparts (pointer change: use normal_dup).
-
-	if (cur_info->spec_version == 1)
-		RoundOffBspTree(root_node);
 
 	// GL Nodes
 	{
 		if (num_normal_vert > 32767 || num_gl_vert > 32767)
 		{
-			if (cur_info->spec_version < 3)
+			if (! cur_info->force_v5)
 			{
 				lev_force_v5 = true;
 				MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
@@ -2254,7 +2231,7 @@ void SaveLevel(node_t *root_node)
 
 		if (num_segs > 65534)
 		{
-			if (cur_info->spec_version < 3)
+			if (! cur_info->force_v5)
 			{
 				lev_force_v5 = true;
 				MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
@@ -2263,25 +2240,22 @@ void SaveLevel(node_t *root_node)
 
 		if (num_nodes > 32767)
 		{
-			if (cur_info->spec_version < 5)
+			if (! cur_info->force_v5)
 			{
 				lev_force_v5 = true;
 				MarkV5Switch(LIMIT_GL_NODES);
 			}
 		}
 
-		if (cur_info->spec_version == 1)
-			PutVertices("GL_VERT", true);
-		else
-			PutV2Vertices(lev_force_v5);
+		PutGLVertices(lev_force_v5);
 
-		if (lev_force_v3 || lev_force_v5)
-			PutV3Segs(lev_force_v5);
+		if (lev_force_v5)
+			PutGLSegs_V5();
 		else
 			PutGLSegs();
 
-		if (lev_force_v3 || lev_force_v5)
-			PutV3Subsecs(lev_force_v5);
+		if (lev_force_v5)
+			PutGLSubsecs_V5();
 		else
 			PutSubsecs("GL_SSECT", true);
 
@@ -2293,8 +2267,7 @@ void SaveLevel(node_t *root_node)
 
 	if (lev_doing_normal)
 	{
-		if (cur_info->spec_version != 1)
-			RoundOffBspTree(root_node);
+		RoundOffBspTree(root_node);
 
 		NormaliseBspTree(root_node);
 
@@ -2307,7 +2280,7 @@ void SaveLevel(node_t *root_node)
 		if (lev_force_v5)
 		{
 			// don't report a problem when -v5 was explicitly given
-			if (cur_info->spec_version < 5)
+			if (! cur_info->force_v5)
 				MarkZDSwitch();
 
 			SaveZDFormat(root_node);
@@ -2403,19 +2376,6 @@ static build_result_e CheckInfo(nodebuildinfo_t *info)
 	{
 		info->factor = DEFAULT_FACTOR;
 		SetErrorMsg("Bad factor value !");
-		return BUILD_BadInfoFixed;
-	}
-
-	if (info->spec_version <= 0 || info->spec_version > 5)
-	{
-		info->spec_version = 2;
-		SetErrorMsg("Bad GL-Nodes version number !");
-		return BUILD_BadInfoFixed;
-	}
-	else if (info->spec_version == 4)
-	{
-		info->spec_version = 5;
-		SetErrorMsg("V4 GL-Nodes is not supported");
 		return BUILD_BadInfoFixed;
 	}
 
