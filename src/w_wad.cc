@@ -153,7 +153,7 @@ bool Lump_c::GetLine(char *buffer, size_t buf_size)
 }
 
 
-bool Lump_c::Write(void *data, int len)
+bool Lump_c::Write(const void *data, int len)
 {
 	SYS_ASSERT(data && len > 0);
 

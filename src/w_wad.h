@@ -70,7 +70,7 @@ public:
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
-	bool Write(void *data, int len);
+	bool Write(const void *data, int len);
 
 	// write some text to the lump
 	void Printf(const char *msg, ...);
