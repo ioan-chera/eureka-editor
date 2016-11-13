@@ -68,13 +68,14 @@ public:
 	bool GetLine(char *buffer, size_t buf_size);
 
 	// write some data to the lump.  Only the lump which had just
-	// been created with Wad_file::AddLump() can be written to.
+	// been created with Wad_file::AddLump() or RecreateLump() can be
+	// written to.
 	bool Write(void *data, int len);
 
 	// write some text to the lump
 	void Printf(const char *msg, ...);
 
-	// mark the lump as finished (after writing it).
+	// mark the lump as finished (after writing data to it).
 	bool Finish();
 
 	// predicate for std::sort()
@@ -192,7 +193,8 @@ public:
 	bool Backup(const char *filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
-	// and EndWrite() methods.
+	// and EndWrite() methods.  the on-disk wad directory may be trashed
+	// during this period, it will be re-written by EndWrite().
 	void BeginWrite();
 	void EndWrite();
 
@@ -215,6 +217,10 @@ public:
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
 	Lump_c * AddLevel(const char *name, int max_size = -1);
+
+	// setup lump to write new data to it.
+	// the old contents are lost.
+	void RecreateLump(Lump_c *lump, int max_size = -1);
 
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of

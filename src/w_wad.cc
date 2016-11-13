@@ -954,6 +954,19 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 }
 
 
+void Wad_file::RecreateLump(Lump_c *lump, int max_size)
+{
+	SYS_ASSERT(begun_write);
+
+	begun_max_size = max_size;
+
+	int start = PositionForWrite(max_size);
+
+	lump->l_start  = start;
+	lump->l_length = 0;
+}
+
+
 Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 {
 	int actual_point = insert_point;
