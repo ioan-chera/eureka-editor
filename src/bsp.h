@@ -62,6 +62,8 @@ public:
 	int factor;
 
 	bool gl_nodes;
+
+	// when these two are false, the create an empty lump
 	bool do_blockmap;
 	bool do_reject;
 
