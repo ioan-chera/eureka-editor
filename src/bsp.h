@@ -540,10 +540,6 @@ void PutReject(void);
 // LEVEL : Level structures & read/write functions.
 //------------------------------------------------------------------------
 
-// FIXME !!!
-#include "bsp_wad.h"
-
-
 struct node_s;
 struct sector_s;
 struct superblock_s;
@@ -936,6 +932,42 @@ void FreeLevel(void);
 void SaveLevel(short lev_idx, node_t *root_node);
 
 Lump_c * CreateGLMarker();
+
+Lump_c * CreateLevelLump(const char *name, int max_size = -1);
+
+// Zlib compression support
+void ZLibBeginLump(Lump_c *lump);
+void ZLibAppendLump(const void *data, int length);
+void ZLibFinishLump(void);
+
+// mark the fact that this level failed to build.
+void MarkSoftFailure(int soft);
+void MarkHardFailure(int hard);
+void MarkV5Switch(int v5);
+void MarkZDSwitch(void);
+
+// alert the user if any levels failed to build properly.
+void ReportFailedLevels(void);
+
+/* limit flags, to show what went wrong */
+#define LIMIT_VERTEXES     0x000001
+#define LIMIT_SECTORS      0x000002
+#define LIMIT_SIDEDEFS     0x000004
+#define LIMIT_LINEDEFS     0x000008
+
+#define LIMIT_SEGS         0x000010
+#define LIMIT_SSECTORS     0x000020
+#define LIMIT_NODES        0x000040
+
+#define LIMIT_GL_VERT      0x000100
+#define LIMIT_GL_SEGS      0x000200
+#define LIMIT_GL_SSECT     0x000400
+#define LIMIT_GL_NODES     0x000800
+
+#define LIMIT_BAD_SIDE     0x001000
+#define LIMIT_BMAP_TRUNC   0x002000
+#define LIMIT_BLOCKMAP     0x004000
+#define LIMIT_ZDBSP        0x008000
 
 
 //------------------------------------------------------------------------

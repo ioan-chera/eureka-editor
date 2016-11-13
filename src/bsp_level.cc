@@ -395,19 +395,19 @@ static void CompressBlockmap(void)
 
 static void WriteBlockmap(void)
 {
+	// leave empty if the blockmap overflowed
+	if (block_overflowed)
+		return;
+
 	int i;
 
 	raw_blockmap_header_t header;
 
-	lump_t *lump = CreateLevelLump("BLOCKMAP");
+	Lump_c *lump = CreateLevelLump("BLOCKMAP");
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
 	u16_t m_neg1 = 0xFFFF;
-
-	// leave empty if the blockmap overflowed
-	if (block_overflowed)
-		return;
 
 	// fill in header
 	header.x_origin = LE_U16(block_x);
@@ -570,7 +570,7 @@ void PutBlockmap(void)
 	if (! cur_info->do_blockmap)
 	{
 		// just create an empty blockmap lump
-		CreateLevelLump("BLOCKMAP");
+		CreateLevelLump("BLOCKMAP")->Finish();
 		return;
 	}
 
@@ -773,12 +773,12 @@ void PutReject(void)
 {
 	int reject_size;
 	u8_t *matrix;
-	lump_t *lump;
+	Lump_c *lump;
 
 	if (! cur_info->do_reject)
 	{
 		// just create an empty reject lump
-		CreateLevelLump("REJECT");
+		CreateLevelLump("REJECT")->Finish();
 		return;
 	}
 
@@ -823,6 +823,8 @@ void PutReject(void)
 // per-level variables
 
 const char *lev_current_name;
+
+short lev_current_idx;
 
 bool lev_doing_hexen;
 
@@ -979,7 +981,8 @@ void GetVertices(void)
 {
 	int i, count=-1;
 	raw_vertex_t *raw;
-	lump_t *lump = FindLevelLump("VERTEXES");
+
+	Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump)
 		count = lump->length / sizeof(raw_vertex_t);
@@ -1015,7 +1018,8 @@ void GetSectors(void)
 {
 	int i, count=-1;
 	raw_sector_t *raw;
-	lump_t *lump = FindLevelLump("SECTORS");
+
+	Lump_c *lump = FindLevelLump("SECTORS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_sector_t);
@@ -1062,7 +1066,8 @@ void GetThings(void)
 {
 	int i, count=-1;
 	raw_thing_t *raw;
-	lump_t *lump = FindLevelLump("THINGS");
+
+	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_thing_t);
@@ -1097,7 +1102,8 @@ void GetThingsHexen(void)
 {
 	int i, count=-1;
 	raw_hexen_thing_t *raw;
-	lump_t *lump = FindLevelLump("THINGS");
+
+	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_hexen_thing_t);
@@ -1132,7 +1138,8 @@ void GetSidedefs(void)
 {
 	int i, count=-1;
 	raw_sidedef_t *raw;
-	lump_t *lump = FindLevelLump("SIDEDEFS");
+
+	Lump_c *lump = FindLevelLump("SIDEDEFS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_sidedef_t);
@@ -1186,7 +1193,8 @@ void GetLinedefs(void)
 {
 	int i, count=-1;
 	raw_linedef_t *raw;
-	lump_t *lump = FindLevelLump("LINEDEFS");
+
+	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_linedef_t);
@@ -1256,7 +1264,8 @@ void GetLinedefsHexen(void)
 {
 	int i, j, count=-1;
 	raw_hexen_linedef_t *raw;
-	lump_t *lump = FindLevelLump("LINEDEFS");
+
+	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
 		count = lump->length / sizeof(raw_hexen_linedef_t);
@@ -1369,14 +1378,10 @@ static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 void PutVertices(const char *name, int do_gl)
 {
 	int count, i;
-	lump_t *lump;
 
 	GB_DisplayTicker();
 
-	if (do_gl)
-		lump = CreateGLLump(name);
-	else
-		lump = CreateLevelLump(name);
+	Lump_c *lump = CreateLevelLump(name);
 
 	for (i=0, count=0; i < num_vertices; i++)
 	{
@@ -1409,11 +1414,10 @@ void PutVertices(const char *name, int do_gl)
 void PutGLVertices(int do_v5)
 {
 	int count, i;
-	lump_t *lump;
 
 	GB_DisplayTicker();
 
-	lump = CreateGLLump("GL_VERT");
+	Lump_c *lump = CreateLevelLump("GL_VERT");
 
 	if (do_v5)
 		AppendLevelLump(lump, lev_v5_magic, 4);
@@ -1487,7 +1491,8 @@ static inline u32_t VertexIndex32BitV5(const vertex_t *v)
 void PutSegs(void)
 {
 	int i, count;
-	lump_t *lump = CreateLevelLump("SEGS");
+
+	Lump_c *lump = CreateLevelLump("SEGS");
 
 	GB_DisplayTicker();
 
@@ -1536,7 +1541,8 @@ void PutSegs(void)
 void PutGLSegs(void)
 {
 	int i, count;
-	lump_t *lump = CreateGLLump("GL_SEGS");
+
+	Lump_c *lump = CreateLevelLump("GL_SEGS");
 
 	GB_DisplayTicker();
 
@@ -1591,7 +1597,8 @@ void PutGLSegs(void)
 void PutGLSegs_V5()
 {
 	int i, count;
-	lump_t *lump = CreateGLLump("GL_SEGS");
+
+	Lump_c *lump = CreateLevelLump("GL_SEGS");
 
 	GB_DisplayTicker();
 
@@ -1639,17 +1646,14 @@ void PutGLSegs_V5()
 				num_complete_seg);
 }
 
+
 void PutSubsecs(const char *name, int do_gl)
 {
 	int i;
-	lump_t *lump;
 
 	GB_DisplayTicker();
 
-	if (do_gl)
-		lump = CreateGLLump(name);
-	else
-		lump = CreateLevelLump(name);
+	Lump_c * lump = CreateLevelLump(name);
 
 	for (i=0; i < num_subsecs; i++)
 	{
@@ -1671,14 +1675,14 @@ void PutSubsecs(const char *name, int do_gl)
 		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 }
 
+
 void PutGLSubsecs_V5()
 {
 	int i;
-	lump_t *lump;
 
 	GB_DisplayTicker();
 
-	lump = CreateGLLump("GL_SSECT");
+	Lump_c *lump = CreateLevelLump("GL_SSECT");
 
 	for (i=0; i < num_subsecs; i++)
 	{
@@ -1699,7 +1703,7 @@ void PutGLSubsecs_V5()
 
 static int node_cur_index;
 
-static void PutOneNode(node_t *node, lump_t *lump)
+static void PutOneNode(node_t *node, Lump_c *lump)
 {
 	raw_node_t raw;
 
@@ -1750,7 +1754,7 @@ static void PutOneNode(node_t *node, lump_t *lump)
 # endif
 }
 
-static void PutOneNode_V5(node_t *node, lump_t *lump)
+static void PutOneNode_V5(node_t *node, Lump_c *lump)
 {
 	raw_v5_node_t raw;
 
@@ -1801,16 +1805,10 @@ static void PutOneNode_V5(node_t *node, lump_t *lump)
 # endif
 }
 
+
 void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 {
-	lump_t *lump;
-
-	GB_DisplayTicker();
-
-	if (do_gl)
-		lump = CreateGLLump(name);
-	else
-		lump = CreateLevelLump(name);
+	Lump_c *lump = CreateLevelLump(name);
 
 	node_cur_index = 0;
 
@@ -2031,17 +2029,16 @@ void PutZNodes(node_t *root)
 				node_cur_index, num_nodes);
 }
 
+
 void SaveZDFormat(node_t *root_node)
 {
-	lump_t *lump;
-
 	// leave SEGS and SSECTORS empty
-	CreateLevelLump("SEGS");
-	CreateLevelLump("SSECTORS");
+	CreateLevelLump("SEGS")->Finish();
+	CreateLevelLump("SSECTORS")->Finish();
 
-	lump = CreateLevelLump("NODES");
+	Lump_c *lump = CreateLevelLump("NODES");
 
-	AppendLevelLump(lump, lev_ZD_magic, 4);
+	lump->Write(lev_ZD_magic, 4);
 
 	ZLibBeginLump(lump);
 
@@ -2058,6 +2055,8 @@ void SaveZDFormat(node_t *root_node)
 
 void LoadLevel(short lev_idx)
 {
+	lev_current_idx = lev_idx;
+
 	char *message;
 
 	Lump_c *LEV = edit_wad->GetLump(edit_wad->GetLevel(lev_idx));
@@ -2131,11 +2130,10 @@ void FreeLevel(void)
 static u32_t CalcGLChecksum(void)
 {
 	u32_t crc;
-	lump_t *lump;
 
 	Adler32_Begin(&crc);
 
-	lump = FindLevelLump("VERTEXES");
+	Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump && lump->length > 0)
 		Adler32_AddBlock(&crc, (u8_t*) lump->data, lump->length);
@@ -2193,6 +2191,8 @@ void UpdateGLMarker(Lump_c *marker)
 
 void SaveLevel(short lev_idx, node_t *root_node)
 {
+	lev_current_idx = lev_idx;
+
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
 
@@ -2250,14 +2250,21 @@ void SaveLevel(short lev_idx, node_t *root_node)
 		}
 	}
 
-	// GL Nodes
+
+	// FIXME !!!!
+	//    check for gaps in level structure
+	//    in particular, that NODES, SEGS and SSECTORS are missing
+	//    as well as BLOCKMAP and REJECT
+	//    ---> fill in these gaps
+
+
+	/* --- GL Nodes --- */
+
 	if (cur_info->gl_nodes)
 	{
-		// FIXME : insert_point
-
 		// create empty marker now, flesh it out later
-		// FIXME !!!!  use CreateGLMarker
 		gl_marker = CreateGLMarker();
+		gl_marker->Finish();
 
 		PutGLVertices(lev_force_v5);
 
@@ -2274,13 +2281,16 @@ void SaveLevel(short lev_idx, node_t *root_node)
 		PutNodes("GL_NODES", true, lev_force_v5, root_node);
 
 		// -JL- Add empty PVS lump
-		CreateGLLump("GL_PVS");
+		CreateLevelLump("GL_PVS")->Finish();
 	}
 
-	// normal nodes   [ always added ]
+	/* --- Normal nodes --- */
+
 	{
+		// FIXME!!! necessary for XNOD/ZNOD ???
 		RoundOffBspTree(root_node);
 
+		// FIXME!!! necessary for XNOD/ZNOD ???
 		NormaliseBspTree(root_node);
 
 		// FIXME : check if XNOD supplies its own vertices
@@ -2318,12 +2328,12 @@ void SaveLevel(short lev_idx, node_t *root_node)
 //----------------------------------------------------------------------
 
 
-static lump_t  *zout_lump;
+static Lump_c  *zout_lump;
 static z_stream zout_stream;
 static Bytef    zout_buffer[1024];
 
 
-void ZLibBeginLump(lump_t *lump)
+void ZLibBeginLump(Lump_c *lump)
 {
 	zout_lump = lump;
 
@@ -2356,7 +2366,7 @@ void ZLibAppendLump(const void *data, int length)
 
 		if (zout_stream.avail_out == 0)
 		{
-			AppendLevelLump(zout_lump, zout_buffer, sizeof(zout_buffer));
+			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
 
 			zout_stream.next_out  = zout_buffer;
 			zout_stream.avail_out = sizeof(zout_buffer);
@@ -2386,7 +2396,7 @@ void ZLibFinishLump(void)
 
 		if (zout_stream.avail_out == 0)
 		{
-			AppendLevelLump(zout_lump, zout_buffer, sizeof(zout_buffer));
+			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
 
 			zout_stream.next_out  = zout_buffer;
 			zout_stream.avail_out = sizeof(zout_buffer);
@@ -2396,7 +2406,7 @@ void ZLibFinishLump(void)
 	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
 
 	if (left_over > 0)
-		AppendLevelLump(zout_lump, zout_buffer, left_over);
+		zout_lump->Write(zout_buffer, left_over);
 
 	deflateEnd(&zout_stream);
 	zout_lump = NULL;
@@ -2437,12 +2447,12 @@ void MarkZDSwitch(void)
 }
 
 
-void ReportOneOverflow(const lump_t *lump, int limit, bool hard)
+void ReportOneOverflow(const Lump_c *lump, int limit, bool hard)
 {
 	const char *msg = hard ? "overflowed the absolute limit" :
 		"overflowed the original limit";
 
-	PrintMsg("%-8s: ", lump->name);
+	PrintMsg("%-8s: ", lump->Name());
 
 	switch (limit)
 	{
@@ -2618,8 +2628,30 @@ void ReportFailedLevels(void)
 }
 
 
+Lump_c * CreateLevelLump(const char *name, int max_size)
+{
+	// look for existing one
+	Lump_c *lump = edit_wad->FindLumpInLevel(name, edit_wad->GetLevel(lev_current_idx));
+
+	if (lump)
+	{
+		edit_wad->RecreateLump(lump);
+	}
+	else
+	{
+		// FIXME !!!! : insert_point
+
+		lump = edit_wad->AddLump(name, max_size);
+	}
+
+	return lump;
+}
+
+
 Lump_c * CreateGLMarker()
 {
+	// FIXME !!!! : insert_point
+
 	char name_buf[64];
 
 	if (strlen(lev_current_name) <= 5)
@@ -2637,8 +2669,6 @@ Lump_c * CreateGLMarker()
 	}
 
 	Lump_c *marker = edit_wad->AddLump(name_buf);
-
-	marker->Finish();
 
 	return marker;
 }

@@ -213,7 +213,7 @@ void AppendLevelLump(lump_t *lump, const void *data, int length);
 // void AddGLTextLine(const char *keyword, const char *value);
 
 // Zlib compression support
-void ZLibBeginLump(lump_t *lump);
+void ZLibBeginLump(Lump_c *lump);
 void ZLibAppendLump(const void *data, int length);
 void ZLibFinishLump(void);
 
