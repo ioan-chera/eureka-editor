@@ -1478,127 +1478,24 @@ void PutV2Vertices(int do_v5)
 		MarkSoftFailure(LIMIT_GL_VERT);
 }
 
-void PutSectors(void)
+void ValidateSectors(void)
 {
-	int i;
-	lump_t *lump = CreateLevelLump("SECTORS");
-
-	GB_DisplayTicker();
-
-	for (i=0; i < num_sectors; i++)
-	{
-		raw_sector_t raw;
-		sector_t *sector = lev_sectors[i];
-
-		raw.floor_h = LE_S16(sector->floor_h);
-		raw.ceil_h  = LE_S16(sector->ceil_h);
-
-		memcpy(raw.floor_tex, sector->floor_tex, sizeof(raw.floor_tex));
-		memcpy(raw.ceil_tex,  sector->ceil_tex,  sizeof(raw.ceil_tex));
-
-		raw.light = LE_U16(sector->light);
-		raw.special = LE_U16(sector->special);
-		raw.tag   = LE_S16(sector->tag);
-
-		AppendLevelLump(lump, &raw, sizeof(raw));
-	}
-
 	if (num_sectors > 65534)
 		MarkHardFailure(LIMIT_SECTORS);
 	else if (num_sectors > 32767)
 		MarkSoftFailure(LIMIT_SECTORS);
 }
 
-void PutSidedefs(void)
+void ValidateSidedefs(void)
 {
-	int i;
-	lump_t *lump = CreateLevelLump("SIDEDEFS");
-
-	GB_DisplayTicker();
-
-	for (i=0; i < num_sidedefs; i++)
-	{
-		raw_sidedef_t raw;
-		sidedef_t *side = lev_sidedefs[i];
-
-		raw.sector = (side->sector == NULL) ? LE_S16(-1) :
-			LE_U16(side->sector->index);
-
-		raw.x_offset = LE_S16(side->x_offset);
-		raw.y_offset = LE_S16(side->y_offset);
-
-		memcpy(raw.upper_tex, side->upper_tex, sizeof(raw.upper_tex));
-		memcpy(raw.lower_tex, side->lower_tex, sizeof(raw.lower_tex));
-		memcpy(raw.mid_tex,   side->mid_tex,   sizeof(raw.mid_tex));
-
-		AppendLevelLump(lump, &raw, sizeof(raw));
-	}
-
 	if (num_sidedefs > 65534)
 		MarkHardFailure(LIMIT_SIDEDEFS);
 	else if (num_sidedefs > 32767)
 		MarkSoftFailure(LIMIT_SIDEDEFS);
 }
 
-void PutLinedefs(void)
+void ValidateLinedefs(void)
 {
-	int i;
-	lump_t *lump = CreateLevelLump("LINEDEFS");
-
-	GB_DisplayTicker();
-
-	for (i=0; i < num_linedefs; i++)
-	{
-		raw_linedef_t raw;
-		linedef_t *line = lev_linedefs[i];
-
-		raw.start = LE_U16(line->start->index);
-		raw.end   = LE_U16(line->end->index);
-
-		raw.flags = LE_U16(line->flags);
-		raw.type  = LE_U16(line->type);
-		raw.tag   = LE_S16(line->tag);
-
-		raw.sidedef1 = line->right ? LE_U16(line->right->index) : 0xFFFF;
-		raw.sidedef2 = line->left  ? LE_U16(line->left->index)  : 0xFFFF;
-
-		AppendLevelLump(lump, &raw, sizeof(raw));
-	}
-
-	if (num_linedefs > 65534)
-		MarkHardFailure(LIMIT_LINEDEFS);
-	else if (num_linedefs > 32767)
-		MarkSoftFailure(LIMIT_LINEDEFS);
-}
-
-void PutLinedefsHexen(void)
-{
-	int i, j;
-	lump_t *lump = CreateLevelLump("LINEDEFS");
-
-	GB_DisplayTicker();
-
-	for (i=0; i < num_linedefs; i++)
-	{
-		raw_hexen_linedef_t raw;
-		linedef_t *line = lev_linedefs[i];
-
-		raw.start = LE_U16(line->start->index);
-		raw.end   = LE_U16(line->end->index);
-
-		raw.flags = LE_U16(line->flags);
-		raw.type  = (u8_t)(line->type);
-
-		// write specials
-		for (j=0; j < 5; j++)
-			raw.specials[j] = (u8_t)(line->specials[j]);
-
-		raw.sidedef1 = line->right ? LE_U16(line->right->index) : 0xFFFF;
-		raw.sidedef2 = line->left  ? LE_U16(line->left->index)  : 0xFFFF;
-
-		AppendLevelLump(lump, &raw, sizeof(raw));
-	}
-
 	if (num_linedefs > 65534)
 		MarkHardFailure(LIMIT_LINEDEFS);
 	else if (num_linedefs > 32767)
@@ -2402,13 +2299,10 @@ void SaveLevel(node_t *root_node)
 		NormaliseBspTree(root_node);
 
 		PutVertices("VERTEXES", false);
-		PutSectors();
-		PutSidedefs();
 
-		if (lev_doing_hexen)
-			PutLinedefsHexen();
-		else
-			PutLinedefs();
+		ValidateSectors();
+		ValidateSidedefs();
+		ValidateLinedefs();
 
 		if (lev_force_v5)
 		{
