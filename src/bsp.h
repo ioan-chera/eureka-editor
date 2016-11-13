@@ -72,8 +72,6 @@ public:
 	bool load_all;
 	bool no_normal;
 	bool force_normal;
-	bool skip_self_ref;
-	bool window_fx;
 
 	int block_limit;
 
@@ -116,8 +114,6 @@ public:
 		load_all(false),
 		no_normal(false),
 		force_normal(false),
-		skip_self_ref(false),
-		window_fx(false),
 
 		block_limit(DEFAULT_BLOCK_LIMIT),
 
@@ -935,7 +931,6 @@ void SaveLevel(node_t *root_node);
 void DetectDuplicateVertices(void);
 void DetectPolyobjSectors(void);
 void DetectOverlappingLines(void);
-void DetectWindowEffects(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);
