@@ -76,8 +76,7 @@ public:
 
 	int block_limit;
 
-	// private stuff -- values computed in GlbspParseArgs or
-	// GlbspCheckInfo that need to be passed to GlbspBuildNodes.
+	// private stuff
 
 	bool missing_output;
 	bool same_filenames;

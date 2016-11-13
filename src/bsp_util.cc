@@ -691,7 +691,7 @@ void DetectOverlappingVertices(void)
 			vertex_t *A = lev_vertices[array[i]];
 			vertex_t *B = lev_vertices[array[i+1]];
 
-			// found a duplicate !
+			// found an overlap !
 			B->overlap = A->overlap ? A->overlap : A;
 		}
 	}
