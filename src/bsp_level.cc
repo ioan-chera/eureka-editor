@@ -813,6 +813,7 @@ bool lev_doing_normal;
 bool lev_doing_hexen;
 
 static bool lev_force_v5;
+static bool lev_force_xnod;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -2208,45 +2209,65 @@ void PutGLChecksum(void)
 	AddGLTextLine("CHECKSUM", num_buf);
 }
 
-//
-// SaveLevel
-//
+
 void SaveLevel(node_t *root_node)
 {
-	lev_force_v5 = cur_info->force_v5;
+	lev_force_v5   = cur_info->force_v5;
+	lev_force_xnod = cur_info->force_xnod;
 
 	// Note: RoundOffBspTree will convert the GL vertices in segs to
 	// their normal counterparts (pointer change: use normal_dup).
 
-	// GL Nodes
+	// FIXME : verify this is correct for XNOD format
+
+	if (num_normal_vert > 32767 || num_gl_vert > 32767)
 	{
-		if (num_normal_vert > 32767 || num_gl_vert > 32767)
+		if (! cur_info->force_v5)
 		{
-			if (! cur_info->force_v5)
-			{
-				lev_force_v5 = true;
-				MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
-			}
+			lev_force_v5 = true;
+			MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
 		}
 
-		if (num_segs > 65534)
+		if (! cur_info->force_xnod)
 		{
-			if (! cur_info->force_v5)
-			{
-				lev_force_v5 = true;
-				MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
-			}
+			lev_force_xnod = true;
+			MarkZDSwitch();
+		}
+	}
+
+	if (num_segs > 65534)
+	{
+		if (! cur_info->force_v5)
+		{
+			lev_force_v5 = true;
+			MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
 		}
 
-		if (num_nodes > 32767)
+		if (! cur_info->force_xnod)
 		{
-			if (! cur_info->force_v5)
-			{
-				lev_force_v5 = true;
-				MarkV5Switch(LIMIT_GL_NODES);
-			}
+			lev_force_xnod = true;
+			MarkZDSwitch();
+		}
+	}
+
+	if (num_nodes > 32767)
+	{
+		if (! cur_info->force_v5)
+		{
+			lev_force_v5 = true;
+			MarkV5Switch(LIMIT_GL_NODES);
 		}
 
+		if (! cur_info->force_xnod)
+		{
+			lev_force_xnod = true;
+			MarkZDSwitch();
+		}
+	}
+
+	// GL Nodes
+	// FIXME if (cur_info->do_GL)
+	{
 		PutGLVertices(lev_force_v5);
 
 		if (lev_force_v5)
@@ -2271,18 +2292,15 @@ void SaveLevel(node_t *root_node)
 
 		NormaliseBspTree(root_node);
 
+		// FIXME : check if XNOD supplies its own vertices
 		PutVertices("VERTEXES", false);
 
 		ValidateSectors();
 		ValidateSidedefs();
 		ValidateLinedefs();
 
-		if (lev_force_v5)
+		if (lev_force_xnod)
 		{
-			// don't report a problem when -v5 was explicitly given
-			if (! cur_info->force_v5)
-				MarkZDSwitch();
-
 			SaveZDFormat(root_node);
 		}
 		else

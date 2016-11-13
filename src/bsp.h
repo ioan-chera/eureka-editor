@@ -72,6 +72,7 @@ public:
 	bool force_normal;
 
 	bool force_v5;
+	bool force_xnod;
 
 	int block_limit;
 
