@@ -556,7 +556,7 @@ void UI_Canvas::DrawLinedefs()
 				else
 					DrawKnobbyLine(x1, y1, x2, y2);
 
-				if (n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
+				if (n != split_ld && n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
 				{
 					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
 				}
@@ -1297,7 +1297,18 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 	fl_line(scr_x1, scr_y1, scr_mx, scr_my);
 	fl_line(scr_x2, scr_y2, scr_mx, scr_my);
 
+	if (! edit.show_object_numbers)
+	{
+		int len1 = ComputeDist(map_x1 - split_x, map_y1 - split_y);
+		int len2 = ComputeDist(map_x2 - split_x, map_y2 - split_y);
+
+		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, len1);
+		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
+	}
+
 	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+
+	fl_color(HI_AND_SEL_COL);
 
 	fl_pie(scr_mx - size/2, scr_my - size/2, size, size, 0, 360);
 }
