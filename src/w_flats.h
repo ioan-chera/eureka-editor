@@ -33,7 +33,7 @@ void W_LoadFlats();
 
 bool W_FlatExists(const char *name);
 
-Img_c * W_GetFlat(const char *name);
+Img_c * W_GetFlat(const char *name, bool try_uppercase = false);
 
 #endif  /* __EUREKA_W_FLATS_H__ */
 

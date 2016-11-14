@@ -130,7 +130,7 @@ void W_LoadFlats()
 }
 
 
-Img_c * W_GetFlat(const char *name)
+Img_c * W_GetFlat(const char *name, bool try_uppercase)
 {
 	std::string f_str = name;
 
@@ -138,6 +138,20 @@ Img_c * W_GetFlat(const char *name)
 
 	if (P != flats.end())
 		return P->second;
+
+	if (try_uppercase)
+	{
+		char upr_name[WAD_FLAT_NAME+1];
+
+		memset(upr_name, 0, sizeof(upr_name));
+
+		strncpy(upr_name, name, WAD_FLAT_NAME);
+
+		for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
+			upr_name[i] = toupper(upr_name[i]);
+
+		return W_GetFlat(upr_name, false);
+	}
 
 	return NULL;
 }

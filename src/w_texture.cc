@@ -464,7 +464,7 @@ void W_LoadTextures()
 }
 
 
-Img_c * W_GetTexture(const char *name)
+Img_c * W_GetTexture(const char *name, bool try_uppercase)
 {
 	if (is_missing_tex(name))
 		return NULL;
@@ -475,6 +475,20 @@ Img_c * W_GetTexture(const char *name)
 
 	if (P != textures.end())
 		return P->second;
+
+	if (try_uppercase)
+	{
+		char upr_name[WAD_FLAT_NAME+1];
+
+		memset(upr_name, 0, sizeof(upr_name));
+
+		strncpy(upr_name, name, WAD_FLAT_NAME);
+
+		for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
+			upr_name[i] = toupper(upr_name[i]);
+
+		return W_GetTexture(upr_name, false);
+	}
 
 	return NULL;
 }

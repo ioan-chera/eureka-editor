@@ -33,7 +33,7 @@ void W_LoadTextures();
 
 bool W_TextureExists(const char *name);
 
-Img_c * W_GetTexture(const char *name);
+Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
 
 bool W_TextureCausesMedusa(const char *name);
 

@@ -116,8 +116,11 @@ void UI_Pic::MarkMissing()
 
 void UI_Pic::GetFlat(const char * fname)
 {
-	TiledImg(W_GetFlat(fname));
+	Img_c *img = W_GetFlat(fname, true /* try_uppercase */);
+
+	TiledImg(img);
 }
+
 
 void UI_Pic::GetTex(const char * tname)
 {
@@ -127,7 +130,9 @@ void UI_Pic::GetTex(const char * tname)
 		return;
 	}
 
-	TiledImg(W_GetTexture(tname));
+	Img_c *img = W_GetTexture(tname, true /* try_uppercase */);
+
+	TiledImg(img);
 }
 
 

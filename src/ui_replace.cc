@@ -703,6 +703,7 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 	box->rep_value->do_callback();
 }
 
+
 void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
@@ -751,7 +752,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 	}
 
 
-	// Line Textures   [ TODO probably should upper-case the text ]
+	// Line Textures
 	if (what->value() == 1)
 	{
 		pic->GetTex(inp_text);
