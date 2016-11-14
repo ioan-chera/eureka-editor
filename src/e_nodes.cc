@@ -393,6 +393,12 @@ fprintf(stderr, "new_name : %s\n", new_name);
 
 void CMD_TestMap()
 {
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
+		return;
+	}
+
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
@@ -406,24 +412,30 @@ void CMD_TestMap()
 			return;
 	}
 
-	if (! edit_wad)
-	{
-		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
-		return;
-	}
-
 	
 	// FIXME:
 	// if (missing nodes)
 	//    DLG_Confirm(  "build the nodes now?")
 
 
+	// FIXME: figure out the proper directory to cd into
+	//        (and ensure that it exists)
+
+	// TODO : remember current dir, reset afterwards
+
+	// FIXME : check if this worked
+	FileChangeDir("/home/aapted/oblige");
+
+
 	char cmd_buffer[FL_PATH_MAX * 2];
 
 	// FIXME: use fl_filename_absolute() to get absolute paths
 
+
+	// FIXME : handle DOOM1/ULTDOOM style warp option
+
 	snprintf(cmd_buffer, sizeof(cmd_buffer),
-	         "cd /home/aapted/doom; ./edge135 -iwad %s -file %s -warp %s",
+	         "./boomPR -iwad %s -file %s -warp %s",
 			 game_wad->PathName(),
 			 edit_wad->PathName(),
 			 Level_name);
@@ -431,7 +443,18 @@ void CMD_TestMap()
 	LogPrintf("Playing map using the following command:\n");
 	LogPrintf("  %s\n", cmd_buffer);
 
-	system(cmd_buffer);
+	Status_Set("TESTING MAP...");
+
+	main_win->redraw();
+	Fl::wait(0.1);
+	Fl::wait(0.1);
+
+	int status = system(cmd_buffer);
+
+	if (status == 0)
+		Status_Set("Result: OK");
+	else
+		Status_Set("Result code: %d\n", status);
 }
 
 
