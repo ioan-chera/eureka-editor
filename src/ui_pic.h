@@ -48,7 +48,7 @@ public:
 	UI_Pic(int X, int Y, int W, int H, const char *L = "");
 	virtual ~UI_Pic();
 
-	// FLTK virtual method for drawing.
+	// FLTK method for event handling
 	int handle(int event);
 
 public:
