@@ -910,6 +910,37 @@ void Wad_file::RemoveLevel(short index)
 }
 
 
+void Wad_file::RemoveGLNodes(short index)
+{
+	SYS_ASSERT(begun_write);
+	SYS_ASSERT(0 <= index && index < NumLumps());
+
+	short max_index = index + MAX_LUMPS_IN_A_LEVEL - 1;
+
+	if (max_index >= NumLumps())
+		max_index = NumLumps() - 1;
+
+	index++;
+
+	while (index <= max_index &&
+		   IsLevelLump(directory[index]->name))
+	{
+		index++;
+	}
+
+	short count = 0;
+
+	while (index+count <= max_index &&
+		   IsGLNodeLump(directory[index+count]->name))
+	{
+		count++;
+	}
+
+	if (count > 0)
+		RemoveLumps(index, count);
+}
+
+
 void Wad_file::FixGroup(std::vector<short>& group, short index,
                         short num_added, short num_removed)
 {

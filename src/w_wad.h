@@ -211,6 +211,10 @@ public:
 	// which follow it.  'index' is a lump number (e.g. from FindLevel)
 	void RemoveLevel(short index);
 
+	// removes any GL-Nodes lumps that are associated with the given
+	// level.  'index' is a lump number.
+	void RemoveGLNodes(short index);
+
 	// insert a new lump.
 	// The second form is for a level marker.
 	// The 'max_size' parameter (if >= 0) specifies the most data
