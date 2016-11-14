@@ -386,17 +386,19 @@ short Wad_file::FindLumpNum(const char *name)
 }
 
 
-Lump_c * Wad_file::FindLumpInLevel(const char *name, short level)
+Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
 {
-	SYS_ASSERT(0 <= level && level < NumLumps());
+	short start = index;
+
+	SYS_ASSERT(0 <= start && start < NumLumps());
 
 	// determine how far past the level marker (MAP01 etc) to search
-	short last = level + MAX_LUMPS_IN_A_LEVEL;
+	short last = start + MAX_LUMPS_IN_A_LEVEL;
 
 	if (last >= NumLumps())
 		last = NumLumps() - 1;
 
-	for (short k = level+1 ; k <= last ; k++)
+	for (short k = start+1 ; k <= last ; k++)
 	{
 		SYS_ASSERT(0 <= k && k < NumLumps());
 
