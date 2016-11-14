@@ -26,6 +26,8 @@
 rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 							  int& width, int& height);
 
+void TGA_FreeImage(rgba_color_t *pixels);
+
 #endif  /* __EUREKA_TGA_LOADER_H__ */
 
 //--- editor settings ---

@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <string>
 
+#include "lib_tga.h"
+
 #include "m_game.h"      /* yg_picture_format */
 #include "levels.h"
 #include "w_loadpic.h"
@@ -353,6 +355,36 @@ static void LoadTexture_JPEG(const char *name, Lump_c *lump, char img_fmt)
 }
 
 
+static void LoadTexture_TGA(const char *name, Lump_c *lump, char img_fmt)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	// decode it
+	int width;
+	int height;
+
+	rgba_color_t * rgba = TGA_DecodeImage(tex_data, (size_t)tex_length, width, height);
+
+	W_FreeLumpData(&tex_data);
+
+	if (! rgba)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name);
+		return;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertTGAImage(rgba, width, height);
+
+	W_AddTexture(name, img, false /* is_medusa */);
+
+	TGA_FreeImage(rgba);
+}
+
+
 void W_LoadTextures_TX_START(Wad_file *wf)
 {
 	for (int k = 0 ; k < (int)wf->tx_tex.size() ; k++)
@@ -369,10 +401,12 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 				LoadTexture_SinglePatch(lump->Name(), lump);
 				break;
 
-			// TODO : case 't': /* TGA */
-
 			case 'p': /* PNG */
 				LoadTexture_PNG(lump->Name(), lump, img_fmt);
+				break;
+
+			case 't': /* TGA */
+				LoadTexture_TGA(lump->Name(), lump, img_fmt);
 				break;
 
 			case 'j': /* JPEG */

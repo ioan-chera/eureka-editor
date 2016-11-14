@@ -392,5 +392,12 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 }
 
 
+void TGA_FreeImage(rgba_color_t *pixels)
+{
+	SYS_ASSERT(pixels);
+
+	delete[] pixels;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
