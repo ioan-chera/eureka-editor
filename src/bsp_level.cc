@@ -2722,7 +2722,9 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 	}
 	else
 	{
-		// FIXME !!!! : insert_point
+		short last_idx = edit_wad->LastLevelLump(lev_current_idx);
+
+		edit_wad->InsertPoint(last_idx + 1);
 
 		lump = edit_wad->AddLump(name, max_size);
 	}
@@ -2733,8 +2735,6 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 
 Lump_c * CreateGLMarker()
 {
-	// FIXME !!!! : insert_point
-
 	char name_buf[64];
 
 	if (strlen(lev_current_name) <= 5)
@@ -2750,6 +2750,10 @@ Lump_c * CreateGLMarker()
 
 		lev_long_name = true;
 	}
+
+	short last_idx = edit_wad->LastLevelLump(lev_current_idx);
+
+	edit_wad->InsertPoint(last_idx + 1);
 
 	Lump_c *marker = edit_wad->AddLump(name_buf);
 
