@@ -25,6 +25,9 @@
 #include <string>
 
 
+class Browser_Button;
+
+
 class Browser_Item : public Fl_Group
 {
 private:
@@ -39,7 +42,7 @@ public:
 
 	int recent_idx;
 
-	Fl_Repeat_Button * button;
+	Browser_Button * button;
 
 	UI_Pic *pic;
 

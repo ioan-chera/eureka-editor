@@ -66,6 +66,31 @@ typedef enum
 } sort_method_e;
 
 
+//
+// this sub-class of button prevents grabbing the keyboard focus,
+// which is mainly useful for the Find/Replace panel, as it needs
+// to know which input box (Find or Replace) was last active.
+//
+class Browser_Button : public Fl_Button
+{
+public:
+	Browser_Button(int X, int Y, int W, int H, const char *L) :
+		Fl_Button(X, Y, W, H, L)
+	{ }
+
+	virtual ~Browser_Button()
+	{ }
+
+	int handle(int event)
+	{
+		if (event == FL_FOCUS)
+			return 0;
+
+		return Fl_Button::handle(event);
+	}
+};
+
+
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
@@ -79,7 +104,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 {
 	end();
 
-	button = new Fl_Repeat_Button(X + 4, Y + 1, W - 8, H - 2, desc.c_str());
+	button = new Browser_Button(X + 4, Y + 1, W - 8, H - 2, desc.c_str());
 
 	button->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   	button->labelfont(FL_COURIER);
