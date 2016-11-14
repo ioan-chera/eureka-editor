@@ -179,10 +179,6 @@ typedef enum
 build_result_e;
 
 
-// FIXME remove this
-build_result_e CheckInfo(nodebuildinfo_t *info);
-
-
 build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx);
 
 

@@ -2765,63 +2765,6 @@ Lump_c * CreateGLMarker()
 nodebuildinfo_t * cur_info = NULL;
 
 
-build_result_e CheckInfo(nodebuildinfo_t *info)
-{
-	cur_info = info;
-
-	SetErrorMsg("(Unknown Problem)");
-
-	info->same_filenames = false;
-	info->missing_output = false;
-
-	if (!info->input_file || info->input_file[0] == 0)
-	{
-		SetErrorMsg("Missing input filename !");
-		return BUILD_BadArgs;
-	}
-
-	if (!info->output_file || info->output_file[0] == 0)
-	{
-		SetErrorMsg("Missing output filename !");
-		return BUILD_BadArgs;
-	}
-
-	if (MatchExtension(info->input_file, "gwa"))
-	{
-		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
-		return BUILD_BadArgs;
-	}
-
-	if (MatchExtension(info->output_file, "gwa"))
-	{
-		SetErrorMsg("Output file cannot be GWA");
-		return BUILD_BadArgs;
-	}
-
-	if (UtilStrCaseCmp(info->input_file, info->output_file) == 0)
-	{
-		info->load_all = true;
-		info->same_filenames = true;
-	}
-
-	if (info->factor <= 0 || info->factor > 32)
-	{
-		info->factor = DEFAULT_FACTOR;
-		SetErrorMsg("Bad factor value !");
-		return BUILD_BadInfoFixed;
-	}
-
-	if (info->block_limit < 1000 || info->block_limit > 64000)
-	{
-		info->block_limit = DEFAULT_BLOCK_LIMIT;
-		SetErrorMsg("Bad blocklimit value !");
-		return BUILD_BadInfoFixed;
-	}
-
-	return BUILD_OK;
-}
-
-
 /* ----- build nodes for a single level --------------------------- */
 
 build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)

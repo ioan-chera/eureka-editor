@@ -162,13 +162,66 @@ void GB_DisplayClose(void)
 }
 
 
+static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
+{
+	info->same_filenames = false;
+	info->missing_output = false;
+
+	if (!info->input_file || info->input_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("Missing input filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (!info->output_file || info->output_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("Missing output filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (MatchExtension(info->input_file, "gwa"))
+	{
+		ajbsp::SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (MatchExtension(info->output_file, "gwa"))
+	{
+		ajbsp::SetErrorMsg("Output file cannot be GWA");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (y_stricmp(info->input_file, info->output_file) == 0)
+	{
+		ajbsp::SetErrorMsg("Input and Outfile file are the same!");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (info->factor < 1 || info->factor > 32)
+	{
+		info->factor = DEFAULT_FACTOR;
+//???		SetErrorMsg("Bad factor value !");
+//???		return BUILD_BadInfoFixed;
+	}
+
+	if (info->block_limit < 1000 || info->block_limit > 64000)
+	{
+		info->block_limit = DEFAULT_BLOCK_LIMIT;
+//???		SetErrorMsg("Bad blocklimit value !");
+//???		return BUILD_;
+	}
+
+	return ajbsp::BUILD_OK;
+}
+
+
 static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 {
 	char *file_msg;
 
 	ajbsp::build_result_e ret;
 
-	ret = ajbsp::CheckInfo(info);
+	ret = CheckInfo(info);
 
 	if (ret != ajbsp::BUILD_OK)
 		return ret;
