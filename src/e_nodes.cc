@@ -228,6 +228,8 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 		info->file_pos += 10;
 
 		GB_DisplaySetBar(2, info->file_pos);
+
+		Fl::check();
 	}
 
 	GB_DisplayClose();
