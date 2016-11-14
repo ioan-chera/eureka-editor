@@ -377,6 +377,7 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 
 			case 'j': /* JPEG */
 				LoadTexture_JPEG(lump->Name(), lump, img_fmt);
+				break;
 
 			case 0:
 				LogPrintf("Unknown texture format in '%s' lump\n", lump->Name());

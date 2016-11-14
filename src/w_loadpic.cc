@@ -232,7 +232,7 @@ char W_DetectImageFormat(Lump_c *lump)
 
 	byte cmap_type = header[1];
 	byte img_type  = header[2];
-	byte depth     = header[17];
+	byte depth     = header[16];
 
 	if (width  > 0 && width  <= 2048 &&
 		height > 0 && height <= 2048 &&
