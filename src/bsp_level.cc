@@ -2243,12 +2243,44 @@ void UpdateGLMarker(Lump_c *marker)
 }
 
 
+static void AddMissingLump(const char *name, const char *after)
+{
+	if (edit_wad->FindLumpInLevel(name, lev_current_start))
+		return;
+
+	short exist = edit_wad->FindLumpInLevel_Raw(after, lev_current_start);
+
+	// FIXME : if this happens, the level structure is very broken, so.... do what?????
+	if (exist < 0)
+	{
+		exist = edit_wad->LastLevelLump(lev_current_idx);
+		// PrintMsg ???
+	}
+
+	edit_wad->InsertPoint(exist + 1);
+
+	edit_wad->AddLump(name)->Finish();
+}
+
+
 void SaveLevel(node_t *root_node)
 {
+	// remove any existing GL-Nodes
+	edit_wad->RemoveGLNodes(lev_current_start);
+
+	// ensure all necessary level lumps are present
+	AddMissingLump("SEGS",     "VERTEXES");
+	AddMissingLump("SSECTORS", "SEGS");
+	AddMissingLump("NODES",    "SSECTORS");
+	AddMissingLump("REJECT",   "SECTORS");
+	AddMissingLump("BLOCKMAP", "REJECT");
+
+
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
 
 	Lump_c * gl_marker = NULL;
+
 
 	// Note: RoundOffBspTree will convert the GL vertices in segs to
 	// their normal counterparts (pointer change: use normal_dup).
@@ -2301,13 +2333,6 @@ void SaveLevel(node_t *root_node)
 			MarkZDSwitch();
 		}
 	}
-
-
-	// FIXME !!!!
-	//    check for gaps in level structure
-	//    in particular, that NODES, SEGS and SSECTORS are missing
-	//    as well as BLOCKMAP and REJECT
-	//    ---> fill in these gaps
 
 
 	/* --- GL Nodes --- */
