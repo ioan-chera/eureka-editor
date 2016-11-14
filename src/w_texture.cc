@@ -301,6 +301,58 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 }
 
 
+static void LoadTexture_PNG(const char *name, Lump_c *lump, char img_fmt)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	// pass it to FLTK for decoding
+	Fl_PNG_Image fltk_img(NULL, tex_data, tex_length);
+
+	W_FreeLumpData(&tex_data);
+
+	if (fltk_img.w() <= 0)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name);
+		return;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+
+	W_AddTexture(name, img, false /* is_medusa */);
+}
+
+
+static void LoadTexture_JPEG(const char *name, Lump_c *lump, char img_fmt)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	(void) tex_length;
+
+	// pass it to FLTK for decoding
+	Fl_JPEG_Image fltk_img(NULL, tex_data);
+
+	W_FreeLumpData(&tex_data);
+
+	if (fltk_img.w() <= 0)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name);
+		return;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+
+	W_AddTexture(name, img, false /* is_medusa */);
+}
+
+
 void W_LoadTextures_TX_START(Wad_file *wf)
 {
 	for (int k = 0 ; k < (int)wf->tx_tex.size() ; k++)
@@ -317,9 +369,14 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 				LoadTexture_SinglePatch(lump->Name(), lump);
 				break;
 
-			// TODO : case 'p': /* PNG */
-
 			// TODO : case 't': /* TGA */
+
+			case 'p': /* PNG */
+				LoadTexture_PNG(lump->Name(), lump, img_fmt);
+				break;
+
+			case 'j': /* JPEG */
+				LoadTexture_JPEG(lump->Name(), lump, img_fmt);
 
 			case 0:
 				LogPrintf("Unknown texture format in '%s' lump\n", lump->Name());
