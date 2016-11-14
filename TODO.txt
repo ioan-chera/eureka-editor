@@ -241,6 +241,8 @@ Editing
 
 -  more port-specific line/thing flags
 
+WISH : autocomplete flat/texture names in Linedef and Sector panels
+
 
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
