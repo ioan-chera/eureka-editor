@@ -223,9 +223,6 @@ Editing
 +  support PNG (etc?) image formats [enabled by a port definition]
    -->  feature png
 
--  support TX_START / TX_END namespace for textures
-   -->  feature tx_start
-
 +  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
    that merging.

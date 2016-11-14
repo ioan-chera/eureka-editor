@@ -26,3 +26,5 @@ CHANGES IN Eureka 1.XX
 -  bug fix : panel staying on a highlighted object when going
    into 3D mode
 
++  support for TX_START/TX_END textures, including PNG and TGA format
+
