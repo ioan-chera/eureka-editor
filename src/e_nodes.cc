@@ -164,9 +164,6 @@ void GB_DisplayClose(void)
 
 static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
 {
-	info->same_filenames = false;
-	info->missing_output = false;
-
 	if (!info->input_file || info->input_file[0] == 0)
 	{
 		ajbsp::SetErrorMsg("Missing input filename !");
@@ -239,12 +236,6 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 		ajbsp::SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
 		return ajbsp::BUILD_BadArgs;
 	}
-
-///???	if (info->missing_output)
-///???		PrintMsg("* No output file specified. Using: %s\n\n", info->output_file);
-///???
-///???	if (info->same_filenames)
-///???		PrintMsg("* Output file is same as input file. Using -loadall\n\n");
 
 	int num_levels = edit_wad->NumLevels();
 

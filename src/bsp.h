@@ -72,19 +72,11 @@ public:
 	bool force_v5;
 	bool force_xnod;
 
-	bool no_progress;
+	bool fast;
 	bool quiet;
 	bool mini_warnings;
-	bool fast;
-
-	bool load_all;
 
 	int block_limit;
-
-	// private stuff
-
-	bool missing_output;
-	bool same_filenames;
 
 	// This is for two-way communication (esp. with the GUI).
 	// Should be flagged 'volatile' since multiple threads (real or
@@ -115,17 +107,11 @@ public:
 		force_v5(false),
 		force_xnod(false),
 
-		no_progress(false),
+		fast(false),
 		quiet(false),
 		mini_warnings(false),
-		fast(false),
-
-		load_all(false),
 
 		block_limit(DEFAULT_BLOCK_LIMIT),
-
-		missing_output(false),
-		same_filenames(false),
 
 		message(NULL),
 		cancelled(false),
