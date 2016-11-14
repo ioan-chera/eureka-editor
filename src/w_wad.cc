@@ -386,7 +386,7 @@ short Wad_file::FindLumpNum(const char *name)
 }
 
 
-Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
+short Wad_file::FindLumpInLevel_Raw(const char *name, short index)
 {
 	short start = index;
 
@@ -407,8 +407,19 @@ Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
 			break;
 
 		if (y_stricmp(directory[k]->name, name) == 0)
-			return directory[k];
+			return k;
 	}
+
+	return -1;  // not found
+}
+
+
+Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
+{
+	short k = FindLumpInLevel_Raw(name, index);
+
+	if (k >= 0)
+		return directory[k];
 
 	return NULL;  // not found
 }

@@ -167,6 +167,7 @@ public:
 	Lump_c * GetLump(short index);
 	Lump_c * FindLump(const char *name);
 	Lump_c * FindLumpInLevel(const char *name, short index /* a lump index */);
+	short    FindLumpInLevel_Raw(const char *name, short index /* a lump index */);
 
 	short FindLumpNum(const char *name);
 
