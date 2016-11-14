@@ -21,7 +21,6 @@
 #include "main.h"
 #include "ui_window.h"
 #include "ui_about.h"
-#include "ui_misc.h"
 #include "ui_prefs.h"
 
 #include "editloop.h"
@@ -211,47 +210,17 @@ static void edit_do_last_sel(Fl_Widget *w, void * data)
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to move");
-		return;
-	}
-
-	UI_MoveDialog * dialog = new UI_MoveDialog();
-
-	dialog->Run();
-
-	delete dialog;
+	CMD_MoveObjects_Dialog();
 }
 
 static void edit_do_scale(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to scale");
-		return;
-	}
-
-	UI_ScaleDialog * dialog = new UI_ScaleDialog();
-
-	dialog->Run();
-
-	delete dialog;
+	CMD_ScaleObjects_Dialog();
 }
 
 static void edit_do_rotate(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to rotate");
-		return;
-	}
-
-	UI_RotateDialog * dialog = new UI_RotateDialog();
-
-	dialog->Run();
-
-	delete dialog;
+	CMD_RotateObjects_Dialog();
 }
 
 static void edit_do_prune_unused(Fl_Widget *w, void * data)

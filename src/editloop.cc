@@ -41,6 +41,7 @@
 #include "x_hover.h"
 #include "r_render.h"
 #include "ui_window.h"
+#include "ui_misc.h"
 
 
 Editor_State_t  edit;
@@ -917,6 +918,54 @@ void CMD_CopyAndPaste(void)
 }
 
 
+void CMD_MoveObjects_Dialog()
+{
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to move");
+		return;
+	}
+
+	UI_MoveDialog * dialog = new UI_MoveDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+
+void CMD_ScaleObjects_Dialog()
+{
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to scale");
+		return;
+	}
+
+	UI_ScaleDialog * dialog = new UI_ScaleDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+
+void CMD_RotateObjects_Dialog()
+{
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to rotate");
+		return;
+	}
+
+	UI_RotateDialog * dialog = new UI_RotateDialog();
+
+	dialog->Run();
+
+	delete dialog;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1674,6 +1723,18 @@ static editor_command_t  command_table[] =
 
 	{	"PruneUnused",
 		&CMD_PruneUnused
+	},
+
+	{	"MoveObjectsDialog",
+		&CMD_MoveObjects_Dialog
+	},
+
+	{	"ScaleObjectsDialog",
+		&CMD_ScaleObjects_Dialog
+	},
+
+	{	"RotateObjectsDialog",
+		&CMD_RotateObjects_Dialog
 	},
 
 

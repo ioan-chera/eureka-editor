@@ -155,6 +155,10 @@ void CMD_GoToCamera(void);
 
 void CMD_ToggleVar(void);
 
+void CMD_MoveObjects_Dialog();
+void CMD_ScaleObjects_Dialog();
+void CMD_RotateObjects_Dialog();
+
 #endif /* __EUREKA_EDITLOOP_H__ */
 
 //--- editor settings ---

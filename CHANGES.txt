@@ -28,3 +28,7 @@ CHANGES IN Eureka 1.XX
 
 +  support for TX_START/TX_END textures, including PNG and TGA format
 
+-  fixed problem of unable to split lines close to an end-point
+
+-  edit menu "Move/Scale/Rotate Objects" commands can be bound to keys
+
