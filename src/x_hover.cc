@@ -988,7 +988,7 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 		double along = AlongDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 		double  perp =  PerpDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 
-		if (along < len * 0.1 || along > len * 0.9 || fabs(perp) > len * 0.2)
+		if (along <= 0 || along >= len || fabs(perp) > len * 0.2)
 		{
 			o.clear();
 		}
