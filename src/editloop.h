@@ -149,6 +149,9 @@ void CMD_LastSelection(void);
 
 void CMD_Quit(void);
 
+void CMD_Undo(void);
+void CMD_Redo(void);
+
 void CMD_ZoomWholeMap(void);
 void CMD_ZoomSelection(void);
 void CMD_GoToCamera(void);

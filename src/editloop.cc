@@ -438,6 +438,32 @@ void CMD_Quit(void)
 }
 
 
+void CMD_Undo(void)
+{
+	if (! BA_Undo())
+	{
+		Beep("No operation to undo");
+		return;
+	}
+
+	RedrawMap();
+	main_win->UpdatePanelObj();
+}
+
+
+void CMD_Redo(void)
+{
+	if (! BA_Redo())
+	{
+		Beep("No operation to redo");
+		return;
+	}
+
+	RedrawMap();
+	main_win->UpdatePanelObj();
+}
+
+
 void CMD_SetVar(void)
 {
 	const char *var_name = EXEC_Param[0];

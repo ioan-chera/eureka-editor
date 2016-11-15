@@ -138,18 +138,12 @@ static void file_do_load_recent(Fl_Widget *w, void *data)
 
 static void edit_do_undo(Fl_Widget *w, void * data)
 {
-	if (BA_Undo())
-		RedrawMap();
-	else
-		Beep("No operation to undo");
+	CMD_Undo();
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
 {
-	if (BA_Redo())
-		RedrawMap();
-	else
-		Beep("No operation to redo");
+	CMD_Redo();
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
