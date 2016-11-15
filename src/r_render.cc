@@ -65,7 +65,7 @@ struct highlight_3D_info_t
 public:
 	int line;    // -1 for none
 	int sector;  // -1 for none
-	int side;    // SIDE_XXX, or -1=floor +1=ceiling
+	int side;    // SIDE_XXX  (not used for Floor or Ceil)
 	query_part_e part;
 
 public:
@@ -280,15 +280,7 @@ public:
 
 	void FindHighlight()
 	{
-		hl.sector = -1;
-
-		hl.line = main_win->render->query(&hl.side, &hl.part);
-
-		if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
-		{
-			// FIXME: get sector
-			hl.line = -1;
-		}
+		main_win->render->query(hl);
 	}
 };
 
@@ -1760,7 +1752,7 @@ void UI_Render3D::draw()
 }
 
 
-int UI_Render3D::query(int *side, query_part_e *part)
+bool UI_Render3D::query(highlight_3D_info_t& hl)
 {
 	int ow = w();
 	int oh = h();
@@ -1780,19 +1772,34 @@ int UI_Render3D::query(int *side, query_part_e *part)
 
 	rend.DoQuery(sx, sy);
 
-	if (rend.query_wall)
+	hl.Clear();
+
+	if (! rend.query_wall)
 	{
-		*side = rend.query_wall->side;
-		*part = rend.query_part;
+		// nothing was hit
+		return false;
+	}
+
+	hl.part = rend.query_part;
+
+	if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
+	{
+		// ouch -- fix?
+		for (int n = 0 ; n < NumSectors ; n++)
+			if (rend.query_wall->sec == Sectors[n])
+				hl.sector = n;
+	}
+	else
+	{
+		hl.side = rend.query_wall->side;
 
 		// ouch -- fix?
 		for (int n = 0 ; n < NumLineDefs ; n++)
 			if (rend.query_wall->ld == LineDefs[n])
-				return n;
+				hl.line = n;
 	}
 
-	// nothing was hit
-	return -1;
+	return (hl.line >= 0) || (hl.sector >= 0);
 }
 
 

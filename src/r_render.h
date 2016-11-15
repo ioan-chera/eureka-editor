@@ -27,6 +27,9 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
+struct highlight_3D_info_t;
+
+
 typedef enum
 {
 	QRP_Floor = -2,
@@ -51,10 +54,9 @@ public:
 	int handle(int event);
 
 	// perform a query to see what the mouse pointer is over.
-	// returns the linedef hit, or -1 if none found.
-	// side will be either SIDE_LEFT or SIDE_RIGHT.
-	// part will distinguish between floor, lower, upper, ceiling.
-	int query(int *side, query_part_e *part);
+	// returns true if something was hit, false otherwise.
+	// [ see the struct definition for more details... ]
+	bool query(highlight_3D_info_t& hl);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);
