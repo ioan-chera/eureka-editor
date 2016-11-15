@@ -76,6 +76,30 @@ private:
 };
 
 
+//------------------------------------------------------------------------
+
+
+class UI_PicName : public Fl_Input
+{
+private:
+	Fl_Callback *callback2_;
+	void *data2_;
+
+public:
+	UI_PicName(int X, int Y, int W, int H, const char *L = NULL);
+	virtual ~UI_PicName();
+
+	// FLTK method for event handling
+	int handle(int event);
+
+	// main callback is done on ENTER or RELEASE, but this
+	// secondary callback is done on each change by the user.
+	void callback2(Fl_Callback *cb, void *data)
+	{
+		callback2_ = cb; data2_ = data;
+	}
+};
+
 #endif  /* __EUREKA_UI_PIC_H__ */
 
 //--- editor settings ---

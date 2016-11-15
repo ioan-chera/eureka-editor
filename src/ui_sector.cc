@@ -27,6 +27,7 @@
 #include "e_things.h"
 #include "m_game.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 // config items
@@ -121,7 +122,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 10;
 
 
-	c_tex = new Fl_Input(X+70, Y, 108, 24, "Ceiling: ");
+	c_tex = new UI_PicName(X+70, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(tex_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -167,7 +168,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new Fl_Input(X+70, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_PicName(X+70, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(tex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -349,9 +350,13 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	{
 		new_tex = BA_InternaliseString(is_floor ? default_floor_tex : default_ceil_tex);
 	}
+	else if (is_floor)
+	{
+		new_tex = BA_InternaliseString(NormalizeTex(box->f_tex->value()));
+	}
 	else
 	{
-		new_tex = FlatFromWidget(is_floor ? box->f_tex : box->c_tex);
+		new_tex = BA_InternaliseString(NormalizeTex(box->c_tex->value()));
 	}
 
 change_it:
@@ -753,21 +758,6 @@ void UI_SectorBox::AdjustLight(s16_t *L, int delta)
 		*L = 0;
 	else if (*L > 255)
 		*L = 255;
-}
-
-
-int UI_SectorBox::FlatFromWidget(Fl_Input *w)
-{
-	char name[WAD_FLAT_NAME+1];
-
-	memset(name, 0, sizeof(name));
-
-	strncpy(name, w->value(), WAD_FLAT_NAME);
-
-	for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	return BA_InternaliseString(name);
 }
 
 

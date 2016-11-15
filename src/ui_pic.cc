@@ -356,5 +356,28 @@ void UI_Pic::Selected(bool _val)
 }
 
 
+//------------------------------------------------------------------------
+
+
+UI_PicName::UI_PicName(int X, int Y, int W, int H, const char *L) :
+	Fl_Input(X, Y, W, H, L),
+	callback2_(NULL), data2_(NULL)
+{ }
+
+
+UI_PicName::~UI_PicName()
+{ }
+
+
+int UI_PicName::handle(int event)
+{
+	// FIXME
+
+	int res = Fl_Input::handle(event);
+
+	return res;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

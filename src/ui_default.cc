@@ -25,6 +25,7 @@
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 #define HIDE_BG  (gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
@@ -62,7 +63,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	Y += 20;
 
-	w_tex = new Fl_Input(X+68,   Y, 108, 24, "Wall: ");
+	w_tex = new UI_PicName(X+68,   Y, 108, 24, "Wall: ");
 	w_tex->callback(tex_callback, this);
 	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
@@ -78,7 +79,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	f_pic->callback(flat_callback, this);
 
 
-	c_tex = new Fl_Input(X+68, Y, 108, 24, "Ceiling: ");
+	c_tex = new UI_PicName(X+68, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(flat_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -127,7 +128,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new Fl_Input(X+68, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_PicName(X+68, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(flat_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -239,20 +240,13 @@ void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 }
 
 
-const char * UI_DefaultProps::NormalizeTex_and_Dup(Fl_Input *w)
+const char * UI_DefaultProps::Normalize_and_Dup(UI_PicName *w)
 {
-	char name[WAD_TEX_NAME + 1];
+	const char *normalized = StringDup(NormalizeTex(w->value()));
 
-	memset(name, 0, sizeof(name));
+	w->value(normalized);
 
-	strncpy(name, w->value(), WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	w->value(name);
-
-	return StringDup(name);
+	return normalized;
 }
 
 
@@ -276,7 +270,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 	if (w == box->w_tex)
 	{
-		default_wall_tex = NormalizeTex_and_Dup(box->w_tex);
+		default_wall_tex = Normalize_and_Dup(box->w_tex);
 	}
 
 	box->w_pic->GetTex(box->w_tex->value());
@@ -302,10 +296,10 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 	}
 
 	if (w == box->f_tex)
-		default_floor_tex = NormalizeTex_and_Dup(box->f_tex);
+		default_floor_tex = Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
-		default_ceil_tex = NormalizeTex_and_Dup(box->c_tex);
+		default_ceil_tex = Normalize_and_Dup(box->c_tex);
 
 	box->f_pic->GetFlat(box->f_tex->value());
 	box->c_pic->GetFlat(box->c_tex->value());

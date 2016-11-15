@@ -25,6 +25,7 @@
 #include "levels.h"
 #include "m_game.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 #include "x_hover.h"
 
 
@@ -109,9 +110,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += 65;
 
 
-	l_tex = new Fl_Input(LX-8, Y, 80, 20);
-	u_tex = new Fl_Input(UX-8, Y, 80, 20);
-	r_tex = new Fl_Input(MX-8, Y, 80, 20);
+	l_tex = new UI_PicName(LX-8, Y, 80, 20);
+	u_tex = new UI_PicName(UX-8, Y, 80, 20);
+	r_tex = new UI_PicName(MX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
 	u_tex->textsize(12);
@@ -175,11 +176,11 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	else
 	{
 		if (w == box->l_tex)
-			new_tex = TexFromWidget(box->l_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->l_tex->value()));
 		else if (w == box->u_tex)
-			new_tex = TexFromWidget(box->u_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->u_tex->value()));
 		else
-			new_tex = TexFromWidget(box->r_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->r_tex->value()));
 	}
 
 	// iterate over selected linedefs
@@ -590,21 +591,6 @@ void UI_SideBox::UnselectPics()
 	l_pic->Selected(false);
 	u_pic->Selected(false);
 	r_pic->Selected(false);
-}
-
-
-int UI_SideBox::TexFromWidget(Fl_Input *w)
-{
-	char name[WAD_TEX_NAME+1];
-
-	memset(name, 0, sizeof(name));
-
-	strncpy(name, w->value(), WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	return BA_InternaliseString(name);
 }
 
 

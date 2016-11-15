@@ -46,11 +46,11 @@ public:
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
 
-	Fl_Input *c_tex;
-	UI_Pic   *c_pic;
+	UI_PicName *c_tex;
+	UI_Pic     *c_pic;
 
-	Fl_Input *f_tex;
-	UI_Pic   *f_pic;
+	UI_PicName *f_tex;
+	UI_Pic     *f_pic;
 
 	Fl_Int_Input *headroom;
 
@@ -94,10 +94,6 @@ public:
 	int GetSelectedPics() const;
 
 	void UnselectPics();
-
-	// this truncates the name and makes it uppercase, then returns
-	// the internalised string.
-	static int FlatFromWidget(Fl_Input *w);
 
 private:
 	void AdjustHeight(s16_t *h, int delta);

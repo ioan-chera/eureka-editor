@@ -26,6 +26,7 @@
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 class number_group_c
@@ -1163,7 +1164,7 @@ void UI_FindAndReplace::DoReplace()
 		return;
 	}
 
-	int replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 	BA_Begin();
 
@@ -1258,7 +1259,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 		BA_Begin();
 	}

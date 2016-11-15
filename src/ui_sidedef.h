@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -52,9 +52,9 @@ public:
 	UI_Pic   *u_pic;
 	UI_Pic   *r_pic;
 
-	Fl_Input *l_tex;
-	Fl_Input *u_tex;
-	Fl_Input *r_tex;
+	UI_PicName *l_tex;
+	UI_PicName *u_tex;
+	UI_PicName *r_tex;
 
 	Fl_Button *add_button;
 	Fl_Button *del_button;
@@ -76,8 +76,6 @@ public:
 	int GetSelectedPics() const;
 
 	void UnselectPics();
-
-	static int TexFromWidget(Fl_Input *w);
 
 private:
 	void UpdateLabel();
