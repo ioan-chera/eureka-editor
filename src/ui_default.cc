@@ -65,6 +65,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	w_tex = new UI_PicName(X+68,   Y, 108, 24, "Wall: ");
 	w_tex->callback(tex_callback, this);
+	w_tex->callback2(dyntex_callback, this);
 	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += w_tex->h() + 50;
@@ -82,6 +83,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	c_tex = new UI_PicName(X+68, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(flat_callback, this);
+	c_tex->callback2(dyntex_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += c_tex->h() + 3;
@@ -131,6 +133,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	f_tex = new UI_PicName(X+68, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(flat_callback, this);
+	f_tex->callback2(dyntex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += f_tex->h() + 8;
@@ -180,6 +183,7 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 	w->value(buffer);
 }
 
+
 void UI_DefaultProps::UpdateThingDesc()
 {
 	const thingtype_t *info = M_GetThingType(default_thing);
@@ -188,11 +192,13 @@ void UI_DefaultProps::UpdateThingDesc()
 	th_sprite->GetSprite(default_thing, FL_DARK2);
 }
 
+
 void UI_DefaultProps::SetTexture(const char *name, int e_state)
 {
 	w_tex->value(name);
 	w_tex->do_callback();
 }
+
 
 void UI_DefaultProps::SetFlat(const char *name, int e_state)
 {
@@ -216,6 +222,7 @@ void UI_DefaultProps::SetFlat(const char *name, int e_state)
 	}
 }
 
+
 void UI_DefaultProps::SetThing(int number)
 {
 	default_thing = number;
@@ -224,6 +231,7 @@ void UI_DefaultProps::SetThing(int number)
 
 	UpdateThingDesc();
 }
+
 
 void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 {
@@ -276,6 +284,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 	box->w_pic->GetTex(box->w_tex->value());
 }
 
+
 void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
@@ -305,6 +314,26 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 	box->c_pic->GetFlat(box->c_tex->value());
 }
 
+
+void UI_DefaultProps::dyntex_callback(Fl_Widget *w, void *data)
+{
+	UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+	if (w == box->w_tex)
+	{
+		box->w_pic->GetTex(box->w_tex->value());
+	}
+	else if (w == box->f_tex)
+	{
+		box->f_pic->GetFlat(box->f_tex->value());
+	}
+	else if (w == box->c_tex)
+	{
+		box->c_pic->GetFlat(box->c_tex->value());
+	}
+}
+
+
 void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
@@ -331,6 +360,7 @@ void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 	box->SetIntVal(box-> ceil_h, default_ceil_h);
 }
 
+
 void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
@@ -339,6 +369,7 @@ void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 	default_ceil_h  = atoi(box-> ceil_h->value());
 	default_light_level = atoi(box->light->value());
 }
+
 
 void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 {
@@ -354,6 +385,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 	box->UpdateThingDesc();
 }
+
 
 void UI_DefaultProps::LoadValues()
 {

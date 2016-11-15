@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -68,6 +68,7 @@ private:
 
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    tex_callback(Fl_Widget *w, void *data);
+	static void dyntex_callback(Fl_Widget *w, void *data);
 	static void   flat_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);
 	static void height_callback(Fl_Widget *w, void *data);
