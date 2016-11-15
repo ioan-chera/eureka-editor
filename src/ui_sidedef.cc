@@ -122,6 +122,10 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	u_tex->callback(tex_callback, this);
 	r_tex->callback(tex_callback, this);
 
+	l_tex->callback2(dyntex_callback, this);
+	u_tex->callback2(dyntex_callback, this);
+	r_tex->callback2(dyntex_callback, this);
+
 	l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -225,6 +229,30 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		BA_End();
 
 		box->UpdateField();
+	}
+}
+
+
+void UI_SideBox::dyntex_callback(Fl_Widget *w, void *data)
+{
+	// change picture to match the input, BUT does not change the map
+
+	UI_SideBox *box = (UI_SideBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	if (w == box->l_tex)
+	{
+		box->l_pic->GetTex(box->l_tex->value());
+	}
+	else if (w == box->u_tex)
+	{
+		box->u_pic->GetTex(box->u_tex->value());
+	}
+	else if (w == box->r_tex)
+	{
+		box->r_pic->GetTex(box->r_tex->value());
 	}
 }
 

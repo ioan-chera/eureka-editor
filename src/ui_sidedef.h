@@ -83,6 +83,7 @@ private:
 	void UpdateAddDel();
 
 	static void    tex_callback(Fl_Widget *, void *);
+	static void dyntex_callback(Fl_Widget *, void *);
 	static void offset_callback(Fl_Widget *, void *);
 	static void sector_callback(Fl_Widget *, void *);
 	static void    add_callback(Fl_Widget *, void *);

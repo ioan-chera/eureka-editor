@@ -371,9 +371,12 @@ UI_PicName::~UI_PicName()
 
 int UI_PicName::handle(int event)
 {
-	// FIXME
-
 	int res = Fl_Input::handle(event);
+
+	if ((event == FL_KEYBOARD || event == FL_PASTE) && callback2_)
+	{
+		callback2_(this, data2_);
+	}
 
 	return res;
 }

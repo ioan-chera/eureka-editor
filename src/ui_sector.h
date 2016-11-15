@@ -103,6 +103,7 @@ private:
 	static void headroom_callback(Fl_Widget *, void *);
 
 	static void    tex_callback(Fl_Widget *, void *);
+	static void dyntex_callback(Fl_Widget *, void *);
 	static void   type_callback(Fl_Widget *, void *);
 	static void  light_callback(Fl_Widget *, void *);
 	static void    tag_callback(Fl_Widget *, void *);
