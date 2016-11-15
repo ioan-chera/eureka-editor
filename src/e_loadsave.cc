@@ -1652,6 +1652,8 @@ bool CMD_ExportMap()
 	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
+	bool new_resources = false;
+
 	Wad_file *wad;
 
 	if (exists)
@@ -1664,6 +1666,15 @@ bool CMD_ExportMap()
 
 			delete wad;
 			return false;
+		}
+
+		// adopt iwad/port/resources of the target wad
+		if (wad->FindLump(EUREKA_LUMP))
+		{
+			if (! M_ParseEurekaLump(wad))
+				return false;
+
+			new_resources = true;
 		}
 	}
 	else
@@ -1715,6 +1726,12 @@ bool CMD_ExportMap()
 	if (exists)
 	{
 		M_BackupWad(wad);
+	}
+
+
+	if (new_resources)
+	{
+		Main_LoadResources();
 	}
 
 
