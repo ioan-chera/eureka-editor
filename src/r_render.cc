@@ -697,6 +697,8 @@ struct RenderLine
 {
 	short sx1, sy1, sx2, sy2;
 
+	short thick;
+
 	Fl_Color color;
 };
 
@@ -760,7 +762,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
+	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
 	{
 		if (! render_high_detail)
 		{
@@ -772,6 +774,8 @@ public:
 
 		new_line.sx1 = sx1; new_line.sy1 = sy1;
 		new_line.sx2 = sx2; new_line.sy2 = sy2;
+
+		new_line.thick = thick;
 		new_line.color = color;
 
 		hl_lines.push_back(new_line);
@@ -1170,10 +1174,11 @@ public:
 		int ry1 = DistToY(dw->iz2, h2);
 		int ry2 = DistToY(dw->iz2, h1);
 
-		AddRenderLine(x1, ly1, x1, ly2, HI_COL); 
-		AddRenderLine(x2, ry1, x2, ry2, HI_COL); 
-		AddRenderLine(x1, ly1, x2, ry1, HI_COL);
-		AddRenderLine(x1, ly2, x2, ry2, HI_COL);
+		// keep the lines thin, makes aligning textures easier
+		AddRenderLine(x1, ly1, x1, ly2, 0, HI_COL);
+		AddRenderLine(x2, ry1, x2, ry2, 0, HI_COL);
+		AddRenderLine(x1, ly1, x2, ry1, 0, HI_COL);
+		AddRenderLine(x1, ly2, x2, ry2, 0, HI_COL);
 	}
 
 	void ComputeSurfaces()
@@ -1741,7 +1746,14 @@ void UI_Render3D::draw()
 		RenderLine& line = rend.hl_lines[k];
 
 		fl_color(line.color);
+
+		if (line.thick)
+			fl_line_style(FL_SOLID, 2);
+
 		fl_line(ox + line.sx1, oy + line.sy1, ox + line.sx2, oy + line.sy2);
+
+		if (line.thick)
+			fl_line_style(0);
 	}
 
 	DrawInfoBar();
