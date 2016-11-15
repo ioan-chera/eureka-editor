@@ -478,16 +478,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 
 	if (try_uppercase)
 	{
-		char upr_name[WAD_FLAT_NAME+1];
-
-		memset(upr_name, 0, sizeof(upr_name));
-
-		strncpy(upr_name, name, WAD_FLAT_NAME);
-
-		for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
-			upr_name[i] = toupper(upr_name[i]);
-
-		return W_GetTexture(upr_name, false);
+		return W_GetTexture(NormalizeTex(name), false);
 	}
 
 	return NULL;
@@ -511,6 +502,21 @@ bool W_TextureCausesMedusa(const char *name)
 	std::map<std::string, int>::iterator P = medusa_textures.find(t_str);
 
 	return (P != medusa_textures.end() && P->second > 0);
+}
+
+
+const char *NormalizeTex(const char *name)
+{
+	static char buffer[WAD_TEX_NAME+1];
+
+	memset(buffer, 0, sizeof(buffer));
+
+	strncpy(buffer, name, WAD_TEX_NAME);
+
+	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
+		buffer[i] = toupper(buffer[i]);
+
+	return buffer;
 }
 
 

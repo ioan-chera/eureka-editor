@@ -37,6 +37,10 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
 
 bool W_TextureCausesMedusa(const char *name);
 
+// this truncates the name to 8 chars, and makes it uppercase.
+// [ result is a static buffer, copy if necessary! ]
+const char *NormalizeTex(const char *name);
+
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 
 //--- editor settings ---
