@@ -223,11 +223,6 @@ static void edit_do_rotate(Fl_Widget *w, void * data)
 	CMD_RotateObjects_Dialog();
 }
 
-static void edit_do_prune_unused(Fl_Widget *w, void * data)
-{
-	CMD_PruneUnused();
-}
-
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Mirror", "horiz");
@@ -509,7 +504,6 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
 		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
 		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
-		{ "Prune Unused", 0,            FCAL edit_do_prune_unused },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
