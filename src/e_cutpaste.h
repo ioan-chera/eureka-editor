@@ -33,7 +33,7 @@ void Clipboard_NotifyChange(obj_type_e type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
 void UnusedVertices(selection_c *lines, selection_c *result);
-void UnusedSideDefs(selection_c *lines, selection_c *result);
+void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
 
 void CMD_Delete(void);
 

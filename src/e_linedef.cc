@@ -105,9 +105,10 @@ void DeleteLineDefs(selection_c *lines)
 {
 	selection_c  verts(OBJ_VERTICES);
 	selection_c  sides(OBJ_SIDEDEFS);
+	selection_c  secs (OBJ_SECTORS);	// stays empty
 
 	UnusedVertices(lines, &verts);
-	UnusedSideDefs(lines, &sides);
+	UnusedSideDefs(lines, &secs, &sides);
 
 	DeleteObjects(lines);
 	DeleteObjects(&verts);

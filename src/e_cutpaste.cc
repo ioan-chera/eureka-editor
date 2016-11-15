@@ -775,7 +775,8 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 	}
 }
 
-void UnusedSideDefs(selection_c *lines, selection_c *result)
+
+void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 {
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
 
@@ -792,7 +793,16 @@ void UnusedSideDefs(selection_c *lines, selection_c *result)
 		if (L->Right()) result->clear(L->right);
 		if (L->Left())  result->clear(L->left);
 	}
+
+	for (int i = 0 ; i < NumSideDefs ; i++)
+	{
+		const SideDef *SD = SideDefs[i];
+
+		if (secs->get(SD->sector))
+			result->set(i);
+	}
 }
+
 
 void UnusedLineDefs(selection_c *sectors, selection_c *result)
 {
@@ -815,6 +825,7 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 		}
 	}
 }
+
 
 void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 {
@@ -1042,7 +1053,7 @@ void CMD_Delete(void)
 		if (line_sel.notempty())
 		{
 			UnusedVertices(&line_sel, &vert_sel);
-			UnusedSideDefs(&line_sel, &side_sel);
+			UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 		}
 	}
 
@@ -1053,8 +1064,8 @@ void CMD_Delete(void)
 
 	if (edit.mode == OBJ_VERTICES || edit.mode == OBJ_LINEDEFS)
 	{
-		UnusedSideDefs(&line_sel, &side_sel);
 		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
+		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 	}
 
 	BA_Begin();
