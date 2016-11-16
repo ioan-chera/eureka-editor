@@ -56,7 +56,7 @@ public:
 	// perform a query to see what the mouse pointer is over.
 	// returns true if something was hit, false otherwise.
 	// [ see the struct definition for more details... ]
-	bool query(highlight_3D_info_t& hl);
+	bool query(highlight_3D_info_t& hl, int sx, int sy);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);

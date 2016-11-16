@@ -86,8 +86,10 @@ public:
 
 	bool isSame(const highlight_3D_info_t& other) const
 	{
-		return	(line == other.line) && (sector == other.sector) &&
-				(side == other.side) && (part == other.part);
+		return	(line == other.line) &&
+				(sector == other.sector) &&
+				(side == other.side) &&
+				(part == other.part);
 	}
 
 };
@@ -276,11 +278,6 @@ public:
 	void ClearHighlight()
 	{
 		hl.Clear();
-	}
-
-	void FindHighlight()
-	{
-		main_win->render->query(hl);
 	}
 };
 
@@ -1721,11 +1718,11 @@ public:
 		RestoreOffsets();
 	}
 
-	void DoQuery(int sx, int sy)
+	void DoQuery(int qx, int qy)
 	{
 		query_mode = 1;
-		query_sx   = sx;
-		query_sy   = sy;
+		query_sx   = qx;
+		query_sy   = qy;
 
 		query_wall = NULL;
 
@@ -1800,25 +1797,25 @@ void UI_Render3D::draw()
 }
 
 
-bool UI_Render3D::query(highlight_3D_info_t& hl)
+bool UI_Render3D::query(highlight_3D_info_t& hl, int sx, int sy)
 {
 	int ow = w();
 	int oh = h();
 
 	view.PrepareToRender(ow, oh);
 
-	int sx = Fl::event_x() - x();
-	int sy = Fl::event_y() - y();
+	int qx = sx - x();
+	int qy = sy - y() - INFO_BAR_H / 2;
 
 	if (! render_high_detail)
 	{
-		sx = sx / 2;
-		sy = sy / 2;
+		qx = qx / 2;
+		qy = qy / 2;
 	}
 
 	RendInfo rend;
 
-	rend.DoQuery(sx, sy);
+	rend.DoQuery(qx, qy);
 
 	hl.Clear();
 
@@ -2076,7 +2073,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod)
 {
 	highlight_3D_info_t old(view.hl);
 
-	view.FindHighlight();
+	main_win->render->query(view.hl, x, y);
 
 	if (old.isSame(view.hl))
 		return;
