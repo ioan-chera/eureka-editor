@@ -109,8 +109,7 @@ public:
 	int p_type, px, py;
 
 	// view position.
-	float x, y; 
-	int z;
+	float x, y, z;
 
 	// view direction.  angle is in radians
 	float angle;
@@ -872,25 +871,19 @@ public:
 		if (sec_h < -32770)
 			return +9999;
 
-		sec_h -= view.z;
+		int y = int(view.aspect_sh * (sec_h - view.z) * iz * Y_SLOPE);
 
-		int y = int(view.aspect_sh * sec_h * iz * Y_SLOPE);
-
-		y = (view.sh - y) / 2;
-
-		return y;
+		return (view.sh - y) / 2;
 	}
 
 	static inline float YToDist(int y, int sec_h)
 	{
-		sec_h -= view.z;
-
 		y = view.sh - y * 2;
 
 		if (y == 0)
 			return 999999;
 
-		return view.aspect_sh * sec_h * Y_SLOPE / y;
+		return view.aspect_sh * (sec_h - view.z) * Y_SLOPE / y;
 	}
 
 	static inline float YToSecH(int y, double iz)
@@ -1961,7 +1954,7 @@ void UI_Render3D::DrawInfoBar()
 
 	DrawNumber(cx, cy, "x", I_ROUND(view.x), -5);
 	DrawNumber(cx, cy, "y", I_ROUND(view.y), -5);
-	DrawNumber(cx, cy, "z",         view.z,  -4);
+	DrawNumber(cx, cy, "z", I_ROUND(view.z), -4);
 
 	int ang = I_ROUND(view.angle * 180 / M_PI);
 	if (ang < 0) ang += 360;
@@ -2203,7 +2196,7 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 		else if (mod == MOD_COMMAND)
 			speed *= 3;
 
-		view.z -= dy * speed / 16;
+		view.z -= dy * speed / 16.0;
 
 		view.gravity = false;
 	}
@@ -2349,7 +2342,7 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 	{
 		view.x = atof(tokens[1]);
 		view.y = atof(tokens[2]);
-		view.z = atoi(tokens[3]);
+		view.z = atof(tokens[3]);
 
 		view.SetAngle(atof(tokens[4]));
 
@@ -2386,11 +2379,8 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 
 void Render3D_WriteUser(FILE *fp)
 {
-	fprintf(fp, "camera %1.2f %1.2f %d %1.2f\n",
-	        view.x,
-			view.y,
-			view.z,
-			view.angle);
+	fprintf(fp, "camera %1.2f %1.2f %1.2f %1.2f\n",
+	        view.x, view.y, view.z, view.angle);
 
 	fprintf(fp, "r_modes %d %d %d\n",
 	        view.texturing  ? 1 : 0,
