@@ -1046,7 +1046,10 @@ int wheel_dy;
 int Editor_RawKey(int event)
 {
 	if (event == FL_KEYUP)
+	{
+		edit.is_navigating = false;
 		return 0;
+	}
 
 	bool convert_meta = (edit.action == ACT_WAIT_META);
 

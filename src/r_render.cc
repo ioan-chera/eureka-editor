@@ -145,6 +145,9 @@ public:
 	// navigation loop info
 	unsigned int nav_time;
 
+	float nav_dx, nav_dy, nav_dz;
+	float nav_dangle;
+
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
@@ -308,6 +311,22 @@ public:
 			diff = limit;
 
 		return (int)diff;
+	}
+
+	void NavBegin()
+	{
+		if (! edit.is_navigating)
+		{
+			edit.is_navigating = true;
+
+			// set the starting time
+			UpdateNavTime(1);
+		}
+
+		nav_dx = 0;
+		nav_dy = 0;
+		nav_dz = 0;
+		nav_dangle = 0;
 	}
 };
 
@@ -2343,9 +2362,16 @@ void Render3D_Term()
 
 void Render3D_Navigate()
 {
-	int delay_ms = view.UpdateNavTime(200 /* limit */);
+	float delay_ms = view.UpdateNavTime(200 /* limit */);
 
-	view.y = view.y + delay_ms * 0.05;
+	delay_ms = delay_ms / 1000.0;
+
+	view.x = view.x + view.nav_dx * delay_ms;
+	view.y = view.y + view.nav_dy * delay_ms;
+	view.z = view.z + view.nav_dz * delay_ms;
+
+	// FIXME : prevent angles from getting too big
+	view.SetAngle(view.angle + view.nav_dangle * delay_ms);
 
 	RedrawMap();
 }
@@ -2434,8 +2460,10 @@ void R3D_Forward(void)
 {
 	int dist = atoi(EXEC_Param[0]);
 
-	view.x += view.Cos * dist;
-	view.y += view.Sin * dist;
+	view.NavBegin();
+
+	view.nav_dx = view.Cos * dist * 8;
+	view.nav_dy = view.Sin * dist * 8;
 
 	RedrawMap();
 }
@@ -2444,8 +2472,13 @@ void R3D_Backward(void)
 {
 	int dist = atoi(EXEC_Param[0]);
 
-	view.x -= view.Cos * dist;
-	view.y -= view.Sin * dist;
+	view.NavBegin();
+
+	view.nav_dx = view.Cos * dist * -8;
+	view.nav_dy = view.Sin * dist * -8;
+
+//	view.x -= view.Cos * dist;
+//	view.y -= view.Sin * dist;
 
 	RedrawMap();
 }
