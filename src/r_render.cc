@@ -142,6 +142,9 @@ public:
 	// current highlighted wotsit
 	highlight_3D_info_t hl;
 
+	// navigation loop info
+	unsigned int nav_time;
+
 public:
 	Y_View() : p_type(0), screen(NULL),
 			   texturing(false), sprites(false), lighting(false),
@@ -284,6 +287,27 @@ public:
 	void ClearHighlight()
 	{
 		hl.Clear();
+	}
+
+	// sets a new nav_time value, and returns number of milliseconds
+	// since the previous value.
+	int UpdateNavTime(unsigned int limit)
+	{
+		unsigned int old_time = nav_time;
+
+		nav_time = TimeGetMillies();
+
+		// handle overflow
+		if (nav_time < old_time)
+			return 10;
+
+		unsigned int diff = (nav_time - old_time);
+
+		// clamp large values
+		if (diff > limit)
+			diff = limit;
+
+		return (int)diff;
 	}
 };
 
@@ -2314,6 +2338,16 @@ void Render3D_Term()
 
 	delete view.screen;
 	view.screen = NULL;
+}
+
+
+void Render3D_Navigate()
+{
+	int delay_ms = view.UpdateNavTime(200 /* limit */);
+
+	view.y = view.y + delay_ms * 0.05;
+
+	RedrawMap();
 }
 
 

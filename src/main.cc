@@ -677,7 +677,17 @@ void Main_Loop()
 
     for (;;)
     {
-        Fl::wait(0.2);
+		while (edit.is_navigating)
+		{
+			Render3D_Navigate();
+
+			Fl::wait(0);
+
+			if (want_quit)
+				break;
+		}
+
+		Fl::wait(0.2);
 
 		if (want_quit)
 		{

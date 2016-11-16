@@ -1857,7 +1857,8 @@ void Editor_Init()
 	}
 
 	edit.action = ACT_NOTHING;
-	edit.is_scrolling = false;
+	edit.is_scrolling  = false;
+	edit.is_navigating = false;
 
 	edit.render3d = false;
 	edit.error_mode = false;
