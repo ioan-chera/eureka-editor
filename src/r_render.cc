@@ -64,34 +64,41 @@ struct highlight_3D_info_t
 {
 public:
 	int line;    // -1 for none
+	int side;    // SIDE_XXX of the line  [ unused for sectors or things ]
 	int sector;  // -1 for none
-	int side;    // SIDE_XXX  (not used for Floor or Ceil)
+	int thing;   // -1 for none
+
 	query_part_e part;
 
 public:
-	highlight_3D_info_t() : line(-1), sector(-1), side(0), part(QRP_Lower)
+	highlight_3D_info_t() : line(-1), side(0), sector(-1), thing(-1), part(QRP_Lower)
 	{ }
 
 	highlight_3D_info_t(const highlight_3D_info_t& other) :
-		line(other.line), sector(other.sector),
-		side(other.side),   part(other.part)
+		line(other.line),
+		side(other.side),
+		sector(other.sector),
+		thing(other.thing),
+		part(other.part)
 	{ }
 
 	void Clear()
 	{
-		line = sector = -1;
-		side = 0;
-		part = QRP_Lower;
+		line   = -1;
+		side   =  0;
+		sector = -1;
+		thing  = -1;
+		part   = QRP_Lower;
 	}
 
 	bool isSame(const highlight_3D_info_t& other) const
 	{
 		return	(line == other.line) &&
-				(sector == other.sector) &&
 				(side == other.side) &&
+				(sector == other.sector) &&
+				(thing == other.thing) &&
 				(part == other.part);
 	}
-
 };
 
 
@@ -1115,6 +1122,8 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
+		else if (th_index == view.hl.thing)
+			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
 
@@ -1194,6 +1203,23 @@ public:
 		AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, 0, HI_COL);
 	}
 
+	void HighlightThing(DrawWall *dw)
+	{
+		int h1 = dw->ceil.h1 - 1;
+		int h2 = dw->ceil.h2 + 1;
+
+		int x1 = dw->sx1 - 1;
+		int x2 = dw->sx2 + 1;
+
+		int y1 = DistToY(dw->iz1, h2);
+		int y2 = DistToY(dw->iz1, h1);
+
+		AddRenderLine(x1, y1, x1, y2, 0, HI_COL);
+		AddRenderLine(x2, y1, x2, y2, 0, HI_COL);
+		AddRenderLine(x1, y1, x2, y1, 0, HI_COL);
+		AddRenderLine(x1, y2, x2, y2, 0, HI_COL);
+	}
+
 	void HighlightGeometry()
 	{
 		const LineDef *hl_linedef = is_linedef(view.hl.line) ?
@@ -1223,6 +1249,9 @@ public:
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			DrawWall *dw = (*S);
+
+			if (dw->th >= 0 && dw->th == view.hl.thing)
+				HighlightThing(dw);
 
 			if (! dw->ld)
 				continue;
@@ -1442,7 +1471,7 @@ public:
 
 		/* query mode : is mouse over this wall part? */
 
-		if (query_mode)
+		if (query_mode == 1)
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
@@ -1513,6 +1542,17 @@ public:
 		int thsec = view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
 		float dist = 1.0 / dw->cur_iz;
+
+		if (query_mode == 2)
+		{
+			if (y1 <= query_sy && query_sy <= y2)
+			{
+				query_wall = dw;
+				query_part = QRP_Thing;
+			}
+
+			return;
+		}
 
 		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
 		{
@@ -1703,7 +1743,7 @@ public:
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
-		if (view.sprites && ! query_mode)
+		if (view.sprites && query_mode != 1)
 			for (int k=0 ; k < NumThings ; k++)
 				AddThing(k);
 
@@ -1720,7 +1760,7 @@ public:
 
 	void DoQuery(int qx, int qy)
 	{
-		query_mode = 1;
+		query_mode = 2;
 		query_sx   = qx;
 		query_sy   = qy;
 
@@ -1827,7 +1867,11 @@ bool UI_Render3D::query(highlight_3D_info_t& hl, int sx, int sy)
 
 	hl.part = rend.query_part;
 
-	if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
+	if (hl.part == QRP_Thing)
+	{
+		hl.thing = rend.query_wall->th;
+	}
+	else if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
 	{
 		// ouch -- fix?
 		for (int n = 0 ; n < NumSectors ; n++)
@@ -1844,7 +1888,7 @@ bool UI_Render3D::query(highlight_3D_info_t& hl, int sx, int sy)
 				hl.line = n;
 	}
 
-	return (hl.line >= 0) || (hl.sector >= 0);
+	return (hl.line >= 0 || hl.sector >= 0 || hl.thing >= 0);
 }
 
 

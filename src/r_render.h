@@ -37,6 +37,7 @@ typedef enum
 	QRP_Rail  =  0,
 	QRP_Upper = +1,
 	QRP_Ceil  = +2,
+	QRP_Thing = +3,
 
 } query_part_e;
 
