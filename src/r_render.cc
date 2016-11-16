@@ -1063,9 +1063,14 @@ public:
 		if (ty < 4)
 			return;
 
+		bool is_unknown = false;
+
 		Img_c *sprite = W_GetSprite(th->type);
-		if (! sprite)  // TODO: show a question mark (same color as on 2D map)
-			return;
+		if (! sprite)
+		{
+			sprite = IM_UnknownSprite();
+			is_unknown = true;
+		}
 
 		float tx1 = tx - sprite->width() / 2.0;
 		float tx2 = tx + sprite->width() / 2.0;
@@ -1110,6 +1115,9 @@ public:
 		dw->sec = NULL;
 
 		dw->side = info ? info->flags : 0;
+
+		if (is_unknown && render_unknown_bright)
+			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
 

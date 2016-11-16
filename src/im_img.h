@@ -110,6 +110,7 @@ void IM_ResetDummyTextures();
 Img_c * IM_MissingTex();
 Img_c * IM_UnknownTex();
 Img_c * IM_UnknownFlat();
+Img_c * IM_UnknownSprite();
 
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 

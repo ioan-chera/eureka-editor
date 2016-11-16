@@ -315,10 +315,12 @@ void Img_c::test_make_RGB()
 static int missing_tex_color;
 static int unknown_tex_color;
 static int unknown_flat_color;
+static int unknown_sprite_color;
 
 static Img_c * missing_tex_image;
 static Img_c * unknown_tex_image;
 static Img_c * unknown_flat_image;
+static Img_c * unknown_sprite_image;
 
 
 void IM_ResetDummyTextures()
@@ -432,6 +434,30 @@ Img_c * IM_UnknownFlat()
 	}
 
 	return unknown_flat_image;
+}
+
+
+Img_c * IM_UnknownSprite()
+{
+	if (! unknown_sprite_image || unknown_sprite_color != game_info.unknown_tex)
+	{
+		unknown_sprite_color = game_info.unknown_tex;
+
+		if (unknown_sprite_image)
+			delete unknown_sprite_image;
+
+		unknown_sprite_image = new Img_c(64, 64, true);
+
+		img_pixel_t *obuf = unknown_sprite_image->wbuf();
+
+		for (int y = 0 ; y < 64 ; y++)
+		for (int x = 0 ; x < 64 ; x++)
+		{
+			obuf[y * 64 + x] = unknown_graphic[(y/4) * 16 + (x/4)] ? unknown_sprite_color : TRANS_PIXEL;
+		}
+	}
+
+	return unknown_sprite_image;
 }
 
 
