@@ -363,7 +363,7 @@ public:
 		}
 
 		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
-		  context->add("Browser|Render|Vertex|Thing|Sector|Linedef|General");
+		  context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General");
 		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)context_callback, this);
 		}

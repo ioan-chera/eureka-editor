@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013-2015 Andrew Apted
+//  Copyright (C) 2013-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -825,11 +825,16 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	static char buffer[600];
 
+	// we prefer the UI to say "3D view" instead of "render"
+	const char *ctx_name = M_KeyContextString(bind.context);
+	if (y_stricmp(ctx_name, "render") == 0)
+		ctx_name = "3D view";
+
 	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
 			bind.is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName(bind.key),
 			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
-			M_KeyContextString(bind.context),
+			ctx_name,
 			M_StringForFunc(index) );
 
 	return buffer;
