@@ -68,6 +68,7 @@ private:
 	void DrawFlag  (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
 };
 
+
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 

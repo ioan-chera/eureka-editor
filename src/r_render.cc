@@ -343,7 +343,7 @@ public:
 		K_FLAT,
 		K_TEXTURE
 	};
-	int kind;  
+	int kind;
 
 	// heights for the surface (h1 is below h2)
 	int h1, h2, tex_h;
@@ -472,7 +472,7 @@ public:
 
 	// distance values (inverted, so they can be lerped)
 	double iz1, iz2;
-	double diz, cur_iz; 
+	double diz, cur_iz;
 	double mid_iz;
 
 	// translate coord, for sprite
@@ -2458,49 +2458,82 @@ void Render3D_WriteUser(FILE *fp)
 
 void R3D_Forward(void)
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
-	view.NavBegin();
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
 
-	view.nav_dx = view.Cos * dist * 8;
-	view.nav_dy = view.Sin * dist * 8;
+		view.nav_dx = view.Cos * dist;
+		view.nav_dy = view.Sin * dist;
+	}
+	else
+	{
+		view.x += view.Cos * dist;
+		view.y += view.Sin * dist;
 
-	RedrawMap();
+		RedrawMap();
+	}
 }
 
 void R3D_Backward(void)
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
-	view.NavBegin();
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
 
-	view.nav_dx = view.Cos * dist * -8;
-	view.nav_dy = view.Sin * dist * -8;
+		view.nav_dx = view.Cos * -dist;
+		view.nav_dy = view.Sin * -dist;
+	}
+	else
+	{
+		view.x -= view.Cos * dist;
+		view.y -= view.Sin * dist;
 
-//	view.x -= view.Cos * dist;
-//	view.y -= view.Sin * dist;
-
-	RedrawMap();
+		RedrawMap();
+	}
 }
 
 void R3D_Left(void)
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
-	view.x -= view.Sin * dist;
-	view.y += view.Cos * dist;
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
 
-	RedrawMap();
+		view.nav_dx = view.Sin * -dist;
+		view.nav_dy = view.Cos *  dist;
+	}
+	else
+	{
+		view.x -= view.Sin * dist;
+		view.y += view.Cos * dist;
+
+		RedrawMap();
+	}
 }
 
 void R3D_Right(void)
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
-	view.x += view.Sin * dist;
-	view.y -= view.Cos * dist;
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
 
-	RedrawMap();
+		view.nav_dx = view.Sin *  dist;
+		view.nav_dy = view.Cos * -dist;
+	}
+	else
+	{
+		view.x += view.Sin * dist;
+		view.y -= view.Cos * dist;
+
+		RedrawMap();
+	}
 }
 
 void R3D_Up(void)
@@ -2511,12 +2544,22 @@ void R3D_Up(void)
 		return;
 	}
 
-	int dist = atoi(EXEC_Param[0]);
-
-	view.z += dist;
 	view.gravity = false;
 
-	RedrawMap();
+	float dist = atof(EXEC_Param[0]);
+
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
+
+		view.nav_dz = dist;
+	}
+	else
+	{
+		view.z += dist;
+
+		RedrawMap();
+	}
 }
 
 void R3D_Down(void)
@@ -2527,12 +2570,22 @@ void R3D_Down(void)
 		return;
 	}
 
-	int dist = atoi(EXEC_Param[0]);
-
-	view.z -= dist;
 	view.gravity = false;
 
-	RedrawMap();
+	float dist = atof(EXEC_Param[0]);
+
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
+
+		view.nav_dz = -dist;
+	}
+	else
+	{
+		view.z -= dist;
+
+		RedrawMap();
+	}
 }
 
 
@@ -2543,9 +2596,18 @@ void R3D_Turn(void)
 	// convert to radians
 	angle = angle * M_PI / 180.0;
 
-	view.SetAngle(view.angle + angle);
+	if (Exec_HasFlag("/smooth"))
+	{
+		view.NavBegin();
 
-	RedrawMap();
+		view.nav_dangle = angle;
+	}
+	else
+	{
+		view.SetAngle(view.angle + angle);
+
+		RedrawMap();
+	}
 }
 
 void R3D_DropToFloor(void)
@@ -2733,31 +2795,38 @@ void R3D_Align(void)
 static editor_command_t  render_commands[] =
 {
 	{	"3D_Forward",
-		&R3D_Forward
+		&R3D_Forward,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Backward",
-		&R3D_Backward
+		&R3D_Backward,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Left",
-		&R3D_Left
+		&R3D_Left,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Right",
-		&R3D_Right
+		&R3D_Right,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Up",
-		&R3D_Up
+		&R3D_Up,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Down",
-		&R3D_Down
+		&R3D_Down,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_Turn",
-		&R3D_Turn
+		&R3D_Turn,
+		/* flags */ "/smooth"
 	},
 
 	{	"3D_DropToFloor",
