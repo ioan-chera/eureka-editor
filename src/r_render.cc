@@ -1760,7 +1760,8 @@ public:
 
 	void DoQuery(int qx, int qy)
 	{
-		query_mode = 2;
+		query_mode = (edit.mode == OBJ_THINGS) ? 2 : 1;
+
 		query_sx   = qx;
 		query_sy   = qy;
 
