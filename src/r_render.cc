@@ -172,15 +172,26 @@ public:
 		Cos = cos(angle);
 	}
 
-	void CalcViewZ()
+	void FindGroundZ()
 	{
-		Objid o;
-		GetNearObject(o, OBJ_SECTORS, int(x), int(y));
+		// test a grid of points on the player's bounding box, and
+		// use the maximum floor of all contacted sectors.
 
-		int secnum = o.num;
+		int max_floor = INT_MIN;
 
-		if (secnum >= 0)
-			z = Sectors[secnum]->floorh + game_info.view_height;
+		for (int dx = -2 ; dx <= 2 ; dx++)
+		for (int dy = -2 ; dy <= 2 ; dy++)
+		{
+			Objid o;
+
+			GetNearObject(o, OBJ_SECTORS, int(x + dx*8), int(y + dy*8));
+
+			if (o.num >= 0)
+				max_floor = MAX(max_floor, Sectors[o.num]->floorh);
+		}
+
+		if (max_floor != INT_MIN)
+			z = max_floor + game_info.view_height;
 	}
 
 	void CalcAspect()
@@ -284,7 +295,7 @@ public:
 		UpdateScreen(ow, oh);
 
 		if (gravity)
-			CalcViewZ();
+			FindGroundZ();
 	}
 
 	void ClearHighlight()
@@ -2112,7 +2123,8 @@ void Render3D_Setup()
 		view.x = view.px = player->x;
 		view.y = view.py = player->y;
 
-		view.CalcViewZ();
+		view.FindGroundZ();
+
 		view.SetAngle(player->angle * M_PI / 180.0);
 	}
 	else
@@ -2382,7 +2394,7 @@ void Render3D_SetCameraPos(int new_x, int new_y)
 	view.x = new_x;
 	view.y = new_y;
 
-	view.CalcViewZ();
+	view.FindGroundZ();
 }
 
 
@@ -2612,7 +2624,7 @@ void R3D_Turn(void)
 
 void R3D_DropToFloor(void)
 {
-	view.CalcViewZ();
+	view.FindGroundZ();
 
 	RedrawMap();
 }
