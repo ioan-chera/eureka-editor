@@ -32,6 +32,7 @@
 #include "levels.h"
 #include "r_render.h"
 #include "w_flats.h"
+#include "w_sprite.h"
 
 #include <algorithm>
 
@@ -258,8 +259,8 @@ void UI_Canvas::DrawMap()
 
 	if (edit.mode == OBJ_THINGS)
 	{
-		DrawThingBodies();
-		DrawThings();
+//!!!!		DrawThingBodies();
+		DrawThingSprites();
 	}
 }
 
@@ -793,6 +794,63 @@ void UI_Canvas::DrawThingBodies()
 		int sy2 = SCREENY(y - r);
 
 		fl_rectf(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
+	}
+}
+
+
+void UI_Canvas::DrawThingSprites()
+{
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		int x = Things[n]->x;
+		int y = Things[n]->y;
+
+		if (! Vis(x, y, MAX_RADIUS))
+			continue;
+
+		Img_c *sprite = W_GetSprite(Things[n]->type);
+
+		if (! sprite)
+			sprite = IM_UnknownSprite();
+
+		DrawSprite(x, y, sprite);
+	}
+}
+
+
+void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img)
+{
+	int W = img->width();
+	int H = img->height();
+
+	int sx1 = SCREENX(map_x - W / 2);
+	int sx2 = SCREENX(map_x + W / 2);
+
+	int sy1 = SCREENY(map_y + H / 2);
+	int sy2 = SCREENY(map_y - H / 2);
+
+	if (sx2 <= sx1) sx2 = sx1 + 1;
+	if (sy2 <= sy1) sy2 = sy1 + 1;
+
+	for (int sy = sy1 ; sy <= sy2 ; sy++)
+	for (int sx = sx1 ; sx <= sx2 ; sx++)
+	{
+		int ix = W * (sx - sx1) / (sx2 - sx1);
+		int iy = H * (sy - sy1) / (sy2 - sy1);
+
+		ix = CLAMP(0, ix, W - 1);
+		iy = CLAMP(0, iy, H - 1);
+
+		img_pixel_t pix = img->buf()[iy * W + ix];
+
+		if (pix == TRANS_PIXEL)
+			continue;
+
+		u8_t rgb[3];
+
+		IM_DecodePixel(pix, rgb[0], rgb[1], rgb[2]);
+
+		fl_draw_image(rgb, sx, sy, 1, 1);
 	}
 }
 

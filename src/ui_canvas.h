@@ -28,6 +28,9 @@
 #include "x_mirror.h"
 
 
+class Img_c;
+
+
 class UI_Canvas : public Fl_Widget
 {
 private:
@@ -116,6 +119,7 @@ private:
 	void DrawLinedefs();
 	void DrawThings();
 	void DrawThingBodies();
+	void DrawThingSprites();
 
 	void DrawMapPoint(int map_x, int map_y);
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
@@ -126,6 +130,7 @@ private:
 	void DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
+	void DrawSprite(int map_x, int map_y, Img_c *img);
 	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
