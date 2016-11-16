@@ -1128,11 +1128,19 @@ public:
 		walls.push_back(dw);
 	}
 
+	void ComputeSurfaces()
+	{
+		DrawWall::vec_t::iterator S;
+
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			if ((*S)->ld)
+				(*S)->ComputeWallSurface();
+		}
+	}
+
 	void HighlightWall(DrawWall *dw)
 	{
-		if (dw->side != view.hl.side)
-			return;
-
 		int h1, h2;
 
 		if (! dw->ld->TwoSided())
@@ -1173,22 +1181,52 @@ public:
 		AddRenderLine(x1, ly2, x2, ry2, 0, HI_COL);
 	}
 
-	void ComputeSurfaces()
+	void HighlightSector(DrawWall *dw, int sec_num, int sec_h)
+	{
+		int sy1 = DistToY(dw->iz1, sec_h);
+		int sy2 = DistToY(dw->iz2, sec_h);
+
+		AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, 0, HI_COL);
+	}
+
+	void HighlightGeometry()
 	{
 		const LineDef *hl_linedef = is_linedef(view.hl.line) ?
 			LineDefs[view.hl.line] : NULL;
+
+		int hl_sec = view.hl.sector;
+		int sec_h  = 0;
+
+		if (hl_sec >= 0)
+		{
+			if (view.hl.part == QRP_Floor)
+			{
+				sec_h = Sectors[hl_sec]->floorh;
+
+				if (sec_h >= view.z) hl_sec = -1;
+			}
+			else  /* QRP_Ceil */
+			{
+				sec_h = Sectors[hl_sec]->ceilh;
+
+				if (sec_h <= view.z) hl_sec = -1;
+			}
+		}
 
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
-			if ((*S)->ld)
-			{
-				(*S)->ComputeWallSurface();
+			DrawWall *dw = (*S);
 
-				if ((*S)->ld == hl_linedef)
-					HighlightWall(*S);
-			}
+			if (! dw->ld)
+				continue;
+
+			if (dw->ld == hl_linedef && dw->side == view.hl.side)
+				HighlightWall(dw);
+
+			if (hl_sec >= 0 && dw->ld->TouchesSector(hl_sec))
+				HighlightSector(dw, hl_sec, sec_h);
 		}
 	}
 
@@ -1667,6 +1705,8 @@ public:
 		ClipSolids();
 
 		ComputeSurfaces();
+
+		HighlightGeometry();
 
 		RenderWalls();
 
