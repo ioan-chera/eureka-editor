@@ -63,7 +63,7 @@ typedef struct
 	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
 
 	bool is_scrolling;	// user is scrolling the map (or moving in 3D view)
-	bool is_navigating;	// user is holding down a navigation key (in 3D view)
+	bool is_navigating;	// user is holding down a navigation key
 
 	bool render3d;    // 3D preview is active
 	bool error_mode;  // draw selection in red
@@ -147,6 +147,7 @@ void Nav_Clear();
 void Nav_Navigate();
 void Nav_SetKey(keycode_t key, nav_release_func_t func);
 void Nav_UpdateKeys();
+unsigned int Nav_TimeDiff(); /* milliseconds */
 
 /* commands */
 

@@ -482,6 +482,8 @@ typedef struct
 
 static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
 
+static unsigned int nav_time;
+
 
 void Nav_Clear()
 {
@@ -505,6 +507,10 @@ void Nav_Navigate()
 
 void Nav_SetKey(keycode_t key, nav_release_func_t func)
 {
+	// when starting a navigation, grab the current time
+	if (! edit.is_navigating)
+		Nav_TimeDiff();
+
 	edit.is_navigating = true;
 
 	int free_slot = -1;
@@ -512,6 +518,14 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
 	{
 		nav_active_key_t& N = nav_actives[i];
+
+		if (! N.key)
+		{
+			if (free_slot < 0)
+				free_slot = i;
+
+			continue;
+		}
 
 		// already active?
 		if (N.key == key && N.release == func)
@@ -523,12 +537,6 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 			(N.release)(N.key);
 
 			N.key = 0;
-		}
-
-		if (! N.key)
-		{
-			if (free_slot < 0)
-				free_slot = i;
 		}
 	}
 
@@ -591,6 +599,27 @@ void Nav_UpdateKeys()
 		// at least one navigation key is still active
 		edit.is_navigating = true;
 	}
+}
+
+
+// returns number of milliseconds since the previous call
+unsigned int Nav_TimeDiff()
+{
+	unsigned int old_time = nav_time;
+
+	nav_time = TimeGetMillies();
+
+	// handle overflow
+	if (nav_time < old_time)
+		return 10;
+
+	unsigned int diff = (nav_time - old_time);
+
+	// clamp large values
+	if (diff > 250)
+		diff = 250;
+
+	return diff;
 }
 
 
@@ -1184,6 +1213,8 @@ static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
 
 
 //------------------------------------------------------------------------
+//   EVENT HANDLING
+//------------------------------------------------------------------------
 
 int wheel_dx;
 int wheel_dy;
@@ -1191,11 +1222,10 @@ int wheel_dy;
 
 int Editor_RawKey(int event)
 {
+	Nav_UpdateKeys();
+
 	if (event == FL_KEYUP)
-	{
-		edit.is_navigating = false;
 		return 0;
-	}
 
 	bool convert_meta = (edit.action == ACT_WAIT_META);
 
@@ -1278,6 +1308,8 @@ int Editor_RawWheel(int event)
 
 int Editor_RawButton(int event)
 {
+	Nav_UpdateKeys();
+
 	if (edit.action == ACT_WAIT_META)
 		Editor_ClearAction();
 

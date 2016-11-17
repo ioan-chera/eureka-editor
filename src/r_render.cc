@@ -303,35 +303,11 @@ public:
 		hl.Clear();
 	}
 
-	// sets a new nav_time value, and returns number of milliseconds
-	// since the previous value.
-	int UpdateNavTime(unsigned int limit)
-	{
-		unsigned int old_time = nav_time;
-
-		nav_time = TimeGetMillies();
-
-		// handle overflow
-		if (nav_time < old_time)
-			return 10;
-
-		unsigned int diff = (nav_time - old_time);
-
-		// clamp large values
-		if (diff > limit)
-			diff = limit;
-
-		return (int)diff;
-	}
-
 	void NavBegin()
 	{
 		if (! edit.is_navigating)
 		{
 			edit.is_navigating = true;
-
-			// set the starting time
-			UpdateNavTime(1);
 		}
 
 		nav_fwd    = 0;
@@ -2379,7 +2355,7 @@ void Render3D_ClearNav()
 
 void Render3D_Navigate()
 {
-	float delay_ms = view.UpdateNavTime(200 /* limit */);
+	float delay_ms = Nav_TimeDiff();
 
 	delay_ms = delay_ms / 1000.0;
 
