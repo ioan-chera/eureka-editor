@@ -357,9 +357,6 @@ key_context_e M_ParseKeyContext(const char *str)
 	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
 	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
 
-// TEMPORARY for compatibility
-	if (y_stricmp(str, "global")  == 0) return KCTX_General;
-
 	return KCTX_NONE;
 }
 
@@ -376,8 +373,7 @@ const char * M_KeyContextString(key_context_e context)
 		case KCTX_Thing:   return "thing";
 		case KCTX_Vertex:  return "vertex";
 
-		default:
-			break;
+		default: break;
 	}
 
 	return "INVALID";
