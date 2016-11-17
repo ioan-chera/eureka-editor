@@ -518,7 +518,7 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 			return;
 
 		// if it's the same physical key, release it now
-		if ((N.key | MOD_ALL_MASK) == (key | MOD_ALL_MASK))
+		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
 			(N.release)(N.key);
 
@@ -542,11 +542,19 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 void Nav_UpdateKeys()
 {
+	// ensure the currently active keys are still pressed
+	// [ call this after getting each keyboard event from FLTK ]
+
 	if (! edit.is_navigating)
 		return;
 
-	// rebuilt this value
+	// we rebuilt this value
 	edit.is_navigating = false;
+
+	int cur_buttons = Fl::event_buttons();
+
+	// grab current modifiers, but simplify to a single one
+	keycode_t cur_mod = M_TranslateKey(0, Fl::event_state());
 
 	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
 	{
@@ -555,11 +563,23 @@ void Nav_UpdateKeys()
 		if (! N.key)
 			continue;
 
-		// FIXME : check if key still pressed
-//??		keycode_t base = M_BaseKey(N.key);
-//??		keycode_t mod  = 
+		keycode_t base = N.key & FL_KEY_MASK;
+		keycode_t mod  = N.key & MOD_ALL_MASK;
 
-		if (false)
+		bool is_pressed = false;
+
+		if (is_mouse_button(base))
+		{
+			if (mod == cur_mod && (cur_buttons & FL_BUTTON(base - FL_Button)))
+				is_pressed = true;
+		}
+		else  // key on keyboard
+		{
+			if (mod == cur_mod && Fl::event_key(base))
+				is_pressed = true;
+		}
+
+		if (! is_pressed)
 		{
 			// call release function, clear the slot
 			(N.release)(N.key);
