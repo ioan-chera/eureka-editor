@@ -823,34 +823,81 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img)
 	int W = img->width();
 	int H = img->height();
 
-	int sx1 = SCREENX(map_x - W / 2);
-	int sx2 = SCREENX(map_x + W / 2);
+	int bx1 = SCREENX(map_x - W / 2);
+	int bx2 = SCREENX(map_x + W / 2);
 
-	int sy1 = SCREENY(map_y + H / 2);
-	int sy2 = SCREENY(map_y - H / 2);
+	int by1 = SCREENY(map_y + H / 2);
+	int by2 = SCREENY(map_y - H / 2);
 
-	if (sx2 <= sx1) sx2 = sx1 + 1;
-	if (sy2 <= sy1) sy2 = sy1 + 1;
+	// prevent division by zero
+	if (bx2 <= bx1) bx2 = bx1 + 1;
+	if (by2 <= by1) by2 = by1 + 1;
+
+	// clip to screen
+	int sx1 = MAX(bx1, x());
+	int sy1 = MAX(by1, y());
+
+	int sx2 = MIN(bx2, x() + w());
+	int sy2 = MIN(by2, y() + h());
+
+	if (sy2 <= sy1 || sx2 <= sx1)
+		return;
+
+	// collect batches of pixels, it can greatly speed up rendering
+	const int BATCH_MAX_LEN = 128;
+
+	u8_t batch_rgb[BATCH_MAX_LEN * 3];
+	u8_t *batch_dest = NULL;
+
+	int  batch_len = 0;
+	int  batch_sx  = 0;
 
 	for (int sy = sy1 ; sy <= sy2 ; sy++)
-	for (int sx = sx1 ; sx <= sx2 ; sx++)
 	{
-		int ix = W * (sx - sx1) / (sx2 - sx1);
-		int iy = H * (sy - sy1) / (sy2 - sy1);
+		batch_len = 0;
 
-		ix = CLAMP(0, ix, W - 1);
-		iy = CLAMP(0, iy, H - 1);
+		for (int sx = sx1 ; sx <= sx2 ; sx++)
+		{
+			int ix = W * (sx - bx1) / (bx2 - bx1);
+			int iy = H * (sy - by1) / (by2 - by1);
 
-		img_pixel_t pix = img->buf()[iy * W + ix];
+			ix = CLAMP(0, ix, W - 1);
+			iy = CLAMP(0, iy, H - 1);
 
-		if (pix == TRANS_PIXEL)
-			continue;
+			img_pixel_t pix = img->buf()[iy * W + ix];
 
-		u8_t rgb[3];
+			if (pix == TRANS_PIXEL)
+			{
+				if (batch_len > 0)
+				{
+					fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+					batch_len = 0;
+				}
+				continue;
+			}
 
-		IM_DecodePixel(pix, rgb[0], rgb[1], rgb[2]);
+			if (batch_len >= BATCH_MAX_LEN)
+			{
+				fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+				batch_len = 0;
+			}
 
-		fl_draw_image(rgb, sx, sy, 1, 1);
+			if (batch_len == 0)
+			{
+				batch_sx = sx;
+				batch_dest = batch_rgb;
+			}
+
+			IM_DecodePixel(pix, batch_dest[0], batch_dest[1], batch_dest[2]);
+
+			batch_len++;
+			batch_dest += 3;
+		}
+
+		if (batch_len > 0)
+		{
+			fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+		}
 	}
 }
 
