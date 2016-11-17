@@ -2623,6 +2623,11 @@ void R3D_Turn(void)
 		view.NavBegin();
 
 		view.nav_dangle = angle;
+
+		if (Exec_HasFlag("/circle"))
+		{
+			view.nav_right = angle * 300;
+		}
 	}
 	else
 	{
