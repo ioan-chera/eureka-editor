@@ -166,6 +166,12 @@ static const key_mapping_t key_map[] =
 };
 
 
+bool is_mouse_button(keycode_t key)
+{
+	return (FL_Button <= key && key <= FL_Button + 20);
+}
+
+
 /* returns zero (an invalid key) if parsing fails */
 keycode_t M_ParseKeyString(const char *str)
 {
@@ -240,7 +246,7 @@ static const char * BareKeyName(keycode_t key)
 		return buffer;
 	}
 
-	if (FL_Button < key && key <= FL_Button + 20)
+	if (is_mouse_button(key))
 	{
 		sprintf(buffer, "MOUSE%d", key - FL_Button);
 		return buffer;
@@ -326,10 +332,10 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 
 	// make mouse buttons separate from everything else
 
-	if ((A >= FL_Button && A <= FL_Button + 20) || A == FL_WheelUp || A == FL_WheelDn)
+	if (is_mouse_button(A) || A == FL_WheelUp || A == FL_WheelDn)
 		A += 0x10000;
 
-	if ((B >= FL_Button && B <= FL_Button + 20) || B == FL_WheelUp || B == FL_WheelDn)
+	if (is_mouse_button(B) || B == FL_WheelUp || B == FL_WheelDn)
 		B += 0x10000;
 
 	// base key is most important

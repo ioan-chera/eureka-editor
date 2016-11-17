@@ -57,6 +57,10 @@ typedef unsigned int keycode_t;
 #define FL_WheelDn	0xEF92
 
 
+// this excludes the mouse wheel
+bool is_mouse_button(keycode_t key);
+
+
 typedef enum
 {
 	KCTX_NONE = 0,  /* INVALID */
