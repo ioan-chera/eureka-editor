@@ -57,7 +57,7 @@ int default_edit_mode = 0;  // Things
 
 bool digits_set_zoom = false;
 bool mouse_wheel_scrolls_map = false;
-bool same_mode_clears_selection = false; 
+bool same_mode_clears_selection = false;
 
 int multi_select_modifier = 0;
 int minimum_drag_pixels = 5;
@@ -122,7 +122,7 @@ static void UpdatePanel()
 	// Choose object to show in right-hand panel:
 	//   - the highlighted object takes priority
 	//   - otherwise show the selection (first + count)
-	// 
+	//
 	// It's a little more complicated since highlight may or may not
 	// be part of the selection.
 
@@ -355,9 +355,119 @@ void Editor_ChangeMode(char mode_char)
 }
 
 
+static int mouse_last_x;
+static int mouse_last_y;
+
+// screen position when LMB was pressed
+static int mouse_button1_x;
+static int mouse_button1_y;
+
+// map location when LMB was pressed
+static int button1_map_x;
+static int button1_map_y;
+
+
+void Editor_ClearAction()
+{
+	switch (edit.action)
+	{
+		case ACT_NOTHING:
+			return;
+
+		case ACT_WAIT_META:
+			Status_Clear();
+			break;
+
+		case ACT_ADJUST_OFS:
+			main_win->SetCursor(FL_CURSOR_DEFAULT);
+			break;
+
+		default:
+			/* no special for the rest */
+			break;
+	}
+
+	edit.action = ACT_NOTHING;
+}
+
+
+void Editor_SetAction(editor_action_e  new_action)
+{
+	Editor_ClearAction();
+
+	edit.action = new_action;
+
+	switch (edit.action)
+	{
+		case ACT_NOTHING:
+			return;
+
+		case ACT_WAIT_META:
+			Status_Set("META...");
+			break;
+
+		case ACT_ADJUST_OFS:
+			mouse_last_x = Fl::event_x();
+			mouse_last_y = Fl::event_y();
+
+			main_win->SetCursor(FL_CURSOR_HAND);
+			break;
+
+		default:
+			/* no special for the rest */
+			break;
+	}
+}
+
+
+void Editor_DigitKey(keycode_t key)
+{
+	// [1] - [9]: set the grid size
+
+	int digit = (key & 127) - '0';
+
+	bool do_zoom = digits_set_zoom;
+
+	if (key & MOD_SHIFT)
+		do_zoom = !do_zoom;
+
+	if (do_zoom)
+	{
+		float S1 = grid.Scale;
+		grid.ScaleFromDigit(digit);
+		grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+	}
+	else
+	{
+		grid.StepFromDigit(digit);
+	}
+}
+
+
+void Editor_Zoom(int delta, int mid_x, int mid_y)
+{
+    float S1 = grid.Scale;
+
+    grid.AdjustScale(delta);
+
+    grid.RefocusZoom(mid_x, mid_y, S1);
+}
+
+
+//------------------------------------------------------------------------
+//  COMMAND FUNCTIONS
+//------------------------------------------------------------------------
+
+
 void CMD_Nothing(void)
 {
 	/* hey jude, don't make it bad */
+}
+
+
+void CMD_MetaKey(void)
+{
+	Editor_SetAction(ACT_WAIT_META);
 }
 
 
@@ -569,77 +679,6 @@ void CMD_ToggleVar(void)
 }
 
 
-static int mouse_last_x;
-static int mouse_last_y;
-
-// screen position when LMB was pressed
-static int mouse_button1_x;
-static int mouse_button1_y;
-
-// map location when LMB was pressed
-static int button1_map_x;
-static int button1_map_y;
-
-
-void Editor_ClearAction()
-{
-	switch (edit.action)
-	{
-		case ACT_NOTHING:
-			return;
-
-		case ACT_WAIT_META:
-			Status_Clear();
-			break;
-	
-		case ACT_ADJUST_OFS:
-			main_win->SetCursor(FL_CURSOR_DEFAULT);
-			break;
-
-		default:
-			/* no special for the rest */
-			break;
-	}
-
-	edit.action = ACT_NOTHING;
-}
-
-
-void Editor_SetAction(editor_action_e  new_action)
-{
-	Editor_ClearAction();
-
-	edit.action = new_action;
-
-	switch (edit.action)
-	{
-		case ACT_NOTHING:
-			return;
-
-		case ACT_WAIT_META:
-			Status_Set("META...");
-			break;
-
-		case ACT_ADJUST_OFS:
-			mouse_last_x = Fl::event_x();
-			mouse_last_y = Fl::event_y();
-
-			main_win->SetCursor(FL_CURSOR_HAND);
-			break;
-
-		default:
-			/* no special for the rest */
-			break;
-	}
-}
-
-
-void CMD_MetaKey(void)
-{
-	Editor_SetAction(ACT_WAIT_META);
-}
-
-
 void CMD_BrowserMode(void)
 {
 	if (! EXEC_Param[0][0])
@@ -658,51 +697,6 @@ void CMD_BrowserMode(void)
 	}
 
 	main_win->ShowBrowser(mode);
-}
-
-
-void BR_CycleCategory(void)
-{
-	if (! main_win->browser->visible())
-	{
-		Beep("Browser not open");
-		return;
-	}
-
-	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
-
-	main_win->browser->CycleCategory(dir);
-}
-
-void BR_ClearSearch(void)
-{
-	if (! main_win->browser->visible())
-	{
-		Beep("Browser not open");
-		return;
-	}
-
-	main_win->browser->ClearSearchBox();
-}
-
-
-void BR_Scroll(void)
-{
-	if (! main_win->browser->visible())
-	{
-		Beep("Browser not open");
-		return;
-	}
-
-	if (! EXEC_Param[0][0])
-	{
-		Beep("Missing parameter to BR_Scroll");
-		return;
-	}
-
-	int delta = atoi(EXEC_Param[0]);
-
-	main_win->browser->Scroll(delta);
 }
 
 
@@ -787,49 +781,6 @@ void CMD_Disconnect(void)
 	}
 }
 
-
-void GRID_Step(void)
-{
-	int delta = atoi(EXEC_Param[0]);
-
-	delta = (delta >= 0) ? +1 : -1;
-
-	grid.AdjustStep(delta);
-}
-
-
-void Editor_DigitKey(keycode_t key)
-{
-	// [1] - [9]: set the grid size
-
-	int digit = (key & 127) - '0';
-
-	bool do_zoom = digits_set_zoom;
-
-	if (key & MOD_SHIFT)
-		do_zoom = !do_zoom;
-
-	if (do_zoom)
-	{
-		float S1 = grid.Scale;
-		grid.ScaleFromDigit(digit);
-		grid.RefocusZoom(edit.map_x, edit.map_y, S1);
-	}
-	else
-	{
-		grid.StepFromDigit(digit);
-	}
-}
-
-
-void Editor_Zoom(int delta, int mid_x, int mid_y)
-{
-    float S1 = grid.Scale;
-
-    grid.AdjustScale(delta);
-
-    grid.RefocusZoom(mid_x, mid_y, S1);
-}
 
 void CMD_Zoom(void)
 {
@@ -992,6 +943,61 @@ void CMD_RotateObjects_Dialog()
 }
 
 
+void GRID_Step(void)
+{
+	int delta = atoi(EXEC_Param[0]);
+
+	delta = (delta >= 0) ? +1 : -1;
+
+	grid.AdjustStep(delta);
+}
+
+
+void BR_CycleCategory(void)
+{
+	if (! main_win->browser->visible())
+	{
+		Beep("Browser not open");
+		return;
+	}
+
+	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
+
+	main_win->browser->CycleCategory(dir);
+}
+
+void BR_ClearSearch(void)
+{
+	if (! main_win->browser->visible())
+	{
+		Beep("Browser not open");
+		return;
+	}
+
+	main_win->browser->ClearSearchBox();
+}
+
+
+void BR_Scroll(void)
+{
+	if (! main_win->browser->visible())
+	{
+		Beep("Browser not open");
+		return;
+	}
+
+	if (! EXEC_Param[0][0])
+	{
+		Beep("Missing parameter to BR_Scroll");
+		return;
+	}
+
+	int delta = atoi(EXEC_Param[0]);
+
+	main_win->browser->Scroll(delta);
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1090,7 +1096,7 @@ int Editor_RawKey(int event)
 
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
 		return 1;
-	
+
 	if (ExecuteKey(key, KCTX_General))
 		return 1;
 
