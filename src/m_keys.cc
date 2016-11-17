@@ -170,7 +170,7 @@ bool is_mouse_button(keycode_t key)
 {
 	key &= FL_KEY_MASK;
 
-	return (FL_Button <= key && key <= FL_Button + 20);
+	return (FL_Button < key && key <= FL_Button + 8);
 }
 
 
