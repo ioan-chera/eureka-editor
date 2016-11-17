@@ -90,7 +90,7 @@ const editor_command_t * LookupEditorCommand(int idx)
 {
 	if (idx >= (int)all_commands.size())
 		return NULL;
-	
+
 	return all_commands[idx];
 }
 
@@ -106,7 +106,7 @@ typedef struct
 } key_mapping_t;
 
 
-static key_mapping_t key_map[] =
+static const key_mapping_t key_map[] =
 {
 	{ ' ',			"SPACE" },
 	{ FL_BackSpace,	"BS" },
@@ -187,6 +187,10 @@ keycode_t M_ParseKeyString(const char *str)
 	{
 		key |= MOD_SHIFT;  str += 6;
 	}
+
+	// convert uppercase letter --> lowercase + MOD_SHIFT
+	if (strlen(str) == 1 && str[0] >= 'A' && str[0] <= 'Z')
+		return MOD_SHIFT | (unsigned char) toupper(str[0]);
 
 	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
@@ -270,8 +274,16 @@ const char * M_KeyToString(keycode_t key)
 {
 	static char buffer[200];
 
-	strcpy(buffer, ModName(key));
+	// convert SHIFT + letter --> uppercase letter
+	if ((key & MOD_ALL_MASK) == MOD_SHIFT &&
+		(key & FL_KEY_MASK)  <  127 &&
+		isalpha(key & FL_KEY_MASK))
+	{
+		sprintf(buffer, "%c", toupper(key & FL_KEY_MASK));
+		return buffer;
+	}
 
+	strcpy(buffer, ModName(key));
 	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
 
 	return buffer;
@@ -293,18 +305,6 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 
 	if ((B >= FL_Button && B <= FL_Button + 20) || B == FL_WheelUp || B == FL_WheelDn)
 		B += 0x10000;
-
-	// we want lower- and uppercase of a key together (e.g. a + A)
-
-	if (A < 256 && isupper(A))
-	{
-		A = tolower(A); A_mod |= MOD_SHIFT;
-	}
-
-	if (B < 256 && isupper(B))
-	{
-		B = tolower(B); B_mod |= MOD_SHIFT;
-	}
 
 	// base key is most important
 
@@ -496,7 +496,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		if (! line)
 			break;
-		
+
 		StringRemoveCRLF(line);
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, false /* do_strings */);
@@ -712,13 +712,13 @@ public:
 	{
 		if (column == 'c' && k1.context != k2.context)
 			return k1.context > k2.context;
-			
+
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
 
 ///		if (column == 'k' && k1.context != k2.context)
 ///			return k1.context > k2.context;
-			
+
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
@@ -830,10 +830,19 @@ const char * M_StringForBinding(int index, bool changing_key)
 	if (y_stricmp(ctx_name, "render") == 0)
 		ctx_name = "3D view";
 
+	// display SHIFT + letter as an uppercase letter
+	keycode_t tempk = bind.key;
+	if ((tempk & MOD_ALL_MASK) == MOD_SHIFT &&
+		(tempk & FL_KEY_MASK)  <  127 &&
+		isalpha(tempk & FL_KEY_MASK))
+	{
+		tempk = toupper(tempk & FL_KEY_MASK);
+	}
+
 	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
 			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName(bind.key),
-			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
+			changing_key ? "<?"     : ModName(tempk),
+			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
 			ctx_name,
 			M_StringForFunc(index) );
 
@@ -898,7 +907,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 		sprintf(error_msg, "%s can only be used in %s mode",
 		        tokens[0], mode);
-		
+
 		StringFree(mode);
 
 		return error_msg;
@@ -1000,22 +1009,12 @@ keycode_t M_TranslateKey(int key, int state)
 	if (key == '\t') key = FL_Tab;
 	if (key == '\b') key = FL_BackSpace;
 
-	// modifier logic -- only allow a single one 
+	// modifier logic -- only allow a single one
 
 	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
 	else if (state & MOD_META)    key |= MOD_META;
 	else if (state & MOD_ALT)     key |= MOD_ALT;
-	else if (state & MOD_SHIFT)
-	{
-		// Note: SHIFT + digit is kept that way (rather than get '!', '@' etc)
-
-		if (key < 127 && isalpha(key))
-			key = toupper(key);
-		else if (key < 127 && ispunct(key) && strlen(Fl::event_text()) == 1)
-			key = Fl::event_text()[0];
-		else
-			key |= MOD_SHIFT;
-	}
+	else if (state & MOD_SHIFT)   key |= MOD_SHIFT;
 
 	return key;
 }
@@ -1110,7 +1109,7 @@ bool ExecuteCommand(const char *name, const char *param1,
 
 	if (! cmd)
 		return false;
-	
+
 	Status_Clear();
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
