@@ -145,7 +145,7 @@ public:
 	// navigation loop info
 	unsigned int nav_time;
 
-	float nav_dx, nav_dy, nav_dz;
+	float nav_fwd, nav_right, nav_up;
 	float nav_dangle;
 
 public:
@@ -334,9 +334,9 @@ public:
 			UpdateNavTime(1);
 		}
 
-		nav_dx = 0;
-		nav_dy = 0;
-		nav_dz = 0;
+		nav_fwd    = 0;
+		nav_right  = 0;
+		nav_up     = 0;
 		nav_dangle = 0;
 	}
 };
@@ -2378,12 +2378,26 @@ void Render3D_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	view.x = view.x + view.nav_dx * delay_ms;
-	view.y = view.y + view.nav_dy * delay_ms;
-	view.z = view.z + view.nav_dz * delay_ms;
+	if (view.nav_fwd || view.nav_right)
+	{
+		float dx = view.Cos * view.nav_fwd + view.Sin * view.nav_right;
+		float dy = view.Sin * view.nav_fwd - view.Cos * view.nav_right;
 
-	// FIXME : prevent angles from getting too big
-	view.SetAngle(view.angle + view.nav_dangle * delay_ms);
+		view.x += dx * delay_ms;
+		view.y += dy * delay_ms;
+	}
+
+	if (view.nav_up)
+		view.z += view.nav_up * delay_ms;
+
+	if (view.nav_dangle)
+	{
+		float dang = view.nav_dangle * delay_ms;
+
+		dang = CLAMP(-90, dang, 90);
+
+		view.SetAngle(view.angle + dang);
+	}
 
 	RedrawMap();
 }
@@ -2476,8 +2490,7 @@ void R3D_Forward(void)
 	{
 		view.NavBegin();
 
-		view.nav_dx = view.Cos * dist;
-		view.nav_dy = view.Sin * dist;
+		view.nav_fwd = dist;
 	}
 	else
 	{
@@ -2496,8 +2509,7 @@ void R3D_Backward(void)
 	{
 		view.NavBegin();
 
-		view.nav_dx = view.Cos * -dist;
-		view.nav_dy = view.Sin * -dist;
+		view.nav_fwd = -dist;
 	}
 	else
 	{
@@ -2516,8 +2528,7 @@ void R3D_Left(void)
 	{
 		view.NavBegin();
 
-		view.nav_dx = view.Sin * -dist;
-		view.nav_dy = view.Cos *  dist;
+		view.nav_right = -dist;
 	}
 	else
 	{
@@ -2536,8 +2547,7 @@ void R3D_Right(void)
 	{
 		view.NavBegin();
 
-		view.nav_dx = view.Sin *  dist;
-		view.nav_dy = view.Cos * -dist;
+		view.nav_right = dist;
 	}
 	else
 	{
@@ -2564,7 +2574,7 @@ void R3D_Up(void)
 	{
 		view.NavBegin();
 
-		view.nav_dz = dist;
+		view.nav_up = dist;
 	}
 	else
 	{
@@ -2590,7 +2600,7 @@ void R3D_Down(void)
 	{
 		view.NavBegin();
 
-		view.nav_dz = -dist;
+		view.nav_up = -dist;
 	}
 	else
 	{
