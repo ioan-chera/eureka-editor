@@ -2491,76 +2491,38 @@ void R3D_Forward(void)
 {
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.x += view.Cos * dist;
+	view.y += view.Sin * dist;
 
-		view.nav_fwd = dist;
-	}
-	else
-	{
-		view.x += view.Cos * dist;
-		view.y += view.Sin * dist;
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
 
 void R3D_Backward(void)
 {
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
-
-		view.nav_fwd = -dist;
-	}
-	else
-	{
-		view.x -= view.Cos * dist;
-		view.y -= view.Sin * dist;
-
-		RedrawMap();
-	}
+	view.x -= view.Cos * dist;
+	view.y -= view.Sin * dist;
 }
 
 void R3D_Left(void)
 {
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.x -= view.Sin * dist;
+	view.y += view.Cos * dist;
 
-		view.nav_right = -dist;
-	}
-	else
-	{
-		view.x -= view.Sin * dist;
-		view.y += view.Cos * dist;
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
 
 void R3D_Right(void)
 {
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.x += view.Sin * dist;
+	view.y -= view.Cos * dist;
 
-		view.nav_right = dist;
-	}
-	else
-	{
-		view.x += view.Sin * dist;
-		view.y -= view.Cos * dist;
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
 
 void R3D_Up(void)
@@ -2575,18 +2537,9 @@ void R3D_Up(void)
 
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.z += dist;
 
-		view.nav_up = dist;
-	}
-	else
-	{
-		view.z += dist;
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
 
 void R3D_Down(void)
@@ -2601,18 +2554,9 @@ void R3D_Down(void)
 
 	float dist = atof(EXEC_Param[0]);
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.z -= dist;
 
-		view.nav_up = -dist;
-	}
-	else
-	{
-		view.z -= dist;
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
 
 
@@ -2623,24 +2567,51 @@ void R3D_Turn(void)
 	// convert to radians
 	angle = angle * M_PI / 180.0;
 
-	if (Exec_HasFlag("/smooth"))
-	{
-		view.NavBegin();
+	view.SetAngle(view.angle + angle);
 
-		view.nav_dangle = angle;
-
-		if (Exec_HasFlag("/circle"))
-		{
-			view.nav_right = angle * 300;
-		}
-	}
-	else
-	{
-		view.SetAngle(view.angle + angle);
-
-		RedrawMap();
-	}
+	RedrawMap();
 }
+
+
+void R3D_NAV_Forward(void)
+{
+	float dist = atof(EXEC_Param[0]);
+
+	view.NavBegin();
+
+	view.nav_fwd = dist;
+}
+
+
+void R3D_NAV_Right(void)
+{
+	float dist = atof(EXEC_Param[0]);
+
+	view.NavBegin();
+
+	view.nav_right = dist;
+}
+
+
+void R3D_NAV_Up(void)
+{
+	float dist = atof(EXEC_Param[0]);
+
+	view.NavBegin();
+
+	view.nav_up = dist;
+}
+
+
+void R3D_NAV_Turn(void)
+{
+	float angle = atof(EXEC_Param[0]);
+
+	view.NavBegin();
+
+	view.nav_dangle = angle;
+}
+
 
 void R3D_DropToFloor(void)
 {
@@ -2827,39 +2798,50 @@ void R3D_Align(void)
 static editor_command_t  render_commands[] =
 {
 	{	"3D_Forward",
-		&R3D_Forward,
-		/* flags */ "/smooth"
+		&R3D_Forward
 	},
 
 	{	"3D_Backward",
-		&R3D_Backward,
-		/* flags */ "/smooth"
+		&R3D_Backward
 	},
 
 	{	"3D_Left",
-		&R3D_Left,
-		/* flags */ "/smooth"
+		&R3D_Left
 	},
 
 	{	"3D_Right",
-		&R3D_Right,
-		/* flags */ "/smooth"
+		&R3D_Right
 	},
 
 	{	"3D_Up",
-		&R3D_Up,
-		/* flags */ "/smooth"
+		&R3D_Up
 	},
 
 	{	"3D_Down",
-		&R3D_Down,
-		/* flags */ "/smooth"
+		&R3D_Down
 	},
 
 	{	"3D_Turn",
-		&R3D_Turn,
-		/* flags */ "/smooth"
+		&R3D_Turn
 	},
+
+	{	"3D_NAV_Forward",
+		&R3D_NAV_Forward
+	},
+
+	{	"3D_NAV_Right",
+		&R3D_NAV_Right
+	},
+
+	{	"3D_NAV_Up",
+		&R3D_NAV_Up
+	},
+
+	{	"3D_NAV_Turn",
+		&R3D_NAV_Turn
+	},
+
+	// TODO : 3D_NAV_CircleStrafe
 
 	{	"3D_DropToFloor",
 		&R3D_DropToFloor
