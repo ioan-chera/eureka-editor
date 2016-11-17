@@ -454,6 +454,58 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 }
 
 
+void Editor_Navigate()
+{
+	// TODO
+}
+
+
+/* navigation system */
+
+#define MAX_NAV_ACTIVE_KEYS  8
+
+typedef struct
+{
+	// key or button code, including any modifier.
+	// zero when this slot is unused (not active).
+	keycode_t  code;
+
+	nav_release_func_t  func;
+
+} nav_active_key_t;
+
+static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
+
+
+void Nav_Clear()
+{
+	edit.is_navigating = false;
+
+	memset(nav_actives, 0, sizeof(nav_actives));
+}
+
+
+void Nav_Navigate()
+{
+	if (edit.render3d)
+		Render3D_Navigate();
+	else
+		Editor_Navigate();
+}
+
+
+void Nav_SetKey(keycode_t key, nav_release_func_t func)
+{
+	// TODO
+}
+
+
+void Nav_UpdateKeys()
+{
+	// TODO
+}
+
+
 //------------------------------------------------------------------------
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
@@ -1867,7 +1919,8 @@ void Editor_Init()
 
 	edit.action = ACT_NOTHING;
 	edit.is_scrolling  = false;
-	edit.is_navigating = false;
+
+	Nav_Clear();
 
 	edit.render3d = false;
 	edit.error_mode = false;

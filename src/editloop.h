@@ -141,6 +141,13 @@ int  Editor_RawButton(int event);
 int  Editor_RawWheel(int event);
 int  Editor_RawMouse(int event);
 
+typedef void (* nav_release_func_t)(keycode_t key);
+
+void Nav_Clear();
+void Nav_Navigate();
+void Nav_SetKey(keycode_t key, nav_release_func_t func);
+void Nav_UpdateKeys();
+
 /* commands */
 
 void CMD_SelectAll(void);
