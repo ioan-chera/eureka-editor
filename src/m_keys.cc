@@ -168,6 +168,8 @@ static const key_mapping_t key_map[] =
 
 bool is_mouse_button(keycode_t key)
 {
+	key &= FL_KEY_MASK;
+
 	return (FL_Button <= key && key <= FL_Button + 20);
 }
 
