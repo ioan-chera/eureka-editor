@@ -171,9 +171,15 @@ keycode_t M_ParseKeyString(const char *str)
 {
 	int key = 0;
 
+	// for MOD_COMMAND, accept both CMD and CTRL prefixes
+
 	if (y_strnicmp(str, "CMD-", 4) == 0)
 	{
 		key |= MOD_COMMAND;  str += 4;
+	}
+	else if (y_strnicmp(str, "CTRL-", 5) == 0)
+	{
+		key |= MOD_COMMAND;  str += 5;
 	}
 	else if (y_strnicmp(str, "META-", 5) == 0)
 	{
@@ -259,12 +265,31 @@ static const char * BareKeyName(keycode_t key)
 }
 
 
-static const char *ModName(keycode_t mod)
+static const char *ModName_Dash(keycode_t mod)
 {
+#ifdef __APPLE__
 	if (mod & MOD_COMMAND) return "CMD-";
+#else
+	if (mod & MOD_COMMAND) return "CTRL-";
+#endif
 	if (mod & MOD_META)    return "META-";
 	if (mod & MOD_ALT)     return "ALT-";
 	if (mod & MOD_SHIFT)   return "SHIFT-";
+
+	return "";
+}
+
+
+static const char *ModName_Space(keycode_t mod)
+{
+#ifdef __APPLE__
+	if (mod & MOD_COMMAND) return "CMD ";
+#else
+	if (mod & MOD_COMMAND) return "CTRL ";
+#endif
+	if (mod & MOD_META)    return "META ";
+	if (mod & MOD_ALT)     return "ALT ";
+	if (mod & MOD_SHIFT)   return "SHIFT ";
 
 	return "";
 }
@@ -283,7 +308,8 @@ const char * M_KeyToString(keycode_t key)
 		return buffer;
 	}
 
-	strcpy(buffer, ModName(key));
+	strcpy(buffer, ModName_Dash(key));
+
 	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
 
 	return buffer;
@@ -841,7 +867,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
 			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName(tempk),
+			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
 			ctx_name,
 			M_StringForFunc(index) );
