@@ -2372,6 +2372,11 @@ void Render3D_Term()
 }
 
 
+void Render3D_ClearNav()
+{
+}
+
+
 void Render3D_Navigate()
 {
 	float delay_ms = view.UpdateNavTime(200 /* limit */);

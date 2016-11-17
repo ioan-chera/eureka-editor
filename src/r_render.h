@@ -78,7 +78,9 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod);
 void Render3D_Wheel(int dx, int dy, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
+
 void Render3D_Navigate();
+void Render3D_ClearNav();
 
 void Render3D_SetCameraPos(int new_x, int new_y);
 void Render3D_GetCameraPos(int *x, int *y, float *angle);

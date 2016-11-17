@@ -454,7 +454,12 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 }
 
 
-void Editor_Navigate()
+static void Editor_ClearNav()
+{
+}
+
+
+static void Editor_Navigate()
 {
 	// TODO
 }
@@ -462,15 +467,16 @@ void Editor_Navigate()
 
 /* navigation system */
 
-#define MAX_NAV_ACTIVE_KEYS  8
+#define MAX_NAV_ACTIVE_KEYS  20
 
 typedef struct
 {
 	// key or button code, including any modifier.
-	// zero when this slot is unused (not active).
-	keycode_t  code;
+	// zero when this slot is unused.
+	keycode_t  key;
 
-	nav_release_func_t  func;
+	// function to call when user releases the key or button.
+	nav_release_func_t  release;
 
 } nav_active_key_t;
 
@@ -479,9 +485,12 @@ static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
 
 void Nav_Clear()
 {
-	edit.is_navigating = false;
+	  Editor_ClearNav();
+	Render3D_ClearNav();
 
 	memset(nav_actives, 0, sizeof(nav_actives));
+
+	edit.is_navigating = false;
 }
 
 
@@ -496,13 +505,72 @@ void Nav_Navigate()
 
 void Nav_SetKey(keycode_t key, nav_release_func_t func)
 {
-	// TODO
+	edit.is_navigating = true;
+
+	int free_slot = -1;
+
+	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
+	{
+		nav_active_key_t& N = nav_actives[i];
+
+		// already active?
+		if (N.key == key && N.release == func)
+			return;
+
+		// if it's the same physical key, release it now
+		if ((N.key | MOD_ALL_MASK) == (key | MOD_ALL_MASK))
+		{
+			(N.release)(N.key);
+
+			N.key = 0;
+		}
+
+		if (! N.key)
+		{
+			if (free_slot < 0)
+				free_slot = i;
+		}
+	}
+
+	if (free_slot >= 0)
+	{
+		nav_actives[free_slot].key = key;
+		nav_actives[free_slot].release = func;
+	}
 }
 
 
 void Nav_UpdateKeys()
 {
-	// TODO
+	if (! edit.is_navigating)
+		return;
+
+	// rebuilt this value
+	edit.is_navigating = false;
+
+	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
+	{
+		nav_active_key_t& N = nav_actives[i];
+
+		if (! N.key)
+			continue;
+
+		// FIXME : check if key still pressed
+//??		keycode_t base = M_BaseKey(N.key);
+//??		keycode_t mod  = 
+
+		if (false)
+		{
+			// call release function, clear the slot
+			(N.release)(N.key);
+
+			N.key = 0;
+			continue;
+		}
+
+		// at least one navigation key is still active
+		edit.is_navigating = true;
+	}
 }
 
 
