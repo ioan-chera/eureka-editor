@@ -907,62 +907,6 @@ void Editor_MouseRelease()
 }
 
 
-void Editor_MiddlePress(keycode_t mod)
-{
-	if (edit.button_down & 1)  // allow 0 or 2
-		return;
-
-#if 0
-	// ability to insert stuff via the mouse
-	if (mod == 0)
-	{
-		EXEC_Param[0] = "";
-		EXEC_Flags[0] = "";
-
-		CMD_Insert();
-		return;
-	}
-#endif
-
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to scale");
-		return;
-	}
-
-	int middle_x, middle_y;
-
-	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
-
-
-	Editor_SetAction(ACT_SCALE);
-
-	edit.button_mod = mod;
-
-	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
-}
-
-
-void Editor_MiddleRelease()
-{
-	edit.button_down = 0;
-
-	if (edit.action == ACT_SCALE)
-	{
-		Editor_ClearAction();
-
-		scale_param_t param;
-
-		main_win->canvas->ScaleFinish(param);
-
-		CMD_ScaleObjects2(param);
-
-		RedrawMap();
-	}
-}
-
-
-
 void Editor_LeaveWindow()
 {
 	edit.pointer_in_window = false;
@@ -1174,7 +1118,7 @@ int Editor_RawButton(int event)
 
 	bool down = (event == FL_PUSH);
 
-	if (button >= 3)
+	if (button >= 2)
 	{
 		return Editor_RawKey(event);
 	}
@@ -1195,20 +1139,14 @@ int Editor_RawButton(int event)
 
 	if (! down)
 	{
-		if (button == 2)
-			Editor_MiddleRelease();
-		else if (! edit.render3d)
+		if (! edit.render3d)
 			Editor_MouseRelease();
 		return 1;
 	}
 
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (button == 2)
-	{
-		Editor_MiddlePress(mod);
-	}
-	else if (! edit.render3d)
+	if (! edit.render3d)
 	{
 		Editor_MousePress(mod);
 	}
@@ -1591,7 +1529,7 @@ void CMD_NAV_Scroll_Mouse(void)
 }
 
 
-static void ACT_Selbox_Mouse_release(void)
+static void ACT_SelectBox_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_SELBOX)
@@ -1615,7 +1553,7 @@ static void ACT_Selbox_Mouse_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Selbox_Mouse(void)
+void CMD_ACT_SelectBox(void)
 {
 	if (edit.render3d)
 		return;
@@ -1623,12 +1561,61 @@ void CMD_ACT_Selbox_Mouse(void)
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_Selbox_Mouse_release))
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
 	{
 		Editor_SetAction(ACT_SELBOX);
 
 		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 	}
+}
+
+
+static void ACT_Scale_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_SCALE)
+		return;
+
+	Editor_ClearAction();
+
+	scale_param_t param;
+
+	main_win->canvas->ScaleFinish(param);
+
+	CMD_ScaleObjects2(param);
+
+	RedrawMap();
+}
+
+void CMD_ACT_Scale(void)
+{
+	if (edit.render3d)
+		return;
+
+	if (! EXEC_CurKey)
+		return;
+
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to scale");
+		return;
+	}
+
+
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Scale_release))
+		return;
+
+
+	// FIXME
+	edit.button_mod = Fl::event_state() & MOD_ALL_MASK;
+
+	int middle_x, middle_y;
+
+	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
+
+	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
+
+	Editor_SetAction(ACT_SCALE);
 }
 
 
@@ -1995,8 +1982,12 @@ static editor_command_t  command_table[] =
 		&CMD_NAV_Scroll_Mouse
 	},
 
-	{	"ACT_Selbox_Mouse",
-		&CMD_ACT_Selbox_Mouse
+	{	"ACT_SelectBox",
+		&CMD_ACT_SelectBox
+	},
+
+	{	"ACT_Scale",
+		&CMD_ACT_Scale,
 	},
 
 	{	"GoToCamera",
