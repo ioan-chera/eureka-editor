@@ -145,8 +145,10 @@ public:
 	// navigation loop info
 	unsigned int nav_time;
 
-	float nav_fwd, nav_right, nav_up;
-	float nav_turn;
+	float nav_fwd, nav_back;
+	float nav_left, nav_right;
+	float nav_up, nav_down;
+	float nav_turn_L, nav_turn_R;
 
 public:
 	Y_View() : p_type(0), screen(NULL),
@@ -2337,10 +2339,11 @@ void Render3D_Term()
 
 void Render3D_ClearNav()
 {
-	view.nav_fwd   = 0;
-	view.nav_right = 0;
-	view.nav_up    = 0;
-	view.nav_turn  = 0;
+	view.nav_fwd  = view.nav_back  = 0;
+	view.nav_left = view.nav_right = 0;
+	view.nav_up   = view.nav_down  = 0;
+
+	view.nav_turn_L = view.nav_turn_R = 0;
 }
 
 
@@ -2350,23 +2353,26 @@ void Render3D_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	if (view.nav_fwd || view.nav_right)
+	if (view.nav_fwd || view.nav_back || view.nav_right || view.nav_left)
 	{
-		float dx = view.Cos * view.nav_fwd + view.Sin * view.nav_right;
-		float dy = view.Sin * view.nav_fwd - view.Cos * view.nav_right;
+		float fwd   = view.nav_fwd   - view.nav_back;
+		float right = view.nav_right - view.nav_left;
+
+		float dx = view.Cos * fwd + view.Sin * right;
+		float dy = view.Sin * fwd - view.Cos * right;
 
 		view.x += dx * delay_ms;
 		view.y += dy * delay_ms;
 	}
 
-	if (view.nav_up)
+	if (view.nav_up || view.nav_down)
 	{
-		view.z += view.nav_up * delay_ms;
+		view.z += (view.nav_up - view.nav_down) * delay_ms;
 	}
 
-	if (view.nav_turn)
+	if (view.nav_turn_L || view.nav_turn_R)
 	{
-		float dang = view.nav_turn * delay_ms;
+		float dang = (view.nav_turn_L - view.nav_turn_R) * delay_ms;
 
 		dang = CLAMP(-90, dang, 90);
 
@@ -2555,11 +2561,28 @@ void R3D_NAV_Forward(void)
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float dist = atof(EXEC_Param[0]);
+	view.nav_fwd = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
+}
 
-	view.nav_fwd = dist;
+
+static void R3D_NAV_Back_release(void)
+{
+	view.nav_back = 0;
+}
+
+void R3D_NAV_Back(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_back = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
 
 
@@ -2576,11 +2599,28 @@ void R3D_NAV_Right(void)
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float dist = atof(EXEC_Param[0]);
+	view.nav_right = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
+}
 
-	view.nav_right = dist;
+
+static void R3D_NAV_Left_release(void)
+{
+	view.nav_left = 0;
+}
+
+void R3D_NAV_Left(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_left = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
 
 
@@ -2605,20 +2645,45 @@ void R3D_NAV_Up(void)
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float dist = atof(EXEC_Param[0]);
+	view.nav_up = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
-
-	view.nav_up = dist;
 }
 
 
-static void R3D_NAV_Turn_release(void)
+static void R3D_NAV_Down_release(void)
 {
-	view.nav_turn = 0;
+	view.nav_down = 0;
 }
 
-void R3D_NAV_Turn(void)
+void R3D_NAV_Down(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
+	view.gravity = false;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_down = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
+}
+
+
+static void R3D_NAV_TurnLeft_release(void)
+{
+	view.nav_turn_L = 0;
+}
+
+void R3D_NAV_TurnLeft(void)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2629,11 +2694,31 @@ void R3D_NAV_Turn(void)
 	float turn = atof(EXEC_Param[0]);
 
 	// convert to radians
-	turn = turn * M_PI / 180.0;
+	view.nav_turn_L = turn * M_PI / 180.0;
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Turn_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
+}
 
-	view.nav_turn = turn;
+
+static void R3D_NAV_TurnRight_release(void)
+{
+	view.nav_turn_R = 0;
+}
+
+void R3D_NAV_TurnRight(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	float turn = atof(EXEC_Param[0]);
+
+	// convert to radians
+	view.nav_turn_R = turn * M_PI / 180.0;
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
 
 
@@ -2853,19 +2938,33 @@ static editor_command_t  render_commands[] =
 		&R3D_NAV_Forward
 	},
 
+	{	"3D_NAV_Back",
+		&R3D_NAV_Back
+	},
+
 	{	"3D_NAV_Right",
 		&R3D_NAV_Right
+	},
+
+	{	"3D_NAV_Left",
+		&R3D_NAV_Left
 	},
 
 	{	"3D_NAV_Up",
 		&R3D_NAV_Up
 	},
 
-	{	"3D_NAV_Turn",
-		&R3D_NAV_Turn
+	{	"3D_NAV_Down",
+		&R3D_NAV_Down
 	},
 
-	// TODO : 3D_NAV_CircleStrafe
+	{	"3D_NAV_TurnLeft",
+		&R3D_NAV_TurnLeft
+	},
+
+	{	"3D_NAV_TurnRight",
+		&R3D_NAV_TurnRight
+	},
 
 	{	"3D_DropToFloor",
 		&R3D_DropToFloor
