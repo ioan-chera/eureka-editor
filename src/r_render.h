@@ -75,7 +75,6 @@ void Render3D_RegisterCommands();
 void Render3D_Enable(bool _enable);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod);
-void Render3D_Wheel(int dx, int dy, keycode_t mod);
 void Render3D_RBScroll(int dx, int dy, keycode_t mod);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
 

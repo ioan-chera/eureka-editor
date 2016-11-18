@@ -151,8 +151,10 @@ static const key_mapping_t key_map[] =
 	{ FL_Favorites,	"FAVORITES" },
 
 	// special stuff (not in FLTK)
-	{ FL_WheelUp,   "WHEEL_UP" },
-	{ FL_WheelDn,   "WHEEL_DN" },
+	{ FL_WheelUp,    "WHEEL_UP" },
+	{ FL_WheelDown,  "WHEEL_DOWN" },
+	{ FL_WheelLeft,  "WHEEL_LEFT" },
+	{ FL_WheelRight, "WHEEL_RIGHT" },
 
 	// some synonyms for user input
 	{ ' ',			"SPC" },
@@ -167,6 +169,13 @@ static const key_mapping_t key_map[] =
 	{ 0, NULL } // the end
 };
 
+
+bool is_mouse_wheel(keycode_t key)
+{
+	key &= FL_KEY_MASK;
+
+	return (FL_WheelUp <= key && key <= FL_WheelRight);
+}
 
 bool is_mouse_button(keycode_t key)
 {
@@ -336,10 +345,10 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 
 	// make mouse buttons separate from everything else
 
-	if (is_mouse_button(A) || A == FL_WheelUp || A == FL_WheelDn)
+	if (is_mouse_button(A) || is_mouse_wheel(A))
 		A += 0x10000;
 
-	if (is_mouse_button(B) || B == FL_WheelUp || B == FL_WheelDn)
+	if (is_mouse_button(B) || is_mouse_wheel(B))
 		B += 0x10000;
 
 	// base key is most important

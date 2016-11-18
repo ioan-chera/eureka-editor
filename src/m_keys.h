@@ -53,11 +53,13 @@ typedef unsigned int keycode_t;
 
 
 // values to represent the mouse wheel
-#define FL_WheelUp	0xEF91
-#define FL_WheelDn	0xEF92
+#define FL_WheelUp		0xEF91
+#define FL_WheelDown	0xEF92
+#define FL_WheelLeft	0xEF93
+#define FL_WheelRight	0xEF94
 
 
-// this excludes the mouse wheel
+bool is_mouse_wheel (keycode_t key);
 bool is_mouse_button(keycode_t key);
 
 

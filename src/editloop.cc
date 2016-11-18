@@ -994,8 +994,20 @@ int Editor_RawKey(int event)
 		return 0;
 
 	int raw_key = Fl::event_key();
+
 	if (event == FL_PUSH)
+	{
+		// convert mouse button to a fake key
 		raw_key = FL_Button + Fl::event_button();
+	}
+	else if (event == FL_MOUSEWHEEL)
+	{
+		// convert wheel direction to a fake key
+		if (abs(wheel_dy) >= abs(wheel_dx))
+			raw_key = wheel_dy < 0 ? FL_WheelUp : FL_WheelDown;
+		else
+			raw_key = wheel_dx < 0 ? FL_WheelLeft : FL_WheelRight;
+	}
 
 	int raw_state = Fl::event_state();
 
@@ -1059,14 +1071,19 @@ int Editor_RawWheel(int event)
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	// TODO: DistributeKey(EU_Wheel | mod)
+	if (wheel_dx == 0 && wheel_dy == 0)
+		return 1;
 
 	if (edit.render3d)
-		Render3D_Wheel(wheel_dx, 0 - wheel_dy, mod);
+	{
+		Editor_RawKey(FL_MOUSEWHEEL);
+	}
 	else
+	{
+		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
 		Editor_Wheel(wheel_dx, wheel_dy, mod);
+	}
 
 	return 1;
 }

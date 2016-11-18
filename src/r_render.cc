@@ -2140,22 +2140,6 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod)
 }
 
 
-void Render3D_Wheel(int dx, int dy, keycode_t mod)
-{
-	float speed = 48;  // TODO: CONFIG ITEM
-
-	if (mod == MOD_SHIFT)
-		speed = MAX(1, speed / 8);
-	else if (mod == MOD_COMMAND)
-		speed *= 4;
-
-	view.x += speed * (view.Cos * dy + view.Sin * dx);
-	view.y += speed * (view.Sin * dy - view.Cos * dx);
-
-	RedrawMap();
-}
-
-
 void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 {
 	// we separate the movement into either turning or moving up/down
@@ -2548,6 +2532,14 @@ void R3D_Turn(void)
 }
 
 
+void R3D_DropToFloor(void)
+{
+	view.FindGroundZ();
+
+	RedrawMap();
+}
+
+
 static void R3D_NAV_Forward_release(void)
 {
 	view.nav_fwd = 0;
@@ -2743,14 +2735,6 @@ void R3D_ACT_AdjustOffsets(void)
 }
 
 
-void R3D_DropToFloor(void)
-{
-	view.FindGroundZ();
-
-	RedrawMap();
-}
-
-
 void R3D_Set(void)
 {
 	const char *var_name = EXEC_Param[0];
@@ -2922,6 +2906,30 @@ void R3D_Align(void)
 }
 
 
+void R3D_WHEEL_Move(void)
+{
+	float dx = Fl::event_dx();
+	float dy = Fl::event_dy();
+
+	dy = 0 - dy;
+
+	float speed = atof(EXEC_Param[0]);
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (mod == MOD_SHIFT)
+		speed /= 4.0;
+	else if (mod == MOD_COMMAND)
+		speed *= 4.0;
+
+	view.x += speed * (view.Cos * dy + view.Sin * dx);
+	view.y += speed * (view.Sin * dy - view.Cos * dx);
+
+	RedrawMap();
+}
+
+
+
 //------------------------------------------------------------------------
 
 
@@ -2953,6 +2961,10 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_Turn",
 		&R3D_Turn
+	},
+
+	{	"3D_DropToFloor",
+		&R3D_DropToFloor
 	},
 
 	{	"3D_NAV_Forward",
@@ -2987,12 +2999,12 @@ static editor_command_t  render_commands[] =
 		&R3D_NAV_TurnRight
 	},
 
-	{	"3D_DropToFloor",
-		&R3D_DropToFloor
-	},
-
 	{	"3D_ACT_AdjustOfs",
 		&R3D_ACT_AdjustOffsets
+	},
+
+	{	"3D_WHEEL_Move",
+		&R3D_WHEEL_Move
 	},
 
 	{	"3D_Set",
