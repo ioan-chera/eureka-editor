@@ -564,21 +564,21 @@ void Grid_State_c::ToggleSnap()
 
 void Grid_State_c::NearestScale(double want_scale)
 {
-	int result = 0;
+	int best = 0;
 
 	for (int i = 0 ; i < NUM_SCALE_VALUES ; i++)
 	{
-		result = i;
+		best = i;
 
-		if (scale_values[i] < want_scale)
+		if (scale_values[i] < want_scale * 1.1)
 			break;
 	}
 
-	ScaleFromWidget(result);
+	ScaleFromWidget(best);
 
 	if (main_win)
 	{
-		main_win->info_bar->SetScale(result);
+		main_win->info_bar->SetScale(best);
 		main_win->scroll->AdjustPos();
 	}
 }

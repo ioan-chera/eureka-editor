@@ -333,15 +333,6 @@ static const opt_desc_t options[] =
 		&default_port
 	},
 
-	{	"digits_set_zoom",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Digit keys set zoom factor (rather than grid size)",
-		NULL,
-		&digits_set_zoom
-	},
-
 	{	"dotty_axis_col",
 		0,
 		OPT_COLOR,

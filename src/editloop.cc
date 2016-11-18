@@ -55,7 +55,6 @@ int active_wmask = 0;
 // config items
 int default_edit_mode = 0;  // Things
 
-bool digits_set_zoom = false;
 bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false;
 
@@ -1829,23 +1828,24 @@ void GRID_Set(void)
 
 void GRID_Zoom(void)
 {
-#if 0  // FIXME : specify the target scale
+	// target scale is positive for NN:1 and negative for 1:NN
 
-	int digit = atoi(EXEC_Param[0]);
+	double scale = atof(EXEC_Param[0]);
 
-	if (digit < 1 || digit > 9)
+	if (scale == 0)
 	{
-		Beep("Bad zoom digit");
+		Beep("Bad scale");
 		return;
 	}
 
-	float S1 = grid.Scale;
-	grid.ScaleFromDigit(digit);
-	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+	if (scale < 0)
+		scale = -1.0 / scale;
 
-#else
-	Beep("GRID_Zoom not implemented");
-#endif
+	float S1 = grid.Scale;
+
+	grid.NearestScale(scale);
+
+	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
 }
 
 

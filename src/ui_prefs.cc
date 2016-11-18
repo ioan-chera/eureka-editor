@@ -529,7 +529,6 @@ public:
 	Fl_Choice *grid_toggle;
 	Fl_Choice *grid_size;
 
-	Fl_Check_Button *gen_digitzoom;
 	Fl_Choice *gen_smallscroll;
 	Fl_Choice *gen_largescroll;
 
@@ -753,9 +752,6 @@ UI_Preferences::UI_Preferences() :
 		{ grid_toggle = new Fl_Choice(435, 180, 95, 25, "grid toggle types ");
 		  grid_toggle->down_box(FL_BORDER_BOX);
 		  grid_toggle->add("BOTH|Dotty|Normal");
-		}
-		{ gen_digitzoom = new Fl_Check_Button(50, 140, 240, 25, " digit keys zoom the map");
-		  gen_digitzoom->down_box(FL_DOWN_BOX);
 		}
 		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
 		  gen_smallscroll->down_box(FL_BORDER_BOX);
@@ -1259,7 +1255,6 @@ void UI_Preferences::LoadValues()
 	grid_mode->value(default_grid_mode);
 	grid_toggle->value(grid_toggle_type);
 
-	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
 	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
@@ -1369,7 +1364,6 @@ void UI_Preferences::SaveValues()
 	default_grid_mode = grid_mode->value();
 	grid_toggle_type  = grid_toggle->value();
 
-	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
 	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
 	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
