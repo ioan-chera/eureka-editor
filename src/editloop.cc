@@ -420,30 +420,6 @@ void Editor_SetAction(editor_action_e  new_action)
 }
 
 
-void Editor_DigitKey(keycode_t key)
-{
-	// [1] - [9]: set the grid size
-
-	int digit = (key & 127) - '0';
-
-	bool do_zoom = digits_set_zoom;
-
-	if (key & MOD_SHIFT)
-		do_zoom = !do_zoom;
-
-	if (do_zoom)
-	{
-		float S1 = grid.Scale;
-		grid.ScaleFromDigit(digit);
-		grid.RefocusZoom(edit.map_x, edit.map_y, S1);
-	}
-	else
-	{
-		grid.StepFromDigit(digit);
-	}
-}
-
-
 void Editor_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = grid.Scale;
@@ -1042,13 +1018,6 @@ int Editor_RawKey(int event)
 #endif
 
 	// keyboard propagation logic
-
-	// handle digits specially
-	if ('1' <= (key & FL_KEY_MASK) && (key & FL_KEY_MASK) <= '9')
-	{
-		Editor_DigitKey(key);
-		return 1;
-	}
 
 	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
@@ -1834,13 +1803,49 @@ void CMD_RotateObjects_Dialog()
 }
 
 
-void GRID_Step(void)
+void GRID_AdjustStep(void)
 {
 	int delta = atoi(EXEC_Param[0]);
 
 	delta = (delta >= 0) ? +1 : -1;
 
 	grid.AdjustStep(delta);
+}
+
+
+void GRID_Set(void)
+{
+	int step = atoi(EXEC_Param[0]);
+
+	if (step < 2 || step > 4096)
+	{
+		Beep("Bad grid step");
+		return;
+	}
+
+	grid.SetStep(step);
+}
+
+
+void GRID_Zoom(void)
+{
+#if 0  // FIXME : specify the target scale
+
+	int digit = atoi(EXEC_Param[0]);
+
+	if (digit < 1 || digit > 9)
+	{
+		Beep("Bad zoom digit");
+		return;
+	}
+
+	float S1 = grid.Scale;
+	grid.ScaleFromDigit(digit);
+	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+
+#else
+	Beep("GRID_Zoom not implemented");
+#endif
 }
 
 
@@ -2015,8 +2020,16 @@ static editor_command_t  command_table[] =
 		&CMD_ZoomSelection
 	},
 
-	{	"GRID_Step",
-		&GRID_Step
+	{	"GRID_AdjustStep",
+		&GRID_AdjustStep
+	},
+
+	{	"GRID_Set",
+		&GRID_Set
+	},
+
+	{	"GRID_Zoom",
+		&GRID_Zoom
 	},
 
 

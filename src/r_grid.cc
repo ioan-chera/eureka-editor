@@ -267,6 +267,16 @@ void Grid_State_c::ScaleFromWidget(int i)
 }
 
 
+void Grid_State_c::SetStep(int new_step)
+{
+	step = new_step;
+
+	// FIXME : widget on info bar will be wrong
+
+	RedrawMap();
+}
+
+
 void Grid_State_c::StepFromWidget(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_GRID_VALUES);
@@ -308,10 +318,7 @@ void Grid_State_c::StepFromScale()
 
 	step = grid_values[result];
 
-	if (main_win)
-	{
-		main_win->canvas->redraw();
-	}
+	RedrawMap();
 }
 
 

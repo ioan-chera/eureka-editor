@@ -86,6 +86,8 @@ public:
 	static const char *scale_options();
 	static const char *grid_options();
 
+	void SetStep(int new_step);
+
 	void ScaleFromWidget(int i);
 	void  StepFromWidget(int i);
 
