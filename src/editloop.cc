@@ -69,6 +69,15 @@ extern bool easier_drawing_mode;
 void Editor_MouseMotion(int x, int y, keycode_t mod);
 
 
+void ClearStickyMod()
+{
+	if (edit.sticky_mod)
+		Status_Clear();
+
+	edit.sticky_mod = 0;
+}
+
+
 /*
  *  zoom_fit - adjust zoom factor to make level fit in window
  *
@@ -373,10 +382,6 @@ void Editor_ClearAction()
 		case ACT_NOTHING:
 			return;
 
-		case ACT_WAIT_META:
-			Status_Clear();
-			break;
-
 		case ACT_ADJUST_OFS:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
@@ -400,10 +405,6 @@ void Editor_SetAction(editor_action_e  new_action)
 	{
 		case ACT_NOTHING:
 			return;
-
-		case ACT_WAIT_META:
-			Status_Set("META...");
-			break;
 
 		case ACT_ADJUST_OFS:
 			mouse_last_x = Fl::event_x();
@@ -992,23 +993,24 @@ int Editor_RawKey(int event)
 	if (event == FL_KEYUP || event == FL_RELEASE)
 		return 0;
 
-	bool convert_meta = (edit.action == ACT_WAIT_META);
-
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
-
 	int raw_key = Fl::event_key();
 	if (event == FL_PUSH)
 		raw_key = FL_Button + Fl::event_button();
 
 	int raw_state = Fl::event_state();
-	if (convert_meta)
-		raw_state = MOD_META;
+
+	int old_sticky_mod = edit.sticky_mod;
+
+	if (edit.sticky_mod)
+	{
+		raw_state = edit.sticky_mod;
+		ClearStickyMod();
+	}
 
 	keycode_t key = M_TranslateKey(raw_key, raw_state);
 
 	if (key == 0)
-		return convert_meta ? 1 : 0;
+		return 1;
 
 	wheel_dx = wheel_dy = 0;
 
@@ -1043,14 +1045,13 @@ int Editor_RawKey(int event)
 	// prevent a META-fied key from being sent elsewhere, because it
 	// won't really be META-fied anywhere else -- including the case
 	// of it being sent back to this function as a SHORTCUT event.
-	return convert_meta ? 1 : 0;
+	return old_sticky_mod ? 1 : 0;
 }
 
 
 int Editor_RawWheel(int event)
 {
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
+	ClearStickyMod();
 
 	// ensure we zoom from correct place
 	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
@@ -1073,6 +1074,8 @@ int Editor_RawWheel(int event)
 
 int Editor_RawButton(int event)
 {
+	ClearStickyMod();
+
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button
 	// release event, because when the first button is released the "pushed"
@@ -1093,9 +1096,6 @@ int Editor_RawButton(int event)
 
 
 	Nav_UpdateKeys();
-
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
 
 
 //---	// adjust offsets on a sidedef?
@@ -1168,7 +1168,15 @@ void CMD_Nothing(void)
 
 void CMD_MetaKey(void)
 {
-	Editor_SetAction(ACT_WAIT_META);
+	if (edit.sticky_mod)
+	{
+		ClearStickyMod();
+		return;
+	}
+
+	Status_Set("META...");
+
+	edit.sticky_mod = MOD_META;
 }
 
 

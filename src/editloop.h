@@ -32,8 +32,6 @@ typedef enum
 {
 	ACT_NOTHING = 0,
 
-	ACT_WAIT_META,		// user pressed ';' -- waiting for next key
-
 	ACT_SELBOX,			// user is outlining a selection box
 	ACT_DRAG,			// user is dragging some objects
 	ACT_SCALE,			// user is scaling (etc) some objects
@@ -65,7 +63,9 @@ typedef struct
 	bool is_scrolling;	// user is scrolling the map (or moving in 3D view)
 	bool is_navigating;	// user is holding down a navigation key
 
-	bool render3d;    // 3D preview is active
+	keycode_t sticky_mod;	// user pressed ';' -- waiting for next key
+
+	bool render3d;    // 3D view is active
 	bool error_mode;  // draw selection in red
 
 	int  sector_render_mode;	// one of the SREND_XXX values
