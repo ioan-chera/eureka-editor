@@ -2360,7 +2360,9 @@ void Render3D_Navigate()
 	}
 
 	if (view.nav_up)
+	{
 		view.z += view.nav_up * delay_ms;
+	}
 
 	if (view.nav_turn)
 	{
@@ -2591,6 +2593,14 @@ void R3D_NAV_Up(void)
 {
 	if (! EXEC_CurKey)
 		return;
+
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
+	view.gravity = false;
 
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
