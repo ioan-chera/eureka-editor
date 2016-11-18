@@ -561,7 +561,7 @@ void Nav_Navigate()
 }
 
 
-void Nav_SetKey(keycode_t key, nav_release_func_t func)
+bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 {
 	// when starting a navigation, grab the current time
 	if (! edit.is_navigating)
@@ -585,7 +585,7 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 		// already active?
 		if (N.key == key && N.release == func)
-			return;
+			return false;
 
 		// if it's the same physical key, release it now
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
@@ -601,6 +601,8 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 		nav_actives[free_slot].key = key;
 		nav_actives[free_slot].release = func;
 	}
+
+	return true;
 }
 
 
@@ -764,8 +766,8 @@ void Editor_MousePress(keycode_t mod)
 		if (edit.did_a_move)
 			Selection_Clear();
 
-		Editor_SetAction(ACT_SELBOX);
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+//!!!!		Editor_SetAction(ACT_SELBOX);
+//!!!!		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
 	}
 
@@ -809,24 +811,6 @@ void Editor_MouseRelease()
 	// releasing the button while there was a selection box
 	// causes all the objects within the box to be selected.
 
-	if (edit.action == ACT_SELBOX)
-	{
-		Editor_ClearAction();
-		Editor_ClearErrorMode();
-
-		int x1, y1, x2, y2;
-		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
-
-		// a mere click and release will unselect everything
-		if (x1 == x2 && y1 == y2)
-			CMD_UnselectAll();
-		else
-			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
-
-		UpdateHighlight();
-		RedrawMap();
-		return;
-	}
 
 
 	// nothing needed while in drawing mode
@@ -1558,9 +1542,51 @@ void CMD_NAV_Scroll_Mouse(void)
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Mouse_release);
+	if (Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Mouse_release))
+	{
+		Editor_ScrollMap(-1);
+	}
+}
 
-	Editor_ScrollMap(-1);
+
+static void ACT_Selbox_Mouse_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_SELBOX)
+		return;
+
+	Editor_ClearAction();
+	Editor_ClearErrorMode();
+
+	int x1, y1, x2, y2;
+
+	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+
+	// a mere click and release will unselect everything
+	// FIXME : REVIEW THIS
+	if (x1 == x2 && y1 == y2)
+		CMD_UnselectAll();
+	else
+		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+void CMD_ACT_Selbox_Mouse(void)
+{
+	if (edit.render3d)
+		return;
+
+	if (! EXEC_CurKey)
+		return;
+
+	if (Nav_SetKey(EXEC_CurKey, &ACT_Selbox_Mouse_release))
+	{
+		Editor_SetAction(ACT_SELBOX);
+
+		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+	}
 }
 
 
@@ -1925,6 +1951,10 @@ static editor_command_t  command_table[] =
 
 	{	"NAV_Scroll_Mouse",
 		&CMD_NAV_Scroll_Mouse
+	},
+
+	{	"ACT_Selbox_Mouse",
+		&CMD_ACT_Selbox_Mouse
 	},
 
 	{	"GoToCamera",
