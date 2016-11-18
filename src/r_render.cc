@@ -2722,6 +2722,27 @@ void R3D_NAV_TurnRight(void)
 }
 
 
+static void ACT_AdjustOffsets_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_ADJUST_OFS)
+		return;
+
+	Render3D_AdjustOffsets(+1);
+}
+
+void R3D_ACT_AdjustOffsets(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOffsets_release))
+	{
+		Render3D_AdjustOffsets(-1);
+	}
+}
+
+
 void R3D_DropToFloor(void)
 {
 	view.FindGroundZ();
@@ -2968,6 +2989,10 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_DropToFloor",
 		&R3D_DropToFloor
+	},
+
+	{	"3D_ACT_AdjustOfs",
+		&R3D_ACT_AdjustOffsets
 	},
 
 	{	"3D_Set",

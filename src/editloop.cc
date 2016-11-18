@@ -1186,12 +1186,12 @@ int Editor_RawButton(int event)
 		Editor_ClearAction();
 
 
-	// adjust offsets on a sidedef?
-	if (edit.render3d && button == 2)
-	{
-		Render3D_AdjustOffsets(down ? -1 : +1);
-		return 1;
-	}
+//---	// adjust offsets on a sidedef?
+//---	if (edit.render3d && button == 2)
+//---	{
+//---		Render3D_AdjustOffsets(down ? -1 : +1);
+//---		return 1;
+//---	}
 
 	if (! down)
 	{
