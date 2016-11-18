@@ -271,7 +271,23 @@ void Grid_State_c::SetStep(int new_step)
 {
 	step = new_step;
 
-	// FIXME : widget on info bar will be wrong
+	// find closest value in info bar
+	int best = 0;
+	int best_dist = 999999;
+
+	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+	{
+		int dist = abs(grid_values[i] - new_step);
+
+		if (dist < best_dist)
+		{
+			best = i;
+			best_dist = dist;
+		}
+	}
+
+	if (main_win)
+		main_win->info_bar->SetGrid(best);
 
 	RedrawMap();
 }
