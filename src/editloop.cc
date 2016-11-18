@@ -703,34 +703,9 @@ unsigned int Nav_TimeDiff()
 //   EVENT HANDLING
 //------------------------------------------------------------------------
 
-static int wheel_dx;
-static int wheel_dy;
-
-
-void Editor_Wheel(int dx, int dy, keycode_t mod)
-{
-	if (mouse_wheel_scrolls_map && mod !=
-#ifdef __APPLE__
-		MOD_ALT)
-#else
-		MOD_COMMAND)
-#endif
-	{
-		int speed = 12;  // FIXME: CONFIG OPTION
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 3);
-
-		grid.Scroll(  dx * (double) speed / grid.Scale,
-		            - dy * (double) speed / grid.Scale);
-	}
-	else
-	{
-		dy = (dy > 0) ? +1 : -1;
-
-		Editor_Zoom(- dy, edit.map_x, edit.map_y);
-	}
-}
+// these are grabbed from FL_MOUSEWHEEL events
+int wheel_dx;
+int wheel_dy;
 
 
 void Editor_MousePress(keycode_t mod)
@@ -1024,8 +999,6 @@ int Editor_RawKey(int event)
 	if (key == 0)
 		return 1;
 
-	wheel_dx = wheel_dy = 0;
-
 #if 0  // DEBUG
 	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
 #endif
@@ -1074,16 +1047,7 @@ int Editor_RawWheel(int event)
 	if (wheel_dx == 0 && wheel_dy == 0)
 		return 1;
 
-	if (edit.render3d)
-	{
-		Editor_RawKey(FL_MOUSEWHEEL);
-	}
-	else
-	{
-		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-		Editor_Wheel(wheel_dx, wheel_dy, mod);
-	}
+	Editor_RawKey(FL_MOUSEWHEEL);
 
 	return 1;
 }
@@ -1599,7 +1563,7 @@ void CMD_ACT_Scale(void)
 		return;
 
 
-	// FIXME
+	// FIXME : button_mod is probably obsolete
 	edit.button_mod = Fl::event_state() & MOD_ALL_MASK;
 
 	int middle_x, middle_y;
@@ -1609,6 +1573,24 @@ void CMD_ACT_Scale(void)
 	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
 
 	Editor_SetAction(ACT_SCALE);
+}
+
+
+void CMD_WHEEL_Scroll()
+{
+	float speed = atof(EXEC_Param[0]);
+
+//???	if (mod == MOD_SHIFT)
+//???		speed /= 3.0;
+
+	float delta_x =     wheel_dx;
+	float delta_y = 0 - wheel_dy;
+
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+
+	speed = speed * base_size / 100.0 / grid.Scale;
+
+	grid.Scroll(delta_x * speed, delta_y * speed);
 }
 
 
@@ -2018,6 +2000,10 @@ static editor_command_t  command_table[] =
 
 	{	"ACT_Scale",
 		&CMD_ACT_Scale,
+	},
+
+	{	"WHEEL_Scroll",
+		&CMD_WHEEL_Scroll
 	},
 
 	{	"GoToCamera",

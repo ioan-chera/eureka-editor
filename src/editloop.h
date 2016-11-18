@@ -112,7 +112,6 @@ void Editor_Init();
 
 void Editor_DigitKey(keycode_t key);
 
-void Editor_Wheel(int dx, int dy, keycode_t mod);
 void Editor_MousePress(keycode_t mod);
 void Editor_MouseRelease();
 void Editor_MiddlePress(keycode_t mod);
