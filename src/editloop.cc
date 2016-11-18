@@ -1044,7 +1044,7 @@ int Editor_RawKey(int event)
 {
 	Nav_UpdateKeys();
 
-	if (event == FL_KEYUP)
+	if (event == FL_KEYUP || event == FL_RELEASE)
 		return 0;
 
 	bool convert_meta = (edit.action == ACT_WAIT_META);
@@ -1052,9 +1052,11 @@ int Editor_RawKey(int event)
 	if (edit.action == ACT_WAIT_META)
 		Editor_ClearAction();
 
-	int raw_key   = Fl::event_key();
-	int raw_state = Fl::event_state();
+	int raw_key = Fl::event_key();
+	if (event == FL_PUSH)
+		raw_key = FL_Button + Fl::event_button();
 
+	int raw_state = Fl::event_state();
 	if (convert_meta)
 		raw_state = MOD_META;
 
@@ -1088,6 +1090,11 @@ int Editor_RawKey(int event)
 		return 1;
 
 	if (ExecuteKey(key, KCTX_General))
+		return 1;
+
+
+	// always eat mouse buttons
+	if (event == FL_PUSH)
 		return 1;
 
 
@@ -1128,15 +1135,6 @@ int Editor_RawWheel(int event)
 
 int Editor_RawButton(int event)
 {
-	Nav_UpdateKeys();
-
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
-
-	int button = Fl::event_button();
-
-	bool down = (event == FL_PUSH);
-
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button
 	// release event, because when the first button is released the "pushed"
@@ -1145,12 +1143,22 @@ int Editor_RawButton(int event)
 	if (Fl::event_buttons() != 0)
 		Fl::pushed(main_win->canvas);
 
-	// start scrolling the map?  [or moving in 3D view]
-	if (button == 3)
+
+	int button = Fl::event_button();
+
+	bool down = (event == FL_PUSH);
+
+	if (button >= 3)
 	{
-		Editor_ScrollMap(down ? -1 : +1);
-		return 1;
+		return Editor_RawKey(event);
 	}
+
+
+	Nav_UpdateKeys();
+
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
+
 
 	// adjust offsets on a sidedef?
 	if (edit.render3d && button == 2)
@@ -1537,6 +1545,25 @@ void CMD_NAV_Scroll_Y(void)
 }
 
 
+static void NAV_Scroll_Mouse_release(void)
+{
+	Editor_ScrollMap(+1);
+}
+
+void CMD_NAV_Scroll_Mouse(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Mouse_release);
+
+	Editor_ScrollMap(-1);
+}
+
+
 void CMD_Merge(void)
 {
 	switch (edit.mode)
@@ -1894,6 +1921,10 @@ static editor_command_t  command_table[] =
 
 	{	"NAV_Scroll_Y",
 		&CMD_NAV_Scroll_Y
+	},
+
+	{	"NAV_Scroll_Mouse",
+		&CMD_NAV_Scroll_Mouse
 	},
 
 	{	"GoToCamera",
