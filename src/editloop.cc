@@ -536,6 +536,8 @@ typedef struct
 
 } nav_active_key_t;
 
+static nav_active_key_t cur_action_key;
+
 static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
 
 static unsigned int nav_time;
@@ -591,8 +593,7 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
 			(N.release)();
-
-			N.key = 0;
+			 N.key = 0;
 		}
 	}
 
@@ -606,21 +607,78 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 }
 
 
+bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
+{
+	nav_active_key_t& N = cur_action_key;
+
+	// already active?
+	if (N.key == key && N.release == func)
+		return false;
+
+	// release existing action
+	if (N.key != 0)
+	{
+		(N.release)();
+		 N.key = 0;
+	}
+
+	N.key = key;
+	N.release = func;
+
+	return true;
+}
+
+
+static inline bool CheckKeyPressed(nav_active_key_t& N)
+{
+	keycode_t base = N.key & FL_KEY_MASK;
+	keycode_t mod  = N.key & MOD_ALL_MASK;
+
+	// grab current modifiers, but simplify to a single one
+	keycode_t cur_mod = M_TranslateKey(0, Fl::event_state());
+
+	if (is_mouse_button(base))
+	{
+		if (mod == cur_mod && (Fl::event_buttons() & FL_BUTTON(base - FL_Button)))
+			return true;
+	}
+	else  // key on keyboard
+	{
+		if (mod == cur_mod && Fl::event_key(base))
+			return true;
+	}
+
+	return false;
+}
+
+
+void Nav_UpdateActionKey()
+{
+	nav_active_key_t& N = cur_action_key;
+
+	if (! N.key)
+		return;
+
+	if (! CheckKeyPressed(N))
+	{
+		(N.release)();
+		 N.key = 0;
+	}
+}
+
+
 void Nav_UpdateKeys()
 {
 	// ensure the currently active keys are still pressed
 	// [ call this after getting each keyboard event from FLTK ]
+
+	Nav_UpdateActionKey();
 
 	if (! edit.is_navigating)
 		return;
 
 	// we rebuilt this value
 	edit.is_navigating = false;
-
-	int cur_buttons = Fl::event_buttons();
-
-	// grab current modifiers, but simplify to a single one
-	keycode_t cur_mod = M_TranslateKey(0, Fl::event_state());
 
 	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
 	{
@@ -629,23 +687,7 @@ void Nav_UpdateKeys()
 		if (! N.key)
 			continue;
 
-		keycode_t base = N.key & FL_KEY_MASK;
-		keycode_t mod  = N.key & MOD_ALL_MASK;
-
-		bool is_pressed = false;
-
-		if (is_mouse_button(base))
-		{
-			if (mod == cur_mod && (cur_buttons & FL_BUTTON(base - FL_Button)))
-				is_pressed = true;
-		}
-		else  // key on keyboard
-		{
-			if (mod == cur_mod && Fl::event_key(base))
-				is_pressed = true;
-		}
-
-		if (! is_pressed)
+		if (! CheckKeyPressed(N))
 		{
 			// call release function, clear the slot
 			(N.release)();
@@ -1581,7 +1623,7 @@ void CMD_ACT_Selbox_Mouse(void)
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_SetKey(EXEC_CurKey, &ACT_Selbox_Mouse_release))
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_Selbox_Mouse_release))
 	{
 		Editor_SetAction(ACT_SELBOX);
 
