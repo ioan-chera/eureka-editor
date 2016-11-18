@@ -2616,11 +2616,14 @@ void R3D_NAV_Turn(void)
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float dist = atof(EXEC_Param[0]);
+	float turn = atof(EXEC_Param[0]);
+
+	// convert to radians
+	turn = turn * M_PI / 180.0;
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Turn_release);
 
-	view.nav_turn = dist;
+	view.nav_turn = turn;
 }
 
 
