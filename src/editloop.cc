@@ -534,7 +534,7 @@ void Nav_SetKey(keycode_t key, nav_release_func_t func)
 		// if it's the same physical key, release it now
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
-			(N.release)(N.key);
+			(N.release)();
 
 			N.key = 0;
 		}
@@ -590,7 +590,7 @@ void Nav_UpdateKeys()
 		if (! is_pressed)
 		{
 			// call release function, clear the slot
-			(N.release)(N.key);
+			(N.release)();
 
 			N.key = 0;
 			continue;

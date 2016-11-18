@@ -158,6 +158,9 @@ extern const char * EXEC_Flags[MAX_EXEC_PARAM];
 // result from command function, 0 is OK
 extern int EXEC_Errno;
 
+// key or mouse button pressed for command, 0 when none
+extern keycode_t EXEC_CurKey;
+
 bool Exec_HasFlag(const char *flag);
 
 bool ExecuteKey(keycode_t key, key_context_e context);

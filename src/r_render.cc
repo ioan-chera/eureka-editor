@@ -146,7 +146,7 @@ public:
 	unsigned int nav_time;
 
 	float nav_fwd, nav_right, nav_up;
-	float nav_dangle;
+	float nav_turn;
 
 public:
 	Y_View() : p_type(0), screen(NULL),
@@ -301,19 +301,6 @@ public:
 	void ClearHighlight()
 	{
 		hl.Clear();
-	}
-
-	void NavBegin()
-	{
-		if (! edit.is_navigating)
-		{
-			edit.is_navigating = true;
-		}
-
-		nav_fwd    = 0;
-		nav_right  = 0;
-		nav_up     = 0;
-		nav_dangle = 0;
 	}
 };
 
@@ -2350,6 +2337,10 @@ void Render3D_Term()
 
 void Render3D_ClearNav()
 {
+	view.nav_fwd   = 0;
+	view.nav_right = 0;
+	view.nav_up    = 0;
+	view.nav_turn  = 0;
 }
 
 
@@ -2371,9 +2362,9 @@ void Render3D_Navigate()
 	if (view.nav_up)
 		view.z += view.nav_up * delay_ms;
 
-	if (view.nav_dangle)
+	if (view.nav_turn)
 	{
-		float dang = view.nav_dangle * delay_ms;
+		float dang = view.nav_turn * delay_ms;
 
 		dang = CLAMP(-90, dang, 90);
 
@@ -2549,43 +2540,87 @@ void R3D_Turn(void)
 }
 
 
+static void R3D_NAV_Forward_release(void)
+{
+	view.nav_fwd = 0;
+}
+
 void R3D_NAV_Forward(void)
 {
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
 	float dist = atof(EXEC_Param[0]);
 
-	view.NavBegin();
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 
 	view.nav_fwd = dist;
 }
 
 
+static void R3D_NAV_Right_release(void)
+{
+	view.nav_right = 0;
+}
+
 void R3D_NAV_Right(void)
 {
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
 	float dist = atof(EXEC_Param[0]);
 
-	view.NavBegin();
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 
 	view.nav_right = dist;
 }
 
 
+static void R3D_NAV_Up_release(void)
+{
+	view.nav_up = 0;
+}
+
 void R3D_NAV_Up(void)
 {
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
 	float dist = atof(EXEC_Param[0]);
 
-	view.NavBegin();
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 
 	view.nav_up = dist;
 }
 
 
+static void R3D_NAV_Turn_release(void)
+{
+	view.nav_turn = 0;
+}
+
 void R3D_NAV_Turn(void)
 {
-	float angle = atof(EXEC_Param[0]);
+	if (! EXEC_CurKey)
+		return;
 
-	view.NavBegin();
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
 
-	view.nav_dangle = angle;
+	float dist = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Turn_release);
+
+	view.nav_turn = dist;
 }
 
 

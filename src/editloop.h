@@ -141,7 +141,7 @@ int  Editor_RawButton(int event);
 int  Editor_RawWheel(int event);
 int  Editor_RawMouse(int event);
 
-typedef void (* nav_release_func_t)(keycode_t key);
+typedef void (* nav_release_func_t)(void);
 
 void Nav_Clear();
 void Nav_Navigate();

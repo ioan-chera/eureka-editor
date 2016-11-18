@@ -29,6 +29,8 @@ const char * EXEC_Flags[MAX_EXEC_PARAM];
 
 int EXEC_Errno;
 
+keycode_t EXEC_CurKey;
+
 
 static std::vector< editor_command_t * > all_commands;
 
@@ -1101,6 +1103,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 	EXEC_Errno = 0;
 
+	EXEC_CurKey = key;
+
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
 		key_binding_t& bind = all_bindings[i];
@@ -1152,7 +1156,8 @@ bool ExecuteCommand(const char *name, const char *param1,
 	EXEC_Param[1] = param2;
 	EXEC_Param[2] = param3;
 
-	EXEC_Errno = 0;
+	EXEC_Errno  = 0;
+	EXEC_CurKey = 0;
 
 	DoExecuteCommand(cmd);
 
