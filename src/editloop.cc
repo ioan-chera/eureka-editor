@@ -55,7 +55,6 @@ int active_wmask = 0;
 // config items
 int default_edit_mode = 0;  // Things
 
-bool mouse_wheel_scrolls_map = false;
 bool same_mode_clears_selection = false;
 
 int multi_select_modifier = 0;

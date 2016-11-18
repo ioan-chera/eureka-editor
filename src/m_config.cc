@@ -540,15 +540,6 @@ static const opt_desc_t options[] =
 		&minimum_drag_pixels
 	},
 
-	{	"mouse_wheel_scrolls_map",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Use the mouse wheel events for scrolling, not zooming",
-		NULL,
-		&mouse_wheel_scrolls_map
-	},
-
 	{	"multi_select_modifier",
 		0,
 		OPT_INTEGER,

@@ -532,7 +532,6 @@ public:
 	Fl_Choice *gen_smallscroll;
 	Fl_Choice *gen_largescroll;
 
-	Fl_Check_Button *gen_wheelscroll;
 	Fl_Check_Button *grid_hide_free;
 
 	Fl_Button *dotty_axis;
@@ -760,9 +759,6 @@ UI_Preferences::UI_Preferences() :
 		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
 		  gen_largescroll->down_box(FL_BORDER_BOX);
 		  gen_largescroll->hide();
-		}
-		{ gen_wheelscroll = new Fl_Check_Button(50, 170, 245, 25, " mouse wheel scrolls the map");
-		  gen_wheelscroll->down_box(FL_DOWN_BOX);
 		}
 		{ grid_hide_free = new Fl_Check_Button(50, 200, 245, 25, " hide grid in FREE mode");
 		  grid_hide_free->down_box(FL_DOWN_BOX);
@@ -1256,7 +1252,6 @@ void UI_Preferences::LoadValues()
 	grid_toggle->value(grid_toggle_type);
 
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
-	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
 	dotty_axis ->color(dotty_axis_col);
@@ -1365,7 +1360,6 @@ void UI_Preferences::SaveValues()
 	grid_toggle_type  = grid_toggle->value();
 
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
-	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
 	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
 
 	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();

@@ -39,7 +39,6 @@ extern bool begin_maximized;
 extern bool map_scroll_bars;
 
 extern bool leave_offsets_alone;
-extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
