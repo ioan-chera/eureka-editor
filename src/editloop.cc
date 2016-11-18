@@ -498,12 +498,26 @@ static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
 
 static void Editor_ClearNav()
 {
+	edit.nav_scroll_dx = 0;
+	edit.nav_scroll_dy = 0;
 }
 
 
 static void Editor_Navigate()
 {
-	// TODO
+	float delay_ms = Nav_TimeDiff();
+
+	delay_ms = delay_ms / 1000.0;
+
+	if (edit.nav_scroll_dx || edit.nav_scroll_dy)
+	{
+		float delta_x = edit.nav_scroll_dx * delay_ms;
+		float delta_y = edit.nav_scroll_dy * delay_ms;
+
+		grid.Scroll(delta_x, delta_y);
+	}
+
+	RedrawMap();
 }
 
 
@@ -1477,24 +1491,49 @@ void CMD_Scroll(void)
 }
 
 
-void CMD_NAV_Scroll(void)
+static void NAV_Scroll_X_release(void)
 {
-	// these are percentages
-	float delta_x = atof(EXEC_Param[0]);
-	float delta_y = atof(EXEC_Param[1]);
+	edit.nav_scroll_dx = 0;
+}
 
-	if (delta_x == 0 && delta_y == 0)
-	{
-		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0], EXEC_Param[1]);
+void CMD_NAV_Scroll_X(void)
+{
+	if (! EXEC_CurKey)
 		return;
-	}
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	float perc = atof(EXEC_Param[0]);
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta_x = delta_x * base_size / 100.0 / grid.Scale;
-	delta_y = delta_y * base_size / 100.0 / grid.Scale;
+	edit.nav_scroll_dx = perc * base_size / 100.0 / grid.Scale;
 
-	// TODO
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_X_release);
+}
+
+
+static void NAV_Scroll_Y_release(void)
+{
+	edit.nav_scroll_dy = 0;
+}
+
+void CMD_NAV_Scroll_Y(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	float perc = atof(EXEC_Param[0]);
+
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+
+	edit.nav_scroll_dy = perc * base_size / 100.0 / grid.Scale;
+
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Y_release);
 }
 
 
@@ -1849,8 +1888,12 @@ static editor_command_t  command_table[] =
 		&CMD_Scroll
 	},
 
-	{	"NAV_Scroll",
-		&CMD_NAV_Scroll
+	{	"NAV_Scroll_X",
+		&CMD_NAV_Scroll_X
+	},
+
+	{	"NAV_Scroll_Y",
+		&CMD_NAV_Scroll_Y
 	},
 
 	{	"GoToCamera",

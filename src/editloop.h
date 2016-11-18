@@ -98,6 +98,10 @@ typedef struct
 
 	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
 
+	// private navigation stuff
+	float nav_scroll_dx;
+	float nav_scroll_dy;
+
 } Editor_State_t;
 
 
