@@ -454,6 +454,48 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 }
 
 
+static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
+{
+	// started?
+	if (mode < 0)
+	{
+		edit.is_scrolling = true;
+		main_win->SetCursor(FL_CURSOR_HAND);
+		return;
+	}
+
+	// finished?
+	if (mode > 0)
+	{
+		edit.is_scrolling = false;
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
+		return;
+	}
+
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (edit.render3d)
+	{
+		Render3D_RBScroll(dx, dy, mod);
+	}
+	else
+	{
+		int speed = 8;  // FIXME: CONFIG OPTION
+
+		if (mod == MOD_SHIFT)
+			speed /= 2;
+		else if (mod == MOD_COMMAND)
+			speed *= 2;
+
+		double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
+		double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
+
+		grid.Scroll(delta_x, delta_y);
+	}
+}
+
+
 static void Editor_ClearNav()
 {
 }
@@ -620,6 +662,542 @@ unsigned int Nav_TimeDiff()
 		diff = 250;
 
 	return diff;
+}
+
+
+//------------------------------------------------------------------------
+//   EVENT HANDLING
+//------------------------------------------------------------------------
+
+static int wheel_dx;
+static int wheel_dy;
+
+
+void Editor_Wheel(int dx, int dy, keycode_t mod)
+{
+	if (mouse_wheel_scrolls_map && mod !=
+#ifdef __APPLE__
+		MOD_ALT)
+#else
+		MOD_COMMAND)
+#endif
+	{
+		int speed = 12;  // FIXME: CONFIG OPTION
+
+		if (mod == MOD_SHIFT)
+			speed = MAX(1, speed / 3);
+
+		grid.Scroll(  dx * (double) speed / grid.Scale,
+		            - dy * (double) speed / grid.Scale);
+	}
+	else
+	{
+		dy = (dy > 0) ? +1 : -1;
+
+		Editor_Zoom(- dy, edit.map_x, edit.map_y);
+	}
+}
+
+
+void Editor_MousePress(keycode_t mod)
+{
+	if (edit.button_down >= 2)
+		return;
+
+	edit.button_down = 1;
+	edit.button_mod  = mod;
+
+	// remember some state (for dragging)
+	mouse_button1_x = Fl::event_x();
+	mouse_button1_y = Fl::event_y();
+
+	button1_map_x = edit.map_x;
+	button1_map_y = edit.map_y;
+
+	// this is a special case, since we want to allow the new vertex
+	// from a split-line (when in in drawing mode) to be draggable.
+	// [ that is achieved by setting edit.clicked ]
+
+	if (easier_drawing_mode && edit.split_line.valid() &&
+		edit.action != ACT_DRAW_LINE)
+	{
+		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
+		return;
+	}
+
+	if (edit.action == ACT_DRAW_LINE)
+	{
+		bool force_cont = (mod == MOD_SHIFT);
+		bool no_fill    = (mod == MOD_COMMAND);
+
+		Insert_Vertex(force_cont, no_fill, true /* is_button */);
+		return;
+	}
+
+	// find the object under the pointer.
+	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
+
+	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
+	// opening a selection box in places which are otherwise impossible.
+	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
+	{
+		edit.clicked.clear();
+	}
+
+	// clicking on an empty space starts a new selection box.
+	if (edit.clicked.is_nil())
+	{
+		if (edit.did_a_move)
+			Selection_Clear();
+
+		Editor_SetAction(ACT_SELBOX);
+		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		return;
+	}
+
+	// Note: drawing mode is activated on RELEASE...
+	//       (as the user may be trying to drag the vertex)
+}
+
+
+void Editor_MouseRelease()
+{
+	edit.button_down = 0;
+
+	Objid click_obj(edit.clicked);
+	edit.clicked.clear();
+
+	bool was_did_move = edit.did_a_move;
+	edit.did_a_move = false;
+
+	// releasing the button while dragging : drop the selection.
+
+	if (edit.action == ACT_DRAG)
+	{
+		Editor_ClearAction();
+
+		int dx, dy;
+		main_win->canvas->DragFinish(&dx, &dy);
+
+		if (! (dx==0 && dy==0))
+		{
+			CMD_MoveObjects(dx, dy);
+
+			// next select action will clear the selection
+			edit.did_a_move = true;
+		}
+
+		edit.drag_single_vertex = -1;
+		RedrawMap();
+		return;
+	}
+
+	// releasing the button while there was a selection box
+	// causes all the objects within the box to be selected.
+
+	if (edit.action == ACT_SELBOX)
+	{
+		Editor_ClearAction();
+		Editor_ClearErrorMode();
+
+		int x1, y1, x2, y2;
+		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+
+		// a mere click and release will unselect everything
+		if (x1 == x2 && y1 == y2)
+			CMD_UnselectAll();
+		else
+			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+
+		UpdateHighlight();
+		RedrawMap();
+		return;
+	}
+
+
+	// nothing needed while in drawing mode
+	if (edit.action == ACT_DRAW_LINE)
+		return;
+
+
+	// optional multi-select : require a certain modifier key
+	if (multi_select_modifier &&
+		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
+	{
+		was_did_move = true;
+	}
+
+
+	// handle a clicked-on object
+	// e.g. select the object if unselected, and vice versa.
+
+	if (click_obj.valid())
+	{
+		bool was_empty = edit.Selected->empty();
+
+		Editor_ClearErrorMode();
+
+		if (was_did_move)
+			Selection_Clear();
+
+		// check if pointing at the same object as before
+		Objid near_obj;
+
+		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
+
+		if (near_obj != click_obj)
+			return;
+
+		// begin drawing mode (unless a modifier was pressed)
+		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
+			was_empty && edit.button_mod == 0)
+		{
+			Editor_SetAction(ACT_DRAW_LINE);
+			edit.drawing_from = click_obj.num;
+			edit.Selected->set(click_obj.num);
+
+			RedrawMap();
+			return;
+		}
+
+		edit.Selected->toggle(click_obj.num);
+		RedrawMap();
+		return;
+	}
+}
+
+
+void Editor_MiddlePress(keycode_t mod)
+{
+	if (edit.button_down & 1)  // allow 0 or 2
+		return;
+
+#if 0
+	// ability to insert stuff via the mouse
+	if (mod == 0)
+	{
+		EXEC_Param[0] = "";
+		EXEC_Flags[0] = "";
+
+		CMD_Insert();
+		return;
+	}
+#endif
+
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to scale");
+		return;
+	}
+
+	int middle_x, middle_y;
+
+	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
+
+
+	Editor_SetAction(ACT_SCALE);
+
+	edit.button_mod = mod;
+
+	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
+}
+
+
+void Editor_MiddleRelease()
+{
+	edit.button_down = 0;
+
+	if (edit.action == ACT_SCALE)
+	{
+		Editor_ClearAction();
+
+		scale_param_t param;
+
+		main_win->canvas->ScaleFinish(param);
+
+		CMD_ScaleObjects2(param);
+
+		RedrawMap();
+	}
+}
+
+
+
+void Editor_LeaveWindow()
+{
+	edit.pointer_in_window = false;
+
+	// this offers a handy way to get out of drawing mode
+	if (edit.action == ACT_DRAW_LINE)
+		Editor_ClearAction();
+
+	UpdateHighlight();
+}
+
+
+void Editor_MouseMotion(int x, int y, keycode_t mod)
+{
+	int map_x, map_y;
+
+	main_win->canvas->PointerPos(&map_x, &map_y);
+
+	edit.map_x = map_x;
+	edit.map_y = map_y;
+	edit.pointer_in_window = true; // FIXME
+
+	if (edit.pointer_in_window)
+		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+
+//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+
+	if (edit.action == ACT_SCALE)
+	{
+		main_win->canvas->ScaleUpdate(edit.map_x, edit.map_y, mod);
+		return;
+	}
+
+	if (edit.action == ACT_DRAW_LINE)
+	{
+		UpdateHighlight();
+		main_win->canvas->redraw();
+		return;
+	}
+
+	if (edit.action == ACT_SELBOX)
+	{
+		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
+		return;
+	}
+
+	if (edit.action == ACT_DRAG)
+	{
+		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+
+		// if dragging a single vertex, update the possible split_line
+		UpdateHighlight();
+		return;
+	}
+
+	//
+	// begin dragging?
+	//
+	int pixel_dx = Fl::event_x() - mouse_button1_x;
+	int pixel_dy = Fl::event_y() - mouse_button1_y;
+
+	if (edit.button_down == 1 && edit.clicked.valid() &&
+		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
+	{
+		if (! edit.Selected->get(edit.clicked.num))
+		{
+			if (edit.did_a_move)
+				Selection_Clear();
+
+			edit.Selected->set(edit.clicked.num);
+			edit.did_a_move = false;
+		}
+
+		int focus_x, focus_y;
+
+		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
+
+		Editor_SetAction(ACT_DRAG);
+		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
+
+		// check for a single vertex
+		edit.drag_single_vertex = -1;
+
+		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
+		{
+			edit.drag_single_vertex = edit.Selected->find_first();
+			SYS_ASSERT(edit.drag_single_vertex >= 0);
+		}
+
+		UpdateHighlight();
+		return;
+	}
+
+
+	// in general, just update the highlight, split-line (etc)
+
+	UpdateHighlight();
+}
+
+
+//------------------------------------------------------------------------
+
+
+int Editor_RawKey(int event)
+{
+	Nav_UpdateKeys();
+
+	if (event == FL_KEYUP)
+		return 0;
+
+	bool convert_meta = (edit.action == ACT_WAIT_META);
+
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
+
+	int raw_key   = Fl::event_key();
+	int raw_state = Fl::event_state();
+
+	if (convert_meta)
+		raw_state = MOD_META;
+
+	keycode_t key = M_TranslateKey(raw_key, raw_state);
+
+	if (key == 0)
+		return convert_meta ? 1 : 0;
+
+	wheel_dx = wheel_dy = 0;
+
+#if 0  // DEBUG
+	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
+#endif
+
+	// keyboard propagation logic
+
+	// handle digits specially
+	if ('1' <= (key & FL_KEY_MASK) && (key & FL_KEY_MASK) <= '9')
+	{
+		Editor_DigitKey(key);
+		return 1;
+	}
+
+	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+		return 1;
+
+	if (edit.render3d && ExecuteKey(key, KCTX_Render))
+		return 1;
+
+	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
+		return 1;
+
+	if (ExecuteKey(key, KCTX_General))
+		return 1;
+
+
+	// NOTE: the key may still get handled by something (e.g. Menus)
+	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
+
+
+	// prevent a META-fied key from being sent elsewhere, because it
+	// won't really be META-fied anywhere else -- including the case
+	// of it being sent back to this function as a SHORTCUT event.
+	return convert_meta ? 1 : 0;
+}
+
+
+int Editor_RawWheel(int event)
+{
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
+
+	// ensure we zoom from correct place
+	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
+
+	wheel_dx = Fl::event_dx();
+	wheel_dy = Fl::event_dy();
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	// TODO: DistributeKey(EU_Wheel | mod)
+
+	if (edit.render3d)
+		Render3D_Wheel(wheel_dx, 0 - wheel_dy, mod);
+	else
+		Editor_Wheel(wheel_dx, wheel_dy, mod);
+
+	return 1;
+}
+
+
+int Editor_RawButton(int event)
+{
+	Nav_UpdateKeys();
+
+	if (edit.action == ACT_WAIT_META)
+		Editor_ClearAction();
+
+	int button = Fl::event_button();
+
+	bool down = (event == FL_PUSH);
+
+	// Hack Alert : this is required to support pressing two buttons at the
+	// same time.  Without this, FLTK does not send us the second button
+	// release event, because when the first button is released the "pushed"
+	// widget becomes NULL.
+
+	if (Fl::event_buttons() != 0)
+		Fl::pushed(main_win->canvas);
+
+	// start scrolling the map?  [or moving in 3D view]
+	if (button == 3)
+	{
+		Editor_ScrollMap(down ? -1 : +1);
+		return 1;
+	}
+
+	// adjust offsets on a sidedef?
+	if (edit.render3d && button == 2)
+	{
+		Render3D_AdjustOffsets(down ? -1 : +1);
+		return 1;
+	}
+
+	if (! down)
+	{
+		if (button == 2)
+			Editor_MiddleRelease();
+		else if (! edit.render3d)
+			Editor_MouseRelease();
+		return 1;
+	}
+
+	int mod = Fl::event_state() & MOD_ALL_MASK;
+
+	if (button == 2)
+	{
+		Editor_MiddlePress(mod);
+	}
+	else if (! edit.render3d)
+	{
+		Editor_MousePress(mod);
+	}
+
+	return 1;
+}
+
+
+int Editor_RawMouse(int event)
+{
+	int mod = Fl::event_state() & MOD_ALL_MASK;
+
+	int dx = Fl::event_x() - mouse_last_x;
+	int dy = Fl::event_y() - mouse_last_y;
+
+
+	if (edit.is_scrolling)
+	{
+		Editor_ScrollMap(0, dx, dy);
+	}
+	else if (edit.action == ACT_ADJUST_OFS)
+	{
+		Render3D_AdjustOffsets(0, dx, dy);
+	}
+	else if (edit.render3d)
+	{
+		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+	}
+	else
+	{
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+	}
+
+	mouse_last_x = Fl::event_x();
+	mouse_last_y = Fl::event_y();
+
+	return 1;
 }
 
 
@@ -1187,592 +1765,6 @@ void BR_Scroll(void)
 	int delta = atoi(EXEC_Param[0]);
 
 	main_win->browser->Scroll(delta);
-}
-
-
-//------------------------------------------------------------------------
-
-
-static void Editor_ScrollMap(int mode, int dx = 0, int dy = 0)
-{
-	// started?
-	if (mode < 0)
-	{
-		edit.is_scrolling = true;
-		main_win->SetCursor(FL_CURSOR_HAND);
-		return;
-	}
-
-	// finished?
-	if (mode > 0)
-	{
-		edit.is_scrolling = false;
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
-		return;
-	}
-
-
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (edit.render3d)
-	{
-		Render3D_RBScroll(dx, dy, mod);
-	}
-	else
-	{
-		int speed = 8;  // FIXME: CONFIG OPTION
-
-		if (mod == MOD_SHIFT)
-			speed /= 2;
-		else if (mod == MOD_COMMAND)
-			speed *= 2;
-
-		double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
-		double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
-
-		grid.Scroll(delta_x, delta_y);
-	}
-}
-
-
-//------------------------------------------------------------------------
-//   EVENT HANDLING
-//------------------------------------------------------------------------
-
-int wheel_dx;
-int wheel_dy;
-
-
-int Editor_RawKey(int event)
-{
-	Nav_UpdateKeys();
-
-	if (event == FL_KEYUP)
-		return 0;
-
-	bool convert_meta = (edit.action == ACT_WAIT_META);
-
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
-
-	int raw_key   = Fl::event_key();
-	int raw_state = Fl::event_state();
-
-	if (convert_meta)
-		raw_state = MOD_META;
-
-	keycode_t key = M_TranslateKey(raw_key, raw_state);
-
-	if (key == 0)
-		return convert_meta ? 1 : 0;
-
-	wheel_dx = wheel_dy = 0;
-
-#if 0  // DEBUG
-	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key));
-#endif
-
-	// keyboard propagation logic
-
-	// handle digits specially
-	if ('1' <= (key & FL_KEY_MASK) && (key & FL_KEY_MASK) <= '9')
-	{
-		Editor_DigitKey(key);
-		return 1;
-	}
-
-	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
-		return 1;
-
-	if (edit.render3d && ExecuteKey(key, KCTX_Render))
-		return 1;
-
-	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
-		return 1;
-
-	if (ExecuteKey(key, KCTX_General))
-		return 1;
-
-
-	// NOTE: the key may still get handled by something (e.g. Menus)
-	// fprintf(stderr, "Unknown key %d (0x%04x)\n", key, key);
-
-
-	// prevent a META-fied key from being sent elsewhere, because it
-	// won't really be META-fied anywhere else -- including the case
-	// of it being sent back to this function as a SHORTCUT event.
-	return convert_meta ? 1 : 0;
-}
-
-
-int Editor_RawWheel(int event)
-{
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
-
-	// ensure we zoom from correct place
-	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
-
-	wheel_dx = Fl::event_dx();
-	wheel_dy = Fl::event_dy();
-
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
-
-	// TODO: DistributeKey(EU_Wheel | mod)
-
-	if (edit.render3d)
-		Render3D_Wheel(wheel_dx, 0 - wheel_dy, mod);
-	else
-		Editor_Wheel(wheel_dx, wheel_dy, mod);
-
-	return 1;
-}
-
-
-int Editor_RawButton(int event)
-{
-	Nav_UpdateKeys();
-
-	if (edit.action == ACT_WAIT_META)
-		Editor_ClearAction();
-
-	int button = Fl::event_button();
-
-	bool down = (event == FL_PUSH);
-
-	// Hack Alert : this is required to support pressing two buttons at the
-	// same time.  Without this, FLTK does not send us the second button
-	// release event, because when the first button is released the "pushed"
-	// widget becomes NULL.
-
-	if (Fl::event_buttons() != 0)
-		Fl::pushed(main_win->canvas);
-
-	// start scrolling the map?  [or moving in 3D view]
-	if (button == 3)
-	{
-		Editor_ScrollMap(down ? -1 : +1);
-		return 1;
-	}
-
-	// adjust offsets on a sidedef?
-	if (edit.render3d && button == 2)
-	{
-		Render3D_AdjustOffsets(down ? -1 : +1);
-		return 1;
-	}
-
-	if (! down)
-	{
-		if (button == 2)
-			Editor_MiddleRelease();
-		else if (! edit.render3d)
-			Editor_MouseRelease();
-		return 1;
-	}
-
-	int mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (button == 2)
-	{
-		Editor_MiddlePress(mod);
-	}
-	else if (! edit.render3d)
-	{
-		Editor_MousePress(mod);
-	}
-
-	return 1;
-}
-
-
-int Editor_RawMouse(int event)
-{
-	int mod = Fl::event_state() & MOD_ALL_MASK;
-
-	int dx = Fl::event_x() - mouse_last_x;
-	int dy = Fl::event_y() - mouse_last_y;
-
-
-	if (edit.is_scrolling)
-	{
-		Editor_ScrollMap(0, dx, dy);
-	}
-	else if (edit.action == ACT_ADJUST_OFS)
-	{
-		Render3D_AdjustOffsets(0, dx, dy);
-	}
-	else if (edit.render3d)
-	{
-		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
-	}
-	else
-	{
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
-	}
-
-	mouse_last_x = Fl::event_x();
-	mouse_last_y = Fl::event_y();
-
-	return 1;
-}
-
-
-//------------------------------------------------------------------------
-
-void Editor_Wheel(int dx, int dy, keycode_t mod)
-{
-	if (mouse_wheel_scrolls_map && mod !=
-#ifdef __APPLE__
-		MOD_ALT)
-#else
-		MOD_COMMAND)
-#endif
-	{
-		int speed = 12;  // FIXME: CONFIG OPTION
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 3);
-
-		grid.Scroll(  dx * (double) speed / grid.Scale,
-		            - dy * (double) speed / grid.Scale);
-	}
-	else
-	{
-		dy = (dy > 0) ? +1 : -1;
-
-		Editor_Zoom(- dy, edit.map_x, edit.map_y);
-	}
-}
-
-
-void Editor_MousePress(keycode_t mod)
-{
-	if (edit.button_down >= 2)
-		return;
-
-	edit.button_down = 1;
-	edit.button_mod  = mod;
-
-	// remember some state (for dragging)
-	mouse_button1_x = Fl::event_x();
-	mouse_button1_y = Fl::event_y();
-
-	button1_map_x = edit.map_x;
-	button1_map_y = edit.map_y;
-
-	// this is a special case, since we want to allow the new vertex
-	// from a split-line (when in in drawing mode) to be draggable.
-	// [ that is achieved by setting edit.clicked ]
-
-	if (easier_drawing_mode && edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
-	{
-		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
-		return;
-	}
-
-	if (edit.action == ACT_DRAW_LINE)
-	{
-		bool force_cont = (mod == MOD_SHIFT);
-		bool no_fill    = (mod == MOD_COMMAND);
-
-		Insert_Vertex(force_cont, no_fill, true /* is_button */);
-		return;
-	}
-
-	// find the object under the pointer.
-	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
-
-	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
-	// opening a selection box in places which are otherwise impossible.
-	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
-	{
-		edit.clicked.clear();
-	}
-
-	// clicking on an empty space starts a new selection box.
-	if (edit.clicked.is_nil())
-	{
-		if (edit.did_a_move)
-			Selection_Clear();
-
-		Editor_SetAction(ACT_SELBOX);
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
-		return;
-	}
-
-	// Note: drawing mode is activated on RELEASE...
-	//       (as the user may be trying to drag the vertex)
-}
-
-
-void Editor_MouseRelease()
-{
-	edit.button_down = 0;
-
-	Objid click_obj(edit.clicked);
-	edit.clicked.clear();
-
-	bool was_did_move = edit.did_a_move;
-	edit.did_a_move = false;
-
-	// releasing the button while dragging : drop the selection.
-
-	if (edit.action == ACT_DRAG)
-	{
-		Editor_ClearAction();
-
-		int dx, dy;
-		main_win->canvas->DragFinish(&dx, &dy);
-
-		if (! (dx==0 && dy==0))
-		{
-			CMD_MoveObjects(dx, dy);
-
-			// next select action will clear the selection
-			edit.did_a_move = true;
-		}
-
-		edit.drag_single_vertex = -1;
-		RedrawMap();
-		return;
-	}
-
-	// releasing the button while there was a selection box
-	// causes all the objects within the box to be selected.
-
-	if (edit.action == ACT_SELBOX)
-	{
-		Editor_ClearAction();
-		Editor_ClearErrorMode();
-
-		int x1, y1, x2, y2;
-		main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
-
-		// a mere click and release will unselect everything
-		if (x1 == x2 && y1 == y2)
-			CMD_UnselectAll();
-		else
-			SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
-
-		UpdateHighlight();
-		RedrawMap();
-		return;
-	}
-
-
-	// nothing needed while in drawing mode
-	if (edit.action == ACT_DRAW_LINE)
-		return;
-
-
-	// optional multi-select : require a certain modifier key
-	if (multi_select_modifier &&
-		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
-	{
-		was_did_move = true;
-	}
-
-
-	// handle a clicked-on object
-	// e.g. select the object if unselected, and vice versa.
-
-	if (click_obj.valid())
-	{
-		bool was_empty = edit.Selected->empty();
-
-		Editor_ClearErrorMode();
-
-		if (was_did_move)
-			Selection_Clear();
-
-		// check if pointing at the same object as before
-		Objid near_obj;
-
-		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
-
-		if (near_obj != click_obj)
-			return;
-
-		// begin drawing mode (unless a modifier was pressed)
-		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty && edit.button_mod == 0)
-		{
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = click_obj.num;
-			edit.Selected->set(click_obj.num);
-
-			RedrawMap();
-			return;
-		}
-
-		edit.Selected->toggle(click_obj.num);
-		RedrawMap();
-		return;
-	}
-}
-
-
-void Editor_MiddlePress(keycode_t mod)
-{
-	if (edit.button_down & 1)  // allow 0 or 2
-		return;
-
-#if 0
-	// ability to insert stuff via the mouse
-	if (mod == 0)
-	{
-		EXEC_Param[0] = "";
-		EXEC_Flags[0] = "";
-
-		CMD_Insert();
-		return;
-	}
-#endif
-
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to scale");
-		return;
-	}
-
-	int middle_x, middle_y;
-
-	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
-
-
-	Editor_SetAction(ACT_SCALE);
-
-	edit.button_mod = mod;
-
-	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
-}
-
-
-void Editor_MiddleRelease()
-{
-	edit.button_down = 0;
-
-	if (edit.action == ACT_SCALE)
-	{
-		Editor_ClearAction();
-
-		scale_param_t param;
-
-		main_win->canvas->ScaleFinish(param);
-
-		CMD_ScaleObjects2(param);
-
-		RedrawMap();
-	}
-}
-
-
-
-void Editor_LeaveWindow()
-{
-	edit.pointer_in_window = false;
-
-	// this offers a handy way to get out of drawing mode
-	if (edit.action == ACT_DRAW_LINE)
-		Editor_ClearAction();
-
-	UpdateHighlight();
-}
-
-
-void Editor_MouseMotion(int x, int y, keycode_t mod)
-{
-	int map_x, map_y;
-
-	main_win->canvas->PointerPos(&map_x, &map_y);
-
-	edit.map_x = map_x;
-	edit.map_y = map_y;
-	edit.pointer_in_window = true; // FIXME
-
-	if (edit.pointer_in_window)
-		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
-
-//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
-
-	if (edit.action == ACT_SCALE)
-	{
-		main_win->canvas->ScaleUpdate(edit.map_x, edit.map_y, mod);
-		return;
-	}
-
-	if (edit.action == ACT_DRAW_LINE)
-	{
-		UpdateHighlight();
-		main_win->canvas->redraw();
-		return;
-	}
-
-	if (edit.action == ACT_SELBOX)
-	{
-		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
-		return;
-	}
-
-	if (edit.action == ACT_DRAG)
-	{
-		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
-
-		// if dragging a single vertex, update the possible split_line
-		UpdateHighlight();
-		return;
-	}
-
-	//
-	// begin dragging?
-	//
-	int pixel_dx = Fl::event_x() - mouse_button1_x;
-	int pixel_dy = Fl::event_y() - mouse_button1_y;
-
-	if (edit.button_down == 1 && edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
-	{
-		if (! edit.Selected->get(edit.clicked.num))
-		{
-			if (edit.did_a_move)
-				Selection_Clear();
-
-			edit.Selected->set(edit.clicked.num);
-			edit.did_a_move = false;
-		}
-
-		int focus_x, focus_y;
-
-		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
-
-		Editor_SetAction(ACT_DRAG);
-		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
-
-		// check for a single vertex
-		edit.drag_single_vertex = -1;
-
-		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
-		{
-			edit.drag_single_vertex = edit.Selected->find_first();
-			SYS_ASSERT(edit.drag_single_vertex >= 0);
-		}
-
-		UpdateHighlight();
-		return;
-	}
-
-
-	// in general, just update the highlight, split-line (etc)
-
-	UpdateHighlight();
-}
-
-
-void Editor_Resize(int is_width, int is_height)
-{
-	RedrawMap();
 }
 
 
