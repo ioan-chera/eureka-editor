@@ -872,8 +872,8 @@ void CMD_BrowserMode(void)
 void CMD_Scroll(void)
 {
 	// these are percentages
-	int delta_x = atoi(EXEC_Param[0]);
-	int delta_y = atoi(EXEC_Param[1]);
+	float delta_x = atof(EXEC_Param[0]);
+	float delta_y = atof(EXEC_Param[1]);
 
 	if (delta_x == 0 && delta_y == 0)
 	{
@@ -881,8 +881,10 @@ void CMD_Scroll(void)
 		return;
 	}
 
-	delta_x = delta_x * main_win->canvas->w() / 100.0 / grid.Scale;
-	delta_y = delta_y * main_win->canvas->h() / 100.0 / grid.Scale;
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+
+	delta_x = delta_x * base_size / 100.0 / grid.Scale;
+	delta_y = delta_y * base_size / 100.0 / grid.Scale;
 
 	grid.Scroll(delta_x, delta_y);
 
@@ -894,6 +896,27 @@ void CMD_Scroll(void)
 
 		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
 	}
+}
+
+
+void CMD_NAV_Scroll(void)
+{
+	// these are percentages
+	float delta_x = atof(EXEC_Param[0]);
+	float delta_y = atof(EXEC_Param[1]);
+
+	if (delta_x == 0 && delta_y == 0)
+	{
+		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0], EXEC_Param[1]);
+		return;
+	}
+
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+
+	delta_x = delta_x * base_size / 100.0 / grid.Scale;
+	delta_y = delta_y * base_size / 100.0 / grid.Scale;
+
+	// TODO
 }
 
 
@@ -1832,6 +1855,10 @@ static editor_command_t  command_table[] =
 
 	{	"Scroll",
 		&CMD_Scroll
+	},
+
+	{	"NAV_Scroll",
+		&CMD_NAV_Scroll
 	},
 
 	{	"GoToCamera",
