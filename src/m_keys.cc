@@ -206,7 +206,7 @@ keycode_t M_ParseKeyString(const char *str)
 
 	// convert uppercase letter --> lowercase + MOD_SHIFT
 	if (strlen(str) == 1 && str[0] >= 'A' && str[0] <= 'Z')
-		return MOD_SHIFT | (unsigned char) toupper(str[0]);
+		return MOD_SHIFT | (unsigned char) tolower(str[0]);
 
 	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
