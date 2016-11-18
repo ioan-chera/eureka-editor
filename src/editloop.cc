@@ -1177,6 +1177,29 @@ void CMD_EditMode(void)
 }
 
 
+void CMD_Select(void)
+{
+	if (edit.render3d)
+		return;
+
+	// FIXME : action in effect?
+
+	// FIXME : split_line in effect?
+
+	if (edit.highlight.is_nil())
+	{
+		Beep("Nothing under cursor");
+		return;
+	}
+
+	int obj_num = edit.highlight.num;
+
+	edit.Selected->toggle(obj_num);
+
+	RedrawMap();
+}
+
+
 void CMD_SelectAll(void)
 {
 	Editor_ClearErrorMode();
@@ -2026,6 +2049,10 @@ static editor_command_t  command_table[] =
 		&CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
+	},
+
+	{	"Select",
+		&CMD_Select
 	},
 
 	{	"SelectAll",
