@@ -779,7 +779,7 @@ void Editor_MouseRelease()
 	edit.did_a_move = false;
 
 	// releasing the button while dragging : drop the selection.
-
+#if 1
 	if (edit.action == ACT_DRAG)
 	{
 		Editor_ClearAction();
@@ -799,6 +799,7 @@ void Editor_MouseRelease()
 		RedrawMap();
 		return;
 	}
+#endif
 
 	// releasing the button while there was a selection box
 	// causes all the objects within the box to be selected.
@@ -912,6 +913,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		return;
 	}
 
+#if 0
 	//
 	// begin dragging?
 	//
@@ -949,6 +951,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		UpdateHighlight();
 		return;
 	}
+#endif
 
 
 	// in general, just update the highlight, split-line (etc)
@@ -1526,6 +1529,70 @@ void CMD_ACT_SelectBox(void)
 }
 
 
+static void ACT_Drag_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_DRAG)
+		return;
+
+	Editor_ClearAction();
+
+	int dx, dy;
+	main_win->canvas->DragFinish(&dx, &dy);
+
+	if (! (dx==0 && dy==0))
+	{
+		CMD_MoveObjects(dx, dy);
+
+//???	// next select action will clear the selection
+//???	edit.did_a_move = true;
+	}
+
+	edit.drag_single_vertex = -1;
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+void CMD_ACT_Drag(void)
+{
+	if (edit.render3d)
+		return;
+
+	if (! EXEC_CurKey)
+		return;
+
+	if (edit.Selected->empty())
+	{
+		Beep("Nothing to drag");
+		return;
+	}
+
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
+	{
+		int focus_x, focus_y;
+
+		GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+
+		Editor_SetAction(ACT_DRAG);
+		main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
+
+		// check for a single vertex
+		edit.drag_single_vertex = -1;
+
+#if 0  //????
+		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
+		{
+			edit.drag_single_vertex = edit.Selected->find_first();
+			SYS_ASSERT(edit.drag_single_vertex >= 0);
+		}
+#endif
+
+		UpdateHighlight();
+	}
+}
+
+
 static void ACT_Scale_release(void)
 {
 	// check if cancelled or overridden
@@ -1995,6 +2062,10 @@ static editor_command_t  command_table[] =
 
 	{	"ACT_SelectBox",
 		&CMD_ACT_SelectBox
+	},
+
+	{	"ACT_Drag",
+		&CMD_ACT_Drag
 	},
 
 	{	"ACT_Scale",
