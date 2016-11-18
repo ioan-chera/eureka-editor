@@ -1802,7 +1802,7 @@ void CMD_RotateObjects_Dialog()
 }
 
 
-void GRID_AdjustStep(void)
+void GRID_Bump(void)
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -2020,8 +2020,8 @@ static editor_command_t  command_table[] =
 		&CMD_ZoomSelection
 	},
 
-	{	"GRID_AdjustStep",
-		&GRID_AdjustStep
+	{	"GRID_Bump",
+		&GRID_Bump
 	},
 
 	{	"GRID_Set",
