@@ -543,7 +543,7 @@ void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 	if (LineDefAlreadyExists(v1, v2))
 		return;
 
-fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
+///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 
 	// Find a linedef which this new line would cross, and if it exists
 	// add a vertex there and create TWO lines.  Also handle a vertex
