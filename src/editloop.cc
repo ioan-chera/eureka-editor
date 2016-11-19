@@ -885,7 +885,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 
 //  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
-	if (edit.action == ACT_SCALE)
+	if (edit.action == ACT_TRANSFORM)
 	{
 		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y, mod);
 		return;
@@ -1221,7 +1221,7 @@ void CMD_UnselectAll(void)
 	Editor_ClearErrorMode();
 
 	if (edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_SCALE)
+		edit.action == ACT_TRANSFORM)
 	{
 		Editor_ClearAction();
 	}
@@ -1616,10 +1616,10 @@ void CMD_ACT_Drag(void)
 }
 
 
-static void ACT_Scale_release(void)
+static void ACT_Transform_release(void)
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_SCALE)
+	if (edit.action != ACT_TRANSFORM)
 		return;
 
 	Editor_ClearAction();
@@ -1633,7 +1633,7 @@ static void ACT_Scale_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Scale(void)
+void CMD_ACT_Transform(void)
 {
 	if (edit.render3d)
 		return;
@@ -1647,8 +1647,45 @@ void CMD_ACT_Scale(void)
 		return;
 	}
 
+	const char *keyword = EXEC_Param[0];
+	transform_keyword_e  mode;
 
-	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Scale_release))
+	if (! keyword[0])
+	{
+		Beep("ACT_Transform: missing keyword");
+		return;
+	}
+	else if (y_stricmp(keyword, "scale") == 0)
+	{
+		mode = TRANS_K_Scale;
+	}
+	else if (y_stricmp(keyword, "stretch") == 0)
+	{
+		mode = TRANS_K_Stretch;
+	}
+	else if (y_stricmp(keyword, "rotate") == 0)
+	{
+		mode = TRANS_K_Rotate;
+	}
+	else if (y_stricmp(keyword, "rotscale") == 0)
+	{
+		mode = TRANS_K_RotScale;
+	}
+	else if (y_stricmp(keyword, "skew") == 0)
+	{
+		mode = TRANS_K_Skew;
+	}
+	else
+	{
+		Beep("ACT_Transform: unknown keyword: %s", keyword);
+		return;
+	}
+
+
+	// FIXME : use "mode" properly
+
+
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Transform_release))
 		return;
 
 
@@ -1661,7 +1698,7 @@ void CMD_ACT_Scale(void)
 
 	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y);
 
-	Editor_SetAction(ACT_SCALE);
+	Editor_SetAction(ACT_TRANSFORM);
 }
 
 
@@ -2095,8 +2132,10 @@ static editor_command_t  command_table[] =
 		&CMD_ACT_Drag
 	},
 
-	{	"ACT_Scale",
-		&CMD_ACT_Scale,
+	{	"ACT_Transform",
+		&CMD_ACT_Transform,
+		/* flags */ NULL,
+		/* keywords */ "scale stretch rotate rotscale skew"
 	},
 
 	{	"WHEEL_Scroll",

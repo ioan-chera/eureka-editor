@@ -34,7 +34,7 @@ typedef enum
 
 	ACT_SELBOX,			// user is outlining a selection box
 	ACT_DRAG,			// user is dragging some objects
-	ACT_SCALE,			// user is scaling (etc) some objects
+	ACT_TRANSFORM,		// user is scaling/rotating some objects
 
 	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
 	ACT_DRAW_LINE,		// user is drawing a new line

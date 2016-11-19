@@ -46,6 +46,17 @@ public:
 };
 
 
+typedef enum
+{
+	TRANS_K_Scale	= 0,	// scale and keep aspect
+	TRANS_K_Stretch,		// scale X and Y independently
+	TRANS_K_Rotate,			// rotate
+	TRANS_K_RotScale,		// rotate and scale at same time
+	TRANS_K_Skew			// skew (shear) along an axis
+
+} transform_keyword_e;
+
+
 void Objs_CalcMiddle(selection_c * list, int *x, int *y);
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
 

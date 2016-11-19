@@ -199,7 +199,7 @@ void UI_Canvas::DrawEverything()
 
 	if (edit.action == ACT_DRAG && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
-	else if (edit.action == ACT_SCALE && ! trans_lines.empty())
+	else if (edit.action == ACT_TRANSFORM && ! trans_lines.empty())
 		DrawSelection(&trans_lines);
 
 	if (highlight.valid())
@@ -1302,7 +1302,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	selection_iterator_c it;
 
-	if (edit.action == ACT_SCALE)
+	if (edit.action == ACT_TRANSFORM)
 	{
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
