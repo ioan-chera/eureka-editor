@@ -887,7 +887,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 
 	if (edit.action == ACT_SCALE)
 	{
-		main_win->canvas->ScaleUpdate(edit.map_x, edit.map_y, mod);
+		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y, mod);
 		return;
 	}
 
@@ -1624,11 +1624,11 @@ static void ACT_Scale_release(void)
 
 	Editor_ClearAction();
 
-	scale_param_t param;
+	transform_t param;
 
-	main_win->canvas->ScaleFinish(param);
+	main_win->canvas->TransformFinish(param);
 
-	ScaleObjects2(param);
+	TransformObjects(param);
 
 	RedrawMap();
 }
@@ -1659,7 +1659,7 @@ void CMD_ACT_Scale(void)
 
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	main_win->canvas->ScaleBegin(edit.map_x, edit.map_y, middle_x, middle_y);
+	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y);
 
 	Editor_SetAction(ACT_SCALE);
 }

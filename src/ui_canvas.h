@@ -52,9 +52,9 @@ private:
 	selection_c drag_lines;
 
 	// scaling state
-	int   scale_start_x,  scale_start_y;
-	scale_param_t scale_param;
-	selection_c scale_lines;
+	int   trans_start_x,  trans_start_y;
+	transform_t trans_param;
+	selection_c trans_lines;
 
 	// drawing state only
 	int map_lx, map_ly;
@@ -95,9 +95,9 @@ public:
 	void DragUpdate(int map_x, int map_y);
 	void DragFinish(int *dx, int *dy);
 
-	void ScaleBegin(int map_x, int map_y, int middle_x, int middle_y);
-	void ScaleUpdate(int map_x, int map_y, keycode_t mod);
-	void ScaleFinish(scale_param_t& param);
+	void TransformBegin(int map_x, int map_y, int middle_x, int middle_y);
+	void TransformUpdate(int map_x, int map_y, keycode_t mod);
+	void TransformFinish(transform_t& param);
 
 	void PointerPos(int *map_x, int *map_y);
 

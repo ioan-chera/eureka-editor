@@ -41,7 +41,7 @@
 #include "x_mirror.h"
 
 
-void scale_param_t::Clear()
+void transform_t::Clear()
 {
 	mid_x = mid_y = 0;
 
@@ -53,7 +53,7 @@ void scale_param_t::Clear()
 }
 
 
-void scale_param_t::Apply(int *x, int *y) const
+void transform_t::Apply(int *x, int *y) const
 {
 	float x0 = *x - mid_x;
 	float y0 = *y - mid_y;
@@ -618,7 +618,7 @@ void CMD_Shrink(void)
 }
 
 
-static void DoScaleTwoThings(selection_c& list, scale_param_t& param)
+static void DoScaleTwoThings(selection_c& list, transform_t& param)
 {
 	selection_iterator_c it;
 
@@ -646,7 +646,7 @@ static void DoScaleTwoThings(selection_c& list, scale_param_t& param)
 }
 
 
-static void DoScaleTwoVertices(selection_c& list, scale_param_t& param)
+static void DoScaleTwoVertices(selection_c& list, transform_t& param)
 {
 	selection_c verts(OBJ_VERTICES);
 
@@ -669,7 +669,7 @@ static void DoScaleTwoVertices(selection_c& list, scale_param_t& param)
 }
 
 
-static void DoScaleTwoStuff(selection_c& list, scale_param_t& param)
+static void DoScaleTwoStuff(selection_c& list, transform_t& param)
 {
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -693,7 +693,7 @@ static void DoScaleTwoStuff(selection_c& list, scale_param_t& param)
 }
 
 
-void ScaleObjects2(scale_param_t& param)
+void TransformObjects(transform_t& param)
 {
 	// this is called by the MOUSE2 dynamic scaling code
 
@@ -723,7 +723,7 @@ void ScaleObjects2(scale_param_t& param)
 }
 
 
-static void DetermineOrigin(scale_param_t& param, int pos_x, int pos_y)
+static void DetermineOrigin(transform_t& param, int pos_x, int pos_y)
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
@@ -756,7 +756,7 @@ void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 	SYS_ASSERT(scale_x > 0);
 	SYS_ASSERT(scale_y > 0);
 
-	scale_param_t param;
+	transform_t param;
 
 	param.Clear();
 
@@ -820,7 +820,7 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 {
 	SYS_ASSERT(edit.mode == OBJ_SECTORS);
 
-	scale_param_t param;
+	transform_t param;
 
 	param.Clear();
 
@@ -841,7 +841,7 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 
 void RotateObjects3(double deg, int pos_x, int pos_y)
 {
-	scale_param_t param;
+	transform_t param;
 
 	param.Clear();
 

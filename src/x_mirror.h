@@ -28,7 +28,7 @@
 #define __EUREKA_X_MIRROR_H__
 
 
-struct scale_param_t
+struct transform_t
 {
 public:
 	int mid_x, mid_y;
@@ -50,7 +50,7 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y);
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
 
 
-void ScaleObjects2(scale_param_t& param);
+void TransformObjects(transform_t& param);
 
 void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
 void ScaleObjects4(double scale_x, double scale_y, double scale_z,

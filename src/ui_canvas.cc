@@ -66,7 +66,7 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label),
 	highlight(), split_ld(-1),
 	drag_lines(),
-	scale_lines(),
+	trans_lines(),
 	seen_sectors()
 { }
 
@@ -199,8 +199,8 @@ void UI_Canvas::DrawEverything()
 
 	if (edit.action == ACT_DRAG && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
-	else if (edit.action == ACT_SCALE && ! scale_lines.empty())
-		DrawSelection(&scale_lines);
+	else if (edit.action == ACT_SCALE && ! trans_lines.empty())
+		DrawSelection(&trans_lines);
 
 	if (highlight.valid())
 	{
@@ -1197,7 +1197,7 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x = Things[objnum]->x;
 			int y = Things[objnum]->y;
 
-			scale_param.Apply(&x, &y);
+			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				return;
@@ -1215,7 +1215,7 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x = Vertices[objnum]->x;
 			int y = Vertices[objnum]->y;
 
-			scale_param.Apply(&x, &y);
+			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
 				return;
@@ -1243,8 +1243,8 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x2 = LineDefs[objnum]->End  ()->x;
 			int y2 = LineDefs[objnum]->End  ()->y;
 
-			scale_param.Apply(&x1, &y1);
-			scale_param.Apply(&x2, &y2);
+			trans_param.Apply(&x1, &y1);
+			trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				return;
@@ -1276,8 +1276,8 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 				int x2 = LineDefs[n]->End  ()->x;
 				int y2 = LineDefs[n]->End  ()->y;
 
-				scale_param.Apply(&x1, &y1);
-				scale_param.Apply(&x2, &y2);
+				trans_param.Apply(&x1, &y1);
+				trans_param.Apply(&x2, &y2);
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1666,52 +1666,52 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 }
 
 
-void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
+void UI_Canvas::TransformBegin(int map_x, int map_y, int middle_x, int middle_y)
 {
-	scale_start_x = map_x;
-	scale_start_y = map_y;
+	trans_start_x = map_x;
+	trans_start_y = map_y;
 
-	scale_param.Clear();
+	trans_param.Clear();
 
-	scale_param.mid_x = middle_x;
-	scale_param.mid_y = middle_y;
+	trans_param.mid_x = middle_x;
+	trans_param.mid_y = middle_y;
 
 	if (edit.mode == OBJ_VERTICES)
 	{
-		scale_lines.change_type(OBJ_LINEDEFS);
+		trans_lines.change_type(OBJ_LINEDEFS);
 
-		ConvertSelection(edit.Selected, &scale_lines);
+		ConvertSelection(edit.Selected, &trans_lines);
 	}
 }
 
-void UI_Canvas::ScaleFinish(scale_param_t& param)
+void UI_Canvas::TransformFinish(transform_t& param)
 {
-	scale_lines.clear_all();
+	trans_lines.clear_all();
 
-	param = scale_param;
+	param = trans_param;
 }
 
-void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
+void UI_Canvas::TransformUpdate(int map_x, int map_y, keycode_t mod)
 {
-	int dx1 = map_x - scale_param.mid_x;
-	int dy1 = map_y - scale_param.mid_y;
+	int dx1 = map_x - trans_param.mid_x;
+	int dy1 = map_y - trans_param.mid_y;
 
-	int dx2 = scale_start_x - scale_param.mid_x;
-	int dy2 = scale_start_y - scale_param.mid_y;
+	int dx2 = trans_start_x - trans_param.mid_x;
+	int dy2 = trans_start_y - trans_param.mid_y;
 
 	bool any_aspect = (mod & MOD_SHIFT)   ? true : false;
 	bool rotate     = (mod & MOD_COMMAND) ? true : false;
 
-	scale_param.rotate = 0;
+	trans_param.rotate = 0;
 
 	if (rotate)
 	{
 		int angle1 = (int)ComputeAngle(dx1, dy1);
 		int angle2 = (int)ComputeAngle(dx2, dy2);
 
-		scale_param.rotate = angle1 - angle2;
+		trans_param.rotate = angle1 - angle2;
 
-//		fprintf(stderr, "angle diff : %1.2f\n", scale_rotate * 360.0 / 65536.0);
+//		fprintf(stderr, "angle diff : %1.2f\n", trans_rotate * 360.0 / 65536.0);
 	}
 
 	if (rotate)  // TODO: CONFIG ITEM: rotate_with_scale
@@ -1729,8 +1729,8 @@ void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
 		dy2 = dx2;
 	}
 
-	scale_param.scale_x = dx2 ? (dx1 / (float)dx2) : 1.0;
-	scale_param.scale_y = dy2 ? (dy1 / (float)dy2) : 1.0;
+	trans_param.scale_x = dx2 ? (dx1 / (float)dx2) : 1.0;
+	trans_param.scale_y = dy2 ? (dy1 / (float)dy2) : 1.0;
 
 	redraw();
 }
