@@ -250,9 +250,9 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_z = that->origin_z->value() - 1;
 
 	if (edit.mode == OBJ_SECTORS)
-		CMD_ScaleObjects4(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
+		ScaleObjects4(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
 	else
-		CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
+		ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
 
 	that->want_close = true;
 }
@@ -342,7 +342,7 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_x = (that->origin->value() % 3) - 1;
 	int pos_y = (that->origin->value() / 3) - 1;
 
-	CMD_RotateObjects3(angle, pos_x, pos_y);
+	RotateObjects3(angle, pos_x, pos_y);
 
 	that->want_close = true;
 }

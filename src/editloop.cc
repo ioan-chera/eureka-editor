@@ -1628,7 +1628,7 @@ static void ACT_Scale_release(void)
 
 	main_win->canvas->ScaleFinish(param);
 
-	CMD_ScaleObjects2(param);
+	ScaleObjects2(param);
 
 	RedrawMap();
 }

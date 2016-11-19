@@ -50,6 +50,15 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y);
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
 
 
+void ScaleObjects2(scale_param_t& param);
+
+void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
+void ScaleObjects4(double scale_x, double scale_y, double scale_z,
+                   int pos_x, int pos_y, int pos_z);
+
+void RotateObjects3(double deg, int pos_x, int pos_y);
+
+
 /* commands */
 
 void CMD_Mirror  (void);
@@ -57,15 +66,6 @@ void CMD_Rotate90(void);
 void CMD_Enlarge (void);
 void CMD_Shrink  (void);
 void CMD_Quantize(void);
-
-void CMD_ScaleObjects2(scale_param_t& param);
-
-void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
-void CMD_ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                       int pos_x, int pos_y, int pos_z);
-
-void CMD_RotateObjects3(double deg, int pos_x, int pos_y);
-
 
 #endif  /* __EUREKA_X_MIRROR_H__ */
 

@@ -693,7 +693,7 @@ static void DoScaleTwoStuff(selection_c& list, scale_param_t& param)
 }
 
 
-void CMD_ScaleObjects2(scale_param_t& param)
+void ScaleObjects2(scale_param_t& param)
 {
 	// this is called by the MOUSE2 dynamic scaling code
 
@@ -751,7 +751,7 @@ static void DetermineOrigin(scale_param_t& param, int pos_x, int pos_y)
 }
 
 
-void CMD_ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
+void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 {
 	SYS_ASSERT(scale_x > 0);
 	SYS_ASSERT(scale_y > 0);
@@ -815,8 +815,8 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 	}
 }
 
-void CMD_ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                       int pos_x, int pos_y, int pos_z)
+void ScaleObjects4(double scale_x, double scale_y, double scale_z,
+                   int pos_x, int pos_y, int pos_z)
 {
 	SYS_ASSERT(edit.mode == OBJ_SECTORS);
 
@@ -839,7 +839,7 @@ void CMD_ScaleObjects4(double scale_x, double scale_y, double scale_z,
 }
 
 
-void CMD_RotateObjects3(double deg, int pos_x, int pos_y)
+void RotateObjects3(double deg, int pos_x, int pos_y)
 {
 	scale_param_t param;
 
