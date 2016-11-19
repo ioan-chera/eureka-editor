@@ -19,10 +19,7 @@ General
    -  floor_bump_xxx values
 
 +  Key binding system for mouse buttons
-   -  convert MIDDLE button (insert/resize/rotate) for KEY system
    -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
-   -  convert button stuff in 3D render to use KEY system
-   -  preference for "bindable mouse wheel (disable normal behavior)"
 
 +  Proper system to specify which ports can be used with each game.
 
@@ -102,8 +99,6 @@ General
 +  Large font mode, more readable on 1920x1080 monitors
 
 +  sprite rendering in the 2D canvas
-
-+  ability to hide the right-side panel
 
 ?  a toolbar
 
@@ -186,10 +181,6 @@ WISH: support DECORATE as (or in) a resource file
 
 Documentation
 -------------
-
-+  cannot Undo after building nodes
-   -  happens because we reload the map (because the current WAD file 
-      has been replaced by a new one)
 
 +  add supported OSes -- e.g. Windows >= XP
 
@@ -341,6 +332,8 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+NO:  use OpenGL for rendering 2D and/or 3D views
+
 NO:  Restore last window position and maximized state
 
 NO:  un-hard-code menu shortcuts?
@@ -411,4 +404,6 @@ NO:  a key to toggle "grab mouse" mode in 3D view
 
 NO:  animation mode, render continuously and show any lighting
      effects and animated / scrolling textures and sprites
+
+NO:  ability to hide the right-side panel
 

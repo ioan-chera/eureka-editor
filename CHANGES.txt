@@ -24,6 +24,9 @@ CHANGES IN Eureka 1.XX
 
 -  edit menu "Move/Scale/Rotate Objects" commands can be bound to keys
 
+-  ability to skew (shear) objects with the mouse
+
+
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
