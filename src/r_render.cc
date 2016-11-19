@@ -1484,7 +1484,7 @@ public:
 
 		/* query mode : is mouse over this wall part? */
 
-		if (query_mode == 1)
+		if (query_mode & 1)
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
@@ -1556,7 +1556,7 @@ public:
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
 		float dist = 1.0 / dw->cur_iz;
 
-		if (query_mode == 2)
+		if (query_mode & 2)
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
@@ -1756,7 +1756,7 @@ public:
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
-		if (view.sprites && query_mode != 1)
+		if (view.sprites)
 			for (int k=0 ; k < NumThings ; k++)
 				AddThing(k);
 
@@ -1773,7 +1773,7 @@ public:
 
 	void DoQuery(int qx, int qy)
 	{
-		query_mode = (edit.mode == OBJ_THINGS) ? 2 : 1;
+		query_mode = 3;
 
 		query_sx   = qx;
 		query_sy   = qy;
