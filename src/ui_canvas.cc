@@ -1699,8 +1699,8 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 	int dx1 = map_x - trans_param.mid_x;
 	int dy1 = map_y - trans_param.mid_y;
 
-	int dx2 = trans_start_x - trans_param.mid_x;
-	int dy2 = trans_start_y - trans_param.mid_y;
+	int dx0 = trans_start_x - trans_param.mid_x;
+	int dy0 = trans_start_y - trans_param.mid_y;
 
 	trans_param.scale_x = trans_param.scale_y = 1;
 	trans_param.skew_x  = trans_param.skew_y  = 0;
@@ -1709,9 +1709,9 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 	if (trans_mode == TRANS_K_Rotate || trans_mode == TRANS_K_RotScale)
 	{
 		int angle1 = (int)ComputeAngle(dx1, dy1);
-		int angle2 = (int)ComputeAngle(dx2, dy2);
+		int angle0 = (int)ComputeAngle(dx0, dy0);
 
-		trans_param.rotate = angle1 - angle2;
+		trans_param.rotate = angle1 - angle0;
 
 //		fprintf(stderr, "angle diff : %1.2f\n", trans_rotate * 360.0 / 65536.0);
 	}
@@ -1721,18 +1721,18 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 		case TRANS_K_Scale:
 		case TRANS_K_RotScale:
 			dx1 = MAX(abs(dx1), abs(dy1));
-			dx2 = MAX(abs(dx2), abs(dy2));
+			dx0 = MAX(abs(dx0), abs(dy0));
 
-			if (dx2)
+			if (dx0)
 			{
-				trans_param.scale_x = dx1 / (float)dx2;
+				trans_param.scale_x = dx1 / (float)dx0;
 				trans_param.scale_y = trans_param.scale_x;
 			}
 			break;
 
 		case TRANS_K_Stretch:
-			if (dx2) trans_param.scale_x = dx1 / (float)dx2;
-			if (dy2) trans_param.scale_y = dy1 / (float)dy2;
+			if (dx0) trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) trans_param.scale_y = dy1 / (float)dy0;
 			break;
 
 		case TRANS_K_Rotate:
@@ -1740,7 +1740,14 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 			break;
 
 		case TRANS_K_Skew:
-			// FIXME : skew logic
+			if (abs(dx0) >= abs(dy0))
+			{
+				if (dx0) trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+			}
+			else
+			{
+				if (dy0) trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+			}
 			break;
 	}
 

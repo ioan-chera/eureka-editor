@@ -75,8 +75,8 @@ void transform_t::Apply(int *x, int *y) const
 		float x1 = x0;
 		float y1 = y0;
 
-		x0 = x1 + y1 * skew_y;
-		y0 = y1 + x1 * skew_x;
+		x0 = x1 + y1 * skew_x;
+		y0 = y1 + x1 * skew_y;
 	}
 
 	x0 = x0 * scale_x;
