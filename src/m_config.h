@@ -93,9 +93,9 @@ extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
-extern bool glbsp_fast;
-extern bool glbsp_verbose;
-extern bool glbsp_warn;
+extern bool bsp_fast;
+extern bool bsp_verbose;
+extern bool bsp_warn;
 
 
 /* ==== FUNCTIONS ==================== */

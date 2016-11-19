@@ -1223,5 +1223,107 @@ void LD_FixForLostSide(int ld)
 }
 
 
+//  SideDef packing logic -- raw from glBSP
+#if 0
+
+static int SidedefCompare(const void *p1, const void *p2)
+{
+	int comp;
+
+	int side1 = ((const u16_t *) p1)[0];
+	int side2 = ((const u16_t *) p2)[0];
+
+	sidedef_t *A = lev_sidedefs[side1];
+	sidedef_t *B = lev_sidedefs[side2];
+
+	if (side1 == side2)
+		return 0;
+
+	// don't merge sidedefs on special lines
+	if (A->on_special || B->on_special)
+		return side1 - side2;
+
+	if (A->sector != B->sector)
+	{
+		if (A->sector == NULL) return -1;
+		if (B->sector == NULL) return +1;
+
+		return (A->sector->index - B->sector->index);
+	}
+
+	if ((int)A->x_offset != (int)B->x_offset)
+		return A->x_offset - (int)B->x_offset;
+
+	if ((int)A->y_offset != B->y_offset)
+		return (int)A->y_offset - (int)B->y_offset;
+
+	// compare textures
+
+	comp = memcmp(A->upper_tex, B->upper_tex, sizeof(A->upper_tex));
+	if (comp) return comp;
+
+	comp = memcmp(A->lower_tex, B->lower_tex, sizeof(A->lower_tex));
+	if (comp) return comp;
+
+	comp = memcmp(A->mid_tex, B->mid_tex, sizeof(A->mid_tex));
+	if (comp) return comp;
+
+	// sidedefs must be the same
+	return 0;
+}
+
+void DetectDuplicateSidedefs(void)
+{
+	int i;
+	u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
+
+	GB_DisplayTicker();
+
+	// sort array of indices
+	for (i=0; i < num_sidedefs; i++)
+		array[i] = i;
+
+	qsort(array, num_sidedefs, sizeof(u16_t), SidedefCompare);
+
+	// now mark them off
+	for (i=0; i < num_sidedefs - 1; i++)
+	{
+		// duplicate ?
+		if (SidedefCompare(array + i, array + i+1) == 0)
+		{
+			sidedef_t *A = lev_sidedefs[array[i]];
+			sidedef_t *B = lev_sidedefs[array[i+1]];
+
+			// found a duplicate !
+			B->equiv = A->equiv ? A->equiv : A;
+		}
+	}
+
+	UtilFree(array);
+
+	// update all linedefs
+	for (i=0, new_num=0; i < num_linedefs; i++)
+	{
+		linedef_t *L = lev_linedefs[i];
+
+		// handle duplicated sidedefs
+		while (L->right && L->right->equiv)
+		{
+			L->right->ref_count--;
+			L->right = L->right->equiv;
+			L->right->ref_count++;
+		}
+
+		while (L->left && L->left->equiv)
+		{
+			L->left->ref_count--;
+			L->left = L->left->equiv;
+			L->left->ref_count++;
+		}
+	}
+}
+#endif
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

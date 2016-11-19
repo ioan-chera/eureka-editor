@@ -68,13 +68,14 @@ public:
 	bool GetLine(char *buffer, size_t buf_size);
 
 	// write some data to the lump.  Only the lump which had just
-	// been created with Wad_file::AddLump() can be written to.
-	bool Write(void *data, int len);
+	// been created with Wad_file::AddLump() or RecreateLump() can be
+	// written to.
+	bool Write(const void *data, int len);
 
 	// write some text to the lump
 	void Printf(const char *msg, ...);
 
-	// mark the lump as finished (after writing it).
+	// mark the lump as finished (after writing data to it).
 	bool Finish();
 
 	// predicate for std::sort()
@@ -165,7 +166,8 @@ public:
 
 	Lump_c * GetLump(short index);
 	Lump_c * FindLump(const char *name);
-	Lump_c * FindLumpInLevel(const char *name, short level);
+	Lump_c * FindLumpInLevel(const char *name, short index /* a lump index */);
+	short    FindLumpInLevel_Raw(const char *name, short index /* a lump index */);
 
 	short FindLumpNum(const char *name);
 
@@ -179,6 +181,7 @@ public:
 	short NumLevels() const { return (short)levels.size(); }
 	short GetLevel(short index);
 	short FindLevel_Raw(const char *name);  // returns level index
+	short LastLevelLump(short index);
 
 	map_format_e LevelFormat(short lump_index);
 
@@ -192,7 +195,8 @@ public:
 	bool Backup(const char *filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
-	// and EndWrite() methods.
+	// and EndWrite() methods.  the on-disk wad directory may be trashed
+	// during this period, it will be re-written by EndWrite().
 	void BeginWrite();
 	void EndWrite();
 
@@ -208,6 +212,10 @@ public:
 	// which follow it.  'index' is a lump number (e.g. from FindLevel)
 	void RemoveLevel(short index);
 
+	// removes any GL-Nodes lumps that are associated with the given
+	// level.  'index' is a lump number.
+	void RemoveGLNodes(short index);
+
 	// insert a new lump.
 	// The second form is for a level marker.
 	// The 'max_size' parameter (if >= 0) specifies the most data
@@ -215,6 +223,10 @@ public:
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
 	Lump_c * AddLevel(const char *name, int max_size = -1);
+
+	// setup lump to write new data to it.
+	// the old contents are lost.
+	void RecreateLump(Lump_c *lump, int max_size = -1);
 
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of

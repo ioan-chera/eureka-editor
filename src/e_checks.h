@@ -30,7 +30,7 @@
 #include "ui_window.h"
 
 
-void SideDefs_Unpack(bool no_history = false);
+void SideDefs_Unpack(bool is_after_load = false);
 void SideDefs_NormalizeMiddles();
 
 void Tags_ApplyNewValue(int new_tag);

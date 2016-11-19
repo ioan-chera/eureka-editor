@@ -396,31 +396,31 @@ static const opt_desc_t options[] =
 		&floor_bump_large
 	},
 
-	{	"glbsp_fast",
+	{	"bsp_fast",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
-		&glbsp_fast
+		&bsp_fast
 	},
 
-	{	"glbsp_verbose",
+	{	"bsp_verbose",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: be verbose, show level information",
 		NULL,
-		&glbsp_verbose
+		&bsp_verbose
 	},
 
-	{	"glbsp_warn",
+	{	"bsp_warn",
 		0,
 		OPT_BOOLEAN,
 		"v",
 		"Node building: show all warning messages",
 		NULL,
-		&glbsp_warn
+		&bsp_warn
 	},
 
 	{	"grid_hide_in_free_mode",
@@ -1399,7 +1399,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 		tokenbuf[tokenlen] = 0;
 		tokenlen = -1;
 
-		tokens[num_tok++] = strdup(tokenbuf);
+		tokens[num_tok++] = StringDup(tokenbuf);
 
 		// end of line?  if yes, break out of for loop
 		if (ch == 0 || ch == '\n')
@@ -1414,7 +1414,7 @@ void M_FreeLine(const char ** tokens, int num_tok)
 {
 	for (int i = 0 ; i < num_tok ; i++)
 	{
-		free((void *) tokens[i]);
+		StringFree(tokens[i]);
 
 		tokens[i] = NULL;
 	}

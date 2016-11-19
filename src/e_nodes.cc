@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,20 +26,18 @@
 #include "ui_window.h"
 #include "ui_nodes.h"
 
-
-#include "glbsp.h"
+#include "bsp.h"
 
 
 // config items
-bool glbsp_fast    = false;
-bool glbsp_verbose = false;
-bool glbsp_warn    = false;
+bool bsp_fast    = false;
+bool bsp_verbose = false;
+bool bsp_warn    = false;
 
 
-static glbsp::nodebuildinfo_t nb_info;
-static volatile glbsp::nodebuildcomms_t nb_comms;
+static ajbsp::nodebuildinfo_t * nb_info;
 
-static int display_mode = glbsp::DIS_INVALID;
+static int display_mode = ajbsp::DIS_INVALID;
 static int progress_limit;
 
 static char message_buf[MSG_BUF_LEN];
@@ -47,34 +45,34 @@ static char message_buf[MSG_BUF_LEN];
 static UI_NodeDialog * dialog;
 
 
-static const char *glbsp_ErrorString(glbsp::glbsp_ret_e ret)
+static const char *build_ErrorString(ajbsp::build_result_e ret)
 {
 	switch (ret)
 	{
-		case glbsp::GLBSP_E_OK: return "OK";
+		case ajbsp::BUILD_OK: return "OK";
 
 		 // the arguments were bad/inconsistent.
-		case glbsp::GLBSP_E_BadArgs: return "Bad Arguments";
+		case ajbsp::BUILD_BadArgs: return "Bad Arguments";
 
 		// the info was bad/inconsistent, but has been fixed
-		case glbsp::GLBSP_E_BadInfoFixed: return "Bad Args (fixed)";
+		case ajbsp::BUILD_BadInfoFixed: return "Bad Args (fixed)";
 
 		// file errors
-		case glbsp::GLBSP_E_ReadError:  return "Read Error";
-		case glbsp::GLBSP_E_WriteError: return "Write Error";
+		case ajbsp::BUILD_ReadError:  return "Read Error";
+		case ajbsp::BUILD_WriteError: return "Write Error";
 
 		// building was cancelled
-		case glbsp::GLBSP_E_Cancelled: return "Cancelled by User";
+		case ajbsp::BUILD_Cancelled: return "Cancelled by User";
 
 		// an unknown error occurred (this is the catch-all value)
-		case glbsp::GLBSP_E_Unknown:
+		case ajbsp::BUILD_Unknown:
 
 		default: return "Unknown Error";
 	}
 }
 
 
-static void GB_PrintMsg(const char *str, ...)
+void GB_PrintMsg(const char *str, ...)
 {
 	va_list args;
 
@@ -86,45 +84,31 @@ static void GB_PrintMsg(const char *str, ...)
 
 	dialog->Print(message_buf);
 
-	LogPrintf("GLBSP: %s", message_buf);
+	LogPrintf("BSP: %s", message_buf);
 }
 
-static void GB_FatalError(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, MSG_BUF_LEN, str, args);
-	va_end(args);
-
-	message_buf[MSG_BUF_LEN-1] = 0;
-
-	FatalError("glBSP Failure:\n\n%s", message_buf);
-	/* NOT REACHED */
-}
-
-static void GB_Ticker(void)
+void GB_DisplayTicker(void)
 {
 	if (dialog->WantCancel())
 	{
-		nb_comms.cancelled = TRUE;
+		nb_info->cancelled = true;
 	}
 }
 
-static glbsp::boolean_g GB_DisplayOpen(glbsp::displaytype_e type)
+bool GB_DisplayOpen(ajbsp::displaytype_e type)
 {
 	display_mode = type;
-	return TRUE;
+	return true;
 }
 
-static void GB_DisplaySetTitle(const char *str)
+void GB_DisplaySetTitle(const char *str)
 {
 	/* does nothing */
 }
 
-static void GB_DisplaySetBarText(int barnum, const char *str)
+void GB_DisplaySetBarText(int barnum, const char *str)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 1)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
 		dialog->SetStatus(str);
 
@@ -153,17 +137,17 @@ static void GB_DisplaySetBarText(int barnum, const char *str)
 	}
 }
 
-static void GB_DisplaySetBarLimit(int barnum, int limit)
+void GB_DisplaySetBarLimit(int barnum, int limit)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		progress_limit = MAX(1, limit);
 	}
 }
 
-static void GB_DisplaySetBar(int barnum, int count)
+void GB_DisplaySetBar(int barnum, int count)
 {
-	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		int perc = count * 100.0 / progress_limit;
 
@@ -171,75 +155,185 @@ static void GB_DisplaySetBar(int barnum, int count)
 	}
 }
 
-static void GB_DisplayClose(void)
+
+void GB_DisplayClose(void)
 {
 	/* does nothing */
 }
 
-static const glbsp::nodebuildfuncs_t  build_funcs =
-{
-	GB_FatalError,
-	GB_PrintMsg,
-	GB_Ticker,
 
-	GB_DisplayOpen,
-	GB_DisplaySetTitle,
-	GB_DisplaySetBar,
-	GB_DisplaySetBarLimit,
-	GB_DisplaySetBarText,
-	GB_DisplayClose
-};
+static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
+{
+	if (!info->input_file || info->input_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("Missing input filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (!info->output_file || info->output_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("Missing output filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (MatchExtension(info->input_file, "gwa"))
+	{
+		ajbsp::SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (MatchExtension(info->output_file, "gwa"))
+	{
+		ajbsp::SetErrorMsg("Output file cannot be GWA");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (y_stricmp(info->input_file, info->output_file) == 0)
+	{
+		ajbsp::SetErrorMsg("Input and Outfile file are the same!");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	if (info->factor < 1 || info->factor > 32)
+	{
+		info->factor = DEFAULT_FACTOR;
+//???		SetErrorMsg("Bad factor value !");
+//???		return BUILD_BadInfoFixed;
+	}
+
+	if (info->block_limit < 1000 || info->block_limit > 64000)
+	{
+		info->block_limit = DEFAULT_BLOCK_LIMIT;
+//???		SetErrorMsg("Bad blocklimit value !");
+//???		return BUILD_;
+	}
+
+	return ajbsp::BUILD_OK;
+}
+
+
+static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
+{
+	char *file_msg;
+
+	ajbsp::build_result_e ret;
+
+	ret = CheckInfo(info);
+
+	if (ret != ajbsp::BUILD_OK)
+		return ret;
+
+	info->total_big_warn = 0;
+	info->total_small_warn = 0;
+
+	// clear cancelled flag
+	info->cancelled = false;
+
+	// sanity check
+	if (!info->input_file  || info->input_file[0] == 0 ||
+		!info->output_file || info->output_file[0] == 0)
+	{
+		ajbsp::SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
+		return ajbsp::BUILD_BadArgs;
+	}
+
+	int num_levels = edit_wad->NumLevels();
+
+	if (num_levels <= 0)
+	{
+		ajbsp::SetErrorMsg("No levels found in wad !");
+		return ajbsp::BUILD_Unknown;
+	}
+
+	GB_PrintMsg("\n");
+//	PrintVerbose("Creating nodes using tunable factor of %d\n", info->factor);
+
+	GB_DisplayOpen(ajbsp::DIS_BUILDPROGRESS);
+	GB_DisplaySetTitle("glBSP Build Progress");
+
+	file_msg = StringPrintf("File: %s", info->input_file);
+
+	GB_DisplaySetBarText(2, file_msg);
+	GB_DisplaySetBarLimit(2, num_levels * 10);
+	GB_DisplaySetBar(2, 0);
+
+	StringFree(file_msg);
+
+	info->file_pos = 0;
+
+	// loop over each level in the wad
+	for (int n = 0 ; n < num_levels ; n++)
+	{
+		ret = ajbsp::BuildNodesForLevel(info, n);
+
+		if (ret != ajbsp::BUILD_OK)
+			break;
+
+		info->file_pos += 10;
+
+		GB_DisplaySetBar(2, info->file_pos);
+
+		Fl::check();
+	}
+
+	GB_DisplayClose();
+
+	// writes all the lumps to the output wad
+	if (ret == ajbsp::BUILD_OK)
+	{
+		GB_PrintMsg("\n");
+		GB_PrintMsg("Total serious warnings: %d\n", info->total_big_warn);
+		GB_PrintMsg("Total minor warnings: %d\n", info->total_small_warn);
+
+//!!!		ReportFailedLevels();
+	}
+
+	return ret;
+}
 
 
 static bool DM_BuildNodes(const char *in_name, const char *out_name)
 {
 	LogPrintf("\n");
 
-	display_mode = glbsp::DIS_INVALID;
+	display_mode = ajbsp::DIS_INVALID;
 
-	memcpy(&nb_info,  &glbsp::default_buildinfo,  sizeof(glbsp::default_buildinfo));
-	memcpy((void*)&nb_comms, &glbsp::default_buildcomms, sizeof(glbsp::nodebuildcomms_t));
+	nb_info = new ajbsp::nodebuildinfo_t;
 
-	nb_info.input_file  = glbsp::GlbspStrDup(in_name);
-	nb_info.output_file = glbsp::GlbspStrDup(out_name);
+	nb_info->input_file  = StringDup(in_name);
+	nb_info->output_file = StringDup(out_name);
 
-	nb_info.fast          = glbsp_fast ? TRUE : FALSE;
-	nb_info.quiet         = glbsp_verbose ? FALSE : TRUE;
-	nb_info.mini_warnings = glbsp_warn ? TRUE : FALSE;
+	nb_info->fast          = bsp_fast ? true : false;
+	nb_info->quiet         = bsp_verbose ? false : true;
+	nb_info->mini_warnings = bsp_warn ? true : false;
 
-	nb_info.pack_sides = FALSE;
-	nb_info.force_normal = TRUE;
+	ajbsp::build_result_e  ret;
 
-	glbsp::glbsp_ret_e  ret;
+	ret = BuildAllNodes(nb_info);
 
-	ret = glbsp::CheckInfo(&nb_info, &nb_comms);
-
-	if (ret != glbsp::GLBSP_E_OK)
-	{
-		// check info failure (unlikely to happen)
-		GB_PrintMsg("\n");
-		GB_PrintMsg("Param Check FAILED: %s\n", glbsp_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
-		return false;
-	}
-
-	ret = glbsp::BuildNodes(&nb_info, &build_funcs, &nb_comms);
-
-	if (ret == glbsp::GLBSP_E_Cancelled)
+	if (ret == ajbsp::BUILD_Cancelled)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
+
+		delete nb_info;
+
 		return false;
 	}
 
-	if (ret != glbsp::GLBSP_E_OK)
+	if (ret != ajbsp::BUILD_OK)
 	{
 		// build nodes failed
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Building FAILED: %s\n", glbsp_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_comms.message);
+		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
+		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
+
+		delete nb_info;
+
 		return false;
 	}
+
+	delete nb_info;
 
 	return true;
 }
@@ -342,7 +436,7 @@ fprintf(stderr, "new_name : %s\n", new_name);
 	{
 		dialog->Finish_OK();
 	}
-	else if (nb_comms.cancelled)
+	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
 

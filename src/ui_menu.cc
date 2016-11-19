@@ -458,18 +458,21 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 		{ "&Copy Map",    0,  FCAL file_do_copy_map },
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Rename Map",   0,  FCAL file_do_rename },
 		{ "Delete Map",   0,  FCAL file_do_delete },
 
-		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 #if 0
 		{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
 #endif
+		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 

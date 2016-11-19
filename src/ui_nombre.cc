@@ -35,7 +35,7 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
     Fl_Box(FL_FLAT_BOX, X, Y, W, H, ""),
     index(-1), total(0), selected(0)
 {
-	type_name = strdup(what);  // FIXME: consistent string handling
+	type_name = StringDup(what);
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 	color(NOMBRBACK_COL);
@@ -51,6 +51,8 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
 //
 UI_Nombre::~UI_Nombre()
 {
+	StringFree(type_name);
+	type_name = NULL;
 }
 
 
