@@ -29,10 +29,6 @@ namespace ajbsp
 
 #define DEBUGGING_FILE  "gb_debug.txt"
 
-#define DEBUG_ENDIAN  0
-
-static int cpu_big_endian = 0;
-
 
 #define SYS_MSG_BUFLEN  4000
 
