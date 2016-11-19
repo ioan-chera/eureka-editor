@@ -204,7 +204,7 @@ static void BlockAddLine(linedef_t *L)
 	// handle simple case #1: completely horizontal
 	if (by1 == by2)
 	{
-		for (bx=bx1; bx <= bx2; bx++)
+		for (bx=bx1 ; bx <= bx2 ; bx++)
 		{
 			int blk_num = by1 * block_w + bx;
 			BlockAdd(blk_num, line_index);
@@ -215,7 +215,7 @@ static void BlockAddLine(linedef_t *L)
 	// handle simple case #2: completely vertical
 	if (bx1 == bx2)
 	{
-		for (by=by1; by <= by2; by++)
+		for (by=by1 ; by <= by2 ; by++)
 		{
 			int blk_num = by * block_w + bx1;
 			BlockAdd(blk_num, line_index);
@@ -225,21 +225,21 @@ static void BlockAddLine(linedef_t *L)
 
 	// handle the rest (diagonals)
 
-	for (by=by1; by <= by2; by++)
-		for (bx=bx1; bx <= bx2; bx++)
+	for (by=by1 ; by <= by2 ; by++)
+	for (bx=bx1 ; bx <= bx2 ; bx++)
+	{
+		int blk_num = by * block_w + bx;
+
+		int minx = block_x + bx * 128;
+		int miny = block_y + by * 128;
+		int maxx = minx + 127;
+		int maxy = miny + 127;
+
+		if (CheckLinedefInsideBox(minx, miny, maxx, maxy, x1, y1, x2, y2))
 		{
-			int blk_num = by * block_w + bx;
-
-			int minx = block_x + bx * 128;
-			int miny = block_y + by * 128;
-			int maxx = minx + 127;
-			int maxy = miny + 127;
-
-			if (CheckLinedefInsideBox(minx, miny, maxx, maxy, x1, y1, x2, y2))
-			{
-				BlockAdd(blk_num, line_index);
-			}
+			BlockAdd(blk_num, line_index);
 		}
+	}
 }
 
 static void CreateBlockmap(void)
@@ -250,7 +250,7 @@ static void CreateBlockmap(void)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = LookupLinedef(i);
 
@@ -307,7 +307,7 @@ static void CompressBlockmap(void)
 	// will be next to each other.  The duplicate array gives the order
 	// of the blocklists in the BLOCKMAP lump.
 
-	for (i=0; i < block_count; i++)
+	for (i=0 ; i < block_count ; i++)
 		block_dups[i] = i;
 
 	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
@@ -321,7 +321,7 @@ static void CompressBlockmap(void)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < block_count; i++)
+	for (i=0 ; i < block_count ; i++)
 	{
 		int blk_num = block_dups[i];
 		int count;
@@ -413,7 +413,7 @@ static void WriteBlockmap(void)
 	lump->Write(&header, sizeof(header));
 
 	// handle pointers
-	for (i=0; i < block_count; i++)
+	for (i=0 ; i < block_count ; i++)
 	{
 		u16_t ptr = LE_U16(block_ptrs[i]);
 
@@ -427,7 +427,7 @@ static void WriteBlockmap(void)
 	lump->Write(null_block, sizeof(null_block));
 
 	// handle each block list
-	for (i=0; i < block_count; i++)
+	for (i=0 ; i < block_count ; i++)
 	{
 		int blk_num = block_dups[i];
 		u16_t *blk;
@@ -452,7 +452,7 @@ static void FreeBlockmap(void)
 {
 	int i;
 
-	for (i=0; i < block_count; i++)
+	for (i=0 ; i < block_count ; i++)
 	{
 		if (block_lines[i])
 			UtilFree(block_lines[i]);
@@ -476,7 +476,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = LookupLinedef(i);
 
@@ -623,7 +623,7 @@ static void InitReject(void)
 {
 	int i;
 
-	for (i=0; i < num_sectors; i++)
+	for (i=0 ; i < num_sectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 
@@ -643,7 +643,7 @@ static void GroupSectors(void)
 {
 	int i;
 
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
 		sector_t *sec1, *sec2, *tmp;
@@ -682,7 +682,7 @@ static void GroupSectors(void)
 
 		sec2->rej_group = sec1->rej_group;
 
-		for (tmp=sec2->rej_next; tmp != sec2; tmp=tmp->rej_next)
+		for (tmp=sec2->rej_next ; tmp != sec2 ; tmp=tmp->rej_next)
 			tmp->rej_group = sec1->rej_group;
 
 		// merge 'em baby...
@@ -703,7 +703,7 @@ static void CountGroups(void)
 
 	int i;
 
-	for (i=0; i < num_sectors; i++)
+	for (i=0 ; i < num_sectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 		sector_t *tmp;
@@ -717,7 +717,7 @@ static void CountGroups(void)
 		sec->rej_group = -1;
 		num++;
 
-		for (tmp=sec->rej_next; tmp != sec; tmp=tmp->rej_next)
+		for (tmp=sec->rej_next ; tmp != sec ; tmp=tmp->rej_next)
 		{
 			tmp->rej_group = -1;
 			num++;
@@ -733,9 +733,9 @@ static void CreateReject(u8_t *matrix)
 {
 	int view, target;
 
-	for (view=0; view < num_sectors; view++)
+	for (view=0 ; view < num_sectors ; view++)
 	{
-		for (target=0; target < view; target++)
+		for (target=0 ; target < view ; target++)
 		{
 			sector_t *view_sec = LookupSector(view);
 			sector_t *targ_sec = LookupSector(target);
@@ -899,7 +899,7 @@ wall_tip_t *NewWallTip(void)
 #define FREEMASON(TYPE, BASEVAR, NUMVAR)  \
 {  \
   int i;  \
-  for (i=0; i < NUMVAR; i++)  \
+  for (i=0 ; i < NUMVAR ; i++)  \
     UtilFree(BASEVAR[i]);  \
   if (BASEVAR)  \
     UtilFree(BASEVAR);  \
@@ -1336,7 +1336,7 @@ void GetLinedefsHexen(void)
 		line->tag  = 0;
 
 		/* read specials */
-		for (j=0; j < 5; j++)
+		for (j=0 ; j < 5 ; j++)
 			line->specials[j] = (u8_t)(raw.specials[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
@@ -1415,7 +1415,7 @@ void PutVertices(const char *name, int do_gl)
 
 	Lump_c *lump = CreateLevelLump(name);
 
-	for (i=0, count=0; i < num_vertices; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_vertex_t raw;
 
@@ -1457,7 +1457,7 @@ void PutGLVertices(int do_v5)
 	else
 		lump->Write(lev_v2_magic, 4);
 
-	for (i=0, count=0; i < num_vertices; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
 
@@ -1533,7 +1533,7 @@ void PutSegs(void)
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
-	for (i=0, count=0; i < num_segs; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_seg_t raw;
 
@@ -1584,7 +1584,7 @@ void PutGLSegs(void)
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
-	for (i=0, count=0; i < num_segs; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_gl_seg_t raw;
 
@@ -1641,7 +1641,7 @@ void PutGLSegs_V5()
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
-	for (i=0, count=0; i < num_segs; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_v5_seg_t raw;
 
@@ -1692,7 +1692,7 @@ void PutSubsecs(const char *name, int do_gl)
 
 	Lump_c * lump = CreateLevelLump(name);
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		raw_subsec_t raw;
 
@@ -1722,7 +1722,7 @@ void PutGLSubsecs_V5()
 
 	Lump_c *lump = CreateLevelLump("GL_SSECT");
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		raw_v5_subsec_t raw;
 
@@ -1884,7 +1884,7 @@ void PutZVertices(void)
 
 	GB_DisplayTicker();
 
-	for (i=0, count=0; i < num_vertices; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
 
@@ -1917,7 +1917,7 @@ void PutZSubsecs(void)
 	ZLibAppendLump(&raw_num, 4);
 	GB_DisplayTicker();
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = subsecs[i];
 		seg_t *seg;
@@ -1928,7 +1928,7 @@ void PutZSubsecs(void)
 
 		// sanity check the seg index values
 		count = 0;
-		for (seg = sub->seg_list; seg; seg = seg->next, cur_seg_index++)
+		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			// ignore minisegs and degenerate segs
 			if (! seg->linedef || seg->degenerate)
@@ -1959,7 +1959,7 @@ void PutZSegs(void)
 	ZLibAppendLump(&raw_num, 4);
 	GB_DisplayTicker();
 
-	for (i=0, count=0; i < num_segs; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = segs[i];
 
@@ -2577,7 +2577,7 @@ void ReportOverflows(bool hard)
 				);
 	}
 
-	for (cur=wad.dir_head; cur; cur=cur->next)
+	for (cur=wad.dir_head ; cur ; cur=cur->next)
 	{
 		level_t *lev = cur->lev_info;
 
@@ -2591,7 +2591,7 @@ void ReportOverflows(bool hard)
 		if (limits == 0)
 			continue;
 
-		for (one_lim = (1<<20); one_lim; one_lim >>= 1)
+		for (one_lim = (1<<20) ; one_lim ; one_lim >>= 1)
 		{
 			if (limits & one_lim)
 				ReportOneOverflow(cur, one_lim, hard);
@@ -2613,7 +2613,7 @@ void ReportV5Switches(void)
 			"which supports V5 GL-Nodes, otherwise they will fail (or crash).\n\n"
 			);
 
-	for (cur=wad.dir_head; cur; cur=cur->next)
+	for (cur=wad.dir_head ; cur ; cur=cur->next)
 	{
 		level_t *lev = cur->lev_info;
 
@@ -2657,7 +2657,7 @@ void ReportFailedLevels(void)
 
 	bool need_spacer = false;
 
-	for (cur=wad.dir_head; cur; cur=cur->next)
+	for (cur=wad.dir_head ; cur ; cur=cur->next)
 	{
 		if (! (cur->lev_info && ! (cur->lev_info->flags & LEVEL_IS_GL)))
 			continue;

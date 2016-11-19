@@ -273,7 +273,7 @@ static void AddIntersection(intersection_t ** cut_list,
 	intersection_t *after;
 
 	/* check if vertex already present */
-	for (cut=(*cut_list); cut; cut=cut->next)
+	for (cut=(*cut_list) ; cut ; cut=cut->next)
 	{
 		if (vert == cut->vertex)
 			return;
@@ -291,7 +291,7 @@ static void AddIntersection(intersection_t ** cut_list,
 
 	/* enqueue the new intersection into the list */
 
-	for (after=(*cut_list); after && after->next; after=after->next)
+	for (after=(*cut_list) ; after && after->next ; after=after->next)
 	{ }
 
 	while (after && cut->along_dist < after->along_dist)
@@ -374,7 +374,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 	/* check partition against all Segs */
 
-	for (check=seg_list->segs; check; check=check->next)
+	for (check=seg_list->segs ; check ; check=check->next)
 	{
 		// This is the heart of my pruning idea - it catches
 		// bad segs early on. Killough
@@ -513,7 +513,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 	/* handle sub-blocks recursively */
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (! seg_list->subs[num])
 			continue;
@@ -599,7 +599,7 @@ static void EvaluateFastWorker(superblock_t *seg_list,
 	seg_t *part;
 	int num;
 
-	for (part=seg_list->segs; part; part = part->next)
+	for (part=seg_list->segs ; part ; part = part->next)
 	{
 		/* ignore minisegs as partition candidates */
 		if (! part->linedef)
@@ -637,7 +637,7 @@ static void EvaluateFastWorker(superblock_t *seg_list,
 
 	/* handle sub-blocks recursively */
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (! seg_list->subs[num])
 			continue;
@@ -692,7 +692,7 @@ static int PickNodeWorker(superblock_t *part_list,
 	int cost;
 
 	/* use each Seg as partition */
-	for (part=part_list->segs; part; part = part->next)
+	for (part=part_list->segs ; part ; part = part->next)
 	{
 		if (cur_info->cancelled)
 			return false;
@@ -735,7 +735,7 @@ static int PickNodeWorker(superblock_t *part_list,
 
 	/* recursively handle sub-blocks */
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (part_list->subs[num])
 			PickNodeWorker(part_list->subs[num], seg_list, best, best_cost,
@@ -956,7 +956,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 	}
 
 	// recursively handle sub-blocks
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		superblock_t *A = seg_list->subs[num];
 
@@ -981,7 +981,7 @@ static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 	seg_t *cur;
 	int num;
 
-	for (cur=block->segs; cur; cur=cur->next)
+	for (cur=block->segs ; cur ; cur=cur->next)
 	{
 		double x1 = cur->start->x;
 		double y1 = cur->start->y;
@@ -1001,7 +1001,7 @@ static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 
 	// recursive handle sub-blocks
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (block->subs[num])
 			FindLimitWorker(block->subs[num], bbox);
@@ -1041,7 +1041,7 @@ void AddMinisegs(seg_t *part,
 	DebugPrintf("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n",
 			part->psx, part->psy, part->pdx, part->pdy);
 
-	for (cur=cut_list; cur; cur=cur->next)
+	for (cur=cut_list ; cur ; cur=cur->next)
 	{
 		DebugPrintf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
 				cur->vertex->index, cur->vertex->x, cur->vertex->y,
@@ -1128,7 +1128,7 @@ void AddMinisegs(seg_t *part,
 
 	// STEP 2: find connections in the intersection list...
 
-	for (cur = cut_list; cur && cur->next; cur = cur->next)
+	for (cur = cut_list ; cur && cur->next ; cur = cur->next)
 	{
 		next = cur->next;
 
@@ -1380,7 +1380,7 @@ void FreeSuper(superblock_t *block)
 #endif
 
 	// recursively handle sub-blocks
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (block->subs[num])
 			FreeSuper(block->subs[num]);
@@ -1399,7 +1399,7 @@ static void TestSuperWorker(superblock_t *block, int *real, int *mini)
 	seg_t *cur;
 	int num;
 
-	for (cur=block->segs; cur; cur=cur->next)
+	for (cur=block->segs ; cur ; cur=cur->next)
 	{
 		if (cur->linedef)
 			(*real) += 1;
@@ -1407,7 +1407,7 @@ static void TestSuperWorker(superblock_t *block, int *real, int *mini)
 			(*mini) += 1;
 	}
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (block->subs[num])
 			TestSuperWorker(block->subs[num], real, mini);
@@ -1596,7 +1596,7 @@ superblock_t *CreateSegs(void)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
 
@@ -1695,7 +1695,7 @@ static void DetermineMiddle(subsec_t *sub)
 		return;
 
 	// compute middle coordinates
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		mid_x += cur->start->x + cur->end->x;
 		mid_y += cur->start->y + cur->end->y;
@@ -1730,7 +1730,7 @@ static void ClockwiseOrder(subsec_t *sub)
 # endif
 
 	// count segs and create an array to manipulate them
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 		total++;
 
 	// use local array if small enough
@@ -1739,7 +1739,7 @@ static void ClockwiseOrder(subsec_t *sub)
 	else
 		array = (seg_t **) UtilCalloc(total * sizeof(seg_t *));
 
-	for (cur=sub->seg_list, i=0; cur; cur=cur->next, i++)
+	for (cur=sub->seg_list, i=0 ; cur ; cur=cur->next, i++)
 		array[i] = cur;
 
 	if (i != total)
@@ -1780,7 +1780,7 @@ static void ClockwiseOrder(subsec_t *sub)
 	// choose the seg that will be first (the game engine will typically use
 	// that to determine the sector).  In particular, we don't like self
 	// referencing linedefs (they are often used for deep-water effects).
-	for (i=0; i < total; i++)
+	for (i=0 ; i < total ; i++)
 	{
 		int cur_score = 3;
 
@@ -1801,7 +1801,7 @@ static void ClockwiseOrder(subsec_t *sub)
 	// transfer sorted array back into sub
 	sub->seg_list = NULL;
 
-	for (i=total-1; i >= 0; i--)
+	for (i=total-1 ; i >= 0 ; i--)
 	{
 		int j = (i + first) % total;
 
@@ -1815,7 +1815,7 @@ static void ClockwiseOrder(subsec_t *sub)
 # if DEBUG_SORTER
 	DebugPrintf("Sorted SEGS around (%1.1f,%1.1f)\n", sub->mid_x, sub->mid_y);
 
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		angle_g angle = UtilComputeAngle(cur->start->x - sub->mid_x,
 				cur->start->y - sub->mid_y);
@@ -1834,7 +1834,7 @@ static void SanityCheckClosed(subsec_t *sub)
 	seg_t *cur, *next;
 	int total=0, gaps=0;
 
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		next = cur->next ? cur->next : sub->seg_list;
 
@@ -1851,7 +1851,7 @@ static void SanityCheckClosed(subsec_t *sub)
 				sub->mid_x, sub->mid_y, gaps, total);
 
 #   if DEBUG_SUBSEC
-		for (cur=sub->seg_list; cur; cur=cur->next)
+		for (cur=sub->seg_list ; cur ; cur=cur->next)
 		{
 			DebugPrintf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", cur,
 					cur->start->x, cur->start->y, cur->end->x, cur->end->y);
@@ -1869,7 +1869,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 	seg_t *compare;
 
 	// find a suitable seg for comparison
-	for (compare=sub->seg_list; compare; compare=compare->next)
+	for (compare=sub->seg_list ; compare ; compare=compare->next)
 	{
 		if (! compare->sector)
 			continue;
@@ -1883,7 +1883,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 	if (! compare)
 		return;
 
-	for (cur=compare->next; cur; cur=cur->next)
+	for (cur=compare->next ; cur ; cur=cur->next)
 	{
 		if (! cur->sector)
 			continue;
@@ -1921,7 +1921,7 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 {
 	seg_t *cur;
 
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		if (cur->linedef)
 			return;
@@ -1944,7 +1944,7 @@ static void RenumberSubsecSegs(subsec_t *sub)
 
 	sub->seg_count = 0;
 
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		cur->index = num_complete_seg;
 		num_complete_seg++;
@@ -1978,7 +1978,7 @@ static void CreateSubsecWorker(subsec_t *sub, superblock_t *block)
 
 	// recursively handle sub-blocks
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		superblock_t *A = block->subs[num];
 
@@ -2047,14 +2047,14 @@ static void DebugShowSegs(superblock_t *seg_list)
 	seg_t *cur;
 	int num;
 
-	for (cur=seg_list->segs; cur; cur=cur->next)
+	for (cur=seg_list->segs ; cur ; cur=cur->next)
 	{
 		DebugPrintf("Build:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				cur->linedef ? "" : "MINI", cur, cur->sector->index,
 				cur->start->x, cur->start->y, cur->end->x, cur->end->y);
 	}
 
-	for (num=0; num < 2; num++)
+	for (num=0 ; num < 2 ; num++)
 	{
 		if (seg_list->subs[num])
 			DebugShowSegs(seg_list->subs[num]);
@@ -2292,7 +2292,7 @@ void ClockwiseBspTree(node_t *root)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
@@ -2373,7 +2373,7 @@ void NormaliseBspTree(node_t *root)
 
 	num_complete_seg = 0;
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
@@ -2402,7 +2402,7 @@ static void RoundOffSubsector(subsec_t *sub)
 # endif
 
 	// do an initial pass, just counting the degenerates
-	for (cur=sub->seg_list; cur; cur=cur->next)
+	for (cur=sub->seg_list ; cur ; cur=cur->next)
 	{
 		// handle the duplex vertices
 		if (cur->start->normal_dup)
@@ -2511,7 +2511,7 @@ void RoundOffBspTree(node_t *root)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < num_subsecs; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 

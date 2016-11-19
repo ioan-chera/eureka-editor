@@ -207,7 +207,7 @@ char *UtilStrNDup(const char *str, int size)
 	char *result;
 	int len;
 
-	for (len=0; len < size && str[len]; len++)
+	for (len=0 ; len < size && str[len] ; len++)
 	{ }
 
 	result = (char *) UtilCalloc(len+1);
@@ -254,7 +254,7 @@ char *UtilFormat(const char *str, ...)
 
 int UtilStrCaseCmp(const char *A, const char *B)
 {
-	for (; *A || *B; A++, B++)
+	for ( ; *A || *B ; A++, B++)
 	{
 		// this test also catches end-of-string conditions
 		if (toupper(*A) != toupper(*B))
@@ -280,7 +280,7 @@ int UtilRoundPOW2(int x)
 
 	x--;
 
-	for (tmp=x / 2; tmp; tmp /= 2)
+	for (tmp=x / 2 ; tmp ; tmp /= 2)
 		x |= tmp;
 
 	return (x + 1);
@@ -373,7 +373,7 @@ void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length)
 	u32_t s1 = (*crc) & 0xFFFF;
 	u32_t s2 = ((*crc) >> 16) & 0xFFFF;
 
-	for (; length > 0; data++, length--)
+	for ( ; length > 0 ; data++, length--)
 	{
 		s1 = (s1 + *data) % 65521;
 		s2 = (s2 + s1)    % 65521;
@@ -428,7 +428,7 @@ static void MarkPolyobjSector(sector_t *sector)
 	 */
 	sector->has_polyobj = true;
 
-	for (i = 0; i < num_linedefs; i++)
+	for (i = 0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -461,7 +461,7 @@ static void MarkPolyobjPoint(double x, double y)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0; i < num_linedefs; i++)
+	for (i = 0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -492,7 +492,7 @@ static void MarkPolyobjPoint(double x, double y)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0; i < num_linedefs; i++)
+	for (i = 0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -585,7 +585,7 @@ void DetectPolyobjSectors(void)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0; i < num_linedefs; i++)
+	for (i = 0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -602,7 +602,7 @@ void DetectPolyobjSectors(void)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	hexen_style = true;
 
-	for (i = 0; i < num_things; i++)
+	for (i = 0 ; i < num_things ; i++)
 	{
 		thing_t *T = LookupThing(i);
 
@@ -619,7 +619,7 @@ void DetectPolyobjSectors(void)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0; i < num_things; i++)
+	for (i = 0 ; i < num_things ; i++)
 	{
 		thing_t *T = LookupThing(i);
 
@@ -676,13 +676,13 @@ void DetectOverlappingVertices(void)
 	GB_DisplayTicker();
 
 	// sort array of indices
-	for (i=0; i < num_vertices; i++)
+	for (i=0 ; i < num_vertices ; i++)
 		array[i] = i;
 
 	qsort(array, num_vertices, sizeof(u16_t), VertexCompare);
 
 	// now mark them off
-	for (i=0; i < num_vertices - 1; i++)
+	for (i=0 ; i < num_vertices - 1 ; i++)
 	{
 		// duplicate ?
 		if (VertexCompare(array + i, array + i+1) == 0)
@@ -827,16 +827,16 @@ void DetectOverlappingLines(void)
 	GB_DisplayTicker();
 
 	// sort array of indices
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 		array[i] = i;
 
 	qsort(array, num_linedefs, sizeof(int), LineStartCompare);
 
-	for (i=0; i < num_linedefs - 1; i++)
+	for (i=0 ; i < num_linedefs - 1 ; i++)
 	{
 		int j;
 
-		for (j = i+1; j < num_linedefs; j++)
+		for (j = i+1 ; j < num_linedefs ; j++)
 		{
 			if (LineStartCompare(array + i, array + j) != 0)
 				break;
@@ -870,7 +870,7 @@ static void CountWallTips(vertex_t *vert, int *one_sided, int *two_sided)
 	*one_sided = 0;
 	*two_sided = 0;
 
-	for (tip=vert->tip_set; tip; tip=tip->next)
+	for (tip=vert->tip_set ; tip ; tip=tip->next)
 	{
 		if (!tip->left || !tip->right)
 			(*one_sided) += 1;
@@ -893,7 +893,7 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 	tip->right = right;
 
 	// find the correct place (order is increasing angle)
-	for (after=vert->tip_set; after && after->next; after=after->next)
+	for (after=vert->tip_set ; after && after->next ; after=after->next)
 	{ }
 
 	while (after && tip->angle + ANG_EPSILON < after->angle)
@@ -925,7 +925,7 @@ void CalculateWallTips(void)
 
 	GB_DisplayTicker();
 
-	for (i=0; i < num_linedefs; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -945,7 +945,7 @@ void CalculateWallTips(void)
 	}
 
 # if DEBUG_WALLTIPS
-	for (i=0; i < num_vertices; i++)
+	for (i=0 ; i < num_vertices ; i++)
 	{
 		vertex_t *V = LookupVertex(i);
 
@@ -1050,7 +1050,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 	// direction of the given direction (which is relative to the
 	// vertex).
 
-	for (tip=vert->tip_set; tip; tip=tip->next)
+	for (tip=vert->tip_set ; tip ; tip=tip->next)
 	{
 		if (fabs(tip->angle - angle) < ANG_EPSILON ||
 				fabs(tip->angle - angle) > (360.0 - ANG_EPSILON))
@@ -1064,7 +1064,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 	// the angle we're interested in.  Therefore we'll be on the RIGHT
 	// side of that wall_tip.
 
-	for (tip=vert->tip_set; tip; tip=tip->next)
+	for (tip=vert->tip_set ; tip ; tip=tip->next)
 	{
 		if (angle + ANG_EPSILON < tip->angle)
 		{
