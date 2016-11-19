@@ -73,12 +73,12 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+58, Y, 65, 24, "Type: ");
+	type = new Fl_Int_Input(X+58, Y, 75, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	choose = new Fl_Button(X+W/2+15, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2-5, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	gen = new Fl_Button(X+W-60, Y, 50, 24, "Gen");
@@ -492,15 +492,6 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		int cur_type = atoi(box->type->value());
-
-		if ((game_info.gen_types && is_genline(cur_type)) ||
-			Fl::event_button() == 3)
-		{
-			main_win->ShowBrowser('G');
-			return;
-		}
-
 		main_win->ShowBrowser('L');
 		return;
 	}
@@ -611,13 +602,11 @@ void UI_LineBox::UpdateField(int field)
 			if (gen_desc)
 			{
 				desc->value(gen_desc);
-				choose->label("Edit");
 			}
 			else
 			{
 				const linetype_t *info = M_GetLineType(type_num);
 				desc->value(info->desc);
-				choose->label("Choose");
 			}
 
 			main_win->browser->UpdateGenType(type_num);
@@ -827,11 +816,10 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
-#if 0
+
 		if (game_info.gen_types)
 			gen->show();
 		else
-#endif
 			gen->hide();
 	}
 

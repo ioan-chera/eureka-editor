@@ -69,12 +69,12 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+70, Y, 64, 24, "Type: ");
+	type = new Fl_Int_Input(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	Y += type->h() + 4;
