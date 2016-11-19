@@ -572,12 +572,12 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->lt_up)
 	{
-		CMD_AdjustLight(+lt_step);
+		SectorsAdjustLight(+lt_step);
 		return;
 	}
 	else if (w == box->lt_down)
 	{
-		CMD_AdjustLight(-lt_step);
+		SectorsAdjustLight(-lt_step);
 		return;
 	}
 

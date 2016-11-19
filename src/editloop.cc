@@ -789,7 +789,7 @@ void Editor_MouseRelease()
 
 		if (! (dx==0 && dy==0))
 		{
-			CMD_MoveObjects(dx, dy);
+			MoveObjects(dx, dy);
 
 			// next select action will clear the selection
 			edit.did_a_move = true;
@@ -1565,7 +1565,7 @@ static void ACT_Drag_release(void)
 
 	if (! (dx==0 && dy==0))
 	{
-		CMD_MoveObjects(dx, dy);
+		MoveObjects(dx, dy);
 
 //???	// next select action will clear the selection
 //???	edit.did_a_move = true;

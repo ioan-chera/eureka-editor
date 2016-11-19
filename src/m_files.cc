@@ -430,7 +430,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	recent_file_data_c *data = (recent_file_data_c *)priv_data;
 
-	CMD_OpenFileMap(data->file, data->map);
+	OpenFileMap(data->file, data->map);
 }
 
 

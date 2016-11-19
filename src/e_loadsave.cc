@@ -981,70 +981,7 @@ void RemoveEditWad()
 }
 
 
-bool CMD_OpenMap()
-{
-	if (! Main_ConfirmQuit("open another map"))
-		return false;
-
-
-	Wad_file *wad = NULL;
-	const char *map_name = NULL;
-	bool is_new_pwad = false;
-
-	UI_OpenMap * dialog = new UI_OpenMap();
-
-	dialog->Run(&wad, &is_new_pwad, &map_name);
-
-	delete dialog;
-
-
-	// cancelled?
-	if (! wad)
-		return false;
-
-
-	// this shouldn't happen -- but just in case...
-	if (wad->FindLevel(map_name) < 0)
-	{
-		DLG_Notify("Hmmmm, cannot find that map !?!");
-		return false;
-	}
-
-
-	if (is_new_pwad && wad->FindLump(EUREKA_LUMP))
-	{
-		if (! M_ParseEurekaLump(wad))
-			return false;
-	}
-
-
-	// has this removed or replaced the currently edited wad?
-
-	if (edit_wad && (wad != edit_wad))
-	{
-		RemoveEditWad();
-	}
-
-	if (is_new_pwad)
-	{
-		edit_wad = wad;
-		Pwad_name = edit_wad->PathName();
-
-		MasterDir_Add(edit_wad);
-
-		Main_LoadResources();
-	}
-
-
-	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
-
-	LoadLevel(wad, map_name);
-
-	return true;
-}
-
-
-void CMD_OpenFileMap(const char *filename, const char *map_name)
+void OpenFileMap(const char *filename, const char *map_name)
 {
 	if (! Main_ConfirmQuit("open another map"))
 		return;
@@ -1135,6 +1072,69 @@ void CMD_OpenFileMap(const char *filename, const char *map_name)
 }
 
 
+bool CMD_OpenMap()
+{
+	if (! Main_ConfirmQuit("open another map"))
+		return false;
+
+
+	Wad_file *wad = NULL;
+	const char *map_name = NULL;
+	bool is_new_pwad = false;
+
+	UI_OpenMap * dialog = new UI_OpenMap();
+
+	dialog->Run(&wad, &is_new_pwad, &map_name);
+
+	delete dialog;
+
+
+	// cancelled?
+	if (! wad)
+		return false;
+
+
+	// this shouldn't happen -- but just in case...
+	if (wad->FindLevel(map_name) < 0)
+	{
+		DLG_Notify("Hmmmm, cannot find that map !?!");
+		return false;
+	}
+
+
+	if (is_new_pwad && wad->FindLump(EUREKA_LUMP))
+	{
+		if (! M_ParseEurekaLump(wad))
+			return false;
+	}
+
+
+	// has this removed or replaced the currently edited wad?
+
+	if (edit_wad && (wad != edit_wad))
+	{
+		RemoveEditWad();
+	}
+
+	if (is_new_pwad)
+	{
+		edit_wad = wad;
+		Pwad_name = edit_wad->PathName();
+
+		MasterDir_Add(edit_wad);
+
+		Main_LoadResources();
+	}
+
+
+	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
+
+	LoadLevel(wad, map_name);
+
+	return true;
+}
+
+
 void CMD_GivenFile()
 {
 	const char *mode = EXEC_Param[0];
@@ -1177,7 +1177,7 @@ void CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	CMD_OpenFileMap(Pwad_list[index], NULL);
+	OpenFileMap(Pwad_list[index], NULL);
 }
 
 

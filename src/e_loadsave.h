@@ -35,14 +35,17 @@ void RemoveEditWad();
 
 bool MissingIWAD_Dialog();
 
+void OpenFileMap(const char *filename, const char *map_name = NULL);
+
+extern int last_given_file;
+
+/* commands */
+
 bool CMD_NewProject();
 bool CMD_ManageProject();
 
 void CMD_NewMap();
 bool CMD_OpenMap();
-void CMD_OpenFileMap(const char *filename, const char *map_name = NULL);
-
-extern int last_given_file;
 
 void CMD_GivenFile();
 void CMD_FlipMap();

@@ -31,8 +31,9 @@
 void SelectObjectsInBox (selection_c *list, int, int, int, int, int);
 void HighlightObject (int, int, int);
 
-void DeleteObjects (selection_c * list);
+void MoveObjects(int delta_x, int delta_y, int delta_z = 0);
 
+void DeleteObjects (selection_c * list);
 
 bool LineTouchesBox (int, int, int, int, int);
 
@@ -47,8 +48,6 @@ void Insert_Vertex_split(int split_ld, int new_x, int new_y);
 /* commands */
 
 void CMD_Insert(void);
-
-void CMD_MoveObjects(int delta_x, int delta_y, int delta_z = 0);
 
 void CMD_CopyProperties(void);
 

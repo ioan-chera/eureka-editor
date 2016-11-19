@@ -122,7 +122,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	if (given_idx >= 0)
 		last_given_file = given_idx;
 
-	CMD_OpenFileMap(filename);
+	OpenFileMap(filename);
 }
 
 

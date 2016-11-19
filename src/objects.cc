@@ -1037,7 +1037,7 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y, int delta
 }
 
 
-void CMD_MoveObjects(int delta_x, int delta_y, int delta_z)
+void MoveObjects(int delta_x, int delta_y, int delta_z)
 {
 	if (edit.Selected->empty())
 		return;

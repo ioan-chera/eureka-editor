@@ -137,7 +137,7 @@ static int light_add_delta(int level, int delta)
 }
 
 
-void CMD_AdjustLight(int delta)
+void SectorsAdjustLight(int delta)
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -177,7 +177,7 @@ void SEC_Light(void)
 		return;
 	}
 
-	CMD_AdjustLight(diff);
+	SectorsAdjustLight(diff);
 }
 
 
