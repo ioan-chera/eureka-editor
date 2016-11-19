@@ -1184,7 +1184,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 }
 
 
-void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
+void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 {
 	fl_color(col);
 
@@ -1306,7 +1306,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	{
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
-			DrawHighlightScaled(list->what_type(), *it, SEL_COL);
+			DrawHighlightTransform(list->what_type(), *it, SEL_COL);
 		}
 
 		return;
@@ -1666,10 +1666,13 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 }
 
 
-void UI_Canvas::TransformBegin(int map_x, int map_y, int middle_x, int middle_y)
+void UI_Canvas::TransformBegin(int map_x, int map_y, int middle_x, int middle_y,
+							   transform_keyword_e mode)
 {
 	trans_start_x = map_x;
 	trans_start_y = map_y;
+
+	trans_mode = mode;
 
 	trans_param.Clear();
 
@@ -1691,7 +1694,7 @@ void UI_Canvas::TransformFinish(transform_t& param)
 	param = trans_param;
 }
 
-void UI_Canvas::TransformUpdate(int map_x, int map_y, keycode_t mod)
+void UI_Canvas::TransformUpdate(int map_x, int map_y)
 {
 	int dx1 = map_x - trans_param.mid_x;
 	int dy1 = map_y - trans_param.mid_y;
@@ -1699,12 +1702,11 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y, keycode_t mod)
 	int dx2 = trans_start_x - trans_param.mid_x;
 	int dy2 = trans_start_y - trans_param.mid_y;
 
-	bool any_aspect = (mod & MOD_SHIFT)   ? true : false;
-	bool rotate     = (mod & MOD_COMMAND) ? true : false;
+	trans_param.scale_x = trans_param.scale_y = 1;
+	trans_param.skew_x  = trans_param.skew_y  = 0;
+	trans_param.rotate  = 0;
 
-	trans_param.rotate = 0;
-
-	if (rotate)
+	if (trans_mode == TRANS_K_Rotate || trans_mode == TRANS_K_RotScale)
 	{
 		int angle1 = (int)ComputeAngle(dx1, dy1);
 		int angle2 = (int)ComputeAngle(dx2, dy2);
@@ -1714,23 +1716,33 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y, keycode_t mod)
 //		fprintf(stderr, "angle diff : %1.2f\n", trans_rotate * 360.0 / 65536.0);
 	}
 
-	if (rotate)  // TODO: CONFIG ITEM: rotate_with_scale
+	switch (trans_mode)
 	{
-		// no scaling
-		dx1 = dx2 = 10;
-		dy1 = dy2 = 10;
-	}
-	else if (rotate || !any_aspect)
-	{
-		dx1 = MAX(abs(dx1), abs(dy1));
-		dx2 = MAX(abs(dx2), abs(dy2));
+		case TRANS_K_Scale:
+		case TRANS_K_RotScale:
+			dx1 = MAX(abs(dx1), abs(dy1));
+			dx2 = MAX(abs(dx2), abs(dy2));
 
-		dy1 = dx1;
-		dy2 = dx2;
-	}
+			if (dx2)
+			{
+				trans_param.scale_x = dx1 / (float)dx2;
+				trans_param.scale_y = trans_param.scale_x;
+			}
+			break;
 
-	trans_param.scale_x = dx2 ? (dx1 / (float)dx2) : 1.0;
-	trans_param.scale_y = dy2 ? (dy1 / (float)dy2) : 1.0;
+		case TRANS_K_Stretch:
+			if (dx2) trans_param.scale_x = dx1 / (float)dx2;
+			if (dy2) trans_param.scale_y = dy1 / (float)dy2;
+			break;
+
+		case TRANS_K_Rotate:
+			// already done
+			break;
+
+		case TRANS_K_Skew:
+			// FIXME : skew logic
+			break;
+	}
 
 	redraw();
 }

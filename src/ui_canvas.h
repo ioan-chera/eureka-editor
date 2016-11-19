@@ -51,8 +51,9 @@ private:
 	int  drag_cur_x,   drag_cur_y;
 	selection_c drag_lines;
 
-	// scaling state
+	// scaling/rotating state
 	int   trans_start_x,  trans_start_y;
+	transform_keyword_e trans_mode;
 	transform_t trans_param;
 	selection_c trans_lines;
 
@@ -85,7 +86,7 @@ public:
 	void DrawSelection(selection_c *list);
 	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true,
 	                   bool skip_lines = false, int dx=0, int dy=0);
-	void DrawHighlightScaled(int objtype, int objnum, Fl_Color col);
+	void DrawHighlightTransform(int objtype, int objnum, Fl_Color col);
 
 	void SelboxBegin(int map_x, int map_y);
 	void SelboxUpdate(int map_x, int map_y);
@@ -95,8 +96,8 @@ public:
 	void DragUpdate(int map_x, int map_y);
 	void DragFinish(int *dx, int *dy);
 
-	void TransformBegin(int map_x, int map_y, int middle_x, int middle_y);
-	void TransformUpdate(int map_x, int map_y, keycode_t mod);
+	void TransformBegin(int map_x, int map_y, int middle_x, int middle_y, transform_keyword_e mode);
+	void TransformUpdate(int map_x, int map_y);
 	void TransformFinish(transform_t& param);
 
 	void PointerPos(int *map_x, int *map_y);

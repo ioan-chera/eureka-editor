@@ -887,7 +887,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y, mod);
+		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y);
 		return;
 	}
 
@@ -1682,21 +1682,15 @@ void CMD_ACT_Transform(void)
 	}
 
 
-	// FIXME : use "mode" properly
-
-
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Transform_release))
 		return;
 
-
-	// FIXME : button_mod is probably obsolete
-	edit.button_mod = Fl::event_state() & MOD_ALL_MASK;
 
 	int middle_x, middle_y;
 
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y);
+	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y, mode);
 
 	Editor_SetAction(ACT_TRANSFORM);
 }
