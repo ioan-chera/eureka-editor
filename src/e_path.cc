@@ -36,6 +36,7 @@
 #include "x_mirror.h"
 
 #include "ui_window.h"
+#include "ui_misc.h"
 
 
 typedef enum
@@ -129,7 +130,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 
 			if (*L_other >= 0)  // There is a fork in the path. Stop here.
 				return false;
-			
+
 			*L_other = n;
 			*V_other = v2;
 		}
@@ -437,20 +438,25 @@ void GoToObject(const Objid& objid)
 
 void CMD_JumpToObject(void)
 {
-	const char *buf = fl_input("Enter index number", "");
+	int total = NumObjects(edit.mode);
 
-	if (! buf)   // cancelled
-		return;
-
-	// TODO: validate it is a number
-
-	int num = atoi(buf);
-
-	if (num < 0 || num >= NumObjects(edit.mode))
+	if (total <= 0)
 	{
-		Beep("No such object: #%d", num);
+		Beep("No objects!");
 		return;
 	}
+
+	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(edit.mode), total - 1);
+
+	int num = dialog->Run();
+
+	delete dialog;
+
+	if (num < 0)	// cancelled
+		return;
+
+	// this is guaranteed by the dialog
+	SYS_ASSERT(num < total);
 
 	GoToObject(Objid(edit.mode, num));
 }
