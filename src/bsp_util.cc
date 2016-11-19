@@ -834,22 +834,6 @@ void DetectOverlappingLines(void)
 	UtilFree(array);
 }
 
-static void CountWallTips(vertex_t *vert, int *one_sided, int *two_sided)
-{
-	wall_tip_t *tip;
-
-	*one_sided = 0;
-	*two_sided = 0;
-
-	for (tip=vert->tip_set ; tip ; tip=tip->next)
-	{
-		if (!tip->left || !tip->right)
-			(*one_sided) += 1;
-		else
-			(*two_sided) += 1;
-	}
-}
-
 
 /* ----- vertex routines ------------------------------- */
 
