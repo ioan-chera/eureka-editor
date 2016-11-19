@@ -644,8 +644,9 @@ public:
 
 			lower.FindTex(sd->LowerTex(), ld);
 
+			// note "sky_upper" here, needed to match original DOOM behavior
 			if (ld->flags & MLF_LowerUnpegged)
-				lower.tex_h = front->ceilh;
+				lower.tex_h = sky_upper ? back->ceilh : front->ceilh;
 			else
 				lower.tex_h = lower.h2;
 
