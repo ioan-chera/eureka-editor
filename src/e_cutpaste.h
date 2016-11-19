@@ -35,10 +35,15 @@ void Clipboard_NotifyEnd();
 void UnusedVertices(selection_c *lines, selection_c *result);
 void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
 
-void CMD_Delete(void);
-
 bool CMD_Copy();
 bool CMD_Paste();
+
+void CMD_Delete(void);
+void CMD_CopyAndPaste(void);
+
+void CMD_Clipboard_Cut(void);
+void CMD_Clipboard_Copy(void);
+void CMD_Clipboard_Paste(void);
 
 #endif  /* __EUREKA_E_CUTPASTE_H__ */
 

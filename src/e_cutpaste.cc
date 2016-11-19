@@ -756,6 +756,55 @@ bool CMD_Paste()
 
 //------------------------------------------------------------------------
 
+void CMD_CopyAndPaste(void)
+{
+	if (edit.Selected->empty() && edit.highlight.is_nil())
+	{
+		Beep("Nothing to copy and paste");
+		return;
+	}
+
+	if (CMD_Copy())
+	{
+		CMD_Paste();
+	}
+}
+
+
+void CMD_Clipboard_Cut(void)
+{
+	if (! CMD_Copy())
+	{
+		Beep("Nothing to cut");
+		return;
+	}
+
+	ExecuteCommand("Delete");
+}
+
+
+void CMD_Clipboard_Copy(void)
+{
+	if (! CMD_Copy())
+	{
+		Beep("Nothing to copy");
+		return;
+	}
+}
+
+
+void CMD_Clipboard_Paste(void)
+{
+	if (! CMD_Paste())
+	{
+		Beep("Clipboard is empty");
+		return;
+	}
+}
+
+
+//------------------------------------------------------------------------
+
 void UnusedVertices(selection_c *lines, selection_c *result)
 {
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);

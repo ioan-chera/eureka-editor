@@ -148,31 +148,17 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	if (! CMD_Copy())
-	{
-		Beep("Nothing to cut");
-		return;
-	}
-
-	ExecuteCommand("Delete");
+	CMD_Clipboard_Cut();
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	if (! CMD_Copy())
-	{
-		Beep("Nothing to copy");
-		return;
-	}
+	CMD_Clipboard_Copy();
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	if (! CMD_Paste())
-	{
-		Beep("Clipboard is empty");
-		return;
-	}
+	CMD_Clipboard_Paste();
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)

@@ -1872,21 +1872,6 @@ void CMD_Gamma(void)
 }
 
 
-void CMD_CopyAndPaste(void)
-{
-	if (edit.Selected->empty() && edit.highlight.is_nil())
-	{
-		Beep("Nothing to copy and paste");
-		return;
-	}
-
-	if (CMD_Copy())
-	{
-		CMD_Paste();
-	}
-}
-
-
 void CMD_MoveObjects_Dialog()
 {
 	if (edit.Selected->empty())
@@ -2227,6 +2212,18 @@ static editor_command_t  command_table[] =
 
 	{	"Gamma",
 		&CMD_Gamma
+	},
+
+	{	"Clipboard_Cut",
+		&CMD_Clipboard_Cut
+	},
+
+	{	"Clipboard_Copy",
+		&CMD_Clipboard_Copy
+	},
+
+	{	"Clipboard_Paste",
+		&CMD_Clipboard_Paste
 	},
 
 	{	"CopyAndPaste",
