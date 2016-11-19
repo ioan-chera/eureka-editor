@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ ! -d glbsp_src ]; then
+if [ ! -d ports ]; then
   echo "Run this script from the top level."
   exit 1
 fi
