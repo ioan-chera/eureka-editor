@@ -26,6 +26,8 @@ CHANGES IN Eureka 1.XX
 
 -  ability to skew (shear) objects with the mouse
 
+-  a better dialog for the "JumpToObject" command
+
 
 
 -  fixed unwanted rail texture when splitting a sector and the
