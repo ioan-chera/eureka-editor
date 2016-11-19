@@ -47,29 +47,43 @@ void scale_param_t::Clear()
 
 	scale_x = scale_y = 1;
 
+	skew_x = skew_y = 0;
+
 	rotate = 0;
 }
 
 
 void scale_param_t::Apply(int *x, int *y) const
 {
-	*x = *x - mid_x;
-	*y = *y - mid_y;
+	float x0 = *x - mid_x;
+	float y0 = *y - mid_y;
 
 	if (rotate)
 	{
 		float s = sin(rotate * M_PI / 32768.0);
 		float c = cos(rotate * M_PI / 32768.0);
 
-		int x1 = *x;
-		int y1 = *y;
+		float x1 = x0;
+		float y1 = y0;
 
-		*x = x1 * c - y1 * s;
-		*y = y1 * c + x1 * s;
+		x0 = x1 * c - y1 * s;
+		y0 = y1 * c + x1 * s;
 	}
 
-	*x = mid_x + I_ROUND( (*x) * scale_x );
-	*y = mid_y + I_ROUND( (*y) * scale_y );
+	if (skew_x || skew_y)
+	{
+		float x1 = x0;
+		float y1 = y0;
+
+		x0 = x1 + y1 * skew_y;
+		y0 = y1 + x1 * skew_x;
+	}
+
+	x0 = x0 * scale_x;
+	y0 = y0 * scale_y;
+
+	*x = mid_x + I_ROUND(x0);
+	*y = mid_y + I_ROUND(y0);
 }
 
 

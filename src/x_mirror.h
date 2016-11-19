@@ -35,6 +35,8 @@ public:
 
 	float scale_x, scale_y;
 
+	float skew_x, skew_y;
+
 	int rotate;  // 16 bits (65536 = 360 degrees)
 
 public:
