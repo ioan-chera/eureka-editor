@@ -48,7 +48,7 @@ public:
 
 typedef enum
 {
-	TRANS_K_Scale	= 0,	// scale and keep aspect
+	TRANS_K_Scale = 0,		// scale and keep aspect
 	TRANS_K_Stretch,		// scale X and Y independently
 	TRANS_K_Rotate,			// rotate
 	TRANS_K_RotScale,		// rotate and scale at same time

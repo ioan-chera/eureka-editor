@@ -163,7 +163,7 @@ static void edit_do_paste(Fl_Widget *w, void * data)
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Delete");
+	CMD_Delete();
 }
 
 

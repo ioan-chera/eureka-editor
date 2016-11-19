@@ -262,7 +262,7 @@ void Clipboard_ClearLocals()
 }
 
 
-bool Clipboard_HasStuff()
+static bool Clipboard_HasStuff()
 {
 	return clip_board ? true : false;
 }
@@ -441,7 +441,7 @@ static void CopyGroupOfObjects(selection_c *list)
 }
 
 
-bool CMD_Copy()
+static bool Clipboard_DoCopy()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -661,7 +661,7 @@ static void ReselectGroup()
 }
 
 
-bool CMD_Paste()
+static bool Clipboard_DoPaste()
 {
 	bool reselect = true;  // CONFIG TODO
 
@@ -764,16 +764,16 @@ void CMD_CopyAndPaste(void)
 		return;
 	}
 
-	if (CMD_Copy())
+	if (Clipboard_DoCopy())
 	{
-		CMD_Paste();
+		Clipboard_DoPaste();
 	}
 }
 
 
 void CMD_Clipboard_Cut(void)
 {
-	if (! CMD_Copy())
+	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to cut");
 		return;
@@ -785,7 +785,7 @@ void CMD_Clipboard_Cut(void)
 
 void CMD_Clipboard_Copy(void)
 {
-	if (! CMD_Copy())
+	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to copy");
 		return;
@@ -795,7 +795,7 @@ void CMD_Clipboard_Copy(void)
 
 void CMD_Clipboard_Paste(void)
 {
-	if (! CMD_Paste())
+	if (! Clipboard_DoPaste())
 	{
 		Beep("Clipboard is empty");
 		return;

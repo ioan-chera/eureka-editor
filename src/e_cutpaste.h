@@ -24,8 +24,6 @@
 void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
-bool Clipboard_HasStuff();
-
 void Clipboard_NotifyBegin();
 void Clipboard_NotifyInsert(obj_type_e type, int objnum);
 void Clipboard_NotifyDelete(obj_type_e type, int objnum);
@@ -34,9 +32,6 @@ void Clipboard_NotifyEnd();
 
 void UnusedVertices(selection_c *lines, selection_c *result);
 void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
-
-bool CMD_Copy();
-bool CMD_Paste();
 
 void CMD_Delete(void);
 void CMD_CopyAndPaste(void);
