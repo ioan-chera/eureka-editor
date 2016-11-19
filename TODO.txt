@@ -69,6 +69,9 @@ Editing
 
    (could also be bound to right mouse button)
 
++  the criss-crossing-lines detection is too sloppy
+   [ e.g. see MAP24 of Ancient Aliens ]
+
 
 
 3D View
@@ -105,6 +108,7 @@ General
 -  a key to copy properties TO defaults (e.g. shift-C)
 
 -  View/Place Camera command, cursor turns into +
+   [ need an ACT_ASK_SPOT action, plus a /ask flag for command ]
 
 +  Preferences window:
    +  add backup_max_files / backup_max_space
@@ -173,6 +177,8 @@ IDEA: for generalized lines, show more info in tooltip of desc
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
 
+WISH: a scripting language
+
 WISH: support ZDoom PK3 for textures (etc)
 
 WISH: support DECORATE as (or in) a resource file
@@ -200,6 +206,8 @@ Coding
 Editing
 -------
 
+-  for "type" in Line/Sector/Thing panels, update the desc as we type
+
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
@@ -215,10 +223,10 @@ Editing
    and new vertices would be constrained to that curve, and you can
    move existing vertices onto the curve.
 
+-  feature request: a way to see angle of lines
+
 -  assume texture names beginning with '#' are special
    (The texture checker ignores them -- what else is needed ??)
-
-?  quantization function: prevent linedefs from overlapping / crossing
 
 ?  Multi-select : if CTRL is pressed, don't clear selection after drag
 
@@ -335,8 +343,6 @@ NO:  Restore last window position and maximized state
 
 NO:  un-hard-code menu shortcuts?
 
-NO:  Scripting language
-
 NO:  ability to use an external node builder
 
 NO:  if a given pwad (from command line) does not exist, ask to create it
@@ -403,4 +409,6 @@ NO:  animation mode, render continuously and show any lighting
      effects and animated / scrolling textures and sprites
 
 NO:  ability to hide the right-side panel
+
+NO:  quantization should prevent linedefs from overlapping / crossing
 
