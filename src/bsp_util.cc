@@ -135,8 +135,6 @@ SYS_ASSERT(cur_info);
 
 
 //
-// UtilCalloc
-//
 // Allocate memory with error checking.  Zeros the memory.
 //
 void *UtilCalloc(int size)
@@ -149,8 +147,7 @@ void *UtilCalloc(int size)
 	return ret;
 }
 
-//
-// UtilRealloc
+
 //
 // Reallocate memory with error checking.
 //
@@ -164,8 +161,7 @@ void *UtilRealloc(void *old, int size)
 	return ret;
 }
 
-//
-// UtilFree
+
 //
 // Free the memory with error checking.
 //
@@ -177,8 +173,7 @@ void UtilFree(void *data)
 	free(data);
 }
 
-//
-// UtilStrDup
+
 //
 // Duplicate a string with error checking.
 //
@@ -197,8 +192,7 @@ char *UtilStrDup(const char *str)
 	return result;
 }
 
-//
-// UtilStrNDup
+
 //
 // Duplicate a limited length string.
 //
@@ -219,6 +213,7 @@ char *UtilStrNDup(const char *str, int size)
 
 	return result;
 }
+
 
 char *UtilFormat(const char *str, ...)
 {
@@ -252,6 +247,7 @@ char *UtilFormat(const char *str, ...)
 	}
 }
 
+
 int UtilStrCaseCmp(const char *A, const char *B)
 {
 	for ( ; *A || *B ; A++, B++)
@@ -266,8 +262,6 @@ int UtilStrCaseCmp(const char *A, const char *B)
 }
 
 
-//
-// UtilRoundPOW2
 //
 // Rounds the value _up_ to the nearest power of two.
 //
@@ -288,8 +282,6 @@ int UtilRoundPOW2(int x)
 
 
 //
-// UtilComputeAngle
-//
 // Translate (dx, dy) into an angle value (degrees)
 //
 angle_g UtilComputeAngle(double dx, double dy)
@@ -308,9 +300,6 @@ angle_g UtilComputeAngle(double dx, double dy)
 }
 
 
-//
-// UtilFileExists
-//
 int UtilFileExists(const char *filename)
 {
 	FILE *fp = fopen(filename, "rb");
@@ -565,8 +554,7 @@ static void MarkPolyobjPoint(double x, double y)
 	MarkPolyobjSector(sector);
 }
 
-//
-// DetectPolyobjSectors
+
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
@@ -647,6 +635,7 @@ void DetectPolyobjSectors(void)
 		MarkPolyobjPoint(x, y);
 	}
 }
+
 
 /* ----- analysis routines ----------------------------- */
 

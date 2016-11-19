@@ -72,9 +72,6 @@ eval_info_t;
 static intersection_t *quick_alloc_cuts = NULL;
 
 
-//
-// NewIntersection
-//
 static intersection_t *NewIntersection(void)
 {
 	intersection_t *cut;
@@ -92,9 +89,7 @@ static intersection_t *NewIntersection(void)
 	return cut;
 }
 
-//
-// FreeQuickAllocCuts
-//
+
 void FreeQuickAllocCuts(void)
 {
 	while (quick_alloc_cuts)
@@ -107,8 +102,6 @@ void FreeQuickAllocCuts(void)
 }
 
 
-//
-// RecomputeSeg
 //
 // Fill in the fields 'angle', 'len', 'pdx', 'pdy', etc...
 //
@@ -133,8 +126,6 @@ void RecomputeSeg(seg_t *seg)
 
 
 //
-// SplitSeg
-//
 // -AJA- Splits the given seg at the point (x,y).  The new seg is
 //       returned.  The old seg is shortened (the original start
 //       vertex is unchanged), whereas the new seg becomes the cut-off
@@ -150,7 +141,7 @@ void RecomputeSeg(seg_t *seg)
 //       contains the seg (and/or partner), so that future processing
 //       is not fucked up by incorrect counts.
 //
-static seg_t *SplitSeg(seg_t *old_seg, double x, double y)
+static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 {
 	seg_t *new_seg;
 	vertex_t *new_vert;
@@ -220,8 +211,6 @@ static seg_t *SplitSeg(seg_t *old_seg, double x, double y)
 
 
 //
-// ComputeIntersection
-//
 // -AJA- In the quest for slime-trail annihilation :->, this routine
 //       calculates the intersection location between the current seg
 //       and the partitioning seg, and takes advantage of some common
@@ -263,9 +252,6 @@ static inline void ComputeIntersection(seg_t *cur, seg_t *part,
 }
 
 
-//
-// AddIntersection
-//
 static void AddIntersection(intersection_t ** cut_list,
 		vertex_t *vert, seg_t *part, bool self_ref)
 {
@@ -318,8 +304,6 @@ static void AddIntersection(intersection_t ** cut_list,
 }
 
 
-//
-// EvalPartitionWorker
 //
 // Returns true if a "bad seg" was found early.
 //
@@ -527,8 +511,6 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 }
 
 //
-// EvalPartition
-//
 // -AJA- Evaluate a partition seg & determine the cost, taking into
 //       account the number of splits, difference between left &
 //       right, and linedefs that are tagged 'precious'.
@@ -537,7 +519,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 // skipped altogether.
 //
 static int EvalPartition(superblock_t *seg_list, seg_t *part,
-		int best_cost)
+						 int best_cost)
 {
 	eval_info_t info;
 
@@ -745,8 +727,7 @@ static int PickNodeWorker(superblock_t *part_list,
 	return true;
 }
 
-//
-// PickNode
+
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
@@ -841,8 +822,6 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 
 
 //
-// DivideOneSeg
-//
 // Apply the partition line to the given seg, taking the necessary
 // action (moving it into either the left list, right list, or
 // splitting it).
@@ -936,9 +915,7 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
 	}
 }
 
-//
-// SeparateSegs
-//
+
 void SeparateSegs(superblock_t *seg_list, seg_t *part,
 		superblock_t *lefts, superblock_t *rights,
 		intersection_t ** cut_list)
@@ -978,10 +955,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 
 static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 {
-	seg_t *cur;
-	int num;
-
-	for (cur=block->segs ; cur ; cur=cur->next)
+	for (seg_t *cur=block->segs ; cur ; cur=cur->next)
 	{
 		double x1 = cur->start->x;
 		double y1 = cur->start->y;
@@ -1001,15 +975,14 @@ static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 
 	// recursive handle sub-blocks
 
-	for (num=0 ; num < 2 ; num++)
+	for (int num=0 ; num < 2 ; num++)
 	{
 		if (block->subs[num])
 			FindLimitWorker(block->subs[num], bbox);
 	}
 }
 
-//
-// FindLimits
+
 //
 // Find the limits from a list of segs, by stepping through the segs
 // and comparing the vertices at both ends.
@@ -1023,9 +996,6 @@ void FindLimits(superblock_t *seg_list, bbox_t *bbox)
 }
 
 
-//
-// AddMinisegs
-//
 void AddMinisegs(seg_t *part,
 		superblock_t *left_list, superblock_t *right_list,
 		intersection_t *cut_list)
@@ -1261,8 +1231,6 @@ static superblock_t *quick_alloc_supers = NULL;
 
 
 //
-// PointOnLineSide
-//
 // Returns -1 for left, +1 for right, or 0 for intersect.
 //
 static int PointOnLineSide(seg_t *part, double x, double y)
@@ -1275,9 +1243,7 @@ static int PointOnLineSide(seg_t *part, double x, double y)
 	return (perp < 0) ? -1 : +1;
 }
 
-//
-// BoxOnLineSide
-//
+
 int BoxOnLineSide(superblock_t *box, seg_t *part)
 {
 	double x1 = (double)box->x1 - IFFY_LEN * 1.5;
@@ -1331,9 +1297,6 @@ int BoxOnLineSide(superblock_t *box, seg_t *part)
 
 /* ----- super block routines ------------------------------------ */
 
-//
-// NewSuperBlock
-//
 static superblock_t *NewSuperBlock(void)
 {
 	superblock_t *block;
@@ -1350,9 +1313,7 @@ static superblock_t *NewSuperBlock(void)
 	return block;
 }
 
-//
-// FreeQuickAllocSupers
-//
+
 void FreeQuickAllocSupers(void)
 {
 	while (quick_alloc_supers)
@@ -1364,9 +1325,7 @@ void FreeQuickAllocSupers(void)
 	}
 }
 
-//
-// FreeSuper
-//
+
 void FreeSuper(superblock_t *block)
 {
 	int num;
@@ -1393,6 +1352,7 @@ void FreeSuper(superblock_t *block)
 	quick_alloc_supers = block;
 }
 
+
 #if 0 // DEBUGGING CODE
 static void TestSuperWorker(superblock_t *block, int *real, int *mini)
 {
@@ -1414,9 +1374,6 @@ static void TestSuperWorker(superblock_t *block, int *real, int *mini)
 	}
 }
 
-//
-// TestSuper
-//
 void TestSuper(superblock_t *block)
 {
 	int real_num = 0;
@@ -1430,9 +1387,7 @@ void TestSuper(superblock_t *block)
 }
 #endif
 
-//
-// AddSegToSuper
-//
+
 void AddSegToSuper(superblock_t *block, seg_t *seg)
 {
 	for (;;)
@@ -1522,9 +1477,7 @@ void AddSegToSuper(superblock_t *block, seg_t *seg)
 	}
 }
 
-//
-// SplitSegInSuper
-//
+
 void SplitSegInSuper(superblock_t *block, seg_t *seg)
 {
 	do
@@ -1569,11 +1522,10 @@ static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
 	return seg;
 }
 
+
 //
-// CreateSegs
-//
-// Initially create all segs, one for each linedef.  Must be called
-// _after_ InitBlockmap().
+// Initially create all segs, one for each linedef.
+// Must be called *after* InitBlockmap().
 //
 superblock_t *CreateSegs(void)
 {
@@ -1681,9 +1633,7 @@ superblock_t *CreateSegs(void)
 	return block;
 }
 
-//
-// DetermineMiddle
-//
+
 static void DetermineMiddle(subsec_t *sub)
 {
 	seg_t *cur;
@@ -1707,8 +1657,7 @@ static void DetermineMiddle(subsec_t *sub)
 	sub->mid_y = mid_y / total;
 }
 
-//
-// ClockwiseOrder
+
 //
 // -AJA- Put the list of segs into clockwise order.
 //       Uses the now famous "double bubble" sorter :).
@@ -1826,9 +1775,7 @@ static void ClockwiseOrder(subsec_t *sub)
 # endif
 }
 
-//
-// SanityCheckClosed
-//
+
 static void SanityCheckClosed(subsec_t *sub)
 {
 	seg_t *cur, *next;
@@ -1860,9 +1807,7 @@ static void SanityCheckClosed(subsec_t *sub)
 	}
 }
 
-//
-// SanityCheckSameSector
-//
+
 static void SanityCheckSameSector(subsec_t *sub)
 {
 	seg_t *cur;
@@ -1914,9 +1859,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 	}
 }
 
-//
-// SanityCheckHasRealSeg
-//
+
 static void SanityCheckHasRealSeg(subsec_t *sub)
 {
 	seg_t *cur;
@@ -1931,9 +1874,7 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 			sub->index, sub->mid_x, sub->mid_y);
 }
 
-//
-// RenumberSubsecSegs
-//
+
 static void RenumberSubsecSegs(subsec_t *sub)
 {
 	seg_t *cur;
@@ -1997,8 +1938,7 @@ static void CreateSubsecWorker(subsec_t *sub, superblock_t *block)
 	block->real_num = block->mini_num = 0;
 }
 
-//
-// CreateSubsec
+
 //
 // Create a subsector from a list of segs.
 //
@@ -2021,9 +1961,7 @@ static subsec_t *CreateSubsec(superblock_t *seg_list)
 	return sub;
 }
 
-//
-// ComputeBspHeight
-//
+
 int ComputeBspHeight(node_t *node)
 {
 	if (node)
@@ -2121,11 +2059,9 @@ static node_t * CreateDummyNode(superblock_t *seg_list)
 }
 
 
-//
-// BuildNodes
-//
 build_result_e BuildNodes(superblock_t *seg_list,
-		node_t ** N, subsec_t ** S, int depth, const bbox_t *bbox)
+						  node_t ** N, subsec_t ** S,
+						  int depth, const bbox_t *bbox)
 {
 	node_t *node;
 	seg_t *best;
@@ -2281,9 +2217,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	return ret;
 }
 
-//
-// ClockwiseBspTree
-//
+
 void ClockwiseBspTree(node_t *root)
 {
 	int i;

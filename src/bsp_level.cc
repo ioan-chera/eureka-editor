@@ -615,8 +615,6 @@ void PutBlockmap(void)
 
 
 //
-// InitReject
-//
 // Puts each sector into individual groups.
 //
 static void InitReject(void)
@@ -632,8 +630,7 @@ static void InitReject(void)
 	}
 }
 
-//
-// GroupSectors
+
 //
 // Algorithm: Initially all sectors are in individual groups.  Now we
 // scan the linedef list.  For each 2-sectored line, merge the two
@@ -757,8 +754,6 @@ static void CreateReject(u8_t *matrix)
 }
 
 
-//
-// PutReject
 //
 // For now we only do very basic reject processing, limited to
 // determining all isolated groups of sectors (islands that are
