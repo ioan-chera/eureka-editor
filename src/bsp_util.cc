@@ -300,20 +300,6 @@ angle_g UtilComputeAngle(double dx, double dy)
 }
 
 
-int UtilFileExists(const char *filename)
-{
-	FILE *fp = fopen(filename, "rb");
-
-	if (fp)
-	{
-		fclose(fp);
-		return true;
-	}
-
-	return false;
-}
-
-
 char *UtilTimeString(void)
 {
 #ifdef WIN32

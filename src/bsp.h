@@ -482,9 +482,6 @@ angle_g UtilComputeAngle(double dx, double dy);
     (((x) * (part)->pdy - (y) * (part)->pdx + (part)->p_perp)  \
      / (part)->p_length)
 
-// check if the file exists.
-int UtilFileExists(const char *filename);
-
 // checksum functions
 void Adler32_Begin(u32_t *crc);
 void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
