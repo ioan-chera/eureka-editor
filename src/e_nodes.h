@@ -21,7 +21,7 @@
 #ifndef __EUREKA_E_NODES_H__
 #define __EUREKA_E_NODES_H__
 
-bool CMD_BuildNodes();
+bool CMD_BuildAllNodes();
 void CMD_TestMap();
 
 #endif  /* __EUREKA_E_NODES_H__ */

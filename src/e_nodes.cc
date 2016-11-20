@@ -219,7 +219,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 }
 
 
-bool CMD_BuildNodes()
+bool CMD_BuildAllNodes()
 {
 	if (MadeChanges)
 	{
@@ -382,7 +382,7 @@ void CMD_TestMap()
 			return;
 		}
 
-		if (! CMD_BuildNodes())
+		if (! CMD_SaveMap())
 			return;
 	}
 

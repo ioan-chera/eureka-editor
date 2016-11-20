@@ -102,7 +102,7 @@ static void file_do_prefs(Fl_Widget *w, void * data)
 
 static void file_do_build_nodes(Fl_Widget *w, void * data)
 {
-	CMD_BuildNodes();
+	CMD_BuildAllNodes();
 }
 
 #if 0
