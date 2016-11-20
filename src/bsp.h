@@ -389,6 +389,9 @@ void PrintVerbose(const char *str, ...);
 void PrintWarn(const char *str, ...);
 void PrintMiniWarn(const char *str, ...);
 
+// set message for certain errors
+void SetErrorMsg(const char *str, ...);
+
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
 
