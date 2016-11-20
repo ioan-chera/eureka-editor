@@ -136,15 +136,6 @@ namespace ajbsp
 {
 
 
-// certain GCC attributes can be useful
-#undef GCCATTR
-#ifdef __GNUC__
-#define GCCATTR(xyz)  __attribute__ (xyz)
-#else
-#define GCCATTR(xyz)  /* nothing */
-#endif
-
-
 // internal storage of node building parameters
 
 extern nodebuildinfo_t * cur_info;
@@ -388,27 +379,15 @@ typedef struct raw_v5_node_s
 raw_v5_node_t;
 
 
-
-//------------------------------------------------------------------------
-// SYSTEM : Bridging code
-//------------------------------------------------------------------------
-
-
-/* ----- function prototypes ---------------------------- */
-
-// display normal messages & warnings to the screen
-void PrintMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-void PrintVerbose(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-void PrintWarn(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-void PrintMiniWarn(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-
-
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-
-/* ----- function prototypes ---------------------------- */
+// display normal messages & warnings to the screen
+void PrintMsg(const char *str, ...);
+void PrintVerbose(const char *str, ...);
+void PrintWarn(const char *str, ...);
+void PrintMiniWarn(const char *str, ...);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -422,7 +401,7 @@ char *UtilStrNDup(const char *str, int size);
 
 // format the string and return the allocated memory.
 // The memory must be freed with UtilFree.
-char *UtilFormat(const char *str, ...) GCCATTR((format (printf, 1, 2)));
+char *UtilFormat(const char *str, ...);
 
 // free some memory or a string.
 void UtilFree(void *data);
