@@ -2230,6 +2230,8 @@ static void AddMissingLump(const char *name, const char *after)
 
 void SaveLevel(node_t *root_node)
 {
+	edit_wad->BeginWrite();
+
 	// remove any existing GL-Nodes
 	edit_wad->RemoveGLNodes(lev_current_start);
 
@@ -2364,6 +2366,8 @@ void SaveLevel(node_t *root_node)
 	{
 		UpdateGLMarker(gl_marker);
 	}
+
+	edit_wad->EndWrite();
 }
 
 
