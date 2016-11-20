@@ -2142,7 +2142,8 @@ static u32_t CalcGLChecksum(void)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Read(data, lump->Length()))
+		if (! lump->Seek() ||
+		    ! lump->Read(data, lump->Length()))
 			FatalError("Error reading vertices (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
@@ -2155,7 +2156,8 @@ static u32_t CalcGLChecksum(void)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Read(data, lump->Length()))
+		if (! lump->Seek() ||
+		    ! lump->Read(data, lump->Length()))
 			FatalError("Error reading linedefs (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
@@ -2183,6 +2185,10 @@ static const char *CalcOptionsString()
 
 void UpdateGLMarker(Lump_c *marker)
 {
+	// we *must* compute the checksum BEFORE (re)creating the lump
+	// [ otherwise we write data into the wrong part of the file ]
+	u32_t crc = CalcGLChecksum();
+
 	edit_wad->RecreateLump(marker);
 
 	if (lev_long_name)
@@ -2202,7 +2208,7 @@ void UpdateGLMarker(Lump_c *marker)
 		StringFree(time_str);
 	}
 
-	marker->Printf("CHECKSUM=0x%08x\n", CalcGLChecksum());
+	marker->Printf("CHECKSUM=0x%08x\n", crc);
 
 	marker->Finish();
 }
