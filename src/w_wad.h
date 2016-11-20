@@ -182,6 +182,7 @@ public:
 	short GetLevel(short index);
 	short FindLevel_Raw(const char *name);  // returns level index
 	short LastLevelLump(short index);
+	void  SortLevels();
 
 	map_format_e LevelFormat(short lump_index);
 
@@ -222,7 +223,7 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
-	Lump_c * AddLevel(const char *name, int max_size = -1);
+	Lump_c * AddLevel(const char *name, int max_size = -1, short *lev_idx = NULL);
 
 	// setup lump to write new data to it.
 	// the old contents are lost.

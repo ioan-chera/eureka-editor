@@ -651,6 +651,12 @@ void Wad_file::DetectLevels()
 	// sort levels into alphabetical order
 	// (mainly for the 'N' next map and 'P' prev map commands)
 
+	SortLevels();
+}
+
+
+void Wad_file::SortLevels()
+{
 	std::sort(levels.begin(), levels.end(), level_name_CMP_pred(this));
 }
 
@@ -1033,7 +1039,7 @@ void Wad_file::RecreateLump(Lump_c *lump, int max_size)
 }
 
 
-Lump_c * Wad_file::AddLevel(const char *name, int max_size)
+Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_idx)
 {
 	int actual_point = insert_point;
 
@@ -1042,9 +1048,10 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size)
 
 	Lump_c * lump = AddLump(name, max_size);
 
-	levels.push_back(actual_point);
+	if (*lev_idx)
+		*lev_idx = (short)levels.size();
 
-	std::sort(levels.begin(), levels.end(), level_name_CMP_pred(this));
+	levels.push_back(actual_point);
 
 	return lump;
 }
