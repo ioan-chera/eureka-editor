@@ -763,10 +763,9 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		}
 	}
 
-	/* -AJA- another (optional) optimisation, when building just the GL
-	 *       nodes.  We assume that the original nodes are reasonably
-	 *       good choices, and re-use them as much as possible, saving
-	 *       *heaps* of time on really large levels.
+	/* -AJA- here is the logic for "fast mode".  We look for segs which
+	 *       are axis-aligned and roughly divide the current group into
+	 *       two halves.  This can save *heaps* of times on large levels.
 	 */
 	if (cur_info->fast && seg_list->real_num >= SEG_FAST_THRESHHOLD)
 	{
