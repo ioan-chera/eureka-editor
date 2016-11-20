@@ -111,29 +111,6 @@ void GB_DisplaySetBarText(int barnum, const char *str)
 	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 1)
 	{
 		dialog->SetStatus(str);
-
-/* UNUSED:
-		// extract map name
-		const char * map_name = str + strlen(str);
-
-		if (map_name > str)
-			map_name--;
-
-		// handle the (Hexen) suffix
-		if (*map_name == ')')
-		{
-			while (map_name > str && map_name[1] != '(')
-				map_name--;
-
-			while (map_name > str && isspace(*map_name))
-				map_name--;
-
-			//  map_name[1] = 0;
-		}
-
-		while (map_name > str && !isspace(*map_name))
-			map_name--;
-*/
 	}
 }
 
@@ -162,19 +139,13 @@ void GB_DisplayClose(void)
 }
 
 
-static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
+static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 {
-	if (!info->input_file || info->input_file[0] == 0)
-	{
-		ajbsp::SetErrorMsg("Missing input filename !");
-		return ajbsp::BUILD_BadArgs;
-	}
+	// sanity check
+	SYS_ASSERT(info->input_file  && info->input_file[0]);
+	SYS_ASSERT(info->output_file && info->output_file[0]);
 
-	if (!info->output_file || info->output_file[0] == 0)
-	{
-		ajbsp::SetErrorMsg("Missing output filename !");
-		return ajbsp::BUILD_BadArgs;
-	}
+	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
 	if (MatchExtension(info->input_file, "gwa"))
 	{
@@ -194,41 +165,11 @@ static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
 		return ajbsp::BUILD_BadArgs;
 	}
 
-	if (info->factor < 1 || info->factor > 32)
-	{
-		info->factor = DEFAULT_FACTOR;
-//???		SetErrorMsg("Bad factor value !");
-//???		return BUILD_BadInfoFixed;
-	}
-
-	return ajbsp::BUILD_OK;
-}
-
-
-static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
-{
-	char *file_msg;
-
-	ajbsp::build_result_e ret;
-
-	ret = CheckInfo(info);
-
-	if (ret != ajbsp::BUILD_OK)
-		return ret;
-
 	info->total_big_warn = 0;
 	info->total_small_warn = 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
-
-	// sanity check
-	if (!info->input_file  || info->input_file[0] == 0 ||
-		!info->output_file || info->output_file[0] == 0)
-	{
-		ajbsp::SetErrorMsg("INTERNAL ERROR: Missing in/out filename !");
-		return ajbsp::BUILD_BadArgs;
-	}
 
 	int num_levels = edit_wad->NumLevels();
 
@@ -239,12 +180,11 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 	}
 
 	GB_PrintMsg("\n");
-//	PrintVerbose("Creating nodes using tunable factor of %d\n", info->factor);
 
 	GB_DisplayOpen(ajbsp::DIS_BUILDPROGRESS);
 	GB_DisplaySetTitle("glBSP Build Progress");
 
-	file_msg = StringPrintf("File: %s", info->input_file);
+	char *file_msg = StringPrintf("File: %s", info->input_file);
 
 	GB_DisplaySetBarText(2, file_msg);
 	GB_DisplaySetBarLimit(2, num_levels * 10);
@@ -253,6 +193,8 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 	StringFree(file_msg);
 
 	info->file_pos = 0;
+
+	ajbsp::build_result_e ret;
 
 	// loop over each level in the wad
 	for (int n = 0 ; n < num_levels ; n++)
