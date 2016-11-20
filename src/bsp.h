@@ -141,21 +141,15 @@ typedef enum
 	// everything went peachy keen
 	BUILD_OK = 0,
 
-	// an unknown error occurred (this is the catch-all value)
-	BUILD_Unknown,
+	// building was cancelled
+	BUILD_Cancelled,
 
-	// the arguments were bad/inconsistent.
-	BUILD_BadArgs,
-
-	// the info was bad/inconsistent, but has been fixed
-	BUILD_BadInfoFixed,
+	// the WAD file was corrupt / empty / bad filename
+	BUILD_BadFile,
 
 	// file errors
 	BUILD_ReadError,
-	BUILD_WriteError,
-
-	// building was cancelled
-	BUILD_Cancelled
+	BUILD_WriteError
 }
 build_result_e;
 

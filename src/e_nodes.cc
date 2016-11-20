@@ -51,21 +51,15 @@ static const char *build_ErrorString(ajbsp::build_result_e ret)
 	{
 		case ajbsp::BUILD_OK: return "OK";
 
-		 // the arguments were bad/inconsistent.
-		case ajbsp::BUILD_BadArgs: return "Bad Arguments";
+		// building was cancelled
+		case ajbsp::BUILD_Cancelled: return "Cancelled by User";
 
-		// the info was bad/inconsistent, but has been fixed
-		case ajbsp::BUILD_BadInfoFixed: return "Bad Args (fixed)";
+		// the WAD file was corrupt / empty / bad filename
+		case ajbsp::BUILD_BadFile: return "Bad File";
 
 		// file errors
 		case ajbsp::BUILD_ReadError:  return "Read Error";
 		case ajbsp::BUILD_WriteError: return "Write Error";
-
-		// building was cancelled
-		case ajbsp::BUILD_Cancelled: return "Cancelled by User";
-
-		// an unknown error occurred (this is the catch-all value)
-		case ajbsp::BUILD_Unknown:
 
 		default: return "Unknown Error";
 	}
@@ -150,19 +144,19 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 	if (MatchExtension(info->input_file, "gwa"))
 	{
 		ajbsp::SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
-		return ajbsp::BUILD_BadArgs;
+		return ajbsp::BUILD_BadFile;
 	}
 
 	if (MatchExtension(info->output_file, "gwa"))
 	{
 		ajbsp::SetErrorMsg("Output file cannot be GWA");
-		return ajbsp::BUILD_BadArgs;
+		return ajbsp::BUILD_BadFile;
 	}
 
 	if (y_stricmp(info->input_file, info->output_file) == 0)
 	{
 		ajbsp::SetErrorMsg("Input and Outfile file are the same!");
-		return ajbsp::BUILD_BadArgs;
+		return ajbsp::BUILD_BadFile;
 	}
 
 	info->total_big_warn = 0;
@@ -176,7 +170,7 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 	if (num_levels <= 0)
 	{
 		ajbsp::SetErrorMsg("No levels found in wad !");
-		return ajbsp::BUILD_Unknown;
+		return ajbsp::BUILD_BadFile;
 	}
 
 	GB_PrintMsg("\n");
