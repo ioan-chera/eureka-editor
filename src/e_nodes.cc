@@ -201,13 +201,6 @@ static ajbsp::build_result_e CheckInfo(ajbsp::nodebuildinfo_t *info)
 //???		return BUILD_BadInfoFixed;
 	}
 
-	if (info->block_limit < 1000 || info->block_limit > 64000)
-	{
-		info->block_limit = DEFAULT_BLOCK_LIMIT;
-//???		SetErrorMsg("Bad blocklimit value !");
-//???		return BUILD_;
-	}
-
 	return ajbsp::BUILD_OK;
 }
 

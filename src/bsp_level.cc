@@ -47,6 +47,8 @@ static u16_t *block_dups;
 static int block_compression;
 static int block_overflowed;
 
+#define BLOCK_LIMIT  16000
+
 #define DUMMY_DUP  0xFFFF
 
 
@@ -517,7 +519,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 
 static void TruncateBlockmap(void)
 {
-	while (block_w * block_h > cur_info->block_limit)
+	while (block_w * block_h > BLOCK_LIMIT)
 	{
 		block_w -= block_w / 8;
 		block_h -= block_h / 8;
@@ -575,7 +577,7 @@ void PutBlockmap(void)
 	// blocks to around 16000 (user changeable), this leaves about 48K
 	// of shorts for the actual line lists.
 
-	if (block_count > cur_info->block_limit)
+	if (block_count > BLOCK_LIMIT)
 	{
 		MarkSoftFailure(LIMIT_BLOCKMAP);
 		block_overflowed = true;

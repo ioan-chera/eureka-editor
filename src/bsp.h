@@ -53,7 +53,6 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // responsibility to free the strings in here.
 //
 #define DEFAULT_FACTOR  11
-#define DEFAULT_BLOCK_LIMIT  16000
 
 class nodebuildinfo_t
 {
@@ -75,8 +74,6 @@ public:
 	bool fast;
 	bool quiet;
 	bool mini_warnings;
-
-	int block_limit;
 
 	// This is for two-way communication (esp. with the GUI).
 	// Should be flagged 'volatile' since multiple threads (real or
@@ -110,8 +107,6 @@ public:
 		fast(false),
 		quiet(false),
 		mini_warnings(false),
-
-		block_limit(DEFAULT_BLOCK_LIMIT),
 
 		message(NULL),
 		cancelled(false),
