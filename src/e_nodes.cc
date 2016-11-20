@@ -291,7 +291,8 @@ void GB_PrintMsg(const char *str, ...)
 
 	message_buf[MSG_BUF_LEN-1] = 0;
 
-	dialog->Print(message_buf);
+	if (dialog)
+		dialog->Print(message_buf);
 
 	LogPrintf("BSP: %s", message_buf);
 }
@@ -390,6 +391,29 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	}
 
 	return ret;
+}
+
+
+void BuildNodesAfterSave(short lev_idx)
+{
+	dialog = NULL;
+
+	nb_info = new nodebuildinfo_t;
+
+	PrepareInfo(nb_info);
+
+	LogPrintf("Building nodes after save....\n");
+
+	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx);
+
+	// TODO : maybe print # of serious/minor warnings
+
+	if (ret == BUILD_OK)
+		LogPrintf("OK\n");
+	else
+		LogPrintf("FAILED.\n");
+
+	delete nb_info;
 }
 
 

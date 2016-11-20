@@ -28,8 +28,9 @@
 #include "main.h"
 
 #include "e_basis.h"
-#include "e_loadsave.h"
 #include "e_checks.h"
+#include "e_loadsave.h"
+#include "e_nodes.h"
 #include "levels.h"  // CalculateLevelBounds()
 #include "lib_adler.h"
 #include "m_config.h"
@@ -1269,12 +1270,14 @@ void CMD_FlipMap()
 
 static Wad_file *save_wad;
 
+static short save_level_idx;
+
 
 static void SaveHeader(const char *level)
 {
 	int size = (int)HeaderData.size();
 
-	Lump_c *lump = save_wad->AddLevel(level, size);
+	Lump_c *lump = save_wad->AddLevel(level, size, &save_level_idx);
 
 	if (size > 0)
 	{
@@ -1516,6 +1519,9 @@ static void SaveLevel(Wad_file *wad, const char *level)
 {
 	save_wad = wad;
 
+	Level_name = StringUpper(level);
+
+
 	save_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
@@ -1558,13 +1564,18 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	save_wad->EndWrite();
 
 
-	Level_name = StringUpper(level);
+	// build the nodes
+	if (true)   // TODO: user preference [enable / disable node build]
+	{
+		BuildNodesAfterSave(save_level_idx);
+	}
+
 
 	M_WriteEurekaLump(save_wad);
 
 	M_AddRecent(wad->PathName(), Level_name);
 
-	Status_Set("Saved %s  --  NO NODES", Level_name);
+	Status_Set("Saved %s", Level_name);
 
 	if (main_win)
 	{
