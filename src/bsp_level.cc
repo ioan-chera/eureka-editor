@@ -2064,8 +2064,6 @@ void SaveZDFormat(node_t *root_node)
 
 void LoadLevel()
 {
-	char *message;
-
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
@@ -2073,15 +2071,15 @@ void LoadLevel()
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
 
-	// FIXME StringPrintf()
-	message = UtilFormat("Building nodes on %s%s", lev_current_name,
-						lev_doing_hexen ? " (Hexen)" : "");
+	char * message = StringPrintf(
+			"Building nodes on %s%s", lev_current_name,
+			lev_doing_hexen ? " (Hexen)" : "");
 
 	PrintVerbose("\n\n");
 	PrintMsg("%s\n", message);
 	PrintVerbose("\n");
 
-	UtilFree(message);
+	StringFree(message);
 
 	GetVertices();
 	GetSectors();

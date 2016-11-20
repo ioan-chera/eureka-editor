@@ -395,19 +395,8 @@ void *UtilCalloc(int size);
 // re-allocate some memory.  guaranteed not to fail.
 void *UtilRealloc(void *old, int size);
 
-// duplicate a string.
-char *UtilStrDup(const char *str);
-char *UtilStrNDup(const char *str, int size);
-
-// format the string and return the allocated memory.
-// The memory must be freed with UtilFree.
-char *UtilFormat(const char *str, ...);
-
 // free some memory or a string.
 void UtilFree(void *data);
-
-// compare two strings case insensitively.
-int UtilStrCaseCmp(const char *A, const char *B);
 
 // return an allocated string for the current data and time,
 // or NULL if an error occurred.
