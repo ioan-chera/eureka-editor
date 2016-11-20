@@ -340,19 +340,19 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info,
 
 	if (MatchExtension(input_file, "gwa"))
 	{
-		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
+		GB_PrintMsg("ERROR: Input file cannot be GWA (contains nothing to build)");
 		return BUILD_BadFile;
 	}
 
 	if (MatchExtension(output_file, "gwa"))
 	{
-		SetErrorMsg("Output file cannot be GWA");
+		GB_PrintMsg("ERROR: Output file cannot be GWA");
 		return BUILD_BadFile;
 	}
 
 	if (y_stricmp(input_file, output_file) == 0)
 	{
-		SetErrorMsg("Input and Outfile file are the same!");
+		GB_PrintMsg("ERROR: Input and outfile file are the same!");
 		return BUILD_BadFile;
 	}
 
@@ -388,7 +388,6 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info,
 		}
 	}
 
-	// writes all the lumps to the output wad
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
@@ -396,6 +395,18 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info,
 		GB_PrintMsg("Total minor warnings: %d\n", info->total_small_warn);
 
 //!!!		ReportFailedLevels();
+	}
+	else if (ret == BUILD_Cancelled)
+	{
+		GB_PrintMsg("\n");
+		GB_PrintMsg("Building CANCELLED.\n\n");
+	}
+	else
+	{
+		// build nodes failed
+		GB_PrintMsg("\n");
+		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
+		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
 	}
 
 	return ret;
@@ -412,31 +423,9 @@ static bool DM_BuildNodes(const char *input_file, const char *output_file)
 
 	build_result_e ret = BuildAllNodes(nb_info, input_file, output_file);
 
-	if (ret == BUILD_Cancelled)
-	{
-		GB_PrintMsg("\n");
-		GB_PrintMsg("Building CANCELLED.\n\n");
-
-		delete nb_info;
-
-		return false;
-	}
-
-	if (ret != BUILD_OK)
-	{
-		// build nodes failed
-		GB_PrintMsg("\n");
-		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
-
-		delete nb_info;
-
-		return false;
-	}
-
 	delete nb_info;
 
-	return true;
+	return (ret == BUILD_OK);
 }
 
 
