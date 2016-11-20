@@ -664,9 +664,8 @@ static seg_t *FindFastSeg(superblock_t *seg_list, const bbox_t *bbox)
 
 
 /* returns false if cancelled */
-static int PickNodeWorker(superblock_t *part_list,
-		superblock_t *seg_list, seg_t ** best, int *best_cost,
-		int *progress, int prog_step)
+static bool PickNodeWorker(superblock_t *part_list,
+		superblock_t *seg_list, seg_t ** best, int *best_cost)
 {
 	seg_t *part;
 
@@ -685,16 +684,6 @@ static int PickNodeWorker(superblock_t *part_list,
 				part->sector ? part->sector->index : -1,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
-
-		/* something for the user to look at */
-		(*progress) += 1;
-
-		if ((*progress % prog_step) == 0)
-		{
-			cur_info->build_pos++;
-			GB_DisplaySetBar(1, cur_info->build_pos);
-			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
-		}
 
 		/* ignore minisegs as partition candidates */
 		if (! part->linedef)
@@ -718,8 +707,7 @@ static int PickNodeWorker(superblock_t *part_list,
 	for (num=0 ; num < 2 ; num++)
 	{
 		if (part_list->subs[num])
-			PickNodeWorker(part_list->subs[num], seg_list, best, best_cost,
-					progress, prog_step);
+			PickNodeWorker(part_list->subs[num], seg_list, best, best_cost);
 	}
 
 	return true;
@@ -735,33 +723,9 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 
 	int best_cost=INT_MAX;
 
-	int progress=0;
-	int prog_step=1<<24;
-	int build_step=0;
-
 # if DEBUG_PICKNODE
 	DebugPrintf("PickNode: BEGUN (depth %d)\n", depth);
 # endif
-
-	/* compute info for showing progress */
-	if (depth <= 6)
-	{
-		static int depth_counts[7] = { 248, 100, 30, 10, 6, 4, 2 };
-
-		int total = seg_list->real_num + seg_list->mini_num;
-
-		build_step = depth_counts[depth];
-		prog_step = 1 + ((total - 1) / build_step);
-
-		if (total / prog_step < build_step)
-		{
-			cur_info->build_pos += build_step - total / prog_step;
-			build_step = total / prog_step;
-
-			GB_DisplaySetBar(1, cur_info->build_pos);
-			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
-		}
-	}
 
 	/* -AJA- here is the logic for "fast mode".  We look for segs which
 	 *       are axis-aligned and roughly divide the current group into
@@ -777,11 +741,6 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 
 		if (best)
 		{
-			/* update progress */
-			cur_info->build_pos += build_step;
-			GB_DisplaySetBar(1, cur_info->build_pos);
-			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
-
 #     if DEBUG_PICKNODE
 			DebugPrintf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 					best->start->x, best->start->y, best->end->x, best->end->y);
@@ -791,8 +750,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		}
 	}
 
-	if (false == PickNodeWorker(seg_list, seg_list, &best, &best_cost,
-				&progress, prog_step))
+	if (! PickNodeWorker(seg_list, seg_list, &best, &best_cost))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
 		return NULL;

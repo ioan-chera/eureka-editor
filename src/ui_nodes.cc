@@ -118,12 +118,6 @@ int UI_NodeDialog::handle(int event)
 }
 
 
-void UI_NodeDialog::SetStatus(const char *str)
-{
-	/* not used */
-}
-
-
 void UI_NodeDialog::SetProg(int perc)
 {
 	if (perc == cur_prog)

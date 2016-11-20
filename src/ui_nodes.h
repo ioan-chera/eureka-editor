@@ -47,8 +47,6 @@ public:
 	int handle(int event);
 
 public:
-	void SetStatus(const char *str);
-
 	void SetProg(int perc);
 
 	void Print(const char *str);

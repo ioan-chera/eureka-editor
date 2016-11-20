@@ -37,9 +37,6 @@ bool bsp_warn    = false;
 
 static ajbsp::nodebuildinfo_t * nb_info;
 
-static int display_mode = ajbsp::DIS_INVALID;
-static int progress_limit;
-
 static char message_buf[MSG_BUF_LEN];
 
 static UI_NodeDialog * dialog;
@@ -79,49 +76,6 @@ void GB_PrintMsg(const char *str, ...)
 	dialog->Print(message_buf);
 
 	LogPrintf("BSP: %s", message_buf);
-}
-
-bool GB_DisplayOpen(ajbsp::displaytype_e type)
-{
-	display_mode = type;
-	return true;
-}
-
-void GB_DisplaySetTitle(const char *str)
-{
-	/* does nothing */
-}
-
-void GB_DisplaySetBarText(int barnum, const char *str)
-{
-	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 1)
-	{
-		dialog->SetStatus(str);
-	}
-}
-
-void GB_DisplaySetBarLimit(int barnum, int limit)
-{
-	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
-	{
-		progress_limit = MAX(1, limit);
-	}
-}
-
-void GB_DisplaySetBar(int barnum, int count)
-{
-	if (display_mode == ajbsp::DIS_BUILDPROGRESS && barnum == 2)
-	{
-		int perc = count * 100.0 / progress_limit;
-
-		dialog->SetProg(perc);
-	}
-}
-
-
-void GB_DisplayClose(void)
-{
-	/* does nothing */
 }
 
 
@@ -167,18 +121,7 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 
 	GB_PrintMsg("\n");
 
-	GB_DisplayOpen(ajbsp::DIS_BUILDPROGRESS);
-	GB_DisplaySetTitle("glBSP Build Progress");
-
-	char *file_msg = StringPrintf("File: %s", info->input_file);
-
-	GB_DisplaySetBarText(2, file_msg);
-	GB_DisplaySetBarLimit(2, num_levels * 10);
-	GB_DisplaySetBar(2, 0);
-
-	StringFree(file_msg);
-
-	info->file_pos = 0;
+	dialog->SetProg(0);
 
 	ajbsp::build_result_e ret;
 
@@ -190,9 +133,7 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 		if (ret != ajbsp::BUILD_OK)
 			break;
 
-		info->file_pos += 10;
-
-		GB_DisplaySetBar(2, info->file_pos);
+		dialog->SetProg(100 * (n + 1) / num_levels);
 
 		Fl::check();
 
@@ -201,8 +142,6 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 			nb_info->cancelled = true;
 		}
 	}
-
-	GB_DisplayClose();
 
 	// writes all the lumps to the output wad
 	if (ret == ajbsp::BUILD_OK)
@@ -221,8 +160,6 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 static bool DM_BuildNodes(const char *in_name, const char *out_name)
 {
 	LogPrintf("\n");
-
-	display_mode = ajbsp::DIS_INVALID;
 
 	nb_info = new ajbsp::nodebuildinfo_t;
 

@@ -2077,8 +2077,6 @@ void LoadLevel()
 	message = UtilFormat("Building nodes on %s%s", lev_current_name,
 						lev_doing_hexen ? " (Hexen)" : "");
 
-	GB_DisplaySetBarText(1, message);
-
 	PrintVerbose("\n\n");
 	PrintMsg("%s\n", message);
 	PrintVerbose("\n");
@@ -2754,11 +2752,6 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
-
-	GB_DisplaySetBarLimit(1, 1000);
-	GB_DisplaySetBar(1, 0);
-
-	cur_info->build_pos = 0;
 
 	lev_current_idx   = lev_idx;
 	lev_current_start = edit_wad->GetLevel(lev_idx);

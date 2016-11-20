@@ -87,7 +87,6 @@ public:
 
 	// from here on, various bits of internal state
 	int total_small_warn, total_big_warn;
-	int build_pos, file_pos;
 
 
 public:
@@ -110,10 +109,9 @@ public:
 
 		message(NULL),
 		cancelled(false),
+
 		total_small_warn(0),
-		total_big_warn(0),
-		build_pos(0),
-		file_pos(0)
+		total_big_warn(0)
 	{ }
 
 	~nodebuildinfo_t()
@@ -121,17 +119,6 @@ public:
 		// FIXME : free strings
 	}
 };
-
-
-// Display Prototypes
-typedef enum
-{
-	DIS_INVALID,        // Nonsense value is always useful
-	DIS_BUILDPROGRESS,  // Build Box, has 2 bars
-	DIS_FILEPROGRESS,   // File Box, has 1 bar
-	NUMOFGUITYPES
-}
-displaytype_e;
 
 
 /* -------- engine prototypes ----------------------- */
@@ -1011,7 +998,7 @@ intersection_t;
 // scan all the segs in the list, and choose the best seg to use as a
 // partition line, returning it.  If no seg can be used, returns NULL.
 // The 'depth' parameter is the current depth in the tree, used for
-// computing  the current progress.
+// computing the current progress.
 //
 seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox);
 
@@ -1120,15 +1107,6 @@ void FreeQuickAllocSupers(void);
 /* external funcs */
 
 void GB_PrintMsg(const char *str, ...);
-
-void GB_DisplayTicker(void);
-
-bool GB_DisplayOpen(ajbsp::displaytype_e type);
-void GB_DisplaySetTitle(const char *str);
-void GB_DisplaySetBarText(int barnum, const char *str);
-void GB_DisplaySetBarLimit(int barnum, int limit);
-void GB_DisplaySetBar(int barnum, int count);
-void GB_DisplayClose(void);
 
 
 #endif /* __EUREKA_BSP_H__ */
