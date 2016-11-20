@@ -328,33 +328,13 @@ static void PrepareInfo(nodebuildinfo_t *info)
 }
 
 
-static build_result_e BuildAllNodes(nodebuildinfo_t *info,
-	const char *input_file, const char *output_file)
-
+static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 {
+	LogPrintf("\n");
+
 	// sanity check
-	SYS_ASSERT(input_file  && input_file[0]);
-	SYS_ASSERT(output_file && output_file[0]);
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
-
-	if (MatchExtension(input_file, "gwa"))
-	{
-		GB_PrintMsg("ERROR: Input file cannot be GWA (contains nothing to build)");
-		return BUILD_BadFile;
-	}
-
-	if (MatchExtension(output_file, "gwa"))
-	{
-		GB_PrintMsg("ERROR: Output file cannot be GWA");
-		return BUILD_BadFile;
-	}
-
-	if (y_stricmp(input_file, output_file) == 0)
-	{
-		GB_PrintMsg("ERROR: Input and outfile file are the same!");
-		return BUILD_BadFile;
-	}
 
 	int num_levels = edit_wad->NumLevels();
 
@@ -413,33 +393,18 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info,
 }
 
 
-static bool DM_BuildNodes(const char *input_file, const char *output_file)
-{
-	LogPrintf("\n");
-
-	nb_info = new nodebuildinfo_t;
-
-	PrepareInfo(nb_info);
-
-	build_result_e ret = BuildAllNodes(nb_info, input_file, output_file);
-
-	delete nb_info;
-
-	return (ret == BUILD_OK);
-}
-
-
 bool CMD_BuildAllNodes()
 {
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
-						"and then build the nodes?") <= 0)
+						"and then build all the nodes?") <= 0)
 		{
 			return false;
 		}
 
+		// FIXME : inhibit a node build here
 		if (! CMD_SaveMap())
 			return false;
 	}
@@ -459,16 +424,6 @@ bool CMD_BuildAllNodes()
 	SYS_ASSERT(edit_wad);
 
 
-	const char *old_name = StringDup(edit_wad->PathName());
-	const char *new_name = ReplaceExtension(old_name, "new");
-
-	if (MatchExtension(old_name, "new"))
-	{
-		DLG_Notify("Cannot build nodes on a pwad with .NEW extension.");
-		return false;
-	}
-
-
 	dialog = new UI_NodeDialog();
 
 	dialog->set_modal();
@@ -477,52 +432,14 @@ bool CMD_BuildAllNodes()
 	Fl::check();
 
 
-	bool was_ok = DM_BuildNodes(old_name, new_name);
+	nb_info = new nodebuildinfo_t;
 
-	if (was_ok)
-	{
-		MasterDir_Remove(edit_wad);
+	PrepareInfo(nb_info);
 
-		delete edit_wad;
-		edit_wad = NULL;
-		Pwad_name = NULL;
-
-		// delete the old file, rename the new file
-		if (! FileDelete(old_name))
-		{
-#if 0
-fprintf(stderr, "DELETE ERROR: %s\n", strerror(errno));
-fprintf(stderr, "old_name : %s\n", old_name);
-#endif
-			FatalError("Unable to replace the pwad with the new version\n"
-			           "containing the freshly built nodes, as the original\n"
-					   "could not be deleted.\n");
-		}
-
-		if (! FileRename(new_name, old_name))
-		{
-#if 0
-fprintf(stderr, "RENAME ERROR: %s\n", strerror(errno));
-fprintf(stderr, "old_name : %s\n", old_name);
-fprintf(stderr, "new_name : %s\n", new_name);
-#endif
-			FatalError("Unable to replace the pwad with the new version\n"
-			           "containing the freshly built nodes, as a problem\n"
-					   "occurred trying to rename the new file.\n"
-					   "\n"
-					   "Your wad has been left with the .NEW extension.\n");
-		}
-
-		GB_PrintMsg("\n");
-		GB_PrintMsg("Replaced the old file with the new file.\n");
-	}
-	else
-	{
-		FileDelete(new_name);
-	}
+	build_result_e ret = BuildAllNodes(nb_info);
 
 
-	if (was_ok)
+	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
 	}
@@ -544,31 +461,24 @@ fprintf(stderr, "new_name : %s\n", new_name);
 		Fl::wait(0.2);
 	}
 
-	delete dialog;
-	dialog = NULL;
+	delete nb_info; nb_info = NULL;
+	delete dialog;  dialog = NULL;
 
-	if (was_ok)
+
+	if (ret == BUILD_OK)
 	{
-		// re-open the PWAD
+		// reload the current map
 
-		LogPrintf("Re-opening the PWAD...\n");
-
-		edit_wad = Wad_file::Open(old_name, 'a');
-		Pwad_name = old_name;
-
-		if (! edit_wad)
-			FatalError("Unable to re-open the PWAD.\n");
-
-		MasterDir_Add(edit_wad);
-
-		LogPrintf("Re-opening the map (%s)\n", Level_name);
+		LogPrintf("Reloading current map...\n");
 
 		LoadLevel(edit_wad, Level_name);
 
 		Status_Set("Built nodes OK");
+
+		return true;
 	}
 
-	return was_ok;
+	return false;
 }
 
 
