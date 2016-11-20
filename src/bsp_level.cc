@@ -511,7 +511,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 }
 
 
-static void TruncateBlockmap(void)
+void TruncateBlockmap(void)
 {
 	while (block_w * block_h > BLOCK_LIMIT)
 	{
