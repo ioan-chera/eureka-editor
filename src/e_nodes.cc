@@ -35,28 +35,28 @@ bool bsp_verbose = false;
 bool bsp_warn    = false;
 
 
-static ajbsp::nodebuildinfo_t * nb_info;
+static nodebuildinfo_t * nb_info;
 
 static char message_buf[MSG_BUF_LEN];
 
 static UI_NodeDialog * dialog;
 
 
-static const char *build_ErrorString(ajbsp::build_result_e ret)
+static const char *build_ErrorString(build_result_e ret)
 {
 	switch (ret)
 	{
-		case ajbsp::BUILD_OK: return "OK";
+		case BUILD_OK: return "OK";
 
 		// building was cancelled
-		case ajbsp::BUILD_Cancelled: return "Cancelled by User";
+		case BUILD_Cancelled: return "Cancelled by User";
 
 		// the WAD file was corrupt / empty / bad filename
-		case ajbsp::BUILD_BadFile: return "Bad File";
+		case BUILD_BadFile: return "Bad File";
 
 		// file errors
-		case ajbsp::BUILD_ReadError:  return "Read Error";
-		case ajbsp::BUILD_WriteError: return "Write Error";
+		case BUILD_ReadError:  return "Read Error";
+		case BUILD_WriteError: return "Write Error";
 
 		default: return "Unknown Error";
 	}
@@ -79,7 +79,24 @@ void GB_PrintMsg(const char *str, ...)
 }
 
 
-static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
+// set message for certain errors
+static void SetErrorMsg(const char *str, ...)
+{
+	va_list args;
+
+	va_start(args, str);
+	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_end(args);
+
+SYS_ASSERT(nb_info);
+
+	StringFree(nb_info->message);
+
+	nb_info->message = StringDup(message_buf);
+}
+
+
+static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 {
 	// sanity check
 	SYS_ASSERT(info->input_file  && info->input_file[0]);
@@ -89,20 +106,20 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 
 	if (MatchExtension(info->input_file, "gwa"))
 	{
-		ajbsp::SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
-		return ajbsp::BUILD_BadFile;
+		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
+		return BUILD_BadFile;
 	}
 
 	if (MatchExtension(info->output_file, "gwa"))
 	{
-		ajbsp::SetErrorMsg("Output file cannot be GWA");
-		return ajbsp::BUILD_BadFile;
+		SetErrorMsg("Output file cannot be GWA");
+		return BUILD_BadFile;
 	}
 
 	if (y_stricmp(info->input_file, info->output_file) == 0)
 	{
-		ajbsp::SetErrorMsg("Input and Outfile file are the same!");
-		return ajbsp::BUILD_BadFile;
+		SetErrorMsg("Input and Outfile file are the same!");
+		return BUILD_BadFile;
 	}
 
 	info->total_big_warn = 0;
@@ -115,22 +132,22 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 
 	if (num_levels <= 0)
 	{
-		ajbsp::SetErrorMsg("No levels found in wad !");
-		return ajbsp::BUILD_BadFile;
+		SetErrorMsg("No levels found in wad !");
+		return BUILD_BadFile;
 	}
 
 	GB_PrintMsg("\n");
 
 	dialog->SetProg(0);
 
-	ajbsp::build_result_e ret;
+	build_result_e ret;
 
 	// loop over each level in the wad
 	for (int n = 0 ; n < num_levels ; n++)
 	{
-		ret = ajbsp::BuildNodesForLevel(info, n);
+		ret = AJBSP_BuildLevel(info, n);
 
-		if (ret != ajbsp::BUILD_OK)
+		if (ret != BUILD_OK)
 			break;
 
 		dialog->SetProg(100 * (n + 1) / num_levels);
@@ -144,7 +161,7 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 	}
 
 	// writes all the lumps to the output wad
-	if (ret == ajbsp::BUILD_OK)
+	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Total serious warnings: %d\n", info->total_big_warn);
@@ -161,7 +178,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 {
 	LogPrintf("\n");
 
-	nb_info = new ajbsp::nodebuildinfo_t;
+	nb_info = new nodebuildinfo_t;
 
 	nb_info->input_file  = StringDup(in_name);
 	nb_info->output_file = StringDup(out_name);
@@ -170,11 +187,11 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 	nb_info->quiet         = bsp_verbose ? false : true;
 	nb_info->mini_warnings = bsp_warn ? true : false;
 
-	ajbsp::build_result_e  ret;
+	build_result_e  ret;
 
 	ret = BuildAllNodes(nb_info);
 
-	if (ret == ajbsp::BUILD_Cancelled)
+	if (ret == BUILD_Cancelled)
 	{
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building CANCELLED.\n\n");
@@ -184,7 +201,7 @@ static bool DM_BuildNodes(const char *in_name, const char *out_name)
 		return false;
 	}
 
-	if (ret != ajbsp::BUILD_OK)
+	if (ret != BUILD_OK)
 	{
 		// build nodes failed
 		GB_PrintMsg("\n");

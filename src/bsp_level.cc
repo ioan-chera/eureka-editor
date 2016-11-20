@@ -2792,12 +2792,13 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	return ret;
 }
 
-
-/* ----- main routine -------------------------------------- */
-
-
-
 }  // namespace ajbsp
+
+
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx)
+{
+	return ajbsp::BuildNodesForLevel(info, lev_idx);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

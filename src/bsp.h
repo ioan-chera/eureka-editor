@@ -23,27 +23,11 @@
 
 class Lump_c;
 
-/** Eureka change: namespacing */
 
-namespace ajbsp
-{
+/* external funcs */
 
+void GB_PrintMsg(const char *str, ...);
 
-// certain GCC attributes can be useful
-#undef GCCATTR
-#ifdef __GNUC__
-#define GCCATTR(xyz)  __attribute__ (xyz)
-#else
-#define GCCATTR(xyz)  /* nothing */
-#endif
-
-
-/* ----- basic types --------------------------- */
-
-typedef double angle_g;  // degrees, 0 is E, 90 is N
-
-
-/* ----- complex types --------------------------- */
 
 // Node Build Information Structure
 //
@@ -121,8 +105,6 @@ public:
 };
 
 
-/* -------- engine prototypes ----------------------- */
-
 typedef enum
 {
 	// everything went peachy keen
@@ -141,18 +123,38 @@ typedef enum
 build_result_e;
 
 
-build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx);
 
 
-// main routine, this will build the nodes (GL and/or normal) for the
-// given input wad file out to the given output file.  Returns
-// BUILD_OK if everything went well, otherwise another error code.
-// Typical errors are fubar parameters (like input_file == NULL),
-// problems reading/writing files, or cancellation by another thread
-// (esp. the GUI) using the comms->cancelled flag.  Upon errors, the
-// comms->message field usually contains a string describing it.
+//======================================================================
 //
-///---  build_result_e BuildNodes(nodebuildinfo_t *info);
+//    INTERNAL STUFF FROM HERE ON
+//
+//======================================================================
+
+namespace ajbsp
+{
+
+
+// certain GCC attributes can be useful
+#undef GCCATTR
+#ifdef __GNUC__
+#define GCCATTR(xyz)  __attribute__ (xyz)
+#else
+#define GCCATTR(xyz)  /* nothing */
+#endif
+
+
+// internal storage of node building parameters
+
+extern nodebuildinfo_t * cur_info;
+
+
+
+/* ----- basic types --------------------------- */
+
+typedef double angle_g;  // degrees, 0 is E, 90 is N
+
 
 
 //------------------------------------------------------------------------
@@ -392,11 +394,6 @@ raw_v5_node_t;
 //------------------------------------------------------------------------
 
 
-// internal storage of node building parameters
-
-extern nodebuildinfo_t * cur_info;
-
-
 /* ----- function prototypes ---------------------------- */
 
 // display normal messages & warnings to the screen
@@ -404,9 +401,6 @@ void PrintMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 void PrintVerbose(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 void PrintWarn(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 void PrintMiniWarn(const char *str, ...) GCCATTR((format (printf, 1, 2)));
-
-// set message for certain errors
-void SetErrorMsg(const char *str, ...) GCCATTR((format (printf, 1, 2)));
 
 
 //------------------------------------------------------------------------
@@ -1102,11 +1096,6 @@ void RoundOffBspTree(node_t *root);
 void FreeQuickAllocSupers(void);
 
 }  // namespace ajbsp
-
-
-/* external funcs */
-
-void GB_PrintMsg(const char *str, ...);
 
 
 #endif /* __EUREKA_BSP_H__ */
