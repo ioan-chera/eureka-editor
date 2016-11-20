@@ -1952,64 +1952,6 @@ static void DebugShowSegs(superblock_t *seg_list)
 #endif
 
 
-static seg_t * CreateDummySeg(seg_t *orig)
-{
-	seg_t *dummy = NewSeg();
-
-	// copy most stuff from original seg
-	memcpy(dummy, orig, sizeof(seg_t));
-
-	dummy->next = NULL;
-	dummy->partner = NULL;
-	dummy->block = NULL;
-
-	dummy->index = num_complete_seg;
-	num_complete_seg++;
-
-	return dummy;
-}
-
-
-static node_t * CreateDummyNode(superblock_t *seg_list)
-{
-	node_t *node;
-
-	seg_t *best;
-
-	PrintWarn("LEVEL TOO SIMPLE, creating a dummy node...\n");
-
-	// first seg of the whole list will be our partition line
-	// (the choice is totally arbitrary)
-	best = seg_list->segs;
-
-	node = NewNode();
-
-	node->x  = best->linedef->start->x;
-	node->y  = best->linedef->start->y;
-	node->dx = best->linedef->end->x - node->x;
-	node->dy = best->linedef->end->y - node->y;
-
-	FindLimits(seg_list, &node->l.bounds);
-	FindLimits(seg_list, &node->r.bounds);
-
-	// the right side will have a normal subsector
-
-	node->r.subsec = CreateSubsec(seg_list);
-
-	// the left side gets a fake subsector
-
-	node->l.subsec = NewSubsec();
-
-	node->l.subsec->seg_list = CreateDummySeg(best);
-	node->l.subsec->seg_count = 1;
-
-	node->l.subsec->index = num_subsecs - 1;
-	node->l.subsec->is_dummy = true;
-
-	return node;
-}
-
-
 build_result_e BuildNodes(superblock_t *seg_list,
 						  node_t ** N, subsec_t ** S,
 						  int depth, const bbox_t *bbox)
@@ -2047,28 +1989,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 		DebugPrintf("Build: CONVEX\n");
 #   endif
 
-#if 0  // turns out this was bogus -- AJA nov/2015
-		if (depth == 0)
-		{
-			/* -AJA- welcome to Hack Central, hope you enjoy your stay.
-			 *
-			 * Vanilla DOOM (and some source ports) do not function when
-			 * there are no nodes at all.  For this case we create a dummy
-			 * node with the real subsector on one side, and a fake-ish
-			 * subsector (containing a copy of a seg) on the other side.
-			 *
-			 * Tested in Chocolate Doom, PrBoom, Legacy and Odamex, with
-			 * no problems.
-			 *
-			 * [ P.S. no need to set *S here ]
-			 */
-			*N = CreateDummyNode(seg_list);
-		}
-		else
-#endif
-		{
-			*S = CreateSubsec(seg_list);
-		}
+		*S = CreateSubsec(seg_list);
 
 		return BUILD_OK;
 	}
