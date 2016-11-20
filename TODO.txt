@@ -313,6 +313,8 @@ Game / Port Definitions
 
 -  HacX : categorize the textures
 
+?  MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
+
 IDEA: for DOOM have "Switch", "Grating", "Door" categories
 
 WISH: conversion between Hexen <--> DOOM formats
