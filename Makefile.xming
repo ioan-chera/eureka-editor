@@ -97,7 +97,6 @@ OBJS = \
 	$(OBJ_DIR)/ui_menu.o  \
 	$(OBJ_DIR)/ui_misc.o  \
 	$(OBJ_DIR)/ui_nombre.o  \
-	$(OBJ_DIR)/ui_nodes.o  \
 	$(OBJ_DIR)/ui_pic.o  \
 	$(OBJ_DIR)/ui_prefs.o  \
 	$(OBJ_DIR)/ui_replace.o  \
