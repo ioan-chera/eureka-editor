@@ -713,8 +713,6 @@ static int PickNodeWorker(superblock_t *part_list,
 		(*best) = part;
 	}
 
-	GB_DisplayTicker();
-
 	/* recursively handle sub-blocks */
 
 	for (num=0 ; num < 2 ; num++)
@@ -764,8 +762,6 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 			GB_DisplaySetBar(2, cur_info->file_pos + cur_info->build_pos / 100);
 		}
 	}
-
-	GB_DisplayTicker();
 
 	/* -AJA- another (optional) optimisation, when building just the GL
 	 *       nodes.  We assume that the original nodes are reasonably
@@ -1546,8 +1542,6 @@ superblock_t *CreateSegs(void)
 
 	// step through linedefs and get side numbers
 
-	GB_DisplayTicker();
-
 	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
@@ -2148,8 +2142,6 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	if (lefts->real_num + lefts->mini_num == 0)
 		BugError("Separated seg-list has no LEFT side");
 
-	GB_DisplayTicker();
-
 	AddMinisegs(best, lefts, rights, cut_list);
 
 	*N = node = NewNode();
@@ -2223,8 +2215,6 @@ void ClockwiseBspTree(node_t *root)
 	int i;
 
 	(void) root;
-
-	GB_DisplayTicker();
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -2300,8 +2290,6 @@ void NormaliseBspTree(node_t *root)
 	int i;
 
 	(void) root;
-
-	GB_DisplayTicker();
 
 	// unlink all minisegs from each subsector:
 
@@ -2442,8 +2430,6 @@ void RoundOffBspTree(node_t *root)
 	(void) root;
 
 	num_complete_seg = 0;
-
-	GB_DisplayTicker();
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{

@@ -81,14 +81,6 @@ void GB_PrintMsg(const char *str, ...)
 	LogPrintf("BSP: %s", message_buf);
 }
 
-void GB_DisplayTicker(void)
-{
-	if (dialog->WantCancel())
-	{
-		nb_info->cancelled = true;
-	}
-}
-
 bool GB_DisplayOpen(ajbsp::displaytype_e type)
 {
 	display_mode = type;
@@ -203,6 +195,11 @@ static ajbsp::build_result_e BuildAllNodes(ajbsp::nodebuildinfo_t *info)
 		GB_DisplaySetBar(2, info->file_pos);
 
 		Fl::check();
+
+		if (dialog->WantCancel())
+		{
+			nb_info->cancelled = true;
+		}
 	}
 
 	GB_DisplayClose();

@@ -250,8 +250,6 @@ static void CreateBlockmap(void)
 
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	GB_DisplayTicker();
-
 	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = LookupLinedef(i);
@@ -303,8 +301,6 @@ static void CompressBlockmap(void)
 	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
 	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
 
-	GB_DisplayTicker();
-
 	// sort duplicate-detecting array.  After the sort, all duplicates
 	// will be next to each other.  The duplicate array gives the order
 	// of the blocklists in the BLOCKMAP lump.
@@ -320,8 +316,6 @@ static void CompressBlockmap(void)
 
 	orig_size = 4 + block_count;
 	new_size  = cur_offset;
-
-	GB_DisplayTicker();
 
 	for (i=0 ; i < block_count ; i++)
 	{
@@ -774,8 +768,6 @@ void PutReject(void)
 		return;
 	}
 
-	GB_DisplayTicker();
-
 	InitReject();
 	GroupSectors();
 
@@ -979,8 +971,6 @@ void GetVertices(void)
 	if (lump)
 		count = lump->Length() / sizeof(raw_vertex_t);
 
-	GB_DisplayTicker();
-
 # if DEBUG_LOAD
 	DebugPrintf("GetVertices: num = %d\n", count);
 # endif
@@ -1026,8 +1016,6 @@ void GetSectors(void)
 
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
-
-	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSectors: num = %d\n", count);
@@ -1080,8 +1068,6 @@ void GetThings(void)
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
 
-	GB_DisplayTicker();
-
 # if DEBUG_LOAD
 	DebugPrintf("GetThings: num = %d\n", count);
 # endif
@@ -1121,8 +1107,6 @@ void GetThingsHexen(void)
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
 
-	GB_DisplayTicker();
-
 # if DEBUG_LOAD
 	DebugPrintf("GetThingsHexen: num = %d\n", count);
 # endif
@@ -1161,8 +1145,6 @@ void GetSidedefs(void)
 
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
-
-	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSidedefs: num = %d\n", count);
@@ -1221,8 +1203,6 @@ void GetLinedefs(void)
 
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
-
-	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefs: num = %d\n", count);
@@ -1297,8 +1277,6 @@ void GetLinedefsHexen(void)
 
 	if (! lump->Seek())
 		FatalError("Error seeking to a lump\n");
-
-	GB_DisplayTicker();
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
@@ -1408,8 +1386,6 @@ void PutVertices(const char *name, int do_gl)
 {
 	int count, i;
 
-	GB_DisplayTicker();
-
 	Lump_c *lump = CreateLevelLump(name);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
@@ -1441,11 +1417,10 @@ void PutVertices(const char *name, int do_gl)
 		MarkSoftFailure(do_gl ? LIMIT_GL_VERT : LIMIT_VERTEXES);
 }
 
+
 void PutGLVertices(int do_v5)
 {
 	int count, i;
-
-	GB_DisplayTicker();
 
 	Lump_c *lump = CreateLevelLump("GL_VERT");
 
@@ -1479,6 +1454,7 @@ void PutGLVertices(int do_v5)
 		MarkSoftFailure(LIMIT_GL_VERT);
 }
 
+
 void ValidateSectors(void)
 {
 	if (num_sectors > 65534)
@@ -1503,6 +1479,7 @@ void ValidateLinedefs(void)
 		MarkSoftFailure(LIMIT_LINEDEFS);
 }
 
+
 static inline u16_t VertexIndex16Bit(const vertex_t *v)
 {
 	if (v->index & IS_GL_VERTEX)
@@ -1510,6 +1487,7 @@ static inline u16_t VertexIndex16Bit(const vertex_t *v)
 
 	return (u16_t) v->index;
 }
+
 
 static inline u32_t VertexIndex32BitV5(const vertex_t *v)
 {
@@ -1519,13 +1497,12 @@ static inline u32_t VertexIndex32BitV5(const vertex_t *v)
 	return (u32_t) v->index;
 }
 
+
 void PutSegs(void)
 {
 	int i, count;
 
 	Lump_c *lump = CreateLevelLump("SEGS");
-
-	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1570,13 +1547,12 @@ void PutSegs(void)
 		MarkSoftFailure(LIMIT_SEGS);
 }
 
+
 void PutGLSegs(void)
 {
 	int i, count;
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS");
-
-	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1627,13 +1603,12 @@ void PutGLSegs(void)
 		MarkSoftFailure(LIMIT_GL_SEGS);
 }
 
+
 void PutGLSegs_V5()
 {
 	int i, count;
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS");
-
-	GB_DisplayTicker();
 
 	// sort segs into ascending index
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
@@ -1685,8 +1660,6 @@ void PutSubsecs(const char *name, int do_gl)
 {
 	int i;
 
-	GB_DisplayTicker();
-
 	Lump_c * lump = CreateLevelLump(name);
 
 	for (i=0 ; i < num_subsecs ; i++)
@@ -1715,8 +1688,6 @@ void PutGLSubsecs_V5()
 {
 	int i;
 
-	GB_DisplayTicker();
-
 	Lump_c *lump = CreateLevelLump("GL_SSECT");
 
 	for (i=0 ; i < num_subsecs ; i++)
@@ -1736,6 +1707,7 @@ void PutGLSubsecs_V5()
 #   endif
 	}
 }
+
 
 static int node_cur_index;
 
@@ -1789,6 +1761,7 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 			node->x + node->dx, node->y + node->dy);
 # endif
 }
+
 
 static void PutOneNode_V5(node_t *node, Lump_c *lump)
 {
@@ -1879,8 +1852,6 @@ void PutZVertices(void)
 	ZLibAppendLump(&orgverts, 4);
 	ZLibAppendLump(&newverts, 4);
 
-	GB_DisplayTicker();
-
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
@@ -1903,6 +1874,7 @@ void PutZVertices(void)
 				count, num_gl_vert);
 }
 
+
 void PutZSubsecs(void)
 {
 	int i;
@@ -1912,7 +1884,6 @@ void PutZSubsecs(void)
 	int cur_seg_index = 0;
 
 	ZLibAppendLump(&raw_num, 4);
-	GB_DisplayTicker();
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1948,13 +1919,13 @@ void PutZSubsecs(void)
 				cur_seg_index, num_complete_seg);
 }
 
+
 void PutZSegs(void)
 {
 	int i, count;
 	u32_t raw_num = LE_U32(num_complete_seg);
 
 	ZLibAppendLump(&raw_num, 4);
-	GB_DisplayTicker();
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1988,6 +1959,7 @@ void PutZSegs(void)
 		BugError("PutZSegs miscounted (%d != %d)",
 				count, num_complete_seg);
 }
+
 
 static void PutOneZNode(node_t *node)
 {
@@ -2049,12 +2021,12 @@ static void PutOneZNode(node_t *node)
 # endif
 }
 
+
 void PutZNodes(node_t *root)
 {
 	u32_t raw_num = LE_U32(num_nodes);
 
 	ZLibAppendLump(&raw_num, 4);
-	GB_DisplayTicker();
 
 	node_cur_index = 0;
 

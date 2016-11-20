@@ -644,8 +644,6 @@ void DetectOverlappingVertices(void)
 	int i;
 	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
 
-	GB_DisplayTicker();
-
 	// sort array of indices
 	for (i=0 ; i < num_vertices ; i++)
 		array[i] = i;
@@ -784,6 +782,7 @@ static int LineEndCompare(const void *p1, const void *p2)
 	return (int)C->y - (int)D->y;
 }
 
+
 void DetectOverlappingLines(void)
 {
 	// Algorithm:
@@ -794,8 +793,6 @@ void DetectOverlappingLines(void)
 	int i;
 	int *array = (int *)UtilCalloc(num_linedefs * sizeof(int));
 	int count = 0;
-
-	GB_DisplayTicker();
 
 	// sort array of indices
 	for (i=0 ; i < num_linedefs ; i++)
@@ -874,11 +871,10 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 	}
 }
 
+
 void CalculateWallTips(void)
 {
 	int i;
-
-	GB_DisplayTicker();
 
 	for (i=0 ; i < num_linedefs ; i++)
 	{
