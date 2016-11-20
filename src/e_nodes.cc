@@ -297,7 +297,7 @@ void GB_PrintMsg(const char *str, ...)
 }
 
 
-// set message for certain errors
+// set message for certain errors  [ FIXME : REMOVE THIS ]
 static void SetErrorMsg(const char *str, ...)
 {
 	va_list args;
@@ -314,37 +314,47 @@ SYS_ASSERT(nb_info);
 }
 
 
-static build_result_e BuildAllNodes(nodebuildinfo_t *info)
+static void PrepareInfo(nodebuildinfo_t *info)
+{
+	info->fast          = bsp_fast ? true : false;
+	info->quiet         = bsp_verbose ? false : true;
+	info->mini_warnings = bsp_warn ? true : false;
+
+	info->total_big_warn   = 0;
+	info->total_small_warn = 0;
+
+	// clear cancelled flag
+	info->cancelled = false;
+}
+
+
+static build_result_e BuildAllNodes(nodebuildinfo_t *info,
+	const char *input_file, const char *output_file)
+
 {
 	// sanity check
-	SYS_ASSERT(info->input_file  && info->input_file[0]);
-	SYS_ASSERT(info->output_file && info->output_file[0]);
+	SYS_ASSERT(input_file  && input_file[0]);
+	SYS_ASSERT(output_file && output_file[0]);
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	if (MatchExtension(info->input_file, "gwa"))
+	if (MatchExtension(input_file, "gwa"))
 	{
 		SetErrorMsg("Input file cannot be GWA (contains nothing to build)");
 		return BUILD_BadFile;
 	}
 
-	if (MatchExtension(info->output_file, "gwa"))
+	if (MatchExtension(output_file, "gwa"))
 	{
 		SetErrorMsg("Output file cannot be GWA");
 		return BUILD_BadFile;
 	}
 
-	if (y_stricmp(info->input_file, info->output_file) == 0)
+	if (y_stricmp(input_file, output_file) == 0)
 	{
 		SetErrorMsg("Input and Outfile file are the same!");
 		return BUILD_BadFile;
 	}
-
-	info->total_big_warn = 0;
-	info->total_small_warn = 0;
-
-	// clear cancelled flag
-	info->cancelled = false;
 
 	int num_levels = edit_wad->NumLevels();
 
@@ -392,22 +402,15 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 }
 
 
-static bool DM_BuildNodes(const char *in_name, const char *out_name)
+static bool DM_BuildNodes(const char *input_file, const char *output_file)
 {
 	LogPrintf("\n");
 
 	nb_info = new nodebuildinfo_t;
 
-	nb_info->input_file  = StringDup(in_name);
-	nb_info->output_file = StringDup(out_name);
+	PrepareInfo(nb_info);
 
-	nb_info->fast          = bsp_fast ? true : false;
-	nb_info->quiet         = bsp_verbose ? false : true;
-	nb_info->mini_warnings = bsp_warn ? true : false;
-
-	build_result_e  ret;
-
-	ret = BuildAllNodes(nb_info);
+	build_result_e ret = BuildAllNodes(nb_info, input_file, output_file);
 
 	if (ret == BUILD_Cancelled)
 	{

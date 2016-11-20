@@ -41,9 +41,6 @@ void GB_PrintMsg(const char *str, ...);
 class nodebuildinfo_t
 {
 public:
-	const char *input_file;
-	const char *output_file;
-
 	int factor;
 
 	bool gl_nodes;
@@ -63,11 +60,11 @@ public:
 	// Should be flagged 'volatile' since multiple threads (real or
 	// otherwise, e.g. signals) may read or change the values.
 
-	// if the node builder failed, this will contain the error
-	const char *message;
-
 	// the GUI can set this to tell the node builder to stop
 	bool cancelled;
+
+	// if the node builder failed, this will contain the error
+	const char *message;
 
 	// from here on, various bits of internal state
 	int total_small_warn, total_big_warn;
@@ -75,9 +72,6 @@ public:
 
 public:
 	nodebuildinfo_t() :
-		input_file(NULL),
-		output_file(NULL),
-
 		factor(DEFAULT_FACTOR),
 
 		gl_nodes(true),
@@ -91,8 +85,8 @@ public:
 		quiet(false),
 		mini_warnings(false),
 
-		message(NULL),
 		cancelled(false),
+		message(NULL),
 
 		total_small_warn(0),
 		total_big_warn(0)
