@@ -175,6 +175,7 @@ static void BlockAdd(int blk_num, int line_index)
 	cur[BK_NUM]++;
 }
 
+
 static void BlockAddLine(linedef_t *L)
 {
 	int x1 = (int) L->start->x;
@@ -245,6 +246,7 @@ static void BlockAddLine(linedef_t *L)
 	}
 }
 
+
 static void CreateBlockmap(void)
 {
 	int i;
@@ -290,6 +292,7 @@ static int BlockCompare(const void *p1, const void *p2)
 
 	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(u16_t));
 }
+
 
 static void CompressBlockmap(void)
 {
@@ -385,6 +388,37 @@ static void CompressBlockmap(void)
 }
 
 
+static int CalcBlockmapSize()
+{
+	// compute size of final BLOCKMAP lump.
+	// it does not need to be exact, but it *does* need to be bigger
+	// (or equal) to the actual size of the lump.
+
+	// header + null_block + a bit extra
+	int size = 20;
+
+	// the pointers (offsets to the line lists)
+	size = size + block_count * 2;
+
+	// add size of each block
+	for (int i=0 ; i < block_count ; i++)
+	{
+		int blk_num = block_dups[i];
+
+		// ignore duplicate or empty blocks
+		if (blk_num == DUMMY_DUP)
+			continue;
+
+		u16_t *blk = block_lines[blk_num];
+		SYS_ASSERT(blk);
+
+		size += (1 + (int)(blk[BK_NUM]) + 1) * 2;
+	}
+
+	return size;
+}
+
+
 static void WriteBlockmap(void)
 {
 	// leave empty if the blockmap overflowed
@@ -393,9 +427,9 @@ static void WriteBlockmap(void)
 
 	int i;
 
-	// TODO : compute size of blockmap (can be rough as long as always bigger)
+	int max_size = CalcBlockmapSize();
 
-	Lump_c *lump = CreateLevelLump("BLOCKMAP");
+	Lump_c *lump = CreateLevelLump("BLOCKMAP", max_size);
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
@@ -429,16 +463,13 @@ static void WriteBlockmap(void)
 	for (i=0 ; i < block_count ; i++)
 	{
 		int blk_num = block_dups[i];
-		u16_t *blk;
 
 		// ignore duplicate or empty blocks
 		if (blk_num == DUMMY_DUP)
 			continue;
 
-		blk = block_lines[blk_num];
-
-		if (blk == NULL)
-			BugError("WriteBlockmap: block %d is NULL !", i);
+		u16_t *blk = block_lines[blk_num];
+		SYS_ASSERT(blk);
 
 		lump->Write(&m_zero, sizeof(u16_t));
 		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
@@ -451,9 +482,7 @@ static void WriteBlockmap(void)
 
 static void FreeBlockmap(void)
 {
-	int i;
-
-	for (i=0 ; i < block_count ; i++)
+	for (int i=0 ; i < block_count ; i++)
 	{
 		if (block_lines[i])
 			UtilFree(block_lines[i]);
