@@ -9,6 +9,42 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+BSP rework
+----------
+
+!!  check that ALL logic can handle an empty map (NO linedefs etc)
+
++  make read errors NOT call FatalError()
+
++  support XNOD uncompressed 
+
+-  support ZNOD somehow (as a preference)
+
++  do something with the ReportFailedLevels stuff
+
+-  check utils like PerpDist()   [ add missing ones into Eureka? ]
+
++  Preference panel:
+         [x] always build nodes on save (recommended)
+
+         seg split factor [ 11 ]
+
+         [ ] fast mode
+         [ ] verbose
+         [ ] warnings
+
+         Advanced settings :
+
+         [x] build BLOCKMAP
+         [x] build REJECT
+         [x] build GL-Nodes
+
+         [ ] force V5 of GL-Nodes
+         [ ] force ZDoom format of normal nodes
+         [ ] force zlib compression
+
+
+
 General
 -------
 
