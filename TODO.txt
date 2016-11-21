@@ -177,6 +177,9 @@ IDEA: for generalized lines, show more info in tooltip of desc
 IDEA: after inserting a new object, allow moving another object
       (i.e. set edit.did_a_move = true).  Perhaps config item.
 
+IDEA: when building REJECT, support a simple distance check
+      [ i.e. if distance between two sectors >= N, mark as cannot see ]
+
 WISH: a scripting language
 
 WISH: support ZDoom PK3 for textures (etc)

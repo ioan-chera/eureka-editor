@@ -430,10 +430,10 @@ void Adler32_Finish(u32_t *crc);
 // compute blockmap origin & size (the block_x/y/w/h variables)
 // based on the set of loaded linedefs.
 //
-void InitBlockmap(void);
+void InitBlockmap();
 
 // build the blockmap and write the data into the BLOCKMAP lump
-void PutBlockmap(void);
+void PutBlockmap();
 
 // utility routines...
 void GetBlockmapBounds(int *x, int *y, int *w, int *h);
@@ -447,7 +447,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 //------------------------------------------------------------------------
 
 // build the reject table and write it into the REJECT lump
-void PutReject(void);
+void PutReject();
 
 
 //------------------------------------------------------------------------

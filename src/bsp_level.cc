@@ -441,6 +441,8 @@ static void WriteBlockmap(void)
 		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
 		lump->Write(&m_neg1, sizeof(u16_t));
 	}
+
+	lump->Finish();
 }
 
 
@@ -459,8 +461,6 @@ static void FreeBlockmap(void)
 	UtilFree(block_dups);
 }
 
-
-/* ----- top level funcs ------------------------------------ */
 
 static void FindBlockmapLimits(bbox_t *bbox)
 {
@@ -536,7 +536,7 @@ void TruncateBlockmap(void)
 }
 
 
-void InitBlockmap(void)
+void InitBlockmap()
 {
 	bbox_t map_bbox;
 
@@ -556,7 +556,7 @@ void InitBlockmap(void)
 }
 
 
-void PutBlockmap(void)
+void PutBlockmap()
 {
 	if (! cur_info->do_blockmap)
 	{
@@ -609,15 +609,23 @@ void PutBlockmap(void)
 
 #define DEBUG_REJECT  0
 
+static u8_t *rej_matrix;
+static int   rej_total_size;	// in bytes
+
 
 //
-// Puts each sector into individual groups.
+// Allocate the matrix, init sectors into individual groups.
 //
-static void InitReject(void)
+static void Reject_Init()
 {
-	int i;
+	rej_total_size = (num_sectors * num_sectors + 7) / 8;
 
-	for (i=0 ; i < num_sectors ; i++)
+	rej_matrix = new u8_t[rej_total_size];
+
+	memset(rej_matrix, 0, rej_total_size);
+
+
+	for (int i=0 ; i < num_sectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 
@@ -627,12 +635,19 @@ static void InitReject(void)
 }
 
 
+static void Reject_Free()
+{
+	delete[] rej_matrix;
+	rej_matrix = NULL;
+}
+
+
 //
 // Algorithm: Initially all sectors are in individual groups.  Now we
 // scan the linedef list.  For each 2-sectored line, merge the two
 // sector groups into one.  That's it !
 //
-static void GroupSectors(void)
+static void Reject_GroupSectors()
 {
 	int i;
 
@@ -689,8 +704,9 @@ static void GroupSectors(void)
 	}
 }
 
+
 #if DEBUG_REJECT
-static void CountGroups(void)
+static void Reject_DebugGroups()
 {
 	// Note: this routine is destructive to the group numbers
 
@@ -722,13 +738,11 @@ static void CountGroups(void)
 #endif
 
 
-static void CreateReject(u8_t *matrix)
+static void Reject_ProcessSectors()
 {
-	int view, target;
-
-	for (view=0 ; view < num_sectors ; view++)
+	for (int view=0 ; view < num_sectors ; view++)
 	{
-		for (target=0 ; target < view ; target++)
+		for (int target=0 ; target < view ; target++)
 		{
 			sector_t *view_sec = LookupSector(view);
 			sector_t *targ_sec = LookupSector(target);
@@ -738,15 +752,25 @@ static void CreateReject(u8_t *matrix)
 			if (view_sec->rej_group == targ_sec->rej_group)
 				continue;
 
-			// for symmetry, do two bits at a time
+			// for symmetry, do both sides at same time
 
 			p1 = view * num_sectors + target;
 			p2 = target * num_sectors + view;
 
-			matrix[p1 >> 3] |= (1 << (p1 & 7));
-			matrix[p2 >> 3] |= (1 << (p2 & 7));
+			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
+			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
 		}
 	}
+}
+
+
+static void Reject_WriteLump()
+{
+	Lump_c *lump = CreateLevelLump("REJECT");
+
+	lump->Write(rej_matrix, rej_total_size);
+
+	lump->Finish();
 }
 
 
@@ -755,38 +779,27 @@ static void CreateReject(u8_t *matrix)
 // determining all isolated groups of sectors (islands that are
 // surrounded by void space).
 //
-void PutReject(void)
+void PutReject()
 {
-	int reject_size;
-	u8_t *matrix;
-	Lump_c *lump;
-
-	if (! cur_info->do_reject)
+	if (! cur_info->do_reject || num_sectors == 0)
 	{
 		// just create an empty reject lump
 		CreateLevelLump("REJECT")->Finish();
 		return;
 	}
 
-	InitReject();
-	GroupSectors();
-
-	reject_size = (num_sectors * num_sectors + 7) / 8;
-	matrix = (u8_t *)UtilCalloc(reject_size);
-
-	CreateReject(matrix);
+	Reject_Init();
+	Reject_GroupSectors();
+	Reject_ProcessSectors();
 
 # if DEBUG_REJECT
-	CountGroups();
+	Reject_DebugGroups();
 # endif
 
-	lump = CreateLevelLump("REJECT");
-
-	lump->Write(matrix, reject_size);
+	Reject_WriteLump();
+	Reject_Free();
 
 	PrintVerbose("Added simple reject lump\n");
-
-	UtilFree(matrix);
 }
 
 
