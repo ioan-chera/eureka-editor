@@ -59,13 +59,6 @@
  *  Global variables
  */
 
-// progress during initialisation:
-//   0 = nothing yet
-//   1 = read early options, set up logging
-//   2 = read all options, and possibly a config file
-//   3 = inited FLTK, opened main window
-int  init_progress;
-
 bool want_quit = false;
 
 const char *config_file = NULL;
@@ -89,13 +82,6 @@ const char *Level_name;
 map_format_e Level_format;
 
 
-int show_help     = 0;
-int show_version  = 0;
-
-int KF;
-int KF_fonth;
-
-
 // config items
 bool auto_load_recent = false;
 bool begin_maximized  = false;
@@ -116,10 +102,21 @@ rgb_color_t gui_custom_ig = RGB_MAKE(255, 255, 255);
 rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 
 
+// Progress during initialisation:
+//    0 = nothing yet
+//    1 = read early options, set up logging
+//    2 = read all options, and possibly a config file
+//    3 = inited FLTK, opened main window
+int  init_progress;
+
+int show_help     = 0;
+int show_version  = 0;
+
+
 /*
  *  Prototypes of private functions
  */
-static void TermFLTK();
+static void Main_CloseWindow();
 
 
 static void RemoveSingleNewlines(char *buffer)
@@ -169,7 +166,7 @@ void FatalError(const char *fmt, ...)
 
 		init_progress = 2;
 
-		TermFLTK();
+		Main_CloseWindow();
 	}
 #ifdef WIN32
 	else
@@ -536,12 +533,16 @@ int Main_key_handler(int event)
 }
 
 
+//
+// Creates the main window
+//
 static void Main_OpenWindow()
 {
-	/*
-	 *  Create the window
-	 */
 	Fl::visual(FL_DOUBLE | FL_RGB);
+
+	// disable keyboard navigation, as it often interferes with our
+	// user interface, especially TAB key for toggling the 3D view.
+	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
 
 
 	if (gui_color_set == 0)
@@ -639,8 +640,9 @@ static void Main_OpenWindow()
 }
 
 
-static void TermFLTK()
+static void Main_CloseWindow()
 {
+	// we don't actually need anything here
 }
 
 
@@ -1042,7 +1044,7 @@ quit:
 
 	init_progress = 2;
 
-	TermFLTK();
+	Main_CloseWindow();
 
 
 	init_progress = 0;

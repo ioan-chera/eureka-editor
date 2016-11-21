@@ -35,10 +35,14 @@
 
 
 
-UI_MainWin *main_win;
-
 #define MAIN_WINDOW_W  (800 - 32)
 #define MAIN_WINDOW_H  (600 - 40)
+
+UI_MainWin *main_win;
+
+// Kromulent Factor crud
+int KF;
+int KF_fonth;
 
 
 //
