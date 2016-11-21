@@ -105,6 +105,17 @@ static void zoom_fit()
 }
 
 
+void ZoomWholeMap()
+{
+	if (MadeChanges)
+		CalculateLevelBounds();
+
+	zoom_fit();
+
+	RedrawMap();
+}
+
+
 void RedrawMap()
 {
 	if (! main_win)
@@ -1247,7 +1258,7 @@ void CMD_InvertSelection(void)
 
 void CMD_Quit(void)
 {
-	want_quit = true;
+	Main_Quit();
 }
 
 
@@ -1772,12 +1783,7 @@ void CMD_Zoom(void)
 
 void CMD_ZoomWholeMap(void)
 {
-	if (MadeChanges)
-		CalculateLevelBounds();
-
-	zoom_fit();
-
-	RedrawMap();
+	ZoomWholeMap();
 }
 
 

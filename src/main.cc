@@ -674,6 +674,12 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
+void Main_Quit()
+{
+	want_quit = true;
+}
+
+
 void Main_Loop()
 {
 	UpdateHighlight();

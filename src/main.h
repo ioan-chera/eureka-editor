@@ -163,6 +163,7 @@ extern int KF_fonth;  // default font size
 
 bool Main_ConfirmQuit(const char *action);
 void Main_LoadResources();
+void Main_Quit();
 
 #ifdef __GNUC__
 __attribute__((noreturn))

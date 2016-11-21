@@ -131,6 +131,7 @@ bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
 void RedrawMap();
+void ZoomWholeMap();
 
 /* raw input handling */
 

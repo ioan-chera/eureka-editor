@@ -54,6 +54,19 @@ static const char * overwrite_message =
 	"Are you sure you want to continue?";
 
 
+void RemoveEditWad()
+{
+	if (! edit_wad)
+		return;
+
+	MasterDir_Remove(edit_wad);
+	delete edit_wad;
+
+	edit_wad  = NULL;
+	Pwad_name = NULL;
+}
+
+
 static void FreshLevel()
 {
 	BA_ClearAll();
@@ -98,13 +111,8 @@ static void FreshLevel()
 
 	CalculateLevelBounds();
 
-	CMD_ZoomWholeMap();
+	ZoomWholeMap();
 }
-
-
-extern void CMD_ZoomWholeMap();
-
-void RemoveEditWad();
 
 
 static bool Project_AskFile(char *filename)
@@ -960,19 +968,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 			M_DefaultUserState();
 		}
 	}
-}
-
-
-void RemoveEditWad()
-{
-	if (! edit_wad)
-		return;
-
-	MasterDir_Remove(edit_wad);
-	delete edit_wad;
-
-	edit_wad = NULL;
-	Pwad_name = NULL;
 }
 
 

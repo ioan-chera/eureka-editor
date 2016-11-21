@@ -41,12 +41,6 @@ UI_MainWin *main_win;
 #define MAIN_WINDOW_H  (600 - 40)
 
 
-static void main_win_close_CB(Fl_Widget *w, void *data)
-{
-	CMD_Quit();
-}
-
-
 //
 // MainWin Constructor
 //
@@ -59,7 +53,7 @@ UI_MainWin::UI_MainWin() :
 
 	size_range(MAIN_WINDOW_W, MAIN_WINDOW_H);
 
-	callback((Fl_Callback *) main_win_close_CB);
+	callback((Fl_Callback *) quit_callback);
 
 	color(WINDOW_BG, WINDOW_BG);
 
@@ -130,11 +124,18 @@ UI_MainWin::UI_MainWin() :
 	add(find_box);
 }
 
+
 //
 // MainWin Destructor
 //
 UI_MainWin::~UI_MainWin()
 { }
+
+
+void UI_MainWin::quit_callback(Fl_Widget *w, void *data)
+{
+	Main_Quit();
+}
 
 
 void UI_MainWin::NewEditMode(obj_type_e mode)

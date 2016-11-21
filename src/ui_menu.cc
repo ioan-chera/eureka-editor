@@ -42,7 +42,7 @@
 
 static void file_do_quit(Fl_Widget *w, void * data)
 {
-	CMD_Quit();
+	Main_Quit();
 }
 
 static void file_do_new(Fl_Widget *w, void * data)
@@ -235,17 +235,17 @@ static void view_do_zoom_out(Fl_Widget *w, void * data)
 
 static void view_do_whole_map(Fl_Widget *w, void * data)
 {
-	CMD_ZoomWholeMap();
+	ExecuteCommand("ZoomWholeMap");
 }
 
 static void view_do_whole_selection(Fl_Widget *w, void * data)
 {
-	CMD_ZoomSelection();
+	ExecuteCommand("ZoomSelection");
 }
 
 static void view_do_camera_pos(Fl_Widget *w, void * data)
 {
-	CMD_GoToCamera();
+	ExecuteCommand("GoToCamera");
 }
 
 static void view_do_toggle_3d(Fl_Widget *w, void * data)
@@ -291,7 +291,7 @@ static void view_do_next(Fl_Widget *w, void * data)
 
 static void view_do_jump(Fl_Widget *w, void * data)
 {
-	CMD_JumpToObject();
+	ExecuteCommand("JumpToObject");
 }
 
 

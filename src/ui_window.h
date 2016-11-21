@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2015 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -137,6 +137,9 @@ public:
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.
 	void UpdateGameInfo();
+
+private:
+	static void quit_callback(Fl_Widget *w, void *data);
 };
 
 

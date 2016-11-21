@@ -1535,7 +1535,7 @@ void M_DefaultUserState()
 {
 	grid.Init();
 
-	CMD_ZoomWholeMap();
+	ZoomWholeMap();
 
 	Render3D_Setup();
 }
