@@ -1200,8 +1200,8 @@ void CMD_FlipMap()
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// the level might not be found (lev_idx < 0) -- that is OK
-	int lev_idx = wad->FindLevel_Raw(Level_name);
-	int max_idx = wad->NumLevels() - 1;
+	int lev_idx = wad->LevelFind(Level_name);
+	int max_idx = wad->LevelCount() - 1;
 
 	if (max_idx < 0)
 	{
@@ -1254,7 +1254,7 @@ void CMD_FlipMap()
 	SYS_ASSERT(lev_idx <= max_idx);
 
 
-	short lump_idx = wad->GetLevel(lev_idx);
+	short lump_idx = wad->LevelHeader(lev_idx);
 	Lump_c * lump  = wad->GetLump(lump_idx);
 	const char *map_name = lump->Name();
 
@@ -1903,7 +1903,7 @@ void CMD_DeleteMap()
 		return;
 	}
 
-	if (edit_wad->NumLevels() < 2)
+	if (edit_wad->LevelCount() < 2)
 	{
 		// perhaps ask either to Rename map, or Delete the file (and Eureka will shut down)
 
@@ -1920,8 +1920,8 @@ void CMD_DeleteMap()
 
 	LogPrintf("Deleting Map : %s...\n", Level_name);
 
+	short level_idx  = edit_wad->LevelFind(Level_name);
 	short level_lump = edit_wad->FindLevel(Level_name);
-	short level_idx  = edit_wad->FindLevel_Raw(Level_name);
 
 	if (level_lump < 0 || level_idx < 0)
 	{
@@ -1939,10 +1939,10 @@ void CMD_DeleteMap()
 
 	// choose a new level to load
 	{
-		if (level_idx >= edit_wad->NumLevels())
-			level_idx =  edit_wad->NumLevels() - 1;
+		if (level_idx >= edit_wad->LevelCount())
+			level_idx =  edit_wad->LevelCount() - 1;
 
-		short lump_idx = edit_wad->GetLevel(level_idx);
+		short lump_idx = edit_wad->LevelHeader(level_idx);
 		Lump_c * lump  = edit_wad->GetLump(lump_idx);
 		const char *map_name = lump->Name();
 

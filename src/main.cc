@@ -495,9 +495,11 @@ static const char * DetermineLevel()
 
 		if (level_number > 0)
 		{
-			lev_idx = wad->FindLevelByNumber(level_number);
+			lev_idx = wad->LevelFindByNumber(level_number);
 			if (lev_idx < 0)
 				FatalError("Level '%d' not found (no matches)\n", level_number);
+
+			lev_idx = wad->LevelHeader(lev_idx);
 		}
 		else
 		{

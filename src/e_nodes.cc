@@ -337,7 +337,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	int num_levels = edit_wad->NumLevels();
+	int num_levels = edit_wad->LevelCount();
 
 	if (num_levels <= 0)
 	{

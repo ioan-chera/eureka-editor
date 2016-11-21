@@ -2224,7 +2224,7 @@ static void AddMissingLump(const char *name, const char *after)
 	// FIXME : if this happens, the level structure is very broken, so.... do what?????
 	if (exist < 0)
 	{
-		exist = edit_wad->LastLevelLump(lev_current_idx);
+		exist = edit_wad->LevelLastLump(lev_current_idx);
 		// PrintMsg ???
 	}
 
@@ -2697,7 +2697,7 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 	}
 	else
 	{
-		short last_idx = edit_wad->LastLevelLump(lev_current_idx);
+		short last_idx = edit_wad->LevelLastLump(lev_current_idx);
 
 		edit_wad->InsertPoint(last_idx + 1);
 
@@ -2726,7 +2726,7 @@ Lump_c * CreateGLMarker()
 		lev_long_name = true;
 	}
 
-	short last_idx = edit_wad->LastLevelLump(lev_current_idx);
+	short last_idx = edit_wad->LevelLastLump(lev_current_idx);
 
 	edit_wad->InsertPoint(last_idx + 1);
 
@@ -2762,7 +2762,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 		return BUILD_Cancelled;
 
 	lev_current_idx   = lev_idx;
-	lev_current_start = edit_wad->GetLevel(lev_idx);
+	lev_current_start = edit_wad->LevelHeader(lev_idx);
 
 	LoadLevel();
 

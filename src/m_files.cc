@@ -467,7 +467,7 @@ bool M_TryOpenMostRecent()
 	}
 
 	// make sure at least one level can be loaded
-	if (wad->NumLevels() == 0)
+	if (wad->LevelCount() == 0)
 	{
 		LogPrintf("No levels in most recent pwad: %s\n", filename);
 

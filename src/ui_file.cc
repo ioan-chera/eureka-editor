@@ -476,7 +476,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 {
 	result_wad = wad;
 
-	int num_levels = wad->NumLevels();
+	int num_levels = wad->LevelCount();
 
 	if (num_levels == 0)
 		return;
@@ -495,7 +495,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
-		Lump_c *lump = wad->GetLump(wad->GetLevel(lev));
+		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
 		level_names[std::string(lump->Name())] = 1;
 	}

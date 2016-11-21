@@ -173,15 +173,16 @@ public:
 
 	// these all return a lump index
 	short FindLevel(const char *name);
-	short FindLevelByNumber(int number);
 	short FindFirstLevel();
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
-	short NumLevels() const { return (short)levels.size(); }
-	short GetLevel(short index);
-	short FindLevel_Raw(const char *name);  // returns level index
-	short LastLevelLump(short index);
+	short LevelCount() const { return (short)levels.size(); }
+	short LevelHeader(short lev_num);
+	short LevelLastLump(short lev_num);
+	short LevelFind(const char *name);  // returns level index
+	short LevelFindByNumber(int number);
+
 	void  SortLevels();
 
 	map_format_e LevelFormat(short lump_index);
@@ -206,7 +207,7 @@ public:
 
 	// remove the given lump(s)
 	// this will change index numbers on existing lumps
-	// (previous results of FindLumpNum or GetLevel are invalidated).
+	// (previous results of FindLumpNum or LevelHeader are invalidated).
 	void RemoveLumps(short index, short count = 1);
 
 	// this removes the level marker PLUS all associated level lumps
@@ -223,7 +224,7 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
-	Lump_c * AddLevel(const char *name, int max_size = -1, short *lev_idx = NULL);
+	Lump_c * AddLevel(const char *name, int max_size = -1, short *lev_num = NULL);
 
 	// setup lump to write new data to it.
 	// the old contents are lost.

@@ -425,7 +425,7 @@ Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
 }
 
 
-short Wad_file::FindLevel_Raw(const char *name)
+short Wad_file::LevelFind(const char *name)
 {
 	for (short k = 0 ; k < (int)levels.size() ; k++)
 	{
@@ -442,9 +442,9 @@ short Wad_file::FindLevel_Raw(const char *name)
 }
 
 
-short Wad_file::LastLevelLump(short index)
+short Wad_file::LevelLastLump(short lev_num)
 {
-	short start = GetLevel(index);
+	short start = LevelHeader(lev_num);
 
 	int count = 1;
 
@@ -462,7 +462,7 @@ short Wad_file::LastLevelLump(short index)
 
 short Wad_file::FindLevel(const char *name)
 {
-	short k = FindLevel_Raw(name);
+	short k = LevelFind(name);
 
 	if (k >= 0)
 		return levels[k];
@@ -471,7 +471,7 @@ short Wad_file::FindLevel(const char *name)
 }
 
 
-short Wad_file::FindLevelByNumber(int number)
+short Wad_file::LevelFindByNumber(int number)
 {
 	// sanity check
 	if (number <= 0 || number > 99)
@@ -490,7 +490,7 @@ short Wad_file::FindLevelByNumber(int number)
 	// otherwise try E#M#
 	sprintf(buffer, "E%dM%d", MAX(1, number / 10), number % 10);
 
-	index = FindLevel(buffer);
+	index = LevelFind(buffer);
 	if (index >= 0)
 		return index;
 
@@ -507,11 +507,11 @@ short Wad_file::FindFirstLevel()
 }
 
 
-short Wad_file::GetLevel(short index)
+short Wad_file::LevelHeader(short lev_num)
 {
-	SYS_ASSERT(0 <= index && index < NumLevels());
+	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	return levels[index];
+	return levels[lev_num];
 }
 
 
@@ -1039,7 +1039,7 @@ void Wad_file::RecreateLump(Lump_c *lump, int max_size)
 }
 
 
-Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_idx)
+Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_num)
 {
 	int actual_point = insert_point;
 
@@ -1048,9 +1048,9 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_idx)
 
 	Lump_c * lump = AddLump(name, max_size);
 
-	if (lev_idx)
+	if (lev_num)
 	{
-		*lev_idx = (short)levels.size();
+		*lev_num = (short)levels.size();
 	}
 
 	levels.push_back(actual_point);
