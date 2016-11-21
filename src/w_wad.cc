@@ -1048,8 +1048,10 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_idx)
 
 	Lump_c * lump = AddLump(name, max_size);
 
-	if (*lev_idx)
+	if (lev_idx)
+	{
 		*lev_idx = (short)levels.size();
+	}
 
 	levels.push_back(actual_point);
 
