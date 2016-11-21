@@ -21,6 +21,8 @@
 #include "main.h"
 #include "bsp.h"
 
+#include "w_rawdef.h"
+
 
 namespace ajbsp
 {
