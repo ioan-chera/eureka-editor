@@ -258,12 +258,12 @@ bool CMD_NewProject()
 	// determine map name (same as first level in the IWAD)
 	const char *map_name = "MAP01";
 
-	short idx = game_wad->FindFirstLevel();
+	short idx = game_wad->LevelFindFirst();
 
 	if (idx >= 0)
 	{
-		Lump_c * lump = game_wad->GetLump(idx);
-		map_name = lump->Name();
+		idx = game_wad->LevelHeader(idx);
+		map_name = game_wad->GetLump(idx)->Name();
 	}
 
 	LogPrintf("Creating New File : %s in %s\n", map_name, filename);
@@ -1009,26 +1009,20 @@ void OpenFileMap(const char *filename, const char *map_name)
 	}
 
 
-	int lev_idx = -1;
+	int lev_num = -1;
 
 	if (map_name)
 	{
-		lev_idx = wad->FindLevel(map_name);
-
-		if (lev_idx < 0)
-		{
-			// FIXME: WARN ??  ERROR ??
-		}
+		lev_num = wad->LevelFind(map_name);
 	}
 
-	if (lev_idx < 0)
+	if (lev_num < 0)
 	{
 		map_name = NULL;
-
-		lev_idx = wad->FindFirstLevel();
+		lev_num = wad->LevelFindFirst();
 	}
 
-	if (lev_idx < 0)
+	if (lev_num < 0)
 	{
 		delete wad;
 
@@ -1062,9 +1056,8 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	if (! map_name)
 	{
-		Lump_c *lump = wad->GetLump(lev_idx);
-
-		map_name = lump->Name();
+		short idx = wad->LevelHeader(lev_num);
+		map_name  = wad->GetLump(idx)->Name();
 	}
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
@@ -1199,7 +1192,7 @@ void CMD_FlipMap()
 
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
-	// the level might not be found (lev_idx < 0) -- that is OK
+	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(Level_name);
 	int max_idx = wad->LevelCount() - 1;
 
@@ -1840,12 +1833,12 @@ void CMD_RenameMap()
 	// [ user may be trying to rename map after changing the IWAD ]
 	char format = 'M';
 	{
-		short idx = game_wad->FindFirstLevel();
+		short idx = game_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			Lump_c * lump  = game_wad->GetLump(idx);
-			const char *name = lump->Name();
+			idx = game_wad->LevelHeader(idx);
+			const char *name = game_wad->GetLump(idx)->Name();
 			format = toupper(name[0]);
 		}
 	}

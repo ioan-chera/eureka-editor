@@ -436,7 +436,7 @@ void UI_OpenMap::Populate()
 
 		for (int r = last ; r >= first ; r--)
 		{
-			if (master_dir[r]->FindFirstLevel() >= 0)
+			if (master_dir[r]->LevelCount() >= 0)
 			{
 				PopulateButtons(master_dir[r]);
 				break;
@@ -674,7 +674,7 @@ void UI_OpenMap::LoadFile()
 		return;
 	}
 
-	if (wad->FindFirstLevel() < 0)
+	if (wad->LevelCount() < 0)
 	{
 		DLG_Notify("The chosen WAD contains no levels.\n\n"
 				   "Please try again.");

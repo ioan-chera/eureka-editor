@@ -692,14 +692,14 @@ const char * M_PickDefaultIWAD()
 	}
 	else if (edit_wad)
 	{
-		int lev = edit_wad->FindFirstLevel();
-		const char *lev_name = "";
+		short idx = edit_wad->LevelFindFirst();
 
-		if (lev >= 0)
+		if (idx >= 0)
 		{
-			lev_name = edit_wad->GetLump(lev)->Name();
+			idx = edit_wad->LevelHeader(idx);
+			const char *name = edit_wad->GetLump(idx)->Name();
 
-			if (toupper(lev_name[0]) == 'E')
+			if (toupper(name[0]) == 'E')
 				default_game = "doom";
 		}
 	}

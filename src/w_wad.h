@@ -173,15 +173,16 @@ public:
 
 	// these all return a lump index
 	short FindLevel(const char *name);
-	short FindFirstLevel();
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
+	// these generally return a level number (0 .. count-1)
 	short LevelCount() const { return (short)levels.size(); }
 	short LevelHeader(short lev_num);
 	short LevelLastLump(short lev_num);
-	short LevelFind(const char *name);  // returns level index
+	short LevelFind(const char *name);
 	short LevelFindByNumber(int number);
+	short LevelFindFirst();
 
 	void  SortLevels();
 

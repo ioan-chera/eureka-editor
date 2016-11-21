@@ -491,24 +491,25 @@ static const char * DetermineLevel()
 		if (! wad)
 			continue;
 
-		short lev_idx;
+		short lev_num;
 
 		if (level_number > 0)
 		{
-			lev_idx = wad->LevelFindByNumber(level_number);
-			if (lev_idx < 0)
+			lev_num = wad->LevelFindByNumber(level_number);
+			if (lev_num < 0)
 				FatalError("Level '%d' not found (no matches)\n", level_number);
 
-			lev_idx = wad->LevelHeader(lev_idx);
 		}
 		else
 		{
-			lev_idx = wad->FindFirstLevel();
-			if (lev_idx < 0)
+			lev_num = wad->LevelFindFirst();
+			if (lev_num < 0)
 				FatalError("No levels found in the %s!\n", (pass == 0) ? "PWAD" : "IWAD");
 		}
 
-		Lump_c *lump = wad->GetLump(lev_idx);
+		short idx = wad->LevelHeader(lev_num);
+
+		Lump_c *lump = wad->GetLump(idx);
 		SYS_ASSERT(lump);
 
 		return StringDup(lump->Name());
