@@ -1503,11 +1503,16 @@ static void SaveLevel(const char *level)
 	edit_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
-	int lev_num  = edit_wad->LevelFind(level);
-	if (lev_num >= 0)
-		edit_wad->RemoveLevel(lev_num);
+	int lev_num = edit_wad->LevelFind(level);
+	int level_lump = -1;
 
-	int level_lump = edit_wad->LevelHeader(lev_num);
+	if (lev_num >= 0)
+	{
+		level_lump = edit_wad->LevelHeader(lev_num);
+
+		edit_wad->RemoveLevel(lev_num);
+	}
+
 	edit_wad->InsertPoint(level_lump);
 
 	SaveHeader(level);
