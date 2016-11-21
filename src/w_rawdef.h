@@ -165,6 +165,94 @@ typedef struct raw_hexen_thing_s
 } PACKEDATTR raw_hexen_thing_t;
 
 
+/* ----- The BSP tree structures ----------------------- */
+
+typedef struct raw_seg_s
+{
+	u16_t start;     // from this vertex...
+	u16_t end;       // ... to this vertex
+	u16_t angle;     // angle (0 = east, 16384 = north, ...)
+	u16_t linedef;   // linedef that this seg goes along
+	u16_t flip;      // true if not the same direction as linedef
+	u16_t dist;      // distance from starting point
+
+} PACKEDATTR raw_seg_t;
+
+
+typedef struct raw_gl_seg_s
+{
+	u16_t start;      // from this vertex...
+	u16_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u16_t partner;    // partner seg number, or -1
+
+} PACKEDATTR raw_gl_seg_t;
+
+
+typedef struct raw_v5_seg_s
+{
+	u32_t start;      // from this vertex...
+	u32_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u32_t partner;    // partner seg number, or -1
+
+} PACKEDATTR raw_v5_seg_t;
+
+
+typedef struct raw_bbox_s
+{
+	s16_t maxy, miny;
+	s16_t minx, maxx;
+
+} PACKEDATTR raw_bbox_t;
+
+
+typedef struct raw_node_s
+{
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;  // bounding rectangles
+	u16_t right, left;  // children: Node or SSector (if high bit is set)
+
+} PACKEDATTR raw_node_t;
+
+
+typedef struct raw_subsec_s
+{
+	u16_t num;     // number of Segs in this Sub-Sector
+	u16_t first;   // first Seg
+
+} PACKEDATTR raw_subsec_t;
+
+
+typedef struct raw_v5_subsec_s
+{
+	u32_t num;     // number of Segs in this Sub-Sector
+	u32_t first;   // first Seg
+
+} PACKEDATTR raw_v5_subsec_t;
+
+
+typedef struct raw_v5_node_s
+{
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;  // bounding rectangles
+	u32_t right, left;  // children: Node or SSector (if high bit is set)
+
+} PACKEDATTR raw_v5_node_t;
+
+
+typedef struct raw_blockmap_header_s
+{
+	s16_t x_origin, y_origin;
+	s16_t x_blocks, y_blocks;
+
+} PACKEDATTR raw_blockmap_header_t;
+
+
 /* ----- Graphical structures ---------------------- */
 
 typedef struct

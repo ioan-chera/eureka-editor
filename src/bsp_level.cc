@@ -21,6 +21,7 @@
 #include "main.h"
 #include "bsp.h"
 
+#include "w_rawdef.h"
 #include "w_wad.h"
 
 #include <zlib.h>
@@ -551,8 +552,8 @@ void InitBlockmap()
 
 	block_w = ((map_bbox.maxx - block_x) / 128) + 1;
 	block_h = ((map_bbox.maxy - block_y) / 128) + 1;
-	block_count = block_w * block_h;
 
+	block_count = block_w * block_h;
 }
 
 
@@ -1043,14 +1044,14 @@ void GetSectors(void)
 
 		sector_t *sector = NewSector();
 
-		sector->floor_h = LE_S16(raw.floor_h);
-		sector->ceil_h  = LE_S16(raw.ceil_h);
+		sector->floor_h = LE_S16(raw.floorh);
+		sector->ceil_h  = LE_S16(raw.ceilh);
 
 		memcpy(sector->floor_tex, raw.floor_tex, sizeof(sector->floor_tex));
 		memcpy(sector->ceil_tex,  raw.ceil_tex,  sizeof(sector->ceil_tex));
 
 		sector->light = LE_U16(raw.light);
-		sector->special = LE_U16(raw.special);
+		sector->special = LE_U16(raw.type);
 		sector->tag = LE_S16(raw.tag);
 
 		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
@@ -1249,12 +1250,12 @@ void GetLinedefs(void)
 		line->type = LE_U16(raw.type);
 		line->tag  = LE_S16(raw.tag);
 
-		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
+		line->two_sided = (line->flags & MLF_TwoSided) ? true : false;
 		line->is_precious = (line->tag >= 900 && line->tag < 1000) ?
 			true : false;
 
-		line->right = SafeLookupSidedef(LE_U16(raw.sidedef1));
-		line->left  = SafeLookupSidedef(LE_U16(raw.sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw.right));
+		line->left  = SafeLookupSidedef(LE_U16(raw.left));
 
 		if (line->right)
 		{
@@ -1325,13 +1326,13 @@ void GetLinedefsHexen(void)
 
 		/* read specials */
 		for (j=0 ; j < 5 ; j++)
-			line->specials[j] = (u8_t)(raw.specials[j]);
+			line->specials[j] = (u8_t)(raw.args[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
-		line->two_sided = (line->flags & LINEFLAG_TWO_SIDED) ? true : false;
+		line->two_sided = (line->flags & MLF_TwoSided) ? true : false;
 
-		line->right = SafeLookupSidedef(LE_U16(raw.sidedef1));
-		line->left  = SafeLookupSidedef(LE_U16(raw.sidedef2));
+		line->right = SafeLookupSidedef(LE_U16(raw.right));
+		line->left  = SafeLookupSidedef(LE_U16(raw.left));
 
 		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
 		if (line->right)
