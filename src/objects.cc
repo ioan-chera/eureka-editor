@@ -1037,42 +1037,12 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y, int delta
 }
 
 
-void MoveObjects(int delta_x, int delta_y, int delta_z)
+void MoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
 {
-	if (edit.Selected->empty())
+	if (list->empty())
 		return;
-
-	int did_split_line = -1;
 
 	BA_Begin();
-
-	// handle a single vertex merging onto an existing one
-	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
-	    edit.highlight.valid())
-	{
-		BA_Message("merge vertex #%d", edit.drag_single_vertex);
-
-		MergeVertex(edit.drag_single_vertex, edit.highlight.num,
-		            true /* v1_will_be_deleted */);
-
-		BA_Delete(OBJ_VERTICES, edit.drag_single_vertex);
-
-		edit.drag_single_vertex = -1;
-
-		BA_End();
-		return;
-	}
-
-	// handle a single vertex splitting a linedef
-	if (edit.mode == OBJ_VERTICES && edit.drag_single_vertex >= 0 &&
-		edit.split_line.valid())
-	{
-		did_split_line = edit.split_line.num;
-
-		SplitLineDefAtVertex(edit.split_line.num, edit.drag_single_vertex);
-
-		// now move the vertex!
-	}
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -1081,17 +1051,59 @@ void MoveObjects(int delta_x, int delta_y, int delta_z)
 	{
 		selection_c thing_sel(OBJ_THINGS);
 
-		ConvertSelection(edit.Selected, &thing_sel);
+		ConvertSelection(list, &thing_sel);
 
 		DoMoveObjects(&thing_sel, delta_x, delta_y, delta_z);
 	}
 
-	DoMoveObjects(edit.Selected, delta_x, delta_y, delta_z);
+	DoMoveObjects(list, delta_x, delta_y, delta_z);
+
+	BA_MessageForSel("moved", list);
+
+	BA_End();
+}
+
+
+void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
+{
+	BA_Begin();
+
+	int did_split_line = -1;
+
+	// handle a single vertex merging onto an existing one
+	if (edit.mode == OBJ_VERTICES && edit.highlight.valid())
+	{
+		BA_Message("merge vertex #%d", obj_num);
+
+		MergeVertex(obj_num, edit.highlight.num,
+		            true /* v1_will_be_deleted */);
+
+		BA_Delete(OBJ_VERTICES, obj_num);
+
+		BA_End();
+		return;
+	}
+
+	// handle a single vertex splitting a linedef
+	if (edit.mode == OBJ_VERTICES && edit.split_line.valid())
+	{
+		did_split_line = edit.split_line.num;
+
+		SplitLineDefAtVertex(edit.split_line.num, obj_num);
+
+		// now move the vertex!
+	}
+
+	selection_c list(edit.mode);
+
+	list.set(obj_num);
+
+	DoMoveObjects(&list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
 		BA_Message("split linedef #%d", did_split_line);
 	else
-		BA_MessageForSel("moved", edit.Selected);
+		BA_MessageForSel("moved", &list);
 
 	BA_End();
 }

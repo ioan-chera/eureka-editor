@@ -188,13 +188,6 @@ void LIN_SelectPath(void)
 	if (Exec_HasFlag("/onesided")) match |= SLP_OneSided;
 	if (Exec_HasFlag("/sametex"))  match |= SLP_SameTex;
 
-	if (edit.did_a_move)
-	{
-		edit.did_a_move = false;
-		additive = false;
-	}
-
-
 	int start_L = edit.highlight.num;
 
 	if ((match & SLP_OneSided) && ! LineDefs[start_L]->OneSided())
@@ -330,13 +323,6 @@ void SEC_SelectGroup(void)
 	}
 
 	bool additive = Exec_HasFlag("/add");
-
-	if (edit.did_a_move)
-	{
-		edit.did_a_move = false;
-		additive = false;
-	}
-
 
 	int start_sec = edit.highlight.num;
 

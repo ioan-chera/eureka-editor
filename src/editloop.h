@@ -84,8 +84,6 @@ typedef struct
 	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred.
 
-	bool did_a_move;   // just moved stuff, clear the next selection
-
 	selection_c *Selected;    // all selected objects (usually empty)
 
 	Objid highlight;   // The highlighted object
@@ -96,7 +94,7 @@ typedef struct
 
 	int drawing_from;	 // for ACT_DRAW_LINE, the vertex we are drawing a line from
 
-	int drag_single_vertex;  // -1, or vertex number when dragging one vertex
+	int drag_single_obj;  // -1, or object number we are dragging
 
 	// private navigation stuff
 	float nav_scroll_dx;

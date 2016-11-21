@@ -28,6 +28,8 @@ CHANGES IN Eureka 1.XX
 
 -  a better dialog for the "JumpToObject" command
 
++  improved drag behavior, don't interfere with the selection
+
 
 
 -  fixed unwanted rail texture when splitting a sector and the

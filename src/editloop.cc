@@ -179,7 +179,7 @@ static void UpdateSplitLine(int map_x, int map_y)
 	edit.split_line.clear();
 
 	// usually disabled while dragging stuff
-	if (edit.action == ACT_DRAG && edit.drag_single_vertex < 0)
+	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
 		return;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -189,7 +189,7 @@ static void UpdateSplitLine(int map_x, int map_y)
 		edit.pointer_in_window && !edit.render3d &&
 	    edit.highlight.is_nil())
 	{
-		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_vertex);
+		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_obj);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -220,13 +220,13 @@ void UpdateHighlight()
 	edit.highlight.clear();
 
 	if (edit.pointer_in_window && !edit.render3d &&
-	    (!dragging || edit.drag_single_vertex >= 0))
+	    (!dragging || (edit.mode == OBJ_VERTICES && edit.drag_single_obj >= 0)))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.drag_single_vertex >= 0 && edit.highlight.valid() &&
-			edit.drag_single_vertex == edit.highlight.num)
+		if (edit.drag_single_obj >= 0 && edit.highlight.valid() &&
+			edit.drag_single_obj == edit.highlight.num)
 		{
 			edit.highlight.clear();
 		}
@@ -311,7 +311,6 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 	edit.highlight.clear();
 	edit.split_line.clear();
-	edit.did_a_move = false;
 }
 
 
@@ -755,9 +754,6 @@ void Editor_MousePress(keycode_t mod)
 	// clicking on an empty space starts a new selection box.
 	if (edit.clicked.is_nil())
 	{
-		if (edit.did_a_move)
-			Selection_Clear();
-
 //!!!!		Editor_SetAction(ACT_SELBOX);
 //!!!!		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 		return;
@@ -775,9 +771,6 @@ void Editor_MouseRelease()
 	Objid click_obj(edit.clicked);
 	edit.clicked.clear();
 
-	bool was_did_move = edit.did_a_move;
-	edit.did_a_move = false;
-
 	// releasing the button while dragging : drop the selection.
 #if 1
 	if (edit.action == ACT_DRAG)
@@ -787,15 +780,15 @@ void Editor_MouseRelease()
 		int dx, dy;
 		main_win->canvas->DragFinish(&dx, &dy);
 
-		if (! (dx==0 && dy==0))
+		if (dx || dy)
 		{
-			MoveObjects(dx, dy);
-
-			// next select action will clear the selection
-			edit.did_a_move = true;
+			if (edit.drag_single_obj >= 0)
+				DragSingleObject(edit.drag_single_obj, dx, dy);
+			else
+				MoveObjects(edit.Selected, dx, dy);
 		}
 
-		edit.drag_single_vertex = -1;
+		edit.drag_single_obj = -1;
 		RedrawMap();
 		return;
 	}
@@ -815,7 +808,8 @@ void Editor_MouseRelease()
 	if (multi_select_modifier &&
 		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
 	{
-		was_did_move = true;
+//FIXME : REVIEW THIS
+//		Selection_Clear();
 	}
 
 
@@ -827,9 +821,6 @@ void Editor_MouseRelease()
 		bool was_empty = edit.Selected->empty();
 
 		Editor_ClearErrorMode();
-
-		if (was_did_move)
-			Selection_Clear();
 
 		// check if pointing at the same object as before
 		Objid near_obj;
@@ -913,7 +904,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 		return;
 	}
 
-#if 0
+#if 1
 	//
 	// begin dragging?
 	//
@@ -923,30 +914,27 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 	if (edit.button_down == 1 && edit.clicked.valid() &&
 		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
 	{
-		if (! edit.Selected->get(edit.clicked.num))
-		{
-			if (edit.did_a_move)
-				Selection_Clear();
+		Editor_SetAction(ACT_DRAG);
 
-			edit.Selected->set(edit.clicked.num);
-			edit.did_a_move = false;
-		}
+		// if highlighted object is in selection, we drag the selection,
+		// otherwise we drag just this one object
+
+		if (! edit.Selected->get(edit.clicked.num))
+			edit.drag_single_obj = edit.clicked.num;
+		else
+			edit.drag_single_obj = -1;
 
 		int focus_x, focus_y;
 
 		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
 
-		Editor_SetAction(ACT_DRAG);
 		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
 
-		// check for a single vertex
-		edit.drag_single_vertex = -1;
-
-		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
-		{
-			edit.drag_single_vertex = edit.Selected->find_first();
-			SYS_ASSERT(edit.drag_single_vertex >= 0);
-		}
+///---		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
+///---		{
+///---			edit.drag_single_vertex = edit.Selected->find_first();
+///---			SYS_ASSERT(edit.drag_single_vertex >= 0);
+///---		}
 
 		UpdateHighlight();
 		return;
@@ -1563,15 +1551,15 @@ static void ACT_Drag_release(void)
 	int dx, dy;
 	main_win->canvas->DragFinish(&dx, &dy);
 
-	if (! (dx==0 && dy==0))
+	if (dx || dy)
 	{
-		MoveObjects(dx, dy);
-
-//???	// next select action will clear the selection
-//???	edit.did_a_move = true;
+		if (edit.drag_single_obj >= 0)
+			DragSingleObject(edit.drag_single_obj, dx, dy);
+		else
+			MoveObjects(edit.Selected, dx, dy);
 	}
 
-	edit.drag_single_vertex = -1;
+	edit.drag_single_obj = -1;
 
 	UpdateHighlight();
 	RedrawMap();
@@ -1600,8 +1588,8 @@ void CMD_ACT_Drag(void)
 		Editor_SetAction(ACT_DRAG);
 		main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
 
-		// check for a single vertex
-		edit.drag_single_vertex = -1;
+		// check for a single vertex    FIXME FIXME
+		edit.drag_single_obj = -1;
 
 #if 0  //????
 		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
@@ -2365,11 +2353,9 @@ void Editor_Init()
 	edit.highlight.clear();
 	edit.split_line.clear();
 	edit.drawing_from = -1;
-	edit.drag_single_vertex = -1;
+	edit.drag_single_obj = -1;
 
 	edit.Selected = new selection_c(edit.mode);
-
-	edit.did_a_move = false;
 
 	grid.Init();
 

@@ -197,12 +197,22 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(edit.Selected);
 
-	if (edit.action == ACT_DRAG && ! drag_lines.empty())
+	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0 && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
 	else if (edit.action == ACT_TRANSFORM && ! trans_lines.empty())
 		DrawSelection(&trans_lines);
 
-	if (highlight.valid())
+	if (edit.action == ACT_DRAG && edit.drag_single_obj >= 0)
+	{
+		int dx = 0;
+		int dy = 0;
+		DragDelta(&dx, &dy);
+
+		DrawHighlight(edit.mode, edit.drag_single_obj, HI_COL,
+		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
+					  dx, dy);
+	}
+	else if (highlight.valid())
 	{
 		Fl_Color hi_color = HI_COL;
 
@@ -1315,7 +1325,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	int dx = 0;
 	int dy = 0;
 
-	if (edit.action == ACT_DRAG)
+	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
 	{
 		DragDelta(&dx, &dy);
 	}

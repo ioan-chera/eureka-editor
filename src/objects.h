@@ -28,14 +28,15 @@
 #define __EUREKA_OBJECTS_H__
 
 
-void SelectObjectsInBox (selection_c *list, int, int, int, int, int);
-void HighlightObject (int, int, int);
+void SelectObjectsInBox(selection_c *list, int, int, int, int, int);
+void HighlightObject(int, int, int);
 
-void MoveObjects(int delta_x, int delta_y, int delta_z = 0);
+void MoveObjects(selection_c * list, int delta_x, int delta_y, int delta_z = 0);
+void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z = 0);
 
-void DeleteObjects (selection_c * list);
+void DeleteObjects(selection_c * list);
 
-bool LineTouchesBox (int, int, int, int, int);
+bool LineTouchesBox(int, int, int, int, int);
 
 void GetDragFocus(int *x, int *y, int map_x, int map_y);
 
