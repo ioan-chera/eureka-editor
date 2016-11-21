@@ -1442,18 +1442,15 @@ bool M_LoadUserState()
 
 	BA_LevelChecksum(crc);
 
-
 	char *filename = PersistFilename(crc);
-
-	LogPrintf("Load user state from: %s\n", filename);
 
 	FILE *fp = fopen(filename, "r");
 
 	if (! fp)
-	{
-		LogPrintf("--> %s\n", strerror(errno));
 		return false;
-	}
+
+	LogPrintf("Loading user state from: %s\n", filename);
+
 
 	static char line_buf[FL_PATH_MAX];
 
