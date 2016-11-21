@@ -45,7 +45,7 @@
 int last_given_file;
 
 
-static void SaveLevel(Wad_file *wad, const char *level);
+static void SaveLevel(const char *level);
 
 static const char * overwrite_message =
 	"The %s PWAD already contains this map.  "
@@ -286,7 +286,7 @@ bool CMD_NewProject()
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(edit_wad, map_name);
+	SaveLevel(map_name);
 
 	return true;
 }
@@ -355,7 +355,7 @@ void CMD_NewMap()
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(edit_wad, map_name);
+	SaveLevel(map_name);
 }
 
 
@@ -1268,8 +1268,6 @@ void CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-static Wad_file *save_wad;
-
 static short save_level_idx;
 
 
@@ -1277,7 +1275,7 @@ static void SaveHeader(const char *level)
 {
 	int size = (int)HeaderData.size();
 
-	Lump_c *lump = save_wad->AddLevel(level, size, &save_level_idx);
+	Lump_c *lump = edit_wad->AddLevel(level, size, &save_level_idx);
 
 	if (size > 0)
 	{
@@ -1292,7 +1290,7 @@ static void SaveBehavior()
 {
 	int size = (int)BehaviorData.size();
 
-	Lump_c *lump = save_wad->AddLump("BEHAVIOR", size);
+	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
 
 	if (size > 0)
 	{
@@ -1307,7 +1305,7 @@ static void SaveVertices()
 {
 	int size = NumVertices * (int)sizeof(raw_vertex_t);
 
-	Lump_c *lump = save_wad->AddLump("VERTEXES", size);
+	Lump_c *lump = edit_wad->AddLump("VERTEXES", size);
 
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
@@ -1329,7 +1327,7 @@ static void SaveSectors()
 {
 	int size = NumSectors * (int)sizeof(raw_sector_t);
 
-	Lump_c *lump = save_wad->AddLump("SECTORS", size);
+	Lump_c *lump = edit_wad->AddLump("SECTORS", size);
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
@@ -1358,7 +1356,7 @@ static void SaveThings()
 {
 	int size = NumThings * (int)sizeof(raw_thing_t);
 
-	Lump_c *lump = save_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS", size);
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
@@ -1385,7 +1383,7 @@ static void SaveThings_Hexen()
 {
 	int size = NumThings * (int)sizeof(raw_hexen_thing_t);
 
-	Lump_c *lump = save_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS", size);
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
@@ -1421,7 +1419,7 @@ static void SaveSideDefs()
 {
 	int size = NumSideDefs * (int)sizeof(raw_sidedef_t);
 
-	Lump_c *lump = save_wad->AddLump("SIDEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("SIDEDEFS", size);
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
@@ -1449,7 +1447,7 @@ static void SaveLineDefs()
 {
 	int size = NumLineDefs * (int)sizeof(raw_linedef_t);
 
-	Lump_c *lump = save_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
@@ -1479,7 +1477,7 @@ static void SaveLineDefs_Hexen()
 {
 	int size = NumLineDefs * (int)sizeof(raw_hexen_linedef_t);
 
-	Lump_c *lump = save_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
@@ -1511,25 +1509,23 @@ static void SaveLineDefs_Hexen()
 
 static void EmptyLump(const char *name)
 {
-	save_wad->AddLump(name)->Finish();
+	edit_wad->AddLump(name)->Finish();
 }
 
 
-static void SaveLevel(Wad_file *wad, const char *level)
+static void SaveLevel(const char *level)
 {
-	save_wad = wad;
-
 	Level_name = StringUpper(level);
 
 
-	save_wad->BeginWrite();
+	edit_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
-	int level_lump = save_wad->FindLevel(level);
+	int level_lump = edit_wad->FindLevel(level);
 	if (level_lump >= 0)
-		save_wad->RemoveLevel(level_lump);
+		edit_wad->RemoveLevel(level_lump);
 
-	save_wad->InsertPoint(level_lump);
+	edit_wad->InsertPoint(level_lump);
 
 	SaveHeader(level);
 
@@ -1561,7 +1557,7 @@ static void SaveLevel(Wad_file *wad, const char *level)
 		SaveBehavior();
 
 	// write out the new directory
-	save_wad->EndWrite();
+	edit_wad->EndWrite();
 
 
 	// build the nodes
@@ -1571,15 +1567,19 @@ static void SaveLevel(Wad_file *wad, const char *level)
 	}
 
 
-	M_WriteEurekaLump(save_wad);
+	// this is mainly for Next/Prev-map commands
+	// [ it doesn't change the on-disk wad file at all ]
+	edit_wad->SortLevels();
 
-	M_AddRecent(wad->PathName(), Level_name);
+	M_WriteEurekaLump(edit_wad);
+
+	M_AddRecent(edit_wad->PathName(), Level_name);
 
 	Status_Set("Saved %s", Level_name);
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), Level_name, false);
+		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1616,7 +1616,7 @@ bool CMD_SaveMap()
 
 	LogPrintf("Saving Map : %s of %s\n", Level_name, edit_wad->PathName());
 
-	SaveLevel(edit_wad, Level_name);
+	SaveLevel(Level_name);
 
 	return true;
 }
@@ -1739,16 +1739,12 @@ bool CMD_ExportMap()
 		M_BackupWad(wad);
 	}
 
-
 	if (new_resources)
 	{
 		Main_LoadResources();
 	}
 
-
-	LogPrintf("Exporting Map : %s of %s\n", map_name, wad->PathName());
-
-	SaveLevel(wad, map_name);
+	LogPrintf("Exporting Map : %s into %s\n", map_name, wad->PathName());
 
 
 	// the new wad replaces the current PWAD
@@ -1764,6 +1760,9 @@ bool CMD_ExportMap()
 	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
+
+
+	SaveLevel(map_name);
 
 	return true;
 }
@@ -1812,7 +1811,7 @@ void CMD_CopyMap()
 	// perform the copy (just a save)
 	LogPrintf("Copying Map : %s --> %s\n", Level_name, new_name);
 
-	SaveLevel(edit_wad, new_name);
+	SaveLevel(new_name);
 
 	Status_Set("Copied to %s", Level_name);
 }

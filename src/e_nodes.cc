@@ -402,16 +402,12 @@ void BuildNodesAfterSave(short lev_idx)
 
 	PrepareInfo(nb_info);
 
-	LogPrintf("Building nodes after save....\n");
-
 	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx);
 
 	// TODO : maybe print # of serious/minor warnings
 
-	if (ret == BUILD_OK)
-		LogPrintf("OK\n");
-	else
-		LogPrintf("FAILED.\n");
+	if (ret != BUILD_OK)
+		LogPrintf("NODES FAILED TO FAILED.\n");
 
 	delete nb_info;
 }
