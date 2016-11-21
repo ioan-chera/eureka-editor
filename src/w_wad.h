@@ -213,11 +213,11 @@ public:
 
 	// this removes the level marker PLUS all associated level lumps
 	// which follow it.  'index' is a lump number (e.g. from FindLevel)
-	void RemoveLevel(short index);
+	void RemoveLevel(short lev_num);
 
 	// removes any GL-Nodes lumps that are associated with the given
 	// level.  'index' is a lump number.
-	void RemoveGLNodes(short index);
+	void RemoveGLNodes(short lev_num);
 
 	// insert a new lump.
 	// The second form is for a level marker.

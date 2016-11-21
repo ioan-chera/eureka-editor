@@ -2239,7 +2239,7 @@ void SaveLevel(node_t *root_node)
 	edit_wad->BeginWrite();
 
 	// remove any existing GL-Nodes
-	edit_wad->RemoveGLNodes(lev_current_start);
+	edit_wad->RemoveGLNodes(lev_current_idx);
 
 	// ensure all necessary level lumps are present
 	AddMissingLump("SEGS",     "VERTEXES");

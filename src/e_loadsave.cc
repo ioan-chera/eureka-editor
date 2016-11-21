@@ -1508,16 +1508,17 @@ static void EmptyLump(const char *name)
 
 static void SaveLevel(const char *level)
 {
+	// set global level name now (for debugging code)
 	Level_name = StringUpper(level);
-
 
 	edit_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
-	int level_lump = edit_wad->FindLevel(level);
-	if (level_lump >= 0)
-		edit_wad->RemoveLevel(level_lump);
+	int lev_num  = edit_wad->LevelFind(level);
+	if (lev_num >= 0)
+		edit_wad->RemoveLevel(lev_num);
 
+	int level_lump = edit_wad->LevelHeader(lev_num);
 	edit_wad->InsertPoint(level_lump);
 
 	SaveHeader(level);
@@ -1925,7 +1926,7 @@ void CMD_DeleteMap()
 
 	edit_wad->BeginWrite();
 
-	edit_wad->RemoveLevel(level_lump);
+	edit_wad->RemoveLevel(level_idx);
 
 	edit_wad->EndWrite();
 

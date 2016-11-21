@@ -906,57 +906,59 @@ void Wad_file::RemoveLumps(short index, short count)
 }
 
 
-void Wad_file::RemoveLevel(short index)
+void Wad_file::RemoveLevel(short lev_num)
 {
 	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= index && index < NumLumps());
+	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
+	short start = LevelHeader(lev_num);
 	short count = 1;
 
 	// collect associated lumps (THINGS, VERTEXES etc)
 	// this will stop when it hits a non-level lump
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
-		   index + count < NumLumps() &&
-		   (IsLevelLump(directory[index+count]->name) ||
-		    IsGLNodeLump(directory[index+count]->name)) )
+		   start + count < NumLumps() &&
+		   (IsLevelLump(directory[start+count]->name) ||
+		    IsGLNodeLump(directory[start+count]->name)) )
 	{
 		count++;
 	}
 
-	// Note: FixGroup() will remove the entry in levels[]
+	// NOTE: FixGroup() will remove the entry in levels[]
 
-	RemoveLumps(index, count);
+	RemoveLumps(start, count);
 }
 
 
-void Wad_file::RemoveGLNodes(short index)
+void Wad_file::RemoveGLNodes(short lev_num)
 {
 	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= index && index < NumLumps());
+	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	short max_index = index + MAX_LUMPS_IN_A_LEVEL - 1;
+	short start  = LevelHeader(lev_num);
+	short finish = start + MAX_LUMPS_IN_A_LEVEL - 1;
 
-	if (max_index >= NumLumps())
-		max_index = NumLumps() - 1;
+	if (finish >= NumLumps())
+		finish = NumLumps() - 1;
 
-	index++;
+	start++;
 
-	while (index <= max_index &&
-		   IsLevelLump(directory[index]->name))
+	while (start <= finish &&
+		   IsLevelLump(directory[start]->name))
 	{
-		index++;
+		start++;
 	}
 
 	short count = 0;
 
-	while (index+count <= max_index &&
-		   IsGLNodeLump(directory[index+count]->name))
+	while (start+count <= finish &&
+		   IsGLNodeLump(directory[start+count]->name))
 	{
 		count++;
 	}
 
 	if (count > 0)
-		RemoveLumps(index, count);
+		RemoveLumps(start, count);
 }
 
 
