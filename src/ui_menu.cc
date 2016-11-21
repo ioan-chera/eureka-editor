@@ -677,7 +677,8 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 	{
 		const char *short_name = fl_filename_name(Pwad_list[k]);
 
-		short_name = StringPrintf("%s%d. %s", (k < 9) ? "&" : "", 1+k, short_name);
+		short_name = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
+								  (k < 9) ? "&" : "", 1+k, short_name);
 
 		Menu_AddItem(pos, short_name,
 					 FCAL file_do_load_given,

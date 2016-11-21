@@ -110,7 +110,7 @@ int M_FindGivenFile(const char *filename)
 //  RECENT FILE HANDLING
 //------------------------------------------------------------------------
 
-#define MAX_RECENT  12
+#define MAX_RECENT  24
 
 
 // this is for the 'File/Recent' menu
@@ -274,7 +274,8 @@ public:
 		const char *name = fl_filename_name(filenames[index]);
 		// const char *map  = map_names[index];
 
-		sprintf(buffer, "%s%d. %-.42s", (index < 9) ? "&" : "", 1+index, name);
+		sprintf(buffer, "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
+				(index < 9) ? "&" : "", 1+index, name);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
