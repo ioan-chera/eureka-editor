@@ -145,7 +145,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		but->copy_label(name_buf);
 		but->callback(button_callback, this);
 
-		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
+		if (test_wad && test_wad->LevelFind(name_buf) >= 0)
 		{
 			if (rename_wad)
 				but->deactivate();
@@ -222,7 +222,7 @@ void UI_ChooseMap::CheckMapName()
 
 	if (rename_wad && is_valid)
 	{
-		if (rename_wad->FindLevel(map_name->value()) >= 0)
+		if (rename_wad->LevelFind(map_name->value()) >= 0)
 			is_valid = false;
 	}
 
@@ -392,7 +392,7 @@ void UI_OpenMap::CheckMapName()
 
 	bool  is_valid = (result_wad != NULL) &&
 	                 ValidateMapName(map_name->value()) &&
-					 (result_wad->FindLevel(map_name->value()) >= 0);
+					 (result_wad->LevelFind(map_name->value()) >= 0);
 
 	if (was_valid == is_valid)
 		return;

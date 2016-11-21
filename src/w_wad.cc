@@ -460,17 +460,6 @@ short Wad_file::LevelLastLump(short lev_num)
 }
 
 
-short Wad_file::FindLevel(const char *name)
-{
-	short k = LevelFind(name);
-
-	if (k >= 0)
-		return levels[k];
-
-	return -1;  // not found
-}
-
-
 short Wad_file::LevelFindByNumber(int number)
 {
 	// sanity check
@@ -483,7 +472,7 @@ short Wad_file::LevelFindByNumber(int number)
 	 // try MAP## first
 	sprintf(buffer, "MAP%02d", number);
 
-	index = FindLevel(buffer);
+	index = LevelFind(buffer);
 	if (index >= 0)
 		return index;
 
@@ -515,9 +504,9 @@ short Wad_file::LevelHeader(short lev_num)
 }
 
 
-map_format_e Wad_file::LevelFormat(short lump_index)
+map_format_e Wad_file::LevelFormat(short lev_num)
 {
-	int start = lump_index;
+	int start = LevelHeader(lev_num);
 
 	if (start + LL_BEHAVIOR < (int)NumLumps())
 	{

@@ -475,9 +475,9 @@ bool M_TryOpenMostRecent()
 		return false;
 	}
 
-	// -- OK --
+	/* -- OK -- */
 
-	if (wad->FindLevel(map_name) >= 0)
+	if (wad->LevelFind(map_name) >= 0)
 		Level_name = map_name;
 	else
 		Level_name = NULL;

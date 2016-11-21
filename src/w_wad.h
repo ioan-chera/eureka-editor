@@ -171,9 +171,6 @@ public:
 
 	short FindLumpNum(const char *name);
 
-	// these all return a lump index
-	short FindLevel(const char *name);
-
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
 	// these generally return a level number (0 .. count-1)
@@ -184,9 +181,12 @@ public:
 	short LevelFindByNumber(int number);
 	short LevelFindFirst();
 
+	// returns a lump index, -1 if not found
+	short LevelLookupLump(short lev_num, const char *name);
+
 	void  SortLevels();
 
-	map_format_e LevelFormat(short lump_index);
+	map_format_e LevelFormat(short lev_num);
 
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change
@@ -212,11 +212,11 @@ public:
 	void RemoveLumps(short index, short count = 1);
 
 	// this removes the level marker PLUS all associated level lumps
-	// which follow it.  'index' is a lump number (e.g. from FindLevel)
+	// which follow it.
 	void RemoveLevel(short lev_num);
 
 	// removes any GL-Nodes lumps that are associated with the given
-	// level.  'index' is a lump number.
+	// level.
 	void RemoveGLNodes(short lev_num);
 
 	// insert a new lump.

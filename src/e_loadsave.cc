@@ -338,7 +338,7 @@ void CMD_NewMap()
 		return;
 
 	// would this replace an existing map?
-	if (edit_wad->FindLevel(map_name) >= 0)
+	if (edit_wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "current") <= 0)
@@ -385,7 +385,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 
 static void LoadVertices()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("VERTEXES", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("VERTEXES", loading_level);
 	if (! lump)
 		FatalError("No vertex lump!\n");
 
@@ -419,7 +419,7 @@ static void LoadVertices()
 
 static void LoadSectors()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("SECTORS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("SECTORS", loading_level);
 	if (! lump)
 		FatalError("No sector lump!\n");
 
@@ -475,7 +475,7 @@ static void CreateFallbackSector()
 
 static void LoadHeader()
 {
-	Lump_c *lump = load_wad->GetLump(loading_level);
+	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
 	int length = lump->Length();
 
@@ -495,7 +495,7 @@ static void LoadHeader()
 static void LoadBehavior()
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = load_wad->FindLumpInLevel("BEHAVIOR", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("BEHAVIOR", loading_level);
 	if (! lump)
 		FatalError("No BEHAVIOR lump!\n");
 
@@ -516,7 +516,7 @@ static void LoadBehavior()
 
 static void LoadThings()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("THINGS", loading_level);
 	if (! lump)
 		FatalError("No things lump!\n");
 
@@ -553,7 +553,7 @@ static void LoadThings()
 // IOANCH 9/2015
 static void LoadThings_Hexen()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("THINGS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("THINGS", loading_level);
 	if (! lump)
 		FatalError("No things lump!\n");
 
@@ -598,7 +598,7 @@ static void LoadThings_Hexen()
 
 static void LoadSideDefs()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("SIDEDEFS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("SIDEDEFS", loading_level);
 	if (! lump)
 		FatalError("No sidedefs lump!\n");
 
@@ -688,7 +688,7 @@ static void ValidateSidedefs(LineDef * ld)
 
 static void LoadLineDefs()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("LINEDEFS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("LINEDEFS", loading_level);
 	if (! lump)
 		FatalError("No linedefs lump!\n");
 
@@ -751,7 +751,7 @@ static void LoadLineDefs()
 // IOANCH 9/2015
 static void LoadLineDefs_Hexen()
 {
-	Lump_c *lump = load_wad->FindLumpInLevel("LINEDEFS", loading_level);
+	Lump_c *lump = load_wad->LevelLookupLump2("LINEDEFS", loading_level);
 	if (! lump)
 		FatalError("No linedefs lump!\n");
 
@@ -881,7 +881,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 {
 	load_wad = wad;
 
-	loading_level = load_wad->FindLevel(level);
+	loading_level = load_wad->LevelFind(level);
 	if (loading_level < 0)
 		FatalError("No such map: %s\n", level);
 
@@ -1089,7 +1089,7 @@ bool CMD_OpenMap()
 
 
 	// this shouldn't happen -- but just in case...
-	if (wad->FindLevel(map_name) < 0)
+	if (wad->LevelFind(map_name) < 0)
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 		return false;
@@ -1261,14 +1261,14 @@ void CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-static short save_level_idx;
+static short saving_level;
 
 
 static void SaveHeader(const char *level)
 {
 	int size = (int)HeaderData.size();
 
-	Lump_c *lump = edit_wad->AddLevel(level, size, &save_level_idx);
+	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
@@ -1557,7 +1557,7 @@ static void SaveLevel(const char *level)
 	// build the nodes
 	if (true)   // TODO: user preference [enable / disable node build]
 	{
-		BuildNodesAfterSave(save_level_idx);
+		BuildNodesAfterSave(saving_level);
 	}
 
 
@@ -1717,7 +1717,7 @@ bool CMD_ExportMap()
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
-	if (exists && wad->FindLevel(map_name) >= 0)
+	if (exists && wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "selected") <= 0)
@@ -1864,10 +1864,12 @@ void CMD_RenameMap()
 
 
 	// perform the rename
-	short level_lump = edit_wad->FindLevel(Level_name);
+	short lev_num = edit_wad->LevelFind(Level_name);
 
 	if (level_lump >= 0)
 	{
+		short level_lump = edit_wad->LevelHeader(lev_num);
+
 		edit_wad->BeginWrite();
 
 		edit_wad->RenameLump(level_lump, new_name);
@@ -1914,14 +1916,15 @@ void CMD_DeleteMap()
 
 	LogPrintf("Deleting Map : %s...\n", Level_name);
 
-	short level_idx  = edit_wad->LevelFind(Level_name);
-	short level_lump = edit_wad->FindLevel(Level_name);
+	short lev_num = edit_wad->LevelFind(Level_name);
 
-	if (level_lump < 0 || level_idx < 0)
+	if (lev_num < 0 || lev_num < 0)
 	{
 		Beep("No such map ?!?");
 		return;
 	}
+
+	short level_lump = edit_wad->LevelHeader(lev_num);
 
 
 	edit_wad->BeginWrite();
