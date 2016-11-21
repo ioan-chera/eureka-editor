@@ -28,7 +28,7 @@ CHANGES IN Eureka 1.XX
 
 -  a better dialog for the "JumpToObject" command
 
-+  improved drag behavior, don't interfere with the selection
++  improved drag behavior, never modify the current selection
 
 
 
@@ -43,5 +43,5 @@ CHANGES IN Eureka 1.XX
 
 -  fixed Export to adopt the iwad/port/resources of target wad
 
--  fixed Y offsets lowers with UNPEG flag under sky ceilings
+-  3D view: fixed Y offsets of unpegged lowers under sky ceilings
 
