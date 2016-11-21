@@ -60,9 +60,6 @@ void UI_Nombre::Update()
 {
 	char buffer[256];
 
-///	if (index < 0 && total <= 0)
-///		sprintf(buffer, "%s: NONE\n", type_name);
-/// else
 	if (index < 0)
 		sprintf(buffer, "No %s    / %d\n", type_name, total);
 	else if (selected > 1)

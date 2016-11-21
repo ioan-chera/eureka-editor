@@ -138,69 +138,69 @@ static void file_do_load_recent(Fl_Widget *w, void *data)
 
 static void edit_do_undo(Fl_Widget *w, void * data)
 {
-	CMD_Undo();
+	ExecuteCommand("Undo");
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
 {
-	CMD_Redo();
+	ExecuteCommand("Redo");
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	CMD_Clipboard_Cut();
+	ExecuteCommand("Clipboard_Cut");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	CMD_Clipboard_Copy();
+	ExecuteCommand("Clipboard_Copy");
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	CMD_Clipboard_Paste();
+	ExecuteCommand("Clipboard_Paste");
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	CMD_Delete();
+	ExecuteCommand("Delete");
 }
 
 
 static void edit_do_select_all(Fl_Widget *w, void * data)
 {
-	CMD_SelectAll();
+	ExecuteCommand("SelectAll");
 }
 
 static void edit_do_unselect_all(Fl_Widget *w, void * data)
 {
-	CMD_UnselectAll();
+	ExecuteCommand("UnselectAll");
 }
 
 static void edit_do_invert_sel(Fl_Widget *w, void * data)
 {
-	CMD_InvertSelection();
+	ExecuteCommand("InvertSelection");
 }
 
 static void edit_do_last_sel(Fl_Widget *w, void * data)
 {
-	CMD_LastSelection();
+	ExecuteCommand("LastSelection");
 }
 
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
-	CMD_MoveObjects_Dialog();
+	ExecuteCommand("MoveObjectsDialog");
 }
 
 static void edit_do_scale(Fl_Widget *w, void * data)
 {
-	CMD_ScaleObjects_Dialog();
+	ExecuteCommand("ScaleObjectsDialog");
 }
 
 static void edit_do_rotate(Fl_Widget *w, void * data)
 {
-	CMD_RotateObjects_Dialog();
+	ExecuteCommand("RotateObjectsDialog");
 }
 
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
