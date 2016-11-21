@@ -1192,6 +1192,20 @@ int Wad_file::WritePadding(int count)
 }
 
 
+//
+// IDEA : Truncate file to "total_size" after writing the directory.
+//
+//        On Linux / MacOSX, this can be done as follows:
+//                 - fflush(fp)   -- ensure STDIO has empty buffers
+//                 - ftruncate(fileno(fp), total_size);
+//                 - freopen(fp)
+//
+//        On Windows:
+//                 - instead of ftruncate, use _chsize() or _chsize_s()
+//                   [ investigate what the difference is.... ]
+//
+
+
 void Wad_file::WriteDirectory()
 {
 	dir_start = PositionForWrite();
