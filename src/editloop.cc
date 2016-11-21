@@ -2196,6 +2196,22 @@ static editor_command_t  command_table[] =
 		&CMD_Gamma
 	},
 
+	{	"ApplyTag",
+		&CMD_ApplyTag,
+		/* flags */ NULL,
+		/* keywords */ "fresh last"
+	},
+
+	/* ----- the EDIT menu ----- */
+
+	{	"Undo",
+		&CMD_Undo
+	},
+
+	{	"Redo",
+		&CMD_Redo
+	},
+
 	{	"Clipboard_Cut",
 		&CMD_Clipboard_Cut
 	},
@@ -2215,12 +2231,6 @@ static editor_command_t  command_table[] =
 	{	"CopyProperties",
 		&CMD_CopyProperties,
 		/* flags */ "/reverse"
-	},
-
-	{	"ApplyTag",
-		&CMD_ApplyTag,
-		/* flags */ NULL,
-		/* keywords */ "fresh last"
 	},
 
 	{	"PruneUnused",
