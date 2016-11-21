@@ -386,11 +386,9 @@ short Wad_file::FindLumpNum(const char *name)
 }
 
 
-short Wad_file::FindLumpInLevel_Raw(const char *name, short index)
+short Wad_file::LevelLookupLump(short lev_num, const char *name)
 {
-	short start = index;
-
-	SYS_ASSERT(0 <= start && start < NumLumps());
+	short start = LevelHeader(lev_num);
 
 	// determine how far past the level marker (MAP01 etc) to search
 	short last = start + MAX_LUMPS_IN_A_LEVEL;
@@ -411,17 +409,6 @@ short Wad_file::FindLumpInLevel_Raw(const char *name, short index)
 	}
 
 	return -1;  // not found
-}
-
-
-Lump_c * Wad_file::FindLumpInLevel(const char *name, short index)
-{
-	short k = FindLumpInLevel_Raw(name, index);
-
-	if (k >= 0)
-		return directory[k];
-
-	return NULL;  // not found
 }
 
 

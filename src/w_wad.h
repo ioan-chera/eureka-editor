@@ -163,20 +163,17 @@ public:
 	int TotalSize() const { return total_size; }
 
 	short NumLumps() const { return (short)directory.size(); }
-
 	Lump_c * GetLump(short index);
 	Lump_c * FindLump(const char *name);
-	Lump_c * FindLumpInLevel(const char *name, short index /* a lump index */);
-	short    FindLumpInLevel_Raw(const char *name, short index /* a lump index */);
-
 	short FindLumpNum(const char *name);
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
-	// these generally return a level number (0 .. count-1)
 	short LevelCount() const { return (short)levels.size(); }
 	short LevelHeader(short lev_num);
 	short LevelLastLump(short lev_num);
+
+	// these return a level number (0 .. count-1)
 	short LevelFind(const char *name);
 	short LevelFindByNumber(int number);
 	short LevelFindFirst();
@@ -184,9 +181,9 @@ public:
 	// returns a lump index, -1 if not found
 	short LevelLookupLump(short lev_num, const char *name);
 
-	void  SortLevels();
-
 	map_format_e LevelFormat(short lev_num);
+
+	void  SortLevels();
 
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change

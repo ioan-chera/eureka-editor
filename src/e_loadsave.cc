@@ -383,14 +383,29 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-static void LoadVertices()
+static Lump_c * Load_LookupAndSeek(const char *name)
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("VERTEXES", loading_level);
-	if (! lump)
-		FatalError("No vertex lump!\n");
+	short idx = load_wad->LevelLookupLump(loading_level, name);
+
+	if (idx < 0)
+		return NULL;
+
+	Lump_c *lump = load_wad->GetLump(idx);
 
 	if (! lump->Seek())
-		FatalError("Error seeking to vertex lump!\n");
+	{
+		LogPrintf("WARNING: failed to seek to %s lump!\n", name);
+	}
+
+	return lump;
+}
+
+
+static void LoadVertices()
+{
+	Lump_c *lump = Load_LookupAndSeek("VERTEXES");
+	if (! lump)
+		FatalError("No vertex lump!\n");
 
 	int count = lump->Length() / sizeof(raw_vertex_t);
 
@@ -419,12 +434,9 @@ static void LoadVertices()
 
 static void LoadSectors()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("SECTORS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("SECTORS");
 	if (! lump)
 		FatalError("No sector lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to sector lump!\n");
 
 	int count = lump->Length() / sizeof(raw_sector_t);
 
@@ -495,12 +507,9 @@ static void LoadHeader()
 static void LoadBehavior()
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = load_wad->LevelLookupLump2("BEHAVIOR", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("BEHAVIOR");
 	if (! lump)
 		FatalError("No BEHAVIOR lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to BEHAVIOR lump!\n");
 
 	int length = lump->Length();
 
@@ -516,12 +525,9 @@ static void LoadBehavior()
 
 static void LoadThings()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("THINGS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
 		FatalError("No things lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to things lump!\n");
 
 	int count = lump->Length() / sizeof(raw_thing_t);
 
@@ -553,12 +559,9 @@ static void LoadThings()
 // IOANCH 9/2015
 static void LoadThings_Hexen()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("THINGS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
 		FatalError("No things lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to things lump!\n");
 
 	int count = lump->Length() / sizeof(raw_hexen_thing_t);
 
@@ -598,12 +601,9 @@ static void LoadThings_Hexen()
 
 static void LoadSideDefs()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("SIDEDEFS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
 	if (! lump)
 		FatalError("No sidedefs lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to sidedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_sidedef_t);
 
@@ -688,12 +688,9 @@ static void ValidateSidedefs(LineDef * ld)
 
 static void LoadLineDefs()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("LINEDEFS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
 		FatalError("No linedefs lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to linedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_linedef_t);
 
@@ -751,12 +748,9 @@ static void LoadLineDefs()
 // IOANCH 9/2015
 static void LoadLineDefs_Hexen()
 {
-	Lump_c *lump = load_wad->LevelLookupLump2("LINEDEFS", loading_level);
+	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
 		FatalError("No linedefs lump!\n");
-
-	if (! lump->Seek())
-		FatalError("Error seeking to linedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_hexen_linedef_t);
 
@@ -1866,14 +1860,12 @@ void CMD_RenameMap()
 	// perform the rename
 	short lev_num = edit_wad->LevelFind(Level_name);
 
-	if (level_lump >= 0)
+	if (lev_num >= 0)
 	{
 		short level_lump = edit_wad->LevelHeader(lev_num);
 
 		edit_wad->BeginWrite();
-
 		edit_wad->RenameLump(level_lump, new_name);
-
 		edit_wad->EndWrite();
 	}
 
@@ -1924,22 +1916,19 @@ void CMD_DeleteMap()
 		return;
 	}
 
-	short level_lump = edit_wad->LevelHeader(lev_num);
 
-
+	// kick it to the curb
 	edit_wad->BeginWrite();
-
-	edit_wad->RemoveLevel(level_idx);
-
+	edit_wad->RemoveLevel(lev_num);
 	edit_wad->EndWrite();
 
 
 	// choose a new level to load
 	{
-		if (level_idx >= edit_wad->LevelCount())
-			level_idx =  edit_wad->LevelCount() - 1;
+		if (lev_num >= edit_wad->LevelCount())
+			lev_num =  edit_wad->LevelCount() - 1;
 
-		short lump_idx = edit_wad->LevelHeader(level_idx);
+		short lump_idx = edit_wad->LevelHeader(lev_num);
 		Lump_c * lump  = edit_wad->GetLump(lump_idx);
 		const char *map_name = lump->Name();
 

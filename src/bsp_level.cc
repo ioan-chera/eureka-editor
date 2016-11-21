@@ -2216,10 +2216,10 @@ void UpdateGLMarker(Lump_c *marker)
 
 static void AddMissingLump(const char *name, const char *after)
 {
-	if (edit_wad->FindLumpInLevel(name, lev_current_start))
+	if (edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
 		return;
 
-	short exist = edit_wad->FindLumpInLevel_Raw(after, lev_current_start);
+	short exist = edit_wad->LevelLookupLump(lev_current_idx, after);
 
 	// FIXME : if this happens, the level structure is very broken, so.... do what?????
 	if (exist < 0)
@@ -2682,7 +2682,12 @@ void ReportFailedLevels(void)
 
 Lump_c * FindLevelLump(const char *name)
 {
-	return edit_wad->FindLumpInLevel(name, lev_current_start);
+	short idx = edit_wad->LevelLookupLump(lev_current_idx, name);
+
+	if (idx < 0)
+		return NULL;
+
+	return edit_wad->GetLump(idx);
 }
 
 
