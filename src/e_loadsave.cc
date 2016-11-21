@@ -266,7 +266,7 @@ bool CMD_NewProject()
 		map_name = lump->Name();
 	}
 
-	LogPrintf("Creating New File : %s of %s\n", map_name, filename);
+	LogPrintf("Creating New File : %s in %s\n", map_name, filename);
 
 
 	Wad_file * wad = Wad_file::Open(filename, 'w');
@@ -1614,7 +1614,7 @@ bool CMD_SaveMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Saving Map : %s of %s\n", Level_name, edit_wad->PathName());
+	LogPrintf("Saving Map : %s in %s\n", Level_name, edit_wad->PathName());
 
 	SaveLevel(Level_name);
 
@@ -1744,7 +1744,7 @@ bool CMD_ExportMap()
 		Main_LoadResources();
 	}
 
-	LogPrintf("Exporting Map : %s into %s\n", map_name, wad->PathName());
+	LogPrintf("Exporting Map : %s in %s\n", map_name, wad->PathName());
 
 
 	// the new wad replaces the current PWAD
