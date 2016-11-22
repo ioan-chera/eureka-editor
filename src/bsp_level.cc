@@ -625,7 +625,7 @@ void PutBlockmap()
 	WriteBlockmap();
 
 	if (block_overflowed)
-		PrintVerbose("Blockmap overflowed (lump will be empty)\n");
+		PrintWarn("Blockmap overflowed (lump will be empty)\n");
 	else
 		PrintVerbose("Completed blockmap, size %dx%d (compression: %d%%)\n",
 				block_w, block_h, block_compression);
