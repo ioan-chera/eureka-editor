@@ -559,16 +559,30 @@ public:
 
 	/* Mouse Tab */
 
+	/* Nodes Tab */
+
+	Fl_Check_Button *nod_always;
+
+	Fl_Check_Button *nod_fast;
+	Fl_Check_Button *nod_warn;
+	Fl_Check_Button *nod_verbose;
+
+	Fl_Check_Button *nod_blockmap;
+	Fl_Check_Button *nod_reject;
+	Fl_Check_Button *nod_gl_nodes;
+
+	Fl_Choice *nod_factor;
+
+	Fl_Check_Button *nod_force_v5;
+	Fl_Check_Button *nod_force_xnod;
+	Fl_Check_Button *nod_compress;
+
 	/* Other Tab */
 
 	Fl_Float_Input  *rend_aspect;;
 
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
-
-	Fl_Check_Button *nod_warn;
-	Fl_Check_Button *nod_verbose;
-	Fl_Check_Button *nod_fast;
 };
 
 
@@ -657,13 +671,10 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
-		  gen_autoload->down_box(FL_DOWN_BOX);
 		}
 		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
-		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
 		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
-		  gen_maximized->down_box(FL_DOWN_BOX);
 		  // not supported on MacOS X
 		  // (on that platform we should restore last window position, but I don't
 		  //  know how to code that)
@@ -692,26 +703,20 @@ UI_Preferences::UI_Preferences() :
 		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
 		}
 		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
-		  edit_newislands->down_box(FL_DOWN_BOX);
 		}
 		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
-		  edit_autoadjustX->down_box(FL_DOWN_BOX);
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
-		  edit_samemode->down_box(FL_DOWN_BOX);
 		}
 		{ edit_multiselect = new Fl_Check_Button(50, 210, 275, 30, " multi-select requires a modifier key");
-		  edit_multiselect->down_box(FL_DOWN_BOX);
 		}
 		{ edit_modkey = new Fl_Choice(370, 210, 95, 30, "---->   ");
-		  edit_modkey->down_box(FL_BORDER_BOX);
 		  edit_modkey->add("CTRL");
 		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
 		{ edit_drawingmode = new Fl_Check_Button(50, 240, 270, 30, " easier line drawing using the LMB");
-		  edit_drawingmode->down_box(FL_DOWN_BOX);
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
@@ -719,7 +724,6 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
-		  brow_smalltex->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -735,33 +739,25 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
-		  gen_scrollbars->down_box(FL_DOWN_BOX);
 		}
 		{ grid_snap = new Fl_Check_Button(50, 110, 235, 25, " default SNAP mode");
-		  grid_snap->down_box(FL_DOWN_BOX);
 		}
 		{ grid_size = new Fl_Choice(435, 110, 95, 25, "default grid size ");
-		  grid_size->down_box(FL_BORDER_BOX);
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
 		{ grid_mode = new Fl_Choice(435, 145, 95, 25, "default grid type ");
-		  grid_mode->down_box(FL_BORDER_BOX);
 		  grid_mode->add("OFF|Dotty|Normal");
 		}
 		{ grid_toggle = new Fl_Choice(435, 180, 95, 25, "grid toggle types ");
-		  grid_toggle->down_box(FL_BORDER_BOX);
 		  grid_toggle->add("BOTH|Dotty|Normal");
 		}
 		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
-		  gen_smallscroll->down_box(FL_BORDER_BOX);
 		  gen_smallscroll->hide();
 		}
 		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
-		  gen_largescroll->down_box(FL_BORDER_BOX);
 		  gen_largescroll->hide();
 		}
 		{ grid_hide_free = new Fl_Check_Button(50, 200, 245, 25, " hide grid in FREE mode");
-		  grid_hide_free->down_box(FL_DOWN_BOX);
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
@@ -874,6 +870,29 @@ UI_Preferences::UI_Preferences() :
 	  }
 #endif
 
+	  /* ---- Nodes Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Nodes" R_SPACES);
+		o->selection_color(FL_LIGHT1);
+		o->labelsize(16);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "Node Building");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ nod_always = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving  (recommended)");
+		}
+		{ nod_fast = new Fl_Check_Button(50, 160, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		}
+		{ nod_warn = new Fl_Check_Button(50, 190, 220, 30, " Show warning messages");
+		}
+		{ nod_verbose = new Fl_Check_Button(50, 220, 350, 30, " Verbose -- show information about each level");
+		  nod_verbose->hide();
+		}
+		o->end();
+	  }
+
 	  /* ---- Other Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Other" R_SPACES);
@@ -888,24 +907,8 @@ UI_Preferences::UI_Preferences() :
 		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
 		}
 		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
-		  rend_high_detail->down_box(FL_DOWN_BOX);
 		}
 		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
-		  rend_lock_grav->down_box(FL_DOWN_BOX);
-		}
-
-		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "Node Building");
-		  o->labelfont(1);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-		{ nod_warn = new Fl_Check_Button(50, 290, 220, 30, " Show all warning messages");
-		  nod_warn->down_box(FL_DOWN_BOX);
-		}
-		{ nod_verbose = new Fl_Check_Button(50, 320, 350, 30, " Verbose -- show information about each level");
-		  nod_verbose->down_box(FL_DOWN_BOX);
-		}
-		{ nod_fast = new Fl_Check_Button(50, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
-		  nod_fast->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
