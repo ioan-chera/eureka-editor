@@ -43,6 +43,7 @@
 #include "w_wad.h"
 
 #include "ui_window.h"
+#include "ui_about.h"
 #include "ui_file.h"
 #include "r_render.h"
 
@@ -622,6 +623,8 @@ static void Main_OpenWindow()
 	}
 
 	Fl::check();
+
+	InitAboutDialog();
 
 	if (begin_maximized)
 		main_win->Maximize();

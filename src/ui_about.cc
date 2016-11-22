@@ -205,5 +205,20 @@ void DLG_AboutText(void)
 }
 
 
+#ifdef __APPLE__
+static void about_callback_macosx(Fl_Widget *, void *)
+{
+	UI_About::Open();
+}
+#endif
+
+
+void InitAboutDialog()
+{
+#ifdef __APPLE__
+	fl_mac_set_about(about_callback_macosx, NULL);
+#endif
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
