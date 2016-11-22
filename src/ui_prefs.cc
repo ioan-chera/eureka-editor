@@ -567,11 +567,11 @@ public:
 	Fl_Check_Button *nod_warn;
 	Fl_Check_Button *nod_verbose;
 
+	Fl_Choice *nod_factor;
+
 	Fl_Check_Button *nod_blockmap;
 	Fl_Check_Button *nod_reject;
 	Fl_Check_Button *nod_gl_nodes;
-
-	Fl_Choice *nod_factor;
 
 	Fl_Check_Button *nod_force_v5;
 	Fl_Check_Button *nod_force_xnod;
@@ -881,14 +881,27 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(1);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_always = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving  (recommended)");
+		{ nod_always = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving   (recommended)");
 		}
-		{ nod_fast = new Fl_Check_Button(50, 160, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
+		{ nod_fast = new Fl_Check_Button(50, 110, 440, 30, " Fast mode   (the nodes may not be as good)");
 		}
-		{ nod_warn = new Fl_Check_Button(50, 190, 220, 30, " Show warning messages");
+		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
 		{ nod_verbose = new Fl_Check_Button(50, 220, 350, 30, " Verbose -- show information about each level");
 		  nod_verbose->hide();
+		}
+		{ nod_factor = new Fl_Choice(177, 180, 180, 30, "Seg split factor: ");
+		  nod_factor->add("NORMAL|Minimize Splits|Best BSP Tree");
+		}
+
+		{ Fl_Box* o = new Fl_Box(25, 270, 250, 30, "Advanced Settings:");
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ nod_force_v5 = new Fl_Check_Button(75, 300, 250, 30, " Force V5 of GL-Nodes");
+		}
+		{ nod_force_xnod = new Fl_Check_Button(75, 330, 250, 30, " Force ZDoom format of normal nodes");
+		}
+		{ nod_compress = new Fl_Check_Button(75, 360, 250, 30, " Force zlib compression");
 		}
 		o->end();
 	  }
