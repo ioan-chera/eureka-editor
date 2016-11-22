@@ -317,9 +317,8 @@ SYS_ASSERT(nb_info);
 
 static void PrepareInfo(nodebuildinfo_t *info)
 {
-	info->fast          = bsp_fast ? true : false;
-	info->quiet         = bsp_verbose ? false : true;
-	info->mini_warnings = bsp_warn ? true : false;
+	info->fast     = bsp_fast ? true : false;
+	info->warnings = bsp_warn ? true : false;
 
 	info->total_big_warn   = 0;
 	info->total_small_warn = 0;

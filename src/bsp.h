@@ -45,7 +45,7 @@ public:
 
 	bool gl_nodes;
 
-	// when these two are false, the create an empty lump
+	// when these two are false, they create an empty lump
 	bool do_blockmap;
 	bool do_reject;
 
@@ -53,12 +53,7 @@ public:
 	bool force_xnod;
 
 	bool fast;
-	bool quiet;
-	bool mini_warnings;
-
-	// This is for two-way communication (esp. with the GUI).
-	// Should be flagged 'volatile' since multiple threads (real or
-	// otherwise, e.g. signals) may read or change the values.
+	bool warnings;
 
 	// the GUI can set this to tell the node builder to stop
 	bool cancelled;
@@ -82,8 +77,7 @@ public:
 		force_xnod(false),
 
 		fast(false),
-		quiet(false),
-		mini_warnings(false),
+		warnings(false),
 
 		cancelled(false),
 		message(NULL),

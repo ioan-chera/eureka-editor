@@ -55,16 +55,15 @@ void PrintMsg(const char *str, ...)
 
 void PrintVerbose(const char *str, ...)
 {
+	(void) str;
+
+#if DEBUG_ENABLED
 	va_list args;
 
 	va_start(args, str);
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	if (! cur_info->quiet)
-		GB_PrintMsg("%s", message_buf);
-
-#if DEBUG_ENABLED
 	DebugPrintf(">>> %s", message_buf);
 #endif
 }
@@ -78,7 +77,8 @@ void PrintWarn(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	GB_PrintMsg("Warning: %s", message_buf);
+	if (cur_info->warnings)
+		GB_PrintMsg("Warning: %s", message_buf);
 
 	cur_info->total_big_warn++;
 
@@ -90,20 +90,19 @@ void PrintWarn(const char *str, ...)
 
 void PrintMiniWarn(const char *str, ...)
 {
+	(void) str;
+
+#if DEBUG_ENABLED
 	va_list args;
 
 	va_start(args, str);
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	if (cur_info->mini_warnings)
-		GB_PrintMsg("Warning: %s", message_buf);
-
-	cur_info->total_small_warn++;
-
-#if DEBUG_ENABLED
 	DebugPrintf("MiniWarn: %s", message_buf);
 #endif
+
+	cur_info->total_small_warn++;
 }
 
 

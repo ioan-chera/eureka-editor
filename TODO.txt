@@ -27,11 +27,12 @@ BSP rework
 +  Preference panel:
          [x] always build nodes on save (recommended)
 
-         seg split factor [ 11 ]
+         seg split factor : NORMAL / Minimize splits / Better BSP tree
+                            11       29                2
+                            7-15
 
          [ ] fast mode
-         [ ] verbose
-         [ ] warnings
+         [ ] print warnings in log file
 
          Advanced settings :
 
