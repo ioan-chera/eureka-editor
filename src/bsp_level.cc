@@ -830,6 +830,9 @@ bool lev_force_xnod;
 
 bool lev_long_name;
 
+// a bit-mask of LIMIT_XXX flags
+int lev_failure_flags;
+
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
     TYPE ** BASEVAR = NULL;  \
@@ -1394,6 +1397,12 @@ static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 
+void MarkHardFailure(int flags)
+{
+	lev_failure_flags |= flags;
+}
+
+
 void PutVertices(const char *name, int do_gl)
 {
 	int count, i;
@@ -1428,8 +1437,6 @@ void PutVertices(const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 		MarkHardFailure(LIMIT_VERTEXES);
-	else if (count > 32767)
-		MarkSoftFailure(do_gl ? LIMIT_GL_VERT : LIMIT_VERTEXES);
 }
 
 
@@ -1465,11 +1472,7 @@ void PutGLVertices(int do_v5)
 	}
 
 	if (count != num_gl_vert)
-		BugError("PutGLVertices miscounted (%d != %d)", count,
-				num_gl_vert);
-
-	if (count > 32767)
-		MarkSoftFailure(LIMIT_GL_VERT);
+		BugError("PutGLVertices miscounted (%d != %d)", count, num_gl_vert);
 }
 
 
@@ -1477,24 +1480,18 @@ void ValidateSectors(void)
 {
 	if (num_sectors > 65534)
 		MarkHardFailure(LIMIT_SECTORS);
-	else if (num_sectors > 32767)
-		MarkSoftFailure(LIMIT_SECTORS);
 }
 
 void ValidateSidedefs(void)
 {
 	if (num_sidedefs > 65534)
 		MarkHardFailure(LIMIT_SIDEDEFS);
-	else if (num_sidedefs > 32767)
-		MarkSoftFailure(LIMIT_SIDEDEFS);
 }
 
 void ValidateLinedefs(void)
 {
 	if (num_linedefs > 65534)
 		MarkHardFailure(LIMIT_LINEDEFS);
-	else if (num_linedefs > 32767)
-		MarkSoftFailure(LIMIT_LINEDEFS);
 }
 
 
@@ -1564,8 +1561,6 @@ void PutSegs(void)
 
 	if (count > 65534)
 		MarkHardFailure(LIMIT_SEGS);
-	else if (count > 32767)
-		MarkSoftFailure(LIMIT_SEGS);
 }
 
 
@@ -1623,8 +1618,6 @@ void PutGLSegs(void)
 
 	if (count > 65534)
 		BugError("PutGLSegs with %d (> 65534) segs", count);
-	else if (count > 32767)
-		MarkSoftFailure(LIMIT_GL_SEGS);
 }
 
 
@@ -2104,12 +2097,13 @@ void LoadLevel()
 {
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
-	lev_current_name = LEV->Name();
-
-	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
+	lev_current_name  = LEV->Name();
+	lev_failure_flags = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
+
+	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
 
 	GetVertices();
 	GetSectors();
@@ -2298,46 +2292,28 @@ void SaveLevel(node_t *root_node)
 	if (num_normal_vert > 32767 || num_gl_vert > 32767)
 	{
 		if (cur_info->gl_nodes && !cur_info->force_v5)
-		{
 			lev_force_v5 = true;
-			MarkV5Switch(LIMIT_VERTEXES | LIMIT_GL_SEGS);
-		}
 
 		if (! cur_info->force_xnod)
-		{
 			lev_force_xnod = true;
-			MarkZDSwitch();
-		}
 	}
 
 	if (num_segs > 65534)
 	{
 		if (cur_info->gl_nodes && !cur_info->force_v5)
-		{
 			lev_force_v5 = true;
-			MarkV5Switch(LIMIT_GL_SSECT | LIMIT_GL_SEGS);
-		}
 
 		if (! cur_info->force_xnod)
-		{
 			lev_force_xnod = true;
-			MarkZDSwitch();
-		}
 	}
 
 	if (num_nodes > 32767)
 	{
 		if (cur_info->gl_nodes && !cur_info->force_v5)
-		{
 			lev_force_v5 = true;
-			MarkV5Switch(LIMIT_GL_NODES);
-		}
 
 		if (! cur_info->force_xnod)
-		{
 			lev_force_xnod = true;
-			MarkZDSwitch();
-		}
 	}
 
 
@@ -2500,37 +2476,6 @@ void ZLibFinishLump(void)
 /* ---------------------------------------------------------------- */
 
 
-//
-// Mark failure routines
-//
-void MarkSoftFailure(int soft)
-{
-//TODO  wad.current_level->lev_info->soft_limit |= soft;
-}
-
-void MarkHardFailure(int hard)
-{
-//TODO  wad.current_level->lev_info->hard_limit |= hard;
-}
-
-void MarkV5Switch(int v5)
-{
-//TODO  wad.current_level->lev_info->v5_switch |= v5;
-}
-
-void MarkZDSwitch(void)
-{
-#if 0  // TODO
-  level_t *lev = wad.current_level->lev_info;
-
-  lev->v5_switch |= LIMIT_ZDBSP;
-
-  lev->soft_limit &= ~ (LIMIT_VERTEXES);
-  lev->hard_limit &= ~ (LIMIT_VERTEXES);
-#endif
-}
-
-
 void ReportOneOverflow(const Lump_c *lump, int limit, bool hard)
 {
 	const char *msg = hard ? "overflowed the absolute limit" :
@@ -2553,10 +2498,6 @@ void ReportOneOverflow(const Lump_c *lump, int limit, bool hard)
 		case LIMIT_GL_SEGS:  PrintMsg("Number of GL segs %s.\n", msg); break;
 		case LIMIT_GL_SSECT: PrintMsg("Number of GL subsectors %s.\n", msg); break;
 		case LIMIT_GL_NODES: PrintMsg("Number of GL nodes %s.\n", msg); break;
-
-		case LIMIT_BAD_SIDE:   PrintMsg("One or more linedefs has a bad sidedef.\n"); break;
-		case LIMIT_BMAP_TRUNC: PrintMsg("Blockmap area was too big - truncated.\n"); break;
-		case LIMIT_BLOCKMAP:   PrintMsg("Blockmap lump %s.\n", msg); break;
 
 		default:
 			BugError("UNKNOWN LIMIT BIT: 0x%06x", limit);

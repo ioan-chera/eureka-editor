@@ -604,15 +604,6 @@ void ZLibBeginLump(Lump_c *lump);
 void ZLibAppendLump(const void *data, int length);
 void ZLibFinishLump(void);
 
-// mark the fact that this level failed to build.
-void MarkSoftFailure(int soft);
-void MarkHardFailure(int hard);
-void MarkV5Switch(int v5);
-void MarkZDSwitch(void);
-
-// alert the user if any levels failed to build properly.
-void ReportFailedLevels(void);
-
 /* limit flags, to show what went wrong */
 #define LIMIT_VERTEXES     0x000001
 #define LIMIT_SECTORS      0x000002
@@ -627,11 +618,6 @@ void ReportFailedLevels(void);
 #define LIMIT_GL_SEGS      0x000200
 #define LIMIT_GL_SSECT     0x000400
 #define LIMIT_GL_NODES     0x000800
-
-#define LIMIT_BAD_SIDE     0x001000
-#define LIMIT_BMAP_TRUNC   0x002000
-#define LIMIT_BLOCKMAP     0x004000
-#define LIMIT_ZDBSP        0x008000
 
 
 //------------------------------------------------------------------------

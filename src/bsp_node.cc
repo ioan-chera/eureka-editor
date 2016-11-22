@@ -1454,10 +1454,7 @@ static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
 	// check for bad sidedef
 	if (! side->sector)
 	{
-		PrintWarn("Bad sidedef on linedef #%d (Z_CheckHeap error)\n",
-				line->index);
-
-		MarkSoftFailure(LIMIT_BAD_SIDE);
+		PrintWarn("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line->index);
 	}
 
 	seg->start   = start;
