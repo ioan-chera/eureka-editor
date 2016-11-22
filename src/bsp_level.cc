@@ -370,7 +370,6 @@ static void CompressBlockmap(void)
 
 	if (cur_offset > 65535)
 	{
-		MarkSoftFailure(LIMIT_BLOCKMAP);
 		block_overflowed = true;
 		return;
 	}
@@ -421,10 +420,6 @@ static int CalcBlockmapSize()
 
 static void WriteBlockmap(void)
 {
-	// leave empty if the blockmap overflowed
-	if (block_overflowed)
-		return;
-
 	int i;
 
 	int max_size = CalcBlockmapSize();
@@ -543,31 +538,6 @@ static void FindBlockmapLimits(bbox_t *bbox)
 }
 
 
-void TruncateBlockmap(void)
-{
-	while (block_w * block_h > BLOCK_LIMIT)
-	{
-		block_w -= block_w / 8;
-		block_h -= block_h / 8;
-	}
-
-	block_count = block_w * block_h;
-
-	PrintMiniWarn("Blockmap TOO LARGE!  Truncated to %dx%d blocks\n",
-			block_w, block_h);
-
-	MarkSoftFailure(LIMIT_BMAP_TRUNC);
-
-	/* center the truncated blockmap */
-	block_x = block_mid_x - block_w * 64;
-	block_y = block_mid_y - block_h * 64;
-
-# if DEBUG_BLOCKMAP
-	DebugPrintf("New blockmap origin: (%d,%d)\n", block_x, block_y);
-# endif
-}
-
-
 void InitBlockmap()
 {
 	bbox_t map_bbox;
@@ -599,16 +569,6 @@ void PutBlockmap()
 
 	block_overflowed = false;
 
-	// truncate blockmap if too large.  We're limiting the number of
-	// blocks to around 16000 (user changeable), this leaves about 48K
-	// of shorts for the actual line lists.
-
-	if (block_count > BLOCK_LIMIT)
-	{
-		MarkSoftFailure(LIMIT_BLOCKMAP);
-		block_overflowed = true;
-	}
-
 	// initial phase: create internal blockmap containing the index of
 	// all lines in each block.
 
@@ -616,19 +576,26 @@ void PutBlockmap()
 
 	// -AJA- second phase: compress the blockmap.  We do this by sorting
 	//       the blocks, which is a typical way to detect duplicates in
-	//       a large list.
+	//       a large list.  This also detects BLOCKMAP overflow.
 
 	CompressBlockmap();
 
 	// final phase: write it out in the correct format
 
-	WriteBlockmap();
-
 	if (block_overflowed)
+	{
+		// leave an empty blockmap lump
+		CreateLevelLump("BLOCKMAP")->Finish();
+
 		PrintWarn("Blockmap overflowed (lump will be empty)\n");
+	}
 	else
+	{
+		WriteBlockmap();
+
 		PrintVerbose("Completed blockmap, size %dx%d (compression: %d%%)\n",
 				block_w, block_h, block_compression);
+	}
 
 	FreeBlockmap();
 }
@@ -2139,18 +2106,10 @@ void LoadLevel()
 
 	lev_current_name = LEV->Name();
 
+	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
+
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
-
-	char * message = StringPrintf(
-			"Building nodes on %s%s", lev_current_name,
-			lev_doing_hexen ? " (Hexen)" : "");
-
-	PrintVerbose("\n\n");
-	PrintMsg("%s\n", message);
-	PrintVerbose("\n");
-
-	StringFree(message);
 
 	GetVertices();
 	GetSectors();
