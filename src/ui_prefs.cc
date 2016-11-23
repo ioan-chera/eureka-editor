@@ -685,6 +685,55 @@ UI_Preferences::UI_Preferences() :
 		o->end();
 	  }
 
+	  /* ---- Key bindings Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
+		o->labelsize(16);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
+		  o->labelfont(1);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+
+		{ key_key = new Fl_Button(30, 90, 120, 25, "KEY");
+		  key_key->color((Fl_Color)231);
+		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
+		  key_key->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_group = new Fl_Button(155, 90, 90, 25, "MODE");
+		  key_group->color((Fl_Color)231);
+		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_group->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_func = new Fl_Button(250, 90, 190, 25, "FUNCTION");
+		  key_func->color((Fl_Color)231);
+		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_func->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
+		  key_list->textfont(FL_COURIER);
+		}
+		{ key_bind = new Fl_Button(470, 140, 90, 30, "Bind");
+		  key_bind->callback((Fl_Callback*)bind_key_callback, this);
+		  key_bind->shortcut(FL_Enter);
+		}
+		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
+		  key_copy->callback((Fl_Callback*)copy_key_callback, this);
+		}
+		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
+		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
+		}
+		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
+		  key_delete->callback((Fl_Callback*)del_key_callback, this);
+		  key_delete->shortcut(FL_Delete);
+		}
+		{ key_reset = new Fl_Button(470, 335, 90, 50, "Reset\nDefaults");
+		  key_reset->callback((Fl_Callback*)reset_callback, this);
+		}
+		o->end();
+	  }
+
 	  /* ---- Editing Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing" R_SPACES);
@@ -807,55 +856,6 @@ UI_Preferences::UI_Preferences() :
 		  dotty_point->callback((Fl_Callback*)color_callback, this);
 		}
 
-		o->end();
-	  }
-
-	  /* ---- Key bindings Tab ---- */
-
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
-		o->labelsize(16);
-		o->hide();
-
-		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
-		  o->labelfont(1);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-
-		{ key_key = new Fl_Button(30, 90, 120, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_group = new Fl_Button(155, 90, 90, 25, "MODE");
-		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  key_group->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_func = new Fl_Button(250, 90, 190, 25, "FUNCTION");
-		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  key_func->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
-		  key_list->textfont(FL_COURIER);
-		}
-		{ key_bind = new Fl_Button(470, 140, 90, 30, "Bind");
-		  key_bind->callback((Fl_Callback*)bind_key_callback, this);
-		  key_bind->shortcut(FL_Enter);
-		}
-		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
-		  key_copy->callback((Fl_Callback*)copy_key_callback, this);
-		}
-		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
-		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
-		}
-		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
-		  key_delete->callback((Fl_Callback*)del_key_callback, this);
-		  key_delete->shortcut(FL_Delete);
-		}
-		{ key_reset = new Fl_Button(470, 335, 90, 50, "Reset\nDefaults");
-		  key_reset->callback((Fl_Callback*)reset_callback, this);
-		}
 		o->end();
 	  }
 
