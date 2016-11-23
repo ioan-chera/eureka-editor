@@ -1064,13 +1064,12 @@ bool CMD_OpenMap()
 		return false;
 
 
-	Wad_file *wad = NULL;
-	const char *map_name = NULL;
-	bool is_new_pwad = false;
-
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	dialog->Run(&wad, &is_new_pwad, &map_name);
+	const char *map_name = NULL;
+	bool did_load = false;
+
+	Wad_file *wad = dialog->Run(&map_name, &did_load);
 
 	delete dialog;
 
@@ -1084,14 +1083,19 @@ bool CMD_OpenMap()
 	if (wad->LevelFind(map_name) < 0)
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
+
+		delete wad;
 		return false;
 	}
 
 
-	if (is_new_pwad && wad->FindLump(EUREKA_LUMP))
+	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
 		if (! M_ParseEurekaLump(wad))
+		{
+			delete wad;
 			return false;
+		}
 	}
 
 
@@ -1102,7 +1106,7 @@ bool CMD_OpenMap()
 		RemoveEditWad();
 	}
 
-	if (is_new_pwad)
+	if (did_load)
 	{
 		edit_wad = wad;
 		Pwad_name = edit_wad->PathName();
@@ -1111,7 +1115,6 @@ bool CMD_OpenMap()
 
 		Main_LoadResources();
 	}
-
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 

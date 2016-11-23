@@ -250,7 +250,8 @@ void UI_ChooseMap::CheckMapName()
 UI_OpenMap::UI_OpenMap() :
 	UI_Escapable_Window(420, 530, "Open Map"),
 	action(ACT_none),
-	result_wad(NULL), new_pwad(NULL)
+	loaded_wad(NULL),
+	 using_wad(NULL)
 {
 	resizable(NULL);
 
@@ -345,11 +346,10 @@ UI_OpenMap::~UI_OpenMap()
 }
 
 
-void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
+Wad_file * UI_OpenMap::Run(const char ** map_v, bool * did_load)
 {
-	*wad_v = NULL;
 	*map_v = NULL;
-	*is_new_pwad = false;
+	*did_load = false;
 
 	if (edit_wad)
 		SetPWAD(edit_wad->PathName());
@@ -357,7 +357,6 @@ void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
 	Populate();
 
 	set_modal();
-
 	show();
 
 	while (action == ACT_none)
@@ -365,24 +364,26 @@ void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
 		Fl::wait(0.2);
 	}
 
-	if (action == ACT_ACCEPT)
-	{
-		SYS_ASSERT(result_wad);
+	if (action != ACT_ACCEPT)
+		using_wad = NULL;
 
-		*wad_v = result_wad;
+	if (using_wad)
+	{
 		*map_v = StringUpper(map_name->value());
 
-		if (result_wad == new_pwad)
+		if (using_wad == loaded_wad)
 		{
-			*is_new_pwad = true;
-			new_pwad = NULL;
+			*did_load  = true;
+			loaded_wad = NULL;
 		}
 	}
 
-	if (new_pwad)
-	{
-		delete new_pwad;
-	}
+	// if we are not returning a pwad which got loaded, e.g. because
+	// the user cancelled or chose the game IWAD, then close it now.
+	if (loaded_wad)
+		delete loaded_wad;
+
+	return using_wad;
 }
 
 
@@ -390,9 +391,9 @@ void UI_OpenMap::CheckMapName()
 {
 	bool was_valid = ok_but->active();
 
-	bool  is_valid = (result_wad != NULL) &&
+	bool  is_valid = (using_wad != NULL) &&
 	                 ValidateMapName(map_name->value()) &&
-					 (result_wad->LevelFind(map_name->value()) >= 0);
+					 (using_wad->LevelFind(map_name->value()) >= 0);
 
 	if (was_valid == is_valid)
 		return;
@@ -417,11 +418,12 @@ void UI_OpenMap::Populate()
 	button_grp->label("\n\nNone Found");
 	button_grp->clear();
 
-	result_wad = NULL;
+	using_wad = NULL;
 
 	if (look_iwad->value())
 	{
-		PopulateButtons(game_wad);
+		using_wad = game_wad;
+		PopulateButtons();
 	}
 	else if (look_res->value())
 	{
@@ -432,23 +434,27 @@ void UI_OpenMap::Populate()
 			last--;
 
 		// we simply use the last resource which contains levels
-		// TODO: should grab list from each of them and merge into one big list
+		// TODO: ideally grab list from each of them and merge into one big list
 
 		for (int r = last ; r >= first ; r--)
 		{
 			if (master_dir[r]->LevelCount() >= 0)
 			{
-				PopulateButtons(master_dir[r]);
+				using_wad = master_dir[r];
+				PopulateButtons();
 				break;
 			}
 		}
 	}
-	else
+	else if (loaded_wad)
 	{
-		if (new_pwad)
-			PopulateButtons(new_pwad);
-		else if (edit_wad)
-			PopulateButtons(edit_wad);
+		using_wad = loaded_wad;
+		PopulateButtons();
+	}
+	else if (edit_wad)
+	{
+		using_wad = edit_wad;
+		PopulateButtons();
 	}
 }
 
@@ -472,9 +478,10 @@ static bool DifferentEpisode(const char *A, const char *B)
 }
 
 
-void UI_OpenMap::PopulateButtons(Wad_file *wad)
+void UI_OpenMap::PopulateButtons()
 {
-	result_wad = wad;
+	Wad_file *wad = using_wad;
+	SYS_ASSERT(wad);
 
 	int num_levels = wad->LevelCount();
 
@@ -587,7 +594,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	// santify check
-	if (that->result_wad && ValidateMapName(that->map_name->value()))
+	if (that->using_wad && ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
 		fl_beep();
@@ -599,7 +606,7 @@ void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	// sanity check
-	if (! that->result_wad)
+	if (! that->using_wad)
 		return;
 
 	that->map_name->value(w->label());
@@ -682,18 +689,19 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	if (new_pwad)
-	{
-		delete new_pwad;
-	}
+	// replace existing one
+	if (loaded_wad)
+		delete loaded_wad;
 
-	new_pwad = wad;
+	loaded_wad = wad;
 
-	SetPWAD(new_pwad->PathName());
+	SetPWAD(loaded_wad->PathName());
+
+	if (using_wad == loaded_wad)
+		using_wad = wad;
 
 
-	// change the "Look in ..." setting to be the current pwad
-
+	// change the "Look in ..." setting
 	look_iwad->value(0);
 	look_res ->value(0);
 	look_pwad->value(1);

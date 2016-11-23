@@ -88,11 +88,16 @@ private:
 
 	int action;
 
-	Wad_file * result_wad;
-	Wad_file * new_pwad;
+	// the WAD file opened by the "Load" button (initially NULL)
+	Wad_file * loaded_wad;
+
+	// the WAD file which we are showing map buttons for.
+	// can be the "game_wad" or "edit_wad" globals, the "loaded_wad"
+	// field above, or NULL.
+	Wad_file * using_wad;
 
 	void Populate();
-	void PopulateButtons(Wad_file *wad);
+	void PopulateButtons();
 
 	void LoadFile();
 	void SetPWAD(const char *name);
@@ -102,9 +107,16 @@ public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	// the 'wad' result will be NULL when cancelled.
-	// when OK and 'is_new_pwad' is set, the wad should become the edit_wad
-	void Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v);
+	// Run the dialog and return an opened wad (from Wad_file::Open),
+	// or NULL if the user cancelled.
+	//
+	// "map_v" parameter must be non-NULL, it receives the chosen map
+	// name, or set to NULL when cancelled.
+	//
+	// "did_load" is true when the user loaded a new pwad and this
+	// method returned it.  It should become the next edit_wad.
+	//
+	Wad_file * Run(const char ** map_v, bool * did_load);
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);
