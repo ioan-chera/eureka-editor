@@ -324,8 +324,15 @@ SYS_ASSERT(nb_info);
 
 static void PrepareInfo(nodebuildinfo_t *info)
 {
-	info->fast     = bsp_fast;
-	info->warnings = bsp_warnings;
+	info->factor	= CLAMP(1, bsp_split_factor, 31);
+
+	info->gl_nodes	= bsp_gl_nodes;
+	info->fast		= bsp_fast;
+	info->warnings	= bsp_warnings;
+
+	info->force_v5			= bsp_force_v5;
+	info->force_xnod		= bsp_force_zdoom;
+	info->force_compress	= bsp_compressed;
 
 	// FIXME : OTHER bsp_xxxx config vars
 

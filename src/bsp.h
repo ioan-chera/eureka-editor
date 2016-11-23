@@ -49,11 +49,12 @@ public:
 	bool do_blockmap;
 	bool do_reject;
 
-	bool force_v5;
-	bool force_xnod;
-
 	bool fast;
 	bool warnings;
+
+	bool force_v5;
+	bool force_xnod;
+	bool force_compress;
 
 	// the GUI can set this to tell the node builder to stop
 	bool cancelled;
@@ -71,14 +72,16 @@ public:
 		factor(DEFAULT_FACTOR),
 
 		gl_nodes(true),
+
 		do_blockmap(true),
 		do_reject  (true),
 
-		force_v5(false),
-		force_xnod(false),
-
 		fast(false),
 		warnings(false),
+
+		force_v5(false),
+		force_xnod(false),
+		force_compress(false),
 
 		cancelled(false),
 		message(NULL),
