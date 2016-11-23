@@ -37,35 +37,9 @@ namespace ajbsp
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-void PrintMsg(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-	GB_PrintMsg("%s", message_buf);
-
-#if DEBUG_ENABLED
-	DebugPrintf(">>> %s", message_buf);
-#endif
-}
-
-
 void PrintVerbose(const char *str, ...)
 {
 	(void) str;
-
-#if DEBUG_ENABLED
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-	DebugPrintf(">>> %s", message_buf);
-#endif
 }
 
 

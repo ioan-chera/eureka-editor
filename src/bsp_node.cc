@@ -1485,8 +1485,6 @@ superblock_t *CreateSegs(void)
 	seg_t *left, *right;
 	superblock_t *block;
 
-	PrintVerbose("Creating Segs...\n");
-
 	block = NewSuperBlock();
 
 	GetBlockmapBounds(&block->x1, &block->y1, &bw, &bh);

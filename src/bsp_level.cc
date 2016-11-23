@@ -2290,11 +2290,12 @@ static void AddMissingLump(const char *name, const char *after)
 
 	short exist = edit_wad->LevelLookupLump(lev_current_idx, after);
 
-	// FIXME : if this happens, the level structure is very broken, so.... do what?????
+	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
+		Warning("Missing %s lump -- level structure is broken\n", after);
+
 		exist = edit_wad->LevelLastLump(lev_current_idx);
-		// PrintMsg ???
 	}
 
 	edit_wad->InsertPoint(exist + 1);
