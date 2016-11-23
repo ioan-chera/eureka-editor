@@ -16,33 +16,11 @@ BSP rework
 
 +  make read errors NOT call FatalError()
 
-+  support XNOD uncompressed 
-
--  support ZNOD somehow (as a preference)
-
-+  do something with the ReportFailedLevels stuff
-
--  check utils like PerpDist()   [ add missing ones into Eureka? ]
-
-+  Preference panel:
-         [x] always build nodes on save (recommended)
-
-         seg split factor : NORMAL / Minimize splits / Better BSP tree
-                            11       29                2
-                            7-15
-
-         [ ] fast mode
-         [ ] print warnings in log file
-
-         Advanced settings :
-
-         [x] build BLOCKMAP
-         [x] build REJECT
-         [x] build GL-Nodes
-
-         [ ] force V5 of GL-Nodes
-         [ ] force ZDoom format of normal nodes
-         [ ] force zlib compression
++  fix ZDoom format
+   -  XNOD/ZNOD require SEGS to be written in USAGE ORDER
+   -  use the _zdoom_seg_t and _zdoom_subsec_t
+   -  support XNOD uncompressed  [ same as ZNOD but without the zlib ]
+   -  support ZNOD as a preference
 
 
 
@@ -378,6 +356,8 @@ ______________________________________________________________________
   NOT-TO-DO
 ______________________________________________________________________
 
+
+NO:  UDMF support
 
 NO:  use OpenGL for rendering 2D and/or 3D views
 
