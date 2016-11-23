@@ -1489,8 +1489,8 @@ superblock_t *CreateSegs(void)
 
 	GetBlockmapBounds(&block->x1, &block->y1, &bw, &bh);
 
-	block->x2 = block->x1 + 128 * UtilRoundPOW2(bw);
-	block->y2 = block->y1 + 128 * UtilRoundPOW2(bh);
+	block->x2 = block->x1 + 128 * RoundPOW2(bw);
+	block->y2 = block->y1 + 128 * RoundPOW2(bh);
 
 	// step through linedefs and get side numbers
 

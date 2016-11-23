@@ -146,25 +146,6 @@ void UtilFree(void *data)
 
 
 //
-// Rounds the value _up_ to the nearest power of two.
-//
-int UtilRoundPOW2(int x)
-{
-	int tmp;
-
-	if (x <= 2)
-		return x;
-
-	x--;
-
-	for (tmp=x / 2 ; tmp ; tmp /= 2)
-		x |= tmp;
-
-	return (x + 1);
-}
-
-
-//
 // Translate (dx, dy) into an angle value (degrees)
 //
 angle_g UtilComputeAngle(double dx, double dy)

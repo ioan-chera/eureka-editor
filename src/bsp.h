@@ -163,9 +163,6 @@ void UtilFree(void *data);
 // or NULL if an error occurred.
 char *UtilTimeString(void);
 
-// round a positive value up to the nearest power of two.
-int UtilRoundPOW2(int x);
-
 // compute angle & distance from (0,0) to (dx,dy)
 angle_g UtilComputeAngle(double dx, double dy);
 #define UtilComputeDist(dx,dy)  sqrt((dx) * (dx) + (dy) * (dy))

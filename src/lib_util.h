@@ -57,6 +57,9 @@ double PerpDist(double x, double y,  /* coord to test */
 double AlongDist(double x, double y, /* coord to test */
                  double x1, double y1, double x2, double y2 /* line */);
 
+// round a positive value up to the nearest power of two
+int RoundPOW2(int x);
+
 
 const char * Int_TmpStr(int value);
 

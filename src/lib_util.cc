@@ -359,5 +359,22 @@ const char *Int_TmpStr(int value)
 }
 
 
+//
+// rounds the value _up_ to the nearest power of two.
+//
+int RoundPOW2(int x)
+{
+	if (x <= 2)
+		return x;
+
+	x--;
+
+	for (int tmp = x >> 1 ; tmp ; tmp >>= 1)
+		x |= tmp;
+
+	return x + 1;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
