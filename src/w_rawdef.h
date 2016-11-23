@@ -201,6 +201,16 @@ typedef struct raw_v5_seg_s
 } PACKEDATTR raw_v5_seg_t;
 
 
+typedef struct raw_zdoom_seg_s
+{
+	u32_t start;      // from this vertex...
+	u32_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	 u8_t side;       // 0 if on right of linedef, 1 if on left
+
+} PACKEDATTR raw_zdoom_seg_t;
+
+
 typedef struct raw_bbox_s
 {
 	s16_t maxy, miny;
@@ -235,8 +245,22 @@ typedef struct raw_v5_subsec_s
 } PACKEDATTR raw_v5_subsec_t;
 
 
+typedef struct raw_zdoom_subsec_s
+{
+	u32_t segnum;
+
+	// NOTE : no "first" value, segs must be contiguous and appear
+	//        in an order dictated by the subsector list, e.g. all
+	//        segs of the second subsector must appear directly after
+	//        all segs of the first subsector.
+
+} PACKEDATTR raw_zdoom_subsec_t;
+
+
 typedef struct raw_v5_node_s
 {
+	// this structure used by ZDoom nodes too
+
 	s16_t x, y;         // starting point
 	s16_t dx, dy;       // offset to ending point
 	raw_bbox_t b1, b2;  // bounding rectangles
