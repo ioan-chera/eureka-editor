@@ -830,8 +830,7 @@ bool lev_force_xnod;
 
 bool lev_long_name;
 
-// a bit-mask of LIMIT_XXX flags
-int lev_failure_flags;
+int lev_hard_failures;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -1399,7 +1398,9 @@ static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 void MarkHardFailure(int flags)
 {
-	lev_failure_flags |= flags;
+	// flags are ignored
+
+	lev_hard_failures++;
 }
 
 
@@ -1436,7 +1437,10 @@ void PutVertices(const char *name, int do_gl)
 				do_gl ? num_gl_vert : num_normal_vert);
 
 	if (! do_gl && count > 65534)
+	{
+		PrintWarn("Number of vertices has overflowed.\n");
 		MarkHardFailure(LIMIT_VERTEXES);
+	}
 }
 
 
@@ -1473,25 +1477,6 @@ void PutGLVertices(int do_v5)
 
 	if (count != num_gl_vert)
 		BugError("PutGLVertices miscounted (%d != %d)", count, num_gl_vert);
-}
-
-
-void ValidateSectors(void)
-{
-	if (num_sectors > 65534)
-		MarkHardFailure(LIMIT_SECTORS);
-}
-
-void ValidateSidedefs(void)
-{
-	if (num_sidedefs > 65534)
-		MarkHardFailure(LIMIT_SIDEDEFS);
-}
-
-void ValidateLinedefs(void)
-{
-	if (num_linedefs > 65534)
-		MarkHardFailure(LIMIT_LINEDEFS);
 }
 
 
@@ -1560,7 +1545,10 @@ void PutSegs(void)
 				num_complete_seg);
 
 	if (count > 65534)
+	{
+		PrintWarn("Number of segs has overflowed.\n");
 		MarkHardFailure(LIMIT_SEGS);
+	}
 }
 
 
@@ -1702,7 +1690,10 @@ void PutSubsecs(const char *name, int do_gl)
 	}
 
 	if (num_subsecs > 32767)
+	{
+		PrintWarn("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
+	}
 }
 
 
@@ -1863,7 +1854,58 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 				node_cur_index, num_nodes);
 
 	if (!do_v5 && node_cur_index > 32767)
+	{
+		PrintWarn("Number of nodes has overflowed.\n");
 		MarkHardFailure(LIMIT_NODES);
+	}
+}
+
+
+void CheckLimits()
+{
+	if (num_sectors > 65534)
+	{
+		PrintWarn("Map has too many sectors.\n");
+		MarkHardFailure(LIMIT_SECTORS);
+	}
+
+	if (num_sidedefs > 65534)
+	{
+		PrintWarn("Map has too many sidedefs.\n");
+		MarkHardFailure(LIMIT_SIDEDEFS);
+	}
+
+	if (num_linedefs > 65534)
+	{
+		PrintWarn("Map has too many linedefs.\n");
+		MarkHardFailure(LIMIT_LINEDEFS);
+	}
+
+	if (cur_info->gl_nodes && !cur_info->force_v5)
+	{
+		if (num_normal_vert > 32767 ||
+			num_gl_vert > 32767 ||
+			num_segs > 65534 ||
+			num_nodes > 32767)
+		{
+			PrintWarn("Forcing V5 of GL-Nodes due to overflows.\n");
+			lev_force_v5 = true;
+		}
+	}
+
+	// FIXME : verify following is correct for ZDoom format
+
+	if (! cur_info->force_xnod)
+	{
+		if (num_normal_vert > 32767 ||
+			num_gl_vert > 32767 ||
+			num_segs > 65534 ||
+			num_nodes > 32767)
+		{
+			PrintWarn("Forcing ZDoom format nodes due to overflows.\n");
+			lev_force_xnod = true;
+		}
+	}
 }
 
 
@@ -2098,7 +2140,7 @@ void LoadLevel()
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
 	lev_current_name  = LEV->Name();
-	lev_failure_flags = 0;
+	lev_hard_failures = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
@@ -2279,45 +2321,15 @@ void SaveLevel(node_t *root_node)
 	lev_force_v5   = cur_info->force_v5;
 	lev_force_xnod = cur_info->force_xnod;
 
-	Lump_c * gl_marker = NULL;
-
-
-	// Note: RoundOffBspTree will convert the GL vertices in segs to
-	// their normal counterparts (pointer change: use normal_dup).
 
 	// check for overflows...
 
-	// FIXME : verify this is correct for XNOD format
-
-	if (num_normal_vert > 32767 || num_gl_vert > 32767)
-	{
-		if (cur_info->gl_nodes && !cur_info->force_v5)
-			lev_force_v5 = true;
-
-		if (! cur_info->force_xnod)
-			lev_force_xnod = true;
-	}
-
-	if (num_segs > 65534)
-	{
-		if (cur_info->gl_nodes && !cur_info->force_v5)
-			lev_force_v5 = true;
-
-		if (! cur_info->force_xnod)
-			lev_force_xnod = true;
-	}
-
-	if (num_nodes > 32767)
-	{
-		if (cur_info->gl_nodes && !cur_info->force_v5)
-			lev_force_v5 = true;
-
-		if (! cur_info->force_xnod)
-			lev_force_xnod = true;
-	}
+	CheckLimits();
 
 
 	/* --- GL Nodes --- */
+
+	Lump_c * gl_marker = NULL;
 
 	if (cur_info->gl_nodes)
 	{
@@ -2344,10 +2356,6 @@ void SaveLevel(node_t *root_node)
 
 	/* --- Normal nodes --- */
 
-	ValidateSectors();
-	ValidateSidedefs();
-	ValidateLinedefs();
-
 	if (lev_force_xnod)
 	{
 		// remove mini-segs
@@ -2357,6 +2365,9 @@ void SaveLevel(node_t *root_node)
 	}
 	else
 	{
+		// Note: RoundOffBspTree will convert the GL vertices in segs to
+		// their normal counterparts (pointer change: use normal_dup).
+
 		RoundOffBspTree(root_node);
 
 		NormaliseBspTree(root_node);
@@ -2379,6 +2390,9 @@ void SaveLevel(node_t *root_node)
 	}
 
 	edit_wad->EndWrite();
+
+	if (lev_hard_failures > 0)
+		GB_PrintMsg("FAILED with %d hard failures\n", lev_hard_failures);
 }
 
 
@@ -2471,183 +2485,6 @@ void ZLibFinishLump(void)
 
 
 /* ---------------------------------------------------------------- */
-
-
-void ReportOneOverflow(const Lump_c *lump, int limit, bool hard)
-{
-	const char *msg = hard ? "overflowed the absolute limit" :
-		"overflowed the original limit";
-
-	PrintMsg("%-8s: ", lump->Name());
-
-	switch (limit)
-	{
-		case LIMIT_VERTEXES: PrintMsg("Number of Vertices %s.\n", msg); break;
-		case LIMIT_SECTORS:  PrintMsg("Number of Sectors %s.\n", msg); break;
-		case LIMIT_SIDEDEFS: PrintMsg("Number of Sidedefs %s\n", msg); break;
-		case LIMIT_LINEDEFS: PrintMsg("Number of Linedefs %s\n", msg); break;
-
-		case LIMIT_SEGS:     PrintMsg("Number of Segs %s.\n", msg); break;
-		case LIMIT_SSECTORS: PrintMsg("Number of Subsectors %s.\n", msg); break;
-		case LIMIT_NODES:    PrintMsg("Number of Nodes %s.\n", msg); break;
-
-		case LIMIT_GL_VERT:  PrintMsg("Number of GL vertices %s.\n", msg); break;
-		case LIMIT_GL_SEGS:  PrintMsg("Number of GL segs %s.\n", msg); break;
-		case LIMIT_GL_SSECT: PrintMsg("Number of GL subsectors %s.\n", msg); break;
-		case LIMIT_GL_NODES: PrintMsg("Number of GL nodes %s.\n", msg); break;
-
-		default:
-			BugError("UNKNOWN LIMIT BIT: 0x%06x", limit);
-	}
-}
-
-
-void ReportOverflows(bool hard)
-{
-#if 0
-	lump_t *cur;
-
-	if (hard)
-	{
-		PrintMsg(
-				"ERRORS.  The following levels failed to be built, and won't\n"
-				"work in any Doom port (and may even crash it).\n\n"
-				);
-	}
-	else  // soft
-	{
-		PrintMsg(
-				"POTENTIAL FAILURES.  The following levels should work in a\n"
-				"modern Doom port, but may fail (or even crash) in older ports.\n\n"
-				);
-	}
-
-	for (cur=wad.dir_head ; cur ; cur=cur->next)
-	{
-		level_t *lev = cur->lev_info;
-
-		int limits, one_lim;
-
-		if (! (lev && ! (lev->flags & LEVEL_IS_GL)))
-			continue;
-
-		limits = hard ? lev->hard_limit : lev->soft_limit;
-
-		if (limits == 0)
-			continue;
-
-		for (one_lim = (1<<20) ; one_lim ; one_lim >>= 1)
-		{
-			if (limits & one_lim)
-				ReportOneOverflow(cur, one_lim, hard);
-		}
-	}
-#endif
-}
-
-
-void ReportV5Switches(void)
-{
-#if 0
-	lump_t *cur;
-
-	int saw_zdbsp = false;
-
-	PrintMsg(
-			"V5 FORMAT UPGRADES.  The following levels require a Doom port\n"
-			"which supports V5 GL-Nodes, otherwise they will fail (or crash).\n\n"
-			);
-
-	for (cur=wad.dir_head ; cur ; cur=cur->next)
-	{
-		level_t *lev = cur->lev_info;
-
-		if (! (lev && ! (lev->flags & LEVEL_IS_GL)))
-			continue;
-
-		if (lev->v5_switch == 0)
-			continue;
-
-		if ((lev->v5_switch & LIMIT_ZDBSP) && ! saw_zdbsp)
-		{
-			PrintMsg("ZDBSP FORMAT has also been used for regular nodes.\n\n");
-			saw_zdbsp = true;
-		}
-
-		if (lev->v5_switch & LIMIT_VERTEXES)
-		{
-			PrintMsg("%-8s: Number of Vertices overflowed the limit.\n", cur->name);
-		}
-
-		if (lev->v5_switch & LIMIT_GL_SSECT)
-		{
-			PrintMsg("%-8s: Number of GL segs overflowed the limit.\n", cur->name);
-		}
-	}
-#endif
-}
-
-
-void ReportFailedLevels(void)
-{
-	PrintMsg("*** Problem Report ***\n\n");
-
-#if 0
-	lump_t *cur;
-	int lev_count = 0;
-
-	int fail_soft = 0;
-	int fail_hard = 0;
-	int fail_v5   = 0;
-
-	bool need_spacer = false;
-
-	for (cur=wad.dir_head ; cur ; cur=cur->next)
-	{
-		if (! (cur->lev_info && ! (cur->lev_info->flags & LEVEL_IS_GL)))
-			continue;
-
-		lev_count++;
-
-		if (cur->lev_info->soft_limit != 0) fail_soft++;
-		if (cur->lev_info->hard_limit != 0) fail_hard++;
-		if (cur->lev_info->v5_switch  != 0) fail_v5++;
-	}
-
-	PrintMsg("\n");
-
-	if (fail_soft + fail_hard + fail_v5 == 0)
-	{
-		PrintMsg("All levels were built successfully.\n");
-		return;
-	}
-
-	if (fail_soft > 0)
-	{
-		ReportOverflows(false);
-		need_spacer = true;
-	}
-
-	if (fail_v5 > 0)
-	{
-		if (need_spacer)
-			PrintMsg("\n");
-
-		ReportV5Switches();
-		need_spacer = true;
-	}
-
-	if (fail_hard > 0)
-	{
-		if (need_spacer)
-			PrintMsg("\n");
-
-		ReportOverflows(true);
-	}
-
-#endif
-	PrintMsg("\nEnd of problem report.\n");
-}
 
 
 Lump_c * FindLevelLump(const char *name)
