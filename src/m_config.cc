@@ -261,15 +261,6 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
-	{	"easier_drawing_mode",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Easier line drawing using the LMB",
-		NULL,
-		&easier_drawing_mode
-	},
-
 	{	"browser_small_tex",
 		0,
 		OPT_BOOLEAN,
@@ -277,6 +268,78 @@ static const opt_desc_t options[] =
 		"Show smaller (more compact) textures in the browser",
 		NULL,
 		&browser_small_tex
+	},
+
+	{	"bsp_on_save",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: always build the nodes after saving",
+		NULL,
+		&bsp_on_save
+	},
+
+	{	"bsp_fast",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: enable fast mode (may be lower quality)",
+		NULL,
+		&bsp_fast
+	},
+
+	{	"bsp_warnings",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: show all warning messages",
+		NULL,
+		&bsp_warnings
+	},
+
+	{	"bsp_split_factor",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Node building: seg splitting factor",
+		NULL,
+		&bsp_split_factor
+	},
+
+	{	"bsp_gl_nodes",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: build GL-Nodes",
+		NULL,
+		&bsp_gl_nodes
+	},
+
+	{	"bsp_force_v5",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force V5 of GL-Nodes",
+		NULL,
+		&bsp_force_v5
+	},
+
+	{	"bsp_force_zdoom",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force ZDoom format for normal nodes",
+		NULL,
+		&bsp_force_zdoom
+	},
+
+	{	"bsp_compressed",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force zlib compression of ZDoom nodes",
+		NULL,
+		&bsp_compressed
 	},
 
 	{	"default_gamma",
@@ -369,6 +432,15 @@ static const opt_desc_t options[] =
 		&dotty_point_col
 	},
 
+	{	"easier_drawing_mode",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Easier line drawing using the LMB",
+		NULL,
+		&easier_drawing_mode
+	},
+
 	{	"floor_bump_small",
 		0,
 		OPT_INTEGER,
@@ -394,33 +466,6 @@ static const opt_desc_t options[] =
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
 		&floor_bump_large
-	},
-
-	{	"bsp_fast",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: enable fast mode (may be lower quality)",
-		NULL,
-		&bsp_fast
-	},
-
-	{	"bsp_verbose",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: be verbose, show level information",
-		NULL,
-		&bsp_verbose
-	},
-
-	{	"bsp_warn",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: show all warning messages",
-		NULL,
-		&bsp_warn
 	},
 
 	{	"grid_hide_in_free_mode",

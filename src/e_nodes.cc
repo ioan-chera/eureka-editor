@@ -29,9 +29,16 @@
 
 
 // config items
-bool bsp_fast    = false;
-bool bsp_verbose = false;
-bool bsp_warn    = false;
+bool bsp_on_save	= true;
+bool bsp_fast		= false;
+bool bsp_warnings	= false;
+
+int  bsp_split_factor	= DEFAULT_FACTOR;
+
+bool bsp_gl_nodes		= true;
+bool bsp_force_v5		= false;
+bool bsp_force_zdoom	= false;
+bool bsp_compressed		= false;
 
 
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
@@ -317,8 +324,10 @@ SYS_ASSERT(nb_info);
 
 static void PrepareInfo(nodebuildinfo_t *info)
 {
-	info->fast     = bsp_fast ? true : false;
-	info->warnings = bsp_warn ? true : false;
+	info->fast     = bsp_fast;
+	info->warnings = bsp_warnings;
+
+	// FIXME : OTHER bsp_xxxx config vars
 
 	info->total_failed_maps    = 0;
 	info->total_warnings       = 0;

@@ -569,7 +569,7 @@ public:
 
 	Fl_Check_Button *nod_gl_nodes;
 	Fl_Check_Button *nod_force_v5;
-	Fl_Check_Button *nod_force_xnod;
+	Fl_Check_Button *nod_force_zdoom;
 	Fl_Check_Button *nod_compress;
 
 	/* Other Tab */
@@ -883,7 +883,7 @@ UI_Preferences::UI_Preferences() :
 		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
 		{ nod_factor = new Fl_Choice(175, 180, 180, 30, "Seg split factor: ");
-		  nod_factor->add("NORMAL|Minimize Splits|Best BSP Tree");
+		  nod_factor->add("NORMAL|Minimize Splits|Balanced BSP Tree");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 235, 250, 30, "Advanced BSP Settings");
@@ -894,7 +894,7 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ nod_force_v5 = new Fl_Check_Button(50, 305, 250, 30, " Force V5 of GL-Nodes");
 		}
-		{ nod_force_xnod = new Fl_Check_Button(50, 335, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_force_zdoom = new Fl_Check_Button(50, 335, 250, 30, " Force ZDoom format of normal nodes");
 		}
 		{ nod_compress = new Fl_Check_Button(50, 365, 250, 30, " Force zlib compression");
 		}
@@ -1277,6 +1277,24 @@ void UI_Preferences::LoadValues()
 
 	// TODO: smallscroll, largescroll
 
+	/* Nodes Tab */
+
+	nod_on_save->value(bsp_on_save ? 1 : 0);
+	nod_fast->value(bsp_fast ? 1 : 0);
+	nod_warn->value(bsp_warnings ? 1 : 0);
+
+	if (bsp_split_factor < 7)
+		nod_factor->value(2);	// Balanced BSP tree
+	else if (bsp_split_factor > 15)
+		nod_factor->value(1);	// Minimize Splits
+	else
+		nod_factor->value(0);	// NORMAL
+
+	nod_gl_nodes->value(bsp_gl_nodes ? 1 : 0);
+	nod_force_v5->value(bsp_force_v5 ? 1 : 0);
+	nod_force_zdoom->value(bsp_force_zdoom ? 1 : 0);
+	nod_compress->value(bsp_compressed ? 1 : 0);
+
 	/* Other Tab */
 
 	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
@@ -1287,9 +1305,6 @@ void UI_Preferences::LoadValues()
 
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
-
-	nod_fast->value(bsp_fast ? 1 : 0);
-	nod_warn->value(bsp_warn ? 1 : 0);
 }
 
 
@@ -1384,6 +1399,24 @@ void UI_Preferences::SaveValues()
 
 	// TODO: smallscroll, largescroll
 
+	/* Nodes Tab */
+
+	bsp_on_save = nod_on_save->value() ? true : false;
+	bsp_fast = nod_fast->value() ? true : false;
+	bsp_warnings = nod_warn->value() ? true : false;
+
+	if (nod_factor->value() == 1)			// Minimize Splits
+		bsp_split_factor = 29;
+	else if (nod_factor->value() == 2)		// Balanced BSP tree
+		bsp_split_factor = 2;
+	else
+		bsp_split_factor = 11;
+
+	bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
+	bsp_force_v5 = nod_force_v5->value() ? true : false;
+	bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
+	bsp_compressed = nod_compress->value() ? true : false;
+
 	/* Other Tab */
 
 	render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
@@ -1392,8 +1425,6 @@ void UI_Preferences::SaveValues()
 	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
-	bsp_fast = nod_fast->value() ? true : false;
-	bsp_warn = nod_warn->value() ? true : false;
 }
 
 

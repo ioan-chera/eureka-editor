@@ -93,9 +93,15 @@ extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
+extern bool bsp_on_save;
 extern bool bsp_fast;
-extern bool bsp_verbose;
-extern bool bsp_warn;
+extern bool bsp_warnings;
+extern int  bsp_split_factor;
+
+extern bool bsp_gl_nodes;
+extern bool bsp_force_v5;
+extern bool bsp_force_zdoom;
+extern bool bsp_compressed;
 
 
 /* ==== FUNCTIONS ==================== */
