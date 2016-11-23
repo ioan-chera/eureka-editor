@@ -30,6 +30,7 @@ CHANGES IN Eureka 1.XX
 
 +  improved drag behavior, never modify the current selection
 
+-  increased number of remembered recent files
 
 
 -  fixed unwanted rail texture when splitting a sector and the
