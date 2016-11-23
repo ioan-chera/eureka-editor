@@ -2344,35 +2344,32 @@ void SaveLevel(node_t *root_node)
 
 	/* --- Normal nodes --- */
 
-	{
-		// FIXME!!! necessary for XNOD/ZNOD ???
-		RoundOffBspTree(root_node);
+	ValidateSectors();
+	ValidateSidedefs();
+	ValidateLinedefs();
 
-		// FIXME!!! necessary for XNOD/ZNOD ???
+	if (lev_force_xnod)
+	{
+		// remove mini-segs
 		NormaliseBspTree(root_node);
 
-		// FIXME : check if XNOD supplies its own vertices
+		SaveZDFormat(root_node);
+	}
+	else
+	{
+		RoundOffBspTree(root_node);
+
+		NormaliseBspTree(root_node);
+
 		PutVertices("VERTEXES", false);
 
-		ValidateSectors();
-		ValidateSidedefs();
-		ValidateLinedefs();
-
-		if (lev_force_xnod)
-		{
-			SaveZDFormat(root_node);
-		}
-		else
-		{
-			PutSegs();
-			PutSubsecs("SSECTORS", false);
-			PutNodes("NODES", false, false, root_node);
-		}
-
-		// -JL- Don't touch blockmap and reject if not doing normal nodes
-		PutBlockmap();
-		PutReject();
+		PutSegs();
+		PutSubsecs("SSECTORS", false);
+		PutNodes("NODES", false, false, root_node);
 	}
+
+	PutBlockmap();
+	PutReject();
 
 	// keyword support (v5.0 of the specs).
 	// must be done *after* doing normal nodes, for proper checksum.
@@ -2771,6 +2768,10 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 					ComputeBspHeight(root_node->l.node));
 
 		SaveLevel(root_node);
+	}
+	else
+	{
+		/* build was Cancelled by the user */
 	}
 
 	FreeLevel();
