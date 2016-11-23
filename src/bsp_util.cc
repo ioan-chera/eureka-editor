@@ -69,7 +69,7 @@ void PrintVerbose(const char *str, ...)
 }
 
 
-void PrintWarn(const char *str, ...)
+void Warning(const char *str, ...)
 {
 	va_list args;
 
@@ -80,7 +80,7 @@ void PrintWarn(const char *str, ...)
 	if (cur_info->warnings)
 		GB_PrintMsg("Warning: %s", message_buf);
 
-	cur_info->total_big_warn++;
+	cur_info->total_warnings++;
 
 #if DEBUG_ENABLED
 	DebugPrintf("Warning: %s", message_buf);
@@ -88,7 +88,7 @@ void PrintWarn(const char *str, ...)
 }
 
 
-void PrintMiniWarn(const char *str, ...)
+void MinorWarning(const char *str, ...)
 {
 	(void) str;
 
@@ -99,10 +99,10 @@ void PrintMiniWarn(const char *str, ...)
 	vsnprintf(message_buf, sizeof(message_buf), str, args);
 	va_end(args);
 
-	DebugPrintf("MiniWarn: %s", message_buf);
+	DebugPrintf("MinorWarn: %s", message_buf);
 #endif
 
-	cur_info->total_small_warn++;
+	cur_info->total_minor_warnings++;
 }
 
 
@@ -406,7 +406,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	if (! best_match)
 	{
-		PrintWarn("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
@@ -442,7 +442,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	if (! sector)
 	{
-		PrintWarn("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 

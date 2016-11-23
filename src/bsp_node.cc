@@ -997,7 +997,7 @@ void AddMinisegs(seg_t *part,
 
 		if (len > DIST_EPSILON)
 		{
-			PrintMiniWarn("Skipping very short seg (len=%1.3f) near (%1.1f,%1.1f)\n",
+			MinorWarning("Skipping very short seg (len=%1.3f) near (%1.1f,%1.1f)\n",
 					len, cur->vertex->x, cur->vertex->y);
 		}
 
@@ -1063,7 +1063,7 @@ void AddMinisegs(seg_t *part,
 		{
 			if (!cur->self_ref && !cur->after->warned_unclosed)
 			{
-				PrintMiniWarn("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
+				MinorWarning("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
 						cur->after->index,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
@@ -1075,7 +1075,7 @@ void AddMinisegs(seg_t *part,
 		{
 			if (!next->self_ref && !next->before->warned_unclosed)
 			{
-				PrintMiniWarn("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
+				MinorWarning("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
 						next->before->index,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
@@ -1090,7 +1090,7 @@ void AddMinisegs(seg_t *part,
 		if (cur->after != next->before)
 		{
 			if (!cur->self_ref && !next->self_ref)
-				PrintMiniWarn("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
+				MinorWarning("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
 						cur->after->index, cur->vertex->x, cur->vertex->y,
 						next->before->index, next->vertex->x, next->vertex->y);
 
@@ -1454,7 +1454,7 @@ static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
 	// check for bad sidedef
 	if (! side->sector)
 	{
-		PrintWarn("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line->index);
+		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line->index);
 	}
 
 	seg->start   = start;
@@ -1517,7 +1517,7 @@ superblock_t *CreateSegs(void)
 			if (UtilComputeDist(line->start->x - line->end->x,
 				line->start->y - line->end->y) >= 30000)
 			{
-				PrintWarn("Linedef #%d is VERY long, it may cause problems\n",
+				Warning("Linedef #%d is VERY long, it may cause problems\n",
 						line->index);
 			}
 		}
@@ -1528,7 +1528,7 @@ superblock_t *CreateSegs(void)
 			AddSegToSuper(block, right);
 		}
 		else
-			PrintWarn("Linedef #%d has no right sidedef!\n", line->index);
+			Warning("Linedef #%d has no right sidedef!\n", line->index);
 
 		if (line->left)
 		{
@@ -1549,7 +1549,7 @@ superblock_t *CreateSegs(void)
 		{
 			if (line->two_sided)
 			{
-				PrintWarn("Linedef #%d is 2s but has no left sidedef\n",
+				Warning("Linedef #%d is 2s but has no left sidedef\n",
 						line->index);
 				line->two_sided = 0;
 			}
@@ -1741,7 +1741,7 @@ static void SanityCheckClosed(subsec_t *sub)
 
 	if (gaps > 0)
 	{
-		PrintMiniWarn("Subsector #%d near (%1.1f,%1.1f) is not closed "
+		MinorWarning("Subsector #%d near (%1.1f,%1.1f) is not closed "
 				"(%d gaps, %d segs)\n", sub->index,
 				sub->mid_x, sub->mid_y, gaps, total);
 
@@ -1796,12 +1796,12 @@ static void SanityCheckSameSector(subsec_t *sub)
 		compare->sector->warned_facing = cur->sector->index;
 
 		if (cur->linedef)
-			PrintMiniWarn("Sector #%d has sidedef facing #%d (line #%d) "
+			MinorWarning("Sector #%d has sidedef facing #%d (line #%d) "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
 					cur->sector->index, cur->linedef->index,
 					sub->mid_x, sub->mid_y);
 		else
-			PrintMiniWarn("Sector #%d has sidedef facing #%d "
+			MinorWarning("Sector #%d has sidedef facing #%d "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
 					cur->sector->index, sub->mid_x, sub->mid_y);
 	}
@@ -2043,7 +2043,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	{
 		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
 		{
-			PrintMiniWarn("Loss of accuracy on VERY long node: "
+			MinorWarning("Loss of accuracy on VERY long node: "
 					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
 					node->x + node->dx, node->y + node->dy);
 		}

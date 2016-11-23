@@ -320,8 +320,9 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	info->fast     = bsp_fast ? true : false;
 	info->warnings = bsp_warn ? true : false;
 
-	info->total_big_warn   = 0;
-	info->total_small_warn = 0;
+	info->total_failed_maps    = 0;
+	info->total_warnings       = 0;
+	info->total_minor_warnings = 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
@@ -371,10 +372,9 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Total serious warnings: %d\n", info->total_big_warn);
-		GB_PrintMsg("Total minor warnings: %d\n", info->total_small_warn);
-
-//!!!		ReportFailedLevels();
+		GB_PrintMsg("Total filed maps: %d\n", info->total_failed_maps);
+		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
+					info->total_minor_warnings);
 	}
 	else if (ret == BUILD_Cancelled)
 	{

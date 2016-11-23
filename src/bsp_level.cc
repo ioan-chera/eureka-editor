@@ -587,7 +587,7 @@ void PutBlockmap()
 		// leave an empty blockmap lump
 		CreateLevelLump("BLOCKMAP")->Finish();
 
-		PrintWarn("Blockmap overflowed (lump will be empty)\n");
+		Warning("Blockmap overflowed (lump will be empty)\n");
 	}
 	else
 	{
@@ -1438,7 +1438,7 @@ void PutVertices(const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 	{
-		PrintWarn("Number of vertices has overflowed.\n");
+		Warning("Number of vertices has overflowed.\n");
 		MarkHardFailure(LIMIT_VERTEXES);
 	}
 }
@@ -1546,7 +1546,7 @@ void PutSegs(void)
 
 	if (count > 65534)
 	{
-		PrintWarn("Number of segs has overflowed.\n");
+		Warning("Number of segs has overflowed.\n");
 		MarkHardFailure(LIMIT_SEGS);
 	}
 }
@@ -1691,7 +1691,7 @@ void PutSubsecs(const char *name, int do_gl)
 
 	if (num_subsecs > 32767)
 	{
-		PrintWarn("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		Warning("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
@@ -1855,7 +1855,7 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
-		PrintWarn("Number of nodes has overflowed.\n");
+		Warning("Number of nodes has overflowed.\n");
 		MarkHardFailure(LIMIT_NODES);
 	}
 }
@@ -1865,19 +1865,19 @@ void CheckLimits()
 {
 	if (num_sectors > 65534)
 	{
-		PrintWarn("Map has too many sectors.\n");
+		Warning("Map has too many sectors.\n");
 		MarkHardFailure(LIMIT_SECTORS);
 	}
 
 	if (num_sidedefs > 65534)
 	{
-		PrintWarn("Map has too many sidedefs.\n");
+		Warning("Map has too many sidedefs.\n");
 		MarkHardFailure(LIMIT_SIDEDEFS);
 	}
 
 	if (num_linedefs > 65534)
 	{
-		PrintWarn("Map has too many linedefs.\n");
+		Warning("Map has too many linedefs.\n");
 		MarkHardFailure(LIMIT_LINEDEFS);
 	}
 
@@ -1888,7 +1888,7 @@ void CheckLimits()
 			num_segs > 65534 ||
 			num_nodes > 32767)
 		{
-			PrintWarn("Forcing V5 of GL-Nodes due to overflows.\n");
+			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
 			lev_force_v5 = true;
 		}
 	}
@@ -1902,7 +1902,7 @@ void CheckLimits()
 			num_segs > 65534 ||
 			num_nodes > 32767)
 		{
-			PrintWarn("Forcing ZDoom format nodes due to overflows.\n");
+			Warning("Forcing ZDoom format nodes due to overflows.\n");
 			lev_force_xnod = true;
 		}
 	}
@@ -2392,7 +2392,10 @@ void SaveLevel(node_t *root_node)
 	edit_wad->EndWrite();
 
 	if (lev_hard_failures > 0)
+	{
+		cur_info->total_failed_maps++;
 		GB_PrintMsg("FAILED with %d hard failures\n", lev_hard_failures);
+	}
 }
 
 

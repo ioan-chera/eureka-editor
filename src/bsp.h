@@ -62,8 +62,9 @@ public:
 	const char *message;
 
 	// from here on, various bits of internal state
-	int total_small_warn, total_big_warn;
-
+	int total_failed_maps;
+	int total_warnings;
+	int total_minor_warnings;
 
 public:
 	nodebuildinfo_t() :
@@ -82,8 +83,9 @@ public:
 		cancelled(false),
 		message(NULL),
 
-		total_small_warn(0),
-		total_big_warn(0)
+		total_failed_maps(0),
+		total_warnings(0),
+		total_minor_warnings(0)
 	{ }
 
 	~nodebuildinfo_t()
@@ -142,8 +144,9 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // display normal messages & warnings to the screen
 void PrintMsg(const char *str, ...);
 void PrintVerbose(const char *str, ...);
-void PrintWarn(const char *str, ...);
-void PrintMiniWarn(const char *str, ...);
+
+void Warning(const char *str, ...);
+void MinorWarning(const char *str, ...);
 
 // set message for certain errors
 void SetErrorMsg(const char *str, ...);
