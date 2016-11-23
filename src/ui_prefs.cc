@@ -392,7 +392,7 @@ public:
 			cancel->callback((Fl_Callback*)close_callback, this);
 		  }
 		  { ok_but = new Fl_Button(295, 254, 80, 35, "OK");
-			ok_but->labelfont(1);
+			ok_but->labelfont(FL_BOLD);
 			ok_but->callback((Fl_Callback*)ok_callback, this);
 			ok_but->deactivate();
 		  }
@@ -561,18 +561,13 @@ public:
 
 	/* Nodes Tab */
 
-	Fl_Check_Button *nod_always;
-
+	Fl_Check_Button *nod_on_save;
 	Fl_Check_Button *nod_fast;
 	Fl_Check_Button *nod_warn;
-	Fl_Check_Button *nod_verbose;
 
 	Fl_Choice *nod_factor;
 
-	Fl_Check_Button *nod_blockmap;
-	Fl_Check_Button *nod_reject;
 	Fl_Check_Button *nod_gl_nodes;
-
 	Fl_Check_Button *nod_force_v5;
 	Fl_Check_Button *nod_force_xnod;
 	Fl_Check_Button *nod_compress;
@@ -611,7 +606,7 @@ UI_Preferences::UI_Preferences() :
 		// o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 145, 30, "GUI Appearance");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ Fl_Group* o = new Fl_Group(45, 90, 250, 115);
@@ -667,7 +662,7 @@ UI_Preferences::UI_Preferences() :
 		  o->end();
 		}
 		{ Fl_Box* o = new Fl_Box(30, 240, 280, 35, "Miscellaneous");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
@@ -692,7 +687,7 @@ UI_Preferences::UI_Preferences() :
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
@@ -741,7 +736,7 @@ UI_Preferences::UI_Preferences() :
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Editing Options");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "default port: ");
@@ -769,7 +764,7 @@ UI_Preferences::UI_Preferences() :
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
@@ -784,7 +779,7 @@ UI_Preferences::UI_Preferences() :
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Map Grid and Scrolling");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
@@ -810,7 +805,7 @@ UI_Preferences::UI_Preferences() :
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
@@ -878,30 +873,30 @@ UI_Preferences::UI_Preferences() :
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "Node Building");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_always = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving   (recommended)");
+		{ nod_on_save = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving   (recommended)");
 		}
 		{ nod_fast = new Fl_Check_Button(50, 110, 440, 30, " Fast mode   (the nodes may not be as good)");
 		}
 		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
-		{ nod_verbose = new Fl_Check_Button(50, 220, 350, 30, " Verbose -- show information about each level");
-		  nod_verbose->hide();
-		}
-		{ nod_factor = new Fl_Choice(177, 180, 180, 30, "Seg split factor: ");
+		{ nod_factor = new Fl_Choice(175, 180, 180, 30, "Seg split factor: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Best BSP Tree");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 270, 250, 30, "Advanced Settings:");
+		{ Fl_Box* o = new Fl_Box(25, 235, 250, 30, "Advanced BSP Settings");
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_force_v5 = new Fl_Check_Button(75, 300, 250, 30, " Force V5 of GL-Nodes");
+		{ nod_gl_nodes = new Fl_Check_Button(50, 275, 150, 30, " Build GL-Nodes");
 		}
-		{ nod_force_xnod = new Fl_Check_Button(75, 330, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_force_v5 = new Fl_Check_Button(50, 305, 250, 30, " Force V5 of GL-Nodes");
 		}
-		{ nod_compress = new Fl_Check_Button(75, 360, 250, 30, " Force zlib compression");
+		{ nod_force_xnod = new Fl_Check_Button(50, 335, 250, 30, " Force ZDoom format of normal nodes");
+		}
+		{ nod_compress = new Fl_Check_Button(50, 365, 250, 30, " Force zlib compression");
 		}
 		o->end();
 	  }
@@ -914,7 +909,7 @@ UI_Preferences::UI_Preferences() :
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D Preview Options");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
@@ -928,7 +923,7 @@ UI_Preferences::UI_Preferences() :
 	  tabs->end();
 	}
 	{ apply_but = new Fl_Button(480, 450, 95, 35, "Apply");
-	  apply_but->labelfont(1);
+	  apply_but->labelfont(FL_BOLD);
 	  apply_but->callback(close_callback, this);
 	}
 	{ discard_but = new Fl_Button(350, 450, 95, 35, "Discard");
@@ -1294,7 +1289,6 @@ void UI_Preferences::LoadValues()
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
 	nod_fast->value(bsp_fast ? 1 : 0);
-	nod_verbose->value(bsp_verbose ? 1 : 0);
 	nod_warn->value(bsp_warn ? 1 : 0);
 }
 
@@ -1399,7 +1393,6 @@ void UI_Preferences::SaveValues()
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
 	bsp_fast = nod_fast->value() ? true : false;
-	bsp_verbose = nod_verbose->value() ? true : false;
 	bsp_warn = nod_warn->value() ? true : false;
 }
 
