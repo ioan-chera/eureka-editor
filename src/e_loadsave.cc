@@ -1024,7 +1024,10 @@ void OpenFileMap(const char *filename, const char *map_name)
 	if (wad->FindLump(EUREKA_LUMP))
 	{
 		if (! M_ParseEurekaLump(wad))
+		{
+			delete wad;
 			return;
+		}
 	}
 
 
@@ -1671,7 +1674,10 @@ bool CMD_ExportMap()
 		if (wad->FindLump(EUREKA_LUMP))
 		{
 			if (! M_ParseEurekaLump(wad))
+			{
+				delete wad;
 				return false;
+			}
 
 			new_resources = true;
 		}
