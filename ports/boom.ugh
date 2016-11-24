@@ -26,9 +26,6 @@
 
 supported_games doom doom2
 
-exclude_game heretic
-exclude_game hexen
-
 
 #---- BOOM FEATURES -------------
 
