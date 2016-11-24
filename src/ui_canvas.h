@@ -23,7 +23,7 @@
 
 #include "editloop.h"
 #include "m_select.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "r_grid.h"
 #include "x_mirror.h"
 

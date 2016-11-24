@@ -36,7 +36,7 @@
 #include "e_path.h"
 #include "e_vertex.h"
 #include "levels.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "x_mirror.h"
 #include "x_hover.h"
 #include "r_render.h"

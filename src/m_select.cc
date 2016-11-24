@@ -27,7 +27,7 @@
 #include "main.h"
 
 #include "m_select.h"
-#include "objects.h"
+#include "e_objects.h"
 
 
 //#define NEED_SLOW_CLEAR

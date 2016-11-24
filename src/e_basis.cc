@@ -39,7 +39,7 @@
 
 // need these for the XXX_Notify() prototypes
 #include "e_cutpaste.h"
-#include "objects.h"
+#include "e_objects.h"
 
 
 std::vector<Thing *>   Things;

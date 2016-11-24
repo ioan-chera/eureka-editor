@@ -60,6 +60,7 @@ OBJS = \
 	$(OBJ_DIR)/e_linedef.o   \
 	$(OBJ_DIR)/e_loadsave.o  \
 	$(OBJ_DIR)/e_nodes.o  \
+	$(OBJ_DIR)/e_objects.o  \
 	$(OBJ_DIR)/e_path.o  \
 	$(OBJ_DIR)/e_sector.o  \
 	$(OBJ_DIR)/e_things.o  \
@@ -80,7 +81,6 @@ OBJS = \
 	$(OBJ_DIR)/m_keys.o  \
 	$(OBJ_DIR)/m_select.o  \
 	$(OBJ_DIR)/m_strings.o  \
-	$(OBJ_DIR)/objects.o  \
 	$(OBJ_DIR)/r_grid.o  \
 	$(OBJ_DIR)/r_render.o  \
 	$(OBJ_DIR)/sys_debug.o \

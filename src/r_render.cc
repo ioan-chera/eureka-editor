@@ -30,7 +30,7 @@
 #include "e_things.h"
 #include "editloop.h"
 #include "m_game.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "x_hover.h"
 #include "w_rawdef.h"
 #include "w_loadpic.h"

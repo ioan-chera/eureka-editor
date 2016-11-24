@@ -31,7 +31,7 @@
 #include "e_sector.h"
 #include "editloop.h"
 #include "m_bitvec.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "x_loop.h"
 
 #include "ui_window.h"

@@ -35,7 +35,7 @@
 #include "editloop.h"
 #include "m_game.h"
 #include "levels.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "ui_window.h"

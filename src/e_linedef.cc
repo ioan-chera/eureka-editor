@@ -32,7 +32,7 @@
 #include "im_img.h"
 #include "levels.h"
 #include "m_game.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
