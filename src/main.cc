@@ -1024,13 +1024,17 @@ int main(int argc, char *argv[])
 		goto quit;
 
 
+	// FIXME: only need to load the IWAD here
+	Main_LoadResources();
+
+	Level_name = DetermineLevel();
+
+	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
+
 	Main_LoadResources();
 
 
 	// load the initial level
-
-	Level_name = DetermineLevel();
-
 	LogPrintf("Loading initial map : %s\n", Level_name);
 
 	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);

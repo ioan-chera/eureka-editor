@@ -31,6 +31,8 @@
 
 void LoadLevel(Wad_file *wad, const char *level);
 
+void GetLevelFormat(Wad_file *wad, const char *level);
+
 void RemoveEditWad();
 
 bool MissingIWAD_Dialog();

@@ -880,19 +880,31 @@ static void ShowLoadProblem()
 }
 
 
-/*
-   read in the level data
-*/
+void GetLevelFormat(Wad_file *wad, const char *level)
+{
+	int lev_num = wad->LevelFind(level);
+
+	// ignore failure here, it will be caught later
+	if (lev_num >= 0)
+	{
+		Level_format = wad->LevelFormat(lev_num);
+	}
+}
+
+
+//
+// Read in the level data
+//
 
 void LoadLevel(Wad_file *wad, const char *level)
 {
+	GetLevelFormat(wad, level);
+
 	load_wad = wad;
 
 	loading_level = load_wad->LevelFind(level);
 	if (loading_level < 0)
 		FatalError("No such map: %s\n", level);
-
-	Level_format = load_wad->LevelFormat(loading_level);
 
 	BA_ClearAll();
 
@@ -931,7 +943,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	// However they just get in the way for editing, so remove them.
 	RemoveUnusedVerticesAtEnd();
 
-	SideDefs_Unpack(true);  // TODO: CONFIG ITEM?
+	SideDefs_Unpack(true);
 
 	CalculateLevelBounds();
 
@@ -1048,14 +1060,17 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	MasterDir_Add(edit_wad);
 
-	Main_LoadResources();
-
-
 	if (! map_name)
 	{
 		short idx = wad->LevelHeader(lev_num);
 		map_name  = wad->GetLump(idx)->Name();
 	}
+
+
+	GetLevelFormat(wad, map_name);
+
+	Main_LoadResources();
+
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
@@ -1117,6 +1132,8 @@ bool CMD_OpenMap()
 		Pwad_name = edit_wad->PathName();
 
 		MasterDir_Add(edit_wad);
+
+		GetLevelFormat(wad, map_name);
 
 		Main_LoadResources();
 	}
@@ -1505,6 +1522,10 @@ static void EmptyLump(const char *name)
 	edit_wad->AddLump(name)->Finish();
 }
 
+
+//
+// Write out the level data
+//
 
 static void SaveLevel(const char *level)
 {
