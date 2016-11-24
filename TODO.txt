@@ -22,6 +22,8 @@ BSP rework
    -  support XNOD uncompressed  [ same as ZNOD but without the zlib ]
    -  support ZNOD as a preference
 
++  CMD_BuildAllNodes: if a MadeChanges dialog is shown and user
+   saves the map, then inhibit a node build for that save
 
 
 General
