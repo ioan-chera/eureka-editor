@@ -65,6 +65,47 @@ typedef enum
 } sort_method_e;
 
 
+bool Texture_MatchPattern(const char *tex, const char *pattern)
+{
+	// Note: an empty pattern matches NOTHING
+
+	char local_pat[256];
+	local_pat[0] = 0;
+
+
+	// add '*' to the start and end of the pattern
+	// (unless it uses the ^ or $ anchors)
+
+	bool negated = false;
+	if (pattern[0] == '!')
+	{
+		pattern++;
+		negated = true;
+	}
+
+	if (pattern[0] == '^')
+		pattern++;
+	else
+		strcpy(local_pat, "*");
+
+	strcat(local_pat, pattern);
+
+	size_t len = strlen(local_pat);
+
+	if (len == 0)
+		return false;
+
+	if (local_pat[len-1] == '$')
+		local_pat[len-1] = 0;
+	else
+		strcat(local_pat, "*");
+
+	bool result = fl_filename_match(tex, local_pat) ? true : false;
+
+	return negated ? !result : result;
+}
+
+
 //
 // this sub-class of button prevents grabbing the keyboard focus,
 // which is mainly useful for the Find/Replace panel, as it needs
@@ -255,7 +296,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 			alpha->callback(repop_callback, this);
 		else
 			alpha->callback(sort_callback, this);
- 
+
 		// things usually show pics (with sprite name), so want alpha
 		if (kind == 'O')
 			alpha->value(1);
@@ -583,7 +624,7 @@ const char * TidyLineDesc(const char *name)
 
 	if (! strchr(name, '&'))
 		return name;
-	
+
 	static char buffer[FL_PATH_MAX];
 
 	char *dest = buffer;
@@ -1126,7 +1167,7 @@ public:
 	int ComputeType() const
 	{
 		int value = 0;
-		
+
 		for (int i = 0 ; i < num_items ; i++)
 		{
 			if (items[i]->active())
@@ -1599,7 +1640,7 @@ bool UI_Browser_Box::ParseUser(const char ** tokens, int num_tok)
 
 	if (num_tok < 3)
 		return false;
-	
+
 	if (strcmp(tokens[0], "browser") != 0)
 		return false;
 

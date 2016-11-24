@@ -1542,45 +1542,5 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y)
 }
 
 
-bool Texture_MatchPattern(const char *tex, const char *pattern)
-{
-	// Note: an empty pattern matches NOTHING
-
-	char local_pat[256];
-	local_pat[0] = 0;
-
-
-	// add '*' to the start and end of the pattern
-	// (unless it uses the ^ or $ anchors)
-
-	bool negated = false;
-	if (pattern[0] == '!')
-	{
-		pattern++;
-		negated = true;
-	}
-
-	if (pattern[0] == '^')
-		pattern++;
-	else
-		strcpy(local_pat, "*");
-	
-	strcat(local_pat, pattern);
-
-	size_t len = strlen(local_pat);
-
-	if (len == 0)
-		return false;
-
-	if (local_pat[len-1] == '$')
-		local_pat[len-1] = 0;
-	else
-		strcat(local_pat, "*");
-
-	bool result = fl_filename_match(tex, local_pat) ? true : false;
-
-	return negated ? !result : result;
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
