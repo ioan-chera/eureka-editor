@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  TEXTURE LOADING
+//  TEXTURES / FLATS / SPRITES
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -37,6 +37,11 @@
 #include "w_loadpic.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
+
+
+//----------------------------------------------------------------------
+//    TEXTURE HANDLING
+//----------------------------------------------------------------------
 
 
 std::map<std::string, Img_c *> textures;
@@ -531,6 +536,323 @@ const char *NormalizeTex(const char *name)
 	return buffer;
 }
 
+
+//----------------------------------------------------------------------
+//    FLAT HANDLING
+//----------------------------------------------------------------------
+
+
+std::map<std::string, Img_c *> flats;
+
+
+static void DeleteFlat(const std::map<std::string, Img_c *>::value_type& P)
+{
+	delete P.second;
+}
+
+
+static void W_ClearFlats()
+{
+	std::for_each(flats.begin(), flats.end(), DeleteFlat);
+
+	flats.clear();
+}
+
+
+static void W_AddFlat(const char *name, Img_c *img)
+{
+	// find any existing one with same name, and free it
+
+	std::string flat_str = name;
+
+	std::map<std::string, Img_c *>::iterator P = flats.find(flat_str);
+
+	if (P != flats.end())
+	{
+		delete P->second;
+
+		P->second = img;
+	}
+	else
+	{
+		flats[flat_str] = img;
+	}
+}
+
+
+static Img_c * LoadFlatImage(const char *name, Lump_c *lump)
+{
+	// TODO: check size == 64*64
+
+	Img_c *img = new Img_c(64, 64, false);
+
+	int size = 64 * 64;
+
+	byte *raw = new byte[size];
+
+	if (! (lump->Seek() && lump->Read(raw, size)))
+		FatalError("Error reading flat from WAD.\n");
+
+	for (int i = 0 ; i < size ; i++)
+	{
+		img_pixel_t pix = raw[i];
+
+		if (pix == TRANS_PIXEL)
+			pix = trans_replace;
+
+		img->wbuf() [i] = pix;
+	}
+
+	delete[] raw;
+
+	return img;
+}
+
+
+void W_LoadFlats()
+{
+	W_ClearFlats();
+
+	for (int i = 0 ; i < (int)master_dir.size() ; i++)
+	{
+		LogPrintf("Loading Flats from WAD #%d\n", i+1);
+
+		Wad_file *wf = master_dir[i];
+
+		for (int k = 0 ; k < (int)wf->flats.size() ; k++)
+		{
+			Lump_c *lump = wf->GetLump(wf->flats[k]);
+
+			DebugPrintf("  Flat %d : '%s'\n", k, lump->Name());
+
+			Img_c * img = LoadFlatImage(lump->Name(), lump);
+
+			if (img)
+				W_AddFlat(lump->Name(), img);
+		}
+	}
+}
+
+
+Img_c * W_GetFlat(const char *name, bool try_uppercase)
+{
+	std::string f_str = name;
+
+	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
+
+	if (P != flats.end())
+		return P->second;
+
+	if (try_uppercase)
+	{
+		return W_GetFlat(NormalizeTex(name), false);
+	}
+
+	return NULL;
+}
+
+
+bool W_FlatIsKnown(const char *name)
+{
+	// sectors do not support "-" (but our code can make it)
+	if (is_null_tex(name))
+		return false;
+
+	if (strlen(name) == 0)
+		return false;
+
+	std::string f_str = name;
+
+	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
+
+	return (P != flats.end());
+}
+
+
+//----------------------------------------------------------------------
+//    SPRITE HANDLING
+//----------------------------------------------------------------------
+
+
+// maps type number to an image
+typedef std::map<int, Img_c *> sprite_map_t;
+
+static sprite_map_t sprites;
+
+
+static Img_c * CreateDogSprite();
+
+
+static void DeleteSprite(const sprite_map_t::value_type& P)
+{
+	delete P.second;
+}
+
+void W_ClearSprites()
+{
+	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
+
+	sprites.clear();
+}
+
+
+// find sprite by prefix
+Lump_c * Sprite_loc_by_root (const char *name)
+{
+	char buffer[16];
+
+	strcpy(buffer, name);
+
+	if (strlen(buffer) == 4)
+		strcat(buffer, "A");
+
+	if (strlen(buffer) == 5)
+		strcat(buffer, "0");
+
+	Lump_c *lump = W_FindSpriteLump(buffer);
+
+	if (! lump)
+	{
+		buffer[5] = '1';
+		lump = W_FindSpriteLump(buffer);
+	}
+
+	if (! lump)
+	{
+		strcat(buffer, "D1");
+		lump = W_FindSpriteLump(buffer);
+	}
+
+	return lump;
+}
+
+
+Img_c * W_GetSprite(int type)
+{
+	sprite_map_t::iterator P = sprites.find(type);
+
+	if (P != sprites.end ())
+		return P->second;
+
+	// sprite not in the list yet.  Add it.
+
+	const thingtype_t *info = M_GetThingType(type);
+
+	Img_c *result = NULL;
+
+	if (y_stricmp(info->sprite, "NULL") != 0)
+	{
+		Lump_c *lump = Sprite_loc_by_root(info->sprite);
+		if (! lump)
+		{
+			LogPrintf("Sprite not found: '%s'\n", info->sprite);
+
+			// for the MBF dog, create our own sprite for it, since
+			// it is defined in the Boom definition file and the
+			// missing sprite looks ugly in the thing browser.
+
+			if (y_stricmp(info->sprite, "DOGS") == 0)
+				result = CreateDogSprite();
+		}
+		else
+		{
+			result = new Img_c ();
+
+			if (! LoadPicture(*result, lump, info->sprite, 0, 0))
+			{
+				delete result;
+				result = NULL;
+			}
+		}
+	}
+
+	// player color remapping
+	// [ FIXME : put colors into game definition file ]
+	// [ TODO  : support types 4001..4004 ]
+	if (result && type >= 2 && type <= 4)
+	{
+		Img_c *old_img = result;
+
+		switch (type)
+		{
+			case 2:
+				result = old_img->color_remap(0x70, 0x7f, 0x60, 0x6f);
+				break;
+
+			case 3:
+				result = old_img->color_remap(0x70, 0x7f, 0x40, 0x4f);
+				break;
+
+			case 4:
+			default:
+				result = old_img->color_remap(0x70, 0x7f, 0x20, 0x2f);
+				break;
+		}
+
+		delete old_img;
+	}
+
+	// note that a NULL image is OK.  Our renderer will just ignore the
+	// missing sprite.
+
+	sprites[type] = result;
+	return result;
+}
+
+
+//
+// This dog sprite was sourced from OpenGameArt.org
+// Authors are 'Benalene' and 'qudobup' (users on the OGA site).
+// License is CC-BY 3.0 (Creative Commons Attribution license).
+//
+
+static const rgb_color_t dog_palette[] =
+{
+	0x302020ff,
+	0x944921ff,
+	0x000000ff,
+	0x844119ff,
+	0x311800ff,
+	0x4A2400ff,
+	0x633119ff,
+};
+
+
+static const char *dog_image_text[] =
+{
+	"       aaaa                                 ",
+	"      abbbba                                ",
+	"     abbbbbba                               ",
+	" aaaabcbbbbbda                              ",
+	"aeedbbbfbbbbda                              ",
+	"aegdddbbdbbdbbaaaaaaaaaaaaaaaaa           a ",
+	"affggddbgddgbccceeeeeeeeeeeeeeeaa        aba",
+	" affgggdfggfccceeeeeeeeeeeeeefffgaaa   aaba ",
+	"  afffaafgecccefffffffffffffffggggddaaabbba ",
+	"   aaa  aeeccggggffffffffffffggddddbbbbbaa  ",
+	"         accbdddggfffffffffffggdbbbbbbba    ",
+	"          aabbdbddgfffffffffggddbaaaaaa     ",
+	"            abbbbdddfffffffggdbbba          ",
+	"            abbbbbbdddddddddddbbba          ",
+	"           aeebbbbbbbbaaaabbbbbbbba         ",
+	"           aeebbbbbaaa    aeebbbbbba        ",
+	"          afebbbbaa       affeebbbba        ",
+	"         agfbbbaa         aggffabbbba       ",
+	"        agfebba           aggggaabbba       ",
+	"      aadgfabba            addda abba       ",
+	"     abbddaabbbaa           adddaabba       ",
+	"    abbbba  abbbba          adbbaabba       ",
+	"     aaaa    abbba         abbba  abba      ",
+	"              aaa         abbba   abba      ",
+	"                         abbba   abbba      ",
+	"                          aaa     aaa       "
+};
+
+
+static Img_c * CreateDogSprite()
+{
+	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

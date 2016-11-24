@@ -37,7 +37,6 @@
 #include "levels.h"
 #include "objects.h"
 #include "w_rawdef.h"
-#include "w_flats.h"
 #include "w_texture.h"
 #include "ui_window.h"
 #include "x_hover.h"

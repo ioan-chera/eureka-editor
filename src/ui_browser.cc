@@ -32,7 +32,6 @@
 #include "m_game.h"
 #include "e_things.h"
 #include "w_rawdef.h"
-#include "w_flats.h"
 #include "w_texture.h"
 #include "levels.h"
 

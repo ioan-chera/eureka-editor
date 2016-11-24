@@ -108,8 +108,6 @@ OBJS = \
 	$(OBJ_DIR)/ui_vertex.o  \
 	$(OBJ_DIR)/ui_window.o  \
 	$(OBJ_DIR)/w_loadpic.o  \
-	$(OBJ_DIR)/w_flats.o  \
-	$(OBJ_DIR)/w_sprite.o  \
 	$(OBJ_DIR)/w_texture.o  \
 	$(OBJ_DIR)/w_wad.o   \
 	$(OBJ_DIR)/x_hover.o  \

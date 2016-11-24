@@ -32,14 +32,11 @@
 #include "m_game.h"
 #include "objects.h"
 #include "x_hover.h"
-#include "w_loadpic.h"
 #include "w_rawdef.h"
+#include "w_loadpic.h"
+#include "w_texture.h"
 
 #include "r_render.h"
-
-#include "w_flats.h"
-#include "w_sprite.h"
-#include "w_texture.h"
 
 #include "editloop.h"
 #include "ui_window.h"

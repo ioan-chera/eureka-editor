@@ -36,9 +36,7 @@
 #include "m_files.h"
 #include "levels.h"    /* Because of "viewtex" */
 
-#include "w_flats.h"
 #include "w_rawdef.h"
-#include "w_sprite.h"
 #include "w_texture.h"
 #include "w_wad.h"
 

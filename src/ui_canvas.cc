@@ -31,8 +31,7 @@
 #include "im_img.h"
 #include "levels.h"
 #include "r_render.h"
-#include "w_flats.h"
-#include "w_sprite.h"
+#include "w_texture.h"
 
 #include <algorithm>
 
