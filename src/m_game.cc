@@ -996,11 +996,15 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
 						  NULL /* prettyname */, &info);
 
-	filename = FindDefinitionFile("ports", port);
-	SYS_ASSERT(filename);
+	// for Vanilla, only the game itself is checked
+	if (strcmp(port, "vanilla") != 0)
+	{
+		filename = FindDefinitionFile("ports", port);
+		SYS_ASSERT(filename);
 
-	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
-						  NULL /* prettyname */, &info);
+		M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
+							  NULL /* prettyname */, &info);
+	}
 
 	return info.formats;
 }
@@ -1008,6 +1012,13 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 
 static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 {
+	if (strcmp(port, "vanilla") == 0)
+	{
+		// Vanilla means the engine that comes with the game, hence
+		// it supports everything.
+		return true;
+	}
+
 	parse_check_info_t info;
 
 	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
