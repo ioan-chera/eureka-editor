@@ -23,7 +23,6 @@
 #include "ui_about.h"
 #include "ui_prefs.h"
 
-#include "editloop.h"
 #include "e_basis.h"
 #include "e_objects.h"
 #include "e_cutpaste.h"

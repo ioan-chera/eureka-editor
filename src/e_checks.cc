@@ -34,7 +34,6 @@
 #include "e_misc.h"
 #include "e_path.h"
 #include "e_vertex.h"
-#include "editloop.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "w_rawdef.h"

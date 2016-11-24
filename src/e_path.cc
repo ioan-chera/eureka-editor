@@ -27,7 +27,6 @@
 #include "main.h"
 
 #include "m_bitvec.h"
-#include "editloop.h"
 #include "e_misc.h"
 #include "e_objects.h"
 #include "e_path.h"

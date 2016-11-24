@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 
 #include "lib_adler.h"
-#include "editloop.h"
 #include "im_color.h"
 #include "m_config.h"
 #include "m_loadsave.h"

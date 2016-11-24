@@ -27,7 +27,6 @@
 #include "main.h"
 
 #include "e_checks.h"
-#include "editloop.h"
 #include "e_cutpaste.h"
 #include "e_hover.h"
 #include "r_grid.h"

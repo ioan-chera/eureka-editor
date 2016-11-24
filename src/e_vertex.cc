@@ -26,7 +26,6 @@
 
 #include "main.h"
 
-#include "editloop.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_misc.h"

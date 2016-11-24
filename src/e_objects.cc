@@ -34,7 +34,6 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_vertex.h"
-#include "editloop.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"
