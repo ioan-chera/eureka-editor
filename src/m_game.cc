@@ -760,9 +760,24 @@ static bool M_ParseConditional(parser_state_t *pst)
 {
 	// returns the result of the "IF" test, true or false.
 
-	// FIXME : ParseConditional
+	char **argv  = pst->argv + 1;
+	int    nargs = pst->argc - 1;
 
-	FatalError("Conditionals not yet implemented.\n");
+	if (nargs == 3 &&
+		y_stricmp(argv[0], "$MAP_FORMAT") == 0 &&
+		y_stricmp(argv[1], "is") == 0)
+	{
+		if (y_stricmp(argv[2], "DOOM") == 0)
+			return Level_format == MAPF_Doom;
+
+		if (y_stricmp(argv[2], "HEXEN") == 0)
+			return Level_format == MAPF_Hexen;
+
+		FatalError("%s(%d): unknown map format '%s'\n",
+					pst->fname, pst->lineno, argv[2]);
+	}
+
+	FatalError("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
 	return false;
 }
 
