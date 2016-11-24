@@ -39,7 +39,6 @@
 #include "r_grid.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
-#include "x_loop.h"
 
 #include "ui_window.h"
 

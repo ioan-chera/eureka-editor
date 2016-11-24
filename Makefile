@@ -110,7 +110,6 @@ OBJS = \
 	$(OBJ_DIR)/w_texture.o  \
 	$(OBJ_DIR)/w_wad.o   \
 	$(OBJ_DIR)/x_hover.o  \
-	$(OBJ_DIR)/x_loop.o  \
 	\
 	$(OBJ_DIR)/bsp_level.o \
 	$(OBJ_DIR)/bsp_node.o \
