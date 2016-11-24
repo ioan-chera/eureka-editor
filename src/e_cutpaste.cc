@@ -24,6 +24,7 @@
 
 #include "e_basis.h"
 #include "e_cutpaste.h"
+#include "e_hover.h"
 #include "e_linedef.h"
 #include "e_misc.h"
 #include "e_sector.h"
@@ -33,7 +34,6 @@
 #include "e_objects.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
 
 
 #define INVALID_SECTOR  (-999999)

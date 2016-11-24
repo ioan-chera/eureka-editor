@@ -28,10 +28,10 @@
 
 #include <algorithm>
 
+#include "e_hover.h"
 #include "e_misc.h"		// Map_bound_xxx
 #include "m_game.h"
 #include "r_grid.h"
-#include "x_hover.h"
 
 
 extern int vertex_radius(double scale);

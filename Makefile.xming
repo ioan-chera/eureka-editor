@@ -57,6 +57,7 @@ OBJS = \
 	$(OBJ_DIR)/e_basis.o   \
 	$(OBJ_DIR)/e_checks.o   \
 	$(OBJ_DIR)/e_cutpaste.o  \
+	$(OBJ_DIR)/e_hover.o  \
 	$(OBJ_DIR)/e_linedef.o  \
 	$(OBJ_DIR)/e_misc.o  \
 	$(OBJ_DIR)/e_objects.o  \
@@ -109,7 +110,6 @@ OBJS = \
 	$(OBJ_DIR)/w_loadpic.o  \
 	$(OBJ_DIR)/w_texture.o  \
 	$(OBJ_DIR)/w_wad.o   \
-	$(OBJ_DIR)/x_hover.o  \
 	\
 	$(OBJ_DIR)/bsp_level.o \
 	$(OBJ_DIR)/bsp_node.o \

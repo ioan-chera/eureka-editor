@@ -21,11 +21,11 @@
 #include "main.h"
 #include "ui_window.h"
 
+#include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
-#include "x_hover.h"
 
 
 // config item

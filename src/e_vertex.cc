@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "editloop.h"
+#include "e_hover.h"
 #include "e_linedef.h"
 #include "e_misc.h"
 #include "e_objects.h"
@@ -36,7 +37,6 @@
 #include "m_game.h"
 #include "e_objects.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
 
 #include <algorithm>
 

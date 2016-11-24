@@ -29,11 +29,11 @@
 #include "m_bitvec.h"
 #include "m_game.h"
 #include "editloop.h"
+#include "e_hover.h"
 #include "e_misc.h"
 #include "e_path.h"
 #include "e_things.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
 
 #include "ui_window.h"
 

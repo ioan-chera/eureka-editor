@@ -30,6 +30,7 @@
 
 #include "e_checks.h"
 #include "e_cutpaste.h"
+#include "e_hover.h"
 #include "e_misc.h"
 #include "e_path.h"
 #include "e_vertex.h"
@@ -39,7 +40,6 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "ui_window.h"
-#include "x_hover.h"
 
 
 #define   ERROR_MSG_COLOR	FL_RED
