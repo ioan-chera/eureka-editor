@@ -21,7 +21,7 @@
 #include "main.h"
 #include "ui_window.h"
 #include "ui_misc.h"
-#include "x_mirror.h"
+#include "e_objects.h"
 
 
 UI_MoveDialog::UI_MoveDialog() :

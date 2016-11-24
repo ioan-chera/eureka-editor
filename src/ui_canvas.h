@@ -25,7 +25,6 @@
 #include "m_select.h"
 #include "e_objects.h"
 #include "r_grid.h"
-#include "x_mirror.h"
 
 
 class Img_c;

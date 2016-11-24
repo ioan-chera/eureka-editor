@@ -26,6 +26,7 @@
 #include "editloop.h"
 #include "e_basis.h"
 #include "e_loadsave.h"
+#include "e_objects.h"
 #include "e_nodes.h"
 #include "e_cutpaste.h"
 #include "e_path.h"
@@ -33,7 +34,6 @@
 #include "m_files.h"
 #include "r_grid.h"
 #include "r_render.h"
-#include "x_mirror.h"
 
 
 //------------------------------------------------------------------------

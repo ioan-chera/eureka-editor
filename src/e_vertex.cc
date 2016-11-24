@@ -28,6 +28,7 @@
 
 #include "editloop.h"
 #include "e_linedef.h"
+#include "e_objects.h"
 #include "e_vertex.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
@@ -36,7 +37,6 @@
 #include "e_objects.h"
 #include "w_rawdef.h"
 #include "x_hover.h"
-#include "x_mirror.h"
 
 #include <algorithm>
 
