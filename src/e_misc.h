@@ -74,6 +74,8 @@ void Selection_Push();
 void Selection_InvalidateLast();
 
 
+void CMD_LastSelection(void);
+
 
 // handling of recently used textures, flats and things
 

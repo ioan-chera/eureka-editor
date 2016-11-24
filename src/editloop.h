@@ -127,6 +127,9 @@ void Editor_ChangeMode(char mode);
 void Editor_ChangeMode_Raw(obj_type_e new_mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
+void Editor_UpdateFromScroll();
+void Editor_ScrollMap(int mode, int dx = 0, int dy = 0);
+
 bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
@@ -135,10 +138,15 @@ void ZoomWholeMap();
 
 /* raw input handling */
 
+void ClearStickyMod();
+
 int  Editor_RawKey(int event);
 int  Editor_RawButton(int event);
 int  Editor_RawWheel(int event);
 int  Editor_RawMouse(int event);
+
+extern int wheel_dx;
+extern int wheel_dy;
 
 typedef void (* nav_release_func_t)(void);
 
@@ -150,27 +158,7 @@ void Nav_UpdateKeys();
 
 unsigned int Nav_TimeDiff(); /* milliseconds */
 
-/* commands */
-
-void CMD_SelectAll(void);
-void CMD_UnselectAll(void);
-void CMD_InvertSelection(void);
-void CMD_LastSelection(void);
-
-void CMD_Quit(void);
-
-void CMD_Undo(void);
-void CMD_Redo(void);
-
-void CMD_ZoomWholeMap(void);
-void CMD_ZoomSelection(void);
-void CMD_GoToCamera(void);
-
-void CMD_ToggleVar(void);
-
-void CMD_MoveObjects_Dialog();
-void CMD_ScaleObjects_Dialog();
-void CMD_RotateObjects_Dialog();
+void Editor_ClearNav();
 
 #endif /* __EUREKA_EDITLOOP_H__ */
 

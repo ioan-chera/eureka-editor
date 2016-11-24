@@ -56,6 +56,7 @@ OBJS = \
 	$(OBJ_DIR)/editloop.o  \
 	$(OBJ_DIR)/e_basis.o   \
 	$(OBJ_DIR)/e_checks.o   \
+	$(OBJ_DIR)/e_commands.o  \
 	$(OBJ_DIR)/e_cutpaste.o  \
 	$(OBJ_DIR)/e_hover.o  \
 	$(OBJ_DIR)/e_linedef.o  \
