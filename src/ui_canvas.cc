@@ -24,7 +24,7 @@
 
 #include "ui_window.h"
 
-#include "editloop.h"
+#include "m_events.h"
 #include "e_misc.h"
 #include "e_sector.h"
 #include "e_things.h"

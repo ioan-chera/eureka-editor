@@ -21,7 +21,7 @@
 #ifndef __EUREKA_UI_CANVAS_H__
 #define __EUREKA_UI_CANVAS_H__
 
-#include "editloop.h"
+#include "m_events.h"
 #include "m_select.h"
 #include "e_objects.h"
 #include "r_grid.h"

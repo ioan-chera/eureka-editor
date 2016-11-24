@@ -36,7 +36,7 @@
 #include "w_loadpic.h"
 #include "w_texture.h"
 
-#include "editloop.h"
+#include "m_events.h"
 #include "r_render.h"
 
 #include "ui_window.h"

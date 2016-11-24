@@ -35,7 +35,7 @@
 #include "m_loadsave.h"
 
 #include "e_misc.h"
-#include "editloop.h"
+#include "m_events.h"
 #include "r_render.h"
 
 #include "w_rawdef.h"

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  EDIT LOOP
+//  EVENT HANDLING
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -26,19 +26,11 @@
 
 #include "main.h"
 
-#include "e_checks.h"
-#include "editloop.h"
-#include "e_cutpaste.h"
-#include "e_hover.h"
-#include "r_grid.h"
-#include "e_linedef.h"
+#include "m_events.h"
 #include "e_misc.h"
-#include "e_objects.h"
-#include "e_sector.h"
-#include "e_path.h"
-#include "e_vertex.h"
-#include "m_loadsave.h"
+#include "e_hover.h"
 #include "r_render.h"
+
 #include "ui_window.h"
 #include "ui_misc.h"
 
