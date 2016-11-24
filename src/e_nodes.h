@@ -23,7 +23,7 @@
 
 void BuildNodesAfterSave(short lev_idx);
 
-bool CMD_BuildAllNodes();
+void CMD_BuildAllNodes();
 void CMD_TestMap();
 
 #endif  /* __EUREKA_E_NODES_H__ */

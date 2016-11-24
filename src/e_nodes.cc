@@ -428,35 +428,34 @@ void BuildNodesAfterSave(short lev_idx)
 }
 
 
-bool CMD_BuildAllNodes()
+void CMD_BuildAllNodes()
 {
+	if (! edit_wad)
+	{
+		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
+		return;
+	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot build nodes on a read-only file.");
+		return;
+	}
+
+
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
 						"and then build all the nodes?") <= 0)
 		{
-			return false;
+			return;
 		}
 
 		// FIXME : inhibit a node build here
 		if (! CMD_SaveMap())
-			return false;
+			return;
 	}
-
-	if (! edit_wad)
-	{
-		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
-		return false;
-	}
-
-	if (edit_wad->IsReadOnly())
-	{
-		DLG_Notify("Cannot build nodes on a read-only file.");
-		return false;
-	}
-
-	SYS_ASSERT(edit_wad);
 
 
 	dialog = new UI_NodeDialog();
@@ -477,6 +476,8 @@ bool CMD_BuildAllNodes()
 	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
+
+		Status_Set("Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
@@ -500,20 +501,7 @@ bool CMD_BuildAllNodes()
 	delete dialog;  dialog = NULL;
 
 
-	if (ret == BUILD_OK)
-	{
-		// reload the current map
-
-		LogPrintf("Reloading current map...\n");
-
-		LoadLevel(edit_wad, Level_name);
-
-		Status_Set("Built nodes OK");
-
-		return true;
-	}
-
-	return false;
+	return;
 }
 
 
