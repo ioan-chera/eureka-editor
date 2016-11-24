@@ -1686,14 +1686,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 				const char *tex = (part == 0) ? SD->LowerTex() :
 								  (part == 1) ? SD->UpperTex() : SD->MidTex();
 
-				if (strcmp(tex, "-") == 0)
-					continue;
-
-				// textures beginning with '#' are special
-				if (tex[0] == '#')
-					continue;
-
-				if (! W_TextureExists(tex))
+				if (! W_TextureIsKnown(tex))
 				{
 					bump_unknown_name(names, tex);
 
@@ -1720,7 +1713,7 @@ void Textures_FindUnknownFlat(selection_c& secs,
 		{
 			const char *flat = part ? S->CeilTex() : S->FloorTex();
 
-			if (! W_FlatExists(flat))
+			if (! W_FlatIsKnown(flat))
 			{
 				bump_unknown_name(names, flat);
 
@@ -1806,13 +1799,13 @@ void Textures_FixUnknownTex()
 
 			const SideDef *SD = SideDefs[sd_num];
 
-			if (! W_TextureExists(SD->LowerTex()))
+			if (! W_TextureIsKnown(SD->LowerTex()))
 				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
-			if (! W_TextureExists(SD->UpperTex()))
+			if (! W_TextureIsKnown(SD->UpperTex()))
 				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
-			if (! W_TextureExists(SD->MidTex()))
+			if (! W_TextureIsKnown(SD->MidTex()))
 				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
@@ -1833,10 +1826,10 @@ void Textures_FixUnknownFlat()
 	{
 		const Sector *S = Sectors[s];
 
-		if (! W_FlatExists(S->FloorTex()))
+		if (! W_FlatIsKnown(S->FloorTex()))
 			BA_ChangeSEC(s, Sector::F_FLOOR_TEX, new_floor);
 
-		if (! W_FlatExists(S->CeilTex()))
+		if (! W_FlatIsKnown(S->CeilTex()))
 			BA_ChangeSEC(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 

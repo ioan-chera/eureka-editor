@@ -149,7 +149,7 @@ Img_c * W_GetFlat(const char *name, bool try_uppercase)
 }
 
 
-bool W_FlatExists(const char *name)
+bool W_FlatIsKnown(const char *name)
 {
 	std::string f_str = name;
 

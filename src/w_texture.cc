@@ -485,8 +485,14 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 }
 
 
-bool W_TextureExists(const char *name)
+bool W_TextureIsKnown(const char *name)
 {
+	// FIXME : is_missing_tex
+	if (name[0] == '-') return true;
+
+	// special textures
+	if (name[0] == '#') return true;
+
 	std::string t_str = name;
 
 	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);

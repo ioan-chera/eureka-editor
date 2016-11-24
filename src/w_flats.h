@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -31,7 +31,8 @@
 
 void W_LoadFlats();
 
-bool W_FlatExists(const char *name);
+// checks if the flat exists
+bool W_FlatIsKnown(const char *name);
 
 Img_c * W_GetFlat(const char *name, bool try_uppercase = false);
 

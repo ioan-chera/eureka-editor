@@ -31,7 +31,8 @@
 
 void W_LoadTextures();
 
-bool W_TextureExists(const char *name);
+// accepts "-", "#xxxx" or an existing texture name
+bool W_TextureIsKnown(const char *name);
 
 Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
 
