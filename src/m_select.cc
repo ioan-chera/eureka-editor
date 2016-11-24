@@ -375,8 +375,18 @@ void selection_c::begin(selection_iterator_c *it) const
 }
 
 
+selection_iterator_c::selection_iterator_c()
+{
+	// dummy values -- cannot use the iterator without begin() above
+	sel = NULL;
+	pos = -777777;
+}
+
+
 bool selection_iterator_c::at_end() const
 {
+	SYS_ASSERT(sel);
+
 	if (sel->bv)
 		return (pos >= sel->bv->size());
 	else
@@ -386,6 +396,8 @@ bool selection_iterator_c::at_end() const
 
 int selection_iterator_c::operator* () const
 {
+	SYS_ASSERT(sel);
+
 	if (sel->bv)
 		return pos;
 	else
@@ -395,6 +407,8 @@ int selection_iterator_c::operator* () const
 
 selection_iterator_c& selection_iterator_c::operator++ ()
 {
+	SYS_ASSERT(sel);
+
 	pos++;
 
 	if (sel->bv)
