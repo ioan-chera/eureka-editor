@@ -20,8 +20,8 @@
 
 #include "main.h"
 #include "levels.h"
-#include "e_loadsave.h"
 #include "m_game.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 
 #include "ui_window.h"

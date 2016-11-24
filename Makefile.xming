@@ -58,8 +58,6 @@ OBJS = \
 	$(OBJ_DIR)/e_checks.o   \
 	$(OBJ_DIR)/e_cutpaste.o  \
 	$(OBJ_DIR)/e_linedef.o  \
-	$(OBJ_DIR)/e_loadsave.o  \
-	$(OBJ_DIR)/e_nodes.o  \
 	$(OBJ_DIR)/e_objects.o  \
 	$(OBJ_DIR)/e_path.o  \
 	$(OBJ_DIR)/e_sector.o  \
@@ -79,6 +77,8 @@ OBJS = \
 	$(OBJ_DIR)/m_files.o  \
 	$(OBJ_DIR)/m_game.o  \
 	$(OBJ_DIR)/m_keys.o  \
+	$(OBJ_DIR)/m_loadsave.o  \
+	$(OBJ_DIR)/m_nodes.o  \
 	$(OBJ_DIR)/m_select.o  \
 	$(OBJ_DIR)/m_strings.o  \
 	$(OBJ_DIR)/r_grid.o  \

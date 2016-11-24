@@ -29,12 +29,12 @@
 
 #include "e_basis.h"
 #include "e_checks.h"
-#include "e_loadsave.h"
-#include "e_nodes.h"
 #include "levels.h"  // CalculateLevelBounds()
 #include "lib_adler.h"
 #include "m_config.h"
 #include "m_files.h"
+#include "m_loadsave.h"
+#include "m_nodes.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 

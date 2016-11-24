@@ -28,12 +28,12 @@
 
 #include <time.h>
 
-#include "e_loadsave.h"
 #include "im_color.h"
 #include "m_config.h"
 #include "editloop.h"
 #include "m_game.h"
 #include "m_files.h"
+#include "m_loadsave.h"
 #include "levels.h"    /* Because of "viewtex" */
 
 #include "w_rawdef.h"
@@ -1027,6 +1027,7 @@ int main(int argc, char *argv[])
 
 	Level_name = DetermineLevel();
 
+	// config file parsing can depend on the map format, so get it now
 	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
 
 	Main_LoadResources();
