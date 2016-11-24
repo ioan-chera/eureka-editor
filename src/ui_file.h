@@ -68,14 +68,18 @@ private:
 class UI_OpenMap : public UI_Escapable_Window
 {
 private:
-	Fl_Round_Button *look_iwad;
-	Fl_Round_Button *look_res;
-	Fl_Round_Button *look_pwad;
+	enum
+	{
+		LOOK_PWad = 0,
+		LOOK_IWad,
+		LOOK_Resource
+	};
 
 	Fl_Output *pwad_name;
-	Fl_Input  *map_name;
+	Fl_Choice *look_where;
 
-	Fl_Group *button_grp;
+	Fl_Input  *map_name;
+	Fl_Group  *button_grp;
 
 	Fl_Return_Button *ok_but;
 
@@ -96,13 +100,6 @@ private:
 	// field above, or NULL.
 	Wad_file * using_wad;
 
-	void Populate();
-	void PopulateButtons();
-
-	void LoadFile();
-	void SetPWAD(const char *name);
-	void CheckMapName();
-
 public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
@@ -117,6 +114,14 @@ public:
 	// method returned it.  It should become the next edit_wad.
 	//
 	Wad_file * Run(const char ** map_v, bool * did_load);
+
+private:
+	void Populate();
+	void PopulateButtons();
+
+	void LoadFile();
+	void SetPWAD(const char *name);
+	void CheckMapName();
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);

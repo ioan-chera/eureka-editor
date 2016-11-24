@@ -32,6 +32,8 @@ CHANGES IN Eureka 1.XX
 
 -  increased number of remembered recent files
 
+-  the "Open Map" dialog was improved
+
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
@@ -45,4 +47,6 @@ CHANGES IN Eureka 1.XX
 -  fixed Export to adopt the iwad/port/resources of target wad
 
 -  3D view: fixed Y offsets of unpegged lowers under sky ceilings
+
+-  fixed unknown texture "FIX" button to not change "-" textures
 

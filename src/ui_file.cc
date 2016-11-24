@@ -248,7 +248,7 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap() :
-	UI_Escapable_Window(420, 530, "Open Map"),
+	UI_Escapable_Window(420, 470, "Open Map"),
 	action(ACT_none),
 	loaded_wad(NULL),
 	 using_wad(NULL)
@@ -258,55 +258,33 @@ UI_OpenMap::UI_OpenMap() :
 	callback(close_callback, this);
 
 	{
-		Fl_Box *o = new Fl_Box(10, 10, 300, 37, "Look for the map in which file:");
+		look_where = new Fl_Choice(130, 80, 190, 25, "Find map in:  ");
+		look_where->labelfont(FL_HELVETICA_BOLD);
+		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
+		look_where->callback(look_callback, this);
+
+		look_where->value(edit_wad ? LOOK_PWad : LOOK_IWad);
+	}
+
+	{
+		Fl_Box* o = new Fl_Box(15, 15, 270, 20, "PWAD file:");
 		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
-	{
-		Fl_Group *o = new Fl_Group(50, 50, 235, 85);
+	pwad_name = new Fl_Output(20, 40, 295, 26);
 
-		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the Game (IWAD) file");
-		look_iwad->down_box(FL_ROUND_DOWN_BOX);
-		look_iwad->type(FL_RADIO_BUTTON);
-		look_iwad->callback(look_callback, this);
-
-		look_res = new Fl_Round_Button(50, 75, 215, 25, " the Resource wads");
-		look_res->down_box(FL_ROUND_DOWN_BOX);
-		look_res->type(FL_RADIO_BUTTON);
-		look_res->callback(look_callback, this);
-
-		look_pwad = new Fl_Round_Button(50, 100, 235, 25, " the currently edited PWAD");
-		look_pwad->down_box(FL_ROUND_DOWN_BOX);
-		look_pwad->type(FL_RADIO_BUTTON);
-		look_pwad->callback(look_callback, this);
-
-		if (edit_wad)
-			look_pwad->value(1);
-		else
-			look_iwad->value(1);
-
-		o->end();
-	}
-
-	{
-		Fl_Box* o = new Fl_Box(10, 140, 300, 20, "Current PWAD file:");
-		o->labelfont(FL_HELVETICA_BOLD);
-		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-	}
-
-	pwad_name = new Fl_Output(25, 165, 265, 26);
-
-	Fl_Button *load_but = new Fl_Button(305, 164, 70, 28, "Load");
+	Fl_Button *load_but = new Fl_Button(330, 39, 65, 28, "Load");
 	load_but->callback(load_callback, this);
 
-	map_name = new Fl_Input(94, 205, 100, 26, "Map slot: ");
+
+	map_name = new Fl_Input(99, 125, 100, 26, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
 
 	{
-		Fl_Box *o = new Fl_Box(205, 205, 180, 26, "Available maps:");
+		Fl_Box *o = new Fl_Box(230, 125, 180, 26, "Available maps:");
 		// o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
@@ -314,22 +292,24 @@ UI_OpenMap::UI_OpenMap() :
 
 	// all the map buttons go into this group
 
-	button_grp = new Fl_Group(0, 235, w(), 230, "\n\nNone Found");
+	button_grp = new Fl_Group(0, 165, w(), 230, "");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
 
-	{
-		int bottom_y = 470;
+	/* bottom buttons */
 
-		Fl_Group* o = new Fl_Group(0, bottom_y, w(), 60);
+	{
+		int bottom_y = h() - 70;
+
+		Fl_Group* o = new Fl_Group(0, bottom_y, w(), 70);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(280, bottom_y + 15, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(280, bottom_y + 20, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(140, bottom_y + 15, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(100, bottom_y + 20, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -342,8 +322,7 @@ UI_OpenMap::UI_OpenMap() :
 
 
 UI_OpenMap::~UI_OpenMap()
-{
-}
+{ }
 
 
 Wad_file * UI_OpenMap::Run(const char ** map_v, bool * did_load)
@@ -415,17 +394,17 @@ void UI_OpenMap::CheckMapName()
 
 void UI_OpenMap::Populate()
 {
-	button_grp->label("\n\nNone Found");
+	button_grp->label("\n\n\n\n\nNO   MAPS   FOUND");
 	button_grp->clear();
 
 	using_wad = NULL;
 
-	if (look_iwad->value())
+	if (look_where->value() == LOOK_IWad)
 	{
 		using_wad = game_wad;
 		PopulateButtons();
 	}
-	else if (look_res->value())
+	else if (look_where->value() >= LOOK_Resource)
 	{
 		int first = 1;
 		int last  = (int)master_dir.size() - 1;
@@ -434,7 +413,8 @@ void UI_OpenMap::Populate()
 			last--;
 
 		// we simply use the last resource which contains levels
-		// TODO: ideally grab list from each of them and merge into one big list
+
+		// TODO: probably should collect ones with a map, add to look_where choices
 
 		for (int r = last ; r >= first ; r--)
 		{
@@ -701,10 +681,8 @@ void UI_OpenMap::LoadFile()
 		using_wad = wad;
 
 
-	// change the "Look in ..." setting
-	look_iwad->value(0);
-	look_res ->value(0);
-	look_pwad->value(1);
+	// change the "Find map in ..." setting
+	look_where->value(LOOK_PWad);
 
 	Populate();
 }
