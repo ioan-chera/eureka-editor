@@ -3758,7 +3758,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		if (game_info.medusa_bug)
+		if (! game_info.medusa_fixed)
 		{
 			Textures_FindMedusa(sel, names);
 

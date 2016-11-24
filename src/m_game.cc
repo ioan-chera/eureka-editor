@@ -206,9 +206,9 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.midtex_3d = atoi(argv[1]);
 	}
-	else if (y_stricmp(argv[0], "medusa_bug") == 0)
+	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
 	{
-		game_info.medusa_bug = atoi(argv[1]);
+		game_info.medusa_fixed = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "no_need_players") == 0)
 	{

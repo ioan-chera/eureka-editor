@@ -40,6 +40,8 @@ feature pass_through  1
 # an MBF feature, but most "Boom Compatible" ports will support it
 feature friend_flag 1
 
+feature medusa_fixed 1
+
 
 #---- BOOM THINGS -------------
 

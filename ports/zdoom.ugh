@@ -24,6 +24,8 @@ supported_games doom doom2 heretic hexen
 
 map_formats DOOM HEXEN
 
+feature medusa_fixed 1
+
 feature tx_start 1
 
 

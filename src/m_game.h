@@ -144,7 +144,7 @@ typedef struct
 	int pass_through;	// Boom's MTF_PASSTHRU line flag
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
 
-	int medusa_bug;		// used for Vanilla, prone to the Medusa Effect
+	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
 
 	int no_need_players;	// having no players is OK (Things checker)
 
