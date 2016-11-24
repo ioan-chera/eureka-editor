@@ -20,7 +20,7 @@
 
 #include "main.h"
 #include "m_config.h"
-#include "levels.h"
+#include "e_misc.h"		// Map_bound_xxx
 
 #include "ui_scroll.h"
 #include "ui_canvas.h"

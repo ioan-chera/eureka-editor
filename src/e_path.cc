@@ -28,9 +28,9 @@
 
 #include "m_bitvec.h"
 #include "editloop.h"
+#include "e_misc.h"
 #include "e_objects.h"
 #include "e_path.h"
-#include "levels.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "w_rawdef.h"

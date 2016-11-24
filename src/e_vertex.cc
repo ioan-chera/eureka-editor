@@ -28,11 +28,11 @@
 
 #include "editloop.h"
 #include "e_linedef.h"
+#include "e_misc.h"
 #include "e_objects.h"
 #include "e_vertex.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
-#include "levels.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "w_rawdef.h"

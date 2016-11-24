@@ -21,7 +21,6 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"

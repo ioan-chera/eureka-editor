@@ -22,7 +22,6 @@
 #include "ui_window.h"
 
 #include "e_linedef.h"
-#include "levels.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

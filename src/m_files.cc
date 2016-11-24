@@ -19,7 +19,6 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
-#include "levels.h"
 #include "m_game.h"
 #include "m_loadsave.h"
 #include "w_wad.h"

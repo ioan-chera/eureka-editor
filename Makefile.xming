@@ -58,6 +58,7 @@ OBJS = \
 	$(OBJ_DIR)/e_checks.o   \
 	$(OBJ_DIR)/e_cutpaste.o  \
 	$(OBJ_DIR)/e_linedef.o  \
+	$(OBJ_DIR)/e_misc.o  \
 	$(OBJ_DIR)/e_objects.o  \
 	$(OBJ_DIR)/e_path.o  \
 	$(OBJ_DIR)/e_sector.o  \
@@ -66,7 +67,6 @@ OBJS = \
 	$(OBJ_DIR)/im_arrows.o  \
 	$(OBJ_DIR)/im_color.o  \
 	$(OBJ_DIR)/im_img.o   \
-	$(OBJ_DIR)/levels.o  \
 	$(OBJ_DIR)/lib_adler.o  \
 	$(OBJ_DIR)/lib_file.o  \
 	$(OBJ_DIR)/lib_tga.o   \

@@ -28,9 +28,9 @@
 
 #include "e_cutpaste.h"
 #include "e_linedef.h"
+#include "e_misc.h"
 #include "editloop.h"
 #include "im_img.h"
-#include "levels.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "w_rawdef.h"

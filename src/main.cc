@@ -34,7 +34,6 @@
 #include "m_game.h"
 #include "m_files.h"
 #include "m_loadsave.h"
-#include "levels.h"    /* Because of "viewtex" */
 
 #include "w_rawdef.h"
 #include "w_texture.h"

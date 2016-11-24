@@ -20,20 +20,20 @@
 
 #include "main.h"
 
+#include <algorithm>
+
 #include "ui_window.h"
 
 #include "editloop.h"
+#include "e_misc.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "im_color.h"
 #include "im_img.h"
-#include "levels.h"
 #include "r_render.h"
 #include "w_texture.h"
-
-#include <algorithm>
 
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)

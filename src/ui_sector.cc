@@ -21,7 +21,6 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
 #include "e_checks.h"
 #include "e_sector.h"
 #include "e_things.h"

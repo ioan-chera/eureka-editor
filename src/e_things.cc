@@ -29,7 +29,6 @@
 #include "m_game.h"
 #include "e_things.h"
 #include "editloop.h"
-#include "levels.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
 

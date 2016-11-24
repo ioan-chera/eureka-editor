@@ -33,7 +33,6 @@
 #include "lib_tga.h"
 
 #include "m_game.h"      /* yg_picture_format */
-#include "levels.h"
 #include "w_loadpic.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

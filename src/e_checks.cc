@@ -30,11 +30,11 @@
 
 #include "e_checks.h"
 #include "e_cutpaste.h"
+#include "e_misc.h"
 #include "e_path.h"
 #include "e_vertex.h"
 #include "editloop.h"
 #include "m_game.h"
-#include "levels.h"
 #include "e_objects.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

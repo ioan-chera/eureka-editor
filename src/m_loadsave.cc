@@ -27,10 +27,11 @@
 
 #include "main.h"
 
+#include "lib_adler.h"
+
 #include "e_basis.h"
 #include "e_checks.h"
-#include "levels.h"  // CalculateLevelBounds()
-#include "lib_adler.h"
+#include "e_misc.h"  // CalculateLevelBounds()
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"

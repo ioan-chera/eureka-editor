@@ -30,9 +30,10 @@
 #include <list>
 #include <string>
 
-#include "e_basis.h"
-#include "levels.h"
 #include "lib_adler.h"
+
+#include "e_basis.h"
+#include "e_misc.h"
 #include "m_strings.h"
 
 #include "m_game.h"  // g_default_xxx

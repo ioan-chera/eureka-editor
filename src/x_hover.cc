@@ -28,9 +28,9 @@
 
 #include <algorithm>
 
-#include "r_grid.h"
-#include "levels.h"
+#include "e_misc.h"		// Map_bound_xxx
 #include "m_game.h"
+#include "r_grid.h"
 #include "x_hover.h"
 
 

@@ -26,12 +26,12 @@
 
 #include "main.h"
 
-#include "levels.h"
 #include "e_linedef.h"
+#include "e_misc.h"
+#include "e_objects.h"
 #include "e_sector.h"
 #include "editloop.h"
 #include "m_bitvec.h"
-#include "e_objects.h"
 #include "x_loop.h"
 
 #include "ui_window.h"

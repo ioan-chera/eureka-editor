@@ -157,6 +157,9 @@ extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size
 
 
+extern int MadeChanges;
+
+
 /*
  *  Various global functions
  */
