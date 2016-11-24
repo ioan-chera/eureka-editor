@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "e_misc.h"
 #include "m_config.h"
 #include "ui_window.h"
 #include "w_wad.h"

@@ -33,9 +33,13 @@
 #include "e_misc.h"
 #include "e_path.h"
 #include "e_things.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
+
+
+Editor_State_t  edit;
 
 
 int Map_bound_x1 =  32767;   /* minimum X value of map */
@@ -50,6 +54,12 @@ static int  new_vertex_minimum;
 static int  moved_vertex_count;
 
 static selection_c * last_Sel;
+
+
+// config items
+int default_edit_mode = 0;  // Things
+
+int sector_render_default = (int)SREND_Floor;
 
 
 void MarkChanges()
@@ -888,6 +898,110 @@ bool RecUsed_ParseUser(const char ** tokens, int num_tok)
 	return true;
 }
 
+
+//------------------------------------------------------------------------
+
+
+// this in e_commands.cc
+void Editor_RegisterCommands();
+
+
+void Editor_Init()
+{
+	memset(&edit, 0, sizeof(edit));  /* Catch-all */
+
+	switch (default_edit_mode)
+	{
+		case 1:  edit.mode = OBJ_LINEDEFS; break;
+		case 2:  edit.mode = OBJ_SECTORS;  break;
+		case 3:  edit.mode = OBJ_VERTICES; break;
+		default: edit.mode = OBJ_THINGS;   break;
+	}
+
+	edit.action = ACT_NOTHING;
+	edit.is_scrolling  = false;
+
+	Nav_Clear();
+
+	edit.render3d = false;
+	edit.error_mode = false;
+
+	edit.sector_render_mode = sector_render_default;
+
+	edit.show_object_numbers = false;
+	edit.show_things_squares = false;
+	edit.show_things_sprites = true;
+
+	edit.button_down = 0;
+	edit.button_mod  = 0;
+	edit.clicked.clear();
+
+	edit.highlight.clear();
+	edit.split_line.clear();
+	edit.drawing_from = -1;
+	edit.drag_single_obj = -1;
+
+	edit.Selected = new selection_c(edit.mode);
+
+	grid.Init();
+
+	MadeChanges = 0;
+
+	Editor_RegisterCommands();
+	Render3D_RegisterCommands();
+}
+
+
+bool Editor_ParseUser(const char ** tokens, int num_tok)
+{
+	if (strcmp(tokens[0], "edit_mode") == 0 && num_tok >= 2)
+	{
+		Editor_ChangeMode(tokens[1][0]);
+		return true;
+	}
+
+	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
+	{
+		edit.render3d = atoi(tokens[1]);
+		UpdateHighlight();
+		RedrawMap();
+		return true;
+	}
+
+	if (strcmp(tokens[0], "sector_render_mode") == 0 && num_tok >= 2)
+	{
+		edit.sector_render_mode = atoi(tokens[1]);
+		RedrawMap();
+		return true;
+	}
+
+	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
+	{
+		edit.show_object_numbers = atoi(tokens[1]);
+		RedrawMap();
+		return true;
+	}
+
+	return false;
+}
+
+
+void Editor_WriteUser(FILE *fp)
+{
+	switch (edit.mode)
+	{
+		case OBJ_THINGS:   fprintf(fp, "edit_mode t\n"); break;
+		case OBJ_LINEDEFS: fprintf(fp, "edit_mode l\n"); break;
+		case OBJ_SECTORS:  fprintf(fp, "edit_mode s\n"); break;
+		case OBJ_VERTICES: fprintf(fp, "edit_mode v\n"); break;
+
+		default: break;
+	}
+
+	fprintf(fp, "render_mode %d\n", edit.render3d ? 1 : 0);
+	fprintf(fp, "sector_render_mode %d\n", edit.sector_render_mode);
+	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
+}
 
 
 //--- editor settings ---

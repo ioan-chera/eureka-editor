@@ -30,10 +30,13 @@
 
 #include "im_color.h"
 #include "m_config.h"
-#include "editloop.h"
 #include "m_game.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+
+#include "e_misc.h"
+#include "editloop.h"
+#include "r_render.h"
 
 #include "w_rawdef.h"
 #include "w_texture.h"
@@ -42,7 +45,6 @@
 #include "ui_window.h"
 #include "ui_about.h"
 #include "ui_file.h"
-#include "r_render.h"
 
 #ifndef WIN32
 #include <time.h>

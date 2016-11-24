@@ -29,7 +29,77 @@
 
 #include <string>
 
+#include "editloop.h"
 #include "e_things.h"
+
+
+typedef enum
+{
+	SREND_Nothing = 0,
+	SREND_Floor,
+	SREND_Ceiling,
+	SREND_Lighting
+
+} sector_rendering_mode_e;
+
+
+/* this holds some important editor state */
+
+typedef struct
+{
+	obj_type_e  mode;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+
+	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
+
+	bool is_scrolling;	// user is scrolling the map (or moving in 3D view)
+	bool is_navigating;	// user is holding down a navigation key
+
+	keycode_t sticky_mod;	// user pressed ';' -- waiting for next key
+
+	bool render3d;    // 3D view is active
+	bool error_mode;  // draw selection in red
+
+	int  sector_render_mode;	// one of the SREND_XXX values
+
+	bool show_object_numbers; // Whether the object numbers are shown
+	bool show_things_squares; // Whether the things squares are shown
+	bool show_things_sprites; // Whether the things sprites are shown
+
+	int map_x;    // Map coordinates of pointer
+	int map_y;
+	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
+
+	int button_down;  // mouse button 1 to 3, or 0 for none,
+	keycode_t button_mod;  // modifier(s) used when button was pressed
+
+	Objid clicked;		// The object that was under the pointer when
+						// the left click occurred.
+
+	selection_c *Selected;    // all selected objects (usually empty)
+
+	Objid highlight;   // The highlighted object
+
+	Objid split_line;  // linedef which would be split by a new vertex
+	int split_x;
+	int split_y;
+
+	int drawing_from;	 // for ACT_DRAW_LINE, the vertex we are drawing a line from
+
+	int drag_single_obj;  // -1, or object number we are dragging
+
+	// private navigation stuff
+	float nav_scroll_dx;
+	float nav_scroll_dy;
+
+} Editor_State_t;
+
+
+extern Editor_State_t  edit;
+
+
+void Editor_Init();
+bool Editor_ParseUser(const char ** tokens, int num_tok);
+void Editor_WriteUser(FILE *fp);
 
 
 extern int Map_bound_x1;   /* minimum X value of map */

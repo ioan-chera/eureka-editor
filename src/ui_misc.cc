@@ -19,9 +19,11 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "e_misc.h"
+#include "e_objects.h"
 #include "ui_window.h"
 #include "ui_misc.h"
-#include "e_objects.h"
 
 
 UI_MoveDialog::UI_MoveDialog() :

@@ -28,17 +28,17 @@
 #include "im_img.h"
 #include "e_hover.h"
 #include "e_linedef.h"
+#include "e_misc.h"
 #include "e_things.h"
-#include "editloop.h"
-#include "m_game.h"
 #include "e_objects.h"
+#include "m_game.h"
 #include "w_rawdef.h"
 #include "w_loadpic.h"
 #include "w_texture.h"
 
+#include "editloop.h"
 #include "r_render.h"
 
-#include "editloop.h"
 #include "ui_window.h"
 
 
