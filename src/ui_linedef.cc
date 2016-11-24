@@ -773,7 +773,7 @@ int UI_LineBox::SolidMask(int side)
 	if (right->floorh < left->floorh)
 		mask |= SOLID_LOWER;
 
-	// upper texture of '-' is OK between two skies
+	// upper texture of "-" is OK between two skies
 	bool two_skies = is_sky(right->CeilTex()) && is_sky(left->CeilTex());
 
 	if (right-> ceilh > left-> ceilh && !two_skies)

@@ -631,6 +631,11 @@ static void LoadSideDefs()
 		sd->x_offset = LE_S16(raw.x_offset);
 		sd->y_offset = LE_S16(raw.y_offset);
 
+		// convert empty names to the "-" null texture
+		if (raw.upper_tex[0] == 0) strcpy(raw.upper_tex, "-");
+		if (raw.lower_tex[0] == 0) strcpy(raw.lower_tex, "-");
+		if (raw.  mid_tex[0] == 0) strcpy(raw.  mid_tex, "-");
+
 		UpperCaseShortStr(raw.upper_tex, 8);
 		UpperCaseShortStr(raw.lower_tex, 8);
 		UpperCaseShortStr(raw.  mid_tex, 8);

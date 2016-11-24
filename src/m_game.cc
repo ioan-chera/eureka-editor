@@ -1099,11 +1099,10 @@ bool is_null_tex(const char *tex)
 	return tex[0] == '-';
 }
 
-bool is_missing_tex(const char *tex)
+bool is_special_tex(const char *tex)
 {
-	return (tex[0] == 0 || tex[0] == '-');
+	return tex[0] == '#';
 }
-
 
 
 const sectortype_t * M_GetSectorType(int type)

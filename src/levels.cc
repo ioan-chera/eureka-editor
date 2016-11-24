@@ -737,7 +737,11 @@ int Recently_used::find_number(int val)
 void Recently_used::insert(const char *name)
 {
 	// ignore '-' texture
-	if (is_missing_tex(name))
+	if (is_null_tex(name))
+		return;
+
+	// ignore empty strings to prevent potential problems
+	if (strlen(name) == 0)
 		return;
 
 	int idx = find(name);

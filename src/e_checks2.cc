@@ -1327,7 +1327,7 @@ void Textures_FindMissing(selection_c& lines)
 
 		if (L->OneSided())
 		{
-			if (is_missing_tex(L->Right()->MidTex()))
+			if (is_null_tex(L->Right()->MidTex()))
 				lines.set(n);
 		}
 		else  // Two Sided
@@ -1335,20 +1335,20 @@ void Textures_FindMissing(selection_c& lines)
 			const Sector *front = L->Right()->SecRef();
 			const Sector *back  = L->Left() ->SecRef();
 
-			if (front->floorh < back->floorh && is_missing_tex(L->Right()->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right()->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_missing_tex(L->Left()->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left()->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_missing_tex(L->Right()->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right()->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_missing_tex(L->Left()->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left()->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -1382,7 +1382,7 @@ void Textures_FixMissing()
 
 		if (L->OneSided())
 		{
-			if (is_missing_tex(L->Right()->MidTex()))
+			if (is_null_tex(L->Right()->MidTex()))
 				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
@@ -1390,20 +1390,20 @@ void Textures_FixMissing()
 			const Sector *front = L->Right()->SecRef();
 			const Sector *back  = L->Left() ->SecRef();
 
-			if (front->floorh < back->floorh && is_missing_tex(L->Right()->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right()->LowerTex()))
 				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_missing_tex(L->Left()->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left()->LowerTex()))
 				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_missing_tex(L->Right()->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right()->UpperTex()))
 				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_missing_tex(L->Left()->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left()->UpperTex()))
 				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -1415,7 +1415,9 @@ void Textures_FixMissing()
 static bool is_transparent(const char *tex)
 {
 	// ignore lack of texture here
-	if (is_missing_tex(tex))
+	// [ technically "-" is the poster-child of transparency,
+	//   but it is handled by the Missing Texture checks ]
+	if (is_null_tex(tex))
 		return false;
 
 	Img_c *img = W_GetTexture(tex);
@@ -1548,26 +1550,17 @@ void Textures_LogTransparent()
 }
 
 
-static bool is_medusa(const char *tex)
-{
-	// ignore lack of texture here
-	if (is_missing_tex(tex))
-		return false;
-
-	return W_TextureCausesMedusa(tex);
-}
-
-
 static int check_medusa(const char *tex,
                         std::map<std::string, int>& names)
 {
-	if (is_medusa(tex))
-	{
-		bump_unknown_name(names, tex);
-		return 1;
-	}
+	if (is_null_tex(tex) || is_special_tex(tex))
+		return 0;
 
-	return 0;
+	if (! W_TextureCausesMedusa(tex))
+		return 0;
+
+	bump_unknown_name(names, tex);
+	return 1;
 }
 
 

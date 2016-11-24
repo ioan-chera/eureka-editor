@@ -202,7 +202,7 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 	int num_tex = LE_S32(tex_data_s32[0]);
 
 	// FIXME validate num_tex
-	
+
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
     //       usable (in the DOOM engine the #0 texture is not drawn).
 
@@ -466,7 +466,10 @@ void W_LoadTextures()
 
 Img_c * W_GetTexture(const char *name, bool try_uppercase)
 {
-	if (is_missing_tex(name))
+	if (is_null_tex(name))
+		return NULL;
+
+	if (strlen(name) == 0)
 		return NULL;
 
 	std::string t_str = name;
@@ -487,11 +490,11 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 
 bool W_TextureIsKnown(const char *name)
 {
-	// FIXME : is_missing_tex
-	if (name[0] == '-') return true;
+	if (is_null_tex(name) || is_special_tex(name))
+		return true;
 
-	// special textures
-	if (name[0] == '#') return true;
+	if (strlen(name) == 0)
+		return false;
 
 	std::string t_str = name;
 
@@ -513,6 +516,9 @@ bool W_TextureCausesMedusa(const char *name)
 
 const char *NormalizeTex(const char *name)
 {
+	if (name[0] == 0)
+		return "-";
+
 	static char buffer[WAD_TEX_NAME+1];
 
 	memset(buffer, 0, sizeof(buffer));

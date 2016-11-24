@@ -151,6 +151,13 @@ Img_c * W_GetFlat(const char *name, bool try_uppercase)
 
 bool W_FlatIsKnown(const char *name)
 {
+	// sectors do not support "-" (but our code can make it)
+	if (is_null_tex(name))
+		return false;
+
+	if (strlen(name) == 0)
+		return false;
+
 	std::string f_str = name;
 
 	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);

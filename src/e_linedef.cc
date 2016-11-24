@@ -359,9 +359,6 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 
 static int GetTextureHeight(const char *name)
 {
-	if (is_missing_tex(name))
-		return 128;
-
 	Img_c *img = W_GetTexture(name);
 
 	if (! img)

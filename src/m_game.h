@@ -245,8 +245,8 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 // is this flat a sky?
 bool is_sky(const char *flat);
 
-bool is_null_tex(const char *tex);
-bool is_missing_tex(const char *tex);
+bool is_null_tex(const char *tex);		// the "-" texture
+bool is_special_tex(const char *tex);	// begins with "#"
 
 
 const sectortype_t * M_GetSectorType(int type);
