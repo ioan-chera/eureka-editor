@@ -46,6 +46,8 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
 void LD_RemoveSideDef(int ld, int ld_side);
 void LD_FixForLostSide(int ld);
 
+double AngleBetweenLines(int A, int B, int C);
+
 
 typedef enum
 {

@@ -1220,6 +1220,44 @@ void LD_FixForLostSide(int ld)
 }
 
 
+//
+// Compute the angle between lines AB and BC, going anticlockwise.
+// result is in degrees in the range [0, 360).
+//
+// A, B and C are VERTEX indices.
+//
+// -AJA- 2001-05-09
+//
+double AngleBetweenLines(int A, int B, int C)
+{
+	int a_dx = Vertices[B]->x - Vertices[A]->x;
+	int a_dy = Vertices[B]->y - Vertices[A]->y;
+
+	int c_dx = Vertices[B]->x - Vertices[C]->x;
+	int c_dy = Vertices[B]->y - Vertices[C]->y;
+
+	double AB_angle = (a_dx == 0) ? (a_dy >= 0 ? 90 : -90) : atan2(a_dy, a_dx) * 180 / M_PI;
+	double CB_angle = (c_dx == 0) ? (c_dy >= 0 ? 90 : -90) : atan2(c_dy, c_dx) * 180 / M_PI;
+
+	double result = CB_angle - AB_angle;
+
+	while (result >= 360.0)
+		result -= 360.0;
+
+	while (result < 0)
+		result += 360.0;
+
+#if 0  // DEBUGGING
+	DebugPrintf("ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
+			Vertices[A].x, Vertices[A].y,
+			Vertices[B].x, Vertices[B].y,
+			Vertices[C].x, Vertices[C].y);
+#endif
+
+	return result;
+}
+
+
 //  SideDef packing logic -- raw from glBSP
 #if 0
 
