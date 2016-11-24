@@ -101,6 +101,16 @@ void Editor_Init();
 bool Editor_ParseUser(const char ** tokens, int num_tok);
 void Editor_WriteUser(FILE *fp);
 
+void Editor_ClearErrorMode();
+void Editor_ChangeMode(char mode);
+void Editor_ChangeMode_Raw(obj_type_e new_mode);
+
+bool GetCurrentObjects(selection_c *list);
+void UpdateHighlight();
+
+void RedrawMap();
+void ZoomWholeMap();
+
 
 extern int Map_bound_x1;   /* minimum X value of map */
 extern int Map_bound_y1;   /* minimum Y value of map */

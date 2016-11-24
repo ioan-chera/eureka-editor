@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "r_grid.h"
+#include "e_misc.h"
 #include "ui_window.h"
 
 

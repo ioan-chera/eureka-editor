@@ -42,30 +42,17 @@ typedef enum
 } editor_action_e;
 
 
-void Editor_DigitKey(keycode_t key);
-
 void Editor_MousePress(keycode_t mod);
 void Editor_MouseRelease();
-void Editor_MiddlePress(keycode_t mod);
-void Editor_MiddleRelease();
 void Editor_LeaveWindow();
 
 void Editor_ClearAction();
 void Editor_SetAction(editor_action_e new_action);
 
-void Editor_ClearErrorMode();
-void Editor_ChangeMode(char mode);
-void Editor_ChangeMode_Raw(obj_type_e new_mode);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 void Editor_UpdateFromScroll();
 void Editor_ScrollMap(int mode, int dx = 0, int dy = 0);
-
-bool GetCurrentObjects(selection_c *list);
-void UpdateHighlight();
-
-void RedrawMap();
-void ZoomWholeMap();
 
 /* raw input handling */
 

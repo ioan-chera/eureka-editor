@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_checks.h"
+#include "e_misc.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
