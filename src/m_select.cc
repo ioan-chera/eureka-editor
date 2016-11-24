@@ -60,7 +60,7 @@ bool selection_c::empty() const
 {
 	if (bv)
 		return b_count == 0;
-	
+
 	return count == 0;
 }
 
@@ -69,7 +69,7 @@ int selection_c::count_obj() const
 {
 	if (! bv)
 		return count;
-	
+
 	return b_count;  // hmmm, not so slow after all
 }
 
@@ -131,7 +131,7 @@ void selection_c::clear(int n)
 		for (i = 0 ; i < count ; i++)
 			if (objs[i] == n)
 				break;
-		
+
 		if (i >= count)
 			return;  // not present
 
@@ -363,7 +363,7 @@ void selection_c::begin(selection_iterator_c *it) const
 {
 	it->sel = this;
 	it->pos = 0;
-	
+
 	if (bv)
 	{
 		// for bit vector, need to find the first one bit

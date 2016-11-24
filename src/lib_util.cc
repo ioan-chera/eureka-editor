@@ -114,7 +114,7 @@ void y_strlowr (char *str)
 char *StringNew(int length)
 {
   // length does not include the trailing NUL.
-  
+
   char *s = (char *) calloc(length + 1, 1);
 
   if (! s)
@@ -162,7 +162,7 @@ char *StringPrintf(const char *str, ...)
    */
   char *buf = NULL;
   int buf_size = 128;
-  
+
   for (;;)
   {
     va_list args;
@@ -272,7 +272,7 @@ unsigned int TimeGetMillies()
   (int) sizeof (type));           \
   }                 \
   while (0)
-   
+
 #define assert_wrap(type,high,low)          \
   do                  \
   {                 \

@@ -860,7 +860,7 @@ UI_Preferences::UI_Preferences() :
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Mouse" R_SPACES);
 		o->labelsize(16);
 		o->hide();
-	    
+
 		o->end();
 	  }
 #endif
@@ -1054,7 +1054,7 @@ void UI_Preferences::copy_key_callback(Fl_Button *w, void *data)
 
 	const char *new_func = M_StringForFunc(bind_idx);
 
-	
+
 	M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
 
 	// we will reload the lines, so use a dummy one here
@@ -1210,7 +1210,7 @@ int UI_Preferences::GridSizeToChoice(int size)
 void UI_Preferences::LoadValues()
 {
 	/* Theme stuff */
-	
+
 	switch (gui_scheme)
 	{
 		case 0: theme_FLTK->value(1); break;

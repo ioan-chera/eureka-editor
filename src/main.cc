@@ -264,7 +264,7 @@ static void Determine_HomeDir(const char *argv0)
 
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
-      
+
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
    home_dir = StringDup(path);
 
@@ -283,7 +283,7 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (! home_dir)
 		FatalError("Unable to find home directory!\n");
-	
+
 	if (! cache_dir)
 		cache_dir = home_dir;
 
@@ -452,7 +452,7 @@ static void DeterminePort()
 static const char * DetermineMod(const char *res_name)
 {
 	static char mod_name[FL_PATH_MAX];
-		
+
 	strcpy(mod_name, fl_filename_name(res_name));
 
 	fl_filename_setext(mod_name, "");
@@ -667,7 +667,7 @@ bool Main_ConfirmQuit(const char *action)
 	if (p)
 		*p = 0;
 
-	if (DLG_Confirm(buttons, 
+	if (DLG_Confirm(buttons,
 	                "You have unsaved changes.  "
 	                "Do you really want to %s?", action) == 1)
 	{
@@ -745,7 +745,7 @@ static void LoadResourceFile(const char *filename)
 
 	// load corresponding mod file if it exists
 	const char *mod_name = DetermineMod(filename);
-	
+
 	if (M_CanLoadDefinitions("mods", mod_name))
 	{
 		M_LoadDefinitions("mods", mod_name);
@@ -778,7 +778,7 @@ void Main_LoadResources()
 	// reset the master directory
 	if (edit_wad)
 		MasterDir_Remove(edit_wad);
-	
+
 	MasterDir_CloseAll();
 
 
@@ -883,7 +883,7 @@ static void ShowTime()
 			  calend_time->tm_hour, calend_time->tm_min,
 			  calend_time->tm_year + 1900, calend_time->tm_mon + 1,
 			  calend_time->tm_mday);
-#endif  
+#endif
 }
 
 

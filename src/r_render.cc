@@ -490,7 +490,7 @@ public:
 			}
 
 			// this case usually occurs at a column where two walls share a vertex.
-			// 
+			//
 			// hence we check if they actually share a vertex, and if so then
 			// we test whether A is behind B or not -- by checking which side
 			// of B the camera and the other vertex of A are on.
@@ -573,7 +573,7 @@ public:
 		bool self_ref  = (front == back) ? true : false;
 
 		if ((front->ceilh > view.z || is_sky(front->CeilTex()))
-		    && ! sky_upper && ! self_ref) 
+		    && ! sky_upper && ! self_ref)
 		{
 			ceil.kind = DrawSurf::K_FLAT;
 			ceil.h1 = front->ceilh;
@@ -736,7 +736,7 @@ public:
 	query_part_e  query_part;  // the part of the hit wall
 
 	// inverse distances over X range, 0 when empty.
-	std::vector<double> depth_x;  
+	std::vector<double> depth_x;
 
 	int open_y1;
 	int open_y2;
@@ -2028,7 +2028,7 @@ int UI_Render3D::handle(int event)
 		case FL_ENTER:
 			// we greedily grab the focus
 			if (Fl::focus() != this)
-				take_focus(); 
+				take_focus();
 
 			return 1;
 

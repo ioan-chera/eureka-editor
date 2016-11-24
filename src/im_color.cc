@@ -61,7 +61,7 @@ void W_UpdateGamma()
 		r = gammatable[usegamma][r];
 		g = gammatable[usegamma][g];
 		b = gammatable[usegamma][b];
-		
+
 		palette[c] = fl_rgb_color(r, g, b);
 	}
 

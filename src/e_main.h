@@ -173,8 +173,8 @@ public:
 	 Recently_used();
 	~Recently_used();
 
-	int find(const char *name); 
-	int find_number(int val); 
+	int find(const char *name);
+	int find_number(int val);
 
 	void insert(const char *name);
 	void insert_number(int val);

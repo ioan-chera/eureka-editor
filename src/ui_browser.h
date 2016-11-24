@@ -198,7 +198,7 @@ private:
 	{
 		ACTIVE_GENERALIZED = 5
 	};
- 
+
  	// currently active browser box (may be hidden though)
 	int active;
 

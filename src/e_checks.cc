@@ -115,7 +115,7 @@ void UI_Check_base::Reset()
 
 	cy = 45;
 
-	line_group->clear();	
+	line_group->clear();
 
 	redraw();
 }
@@ -1465,12 +1465,12 @@ static void CollectBlockingThings(std::vector<int>& list,
    value.  The move is allowed when the *new position* has no
    blocking things or walls, which means that things can overlap
    a short distance and won't be stuck.
-  
+
    Properly taking this into account requires knowing the speed of
    each individual monster, but we don't have that information here.
    Hence I've chosen a conservative value based on the speed of the
    slowest monster (8 units).
-   
+
    TODO: make it either game config or user preference.
 */
 #define MONSTER_STEP_DIST  8
@@ -1552,10 +1552,10 @@ static inline bool LD_is_blocking(const LineDef *L)
 	// ignore virtual linedefs
 	if (L->right < 0 && L->left < 0)
 		return false;
-	
+
 	if (L->right < 0 || L->left < 0)
 		return true;
-	
+
 	const Sector *S1 = L->Right()->SecRef();
 	const Sector *S2 = L-> Left()->SecRef();
 
@@ -1917,7 +1917,7 @@ void LineDefs_FindManualDoors(selection_c& lines)
 			continue;
 
 		const linetype_t *info = M_GetLineType(L->type);
-		
+
 		if (info->desc[0] == 'D' &&
 			(info->desc[1] == '1' || info->desc[1] == 'R'))
 		{
@@ -2765,7 +2765,7 @@ void CMD_ApplyTag()
 	}
 	else
 	{
-		Beep("ApplyTag: unknown keyword: %s\n", mode); 
+		Beep("ApplyTag: unknown keyword: %s\n", mode);
 		return;
 	}
 
@@ -2814,7 +2814,7 @@ static bool LD_tag_exists(int tag)
 	for (int n = 0 ; n < NumLineDefs ; n++)
 		if (LineDefs[n]->tag == tag)
 			return true;
-	
+
 	return false;
 }
 
@@ -3464,7 +3464,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 }
 
 
-void Textures_FindUnknownFlat(selection_c& secs, 
+void Textures_FindUnknownFlat(selection_c& secs,
                               std::map<std::string, int>& names)
 {
 	secs.change_type(OBJ_SECTORS);

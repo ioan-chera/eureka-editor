@@ -50,7 +50,7 @@ int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 //
 // UI_SectorBox Constructor
 //
-UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) : 
+UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {

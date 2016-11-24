@@ -204,7 +204,7 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 		lineloop_c& loop = (pass == 0) ? right_loop : left_loop;
 
 		bool ok = (pass == 0) ? right_ok : left_ok;
-		
+
 		if (ok && ! loop.faces_outward)
 		{
 			loop.FindIslands();
@@ -319,8 +319,8 @@ DebugPrintf("COMPLEX LOOP : LINE #%d : %d --> %d\n", new_ld, v1, v2);
 	bool right_new = (right_front < 0) && (right_back < 0);
 	bool  left_new = ( left_front < 0) && ( left_back < 0);
 
-DebugPrintf("RIGHT LINE #%d : front=%d back=%d\n", right_ld, right_front, right_back); 
-DebugPrintf(" LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_back); 
+DebugPrintf("RIGHT LINE #%d : front=%d back=%d\n", right_ld, right_front, right_back);
+DebugPrintf(" LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_back);
 
 	if (right_new || left_new)
 	{
@@ -568,7 +568,7 @@ void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 	}
 
 	// recursively handle both sides
-	
+
 	Insert_LineDef_autosplit(v1, cross.vert, no_fill);
 	Insert_LineDef_autosplit(cross.vert, v2, no_fill);
 }
@@ -658,7 +658,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 			return;
 		}
 
-		
+
 		// the simple "unselect it" case
 		if (near_vert == from_vert)
 		{
@@ -805,7 +805,7 @@ static void Insert_Sector(bool force_new)
 		return;
 	}
 
-	// if outside of the map, create a square 
+	// if outside of the map, create a square
 	if (PointOutsideOfMap(edit.map_x, edit.map_y))
 	{
 		BA_Begin();
@@ -949,7 +949,7 @@ bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 	// end is entirely inside the square?
 	if (lx1 >= x0 && lx1 <= x1 && ly1 >= y0 && ly1 <= y1)
 		return true;
-	
+
 
 	if ((ly0 > y0) != (ly1 > y0))
 	{
@@ -1155,7 +1155,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 	// handle textures
 	if (do_tex && L1->Right() && L2->Right())
 	{
-		/* There are four cases, depending on number of sides: 
+		/* There are four cases, depending on number of sides:
 		 *
 		 * (a) single --> single : easy
 		 *
@@ -1233,7 +1233,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 			const Sector *F2 = L2->Right()->SecRef();
 			const Sector *B2 = L2-> Left()->SecRef();
 
-			// logic to determine which sides we copy 
+			// logic to determine which sides we copy
 
 			int f_diff1 = B1->floorh - F1->floorh;
 			int f_diff2 = B2->floorh - F2->floorh;
@@ -1824,7 +1824,7 @@ void CMD_Mirror(void)
 	int mid_x, mid_y;
 
 	Objs_CalcMiddle(&list, &mid_x, &mid_y);
-	
+
 	BA_Begin();
 
 	BA_MessageForSel("mirrored", &list, is_vert ? " vertically" : " horizontally");
@@ -1886,7 +1886,7 @@ void CMD_Rotate90(void)
 	int mid_x, mid_y;
 
 	Objs_CalcMiddle(&list, &mid_x, &mid_y);
-	
+
 	BA_Begin();
 
 	BA_MessageForSel("rotated", &list, anti_clockwise ? " anti-clockwise" : " clockwise");
@@ -1934,7 +1934,7 @@ void CMD_Rotate90(void)
 
 	BA_End();
 }
- 
+
 
 static void DoEnlargeThings(selection_c& list, int mul, int mid_x, int mid_y)
 {
@@ -2308,7 +2308,7 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector * S = Sectors[*it];
-		
+
 		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
 

@@ -70,7 +70,7 @@ const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
 	{
 		const char *name = KI->first.c_str();
-		
+
 		if (result[0])
 			strcat(result, "|");
 
@@ -100,7 +100,7 @@ int M_FindGivenFile(const char *filename)
 	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
 		if (strcmp(Pwad_list[i], filename) == 0)
 			return i;
-	
+
 	return -1;  // Not Found
 }
 
@@ -169,7 +169,7 @@ public:
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-#ifdef FREE_RECENT_FILES 
+#ifdef FREE_RECENT_FILES
 			StringFree(filenames[k]);
 			StringFree(map_names[k]);
 #endif
@@ -204,7 +204,7 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < MAX_RECENT);
 
-#ifdef FREE_RECENT_FILES 
+#ifdef FREE_RECENT_FILES
 		StringFree(filenames[index]);
 		StringFree(map_names[index]);
 #endif
@@ -707,7 +707,7 @@ const char * M_PickDefaultIWAD()
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
 	const char *result;
-	
+
 	result = StringDup(M_QueryKnownIWAD(default_game));
 	if (result)
 		return result;
@@ -772,7 +772,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		LogPrintf("--> does not exist.\n");
 		return true;
 	}
-	
+
 	if (! lump->Seek())
 	{
 		LogPrintf("--> error seeking.\n");
@@ -841,7 +841,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
-			
+
 				res = FilenameReposition(pos, wad->PathName());
 				LogPrintf("  trying: %s\n", res);
 			}
@@ -892,7 +892,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		if (! (keep_cmd_line_args && Iwad_name))
 			Iwad_name = new_iwad;
 	}
-	
+
 	if (new_port)
 	{
 		if (! (keep_cmd_line_args && Port_name))

@@ -61,7 +61,7 @@ void SEC_Floor(void)
 
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -100,7 +100,7 @@ void SEC_Ceil(void)
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -151,7 +151,7 @@ void SectorsAdjustLight(int delta)
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -195,7 +195,7 @@ void SEC_SwapFlats()
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -456,7 +456,7 @@ int lineloop_c::FacesSector() const
 	// test is only valid for islands
 	if (! faces_outward)
 		return -1;
-	
+
 	// we might need to check multiple lines, as the first line could
 	// be facing a linedef which is ALSO part of the island.
 
@@ -507,7 +507,7 @@ void lineloop_c::CalcBounds(int *x1, int *y1, int *x2, int *y2) const
    be in a valid state).
 
    side is either SIDE_LEFT or SIDE_RIGHT.
-   
+
    -AJA- 2001-05-09
  */
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
@@ -676,7 +676,7 @@ bool lineloop_c::LookForIsland()
 		    MAX(y1, y2) < bb_y1 || MIN(y1, y2) > bb_y2)
 			continue;
 
-		// ouch, this is gonna be SLOW : O(n^2) on # lines 
+		// ouch, this is gonna be SLOW : O(n^2) on # lines
 
 		for (int where = 0 ; where < 2 ; where++)
 		{
@@ -737,7 +737,7 @@ void lineloop_c::FindIslands()
 	//
 	// Example: the two pillars at the start of MAP01 of DOOM 2.
 
-	// use a counter for safety 
+	// use a counter for safety
 	for (int loop = 200 ; loop >= 0 ; loop--)
 	{
 		if (loop == 0)
@@ -754,7 +754,7 @@ void lineloop_c::Dump() const
 {
 	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
 	            this, lines.size(), islands.size());
-	
+
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		const LineDef *L = LineDefs[lines[i]];
@@ -762,7 +762,7 @@ void lineloop_c::Dump() const
 		DebugPrintf("  %s of line #%d : (%d %d) --> (%d %d)\n",
 		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
 					lines[i],
-					L->Start()->x, L->Start()->y, 
+					L->Start()->x, L->Start()->y,
 					L->End  ()->x, L->End  ()->y);
 	}
 }

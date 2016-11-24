@@ -54,7 +54,7 @@ public:
 public:
 	Objid() : type(OBJ_THINGS), num(NIL_OBJ) { }
 	Objid(obj_type_e t, int n) : type(t), num(n) { }
-	Objid(const Objid& other) : type(other.type), num(other.num) { } 
+	Objid(const Objid& other) : type(other.type), num(other.num) { }
 
 	void clear() { num = NIL_OBJ; }
 

@@ -37,7 +37,7 @@ bool sidedef_add_del_buttons = false;
 //
 // Constructor
 //
-UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) : 
+UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
     Fl_Group(X, Y, W, H),
     obj(SETOBJ_NO_LINE), is_front(_side == 0),
 	on_2S_line(false)
@@ -51,7 +51,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	else
 		labelcolor(fl_rgb_color(224,64,0));
 
-	
+
 	add_button = new Fl_Button(X + W - 120, Y, 50, 20, "ADD");
 	add_button->labelcolor(labelcolor());
 	add_button->callback(add_callback, this);
@@ -92,7 +92,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	int LX = X+16;
 	int UX = X+W-64-16;
 	    MX = MX-32;
-	
+
 	if (swap_sidedefs)
 	{
 		std::swap(UX, LX);

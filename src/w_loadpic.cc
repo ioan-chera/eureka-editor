@@ -42,7 +42,7 @@ typedef struct
 
     // length data bytes follows
 	byte length;
-	
+
 	/* byte pixels[length+2] */
 }
 post_t;
@@ -125,7 +125,7 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 	W_LoadLumpData(lump, &raw_data);
 
 	const patch_t *pat = (patch_t *) raw_data;
-  
+
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);
 //	int offset_x = LE_S16(pat->leftoffset);

@@ -190,7 +190,7 @@ int ClosestLine_CastAtAngle(int x, int y, float radians)
 
 		float a = PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
 		float b = PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
-		                 
+
 		// completely on one side of the vector?
 		if (a > 0 && b > 0) continue;
 		if (a < 0 && b < 0) continue;
@@ -554,7 +554,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 
 	if (test.dx == 0 && test.dy == 0)
 		return -1;
-	
+
 	test.best_match = -1;
 	test.best_dist  = 9e9;
 
@@ -912,7 +912,7 @@ static void get_cur_vertex(Close_obj& closest, int x, int y)
 
 /*
  *  GetNearObject - determine which object is under the pointer
- * 
+ *
  *  Set <o> to point to the object under the pointer (map
  *  coordinates (<x>, <y>). If several objects are close
  *  enough to the pointer, the smallest object is chosen.
@@ -1042,7 +1042,7 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 	double best_dist = 9e9;
 
 	/* try all vertices */
-	
+
 	for (int v = 0 ; v < NumVertices ; v++)
 	{
 		if (v == v1 || v == v2)
@@ -1116,7 +1116,7 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 			continue;
 
 		// compute intersection point
-		double l_along = a / (a - b); 
+		double l_along = a / (a - b);
 
 		double ix = lx1 + l_along * (lx2 - lx1);
 		double iy = ly1 + l_along * (ly2 - ly1);

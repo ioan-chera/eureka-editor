@@ -174,7 +174,7 @@ void LogSaveTo(FILE *dest_fp)
 	}
 
 	// restore write position for the log file
-	
+
 	fseek(log_fp, 0L, SEEK_END);
 }
 

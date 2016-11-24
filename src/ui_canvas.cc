@@ -61,7 +61,7 @@ int vertex_radius(double scale);
 //
 // UI_Canvas Constructor
 //
-UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) : 
+UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label),
 	highlight(), split_ld(-1),
 	drag_lines(),
@@ -111,7 +111,7 @@ int UI_Canvas::handle(int event)
 		case FL_ENTER:
 			// we greedily grab the focus
 			if (Fl::focus() != this)
-				take_focus(); 
+				take_focus();
 
 			return 1;
 
@@ -165,13 +165,13 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 	if (x1 < 8 || x2 > w() - 8 ||
 		y1 < 8 || y2 > h() - 8)
 		return 1; // too big
-	
+
 	float x_ratio = MAX(4, x2 - x1) / (float) MAX(4, w());
 	float y_ratio = MAX(4, y2 - y1) / (float) MAX(4, h());
 
 	if (MAX(x_ratio, y_ratio) < 0.25)
 		return -1;  // too small
-	
+
 	return 0;
 }
 
@@ -192,7 +192,7 @@ void UI_Canvas::DrawEverything()
 		seen_sectors.clear_all();
 	}
 
-	DrawMap(); 
+	DrawMap();
 
 	DrawSelection(edit.Selected);
 
@@ -602,7 +602,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				int sd1 = L->right;
 				int sd2 = L->left;
-				
+
 				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
 
@@ -916,7 +916,7 @@ void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int 
 	// only draw a number for the first linedef actually visible
 	if (seen_sectors.get(n))
 		return;
-	
+
 	seen_sectors.set(n);
 
 	DrawLineNumber(mx1, my1, mx2, my2, side, n);
@@ -1003,7 +1003,7 @@ void UI_Canvas::HighlightSet(Objid& obj)
 {
 	if (highlight == obj)
 		return;
-	
+
 	highlight = obj;
 	redraw();
 }
@@ -1013,7 +1013,7 @@ void UI_Canvas::HighlightForget()
 {
 	if (highlight.is_nil())
 		return;
-	
+
 	highlight.clear();
 	redraw();
 }
@@ -1023,7 +1023,7 @@ void UI_Canvas::SplitLineSet(int ld, int new_x, int new_y)
 {
 	if (split_ld == ld && split_x == new_x && split_y == new_y)
 		return;
-	
+
 	split_ld = ld;
 	split_x  = new_x;
 	split_y  = new_y;
@@ -1036,7 +1036,7 @@ void UI_Canvas::SplitLineForget()
 {
 	if (split_ld < 0)
 		return;
-	
+
 	split_ld = -1;
 	redraw();
 }
@@ -1831,7 +1831,7 @@ void UI_Canvas::RenderSector(int num)
 
 	if (edit.sector_render_mode == SREND_Lighting)
 	{
-		fl_color(light_col); 
+		fl_color(light_col);
 	}
 	else
 	{
@@ -1902,7 +1902,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
 			continue;
-				
+
 		// skip horizontal lines
 		if (edge.scr_y1 == edge.scr_y2)
 			continue;
@@ -2002,7 +2002,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			active_edges.pop_back();
 
 		// compute spans
-		
+
 		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
 		{
 			const sector_edge_t * E1 = active_edges[i - 1];

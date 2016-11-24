@@ -175,7 +175,7 @@ void TH_Disconnect(void)
 			continue;
 
  		int mid_x, mid_y;
- 
+
  		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
 
 

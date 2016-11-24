@@ -304,7 +304,7 @@ void Clipboard_NotifyInsert(obj_type_e type, int objnum)
 
 void Clipboard_NotifyDelete(obj_type_e type, int objnum)
 {
-	// this function notifies us that a sector is about to be deleted 
+	// this function notifies us that a sector is about to be deleted
 	// (causing other sectors to be moved).
 
 	if (type != OBJ_SECTORS)
@@ -451,7 +451,7 @@ static bool Clipboard_DoCopy()
 	// create storage for the copied objects
 	if (clip_board)
 		delete clip_board;
-	
+
 	clip_board = new clipboard_data_c(edit.mode);
 
 	switch (edit.mode)
@@ -710,7 +710,7 @@ static bool Clipboard_DoPaste()
 			}
 			break;
 		}
-		
+
 		case OBJ_VERTICES:
 		{
 			int cx, cy;
@@ -720,7 +720,7 @@ static bool Clipboard_DoPaste()
 			{
 				int new_v = BA_New(OBJ_VERTICES);
 				Vertex * V = Vertices[new_v];
-				
+
 				V->RawCopy(clip_board->verts[i]);
 
 				V->x += pos_x - cx;
@@ -901,7 +901,7 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
 			int what_side = pass ? SIDE_LEFT : SIDE_RIGHT;
-			
+
 			int sec_num = L->WhatSector(what_side);
 
 			if (sec_num < 0)

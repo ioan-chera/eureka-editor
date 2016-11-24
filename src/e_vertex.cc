@@ -275,7 +275,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			int new_x, new_y;
 
 			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
-			
+
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
 			if (which != num_lines-1)
@@ -391,7 +391,7 @@ void VT_Disconnect(void)
 
 		// nothing to do unless vertex has 2 or more linedefs
 		int num_lines = VertexHowManyLineDefs(*it);
-		
+
 		if (num_lines < 2)
 			continue;
 
@@ -925,7 +925,7 @@ static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x
 
 	if (dist > extent * 0.33)
 		return 0.25;
-	
+
 	return 1.0;
 }
 
@@ -1088,7 +1088,7 @@ void VT_ShapeLine(void)
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
 		double frac;
-		
+
 		if (true /* regular spacing */)
 			frac = i / (double)(along_list.size() - 1);
 		else

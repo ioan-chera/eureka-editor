@@ -306,7 +306,7 @@ bool FileDelete(const char *filename)
 
 
 bool FileChangeDir(const char *dir_name)
-{ 
+{
 #ifdef WIN32
 	return (::SetCurrentDirectory(dir_name) != 0);
 
@@ -446,7 +446,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 #ifdef WIN32
 
 	// this is a bit clunky.  We set the current directory to the
-	// target and use FindFirstFile with "*.*" as the pattern. 
+	// target and use FindFirstFile with "*.*" as the pattern.
 	// Afterwards we restore the current directory.
 
 	char old_dir[MAX_PATH+1];
@@ -487,7 +487,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		if (strcmp(fdata.cFileName, ".")  == 0 ||
 				strcmp(fdata.cFileName, "..") == 0)
 		{
-			// skip the funky "." and ".." dirs 
+			// skip the funky "." and ".." dirs
 		}
 		else
 		{
@@ -518,7 +518,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		if (strlen(fdata->d_name) == 0)
 			continue;
 
-		// skip the funky "." and ".." dirs 
+		// skip the funky "." and ".." dirs
 		if (strcmp(fdata->d_name, ".")  == 0 ||
 				strcmp(fdata->d_name, "..") == 0)
 			continue;

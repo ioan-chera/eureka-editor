@@ -54,7 +54,7 @@ public:
 //
 // UI_LineBox Constructor
 //
-UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) : 
+UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -428,7 +428,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			const LineDef *L = LineDefs[*it];
@@ -461,7 +461,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
@@ -758,7 +758,7 @@ int UI_LineBox::SolidMask(int side)
 
 	if (L->left < 0 && L->right < 0)
 		return 0;
-	
+
 	if (L->left < 0 || L->right < 0)
 		return SOLID_MID;
 

@@ -186,7 +186,7 @@ bool Grid_State_c::OnGridX(int map_x) const
 {
 	if (map_x < 0)
 		map_x = -map_x;
-	
+
 	return (map_x % step) == 0;
 }
 
@@ -194,7 +194,7 @@ bool Grid_State_c::OnGridY(int map_y) const
 {
 	if (map_y < 0)
 		map_y = -map_y;
-	
+
 	return (map_y % step) == 0;
 }
 
@@ -246,7 +246,7 @@ const char *Grid_State_c::scale_options()
 {
 	return  "x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
 			" 100% |"
-			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64"; 
+			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64";
 }
 
 const char *Grid_State_c::grid_options()

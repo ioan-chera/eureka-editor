@@ -1198,7 +1198,7 @@ void dump_parameters(FILE *fp)
 	{
 		if (! o->long_name)
 			continue;
-		
+
 		fprintf (fp, "%-*s  %-*s  ", name_maxlen, o->long_name, desc_maxlen, o->desc);
 
 		if (o->opt_type == OPT_BOOLEAN)
@@ -1384,7 +1384,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 	// skip leading whitespace
 	while (isspace(*line))
 		line++;
-	
+
 	// blank line or comment line?
 	if (*line == 0 || *line == '\n' || *line == '#')
 		return 0;

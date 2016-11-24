@@ -29,7 +29,7 @@
 //
 // UI_VertexBox Constructor
 //
-UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) : 
+UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -92,7 +92,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeVT(*it, Vertex::F_X, new_x);
 
@@ -113,7 +113,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeVT(*it, Vertex::F_Y, new_y);
 

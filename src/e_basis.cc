@@ -439,7 +439,7 @@ static int * RawDeleteLineDef(int objnum)
 
 	for (int n = objnum ; n < NumLineDefs-1 ; n++)
 		LineDefs[n] = LineDefs[n + 1];
-	
+
 	LineDefs.pop_back();
 
 	return result;
@@ -554,7 +554,7 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 
 		case OBJ_SIDEDEFS:
 			return RawDeleteSideDef(objnum);
-		
+
 		case OBJ_LINEDEFS:
 			return RawDeleteLineDef(objnum);
 
@@ -603,7 +603,7 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 		case OBJ_SIDEDEFS:
 			pos = (int*) SideDefs[objnum];
 			break;
-		
+
 		case OBJ_LINEDEFS:
 			pos = (int*) LineDefs[objnum];
 			break;
@@ -1033,7 +1033,7 @@ bool BA_Redo()
 {
 	if (redo_future.empty())
 		return false;
-	
+
 	DoClearChangeStatus();
 
 	undo_group_c * grp = redo_future.front();

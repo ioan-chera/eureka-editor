@@ -65,7 +65,7 @@ static const char ** arrow_pixmaps[8] =
 //
 // UI_ThingBox Constructor
 //
-UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) : 
+UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -335,7 +335,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
@@ -366,7 +366,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
@@ -418,7 +418,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
@@ -467,7 +467,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_X, new_x);
 
@@ -488,7 +488,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Y, new_y);
 
@@ -534,7 +534,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			const Thing *T = Things[*it];
@@ -600,7 +600,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
@@ -644,7 +644,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
 		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
 		o_dm  ->value((options & MTF_Hexen_DM)   ? 1 : 0);
-		
+
 		o_fight ->value((options & MTF_Hexen_Fighter) ? 1 : 0);
 		o_cleric->value((options & MTF_Hexen_Cleric)  ? 1 : 0);
 		o_mage  ->value((options & MTF_Hexen_Mage)    ? 1 : 0);

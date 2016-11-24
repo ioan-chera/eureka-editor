@@ -298,7 +298,7 @@ int UI_MainWin::GetPanelObjNum() const
 
 void UI_MainWin::InvalidatePanelObj()
 {
-	if (thing_box->visible()) 
+	if (thing_box->visible())
 		thing_box->SetObj(-1, 0);
 
 	if (line_box->visible())
@@ -313,7 +313,7 @@ void UI_MainWin::InvalidatePanelObj()
 
 void UI_MainWin::UpdatePanelObj()
 {
-	if (thing_box->visible()) 
+	if (thing_box->visible())
 		thing_box->UpdateField();
 
 	if (line_box->visible())
@@ -595,7 +595,7 @@ UI_LogViewer::UI_LogViewer() :
 			o->color(fl_gray_ramp(4));
 		else
 			o->color(WINDOW_BG);
-		
+
 		int bx  = w() - 110;
 		int bx2 = bx;
 		{

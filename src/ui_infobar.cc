@@ -32,7 +32,7 @@
 //
 // UI_InfoBar Constructor
 //
-UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) : 
+UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
@@ -113,7 +113,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 
 	// ---- resizable ----
- 
+
  	resizable(status);
 
 	end();

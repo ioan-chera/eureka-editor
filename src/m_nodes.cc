@@ -528,7 +528,7 @@ void CMD_TestMap()
 			return;
 	}
 
-	
+
 	// FIXME:
 	// if (missing nodes)
 	//    DLG_Confirm(  "build the nodes now?")

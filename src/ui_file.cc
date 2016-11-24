@@ -443,7 +443,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 {
 	if (A[0] != B[0])
 		return true;
-	
+
 	// handle ExMx
 	if (toupper(A[0]) == 'E')
 	{
@@ -453,7 +453,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 	// handle MAPxx
 	if (strlen(A) < 4 && strlen(B) < 4)
 		return false;
-	
+
 	return A[3] != B[3];
 }
 

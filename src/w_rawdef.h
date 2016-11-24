@@ -63,7 +63,7 @@ typedef enum
 	LL_SSECTORS,  // SubSectors, list of LineSegs
 	LL_NODES,     // BSP nodes
 	LL_SECTORS,   // Sectors, from editing
-	LL_REJECT,    // LUT, sector-sector visibility 
+	LL_REJECT,    // LUT, sector-sector visibility
 	LL_BLOCKMAP,  // LUT, motion clipping, walls/grid element
 	LL_BEHAVIOR   // Hexen scripting stuff
 }
@@ -343,14 +343,14 @@ typedef struct
 //
 typedef struct patch_s
 {
-	// bounding box size 
+	// bounding box size
 	s16_t width;
 	s16_t height;
 
-	// pixels to the left of origin 
+	// pixels to the left of origin
 	s16_t leftoffset;
 
-	// pixels below the origin 
+	// pixels below the origin
 	s16_t topoffset;
 
 	u32_t columnofs[1];  // only [width] used

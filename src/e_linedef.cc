@@ -72,7 +72,7 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 			continue;
 
 		double a, b;
-		
+
 		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 		b = PerpDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 
@@ -325,13 +325,13 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 
 	if (! L->TwoSided())
 		return (part == 'l');
-	
+
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
 	if (soal_side(zz) == SIDE_LEFT)
 		std::swap(front, back);
-	
+
 	// ignore sky walls
 	if (part == 'u' && is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 		return false;
@@ -658,7 +658,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	// create new linedef
 	int new_l = BA_New(OBJ_LINEDEFS);
-	
+
 	LineDef * L2 = LineDefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
@@ -844,7 +844,7 @@ void LD_MergedSecondSideDef(int ld)
 
 	if (! is_null_tex(L->Right()->MidTex()))
 		right_tex = L->Right()->mid_tex;
-	
+
 	if (! left_tex)  left_tex = right_tex;
 	if (! right_tex) right_tex = left_tex;
 

@@ -492,7 +492,7 @@ void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
 
 	if (objnum > main_win->GetPanelObjNum())
 		return;
-	
+
 	invalidated_panel_obj = true;
 }
 
@@ -506,7 +506,7 @@ void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
 
 	if (objnum > main_win->GetPanelObjNum())
 		return;
-	
+
 	invalidated_panel_obj = true;
 }
 
@@ -752,7 +752,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	if (dest->what_type() != OBJ_SECTORS)
 		return;
-	
+
 	if (src->what_type() != OBJ_LINEDEFS && src->what_type() != OBJ_VERTICES)
 		return;
 
