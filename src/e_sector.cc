@@ -749,6 +749,7 @@ void lineloop_c::FindIslands()
 }
 
 
+#ifdef DEBUG_LINELOOP
 void lineloop_c::Dump() const
 {
 	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
@@ -765,6 +766,7 @@ void lineloop_c::Dump() const
 					L->End  ()->x, L->End  ()->y);
 	}
 }
+#endif
 
 
 /*

@@ -296,11 +296,6 @@ public:
 		if (gravity)
 			FindGroundZ();
 	}
-
-	void ClearHighlight()
-	{
-		hl.Clear();
-	}
 };
 
 
@@ -1440,17 +1435,6 @@ public:
 		}
 	}
 
-	void HighlightColumn(int x, int y1, int y2, img_pixel_t col)
-	{
-		img_pixel_t *dest = view.screen;
-
-		dest += x + y1 * view.sw;
-
-		for ( ; y1 <= y2 ; y1++, dest += view.sw)
-			*dest = col;
-	}
-
-
 	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
 								  query_part_e part)
 	{
@@ -2307,15 +2291,6 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	view.adjust_dy -= dy * factor * view.adjust_dy_factor;
 
 	RedrawMap();
-}
-
-
-void Render3D_Term()
-{
-	/* all done */
-
-	delete view.screen;
-	view.screen = NULL;
 }
 
 

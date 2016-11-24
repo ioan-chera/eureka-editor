@@ -115,55 +115,6 @@ void DeleteLineDefs(selection_c *lines)
 }
 
 
-/*
-   get the absolute height from which the textures are drawn
-*/
-
-int GetTextureRefHeight (int sidedef)
-{
-	int l, sector;
-	int otherside = NIL_OBJ;
-
-	/* find the sidedef on the other side of the LineDef, if any */
-
-	for (l = 0 ; l < NumLineDefs ; l++)
-	{
-		if (LineDefs[l]->right == sidedef)
-		{
-			otherside = LineDefs[l]->left;
-			break;
-		}
-		if (LineDefs[l]->left == sidedef)
-		{
-			otherside = LineDefs[l]->right;
-			break;
-		}
-	}
-	/* get the Sector number */
-
-	sector = SideDefs[sidedef]->sector;
-	/* if the upper texture is displayed,
-	   then the reference is taken from the other Sector */
-	if (otherside >= 0)
-	{
-		l = SideDefs[otherside]->sector;
-		if (l > 0)
-		{
-
-			if (Sectors[l]->ceilh < Sectors[sector]->ceilh
-					&& Sectors[l]->ceilh > Sectors[sector]->floorh)
-				sector = l;
-		}
-	}
-	/* return the altitude of the ceiling */
-
-	if (sector >= 0)
-		return Sectors[sector]->ceilh; /* textures are drawn from the ceiling down */
-	else
-		return 0; /* yuck! */
-}
-
-
 // this type represents one side of a linedef
 typedef int side_on_a_line_t;
 

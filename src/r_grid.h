@@ -110,9 +110,6 @@ public:
 	// choose the scale nearest to (and less than) the wanted one
 	void NearestScale(double want_scale);
 
-	void ScaleFromDigit(int digit);
-	void  StepFromDigit(int digit);
-
 	// move the origin so that the focus point of the last zoom
 	// operation (scale change) is map_x/y.
 	void RefocusZoom(int map_x, int map_y, float before_Scale);

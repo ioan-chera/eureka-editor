@@ -188,6 +188,7 @@ public:
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change
 	// in directory size or location, and directory contents (CRC).
+	// [ NOT USED YET.... ]
 	bool WasExternallyModified();
 
 	// backup the current wad into the given filename.

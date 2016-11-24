@@ -1173,6 +1173,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 }
 
 
+#if 0
 /*
  *  Print a list of the parameters with their current value.
  */
@@ -1223,6 +1224,7 @@ void dump_parameters(FILE *fp)
 		fputc ('\n', fp);
 	}
 }
+#endif
 
 
 /*

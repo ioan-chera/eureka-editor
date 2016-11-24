@@ -96,9 +96,6 @@ public:
 	void UnselectPics();
 
 private:
-	void AdjustHeight(s16_t *h, int delta);
-	void AdjustLight (s16_t *L, int delta);
-
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);
 

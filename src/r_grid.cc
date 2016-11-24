@@ -585,37 +585,6 @@ void Grid_State_c::NearestScale(double want_scale)
 }
 
 
-void Grid_State_c::ScaleFromDigit(int digit)
-{
-	// digit must be 1 to 9
-	SYS_ASSERT(1 <= digit && digit <= 9);
-
-	int result = digit_scales[digit - 1];
-
-	ScaleFromWidget(result);
-
-	if (main_win)
-	{
-		main_win->info_bar->SetScale(result);
-		main_win->scroll->AdjustPos();
-	}
-}
-
-
-void Grid_State_c::StepFromDigit(int digit)
-{
-	// digit must be 1 to 9
-	SYS_ASSERT(1 <= digit && digit <= 9);
-
-	int result = NUM_GRID_VALUES - digit;
-
-	StepFromWidget(result);
-
-	if (main_win)
-		main_win->info_bar->SetGrid(result);
-}
-
-
 bool Grid_ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "map_pos") == 0 && num_tok >= 4)

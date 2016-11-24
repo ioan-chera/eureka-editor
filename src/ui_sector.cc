@@ -741,48 +741,6 @@ void UI_SectorBox::UnselectPics()
 
 
 // FIXME: make a method of Sector class
-void UI_SectorBox::AdjustHeight(s16_t *h, int delta)
-{
-	// prevent overflow
-	if (delta > 0 && (int(*h) + delta) > 32767)
-	{
-		*h = 32767; return;
-	}
-	else if (delta < 0 && (int(*h) + delta) < -32767)
-	{
-		*h = -32767; return;
-	}
-
-	*h = *h + delta;
-}
-
-
-// FIXME: make a method of Sector class
-void UI_SectorBox::AdjustLight(s16_t *L, int delta)
-{
-	if (abs(delta) > 16)
-	{
-		*L = (delta > 0) ? 255 : 0;
-		return;
-	}
-
-	if (abs(delta) < 4)
-		*L += delta;
-	else
-	{
-		if (delta > 0)
-			*L = (*L | 15) + 1;
-		else
-			*L = (*L - 1) & ~15;
-	}
-
-	if (*L < 0)
-		*L = 0;
-	else if (*L > 255)
-		*L = 255;
-}
-
-
 void UI_SectorBox::UpdateTotal()
 {
 	which->SetTotal(NumSectors);
