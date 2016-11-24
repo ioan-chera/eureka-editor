@@ -18,8 +18,11 @@
 #
 #------------------------------------------------------------------------
 
+if $MAP_FORMAT is DOOM
 include "boom"
+endif
 
+# this must occur *after* including the Boom definitions
 supported_games doom doom2 heretic hexen
 
 map_formats DOOM HEXEN
