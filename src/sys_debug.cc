@@ -167,7 +167,7 @@ void LogSaveTo(FILE *dest_fp)
 	{
 		size_t rlen = fread(buffer, 1, sizeof(buffer), log_fp);
 
-		if (rlen <= 0)
+		if (rlen == 0)
 			break;
 
 		fwrite(buffer, 1, rlen, dest_fp);

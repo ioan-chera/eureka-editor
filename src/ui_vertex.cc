@@ -59,8 +59,6 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	pos_x->callback(x_callback, this);
 	pos_y->callback(y_callback, this);
 
-	Y += pos_y->h() + 4;
-
 
 	resizable(NULL);
 

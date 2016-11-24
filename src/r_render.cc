@@ -136,9 +136,6 @@ public:
 	float adjust_dx, adjust_dx_factor;
 	float adjust_dy, adjust_dy_factor;
 
-	// current highlighted wotsit
-	highlight_3D_info_t hl;
-
 	// navigation loop info
 	unsigned int nav_time;
 
@@ -147,15 +144,23 @@ public:
 	float nav_up, nav_down;
 	float nav_turn_L, nav_turn_R;
 
+	// current highlighted wotsit
+	highlight_3D_info_t hl;
+
 public:
-	Y_View() : p_type(0), screen(NULL),
-			   texturing(false), sprites(false), lighting(false),
-			   gravity(true),
-	           thing_sectors(),
-			   thsec_sector_num(0),
-			   thsec_invalidated(false),
-			   adjust_ld(-1), adjust_sd(-1),
-			   hl()
+	Y_View() :
+		p_type(0), px(), py(),
+		x(), y(), z(),
+		angle(), Sin(), Cos(),
+		sw(), sh(), screen(NULL),
+		texturing(false), sprites(false), lighting(false),
+		gravity(true),
+	    thing_sectors(),
+		thsec_sector_num(0),
+		thsec_invalidated(false),
+		adjust_ld(-1), adjust_sd(-1),
+		nav_time(0),
+		hl()
 	{ }
 
 	void SetAngle(float new_ang)
@@ -329,7 +334,9 @@ public:
 	bool fullbright;
 
 public:
-	DrawSurf() : kind(K_INVIS), img(NULL), fullbright(false)
+	DrawSurf() : kind(K_INVIS), h1(), h2(), tex_h(),
+				 img(NULL), col(), y_clip(),
+				 fullbright(false)
 	{ }
 
 	~DrawSurf()
@@ -750,8 +757,12 @@ private:
 	}
 
 public:
-	RendInfo() : walls(), active(), query_mode(0), depth_x(),
-				 hl_lines()
+	RendInfo() :
+		walls(), active(),
+		query_mode(0), query_sx(), query_sy(),
+		depth_x(), open_y1(), open_y2(),
+		hl_lines(),
+		saved_x_offset(), saved_y_offset()
 	{ }
 
 	~RendInfo()

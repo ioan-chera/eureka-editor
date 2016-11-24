@@ -75,6 +75,10 @@ public:
 	void toggle_all();
 
 private:
+	// deliberately don't implement copying
+	bitvec_c(const bitvec_c& other);
+
+private:
 	/* NOTE : these functions do no range checking! */
 
 	inline bool raw_get(int n) const

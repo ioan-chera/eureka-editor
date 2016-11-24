@@ -264,7 +264,7 @@ bool FileCopy(const char *src_name, const char *dest_name)
 	while (true)
 	{
 		size_t rlen = fread(buffer, 1, sizeof(buffer), src);
-		if (rlen <= 0)
+		if (rlen == 0)
 			break;
 
 		size_t wlen = fwrite(buffer, 1, rlen, dest);

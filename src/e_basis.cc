@@ -652,7 +652,7 @@ public:
 	int value;
 
 public:
-	edit_op_c() : action(0), objtype(0), field(0), objnum(0), ptr(NULL), value(0)
+	edit_op_c() : action(0), objtype(0), field(0), _pad(0), objnum(0), ptr(NULL), value(0)
 	{ }
 
 	~edit_op_c()

@@ -2940,8 +2940,8 @@ public:
 
 public:
 	UI_Check_Tags(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Tags",
-		              "Tag test results")
+		UI_Check_base(520, 286, all_mode, "Check : Tags", "Tag test results"),
+		fresh_tag(0)
 	{ }
 
 public:

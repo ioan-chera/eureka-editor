@@ -1946,7 +1946,7 @@ void CMD_DeleteMap()
 
 	short lev_num = edit_wad->LevelFind(Level_name);
 
-	if (lev_num < 0 || lev_num < 0)
+	if (lev_num < 0)
 	{
 		Beep("No such map ?!?");
 		return;

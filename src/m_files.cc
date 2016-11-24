@@ -147,7 +147,7 @@ public:
 	RecentFiles_c() : size(0)
 	{
 		memset(filenames, 0, sizeof(filenames));
-		memset(filenames, 0, sizeof(map_names));
+		memset(map_names, 0, sizeof(map_names));
 	}
 
 	~RecentFiles_c()
