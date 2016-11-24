@@ -875,6 +875,8 @@ void SEC_Disconnect(void)
 		}
 	}
 
+	delete[] mapping;
+
 	// finally move all vertices of selected sectors
 
 	selection_c all_verts(OBJ_VERTICES);

@@ -168,7 +168,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 		if (targa_header.pixel_bits != 24 && targa_header.pixel_bits != 32)
 		{
 			LogPrintf("Bad tga file: only 24 or 32 bit images supported\n");
-			delete pixels;
+			delete[] pixels;
 			return NULL;
 		}
 
@@ -200,7 +200,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 		if (targa_header.pixel_bits != 24 && targa_header.pixel_bits != 32)
 		{
 			LogPrintf("Bad tga file: only 24 or 32 bit images supported\n");
-			delete pixels;
+			delete[] pixels;
 			return NULL;
 		}
 

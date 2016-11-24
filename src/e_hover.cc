@@ -549,6 +549,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 	test.ld_side = ld_side;
 	test.result_side = result_side;
 
+	// this sets dx and dy
 	test.ComputeCastOrigin();
 
 	if (test.dx == 0 && test.dy == 0)
