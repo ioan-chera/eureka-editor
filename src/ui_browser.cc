@@ -30,7 +30,7 @@
 #include "im_color.h"
 #include "m_config.h"
 #include "m_game.h"
-#include "e_misc.h"		// recent_xxx
+#include "e_main.h"		// recent_xxx
 #include "e_things.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

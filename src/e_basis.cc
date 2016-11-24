@@ -33,7 +33,7 @@
 #include "lib_adler.h"
 
 #include "e_basis.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "m_strings.h"
 
 #include "m_game.h"  // g_default_xxx

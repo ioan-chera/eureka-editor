@@ -30,7 +30,7 @@
 #include "m_game.h"
 #include "e_hover.h"
 #include "e_linedef.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "e_path.h"
 #include "e_things.h"
 #include "e_vertex.h"

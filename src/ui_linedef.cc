@@ -23,7 +23,7 @@
 
 #include "e_checks.h"
 #include "e_linedef.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "e_things.h"
 #include "m_game.h"
 #include "w_rawdef.h"

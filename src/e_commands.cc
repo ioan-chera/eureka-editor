@@ -31,7 +31,7 @@
 #include "e_hover.h"
 #include "r_grid.h"
 #include "e_linedef.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_path.h"

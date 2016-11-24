@@ -28,7 +28,7 @@
 
 #include "e_cutpaste.h"
 #include "e_linedef.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "im_img.h"
 #include "m_game.h"
 #include "e_objects.h"

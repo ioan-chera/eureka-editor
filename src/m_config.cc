@@ -35,7 +35,7 @@
 #include "m_loadsave.h"
 #include "r_grid.h"
 #include "r_render.h"
-#include "e_misc.h"	  // RecUsed_xxx
+#include "e_main.h"	  // RecUsed_xxx
 
 #include "ui_window.h"  // meh!
 

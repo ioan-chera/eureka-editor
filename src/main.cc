@@ -34,7 +34,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 
-#include "e_misc.h"
+#include "e_main.h"
 #include "m_events.h"
 #include "r_render.h"
 

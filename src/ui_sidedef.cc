@@ -23,7 +23,7 @@
 
 #include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

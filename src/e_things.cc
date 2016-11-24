@@ -28,7 +28,7 @@
 
 #include "m_game.h"
 #include "e_things.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
 

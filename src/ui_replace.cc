@@ -22,7 +22,7 @@
 #include "ui_window.h"
 
 #include "e_path.h"  // GoToObject
-#include "e_misc.h"  // Selection_Clear
+#include "e_main.h"  // Selection_Clear
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "w_rawdef.h"

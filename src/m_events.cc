@@ -27,7 +27,7 @@
 #include "main.h"
 
 #include "m_events.h"
-#include "e_misc.h"
+#include "e_main.h"
 #include "e_hover.h"
 #include "r_render.h"
 

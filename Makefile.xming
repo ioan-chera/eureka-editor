@@ -59,7 +59,7 @@ OBJS = \
 	$(OBJ_DIR)/e_cutpaste.o  \
 	$(OBJ_DIR)/e_hover.o  \
 	$(OBJ_DIR)/e_linedef.o  \
-	$(OBJ_DIR)/e_misc.o  \
+	$(OBJ_DIR)/e_main.o  \
 	$(OBJ_DIR)/e_objects.o  \
 	$(OBJ_DIR)/e_path.o  \
 	$(OBJ_DIR)/e_sector.o  \

@@ -22,7 +22,7 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "e_misc.h"
+#include "e_main.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 
