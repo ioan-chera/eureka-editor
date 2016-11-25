@@ -130,6 +130,15 @@ void W_LoadColormap()
 		if (raw_colormap[i][c] == TRANS_PIXEL)
 			raw_colormap[i][c] = trans_replace;
 	}
+
+	// workaround for Harmony having a bugged colormap
+	if (raw_palette[0][0] == 0 &&
+		raw_palette[0][1] == 0 &&
+		raw_palette[0][2] == 0)
+	{
+		for (int k = 0 ; k < 32 ; k++)
+			raw_colormap[k][0] = 0;
+	}
 }
 
 
