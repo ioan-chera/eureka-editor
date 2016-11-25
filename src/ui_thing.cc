@@ -23,6 +23,7 @@
 #include "ui_window.h"
 
 #include "e_main.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 
@@ -141,19 +142,21 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 
 	int ang_mx = X + W - 75;
-	int ang_my = Y + 15;
+	int ang_my = Y + 17;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
-		int x = ang_mx + 30 * cos(i * 45 * M_PI / 180.0);
-		int y = ang_my - 30 * sin(i * 45 * M_PI / 180.0);
+		int dist = (i == 2 || i == 6) ? 32 : 35;
+
+		int x = ang_mx + dist * cos(i * 45 * M_PI / 180.0);
+		int y = ang_my - dist * sin(i * 45 * M_PI / 180.0);
 
 		ang_buts[i] = new Fl_Button(x - 9, y - 9, 24, 24, 0);
 
 		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
 		ang_buts[i]->align(FL_ALIGN_CENTER);
 		ang_buts[i]->clear_visible_focus();
-     	ang_buts[i]->callback(button_callback, this);
+		ang_buts[i]->callback(button_callback, this);
 	}
 
 	Y = Y + 50;
