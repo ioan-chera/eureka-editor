@@ -613,19 +613,19 @@ void CMD_Merge(void)
 	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
-			VT_Merge();
+			CMD_VT_Merge();
 			break;
 
 		case OBJ_LINEDEFS:
-			LIN_MergeTwo();
+			CMD_LIN_MergeTwo();
 			break;
 
 		case OBJ_SECTORS:
-			SEC_Merge();
+			CMD_SEC_Merge();
 			break;
 
 		case OBJ_THINGS:
-			TH_Merge();
+			CMD_TH_Merge();
 			break;
 
 		default:
@@ -640,19 +640,19 @@ void CMD_Disconnect(void)
 	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
-			VT_Disconnect();
+			CMD_VT_Disconnect();
 			break;
 
 		case OBJ_LINEDEFS:
-			LIN_Disconnect();
+			CMD_LIN_Disconnect();
 			break;
 
 		case OBJ_SECTORS:
-			SEC_Disconnect();
+			CMD_SEC_Disconnect();
 			break;
 
 		case OBJ_THINGS:
-			TH_Disconnect();
+			CMD_TH_Disconnect();
 			break;
 
 		default:
@@ -803,7 +803,7 @@ void CMD_RotateObjects_Dialog()
 }
 
 
-void GRID_Bump(void)
+void CMD_GRID_Bump(void)
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -813,7 +813,7 @@ void GRID_Bump(void)
 }
 
 
-void GRID_Set(void)
+void CMD_GRID_Set(void)
 {
 	int step = atoi(EXEC_Param[0]);
 
@@ -827,7 +827,7 @@ void GRID_Set(void)
 }
 
 
-void GRID_Zoom(void)
+void CMD_GRID_Zoom(void)
 {
 	// target scale is positive for NN:1 and negative for 1:NN
 
@@ -850,7 +850,7 @@ void GRID_Zoom(void)
 }
 
 
-void BR_CycleCategory(void)
+void CMD_BR_CycleCategory(void)
 {
 	if (! main_win->browser->visible())
 	{
@@ -863,7 +863,7 @@ void BR_CycleCategory(void)
 	main_win->browser->CycleCategory(dir);
 }
 
-void BR_ClearSearch(void)
+void CMD_BR_ClearSearch(void)
 {
 	if (! main_win->browser->visible())
 	{
@@ -875,7 +875,7 @@ void BR_ClearSearch(void)
 }
 
 
-void BR_Scroll(void)
+void CMD_BR_Scroll(void)
 {
 	if (! main_win->browser->visible())
 	{
@@ -1036,15 +1036,15 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"GRID_Bump",
-		&GRID_Bump
+		&CMD_GRID_Bump
 	},
 
 	{	"GRID_Set",
-		&GRID_Set
+		&CMD_GRID_Set
 	},
 
 	{	"GRID_Zoom",
-		&GRID_Zoom
+		&CMD_GRID_Zoom
 	},
 
 
@@ -1154,70 +1154,70 @@ static editor_command_t  command_table[] =
 	/* -------- linedef -------- */
 
 	{	"LIN_Flip",
-		&LIN_Flip,
+		&CMD_LIN_Flip,
 		/* flags */ "/verts /sides"
 	},
 
 	{	"LIN_SplitHalf",
-		&LIN_SplitHalf
+		&CMD_LIN_SplitHalf
 	},
 
 	{	"LIN_SelectPath",
-		&LIN_SelectPath,
+		&CMD_LIN_SelectPath,
 		/* flags */ "/add /onesided /sametex"
 	},
 
 	/* -------- sector -------- */
 
 	{	"SEC_Floor",
-		&SEC_Floor
+		&CMD_SEC_Floor
 	},
 
 	{	"SEC_Ceil",
-		&SEC_Ceil
+		&CMD_SEC_Ceil
 	},
 
 	{	"SEC_Light",
-		&SEC_Light
+		&CMD_SEC_Light
 	},
 
 	{	"SEC_SelectGroup",
-		&SEC_SelectGroup,
+		&CMD_SEC_SelectGroup,
 		/* flags */ "/add /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
 	{	"SEC_SwapFlats",
-		&SEC_SwapFlats
+		&CMD_SEC_SwapFlats
 	},
 
 	/* -------- thing -------- */
 
 	{	"TH_Spin",
-		&TH_SpinThings
+		&CMD_TH_SpinThings
 	},
 
 	/* -------- vertex -------- */
 
 	{	"VT_ShapeLine",
-		&VT_ShapeLine
+		&CMD_VT_ShapeLine
 	},
 
 	{	"VT_ShapeArc",
-		&VT_ShapeArc
+		&CMD_VT_ShapeArc
 	},
 
 	/* -------- browser -------- */
 
 	{	"BR_CycleCategory",
-		&BR_CycleCategory
+		&CMD_BR_CycleCategory
 	},
 
 	{	"BR_ClearSearch",
-		&BR_ClearSearch
+		&CMD_BR_ClearSearch
 	},
 
 	{	"BR_Scroll",
-		&BR_Scroll
+		&CMD_BR_Scroll
 	},
 
 	// end of command list

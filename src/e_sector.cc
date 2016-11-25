@@ -39,7 +39,7 @@
 #include "ui_window.h"
 
 
-void SEC_Floor(void)
+void CMD_SEC_Floor(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -79,7 +79,7 @@ void SEC_Floor(void)
 }
 
 
-void SEC_Ceil(void)
+void CMD_SEC_Ceil(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -169,7 +169,7 @@ void SectorsAdjustLight(int delta)
 }
 
 
-void SEC_Light(void)
+void CMD_SEC_Light(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -183,7 +183,7 @@ void SEC_Light(void)
 }
 
 
-void SEC_SwapFlats()
+void CMD_SEC_SwapFlats()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -248,7 +248,7 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 }
 
 
-void SEC_Merge(void)
+void CMD_SEC_Merge(void)
 {
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())

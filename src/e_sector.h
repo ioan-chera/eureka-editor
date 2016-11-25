@@ -97,13 +97,13 @@ void SectorsAdjustLight(int delta);
 
 /* commands */
 
-void SEC_Floor(void);
-void SEC_Ceil(void);
+void CMD_SEC_Floor(void);
+void CMD_SEC_Ceil(void);
 
-void SEC_Light(void);
+void CMD_SEC_Light(void);
 
-void SEC_Merge(void);
-void SEC_SwapFlats(void);
+void CMD_SEC_Merge(void);
+void CMD_SEC_SwapFlats(void);
 
 #endif  /* __EUREKA_E_SECTOR_H__ */
 

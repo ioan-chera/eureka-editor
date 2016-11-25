@@ -36,14 +36,17 @@ int VertexHowManyLineDefs(int v_num);
 void Vertex_MergeList(selection_c *list);
 bool Vertex_TryFixDangler(int v_num);
 
-void VT_Merge(void);
-void VT_Disconnect(void);
+/* commands */
 
-void LIN_Disconnect(void);
-void SEC_Disconnect(void);
+void CMD_VT_Merge(void);
 
-void VT_ShapeLine(void);
-void VT_ShapeArc (void);
+void CMD_VT_Disconnect(void);
+
+void CMD_LIN_Disconnect(void);
+void CMD_SEC_Disconnect(void);
+
+void CMD_VT_ShapeLine(void);
+void CMD_VT_ShapeArc (void);
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 

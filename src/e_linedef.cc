@@ -612,10 +612,10 @@ void FlipLineDefGroup(selection_c& flip)
 }
 
 
-/*
-   flip one or several LineDefs
-*/
-void LIN_Flip(void)
+//
+// flip one or several LineDefs
+//
+void CMD_LIN_Flip(void)
 {
 	selection_c list;
 
@@ -732,10 +732,10 @@ static bool DoSplitLineDef(int ld)
 }
 
 
-/*
-   split one or more LineDefs in two, adding new Vertices in the middle
-*/
-void LIN_SplitHalf(void)
+//
+// split one or more LineDefs in two, adding new Vertices in the middle
+//
+void CMD_LIN_SplitHalf(void)
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -920,7 +920,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 }
 
 
-void LIN_MergeTwo(void)
+void CMD_LIN_MergeTwo(void)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{

@@ -345,7 +345,7 @@ void Vertex_MergeList(selection_c *list)
 }
 
 
-void VT_Merge()
+void CMD_VT_Merge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -364,7 +364,7 @@ void VT_Merge()
 }
 
 
-void VT_Disconnect(void)
+void CMD_VT_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
@@ -567,7 +567,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 }
 
 
-void LIN_Disconnect(void)
+void CMD_LIN_Disconnect(void)
 {
 	// Note: the logic here is significantly different than the logic
 	//       in VT_Disconnect, since we want to keep linedefs in the
@@ -777,7 +777,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 }
 
 
-void SEC_Disconnect(void)
+void CMD_SEC_Disconnect(void)
 {
 	if (NumVertices == 0)
 	{
@@ -950,7 +950,7 @@ public:
 };
 
 
-void VT_ShapeLine(void)
+void CMD_VT_ShapeLine(void)
 {
 	if (edit.Selected->count_obj() < 3)
 	{
@@ -1185,7 +1185,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void VT_ShapeArc(void)
+void CMD_VT_ShapeArc(void)
 {
 	if (! EXEC_Param[0][0])
 	{

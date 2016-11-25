@@ -171,7 +171,7 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 
 /* Select/unselect all linedefs in non-forked path.
  */
-void LIN_SelectPath(void)
+void CMD_LIN_SelectPath(void)
 {
 	// determine starting linedef
 	if (edit.highlight.is_nil())
@@ -310,9 +310,10 @@ static bool GrowContiguousSectors(selection_c &seen, bool additive)
 }
 
 
-/* Select/unselect a contiguous group of sectors.
- */
-void SEC_SelectGroup(void)
+//
+// select/unselect a contiguous group of sectors.
+//
+void CMD_SEC_SelectGroup(void)
 {
 	// determine starting sector
 	if (edit.highlight.is_nil())

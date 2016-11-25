@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -57,9 +57,9 @@ int calc_new_angle(int angle, int diff);
 
 /* commands */
 
-void TH_SpinThings(void);
-void TH_Disconnect(void);
-void TH_Merge(void);
+void CMD_TH_SpinThings(void);
+void CMD_TH_Disconnect(void);
+void CMD_TH_Merge(void);
 
 
 #endif  /* __EUREKA_E_THINGS_H__ */

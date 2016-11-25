@@ -36,9 +36,9 @@ void GoToErrors();
 
 /* commands */
 
-void LIN_SelectPath(void);
+void CMD_LIN_SelectPath(void);
 
-void SEC_SelectGroup(void);
+void CMD_SEC_SelectGroup(void);
 
 void CMD_JumpToObject(void);
 void CMD_NextObject();

@@ -46,10 +46,10 @@ int calc_new_angle(int angle, int diff)
 }
 
 
-/*
- *  spin_thing - change the angle of things
- */
-void TH_SpinThings(void)
+//
+// spin_thing - change the angle of things
+//
+void CMD_TH_SpinThings(void)
 {
 	int degrees = atoi(EXEC_Param[0]);
 
@@ -137,11 +137,12 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 }
 
 
-/*  all things lying at same location (or very near) to the selected
- *  things are moved so they are more distinct -- about 8 units away
- *  from that location.
- */
-void TH_Disconnect(void)
+//
+//  all things lying at same location (or very near) to the selected
+//  things are moved so they are more distinct -- about 8 units away
+//  from that location.
+//
+void CMD_TH_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
@@ -191,8 +192,10 @@ void TH_Disconnect(void)
 }
 
 
-/* place all selected things at same location */
-void TH_Merge(void)
+//
+// place all selected things at same location
+//
+void CMD_TH_Merge(void)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
