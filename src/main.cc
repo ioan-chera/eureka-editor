@@ -1002,10 +1002,13 @@ int main(int argc, char *argv[])
 		//       placed at the correct spot (at the end)
 		MasterDir_Add(edit_wad);
 	}
-	else if (auto_load_recent &&
-	         ! (Iwad_name || Level_name))
+	// don't auto-load when --iwad or --warp was used on the command line
+	else if (auto_load_recent && ! (Iwad_name || Level_name))
 	{
-		M_TryOpenMostRecent();
+		if (M_TryOpenMostRecent())
+		{
+			MasterDir_Add(edit_wad);
+		}
 	}
 
 

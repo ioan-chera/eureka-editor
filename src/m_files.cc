@@ -486,8 +486,6 @@ bool M_TryOpenMostRecent()
 
 	edit_wad = wad;
 
-	MasterDir_Add(edit_wad);
-
 	return true;
 }
 
