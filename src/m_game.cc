@@ -323,7 +323,10 @@ public:
 	const char *fname;
 
 	// buffer containing the raw line
-	char readbuf[512];
+	char readbuf [512];
+
+	// buffer storing the tokens
+	char tokenbuf[512];
 
 	// the line parsed into tokens
 	int    argc;
@@ -357,14 +360,11 @@ static void M_TokenizeLine(parser_state_c *pst)
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
 
+	const char	*src  = pst->readbuf;
+	char		*dest = pst->tokenbuf;
+
 	bool		in_token = false;
 	bool		quoted   = false;
-
-	// create a buffer to contain the tokens [ FIXME: never freed ]
-	char *buf = StringNew((int)strlen(pst->readbuf) + 1);
-
-	const char	*src  = pst->readbuf;
-	char		*dest = buf;
 
 	pst->argc = 0;
 
@@ -490,9 +490,9 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		default_wall_tex	= argv[1];
-		default_floor_tex	= argv[2];
-		default_ceil_tex	= argv[3];
+		default_wall_tex	= StringDup(argv[1]);
+		default_floor_tex	= StringDup(argv[2]);
+		default_ceil_tex	= StringDup(argv[3]);
 	}
 
 	else if (y_stricmp(argv[0], "default_thing") == 0)
@@ -511,7 +511,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		linegroup_t * lg = new linegroup_t;
 
 		lg->group = argv[1][0];
-		lg->desc  = argv[2];
+		lg->desc  = StringDup(argv[2]);
 
 		line_groups[lg->group] = lg;
 	}
@@ -529,14 +529,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		int number = atoi(argv[1]);
 
 		info->group = argv[2][0];
-		info->desc  = argv[3];
+		info->desc  = StringDup(argv[3]);
 
 		int arg_count = MIN(nargs - 3, 5);
 
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
-				info->args[i] = argv[4 + i];
+				info->args[i] = StringDup(argv[4 + i]);
 		}
 
 		// FIXME : have separate tables for "special"
@@ -559,7 +559,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		sectortype_t *info = new sectortype_t;
 
-		info->desc = argv[2];
+		info->desc = StringDup(argv[2]);
 
 		sector_types[number] = info;
 	}
@@ -573,7 +573,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		tg->group = argv[1][0];
 		tg->color = ParseColor(argv[2]);
-		tg->desc  = argv[3];
+		tg->desc  = StringDup(argv[3]);
 
 		thing_groups[tg->group] = tg;
 	}
@@ -590,8 +590,8 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info->group  = argv[2][0];
 		info->flags  = ParseThingdefFlags(argv[3]);
 		info->radius = atoi(argv[4]);
-		info->sprite = argv[5];
-		info->desc   = argv[6];
+		info->sprite = StringDup(argv[5]);
+		info->desc   = StringDup(argv[6]);
 
 		if (thing_groups.find(info->group) == thing_groups.end())
 		{
@@ -614,7 +614,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		texturegroup_t * tg = new texturegroup_t;
 
 		tg->group = argv[1][0];
-		tg->desc  = argv[2];
+		tg->desc  = StringDup(argv[2]);
 
 		texture_groups[tg->group] = tg;
 	}
@@ -672,7 +672,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		def->base   = strtol(argv[2], NULL, 0);
 		def->length = strtol(argv[3], NULL, 0);
 
-		def->name = argv[4];
+		def->name = StringDup(argv[4]);
 		def->num_fields = 0;
 	}
 
@@ -699,14 +699,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		field->default_val = atoi(argv[3]);
 
-		field->name = argv[4];
+		field->name = StringDup(argv[4]);
 
 		// grab the keywords
 		field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{
-			field->keywords[i] = argv[5 + i];
+			field->keywords[i] = StringDup(argv[5 + i]);
 		}
 	}
 
