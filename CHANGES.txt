@@ -34,6 +34,10 @@ CHANGES IN Eureka 1.XX
 
 -  the "Open Map" dialog was improved
 
++  properly detect which ports can be used with each game
+
+-  beginnings of a port definition file for ZDoom
+
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").

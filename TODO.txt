@@ -38,16 +38,6 @@ General
 +  Key binding system for mouse buttons
    -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
 
-+  Proper system to specify which ports can be used with each game.
-
-   (a) each port specifies the games it supports
-       e.g. "supported_games X Y Z"
-
-   (b) each game can say "I am a variation of game XXX"
-       e.g. tnt,plutonia,freedoom2 are variation of "doom2"
-
-       if a port supports XXX, then it supports this game too
-
 
 
 Documentation
