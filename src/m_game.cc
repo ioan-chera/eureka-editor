@@ -100,8 +100,21 @@ void M_ClearAllDefinitions()
 	memset(&gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
 
-	// clear the parse variables
+	// clear the parse variables, pre-set a few vars
 	parse_vars.clear();
+
+	switch (Level_format)
+	{
+		case MAPF_Doom:
+			parse_vars[std::string("$MAP_FORMAT")] = std::string("DOOM");
+			break;
+
+		case MAPF_Hexen:
+			parse_vars[std::string("$MAP_FORMAT")] = std::string("HEXEN");
+			break;
+
+		default: break;
+	}
 }
 
 
@@ -796,7 +809,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 }
 
 
-void M_ParseSetCommand(parser_state_c *pst)
+void M_ParseSetVar(parser_state_c *pst)
 {
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
@@ -910,7 +923,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		// handle setting variables
 		if (y_stricmp(pst->argv[0], "set") == 0)
 		{
-			M_ParseSetCommand(pst);
+			M_ParseSetVar(pst);
 			continue;
 		}
 
