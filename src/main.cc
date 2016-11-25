@@ -754,6 +754,17 @@ static void LoadResourceFile(const char *filename)
 }
 
 
+static void Main_LoadIWAD()
+{
+	// Load the IWAD (read only)
+	game_wad = Wad_file::Open(Iwad_name, 'r');
+	if (! game_wad)
+		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
+
+	MasterDir_Add(game_wad);
+}
+
+
 //
 // load all game/port definitions (*.ugh)
 //
@@ -785,12 +796,7 @@ void Main_LoadResources()
 	MasterDir_CloseAll();
 
 
-	// Load the IWAD (read only)
-	game_wad = Wad_file::Open(Iwad_name, 'r');
-	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
-
-	MasterDir_Add(game_wad);
+	Main_LoadIWAD();
 
 
 	// Load all resource wads
@@ -982,12 +988,13 @@ int main(int argc, char *argv[])
 
 	if (Pwad_list.size() > 0)
 	{
+		// this fatal errors on any missing file
+		// [ hence the Open() below is very unlikely to fail ]
 		M_ValidateGivenFiles();
 
 		Pwad_name = Pwad_list[0];
 
 		edit_wad = Wad_file::Open(Pwad_name, 'a');
-
 		if (! edit_wad)
 			FatalError("Cannot load pwad: %s\n", Pwad_name);
 
@@ -1026,8 +1033,8 @@ int main(int argc, char *argv[])
 		goto quit;
 
 
-	// FIXME: only need to load the IWAD here
-	Main_LoadResources();
+	// load *just* the iwad, the following few functions need it
+	Main_LoadIWAD();
 
 	Level_name = DetermineLevel();
 
