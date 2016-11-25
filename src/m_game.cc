@@ -790,18 +790,18 @@ static bool M_ParseConditional(parser_state_c *pst)
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
-	if (nargs == 3 &&
-		y_stricmp(argv[0], "$MAP_FORMAT") == 0 &&
-		y_stricmp(argv[1], "is") == 0)
+	if (nargs == 3 && y_stricmp(argv[1], "is") == 0)
 	{
-		if (y_stricmp(argv[2], "DOOM") == 0)
-			return Level_format == MAPF_Doom;
+		if (strlen(argv[0]) < 2 || argv[0][0] != '$')
+			FatalError("%s(%d): expected variable in if statement\n",
+						pst->fname, pst->lineno, argv[2]);
 
-		if (y_stricmp(argv[2], "HEXEN") == 0)
-			return Level_format == MAPF_Hexen;
+		// tokens are stored in pst->tokenbuf, so this is OK
+		y_strupr(argv[0]);
 
-		FatalError("%s(%d): unknown map format '%s'\n",
-					pst->fname, pst->lineno, argv[2]);
+		std::string var_value = parse_vars[std::string(argv[0])];
+
+		return (y_stricmp(var_value.c_str(), argv[2]) == 0);
 	}
 
 	FatalError("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
@@ -820,6 +820,9 @@ void M_ParseSetVar(parser_state_c *pst)
 	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 		FatalError("%s(%d): variable name too short or lacks '$' prefix\n",
 					pst->fname, pst->lineno);
+
+	// tokens are stored in pst->tokenbuf, so this is OK
+	y_strupr(argv[0]);
 
 	parse_vars[std::string(argv[0])] = std::string(argv[1]);
 }
