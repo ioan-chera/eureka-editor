@@ -1173,64 +1173,10 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 }
 
 
-#if 0
-/*
- *  Print a list of the parameters with their current value.
- */
-void dump_parameters(FILE *fp)
-{
-	const opt_desc_t *o;
-	int desc_maxlen = 0;
-	int name_maxlen = 0;
-
-	for (o = options; o->opt_type != OPT_END; o++)
-	{
-		int len = (int)strlen (o->desc);
-		desc_maxlen = MAX(desc_maxlen, len);
-		if (o->long_name)
-		{
-			len = (int)strlen (o->long_name);
-			name_maxlen = MAX(name_maxlen, len);
-		}
-	}
-
-	for (o = options; o->opt_type != OPT_END; o++)
-	{
-		if (! o->long_name)
-			continue;
-
-		fprintf (fp, "%-*s  %-*s  ", name_maxlen, o->long_name, desc_maxlen, o->desc);
-
-		if (o->opt_type == OPT_BOOLEAN)
-			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
-		else if (o->opt_type == OPT_INTEGER)
-			fprintf (fp, "%d", *((int *) o->data_ptr));
-		else if (o->opt_type == OPT_COLOR)
-			fprintf (fp, "%06x", *((rgb_color_t *) o->data_ptr) >> 8);
-		else if (o->opt_type == OPT_STRING)
-		{
-			const char *str = *((const char **) o->data_ptr);
-			fprintf(fp, "'%s'", str ? str : "--none--");
-		}
-		else if (o->opt_type == OPT_STRING_LIST)
-		{
-			string_list_t *list = (string_list_t *)o->data_ptr;
-
-			if (list->empty())
-				fprintf(fp, "--none--");
-			else for (unsigned int i = 0 ; i < list->size() ; i++)
-				fprintf(fp, "'%s' ", list->at(i));
-		}
-		fputc ('\n', fp);
-	}
-}
-#endif
-
-
-/*
- *  Print a list of all command line options (usage message).
- */
-void dump_command_line_options(FILE *fp)
+//
+// print a list of all command line options (usage message).
+//
+void M_PrintCommandLineOptions(FILE *fp)
 {
 	const opt_desc_t *o;
 	int name_maxlen = 0;

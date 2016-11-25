@@ -842,7 +842,7 @@ static void ShowHelp()
 			"\n"
 			"Available options are:\n");
 
-	dump_command_line_options(stdout);
+	M_PrintCommandLineOptions(stdout);
 
 	fflush(stdout);
 }

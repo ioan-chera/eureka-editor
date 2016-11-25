@@ -112,8 +112,7 @@ int M_WriteConfigFile();
 int M_ParseEnvironmentVars();
 int M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
-void dump_parameters (FILE *fp);
-void dump_command_line_options (FILE *fp);
+void M_PrintCommandLineOptions(FILE *fp);
 
 
 // returns number of tokens, zero for comment, negative on error
