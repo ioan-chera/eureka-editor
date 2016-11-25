@@ -1,0 +1,78 @@
+#------------------------------------------------------------------------
+#  HARMONY 1.1 definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2016  Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+player_size 16 56 41
+
+sky_flat  F_SKY1
+
+default_textures  PANEL2  FLAT10  FLAT20
+default_thing  2011
+
+include "doom_specials"
+
+
+#---- COLORS --------------------
+
+color sky  244
+
+color wall    28   3
+color floor  140 130
+color invis   14  24
+
+color missing  39
+
+color unknown_tex   241
+color unknown_flat  250
+
+
+#---- THINGS ----------------
+
+thinggroup p 4F4 "Player"
+thinggroup m F00 "Monster"
+thinggroup w FA0 "Weapon"
+thinggroup a 850 "Ammunition"
+thinggroup h 280 "Health && Armor"
+thinggroup b 280 "Bonus"
+thinggroup k F0F "Key"
+thinggroup d 66C "Decoration"
+thinggroup g 850 "Gore"
+thinggroup l 66C "Light Source"
+thinggroup n 66C "Natural"
+thinggroup - 0BD "OTHER"
+
+thing    1 p -  16 PLAY   "Player 1 start"    #0.30
+thing    2 p -  16 PLAY   "Player 2 start"    #0.30
+thing    3 p -  16 PLAY   "Player 3 start"    #0.30
+thing    4 p -  16 PLAY   "Player 4 start"    #0.30
+thing   11 p t  16 PLAYF1 "Deathmatch start"  #0.30
+thing   14 p t  16 TFOG   "Teleport exit"
+
+
+# FIXME : all the other things
+
+
+#---- TEXTURES ----------------
+
+# TODO
+
+#---- FLATS ----------------
+
+# TODO
+
