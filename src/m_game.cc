@@ -296,13 +296,17 @@ typedef enum
 
 #define MAX_INCLUDE_LEVEL  10
 
-typedef struct
+class parser_state_c
 {
+public:
 	// current line number
 	int lineno;
 
-	// filename (generally without any directories)
+	// filename for error messages (lacks the directory)
 	const char *fname;
+
+	// current set of variables, names include the '$' prefix
+	std::map< std::string, std::string > vars;
 
 	// buffer containing the raw line
 	char readbuf[512];
@@ -318,14 +322,24 @@ typedef struct
 	// BOOM generalized linedef stuff
 	int current_gen_line;
 
-} parser_state_t;
+public:
+	parser_state_c() :
+		lineno(0), fname(NULL),
+		vars(), argc(0),
+		cond(PCOND_NONE), cond_lineno(),
+		current_gen_line(-1)
+	{
+		memset(readbuf, 0, sizeof(readbuf));
+		memset(argv,    0, sizeof(argv));
+	}
+};
 
 
 static const char *const bad_arg_count =
 		"%s(%d): directive \"%s\" takes %d parameters\n";
 
 
-static void M_TokenizeLine(parser_state_t *pst)
+static void M_TokenizeLine(parser_state_c *pst)
 {
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
@@ -393,7 +407,7 @@ static void M_TokenizeLine(parser_state_t *pst)
 }
 
 
-static void M_ParseNormalLine(parser_state_t *pst)
+static void M_ParseNormalLine(parser_state_c *pst)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -698,7 +712,7 @@ static void M_ParseNormalLine(parser_state_t *pst)
 }
 
 
-static void M_ParseGameCheckLine(parser_state_t *pst, parse_check_info_t *check_info)
+static void M_ParseGameCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -723,7 +737,7 @@ static void M_ParseGameCheckLine(parser_state_t *pst, parse_check_info_t *check_
 }
 
 
-static void M_ParsePortCheckLine(parser_state_t *pst, parse_check_info_t *check_info)
+static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -756,7 +770,7 @@ static void M_ParsePortCheckLine(parser_state_t *pst, parse_check_info_t *check_
 }
 
 
-static bool M_ParseConditional(parser_state_t *pst)
+static bool M_ParseConditional(parser_state_c *pst)
 {
 	// returns the result of the "IF" test, true or false.
 
@@ -782,6 +796,22 @@ static bool M_ParseConditional(parser_state_t *pst)
 }
 
 
+void M_ParseSetCommand(parser_state_c *pst)
+{
+	char **argv  = pst->argv + 1;
+	int    nargs = pst->argc - 1;
+
+	if (nargs != 2)
+		FatalError(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
+
+	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
+		FatalError("%s(%d): variable name too short or lacks '$' prefix\n",
+					pst->fname, pst->lineno);
+
+	pst->vars[std::string(argv[0])] = std::string(argv[1]);
+}
+
+
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
@@ -796,16 +826,12 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		prettyname = fl_filename_name(filename);
 
 
-	parser_state_t parser_state;
-
-	memset(&parser_state, 0, sizeof(parser_state));
+	parser_state_c parser_state;
 
 	// this is a bit silly, but makes it easier to move code around
-	parser_state_t *pst = &parser_state;
+	parser_state_c *pst = &parser_state;
 
 	pst->fname = prettyname;
-	pst->current_gen_line = -1;
-	pst->cond = PCOND_NONE;
 
 
 	// read the definition file, line by line
@@ -861,6 +887,13 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 
 
+		// handle setting variables
+		if (y_stricmp(pst->argv[0], "set") == 0)
+		{
+			M_ParseSetCommand(pst);
+			continue;
+		}
+
 		// handle includes
 		if (y_stricmp(pst->argv[0], "include") == 0)
 		{
@@ -868,7 +901,8 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 				FatalError(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
-				FatalError("%s(%d): Too many includes (check for a loop)\n", pst->fname, pst->lineno);
+				FatalError("%s(%d): Too many includes (check for a loop)\n",
+							pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
 			const char * new_name = FindDefinitionFile(new_folder, pst->argv[1]);
