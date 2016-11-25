@@ -79,6 +79,7 @@ typedef struct
 	char group;      // Thing group
 	short flags;     // Flags
 	short radius;    // Radius of thing
+	float scale;	 // Scaling (1.0 is normal)
 	const char *desc;  // Short description of thing
 	const char *sprite;  // Root of name of sprite for thing
 	rgb_color_t color;   // RGB color (from group)

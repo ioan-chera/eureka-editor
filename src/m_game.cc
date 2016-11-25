@@ -580,7 +580,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 	else if (y_stricmp(argv[0], "thing") == 0)
 	{
-		if (nargs != 6)
+		if (nargs < 6)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 6);
 
 		thingtype_t * info = new thingtype_t;
@@ -592,6 +592,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info->radius = atoi(argv[4]);
 		info->sprite = StringDup(argv[5]);
 		info->desc   = StringDup(argv[6]);
+		info->scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
 
 		if (thing_groups.find(info->group) == thing_groups.end())
 		{
@@ -1234,7 +1235,7 @@ const thingtype_t * M_GetThingType(int type)
 
 	static thingtype_t dummy_type =
 	{
-		0, 0, UNKNOWN_THING_RADIUS,
+		0, 0, UNKNOWN_THING_RADIUS, 1.0f,
 		"UNKNOWN TYPE", "NULL",
 		UNKNOWN_THING_COLOR
 	};
