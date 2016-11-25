@@ -24,7 +24,9 @@
 #
 #------------------------------------------------------------------------
 
+if $ALLOW_BOOM is 1
 include "boom"
+endif
 
 feature tx_start 1
 

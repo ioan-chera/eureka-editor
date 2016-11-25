@@ -25,7 +25,9 @@
 #
 #------------------------------------------------------------------------
 
+if $ALLOW_BOOM is 1
 include "boom"
+endif
 
 feature 3d_midtex 1
 

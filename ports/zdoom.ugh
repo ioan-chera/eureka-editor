@@ -18,11 +18,17 @@
 #
 #------------------------------------------------------------------------
 
-if $MAP_FORMAT is DOOM
+# disable all Boom defs for Hexen format maps
+if $MAP_FORMAT is HEXEN
+set $ALLOW_BOOM 0
+endif
+
+# be Boom compatible, but only for the DOOM games
+if $ALLOW_BOOM is 1
 include "boom"
 endif
 
-# this must occur *after* including the Boom definitions
+
 supported_games doom doom2 heretic hexen
 
 map_formats DOOM HEXEN
