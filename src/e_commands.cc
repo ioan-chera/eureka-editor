@@ -298,7 +298,7 @@ void CMD_BrowserMode(void)
 {
 	if (! EXEC_Param[0][0])
 	{
-		Beep("Missing parameter to CMD_BrowserMode");
+		Beep("BrowserMode: missing mode");
 		return;
 	}
 
@@ -421,7 +421,7 @@ static void ACT_SelectBox_release(void)
 	// a mere click and release will unselect everything
 	// FIXME : REVIEW THIS
 	if (x1 == x2 && y1 == y2)
-		CMD_UnselectAll();
+		ExecuteCommand("UnselectAll");
 	else
 		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 
@@ -668,7 +668,7 @@ void CMD_Zoom(void)
 
 	if (delta == 0)
 	{
-		Beep("Bad parameter to CMD_Zoom");
+		Beep("Zoom: bad or missing value");
 		return;
 	}
 
