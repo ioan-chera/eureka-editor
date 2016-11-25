@@ -679,9 +679,6 @@ typedef std::map<int, Img_c *> sprite_map_t;
 static sprite_map_t sprites;
 
 
-static Img_c * CreateDogSprite();
-
-
 static void DeleteSprite(const sprite_map_t::value_type& P)
 {
 	delete P.second;
@@ -751,7 +748,7 @@ Img_c * W_GetSprite(int type)
 			// missing sprite looks ugly in the thing browser.
 
 			if (y_stricmp(info->sprite, "DOGS") == 0)
-				result = CreateDogSprite();
+				result = IM_CreateDogSprite();
 		}
 		else
 		{
@@ -798,60 +795,6 @@ Img_c * W_GetSprite(int type)
 	return result;
 }
 
-
-//
-// This dog sprite was sourced from OpenGameArt.org
-// Authors are 'Benalene' and 'qudobup' (users on the OGA site).
-// License is CC-BY 3.0 (Creative Commons Attribution license).
-//
-
-static const rgb_color_t dog_palette[] =
-{
-	0x302020ff,
-	0x944921ff,
-	0x000000ff,
-	0x844119ff,
-	0x311800ff,
-	0x4A2400ff,
-	0x633119ff,
-};
-
-
-static const char *dog_image_text[] =
-{
-	"       aaaa                                 ",
-	"      abbbba                                ",
-	"     abbbbbba                               ",
-	" aaaabcbbbbbda                              ",
-	"aeedbbbfbbbbda                              ",
-	"aegdddbbdbbdbbaaaaaaaaaaaaaaaaa           a ",
-	"affggddbgddgbccceeeeeeeeeeeeeeeaa        aba",
-	" affgggdfggfccceeeeeeeeeeeeeefffgaaa   aaba ",
-	"  afffaafgecccefffffffffffffffggggddaaabbba ",
-	"   aaa  aeeccggggffffffffffffggddddbbbbbaa  ",
-	"         accbdddggfffffffffffggdbbbbbbba    ",
-	"          aabbdbddgfffffffffggddbaaaaaa     ",
-	"            abbbbdddfffffffggdbbba          ",
-	"            abbbbbbdddddddddddbbba          ",
-	"           aeebbbbbbbbaaaabbbbbbbba         ",
-	"           aeebbbbbaaa    aeebbbbbba        ",
-	"          afebbbbaa       affeebbbba        ",
-	"         agfbbbaa         aggffabbbba       ",
-	"        agfebba           aggggaabbba       ",
-	"      aadgfabba            addda abba       ",
-	"     abbddaabbbaa           adddaabba       ",
-	"    abbbba  abbbba          adbbaabba       ",
-	"     aaaa    abbba         abbba  abba      ",
-	"              aaa         abbba   abba      ",
-	"                         abbba   abbba      ",
-	"                          aaa     aaa       "
-};
-
-
-static Img_c * CreateDogSprite()
-{
-	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

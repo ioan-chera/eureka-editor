@@ -30,6 +30,17 @@
 #include "m_game.h"
 
 
+static int missing_tex_color;
+static int unknown_tex_color;
+static int unknown_flat_color;
+static int unknown_sprite_color;
+
+static Img_c * missing_tex_image;
+static Img_c * unknown_tex_image;
+static Img_c * unknown_flat_image;
+static Img_c * unknown_sprite_image;
+
+
 /*
  *  Img_c::Img_c - default constructor
  *
@@ -312,22 +323,12 @@ void Img_c::test_make_RGB()
 //------------------------------------------------------------------------
 
 
-static int missing_tex_color;
-static int unknown_tex_color;
-static int unknown_flat_color;
-static int unknown_sprite_color;
-
-static Img_c * missing_tex_image;
-static Img_c * unknown_tex_image;
-static Img_c * unknown_flat_image;
-static Img_c * unknown_sprite_image;
-
-
 void IM_ResetDummyTextures()
 {
 	missing_tex_color  = -1;
 	unknown_tex_color  = -1;
 	unknown_flat_color = -1;
+	unknown_sprite_color = -1;
 }
 
 
@@ -562,6 +563,63 @@ Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 	}
 
 	return img;
+}
+
+
+//------------------------------------------------------------------------
+
+//
+// This dog sprite was sourced from OpenGameArt.org
+// Authors are 'Benalene' and 'qudobup' (users on the OGA site).
+// License is CC-BY 3.0 (Creative Commons Attribution license).
+//
+
+static const rgb_color_t dog_palette[] =
+{
+	0x302020ff,
+	0x944921ff,
+	0x000000ff,
+	0x844119ff,
+	0x311800ff,
+	0x4A2400ff,
+	0x633119ff,
+};
+
+
+static const char *dog_image_text[] =
+{
+	"       aaaa                                 ",
+	"      abbbba                                ",
+	"     abbbbbba                               ",
+	" aaaabcbbbbbda                              ",
+	"aeedbbbfbbbbda                              ",
+	"aegdddbbdbbdbbaaaaaaaaaaaaaaaaa           a ",
+	"affggddbgddgbccceeeeeeeeeeeeeeeaa        aba",
+	" affgggdfggfccceeeeeeeeeeeeeefffgaaa   aaba ",
+	"  afffaafgecccefffffffffffffffggggddaaabbba ",
+	"   aaa  aeeccggggffffffffffffggddddbbbbbaa  ",
+	"         accbdddggfffffffffffggdbbbbbbba    ",
+	"          aabbdbddgfffffffffggddbaaaaaa     ",
+	"            abbbbdddfffffffggdbbba          ",
+	"            abbbbbbdddddddddddbbba          ",
+	"           aeebbbbbbbbaaaabbbbbbbba         ",
+	"           aeebbbbbaaa    aeebbbbbba        ",
+	"          afebbbbaa       affeebbbba        ",
+	"         agfbbbaa         aggffabbbba       ",
+	"        agfebba           aggggaabbba       ",
+	"      aadgfabba            addda abba       ",
+	"     abbddaabbbaa           adddaabba       ",
+	"    abbbba  abbbba          adbbaabba       ",
+	"     aaaa    abbba         abbba  abba      ",
+	"              aaa         abbba   abba      ",
+	"                         abbba   abbba      ",
+	"                          aaa     aaa       "
+};
+
+
+Img_c * IM_CreateDogSprite()
+{
+	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
 }
 
 //--- editor settings ---

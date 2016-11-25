@@ -113,6 +113,7 @@ Img_c * IM_UnknownFlat();
 Img_c * IM_UnknownSprite();
 
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
+Img_c * IM_CreateDogSprite();
 
 Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
