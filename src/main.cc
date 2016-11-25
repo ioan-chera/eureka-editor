@@ -744,6 +744,7 @@ static void LoadResourceFile(const char *filename)
 	MasterDir_Add(wad);
 
 	// load corresponding mod file if it exists
+	// [ TODO : probably ahould do this in ManageProject dialog instead of here ]
 	const char *mod_name = DetermineMod(filename);
 
 	if (M_CanLoadDefinitions("mods", mod_name))
@@ -753,13 +754,15 @@ static void LoadResourceFile(const char *filename)
 }
 
 
+//
+// load all game/port definitions (*.ugh)
+//
 void Main_LoadResources()
 {
 	LogPrintf("\n");
 	LogPrintf("----- Loading Resources -----\n");
 
-	// Load game definitions (*.ugh)
-	M_InitDefinitions();
+	M_ClearAllDefinitions();
 
 	Game_name = DetermineGame(Iwad_name);
 

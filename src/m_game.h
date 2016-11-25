@@ -198,8 +198,10 @@ extern int num_gen_linetypes;
 
 //------------------------------------------------------------------------
 
-void M_InitDefinitions();
+void M_ClearAllDefinitions();
+
 void M_LoadDefinitions(const char *folder, const char *name);
+
 bool M_CanLoadDefinitions(const char *folder, const char *name);
 
 typedef enum
@@ -231,7 +233,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *prettyname = NULL,
 						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
-void M_FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 

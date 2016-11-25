@@ -57,13 +57,13 @@ generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 
 int num_gen_linetypes;
 
+// variables which are "set" in def files
+static std::map< std::string, std::string > parse_vars;
 
-/*
- *  Create empty lists for game definitions
- */
-void M_InitDefinitions()
+
+static void M_FreeAllDefinitions()
 {
-	// FIXME: delete the contents
+	// FIXME: prevent memory leak, delete contents of these vectors
 
     line_groups.clear();
     line_types.clear();
@@ -75,6 +75,16 @@ void M_InitDefinitions()
 	texture_groups.clear();
 	texture_assigns.clear();
 	flat_assigns.clear();
+}
+
+
+//
+//  this is called each time the full set of definitions
+//  (game, port, resource files) are loaded.
+//
+void M_ClearAllDefinitions()
+{
+	M_FreeAllDefinitions();
 
 	// reset game information
 	memset(&game_info, 0, sizeof(game_info));
@@ -89,15 +99,9 @@ void M_InitDefinitions()
 	// reset generalized types
 	memset(&gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
-}
 
-
-/*
- *  Free all memory allocated to game definitions
- */
-void M_FreeDefinitions()
-{
-	// TODO ??
+	// clear the parse variables
+	parse_vars.clear();
 }
 
 
@@ -305,9 +309,6 @@ public:
 	// filename for error messages (lacks the directory)
 	const char *fname;
 
-	// current set of variables, names include the '$' prefix
-	std::map< std::string, std::string > vars;
-
 	// buffer containing the raw line
 	char readbuf[512];
 
@@ -324,8 +325,7 @@ public:
 
 public:
 	parser_state_c() :
-		lineno(0), fname(NULL),
-		vars(), argc(0),
+		lineno(0), fname(NULL), argc(0),
 		cond(PCOND_NONE), cond_lineno(),
 		current_gen_line(-1)
 	{
@@ -808,10 +808,17 @@ void M_ParseSetCommand(parser_state_c *pst)
 		FatalError("%s(%d): variable name too short or lacks '$' prefix\n",
 					pst->fname, pst->lineno);
 
-	pst->vars[std::string(argv[0])] = std::string(argv[1]);
+	parse_vars[std::string(argv[0])] = std::string(argv[1]);
 }
 
 
+//
+//  this is main function for parsing a definition file.
+//
+//  when purpose is PURPOSE_GameCheck or PURPOSE_PortCheck, then
+//  only minimal parsing occurs, in particular the "include", "set"
+//  and "if".."endif" directives are NOT handled.
+//
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
@@ -851,6 +858,19 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 
 		int nargs = pst->argc - 1;
+
+
+		// handle the special game or port checks
+		if (purpose == PURPOSE_GameCheck)
+		{
+			M_ParseGameCheckLine(pst, check_info);
+			continue;
+		}
+		else if (purpose == PURPOSE_PortCheck)
+		{
+			M_ParsePortCheckLine(pst, check_info);
+			continue;
+		}
 
 
 		// handle conditionals: if...else...endif
@@ -894,6 +914,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 		}
 
+
 		// handle includes
 		if (y_stricmp(pst->argv[0], "include") == 0)
 		{
@@ -925,22 +946,8 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		}
 
 
-		// all other lines are handled by a purpose-orientated function
-
-		switch (purpose)
-		{
-			case PURPOSE_GameCheck:
-				M_ParseGameCheckLine(pst, check_info);
-				break;
-
-			case PURPOSE_PortCheck:
-				M_ParsePortCheckLine(pst, check_info);
-				break;
-
-			default:
-				M_ParseNormalLine(pst);
-				break;
-		}
+		// handle everything else
+		M_ParseNormalLine(pst);
 	}
 
 	// check for an unterminated conditional
