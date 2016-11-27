@@ -57,15 +57,89 @@ thinggroup l 66C "Light Source"
 thinggroup n 66C "Natural"
 thinggroup - 0BD "OTHER"
 
-thing    1 p -  16 PLAY   "Player 1 start"    #0.30
-thing    2 p -  16 PLAY   "Player 2 start"    #0.30
-thing    3 p -  16 PLAY   "Player 3 start"    #0.30
-thing    4 p -  16 PLAY   "Player 4 start"    #0.30
-thing   11 p t  16 PLAYF1 "Deathmatch start"  #0.30
-thing   14 p t  16 TFOG   "Teleport exit"
+thing    1 p -   16 PLAY   "Player 1 start"    0.30
+thing    2 p -   16 PLAY   "Player 2 start"    0.30
+thing    3 p -   16 PLAY   "Player 3 start"    0.30
+thing    4 p -   16 PLAY   "Player 4 start"    0.30
+thing   11 p t   16 PLAYF1 "Deathmatch start"  0.30
+thing   14 p t   16 TFOG   "Teleport exit"
+
+thing    5 k nl  20 BKEY   "Green keycard"    0.30
+thing    6 k nl  20 YKEY   "Yellow keycard"   0.30
+thing   13 k nl  20 RKEY   "Purple keycard"   0.30
+thing   38 k nl  20 BSKU   "Green PP key"     0.30
+thing   39 k nl  20 YSKU   "Yellow PP key"    0.30
+thing   40 k nl  20 RSKU   "Purple PP key"    0.30
+
+thing    8 b n   20 BPAKA   "Backpack"        0.30
+thing 2026 b n   20 PMAPA   "Computer map"    0.30
+thing 2010 b n   20 ROCKA   "Time Bomb"       0.30
 
 
-# FIXME : all the other things
+thing   17 d -   20 CELPA   "Chaos bars"         0.30
+thing   26 d -   16 POL6A   "Shootable crate"    0.30
+thing   30 d -   16 COL1A   "Big Mushroom"       0.30
+thing   34 d -   20 CBRAA   "White candle"       0.30
+thing   36 d -   16 COL5A   "Looping explosion"  0.30
+thing   45 d -   16 TGRNA   "Dopefish"           0.50
+thing   46 d -   16 TREDA   "Green splash"       0.30
+thing   48 d -   16 ELECA   "Tall lamp"          0.30
+
+thing   28 d -   16 POL2A   "Tentacle"            0.30
+thing   27 d -   16 SMT2A   "Silver rocket"       0.30
+thing   29 d -   16 POL3A   "Silver rocket launched" 0.30
+thing   31 d -   16 COL2A   "Truck pipe"          0.30
+thing   32 d -   16 COL3A   "Abducted Amira"      0.30
+thing   33 d -   16 COL4A   "Arty sphere with heads"  0.30
+thing   42 d -   16 FSKUA   "Dripping water"      0.30
+thing   51 d -   16 GOR3A   "Neutronbeam blocker" 0.30
+thing   54 d -   32 TRE2A   "Large tree"          0.30
+thing   55 d -   16 SMBTA   "Fire"                0.30
+thing   56 d -   16 SMGTA   "Spark from ceiling"  0.30
+thing   57 d -   16 SMRTA   "Firebox"             0.30
+thing   63 d -   20 GOR1A   "Hanging fire"        0.30
+thing   73 d -   16 HDB1A   "Hanging chain"       0.30
+thing   74 d -   16 HDB2A   "Stored miniguns"     0.30
+thing   75 d -   16 HDB3A   "Stored shotguns"     0.30
+thing   79 d -   20 HEADA   "Crate explosion"     0.30
+thing   81 d -   20 BRS1A   "Hanging light"       0.30
+
+thing   15 g -   20 ARM2B   "Dead Amazone"      0.30
+thing   19 g -   20 ARM1B   "Dead Follower"     0.30
+thing   21 g -   20 SARGN   "Dead Beastling"    0.30
+thing   44 g -   16 TBLUA   "Dead Beastling 2"  0.30
+thing 2007 g -   20 CEYEB   "Flies"             0.30
+
+thing 2028 d -   16 COLUA   "Laser lamp"        0.30
+thing 2035 d -   10 BAR1A   "Red barrel"        0.30
+thing 3006 d -   16 SKULA   "Mine"              0.30
+
+thing 2001 w -   20 SHOTA   "Shotgun"           0.30
+thing 2002 w -   20 MGUNA   "Minigun"           0.30
+thing 2003 w -   20 LAUNA   "Grenade launcher"  0.30
+thing 2004 w -   20 PLASA   "Entrophy thrower"  0.30
+
+thing 2008 a -   20 SHELA   "Shotgun shells"      0.30
+thing 2006 a -   20 BFUGA   "Grenade"             0.30
+thing 2046 a -   20 BROKA   "Belt with grenades"  0.30
+thing 2048 a -   20 AMMOA   "Minigun ammo"        0.30
+thing 2049 a -   20 SBOXA   "Box of shells"       0.30
+
+thing 2011 h -   20 STIMA   "Mushroom"          0.30
+thing 2012 h -   20 MEDIA   "Medkit"            0.30
+thing 2013 h -   20 SOULA   "big Mushroom"      0.30
+thing 2018 h -   20 ARM1A   "Red Armor"         0.30
+thing 2019 h -   20 ARM2A   "NDF armor"         0.30
+
+thing    9 m -   20 SPOSA   "Follower"          0.30
+thing   64 m -   20 VILEA   "Falling Follower"  0.30
+thing   65 m -   20 CPOSA   "Soldier"           0.30
+thing   16 m -   40 CYBRA   "Predator"          0.30
+thing   66 m -   20 CYBRA   "Centaur"           0.30
+thing   68 m -   64 SSWVA   "Phage"             0.30
+thing 3003 m -   24 BOSSA   "Critter"           0.30
+thing 3004 m -   30 SARGA   "Beastling"         0.30
+thing    7 m -  128 SPIDA   "Echidna"           0.30
 
 
 #---- TEXTURES ----------------
