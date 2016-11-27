@@ -120,7 +120,6 @@ thing 2002 w n   20 MGUNA   "Minigun"           0.30
 thing 2003 w n   20 LAUNA   "Grenade launcher"  0.30
 thing 2004 w n   20 PLASA   "Entrophy thrower"  0.30
 
-thing 2008 a n   20 SHELA   "Shotgun shells"      0.30
 thing 2006 a n   20 BFUGA   "Grenade"             0.30
 thing 2046 a n   20 BROKA   "Belt with grenades"  0.30
 thing 2048 a n   20 AMMOA   "Minigun ammo"        0.30
