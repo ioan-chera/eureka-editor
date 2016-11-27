@@ -43,6 +43,8 @@ Game Defs:
 
 -  support for HARMONY
 
+-  added "MBF" as a separate port
+
 -  beginnings of a port definition file for ZDoom
 
 

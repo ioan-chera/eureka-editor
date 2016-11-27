@@ -112,7 +112,7 @@ General
 
 ?  a toolbar
 
--  a key to copy properties TO defaults (e.g. shift-C)
+-  a key to copy properties TO defaults (e.g. 'y' for yank)
 
 -  View/Place Camera command, cursor turns into +
    [ need an ACT_ASK_SPOT action, plus a /ask flag for command ]
@@ -168,8 +168,6 @@ WISH: can import UDMF format maps
 
 -  PRINT key to make a screenshot of map or 3D view
 
-
-?  config system: OPT_KEY values
 
 ?  ability to view (perhaps edit) a map header lump
    (for FraggleScript etc...)
@@ -275,10 +273,10 @@ IDEA: for quantizing a group of objects, try about 9 delta
 -  moving up/down with RMB should not disable gravity when change
    is small
 
--  able to drag things around
-   - raise floors?
-   - move vertices?
-   + shift textures?
+-  able to drag stuff around
+   - raise/lower floors
+   - move things on a 2D plane
+   - move things vertically (for Hexen format)
 
 +  slopes
 
@@ -290,7 +288,7 @@ IDEA: for quantizing a group of objects, try about 9 delta
    -  create a DrawWall for their floor/ceil and sides
    -  distance is slightly closer than normal wall segment
 
-?  rotated sprites
+WISH:  rotated sprites
 
 
 
@@ -314,8 +312,6 @@ Browser
 
 Game / Port Definitions
 -----------------------
-
-+  support Harmony
 
 +  flesh out the ZDoom configuration
 
@@ -393,7 +389,7 @@ NO:  3D view: handle very tall/thin window, letter box with black
 NO:  an auto-save feature (e.g. save every N minutes unless no
      changes occurred in the last N minutes).
 
-NO:  no-pic mode for textures and flats
+NO:  a name-only mode for texture and flat browsers
 
 NO:  exchange object numbers
 
