@@ -122,6 +122,7 @@ void M_DeleteLocalBinding(int index);
 void M_LoadBindings();
 void M_SaveBindings();
 
+bool M_IsKeyBound   (keycode_t key, key_context_e context);
 void M_RemoveBinding(keycode_t key, key_context_e context);
 
 

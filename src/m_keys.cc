@@ -423,6 +423,20 @@ static std::vector<key_binding_t> all_bindings;
 static std::vector<key_binding_t> install_binds;
 
 
+bool M_IsKeyBound(keycode_t key, key_context_e context)
+{
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	{
+		key_binding_t& bind = all_bindings[i];
+
+		if (bind.key == key && bind.context == context)
+			return true;
+	}
+
+	return false;
+}
+
+
 void M_RemoveBinding(keycode_t key, key_context_e context)
 {
 	std::vector<key_binding_t>::iterator IT;
@@ -1116,8 +1130,6 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 	EXEC_Errno = 0;
 
-	EXEC_CurKey = key;
-
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
 		key_binding_t& bind = all_bindings[i];
@@ -1138,6 +1150,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 				else
 					EXEC_Param[p_idx++] = bind.param[p];
 			}
+
+			EXEC_CurKey = key;
 
 			DoExecuteCommand(bind.cmd);
 

@@ -605,6 +605,35 @@ static Fl_Menu_Item menu_items[] =
 
 #define MAX_PWAD_LIST  20
 
+//
+// allow the hard-coded menu shortcuts to be bind to other functions
+// by the user, hence we remove those shortcuts when this happens. 
+//
+static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
+{
+	int total = items[0].size();  // includes {0} at end
+
+	for (int i = 0 ; i < total ; i++)
+	{
+		if (! items[i].text)
+			continue;
+
+		int shortcut = items[i].shortcut_;
+		if (! shortcut)
+			continue;
+
+		// convert to a Eureka key code
+		keycode_t key = shortcut & FL_KEY_MASK;
+
+			 if (shortcut & FL_COMMAND) key |= MOD_COMMAND;
+		else if (shortcut & FL_META)    key |= MOD_META;
+		else if (shortcut & FL_ALT)     key |= MOD_ALT;
+
+		if (M_IsKeyBound(key, KCTX_General))
+			items[i].shortcut_ = 0;
+	}
+}
+
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
@@ -744,6 +773,8 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 #endif
 
 	Fl_Menu_Item *items = menu_items;
+
+	Menu_RemovedBoundKeys(items);
 
 	items = Menu_PopulateGivenFiles(items);
 	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);
