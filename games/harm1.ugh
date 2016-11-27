@@ -62,7 +62,7 @@ thing    2 p -   16 PLAY   "Player 2 start"    0.30
 thing    3 p -   16 PLAY   "Player 3 start"    0.30
 thing    4 p -   16 PLAY   "Player 4 start"    0.30
 thing   11 p t   16 PLAYF1 "Deathmatch start"  0.30
-thing   14 p t   16 TFOG   "Teleport exit"
+thing   14 p t   16 FATBA3A7  "Teleport exit"
 
 thing    5 k nl  20 BKEY   "Green keycard"    0.30
 thing    6 k nl  20 YKEY   "Yellow keycard"   0.30
@@ -76,7 +76,7 @@ thing 2026 b n   20 PMAPA   "Computer map"    0.30
 thing 2010 b n   20 ROCKA   "Time Bomb"       0.30
 
 thing   17 d -   20 CELPA   "Chaos bars"         0.30
-thing   26 d -   16 POL6A   "Shootable crate"    0.30
+thing   26 d -   16 HEADH   "Shootable crate"    0.30
 thing   30 d -   16 COL1A   "Big Mushroom"       0.30
 thing   34 d -   20 CBRAA   "White candle"       0.30
 thing   36 d -   16 COL5A   "Looping explosion"  0.30
@@ -109,7 +109,7 @@ thing   15 g n   20 ARM2B   "Dead Amazone"      0.30
 thing   19 g n   20 ARM1B   "Dead Follower"     0.30
 thing   21 g n   20 SARGN   "Dead Beastling"    0.30
 thing   44 g n   16 TBLUA   "Dead Beastling 2"  0.30
-thing   18 g n   20 POSSL   "Dead Something"    0.30
+thing   18 g n   20 NULL    "Dead Giblet"       0.30
 thing 2007 g n   20 CEYEB   "Flies"             0.30
 
 thing 2028 d -   16 COLUA   "Laser lamp"        0.30
@@ -127,7 +127,7 @@ thing 2049 a n   20 SBOXA   "Box of shells"       0.30
 
 thing 2011 h n   20 STIMA   "Mushroom"          0.30
 thing 2012 h n   20 MEDIA   "Medkit"            0.30
-thing 2013 h n   20 SOULA   "big Mushroom"      0.30
+thing 2013 h n   20 SOULA   "Big Mushroom"      0.30
 thing 2018 h n   20 ARM1A   "Red Armor"         0.30
 thing 2019 h n   20 ARM2A   "NDF armor"         0.30
 
@@ -145,9 +145,9 @@ thing 3002 - -   30 NULL    "Window smash fx"
 thing   67 - -   48 NULL    "THING #67 fx"
 thing   79 - -   20 NULL    "Crate explode fx"
 
-thing   87 - nl  16 FIREF   "Spawn spot"
-thing   88 - -   16 BBRNA   "Boss brain"
-thing   89 - -   16 BOSFB   "Boss shooter"
+thing   87 - nl  16 NULL    "Spawn spot"
+thing   88 - -   16 NULL    "Boss brain"
+thing   89 - -   16 NULL    "Boss shooter"
 
 
 #---- TEXTURES ----------------
