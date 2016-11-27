@@ -437,13 +437,10 @@ public:
 	// lighting for wall, adjusted for N/S and E/W walls
 	int wall_light;
 
-	// clipped angles
-	float ang1;
-	float delta_ang;
-
 	// line constants
+	float delta_ang;
 	float dist, t_dist;
-	float normal;
+	float normal;	// scale for things
 
 	// distance values (inverted, so they can be lerped)
 	double iz1, iz2;
@@ -1049,7 +1046,6 @@ public:
 		else if (ld->Start()->y == ld->End()->y)
 			dw->wall_light -= 16;
 
-		dw->ang1 = angle1;
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
 
 		dw->dist = dist;
@@ -1085,6 +1081,8 @@ public:
 
 		bool is_unknown = false;
 
+		float scale = info->scale;
+
 		Img_c *sprite = W_GetSprite(th->type);
 		if (! sprite)
 		{
@@ -1092,8 +1090,8 @@ public:
 			is_unknown = true;
 		}
 
-		float tx1 = tx - sprite->width() / 2.0;
-		float tx2 = tx + sprite->width() / 2.0;
+		float tx1 = tx - sprite->width() * scale / 2.0;
+		float tx2 = tx + sprite->width() * scale / 2.0;
 
 		double iz = 1 / ty;
 
@@ -1117,12 +1115,12 @@ public:
 		{
 			// IOANCH 9/2015: also add z
 			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
-			h1 = h2 - sprite->height();
+			h1 = h2 - sprite->height() * scale;
 		}
 		else
 		{
 			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
-			h2 = h1 + sprite->height();
+			h2 = h1 + sprite->height() * scale;
 		}
 
 		// create drawwall structure
@@ -1143,7 +1141,7 @@ public:
 
 		dw->spr_tx1 = tx1;
 
-		dw->ang1 = 0;
+		dw->normal = scale;
 
 		dw->iz1 = dw->mid_iz = iz;
 		dw->diz = 0;
@@ -1531,7 +1529,9 @@ public:
 		int tw = dw->ceil.img->width();
 		int th = dw->ceil.img->height();
 
-		int tx = int(XToDelta(x, dw->cur_iz) - dw->spr_tx1);
+		float scale = dw->normal;
+
+		int tx = int((XToDelta(x, dw->cur_iz) - dw->spr_tx1) / scale);
 
 		if (tx < 0 || tx >= tw)
 			return;
@@ -1561,7 +1561,7 @@ public:
 
 		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
 		{
-			int ty = int(hh);
+			int ty = int(hh / scale);
 
 			if (ty < 0 || ty >= th)
 				continue;
