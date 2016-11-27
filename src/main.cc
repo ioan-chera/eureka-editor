@@ -638,6 +638,8 @@ static void Main_OpenWindow()
 
 	main_win->NewEditMode(edit.mode);
 
+	Fl::focus(main_win->canvas);
+
 	Fl::check();
 }
 
