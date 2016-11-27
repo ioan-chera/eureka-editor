@@ -14,11 +14,9 @@ CHANGES IN Eureka 1.XX
 
 -  undo, redo : show what was (un)done in status area
 
-+  support editing STRIFE maps
+-  find/replace : added a "Restrict to Selection" filter
 
--  Find/Replace : added a "Restrict to Selection" filter
-
--  Find/Replace : better way to choose textures/things
+-  find/replace : better way to choose textures/things
 
 +  support for TX_START/TX_END textures, including PNG and TGA format
 
@@ -36,8 +34,17 @@ CHANGES IN Eureka 1.XX
 
 +  properly detect which ports can be used with each game
 
+
+Game Defs:
+
++  support for STRIFE (based on Slade3 defs)
+
+-  support for HARMONY
+
 -  beginnings of a port definition file for ZDoom
 
+
+Bugs Fixed:
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
