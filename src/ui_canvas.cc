@@ -817,26 +817,30 @@ void UI_Canvas::DrawThingSprites()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
+		const thingtype_t *info = M_GetThingType(Things[n]->type);
+
 		Img_c *sprite = W_GetSprite(Things[n]->type);
 
 		if (! sprite)
 			sprite = IM_UnknownSprite();
 
-		DrawSprite(x, y, sprite);
+		DrawSprite(x, y, sprite, info->scale);
 	}
 }
 
 
-void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img)
+void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 {
 	int W = img->width();
 	int H = img->height();
 
-	int bx1 = SCREENX(map_x - W / 2);
-	int bx2 = SCREENX(map_x + W / 2);
+	scale = scale * 0.5;
 
-	int by1 = SCREENY(map_y + H / 2);
-	int by2 = SCREENY(map_y - H / 2);
+	int bx1 = SCREENX(map_x - W * scale);
+	int bx2 = SCREENX(map_x + W * scale);
+
+	int by1 = SCREENY(map_y + H * scale);
+	int by2 = SCREENY(map_y - H * scale);
 
 	// prevent division by zero
 	if (bx2 <= bx1) bx2 = bx1 + 1;
