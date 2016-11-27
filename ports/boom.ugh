@@ -38,6 +38,7 @@ feature pass_through  1
 feature friend_flag 1
 
 feature medusa_fixed 1
+feature lax_sprites  1
 
 
 #---- BOOM THINGS -------------

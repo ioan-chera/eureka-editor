@@ -34,6 +34,8 @@ CHANGES IN Eureka 1.XX
 
 +  properly detect which ports can be used with each game
 
+-  find sprites outside of S_START..S_END (except in vanilla)
+
 
 Game Defs:
 
