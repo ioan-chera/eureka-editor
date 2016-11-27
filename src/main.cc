@@ -55,9 +55,10 @@
 #include "OSXCalls.h"
 #endif
 
-/*
- *  Global variables
- */
+
+//
+//  global variables
+//
 
 bool want_quit = false;
 
@@ -82,7 +83,9 @@ const char *Level_name;
 map_format_e Level_format;
 
 
+//
 // config items
+//
 bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
@@ -105,18 +108,12 @@ rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 // Progress during initialisation:
 //    0 = nothing yet
 //    1 = read early options, set up logging
-//    2 = read all options, and possibly a config file
-//    3 = inited FLTK, opened main window
+//    2 = parsed all options, inited FLTK
+//    3 = opened the main window
 int  init_progress;
 
 int show_help     = 0;
 int show_version  = 0;
-
-
-/*
- *  Prototypes of private functions
- */
-static void Main_CloseWindow();
 
 
 static void RemoveSingleNewlines(char *buffer)
@@ -133,9 +130,9 @@ static void RemoveSingleNewlines(char *buffer)
 }
 
 
-/*
- *  Show an error message and terminate the program
- */
+//
+//  show an error message and terminate the program
+//
 void FatalError(const char *fmt, ...)
 {
 	va_list arg_ptr;
@@ -158,15 +155,13 @@ void FatalError(const char *fmt, ...)
 		LogPrintf("\nFATAL ERROR: %s", buffer);
 	}
 
-	if (init_progress >= 3)
+	if (init_progress >= 2)
 	{
 		RemoveSingleNewlines(buffer);
 
 		DLG_ShowError("%s", buffer);
 
-		init_progress = 2;
-
-		Main_CloseWindow();
+		init_progress = 1;
 	}
 #ifdef WIN32
 	else
@@ -517,7 +512,7 @@ static const char * DetermineLevel()
 }
 
 
-/* this is only to prevent ESCAPE key from quitting */
+// this is only to prevent ESCAPE key from quitting
 int Main_key_handler(int event)
 {
 	if (event != FL_SHORTCUT)
@@ -533,10 +528,7 @@ int Main_key_handler(int event)
 }
 
 
-//
-// Creates the main window
-//
-static void Main_OpenWindow()
+static void Main_SetupFLTK()
 {
 	Fl::visual(FL_DOUBLE | FL_RGB);
 
@@ -595,8 +587,14 @@ static void Main_OpenWindow()
 #endif
 
 	KF_fonth = (14 + KF * 2);
+}
 
 
+//
+// Creates the main window
+//
+static void Main_OpenWindow()
+{
 	main_win = new UI_MainWin();
 
 	main_win->label("Eureka v" EUREKA_VERSION);
@@ -638,15 +636,11 @@ static void Main_OpenWindow()
 
 	main_win->NewEditMode(edit.mode);
 
+	// allow processing keyboard events, even before the mouse
+	// pointer has entered our window.
 	Fl::focus(main_win->canvas);
 
 	Fl::check();
-}
-
-
-static void Main_CloseWindow()
-{
-	// we don't actually need anything here
 }
 
 
@@ -898,18 +892,17 @@ static void ShowTime()
 }
 
 
-/*
- *  the driving program
- */
+//
+//  the program starts here
+//
 int main(int argc, char *argv[])
 {
 	init_progress = 0;
 
-	int r;
 
 	// a quick pass through the command line arguments
 	// to handle special options, like --help, --install, --config
-	r = M_ParseCommandLine(argc - 1, argv + 1, 1);
+	int r = M_ParseCommandLine(argc - 1, argv + 1, 1);
 
 	if (r)
 		exit(3);
@@ -925,10 +918,8 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	//printf ("%s\n", what ());
-
-
 	init_progress = 1;
+
 
 	LogPrintf("\n");
 	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2016 Andrew Apted, et al ***\n");
@@ -942,7 +933,6 @@ int main(int argc, char *argv[])
 
 	Determine_InstallPath(argv[0]);
 	Determine_HomeDir(argv[0]);
-
 
 	LogOpenFile(log_file);
 
@@ -970,19 +960,21 @@ int main(int argc, char *argv[])
 	}
 
 
+	Editor_Init();
+
+	Main_SetupFLTK();
+
 	init_progress = 2;
 
-	M_LoadRecent();
-	M_LookForIWADs();
 
-	Editor_Init();
+	M_LoadRecent();
+	M_LoadBindings();
+
+	M_LookForIWADs();
 
 	Main_OpenWindow();
 
-
 	init_progress = 3;
-
-	M_LoadBindings();
 
 
 	// open a specified PWAD now
@@ -1062,12 +1054,6 @@ quit:
 	/* that's all folks! */
 
 	LogPrintf("Quit\n");
-
-
-	init_progress = 2;
-
-	Main_CloseWindow();
-
 
 	init_progress = 0;
 
