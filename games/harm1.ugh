@@ -75,7 +75,6 @@ thing    8 b n   20 BPAKA   "Backpack"        0.30
 thing 2026 b n   20 PMAPA   "Computer map"    0.30
 thing 2010 b n   20 ROCKA   "Time Bomb"       0.30
 
-
 thing   17 d -   20 CELPA   "Chaos bars"         0.30
 thing   26 d -   16 POL6A   "Shootable crate"    0.30
 thing   30 d -   16 COL1A   "Big Mushroom"       0.30
@@ -86,12 +85,14 @@ thing   46 d -   16 TREDA   "Green splash"       0.30
 thing   48 d -   16 ELECA   "Tall lamp"          0.30
 
 thing   28 d -   16 POL2A   "Tentacle"            0.30
-thing   27 d -   16 SMT2A   "Silver rocket"       0.30
-thing   29 d -   16 POL3A   "Silver rocket launched" 0.30
+thing   27 d -   16 SMT2A   "Rocket standing"     0.30
+thing   29 d -   16 POL3A   "Rocket launched"     0.30
 thing   31 d -   16 COL2A   "Truck pipe"          0.30
 thing   32 d -   16 COL3A   "Abducted Amira"      0.30
-thing   33 d -   16 COL4A   "Arty sphere with heads"  0.30
+thing   33 d -   16 COL4A   "Arty sphere"         0.30
+thing   37 d -   16 COL6A   "Shell head"          0.30
 thing   42 d -   16 FSKUA   "Dripping water"      0.30
+thing   47 d -   16 SMITA   "Gray Blob"           0.30
 thing   51 d -   16 GOR3A   "Neutronbeam blocker" 0.30
 thing   54 d -   32 TRE2A   "Large tree"          0.30
 thing   55 d -   16 SMBTA   "Fire"                0.30
@@ -101,45 +102,53 @@ thing   63 d -   20 GOR1A   "Hanging fire"        0.30
 thing   73 d -   16 HDB1A   "Hanging chain"       0.30
 thing   74 d -   16 HDB2A   "Stored miniguns"     0.30
 thing   75 d -   16 HDB3A   "Stored shotguns"     0.30
-thing   79 d -   20 HEADA   "Crate explosion"     0.30
 thing   81 d -   20 BRS1A   "Hanging light"       0.30
+thing 3006 d -   16 PAINA   "Mine"                0.30
 
-thing   15 g -   20 ARM2B   "Dead Amazone"      0.30
-thing   19 g -   20 ARM1B   "Dead Follower"     0.30
-thing   21 g -   20 SARGN   "Dead Beastling"    0.30
-thing   44 g -   16 TBLUA   "Dead Beastling 2"  0.30
-thing 2007 g -   20 CEYEB   "Flies"             0.30
+thing   15 g n   20 ARM2B   "Dead Amazone"      0.30
+thing   19 g n   20 ARM1B   "Dead Follower"     0.30
+thing   21 g n   20 SARGN   "Dead Beastling"    0.30
+thing   44 g n   16 TBLUA   "Dead Beastling 2"  0.30
+thing   18 g n   20 POSSL   "Dead Something"    0.30
+thing 2007 g n   20 CEYEB   "Flies"             0.30
 
 thing 2028 d -   16 COLUA   "Laser lamp"        0.30
 thing 2035 d -   10 BAR1A   "Red barrel"        0.30
-thing 3006 d -   16 SKULA   "Mine"              0.30
 
-thing 2001 w -   20 SHOTA   "Shotgun"           0.30
-thing 2002 w -   20 MGUNA   "Minigun"           0.30
-thing 2003 w -   20 LAUNA   "Grenade launcher"  0.30
-thing 2004 w -   20 PLASA   "Entrophy thrower"  0.30
+thing 2001 w n   20 SHOTA   "Compensator"       0.30
+thing 2002 w n   20 MGUNA   "Minigun"           0.30
+thing 2003 w n   20 LAUNA   "Grenade launcher"  0.30
+thing 2004 w n   20 PLASA   "Entrophy thrower"  0.30
 
-thing 2008 a -   20 SHELA   "Shotgun shells"      0.30
-thing 2006 a -   20 BFUGA   "Grenade"             0.30
-thing 2046 a -   20 BROKA   "Belt with grenades"  0.30
-thing 2048 a -   20 AMMOA   "Minigun ammo"        0.30
-thing 2049 a -   20 SBOXA   "Box of shells"       0.30
+thing 2008 a n   20 SHELA   "Shotgun shells"      0.30
+thing 2006 a n   20 BFUGA   "Grenade"             0.30
+thing 2046 a n   20 BROKA   "Belt with grenades"  0.30
+thing 2048 a n   20 AMMOA   "Minigun ammo"        0.30
+thing 2049 a n   20 SBOXA   "Box of shells"       0.30
 
-thing 2011 h -   20 STIMA   "Mushroom"          0.30
-thing 2012 h -   20 MEDIA   "Medkit"            0.30
-thing 2013 h -   20 SOULA   "big Mushroom"      0.30
-thing 2018 h -   20 ARM1A   "Red Armor"         0.30
-thing 2019 h -   20 ARM2A   "NDF armor"         0.30
+thing 2011 h n   20 STIMA   "Mushroom"          0.30
+thing 2012 h n   20 MEDIA   "Medkit"            0.30
+thing 2013 h n   20 SOULA   "big Mushroom"      0.30
+thing 2018 h n   20 ARM1A   "Red Armor"         0.30
+thing 2019 h n   20 ARM2A   "NDF armor"         0.30
 
 thing    9 m -   20 SPOSA   "Follower"          0.30
-thing   64 m -   20 VILEA   "Falling Follower"  0.30
+thing   64 m -   20 FCANB   "Falling Follower"  0.30
 thing   65 m -   20 CPOSA   "Soldier"           0.30
 thing   16 m -   40 CYBRA   "Predator"          0.30
 thing   66 m -   20 CYBRA   "Centaur"           0.30
 thing   68 m -   64 SSWVA   "Phage"             0.30
 thing 3003 m -   24 BOSSA   "Critter"           0.30
 thing 3004 m -   30 SARGA   "Beastling"         0.30
-thing    7 m -  128 SPIDA   "Echidna"           0.30
+thing    7 m -  128 POSSA   "Echidna Boss"      0.30
+
+thing 3002 - -   30 NULL    "Window smash fx"
+thing   67 - -   48 NULL    "THING #67 fx"
+thing   79 - -   20 NULL    "Crate explode fx"
+
+thing   87 - nl  16 FIREF   "Spawn spot"
+thing   88 - -   16 BBRNA   "Boss brain"
+thing   89 - -   16 BOSFB   "Boss shooter"
 
 
 #---- TEXTURES ----------------
