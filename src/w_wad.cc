@@ -1310,14 +1310,11 @@ Lump_c * W_FindPatchLump(const char *name)
 	}
 
 	// Fallback: try free-standing lumps
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
-	{
-		Lump_c *L = master_dir[i]->FindLump(name);
+	Lump_c *L = W_FindLump(name);
 
-		// FIXME: do basic test (size etc)
-		if (L)
-			return L;
-	}
+	// TODO: verify lump is OK (size etc)
+	if (L)
+		return L;
 
 	return NULL;  // not found
 }

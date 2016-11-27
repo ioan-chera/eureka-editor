@@ -146,6 +146,7 @@ typedef struct
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
+	int lax_sprites;	// sprites can be found outside of S_START..S_END
 
 	int no_need_players;	// having no players is OK (Things checker)
 

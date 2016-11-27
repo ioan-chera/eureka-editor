@@ -695,6 +695,9 @@ void W_ClearSprites()
 // find sprite by prefix
 Lump_c * Sprite_loc_by_root (const char *name)
 {
+	// first look for one in the sprite namespace (S_START..S_END),
+	// only if that fails do we check the whole wad.
+
 	char buffer[16];
 
 	strcpy(buffer, name);
@@ -717,6 +720,36 @@ Lump_c * Sprite_loc_by_root (const char *name)
 	{
 		strcat(buffer, "D1");
 		lump = W_FindSpriteLump(buffer);
+	}
+
+	if (lump)
+		return lump;
+
+	// check outside of the sprite namespace...
+
+	if (! game_info.lax_sprites)
+		return NULL;
+
+	strcpy(buffer, name);
+
+	if (strlen(buffer) == 4)
+		strcat(buffer, "A");
+
+	if (strlen(buffer) == 5)
+		strcat(buffer, "0");
+
+	lump = W_FindLump(buffer);
+
+	if (! lump)
+	{
+		buffer[5] = '1';
+		lump = W_FindLump(buffer);
+	}
+
+	// TODO: verify lump is OK (size etc)
+	if (lump)
+	{
+		LogPrintf("WARNING: using sprite '%s' outside of S_START..S_END\n", name);
 	}
 
 	return lump;

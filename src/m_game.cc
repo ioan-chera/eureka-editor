@@ -227,6 +227,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.medusa_fixed = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "lax_sprites") == 0)
+	{
+		game_info.lax_sprites = atoi(argv[1]);
+	}
 	else if (y_stricmp(argv[0], "no_need_players") == 0)
 	{
 		game_info.no_need_players = atoi(argv[1]);
