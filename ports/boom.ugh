@@ -34,9 +34,6 @@ feature gen_types 1
 feature coop_dm_flags 1
 feature pass_through  1
 
-# an MBF feature, but most "Boom Compatible" ports will support it
-feature friend_flag 1
-
 feature medusa_fixed 1
 feature lax_sprites  1
 
@@ -45,9 +42,6 @@ feature lax_sprites  1
 
 thing 5001 - nv  20 NULL  "BOOM: Point pusher"
 thing 5002 - nv  20 NULL  "BOOM: Point puller"
-
-# an MBF feature, but some "Boom Compatible" ports support it
-thing  888 - -  12 DOGS   "Dog (MBF)"
 
 
 #---- BOOM LINETYPES ----------
@@ -199,11 +193,6 @@ line 266 t "W1 BOOM: Teleport Line /mon"
 line 267 t "WR BOOM: Teleport Line /mon"
 line 268 t "W1 BOOM: Teleport /mon"
 line 269 t "WR BOOM: Teleport /mon"
-
-# these were not in the original BOOM, but are considered nowadays
-# to be features which "Boom-Compatible" source ports provide. 
-line 271 - "-- MBF: Transfer sky"
-line 272 - "-- MBF: Mirror sky"
 
 
 #---- GENERALIZED LINETYPES ----------
