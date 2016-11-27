@@ -166,10 +166,18 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	int nw = w();
 	int nh = h();
 
-	int scale = 1;
+	float scale = info->scale;
 
-	if (iw*3 < nw && ih*3 < nh)
-		scale = 2;
+	float fit_x = iw * scale / (float)nw;
+	float fit_y = ih * scale / (float)nh;
+
+	// shrink if too big
+	if (fit_x > 1.00 || fit_x > 1.00)
+		scale = scale / MAX(fit_x, fit_y);
+
+	// enlarge if too small
+	if (fit_x < 0.4 && fit_y < 0.4)
+		scale = scale / (2.5 * MAX(fit_x, fit_y));
 
 
 	uchar *buf = new uchar[nw * nh * 3];
@@ -189,7 +197,6 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		}
 
 		int ix = x / scale - (nw / scale - iw) / 2;
-		//  int iy = (ih-1) - (nh-4 - y);
 		int iy = y / scale - (nh / scale - ih) / 2;
 
 		img_pixel_t pix = TRANS_PIXEL;
