@@ -94,20 +94,22 @@ private:
 	{
 		if (awaiting_key)
 		{
-			if (event == FL_KEYDOWN)
+			// escape key cancels
+			if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
 			{
-				// escape key cancels
-				if (Fl::event_key() == FL_Escape)
-				{
-					FinishGrab();
+				FinishGrab();
 
-					if (key)
-						key_name->value(M_KeyToString(key));
+				if (key)
+					key_name->value(M_KeyToString(key));
 
-					return 1;
-				}
+				return 1;
+			}
 
-				keycode_t new_key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+			if (event == FL_KEYDOWN ||
+				event == FL_PUSH    ||
+				event == FL_MOUSEWHEEL)
+			{
+				keycode_t new_key = M_CookedKeyForEvent(event);
 
 				if (new_key)
 				{
@@ -1591,15 +1593,18 @@ int UI_Preferences::handle(int event)
 {
 	if (awaiting_line > 0)
 	{
-		if (event == FL_KEYDOWN)
+		// escape key cancels
+		if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
 		{
-			if (Fl::event_key() == FL_Escape)
-			{
-				ClearWaiting();
-				return 1;
-			}
+			ClearWaiting();
+			return 1;
+		}
 
-			keycode_t new_key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+		if (event == FL_KEYDOWN ||
+			event == FL_PUSH    ||
+			event == FL_MOUSEWHEEL)
+		{
+			keycode_t new_key = M_CookedKeyForEvent(event);
 
 			if (new_key)
 			{
@@ -1607,9 +1612,6 @@ int UI_Preferences::handle(int event)
 				return 1;
 			}
 		}
-
-		if (event == FL_PUSH)
-			ClearWaiting();
 	}
 
 	return Fl_Double_Window::handle(event);
