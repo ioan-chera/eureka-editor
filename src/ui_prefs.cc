@@ -30,7 +30,7 @@
 
 
 #define PREF_WINDOW_W  600
-#define PREF_WINDOW_H  500
+#define PREF_WINDOW_H  520
 
 #define PREF_WINDOW_TITLE  "Eureka Preferences"
 
@@ -50,8 +50,8 @@ private:
 
 	Fl_Input  *key_name;
 
-	Fl_Choice *context;
 	Fl_Choice *func;
+	Fl_Choice *context;
 	Fl_Input  *params;
 
 	const editor_command_t *cur_cmd;
@@ -101,6 +101,7 @@ private:
 
 		for (unsigned int k = 0 ; k < name_list.size() ; k++)
 		{
+			//@@
 			func->add(name_list[k]);
 
 			if (find_name && strcmp(name_list[k], find_name) == 0)
@@ -362,15 +363,15 @@ public:
 		  o->hide();  // TODO: IMPLEMENT THIS
 		}
 
-		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
+		{ func = new Fl_Choice(85, 65, 150, 25, "Function:");
+		  func->callback((Fl_Callback*) func_callback, this);
+		}
+		{ context = new Fl_Choice(85, 105, 150, 25, "Mode:");
 		  context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General");
 		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)context_callback, this);
 		}
 
-		{ func = new Fl_Choice(85, 105, 150, 25, "Function:");
-		  func->callback((Fl_Callback*) func_callback, this);
-		}
 		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
 		  params->value("");
 		  params->when(FL_WHEN_CHANGED);
@@ -456,7 +457,6 @@ private:
 	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
-	static void copy_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
 	static void    reset_callback(Fl_Button *w, void *data);
 
@@ -551,10 +551,11 @@ public:
 	Fl_Button *key_key;
 	Fl_Button *key_func;
 
-	Fl_Button *key_bind;
+	Fl_Button *key_add;
 	Fl_Button *key_copy;
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
+	Fl_Button *key_rebind;
 	Fl_Button *key_reset;
 
 	/* Mouse Tab */
@@ -597,7 +598,7 @@ UI_Preferences::UI_Preferences() :
 
 	callback(close_callback, this);
 
-	{ tabs = new Fl_Tabs(0, 0, 585, 435);
+	{ tabs = new Fl_Tabs(0, 0, PREF_WINDOW_W-15, PREF_WINDOW_H-70);
 
 	  /* ---- General Tab ---- */
 
@@ -706,24 +707,27 @@ UI_Preferences::UI_Preferences() :
 		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
+		{ key_list = new Fl_Hold_Browser(30, 115, 430, 305);
 		  key_list->textfont(FL_COURIER);
 		}
-		{ key_bind = new Fl_Button(470, 140, 90, 30, "Bind");
-		  key_bind->callback((Fl_Callback*)bind_key_callback, this);
-		  key_bind->shortcut(FL_Enter);
+		{ key_add = new Fl_Button(480, 115, 85, 30, "&Add");
+		  key_add->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
-		  key_copy->callback((Fl_Callback*)copy_key_callback, this);
+		{ key_copy = new Fl_Button(480, 150, 85, 30, "&Copy");
+		  key_copy->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
+		{ key_edit = new Fl_Button(480, 185, 85, 30, "&Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
+		{ key_delete = new Fl_Button(480, 220, 85, 30, "Delete");
 		  key_delete->callback((Fl_Callback*)del_key_callback, this);
 		  key_delete->shortcut(FL_Delete);
 		}
-		{ key_reset = new Fl_Button(470, 335, 90, 50, "Reset\nDefaults");
+		{ key_rebind = new Fl_Button(480, 295, 85, 30, "&Re-bind");
+		  key_rebind->callback((Fl_Callback*)bind_key_callback, this);
+		  // key_rebind->shortcut(FL_Enter);
+		}
+		{ key_reset = new Fl_Button(480, 370, 85, 50, "Reset\nDefaults");
 		  key_reset->callback((Fl_Callback*)reset_callback, this);
 		}
 		o->end();
@@ -908,7 +912,7 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D Preview Options");
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D View Settings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
@@ -922,11 +926,11 @@ UI_Preferences::UI_Preferences() :
 	  }
 	  tabs->end();
 	}
-	{ apply_but = new Fl_Button(480, 450, 95, 35, "Apply");
+	{ apply_but = new Fl_Button(PREF_WINDOW_W-150, PREF_WINDOW_H-50, 95, 35, "Apply");
 	  apply_but->labelfont(FL_BOLD);
 	  apply_but->callback(close_callback, this);
 	}
-	{ discard_but = new Fl_Button(350, 450, 95, 35, "Discard");
+	{ discard_but = new Fl_Button(PREF_WINDOW_W-290, PREF_WINDOW_H-50, 95, 35, "Discard");
 	  discard_but->callback(close_callback, this);
 	}
 
@@ -1034,7 +1038,7 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::copy_key_callback(Fl_Button *w, void *data)
+void UI_Preferences__copy_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
@@ -1064,7 +1068,7 @@ void UI_Preferences::copy_key_callback(Fl_Button *w, void *data)
 
 	prefs->ReloadKeys();
 
-	bind_key_callback(w, data);
+//!!!!	bind_key_callback(w, data);
 }
 
 
@@ -1072,24 +1076,37 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	bool is_add  = (w == prefs->key_add);
+	bool is_copy = (w == prefs->key_copy);
+
+
+	keycode_t     new_key  = 0;
+	key_context_e new_context = KCTX_General;
+	const char *  new_func = "Nothing";
+
+
+	int bind_idx = -1;
+
+
+	if (! is_add)
 	{
-		fl_beep();
-		return;
+		int line = prefs->key_list->value();
+
+		if (line < 1)
+		{
+			fl_beep();
+			return;
+		}
+
+		prefs->EnsureKeyVisible(line);
+
+		int bind_idx = line - 1;
+		SYS_ASSERT(bind_idx >= 0);
+
+		M_GetBindingInfo(bind_idx, &new_key, &new_context);
+
+		new_func = M_StringForFunc(bind_idx);
 	}
-
-	prefs->EnsureKeyVisible(line);
-
-
-	int bind_idx = line - 1;
-
-	keycode_t     new_key;
-	key_context_e new_context;
-
-	M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
-	const char *new_func = M_StringForFunc(bind_idx);
 
 
 	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
@@ -1097,7 +1114,10 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (dialog->Run(&new_key, &new_context, &new_func))
 	{
 		// assume it works (since we validated it)
-		M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
+		if (is_add || is_copy)
+			M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+		else
+			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
 	}
 
 	delete dialog;
