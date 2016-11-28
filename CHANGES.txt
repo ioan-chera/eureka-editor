@@ -36,6 +36,8 @@ CHANGES IN Eureka 1.XX
 
 -  find sprites outside of S_START..S_END (except in vanilla)
 
+-  allow keys hard-coded in the menus to be bound to other functions
+
 
 Game Defs:
 
