@@ -58,6 +58,9 @@ void Editor_ScrollMap(int mode, int dx = 0, int dy = 0);
 
 void ClearStickyMod();
 
+keycode_t M_RawKeyForEvent(int event);
+keycode_t M_CookedKeyForEvent(int event);
+
 int  Editor_RawKey(int event);
 int  Editor_RawButton(int event);
 int  Editor_RawWheel(int event);

@@ -660,6 +660,41 @@ void Editor_MouseMotion(int x, int y, keycode_t mod)
 //------------------------------------------------------------------------
 
 
+keycode_t M_RawKeyForEvent(int event)
+{
+	// event must be FL_KEYDOWN, FL_PUSH or FL_MOUSEWHEEL
+
+	if (event == FL_PUSH)
+	{
+		// convert mouse button to a fake key
+		return FL_Button + Fl::event_button();
+	}
+
+	if (event == FL_MOUSEWHEEL)
+	{
+		int dx = Fl::event_dx();
+		int dy = Fl::event_dy();
+
+		// convert wheel direction to a fake key
+		if (abs(dx) > abs(dy))
+			return dx < 0 ? FL_WheelLeft : FL_WheelRight;
+
+		return dy < 0 ? FL_WheelUp : FL_WheelDown;
+	}
+
+	return Fl::event_key();
+}
+
+
+keycode_t M_CookedKeyForEvent(int event)
+{
+	int raw_key   = M_RawKeyForEvent(event);
+	int raw_state = Fl::event_state();
+
+	return M_TranslateKey(raw_key, raw_state);
+}
+
+
 int Editor_RawKey(int event)
 {
 	Nav_UpdateKeys();
@@ -667,22 +702,7 @@ int Editor_RawKey(int event)
 	if (event == FL_KEYUP || event == FL_RELEASE)
 		return 0;
 
-	int raw_key = Fl::event_key();
-
-	if (event == FL_PUSH)
-	{
-		// convert mouse button to a fake key
-		raw_key = FL_Button + Fl::event_button();
-	}
-	else if (event == FL_MOUSEWHEEL)
-	{
-		// convert wheel direction to a fake key
-		if (abs(wheel_dy) >= abs(wheel_dx))
-			raw_key = wheel_dy < 0 ? FL_WheelUp : FL_WheelDown;
-		else
-			raw_key = wheel_dx < 0 ? FL_WheelLeft : FL_WheelRight;
-	}
-
+	int raw_key   = M_RawKeyForEvent(event);
 	int raw_state = Fl::event_state();
 
 	int old_sticky_mod = edit.sticky_mod;
