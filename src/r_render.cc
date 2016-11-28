@@ -2919,91 +2919,91 @@ void R3D_WHEEL_Move(void)
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Forward",
+	{	"3D_Forward", NULL,
 		&R3D_Forward
 	},
 
-	{	"3D_Backward",
+	{	"3D_Backward", NULL,
 		&R3D_Backward
 	},
 
-	{	"3D_Left",
+	{	"3D_Left", NULL,
 		&R3D_Left
 	},
 
-	{	"3D_Right",
+	{	"3D_Right", NULL,
 		&R3D_Right
 	},
 
-	{	"3D_Up",
+	{	"3D_Up", NULL,
 		&R3D_Up
 	},
 
-	{	"3D_Down",
+	{	"3D_Down", NULL,
 		&R3D_Down
 	},
 
-	{	"3D_Turn",
+	{	"3D_Turn", NULL,
 		&R3D_Turn
 	},
 
-	{	"3D_DropToFloor",
+	{	"3D_DropToFloor", NULL,
 		&R3D_DropToFloor
 	},
 
-	{	"3D_NAV_Forward",
+	{	"3D_NAV_Forward", NULL,
 		&R3D_NAV_Forward
 	},
 
-	{	"3D_NAV_Back",
+	{	"3D_NAV_Back", NULL,
 		&R3D_NAV_Back
 	},
 
-	{	"3D_NAV_Right",
+	{	"3D_NAV_Right", NULL,
 		&R3D_NAV_Right
 	},
 
-	{	"3D_NAV_Left",
+	{	"3D_NAV_Left", NULL,
 		&R3D_NAV_Left
 	},
 
-	{	"3D_NAV_Up",
+	{	"3D_NAV_Up", NULL,
 		&R3D_NAV_Up
 	},
 
-	{	"3D_NAV_Down",
+	{	"3D_NAV_Down", NULL,
 		&R3D_NAV_Down
 	},
 
-	{	"3D_NAV_TurnLeft",
+	{	"3D_NAV_TurnLeft", NULL,
 		&R3D_NAV_TurnLeft
 	},
 
-	{	"3D_NAV_TurnRight",
+	{	"3D_NAV_TurnRight", NULL,
 		&R3D_NAV_TurnRight
 	},
 
-	{	"3D_ACT_AdjustOfs",
+	{	"3D_ACT_AdjustOfs", NULL,
 		&R3D_ACT_AdjustOffsets
 	},
 
-	{	"3D_WHEEL_Move",
+	{	"3D_WHEEL_Move", NULL,
 		&R3D_WHEEL_Move
 	},
 
-	{	"3D_Set",
+	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
 		/* keywords */ "gamma tex obj light grav"
 	},
 
-	{	"3D_Toggle",
+	{	"3D_Toggle", NULL,
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
-	{	"3D_Align",
+	{	"3D_Align", NULL,
 		&R3D_Align,
 		/* flags */ "/right /clear"
 	},

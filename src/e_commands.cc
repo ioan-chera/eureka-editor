@@ -900,328 +900,339 @@ void CMD_BR_Scroll(void)
 
 static editor_command_t  command_table[] =
 {
-	/* ------ interface stuff ------ */
+	/* ----- FILE menu ----- */
 
-	{	"Nothing",
-		&CMD_Nothing
-	},
-
-	{	"Quit",
+	{	"Quit",  "File",
 		&CMD_Quit
 	},
 
-	{	"EditMode",
-		&CMD_EditMode,
-		/* flags */ NULL,
-		/* keywords */ "thing line sector vertex"
-	},
-
- 	{	"BrowserMode",
-		&CMD_BrowserMode,
-		/* flags */ NULL,
-		/* keywords */ "obj tex flat line sec genline"
-	},
-
-	{	"Set",
-		&CMD_SetVar,
-		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap"
-	},
-
-	{	"Toggle",
-		&CMD_ToggleVar,
-		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap recent"
-	},
-
-	{	"Check",
-		&CMD_CheckMap,
-		/* flags */ NULL,
-		/* keywords */ "all major vertices sectors linedefs things textures tags current"
-	},
-
-	{	"MetaKey",
-		&CMD_MetaKey
-	},
-
-	{	"GivenFile",
+	{	"GivenFile",  "File",
 		&CMD_GivenFile,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last current"
 	},
 
-	{	"FlipMap",
+	{	"FlipMap",  "File",
 		&CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
 	},
 
-	{	"Select",
-		&CMD_Select
-	},
 
-	{	"SelectAll",
-		&CMD_SelectAll
-	},
+	/* ----- EDIT menu ----- */
 
-	{	"UnselectAll",
-		&CMD_UnselectAll
-	},
-
-	{	"InvertSelection",
-		&CMD_InvertSelection
-	},
-
-	{	"LastSelection",
-		&CMD_LastSelection
-	},
-
-	{	"Scroll",
-		&CMD_Scroll
-	},
-
-	{	"NAV_Scroll_X",
-		&CMD_NAV_Scroll_X
-	},
-
-	{	"NAV_Scroll_Y",
-		&CMD_NAV_Scroll_Y
-	},
-
-	{	"NAV_Scroll_Mouse",
-		&CMD_NAV_Scroll_Mouse
-	},
-
-	{	"ACT_SelectBox",
-		&CMD_ACT_SelectBox
-	},
-
-	{	"ACT_Drag",
-		&CMD_ACT_Drag
-	},
-
-	{	"ACT_Transform",
-		&CMD_ACT_Transform,
-		/* flags */ NULL,
-		/* keywords */ "scale stretch rotate rotscale skew"
-	},
-
-	{	"WHEEL_Scroll",
-		&CMD_WHEEL_Scroll
-	},
-
-	{	"GoToCamera",
-		&CMD_GoToCamera
-	},
-
-	{	"PlaceCamera",
-		&CMD_PlaceCamera,
-		/* flags */ "/open3d"
-	},
-
-	{	"JumpToObject",
-		&CMD_JumpToObject
-	},
-
-	{	"Zoom",
-		&CMD_Zoom
-	},
-
-	{	"ZoomWholeMap",
-		&CMD_ZoomWholeMap
-	},
-
-	{	"ZoomSelection",
-		&CMD_ZoomSelection
-	},
-
-	{	"GRID_Bump",
-		&CMD_GRID_Bump
-	},
-
-	{	"GRID_Set",
-		&CMD_GRID_Set
-	},
-
-	{	"GRID_Zoom",
-		&CMD_GRID_Zoom
-	},
-
-
-	/* ----- general map stuff ----- */
-
-	{	"Insert",
+	{	"Insert",	"Edit",
 		&CMD_Insert,
 		/* flags */ "/new /continue /nofill"
 	},
 
-	{	"Delete",
+	{	"Delete",	"Edit",
 		&CMD_Delete,
 		/* flags */ "/keep_things /keep_unused"
 	},
 
-	{	"Mirror",
+	{	"Undo",   "Edit",
+		&CMD_Undo
+	},
+
+	{	"Redo",   "Edit",
+		&CMD_Redo
+	},
+
+	{	"Clipboard_Cut",   "Edit",
+		&CMD_Clipboard_Cut
+	},
+
+	{	"Clipboard_Copy",   "Edit",
+		&CMD_Clipboard_Copy
+	},
+
+	{	"Clipboard_Paste",   "Edit",
+		&CMD_Clipboard_Paste
+	},
+
+	{	"Select",	"Edit",
+		&CMD_Select
+	},
+
+	{	"SelectAll",	"Edit",
+		&CMD_SelectAll
+	},
+
+	{	"UnselectAll",	"Edit",
+		&CMD_UnselectAll
+	},
+
+	{	"InvertSelection",	"Edit",
+		&CMD_InvertSelection
+	},
+
+	{	"LastSelection",	"Edit",
+		&CMD_LastSelection
+	},
+
+	{	"CopyAndPaste",   "Edit",
+		&CMD_CopyAndPaste
+	},
+
+	{	"CopyProperties",   "Edit",
+		&CMD_CopyProperties,
+		/* flags */ "/reverse"
+	},
+
+	{	"PruneUnused",   "Edit",
+		&CMD_PruneUnused
+	},
+
+	{	"MoveObjectsDialog",   "Edit",
+		&CMD_MoveObjects_Dialog
+	},
+
+	{	"ScaleObjectsDialog",   "Edit",
+		&CMD_ScaleObjects_Dialog
+	},
+
+	{	"RotateObjectsDialog",   "Edit",
+		&CMD_RotateObjects_Dialog
+	},
+
+
+	/* ----- VIEW menu ----- */
+
+	{	"GoToCamera",  "View",
+		&CMD_GoToCamera
+	},
+
+	{	"PlaceCamera",  "View",
+		&CMD_PlaceCamera,
+		/* flags */ "/open3d"
+	},
+
+	{	"Zoom",  "View",
+		&CMD_Zoom
+	},
+
+	{	"ZoomWholeMap",  "View",
+		&CMD_ZoomWholeMap
+	},
+
+	{	"ZoomSelection",  "View",
+		&CMD_ZoomSelection
+	},
+
+	{	"JumpToObject",  "View",
+		&CMD_JumpToObject
+	},
+
+
+	/* ------ interface stuff ------ */
+
+	{	"EditMode", "UI",
+		&CMD_EditMode,
+		/* flags */ NULL,
+		/* keywords */ "thing line sector vertex"
+	},
+
+	{	"Set", "UI",
+		&CMD_SetVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums snap"
+	},
+
+	{	"Toggle", "UI",
+		&CMD_ToggleVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums snap recent"
+	},
+
+	{	"Check", "UI",
+		&CMD_CheckMap,
+		/* flags */ NULL,
+		/* keywords */ "all major vertices sectors linedefs things textures tags current"
+	},
+
+	{	"MetaKey", "UI",
+		&CMD_MetaKey
+	},
+
+	{	"Scroll",  "Grid",
+		&CMD_Scroll
+	},
+
+	{	"NAV_Scroll_X",  "Grid",
+		&CMD_NAV_Scroll_X
+	},
+
+	{	"NAV_Scroll_Y",  "Grid",
+		&CMD_NAV_Scroll_Y
+	},
+
+	{	"NAV_Scroll_Mouse",  "Grid",
+		&CMD_NAV_Scroll_Mouse
+	},
+
+	{	"WHEEL_Scroll",  "Grid",
+		&CMD_WHEEL_Scroll
+	},
+
+	{	"GRID_Bump",  "Grid",
+		&CMD_GRID_Bump
+	},
+
+	{	"GRID_Set",  "Grid",
+		&CMD_GRID_Set
+	},
+
+	{	"GRID_Zoom",  "Grid",
+		&CMD_GRID_Zoom
+	},
+
+
+	/* ----- general operations ----- */
+
+	{	"Nothing", "General",
+		&CMD_Nothing
+	},
+
+	{	"Mirror",	"General",
 		&CMD_Mirror,
 		/* flags */ NULL,
 		/* keywords */ "horiz vert"
 	},
 
-	{	"Rotate90",
+	{	"Rotate90",	"General",
 		&CMD_Rotate90,
 		/* flags */ NULL,
 		/* keywords */ "cw acw"
 	},
 
-	{	"Enlarge",
+	{	"Enlarge",	"General",
 		&CMD_Enlarge
 	},
 
-	{	"Shrink",
+	{	"Shrink",	"General",
 		&CMD_Shrink
 	},
 
-	{	"Disconnect",
+	{	"Disconnect",	"General",
 		&CMD_Disconnect
 	},
 
-	{	"Merge",
+	{	"Merge",	"General",
 		&CMD_Merge,
 		/* flags */ "/keep"
 	},
 
-	{	"Quantize",
+	{	"Quantize",	"General",
 		&CMD_Quantize
 	},
 
-	{	"Gamma",
+	{	"Gamma",	"General",
 		&CMD_Gamma
 	},
 
-	{	"ApplyTag",
+	{	"ApplyTag",	"General",
 		&CMD_ApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
 	},
 
-	/* ----- the EDIT menu ----- */
-
-	{	"Undo",
-		&CMD_Undo
+	{	"ACT_SelectBox", "General",
+		&CMD_ACT_SelectBox
 	},
 
-	{	"Redo",
-		&CMD_Redo
+	{	"ACT_Drag", "General",
+		&CMD_ACT_Drag
 	},
 
-	{	"Clipboard_Cut",
-		&CMD_Clipboard_Cut
-	},
-
-	{	"Clipboard_Copy",
-		&CMD_Clipboard_Copy
-	},
-
-	{	"Clipboard_Paste",
-		&CMD_Clipboard_Paste
-	},
-
-	{	"CopyAndPaste",
-		&CMD_CopyAndPaste
-	},
-
-	{	"CopyProperties",
-		&CMD_CopyProperties,
-		/* flags */ "/reverse"
-	},
-
-	{	"PruneUnused",
-		&CMD_PruneUnused
-	},
-
-	{	"MoveObjectsDialog",
-		&CMD_MoveObjects_Dialog
-	},
-
-	{	"ScaleObjectsDialog",
-		&CMD_ScaleObjects_Dialog
-	},
-
-	{	"RotateObjectsDialog",
-		&CMD_RotateObjects_Dialog
+	{	"ACT_Transform", "General",
+		&CMD_ACT_Transform,
+		/* flags */ NULL,
+		/* keywords */ "scale stretch rotate rotscale skew"
 	},
 
 
 	/* -------- linedef -------- */
 
-	{	"LIN_Flip",
+	{	"LIN_Flip", NULL,
 		&CMD_LIN_Flip,
 		/* flags */ "/verts /sides"
 	},
 
-	{	"LIN_SplitHalf",
+	{	"LIN_SplitHalf", NULL,
 		&CMD_LIN_SplitHalf
 	},
 
-	{	"LIN_SelectPath",
+	{	"LIN_SelectPath", NULL,
 		&CMD_LIN_SelectPath,
 		/* flags */ "/add /onesided /sametex"
 	},
 
+
 	/* -------- sector -------- */
 
-	{	"SEC_Floor",
+	{	"SEC_Floor", NULL,
 		&CMD_SEC_Floor
 	},
 
-	{	"SEC_Ceil",
+	{	"SEC_Ceil", NULL,
 		&CMD_SEC_Ceil
 	},
 
-	{	"SEC_Light",
+	{	"SEC_Light", NULL,
 		&CMD_SEC_Light
 	},
 
-	{	"SEC_SelectGroup",
+	{	"SEC_SelectGroup", NULL,
 		&CMD_SEC_SelectGroup,
 		/* flags */ "/add /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
-	{	"SEC_SwapFlats",
+	{	"SEC_SwapFlats", NULL,
 		&CMD_SEC_SwapFlats
 	},
 
+
 	/* -------- thing -------- */
 
-	{	"TH_Spin",
+	{	"TH_Spin", NULL,
 		&CMD_TH_SpinThings
 	},
 
+
 	/* -------- vertex -------- */
 
-	{	"VT_ShapeLine",
+	{	"VT_ShapeLine", NULL,
 		&CMD_VT_ShapeLine
 	},
 
-	{	"VT_ShapeArc",
+	{	"VT_ShapeArc", NULL,
 		&CMD_VT_ShapeArc
 	},
 
+
 	/* -------- browser -------- */
 
-	{	"BR_CycleCategory",
+ 	{	"BrowserMode", "Browser",
+		&CMD_BrowserMode,
+		/* flags */ NULL,
+		/* keywords */ "obj tex flat line sec genline"
+	},
+
+	{	"BR_CycleCategory", "Browser",
 		&CMD_BR_CycleCategory
 	},
 
-	{	"BR_ClearSearch",
+	{	"BR_ClearSearch", "Browser",
 		&CMD_BR_ClearSearch
 	},
 
-	{	"BR_Scroll",
+	{	"BR_Scroll", "Browser",
 		&CMD_BR_Scroll
 	},
 
 	// end of command list
-	{	NULL, NULL	}
+	{	NULL, NULL, NULL  }
 };
 
 

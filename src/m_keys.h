@@ -134,6 +134,10 @@ typedef struct
 {
 	const char *name;
 
+	// used in the Key binding preferences
+	// when NULL, will be computed from 'req_context'
+	const char *group_name;
+
 	command_func_t func;
 
 	const char *flag_list;

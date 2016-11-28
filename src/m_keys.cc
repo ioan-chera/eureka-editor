@@ -49,8 +49,27 @@ static key_context_e ContextFromName(const char *name)
 }
 
 
+static const char * CalcGroupName(const char *given, key_context_e ctx)
+{
+	if (given)
+		return given;
+
+	switch (ctx)
+	{
+		case KCTX_Line:    return "Line";
+		case KCTX_Sector:  return "Sector";
+		case KCTX_Thing:   return "Thing";
+		case KCTX_Vertex:  return "Vertex";
+		case KCTX_Render:  return "3D View";
+		case KCTX_Browser: return "Browser";
+
+		default: return "General";
+	}
+}
+
+
 /* this should only be called during startup */
-void M_RegisterCommand(const char *name, command_func_t func)
+void M_RegisterCommand(const char *name, command_func_t func, const char *group_name)
 {
 	editor_command_t *cmd = new editor_command_t;
 
@@ -58,7 +77,9 @@ void M_RegisterCommand(const char *name, command_func_t func)
 	cmd->func = func;
 	cmd->flag_list = NULL;
 	cmd->keyword_list = NULL;
+
 	cmd->req_context = ContextFromName(name);
+	cmd->group_name  = CalcGroupName(group_name, cmd->req_context);
 
 	all_commands.push_back(cmd);
 }
@@ -72,6 +93,7 @@ void M_RegisterCommandList(editor_command_t * list)
 	for ( ; list->name ; list++)
 	{
 		list->req_context = ContextFromName(list->name);
+		list->group_name  = CalcGroupName(list->group_name, list->req_context);
 
 		all_commands.push_back(list);
 	}
