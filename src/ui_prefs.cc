@@ -51,7 +51,9 @@ private:
 	Fl_Input  *key_name;
 	Fl_Button *grab_but;
 
-	Fl_Choice *func;
+	Fl_Output *func;
+	Fl_Menu_Button *func_choose;
+
 	Fl_Choice *context;
 	Fl_Input  *params;
 
@@ -88,6 +90,8 @@ private:
 
 		key_name->color(FL_BACKGROUND2_COLOR, FL_SELECTION_COLOR);
 		grab_but->activate();
+
+		redraw();
 	}
 
 	int handle(int event)
@@ -135,15 +139,18 @@ private:
 		}
 	};
 
-	int PopulateFuncMenu(key_context_e ctx, const char *find_name = NULL)
+	void PopulateFuncMenu(const char *find_name = NULL)
 	{
-		if (ctx == KCTX_Browser || ctx == KCTX_General)
-			ctx = KCTX_NONE;
+		func->value("");
 
-		func->clear();
+		func_choose->clear();
 
-		// collect all names so we can sort them alphabetically
-		std::vector< const char * > name_list;
+		cur_cmd = NULL;
+
+		// add names to menu, and find the current function
+		char buffer[512];
+
+		bool did_separator = false;
 
 		for (int i = 0 ; ; i++)
 		{
@@ -152,31 +159,24 @@ private:
 			if (! cmd)
 				break;
 
-			if (cmd->req_context == ctx)
-				name_list.push_back(cmd->name);
-		}
-
-		std::sort(name_list.begin(), name_list.end(), name_CMP_pred());
-
-		// add sorted names to menu, and find the current function
-		int result = 0;
-
-		cur_cmd = NULL;
-
-		for (unsigned int k = 0 ; k < name_list.size() ; k++)
-		{
-			//@@
-			func->add(name_list[k]);
-
-			if (find_name && strcmp(name_list[k], find_name) == 0)
+			if (cmd->req_context != KCTX_NONE && ! did_separator)
 			{
-				result = (int)k;
+				func_choose->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
+				did_separator = true;
+			}
 
-				cur_cmd = FindEditorCommand(find_name);
+			snprintf(buffer, sizeof(buffer), "%s/%s", cmd->group_name, cmd->name);
+
+			func_choose->add(buffer, 0, 0, (void *)(long)i, 0 /* flags */);
+
+			if (find_name && strcmp(cmd->name, find_name) == 0)
+			{
+				cur_cmd = cmd;
 			}
 		}
 
-		return result;
+		if (cur_cmd)
+			func->value(cur_cmd->name);
 	}
 
 	void Decode(key_context_e ctx, const char *str)
@@ -195,9 +195,10 @@ private:
 
 		func_buf[pos] = 0;
 
-		func->value(PopulateFuncMenu(ctx, func_buf));
+		PopulateFuncMenu(func_buf);
 
-		PopulateMenus();
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
 
 		if (*str == ':')
 			str++;
@@ -253,12 +254,6 @@ private:
 		M_FreeLine(tokens, num_tok);
 
 		menu->activate();
-	}
-
-	void PopulateMenus()
-	{
-		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
-		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
 	}
 
 	bool ValidateKey()
@@ -317,24 +312,22 @@ private:
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
-		key_context_e ctx = (key_context_e)(1 + w->value());
-
-		const char *cur_func = dialog->cur_cmd ? dialog->cur_cmd->name : NULL;
-
-		dialog->func->value(dialog->PopulateFuncMenu(ctx, cur_func));
-		dialog->func->do_callback();
+		// TODO : ctx = (ctx)(long) w->mvalue()->user_data_;
 	}
 
-	static void func_callback(Fl_Choice *w, void *data)
+	static void func_callback(Fl_Menu_Button *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
-		const char * name = w->mvalue()->text;
-		SYS_ASSERT(name);
+		int cmd_index = (int)(long)w->mvalue()->user_data_;
+		SYS_ASSERT(cmd_index >= 0);
 
-		dialog->cur_cmd = FindEditorCommand(name);
+		dialog->cur_cmd = LookupEditorCommand(cmd_index);
 
-		dialog->PopulateMenus();
+		if (dialog->cur_cmd)
+			dialog->func->value(dialog->cur_cmd->name);
+
+		dialog->redraw();
 	}
 
 	void ReplaceKeyword(const char *new_word)
@@ -408,7 +401,7 @@ private:
 	}
 
 public:
-	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
+	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_funcname) :
 		UI_Escapable_Window(400, 306, "Edit Key Binding"),
 		want_close(false), cancelled(false),
 		awaiting_key(false),
@@ -425,19 +418,21 @@ public:
 		  key_name->when(FL_WHEN_CHANGED);
 		  key_name->callback((Fl_Callback*)validate_callback, this);
 		}
-		{ grab_but = new Fl_Button(250, 25, 85, 25, "Grab");
+		{ grab_but = new Fl_Button(255, 25, 90, 25, "Grab");
 		  grab_but->callback((Fl_Callback*)grab_key_callback, this);
 		}
 
-		{ func = new Fl_Choice(85, 65, 150, 25, "Function:");
-		  func->callback((Fl_Callback*) func_callback, this);
-		}
-		{ context = new Fl_Choice(85, 105, 150, 25, "Mode:");
+		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
 		  context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General");
 		  context->value((int)ctx - 1);
 		  context->callback((Fl_Callback*)context_callback, this);
 		}
 
+		{ func = new Fl_Output(85, 105, 150, 25, "Function:");
+		}
+		{ func_choose = new Fl_Menu_Button(255, 105, 90, 25, "Choose");
+		  func_choose->callback((Fl_Callback*) func_callback, this);
+		}
 		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
 		  params->value("");
 		  params->when(FL_WHEN_CHANGED);
@@ -469,7 +464,7 @@ public:
 		end();
 
 		// parse line into function name and parameters
-		Decode(ctx, _func);
+		Decode(ctx, _funcname);
 	}
 
 
