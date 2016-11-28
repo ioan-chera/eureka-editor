@@ -321,7 +321,7 @@ bool Nav_ActionKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
 
 static inline bool CheckKeyPressed(nav_active_key_t& N)
 {
-	keycode_t base = N.key & FL_KEY_MASK;
+#if 0  // IGNORE MODIFIER CHANGES
 	keycode_t mod  = N.key & MOD_ALL_MASK;
 
 	// grab current modifiers, but simplify to a single one
@@ -329,6 +329,9 @@ static inline bool CheckKeyPressed(nav_active_key_t& N)
 
 	if ((mod | N.lax_mod) != (cur_mod | N.lax_mod))
 		return false;
+#endif
+
+	keycode_t base = N.key & FL_KEY_MASK;
 
 	if (is_mouse_button(base))
 	{
