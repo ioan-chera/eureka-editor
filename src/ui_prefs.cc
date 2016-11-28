@@ -44,11 +44,12 @@ private:
 	bool want_close;
 	bool cancelled;
 
-	bool grab_active;
+	bool awaiting_key;
 
 	keycode_t key;
 
 	Fl_Input  *key_name;
+	Fl_Button *grab_but;
 
 	Fl_Choice *func;
 	Fl_Choice *context;
@@ -61,6 +62,67 @@ private:
 
 	Fl_Button *cancel;
 	Fl_Button *ok_but;
+
+private:
+	void BeginGrab()
+	{
+		SYS_ASSERT(! awaiting_key);
+
+		awaiting_key = true;
+
+		key_name->color(FL_YELLOW, FL_YELLOW);
+		key_name->value("<\077\077\077>");
+		grab_but->deactivate();
+
+		Fl::focus(this);
+
+		redraw();
+	}
+
+	void FinishGrab()
+	{
+		if (! awaiting_key)
+			return;
+
+		awaiting_key = false;
+
+		key_name->color(FL_BACKGROUND2_COLOR, FL_SELECTION_COLOR);
+		grab_but->activate();
+	}
+
+	int handle(int event)
+	{
+		if (awaiting_key)
+		{
+			if (event == FL_KEYDOWN)
+			{
+				// escape key cancels
+				if (Fl::event_key() == FL_Escape)
+				{
+					FinishGrab();
+
+					if (key)
+						key_name->value(M_KeyToString(key));
+
+					return 1;
+				}
+
+				keycode_t new_key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+
+				if (new_key)
+				{
+					FinishGrab();
+
+					key = new_key;
+					key_name->value(M_KeyToString(key));
+
+					return 1;
+				}
+			}
+		}
+
+		return UI_Escapable_Window::handle(event);
+	}
 
 private:
 	struct name_CMP_pred
@@ -229,7 +291,9 @@ private:
 
 	static void grab_key_callback(Fl_Button *w, void *data)
 	{
-		// FIXME
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->BeginGrab();
 	}
 
 	static void close_callback(Fl_Widget *w, void *data)
@@ -344,7 +408,8 @@ private:
 public:
 	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
 		UI_Escapable_Window(400, 306, "Edit Key Binding"),
-		want_close(false), cancelled(false), grab_active(false),
+		want_close(false), cancelled(false),
+		awaiting_key(false),
 		key(_key)
 	{
 		if (ctx == KCTX_NONE)
@@ -358,9 +423,8 @@ public:
 		  key_name->when(FL_WHEN_CHANGED);
 		  key_name->callback((Fl_Callback*)validate_callback, this);
 		}
-		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
-		  o->callback((Fl_Callback*)grab_key_callback, this);
-		  o->hide();  // TODO: IMPLEMENT THIS
+		{ grab_but = new Fl_Button(250, 25, 85, 25, "Grab");
+		  grab_but->callback((Fl_Callback*)grab_key_callback, this);
 		}
 
 		{ func = new Fl_Choice(85, 65, 150, 25, "Function:");
@@ -406,7 +470,9 @@ public:
 		Decode(ctx, _func);
 	}
 
-	bool Run(keycode_t *key_v, key_context_e *ctx_v, const char **func_v)
+
+	bool Run(keycode_t *key_v, key_context_e *ctx_v,
+			 const char **func_v, bool start_grabbed)
 	{
 		*key_v  = 0;
 		*ctx_v  = KCTX_NONE;
@@ -416,10 +482,15 @@ public:
 		validate_callback(this, this);
 
 		set_modal();
-
 		show();
 
-		Fl::focus(params);
+		Fl::wait(0.1);
+		Fl::wait(0.1);
+
+		if (start_grabbed)
+			BeginGrab();
+		else
+			Fl::focus(params);
 
 		while (! want_close)
 			Fl::wait(0.2);
@@ -990,7 +1061,6 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	SYS_ASSERT(str);
 
 	prefs->key_list->text(line, str);
-
 	prefs->key_list->selection_color(FL_YELLOW);
 
 	Fl::focus(prefs);
@@ -1109,9 +1179,11 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	}
 
 
+	bool start_grabbed = false;  //???  is_add || is_copy;
+
 	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
 
-	if (dialog->Run(&new_key, &new_context, &new_func))
+	if (dialog->Run(&new_key, &new_context, &new_func, start_grabbed))
 	{
 		// assume it works (since we validated it)
 		if (is_add || is_copy)
@@ -1527,11 +1599,11 @@ int UI_Preferences::handle(int event)
 				return 1;
 			}
 
-			keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+			keycode_t new_key = M_TranslateKey(Fl::event_key(), Fl::event_state());
 
-			if (key != 0)
+			if (new_key)
 			{
-				SetBinding(key);
+				SetBinding(new_key);
 				return 1;
 			}
 		}
