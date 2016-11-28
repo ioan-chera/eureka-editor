@@ -2539,7 +2539,7 @@ void R3D_NAV_Forward(void)
 
 	view.nav_fwd = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2558,7 +2558,7 @@ void R3D_NAV_Back(void)
 
 	view.nav_back = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2577,7 +2577,7 @@ void R3D_NAV_Right(void)
 
 	view.nav_right = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2596,7 +2596,7 @@ void R3D_NAV_Left(void)
 
 	view.nav_left = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2623,7 +2623,7 @@ void R3D_NAV_Up(void)
 
 	view.nav_up = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2650,7 +2650,7 @@ void R3D_NAV_Down(void)
 
 	view.nav_down = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2672,7 +2672,7 @@ void R3D_NAV_TurnLeft(void)
 	// convert to radians
 	view.nav_turn_L = turn * M_PI / 180.0;
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -2694,7 +2694,7 @@ void R3D_NAV_TurnRight(void)
 	// convert to radians
 	view.nav_turn_R = turn * M_PI / 180.0;
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 

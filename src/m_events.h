@@ -73,8 +73,8 @@ typedef void (* nav_release_func_t)(void);
 
 void Nav_Clear();
 void Nav_Navigate();
-bool Nav_SetKey(keycode_t key, nav_release_func_t func);
-bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
+bool Nav_SetKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod = 0);
+bool Nav_ActionKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod = 0);
 void Nav_UpdateKeys();
 
 unsigned int Nav_TimeDiff(); /* milliseconds */

@@ -358,7 +358,7 @@ void CMD_NAV_Scroll_X(void)
 
 	edit.nav_scroll_dx = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_X_release);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_X_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -381,7 +381,7 @@ void CMD_NAV_Scroll_Y(void)
 
 	edit.nav_scroll_dy = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Y_release);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Y_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 

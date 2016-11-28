@@ -217,6 +217,10 @@ typedef struct
 	// function to call when user releases the key or button.
 	nav_release_func_t  release;
 
+	// modifiers that can change state without a keypress
+	// being considered as a new command.
+	keycode_t  lax_mod;
+
 } nav_active_key_t;
 
 static nav_active_key_t cur_action_key;
@@ -246,7 +250,7 @@ void Nav_Navigate()
 }
 
 
-bool Nav_SetKey(keycode_t key, nav_release_func_t func)
+bool Nav_SetKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
 {
 	// when starting a navigation, grab the current time
 	if (! edit.is_navigating)
@@ -269,10 +273,10 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 		}
 
 		// already active?
-		if (N.key == key && N.release == func)
+		if ((N.key | N.lax_mod) == (key | N.lax_mod) && N.release == func)
 			return false;
 
-		// if it's the same physical key, release it now
+		// if it's the same physical key, release the previous action
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
 			(N.release)();
@@ -282,31 +286,34 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 	if (free_slot >= 0)
 	{
-		nav_actives[free_slot].key = key;
-		nav_actives[free_slot].release = func;
+		nav_active_key_t& N = nav_actives[free_slot];
+
+		N.key     = key;
+		N.release = func;
+		N.lax_mod = lax_mod;
 	}
 
 	return true;
 }
 
 
-bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
+bool Nav_ActionKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
 {
 	nav_active_key_t& N = cur_action_key;
 
-	// already active?
-	if (N.key == key && N.release == func)
-		return false;
-
-	// release existing action
-	if (N.key != 0)
+	if (N.key)
 	{
+		// already active?
+		if ((N.key | N.lax_mod) == (key | N.lax_mod) && N.release == func)
+			return false;
+
+		// release the existing action
 		(N.release)();
-		 N.key = 0;
 	}
 
-	N.key = key;
+	N.key     = key;
 	N.release = func;
+	N.lax_mod = lax_mod;
 
 	return true;
 }
@@ -320,14 +327,21 @@ static inline bool CheckKeyPressed(nav_active_key_t& N)
 	// grab current modifiers, but simplify to a single one
 	keycode_t cur_mod = M_TranslateKey(0, Fl::event_state());
 
+	if ((mod | N.lax_mod) != (cur_mod | N.lax_mod))
+		return false;
+
 	if (is_mouse_button(base))
 	{
-		if (mod == cur_mod && (Fl::event_buttons() & FL_BUTTON(base - FL_Button)))
+		if (Fl::event_buttons() & FL_BUTTON(base - FL_Button))
 			return true;
+	}
+	else if (is_mouse_wheel(base))
+	{
+		return false;
 	}
 	else  // key on keyboard
 	{
-		if (mod == cur_mod && Fl::event_key(base))
+		if (Fl::event_key(base))
 			return true;
 	}
 
@@ -374,8 +388,7 @@ void Nav_UpdateKeys()
 		{
 			// call release function, clear the slot
 			(N.release)();
-
-			N.key = 0;
+			 N.key = 0;
 			continue;
 		}
 
