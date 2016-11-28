@@ -2698,7 +2698,7 @@ void R3D_NAV_TurnRight(void)
 }
 
 
-static void ACT_AdjustOffsets_release(void)
+static void ACT_AdjustOfs_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_ADJUST_OFS)
@@ -2707,12 +2707,12 @@ static void ACT_AdjustOffsets_release(void)
 	Render3D_AdjustOffsets(+1);
 }
 
-void R3D_ACT_AdjustOffsets(void)
+void R3D_ACT_AdjustOfs(void)
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOffsets_release))
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
 	{
 		Render3D_AdjustOffsets(-1);
 	}
@@ -2919,97 +2919,97 @@ void R3D_WHEEL_Move(void)
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Forward", NULL,
-		&R3D_Forward
-	},
-
-	{	"3D_Backward", NULL,
-		&R3D_Backward
-	},
-
-	{	"3D_Left", NULL,
-		&R3D_Left
-	},
-
-	{	"3D_Right", NULL,
-		&R3D_Right
-	},
-
-	{	"3D_Up", NULL,
-		&R3D_Up
-	},
-
-	{	"3D_Down", NULL,
-		&R3D_Down
-	},
-
-	{	"3D_Turn", NULL,
-		&R3D_Turn
-	},
-
-	{	"3D_DropToFloor", NULL,
-		&R3D_DropToFloor
-	},
-
-	{	"3D_NAV_Forward", NULL,
-		&R3D_NAV_Forward
-	},
-
-	{	"3D_NAV_Back", NULL,
-		&R3D_NAV_Back
-	},
-
-	{	"3D_NAV_Right", NULL,
-		&R3D_NAV_Right
-	},
-
-	{	"3D_NAV_Left", NULL,
-		&R3D_NAV_Left
-	},
-
-	{	"3D_NAV_Up", NULL,
-		&R3D_NAV_Up
-	},
-
-	{	"3D_NAV_Down", NULL,
-		&R3D_NAV_Down
-	},
-
-	{	"3D_NAV_TurnLeft", NULL,
-		&R3D_NAV_TurnLeft
-	},
-
-	{	"3D_NAV_TurnRight", NULL,
-		&R3D_NAV_TurnRight
-	},
-
-	{	"3D_ACT_AdjustOfs", NULL,
-		&R3D_ACT_AdjustOffsets
-	},
-
-	{	"3D_WHEEL_Move", NULL,
-		&R3D_WHEEL_Move
-	},
-
-	{	"3D_Set", NULL,
+	{	"3D_Set", NULL, 0,
 		&R3D_Set,
 		/* flags */ NULL,
 		/* keywords */ "gamma tex obj light grav"
 	},
 
-	{	"3D_Toggle", NULL,
+	{	"3D_Toggle", NULL, 0,
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
-	{	"3D_Align", NULL,
+	{	"3D_Align", NULL, 0,
 		&R3D_Align,
 		/* flags */ "/right /clear"
 	},
 
+	{	"3D_ACT_AdjustOfs", NULL, 0,
+		&R3D_ACT_AdjustOfs
+	},
+
+	{	"3D_Forward", NULL, 0,
+		&R3D_Forward
+	},
+
+	{	"3D_Backward", NULL, 0,
+		&R3D_Backward
+	},
+
+	{	"3D_Left", NULL, 0,
+		&R3D_Left
+	},
+
+	{	"3D_Right", NULL, 0,
+		&R3D_Right
+	},
+
+	{	"3D_Up", NULL, 0,
+		&R3D_Up
+	},
+
+	{	"3D_Down", NULL, 0,
+		&R3D_Down
+	},
+
+	{	"3D_Turn", NULL, 0,
+		&R3D_Turn
+	},
+
+	{	"3D_DropToFloor", NULL, 0,
+		&R3D_DropToFloor
+	},
+
+	{	"3D_WHEEL_Move", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_WHEEL_Move
+	},
+
+	{	"3D_NAV_Forward", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Forward
+	},
+
+	{	"3D_NAV_Back", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Back
+	},
+
+	{	"3D_NAV_Right", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Right
+	},
+
+	{	"3D_NAV_Left", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Left
+	},
+
+	{	"3D_NAV_Up", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Up
+	},
+
+	{	"3D_NAV_Down", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_Down
+	},
+
+	{	"3D_NAV_TurnLeft", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_TurnLeft
+	},
+
+	{	"3D_NAV_TurnRight", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_TurnRight
+	},
+
 	// end of command list
-	{	NULL, NULL	}
+	{	NULL, NULL, 0, NULL  }
 };
 
 

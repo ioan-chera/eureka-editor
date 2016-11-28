@@ -68,13 +68,16 @@ static const char * CalcGroupName(const char *given, key_context_e ctx)
 }
 
 
-/* this should only be called during startup */
+//
+// this should only be called during startup
+//
 void M_RegisterCommand(const char *name, command_func_t func, const char *group_name)
 {
 	editor_command_t *cmd = new editor_command_t;
 
 	cmd->name = name;
 	cmd->func = func;
+	cmd->lax_mods = 0;
 	cmd->flag_list = NULL;
 	cmd->keyword_list = NULL;
 
@@ -85,7 +88,9 @@ void M_RegisterCommand(const char *name, command_func_t func, const char *group_
 }
 
 
-/* this should only be called during startup */
+//
+// this should only be called during startup
+//
 void M_RegisterCommandList(editor_command_t * list)
 {
 	// the structures are used directly
@@ -207,7 +212,9 @@ bool is_mouse_button(keycode_t key)
 }
 
 
-/* returns zero (an invalid key) if parsing fails */
+//
+// returns zero (an invalid key) if parsing fails
+//
 keycode_t M_ParseKeyString(const char *str)
 {
 	int key = 0;
@@ -1156,29 +1163,38 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	{
 		key_binding_t& bind = all_bindings[i];
 
-		if (bind.key == key && bind.context == context)
+		SYS_ASSERT(bind.cmd);
+
+		if (bind.context != context)
+			continue;
+
+		// match modifiers "loosely" for certain commands (esp. NAV_xxx)
+
+		if ((bind.key | bind.cmd->lax_mods) != (key | bind.cmd->lax_mods))
+			continue;
+
+		// found a match!
+
+		int p_idx = 0;
+		int f_idx = 0;
+
+		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		{
-			int p_idx = 0;
-			int f_idx = 0;
+			if (! bind.param[p][0])
+				break;
 
-			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-			{
-				if (! bind.param[p][0])
-					break;
-
-				// separate flags from normal parameters
-				if (bind.param[p][0] == '/')
-					EXEC_Flags[f_idx++] = bind.param[p];
-				else
-					EXEC_Param[p_idx++] = bind.param[p];
-			}
-
-			EXEC_CurKey = key;
-
-			DoExecuteCommand(bind.cmd);
-
-			return true;
+			// separate flags from normal parameters
+			if (bind.param[p][0] == '/')
+				EXEC_Flags[f_idx++] = bind.param[p];
+			else
+				EXEC_Param[p_idx++] = bind.param[p];
 		}
+
+		EXEC_CurKey = key;
+
+		DoExecuteCommand(bind.cmd);
+
+		return true;
 	}
 
 	return false;
@@ -1214,9 +1230,9 @@ bool ExecuteCommand(const char *name, const char *param1,
 }
 
 
-/*
- *  play a fascinating tune
- */
+//
+//  play a fascinating tune
+//
 void Beep(const char *fmt, ...)
 {
 	va_list arg_ptr;

@@ -902,17 +902,17 @@ static editor_command_t  command_table[] =
 {
 	/* ----- FILE menu ----- */
 
-	{	"Quit",  "File",
+	{	"Quit",  "File", 0,
 		&CMD_Quit
 	},
 
-	{	"GivenFile",  "File",
+	{	"GivenFile",  "File", 0,
 		&CMD_GivenFile,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last current"
 	},
 
-	{	"FlipMap",  "File",
+	{	"FlipMap",  "File", 0,
 		&CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
@@ -921,231 +921,231 @@ static editor_command_t  command_table[] =
 
 	/* ----- EDIT menu ----- */
 
-	{	"Insert",	"Edit",
+	{	"Insert",	"Edit", 0,
 		&CMD_Insert,
 		/* flags */ "/new /continue /nofill"
 	},
 
-	{	"Delete",	"Edit",
+	{	"Delete",	"Edit", 0,
 		&CMD_Delete,
 		/* flags */ "/keep_things /keep_unused"
 	},
 
-	{	"Undo",   "Edit",
+	{	"Undo",   "Edit", 0,
 		&CMD_Undo
 	},
 
-	{	"Redo",   "Edit",
+	{	"Redo",   "Edit", 0,
 		&CMD_Redo
 	},
 
-	{	"Clipboard_Cut",   "Edit",
+	{	"Clipboard_Cut",   "Edit", 0,
 		&CMD_Clipboard_Cut
 	},
 
-	{	"Clipboard_Copy",   "Edit",
+	{	"Clipboard_Copy",   "Edit", 0,
 		&CMD_Clipboard_Copy
 	},
 
-	{	"Clipboard_Paste",   "Edit",
+	{	"Clipboard_Paste",   "Edit", 0,
 		&CMD_Clipboard_Paste
 	},
 
-	{	"Select",	"Edit",
+	{	"Select",	"Edit", 0,
 		&CMD_Select
 	},
 
-	{	"SelectAll",	"Edit",
+	{	"SelectAll",	"Edit", 0,
 		&CMD_SelectAll
 	},
 
-	{	"UnselectAll",	"Edit",
+	{	"UnselectAll",	"Edit", 0,
 		&CMD_UnselectAll
 	},
 
-	{	"InvertSelection",	"Edit",
+	{	"InvertSelection",	"Edit", 0,
 		&CMD_InvertSelection
 	},
 
-	{	"LastSelection",	"Edit",
+	{	"LastSelection",	"Edit", 0,
 		&CMD_LastSelection
 	},
 
-	{	"CopyAndPaste",   "Edit",
+	{	"CopyAndPaste",   "Edit", 0,
 		&CMD_CopyAndPaste
 	},
 
-	{	"CopyProperties",   "Edit",
+	{	"CopyProperties",   "Edit", 0,
 		&CMD_CopyProperties,
 		/* flags */ "/reverse"
 	},
 
-	{	"PruneUnused",   "Edit",
+	{	"PruneUnused",   "Edit", 0,
 		&CMD_PruneUnused
 	},
 
-	{	"MoveObjectsDialog",   "Edit",
+	{	"MoveObjectsDialog",   "Edit", 0,
 		&CMD_MoveObjects_Dialog
 	},
 
-	{	"ScaleObjectsDialog",   "Edit",
+	{	"ScaleObjectsDialog",   "Edit", 0,
 		&CMD_ScaleObjects_Dialog
 	},
 
-	{	"RotateObjectsDialog",   "Edit",
+	{	"RotateObjectsDialog",   "Edit", 0,
 		&CMD_RotateObjects_Dialog
 	},
 
 
 	/* ----- VIEW menu ----- */
 
-	{	"GoToCamera",  "View",
+	{	"GoToCamera",  "View", 0,
 		&CMD_GoToCamera
 	},
 
-	{	"PlaceCamera",  "View",
+	{	"PlaceCamera",  "View", 0,
 		&CMD_PlaceCamera,
 		/* flags */ "/open3d"
 	},
 
-	{	"Zoom",  "View",
+	{	"Zoom",  "View", 0,
 		&CMD_Zoom
 	},
 
-	{	"ZoomWholeMap",  "View",
+	{	"ZoomWholeMap",  "View", 0,
 		&CMD_ZoomWholeMap
 	},
 
-	{	"ZoomSelection",  "View",
+	{	"ZoomSelection",  "View", 0,
 		&CMD_ZoomSelection
 	},
 
-	{	"JumpToObject",  "View",
+	{	"JumpToObject",  "View", 0,
 		&CMD_JumpToObject
 	},
 
 
 	/* ------ interface stuff ------ */
 
-	{	"EditMode", "UI",
+	{	"MetaKey", "UI", 0,
+		&CMD_MetaKey
+	},
+
+	{	"EditMode", "UI", 0,
 		&CMD_EditMode,
 		/* flags */ NULL,
 		/* keywords */ "thing line sector vertex"
 	},
 
-	{	"Set", "UI",
+	{	"Set", "UI", 0,
 		&CMD_SetVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser grid obj_nums snap"
 	},
 
-	{	"Toggle", "UI",
+	{	"Toggle", "UI", 0,
 		&CMD_ToggleVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser grid obj_nums snap recent"
 	},
 
-	{	"Check", "UI",
+	{	"Check", "UI", 0,
 		&CMD_CheckMap,
 		/* flags */ NULL,
 		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
 
-	{	"MetaKey", "UI",
-		&CMD_MetaKey
-	},
-
-	{	"Scroll",  "Grid",
-		&CMD_Scroll
-	},
-
-	{	"NAV_Scroll_X",  "Grid",
-		&CMD_NAV_Scroll_X
-	},
-
-	{	"NAV_Scroll_Y",  "Grid",
-		&CMD_NAV_Scroll_Y
-	},
-
-	{	"NAV_Scroll_Mouse",  "Grid",
-		&CMD_NAV_Scroll_Mouse
-	},
-
-	{	"WHEEL_Scroll",  "Grid",
-		&CMD_WHEEL_Scroll
-	},
-
-	{	"GRID_Bump",  "Grid",
+	{	"GRID_Bump",  "UI", 0,
 		&CMD_GRID_Bump
 	},
 
-	{	"GRID_Set",  "Grid",
+	{	"GRID_Set",  "UI", 0,
 		&CMD_GRID_Set
 	},
 
-	{	"GRID_Zoom",  "Grid",
+	{	"GRID_Zoom",  "UI", 0,
 		&CMD_GRID_Zoom
+	},
+
+	{	"Scroll",  "UI", 0,
+		&CMD_Scroll
+	},
+
+	{	"WHEEL_Scroll",  "UI", 0,
+		&CMD_WHEEL_Scroll
+	},
+
+	{	"NAV_Scroll_X",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_X
+	},
+
+	{	"NAV_Scroll_Y",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_Y
+	},
+
+	{	"NAV_Scroll_Mouse", "UI", 0,
+		&CMD_NAV_Scroll_Mouse
 	},
 
 
 	/* ----- general operations ----- */
 
-	{	"Nothing", "General",
+	{	"Nothing", "General", 0,
 		&CMD_Nothing
 	},
 
-	{	"Mirror",	"General",
+	{	"Mirror",	"General", 0,
 		&CMD_Mirror,
 		/* flags */ NULL,
 		/* keywords */ "horiz vert"
 	},
 
-	{	"Rotate90",	"General",
+	{	"Rotate90",	"General", 0,
 		&CMD_Rotate90,
 		/* flags */ NULL,
 		/* keywords */ "cw acw"
 	},
 
-	{	"Enlarge",	"General",
+	{	"Enlarge",	"General", 0,
 		&CMD_Enlarge
 	},
 
-	{	"Shrink",	"General",
+	{	"Shrink",	"General", 0,
 		&CMD_Shrink
 	},
 
-	{	"Disconnect",	"General",
+	{	"Disconnect",	"General", 0,
 		&CMD_Disconnect
 	},
 
-	{	"Merge",	"General",
+	{	"Merge",	"General", 0,
 		&CMD_Merge,
 		/* flags */ "/keep"
 	},
 
-	{	"Quantize",	"General",
+	{	"Quantize",	"General", 0,
 		&CMD_Quantize
 	},
 
-	{	"Gamma",	"General",
+	{	"Gamma",	"General", 0,
 		&CMD_Gamma
 	},
 
-	{	"ApplyTag",	"General",
+	{	"ApplyTag",	"General", 0,
 		&CMD_ApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
 	},
 
-	{	"ACT_SelectBox", "General",
+	{	"ACT_SelectBox", "General", 0,
 		&CMD_ACT_SelectBox
 	},
 
-	{	"ACT_Drag", "General",
+	{	"ACT_Drag", "General", 0,
 		&CMD_ACT_Drag
 	},
 
-	{	"ACT_Transform", "General",
+	{	"ACT_Transform", "General", 0,
 		&CMD_ACT_Transform,
 		/* flags */ NULL,
 		/* keywords */ "scale stretch rotate rotscale skew"
@@ -1154,16 +1154,16 @@ static editor_command_t  command_table[] =
 
 	/* -------- linedef -------- */
 
-	{	"LIN_Flip", NULL,
+	{	"LIN_Flip", NULL, 0,
 		&CMD_LIN_Flip,
 		/* flags */ "/verts /sides"
 	},
 
-	{	"LIN_SplitHalf", NULL,
+	{	"LIN_SplitHalf", NULL, 0,
 		&CMD_LIN_SplitHalf
 	},
 
-	{	"LIN_SelectPath", NULL,
+	{	"LIN_SelectPath", NULL, 0,
 		&CMD_LIN_SelectPath,
 		/* flags */ "/add /onesided /sametex"
 	},
@@ -1171,68 +1171,68 @@ static editor_command_t  command_table[] =
 
 	/* -------- sector -------- */
 
-	{	"SEC_Floor", NULL,
+	{	"SEC_Floor", NULL, 0,
 		&CMD_SEC_Floor
 	},
 
-	{	"SEC_Ceil", NULL,
+	{	"SEC_Ceil", NULL, 0,
 		&CMD_SEC_Ceil
 	},
 
-	{	"SEC_Light", NULL,
+	{	"SEC_Light", NULL, 0,
 		&CMD_SEC_Light
 	},
 
-	{	"SEC_SelectGroup", NULL,
+	{	"SEC_SelectGroup", NULL, 0,
 		&CMD_SEC_SelectGroup,
 		/* flags */ "/add /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
-	{	"SEC_SwapFlats", NULL,
+	{	"SEC_SwapFlats", NULL, 0,
 		&CMD_SEC_SwapFlats
 	},
 
 
 	/* -------- thing -------- */
 
-	{	"TH_Spin", NULL,
+	{	"TH_Spin", NULL, 0,
 		&CMD_TH_SpinThings
 	},
 
 
 	/* -------- vertex -------- */
 
-	{	"VT_ShapeLine", NULL,
+	{	"VT_ShapeLine", NULL, 0,
 		&CMD_VT_ShapeLine
 	},
 
-	{	"VT_ShapeArc", NULL,
+	{	"VT_ShapeArc", NULL, 0,
 		&CMD_VT_ShapeArc
 	},
 
 
 	/* -------- browser -------- */
 
- 	{	"BrowserMode", "Browser",
+ 	{	"BrowserMode", "Browser", 0,
 		&CMD_BrowserMode,
 		/* flags */ NULL,
 		/* keywords */ "obj tex flat line sec genline"
 	},
 
-	{	"BR_CycleCategory", "Browser",
+	{	"BR_CycleCategory", "Browser", 0,
 		&CMD_BR_CycleCategory
 	},
 
-	{	"BR_ClearSearch", "Browser",
+	{	"BR_ClearSearch", "Browser", 0,
 		&CMD_BR_ClearSearch
 	},
 
-	{	"BR_Scroll", "Browser",
+	{	"BR_Scroll", "Browser", 0,
 		&CMD_BR_Scroll
 	},
 
 	// end of command list
-	{	NULL, NULL, NULL  }
+	{	NULL, NULL, 0, NULL  }
 };
 
 

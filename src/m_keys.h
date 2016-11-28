@@ -138,6 +138,10 @@ typedef struct
 	// when NULL, will be computed from 'req_context'
 	const char *group_name;
 
+	// bit-mask of modifier keys that this command "hogs" for itself.
+	// generally only used for the special NAV_ and ACT_ commands.
+	keycode_t lax_mods;
+
 	command_func_t func;
 
 	const char *flag_list;
