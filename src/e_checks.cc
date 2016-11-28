@@ -3875,13 +3875,13 @@ void CHECK_All(bool major_stuff)
 }
 
 
-void CMD_CheckMap()
+void CMD_MapCheck()
 {
 	const char *what = EXEC_Param[0];
 
 	if (! what[0])
 	{
-		Beep("Check: missing keyword");
+		Beep("MapCheck: missing keyword");
 		return;
 	}
 	else if (y_stricmp(what, "all") == 0)
@@ -3943,7 +3943,7 @@ void CMD_CheckMap()
 	}
 	else
 	{
-		Beep("Check: unknown keyword: %s\n", what);
+		Beep("MapCheck: unknown keyword: %s\n", what);
 	}
 }
 

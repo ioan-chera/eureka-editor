@@ -372,42 +372,42 @@ static void browser_hide(Fl_Widget *w, void * data)
 
 static void checks_do_all(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "all");
+	ExecuteCommand("MapCheck", "all");
 }
 
 static void checks_do_major(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "major");
+	ExecuteCommand("MapCheck", "major");
 }
 
 static void checks_do_vertices(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "vertices");
+	ExecuteCommand("MapCheck", "vertices");
 }
 
 static void checks_do_sectors(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "sectors");
+	ExecuteCommand("MapCheck", "sectors");
 }
 
 static void checks_do_linedefs(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "linedefs");
+	ExecuteCommand("MapCheck", "linedefs");
 }
 
 static void checks_do_things(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "things");
+	ExecuteCommand("MapCheck", "things");
 }
 
 static void checks_do_textures(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "textures");
+	ExecuteCommand("MapCheck", "textures");
 }
 
 static void checks_do_tags(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "tags");
+	ExecuteCommand("MapCheck", "tags");
 }
 
 

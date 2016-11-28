@@ -523,8 +523,13 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 	temp.cmd = FindEditorCommand(tokens[2]);
 
 	// backwards compatibility
-	if (! temp.cmd && y_stricmp(tokens[2], "GRID_Step") == 0)
-		temp.cmd = FindEditorCommand("GRID_Bump");
+	if (! temp.cmd)
+	{
+		if (y_stricmp(tokens[2], "GRID_Step") == 0)
+			temp.cmd = FindEditorCommand("GRID_Bump");
+		else if (y_stricmp(tokens[2], "Check") == 0)
+			temp.cmd = FindEditorCommand("MapCheck");
+	}
 
 	if (! temp.cmd)
 	{

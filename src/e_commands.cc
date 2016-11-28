@@ -1027,14 +1027,20 @@ static editor_command_t  command_table[] =
 
 	/* ------ interface stuff ------ */
 
-	{	"MetaKey", "UI", 0,
-		&CMD_MetaKey
-	},
-
 	{	"EditMode", "UI", 0,
 		&CMD_EditMode,
 		/* flags */ NULL,
 		/* keywords */ "thing line sector vertex"
+	},
+
+	{	"MetaKey", "UI", 0,
+		&CMD_MetaKey
+	},
+
+	{	"MapCheck", "UI", 0,
+		&CMD_MapCheck,
+		/* flags */ NULL,
+		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
 
 	{	"Set", "UI", 0,
@@ -1049,10 +1055,8 @@ static editor_command_t  command_table[] =
 		/* keywords */ "3d browser grid obj_nums snap recent"
 	},
 
-	{	"Check", "UI", 0,
-		&CMD_CheckMap,
-		/* flags */ NULL,
-		/* keywords */ "all major vertices sectors linedefs things textures tags current"
+	{	"Scroll",  "UI", 0,
+		&CMD_Scroll
 	},
 
 	{	"GRID_Bump",  "UI", 0,
@@ -1065,10 +1069,6 @@ static editor_command_t  command_table[] =
 
 	{	"GRID_Zoom",  "UI", 0,
 		&CMD_GRID_Zoom
-	},
-
-	{	"Scroll",  "UI", 0,
-		&CMD_Scroll
 	},
 
 	{	"WHEEL_Scroll",  "UI", 0,

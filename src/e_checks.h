@@ -36,7 +36,7 @@ void SideDefs_NormalizeMiddles();
 void Tags_ApplyNewValue(int new_tag);
 
 
-void CMD_CheckMap();
+void CMD_MapCheck();
 
 void CMD_ApplyTag();
 
