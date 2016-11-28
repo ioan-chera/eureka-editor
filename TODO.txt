@@ -79,6 +79,11 @@ Editing
 +  the criss-crossing-lines detection is too sloppy
    [ e.g. see MAP24 of Ancient Aliens ]
 
++  hard to select very short (1-unit) lines?
+
++  crossing lines sometimes mucks up?
+   e.g. drawing over the stairs in MAP01
+
 
 
 3D View
@@ -124,8 +129,6 @@ General
 
 +  a dialog to view / load / prune backups.
 
-IDEA: 3D_NAV_CircleStrafe command
-
 IDEA: MMB on sidedef/sector tex : open RECENT browser
 
 WISH: support Windows 95/98/ME
@@ -168,6 +171,8 @@ WISH: can import UDMF format maps
 
 -  PRINT key to make a screenshot of map or 3D view
 
+-  texture checks : warn about a 2S switch line with same switch in
+   both the UPPER and LOWER textures
 
 ?  ability to view (perhaps edit) a map header lump
    (for FraggleScript etc...)
@@ -288,7 +293,11 @@ IDEA: for quantizing a group of objects, try about 9 delta
    -  create a DrawWall for their floor/ceil and sides
    -  distance is slightly closer than normal wall segment
 
+-  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
+
 WISH:  rotated sprites
+
+IDEA: 3D_NAV_CircleStrafe command
 
 
 
