@@ -150,6 +150,11 @@ static inline const SideDef * soal_SD_ptr(side_on_a_line_t zz)
 }
 
 
+// disabled this partial texture comparison, as it can lead to
+// unexpected results.  [ and an option for it may be overkill ]
+#if 1
+#define  PartialTexCmp  y_stricmp
+#else
 static int PartialTexCmp(const char *A, const char *B)
 {
 	// only compare the first 6 characters
@@ -164,6 +169,7 @@ static int PartialTexCmp(const char *A, const char *B)
 
 	return y_stricmp(A2, B2);
 }
+#endif
 
 
 static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
