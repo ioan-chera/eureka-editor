@@ -32,6 +32,7 @@ typedef enum
 {
 	ACT_NOTHING = 0,
 
+	ACT_CLICK,			// user has clicked on something
 	ACT_SELBOX,			// user is outlining a selection box
 	ACT_DRAG,			// user is dragging some objects
 	ACT_TRANSFORM,		// user is scaling/rotating some objects
@@ -42,8 +43,6 @@ typedef enum
 } editor_action_e;
 
 
-void Editor_MousePress(keycode_t mod);
-void Editor_MouseRelease();
 void Editor_LeaveWindow();
 
 void Editor_ClearAction();

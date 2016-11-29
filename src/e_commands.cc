@@ -36,6 +36,7 @@
 #include "e_sector.h"
 #include "e_path.h"
 #include "e_vertex.h"
+#include "m_config.h"
 #include "m_loadsave.h"
 #include "r_render.h"
 #include "ui_window.h"
@@ -430,6 +431,9 @@ static void NAV_MouseScroll_release(void)
 
 void CMD_NAV_MouseScroll(void)
 {
+	if (edit.render3d)
+		return;
+
 	if (! EXEC_CurKey)
 		return;
 
@@ -443,6 +447,231 @@ void CMD_NAV_MouseScroll(void)
 		Editor_ScrollMap(-1);
 	}
 }
+
+
+// screen position when LMB was pressed
+static int mouse_button1_x;
+static int mouse_button1_y;
+
+// map location when LMB was pressed
+static int button1_map_x;
+static int button1_map_y;
+
+
+static void DoClickStuff(keycode_t mod)
+{
+///---	if (edit.button_down >= 2)
+///---		return;
+
+	edit.button_down = 1;
+	edit.button_mod  = mod;
+
+	// remember some state (for dragging)
+	mouse_button1_x = Fl::event_x();
+	mouse_button1_y = Fl::event_y();
+
+	button1_map_x = edit.map_x;
+	button1_map_y = edit.map_y;
+
+	// this is a special case, since we want to allow the new vertex
+	// from a split-line (when in in drawing mode) to be draggable.
+	// [ that is achieved by setting edit.clicked ]
+
+	if (easier_drawing_mode && edit.split_line.valid() &&
+		edit.action != ACT_DRAW_LINE)
+	{
+		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
+		return;
+	}
+
+	if (edit.action == ACT_DRAW_LINE)
+	{
+		bool force_cont = (mod == MOD_SHIFT);
+		bool no_fill    = (mod == MOD_COMMAND);
+
+		Insert_Vertex(force_cont, no_fill, true /* is_button */);
+		return;
+	}
+
+	// find the object under the pointer.
+	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
+
+	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
+	// opening a selection box in places which are otherwise impossible.
+	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
+	{
+		edit.clicked.clear();
+	}
+
+	// clicking on an empty space starts a new selection box.
+	if (edit.clicked.is_nil())
+	{
+//!!!!		Editor_SetAction(ACT_SELBOX);
+//!!!!		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		return;
+	}
+
+	// Note: drawing mode is activated on RELEASE...
+	//       (as the user may be trying to drag the vertex)
+}
+
+
+static void DoDragStuff()
+{
+	// releasing the button while there was a selection box
+	// causes all the objects within the box to be selected.
+
+
+	// releasing the button while dragging : drop the selection.
+	if (edit.action == ACT_DRAG)
+	{
+		Editor_ClearAction();
+
+		int dx, dy;
+		main_win->canvas->DragFinish(&dx, &dy);
+
+		if (dx || dy)
+		{
+			if (edit.drag_single_obj >= 0)
+				DragSingleObject(edit.drag_single_obj, dx, dy);
+			else
+				MoveObjects(edit.Selected, dx, dy);
+		}
+
+		edit.drag_single_obj = -1;
+		RedrawMap();
+		return;
+	}
+}
+
+
+static void CheckBeginDrag(keycode_t mod)
+{
+	int pixel_dx = Fl::event_x() - mouse_button1_x;
+	int pixel_dy = Fl::event_y() - mouse_button1_y;
+
+	if (edit.button_down == 1 && edit.clicked.valid() &&
+		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
+	{
+		Editor_SetAction(ACT_DRAG);
+
+		// if highlighted object is in selection, we drag the selection,
+		// otherwise we drag just this one object
+
+		if (! edit.Selected->get(edit.clicked.num))
+			edit.drag_single_obj = edit.clicked.num;
+		else
+			edit.drag_single_obj = -1;
+
+		int focus_x, focus_y;
+
+		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
+
+		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
+
+///---		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
+///---		{
+///---			edit.drag_single_vertex = edit.Selected->find_first();
+///---			SYS_ASSERT(edit.drag_single_vertex >= 0);
+///---		}
+
+		UpdateHighlight();
+		return;
+	}
+}
+
+
+static void ACT_Click_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_CLICK)
+		return;
+
+	Editor_ClearAction();
+	Editor_ClearErrorMode();
+
+
+fprintf(stderr, "*** CLICK release\n");
+{ return; }
+
+
+	Objid click_obj(edit.clicked);
+	edit.clicked.clear();
+
+
+#if 0
+	// nothing needed while in drawing mode
+	if (edit.action == ACT_DRAW_LINE)
+		return;
+#endif
+
+
+#if 0
+	// optional multi-select : require a certain modifier key
+	if (multi_select_modifier &&
+		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
+	{
+//FIXME : REVIEW THIS
+//		Selection_Clear();
+	}
+#endif
+
+
+	// handle a clicked-on object
+	// e.g. select the object if unselected, and vice versa.
+
+	if (! click_obj.valid())
+		return;
+
+	bool was_empty = edit.Selected->empty();
+
+	Editor_ClearErrorMode();
+
+
+	// check if pointing at the same object as before
+	Objid near_obj;
+
+	GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
+
+	if (near_obj != click_obj)
+		return;
+
+#if 0
+	// begin drawing mode (unless a modifier was pressed)
+	if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
+		was_empty && edit.button_mod == 0)
+	{
+		Editor_SetAction(ACT_DRAW_LINE);
+		edit.drawing_from = click_obj.num;
+		edit.Selected->set(click_obj.num);
+
+		RedrawMap();
+		return;
+	}
+#endif
+
+	edit.Selected->toggle(click_obj.num);
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+void CMD_ACT_Click(void)
+{
+	if (edit.render3d)
+		return;
+
+	if (! EXEC_CurKey)
+		return;
+
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
+	{
+		Editor_SetAction(ACT_CLICK);
+
+fprintf(stderr, "*** CLICK pressed!\n");
+	}
+}
+
 
 
 static void ACT_SelectBox_release(void)
@@ -1183,6 +1412,11 @@ static editor_command_t  command_table[] =
 		&CMD_ApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
+	},
+
+	{	"ACT_Click", "General", 0,
+		&CMD_ACT_Click,
+		/* flags */ "/select /drag /drawline"
 	},
 
 	{	"ACT_SelectBox", "General", 0,

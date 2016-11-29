@@ -61,14 +61,6 @@ void ClearStickyMod()
 static int mouse_last_x;
 static int mouse_last_y;
 
-// screen position when LMB was pressed
-static int mouse_button1_x;
-static int mouse_button1_y;
-
-// map location when LMB was pressed
-static int button1_map_x;
-static int button1_map_y;
-
 
 void Editor_ClearAction()
 {
@@ -432,148 +424,6 @@ int wheel_dx;
 int wheel_dy;
 
 
-void Editor_MousePress(keycode_t mod)
-{
-	if (edit.button_down >= 2)
-		return;
-
-	edit.button_down = 1;
-	edit.button_mod  = mod;
-
-	// remember some state (for dragging)
-	mouse_button1_x = Fl::event_x();
-	mouse_button1_y = Fl::event_y();
-
-	button1_map_x = edit.map_x;
-	button1_map_y = edit.map_y;
-
-	// this is a special case, since we want to allow the new vertex
-	// from a split-line (when in in drawing mode) to be draggable.
-	// [ that is achieved by setting edit.clicked ]
-
-	if (easier_drawing_mode && edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
-	{
-		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
-		return;
-	}
-
-	if (edit.action == ACT_DRAW_LINE)
-	{
-		bool force_cont = (mod == MOD_SHIFT);
-		bool no_fill    = (mod == MOD_COMMAND);
-
-		Insert_Vertex(force_cont, no_fill, true /* is_button */);
-		return;
-	}
-
-	// find the object under the pointer.
-	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
-
-	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
-	// opening a selection box in places which are otherwise impossible.
-	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
-	{
-		edit.clicked.clear();
-	}
-
-	// clicking on an empty space starts a new selection box.
-	if (edit.clicked.is_nil())
-	{
-//!!!!		Editor_SetAction(ACT_SELBOX);
-//!!!!		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
-		return;
-	}
-
-	// Note: drawing mode is activated on RELEASE...
-	//       (as the user may be trying to drag the vertex)
-}
-
-
-void Editor_MouseRelease()
-{
-	edit.button_down = 0;
-
-	Objid click_obj(edit.clicked);
-	edit.clicked.clear();
-
-	// releasing the button while dragging : drop the selection.
-#if 1
-	if (edit.action == ACT_DRAG)
-	{
-		Editor_ClearAction();
-
-		int dx, dy;
-		main_win->canvas->DragFinish(&dx, &dy);
-
-		if (dx || dy)
-		{
-			if (edit.drag_single_obj >= 0)
-				DragSingleObject(edit.drag_single_obj, dx, dy);
-			else
-				MoveObjects(edit.Selected, dx, dy);
-		}
-
-		edit.drag_single_obj = -1;
-		RedrawMap();
-		return;
-	}
-#endif
-
-	// releasing the button while there was a selection box
-	// causes all the objects within the box to be selected.
-
-
-
-	// nothing needed while in drawing mode
-	if (edit.action == ACT_DRAW_LINE)
-		return;
-
-
-	// optional multi-select : require a certain modifier key
-	if (multi_select_modifier &&
-		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
-	{
-//FIXME : REVIEW THIS
-//		Selection_Clear();
-	}
-
-
-	// handle a clicked-on object
-	// e.g. select the object if unselected, and vice versa.
-
-	if (click_obj.valid())
-	{
-		bool was_empty = edit.Selected->empty();
-
-		Editor_ClearErrorMode();
-
-		// check if pointing at the same object as before
-		Objid near_obj;
-
-		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
-
-		if (near_obj != click_obj)
-			return;
-
-		// begin drawing mode (unless a modifier was pressed)
-		if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-			was_empty && edit.button_mod == 0)
-		{
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = click_obj.num;
-			edit.Selected->set(click_obj.num);
-
-			RedrawMap();
-			return;
-		}
-
-		edit.Selected->toggle(click_obj.num);
-		RedrawMap();
-		return;
-	}
-}
-
 
 void Editor_LeaveWindow()
 {
@@ -636,42 +486,10 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-#if 1
-	//
+
 	// begin dragging?
-	//
-	int pixel_dx = Fl::event_x() - mouse_button1_x;
-	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
-	if (edit.button_down == 1 && edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
-	{
-		Editor_SetAction(ACT_DRAG);
-
-		// if highlighted object is in selection, we drag the selection,
-		// otherwise we drag just this one object
-
-		if (! edit.Selected->get(edit.clicked.num))
-			edit.drag_single_obj = edit.clicked.num;
-		else
-			edit.drag_single_obj = -1;
-
-		int focus_x, focus_y;
-
-		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
-
-		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
-
-///---		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
-///---		{
-///---			edit.drag_single_vertex = edit.Selected->find_first();
-///---			SYS_ASSERT(edit.drag_single_vertex >= 0);
-///---		}
-
-		UpdateHighlight();
-		return;
-	}
-#endif
+//!!!	CheckBeginDrag()
 
 
 	// in general, just update the highlight, split-line (etc)
@@ -812,37 +630,31 @@ int Editor_RawButton(int event)
 
 	bool down = (event == FL_PUSH);
 
-	if (button >= 2)
-	{
-		return Editor_RawKey(event);
-	}
+	if (button < 1 || button > 8)
+		return 0;
+
+	return Editor_RawKey(event);
 
 
-	Nav_UpdateKeys();
+///---	// this will detect released buttons
+///---	Nav_UpdateKeys();
 
 
-//---	// adjust offsets on a sidedef?
-//---	if (edit.render3d && button == 2)
-//---	{
-//---		Render3D_AdjustOffsets(down ? -1 : +1);
-//---		return 1;
-//---	}
+///---	if (! down)
+///---	{
+///---		if (! edit.render3d)
+///---			Editor_MouseRelease();
+///---		return 1;
+///---	}
+///---
+///---	int mod = Fl::event_state() & MOD_ALL_MASK;
+///---
+///---	if (! edit.render3d)
+///---	{
+///---		Editor_MousePress(mod);
+///---	}
 
-	if (! down)
-	{
-		if (! edit.render3d)
-			Editor_MouseRelease();
-		return 1;
-	}
-
-	int mod = Fl::event_state() & MOD_ALL_MASK;
-
-	if (! edit.render3d)
-	{
-		Editor_MousePress(mod);
-	}
-
-	return 1;
+///---	return 1;
 }
 
 
