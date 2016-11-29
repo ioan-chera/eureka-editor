@@ -35,8 +35,8 @@ Grid_State_c  grid;
 
 // config items
 int  default_grid_size = 64;
-bool default_grid_snap = true;
-int  default_grid_mode = 2;  // normal
+bool default_grid_snap = false;
+int  default_grid_mode = 0;  // off
 
 int  grid_toggle_type = 0;  // both
 bool grid_hide_in_free_mode = false;
