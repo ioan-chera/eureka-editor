@@ -209,9 +209,9 @@ static void CreateHomeDirs()
 		"cache", "backups",
 
 		// these under $home_dir
-		"iwads", "games", "ports", "mods",
+		"iwads", "games", "ports",
 
-		NULL
+		NULL	// end of list
 	};
 
 	for (int i = 0 ; subdirs[i] ; i++)
@@ -441,20 +441,6 @@ static void DeterminePort()
 	}
 
 	Port_name = default_port;
-}
-
-
-static const char * DetermineMod(const char *res_name)
-{
-	static char mod_name[FL_PATH_MAX];
-
-	strcpy(mod_name, fl_filename_name(res_name));
-
-	fl_filename_setext(mod_name, "");
-
-	y_strlowr(mod_name);
-
-	return StringDup(mod_name);
 }
 
 
@@ -738,15 +724,6 @@ static void LoadResourceFile(const char *filename)
 		FatalError("Cannot load resource: %s\n", filename);
 
 	MasterDir_Add(wad);
-
-	// load corresponding mod file if it exists
-	// [ TODO : probably ahould do this in ManageProject dialog instead of here ]
-	const char *mod_name = DetermineMod(filename);
-
-	if (M_CanLoadDefinitions("mods", mod_name))
-	{
-		M_LoadDefinitions("mods", mod_name);
-	}
 }
 
 

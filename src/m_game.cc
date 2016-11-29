@@ -279,7 +279,6 @@ bool M_CanLoadDefinitions(const char *folder, const char *name)
  *
  *  Examples: "games" + "doom2"
  *            "ports" + "edge"
- *            "mods"  + "qdoom"
  */
 void M_LoadDefinitions(const char *folder, const char *name)
 {
@@ -297,10 +296,7 @@ void M_LoadDefinitions(const char *folder, const char *name)
 
 	DebugPrintf("  found at: %s\n", filename);
 
-	if (strcmp(folder, "mods") == 0)
-		M_ParseDefinitionFile(PURPOSE_Resource, filename, folder, prettyname);
-	else
-		M_ParseDefinitionFile(PURPOSE_Normal, filename, folder, prettyname);
+	M_ParseDefinitionFile(PURPOSE_Normal, filename, folder, prettyname);
 }
 
 
