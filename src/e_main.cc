@@ -336,7 +336,7 @@ void Editor_ChangeMode(char mode_char)
 		case 'v': Editor_ChangeMode_Raw(OBJ_VERTICES); break;
 
 		default:
-			LogPrintf("INTERNAL ERROR: unknown mode %d\n", mode_char);
+			Beep("Unknown mode: %c\n", mode_char);
 			return;
 	}
 
