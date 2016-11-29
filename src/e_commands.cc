@@ -472,55 +472,6 @@ static bool click_check_select;
 static bool click_force_single;
 
 
-static void DoClickStuff(keycode_t mod)
-{
-	// remember some state (for dragging)
-	mouse_button1_x = Fl::event_x();
-	mouse_button1_y = Fl::event_y();
-
-	button1_map_x = edit.map_x;
-	button1_map_y = edit.map_y;
-
-	// this is a special case, since we want to allow the new vertex
-	// from a split-line (when in in drawing mode) to be draggable.
-	// [ that is achieved by setting edit.clicked ]
-
-	if (edit.split_line.valid() && edit.action != ACT_DRAW_LINE)
-	{
-	}
-
-	if (edit.action == ACT_DRAW_LINE)
-	{
-		bool force_cont = (mod == MOD_SHIFT);
-		bool no_fill    = (mod == MOD_COMMAND);
-
-		Insert_Vertex(force_cont, no_fill, true /* is_button */);
-		return;
-	}
-
-	// find the object under the pointer.
-	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
-
-	// inhibit in sector/linedef mode when SHIFT is pressed, to allow
-	// opening a selection box in places which are otherwise impossible.
-	if (mod == MOD_SHIFT && (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
-	{
-		edit.clicked.clear();
-	}
-
-	// clicking on an empty space starts a new selection box.
-	if (edit.clicked.is_nil())
-	{
-//!!!!		Editor_SetAction(ACT_SELBOX);
-//!!!!		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
-		return;
-	}
-
-	// Note: drawing mode is activated on RELEASE...
-	//       (as the user may be trying to drag the vertex)
-}
-
-
 void CheckBeginDrag()
 {
 	if (! click_check_drag)
