@@ -581,7 +581,6 @@ public:
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
-	Fl_Choice       *edit_modkey;
 	Fl_Int_Input    *edit_sectorsize;
 
 	Fl_Check_Button *brow_smalltex;
@@ -623,8 +622,6 @@ public:
 	Fl_Button *key_delete;
 	Fl_Button *key_rebind;
 	Fl_Button *key_reset;
-
-	/* Mouse Tab */
 
 	/* Nodes Tab */
 
@@ -822,10 +819,6 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		}
-		{ edit_modkey = new Fl_Choice(370, 210, 95, 30, "---->   ");
-		  edit_modkey->add("CTRL");
-		  edit_modkey->value(0);
-		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
 
@@ -919,17 +912,6 @@ UI_Preferences::UI_Preferences() :
 
 		o->end();
 	  }
-
-	  /* ---- Mouse Tab ---- */
-
-#if 0
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Mouse" R_SPACES);
-		o->labelsize(16);
-		o->hide();
-
-		o->end();
-	  }
-#endif
 
 	  /* ---- Nodes Tab ---- */
 
