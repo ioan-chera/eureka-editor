@@ -2353,6 +2353,12 @@ void Render3D_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	float mod_factor = 1.0;
+	if (mod & MOD_SHIFT)   mod_factor = 0.5;
+	if (mod & MOD_COMMAND) mod_factor = 2.0;
+
 	if (view.nav_fwd || view.nav_back || view.nav_right || view.nav_left)
 	{
 		float fwd   = view.nav_fwd   - view.nav_back;
@@ -2361,19 +2367,25 @@ void Render3D_Navigate()
 		float dx = view.Cos * fwd + view.Sin * right;
 		float dy = view.Sin * fwd - view.Cos * right;
 
+		dx = dx * mod_factor * mod_factor;
+		dy = dy * mod_factor * mod_factor;
+
 		view.x += dx * delay_ms;
 		view.y += dy * delay_ms;
 	}
 
 	if (view.nav_up || view.nav_down)
 	{
-		view.z += (view.nav_up - view.nav_down) * delay_ms;
+		float dz = (view.nav_up - view.nav_down);
+
+		view.z += dz * mod_factor * delay_ms;
 	}
 
 	if (view.nav_turn_L || view.nav_turn_R)
 	{
-		float dang = (view.nav_turn_L - view.nav_turn_R) * delay_ms;
+		float dang = (view.nav_turn_L - view.nav_turn_R);
 
+		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
 
 		view.SetAngle(view.angle + dang);

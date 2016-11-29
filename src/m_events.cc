@@ -189,11 +189,20 @@ static void Editor_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	float mod_factor = 1.0;
+	if (mod & MOD_SHIFT)   mod_factor = 0.5;
+	if (mod & MOD_COMMAND) mod_factor = 2.0;
+
 	if (edit.nav_scroll_left || edit.nav_scroll_right ||
 		edit.nav_scroll_up   || edit.nav_scroll_down)
 	{
-		float delta_x = (edit.nav_scroll_right - edit.nav_scroll_left) * delay_ms;
-		float delta_y = (edit.nav_scroll_up    - edit.nav_scroll_down) * delay_ms;
+		float delta_x = (edit.nav_scroll_right - edit.nav_scroll_left);
+		float delta_y = (edit.nav_scroll_up    - edit.nav_scroll_down);
+
+		delta_x = delta_x * mod_factor * delay_ms;
+		delta_y = delta_y * mod_factor * delay_ms;
 
 		grid.Scroll(delta_x, delta_y);
 	}
