@@ -316,6 +316,12 @@ void CMD_BrowserMode(void)
 }
 
 
+void CMD_OperationMenu(void)
+{
+	Beep("operation menu NYI");
+}
+
+
 void CMD_Scroll(void)
 {
 	// these are percentages
@@ -1317,6 +1323,10 @@ static editor_command_t  command_table[] =
 
 	{	"Scroll",  "UI", 0,
 		&CMD_Scroll
+	},
+
+	{	"OperationMenu",  "UI", 0,
+		&CMD_OperationMenu
 	},
 
 	{	"GRID_Bump",  "UI", 0,
