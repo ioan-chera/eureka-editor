@@ -150,7 +150,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
 
-	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block walk");
+	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "impassible");
 	f_walk->labelsize(12);
 	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
 
