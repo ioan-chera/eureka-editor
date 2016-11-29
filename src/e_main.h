@@ -93,6 +93,8 @@ typedef struct
 	float nav_scroll_up;
 	float nav_scroll_down;
 
+	float scroll_speed;
+
 } Editor_State_t;
 
 

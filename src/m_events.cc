@@ -137,6 +137,7 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 }
 
 
+// this is only used for mouse scrolling
 void Editor_ScrollMap(int mode, int dx, int dy)
 {
 	// started?
@@ -155,22 +156,15 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 		return;
 	}
 
+	float speed = edit.scroll_speed / grid.Scale;
 
-	keycode_t mod = 0; ///???  Fl::event_state() & MOD_ALL_MASK;
+	//??		 if (mod & MOD_COMMAND) speed *= 2.0;
+	//??	else if (mod & MOD_SHIFT)   speed *= 0.5;
 
-	{
-		int speed = 8;  // FIXME: CONFIG OPTION
+	double delta_x = ((double) -dx * speed);
+	double delta_y = ((double)  dy * speed);
 
-		if (mod == MOD_SHIFT)
-			speed /= 2;
-		else if (mod == MOD_COMMAND)
-			speed *= 2;
-
-		double delta_x = ((double) -dx * speed / 8.0 / grid.Scale);
-		double delta_y = ((double)  dy * speed / 8.0 / grid.Scale);
-
-		grid.Scroll(delta_x, delta_y);
-	}
+	grid.Scroll(delta_x, delta_y);
 }
 
 

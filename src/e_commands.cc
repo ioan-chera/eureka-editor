@@ -433,6 +433,8 @@ void CMD_NAV_MouseScroll(void)
 	if (! EXEC_CurKey)
 		return;
 
+	edit.scroll_speed = atof(EXEC_Param[0]);
+
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 

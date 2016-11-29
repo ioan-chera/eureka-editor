@@ -138,6 +138,7 @@ public:
 
 	// navigation loop info
 	bool is_scrolling;
+	float scroll_speed;
 
 	unsigned int nav_time;
 
@@ -2141,6 +2142,9 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 		return;
 	}
 
+	if (dx == 0 && dy == 0)
+		return;
+
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
 
@@ -2154,52 +2158,36 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 			dx = 0;
 	}
 
-	if (mod == MOD_ALT)  // strafing
+	bool is_strafe = (mod & MOD_ALT) ? true : false;
+
+	float mod_factor = 1.0;
+	if (mod & MOD_SHIFT)   mod_factor = 0.4;
+	if (mod & MOD_COMMAND) mod_factor = 2.5;
+
+	float speed = view.scroll_speed * mod_factor;
+
+	if (is_strafe)
 	{
-		if (dx)
-		{
-			view.x += view.Sin * dx * 2;
-			view.y -= view.Cos * dx * 2;
-
-			dx = 0;
-		}
-/*
-		dy = -dy;  // CONFIG OPT
-
-		if (dy)
-		{
-			view.x += view.Cos * dy * 2;
-			view.y += view.Sin * dy * 2;
-
-			dy = 0;
-		}
-*/
+		view.x += view.Sin * dx * mod_factor;
+		view.y -= view.Cos * dx * mod_factor;
 	}
-
-	if (dx)
+	else  // turn camera
 	{
-		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 4);
-		else if (mod == MOD_COMMAND)
-			speed *= 3;
-
-		double d_ang = dx * M_PI * speed / (1440.0*4.0);
+		double d_ang = dx * speed * M_PI / 480.0;
 
 		view.SetAngle(view.angle - d_ang);
 	}
 
-	if (dy && ! (render_lock_gravity && view.gravity))
+	dy = -dy;  //TODO CONFIG ITEM
+
+	if (is_strafe)
 	{
-		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 4);
-		else if (mod == MOD_COMMAND)
-			speed *= 3;
-
-		view.z -= dy * speed / 16.0;
+		view.x += view.Cos * dy * mod_factor;
+		view.y += view.Sin * dy * mod_factor;
+	}
+	else if (! (render_lock_gravity && view.gravity))
+	{
+		view.z += dy * speed * 0.75;
 
 		view.gravity = false;
 	}
@@ -2751,6 +2739,8 @@ void R3D_NAV_MouseMove(void)
 {
 	if (! EXEC_CurKey)
 		return;
+
+	view.scroll_speed = atof(EXEC_Param[0]);
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
