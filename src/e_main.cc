@@ -58,7 +58,7 @@ static selection_c * last_Sel;
 
 
 // config items
-int default_edit_mode = 0;  // Things
+int default_edit_mode = 3;  // Vertices
 
 bool same_mode_clears_selection = false;
 
