@@ -519,36 +519,6 @@ static void DoClickStuff(keycode_t mod)
 }
 
 
-// THIS IS PROBABLY JUST WHATS IN ACT_Drag_release, VERIFY THEN REMOVE IT
-static void DoDragStuff()
-{
-	// releasing the button while there was a selection box
-	// causes all the objects within the box to be selected.
-
-
-	// releasing the button while dragging : drop the selection.
-	if (edit.action == ACT_DRAG)
-	{
-		Editor_ClearAction();
-
-		int dx, dy;
-		main_win->canvas->DragFinish(&dx, &dy);
-
-		if (dx || dy)
-		{
-			if (edit.drag_single_obj >= 0)
-				DragSingleObject(edit.drag_single_obj, dx, dy);
-			else
-				MoveObjects(edit.Selected, dx, dy);
-		}
-
-		edit.drag_single_obj = -1;
-		RedrawMap();
-		return;
-	}
-}
-
-
 void CheckBeginDrag()
 {
 	if (! click_check_drag)
