@@ -457,6 +457,8 @@ static int mouse_button1_y;
 static int button1_map_x;
 static int button1_map_y;
 
+static bool click_check_drag;
+
 
 static void DoClickStuff(keycode_t mod)
 {
@@ -539,12 +541,15 @@ static void DoDragStuff()
 }
 
 
-static void CheckBeginDrag(keycode_t mod)
+void CheckBeginDrag()
 {
+	if (! click_check_drag)
+		return;
+
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
-	if (/* edit.button_down == 1 && */ edit.clicked.valid() &&
+	if (edit.clicked.valid() &&
 		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
 	{
 		Editor_SetAction(ACT_DRAG);
@@ -562,14 +567,6 @@ static void CheckBeginDrag(keycode_t mod)
 		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
 
 		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
-
-///---		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
-///---		{
-///---			edit.drag_single_vertex = edit.Selected->find_first();
-///---			SYS_ASSERT(edit.drag_single_vertex >= 0);
-///---		}
-
-		UpdateHighlight();
 		return;
 	}
 }
@@ -600,11 +597,46 @@ static void ACT_SelectBox_release(void)
 }
 
 
+static void ACT_Drag_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_DRAG)
+		return;
+
+	Editor_ClearAction();
+
+	int dx, dy;
+	main_win->canvas->DragFinish(&dx, &dy);
+
+	if (dx || dy)
+	{
+		if (edit.drag_single_obj >= 0)
+			DragSingleObject(edit.drag_single_obj, dx, dy);
+		else
+			MoveObjects(edit.Selected, dx, dy);
+	}
+
+	edit.drag_single_obj = -1;
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+
+
 static void ACT_Click_release(void)
 {
+	click_check_drag = false;
+
+
 	if (edit.action == ACT_SELBOX)
 	{
 		ACT_SelectBox_release();
+		return;
+	}
+	else if (edit.action == ACT_DRAG)
+	{
+		ACT_Drag_release();
 		return;
 	}
 
@@ -704,9 +736,21 @@ void CMD_ACT_Click(void)
 		return;
 	}
 
+fprintf(stderr, "*** CLICK pressed!!\n");
+
 	Editor_SetAction(ACT_CLICK);
 
-fprintf(stderr, "*** CLICK pressed!!\n");
+	click_check_drag = Exec_HasFlag("/drag");
+
+	if (click_check_drag)
+	{
+		// remember some state (for drag detection)
+		mouse_button1_x = Fl::event_x();
+		mouse_button1_y = Fl::event_y();
+
+		button1_map_x = edit.map_x;
+		button1_map_y = edit.map_y;
+	}
 }
 
 
@@ -727,31 +771,6 @@ void CMD_ACT_SelectBox(void)
 	}
 }
 
-
-static void ACT_Drag_release(void)
-{
-	// check if cancelled or overridden
-	if (edit.action != ACT_DRAG)
-		return;
-
-	Editor_ClearAction();
-
-	int dx, dy;
-	main_win->canvas->DragFinish(&dx, &dy);
-
-	if (dx || dy)
-	{
-		if (edit.drag_single_obj >= 0)
-			DragSingleObject(edit.drag_single_obj, dx, dy);
-		else
-			MoveObjects(edit.Selected, dx, dy);
-	}
-
-	edit.drag_single_obj = -1;
-
-	UpdateHighlight();
-	RedrawMap();
-}
 
 void CMD_ACT_Drag(void)
 {

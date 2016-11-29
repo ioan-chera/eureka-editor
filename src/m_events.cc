@@ -423,6 +423,8 @@ unsigned int Nav_TimeDiff()
 int wheel_dx;
 int wheel_dy;
 
+extern void CheckBeginDrag();
+
 
 
 void Editor_LeaveWindow()
@@ -488,8 +490,7 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 
 	// begin dragging?
-
-//!!!	CheckBeginDrag()
+	CheckBeginDrag();
 
 
 	// in general, just update the highlight, split-line (etc)
