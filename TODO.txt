@@ -84,6 +84,9 @@ Editing
 +  crossing lines sometimes mucks up?
    e.g. drawing over the stairs in MAP01
 
++  improve X texture alignment
+   [ e.g. picking "wrong" or not-optimal line ]
+
 
 
 3D View
@@ -245,6 +248,8 @@ Editing
 
 -  more port-specific line/thing flags
 
+-  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
+
 WISH : autocomplete flat/texture names in Linedef and Sector panels
 
 
@@ -295,7 +300,9 @@ IDEA: for quantizing a group of objects, try about 9 delta
 
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
-WISH:  rotated sprites
+WISH: bound flats by 1S lines facing away from the camera
+
+WISH: rotated sprites
 
 IDEA: 3D_NAV_CircleStrafe command
 
@@ -303,9 +310,6 @@ IDEA: 3D_NAV_CircleStrafe command
 
 Browser
 -------
-
-+  ability to shrink categories, i.e. say that for things the
-   'b' (bonus) and 'k' categories should become a single one
 
 -  can change the [max] size of the texture/flat previews
 
@@ -316,6 +320,9 @@ Browser
 -  preference for # of RECENT items
 
 ?  command to clear the recent lists
+
+IDEA:  ability to shrink categories, i.e. say that for things the
+       'b' (bonus) and 'k' categories should become a single one
 
 
 
