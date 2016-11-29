@@ -596,7 +596,9 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 	// easier_drawing_mode
 	if (edit.action == ACT_DRAW_LINE)
+	{
 		from_vert = edit.drawing_from;
+	}
 
 
 	// if no highlight, look for a vertex at snapped coord
@@ -848,32 +850,6 @@ static void Insert_Sector(bool force_new)
 	Selection_Clear();
 
 	edit.Selected->set(new_sec);
-}
-
-
-void Insert_Vertex_split(int split_ld, int new_x, int new_y)
-{
-	BA_Begin();
-
-	BA_Message("split linedef #%d", split_ld);
-
-	int new_vert = BA_New(OBJ_VERTICES);
-
-	Vertex *V = Vertices[new_vert];
-
-	V->x = new_x;
-	V->y = new_y;
-
-	SplitLineDefAtVertex(split_ld, new_vert);
-
-	BA_End();
-
-	Selection_Clear();
-	Editor_ClearAction();
-
-	edit.clicked = Objid(OBJ_VERTICES, new_vert);
-
-	RedrawMap();
 }
 
 

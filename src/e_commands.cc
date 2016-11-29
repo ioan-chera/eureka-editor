@@ -469,6 +469,7 @@ static int button1_map_y;
 
 static bool click_check_drag;
 static bool click_check_select;
+static bool click_force_single;
 
 
 static void DoClickStuff(keycode_t mod)
@@ -484,11 +485,8 @@ static void DoClickStuff(keycode_t mod)
 	// from a split-line (when in in drawing mode) to be draggable.
 	// [ that is achieved by setting edit.clicked ]
 
-	if (edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
+	if (edit.split_line.valid() && edit.action != ACT_DRAW_LINE)
 	{
-		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);
-		return;
 	}
 
 	if (edit.action == ACT_DRAW_LINE)
@@ -539,7 +537,7 @@ void CheckBeginDrag()
 		// if highlighted object is in selection, we drag the selection,
 		// otherwise we drag just this one object
 
-		if (! edit.Selected->get(edit.clicked.num))
+		if (click_force_single || ! edit.Selected->get(edit.clicked.num))
 			edit.drag_single_obj = edit.clicked.num;
 		else
 			edit.drag_single_obj = -1;
@@ -664,6 +662,51 @@ void CMD_ACT_Click(void)
 
 	click_check_select = Exec_HasFlag("/select");
 	click_check_drag   = Exec_HasFlag("/drag");
+	click_force_single = false;
+
+	if (click_check_drag)
+	{
+		// remember some state (for drag detection)
+		mouse_button1_x = Fl::event_x();
+		mouse_button1_y = Fl::event_y();
+
+		button1_map_x = edit.map_x;
+		button1_map_y = edit.map_y;
+	}
+
+	// check for splitting a line, and ensure we can drag the vertex
+	if (Exec_HasFlag("/split") &&
+		edit.split_line.valid() &&
+		edit.action != ACT_DRAW_LINE)
+	{
+		int split_ld = edit.split_line.num;
+
+		click_force_single = true;   // if drag vertex, force single-obj mode
+		click_check_select = false;  // do NOT select the new vertex
+
+		// check if both ends are in selection
+
+		BA_Begin();
+		BA_Message("split linedef #%d", split_ld);
+
+		int new_vert = BA_New(OBJ_VERTICES);
+
+		Vertex *V = Vertices[new_vert];
+
+		V->x = edit.split_x;
+		V->y = edit.split_y;
+
+		SplitLineDefAtVertex(split_ld, new_vert);
+
+		BA_End();
+
+		edit.clicked = Objid(OBJ_VERTICES, new_vert);
+
+		Editor_SetAction(ACT_CLICK);
+
+		RedrawMap();
+		return;
+	}
 
 	// find the object under the pointer.
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
@@ -680,16 +723,6 @@ void CMD_ACT_Click(void)
 fprintf(stderr, "*** CLICK pressed!!\n");
 
 	Editor_SetAction(ACT_CLICK);
-
-	if (click_check_drag)
-	{
-		// remember some state (for drag detection)
-		mouse_button1_x = Fl::event_x();
-		mouse_button1_y = Fl::event_y();
-
-		button1_map_x = edit.map_x;
-		button1_map_y = edit.map_y;
-	}
 }
 
 
@@ -1391,7 +1424,7 @@ static editor_command_t  command_table[] =
 
 	{	"ACT_Click", "General", 0,
 		&CMD_ACT_Click,
-		/* flags */ "/select /drag /drawline"
+		/* flags */ "/select /drag /split"
 	},
 
 	{	"ACT_SelectBox", "General", 0,
