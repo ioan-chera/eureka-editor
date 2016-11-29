@@ -1233,8 +1233,6 @@ void Editor_Init()
 	edit.show_things_squares = false;
 	edit.show_things_sprites = true;
 
-	edit.button_down = 0;
-	edit.button_mod  = 0;
 	edit.clicked.clear();
 
 	edit.highlight.clear();

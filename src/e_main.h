@@ -69,9 +69,6 @@ typedef struct
 	int map_y;
 	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
 
-	int button_down;  // mouse button 1 to 3, or 0 for none,
-	keycode_t button_mod;  // modifier(s) used when button was pressed
-
 	Objid clicked;		// The object that was under the pointer when
 						// the left click occurred.
 

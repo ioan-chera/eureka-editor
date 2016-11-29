@@ -460,12 +460,6 @@ static int button1_map_y;
 
 static void DoClickStuff(keycode_t mod)
 {
-///---	if (edit.button_down >= 2)
-///---		return;
-
-	edit.button_down = 1;
-	edit.button_mod  = mod;
-
 	// remember some state (for dragging)
 	mouse_button1_x = Fl::event_x();
 	mouse_button1_y = Fl::event_y();
@@ -550,7 +544,7 @@ static void CheckBeginDrag(keycode_t mod)
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
-	if (edit.button_down == 1 && edit.clicked.valid() &&
+	if (/* edit.button_down == 1 && */ edit.clicked.valid() &&
 		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
 	{
 		Editor_SetAction(ACT_DRAG);
@@ -637,9 +631,9 @@ fprintf(stderr, "*** CLICK release\n");
 		return;
 
 #if 0
-	// begin drawing mode (unless a modifier was pressed)
+	// begin drawing mode
 	if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-		was_empty && edit.button_mod == 0)
+		was_empty)
 	{
 		Editor_SetAction(ACT_DRAW_LINE);
 		edit.drawing_from = click_obj.num;
