@@ -575,8 +575,39 @@ static void CheckBeginDrag(keycode_t mod)
 }
 
 
+static void ACT_SelectBox_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_SELBOX)
+		return;
+
+	Editor_ClearAction();
+	Editor_ClearErrorMode();
+
+	int x1, y1, x2, y2;
+
+	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+
+	// a mere click and release will unselect everything
+	// FIXME : REVIEW THIS
+	if (x1 == x2 && y1 == y2)
+		ExecuteCommand("UnselectAll");
+	else
+		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+
 static void ACT_Click_release(void)
 {
+	if (edit.action == ACT_SELBOX)
+	{
+		ACT_SelectBox_release();
+		return;
+	}
+
 	// check if cancelled or overridden
 	if (edit.action != ACT_CLICK)
 		return;
@@ -658,39 +689,27 @@ void CMD_ACT_Click(void)
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
-	{
-		Editor_SetAction(ACT_CLICK);
-
-fprintf(stderr, "*** CLICK pressed!\n");
-	}
-}
-
-
-
-static void ACT_SelectBox_release(void)
-{
-	// check if cancelled or overridden
-	if (edit.action != ACT_SELBOX)
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
-	Editor_ClearAction();
-	Editor_ClearErrorMode();
+	// find the object under the pointer.
+	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
-	int x1, y1, x2, y2;
+	// clicking on an empty space starts a new selection box
+	if (Exec_HasFlag("/select") && edit.clicked.is_nil())
+	{
+		Editor_SetAction(ACT_SELBOX);
 
-	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
+		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		return;
+	}
 
-	// a mere click and release will unselect everything
-	// FIXME : REVIEW THIS
-	if (x1 == x2 && y1 == y2)
-		ExecuteCommand("UnselectAll");
-	else
-		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+	Editor_SetAction(ACT_CLICK);
 
-	UpdateHighlight();
-	RedrawMap();
+fprintf(stderr, "*** CLICK pressed!!\n");
 }
+
+
 
 void CMD_ACT_SelectBox(void)
 {
