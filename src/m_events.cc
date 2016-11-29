@@ -176,8 +176,10 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 
 void Editor_ClearNav()
 {
-	edit.nav_scroll_dx = 0;
-	edit.nav_scroll_dy = 0;
+	edit.nav_scroll_left  = 0;
+	edit.nav_scroll_right = 0;
+	edit.nav_scroll_up    = 0;
+	edit.nav_scroll_down  = 0;
 }
 
 
@@ -187,10 +189,11 @@ static void Editor_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	if (edit.nav_scroll_dx || edit.nav_scroll_dy)
+	if (edit.nav_scroll_left || edit.nav_scroll_right ||
+		edit.nav_scroll_up   || edit.nav_scroll_down)
 	{
-		float delta_x = edit.nav_scroll_dx * delay_ms;
-		float delta_y = edit.nav_scroll_dy * delay_ms;
+		float delta_x = (edit.nav_scroll_right - edit.nav_scroll_left) * delay_ms;
+		float delta_y = (edit.nav_scroll_up    - edit.nav_scroll_down) * delay_ms;
 
 		grid.Scroll(delta_x, delta_y);
 	}

@@ -339,12 +339,12 @@ void CMD_Scroll(void)
 }
 
 
-static void NAV_Scroll_X_release(void)
+static void NAV_Scroll_Left_release(void)
 {
-	edit.nav_scroll_dx = 0;
+	edit.nav_scroll_left = 0;
 }
 
-void CMD_NAV_Scroll_X(void)
+void CMD_NAV_Scroll_Left(void)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -353,21 +353,19 @@ void CMD_NAV_Scroll_X(void)
 		Editor_ClearNav();
 
 	float perc = atof(EXEC_Param[0]);
-
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_scroll_left = perc * base_size / 100.0 / grid.Scale;
 
-	edit.nav_scroll_dx = perc * base_size / 100.0 / grid.Scale;
-
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_X_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
-static void NAV_Scroll_Y_release(void)
+static void NAV_Scroll_Right_release(void)
 {
-	edit.nav_scroll_dy = 0;
+	edit.nav_scroll_right = 0;
 }
 
-void CMD_NAV_Scroll_Y(void)
+void CMD_NAV_Scroll_Right(void)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -376,12 +374,52 @@ void CMD_NAV_Scroll_Y(void)
 		Editor_ClearNav();
 
 	float perc = atof(EXEC_Param[0]);
-
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_scroll_right = perc * base_size / 100.0 / grid.Scale;
 
-	edit.nav_scroll_dy = perc * base_size / 100.0 / grid.Scale;
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release, MOD_COMMAND | MOD_SHIFT);
+}
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Y_release, MOD_COMMAND | MOD_SHIFT);
+
+static void NAV_Scroll_Up_release(void)
+{
+	edit.nav_scroll_up = 0;
+}
+
+void CMD_NAV_Scroll_Up(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	float perc = atof(EXEC_Param[0]);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_scroll_up = perc * base_size / 100.0 / grid.Scale;
+
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release, MOD_COMMAND | MOD_SHIFT);
+}
+
+
+static void NAV_Scroll_Down_release(void)
+{
+	edit.nav_scroll_down = 0;
+}
+
+void CMD_NAV_Scroll_Down(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	float perc = atof(EXEC_Param[0]);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_scroll_down = perc * base_size / 100.0 / grid.Scale;
+
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release, MOD_COMMAND | MOD_SHIFT);
 }
 
 
@@ -1075,12 +1113,20 @@ static editor_command_t  command_table[] =
 		&CMD_WHEEL_Scroll
 	},
 
-	{	"NAV_Scroll_X",  "UI",  MOD_SHIFT | MOD_COMMAND,
-		&CMD_NAV_Scroll_X
+	{	"NAV_Scroll_Left",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_Left
 	},
 
-	{	"NAV_Scroll_Y",  "UI",  MOD_SHIFT | MOD_COMMAND,
-		&CMD_NAV_Scroll_Y
+	{	"NAV_Scroll_Right",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_Right
+	},
+
+	{	"NAV_Scroll_Up",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_Up
+	},
+
+	{	"NAV_Scroll_Down",  "UI",  MOD_SHIFT | MOD_COMMAND,
+		&CMD_NAV_Scroll_Down
 	},
 
 	{	"NAV_MouseScroll", "UI", 0,

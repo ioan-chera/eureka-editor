@@ -88,8 +88,10 @@ typedef struct
 	int drag_single_obj;  // -1, or object number we are dragging
 
 	// private navigation stuff
-	float nav_scroll_dx;
-	float nav_scroll_dy;
+	float nav_scroll_left;
+	float nav_scroll_right;
+	float nav_scroll_up;
+	float nav_scroll_down;
 
 } Editor_State_t;
 
