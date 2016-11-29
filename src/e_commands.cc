@@ -43,6 +43,10 @@
 #include "ui_misc.h"
 
 
+// config items
+int minimum_drag_pixels = 5;
+
+
 void CMD_Nothing(void)
 {
 	/* hey jude, don't make it bad */

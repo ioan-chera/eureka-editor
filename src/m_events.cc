@@ -39,11 +39,6 @@ int active_when = 0;  // FIXME MOVE THESE into Editor_State
 int active_wmask = 0;
 
 
-// config items
-int multi_select_modifier = 0;
-int minimum_drag_pixels = 5;
-
-
 void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 
 
@@ -627,33 +622,10 @@ int Editor_RawButton(int event)
 
 	int button = Fl::event_button();
 
-	bool down = (event == FL_PUSH);
-
 	if (button < 1 || button > 8)
 		return 0;
 
 	return Editor_RawKey(event);
-
-
-///---	// this will detect released buttons
-///---	Nav_UpdateKeys();
-
-
-///---	if (! down)
-///---	{
-///---		if (! edit.render3d)
-///---			Editor_MouseRelease();
-///---		return 1;
-///---	}
-///---
-///---	int mod = Fl::event_state() & MOD_ALL_MASK;
-///---
-///---	if (! edit.render3d)
-///---	{
-///---		Editor_MousePress(mod);
-///---	}
-
-///---	return 1;
 }
 
 

@@ -575,15 +575,6 @@ static const opt_desc_t options[] =
 		&minimum_drag_pixels
 	},
 
-	{	"multi_select_modifier",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Require a modifier key for multi-select (0 = none, 1 = SHIFT, 2 = CTRL)",
-		NULL,
-		&multi_select_modifier
-	},
-
 	{	"new_islands_are_void",
 		0,
 		OPT_BOOLEAN,

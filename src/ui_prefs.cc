@@ -581,10 +581,8 @@ public:
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
-	Fl_Check_Button *edit_multiselect;
 	Fl_Choice       *edit_modkey;
 	Fl_Int_Input    *edit_sectorsize;
-	Fl_Check_Button *edit_drawingmode;
 
 	Fl_Check_Button *brow_smalltex;
 
@@ -824,15 +822,11 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		}
-		{ edit_multiselect = new Fl_Check_Button(50, 210, 275, 30, " multi-select requires a modifier key");
-		}
 		{ edit_modkey = new Fl_Choice(370, 210, 95, 30, "---->   ");
 		  edit_modkey->add("CTRL");
 		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
-		}
-		{ edit_drawingmode = new Fl_Check_Button(50, 240, 270, 30, " easier line drawing using the LMB");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
@@ -1333,7 +1327,6 @@ void UI_Preferences::LoadValues()
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
-	edit_multiselect->value(multi_select_modifier ? 2 : 0);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
 
@@ -1454,7 +1447,6 @@ void UI_Preferences::SaveValues()
 	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
-	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
