@@ -458,6 +458,7 @@ static int button1_map_x;
 static int button1_map_y;
 
 static bool click_check_drag;
+static bool click_check_select;
 
 
 static void DoClickStuff(keycode_t mod)
@@ -512,6 +513,7 @@ static void DoClickStuff(keycode_t mod)
 }
 
 
+// THIS IS PROBABLY JUST WHATS IN ACT_Drag_release, VERIFY THEN REMOVE IT
 static void DoDragStuff()
 {
 	// releasing the button while there was a selection box
@@ -623,9 +625,11 @@ static void ACT_Drag_release(void)
 }
 
 
-
 static void ACT_Click_release(void)
 {
+	Objid click_obj(edit.clicked);
+	edit.clicked.clear();
+
 	click_check_drag = false;
 
 
@@ -644,70 +648,24 @@ static void ACT_Click_release(void)
 	if (edit.action != ACT_CLICK)
 		return;
 
+fprintf(stderr, "*** CLICK release\n");
+
+
+	if (click_check_select && click_obj.valid())
+	{
+		// check if pointing at the same object as before
+		Objid near_obj;
+
+		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
+
+		if (near_obj == click_obj)
+		{
+			edit.Selected->toggle(click_obj.num);
+		}
+	}
+
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
-
-
-fprintf(stderr, "*** CLICK release\n");
-{ return; }
-
-
-	Objid click_obj(edit.clicked);
-	edit.clicked.clear();
-
-
-#if 0
-	// nothing needed while in drawing mode
-	if (edit.action == ACT_DRAW_LINE)
-		return;
-#endif
-
-
-#if 0
-	// optional multi-select : require a certain modifier key
-	if (multi_select_modifier &&
-		edit.button_mod != (multi_select_modifier == 1 ? MOD_SHIFT : MOD_COMMAND))
-	{
-//FIXME : REVIEW THIS
-//		Selection_Clear();
-	}
-#endif
-
-
-	// handle a clicked-on object
-	// e.g. select the object if unselected, and vice versa.
-
-	if (! click_obj.valid())
-		return;
-
-	bool was_empty = edit.Selected->empty();
-
-	Editor_ClearErrorMode();
-
-
-	// check if pointing at the same object as before
-	Objid near_obj;
-
-	GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
-
-	if (near_obj != click_obj)
-		return;
-
-#if 0
-	// begin drawing mode
-	if (easier_drawing_mode && edit.mode == OBJ_VERTICES &&
-		was_empty)
-	{
-		Editor_SetAction(ACT_DRAW_LINE);
-		edit.drawing_from = click_obj.num;
-		edit.Selected->set(click_obj.num);
-
-		RedrawMap();
-		return;
-	}
-#endif
-
-	edit.Selected->toggle(click_obj.num);
 
 	UpdateHighlight();
 	RedrawMap();
@@ -724,11 +682,14 @@ void CMD_ACT_Click(void)
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
+	click_check_select = Exec_HasFlag("/select");
+	click_check_drag   = Exec_HasFlag("/drag");
+
 	// find the object under the pointer.
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
-	if (Exec_HasFlag("/select") && edit.clicked.is_nil())
+	if (click_check_select && edit.clicked.is_nil())
 	{
 		Editor_SetAction(ACT_SELBOX);
 
@@ -739,8 +700,6 @@ void CMD_ACT_Click(void)
 fprintf(stderr, "*** CLICK pressed!!\n");
 
 	Editor_SetAction(ACT_CLICK);
-
-	click_check_drag = Exec_HasFlag("/drag");
 
 	if (click_check_drag)
 	{
