@@ -2299,7 +2299,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	float factor = (mod == MOD_SHIFT) ? 0.25 : 1.0;
+	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
 
 	if (render_high_detail)
 		factor = factor * 2.0;
@@ -3001,7 +3001,7 @@ static editor_command_t  render_commands[] =
 		/* flags */ "/right /clear"
 	},
 
-	{	"3D_ACT_AdjustOfs", NULL, 0,
+	{	"3D_ACT_AdjustOfs", NULL, MOD_SHIFT,
 		&R3D_ACT_AdjustOfs
 	},
 
