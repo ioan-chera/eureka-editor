@@ -38,6 +38,9 @@ General
 +  Key binding system for mouse buttons
    -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
 
++  allow Game and Port definitions to specify the linedef and thing
+   flags which can be used  (rather than hard-coding them)
+
 
 
 Documentation
@@ -118,8 +121,6 @@ General
 
 +  sprite rendering in the 2D canvas
 
-?  a toolbar
-
 -  a key to copy properties TO defaults (e.g. 'y' for yank)
 
 -  View/Place Camera command, cursor turns into +
@@ -133,6 +134,8 @@ General
 +  a dialog to view / load / prune backups.
 
 IDEA: MMB on sidedef/sector tex : open RECENT browser
+
+IDEA: a toolbar
 
 WISH: support Windows 95/98/ME
 
@@ -156,8 +159,6 @@ WISH: can import UDMF format maps
 
    -  each map (via .dat?) can specify _override_ config
 
-?  GUI buttons for NewTag / LastTag commands
-
 -  vertex/linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
@@ -177,14 +178,6 @@ WISH: can import UDMF format maps
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures
 
-?  ability to view (perhaps edit) a map header lump
-   (for FraggleScript etc...)
-
-?  ability to create / view / edit / import arbitrary lumps
-   (e.g. MAPINFO, DECORATE, etc...)
-
-?  a way to slow down fake mouse wheels?
-
 IDEA: for generalized lines, show more info in tooltip of desc
 
 IDEA: after inserting a new object, allow moving another object
@@ -198,6 +191,12 @@ WISH: a scripting language
 WISH: support ZDoom PK3 for textures (etc)
 
 WISH: support DECORATE as (or in) a resource file
+
+WISH: ability to view (perhaps edit) a map header lump
+      (for FraggleScript etc...)
+
+WISH: ability to create / view / edit / import arbitrary lumps
+      (e.g. MAPINFO, DECORATE, etc...)
 
 
 
@@ -244,14 +243,9 @@ Editing
 -  assume texture names beginning with '#' are special
    (The texture checker ignores them -- what else is needed ??)
 
-?  Multi-select : if CTRL is pressed, don't clear selection after drag
-
--  more port-specific line/thing flags
-
 -  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
 
 WISH : autocomplete flat/texture names in Linedef and Sector panels
-
 
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
@@ -319,10 +313,13 @@ Browser
 
 -  preference for # of RECENT items
 
-?  command to clear the recent lists
+IDEA: a command to clear the recent lists
 
-IDEA:  ability to shrink categories, i.e. say that for things the
-       'b' (bonus) and 'k' categories should become a single one
+IDEA: using "Browser / Things" (etc) to open the browser will reset
+      the category to ALL and clear the match string
+
+IDEA: ability to shrink categories, i.e. say that for things the
+      'b' (bonus) and 'k' categories should become a single one
 
 
 
@@ -335,9 +332,9 @@ Game / Port Definitions
 
 -  HacX : categorize the textures
 
-?  MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
-
 IDEA: for DOOM have "Switch", "Grating", "Door" categories
+
+IDEA: add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
 
 WISH: conversion between Hexen <--> DOOM formats
       [ perhaps as a script ]

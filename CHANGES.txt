@@ -65,5 +65,8 @@ Bugs Fixed:
 
 -  3D view: fixed Y offsets of unpegged lowers under sky ceilings
 
--  fixed unknown texture "FIX" button to not change "-" textures
+-  fixed "FIX" button for unknown textures to not change "-" textures
+
+-  fixed how deleting a loop of linedefs inside another sector
+   could sometimes delete that outer sector too
 
