@@ -880,16 +880,25 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 	SYS_ASSERT(verts->what_type() == OBJ_VERTICES);
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
 
+	// collect all the sectors that touch a linedef being removed.
+
+	bitvec_c del_lines(NumLineDefs);
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
 		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
 		{
+			del_lines.set(n);
+
 			if (L->WhatSector(SIDE_LEFT ) >= 0) result->set(L->WhatSector(SIDE_LEFT ));
 			if (L->WhatSector(SIDE_RIGHT) >= 0) result->set(L->WhatSector(SIDE_RIGHT));
 		}
 	}
+
+	// visit all linedefs NOT being removed, and see if the sector(s)
+	// on it will actually be OK after the delete.
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -907,29 +916,25 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 			if (sec_num < 0)
 				continue;
 
-			// if already clear, skip it (prevent expensive tests below)
+			// skip sectors that are not potentials for removal,
+			// and prevent the expensive tests below...
 			if (! result->get(sec_num))
 				continue;
 
-			// check if the linedef opposite this is being deleted, which
-			// means this linedef will get mucked up.  When all remaining
-			// lines are like this, we should consider the sector "unused"
-			// and let it be removed.
+			// check if the linedef opposite faces this sector (BUT
+			// IGNORING any lines being deleted).  when found, we
+			// know that this sector should be kept.
 
 			int opp_side;
-			int opp_ld = OppositeLineDef(n, what_side, &opp_side);
+			int opp_ld = OppositeLineDef(n, what_side, &opp_side, &del_lines);
 
-			if (opp_ld >= 0)
-			{
-				const LineDef *L2 = LineDefs[opp_ld];
-
-				if ((L2->WhatSector(opp_side) == sec_num) &&
-					(L2->WhatSector(SIDE_LEFT) != L2->WhatSector(SIDE_RIGHT)) &&
-					(lines->get(opp_ld) || verts->get(L2->start) || verts->get(L2->end)))
+			if (opp_ld < 0)
 				continue;
-			}
 
-			result->clear(sec_num);
+			const LineDef *L2 = LineDefs[opp_ld];
+
+			if (L2->WhatSector(opp_side) == sec_num)
+				result->clear(sec_num);
 		}
 	}
 }
@@ -1110,6 +1115,8 @@ void CMD_Delete(void)
 		UnusedVertices(&line_sel, &vert_sel);
 	}
 
+	// try to detect sectors that become "dudded", where all the
+	// remaining linedefs of the sector face into the void.
 	if (edit.mode == OBJ_VERTICES || edit.mode == OBJ_LINEDEFS)
 	{
 		UnusedSectors(&vert_sel, &line_sel, &sec_sel);

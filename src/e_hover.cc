@@ -538,7 +538,7 @@ void FastOpposite_Finish()
 }
 
 
-int OppositeLineDef(int ld, int ld_side, int *result_side)
+int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_lines)
 {
 	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).
@@ -562,6 +562,8 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 	{
 		// fast way : use the binary tree
 
+		SYS_ASSERT(ignore_lines == NULL);
+
 		if (test.is_horizontal)
 			fastopp_Y_tree->Process(test, test.y);
 		else
@@ -572,7 +574,12 @@ int OppositeLineDef(int ld, int ld_side, int *result_side)
 		// normal way : test all linedefs
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			if (ignore_lines && ignore_lines->get(n))
+				continue;
+
 			test.ProcessLine(n);
+		}
 	}
 
 	return test.best_match;

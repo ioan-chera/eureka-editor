@@ -29,6 +29,8 @@
 
 
 class Objid;
+class bitvec_c;
+
 
 void GetNearObject(Objid& o, obj_type_e objtype, int x, int y);
 
@@ -41,7 +43,7 @@ int ClosestLine_CastingHoriz(int x, int y, int *side);
 int ClosestLine_CastingVert (int x, int y, int *side);
 int ClosestLine_CastAtAngle (int x, int y, float radians);
 
-int OppositeLineDef(int ld, int ld_side, int *result_side);
+int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_lines = NULL);
 int OppositeSector(int ld, int ld_side);
 
 void FastOpposite_Begin();
