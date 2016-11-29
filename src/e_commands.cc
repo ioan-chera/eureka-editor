@@ -676,6 +676,7 @@ void CMD_ACT_Click(void)
 
 	// check for splitting a line, and ensure we can drag the vertex
 	if (Exec_HasFlag("/split") &&
+		edit.mode == OBJ_VERTICES &&
 		edit.split_line.valid() &&
 		edit.action != ACT_DRAW_LINE)
 	{
@@ -684,7 +685,11 @@ void CMD_ACT_Click(void)
 		click_force_single = true;   // if drag vertex, force single-obj mode
 		click_check_select = false;  // do NOT select the new vertex
 
-		// check if both ends are in selection
+		// check if both ends are in selection, if so (and only then)
+		// shall we select the new vertex
+		const LineDef *L = LineDefs[split_ld];
+
+		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
 		BA_Begin();
 		BA_Message("split linedef #%d", split_ld);
@@ -699,6 +704,9 @@ void CMD_ACT_Click(void)
 		SplitLineDefAtVertex(split_ld, new_vert);
 
 		BA_End();
+
+		if (want_select)
+			edit.Selected->set(new_vert);
 
 		edit.clicked = Objid(OBJ_VERTICES, new_vert);
 
