@@ -137,6 +137,8 @@ public:
 	float adjust_dy, adjust_dy_factor;
 
 	// navigation loop info
+	bool is_scrolling;
+
 	unsigned int nav_time;
 
 	float nav_fwd, nav_back;
@@ -159,6 +161,7 @@ public:
 		thsec_sector_num(0),
 		thsec_invalidated(false),
 		adjust_ld(-1), adjust_sd(-1),
+		is_scrolling(false),
 		nav_time(0),
 		hl()
 	{ }
@@ -2120,21 +2123,24 @@ void Render3D_Enable(bool _enable)
 }
 
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod)
+void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 {
-	highlight_3D_info_t old(view.hl);
-
-	main_win->render->query(view.hl, x, y);
-
-	if (old.isSame(view.hl))
+	// started?
+	if (mode < 0)
+	{
+		view.is_scrolling = true;
+		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
+	}
 
-	main_win->render->redraw();
-}
+	// finished?
+	if (mode > 0)
+	{
+		view.is_scrolling = false;
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
+		return;
+	}
 
-
-void Render3D_RBScroll(int dx, int dy, keycode_t mod)
-{
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
 
@@ -2303,6 +2309,32 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	RedrawMap();
 }
+
+
+void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+{
+	if (view.is_scrolling)
+	{
+		Render3D_RBScroll(0, dx, dy, mod);
+		return;
+	}
+	else if (edit.action == ACT_ADJUST_OFS)
+	{
+		Render3D_AdjustOffsets(0, dx, dy);
+		return;
+	}
+
+	highlight_3D_info_t old(view.hl);
+
+	main_win->render->query(view.hl, x, y);
+
+	if (old.isSame(view.hl))
+		return;
+
+	main_win->render->redraw();
+}
+
+
 
 
 void Render3D_ClearNav()
@@ -2698,6 +2730,27 @@ void R3D_NAV_TurnRight(void)
 }
 
 
+static void R3D_NAV_MouseMove_release(void)
+{
+	Render3D_RBScroll(+1);
+}
+
+void R3D_NAV_MouseMove(void)
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	if (Nav_SetKey(EXEC_CurKey, &R3D_NAV_MouseMove_release))
+	{
+		Render3D_RBScroll(-1);
+	}
+}
+
+
+
 static void ACT_AdjustOfs_release(void)
 {
 	// check if cancelled or overridden
@@ -3006,6 +3059,10 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_NAV_TurnRight", NULL, MOD_COMMAND | MOD_SHIFT,
 		&R3D_NAV_TurnRight
+	},
+
+	{	"3D_NAV_MouseMove", NULL, MOD_COMMAND | MOD_SHIFT,
+		&R3D_NAV_MouseMove
 	},
 
 	// end of command list

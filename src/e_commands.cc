@@ -385,12 +385,12 @@ void CMD_NAV_Scroll_Y(void)
 }
 
 
-static void NAV_Scroll_Mouse_release(void)
+static void NAV_MouseScroll_release(void)
 {
 	Editor_ScrollMap(+1);
 }
 
-void CMD_NAV_Scroll_Mouse(void)
+void CMD_NAV_MouseScroll(void)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -398,7 +398,7 @@ void CMD_NAV_Scroll_Mouse(void)
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	if (Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Mouse_release))
+	if (Nav_SetKey(EXEC_CurKey, &NAV_MouseScroll_release))
 	{
 		Editor_ScrollMap(-1);
 	}
@@ -1083,8 +1083,8 @@ static editor_command_t  command_table[] =
 		&CMD_NAV_Scroll_Y
 	},
 
-	{	"NAV_Scroll_Mouse", "UI", 0,
-		&CMD_NAV_Scroll_Mouse
+	{	"NAV_MouseScroll", "UI", 0,
+		&CMD_NAV_MouseScroll
 	},
 
 

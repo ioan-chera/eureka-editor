@@ -46,7 +46,7 @@ int minimum_drag_pixels = 5;
 
 extern bool easier_drawing_mode;
 
-void Editor_MouseMotion(int x, int y, keycode_t mod);
+void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 
 
 void ClearStickyMod()
@@ -122,7 +122,7 @@ void Editor_UpdateFromScroll()
 	{
 		int mod = Fl::event_state() & MOD_ALL_MASK;
 
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, 0, 0);
 	}
 }
 
@@ -156,13 +156,8 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 	}
 
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = 0; ///???  Fl::event_state() & MOD_ALL_MASK;
 
-	if (edit.render3d)
-	{
-		Render3D_RBScroll(dx, dy, mod);
-	}
-	else
 	{
 		int speed = 8;  // FIXME: CONFIG OPTION
 
@@ -586,8 +581,14 @@ void Editor_LeaveWindow()
 }
 
 
-void Editor_MouseMotion(int x, int y, keycode_t mod)
+void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
+	if (edit.is_scrolling)
+	{
+		Editor_ScrollMap(0, dx, dy);
+		return;
+	}
+
 	int map_x, map_y;
 
 	main_win->canvas->PointerPos(&map_x, &map_y);
@@ -846,22 +847,13 @@ int Editor_RawMouse(int event)
 	int dx = Fl::event_x() - mouse_last_x;
 	int dy = Fl::event_y() - mouse_last_y;
 
-
-	if (edit.is_scrolling)
+	if (edit.render3d)
 	{
-		Editor_ScrollMap(0, dx, dy);
-	}
-	else if (edit.action == ACT_ADJUST_OFS)
-	{
-		Render3D_AdjustOffsets(0, dx, dy);
-	}
-	else if (edit.render3d)
-	{
-		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 	else
 	{
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod);
+		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 
 	mouse_last_x = Fl::event_x();
