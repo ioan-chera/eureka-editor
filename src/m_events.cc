@@ -44,8 +44,6 @@ int multi_select_modifier = 0;
 int minimum_drag_pixels = 5;
 
 
-extern bool easier_drawing_mode;
-
 void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 
 

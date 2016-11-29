@@ -55,7 +55,6 @@ extern rgb_color_t gui_custom_fg;
 extern int  multi_select_modifier;
 extern int  minimum_drag_pixels;
 extern int  new_sector_size;
-extern bool easier_drawing_mode;
 extern int  sector_render_default;
 
 extern int  default_grid_size;

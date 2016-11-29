@@ -46,8 +46,6 @@
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
 
-bool easier_drawing_mode = true;
-
 
 /*
    delete a group of objects.
@@ -596,28 +594,9 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
 
-	if (easier_drawing_mode)
-	{
-		if (edit.action == ACT_DRAW_LINE)
-			from_vert = edit.drawing_from;
-	}
-	else
-	{
-		if (edit.Selected->count_obj() > 2)
-		{
-			Beep("Too many vertices to add a linedef");
-			return;
-		}
-
-		from_vert = edit.Selected->find_first();
-		  to_vert = edit.Selected->find_second();
-
-		if (from_vert >= 0 && to_vert >= 0 && split_ld >= 0)
-		{
-			Beep("Too many vertices to split a linedef");
-			return;
-		}
-	}
+	// easier_drawing_mode
+	if (edit.action == ACT_DRAW_LINE)
+		from_vert = edit.drawing_from;
 
 
 	// if no highlight, look for a vertex at snapped coord
@@ -649,7 +628,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 			edit.Selected->set(near_vert);
 
-			if (easier_drawing_mode)
+			// easier_drawing_mode
 			{
 				Editor_SetAction(ACT_DRAW_LINE);
 				edit.drawing_from = near_vert;
@@ -773,7 +752,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	{
 		edit.Selected->set(to_vert);
 
-		if (easier_drawing_mode)
+		// easier_drawing_mode
 		{
 			Editor_SetAction(ACT_DRAW_LINE);
 			edit.drawing_from = to_vert;

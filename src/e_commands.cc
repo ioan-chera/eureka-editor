@@ -480,7 +480,7 @@ static void DoClickStuff(keycode_t mod)
 	// from a split-line (when in in drawing mode) to be draggable.
 	// [ that is achieved by setting edit.clicked ]
 
-	if (easier_drawing_mode && edit.split_line.valid() &&
+	if (edit.split_line.valid() &&
 		edit.action != ACT_DRAW_LINE)
 	{
 		Insert_Vertex_split(edit.split_line.num, edit.split_x, edit.split_y);

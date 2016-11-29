@@ -431,15 +431,6 @@ static const opt_desc_t options[] =
 		&dotty_point_col
 	},
 
-	{	"easier_drawing_mode",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Easier line drawing using the LMB",
-		NULL,
-		&easier_drawing_mode
-	},
-
 	{	"floor_bump_small",
 		0,
 		OPT_INTEGER,
