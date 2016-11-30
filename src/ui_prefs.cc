@@ -557,12 +557,12 @@ public:
 
 	/* General Tab */
 
-	Fl_Round_Button *theme_FLTK;
-	Fl_Round_Button *theme_GTK;
 	Fl_Round_Button *theme_plastic;
+	Fl_Round_Button *theme_GTK;
+	Fl_Round_Button *theme_FLTK;
 
-	Fl_Round_Button *cols_default;
 	Fl_Round_Button *cols_bright;
+	Fl_Round_Button *cols_default;
 	Fl_Round_Button *cols_custom;
 
 	Fl_Button *bg_colorbox;
@@ -674,28 +674,28 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ Fl_Group* o = new Fl_Group(45, 90, 250, 115);
-		  { theme_FLTK = new Fl_Round_Button(50, 90, 150, 25, " FLTK theme");
-			theme_FLTK->type(102);
-			theme_FLTK->down_box(FL_ROUND_DOWN_BOX);
+		  { theme_plastic = new Fl_Round_Button(50, 90, 165, 25, " Plastic theme ");
+			theme_plastic->type(102);
+			theme_plastic->down_box(FL_ROUND_DOWN_BOX);
 		  }
 		  { theme_GTK = new Fl_Round_Button(50, 120, 150, 25, " GTK+ theme ");
 			theme_GTK->type(102);
 			theme_GTK->down_box(FL_ROUND_DOWN_BOX);
 		  }
-		  { theme_plastic = new Fl_Round_Button(50, 150, 165, 25, " plastic theme ");
-			theme_plastic->type(102);
-			theme_plastic->down_box(FL_ROUND_DOWN_BOX);
+		  { theme_FLTK = new Fl_Round_Button(50, 150, 150, 25, " FLTK theme");
+			theme_FLTK->type(102);
+			theme_FLTK->down_box(FL_ROUND_DOWN_BOX);
 		  }
 		  o->end();
 		}
 		{ Fl_Group* o = new Fl_Group(220, 90, 190, 90);
-		  { cols_default = new Fl_Round_Button(245, 90, 135, 25, "default colors");
-			cols_default->type(102);
-			cols_default->down_box(FL_ROUND_DOWN_BOX);
-		  }
-		  { cols_bright = new Fl_Round_Button(245, 120, 140, 25, "bright colors");
+		  { cols_bright = new Fl_Round_Button(245, 90, 140, 25, "bright colors");
 			cols_bright->type(102);
 			cols_bright->down_box(FL_ROUND_DOWN_BOX);
+		  }
+		  { cols_default = new Fl_Round_Button(245, 120, 135, 25, "default colors");
+			cols_default->type(102);
+			cols_default->down_box(FL_ROUND_DOWN_BOX);
 		  }
 		  { cols_custom = new Fl_Round_Button(245, 150, 165, 25, "custom colors   ---->");
 			cols_custom->type(102);
