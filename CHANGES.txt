@@ -12,7 +12,7 @@ CHANGES IN Eureka 1.XX
 
 -  Browser : changing categories clears the search box
 
--  undo, redo : show what was (un)done in status area
+-  undo, redo : show what was (un)done in the status area
 
 -  find/replace : added a "Restrict to Selection" filter
 
@@ -32,18 +32,37 @@ CHANGES IN Eureka 1.XX
 
 -  the "Open Map" dialog was improved
 
-+  properly detect which ports can be used with each game
-
 -  find sprites outside of S_START..S_END (except in vanilla)
+
+-  better default directory for file open/save dialogs
+
+-  default edit mode is Vertices, and grid-snapping OFF
+
+
+Key System
+
++  mouse buttons (and wheel) use the key binding system
+
+-  line drawing is now done with RMB (MOUSE3) button
+
+-  smooth scrolling/navigation in both 2D and 3D views
+
+-  improved key binding dialog in the Preferences
 
 -  allow keys hard-coded in the menus to be bound to other functions
 
--  better default directory for file open/save dialogs
+-  changed scaling and rotation to the 'r' key (was MOUSE2)
+
+-  changed map panning to use MMB (MOUSE2) or the 'a' key
+
+-  changed grid toggle to the 'g' key
 
 
 Game Defs:
 
-+  support for STRIFE (based on Slade3 defs)
++  properly detect which ports can be used with each game
+
++  support for STRIFE (based on the Slade3 config)
 
 -  support for HARMONY
 
@@ -65,7 +84,7 @@ Bugs Fixed:
 
 -  fixed Export to adopt the iwad/port/resources of target wad
 
--  3D view: fixed Y offsets of unpegged lowers under sky ceilings
+-  fixed rendering of unpegged lowers under sky ceilings (Y offset)
 
 -  fixed "FIX" button for unknown textures to not change "-" textures
 
