@@ -2109,7 +2109,7 @@ void PutZNodes(node_t *root)
 }
 
 
-static int CalcZDoomNodesSize(bool is_compressed)
+static int CalcZDoomNodesSize()
 {
 	// compute size of the ZDoom format nodes.
 	// it does not need to be exact, but it *does* need to be bigger
@@ -2122,7 +2122,7 @@ static int CalcZDoomNodesSize(bool is_compressed)
 	size += 4 + num_complete_seg * 11;
 	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
 
-	if (is_compressed)
+	if (cur_info->force_compress)
 	{
 		// according to RFC1951, the zlib compression worst-case
 		// scenario is 5 extra bytes per 32KB (0.015% increase).
@@ -2141,12 +2141,16 @@ void SaveZDFormat(node_t *root_node)
 	CreateLevelLump("SEGS")->Finish();
 	CreateLevelLump("SSECTORS")->Finish();
 
-	int max_size = CalcZDoomNodesSize(true /* is_compressed */);
+	int max_size = CalcZDoomNodesSize();
 
 	Lump_c *lump = CreateLevelLump("NODES", max_size);
 
-	lump->Write(lev_ZNOD_magic, 4);
+	if (cur_info->force_compress)
+		lump->Write(lev_ZNOD_magic, 4);
+	else
+		lump->Write(lev_XNOD_magic, 4);
 
+	// the ZLibXXX functions do no compression for XNOD format
 	ZLibBeginLump(lump);
 
 	PutZVertices();
@@ -2442,6 +2446,9 @@ void ZLibBeginLump(Lump_c *lump)
 {
 	zout_lump = lump;
 
+	if (! cur_info->force_compress)
+		return;
+
 	zout_stream.zalloc = (alloc_func)0;
 	zout_stream.zfree  = (free_func)0;
 	zout_stream.opaque = (voidpf)0;
@@ -2458,6 +2465,12 @@ void ZLibAppendLump(const void *data, int length)
 {
 	// ASSERT(zout_lump)
 	// ASSERT(length > 0)
+
+	if (! cur_info->force_compress)
+	{
+		zout_lump->Write(data, length);
+		return;
+	}
 
 	zout_stream.next_in  = (Bytef*)data;   // const override
 	zout_stream.avail_in = length;
@@ -2482,6 +2495,12 @@ void ZLibAppendLump(const void *data, int length)
 
 void ZLibFinishLump(void)
 {
+	if (! cur_info->force_compress)
+	{
+		zout_lump = NULL;
+		return;
+	}
+
 	int left_over;
 
 	// ASSERT(zout_stream.avail_out > 0)
