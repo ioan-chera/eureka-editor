@@ -1586,8 +1586,7 @@ static void SaveLevel(const char *level)
 
 
 	// build the nodes
-	// TODO: user preference [enable / disable node build]
-	if (! inhibit_node_build)
+	if (bsp_on_save && ! inhibit_node_build)
 	{
 		BuildNodesAfterSave(saving_level);
 	}
