@@ -807,7 +807,7 @@ void PutReject()
 //------------------------------------------------------------------------
 
 
-// Note: ZDBSP format support based on code (C) 2002,2003 Randy Heit
+// Note: ZDoom format support based on code (C) 2002,2003 Randy Heit
 
 
 #define DEBUG_LOAD      0
@@ -1893,13 +1893,11 @@ void CheckLimits()
 		}
 	}
 
-	// FIXME : verify following is correct for ZDoom format
-
 	if (! cur_info->force_xnod)
 	{
 		if (num_normal_vert > 32767 ||
 			num_gl_vert > 32767 ||
-			num_segs > 65534 ||
+			num_segs > 32767 ||
 			num_nodes > 32767)
 		{
 			Warning("Forcing ZDoom format nodes due to overflows.\n");
@@ -1909,9 +1907,10 @@ void CheckLimits()
 }
 
 
-/* ----- ZDBSP format writing --------------------------- */
+/* ----- ZDoom format writing --------------------------- */
 
-static const u8_t *lev_ZD_magic = (u8_t *) "ZNOD";
+static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
+static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
 void PutZVertices(void)
 {
@@ -2110,17 +2109,43 @@ void PutZNodes(node_t *root)
 }
 
 
+static int CalcZDoomNodesSize(bool is_compressed)
+{
+	// compute size of the ZDoom format nodes.
+	// it does not need to be exact, but it *does* need to be bigger
+	// (or equal) to the actual size of the lump.
+
+	int size = 32;  // header + a bit extra
+
+	size += 8 + num_vertices * 8;
+	size += 4 + num_subsecs  * 4;
+	size += 4 + num_complete_seg * 11;
+	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
+
+	if (is_compressed)
+	{
+		// according to RFC1951, the zlib compression worst-case
+		// scenario is 5 extra bytes per 32KB (0.015% increase).
+		// we are significantly more conservative!
+
+		size += ((size + 255) >> 5);
+	}
+
+	return size;
+}
+
+
 void SaveZDFormat(node_t *root_node)
 {
 	// leave SEGS and SSECTORS empty
 	CreateLevelLump("SEGS")->Finish();
 	CreateLevelLump("SSECTORS")->Finish();
 
-	// TODO : compute worst-case size of the lump (plus a healthy margin)
+	int max_size = CalcZDoomNodesSize(true /* is_compressed */);
 
-	Lump_c *lump = CreateLevelLump("NODES");
+	Lump_c *lump = CreateLevelLump("NODES", max_size);
 
-	lump->Write(lev_ZD_magic, 4);
+	lump->Write(lev_ZNOD_magic, 4);
 
 	ZLibBeginLump(lump);
 
@@ -2240,10 +2265,10 @@ static const char *CalcOptionsString()
 {
 	static char buffer[256];
 
-	// FIXME FOR AJ-BSP / EUREKA
 	sprintf(buffer, "--factor %d", cur_info->factor);
 
-	if (cur_info->fast) strcat(buffer, "--fast");
+	if (cur_info->fast)
+		strcat(buffer, " --fast");
 
 	return buffer;
 }
