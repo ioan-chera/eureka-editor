@@ -542,6 +542,8 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 
 void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
 {
+	// part can be: 'l' for LOWER, 'u' for UPPER.
+
 	side_on_a_line_t cur = soal_make(ld, side);
 
 	side_on_a_line_t adj = DetermineAdjoiner(cur, part, align_flags);

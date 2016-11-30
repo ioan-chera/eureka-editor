@@ -3426,9 +3426,6 @@ void Textures_LogMedusa()
 }
 
 
-// FIXME:  is_unknown_tex   (allow '-' and '#....')
-
-
 void Textures_FindUnknownTex(selection_c& lines,
                              std::map<std::string, int>& names)
 {

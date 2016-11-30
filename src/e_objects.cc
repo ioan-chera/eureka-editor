@@ -2321,10 +2321,8 @@ void RotateObjects3(double deg, int pos_x, int pos_y)
 }
 
 
-bool SpotInUse(obj_type_e obj_type, int map_x, int map_y)
+static bool SpotInUse(obj_type_e obj_type, int map_x, int map_y)
 {
-	// FIXME: FindObjectAt(obj_type, map_x, map_y)
-
 	switch (obj_type)
 	{
 		case OBJ_THINGS:

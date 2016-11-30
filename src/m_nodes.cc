@@ -319,8 +319,6 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	info->force_xnod		= bsp_force_zdoom;
 	info->force_compress	= bsp_compressed;
 
-	// FIXME : OTHER bsp_xxxx config vars
-
 	info->total_failed_maps    = 0;
 	info->total_warnings       = 0;
 	info->total_minor_warnings = 0;

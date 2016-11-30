@@ -63,7 +63,7 @@ static std::map< std::string, std::string > parse_vars;
 
 static void M_FreeAllDefinitions()
 {
-	// FIXME: prevent memory leak, delete contents of these vectors
+	// TODO: prevent memory leak, delete contents of these maps
 
     line_groups.clear();
     line_types.clear();
