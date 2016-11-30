@@ -122,7 +122,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 10;
 
 
-	c_tex = new UI_PicName(X+70, Y, 108, 24, "Ceiling: ");
+	c_tex = new UI_PicName(X+70, Y-5, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(tex_callback, this);
 	c_tex->callback2(dyntex_callback, this);
@@ -169,13 +169,13 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new UI_PicName(X+70, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_PicName(X+70, Y+5, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(tex_callback, this);
 	f_tex->callback2(dyntex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += f_tex->h() + 28;
+	Y += f_tex->h() + 33;
 
 
 	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
