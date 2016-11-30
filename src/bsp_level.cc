@@ -560,7 +560,7 @@ void InitBlockmap()
 
 void PutBlockmap()
 {
-	if (! cur_info->do_blockmap)
+	if (! cur_info->do_blockmap || num_linedefs == 0)
 	{
 		// just create an empty blockmap lump
 		CreateLevelLump("BLOCKMAP")->Finish();
@@ -2306,6 +2306,8 @@ static void AddMissingLump(const char *name, const char *after)
 
 void SaveLevel(node_t *root_node)
 {
+	// root_node may be NULL
+
 	edit_wad->BeginWrite();
 
 	// remove any existing GL-Nodes
@@ -2332,7 +2334,7 @@ void SaveLevel(node_t *root_node)
 
 	Lump_c * gl_marker = NULL;
 
-	if (cur_info->gl_nodes)
+	if (cur_info->gl_nodes && num_linedefs > 0)
 	{
 		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
@@ -2357,7 +2359,7 @@ void SaveLevel(node_t *root_node)
 
 	/* --- Normal nodes --- */
 
-	if (lev_force_xnod)
+	if (lev_force_xnod && num_linedefs > 0)
 	{
 		// remove mini-segs
 		NormaliseBspTree(root_node);
@@ -2369,9 +2371,12 @@ void SaveLevel(node_t *root_node)
 		// Note: RoundOffBspTree will convert the GL vertices in segs to
 		// their normal counterparts (pointer change: use normal_dup).
 
-		RoundOffBspTree(root_node);
+		if (root_node)
+		{
+			RoundOffBspTree(root_node);
 
-		NormaliseBspTree(root_node);
+			NormaliseBspTree(root_node);
+		}
 
 		PutVertices("VERTEXES", false);
 
@@ -2568,13 +2573,10 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 {
 	cur_info = info;
 
-	superblock_t *seg_list;
-	bbox_t seg_bbox;
+	node_t *root_node  = NULL;
+	subsec_t *root_sub = NULL;
 
-	node_t *root_node;
-	subsec_t *root_sub;
-
-	build_result_e ret;
+	build_result_e ret = BUILD_OK;
 
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
@@ -2586,27 +2588,34 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	InitBlockmap();
 
-	// create initial segs
-	seg_list = CreateSegs();
+	if (num_linedefs > 0)
+	{
+		bbox_t seg_bbox;
 
-	FindLimits(seg_list, &seg_bbox);
+		// create initial segs
+		superblock_t * seg_list = CreateSegs();
 
-	// recursively create nodes
-	ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
+		FindLimits(seg_list, &seg_bbox);
 
-	FreeSuper(seg_list);
+		// recursively create nodes
+		ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
+
+		FreeSuper(seg_list);
+	}
 
 	if (ret == BUILD_OK)
 	{
-		ClockwiseBspTree(root_node);
-
 		PrintVerbose("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
 				num_nodes, num_subsecs, num_segs, num_normal_vert + num_gl_vert);
 
 		if (root_node)
+		{
+			ClockwiseBspTree(root_node);
+
 			PrintVerbose("Heights of left and right subtrees = (%d,%d)\n",
 					ComputeBspHeight(root_node->r.node),
 					ComputeBspHeight(root_node->l.node));
+		}
 
 		SaveLevel(root_node);
 	}
