@@ -522,6 +522,15 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs < 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
+		// the "line" command is only used in DOOM format
+		// similarly the "special" command is only used in HEXEN format
+		if (y_stricmp(argv[0], "line") == 0 && Level_format == MAPF_Hexen)
+			return;
+		if (y_stricmp(argv[0], "special") == 0 && Level_format != MAPF_Hexen)
+			return;
+
+		// only read "special" in HEXEN map format
+
 		linetype_t * info = new linetype_t;
 
 		memset(info->args, 0, sizeof(info->args));
@@ -538,8 +547,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			if (argv[4 + i][0] != '-')
 				info->args[i] = StringDup(argv[4 + i]);
 		}
-
-		// FIXME : have separate tables for "special"
 
 		if (line_groups.find( info->group) == line_groups.end())
 		{
