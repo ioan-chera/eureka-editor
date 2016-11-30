@@ -46,6 +46,11 @@
 int last_given_file;
 
 
+// this is only used to prevent a CMD_Save which happens inside
+// CMD_BuildAllNodes from building that saved level twice.
+bool inhibit_node_build;
+
+
 static void SaveLevel(const char *level);
 
 static const char * overwrite_message =
@@ -1581,7 +1586,8 @@ static void SaveLevel(const char *level)
 
 
 	// build the nodes
-	if (true)   // TODO: user preference [enable / disable node build]
+	// TODO: user preference [enable / disable node build]
+	if (! inhibit_node_build)
 	{
 		BuildNodesAfterSave(saving_level);
 	}

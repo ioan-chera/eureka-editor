@@ -40,6 +40,9 @@ bool bsp_force_zdoom	= false;
 bool bsp_compressed		= false;
 
 
+extern bool inhibit_node_build;
+
+
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
@@ -451,8 +454,14 @@ void CMD_BuildAllNodes()
 			return;
 		}
 
-		// FIXME : inhibit a node build here
-		if (! CMD_SaveMap())
+		inhibit_node_build = true;
+
+		bool save_result = CMD_SaveMap();
+
+		inhibit_node_build = false;
+
+		// user cancelled the save?
+		if (! save_result)
 			return;
 	}
 
@@ -527,11 +536,6 @@ void CMD_TestMap()
 		if (! CMD_SaveMap())
 			return;
 	}
-
-
-	// FIXME:
-	// if (missing nodes)
-	//    DLG_Confirm(  "build the nodes now?")
 
 
 	// FIXME: figure out the proper directory to cd into
