@@ -20,7 +20,7 @@
 
 if $ALLOW_BOOM is 1
 include "mbf"
-end
+endif
 
 
 #---- ODAMEX THINGS ----------
