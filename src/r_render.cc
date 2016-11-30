@@ -2119,6 +2119,12 @@ void Render3D_Enable(bool _enable)
 	// the UpdateHighlight() code will use stale mouse coordinates.
 	edit.pointer_in_window = false;
 
+	// give keyboard focus to the appropriate large widget
+	if (edit.render3d)
+		Fl::focus(main_win->render);
+	else
+		Fl::focus(main_win->canvas);
+
 	UpdateHighlight();
 	RedrawMap();
 }
