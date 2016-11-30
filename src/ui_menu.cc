@@ -249,12 +249,17 @@ static void view_do_camera_pos(Fl_Widget *w, void * data)
 
 static void view_do_toggle_3d(Fl_Widget *w, void * data)
 {
-	Render3D_Enable(! edit.render3d);
+	ExecuteCommand("Toggle", "3d");
 }
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Toggle", "obj_nums");
+}
+
+static void view_do_sprites(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Toggle", "sprites");
 }
 
 static void view_do_grid_type(Fl_Widget *w, void * data)
@@ -515,6 +520,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
+		{ "Toggle S&prites",      0, FCAL view_do_sprites },
 		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
 		{ "&Toggle Grid Type",    0, FCAL view_do_grid_type },
 
