@@ -39,10 +39,6 @@
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
 
 
-extern int active_when;
-extern int active_wmask;
-
-
 // config items
 rgb_color_t dotty_axis_col  = RGB_MAKE(0, 128, 255);
 rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 238);
@@ -744,7 +740,8 @@ void UI_Canvas::DrawThings()
 			{
 				fl_color(LIGHTGREY);
 			}
-			else if (active_wmask)
+#if 0  // THIS DESIGNED TO SHOW SKILLS VIA COLOR, BUT DOESN'T WORK VERY WELL
+			else if (true)
 			{
 				if (Things[n]->options & 1)
 					fl_color (YELLOW);
@@ -755,6 +752,7 @@ void UI_Canvas::DrawThings()
 				else
 					fl_color (DARKGREY);
 			}
+#endif
 			else
 				fl_color((Fl_Color) info->color);
 		}

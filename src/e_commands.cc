@@ -246,7 +246,7 @@ void CMD_SetVar(void)
 		edit.show_object_numbers = bool_val;
 		RedrawMap();
 	}
-	else   // TODO: "skills"
+	else
 	{
 		Beep("Set: unknown var: %s", var_name);
 	}
@@ -293,13 +293,6 @@ void CMD_ToggleVar(void)
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
-		RedrawMap();
-	}
-	else if (y_stricmp(var_name, "skills") == 0)
-	{
-//FIXME!!!!
-//		active_wmask ^= 1;
-//		active_when = active_wmask;
 		RedrawMap();
 	}
 	else

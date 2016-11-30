@@ -35,13 +35,6 @@
 #include "ui_misc.h"
 
 
-int active_when = 0;  // FIXME MOVE THESE into Editor_State
-int active_wmask = 0;
-
-
-void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
-
-
 void ClearStickyMod()
 {
 	if (edit.sticky_mod)
@@ -98,6 +91,9 @@ void Editor_SetAction(editor_action_e  new_action)
 			break;
 	}
 }
+
+
+void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 
 
 void Editor_UpdateFromScroll()
