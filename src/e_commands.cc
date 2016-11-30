@@ -236,6 +236,11 @@ void CMD_SetVar(void)
 	{
 		grid.SetSnap(bool_val);
 	}
+	else if (y_stricmp(var_name, "sprites") == 0)
+	{
+		edit.thing_render_mode = int_val;
+		RedrawMap();
+	}
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = bool_val;
@@ -279,6 +284,11 @@ void CMD_ToggleVar(void)
 	else if (y_stricmp(var_name, "snap") == 0)
 	{
 		grid.ToggleSnap();
+	}
+	else if (y_stricmp(var_name, "sprites") == 0)
+	{
+		edit.thing_render_mode = ! edit.thing_render_mode;
+		RedrawMap();
 	}
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
@@ -1278,13 +1288,13 @@ static editor_command_t  command_table[] =
 	{	"Set", "UI", 0,
 		&CMD_SetVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap"
+		/* keywords */ "3d browser grid obj_nums snap sprites"
 	},
 
 	{	"Toggle", "UI", 0,
 		&CMD_ToggleVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap recent"
+		/* keywords */ "3d browser grid obj_nums snap recent sprites"
 	},
 
 	{	"Scroll",  "UI", 0,
