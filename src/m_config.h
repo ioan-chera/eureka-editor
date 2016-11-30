@@ -55,6 +55,7 @@ extern rgb_color_t gui_custom_fg;
 extern int  minimum_drag_pixels;
 extern int  new_sector_size;
 extern int  sector_render_default;
+extern int   thing_render_default;
 
 extern int  default_grid_size;
 extern bool default_grid_snap;

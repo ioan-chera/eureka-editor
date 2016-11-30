@@ -268,8 +268,16 @@ void UI_Canvas::DrawMap()
 
 	if (edit.mode == OBJ_THINGS)
 	{
-//!!!!		DrawThingBodies();
-		DrawThingSprites();
+		if (edit.thing_render_mode > 0)
+		{
+			DrawThings();
+			DrawThingSprites();
+		}
+		else
+		{
+			DrawThingBodies();
+			DrawThings();
+		}
 	}
 }
 

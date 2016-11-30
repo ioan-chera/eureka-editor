@@ -60,6 +60,7 @@ typedef struct
 	bool error_mode;  // draw selection in red
 
 	int  sector_render_mode;	// one of the SREND_XXX values
+	int   thing_render_mode;
 
 	bool show_object_numbers; // Whether the object numbers are shown
 	bool show_things_squares; // Whether the things squares are shown

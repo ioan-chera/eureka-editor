@@ -728,6 +728,15 @@ static const opt_desc_t options[] =
 		&sidedef_add_del_buttons
 	},
 
+	{	"thing_render_default",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default thing rendering mode: 0 = boxes, 1 = sprites",
+		NULL,
+		&thing_render_default
+	},
+
 	{	"swap_sidedefs",
 		0,
 		OPT_BOOLEAN,

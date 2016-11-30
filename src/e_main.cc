@@ -63,6 +63,7 @@ int default_edit_mode = 3;  // Vertices
 bool same_mode_clears_selection = false;
 
 int sector_render_default = (int)SREND_Floor;
+int  thing_render_default = 1;
 
 
 void MarkChanges()
@@ -1228,6 +1229,7 @@ void Editor_Init()
 	edit.error_mode = false;
 
 	edit.sector_render_mode = sector_render_default;
+	edit. thing_render_mode =  thing_render_default;
 
 	edit.show_object_numbers = false;
 	edit.show_things_squares = false;
@@ -1274,6 +1276,13 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
+	if (strcmp(tokens[0], "thing_render_mode") == 0 && num_tok >= 2)
+	{
+		edit.thing_render_mode = atoi(tokens[1]);
+		RedrawMap();
+		return true;
+	}
+
 	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
 	{
 		edit.show_object_numbers = atoi(tokens[1]);
@@ -1299,6 +1308,7 @@ void Editor_WriteUser(FILE *fp)
 
 	fprintf(fp, "render_mode %d\n", edit.render3d ? 1 : 0);
 	fprintf(fp, "sector_render_mode %d\n", edit.sector_render_mode);
+	fprintf(fp, "thing_render_mode %d\n",  edit.thing_render_mode);
 	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
 }
 
