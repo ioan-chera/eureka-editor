@@ -7,8 +7,6 @@ CHANGES IN Eureka 1.XX
 
 General:
 
-+  support for TX_START/TX_END textures, including PNG and TGA format
-
 +  improved drag behavior, never modify the current selection
 
 +  command to skew (shear) objects with the mouse, on 'K' key
@@ -30,9 +28,11 @@ General:
 -  better default directory for file chooser dialogs
 
 
-Game Defs:
+Game and Ports:
 
 +  properly detect which ports can be used with each game
+
++  support TX_START/TX_END textures, including PNG and TGA format
 
 +  support for STRIFE (based on the Slade3 config)
 +  support for HARMONY
@@ -64,12 +64,12 @@ Bugs Fixed:
    could sometimes delete that outer sector too
 
 +  fixed problem of unable to split lines close to an end-point
-+  fixed rendering of unpegged lowers under sky ceilings (Y offset)
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
 
 -  fixed exporting to keep the iwad/port/resources of target wad
+-  fixed rendering of unpegged lowers under sky ceilings (Y offset)
 -  fixed panel staying on a highlighted object when going to 3D mode
 -  fixed textures in LineDef panel not updating after undo or redo
 -  fixed "FIX" button for unknown textures to not change "-" textures
