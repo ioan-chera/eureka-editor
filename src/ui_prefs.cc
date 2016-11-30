@@ -674,11 +674,11 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ Fl_Group* o = new Fl_Group(45, 90, 250, 115);
-		  { theme_plastic = new Fl_Round_Button(50, 90, 165, 25, " Plastic theme ");
+		  { theme_plastic = new Fl_Round_Button(50, 120, 165, 25, " Plastic theme ");
 			theme_plastic->type(102);
 			theme_plastic->down_box(FL_ROUND_DOWN_BOX);
 		  }
-		  { theme_GTK = new Fl_Round_Button(50, 120, 150, 25, " GTK+ theme ");
+		  { theme_GTK = new Fl_Round_Button(50, 90, 150, 25, " GTK+ theme ");
 			theme_GTK->type(102);
 			theme_GTK->down_box(FL_ROUND_DOWN_BOX);
 		  }

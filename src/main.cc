@@ -97,7 +97,7 @@ const char *default_port = DEFAULT_PORT_NAME;
 int scroll_less   = 10;
 int scroll_more   = 90;
 
-int gui_scheme    = 2;  // plastic
+int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
 
 rgb_color_t gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);

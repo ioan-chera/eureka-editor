@@ -188,7 +188,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	cy += (H - cy - bh) / 2 - 6;
 
-	Fl_Color but_color = fl_rgb_color(128, 128, 255);
+	Fl_Color but_color = fl_rgb_color(128, 208, 255);
 
 	Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
 	button->color(but_color, but_color);
