@@ -859,6 +859,12 @@ void CMD_Insert(void)
 	bool force_cont;
 	bool no_fill;
 
+	if (edit.render3d)
+	{
+		Beep("Insert: not usable in 3D view");
+		return;
+	}
+
 	switch (edit.mode)
 	{
 		case OBJ_THINGS:
