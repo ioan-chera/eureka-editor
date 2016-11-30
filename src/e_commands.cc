@@ -520,7 +520,6 @@ static void ACT_SelectBox_release(void)
 	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
 
 	// a mere click and release will unselect everything
-	// FIXME : REVIEW THIS
 	if (x1 == x2 && y1 == y2)
 		ExecuteCommand("UnselectAll");
 	else
@@ -579,8 +578,6 @@ static void ACT_Click_release(void)
 	// check if cancelled or overridden
 	if (edit.action != ACT_CLICK)
 		return;
-
-fprintf(stderr, "*** CLICK release\n");
 
 
 	if (click_check_select && click_obj.valid())
@@ -682,8 +679,6 @@ void CMD_ACT_Click(void)
 		return;
 	}
 
-fprintf(stderr, "*** CLICK pressed!!\n");
-
 	Editor_SetAction(ACT_CLICK);
 }
 
@@ -697,12 +692,12 @@ void CMD_ACT_SelectBox(void)
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
-	{
-		Editor_SetAction(ACT_SELBOX);
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
+		return;
 
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
-	}
+	Editor_SetAction(ACT_SELBOX);
+
+	main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
 }
 
 
@@ -720,28 +715,19 @@ void CMD_ACT_Drag(void)
 		return;
 	}
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
-	{
-		int focus_x, focus_y;
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
+		return;
 
-		GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+	int focus_x, focus_y;
 
-		Editor_SetAction(ACT_DRAG);
-		main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
+	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
 
-		// check for a single vertex    FIXME FIXME
-		edit.drag_single_obj = -1;
+	Editor_SetAction(ACT_DRAG);
+	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
 
-#if 0  //????
-		if (edit.mode == OBJ_VERTICES && edit.Selected->find_second() < 0)
-		{
-			edit.drag_single_vertex = edit.Selected->find_first();
-			SYS_ASSERT(edit.drag_single_vertex >= 0);
-		}
-#endif
+	edit.drag_single_obj = -1;
 
-		UpdateHighlight();
-	}
+	UpdateHighlight();
 }
 
 
