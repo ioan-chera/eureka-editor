@@ -110,7 +110,10 @@ rgb_color_t SectorLightColor(int light);
 #define HI_COL          fl_rgb_color(255,255,0)
 #define HI_AND_SEL_COL  fl_rgb_color(255,192,128)
 
-#define WINTITLE        fl_rgb_color(0xff, 0xff, 0x00)
+#define THING_MODE_COL  fl_rgb_color(255,64,255)
+#define LINE_MODE_COL   fl_rgb_color(0,160,255)
+#define SECTOR_MODE_COL fl_rgb_color(255,255,0)
+#define VERTEX_MODE_COL fl_rgb_color(0,255,128)
 
 
 #endif  /* __EUREKA_IM_COLOR_H__ */

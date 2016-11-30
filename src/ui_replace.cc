@@ -428,11 +428,11 @@ void UI_FindAndReplace::UpdateWhatColor()
 {
 	switch (what->value())
 	{
-		case 0: /* Things      */ what->color(FL_MAGENTA); break;
-		case 1: /* Line Tex    */ what->color(fl_rgb_color(0,128,255)); break;
-		case 2: /* Sector Flat */ what->color(FL_YELLOW); break;
+		case 0: /* Things      */ what->color(THING_MODE_COL); break;
+		case 1: /* Line Tex    */ what->color(LINE_MODE_COL); break;
+		case 2: /* Sector Flat */ what->color(SECTOR_MODE_COL); break;
 		case 3: /* Line Type   */ what->color(FL_GREEN); break;
-		case 4: /* Sector Type */ what->color(fl_rgb_color(255,144,0)); break;
+		case 4: /* Sector Type */ what->color(fl_rgb_color(255,160,0)); break;
 	}
 }
 
