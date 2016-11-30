@@ -43,7 +43,7 @@ int light_bump_large  = 64;
 //TODO make these configurable
 int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 {
-	0, 72, 96, 128, 192, 256
+	0, 64, 96, 128, 192, 256
 };
 
 
