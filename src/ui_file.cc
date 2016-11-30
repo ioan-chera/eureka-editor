@@ -627,8 +627,7 @@ void UI_OpenMap::LoadFile()
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -1086,8 +1085,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	switch (chooser.show())
 	{
@@ -1138,8 +1136,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	switch (chooser.show())
 	{

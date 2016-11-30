@@ -630,6 +630,12 @@ static void Main_OpenWindow()
 }
 
 
+void Main_Quit()
+{
+	want_quit = true;
+}
+
+
 // used for 'New Map' / 'Open Map' functions too
 bool Main_ConfirmQuit(const char *action)
 {
@@ -660,9 +666,35 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
-void Main_Quit()
+//
+// the directory we should use for a file open/save operation.
+// returns NULL when not sure.
+//
+const char * Main_FileOpFolder()
 {
-	want_quit = true;
+	static char folder[FL_PATH_MAX];
+
+	if (Pwad_name)
+	{
+		snprintf(folder, sizeof(folder), "%s", Pwad_name);
+
+		char *p = (char *)FindBaseName(folder);
+
+		// remove trailing slash (except when following "C:" or similar)
+		if (p-1 >= folder && (p[-1] == '/' || p[-1] == '\\') &&
+			! (p-2 >= folder && p[-2] == ':'))
+		{
+			p--;
+		}
+
+		if (p > folder)
+		{
+			*p = 0;
+			return folder;
+		}
+	}
+
+	return NULL;
 }
 
 

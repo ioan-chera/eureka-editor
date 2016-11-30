@@ -182,6 +182,8 @@ int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 const char * DetermineGame(const char *iwad_name);
 
+const char * Main_FileOpFolder();
+
 
 void Beep(const char *msg, ...);
 
