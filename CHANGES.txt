@@ -38,6 +38,8 @@ CHANGES IN Eureka 1.XX
 
 -  allow keys hard-coded in the menus to be bound to other functions
 
+-  better default directory for file open/save dialogs
+
 
 Game Defs:
 

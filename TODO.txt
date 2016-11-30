@@ -31,12 +31,7 @@ General
 
 +  Preferences:
    -  sector_render_default
-   -  headroom button values
-   -  ability to change mouse move/turn speed in 3D view
    -  floor_bump_xxx values
-
-+  Key binding system for mouse buttons
-   -  convert LEFT BUTTON (select, insert-line, drag, selbox) for KEY system
 
 +  allow Game and Port definitions to specify the linedef and thing
    flags which can be used  (rather than hard-coding them)
@@ -342,12 +337,11 @@ WISH: conversion between Hexen <--> DOOM formats
 WISH: conversion from Boom --> vanilla DOOM
 
 
+
 Possible user config
 --------------------
 
-render_forward_speed  (16)
-render_turn_speed     (16)
-render_updown_speed   (16)
+headroom button_1..6
 
 paste_reselects  (true)
 
