@@ -967,12 +967,10 @@ int M_ParseConfigFile()
 }
 
 
-/*
- *  parse_environment_vars
- *  Check certain environment variables.
- *  Returns 0 on success, <>0 on error.
- */
-int M_ParseEnvironmentVars()
+//
+// check certain environment variables...
+//
+void M_ParseEnvironmentVars()
 {
 #if 0
 	char *value;
@@ -981,8 +979,6 @@ int M_ParseEnvironmentVars()
 	if (value != NULL)
 		Game = value;
 #endif
-
-	return 0;
 }
 
 
@@ -992,16 +988,15 @@ void M_AddPwadName(const char *filename)
 }
 
 
-/*
- *  parses the command line options
- *
- *  If <pass> is set to 1, ignores all options except those
- *  that have the "1" flag.
- *  Else, ignores all options that have the "1" flag.
- *  If an error occurs, report it with LogPrintf().
- *  and returns non-zero. Else, returns 0.
- */
-int M_ParseCommandLine(int argc, const char *const *argv, int pass)
+//
+// parses the command line options
+//
+// If <pass> is set to 1, ignores all options except those
+// that have the "1" flag (the "early" options).
+//
+// Otherwise, ignores all options that have the "1" flag.
+//
+void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 {
 	const opt_desc_t *o;
 
@@ -1027,7 +1022,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			if (o->opt_type == OPT_END)
 			{
 				FatalError("unknown option: '%s'\n", argv[0]);
-				return 1;
+				/* NOT REACHED */
 			}
 
 			if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
@@ -1073,7 +1068,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1089,7 +1084,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1105,7 +1100,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1135,7 +1130,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
 				{
@@ -1151,16 +1146,13 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				break;
 
 			default:
-				{
-					BugError("INTERNAL ERROR: unknown option type (%d)", (int) o->opt_type);
-					return 1;
-				}
+				BugError("INTERNAL ERROR: unknown option type (%d)", (int) o->opt_type);
+				/* NOT REACHED */
 		}
 
 		argv++;
 		argc--;
 	}
-	return 0;
 }
 
 

@@ -911,10 +911,7 @@ int main(int argc, char *argv[])
 
 	// a quick pass through the command line arguments
 	// to handle special options, like --help, --install, --config
-	int r = M_ParseCommandLine(argc - 1, argv + 1, 1);
-
-	if (r)
-		exit(3);
+	M_ParseCommandLine(argc - 1, argv + 1, 1);
 
 	if (show_help)
 	{
@@ -949,24 +946,11 @@ int main(int argc, char *argv[])
 	// a config file can provides some values
 	M_ParseConfigFile();
 
-	if (r == 0)
-	{
-		// environment variables can override them
-		r = M_ParseEnvironmentVars();
-	}
+	// environment variables can override them
+	M_ParseEnvironmentVars();
 
-	if (r == 0)
-	{
-		// and command line arguments will override both
-		r = M_ParseCommandLine(argc - 1, argv + 1, 2);
-	}
-
-	if (r != 0)
-	{
-		// FIXME
-		fprintf(stderr, "Error parsing config or cmd-line options.\n");
-		exit(1);
-	}
+	// and command line arguments will override both
+	M_ParseCommandLine(argc - 1, argv + 1, 2);
 
 
 	Editor_Init();
