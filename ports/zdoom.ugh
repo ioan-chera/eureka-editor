@@ -38,6 +38,12 @@ feature medusa_fixed 1
 feature lax_sprites 1
 
 
+if $HEXEN_SPECIALS is 1
+else
+include "hexen_specials"
+endif
+
+
 #---- THINGS ------------
 
 # TODO

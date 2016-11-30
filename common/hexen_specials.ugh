@@ -24,6 +24,8 @@
 #
 #------------------------------------------------------------------------
 
+set $HEXEN_SPECIALS  1
+
 # Categories...
 
 linegroup a "Animated"
