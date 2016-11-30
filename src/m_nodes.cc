@@ -307,23 +307,6 @@ void GB_PrintMsg(const char *str, ...)
 }
 
 
-// set message for certain errors  [ FIXME : REMOVE THIS ]
-static void SetErrorMsg(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-SYS_ASSERT(nb_info);
-
-	StringFree(nb_info->message);
-
-	nb_info->message = StringDup(message_buf);
-}
-
-
 static void PrepareInfo(nodebuildinfo_t *info)
 {
 	info->factor	= CLAMP(1, bsp_split_factor, 31);
@@ -356,12 +339,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
 	int num_levels = edit_wad->LevelCount();
-
-	if (num_levels <= 0)
-	{
-		SetErrorMsg("No levels found in wad !");
-		return BUILD_BadFile;
-	}
+	SYS_ASSERT(num_levels > 0);
 
 	GB_PrintMsg("\n");
 
@@ -444,7 +422,6 @@ void CMD_BuildAllNodes()
 		return;
 	}
 
-
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
@@ -463,6 +440,14 @@ void CMD_BuildAllNodes()
 		// user cancelled the save?
 		if (! save_result)
 			return;
+	}
+
+
+	// this probably cannot happen, but check anyway
+	if (edit_wad->LevelCount() == 0)
+	{
+		DLG_Notify("Cannot build nodes: no levels found!");
+		return;
 	}
 
 
