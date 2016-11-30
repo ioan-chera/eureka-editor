@@ -196,7 +196,7 @@ void CMD_Redo(void)
 void CMD_SetVar(void)
 {
 	const char *var_name = EXEC_Param[0];
-	const char *value    = EXEC_Param[0];
+	const char *value    = EXEC_Param[1];
 
 	if (! var_name[0])
 	{
