@@ -9,23 +9,6 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-BSP rework
-----------
-
-!!  check that ALL logic can handle an empty map (NO linedefs etc)
-
-+  make read errors NOT call FatalError()
-
-+  fix ZDoom format
-   -  XNOD/ZNOD require SEGS to be written in USAGE ORDER
-   -  use the _zdoom_seg_t and _zdoom_subsec_t
-   -  support XNOD uncompressed  [ same as ZNOD but without the zlib ]
-   -  support ZNOD as a preference
-
-+  CMD_BuildAllNodes: if a MadeChanges dialog is shown and user
-   saves the map, then inhibit a node build for that save
-
-
 General
 -------
 
@@ -120,6 +103,8 @@ General
    -  add more stuff (see USER CONFIG NEEDED, below)
 
 +  a dialog to view / load / prune backups.
+
+-  BSP: make read errors more tolerant (DON'T call FatalError)
 
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
