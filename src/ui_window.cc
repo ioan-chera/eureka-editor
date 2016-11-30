@@ -51,7 +51,7 @@ int KF_fonth;
 // MainWin Constructor
 //
 UI_MainWin::UI_MainWin() :
-	Fl_Double_Window(MAIN_WINDOW_W, MAIN_WINDOW_H, EUREKA_TITLE),
+	Fl_Double_Window(MAIN_WINDOW_W + 64, MAIN_WINDOW_H, EUREKA_TITLE),
 	cursor_shape(FL_CURSOR_DEFAULT),
 	last_x(0), last_y(0), last_w(0), last_h(0)
 {
