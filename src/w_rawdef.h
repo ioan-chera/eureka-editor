@@ -312,7 +312,7 @@ typedef struct
 	u32_t masked;      // NOT USED
 	u16_t width;
 	u16_t height;
-	u32_t column_dir;  // NOT USED
+	u16_t column_dir[2];  // NOT USED
 	u16_t patch_count;
 
 	raw_patchdef_t patches[1];

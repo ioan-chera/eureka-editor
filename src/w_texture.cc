@@ -87,106 +87,179 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 }
 
 
-static void LoadTextures_Strife(Lump_c *lump, byte *pnames, int pname_size,
-                                bool skip_first)
+static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
+								   bool skip_first)
 {
-	// skip size word at front of PNAMES
-	pnames += 4;
+	// we follow the ZDoom logic here: check ALL the texture entries
+	// assuming DOOM format, and if any have a patch_count of zero or
+	// the last two bytes of columndir are non-zero then assume Strife.
 
-	pname_size /= 8;
-
-	// load TEXTUREx data into memory for easier processing
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	// shut up, compiler
-	(void) tex_length;
-
-	// at the front of the TEXTUREx lump are some 4-byte integers
-	s32_t *tex_data_s32 = (s32_t *)tex_data;
-
-	int num_tex = LE_S32(tex_data_s32[0]);
+	const s32_t *tex_data_s32 = (const s32_t *)tex_data;
 
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
-		int offset = LE_S32(tex_data_s32[1+n]);
+		int offset = LE_S32(tex_data_s32[1 + n]);
 
-		// FIXME: validate offset
+		// FIXME ignore invalid offset
 
-		const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
+		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
-		// create the new image
-		int width  = LE_U16(raw->width);
-		int height = LE_U16(raw->height);
+		if (LE_S16(raw->patch_count) <= 0)
+			return true;
 
-		DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
-
-		if (width == 0 || height == 0)
-			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
-
-		Img_c *img = new Img_c(width, height, false);
-		bool is_medusa = false;
-
-		// apply all the patches
-		int num_patches = LE_S16(raw->patch_count);
-		if (! num_patches)
-			FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
-
-		const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
-
-		if (num_patches >= 2)
-			is_medusa = true;
-
-		for (int j = 0 ; j < num_patches ; j++, patdef++)
-		{
-			int xofs = LE_S16(patdef->x_origin);
-			int yofs = LE_S16(patdef->y_origin);
-			int pname_idx = LE_U16(patdef->pname);
-
-			if (yofs < 0)
-				yofs = 0;
-
-			if (pname_idx >= pname_size)
-			{
-				LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
-				continue;
-			}
-
-			char picname[16];
-			memcpy(picname, pnames + 8*pname_idx, 8);
-			picname[8] = 0;
-
-			Lump_c *lump = W_FindPatchLump(picname);
-
-			if (! lump ||
-				! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
-			{
-				LogPrintf("texture '%.8s': patch '%.8s' not found.\n",
-						  raw->name, picname);
-			}
-		}
-
-		// store the new texture
-		char namebuf[16];
-		memcpy(namebuf, raw->name, 8);
-		namebuf[8] = 0;
-
-		W_AddTexture(namebuf, img, is_medusa);
+		if (raw->column_dir[1] != 0)
+			return true;
 	}
 
-	W_FreeLumpData(&tex_data);
+	return false;
+}
+
+
+static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
+									byte *pnames, int pname_size, bool skip_first)
+{
+	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
+
+	// create the new image
+	int width  = LE_U16(raw->width);
+	int height = LE_U16(raw->height);
+
+	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+
+	if (width == 0 || height == 0)
+		FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
+
+	Img_c *img = new Img_c(width, height, false);
+	bool is_medusa = false;
+
+	// apply all the patches
+	int num_patches = LE_S16(raw->patch_count);
+
+	if (! num_patches)
+		FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
+
+	const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
+
+	if (num_patches >= 2)
+		is_medusa = true;
+
+	for (int j = 0 ; j < num_patches ; j++, patdef++)
+	{
+		int xofs = LE_S16(patdef->x_origin);
+		int yofs = LE_S16(patdef->y_origin);
+		int pname_idx = LE_U16(patdef->pname);
+
+		if (yofs < 0)
+			yofs = 0;
+
+		if (pname_idx >= pname_size)
+		{
+			LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
+			continue;
+		}
+
+		char picname[16];
+		memcpy(picname, pnames + 8*pname_idx, 8);
+		picname[8] = 0;
+
+		Lump_c *lump = W_FindPatchLump(picname);
+
+		if (! lump ||
+			! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
+		{
+			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
+		}
+	}
+
+	// store the new texture
+	char namebuf[16];
+	memcpy(namebuf, raw->name, 8);
+	namebuf[8] = 0;
+
+	W_AddTexture(namebuf, img, is_medusa);
+}
+
+
+static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
+								  byte *pnames, int pname_size, bool skip_first)
+{
+	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
+
+	// create the new image
+	int width  = LE_U16(raw->width);
+	int height = LE_U16(raw->height);
+
+	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+
+	if (width == 0 || height == 0)
+		FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
+
+	Img_c *img = new Img_c(width, height, false);
+	bool is_medusa = false;
+
+	// apply all the patches
+	int num_patches = LE_S16(raw->patch_count);
+
+	if (! num_patches)
+		FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
+
+	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
+
+	// andrewj: this is not strictly correct, the Medusa Effect is only
+	//          triggered when multiple patches occupy a single column of
+	//          the texture.  But checking for that is a major pain since
+	//          we don't know the width of each patch here....
+	if (num_patches >= 2)
+		is_medusa = true;
+
+	for (int j = 0 ; j < num_patches ; j++, patdef++)
+	{
+		int xofs = LE_S16(patdef->x_origin);
+		int yofs = LE_S16(patdef->y_origin);
+		int pname_idx = LE_U16(patdef->pname);
+
+		// AYM 1998-08-08: Yes, that's weird but that's what Doom
+		// does. Without these two lines, the few textures that have
+		// patches with negative y-offsets (BIGDOOR7, SKY1, TEKWALL1,
+		// TEKWALL5 and a few others) would not look in the texture
+		// viewer quite like in Doom. This should be mentioned in
+		// the UDS, by the way.
+		if (yofs < 0)
+			yofs = 0;
+
+		if (pname_idx >= pname_size)
+		{
+			LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
+			continue;
+		}
+
+		char picname[16];
+		memcpy(picname, pnames + 8*pname_idx, 8);
+		picname[8] = 0;
+
+//DebugPrintf("-- %d patch [%s]\n", j, picname);
+		Lump_c *lump = W_FindPatchLump(picname);
+
+		if (! lump ||
+			! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
+		{
+			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
+		}
+	}
+
+	// store the new texture
+	char namebuf[16];
+	memcpy(namebuf, raw->name, 8);
+	namebuf[8] = 0;
+
+	W_AddTexture(namebuf, img, is_medusa);
 }
 
 
 static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
                              bool skip_first)
 {
-	// FIXME : do this better [ though hard to autodetect based on lump contents ]
-	if (strcmp(Game_name, "strife1") == 0)
-	{
-		LoadTextures_Strife(lump, pnames, pname_size, skip_first);
-		return;
-	}
+	// TODO : verify size word at front of PNAMES ??
 
 	// skip size word at front of PNAMES
 	pnames += 4;
@@ -195,10 +268,8 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 	// load TEXTUREx data into memory for easier processing
 	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
 
-	// shut the fuck up, compiler
-	(void) tex_length;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data;
@@ -207,85 +278,21 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 	// FIXME validate num_tex
 
+	bool is_strife = CheckTexturesAreStrife(tex_data, tex_length, num_tex, skip_first);
+
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
-    //       usable (in the DOOM engine the #0 texture is not drawn).
+    //       usable (in the DOOM engine the #0 texture means "do not draw").
 
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
-		int offset = LE_S32(tex_data_s32[1+n]);
+		int offset = LE_S32(tex_data_s32[1 + n]);
 
 		// FIXME: validate offset
 
-		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
-
-		// create the new image
-		int width  = LE_U16(raw->width);
-		int height = LE_U16(raw->height);
-
-		DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
-
-		if (width == 0 || height == 0)
-			FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
-
-		Img_c *img = new Img_c(width, height, false);
-		bool is_medusa = false;
-
-		// apply all the patches
-		int num_patches = LE_S16(raw->patch_count);
-		if (! num_patches)
-			FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
-
-		const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
-
-		// andrewj: this is not strictly correct, the Medusa Effect is only
-		//          triggered when multiple patches occupy a single column of
-		//          the texture.  But checking for that is a major pain since
-		//          we don't know the width of each patch here....
-		if (num_patches >= 2)
-			is_medusa = true;
-
-		for (int j = 0 ; j < num_patches ; j++, patdef++)
-		{
-			int xofs = LE_S16(patdef->x_origin);
-			int yofs = LE_S16(patdef->y_origin);
-			int pname_idx = LE_U16(patdef->pname);
-
-			// AYM 1998-08-08: Yes, that's weird but that's what Doom
-			// does. Without these two lines, the few textures that have
-			// patches with negative y-offsets (BIGDOOR7, SKY1, TEKWALL1,
-			// TEKWALL5 and a few others) would not look in the texture
-			// viewer quite like in Doom. This should be mentioned in
-			// the UDS, by the way.
-			if (yofs < 0)
-				yofs = 0;
-
-			if (pname_idx >= pname_size)
-			{
-				LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
-				continue;
-			}
-
-			char picname[16];
-			memcpy(picname, pnames + 8*pname_idx, 8);
-			picname[8] = 0;
-
-//DebugPrintf("-- %d patch [%s]\n", j, picname);
-			Lump_c *lump = W_FindPatchLump(picname);
-
-			if (! lump ||
-				! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
-			{
-				LogPrintf("texture '%.8s': patch '%.8s' not found.\n",
-						raw->name, picname);
-			}
-		}
-
-		// store the new texture
-		char namebuf[16];
-		memcpy(namebuf, raw->name, 8);
-		namebuf[8] = 0;
-
-		W_AddTexture(namebuf, img, is_medusa);
+		if (is_strife)
+			LoadTextureEntry_Strife(tex_data, tex_length, offset, pnames, pname_size, skip_first);
+		else
+			LoadTextureEntry_DOOM(tex_data, tex_length, offset, pnames, pname_size, skip_first);
 	}
 
 	W_FreeLumpData(&tex_data);
@@ -458,6 +465,8 @@ void W_LoadTextures()
 
 			if (texture2)
 				LoadTexturesLump(texture2, pname_data, pname_size, false);
+
+			W_FreeLumpData(&pname_data);
 		}
 
 		if (game_info.tx_start)
