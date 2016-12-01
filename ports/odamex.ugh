@@ -25,6 +25,11 @@ endif
 
 #---- ODAMEX THINGS ----------
 
+thing 4001 p -  16 PLAYA1 "Player 5 start"
+thing 4002 p -  16 PLAYA1 "Player 6 start"
+thing 4003 p -  16 PLAYA1 "Player 7 start"
+thing 4004 p -  16 PLAYA1 "Player 8 start"
+
 thing 5080 p -  16 PLAYF1  "ODAMEX: Blue start"
 thing 5081 p -  16 PLAYF1  "ODAMEX: Red start"
 

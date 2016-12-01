@@ -40,6 +40,12 @@ feature lax_sprites  1
 
 #---- BOOM THINGS -------------
 
+# Note: Boom and MBF just ignore the extra player starts
+thing 4001 p - 16 NULL "Player 5 start"
+thing 4002 p - 16 NULL "Player 6 start"
+thing 4003 p - 16 NULL "Player 7 start"
+thing 4004 p - 16 NULL "Player 8 start"
+
 thing 5001 - nv  20 NULL  "BOOM: Point pusher"
 thing 5002 - nv  20 NULL  "BOOM: Point puller"
 
