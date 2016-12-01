@@ -930,23 +930,23 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
-		{ nod_factor = new Fl_Choice(175, 180, 180, 30, "Seg split logic: ");
-		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
-		}
 
-		{ Fl_Box* o = new Fl_Box(25, 235, 250, 30, "Advanced BSP Settings");
+		{ Fl_Box* o = new Fl_Box(25, 205, 250, 30, "Advanced BSP Settings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_gl_nodes = new Fl_Check_Button(50, 275, 150, 30, " Build GL-Nodes");
+		{ nod_gl_nodes = new Fl_Check_Button(50, 245, 150, 30, " Build GL-Nodes");
 		}
-		{ nod_force_v5 = new Fl_Check_Button(50, 305, 250, 30, " Force V5 of GL-Nodes");
+		{ nod_force_v5 = new Fl_Check_Button(50, 275, 250, 30, " Force V5 of GL-Nodes");
 		}
-		{ nod_force_zdoom = new Fl_Check_Button(50, 335, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_force_zdoom = new Fl_Check_Button(50, 305, 250, 30, " Force ZDoom format of normal nodes");
 		}
 		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
-		{ nod_compress = new Fl_Check_Button(50, 365, 250, 30, " Force zlib compression");
+		{ nod_compress = new Fl_Check_Button(50, 335, 250, 30, " Force zlib compression");
 		  nod_compress->hide();
+		}
+		{ nod_factor = new Fl_Choice(165, 345, 180, 30, "Seg split logic: ");
+		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
 		}
 		o->end();
 	  }
