@@ -12,6 +12,8 @@ ______________________________________________________________________
 General
 -------
 
++  for "type" in Line/Sector/Thing panels, update the desc as we type
+
 +  Preferences:
    -  sector_render_default
    -   thing_render_default
@@ -114,7 +116,6 @@ IDEA: MMB on sidedef/sector tex : open RECENT browser
 IDEA: a toolbar
 
 WISH: support Windows 95/98/ME
-
       [running on Windows 98SE requires KernelEx]
 
 WISH: can import DWD (DoomEd) format maps
@@ -149,8 +150,6 @@ WISH: can import UDMF format maps
 
 -  make sure Load/Export wad filename not already in master_dir
 
--  PRINT key to make a screenshot of map or 3D view
-
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures
 
@@ -163,6 +162,8 @@ IDEA: when building REJECT, support a simple distance check
       [ i.e. if distance between two sectors >= N, mark as cannot see ]
 
 WISH: a scripting language
+
+WISH: PRINT key makes a screenshot of 2D or 3D view
 
 WISH: support ZDoom PK3 for textures (etc)
 
@@ -195,8 +196,6 @@ WISH: edit-key dialog has a button which opens a web browser to
 Editing
 -------
 
--  for "type" in Line/Sector/Thing panels, update the desc as we type
-
 +  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
 
@@ -216,6 +215,7 @@ Editing
 
 -  assume texture names beginning with '#' are special
    (The texture checker ignores them -- what else is needed ??)
+   (perhaps have a special purple ? for the UI_PIC)
 
 -  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
 
@@ -223,9 +223,11 @@ WISH : autocomplete flat/texture names in Linedef and Sector panels
 
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
-Q/  disconnect sectors : include islands (perhaps with 'D')
+Q/ disconnect sectors : include islands (perhaps with 'D')
 
-IDEA:  in Find/Replace panel, can filter things by CATEGORY
+IDEA: a mode to show skill levels via color of drawn things
+
+IDEA: in Find/Replace panel, can filter things by CATEGORY
 
 IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
@@ -236,20 +238,13 @@ IDEA: for quantizing a group of objects, try about 9 delta
 3D View
 -------
 
-+  draw the sky (optionally)
-
--  option to reverse mouse movement
-
--  closed sectors have a see-through gap (gets bigger further away)
++  CTRL-C and CTRL-V for copy/paste textures
 
 +  being able to select stuff to modify:
    - things
    - floors
    - ceilings
    - sidedef textures
-
--  moving up/down with RMB should not disable gravity when change
-   is small
 
 -  able to drag stuff around
    - raise/lower floors
@@ -266,11 +261,17 @@ IDEA: for quantizing a group of objects, try about 9 delta
    -  create a DrawWall for their floor/ceil and sides
    -  distance is slightly closer than normal wall segment
 
+-  bug: closed sectors have a see-through gap (gets bigger further away)
+
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
-WISH: bound flats by 1S lines facing away from the camera
+Q/ an option to reverse mouse movement, is it needed?
+
+WISH: draw the sky texture
 
 WISH: rotated sprites
+
+WISH: bound flats by 1S lines facing away from the camera
 
 IDEA: 3D_NAV_CircleStrafe command
 
