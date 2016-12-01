@@ -554,14 +554,14 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Things",       0, FCAL browser_do_things },
-		{ "Te&xtures",     0, FCAL browser_do_textures },
+		{ "&Textures",     0, FCAL browser_do_textures },
 		{ "&Flats",        0, FCAL browser_do_flats },
-		{ "&Line Types",   0, FCAL browser_do_lines },
-		{ "&Sector Types", 0, FCAL browser_do_sectors },
+		{ "Thin&gs",       0, FCAL browser_do_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Line Types",   0, FCAL browser_do_lines },
+		{ "&Sector Types", 0, FCAL browser_do_sectors },
 		{ "&Generalized Types", 0, FCAL browser_do_gen_types },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },

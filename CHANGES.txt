@@ -11,7 +11,7 @@ General:
 
 +  command to skew (shear) objects with the mouse, on 'K' key
 
--  new "File/Copy Map" command
+-  a new "File/Copy Map" command
 -  a better dialog for "File / Open Map" command
 -  a better dialog for "JumpToObject" command
 
@@ -28,7 +28,7 @@ General:
 -  better default directory for file chooser dialogs
 
 
-Game and Ports:
+Games and Ports:
 
 +  properly detect which ports can be used with each game
 
@@ -56,6 +56,7 @@ Key System:
 -  changed scaling and rotation to the 'r' key (was MOUSE2)
 -  changed map panning to use MMB (MOUSE2) or the 'a' key
 -  changed grid toggle to the 'g' key
+-  changed browse-textures back to 'T' key
 
 
 Bugs Fixed:
