@@ -1489,10 +1489,19 @@ static inline u16_t VertexIndex16Bit(const vertex_t *v)
 }
 
 
-static inline u32_t VertexIndex32BitV5(const vertex_t *v)
+static inline u32_t VertexIndex_V5(const vertex_t *v)
 {
 	if (v->index & IS_GL_VERTEX)
 		return (u32_t) ((v->index & ~IS_GL_VERTEX) | 0x80000000U);
+
+	return (u32_t) v->index;
+}
+
+
+static inline u32_t VertexIndex_XNOD(const vertex_t *v)
+{
+	if (v->index & IS_GL_VERTEX)
+		return (u32_t) (num_normal_vert + (v->index & ~IS_GL_VERTEX));
 
 	return (u32_t) v->index;
 }
@@ -1506,9 +1515,6 @@ void PutSegs(void)
 	int size = num_segs * (int)sizeof(raw_seg_t);
 
 	Lump_c *lump = CreateLevelLump("SEGS", size);
-
-	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1560,9 +1566,6 @@ void PutGLSegs(void)
 	int size = num_segs * (int)sizeof(raw_gl_seg_t);
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
-
-	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1618,9 +1621,6 @@ void PutGLSegs_V5()
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
 
-	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
-
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_v5_seg_t raw;
@@ -1631,8 +1631,8 @@ void PutGLSegs_V5()
 		if (seg->degenerate)
 			continue;
 
-		raw.start = LE_U32(VertexIndex32BitV5(seg->start));
-		raw.end   = LE_U32(VertexIndex32BitV5(seg->end));
+		raw.start = LE_U32(VertexIndex_V5(seg->start));
+		raw.end   = LE_U32(VertexIndex_V5(seg->end));
 
 		raw.side  = LE_U16(seg->side);
 
@@ -2010,8 +2010,8 @@ void PutZSegs(void)
 					count, seg->index);
 
 		{
-			u32_t v1 = LE_U32(VertexIndex32BitV5(seg->start));
-			u32_t v2 = LE_U32(VertexIndex32BitV5(seg->end));
+			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
+			u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
 
 			u16_t line = LE_U16(seg->linedef->index);
 			u8_t  side = seg->side;
@@ -2335,7 +2335,7 @@ static void AddMissingLump(const char *name, const char *after)
 
 void SaveLevel(node_t *root_node)
 {
-	// root_node may be NULL
+	// Note: root_node may be NULL
 
 	edit_wad->BeginWrite();
 
@@ -2357,6 +2357,9 @@ void SaveLevel(node_t *root_node)
 	// check for overflows...
 
 	CheckLimits();
+
+	// sort segs into ascending index
+	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
 
 	/* --- GL Nodes --- */

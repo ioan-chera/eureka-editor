@@ -2160,11 +2160,11 @@ static void NormaliseSubsector(subsec_t *sub)
 
 void NormaliseBspTree(node_t *root)
 {
+	// unlinks all minisegs from each subsector
+
 	int i;
 
 	(void) root;
-
-	// unlink all minisegs from each subsector:
 
 	num_complete_seg = 0;
 
