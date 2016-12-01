@@ -100,7 +100,9 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 	{
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
-		// FIXME ignore invalid offset
+		// ignore invalid offsets here  [ caught later ]
+		if (offset < 4 * num_tex || offset >= tex_length)
+			continue;
 
 		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
@@ -127,7 +129,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
+		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
 	Img_c *img = new Img_c(width, height, false);
 	bool is_medusa = false;
@@ -136,7 +138,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
+		FatalError("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
 
@@ -192,7 +194,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		FatalError("W_InitTextures: Texture '%.8s' has zero size\n", raw->name);
+		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
 	Img_c *img = new Img_c(width, height, false);
 	bool is_medusa = false;
@@ -201,7 +203,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		FatalError("W_InitTextures: Texture '%.8s' has no patches\n", raw->name);
+		FatalError("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
 
@@ -276,7 +278,15 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 	int num_tex = LE_S32(tex_data_s32[0]);
 
-	// FIXME validate num_tex
+	// it seems having a count of zero is valid
+	if (num_tex == 0)
+	{
+		W_FreeLumpData(&tex_data);
+		return;
+	}
+
+	if (num_tex < 0 || num_tex > (1<<20))
+		FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
 
 	bool is_strife = CheckTexturesAreStrife(tex_data, tex_length, num_tex, skip_first);
 
@@ -287,7 +297,8 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 	{
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
-		// FIXME: validate offset
+		if (offset < 4 * num_tex || offset >= tex_length)
+			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
 			LoadTextureEntry_Strife(tex_data, tex_length, offset, pnames, pname_size, skip_first);
