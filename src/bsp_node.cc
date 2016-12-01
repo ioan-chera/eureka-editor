@@ -216,39 +216,39 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 //       and the partitioning seg, and takes advantage of some common
 //       situations like horizontal/vertical lines.
 //
-static inline void ComputeIntersection(seg_t *cur, seg_t *part,
+static inline void ComputeIntersection(seg_t *seg, seg_t *part,
 		double perp_c, double perp_d, double *x, double *y)
 {
 	double ds;
 
 	// horizontal partition against vertical seg
-	if (part->pdy == 0 && cur->pdx == 0)
+	if (part->pdy == 0 && seg->pdx == 0)
 	{
-		*x = cur->psx;
+		*x = seg->psx;
 		*y = part->psy;
 		return;
 	}
 
 	// vertical partition against horizontal seg
-	if (part->pdx == 0 && cur->pdy == 0)
+	if (part->pdx == 0 && seg->pdy == 0)
 	{
 		*x = part->psx;
-		*y = cur->psy;
+		*y = seg->psy;
 		return;
 	}
 
 	// 0 = start, 1 = end
 	ds = perp_c / (perp_c - perp_d);
 
-	if (cur->pdx == 0)
-		*x = cur->psx;
+	if (seg->pdx == 0)
+		*x = seg->psx;
 	else
-		*x = cur->psx + (cur->pdx * ds);
+		*x = seg->psx + (seg->pdx * ds);
 
-	if (cur->pdy == 0)
-		*y = cur->psy;
+	if (seg->pdy == 0)
+		*y = seg->psy;
 	else
-		*y = cur->psy + (cur->pdy * ds);
+		*y = seg->psy + (seg->pdy * ds);
 }
 
 
@@ -785,7 +785,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-void DivideOneSeg(seg_t *cur, seg_t *part,
+void DivideOneSeg(seg_t *seg, seg_t *part,
 		superblock_t *left_list, superblock_t *right_list,
 		intersection_t ** cut_list)
 {
@@ -794,30 +794,30 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
 	double x, y;
 
 	/* get state of lines' relation to each other */
-	double a = UtilPerpDist(part, cur->psx, cur->psy);
-	double b = UtilPerpDist(part, cur->pex, cur->pey);
+	double a = UtilPerpDist(part, seg->psx, seg->psy);
+	double b = UtilPerpDist(part, seg->pex, seg->pey);
 
-	bool self_ref = cur->linedef ? cur->linedef->self_ref : false;
+	bool self_ref = seg->linedef ? seg->linedef->self_ref : false;
 
-	if (cur->source_line == part->source_line)
+	if (seg->source_line == part->source_line)
 		a = b = 0;
 
 	/* check for being on the same line */
 	if (fabs(a) <= DIST_EPSILON && fabs(b) <= DIST_EPSILON)
 	{
-		AddIntersection(cut_list, cur->start, part, self_ref);
-		AddIntersection(cut_list, cur->end,   part, self_ref);
+		AddIntersection(cut_list, seg->start, part, self_ref);
+		AddIntersection(cut_list, seg->end,   part, self_ref);
 
 		// this seg runs along the same line as the partition.  check
 		// whether it goes in the same direction or the opposite.
 
-		if (cur->pdx*part->pdx + cur->pdy*part->pdy < 0)
+		if (seg->pdx*part->pdx + seg->pdy*part->pdy < 0)
 		{
-			AddSegToSuper(left_list, cur);
+			AddSegToSuper(left_list, seg);
 		}
 		else
 		{
-			AddSegToSuper(right_list, cur);
+			AddSegToSuper(right_list, seg);
 		}
 
 		return;
@@ -827,11 +827,11 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
 	if (a > -DIST_EPSILON && b > -DIST_EPSILON)
 	{
 		if (a < DIST_EPSILON)
-			AddIntersection(cut_list, cur->start, part, self_ref);
+			AddIntersection(cut_list, seg->start, part, self_ref);
 		else if (b < DIST_EPSILON)
-			AddIntersection(cut_list, cur->end, part, self_ref);
+			AddIntersection(cut_list, seg->end, part, self_ref);
 
-		AddSegToSuper(right_list, cur);
+		AddSegToSuper(right_list, seg);
 		return;
 	}
 
@@ -839,31 +839,31 @@ void DivideOneSeg(seg_t *cur, seg_t *part,
 	if (a < DIST_EPSILON && b < DIST_EPSILON)
 	{
 		if (a > -DIST_EPSILON)
-			AddIntersection(cut_list, cur->start, part, self_ref);
+			AddIntersection(cut_list, seg->start, part, self_ref);
 		else if (b > -DIST_EPSILON)
-			AddIntersection(cut_list, cur->end, part, self_ref);
+			AddIntersection(cut_list, seg->end, part, self_ref);
 
-		AddSegToSuper(left_list, cur);
+		AddSegToSuper(left_list, seg);
 		return;
 	}
 
 	// when we reach here, we have a and b non-zero and opposite sign,
 	// hence this seg will be split by the partition line.
 
-	ComputeIntersection(cur, part, a, b, &x, &y);
+	ComputeIntersection(seg, part, a, b, &x, &y);
 
-	new_seg = SplitSeg(cur, x, y);
+	new_seg = SplitSeg(seg, x, y);
 
-	AddIntersection(cut_list, cur->end, part, self_ref);
+	AddIntersection(cut_list, seg->end, part, self_ref);
 
 	if (a < 0)
 	{
-		AddSegToSuper(left_list,  cur);
+		AddSegToSuper(left_list,  seg);
 		AddSegToSuper(right_list, new_seg);
 	}
 	else
 	{
-		AddSegToSuper(right_list, cur);
+		AddSegToSuper(right_list, seg);
 		AddSegToSuper(left_list,  new_seg);
 	}
 }
@@ -877,12 +877,12 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 
 	while (seg_list->segs)
 	{
-		seg_t *cur = seg_list->segs;
-		seg_list->segs = cur->next;
+		seg_t *seg = seg_list->segs;
+		seg_list->segs = seg->next;
 
-		cur->block = NULL;
+		seg->block = NULL;
 
-		DivideOneSeg(cur, part, lefts, rights, cut_list);
+		DivideOneSeg(seg, part, lefts, rights, cut_list);
 	}
 
 	// recursively handle sub-blocks
@@ -908,12 +908,12 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 
 static void FindLimitWorker(superblock_t *block, bbox_t *bbox)
 {
-	for (seg_t *cur=block->segs ; cur ; cur=cur->next)
+	for (seg_t *seg=block->segs ; seg ; seg=seg->next)
 	{
-		double x1 = cur->start->x;
-		double y1 = cur->start->y;
-		double x2 = cur->end->x;
-		double y2 = cur->end->y;
+		double x1 = seg->start->x;
+		double y1 = seg->start->y;
+		double x2 = seg->end->x;
+		double y2 = seg->end->y;
 
 		int lx = (int) floor(MIN(x1, x2));
 		int ly = (int) floor(MIN(y1, y2));
@@ -1309,12 +1309,12 @@ void FreeSuper(superblock_t *block)
 #if 0 // DEBUGGING CODE
 static void TestSuperWorker(superblock_t *block, int *real, int *mini)
 {
-	seg_t *cur;
+	seg_t *seg;
 	int num;
 
-	for (cur=block->segs ; cur ; cur=cur->next)
+	for (seg=block->segs ; seg ; seg=seg->next)
 	{
-		if (cur->linedef)
+		if (seg->linedef)
 			(*real) += 1;
 		else
 			(*mini) += 1;
@@ -1582,7 +1582,7 @@ superblock_t *CreateSegs(void)
 
 static void DetermineMiddle(subsec_t *sub)
 {
-	seg_t *cur;
+	seg_t *seg;
 
 	double mid_x=0, mid_y=0;
 	int total=0;
@@ -1591,10 +1591,10 @@ static void DetermineMiddle(subsec_t *sub)
 		return;
 
 	// compute middle coordinates
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		mid_x += cur->start->x + cur->end->x;
-		mid_y += cur->start->y + cur->end->y;
+		mid_x += seg->start->x + seg->end->x;
+		mid_y += seg->start->y + seg->end->y;
 
 		total += 2;
 	}
@@ -1610,7 +1610,7 @@ static void DetermineMiddle(subsec_t *sub)
 //
 static void ClockwiseOrder(subsec_t *sub)
 {
-	seg_t *cur;
+	seg_t *seg;
 	seg_t ** array;
 	seg_t *seg_buffer[32];
 
@@ -1625,7 +1625,7 @@ static void ClockwiseOrder(subsec_t *sub)
 # endif
 
 	// count segs and create an array to manipulate them
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 		total++;
 
 	// use local array if small enough
@@ -1634,8 +1634,8 @@ static void ClockwiseOrder(subsec_t *sub)
 	else
 		array = (seg_t **) UtilCalloc(total * sizeof(seg_t *));
 
-	for (cur=sub->seg_list, i=0 ; cur ; cur=cur->next, i++)
-		array[i] = cur;
+	for (seg=sub->seg_list, i=0 ; seg ; seg=seg->next, i++)
+		array[i] = seg;
 
 	if (i != total)
 		BugError("ClockwiseOrder miscounted.");
@@ -1710,13 +1710,13 @@ static void ClockwiseOrder(subsec_t *sub)
 # if DEBUG_SORTER
 	DebugPrintf("Sorted SEGS around (%1.1f,%1.1f)\n", sub->mid_x, sub->mid_y);
 
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		angle_g angle = UtilComputeAngle(cur->start->x - sub->mid_x,
-				cur->start->y - sub->mid_y);
+		angle_g angle = UtilComputeAngle(seg->start->x - sub->mid_x,
+				seg->start->y - sub->mid_y);
 
 		DebugPrintf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				cur, angle, cur->start->x, cur->start->y, cur->end->x, cur->end->y);
+				seg, angle, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
 # endif
 }
@@ -1724,14 +1724,14 @@ static void ClockwiseOrder(subsec_t *sub)
 
 static void SanityCheckClosed(subsec_t *sub)
 {
-	seg_t *cur, *next;
+	seg_t *seg, *next;
 	int total=0, gaps=0;
 
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		next = cur->next ? cur->next : sub->seg_list;
+		next = seg->next ? seg->next : sub->seg_list;
 
-		if (cur->end->x != next->start->x || cur->end->y != next->start->y)
+		if (seg->end->x != next->start->x || seg->end->y != next->start->y)
 			gaps++;
 
 		total++;
@@ -1744,10 +1744,10 @@ static void SanityCheckClosed(subsec_t *sub)
 				sub->mid_x, sub->mid_y, gaps, total);
 
 #   if DEBUG_SUBSEC
-		for (cur=sub->seg_list ; cur ; cur=cur->next)
+		for (seg=sub->seg_list ; seg ; seg=seg->next)
 		{
-			DebugPrintf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", cur,
-					cur->start->x, cur->start->y, cur->end->x, cur->end->y);
+			DebugPrintf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
+					seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 		}
 #   endif
 	}
@@ -1756,7 +1756,7 @@ static void SanityCheckClosed(subsec_t *sub)
 
 static void SanityCheckSameSector(subsec_t *sub)
 {
-	seg_t *cur;
+	seg_t *seg;
 	seg_t *compare;
 
 	// find a suitable seg for comparison
@@ -1774,45 +1774,45 @@ static void SanityCheckSameSector(subsec_t *sub)
 	if (! compare)
 		return;
 
-	for (cur=compare->next ; cur ; cur=cur->next)
+	for (seg=compare->next ; seg ; seg=seg->next)
 	{
-		if (! cur->sector)
+		if (! seg->sector)
 			continue;
 
-		if (cur->sector == compare->sector)
+		if (seg->sector == compare->sector)
 			continue;
 
 		// All subsectors must come from same sector unless it's marked
 		// "special" with sector tag >= 900. Original idea, Lee Killough
-		if (cur->sector->coalesce)
+		if (seg->sector->coalesce)
 			continue;
 
 		// prevent excessive number of warnings
-		if (compare->sector->warned_facing == cur->sector->index)
+		if (compare->sector->warned_facing == seg->sector->index)
 			continue;
 
-		compare->sector->warned_facing = cur->sector->index;
+		compare->sector->warned_facing = seg->sector->index;
 
-		if (cur->linedef)
+		if (seg->linedef)
 			MinorWarning("Sector #%d has sidedef facing #%d (line #%d) "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
-					cur->sector->index, cur->linedef->index,
+					seg->sector->index, seg->linedef->index,
 					sub->mid_x, sub->mid_y);
 		else
 			MinorWarning("Sector #%d has sidedef facing #%d "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
-					cur->sector->index, sub->mid_x, sub->mid_y);
+					seg->sector->index, sub->mid_x, sub->mid_y);
 	}
 }
 
 
 static void SanityCheckHasRealSeg(subsec_t *sub)
 {
-	seg_t *cur;
+	seg_t *seg;
 
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		if (cur->linedef)
+		if (seg->linedef)
 			return;
 	}
 
@@ -1823,7 +1823,7 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 
 static void RenumberSubsecSegs(subsec_t *sub)
 {
-	seg_t *cur;
+	seg_t *seg;
 
 # if DEBUG_SUBSEC
 	DebugPrintf("Subsec: Renumbering %d\n", sub->index);
@@ -1831,16 +1831,16 @@ static void RenumberSubsecSegs(subsec_t *sub)
 
 	sub->seg_count = 0;
 
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		cur->index = num_complete_seg;
+		seg->index = num_complete_seg;
 		num_complete_seg++;
 
 		sub->seg_count++;
 
 #   if DEBUG_SUBSEC
 		DebugPrintf("Subsec:   %d: Seg %p  Index %d\n", sub->seg_count,
-				cur, cur->index);
+				seg, seg->index);
 #   endif
 	}
 }
@@ -1853,14 +1853,14 @@ static void CreateSubsecWorker(subsec_t *sub, superblock_t *block)
 	while (block->segs)
 	{
 		// unlink first seg from block
-		seg_t *cur = block->segs;
-		block->segs = cur->next;
+		seg_t *seg = block->segs;
+		block->segs = seg->next;
 
 		// link it into head of the subsector's list
-		cur->next = sub->seg_list;
-		cur->block = NULL;
+		seg->next = sub->seg_list;
+		seg->block = NULL;
 
-		sub->seg_list = cur;
+		sub->seg_list = seg;
 	}
 
 	// recursively handle sub-blocks
@@ -1928,14 +1928,14 @@ int ComputeBspHeight(node_t *node)
 
 static void DebugShowSegs(superblock_t *seg_list)
 {
-	seg_t *cur;
+	seg_t *seg;
 	int num;
 
-	for (cur=seg_list->segs ; cur ; cur=cur->next)
+	for (seg=seg_list->segs ; seg ; seg=seg->next)
 	{
 		DebugPrintf("Build:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				cur->linedef ? "" : "MINI", cur, cur->sector->index,
-				cur->start->x, cur->start->y, cur->end->x, cur->end->y);
+				seg->linedef ? "" : "MINI", seg, seg->sector->index,
+				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
 
 	for (num=0 ; num < 2 ; num++)
@@ -2121,33 +2121,33 @@ static void NormaliseSubsector(subsec_t *sub)
 	while (sub->seg_list)
 	{
 		// remove head
-		seg_t *cur = sub->seg_list;
-		sub->seg_list = cur->next;
+		seg_t *seg = sub->seg_list;
+		sub->seg_list = seg->next;
 
 		// only add non-minisegs to new list
-		if (cur->linedef)
+		if (seg->linedef)
 		{
-			cur->next = NULL;
+			seg->next = NULL;
 
 			if (new_tail)
-				new_tail->next = cur;
+				new_tail->next = seg;
 			else
-				new_head = cur;
+				new_head = seg;
 
-			new_tail = cur;
+			new_tail = seg;
 
 			// this updated later
-			cur->index = -1;
+			seg->index = -1;
 		}
 		else
 		{
 #     if DEBUG_SUBSEC
-			DebugPrintf("Subsec: Removing miniseg %p\n", cur);
+			DebugPrintf("Subsec: Removing miniseg %p\n", seg);
 #     endif
 
 			// set index to a really high value, so that SortSegs() will
 			// move all the minisegs to the top of the seg array.
-			cur->index = 1<<24;
+			seg->index = 1<<24;
 		}
 	}
 
@@ -2183,7 +2183,7 @@ static void RoundOffSubsector(subsec_t *sub)
 	seg_t *new_head = NULL;
 	seg_t *new_tail = NULL;
 
-	seg_t *cur;
+	seg_t *seg;
 	seg_t *last_real_degen = NULL;
 
 	int real_total  = 0;
@@ -2197,29 +2197,29 @@ static void RoundOffSubsector(subsec_t *sub)
 # endif
 
 	// do an initial pass, just counting the degenerates
-	for (cur=sub->seg_list ; cur ; cur=cur->next)
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
 		// handle the duplex vertices
-		if (cur->start->normal_dup)
-			cur->start = cur->start->normal_dup;
+		if (seg->start->normal_dup)
+			seg->start = seg->start->normal_dup;
 
-		if (cur->end->normal_dup)
-			cur->end = cur->end->normal_dup;
+		if (seg->end->normal_dup)
+			seg->end = seg->end->normal_dup;
 
 		// is the seg degenerate ?
-		if (I_ROUND(cur->start->x) == I_ROUND(cur->end->x) &&
-			I_ROUND(cur->start->y) == I_ROUND(cur->end->y))
+		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
+			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
 		{
-			cur->degenerate = 1;
+			seg->degenerate = 1;
 
-			if (cur->linedef)
-				last_real_degen = cur;
+			if (seg->linedef)
+				last_real_degen = seg;
 
 			degen_total++;
 			continue;
 		}
 
-		if (cur->linedef)
+		if (seg->linedef)
 			real_total++;
 	}
 
@@ -2260,32 +2260,32 @@ static void RoundOffSubsector(subsec_t *sub)
 	while (sub->seg_list)
 	{
 		// remove head
-		cur = sub->seg_list;
-		sub->seg_list = cur->next;
+		seg = sub->seg_list;
+		sub->seg_list = seg->next;
 
-		if (! cur->degenerate)
+		if (! seg->degenerate)
 		{
-			cur->next = NULL;
+			seg->next = NULL;
 
 			if (new_tail)
-				new_tail->next = cur;
+				new_tail->next = seg;
 			else
-				new_head = cur;
+				new_head = seg;
 
-			new_tail = cur;
+			new_tail = seg;
 
 			// this updated later
-			cur->index = -1;
+			seg->index = -1;
 		}
 		else
 		{
 #     if DEBUG_SUBSEC
-			DebugPrintf("Subsec: Removing degenerate %p\n", cur);
+			DebugPrintf("Subsec: Removing degenerate %p\n", seg);
 #     endif
 
 			// set index to a really high value, so that SortSegs() will
 			// move all the minisegs to the top of the seg array.
-			cur->index = 1<<24;
+			seg->index = 1<<24;
 		}
 	}
 
