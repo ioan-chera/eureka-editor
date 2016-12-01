@@ -1515,8 +1515,7 @@ superblock_t *CreateSegs(void)
 			if (UtilComputeDist(line->start->x - line->end->x,
 				line->start->y - line->end->y) >= 30000)
 			{
-				Warning("Linedef #%d is VERY long, it may cause problems\n",
-						line->index);
+				Warning("Linedef #%d is VERY long, it may cause problems\n", line->index);
 			}
 		}
 
@@ -1547,31 +1546,8 @@ superblock_t *CreateSegs(void)
 		{
 			if (line->two_sided)
 			{
-				Warning("Linedef #%d is 2s but has no left sidedef\n",
-						line->index);
+				Warning("Linedef #%d is 2s but has no left sidedef\n", line->index);
 				line->two_sided = 0;
-			}
-
-			// handle the 'One-Sided Window' trick
-			if (line->window_effect)
-			{
-				seg_t *left = NewSeg();
-
-				left->start   = line->end;
-				left->end     = line->start;
-				left->side    = 1;
-				left->linedef = right->linedef;
-				left->sector  = line->window_effect;
-
-				left->source_line = line;
-				left->index = -1;
-
-				RecomputeSeg(left);
-
-				AddSegToSuper(block, left);
-
-				left->partner = right;
-				right->partner = left;
 			}
 		}
 	}
@@ -1681,8 +1657,6 @@ static void ClockwiseOrder(subsec_t *sub)
 
 		if (! array[i]->linedef)
 			cur_score = 0;
-		else if (array[i]->linedef->window_effect)
-			cur_score = 1;
 		else if (array[i]->linedef->self_ref)
 			cur_score = 2;
 
@@ -2085,11 +2059,11 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 void ClockwiseBspTree(node_t *root)
 {
-	int i;
-
 	(void) root;
 
-	for (i=0 ; i < num_subsecs ; i++)
+	num_complete_seg = 0;
+
+	for (int i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
