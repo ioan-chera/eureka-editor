@@ -780,7 +780,7 @@ Img_c * W_GetSprite(int type)
 {
 	sprite_map_t::iterator P = sprites.find(type);
 
-	if (P != sprites.end ())
+	if (P != sprites.end())
 		return P->second;
 
 	// sprite not in the list yet.  Add it.
@@ -805,7 +805,7 @@ Img_c * W_GetSprite(int type)
 		}
 		else
 		{
-			result = new Img_c ();
+			result = new Img_c();
 
 			if (! LoadPicture(*result, lump, info->sprite, 0, 0))
 			{
@@ -817,28 +817,42 @@ Img_c * W_GetSprite(int type)
 
 	// player color remapping
 	// [ FIXME : put colors into game definition file ]
-	// [ TODO  : support types 4001..4004 ]
-	if (result && type >= 2 && type <= 4)
+	if (result && info->group == 'p')
 	{
-		Img_c *old_img = result;
+		Img_c *new_img = NULL;
 
 		switch (type)
 		{
+			case 1:
+				// no change
+				break;
+
 			case 2:
-				result = old_img->color_remap(0x70, 0x7f, 0x60, 0x6f);
+				new_img = result->color_remap(0x70, 0x7f, 0x60, 0x6f);
 				break;
 
 			case 3:
-				result = old_img->color_remap(0x70, 0x7f, 0x40, 0x4f);
+				new_img = result->color_remap(0x70, 0x7f, 0x40, 0x4f);
 				break;
 
 			case 4:
-			default:
-				result = old_img->color_remap(0x70, 0x7f, 0x20, 0x2f);
+				new_img = result->color_remap(0x70, 0x7f, 0x20, 0x2f);
+				break;
+
+			// blue for the extra coop starts
+			case 4001:
+			case 4002:
+			case 4003:
+			case 4004:
+				new_img = result->color_remap(0x70, 0x7f, 0xc4, 0xcf);
 				break;
 		}
 
-		delete old_img;
+		if (new_img)
+		{
+			std::swap(result, new_img);
+			delete new_img;
+		}
 	}
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
