@@ -7,13 +7,21 @@ CHANGES IN Eureka 1.XX
 
 General:
 
++  improved BSP code, can build nodes for a map on each save,
+   building nodes no longer resets the undo/redo history,
+   more preference settings, ability to disable GL nodes,
+   and support for ZDoom uncompressed node format (XNOD)
+
++  line drawing is now done with RMB (MOUSE3) button
+
 +  improved drag behavior, never modify the current selection
 
-+  command to skew (shear) objects with the mouse, on 'K' key
++  sprite rendering on the 2D canvas
 
 -  a new "File/Copy Map" command
 -  a better dialog for "File / Open Map" command
 -  a better dialog for "JumpToObject" command
+-  a command to skew (shear) objects with the mouse, on 'K' key
 
 -  LineDef panel : entering a negative "Length" moves the start vertex
    instead of the end vertex
@@ -35,6 +43,7 @@ Games and Ports:
 +  support TX_START/TX_END textures, including PNG and TGA format
 
 +  support for STRIFE (based on the Slade3 config)
+
 +  support for HARMONY
 
 -  added "MBF" as a separate port
@@ -46,9 +55,8 @@ Key System:
 
 +  mouse buttons (and wheel) use the key binding system
 
-+  line drawing is now done with RMB (MOUSE3) button
++  smooth scrolling/navigation in both 2D and 3D views
 
--  smooth scrolling/navigation in both 2D and 3D views
 -  improved key binding dialog in the Preferences
 -  edit menu "Move/Scale/Rotate Objects" commands are bindable
 -  allow keys hard-coded in the menus to be bound to other commands
@@ -61,10 +69,10 @@ Key System:
 
 Bugs Fixed:
 
-+  fixed how deleting a loop of linedefs inside another sector
-   could sometimes delete that outer sector too
-
 +  fixed problem of unable to split lines close to an end-point
+
+-  fixed how deleting a loop of linedefs inside another sector
+   could sometimes delete that outer sector too
 
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").

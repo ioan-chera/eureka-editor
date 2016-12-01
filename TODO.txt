@@ -55,7 +55,7 @@ Editing
 +  ENTER key pops up an "operation" menu, which provides all the
    commands that can be done via the keyboard (e.g. flip linedefs)
 
-   (could also be bound to right mouse button)
+   (also bound to right mouse button)
 
 +  the criss-crossing-lines detection is too sloppy
    [ e.g. see MAP24 of Ancient Aliens ]
@@ -91,8 +91,6 @@ General
 -------
 
 +  Large font mode, more readable on 1920x1080 monitors
-
-+  sprite rendering in the 2D canvas
 
 -  a key to copy properties TO defaults (e.g. 'y' for yank)
 
