@@ -1048,10 +1048,12 @@ void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
 
 		SYS_ASSERT(obj_num != edit.highlight.num);
 
-		MergeVertex(obj_num, edit.highlight.num,
-		            true /* v1_will_be_deleted */);
+		selection_c verts(OBJ_VERTICES);
 
-		BA_Delete(OBJ_VERTICES, obj_num);
+		verts.set(edit.highlight.num);	// keep the highlight
+		verts.set(obj_num);
+
+		Vertex_MergeList(&verts);
 
 		BA_End();
 		return;

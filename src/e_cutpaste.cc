@@ -1144,7 +1144,7 @@ void CMD_Delete(void)
 	bool keep_things = Exec_HasFlag("/keep_things");
 	bool keep_unused = Exec_HasFlag("/keep_unused");
 
-	// special case for a single vertex connected to two linedef,
+	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
 	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
 	{

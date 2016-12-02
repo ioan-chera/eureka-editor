@@ -26,6 +26,7 @@
 
 #include "main.h"
 
+#include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
@@ -52,26 +53,10 @@ int Vertex_FindExact(int x, int y)
 }
 
 
-// TODO: InsertPolygonVertices
-#if 0
-
-/*
-   insert the vertices of a new polygon
-*/
-void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
-{
-	for (int n = 0 ; n < sides ; n++)
-	{
-		DoInsertObject (OBJ_VERTICES, -1,
-				centerx + (int) ((double)radius * cos (2*M_PI * (double)n / (double)sides)),
-				centery + (int) ((double)radius * sin (2*M_PI * (double)n / (double)sides)));
-	}
-}
-#endif
-
-
-/* we merge ld1 into ld2 -- v is the common vertex
- */
+//
+// we merge ld1 into ld2, to prevent them overlapping.
+// the vertex 'v' is the common vertex (the "hinge").
+//
 static void MergeConnectedLines(int ld1, int ld2, int v)
 {
 	LineDef *L1 = LineDefs[ld1];
@@ -134,7 +119,7 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 }
 
 
-void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
+static void DoMergeVertex(int v1, int v2)
 {
 	/* merge v1 into v2 */
 
@@ -146,7 +131,7 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (! (L->start == v1 || L->end == v1))
+		if (! L->TouchesVertex(v1))
 			continue;
 
 		int v3 = (L->start == v1) ? L->end : L->start;
@@ -176,25 +161,19 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 		}
 	}
 
-	// update any linedefs which use V1 to use V2 instead
-	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
+	// update all linedefs which use V1 to use V2 instead, and
+	// delete any line that exists between the two vertices.
+
+	selection_c del_lines(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
-		// handle a line that exists between the two vertices
 		if ((L->start == v1 && L->end == v2) ||
 			(L->start == v2 && L->end == v1))
 		{
-			if (v1_will_be_deleted)
-			{
-				// we simply skip it, hence when V1 is deleted this line
-				// will automatically be deleted too (as it refers to V1).
-				// Clever huh?
-			}
-			else
-			{
-				BA_Delete(OBJ_LINEDEFS, n);
-			}
+			del_lines.set(n);
 			continue;
 		}
 
@@ -204,6 +183,8 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 		if (L->end == v1)
 			BA_ChangeLD(n, LineDef::F_END, v2);
 	}
+
+	DeleteObjects_WithUnused(&del_lines);
 }
 
 
@@ -330,7 +311,7 @@ void Vertex_MergeList(selection_c *list)
 
 	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
-		MergeVertex(*it, v, true /* v1_will_be_deleted */);
+		DoMergeVertex(*it, v);
 	}
 
 	DeleteObjects(list);
@@ -450,16 +431,16 @@ bool Vertex_TryFixDangler(int v_num)
 			std::swap(v_num, v_other);
 
 fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
-		BA_Begin();
 
-		MergeVertex(v_num, v_other, true /* v1_will_be_deleted */);
+		BA_Begin();
+		BA_Message("merged dangling vertex #%d\n", v_num);
 
 		selection_c list(OBJ_VERTICES);
+
+		list.set(v_other);	// first one is the one kept
 		list.set(v_num);
 
-		DeleteObjects(&list);
-
-		BA_Message("merged dangling vertex #%d\n", v_num);
+		Vertex_MergeList(&list);
 
 		BA_End();
 
