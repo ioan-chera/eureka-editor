@@ -118,6 +118,9 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		// geometry was broken / unclosed sector(s)
 	}
 
+	del_lines.set(ld1);
+
+
 	// fix orientation of remaining linedef if needed
 	if (L2->Left() && ! L2->Right())
 	{
@@ -129,7 +132,21 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		BA_ChangeSD(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
-	del_lines.set(ld1);
+	// fix flags of remaining linedef
+	int new_flags = L2->flags;
+
+	if (L2->TwoSided())
+	{
+		new_flags |=  MLF_TwoSided;
+		new_flags &= ~MLF_Blocking;
+	}
+	else
+	{
+		new_flags &= ~MLF_TwoSided;
+		new_flags |=  MLF_Blocking;
+	}
+
+	BA_ChangeLD(ld2, LineDef::F_FLAGS, new_flags);
 }
 
 
