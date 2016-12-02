@@ -204,85 +204,6 @@ static void DoMergeVertex(int v1, int v2)
 }
 
 
-static void CalcDisconnectCoord(const LineDef *L, int v_num, int *x, int *y)
-{
-	const Vertex * V = Vertices[v_num];
-
-	int dx = L->End()->x - L->Start()->x;
-	int dy = L->End()->y - L->Start()->y;
-
-	if (L->end == v_num)
-	{
-		dx = -dx;
-		dy = -dy;
-	}
-
-	if (abs(dx) < 4 && abs(dy) < 4)
-	{
-		dx = dx / 2;
-		dy = dy / 2;
-	}
-	else if (abs(dx) < 16 && abs(dy) < 16)
-	{
-		dx = dx / 4;
-		dy = dy / 4;
-	}
-	else if (abs(dx) >= abs(dy))
-	{
-		dy = dy * 8 / abs(dx);
-		dx = (dx < 0) ? -8 : 8;
-	}
-	else
-	{
-		dx = dx * 8 / abs(dy);
-		dy = (dy < 0) ? -8 : 8;
-	}
-
-	*x = V->x + dx;
-	*y = V->y + dy;
-}
-
-
-static void DoDisconnectVertex(int v_num, int num_lines)
-{
-	int which = 0;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = LineDefs[n];
-
-		if (L->start == v_num || L->end == v_num)
-		{
-			int new_x, new_y;
-
-			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
-
-			// the _LAST_ linedef keeps the current vertex, the rest
-			// need a new one.
-			if (which != num_lines-1)
-			{
-				int new_v = BA_New(OBJ_VERTICES);
-
-				Vertices[new_v]->x = new_x;
-				Vertices[new_v]->y = new_y;
-
-				if (L->start == v_num)
-					BA_ChangeLD(n, LineDef::F_START, new_v);
-				else
-					BA_ChangeLD(n, LineDef::F_END, new_v);
-			}
-			else
-			{
-				BA_ChangeVT(v_num, Vertex::F_X, new_x);
-				BA_ChangeVT(v_num, Vertex::F_Y, new_y);
-			}
-
-			which++;
-		}
-	}
-}
-
-
 void Vertex_MergeList(selection_c *list)
 {
 	if (list->count_obj() < 2)
@@ -341,51 +262,6 @@ void CMD_VT_Merge()
 	BA_End();
 
 	Editor_ClearAction();
-}
-
-
-void CMD_VT_Disconnect(void)
-{
-	if (edit.Selected->empty())
-	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("Nothing to disconnect");
-			return;
-		}
-
-		edit.Selected->set(edit.highlight.num);
-	}
-
-	bool seen_one = false;
-
-	BA_Begin();
-
-	BA_MessageForSel("disconnected", edit.Selected);
-
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
-	{
-		int v_num = *it;
-
-		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = Vertex_HowManyLineDefs(*it);
-
-		if (num_lines < 2)
-			continue;
-
-		DoDisconnectVertex(v_num, num_lines);
-
-		seen_one = true;
-	}
-
-	if (! seen_one)
-		Beep("Nothing was disconnected");
-
-	BA_End();
-
-	Selection_Clear(true);
 }
 
 
@@ -488,6 +364,130 @@ fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_o
 
 	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;
+}
+
+
+static void CalcDisconnectCoord(const LineDef *L, int v_num, int *x, int *y)
+{
+	const Vertex * V = Vertices[v_num];
+
+	int dx = L->End()->x - L->Start()->x;
+	int dy = L->End()->y - L->Start()->y;
+
+	if (L->end == v_num)
+	{
+		dx = -dx;
+		dy = -dy;
+	}
+
+	if (abs(dx) < 4 && abs(dy) < 4)
+	{
+		dx = dx / 2;
+		dy = dy / 2;
+	}
+	else if (abs(dx) < 16 && abs(dy) < 16)
+	{
+		dx = dx / 4;
+		dy = dy / 4;
+	}
+	else if (abs(dx) >= abs(dy))
+	{
+		dy = dy * 8 / abs(dx);
+		dx = (dx < 0) ? -8 : 8;
+	}
+	else
+	{
+		dx = dx * 8 / abs(dy);
+		dy = (dy < 0) ? -8 : 8;
+	}
+
+	*x = V->x + dx;
+	*y = V->y + dy;
+}
+
+
+static void DoDisconnectVertex(int v_num, int num_lines)
+{
+	int which = 0;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		LineDef *L = LineDefs[n];
+
+		if (L->start == v_num || L->end == v_num)
+		{
+			int new_x, new_y;
+
+			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
+
+			// the _LAST_ linedef keeps the current vertex, the rest
+			// need a new one.
+			if (which != num_lines-1)
+			{
+				int new_v = BA_New(OBJ_VERTICES);
+
+				Vertices[new_v]->x = new_x;
+				Vertices[new_v]->y = new_y;
+
+				if (L->start == v_num)
+					BA_ChangeLD(n, LineDef::F_START, new_v);
+				else
+					BA_ChangeLD(n, LineDef::F_END, new_v);
+			}
+			else
+			{
+				BA_ChangeVT(v_num, Vertex::F_X, new_x);
+				BA_ChangeVT(v_num, Vertex::F_Y, new_y);
+			}
+
+			which++;
+		}
+	}
+}
+
+
+void CMD_VT_Disconnect(void)
+{
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("Nothing to disconnect");
+			return;
+		}
+
+		edit.Selected->set(edit.highlight.num);
+	}
+
+	bool seen_one = false;
+
+	BA_Begin();
+
+	BA_MessageForSel("disconnected", edit.Selected);
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		int v_num = *it;
+
+		// nothing to do unless vertex has 2 or more linedefs
+		int num_lines = Vertex_HowManyLineDefs(*it);
+
+		if (num_lines < 2)
+			continue;
+
+		DoDisconnectVertex(v_num, num_lines);
+
+		seen_one = true;
+	}
+
+	if (! seen_one)
+		Beep("Nothing was disconnected");
+
+	BA_End();
+
+	Selection_Clear(true);
 }
 
 
