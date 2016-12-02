@@ -1153,7 +1153,7 @@ static void DoExecuteCommand(const editor_command_t *cmd)
 {
 	(* cmd->func)();
 
-	Debug_CheckUnusedStuff();
+//	Debug_CheckUnusedStuff();
 }
 
 
