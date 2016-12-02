@@ -326,11 +326,8 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 }
 
 
-void Vertex_MergeOverlaps()
+static void Vertex_DoMergeOverlaps()
 {
-	BA_Begin();
-	BA_Message("merged overlapping vertices");
-
 	for (;;)
 	{
 		selection_c sel;
@@ -342,6 +339,15 @@ void Vertex_MergeOverlaps()
 
 		Vertex_MergeList(&sel);
 	}
+}
+
+
+void Vertex_MergeOverlaps()
+{
+	BA_Begin();
+	BA_Message("merged overlapping vertices");
+
+	Vertex_DoMergeOverlaps();
 
 	BA_End();
 
@@ -460,19 +466,6 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 
 	for (;;)
 	{
-		Vertex_FindDanglers(sel);
-
-		if (sel.empty())
-			dialog->AddLine("No dangling vertices");
-		else
-		{
-			sprintf(check_message, "%d dangling vertices", sel.count_obj());
-
-			dialog->AddLine(check_message, 2, 210,
-			                "Show",  &UI_Check_Vertices::action_show_danglers);
-		}
-
-
 		Vertex_FindOverlaps(sel);
 
 		if (sel.empty())
@@ -486,6 +479,19 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_highlight,
 			                "Merge", &UI_Check_Vertices::action_merge);
+		}
+
+
+		Vertex_FindDanglers(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No dangling vertices");
+		else
+		{
+			sprintf(check_message, "%d dangling vertices", sel.count_obj());
+
+			dialog->AddLine(check_message, 2, 210,
+			                "Show",  &UI_Check_Vertices::action_show_danglers);
 		}
 
 
@@ -607,21 +613,21 @@ void Sectors_ShowUnclosed(obj_type_e what)
 
 void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 {
-	/*
-	   Note from RQ:
-	   This is a very simple idea, but it works!  The first test (above)
-	   checks that all Sectors are closed.  But if a closed set of LineDefs
-	   is moved out of a Sector and has all its "external" SideDefs pointing
-	   to that Sector instead of the new one, then we need a second test.
-	   That's why I check if the SideDefs facing each other are bound to
-	   the same Sector.
-
-	   Other note from RQ:
-	   Nowadays, what makes the power of a good editor is its automatic tests.
-	   So, if you are writing another Doom editor, you will probably want
-	   to do the same kind of tests in your program.  Fine, but if you use
-	   these ideas, don't forget to credit DEU...  Just a reminder... :-)
-	*/
+	//
+	// Note from RQ:
+	// This is a very simple idea, but it works!  The first test (above)
+	// checks that all Sectors are closed.  But if a closed set of LineDefs
+	// is moved out of a Sector and has all its "external" SideDefs pointing
+	// to that Sector instead of the new one, then we need a second test.
+	// That's why I check if the SideDefs facing each other are bound to
+	// the same Sector.
+	//
+	// Other note from RQ:
+	// Nowadays, what makes the power of a good editor is its automatic tests.
+	// So, if you are writing another Doom editor, you will probably want
+	// to do the same kind of tests in your program.  Fine, but if you use
+	// these ideas, don't forget to credit DEU...  Just a reminder... :-)
+	//
 
 	 secs.change_type(OBJ_SECTORS);
 	lines.change_type(OBJ_LINEDEFS);
@@ -1842,30 +1848,25 @@ void LineDefs_FindZeroLen(selection_c& lines)
 
 void LineDefs_RemoveZeroLen()
 {
-	selection_c sel;
+	selection_c lines(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (LineDefs[n]->isZeroLength())
+			lines.set(n);
+	}
 
 	BA_Begin();
 	BA_Message("removed zero-len linedefs");
 
-	for (int n = NumLineDefs-1 ; n >= 0 ; n--)
+	DeleteObjects_WithUnused(&lines);
+
+	if (lines.notempty())
 	{
-		const LineDef *L = LineDefs[n];
-
-		if (! L->isZeroLength())
-			continue;
-
-		// merge the vertices if possible
-
-		if (L->start == L->end)
-		{
-			BA_Delete(OBJ_LINEDEFS, n);
-		}
-		else
-		{
-			MergeVertex(L->start, L->end, true);
-
-			BA_Delete(OBJ_VERTICES, L->start);
-		}
+		// technically, this is slightly wrong, as it should only merge
+		// vertices that belong to one of the deleted linedefs.
+		// pragmatically, I don't think it will hurt anybody.
+		Vertex_DoMergeOverlaps();
 	}
 
 	BA_End();
