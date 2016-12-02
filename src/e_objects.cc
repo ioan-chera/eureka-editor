@@ -517,6 +517,7 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	{
 		case 0:
 			// this should not happen!
+			return;
 
 		case 1:
 			// joined onto an isolated vertex : nothing to do
@@ -575,193 +576,179 @@ void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 
 void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 {
-	bool do_continue = true;
+	bool closed_a_loop = false;
 
-	int from_vert = -1;
-	int   to_vert = -1;
+	int old_vert = -1;
+	int new_vert = -1;
 
-
-	// the "nearby" vertex is usually the highlighted one.
-	int near_vert = -1;
-
-	if (edit.highlight.valid())
-		near_vert = edit.highlight.num;
+	Vertex *V = NULL;
 
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
 
 
+	// are we drawing a line?
+	if (edit.action == ACT_DRAW_LINE)
+		old_vert = edit.drawing_from;
+
 	// a linedef which we are splitting (usually none)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
 
-	// easier_drawing_mode
-	if (edit.action == ACT_DRAW_LINE)
+	// only use the highlight when not splitting a line
+	if (split_ld < 0)
 	{
-		from_vert = edit.drawing_from;
-	}
+		// the "nearby" vertex is usually the highlighted one.
+		int hi_vert = -1;
 
+		if (edit.highlight.valid())
+			hi_vert = edit.highlight.num;
 
-	// if no highlight, look for a vertex at snapped coord
-	if (! (edit.action == ACT_DRAW_LINE) && near_vert < 0 && grid.snap)
-	{
-		near_vert = Vertex_FindExact(new_x, new_y);
-	}
+		// if no highlight, look for a vertex at snapped coord
+		if (hi_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
+			hi_vert = Vertex_FindExact(new_x, new_y);
 
-
-	//
-	// handle a highlighted vertex
-	// [ an explicit destination overrides any highlight ]
-	// [ a splittable line also overrides ]
-	//
-	if (near_vert >= 0 && to_vert < 0 && split_ld < 0)
-	{
-		// the simple "select it" case, as we have no explicit source
-		if (from_vert < 0)
+		//
+		// handle a highlighted vertex:
+		// either start drawing from it, or finish a loop at it.
+		//
+		if (hi_vert >= 0)
 		{
+			// just ignore when same as drawing_from vert
+			if (hi_vert == old_vert)
+			{
+#if 1
+				edit.Selected->set(old_vert);
+				return;
+#else
+				// simply unselect it and stop drawing
+				edit.Selected->clear(old_vert);
+				Editor_ClearAction();
+				return;
+#endif
+			}
+
 			// a plain INSERT will attempt to fix a dangling vertex
 			if (!is_button && edit.action == ACT_NOTHING)
 			{
-				if (Vertex_TryFixDangler(near_vert))
+				if (Vertex_TryFixDangler(hi_vert))
 				{
 					// a vertex was deleted, selection/highlight is now invalid
 					return;
 				}
 			}
 
-			edit.Selected->set(near_vert);
-
-			// easier_drawing_mode
+			if (old_vert < 0)
 			{
-				Editor_SetAction(ACT_DRAW_LINE);
-				edit.drawing_from = near_vert;
+				old_vert = hi_vert;
+				goto begin_drawing;
 			}
 
-			return;
+			new_vert = hi_vert;
 		}
 
-
-		// the simple "unselect it" case
-		if (near_vert == from_vert)
+		// handle case where a line already exists between the two vertices
+		if (old_vert >= 0 && new_vert >= 0 &&
+			LineDefAlreadyExists(old_vert, new_vert))
 		{
-			edit.Selected->clear(from_vert);
-			Editor_ClearAction();
+			// just continue drawing from the second vertex
+			edit.drawing_from = new_vert;
+			edit.Selected->set(new_vert);
 			return;
 		}
-
-
-		// we have no explicit destination, so use the highlight
-		// [ in drawing mode we never have an explicit destination ]
-
-		to_vert = near_vert;
-
-
-		// 'near_vert' is no longer used...
 	}
 
 
-	if (from_vert >= 0 && to_vert >= 0)
+	// prevent creating an overlapping line when splitting
+	if (split_ld >= 0 && old_vert >= 0 &&
+		LineDefs[split_ld]->TouchesVertex(old_vert))
 	{
-		/* ------ adding a linedef, no new vertex ------ */
-
-		if (LineDefAlreadyExists(from_vert, to_vert))
-		{
-			edit.Selected->set(from_vert);
-			edit.Selected->set(to_vert);
-
-			Editor_ClearAction();
-			return;
-		}
-
-		if (!force_continue && VertexHowManyLineDefs(to_vert) > 0)
-			do_continue = false;
-
-		BA_Begin();
-
-		Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
-
-		BA_Message("added linedef");
-
-		BA_End();
+		old_vert = -1;
 	}
-	else
+
+
+	BA_Begin();
+
+
+	if (new_vert < 0)
 	{
-		/* ------ creating a new vertex ------ */
+		new_vert = BA_New(OBJ_VERTICES);
 
-		// do not create a new line when we are splitting a line and
-		// the source vertex is an endpoint of that line (otherwise
-		// we would get two overlapping lines).
+		BA_Message("added vertex #%d", new_vert);
 
-		if (from_vert >= 0 && split_ld >= 0 &&
-			LineDefs[split_ld]->TouchesVertex(from_vert))
-		{
-			from_vert = -1;
-		}
-
-
-		// the following should not happen, but just in case...
-		if (from_vert >= 0 && split_ld < 0 &&
-			Vertices[from_vert]->x == new_x &&
-			Vertices[from_vert]->y == new_y)
-		{
-			Beep("Bug detected (creation of zero-length line)");
-			return;
-		}
-
-
-		BA_Begin();
-
-		to_vert = BA_New(OBJ_VERTICES);
-
-		BA_Message("added vertex #%d", to_vert);
-
-
-		Vertex *V = Vertices[to_vert];
+		V = Vertices[new_vert];
 
 		V->x = new_x;
 		V->y = new_y;
 
-		// split an existing linedef?
-		if (split_ld >= 0)
+		if (old_vert < 0)
 		{
-			V->x = edit.split_x;
-			V->y = edit.split_y;
-
-			BA_Message("split linedef #%d", split_ld);
-
-			SplitLineDefAtVertex(split_ld, to_vert);
-
-			if (!force_continue && from_vert >= 0)
-				do_continue = false;
+			old_vert = new_vert;
+			new_vert = -1;
 		}
-
-		// add a new linedef?
-		if (from_vert >= 0)
-		{
-			Insert_LineDef_autosplit(from_vert, to_vert, no_fill);
-
-			BA_Message("added linedef");
-		}
-
-		BA_End();
 	}
 
 
-	Selection_Clear();
-	Editor_ClearAction();
-
-	// continue drawing / select new vertex
-	if (do_continue)
+	// splitting an existing line?
+	if (split_ld >= 0)
 	{
-		edit.Selected->set(to_vert);
+		SYS_ASSERT(V);
 
-		// easier_drawing_mode
-		{
-			Editor_SetAction(ACT_DRAW_LINE);
-			edit.drawing_from = to_vert;
-		}
+		V->x = edit.split_x;
+		V->y = edit.split_y;
+
+		BA_Message("split linedef #%d", split_ld);
+
+		SplitLineDefAtVertex(split_ld, new_vert);
 	}
 
+
+	// closing a loop?
+	if (!force_continue && VertexHowManyLineDefs(new_vert) > 0)
+	{
+		closed_a_loop = true;
+	}
+
+
+	// adding a linedef?
+	if (old_vert >= 0 && new_vert >= 0)
+	{
+		SYS_ASSERT(old_vert != new_vert);
+
+		// sanity check
+		if (Vertices[old_vert]->Matches(Vertices[new_vert]))
+			BugError("Bug detected (creation of zero-length line)\n");
+
+		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
+
+		BA_Message("added linedef");
+
+		edit.drawing_from = new_vert;
+	}
+
+	BA_End();
+
+
+	// begin drawing mode?
+begin_drawing:
+	if (edit.action == ACT_NOTHING && !closed_a_loop &&
+		old_vert >= 0 && new_vert < 0)
+	{
+		Selection_Clear();
+
+		edit.Selected->set(old_vert);
+
+		Editor_SetAction(ACT_DRAW_LINE);
+		edit.drawing_from = old_vert;
+	}
+
+	// stop drawing mode?
+	if (closed_a_loop && !force_continue)
+	{
+		Editor_ClearAction();
+	}
+
+	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -1036,6 +1023,8 @@ void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
 	if (edit.mode == OBJ_VERTICES && edit.highlight.valid())
 	{
 		BA_Message("merge vertex #%d", obj_num);
+
+		SYS_ASSERT(obj_num != edit.highlight.num);
 
 		MergeVertex(obj_num, edit.highlight.num,
 		            true /* v1_will_be_deleted */);
