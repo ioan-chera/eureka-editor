@@ -230,6 +230,9 @@ void Vertex_MergeList(selection_c *verts)
 	selection_c del_lines(OBJ_LINEDEFS);
 	selection_iterator_c it;
 
+	// this prevents unnecessary sandwich mergers
+	ConvertSelection(verts, &del_lines);
+
 	for (verts->begin(&it) ; !it.at_end() ; ++it)
 	{
 		DoMergeVertex(*it, v, del_lines);
