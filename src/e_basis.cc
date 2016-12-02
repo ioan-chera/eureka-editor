@@ -815,10 +815,10 @@ void BA_End()
 
 	cur_group->End();
 
-	if (! cur_group->Empty())
-	{
+	if (cur_group->Empty())
+		delete cur_group;
+	else
 		undo_history.push_front(cur_group);
-	}
 
 	cur_group = NULL;
 
