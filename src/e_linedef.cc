@@ -54,10 +54,11 @@ bool LineDefAlreadyExists(int v1, int v2)
 }
 
 
-/* return true if adding a line between v1 and v2 would overlap an
-   existing line.  By "overlap" I mean parallel and sitting on top
-   (this does NOT test for lines crossing each other).
-*/
+//
+// return true if adding a line between v1 and v2 would overlap an
+// existing line.  By "overlap" I mean parallel and sitting on top
+// (this does NOT test for lines crossing each other).
+//
 bool LineDefWouldOverlap(int v1, int x2, int y2)
 {
 	int x1 = Vertices[v1]->x;
@@ -94,24 +95,6 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 	}
 
 	return false;
-}
-
-
-/*
-  deletes all the linedefs AND unused vertices AND unused sidedefs
-*/
-void DeleteLineDefs(selection_c *lines)
-{
-	selection_c  verts(OBJ_VERTICES);
-	selection_c  sides(OBJ_SIDEDEFS);
-	selection_c  secs (OBJ_SECTORS);	// stays empty
-
-	UnusedVertices(lines, &verts);
-	UnusedSideDefs(lines, &secs, &sides);
-
-	DeleteObjects(lines);
-	DeleteObjects(&verts);
-	DeleteObjects(&sides);
 }
 
 
@@ -993,7 +976,7 @@ void CMD_LIN_MergeTwo(void)
 
 	del_line.set(ld1);
 
-	DeleteLineDefs(&del_line);
+	DeleteObjects_WithUnused(&del_line);
 
 	BA_Message("merged two linedefs");
 
