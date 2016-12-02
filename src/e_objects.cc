@@ -681,6 +681,9 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		V->x = new_x;
 		V->y = new_y;
 
+		edit.Selected->set(new_vert);
+		edit.drawing_from = new_vert;
+
 		if (old_vert < 0)
 		{
 			old_vert = new_vert;
@@ -699,12 +702,12 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 		BA_Message("split linedef #%d", split_ld);
 
-		SplitLineDefAtVertex(split_ld, new_vert);
+		SplitLineDefAtVertex(split_ld, new_vert >= 0 ? new_vert : old_vert);
 	}
 
 
 	// closing a loop?
-	if (!force_continue && VertexHowManyLineDefs(new_vert) > 0)
+	if (!force_continue && new_vert >= 0 && VertexHowManyLineDefs(new_vert) > 0)
 	{
 		closed_a_loop = true;
 	}
@@ -723,6 +726,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 		BA_Message("added linedef");
 
+		edit.Selected->set(new_vert);
 		edit.drawing_from = new_vert;
 	}
 
