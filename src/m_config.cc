@@ -629,11 +629,11 @@ static const opt_desc_t options[] =
 		&normal_small_col
 	},
 
-	{	"render_pixel_aspect",
+	{	"render_pix_aspect",
 		0,
 		OPT_INTEGER,
 		"v",
-		"Pixel aspect ratio for 3D view (100 * width / height)",
+		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
 		&render_pixel_aspect
 	},

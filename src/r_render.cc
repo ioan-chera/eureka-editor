@@ -49,12 +49,14 @@
 
 
 // config items
-int  render_pixel_aspect = 100;   // 100 * width / height
-
 bool render_high_detail    = false;
 bool render_lock_gravity   = false;
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
+
+// in original DOOM pixels were 20% taller than wide, giving 0.83
+// as the pixel aspect ratio.
+int  render_pixel_aspect = 83;  //  100 * width / height
 
 
 struct highlight_3D_info_t
@@ -204,11 +206,9 @@ public:
 
 	void CalcAspect()
 	{
-		float window_aspect = float(sw) / float(sh);
-
-		aspect_sh = sh * window_aspect * (render_pixel_aspect / 133.0);
-
 		aspect_sw = sw;	 // things break if these are different
+
+		aspect_sh = sw / (render_pixel_aspect / 100.0);
 	}
 
 	void UpdateScreen(int ow, int oh)
@@ -742,8 +742,6 @@ public:
 	int open_y1;
 	int open_y2;
 
-#define Y_SLOPE  1.70
-
 	// remembered lines for drawing highlight (etc)
 	std::vector<RenderLine> hl_lines;
 
@@ -895,7 +893,7 @@ public:
 		if (sec_h < -32770)
 			return +9999;
 
-		int y = int(view.aspect_sh * (sec_h - view.z) * iz * Y_SLOPE);
+		int y = int(view.aspect_sh * (sec_h - view.z) * iz);
 
 		return (view.sh - y) / 2;
 	}
@@ -907,14 +905,14 @@ public:
 		if (y == 0)
 			return 999999;
 
-		return view.aspect_sh * (sec_h - view.z) * Y_SLOPE / y;
+		return view.aspect_sh * (sec_h - view.z) / y;
 	}
 
 	static inline float YToSecH(int y, double iz)
 	{
 		y = y * 2 - view.sh;
 
-		return view.z - (float(y) / view.aspect_sh / iz / Y_SLOPE);
+		return view.z - (float(y) / view.aspect_sh / iz);
 	}
 
 	void AddLine(int ld_index)
@@ -2234,7 +2232,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 		// TODO: take perspective into account (angled wall --> reduce dx_factor)
 		view.adjust_dx_factor = dist / view.aspect_sw;
-		view.adjust_dy_factor = dist / view.aspect_sh / Y_SLOPE;
+		view.adjust_dy_factor = dist / view.aspect_sh;
 
 		Editor_SetAction(ACT_ADJUST_OFS);
 		return;
