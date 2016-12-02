@@ -68,6 +68,9 @@ Editing
 +  improve X texture alignment
    [ e.g. picking "wrong" or not-optimal line ]
 
++  cannot auto-split close to a vertex?
+   it should be allowed when zoomed in far
+
 
 
 3D View
@@ -134,7 +137,7 @@ WISH: can import UDMF format maps
 
    -  each map (via .dat?) can specify _override_ config
 
--  vertex/linedef mode: '[' and ']' to adjust length of current line
+-  linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
 
@@ -145,6 +148,8 @@ WISH: can import UDMF format maps
    +  "Grab" button in UI_EditKey
    -  "Find" or "Match" button for function in UI_EditKey
    -  reverse ordering of KCTX_XXX values
+
+-  replace "Toggle XXX" in View menu with checkboxes
 
 -  make sure Load/Export wad filename not already in master_dir
 
@@ -222,6 +227,8 @@ WISH : autocomplete flat/texture names in Linedef and Sector panels
 Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
 Q/ disconnect sectors : include islands (perhaps with 'D')
+
+IDEA: a command to split-line-in-half-and-move-to-curve
 
 IDEA: a mode to show skill levels via color of drawn things
 

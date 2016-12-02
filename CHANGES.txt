@@ -82,4 +82,5 @@ Bugs Fixed:
 -  fixed panel staying on a highlighted object when going to 3D mode
 -  fixed textures in LineDef panel not updating after undo or redo
 -  fixed "FIX" button for unknown textures to not change "-" textures
+-  fixed pixel-aspect default to be 0.83, matching original DOOM
 
