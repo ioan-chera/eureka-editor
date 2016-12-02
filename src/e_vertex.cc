@@ -320,10 +320,6 @@ void Vertex_MergeList(selection_c *list)
 	new_y = Vertices[v]->y;
 #endif
 
-	BA_Begin();
-
-	BA_MessageForSel("merged", list);
-
 	BA_ChangeVT(v, Vertex::F_X, new_x);
 	BA_ChangeVT(v, Vertex::F_Y, new_y);
 
@@ -338,8 +334,6 @@ void Vertex_MergeList(selection_c *list)
 	}
 
 	DeleteObjects(list);
-
-	BA_End();
 
 	list->clear_all();
 }
@@ -358,7 +352,12 @@ void CMD_VT_Merge()
 		return;
 	}
 
+	BA_Begin();
+	BA_MessageForSel("merged", edit.Selected);
+
 	Vertex_MergeList(edit.Selected);
+
+	BA_End();
 
 	Editor_ClearAction();
 }

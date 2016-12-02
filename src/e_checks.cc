@@ -328,6 +328,9 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 
 void Vertex_MergeOverlaps()
 {
+	BA_Begin();
+	BA_Message("merged overlapping vertices");
+
 	for (;;)
 	{
 		selection_c sel;
@@ -339,6 +342,10 @@ void Vertex_MergeOverlaps()
 
 		Vertex_MergeList(&sel);
 	}
+
+	BA_End();
+
+	RedrawMap();
 }
 
 
