@@ -70,10 +70,11 @@ int Vertex_HowManyLineDefs(int v_num)
 
 
 //
-// we merge ld1 into ld2, to prevent them overlapping.
-// the vertex 'v' is the common vertex (the "hinge").
+// two linedefs are being sandwiched together.
+// vertex 'v' is the shared vertex (the "hinge").
+// to prevent an overlap, we merge ld1 into ld2.
 //
-static void MergeConnectedLines(int ld1, int ld2, int v)
+static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 {
 	LineDef *L1 = LineDefs[ld1];
 	LineDef *L2 = LineDefs[ld2];
@@ -84,8 +85,8 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 	int new_mid_tex = (ld1_onesided) ? L1->Right()->mid_tex :
 					  (ld2_onesided) ? L2->Right()->mid_tex : 0;
 
-	// flip ld1 so it would be parallel (after merging the other endpoints)
-	// with ld2 but going the opposite direction.
+	// flip L1 so it would be parallel with L2 (after merging the other
+	// endpoint) but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
 	{
 		FlipLineDef(ld1);
@@ -96,13 +97,11 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 
 	if (same_left && same_right)
 	{
-		// delete other line too
-		// [ MUST do the highest numbered first ]
-		if (ld2 < ld1)
-			std::swap(ld1, ld2);
+		// the merged line would have the same thing on both sides
+		// (possibly VOID space), so the linedefs both "vanish".
 
-		BA_Delete(OBJ_LINEDEFS, ld2);
-		BA_Delete(OBJ_LINEDEFS, ld1);
+		del_lines.set(ld1);
+		del_lines.set(ld2);
 		return;
 	}
 
@@ -130,31 +129,36 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 		BA_ChangeSD(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
-
-	BA_Delete(OBJ_LINEDEFS, ld1);
+	del_lines.set(ld1);
 }
 
 
-static void DoMergeVertex(int v1, int v2)
+//
+// merge v1 into v2
+//
+static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 {
-	/* merge v1 into v2 */
-
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
 
-	// first check if two linedefs would overlap after the merge
-	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
+	// check if two linedefs would overlap after the merge
+	// [ but ignore lines already marked for deletion ]
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
 		if (! L->TouchesVertex(v1))
 			continue;
 
+		if (del_lines.get(n))
+			continue;
+
 		int v3 = (L->start == v1) ? L->end : L->start;
 
 		int found = -1;
 
-		for (int k = NumLineDefs - 1 ; k >= 0 ; k--)
+		for (int k = 0 ; k < NumLineDefs ; k++)
 		{
 			if (k == n)
 				continue;
@@ -169,10 +173,9 @@ static void DoMergeVertex(int v1, int v2)
 			}
 		}
 
-		if (found >= 0)
+		if (found >= 0 && ! del_lines.get(found))
 		{
-			// this deletes linedef [n], and maybe the other too
-			MergeConnectedLines(n, found, v3);
+			MergeSandwichLines(n, found, v3, del_lines);
 			break;
 		}
 	}
@@ -180,43 +183,40 @@ static void DoMergeVertex(int v1, int v2)
 	// update all linedefs which use V1 to use V2 instead, and
 	// delete any line that exists between the two vertices.
 
-	selection_c del_lines(OBJ_LINEDEFS);
-
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if ((L->start == v1 && L->end == v2) ||
-			(L->start == v2 && L->end == v1))
-		{
-			del_lines.set(n);
-			continue;
-		}
+		// change *ALL* references, this is critical
+		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
 			BA_ChangeLD(n, LineDef::F_START, v2);
 
 		if (L->end == v1)
 			BA_ChangeLD(n, LineDef::F_END, v2);
-	}
 
-	DeleteObjects_WithUnused(&del_lines);
+		if (L->start == v2 && L->end == v2)
+			del_lines.set(n);
+	}
 }
 
 
-void Vertex_MergeList(selection_c *list)
+//
+// the first vertex is kept, all the other vertices are deleted
+// (after fixing the attached linedefs).
+//
+void Vertex_MergeList(selection_c *verts)
 {
-	if (list->count_obj() < 2)
+	if (verts->count_obj() < 2)
 		return;
 
-	// the first vertex is kept, all the other vertices are removed.
-
-	int v = list->find_first();
+	int v = verts->find_first();
 
 	int new_x, new_y;
 
 #if 0
-	Objs_CalcMiddle(list, &new_x, &new_y);
+	Objs_CalcMiddle(verts, &new_x, &new_y);
 #else
 	new_x = Vertices[v]->x;
 	new_y = Vertices[v]->y;
@@ -225,19 +225,23 @@ void Vertex_MergeList(selection_c *list)
 	BA_ChangeVT(v, Vertex::F_X, new_x);
 	BA_ChangeVT(v, Vertex::F_Y, new_y);
 
+	verts->clear(v);
 
-	list->clear(v);
-
+	selection_c del_lines(OBJ_LINEDEFS);
 	selection_iterator_c it;
 
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (verts->begin(&it) ; !it.at_end() ; ++it)
 	{
-		DoMergeVertex(*it, v);
+		DoMergeVertex(*it, v, del_lines);
 	}
 
-	DeleteObjects(list);
+	// all these vertices will be unused now, hence this call
+	// shouldn't kill any other objects.
+	DeleteObjects(verts);
 
-	list->clear_all();
+	DeleteObjects_WithUnused(&del_lines);
+
+	verts->clear_all();
 }
 
 
