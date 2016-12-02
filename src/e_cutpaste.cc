@@ -846,7 +846,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 	{
 		const SideDef *SD = SideDefs[i];
 
-		if (secs->get(SD->sector))
+		if (secs && secs->get(SD->sector))
 			result->set(i);
 	}
 }
@@ -1020,6 +1020,15 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	if (LineDefAlreadyExists(v1, v2))
 		return false;
 
+	// see what sidedefs would become unused
+	selection_c line_sel(OBJ_LINEDEFS);
+	selection_c side_sel(OBJ_SIDEDEFS);
+
+	line_sel.set(ld2);
+
+	UnusedSideDefs(&line_sel, NULL /* sec_sel */, &side_sel);
+
+
 	BA_Begin();
 
 	BA_Message("deleted vertex #%d\n", v_num);
@@ -1033,6 +1042,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 	BA_Delete(OBJ_LINEDEFS, ld2);
 	BA_Delete(OBJ_VERTICES, v_num);
+
+	DeleteObjects(&side_sel);
 
 	BA_End();
 

@@ -47,10 +47,11 @@ bool new_islands_are_void = false;
 int  new_sector_size = 128;
 
 
-/*
-   delete a group of objects.
-   The selection is no longer valid after this!
-*/
+//
+//  delete a group of objects.
+//  this is very raw, e.g. it does not check for stuff that will
+//  remain unused afterwards.
+//
 void DeleteObjects(selection_c *list)
 {
 	// we need to process the object numbers from highest to lowest,
