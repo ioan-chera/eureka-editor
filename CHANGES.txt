@@ -28,12 +28,13 @@ General:
 
 -  undo, redo : show what was (un)done in the status area
 -  increased number of remembered recent files
+-  better default directory for file chooser dialogs
 -  default edit mode is Vertices, and grid-snapping OFF
 
 -  find/replace : added a "Restrict to Selection" filter
 -  find/replace : better way to choose textures/things
 -  Browser : changing categories clears the search box
--  better default directory for file chooser dialogs
+-  Vertex panel : arrow buttons for position adjustments
 
 
 Games and Ports:

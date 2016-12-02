@@ -34,6 +34,11 @@ public:
 	Fl_Int_Input *pos_x;
 	Fl_Int_Input *pos_y;
 
+	Fl_Button *move_left;
+	Fl_Button *move_right;
+	Fl_Button *move_up;
+	Fl_Button *move_down;
+
 public:
 	UI_VertexBox(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_VertexBox();
@@ -55,6 +60,7 @@ public:
 private:
 	static void x_callback(Fl_Widget *, void *);
 	static void y_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
 };
 
 

@@ -54,7 +54,8 @@ extern const char * arrow_225_xpm[];
 extern const char * arrow_270_xpm[];
 extern const char * arrow_315_xpm[];
 
-static const char ** arrow_pixmaps[8] =
+
+const char ** arrow_pixmaps[8] =
 {
 	arrow_0_xpm,   arrow_45_xpm,
 	arrow_90_xpm,  arrow_135_xpm,
