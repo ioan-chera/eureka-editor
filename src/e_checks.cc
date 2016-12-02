@@ -2249,6 +2249,10 @@ void LineDefs_FindOverlaps(selection_c& lines)
 		int ld1 = sorted_list[n];
 		int ld2 = sorted_list[n + 1];
 
+		// ignore zero-length lines
+		if (LineDefs[ld2]->isZeroLength())
+			continue;
+
 		// only the second (or third, etc) linedef is stored
 		if (linedef_pos_cmp(ld1, ld2) == 0)
 			lines.set(ld2);
