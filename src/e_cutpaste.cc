@@ -1151,7 +1151,7 @@ void CMD_Delete(void)
 		int v_num = list.find_first();
 		SYS_ASSERT(v_num >= 0);
 
-		if (VertexHowManyLineDefs(v_num) == 2)
+		if (Vertex_HowManyLineDefs(v_num) == 2)
 		{
 			if (DeleteVertex_MergeLineDefs(v_num))
 				goto success;

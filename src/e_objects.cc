@@ -515,7 +515,7 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 
 	selection_c flip(OBJ_LINEDEFS);
 
-	switch (VertexHowManyLineDefs(v2))
+	switch (Vertex_HowManyLineDefs(v2))
 	{
 		case 0:
 			// this should not happen!
@@ -711,7 +711,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 
 	// closing a loop?
-	if (!force_continue && new_vert >= 0 && VertexHowManyLineDefs(new_vert) > 0)
+	if (!force_continue && new_vert >= 0 && Vertex_HowManyLineDefs(new_vert) > 0)
 	{
 		closed_a_loop = true;
 	}

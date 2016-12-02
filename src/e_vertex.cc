@@ -53,6 +53,22 @@ int Vertex_FindExact(int x, int y)
 }
 
 
+int Vertex_HowManyLineDefs(int v_num)
+{
+	int count = 0;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		LineDef *L = LineDefs[n];
+
+		if (L->start == v_num || L->end == v_num)
+			count++;
+	}
+
+	return count;
+}
+
+
 //
 // we merge ld1 into ld2, to prevent them overlapping.
 // the vertex 'v' is the common vertex (the "hinge").
@@ -185,22 +201,6 @@ static void DoMergeVertex(int v1, int v2)
 	}
 
 	DeleteObjects_WithUnused(&del_lines);
-}
-
-
-int VertexHowManyLineDefs(int v_num)
-{
-	int count = 0;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = LineDefs[n];
-
-		if (L->start == v_num || L->end == v_num)
-			count++;
-	}
-
-	return count;
 }
 
 
@@ -370,7 +370,7 @@ void CMD_VT_Disconnect(void)
 		int v_num = *it;
 
 		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = VertexHowManyLineDefs(*it);
+		int num_lines = Vertex_HowManyLineDefs(*it);
 
 		if (num_lines < 2)
 			continue;
@@ -413,9 +413,9 @@ bool Vertex_TryFixDangler(int v_num)
 
 
 	// check for a dangling vertex
-	if (VertexHowManyLineDefs(v_num) != 1)
+	if (Vertex_HowManyLineDefs(v_num) != 1)
 	{
-		if (v_other >= 0 && VertexHowManyLineDefs(v_other) == 1)
+		if (v_other >= 0 && Vertex_HowManyLineDefs(v_other) == 1)
 			std::swap(v_num, v_other);
 		else
 			return false;

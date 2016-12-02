@@ -28,7 +28,7 @@
 #define __EUREKA_E_VERTEX_H__
 
 int Vertex_FindExact(int x, int y);
-int VertexHowManyLineDefs(int v_num);
+int Vertex_HowManyLineDefs(int v_num);
 
 void Vertex_MergeList(selection_c *list);
 bool Vertex_TryFixDangler(int v_num);
