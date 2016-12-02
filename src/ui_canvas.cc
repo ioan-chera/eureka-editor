@@ -203,7 +203,8 @@ void UI_Canvas::DrawEverything()
 		int dy = 0;
 		DragDelta(&dx, &dy);
 
-		DrawHighlight(edit.mode, edit.drag_single_obj, HI_COL,
+		DrawHighlight(edit.mode, edit.drag_single_obj,
+					  (edit.mode == OBJ_VERTICES) ? HI_AND_SEL_COL : HI_COL,
 		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
 					  dx, dy);
 	}
