@@ -1856,6 +1856,7 @@ void LineDefs_RemoveZeroLen()
 		else
 		{
 			MergeVertex(L->start, L->end, true);
+
 			BA_Delete(OBJ_VERTICES, L->start);
 		}
 	}

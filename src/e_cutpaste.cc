@@ -1051,19 +1051,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 }
 
 
-void CMD_Delete(void)
+void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unused)
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("Nothing to delete");
-		return;
-	}
-
-	bool keep_things = Exec_HasFlag("/keep_things");
-	bool keep_unused = Exec_HasFlag("/keep_unused");
-
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
 	selection_c line_sel(OBJ_LINEDEFS);
@@ -1072,42 +1061,20 @@ void CMD_Delete(void)
 	switch (edit.mode)
 	{
 		case OBJ_VERTICES:
-			vert_sel.merge(list);
+			vert_sel.merge(*list);
 			break;
 
 		case OBJ_LINEDEFS:
-			line_sel.merge(list);
+			line_sel.merge(*list);
 			break;
 
 		case OBJ_SECTORS:
-			sec_sel.merge(list);
+			sec_sel.merge(*list);
 			break;
 
-		default: /* OBJ_THINGS */
-			BA_Begin();
-			BA_MessageForSel("deleted", &list);
-
-			DeleteObjects(&list);
-
-			BA_End();
-
-			goto success;
-	}
-
-	// special case for a single vertex connected to two linedef,
-	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == OBJ_VERTICES && vert_sel.count_obj() == 1)
-	{
-		int v_num = vert_sel.find_first();
-		SYS_ASSERT(v_num >= 0);
-
-		if (VertexHowManyLineDefs(v_num) == 2)
-		{
-			if (DeleteVertex_MergeLineDefs(v_num))
-				goto success;
-
-			// delete vertex normally
-		}
+		default: /* OBJ_THINGS or OBJ_SIDEDEFS */
+			DeleteObjects(list);
+			return;
 	}
 
 	if (!keep_unused && edit.mode == OBJ_SECTORS)
@@ -1133,10 +1100,6 @@ void CMD_Delete(void)
 		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
 		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 	}
-
-	BA_Begin();
-
-	BA_MessageForSel("deleted", &list);
 
 	// delete things from each deleted sector
 	if (!keep_things && sec_sel.notempty())
@@ -1165,6 +1128,42 @@ void CMD_Delete(void)
 	DeleteObjects(&side_sel);
 	DeleteObjects(&vert_sel);
 	DeleteObjects( &sec_sel);
+}
+
+
+void CMD_Delete(void)
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("Nothing to delete");
+		return;
+	}
+
+	bool keep_things = Exec_HasFlag("/keep_things");
+	bool keep_unused = Exec_HasFlag("/keep_unused");
+
+	// special case for a single vertex connected to two linedef,
+	// we delete the vertex but merge the two linedefs.
+	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
+	{
+		int v_num = list.find_first();
+		SYS_ASSERT(v_num >= 0);
+
+		if (VertexHowManyLineDefs(v_num) == 2)
+		{
+			if (DeleteVertex_MergeLineDefs(v_num))
+				goto success;
+		}
+
+		// delete vertex normally
+	}
+
+	BA_Begin();
+	BA_MessageForSel("deleted", &list);
+
+	DeleteObjects_WithUnused(&list, keep_things, keep_unused);
 
 	BA_End();
 
