@@ -3945,5 +3945,37 @@ void CMD_MapCheck()
 }
 
 
+void Debug_CheckUnusedStuff()
+{
+	selection_c sel;
+
+	Sectors_FindUnused(sel);
+
+	int num = sel.count_obj();
+
+	if (num > 0)
+	{
+		fl_beep();
+		DLG_Notify("Operation left %d sectors unused.", num);
+
+		Sectors_RemoveUnused();
+		return;
+	}
+
+	SideDefs_FindUnused(sel);
+
+	num = sel.count_obj();
+
+	if (num > 0)
+	{
+		fl_beep();
+		DLG_Notify("Operation left %d sidedefs unused.", num);
+
+		SideDefs_RemoveUnused();
+		return;
+	}
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

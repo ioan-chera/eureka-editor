@@ -1146,9 +1146,14 @@ bool Exec_HasFlag(const char *flag)
 }
 
 
+extern void Debug_CheckUnusedStuff();
+
+
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
 	(* cmd->func)();
+
+	Debug_CheckUnusedStuff();
 }
 
 
