@@ -506,6 +506,25 @@ void lineloop_c::CalcBounds(int *x1, int *y1, int *x2, int *y2) const
 }
 
 
+void lineloop_c::GetAllSectors(selection_c *list) const
+{
+	// assumes the given selection is empty (this adds to it)
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+
+		if (sec >= 0)
+			list->set(sec);
+	}
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+	{
+		islands[i]->GetAllSectors(list);
+	}
+}
+
+
 /*
    Follows the path clockwise from the given start line, adding each
    line into the appropriate set.  Returns true if the path was closed,
@@ -893,10 +912,24 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 	}
 
 	selection_c flip(OBJ_LINEDEFS);
+	selection_c unused(OBJ_SECTORS);
+
+	loop.GetAllSectors(&unused);
 
 	AssignSectorToLoop(loop, new_sec, flip);
 
 	FlipLineDefGroup(flip);
+
+	// detect any sectors which have become unused, and delete them
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->WhatSector(SIDE_LEFT ) >= 0) unused.clear(L->WhatSector(SIDE_LEFT ));
+		if (L->WhatSector(SIDE_RIGHT) >= 0) unused.clear(L->WhatSector(SIDE_RIGHT));
+	}
+
+	DeleteObjects(&unused);
 }
 
 //--- editor settings ---

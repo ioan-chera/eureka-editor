@@ -78,6 +78,9 @@ public:
 	// sector, returning the sector number if true, otherwise -1.
 	int FacesSector() const;
 
+	// return all the sectors which the lineloop faces
+	void GetAllSectors(selection_c *list) const;
+
 	void Dump() const;
 
 public:

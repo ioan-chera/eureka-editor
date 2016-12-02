@@ -769,10 +769,9 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 static void Correct_Sector(int sec_num)
 {
 	BA_Begin();
+	BA_Message("corrected sector");
 
 	AssignSectorToSpace(edit.map_x, edit.map_y, sec_num);
-
-	BA_Message("corrected sector");
 
 	BA_End();
 }
@@ -799,7 +798,6 @@ static void Insert_Sector(bool force_new)
 		CreateSquare(model);
 
 		BA_Message("added sector (outside map)");
-
 		BA_End();
 
 		return;
@@ -816,6 +814,8 @@ static void Insert_Sector(bool force_new)
 		}
 
 		Correct_Sector(edit.highlight.num);
+
+		UpdateHighlight();
 		return;
 	}
 
@@ -833,6 +833,7 @@ static void Insert_Sector(bool force_new)
 
 
 	BA_Begin();
+	BA_Message("added new sector");
 
 	int new_sec = BA_New(OBJ_SECTORS);
 
@@ -843,14 +844,15 @@ static void Insert_Sector(bool force_new)
 
 	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec, model < 0);
 
-	BA_Message("added sector #%d", new_sec);
-
 	BA_End();
 
-
+	// select the new sector
 	Selection_Clear();
 
-	edit.Selected->set(new_sec);
+	edit.Selected->set(NumSectors - 1);
+
+	UpdateHighlight();
+	RedrawMap();
 }
 
 
