@@ -207,6 +207,9 @@ void UI_Canvas::DrawEverything()
 					  (edit.mode == OBJ_VERTICES) ? HI_AND_SEL_COL : HI_COL,
 		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
 					  dx, dy);
+
+		if (edit.mode == OBJ_VERTICES && highlight.valid())
+			DrawHighlight(highlight.type, highlight.num, HI_COL, false);
 	}
 	else if (highlight.valid())
 	{
