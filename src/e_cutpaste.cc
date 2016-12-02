@@ -1058,7 +1058,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 	selection_c line_sel(OBJ_LINEDEFS);
 	selection_c  sec_sel(OBJ_SECTORS);
 
-	switch (edit.mode)
+	switch (list->what_type())
 	{
 		case OBJ_VERTICES:
 			vert_sel.merge(*list);
@@ -1077,7 +1077,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 			return;
 	}
 
-	if (!keep_unused && edit.mode == OBJ_SECTORS)
+	if (!keep_unused && list->what_type() == OBJ_SECTORS)
 	{
 		UnusedLineDefs(&sec_sel, &line_sel);
 
@@ -1088,14 +1088,14 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 		}
 	}
 
-	if (!keep_unused && edit.mode == OBJ_LINEDEFS)
+	if (!keep_unused && list->what_type() == OBJ_LINEDEFS)
 	{
 		UnusedVertices(&line_sel, &vert_sel);
 	}
 
 	// try to detect sectors that become "dudded", where all the
 	// remaining linedefs of the sector face into the void.
-	if (edit.mode == OBJ_VERTICES || edit.mode == OBJ_LINEDEFS)
+	if (list->what_type() == OBJ_VERTICES || list->what_type() == OBJ_LINEDEFS)
 	{
 		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
 		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
