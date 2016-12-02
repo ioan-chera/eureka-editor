@@ -46,6 +46,8 @@
 bool new_islands_are_void = false;
 int  new_sector_size = 128;
 
+bool select_verts_of_new_sectors = true;
+
 
 //
 //  delete a group of objects.
@@ -586,6 +588,8 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
 
+	int orig_num_sectors = NumSectors;
+
 
 	// are we drawing a line?
 	if (edit.action == ACT_DRAW_LINE)
@@ -722,6 +726,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		if (Vertices[old_vert]->Matches(Vertices[new_vert]))
 			BugError("Bug detected (creation of zero-length line)\n");
 
+		// this can make new sectors too
 		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
 
 		BA_Message("added linedef");
@@ -750,6 +755,19 @@ begin_drawing:
 	if (closed_a_loop && !force_continue)
 	{
 		Editor_ClearAction();
+	}
+
+	// select vertices of a newly created sector?
+	if (select_verts_of_new_sectors && closed_a_loop &&
+		NumSectors > orig_num_sectors)
+	{
+		selection_c sel(OBJ_SECTORS);
+
+		// more than one sector may have been created, pick the last
+		sel.set(NumSectors - 1);
+
+		edit.Selected->change_type(edit.mode);
+		ConvertSelection(&sel, edit.Selected);
 	}
 
 	UpdateHighlight();
