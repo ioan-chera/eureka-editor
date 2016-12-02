@@ -875,7 +875,7 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 }
 
 
-void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
+void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 {
 	SYS_ASSERT(verts->what_type() == OBJ_VERTICES);
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
@@ -1077,6 +1077,17 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 			return;
 	}
 
+	if (list->what_type() == OBJ_VERTICES)
+	{
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			if (list->get(L->start) || list->get(L->end))
+				line_sel.set(n);
+		}
+	}
+
 	if (!keep_unused && list->what_type() == OBJ_SECTORS)
 	{
 		UnusedLineDefs(&sec_sel, &line_sel);
@@ -1097,7 +1108,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 	// remaining linedefs of the sector face into the void.
 	if (list->what_type() == OBJ_VERTICES || list->what_type() == OBJ_LINEDEFS)
 	{
-		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
+		DuddedSectors(&vert_sel, &line_sel, &sec_sel);
 		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 	}
 
