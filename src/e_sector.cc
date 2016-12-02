@@ -30,6 +30,7 @@
 
 #include "m_bitvec.h"
 #include "w_rawdef.h"
+#include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
@@ -264,9 +265,11 @@ void CMD_SEC_Merge(void)
 
 	bool keep_common_lines = Exec_HasFlag("/keep");
 
-	int source = edit.Selected->find_first();
+	int new_sec = edit.Selected->find_first();
 
 	selection_c common_lines(OBJ_LINEDEFS);
+	selection_c unused_secs (OBJ_SECTORS);
+
 	selection_iterator_c it;
 
 	BA_Begin();
@@ -275,20 +278,23 @@ void CMD_SEC_Merge(void)
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		int target = *it;
+		int old_sec = *it;
 
-		if (target == source)
+		if (old_sec == new_sec)
 			continue;
 
-		LineDefsBetweenSectors(&common_lines, target, source);
+		LineDefsBetweenSectors(&common_lines, old_sec, new_sec);
 
-		ReplaceSectorRefs(target, source);
+		ReplaceSectorRefs(old_sec, new_sec);
+
+		unused_secs.set(old_sec);
 	}
+
+	DeleteObjects(&unused_secs);
 
 	if (! keep_common_lines)
 	{
-		// this deletes any unused vertices/sidedefs too
-		DeleteLineDefs(&common_lines);
+		DeleteObjects_WithUnused(&common_lines);
 	}
 
 	BA_End();
@@ -296,7 +302,7 @@ void CMD_SEC_Merge(void)
 	// re-select the final sector
 	Selection_Clear(true);
 
-	edit.Selected->set(source);
+	edit.Selected->set(new_sec);
 }
 
 
