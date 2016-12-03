@@ -84,11 +84,6 @@ static void file_do_delete(Fl_Widget *w, void * data)
 	CMD_DeleteMap();
 }
 
-static void file_do_default_props(Fl_Widget *w, void * data)
-{
-	main_win->ShowDefaultProps();
-}
-
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
 	CMD_Preferences();
@@ -215,7 +210,7 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 
 static void view_do_logs(Fl_Widget *w, void * data)
 {
-	LogViewer_Open();
+	ExecuteCommand("LogViewer");
 }
 
 static void view_do_zoom_in(Fl_Widget *w, void * data)
@@ -279,14 +274,19 @@ static void view_do_sector_render(Fl_Widget *w, void * data)
 	main_win->redraw();
 }
 
+static void view_do_default_props(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("DefaultProps");
+}
+
 static void view_do_find(Fl_Widget *w, void * data)
 {
-	main_win->ShowFindAndReplace();
+	ExecuteCommand("FindDialog");
 }
 
 static void view_do_next(Fl_Widget *w, void * data)
 {
-	main_win->find_box->FindNext();
+	ExecuteCommand("FindNext");
 }
 
 static void view_do_jump(Fl_Widget *w, void * data)
@@ -455,7 +455,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 #if 0
-		{ "&Test in Game",       FL_COMMAND + 't', FCAL file_do_test_map },
+		{ "&Test in Game",     FL_COMMAND + 't', FCAL file_do_test_map },
 #endif
 		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
@@ -499,16 +499,14 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "Mirror &Horizontally",  0, FCAL edit_do_mirror_horiz },
 		{ "Mirror &Vertically",    0, FCAL edit_do_mirror_vert },
-
-//??   "~Exchange object numbers", 24,     0,
 		{ 0 },
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
 		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
 		{ "Toggle S&prites",      0, FCAL view_do_sprites },
-		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
-		{ "&Toggle Grid Type",    0, FCAL view_do_grid_type },
+		{ "Toggle &Grid Type",    0, FCAL view_do_grid_type },
+		{ "Toggle Object Nums",   0, FCAL view_do_object_nums },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -528,12 +526,12 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL file_do_default_props },
+		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
-		{ "&Go to next",       FL_COMMAND + 'g', FCAL view_do_next },
+		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
 		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
 		{ "&Jump to Object",   0, FCAL view_do_jump },
 		{ 0 },

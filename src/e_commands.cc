@@ -1028,7 +1028,7 @@ void CMD_RotateObjects_Dialog()
 }
 
 
-void CMD_GRID_Bump(void)
+void CMD_GRID_Bump()
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -1038,7 +1038,7 @@ void CMD_GRID_Bump(void)
 }
 
 
-void CMD_GRID_Set(void)
+void CMD_GRID_Set()
 {
 	int step = atoi(EXEC_Param[0]);
 
@@ -1052,7 +1052,7 @@ void CMD_GRID_Set(void)
 }
 
 
-void CMD_GRID_Zoom(void)
+void CMD_GRID_Zoom()
 {
 	// target scale is positive for NN:1 and negative for 1:NN
 
@@ -1075,7 +1075,7 @@ void CMD_GRID_Zoom(void)
 }
 
 
-void CMD_BR_CycleCategory(void)
+void CMD_BR_CycleCategory()
 {
 	if (! main_win->browser->visible())
 	{
@@ -1088,7 +1088,8 @@ void CMD_BR_CycleCategory(void)
 	main_win->browser->CycleCategory(dir);
 }
 
-void CMD_BR_ClearSearch(void)
+
+void CMD_BR_ClearSearch()
 {
 	if (! main_win->browser->visible())
 	{
@@ -1100,7 +1101,7 @@ void CMD_BR_ClearSearch(void)
 }
 
 
-void CMD_BR_Scroll(void)
+void CMD_BR_Scroll()
 {
 	if (! main_win->browser->visible())
 	{
@@ -1117,6 +1118,30 @@ void CMD_BR_Scroll(void)
 	int delta = atoi(EXEC_Param[0]);
 
 	main_win->browser->Scroll(delta);
+}
+
+
+void CMD_DefaultProps()
+{
+	main_win->ShowDefaultProps();
+}
+
+
+void CMD_FindDialog()
+{
+	main_win->ShowFindAndReplace();
+}
+
+
+void CMD_FindNext()
+{
+	main_win->find_box->FindNext();
+}
+
+
+void CMD_LogViewer()
+{
+	LogViewer_Open();
 }
 
 
@@ -1248,6 +1273,22 @@ static editor_command_t  command_table[] =
 
 	{	"JumpToObject",  "View", 0,
 		&CMD_JumpToObject
+	},
+
+	{	"DefaultProps",  "View", 0,
+		&CMD_DefaultProps
+	},
+
+	{	"FindDialog",  "View", 0,
+		&CMD_FindDialog
+	},
+
+	{	"FindNext",  "View", 0,
+		&CMD_FindNext
+	},
+
+	{	"LogViewer",  "View", 0,
+		&CMD_LogViewer
 	},
 
 
