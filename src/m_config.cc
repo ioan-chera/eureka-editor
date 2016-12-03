@@ -1263,6 +1263,8 @@ int M_WriteConfigFile()
 		return -1;
 	}
 
+	fprintf(fp, "# Eureka configuration (local)\n");
+
 	const opt_desc_t *o;
 
 	for (o = options; o->opt_type != OPT_END; o++)
