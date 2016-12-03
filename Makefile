@@ -140,6 +140,8 @@ install: stripped
 	install -d $(INSTALL_DIR)/ports
 	rm -f $(INSTALL_DIR)/games/freedoom.ugh
 	install -o root -m 644 bindings.cfg $(INSTALL_DIR)/bindings.cfg
+	install -o root -m 644 defaults.cfg $(INSTALL_DIR)/defaults.cfg
+	install -o root -m 644 operations.cfg $(INSTALL_DIR)/operations.cfg
 	install -o root -m 644 misc/about_logo.png $(INSTALL_DIR)/about_logo.png
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
 	install -o root -m 644 common/*.* $(INSTALL_DIR)/common

@@ -28,6 +28,8 @@ mkdir $dest/obj_win32
 #  Data files
 #
 cp -av bindings.cfg $dest
+cp -av defaults.cfg $dest
+cp -av operations.cfg $dest
 
 cp -av common $dest/common
 cp -av games  $dest/games

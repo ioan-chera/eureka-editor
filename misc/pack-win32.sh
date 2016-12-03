@@ -25,6 +25,8 @@ cp -av games  $dest/games
 cp -av ports  $dest/ports
 
 cp -av bindings.cfg $dest
+cp -av defaults.cfg $dest
+cp -av operations.cfg $dest
 
 cp -av misc/about_logo.png $dest/common
 
