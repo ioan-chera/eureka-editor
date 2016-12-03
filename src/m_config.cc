@@ -1376,12 +1376,16 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 			continue;
 		}
 
-		if (ch == '"' && in_string)
+		if (in_string && ch == '"')
 		{
 			// end of string
 			in_string = false;
 		}
-		else if (ch == 0 || ch == '\n' || isspace(ch))
+		else if (ch == 0 || ch == '\n')
+		{
+			// end of line
+		}
+		else if (! in_string && isspace(ch))
 		{
 			// end of token
 		}
@@ -1402,7 +1406,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 
 		tokens[num_tok++] = StringDup(tokenbuf);
 
-		// end of line?  if yes, break out of for loop
+		// end of line?  if yes, we are done
 		if (ch == 0 || ch == '\n')
 			break;
 	}
