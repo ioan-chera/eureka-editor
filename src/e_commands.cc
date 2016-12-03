@@ -321,6 +321,11 @@ void CMD_BrowserMode(void)
 	}
 
 	main_win->ShowBrowser(mode);
+
+	if (Exec_HasFlag("/recent"))
+	{
+		main_win->browser->ToggleRecent(true /* force */);
+	}
 }
 
 
@@ -1499,7 +1504,7 @@ static editor_command_t  command_table[] =
 
  	{	"BrowserMode", "Browser", 0,
 		&CMD_BrowserMode,
-		/* flags */ NULL,
+		/* flags */ "/recent",
 		/* keywords */ "obj tex flat line sec genline"
 	},
 

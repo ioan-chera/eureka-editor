@@ -331,23 +331,17 @@ static void browser_do_gen_types(Fl_Widget *w, void * data)
 
 static void browser_do_recent_tex(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("BrowserMode", "T");
-
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "T", "/recent");
 }
 
 static void browser_do_recent_flats(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("BrowserMode", "F");
-
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "F", "/recent");
 }
 
 static void browser_do_recent_things(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("BrowserMode", "O");
-
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "O", "/recent");
 }
 
 static void browser_hide(Fl_Widget *w, void * data)
