@@ -888,7 +888,16 @@ void CMD_Zoom(void)
 		return;
 	}
 
-	Editor_Zoom(delta, edit.map_x, edit.map_y);
+	int mid_x = edit.map_x;
+	int mid_y = edit.map_y;
+
+	if (Exec_HasFlag("/center"))
+	{
+		mid_x = I_ROUND(grid.orig_x);
+		mid_y = I_ROUND(grid.orig_y);
+	}
+
+	Editor_Zoom(delta, mid_x, mid_y);
 }
 
 
@@ -1225,7 +1234,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"Zoom",  "View", 0,
-		&CMD_Zoom
+		&CMD_Zoom,
+		/* flags */ "/center"
 	},
 
 	{	"ZoomWholeMap",  "View", 0,
