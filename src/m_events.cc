@@ -780,7 +780,9 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// we want to open it explictly by our own code.
 	menu->type(0x40);
 
+	// the boxtype MUST be FL_NO_BOX
 	menu->box(FL_NO_BOX);
+
 	menu->textsize(KF_fonth);
 	menu->show();
 }
@@ -822,6 +824,11 @@ void CMD_OperationMenu()
 	}
 
 	SYS_ASSERT(menu);
+
+	// forget the last chosen command in this menu, otherwise FLTK
+	// positions the menu to point at that item, which can be annoying
+	// especially if the last command was destructive.
+	menu->value((const Fl_Menu_Item *)NULL);
 
 	menu->popup();
 }
