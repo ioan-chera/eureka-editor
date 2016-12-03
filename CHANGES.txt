@@ -61,9 +61,9 @@ Key System:
 
 +  smooth scrolling/navigation in both 2D and 3D views
 
+-  bindable commands for all the functions in the menus
 -  improved key binding dialog in the Preferences
--  edit menu "Move/Scale/Rotate Objects" commands are bindable
--  allow keys hard-coded in the menus to be bound to other commands
+-  allow key bindings to override hard-coded menu shortcuts
 
 -  support "/center" flag for Zoom command
 

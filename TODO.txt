@@ -96,11 +96,6 @@ ______________________________________________________________________
 General
 -------
 
--  a key to copy properties TO defaults (e.g. 'y' for yank)
-
--  View/Place Camera command, cursor turns into +
-   [ need an ACT_ASK_SPOT action, plus a /ask flag for command ]
-
 +  Preferences window:
    +  add backup_max_files / backup_max_space
    -  implement the scrolling sizes
@@ -108,12 +103,17 @@ General
 
 +  a dialog to view / load / prune backups.
 
+-  View/Place Camera command, cursor turns into +
+   [ need an ACT_ASK_SPOT action, plus a /ask flag for command ]
+
 -  BSP: make read errors more tolerant (DON'T call FatalError)
 
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
 
 IDEA: large font mode, more readable on 1920x1080 monitors
+
+IDEA: a key to copy properties TO defaults (e.g. 'y' for yank)
 
 IDEA: MMB on sidedef/sector tex : open RECENT browser
 
@@ -138,18 +138,11 @@ WISH: can import UDMF format maps
    -  make sure the user built the nodes
       (option to invoke it automatically, or not check at all)
 
-   -  each map (via .dat?) can specify _override_ config
-
 -  linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
 
--  binding functions for all menu stuff (NewMap, OpenMap, etc....)
-   (perhaps prefix with MENU_xxx)
-
 -  improve Key binding preferences:
-   +  "Grab" button in UI_EditKey
-   -  "Find" or "Match" button for function in UI_EditKey
    -  reverse ordering of KCTX_XXX values
 
 -  replace "Toggle XXX" in View menu with checkboxes
@@ -161,9 +154,6 @@ WISH: can import UDMF format maps
 
 IDEA: for generalized lines, show more info in tooltip of desc
 
-IDEA: after inserting a new object, allow moving another object
-      (i.e. set edit.did_a_move = true).  Perhaps config item.
-
 IDEA: when building REJECT, support a simple distance check
       [ i.e. if distance between two sectors >= N, mark as cannot see ]
 
@@ -171,15 +161,15 @@ WISH: a scripting language
 
 WISH: PRINT key makes a screenshot of 2D or 3D view
 
-WISH: support ZDoom PK3 for textures (etc)
-
-WISH: support DECORATE as (or in) a resource file
-
 WISH: ability to view (perhaps edit) a map header lump
       (for FraggleScript etc...)
 
 WISH: ability to create / view / edit / import arbitrary lumps
       (e.g. MAPINFO, DECORATE, etc...)
+
+WISH: support ZDoom PK3 for textures (etc)
+
+WISH: support DECORATE as (or in) a resource file
 
 
 
@@ -288,18 +278,16 @@ IDEA: 3D_NAV_CircleStrafe command
 Browser
 -------
 
--  can change the [max] size of the texture/flat previews
-
--  scroll speed (i.e. linesize) is configurable
-
 -  search box: ',' for OR
-
--  preference for # of RECENT items
+   --> split match into N pieces, perform normal match on each
 
 IDEA: a command to clear the recent lists
 
+IDEA: can change the [max] size of the texture/flat previews
+
 IDEA: using "Browser / Things" (etc) to open the browser will reset
       the category to ALL and clear the match string
+      --->  a "/clear" flag to BrowserMode  [ or two flags ]
 
 IDEA: ability to shrink categories, i.e. say that for things the
       'b' (bonus) and 'k' categories should become a single one
@@ -311,27 +299,31 @@ Game / Port Definitions
 
 +  flesh out the ZDoom configuration
 
--  FreeDOOM : categorize all the new textures
+WISH:  FreeDOOM : categorize all the new textures
 
--  HacX : categorize the textures
-
-IDEA: for DOOM have "Switch", "Grating", "Door" categories
-
-IDEA: add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
+WISH:  HacX and Harmony : categorize the textures
 
 WISH: conversion between Hexen <--> DOOM formats
       [ perhaps as a script ]
 
 WISH: conversion from Boom --> vanilla DOOM
 
+IDEA: for DOOM have "Switch", "Grating", "Door" categories
+
+IDEA: add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
+
 
 
 Possible user config
 --------------------
 
-headroom button_1..6
+-  headroom button_1..6
 
-paste_reselects  (true)
+-  number of RECENT items in browser
+
+-  browser scroll speed (i.e. linesize)
+
+-  paste_reselects  (true)
 
 
 ______________________________________________________________________
