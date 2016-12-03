@@ -34,7 +34,10 @@ General:
 -  find/replace : added a "Restrict to Selection" filter
 -  find/replace : better way to choose textures/things
 -  Browser : changing categories clears the search box
+
 -  Vertex panel : arrow buttons for position adjustments
+
+-  a "Reset All Settings" button in the preferences dialog
 
 
 Games and Ports:
@@ -61,6 +64,8 @@ Key System:
 -  improved key binding dialog in the Preferences
 -  edit menu "Move/Scale/Rotate Objects" commands are bindable
 -  allow keys hard-coded in the menus to be bound to other commands
+
+-  support "/center" flag for Zoom command
 
 -  changed scaling and rotation to the 'r' key (was MOUSE2)
 -  changed map panning to use MMB (MOUSE2) or the 'a' key

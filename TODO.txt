@@ -57,6 +57,9 @@ Editing
 
    (also bound to right mouse button)
 
+   -->  for "ACT_XXX" commands, turn pointer into a '+' and
+        wait for user to begin action (with MOUSE1..3 or SPACE key)
+
 +  the criss-crossing-lines detection is too sloppy
    [ e.g. see MAP24 of Ancient Aliens ]
 
@@ -93,8 +96,6 @@ ______________________________________________________________________
 General
 -------
 
-+  Large font mode, more readable on 1920x1080 monitors
-
 -  a key to copy properties TO defaults (e.g. 'y' for yank)
 
 -  View/Place Camera command, cursor turns into +
@@ -111,6 +112,8 @@ General
 
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
+
+IDEA: large font mode, more readable on 1920x1080 monitors
 
 IDEA: MMB on sidedef/sector tex : open RECENT browser
 
