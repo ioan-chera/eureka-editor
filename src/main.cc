@@ -282,8 +282,8 @@ static void Determine_HomeDir(const char *argv0)
 	if (! cache_dir)
 		cache_dir = home_dir;
 
-    LogPrintf("Home  dir: %s\n", home_dir);
-    LogPrintf("Cache dir: %s\n", cache_dir);
+	LogPrintf("Home  dir: %s\n", home_dir);
+	LogPrintf("Cache dir: %s\n", cache_dir);
 
 	// create cache directory (etc)
 	CreateHomeDirs();
@@ -616,7 +616,7 @@ static void Main_OpenWindow()
 
 	LogOpenWindow();
 
-    Fl::add_handler(Main_key_handler);
+	Fl::add_handler(Main_key_handler);
 
 	main_win->ShowBrowser(0);
 
@@ -702,8 +702,8 @@ void Main_Loop()
 {
 	UpdateHighlight();
 
-    for (;;)
-    {
+	for (;;)
+	{
 		if (edit.is_navigating)
 		{
 			Nav_Navigate();
@@ -734,7 +734,7 @@ void Main_Loop()
 
 		if (edit.Selected->empty())
 			edit.error_mode = false;
-    }
+	}
 }
 
 
