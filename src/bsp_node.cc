@@ -2057,10 +2057,8 @@ build_result_e BuildNodes(superblock_t *seg_list,
 }
 
 
-void ClockwiseBspTree(node_t *root)
+void ClockwiseBspTree()
 {
-	(void) root;
-
 	num_complete_seg = 0;
 
 	for (int i=0 ; i < num_subsecs ; i++)
@@ -2132,13 +2130,11 @@ static void NormaliseSubsector(subsec_t *sub)
 }
 
 
-void NormaliseBspTree(node_t *root)
+void NormaliseBspTree()
 {
 	// unlinks all minisegs from each subsector
 
 	int i;
-
-	(void) root;
 
 	num_complete_seg = 0;
 
@@ -2270,11 +2266,9 @@ static void RoundOffSubsector(subsec_t *sub)
 }
 
 
-void RoundOffBspTree(node_t *root)
+void RoundOffBspTree()
 {
 	int i;
-
-	(void) root;
 
 	num_complete_seg = 0;
 

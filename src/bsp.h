@@ -785,25 +785,26 @@ build_result_e BuildNodes(superblock_t *seg_list,
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);
 
-// traverse the BSP tree and put all the segs in each subsector into
-// clockwise order, and renumber the seg indices.  This cannot be done
-// DURING BuildNodes() since splitting a seg with a partner may insert
-// another seg into that partner's list -- usually in the wrong place
-// order-wise.
+// put all the segs in each subsector into clockwise order, and renumber
+// the seg indices.
 //
-void ClockwiseBspTree(node_t *root);
+// [ This cannot be done DURING BuildNodes() since splitting a seg with
+//   a partner will insert another seg into that partner's list, usually
+//   in the wrong place order-wise. ]
+//
+void ClockwiseBspTree();
 
 // traverse the BSP tree and do whatever is necessary to convert the
 // node information from GL standard to normal standard (for example,
 // removing minisegs).
 //
-void NormaliseBspTree(node_t *root);
+void NormaliseBspTree();
 
 // traverse the BSP tree, doing whatever is necessary to round
 // vertices to integer coordinates (for example, removing segs whose
 // rounded coordinates degenerate to the same point).
 //
-void RoundOffBspTree(node_t *root);
+void RoundOffBspTree();
 
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);

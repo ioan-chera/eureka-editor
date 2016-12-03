@@ -2394,7 +2394,7 @@ void SaveLevel(node_t *root_node)
 	if (lev_force_xnod && num_linedefs > 0)
 	{
 		// remove mini-segs
-		NormaliseBspTree(root_node);
+		NormaliseBspTree();
 
 		SaveZDFormat(root_node);
 	}
@@ -2403,12 +2403,8 @@ void SaveLevel(node_t *root_node)
 		// Note: RoundOffBspTree will convert the GL vertices in segs to
 		// their normal counterparts (pointer change: use normal_dup).
 
-		if (root_node)
-		{
-			RoundOffBspTree(root_node);
-
-			NormaliseBspTree(root_node);
-		}
+		RoundOffBspTree();
+		NormaliseBspTree();
 
 		PutVertices("VERTEXES", false);
 
@@ -2657,12 +2653,12 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 		if (root_node)
 		{
-			ClockwiseBspTree(root_node);
-
 			PrintVerbose("Heights of left and right subtrees = (%d,%d)\n",
 					ComputeBspHeight(root_node->r.node),
 					ComputeBspHeight(root_node->l.node));
 		}
+
+		ClockwiseBspTree();
 
 		SaveLevel(root_node);
 	}
