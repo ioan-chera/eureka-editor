@@ -969,6 +969,8 @@ int main(int argc, char *argv[])
 
 	init_progress = 3;
 
+	M_LoadOperationMenus();
+
 
 	// open a specified PWAD now
 	// [ the map is loaded later.... ]

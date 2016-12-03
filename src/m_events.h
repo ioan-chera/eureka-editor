@@ -80,6 +80,10 @@ unsigned int Nav_TimeDiff(); /* milliseconds */
 
 void Editor_ClearNav();
 
+
+void M_LoadOperationMenus();
+
+
 #endif /* __EUREKA_M_EVENTS_H__ */
 
 //--- editor settings ---

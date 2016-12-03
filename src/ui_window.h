@@ -78,6 +78,13 @@ public:
 	UI_DefaultProps   *props_box;
 	UI_FindAndReplace *find_box;
 
+	// pop-up Operation menus
+	Fl_Menu_Button	*op_thing;
+	Fl_Menu_Button	*op_line;
+	Fl_Menu_Button	*op_sector;
+	Fl_Menu_Button	*op_vertex;
+	Fl_Menu_Button	*op_render;
+
 private:
 	Fl_Cursor cursor_shape;
 

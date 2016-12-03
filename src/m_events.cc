@@ -648,5 +648,14 @@ int Editor_RawMouse(int event)
 }
 
 
+//------------------------------------------------------------------------
+//   OPERATION MENU(S)
+//------------------------------------------------------------------------
+
+void M_LoadOperationMenus()
+{
+	// TODO
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
