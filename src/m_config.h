@@ -108,6 +108,8 @@ extern bool bsp_compressed;
 int M_ParseConfigFile();
 int M_WriteConfigFile();
 
+int M_ParseDefaultConfigFile();
+
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 

@@ -43,9 +43,9 @@
 
 //------------------------------------------------------------------------
 
-/*
- *  Description of the command line arguments and config file keywords
- */
+//
+//  Structures for command line arguments and config settings
+//
 typedef enum
 {
 	// End of the options description
@@ -901,11 +901,11 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 }
 
 
-/*
- *  try to parse a config file by pathname.
- *
- *  Return 0 on success, negative value on failure.
- */
+//
+//  try to parse a config file by pathname.
+//
+//  Return 0 on success, negative value on failure.
+//
 static int parse_a_config_file(FILE *fp, const char *filename)
 {
 	static char line[1024];
@@ -937,11 +937,11 @@ static const char * default_config_file()
 }
 
 
-/*
- *  parses the config file (either a user-specific one or the default one).
- *
- *  return 0 on success, negative value on error.
- */
+//
+//  parses the config file (either a user-specific one or the default one).
+//
+//  return 0 on success, negative value on error.
+//
 int M_ParseConfigFile()
 {
 	if (! config_file)
@@ -960,6 +960,30 @@ int M_ParseConfigFile()
 	}
 
 	int rc = parse_a_config_file(fp, config_file);
+
+	fclose(fp);
+
+	return rc;
+}
+
+
+int M_ParseDefaultConfigFile()
+{
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/defaults.cfg", install_dir);
+
+	FILE * fp = fopen(filename, "r");
+
+	LogPrintf("Reading config file: %s\n", filename);
+
+	if (fp == NULL)
+	{
+		LogPrintf("--> %s\n", strerror(errno));
+		return -1;
+	}
+
+	int rc = parse_a_config_file(fp, filename);
 
 	fclose(fp);
 

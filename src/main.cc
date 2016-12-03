@@ -943,7 +943,7 @@ int main(int argc, char *argv[])
 	LogOpenFile(log_file);
 
 
-	// a config file can provides some values
+	// load all the config settings
 	M_ParseConfigFile();
 
 	// environment variables can override them
