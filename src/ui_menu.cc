@@ -125,7 +125,7 @@ static void file_do_load_recent(Fl_Widget *w, void *data)
 
 static void file_do_quit(Fl_Widget *w, void * data)
 {
-	Main_Quit();
+	ExecuteCommand("Quit");
 }
 
 
@@ -163,7 +163,6 @@ static void edit_do_delete(Fl_Widget *w, void * data)
 	ExecuteCommand("Delete");
 }
 
-
 static void edit_do_select_all(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("SelectAll");
@@ -183,7 +182,6 @@ static void edit_do_last_sel(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("LastSelection");
 }
-
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
@@ -222,12 +220,12 @@ static void view_do_logs(Fl_Widget *w, void * data)
 
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
-	Editor_Zoom(+1, I_ROUND(grid.orig_x), I_ROUND(grid.orig_y));
+	ExecuteCommand("Zoom", "+1", "/center");
 }
 
 static void view_do_zoom_out(Fl_Widget *w, void * data)
 {
-	Editor_Zoom(-1, I_ROUND(grid.orig_x), I_ROUND(grid.orig_y));
+	ExecuteCommand("Zoom", "-1", "/center");
 }
 
 static void view_do_whole_map(Fl_Widget *w, void * data)
@@ -303,69 +301,58 @@ static void view_do_jump(Fl_Widget *w, void * data)
 
 static void browser_do_textures(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('T');
+	ExecuteCommand("BrowserMode", "T");
 }
 
 static void browser_do_flats(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('F');
+	ExecuteCommand("BrowserMode", "F");
 }
 
 static void browser_do_things(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('O');
+	ExecuteCommand("BrowserMode", "O");
 }
 
 static void browser_do_lines(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('L');
+	ExecuteCommand("BrowserMode", "L");
 }
 
 static void browser_do_sectors(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('S');
+	ExecuteCommand("BrowserMode", "S");
 }
 
 static void browser_do_gen_types(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('G');
-}
-
-
-static void browser_do_recent_things(Fl_Widget *w, void * data)
-{
-	main_win->ShowBrowser('O');
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "G");
 }
 
 static void browser_do_recent_tex(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('T');
+	ExecuteCommand("BrowserMode", "T");
+
 	main_win->browser->ToggleRecent(true /* force */);
 }
 
 static void browser_do_recent_flats(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('F');
+	ExecuteCommand("BrowserMode", "F");
+
 	main_win->browser->ToggleRecent(true /* force */);
 }
 
-
-#if 0
-static void browser_go_wide(Fl_Widget *w, void * data)
+static void browser_do_recent_things(Fl_Widget *w, void * data)
 {
-	// TODO
-}
+	ExecuteCommand("BrowserMode", "O");
 
-static void browser_go_narrow(Fl_Widget *w, void * data)
-{
-	// TODO
+	main_win->browser->ToggleRecent(true /* force */);
 }
-#endif
 
 static void browser_hide(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser(0);
+	ExecuteCommand("Set", "browser", "0");
 }
 
 
