@@ -753,28 +753,29 @@ UI_Preferences::UI_Preferences() :
 		o->labelsize(16);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
+		{ Fl_Box* o = new Fl_Box(20, 45, 355, 30, "Key Bindings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_key = new Fl_Button(25, 87, 135, 25, "KEY");
+		{ key_key = new Fl_Button(25, 87, 125, 25, "KEY");
 		  key_key->color((Fl_Color)231);
 		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_key->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_group = new Fl_Button(165, 87, 75, 25, "MODE");
+		{ key_group = new Fl_Button(155, 87, 75, 25, "MODE");
 		  key_group->color((Fl_Color)231);
 		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_group->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_func = new Fl_Button(245, 87, 195, 25, "FUNCTION");
+		{ key_func = new Fl_Button(235, 87, 205, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
 		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
 		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
 		  key_list->textfont(FL_COURIER);
+		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
