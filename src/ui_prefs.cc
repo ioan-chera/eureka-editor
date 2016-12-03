@@ -1228,7 +1228,7 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 		"using the \"Discard\" button at the bottom of "
 		"the Preferences window."
 		"\n  ",
-		is_keys ? "key bindings" : "config settings");
+		is_keys ? "key bindings" : "preferences");
 
 	if (res <= 0)
 		return;
@@ -1241,9 +1241,14 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 	}
 	else
 	{
-		M_ParseDefaultConfigFile();
-
-		prefs->LoadValues();
+		if (M_ParseDefaultConfigFile() != 0)
+		{
+			DLG_Notify("Installation problem: failed to find the \"defaults.cfg\" file!");
+		}
+		else
+		{
+			prefs->LoadValues();
+		}
 	}
 }
 
