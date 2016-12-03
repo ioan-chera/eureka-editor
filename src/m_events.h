@@ -83,6 +83,8 @@ void Editor_ClearNav();
 
 void M_LoadOperationMenus();
 
+void CMD_OperationMenu();
+
 
 #endif /* __EUREKA_M_EVENTS_H__ */
 

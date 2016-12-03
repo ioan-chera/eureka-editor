@@ -657,7 +657,19 @@ int Editor_RawMouse(int event)
 static void ParseOperationLine(const char ** tokens, int num_tok,
 							   Fl_Menu_Button *menu)
 {
+	if (num_tok < 2)
+		FatalError("Bad operations menu : missing entry name.\n");
+
+	// just a spacer?
+	if (tokens[1][0] == '_')
+	{
+		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
+		return;
+	}
+
 	// FIXME
+
+	menu->add(tokens[1], 0, 0, 0, 0);
 }
 
 
@@ -698,6 +710,9 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 		StringRemoveCRLF(line);
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+
+///  fprintf(stderr, "LINE [%s]  num_tok:%d\n", line, num_tok);
+
 		if (num_tok == 0)
 			continue;
 
@@ -740,6 +755,36 @@ void M_LoadOperationMenus()
 	M_ParseOperationFile("vertex", main_win->op_vertex);
 	M_ParseOperationFile("render", main_win->op_render);
 }
+
+
+void CMD_OperationMenu()
+{
+	Fl_Menu_Button *menu = NULL;
+
+	if (edit.render3d)
+	{
+		menu = main_win->op_render;
+	}
+	else
+	{
+		switch (edit.mode)
+		{
+			case OBJ_THINGS:	menu = main_win->op_thing;  break;
+			case OBJ_LINEDEFS:	menu = main_win->op_line;   break;
+			case OBJ_SECTORS:	menu = main_win->op_sector; break;
+			case OBJ_VERTICES:	menu = main_win->op_vertex; break;
+
+			default:
+				Beep("a strange case indeed!");
+				return;
+		}
+	}
+
+	SYS_ASSERT(menu);
+
+	menu->popup();
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

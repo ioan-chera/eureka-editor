@@ -37,6 +37,7 @@
 #include "e_path.h"
 #include "e_vertex.h"
 #include "m_config.h"
+#include "m_events.h"
 #include "m_loadsave.h"
 #include "r_render.h"
 #include "ui_window.h"
@@ -320,12 +321,6 @@ void CMD_BrowserMode(void)
 	}
 
 	main_win->ShowBrowser(mode);
-}
-
-
-void CMD_OperationMenu(void)
-{
-	Beep("operation menu NYI");
 }
 
 
