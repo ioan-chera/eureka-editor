@@ -476,7 +476,7 @@ static const opt_desc_t options[] =
 		&grid_toggle_type
 	},
 
-	{	"gui_scheme",
+	{	"gui_theme",
 		0,
 		OPT_INTEGER,
 		"v",
