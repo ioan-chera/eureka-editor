@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include "m_events.h"
+#include "m_config.h"
 #include "e_main.h"
 #include "e_hover.h"
 #include "r_render.h"
@@ -653,6 +654,15 @@ int Editor_RawMouse(int event)
 //------------------------------------------------------------------------
 
 
+static void ParseOperationLine(const char ** tokens, int num_tok,
+							   Fl_Menu_Button *menu)
+{
+	// FIXME
+}
+
+
+#define MAX_TOKENS  30
+
 static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 {
 	// open the file and build the menu from all line whose first
@@ -664,8 +674,6 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	FILE *fp = fopen(filename, "r");
 
-	bool saw_something = false;
-
 	if (! fp)
 	{
 		// if (context[0] == 't')
@@ -675,11 +683,35 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	menu->clear();
 
-	// FIXME : parse each line
+
+	// parse each line
+
+	static char line_buf[FL_PATH_MAX];
+	const  char * tokens[MAX_TOKENS];
+
+	while (! feof(fp))
+	{
+		char *line = fgets(line_buf, FL_PATH_MAX, fp);
+		if (! line)
+			break;
+
+		StringRemoveCRLF(line);
+
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+		if (num_tok == 0)
+			continue;
+
+		// first word is the context, require a match
+		if (y_stricmp(tokens[0], context) != 0)
+			continue;
+
+		ParseOperationLine(tokens, num_tok, menu);
+	}
 
 	fclose(fp);
 
-	if (! saw_something)
+
+	if (menu->size() < 2)
 	{
 		FatalError("Bad operations menu : no %s items.\n", context);
 		return;
