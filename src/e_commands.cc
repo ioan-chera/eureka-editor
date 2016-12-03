@@ -42,6 +42,7 @@
 #include "m_nodes.h"
 #include "r_render.h"
 #include "ui_window.h"
+#include "ui_about.h"
 #include "ui_misc.h"
 #include "ui_prefs.h"
 
@@ -1152,6 +1153,18 @@ void CMD_LogViewer()
 }
 
 
+void CMD_Documentation()
+{
+	fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+}
+
+
+void CMD_AboutDialog()
+{
+	DLG_AboutText();
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -1342,8 +1355,19 @@ static editor_command_t  command_table[] =
 		&CMD_FindNext
 	},
 
-	{	"LogViewer",  "View", 0,
+
+	/* ------ HELP menu ------ */
+
+	{	"LogViewer",  "Help", 0,
 		&CMD_LogViewer
+	},
+
+	{	"Documentation",  "Help", 0,
+		&CMD_Documentation
+	},
+
+	{	"AboutDialog",  "Help", 0,
+		&CMD_AboutDialog
 	},
 
 
@@ -1491,7 +1515,7 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* -------- linedef -------- */
+	/* ------ LineDef mode ------ */
 
 	{	"LIN_Flip", NULL, 0,
 		&CMD_LIN_Flip,
@@ -1508,7 +1532,7 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* -------- sector -------- */
+	/* ------ Sector mode ------ */
 
 	{	"SEC_Floor", NULL, 0,
 		&CMD_SEC_Floor
@@ -1532,14 +1556,14 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* -------- thing -------- */
+	/* ------ Thing mode ------ */
 
 	{	"TH_Spin", NULL, 0,
 		&CMD_TH_SpinThings
 	},
 
 
-	/* -------- vertex -------- */
+	/* ------ Vertex mode ------ */
 
 	{	"VT_ShapeLine", NULL, 0,
 		&CMD_VT_ShapeLine
@@ -1550,7 +1574,7 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* -------- browser -------- */
+	/* -------- Browser -------- */
 
  	{	"BrowserMode", "Browser", 0,
 		&CMD_BrowserMode,

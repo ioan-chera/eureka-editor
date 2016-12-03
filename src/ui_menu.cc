@@ -20,19 +20,10 @@
 
 #include "main.h"
 #include "ui_window.h"
-#include "ui_about.h"
-#include "ui_prefs.h"
 
-#include "e_basis.h"
-#include "e_objects.h"
-#include "e_cutpaste.h"
 #include "e_main.h"
-#include "e_path.h"
 #include "m_files.h"
 #include "m_loadsave.h"
-#include "m_nodes.h"
-#include "r_grid.h"
-#include "r_render.h"
 
 
 //------------------------------------------------------------------------
@@ -401,12 +392,12 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 
 void help_do_online_docs(Fl_Widget *w, void * data)
 {
-	fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+	ExecuteCommand("Documentation");
 }
 
 void help_do_about(Fl_Widget *w, void * data)
 {
-	DLG_AboutText();
+	ExecuteCommand("AboutDialog");
 }
 
 
