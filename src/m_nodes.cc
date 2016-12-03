@@ -431,7 +431,7 @@ void CMD_BuildAllNodes()
 
 		inhibit_node_build = true;
 
-		bool save_result = CMD_SaveMap();
+		bool save_result = M_SaveMap();
 
 		inhibit_node_build = false;
 
@@ -516,7 +516,7 @@ void CMD_TestMap()
 			return;
 		}
 
-		if (! CMD_SaveMap())
+		if (! M_SaveMap())
 			return;
 	}
 

@@ -41,63 +41,63 @@
 
 static void file_do_new_project(Fl_Widget *w, void * data)
 {
-	CMD_NewProject();
+	ExecuteCommand("NewProject");
 }
 
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	CMD_ManageProject();
+	ExecuteCommand("ManageProject");
 }
 
 static void file_do_open(Fl_Widget *w, void * data)
 {
-	CMD_OpenMap();
+	ExecuteCommand("OpenMap");
 }
 
 static void file_do_save(Fl_Widget *w, void * data)
 {
-	CMD_SaveMap();
+	ExecuteCommand("SaveMap");
 }
 
 static void file_do_export(Fl_Widget *w, void * data)
 {
-	CMD_ExportMap();
+	ExecuteCommand("ExportMap");
 }
 
 static void file_do_fresh_map(Fl_Widget *w, void * data)
 {
-	CMD_FreshMap();
+	ExecuteCommand("FreshMap");
 }
 
 static void file_do_copy_map(Fl_Widget *w, void * data)
 {
-	CMD_CopyMap();
+	ExecuteCommand("CopyMap");
 }
 
 static void file_do_rename(Fl_Widget *w, void * data)
 {
-	CMD_RenameMap();
+	ExecuteCommand("RenameMap");
 }
 
 static void file_do_delete(Fl_Widget *w, void * data)
 {
-	CMD_DeleteMap();
+	ExecuteCommand("DeleteMap");
 }
 
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
-	CMD_Preferences();
+	ExecuteCommand("PreferenceDialog");
 }
 
 static void file_do_build_nodes(Fl_Widget *w, void * data)
 {
-	CMD_BuildAllNodes();
+	ExecuteCommand("BuildAllNodes");
 }
 
 #if 0
 static void file_do_test_map(Fl_Widget *w, void * data)
 {
-	CMD_TestMap();
+	ExecuteCommand("TestMap");
 }
 #endif
 

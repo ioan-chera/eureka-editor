@@ -46,7 +46,7 @@
 int last_given_file;
 
 
-// this is only used to prevent a CMD_Save which happens inside
+// this is only used to prevent a M_SaveMap which happens inside
 // CMD_BuildAllNodes from building that saved level twice.
 bool inhibit_node_build;
 
@@ -194,7 +194,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 }
 
 
-bool CMD_ManageProject()
+void CMD_ManageProject()
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, false /* is_startup */);
 
@@ -206,15 +206,13 @@ bool CMD_ManageProject()
 	}
 
 	delete dialog;
-
-	return ok;
 }
 
 
-bool CMD_NewProject()
+void CMD_NewProject()
 {
 	if (! Main_ConfirmQuit("create a new project"))
-		return false;
+		return;
 
 
 	/* first, ask for the output file */
@@ -222,7 +220,7 @@ bool CMD_NewProject()
 	char filename[FL_PATH_MAX];
 
 	if (! Project_AskFile(filename))
-		return false;
+		return;
 
 
 	/* second, query what Game, Port and Resources to use */
@@ -234,8 +232,7 @@ bool CMD_NewProject()
 	if (! ok)
 	{
 		delete dialog;
-
-		return false;
+		return;
 	}
 
 
@@ -252,8 +249,7 @@ bool CMD_NewProject()
 			DLG_Notify("Unable to delete the existing file.");
 
 			delete dialog;
-
-			return false;
+			return;
 		}
 
 		Fl::wait(0.1);
@@ -287,7 +283,7 @@ bool CMD_NewProject()
 	if (! wad)
 	{
 		DLG_Notify("Unable to create the new WAD file.");
-		return false;
+		return;
 	}
 
 	edit_wad = wad;
@@ -300,8 +296,6 @@ bool CMD_NewProject()
 
 	// save it now : sets Level_name and window title
 	SaveLevel(map_name);
-
-	return true;
 }
 
 
@@ -1089,10 +1083,10 @@ void OpenFileMap(const char *filename, const char *map_name)
 }
 
 
-bool CMD_OpenMap()
+void CMD_OpenMap()
 {
 	if (! Main_ConfirmQuit("open another map"))
-		return false;
+		return;
 
 
 	UI_OpenMap * dialog = new UI_OpenMap();
@@ -1107,7 +1101,7 @@ bool CMD_OpenMap()
 
 	// cancelled?
 	if (! wad)
-		return false;
+		return;
 
 
 	// this shouldn't happen -- but just in case...
@@ -1116,7 +1110,7 @@ bool CMD_OpenMap()
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
 		delete wad;
-		return false;
+		return;
 	}
 
 
@@ -1125,7 +1119,7 @@ bool CMD_OpenMap()
 		if (! M_ParseEurekaLump(wad))
 		{
 			delete wad;
-			return false;
+			return;
 		}
 	}
 
@@ -1152,8 +1146,6 @@ bool CMD_OpenMap()
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
 	LoadLevel(wad, map_name);
-
-	return true;
 }
 
 
@@ -1620,14 +1612,14 @@ static void SaveLevel(const char *level)
 }
 
 
-bool CMD_SaveMap()
+bool M_SaveMap()
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
 	if (! edit_wad)
 	{
-		return CMD_ExportMap();
+		return M_ExportMap();
 	}
 
 	if (edit_wad->IsReadOnly())
@@ -1639,7 +1631,7 @@ bool CMD_SaveMap()
 			return false;
 		}
 		else
-			return CMD_ExportMap();
+			return M_ExportMap();
 	}
 
 
@@ -1653,7 +1645,7 @@ bool CMD_SaveMap()
 }
 
 
-bool CMD_ExportMap()
+bool M_ExportMap()
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1798,6 +1790,18 @@ bool CMD_ExportMap()
 	SaveLevel(map_name);
 
 	return true;
+}
+
+
+void CMD_SaveMap()
+{
+	M_SaveMap();
+}
+
+
+void CMD_ExportMap()
+{
+	M_ExportMap();
 }
 
 

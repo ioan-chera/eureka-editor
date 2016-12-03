@@ -41,17 +41,21 @@ void OpenFileMap(const char *filename, const char *map_name = NULL);
 
 extern int last_given_file;
 
+// these return false if user cancelled
+bool M_SaveMap();
+bool M_ExportMap();
+
 /* commands */
 
-bool CMD_NewProject();
-bool CMD_ManageProject();
+void CMD_NewProject();
+void CMD_ManageProject();
 
-bool CMD_OpenMap();
+void CMD_OpenMap();
 void CMD_GivenFile();
 void CMD_FlipMap();
 
-bool CMD_SaveMap();
-bool CMD_ExportMap();
+void CMD_SaveMap();
+void CMD_ExportMap();
 
 void CMD_FreshMap();
 void CMD_CopyMap();

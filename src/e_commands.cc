@@ -39,9 +39,11 @@
 #include "m_config.h"
 #include "m_events.h"
 #include "m_loadsave.h"
+#include "m_nodes.h"
 #include "r_render.h"
 #include "ui_window.h"
 #include "ui_misc.h"
+#include "ui_prefs.h"
 
 
 // config items
@@ -1157,8 +1159,16 @@ static editor_command_t  command_table[] =
 {
 	/* ----- FILE menu ----- */
 
-	{	"Quit",  "File", 0,
-		&CMD_Quit
+	{	"NewProject",  "File", 0,
+		&CMD_NewProject
+	},
+
+	{	"ManageProject",  "File", 0,
+		&CMD_ManageProject
+	},
+
+	{	"OpenMap",  "File", 0,
+		&CMD_OpenMap
 	},
 
 	{	"GivenFile",  "File", 0,
@@ -1171,6 +1181,46 @@ static editor_command_t  command_table[] =
 		&CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
+	},
+
+	{	"SaveMap",  "File", 0,
+		&CMD_SaveMap
+	},
+
+	{	"ExportMap",  "File", 0,
+		&CMD_ExportMap
+	},
+
+	{	"FreshMap",  "File", 0,
+		&CMD_FreshMap
+	},
+
+	{	"CopyMap",  "File", 0,
+		&CMD_CopyMap
+	},
+
+	{	"RenameMap",  "File", 0,
+		&CMD_RenameMap
+	},
+
+	{	"DeleteMap",  "File", 0,
+		&CMD_DeleteMap
+	},
+
+	{	"TestMap",  "File", 0,
+		&CMD_TestMap
+	},
+
+	{	"BuildAllNodes",  "File", 0,
+		&CMD_BuildAllNodes
+	},
+
+	{	"PreferenceDialog",  "File", 0,
+		&CMD_Preferences
+	},
+
+	{	"Quit",  "File", 0,
+		&CMD_Quit
 	},
 
 
