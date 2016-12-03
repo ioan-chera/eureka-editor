@@ -652,9 +652,61 @@ int Editor_RawMouse(int event)
 //   OPERATION MENU(S)
 //------------------------------------------------------------------------
 
+
+static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
+{
+	// open the file and build the menu from all line whose first
+	// keyword matches the given 'context'.
+
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/operations.cfg", install_dir);
+
+	FILE *fp = fopen(filename, "r");
+
+	bool saw_something = false;
+
+	if (! fp)
+	{
+		// if (context[0] == 't')
+		FatalError("Installation problem: cannot find \"operaitons.cfg\" file!");
+		return;
+	}
+
+	menu->clear();
+
+	// FIXME : parse each line
+
+	fclose(fp);
+
+	if (! saw_something)
+	{
+		FatalError("Bad operations menu : no %s items.\n", context);
+		return;
+	}
+
+	// enable the menu
+
+	// this is quite hacky, use button 7 as the trigger button(s) since
+	// we don't actually want mouse buttons to directly open it, rather
+	// we want to open it explictly by our own code.
+	menu->type(0x40);
+
+	menu->box(FL_NO_BOX);	// needed?
+
+	menu->show();
+}
+
+
 void M_LoadOperationMenus()
 {
-	// TODO
+	LogPrintf("Loading Operation menus...\n");
+
+	M_ParseOperationFile("thing",  main_win->op_thing);
+	M_ParseOperationFile("line",   main_win->op_line);
+	M_ParseOperationFile("sector", main_win->op_sector);
+	M_ParseOperationFile("vertex", main_win->op_vertex);
+	M_ParseOperationFile("render", main_win->op_render);
 }
 
 //--- editor settings ---
