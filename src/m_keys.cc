@@ -978,7 +978,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
 
-	if (num_tok == 0)
+	if (num_tok <= 0)
 		return "Missing function name";
 
 	const editor_command_t * cmd = FindEditorCommand(tokens[0]);

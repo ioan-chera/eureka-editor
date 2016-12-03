@@ -751,11 +751,14 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 		StringRemoveCRLF(line);
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
-
-///  fprintf(stderr, "LINE [%s]  num_tok:%d\n", line, num_tok);
-
 		if (num_tok == 0)
 			continue;
+
+		if (num_tok < 0)
+		{
+			LogPrintf("operations.cfg: failed parsing a line\n");
+			continue;
+		}
 
 		// first word is the context, require a match
 		if (y_stricmp(tokens[0], context) != 0)
