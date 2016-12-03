@@ -515,10 +515,6 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Logs....",   0, FCAL view_do_logs },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
 		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
 		{ "Toggle S&prites",      0, FCAL view_do_sprites },
 		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
@@ -595,6 +591,10 @@ static Fl_Menu_Item menu_items[] =
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
+		{ "&View Logs....",   0, FCAL view_do_logs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Online Docs...",    0,  FCAL help_do_online_docs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
