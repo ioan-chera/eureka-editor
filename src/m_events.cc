@@ -739,8 +739,8 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// we want to open it explictly by our own code.
 	menu->type(0x40);
 
-	menu->box(FL_NO_BOX);	// needed?
-
+	menu->box(FL_NO_BOX);
+	menu->textsize(KF_fonth);
 	menu->show();
 }
 
