@@ -46,15 +46,14 @@ extern int last_given_file;
 bool CMD_NewProject();
 bool CMD_ManageProject();
 
-void CMD_NewMap();
 bool CMD_OpenMap();
-
 void CMD_GivenFile();
 void CMD_FlipMap();
 
 bool CMD_SaveMap();
 bool CMD_ExportMap();
 
+void CMD_FreshMap();
 void CMD_CopyMap();
 void CMD_RenameMap();
 void CMD_DeleteMap();

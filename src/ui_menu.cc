@@ -66,7 +66,7 @@ static void file_do_export(Fl_Widget *w, void * data)
 
 static void file_do_fresh_map(Fl_Widget *w, void * data)
 {
-	CMD_NewMap();
+	CMD_FreshMap();
 }
 
 static void file_do_copy_map(Fl_Widget *w, void * data)

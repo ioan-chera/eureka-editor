@@ -326,16 +326,22 @@ bool MissingIWAD_Dialog()
 }
 
 
-void CMD_NewMap()
+void CMD_FreshMap()
 {
-	if (! Main_ConfirmQuit("create a new map"))
-		return;
-
-	if (! edit_wad || edit_wad->IsReadOnly())
+	if (! edit_wad)
 	{
-		CMD_NewProject();
+		DLG_Notify("Cannot create a fresh map unless editing a PWAD.");
 		return;
 	}
+
+	if (edit_wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot create a fresh map : file is read-only.");
+		return;
+	}
+
+	if (! Main_ConfirmQuit("create a fresh map"))
+		return;
 
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
