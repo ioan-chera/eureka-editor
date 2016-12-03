@@ -653,12 +653,31 @@ int Editor_RawMouse(int event)
 //   OPERATION MENU(S)
 //------------------------------------------------------------------------
 
+typedef struct
+{
+	const editor_command_t *cmd;
+
+	char param[MAX_EXEC_PARAM][MAX_BIND_LENGTH];
+
+} operation_command_t;
+
+
+static void operation_callback_func(Fl_Widget *w, void *data)
+{
+	operation_command_t *info = (operation_command_t *)data;
+
+	// TODO : support more than 4 parameters
+
+	ExecuteCommand(info->cmd, info->param[0], info->param[1],
+				   info->param[2], info->param[3]);
+}
+
 
 static void ParseOperationLine(const char ** tokens, int num_tok,
 							   Fl_Menu_Button *menu)
 {
 	if (num_tok < 2)
-		FatalError("Bad operations menu : missing entry name.\n");
+		FatalError("Bad operations menu : missing description.\n");
 
 	// just a spacer?
 	if (tokens[1][0] == '_')
@@ -667,9 +686,31 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 		return;
 	}
 
-	// FIXME
+	if (num_tok < 3)
+		FatalError("Bad operations menu : missing command name.\n");
 
-	menu->add(tokens[1], 0, 0, 0, 0);
+	// parse the command and its parameters...
+	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
+
+	if (! cmd)
+	{
+		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2]);
+		return;
+	}
+
+	operation_command_t * info = new operation_command_t;
+
+	// this ensures all parameters are NUL terminated
+	memset(info, 0, sizeof(*info));
+
+	info->cmd = cmd;
+
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		if (num_tok >= 4 + p)
+			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
+
+	menu->add(tokens[1], 0 /* shortcut */, &operation_callback_func,
+			  (void *)info, 0 /* flags */);
 }
 
 
