@@ -39,14 +39,14 @@
 //  FILE MENU
 //------------------------------------------------------------------------
 
-static void file_do_quit(Fl_Widget *w, void * data)
+static void file_do_new_project(Fl_Widget *w, void * data)
 {
-	Main_Quit();
+	CMD_NewProject();
 }
 
-static void file_do_new(Fl_Widget *w, void * data)
+static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	CMD_NewMap();
+	CMD_ManageProject();
 }
 
 static void file_do_open(Fl_Widget *w, void * data)
@@ -64,6 +64,11 @@ static void file_do_export(Fl_Widget *w, void * data)
 	CMD_ExportMap();
 }
 
+static void file_do_fresh_map(Fl_Widget *w, void * data)
+{
+	CMD_NewMap();
+}
+
 static void file_do_copy_map(Fl_Widget *w, void * data)
 {
 	CMD_CopyMap();
@@ -77,16 +82,6 @@ static void file_do_rename(Fl_Widget *w, void * data)
 static void file_do_delete(Fl_Widget *w, void * data)
 {
 	CMD_DeleteMap();
-}
-
-static void file_do_new_project(Fl_Widget *w, void * data)
-{
-	CMD_NewProject();
-}
-
-static void file_do_manage_project(Fl_Widget *w, void * data)
-{
-	CMD_ManageProject();
 }
 
 static void file_do_default_props(Fl_Widget *w, void * data)
@@ -111,7 +106,6 @@ static void file_do_test_map(Fl_Widget *w, void * data)
 }
 #endif
 
-
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
 	const char *filename = (const char *) data;
@@ -124,10 +118,14 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	OpenFileMap(filename);
 }
 
-
 static void file_do_load_recent(Fl_Widget *w, void *data)
 {
 	M_OpenRecentFromMenu(data);
+}
+
+static void file_do_quit(Fl_Widget *w, void * data)
+{
+	Main_Quit();
 }
 
 
@@ -445,10 +443,9 @@ static Fl_Menu_Item menu_items[] =
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
 		{ "&New Project   ",  FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "New Map",   FL_COMMAND + FL_SHIFT + 'n', FCAL file_do_new },
 		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
@@ -458,25 +455,31 @@ static Fl_Menu_Item menu_items[] =
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
-		{ "&Copy Map",    0,  FCAL file_do_copy_map },
 
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Fresh Map",    0, FCAL file_do_fresh_map },
+		{ "&Copy Map",    0,  FCAL file_do_copy_map },
 		{ "Rename Map",   0,  FCAL file_do_rename },
 		{ "Delete Map",   0,  FCAL file_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 #if 0
-		{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
+		{ "&Test in Game",       FL_COMMAND + 't', FCAL file_do_test_map },
 #endif
 		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
-		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
-
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
+
+#if 0 // IDEA : SEPARATE KEY BINDING DIALOG
+		{ "&Key Bindings",     FL_COMMAND + 'k', FCAL file_do_prefs },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+#endif
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
