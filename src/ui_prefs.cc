@@ -526,7 +526,8 @@ private:
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
-	static void    reset_callback(Fl_Button *w, void *data);
+
+	static void reset_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -621,7 +622,6 @@ public:
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
 	Fl_Button *key_rebind;
-	Fl_Button *key_reset;
 
 	/* Nodes Tab */
 
@@ -642,6 +642,9 @@ public:
 
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
+
+	Fl_Button * reset_conf;
+	Fl_Button * reset_keys;
 };
 
 
@@ -789,9 +792,6 @@ UI_Preferences::UI_Preferences() :
 		{ key_rebind = new Fl_Button(480, 295, 85, 30, "&Re-bind");
 		  key_rebind->callback((Fl_Callback*)bind_key_callback, this);
 		  // key_rebind->shortcut(FL_Enter);
-		}
-		{ key_reset = new Fl_Button(480, 370, 85, 50, "Reset\nDefaults");
-		  key_reset->callback((Fl_Callback*)reset_callback, this);
 		}
 		o->end();
 	  }
@@ -970,6 +970,17 @@ UI_Preferences::UI_Preferences() :
 		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
 		}
 		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
+		}
+
+		{ Fl_Box* o = new Fl_Box(25, 255, 280, 30, "Configuration Reset");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ reset_conf = new Fl_Button(100, 290, 200, 30, "Reset Config Settings");
+		  reset_conf->callback((Fl_Callback*)reset_callback, this);
+		}
+		{ reset_keys = new Fl_Button(100, 330, 200, 30, "Reset Key Bindings");
+		  reset_keys->callback((Fl_Callback*)reset_callback, this);
 		}
 		o->end();
 	  }
@@ -1207,22 +1218,33 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	if (true)
+	bool is_keys = (w == prefs->reset_keys);
+
+	int res = DLG_Confirm("Cancel|&Reset",
+		"This will reset all %s to their default values, "
+		"removing any changes you may have made."
+		"\n\n"
+		"If you continue, you can still back out by "
+		"using the \"Discard\" button at the bottom of "
+		"the Preferences window."
+		"\n  ",
+		is_keys ? "key bindings" : "config settings");
+
+	if (res <= 0)
+		return;
+
+	if (is_keys)
 	{
-		int res = DLG_Confirm("Cancel|Reset",
-		                      "You are about to reset all key bindings to their default "
-							  "values.  Pressing the preference window's \"Apply\" button "
-							  "will cause any changes you have made to be lost."
-							  "\n\n"
-							  "Are you sure you want to continue?");
+		M_CopyBindings(true /* from_defaults */);
 
-		if (res <= 0)
-			return;
+		prefs->LoadKeys();
 	}
+	else
+	{
+		M_ParseDefaultConfigFile();
 
-	M_CopyBindings(true /* from_defaults */);
-
-	prefs->LoadKeys();
+		prefs->LoadValues();
+	}
 }
 
 
