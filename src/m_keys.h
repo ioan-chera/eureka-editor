@@ -161,7 +161,8 @@ const editor_command_t * LookupEditorCommand(int index);
 
 
 // parameter(s) for command function -- must be valid strings
-#define MAX_EXEC_PARAM	16
+#define MAX_EXEC_PARAM   16
+#define MAX_BIND_LENGTH  64
 
 extern const char * EXEC_Param[MAX_EXEC_PARAM];
 extern const char * EXEC_Flags[MAX_EXEC_PARAM];
@@ -176,8 +177,13 @@ bool Exec_HasFlag(const char *flag);
 
 bool ExecuteKey(keycode_t key, key_context_e context);
 
-bool ExecuteCommand(const char *name, const char *param1 = "",
-                    const char *param2 = "", const char *param3 = "");
+bool ExecuteCommand(const editor_command_t *cmd,
+					const char *param1 = "", const char *param2 = "",
+                    const char *param3 = "", const char *param4 = "");
+
+bool ExecuteCommand(const char *name,
+					const char *param1 = "", const char *param2 = "",
+                    const char *param3 = "", const char *param4 = "");
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 

@@ -430,8 +430,6 @@ const char * M_KeyContextString(key_context_e context)
 
 //------------------------------------------------------------------------
 
-#define MAX_BIND_LENGTH  32
-
 typedef struct
 {
 	keycode_t key;
@@ -1211,14 +1209,10 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 }
 
 
-bool ExecuteCommand(const char *name, const char *param1,
-                    const char *param2, const char *param3)
+bool ExecuteCommand(const editor_command_t *cmd,
+					const char *param1, const char *param2,
+                    const char *param3, const char *param4)
 {
-	const editor_command_t * cmd = FindEditorCommand(name);
-
-	if (! cmd)
-		return false;
-
 	Status_Clear();
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
@@ -1227,9 +1221,21 @@ bool ExecuteCommand(const char *name, const char *param1,
 		EXEC_Flags[p] = "";
 	}
 
-	EXEC_Param[0] = param1;
-	EXEC_Param[1] = param2;
-	EXEC_Param[2] = param3;
+	// separate flags from normal parameters
+	int p_idx = 0;
+	int f_idx = 0;
+
+	if (param1[0] == '/') EXEC_Flags[f_idx++] = param1;
+	else if (param1[0])   EXEC_Param[p_idx++] = param1;
+
+	if (param2[0] == '/') EXEC_Flags[f_idx++] = param2;
+	else if (param2[0])   EXEC_Param[p_idx++] = param2;
+
+	if (param3[0] == '/') EXEC_Flags[f_idx++] = param3;
+	else if (param3[0])   EXEC_Param[p_idx++] = param3;
+
+	if (param4[0] == '/') EXEC_Flags[f_idx++] = param4;
+	else if (param4[0])   EXEC_Param[p_idx++] = param4;
 
 	EXEC_Errno  = 0;
 	EXEC_CurKey = 0;
@@ -1237,6 +1243,19 @@ bool ExecuteCommand(const char *name, const char *param1,
 	DoExecuteCommand(cmd);
 
 	return true;
+}
+
+
+bool ExecuteCommand(const char *name,
+					const char *param1, const char *param2,
+					const char *param3, const char *param4)
+{
+	const editor_command_t * cmd = FindEditorCommand(name);
+
+	if (! cmd)
+		return false;
+
+	return ExecuteCommand(cmd, param1, param2, param3, param4);
 }
 
 
