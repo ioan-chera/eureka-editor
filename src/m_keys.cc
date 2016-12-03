@@ -932,7 +932,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
 
-	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
+	sprintf(buffer, "%s%6.6s%-11.11s %-9.9s %.32s",
 			bind.is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),

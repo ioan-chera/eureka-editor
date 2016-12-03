@@ -758,38 +758,38 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_key = new Fl_Button(30, 90, 120, 25, "KEY");
+		{ key_key = new Fl_Button(25, 87, 135, 25, "KEY");
 		  key_key->color((Fl_Color)231);
 		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_key->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_group = new Fl_Button(155, 90, 90, 25, "MODE");
+		{ key_group = new Fl_Button(165, 87, 75, 25, "MODE");
 		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_group->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_func = new Fl_Button(250, 90, 190, 25, "FUNCTION");
+		{ key_func = new Fl_Button(245, 87, 195, 25, "FUNCTION");
 		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 305);
+		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
 		  key_list->textfont(FL_COURIER);
 		}
-		{ key_add = new Fl_Button(480, 115, 85, 30, "&Add");
+		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_copy = new Fl_Button(480, 150, 85, 30, "&Copy");
+		{ key_copy = new Fl_Button(480, 195, 85, 30, "&Copy");
 		  key_copy->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_edit = new Fl_Button(480, 185, 85, 30, "&Edit");
+		{ key_edit = new Fl_Button(480, 235, 85, 30, "&Edit");
 		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
 		}
-		{ key_delete = new Fl_Button(480, 220, 85, 30, "Delete");
+		{ key_delete = new Fl_Button(480, 275, 85, 30, "Delete");
 		  key_delete->callback((Fl_Callback*)del_key_callback, this);
 		  key_delete->shortcut(FL_Delete);
 		}
-		{ key_rebind = new Fl_Button(480, 295, 85, 30, "&Re-bind");
+		{ key_rebind = new Fl_Button(480, 370, 85, 30, "&Re-bind");
 		  key_rebind->callback((Fl_Callback*)bind_key_callback, this);
 		  // key_rebind->shortcut(FL_Enter);
 		}
