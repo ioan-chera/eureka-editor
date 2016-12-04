@@ -1103,9 +1103,7 @@ void CMD_OpenMap()
 
 	delete dialog;
 
-
-	// cancelled?
-	if (! wad)
+	if (! wad)	// cancelled
 		return;
 
 
@@ -1129,22 +1127,23 @@ void CMD_OpenMap()
 	}
 
 
-	// has this removed or replaced the currently edited wad?
-
-	if (edit_wad && (wad != edit_wad))
-	{
-		RemoveEditWad();
-	}
-
+	// does this wad replace the currently edited wad?
 	if (did_load)
 	{
-		edit_wad = wad;
-		Pwad_name = edit_wad->PathName();
+		SYS_ASSERT(wad != edit_wad);
+		SYS_ASSERT(wad != game_wad);
 
-		MasterDir_Add(edit_wad);
+		ReplaceEditWad(wad);
 
 		GetLevelFormat(wad, map_name);
+		Main_LoadResources();
+	}
+	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
+	else if (wad != edit_wad)
+	{
+		RemoveEditWad();
 
+		GetLevelFormat(wad, map_name);
 		Main_LoadResources();
 	}
 

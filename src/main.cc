@@ -800,16 +800,13 @@ void Main_LoadResources()
 
 	MasterDir_CloseAll();
 
-
 	Main_LoadIWAD();
-
 
 	// Load all resource wads
 	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
 		LoadResourceFile(Resource_list[i]);
 	}
-
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);

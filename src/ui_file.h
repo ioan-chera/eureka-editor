@@ -104,8 +104,8 @@ public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	// Run the dialog and return an opened wad (from Wad_file::Open),
-	// or NULL if the user cancelled.
+	// Run the dialog and return an opened wad (from Wad_file::Open)
+	// or edit_wad/game_wad, or NULL if the user cancelled.
 	//
 	// "map_v" parameter must be non-NULL, it receives the chosen map
 	// name, or set to NULL when cancelled.
