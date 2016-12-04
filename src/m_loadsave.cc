@@ -259,6 +259,7 @@ void CMD_NewProject()
 
 	RemoveEditWad();
 
+	// this calls Main_LoadResources which resets the master directory
 	Project_ApplyChanges(dialog);
 
 	delete dialog;
@@ -993,6 +994,10 @@ void LoadLevel(Wad_file *wad, const char *level)
 }
 
 
+//
+// open a new wad file.
+// when 'map_name' is not NULL, try to open that map.
+//
 void OpenFileMap(const char *filename, const char *map_name)
 {
 	if (! Main_ConfirmQuit("open another map"))
@@ -1001,11 +1006,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	Wad_file *wad = NULL;
 
-	// make sure the file exists [Open with 'a' would create it]
-
-	// TODO: perhaps check this when building the Pwad_list
-	//       [however, 'eureka foo.wad' should fatal error if no foo.wad]
-
+	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
 		wad = Wad_file::Open(filename, 'a');
@@ -1020,6 +1021,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 	}
 
 
+	// determine which level to use
 	int lev_num = -1;
 
 	if (map_name)
@@ -1029,19 +1031,16 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	if (lev_num < 0)
 	{
-		map_name = NULL;
 		lev_num = wad->LevelFindFirst();
 	}
 
 	if (lev_num < 0)
 	{
-		delete wad;
-
 		DLG_Notify("No levels found in that WAD.");
+
+		delete wad;
 		return;
 	}
-
-	// IOANCH 9/2015: support Hexen, too
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
@@ -1053,7 +1052,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 	}
 
 
-	// OK, open it
+	/* OK, open it */
 
 
 	// this wad replaces the current PWAD
@@ -1065,12 +1064,12 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	MasterDir_Add(edit_wad);
 
-	if (! map_name)
+
+	// always grab map_name from the actual level
 	{
 		short idx = wad->LevelHeader(lev_num);
 		map_name  = wad->GetLump(idx)->Name();
 	}
-
 
 	GetLevelFormat(wad, map_name);
 
