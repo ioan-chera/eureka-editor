@@ -676,22 +676,10 @@ const char * Main_FileOpFolder()
 
 	if (Pwad_name)
 	{
-		snprintf(folder, sizeof(folder), "%s", Pwad_name);
+		FilenameGetPath(folder, sizeof(folder), Pwad_name);
 
-		char *p = (char *)FindBaseName(folder);
-
-		// remove trailing slash (except when following "C:" or similar)
-		if (p-1 >= folder && (p[-1] == '/' || p[-1] == '\\') &&
-			! (p-2 >= folder && p[-2] == ':'))
-		{
-			p--;
-		}
-
-		if (p > folder)
-		{
-			*p = 0;
+		if (folder[0])
 			return folder;
-		}
 	}
 
 	return NULL;

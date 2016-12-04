@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2012 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -220,9 +220,10 @@ void FilenameStripBase(char *buffer)
 }
 
 
-/* takes the basename in 'filename' and prepends the path from 'othername'.
- * returns a newly allocated string.
- */
+//
+// takes the basename in 'filename' and prepends the path from 'othername'.
+// returns a newly allocated string.
+//
 const char *FilenameReposition(const char *filename, const char *othername)
 {
 	filename = fl_filename_name(filename);
@@ -243,6 +244,27 @@ const char *FilenameReposition(const char *filename, const char *othername)
 	strcat(result, filename);
 
 	return result;
+}
+
+
+void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
+{
+	snprintf(dest, maxsize, "%s", filename);
+
+	char *p = (char *)FindBaseName(dest);
+
+	// remove trailing slash (except when following "C:" or similar)
+	if (p >= dest+1 &&
+		(p[-1] == '/' || p[-1] == '\\') &&
+		! (p >= dest+2 && p[-2] == ':'))
+	{
+		p--;
+	}
+
+	if (p > dest)
+	{
+		*p = 0;
+	}
 }
 
 
