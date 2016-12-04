@@ -356,7 +356,7 @@ static const char * GrabWadNames()
 		if (wad == game_wad || wad == edit_wad)
 			continue;
 
-		AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(),
+		AppendWadName(wad_names, sizeof(wad_names), wad->PathName(),
 					  !has_file ? "-file" : NULL);
 		has_file = true;
 	}
@@ -437,7 +437,7 @@ void CMD_TestMap()
 			 CalcEXEName(info), GrabWadNames(), CalcWarpString());
 
 	LogPrintf("Testing map using the following command:\n");
-	LogPrintf("--| %s\n", cmd_buffer);
+	LogPrintf("--> %s\n", cmd_buffer);
 
 	Status_Set("TESTING MAP");
 
