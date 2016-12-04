@@ -59,12 +59,20 @@ public:
 
 	bool want_close;
 
-private:
+public:
 	void SetEXE(const char *newbie)
 	{
 		StringFree(exe_name);
 
 		exe_name = StringDup(newbie);
+
+		// NULL is ok here
+		exe_display->value(exe_name);
+
+		if (exe_name && FileExists(exe_name))
+			ok_but->activate();
+		else
+			ok_but->deactivate();
 	}
 
 	static void ok_callback(Fl_Widget *w, void *data)
@@ -150,6 +158,7 @@ public:
 			ok_but->labelfont(FL_HELVETICA_BOLD);
 			ok_but->callback(ok_callback, this);
 			ok_but->shortcut(FL_Enter);
+			ok_but->deactivate();
 		}
 		grp->end();
 
@@ -198,12 +207,18 @@ bool M_PortSetupDialog(const char *port, const char *game)
 
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf);
 
+	// populate the EXE name from existing info, if exists
+	port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
+
+	if (info && strlen(info->exe_filename) > 0)
+		dialog->SetEXE(info->exe_filename);
+
 	bool ok = dialog->Run();
 
 	if (ok)
 	{
 		// persist the new port settings
-		port_path_info_t *info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
+		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
 		snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", dialog->exe_name);
 
