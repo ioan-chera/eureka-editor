@@ -62,6 +62,9 @@ void CMD_CopyMap();
 void CMD_RenameMap();
 void CMD_DeleteMap();
 
+// this one in m_testmap.cc
+void CMD_TestMap();
+
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
 //--- editor settings ---
