@@ -931,8 +931,8 @@ int main(int argc, char *argv[])
 	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2016 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
 
-	// Sanity checks (useful when porting).
-	check_types();
+	// sanity checks type sizes (useful when porting)
+	CheckTypeSizes();
 
 	ShowTime();
 

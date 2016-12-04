@@ -257,10 +257,8 @@ unsigned int TimeGetMillies()
 
 
 //
-//  check_types
-//
-//  Sanity checks about the sizes and properties of certain types.
-//  Useful when porting.
+// sanity checks for the sizes and properties of certain types.
+// useful when porting.
 //
 
 #define assert_size(type,size)            \
@@ -283,20 +281,20 @@ unsigned int TimeGetMillies()
   while (0)
 
 
-void check_types()
+void CheckTypeSizes()
 {
-	assert_size (u8_t,  1);
-	assert_size (s8_t,  1);
-	assert_size (u16_t, 2);
-	assert_size (s16_t, 2);
-	assert_size (u32_t, 4);
-	assert_size (s32_t, 4);
+	assert_size(u8_t,  1);
+	assert_size(s8_t,  1);
+	assert_size(u16_t, 2);
+	assert_size(s16_t, 2);
+	assert_size(u32_t, 4);
+	assert_size(s32_t, 4);
 
-	assert_size (raw_linedef_t, 14);
-	assert_size (raw_sector_s,  26);
-	assert_size (raw_sidedef_t, 30);
-	assert_size (raw_thing_t,   10);
-	assert_size (raw_vertex_t,   4);
+	assert_size(raw_linedef_t, 14);
+	assert_size(raw_sector_s,  26);
+	assert_size(raw_sidedef_t, 30);
+	assert_size(raw_thing_t,   10);
+	assert_size(raw_vertex_t,   4);
 }
 
 

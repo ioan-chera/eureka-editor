@@ -43,7 +43,7 @@ void StringFree(const char *str);
 void StringRemoveCRLF(char *str);
 char *StringTidy(const char *str, const char *bad_chars = "");
 
-void check_types ();
+void CheckTypeSizes();
 
 void TimeDelay(unsigned int millies);
 unsigned int TimeGetMillies();
