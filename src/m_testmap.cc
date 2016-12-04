@@ -197,7 +197,7 @@ bool M_PortSetupDialog(const char *port, const char *game)
 		snprintf(name_buf, sizeof(name_buf), "Vanilla %s\n", game);
 		name_buf[8] = toupper(name_buf[8]);
 	}
-	else if (y_stricmp(port, "mbf") == 0)	// temp hack
+	else if (y_stricmp(port, "mbf") == 0)	// temp hack for aesthetics
 	{
 		strcpy(name_buf, "MBF");
 	}
@@ -276,16 +276,29 @@ void CMD_TestMap()
 	}
 
 
-	// FIXME: figure out the proper directory to cd into
-	//        (and ensure that it exists)
+	// remember the previous working directory
+	static char old_dir[FL_PATH_MAX];
 
-	// TODO : remember current dir, reset afterwards
+	if (getcwd(old_dir, sizeof(old_dir)) == NULL)
+	{
+		old_dir[0] = 0;
+	}
 
-	// FIXME : check if this worked
-	FileChangeDir("/home/aapted/oblige");
 
+	// change working directory to be same as the executable
+	static char folder[FL_PATH_MAX];
 
-	char cmd_buffer[FL_PATH_MAX * 2];
+	FilenameGetPath(folder, sizeof(folder), info->exe_filename);
+
+	LogPrintf("Changing current dir to: %s\n", folder);
+
+	if (FileChangeDir(folder) != 0)
+	{
+		// FIXME : proper error dialog
+		Beep("chdir failed!");
+		return;
+	}
+
 
 	// FIXME: use fl_filename_absolute() to get absolute paths
 
@@ -294,8 +307,20 @@ void CMD_TestMap()
 
 	// FIXME : handle DOOM1/ULTDOOM style warp option
 
+
+	// make the executable name relative, since we chdir() to its folder
+	static char exe_name[FL_PATH_MAX];
+
+	fl_filename_relative(exe_name, sizeof(exe_name), info->exe_filename);
+
+
+	static char cmd_buffer[FL_PATH_MAX * 2];
+
+	// FIXME : proper WARP parameter !!!
+
 	snprintf(cmd_buffer, sizeof(cmd_buffer),
-	         "./boomPR -iwad %s -file %s -warp %s",
+	         "%s -iwad %s -file %s -warp %s",
+			 exe_name,
 			 game_wad->PathName(),
 			 edit_wad->PathName(),
 			 Level_name);
@@ -315,6 +340,13 @@ void CMD_TestMap()
 		Status_Set("Result: OK");
 	else
 		Status_Set("Result code: %d\n", status);
+
+
+	// restore previous working directory
+	if (old_dir[0])
+	{
+		FileChangeDir(old_dir);
+	}
 
 	main_win->redraw();
 	Fl::wait(0.1);
