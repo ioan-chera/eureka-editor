@@ -27,11 +27,9 @@
 #include "ui_window.h"
 
 
-class UI_TestMapDialog : public UI_Escapable_Window
+class UI_PortPathDialog : public UI_Escapable_Window
 {
 private:
-	Fl_Choice *port;
-
 	Fl_Output *exe_path;
 
 	Fl_Button *ok_but;
@@ -43,7 +41,7 @@ private:
 private:
 	static void ok_callback(Fl_Widget *w, void *data)
 	{
-		UI_TestMapDialog * that = (UI_TestMapDialog *)data;
+		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
 
 		that->result = true;
 		that->want_close = true;
@@ -51,39 +49,42 @@ private:
 
 	static void close_callback(Fl_Widget *w, void *data)
 	{
-		UI_TestMapDialog * that = (UI_TestMapDialog *)data;
+		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
 
 		that->result = false;
 		that->want_close = true;
 	}
 
 public:
-	UI_TestMapDialog() :
-		UI_Escapable_Window(460, 425, "Test Map Settings"),
+	UI_PortPathDialog() :
+		UI_Escapable_Window(560, 250, "Port Settings"),
 		result(false), want_close(false)
 	{
-		int X = 0;
-		int Y = 0;
+		// FIXME : name of port in this message
 
-		port = new Fl_Choice(90, Y+30, 200, 30, "Port: ");
-		port->textsize(17);
-		port->add("Boom|Edge|XDoom|Vanilla Doom|Vanilla Heretic|Vanilla HacX|Vanilla Strife");
-		port->value(0);
+		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30,
+		           "Setting up location of the executable (EXE) for Vanilla Doom2.");
+		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
-		exe_path = new Fl_Output(90, 80, 225, 26, "Exe path: ");
+		header = new Fl_Box(FL_NO_BOX, 20, 55, w() - 40, 30,
+		           "This is only needed for the Test Map command.");
+		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
-		Fl_Button *load_but = new Fl_Button(380, 80, 60, 26, "Load");
+
+		exe_path = new Fl_Output(98, 100, w()-200, 26, "Exe path: ");
+
+		Fl_Button *find_but = new Fl_Button(w()-80, 100, 60, 26, "Find");
 
 		/* bottom buttons */
 
-		Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
+		Fl_Group * grp = new Fl_Group(0, h() - 60, w(), 70);
 		grp->box(FL_FLAT_BOX);
 		grp->color(WINDOW_BG, WINDOW_BG);
 		{
-			cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
+			cancel_but = new Fl_Button(w() - 260, h() - 45, 95, 30, "Cancel");
 			cancel_but->callback(close_callback, this);
 
-			ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Play");
+			ok_but = new Fl_Button(w() - 120, h() - 45, 95, 30, "OK");
 			ok_but->labelfont(FL_HELVETICA_BOLD);
 			ok_but->callback(ok_callback, this);
 			ok_but->shortcut(FL_Enter);
@@ -97,7 +98,7 @@ public:
 		callback(close_callback, this);
 	}
 
-	virtual ~UI_TestMapDialog()
+	virtual ~UI_PortPathDialog()
 	{ }
 
 	// returns true if user clicked OK
@@ -116,7 +117,7 @@ public:
 
 bool M_PortSetupDialog(const char *port, const char *game)
 {
-	UI_TestMapDialog *dialog = new UI_TestMapDialog();
+	UI_PortPathDialog *dialog = new UI_PortPathDialog();
 
 	bool ok = dialog->Run();
 
