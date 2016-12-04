@@ -152,9 +152,13 @@ port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
 
 bool M_IsPortPathValid(const port_path_info_t *info)
 {
-	// FIXME !!!!
+	if (strlen(info->exe_filename) < 2)
+		return false;
 
-	return false;
+	if (! FileExists(info->exe_filename))
+		return false;
+
+	return true;
 }
 
 
@@ -164,6 +168,8 @@ void M_ParsePortPath(const char *name, char *line)
 		line++;
 
 	char *arg_pos = line;
+
+	(void) arg_pos;	 // shut up a warning
 
 	line = strchr(line, '|');
 	if (! line)
