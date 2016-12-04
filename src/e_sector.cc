@@ -525,16 +525,16 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 }
 
 
-/*
-   Follows the path clockwise from the given start line, adding each
-   line into the appropriate set.  Returns true if the path was closed,
-   or false for failure (in which case the lineloop_c object will not
-   be in a valid state).
-
-   side is either SIDE_LEFT or SIDE_RIGHT.
-
-   -AJA- 2001-05-09
- */
+//
+// Follows the path clockwise from the given start line, adding each
+// line into the appropriate set.  Returns true if the path was closed,
+// or false for failure (in which case the lineloop_c object will not
+// be in a valid state).
+//
+// side is either SIDE_LEFT or SIDE_RIGHT.
+//
+// -AJA- 2001-05-09
+//
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
 {
 	loop.clear();
@@ -794,10 +794,10 @@ void lineloop_c::Dump() const
 #endif
 
 
-/*
-   update the side on a single linedef, using the given sector
-   reference.  Will create a new sidedef if necessary.
- */
+//
+// update the side on a single linedef, using the given sector
+// reference, and creating a new sidedef if necessary.
+//
 static void DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
@@ -862,7 +862,7 @@ void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip)
 
 
 //
-// Change the closed sector at the pointer
+// change the closed sector at the pointer
 //
 // "sector" here really means a bunch of sidedefs that all face
 // inward to the current area under the mouse cursor.

@@ -646,9 +646,9 @@ static const char * SearchForIWAD(const char *game)
 }
 
 
-/*
- * search for iwads in various places
- */
+//
+// search for iwads in various places
+//
 void M_LookForIWADs()
 {
 	LogPrintf("Looking for IWADs....\n");
@@ -757,8 +757,9 @@ static void M_AddResource_Unique(const char * filename)
 }
 
 
-/* returns false if user wanted to cancel the load */
-
+//
+// returns false if user wants to cancel the load
+//
 bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);

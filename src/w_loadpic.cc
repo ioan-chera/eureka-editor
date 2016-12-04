@@ -95,28 +95,28 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 }
 
 
-/*
- *  LoadPicture - read a picture from a wad file into an Img_c object
- *
- *  If img->is_null() is false, LoadPicture() does not allocate the
- *  buffer itself. The buffer and the picture don't have to have the
- *  same dimensions. Thanks to this, it can also be used to compose
- *  textures : you allocate a single buffer for the whole texture
- *  and then you call LoadPicture() on it once for each patch.
- *  LoadPicture() takes care of all the necessary clipping.
- *
- *  If img->is_null() is true, LoadPicture() sets the size of img
- *  to match that of the picture. This is useful in display_pic().
- *
- *  Return true on success, false on failure.
- *
- *  If pic_x_offset == INT_MIN, the picture is centred horizontally.
- *  If pic_y_offset == INT_MIN, the picture is centred vertically.
- */
+//
+//  LoadPicture - read a picture from a wad file into an Img_c object
+//
+//  If img->is_null() is false, LoadPicture() does not allocate the
+//  buffer itself. The buffer and the picture don't have to have the
+//  same dimensions. Thanks to this, it can also be used to compose
+//  textures : you allocate a single buffer for the whole texture
+//  and then you call LoadPicture() on it once for each patch.
+//  LoadPicture() takes care of all the necessary clipping.
+//
+//  If img->is_null() is true, LoadPicture() sets the size of img
+//  to match that of the picture. This is useful in display_pic().
+//
+//  Return true on success, false on failure.
+//
+//  If pic_x_offset == INT_MIN, the picture is centred horizontally.
+//  If pic_y_offset == INT_MIN, the picture is centred vertically.
+//
 bool LoadPicture(Img_c& img,      // image to load picture into
 	Lump_c *lump,
-	const char *pic_name,   // Picture name (for messages)
-	int pic_x_offset,    // Coordinates of top left corner of picture
+	const char *pic_name,   // picture name (for messages)
+	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
 	int *pic_height)   // (can be NULL)

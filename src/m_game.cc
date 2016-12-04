@@ -273,13 +273,13 @@ bool M_CanLoadDefinitions(const char *folder, const char *name)
 }
 
 
-/*
- *  Loads a definition file.  The ".ugh" extension is added.
- *  Will try the "common" folder if not found in the given one.
- *
- *  Examples: "games" + "doom2"
- *            "ports" + "edge"
- */
+//
+// Loads a definition file.  The ".ugh" extension is added.
+// Will try the "common" folder if not found in the given one.
+//
+// Examples: "games" + "doom2"
+//           "ports" + "edge"
+//
 void M_LoadDefinitions(const char *folder, const char *name)
 {
 	// this is for error messages & debugging

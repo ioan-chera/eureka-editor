@@ -251,9 +251,10 @@ void Clipboard_Clear()
 }
 
 
-/* this remove sidedefs which refer to local sectors, allowing the
-   clipboard geometry to persist when changing maps.
- */
+//
+// this remove sidedefs which refer to local sectors, allowing the
+// clipboard geometry to persist when changing maps.
+//
 void Clipboard_ClearLocals()
 {
 	if (clip_board)
