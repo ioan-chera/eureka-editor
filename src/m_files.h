@@ -59,6 +59,8 @@ typedef struct port_path_info_t
 
 port_path_info_t * M_QueryPortPath(const char *name, bool create_it = false);
 
+bool M_IsPortPathValid(const port_path_info_t *info);
+
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

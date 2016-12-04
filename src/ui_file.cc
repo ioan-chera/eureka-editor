@@ -735,6 +735,11 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	port_choice->down_box(FL_BORDER_BOX);
 	port_choice->callback((Fl_Callback*)port_callback, this);
 
+	{
+		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
+		o->callback((Fl_Callback*)setup_callback, this);
+	}
+
 	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
 	format_choice->labelfont(FL_HELVETICA_BOLD);
 	format_choice->down_box(FL_BORDER_BOX);
@@ -1120,6 +1125,25 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	that->PopulateIWADs();
 	that->PopulatePort();
 	that->PopulateMapFormat();
+}
+
+
+// m_testmap.cc
+extern bool M_PortSetupDialog(const char *port, const char *game);
+
+
+void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// FIXME : deactivate button when this is true
+	if (that->game == NULL || that->port == NULL)
+	{
+		fl_beep();
+		return;
+	}
+
+	M_PortSetupDialog(that->port, that->game);
 }
 
 

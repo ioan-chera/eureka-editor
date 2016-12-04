@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "m_files.h"
 #include "m_loadsave.h"
 #include "w_wad.h"
 
@@ -112,6 +114,17 @@ public:
 };
 
 
+bool M_PortSetupDialog(const char *port, const char *game)
+{
+	UI_TestMapDialog *dialog = new UI_TestMapDialog();
+
+	bool ok = dialog->Run();
+
+	delete dialog;
+	return ok;
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -138,16 +151,22 @@ void CMD_TestMap()
 	}
 
 
-	UI_TestMapDialog *dialog = new UI_TestMapDialog();
+	port_path_info_t *info = M_QueryPortPath(Port_name);
 
-	bool ok = dialog->Run();
-
-	if (! ok)
+	if (! (info && M_IsPortPathValid(info)))
 	{
-		delete dialog;
-		return;
+		if (! M_PortSetupDialog(Port_name, Game_name))
+			return;
+
+		info = M_QueryPortPath(Port_name);
 	}
 
+	// this generally cannot happen, but we check anyway...
+	if (! (info && M_IsPortPathValid(info)))
+	{
+		fl_beep();
+		return;
+	}
 
 
 	// FIXME: figure out the proper directory to cd into
@@ -190,11 +209,8 @@ void CMD_TestMap()
 	else
 		Status_Set("Result code: %d\n", status);
 
-
-	delete dialog;
-
 	main_win->redraw();
-
+	Fl::wait(0.1);
 	Fl::wait(0.1);
 }
 

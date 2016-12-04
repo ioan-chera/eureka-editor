@@ -150,6 +150,14 @@ port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
 }
 
 
+bool M_IsPortPathValid(const port_path_info_t *info)
+{
+	// FIXME !!!!
+
+	return false;
+}
+
+
 void M_ParsePortPath(const char *name, char *line)
 {
 	while (isspace(*line))
