@@ -25,6 +25,78 @@
 #include "ui_window.h"
 
 
+class UI_TestMapDialog : public UI_Escapable_Window
+{
+private:
+	Fl_Button *ok_but;
+	Fl_Button *cancel_but;
+
+	bool result;
+	bool want_close;
+
+private:
+	static void ok_callback(Fl_Widget *w, void *data)
+	{
+		UI_TestMapDialog * that = (UI_TestMapDialog *)data;
+
+		that->result = true;
+		that->want_close = true;
+	}
+
+	static void close_callback(Fl_Widget *w, void *data)
+	{
+		UI_TestMapDialog * that = (UI_TestMapDialog *)data;
+
+		that->result = false;
+		that->want_close = true;
+	}
+
+public:
+	UI_TestMapDialog() :
+		UI_Escapable_Window(460, 425, "Test Map Settings"),
+		result(false), want_close(false)
+	{
+		Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
+		grp->box(FL_FLAT_BOX);
+		grp->color(WINDOW_BG, WINDOW_BG);
+		{
+			cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
+			cancel_but->callback(close_callback, this);
+
+			ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Play");
+			ok_but->labelfont(FL_HELVETICA_BOLD);
+			ok_but->callback(ok_callback, this);
+///			ok_but->deactivate();
+		}
+		grp->end();
+
+		end();
+
+		resizable(NULL);
+
+		callback(close_callback, this);
+	}
+
+	virtual ~UI_TestMapDialog()
+	{ }
+
+	// returns true if user clicked OK
+	bool Run()
+	{
+		set_modal();
+		show();
+
+		while (! want_close)
+			Fl::wait(0.2);
+
+		return result;
+	}
+};
+
+
+//------------------------------------------------------------------------
+
+
 void CMD_TestMap()
 {
 	// FIXME : remove this restriction  (simply don't have a -file parameter for the edit_wad)
@@ -46,6 +118,15 @@ void CMD_TestMap()
 		if (! M_SaveMap())
 			return;
 	}
+
+
+	UI_TestMapDialog *dialog = new UI_TestMapDialog();
+
+	dialog->Run();
+
+	delete dialog;
+
+	return;
 
 
 	// FIXME: figure out the proper directory to cd into
