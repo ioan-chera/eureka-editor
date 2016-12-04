@@ -82,26 +82,24 @@ int y_strnicmp(const char *s1, const char *s2, size_t len)
 }
 
 
-/*
- *  y_strupr
- *  Upper-case a string
- */
-void y_strupr (char *str)
+//
+// upper-case a string (in situ)
+//
+void y_strupr(char *str)
 {
-	for (; *str; str++)
+	for ( ; *str ; str++)
 	{
 		*str = toupper(*str);
 	}
 }
 
 
-/*
- *  y_strlowr
- *  Lower-case a string
- */
-void y_strlowr (char *str)
+//
+// lower-case a string (in situ)
+//
+void y_strlowr(char *str)
 {
-	for (; *str; str++)
+	for ( ; *str ; str++)
 	{
 		*str = tolower(*str);
 	}
@@ -110,86 +108,90 @@ void y_strlowr (char *str)
 
 char *StringNew(int length)
 {
-  // length does not include the trailing NUL.
+	// length does not include the trailing NUL.
 
-  char *s = (char *) calloc(length + 1, 1);
+	char *s = (char *) calloc(length + 1, 1);
 
-  if (! s)
-    FatalError("Out of memory (%d bytes for string)\n", length);
+	if (! s)
+		FatalError("Out of memory (%d bytes for string)\n", length);
 
-  return s;
+	return s;
 }
+
 
 char *StringDup(const char *orig, int limit)
 {
-  if (! orig)
-  	return NULL;
+	if (! orig)
+		return NULL;
 
-  if (limit < 0)
-  {
-    char *s = strdup(orig);
+	if (limit < 0)
+	{
+		char *s = strdup(orig);
 
-    if (! s)
-      FatalError("Out of memory (copy string)\n");
+		if (! s)
+			FatalError("Out of memory (copy string)\n");
 
-    return s;
-  }
+		return s;
+	}
 
-  char * s = StringNew(limit+1);
-  strncpy(s, orig, limit);
-  s[limit] = 0;
+	char * s = StringNew(limit+1);
+	strncpy(s, orig, limit);
+	s[limit] = 0;
 
-  return s;
+	return s;
 }
+
 
 char *StringUpper(const char *name)
 {
-  char *copy = StringDup(name);
+	char *copy = StringDup(name);
 
-  for (char *p = copy; *p; p++)
-    *p = toupper(*p);
+	for (char *p = copy; *p; p++)
+		*p = toupper(*p);
 
-  return copy;
+	return copy;
 }
+
 
 char *StringPrintf(const char *str, ...)
 {
-  /* Algorithm: keep doubling the allocated buffer size
-   * until the output fits. Based on code by Darren Salt.
-   */
-  char *buf = NULL;
-  int buf_size = 128;
+	// Algorithm: keep doubling the allocated buffer size
+	// until the output fits. Based on code by Darren Salt.
 
-  for (;;)
-  {
-    va_list args;
-    int out_len;
+	char *buf = NULL;
+	int buf_size = 128;
 
-    buf_size *= 2;
+	for (;;)
+	{
+		va_list args;
+		int out_len;
 
-    buf = (char*)realloc(buf, buf_size);
-    if (!buf)
-      FatalError("Out of memory (formatting string)\n");
+		buf_size *= 2;
 
-    va_start(args, str);
-    out_len = vsnprintf(buf, buf_size, str, args);
-    va_end(args);
+		buf = (char*)realloc(buf, buf_size);
+		if (!buf)
+			FatalError("Out of memory (formatting string)\n");
 
-    // old versions of vsnprintf() simply return -1 when
-    // the output doesn't fit.
-    if (out_len < 0 || out_len >= buf_size)
-      continue;
+		va_start(args, str);
+		out_len = vsnprintf(buf, buf_size, str, args);
+		va_end(args);
 
-    return buf;
-  }
+		// old versions of vsnprintf() simply return -1 when
+		// the output doesn't fit.
+		if (out_len < 0 || out_len >= buf_size)
+			continue;
+
+		return buf;
+	}
 }
+
 
 void StringFree(const char *str)
 {
-  if (str)
-  {
-    free((void*) str);
-  }
+	if (str)
+	{
+		free((void*) str);
+	}
 }
 
 
@@ -254,12 +256,12 @@ unsigned int TimeGetMillies()
 }
 
 
-/*
- *  check_types
- *
- *  Sanity checks about the sizes and properties of certain types.
- *  Useful when porting.
- */
+//
+//  check_types
+//
+//  Sanity checks about the sizes and properties of certain types.
+//  Useful when porting.
+//
 
 #define assert_size(type,size)            \
   do                  \
@@ -280,7 +282,8 @@ unsigned int TimeGetMillies()
   }                 \
   while (0)
 
-void check_types ()
+
+void check_types()
 {
 	assert_size (u8_t,  1);
 	assert_size (s8_t,  1);
@@ -297,24 +300,22 @@ void check_types ()
 }
 
 
-/*
-   translate (dx, dy) into an integer angle value (0-65535)
-*/
-
-unsigned ComputeAngle(int dx, int dy)
+//
+// translate (dx, dy) into an integer angle value (0-65535)
+//
+unsigned int ComputeAngle(int dx, int dy)
 {
-	return (unsigned) (atan2 ((double) dy, (double) dx) * 10430.37835 + 0.5);
+	return (unsigned int) (atan2 ((double) dy, (double) dx) * 10430.37835 + 0.5);
 }
 
 
 
-/*
-   compute the distance from (0, 0) to (dx, dy)
-*/
-
-unsigned ComputeDist(int dx, int dy)
+//
+// compute the distance from (0, 0) to (dx, dy)
+//
+unsigned int ComputeDist(int dx, int dy)
 {
-	return (unsigned) (hypot ((double) dx, (double) dy) + 0.5);
+	return (unsigned int) (hypot ((double) dx, (double) dy) + 0.5);
 }
 
 
