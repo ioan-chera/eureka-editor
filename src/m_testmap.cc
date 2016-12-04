@@ -223,6 +223,7 @@ bool M_PortSetupDialog(const char *port, const char *game)
 		// persist the new port settings
 		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
+		// FIXME: check result??
 		fl_filename_absolute(info->exe_filename, sizeof(info->exe_filename), dialog->exe_name);
 
 		M_SaveRecent();
@@ -289,20 +290,48 @@ static const char * CalcWarpString()
 
 static void AppendWadName(char *buf, size_t maxsize, const char *name, const char *parm = NULL)
 {
-	// FIXME: use fl_filename_absolute() to get absolute paths
+	static char abs_name[FL_PATH_MAX];
 
-	// FIXME
+	// FIXME: check result??
+	fl_filename_absolute(abs_name, sizeof(abs_name), name);
+
+	// ensure we don't overflow the 'wad_names' buffer
+	size_t new_len = strlen(buf);
+
+	if (parm)
+		new_len += strlen(parm);
+
+	new_len += strlen(abs_name);
+	new_len += 4; /* spaces + breathing room */;
+
+	if (new_len >= maxsize)
+	{
+		// overflow! -- do something?
+		return;
+	}
+
+	if (parm)
+	{
+		strcat(buf, parm);
+		strcat(buf, " ");
+	}
+
+	strcat(buf, abs_name);
+	strcat(buf, " ");
 }
 
 
 static const char * GrabWadNames()
 {
-	static char wad_names[FL_PATH_MAX * 2];
+	static char wad_names[FL_PATH_MAX * 3];
 
 	bool has_file  = false;
 
 	// WISH : support "-merge" for Chocolate-Doom and derivatives
 
+
+	// begin with empty string
+	wad_names[0] = 0;
 
 	// always specify the iwad
 	AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(), "-iwad");
@@ -333,13 +362,6 @@ static const char * GrabWadNames()
 
 void CMD_TestMap()
 {
-	// FIXME : remove this restriction  (simply don't have a -file parameter for the edit_wad)
-	if (! edit_wad)
-	{
-		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
-		return;
-	}
-
 	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
@@ -399,6 +421,7 @@ void CMD_TestMap()
 	// make the executable name relative, since we chdir() to its folder
 	static char exe_name[FL_PATH_MAX];
 
+	// FIXME: check result??
 	fl_filename_relative(exe_name, sizeof(exe_name), info->exe_filename);
 
 
