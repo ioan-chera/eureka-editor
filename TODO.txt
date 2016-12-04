@@ -127,17 +127,6 @@ WISH: can import DWD (DoomEd) format maps
 WISH: can import UDMF format maps
 
 
-+  File / Test Map
-   +  make filenames absolute
-   +  configurable stuff FOR EACH PORT  [ EACH GAME for "vanilla" ]
-      -  folder to 'cd' into
-      -  program to invoke
-      -  arguments to use (-iwad, -file, -merge, -warp)
-         [ configured in the port's UGH file [ game for "vanilla" ]]
-   -  support resource wads
-   -  make sure the user built the nodes
-      (option to invoke it automatically, or not check at all)
-
 -  linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
@@ -147,7 +136,8 @@ WISH: can import UDMF format maps
 
 -  replace "Toggle XXX" in View menu with checkboxes
 
--  make sure Load/Export wad filename not already in master_dir
+-  for Export Map, ensure wad filename not same as game_wad or one
+   of the resource wads in the master dir
 
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures

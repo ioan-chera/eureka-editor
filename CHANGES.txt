@@ -12,6 +12,8 @@ General:
    more preference settings, ability to disable GL nodes,
    and support for ZDoom uncompressed node format (XNOD)
 
++  "Test Map" command for testing your map in the game
+
 +  line drawing is now done with RMB (MOUSE3) button
 
 +  improved drag behavior, never modify the current selection
