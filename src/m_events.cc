@@ -653,6 +653,9 @@ int Editor_RawMouse(int event)
 //   OPERATION MENU(S)
 //------------------------------------------------------------------------
 
+static bool no_operation_cfg;
+
+
 typedef struct
 {
 	const editor_command_t *cmd;
@@ -729,8 +732,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	if (! fp)
 	{
-		// if (context[0] == 't')
-		FatalError("Installation problem: cannot find \"operaitons.cfg\" file!");
+		no_operation_cfg = true;
 		return;
 	}
 
@@ -795,16 +797,24 @@ void M_LoadOperationMenus()
 {
 	LogPrintf("Loading Operation menus...\n");
 
+	no_operation_cfg = false;
+
 	M_ParseOperationFile("thing",  main_win->op_thing);
 	M_ParseOperationFile("line",   main_win->op_line);
 	M_ParseOperationFile("sector", main_win->op_sector);
 	M_ParseOperationFile("vertex", main_win->op_vertex);
 	M_ParseOperationFile("render", main_win->op_render);
+
+	if (no_operation_cfg)
+		DLG_Notify("Installation problem: cannot find \"operaitons.cfg\" file!");
 }
 
 
 void CMD_OperationMenu()
 {
+	if (no_operation_cfg)
+		return;
+
 	Fl_Menu_Button *menu = NULL;
 
 	if (edit.render3d)
