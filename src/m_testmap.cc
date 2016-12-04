@@ -235,6 +235,54 @@ bool M_PortSetupDialog(const char *port, const char *game)
 //------------------------------------------------------------------------
 
 
+static const char * CalcWarpString()
+{
+	SYS_ASSERT(Level_name);
+
+	static char buffer[128];
+
+	// FIXME : some ports (EDGE and ZDoom) support a full name
+
+	if (strlen(Level_name) >= 4 &&
+		y_strnicmp(Level_name, "MAP", 3) == 0)
+	{
+		const char * p = Level_name + 3;
+
+		while (*p == '0' && isdigit(p[1]))
+			p++;
+
+		sprintf(buffer, "-warp %s", p);
+		return buffer;
+	}
+
+	// detect Ultimate-Doom style episode/map pair
+	if (strlen(Level_name) >= 4 &&
+		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
+		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
+	{
+		sprintf(buffer, "-warp %c %s", Level_name[1], Level_name + 3);
+		return buffer;
+	}
+
+	// map name is non-standard, find the first digit group and hope
+	// for the best...
+
+	const char *p = Level_name;
+
+	while (*p && !isdigit(*p))
+		p++;
+
+	if (*p)
+	{
+		sprintf(buffer, "-warp %s", p);
+		return buffer;
+	}
+
+	// no digits at all, oh shit!
+	return "";
+}
+
+
 void CMD_TestMap()
 {
 	// FIXME : remove this restriction  (simply don't have a -file parameter for the edit_wad)
@@ -292,9 +340,9 @@ void CMD_TestMap()
 
 	LogPrintf("Changing current dir to: %s\n", folder);
 
-	if (FileChangeDir(folder) != 0)
+	if (! FileChangeDir(folder))
 	{
-		// FIXME : proper error dialog
+		// FIXME : a notify dialog
 		Beep("chdir failed!");
 		return;
 	}
@@ -302,10 +350,7 @@ void CMD_TestMap()
 
 	// FIXME: use fl_filename_absolute() to get absolute paths
 
-	// add each wad in the MASTER directory
-
-
-	// FIXME : handle DOOM1/ULTDOOM style warp option
+	// FIXME: resource wads from the MASTER directory
 
 
 	// make the executable name relative, since we chdir() to its folder
@@ -316,23 +361,24 @@ void CMD_TestMap()
 
 	static char cmd_buffer[FL_PATH_MAX * 2];
 
-	// FIXME : proper WARP parameter !!!
-
 	snprintf(cmd_buffer, sizeof(cmd_buffer),
-	         "%s -iwad %s -file %s -warp %s",
+	         "%s -iwad %s -file %s %s",
 			 exe_name,
 			 game_wad->PathName(),
 			 edit_wad->PathName(),
-			 Level_name);
+			 CalcWarpString());
 
 	LogPrintf("Playing map using the following command:\n");
 	LogPrintf("  %s\n", cmd_buffer);
 
-	Status_Set("TESTING MAP...");
+	Status_Set("TESTING MAP");
 
 	main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
+
+
+	/* Go baby! */
 
 	int status = system(cmd_buffer);
 
