@@ -116,9 +116,9 @@ OBJS = \
 	$(OBJ_DIR)/bsp_node.o \
 	$(OBJ_DIR)/bsp_util.o \
 	\
-	$(OBJ_DIR)/eureka_res.o
+	$(OBJ_DIR)/main_res.o
 
-$(OBJ_DIR)/eureka_res.o: misc/eureka.rc
+$(OBJ_DIR)/main_res.o: src/main.rc
 	$(CROSS)windres -i $^ -o $@
 
 $(OBJ_DIR)/%.o: src/%.cc
