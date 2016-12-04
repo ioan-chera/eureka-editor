@@ -28,6 +28,10 @@
 class UI_TestMapDialog : public UI_Escapable_Window
 {
 private:
+	Fl_Choice *port;
+
+	Fl_Output *exe_path;
+
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
@@ -56,6 +60,20 @@ public:
 		UI_Escapable_Window(460, 425, "Test Map Settings"),
 		result(false), want_close(false)
 	{
+		int X = 0;
+		int Y = 0;
+
+		port = new Fl_Choice(90, Y+30, 200, 30, "Port: ");
+		port->textsize(17);
+		port->add("Boom|Edge|XDoom|Vanilla Doom|Vanilla Heretic|Vanilla HacX|Vanilla Strife");
+		port->value(0);
+
+		exe_path = new Fl_Output(90, 80, 225, 26, "Exe path: ");
+
+		Fl_Button *load_but = new Fl_Button(380, 80, 60, 26, "Load");
+
+		/* bottom buttons */
+
 		Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
 		grp->box(FL_FLAT_BOX);
 		grp->color(WINDOW_BG, WINDOW_BG);
@@ -66,7 +84,7 @@ public:
 			ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Play");
 			ok_but->labelfont(FL_HELVETICA_BOLD);
 			ok_but->callback(ok_callback, this);
-///			ok_but->deactivate();
+			ok_but->shortcut(FL_Enter);
 		}
 		grp->end();
 
@@ -122,11 +140,14 @@ void CMD_TestMap()
 
 	UI_TestMapDialog *dialog = new UI_TestMapDialog();
 
-	dialog->Run();
+	bool ok = dialog->Run();
 
-	delete dialog;
+	if (! ok)
+	{
+		delete dialog;
+		return;
+	}
 
-	return;
 
 
 	// FIXME: figure out the proper directory to cd into
@@ -168,6 +189,13 @@ void CMD_TestMap()
 		Status_Set("Result: OK");
 	else
 		Status_Set("Result code: %d\n", status);
+
+
+	delete dialog;
+
+	main_win->redraw();
+
+	Fl::wait(0.1);
 }
 
 
