@@ -1689,8 +1689,6 @@ bool M_ExportMap()
 	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
-	bool new_resources = false;
-
 	Wad_file *wad;
 
 	if (exists)
@@ -1713,8 +1711,6 @@ bool M_ExportMap()
 				delete wad;
 				return false;
 			}
-
-			new_resources = true;
 		}
 	}
 	else
@@ -1768,18 +1764,16 @@ bool M_ExportMap()
 		M_BackupWad(wad);
 	}
 
-	if (new_resources)
-	{
-		Main_LoadResources();
-	}
 
 	LogPrintf("Exporting Map : %s in %s\n", map_name, wad->PathName());
-
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
 	SaveLevel(map_name);
+
+	// do this after the save (in case it fatal errors)
+	Main_LoadResources();
 
 	return true;
 }
