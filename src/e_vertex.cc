@@ -259,7 +259,9 @@ void Vertex_MergeList(selection_c *verts)
 	// shouldn't kill any other objects.
 	DeleteObjects(verts);
 
-	DeleteObjects_WithUnused(&del_lines);
+	// we NEED to keep unused vertices here, otherwise we can merge
+	// all vertices of an isolated sector and end up with NOTHING!
+	DeleteObjects_WithUnused(&del_lines, false /* keep_things */, true /* keep_unused */);
 
 	verts->clear_all();
 }
