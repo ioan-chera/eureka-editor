@@ -85,12 +85,10 @@ static void file_do_build_nodes(Fl_Widget *w, void * data)
 	ExecuteCommand("BuildAllNodes");
 }
 
-#if 0
 static void file_do_test_map(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("TestMap");
 }
-#endif
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
@@ -439,19 +437,12 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-#if 0
 		{ "&Test in Game",     FL_COMMAND + 't', FCAL file_do_test_map },
-#endif
 		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
-
-#if 0 // IDEA : SEPARATE KEY BINDING DIALOG
-		{ "&Key Bindings",     FL_COMMAND + 'k', FCAL file_do_prefs },
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-#endif
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
