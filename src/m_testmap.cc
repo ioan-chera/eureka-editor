@@ -104,6 +104,7 @@ public:
 #endif
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
+		//         [ especially for vanilla -- look in path of Iwad_name ]
 		chooser.directory(Main_FileOpFolder());
 
 		switch (chooser.show())
@@ -241,10 +242,12 @@ static const char * CalcWarpString()
 
 	static char buffer[128];
 
-	// FIXME : some ports (EDGE and ZDoom) support a full name
+	// FIXME : some ports (EDGE and ZDoom) support the full name
 
+	// most common syntax is "MAP##" or "MAP###"
 	if (strlen(Level_name) >= 4 &&
-		y_strnicmp(Level_name, "MAP", 3) == 0)
+		y_strnicmp(Level_name, "MAP", 3) == 0 &&
+		isdigit(Level_name[3]))
 	{
 		const char * p = Level_name + 3;
 
@@ -255,7 +258,8 @@ static const char * CalcWarpString()
 		return buffer;
 	}
 
-	// detect Ultimate-Doom style episode/map pair
+	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
+	// a pair of numbers after -warp
 	if (strlen(Level_name) >= 4 &&
 		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
 		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
@@ -283,6 +287,50 @@ static const char * CalcWarpString()
 }
 
 
+static void AppendWadName(char *buf, size_t maxsize, const char *name, const char *parm = NULL)
+{
+	// FIXME: use fl_filename_absolute() to get absolute paths
+
+	// FIXME
+}
+
+
+static const char * GrabWadNames()
+{
+	static char wad_names[FL_PATH_MAX * 2];
+
+	bool has_file  = false;
+
+	// WISH : support "-merge" for Chocolate-Doom and derivatives
+
+
+	// always specify the iwad
+	AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(), "-iwad");
+
+	// add any resource wads
+	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	{
+		Wad_file *wad = master_dir[k];
+
+		if (wad == game_wad || wad == edit_wad)
+			continue;
+
+		AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(),
+					  has_file ? "-file" : NULL);
+		has_file = true;
+	}
+
+	// the current PWAD, if exists, must be last
+	if (edit_wad)
+	{
+		AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(),
+					  has_file ? "-file" : NULL);
+	}
+
+	return wad_names;
+}
+
+
 void CMD_TestMap()
 {
 	// FIXME : remove this restriction  (simply don't have a -file parameter for the edit_wad)
@@ -306,6 +354,7 @@ void CMD_TestMap()
 	}
 
 
+	// check if we know the executable path, if not then ask
 	port_path_info_t *info = M_QueryPortPath(QueryName());
 
 	if (! (info && M_IsPortPathValid(info)))
@@ -316,7 +365,7 @@ void CMD_TestMap()
 		info = M_QueryPortPath(QueryName());
 	}
 
-	// this generally cannot happen, but we check anyway...
+	// this generally can't happen, but we check anyway...
 	if (! (info && M_IsPortPathValid(info)))
 	{
 		fl_beep();
@@ -331,7 +380,6 @@ void CMD_TestMap()
 	{
 		old_dir[0] = 0;
 	}
-
 
 	// change working directory to be same as the executable
 	static char folder[FL_PATH_MAX];
@@ -348,28 +396,20 @@ void CMD_TestMap()
 	}
 
 
-	// FIXME: use fl_filename_absolute() to get absolute paths
-
-	// FIXME: resource wads from the MASTER directory
-
-
 	// make the executable name relative, since we chdir() to its folder
 	static char exe_name[FL_PATH_MAX];
 
 	fl_filename_relative(exe_name, sizeof(exe_name), info->exe_filename);
 
 
-	static char cmd_buffer[FL_PATH_MAX * 2];
+	// build the command string
+	static char cmd_buffer[FL_PATH_MAX * 4];
 
-	snprintf(cmd_buffer, sizeof(cmd_buffer),
-	         "%s -iwad %s -file %s %s",
-			 exe_name,
-			 game_wad->PathName(),
-			 edit_wad->PathName(),
-			 CalcWarpString());
+	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
+			 exe_name, GrabWadNames(), CalcWarpString());
 
 	LogPrintf("Playing map using the following command:\n");
-	LogPrintf("  %s\n", cmd_buffer);
+	LogPrintf("    %s\n", cmd_buffer);
 
 	Status_Set("TESTING MAP");
 
