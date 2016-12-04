@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -32,55 +32,52 @@
 #include "w_rawdef.h"
 
 
-/*
- *  y_stricmp
- *  A case-insensitive strcmp()
- *  (same thing as DOS stricmp() or GNU strcasecmp())
- */
-int y_stricmp (const char *s1, const char *s2)
+//
+// a case-insensitive strcmp()
+//
+int y_stricmp(const char *s1, const char *s2)
 {
 	for (;;)
 	{
-		if (tolower (*s1) != tolower (*s2))
-			return (unsigned char) *s1 - (unsigned char) *s2;
-		if (! *s1)
+		if (tolower(*s1) != tolower(*s2))
+			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+
+		if (*s1 && *s2)
 		{
-			if (! *s2)
-				return 0;
-			else
-				return -1;
+			s1++;
+			s2++;
+			continue;
 		}
-		if (! *s2)
-			return 1;
-		s1++;
-		s2++;
+
+		// both *s1 and *s2 must be zero
+		return 0;
 	}
 }
 
 
-/*
- *  y_strnicmp
- *  A case-insensitive strncmp()
- *  (same thing as DOS strnicmp() or GNU strncasecmp())
- */
-int y_strnicmp (const char *s1, const char *s2, size_t len)
+//
+// a case-insensitive strncmp()
+//
+int y_strnicmp(const char *s1, const char *s2, size_t len)
 {
+	SYS_ASSERT(len != 0);
+
 	while (len-- > 0)
 	{
-		if (tolower (*s1) != tolower (*s2))
-			return (unsigned char) *s1 - (unsigned char) *s2;
-		if (! *s1)
+		if (tolower(*s1) != tolower(*s2))
+			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+
+		if (*s1 && *s2)
 		{
-			if (! *s2)
-				return 0;
-			else
-				return -1;
+			s1++;
+			s2++;
+			continue;
 		}
-		if (! *s2)
-			return 1;
-		s1++;
-		s2++;
+
+		// both *s1 and *s2 must be zero
+		return 0;
 	}
+
 	return 0;
 }
 
