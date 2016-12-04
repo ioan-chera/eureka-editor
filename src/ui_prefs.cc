@@ -574,6 +574,19 @@ public:
 	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
 
+	/* Keys Tab */
+
+	Fl_Hold_Browser *key_list;
+	Fl_Button *key_group;
+	Fl_Button *key_key;
+	Fl_Button *key_func;
+
+	Fl_Button *key_add;
+	Fl_Button *key_copy;
+	Fl_Button *key_edit;
+	Fl_Button *key_delete;
+	Fl_Button *key_rebind;
+
 	/* Edit Tab */
 
 	Fl_Input  *edit_def_port;
@@ -610,18 +623,12 @@ public:
 	Fl_Button *normal_flat;
 	Fl_Button *normal_small;
 
-	/* Keys Tab */
+	/* 3D Tab */
 
-	Fl_Hold_Browser *key_list;
-	Fl_Button *key_group;
-	Fl_Button *key_key;
-	Fl_Button *key_func;
+	Fl_Float_Input  *rend_aspect;;
 
-	Fl_Button *key_add;
-	Fl_Button *key_copy;
-	Fl_Button *key_edit;
-	Fl_Button *key_delete;
-	Fl_Button *key_rebind;
+	Fl_Check_Button *rend_high_detail;
+	Fl_Check_Button *rend_lock_grav;
 
 	/* Nodes Tab */
 
@@ -638,17 +645,12 @@ public:
 
 	/* Other Tab */
 
-	Fl_Float_Input  *rend_aspect;;
-
-	Fl_Check_Button *rend_high_detail;
-	Fl_Check_Button *rend_lock_grav;
-
 	Fl_Button * reset_conf;
 	Fl_Button * reset_keys;
 };
 
 
-#define R_SPACES  "   "
+#define R_SPACES  "  "
 
 
 UI_Preferences::UI_Preferences() :
@@ -914,6 +916,30 @@ UI_Preferences::UI_Preferences() :
 		o->end();
 	  }
 
+	  /* ---- 3D Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " 3D View" R_SPACES);
+		o->selection_color(FL_LIGHT1);
+		o->labelsize(16);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D View Settings");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
+
+		  Fl_Box* o = new Fl_Box(300, 90, 150, 25, "(higher is wider, default is 0.83)");
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
+		}
+		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
+		}
+
+		o->end();
+	  }
+
 	  /* ---- Nodes Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Nodes" R_SPACES);
@@ -946,7 +972,7 @@ UI_Preferences::UI_Preferences() :
 		{ nod_compress = new Fl_Check_Button(50, 335, 250, 30, " Force zlib compression");
 		  nod_compress->hide();
 		}
-		{ nod_factor = new Fl_Choice(165, 345, 180, 30, "Seg split logic: ");
+		{ nod_factor = new Fl_Choice(160, 345, 180, 30, "Seg split logic: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
 		}
 		o->end();
@@ -958,20 +984,6 @@ UI_Preferences::UI_Preferences() :
 		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
 		o->hide();
-
-		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D View Settings");
-		  o->labelfont(FL_BOLD);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
-
-		  Fl_Box* o = new Fl_Box(300, 90, 150, 25, "(higher is wider, default is 0.83)");
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
-		}
-		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
-		}
 
 		{ Fl_Box* o = new Fl_Box(25, 255, 280, 30, "Configuration Reset");
 		  o->labelfont(FL_BOLD);
@@ -995,7 +1007,7 @@ UI_Preferences::UI_Preferences() :
 	  discard_but->callback(close_callback, this);
 	}
 
-end();
+	end();
 }
 
 
@@ -1373,6 +1385,17 @@ void UI_Preferences::LoadValues()
 
 	// TODO: smallscroll, largescroll
 
+	/* 3D Tab */
+
+	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
+
+	char aspect_buf[64];
+	sprintf(aspect_buf, "%1.2f", render_pixel_aspect / 100.0);
+	rend_aspect->value(aspect_buf);
+
+	rend_high_detail->value(render_high_detail ? 1 : 0);
+	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
+
 	/* Nodes Tab */
 
 	nod_on_save->value(bsp_on_save ? 1 : 0);
@@ -1393,14 +1416,6 @@ void UI_Preferences::LoadValues()
 
 	/* Other Tab */
 
-	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
-
-	char aspect_buf[64];
-	sprintf(aspect_buf, "%1.2f", render_pixel_aspect / 100.0);
-	rend_aspect->value(aspect_buf);
-
-	rend_high_detail->value(render_high_detail ? 1 : 0);
-	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 }
 
 
