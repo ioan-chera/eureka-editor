@@ -222,7 +222,7 @@ bool M_PortSetupDialog(const char *port, const char *game)
 		// persist the new port settings
 		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
-		snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", dialog->exe_name);
+		fl_filename_absolute(info->exe_filename, sizeof(info->exe_filename), dialog->exe_name);
 
 		M_SaveRecent();
 	}
