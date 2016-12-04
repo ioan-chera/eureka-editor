@@ -56,14 +56,16 @@ private:
 	}
 
 public:
-	UI_PortPathDialog() :
+	UI_PortPathDialog(const char *port_name) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
 		result(false), want_close(false)
 	{
-		// FIXME : name of port in this message
+		char message_buf[256];
 
-		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30,
-		           "Setting up location of the executable (EXE) for Vanilla Doom2.");
+		sprintf(message_buf, "Setting up location of the executable (EXE) for %s.", port_name);
+
+		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30, "");
+		header->copy_label(message_buf);
 		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 		header = new Fl_Box(FL_NO_BOX, 20, 55, w() - 40, 30,
@@ -117,7 +119,24 @@ public:
 
 bool M_PortSetupDialog(const char *port, const char *game)
 {
-	UI_PortPathDialog *dialog = new UI_PortPathDialog();
+	char name_buf[256];
+
+	if (y_stricmp(port, "vanilla") == 0)
+	{
+		snprintf(name_buf, sizeof(name_buf), "Vanilla %s\n", game);
+		name_buf[8] = toupper(name_buf[8]);
+	}
+	else if (y_stricmp(port, "mbf") == 0)	// temp hack
+	{
+		strcpy(name_buf, "MBF");
+	}
+	else
+	{
+		snprintf(name_buf, sizeof(name_buf), "%s", port);
+		name_buf[0] = toupper(name_buf[0]);
+	}
+
+	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf);
 
 	bool ok = dialog->Run();
 
