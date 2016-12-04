@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_files.h"
 #include "m_game.h"
 #include "m_loadsave.h"
 #include "w_wad.h"
@@ -84,6 +85,17 @@ const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 }
 
 
+void M_WriteKnownIWADs(FILE *fp)
+{
+	std::map<std::string, std::string>::iterator KI;
+
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
+	{
+		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
+	}
+}
+
+
 void M_ValidateGivenFiles()
 {
 	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
@@ -106,13 +118,87 @@ int M_FindGivenFile(const char *filename)
 
 
 //------------------------------------------------------------------------
+//  PORT PATH HANDLING
+//------------------------------------------------------------------------
+
+// the set of all known source port paths
+
+static std::map<std::string, port_path_info_t> port_paths;
+
+
+port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
+{
+	std::map<std::string, port_path_info_t>::iterator IT;
+
+	IT = port_paths.find(name);
+
+	if (IT != port_paths.end())
+		return &IT->second;
+
+	if (create_it)
+	{
+		port_path_info_t info;
+
+		memset(&info, 0, sizeof(port_path_info_t));
+
+		port_paths[name] = info;
+
+		return M_QueryPortPath(name);
+	}
+
+	return NULL;
+}
+
+
+void M_ParsePortPath(const char *name, char *line)
+{
+	while (isspace(*line))
+		line++;
+
+	char *arg_pos = line;
+
+	line = strchr(line, '|');
+	if (! line)
+	{
+		// TODO : Warn
+		return;
+	}
+
+	// terminate arguments
+	*line++ = 0;
+
+	port_path_info_t *info = M_QueryPortPath(name, true);
+	if (! info)	// should not fail!
+		return;
+
+	snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", line);
+
+	// parse any other arguments
+	// [ none needed atm.... ]
+}
+
+
+void M_WritePortPaths(FILE *fp)
+{
+	std::map<std::string, port_path_info_t>::iterator IT;
+
+	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
+	{
+		port_path_info_t& info = IT->second;
+
+		fprintf(fp, "port_path %s |%s\n", IT->first.c_str(), info.exe_filename);
+	}
+}
+
+
+//------------------------------------------------------------------------
 //  RECENT FILE HANDLING
 //------------------------------------------------------------------------
 
 #define MAX_RECENT  24
 
 
-// this is for the 'File/Recent' menu
+// this is for the "File/Recent" menu callbacks
 class recent_file_data_c
 {
 public:
@@ -341,6 +427,10 @@ static void ParseMiscConfig(FILE * fp)
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
 		}
+		else if (strcmp(line, "port_path") == 0)
+		{
+			M_ParsePortPath(map, pos);
+		}
 		else
 		{
 			// FIXME: warning
@@ -368,6 +458,7 @@ void M_LoadRecent()
 
 	recent_files.clear();
 	 known_iwads.clear();
+	  port_paths.clear();
 
 	ParseMiscConfig(fp);
 
@@ -395,14 +486,10 @@ void M_SaveRecent()
 
 	recent_files.WriteFile(fp);
 
-	// known iwad files
+	M_WriteKnownIWADs(fp);
 
-	std::map<std::string, std::string>::iterator KI;
+	M_WritePortPaths(fp);
 
-	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
-	{
-		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
-	}
 
 	fclose(fp);
 }

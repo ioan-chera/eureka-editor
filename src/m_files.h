@@ -35,6 +35,7 @@ int    M_RecentCount();
 void   M_RecentShortName(int index, char *name_buf);
 void * M_RecentData(int index);
 
+
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
 const char * M_QueryKnownIWAD(const char *game);
@@ -48,6 +49,16 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
 void M_WriteEurekaLump(Wad_file *wad);
 
 void M_BackupWad(Wad_file *wad);
+
+
+typedef struct port_path_info_t
+{
+	char exe_filename[FL_PATH_MAX];
+
+} port_path_info_t;
+
+port_path_info_t * M_QueryPortPath(const char *name, bool create_it = false);
+
 
 #endif  /* __EUREKA_M_FILES_H__ */
 
