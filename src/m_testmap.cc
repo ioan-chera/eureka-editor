@@ -99,7 +99,9 @@ public:
 
 		chooser.title("Pick the executable file");
 		chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+#ifdef WIN32
 		chooser.filter("Executables\t*.exe");
+#endif
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
 		chooser.directory(Main_FileOpFolder());
