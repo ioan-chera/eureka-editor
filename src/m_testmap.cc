@@ -237,6 +237,18 @@ bool M_PortSetupDialog(const char *port, const char *game)
 //------------------------------------------------------------------------
 
 
+static const char *CalcEXEName(const port_path_info_t *info)
+{
+	static char exe_name[FL_PATH_MAX];
+
+	// make the executable name relative, since we chdir() to its folder
+
+	snprintf(exe_name, sizeof(exe_name), "./%s", FindBaseName(info->exe_filename));
+
+	return exe_name;
+}
+
+
 static const char * CalcWarpString()
 {
 	SYS_ASSERT(Level_name);
@@ -345,15 +357,15 @@ static const char * GrabWadNames()
 			continue;
 
 		AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(),
-					  has_file ? "-file" : NULL);
+					  !has_file ? "-file" : NULL);
 		has_file = true;
 	}
 
 	// the current PWAD, if exists, must be last
 	if (edit_wad)
 	{
-		AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(),
-					  has_file ? "-file" : NULL);
+		AppendWadName(wad_names, sizeof(wad_names), edit_wad->PathName(),
+					  !has_file ? "-file" : NULL);
 	}
 
 	return wad_names;
@@ -418,21 +430,14 @@ void CMD_TestMap()
 	}
 
 
-	// make the executable name relative, since we chdir() to its folder
-	static char exe_name[FL_PATH_MAX];
-
-	// FIXME: check result??
-	fl_filename_relative(exe_name, sizeof(exe_name), info->exe_filename);
-
-
 	// build the command string
 	static char cmd_buffer[FL_PATH_MAX * 4];
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 exe_name, GrabWadNames(), CalcWarpString());
+			 CalcEXEName(info), GrabWadNames(), CalcWarpString());
 
-	LogPrintf("Playing map using the following command:\n");
-	LogPrintf("    %s\n", cmd_buffer);
+	LogPrintf("Testing map using the following command:\n");
+	LogPrintf("--| %s\n", cmd_buffer);
 
 	Status_Set("TESTING MAP");
 
@@ -449,6 +454,8 @@ void CMD_TestMap()
 		Status_Set("Result: OK");
 	else
 		Status_Set("Result code: %d\n", status);
+
+	LogPrintf("--> result code: %d\n", status);
 
 
 	// restore previous working directory
