@@ -27,23 +27,50 @@
 #include "ui_window.h"
 
 
+static const char * QueryName(const char *port = Port_name, const char *game = Game_name)
+{
+	SYS_ASSERT(port);
+
+	static char buffer[256];
+
+	if (y_stricmp(port, "vanilla") == 0)
+	{
+		if (! game)
+			game = "doom2";
+
+		snprintf(buffer, sizeof(buffer), "vanilla_%s\n", game);
+		return buffer;
+	}
+
+	return port;
+}
+
+
 class UI_PortPathDialog : public UI_Escapable_Window
 {
-private:
-	Fl_Output *exe_path;
+public:
+	Fl_Output *exe_display;
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
-	bool result;
+	// the chosen EXE name, or NULL if cancelled
+	char *exe_name;
+
 	bool want_close;
 
 private:
+	void SetEXE(const char *newbie)
+	{
+		StringFree(exe_name);
+
+		exe_name = StringDup(newbie);
+	}
+
 	static void ok_callback(Fl_Widget *w, void *data)
 	{
 		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
 
-		that->result = true;
 		that->want_close = true;
 	}
 
@@ -51,14 +78,46 @@ private:
 	{
 		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
 
-		that->result = false;
+		that->SetEXE(NULL);
+
 		that->want_close = true;
+	}
+
+	static void find_callback(Fl_Widget *w, void *data)
+	{
+		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
+
+		Fl_Native_File_Chooser chooser;
+
+		chooser.title("Pick the executable file");
+		chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+		chooser.filter("Executables\t*.exe");
+
+		// FIXME : if we have an exe_filename already, and folder exists, go there
+		chooser.directory(Main_FileOpFolder());
+
+		switch (chooser.show())
+		{
+			case -1:  // error
+				DLG_Notify("Unable to use that exe:\n\n%s", chooser.errmsg());
+				return;
+
+			case 1:  // cancelled
+				return;
+
+			default:
+				break;  // OK
+		}
+
+		// we assume the chosen file exists
+
+		that->SetEXE(chooser.filename());
 	}
 
 public:
 	UI_PortPathDialog(const char *port_name) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
-		result(false), want_close(false)
+		exe_name(NULL), want_close(false)
 	{
 		char message_buf[256];
 
@@ -73,9 +132,10 @@ public:
 		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-		exe_path = new Fl_Output(98, 100, w()-200, 26, "Exe path: ");
+		exe_display = new Fl_Output(98, 100, w()-200, 26, "Exe path: ");
 
 		Fl_Button *find_but = new Fl_Button(w()-80, 100, 60, 26, "Find");
+		find_but->callback((Fl_Callback*)find_callback, this);
 
 		/* bottom buttons */
 
@@ -112,7 +172,7 @@ public:
 		while (! want_close)
 			Fl::wait(0.2);
 
-		return result;
+		return exe_name ? true : false;
 	}
 };
 
@@ -139,6 +199,16 @@ bool M_PortSetupDialog(const char *port, const char *game)
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf);
 
 	bool ok = dialog->Run();
+
+	if (ok)
+	{
+		// persist the new port settings
+		port_path_info_t *info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
+
+		snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", dialog->exe_name);
+
+		M_SaveRecent();
+	}
 
 	delete dialog;
 	return ok;
@@ -171,14 +241,14 @@ void CMD_TestMap()
 	}
 
 
-	port_path_info_t *info = M_QueryPortPath(Port_name);
+	port_path_info_t *info = M_QueryPortPath(QueryName());
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
 		if (! M_PortSetupDialog(Port_name, Game_name))
 			return;
 
-		info = M_QueryPortPath(Port_name);
+		info = M_QueryPortPath(QueryName());
 	}
 
 	// this generally cannot happen, but we check anyway...
