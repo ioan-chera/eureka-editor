@@ -73,6 +73,18 @@ void RemoveEditWad()
 }
 
 
+static void ReplaceEditWad(Wad_file *new_wad)
+{
+	RemoveEditWad();
+
+	edit_wad = new_wad;
+
+	Pwad_name = edit_wad->PathName();
+
+	MasterDir_Add(edit_wad);
+}
+
+
 static void FreshLevel()
 {
 	BA_ClearAll();
@@ -1056,13 +1068,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 
 	// this wad replaces the current PWAD
-
-	RemoveEditWad();
-
-	edit_wad = wad;
-	Pwad_name = edit_wad->PathName();
-
-	MasterDir_Add(edit_wad);
+	ReplaceEditWad(wad);
 
 
 	// always grab map_name from the actual level
@@ -1772,19 +1778,7 @@ bool M_ExportMap()
 
 
 	// the new wad replaces the current PWAD
-
-	if (edit_wad)
-	{
-		MasterDir_Remove(edit_wad);
-
-		delete edit_wad;
-	}
-
-	edit_wad = wad;
-	Pwad_name = edit_wad->PathName();
-
-	MasterDir_Add(edit_wad);
-
+	ReplaceEditWad(wad);
 
 	SaveLevel(map_name);
 
