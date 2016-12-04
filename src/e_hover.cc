@@ -668,9 +668,9 @@ public :
 extern int TestAdjoinerLineDef(int ld);
 
 
-/*
- *  get_cur_linedef - determine which linedef is under the pointer
- */
+//
+// determine which linedef is under the pointer
+//
 static void get_cur_linedef(Close_obj& closest, int x, int y)
 {
 	// slack in map units
@@ -730,10 +730,10 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
 }
 
 
-/*
- *  get_split_linedef - determine which linedef would be split if a
- *                      new vertex was added to the given point.
- */
+//
+// determine which linedef would be split if a new vertex were
+// added at the given coordinates.
+//
 static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
 {
 	// slack in map units
@@ -784,9 +784,9 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
 }
 
 
-/*
- *  get_cur_sector - determine which sector is under the pointer
- */
+//
+//  determine which sector is under the pointer
+//
 static void get_cur_sector(Close_obj& closest,int x, int y)
 {
 	/* hack, hack...  I look for the first LineDef crossing
@@ -828,9 +828,9 @@ static void get_cur_sector(Close_obj& closest,int x, int y)
 }
 
 
-/*
- *  get_cur_thing - determine which thing is under the pointer
- */
+//
+// determine which thing is under the mouse pointer
+//
 static void get_cur_thing(Close_obj& closest, int x, int y)
 {
 	int mapslack = 1 + (int)ceil(16.0f / grid.Scale);
@@ -880,9 +880,9 @@ static void get_cur_thing(Close_obj& closest, int x, int y)
 }
 
 
-/*
- *  get_cur_vertex - determine which vertex is under the pointer
- */
+//
+// determine which vertex is under the pointer
+//
 static void get_cur_vertex(Close_obj& closest, int x, int y)
 {
 	const int screen_pix = vertex_radius(grid.Scale);
@@ -917,13 +917,11 @@ static void get_cur_vertex(Close_obj& closest, int x, int y)
 }
 
 
-/*
- *  GetNearObject - determine which object is under the pointer
- *
- *  Set <o> to point to the object under the pointer (map
- *  coordinates (<x>, <y>). If several objects are close
- *  enough to the pointer, the smallest object is chosen.
- */
+//
+//  sets 'o' to which object is under the pointer at the given
+//  coordinates.  when several objects are close, the smallest
+//  is chosen.
+//
 void GetNearObject(Objid& o, obj_type_e objtype, int x, int y)
 {
 	Close_obj closest;

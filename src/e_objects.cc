@@ -903,9 +903,9 @@ void CMD_Insert(void)
 }
 
 
-/*
-   check if a (part of a) LineDef is inside a given box
-*/
+//
+// check if any part of a LineDef is inside the given box
+//
 bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 {
 	int lx0 = LineDefs[ld]->Start()->x;
@@ -1628,9 +1628,10 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 }
 
 
-/*
- *  Returns a bounding box that completely includes a group of objects
- */
+//
+// returns a bounding box that completely includes a list of objects.
+// when the list is empty, bottom-left coordinate is arbitrary.
+//
 void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 {
 	if (list->empty())

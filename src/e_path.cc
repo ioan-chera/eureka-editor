@@ -139,12 +139,13 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 }
 
 
+//
 // This routine looks for all linedefs other than 'L' which use
 // the vertex 'V'.  If there are none or more than one, the search
 // stops there and nothing else happens.  If there is exactly one,
 // then it is added to the selection and we continue from the new
 // linedef and vertex.
-
+//
 static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 {
 	int start_L = L;
@@ -169,8 +170,9 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 }
 
 
-/* Select/unselect all linedefs in non-forked path.
- */
+//
+// select/unselect all linedefs in a non-forked path.
+//
 void CMD_LIN_SelectPath(void)
 {
 	// determine starting linedef
@@ -409,9 +411,9 @@ void GoToErrors()
 }
 
 
-/*
-  centre the map around the object and zoom in if necessary
-*/
+//
+// centre the map around the object and zoom in if necessary
+//
 void GoToObject(const Objid& objid)
 {
 	Selection_Clear();

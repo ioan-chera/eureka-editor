@@ -41,20 +41,16 @@ static Img_c * unknown_flat_image;
 static Img_c * unknown_sprite_image;
 
 
-/*
- *  Img_c::Img_c - default constructor
- *
- *  The new image is a null image.
- */
+//
+// default constructor, creating a null image
+//
 Img_c::Img_c() : pixels(NULL), w(0), h(0)
 { }
 
 
-/*
- *  Img_c::Img_c - constructor with dimensions
- *
- *  The new image is set to the specified dimensions.
- */
+//
+// a constructor with dimensions
+//
 Img_c::Img_c(int width, int height, bool _dummy) :
 	pixels(NULL), w(0), h(0)
 {
@@ -62,40 +58,38 @@ Img_c::Img_c(int width, int height, bool _dummy) :
 }
 
 
-/*
- *  Img_c::~Img_c - destructor
- */
+//
+// destructor
+//
 Img_c::~Img_c()
 {
 	delete pixels;
 }
 
 
-/*
- *  Img_c::buf - return a const pointer on the buffer
- *
- *  If the image is null, return a null pointer.
- */
+//
+//  return a const pointer on the buffer.
+//  if the image is null, return a NULL pointer.
+//
 const img_pixel_t *Img_c::buf() const
 {
 	return pixels;
 }
 
 
-/*
- *  Img_c::wbuf - return a writable pointer on the buffer
- *
- *  If the image is null, return a null pointer.
- */
+//
+// return a writable pointer on the buffer.
+// if the image is null, return a NULL pointer.
+//
 img_pixel_t *Img_c::wbuf()
 {
 	return pixels;
 }
 
 
-/*
- *  Img_c::clear - clear the image
- */
+//
+// clear the image to fully transparent
+//
 void Img_c::clear()
 {
 	if (pixels)
@@ -109,18 +103,16 @@ void Img_c::clear()
 }
 
 
-/*
- *  Img_c::resize - resize the image
- *
- *  If either dimension is zero, the image becomes a null
- *  image.
- */
+//
+// resize the image.  if either dimension is zero,
+// the image becomes a null image.
+//
 void Img_c::resize(int new_width, int new_height)
 {
 	if (new_width == w && new_height == h)
 		return;
 
-	// Unallocate old buffer
+	// unallocate old buffer
 	if (pixels)
 	{
 		delete[] pixels;
@@ -144,9 +136,9 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
-/*
- *  spectrify_img - make a game image look vaguely like a spectre
- */
+//
+// make a game image look vaguely like a spectre
+//
 Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(width(), height());
@@ -179,32 +171,13 @@ Img_c * Img_c::spectrify() const
 }
 
 
-/*
- *  scale_img - scale a game image
- *
- *  <img> is the source image, <omg> is the destination
- *  image. <scale> is the scaling factor (> 1.0 to magnify).
- *  A scaled copy of <img> is put in <omg>. <img> is not
- *  modified. Any previous data in <omg> is lost.
- *
- *  Example:
- *
- *    Img_c raw;
- *    Img_c scaled;
- *    LoadPicture (raw, ...);
- *    scale_img (raw, 2, scaled);
- *    display_img (scaled, ...);
- *
- *  The implementation is mediocre in the case of scale
- *  factors < 1 because it uses only one source pixel per
- *  destination pixel. On certain patterns, it's likely to
- *  cause a visible loss of quality.
- *
- *  In the case of scale factors > 1, the algorithm is
- *  suboptimal.
- *
- *  andrewj: turned into a method, but untested...
- */
+//
+//  scale a game image, returning a new one.
+//
+//  the implementation is very simplistic and not optimized.
+//
+//  andrewj: turned into a method, but untested...
+//
 Img_c * Img_c::scale_img(double scale) const
 {
 	int iwidth  = width();
@@ -237,12 +210,12 @@ Img_c * Img_c::scale_img(double scale) const
 }
 
 
-/*
- *  Copy the image, but remap pixels in the range 'src1..src2' to the
- *  range 'targ1..targ2'.
- *
- *  TODO : make it work with RGB pixels (find nearest in palette).
- */
+//
+// copy the image, remapping pixels in the range 'src1..src2' to the
+// range 'targ1..targ2'.
+//
+// TODO : make it work with RGB pixels (find nearest in palette).
+//
 Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
@@ -568,7 +541,9 @@ Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 
 //------------------------------------------------------------------------
 
-/* eight basic arrow sprites, made by Andrew Apted, public domain */
+//
+// eight basic arrow sprites, made by Andrew Apted, public domain.
+//
 
 /* XPM */
 const char * arrow_0_xpm[] =

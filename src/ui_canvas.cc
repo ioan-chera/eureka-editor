@@ -230,9 +230,9 @@ void UI_Canvas::DrawEverything()
 }
 
 
-/*
-  draw the actual game map
-*/
+//
+// draw the whole map, except for hilight/selection/selbox
+//
 void UI_Canvas::DrawMap()
 {
 	fl_color(FL_BLACK);
@@ -282,9 +282,9 @@ void UI_Canvas::DrawMap()
 }
 
 
-/*
- *  draw_grid - draw the grid in the background of the edit window
- */
+//
+//  draw the grid in the background of the edit window
+//
 void UI_Canvas::DrawGrid_Normal()
 {
 	float pixels_1 = grid.step * grid.Scale;
@@ -460,9 +460,9 @@ void UI_Canvas::DrawMapBounds()
 }
 
 
-/*
- *  vertex_radius - apparent radius of a vertex, in pixels
- */
+//
+//  the apparent radius of a vertex, in pixels
+//
 int vertex_radius(double scale)
 {
 	int r = 6 * (0.26 + scale / 2);
@@ -474,9 +474,9 @@ int vertex_radius(double scale)
 
 
 
-/*
- *  draw_vertices - draw the vertices, and possibly their numbers
- */
+//
+//  draw the vertices, and possibly their numbers
+//
 void UI_Canvas::DrawVertex(int map_x, int map_y, int r)
 {
 	int scrx = SCREENX(map_x);
@@ -535,9 +535,9 @@ void UI_Canvas::DrawVertices()
 }
 
 
-/*
- *  draw_linedefs - draw the linedefs
- */
+//
+//  draw all the linedefs
+//
 void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
@@ -721,9 +721,9 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 }
 
 
-/*
- *  draw_things_squares - the obvious
- */
+//
+//  draw things as squares (outlines)
+//
 void UI_Canvas::DrawThings()
 {
 	fl_color(DARKGREY);
@@ -788,6 +788,9 @@ void UI_Canvas::DrawThings()
 }
 
 
+//
+//  draw bodies of things (solid boxes, darker than the outline)
+//
 void UI_Canvas::DrawThingBodies()
 {
 	if (edit.error_mode)
@@ -979,9 +982,9 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 }
 
 
-/*
- *  draw_obj_no - draw a number at screen coordinates (x, y)
- */
+//
+//  draw a number at screen coordinates (x, y)
+//
 void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 {
 	char buffer[64];
@@ -1057,9 +1060,9 @@ void UI_Canvas::SplitLineForget()
 
 
 
-/*
-   highlight the selected object
-*/
+//
+//  draw the given object in highlight color
+//
 void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
                               bool do_tagged, bool skip_lines, int dx, int dy)
 {
@@ -1315,9 +1318,9 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 }
 
 
-/*
-   highlight the selected objects
-*/
+//
+//  draw selected objects in light blue
+//
 void UI_Canvas::DrawSelection(selection_c * list)
 {
 	if (! list || list->empty())
@@ -1352,20 +1355,18 @@ void UI_Canvas::DrawSelection(selection_c * list)
 }
 
 
-/*
- *  draw_map_point - draw a point at map coordinates
- *
- *  The point is drawn at map coordinates (<map_x>, <map_y>)
- */
+//
+//  draw a dot at map coordinates   [ NOT USED ATM ]
+//
 void UI_Canvas::DrawMapPoint(int map_x, int map_y)
 {
     fl_point(SCREENX(map_x), SCREENY(map_y));
 }
 
 
-/*
- *  DrawMapLine - draw a line on the screen from map coords
- */
+//
+//  draw a plain line at the given map coords
+//
 void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 {
     fl_line(SCREENX(map_x1), SCREENY(map_y1),
@@ -1373,6 +1374,9 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
+//
+//  draw a line with a "knob" showing the right (front) side
+//
 void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
                                bool reverse)
 {
@@ -1442,9 +1446,6 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
-/*
- *  DrawMapVector - draw an arrow on the screen from map coords
- */
 void UI_Canvas::DrawMapVector (int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	int x1 = SCREENX(map_x1);
@@ -1472,9 +1473,9 @@ void UI_Canvas::DrawMapVector (int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
-/*
- *  DrawMapArrow - draw an arrow on the screen from map coords and angle (0 - 65535)
- */
+//
+//  draw an arrow
+//
 void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
 	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);

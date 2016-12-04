@@ -2870,17 +2870,18 @@ void R3D_Toggle(void)
 }
 
 
-/* Align texture on a sidedef
- *
- * Parameter:
- *     x : align X offset
- *     y : align Y offset
- *    xy : align both X and Y
- *
- * Flags:
- *    /clear : clear offset(s) instead of aligning
- *    /right : align to line on the right of this one (instead of left)
- */
+//
+// Align texture on a sidedef
+//
+// Parameter:
+//     x : align X offset
+//     y : align Y offset
+//    xy : align both X and Y
+//
+// Flags:
+//    /clear : clear offset(s) instead of aligning
+//    /right : align to line on the right of this one (instead of left)
+//
 void R3D_Align(void)
 {
 	if (! edit.render3d)

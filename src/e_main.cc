@@ -76,11 +76,9 @@ void MarkChanges()
 }
 
 
-/*
- *  zoom_fit - adjust zoom factor to make level fit in window
- *
- *  Return 0 on success, non-zero on failure.
- */
+//
+// adjust zoom factor to make whole map fit in window
+//
 static void zoom_fit()
 {
 	if (NumVertices == 0)
@@ -816,10 +814,9 @@ int Selection_FirstLine(selection_c *list)
 }
 
 
-/*
-   select all objects inside a given box
-*/
-
+//
+// select all objects inside a given box
+//
 void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, int y2)
 {
 	if (x2 < x1)
