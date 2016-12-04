@@ -501,6 +501,7 @@ void CMD_BuildAllNodes()
 
 void CMD_TestMap()
 {
+	// FIXME : remove this restriction  (simply don't have a -file parameter for the edit_wad)
 	if (! edit_wad)
 	{
 		DLG_Notify("Cannot test the map unless you are editing a PWAD.");
@@ -533,6 +534,8 @@ void CMD_TestMap()
 	char cmd_buffer[FL_PATH_MAX * 2];
 
 	// FIXME: use fl_filename_absolute() to get absolute paths
+
+	// add each wad in the MASTER directory
 
 
 	// FIXME : handle DOOM1/ULTDOOM style warp option
