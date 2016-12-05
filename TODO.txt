@@ -9,23 +9,21 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-General
+Browser
 -------
 
-+  for "type" in Line/Sector/Thing panels, update the desc as we type
-
-+  Preferences:
-   -  sector_render_default
-   -   thing_render_default
-   -  floor_bump_xxx values
-
-+  allow Game and Port definitions to specify the linedef and thing
-   flags which can be used  (rather than hard-coding them)
++  when opened by a click, jump to the texture/thing/etc clicked on
 
 
 
 Documentation
 -------------
+
++  improve Wiki install
+   -  default font should be larger
+   -  better editing help
+
++  information on each binding command, parameters etc..
 
 +  a tutorial for the basics
 
@@ -45,20 +43,28 @@ Documentation
    
    - common pitfalls (vertices sitting on a linedef or another vertex)
 
-+  information on each binding command, parameters etc..
+
+
+General
+-------
+
++  for "type" in Line/Sector/Thing panels, update the desc as we type
+
++  Preferences:
+   -  sector_render_default
+   -   thing_render_default
+   -  floor_bump_xxx values
+
++  allow Game/Port definitions to specify the linedef/thing flags
+   which can be used  (rather than hard-coding them)
 
 
 
 Editing
 -------
 
-+  ENTER key pops up an "operation" menu, which provides all the
-   commands that can be done via the keyboard (e.g. flip linedefs)
-
-   (also bound to right mouse button)
-
-   -->  for "ACT_XXX" commands, turn pointer into a '+' and
-        wait for user to begin action (with MOUSE1..3 or SPACE key)
++  cannot auto-split close to a vertex?
+   it should be allowed when zoomed in far
 
 +  the criss-crossing-lines detection is too sloppy
    [ e.g. see MAP24 of Ancient Aliens ]
@@ -70,21 +76,6 @@ Editing
 
 +  improve X texture alignment
    [ e.g. picking "wrong" or not-optimal line ]
-
-+  cannot auto-split close to a vertex?
-   it should be allowed when zoomed in far
-
-
-
-3D View
--------
-
-
-
-Browser
--------
-
-+  when opened by a click, jump to the texture/thing/etc clicked on
 
 
 ______________________________________________________________________
@@ -110,6 +101,10 @@ General
 
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
+
+-  Operation menu:
+        for "ACT_XXX" commands, turn pointer into a '+' and
+        wait for user to begin action (with MOUSE1..3 or SPACE key)
 
 IDEA: large font mode, more readable on 1920x1080 monitors
 
