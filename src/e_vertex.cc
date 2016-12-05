@@ -287,7 +287,7 @@ void CMD_VT_Merge()
 
 	BA_End();
 
-	Editor_ClearAction();
+	Selection_Clear(true /* no_save */);
 }
 
 
