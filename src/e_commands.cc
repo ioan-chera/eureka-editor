@@ -197,7 +197,7 @@ void CMD_Redo(void)
 }
 
 
-void CMD_SetVar(void)
+void CMD_SetVar()
 {
 	const char *var_name = EXEC_Param[0];
 	const char *value    = EXEC_Param[1];
@@ -250,6 +250,12 @@ void CMD_SetVar(void)
 		edit.show_object_numbers = bool_val;
 		RedrawMap();
 	}
+	else if (y_stricmp(var_name, "sec_render") == 0)
+	{
+		int_val = CLAMP(0, int_val, 3);
+		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
+		RedrawMap();
+	}
 	else
 	{
 		Beep("Set: unknown var: %s", var_name);
@@ -257,7 +263,7 @@ void CMD_SetVar(void)
 }
 
 
-void CMD_ToggleVar(void)
+void CMD_ToggleVar()
 {
 	const char *var_name = EXEC_Param[0];
 
@@ -297,6 +303,14 @@ void CMD_ToggleVar(void)
 	else if (y_stricmp(var_name, "obj_nums") == 0)
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
+		RedrawMap();
+	}
+	else if (y_stricmp(var_name, "sec_render") == 0)
+	{
+		if (edit.sector_render_mode >= SREND_Lighting)
+			edit.sector_render_mode = SREND_Nothing;
+		else
+			edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)edit.sector_render_mode);
 		RedrawMap();
 	}
 	else
@@ -1399,13 +1413,13 @@ static editor_command_t  command_table[] =
 	{	"Set", "UI",
 		&CMD_SetVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap sprites"
+		/* keywords */ "3d browser grid obj_nums sec_render snap sprites"
 	},
 
 	{	"Toggle", "UI",
 		&CMD_ToggleVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums snap recent sprites"
+		/* keywords */ "3d browser grid obj_nums sec_render snap recent sprites"
 	},
 
 	{	"Scroll",  "UI",
