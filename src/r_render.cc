@@ -2999,10 +2999,6 @@ static editor_command_t  render_commands[] =
 		/* flags */ "/right /clear"
 	},
 
-	{	"3D_ACT_AdjustOfs", NULL,
-		&R3D_ACT_AdjustOfs
-	},
-
 	{	"3D_Forward", NULL,
 		&R3D_Forward
 	},
@@ -3033,6 +3029,10 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_DropToFloor", NULL,
 		&R3D_DropToFloor
+	},
+
+	{	"3D_ACT_AdjustOfs", NULL,
+		&R3D_ACT_AdjustOfs
 	},
 
 	{	"3D_WHEEL_Move", NULL,

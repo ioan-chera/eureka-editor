@@ -1191,6 +1191,96 @@ void CMD_AboutDialog()
 
 static editor_command_t  command_table[] =
 {
+	/* ---- miscellaneous / UI stuff ---- */
+
+	{	"Nothing", "Misc",
+		&CMD_Nothing
+	},
+
+	{	"Set", "Misc",
+		&CMD_SetVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums sec_render snap sprites"
+	},
+
+	{	"Toggle", "Misc",
+		&CMD_ToggleVar,
+		/* flags */ NULL,
+		/* keywords */ "3d browser grid obj_nums sec_render snap recent sprites"
+	},
+
+	{	"MetaKey", "Misc",
+		&CMD_MetaKey
+	},
+
+	{	"EditMode", "Misc",
+		&CMD_EditMode,
+		/* flags */ NULL,
+		/* keywords */ "thing line sector vertex"
+	},
+
+	{	"OperationMenu",  "Misc",
+		&CMD_OperationMenu
+	},
+
+	{	"MapCheck", "Misc",
+		&CMD_MapCheck,
+		/* flags */ NULL,
+		/* keywords */ "all major vertices sectors linedefs things textures tags current"
+	},
+
+	{	"Gamma",	"Misc",
+		&CMD_Gamma
+	},
+
+
+	/* ----- 2D canvas ----- */
+
+	{	"Scroll",  "2D View",
+		&CMD_Scroll
+	},
+
+	{	"GRID_Bump",  "2D View",
+		&CMD_GRID_Bump
+	},
+
+	{	"GRID_Set",  "2D View",
+		&CMD_GRID_Set
+	},
+
+	{	"GRID_Zoom",  "2D View",
+		&CMD_GRID_Zoom
+	},
+
+	{	"ACT_SelectBox", "2D View",
+		&CMD_ACT_SelectBox
+	},
+
+	{	"WHEEL_Scroll",  "2D View",
+		&CMD_WHEEL_Scroll
+	},
+
+	{	"NAV_Scroll_Left",  "2D View",
+		&CMD_NAV_Scroll_Left
+	},
+
+	{	"NAV_Scroll_Right",  "2D View",
+		&CMD_NAV_Scroll_Right
+	},
+
+	{	"NAV_Scroll_Up",  "2D View",
+		&CMD_NAV_Scroll_Up
+	},
+
+	{	"NAV_Scroll_Down",  "2D View",
+		&CMD_NAV_Scroll_Down
+	},
+
+	{	"NAV_MouseScroll", "2D View",
+		&CMD_NAV_MouseScroll
+	},
+
+
 	/* ----- FILE menu ----- */
 
 	{	"NewProject",  "File",
@@ -1260,6 +1350,14 @@ static editor_command_t  command_table[] =
 
 	/* ----- EDIT menu ----- */
 
+	{	"Undo",   "Edit",
+		&CMD_Undo
+	},
+
+	{	"Redo",   "Edit",
+		&CMD_Redo
+	},
+
 	{	"Insert",	"Edit",
 		&CMD_Insert,
 		/* flags */ "/new /continue /nofill"
@@ -1268,14 +1366,6 @@ static editor_command_t  command_table[] =
 	{	"Delete",	"Edit",
 		&CMD_Delete,
 		/* flags */ "/keep_things /keep_unused"
-	},
-
-	{	"Undo",   "Edit",
-		&CMD_Undo
-	},
-
-	{	"Redo",   "Edit",
-		&CMD_Redo
 	},
 
 	{	"Clipboard_Cut",   "Edit",
@@ -1338,15 +1428,6 @@ static editor_command_t  command_table[] =
 
 	/* ----- VIEW menu ----- */
 
-	{	"GoToCamera",  "View",
-		&CMD_GoToCamera
-	},
-
-	{	"PlaceCamera",  "View",
-		&CMD_PlaceCamera,
-		/* flags */ "/open3d"
-	},
-
 	{	"Zoom",  "View",
 		&CMD_Zoom,
 		/* flags */ "/center"
@@ -1360,10 +1441,6 @@ static editor_command_t  command_table[] =
 		&CMD_ZoomSelection
 	},
 
-	{	"JumpToObject",  "View",
-		&CMD_JumpToObject
-	},
-
 	{	"DefaultProps",  "View",
 		&CMD_DefaultProps
 	},
@@ -1374,6 +1451,19 @@ static editor_command_t  command_table[] =
 
 	{	"FindNext",  "View",
 		&CMD_FindNext
+	},
+
+	{	"GoToCamera",  "View",
+		&CMD_GoToCamera
+	},
+
+	{	"PlaceCamera",  "View",
+		&CMD_PlaceCamera,
+		/* flags */ "/open3d"
+	},
+
+	{	"JumpToObject",  "View",
+		&CMD_JumpToObject
 	},
 
 
@@ -1392,85 +1482,15 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* ------ interface stuff ------ */
-
-	{	"EditMode", "UI",
-		&CMD_EditMode,
-		/* flags */ NULL,
-		/* keywords */ "thing line sector vertex"
-	},
-
-	{	"MetaKey", "UI",
-		&CMD_MetaKey
-	},
-
-	{	"MapCheck", "UI",
-		&CMD_MapCheck,
-		/* flags */ NULL,
-		/* keywords */ "all major vertices sectors linedefs things textures tags current"
-	},
-
-	{	"Set", "UI",
-		&CMD_SetVar,
-		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums sec_render snap sprites"
-	},
-
-	{	"Toggle", "UI",
-		&CMD_ToggleVar,
-		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums sec_render snap recent sprites"
-	},
-
-	{	"Scroll",  "UI",
-		&CMD_Scroll
-	},
-
-	{	"OperationMenu",  "UI",
-		&CMD_OperationMenu
-	},
-
-	{	"GRID_Bump",  "UI",
-		&CMD_GRID_Bump
-	},
-
-	{	"GRID_Set",  "UI",
-		&CMD_GRID_Set
-	},
-
-	{	"GRID_Zoom",  "UI",
-		&CMD_GRID_Zoom
-	},
-
-	{	"WHEEL_Scroll",  "UI",
-		&CMD_WHEEL_Scroll
-	},
-
-	{	"NAV_Scroll_Left",  "UI",
-		&CMD_NAV_Scroll_Left
-	},
-
-	{	"NAV_Scroll_Right",  "UI",
-		&CMD_NAV_Scroll_Right
-	},
-
-	{	"NAV_Scroll_Up",  "UI",
-		&CMD_NAV_Scroll_Up
-	},
-
-	{	"NAV_Scroll_Down",  "UI",
-		&CMD_NAV_Scroll_Down
-	},
-
-	{	"NAV_MouseScroll", "UI",
-		&CMD_NAV_MouseScroll
-	},
-
-
 	/* ----- general operations ----- */
 
-	{	"Nothing", "General",
-		&CMD_Nothing
+	{	"Merge",	"General",
+		&CMD_Merge,
+		/* flags */ "/keep"
+	},
+
+	{	"Disconnect",	"General",
+		&CMD_Disconnect
 	},
 
 	{	"Mirror",	"General",
@@ -1493,21 +1513,8 @@ static editor_command_t  command_table[] =
 		&CMD_Shrink
 	},
 
-	{	"Disconnect",	"General",
-		&CMD_Disconnect
-	},
-
-	{	"Merge",	"General",
-		&CMD_Merge,
-		/* flags */ "/keep"
-	},
-
 	{	"Quantize",	"General",
 		&CMD_Quantize
-	},
-
-	{	"Gamma",	"General",
-		&CMD_Gamma
 	},
 
 	{	"ApplyTag",	"General",
@@ -1519,10 +1526,6 @@ static editor_command_t  command_table[] =
 	{	"ACT_Click", "General",
 		&CMD_ACT_Click,
 		/* flags */ "/select /drag /split"
-	},
-
-	{	"ACT_SelectBox", "General",
-		&CMD_ACT_SelectBox
 	},
 
 	{	"ACT_Drag", "General",

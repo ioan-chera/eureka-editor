@@ -159,7 +159,7 @@ private:
 			if (! cmd)
 				break;
 
-			if (cmd->req_context != KCTX_NONE && ! did_separator)
+			if (! did_separator && y_stricmp(cmd->group_name, "General") == 0)
 			{
 				func_choose->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 				did_separator = true;
