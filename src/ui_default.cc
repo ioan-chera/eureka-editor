@@ -337,10 +337,13 @@ void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
 
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
 	int diff = 8;
-	if (Fl::event_shift())
+
+	if (mod & MOD_SHIFT)
 		diff = 1;
-	else if (Fl::event_ctrl())
+	else if (mod & MOD_COMMAND)
 		diff = 64;
 
 	if (w == box->fl_up)
