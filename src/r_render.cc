@@ -2575,7 +2575,7 @@ void R3D_NAV_Forward(void)
 
 	view.nav_fwd = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 }
 
 
@@ -2594,7 +2594,7 @@ void R3D_NAV_Back(void)
 
 	view.nav_back = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
 
 
@@ -2613,7 +2613,7 @@ void R3D_NAV_Right(void)
 
 	view.nav_right = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 }
 
 
@@ -2632,7 +2632,7 @@ void R3D_NAV_Left(void)
 
 	view.nav_left = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
 
 
@@ -2659,7 +2659,7 @@ void R3D_NAV_Up(void)
 
 	view.nav_up = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 }
 
 
@@ -2686,7 +2686,7 @@ void R3D_NAV_Down(void)
 
 	view.nav_down = atof(EXEC_Param[0]);
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
 }
 
 
@@ -2708,7 +2708,7 @@ void R3D_NAV_TurnLeft(void)
 	// convert to radians
 	view.nav_turn_L = turn * M_PI / 180.0;
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
 
 
@@ -2730,7 +2730,7 @@ void R3D_NAV_TurnRight(void)
 	// convert to radians
 	view.nav_turn_R = turn * M_PI / 180.0;
 
-	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
 
 
@@ -2959,12 +2959,15 @@ void R3D_WHEEL_Move(void)
 
 	float speed = atof(EXEC_Param[0]);
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	if (Exec_HasFlag("/LAX"))
+	{
+		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (mod == MOD_SHIFT)
-		speed /= 4.0;
-	else if (mod == MOD_COMMAND)
-		speed *= 4.0;
+		if (mod == MOD_SHIFT)
+			speed /= 4.0;
+		else if (mod == MOD_COMMAND)
+			speed *= 4.0;
+	}
 
 	view.x += speed * (view.Cos * dy + view.Sin * dx);
 	view.y += speed * (view.Sin * dy - view.Cos * dx);
@@ -2979,96 +2982,96 @@ void R3D_WHEEL_Move(void)
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Set", NULL, 0,
+	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
 		/* keywords */ "gamma tex obj light grav"
 	},
 
-	{	"3D_Toggle", NULL, 0,
+	{	"3D_Toggle", NULL,
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
-	{	"3D_Align", NULL, 0,
+	{	"3D_Align", NULL,
 		&R3D_Align,
 		/* flags */ "/right /clear"
 	},
 
-	{	"3D_ACT_AdjustOfs", NULL, MOD_SHIFT,
+	{	"3D_ACT_AdjustOfs", NULL,
 		&R3D_ACT_AdjustOfs
 	},
 
-	{	"3D_Forward", NULL, 0,
+	{	"3D_Forward", NULL,
 		&R3D_Forward
 	},
 
-	{	"3D_Backward", NULL, 0,
+	{	"3D_Backward", NULL,
 		&R3D_Backward
 	},
 
-	{	"3D_Left", NULL, 0,
+	{	"3D_Left", NULL,
 		&R3D_Left
 	},
 
-	{	"3D_Right", NULL, 0,
+	{	"3D_Right", NULL,
 		&R3D_Right
 	},
 
-	{	"3D_Up", NULL, 0,
+	{	"3D_Up", NULL,
 		&R3D_Up
 	},
 
-	{	"3D_Down", NULL, 0,
+	{	"3D_Down", NULL,
 		&R3D_Down
 	},
 
-	{	"3D_Turn", NULL, 0,
+	{	"3D_Turn", NULL,
 		&R3D_Turn
 	},
 
-	{	"3D_DropToFloor", NULL, 0,
+	{	"3D_DropToFloor", NULL,
 		&R3D_DropToFloor
 	},
 
-	{	"3D_WHEEL_Move", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_WHEEL_Move", NULL,
 		&R3D_WHEEL_Move
 	},
 
-	{	"3D_NAV_Forward", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Forward", NULL,
 		&R3D_NAV_Forward
 	},
 
-	{	"3D_NAV_Back", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Back", NULL,
 		&R3D_NAV_Back
 	},
 
-	{	"3D_NAV_Right", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Right", NULL,
 		&R3D_NAV_Right
 	},
 
-	{	"3D_NAV_Left", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Left", NULL,
 		&R3D_NAV_Left
 	},
 
-	{	"3D_NAV_Up", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Up", NULL,
 		&R3D_NAV_Up
 	},
 
-	{	"3D_NAV_Down", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_Down", NULL,
 		&R3D_NAV_Down
 	},
 
-	{	"3D_NAV_TurnLeft", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_TurnLeft", NULL,
 		&R3D_NAV_TurnLeft
 	},
 
-	{	"3D_NAV_TurnRight", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_TurnRight", NULL,
 		&R3D_NAV_TurnRight
 	},
 
-	{	"3D_NAV_MouseMove", NULL, MOD_COMMAND | MOD_SHIFT,
+	{	"3D_NAV_MouseMove", NULL,
 		&R3D_NAV_MouseMove
 	},
 

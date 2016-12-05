@@ -32,6 +32,11 @@ int EXEC_Errno;
 keycode_t EXEC_CurKey;
 
 
+// this fake mod represents the "LAX-" prefix and is NOT used
+// anywhere except in the key_binding_t structure.
+#define MOD_LAX_SHIFTCTRL	FL_SCROLL_LOCK
+
+
 static std::vector< editor_command_t * > all_commands;
 
 
@@ -77,7 +82,6 @@ void M_RegisterCommand(const char *name, command_func_t func, const char *group_
 
 	cmd->name = name;
 	cmd->func = func;
-	cmd->lax_mods = 0;
 	cmd->flag_list = NULL;
 	cmd->keyword_list = NULL;
 
@@ -241,6 +245,10 @@ keycode_t M_ParseKeyString(const char *str)
 	{
 		key |= MOD_SHIFT;  str += 6;
 	}
+	else if (y_strnicmp(str, "LAX-", 4) == 0)
+	{
+		key |= MOD_LAX_SHIFTCTRL;  str += 4;
+	}
 
 	// convert uppercase letter --> lowercase + MOD_SHIFT
 	if (strlen(str) == 1 && str[0] >= 'A' && str[0] <= 'Z')
@@ -324,6 +332,8 @@ static const char *ModName_Dash(keycode_t mod)
 	if (mod & MOD_ALT)     return "ALT-";
 	if (mod & MOD_SHIFT)   return "SHIFT-";
 
+	if (mod & MOD_LAX_SHIFTCTRL) return "LAX-";
+
 	return "";
 }
 
@@ -338,6 +348,8 @@ static const char *ModName_Space(keycode_t mod)
 	if (mod & MOD_META)    return "META ";
 	if (mod & MOD_ALT)     return "ALT ";
 	if (mod & MOD_SHIFT)   return "SHIFT ";
+
+	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
 
 	return "";
 }
@@ -1177,8 +1189,18 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 			continue;
 
 		// match modifiers "loosely" for certain commands (esp. NAV_xxx)
+		bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
 
-		if ((bind.key | bind.cmd->lax_mods) != (key | bind.cmd->lax_mods))
+		keycode_t key1 = key;
+		keycode_t key2 = bind.key;
+
+		if (is_lax)
+		{
+			key1 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
+			key2 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
+		}
+
+		if (key1 != key2)
 			continue;
 
 		// found a match!
@@ -1199,6 +1221,12 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 		}
 
 		EXEC_CurKey = key;
+
+		// commands can test for LAX mode via a special flag
+		if (is_lax && f_idx < MAX_EXEC_PARAM)
+		{
+			EXEC_Flags[f_idx++] = "/LAX";
+		}
 
 		DoExecuteCommand(bind.cmd);
 

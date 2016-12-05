@@ -373,7 +373,7 @@ void CMD_NAV_Scroll_Left(void)
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 	edit.nav_scroll_left = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
 }
 
 
@@ -394,7 +394,7 @@ void CMD_NAV_Scroll_Right(void)
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 	edit.nav_scroll_right = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
 }
 
 
@@ -415,7 +415,7 @@ void CMD_NAV_Scroll_Up(void)
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 	edit.nav_scroll_up = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
 }
 
 
@@ -436,7 +436,7 @@ void CMD_NAV_Scroll_Down(void)
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 	edit.nav_scroll_down = perc * base_size / 100.0 / grid.Scale;
 
-	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release, MOD_COMMAND | MOD_SHIFT);
+	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
 }
 
 
@@ -818,8 +818,15 @@ void CMD_WHEEL_Scroll()
 {
 	float speed = atof(EXEC_Param[0]);
 
-//???	if (mod == MOD_SHIFT)
-//???		speed /= 3.0;
+	if (Exec_HasFlag("/LAX"))
+	{
+		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+		if (mod & MOD_SHIFT)
+			speed /= 3.0;
+		else if (mod & MOD_COMMAND)
+			speed *= 3.0;
+	}
 
 	float delta_x =     wheel_dx;
 	float delta_y = 0 - wheel_dy;
@@ -1172,343 +1179,343 @@ static editor_command_t  command_table[] =
 {
 	/* ----- FILE menu ----- */
 
-	{	"NewProject",  "File", 0,
+	{	"NewProject",  "File",
 		&CMD_NewProject
 	},
 
-	{	"ManageProject",  "File", 0,
+	{	"ManageProject",  "File",
 		&CMD_ManageProject
 	},
 
-	{	"OpenMap",  "File", 0,
+	{	"OpenMap",  "File",
 		&CMD_OpenMap
 	},
 
-	{	"GivenFile",  "File", 0,
+	{	"GivenFile",  "File",
 		&CMD_GivenFile,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last current"
 	},
 
-	{	"FlipMap",  "File", 0,
+	{	"FlipMap",  "File",
 		&CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
 	},
 
-	{	"SaveMap",  "File", 0,
+	{	"SaveMap",  "File",
 		&CMD_SaveMap
 	},
 
-	{	"ExportMap",  "File", 0,
+	{	"ExportMap",  "File",
 		&CMD_ExportMap
 	},
 
-	{	"FreshMap",  "File", 0,
+	{	"FreshMap",  "File",
 		&CMD_FreshMap
 	},
 
-	{	"CopyMap",  "File", 0,
+	{	"CopyMap",  "File",
 		&CMD_CopyMap
 	},
 
-	{	"RenameMap",  "File", 0,
+	{	"RenameMap",  "File",
 		&CMD_RenameMap
 	},
 
-	{	"DeleteMap",  "File", 0,
+	{	"DeleteMap",  "File",
 		&CMD_DeleteMap
 	},
 
-	{	"TestMap",  "File", 0,
+	{	"TestMap",  "File",
 		&CMD_TestMap
 	},
 
-	{	"BuildAllNodes",  "File", 0,
+	{	"BuildAllNodes",  "File",
 		&CMD_BuildAllNodes
 	},
 
-	{	"PreferenceDialog",  "File", 0,
+	{	"PreferenceDialog",  "File",
 		&CMD_Preferences
 	},
 
-	{	"Quit",  "File", 0,
+	{	"Quit",  "File",
 		&CMD_Quit
 	},
 
 
 	/* ----- EDIT menu ----- */
 
-	{	"Insert",	"Edit", 0,
+	{	"Insert",	"Edit",
 		&CMD_Insert,
 		/* flags */ "/new /continue /nofill"
 	},
 
-	{	"Delete",	"Edit", 0,
+	{	"Delete",	"Edit",
 		&CMD_Delete,
 		/* flags */ "/keep_things /keep_unused"
 	},
 
-	{	"Undo",   "Edit", 0,
+	{	"Undo",   "Edit",
 		&CMD_Undo
 	},
 
-	{	"Redo",   "Edit", 0,
+	{	"Redo",   "Edit",
 		&CMD_Redo
 	},
 
-	{	"Clipboard_Cut",   "Edit", 0,
+	{	"Clipboard_Cut",   "Edit",
 		&CMD_Clipboard_Cut
 	},
 
-	{	"Clipboard_Copy",   "Edit", 0,
+	{	"Clipboard_Copy",   "Edit",
 		&CMD_Clipboard_Copy
 	},
 
-	{	"Clipboard_Paste",   "Edit", 0,
+	{	"Clipboard_Paste",   "Edit",
 		&CMD_Clipboard_Paste
 	},
 
-	{	"Select",	"Edit", 0,
+	{	"Select",	"Edit",
 		&CMD_Select
 	},
 
-	{	"SelectAll",	"Edit", 0,
+	{	"SelectAll",	"Edit",
 		&CMD_SelectAll
 	},
 
-	{	"UnselectAll",	"Edit", 0,
+	{	"UnselectAll",	"Edit",
 		&CMD_UnselectAll
 	},
 
-	{	"InvertSelection",	"Edit", 0,
+	{	"InvertSelection",	"Edit",
 		&CMD_InvertSelection
 	},
 
-	{	"LastSelection",	"Edit", 0,
+	{	"LastSelection",	"Edit",
 		&CMD_LastSelection
 	},
 
-	{	"CopyAndPaste",   "Edit", 0,
+	{	"CopyAndPaste",   "Edit",
 		&CMD_CopyAndPaste
 	},
 
-	{	"CopyProperties",   "Edit", 0,
+	{	"CopyProperties",   "Edit",
 		&CMD_CopyProperties,
 		/* flags */ "/reverse"
 	},
 
-	{	"PruneUnused",   "Edit", 0,
+	{	"PruneUnused",   "Edit",
 		&CMD_PruneUnused
 	},
 
-	{	"MoveObjectsDialog",   "Edit", 0,
+	{	"MoveObjectsDialog",   "Edit",
 		&CMD_MoveObjects_Dialog
 	},
 
-	{	"ScaleObjectsDialog",   "Edit", 0,
+	{	"ScaleObjectsDialog",   "Edit",
 		&CMD_ScaleObjects_Dialog
 	},
 
-	{	"RotateObjectsDialog",   "Edit", 0,
+	{	"RotateObjectsDialog",   "Edit",
 		&CMD_RotateObjects_Dialog
 	},
 
 
 	/* ----- VIEW menu ----- */
 
-	{	"GoToCamera",  "View", 0,
+	{	"GoToCamera",  "View",
 		&CMD_GoToCamera
 	},
 
-	{	"PlaceCamera",  "View", 0,
+	{	"PlaceCamera",  "View",
 		&CMD_PlaceCamera,
 		/* flags */ "/open3d"
 	},
 
-	{	"Zoom",  "View", 0,
+	{	"Zoom",  "View",
 		&CMD_Zoom,
 		/* flags */ "/center"
 	},
 
-	{	"ZoomWholeMap",  "View", 0,
+	{	"ZoomWholeMap",  "View",
 		&CMD_ZoomWholeMap
 	},
 
-	{	"ZoomSelection",  "View", 0,
+	{	"ZoomSelection",  "View",
 		&CMD_ZoomSelection
 	},
 
-	{	"JumpToObject",  "View", 0,
+	{	"JumpToObject",  "View",
 		&CMD_JumpToObject
 	},
 
-	{	"DefaultProps",  "View", 0,
+	{	"DefaultProps",  "View",
 		&CMD_DefaultProps
 	},
 
-	{	"FindDialog",  "View", 0,
+	{	"FindDialog",  "View",
 		&CMD_FindDialog
 	},
 
-	{	"FindNext",  "View", 0,
+	{	"FindNext",  "View",
 		&CMD_FindNext
 	},
 
 
 	/* ------ HELP menu ------ */
 
-	{	"LogViewer",  "Help", 0,
+	{	"LogViewer",  "Help",
 		&CMD_LogViewer
 	},
 
-	{	"Documentation",  "Help", 0,
+	{	"Documentation",  "Help",
 		&CMD_Documentation
 	},
 
-	{	"AboutDialog",  "Help", 0,
+	{	"AboutDialog",  "Help",
 		&CMD_AboutDialog
 	},
 
 
 	/* ------ interface stuff ------ */
 
-	{	"EditMode", "UI", 0,
+	{	"EditMode", "UI",
 		&CMD_EditMode,
 		/* flags */ NULL,
 		/* keywords */ "thing line sector vertex"
 	},
 
-	{	"MetaKey", "UI", 0,
+	{	"MetaKey", "UI",
 		&CMD_MetaKey
 	},
 
-	{	"MapCheck", "UI", 0,
+	{	"MapCheck", "UI",
 		&CMD_MapCheck,
 		/* flags */ NULL,
 		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
 
-	{	"Set", "UI", 0,
+	{	"Set", "UI",
 		&CMD_SetVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser grid obj_nums snap sprites"
 	},
 
-	{	"Toggle", "UI", 0,
+	{	"Toggle", "UI",
 		&CMD_ToggleVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser grid obj_nums snap recent sprites"
 	},
 
-	{	"Scroll",  "UI", 0,
+	{	"Scroll",  "UI",
 		&CMD_Scroll
 	},
 
-	{	"OperationMenu",  "UI", 0,
+	{	"OperationMenu",  "UI",
 		&CMD_OperationMenu
 	},
 
-	{	"GRID_Bump",  "UI", 0,
+	{	"GRID_Bump",  "UI",
 		&CMD_GRID_Bump
 	},
 
-	{	"GRID_Set",  "UI", 0,
+	{	"GRID_Set",  "UI",
 		&CMD_GRID_Set
 	},
 
-	{	"GRID_Zoom",  "UI", 0,
+	{	"GRID_Zoom",  "UI",
 		&CMD_GRID_Zoom
 	},
 
-	{	"WHEEL_Scroll",  "UI", 0,
+	{	"WHEEL_Scroll",  "UI",
 		&CMD_WHEEL_Scroll
 	},
 
-	{	"NAV_Scroll_Left",  "UI",  MOD_SHIFT | MOD_COMMAND,
+	{	"NAV_Scroll_Left",  "UI",
 		&CMD_NAV_Scroll_Left
 	},
 
-	{	"NAV_Scroll_Right",  "UI",  MOD_SHIFT | MOD_COMMAND,
+	{	"NAV_Scroll_Right",  "UI",
 		&CMD_NAV_Scroll_Right
 	},
 
-	{	"NAV_Scroll_Up",  "UI",  MOD_SHIFT | MOD_COMMAND,
+	{	"NAV_Scroll_Up",  "UI",
 		&CMD_NAV_Scroll_Up
 	},
 
-	{	"NAV_Scroll_Down",  "UI",  MOD_SHIFT | MOD_COMMAND,
+	{	"NAV_Scroll_Down",  "UI",
 		&CMD_NAV_Scroll_Down
 	},
 
-	{	"NAV_MouseScroll", "UI", 0,
+	{	"NAV_MouseScroll", "UI",
 		&CMD_NAV_MouseScroll
 	},
 
 
 	/* ----- general operations ----- */
 
-	{	"Nothing", "General", 0,
+	{	"Nothing", "General",
 		&CMD_Nothing
 	},
 
-	{	"Mirror",	"General", 0,
+	{	"Mirror",	"General",
 		&CMD_Mirror,
 		/* flags */ NULL,
 		/* keywords */ "horiz vert"
 	},
 
-	{	"Rotate90",	"General", 0,
+	{	"Rotate90",	"General",
 		&CMD_Rotate90,
 		/* flags */ NULL,
 		/* keywords */ "cw acw"
 	},
 
-	{	"Enlarge",	"General", 0,
+	{	"Enlarge",	"General",
 		&CMD_Enlarge
 	},
 
-	{	"Shrink",	"General", 0,
+	{	"Shrink",	"General",
 		&CMD_Shrink
 	},
 
-	{	"Disconnect",	"General", 0,
+	{	"Disconnect",	"General",
 		&CMD_Disconnect
 	},
 
-	{	"Merge",	"General", 0,
+	{	"Merge",	"General",
 		&CMD_Merge,
 		/* flags */ "/keep"
 	},
 
-	{	"Quantize",	"General", 0,
+	{	"Quantize",	"General",
 		&CMD_Quantize
 	},
 
-	{	"Gamma",	"General", 0,
+	{	"Gamma",	"General",
 		&CMD_Gamma
 	},
 
-	{	"ApplyTag",	"General", 0,
+	{	"ApplyTag",	"General",
 		&CMD_ApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
 	},
 
-	{	"ACT_Click", "General", 0,
+	{	"ACT_Click", "General",
 		&CMD_ACT_Click,
 		/* flags */ "/select /drag /split"
 	},
 
-	{	"ACT_SelectBox", "General", 0,
+	{	"ACT_SelectBox", "General",
 		&CMD_ACT_SelectBox
 	},
 
-	{	"ACT_Drag", "General", 0,
+	{	"ACT_Drag", "General",
 		&CMD_ACT_Drag
 	},
 
-	{	"ACT_Transform", "General", 0,
+	{	"ACT_Transform", "General",
 		&CMD_ACT_Transform,
 		/* flags */ NULL,
 		/* keywords */ "scale stretch rotate rotscale skew"
@@ -1517,16 +1524,16 @@ static editor_command_t  command_table[] =
 
 	/* ------ LineDef mode ------ */
 
-	{	"LIN_Flip", NULL, 0,
+	{	"LIN_Flip", NULL,
 		&CMD_LIN_Flip,
 		/* flags */ "/verts /sides"
 	},
 
-	{	"LIN_SplitHalf", NULL, 0,
+	{	"LIN_SplitHalf", NULL,
 		&CMD_LIN_SplitHalf
 	},
 
-	{	"LIN_SelectPath", NULL, 0,
+	{	"LIN_SelectPath", NULL,
 		&CMD_LIN_SelectPath,
 		/* flags */ "/add /onesided /sametex"
 	},
@@ -1534,63 +1541,63 @@ static editor_command_t  command_table[] =
 
 	/* ------ Sector mode ------ */
 
-	{	"SEC_Floor", NULL, 0,
+	{	"SEC_Floor", NULL,
 		&CMD_SEC_Floor
 	},
 
-	{	"SEC_Ceil", NULL, 0,
+	{	"SEC_Ceil", NULL,
 		&CMD_SEC_Ceil
 	},
 
-	{	"SEC_Light", NULL, 0,
+	{	"SEC_Light", NULL,
 		&CMD_SEC_Light
 	},
 
-	{	"SEC_SelectGroup", NULL, 0,
+	{	"SEC_SelectGroup", NULL,
 		&CMD_SEC_SelectGroup,
 		/* flags */ "/add /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
-	{	"SEC_SwapFlats", NULL, 0,
+	{	"SEC_SwapFlats", NULL,
 		&CMD_SEC_SwapFlats
 	},
 
 
 	/* ------ Thing mode ------ */
 
-	{	"TH_Spin", NULL, 0,
+	{	"TH_Spin", NULL,
 		&CMD_TH_SpinThings
 	},
 
 
 	/* ------ Vertex mode ------ */
 
-	{	"VT_ShapeLine", NULL, 0,
+	{	"VT_ShapeLine", NULL,
 		&CMD_VT_ShapeLine
 	},
 
-	{	"VT_ShapeArc", NULL, 0,
+	{	"VT_ShapeArc", NULL,
 		&CMD_VT_ShapeArc
 	},
 
 
 	/* -------- Browser -------- */
 
- 	{	"BrowserMode", "Browser", 0,
+	{	"BrowserMode", "Browser",
 		&CMD_BrowserMode,
 		/* flags */ "/recent",
 		/* keywords */ "obj tex flat line sec genline"
 	},
 
-	{	"BR_CycleCategory", "Browser", 0,
+	{	"BR_CycleCategory", "Browser",
 		&CMD_BR_CycleCategory
 	},
 
-	{	"BR_ClearSearch", "Browser", 0,
+	{	"BR_ClearSearch", "Browser",
 		&CMD_BR_ClearSearch
 	},
 
-	{	"BR_Scroll", "Browser", 0,
+	{	"BR_Scroll", "Browser",
 		&CMD_BR_Scroll
 	},
 

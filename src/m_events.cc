@@ -233,11 +233,16 @@ void Nav_Navigate()
 }
 
 
-bool Nav_SetKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
+bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 {
 	// when starting a navigation, grab the current time
 	if (! edit.is_navigating)
 		Nav_TimeDiff();
+
+	keycode_t lax_mod = 0;
+
+	if (Exec_HasFlag("/LAX"))
+		lax_mod = MOD_SHIFT | MOD_COMMAND;
 
 	edit.is_navigating = true;
 
@@ -280,8 +285,13 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
 }
 
 
-bool Nav_ActionKey(keycode_t key, nav_release_func_t func, keycode_t lax_mod)
+bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
 {
+	keycode_t lax_mod = 0;
+
+	if (Exec_HasFlag("/LAX"))
+		lax_mod = MOD_SHIFT | MOD_COMMAND;
+
 	nav_active_key_t& N = cur_action_key;
 
 	if (N.key)

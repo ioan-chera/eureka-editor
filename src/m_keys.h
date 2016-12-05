@@ -52,7 +52,7 @@ typedef unsigned int keycode_t;
 #define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
 
 
-// values to represent the mouse wheel
+// made-up values to represent the mouse wheel
 #define FL_WheelUp		0xEF91
 #define FL_WheelDown	0xEF92
 #define FL_WheelLeft	0xEF93
@@ -137,10 +137,6 @@ typedef struct
 	// used in the Key binding preferences
 	// when NULL, will be computed from 'req_context'
 	const char *group_name;
-
-	// bit-mask of modifier keys that this command "hogs" for itself.
-	// generally only used for the special NAV_ and ACT_ commands.
-	keycode_t lax_mods;
 
 	command_func_t func;
 
