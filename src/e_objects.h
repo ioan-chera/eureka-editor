@@ -87,15 +87,15 @@ void RotateObjects3(double deg, int pos_x, int pos_y);
 
 /* commands */
 
-void CMD_Insert(void);
+void CMD_Insert();
 
-void CMD_CopyProperties(void);
+void CMD_CopyProperties();
 
-void CMD_Mirror  (void);
-void CMD_Rotate90(void);
-void CMD_Enlarge (void);
-void CMD_Shrink  (void);
-void CMD_Quantize(void);
+void CMD_Mirror  ();
+void CMD_Rotate90();
+void CMD_Enlarge ();
+void CMD_Shrink  ();
+void CMD_Quantize();
 
 
 #endif  /* __EUREKA_OBJECTS_H__ */

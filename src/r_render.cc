@@ -2466,7 +2466,7 @@ void Render3D_WriteUser(FILE *fp)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-void R3D_Forward(void)
+void R3D_Forward()
 {
 	float dist = atof(EXEC_Param[0]);
 
@@ -2476,7 +2476,7 @@ void R3D_Forward(void)
 	RedrawMap();
 }
 
-void R3D_Backward(void)
+void R3D_Backward()
 {
 	float dist = atof(EXEC_Param[0]);
 
@@ -2484,7 +2484,7 @@ void R3D_Backward(void)
 	view.y -= view.Sin * dist;
 }
 
-void R3D_Left(void)
+void R3D_Left()
 {
 	float dist = atof(EXEC_Param[0]);
 
@@ -2494,7 +2494,7 @@ void R3D_Left(void)
 	RedrawMap();
 }
 
-void R3D_Right(void)
+void R3D_Right()
 {
 	float dist = atof(EXEC_Param[0]);
 
@@ -2504,7 +2504,7 @@ void R3D_Right(void)
 	RedrawMap();
 }
 
-void R3D_Up(void)
+void R3D_Up()
 {
 	if (view.gravity && render_lock_gravity)
 	{
@@ -2521,7 +2521,7 @@ void R3D_Up(void)
 	RedrawMap();
 }
 
-void R3D_Down(void)
+void R3D_Down()
 {
 	if (view.gravity && render_lock_gravity)
 	{
@@ -2539,7 +2539,7 @@ void R3D_Down(void)
 }
 
 
-void R3D_Turn(void)
+void R3D_Turn()
 {
 	float angle = atof(EXEC_Param[0]);
 
@@ -2552,7 +2552,7 @@ void R3D_Turn(void)
 }
 
 
-void R3D_DropToFloor(void)
+void R3D_DropToFloor()
 {
 	view.FindGroundZ();
 
@@ -2560,12 +2560,12 @@ void R3D_DropToFloor(void)
 }
 
 
-static void R3D_NAV_Forward_release(void)
+static void R3D_NAV_Forward_release()
 {
 	view.nav_fwd = 0;
 }
 
-void R3D_NAV_Forward(void)
+void R3D_NAV_Forward()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2584,7 +2584,7 @@ static void R3D_NAV_Back_release(void)
 	view.nav_back = 0;
 }
 
-void R3D_NAV_Back(void)
+void R3D_NAV_Back()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2603,7 +2603,7 @@ static void R3D_NAV_Right_release(void)
 	view.nav_right = 0;
 }
 
-void R3D_NAV_Right(void)
+void R3D_NAV_Right()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2622,7 +2622,7 @@ static void R3D_NAV_Left_release(void)
 	view.nav_left = 0;
 }
 
-void R3D_NAV_Left(void)
+void R3D_NAV_Left()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2641,7 +2641,7 @@ static void R3D_NAV_Up_release(void)
 	view.nav_up = 0;
 }
 
-void R3D_NAV_Up(void)
+void R3D_NAV_Up()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2668,7 +2668,7 @@ static void R3D_NAV_Down_release(void)
 	view.nav_down = 0;
 }
 
-void R3D_NAV_Down(void)
+void R3D_NAV_Down()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2695,7 +2695,7 @@ static void R3D_NAV_TurnLeft_release(void)
 	view.nav_turn_L = 0;
 }
 
-void R3D_NAV_TurnLeft(void)
+void R3D_NAV_TurnLeft()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2717,7 +2717,7 @@ static void R3D_NAV_TurnRight_release(void)
 	view.nav_turn_R = 0;
 }
 
-void R3D_NAV_TurnRight(void)
+void R3D_NAV_TurnRight()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2739,7 +2739,7 @@ static void R3D_NAV_MouseMove_release(void)
 	Render3D_RBScroll(+1);
 }
 
-void R3D_NAV_MouseMove(void)
+void R3D_NAV_MouseMove()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2766,7 +2766,7 @@ static void ACT_AdjustOfs_release(void)
 	Render3D_AdjustOffsets(+1);
 }
 
-void R3D_ACT_AdjustOfs(void)
+void R3D_ACT_AdjustOfs()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -2778,7 +2778,7 @@ void R3D_ACT_AdjustOfs(void)
 }
 
 
-void R3D_Set(void)
+void R3D_Set()
 {
 	const char *var_name = EXEC_Param[0];
 	const char *value    = EXEC_Param[1];
@@ -2833,7 +2833,7 @@ void R3D_Set(void)
 }
 
 
-void R3D_Toggle(void)
+void R3D_Toggle()
 {
 	const char *var_name = EXEC_Param[0];
 
@@ -2882,7 +2882,7 @@ void R3D_Toggle(void)
 //    /clear : clear offset(s) instead of aligning
 //    /right : align to line on the right of this one (instead of left)
 //
-void R3D_Align(void)
+void R3D_Align()
 {
 	if (! edit.render3d)
 	{
@@ -2950,7 +2950,7 @@ void R3D_Align(void)
 }
 
 
-void R3D_WHEEL_Move(void)
+void R3D_WHEEL_Move()
 {
 	float dx = Fl::event_dx();
 	float dy = Fl::event_dy();

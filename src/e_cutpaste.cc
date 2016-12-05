@@ -756,7 +756,7 @@ static bool Clipboard_DoPaste()
 
 //------------------------------------------------------------------------
 
-void CMD_CopyAndPaste(void)
+void CMD_CopyAndPaste()
 {
 	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
@@ -771,7 +771,7 @@ void CMD_CopyAndPaste(void)
 }
 
 
-void CMD_Clipboard_Cut(void)
+void CMD_Clipboard_Cut()
 {
 	if (! Clipboard_DoCopy())
 	{
@@ -783,7 +783,7 @@ void CMD_Clipboard_Cut(void)
 }
 
 
-void CMD_Clipboard_Copy(void)
+void CMD_Clipboard_Copy()
 {
 	if (! Clipboard_DoCopy())
 	{
@@ -793,7 +793,7 @@ void CMD_Clipboard_Copy(void)
 }
 
 
-void CMD_Clipboard_Paste(void)
+void CMD_Clipboard_Paste()
 {
 	if (! Clipboard_DoPaste())
 	{
@@ -1143,7 +1143,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 }
 
 
-void CMD_Delete(void)
+void CMD_Delete()
 {
 	selection_c list;
 

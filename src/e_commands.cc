@@ -51,13 +51,13 @@
 int minimum_drag_pixels = 5;
 
 
-void CMD_Nothing(void)
+void CMD_Nothing()
 {
 	/* hey jude, don't make it bad */
 }
 
 
-void CMD_MetaKey(void)
+void CMD_MetaKey()
 {
 	if (edit.sticky_mod)
 	{
@@ -71,7 +71,7 @@ void CMD_MetaKey(void)
 }
 
 
-void CMD_EditMode(void)
+void CMD_EditMode()
 {
 	char mode = tolower(EXEC_Param[0][0]);
 
@@ -85,7 +85,7 @@ void CMD_EditMode(void)
 }
 
 
-void CMD_Select(void)
+void CMD_Select()
 {
 	if (edit.render3d)
 		return;
@@ -108,7 +108,7 @@ void CMD_Select(void)
 }
 
 
-void CMD_SelectAll(void)
+void CMD_SelectAll()
 {
 	Editor_ClearErrorMode();
 
@@ -124,7 +124,7 @@ void CMD_SelectAll(void)
 }
 
 
-void CMD_UnselectAll(void)
+void CMD_UnselectAll()
 {
 	Editor_ClearErrorMode();
 
@@ -141,7 +141,7 @@ void CMD_UnselectAll(void)
 }
 
 
-void CMD_InvertSelection(void)
+void CMD_InvertSelection()
 {
 	// do not clear selection when in error mode
 	edit.error_mode = false;
@@ -165,13 +165,13 @@ void CMD_InvertSelection(void)
 }
 
 
-void CMD_Quit(void)
+void CMD_Quit()
 {
 	Main_Quit();
 }
 
 
-void CMD_Undo(void)
+void CMD_Undo()
 {
 	if (! BA_Undo())
 	{
@@ -184,7 +184,7 @@ void CMD_Undo(void)
 }
 
 
-void CMD_Redo(void)
+void CMD_Redo()
 {
 	if (! BA_Redo())
 	{
@@ -320,7 +320,7 @@ void CMD_ToggleVar()
 }
 
 
-void CMD_BrowserMode(void)
+void CMD_BrowserMode()
 {
 	if (! EXEC_Param[0][0])
 	{
@@ -346,7 +346,7 @@ void CMD_BrowserMode(void)
 }
 
 
-void CMD_Scroll(void)
+void CMD_Scroll()
 {
 	// these are percentages
 	float delta_x = atof(EXEC_Param[0]);
@@ -375,7 +375,7 @@ static void NAV_Scroll_Left_release(void)
 	edit.nav_scroll_left = 0;
 }
 
-void CMD_NAV_Scroll_Left(void)
+void CMD_NAV_Scroll_Left()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -396,7 +396,7 @@ static void NAV_Scroll_Right_release(void)
 	edit.nav_scroll_right = 0;
 }
 
-void CMD_NAV_Scroll_Right(void)
+void CMD_NAV_Scroll_Right()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -417,7 +417,7 @@ static void NAV_Scroll_Up_release(void)
 	edit.nav_scroll_up = 0;
 }
 
-void CMD_NAV_Scroll_Up(void)
+void CMD_NAV_Scroll_Up()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -438,7 +438,7 @@ static void NAV_Scroll_Down_release(void)
 	edit.nav_scroll_down = 0;
 }
 
-void CMD_NAV_Scroll_Down(void)
+void CMD_NAV_Scroll_Down()
 {
 	if (! EXEC_CurKey)
 		return;
@@ -459,7 +459,7 @@ static void NAV_MouseScroll_release(void)
 	Editor_ScrollMap(+1);
 }
 
-void CMD_NAV_MouseScroll(void)
+void CMD_NAV_MouseScroll()
 {
 	if (edit.render3d)
 		return;
@@ -617,7 +617,7 @@ static void ACT_Click_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Click(void)
+void CMD_ACT_Click()
 {
 	if (edit.render3d)
 		return;
@@ -701,7 +701,7 @@ void CMD_ACT_Click(void)
 
 
 
-void CMD_ACT_SelectBox(void)
+void CMD_ACT_SelectBox()
 {
 	if (edit.render3d)
 		return;
@@ -718,7 +718,7 @@ void CMD_ACT_SelectBox(void)
 }
 
 
-void CMD_ACT_Drag(void)
+void CMD_ACT_Drag()
 {
 	if (edit.render3d)
 		return;
@@ -765,7 +765,7 @@ static void ACT_Transform_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Transform(void)
+void CMD_ACT_Transform()
 {
 	if (edit.render3d)
 		return;
@@ -853,7 +853,7 @@ void CMD_WHEEL_Scroll()
 }
 
 
-void CMD_Merge(void)
+void CMD_Merge()
 {
 	switch (edit.mode)
 	{
@@ -880,7 +880,7 @@ void CMD_Merge(void)
 }
 
 
-void CMD_Disconnect(void)
+void CMD_Disconnect()
 {
 	switch (edit.mode)
 	{
@@ -907,7 +907,7 @@ void CMD_Disconnect(void)
 }
 
 
-void CMD_Zoom(void)
+void CMD_Zoom()
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -930,13 +930,13 @@ void CMD_Zoom(void)
 }
 
 
-void CMD_ZoomWholeMap(void)
+void CMD_ZoomWholeMap()
 {
 	ZoomWholeMap();
 }
 
 
-void CMD_ZoomSelection(void)
+void CMD_ZoomSelection()
 {
 	if (edit.Selected->empty())
 	{
@@ -948,7 +948,7 @@ void CMD_ZoomSelection(void)
 }
 
 
-void CMD_GoToCamera(void)
+void CMD_GoToCamera()
 {
 	int x, y;
 	float angle;
@@ -965,7 +965,7 @@ void CMD_GoToCamera(void)
 }
 
 
-void CMD_PlaceCamera(void)
+void CMD_PlaceCamera()
 {
 	if (edit.render3d)
 	{
@@ -995,7 +995,7 @@ void CMD_PlaceCamera(void)
 }
 
 
-void CMD_Gamma(void)
+void CMD_Gamma()
 {
 	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
 

@@ -35,12 +35,12 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
 
 void DeleteObjects_WithUnused(selection_c *list, bool keep_things = false, bool keep_unused = false);
 
-void CMD_Delete(void);
-void CMD_CopyAndPaste(void);
+void CMD_Delete();
+void CMD_CopyAndPaste();
 
-void CMD_Clipboard_Cut(void);
-void CMD_Clipboard_Copy(void);
-void CMD_Clipboard_Paste(void);
+void CMD_Clipboard_Cut();
+void CMD_Clipboard_Copy();
+void CMD_Clipboard_Paste();
 
 #endif  /* __EUREKA_E_CUTPASTE_H__ */
 

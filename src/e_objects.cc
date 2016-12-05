@@ -865,7 +865,7 @@ static void Insert_Sector(bool force_new)
 }
 
 
-void CMD_Insert(void)
+void CMD_Insert()
 {
 	bool force_new;
 	bool force_cont;
@@ -1258,7 +1258,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 }
 
 
-void CMD_CopyProperties(void)
+void CMD_CopyProperties()
 {
 	if (edit.highlight.is_nil())
 	{
@@ -1784,7 +1784,7 @@ static void DoMirrorStuff(selection_c& list, bool is_vert, int mid_x, int mid_y)
 }
 
 
-void CMD_Mirror(void)
+void CMD_Mirror()
 {
 	selection_c list;
 
@@ -1842,7 +1842,7 @@ static void DoRotate90Things(selection_c& list, bool anti_clockwise, int mid_x, 
 }
 
 
-void CMD_Rotate90(void)
+void CMD_Rotate90()
 {
 	if (EXEC_Param[0] == 0)
 	{
@@ -1931,7 +1931,7 @@ static void DoEnlargeThings(selection_c& list, int mul, int mid_x, int mid_y)
 }
 
 
-void CMD_Enlarge(void)
+void CMD_Enlarge()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -2023,7 +2023,7 @@ static void DoShrinkThings(selection_c& list, int div, int mid_x, int mid_y)
 }
 
 
-void CMD_Shrink(void)
+void CMD_Shrink()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -2510,7 +2510,7 @@ static void Quantize_Vertices(selection_c& list)
 }
 
 
-void CMD_Quantize(void)
+void CMD_Quantize()
 {
 	if (edit.Selected->empty())
 	{

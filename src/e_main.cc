@@ -964,7 +964,7 @@ void Selection_Validate()
 }
 
 
-void CMD_LastSelection(void)
+void CMD_LastSelection()
 {
 	if (! last_Sel)
 	{

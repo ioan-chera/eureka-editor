@@ -156,7 +156,9 @@ void Selection_Push();
 void Selection_InvalidateLast();
 
 
-void CMD_LastSelection(void);
+/* commands */
+
+void CMD_LastSelection();
 
 
 // handling of recently used textures, flats and things
