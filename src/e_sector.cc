@@ -265,12 +265,19 @@ void CMD_SEC_Merge(void)
 
 	bool keep_common_lines = Exec_HasFlag("/keep");
 
-	int new_sec = edit.Selected->find_first();
+	// we require the *lowest* numbered sector, otherwise we can
+	// select the wrong sector afterwards (due to renumbering).
+	int new_sec = edit.Selected->max_obj();
+
+	selection_iterator_c it;
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		new_sec = MIN(new_sec, *it);
+	}
 
 	selection_c common_lines(OBJ_LINEDEFS);
 	selection_c unused_secs (OBJ_SECTORS);
-
-	selection_iterator_c it;
 
 	BA_Begin();
 
@@ -300,7 +307,7 @@ void CMD_SEC_Merge(void)
 	BA_End();
 
 	// re-select the final sector
-	Selection_Clear(true);
+	Selection_Clear(true /* no_save */);
 
 	edit.Selected->set(new_sec);
 }
