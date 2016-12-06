@@ -1174,7 +1174,7 @@ void CMD_LogViewer()
 }
 
 
-void CMD_Documentation()
+void CMD_OnlineDocs()
 {
 	fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
 }
@@ -1473,8 +1473,8 @@ static editor_command_t  command_table[] =
 		&CMD_LogViewer
 	},
 
-	{	"Documentation",  "Help",
-		&CMD_Documentation
+	{	"OnlineDocs",  "Help",
+		&CMD_OnlineDocs
 	},
 
 	{	"AboutDialog",  "Help",
