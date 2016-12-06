@@ -69,9 +69,11 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+70, Y, 70, 24, "Type: ");
+	type = new UI_PicName(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
+	type->type(FL_INT_INPUT);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
@@ -491,6 +493,26 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 
 	// update the description
 	box->UpdateField(Sector::F_TYPE);
+}
+
+
+void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_SectorBox *box = (UI_SectorBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	int value = atoi(box->type->value());
+
+	if (game_info.gen_types)
+	{
+		value &= BoomSF_TypeMask;
+	}
+
+	const sectortype_t *info = M_GetSectorType(value);
+
+	box->desc->value(info->desc);
 }
 
 

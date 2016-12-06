@@ -31,7 +31,7 @@ private:
 public:
 	UI_Nombre *which;
 
-	Fl_Int_Input *type;
+	UI_PicName   *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
@@ -99,12 +99,14 @@ private:
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);
 
-	static void    tex_callback(Fl_Widget *, void *);
-	static void dyntex_callback(Fl_Widget *, void *);
-	static void   type_callback(Fl_Widget *, void *);
-	static void  light_callback(Fl_Widget *, void *);
-	static void    tag_callback(Fl_Widget *, void *);
-	static void button_callback(Fl_Widget *, void *);
+	static void     tex_callback(Fl_Widget *, void *);
+	static void  dyntex_callback(Fl_Widget *, void *);
+	static void    type_callback(Fl_Widget *, void *);
+	static void dyntype_callback(Fl_Widget *, void *);
+
+	static void   light_callback(Fl_Widget *, void *);
+	static void     tag_callback(Fl_Widget *, void *);
+	static void  button_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_SECTOR_H__ */
