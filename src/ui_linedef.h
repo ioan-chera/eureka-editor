@@ -31,7 +31,7 @@ private:
 public:
 	UI_Nombre *which;
 
-	Fl_Int_Input *type;
+	UI_DynInput  *type;
 	Fl_Button    *choose;
 	Fl_Button    *gen;
 
@@ -95,7 +95,10 @@ private:
 
 	const char *GeneralizedDesc(int type_num);
 
-	static void   type_callback(Fl_Widget *, void *);
+private:
+	static void    type_callback(Fl_Widget *, void *);
+	static void dyntype_callback(Fl_Widget *, void *);
+
 	static void    tag_callback(Fl_Widget *, void *);
 	static void  flags_callback(Fl_Widget *, void *);
 	static void   args_callback(Fl_Widget *, void *);

@@ -73,10 +73,12 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+58, Y, 75, 24, "Type: ");
+	type = new UI_DynInput(X+58, Y, 75, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	type->type(FL_INT_INPUT);
 
 	choose = new Fl_Button(X+W/2-5, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
@@ -214,15 +216,15 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 // UI_LineBox Destructor
 //
 UI_LineBox::~UI_LineBox()
-{
-}
+{ }
 
 
 void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 {
 	UI_LineBox *box = (UI_LineBox *)data;
 
-	int new_type = atoi(box->type->value());
+	// support hexadecimal
+	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
 	selection_c list;
 	selection_iterator_c it;
@@ -242,6 +244,32 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 	// update description
 	box->UpdateField(LineDef::F_TYPE);
+}
+
+
+void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	// support hexadecimal
+	int new_type = (int)strtol(box->type->value(), NULL, 0);
+
+	const char *gen_desc = box->GeneralizedDesc(new_type);
+
+	if (gen_desc)
+	{
+		box->desc->value(gen_desc);
+	}
+	else
+	{
+		const linetype_t *info = M_GetLineType(new_type);
+		box->desc->value(info->desc);
+	}
+
+	main_win->browser->UpdateGenType(new_type);
 }
 
 
