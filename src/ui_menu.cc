@@ -523,7 +523,7 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Line Types",        0, FCAL browser_do_lines },
+		{ "&Line Specials",     0, FCAL browser_do_lines },
 		{ "&Sector Types",      0, FCAL browser_do_sectors },
 		{ "&Generalized Types", 0, FCAL browser_do_gen_types },
 

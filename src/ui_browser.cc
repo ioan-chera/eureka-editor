@@ -1438,7 +1438,7 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 		"Textures",
 		"Flats",
 		"Things",
-		"Line Types",
+		"Line Specials",
 		"Sector Types"
 	};
 
