@@ -363,17 +363,17 @@ void UI_Pic::Selected(bool _val)
 //------------------------------------------------------------------------
 
 
-UI_PicName::UI_PicName(int X, int Y, int W, int H, const char *L) :
+UI_DynInput::UI_DynInput(int X, int Y, int W, int H, const char *L) :
 	Fl_Input(X, Y, W, H, L),
 	callback2_(NULL), data2_(NULL)
 { }
 
 
-UI_PicName::~UI_PicName()
+UI_DynInput::~UI_DynInput()
 { }
 
 
-int UI_PicName::handle(int event)
+int UI_DynInput::handle(int event)
 {
 	int res = Fl_Input::handle(event);
 

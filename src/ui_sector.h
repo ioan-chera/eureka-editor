@@ -31,7 +31,7 @@ private:
 public:
 	UI_Nombre *which;
 
-	UI_PicName   *type;
+	UI_DynInput   *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
@@ -46,11 +46,11 @@ public:
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
 
-	UI_PicName *c_tex;
-	UI_Pic     *c_pic;
+	UI_DynInput *c_tex;
+	UI_Pic      *c_pic;
 
-	UI_PicName *f_tex;
-	UI_Pic     *f_pic;
+	UI_DynInput *f_tex;
+	UI_Pic      *f_pic;
 
 	Fl_Int_Input *headroom;
 

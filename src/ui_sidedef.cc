@@ -110,9 +110,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += 65;
 
 
-	l_tex = new UI_PicName(LX-8, Y, 80, 20);
-	u_tex = new UI_PicName(UX-8, Y, 80, 20);
-	r_tex = new UI_PicName(MX-8, Y, 80, 20);
+	l_tex = new UI_DynInput(LX-8, Y, 80, 20);
+	u_tex = new UI_DynInput(UX-8, Y, 80, 20);
+	r_tex = new UI_DynInput(MX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
 	u_tex->textsize(12);

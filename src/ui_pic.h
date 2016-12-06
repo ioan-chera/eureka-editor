@@ -79,15 +79,19 @@ private:
 //------------------------------------------------------------------------
 
 
-class UI_PicName : public Fl_Input
+class UI_DynInput : public Fl_Input
 {
+	/* this widget provides a secondary callback which can be
+	 * used to dynamically update a picture or description.
+	 */
+
 private:
 	Fl_Callback *callback2_;
 	void *data2_;
 
 public:
-	UI_PicName(int X, int Y, int W, int H, const char *L = NULL);
-	virtual ~UI_PicName();
+	UI_DynInput(int X, int Y, int W, int H, const char *L = NULL);
+	virtual ~UI_DynInput();
 
 	// FLTK method for event handling
 	int handle(int event);

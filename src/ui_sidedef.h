@@ -48,13 +48,13 @@ public:
 	Fl_Int_Input *y_ofs;
 	Fl_Int_Input *sec;
 
-	UI_Pic   *l_pic;
-	UI_Pic   *u_pic;
-	UI_Pic   *r_pic;
+	UI_Pic *l_pic;
+	UI_Pic *u_pic;
+	UI_Pic *r_pic;
 
-	UI_PicName *l_tex;
-	UI_PicName *u_tex;
-	UI_PicName *r_tex;
+	UI_DynInput *l_tex;
+	UI_DynInput *u_tex;
+	UI_DynInput *r_tex;
 
 	Fl_Button *add_button;
 	Fl_Button *del_button;

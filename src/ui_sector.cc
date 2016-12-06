@@ -69,7 +69,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new UI_PicName(X+70, Y, 70, 24, "Type: ");
+	type = new UI_DynInput(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->callback2(dyntype_callback, this);
@@ -124,7 +124,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 10;
 
 
-	c_tex = new UI_PicName(X+70, Y-5, 108, 24, "Ceiling: ");
+	c_tex = new UI_DynInput(X+70, Y-5, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(tex_callback, this);
 	c_tex->callback2(dyntex_callback, this);
@@ -171,7 +171,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new UI_PicName(X+70, Y+5, 108, 24, "Floor:   ");
+	f_tex = new UI_DynInput(X+70, Y+5, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(tex_callback, this);
 	f_tex->callback2(dyntex_callback, this);

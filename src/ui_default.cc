@@ -62,7 +62,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	Y += 20;
 
-	w_tex = new UI_PicName(X+68,   Y, 108, 24, "Wall: ");
+	w_tex = new UI_DynInput(X+68,   Y, 108, 24, "Wall: ");
 	w_tex->callback(tex_callback, this);
 	w_tex->callback2(dyntex_callback, this);
 	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -79,7 +79,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	f_pic->callback(flat_callback, this);
 
 
-	c_tex = new UI_PicName(X+68, Y, 108, 24, "Ceiling: ");
+	c_tex = new UI_DynInput(X+68, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(flat_callback, this);
 	c_tex->callback2(dyntex_callback, this);
@@ -129,7 +129,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new UI_PicName(X+68, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_DynInput(X+68, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(flat_callback, this);
 	f_tex->callback2(dyntex_callback, this);
@@ -247,7 +247,7 @@ void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 }
 
 
-const char * UI_DefaultProps::Normalize_and_Dup(UI_PicName *w)
+const char * UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
 	const char *normalized = StringDup(NormalizeTex(w->value()));
 

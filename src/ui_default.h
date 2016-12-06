@@ -25,8 +25,8 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
-	UI_Pic     *w_pic;
-	UI_PicName *w_tex;
+	UI_Pic      *w_pic;
+	UI_DynInput *w_tex;
 
 	Fl_Int_Input *ceil_h;
 	Fl_Int_Input *light;
@@ -35,11 +35,11 @@ private:
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
 
-	UI_Pic     *c_pic;
-	UI_PicName *c_tex;
+	UI_Pic      *c_pic;
+	UI_DynInput *c_tex;
 
-	UI_Pic     *f_pic;
-	UI_PicName *f_tex;
+	UI_Pic      *f_pic;
+	UI_DynInput *f_tex;
 
 	Fl_Int_Input *thing;
 	Fl_Output    *th_desc;
@@ -64,7 +64,7 @@ private:
 	void SetThing(int number);
 	void UnselectPicSet(char what /* 'f' or 't' */);
 
-	static const char * Normalize_and_Dup(UI_PicName *w);
+	static const char * Normalize_and_Dup(UI_DynInput *w);
 
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    tex_callback(Fl_Widget *w, void *data);
