@@ -1210,6 +1210,13 @@ void CMD_VT_ShapeArc(void)
 	double arc_rad = arc_deg * M_PI / 180.0;
 
 
+	if (edit.Selected->count_obj() < 3)
+	{
+		Beep("Need 3 or more vertices to shape");
+		return;
+	}
+
+
 	// determine middle point for circle
 	int x1, y1, x2, y2;
 
