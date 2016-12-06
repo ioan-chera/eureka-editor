@@ -27,14 +27,21 @@
 # Categories...
 
 linegroup a "Animated"
-linegroup f "Floor"
-linegroup g "Lift"
 linegroup c "Ceiling"
 linegroup d "Door"
-linegroup l "Light"
-linegroup s "Stairs"
-linegroup t "Thing"
+linegroup e "Elevator"
+linegroup f "Floor"
+linegroup g "Lift"
+linegroup k "Scripting"
+linegroup l "Lighting"
+
 linegroup p "Polyobj"
+linegroup q "Stairs"
+linegroup r "Renderer"
+linegroup s "Sector"
+linegroup t "Thing"
+linegroup u "Teleport"
+linegroup x "Exits"
 linegroup - "OTHER"
 
 # Floors and lifts
@@ -62,10 +69,10 @@ special 65 g "Plat_Up"          tag  speed  delay  dist
 special 60 g "Plat_Perpetual"   tag  speed  delay
 special 61 g "Plat_Stop"        tag
 
-special 26 s "Stairs_Down"        tag  speed  dist  delay  reset
-special 27 s "Stairs_Up"          tag  speed  dist  delay  reset
-special 31 s "Stairs_Down /sync"  tag  speed  dist  reset
-special 32 s "Stairs_Up   /sync"  tag  speed  dist  reset
+special 26 q "Stairs_Down"        tag  speed  dist  delay  reset
+special 27 q "Stairs_Up"          tag  speed  dist  delay  reset
+special 31 q "Stairs_Down /sync"  tag  speed  dist  reset
+special 32 q "Stairs_Up   /sync"  tag  speed  dist  reset
 
 # Ceiling and doors
 
@@ -130,19 +137,19 @@ special 93 p "Polyobj_Move x8 /OR"  po  speed  angle  dist
 
 special 0  - "NOTHING"
 
-special 29 - "Pillar_Build"  tag  speed  dist
-special 30 - "Pillar_Open"   tag  speed  f_dist  c_dist
-special 94 - "Pillar_Crush"  tag  speed  dist  damage
+special 29 e "Pillar_Build"  tag  speed  dist
+special 30 e "Pillar_Open"   tag  speed  f_dist  c_dist
+special 94 e "Pillar_Crush"  tag  speed  dist  damage
 
-special 80 - "ACS_Execute"       script  map  param1  param2  param3
-special 83 - "ACS_Execute /lock" script  map  param1  param2  lock
-special 81 - "ACS_Suspend"       script  map
-special 82 - "ACS_Terminate"     script  map
+special 95 e "Elevator_Lower"    tag  speed  dist
+special 96 e "Elevator_Raise"    tag  speed  dist
 
-special 95 - "Elevator_Lower"    tag  speed  dist
-special 96 - "Elevator_Raise"    tag  speed  dist
+special 80 k "ACS_Execute"       script  map  param1  param2  param3
+special 83 k "ACS_Execute /lock" script  map  param1  param2  lock
+special 81 k "ACS_Suspend"       script  map
+special 82 k "ACS_Terminate"     script  map
 
-special 121 - "Set Line ID"  id_number
+special 121 - "Line_SetIdent"  id_number
 
 special 100 a "Scroll_Left"   speed
 special 101 a "Scroll_Right"  speed
@@ -153,9 +160,9 @@ special 129 - "UsePuzzleItem"  item  script  param1  param2  param3
 special 140 - "Change Sound"  tag  sound_seq
 special 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 
-special 70 - "Teleport"          tid
-special 71 - "Teleport /silent"  tid
+special 70 u "Teleport"          tid
+special 71 u "Teleport /silent"  tid
 
-special 74 - "Game_NewMap"  map  position
-special 75 - "Game_End"
+special 74 x "Exit_ToMap"  map  position
+special 75 x "End_Game"
 

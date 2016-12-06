@@ -153,12 +153,12 @@ special  29 e "Pillar_Build"               tag  speed  dist
 special  94 e "Pillar_BuildAndCrush"       tag  speed  dist  damage  crush_mode
 
 ## group "Stairs"
-special 204 R "Generic_Stairs"             tag  speed  height  flags  reset_delay
-special  26 R "Stairs_BuildDown"           tag  speed  height  delay  reset_delay
-special  31 R "Stairs_BuildDownSync"       tag  speed  height  reset_delay
-special  27 R "Stairs_BuildUp"             tag  speed  height  delay  reset_delay
-special  32 R "Stairs_BuildUpSync"         tag  speed  height  reset_delay
-special 217 R "Stairs_BuildUpDoom"         tag  speed  height  delay  reset_delay
+special 204 q "Generic_Stairs"             tag  speed  height  flags  reset_delay
+special  26 q "Stairs_BuildDown"           tag  speed  height  delay  reset_delay
+special  31 q "Stairs_BuildDownSync"       tag  speed  height  reset_delay
+special  27 q "Stairs_BuildUp"             tag  speed  height  delay  reset_delay
+special  32 q "Stairs_BuildUpSync"         tag  speed  height  reset_delay
+special 217 q "Stairs_BuildUpDoom"         tag  speed  height  delay  reset_delay
 
 ## group "Sector"
 special 181 s "Plane_Align"                floor_side  ceil_side  line_id
@@ -204,14 +204,14 @@ special 117 l "Light_Stop"             tag
 special 109 l "Force_Lightning"        mode
 
 ## group "Teleporters"
-special  70 - "Teleport"               tid  tag  no_fog?
-special  71 - "Teleport_NoFog"         tid  set_angle?  tag
-special  76 - "TeleportOther"          tid  tid  fog?
-special  77 - "TeleportGroup"          group_tid  source_tid  dest_tid  move_source?   fog?
-special  78 - "TeleportInSector"       tag  source_tid  dest_tid  fog?  group_tid
-special 154 - "Teleport_NoStop"        dest_tid  tag  no_fog?
-special 215 - "Teleport_Line"          source_line_id  dest_line_id  flip_180?
-special  39 - "Teleport_ZombieChanger"  tid  tag
+special  70 u "Teleport"               tid  tag  no_fog?
+special  71 u "Teleport_NoFog"         tid  set_angle?  tag
+special  76 u "TeleportOther"          tid  tid  fog?
+special  77 u "TeleportGroup"          group_tid  source_tid  dest_tid  move_source?   fog?
+special  78 u "TeleportInSector"       tag  source_tid  dest_tid  fog?  group_tid
+special 154 u "Teleport_NoStop"        dest_tid  tag  no_fog?
+special 215 u "Teleport_Line"          source_line_id  dest_line_id  flip_180?
+special  39 u "Teleport_ZombieChanger"  tid  tag
 
 ## group "Things"
 special 131 t "Thing_Deactivate"        tid
@@ -283,10 +283,10 @@ special  87 p "Polyobj_Stop"            po
 # coordinates will be limited to the range 0-255.
 
 ## group "Exits"
-special 243 - "Exit_Normal"             pos_arg0
-special 244 - "Exit_Secret"             pos_arg0
-special  74 - "Teleport_NewMap"         map  pos_arg0  keep_angle?
-special  75 - "Teleport_EndGame"
+special 243 x "Exit_Normal"             pos_arg0
+special 244 x "Exit_Secret"             pos_arg0
+special  74 x "Exit_ToMap"              map  pos_arg0  keep_angle?
+special  75 x "End_Game"
 
 ## group "Renderer"
 special   9 r "Line_Horizon"
@@ -310,17 +310,17 @@ special  84 k "ACS_ExecuteWithResult"   script  param1  param2  param3
 special 226 k "ACS_ExecuteAlways"       script  map  param1  param2  param3
 special  81 k "ACS_Suspend"             script  map
 special  82 k "ACS_Terminate"           script  map
-
 special 158 k "FraggleScript"           script  front_only?  lock  remote_msg?
-special 191 k "SetPlayerProperty"       all_players?  turn_on?  property
-special 237 k "ChangeCamera"            tid  all_players?  move_cancels?
-special  15 k "Autosave"
-special 179 k "ChangeSkill"             skill
-special  18 k "StartConversation"       tid  face_talker?
-special 120 k "Earthquake"              intensity  duration  damrad  tremrad  tid
-special 129 k "UsePuzzleItem"           item  script  param1  param2  param3
-special 173 k "NoiseAlert"              target_tid  emitter_tid
-special 174 k "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
+
+special 191 - "SetPlayerProperty"       all_players?  turn_on?  property
+special 237 - "ChangeCamera"            tid  all_players?  move_cancels?
+special  15 - "Autosave"
+special 179 - "ChangeSkill"             skill
+special  18 - "StartConversation"       tid  face_talker?
+special 120 - "Earthquake"              intensity  duration  damrad  tremrad  tid
+special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
+special 173 - "NoiseAlert"              target_tid  emitter_tid
+special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
 
 #---- DOOM FORMAT SPECIALS  ----------
