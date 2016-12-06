@@ -24,8 +24,6 @@
 #
 #------------------------------------------------------------------------
 
-set $HEXEN_SPECIALS  1
-
 # Categories...
 
 linegroup a "Animated"
@@ -113,8 +111,8 @@ special 137 t "Thing_Spawn /silent" tid  type  angle
 
 # Polyobj specials
 
-special 1 p "Polyobj_Start"       po  mirror  sound 
-special 5 p "Polyobj_Explicit"    po  order  mirror  sound 
+special 1 p "Polyobj_Start"       po  mirror  sound_seq 
+special 5 p "Polyobj_Explicit"    po  order  mirror  sound_seq
 
 special 2 p "Polyobj_RotateL"     po  speed  angle 
 special 3 p "Polyobj_RotateR"     po  speed  angle 
@@ -152,7 +150,7 @@ special 102 a "Scroll_Up"     speed
 special 103 a "Scroll_Down"   speed 
 
 special 129 - "UsePuzzleItem"  item  script  param1  param2  param3
-special 140 - "Change Sound"  tag  sound 
+special 140 - "Change Sound"  tag  sound_seq
 special 120 - "Earthquake"  intensity  duration  damrad  tremrad  tid
 
 special 70 - "Teleport"          tid 
