@@ -148,10 +148,12 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- THING PROPS --------------
 
-	thing = new Fl_Int_Input(X+60, Y+20, 64, 24, "Thing: ");
+	thing = new UI_DynInput(X+60, Y+20, 64, 24, "Thing: ");
 	thing->align(FL_ALIGN_LEFT);
 	thing->callback(thing_callback, this);
+	thing->callback2(dynthing_callback, this);
 	thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	thing->type(FL_INT_INPUT);
 
 	th_desc = new Fl_Output(X+60, Y+80-26, 122, 24);
 
@@ -226,7 +228,7 @@ void UI_DefaultProps::SetThing(int number)
 {
 	default_thing = number;
 
-	SetIntVal(thing, default_thing);
+	thing->value(Int_TmpStr(default_thing));
 
 	UpdateThingDesc();
 }
@@ -389,6 +391,19 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
+{
+	UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+	int value = atoi(box->thing->value());
+
+	const thingtype_t *info = M_GetThingType(value);
+
+	box->th_desc->value(info->desc);
+	box->th_sprite->GetSprite(value, FL_DARK2);
+}
+
+
 void UI_DefaultProps::LoadValues()
 {
 	w_tex->value(default_wall_tex);
@@ -402,7 +417,8 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal(floor_h, default_floor_h);
 	SetIntVal( ceil_h, default_ceil_h);
 	SetIntVal(  light, default_light_level);
-	SetIntVal(  thing, default_thing);
+
+	thing->value(Int_TmpStr(default_thing));
 
 	UpdateThingDesc();
 }

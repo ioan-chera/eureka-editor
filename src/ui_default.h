@@ -41,7 +41,7 @@ private:
 	UI_Pic      *f_pic;
 	UI_DynInput *f_tex;
 
-	Fl_Int_Input *thing;
+	UI_DynInput  *thing;
 	Fl_Output    *th_desc;
 	UI_Pic		 *th_sprite;
 
@@ -72,7 +72,9 @@ private:
 	static void   flat_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);
 	static void height_callback(Fl_Widget *w, void *data);
-	static void  thing_callback(Fl_Widget *w, void *data);
+
+	static void    thing_callback(Fl_Widget *w, void *data);
+	static void dynthing_callback(Fl_Widget *w, void *data);
 };
 
 
