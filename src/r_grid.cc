@@ -34,29 +34,27 @@
 Grid_State_c  grid;
 
 // config items
-int  default_grid_size = 64;
-bool default_grid_snap = false;
-int  default_grid_mode = 0;  // off
+int  grid_default_size = 64;
+bool grid_default_snap = false;
+int  grid_default_mode = 0;  // off
 
-int  grid_toggle_type = 0;  // both
+int  grid_style;  // 0 = squares, 1 = dotty
 bool grid_hide_in_free_mode = false;
 
 
 Grid_State_c::Grid_State_c() :
 	 step(16 /* dummy */),
-	 snap(true), shown(true), mode(0),
+	 snap(true), shown(true),
      orig_x(0.0), orig_y(0.0), Scale(1.0)
-{
-}
+{ }
 
 Grid_State_c::~Grid_State_c()
-{
-}
+{ }
 
 
 void Grid_State_c::Init()
 {
-	step = default_grid_size - 1;
+	step = grid_default_size - 1;
 
 	if (step < 1)
 		step = 1;
@@ -68,7 +66,7 @@ void Grid_State_c::Init()
 
 	AdjustStep(+1);
 
-	if (default_grid_mode == 0)
+	if (grid_default_mode == 0)
 	{
 		shown = false;
 
@@ -78,10 +76,9 @@ void Grid_State_c::Init()
 	else
 	{
 		shown = true;
-		mode  = default_grid_mode - 1;
 	}
 
-	snap = default_grid_snap;
+	snap = grid_default_snap;
 
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
@@ -479,9 +476,6 @@ void Grid_State_c::DoSetGrid()
 
 void Grid_State_c::SetShown(bool enable)
 {
-	if (grid_toggle_type > 0)
-		mode = grid_toggle_type - 1;
-
 	shown = enable;
 
 	if (grid_hide_in_free_mode && shown != snap)
@@ -494,26 +488,7 @@ void Grid_State_c::SetShown(bool enable)
 
 void Grid_State_c::ToggleShown()
 {
-	if (grid_toggle_type > 0)
-		mode = grid_toggle_type - 1;
-
-	if (! shown)
-	{
-		shown = true;
-	}
-	else if (grid_toggle_type > 0)
-	{
-		shown = false;
-	}
-	else if (mode == 1)
-	{
-		shown = false;
-		mode  = 0;
-	}
-	else
-	{
-		mode = 1;
-	}
+	shown = !shown;
 
 	if (grid_hide_in_free_mode && shown != snap)
 		SetSnap(shown);
@@ -521,26 +496,6 @@ void Grid_State_c::ToggleShown()
 	DoSetGrid();
 
 	RedrawMap();
-}
-
-
-void Grid_State_c::SetMode(int new_mode)
-{
-	mode = new_mode;
-
-	DoSetGrid();
-
-	RedrawMap();
-}
-
-void Grid_State_c::ToggleMode()
-{
-	if (! shown)
-	{
-		shown = true;
-	}
-
-	SetMode(1 - mode);
 }
 
 
@@ -606,11 +561,9 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "grid") == 0 && num_tok >= 4)
 	{
 		grid.shown = atoi(tokens[1]) ? true : false;
-		grid.mode  = atoi(tokens[2]);
 		grid.step  = atoi(tokens[3]);
 
-		if (grid.mode < 0 || grid.mode > 1)
-			grid.mode = 1;
+		// tokens[2] was grid.mode, currently unused
 
 		grid.DoSetGrid();
 
@@ -642,7 +595,7 @@ void Grid_WriteUser(FILE *fp)
 
 	fprintf(fp, "grid %d %d %d\n",
 			grid.shown ? 1 : 0,
-			grid.mode,
+			grid_style ? 0 : 1,  /* was grid.mode, now unused */
 			grid.step);
 
 	fprintf(fp, "snap %d\n",

@@ -24,6 +24,8 @@
 
 class Grid_State_c
 {
+friend bool Grid_ParseUser(const char ** tokens, int num_tok);
+
 public:
 	// the actual grid step (64, 128, etc)
 	int step;
@@ -33,9 +35,6 @@ public:
 
 	// whether the grid is being displayed or not.
 	bool shown;
-
-	// the mode / style of grid : 0 is dotty, 1 is normal.
-	int mode;
 
 	// map coordinates for centre of canvas
 	double orig_x;
@@ -101,10 +100,8 @@ public:
 
 	void SetShown(bool enable);
 	void SetSnap (bool enable);
-	void SetMode (int new_mode);
 
 	void ToggleShown();
-	void ToggleMode();
 	void ToggleSnap();
 
 	// choose the scale nearest to (and less than) the wanted one
@@ -114,7 +111,7 @@ public:
 	// operation (scale change) is map_x/y.
 	void RefocusZoom(int map_x, int map_y, float before_Scale);
 
-	// these are really private, but needed by Grid_ParseUser()
+private:
 	void DoSetGrid();
 	void DoSetScale();
 

@@ -57,11 +57,11 @@ extern int  new_sector_size;
 extern int  sector_render_default;
 extern int   thing_render_default;
 
-extern int  default_grid_size;
-extern bool default_grid_snap;
-extern int  default_grid_mode;
+extern int  grid_style;
+extern int  grid_default_mode;
+extern bool grid_default_snap;
+extern int  grid_default_size;
 extern bool grid_hide_in_free_mode;
-extern int  grid_toggle_type;
 
 extern rgb_color_t dotty_axis_col;
 extern rgb_color_t dotty_major_col;

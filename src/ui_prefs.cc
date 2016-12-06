@@ -603,9 +603,9 @@ public:
 
 	Fl_Check_Button *gen_scrollbars;
 
+	Fl_Choice *grid_cur_style;
 	Fl_Check_Button *grid_snap;
 	Fl_Choice *grid_mode;
-	Fl_Choice *grid_toggle;
 	Fl_Choice *grid_size;
 
 	Fl_Choice *gen_smallscroll;
@@ -846,16 +846,16 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
 		}
-		{ grid_snap = new Fl_Check_Button(50, 110, 235, 25, " default SNAP mode");
+		{ grid_mode = new Fl_Choice(170, 100, 95, 25, "default grid state ");
+		  grid_mode->add("OFF|ON");
 		}
-		{ grid_size = new Fl_Choice(435, 110, 95, 25, "default grid size ");
+		{ grid_cur_style = new Fl_Choice(170, 130, 95, 25, "grid style ");
+		  grid_cur_style->add("Squares|Dotty");
+		}
+		{ grid_snap = new Fl_Check_Button(50, 160, 235, 25, " default SNAP mode");
+		}
+		{ grid_size = new Fl_Choice(170, 190, 95, 25, "default grid size ");
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
-		}
-		{ grid_mode = new Fl_Choice(435, 145, 95, 25, "default grid type ");
-		  grid_mode->add("OFF|Dotty|Normal");
-		}
-		{ grid_toggle = new Fl_Choice(435, 180, 95, 25, "grid toggle types ");
-		  grid_toggle->add("BOTH|Dotty|Normal");
 		}
 		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
 		  gen_smallscroll->hide();
@@ -863,7 +863,7 @@ UI_Preferences::UI_Preferences() :
 		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
 		  gen_largescroll->hide();
 		}
-		{ grid_hide_free = new Fl_Check_Button(50, 200, 245, 25, " hide grid in FREE mode");
+		{ grid_hide_free = new Fl_Check_Button(335, 200, 245, 25, " hide grid in FREE mode");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
@@ -1359,18 +1359,18 @@ void UI_Preferences::LoadValues()
 
 	/* Grid Tab */
 
-	if (default_grid_mode < 0 || default_grid_mode > 2)
-		default_grid_mode = 2;
+	if (grid_style < 0 || grid_style > 1)
+		grid_style = 1;
 
-	if (grid_toggle_type < 0 || grid_toggle_type > 2)
-		grid_toggle_type = 0;
+	if (grid_default_mode < 0 || grid_default_mode > 1)
+		grid_default_mode = 1;
 
-	grid_snap->value(default_grid_snap ? 1 : 0);
-	grid_size->value(GridSizeToChoice(default_grid_size));
-	grid_mode->value(default_grid_mode);
-	grid_toggle->value(grid_toggle_type);
-
+	grid_cur_style->value(grid_style);
+	grid_mode->value(grid_default_mode);
+	grid_snap->value(grid_default_snap ? 1 : 0);
+	grid_size->value(GridSizeToChoice(grid_default_size));
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
+
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
 	dotty_axis ->color(dotty_axis_col);
@@ -1488,13 +1488,13 @@ void UI_Preferences::SaveValues()
 
 	/* Grid Tab */
 
-	default_grid_snap = grid_snap->value() ? true : false;
-	default_grid_size = atoi(grid_size->mvalue()->text);
-	default_grid_mode = grid_mode->value();
-	grid_toggle_type  = grid_toggle->value();
-
+	grid_style        = grid_cur_style->value();
+	grid_default_mode = grid_mode->value();
+	grid_default_snap = grid_snap->value() ? true : false;
+	grid_default_size = atoi(grid_size->mvalue()->text);
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
-	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
+
+	map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
 	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
 	dotty_major_col = (rgb_color_t) dotty_major->color();

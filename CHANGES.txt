@@ -39,6 +39,8 @@ General:
 
 -  Vertex panel : arrow buttons for position adjustments
 
+-  made "dotty" grid be a preference, rather than three-way toggle
+
 -  a "Reset All Settings" button in the preferences dialog
 
 

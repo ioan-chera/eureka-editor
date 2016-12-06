@@ -350,33 +350,6 @@ static const opt_desc_t options[] =
 		&usegamma
 	},
 
-	{	"default_grid_mode",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
-		NULL,
-		&default_grid_mode
-	},
-
-	{	"default_grid_size",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Default grid size",
-		NULL,
-		&default_grid_size
-	},
-
-	{	"default_grid_snap",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Default grid snapping",
-		NULL,
-		&default_grid_snap
-	},
-
 	{	"default_edit_mode",
 		0,
 		OPT_INTEGER,
@@ -458,6 +431,33 @@ static const opt_desc_t options[] =
 		&floor_bump_large
 	},
 
+	{	"grid_default_mode",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
+		NULL,
+		&grid_default_mode
+	},
+
+	{	"grid_default_size",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default grid size",
+		NULL,
+		&grid_default_size
+	},
+
+	{	"grid_default_snap",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Default grid snapping",
+		NULL,
+		&grid_default_snap
+	},
+
 	{	"grid_hide_in_free_mode",
 		0,
 		OPT_BOOLEAN,
@@ -467,13 +467,13 @@ static const opt_desc_t options[] =
 		&grid_hide_in_free_mode
 	},
 
-	{	"grid_toggle_type",
+	{	"grid_style",
 		0,
 		OPT_INTEGER,
 		"v",
-		"grid toggle type : 0 = BOTH, 1 = dotty, 2 = normal",
+		"grid style : 0 = squares, 1 = dotty",
 		NULL,
-		&grid_toggle_type
+		&grid_style
 	},
 
 	{	"gui_theme",

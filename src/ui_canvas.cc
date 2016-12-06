@@ -28,6 +28,7 @@
 #include "e_main.h"
 #include "e_sector.h"
 #include "e_things.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "im_color.h"
@@ -238,7 +239,7 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-	if (edit.sector_render_mode && (! grid.shown || grid.mode == 0))
+	if (edit.sector_render_mode)
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 			RenderSector(n);
@@ -247,10 +248,10 @@ void UI_Canvas::DrawMap()
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
-		if (grid.mode == 0)
-			DrawGrid_Dotty();
-		else
+		if (grid_style == 0)
 			DrawGrid_Normal();
+		else
+			DrawGrid_Dotty();
 	}
 
 	if (Debugging)
