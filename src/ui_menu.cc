@@ -242,9 +242,9 @@ static void view_do_sprites(Fl_Widget *w, void * data)
 	ExecuteCommand("Toggle", "sprites");
 }
 
-static void view_do_grid_type(Fl_Widget *w, void * data)
+static void view_do_gamma(Fl_Widget *w, void * data)
 {
-	grid.ToggleMode();
+	ExecuteCommand("Gamma", "+1");
 }
 
 static void view_do_sector_render(Fl_Widget *w, void * data)
@@ -412,19 +412,19 @@ static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
-		{ "&New Project   ",  FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
+		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 
+		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
-
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
 
@@ -467,9 +467,9 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Move Objects...",      0, FCAL edit_do_move },
-		{ "&Scale Objects...",     0, FCAL edit_do_scale },
-		{ "Rotate Objects...",     0, FCAL edit_do_rotate },
+		{ "&Move Objects...",      FL_F+2, FCAL edit_do_move },
+		{ "&Scale Objects...",     FL_F+3, FCAL edit_do_scale },
+		{ "Rotate Objects...",     FL_F+4, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -479,10 +479,13 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
-		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
-		{ "Toggle S&prites",      0, FCAL view_do_sprites },
-		{ "Toggle &Grid Type",    0, FCAL view_do_grid_type },
-		{ "Toggle Object Nums",   0, FCAL view_do_object_nums },
+		// Note: FL_Tab cannot be used as a shortcut here, as it
+		//       invokes FLTK's hard-coded navigation stuff.
+
+		{ "Toggle &3D View",           0, FCAL view_do_toggle_3d },
+		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
+		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
+		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -514,14 +517,14 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Textures",     0, FCAL browser_do_textures },
-		{ "&Flats",        0, FCAL browser_do_flats },
-		{ "Thin&gs",       0, FCAL browser_do_things },
+		{ "&Textures",     FL_F+5, FCAL browser_do_textures },
+		{ "&Flats",        FL_F+6, FCAL browser_do_flats },
+		{ "Thin&gs",       FL_F+7, FCAL browser_do_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Line Types",   0, FCAL browser_do_lines },
-		{ "&Sector Types", 0, FCAL browser_do_sectors },
+		{ "&Line Types",        0, FCAL browser_do_lines },
+		{ "&Sector Types",      0, FCAL browser_do_sectors },
 		{ "&Generalized Types", 0, FCAL browser_do_gen_types },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -532,13 +535,13 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Hide",         0, FCAL browser_hide },
+		{ "&Hide",       FL_F+8, FCAL browser_hide },
 		{ 0 },
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
-		{ "&ALL",          0, FCAL checks_do_all },
-		{ "&Major stuff",  0, FCAL checks_do_major },
+		{ "&ALL",           FL_F+9, FCAL checks_do_all },
+		{ "&Major stuff  ",      0, FCAL checks_do_major },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
