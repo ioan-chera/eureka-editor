@@ -775,18 +775,7 @@ begin_drawing:
 }
 
 
-static void Correct_Sector(int sec_num)
-{
-	BA_Begin();
-	BA_Message("corrected sector");
-
-	AssignSectorToSpace(edit.map_x, edit.map_y, sec_num);
-
-	BA_End();
-}
-
-
-static void Insert_Sector(bool force_new)
+static void Insert_Sector()
 {
 	int sel_count = edit.Selected->count_obj();
 	if (sel_count > 1)
@@ -812,21 +801,6 @@ static void Insert_Sector(bool force_new)
 		return;
 	}
 
-	// if a sector is highlighted, merely correct it (unless CTRL is pressed)
-	if (edit.highlight.valid() && ! force_new)
-	{
-		// must not be any selection
-		if (sel_count > 0)
-		{
-			Beep("Correct sector not supported on selection");
-			return;
-		}
-
-		Correct_Sector(edit.highlight.num);
-
-		UpdateHighlight();
-		return;
-	}
 
 	// --- adding a NEW sector to the area ---
 
@@ -867,7 +841,6 @@ static void Insert_Sector(bool force_new)
 
 void CMD_Insert()
 {
-	bool force_new;
 	bool force_cont;
 	bool no_fill;
 
@@ -890,8 +863,7 @@ void CMD_Insert()
 			break;
 
 		case OBJ_SECTORS:
-			force_new = Exec_HasFlag("/new");
-			Insert_Sector(force_new);
+			Insert_Sector();
 			break;
 
 		default:

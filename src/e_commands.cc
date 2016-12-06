@@ -1370,7 +1370,7 @@ static editor_command_t  command_table[] =
 
 	{	"Insert",	"Edit",
 		&CMD_Insert,
-		/* flags */ "/new /continue /nofill"
+		/* flags */ "/continue /nofill"
 	},
 
 	{	"Delete",	"Edit",
