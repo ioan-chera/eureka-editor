@@ -1052,7 +1052,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 }
 
 
-void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unused)
+void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
+							  bool keep_verts, bool keep_lines)
 {
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
@@ -1089,18 +1090,20 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things, bool keep_unu
 		}
 	}
 
-	if (!keep_unused && list->what_type() == OBJ_SECTORS)
+	if (!keep_lines && list->what_type() == OBJ_SECTORS)
 	{
 		UnusedLineDefs(&sec_sel, &line_sel);
 
 		if (line_sel.notempty())
 		{
-			UnusedVertices(&line_sel, &vert_sel);
 			UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
+
+			if (!keep_verts)
+				UnusedVertices(&line_sel, &vert_sel);
 		}
 	}
 
-	if (!keep_unused && list->what_type() == OBJ_LINEDEFS)
+	if (!keep_verts && list->what_type() == OBJ_LINEDEFS)
 	{
 		UnusedVertices(&line_sel, &vert_sel);
 	}
@@ -1153,8 +1156,7 @@ void CMD_Delete()
 		return;
 	}
 
-	bool keep_things = Exec_HasFlag("/keep_things");
-	bool keep_unused = Exec_HasFlag("/keep_unused");
+	bool keep = Exec_HasFlag("/keep");
 
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
@@ -1175,7 +1177,7 @@ void CMD_Delete()
 	BA_Begin();
 	BA_MessageForSel("deleted", &list);
 
-	DeleteObjects_WithUnused(&list, keep_things, keep_unused);
+	DeleteObjects_WithUnused(&list, keep, false /* keep_verts */, keep);
 
 	BA_End();
 

@@ -1375,7 +1375,7 @@ static editor_command_t  command_table[] =
 
 	{	"Delete",	"Edit",
 		&CMD_Delete,
-		/* flags */ "/keep_things /keep_unused"
+		/* flags */ "/keep"
 	},
 
 	{	"Clipboard_Cut",   "Edit",
