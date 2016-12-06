@@ -46,14 +46,15 @@ Games and Ports:
 
 +  properly detect which ports can be used with each game
 
++  STRIFE support (based on the Slade3 config)
+
++  definition file for ZDoom (thanks to Slade3)
+
 +  support TX_START/TX_END textures, including PNG and TGA format
 
-+  support for STRIFE (based on the Slade3 config)
-
-+  support for HARMONY
-
+-  support for the Harmony TC
+-  support for Doom-in-Hexen mapping
 -  added "MBF" as a separate port
--  beginnings of a port definition file for ZDoom
 -  find sprites outside of S_START..S_END (except in vanilla)
 
 
@@ -66,6 +67,8 @@ Key System:
 -  bindable commands for all the functions in the menus
 -  improved key binding dialog in the Preferences
 -  allow key bindings to override hard-coded menu shortcuts
+
+-  use F1..F10 function keys for some menu functions
 
 -  support "/center" flag for Zoom command
 
