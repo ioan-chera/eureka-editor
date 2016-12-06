@@ -85,10 +85,12 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y = Y + which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+70, Y, 70, 24, "Type: ");
+	type = new UI_DynInput(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	type->type(FL_INT_INPUT);
 
 	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
@@ -263,10 +265,12 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	// Hexen thing specials
 
-	spec_type = new Fl_Int_Input(X+74, Y, 64, 24, "Special: ");
+	spec_type = new UI_DynInput(X+74, Y, 64, 24, "Special: ");
 	spec_type->align(FL_ALIGN_LEFT);
 	spec_type->callback(spec_callback, this);
+	spec_type->callback2(dynspec_callback, this);
 	spec_type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	spec_type->type(FL_INT_INPUT);
 	spec_type->hide();
 
 	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
@@ -351,6 +355,22 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	int value = atoi(box->type->value());
+
+	const thingtype_t *info = M_GetThingType(value);
+
+	box->desc->value(info->desc);
+	box->sprite->GetSprite(value, FL_DARK2);
+}
+
+
 void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
@@ -378,6 +398,27 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 		BA_MessageForSel("edited special of", &list);
 		BA_End();
+	}
+}
+
+
+void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	if (box->obj < 0 || Level_format != MAPF_Hexen)
+		return;
+
+	int value = atoi(box->spec_type->value());
+
+	if (value)
+	{
+		const linetype_t *info = M_GetLineType(value);
+		box->spec_desc->value(info->desc);
+	}
+	else
+	{
+		box->spec_desc->value("");
 	}
 }
 
