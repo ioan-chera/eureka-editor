@@ -211,6 +211,7 @@ public:
 
 	void SetActive(int new_active);
 
+	char GetMode() const;
 	void ChangeMode(char new_mode);
 	void NewEditMode(obj_type_e edit_mode);
 

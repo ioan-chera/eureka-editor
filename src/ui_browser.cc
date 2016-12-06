@@ -1522,6 +1522,20 @@ void UI_Browser::SetActive(int new_active)
 }
 
 
+char UI_Browser::GetMode() const
+{
+	switch (active)
+	{
+		case 0:  return 'T';
+		case 1:  return 'F';
+		case 2:  return 'O';
+		case 3:  return 'L';
+		case 4:  return 'S';
+		default: return 'G';
+	}
+}
+
+
 void UI_Browser::ChangeMode(char new_mode)
 {
 	switch (new_mode)

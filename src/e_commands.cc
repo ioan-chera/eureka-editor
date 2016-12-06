@@ -337,6 +337,16 @@ void CMD_BrowserMode()
 		return;
 	}
 
+	// if that browser is already open, close it now
+	if (main_win->browser->visible() &&
+		main_win->browser->GetMode() == mode &&
+		! Exec_HasFlag("/force") &&
+		! Exec_HasFlag("/recent"))
+	{
+		main_win->ShowBrowser(0);
+		return;
+	}
+
 	main_win->ShowBrowser(mode);
 
 	if (Exec_HasFlag("/recent"))
