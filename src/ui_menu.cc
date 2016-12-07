@@ -129,22 +129,22 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Cut");
+	ExecuteCommand("Clipboard_Cut", "/MENU");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Copy");
+	ExecuteCommand("Clipboard_Copy", "/MENU");
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Paste");
+	ExecuteCommand("Clipboard_Paste", "/MENU");
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Delete");
+	ExecuteCommand("Delete", "/MENU");
 }
 
 static void edit_do_select_all(Fl_Widget *w, void * data)
@@ -189,12 +189,12 @@ static void edit_do_rotate(Fl_Widget *w, void * data)
 
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Mirror", "horiz");
+	ExecuteCommand("Mirror", "horiz", "/MENU");
 }
 
 static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Mirror", "vert");
+	ExecuteCommand("Mirror", "vert", "/MENU");
 }
 
 
@@ -388,12 +388,17 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 //  HELP MENU
 //------------------------------------------------------------------------
 
-void help_do_online_docs(Fl_Widget *w, void * data)
+static void help_do_logs(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("LogViewer");
+}
+
+static void help_do_online_docs(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Documentation");
 }
 
-void help_do_about(Fl_Widget *w, void * data)
+static void help_do_about(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("AboutDialog");
 }
