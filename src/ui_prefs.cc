@@ -177,12 +177,12 @@ private:
 
 		AddContextToMenu("General (Any)",  KCTX_General, limit_ctx);
 
-		AddContextToMenu("Linedef",  KCTX_Line,    limit_ctx);
-		AddContextToMenu("Sector",   KCTX_Sector,  limit_ctx);
-		AddContextToMenu("Thing",    KCTX_Thing,   limit_ctx);
-		AddContextToMenu("Vertex",   KCTX_Vertex,  limit_ctx);
-		AddContextToMenu("3D View",  KCTX_Render,  limit_ctx);
-		AddContextToMenu("Browser",  KCTX_Browser, limit_ctx);
+		AddContextToMenu("Linedefs",  KCTX_Line,    limit_ctx);
+		AddContextToMenu("Sectors",   KCTX_Sector,  limit_ctx);
+		AddContextToMenu("Things",    KCTX_Thing,   limit_ctx);
+		AddContextToMenu("Vertices",  KCTX_Vertex,  limit_ctx);
+		AddContextToMenu("3D View",   KCTX_Render,  limit_ctx);
+		AddContextToMenu("Browser",   KCTX_Browser, limit_ctx);
 
 		if (want_ctx != KCTX_NONE)
 			SetContext(want_ctx);
@@ -358,6 +358,34 @@ private:
 		dialog->want_close = true;
 	}
 
+	void SetNewFunction(int cmd_index)
+	{
+		const editor_command_t *old_cmd = cur_cmd;
+
+		cur_cmd = LookupEditorCommand(cmd_index);
+
+		if (! cur_cmd)  // shouldn't happen
+			return;
+
+		func_name->value(cur_cmd->name);
+
+		key_context_e want_ctx = ContextFromMenu();
+
+		if (cur_cmd->req_context)
+			want_ctx = cur_cmd->req_context;
+		else if (y_strnicmp(cur_cmd->name, "BR_", 3) == 0)
+			want_ctx = KCTX_Browser;
+		else if (old_cmd && old_cmd->req_context)
+			want_ctx = KCTX_General;
+
+		PopulateContextMenu(want_ctx);
+
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
+
+		redraw();
+	}
+
 	static void func_callback(Fl_Menu_Button *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
@@ -365,26 +393,7 @@ private:
 		int cmd_index = (int)(long)w->mvalue()->user_data_;
 		SYS_ASSERT(cmd_index >= 0);
 
-		const editor_command_t *old_cmd = dialog->cur_cmd;
-
-		dialog->cur_cmd = LookupEditorCommand(cmd_index);
-
-		if (! dialog->cur_cmd)  // shouldn't happen
-			return;
-
-		dialog->func_name->value(dialog->cur_cmd->name);
-
-		key_context_e want_ctx = dialog->ContextFromMenu();
-
-		if (dialog->cur_cmd->req_context)
-			want_ctx = dialog->cur_cmd->req_context;
-		else if (y_strnicmp(dialog->cur_cmd->name, "BR_", 3) == 0)
-			want_ctx = KCTX_Browser;
-		else if (old_cmd && old_cmd->req_context)
-			want_ctx = KCTX_General;
-
-		dialog->PopulateContextMenu(want_ctx);
-		dialog->redraw();
+		dialog->SetNewFunction(cmd_index);
 	}
 
 	void ReplaceKeyword(const char *new_word)
