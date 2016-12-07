@@ -9,33 +9,33 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
->>> fix layout in the GRID preferences tab
-    also: tooltips for the colors
-
-
-probably need a "chocolate" source port
-[ and treat it like "vanilla" in parts of the code ]
-
-
 Operation menu:
 
 +  ensure ops that use the highlight still function, may need to
    grab the highlight BEFORE the Op-menu was opened
-    
 
-Fix UI_EditKey stuff in preferences:
+-  check /MENU flag, pass it on to the executed command
 
--  the "Mode:" (really context) should be adjusted based on
-   cur_cmd->req_context  (e.g. for LIN_xxx, only a single choice "Linedef")
-
--  "Add" should jump to the new binding in the list (once done)
-   and need to ReloadKeys() probably
+-  give operation commands an /OP flag?
 
 
 BSP:
 
 +  check XNOD maps in ZDoom 2.8.1
    [ see if we get same behavior as Zandronum ]
+
+
+GAMES:
+
+-  hexen things can use args even with no special
+   e.g. clay pot #106 can specify a contained object
+
+   (a) support tooltips for these, as per "special" directive
+
+   (b) update hexen thing defs
+
+   (c) always show a zero (not blank) in these args
+       when the special is zero
 
 
 PORTS / ZDoom:
@@ -53,6 +53,10 @@ PORTS / ZDoom:
    [ and it deselects anything in the panel ]
 
 -  then can copy/paste textures, or use texture browser
+
+
+IDEA: have a "chocolate" source port
+[ and treat it like "vanilla" in parts of the code ]
 
 
 
@@ -87,15 +91,8 @@ Documentation
    - drawing lines in VERTEX mode
 
    - using the browser
-   
+
    - common pitfalls (vertices sitting on a linedef or another vertex)
-
-
-
-General
--------
-
-+  for "type" in Line/Sector/Thing panels, update the desc as we type
 
 
 
@@ -174,9 +171,6 @@ General
 -  linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
-
--  improve Key binding preferences:
-   -  reverse ordering of KCTX_XXX values
 
 -  replace "Toggle XXX" in View menu with checkboxes
 
