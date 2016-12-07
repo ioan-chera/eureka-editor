@@ -2025,7 +2025,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			const sector_edge_t * E2 = active_edges[i];
 #if 1
 			if (E1 == NULL || E2 == NULL)
-				BugError("RenderSector: did not delete NULLs properly!");
+				BugError("RenderSector: did not delete NULLs properly!\n");
 #endif
 
 ///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",

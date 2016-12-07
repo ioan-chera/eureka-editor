@@ -113,7 +113,7 @@ void *UtilCalloc(int size)
 	void *ret = calloc(1, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot allocate %d bytes)", size);
+		FatalError("Out of memory (cannot allocate %d bytes)\n", size);
 
 	return ret;
 }
@@ -127,7 +127,7 @@ void *UtilRealloc(void *old, int size)
 	void *ret = realloc(old, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot reallocate %d bytes)", size);
+		FatalError("Out of memory (cannot reallocate %d bytes)\n", size);
 
 	return ret;
 }
@@ -139,7 +139,7 @@ void *UtilRealloc(void *old, int size)
 void UtilFree(void *data)
 {
 	if (data == NULL)
-		BugError("Trying to free a NULL pointer");
+		BugError("Trying to free a NULL pointer\n");
 
 	free(data);
 }
@@ -569,7 +569,7 @@ void PruneVerticesAtEnd(void)
 		vertex_t *V = lev_vertices[i];
 
 		if (V->ref_count < 0)
-			BugError("Vertex %d ref_count is %d", i, V->ref_count);
+			BugError("Vertex %d ref_count is %d\n", i, V->ref_count);
 
 		if (V->ref_count > 0)
 			break;
@@ -843,7 +843,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	vert->y = start->x;
 
 	if (dlen == 0)
-		BugError("NewVertexDegenerate: bad delta !");
+		BugError("NewVertexDegenerate: bad delta!\n");
 
 	dx /= dlen;
 	dy /= dlen;
@@ -900,7 +900,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		}
 	}
 
-	BugError("Vertex %d has no tips !", vert->index);
+	BugError("Vertex %d has no tips!\n", vert->index);
 	return NULL;
 }
 

@@ -426,7 +426,7 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 			break;
 
 		default:
-			BugError("RawInsert: bad objtype %d", (int) objtype);
+			BugError("RawInsert: bad objtype %d\n", (int)objtype);
 	}
 }
 
@@ -559,7 +559,7 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 			return RawDeleteLineDef(objnum);
 
 		default:
-			BugError("RawDelete: bad objtype %d", (int) objtype);
+			BugError("RawDelete: bad objtype %d\n", (int)objtype);
 			return NULL; /* NOT REACHED */
 	}
 }
@@ -577,7 +577,7 @@ static void DeleteFinally(obj_type_e objtype, int *ptr)
 		case OBJ_LINEDEFS: delete (LineDef *) ptr; break;
 
 		default:
-			BugError("DeleteFinally: bad objtype %d", (int) objtype);
+			BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
 	}
 }
 
@@ -609,7 +609,7 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 			break;
 
 		default:
-			BugError("RawGetBase: bad objtype %d", (int) objtype);
+			BugError("RawGetBase: bad objtype %d\n", (int)objtype);
 			return; /* NOT REACHED */
 	}
 
@@ -678,7 +678,7 @@ public:
 				return;
 
 			default:
-				BugError("edit_op_c::Apply");
+				BugError("edit_op_c::Apply\n");
 		}
 	}
 
@@ -922,7 +922,8 @@ int BA_New(obj_type_e type)
 			op.ptr = (int*) new Sector;
 			break;
 
-		default: BugError("BA_New");
+		default:
+			BugError("BA_New: unknown type\n");
 	}
 
 	SYS_ASSERT(cur_group);

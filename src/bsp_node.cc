@@ -118,7 +118,7 @@ void RecomputeSeg(seg_t *seg)
 	seg->p_angle  = UtilComputeAngle(seg->pdx, seg->pdy);
 
 	if (seg->p_length <= 0)
-		BugError("Seg %p has zero p_length.", seg);
+		BugError("Seg %p has zero p_length.\n", seg);
 
 	seg->p_perp =  seg->psy * seg->pdx - seg->psx * seg->pdy;
 	seg->p_para = -seg->psx * seg->pdx - seg->psy * seg->pdy;
@@ -895,7 +895,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 			SeparateSegs(A, part, lefts, rights, cut_list);
 
 			if (A->real_num + A->mini_num > 0)
-				BugError("SeparateSegs: child %d not empty !", num);
+				BugError("SeparateSegs: child %d not empty!\n", num);
 
 			FreeSuper(A);
 			seg_list->subs[num] = NULL;
@@ -1283,13 +1283,9 @@ void FreeSuper(superblock_t *block)
 {
 	int num;
 
+	// this only happens when node-building was cancelled by the GUI
 	if (block->segs)
-#if 0  // this can happen, but only under abnormal circumstances, in
-		// particular when the node-building was cancelled by the GUI.
-		BugError("FreeSuper: block contains segs");
-#else
-	block->segs = NULL;
-#endif
+		block->segs = NULL;
 
 	// recursively handle sub-blocks
 	for (num=0 ; num < 2 ; num++)
@@ -1335,7 +1331,7 @@ void TestSuper(superblock_t *block)
 	TestSuperWorker(block, &real_num, &mini_num);
 
 	if (real_num != block->real_num || mini_num != block->mini_num)
-		BugError("TestSuper FAILED: block=%p %d/%d != %d/%d",
+		BugError("TestSuper FAILED: block=%p %d/%d != %d/%d\n",
 				block, block->real_num, block->mini_num, real_num, mini_num);
 }
 #endif
@@ -1614,7 +1610,7 @@ static void ClockwiseOrder(subsec_t *sub)
 		array[i] = seg;
 
 	if (i != total)
-		BugError("ClockwiseOrder miscounted.");
+		BugError("ClockwiseOrder miscounted.\n");
 
 	// sort segs by angle (from the middle point to the start vertex).
 	// The desired order (clockwise) means descending angles.
@@ -1790,7 +1786,7 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 			return;
 	}
 
-	BugError("Subsector #%d near (%1.1f,%1.1f) has no real seg !",
+	BugError("Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
 			sub->index, sub->mid_x, sub->mid_y);
 }
 
@@ -1848,7 +1844,7 @@ static void CreateSubsecWorker(subsec_t *sub, superblock_t *block)
 			CreateSubsecWorker(sub, A);
 
 			if (A->real_num + A->mini_num > 0)
-				BugError("CreateSubsec: child %d not empty !", num);
+				BugError("CreateSubsec: child %d not empty!\n", num);
 
 			FreeSuper(A);
 			block->subs[num] = NULL;
@@ -1984,10 +1980,10 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 	/* sanity checks... */
 	if (rights->real_num + rights->mini_num == 0)
-		BugError("Separated seg-list has no RIGHT side");
+		BugError("Separated seg-list has no RIGHT side\n");
 
 	if (lefts->real_num + lefts->mini_num == 0)
-		BugError("Separated seg-list has no LEFT side");
+		BugError("Separated seg-list has no LEFT side\n");
 
 	AddMinisegs(best, lefts, rights, cut_list);
 
@@ -2124,7 +2120,7 @@ static void NormaliseSubsector(subsec_t *sub)
 	}
 
 	if (new_head == NULL)
-		BugError("Subsector %d normalised to being EMPTY", sub->index);
+		BugError("Subsector %d normalised to being EMPTY\n", sub->index);
 
 	sub->seg_list = new_head;
 }
@@ -2202,7 +2198,7 @@ static void RoundOffSubsector(subsec_t *sub)
 	if (real_total == 0)
 	{
 		if (last_real_degen == NULL)
-			BugError("Subsector %d rounded off with NO real segs",
+			BugError("Subsector %d rounded off with NO real segs\n",
 					sub->index);
 
 #   if DEBUG_SUBSEC
@@ -2260,7 +2256,7 @@ static void RoundOffSubsector(subsec_t *sub)
 	}
 
 	if (new_head == NULL)
-		BugError("Subsector %d rounded off to being EMPTY", sub->index);
+		BugError("Subsector %d rounded off to being EMPTY\n", sub->index);
 
 	sub->seg_list = new_head;
 }

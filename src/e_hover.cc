@@ -957,7 +957,7 @@ void GetNearObject(Objid& o, obj_type_e objtype, int x, int y)
 		}
 
 		default:
-			BugError("GetNearObject: bad objtype %d", (int) objtype);
+			BugError("GetNearObject: bad objtype %d\n", (int) objtype);
 			break; /* NOT REACHED */
 	}
 }

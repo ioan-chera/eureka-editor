@@ -893,7 +893,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		default:
-			BugError("INTERNAL ERROR: unknown option type %d", (int) opt->opt_type);
+			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
 			return -1;
 	}
 
@@ -1170,7 +1170,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				break;
 
 			default:
-				BugError("INTERNAL ERROR: unknown option type (%d)", (int) o->opt_type);
+				BugError("INTERNAL ERROR: unknown option type (%d)\n", (int) o->opt_type);
 				/* NOT REACHED */
 		}
 

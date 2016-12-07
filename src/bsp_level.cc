@@ -149,7 +149,7 @@ static void BlockAdd(int blk_num, int line_index)
 # endif
 
 	if (blk_num < 0 || blk_num >= block_count)
-		BugError("BlockAdd: bad block number %d", blk_num);
+		BugError("BlockAdd: bad block number %d\n", blk_num);
 
 	if (! cur)
 	{
@@ -446,7 +446,7 @@ static void WriteBlockmap(void)
 		u16_t ptr = LE_U16(block_ptrs[i]);
 
 		if (ptr == 0)
-			BugError("WriteBlockmap: offset %d not set.", i);
+			BugError("WriteBlockmap: offset %d not set.\n", i);
 
 		lump->Write(&ptr, sizeof(u16_t));
 	}
@@ -943,7 +943,7 @@ void FreeWallTips(void)
 #define LOOKERUPPER(BASEVAR, NUMVAR, NAMESTR)  \
 {  \
   if (index < 0 || index >= NUMVAR)  \
-    FatalError("No such %s number #%d", NAMESTR, index);  \
+    FatalError("No such %s number #%d\n", NAMESTR, index);  \
     \
   return BASEVAR[index];  \
 }
@@ -1381,10 +1381,10 @@ static int SegCompare(const void *p1, const void *p2)
 	const seg_t *B = ((const seg_t **) p2)[0];
 
 	if (A->index < 0)
-		BugError("Seg %p never reached a subsector !", A);
+		BugError("Seg %p never reached a subsector !\n", A);
 
 	if (B->index < 0)
-		BugError("Seg %p never reached a subsector !", B);
+		BugError("Seg %p never reached a subsector !\n", B);
 
 	return (A->index - B->index);
 }
@@ -1433,7 +1433,7 @@ void PutVertices(const char *name, int do_gl)
 	}
 
 	if (count != (do_gl ? num_gl_vert : num_normal_vert))
-		BugError("PutVertices miscounted (%d != %d)", count,
+		BugError("PutVertices miscounted (%d != %d)\n", count,
 				do_gl ? num_gl_vert : num_normal_vert);
 
 	if (! do_gl && count > 65534)
@@ -1476,7 +1476,7 @@ void PutGLVertices(int do_v5)
 	}
 
 	if (count != num_gl_vert)
-		BugError("PutGLVertices miscounted (%d != %d)", count, num_gl_vert);
+		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_gl_vert);
 }
 
 
@@ -1547,7 +1547,7 @@ void PutSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutSegs miscounted (%d != %d)", count,
+		BugError("PutSegs miscounted (%d != %d)\n", count,
 				num_complete_seg);
 
 	if (count > 65534)
@@ -1604,11 +1604,11 @@ void PutGLSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)", count,
+		BugError("PutGLSegs miscounted (%d != %d)\n", count,
 				num_complete_seg);
 
 	if (count > 65534)
-		BugError("PutGLSegs with %d (> 65534) segs", count);
+		BugError("PutGLSegs with %d (> 65534) segs\n", count);
 }
 
 
@@ -1659,7 +1659,7 @@ void PutGLSegs_V5()
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)", count,
+		BugError("PutGLSegs miscounted (%d != %d)\n", count,
 				num_complete_seg);
 }
 
@@ -1758,14 +1758,14 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 	else if (node->r.subsec)
 		raw.right = LE_U16(node->r.subsec->index | 0x8000);
 	else
-		BugError("Bad right child in node %d", node->index);
+		BugError("Bad right child in node %d\n", node->index);
 
 	if (node->l.node)
 		raw.left = LE_U16(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U16(node->l.subsec->index | 0x8000);
 	else
-		BugError("Bad left child in node %d", node->index);
+		BugError("Bad left child in node %d\n", node->index);
 
 	lump->Write(&raw, sizeof(raw));
 
@@ -1810,14 +1810,14 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError("Bad right child in V5 node %d", node->index);
+		BugError("Bad right child in V5 node %d\n", node->index);
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError("Bad left child in V5 node %d", node->index);
+		BugError("Bad left child in V5 node %d\n", node->index);
 
 	lump->Write(&raw, sizeof(raw));
 
@@ -1850,7 +1850,7 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 	}
 
 	if (node_cur_index != num_nodes)
-		BugError("PutNodes miscounted (%d != %d)",
+		BugError("PutNodes miscounted (%d != %d)\n",
 				node_cur_index, num_nodes);
 
 	if (!do_v5 && node_cur_index > 32767)
@@ -1940,7 +1940,7 @@ void PutZVertices(void)
 	}
 
 	if (count != num_gl_vert)
-		BugError("PutZVertices miscounted (%d != %d)",
+		BugError("PutZVertices miscounted (%d != %d)\n",
 				count, num_gl_vert);
 }
 
@@ -1985,7 +1985,7 @@ void PutZSubsecs(void)
 	}
 
 	if (cur_seg_index != num_complete_seg)
-		BugError("PutZSubsecs miscounted segs (%d != %d)",
+		BugError("PutZSubsecs miscounted segs (%d != %d)\n",
 				cur_seg_index, num_complete_seg);
 }
 
@@ -2026,7 +2026,7 @@ void PutZSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutZSegs miscounted (%d != %d)",
+		BugError("PutZSegs miscounted (%d != %d)\n",
 				count, num_complete_seg);
 }
 
@@ -2071,14 +2071,14 @@ static void PutOneZNode(node_t *node)
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError("Bad right child in V5 node %d", node->index);
+		BugError("Bad right child in V5 node %d\n", node->index);
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError("Bad left child in V5 node %d", node->index);
+		BugError("Bad left child in V5 node %d\n", node->index);
 
 	ZLibAppendLump(&raw.right, 4);
 	ZLibAppendLump(&raw.left,  4);
@@ -2104,7 +2104,7 @@ void PutZNodes(node_t *root)
 		PutOneZNode(root);
 
 	if (node_cur_index != num_nodes)
-		BugError("PutZNodes miscounted (%d != %d)",
+		BugError("PutZNodes miscounted (%d != %d)\n",
 				node_cur_index, num_nodes);
 }
 
@@ -2453,7 +2453,7 @@ void ZLibBeginLump(Lump_c *lump)
 	zout_stream.opaque = (voidpf)0;
 
 	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		FatalError("Trouble setting up zlib compression");
+		FatalError("Trouble setting up zlib compression\n");
 
 	zout_stream.next_out  = zout_buffer;
 	zout_stream.avail_out = sizeof(zout_buffer);
