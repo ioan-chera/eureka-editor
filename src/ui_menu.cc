@@ -167,6 +167,11 @@ static void edit_do_last_sel(Fl_Widget *w, void * data)
 	ExecuteCommand("LastSelection");
 }
 
+static void edit_do_op_menu(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("OperationMenu", "/MENU");
+}
+
 static void edit_do_move(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("MoveObjectsDialog");
@@ -467,9 +472,10 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Move Objects...",      FL_F+2, FCAL edit_do_move },
-		{ "&Scale Objects...",     FL_F+3, FCAL edit_do_scale },
-		{ "Rotate Objects...",     FL_F+4, FCAL edit_do_rotate },
+		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
+		{ "&Move Objects...",  FL_F+2, FCAL edit_do_move },
+		{ "&Scale Objects...", FL_F+3, FCAL edit_do_scale },
+		{ "Rotate Objects...", FL_F+4, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
