@@ -605,11 +605,8 @@ public:
 
 	Fl_Choice *grid_cur_style;
 	Fl_Check_Button *grid_snap;
-	Fl_Choice *grid_mode;
+	Fl_Check_Button *grid_enabled;
 	Fl_Choice *grid_size;
-
-	Fl_Choice *gen_smallscroll;
-	Fl_Choice *gen_largescroll;
 
 	Fl_Check_Button *grid_hide_free;
 
@@ -844,26 +841,19 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
-		}
-		{ grid_mode = new Fl_Choice(170, 100, 95, 25, "default grid state ");
-		  grid_mode->add("OFF|ON");
-		}
-		{ grid_cur_style = new Fl_Choice(170, 130, 95, 25, "grid style ");
+		{ grid_cur_style = new Fl_Choice(125, 90, 95, 25, "grid style ");
 		  grid_cur_style->add("Squares|Dotty");
+		}
+		{ grid_enabled = new Fl_Check_Button(50, 125, 95, 25, " default grid to ON");
 		}
 		{ grid_snap = new Fl_Check_Button(50, 160, 235, 25, " default SNAP mode");
 		}
-		{ grid_size = new Fl_Choice(170, 190, 95, 25, "default grid size ");
+		{ grid_size = new Fl_Choice(400, 90, 95, 25, "default grid size ");
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
-		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
-		  gen_smallscroll->hide();
+		{ gen_scrollbars = new Fl_Check_Button(277, 125, 245, 25, " enable scroll-bars for map view");
 		}
-		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
-		  gen_largescroll->hide();
-		}
-		{ grid_hide_free = new Fl_Check_Button(335, 200, 245, 25, " hide grid in FREE mode");
+		{ grid_hide_free = new Fl_Check_Button(277, 160, 245, 25, " hide grid in FREE mode");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
@@ -1366,7 +1356,7 @@ void UI_Preferences::LoadValues()
 		grid_default_mode = 1;
 
 	grid_cur_style->value(grid_style);
-	grid_mode->value(grid_default_mode);
+	grid_enabled->value(grid_default_mode);
 	grid_snap->value(grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(grid_default_size));
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
@@ -1382,8 +1372,6 @@ void UI_Preferences::LoadValues()
 	normal_main ->color(normal_main_col);
 	normal_flat ->color(normal_flat_col);
 	normal_small->color(normal_small_col);
-
-	// TODO: smallscroll, largescroll
 
 	/* 3D Tab */
 
@@ -1489,7 +1477,7 @@ void UI_Preferences::SaveValues()
 	/* Grid Tab */
 
 	grid_style        = grid_cur_style->value();
-	grid_default_mode = grid_mode->value();
+	grid_default_mode = grid_enabled->value();
 	grid_default_snap = grid_snap->value() ? true : false;
 	grid_default_size = atoi(grid_size->mvalue()->text);
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
@@ -1505,8 +1493,6 @@ void UI_Preferences::SaveValues()
 	normal_main_col  = (rgb_color_t) normal_main ->color();
 	normal_flat_col  = (rgb_color_t) normal_flat ->color();
 	normal_small_col = (rgb_color_t) normal_small->color();
-
-	// TODO: smallscroll, largescroll
 
 	/* Nodes Tab */
 
