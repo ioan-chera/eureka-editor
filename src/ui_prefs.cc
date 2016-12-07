@@ -865,42 +865,50 @@ UI_Preferences::UI_Preferences() :
 		  normal_axis->box(FL_BORDER_BOX);
 		  normal_axis->align(FL_ALIGN_LEFT);
 		  normal_axis->callback((Fl_Callback*)color_callback, this);
+		  normal_axis->tooltip("X/Y axis color");
 		}
 		{ normal_main = new Fl_Button(150 + 1*55, 300, 45, 25, "");
 		  normal_main->box(FL_BORDER_BOX);
 		  normal_main->align(FL_ALIGN_RIGHT);
 		  normal_main->callback((Fl_Callback*)color_callback, this);
+		  normal_main->tooltip("large square color");
 		}
 		{ normal_flat = new Fl_Button(150 + 2*55, 300, 45, 25, "");
 		  normal_flat->box(FL_BORDER_BOX);
 		  normal_flat->align(FL_ALIGN_RIGHT);
 		  normal_flat->callback((Fl_Callback*)color_callback, this);
+		  normal_flat->tooltip("64x64 square color");
 		}
 		{ normal_small = new Fl_Button(150 + 3*55, 300, 45, 25, "");
 		  normal_small->box(FL_BORDER_BOX);
 		  normal_small->align(FL_ALIGN_RIGHT);
 		  normal_small->callback((Fl_Callback*)color_callback, this);
+		  normal_small->tooltip("small square color");
 		}
 
 		{ dotty_axis = new Fl_Button(150 + 0*55, 340, 45, 25, "Dotty Grid : ");
 		  dotty_axis->box(FL_BORDER_BOX);
 		  dotty_axis->align(FL_ALIGN_LEFT);
 		  dotty_axis->callback((Fl_Callback*)color_callback, this);
+		  dotty_axis->tooltip("X/Y axis color");
 		}
 		{ dotty_major = new Fl_Button(150 + 1*55, 340, 45, 25, "");
 		  dotty_major->box(FL_BORDER_BOX);
 		  dotty_major->align(FL_ALIGN_RIGHT);
 		  dotty_major->callback((Fl_Callback*)color_callback, this);
+		  dotty_major->tooltip("large square color");
 		}
 		{ dotty_minor = new Fl_Button(150 + 2*55, 340, 45, 25, "");
 		  dotty_minor->box(FL_BORDER_BOX);
 		  dotty_minor->align(FL_ALIGN_RIGHT);
 		  dotty_minor->callback((Fl_Callback*)color_callback, this);
+		  dotty_minor->tooltip("small square color");
 		}
 		{ dotty_point = new Fl_Button(150 + 3*55, 340, 45, 25, "");
 		  dotty_point->box(FL_BORDER_BOX);
 		  dotty_point->align(FL_ALIGN_RIGHT);
 		  dotty_point->callback((Fl_Callback*)color_callback, this);
+		  dotty_point->tooltip("dot color");
 		}
 
 		o->end();
