@@ -202,11 +202,6 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 //  VIEW MENU
 //------------------------------------------------------------------------
 
-static void view_do_logs(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("LogViewer");
-}
-
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("Zoom", "+1", "/center");
@@ -560,19 +555,12 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "Te&xtures",     0, FCAL checks_do_textures },
 		{ "Ta&gs",         0, FCAL checks_do_tags },
-
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
-		{ "&View Logs....",   0, FCAL view_do_logs },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Online Docs...",    0,  FCAL help_do_online_docs },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&About Eureka...",   0,  FCAL help_do_about },
+		{ "&Online Docs...",    0, FCAL help_do_online_docs },
+		{ "&View Logs....",     0, FCAL help_do_logs },
+		{ "&About Eureka...",   0, FCAL help_do_about },
 		{ 0 },
 
 	{ 0 }
