@@ -1177,40 +1177,6 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences__copy_key_callback(Fl_Button *w, void *data)
-{
-	UI_Preferences *prefs = (UI_Preferences *)data;
-
-	int line = prefs->key_list->value();
-	if (line < 1)
-	{
-		fl_beep();
-		return;
-	}
-
-	int bind_idx = line - 1;
-
-	keycode_t     new_key;
-	key_context_e new_context;
-
-	M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
-	const char *new_func = M_StringForFunc(bind_idx);
-
-
-	M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
-
-	// we will reload the lines, so use a dummy one here
-
-	prefs->key_list->insert(line + 1, "");
-	prefs->key_list->select(line + 1);
-
-	prefs->ReloadKeys();
-
-//!!!!	bind_key_callback(w, data);
-}
-
-
 void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
