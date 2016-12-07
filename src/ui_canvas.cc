@@ -48,7 +48,7 @@ rgb_color_t dotty_point_col = RGB_MAKE(0, 0, 255);
 
 rgb_color_t normal_axis_col  = RGB_MAKE(0, 128, 255);
 rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t normal_flat_col  = RGB_MAKE(84, 96, 48);
+rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
