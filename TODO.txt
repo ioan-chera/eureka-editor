@@ -9,6 +9,13 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+!!!  OpenMap crashes when choosing IWAD, since Main_LoadResources
+     closes (and re-opens) everything in the master dir so the
+     'wad' reference is dudded.
+
+     [ review all other LoadLevel usages ]
+
+
 Operation menu:
 
 +  ensure ops that use the highlight still function, may need to
@@ -20,6 +27,9 @@ Operation menu:
 
 
 BSP:
+
+!!  handle levels which consist entirely of dud linedefs
+    [ treat same as empty ]
 
 +  check XNOD maps in ZDoom 2.8.1
    [ see if we get same behavior as Zandronum ]
@@ -103,10 +113,6 @@ Editing
 
 +  cannot auto-split close to a vertex?
    it should be allowed when zoomed in far
-
-+  the criss-crossing-lines detection is too sloppy
-   [ e.g. see MAP24 of Ancient Aliens ]
-   [[ also: ignore two linedefs at an overlapping vertex ]]
 
 +  hard to select very short (1-unit) lines?
 
