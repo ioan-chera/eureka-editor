@@ -2289,8 +2289,18 @@ void LineDefs_RemoveOverlaps()
 }
 
 
-static bool CheckLinesCross(int A, int B)
+static int CheckLinesCross(int A, int B)
 {
+	// return values:
+	//    0 : the lines do not cross
+	//    1 : A is sitting on B (a 'T' junction)
+	//    2 : B is sitting on A (a 'T' junction)
+	//    3 : the lines cross each other (an 'X' junction)
+	//    4 : the lines are co-linear and partially overlap
+
+	const double epsilon = 0.02;
+
+
 	SYS_ASSERT(A != B);
 
 	const LineDef *AL = LineDefs[A];
@@ -2298,12 +2308,12 @@ static bool CheckLinesCross(int A, int B)
 
 	// ignore zero-length lines
 	if (AL->isZeroLength() || BL->isZeroLength())
-		return false;
+		return 0;
 
-	// ignore lines connected at a vertex
-	// TODO: check for sitting on top
-	if (AL->start == BL->start || AL->start == BL->end) return false;
-	if (AL->end   == BL->start || AL->end   == BL->end) return false;
+	// ignore directly overlapping here
+	if (linedef_pos_cmp(A, B) == 0)
+		return 0;
+
 
 	// bbox test
 	//
@@ -2313,14 +2323,15 @@ static bool CheckLinesCross(int A, int B)
 	if (MIN(AL->Start()->y, AL->End()->y) >
 	    MAX(BL->Start()->y, BL->End()->y))
 	{
-		return false;
+		return 0;
 	}
 
 	if (MIN(BL->Start()->y, BL->End()->y) >
 	    MAX(AL->Start()->y, AL->End()->y))
 	{
-		return false;
+		return 0;
 	}
+
 
 	// precise (but slower) intersection test
 
@@ -2334,27 +2345,72 @@ static bool CheckLinesCross(int A, int B)
 	int bx2 = BL->End()->x;
 	int by2 = BL->End()->y;
 
-
-	const double DIST = 0.6;
-
 	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
 	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
 
-	if (c < -DIST && d < -DIST) return false;
-	if (c >  DIST && d >  DIST) return false;
+	int c_side = (c < -epsilon) ? -1 : (c > epsilon) ? +1 : 0;
+	int d_side = (d < -epsilon) ? -1 : (d > epsilon) ? +1 : 0;
 
+	if (c_side != 0 && c_side == d_side)
+		return 0;
 
 	double e = PerpDist(ax1, ay1,  bx1, by1, bx2, by2);
 	double f = PerpDist(ax2, ay2,  bx1, by1, bx2, by2);
 
-	if (e < -DIST && f < -DIST) return false;
-	if (e >  DIST && f >  DIST) return false;
+	int e_side = (e < -epsilon) ? -1 : (e > epsilon) ? +1 : 0;
+	int f_side = (f < -epsilon) ? -1 : (f > epsilon) ? +1 : 0;
+
+	if (e_side != 0 && e_side == f_side)
+		return 0;
 
 
-	// TODO: lines are (roughly) co-linear, check for separation
+	// check whether the two lines definitely cross each other
+	// at a single point (like an 'X' shape), or not.
+	bool a_crossed = (c_side * d_side != 0);
+	bool b_crossed = (e_side * f_side != 0);
+
+	if (a_crossed && b_crossed)
+		return 3;
 
 
-	return true;
+	// are the two lines are co-linear (or very close to it) ?
+	// if so, check the separation between them...
+	if ((c_side == 0 && d_side == 0) ||
+		(e_side == 0 && f_side == 0))
+	{
+		// choose longest line as the measuring stick
+		if (AL->CalcLength() < BL->CalcLength())
+		{
+			std::swap(ax1, bx1);  std::swap(ax2, bx2);
+			std::swap(ay1, by1);  std::swap(ay2, by2);
+
+			// A, B, AL, BL should not be used from here on!
+		}
+
+		c = AlongDist(bx1, by1,  ax1, ay1, ax2, ay2);
+		d = AlongDist(bx2, by2,  ax1, ay1, ax2, ay2);
+		e = AlongDist(ax2, ay2,  ax1, ay1, ax2, ay2);	// just the length
+
+		if (MAX(c, d) < epsilon)
+			return 0;
+
+		if (MIN(c, d) > e - epsilon)
+			return 0;
+
+		// colinear and partially overlapping
+		return 4;
+	}
+
+
+	// this handles the case where the two linedefs meet at a vertex
+	// but are not overlapping at all.
+	if (! a_crossed && ! b_crossed)
+		return 0;
+
+
+	// in this case we have a 'T' junction, where the end-point of
+	// one linedef is sitting along the other one.
+	return a_crossed ? 2 : 1;
 }
 
 
@@ -2397,15 +2453,12 @@ void LineDefs_FindCrossings(selection_c& lines)
 			if (min_x > max_x)
 				break;
 
-			// ignore direct overlapping here
-			if (linedef_pos_cmp(n2, k2) == 0)
-				continue;
+			int res = CheckLinesCross(n2, k2);
 
-			if (CheckLinesCross(n2, k2))
+			if (res)
 			{
-				// only the second (or third, etc) linedef is stored
+				lines.set(n2);
 				lines.set(k2);
-lines.set(n2);
 			}
 		}
 	}
