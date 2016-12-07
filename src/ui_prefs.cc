@@ -412,53 +412,51 @@ public:
 
 		callback(close_callback, this);
 
-		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
-		  if (key)
-			  key_name->value(M_KeyToString(key));
-		  key_name->when(FL_WHEN_CHANGED);
-		  key_name->callback((Fl_Callback*)validate_callback, this);
-		}
-		{ grab_but = new Fl_Button(255, 25, 90, 25, "Grab");
-		  grab_but->callback((Fl_Callback*)grab_key_callback, this);
-		}
+		key_name = new Fl_Input(85, 25, 150, 25, "Key:");
+		key_name->when(FL_WHEN_CHANGED);
+		key_name->callback((Fl_Callback*)validate_callback, this);
 
-		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
-		  context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General");
-		  context->value((int)ctx - 1);
-		  context->callback((Fl_Callback*)context_callback, this);
-		}
+		if (key)
+			key_name->value(M_KeyToString(key));
 
-		{ func = new Fl_Output(85, 105, 150, 25, "Function:");
-		}
-		{ func_choose = new Fl_Menu_Button(255, 105, 90, 25, "Choose");
-		  func_choose->callback((Fl_Callback*) func_callback, this);
-		}
-		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
-		  params->value("");
-		  params->when(FL_WHEN_CHANGED);
-//		  params->callback((Fl_Callback*)validate_callback, this);
-		}
-		{ keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
-		  keyword_menu->callback((Fl_Callback*) keyword_callback, this);
-		}
-		{ flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
-		  flag_menu->callback((Fl_Callback*) flag_callback, this);
-		}
+		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
+		grab_but->callback((Fl_Callback*)grab_key_callback, this);
+
+		func = new Fl_Output(85,  65, 150, 25, "Function:");
+
+		func_choose = new Fl_Menu_Button(255,  65, 90, 25, "Choose");
+		func_choose->callback((Fl_Callback*) func_callback, this);
+
+		context = new Fl_Choice(85, 105, 150, 25, "Mode:");
+		context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General (Any)");
+		context->value((int)ctx - 1);
+		context->callback((Fl_Callback*)context_callback, this);
+
+		params = new Fl_Input(85, 145, 300, 25, "Params:");
+		params->value("");
+		params->when(FL_WHEN_CHANGED);
+//FIXME!!!	params->callback((Fl_Callback*)validate_callback, this);
+
+		keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
+		keyword_menu->callback((Fl_Callback*) keyword_callback, this);
+
+		flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
+		flag_menu->callback((Fl_Callback*) flag_callback, this);
 
 		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
 
-		  o->box(FL_FLAT_BOX);
-		  o->color(WINDOW_BG, WINDOW_BG);
+			o->box(FL_FLAT_BOX);
+			o->color(WINDOW_BG, WINDOW_BG);
 
-		  { cancel = new Fl_Button(170, 254, 80, 35, "Cancel");
+			cancel = new Fl_Button(170, 254, 80, 35, "Cancel");
 			cancel->callback((Fl_Callback*)close_callback, this);
-		  }
-		  { ok_but = new Fl_Button(295, 254, 80, 35, "OK");
+
+			ok_but = new Fl_Button(295, 254, 80, 35, "OK");
 			ok_but->labelfont(FL_BOLD);
 			ok_but->callback((Fl_Callback*)ok_callback, this);
 			ok_but->deactivate();
-		  }
-		  o->end();
+
+			o->end();
 		}
 
 		end();
