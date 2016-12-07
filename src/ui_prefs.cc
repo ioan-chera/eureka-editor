@@ -645,6 +645,7 @@ public:
 	/* Keys Tab */
 
 	Fl_Hold_Browser *key_list;
+
 	Fl_Button *key_group;
 	Fl_Button *key_key;
 	Fl_Button *key_func;
@@ -1229,7 +1230,6 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (! is_add)
 	{
 		int line = prefs->key_list->value();
-
 		if (line < 1)
 		{
 			fl_beep();
@@ -1238,11 +1238,10 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 		prefs->EnsureKeyVisible(line);
 
-		int bind_idx = line - 1;
+		bind_idx = line - 1;
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
 		new_func = M_StringForFunc(bind_idx);
 	}
 
@@ -1251,18 +1250,47 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
 
-	if (dialog->Run(&new_key, &new_context, &new_func, start_grabbed))
+	bool was_ok = dialog->Run(&new_key, &new_context, &new_func, start_grabbed);
+
+	if (was_ok);
 	{
-		// assume it works (since we validated it)
+		// assume we can set it, since the dialog validated it
+
 		if (is_add || is_copy)
+		{
 			M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+
+			if (is_copy)
+				bind_idx++;
+			else
+				bind_idx = M_NumBindings() - 1;
+		}
 		else
+		{
 			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
+		}
 	}
 
 	delete dialog;
 
+
+	// for a new binding, make sure it is visible and selected
+
+	if ((is_add || is_copy) && was_ok && bind_idx >= 0)
+	{
+		// expand the browser size with a dummy line
+		// [ the ReloadKeys() below will grab the correct text ]
+		prefs->key_list->add("");
+
+		SYS_ASSERT(bind_idx >= 0);
+		int line = 1 + bind_idx;
+
+		prefs->key_list->select(line);
+		prefs->EnsureKeyVisible(line);
+	}
+
 	prefs->ReloadKeys();
+	prefs->redraw();
 
 	Fl::focus(prefs->key_list);
 }
