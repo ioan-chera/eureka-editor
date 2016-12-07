@@ -51,7 +51,7 @@ private:
 	Fl_Input  *key_name;
 	Fl_Button *grab_but;
 
-	Fl_Output *func;
+	Fl_Output *func_name;
 	Fl_Menu_Button *func_choose;
 
 	Fl_Choice *context;
@@ -167,8 +167,13 @@ private:
 		context->add(lab, 0, 0, 0, flags);
 	}
 
-	void PopulateContextMenu(key_context_e want_ctx, key_context_e limit_ctx)
+	void PopulateContextMenu(key_context_e want_ctx)
 	{
+		key_context_e limit_ctx = KCTX_NONE;
+
+		if (cur_cmd && cur_cmd->req_context != KCTX_NONE)
+			limit_ctx = cur_cmd->req_context;
+
 		context->clear();
 
 		AddContextToMenu("General (Any)",  KCTX_General, limit_ctx);
@@ -180,13 +185,12 @@ private:
 		AddContextToMenu("3D View",  KCTX_Render,  limit_ctx);
 		AddContextToMenu("Browser",  KCTX_Browser, limit_ctx);
 
-		SetContext(want_ctx);
+		if (want_ctx != KCTX_NONE)
+			SetContext(want_ctx);
 	}
 
 	void PopulateFuncMenu(const char *find_name = NULL)
 	{
-		func->value("");
-
 		func_choose->clear();
 
 		cur_cmd = NULL;
@@ -220,7 +224,9 @@ private:
 		}
 
 		if (cur_cmd)
-			func->value(cur_cmd->name);
+			func_name->value(cur_cmd->name);
+		else
+			func_name->value("");
 	}
 
 	void Decode(key_context_e ctx, const char *str)
@@ -360,11 +366,25 @@ private:
 		int cmd_index = (int)(long)w->mvalue()->user_data_;
 		SYS_ASSERT(cmd_index >= 0);
 
+		const editor_command_t *old_cmd = dialog->cur_cmd;
+
 		dialog->cur_cmd = LookupEditorCommand(cmd_index);
 
-		if (dialog->cur_cmd)
-			dialog->func->value(dialog->cur_cmd->name);
+		if (! dialog->cur_cmd)  // shouldn't happen
+			return;
 
+		dialog->func_name->value(dialog->cur_cmd->name);
+
+		key_context_e want_ctx = dialog->ContextFromMenu();
+
+		if (dialog->cur_cmd->req_context)
+			want_ctx = dialog->cur_cmd->req_context;
+		else if (y_strnicmp(dialog->cur_cmd->name, "BR_", 3) == 0)
+			want_ctx = KCTX_Browser;
+		else if (old_cmd && old_cmd->req_context)
+			want_ctx = KCTX_General;
+
+		dialog->PopulateContextMenu(want_ctx);
 		dialog->redraw();
 	}
 
@@ -445,6 +465,8 @@ public:
 		awaiting_key(false),
 		key(_key)
 	{
+		// _key may be zero (when "Add" button is used)
+
 		if (ctx == KCTX_NONE)
 			ctx = KCTX_General;
 
@@ -460,7 +482,7 @@ public:
 		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
 		grab_but->callback((Fl_Callback*)grab_key_callback, this);
 
-		func = new Fl_Output(85,  65, 150, 25, "Function:");
+		func_name = new Fl_Output(85,  65, 150, 25, "Function:");
 
 		func_choose = new Fl_Menu_Button(255,  65, 90, 25, "Choose");
 		func_choose->callback((Fl_Callback*) func_callback, this);
@@ -470,7 +492,6 @@ public:
 		params = new Fl_Input(85, 145, 300, 25, "Params:");
 		params->value("");
 		params->when(FL_WHEN_CHANGED);
-//FIXME!!!	params->callback((Fl_Callback*)validate_callback, this);
 
 		keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
 		keyword_menu->callback((Fl_Callback*) keyword_callback, this);
@@ -499,7 +520,7 @@ public:
 		// parse line into function name and parameters
 		Decode(ctx, _funcname);
 
-		PopulateContextMenu(ctx, KCTX_NONE /* FIXME */);
+		PopulateContextMenu(ctx == KCTX_NONE ? KCTX_General : ctx);
 	}
 
 
