@@ -139,6 +139,50 @@ private:
 		}
 	};
 
+	// need this because menu is in reverse order
+	key_context_e ContextFromMenu()
+	{
+		int i = context->value();
+		SYS_ASSERT(i >= 0 && i <= 6);
+		return (key_context_e)((int)KCTX_General - i);
+	}
+
+	void SetContext(key_context_e ctx)
+	{
+		int i = (int)KCTX_General - (int)ctx;
+		SYS_ASSERT(i >= 0 && i <= 6);
+		context->value(i);
+	}
+
+	void AddContextToMenu(const char *lab, key_context_e ctx, key_context_e limit_ctx)
+	{
+		int flags = 0;
+
+		if (limit_ctx != KCTX_NONE &&
+			! (ctx == limit_ctx || ctx == KCTX_General))
+		{
+			flags = FL_MENU_INACTIVE;
+		}
+
+		context->add(lab, 0, 0, 0, flags);
+	}
+
+	void PopulateContextMenu(key_context_e want_ctx, key_context_e limit_ctx)
+	{
+		context->clear();
+
+		AddContextToMenu("General (Any)",  KCTX_General, limit_ctx);
+
+		AddContextToMenu("Linedef",  KCTX_Line,    limit_ctx);
+		AddContextToMenu("Sector",   KCTX_Sector,  limit_ctx);
+		AddContextToMenu("Thing",    KCTX_Thing,   limit_ctx);
+		AddContextToMenu("Vertex",   KCTX_Vertex,  limit_ctx);
+		AddContextToMenu("3D View",  KCTX_Render,  limit_ctx);
+		AddContextToMenu("Browser",  KCTX_Browser, limit_ctx);
+
+		SetContext(want_ctx);
+	}
+
 	void PopulateFuncMenu(const char *find_name = NULL)
 	{
 		func->value("");
@@ -195,6 +239,7 @@ private:
 
 		func_buf[pos] = 0;
 
+		// this sets the 'cur_cmd' variable
 		PopulateFuncMenu(func_buf);
 
 		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
@@ -306,13 +351,6 @@ private:
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
 		dialog->want_close = true;
-	}
-
-	static void context_callback(Fl_Choice *w, void *data)
-	{
-		UI_EditKey *dialog = (UI_EditKey *)data;
-
-		// TODO : ctx = (ctx)(long) w->mvalue()->user_data_;
 	}
 
 	static void func_callback(Fl_Menu_Button *w, void *data)
@@ -428,9 +466,6 @@ public:
 		func_choose->callback((Fl_Callback*) func_callback, this);
 
 		context = new Fl_Choice(85, 105, 150, 25, "Mode:");
-		context->add("Browser|3D View|Vertex|Thing|Sector|Linedef|General (Any)");
-		context->value((int)ctx - 1);
-		context->callback((Fl_Callback*)context_callback, this);
 
 		params = new Fl_Input(85, 145, 300, 25, "Params:");
 		params->value("");
@@ -463,6 +498,8 @@ public:
 
 		// parse line into function name and parameters
 		Decode(ctx, _funcname);
+
+		PopulateContextMenu(ctx, KCTX_NONE /* FIXME */);
 	}
 
 
@@ -479,6 +516,8 @@ public:
 		set_modal();
 		show();
 
+		// need this for the 'start_grabbed' feature, get FLTK to
+		// actually put (map) the window onto the screen.
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 
@@ -488,13 +527,15 @@ public:
 			Fl::focus(params);
 
 		while (! want_close)
+		{
 			Fl::wait(0.2);
+		}
 
 		if (cancelled)
 			return false;
 
 		*key_v  = key;
-		*ctx_v  = (key_context_e)(1 + context->value());
+		*ctx_v  = ContextFromMenu();
 		*func_v = Encode();
 
 		return true;
