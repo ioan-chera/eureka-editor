@@ -158,8 +158,7 @@ private:
 	{
 		int flags = 0;
 
-		if (limit_ctx != KCTX_NONE &&
-			! (ctx == limit_ctx || ctx == KCTX_General))
+		if (limit_ctx != KCTX_NONE && ctx != limit_ctx)
 		{
 			flags = FL_MENU_INACTIVE;
 		}
