@@ -1081,14 +1081,12 @@ void OpenFileMap(const char *filename, const char *map_name)
 		map_name  = edit_wad->GetLump(idx)->Name();
 	}
 
-	GetLevelFormat(edit_wad, map_name);
-
-	Main_LoadResources();
-
-
 	LogPrintf("Loading Map : %s of %s\n", map_name, edit_wad->PathName());
 
 	LoadLevel(edit_wad, map_name);
+
+	// must be after LoadLevel as we need the Level_format
+	Main_LoadResources();
 }
 
 
@@ -1132,6 +1130,8 @@ void CMD_OpenMap()
 
 
 	// does this wad replace the currently edited wad?
+	bool new_resources = false;
+
 	if (did_load)
 	{
 		SYS_ASSERT(wad != edit_wad);
@@ -1139,21 +1139,27 @@ void CMD_OpenMap()
 
 		ReplaceEditWad(wad);
 
-		GetLevelFormat(wad, map_name);
-		Main_LoadResources();
+		new_resources = true;
 	}
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
-	else if (wad != edit_wad)
+	else if (edit_wad && wad != edit_wad)
 	{
 		RemoveEditWad();
 
-		GetLevelFormat(wad, map_name);
-		Main_LoadResources();
+		new_resources = true;
 	}
 
 	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
 
 	LoadLevel(wad, map_name);
+
+	if (new_resources)
+	{
+		// this can invalidate the 'wad' var (since it closes/reopens
+		// all wads in the master_dir), so it MUST be after LoadLevel.
+		// less importantly, we need to know the Level_format.
+		Main_LoadResources();
+	}
 }
 
 
