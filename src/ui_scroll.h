@@ -66,6 +66,11 @@ public:
 	//   4 : scroll to end
 	void Scroll(int delta);
 
+	// scroll so that a certain child widget can be seen.
+	// currently it is placed at top of scroll area, or as close
+	// as possible.
+	void JumpToChild(int i);
+
 private:
 	void do_scroll();
 	void calc_extents();

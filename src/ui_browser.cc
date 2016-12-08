@@ -188,6 +188,12 @@ Browser_Item::~Browser_Item()
 }
 
 
+bool Browser_Item::MatchName(const char *name) const
+{
+	return (y_stricmp(real_name.c_str(), name) == 0);
+}
+
+
 void Browser_Item::texture_callback(Fl_Widget *w, void *data)
 {
 	const char *tex_name = (const char *)data;
@@ -976,6 +982,50 @@ void UI_Browser_Box::ClearSearchBox()
 }
 
 
+void UI_Browser_Box::JumpToTex(const char *tex_name)
+{
+	if (! (kind == 'T' || kind == 'F'))
+		return;
+
+	for (int i = 0 ; i < scroll->Children() ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		// REVIEW THIS
+		if (! item->visible())
+			continue;
+
+		if (item->MatchName(tex_name))
+		{
+			scroll->JumpToChild(i);
+			break;
+		}
+	}
+}
+
+
+void UI_Browser_Box::JumpToValue(int value)
+{
+	if (! (kind == 'O' || kind == 'S' || kind == 'L'))
+		return;
+
+	for (int i = 0 ; i < scroll->Children() ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		// REVIEW THIS
+		if (! item->visible())
+			continue;
+
+		if (item->number == value)
+		{
+			scroll->JumpToChild(i);
+			break;
+		}
+	}
+}
+
+
 void UI_Browser_Box::Scroll(int delta)
 {
 	scroll->Scroll(delta);
@@ -1578,6 +1628,24 @@ void UI_Browser::NewEditMode(obj_type_e edit_mode)
 		default:
 			/* no change */
 			break;
+	}
+}
+
+
+void UI_Browser::JumpToTex(const char *tex_name)
+{
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->JumpToTex(tex_name);
+	}
+}
+
+
+void UI_Browser::JumpToValue(int value)
+{
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->JumpToValue(value);
 	}
 }
 

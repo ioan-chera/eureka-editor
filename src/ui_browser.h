@@ -60,6 +60,8 @@ public:
 
 	virtual ~Browser_Item();
 
+	bool MatchName(const char *name) const;
+
 public:
 	static void texture_callback(Fl_Widget *w, void *data);
 	static void    flat_callback(Fl_Widget *w, void *data);
@@ -106,6 +108,10 @@ public:
 	void Scroll(int delta);
 
 	char GetKind() const { return kind; }
+
+	// ensure the given texture or type/special is visible
+	void JumpToTex(const char *tex_name);
+	void JumpToValue(int value);
 
 	void RecentUpdate();
 
@@ -214,6 +220,10 @@ public:
 	char GetMode() const;
 	void ChangeMode(char new_mode);
 	void NewEditMode(obj_type_e edit_mode);
+
+	// ensure the given texture or type/special is visible
+	void JumpToTex(const char *tex_name);
+	void JumpToValue(int value);
 
 	// dir is +1 or -1, or 0 to set the category to "ALL"
 	void CycleCategory(int dir);

@@ -202,6 +202,12 @@ void UI_Scroll::Scroll(int delta)
 }
 
 
+void UI_Scroll::JumpToChild(int i)
+{
+	// FIXME
+}
+
+
 //------------------------------------------------------------------------
 //
 //  PASS-THROUGHS
