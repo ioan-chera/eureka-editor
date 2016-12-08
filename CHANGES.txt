@@ -91,12 +91,13 @@ Bugs Fixed:
 -  fixed unwanted rail texture when splitting a sector and the
    texture name began with '_' or '#' (such as "_WALL").
 
--  fixed textures in LineDef panel not updating after undo or redo
 -  fixed rendering of unpegged lowers under sky ceilings (Y offset)
+-  fixed textures in LineDef panel not updating after undo or redo
 -  fixed exporting to keep the iwad/port/resources of target wad
 -  fixed panel staying on a highlighted object when going to 3D mode
 
 -  fixed "FIX" button for unknown textures to not change "-" textures
+-  fixed bad sidedef fallback when loading a map with no sectors
 -  fixed pixel-aspect default to be 0.83, matching original DOOM
--  fixed the criss-cross linedef detection (was too sloppy)
+-  fixed the inaccurate criss-cross linedef detection
 

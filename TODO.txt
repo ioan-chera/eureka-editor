@@ -9,11 +9,16 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-!!!  OpenMap crashes when choosing IWAD, since Main_LoadResources
-     closes (and re-opens) everything in the master dir so the
-     'wad' reference is dudded.
+Q/ how to handle self-referencing linedefs in auto create/split sector ??
 
-     [ review all other LoadLevel usages ]
+A/ current behavior is bad;
+   (a) creating a new sector can split existing one into two halves
+       [ need to check if this would happen and swap which is NEW ]
+
+   (b) joining a line loop onto a vertex W/ self-ref OR self-ref itself
+       just DOES NOTHING -- bad!
+
+   BUT: maybe the user WANTS TO un-self-reference some lines ???
 
 
 Operation menu:
@@ -27,9 +32,6 @@ Operation menu:
 
 
 BSP:
-
-!!  handle levels which consist entirely of dud linedefs
-    [ treat same as empty ]
 
 +  check XNOD maps in ZDoom 2.8.1
    [ see if we get same behavior as Zandronum ]
@@ -114,7 +116,7 @@ Editing
 +  cannot auto-split close to a vertex?
    it should be allowed when zoomed in far
 
-+  hard to select very short (1-unit) lines?
++  hard/impossible to select very short (1-unit) lines
 
 
 ______________________________________________________________________
@@ -136,7 +138,7 @@ General
 Editing
 -------
 
-+  crossing lines sometimes mucks up?
++  crossing lines while drawing sometimes mucks up?
    e.g. drawing over the stairs in MAP01
 
 +  improve X texture alignment
@@ -179,9 +181,6 @@ General
 -  tag checking: check for valid usage of special 666 / 667 tags.
 
 -  replace "Toggle XXX" in View menu with checkboxes
-
--  for Export Map, ensure wad filename not same as game_wad or one
-   of the resource wads in the master dir
 
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures
@@ -251,7 +250,7 @@ Editing
    vertices and linedefs which would get merged, and implement
    that merging.
 
-+  request: a way to see angle of lines
++  a way to see angle of lines
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
@@ -264,10 +263,6 @@ Editing
    (perhaps have a special purple '?' for the UI_PIC)
 
 -  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
-
-Q/ how to handle self-referencing linedefs in auto create/split sector ??
-
-Q/ disconnect sectors : include islands (perhaps with 'D')
 
 WISH : autocomplete flat/texture names in Linedef and Sector panels
 
@@ -451,6 +446,8 @@ NO:  animation mode, render continuously and show any lighting
      effects and animated / scrolling textures and sprites
 
 NO:  ability to hide the right-side panel
+
+NO:  disconnect sectors : automatically include islands
 
 NO:  quantization should prevent linedefs from overlapping / crossing
 
