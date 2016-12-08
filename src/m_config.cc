@@ -737,6 +737,15 @@ static const opt_desc_t options[] =
 		&thing_render_default
 	},
 
+	{	"transparent_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"color used to represent transparent pixels in textures",
+		NULL,
+		&transparent_col
+	},
+
 	{	"swap_sidedefs",
 		0,
 		OPT_BOOLEAN,

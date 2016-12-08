@@ -58,6 +58,8 @@ bool render_unknown_bright = true;
 // as the pixel aspect ratio.
 int  render_pixel_aspect = 83;  //  100 * width / height
 
+rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
+
 
 struct highlight_3D_info_t
 {

@@ -92,6 +92,8 @@ extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
+extern rgb_color_t transparent_col;
+
 extern bool bsp_on_save;
 extern bool bsp_fast;
 extern bool bsp_warnings;
