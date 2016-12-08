@@ -121,12 +121,12 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 		if (count == 0)
 			break;
 
-		/* swap end points */
+		// swap end points
 		tmp=x1;  x1=x2;  x2=tmp;
 		tmp=y1;  y1=y2;  y2=tmp;
 	}
 
-	/* linedef touches block */
+	// linedef touches block
 	return true;
 }
 
@@ -542,7 +542,7 @@ void InitBlockmap()
 {
 	bbox_t map_bbox;
 
-	/* find limits of linedefs, and store as map limits */
+	// find limits of linedefs, and store as map limits
 	FindBlockmapLimits(&map_bbox);
 
 	PrintVerbose("Map goes from (%d,%d) to (%d,%d)\n",
@@ -853,6 +853,7 @@ static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
 int num_normal_vert = 0;
 int num_gl_vert = 0;
 int num_complete_seg = 0;
+int num_real_lines = 0;
 
 
 /* ----- allocation routines ---------------------------- */
@@ -1011,8 +1012,6 @@ void GetVertices(void)
 	}
 
 	num_normal_vert = num_vertices;
-	num_gl_vert = 0;
-	num_complete_seg = 0;
 }
 
 
@@ -1057,12 +1056,12 @@ void GetSectors(void)
 		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
 			true : false;
 
-		/* sector indices never change */
+		// sector indices never change
 		sector->index = i;
 
 		sector->warned_facing = -1;
 
-		/* Note: rej_* fields are handled completely in reject.c */
+		// Note: rej_* fields are handled completely in reject.c
 	}
 }
 
@@ -1186,7 +1185,7 @@ void GetSidedefs(void)
 		memcpy(side->lower_tex, raw.lower_tex, sizeof(side->lower_tex));
 		memcpy(side->mid_tex,   raw.mid_tex,   sizeof(side->mid_tex));
 
-		/* sidedef indices never change */
+		// sidedef indices never change
 		side->index = i;
 	}
 }
@@ -1242,7 +1241,7 @@ void GetLinedefs(void)
 		line->start = start;
 		line->end   = end;
 
-		/* check for zero-length line */
+		// check for zero-length line
 		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
@@ -1268,6 +1267,9 @@ void GetLinedefs(void)
 			line->left->ref_count++;
 			line->left->on_special |= (line->type > 0) ? 1 : 0;
 		}
+
+		if (line->right || line->left)
+			num_real_lines++;
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
@@ -1324,7 +1326,7 @@ void GetLinedefsHexen(void)
 		line->type = (u8_t)(raw.type);
 		line->tag  = 0;
 
-		/* read specials */
+		// read specials
 		for (j=0 ; j < 5 ; j++)
 			line->specials[j] = (u8_t)(raw.args[j]);
 
@@ -1346,6 +1348,9 @@ void GetLinedefsHexen(void)
 			line->left->ref_count++;
 			line->left->on_special |= (line->type > 0) ? 1 : 0;
 		}
+
+		if (line->right || line->left)
+			num_real_lines++;
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
@@ -2176,6 +2181,10 @@ void LoadLevel()
 
 	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
 
+	num_gl_vert = 0;
+	num_complete_seg = 0;
+	num_real_lines = 0;
+
 	GetVertices();
 	GetSectors();
 	GetSidedefs();
@@ -2366,7 +2375,7 @@ void SaveLevel(node_t *root_node)
 
 	Lump_c * gl_marker = NULL;
 
-	if (cur_info->gl_nodes && num_linedefs > 0)
+	if (cur_info->gl_nodes && num_real_lines > 0)
 	{
 		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
@@ -2391,7 +2400,7 @@ void SaveLevel(node_t *root_node)
 
 	/* --- Normal nodes --- */
 
-	if (lev_force_xnod && num_linedefs > 0)
+	if (lev_force_xnod && num_real_lines > 0)
 	{
 		// remove mini-segs
 		NormaliseBspTree();
@@ -2631,7 +2640,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	InitBlockmap();
 
-	if (num_linedefs > 0)
+	if (num_real_lines > 0)
 	{
 		bbox_t seg_bbox;
 
