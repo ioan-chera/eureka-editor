@@ -9,16 +9,13 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-Q/ how to handle self-referencing linedefs in auto create/split sector ??
+Browser
++  when opened by a click, jump to the texture/thing/etc clicked on
 
-A/ current behavior is bad;
-   (a) creating a new sector can split existing one into two halves
-       [ need to check if this would happen and swap which is NEW ]
 
-   (b) joining a line loop onto a vertex W/ self-ref OR self-ref itself
-       just DOES NOTHING -- bad!
-
-   BUT: maybe the user WANTS TO un-self-reference some lines ???
+sector splitting: when choosing which side (left or right) will
+become NEW sector, prefer the loop which DOES NOT include any
+self-referencing linedefs
 
 
 Operation menu:
@@ -37,25 +34,11 @@ BSP:
    [ see if we get same behavior as Zandronum ]
 
 
-GAMES:
-
--  hexen things can use args even with no special
-   e.g. clay pot #106 can specify a contained object
-
-   (a) support tooltips for these, as per "special" directive
-
-   (b) update hexen thing defs
-
-   (c) always show a zero (not blank) in these args
-       when the special is zero
-
-
 PORTS / ZDoom:
 
 -  the DOOM format line specials
 
 -  all the new things
-
 
 
 3D View:
@@ -71,11 +54,6 @@ IDEA: have a "chocolate" source port
 [ and treat it like "vanilla" in parts of the code ]
 
 
-
-Browser
--------
-
-+  when opened by a click, jump to the texture/thing/etc clicked on
 
 
 
