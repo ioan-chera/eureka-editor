@@ -211,7 +211,9 @@ void UI_Scroll::JumpToChild(int i)
 {
 	const Fl_Widget * w = Child(i);
 
-	ScrollByPixels(w->y() - top_y);
+	int diff = w->y() - top_y - scrollbar->value();
+
+	ScrollByPixels(diff);
 }
 
 
