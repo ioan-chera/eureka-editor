@@ -73,16 +73,18 @@ typedef struct
 thinggroup_t;
 
 
-// thing <number> <group> <flags> <radius> <description> [<sprite>]
+// thing <number> <group> <flags> <radius> <description> [<sprite>]  [ arg1..arg5 ]
 typedef struct
 {
-	char group;      // Thing group
-	short flags;     // Flags
-	short radius;    // Radius of thing
-	float scale;	 // Scaling (1.0 is normal)
-	const char *desc;  // Short description of thing
-	const char *sprite;  // Root of name of sprite for thing
+	char group;      // group letter
+	short flags;     // flags (THINGDEF_XXX)
+	short radius;    // radius of thing
+	float scale;	 // scaling (1.0 is normal)
+
+	const char *desc;    // short description of the thing
+	const char *sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
+	const char *args[5]; // args used when spawned (Hexen)
 }
 thingtype_t;
 

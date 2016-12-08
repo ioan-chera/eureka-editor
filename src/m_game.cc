@@ -541,7 +541,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info->desc  = StringDup(argv[3]);
 
 		int arg_count = MIN(nargs - 3, 5);
-
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
@@ -600,6 +599,15 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info->sprite = StringDup(argv[5]);
 		info->desc   = StringDup(argv[6]);
 		info->scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
+
+		memset(info->args, 0, sizeof(info->args));
+
+		int arg_count = MIN(nargs - 7, 5);
+		for (int i = 0 ; i < arg_count ; i++)
+		{
+			if (argv[8 + i][0] != '-')
+				info->args[i] = StringDup(argv[8 + i]);
+		}
 
 		if (thing_groups.find(info->group) == thing_groups.end())
 		{

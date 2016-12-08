@@ -863,18 +863,30 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = Things[obj];
 
-			const linetype_t *info = M_GetLineType(T->special);
+			const thingtype_t *info = M_GetThingType(T->type);
+			const linetype_t  *spec = M_GetLineType (T->special);
 
-			if (T->arg1 || info->args[0]) args[0]->value(Int_TmpStr(T->arg1));
-			if (T->arg2 || info->args[1]) args[1]->value(Int_TmpStr(T->arg2));
-			if (T->arg3 || info->args[2]) args[2]->value(Int_TmpStr(T->arg3));
-			if (T->arg4 || info->args[3]) args[3]->value(Int_TmpStr(T->arg4));
-			if (T->arg5 || info->args[4]) args[4]->value(Int_TmpStr(T->arg5));
-
-			// set tooltips
+			// set values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
-				if (info->args[a])
+			{
+				int arg_val = T->Arg(1 + a);
+
+				if (T->special)
+				{
+					if (arg_val || spec->args[a])
+						args[a]->value(Int_TmpStr(arg_val));
+
+					args[a]->copy_tooltip(spec->args[a]);
+				}
+				else
+				{
+					// spawn arguments
+					if (arg_val || info->args[a])
+						args[a]->value(Int_TmpStr(arg_val));
+
 					args[a]->copy_tooltip(info->args[a]);
+				}
+			}
 		}
 	}
 }

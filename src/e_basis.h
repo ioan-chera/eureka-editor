@@ -103,6 +103,17 @@ public:
 		arg4 = other->arg4;
 		arg5 = other->arg5;
 	}
+
+	int Arg(int which /* 1..5 */) const
+	{
+		if (which == 1) return arg1;
+		if (which == 2) return arg2;
+		if (which == 3) return arg3;
+		if (which == 4) return arg4;
+		if (which == 5) return arg5;
+
+		return 0;
+	}
 };
 
 
