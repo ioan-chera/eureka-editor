@@ -204,7 +204,7 @@ void UI_MainWin::SetCursor(Fl_Cursor shape)
 }
 
 
-void UI_MainWin::ShowBrowser(char kind)
+void UI_MainWin::BrowserMode(char kind)
 {
 	bool is_visible = browser->visible() ? true : false;
 

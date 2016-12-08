@@ -382,7 +382,7 @@ void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->ShowBrowser(0);
+	main_win->BrowserMode(0);
 }
 
 
@@ -1383,7 +1383,7 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->ShowBrowser(0);
+	main_win->BrowserMode(0);
 }
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
@@ -1627,7 +1627,7 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
-		main_win->ShowBrowser('/');
+		main_win->BrowserMode('/');
 
 		force_recent = true;
 	}
@@ -1716,7 +1716,7 @@ bool UI_Browser::ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "open_browser") == 0 && num_tok >= 2)
 	{
-		main_win->ShowBrowser(tokens[1][0]);
+		main_win->BrowserMode(tokens[1][0]);
 		return true;
 	}
 

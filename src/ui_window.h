@@ -114,7 +114,7 @@ public:
 	// show or hide the Browser panel.
 	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
 	//         'O' for thing types, 'L' line types, 'S' sector types.
-	void ShowBrowser(char kind);
+	void BrowserMode(char kind);
 
 	void ShowDefaultProps();
 	void ShowFindAndReplace();

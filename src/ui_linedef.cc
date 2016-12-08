@@ -520,13 +520,13 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		main_win->ShowBrowser('L');
+		main_win->BrowserMode('L');
 		return;
 	}
 
 	if (w == box->gen)
 	{
-		main_win->ShowBrowser('G');
+		main_win->BrowserMode('G');
 		return;
 	}
 }

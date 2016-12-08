@@ -272,7 +272,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		if (pic->Selected())
 		{
 			box->UnselectPicSet('f');
-			main_win->ShowBrowser('T');
+			main_win->BrowserMode('T');
 		}
 		return;
 	}
@@ -300,7 +300,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		if (pic->Selected())
 		{
 			box->UnselectPicSet('t');
-			main_win->ShowBrowser('F');
+			main_win->BrowserMode('F');
 		}
 		return;
 	}
@@ -381,7 +381,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 	if (w == box->th_sprite)
 	{
-		main_win->ShowBrowser('O');
+		main_win->BrowserMode('O');
 		return;
 	}
 

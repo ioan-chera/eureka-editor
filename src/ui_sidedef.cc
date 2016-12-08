@@ -163,7 +163,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			main_win->ShowBrowser('T');
+			main_win->BrowserMode('T');
 		return;
 	}
 

@@ -230,7 +230,7 @@ void CMD_SetVar()
 		int is_visible = main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
-			main_win->ShowBrowser('/');
+			main_win->BrowserMode('/');
 	}
 	else if (y_stricmp(var_name, "grid") == 0)
 	{
@@ -281,7 +281,7 @@ void CMD_ToggleVar()
 	{
 		Editor_ClearAction();
 
-		main_win->ShowBrowser('/');
+		main_win->BrowserMode('/');
 	}
 	else if (y_stricmp(var_name, "recent") == 0)
 	{
@@ -343,11 +343,11 @@ void CMD_BrowserMode()
 		! Exec_HasFlag("/force") &&
 		! Exec_HasFlag("/recent"))
 	{
-		main_win->ShowBrowser(0);
+		main_win->BrowserMode(0);
 		return;
 	}
 
-	main_win->ShowBrowser(mode);
+	main_win->BrowserMode(mode);
 
 	if (Exec_HasFlag("/recent"))
 	{
