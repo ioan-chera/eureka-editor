@@ -335,15 +335,6 @@ DebugPrintf(" LEFT LINE #%d : front=%d back=%d\n",  left_ld,  left_front,  left_
 		return;
 	}
 
-	// do nothing if touching a "self-referencing linedef"
-	// TODO: REVIEW THIS
-	if ((right_front >= 0 && right_back == right_front) ||
-	    ( left_front >= 0 &&  left_back ==  left_front))
-	{
-		// Beep();
-		return;
-	}
-
 	// AT HERE : either splitting a sector or extending one
 
 	lineloop_c right_loop;
