@@ -249,22 +249,27 @@ const char *FilenameReposition(const char *filename, const char *othername)
 
 void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
 {
-	snprintf(dest, maxsize, "%s", filename);
-
-	char *p = (char *)FindBaseName(dest);
+	size_t len = (size_t)(FindBaseName(filename) - filename);
 
 	// remove trailing slash (except when following "C:" or similar)
-	if (p >= dest+1 &&
-		(p[-1] == '/' || p[-1] == '\\') &&
-		! (p >= dest+2 && p[-2] == ':'))
+	if (len >= 1 &&
+		(filename[len-1] == '/' || filename[len-1] == '\\') &&
+		! (len >= 2 && filename[len-2] == ':'))
 	{
-		p--;
+		len--;
 	}
 
-	if (p > dest)
+	if (len == 0)
 	{
-		*p = 0;
+		strcpy(dest, ".");
+		return;
 	}
+
+	if (len >= maxsize)
+		len =  maxsize - 1;
+
+	strncpy(dest, filename, len);
+	dest[len] = 0;
 }
 
 
