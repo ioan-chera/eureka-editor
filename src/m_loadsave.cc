@@ -1072,21 +1072,23 @@ void OpenFileMap(const char *filename, const char *map_name)
 	// this wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
+	SYS_ASSERT(edit_wad == wad);
+
 
 	// always grab map_name from the actual level
 	{
-		short idx = wad->LevelHeader(lev_num);
-		map_name  = wad->GetLump(idx)->Name();
+		short idx = edit_wad->LevelHeader(lev_num);
+		map_name  = edit_wad->GetLump(idx)->Name();
 	}
 
-	GetLevelFormat(wad, map_name);
+	GetLevelFormat(edit_wad, map_name);
 
 	Main_LoadResources();
 
 
-	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name, edit_wad->PathName());
 
-	LoadLevel(wad, map_name);
+	LoadLevel(edit_wad, map_name);
 }
 
 
