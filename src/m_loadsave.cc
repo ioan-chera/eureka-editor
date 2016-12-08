@@ -1638,8 +1638,8 @@ bool M_SaveMap()
 		{
 			return false;
 		}
-		else
-			return M_ExportMap();
+
+		return M_ExportMap();
 	}
 
 
@@ -1688,6 +1688,14 @@ bool M_ExportMap()
 	char *pos = (char *)fl_filename_ext(filename);
 	if (! *pos)
 		strcat(filename, ".wad");
+
+
+	// don't export into a file we currently have open
+	if (MasterDir_HaveFilename(filename))
+	{
+		DLG_Notify("Unable to export the map:\n\nFile already in use");
+		return false;
+	}
 
 
 	// does the file already exist?  if not, create it...

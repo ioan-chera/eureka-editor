@@ -324,9 +324,13 @@ int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
 
+int W_FilenameAbsCompare(const char *A, const char *B);
+
+
 void MasterDir_Add   (Wad_file *wad);
 void MasterDir_Remove(Wad_file *wad);
 
+bool MasterDir_HaveFilename(const char *chk_path);
 void MasterDir_CloseAll();
 
 

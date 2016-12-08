@@ -1383,5 +1383,31 @@ void MasterDir_CloseAll()
 }
 
 
+int W_FilenameAbsCompare(const char *A, const char *B)
+{
+	static char A_buffer[FL_PATH_MAX];
+	static char B_buffer[FL_PATH_MAX];
+
+	fl_filename_absolute(A_buffer, sizeof(A_buffer), A);
+	fl_filename_absolute(B_buffer, sizeof(B_buffer), B);
+
+	return y_stricmp(A_buffer, B_buffer);
+}
+
+
+bool MasterDir_HaveFilename(const char *chk_path)
+{
+	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	{
+		const char *wad_path = master_dir[k]->PathName();
+
+		if (W_FilenameAbsCompare(wad_path, chk_path) == 0)
+			return true;
+	}
+
+	return false;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
