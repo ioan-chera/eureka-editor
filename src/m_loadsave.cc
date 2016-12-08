@@ -511,6 +511,22 @@ static void CreateFallbackSector()
 }
 
 
+static void CreateFallbackSideDef()
+{
+	// we need a valid sector too!
+	if (NumSectors == 0)
+		CreateFallbackSector();
+
+	LogPrintf("Creating a fallback sidedef.\n");
+
+	SideDef *sd = new SideDef;
+
+	sd->SetDefaults(false);
+
+	SideDefs.push_back(sd);
+}
+
+
 static void LoadHeader()
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
@@ -683,18 +699,6 @@ static void LoadSideDefs()
 }
 
 
-static void CreateFallbackSideDef()
-{
-	LogPrintf("Creating a fallback sidedef.\n");
-
-	SideDef *sd = new SideDef;
-
-	sd->SetDefaults(false);
-
-	SideDefs.push_back(sd);
-}
-
-
 static void ValidateSidedefs(LineDef * ld)
 {
 	if (ld->right == 0xFFFF) ld->right = -1;
@@ -708,11 +712,15 @@ static void ValidateSidedefs(LineDef * ld)
 
 		bad_sidedef_refs++;
 
+		// ensure we have a usable sidedef
+		if (NumSideDefs == 0)
+			CreateFallbackSideDef();
+
 		if (ld->right >= NumSideDefs)
-			ld->right = (ld->left == 0) ? 1 : 0;
+			ld->right = 0;
 
 		if (ld->left >= NumSideDefs)
-			ld->left = (ld->right == 1) ? 0 : 1;
+			ld->left = 0;
 	}
 }
 
@@ -731,9 +739,6 @@ static void LoadLineDefs()
 
 	if (count == 0)
 		return;
-
-	if (NumSideDefs < 2) CreateFallbackSideDef();
-	if (NumSideDefs < 2) CreateFallbackSideDef();
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -791,9 +796,6 @@ static void LoadLineDefs_Hexen()
 
 	if (count == 0)
 		return;
-
-	if (NumSideDefs < 2) CreateFallbackSideDef();
-	if (NumSideDefs < 2) CreateFallbackSideDef();
 
 	for (int i = 0 ; i < count ; i++)
 	{
