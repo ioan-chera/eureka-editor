@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -183,7 +183,12 @@ void UI_Scroll::Scroll(int delta)
 	if (delta < 0)
 		pixels = -pixels;
 
+	ScrollByPixels(pixels);
+}
 
+
+void UI_Scroll::ScrollByPixels(int pixels)
+{
 	int pos = scrollbar->value() + pixels;
 
 	int total_h = bottom_y - top_y;
@@ -204,7 +209,9 @@ void UI_Scroll::Scroll(int delta)
 
 void UI_Scroll::JumpToChild(int i)
 {
-	// FIXME
+	const Fl_Widget * w = Child(i);
+
+	ScrollByPixels(w->y() - top_y);
 }
 
 
