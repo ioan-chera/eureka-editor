@@ -55,6 +55,8 @@ void Editor_ScrollMap(int mode, int dx = 0, int dy = 0);
 
 /* raw input handling */
 
+int EV_HandleEvent(int event);
+
 void ClearStickyMod();
 
 keycode_t M_RawKeyForEvent(int event);

@@ -427,6 +427,26 @@ extern void CheckBeginDrag();
 
 
 
+static void EV_EnterWindow()
+{
+	edit.pointer_in_window = true;
+
+	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
+
+	// we greedily grab the keyboard focus
+	Fl_Widget * foc = main_win->canvas;
+
+	if (edit.render3d)
+		foc = main_win->render;
+
+	if (Fl::focus() != foc)
+		foc->take_focus();
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+
 void Editor_LeaveWindow()
 {
 	edit.pointer_in_window = false;
@@ -436,6 +456,7 @@ void Editor_LeaveWindow()
 		Editor_ClearAction();
 
 	UpdateHighlight();
+	RedrawMap();
 }
 
 
@@ -656,6 +677,48 @@ int Editor_RawMouse(int event)
 	mouse_last_y = Fl::event_y();
 
 	return 1;
+}
+
+
+int EV_HandleEvent(int event)
+{
+	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
+
+	switch (event)
+	{
+		case FL_FOCUS:
+			return 1;
+
+		case FL_ENTER:
+			EV_EnterWindow();
+			return 1;
+
+		case FL_LEAVE:
+			Editor_LeaveWindow();
+			return 1;
+
+		case FL_KEYDOWN:
+		case FL_KEYUP:
+		case FL_SHORTCUT:
+			return Editor_RawKey(event);
+
+		case FL_PUSH:
+		case FL_RELEASE:
+			return Editor_RawButton(event);
+
+		case FL_MOUSEWHEEL:
+			return Editor_RawWheel(event);
+
+		case FL_DRAG:
+		case FL_MOVE:
+			return Editor_RawMouse(event);
+
+		default:
+			// pass on everything else
+			break;
+	}
+
+	return 0;
 }
 
 

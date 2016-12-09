@@ -98,44 +98,8 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
-
-	switch (event)
-	{
-		case FL_FOCUS:
-			return 1;
-
-		case FL_ENTER:
-			// we greedily grab the focus
-			if (Fl::focus() != this)
-				take_focus();
-
-			return 1;
-
-		case FL_LEAVE:
-			Editor_LeaveWindow();
-			redraw();
-			return 1;
-
-		case FL_KEYDOWN:
-		case FL_KEYUP:
-		case FL_SHORTCUT:
-			return Editor_RawKey(event);
-
-		case FL_PUSH:
-		case FL_RELEASE:
-			return Editor_RawButton(event);
-
-		case FL_MOUSEWHEEL:
-			return Editor_RawWheel(event);
-
-		case FL_DRAG:
-		case FL_MOVE:
-			return Editor_RawMouse(event);
-
-		default:
-			break;
-	}
+	if (EV_HandleEvent(event))
+		return 1;
 
 	return Fl_Widget::handle(event);
 }

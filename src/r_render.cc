@@ -2024,37 +2024,8 @@ void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, c
 
 int UI_Render3D::handle(int event)
 {
-	switch (event)
-	{
-		case FL_FOCUS:
-			return 1;
-
-		case FL_ENTER:
-			// we greedily grab the focus
-			if (Fl::focus() != this)
-				take_focus();
-
-			return 1;
-
-		case FL_KEYDOWN:
-		case FL_KEYUP:
-		case FL_SHORTCUT:
-			return Editor_RawKey(event);
-
-		case FL_PUSH:
-		case FL_RELEASE:
-			return Editor_RawButton(event);
-
-		case FL_MOUSEWHEEL:
-			return Editor_RawWheel(event);
-
-		case FL_DRAG:
-		case FL_MOVE:
-			return Editor_RawMouse(event);
-
-		default:
-			break;  // pass it on
-	}
+	if (EV_HandleEvent(event))
+		return 1;
 
 	return Fl_Widget::handle(event);
 }
