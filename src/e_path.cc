@@ -367,7 +367,7 @@ void GoToSelection()
 	int mid_x = (x1 + x2) / 2;
 	int mid_y = (y1 + y2) / 2;
 
-	grid.CenterMapAt(mid_x, mid_y);
+	grid.MoveTo(mid_x, mid_y);
 
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)

@@ -956,7 +956,7 @@ void CMD_GoToCamera()
 
 	Render3D_GetCameraPos(&x, &y, &angle);
 
-	grid.CenterMapAt(x, y);
+	grid.MoveTo(x, y);
 
 	RedrawMap();
 }

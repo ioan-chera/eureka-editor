@@ -88,7 +88,7 @@ static void zoom_fit()
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
-	grid.CenterMapAt((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
+	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
 }
 
 
