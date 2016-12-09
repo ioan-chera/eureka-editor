@@ -1207,8 +1207,6 @@ void Editor_RegisterCommands();
 
 void Editor_Init()
 {
-	memset(&edit, 0, sizeof(edit));  /* Catch-all */
-
 	switch (default_edit_mode)
 	{
 		case 1:  edit.mode = OBJ_LINEDEFS; break;
@@ -1217,35 +1215,37 @@ void Editor_Init()
 		default: edit.mode = OBJ_THINGS;   break;
 	}
 
+	edit.render3d = false;
+
 	edit.action = ACT_NOTHING;
-	edit.is_scrolling  = false;
+	edit.sticky_mod = 0;
+	edit.is_scrolling = false;
 
 	Nav_Clear();
 
-	edit.render3d = false;
-	edit.error_mode = false;
+	edit.pointer_in_window = false;
+	edit.map_x = 0;
+	edit.map_y = 0;
 
-	edit.sector_render_mode = sector_render_default;
-	edit. thing_render_mode =  thing_render_default;
-
-	edit.show_object_numbers = false;
-	edit.show_things_squares = false;
-	edit.show_things_sprites = true;
-
-	edit.clicked.clear();
+	edit.Selected = new selection_c(edit.mode);
 
 	edit.highlight.clear();
 	edit.split_line.clear();
+	edit.clicked.clear();
+
 	edit.drawing_from = -1;
 	edit.drag_single_obj = -1;
 
-	edit.Selected = new selection_c(edit.mode);
+	edit.error_mode = false;
+	edit.sector_render_mode = sector_render_default;
+	edit. thing_render_mode =  thing_render_default;
+	edit.show_object_numbers = false;
 
 	grid.Init();
 
 	MadeChanges = 0;
 
-	Editor_RegisterCommands();
+	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();
 }
 

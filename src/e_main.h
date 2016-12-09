@@ -43,49 +43,53 @@ typedef enum
 } sector_rendering_mode_e;
 
 
-/* this holds some important editor state */
-
+//
+// this holds some important editor state
+//
 typedef struct
 {
-	obj_type_e  mode;   // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+	obj_type_e  mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+
+	bool render3d;     // 3D view is active
 
 	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
 
-	bool is_scrolling;	// user is scrolling the map (or moving in 3D view)
-	bool is_navigating;	// user is holding down a navigation key
+	keycode_t sticky_mod;  // if != 0, waiting for next key  (fake meta)
 
-	keycode_t sticky_mod;	// user pressed ';' -- waiting for next key
+	bool is_scrolling;   // user is scrolling the map (or moving in 3D view)
+	bool is_navigating;  // user is holding down a navigation key
 
-	bool render3d;    // 3D view is active
-	bool error_mode;  // draw selection in red
+	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
+	int map_x;    // map coordinates of pointer
+	int map_y;    //
 
-	int  sector_render_mode;	// one of the SREND_XXX values
-	int   thing_render_mode;
-
-	bool show_object_numbers; // Whether the object numbers are shown
-	bool show_things_squares; // Whether the things squares are shown
-	bool show_things_sprites; // Whether the things sprites are shown
-
-	int map_x;    // Map coordinates of pointer
-	int map_y;
-	int pointer_in_window;  // If false, pointer_[xy] are not meaningful.
-
-	Objid clicked;		// The object that was under the pointer when
-						// the left click occurred.
 
 	selection_c *Selected;    // all selected objects (usually empty)
 
-	Objid highlight;   // The highlighted object
+	Objid highlight;   // the highlighted object
 
 	Objid split_line;  // linedef which would be split by a new vertex
 	int split_x;
 	int split_y;
 
-	int drawing_from;	 // for ACT_DRAW_LINE, the vertex we are drawing a line from
+	// the object that was under the pointer when ACT_Click occurred
+	Objid clicked;
 
-	int drag_single_obj;  // -1, or object number we are dragging
+	int drawing_from;     // for ACT_DRAW_LINE: vertex we are drawing a line from
+	int drag_single_obj;  // for ACT_DRAG: an object number we are dragging, or -1 for selection
 
-	// private navigation stuff
+
+	/* rendering stuff */
+
+	bool error_mode;   // draw selection in red?
+
+	int  sector_render_mode;   // one of the SREND_XXX values
+	int   thing_render_mode;
+
+	bool show_object_numbers;
+
+	/* private navigation stuff */
+
 	float nav_scroll_left;
 	float nav_scroll_right;
 	float nav_scroll_up;
