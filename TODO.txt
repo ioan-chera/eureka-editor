@@ -9,6 +9,14 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+FIXME grid.Scroll and scale-changers need to update stuff
+[ Editor_UpdateFromScroll ]
+[[  use canvas->PointerPos  ]]
+
+
+RedrawMap : always update the highlight
+
+
 Browser
 +  when opened by a click, jump to the texture/thing/etc clicked on
 
@@ -93,8 +101,6 @@ Editing
 
 +  cannot auto-split close to a vertex?
    it should be allowed when zoomed in far
-
-+  hard/impossible to select very short (1-unit) lines
 
 
 ______________________________________________________________________
