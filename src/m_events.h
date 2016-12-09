@@ -43,8 +43,6 @@ typedef enum
 } editor_action_e;
 
 
-void Editor_LeaveWindow();
-
 void Editor_ClearAction();
 void Editor_SetAction(editor_action_e new_action);
 
@@ -61,11 +59,6 @@ void ClearStickyMod();
 
 keycode_t M_RawKeyForEvent(int event);
 keycode_t M_CookedKeyForEvent(int event);
-
-int  Editor_RawKey(int event);
-int  Editor_RawButton(int event);
-int  Editor_RawWheel(int event);
-int  Editor_RawMouse(int event);
 
 extern int wheel_dx;
 extern int wheel_dy;

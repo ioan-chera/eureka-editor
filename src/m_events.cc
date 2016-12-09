@@ -447,7 +447,7 @@ static void EV_EnterWindow()
 }
 
 
-void Editor_LeaveWindow()
+static void EV_LeaveWindow()
 {
 	edit.pointer_in_window = false;
 
@@ -558,7 +558,7 @@ keycode_t M_CookedKeyForEvent(int event)
 }
 
 
-int Editor_RawKey(int event)
+int EV_RawKey(int event)
 {
 	Nav_UpdateKeys();
 
@@ -616,7 +616,7 @@ int Editor_RawKey(int event)
 }
 
 
-int Editor_RawWheel(int event)
+int EV_RawWheel(int event)
 {
 	ClearStickyMod();
 
@@ -629,13 +629,13 @@ int Editor_RawWheel(int event)
 	if (wheel_dx == 0 && wheel_dy == 0)
 		return 1;
 
-	Editor_RawKey(FL_MOUSEWHEEL);
+	EV_RawKey(FL_MOUSEWHEEL);
 
 	return 1;
 }
 
 
-int Editor_RawButton(int event)
+int EV_RawButton(int event)
 {
 	ClearStickyMod();
 
@@ -653,11 +653,11 @@ int Editor_RawButton(int event)
 	if (button < 1 || button > 8)
 		return 0;
 
-	return Editor_RawKey(event);
+	return EV_RawKey(event);
 }
 
 
-int Editor_RawMouse(int event)
+int EV_RawMouse(int event)
 {
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
@@ -694,24 +694,24 @@ int EV_HandleEvent(int event)
 			return 1;
 
 		case FL_LEAVE:
-			Editor_LeaveWindow();
+			EV_LeaveWindow();
 			return 1;
 
 		case FL_KEYDOWN:
 		case FL_KEYUP:
 		case FL_SHORTCUT:
-			return Editor_RawKey(event);
+			return EV_RawKey(event);
 
 		case FL_PUSH:
 		case FL_RELEASE:
-			return Editor_RawButton(event);
+			return EV_RawButton(event);
 
 		case FL_MOUSEWHEEL:
-			return Editor_RawWheel(event);
+			return EV_RawWheel(event);
 
 		case FL_DRAG:
 		case FL_MOVE:
-			return Editor_RawMouse(event);
+			return EV_RawMouse(event);
 
 		default:
 			// pass on everything else
