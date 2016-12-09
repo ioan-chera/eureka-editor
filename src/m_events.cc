@@ -94,9 +94,8 @@ void Editor_SetAction(editor_action_e  new_action)
 }
 
 
-void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
-
-
+// FIXME : this was being called by CMD_Scroll, but smells very hacky
+#if 0
 void Editor_UpdateFromScroll()
 {
 	if (edit.action == ACT_SELBOX || edit.action == ACT_DRAW_LINE ||
@@ -104,9 +103,10 @@ void Editor_UpdateFromScroll()
 	{
 		int mod = Fl::event_state() & MOD_ALL_MASK;
 
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, 0, 0);
+		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, 0, 0);
 	}
 }
+#endif
 
 
 void Editor_Zoom(int delta, int mid_x, int mid_y)
@@ -426,7 +426,6 @@ int wheel_dy;
 extern void CheckBeginDrag();
 
 
-
 static void EV_EnterWindow()
 {
 	edit.pointer_in_window = true;
@@ -460,26 +459,24 @@ static void EV_LeaveWindow()
 }
 
 
-void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
+	// this is probably redundant, as we generally shouldn't get here
+	// unless the mouse is in the 2D/3D view (or began a drag there).
+	edit.pointer_in_window = true;
+
+	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y);
+
+//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+
+
 	if (edit.is_scrolling)
 	{
 		Editor_ScrollMap(0, dx, dy);
 		return;
 	}
 
-	int map_x, map_y;
-
-	main_win->canvas->PointerPos(&map_x, &map_y);
-
-	edit.map_x = map_x;
-	edit.map_y = map_y;
-	edit.pointer_in_window = true; // FIXME
-
-	if (edit.pointer_in_window)
-		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
-
-//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+	main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
 	if (edit.action == ACT_TRANSFORM)
 	{
@@ -509,13 +506,10 @@ void Editor_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-
 	// begin dragging?
 	CheckBeginDrag();
 
-
 	// in general, just update the highlight, split-line (etc)
-
 	UpdateHighlight();
 }
 
@@ -670,7 +664,7 @@ int EV_RawMouse(int event)
 	}
 	else
 	{
-		Editor_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 
 	mouse_last_x = Fl::event_x();

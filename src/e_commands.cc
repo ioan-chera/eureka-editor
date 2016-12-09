@@ -374,9 +374,6 @@ void CMD_Scroll()
 	delta_y = delta_y * base_size / 100.0 / grid.Scale;
 
 	grid.Scroll(delta_x, delta_y);
-
-	// certain actions need to be updated
-	Editor_UpdateFromScroll();
 }
 
 
