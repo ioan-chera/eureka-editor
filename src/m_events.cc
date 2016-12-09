@@ -467,7 +467,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	main_win->canvas->PointerPos(true /* in_event */);
 
-//  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
+//  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
 
 
 	if (edit.is_scrolling)

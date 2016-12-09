@@ -60,8 +60,7 @@ typedef struct
 	bool is_navigating;  // user is holding down a navigation key
 
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
-	int map_x;    // map coordinates of pointer
-	int map_y;    //
+	float map_x, map_y;      // map coordinates of pointer
 
 
 	selection_c *Selected;    // all selected objects (usually empty)

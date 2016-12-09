@@ -164,10 +164,11 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = MAPX(x());
-	map_ly = MAPY(y()+h());
-	map_hx = MAPX(x()+w());
-	map_hy = MAPY(y());
+	map_lx = floor(MAPX(x()));
+	map_ly = floor(MAPY(y() + h()));
+
+	map_hx = ceil(MAPX(x() + w()));
+	map_hy = ceil(MAPY(y()));
 
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
@@ -2048,12 +2049,12 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
-			int ty = (0 - MAPY(y)) & 63;
+			int ty = (0 - (int)MAPY(y)) & 63;
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
 				// TODO : be nice to optimize the next line
-				int tx = MAPX(x) & 63;
+				int tx = (int)MAPX(x) & 63;
 
 				img_pixel_t pix = src_pix[ty * tw + tx];
 
