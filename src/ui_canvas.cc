@@ -105,10 +105,32 @@ int UI_Canvas::handle(int event)
 }
 
 
-void UI_Canvas::PointerPos(int *map_x, int *map_y)
+void UI_Canvas::PointerPos(int *map_x, int *map_y, bool in_event)
 {
-	*map_x = MAPX(Fl::event_x());
-	*map_y = MAPY(Fl::event_y());
+	// NOTE: this fast method is disabled until behavior of the
+	//       other method can be verified on all platforms....
+#if 0
+	if (in_event)
+	{
+		*map_x = MAPX(Fl::event_x());
+		*map_y = MAPY(Fl::event_y());
+
+		return;
+	}
+#endif
+
+	// read current position outside of FLTK's event propagation.
+	// this is a bit harder, and a bit slower in X-windows
+
+	int raw_x, raw_y;
+
+	Fl::get_mouse(raw_x, raw_y);
+
+	raw_x -= main_win->x_root();
+	raw_y -= main_win->y_root();
+
+	*map_x = MAPX(raw_x);
+	*map_y = MAPY(raw_y);
 }
 
 

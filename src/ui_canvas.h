@@ -99,7 +99,7 @@ public:
 	void TransformUpdate(int map_x, int map_y);
 	void TransformFinish(transform_t& param);
 
-	void PointerPos(int *map_x, int *map_y);
+	void PointerPos(int *map_x, int *map_y, bool in_event = false);
 
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
