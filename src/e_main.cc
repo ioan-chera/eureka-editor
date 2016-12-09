@@ -66,16 +66,6 @@ int sector_render_default = (int)SREND_Floor;
 int  thing_render_default = 1;
 
 
-void Editor_NotifyChanges()
-{
-	MadeChanges = 1;
-
-	UpdateHighlight();
-
-	RedrawMap();
-}
-
-
 //
 // adjust zoom factor to make whole map fit in window
 //

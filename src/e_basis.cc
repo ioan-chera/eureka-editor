@@ -116,7 +116,10 @@ static void DoClearChangeStatus()
 static void DoProcessChangeStatus()
 {
 	if (did_make_changes)
-		Editor_NotifyChanges();
+	{
+		MadeChanges = 1;
+		RedrawMap();
+	}
 
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
