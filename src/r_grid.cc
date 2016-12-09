@@ -215,7 +215,7 @@ void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
 
 const double Grid_State_c::scale_values[] =
 {
-	16.0, 8.0, 6.0, 4.0,  3.0, 2.0, 1.5, 1.0,
+	32.0, 16.0, 8.0, 6.0, 4.0,  3.0, 2.0, 1.5, 1.0,
 
 	1.0 / 1.5, 1.0 / 2.0, 1.0 / 3.0,  1.0 / 4.0,
 	1.0 / 6.0, 1.0 / 8.0, 1.0 / 16.0, 1.0 / 32.0,
@@ -235,13 +235,13 @@ const int Grid_State_c::grid_values[] =
 	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2
 };
 
-#define NUM_SCALE_VALUES  17
+#define NUM_SCALE_VALUES  18
 #define NUM_GRID_VALUES   12
 
 
 const char *Grid_State_c::scale_options()
 {
-	return  "x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
+	return  "x 32|x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
 			" 100% |"
 			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64";
 }
