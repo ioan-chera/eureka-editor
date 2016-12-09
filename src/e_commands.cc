@@ -964,10 +964,7 @@ void CMD_GoToCamera()
 
 	grid.CenterMapAt(x, y);
 
-	// FIXME: this is not right, we want to recompute where mouse pointer is
-	edit.map_x = x;
-	edit.map_y = y;
-
+	UpdateHighlight();
 	RedrawMap();
 }
 

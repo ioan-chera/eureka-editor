@@ -97,8 +97,11 @@ void Grid_State_c::MoveTo(double x, double y)
 
 	if (main_win)
 	{
-		main_win->canvas->redraw();
+		main_win->canvas->PointerPos();
+
 		main_win->scroll->AdjustPos();
+
+		RedrawMap();
 	}
 }
 

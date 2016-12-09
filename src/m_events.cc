@@ -430,7 +430,7 @@ static void EV_EnterWindow()
 {
 	edit.pointer_in_window = true;
 
-	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y, true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	// we greedily grab the keyboard focus
 	Fl_Widget * foc = main_win->canvas;
@@ -465,7 +465,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	// unless the mouse is in the 2D/3D view (or began a drag there).
 	edit.pointer_in_window = true;
 
-	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y, true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: %d,%d  map: %d,%d\n", x, y, edit.map_x, edit.map_y);
 
@@ -615,7 +615,7 @@ int EV_RawWheel(int event)
 	ClearStickyMod();
 
 	// ensure we zoom from correct place
-	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y, true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
@@ -633,7 +633,7 @@ int EV_RawButton(int event)
 {
 	ClearStickyMod();
 
-	main_win->canvas->PointerPos(&edit.map_x, &edit.map_y, true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button

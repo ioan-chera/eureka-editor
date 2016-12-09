@@ -105,15 +105,15 @@ int UI_Canvas::handle(int event)
 }
 
 
-void UI_Canvas::PointerPos(int *map_x, int *map_y, bool in_event)
+void UI_Canvas::PointerPos(bool in_event)
 {
 	// NOTE: this fast method is disabled until behavior of the
 	//       other method can be verified on all platforms....
 #if 0
 	if (in_event)
 	{
-		*map_x = MAPX(Fl::event_x());
-		*map_y = MAPY(Fl::event_y());
+		edit.map_x = MAPX(Fl::event_x());
+		edit.map_y = MAPY(Fl::event_y());
 
 		return;
 	}
@@ -129,8 +129,8 @@ void UI_Canvas::PointerPos(int *map_x, int *map_y, bool in_event)
 	raw_x -= main_win->x_root();
 	raw_y -= main_win->y_root();
 
-	*map_x = MAPX(raw_x);
-	*map_y = MAPY(raw_y);
+	edit.map_x = MAPX(raw_x);
+	edit.map_y = MAPY(raw_y);
 }
 
 

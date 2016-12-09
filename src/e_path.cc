@@ -394,11 +394,7 @@ void GoToSelection()
 		grid.AdjustScale(+1);
 	}
 
-	// FIXME: this is not completely right, we should check where mouse pointer is
-	//        and use the following as the fallback (when not pointer_in_window).
-	edit.map_x = mid_x;
-	edit.map_y = mid_y;
-
+	UpdateHighlight();
 	RedrawMap();
 }
 
