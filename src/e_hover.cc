@@ -37,7 +37,7 @@
 extern int vertex_radius(double scale);
 
 
-float ApproxDistToLineDef(const LineDef * L, int x, int y)
+float ApproxDistToLineDef(const LineDef * L, float x, float y)
 {
 	int x1 = L->Start()->x;
 	int y1 = L->Start()->y;
@@ -648,7 +648,7 @@ public :
 		if (inside && ! other.inside) return true;
 		if (! inside && other.inside) return false;
 
-		// Small objects should "mask" large objects
+		// small objects should "mask" large objects
 		if (radius < other.radius) return true;
 		if (radius > other.radius) return false;
 
@@ -671,15 +671,15 @@ extern int TestAdjoinerLineDef(int ld);
 //
 // determine which linedef is under the pointer
 //
-static void get_cur_linedef(Close_obj& closest, int x, int y)
+static void get_cur_linedef(Close_obj& closest, float x, float y)
 {
 	// slack in map units
-	int mapslack = 2 + (int)ceil(16.0f / grid.Scale);
+	float mapslack = 2 + 16.0f / grid.Scale;
 
-	int lx = x - mapslack;
-	int ly = y - mapslack;
-	int hx = x + mapslack;
-	int hy = y + mapslack;
+	int lx = floor(x - mapslack);
+	int ly = floor(y - mapslack);
+	int hx =  ceil(x + mapslack);
+	int hy =  ceil(y + mapslack);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -700,14 +700,14 @@ static void get_cur_linedef(Close_obj& closest, int x, int y)
 		if (dist > mapslack)
 			continue;
 
-		// "<=" because if there are superimposed vertices, we want to
-		// return the highest-numbered one.
-		if (dist > closest.distance)
-			continue;
-
-		closest.obj.type = OBJ_LINEDEFS;
-		closest.obj.num  = n;
-		closest.distance = dist;
+		// use "<=" because if there are overlapping linedefs, we want
+		// to return the highest-numbered one.
+		if (dist <= closest.distance)
+		{
+			closest.obj.type = OBJ_LINEDEFS;
+			closest.obj.num  = n;
+			closest.distance = dist;
+		}
 	}
 
 #if 0  // TESTING CRUD
@@ -831,11 +831,11 @@ static void get_cur_sector(Close_obj& closest,int x, int y)
 //
 // determine which thing is under the mouse pointer
 //
-static void get_cur_thing(Close_obj& closest, int x, int y)
+static void get_cur_thing(Close_obj& closest, float x, float y)
 {
-	int mapslack = 1 + (int)ceil(16.0f / grid.Scale);
+	float mapslack = 1 + 16.0f / grid.Scale;
 
-	int max_radius = MAX_RADIUS + mapslack;
+	int max_radius = MAX_RADIUS + ceil(mapslack);
 
 	int lx = x - max_radius;
 	int ly = y - max_radius;
@@ -867,15 +867,17 @@ static void get_cur_thing(Close_obj& closest, int x, int y)
 		current.obj.num  = n;
 		current.distance = hypot(x - tx, y - ty);
 		current.radius   = info->radius;
-		current.inside   = x > tx - current.radius
-			&& x < tx + current.radius
-			&& y > ty - current.radius
-			&& y < ty + current.radius;
 
-		// "<=" because if there are superimposed vertices, we want to
-		// return the highest-numbered one.
+		current.inside =
+		   (x > tx - current.radius && x < tx + current.radius &&
+			y > ty - current.radius && y < ty + current.radius);
+
+		// use "<=" because if there are superimposed vertices, we want
+		// to return the highest-numbered one.
 		if (current <= closest)
+		{
 			closest = current;
+		}
 	}
 }
 
@@ -883,16 +885,16 @@ static void get_cur_thing(Close_obj& closest, int x, int y)
 //
 // determine which vertex is under the pointer
 //
-static void get_cur_vertex(Close_obj& closest, int x, int y)
+static void get_cur_vertex(Close_obj& closest, float x, float y)
 {
 	const int screen_pix = vertex_radius(grid.Scale);
 
-	int mapslack = 1 + (int)ceil((4 + screen_pix) / grid.Scale);
+	float mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
-	int lx = x - mapslack;
-	int ly = y - mapslack;
-	int hx = x + mapslack;
-	int hy = y + mapslack;
+	int lx = floor(x - mapslack);
+	int ly = floor(y - mapslack);
+	int hx =  ceil(x + mapslack);
+	int hy =  ceil(y + mapslack);
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
@@ -905,14 +907,14 @@ static void get_cur_vertex(Close_obj& closest, int x, int y)
 
 		double dist = hypot(x - vx, y - vy);
 
-		// "<=" because if there are superimposed vertices, we want to
-		// return the highest-numbered one.
-		if (dist > closest.distance)
-			continue;
-
-		closest.obj.type = OBJ_VERTICES;
-		closest.obj.num  = n;
-		closest.distance = dist;
+		// use "<=" because if there are superimposed vertices, we want
+		// to return the highest-numbered one.
+		if (dist <= closest.distance)
+		{
+			closest.obj.type = OBJ_VERTICES;
+			closest.obj.num  = n;
+			closest.distance = dist;
+		}
 	}
 }
 
@@ -922,7 +924,7 @@ static void get_cur_vertex(Close_obj& closest, int x, int y)
 //  coordinates.  when several objects are close, the smallest
 //  is chosen.
 //
-void GetNearObject(Objid& o, obj_type_e objtype, int x, int y)
+void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
 {
 	Close_obj closest;
 
