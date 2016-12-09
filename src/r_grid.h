@@ -41,6 +41,7 @@ public:
 	double orig_y;
 
 	// scale for drawing map
+	// (multiply a map coordinate by this to get a screen coord)
 	float Scale;
 
 public:

@@ -1080,16 +1080,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				return;
 
-			int mx = (x1 + x2) / 2;
-			int my = (y1 + y2) / 2;
-
-			DrawMapLine(mx, my, mx + (y2 - y1) / 5, my + (x1 - x2) / 5);
-
-			fl_line_style(FL_SOLID, 2);
-
 			DrawMapVector(x1, y1, x2, y2);
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 
@@ -1240,16 +1231,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				return;
 
-			int mx = (x1 + x2) / 2;
-			int my = (y1 + y2) / 2;
-
-			DrawMapLine(mx, my, mx + (y2 - y1) / 5, my + (x1 - x2) / 5);
-
-			fl_line_style(FL_SOLID, 2);
-
 			DrawMapVector(x1, y1, x2, y2);
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 
@@ -1411,30 +1393,43 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
-void UI_Canvas::DrawMapVector (int map_x1, int map_y1, int map_x2, int map_y2)
+//
+// draw a bolder linedef with an arrow on the end
+// (used for highlighted / selected lines)
+//
+void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
+	int mx = (x1 + x2) / 2;
+	int my = (y1 + y2) / 2;
+
+	// knob
+	fl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
+
+	fl_line_style(FL_SOLID, 2);
 	fl_line(x1, y1, x2, y2);
 
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
 	if (r2 < 1.0)
-		return;
+		r2 = 1.0;
 
-	double scale = (grid.Scale > 1.0) ? sqrt(grid.Scale) : grid.Scale;
+	double len = CLAMP(6.0, r2 / 10.0, 24.0);
 
-	int dx = (int) ((x1 - x2) * 8.0 / r2 * scale);
-	int dy = (int) ((y1 - y2) * 8.0 / r2 * scale);
+	int dx = (int) (len * (x1 - x2) / r2);
+	int dy = (int) (len * (y1 - y2) / r2);
 
 	x1 = x2 + 2 * dx;
 	y1 = y2 + 2 * dy;
 
 	fl_line(x1 - dy, y1 + dx, x2, y2);
 	fl_line(x1 + dy, y1 - dx, x2, y2);
+
+	fl_line_style(FL_SOLID);
 }
 
 
