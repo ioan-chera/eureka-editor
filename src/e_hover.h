@@ -32,12 +32,12 @@ class Objid;
 class bitvec_c;
 
 
-void GetNearObject(Objid& o, obj_type_e objtype, int x, int y);
+void GetNearObject(Objid& o, obj_type_e objtype, float x, float y);
 
 void GetSplitLineDef(Objid& o, int x, int y, int drag_vert = -1);
 void GetSplitLineForDangler(Objid& o, int v_num);
 
-float ApproxDistToLineDef(const LineDef * L, int x, int y);
+float ApproxDistToLineDef(const LineDef * L, float x, float y);
 
 int ClosestLine_CastingHoriz(int x, int y, int *side);
 int ClosestLine_CastingVert (int x, int y, int *side);
