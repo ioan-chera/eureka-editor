@@ -116,7 +116,7 @@ static void DoClearChangeStatus()
 static void DoProcessChangeStatus()
 {
 	if (did_make_changes)
-		MarkChanges();
+		Editor_NotifyChanges();
 
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();

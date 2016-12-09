@@ -123,7 +123,7 @@ extern int Map_bound_y1;   /* minimum Y value of map */
 extern int Map_bound_x2;   /* maximum X value of map */
 extern int Map_bound_y2;   /* maximum Y value of map */
 
-void MarkChanges();
+void Editor_NotifyChanges();
 
 void CalculateLevelBounds();
 
