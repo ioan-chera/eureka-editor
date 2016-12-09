@@ -119,7 +119,6 @@ void CMD_SelectAll()
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->frob_range(0, total-1, BOP_ADD);
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -136,7 +135,6 @@ void CMD_UnselectAll()
 
 	Selection_Clear();
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -160,7 +158,6 @@ void CMD_InvertSelection()
 
 	edit.Selected->frob_range(0, total-1, BOP_TOGGLE);
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -549,7 +546,6 @@ static void ACT_SelectBox_release(void)
 	else
 		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -575,7 +571,6 @@ static void ACT_Drag_release(void)
 
 	edit.drag_single_obj = -1;
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -620,7 +615,6 @@ static void ACT_Click_release(void)
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -751,7 +745,7 @@ void CMD_ACT_Drag()
 
 	edit.drag_single_obj = -1;
 
-	UpdateHighlight();
+	RedrawMap();
 }
 
 
@@ -964,7 +958,6 @@ void CMD_GoToCamera()
 
 	grid.CenterMapAt(x, y);
 
-	UpdateHighlight();
 	RedrawMap();
 }
 

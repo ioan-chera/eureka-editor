@@ -394,7 +394,6 @@ void GoToSelection()
 		grid.AdjustScale(+1);
 	}
 
-	UpdateHighlight();
 	RedrawMap();
 }
 

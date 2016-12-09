@@ -977,8 +977,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 
-	RedrawMap();
-
 	main_win->UpdateTotals();
 	main_win->UpdateGameInfo();
 	main_win->InvalidatePanelObj();
@@ -1005,6 +1003,8 @@ void LoadLevel(Wad_file *wad, const char *level)
 			M_DefaultUserState();
 		}
 	}
+
+	RedrawMap();
 }
 
 

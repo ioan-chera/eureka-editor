@@ -441,7 +441,6 @@ static void EV_EnterWindow()
 	if (Fl::focus() != foc)
 		foc->take_focus();
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -454,7 +453,6 @@ static void EV_LeaveWindow()
 	if (edit.action == ACT_DRAW_LINE)
 		Editor_ClearAction();
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -486,8 +484,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_DRAW_LINE)
 	{
-		UpdateHighlight();
-		main_win->canvas->redraw();
+		RedrawMap();
 		return;
 	}
 

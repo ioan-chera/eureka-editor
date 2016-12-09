@@ -108,6 +108,8 @@ void RedrawMap()
 	if (! main_win)
 		return;
 
+	UpdateHighlight();
+
 	if (edit.render3d)
 		main_win->render->redraw();
 	else
@@ -354,7 +356,6 @@ void Editor_ChangeMode(char mode_char)
 		Selection_Clear();
 	}
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -979,10 +980,8 @@ void CMD_LastSelection()
 	if (changed_mode)
 		GoToSelection();
 
-	UpdateHighlight();
 	RedrawMap();
 }
-
 
 
 //------------------------------------------------------------------------
@@ -1251,7 +1250,6 @@ bool Editor_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
 	{
 		edit.render3d = atoi(tokens[1]);
-		UpdateHighlight();
 		RedrawMap();
 		return true;
 	}

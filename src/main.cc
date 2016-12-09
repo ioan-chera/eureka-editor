@@ -687,7 +687,7 @@ const char * Main_FileOpFolder()
 
 void Main_Loop()
 {
-	UpdateHighlight();
+	RedrawMap();
 
 	for (;;)
 	{

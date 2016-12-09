@@ -1189,7 +1189,7 @@ success:
 	edit.highlight.clear();
 	edit.split_line.clear();
 
-	UpdateHighlight();
+	RedrawMap();
 }
 
 

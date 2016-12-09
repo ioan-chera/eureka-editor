@@ -2086,17 +2086,17 @@ void Render3D_Enable(bool _enable)
 
 	edit.render3d = _enable;
 
-	// FIXME : this is a workaround, when coming out of the 3D mode
-	// the UpdateHighlight() code will use stale mouse coordinates.
-	edit.pointer_in_window = false;
-
 	// give keyboard focus to the appropriate large widget
 	if (edit.render3d)
+	{
 		Fl::focus(main_win->render);
+	}
 	else
+	{
 		Fl::focus(main_win->canvas);
+		main_win->canvas->PointerPos();
+	}
 
-	UpdateHighlight();
 	RedrawMap();
 }
 

@@ -761,7 +761,6 @@ begin_drawing:
 		ConvertSelection(&sel, edit.Selected);
 	}
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
@@ -825,7 +824,6 @@ static void Insert_Sector()
 
 	edit.Selected->set(NumSectors - 1);
 
-	UpdateHighlight();
 	RedrawMap();
 }
 
