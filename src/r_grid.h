@@ -114,8 +114,8 @@ public:
 	static const char * grid_options();
 
 private:
-	void DoSetGrid();
-	void DoSetScale();
+	void DoSetShown(bool   new_shown);
+	void DoSetScale(double new_scale);
 
 private:
 	static const double scale_values[];

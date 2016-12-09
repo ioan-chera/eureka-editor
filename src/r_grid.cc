@@ -97,9 +97,8 @@ void Grid_State_c::MoveTo(double x, double y)
 
 	if (main_win)
 	{
-		main_win->canvas->PointerPos();
-
 		main_win->scroll->AdjustPos();
+		main_win->canvas->PointerPos();
 
 		RedrawMap();
 	}
@@ -261,8 +260,11 @@ void Grid_State_c::ScaleFromWidget(int i)
 
 	Scale = scale_values[i];
 
-	if (main_win)
-		main_win->scroll->AdjustPos();
+	if (! main_win)
+		return;
+
+	main_win->scroll->AdjustPos();
+	main_win->canvas->PointerPos();
 
 	RedrawMap();
 }
@@ -309,7 +311,7 @@ void Grid_State_c::StepFromWidget(int i)
 		step = grid_values[i];
 	}
 
-	if (grid_hide_in_free_mode && snap != shown)
+	if (grid_hide_in_free_mode)
 		SetSnap(shown);
 
 	RedrawMap();
@@ -414,96 +416,89 @@ void Grid_State_c::AdjustScale(int delta)
 	if (result < 0)
 		return;
 
-	ScaleFromWidget(result);
-
 	if (main_win)
-	{
 		main_win->info_bar->SetScale(result);
-		main_win->scroll->AdjustPos();
-	}
+
+	ScaleFromWidget(result);
 }
 
 
-void Grid_State_c::DoSetScale()
+void Grid_State_c::DoSetScale(double new_scale)
 {
-	if (! main_win)
-		return;
+	int index = 10;  // meh
 
 	for (int i = NUM_SCALE_VALUES-1 ; i >= 0 ; i--)
 	{
-		float ratio = scale_values[i] / Scale;
+		float ratio = scale_values[i] / new_scale;
 
 		if (ratio > 0.99 && ratio < 1.01)
 		{
-			main_win->info_bar->SetScale(i);
-			main_win->scroll->AdjustPos();
-
-			return;
+			index = i;
+			break;
 		}
 	}
 
-	int index = 10;  //meh
-
 	Scale = scale_values[index];
 
-	main_win->info_bar->SetScale(index);
-	main_win->scroll->AdjustPos();
+	if (main_win)
+	{
+		main_win->info_bar->SetScale(index);
+
+		main_win->scroll->AdjustPos();
+		main_win->canvas->PointerPos();
+
+		RedrawMap();
+	}
 }
 
 
-void Grid_State_c::DoSetGrid()
+void Grid_State_c::DoSetShown(bool new_value)
 {
+	shown = new_value;
+
 	if (! main_win)
 		return;
 
 	if (! shown)
 	{
 		main_win->info_bar->SetGrid(0);
+		RedrawMap();
 		return;
 	}
 
-	// find the step
+	// update the info-bar
 	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
 	{
 		if (grid_values[i] == step)
 		{
 			main_win->info_bar->SetGrid(i);
-			return;
+			break;
 		}
 	}
 
-	// bad step?
-	Init();
+	RedrawMap();
 }
 
 
 void Grid_State_c::SetShown(bool enable)
 {
-	shown = enable;
+	DoSetShown(enable);
 
-	if (grid_hide_in_free_mode && shown != snap)
-		SetSnap(shown);
-
-	DoSetGrid();
-
-	RedrawMap();
+	if (grid_hide_in_free_mode)
+		SetSnap(enable);
 }
 
 void Grid_State_c::ToggleShown()
 {
-	shown = !shown;
-
-	if (grid_hide_in_free_mode && shown != snap)
-		SetSnap(shown);
-
-	DoSetGrid();
-
-	RedrawMap();
+	SetShown(!shown);
 }
 
 
 void Grid_State_c::SetSnap(bool enable)
 {
+	if (snap == enable)
+		return;
+
 	snap = enable;
 
 	if (grid_hide_in_free_mode && snap != shown)
@@ -512,7 +507,7 @@ void Grid_State_c::SetSnap(bool enable)
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
 
-	UpdateHighlight();
+	RedrawMap();
 }
 
 void Grid_State_c::ToggleSnap()
@@ -533,13 +528,10 @@ void Grid_State_c::NearestScale(double want_scale)
 			break;
 	}
 
-	ScaleFromWidget(best);
-
 	if (main_win)
-	{
 		main_win->info_bar->SetScale(best);
-		main_win->scroll->AdjustPos();
-	}
+
+	ScaleFromWidget(best);
 }
 
 
@@ -552,23 +544,23 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		grid.MoveTo(x, y);
 
-		grid.Scale = atof(tokens[3]);
+		double new_scale = atof(tokens[3]);
 
-		grid.DoSetScale();
+		grid.DoSetScale(new_scale);
 
 		RedrawMap();
-
 		return true;
 	}
 
 	if (strcmp(tokens[0], "grid") == 0 && num_tok >= 4)
 	{
-		grid.shown = atoi(tokens[1]) ? true : false;
-		grid.step  = atoi(tokens[3]);
+		bool t_shown = atoi(tokens[1]) ? true : false;
+
+		grid.step = atoi(tokens[3]);
 
 		// tokens[2] was grid.mode, currently unused
 
-		grid.DoSetGrid();
+		grid.DoSetShown(t_shown);
 
 		RedrawMap();
 
