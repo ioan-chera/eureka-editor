@@ -129,22 +129,22 @@ static void edit_do_redo(Fl_Widget *w, void * data)
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Cut", "/MENU");
+	ExecuteCommand("Clipboard_Cut");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Copy", "/MENU");
+	ExecuteCommand("Clipboard_Copy");
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Clipboard_Paste", "/MENU");
+	ExecuteCommand("Clipboard_Paste");
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Delete", "/MENU");
+	ExecuteCommand("Delete");
 }
 
 static void edit_do_select_all(Fl_Widget *w, void * data)
@@ -169,7 +169,7 @@ static void edit_do_last_sel(Fl_Widget *w, void * data)
 
 static void edit_do_op_menu(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("OperationMenu", "/MENU");
+	ExecuteCommand("OperationMenu");
 }
 
 static void edit_do_move(Fl_Widget *w, void * data)
@@ -189,12 +189,12 @@ static void edit_do_rotate(Fl_Widget *w, void * data)
 
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Mirror", "horiz", "/MENU");
+	ExecuteCommand("Mirror", "horiz");
 }
 
 static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Mirror", "vert", "/MENU");
+	ExecuteCommand("Mirror", "vert");
 }
 
 

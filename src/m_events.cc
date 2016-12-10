@@ -453,6 +453,7 @@ static void EV_LeaveWindow()
 	if (edit.action == ACT_DRAW_LINE)
 		Editor_ClearAction();
 
+	// this will update (disable) any current highlight
 	RedrawMap();
 }
 
