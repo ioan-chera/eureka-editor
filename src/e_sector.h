@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -74,8 +74,8 @@ public:
 	// only one of them is returned.  If there are none, returns -1.
 	int NeighboringSector() const;
 
-	// check if an island (faces_outward is true) lies inside a sector.
-	// sector, returning the sector number if true, otherwise -1.
+	// check if an island (faces_outward is true) lies inside a sector,
+	// returning the sector number if true, otherwise -1.
 	int FacesSector() const;
 
 	// return all the sectors which the lineloop faces

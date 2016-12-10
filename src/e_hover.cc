@@ -847,14 +847,13 @@ static void get_cur_thing(Close_obj& closest, float x, float y)
 		int tx = Things[n]->x;
 		int ty = Things[n]->y;
 
-		// Filter out things that are farther than <max_radius> units away.
+		// filter out things that are outside the search bbox
 		if (tx < lx || tx > hx || ty < ly || ty > hy)
 			continue;
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		// So how far is that thing exactly ?
-
+		// so how far is that thing exactly ?
 		int thing_radius = info->radius + mapslack;
 
 		if (x < tx - thing_radius || x > tx + thing_radius ||
@@ -891,6 +890,10 @@ static void get_cur_vertex(Close_obj& closest, float x, float y)
 
 	float mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
+	// workaround for overly zealous highlighting when zoomed in far
+	if (grid.Scale >= 15.0) mapslack *= 0.7;
+	if (grid.Scale >= 31.0) mapslack *= 0.5;
+
 	int lx = floor(x - mapslack);
 	int ly = floor(y - mapslack);
 	int hx =  ceil(x + mapslack);
@@ -901,11 +904,14 @@ static void get_cur_vertex(Close_obj& closest, float x, float y)
 		int vx = Vertices[n]->x;
 		int vy = Vertices[n]->y;
 
-		/* Filter out objects that are farther than <radius> units away. */
+		// filter out vertices that are outside the search bbox
 		if (vx < lx || vx > hx || vy < ly || vy > hy)
 			continue;
 
 		double dist = hypot(x - vx, y - vy);
+
+		if (dist > mapslack)
+			continue;
 
 		// use "<=" because if there are superimposed vertices, we want
 		// to return the highest-numbered one.
