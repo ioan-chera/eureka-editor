@@ -722,6 +722,9 @@ int EV_HandleEvent(int event)
 
 static bool no_operation_cfg;
 
+// the value of edit.highlight before the menu was opened
+static Objid op_saved_highlight;
+
 
 typedef struct
 {
@@ -735,6 +738,9 @@ typedef struct
 static void operation_callback_func(Fl_Widget *w, void *data)
 {
 	operation_command_t *info = (operation_command_t *)data;
+
+	// restore the highlight object
+	edit.highlight = op_saved_highlight;
 
 	// TODO : support more than 4 parameters
 
@@ -909,6 +915,12 @@ void CMD_OperationMenu()
 	// positions the menu to point at that item, which can be annoying
 	// especially if the last command was destructive.
 	menu->value((const Fl_Menu_Item *)NULL);
+
+	// save the highlight object, because the pop-up menu will cause
+	// an FL_LEAVE event on the canvas which resets the highlight.
+	op_saved_highlight = edit.highlight;
+
+	// TODO : save the 3D highlight too
 
 	menu->popup();
 }
