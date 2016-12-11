@@ -677,11 +677,11 @@ bool lineloop_c::LookForIsland()
 {
 	// ALGORITHM:
 	//    Iterate over all lines which lie within the bounding box of
-	//    the current path (but not _in_ the current path).
+	//    the current path (but not *on* the current path).
 	//
-	//    Use OppositeLineDef() to find starting lines, and trace them
-	//    (tracing is necessary because in certain shapes, the opposite
-	//    lines will be part of the island too).
+	//    Use OppositeLineDef() to find starting lines, and trace them.
+	//    Tracing is necessary because in certain shapes the opposite
+	//    lines will be part of the island too.
 	//
 	// Returns: true if found one, false otherwise.
 	//
@@ -764,19 +764,17 @@ void lineloop_c::FindIslands()
 	// Look for "islands", closed linedef paths that lie completely
 	// inside the area, i.e. not connected to the main path.
 	//
-	//  Repeat these steps until no more islands are found.
-	//  (This is needed to handle e.g. a big room full of pillars,
-	//   since the pillars in the middle won't "see" the outer sector
-	//   until the neighboring pillars are added).
+	// Repeat these steps until no more islands are found.
+	// (This is needed to handle e.g. a big room full of pillars,
+	// since the pillars in the middle won't "see" the outer sector
+	// until the neighboring pillars are added).
 	//
 	// Example: the two pillars at the start of MAP01 of DOOM 2.
+	//
 
 	// use a counter for safety
-	for (int loop = 200 ; loop >= 0 ; loop--)
+	for (int loop = 0 ; loop < 200 ; loop++)
 	{
-		if (loop == 0)
-			BugError("Infinite loop in FindIslands!\n");
-
 		if (! LookForIsland())
 			break;
 	}
@@ -807,7 +805,7 @@ void lineloop_c::Dump() const
 // update the side on a single linedef, using the given sector
 // reference, and creating a new sidedef if necessary.
 //
-static void DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
+void lineloop_c::DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
@@ -853,19 +851,16 @@ static void DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
 }
 
 
-void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip)
+void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 {
-	for (unsigned int k = 0 ; k < loop.lines.size() ; k++)
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int ld   = loop.lines[k];
-		int side = loop.sides[k];
-
-		DoAssignSector(ld, side, new_sec, flip);
+		DoAssignSector(lines[k], sides[k], new_sec, flip);
 	}
 
-	for (unsigned int i = 0 ; i < loop.islands.size() ; i++)
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
 	{
-		AssignSectorToLoop(* loop.islands[i], new_sec, flip);
+		islands[i]->AssignSector(new_sec, flip);
 	}
 }
 
@@ -925,7 +920,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 
 	loop.GetAllSectors(&unused);
 
-	AssignSectorToLoop(loop, new_sec, flip);
+	loop.AssignSector(new_sec, flip);
 
 	FlipLineDefGroup(flip);
 

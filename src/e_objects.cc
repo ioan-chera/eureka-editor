@@ -188,7 +188,7 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 			int sec_num = loop.IslandSector();
 			if (sec_num >= 0)
 			{
-				AssignSectorToLoop(loop, sec_num, flip);
+				loop.AssignSector(sec_num, flip);
 				did_outer = true;
 			}
 		}
@@ -221,7 +221,7 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 			else
 				Sectors[new_sec]->SetDefaults();
 
-			AssignSectorToLoop(loop, new_sec, flip);
+			loop.AssignSector(new_sec, flip);
 		}
 	}
 }
@@ -390,13 +390,13 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 		// ensure the new linedef usually ends at v2 (the final vertex)
 		if (left_total < right_total)
 		{
-			AssignSectorToLoop(keep_loop, right_front, flip);
-			AssignSectorToLoop( mod_loop, new_sec,     flip);
+			keep_loop.AssignSector(right_front, flip);
+			 mod_loop.AssignSector(new_sec,     flip);
 		}
 		else
 		{
-			AssignSectorToLoop( mod_loop, new_sec,     flip);
-			AssignSectorToLoop(keep_loop, right_front, flip);
+			 mod_loop.AssignSector(new_sec,     flip);
+			keep_loop.AssignSector(right_front, flip);
 		}
 
 		return;
@@ -430,7 +430,7 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 		else
 			Sectors[new_sec]->RawCopy(Sectors[model]);
 
-		AssignSectorToLoop(loop, new_sec, flip);
+		loop.AssignSector(new_sec, flip);
 		return;
 	}
 
@@ -458,7 +458,7 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 			int sec_num = (front >= 0) ? front : loop.IslandSector();
 			if (sec_num >= 0)
 			{
-				AssignSectorToLoop(loop, sec_num, flip);
+				loop.AssignSector(sec_num, flip);
 			}
 		}
 		else
@@ -475,7 +475,7 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 			else
 				Sectors[new_sec]->RawCopy(Sectors[model]);
 
-			AssignSectorToLoop(loop, new_sec, flip);
+			loop.AssignSector(new_sec, flip);
 		}
 	}
 }

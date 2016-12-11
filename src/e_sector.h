@@ -87,19 +87,26 @@ public:
 	// return all the sectors which the lineloop faces
 	void GetAllSectors(selection_c *list) const;
 
+	// assign a new sector to the whole loop, including islands.
+	// the 'flip' parameter will contain lines that should be flipped
+	// afterwards (to ensure it has a valid right side).
+	// 'new_sec' MUST be a valid sector number.
+	void AssignSector(int new_sec, selection_c& flip);
+
 	void Dump() const;
 
-public:
+private:
 	bool LookForIsland();
 
 	void CalcBounds(int *x1, int *y1, int *x2, int *y2) const;
+
+	void DoAssignSector(int ld, int side, int new_sec, selection_c& flip);
 };
 
 
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new = false);
 
 void AssignSectorToSpace(int map_x, int map_y, int new_sec, bool model_from_neighbor = false);
-void AssignSectorToLoop(lineloop_c& loop, int new_sec, selection_c& flip);
 
 void SectorsAdjustLight(int delta);
 
