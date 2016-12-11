@@ -464,7 +464,7 @@ int lineloop_c::NeighboringSector() const
 }
 
 
-int lineloop_c::FacesSector() const
+int lineloop_c::IslandSector() const
 {
 	// test is only valid for islands
 	if (! faces_outward)
@@ -476,17 +476,19 @@ int lineloop_c::FacesSector() const
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		int opp_side;
-		int opp = OppositeLineDef(lines[i], sides[i], &opp_side);
+		int opp_ld = OppositeLineDef(lines[i], sides[i], &opp_side);
 
-		// can see "the void" : outside of map
-		if (opp < 0)
-			return -1;
-
-		// part of the island?
-		if (get_just_line(opp))
+		// can see "the void" ?
+		// this means the geometry around here is broken, but for
+		// the usages of this method we can ignore it.
+		if (opp_ld < 0)
 			continue;
 
-		return LineDefs[opp]->WhatSector(opp_side);
+		// part of the island itself?
+		if (get_just_line(opp_ld))
+			continue;
+
+		return LineDefs[opp_ld]->WhatSector(opp_side);
 	}
 
 	return -1;

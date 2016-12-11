@@ -69,6 +69,7 @@ public:
 	// checks if all lines in the loop are facing the same sector.
 	// when true, returns that sector via 'sec_num' (if not null).
 	// the 'sec_num' value may be -1 if all lines are "bare".
+	// NOTE : does not test the islands.
 	bool SameSector(int *sec_num = NULL) const;
 
 	// true if all lines in the loop are facing nothing.
@@ -79,9 +80,9 @@ public:
 	// only one of them is returned.  If there are none, returns -1.
 	int NeighboringSector() const;
 
-	// check if an island (faces_outward is true) lies inside a sector,
-	// returning the sector number if true, otherwise -1.
-	int FacesSector() const;
+	// check if an island lies inside a sector, returning the sector
+	// number if true, otherwise -1.
+	int IslandSector() const;
 
 	// return all the sectors which the lineloop faces
 	void GetAllSectors(selection_c *list) const;

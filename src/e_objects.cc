@@ -171,10 +171,9 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 	right_ok = right_ok && right_loop.AllBare();
 	 left_ok =  left_ok &&  left_loop.AllBare();
 
-	// check if one of the loops is OK and faces outward.
-	// in that case, we just make the island part of the surrounding
-	// sector (i.e. we DON'T put a new sector in the inside area).
-	// [[ Except when new island contains an island ! ]]
+	// check if one of the loops faces outward (an island), in
+	// which case we just make the island part of the surrounding
+	// sector (i.e. DON'T put a new sector on the inside).
 
 	bool did_outer = false;
 
@@ -186,8 +185,7 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 
 		if (ok && loop.faces_outward)
 		{
-			int sec_num = loop.FacesSector();
-
+			int sec_num = loop.IslandSector();
 			if (sec_num >= 0)
 			{
 				AssignSectorToLoop(loop, sec_num, flip);
@@ -197,8 +195,6 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 	}
 
 	// otherwise try to create new sector in the inside area
-
-	// TODO: CONFIG ITEM 'auto_insert_sector'
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
@@ -359,8 +355,6 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 		// the SPLITTING case....
 		DebugPrintf("SPLITTING sector #%d\n", right_front);
 
-		// TODO: CONFIG ITEM 'auto_split'
-
 		// ensure original sector is OK
 		lineloop_c orig_loop;
 
@@ -444,8 +438,6 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 	// the EXTENDING case....
 	DebugPrintf("EXTENDING....\n");
 
-	// TODO: CONFIG ITEM 'auto_extend'
-
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
 		lineloop_c& loop = (pass == 0) ? right_loop : left_loop;
@@ -458,7 +450,18 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 		if (! ok)
 			continue;
 
-		if (! loop.faces_outward)
+		if (loop.faces_outward)
+		{
+			// we are extending an island, see if that island lies
+			// within an existing sector
+
+			int sec_num = (front >= 0) ? front : loop.IslandSector();
+			if (sec_num >= 0)
+			{
+				AssignSectorToLoop(loop, sec_num, flip);
+			}
+		}
+		else
 		{
 			loop.FindIslands();
 DebugPrintf("ISLANDS = %u\n", loop.islands.size());
@@ -473,19 +476,6 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 				Sectors[new_sec]->RawCopy(Sectors[model]);
 
 			AssignSectorToLoop(loop, new_sec, flip);
-		}
-		else
-		{
-			// when front >= 0, we can be certain we are extending an
-			// island within an existing sector.  When < 0, we check
-			// whether the loop can see an outer sector.
-
-			int sec_num = (front >= 0) ? front : loop.FacesSector();
-
-			if (sec_num >= 0)
-			{
-				AssignSectorToLoop(loop, sec_num, flip);
-			}
 		}
 	}
 }
