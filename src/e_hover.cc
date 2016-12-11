@@ -688,7 +688,7 @@ static Objid NearestLineDef(float x, float y)
 		}
 	}
 
-	if (best > 0)
+	if (best >= 0)
 		return Objid(OBJ_LINEDEFS, best);
 
 	// none found
@@ -750,7 +750,7 @@ static Objid NearestSplitLine(int x, int y, int ignore_vert)
 		}
 	}
 
-	if (best > 0)
+	if (best >= 0)
 		return Objid(OBJ_LINEDEFS, best);
 
 	// none found
@@ -851,7 +851,7 @@ static Objid NearestThing(float x, float y)
 		}
 	}
 
-	if (best > 0)
+	if (best >= 0)
 		return Objid(OBJ_THINGS, best);
 
 	// none found
@@ -903,7 +903,7 @@ static Objid NearestVertex(float x, float y)
 		}
 	}
 
-	if (best > 0)
+	if (best >= 0)
 		return Objid(OBJ_VERTICES, best);
 
 	// none found
