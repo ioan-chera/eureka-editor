@@ -46,6 +46,9 @@ General:
 
 -  improved ability to highlight/select very short linedefs
 
+-  improved insertion of sectors, less "area not closed" errors
+
+
 
 Games and Ports:
 

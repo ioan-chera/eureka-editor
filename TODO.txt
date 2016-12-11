@@ -9,6 +9,14 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+++  improve the FindAllCrossPoints algorithm to get the final
+    result to match what is drawn (ESPECIALLY wrt to vertices)
+
+
+!!!  adding a line to/from an island to the outer loop
+     causes the island to be FILLED
+
+
 Browser
 +  when opened by a click, jump to the texture/thing/etc clicked on
 
@@ -16,16 +24,6 @@ Browser
 sector splitting: when choosing which side (left or right) will
 become NEW sector, prefer the loop which DOES NOT include any
 self-referencing linedefs
-
-
-Operation menu:
-
-+  ensure ops that use the highlight still function, may need to
-   grab the highlight BEFORE the Op-menu was opened
-
--  check /MENU flag, pass it on to the executed command
-
--  give operation commands an /OP flag?
 
 
 BSP:
@@ -56,13 +54,13 @@ IDEA: have a "chocolate" source port
 
 
 
-
 Documentation
 -------------
 
 +  improve Wiki install
-   -  default font should be larger
-   -  better editing help
+   -  improve editing page
+   -  CSS for editing help
+   -  make used links same as unused links
 
 +  information on each binding command, parameters etc..
 
@@ -91,8 +89,14 @@ Editing
 
 +  when get "Area not closed" error, show place where it fails
 
-+  cannot auto-split close to a vertex?
-   it should be allowed when zoomed in far
++  review auto-split when line is close to a vertex
+   [ take SCALE into account ]
+
++  better default texture of new lines
+   (e.g. check drawing_from vertex)
+
++  crossing lines while drawing sometimes mucks up?
+   e.g. drawing over the stairs in MAP01
 
 
 ______________________________________________________________________
@@ -113,9 +117,6 @@ General
 
 Editing
 -------
-
-+  crossing lines while drawing sometimes mucks up?
-   e.g. drawing over the stairs in MAP01
 
 +  improve X texture alignment
    [ e.g. picking "wrong" or not-optimal line ]
@@ -161,6 +162,8 @@ General
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures
 
+
+IDEA: a sector-rendering mode for sound propagation
 
 IDEA: a toolbar
 
