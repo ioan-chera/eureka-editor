@@ -872,13 +872,15 @@ void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 
 
 //
-// change the closed sector at the pointer
-//
-// "sector" here really means a bunch of sidedefs that all face
+// the "space" here really means a bunch of sidedefs that all face
 // inward to the current area under the mouse cursor.
 //
-void AssignSectorToSpace(int map_x, int map_y, int new_sec,
-                         bool model_from_neighbor)
+// the 'new_sec' can be < 0 to create a new sector.
+//
+// the 'model' is what properties to use for a new sector, < 0 means
+// look for a neighboring sector to copy.
+//
+bool AssignSectorToSpace(int map_x, int map_y, int new_sec, int model)
 {
 	int ld, side;
 
@@ -888,7 +890,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 	{
 		Beep("Area is not closed");
 		DebugPrintf("Area is not closed (can see infinity)\n");
-		return;
+		return false;
 	}
 
 	lineloop_c loop;
@@ -897,7 +899,7 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 	{
 		Beep("Area is not closed");
 		DebugPrintf("Area is not closed (tracing a loop failed)\n");
-		return;
+		return false;
 	}
 
 	// FIXME: should look in other directions for an inward line loop
@@ -906,22 +908,27 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 	{
 		Beep("Line loop faces outward");
 		DebugPrintf("Line loop faces outward\n");
-		return;
+		return false;
 	}
 
 	loop.FindIslands();
 
-	if (model_from_neighbor)
-	{
-		int model = loop.NeighboringSector();
+	// OK
 
-		if (model >= 0)
-			Sectors[new_sec]->RawCopy(Sectors[model]);
-		else
+	if (new_sec < 0)
+	{
+		new_sec = BA_New(OBJ_SECTORS);
+
+		if (model < 0)
+			model = loop.NeighboringSector();
+
+		if (model < 0)
 			Sectors[new_sec]->SetDefaults();
+		else
+			Sectors[new_sec]->RawCopy(Sectors[model]);
 	}
 
-	selection_c flip(OBJ_LINEDEFS);
+	selection_c   flip(OBJ_LINEDEFS);
 	selection_c unused(OBJ_SECTORS);
 
 	loop.GetAllSectors(&unused);
@@ -940,6 +947,8 @@ void AssignSectorToSpace(int map_x, int map_y, int new_sec,
 	}
 
 	DeleteObjects(&unused);
+
+	return true;
 }
 
 //--- editor settings ---

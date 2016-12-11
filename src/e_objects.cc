@@ -736,21 +736,16 @@ static void Insert_Sector()
 	BA_Begin();
 	BA_Message("added new sector");
 
-	int new_sec = BA_New(OBJ_SECTORS);
-
-	if (model >= 0)
-	{
-		Sectors[new_sec]->RawCopy(Sectors[model]);
-	}
-
-	AssignSectorToSpace(edit.map_x, edit.map_y, new_sec, model < 0);
+	bool ok = AssignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
 
 	BA_End();
 
 	// select the new sector
-	Selection_Clear();
-
-	edit.Selected->set(NumSectors - 1);
+	if (ok)
+	{
+		Selection_Clear();
+		edit.Selected->set(NumSectors - 1);
+	}
 
 	RedrawMap();
 }
