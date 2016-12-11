@@ -682,8 +682,8 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 bool lineloop_c::LookForIsland()
 {
 	// ALGORITHM:
-	//    Iterate over all lines which lie within the bounding box of
-	//    the current path (but not *on* the current path).
+	//    Iterate over all lines within the bounding box of the
+	//    current path (but not *on* the current path).
 	//
 	//    Use OppositeLineDef() to find starting lines, and trace them.
 	//    Tracing is necessary because in certain shapes the opposite
@@ -692,16 +692,10 @@ bool lineloop_c::LookForIsland()
 	// Returns: true if found one, false otherwise.
 	//
 
-	// FIXME!!!  find isolated linedefs
-
 	// calc bounding box
-	int bb_x1, bb_y1, bb_x2, bb_y2;
+	int bbox_x1, bbox_y1, bbox_x2, bbox_y2;
 
-	CalcBounds(&bb_x1, &bb_y1, &bb_x2, &bb_y2);
-
-	// cut me some slack, dude
-	bb_x1--;  bb_y1--;
-	bb_x2++;  bb_y2++;
+	CalcBounds(&bbox_x1, &bbox_y1, &bbox_x2, &bbox_y2);
 
 	int count = 0;
 
@@ -714,11 +708,11 @@ bool lineloop_c::LookForIsland()
 		int x2 = L->End()->x;
 		int y2 = L->End()->y;
 
-		if (MAX(x1, x2) < bb_x1 || MIN(x1, x2) > bb_x2 ||
-		    MAX(y1, y2) < bb_y1 || MIN(y1, y2) > bb_y2)
+		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
+		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
 			continue;
 
-		// ouch, this is gonna be SLOW : O(n^2) on # lines
+		// ouch, this is gonna be SLOW
 
 		for (int where = 0 ; where < 2 ; where++)
 		{
@@ -730,10 +724,10 @@ bool lineloop_c::LookForIsland()
 			if (opp < 0)
 				continue;
 
-			bool ld_in_path  = get(ld,  ld_side);
+			bool  ld_in_path = get(ld,   ld_side);
 			bool opp_in_path = get(opp, opp_side);
 
-			// nothing to do when both (or neither) are in path
+			// need one in the current loop, and the other NOT in it
 			if (ld_in_path == opp_in_path)
 				continue;
 
@@ -743,6 +737,20 @@ ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 #endif
 
 			lineloop_c *island = new lineloop_c;
+
+			// treat isolated linedefs like islands
+			if (! ld_in_path &&
+				Vertex_HowManyLineDefs(LineDefs[ld]->start) == 1 &&
+				Vertex_HowManyLineDefs(LineDefs[ld]->end)   == 1)
+			{
+				island->push_back(ld, SIDE_RIGHT);
+				island->push_back(ld, SIDE_LEFT);
+
+				islands.push_back(island);
+				count++;
+
+				continue;
+			}
 
 			bool ok;
 
