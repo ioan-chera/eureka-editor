@@ -128,6 +128,7 @@ private:
 
 	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2, bool reverse = false);
 	void DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawSplitPoint(int map_x, int map_y);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
 	void DrawSprite(int map_x, int map_y, Img_c *img, float scale);
@@ -143,6 +144,9 @@ private:
 	void SelboxDraw();
 
 	void DragDelta(int *dx, int *dy);
+
+	static void draw_crossing_point(int map_x, int map_y, double dist,
+									int v, int ld, void *data);
 
 	// convert screen coordinates to map coordinates
 	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }

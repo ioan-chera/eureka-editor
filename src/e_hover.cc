@@ -992,27 +992,65 @@ void GetSplitLineForDangler(Objid& o, int v_num)
 }
 
 
+static void find_closest_cross_handler(int x, int y, double dist, int v, int ld, void *data)
+{
+	cross_state_t *cross = (cross_state_t *)data;
+
+	if (dist >= cross->distance)
+		return;
+
+	cross->distance = dist;
+
+	if (v >= 0)
+	{
+		cross->vert = v;
+		cross->line = -1;
+
+		cross->x = x;
+		cross->y = y;
+
+	}
+	else
+	{
+		cross->vert = -1;
+		cross->line = ld;
+
+		cross->x = x;
+		cross->y = y;
+	}
+}
+
+
 bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 {
+	// TODO : use FindAllCrossPoints(), remove the duplication
+
 	SYS_ASSERT(v1 != v2);
 
 	cross->vert = -1;
 	cross->line = -1;
+	cross->distance = 9e9;
 
 	const Vertex *VA = Vertices[v1];
 	const Vertex *VB = Vertices[v2];
 
-	int x1 = VA->x;
-	int y1 = VA->y;
-	int x2 = VB->x;
-	int y2 = VB->y;
+	FindAllCrossPoints(VA->x, VA->y, v1, VB->x, VB->y, v2,
+					   find_closest_cross_handler, cross);
 
+	return (cross->vert >= 0) || (cross->line >= 0);
+}
+
+
+void FindAllCrossPoints(int x1, int y1, int possible_v1,
+                        int x2, int y2, int possible_v2,
+						crossing_func_t func, void *data)
+{
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
-	// same coords?  (generally should not happen, handle it anyway)
+	// same coords?  (sanity check)
 	if (dx == 0 && dy == 0)
-		return false;
+		return;
 
 	double length = sqrt(dx*dx + dy*dy);
 
@@ -1024,41 +1062,24 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 	close_dist = CLAMP(1.2, close_dist, 24.0);
 
-	double best_dist = 9e9;
-
 	/* try all vertices */
 
 	for (int v = 0 ; v < NumVertices ; v++)
 	{
-		if (v == v1 || v == v2)
+		if (v == possible_v1 || v == possible_v2)
 			continue;
 
 		const Vertex * VC = Vertices[v];
 
 		// ignore vertices ar same coordinates as v1 or v2
-		if (VC->x == VA->x && VC->y == VA->y) continue;
-		if (VC->x == VB->x && VC->y == VB->y) continue;
+		if (VC->Matches(x1, y1) || VC->Matches(x2, y2))
+			continue;
 
 		// is this vertex sitting on the line?
-#if 0
-		if (x1 == x2)
-		{
-			if (VC->x != x1)
-				continue;
-		}
-		else if (y1 == y2)
-		{
-			if (VC->y != y1)
-				continue;
-		}
-		else
-#endif
-		{
-			double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
 
-			if (fabs(perp) > close_dist)
-				continue;
-		}
+		if (fabs(perp) > close_dist)
+			continue;
 
 		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
 
@@ -1067,16 +1088,7 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 		// yes it is
 
-		if (along < best_dist)
-		{
-			best_dist = along;
-
-			cross->vert = v;
-			cross->line = -1;
-
-			cross->x = VC->x;
-			cross->y = VC->y;
-		}
+		(* func)(VC->x, VC->y, along, v, -1, data);
 	}
 
 
@@ -1086,13 +1098,13 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 	{
 		const LineDef * L = LineDefs[ld];
 
-		// only need to handle cases where this linedef distinctly crosses
-		// the new line (i.e. start and end are clearly on opposite sides).
-
 		double lx1 = L->Start()->x;
 		double ly1 = L->Start()->y;
 		double lx2 = L->End()->x;
 		double ly2 = L->End()->y;
+
+		// only need to handle cases where this linedef distinctly crosses
+		// the new line (i.e. start and end are clearly on opposite sides).
 
 		double a = PerpDist(lx1,ly1, x1,y1, x2,y2);
 		double b = PerpDist(lx2,ly2, x1,y1, x2,y2);
@@ -1118,27 +1130,13 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 		if (along < epsilon || along > length - epsilon)
 			continue;
 
-		// OK, this linedef crosses it
-
-fprintf(stderr, "linedef #%d crosses at (%1.3f %1.3f)  along=%1.3f\n", ld, ix, iy, along);
-
 		// allow vertices to win over a nearby linedef
 		along += close_dist * 2;
 
-		if (along < best_dist)
-		{
-			best_dist = along;
+		// OK, this linedef crosses it
 
-			cross->vert = -1;
-			cross->line = ld;
-
-			cross->x = new_x;
-			cross->y = new_y;
-		}
+		(* func)(new_x, new_y, along, -1, ld, data);
 	}
-
-
-	return (cross->vert >= 0) || (cross->line >= 0);
 }
 
 //--- editor settings ---

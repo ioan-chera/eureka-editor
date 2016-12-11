@@ -26,6 +26,7 @@
 
 #include "m_events.h"
 #include "e_main.h"
+#include "e_hover.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_config.h"
@@ -1384,9 +1385,24 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
 }
 
 
+void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
+{
+	int sx = SCREENX(map_x);
+	int sy = SCREENY(map_y);
+
+	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+
+	fl_color(HI_AND_SEL_COL);
+
+	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
+}
+
+
 void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	// show how and where the line will be split
+
+	// fl_color() has been done by caller
 
 	int scr_x1 = SCREENX(map_x1);
 	int scr_y1 = SCREENY(map_y1);
@@ -1408,11 +1424,7 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
 	}
 
-	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
-
-	fl_color(HI_AND_SEL_COL);
-
-	fl_pie(scr_mx - size/2, scr_my - size/2, size, size, 0, 360);
+	DrawSplitPoint(split_x, split_y);
 }
 
 
@@ -1532,6 +1544,19 @@ void UI_Canvas::DrawCamera()
 }
 
 
+/* static */
+void UI_Canvas::draw_crossing_point(int map_x, int map_y, double dist,
+									int v, int ld, void *data)
+{
+	UI_Canvas *canvas = (UI_Canvas *)data;
+
+	if (ld >= 0 && ld == canvas->split_ld)
+		return;
+
+	canvas->DrawSplitPoint(map_x, map_y);
+}
+
+
 void UI_Canvas::DrawCurrentLine()
 {
 	if (edit.drawing_from < 0)
@@ -1548,7 +1573,12 @@ void UI_Canvas::DrawCurrentLine()
 		new_x = Vertices[highlight.num]->x;
 		new_y = Vertices[highlight.num]->y;
 	}
-	else if (split_ld < 0)
+	else if (split_ld >= 0)
+	{
+		new_x = split_x;
+		new_y = split_y;
+	}
+	else
 	{
 		fl_color(FL_GREEN);
 
@@ -1570,6 +1600,11 @@ void UI_Canvas::DrawCurrentLine()
 
 		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
 	}
+
+	// draw all the crossing points
+	FindAllCrossPoints(v->x, v->y, edit.drawing_from,
+					   new_x, new_y, highlight.valid() ? highlight.num : -1,
+					   &draw_crossing_point, this);
 }
 
 

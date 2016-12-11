@@ -61,11 +61,18 @@ typedef struct
 	int line;   // >= 0 when we hit a linedef instead
 
 	int x, y;	// coordinate of line split point
+
+	double distance;
 }
 cross_state_t;
 
+typedef void (* crossing_func_t)(int map_x, int map_y, double dist, int v, int ld, void *data);
+
 bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross);
 
+void FindAllCrossPoints(int x1, int y1, int possible_v1,
+                        int x2, int y2, int possible_v2,
+						crossing_func_t func, void *data);
 
 #endif  /* __EUREKA_X_HOVER_H__ */
 
