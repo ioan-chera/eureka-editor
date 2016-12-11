@@ -1199,6 +1199,73 @@ double AngleBetweenLines(int A, int B, int C)
 }
 
 
+bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
+						int *ld1, int *side1,
+						int *ld2, int *side2)
+{
+	// find the two linedefs that are neighbors to the new line at
+	// the second vertex (v2).  The first one (ld1) is on new_ld's
+	// right side, and the second one (ld2) is on new_ld's left side.
+
+	*ld1 = -1;
+	*ld2 = -1;
+
+	double best_angle1 =  9999;
+	double best_angle2 = -9999;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (n == new_ld)
+			continue;
+
+		const LineDef *L = LineDefs[n];
+
+		int other_v;
+
+		if (L->start == v2)
+			other_v = L->end;
+		else if (L->end == v2)
+			other_v = L->start;
+		else
+			continue;
+
+		double angle = AngleBetweenLines(v1, v2, other_v);
+
+		// overlapping lines
+		if (fabs(angle) < 0.0001)
+			return false;
+
+		if (angle < best_angle1)
+		{
+			*ld1 = n;
+			*side1 = (other_v == L->start) ? SIDE_LEFT : SIDE_RIGHT;
+			best_angle1 = angle;
+		}
+
+		if (angle > best_angle2)
+		{
+			*ld2 = n;
+			*side2 = (other_v == L->start) ? SIDE_RIGHT : SIDE_LEFT;
+			best_angle2 = angle;
+		}
+	}
+
+#if 0
+	DebugPrintf("best right: line:#%d side:%d angle:%1.2f\n",
+	        *ld1, *side1, best_angle1);
+	DebugPrintf("best left: line:#%d side:%d angle:%1.2f\n",
+	        *ld2, *side2, best_angle2);
+#endif
+
+	if (*ld1 < 0 || *ld2 < 0 || *ld1 == *ld2)
+		return false;
+
+	return true;
+}
+
+
+
+
 //  SideDef packing logic -- raw from glBSP
 #if 0
 
