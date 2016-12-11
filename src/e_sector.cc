@@ -879,6 +879,71 @@ void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 }
 
 
+static bool GetLoopForSpace(int map_x, int map_y, lineloop_c& loop)
+{
+	selection_c seen_lines(OBJ_LINEDEFS);
+
+	int ld, side;
+
+	ld = ClosestLine_CastingHoriz(map_x, map_y, &side);
+
+	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, side);
+
+	while (ld >= 0)
+	{
+		// never try this line again
+		seen_lines.set(ld);
+
+		if (! TraceLineLoop(ld, side, loop))
+		{
+			DebugPrintf("Area is not closed (tracing a loop failed)\n");
+			return false;
+		}
+
+		// not an island?  GOOD!
+		if (! loop.faces_outward)
+		{
+			return true;
+		}
+
+		DebugPrintf("  hit island\n");
+
+		// ensure we don't try any lines of this island
+		unsigned int k;
+
+		for (k = 0 ; k < loop.lines.size() ; k++)
+			seen_lines.set(loop.lines[k]);
+
+		// look for the surrounding line loop...
+		ld = -1;
+
+		for (k = 0 ; k < loop.lines.size() ; k++)
+		{
+			int new_ld;
+			int new_side;
+
+			new_ld = OppositeLineDef(loop.lines[k], loop.sides[k], &new_side);
+
+			if (new_ld < 0)
+				continue;
+
+			if (seen_lines.get(new_ld))
+				continue;
+
+			// try again...
+			ld   = new_ld;
+			side = new_side;
+
+			DebugPrintf("  trying again with line #%d, side %d\n", ld, side);
+			break;
+		}
+	}
+
+	DebugPrintf("Area is not closed (can see infinity)\n");
+	return false;
+}
+
+
 //
 // the "space" here really means a bunch of sidedefs that all face
 // inward to the current area under the mouse cursor.
@@ -890,38 +955,15 @@ void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 //
 bool AssignSectorToSpace(int map_x, int map_y, int new_sec, int model)
 {
-	int ld, side;
-
-	ld = ClosestLine_CastingHoriz(map_x, map_y, &side);
-
-	if (ld < 0)
-	{
-		Beep("Area is not closed");
-		DebugPrintf("Area is not closed (can see infinity)\n");
-		return false;
-	}
-
 	lineloop_c loop;
 
-	if (! TraceLineLoop(ld, side, loop))
+	if (! GetLoopForSpace(map_x, map_y, loop))
 	{
 		Beep("Area is not closed");
-		DebugPrintf("Area is not closed (tracing a loop failed)\n");
-		return false;
-	}
-
-	// FIXME: should look in other directions for an inward line loop
-
-	if (loop.faces_outward)
-	{
-		Beep("Line loop faces outward");
-		DebugPrintf("Line loop faces outward\n");
 		return false;
 	}
 
 	loop.FindIslands();
-
-	// OK
 
 	if (new_sec < 0)
 	{
