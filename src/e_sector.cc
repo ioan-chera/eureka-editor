@@ -548,8 +548,9 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 {
 	loop.clear();
 
-	int cur_vert;
-	int prev_vert;
+	int   cur_vert;
+	int  prev_vert;
+	int start_vert;
 
 	if (side == SIDE_RIGHT)
 	{
@@ -562,20 +563,20 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 		prev_vert = LineDefs[ld]->end;
 	}
 
-	int final_vert = prev_vert;
+	start_vert = prev_vert;
 
 #ifdef DEBUG_LINELOOP
-	DebugPrintf("TRACE PATH: line:%d  side:%d  cur:%d  final:%d\n",
-			ld, side, cur_vert, final_vert);
+	DebugPrintf("TRACE PATH: line:%d  side:%d  cur:%d  start:%d\n",
+			ld, side, cur_vert, start_vert);
 #endif
 
-	// compute the average angle
+	// compute the average angle over all the lines
 	double average_angle = 0;
 
 	// add the starting line
 	loop.push_back(ld, side);
 
-	while (cur_vert != final_vert)
+	while (cur_vert != start_vert)
 	{
 		int next_line = -1;
 		int next_vert = -1;
@@ -591,7 +592,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 		{
 			const LineDef * N = LineDefs[n];
 
-			if (N->start != cur_vert && N->end != cur_vert)
+			if (! N->TouchesVertex(cur_vert))
 				continue;
 
 			if (n == ld)
