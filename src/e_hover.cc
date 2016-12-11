@@ -615,36 +615,23 @@ int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2)
 //------------------------------------------------------------------------
 
 
-class Close_obj
+struct thing_comparer_t
 {
-public :
-	Objid  obj;
+public:
 	double distance;
 	bool   inside;
 	int    radius;
 
-	Close_obj()
+	thing_comparer_t()
 	{
-		clear();
-	}
-
-	void clear()
-	{
-		obj.clear();
 		distance = 9e9;
 		radius   = (1 << 30);
 		inside   = false;
 	}
 
-	bool operator== (const Close_obj& other) const
+	bool operator<= (const thing_comparer_t& other) const
 	{
-		return (inside == other.inside &&
-			    radius == other.radius &&
-			    distance == other.distance) ? true : false;
-	}
-
-	bool operator< (const Close_obj& other) const
-	{
+		// being inside is always better
 		if (inside && ! other.inside) return true;
 		if (! inside && other.inside) return false;
 
@@ -652,26 +639,15 @@ public :
 		if (radius < other.radius) return true;
 		if (radius > other.radius) return false;
 
-		if (distance < other.distance) return true;
-		if (distance > other.distance) return false;
-
-		return radius < other.radius;
-	}
-
-	bool operator<= (const Close_obj& other) const
-	{
-		return *this == other || *this < other;
+		return (distance <= other.distance);
 	}
 };
-
-
-extern int TestAdjoinerLineDef(int ld);
 
 
 //
 // determine which linedef is under the pointer
 //
-static void get_cur_linedef(Close_obj& closest, float x, float y)
+static Objid NearestLineDef(float x, float y)
 {
 	// slack in map units
 	float mapslack = 2 + 16.0f / grid.Scale;
@@ -680,6 +656,9 @@ static void get_cur_linedef(Close_obj& closest, float x, float y)
 	int ly = floor(y - mapslack);
 	int hx =  ceil(x + mapslack);
 	int hy =  ceil(y + mapslack);
+
+	int    best = -1;
+	double best_dist = 9e9;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -702,31 +681,18 @@ static void get_cur_linedef(Close_obj& closest, float x, float y)
 
 		// use "<=" because if there are overlapping linedefs, we want
 		// to return the highest-numbered one.
-		if (dist <= closest.distance)
+		if (dist <= best_dist)
 		{
-			closest.obj.type = OBJ_LINEDEFS;
-			closest.obj.num  = n;
-			closest.distance = dist;
+			best = n;
+			best_dist = dist;
 		}
 	}
 
-#if 0  // TESTING CRUD
-	if (closest.obj.type == OBJ_LINEDEFS)
-	{
-		closest.obj.num = TestAdjoinerLineDef(closest.obj.num);
+	if (best > 0)
+		return Objid(OBJ_LINEDEFS, best);
 
-		if (closest.obj.num < 0)
-			closest.clear();
-	}
-
-	else if (closest.obj.type == OBJ_LINEDEFS)
-	{
-		closest.obj.num = OppositeLineDef(closest.obj.num, +1, NULL);
-
-		if (closest.obj.num < 0)
-			closest.clear();
-	}
-#endif
+	// none found
+	return Objid();
 }
 
 
@@ -734,7 +700,7 @@ static void get_cur_linedef(Close_obj& closest, float x, float y)
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
 //
-static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
+static Objid NearestSplitLine(int x, int y, int ignore_vert)
 {
 	// slack in map units
 	int mapslack = 1 + (int)ceil(8.0f / grid.Scale);
@@ -743,6 +709,9 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
 	int ly = y - mapslack;
 	int hx = x + mapslack;
 	int hy = y + mapslack;
+
+	int    best = -1;
+	double best_dist = 9e9;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -769,25 +738,30 @@ static void get_split_linedef(Close_obj& closest, int x, int y, int ignore_vert)
 			abs(L->Start()->y - L->End()->y) < 4)
 			continue;
 
-		float dist = ApproxDistToLineDef(L, x, y);
+		double dist = ApproxDistToLineDef(L, x, y);
 
 		if (dist > mapslack)
 			continue;
 
-		if (dist > closest.distance)
-			continue;
-
-		closest.obj.type = OBJ_LINEDEFS;
-		closest.obj.num  = n;
-		closest.distance = dist;
+		if (dist <= best_dist)
+		{
+			best = n;
+			best_dist = dist;
+		}
 	}
+
+	if (best > 0)
+		return Objid(OBJ_LINEDEFS, best);
+
+	// none found
+	return Objid();
 }
 
 
 //
 //  determine which sector is under the pointer
 //
-static void get_cur_sector(Close_obj& closest,int x, int y)
+static Objid NearestSector(int x, int y)
 {
 	/* hack, hack...  I look for the first LineDef crossing
 	   an horizontal half-line drawn from the cursor */
@@ -820,18 +794,18 @@ static void get_cur_sector(Close_obj& closest,int x, int y)
 		int sd_num = (side1 < 0) ? LineDefs[line1]->left : LineDefs[line1]->right;
 
 		if (sd_num >= 0)
-		{
-			closest.obj.type = OBJ_SECTORS;
-			closest.obj.num  = SideDefs[sd_num]->sector;
-		}
+			return Objid(OBJ_SECTORS, SideDefs[sd_num]->sector);
 	}
+
+	// none found
+	return Objid();
 }
 
 
 //
 // determine which thing is under the mouse pointer
 //
-static void get_cur_thing(Close_obj& closest, float x, float y)
+static Objid NearestThing(float x, float y)
 {
 	float mapslack = 1 + 16.0f / grid.Scale;
 
@@ -842,49 +816,53 @@ static void get_cur_thing(Close_obj& closest, float x, float y)
 	int hx = x + max_radius;
 	int hy = y + max_radius;
 
+	int best = -1;
+	thing_comparer_t best_comp;
+
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int tx = Things[n]->x;
 		int ty = Things[n]->y;
 
-		// filter out things that are outside the search bbox
+		// filter out things that are outside the search bbox.
+		// this search box is enlarged by MAX_RADIUS.
 		if (tx < lx || tx > hx || ty < ly || ty > hy)
 			continue;
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		// so how far is that thing exactly ?
-		int thing_radius = info->radius + mapslack;
+		// more accurate bbox test using the real radius
+		int r = info->radius + mapslack;
 
-		if (x < tx - thing_radius || x > tx + thing_radius ||
-		    y < ty - thing_radius || y > ty + thing_radius)
+		if (x < tx - r - mapslack || x > tx + r + mapslack ||
+			y < ty - r - mapslack || y > ty + r + mapslack)
 			continue;
 
-		Close_obj current;
+		thing_comparer_t th_comp;
 
-		current.obj.type = OBJ_THINGS;
-		current.obj.num  = n;
-		current.distance = hypot(x - tx, y - ty);
-		current.radius   = info->radius;
+		th_comp.distance = hypot(x - tx, y - ty);
+		th_comp.radius   = r;
+		th_comp.inside   = (x > tx - r && x < tx + r && y > ty - r && y < ty + r);
 
-		current.inside =
-		   (x > tx - current.radius && x < tx + current.radius &&
-			y > ty - current.radius && y < ty + current.radius);
-
-		// use "<=" because if there are superimposed vertices, we want
-		// to return the highest-numbered one.
-		if (current <= closest)
+		if (best < 0 || th_comp <= best_comp)
 		{
-			closest = current;
+			best = n;
+			best_comp = th_comp;
 		}
 	}
+
+	if (best > 0)
+		return Objid(OBJ_THINGS, best);
+
+	// none found
+	return Objid();
 }
 
 
 //
 // determine which vertex is under the pointer
 //
-static void get_cur_vertex(Close_obj& closest, float x, float y)
+static Objid NearestVertex(float x, float y)
 {
 	const int screen_pix = vertex_radius(grid.Scale);
 
@@ -898,6 +876,9 @@ static void get_cur_vertex(Close_obj& closest, float x, float y)
 	int ly = floor(y - mapslack);
 	int hx =  ceil(x + mapslack);
 	int hy =  ceil(y + mapslack);
+
+	int    best = -1;
+	double best_dist = 9e9;
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
@@ -915,13 +896,18 @@ static void get_cur_vertex(Close_obj& closest, float x, float y)
 
 		// use "<=" because if there are superimposed vertices, we want
 		// to return the highest-numbered one.
-		if (dist <= closest.distance)
+		if (dist <= best_dist)
 		{
-			closest.obj.type = OBJ_VERTICES;
-			closest.obj.num  = n;
-			closest.distance = dist;
+			best = n;
+			best_dist = dist;
 		}
 	}
+
+	if (best > 0)
+		return Objid(OBJ_VERTICES, best);
+
+	// none found
+	return Objid();
 }
 
 
@@ -932,35 +918,29 @@ static void get_cur_vertex(Close_obj& closest, float x, float y)
 //
 void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
 {
-	Close_obj closest;
-
 	switch (objtype)
 	{
 		case OBJ_THINGS:
 		{
-			get_cur_thing(closest, x, y);
-			o = closest.obj;
+			o = NearestThing(x, y);
 			break;
 		}
 
 		case OBJ_VERTICES:
 		{
-			get_cur_vertex(closest, x, y);
-			o = closest.obj;
+			o = NearestVertex(x, y);
 			break;
 		}
 
 		case OBJ_LINEDEFS:
 		{
-			get_cur_linedef(closest, x, y);
-			o = closest.obj;
+			o = NearestLineDef(x, y);
 			break;
 		}
 
 		case OBJ_SECTORS:
 		{
-			get_cur_sector(closest, x, y);
-			o = closest.obj;
+			o = NearestSector(x, y);
 			break;
 		}
 
@@ -973,11 +953,7 @@ void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
 
 void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 {
-	Close_obj closest;
-
-	get_split_linedef(closest, x, y, drag_vert);
-
-	o = closest.obj;
+	o = NearestSplitLine(x, y, drag_vert);
 
 	// don't highlight the line if the new vertex would snap onto
 	// the same coordinate as the start or end of the linedef.
@@ -1012,11 +988,7 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 void GetSplitLineForDangler(Objid& o, int v_num)
 {
-	Close_obj closest;
-
-	get_split_linedef(closest, Vertices[v_num]->x, Vertices[v_num]->y, v_num);
-
-	o = closest.obj;
+	o = NearestSplitLine(Vertices[v_num]->x, Vertices[v_num]->y, v_num);
 }
 
 
