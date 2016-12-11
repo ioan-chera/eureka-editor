@@ -36,6 +36,7 @@
 #include "e_main.h"
 #include "e_objects.h"
 #include "e_sector.h"
+#include "e_vertex.h"
 
 #include "ui_window.h"
 
@@ -569,6 +570,11 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 	DebugPrintf("TRACE PATH: line:%d  side:%d  cur:%d  start:%d\n",
 			ld, side, cur_vert, start_vert);
 #endif
+
+	// check for an isolated line
+	if (Vertex_HowManyLineDefs( cur_vert) == 1 &&
+		Vertex_HowManyLineDefs(prev_vert) == 1)
+		return false;
 
 	// compute the average angle over all the lines
 	double average_angle = 0;
