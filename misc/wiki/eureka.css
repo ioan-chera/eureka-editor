@@ -3,7 +3,7 @@
 /* This sets the overall frame for the site */
 body {
   margin:0px; background-color: #666; /* #b0c8e4 */
-  font-family:Arial,Helvetica,sans-serif; font-size:11pt;
+  font-family:Arial,Helvetica,sans-serif; font-size:14pt;
   color: #aaa;
 }
 
@@ -61,7 +61,7 @@ h6 { font-size:1.0em; }
   padding:5px; border-right:1px #aaa solid;
   padding-top: 15px;
   line-height:1.33em;
-  font-size:9.4pt; font-family:Verdana,sans-serif;
+  font-size:14pt; font-family:Verdana,sans-serif;
 }
 #wikileft2 .vspace { margin-top:1.125em; }
 #wikileft2 a { text-decoration:none; color:#09c; }
@@ -70,7 +70,7 @@ h6 { font-size:1.0em; }
 #wikileft2 li { margin:0px; padding-left: 6px; }
 .sidehead {
   margin:0px; padding:4px 2px 2px 2px;
-  font-size:11pt; font-weight:bold; font-style:normal;
+  font-size:14pt; font-weight:bold; font-style:normal;
 }
 .sidehead a
   { color:#505050; font-weight:bold; font-style:normal; }
@@ -81,7 +81,7 @@ h6 { font-size:1.0em; }
   padding: 10px 10px 20px 20px;
   background-color: #eeeeee;
   color: black;
-  font-size:11pt;
+  font-size:14pt;
 }
 #wikicmds {
   float:right; white-space:nowrap;
