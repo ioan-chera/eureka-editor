@@ -1169,7 +1169,7 @@ void LD_FixForLostSide(int ld)
 //
 // -AJA- 2001-05-09
 //
-double AngleBetweenLines(int A, int B, int C)
+double LD_AngleBetweenLines(int A, int B, int C)
 {
 	int a_dx = Vertices[B]->x - Vertices[A]->x;
 	int a_dy = Vertices[B]->y - Vertices[A]->y;
@@ -1229,7 +1229,7 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 		else
 			continue;
 
-		double angle = AngleBetweenLines(v1, v2, other_v);
+		double angle = LD_AngleBetweenLines(v1, v2, other_v);
 
 		// overlapping lines
 		if (fabs(angle) < 0.0001)

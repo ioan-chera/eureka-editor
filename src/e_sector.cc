@@ -623,7 +623,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 
 			// found adjoining linedef
 
-			double angle = AngleBetweenLines(prev_vert, cur_vert, other_vert);
+			double angle = LD_AngleBetweenLines(prev_vert, cur_vert, other_vert);
 
 			if (next_line < 0 || angle < best_angle)
 			{
