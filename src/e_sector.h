@@ -104,7 +104,7 @@ private:
 };
 
 
-bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new = false);
+bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare = false);
 
 void AssignSectorToSpace(int map_x, int map_y, int new_sec, bool model_from_neighbor = false);
 

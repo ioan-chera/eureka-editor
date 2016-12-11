@@ -355,10 +355,12 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 		// the SPLITTING case....
 		DebugPrintf("SPLITTING sector #%d\n", right_front);
 
+#if 0	// THIS IS PROBABLY NOT NEEDED
+
 		// ensure original sector is OK
 		lineloop_c orig_loop;
 
-		if (! TraceLineLoop(right_ld, right_side, orig_loop, true /* ignore_new */))
+		if (! TraceLineLoop(right_ld, right_side, orig_loop, true /* ignore_bare */))
 		{
 			DebugPrintf("Traced original : failed\n");
 			return;
@@ -369,6 +371,7 @@ if ( left_ok) DebugPrintf(" left faces outward : %s\n",  left_loop.faces_outward
 			DebugPrintf("Original not all same\n");
 			return;
 		}
+#endif
 
 		// OK WE ARE SPLITTING IT : pick which side will stay the same
 

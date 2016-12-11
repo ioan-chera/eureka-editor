@@ -544,7 +544,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 //
 // -AJA- 2001-05-09
 //
-bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
+bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 {
 	loop.clear();
 
@@ -597,7 +597,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_new)
 			if (n == ld)
 				continue;
 
-			if (ignore_new && !N->Left() && !N->Right())
+			if (ignore_bare && !N->Left() && !N->Right())
 				continue;
 
 			int other_vert;
