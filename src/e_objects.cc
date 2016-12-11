@@ -167,9 +167,9 @@ static void ClosedLoop_Simple(int new_ld, int v2, selection_c& flip)
 	bool right_ok = TraceLineLoop(new_ld, SIDE_RIGHT, right_loop);
 	bool  left_ok = TraceLineLoop(new_ld, SIDE_LEFT,   left_loop);
 
-	// require all lines to be "new" (no sidedefs)
-	right_ok = right_ok && right_loop.AllNew();
-	 left_ok =  left_ok &&  left_loop.AllNew();
+	// require all lines to be "bare" (no sidedefs)
+	right_ok = right_ok && right_loop.AllBare();
+	 left_ok =  left_ok &&  left_loop.AllBare();
 
 	// check if one of the loops is OK and faces outward.
 	// in that case, we just make the island part of the surrounding

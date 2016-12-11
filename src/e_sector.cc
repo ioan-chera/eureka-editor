@@ -419,7 +419,7 @@ bool lineloop_c::SameSector(int *sec_num) const
 }
 
 
-bool lineloop_c::AllNew() const
+bool lineloop_c::AllBare() const
 {
 	int sec_num;
 

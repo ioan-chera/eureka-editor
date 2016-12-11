@@ -66,8 +66,13 @@ public:
 
 	double TotalLength() const;
 
+	// checks if all lines in the loop are facing the same sector.
+	// when true, returns that sector via 'sec_num' (if not null).
+	// the 'sec_num' value may be -1 if all lines are "bare".
 	bool SameSector(int *sec_num = NULL) const;
-	bool AllNew() const;
+
+	// true if all lines in the loop are facing nothing.
+	bool AllBare() const;
 
 	// find a sector that neighbors this line loop, i.e. is on the other
 	// side of one of the lines.  If there are multiple neighbors, then
