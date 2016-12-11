@@ -547,11 +547,13 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 //
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 {
+	int start_ld   = ld;
+	int start_side = side;
+
 	loop.clear();
 
 	int   cur_vert;
 	int  prev_vert;
-	int start_vert;
 
 	if (side == SIDE_RIGHT)
 	{
@@ -564,11 +566,8 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 		prev_vert = LineDefs[ld]->end;
 	}
 
-	start_vert = prev_vert;
-
 #ifdef DEBUG_LINELOOP
-	DebugPrintf("TRACE PATH: line:%d  side:%d  cur:%d  start:%d\n",
-			ld, side, cur_vert, start_vert);
+	DebugPrintf("TRACE PATH: line:%d  side:%d  cur_vert:%d\n", ld, side, cur_vert);
 #endif
 
 	// check for an isolated line
@@ -579,29 +578,26 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 	// compute the average angle over all the lines
 	double average_angle = 0;
 
-	// add the starting line
-	loop.push_back(ld, side);
-
-	while (cur_vert != start_vert)
+	for (;;)
 	{
+		loop.push_back(ld, side);
+
 		int next_line = -1;
 		int next_vert = -1;
 		int next_side =  0;
 
 		double best_angle = 9999;
 
-		// Look for the next linedef in the path.  It's the linedef which
-		// uses the current vertex, not the same as the current line, and
-		// has the smallest interior angle.
+		// look for the next linedef in the path, one using the
+		// current vertex and having the smallest interior angle.
+		// it *can* be the exact same linedef (when hitting a dangling
+		// vertex).
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
 			const LineDef * N = LineDefs[n];
 
 			if (! N->TouchesVertex(cur_vert))
-				continue;
-
-			if (n == ld)
 				continue;
 
 			if (ignore_bare && !N->Left() && !N->Right())
@@ -615,15 +611,18 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 				other_vert = N->end;
 				which_side = SIDE_RIGHT;
 			}
-			else  // (N->end == cur_vert)
+			else  /* (N->end == cur_vert) */
 			{
 				other_vert = N->start;
 				which_side = SIDE_LEFT;
 			}
 
-			// found adjoining linedef
+			double angle;
 
-			double angle = LD_AngleBetweenLines(prev_vert, cur_vert, other_vert);
+			if (n == ld)
+				angle = 361.0;
+			else
+				angle = LD_AngleBetweenLines(prev_vert, cur_vert, other_vert);
 
 			if (next_line < 0 || angle < best_angle)
 			{
@@ -633,8 +632,6 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 
 				best_angle = angle;
 			}
-
-			// continue the search...
 		}
 
 #ifdef DEBUG_LINELOOP
@@ -642,15 +639,20 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 				next_line, next_side, next_vert, best_angle);
 #endif
 
-		// No next line?  Path cannot be closed
+		// no next line?  path cannot be closed
 		if (next_line < 0)
 			return false;
 
-		// Line already seen?  Under normal circumstances this won't
-		// happen, but it _can_ happen and indicates a non-closed
-		// structure
-		if (loop.get_just_line(next_line))
+		// we have come back to the start, so terminate
+		if (next_line == start_ld && next_side == start_side)
+			break;
+
+		// this won't happen under normal circumstances, but it *can*
+		// happen and indicates a non-closed structure.
+		if (loop.get(next_line, next_side))
 			return false;
+
+		// OK
 
 		ld   = next_line;
 		side = next_side;
@@ -659,9 +661,6 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 		cur_vert  = next_vert;
 
 		average_angle += best_angle;
-
-		// add the next line
-		loop.push_back(ld, side);
 	}
 
 	// this might happen if there are overlapping linedefs
@@ -692,6 +691,8 @@ bool lineloop_c::LookForIsland()
 	//
 	// Returns: true if found one, false otherwise.
 	//
+
+	// FIXME!!!  find isolated linedefs
 
 	// calc bounding box
 	int bb_x1, bb_y1, bb_x2, bb_y2;
@@ -788,7 +789,6 @@ void lineloop_c::FindIslands()
 }
 
 
-#ifdef DEBUG_LINELOOP
 void lineloop_c::Dump() const
 {
 	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
@@ -805,7 +805,6 @@ void lineloop_c::Dump() const
 					L->End  ()->x, L->End  ()->y);
 	}
 }
-#endif
 
 
 //

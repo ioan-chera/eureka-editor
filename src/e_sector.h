@@ -32,8 +32,8 @@ class lineloop_c
 public:
 	// This contains the linedefs in the line loop, beginning with
 	// the first line and going in order until the last line.  There
-	// will be at least 3 lines in the loop, and the same linedef
-	// cannot occur more than once.
+	// will be at least 3 lines in the loop.  It is possible for a
+	// linedef to be present twice (a loop traversing both sides).
 	std::vector< int > lines;
 
 	// This contains which side of the linedefs in 'lines'.
