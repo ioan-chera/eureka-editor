@@ -407,7 +407,7 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	int sec = LineDefs[lines[0]]->WhatSector(sides[0]);
 
-	for (unsigned int k = 1 ; k < lines.size() ; k++)
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
 		if (sec != LineDefs[lines[k]]->WhatSector(sides[k]))
 			return false;
@@ -493,6 +493,23 @@ int lineloop_c::IslandSector() const
 	}
 
 	return -1;
+}
+
+
+int lineloop_c::DetermineSector() const
+{
+	if (faces_outward)
+		return IslandSector();
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+
+		if (sec >= 0)
+			return sec;
+	}
+
+	return -1;  // VOID
 }
 
 

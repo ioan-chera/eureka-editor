@@ -84,6 +84,8 @@ public:
 	// number if true, otherwise -1.
 	int IslandSector() const;
 
+	int DetermineSector() const;
+
 	// return all the sectors which the lineloop faces
 	void GetAllSectors(selection_c *list) const;
 
