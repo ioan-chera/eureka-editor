@@ -458,8 +458,48 @@ fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
 		return;
 	}
 
-fprintf(stderr, "--> SPLIT IT\n");
-return;
+
+fprintf(stderr, "--> %s + %s\n",
+		 left.loop.faces_outward ? "OUTIE" : "innie",
+		right.loop.faces_outward ? "OUTIE" : "innie");
+
+	// it is probably impossible for both loops to face outward, so
+	// we only need to handle two cases: both innie, or innie + outie.
+
+	// handle any outie
+
+	bool have_outie = (left.loop.faces_outward || right.loop.faces_outward);
+	bool filled_outie = false;
+
+	if (have_outie)
+	{
+		lineloop_c& outie = left.loop.faces_outward ? left.loop : right.loop;
+
+		// check if faces the void
+		int face_sec = outie.IslandSector();
+
+		if (face_sec >= 0)
+		{
+			outie.AssignSector(face_sec, flip);
+			filled_outie = true;
+		}
+	}
+
+	// handle innies
+
+	// TODO : need special logic when BOTH innies
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		lineloop_c& innie = pass ? right.loop : left.loop;
+
+		if (innie.faces_outward)
+			continue;
+
+		innie.FindIslands();
+
+		// TODO
+	}
 }
 
 
@@ -476,24 +516,15 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (no_fill)
 		return;
 
-	selection_c flip(OBJ_LINEDEFS);
-
-	switch (Vertex_HowManyLineDefs(v2))
+	if (Vertex_HowManyLineDefs(v1) >= 2 &&
+		Vertex_HowManyLineDefs(v2) >= 2)
 	{
-		case 0:
-			// this should not happen!
-			return;
+		selection_c flip(OBJ_LINEDEFS);
 
-		case 1:
-			// joined onto an isolated vertex : nothing to do
-			return;
+		CheckClosedLoop(new_ld, v1, v2, flip);
 
-		default:  // 2 or more
-			CheckClosedLoop(new_ld, v1, v2, flip);
-			break;
+		FlipLineDefGroup(flip);
 	}
-
-	FlipLineDefGroup(flip);
 }
 
 
