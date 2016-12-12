@@ -427,6 +427,11 @@ static void CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 
 		bool ok;
 
+		// what sector we face, -1 for VOID
+		int sec;
+
+		double length;
+
 	} left, right;
 
 	// trace the loops on either side of the new line
@@ -463,26 +468,31 @@ fprintf(stderr, "--> %s + %s\n",
 		 left.loop.faces_outward ? "OUTIE" : "innie",
 		right.loop.faces_outward ? "OUTIE" : "innie");
 
+	 left.sec =  left.loop.DetermineSector();
+	right.sec = right.loop.DetermineSector();
+
+	 left.length =  left.loop.TotalLength();
+	right.length = right.loop.TotalLength();
+
+	if (!  left.loop.faces_outward)  left.loop.FindIslands();
+	if (! right.loop.faces_outward) right.loop.FindIslands();
+
 	// it is probably impossible for both loops to face outward, so
 	// we only need to handle two cases: both innie, or innie + outie.
 
 	// handle any outie
 
-	bool have_outie = (left.loop.faces_outward || right.loop.faces_outward);
 	bool filled_outie = false;
 
-	if (have_outie)
+	if (left.loop.faces_outward && left.sec >= 0)
 	{
-		lineloop_c& outie = left.loop.faces_outward ? left.loop : right.loop;
-
-		// check if faces the void
-		int face_sec = outie.IslandSector();
-
-		if (face_sec >= 0)
-		{
-			outie.AssignSector(face_sec, flip);
-			filled_outie = true;
-		}
+		left.loop.AssignSector(left.sec, flip);
+		filled_outie = true;
+	}
+	else if (right.loop.faces_outward && right.sec >= 0)
+	{
+		right.loop.AssignSector(right.sec, flip);
+		filled_outie = true;
 	}
 
 	// handle innies
@@ -495,8 +505,6 @@ fprintf(stderr, "--> %s + %s\n",
 
 		if (innie.faces_outward)
 			continue;
-
-		innie.FindIslands();
 
 		// TODO
 	}
