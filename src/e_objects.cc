@@ -419,8 +419,23 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 }
 
 
-static void CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
+static int Sector_New(int model)
 {
+	int new_sec = BA_New(OBJ_SECTORS);
+
+	if (model >= 0)
+		Sectors[new_sec]->RawCopy(Sectors[model]);
+	else
+		Sectors[new_sec]->SetDefaults();
+
+	return new_sec;
+}
+
+
+static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
+{
+	// returns true if we assigned a sector (so drawing should stop)
+
 	struct
 	{
 		lineloop_c loop;
@@ -449,7 +464,7 @@ static void CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 		// TODO : find some cases, see what is needed
 
 fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
-		return;
+		return false;
 	}
 
 
@@ -460,7 +475,7 @@ fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
 		right.loop.get( left.loop.lines[0],  left.loop.sides[0]))
 	{
 		// nothing to do, let user keep drawing
-		return;
+		return false;
 	}
 
 
@@ -477,10 +492,11 @@ fprintf(stderr, "--> %s + %s\n",
 	if (!  left.loop.faces_outward)  left.loop.FindIslands();
 	if (! right.loop.faces_outward) right.loop.FindIslands();
 
+
+	/* --- handle outie --- */
+
 	// it is probably impossible for both loops to face outward, so
 	// we only need to handle two cases: both innie, or innie + outie.
-
-	// handle any outie
 
 	bool filled_outie = false;
 
@@ -495,7 +511,24 @@ fprintf(stderr, "--> %s + %s\n",
 		filled_outie = true;
 	}
 
-	// handle innies
+	if (left.loop.faces_outward || right.loop.faces_outward)
+	{
+		lineloop_c& innie = left.loop.faces_outward ? right.loop : left.loop;
+
+		// always fill a loop created out in the void.
+		// also fill a created islands, unless the option is disabled AND
+		// the new island surrounds other islands.
+		if (filled_outie && new_islands_are_void && innie.islands.empty())
+			return true;
+
+		int new_sec = Sector_New(innie.NeighboringSector());
+
+		innie.AssignSector(new_sec, flip);
+		return true;
+	}
+
+
+	/* --- handle innies --- */
 
 	// TODO : need special logic when BOTH innies
 
@@ -508,6 +541,8 @@ fprintf(stderr, "--> %s + %s\n",
 
 		// TODO
 	}
+
+	return true;
 }
 
 
