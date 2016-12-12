@@ -521,6 +521,8 @@ fprintf(stderr, "--> %s + %s\n",
 		if (filled_outie && new_islands_are_void && innie.islands.empty())
 			return true;
 
+		// TODO : REVIEW if we should use left.sec or right.sec
+
 		int new_sec = Sector_New(innie.NeighboringSector());
 
 		innie.AssignSector(new_sec, flip);
@@ -528,18 +530,41 @@ fprintf(stderr, "--> %s + %s\n",
 	}
 
 
-	/* --- handle innies --- */
+	/* --- handle two innies --- */
 
-	// TODO : need special logic when BOTH innies
+	// check if the sectors in each loop are different.
+	// this is not the usual situation!  we assume the user has
+	// deleted a linedef or two and is correcting the geometry.
 
-	for (int pass = 0 ; pass < 2 ; pass++)
+	if (left.sec != right.sec)
 	{
-		lineloop_c& innie = pass ? right.loop : left.loop;
+		if (right.sec >= 0) right.loop.AssignSector(right.sec, flip);
+		if ( left.sec >= 0)  left.loop.AssignSector( left.sec, flip);
 
-		if (innie.faces_outward)
-			continue;
+		return true;
+	}
 
-		// TODO
+	// we are creating a NEW sector in one loop (the smallest),
+	// and updating the other loop (unless it is VOID).
+
+	// the ordering here is significant, and ensures that the
+	// new linedef usually ends at v2 (the final vertex).
+
+	int new_sec = Sector_New(-1 /* FIXME !!! */);
+
+	if (left.length < right.length)
+	{
+		if (right.sec >= 0)
+			right.loop.AssignSector(right.sec, flip);
+
+		left.loop.AssignSector(new_sec, flip);
+	}
+	else
+	{
+		right.loop.AssignSector(new_sec, flip);
+
+		if (left.sec >= 0)
+			left.loop.AssignSector(left.sec, flip);
 	}
 
 	return true;
