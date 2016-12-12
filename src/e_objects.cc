@@ -419,6 +419,50 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 }
 
 
+static void CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
+{
+	struct
+	{
+		lineloop_c loop;
+
+		bool ok;
+
+	} left, right;
+
+	// trace the loops on either side of the new line
+
+	 left.ok = TraceLineLoop(new_ld, SIDE_LEFT,   left.loop);
+	right.ok = TraceLineLoop(new_ld, SIDE_RIGHT, right.loop);
+
+	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",
+			left.ok ? 1 : 0, right.ok ? 1 : 0);
+
+	if (! (left.ok && right.ok))
+	{
+		// this is harder to trigger than you might think.
+
+		// TODO : find some cases, see what is needed
+
+fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
+		return;
+	}
+
+
+	// check if the loops are the same, which means we have NOT
+	// split the sector (or created a new one)
+
+	if ( left.loop.get(right.loop.lines[0], right.loop.sides[0]) ||
+		right.loop.get( left.loop.lines[0],  left.loop.sides[0]))
+	{
+		// nothing to do, let user keep drawing
+		return;
+	}
+
+fprintf(stderr, "--> SPLIT IT\n");
+return;
+}
+
+
 void Insert_LineDef(int v1, int v2, bool no_fill = false)
 {
 	int new_ld = BA_New(OBJ_LINEDEFS);
@@ -444,12 +488,8 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 			// joined onto an isolated vertex : nothing to do
 			return;
 
-		case 2:
-			ClosedLoop_Simple(new_ld, v2, flip);
-			break;
-
-		default:  // 3 or more
-			ClosedLoop_Complex(new_ld, v1, v2, flip);
+		default:  // 2 or more
+			CheckClosedLoop(new_ld, v1, v2, flip);
 			break;
 	}
 
