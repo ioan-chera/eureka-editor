@@ -419,14 +419,17 @@ DebugPrintf("ISLANDS = %u\n", loop.islands.size());
 }
 
 
-static int Sector_New(int model)
+static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
 {
 	int new_sec = BA_New(OBJ_SECTORS);
 
-	if (model >= 0)
-		Sectors[new_sec]->RawCopy(Sectors[model]);
-	else
+	if (model < 0) model = model2;
+	if (model < 0) model = model3;
+
+	if (model < 0)
 		Sectors[new_sec]->SetDefaults();
+	else
+		Sectors[new_sec]->RawCopy(Sectors[model]);
 
 	return new_sec;
 }
@@ -550,10 +553,10 @@ fprintf(stderr, "--> %s + %s\n",
 	// the ordering here is significant, and ensures that the
 	// new linedef usually ends at v2 (the final vertex).
 
-	int new_sec = Sector_New(-1 /* FIXME !!! */);
-
 	if (left.length < right.length)
 	{
+		int new_sec = Sector_New(left.sec, right.sec, left.loop.NeighboringSector());
+
 		if (right.sec >= 0)
 			right.loop.AssignSector(right.sec, flip);
 
@@ -561,6 +564,8 @@ fprintf(stderr, "--> %s + %s\n",
 	}
 	else
 	{
+		int new_sec = Sector_New(right.sec, left.sec, right.loop.NeighboringSector());
+
 		right.loop.AssignSector(new_sec, flip);
 
 		if (left.sec >= 0)
