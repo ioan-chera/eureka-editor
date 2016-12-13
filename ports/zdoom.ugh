@@ -399,11 +399,12 @@ line 416 y "-- EDGE: Thin 3D floor 40%"
 line 417 y "-- EDGE: Thin 3D floor 20%"
 
 # Sector Effects
-line 282 s "-- ZD: Set Light & Fog /rgb"
-line 334 s "-- ZD: Set Light & Fog /rgb"
-line 333 s "-- ZD: Set Gravity /length"
-line 335 s "-- ZD: Set Damage /length"
+line 282 - "-- ZD: Set Light & Fog /rgb"
+line 334 - "-- ZD: Set Light & Fog /rgb"
+line 333 - "-- ZD: Set Gravity /length"
+line 335 - "-- ZD: Set Damage /length"
 
+# Slopes
 line 340 s "-- ZD: Slope front floor"
 line 341 s "-- ZD: Slope front ceiling"
 line 342 s "-- ZD: Slope front floor and ceiling"
