@@ -325,5 +325,99 @@ special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_lo
 
 #---- DOOM FORMAT SPECIALS  ----------
 
-# TODO
+linegroup v "3D Floor"
+
+# Scripting
+line 273 k "WR FS_Execute"
+line 274 k "W1 FS_Execute"
+line 275 k "W1 FS_Execute /front"
+line 276 k "SR FS_Execute"
+line 277 k "S1 FS_Execute"
+line 278 k "GR FS_Execute"
+line 279 k "G1 FS_Execute"
+
+# Renderer
+line 336 r "-- Line Mirror"
+line 337 r "-- Line Horizon"
+
+line 280 r "-- Transfer Heights /swim"
+line 350 r "-- Transfer_Heights"
+line 351 r "-- Transfer_Heights /clip"
+
+# Animated
+line 284 a "-- LEG: Translucent 50%"
+line 285 a "-- LEG: Translucent 75%"
+line 286 a "-- LEG: Translucent 25%"
+line 287 a "-- LEG: Translucent 50% /additive"
+line 288 a "-- LEG: Translucent FX1"
+
+line 338 a "W1 Floor_Waggle /24"
+line 339 a "W1 Floor_Waggle /12"
+
+line 352 a "-- Copy scroller /ceil"
+line 353 a "-- Copy scroller /floor"
+line 354 a "-- Copy scroller /carry"
+
+line 409 a "-- EDGE: Translucent 80%"
+line 410 a "-- EDGE: Translucent 60%"
+line 411 a "-- EDGE: Translucent 40%"
+line 412 a "-- EDGE: Translucent 20%"
+
+line 422 a "-- EDGE: Scroll right"
+line 423 a "-- EDGE: Scroll up"
+line 424 a "-- EDGE: Scroll down"
+line 425 a "-- EDGE: Scroll left/up"
+line 426 a "-- EDGE: Scroll left/down"
+line 427 a "-- EDGE: Scroll right/up"
+line 428 a "-- EDGE: Scroll right/down"
+
+# 3D Floors
+line 281 v "-- LEG: 3D Floor"
+line 289 v "-- LEG: 3D Floor /unlit"
+line 300 v "-- LEG: 3D Floor 50%"
+line 301 v "-- LEG: 3D Floor 50% /swim"
+line 302 v "-- LEG: 3D Floor 50% /fog"
+line 303 v "-- LEG: 3D Floor /invis"
+line 304 v "-- LEG: 3D Floor /swim"
+line 305 v "-- LEG: 3D Floor /invis"
+line 306 v "-- LEG: 3D Floor /solid /invis"
+
+line 400 v "-- EDGE: 3D Floor"
+line 401 v "-- EDGE: 3D Floor /upper"
+line 402 v "-- EDGE: 3D Floor /lower"
+
+line 403 v "-- EDGE: Liquid"
+line 404 v "-- EDGE: Liquid 80%"
+line 405 v "-- EDGE: Liquid 60%"
+line 406 v "-- EDGE: Liquid 40%"
+line 407 v "-- EDGE: Liquid 20%"
+line 408 v "-- EDGE: Liquid  0%"
+
+line 413 v "-- EDGE: Thin 3D floor"
+line 414 v "-- EDGE: Thin 3D floor 80%"
+line 415 v "-- EDGE: Thin 3D floor 60%"
+line 416 v "-- EDGE: Thin 3D floor 40%"
+line 417 v "-- EDGE: Thin 3D floor 20%"
+
+# Sector Effects
+line 282 s "-- Set Light & Fog /rgb"
+line 334 s "-- Set Light & Fog /rgb"
+line 333 s "-- Set Gravity /length"
+line 335 s "-- Set Damage /length"
+
+line 340 s "-- Slope front floor"
+line 341 s "-- Slope front ceiling"
+line 342 s "-- Slope front floor and ceiling"
+line 343 s "-- Slope back floor"
+line 344 s "-- Slope back ceiling"
+line 345 s "-- Slope back floor and ceiling"
+line 346 s "-- Slope back floor and front ceiling"
+line 347 s "-- Slope front floor and back ceiling"
+
+# Other
+line 348 - "W1 Autosave"
+line 349 - "S1 Autosave"
+
+# andrewj: omitted the EDGE "Floor up 2" (types 434-439), as they
+# have almost no practical use outside of EDGE's RTS scripting.
 
