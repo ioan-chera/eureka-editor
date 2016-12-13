@@ -733,11 +733,13 @@ UI_Preferences::UI_Preferences() :
 	callback(close_callback, this);
 
 	{ tabs = new Fl_Tabs(0, 0, PREF_WINDOW_W-15, PREF_WINDOW_H-70);
+	  // tabs->selection_color(FL_WHITE);
 
 	  /* ---- General Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		// o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 145, 30, "GUI Appearance");
@@ -819,6 +821,7 @@ UI_Preferences::UI_Preferences() :
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(20, 45, 355, 30, "Key Bindings");
@@ -869,6 +872,7 @@ UI_Preferences::UI_Preferences() :
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Editing Options");
@@ -904,6 +908,7 @@ UI_Preferences::UI_Preferences() :
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Grid" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Map Grid and Scrolling");
@@ -986,8 +991,8 @@ UI_Preferences::UI_Preferences() :
 	  /* ---- 3D Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " 3D View" R_SPACES);
-		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D View Settings");
@@ -1010,8 +1015,8 @@ UI_Preferences::UI_Preferences() :
 	  /* ---- Nodes Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Nodes" R_SPACES);
-		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "Node Building");
@@ -1048,8 +1053,8 @@ UI_Preferences::UI_Preferences() :
 	  /* ---- Other Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Other" R_SPACES);
-		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 255, 280, 30, "Configuration Reset");
