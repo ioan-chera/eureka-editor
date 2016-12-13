@@ -385,21 +385,10 @@ sector 18 "Carry Player by tag"
 
 #---- LINE TYPES ---------------
 
-linegroup a "Animated"
-linegroup c "Ceiling"
-linegroup d "Door"
-linegroup e "Exit Level"
-linegroup f "Floor (lower)"
-linegroup g "Floor (raise)"
-linegroup h "Crusher"
+include "doom_groups"
+
 linegroup j "Split Door"
-linegroup k "Keyed Door"
-linegroup l "Light"
-linegroup m "Moving floor"
-linegroup p "Lift"
-linegroup s "Stairs"
-linegroup t "Teleport"
-linegroup - "OTHER"
+
 
 line   0 - "-- NOTHING"
 line   9 - "S1 Donut (raise outer, lower inner)"
