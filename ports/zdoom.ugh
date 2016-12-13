@@ -58,7 +58,9 @@ thing 4004 p - 16 PLAYA1 "Player 8 start"
 # TODO
 
 
+#
 #---- HEXEN FORMAT SPECIALS  ----------
+#
 
 #FIXME sort out categories  [ check: hexen_specials.ugh ]
 
@@ -323,45 +325,47 @@ special 173 - "NoiseAlert"              target_tid  emitter_tid
 special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
 
+#
 #---- DOOM FORMAT SPECIALS  ----------
+#
 
-linegroup v "3D Floor"
+linegroup y "3D Floor"
 
 # Scripting
-line 273 k "WR FS_Execute"
-line 274 k "W1 FS_Execute"
-line 275 k "W1 FS_Execute /front"
-line 276 k "SR FS_Execute"
-line 277 k "S1 FS_Execute"
-line 278 k "GR FS_Execute"
-line 279 k "G1 FS_Execute"
+line 273 k "WR SMMU: FS_Execute"
+line 274 k "W1 SMMU: FS_Execute"
+line 275 k "W1 SMMU: FS_Execute /front"
+line 276 k "SR SMMU: FS_Execute"
+line 277 k "S1 SMMU: FS_Execute"
+line 278 k "GR SMMU: FS_Execute"
+line 279 k "G1 SMMU: FS_Execute"
 
 # Renderer
-line 336 r "-- Line Mirror"
-line 337 r "-- Line Horizon"
+line 336 r "-- ZD: Line Mirror"
+line 337 r "-- ZD: Line Horizon"
 
-line 280 r "-- Transfer Heights /swim"
-line 350 r "-- Transfer_Heights"
-line 351 r "-- Transfer_Heights /clip"
+line 280 r "-- ZD: Transfer Heights /swim"
+line 350 r "-- ZD: Transfer_Heights"
+line 351 r "-- ZD: Transfer_Heights /clip"
+
+line 284 r "-- LEG: Translucent 50%"
+line 285 r "-- LEG: Translucent 75%"
+line 286 r "-- LEG: Translucent 25%"
+line 287 r "-- LEG: Translucent 50% /additive"
+line 288 r "-- LEG: Translucent FX1"
+
+line 409 r "-- EDGE: Translucent 80%"
+line 410 r "-- EDGE: Translucent 60%"
+line 411 r "-- EDGE: Translucent 40%"
+line 412 r "-- EDGE: Translucent 20%"
 
 # Animated
-line 284 a "-- LEG: Translucent 50%"
-line 285 a "-- LEG: Translucent 75%"
-line 286 a "-- LEG: Translucent 25%"
-line 287 a "-- LEG: Translucent 50% /additive"
-line 288 a "-- LEG: Translucent FX1"
+line 338 a "W1 ZD: Floor_Waggle /24"
+line 339 a "W1 ZD: Floor_Waggle /12"
 
-line 338 a "W1 Floor_Waggle /24"
-line 339 a "W1 Floor_Waggle /12"
-
-line 352 a "-- Copy scroller /ceil"
-line 353 a "-- Copy scroller /floor"
-line 354 a "-- Copy scroller /carry"
-
-line 409 a "-- EDGE: Translucent 80%"
-line 410 a "-- EDGE: Translucent 60%"
-line 411 a "-- EDGE: Translucent 40%"
-line 412 a "-- EDGE: Translucent 20%"
+line 352 a "-- ZD: Copy scroller /ceil"
+line 353 a "-- ZD: Copy scroller /floor"
+line 354 a "-- ZD: Copy scroller /carry"
 
 line 422 a "-- EDGE: Scroll right"
 line 423 a "-- EDGE: Scroll up"
@@ -372,51 +376,51 @@ line 427 a "-- EDGE: Scroll right/up"
 line 428 a "-- EDGE: Scroll right/down"
 
 # 3D Floors
-line 281 v "-- LEG: 3D Floor"
-line 289 v "-- LEG: 3D Floor /unlit"
-line 300 v "-- LEG: 3D Floor 50%"
-line 301 v "-- LEG: 3D Floor 50% /swim"
-line 302 v "-- LEG: 3D Floor 50% /fog"
-line 303 v "-- LEG: 3D Floor /invis"
-line 304 v "-- LEG: 3D Floor /swim"
-line 305 v "-- LEG: 3D Floor /invis"
-line 306 v "-- LEG: 3D Floor /solid /invis"
+line 281 y "-- LEG: 3D Floor"
+line 289 y "-- LEG: 3D Floor /unlit"
+line 300 y "-- LEG: 3D Floor 50%"
+line 301 y "-- LEG: 3D Floor 50% /swim"
+line 302 y "-- LEG: 3D Floor 50% /fog"
+line 303 y "-- LEG: 3D Floor /invis"
+line 304 y "-- LEG: 3D Floor /swim"
+line 305 y "-- LEG: 3D Floor /invis"
+line 306 y "-- LEG: 3D Floor /solid /invis"
 
-line 400 v "-- EDGE: 3D Floor"
-line 401 v "-- EDGE: 3D Floor /upper"
-line 402 v "-- EDGE: 3D Floor /lower"
+line 400 y "-- EDGE: 3D Floor"
+line 401 y "-- EDGE: 3D Floor /upper"
+line 402 y "-- EDGE: 3D Floor /lower"
 
-line 403 v "-- EDGE: Liquid"
-line 404 v "-- EDGE: Liquid 80%"
-line 405 v "-- EDGE: Liquid 60%"
-line 406 v "-- EDGE: Liquid 40%"
-line 407 v "-- EDGE: Liquid 20%"
-line 408 v "-- EDGE: Liquid  0%"
+line 403 y "-- EDGE: Liquid"
+line 404 y "-- EDGE: Liquid 80%"
+line 405 y "-- EDGE: Liquid 60%"
+line 406 y "-- EDGE: Liquid 40%"
+line 407 y "-- EDGE: Liquid 20%"
+line 408 y "-- EDGE: Liquid  0%"
 
-line 413 v "-- EDGE: Thin 3D floor"
-line 414 v "-- EDGE: Thin 3D floor 80%"
-line 415 v "-- EDGE: Thin 3D floor 60%"
-line 416 v "-- EDGE: Thin 3D floor 40%"
-line 417 v "-- EDGE: Thin 3D floor 20%"
+line 413 y "-- EDGE: Thin 3D floor"
+line 414 y "-- EDGE: Thin 3D floor 80%"
+line 415 y "-- EDGE: Thin 3D floor 60%"
+line 416 y "-- EDGE: Thin 3D floor 40%"
+line 417 y "-- EDGE: Thin 3D floor 20%"
 
 # Sector Effects
-line 282 s "-- Set Light & Fog /rgb"
-line 334 s "-- Set Light & Fog /rgb"
-line 333 s "-- Set Gravity /length"
-line 335 s "-- Set Damage /length"
+line 282 s "-- ZD: Set Light & Fog /rgb"
+line 334 s "-- ZD: Set Light & Fog /rgb"
+line 333 s "-- ZD: Set Gravity /length"
+line 335 s "-- ZD: Set Damage /length"
 
-line 340 s "-- Slope front floor"
-line 341 s "-- Slope front ceiling"
-line 342 s "-- Slope front floor and ceiling"
-line 343 s "-- Slope back floor"
-line 344 s "-- Slope back ceiling"
-line 345 s "-- Slope back floor and ceiling"
-line 346 s "-- Slope back floor and front ceiling"
-line 347 s "-- Slope front floor and back ceiling"
+line 340 s "-- ZD: Slope front floor"
+line 341 s "-- ZD: Slope front ceiling"
+line 342 s "-- ZD: Slope front floor and ceiling"
+line 343 s "-- ZD: Slope back floor"
+line 344 s "-- ZD: Slope back ceiling"
+line 345 s "-- ZD: Slope back floor and ceiling"
+line 346 s "-- ZD: Slope back floor and front ceiling"
+line 347 s "-- ZD: Slope front floor and back ceiling"
 
 # Other
-line 348 - "W1 Autosave"
-line 349 - "S1 Autosave"
+line 348 - "W1 ZD: Autosave"
+line 349 - "S1 ZD: Autosave"
 
 # andrewj: omitted the EDGE "Floor up 2" (types 434-439), as they
 # have almost no practical use outside of EDGE's RTS scripting.
