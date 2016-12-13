@@ -175,24 +175,13 @@ thing 41 s nv 20 NULL "Env: Waterfall"
 
 #---- LINE TYPES ----------------
 
-linegroup d "Door"
-linegroup k "Keyed Door"
-linegroup p "Lift"
-linegroup f "Floor (lower)"
-linegroup g "Floor (raise)"
-linegroup c "Ceiling"
-linegroup h "Crusher"
-linegroup l "Light"
-linegroup e "Exit level"
-linegroup m "Moving floor"
-linegroup u "Stairs"
-linegroup s "Sounds"
-linegroup - "OTHER"
+include "doom_groups"
+
 
 line 0 - "-- NOTHING"
 
-line 48 - "-- Scroll Left"
-line 99 - "-- Scroll Right"
+line 48 a "-- Scroll Left"
+line 99 a "-- Scroll Right"
 
 line  31 d "D1 Open door (stays open)"
 line   1 d "DR Open door"
@@ -250,10 +239,10 @@ line  54 m "W1 Stop  Moving Floor"
 line  87 m "WR Start Moving Floor"
 line  89 m "WR Stop  Moving Floor"
 
-line   7 u "S1 Raise stairs by 8"
-line 107 u "S1 Raise stairs by 16"
-line   8 u "W1 Raise stairs by 8"
-line 106 u "W1 Raise stairs by 16"
+line   7 s "S1 Raise stairs by 8"
+line 107 s "S1 Raise stairs by 16"
+line   8 s "W1 Raise stairs by 8"
+line 106 s "W1 Raise stairs by 16"
 
 line  39 - "W1 Teleport"
 line  97 - "WR Teleport"
