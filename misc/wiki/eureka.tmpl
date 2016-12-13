@@ -2,35 +2,49 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
   <title>$WikiTitle | {$Title} $ActionTitle</title>
   <meta http-equiv='Content-Style-Type' content='text/css' />
   <link rel='stylesheet' href='$SkinDirUrl/eureka.css' type='text/css' />
+
   <!--HTMLHeader-->
 </head>
+
 <body>
-<!--PageHeaderFmt-->
-<!--/PageHeaderFmt-->
-  <table id='wikimid' width='100%' border='0' cellspacing='0' cellpadding='0'><tr>
+  <table id='wikimid' width='100%' border='0' cellspacing='0' cellpadding='0'>
+  <tr>
 <!--PageLeftFmt-->
-      <td id='wikileft' valign='top'>
-	  <div id='wikilogo'><a href='{$ScriptUrl}'><img src='$PageLogoUrl'
-	    alt='$WikiTitle' border='0' /></a></div>
-	  <div id='wikileft2'>
-        <!--wiki:{$Group}.SideBar {$SiteGroup}.SideBar--></div></td>
+    <td id='wikileft' valign='top'>
+
+      <div id='wikilogo'>
+      <a href='{$ScriptUrl}'><img src='$PageLogoUrl' alt='$WikiTitle' border='0' /></a>
+      </div>
+
+      <div id='wikileft2'>
+      <!--wiki:{$Group}.SideBar {$SiteGroup}.SideBar-->
+      </div>
+    </td>
 <!--/PageLeftFmt-->
-      <td id='wikibody' valign='top'>
-<!--PageActionFmt-->
-        <div id='wikicmds'><!--wiki:{$Group}.PageActions {$SiteGroup}.PageActions--></div>
-<!--PageTitleFmt-->
-        <div id='wikititle'>
-          <div class='pagegroup'><a href='{$ScriptUrl}/{$Group}'>{$Group}</a> /</div>
-          <h1 class='pagetitle'>{$Title}</h1></div>
+
+    <td id='wikibody' valign='top'>
+      <!--PageActionFmt-->
+      <div id='wikicmds'>
+      <!--wiki:Site.PageActions-->
+      </div>
+      <!--/PageActionFmt-->
+
+      <div id='wikititle'>
+      <!-- [h1 class='pagetitle']{$Title} [/h1] -->
+      </div>
+
 <!--PageText-->
 &nbsp;
-      </td>
-    </tr></table>
-<!--PageFooterFmt-->
+
+    </td>
+  </tr>
+  </table>
+
   <div id='wikifoot'>
     <div class='footnav'>
       <a href='{$ScriptUrl}/$[{$Group}/RecentChanges]'>$[Recent Changes]</a>  &nbsp;
@@ -46,15 +60,16 @@
       value='$[Go]' /></form>
 
     <div class="footerlinks">
-<a href="http://sourceforge.net/projects/eureka-editor">
-<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=1034699&amp;type=11"
-width="120" height="30" alt="Get Eureka at SourceForge.net" /></a> &nbsp;
+      <a href="http://sourceforge.net/projects/eureka-editor">
+      <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=1034699&amp;type=11"
+           width="120" height="30" alt="Get Eureka at SourceForge.net" /></a>
 
-<a href="http://www.pmwiki.org">
-<img src="pub/skins/pmwiki/pmwiki-32.gif"
-width="66" height="32" alt="PmWiki" /></a> &nbsp;
+      &nbsp; &nbsp; &nbsp;
+
+      <a href="http://www.pmwiki.org">
+      <img src="pub/skins/pmwiki/pmwiki-32.gif"
+           width="66" height="32" alt="PmWiki" /></a> &nbsp;
     </div>
-
 </div>
 
 <!--HTMLFooter-->
