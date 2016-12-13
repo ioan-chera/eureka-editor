@@ -503,10 +503,18 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		default_thing = atoi(argv[1]);
 	}
 
-	else if (y_stricmp(argv[0], "linegroup") == 0)
+	else if (y_stricmp(argv[0], "linegroup") == 0 ||
+			 y_stricmp(argv[0], "spec_group") == 0)
 	{
 		if (nargs != 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		// the "line" command is only used in DOOM format
+		// similarly the "special" command is only used in HEXEN format
+		if (y_strnicmp(argv[0], "line", 4) == 0 && Level_format == MAPF_Hexen)
+			return;
+		if (y_strnicmp(argv[0], "spec", 4) == 0 && Level_format != MAPF_Hexen)
+			return;
 
 		linegroup_t * lg = new linegroup_t;
 
