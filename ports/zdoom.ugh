@@ -275,9 +275,9 @@ special  86 p "Polyobj_MoveToSpot"      po  speed  tid
 special  59 p "Polyobj_OR_MoveToSpot"   po  speed  tid
 special  87 p "Polyobj_Stop"            po
 
-# andrewj: leaving out specials 88/89 "Polyobj_MoveTo" because they
-# seem designed for scripts -- when used in a map the target X/Y
-# coordinates will be limited to the range 0-255.
+## andrewj: leaving out specials 88/89 "Polyobj_MoveTo" because they
+## seem designed for scripts -- when used in a map the target X/Y
+## coordinates will be limited to the range 0-255.
 
 # Exits
 special 243 x "Exit_Normal"             pos_arg0
@@ -326,18 +326,14 @@ special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_lo
 
 # most specials are loaded via "mbf.ugh"
 
-linegroup k "Scripting"
-linegroup r "Renderer"
-linegroup y "3D Floor"
-
 # Scripting
-line 273 k "WR SMMU: FS_Execute"
-line 274 k "W1 SMMU: FS_Execute"
-line 275 k "W1 SMMU: FS_Execute /front"
-line 276 k "SR SMMU: FS_Execute"
-line 277 k "S1 SMMU: FS_Execute"
-line 278 k "GR SMMU: FS_Execute"
-line 279 k "G1 SMMU: FS_Execute"
+line 273 n "WR SMMU: FS_Execute"
+line 274 n "W1 SMMU: FS_Execute"
+line 275 n "W1 SMMU: FS_Execute /front"
+line 276 n "SR SMMU: FS_Execute"
+line 277 n "S1 SMMU: FS_Execute"
+line 278 n "GR SMMU: FS_Execute"
+line 279 n "G1 SMMU: FS_Execute"
 
 # Renderer
 line 336 r "-- ZD: Line Mirror"

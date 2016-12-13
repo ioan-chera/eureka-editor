@@ -29,9 +29,12 @@ linegroup k "Keyed Door"
 
 linegroup l "Light"
 linegroup m "Moving floor"
+linegroup n "Scripting"
 linegroup p "Lift"
+linegroup r "Renderer"
 linegroup s "Stairs"
 linegroup t "Teleport"
 linegroup v "Elevator"
+linegroup y "3D Floor"
 linegroup - "OTHER"
 
