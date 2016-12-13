@@ -28,8 +28,6 @@ BSP:
 
 PORTS / ZDoom:
 
--  the DOOM format line specials
-
 -  all the new things
 
 
