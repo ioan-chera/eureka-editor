@@ -126,6 +126,19 @@ h6 { font-size:1.0em; }
 
 .footnav { padding-top:4px; padding-bottom:10px }
 
+#cheatsheet {
+    font-size: 85%;
+    background-color: #ececfc;
+    border: 1px #7e7e6e solid;
+    padding: 0.3em;
+    margin: 0.9em;
+    line-height: 1.33em;
+}
+
+.cheatsheet ul { list-style:none; }
+
+.cheatbold { color: black; font-weight: bold; }
+
 /* These affect the printed appearance of the web view (not the separate
 ** print view) of pages.  The sidebar and action links aren't printed. */
 @media print {
