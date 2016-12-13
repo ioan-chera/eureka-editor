@@ -24,26 +24,6 @@
 #
 #------------------------------------------------------------------------
 
-# Categories...
-
-linegroup a "Animated"
-linegroup c "Ceiling"
-linegroup d "Door"
-linegroup e "Elevator"
-linegroup f "Floor"
-linegroup g "Lift"
-linegroup k "Scripting"
-linegroup l "Lighting"
-
-linegroup p "Polyobj"
-linegroup q "Stairs"
-linegroup r "Renderer"
-linegroup s "Sector"
-linegroup t "Thing"
-linegroup u "Teleport"
-linegroup x "Exits"
-linegroup - "OTHER"
-
 # Floors and lifts
 
 special 20 f "Floor_Lower"          tag  speed  dist

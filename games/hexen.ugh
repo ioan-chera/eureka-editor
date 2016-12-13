@@ -35,6 +35,7 @@ default_textures CASTLE07 F_009 F_082
 default_thing 81  # healing vial
 
 
+include "hexen_groups"
 include "hexen_specials"
 
 
