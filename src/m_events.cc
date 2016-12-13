@@ -862,7 +862,10 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	menu->box(FL_NO_BOX);
 
 	menu->textsize(KF_fonth);
-	menu->show();
+
+	// NOTE: we cannot show() this menu, as that will interfere with
+	// mouse motion events [ canvas will get FL_LEAVE when the mouse
+	// enters this menu's bbox ]
 }
 
 
