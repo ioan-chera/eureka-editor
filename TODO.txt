@@ -13,17 +13,11 @@ ______________________________________________________________________
     result to match what is drawn (ESPECIALLY wrt to vertices)
 
 
-!!!  adding a line to/from an island to the outer loop
-     causes the island to be FILLED
+build off 1S wall --> get the nearby wall texture
 
 
-Browser
-+  when opened by a click, jump to the texture/thing/etc clicked on
-
-
-sector splitting: when choosing which side (left or right) will
-become NEW sector, prefer the loop which DOES NOT include any
-self-referencing linedefs
++  review auto-split when line is close to a vertex
+   [ take SCALE into account ]
 
 
 BSP:
@@ -53,14 +47,8 @@ IDEA: have a "chocolate" source port
 
 
 
-
 Documentation
 -------------
-
-+  improve Wiki install
-   -  improve editing page
-   -  CSS for editing help
-   -  make used links same as unused links
 
 +  information on each binding command, parameters etc..
 
@@ -81,22 +69,6 @@ Documentation
    - using the browser
 
    - common pitfalls (vertices sitting on a linedef or another vertex)
-
-
-
-Editing
--------
-
-+  when get "Area not closed" error, show place where it fails
-
-+  review auto-split when line is close to a vertex
-   [ take SCALE into account ]
-
-+  better default texture of new lines
-   (e.g. check drawing_from vertex)
-
-+  crossing lines while drawing sometimes mucks up?
-   e.g. drawing over the stairs in MAP01
 
 
 ______________________________________________________________________
@@ -161,6 +133,10 @@ General
 
 -  texture checks : warn about a 2S switch line with same switch in
    both the UPPER and LOWER textures
+
+-  sector splitting: when choosing which side (left or right) will
+   become NEW sector, prefer the loop which DOES NOT include any
+   self-referencing linedefs
 
 
 IDEA: a sector-rendering mode for sound propagation
@@ -245,6 +221,9 @@ Editing
 
 WISH : autocomplete flat/texture names in Linedef and Sector panels
 
+IDEA: when get "Area not closed" error, a way to show the place
+      where it fails
+
 IDEA: a command to split-line-in-half-and-move-to-curve
 
 IDEA: a mode to show skill levels via color of drawn things
@@ -297,6 +276,8 @@ WISH: bound flats by 1S lines facing away from the camera
 
 Browser
 -------
+
++  when opened by a click, jump to the texture/thing/etc clicked on
 
 -  search box: ',' for OR
    --> split match into N pieces, perform normal match on each
