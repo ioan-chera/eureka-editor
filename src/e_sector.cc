@@ -832,26 +832,107 @@ void lineloop_c::Dump() const
 }
 
 
+static inline bool WillBeTwoSided(int ld, int side)
+{
+	const LineDef *L = LineDefs[ld];
+
+	if (L->WhatSideDef(side) < 0)
+	{
+		return (L->right >= 0) || (L->left >= 0);
+	}
+
+	return L->TwoSided();
+}
+
+
 static void DetermineNewTextures(lineloop_c& loop,
 								 std::vector<int>& lower_texs,
 								 std::vector<int>& upper_texs)
 {
-	SYS_ASSERT(lower_texs.size() == loop.lines.size());
+	unsigned int total = loop.lines.size();
+
+	SYS_ASSERT(lower_texs.size() == total);
+
+	int  def_tex = BA_InternaliseString(default_wall_tex);
+	int null_tex = BA_InternaliseString("-");
 
 	unsigned int k;
+	unsigned int pass;
 
-	// reset everything to -1
-	for (k = 0 ; k < loop.lines.size() ; k++)
+	// reset "bare" lines to -1,
+	// and grab the textures of other lines
+
+	for (k = 0 ; k < total ; k++)
 	{
-		lower_texs[k] = upper_texs[k] = -1;
+		int ld = loop.lines[k];
+		int sd = LineDefs[ld]->WhatSideDef(loop.sides[k]);
+
+		if (sd < 0)
+		{
+			lower_texs[k] = upper_texs[k] = -1;
+			continue;
+		}
+
+		const SideDef *SD = SideDefs[sd];
+
+		if (LineDefs[ld]->TwoSided())
+		{
+			lower_texs[k] = SD->lower_tex;
+			upper_texs[k] = SD->upper_tex;
+		}
+		else
+		{
+			lower_texs[k] = upper_texs[k] = SD->mid_tex;
+		}
+
+		// handle missing lowers or uppers
+		if (lower_texs[k] == null_tex) lower_texs[k] = def_tex;
+		if (upper_texs[k] == null_tex) upper_texs[k] = lower_texs[k];
 	}
 
-	// TODO : SMART COOL SHIT....
+	// transfer nearby textures to blank spots
+
+	for (pass = 0 ; pass < total*2 ; pass++)
+	{
+		for (k = 0 ; k < total ; k++)
+		{
+			if (lower_texs[k] >= 0)
+				continue;
+
+			// next and previous line indices
+			unsigned int p = (k > 0) ? (k - 1) : total - 1;
+			unsigned int n = (k < total - 1) ? (k + 1) : 0;
+
+			bool two_k = WillBeTwoSided(loop.lines[k], loop.sides[k]);
+
+			bool two_p = WillBeTwoSided(loop.lines[p], loop.sides[p]);
+			bool two_n = WillBeTwoSided(loop.lines[n], loop.sides[n]);
+
+			// prefer same sided-ness of lines
+			if (pass < total)
+			{
+				if (two_p != two_k) p = total;
+				if (two_n != two_k) n = total;
+			}
+
+			// disable p or n if there is no texture there yet
+			if (p < total && lower_texs[p] < 0) p = total;
+			if (n < total && lower_texs[n] < 0) n = total;
+
+			if (p == total && n == total)
+				continue;
+
+			// if p and n both usable, p trumps n
+			if (p == total)
+				p = n;
+
+			lower_texs[k] = lower_texs[p];
+			upper_texs[k] = upper_texs[p];
+		}
+	}
 
 	// lastly, ensure all textures are valid
-	int def_tex = BA_InternaliseString(default_wall_tex);
-
-	for (k = 0 ; k < loop.lines.size() ; k++)
+	for (k = 0 ; k < total ; k++)
 	{
 		if (lower_texs[k] < 0) lower_texs[k] = def_tex;
 		if (upper_texs[k] < 0) upper_texs[k] = def_tex;
