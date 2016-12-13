@@ -40,10 +40,6 @@ PORTS / ZDoom:
 -  then can copy/paste textures, or use texture browser
 
 
-IDEA: have a "chocolate" source port
-[ and treat it like "vanilla" in parts of the code ]
-
-
 
 Documentation
 -------------

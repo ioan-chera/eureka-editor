@@ -255,7 +255,8 @@ static const char * CalcWarpString()
 
 	static char buffer[128];
 
-	// FIXME : some ports (EDGE and ZDoom) support the full name
+	// FIXME : EDGE allows a full name: -warp MAP03
+	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
 	if (strlen(Level_name) >= 4 &&
@@ -333,14 +334,21 @@ static void AppendWadName(char *buf, size_t maxsize, const char *name, const cha
 }
 
 
-static const char * GrabWadNames()
+static const char * GrabWadNames(const port_path_info_t *info)
 {
 	static char wad_names[FL_PATH_MAX * 3];
 
-	bool has_file  = false;
+	bool has_file = false;
 
-	// WISH : support "-merge" for Chocolate-Doom and derivatives
+	int use_merge = 0;
 
+	// see if we should use the "-merge" parameter, which is
+	// required for Chocolate-Doom and derivates like Crispy Doom.
+	// TODO : is there a better way to do this?
+	if (y_stricmp(Port_name, "vanilla") == 0)
+	{
+		use_merge = 1;
+	}
 
 	// begin with empty string
 	wad_names[0] = 0;
@@ -357,8 +365,13 @@ static const char * GrabWadNames()
 			continue;
 
 		AppendWadName(wad_names, sizeof(wad_names), wad->PathName(),
-					  !has_file ? "-file" : NULL);
-		has_file = true;
+					  (use_merge == 1) ? "-merge" :
+					  (use_merge == 0 && !has_file) ? "-file" : NULL);
+
+		if (use_merge)
+			use_merge++;
+		else
+			has_file = true;
 	}
 
 	// the current PWAD, if exists, must be last
@@ -434,7 +447,7 @@ void CMD_TestMap()
 	static char cmd_buffer[FL_PATH_MAX * 4];
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 CalcEXEName(info), GrabWadNames(), CalcWarpString());
+			 CalcEXEName(info), GrabWadNames(info), CalcWarpString());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer);
