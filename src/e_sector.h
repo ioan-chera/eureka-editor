@@ -101,8 +101,6 @@ private:
 	bool LookForIsland();
 
 	void CalcBounds(int *x1, int *y1, int *x2, int *y2) const;
-
-	void DoAssignSector(int ld, int side, int new_sec, selection_c& flip);
 };
 
 

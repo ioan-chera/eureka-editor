@@ -832,11 +832,40 @@ void lineloop_c::Dump() const
 }
 
 
+static void DetermineNewTextures(lineloop_c& loop,
+								 std::vector<int>& lower_texs,
+								 std::vector<int>& upper_texs)
+{
+	SYS_ASSERT(lower_texs.size() == loop.lines.size());
+
+	unsigned int k;
+
+	// reset everything to -1
+	for (k = 0 ; k < loop.lines.size() ; k++)
+	{
+		lower_texs[k] = upper_texs[k] = -1;
+	}
+
+	// TODO : SMART COOL SHIT....
+
+	// lastly, ensure all textures are valid
+	int def_tex = BA_InternaliseString(default_wall_tex);
+
+	for (k = 0 ; k < loop.lines.size() ; k++)
+	{
+		if (lower_texs[k] < 0) lower_texs[k] = def_tex;
+		if (upper_texs[k] < 0) upper_texs[k] = def_tex;
+	}
+}
+
+
 //
 // update the side on a single linedef, using the given sector
 // reference, and creating a new sidedef if necessary.
 //
-void lineloop_c::DoAssignSector(int ld, int side, int new_sec, selection_c& flip)
+void DoAssignSector(int ld, int side, int new_sec,
+					int new_lower, int new_upper,
+					selection_c& flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
@@ -860,12 +889,29 @@ void lineloop_c::DoAssignSector(int ld, int side, int new_sec, selection_c& flip
 		flip.set(ld);
 	}
 
+	SYS_ASSERT(new_lower >= 0);
+	SYS_ASSERT(new_upper >= 0);
+
 	// create new sidedef
 	int new_sd = BA_New(OBJ_SIDEDEFS);
 
 	SideDef * SD = SideDefs[new_sd];
 
-	SD->SetDefaults(other_sd >= 0);
+	if (other_sd >= 0)
+	{
+		// linedef will be two-sided
+		SD->lower_tex = new_lower;
+		SD->upper_tex = new_upper;
+		SD->  mid_tex = BA_InternaliseString("-");
+	}
+	else
+	{
+		// linedef will be one-sided
+		SD->lower_tex = new_lower;
+		SD->upper_tex = new_lower;
+		SD->  mid_tex = new_lower;
+	}
+
 	SD->sector = new_sec;
 
 	if (side > 0)
@@ -884,9 +930,15 @@ void lineloop_c::DoAssignSector(int ld, int side, int new_sec, selection_c& flip
 
 void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 {
+	std::vector<int> lower_texs(lines.size());
+	std::vector<int> upper_texs(lines.size());
+
+	DetermineNewTextures(*this, lower_texs, upper_texs);
+
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		DoAssignSector(lines[k], sides[k], new_sec, flip);
+		DoAssignSector(lines[k], sides[k], new_sec,
+					   lower_texs[k], upper_texs[k], flip);
 	}
 
 	for (unsigned int i = 0 ; i < islands.size() ; i++)
