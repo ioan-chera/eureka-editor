@@ -221,7 +221,8 @@ public:
 
 	Sector *SecRef() const;
 
-	void SetDefaults(bool two_sided);
+	// use new_tex when >= 0, otherwise use default_wall_tex
+	void SetDefaults(bool two_sided, int new_tex = -1);
 };
 
 

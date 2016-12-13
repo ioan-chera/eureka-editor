@@ -185,15 +185,18 @@ const char * SideDef::LowerTex() const
 	return basis_strtab.get(lower_tex);
 }
 
-void SideDef::SetDefaults(bool two_sided)
+void SideDef::SetDefaults(bool two_sided, int new_tex)
 {
-	lower_tex = BA_InternaliseString(default_wall_tex);
-	upper_tex = BA_InternaliseString(default_wall_tex);
+	if (new_tex < 0)
+		new_tex = BA_InternaliseString(default_wall_tex);
+
+	lower_tex = new_tex;
+	upper_tex = new_tex;
 
 	if (two_sided)
 		mid_tex = BA_InternaliseString("-");
 	else
-		mid_tex = BA_InternaliseString(default_wall_tex);
+		mid_tex = new_tex;
 }
 
 
