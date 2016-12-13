@@ -327,13 +327,13 @@ special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_lo
 # most specials are loaded via "mbf.ugh"
 
 # Scripting
-line 273 n "WR SMMU: FS_Execute"
-line 274 n "W1 SMMU: FS_Execute"
-line 275 n "W1 SMMU: FS_Execute /front"
-line 276 n "SR SMMU: FS_Execute"
-line 277 n "S1 SMMU: FS_Execute"
-line 278 n "GR SMMU: FS_Execute"
-line 279 n "G1 SMMU: FS_Execute"
+line 273 n "WR FraggleScript Exec"
+line 274 n "W1 FraggleScript Exec"
+line 275 n "W1 FraggleScript Exec /front"
+line 276 n "SR FraggleScript Exec"
+line 277 n "S1 FraggleScript Exec"
+line 278 n "GR FraggleScript Exec"
+line 279 n "G1 FraggleScript Exec"
 
 # Renderer
 line 336 r "-- ZD: Line Mirror"
