@@ -28,6 +28,7 @@ default_textures  MODWALL3  FLAT14  FLAT5_1
 default_thing  2014
 
 include "doom_colors"
+include "doom_groups"
 include "doom_specials"
 
 #---- THINGS ----------------

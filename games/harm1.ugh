@@ -28,6 +28,7 @@ default_thing  2011
 feature lax_sprites 1
 
 
+include "doom_groups"
 include "doom_specials"
 
 

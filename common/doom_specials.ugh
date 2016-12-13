@@ -25,28 +25,8 @@
 #------------------------------------------------------------------------
 
 #
-#	Definition of linedef groups
-#	Format is : linegroup <letter> <description>
-#
-
-linegroup a "Animated"
-linegroup c "Ceiling"
-linegroup d "Door"
-linegroup e "Exit level"
-linegroup f "Floor (lower)"
-linegroup g "Floor (raise)"
-linegroup h "Crusher"
-linegroup k "Keyed Door"
-linegroup l "Light"
-linegroup m "Moving floor"
-linegroup p "Lift"
-linegroup s "Stairs"
-linegroup t "Teleport"
-linegroup v "Elevator"
-linegroup - "OTHER"
-
-#
 #	Definition of linedef types
+#
 #	Format is : line <number> <group> <description>
 #
 
@@ -209,9 +189,9 @@ line 127 s "S1 Stair Raise 16"
 
 #------------------------------------------------------------------------
 
-
 #
 #	Definition of sector types
+#
 #	Format is : sector <number> <description>
 #
 
