@@ -1131,17 +1131,32 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 	double length = hypot(dx, dy);
 
+	// bounding box
+	int bbox_x1 = MIN(x1, x2);
+	int bbox_y1 = MIN(y1, y2);
+
+	int bbox_x2 = MAX(x1, x2);
+	int bbox_y2 = MAX(y1, y2);
+
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
 		const LineDef * L = LineDefs[ld];
 
-		double lx1 = L->Start()->x;
-		double ly1 = L->Start()->y;
-		double lx2 = L->End()->x;
-		double ly2 = L->End()->y;
+		int lx1 = L->Start()->x;
+		int ly1 = L->Start()->y;
+		int lx2 = L->End()->x;
+		int ly2 = L->End()->y;
 
-		// FIXME: quick bbox test
+		// bbox test -- eliminate most lines from consideration
+		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
+		    MAX(ly1,ly2) < bbox_y1 || MIN(ly1,ly2) > bbox_y2)
+		{
+			continue;
+		}
+
+		if (L->isZeroLength())
+			continue;
 
 		// skip linedef if an end-point is one of the vertices already
 		// in the crossing state (including the very start or very end).
@@ -1173,8 +1188,8 @@ static void FindCrossingLines(crossing_state_c& cross,
 		// compute intersection point
 		double l_along = a / (a - b);
 
-		double ix = lx1 + l_along * (lx2 - lx1);
-		double iy = ly1 + l_along * (ly2 - ly1);
+		double ix = (double)lx1 + l_along * (lx2 - lx1);
+		double iy = (double)ly1 + l_along * (ly2 - ly1);
 
 		int new_x = I_ROUND(ix);
 		int new_y = I_ROUND(iy);
@@ -1252,11 +1267,14 @@ void FindCrossingPoints(crossing_state_c& cross,
 	cross.Sort();
 
 
+	/* process each pair of adjacent vertices to find split lines */
+
 	int cur_x1 = x1;
 	int cur_y1 = y1;
 	int cur_v  = possible_v1;
 
-	// grab number of points now, since we will add the linedef splits
+	// grab number of points now, since we will adding split points
+	// (and we assume those new points get added at the end).
 	unsigned int num_verts = cross.points.size();
 
 	for (unsigned int k = 0 ; k < num_verts ; k++)
