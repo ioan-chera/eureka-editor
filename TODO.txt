@@ -9,15 +9,7 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-++  improve the FindAllCrossPoints algorithm to get the final
-    result to match what is drawn (ESPECIALLY wrt to vertices)
-
-
 build off 1S wall --> get the nearby wall texture
-
-
-+  review auto-split when line is close to a vertex
-   [ take SCALE into account ]
 
 
 BSP:
