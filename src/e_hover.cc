@@ -1023,14 +1023,14 @@ void crossing_state_c::add_vert(int v, double dist)
 	points.push_back(pt);
 }
 
-void crossing_state_c::add_line(int ld, int ix, int iy, double dist)
+void crossing_state_c::add_line(int ld, int new_x, int new_y, double dist)
 {
 	cross_point_t pt;
 
 	pt.vert = -1;
 	pt.ld   = ld;
-	pt.x    = ix;
-	pt.y    = iy;
+	pt.x    = new_x;
+	pt.y    = new_y;
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1138,14 +1138,13 @@ static void FindCrossingLines(crossing_state_c& cross,
 						int x1, int y1, int possible_v1,
 						int x2, int y2, int possible_v2)
 {
-	int dx = x2 - x1;
-	int dy = y2 - y1;
-
 	// this could happen when two vertices are overlapping
-	if (dx == 0 && dy == 0)
+	if (x1 == x2 && y1 == y2)
 		return;
 
-	double length = hypot(dx, dy);
+	// distances along the WHOLE original line
+	double along1 = AlongDist(x1, y1,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
+	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
 	// bounding box
 	int bbox_x1 = MIN(x1, x2);
@@ -1214,9 +1213,11 @@ static void FindCrossingLines(crossing_state_c& cross,
 		if (new_x == x1 && new_y == y1) continue;
 		if (new_x == x2 && new_y == y2) continue;
 
-		double along = AlongDist(new_x, new_y,  x1,y1, x2,y2);
+		if (L->TouchesCoord(new_x, new_y)) continue;
 
-		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
+		double along = AlongDist(new_x, new_y,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
+
+		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
 		{
 			cross.add_line(ld, new_x, new_y, along);
 		}

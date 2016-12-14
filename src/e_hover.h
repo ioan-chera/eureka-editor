@@ -83,7 +83,7 @@ public:
 	void clear();
 
 	void add_vert(int v, double dist);
-	void add_line(int ld, int ix, int iy, double dist);
+	void add_line(int ld, int new_x, int new_y, double dist);
 
 	bool HasVertex(int v) const;
 	bool HasLine(int ld)  const;
