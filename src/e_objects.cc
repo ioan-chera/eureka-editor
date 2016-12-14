@@ -267,7 +267,7 @@ fprintf(stderr, "--> %s + %s\n",
 			return true;
 		}
 
-		// TODO : REVIEW if we should use left.sec or right.sec
+		// TODO : REVIEW NeighboringSector(), it's a bit random what we get
 
 		int new_sec = Sector_New(innie.NeighboringSector());
 
