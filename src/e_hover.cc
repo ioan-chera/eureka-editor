@@ -1021,6 +1021,25 @@ void crossing_state_c::add_line(int ld, int ix, int iy, double dist)
 }
 
 
+bool crossing_state_c::HasVertex(int v) const
+{
+	for (unsigned int k = 0 ; k < points.size() ; k++)
+		if (points[k].vert == v)
+			return true;
+
+	return false;  // NOPE!
+}
+
+bool crossing_state_c::HasLine(int ld) const
+{
+	for (unsigned int k = 0 ; k < points.size() ; k++)
+		if (points[k].ld == ld)
+			return true;
+
+	return false;  // NO WAY!
+}
+
+
 void crossing_state_c::Sort()
 {
 	// FIXME
@@ -1095,12 +1114,15 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 #endif
 
 
+#define CROSSING_EPSILON  0.8
+#define    ALONG_EPSILON  0.4
+
+
 static void FindCrossingLines(crossing_state_c& cross,
 						int x1, int y1, int possible_v1,
 						int x2, int y2, int possible_v2)
 {
 	// FIXME: don't duplicate this shit
-	double epsilon = 0.4;
 	// when zooming out, make it easier to hit a vertex
 	double sk = 1.0 / grid.Scale;
 	double close_dist = 8 * sqrt(sk);
@@ -1110,7 +1132,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
-	// same coords?  (sanity check)
+	// this could happen when two vertices are overlapping
 	if (dx == 0 && dy == 0)
 		return;
 
@@ -1128,8 +1150,21 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		// FIXME: quick bbox test
 
-		// FIXME: skip if end-point of linedef is in crossing_state already,
-		//        OR equals the very start OR very end
+		// skip linedef if an end-point is one of the vertices already
+		// in the crossing state (including the very start or very end).
+		if (L->TouchesCoord(x1, y1) ||
+			L->TouchesCoord(x2, y2))
+			continue;
+
+		if (L->TouchesCoord(cross.start_x, cross.start_y) ||
+			L->TouchesCoord(cross.  end_x, cross.  end_y))
+			continue;
+
+		if (cross.HasLine(ld))
+			continue;
+
+		if (cross.HasVertex(L->start) || cross.HasVertex(L->end))
+			continue;
 
 		// only need to handle cases where this linedef distinctly crosses
 		// the new line (i.e. start and end are clearly on opposite sides).
@@ -1137,7 +1172,8 @@ static void FindCrossingLines(crossing_state_c& cross,
 		double a = PerpDist(lx1,ly1, x1,y1, x2,y2);
 		double b = PerpDist(lx2,ly2, x1,y1, x2,y2);
 
-		if (! ((a < -epsilon && b > epsilon) || (a > epsilon && b < -epsilon)))
+		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
+			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
 			continue;
 
 		// compute intersection point
@@ -1155,7 +1191,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		double along = AlongDist(new_x, new_y,  x1,y1, x2,y2);
 
-		if (along < epsilon || along > length - epsilon)
+		if (along < ALONG_EPSILON || along > length - ALONG_EPSILON)
 			continue;
 
 		// allow vertices to win over a nearby linedef
@@ -1174,9 +1210,13 @@ void FindCrossingPoints(crossing_state_c& cross,
 {
 	cross.clear();
 
+	cross.start_x = x1;
+	cross.start_y = y1;
+	cross.  end_x = x2;
+	cross.  end_y = y2;
+
 
 	// FIXME: don't duplicate this shit
-	double epsilon = 0.4;
 	// when zooming out, make it easier to hit a vertex
 	double sk = 1.0 / grid.Scale;
 	double close_dist = 8 * sqrt(sk);
@@ -1214,7 +1254,7 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
 
-		if (along < epsilon || along > length - epsilon)
+		if (along < ALONG_EPSILON || along > length - ALONG_EPSILON)
 			continue;
 
 		cross.add_vert(v, along);

@@ -72,6 +72,10 @@ class crossing_state_c
 public:
 	std::vector< cross_point_t > points;
 
+	// the start/end coordinates of the whole tested line
+	int start_x, start_y;
+	int   end_x,   end_y;
+
 public:
 	 crossing_state_c();
 	~crossing_state_c();
@@ -80,6 +84,9 @@ public:
 
 	void add_vert(int v, double dist);
 	void add_line(int ld, int ix, int iy, double dist);
+
+	bool HasVertex(int v) const;
+	bool HasLine(int ld)  const;
 
 	void Sort();
 
