@@ -48,21 +48,23 @@ Documentation
 
 +  a tutorial for the basics
 
-   - describe what a wad file is, PWAD vs IWAD, how to play it,
-     what nodes are, how wad files can contain more than maps,
-     different games and source ports
+-  describe what a wad file is, PWAD vs IWAD, how to play it,
+   what nodes are, how wad files can contain more than maps,
+   different games and source ports
 
-   - describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
+-  describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
 
-   - describe the four modes V/L/S/T, and their panels
+-  describe the four modes V/L/S/T, and their panels
 
-   - hilighting stuff, selecting stuff, dragging stuff
+-  hilighting stuff, selecting stuff, dragging stuff
 
-   - drawing lines in VERTEX mode
+-  drawing lines in VERTEX mode
 
-   - using the browser
+-  using the browser
 
-   - common pitfalls (vertices sitting on a linedef or another vertex)
+-  common pitfalls (vertices sitting on a linedef or another vertex)
+
+-  command line arguments page
 
 
 ______________________________________________________________________
@@ -153,6 +155,9 @@ WISH: a scripting language
 
 WISH: PRINT key makes a screenshot of 2D or 3D view
 
+WISH: edit-key dialog has a button which opens a web browser to
+      the documentation about the current command
+
 WISH: ability to view (perhaps edit) a map header lump
       (for FraggleScript etc...)
 
@@ -169,22 +174,6 @@ WISH: support DECORATE as (or in) a resource file
 
 WISH: support Windows 95/98/ME
       [running on Windows 98SE requires KernelEx]
-
-
-
-Documentation
--------------
-
-+  add supported OSes -- e.g. Windows >= XP
-
--  document texture browser (RIGHT click etc)
-
--  make a manpage for the debian package, list cmdline options
-
--  command line arguments page
-
-WISH: edit-key dialog has a button which opens a web browser to
-      the documentation about the current command
 
 
 
@@ -300,7 +289,6 @@ WISH: conversion from Boom --> vanilla DOOM
 WISH:  FreeDOOM : categorize all the new textures
 
 WISH:  HacX and Harmony : categorize the textures
-
 
 IDEA: for DOOM have "Switch", "Grating", "Door" categories
 
