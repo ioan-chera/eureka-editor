@@ -259,10 +259,13 @@ fprintf(stderr, "--> %s + %s\n",
 		lineloop_c& innie = left.loop.faces_outward ? right.loop : left.loop;
 
 		// always fill a loop created out in the void.
-		// also fill a created islands, unless the option is disabled AND
-		// the new island surrounds other islands.
-		if (filled_outie && new_islands_are_void && innie.islands.empty())
+		// also fill a created island, unless the option is disabled AND
+		// the new island does not surround other islands.
+		if (filled_outie && new_islands_are_void &&
+			innie.AllBare() && innie.islands.empty())
+		{
 			return true;
+		}
 
 		// TODO : REVIEW if we should use left.sec or right.sec
 
