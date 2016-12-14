@@ -1122,13 +1122,6 @@ static void FindCrossingLines(crossing_state_c& cross,
 						int x1, int y1, int possible_v1,
 						int x2, int y2, int possible_v2)
 {
-	// FIXME: don't duplicate this shit
-	// when zooming out, make it easier to hit a vertex
-	double sk = 1.0 / grid.Scale;
-	double close_dist = 8 * sqrt(sk);
-	close_dist = CLAMP(1.2, close_dist, 24.0);
-
-
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
@@ -1136,7 +1129,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 	if (dx == 0 && dy == 0)
 		return;
 
-	double length = sqrt(dx*dx + dy*dy);
+	double length = hypot(dx, dy);
 
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
@@ -1152,8 +1145,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		// skip linedef if an end-point is one of the vertices already
 		// in the crossing state (including the very start or very end).
-		if (L->TouchesCoord(x1, y1) ||
-			L->TouchesCoord(x2, y2))
+		if (L->TouchesCoord(x1, y1) || L->TouchesCoord(x2, y2))
 			continue;
 
 		if (L->TouchesCoord(cross.start_x, cross.start_y) ||
@@ -1174,7 +1166,9 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
 			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
+		{
 			continue;
+		}
 
 		// compute intersection point
 		double l_along = a / (a - b);
@@ -1191,15 +1185,10 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		double along = AlongDist(new_x, new_y,  x1,y1, x2,y2);
 
-		if (along < ALONG_EPSILON || along > length - ALONG_EPSILON)
-			continue;
-
-		// allow vertices to win over a nearby linedef
-		along += close_dist * 2;
-
-		// OK, this linedef crosses it
-
-		cross.add_line(ld, new_x, new_y, along);
+		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
+		{
+			cross.add_line(ld, new_x, new_y, along);
+		}
 	}
 }
 
@@ -1216,8 +1205,8 @@ void FindCrossingPoints(crossing_state_c& cross,
 	cross.  end_y = y2;
 
 
-	// FIXME: don't duplicate this shit
 	// when zooming out, make it easier to hit a vertex
+	// FIXME : REVIEW THIS
 	double sk = 1.0 / grid.Scale;
 	double close_dist = 8 * sqrt(sk);
 	close_dist = CLAMP(1.2, close_dist, 24.0);
@@ -1230,7 +1219,7 @@ void FindCrossingPoints(crossing_state_c& cross,
 	if (dx == 0 && dy == 0)
 		return;
 
-	double length = sqrt(dx*dx + dy*dy);
+	double length = hypot(dx, dy);
 
 
 	/* must do all vertices FIRST */
@@ -1254,10 +1243,10 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
 
-		if (along < ALONG_EPSILON || along > length - ALONG_EPSILON)
-			continue;
-
-		cross.add_vert(v, along);
+		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
+		{
+			cross.add_vert(v, along);
+		}
 	}
 
 	cross.Sort();
