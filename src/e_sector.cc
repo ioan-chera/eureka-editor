@@ -853,11 +853,53 @@ static void DetermineNewTextures(lineloop_c& loop,
 
 	SYS_ASSERT(lower_texs.size() == total);
 
-	int  def_tex = BA_InternaliseString(default_wall_tex);
-	int null_tex = BA_InternaliseString("-");
+	int null_tex  = BA_InternaliseString("-");
+
+	int def_lower = BA_InternaliseString(default_wall_tex);
+	int def_upper = def_lower;
 
 	unsigned int k;
 	unsigned int pass;
+
+	// look for emergency fallback texture
+	for (pass = 0 ; pass < 2 ; pass++)
+	{
+		for (k = 0 ; k < total ; k++)
+		{
+			int ld   = loop.lines[k];
+			int side = loop.sides[k];
+
+			// check back sides in *first* pass
+			// (to allow second pass to override)
+			if (pass == 0)
+				side = -side;
+
+			int sd = LineDefs[ld]->WhatSideDef(side);
+			if (sd < 0)
+				continue;
+
+			const SideDef *SD = SideDefs[sd];
+
+			if (LineDefs[ld]->TwoSided())
+			{
+				if (SD->lower_tex == null_tex) continue;
+				if (SD->upper_tex == null_tex) continue;
+
+				def_lower = SD->lower_tex;
+				def_upper = SD->upper_tex;
+			}
+			else
+			{
+				if (SD->mid_tex == null_tex) continue;
+
+				def_lower = SD->mid_tex;
+				def_upper = SD->mid_tex;
+			}
+
+			// stop once we found something
+			break;
+		}
+	}
 
 	// reset "bare" lines to -1,
 	// and grab the textures of other lines
@@ -885,9 +927,9 @@ static void DetermineNewTextures(lineloop_c& loop,
 			lower_texs[k] = upper_texs[k] = SD->mid_tex;
 		}
 
-		// handle missing lowers or uppers
-		if (lower_texs[k] == null_tex) lower_texs[k] = def_tex;
-		if (upper_texs[k] == null_tex) upper_texs[k] = lower_texs[k];
+		// prevent the "-" null texture
+		if (lower_texs[k] == null_tex) lower_texs[k] = def_lower;
+		if (upper_texs[k] == null_tex) upper_texs[k] = def_upper;
 	}
 
 	// transfer nearby textures to blank spots
@@ -934,8 +976,8 @@ static void DetermineNewTextures(lineloop_c& loop,
 	// lastly, ensure all textures are valid
 	for (k = 0 ; k < total ; k++)
 	{
-		if (lower_texs[k] < 0) lower_texs[k] = def_tex;
-		if (upper_texs[k] < 0) upper_texs[k] = def_tex;
+		if (lower_texs[k] < 0) lower_texs[k] = def_lower;
+		if (upper_texs[k] < 0) upper_texs[k] = def_upper;
 	}
 }
 
