@@ -1238,10 +1238,9 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 
 	// when zooming out, make it easier to hit a vertex
-	// FIXME : REVIEW THIS
-	double sk = 1.0 / grid.Scale;
-	double close_dist = 8 * sqrt(sk);
-	close_dist = CLAMP(1.2, close_dist, 24.0);
+	double close_dist = 4 * sqrt(1.0 / grid.Scale);
+
+	close_dist = CLAMP(1.0, close_dist, 12.0);
 
 
 	int dx = x2 - x1;
