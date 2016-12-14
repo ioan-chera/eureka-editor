@@ -1012,12 +1012,28 @@ void crossing_state_c::clear()
 
 void crossing_state_c::add_vert(int v, double dist)
 {
-	// FIXME
+	cross_point_t pt;
+
+	pt.vert = v;
+	pt.ld   = -1;
+	pt.x    = Vertices[v]->x;
+	pt.y    = Vertices[v]->y;
+	pt.dist = dist;
+
+	points.push_back(pt);
 }
 
 void crossing_state_c::add_line(int ld, int ix, int iy, double dist)
 {
-	// FIXME
+	cross_point_t pt;
+
+	pt.vert = -1;
+	pt.ld   = ld;
+	pt.x    = ix;
+	pt.y    = iy;
+	pt.dist = dist;
+
+	points.push_back(pt);
 }
 
 
