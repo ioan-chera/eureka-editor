@@ -91,6 +91,15 @@ public:
 	void Sort();
 
 	void SplitAllLines();
+
+private:
+	struct point_CMP
+	{
+		inline bool operator() (const cross_point_t &A, const cross_point_t& B) const
+		{
+			return A.dist < B.dist;
+		}
+	};
 };
 
 void FindCrossingPoints(crossing_state_c& cross,

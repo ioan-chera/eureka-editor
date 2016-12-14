@@ -1058,7 +1058,7 @@ bool crossing_state_c::HasLine(int ld) const
 
 void crossing_state_c::Sort()
 {
-	// FIXME
+	std::sort(points.begin(), points.end(), point_CMP());
 }
 
 
