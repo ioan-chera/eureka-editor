@@ -282,6 +282,11 @@ public:
 		return (start == v_num) || (end == v_num);
 	}
 
+	bool TouchesCoord(int tx, int ty) const
+	{
+		return Start()->Matches(tx, ty) || End()->Matches(tx, ty);
+	}
+
 	bool TouchesSector(int sec_num) const;
 
 	bool OneSided() const
