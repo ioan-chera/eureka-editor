@@ -316,8 +316,11 @@ fprintf(stderr, "--> %s + %s\n",
 }
 
 
-void Insert_LineDef(int v1, int v2, bool no_fill = false)
+static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 {
+	if (LineDefAlreadyExists(v1, v2))
+		return;
+
 	int new_ld = BA_New(OBJ_LINEDEFS);
 
 	LineDef * L = LineDefs[new_ld];
@@ -341,16 +344,13 @@ void Insert_LineDef(int v1, int v2, bool no_fill = false)
 }
 
 
-void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
+static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 {
-	if (LineDefAlreadyExists(v1, v2))
-		return;
-
-///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
-
 	// Find a linedef which this new line would cross, and if it exists
 	// add a vertex there and create TWO lines.  Also handle a vertex
 	// that this line crosses (sits on) similarly.
+
+///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 
 	crossing_state_c cross;
 
