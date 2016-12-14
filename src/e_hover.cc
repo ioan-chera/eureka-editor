@@ -29,6 +29,7 @@
 #include <algorithm>
 
 #include "e_hover.h"
+#include "e_linedef.h"	// SplitLineDefAtVertex()
 #include "e_main.h"		// Map_bound_xxx
 #include "m_game.h"
 #include "r_grid.h"
@@ -992,6 +993,60 @@ void GetSplitLineForDangler(Objid& o, int v_num)
 }
 
 
+//------------------------------------------------------------------------
+
+
+crossing_state_c::crossing_state_c() : points()
+{ }
+
+
+crossing_state_c::~crossing_state_c()
+{ }
+
+
+void crossing_state_c::clear()
+{
+	points.clear();
+}
+
+
+void crossing_state_c::add_vert(int v, double dist)
+{
+	// FIXME
+}
+
+void crossing_state_c::add_line(int ld, int ix, int iy, double dist)
+{
+	// FIXME
+}
+
+
+void crossing_state_c::Sort()
+{
+	// FIXME
+}
+
+
+void crossing_state_c::SplitAllLines()
+{
+	for (unsigned int i = 0 ; i < points.size() ; i++)
+	{
+		if (points[i].ld >= 0)
+		{
+			points[i].vert = BA_New(OBJ_VERTICES);
+
+			Vertex *V = Vertices[points[i].vert];
+
+			V->x = points[i].x;
+			V->y = points[i].y;
+
+			SplitLineDefAtVertex(points[i].ld, points[i].vert);
+		}
+	}
+}
+
+
+#if 0
 static void find_closest_cross_handler(int x, int y, double dist, int v, int ld, void *data)
 {
 	cross_state_t *cross = (cross_state_t *)data;
@@ -1023,8 +1078,6 @@ static void find_closest_cross_handler(int x, int y, double dist, int v, int ld,
 
 bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 {
-	// TODO : use FindAllCrossPoints(), remove the duplication
-
 	SYS_ASSERT(v1 != v2);
 
 	cross->vert = -1;
@@ -1039,12 +1092,15 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 
 	return (cross->vert >= 0) || (cross->line >= 0);
 }
+#endif
 
 
-void FindAllCrossPoints(int x1, int y1, int possible_v1,
-                        int x2, int y2, int possible_v2,
-						crossing_func_t func, void *data)
+void FindCrossingPoints(crossing_state_c& cross,
+						int x1, int y1, int possible_v1,
+						int x2, int y2, int possible_v2)
 {
+	cross.clear();
+
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
@@ -1086,9 +1142,7 @@ void FindAllCrossPoints(int x1, int y1, int possible_v1,
 		if (along < epsilon || along > length - epsilon)
 			continue;
 
-		// yes it is
-
-		(* func)(VC->x, VC->y, along, v, -1, data);
+		cross.add_vert(v, along);
 	}
 
 
@@ -1135,8 +1189,10 @@ void FindAllCrossPoints(int x1, int y1, int possible_v1,
 
 		// OK, this linedef crosses it
 
-		(* func)(new_x, new_y, along, -1, ld, data);
+		cross.add_line(ld, new_x, new_y, along);
 	}
+
+	cross.Sort();
 }
 
 //--- editor settings ---

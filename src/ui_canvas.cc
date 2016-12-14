@@ -1544,19 +1544,6 @@ void UI_Canvas::DrawCamera()
 }
 
 
-/* static */
-void UI_Canvas::draw_crossing_point(int map_x, int map_y, double dist,
-									int v, int ld, void *data)
-{
-	UI_Canvas *canvas = (UI_Canvas *)data;
-
-	if (ld >= 0 && ld == canvas->split_ld)
-		return;
-
-	canvas->DrawSplitPoint(map_x, map_y);
-}
-
-
 void UI_Canvas::DrawCurrentLine()
 {
 	if (edit.drawing_from < 0)
@@ -1602,9 +1589,21 @@ void UI_Canvas::DrawCurrentLine()
 	}
 
 	// draw all the crossing points
-	FindAllCrossPoints(v->x, v->y, edit.drawing_from,
-					   new_x, new_y, highlight.valid() ? highlight.num : -1,
-					   &draw_crossing_point, this);
+	crossing_state_c cross;
+
+	FindCrossingPoints(cross,
+					   v->x, v->y, edit.drawing_from,
+					   new_x, new_y, highlight.valid() ? highlight.num : -1);
+
+	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
+	{
+		cross_point_t& point = cross.points[k];
+
+		if (point.ld >= 0 && point.ld == split_ld)
+			return;
+
+		DrawSplitPoint(point.x, point.y);
+	}
 }
 
 

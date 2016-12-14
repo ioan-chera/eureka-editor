@@ -352,30 +352,29 @@ void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 	// add a vertex there and create TWO lines.  Also handle a vertex
 	// that this line crosses (sits on) similarly.
 
-	cross_state_t cross;
+	crossing_state_c cross;
 
-	if (! FindClosestCrossPoint(v1, v2, &cross))
+	FindCrossingPoints(cross,
+					   Vertices[v1]->x, Vertices[v1]->y, v1,
+					   Vertices[v2]->x, Vertices[v2]->y, v2);
+
+	cross.SplitAllLines();
+
+	int cur_v = v1;
+
+	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
-		Insert_LineDef(v1, v2, no_fill);
-		return;
+		int next_v = cross.points[k].vert;
+
+		SYS_ASSERT(next_v != v1);
+		SYS_ASSERT(next_v != v2);
+
+		Insert_LineDef(cur_v, next_v, no_fill);
+
+		cur_v = next_v;
 	}
 
-	if (cross.line >= 0)
-	{
-		cross.vert = BA_New(OBJ_VERTICES);
-
-		Vertex *V = Vertices[cross.vert];
-
-		V->x = cross.x;
-		V->y = cross.y;
-
-		SplitLineDefAtVertex(cross.line, cross.vert);
-	}
-
-	// recursively handle both sides
-
-	Insert_LineDef_autosplit(v1, cross.vert, no_fill);
-	Insert_LineDef_autosplit(cross.vert, v2, no_fill);
+	Insert_LineDef(cur_v, v2, no_fill);
 }
 
 

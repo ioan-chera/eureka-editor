@@ -145,9 +145,6 @@ private:
 
 	void DragDelta(int *dx, int *dy);
 
-	static void draw_crossing_point(int map_x, int map_y, double dist,
-									int v, int ld, void *data);
-
 	// convert screen coordinates to map coordinates
 	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
 	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }

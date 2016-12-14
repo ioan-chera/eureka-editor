@@ -58,21 +58,37 @@ int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2);
 typedef struct
 {
 	int vert;	// >= 0 when we hit a vertex
-	int line;   // >= 0 when we hit a linedef instead
+	int ld;     // >= 0 when we hit a linedef instead
 
 	int x, y;	// coordinate of line split point
 
-	double distance;
+	double dist;
 }
-cross_state_t;
+cross_point_t;
 
-typedef void (* crossing_func_t)(int map_x, int map_y, double dist, int v, int ld, void *data);
 
-bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross);
+class crossing_state_c
+{
+public:
+	std::vector< cross_point_t > points;
 
-void FindAllCrossPoints(int x1, int y1, int possible_v1,
-                        int x2, int y2, int possible_v2,
-						crossing_func_t func, void *data);
+public:
+	 crossing_state_c();
+	~crossing_state_c();
+
+	void clear();
+
+	void add_vert(int v, double dist);
+	void add_line(int ld, int ix, int iy, double dist);
+
+	void Sort();
+
+	void SplitAllLines();
+};
+
+void FindCrossingPoints(crossing_state_c& cross,
+						int x1, int y1, int possible_v1,
+						int x2, int y2, int possible_v2);
 
 #endif  /* __EUREKA_X_HOVER_H__ */
 
