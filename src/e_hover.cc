@@ -1095,11 +1095,17 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 #endif
 
 
-void FindCrossingPoints(crossing_state_c& cross,
+static void FindCrossingLines(crossing_state_c& cross,
 						int x1, int y1, int possible_v1,
 						int x2, int y2, int possible_v2)
 {
-	cross.clear();
+	// FIXME: don't duplicate this shit
+	double epsilon = 0.4;
+	// when zooming out, make it easier to hit a vertex
+	double sk = 1.0 / grid.Scale;
+	double close_dist = 8 * sqrt(sk);
+	close_dist = CLAMP(1.2, close_dist, 24.0);
+
 
 	int dx = x2 - x1;
 	int dy = y2 - y1;
@@ -1110,43 +1116,6 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 	double length = sqrt(dx*dx + dy*dy);
 
-	double epsilon = 0.4;
-
-	// when zooming out, make it easier to hit a vertex
-	double sk = 1.0 / grid.Scale;
-	double close_dist = 8 * sqrt(sk);
-
-	close_dist = CLAMP(1.2, close_dist, 24.0);
-
-	/* try all vertices */
-
-	for (int v = 0 ; v < NumVertices ; v++)
-	{
-		if (v == possible_v1 || v == possible_v2)
-			continue;
-
-		const Vertex * VC = Vertices[v];
-
-		// ignore vertices ar same coordinates as v1 or v2
-		if (VC->Matches(x1, y1) || VC->Matches(x2, y2))
-			continue;
-
-		// is this vertex sitting on the line?
-		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
-
-		if (fabs(perp) > close_dist)
-			continue;
-
-		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
-
-		if (along < epsilon || along > length - epsilon)
-			continue;
-
-		cross.add_vert(v, along);
-	}
-
-
-	/* try all linedefs */
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
@@ -1156,6 +1125,11 @@ void FindCrossingPoints(crossing_state_c& cross,
 		double ly1 = L->Start()->y;
 		double lx2 = L->End()->x;
 		double ly2 = L->End()->y;
+
+		// FIXME: quick bbox test
+
+		// FIXME: skip if end-point of linedef is in crossing_state already,
+		//        OR equals the very start OR very end
 
 		// only need to handle cases where this linedef distinctly crosses
 		// the new line (i.e. start and end are clearly on opposite sides).
@@ -1191,6 +1165,85 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 		cross.add_line(ld, new_x, new_y, along);
 	}
+}
+
+
+void FindCrossingPoints(crossing_state_c& cross,
+						int x1, int y1, int possible_v1,
+						int x2, int y2, int possible_v2)
+{
+	cross.clear();
+
+
+	// FIXME: don't duplicate this shit
+	double epsilon = 0.4;
+	// when zooming out, make it easier to hit a vertex
+	double sk = 1.0 / grid.Scale;
+	double close_dist = 8 * sqrt(sk);
+	close_dist = CLAMP(1.2, close_dist, 24.0);
+
+
+	int dx = x2 - x1;
+	int dy = y2 - y1;
+
+	// same coords?  (sanity check)
+	if (dx == 0 && dy == 0)
+		return;
+
+	double length = sqrt(dx*dx + dy*dy);
+
+
+	/* must do all vertices FIRST */
+
+	for (int v = 0 ; v < NumVertices ; v++)
+	{
+		if (v == possible_v1 || v == possible_v2)
+			continue;
+
+		const Vertex * VC = Vertices[v];
+
+		// ignore vertices ar same coordinates as v1 or v2
+		if (VC->Matches(x1, y1) || VC->Matches(x2, y2))
+			continue;
+
+		// is this vertex sitting on the line?
+		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+
+		if (fabs(perp) > close_dist)
+			continue;
+
+		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
+
+		if (along < epsilon || along > length - epsilon)
+			continue;
+
+		cross.add_vert(v, along);
+	}
+
+	cross.Sort();
+
+
+	int cur_x1 = x1;
+	int cur_y1 = y1;
+	int cur_v  = possible_v1;
+
+	// grab number of points now, since we will add the linedef splits
+	unsigned int num_verts = cross.points.size();
+
+	for (unsigned int k = 0 ; k < num_verts ; k++)
+	{
+		cross_point_t& next_p = cross.points[k];
+
+		FindCrossingLines(cross, cur_x1, cur_y1, cur_v,
+						  next_p.x, next_p.y, next_p.vert);
+
+		cur_x1 = next_p.x;
+		cur_y1 = next_p.y;
+		cur_v  = next_p.vert;
+	}
+
+	FindCrossingLines(cross, cur_x1, cur_y1, cur_v,
+	                  x2, y2, possible_v2);
 
 	cross.Sort();
 }
