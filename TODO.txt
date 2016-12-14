@@ -9,18 +9,10 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-build off 1S wall --> get the nearby wall texture
-
-
 BSP:
 
 +  check XNOD maps in ZDoom 2.8.1
    [ see if we get same behavior as Zandronum ]
-
-
-PORTS / ZDoom:
-
--  all the new things
 
 
 3D View:
