@@ -80,6 +80,11 @@ void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
 void Render3D_Navigate();
 void Render3D_ClearNav();
 
+void Render3D_Cut();
+void Render3D_Copy();
+void Render3D_Paste();
+void Render3D_ClearSelection();
+
 void Render3D_SetCameraPos(int new_x, int new_y);
 void Render3D_GetCameraPos(int *x, int *y, float *angle);
 

@@ -32,6 +32,7 @@
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 
 
@@ -773,6 +774,12 @@ void CMD_CopyAndPaste()
 
 void CMD_Clipboard_Cut()
 {
+	if (edit.render3d)
+	{
+		Render3D_Cut();
+		return;
+	}
+
 	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to cut");
@@ -785,6 +792,12 @@ void CMD_Clipboard_Cut()
 
 void CMD_Clipboard_Copy()
 {
+	if (edit.render3d)
+	{
+		Render3D_Copy();
+		return;
+	}
+
 	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to copy");
@@ -795,6 +808,12 @@ void CMD_Clipboard_Copy()
 
 void CMD_Clipboard_Paste()
 {
+	if (edit.render3d)
+	{
+		Render3D_Paste();
+		return;
+	}
+
 	if (! Clipboard_DoPaste())
 	{
 		Beep("Clipboard is empty");
