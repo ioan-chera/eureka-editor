@@ -1098,7 +1098,7 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
-		else if (th_index == view.hl.thing)
+		else if (view.hl.isThing() && th_index == view.hl.num)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -1143,7 +1143,7 @@ public:
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (view.hl.part == OB3D_Lower)
+			if (view.hl.type == OB3D_Lower)
 			{
 				h1 = MIN(front->floorh, back->floorh);
 				h2 = MAX(front->floorh, back->floorh);
@@ -1198,15 +1198,18 @@ public:
 
 	void HighlightGeometry()
 	{
-		const LineDef *hl_linedef = is_linedef(view.hl.line) ?
-			LineDefs[view.hl.line] : NULL;
+		const LineDef *hl_linedef = NULL;
 
-		int hl_sec = view.hl.sector;
-		int sec_h  = 0;
+		if (view.hl.isLine())
+			hl_linedef = LineDefs[view.hl.num];
+
+		int hl_sec = view.hl.isSector() ? view.hl.num : -1;
+
+		int sec_h = 0;
 
 		if (hl_sec >= 0)
 		{
-			if (view.hl.part == OB3D_Floor)
+			if (view.hl.type == OB3D_Floor)
 			{
 				sec_h = Sectors[hl_sec]->floorh;
 
@@ -1226,7 +1229,7 @@ public:
 		{
 			DrawWall *dw = (*S);
 
-			if (dw->th >= 0 && dw->th == view.hl.thing)
+			if (dw->th >= 0 && view.hl.isThing() && dw->th == view.hl.num)
 				HighlightThing(dw);
 
 			if (! dw->ld)
@@ -1825,7 +1828,7 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 
 	rend.DoQuery(qx, qy);
 
-	hl.Clear();
+	hl.clear();
 
 	if (! rend.query_wall)
 	{
@@ -1833,18 +1836,18 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 		return false;
 	}
 
-	hl.part = rend.query_part;
+	hl.type = rend.query_part;
 
-	if (hl.part == OB3D_Thing)
+	if (hl.type == OB3D_Thing)
 	{
-		hl.thing = rend.query_wall->th;
+		hl.num = rend.query_wall->th;
 	}
-	else if (hl.part == OB3D_Floor || hl.part == OB3D_Ceil)
+	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
 	{
 		// ouch -- fix?
 		for (int n = 0 ; n < NumSectors ; n++)
 			if (rend.query_wall->sec == Sectors[n])
-				hl.sector = n;
+				hl.num = n;
 	}
 	else
 	{
@@ -1853,10 +1856,10 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 		// ouch -- fix?
 		for (int n = 0 ; n < NumLineDefs ; n++)
 			if (rend.query_wall->ld == LineDefs[n])
-				hl.line = n;
+				hl.num = n;
 	}
 
-	return (hl.line >= 0 || hl.sector >= 0 || hl.thing >= 0);
+	return hl.valid();
 }
 
 
@@ -2138,13 +2141,13 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (mode < 0)
 	{
 		// find the line / side to adjust
-		if (! is_linedef(view.hl.line))
+		if (! view.hl.isLine())
 			return;
 
-		if (view.hl.part == OB3D_Floor || view.hl.part == OB3D_Ceil)
+		if (! (view.hl.type == OB3D_Lower || view.hl.type == OB3D_Upper))
 			return;
 
-		const LineDef *L = LineDefs[view.hl.line];
+		const LineDef *L = LineDefs[view.hl.num];
 
 		int sd = (view.hl.side < 0) ? L->left : L->right;
 
@@ -2152,7 +2155,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 			return;
 
 		// OK
-		view.adjust_ld = view.hl.line;
+		view.adjust_ld = view.hl.num;
 		view.adjust_sd = sd;
 
 		// reset offset deltas to 0
@@ -2252,7 +2255,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	main_win->render->query(view.hl, x, y);
 
-	if (old.isSame(view.hl))
+	if (old == view.hl)
 		return;
 
 	main_win->render->redraw();
@@ -2865,14 +2868,14 @@ void R3D_Align()
 	bool do_clear = Exec_HasFlag("/clear");
 
 	// find the line / side to align
-	if (! is_linedef(view.hl.line) ||
-		view.hl.part == OB3D_Floor || view.hl.part == OB3D_Ceil)
+	if (! view.hl.isLine())
 	{
 		Beep("No sidedef there!");
 		return;
 	}
 
-	const LineDef *L = LineDefs[view.hl.line];
+	int ld = view.hl.num;
+	const LineDef *L = LineDefs[ld];
 
 	int sd = (view.hl.side < 0) ? L->left : L->right;
 
@@ -2889,14 +2892,14 @@ void R3D_Align()
 		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
 		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
 
-		BA_Message("cleared offsets on line #%d", view.hl.line);
+		BA_Message("cleared offsets on line #%d", ld);
 
 		BA_End();
 
 		return;
 	}
 
-	char part_c = (view.hl.part == OB3D_Upper) ? 'u' : 'l';
+	char part_c = (view.hl.type == OB3D_Upper) ? 'u' : 'l';
 
 	int align_flags = 0;
 
@@ -2906,7 +2909,7 @@ void R3D_Align()
 	if (Exec_HasFlag("/right"))
 		align_flags |= LINALIGN_Right;
 
-	LineDefs_Align(view.hl.line, view.hl.side, sd, part_c, align_flags);
+	LineDefs_Align(ld, view.hl.side, sd, part_c, align_flags);
 }
 
 

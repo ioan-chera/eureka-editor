@@ -80,12 +80,14 @@ public:
 
 typedef enum
 {
-	OB3D_Floor = -2,
-	OB3D_Lower = -1,  // used for middle of 1S lines too
-	OB3D_Rail  =  0,
-	OB3D_Upper = +1,
-	OB3D_Ceil  = +2,
-	OB3D_Thing = +3,
+	OB3D_Thing = 0,
+
+	OB3D_Floor = -1,
+	OB3D_Ceil  = -2,
+
+	OB3D_Lower = 1,  // used for middle of 1S lines too
+	OB3D_Rail  = 2,
+	OB3D_Upper = 3,
 
 } obj3d_type_e;
 
@@ -93,41 +95,43 @@ typedef enum
 class Obj3d_t
 {
 public:
-	obj3d_type_e part;
+	obj3d_type_e type;
 
-	int line;    // -1 for none
-	int side;    // SIDE_XXX of the line  [ unused for sectors or things ]
-	int sector;  // -1 for none
-	int thing;   // -1 for none
+	// the linedef, sector or thing number, or NIL_OBJ of none
+	int num;
+
+	// SIDE_XXX of the line  [ unused for sectors or things ]
+	int side;
 
 public:
-	Obj3d_t() : part(OB3D_Thing), line(-1), side(0), sector(-1), thing(-1)
+	Obj3d_t() : type(OB3D_Thing), num(NIL_OBJ), side()
 	{ }
 
 	Obj3d_t(const Obj3d_t& other) :
-		part(other.part),
-		line(other.line),
-		side(other.side),
-		sector(other.sector),
-		thing(other.thing)
+		type(other.type),
+		num (other.num),
+		side(other.side)
 	{ }
 
-	void Clear()
+	void clear()
 	{
-		part   = OB3D_Thing;
-		line   = -1;
-		side   =  0;
-		sector = -1;
-		thing  = -1;
+		type  = OB3D_Thing;
+		num   = NIL_OBJ;
+		side  =  0;
 	}
 
-	bool isSame(const Obj3d_t& other) const
+	bool valid()  const { return num >= 0; }
+	bool is_nil() const { return num <  0; }
+
+	bool isLine()   const { return valid() && (type >= OB3D_Lower); }
+	bool isSector() const { return valid() && (type <= OB3D_Floor); }
+	bool isThing()  const { return valid() && (type == OB3D_Thing); }
+
+	bool operator== (const Obj3d_t& other) const
 	{
-		return	(part == other.part) &&
-				(line == other.line) &&
-				(side == other.side) &&
-				(sector == other.sector) &&
-				(thing == other.thing);
+		return	(type == other.type) &&
+				(num  == other.num)  &&
+				(side == other.side);
 	}
 };
 

@@ -973,6 +973,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	Editor_ClearAction();
 
 	Selection_InvalidateLast();
+	Render3D_ClearSelection();
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();
