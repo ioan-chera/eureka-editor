@@ -9,19 +9,26 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+>>>  REVIEW: instead of AddRenderLine(), simply draw them
+     [ see if we can call HighlightGeometry after a render ]
+
+
+!!!  support CTRL-C/X/V when panel pics are selected
+     i.e. select a flat in sector panel, CTRL-C copies to defaults,
+          and CTRL-V can paste from defaults
+
+
+>>>  browser picks sending info to the 3D code
+
+
+>>>  copy/cut/paste textures in 3D view
+
+
+
 BSP:
 
 +  check XNOD maps in ZDoom 2.8.1
    [ see if we get same behavior as Zandronum ]
-
-
-3D View:
-
-+  can "select" a wall part or sector surface in RED
-   like the texture/flat in the LineDef/Sector panel
-   [ and it deselects anything in the panel ]
-
--  then can copy/paste textures, or use texture browser
 
 
 
