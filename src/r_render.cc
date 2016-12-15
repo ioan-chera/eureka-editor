@@ -61,48 +61,6 @@ int  render_pixel_aspect = 83;  //  100 * width / height
 rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
 
 
-struct highlight_3D_info_t
-{
-public:
-	int line;    // -1 for none
-	int side;    // SIDE_XXX of the line  [ unused for sectors or things ]
-	int sector;  // -1 for none
-	int thing;   // -1 for none
-
-	query_part_e part;
-
-public:
-	highlight_3D_info_t() : line(-1), side(0), sector(-1), thing(-1), part(QRP_Lower)
-	{ }
-
-	highlight_3D_info_t(const highlight_3D_info_t& other) :
-		line(other.line),
-		side(other.side),
-		sector(other.sector),
-		thing(other.thing),
-		part(other.part)
-	{ }
-
-	void Clear()
-	{
-		line   = -1;
-		side   =  0;
-		sector = -1;
-		thing  = -1;
-		part   = QRP_Lower;
-	}
-
-	bool isSame(const highlight_3D_info_t& other) const
-	{
-		return	(line == other.line) &&
-				(side == other.side) &&
-				(sector == other.sector) &&
-				(thing == other.thing) &&
-				(part == other.part);
-	}
-};
-
-
 struct Y_View
 {
 public:
@@ -152,7 +110,7 @@ public:
 	float nav_turn_L, nav_turn_R;
 
 	// current highlighted wotsit
-	highlight_3D_info_t hl;
+	Obj3d_t hl;
 
 public:
 	Y_View() :
@@ -736,7 +694,7 @@ public:
 	int query_sy;
 
 	DrawWall     *query_wall;  // the hit wall
-	query_part_e  query_part;  // the part of the hit wall
+	obj3d_type_e  query_part;  // the part of the hit wall
 
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
@@ -1185,12 +1143,12 @@ public:
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (view.hl.part == QRP_Lower)
+			if (view.hl.part == OB3D_Lower)
 			{
 				h1 = MIN(front->floorh, back->floorh);
 				h2 = MAX(front->floorh, back->floorh);
 			}
-			else /* part == QRP_Upper */
+			else /* part == OB3D_Upper */
 			{
 				h1 = MIN(front->ceilh, back->ceilh);
 				h2 = MAX(front->ceilh, back->ceilh);
@@ -1248,13 +1206,13 @@ public:
 
 		if (hl_sec >= 0)
 		{
-			if (view.hl.part == QRP_Floor)
+			if (view.hl.part == OB3D_Floor)
 			{
 				sec_h = Sectors[hl_sec]->floorh;
 
 				if (sec_h >= view.z) hl_sec = -1;
 			}
-			else  /* QRP_Ceil */
+			else  /* OB3D_Ceil */
 			{
 				sec_h = Sectors[hl_sec]->ceilh;
 
@@ -1449,7 +1407,7 @@ public:
 	}
 
 	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
-								  query_part_e part)
+								  obj3d_type_e part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1557,7 +1515,7 @@ public:
 			if (y1 <= query_sy && query_sy <= y2)
 			{
 				query_wall = dw;
-				query_part = QRP_Thing;
+				query_part = OB3D_Thing;
 			}
 
 			return;
@@ -1714,10 +1672,10 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, QRP_Ceil);
-				RenderWallSurface(dw, dw->floor, x, QRP_Floor);
-				RenderWallSurface(dw, dw->upper, x, QRP_Upper);
-				RenderWallSurface(dw, dw->lower, x, QRP_Lower);
+				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
+				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
+				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
 
 				if (open_y1 >= open_y2)
 					break;
@@ -1847,7 +1805,7 @@ void UI_Render3D::draw()
 }
 
 
-bool UI_Render3D::query(highlight_3D_info_t& hl, int sx, int sy)
+bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 {
 	int ow = w();
 	int oh = h();
@@ -1877,11 +1835,11 @@ bool UI_Render3D::query(highlight_3D_info_t& hl, int sx, int sy)
 
 	hl.part = rend.query_part;
 
-	if (hl.part == QRP_Thing)
+	if (hl.part == OB3D_Thing)
 	{
 		hl.thing = rend.query_wall->th;
 	}
-	else if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
+	else if (hl.part == OB3D_Floor || hl.part == OB3D_Ceil)
 	{
 		// ouch -- fix?
 		for (int n = 0 ; n < NumSectors ; n++)
@@ -2183,7 +2141,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 		if (! is_linedef(view.hl.line))
 			return;
 
-		if (view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
+		if (view.hl.part == OB3D_Floor || view.hl.part == OB3D_Ceil)
 			return;
 
 		const LineDef *L = LineDefs[view.hl.line];
@@ -2290,7 +2248,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	highlight_3D_info_t old(view.hl);
+	Obj3d_t old(view.hl);
 
 	main_win->render->query(view.hl, x, y);
 
@@ -2908,7 +2866,7 @@ void R3D_Align()
 
 	// find the line / side to align
 	if (! is_linedef(view.hl.line) ||
-		view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
+		view.hl.part == OB3D_Floor || view.hl.part == OB3D_Ceil)
 	{
 		Beep("No sidedef there!");
 		return;
@@ -2938,7 +2896,7 @@ void R3D_Align()
 		return;
 	}
 
-	char part_c = (view.hl.part == QRP_Upper) ? 'u' : 'l';
+	char part_c = (view.hl.part == OB3D_Upper) ? 'u' : 'l';
 
 	int align_flags = 0;
 

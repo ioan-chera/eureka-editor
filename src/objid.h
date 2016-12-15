@@ -72,6 +72,66 @@ public:
 	bool is_nil() const { return num <  0; }
 };
 
+
+//------------------------------------------------------------------------
+//   ITEMS IN THE 3D VIEW
+//------------------------------------------------------------------------
+
+
+typedef enum
+{
+	OB3D_Floor = -2,
+	OB3D_Lower = -1,  // used for middle of 1S lines too
+	OB3D_Rail  =  0,
+	OB3D_Upper = +1,
+	OB3D_Ceil  = +2,
+	OB3D_Thing = +3,
+
+} obj3d_type_e;
+
+
+class Obj3d_t
+{
+public:
+	obj3d_type_e part;
+
+	int line;    // -1 for none
+	int side;    // SIDE_XXX of the line  [ unused for sectors or things ]
+	int sector;  // -1 for none
+	int thing;   // -1 for none
+
+public:
+	Obj3d_t() : part(OB3D_Thing), line(-1), side(0), sector(-1), thing(-1)
+	{ }
+
+	Obj3d_t(const Obj3d_t& other) :
+		part(other.part),
+		line(other.line),
+		side(other.side),
+		sector(other.sector),
+		thing(other.thing)
+	{ }
+
+	void Clear()
+	{
+		part   = OB3D_Thing;
+		line   = -1;
+		side   =  0;
+		sector = -1;
+		thing  = -1;
+	}
+
+	bool isSame(const Obj3d_t& other) const
+	{
+		return	(part == other.part) &&
+				(line == other.line) &&
+				(side == other.side) &&
+				(sector == other.sector) &&
+				(thing == other.thing);
+	}
+};
+
+
 #endif  /* __EUREKA_OBJ_ID_H__ */
 
 //--- editor settings ---

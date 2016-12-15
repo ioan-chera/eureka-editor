@@ -27,20 +27,6 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
-struct highlight_3D_info_t;
-
-
-typedef enum
-{
-	QRP_Floor = -2,
-	QRP_Lower = -1,  // used for middle of 1S lines too
-	QRP_Rail  =  0,
-	QRP_Upper = +1,
-	QRP_Ceil  = +2,
-	QRP_Thing = +3,
-
-} query_part_e;
-
 
 class UI_Render3D : public Fl_Widget
 {
@@ -57,7 +43,7 @@ public:
 	// perform a query to see what the mouse pointer is over.
 	// returns true if something was hit, false otherwise.
 	// [ see the struct definition for more details... ]
-	bool query(highlight_3D_info_t& hl, int sx, int sy);
+	bool query(Obj3d_t& hl, int sx, int sy);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);
