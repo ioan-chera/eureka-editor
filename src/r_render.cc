@@ -279,6 +279,16 @@ public:
 			   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
 	}
 
+	// this needed since we allow invalid objects in sel
+	bool SelectEmpty() const
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k].valid())
+				return false;
+
+		return true;
+	}
+
 	bool SelectGet(const Obj3d_t& obj) const
 	{
 		for (unsigned int k = 0 ; k < sel.size() ; k++)
@@ -2422,20 +2432,126 @@ void Render3D_Navigate()
 }
 
 
+static int GrabTextureFromObject(const Obj3d_t& obj)
+{
+	if (obj.type == OB3D_Floor)
+		return Sectors[obj.num]->floor_tex;
+
+	if (obj.type == OB3D_Ceil)
+		return Sectors[obj.num]->ceil_tex;
+
+	if (! obj.isLine())
+		return -1;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	if (LD->OneSided())
+	{
+		return LD->Right()->mid_tex;
+	}
+
+	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
+
+	if (! SD)
+		return -1;
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			return SD->lower_tex;
+
+		case OB3D_Upper:
+			return SD->upper_tex;
+
+		case OB3D_Rail:
+			return SD->mid_tex;
+
+		default:
+			return -1;
+	}
+}
+
+
+//
+// grab the texture or flat (as offset into string table) from the
+// current 3D selection.  returns -1 if selection is empty, -2 if
+// there multiple selected and some were different.
+//
+static int GrabTextureFrom3DSel()
+{
+	int result = -1;
+
+	for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+	{
+		const Obj3d_t& obj = view.sel[k];
+
+		if (! obj.valid())
+			continue;
+
+		int cur_tex = GrabTextureFromObject(obj);
+		if (cur_tex < 0)
+			continue;
+
+		// more than one distinct texture?
+		if (result >= 0 && result != cur_tex)
+			return -2;
+
+		result = cur_tex;
+	}
+
+	return result;
+}
+
+
 void Render3D_Cut()
 {
+	// there is re-purposed as "eXchange" between the selected
+	// object(s) and the default properties.
+
+	if (view.SelectEmpty())
+	{
+		Beep("Nothing to cut");
+		return;
+	}
+
+	int new_tex = GrabTextureFrom3DSel();
+	if (new_tex < 0)
+	{
+		Beep("multiple textures present");
+		return;
+	}
+
 	// FIXME
 }
 
 
 void Render3D_Copy()
 {
+	if (view.SelectEmpty())
+	{
+		Beep("Nothing to copy");
+		return;
+	}
+
+	int new_tex = GrabTextureFrom3DSel();
+	if (new_tex < 0)
+	{
+		Beep("multiple textures present");
+		return;
+	}
+
 	// FIXME
 }
 
 
 void Render3D_Paste()
 {
+	if (view.SelectEmpty())
+	{
+		Beep("Nothing to paste into");
+		return;
+	}
+
 	// FIXME
 }
 
