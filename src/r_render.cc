@@ -2439,6 +2439,12 @@ void Render3D_WriteUser(FILE *fp)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
+void R3D_Click()
+{
+	// FIXME
+}
+
+
 void R3D_Forward()
 {
 	float dist = atof(EXEC_Param[0]);
@@ -2955,6 +2961,10 @@ void R3D_WHEEL_Move()
 
 static editor_command_t  render_commands[] =
 {
+	{	"3D_Click", NULL,
+		&R3D_Click
+	},
+
 	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
