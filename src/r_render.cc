@@ -799,6 +799,13 @@ public:
 		hl_lines.push_back(new_line);
 	}
 
+	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
+	{
+		AddRenderLine(sx1, sy1, sx2, sy2,
+				is_selected ? 2 : 0,
+				is_selected ? FL_RED : HI_COL);
+	}
+
 	void SaveOffsets()
 	{
 		if (view.adjust_ld < 0)
@@ -1170,7 +1177,8 @@ public:
 		}
 	}
 
-	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw)
+	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw,
+							bool is_selected)
 	{
 		int h1, h2;
 
@@ -1206,13 +1214,13 @@ public:
 		int ry2 = DistToY(dw->iz2, h1);
 
 		// keep the lines thin, makes aligning textures easier
-		AddRenderLine(x1, ly1, x1, ly2, 0, HI_COL);
-		AddRenderLine(x2, ry1, x2, ry2, 0, HI_COL);
-		AddRenderLine(x1, ly1, x2, ry1, 0, HI_COL);
-		AddRenderLine(x1, ly2, x2, ry2, 0, HI_COL);
+		AddRenderLine(x1, ly1, x1, ly2, is_selected);
+		AddRenderLine(x2, ry1, x2, ry2, is_selected);
+		AddRenderLine(x1, ly1, x2, ry1, is_selected);
+		AddRenderLine(x1, ly2, x2, ry2, is_selected);
 	}
 
-	void Highlight_Line(obj3d_type_e part, int ld, int side)
+	void Highlight_Line(obj3d_type_e part, int ld, int side, bool is_selected)
 	{
 		const LineDef *L = LineDefs[ld];
 
@@ -1223,11 +1231,11 @@ public:
 			const DrawWall *dw = (*S);
 
 			if (dw->ld == L && dw->side == side)
-				Highlight_WallPart(part, dw);
+				Highlight_WallPart(part, dw, is_selected);
 		}
 	}
 
-	void Highlight_Sector(obj3d_type_e part, int sec_num)
+	void Highlight_Sector(obj3d_type_e part, int sec_num, bool is_selected)
 	{
 		int sec_h;
 
@@ -1257,12 +1265,12 @@ public:
 				int sy1 = DistToY(dw->iz1, sec_h);
 				int sy2 = DistToY(dw->iz2, sec_h);
 
-				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, 0, HI_COL);
+				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
 			}
 		}
 	}
 
-	void Highlight_Thing(int th)
+	void Highlight_Thing(int th, bool is_selected)
 	{
 		DrawWall::vec_t::iterator S;
 
@@ -1282,34 +1290,48 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			AddRenderLine(x1, y1, x1, y2, 0, HI_COL);
-			AddRenderLine(x2, y1, x2, y2, 0, HI_COL);
-			AddRenderLine(x1, y1, x2, y1, 0, HI_COL);
-			AddRenderLine(x1, y2, x2, y2, 0, HI_COL);
-
+			AddRenderLine(x1, y1, x1, y2, is_selected);
+			AddRenderLine(x2, y1, x2, y2, is_selected);
+			AddRenderLine(x1, y1, x2, y1, is_selected);
+			AddRenderLine(x1, y2, x2, y2, is_selected);
 			break;
+		}
+	}
+
+	inline void Highlight_Object(Obj3d_t& obj, bool is_selected)
+	{
+		if (obj.isThing())
+		{
+			Highlight_Thing(obj.num, is_selected);
+		}
+		else if (obj.isSector())
+		{
+			Highlight_Sector(obj.type, obj.num, is_selected);
+		}
+		else if (obj.isLine())
+		{
+			Highlight_Line(obj.type, obj.num, obj.side, is_selected);
 		}
 	}
 
 	void HighlightGeometry()
 	{
-		if (view.hl.isThing())
+		/* do the selection */
+
+		for (unsigned int k = 0 ; k < view.sel.size() ; k++)
 		{
-			Highlight_Thing(view.hl.num);
-			return;
+			if (! view.sel[k].valid())
+				continue;
+
+			if (view.hl.valid() && view.hl == view.sel[k])
+				continue;
+
+			Highlight_Object(view.sel[k], true);
 		}
 
-		if (view.hl.isSector())
-		{
-			Highlight_Sector(view.hl.type, view.hl.num);
-			return;
-		}
+		/* do the highlight */
 
-		if (view.hl.isLine())
-		{
-			Highlight_Line(view.hl.type, view.hl.num, view.hl.side);
-			return;
-		}
+		Highlight_Object(view.hl, false);
 	}
 
 	void ClipSolids()
