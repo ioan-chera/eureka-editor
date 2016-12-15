@@ -112,6 +112,11 @@ public:
 	// current highlighted wotsit
 	Obj3d_t hl;
 
+	// current selection
+	std::vector< Obj3d_t > sel;
+
+	obj3d_type_e sel_type;  // valid when sel.size() > 0
+
 public:
 	Y_View() :
 		p_type(0), px(), py(),
@@ -126,7 +131,8 @@ public:
 		adjust_ld(-1), adjust_sd(-1),
 		is_scrolling(false),
 		nav_time(0),
-		hl()
+		hl(),
+		sel(), sel_type(OB3D_Thing)
 	{ }
 
 	void SetAngle(float new_ang)
@@ -264,6 +270,41 @@ public:
 
 		if (gravity)
 			FindGroundZ();
+	}
+
+	bool SelectGet(const Obj3d_t& obj) const
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k] == obj)
+				return true;
+
+		return false;
+	}
+
+	void SelectToggle(const Obj3d_t& obj)
+	{
+		if (! sel.empty() && sel_type != obj.type)
+			sel.clear();
+
+		if (sel.empty())
+		{
+			sel_type = obj.type;
+			sel.push_back(obj);
+			return;
+		}
+
+		// if object already selected, unselect it
+		// [ we are lazy and leave a NIL object in the vector ]
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+		{
+			if (sel[k] == obj)
+			{
+				sel[k].num = NIL_OBJ;
+				return;
+			}
+		}
+
+		sel.push_back(obj);
 	}
 };
 
@@ -2368,7 +2409,7 @@ void Render3D_Paste()
 
 void Render3D_ClearSelection()
 {
-	// FIXME
+	view.sel.clear();
 }
 
 
