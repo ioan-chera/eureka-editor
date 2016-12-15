@@ -272,6 +272,13 @@ public:
 			FindGroundZ();
 	}
 
+	bool SelectIsCompat(obj3d_type_e new_type) const
+	{
+		return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
+			   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
+			   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
+	}
+
 	bool SelectGet(const Obj3d_t& obj) const
 	{
 		for (unsigned int k = 0 ; k < sel.size() ; k++)
@@ -283,7 +290,8 @@ public:
 
 	void SelectToggle(const Obj3d_t& obj)
 	{
-		if (! sel.empty() && sel_type != obj.type)
+		// when type of surface is radically different, clear selection
+		if (! sel.empty() && ! SelectIsCompat(obj.type))
 			sel.clear();
 
 		if (sel.empty())
