@@ -2516,7 +2516,21 @@ void Render3D_WriteUser(FILE *fp)
 
 void R3D_Click()
 {
-	// FIXME
+	if (! view.hl.valid())
+	{
+		Beep("nothing there");
+		return;
+	}
+
+	if (view.hl.type == OB3D_Thing)
+		return;
+
+	view.SelectToggle(view.hl);
+
+	// unselect any texture boxes in the panel
+	main_win->UnselectPics();
+
+	RedrawMap();
 }
 
 
