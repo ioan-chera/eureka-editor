@@ -2083,6 +2083,7 @@ void Render3D_Setup()
 void Render3D_Enable(bool _enable)
 {
 	Editor_ClearAction();
+	Render3D_ClearSelection();
 
 	edit.render3d = _enable;
 
@@ -2298,8 +2299,6 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	main_win->render->redraw();
 }
-
-
 
 
 void Render3D_ClearNav()
