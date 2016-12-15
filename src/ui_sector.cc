@@ -26,6 +26,7 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -342,6 +343,8 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
 			main_win->BrowserMode('F');

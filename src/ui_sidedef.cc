@@ -25,6 +25,7 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -161,6 +162,8 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *)w;
 
 		pic->Selected(! pic->Selected());
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
 			main_win->BrowserMode('T');

@@ -25,6 +25,7 @@
 #include "e_main.h"  // Selection_Clear
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -1060,6 +1061,8 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 			box->find_pic->Selected(false);
 		}
 	}
+
+	Render3D_ClearSelection();
 }
 
 

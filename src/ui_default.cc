@@ -23,6 +23,7 @@
 
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -269,6 +270,8 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 		pic->Selected(! pic->Selected());
 
+		Render3D_ClearSelection();
+
 		if (pic->Selected())
 		{
 			box->UnselectPicSet('f');
@@ -296,6 +299,8 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
 		{
