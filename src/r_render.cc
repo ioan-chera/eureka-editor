@@ -1326,20 +1326,23 @@ public:
 	{
 		/* do the selection */
 
+		bool saw_hl = false;
+
 		for (unsigned int k = 0 ; k < view.sel.size() ; k++)
 		{
 			if (! view.sel[k].valid())
 				continue;
 
 			if (view.hl.valid() && view.hl == view.sel[k])
-				continue;
+				saw_hl = true;
 
 			Highlight_Object(view.sel[k], true);
 		}
 
 		/* do the highlight */
 
-		Highlight_Object(view.hl, false);
+		if (! saw_hl)
+			Highlight_Object(view.hl, false);
 	}
 
 	void ClipSolids()
