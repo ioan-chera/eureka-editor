@@ -36,6 +36,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_nodes.h"
+#include "r_render.h"	// Render3D_ClearSelection
 #include "w_rawdef.h"
 #include "w_wad.h"
 

@@ -702,7 +702,7 @@ public:
 	int open_y1;
 	int open_y2;
 
-	// remembered lines for drawing highlight (etc)
+	// remembered lines for drawing highlight and selection
 	std::vector<RenderLine> hl_lines;
 
 	// saved offsets for mouse adjustment mode
@@ -1129,7 +1129,7 @@ public:
 		}
 	}
 
-	void HighlightWall(DrawWall *dw)
+	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw)
 	{
 		int h1, h2;
 
@@ -1143,12 +1143,12 @@ public:
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (view.hl.type == OB3D_Lower)
+			if (part == OB3D_Lower)
 			{
 				h1 = MIN(front->floorh, back->floorh);
 				h2 = MAX(front->floorh, back->floorh);
 			}
-			else /* part == OB3D_Upper */
+			else  /* part == OB3D_Upper */
 			{
 				h1 = MIN(front->ceilh, back->ceilh);
 				h2 = MAX(front->ceilh, back->ceilh);
@@ -1171,75 +1171,103 @@ public:
 		AddRenderLine(x1, ly2, x2, ry2, 0, HI_COL);
 	}
 
-	void HighlightSector(DrawWall *dw, int sec_num, int sec_h)
+	void Highlight_Line(obj3d_type_e part, int ld, int side)
 	{
-		int sy1 = DistToY(dw->iz1, sec_h);
-		int sy2 = DistToY(dw->iz2, sec_h);
+		const LineDef *L = LineDefs[ld];
 
-		AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, 0, HI_COL);
-	}
+		DrawWall::vec_t::iterator S;
 
-	void HighlightThing(DrawWall *dw)
-	{
-		int h1 = dw->ceil.h1 - 1;
-		int h2 = dw->ceil.h2 + 1;
-
-		int x1 = dw->sx1 - 1;
-		int x2 = dw->sx2 + 1;
-
-		int y1 = DistToY(dw->iz1, h2);
-		int y2 = DistToY(dw->iz1, h1);
-
-		AddRenderLine(x1, y1, x1, y2, 0, HI_COL);
-		AddRenderLine(x2, y1, x2, y2, 0, HI_COL);
-		AddRenderLine(x1, y1, x2, y1, 0, HI_COL);
-		AddRenderLine(x1, y2, x2, y2, 0, HI_COL);
-	}
-
-	void HighlightGeometry()
-	{
-		const LineDef *hl_linedef = NULL;
-
-		if (view.hl.isLine())
-			hl_linedef = LineDefs[view.hl.num];
-
-		int hl_sec = view.hl.isSector() ? view.hl.num : -1;
-
-		int sec_h = 0;
-
-		if (hl_sec >= 0)
+		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
-			if (view.hl.type == OB3D_Floor)
-			{
-				sec_h = Sectors[hl_sec]->floorh;
+			const DrawWall *dw = (*S);
 
-				if (sec_h >= view.z) hl_sec = -1;
-			}
-			else  /* OB3D_Ceil */
-			{
-				sec_h = Sectors[hl_sec]->ceilh;
+			if (dw->ld == L && dw->side == side)
+				Highlight_WallPart(part, dw);
+		}
+	}
 
-				if (sec_h <= view.z) hl_sec = -1;
-			}
+	void Highlight_Sector(obj3d_type_e part, int sec_num)
+	{
+		int sec_h;
+
+		if (part == OB3D_Floor)
+		{
+			sec_h = Sectors[sec_num]->floorh;
+
+			if (sec_h >= view.z)
+				return;
+		}
+		else  /* OB3D_Ceil */
+		{
+			sec_h = Sectors[sec_num]->ceilh;
+
+			if (sec_h <= view.z)
+				return;
 		}
 
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
-			DrawWall *dw = (*S);
+			const DrawWall *dw = (*S);
 
-			if (dw->th >= 0 && view.hl.isThing() && dw->th == view.hl.num)
-				HighlightThing(dw);
+			if (dw->ld && dw->ld->TouchesSector(sec_num))
+			{
+				int sy1 = DistToY(dw->iz1, sec_h);
+				int sy2 = DistToY(dw->iz2, sec_h);
 
-			if (! dw->ld)
+				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, 0, HI_COL);
+			}
+		}
+	}
+
+	void Highlight_Thing(int th)
+	{
+		DrawWall::vec_t::iterator S;
+
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			const DrawWall *dw = (*S);
+
+			if (! (dw->th >= 0 && dw->th == th))
 				continue;
 
-			if (dw->ld == hl_linedef && dw->side == view.hl.side)
-				HighlightWall(dw);
+			int h1 = dw->ceil.h1 - 1;
+			int h2 = dw->ceil.h2 + 1;
 
-			if (hl_sec >= 0 && dw->ld->TouchesSector(hl_sec))
-				HighlightSector(dw, hl_sec, sec_h);
+			int x1 = dw->sx1 - 1;
+			int x2 = dw->sx2 + 1;
+
+			int y1 = DistToY(dw->iz1, h2);
+			int y2 = DistToY(dw->iz1, h1);
+
+			AddRenderLine(x1, y1, x1, y2, 0, HI_COL);
+			AddRenderLine(x2, y1, x2, y2, 0, HI_COL);
+			AddRenderLine(x1, y1, x2, y1, 0, HI_COL);
+			AddRenderLine(x1, y2, x2, y2, 0, HI_COL);
+
+			break;
+		}
+	}
+
+	void HighlightGeometry()
+	{
+		if (view.hl.isThing())
+		{
+			Highlight_Thing(view.hl.num);
+			return;
+		}
+
+		if (view.hl.isSector())
+		{
+			Highlight_Sector(view.hl.type, view.hl.num);
+			return;
+		}
+
+		if (view.hl.isLine())
+		{
+			Highlight_Line(view.hl.type, view.hl.num, view.hl.side);
+			return;
 		}
 	}
 
