@@ -2360,6 +2360,30 @@ void Render3D_Navigate()
 }
 
 
+void Render3D_Cut()
+{
+	// FIXME
+}
+
+
+void Render3D_Copy()
+{
+	// FIXME
+}
+
+
+void Render3D_Paste()
+{
+	// FIXME
+}
+
+
+void Render3D_ClearSelection()
+{
+	// FIXME
+}
+
+
 void Render3D_SetCameraPos(int new_x, int new_y)
 {
 	view.x = new_x;
