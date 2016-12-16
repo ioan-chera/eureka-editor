@@ -2503,6 +2503,116 @@ static int GrabTextureFrom3DSel()
 }
 
 
+static void StoreTextureToObject(const Obj3d_t& obj, int new_tex)
+{
+	if (obj.type == OB3D_Floor)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
+		return;
+	}
+	else if (obj.type == OB3D_Ceil)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
+		return;
+	}
+
+	if (! obj.isLine())
+		return;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	int sd = LD->WhatSideDef(obj.side);
+
+	if (sd < 0)
+		return;
+
+	if (LD->OneSided())
+	{
+		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+		return;
+	}
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+			break;
+
+		case OB3D_Upper:
+			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+			break;
+
+		case OB3D_Rail:
+			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+			break;
+
+		// shut the compiler up
+		default: break;
+	}
+}
+
+
+static void StoreTextureTo3DSel(int new_tex)
+{
+	BA_Begin();
+
+	for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+	{
+		const Obj3d_t& obj = view.sel[k];
+
+		if (! obj.valid())
+			continue;
+
+		StoreTextureToObject(obj, new_tex);
+	}
+
+	BA_Message("pasted texture: %s", BA_GetString(new_tex));
+	BA_End();
+}
+
+
+static int GrabClipboardTex()
+{
+	if (view.sel_type == OB3D_Floor)
+	{
+		return BA_InternaliseString(default_floor_tex);
+	}
+	else if (view.sel_type == OB3D_Floor)
+	{
+		return BA_InternaliseString(default_ceil_tex);
+	}
+	else if (view.sel_type == OB3D_Thing)
+	{
+		return 0;  // cannot happen
+	}
+	else
+	{
+		return BA_InternaliseString(default_wall_tex);
+	}
+}
+
+
+static void StoreClipboardTex(int new_tex)
+{
+	const char *name = BA_GetString(new_tex);
+
+	// TODO : stop leaking memory here
+
+	if (view.sel_type == OB3D_Floor)
+	{
+		default_floor_tex = StringDup(name);
+	}
+	else if (view.sel_type == OB3D_Floor)
+	{
+		default_ceil_tex = StringDup(name);
+	}
+	else if (view.sel_type != OB3D_Thing)
+	{
+		default_wall_tex = StringDup(name);
+	}
+}
+
+
 void Render3D_Cut()
 {
 	// there is re-purposed as "eXchange" between the selected
@@ -2514,14 +2624,20 @@ void Render3D_Cut()
 		return;
 	}
 
-	int new_tex = GrabTextureFrom3DSel();
-	if (new_tex < 0)
+	int sel_tex = GrabTextureFrom3DSel();
+	if (sel_tex < 0)
 	{
 		Beep("multiple textures present");
 		return;
 	}
 
-	// FIXME
+	int cb_tex = GrabClipboardTex();
+
+	StoreClipboardTex(sel_tex);
+
+	StoreTextureTo3DSel(cb_tex);
+
+	Status_Set("Exchanged textures");
 }
 
 
@@ -2540,7 +2656,9 @@ void Render3D_Copy()
 		return;
 	}
 
-	// FIXME
+	StoreClipboardTex(new_tex);
+
+	Status_Set("Copied %s", BA_GetString(new_tex));
 }
 
 
@@ -2552,7 +2670,11 @@ void Render3D_Paste()
 		return;
 	}
 
-	// FIXME
+	int new_tex = GrabClipboardTex();
+
+	StoreTextureTo3DSel(new_tex);
+
+	Status_Set("Pasted %s", BA_GetString(new_tex));
 }
 
 
