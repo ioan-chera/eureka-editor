@@ -2479,6 +2479,11 @@ static int GrabTextureFromObject(const Obj3d_t& obj)
 //
 static int GrabTextureFrom3DSel()
 {
+	if (view.SelectEmpty())
+	{
+		return GrabTextureFromObject(view.hl);
+	}
+
 	int result = -1;
 
 	for (unsigned int k = 0 ; k < view.sel.size() ; k++)
@@ -2556,14 +2561,21 @@ static void StoreTextureTo3DSel(int new_tex)
 {
 	BA_Begin();
 
-	for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+	if (view.SelectEmpty())
 	{
-		const Obj3d_t& obj = view.sel[k];
+		StoreTextureToObject(view.hl, new_tex);
+	}
+	else
+	{
+		for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+		{
+			const Obj3d_t& obj = view.sel[k];
 
-		if (! obj.valid())
-			continue;
+			if (! obj.valid())
+				continue;
 
-		StoreTextureToObject(obj, new_tex);
+			StoreTextureToObject(obj, new_tex);
+		}
 	}
 
 	BA_Message("pasted texture: %s", BA_GetString(new_tex));
@@ -2573,15 +2585,20 @@ static void StoreTextureTo3DSel(int new_tex)
 
 static int GrabClipboardTex()
 {
-	if (view.sel_type == OB3D_Floor)
+	obj3d_type_e type = view.sel_type;
+
+	if (view.SelectEmpty())
+		type = view.hl.type;
+
+	if (type == OB3D_Floor)
 	{
 		return BA_InternaliseString(default_floor_tex);
 	}
-	else if (view.sel_type == OB3D_Floor)
+	else if (type == OB3D_Floor)
 	{
 		return BA_InternaliseString(default_ceil_tex);
 	}
-	else if (view.sel_type == OB3D_Thing)
+	else if (type == OB3D_Thing)
 	{
 		return 0;  // cannot happen
 	}
@@ -2596,17 +2613,22 @@ static void StoreClipboardTex(int new_tex)
 {
 	const char *name = BA_GetString(new_tex);
 
+	obj3d_type_e type = view.sel_type;
+
+	if (view.SelectEmpty())
+		type = view.hl.type;
+
 	// TODO : stop leaking memory here
 
-	if (view.sel_type == OB3D_Floor)
+	if (type == OB3D_Floor)
 	{
 		default_floor_tex = StringDup(name);
 	}
-	else if (view.sel_type == OB3D_Floor)
+	else if (type == OB3D_Floor)
 	{
 		default_ceil_tex = StringDup(name);
 	}
-	else if (view.sel_type != OB3D_Thing)
+	else if (type != OB3D_Thing)
 	{
 		default_wall_tex = StringDup(name);
 	}
@@ -2618,7 +2640,7 @@ void Render3D_Cut()
 	// there is re-purposed as "eXchange" between the selected
 	// object(s) and the default properties.
 
-	if (view.SelectEmpty())
+	if (view.SelectEmpty() && ! view.hl.valid())
 	{
 		Beep("Nothing to cut");
 		return;
@@ -2643,7 +2665,7 @@ void Render3D_Cut()
 
 void Render3D_Copy()
 {
-	if (view.SelectEmpty())
+	if (view.SelectEmpty() && ! view.hl.valid())
 	{
 		Beep("Nothing to copy");
 		return;
@@ -2664,7 +2686,7 @@ void Render3D_Copy()
 
 void Render3D_Paste()
 {
-	if (view.SelectEmpty())
+	if (view.SelectEmpty() && ! view.hl.valid())
 	{
 		Beep("Nothing to paste into");
 		return;
