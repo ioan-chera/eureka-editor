@@ -179,6 +179,37 @@ public:
 	{
 		snprintf(clipboard_flat, sizeof(clipboard_flat), "%s", flat);
 	}
+
+	int GrabClipboard()
+	{
+		obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
+
+		if (type == OB3D_Thing)
+			return GetThing();
+
+		if (type == OB3D_Floor || type == OB3D_Ceil)
+			return GetFlatNum();
+
+		return GetTexNum();
+	}
+
+	void StoreClipboard(int new_val)
+	{
+		obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
+
+		if (type == OB3D_Thing)
+		{
+			clipboard_thing = new_val;
+			return;
+		}
+
+		const char *name = BA_GetString(new_val);
+
+		if (type == OB3D_Floor || type == OB3D_Ceil)
+			SetFlat(name);
+		else
+			SetTex(name);
+	}
 };
 
 static r_editing_info_t  r_edit;
@@ -2645,54 +2676,6 @@ static void StoreTextureTo3DSel(int new_tex)
 }
 
 
-// FIXME : make a method of r_clipboard
-static int GrabClipboardTex()
-{
-	obj3d_type_e type = r_edit.sel_type;
-
-	if (r_edit.SelectEmpty())
-		type = r_edit.hl.type;
-
-	if (type == OB3D_Thing)
-	{
-		return r_edit.GetThing();
-	}
-	else if (type == OB3D_Floor || type == OB3D_Ceil)
-	{
-		return r_edit.GetFlatNum();
-	}
-	else
-	{
-		return r_edit.GetTexNum();
-	}
-}
-
-
-// FIXME : make a method of r_clipboard
-static void StoreClipboardTex(int new_tex)
-{
-	const char *name = BA_GetString(new_tex);
-
-	obj3d_type_e type = r_edit.sel_type;
-
-	if (r_edit.SelectEmpty())
-		type = r_edit.hl.type;
-
-	if (type == OB3D_Thing)
-	{
-		r_edit.clipboard_thing = new_tex;
-	}
-	else if (type == OB3D_Floor || type == OB3D_Ceil)
-	{
-		r_edit.SetFlat(name);
-	}
-	else
-	{
-		r_edit.SetTex(name);
-	}
-}
-
-
 void Render3D_Cut()
 {
 	// there is re-purposed as "eXchange" between the selected
@@ -2711,9 +2694,9 @@ void Render3D_Cut()
 		return;
 	}
 
-	int cb_tex = GrabClipboardTex();
+	int cb_tex = r_edit.GrabClipboard();
 
-	StoreClipboardTex(sel_tex);
+	r_edit.StoreClipboard(sel_tex);
 
 	StoreTextureTo3DSel(cb_tex);
 
@@ -2736,7 +2719,7 @@ void Render3D_Copy()
 		return;
 	}
 
-	StoreClipboardTex(new_tex);
+	r_edit.StoreClipboard(new_tex);
 
 	Status_Set("Copied %s", BA_GetString(new_tex));
 }
@@ -2750,7 +2733,7 @@ void Render3D_Paste()
 		return;
 	}
 
-	int new_tex = GrabClipboardTex();
+	int new_tex = r_edit.GrabClipboard();
 
 	StoreTextureTo3DSel(new_tex);
 
