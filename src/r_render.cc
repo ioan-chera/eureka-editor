@@ -61,7 +61,67 @@ int  render_pixel_aspect = 83;  //  100 * width / height
 rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
 
 
-struct Y_View
+struct r_selection_info_t
+{
+public:
+
+	// the 3D clipboard
+	char clipboard_tex [16];
+	char clipboard_flat[16];
+
+	int  clipboard_thing;
+
+public:
+	r_selection_info_t() :
+		clipboard_thing(0)
+	{
+		clipboard_tex [0] = 0;
+		clipboard_flat[0] = 0;
+	}
+
+	~r_selection_info_t()
+	{ }
+
+public:
+	int GetTexNum()
+	{
+		if (clipboard_tex[0] == 0)
+			SetTex(default_wall_tex);
+
+		return BA_InternaliseString(clipboard_tex);
+	}
+
+	int GetFlatNum()
+	{
+		if (clipboard_flat[0] == 0)
+			SetFlat(default_floor_tex);
+
+		return BA_InternaliseString(clipboard_flat);
+	}
+
+	int GetThing()
+	{
+		if (clipboard_thing == 0)
+			clipboard_thing = default_thing;
+
+		return clipboard_thing;
+	}
+
+	void SetTex(const char *tex)
+	{
+		snprintf(clipboard_tex, sizeof(clipboard_tex), "%s", tex);
+	}
+
+	void SetFlat(const char *flat)
+	{
+		snprintf(clipboard_flat, sizeof(clipboard_flat), "%s", flat);
+	}
+};
+
+static r_selection_info_t  r_sel;
+
+
+struct R_View
 {
 public:
 	// player type and position.
@@ -118,7 +178,7 @@ public:
 	obj3d_type_e sel_type;  // valid when sel.size() > 0
 
 public:
-	Y_View() :
+	R_View() :
 		p_type(0), px(), py(),
 		x(), y(), z(),
 		angle(), Sin(), Cos(),
@@ -133,6 +193,9 @@ public:
 		nav_time(0),
 		hl(),
 		sel(), sel_type(OB3D_Thing)
+	{ }
+
+	~R_View()
 	{ }
 
 	void SetAngle(float new_ang)
@@ -326,8 +389,7 @@ public:
 	}
 };
 
-
-static Y_View view;
+static R_View view;
 
 
 struct DrawSurf
@@ -2583,6 +2645,7 @@ static void StoreTextureTo3DSel(int new_tex)
 }
 
 
+// FIXME : make a method of r_clipboard
 static int GrabClipboardTex()
 {
 	obj3d_type_e type = view.sel_type;
@@ -2590,25 +2653,22 @@ static int GrabClipboardTex()
 	if (view.SelectEmpty())
 		type = view.hl.type;
 
-	if (type == OB3D_Floor)
+	if (type == OB3D_Thing)
 	{
-		return BA_InternaliseString(default_floor_tex);
+		return r_sel.GetThing();
 	}
-	else if (type == OB3D_Floor)
+	else if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		return BA_InternaliseString(default_ceil_tex);
-	}
-	else if (type == OB3D_Thing)
-	{
-		return 0;  // cannot happen
+		return r_sel.GetFlatNum();
 	}
 	else
 	{
-		return BA_InternaliseString(default_wall_tex);
+		return r_sel.GetTexNum();
 	}
 }
 
 
+// FIXME : make a method of r_clipboard
 static void StoreClipboardTex(int new_tex)
 {
 	const char *name = BA_GetString(new_tex);
@@ -2618,19 +2678,17 @@ static void StoreClipboardTex(int new_tex)
 	if (view.SelectEmpty())
 		type = view.hl.type;
 
-	// TODO : stop leaking memory here
-
-	if (type == OB3D_Floor)
+	if (type == OB3D_Thing)
 	{
-		default_floor_tex = StringDup(name);
+		r_sel.clipboard_thing = new_tex;
 	}
-	else if (type == OB3D_Floor)
+	else if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		default_ceil_tex = StringDup(name);
+		r_sel.SetFlat(name);
 	}
-	else if (type != OB3D_Thing)
+	else
 	{
-		default_wall_tex = StringDup(name);
+		r_sel.SetTex(name);
 	}
 }
 
@@ -2734,7 +2792,6 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		view.z = atof(tokens[3]);
 
 		view.SetAngle(atof(tokens[4]));
-
 		return true;
 	}
 
@@ -2758,6 +2815,19 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		usegamma = MAX(0, atoi(tokens[1])) % 5;
 
 		W_UpdateGamma();
+		return true;
+	}
+
+	if (strcmp(tokens[0], "r_clipboard") == 0)
+	{
+		if (strcmp(tokens[1], "tex") == 0)
+			r_sel.SetTex(tokens[2]);
+
+		if (strcmp(tokens[1], "flat") == 0)
+			r_sel.SetFlat(tokens[2]);
+
+		if (strcmp(tokens[1], "thing") == 0)
+			r_sel.clipboard_thing = atoi(tokens[2]);
 
 		return true;
 	}
@@ -2778,6 +2848,10 @@ void Render3D_WriteUser(FILE *fp)
 
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
+
+	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(r_sel.clipboard_tex,  "\""));
+	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(r_sel.clipboard_flat, "\""));
+	fprintf(fp, "r_clipboard thing %d\n",    r_sel.clipboard_thing);
 }
 
 
