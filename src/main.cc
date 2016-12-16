@@ -581,7 +581,7 @@ static void Main_SetupFLTK()
 //
 static void Main_OpenWindow()
 {
-	main_win = new UI_MainWin();
+	main_win = new UI_MainWindow();
 
 	main_win->label("Eureka v" EUREKA_VERSION);
 

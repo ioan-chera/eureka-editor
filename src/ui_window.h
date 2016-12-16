@@ -50,7 +50,7 @@ class Wad_file;
 class UI_Render3D;
 
 
-class UI_MainWin : public Fl_Double_Window
+class UI_MainWindow : public Fl_Double_Window
 {
 public:
 	// main child widgets
@@ -93,8 +93,8 @@ private:
 	int last_x, last_y, last_w, last_h;
 
 public:
-	UI_MainWin();
-	virtual ~UI_MainWin();
+	UI_MainWindow();
+	virtual ~UI_MainWindow();
 
 public:
 	void SetTitle(const char *wad_name, const char *map_name, bool read_only);
@@ -150,7 +150,7 @@ private:
 };
 
 
-extern UI_MainWin * main_win;
+extern UI_MainWindow * main_win;
 
 
 //------------------------------------------------------------------------

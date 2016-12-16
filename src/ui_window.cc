@@ -40,7 +40,7 @@
 #define MAIN_WINDOW_W  (800 - 32)
 #define MAIN_WINDOW_H  (600 - 40)
 
-UI_MainWin *main_win;
+UI_MainWindow *main_win;
 
 // Kromulent Factor crud
 int KF;
@@ -50,7 +50,7 @@ int KF_fonth;
 //
 // MainWin Constructor
 //
-UI_MainWin::UI_MainWin() :
+UI_MainWindow::UI_MainWindow() :
 	Fl_Double_Window(MAIN_WINDOW_W + 64, MAIN_WINDOW_H, EUREKA_TITLE),
 	cursor_shape(FL_CURSOR_DEFAULT),
 	last_x(0), last_y(0), last_w(0), last_h(0)
@@ -155,17 +155,17 @@ UI_MainWin::UI_MainWin() :
 //
 // MainWin Destructor
 //
-UI_MainWin::~UI_MainWin()
+UI_MainWindow::~UI_MainWindow()
 { }
 
 
-void UI_MainWin::quit_callback(Fl_Widget *w, void *data)
+void UI_MainWindow::quit_callback(Fl_Widget *w, void *data)
 {
 	Main_Quit();
 }
 
 
-void UI_MainWin::NewEditMode(obj_type_e mode)
+void UI_MainWindow::NewEditMode(obj_type_e mode)
 {
 	UnselectPics();
 
@@ -193,7 +193,7 @@ void UI_MainWin::NewEditMode(obj_type_e mode)
 }
 
 
-void UI_MainWin::SetCursor(Fl_Cursor shape)
+void UI_MainWindow::SetCursor(Fl_Cursor shape)
 {
 	if (shape == cursor_shape)
 		return;
@@ -204,7 +204,7 @@ void UI_MainWin::SetCursor(Fl_Cursor shape)
 }
 
 
-void UI_MainWin::BrowserMode(char kind)
+void UI_MainWindow::BrowserMode(char kind)
 {
 	bool is_visible = browser->visible() ? true : false;
 
@@ -232,7 +232,7 @@ void UI_MainWin::BrowserMode(char kind)
 }
 
 
-void UI_MainWin::HideSpecialPanel()
+void UI_MainWindow::HideSpecialPanel()
 {
 	props_box->hide();
 	 find_box->hide();
@@ -251,7 +251,7 @@ void UI_MainWin::HideSpecialPanel()
 }
 
 
-void UI_MainWin::ShowDefaultProps()
+void UI_MainWindow::ShowDefaultProps()
 {
 	// already shown?
 	if (props_box->visible())
@@ -272,7 +272,7 @@ void UI_MainWin::ShowDefaultProps()
 }
 
 
-void UI_MainWin::ShowFindAndReplace()
+void UI_MainWindow::ShowFindAndReplace()
 {
 	// already shown?
 	if (find_box->visible())
@@ -293,7 +293,7 @@ void UI_MainWin::ShowFindAndReplace()
 }
 
 
-void UI_MainWin::UpdateTotals()
+void UI_MainWindow::UpdateTotals()
 {
 	thing_box->UpdateTotal();
 	 line_box->UpdateTotal();
@@ -302,7 +302,7 @@ void UI_MainWin::UpdateTotals()
 }
 
 
-int UI_MainWin::GetPanelObjNum() const
+int UI_MainWindow::GetPanelObjNum() const
 {
 	// FIXME: using 'edit' here feels like a hack or mis-design
 	switch (edit.mode)
@@ -317,7 +317,7 @@ int UI_MainWin::GetPanelObjNum() const
 	}
 }
 
-void UI_MainWin::InvalidatePanelObj()
+void UI_MainWindow::InvalidatePanelObj()
 {
 	if (thing_box->visible())
 		thing_box->SetObj(-1, 0);
@@ -332,7 +332,7 @@ void UI_MainWin::InvalidatePanelObj()
 		vert_box->SetObj(-1, 0);
 }
 
-void UI_MainWin::UpdatePanelObj()
+void UI_MainWindow::UpdatePanelObj()
 {
 	if (thing_box->visible())
 		thing_box->UpdateField();
@@ -351,7 +351,7 @@ void UI_MainWin::UpdatePanelObj()
 }
 
 
-void UI_MainWin::UnselectPics()
+void UI_MainWindow::UnselectPics()
 {
 	 line_box->UnselectPics();
 	  sec_box->UnselectPics();
@@ -359,7 +359,7 @@ void UI_MainWin::UnselectPics()
 }
 
 
-void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
+void UI_MainWindow::SetTitle(const char *wad_name, const char *map_name,
 						  bool read_only)
 {
 	static char title_buf[FL_PATH_MAX];
@@ -384,7 +384,7 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
 }
 
 
-void UI_MainWin::UpdateTitle(char want_prefix)
+void UI_MainWindow::UpdateTitle(char want_prefix)
 {
 	if (! label())
 		return;
@@ -416,7 +416,7 @@ void UI_MainWin::UpdateTitle(char want_prefix)
 
 /* DISABLED, since it fails miserably on every platform
 
-void UI_MainWin::ToggleFullscreen()
+void UI_MainWindow::ToggleFullscreen()
 {
 	if (last_w)
 	{
@@ -435,7 +435,7 @@ void UI_MainWin::ToggleFullscreen()
 */
 
 
-void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 
@@ -500,7 +500,7 @@ void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_stat
 }
 
 
-void UI_MainWin::Maximize()
+void UI_MainWindow::Maximize()
 {
 #if defined(WIN32)
 	HWND hWnd = fl_xid(this);
@@ -542,7 +542,7 @@ void UI_MainWin::Maximize()
 }
 
 
-void UI_MainWin::Delay(int steps)
+void UI_MainWindow::Delay(int steps)
 {
 	for (; steps > 0 ; steps--)
 	{
@@ -553,7 +553,7 @@ void UI_MainWin::Delay(int steps)
 }
 
 
-void UI_MainWin::UpdateGameInfo()
+void UI_MainWindow::UpdateGameInfo()
 {
 	thing_box->UpdateGameInfo();
 	 line_box->UpdateGameInfo();
