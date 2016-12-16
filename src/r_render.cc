@@ -854,12 +854,12 @@ public:
 	int open_y1;
 	int open_y2;
 
-	// remembered lines for drawing highlight and selection
-	std::vector<RenderLine> hl_lines;
-
 	// saved offsets for mouse adjustment mode
 	int saved_x_offset;
 	int saved_y_offset;
+
+	// these used by HighlightGeometry()
+	int hl_ox, hl_oy;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -872,7 +872,6 @@ public:
 		walls(), active(),
 		query_mode(0), query_sx(), query_sy(),
 		depth_x(), open_y1(), open_y2(),
-		hl_lines(),
 		saved_x_offset(), saved_y_offset()
 	{ }
 
@@ -899,15 +898,15 @@ public:
 			sx2 *= 2;  sy2 *= 2;
 		}
 
-		RenderLine new_line;
+		fl_color(color);
 
-		new_line.sx1 = sx1; new_line.sy1 = sy1;
-		new_line.sx2 = sx2; new_line.sy2 = sy2;
+		if (thick)
+			fl_line_style(FL_SOLID, 2);
 
-		new_line.thick = thick;
-		new_line.color = color;
+		fl_line(hl_ox + sx1, hl_oy + sy1, hl_ox + sx2, hl_oy + sy2);
 
-		hl_lines.push_back(new_line);
+		if (thick)
+			fl_line_style(0);
 	}
 
 	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
@@ -1425,8 +1424,11 @@ public:
 		}
 	}
 
-	void HighlightGeometry()
+	void HighlightGeometry(int ox, int oy)
 	{
+		hl_ox = ox;
+		hl_oy = oy;
+
 		/* do the selection */
 
 		bool saw_hl = false;
@@ -1846,7 +1848,7 @@ public:
 
 		std::sort(walls.begin(), walls.end(), DrawWall::SX1Cmp());
 
-		active.clear ();
+		active.clear();
 
 		for (int x=0 ; x < view.sw ; x++)
 		{
@@ -1926,8 +1928,6 @@ public:
 
 		ComputeSurfaces();
 
-		HighlightGeometry();
-
 		RenderWalls();
 
 		RestoreOffsets();
@@ -1993,21 +1993,7 @@ void UI_Render3D::draw()
 	else
 		BlitLores(ox, oy, ow, oh);
 
-	// draw the highlight (etc)
-	for (unsigned int k = 0 ; k < rend.hl_lines.size() ; k++)
-	{
-		RenderLine& line = rend.hl_lines[k];
-
-		fl_color(line.color);
-
-		if (line.thick)
-			fl_line_style(FL_SOLID, 2);
-
-		fl_line(ox + line.sx1, oy + line.sy1, ox + line.sx2, oy + line.sy2);
-
-		if (line.thick)
-			fl_line_style(0);
-	}
+	rend.HighlightGeometry(ox, oy);
 
 	DrawInfoBar();
 }
