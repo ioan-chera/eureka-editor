@@ -61,9 +61,16 @@ int  render_pixel_aspect = 83;  //  100 * width / height
 rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
 
 
-struct r_selection_info_t
+struct r_editing_info_t
 {
 public:
+	// current highlighted wotsit
+	Obj3d_t hl;
+
+	// current selection
+	std::vector< Obj3d_t > sel;
+
+	obj3d_type_e sel_type;  // valid when sel.size() > 0
 
 	// the 3D clipboard
 	char clipboard_tex [16];
@@ -72,17 +79,73 @@ public:
 	int  clipboard_thing;
 
 public:
-	r_selection_info_t() :
+	r_editing_info_t() :
+		hl(),
+		sel(),
+		sel_type(OB3D_Thing),
 		clipboard_thing(0)
 	{
 		clipboard_tex [0] = 0;
 		clipboard_flat[0] = 0;
 	}
 
-	~r_selection_info_t()
+	~r_editing_info_t()
 	{ }
 
 public:
+	bool SelectIsCompat(obj3d_type_e new_type) const
+	{
+		return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
+			   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
+			   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
+	}
+
+	// this needed since we allow invalid objects in sel
+	bool SelectEmpty() const
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k].valid())
+				return false;
+
+		return true;
+	}
+
+	bool SelectGet(const Obj3d_t& obj) const
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k] == obj)
+				return true;
+
+		return false;
+	}
+
+	void SelectToggle(const Obj3d_t& obj)
+	{
+		// when type of surface is radically different, clear selection
+		if (! sel.empty() && ! SelectIsCompat(obj.type))
+			sel.clear();
+
+		if (sel.empty())
+		{
+			sel_type = obj.type;
+			sel.push_back(obj);
+			return;
+		}
+
+		// if object already selected, unselect it
+		// [ we are lazy and leave a NIL object in the vector ]
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+		{
+			if (sel[k] == obj)
+			{
+				sel[k].num = NIL_OBJ;
+				return;
+			}
+		}
+
+		sel.push_back(obj);
+	}
+
 	int GetTexNum()
 	{
 		if (clipboard_tex[0] == 0)
@@ -118,7 +181,7 @@ public:
 	}
 };
 
-static r_selection_info_t  r_sel;
+static r_editing_info_t  r_edit;
 
 
 struct R_View
@@ -169,14 +232,6 @@ public:
 	float nav_up, nav_down;
 	float nav_turn_L, nav_turn_R;
 
-	// current highlighted wotsit
-	Obj3d_t hl;
-
-	// current selection
-	std::vector< Obj3d_t > sel;
-
-	obj3d_type_e sel_type;  // valid when sel.size() > 0
-
 public:
 	R_View() :
 		p_type(0), px(), py(),
@@ -190,9 +245,7 @@ public:
 		thsec_invalidated(false),
 		adjust_ld(-1), adjust_sd(-1),
 		is_scrolling(false),
-		nav_time(0),
-		hl(),
-		sel(), sel_type(OB3D_Thing)
+		nav_time(0)
 	{ }
 
 	~R_View()
@@ -333,59 +386,6 @@ public:
 
 		if (gravity)
 			FindGroundZ();
-	}
-
-	bool SelectIsCompat(obj3d_type_e new_type) const
-	{
-		return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
-			   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
-			   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
-	}
-
-	// this needed since we allow invalid objects in sel
-	bool SelectEmpty() const
-	{
-		for (unsigned int k = 0 ; k < sel.size() ; k++)
-			if (sel[k].valid())
-				return false;
-
-		return true;
-	}
-
-	bool SelectGet(const Obj3d_t& obj) const
-	{
-		for (unsigned int k = 0 ; k < sel.size() ; k++)
-			if (sel[k] == obj)
-				return true;
-
-		return false;
-	}
-
-	void SelectToggle(const Obj3d_t& obj)
-	{
-		// when type of surface is radically different, clear selection
-		if (! sel.empty() && ! SelectIsCompat(obj.type))
-			sel.clear();
-
-		if (sel.empty())
-		{
-			sel_type = obj.type;
-			sel.push_back(obj);
-			return;
-		}
-
-		// if object already selected, unselect it
-		// [ we are lazy and leave a NIL object in the vector ]
-		for (unsigned int k = 0 ; k < sel.size() ; k++)
-		{
-			if (sel[k] == obj)
-			{
-				sel[k].num = NIL_OBJ;
-				return;
-			}
-		}
-
-		sel.push_back(obj);
 	}
 };
 
@@ -1226,7 +1226,7 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
-		else if (view.hl.isThing() && th_index == view.hl.num)
+		else if (r_edit.hl.isThing() && th_index == r_edit.hl.num)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -1400,21 +1400,21 @@ public:
 
 		bool saw_hl = false;
 
-		for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+		for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
 		{
-			if (! view.sel[k].valid())
+			if (! r_edit.sel[k].valid())
 				continue;
 
-			if (view.hl.valid() && view.hl == view.sel[k])
+			if (r_edit.hl.valid() && r_edit.hl == r_edit.sel[k])
 				saw_hl = true;
 
-			Highlight_Object(view.sel[k], true);
+			Highlight_Object(r_edit.sel[k], true);
 		}
 
 		/* do the highlight */
 
 		if (! saw_hl)
-			Highlight_Object(view.hl, false);
+			Highlight_Object(r_edit.hl, false);
 	}
 
 	void ClipSolids()
@@ -2315,21 +2315,21 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (mode < 0)
 	{
 		// find the line / side to adjust
-		if (! view.hl.isLine())
+		if (! r_edit.hl.isLine())
 			return;
 
-		if (! (view.hl.type == OB3D_Lower || view.hl.type == OB3D_Upper))
+		if (! (r_edit.hl.type == OB3D_Lower || r_edit.hl.type == OB3D_Upper))
 			return;
 
-		const LineDef *L = LineDefs[view.hl.num];
+		const LineDef *L = LineDefs[r_edit.hl.num];
 
-		int sd = (view.hl.side < 0) ? L->left : L->right;
+		int sd = (r_edit.hl.side < 0) ? L->left : L->right;
 
 		if (sd < 0)  // WTF?
 			return;
 
 		// OK
-		view.adjust_ld = view.hl.num;
+		view.adjust_ld = r_edit.hl.num;
 		view.adjust_sd = sd;
 
 		// reset offset deltas to 0
@@ -2425,11 +2425,11 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	Obj3d_t old(view.hl);
+	Obj3d_t old(r_edit.hl);
 
-	main_win->render->query(view.hl, x, y);
+	main_win->render->query(r_edit.hl, x, y);
 
-	if (old == view.hl)
+	if (old == r_edit.hl)
 		return;
 
 	main_win->render->redraw();
@@ -2541,16 +2541,16 @@ static int GrabTextureFromObject(const Obj3d_t& obj)
 //
 static int GrabTextureFrom3DSel()
 {
-	if (view.SelectEmpty())
+	if (r_edit.SelectEmpty())
 	{
-		return GrabTextureFromObject(view.hl);
+		return GrabTextureFromObject(r_edit.hl);
 	}
 
 	int result = -1;
 
-	for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+	for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
 	{
-		const Obj3d_t& obj = view.sel[k];
+		const Obj3d_t& obj = r_edit.sel[k];
 
 		if (! obj.valid())
 			continue;
@@ -2623,15 +2623,15 @@ static void StoreTextureTo3DSel(int new_tex)
 {
 	BA_Begin();
 
-	if (view.SelectEmpty())
+	if (r_edit.SelectEmpty())
 	{
-		StoreTextureToObject(view.hl, new_tex);
+		StoreTextureToObject(r_edit.hl, new_tex);
 	}
 	else
 	{
-		for (unsigned int k = 0 ; k < view.sel.size() ; k++)
+		for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
 		{
-			const Obj3d_t& obj = view.sel[k];
+			const Obj3d_t& obj = r_edit.sel[k];
 
 			if (! obj.valid())
 				continue;
@@ -2648,22 +2648,22 @@ static void StoreTextureTo3DSel(int new_tex)
 // FIXME : make a method of r_clipboard
 static int GrabClipboardTex()
 {
-	obj3d_type_e type = view.sel_type;
+	obj3d_type_e type = r_edit.sel_type;
 
-	if (view.SelectEmpty())
-		type = view.hl.type;
+	if (r_edit.SelectEmpty())
+		type = r_edit.hl.type;
 
 	if (type == OB3D_Thing)
 	{
-		return r_sel.GetThing();
+		return r_edit.GetThing();
 	}
 	else if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		return r_sel.GetFlatNum();
+		return r_edit.GetFlatNum();
 	}
 	else
 	{
-		return r_sel.GetTexNum();
+		return r_edit.GetTexNum();
 	}
 }
 
@@ -2673,22 +2673,22 @@ static void StoreClipboardTex(int new_tex)
 {
 	const char *name = BA_GetString(new_tex);
 
-	obj3d_type_e type = view.sel_type;
+	obj3d_type_e type = r_edit.sel_type;
 
-	if (view.SelectEmpty())
-		type = view.hl.type;
+	if (r_edit.SelectEmpty())
+		type = r_edit.hl.type;
 
 	if (type == OB3D_Thing)
 	{
-		r_sel.clipboard_thing = new_tex;
+		r_edit.clipboard_thing = new_tex;
 	}
 	else if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		r_sel.SetFlat(name);
+		r_edit.SetFlat(name);
 	}
 	else
 	{
-		r_sel.SetTex(name);
+		r_edit.SetTex(name);
 	}
 }
 
@@ -2698,7 +2698,7 @@ void Render3D_Cut()
 	// there is re-purposed as "eXchange" between the selected
 	// object(s) and the default properties.
 
-	if (view.SelectEmpty() && ! view.hl.valid())
+	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
 		Beep("Nothing to cut");
 		return;
@@ -2723,7 +2723,7 @@ void Render3D_Cut()
 
 void Render3D_Copy()
 {
-	if (view.SelectEmpty() && ! view.hl.valid())
+	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
 		Beep("Nothing to copy");
 		return;
@@ -2744,7 +2744,7 @@ void Render3D_Copy()
 
 void Render3D_Paste()
 {
-	if (view.SelectEmpty() && ! view.hl.valid())
+	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
 		Beep("Nothing to paste into");
 		return;
@@ -2760,7 +2760,7 @@ void Render3D_Paste()
 
 void Render3D_ClearSelection()
 {
-	view.sel.clear();
+	r_edit.sel.clear();
 }
 
 
@@ -2821,13 +2821,13 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "r_clipboard") == 0)
 	{
 		if (strcmp(tokens[1], "tex") == 0)
-			r_sel.SetTex(tokens[2]);
+			r_edit.SetTex(tokens[2]);
 
 		if (strcmp(tokens[1], "flat") == 0)
-			r_sel.SetFlat(tokens[2]);
+			r_edit.SetFlat(tokens[2]);
 
 		if (strcmp(tokens[1], "thing") == 0)
-			r_sel.clipboard_thing = atoi(tokens[2]);
+			r_edit.clipboard_thing = atoi(tokens[2]);
 
 		return true;
 	}
@@ -2849,9 +2849,9 @@ void Render3D_WriteUser(FILE *fp)
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
 
-	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(r_sel.clipboard_tex,  "\""));
-	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(r_sel.clipboard_flat, "\""));
-	fprintf(fp, "r_clipboard thing %d\n",    r_sel.clipboard_thing);
+	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(r_edit.clipboard_tex,  "\""));
+	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(r_edit.clipboard_flat, "\""));
+	fprintf(fp, "r_clipboard thing %d\n",    r_edit.clipboard_thing);
 }
 
 
@@ -2861,16 +2861,16 @@ void Render3D_WriteUser(FILE *fp)
 
 void R3D_Click()
 {
-	if (! view.hl.valid())
+	if (! r_edit.hl.valid())
 	{
 		Beep("nothing there");
 		return;
 	}
 
-	if (view.hl.type == OB3D_Thing)
+	if (r_edit.hl.type == OB3D_Thing)
 		return;
 
-	view.SelectToggle(view.hl);
+	r_edit.SelectToggle(r_edit.hl);
 
 	// unselect any texture boxes in the panel
 	main_win->UnselectPics();
@@ -3318,16 +3318,16 @@ void R3D_Align()
 	bool do_clear = Exec_HasFlag("/clear");
 
 	// find the line / side to align
-	if (! view.hl.isLine())
+	if (! r_edit.hl.isLine())
 	{
 		Beep("No sidedef there!");
 		return;
 	}
 
-	int ld = view.hl.num;
+	int ld = r_edit.hl.num;
 	const LineDef *L = LineDefs[ld];
 
-	int sd = (view.hl.side < 0) ? L->left : L->right;
+	int sd = (r_edit.hl.side < 0) ? L->left : L->right;
 
 	if (sd < 0)  // should NOT happen
 	{
@@ -3349,7 +3349,7 @@ void R3D_Align()
 		return;
 	}
 
-	char part_c = (view.hl.type == OB3D_Upper) ? 'u' : 'l';
+	char part_c = (r_edit.hl.type == OB3D_Upper) ? 'u' : 'l';
 
 	int align_flags = 0;
 
@@ -3359,7 +3359,7 @@ void R3D_Align()
 	if (Exec_HasFlag("/right"))
 		align_flags |= LINALIGN_Right;
 
-	LineDefs_Align(ld, view.hl.side, sd, part_c, align_flags);
+	LineDefs_Align(ld, r_edit.hl.side, sd, part_c, align_flags);
 }
 
 
