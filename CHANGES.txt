@@ -16,6 +16,8 @@ General:
 
 +  line drawing is now done with RMB (MOUSE3) button
 
++  an operation menu, accessed by pressing F1 or CTRL-RMB
+
 +  improved drag behavior, never modify the current selection
 
 +  sprite rendering on the 2D canvas
