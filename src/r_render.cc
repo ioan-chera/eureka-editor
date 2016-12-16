@@ -2682,8 +2682,7 @@ static void StoreTextureTo3DSel(int new_tex)
 
 void Render3D_Cut()
 {
-	// there is re-purposed as "eXchange" between the selected
-	// object(s) and the default properties.
+	// this is equivalent to setting the default texture
 
 	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
@@ -2691,20 +2690,21 @@ void Render3D_Cut()
 		return;
 	}
 
-	int sel_tex = GrabTextureFrom3DSel();
-	if (sel_tex < 0)
-	{
-		Beep("multiple textures present");
+	obj3d_type_e type = r_edit.SelectEmpty() ? r_edit.hl.type : r_edit.sel_type;
+
+	if (type == OB3D_Thing)
 		return;
-	}
 
-	int cb_tex = r_edit.GrabClipboard();
+	const char *name = default_wall_tex;
 
-	r_edit.StoreClipboard(sel_tex);
+	if (type == OB3D_Floor)
+		name = default_floor_tex;
+	else if (type == OB3D_Ceil)
+		name = default_ceil_tex;
 
-	StoreTextureTo3DSel(cb_tex);
+	StoreTextureTo3DSel(BA_InternaliseString(name));
 
-	Status_Set("Exchanged textures");
+	Status_Set("Cut texture to default");
 }
 
 
