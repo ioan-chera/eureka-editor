@@ -541,7 +541,7 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Hide",       FL_F+8, FCAL browser_hide },
+		{ "&Hide",            0, FCAL browser_hide },
 		{ 0 },
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
