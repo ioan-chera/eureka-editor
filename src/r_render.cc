@@ -2747,6 +2747,9 @@ void Render3D_Paste()
 
 void Render3D_ClearSelection()
 {
+	if (! r_edit.SelectEmpty())
+		RedrawMap();
+
 	r_edit.sel.clear();
 }
 
