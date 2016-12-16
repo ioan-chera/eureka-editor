@@ -820,16 +820,6 @@ public:
 };
 
 
-struct RenderLine
-{
-	short sx1, sy1, sx2, sy2;
-
-	short thick;
-
-	Fl_Color color;
-};
-
-
 struct RendInfo
 {
 public:
