@@ -107,6 +107,7 @@ UI_MainWindow::UI_MainWindow() :
 	int BH = ey-4;  // ey-BY-2
 
 	thing_box = new UI_ThingBox(w() - panel_W, BY, panel_W, BH);
+	thing_box->hide();
 	add(thing_box);
 
 	line_box = new UI_LineBox(w() - panel_W, BY, panel_W, BH);
@@ -118,7 +119,6 @@ UI_MainWindow::UI_MainWindow() :
 	add(sec_box);
 
 	vert_box = new UI_VertexBox(w() - panel_W, BY, panel_W, BH);
-	vert_box->hide();
 	add(vert_box);
 
 	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
