@@ -13,15 +13,17 @@ ______________________________________________________________________
      [ see if we can call HighlightGeometry after a render ]
 
 
-!!!  support CTRL-C/X/V when panel pics are selected
-     i.e. select a flat in sector panel, CTRL-C copies to defaults,
-          and CTRL-V can paste from defaults
+!!!  support CTRL-C/X/V when panel pics are selected / highlighted
 
 
->>>  browser picks sending info to the 3D code
++  support using texture/flat browser in 3D mode
 
 
->>>  copy/cut/paste textures in 3D view
++  support selecting things in 3D view, and Copy/Paste as per textures
+
+
++  treat sprite UI_Pic in THING panel and DEFAULTS panel (and Find/Rep)
+   as a highlightable thing, and possible Copy/Paste target
 
 
 
