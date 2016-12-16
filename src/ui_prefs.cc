@@ -722,7 +722,7 @@ public:
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
-	  key_sort_mode('c'), key_sort_rev(false),
+	  key_sort_mode('k'), key_sort_rev(false),
 	  awaiting_line(0)
 {
 	if (gui_color_set == 2)
