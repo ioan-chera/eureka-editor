@@ -35,8 +35,11 @@
 // UI_Pic Constructor
 //
 UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
-    Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-    rgb(NULL), special(SP_None), selected(false)
+	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
+	rgb(NULL), special(SP_None),
+	allow_hl(false),
+	highlighted(false),
+	selected(false)
 {
 	color(FL_DARK2);
 
@@ -308,10 +311,14 @@ int UI_Pic::handle(int event)
 	{
 		case FL_ENTER:
 			main_win->SetCursor(FL_CURSOR_HAND);
+			highlighted = true;
+			redraw();
 			return 1;
 
 		case FL_LEAVE:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
+			highlighted = false;
+			redraw();
 			return 1;
 
 		case FL_PUSH:
@@ -335,6 +342,21 @@ void UI_Pic::draw()
 
 	if (selected)
 		draw_selected();
+	else if (Highlighted())
+		draw_highlighted();
+}
+
+
+void UI_Pic::draw_highlighted()
+{
+	int X = x();
+	int Y = y();
+	int W = w();
+	int H = h();
+
+	fl_rect(X+0, Y+0, W-0, H-0, FL_YELLOW);
+	fl_rect(X+1, Y+1, W-2, H-2, FL_YELLOW);
+	fl_rect(X+2, Y+2, W-4, H-4, FL_BLACK);
 }
 
 

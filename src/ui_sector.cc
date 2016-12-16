@@ -685,6 +685,9 @@ void UI_SectorBox::UpdateField(int field)
 
 			f_pic->GetFlat(Sectors[obj]->FloorTex());
 			c_pic->GetFlat(Sectors[obj]->CeilTex());
+
+			f_pic->AllowHighlight(true);
+			c_pic->AllowHighlight(true);
 		}
 		else
 		{
@@ -693,6 +696,9 @@ void UI_SectorBox::UpdateField(int field)
 
 			f_pic->Clear();
 			c_pic->Clear();
+
+			f_pic->AllowHighlight(false);
+			c_pic->AllowHighlight(false);
 		}
 	}
 

@@ -39,6 +39,9 @@ private:
 
 	int special;
 
+	bool allow_hl;
+
+	bool highlighted;
 	bool selected;
 
 	const char *what_text;
@@ -61,13 +64,18 @@ public:
 	void GetTex (const char * tname);
 	void GetSprite(int type, Fl_Color back_color);
 
-	bool Selected() { return selected; }
+	void AllowHighlight(bool enable) { allow_hl = enable; redraw(); }
+
+	bool Highlighted() const { return allow_hl && highlighted; }
+
+	bool Selected() const { return selected; }
 	void Selected(bool _val);
 
 private:
 	// FLTK virtual method for drawing.
 	void draw();
 
+	void draw_highlighted();
 	void draw_selected();
 
 	void UploadRGB(const byte *buf, int depth);

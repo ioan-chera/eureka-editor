@@ -509,6 +509,10 @@ void UI_SideBox::UpdateField()
 
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
 			u_pic->MarkMissing();
+
+		l_pic->AllowHighlight(true);
+		u_pic->AllowHighlight(true);
+		r_pic->AllowHighlight(true);
 	}
 	else
 	{
@@ -523,6 +527,10 @@ void UI_SideBox::UpdateField()
 		l_pic->Clear();
 		u_pic->Clear();
 		r_pic->Clear();
+
+		l_pic->AllowHighlight(false);
+		u_pic->AllowHighlight(false);
+		r_pic->AllowHighlight(false);
 	}
 }
 

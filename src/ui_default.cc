@@ -60,6 +60,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	w_pic = new UI_Pic(X+W-76,   Y, 64, 64);
 	w_pic->callback(tex_callback, this);
+	w_pic->AllowHighlight(true);
 
 	Y += 20;
 
@@ -78,6 +79,9 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	c_pic->callback(flat_callback, this);
 	f_pic->callback(flat_callback, this);
+
+	f_pic->AllowHighlight(true);
+	c_pic->AllowHighlight(true);
 
 
 	c_tex = new UI_DynInput(X+68, Y, 108, 24, "Ceiling: ");
