@@ -22,6 +22,7 @@
 
 #include "e_main.h"
 #include "m_config.h"
+#include "r_render.h"
 #include "ui_window.h"
 #include "w_wad.h"
 
@@ -438,6 +439,12 @@ void UI_MainWindow::ToggleFullscreen()
 void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
+
+	if (edit.render3d)
+	{
+		if (Render3D_BrowsedItem(kind, number, name, e_state))
+			return;	 // ate it
+	}
 
 	if (props_box->visible())
 	{

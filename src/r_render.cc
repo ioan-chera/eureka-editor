@@ -2730,6 +2730,40 @@ void Render3D_ClearSelection()
 }
 
 
+bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	// do not check the highlight here, as mouse pointer will be
+	// over an item in the browser.
+
+	if (r_edit.SelectEmpty())
+		return false;
+
+	if (kind == 'O' && r_edit.sel_type == OB3D_Thing)
+	{
+		StoreTextureTo3DSel(number);
+		return true;
+	}
+	else if (kind == 'F' && r_edit.sel_type <= OB3D_Floor)
+	{
+		int new_flat = BA_InternaliseString(name);
+		StoreTextureTo3DSel(new_flat);
+		return true;
+	}
+	else if (kind == 'T' && r_edit.sel_type >= OB3D_Lower)
+	{
+		int new_tex = BA_InternaliseString(name);
+		StoreTextureTo3DSel(new_tex);
+		return true;
+	}
+
+	// mismatched usage
+	fl_beep();
+
+	// we still eat it
+	return true;
+}
+
+
 void Render3D_SetCameraPos(int new_x, int new_y)
 {
 	view.x = new_x;
