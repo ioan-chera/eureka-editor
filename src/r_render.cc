@@ -2693,6 +2693,9 @@ static void Render3D_Paste()
 
 bool Render3D_ClipboardOp(char what)
 {
+	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
+		return false;
+
 	switch (what)
 	{
 		case 'x':
