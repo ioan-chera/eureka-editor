@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2015 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -442,61 +442,27 @@ void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_s
 	if (props_box->visible())
 	{
 		props_box->BrowsedItem(kind, number, name, e_state);
-		return;
 	}
-
-	if (find_box->visible())
+	else if (find_box->visible())
 	{
 		find_box->BrowsedItem(kind, number, name, e_state);
-		return;
 	}
-
-	switch (edit.mode)
+	else if (line_box->visible())
 	{
-		case OBJ_LINEDEFS:
-			if (kind == 'T')
-			{
-				line_box->SetTexture(name, e_state);
-				return;
-			}
-			if (kind == 'L')
-			{
-				line_box->SetLineType(number);
-				return;
-			}
-			break;
-
-		case OBJ_SECTORS:
-			if (kind == 'F')
-			{
-				sec_box->SetFlat(name, e_state);
-				return;
-			}
-			if (kind == 'S')
-			{
-				sec_box->SetSectorType(number);
-				return;
-			}
-			break;
-
-		case OBJ_THINGS:
-			if (kind == 'O')
-			{
-				thing_box->SetThingType(number);
-				return;
-			}
-			if (kind == 'L' && Level_format == MAPF_Hexen)
-			{
-				thing_box->SetSpecialType(number);
-				return;
-			}
-			break;
-
-		default:
-			break;
+		line_box->BrowsedItem(kind, number, name, e_state);
 	}
-
-	fl_beep();
+	else if (sec_box->visible())
+	{
+		sec_box->BrowsedItem(kind, number, name, e_state);
+	}
+	else if (thing_box->visible())
+	{
+		thing_box->BrowsedItem(kind, number, name, e_state);
+	}
+	else
+	{
+		fl_beep();
+	}
 }
 
 

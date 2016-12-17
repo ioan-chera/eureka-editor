@@ -451,6 +451,19 @@ void UI_ThingBox::SetSpecialType(int new_type)
 }
 
 
+void UI_ThingBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'O')
+	{
+		SetThingType(number);
+	}
+	else if (kind == 'L' && Level_format == MAPF_Hexen)
+	{
+		SetSpecialType(number);
+	}
+}
+
+
 void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;

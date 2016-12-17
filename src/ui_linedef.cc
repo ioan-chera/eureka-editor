@@ -431,6 +431,19 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
+void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'T')
+	{
+		SetTexture(name, e_state);
+	}
+	else if (kind == 'L')
+	{
+		SetLineType(number);
+	}
+}
+
+
 void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 {
 	UI_LineBox *box = (UI_LineBox *)data;

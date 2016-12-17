@@ -758,6 +758,19 @@ int UI_SectorBox::GetSelectedPics() const
 }
 
 
+void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'F')
+	{
+		SetFlat(name, e_state);
+	}
+	else if (kind == 'S')
+	{
+		SetSectorType(number);
+	}
+}
+
+
 void UI_SectorBox::UnselectPics()
 {
 	f_pic->Selected(false);

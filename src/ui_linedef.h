@@ -75,6 +75,8 @@ public:
 
 	void UpdateTotal();
 
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
+
 	void SetTexture(const char *tex_name, int e_state);
 	void SetLineType(int new_type);
 

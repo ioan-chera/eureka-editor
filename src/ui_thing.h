@@ -92,6 +92,8 @@ public:
 
 	void UpdateTotal();
 
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
+
 	void SetThingType(int new_type);
 	void SetSpecialType(int new_type);
 

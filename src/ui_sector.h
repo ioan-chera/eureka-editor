@@ -87,6 +87,8 @@ public:
 
 	void UpdateGameInfo();
 
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
+
 	void SetFlat(const char *name, int e_state);
 	void SetSectorType(int new_type);
 
