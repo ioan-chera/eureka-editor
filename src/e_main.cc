@@ -995,6 +995,90 @@ void CMD_LastSelection()
 }
 
 
+//----------------------------------------------------------------------
+//  3D CLIPBOARD
+//----------------------------------------------------------------------
+
+render_clipboard_c  r_clipboard;
+
+
+render_clipboard_c::render_clipboard_c() :
+	thing(0)
+{
+	tex [0] = 0;
+	flat[0] = 0;
+}
+
+render_clipboard_c::~render_clipboard_c()
+{ }
+
+
+int render_clipboard_c::GetTexNum()
+{
+	if (tex[0] == 0)
+		SetTex(default_wall_tex);
+
+	return BA_InternaliseString(tex);
+}
+
+int render_clipboard_c::GetFlatNum()
+{
+	if (flat[0] == 0)
+		SetFlat(default_floor_tex);
+
+	return BA_InternaliseString(flat);
+}
+
+int render_clipboard_c::GetThing()
+{
+	if (thing == 0)
+		thing = default_thing;
+
+	return thing;
+}
+
+
+void render_clipboard_c::SetTex(const char *new_tex)
+{
+	snprintf(tex, sizeof(tex), "%s", new_tex);
+}
+
+void render_clipboard_c::SetFlat(const char *new_flat)
+{
+	snprintf(flat, sizeof(flat), "%s", new_flat);
+}
+
+void render_clipboard_c::SetThing(int new_id)
+{
+	thing = new_id;
+}
+
+
+bool render_clipboard_c::ParseUser(const char ** tokens, int num_tok)
+{
+	if (strcmp(tokens[0], "r_clipboard") != 0)
+		return false;
+
+	if (strcmp(tokens[1], "tex") == 0)
+		SetTex(tokens[2]);
+
+	if (strcmp(tokens[1], "flat") == 0)
+		SetFlat(tokens[2]);
+
+	if (strcmp(tokens[1], "thing") == 0)
+		thing = atoi(tokens[2]);
+
+	return true;
+}
+
+void render_clipboard_c::WriteUser(FILE *fp)
+{
+	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(tex,  "\""));
+	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(flat, "\""));
+	fprintf(fp, "r_clipboard thing %d\n",    thing);
+}
+
+
 //------------------------------------------------------------------------
 //  RECENTLY USED TEXTURES (etc)
 //------------------------------------------------------------------------

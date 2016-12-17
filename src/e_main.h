@@ -162,7 +162,41 @@ void Selection_InvalidateLast();
 void CMD_LastSelection();
 
 
-// handling of recently used textures, flats and things
+//----------------------------------------------------------------------
+//  3D Clipboard
+//----------------------------------------------------------------------
+
+class render_clipboard_c
+{
+private:
+	char tex [16];
+	char flat[16];
+
+	int  thing;
+
+public:
+	 render_clipboard_c();
+	~render_clipboard_c();
+
+	// when current one is unset, these return default_wall_tex (etc)
+	int GetTexNum();
+	int GetFlatNum();
+	int GetThing();
+
+	void SetTex(const char *new_tex);
+	void SetFlat(const char *new_flat);
+	void SetThing(int new_id);
+
+	bool ParseUser(const char ** tokens, int num_tok);
+	void WriteUser(FILE *fp);
+};
+
+extern render_clipboard_c  r_clipboard;
+
+
+//----------------------------------------------------------------------
+//  Recently used textures, flats and things
+//----------------------------------------------------------------------
 
 #define RECENTLY_USED_MAX	32
 

@@ -86,6 +86,7 @@ public:
 	Fl_Menu_Button	*op_render;
 
 private:
+	// active cursor
 	Fl_Cursor cursor_shape;
 
 	// remember window size/position after going fullscreen.

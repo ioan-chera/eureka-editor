@@ -72,22 +72,12 @@ public:
 
 	obj3d_type_e sel_type;  // valid when sel.size() > 0
 
-	// the 3D clipboard
-	char clipboard_tex [16];
-	char clipboard_flat[16];
-
-	int  clipboard_thing;
-
 public:
 	r_editing_info_t() :
 		hl(),
 		sel(),
-		sel_type(OB3D_Thing),
-		clipboard_thing(0)
-	{
-		clipboard_tex [0] = 0;
-		clipboard_flat[0] = 0;
-	}
+		sel_type(OB3D_Thing)
+	{ }
 
 	~r_editing_info_t()
 	{ }
@@ -146,51 +136,17 @@ public:
 		sel.push_back(obj);
 	}
 
-	int GetTexNum()
-	{
-		if (clipboard_tex[0] == 0)
-			SetTex(default_wall_tex);
-
-		return BA_InternaliseString(clipboard_tex);
-	}
-
-	int GetFlatNum()
-	{
-		if (clipboard_flat[0] == 0)
-			SetFlat(default_floor_tex);
-
-		return BA_InternaliseString(clipboard_flat);
-	}
-
-	int GetThing()
-	{
-		if (clipboard_thing == 0)
-			clipboard_thing = default_thing;
-
-		return clipboard_thing;
-	}
-
-	void SetTex(const char *tex)
-	{
-		snprintf(clipboard_tex, sizeof(clipboard_tex), "%s", tex);
-	}
-
-	void SetFlat(const char *flat)
-	{
-		snprintf(clipboard_flat, sizeof(clipboard_flat), "%s", flat);
-	}
-
 	int GrabClipboard()
 	{
 		obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
 
 		if (type == OB3D_Thing)
-			return GetThing();
+			return r_clipboard.GetThing();
 
 		if (type == OB3D_Floor || type == OB3D_Ceil)
-			return GetFlatNum();
+			return r_clipboard.GetFlatNum();
 
-		return GetTexNum();
+		return r_clipboard.GetTexNum();
 	}
 
 	void StoreClipboard(int new_val)
@@ -199,16 +155,16 @@ public:
 
 		if (type == OB3D_Thing)
 		{
-			clipboard_thing = new_val;
+			r_clipboard.SetThing(new_val);
 			return;
 		}
 
 		const char *name = BA_GetString(new_val);
 
 		if (type == OB3D_Floor || type == OB3D_Ceil)
-			SetFlat(name);
+			r_clipboard.SetFlat(name);
 		else
-			SetTex(name);
+			r_clipboard.SetTex(name);
 	}
 };
 
@@ -2854,19 +2810,8 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (strcmp(tokens[0], "r_clipboard") == 0)
-	{
-		if (strcmp(tokens[1], "tex") == 0)
-			r_edit.SetTex(tokens[2]);
-
-		if (strcmp(tokens[1], "flat") == 0)
-			r_edit.SetFlat(tokens[2]);
-
-		if (strcmp(tokens[1], "thing") == 0)
-			r_edit.clipboard_thing = atoi(tokens[2]);
-
+	if (r_clipboard.ParseUser(tokens, num_tok))
 		return true;
-	}
 
 	return false;
 }
@@ -2885,9 +2830,7 @@ void Render3D_WriteUser(FILE *fp)
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
 
-	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(r_edit.clipboard_tex,  "\""));
-	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(r_edit.clipboard_flat, "\""));
-	fprintf(fp, "r_clipboard thing %d\n",    r_edit.clipboard_thing);
+	r_clipboard.WriteUser(fp);
 }
 
 
