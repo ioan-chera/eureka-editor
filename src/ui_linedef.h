@@ -77,9 +77,6 @@ public:
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
-	void SetTexture(const char *tex_name, int e_state);
-	void SetLineType(int new_type);
-
 	void UnselectPics();
 
 	void UpdateGameInfo();
@@ -89,6 +86,9 @@ private:
 
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
+
+	void SetTexture(const char *tex_name, int e_state);
+	void SetLineType(int new_type);
 
 	void SetTexOnLine(int ld, int new_tex, int e_state,
 	                  int front_pics, int back_pics);

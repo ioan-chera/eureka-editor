@@ -94,10 +94,16 @@ public:
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
+	void UpdateGameInfo();
+
+private:
 	void SetThingType(int new_type);
 	void SetSpecialType(int new_type);
 
-	void UpdateGameInfo();
+	void AdjustExtraFloor(int dir);
+
+	int  CalcOptions() const;
+	void OptionsFromInt(int options);
 
 private:
 	static void       x_callback(Fl_Widget *w, void *data);
@@ -114,12 +120,6 @@ private:
 	static void    spec_callback(Fl_Widget *w, void *data);
 	static void dynspec_callback(Fl_Widget *w, void *data);
 	static void    args_callback(Fl_Widget *w, void *data);
-
-	void AdjustExtraFloor(int dir);
-
-	int  CalcOptions() const;
-	void OptionsFromInt(int options);
-
 };
 
 #endif  /* __EUREKA_UI_THING_H__ */

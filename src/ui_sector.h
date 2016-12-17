@@ -89,15 +89,15 @@ public:
 
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
-	void SetFlat(const char *name, int e_state);
-	void SetSectorType(int new_type);
-
 	// returns a bitmask: 1 for floor, 2 for ceiling
 	int GetSelectedPics() const;
 
 	void UnselectPics();
 
 private:
+	void SetFlat(const char *name, int e_state);
+	void SetSectorType(int new_type);
+
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);
 
