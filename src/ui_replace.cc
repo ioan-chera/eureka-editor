@@ -314,7 +314,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		find_pic = new UI_Pic(X+225, Y+95, 64, 64, "Choose");
 		find_pic->callback((Fl_Callback *)choose_callback, this);
-		find_pic->AllowHighlight(true);
+///		find_pic->AllowHighlight(true);
 
 		find_but = new Fl_Button(X+50, Y+165, 90, 30, "Find");
 		find_but->labelfont(FL_HELVETICA_BOLD);
@@ -339,7 +339,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		rep_pic = new UI_Pic(X+225, Y+230, 64, 64, "Choose");
 		rep_pic->callback((Fl_Callback *)choose_callback, this);
-		rep_pic->AllowHighlight(true);
+///		rep_pic->AllowHighlight(true);
 
 		apply_but = new Fl_Button(X+45, Y+300, 90, 30, "Replace");
 		apply_but->labelfont(FL_HELVETICA_BOLD);
@@ -900,12 +900,8 @@ char UI_FindAndReplace::GetKind()
 
 bool UI_FindAndReplace::ClipboardOp(char what)
 {
-	if (find_pic->Selected() == 0 &&
-		 rep_pic->Selected() == 0)
-		return false;
-
-	// FIXME
-
+	// hmmm, review this
+	fl_beep();
 	return true;
 }
 
