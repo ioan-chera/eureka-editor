@@ -93,10 +93,15 @@ public:
 
 	// returns a bitmask: 1 for floor, 2 for ceiling
 	int GetSelectedPics() const;
+	int GetHighlightedPics() const;
 
 	void UnselectPics();
 
 private:
+	void CB_Copy();
+	void CB_Paste();
+	void CB_Cut();
+
 	void SetFlat(const char *name, int e_state);
 	void SetSectorType(int new_type);
 

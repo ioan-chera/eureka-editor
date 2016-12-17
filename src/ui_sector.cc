@@ -757,16 +757,129 @@ int UI_SectorBox::GetSelectedPics() const
 			(c_pic->Selected() ? 2 : 0);
 }
 
+int UI_SectorBox::GetHighlightedPics() const
+{
+	return	(f_pic->Highlighted() ? 1 : 0) |
+			(c_pic->Highlighted() ? 2 : 0);
+}
+
+
+void UI_SectorBox::CB_Copy()
+{
+	if (GetSelectedPics() == 3)
+	{
+		Beep("multiple textures");
+		return;
+	}
+
+	const char *name = NULL;
+
+	if (GetSelectedPics() == 2 ||
+		(GetSelectedPics() == 0 && c_pic->Highlighted()))
+	{
+		name = c_tex->value();
+	}
+	else
+	{
+		name = f_tex->value();
+	}
+
+	r_clipboard.SetFlat(name);
+
+	Status_Set("Copied %s", name);
+}
+
+
+void UI_SectorBox::CB_Paste()
+{
+	int sel_pics = GetSelectedPics();
+
+	if (sel_pics == 0)
+		sel_pics = GetHighlightedPics();
+
+	int new_tex = r_clipboard.GetFlatNum();
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it) ; !it.at_end() ; ++it)
+		{
+			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
+		}
+
+		BA_Message("Pasted %s", BA_GetString(new_tex));
+		BA_End();
+
+		UpdateField();
+	}
+}
+
+
+void UI_SectorBox::CB_Cut()
+{
+	int sel_pics = GetSelectedPics();
+
+	if (sel_pics == 0)
+		sel_pics = GetHighlightedPics();
+
+	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it) ; !it.at_end() ; ++it)
+		{
+			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
+			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
+		}
+
+		BA_MessageForSel("cut texture on", &list);
+		BA_End();
+
+		UpdateField();
+	}
+}
+
 
 bool UI_SectorBox::ClipboardOp(char what)
 {
 	if (obj < 0)
 		return false;
 
-	if (GetSelectedPics() == 0)
+	if (!  (f_pic->Selected() || f_pic->Highlighted() ||
+			c_pic->Selected() || c_pic->Highlighted()))
+	{
 		return false;
+	}
 
-	// FIXME
+	switch (what)
+	{
+		case 'c':
+			CB_Copy();
+			break;
+
+		case 'v':
+			CB_Paste();
+			break;
+
+		case 'x':
+			CB_Cut();
+			break;
+
+		case 'd':
+			Beep("cannot clear a sector flat");
+			break;
+	}
 
 	return true;
 }
