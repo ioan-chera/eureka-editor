@@ -9,21 +9,12 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
->>>  REVIEW: instead of AddRenderLine(), simply draw them
-     [ see if we can call HighlightGeometry after a render ]
+Q/  support CTRL-C/X/V in default props and find/replace panels ?
 
 
-!!!  support CTRL-C/X/V when panel pics are selected / highlighted
-
-
-+  support using texture/flat browser in 3D mode
-
-
-+  support selecting things in 3D view, and Copy/Paste as per textures
-
-
-+  treat sprite UI_Pic in THING panel and DEFAULTS panel (and Find/Rep)
-   as a highlightable thing, and possible Copy/Paste target
+-  info bar
+   -  remove X/Y/Z coords  [ show X/Y coords on bottom info bar ]
+   -  show texture of the highlight
 
 
 
@@ -75,6 +66,11 @@ General
 +  allow Game/Port definitions to specify the linedef/thing flags
    which can be used  (rather than hard-coding them)
 
++  support PNG/JPEG/TGA for patches, flats, sprites
+   -->  feature png ??
+   [ need to analyse PNG data for "grAB" chunk, or not?? ]
+
+
 
 Editing
 -------
@@ -92,9 +88,10 @@ ______________________________________________________________________
 General
 -------
 
-+  support PNG/JPEG/TGA for patches, flats, sprites
-   -->  feature png ??
-   [ need to analyse PNG data for "grAB" chunk, or not?? ]
++  support selecting things in 3D view, and Copy/Paste as per textures
+
++  treat sprite UI_Pic in THING panel and DEFAULTS panel (etC)
+   as a highlightable thing, and possible Copy/Paste target
 
 -  Preferences window:
    -  backup_max_files / backup_max_space
@@ -129,6 +126,8 @@ General
 
 
 IDEA: a sector-rendering mode for sound propagation
+
+IDEA: would a "low-res" sector-rendering mode be faster?
 
 IDEA: a toolbar
 
