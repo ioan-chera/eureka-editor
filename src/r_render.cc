@@ -1313,6 +1313,11 @@ public:
 		int ry1 = DistToY(dw->iz2, h2);
 		int ry2 = DistToY(dw->iz2, h1);
 
+		// workaround for crappy line clipping in X windows
+		if (ly1 < -5000 || ly2 < -5000 || ly1 >  5000 || ly2 >  5000 ||
+			ry1 < -5000 || ry2 < -5000 || ry1 >  5000 || ry2 >  5000)
+			return;
+
 		// keep the lines thin, makes aligning textures easier
 		AddRenderLine(x1, ly1, x1, ly2, is_selected);
 		AddRenderLine(x2, ry1, x2, ry2, is_selected);
@@ -1364,6 +1369,11 @@ public:
 			{
 				int sy1 = DistToY(dw->iz1, sec_h);
 				int sy2 = DistToY(dw->iz2, sec_h);
+
+				// workaround for crappy line clipping in X windows
+				if (sy1 < -5000 || sy2 < -5000 ||
+					sy1 >  5000 || sy2 >  5000)
+					continue;
 
 				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
 			}
