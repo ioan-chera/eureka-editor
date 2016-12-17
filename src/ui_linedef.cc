@@ -431,16 +431,131 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
+void UI_LineBox::CB_Copy()
+{
+	// determine which sidedef texture to grab from
+	const char *name = NULL;
+
+	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		UI_SideBox *SD = (pass == 0) ? front : back;
+
+		int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
+
+		for (int b = 0 ; b < 3 ; b++)
+		{
+			if ((sel_pics & (1 << b)) == 0)
+				continue;
+
+			const char *b_name = (b == 0) ? SD->l_tex->value() :
+								 (b == 1) ? SD->u_tex->value() :
+											SD->r_tex->value();
+			SYS_ASSERT(b_name);
+
+			if (name && y_stricmp(name, b_name) != 0)
+			{
+				Beep("multiple textures");
+				return;
+			}
+
+			name = b_name;
+		}
+	}
+
+	r_clipboard.SetTex(name);
+
+	Status_Set("Copied %s", name);
+}
+
+
+void UI_LineBox::CB_Paste(int new_tex)
+{
+	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
+
+	// iterate over selected linedefs
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+
+		for (int pass = 0 ; pass < 2 ; pass++)
+		{
+			int sd = (pass == 0) ? L->right : L->left;
+
+			if (sd < 0)
+				continue;
+
+			UI_SideBox *SD = (pass == 0) ? front : back;
+
+			int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
+
+			if (L->TwoSided())
+			{
+				if (sel_pics & 1)
+					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+
+				if (sel_pics & 2)
+					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+
+				if (sel_pics & 4)
+					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+			}
+			else  // one-sided line
+			{
+				if (sel_pics & 1)
+					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+			}
+		}
+	}
+
+	BA_Message("Pasted %s", BA_GetString(new_tex));
+	BA_End();
+
+	UpdateField();
+	UpdateSides();
+
+	redraw();
+}
+
+
 bool UI_LineBox::ClipboardOp(char what)
 {
 	if (obj < 0)
 		return false;
 
-	if (front->GetSelectedPics() == 0 &&
-		 back->GetSelectedPics() == 0)
+	if (front->GetSelectedPics() == 0 && front->GetHighlightedPics() == 0 &&
+		 back->GetSelectedPics() == 0 &&  back->GetHighlightedPics() == 0)
+	{
 		return false;
+	}
 
-	// FIXME
+	switch (what)
+	{
+		case 'c':
+			CB_Copy();
+			break;
+
+		case 'v':
+			CB_Paste(r_clipboard.GetTexNum());
+			break;
+
+		case 'x':	// Cut
+			CB_Paste(BA_InternaliseString(default_wall_tex));
+			break;
+
+		case 'd': // Delete
+			CB_Paste(BA_InternaliseString("-"));
+			break;
+	}
 
 	return true;
 }

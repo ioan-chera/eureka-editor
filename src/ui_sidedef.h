@@ -74,6 +74,7 @@ public:
 
 	// returns a bitmask: 1 for lower, 2 for upper, 4 for rail
 	int GetSelectedPics() const;
+	int GetHighlightedPics() const;
 
 	void UnselectPics();
 

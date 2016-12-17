@@ -145,8 +145,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 // Destructor
 //
 UI_SideBox::~UI_SideBox()
-{
-}
+{ }
 
 
 void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
@@ -619,9 +618,20 @@ void UI_SideBox::UpdateHiding()
 
 int UI_SideBox::GetSelectedPics() const
 {
+	if (obj < 0) return 0;
+
 	return	(l_pic->Selected() ? 1 : 0) |
 			(u_pic->Selected() ? 2 : 0) |
 			(r_pic->Selected() ? 4 : 0);
+}
+
+int UI_SideBox::GetHighlightedPics() const
+{
+	if (obj < 0) return 0;
+
+	return	(l_pic->Highlighted() ? 1 : 0) |
+			(u_pic->Highlighted() ? 2 : 0) |
+			(r_pic->Highlighted() ? 4 : 0);
 }
 
 

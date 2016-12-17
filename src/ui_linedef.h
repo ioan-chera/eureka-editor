@@ -89,6 +89,9 @@ private:
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
 
+	void CB_Copy();
+	void CB_Paste(int new_tex);
+
 	void SetTexture(const char *tex_name, int e_state);
 	void SetLineType(int new_type);
 
