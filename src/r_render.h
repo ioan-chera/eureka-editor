@@ -66,11 +66,8 @@ void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
 void Render3D_Navigate();
 void Render3D_ClearNav();
 
-void Render3D_Cut();
-void Render3D_Copy();
-void Render3D_Paste();
 void Render3D_ClearSelection();
-
+bool Render3D_ClipboardOp(char what);
 bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 
 void Render3D_SetCameraPos(int new_x, int new_y);

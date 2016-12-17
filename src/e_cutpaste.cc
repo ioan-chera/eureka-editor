@@ -35,6 +35,8 @@
 #include "r_render.h"
 #include "w_rawdef.h"
 
+#include "ui_window.h"
+
 
 #define INVALID_SECTOR  (-999999)
 
@@ -774,11 +776,8 @@ void CMD_CopyAndPaste()
 
 void CMD_Clipboard_Cut()
 {
-	if (edit.render3d)
-	{
-		Render3D_Cut();
+	if (main_win->ClipboardOp('x'))
 		return;
-	}
 
 	if (! Clipboard_DoCopy())
 	{
@@ -792,11 +791,8 @@ void CMD_Clipboard_Cut()
 
 void CMD_Clipboard_Copy()
 {
-	if (edit.render3d)
-	{
-		Render3D_Copy();
+	if (main_win->ClipboardOp('c'))
 		return;
-	}
 
 	if (! Clipboard_DoCopy())
 	{
@@ -808,11 +804,8 @@ void CMD_Clipboard_Copy()
 
 void CMD_Clipboard_Paste()
 {
-	if (edit.render3d)
-	{
-		Render3D_Paste();
+	if (main_win->ClipboardOp('v'))
 		return;
-	}
 
 	if (! Clipboard_DoPaste())
 	{
@@ -1167,6 +1160,9 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 
 void CMD_Delete()
 {
+	if (main_win->ClipboardOp('d'))
+		return;
+
 	selection_c list;
 
 	if (! GetCurrentObjects(&list))

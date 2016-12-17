@@ -137,6 +137,11 @@ public:
 
 	void Delay(int steps);  // each step is 1/10th second
 
+	// see if a panel or the 3D view wants to perform a clipboard
+	// operation.  returns TRUE if it did the operation.
+	// what == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
+	bool ClipboardOp(char what);
+
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)
 	void BrowsedItem(char kind, int number, const char *name, int e_state);

@@ -436,6 +436,19 @@ void UI_MainWindow::ToggleFullscreen()
 */
 
 
+bool UI_MainWindow::ClipboardOp(char what)
+{
+	if (edit.render3d)
+	{
+		return Render3D_ClipboardOp(what);
+	}
+
+	// FIXME : check the panels
+
+	return false;
+}
+
+
 void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);

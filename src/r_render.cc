@@ -2670,7 +2670,7 @@ static void StoreTextureTo3DSel(int new_tex)
 }
 
 
-void Render3D_Cut()
+static void Render3D_Cut()
 {
 	// this is equivalent to setting the default texture
 
@@ -2698,7 +2698,7 @@ void Render3D_Cut()
 }
 
 
-void Render3D_Copy()
+static void Render3D_Copy()
 {
 	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
@@ -2719,7 +2719,7 @@ void Render3D_Copy()
 }
 
 
-void Render3D_Paste()
+static void Render3D_Paste()
 {
 	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 	{
@@ -2732,6 +2732,28 @@ void Render3D_Paste()
 	StoreTextureTo3DSel(new_tex);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
+}
+
+
+bool Render3D_ClipboardOp(char what)
+{
+	switch (what)
+	{
+		case 'x':
+			Render3D_Cut();
+			return true;
+
+		case 'c':
+			Render3D_Copy();
+			return true;
+
+		case 'v':
+			Render3D_Paste();
+			return true;
+
+		default:
+			return false;
+	}
 }
 
 
