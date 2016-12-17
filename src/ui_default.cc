@@ -433,14 +433,16 @@ void UI_DefaultProps::LoadValues()
 }
 
 
+bool UI_DefaultProps::ClipboardOp(char what)
+{
+	// FIXME
+
+	return false;
+}
+
+
 void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
-	if (! visible())
-	{
-		fl_beep();
-		return;
-	}
-
 	switch (kind)
 	{
 		case 'T': SetTexture(name, e_state); break;

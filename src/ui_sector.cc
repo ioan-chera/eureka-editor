@@ -758,6 +758,20 @@ int UI_SectorBox::GetSelectedPics() const
 }
 
 
+bool UI_SectorBox::ClipboardOp(char what)
+{
+	if (obj < 0)
+		return false;
+
+	if (GetSelectedPics() == 0)
+		return false;
+
+	// FIXME
+
+	return true;
+}
+
+
 void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 	if (kind == 'F')

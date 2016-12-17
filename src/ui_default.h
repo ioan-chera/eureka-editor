@@ -49,6 +49,8 @@ public:
 	UI_DefaultProps(int X, int Y, int W, int H);
 	virtual ~UI_DefaultProps();
 
+	// see ui_window.h for description of these two methods
+	bool ClipboardOp(char what);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();

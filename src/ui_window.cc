@@ -443,8 +443,28 @@ bool UI_MainWindow::ClipboardOp(char what)
 		return Render3D_ClipboardOp(what);
 	}
 
-	// FIXME : check the panels
+	if (props_box->visible())
+	{
+		return props_box->ClipboardOp(what);
+	}
+	else if (find_box->visible())
+	{
+		return find_box->ClipboardOp(what);
+	}
+	else if (line_box->visible())
+	{
+		return line_box->ClipboardOp(what);
+	}
+	else if (sec_box->visible())
+	{
+		return sec_box->ClipboardOp(what);
+	}
+	else if (thing_box->visible())
+	{
+		return thing_box->ClipboardOp(what);
+	}
 
+	// nobody wants it
 	return false;
 }
 

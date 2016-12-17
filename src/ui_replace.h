@@ -102,6 +102,7 @@ public:
 	// called by "Find" button in here, or CTRL-G shortcut
 	bool FindNext();
 
+	bool ClipboardOp(char what);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:

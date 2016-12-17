@@ -898,6 +898,18 @@ char UI_FindAndReplace::GetKind()
 }
 
 
+bool UI_FindAndReplace::ClipboardOp(char what)
+{
+	if (find_pic->Selected() == 0 &&
+		 rep_pic->Selected() == 0)
+		return false;
+
+	// FIXME
+
+	return true;
+}
+
+
 void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 	if (kind != GetKind())

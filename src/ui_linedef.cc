@@ -431,6 +431,21 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
+bool UI_LineBox::ClipboardOp(char what)
+{
+	if (obj < 0)
+		return false;
+
+	if (front->GetSelectedPics() == 0 &&
+		 back->GetSelectedPics() == 0)
+		return false;
+
+	// FIXME
+
+	return true;
+}
+
+
 void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 	if (kind == 'T')
