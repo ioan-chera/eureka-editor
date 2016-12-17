@@ -1983,7 +1983,11 @@ void UI_Render3D::draw()
 	else
 		BlitLores(ox, oy, ow, oh);
 
+	fl_push_clip(ox, oy, ow, oh);
+
 	rend.HighlightGeometry(ox, oy);
+
+	fl_pop_clip();
 
 	DrawInfoBar();
 }
