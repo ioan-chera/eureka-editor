@@ -1961,6 +1961,11 @@ void UI_Render3D::draw()
 
 bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 {
+	hl.clear();
+
+	if (! edit.pointer_in_window)
+		return false;
+
 	int ow = w();
 	int oh = h();
 
@@ -1978,8 +1983,6 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 	RendInfo rend;
 
 	rend.DoQuery(qx, qy);
-
-	hl.clear();
 
 	if (! rend.query_wall)
 	{
@@ -2414,6 +2417,19 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 
 	main_win->render->redraw();
+}
+
+
+void Render3D_UpdateHighlight()
+{
+	// this is mainly to clear the highlight when mouse pointer
+	// leaves the 3D viewport.
+
+	if (r_edit.hl.valid() && ! edit.pointer_in_window)
+	{
+		r_edit.hl.clear();
+		main_win->render->redraw();
+	}
 }
 
 

@@ -263,6 +263,8 @@ void UpdateHighlight()
 		main_win->canvas->HighlightForget();
 
 
+	Render3D_UpdateHighlight();
+
 	UpdatePanel();
 }
 
