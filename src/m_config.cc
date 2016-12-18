@@ -37,7 +37,7 @@
 #include "r_render.h"
 #include "e_main.h"	  // RecUsed_xxx
 
-#include "ui_window.h"  // meh!
+#include "ui_window.h"  // Browser_xxx, Props_xxx
 
 
 
@@ -627,6 +627,15 @@ static const opt_desc_t options[] =
 		"small color for the normal grid",
 		NULL,
 		&normal_small_col
+	},
+
+	{	"panel_gamma",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Gamma for images in the panels and the browser (0..4)",
+		NULL,
+		&panel_gamma
 	},
 
 	{	"render_pix_aspect",
