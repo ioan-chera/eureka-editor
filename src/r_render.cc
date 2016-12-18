@@ -2750,7 +2750,7 @@ static void Render3D_Delete()
 
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		Beep("cannot remove sector textures");
+		StoreTextureTo3DSel(BA_InternaliseString(game_info.sky_flat));
 		return;
 	}
 
