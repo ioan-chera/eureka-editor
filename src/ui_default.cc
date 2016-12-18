@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ui_window.h"
 
+#include "e_main.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "r_render.h"
@@ -60,7 +61,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	w_pic = new UI_Pic(X+W-76,   Y, 64, 64);
 	w_pic->callback(tex_callback, this);
-///	w_pic->AllowHighlight(true);
+	w_pic->AllowHighlight(true);
 
 	Y += 20;
 
@@ -80,8 +81,8 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	c_pic->callback(flat_callback, this);
 	f_pic->callback(flat_callback, this);
 
-///	f_pic->AllowHighlight(true);
-///	c_pic->AllowHighlight(true);
+	f_pic->AllowHighlight(true);
+	c_pic->AllowHighlight(true);
 
 
 	c_tex = new UI_DynInput(X+68, Y, 108, 24, "Ceiling: ");
@@ -433,10 +434,82 @@ void UI_DefaultProps::LoadValues()
 }
 
 
+void UI_DefaultProps::CB_Copy(int sel_pics)
+{
+	const char *name = NULL;
+
+	switch (sel_pics)
+	{
+		case 1: name = f_tex->value(); break;
+		case 2: name = c_tex->value(); break;
+		case 4: name = w_tex->value(); break;
+
+		default:
+			Beep("multiple textures");
+			return;
+	}
+
+	if (sel_pics & 4)
+		r_clipboard.SetTex(name);
+	else
+		r_clipboard.SetFlat(name);
+}
+
+
+void UI_DefaultProps::CB_Paste(int sel_pics)
+{
+	if (sel_pics & 1)
+	{
+		f_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		f_tex->do_callback();
+	}
+
+	if (sel_pics & 2)
+	{
+		c_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		c_tex->do_callback();
+	}
+
+	if (sel_pics & 4)
+	{
+		w_tex->value(BA_GetString(r_clipboard.GetTexNum()));
+		w_tex->do_callback();
+	}
+}
+
+
 bool UI_DefaultProps::ClipboardOp(char what)
 {
-	// hmmm, review this
-	fl_beep();
+	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
+					(c_pic->Selected() ? 2 : 0) |
+					(w_pic->Selected() ? 4 : 0);
+
+	if (sel_pics == 0)
+	{
+		sel_pics =	(f_pic->Highlighted() ? 1 : 0) |
+					(c_pic->Highlighted() ? 2 : 0) |
+					(w_pic->Highlighted() ? 4 : 0);
+	}
+
+	if (sel_pics == 0)
+		return false;
+
+	switch (what)
+	{
+		case 'c':
+			CB_Copy(sel_pics);
+			break;
+
+		case 'v':
+			CB_Paste(sel_pics);
+			break;
+
+		case 'x':
+		case 'd':
+			Beep("cannot cut/delete that");
+			break;
+	}
+
 	return true;
 }
 

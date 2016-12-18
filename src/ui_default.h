@@ -66,8 +66,12 @@ private:
 	void SetThing(int number);
 	void UnselectPicSet(char what /* 'f' or 't' */);
 
+	void CB_Copy (int sel_pics);
+	void CB_Paste(int sel_pics);
+
 	static const char * Normalize_and_Dup(UI_DynInput *w);
 
+private:
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    tex_callback(Fl_Widget *w, void *data);
 	static void dyntex_callback(Fl_Widget *w, void *data);
