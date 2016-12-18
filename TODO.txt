@@ -9,17 +9,6 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-Q/  support CTRL-C/X/V in find/replace panel ?
-
-
-IDEA:  popup menu for right-click on flats/textures in the panel
-       -->  Copy
-            Paste
-            Use Default
-            Clear to '-'    (textures only)
-            Make Sky        (flats only)
-
-
 BSP:
 
 +  check XNOD maps in ZDoom 2.8.1
@@ -204,6 +193,7 @@ IDEA: when get "Area not closed" error, a way to show the place
 IDEA: a command to split-line-in-half-and-move-to-curve
 
 IDEA: a mode to show skill levels via color of drawn things
+      [ draw sprites in 2D/3D view differently too ]
 
 IDEA: in Find/Replace panel, can filter things by CATEGORY
 
@@ -211,6 +201,12 @@ IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
       "best" quantization.
 
+IDEA:  popup menu for right-click on flats/textures in the panel
+       -->  Copy
+            Paste
+            Use Default
+            Clear to '-'    (textures only)
+            Make Sky        (flats only)
 
 
 3D View
