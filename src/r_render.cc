@@ -2433,7 +2433,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	}
 
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = M_ReadLaxModifiers();
 
 	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
 
@@ -2500,7 +2500,7 @@ void Render3D_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;

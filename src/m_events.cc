@@ -165,7 +165,7 @@ static void Editor_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
@@ -547,6 +547,36 @@ keycode_t M_CookedKeyForEvent(int event)
 	int raw_state = Fl::event_state();
 
 	return M_TranslateKey(raw_key, raw_state);
+}
+
+
+keycode_t M_ReadLaxModifiers()
+{
+	// this is a workaround for X-windows, where we don't get new
+	// modifier state until the event *after* the shift key is
+	// pressed or released.
+
+#if defined(WIN32) || defined(__APPLE__)
+	return Fl::event_state() & (MOD_COMMAND | MOD_SHIFT);
+
+#else /* Linux and X-Windows */
+
+	// we only need FLTK to read the true keyboard state *once*
+	// from the X server, which is what this Fl::get_key() is
+	// doing here (with an arbitrary key).
+
+	Fl::get_key('1');
+
+	keycode_t result = 0;
+
+	if (Fl::event_key(FL_Shift_L) || Fl::event_key(FL_Shift_R))
+		result |= MOD_SHIFT;
+
+	if (Fl::event_key(FL_Control_L) || Fl::event_key(FL_Control_R))
+		result |= MOD_COMMAND;
+
+	return result;
+#endif
 }
 
 

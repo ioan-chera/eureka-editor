@@ -60,6 +60,8 @@ void ClearStickyMod();
 keycode_t M_RawKeyForEvent(int event);
 keycode_t M_CookedKeyForEvent(int event);
 
+keycode_t M_ReadLaxModifiers();
+
 extern int wheel_dx;
 extern int wheel_dy;
 
