@@ -2698,12 +2698,6 @@ static void Render3D_Cut()
 {
 	// this is equivalent to setting the default texture
 
-	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
-	{
-		Beep("Nothing to cut");
-		return;
-	}
-
 	obj3d_type_e type = r_edit.SelectEmpty() ? r_edit.hl.type : r_edit.sel_type;
 
 	if (type == OB3D_Thing)
@@ -2724,12 +2718,6 @@ static void Render3D_Cut()
 
 static void Render3D_Copy()
 {
-	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
-	{
-		Beep("Nothing to copy");
-		return;
-	}
-
 	int new_tex = GrabTextureFrom3DSel();
 	if (new_tex < 0)
 	{
@@ -2745,17 +2733,30 @@ static void Render3D_Copy()
 
 static void Render3D_Paste()
 {
-	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
-	{
-		Beep("Nothing to paste into");
-		return;
-	}
-
 	int new_tex = r_edit.GrabClipboard();
 
 	StoreTextureTo3DSel(new_tex);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
+}
+
+
+static void Render3D_Delete()
+{
+	obj3d_type_e type = r_edit.SelectEmpty() ? r_edit.hl.type : r_edit.sel_type;
+
+	if (type == OB3D_Thing)
+		return;
+
+	if (type == OB3D_Floor || type == OB3D_Ceil)
+	{
+		Beep("cannot remove sector textures");
+		return;
+	}
+
+	StoreTextureTo3DSel(BA_InternaliseString("-"));
+
+	Status_Set("Removed textures");
 }
 
 
@@ -2766,21 +2767,24 @@ bool Render3D_ClipboardOp(char what)
 
 	switch (what)
 	{
-		case 'x':
-			Render3D_Cut();
-			return true;
-
 		case 'c':
 			Render3D_Copy();
-			return true;
+			break;
 
 		case 'v':
 			Render3D_Paste();
-			return true;
+			break;
 
-		default:
-			return false;
+		case 'x':
+			Render3D_Cut();
+			break;
+
+		case 'd':
+			Render3D_Delete();
+			break;
 	}
+
+	return true;
 }
 
 
