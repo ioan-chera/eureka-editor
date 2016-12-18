@@ -67,9 +67,12 @@ void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
 
 void Render3D_Navigate();
 void Render3D_ClearNav();
-void Render3D_UpdateHighlight();
-
 void Render3D_ClearSelection();
+
+void Render3D_UpdateHighlight();
+void Render3D_SaveHighlight();
+void Render3D_RestoreHighlight();
+
 bool Render3D_ClipboardOp(char what);
 bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 

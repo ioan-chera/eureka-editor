@@ -72,6 +72,9 @@ public:
 
 	obj3d_type_e sel_type;  // valid when sel.size() > 0
 
+	// a remembered highlight (for operation menu)
+	Obj3d_t saved_hl;
+
 public:
 	r_editing_info_t() :
 		hl(),
@@ -2787,6 +2790,17 @@ void Render3D_ClearSelection()
 		RedrawMap();
 
 	r_edit.sel.clear();
+}
+
+
+void Render3D_SaveHighlight()
+{
+	r_edit.saved_hl = r_edit.hl;
+}
+
+void Render3D_RestoreHighlight()
+{
+	r_edit.hl = r_edit.saved_hl;
 }
 
 
