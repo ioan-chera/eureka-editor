@@ -440,7 +440,8 @@ bool UI_MainWindow::ClipboardOp(char what)
 {
 	if (edit.render3d)
 	{
-		return Render3D_ClipboardOp(what);
+		if (Render3D_ClipboardOp(what))
+			return true;
 	}
 
 	if (props_box->visible())
