@@ -52,12 +52,14 @@ extern int trans_replace;
 
 // this palette has the gamma setting applied
 extern rgb_color_t palette[256];
+extern rgb_color_t palette_medium[256];
 
 extern byte raw_palette[256][3];
 
 extern byte raw_colormap[32][256];
 
-extern byte rgb555_gamma[32];
+extern byte rgb555_gamma [32];
+extern byte rgb555_medium[32];
 
 
 void W_UpdateGamma();

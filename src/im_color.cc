@@ -34,8 +34,11 @@
 // config item
 int usegamma = 2;
 
+int panel_gamma = 2;
+
 
 rgb_color_t palette[256];
+rgb_color_t palette_medium[256];
 
 int trans_replace;
 
@@ -45,7 +48,8 @@ byte raw_colormap[32][256];
 
 extern int gammatable[5][256];
 
-byte rgb555_gamma[32];
+byte rgb555_gamma [32];
+byte rgb555_medium[32];
 
 byte bright_map[256];
 
@@ -58,18 +62,25 @@ void W_UpdateGamma()
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		r = gammatable[usegamma][r];
-		g = gammatable[usegamma][g];
-		b = gammatable[usegamma][b];
+		byte r2 = gammatable[usegamma][r];
+		byte g2 = gammatable[usegamma][g];
+		byte b2 = gammatable[usegamma][b];
 
-		palette[c] = fl_rgb_color(r, g, b);
+		palette[c] = fl_rgb_color(r2, g2, b2);
+
+		r2 = gammatable[panel_gamma][r];
+		g2 = gammatable[panel_gamma][g];
+		b2 = gammatable[panel_gamma][b];
+
+		palette_medium[c] = fl_rgb_color(r2, g2, b2);
 	}
 
 	for (int d = 0 ; d < 32 ; d++)
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma[d] = gammatable[usegamma][i];
+		rgb555_gamma [d] = gammatable[usegamma][i];
+		rgb555_medium[d] = gammatable[panel_gamma][i];
 	}
 }
 

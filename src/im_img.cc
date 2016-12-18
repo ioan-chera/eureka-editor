@@ -41,6 +41,27 @@ static Img_c * unknown_flat_image;
 static Img_c * unknown_sprite_image;
 
 
+inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		byte r = IMG_PIXEL_RED(p)   << 3;
+		byte g = IMG_PIXEL_GREEN(p) << 3;
+		byte b = IMG_PIXEL_BLUE(p)  << 3;
+
+		return RGB_MAKE(r, g, b);
+	}
+	else
+	{
+		byte r = raw_palette[p][0];
+		byte g = raw_palette[p][1];
+		byte b = raw_palette[p][2];
+
+		return RGB_MAKE(r, g, b);
+	}
+}
+
+
 //
 // default constructor, creating a null image
 //

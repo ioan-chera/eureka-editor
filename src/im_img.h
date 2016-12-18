@@ -119,31 +119,27 @@ Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
 
 
-// Note: IM_PixelToRGB() does not apply gamma (safe to convert back)
-//
-//       IM_DecodePixel() *does* apply gamma
+//------------------------------------------------------------------------
 
-inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
+
+inline void IM_DecodePixel_raw(img_pixel_t p, byte& r, byte& g, byte& b)
 {
 	if (p & IS_RGB_PIXEL)
 	{
-		byte r = IMG_PIXEL_RED(p)   << 3;
-		byte g = IMG_PIXEL_GREEN(p) << 3;
-		byte b = IMG_PIXEL_BLUE(p)  << 3;
-
-		return RGB_MAKE(r, g, b);
+		r = IMG_PIXEL_RED(p)   << 3;
+		g = IMG_PIXEL_GREEN(p) << 3;
+		b = IMG_PIXEL_BLUE(p)  << 3;
 	}
 	else
 	{
-		byte r = raw_palette[p][0];
-		byte g = raw_palette[p][1];
-		byte b = raw_palette[p][2];
-
-		return RGB_MAKE(r, g, b);
+		r = raw_palette[p][0];
+		g = raw_palette[p][1];
+		b = raw_palette[p][2];
 	}
 }
 
-
+// this one applies the current gamma.
+// for rendering the 3D view or the 2D sectors and sprites.
 inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
 {
 	if (p & IS_RGB_PIXEL)
@@ -162,6 +158,25 @@ inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
 	}
 }
 
+// this applies a constant gamma.
+// for textures/flats/things in the browser and panels.
+inline void IM_DecodePixel_medium(img_pixel_t p, byte& r, byte& g, byte& b)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		r = rgb555_medium[IMG_PIXEL_RED(p)];
+		g = rgb555_medium[IMG_PIXEL_GREEN(p)];
+		b = rgb555_medium[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = palette_medium[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 
