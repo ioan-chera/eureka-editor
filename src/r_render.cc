@@ -2080,41 +2080,33 @@ void UI_Render3D::DrawInfoBar()
 
 	fl_rectf(x(), cy, w(), INFO_BAR_H);
 
-	fl_color(INFO_TEXT_COL);
-
 	cx += 10;
 	cy += 20;
 
 	fl_font(FL_COURIER, 16);
 
-	DrawNumber(cx, cy, "x", I_ROUND(view.x), -5);
-	DrawNumber(cx, cy, "y", I_ROUND(view.y), -5);
-	DrawNumber(cx, cy, "z", I_ROUND(view.z), -4);
-
 	int ang = I_ROUND(view.angle * 180 / M_PI);
 	if (ang < 0) ang += 360;
 
-	DrawNumber(cx, cy, "ang", ang, 3);
+	IB_Number(cx, cy, "angle", ang, 3);
+	cx += 8;
 
-	cx += 12;
+	IB_Number(cx, cy, "z", I_ROUND(view.z) - game_info.view_height, 4);
 
-	DrawFlag(cx, cy, view.gravity, "GRAVITY", "gravity");
-
-	fl_color(INFO_TEXT_COL);
-
-	DrawNumber(cx, cy, "gam", usegamma, 1);
-
+	IB_Number(cx, cy, "gamma", usegamma, 1);
 	cx += 10;
 
-	DrawFlag(cx, cy, !view.texturing, "!Tx", "tex");
-	DrawFlag(cx, cy, !view.lighting,  "!Lt", "lit");
-	DrawFlag(cx, cy, !view.sprites,   "!Ob", "obj");
+	IB_Flag(cx, cy, view.gravity, "GRAVITY", "gravity");
+
+	IB_Flag(cx, cy, true, "|", "|");
+
+	IB_Highlight(cx, cy);
 
 	fl_pop_clip();
 }
 
 
-void UI_Render3D::DrawNumber(int& cx, int& cy, const char *label, int value, int size)
+void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int size)
 {
 	char buffer[256];
 
@@ -2124,12 +2116,14 @@ void UI_Render3D::DrawNumber(int& cx, int& cy, const char *label, int value, int
 	else
 		sprintf(buffer, "%s:%-*d ", label, size, value);
 
+	fl_color(INFO_TEXT_COL);
+
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
 }
 
-void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
 {
 	const char *label = value ? label_on : label_off;
 
@@ -2138,6 +2132,55 @@ void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, c
 	fl_draw(label, cx, cy);
 
 	cx = cx + fl_width(label) + 20;
+}
+
+
+static int GrabTextureFromObject(const Obj3d_t& obj);
+
+void UI_Render3D::IB_Highlight(int& cx, int& cy)
+{
+	char buffer[256];
+
+	if (! r_edit.hl.valid())
+	{
+		fl_color(INFO_DIM_COL);
+
+		strcpy(buffer, "no highlight");
+	}
+	else
+	{
+		fl_color(INFO_TEXT_COL);
+
+		if (r_edit.hl.isThing())
+		{
+			const Thing *th = Things[r_edit.hl.num];
+			const thingtype_t *info = M_GetThingType(th->type);
+
+			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
+					 r_edit.hl.num, info->desc);
+
+		}
+		else if (r_edit.hl.isSector())
+		{
+			int tex = GrabTextureFromObject(r_edit.hl);
+
+			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
+					 r_edit.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+		else
+		{
+			int tex = GrabTextureFromObject(r_edit.hl);
+
+			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
+					 r_edit.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+	}
+
+	fl_draw(buffer, cx, cy);
+
+	cx = cx + fl_width(buffer);
 }
 
 
@@ -2210,11 +2253,15 @@ void Render3D_Enable(bool _enable)
 	if (edit.render3d)
 	{
 		Fl::focus(main_win->render);
+
+		main_win->info_bar->SetMouse(view.x, view.y);
 	}
 	else
 	{
 		Fl::focus(main_win->canvas);
+
 		main_win->canvas->PointerPos();
+		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 	}
 
 	RedrawMap();
@@ -2289,6 +2336,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 		view.gravity = false;
 	}
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -2487,6 +2535,7 @@ void Render3D_Navigate()
 		view.SetAngle(view.angle + dang);
 	}
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -2884,6 +2933,7 @@ void R3D_Forward()
 	view.x += view.Cos * dist;
 	view.y += view.Sin * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -2893,6 +2943,9 @@ void R3D_Backward()
 
 	view.x -= view.Cos * dist;
 	view.y -= view.Sin * dist;
+
+	main_win->info_bar->SetMouse(view.x, view.y);
+	RedrawMap();
 }
 
 void R3D_Left()
@@ -2902,6 +2955,7 @@ void R3D_Left()
 	view.x -= view.Sin * dist;
 	view.y += view.Cos * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -2912,6 +2966,7 @@ void R3D_Right()
 	view.x += view.Sin * dist;
 	view.y -= view.Cos * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -3383,9 +3438,9 @@ void R3D_WHEEL_Move()
 	view.x += speed * (view.Cos * dy + view.Sin * dx);
 	view.y += speed * (view.Sin * dy - view.Cos * dx);
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
-
 
 
 //------------------------------------------------------------------------
