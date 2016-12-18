@@ -802,21 +802,21 @@ void UI_SectorBox::CB_Paste()
 	selection_c list;
 	selection_iterator_c it;
 
-	if (GetCurrentObjects(&list))
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		BA_Begin();
-
-		for (list.begin(&it) ; !it.at_end() ; ++it)
-		{
-			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
-			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
-		}
-
-		BA_Message("Pasted %s", BA_GetString(new_tex));
-		BA_End();
-
-		UpdateField();
+		if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+		if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
 	}
+
+	BA_Message("Pasted %s", BA_GetString(new_tex));
+	BA_End();
+
+	UpdateField();
 }
 
 
@@ -833,21 +833,56 @@ void UI_SectorBox::CB_Cut()
 	selection_c list;
 	selection_iterator_c it;
 
-	if (GetCurrentObjects(&list))
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		BA_Begin();
-
-		for (list.begin(&it) ; !it.at_end() ; ++it)
-		{
-			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
-			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
-		}
-
-		BA_MessageForSel("cut texture on", &list);
-		BA_End();
-
-		UpdateField();
+		if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
+		if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
 	}
+
+	BA_MessageForSel("cut texture on", &list);
+	BA_End();
+
+	UpdateField();
+}
+
+
+void UI_SectorBox::CB_Delete()
+{
+	// we abuse the delete function to turn sector ceilings into sky
+
+	int sel_pics = GetSelectedPics();
+
+	if (sel_pics == 0)
+		sel_pics = GetHighlightedPics();
+
+	if (! (sel_pics & 2))
+	{
+		Beep("cannot delete that");
+		return;
+	}
+
+	int sky_tex = BA_InternaliseString(game_info.sky_flat);
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+		BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  sky_tex);
+
+	BA_MessageForSel("set sky on", &list);
+	BA_End();
+
+	UpdateField();
 }
 
 
@@ -877,7 +912,7 @@ bool UI_SectorBox::ClipboardOp(char what)
 			break;
 
 		case 'd':
-			Beep("cannot clear a sector flat");
+			CB_Delete();
 			break;
 	}
 

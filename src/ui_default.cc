@@ -478,6 +478,22 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 }
 
 
+void UI_DefaultProps::CB_Delete(int sel_pics)
+{
+	// we abuse the delete function to turn sector ceilings into sky
+
+	if (sel_pics & 2)
+	{
+		c_tex->value(game_info.sky_flat);
+		c_tex->do_callback();
+	}
+	else
+	{
+		Beep("cannot delete that");
+	}
+}
+
+
 bool UI_DefaultProps::ClipboardOp(char what)
 {
 	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
@@ -505,8 +521,11 @@ bool UI_DefaultProps::ClipboardOp(char what)
 			break;
 
 		case 'x':
+			Beep("cannot cut that");
+			break;
+
 		case 'd':
-			Beep("cannot cut/delete that");
+			CB_Delete(sel_pics);
 			break;
 	}
 
