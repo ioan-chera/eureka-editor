@@ -52,6 +52,7 @@ General:
 
 -  improved insertion of sectors, less "area not closed" errors
 
+-  3D view : show info about current highlight in the info bar
 
 
 Games and Ports:

@@ -9,13 +9,15 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-Q/  support CTRL-C/X/V in default props and find/replace panels ?
+Q/  support CTRL-C/X/V in find/replace panel ?
 
 
--  info bar
-   -  remove X/Y/Z coords  [ show X/Y coords on bottom info bar ]
-   -  show texture of the highlight
-
+IDEA:  popup menu for right-click on flats/textures in the panel
+       -->  Copy
+            Paste
+            Use Default
+            Clear to '-'    (textures only)
+            Make Sky        (flats only)
 
 
 BSP:
