@@ -438,11 +438,7 @@ void UI_MainWindow::ToggleFullscreen()
 
 bool UI_MainWindow::ClipboardOp(char what)
 {
-	if (edit.render3d)
-	{
-		if (Render3D_ClipboardOp(what))
-			return true;
-	}
+	// Note : this is for the panels, we don't handle the 3D view here
 
 	if (props_box->visible())
 	{
@@ -465,7 +461,7 @@ bool UI_MainWindow::ClipboardOp(char what)
 		return thing_box->ClipboardOp(what);
 	}
 
-	// nobody wants it
+	// no panel wanted it
 	return false;
 }
 

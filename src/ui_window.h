@@ -138,8 +138,8 @@ public:
 
 	void Delay(int steps);  // each step is 1/10th second
 
-	// see if a panel or the 3D view wants to perform a clipboard
-	// operation.  returns TRUE if it did the operation.
+	// see if one of the panels wants to perform a clipboard op,
+	// because a texture is highlighted or selected (for example).
 	// what == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
 	bool ClipboardOp(char what);
 

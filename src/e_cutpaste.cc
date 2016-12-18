@@ -779,6 +779,12 @@ void CMD_Clipboard_Cut()
 	if (main_win->ClipboardOp('x'))
 		return;
 
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('x');
+		return;
+	}
+
 	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to cut");
@@ -794,6 +800,12 @@ void CMD_Clipboard_Copy()
 	if (main_win->ClipboardOp('c'))
 		return;
 
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('c');
+		return;
+	}
+
 	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to copy");
@@ -806,6 +818,12 @@ void CMD_Clipboard_Paste()
 {
 	if (main_win->ClipboardOp('v'))
 		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('v');
+		return;
+	}
 
 	if (! Clipboard_DoPaste())
 	{
@@ -1162,6 +1180,12 @@ void CMD_Delete()
 {
 	if (main_win->ClipboardOp('d'))
 		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('d');
+		return;
+	}
 
 	selection_c list;
 
