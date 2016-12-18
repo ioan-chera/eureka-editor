@@ -790,14 +790,12 @@ void UI_SectorBox::CB_Copy()
 }
 
 
-void UI_SectorBox::CB_Paste()
+void UI_SectorBox::CB_Paste(int new_tex)
 {
 	int sel_pics = GetSelectedPics();
 
 	if (sel_pics == 0)
 		sel_pics = GetHighlightedPics();
-
-	int new_tex = r_clipboard.GetFlatNum();
 
 	selection_c list;
 	selection_iterator_c it;
@@ -851,41 +849,6 @@ void UI_SectorBox::CB_Cut()
 }
 
 
-void UI_SectorBox::CB_Delete()
-{
-	// we abuse the delete function to turn sector ceilings into sky
-
-	int sel_pics = GetSelectedPics();
-
-	if (sel_pics == 0)
-		sel_pics = GetHighlightedPics();
-
-	if (! (sel_pics & 2))
-	{
-		Beep("cannot delete that");
-		return;
-	}
-
-	int sky_tex = BA_InternaliseString(game_info.sky_flat);
-
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
-		return;
-
-	BA_Begin();
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-		BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  sky_tex);
-
-	BA_MessageForSel("set sky on", &list);
-	BA_End();
-
-	UpdateField();
-}
-
-
 bool UI_SectorBox::ClipboardOp(char what)
 {
 	if (obj < 0)
@@ -904,7 +867,7 @@ bool UI_SectorBox::ClipboardOp(char what)
 			break;
 
 		case 'v':
-			CB_Paste();
+			CB_Paste(r_clipboard.GetFlatNum());
 			break;
 
 		case 'x':
@@ -912,7 +875,8 @@ bool UI_SectorBox::ClipboardOp(char what)
 			break;
 
 		case 'd':
-			CB_Delete();
+			// we abuse the delete function to turn sector ceilings into sky
+			CB_Paste(BA_InternaliseString(game_info.sky_flat));
 			break;
 	}
 

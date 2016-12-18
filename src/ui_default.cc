@@ -482,14 +482,16 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 {
 	// we abuse the delete function to turn sector ceilings into sky
 
+	if (sel_pics & 1)
+	{
+		f_tex->value(game_info.sky_flat);
+		f_tex->do_callback();
+	}
+
 	if (sel_pics & 2)
 	{
 		c_tex->value(game_info.sky_flat);
 		c_tex->do_callback();
-	}
-	else
-	{
-		Beep("cannot delete that");
 	}
 }
 

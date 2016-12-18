@@ -99,9 +99,8 @@ public:
 
 private:
 	void CB_Copy();
-	void CB_Paste();
+	void CB_Paste(int new_tex);
 	void CB_Cut();
-	void CB_Delete();
 
 	void SetFlat(const char *name, int e_state);
 	void SetSectorType(int new_type);
