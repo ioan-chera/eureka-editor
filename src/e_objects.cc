@@ -807,12 +807,24 @@ void MoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
 
 void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
 {
+	if (edit.mode != OBJ_VERTICES)
+	{
+		selection_c list(edit.mode);
+
+		list.set(obj_num);
+
+		MoveObjects(&list, delta_x, delta_y, delta_z);
+		return;
+	}
+
+	/* move a single vertex */
+
 	BA_Begin();
 
 	int did_split_line = -1;
 
 	// handle a single vertex merging onto an existing one
-	if (edit.mode == OBJ_VERTICES && edit.highlight.valid())
+	if (edit.highlight.valid())
 	{
 		BA_Message("merge vertex #%d", obj_num);
 
@@ -830,7 +842,7 @@ void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
 	}
 
 	// handle a single vertex splitting a linedef
-	if (edit.mode == OBJ_VERTICES && edit.split_line.valid())
+	if (edit.split_line.valid())
 	{
 		did_split_line = edit.split_line.num;
 
