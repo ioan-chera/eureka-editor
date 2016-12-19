@@ -249,7 +249,7 @@ void CMD_SetVar()
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
-		int_val = CLAMP(0, int_val, 3);
+		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 		RedrawMap();
 	}
@@ -304,7 +304,7 @@ void CMD_ToggleVar()
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
-		if (edit.sector_render_mode >= SREND_Lighting)
+		if (edit.sector_render_mode >= SREND_SoundProp)
 			edit.sector_render_mode = SREND_Nothing;
 		else
 			edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)edit.sector_render_mode);

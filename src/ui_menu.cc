@@ -257,6 +257,8 @@ static void view_do_sector_render(Fl_Widget *w, void * data)
 		edit.sector_render_mode = SREND_Ceiling;
 	else if (strcmp(item->text, "Lighting") == 0)
 		edit.sector_render_mode = SREND_Lighting;
+	else if (strcmp(item->text, "Sound") == 0)
+		edit.sector_render_mode = SREND_SoundProp;
 	else
 		edit.sector_render_mode = SREND_Nothing;
 
@@ -500,6 +502,7 @@ static Fl_Menu_Item menu_items[] =
 			{ "Floors",    0, FCAL view_do_sector_render },
 			{ "Ceilings",  0, FCAL view_do_sector_render },
 			{ "Lighting",  0, FCAL view_do_sector_render },
+			{ "Sound",     0, FCAL view_do_sector_render },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },

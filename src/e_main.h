@@ -38,7 +38,8 @@ typedef enum
 	SREND_Nothing = 0,
 	SREND_Floor,
 	SREND_Ceiling,
-	SREND_Lighting
+	SREND_Lighting,
+	SREND_SoundProp
 
 } sector_rendering_mode_e;
 

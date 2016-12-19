@@ -29,6 +29,7 @@
 #include "e_hover.h"
 #include "e_sector.h"
 #include "e_things.h"
+#include "e_path.h"	  // SoundPropagation
 #include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
@@ -1864,6 +1865,21 @@ void UI_Canvas::RenderSector(int num)
 	if (edit.sector_render_mode == SREND_Lighting)
 	{
 		fl_color(light_col);
+	}
+	else if (edit.sector_render_mode == SREND_SoundProp)
+	{
+		if (edit.mode != OBJ_SECTORS || !edit.highlight.valid())
+			return;
+
+		const byte * prop = SoundPropagation(edit.highlight.num);
+
+		switch ((propagate_level_e) prop[num])
+		{
+			case PGL_Never:   return;
+			case PGL_Maybe:   fl_color(fl_rgb_color(64,64,192));  break;
+			case PGL_Level_1: fl_color(fl_rgb_color(192,32,32));  break;
+			case PGL_Level_2: fl_color(fl_rgb_color(192,128,32)); break;
+		}
 	}
 	else
 	{
