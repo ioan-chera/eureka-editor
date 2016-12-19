@@ -1910,6 +1910,13 @@ void CheckLimits()
 }
 
 
+void SortSegs()
+{
+	// sort segs into ascending index
+	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+}
+
+
 /* ----- ZDoom format writing --------------------------- */
 
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
@@ -2372,8 +2379,7 @@ void SaveLevel(node_t *root_node)
 
 	if (cur_info->gl_nodes && num_real_lines > 0)
 	{
-		// sort segs into ascending index
-		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+		SortSegs();
 
 		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
@@ -2404,7 +2410,7 @@ void SaveLevel(node_t *root_node)
 
 	if (lev_force_xnod && num_real_lines > 0)
 	{
-		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+		SortSegs();
 
 		SaveZDFormat(root_node);
 	}
@@ -2412,8 +2418,7 @@ void SaveLevel(node_t *root_node)
 	{
 		RoundOffBspTree();
 
-		// sort segs into ascending index
-		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+		SortSegs();
 
 		PutVertices("VERTEXES", false);
 
