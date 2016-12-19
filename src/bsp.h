@@ -478,10 +478,6 @@ typedef struct subsec_s
 	// approximate middle point
 	double mid_x;
 	double mid_y;
-
-	// this is normally false, only set for the "no nodes hack"
-	// [ see comments in the BuildNodes() function. ]
-	bool is_dummy;
 }
 subsec_t;
 

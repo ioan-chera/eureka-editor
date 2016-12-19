@@ -1559,9 +1559,6 @@ static void DetermineMiddle(subsec_t *sub)
 	double mid_x=0, mid_y=0;
 	int total=0;
 
-	if (sub->is_dummy)
-		return;
-
 	// compute middle coordinates
 	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
@@ -2061,9 +2058,6 @@ void ClockwiseBspTree()
 	{
 		subsec_t *sub = LookupSubsec(i);
 
-		if (sub->is_dummy)
-			continue;
-
 		ClockwiseOrder(sub);
 		RenumberSubsecSegs(sub);
 
@@ -2078,9 +2072,6 @@ static void NormaliseSubsector(subsec_t *sub)
 {
 	seg_t *new_head = NULL;
 	seg_t *new_tail = NULL;
-
-	if (sub->is_dummy)
-		return;
 
 # if DEBUG_SUBSEC
 	DebugPrintf("Subsec: Normalising %d\n", sub->index);
@@ -2154,9 +2145,6 @@ static void RoundOffSubsector(subsec_t *sub)
 
 	int real_total  = 0;
 	int degen_total = 0;
-
-	if (sub->is_dummy)
-		return;
 
 # if DEBUG_SUBSEC
 	DebugPrintf("Subsec: Rounding off %d\n", sub->index);
