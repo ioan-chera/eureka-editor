@@ -543,5 +543,123 @@ void CMD_PruneUnused(void)
 }
 
 
+//------------------------------------------------------------------------
+
+bool sound_propagation_invalid;
+
+static std::vector<byte> sound_prop_vec;
+static std::vector<byte> sound_temp1_vec;
+static std::vector<byte> sound_temp2_vec;
+
+static int sound_start_sec;
+
+
+static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
+{
+	bool changes;
+
+	memset(&vec[0], 0, NumSectors);
+
+	vec[sound_start_sec] = 2;
+
+	do
+	{
+		changes = false;
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			if (! L->TwoSided())
+				continue;
+
+			int sec1 = L->WhatSector(SIDE_RIGHT);
+			int sec2 = L->WhatSector(SIDE_LEFT);
+
+			// check for doors
+			if (!ignore_doors &&
+				(MIN(Sectors[sec1]->ceilh,  Sectors[sec2]->ceilh) <=
+				 MAX(Sectors[sec1]->floorh, Sectors[sec2]->floorh)))
+			{
+				continue;
+			}
+
+			int val1 = vec[sec1];
+			int val2 = vec[sec2];
+
+			int new_val = MAX(val1, val2);
+
+			if (L->flags & MLF_SoundBlock)
+				new_val -= 1;
+
+			if (new_val > val1 || new_val > val2)
+			{
+				if (new_val > val1) vec[sec1] = new_val;
+				if (new_val > val2) vec[sec2] = new_val;
+
+				changes = true;
+			}
+		}
+
+	} while (changes);
+}
+
+
+static void CalcFinalPropagation()
+{
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		int t1 = sound_temp1_vec[s];
+		int t2 = sound_temp2_vec[s];
+
+		if (t1 != t2)
+		{
+			if (t1 == 0 || t2 == 0)
+			{
+				sound_prop_vec[s] = PGL_Maybe;
+				continue;
+			}
+
+			t1 = MIN(t1, t2);
+		}
+
+		switch (t1)
+		{
+			case 0: sound_prop_vec[s] = PGL_Never;
+			case 1: sound_prop_vec[s] = PGL_Level_1;
+			case 2: sound_prop_vec[s] = PGL_Level_2;
+		}
+	}
+}
+
+
+byte * SoundPropagation(int start_sec)
+{
+	if ((int)sound_prop_vec.size() != NumSectors)
+	{
+		sound_prop_vec .resize(NumSectors);
+		sound_temp1_vec.resize(NumSectors);
+		sound_temp2_vec.resize(NumSectors);
+
+		sound_propagation_invalid = true;
+	}
+
+	if (sound_propagation_invalid ||
+		sound_start_sec != start_sec)
+	{
+		// cannot used cached data, recompute it
+
+		sound_start_sec = start_sec;
+		sound_propagation_invalid = false;
+
+		CalcPropagation(sound_temp1_vec, false);
+		CalcPropagation(sound_temp2_vec, true);
+
+		CalcFinalPropagation();
+	}
+
+	return &sound_prop_vec[0];
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

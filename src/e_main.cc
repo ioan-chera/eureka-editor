@@ -56,6 +56,8 @@ static int  moved_vertex_count;
 
 static selection_c * last_Sel;
 
+extern bool sound_propagation_invalid;
+
 
 // config items
 int default_edit_mode = 3;  // Vertices
@@ -400,6 +402,8 @@ void MapStuff_NotifyBegin()
 	recalc_map_bounds  = false;
 	new_vertex_minimum = -1;
 	moved_vertex_count =  0;
+
+	sound_propagation_invalid = true;
 }
 
 void MapStuff_NotifyInsert(obj_type_e type, int objnum)
