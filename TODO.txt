@@ -9,13 +9,6 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-BSP:
-
-+  check XNOD maps in ZDoom 2.8.1
-   [ see if we get same behavior as Zandronum ]
-
-
-
 Documentation
 -------------
 
@@ -79,11 +72,6 @@ ______________________________________________________________________
 General
 -------
 
-+  support selecting things in 3D view, and Copy/Paste as per textures
-
-+  treat sprite UI_Pic in THING panel and DEFAULTS panel (etC)
-   as a highlightable thing, and possible Copy/Paste target
-
 -  Preferences window:
    -  backup_max_files / backup_max_space
    -  floor_bump_xxx values
@@ -91,6 +79,9 @@ General
    -  add more stuff (see Possible User Config, below)
 
 -  BSP: make read errors more tolerant (DON'T call FatalError)
+
+-  treat sprite UI_Pic in THING panel and DEFAULTS panel as a
+   highlightable thing, and possible Copy/Paste target
 
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
@@ -212,26 +203,20 @@ IDEA:  popup menu for right-click on flats/textures in the panel
 3D View
 -------
 
-+  CTRL-C and CTRL-V for copy/paste textures
++  support selecting things in 3D view, and Copy/Paste as per textures
 
-+  being able to select stuff to modify:
-   - things
-   - floors
-   - ceilings
-   - sidedef textures
++  slopes
 
--  able to drag stuff around
+-  able to drag stuff around?
    - raise/lower floors
    - move things on a 2D plane
    - move things vertically (for Hexen format)
-
-+  slopes
 
 -  BOOM colormaps
 
 -  BOOM deep water
 
--  extrafloors
++  extrafloors
    -  create a DrawWall for their floor/ceil and sides
    -  distance is slightly closer than normal wall segment
 
