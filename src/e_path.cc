@@ -558,7 +558,8 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 {
 	bool changes;
 
-	memset(&vec[0], 0, NumSectors);
+	for (int k = 0 ; k < NumSectors ; k++)
+		vec[k] = 0;
 
 	vec[sound_start_sec] = 2;
 
@@ -575,6 +576,9 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 
 			int sec1 = L->WhatSector(SIDE_RIGHT);
 			int sec2 = L->WhatSector(SIDE_LEFT);
+
+			SYS_ASSERT(sec1 >= 0);
+			SYS_ASSERT(sec2 >= 0);
 
 			// check for doors
 			if (!ignore_doors &&
@@ -625,15 +629,15 @@ static void CalcFinalPropagation()
 
 		switch (t1)
 		{
-			case 0: sound_prop_vec[s] = PGL_Never;
-			case 1: sound_prop_vec[s] = PGL_Level_1;
-			case 2: sound_prop_vec[s] = PGL_Level_2;
+			case 0: sound_prop_vec[s] = PGL_Never;   break;
+			case 1: sound_prop_vec[s] = PGL_Level_1; break;
+			case 2: sound_prop_vec[s] = PGL_Level_2; break;
 		}
 	}
 }
 
 
-byte * SoundPropagation(int start_sec)
+const byte * SoundPropagation(int start_sec)
 {
 	if ((int)sound_prop_vec.size() != NumSectors)
 	{
