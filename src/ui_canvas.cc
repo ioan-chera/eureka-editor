@@ -36,6 +36,7 @@
 #include "im_color.h"
 #include "im_img.h"
 #include "r_render.h"
+#include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
 
 
@@ -587,7 +588,7 @@ void UI_Canvas::DrawLinedefs()
 				}
 				else if (one_sided)
 					fl_color(WHITE);
-				else if (L->flags & 1)
+				else if (L->flags & MLF_Blocking)
 					fl_color(FL_CYAN);
 				else
 					fl_color(LIGHTGREY);
@@ -608,6 +609,15 @@ void UI_Canvas::DrawLinedefs()
 					fl_color(LIGHTGREY);
 				else if (sd1 < 0)
 					fl_color(RED);
+				else if (edit.sector_render_mode == SREND_SoundProp)
+				{
+					if (L->flags & MLF_SoundBlock)
+						fl_color(FL_MAGENTA);
+					else if (one_sided)
+						fl_color(WHITE);
+					else
+						fl_color(LIGHTGREY);
+				}
 				else
 				{
 					bool have_tag  = false;
@@ -1876,9 +1886,9 @@ void UI_Canvas::RenderSector(int num)
 		switch ((propagate_level_e) prop[num])
 		{
 			case PGL_Never:   return;
-			case PGL_Maybe:   fl_color(fl_rgb_color(64,64,192));  break;
-			case PGL_Level_1: fl_color(fl_rgb_color(192,32,32));  break;
-			case PGL_Level_2: fl_color(fl_rgb_color(192,128,32)); break;
+			case PGL_Maybe:   fl_color(fl_rgb_color(64,64,192)); break;
+			case PGL_Level_1: fl_color(fl_rgb_color(192,32,32)); break;
+			case PGL_Level_2: fl_color(fl_rgb_color(192,96,32)); break;
 		}
 	}
 	else
