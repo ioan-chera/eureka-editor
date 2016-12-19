@@ -1528,7 +1528,7 @@ void PutSegs(void)
 		seg_t *seg = segs[i];
 
 		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->degenerate)
+		if (! seg->linedef || seg->is_degenerate)
 			continue;
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
@@ -1579,7 +1579,7 @@ void PutGLSegs(void)
 		seg_t *seg = segs[i];
 
 		// ignore degenerate segs
-		if (seg->degenerate)
+		if (seg->is_degenerate)
 			continue;
 
 		raw.start = LE_U16(VertexIndex16Bit(seg->start));
@@ -1633,7 +1633,7 @@ void PutGLSegs_V5()
 		seg_t *seg = segs[i];
 
 		// ignore degenerate segs
-		if (seg->degenerate)
+		if (seg->is_degenerate)
 			continue;
 
 		raw.start = LE_U32(VertexIndex_V5(seg->start));
@@ -1974,7 +1974,7 @@ void PutZSubsecs(void)
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			// ignore minisegs and degenerate segs
-			if (! seg->linedef || seg->degenerate)
+			if (! seg->linedef || seg->is_degenerate)
 				continue;
 
 			if (cur_seg_index != seg->index)
@@ -2007,7 +2007,7 @@ void PutZSegs(void)
 		seg_t *seg = segs[i];
 
 		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->degenerate)
+		if (! seg->linedef || seg->is_degenerate)
 			continue;
 
 		if (count != seg->index)
@@ -2367,9 +2367,6 @@ void SaveLevel(node_t *root_node)
 
 	CheckLimits();
 
-	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
-
 
 	/* --- GL Nodes --- */
 
@@ -2377,6 +2374,9 @@ void SaveLevel(node_t *root_node)
 
 	if (cur_info->gl_nodes && num_real_lines > 0)
 	{
+		// sort segs into ascending index
+		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+
 		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
 
@@ -2398,12 +2398,15 @@ void SaveLevel(node_t *root_node)
 		CreateLevelLump("GL_PVS")->Finish();
 	}
 
+
 	/* --- Normal nodes --- */
+
+	// remove all the mini-segs
+	NormaliseBspTree();
 
 	if (lev_force_xnod && num_real_lines > 0)
 	{
-		// remove mini-segs
-		NormaliseBspTree();
+		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
 		SaveZDFormat(root_node);
 	}
@@ -2413,7 +2416,9 @@ void SaveLevel(node_t *root_node)
 		// their normal counterparts (pointer change: use normal_dup).
 
 		RoundOffBspTree();
-		NormaliseBspTree();
+
+		// sort segs into ascending index
+		qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 
 		PutVertices("VERTEXES", false);
 

@@ -788,7 +788,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->x = x;
 	vert->y = y;
 
-	vert->is_new = true;
+	vert->is_new = 1;
 
 	vert->ref_count = seg->partner ? 4 : 2;
 

@@ -2164,7 +2164,7 @@ static void RoundOffSubsector(subsec_t *sub)
 		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
 			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
 		{
-			seg->degenerate = 1;
+			seg->is_degenerate = 1;
 
 			if (seg->linedef)
 				last_real_degen = seg;
@@ -2207,7 +2207,7 @@ static void RoundOffSubsector(subsec_t *sub)
 				I_ROUND(last_real_degen->end->y));
 #   endif
 
-		last_real_degen->degenerate = 0;
+		last_real_degen->is_degenerate = 0;
 	}
 
 	// second pass, remove the blighters...
@@ -2217,7 +2217,7 @@ static void RoundOffSubsector(subsec_t *sub)
 		seg = sub->seg_list;
 		sub->seg_list = seg->next;
 
-		if (! seg->degenerate)
+		if (! seg->is_degenerate)
 		{
 			seg->next = NULL;
 

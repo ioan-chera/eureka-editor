@@ -254,7 +254,7 @@ typedef struct vertex_s
 	int index;
 
 	// vertex is newly created (from a seg split)
-	bool is_new;
+	char is_new;
 
 	// reference count.  When building normal node info, unused vertices
 	// will be pruned.
@@ -440,7 +440,7 @@ typedef struct seg_s
 	// start and end vertices produces the same location).  It should be
 	// ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
 	// won't be any of these when writing the V2 GL_SEGS lump].
-	int degenerate;
+	char is_degenerate;
 
 	// the superblock that contains this seg, or NULL if the seg is no
 	// longer in any superblock (e.g. now in a subsector).
