@@ -262,10 +262,9 @@ static void MarkPolyobjSector(sector_t *sector)
 	if (sector->has_polyobj)
 		return;
 
-	/* mark all lines of this sector as precious, to prevent the sector
-	 * from being split.
-	 */
-	sector->has_polyobj = true;
+	// mark all lines of this sector as precious, to prevent the sector
+	// from being split.
+	sector->has_polyobj = 1;
 
 	for (i = 0 ; i < num_linedefs ; i++)
 	{
@@ -274,7 +273,7 @@ static void MarkPolyobjSector(sector_t *sector)
 		if ((L->right && L->right->sector == sector) ||
 				(L->left && L->left->sector == sector))
 		{
-			L->is_precious = true;
+			L->is_precious = 1;
 		}
 	}
 }
@@ -411,7 +410,6 @@ static void MarkPolyobjPoint(double x, double y)
 void DetectPolyobjSectors(void)
 {
 	int i;
-	int hexen_style;
 
 	// -JL- There's a conflict between Hexen polyobj thing types and Doom thing
 	//      types. In Doom type 3001 is for Imp and 3002 for Demon. To solve
@@ -438,7 +436,7 @@ void DetectPolyobjSectors(void)
 	}
 
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
-	hexen_style = true;
+	bool hexen_style = true;
 
 	for (i = 0 ; i < num_things ; i++)
 	{
@@ -568,10 +566,7 @@ void PruneVerticesAtEnd(void)
 	{
 		vertex_t *V = lev_vertices[i];
 
-		if (V->ref_count < 0)
-			BugError("Vertex %d ref_count is %d\n", i, V->ref_count);
-
-		if (V->ref_count > 0)
+		if (V->is_used)
 			break;
 
 		UtilFree(V);
@@ -789,8 +784,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->y = y;
 
 	vert->is_new = 1;
-
-	vert->ref_count = seg->partner ? 4 : 2;
+	vert->is_used = 1;
 
 	vert->index = num_new_vert;
 	num_new_vert++;
@@ -809,7 +803,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 		vert->normal_dup->x = x;
 		vert->normal_dup->y = y;
-		vert->normal_dup->ref_count = vert->ref_count;
+		vert->normal_dup->is_used = 1;
 
 		vert->normal_dup->index = num_old_vert;
 		num_old_vert++;
@@ -832,10 +826,10 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vertex_t *vert = NewVertex();
 
-	vert->ref_count = start->ref_count;
-
 	vert->index = num_old_vert;
 	num_old_vert++;
+
+	vert->is_used = 1;
 
 	// compute new coordinates
 

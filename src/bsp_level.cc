@@ -1053,8 +1053,7 @@ void GetSectors(void)
 		sector->special = LE_U16(raw.type);
 		sector->tag = LE_S16(raw.tag);
 
-		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ?
-			true : false;
+		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ? 1 : 0;
 
 		// sector indices never change
 		sector->index = i;
@@ -1176,7 +1175,7 @@ void GetSidedefs(void)
 			LookupSector(LE_U16(raw.sector));
 
 		if (side->sector)
-			side->sector->ref_count++;
+			side->sector->is_used = 1;
 
 		side->x_offset = LE_S16(raw.x_offset);
 		side->y_offset = LE_S16(raw.y_offset);
@@ -1233,8 +1232,8 @@ void GetLinedefs(void)
 		vertex_t *start = LookupVertex(LE_U16(raw.start));
 		vertex_t *end   = LookupVertex(LE_U16(raw.end));
 
-		start->ref_count++;
-		end->ref_count++;
+		start->is_used = 1;
+		  end->is_used = 1;
 
 		line = NewLinedef();
 
@@ -1249,22 +1248,21 @@ void GetLinedefs(void)
 		line->type = LE_U16(raw.type);
 		line->tag  = LE_S16(raw.tag);
 
-		line->two_sided = (line->flags & MLF_TwoSided) ? true : false;
-		line->is_precious = (line->tag >= 900 && line->tag < 1000) ?
-			true : false;
+		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
+		line->is_precious = (line->tag >= 900 && line->tag < 1000) ? 1 : 0;
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
 
 		if (line->right)
 		{
-			line->right->ref_count++;
+			line->right->is_used = 1;
 			line->right->on_special |= (line->type > 0) ? 1 : 0;
 		}
 
 		if (line->left)
 		{
-			line->left->ref_count++;
+			line->left->is_used = 1;
 			line->left->on_special |= (line->type > 0) ? 1 : 0;
 		}
 
@@ -1310,8 +1308,8 @@ void GetLinedefsHexen(void)
 		vertex_t *start = LookupVertex(LE_U16(raw.start));
 		vertex_t *end   = LookupVertex(LE_U16(raw.end));
 
-		start->ref_count++;
-		end->ref_count++;
+		start->is_used = 1;
+		  end->is_used = 1;
 
 		line = NewLinedef();
 
@@ -1331,7 +1329,7 @@ void GetLinedefsHexen(void)
 			line->specials[j] = (u8_t)(raw.args[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
-		line->two_sided = (line->flags & MLF_TwoSided) ? true : false;
+		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
@@ -1339,13 +1337,13 @@ void GetLinedefsHexen(void)
 		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
 		if (line->right)
 		{
-			line->right->ref_count++;
+			line->right->is_used = 1;
 			line->right->on_special |= (line->type > 0) ? 1 : 0;
 		}
 
 		if (line->left)
 		{
-			line->left->ref_count++;
+			line->left->is_used = 1;
 			line->left->on_special |= (line->type > 0) ? 1 : 0;
 		}
 

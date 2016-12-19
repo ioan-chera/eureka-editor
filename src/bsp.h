@@ -256,9 +256,8 @@ typedef struct vertex_s
 	// vertex is newly created (from a seg split)
 	char is_new;
 
-	// reference count.  When building normal node info, unused vertices
-	// will be pruned.
-	int ref_count;
+	// when building normal nodes, unused vertices will be pruned.
+	char is_used;
 
 	// usually NULL, unless this vertex occupies the same location as a
 	// previous vertex.
@@ -285,11 +284,10 @@ typedef struct sector_s
 	char coalesce;
 
 	// -JL- non-zero if this sector contains a polyobj.
-	int has_polyobj;
+	char has_polyobj;
 
-	// reference count.  When building normal nodes, unused sectors will
-	// be pruned.
-	int ref_count;
+	// when building normal nodes, unused sectors will be pruned.
+	char is_used;
 
 	// heights
 	int floor_h, ceil_h;
@@ -336,9 +334,8 @@ typedef struct sidedef_s
 	// sidedef index.  Always valid after loading & pruning.
 	int index;
 
-	// reference count.  When building normal nodes, unused sidedefs will
-	// be pruned.
-	int ref_count;
+	// when building normal nodes, unused sidedefs will be pruned.
+	char is_used;
 
 	// usually NULL, unless this sidedef is exactly the same as a
 	// previous one.  Only used during the pruning phase.
