@@ -850,8 +850,8 @@ static LEVELARRAY(node_t,    nodes,      num_nodes)
 static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
 
 
-int num_normal_vert = 0;
-int num_gl_vert = 0;
+int num_old_vert = 0;
+int num_new_vert = 0;
 int num_complete_seg = 0;
 int num_real_lines = 0;
 
@@ -1011,7 +1011,7 @@ void GetVertices(void)
 		vert->index = i;
 	}
 
-	num_normal_vert = num_vertices;
+	num_old_vert = num_vertices;
 }
 
 
@@ -1424,7 +1424,7 @@ void PutVertices(const char *name, int do_gl)
 
 		vertex_t *vert = lev_vertices[i];
 
-		if ((do_gl ? 1 : 0) != ((vert->index & IS_GL_VERTEX) ? 1 : 0))
+		if ((do_gl ? 1 : 0) != (vert->is_new ? 1 : 0))
 		{
 			continue;
 		}
@@ -1437,9 +1437,9 @@ void PutVertices(const char *name, int do_gl)
 		count++;
 	}
 
-	if (count != (do_gl ? num_gl_vert : num_normal_vert))
+	if (count != (do_gl ? num_new_vert : num_old_vert))
 		BugError("PutVertices miscounted (%d != %d)\n", count,
-				do_gl ? num_gl_vert : num_normal_vert);
+				do_gl ? num_new_vert : num_old_vert);
 
 	if (! do_gl && count > 65534)
 	{
@@ -1469,7 +1469,7 @@ void PutGLVertices(int do_v5)
 
 		vertex_t *vert = lev_vertices[i];
 
-		if (! (vert->index & IS_GL_VERTEX))
+		if (! vert->is_new)
 			continue;
 
 		raw.x = LE_S32((int)(vert->x * 65536.0));
@@ -1480,15 +1480,15 @@ void PutGLVertices(int do_v5)
 		count++;
 	}
 
-	if (count != num_gl_vert)
-		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_gl_vert);
+	if (count != num_new_vert)
+		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
 }
 
 
 static inline u16_t VertexIndex16Bit(const vertex_t *v)
 {
-	if (v->index & IS_GL_VERTEX)
-		return (u16_t) ((v->index & ~IS_GL_VERTEX) | 0x8000U);
+	if (v->is_new)
+		return (u16_t) (v->index | 0x8000U);
 
 	return (u16_t) v->index;
 }
@@ -1496,8 +1496,8 @@ static inline u16_t VertexIndex16Bit(const vertex_t *v)
 
 static inline u32_t VertexIndex_V5(const vertex_t *v)
 {
-	if (v->index & IS_GL_VERTEX)
-		return (u32_t) ((v->index & ~IS_GL_VERTEX) | 0x80000000U);
+	if (v->is_new)
+		return (u32_t) (v->index | 0x80000000U);
 
 	return (u32_t) v->index;
 }
@@ -1505,8 +1505,8 @@ static inline u32_t VertexIndex_V5(const vertex_t *v)
 
 static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 {
-	if (v->index & IS_GL_VERTEX)
-		return (u32_t) (num_normal_vert + (v->index & ~IS_GL_VERTEX));
+	if (v->is_new)
+		return (u32_t) (num_old_vert + v->index);
 
 	return (u32_t) v->index;
 }
@@ -1888,8 +1888,8 @@ void CheckLimits()
 
 	if (cur_info->gl_nodes && !cur_info->force_v5)
 	{
-		if (num_normal_vert > 32767 ||
-			num_gl_vert > 32767 ||
+		if (num_old_vert > 32767 ||
+			num_new_vert > 32767 ||
 			num_segs > 65534 ||
 			num_nodes > 32767)
 		{
@@ -1900,8 +1900,8 @@ void CheckLimits()
 
 	if (! cur_info->force_xnod)
 	{
-		if (num_normal_vert > 32767 ||
-			num_gl_vert > 32767 ||
+		if (num_old_vert > 32767 ||
+			num_new_vert > 32767 ||
 			num_segs > 32767 ||
 			num_nodes > 32767)
 		{
@@ -1921,8 +1921,8 @@ void PutZVertices(void)
 {
 	int count, i;
 
-	u32_t orgverts = LE_U32(num_normal_vert);
-	u32_t newverts = LE_U32(num_gl_vert);
+	u32_t orgverts = LE_U32(num_old_vert);
+	u32_t newverts = LE_U32(num_new_vert);
 
 	ZLibAppendLump(&orgverts, 4);
 	ZLibAppendLump(&newverts, 4);
@@ -1933,7 +1933,7 @@ void PutZVertices(void)
 
 		vertex_t *vert = lev_vertices[i];
 
-		if (! (vert->index & IS_GL_VERTEX))
+		if (! vert->is_new)
 			continue;
 
 		raw.x = LE_S32((int)(vert->x * 65536.0));
@@ -1944,9 +1944,9 @@ void PutZVertices(void)
 		count++;
 	}
 
-	if (count != num_gl_vert)
+	if (count != num_new_vert)
 		BugError("PutZVertices miscounted (%d != %d)\n",
-				count, num_gl_vert);
+				count, num_new_vert);
 }
 
 
@@ -2181,7 +2181,7 @@ void LoadLevel()
 
 	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
 
-	num_gl_vert = 0;
+	num_new_vert = 0;
 	num_complete_seg = 0;
 	num_real_lines = 0;
 
@@ -2658,7 +2658,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	if (ret == BUILD_OK)
 	{
 		PrintVerbose("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
-				num_nodes, num_subsecs, num_segs, num_normal_vert + num_gl_vert);
+					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
 
 		if (root_node)
 		{

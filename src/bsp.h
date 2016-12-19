@@ -250,8 +250,11 @@ typedef struct vertex_s
 	double x, y;
 
 	// vertex index.  Always valid after loading and pruning of unused
-	// vertices has occurred.  For GL vertices, bit 30 will be set.
+	// vertices has occurred.
 	int index;
+
+	// vertex is newly created (from a seg split)
+	bool is_new;
 
 	// reference count.  When building normal node info, unused vertices
 	// will be pruned.
@@ -271,8 +274,6 @@ typedef struct vertex_s
 	struct vertex_s *normal_dup;
 }
 vertex_t;
-
-#define IS_GL_VERTEX  (1 << 30)
 
 
 typedef struct sector_s
@@ -563,8 +564,8 @@ extern int num_segs;
 extern int num_subsecs;
 extern int num_nodes;
 
-extern int num_normal_vert;
-extern int num_gl_vert;
+extern int num_old_vert;
+extern int num_new_vert;
 extern int num_complete_seg;
 
 

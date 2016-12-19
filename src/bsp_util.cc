@@ -588,7 +588,7 @@ void PruneVerticesAtEnd(void)
 		num_vertices = new_num;
 	}
 
-	num_normal_vert = num_vertices;
+	num_old_vert = num_vertices;
 }
 
 
@@ -788,12 +788,12 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->x = x;
 	vert->y = y;
 
+	vert->is_new = true;
+
 	vert->ref_count = seg->partner ? 4 : 2;
 
-	{
-		vert->index = num_gl_vert | IS_GL_VERTEX;
-		num_gl_vert++;
-	}
+	vert->index = num_new_vert;
+	num_new_vert++;
 
 	// compute wall_tip info
 
@@ -811,8 +811,8 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 		vert->normal_dup->y = y;
 		vert->normal_dup->ref_count = vert->ref_count;
 
-		vert->normal_dup->index = num_normal_vert;
-		num_normal_vert++;
+		vert->normal_dup->index = num_old_vert;
+		num_old_vert++;
 	}
 
 	return vert;
@@ -834,8 +834,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vert->ref_count = start->ref_count;
 
-	vert->index = num_normal_vert;
-	num_normal_vert++;
+	vert->index = num_old_vert;
+	num_old_vert++;
 
 	// compute new coordinates
 
