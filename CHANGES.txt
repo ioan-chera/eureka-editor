@@ -24,6 +24,8 @@ General:
 
 +  sprite rendering on the 2D canvas
 
++  a mode to show sound propagation
+
 -  a new "File/Copy Map" command
 -  a better dialog for "File / Open Map" command
 -  a better dialog for "JumpToObject" command
