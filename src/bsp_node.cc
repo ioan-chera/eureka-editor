@@ -2121,16 +2121,31 @@ void NormaliseBspTree()
 {
 	// unlinks all minisegs from each subsector
 
-	int i;
-
 	num_complete_seg = 0;
 
-	for (i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
 		NormaliseSubsector(sub);
 		RenumberSubsecSegs(sub);
+	}
+}
+
+
+static void RoundOffVertices()
+{
+	for (int i = 0 ; i < num_vertices ; i++)
+	{
+		vertex_t *vert = LookupVertex(i);
+
+		if (vert->is_new)
+		{
+			vert->is_new = 0;
+
+			vert->index = num_old_vert;
+			num_old_vert++;
+		}
 	}
 }
 
@@ -2153,13 +2168,6 @@ static void RoundOffSubsector(subsec_t *sub)
 	// do an initial pass, just counting the degenerates
 	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		// handle the duplex vertices
-		if (seg->start->normal_dup)
-			seg->start = seg->start->normal_dup;
-
-		if (seg->end->normal_dup)
-			seg->end = seg->end->normal_dup;
-
 		// is the seg degenerate ?
 		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
 			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
@@ -2196,8 +2204,8 @@ static void RoundOffSubsector(subsec_t *sub)
 #   endif
 
 		// create a new vertex for this baby
-		last_real_degen->end = NewVertexDegenerate(last_real_degen->start,
-				last_real_degen->end);
+		last_real_degen->end = NewVertexDegenerate(
+				last_real_degen->start, last_real_degen->end);
 
 #   if DEBUG_SUBSEC
 		DebugPrintf("Degenerate after:  (%d,%d) -> (%d,%d)\n",
@@ -2252,11 +2260,11 @@ static void RoundOffSubsector(subsec_t *sub)
 
 void RoundOffBspTree()
 {
-	int i;
-
 	num_complete_seg = 0;
 
-	for (i=0 ; i < num_subsecs ; i++)
+	RoundOffVertices();
+
+	for (int i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 

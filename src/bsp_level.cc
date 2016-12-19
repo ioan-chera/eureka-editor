@@ -2410,9 +2410,6 @@ void SaveLevel(node_t *root_node)
 	}
 	else
 	{
-		// Note: RoundOffBspTree will convert the GL vertices in segs to
-		// their normal counterparts (pointer change: use normal_dup).
-
 		RoundOffBspTree();
 
 		// sort segs into ascending index

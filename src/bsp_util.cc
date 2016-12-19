@@ -783,7 +783,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->x = x;
 	vert->y = y;
 
-	vert->is_new = 1;
+	vert->is_new  = 1;
 	vert->is_used = 1;
 
 	vert->index = num_new_vert;
@@ -796,18 +796,6 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	VertexAddWallTip(vert, seg->pdx, seg->pdy,
 			seg->partner ? seg->partner->sector : NULL, seg->sector);
-
-	// create a duplex vertex for the normal nodes
-	{
-		vert->normal_dup = NewVertex();
-
-		vert->normal_dup->x = x;
-		vert->normal_dup->y = y;
-		vert->normal_dup->is_used = 1;
-
-		vert->normal_dup->index = num_old_vert;
-		num_old_vert++;
-	}
 
 	return vert;
 }
@@ -826,10 +814,11 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vertex_t *vert = NewVertex();
 
+	vert->is_new  = 0;
+	vert->is_used = 1;
+
 	vert->index = num_old_vert;
 	num_old_vert++;
-
-	vert->is_used = 1;
 
 	// compute new coordinates
 

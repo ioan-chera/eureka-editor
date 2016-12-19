@@ -265,12 +265,6 @@ typedef struct vertex_s
 
 	// set of wall_tips
 	wall_tip_t *tip_set;
-
-	// contains a duplicate vertex, needed when both normal and V2 GL
-	// nodes are being built at the same time (this is the vertex used
-	// for the normal segs).  Normally NULL.  Note: the wall tips on
-	// this vertex are not created.
-	struct vertex_s *normal_dup;
 }
 vertex_t;
 
