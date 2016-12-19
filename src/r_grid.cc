@@ -211,7 +211,10 @@ void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
 	orig_y += (map_y - orig_y) * dist_factor;
 
 	if (main_win)
-		main_win->canvas->redraw();
+	{
+		main_win->canvas->PointerPos();
+		RedrawMap();
+	}
 }
 
 
