@@ -75,11 +75,23 @@ public:
 	// a remembered highlight (for operation menu)
 	Obj3d_t saved_hl;
 
+	// state for adjusting offsets via the mouse
+	std::vector<int> adjust_sides;
+	std::vector<int> adjust_lines;
+
+	float adjust_dx, adjust_dx_factor;
+	float adjust_dy, adjust_dy_factor;
+
+	std::vector<int> saved_x_offsets;
+	std::vector<int> saved_y_offsets;
+
 public:
 	r_editing_info_t() :
 		hl(),
 		sel(),
-		sel_type(OB3D_Thing)
+		sel_type(OB3D_Thing),
+		adjust_sides(), adjust_lines(),
+		saved_x_offsets(), saved_y_offsets()
 	{ }
 
 	~r_editing_info_t()
@@ -169,6 +181,82 @@ public:
 		else
 			r_clipboard.SetTex(name);
 	}
+
+	void AddAdjustSide(const Obj3d_t& obj)
+	{
+		const LineDef *L = LineDefs[obj.num];
+
+		int sd = (obj.side < 0) ? L->left : L->right;
+
+		// this should not happen
+		if (sd < 0)
+			return;
+
+		// ensure it is not already there
+		// (e.g. when a line's upper and lower are both selected)
+		for (unsigned int k = 0 ; k < adjust_sides.size() ; k++)
+			if (adjust_sides[k] == sd)
+				return;
+
+		adjust_sides.push_back(sd);
+		adjust_lines.push_back(obj.num);
+	}
+
+	float AdjustDistFactor(float view_x, float view_y)
+	{
+		if (adjust_lines.empty())
+			return 128.0;
+
+		double total = 0;
+
+		for (unsigned int k = 0 ; k < adjust_lines.size() ; k++)
+		{
+			const LineDef *L = LineDefs[adjust_lines[k]];
+			total += ApproxDistToLineDef(L, view_x, view_y);
+		}
+
+		return total / (double)adjust_lines.size();
+	}
+
+	void SaveOffsets()
+	{
+		unsigned int total = adjust_sides.size();
+
+		if (total == 0)
+			return;
+
+		if (saved_x_offsets.size() != total)
+		{
+			saved_x_offsets.resize(total);
+			saved_y_offsets.resize(total);
+		}
+
+		for (unsigned int k = 0 ; k < total ; k++)
+		{
+			SideDef *SD = SideDefs[adjust_sides[k]];
+
+			saved_x_offsets[k] = SD->x_offset;
+			saved_y_offsets[k] = SD->y_offset;
+
+			// change it temporarily (just for the render)
+			SD->x_offset += (int)adjust_dx;
+			SD->y_offset += (int)adjust_dy;
+		}
+	}
+
+	void RestoreOffsets()
+	{
+		unsigned int total = adjust_sides.size();
+
+		for (unsigned int k = 0 ; k < total ; k++)
+		{
+			SideDef *SD = SideDefs[adjust_sides[k]];
+
+			SD->x_offset = saved_x_offsets[k];
+			SD->y_offset = saved_y_offsets[k];
+		}
+	}
+
 };
 
 static r_editing_info_t  r_edit;
@@ -204,13 +292,6 @@ public:
 	int thsec_sector_num;
 	bool thsec_invalidated;
 
-	// state for adjusting offsets via the mouse
-	int   adjust_ld;
-	int   adjust_sd;
-
-	float adjust_dx, adjust_dx_factor;
-	float adjust_dy, adjust_dy_factor;
-
 	// navigation loop info
 	bool is_scrolling;
 	float scroll_speed;
@@ -233,7 +314,6 @@ public:
 	    thing_sectors(),
 		thsec_sector_num(0),
 		thsec_invalidated(false),
-		adjust_ld(-1), adjust_sd(-1),
 		is_scrolling(false),
 		nav_time(0)
 	{ }
@@ -803,10 +883,6 @@ public:
 	int open_y1;
 	int open_y2;
 
-	// saved offsets for mouse adjustment mode
-	int saved_x_offset;
-	int saved_y_offset;
-
 	// these used by HighlightGeometry()
 	int hl_ox, hl_oy;
 
@@ -820,8 +896,7 @@ public:
 	RendInfo() :
 		walls(), active(),
 		query_mode(0), query_sx(), query_sy(),
-		depth_x(), open_y1(), open_y2(),
-		saved_x_offset(), saved_y_offset()
+		depth_x(), open_y1(), open_y2()
 	{ }
 
 	~RendInfo()
@@ -863,32 +938,6 @@ public:
 		AddRenderLine(sx1, sy1, sx2, sy2,
 				is_selected ? 2 : 0,
 				is_selected ? FL_RED : HI_COL);
-	}
-
-	void SaveOffsets()
-	{
-		if (view.adjust_ld < 0)
-			return;
-
-		SideDef *SD = SideDefs[view.adjust_sd];
-
-		saved_x_offset = SD->x_offset;
-		saved_y_offset = SD->y_offset;
-
-		// change it temporarily (just for the render)
-		SD->x_offset += (int)view.adjust_dx;
-		SD->y_offset += (int)view.adjust_dy;
-	}
-
-	void RestoreOffsets()
-	{
-		if (view.adjust_ld < 0)
-			return;
-
-		SideDef *SD = SideDefs[view.adjust_sd];
-
-		SD->x_offset = saved_x_offset;
-		SD->y_offset = saved_y_offset;
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -1874,7 +1923,7 @@ public:
 
 		InitDepthBuf(view.sw);
 
-		SaveOffsets();
+		r_edit.SaveOffsets();
 
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
@@ -1889,7 +1938,7 @@ public:
 
 		RenderWalls();
 
-		RestoreOffsets();
+		r_edit.RestoreOffsets();
 	}
 
 	void DoQuery(int qx, int qy)
@@ -2349,34 +2398,53 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	// started?
 	if (mode < 0)
 	{
-		// find the line / side to adjust
-		if (! r_edit.hl.isLine())
+		r_edit.adjust_sides.clear();
+		r_edit.adjust_lines.clear();
+
+		r_edit.adjust_dx = 0;
+		r_edit.adjust_dy = 0;
+
+		// find the sidedefs to adjust
+		if (! r_edit.SelectEmpty())
+		{
+			if (r_edit.sel_type < OB3D_Lower)
+			{
+				Beep("cannot adjust that");
+				return;
+			}
+
+			for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
+			{
+				const Obj3d_t& obj = r_edit.sel[k];
+
+				if (obj.isLine())
+					r_edit.AddAdjustSide(obj);
+			}
+		}
+		else  // no selection, use the highlight
+		{
+			if (! r_edit.hl.valid())
+			{
+				Beep("nothing to adjust");
+				return;
+			}
+			else if (! r_edit.hl.isLine())
+			{
+				Beep("cannot adjust that");
+				return;
+			}
+
+			r_edit.AddAdjustSide(r_edit.hl);
+		}
+
+		if (r_edit.adjust_sides.empty())  // WTF?
 			return;
 
-		if (! (r_edit.hl.type == OB3D_Lower || r_edit.hl.type == OB3D_Upper))
-			return;
+		float dist = r_edit.AdjustDistFactor(view.x, view.y);
+		dist = CLAMP(20, dist, 1000);
 
-		const LineDef *L = LineDefs[r_edit.hl.num];
-
-		int sd = (r_edit.hl.side < 0) ? L->left : L->right;
-
-		if (sd < 0)  // WTF?
-			return;
-
-		// OK
-		view.adjust_ld = r_edit.hl.num;
-		view.adjust_sd = sd;
-
-		// reset offset deltas to 0
-		view.adjust_dx = 0;
-		view.adjust_dy = 0;
-
-		float dist = ApproxDistToLineDef(L, view.x, view.y);
-		if (dist < 20) dist = 20;
-
-		// TODO: take perspective into account (angled wall --> reduce dx_factor)
-		view.adjust_dx_factor = dist / view.aspect_sw;
-		view.adjust_dy_factor = dist / view.aspect_sh;
+		r_edit.adjust_dx_factor = dist / view.aspect_sw;
+		r_edit.adjust_dy_factor = dist / view.aspect_sh;
 
 		Editor_SetAction(ACT_ADJUST_OFS);
 		return;
@@ -2386,32 +2454,34 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	SYS_ASSERT(view.adjust_ld >= 0);
-
 
 	// finished?
 	if (mode > 0)
 	{
 		// apply the offset deltas now
-		dx = (int)view.adjust_dx;
-		dy = (int)view.adjust_dy;
+		dx = (int)r_edit.adjust_dx;
+		dy = (int)r_edit.adjust_dy;
 
 		if (dx || dy)
 		{
-			const SideDef * SD = SideDefs[view.adjust_sd];
-
 			BA_Begin();
 
-			BA_ChangeSD(view.adjust_sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
-			BA_ChangeSD(view.adjust_sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+			for (unsigned int k = 0 ; k < r_edit.adjust_sides.size() ; k++)
+			{
+				int sd = r_edit.adjust_sides[k];
 
-			BA_Message("adjusted offsets on line #%d", view.adjust_ld);
+				const SideDef * SD = SideDefs[sd];
 
+				BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
+				BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+			}
+
+			BA_Message("adjusted offsets");
 			BA_End();
 		}
 
-		view.adjust_ld = -1;
-		view.adjust_sd = -1;
+		r_edit.adjust_sides.clear();
+		r_edit.adjust_lines.clear();
 
 		Editor_ClearAction();
 		return;
@@ -2440,8 +2510,8 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (render_high_detail)
 		factor = factor * 2.0;
 
-	view.adjust_dx -= dx * factor * view.adjust_dx_factor;
-	view.adjust_dy -= dy * factor * view.adjust_dy_factor;
+	r_edit.adjust_dx -= dx * factor * r_edit.adjust_dx_factor;
+	r_edit.adjust_dy -= dy * factor * r_edit.adjust_dy_factor;
 
 	RedrawMap();
 }
