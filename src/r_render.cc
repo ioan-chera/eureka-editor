@@ -3424,8 +3424,58 @@ void R3D_Toggle()
 }
 
 
+// returns comparison of surface 'j' and 'k' :
+//    negative means do 'j' BEFORE 'k'.
+//    positive means do 'j' AFTER  'k'.
+static int Align_SurfaceCmp(int j, int k, bool do_right)
+{
+	const Obj3d_t& ob_j = r_edit.sel[j];
+	const Obj3d_t& ob_k = r_edit.sel[k];
+
+	// FIXME
+
+	return 0;
+}
+
+
+static int Align_PickNextSurface(const std::vector<byte>& seen, bool do_right)
+{
+	int fallback = -1;
+
+	for (int j = 0 ; j < (int)r_edit.sel.size() ; j++)
+	{
+		if (seen[j]) continue;
+		if (! r_edit.sel[j].valid()) continue;
+
+		if (fallback < 0)
+			fallback = j;
+
+		bool has_better = false;
+
+		for (int k = 0 ; k < (int)r_edit.sel.size() ; k++)
+		{
+			if (k == j)  continue;
+			if (seen[k]) continue;
+			if (! r_edit.sel[k].valid()) continue;
+
+			if (Align_SurfaceCmp(j, k, do_right) > 0)
+			{
+				has_better = true;
+				break;
+			}
+		}
+
+		if (! has_better)
+			return j;
+	}
+
+	// this will be -1 when there is no more surfaces left
+	return fallback;
+}
+
+
 //
-// Align texture on a sidedef
+// Align texture on sidedef(s)
 //
 // Parameter:
 //     x : align X offset
@@ -3457,50 +3507,109 @@ void R3D_Align()
 	}
 
 	bool do_clear = Exec_HasFlag("/clear");
-
-	// find the line / side to align
-	if (! r_edit.hl.isLine())
-	{
-		Beep("No sidedef there!");
-		return;
-	}
-
-	int ld = r_edit.hl.num;
-	const LineDef *L = LineDefs[ld];
-
-	int sd = (r_edit.hl.side < 0) ? L->left : L->right;
-
-	if (sd < 0)  // should NOT happen
-	{
-		Beep("No sidedef there!");
-		return;
-	}
-
-	if (do_clear)
-	{
-		BA_Begin();
-
-		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
-		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
-
-		BA_Message("cleared offsets on line #%d", ld);
-
-		BA_End();
-
-		return;
-	}
-
-	char part_c = (r_edit.hl.type == OB3D_Upper) ? 'u' : 'l';
+	bool do_right = Exec_HasFlag("/right");
 
 	int align_flags = 0;
 
 	if (do_X) align_flags = align_flags | LINALIGN_X;
 	if (do_Y) align_flags = align_flags | LINALIGN_Y;
 
-	if (Exec_HasFlag("/right"))
+	if (do_right)
 		align_flags |= LINALIGN_Right;
 
-	LineDefs_Align(ld, r_edit.hl.side, sd, part_c, align_flags);
+
+	// if selection is empty, add the highlight to it
+	// (and clear it when we are done).
+	bool did_select = false;
+
+	if (r_edit.SelectEmpty())
+	{
+		if (! r_edit.hl.valid())
+		{
+			Beep("nothing to align");
+			return;
+		}
+		else if (! r_edit.hl.isLine())
+		{
+			Beep("cannot align that");
+			return;
+		}
+
+		r_edit.SelectToggle(r_edit.hl);
+		did_select = true;
+	}
+	else
+	{
+		if (r_edit.sel_type < OB3D_Lower)
+		{
+			Beep("cannot align that");
+			return;
+		}
+	}
+
+
+	// we will do each surface in the selection one-by-one,
+	// and the order is significant when doing X offsets, so
+	// mark them off via this array.
+	std::vector<byte> seen;
+
+	seen.resize(r_edit.sel.size());
+
+	unsigned int k;
+
+	for (k = 0 ; k < r_edit.sel.size() ; k++)
+		seen[k] = 0;
+
+
+	BA_Begin();
+
+	for (;;)
+	{
+		// get next unvisited surface
+		int n = Align_PickNextSurface(seen, do_right);
+
+		if (n < 0)
+			break;
+
+		// mark it seen
+		seen[n] = 1;
+
+		const Obj3d_t& obj = r_edit.sel[n];
+
+		int ld = obj.num;
+
+		const LineDef *L = LineDefs[obj.num];
+
+		int sd = L->WhatSideDef(obj.side);
+
+		if (sd < 0)  // should not happen
+			continue;
+
+		if (do_clear)
+		{
+			if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+			if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+		}
+		else
+		{
+			char part_c = (obj.type == OB3D_Upper) ? 'u' : 'l';
+
+			LineDefs_Align(ld, obj.side, sd, part_c, align_flags);
+		}
+	}
+
+	if (do_clear)
+		BA_Message("cleared offsets");
+	else
+		BA_Message("aligned offsets");
+
+	BA_End();
+
+
+	if (did_select)
+		r_edit.sel.clear();
+
+	RedrawMap();
 }
 
 

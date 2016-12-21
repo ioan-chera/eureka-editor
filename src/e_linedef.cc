@@ -533,21 +533,15 @@ void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
 
 	if (adj < 0)
 	{
-		Beep("No nearby wall to align with");
+//????	Beep("No nearby wall to align with");
 		return;
 	}
-
-	BA_Begin();
 
 	if (align_flags & LINALIGN_X)
 		DoAlignX(cur, part, adj, align_flags);
 
 	if (align_flags & LINALIGN_Y)
 		DoAlignY(cur, part, adj, align_flags);
-
-	BA_Message("aligned linedef #%d", ld);
-
-	BA_End();
 }
 
 
