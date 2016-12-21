@@ -1223,7 +1223,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	bool was_ok = dialog->Run(&new_key, &new_context, &new_func, start_grabbed);
 
-	if (was_ok);
+	if (was_ok)
 	{
 		// assume we can set it, since the dialog validated it
 
