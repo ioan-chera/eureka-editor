@@ -194,6 +194,18 @@ void CMD_Redo()
 }
 
 
+static void SetGamma(int new_val)
+{
+	usegamma = CLAMP(0, new_val, 4);
+
+	W_UpdateGamma();
+
+	Status_Set("Gamma level %d", usegamma);
+
+	RedrawMap();
+}
+
+
 void CMD_SetVar()
 {
 	const char *var_name = EXEC_Param[0];
@@ -246,6 +258,10 @@ void CMD_SetVar()
 	{
 		edit.show_object_numbers = bool_val;
 		RedrawMap();
+	}
+	else if (y_stricmp(var_name, "gamma") == 0)
+	{
+		SetGamma(int_val);
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
@@ -301,6 +317,10 @@ void CMD_ToggleVar()
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
 		RedrawMap();
+	}
+	else if (y_stricmp(var_name, "gamma") == 0)
+	{
+		SetGamma((usegamma >= 4) ? 0 : usegamma + 1);
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
@@ -992,20 +1012,6 @@ void CMD_PlaceCamera()
 }
 
 
-void CMD_Gamma()
-{
-	int delta = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
-
-	usegamma = (usegamma + delta + 5) % 5;
-
-	W_UpdateGamma();
-
-	Status_Set("Gamma level %d", usegamma);
-
-	RedrawMap();
-}
-
-
 void CMD_MoveObjects_Dialog()
 {
 	if (edit.Selected->empty())
@@ -1197,13 +1203,13 @@ static editor_command_t  command_table[] =
 	{	"Set", "Misc",
 		&CMD_SetVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums sec_render snap sprites"
+		/* keywords */ "3d browser gamma grid obj_nums sec_render snap sprites"
 	},
 
 	{	"Toggle", "Misc",
 		&CMD_ToggleVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser grid obj_nums sec_render snap recent sprites"
+		/* keywords */ "3d browser gamma grid obj_nums sec_render snap recent sprites"
 	},
 
 	{	"MetaKey", "Misc",
@@ -1224,10 +1230,6 @@ static editor_command_t  command_table[] =
 		&CMD_MapCheck,
 		/* flags */ NULL,
 		/* keywords */ "all major vertices sectors linedefs things textures tags current"
-	},
-
-	{	"Gamma",	"Misc",
-		&CMD_Gamma
 	},
 
 

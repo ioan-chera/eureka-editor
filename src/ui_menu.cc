@@ -244,7 +244,7 @@ static void view_do_sprites(Fl_Widget *w, void * data)
 
 static void view_do_gamma(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Gamma", "+1");
+	ExecuteCommand("Toggle", "gamma");
 }
 
 static void view_do_sector_render(Fl_Widget *w, void * data)
