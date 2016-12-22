@@ -182,7 +182,7 @@ void CMD_LIN_SelectPath(void)
 		return;
 	}
 
-	bool additive = Exec_HasFlag("/add");
+	bool fresh_sel = Exec_HasFlag("/fresh");
 
 	int match = 0;
 
@@ -196,7 +196,7 @@ void CMD_LIN_SelectPath(void)
 
 	bool unset_them = false;
 
-	if (additive && edit.Selected->get(start_L))
+	if (!fresh_sel && edit.Selected->get(start_L))
 		unset_them = true;
 
 	selection_c seen(OBJ_LINEDEFS);
@@ -208,7 +208,7 @@ void CMD_LIN_SelectPath(void)
 
 	Editor_ClearErrorMode();
 
-	if (! additive)
+	if (fresh_sel)
 		Selection_Clear();
 
 	if (unset_them)
@@ -224,7 +224,7 @@ void CMD_LIN_SelectPath(void)
 
 #define PLAYER_STEP_H	24
 
-static bool GrowContiguousSectors(selection_c &seen, bool additive)
+static bool GrowContiguousSectors(selection_c &seen)
 {
 	// returns TRUE when some new sectors got added
 
@@ -324,26 +324,26 @@ void CMD_SEC_SelectGroup(void)
 		return;
 	}
 
-	bool additive = Exec_HasFlag("/add");
+	bool fresh_sel = Exec_HasFlag("/fresh");
 
 	int start_sec = edit.highlight.num;
 
 	bool unset_them = false;
 
-	if (additive && edit.Selected->get(start_sec))
+	if (!fresh_sel && edit.Selected->get(start_sec))
 		unset_them = true;
 
 	selection_c seen(OBJ_SECTORS);
 
 	seen.set(start_sec);
 
-	while (GrowContiguousSectors(seen, additive))
+	while (GrowContiguousSectors(seen))
 	{ }
 
 
 	Editor_ClearErrorMode();
 
-	if (! additive)
+	if (fresh_sel)
 		Selection_Clear();
 
 	if (unset_them)
