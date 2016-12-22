@@ -649,8 +649,8 @@ void CMD_ACT_Click()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
-	click_check_select = Exec_HasFlag("/select");
-	click_check_drag   = Exec_HasFlag("/drag");
+	click_check_select = ! Exec_HasFlag("/noselect");
+	click_check_drag   = ! Exec_HasFlag("/nodrag");
 	click_force_single = false;
 
 	if (click_check_drag)
@@ -664,7 +664,7 @@ void CMD_ACT_Click()
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
-	if (Exec_HasFlag("/split") &&
+	if (! Exec_HasFlag("/nosplit") &&
 		edit.mode == OBJ_VERTICES &&
 		edit.split_line.valid() &&
 		edit.action != ACT_DRAW_LINE)
@@ -1524,7 +1524,7 @@ static editor_command_t  command_table[] =
 
 	{	"ACT_Click", "General",
 		&CMD_ACT_Click,
-		/* flags */ "/select /drag /split"
+		/* flags */ "/noselect /nodrag /nosplit"
 	},
 
 	{	"ACT_Drag", "General",
