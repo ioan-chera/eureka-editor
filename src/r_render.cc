@@ -3353,14 +3353,7 @@ void R3D_Set()
 	bool bool_val = (int_val > 0);
 
 
-	if (y_stricmp(var_name, "gamma") == 0)
-	{
-		usegamma = int_val % 5;
-		if (usegamma < 0) usegamma = 0;
-		W_UpdateGamma();
-		Status_Set("Gamma level %d", usegamma);
-	}
-	else if (y_stricmp(var_name, "tex") == 0)
+	if (y_stricmp(var_name, "tex") == 0)
 	{
 		view.texturing = bool_val;
 	}
@@ -3665,7 +3658,7 @@ static editor_command_t  render_commands[] =
 	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
-		/* keywords */ "gamma tex obj light grav"
+		/* keywords */ "tex obj light grav"
 	},
 
 	{	"3D_Toggle", NULL,
