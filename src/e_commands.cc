@@ -1542,7 +1542,11 @@ static editor_command_t  command_table[] =
 
 	{	"LIN_Flip", NULL,
 		&CMD_LIN_Flip,
-		/* flags */ "/verts /sides"
+		/* flags */ "/force"
+	},
+
+	{	"LIN_SwapSides", NULL,
+		&CMD_LIN_SwapSides
 	},
 
 	{	"LIN_SplitHalf", NULL,

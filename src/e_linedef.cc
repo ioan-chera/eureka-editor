@@ -598,9 +598,9 @@ void FlipLineDefGroup(selection_c& flip)
 
 
 //
-// flip one or several LineDefs
+// flip the orientation of some LineDefs
 //
-void CMD_LIN_Flip(void)
+void CMD_LIN_Flip()
 {
 	selection_c list;
 
@@ -610,27 +610,46 @@ void CMD_LIN_Flip(void)
 		return;
 	}
 
-	BA_Begin();
+	bool force_it = Exec_HasFlag("/force");
 
-	bool do_verts = Exec_HasFlag("/verts");
-	bool do_sides = Exec_HasFlag("/sides");
+	BA_Begin();
 
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		if (! do_verts && ! do_sides)
-		{
-			FlipLineDef_safe(*it);
-		}
+		if (force_it)
+			FlipLineDef(*it);
 		else
-		{
-			if (do_verts) FlipLine_verts(*it);
-			if (do_sides) FlipLine_sides(*it);
-		}
+			FlipLineDef_safe(*it);
 	}
 
 	BA_MessageForSel("flipped", &list);
+
+	BA_End();
+}
+
+
+void CMD_LIN_SwapSides()
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("No lines to swap sides");
+		return;
+	}
+
+	BA_Begin();
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		FlipLine_sides(*it);
+	}
+
+	BA_MessageForSel("swapped sides on", &list);
 
 	BA_End();
 }

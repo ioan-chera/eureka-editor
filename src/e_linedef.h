@@ -65,10 +65,10 @@ void LineDefs_Align(int ld, int side, int sd, char part, int align_flags);
 
 /* commands */
 
-void CMD_LIN_Flip(void);
-void CMD_LIN_Align(void);
-void CMD_LIN_MergeTwo(void);
-void CMD_LIN_SplitHalf(void);
+void CMD_LIN_Flip();
+void CMD_LIN_SwapSides();
+void CMD_LIN_MergeTwo();
+void CMD_LIN_SplitHalf();
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 
