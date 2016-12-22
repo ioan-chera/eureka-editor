@@ -3424,20 +3424,33 @@ void R3D_Toggle()
 }
 
 
-// returns comparison of surface 'j' and 'k' :
-//    negative means do 'j' BEFORE 'k'.
-//    positive means do 'j' AFTER  'k'.
-static int Align_SurfaceCmp(int j, int k, bool do_right)
+// returns true if the surface at 'k' MUST be aligned before the
+// surface at 'j'.
+static int Align_CheckBetter(int j, int k, bool do_right)
 {
 	const Obj3d_t& ob_j = r_edit.sel[j];
 	const Obj3d_t& ob_k = r_edit.sel[k];
 
-	// FIXME
+	// pick we vertex of the 'j' line we need to look at
+	int v = 0;
 
-	return 0;
+	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		v = LineDefs[ob_j.num]->end;
+	else
+		v = LineDefs[ob_j.num]->start;
+
+	// see if the 'k' line adjoins 'j' at that vertex
+	bool res = LineDefs[ob_k.num]->TouchesVertex(v);
+
+	return res;
 }
 
 
+//
+// find an unvisited surface that has no possible dependency on
+// any other unvisited surface.  In the case of loops, we pick
+// an arbitrary surface.
+//
 static int Align_PickNextSurface(const std::vector<byte>& seen, bool do_right)
 {
 	int fallback = -1;
@@ -3458,7 +3471,7 @@ static int Align_PickNextSurface(const std::vector<byte>& seen, bool do_right)
 			if (seen[k]) continue;
 			if (! r_edit.sel[k].valid()) continue;
 
-			if (Align_SurfaceCmp(j, k, do_right) > 0)
+			if (Align_CheckBetter(j, k, do_right))
 			{
 				has_better = true;
 				break;
