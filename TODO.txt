@@ -9,6 +9,7 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
+
 Documentation
 -------------
 
@@ -53,6 +54,8 @@ General
 +  support PNG/JPEG/TGA for patches, flats, sprites
    -->  feature png ??
    [ need to analyse PNG data for "grAB" chunk, or not?? ]
+
++  ability to highlight railings in the 3D view
 
 
 
