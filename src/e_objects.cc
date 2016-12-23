@@ -1696,190 +1696,6 @@ void CMD_Rotate90()
 }
 
 
-static void DoEnlargeThings(selection_c& list, int mul, int mid_x, int mid_y)
-{
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-	{
-		const Thing * T = Things[*it];
-
-		int dx = T->x - mid_x;
-		int dy = T->y - mid_y;
-
-		BA_ChangeTH(*it, Thing::F_X, mid_x + dx * mul);
-		BA_ChangeTH(*it, Thing::F_Y, mid_y + dy * mul);
-	}
-}
-
-
-void CMD_Enlarge()
-{
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("No objects to enlarge");
-		return;
-	}
-
-	int mul = 2;
-	if (EXEC_Param[0][0])
-		mul = atoi(EXEC_Param[0]);
-
-	if (mul < 1 || mul > 64)
-	{
-		Beep("Bad parameter for enlarge: '%s'", EXEC_Param[0]);
-		return;
-	}
-
-	int mid_x, mid_y, hx, hy;
-
-	// TODO: CONFIG ITEM
-	if (true)
-		Objs_CalcMiddle(&list, &mid_x, &mid_y);
-	else
-	{
-		Objs_CalcBBox(&list, &mid_x, &mid_y, &hx, &hy);
-
-		mid_x = mid_x + (hx - mid_x) / 2;
-		mid_y = mid_y + (hy - mid_y) / 2;
-	}
-
-	BA_Begin();
-
-	BA_MessageForSel("enlarged", &list);
-
-	if (edit.mode == OBJ_THINGS)
-	{
-		DoEnlargeThings(list, mul, mid_x, mid_y);
-	}
-	else
-	{
-		// handle things inside sectors
-		if (edit.mode == OBJ_SECTORS)
-		{
-			selection_c things(OBJ_THINGS);
-
-			ConvertSelection(&list, &things);
-
-			DoEnlargeThings(things, mul, mid_x, mid_y);
-		}
-
-		// everything else just scales the vertices
-		selection_c verts(OBJ_VERTICES);
-
-		ConvertSelection(&list, &verts);
-
-		for (verts.begin(&it) ; !it.at_end() ; ++it)
-		{
-			const Vertex * V = Vertices[*it];
-
-			int dx = V->x - mid_x;
-			int dy = V->y - mid_y;
-
-			BA_ChangeVT(*it, Vertex::F_X, mid_x + dx * mul);
-			BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy * mul);
-		}
-	}
-
-	BA_End();
-}
-
-
-static void DoShrinkThings(selection_c& list, int div, int mid_x, int mid_y)
-{
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
-	{
-		const Thing * T = Things[*it];
-
-		int dx = T->x - mid_x;
-		int dy = T->y - mid_y;
-
-		BA_ChangeTH(*it, Thing::F_X, mid_x + dx / div);
-		BA_ChangeTH(*it, Thing::F_Y, mid_y + dy / div);
-	}
-}
-
-
-void CMD_Shrink()
-{
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("No objects to shrink");
-		return;
-	}
-
-	int div = 2;
-	if (EXEC_Param[0][0])
-		div = atoi(EXEC_Param[0]);
-
-	if (div < 1 || div > 64)
-	{
-		Beep("Bad parameter for shrink: '%s'", EXEC_Param[0]);
-		return;
-	}
-
-	int mid_x, mid_y, hx, hy;
-
-	// TODO: CONFIG ITEM
-	if (true)
-		Objs_CalcMiddle(&list, &mid_x, &mid_y);
-	else
-	{
-		Objs_CalcBBox(&list, &mid_x, &mid_y, &hx, &hy);
-
-		mid_x = mid_x + (hx - mid_x) / 2;
-		mid_y = mid_y + (hy - mid_y) / 2;
-	}
-
-	BA_Begin();
-
-	BA_MessageForSel("shrunk", &list);
-
-	if (edit.mode == OBJ_THINGS)
-	{
-		DoShrinkThings(list, div, mid_x, mid_y);
-	}
-	else
-	{
-		// handle things inside sectors
-		if (edit.mode == OBJ_SECTORS)
-		{
-			selection_c things(OBJ_THINGS);
-
-			ConvertSelection(&list, &things);
-
-			DoShrinkThings(things, div, mid_x, mid_y);
-		}
-
-		// everything else just scales the vertices
-		selection_c verts(OBJ_VERTICES);
-
-		ConvertSelection(&list, &verts);
-
-		for (verts.begin(&it) ; !it.at_end() ; ++it)
-		{
-			const Vertex * V = Vertices[*it];
-
-			int dx = V->x - mid_x;
-			int dy = V->y - mid_y;
-
-			BA_ChangeVT(*it, Vertex::F_X, mid_x + dx / div);
-			BA_ChangeVT(*it, Vertex::F_Y, mid_y + dy / div);
-		}
-	}
-
-	BA_End();
-}
-
-
 static void DoScaleTwoThings(selection_c& list, transform_t& param)
 {
 	selection_iterator_c it;
@@ -2140,6 +1956,76 @@ static bool SpotInUse(obj_type_e obj_type, int map_x, int map_y)
 			BugError("IsSpotVacant: bad object type\n");
 			return false;
 	}
+}
+
+
+static void DoEnlargeOrShrink(bool do_shrink)
+{
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
+		return;
+	}
+
+	float mul = 2.0;
+
+	if (EXEC_Param[0][0])
+	{
+		mul = atof(EXEC_Param[0]);
+
+		if (mul < 0.02 || mul > 50)
+		{
+			Beep("bad factor: %s", EXEC_Param[0]);
+			return;
+		}
+	}
+
+	if (do_shrink)
+		mul = 1.0 / mul;
+
+
+	transform_t param;
+
+	param.Clear();
+
+	param.scale_x = mul;
+	param.scale_y = mul;
+
+	// TODO: CONFIG ITEM (or FLAG)
+	if (true)
+	{
+		Objs_CalcMiddle(&list, &param.mid_x, &param.mid_y);
+	}
+	else
+	{
+		int lx, ly, hx, hy;
+		Objs_CalcBBox(&list, &lx, &ly, &hx, &hy);
+
+		param.mid_x = lx + (hx - lx) / 2;
+		param.mid_y = ly + (hy - ly) / 2;
+	}
+
+	BA_Begin();
+
+	BA_MessageForSel(do_shrink ? "shrunk" : "enlarged", edit.Selected);
+
+	DoScaleTwoStuff(list, param);
+
+	BA_End();
+}
+
+
+void CMD_Enlarge()
+{
+	DoEnlargeOrShrink(false /* do_shrink */);
+}
+
+void CMD_Shrink()
+{
+	DoEnlargeOrShrink(true /* do_shrink */);
 }
 
 
