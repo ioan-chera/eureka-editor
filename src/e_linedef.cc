@@ -232,22 +232,46 @@ static void PickAdjoinerPart(Obj3d_t& adj, const Obj3d_t& cur, int align_flags)
 #endif
 
 
-//
-// Evaluate whether the given adjacent surface is a good (or even
-// possible) candidate to align with.
-//
-// Returns < 0 for surfaces that cannot be used.
-//
-static int ScoreAdjoiner(const Obj3d_t& adj,
-						 const Obj3d_t& cur, int align_flags)
+static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 {
+	// result is in the range 1..99
+
 	const LineDef *L  = LD_ptr(cur);
 	const SideDef *LS = SD_ptr(cur);
 
 	const LineDef *N  = LD_ptr(adj);
 	const SideDef *NS = SD_ptr(adj);
 
-	// major fail by caller of Line_AlignOffsets
+	// FIXME
+
+	return 1;
+}
+
+
+//
+// Evaluate whether the given adjacent surface is a good (or even
+// possible) candidate to align with.
+//
+// Having a matching texture is the primary component of the score.
+// The secondary component is the angle between the lines (we prefer
+// this angle to be close to 180 degrees).
+//
+// TODO : have a preference for the same sector ??
+//
+// Returns < 0 for surfaces that cannot be used.
+//
+static int ScoreAdjoiner(const Obj3d_t& adj,
+						 const Obj3d_t& cur, int align_flags)
+{
+	bool do_right = (align_flags & LINALIGN_Right) ? true : false;
+
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *LS = SD_ptr(cur);
+
+	const LineDef *N  = LD_ptr(adj);
+	const SideDef *NS = SD_ptr(adj);
+
+	// major fail by caller of Line_AlignOffsets()
 	if (! LS)
 		return -3;
 
@@ -255,39 +279,31 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 	if (! NS)
 		return -2;
 
-	// wrong side?
-	if (cur.side == adj.side)
-	{
-		if (N->start == L->start) return -1;
-		if (N->end   == L->end)   return -1;
-	}
-	else
-	{
-		if (N->start == L->end)   return -1;
-		if (N->end   == L->start) return -1;
-	}
+	// does the adjoiner sidedef actually mate up with the sidedef
+	// we are aligning (and is on the wanted side) ?
+
+	int v1 = (((cur.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? L->end : L->start;
+	int v2 = (((adj.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? N->start : N->end;
+
+	if (v1 != v2)
+		return -1;
 
 
-	// require adjoiner is "to the left" of this sidedef
-	// [or "to the right" if the 'r' flag is present]
+	/* Ok, we have a potential candidate */
 
-	bool on_left = N->TouchesVertex(cur.side < 0 ? L->end : L->start);
+	int v0 = (v1 == L->end) ? L->start : L->end;
+	int v3 = (v2 == N->end) ? N->start : N->end;
 
-	if (align_flags & LINALIGN_Right)
-	{
-		if (on_left)
-			return -2;
-	}
-	else
-	{
-		if (! on_left)
-			return -2;
-	}
+	double ang = LD_AngleBetweenLines(v0, v1, v3);
 
-	int score = 1;
+	int score = ScoreTextureMatch(adj, cur);
 
-	// FIXME : take 'part' into account !!
+	score = score * 1000 + 500 - (int)fabs(ang - 180.0);
 
+	return score;
+
+
+#if 0
 	// Main requirement is a matching texture.
 	// There are three cases depending on number of sides:
 	//
@@ -337,6 +353,7 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 		score = score + 5;
 
 	return score;
+#endif
 }
 
 
@@ -359,25 +376,28 @@ static void DetermineAdjoiner(Obj3d_t& result,
 		if (N == L)
 			continue;
 
+		if (N->isZeroLength())
+			continue;
+
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
 			continue;
 
-		for (int pass = 0 ; pass < 2 ; pass++)
+		for (int side = 0 ; side < 2 ; side++)
 		for (int what = 0 ; what < 2 ; what++)
 		{
-			Obj3d_t adjoiner;
+			Obj3d_t adj;
 
-			adjoiner.type = (obj3d_type_e)(OB3D_Lower + what);
-			adjoiner.num  = n;
-			adjoiner.side = pass ? SIDE_LEFT : SIDE_RIGHT;
+			adj.type = (obj3d_type_e)(OB3D_Lower + what);
+			adj.num  = n;
+			adj.side = side ? SIDE_LEFT : SIDE_RIGHT;
 
-			int score = ScoreAdjoiner(adjoiner, cur, align_flags);
+			int score = ScoreAdjoiner(adj, cur, align_flags);
 
 // fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
 
 			if (score > best_score)
 			{
-				result     = adjoiner;
+				result     = adj;
 				best_score = score;
 			}
 		}
