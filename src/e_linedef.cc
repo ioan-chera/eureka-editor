@@ -134,7 +134,7 @@ static inline const SideDef * soal_SD_ptr(side_on_a_line_t zz)
 
 
 // disabled this partial texture comparison, as it can lead to
-// unexpected results.  [ and an option for it may be overkill ]
+// unexpected results.  [ perhaps have an option for it ]
 #if 1
 #define  PartialTexCmp  y_stricmp
 #else
@@ -482,14 +482,17 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	bool lower_vis = PartIsVisible(cur, 'l');
 	bool upper_vis = PartIsVisible(cur, 'u');
 
+	bool lower_unpeg = (L->flags & MLF_LowerUnpegged) ? true : false;
+	bool upper_unpeg = (L->flags & MLF_UpperUnpegged) ? true : false;
+
 
 	// handle unpeg flags : check for windows
 
-	if (L->TwoSided() &&
-	    (lower_vis && upper_vis) &&
-	    ((L->flags & MLF_LowerUnpegged) == 0) &&
-	    ((L->flags & MLF_UpperUnpegged) == 0) &&
-	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0 &&
+	if ((align_flags & LINALIGN_Unpeg) &&
+		L->TwoSided() &&
+		lower_vis && upper_vis &&
+		(! lower_unpeg || ! upper_unpeg) &&
+	    (PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0) &&
 	    is_null_tex(SD->MidTex()) /* no rail */)
 	{
 		int new_flags = L->flags;

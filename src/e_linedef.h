@@ -54,9 +54,8 @@ typedef enum
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset
 	LINALIGN_Y		= (1 << 1),		// align the Y offset
-
-	LINALIGN_Left	= 0,			// align with line to the left of this one
-	LINALIGN_Right	= (1 << 4)		// align with line to the right of this one
+	LINALIGN_Unpeg	= (1 << 2),		// change the unpegging flags
+	LINALIGN_Right	= (1 << 4)		// align with sidedef on RIGHT of this one [ otherwise do LEFT ]
 }
 linedef_align_flag_e;
 

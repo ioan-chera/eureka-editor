@@ -3514,14 +3514,15 @@ void R3D_Align()
 
 	bool do_clear = Exec_HasFlag("/clear");
 	bool do_right = Exec_HasFlag("/right");
+	bool do_unpeg = true;
 
 	int align_flags = 0;
 
 	if (do_X) align_flags = align_flags | LINALIGN_X;
 	if (do_Y) align_flags = align_flags | LINALIGN_Y;
 
-	if (do_right)
-		align_flags |= LINALIGN_Right;
+	if (do_right) align_flags |= LINALIGN_Right;
+	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
 
 
 	// if selection is empty, add the highlight to it
