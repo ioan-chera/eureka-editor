@@ -512,6 +512,17 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 }
 
 
+int W_GetTextureHeight(const char *name)
+{
+	Img_c *img = W_GetTexture(name);
+
+	if (! img)
+		return 128;
+
+	return img->height();
+}
+
+
 bool W_TextureIsKnown(const char *name)
 {
 	if (is_null_tex(name) || is_special_tex(name))

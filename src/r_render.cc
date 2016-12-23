@@ -3586,8 +3586,6 @@ void R3D_Align()
 
 		const Obj3d_t& obj = r_edit.sel[n];
 
-		int ld = obj.num;
-
 		const LineDef *L = LineDefs[obj.num];
 
 		int sd = L->WhatSideDef(obj.side);
@@ -3602,9 +3600,7 @@ void R3D_Align()
 		}
 		else
 		{
-			char part_c = (obj.type == OB3D_Upper) ? 'u' : 'l';
-
-			LineDefs_Align(ld, obj.side, sd, part_c, align_flags);
+			Line_AlignOffsets(obj, align_flags);
 		}
 	}
 

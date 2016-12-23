@@ -59,7 +59,7 @@ typedef enum
 }
 linedef_align_flag_e;
 
-void LineDefs_Align(int ld, int side, int sd, char part, int align_flags);
+bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags);
 
 
 /* commands */

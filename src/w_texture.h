@@ -36,6 +36,7 @@ bool W_TextureIsKnown(const char *name);
 
 Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
 
+int  W_GetTextureHeight(const char *name);
 bool W_TextureCausesMedusa(const char *name);
 
 // this truncates the name to 8 chars, and makes it uppercase.

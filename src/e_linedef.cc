@@ -98,43 +98,23 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 }
 
 
-// this type represents one side of a linedef
-typedef int side_on_a_line_t;
+//------------------------------------------------------------------------
 
-static inline side_on_a_line_t soal_make(int ld, int side)
+static inline const LineDef * LD_ptr(const Obj3d_t& obj)
 {
-	return (ld << 1) | (side < 0 ? 1 : 0);
+	return LineDefs[obj.num];
 }
 
-static inline int soal_ld(side_on_a_line_t zz)
+static inline const SideDef * SD_ptr(const Obj3d_t& obj)
 {
-	return (zz >> 1);
-}
+	int sd = LD_ptr(obj)->WhatSideDef(obj.side);
 
-static inline const LineDef * soal_LD_ptr(side_on_a_line_t zz)
-{
-	return LineDefs[soal_ld(zz)];
-}
-
-static inline int soal_side(side_on_a_line_t zz)
-{
-	return (zz & 1) ? SIDE_LEFT : SIDE_RIGHT;
-}
-
-static inline int soal_sd(side_on_a_line_t zz)
-{
-	return soal_LD_ptr(zz)->WhatSideDef(soal_side(zz));
-}
-
-static inline const SideDef * soal_SD_ptr(side_on_a_line_t zz)
-{
-	int sd = soal_sd(zz);
 	return (sd >= 0) ? SideDefs[sd] : NULL;
 }
 
 
 // disabled this partial texture comparison, as it can lead to
-// unexpected results.  [ perhaps have an option for it ]
+// unexpected results.  [ perhaps have an option for it? ]
 #if 1
 #define  PartialTexCmp  y_stricmp
 #else
@@ -155,23 +135,128 @@ static int PartialTexCmp(const char *A, const char *B)
 #endif
 
 
-static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
-						 char part, int align_flags)
+static bool PartIsVisible(const Obj3d_t& obj, char part)
 {
-	const LineDef *L = soal_LD_ptr(zz);
-	const LineDef *N = soal_LD_ptr(adj);
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
 
-	const SideDef *LS = soal_SD_ptr(zz);
-	const SideDef *NS = soal_SD_ptr(adj);
+	if (! L->TwoSided())
+		return (part == 'l');
 
-	SYS_ASSERT(LS);
+	const Sector *front = L->Right()->SecRef();
+	const Sector *back  = L->Left ()->SecRef();
+
+	if (obj.side == SIDE_LEFT)
+		std::swap(front, back);
+
+	// ignore sky walls
+	if (part == 'u' && is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+		return false;
+
+	if (part == 'l')
+	{
+		if (is_null_tex(SD->LowerTex()))
+			return false;
+
+		return back->floorh > front->floorh;
+	}
+	else
+	{
+		if (is_null_tex(SD->UpperTex()))
+			return false;
+
+		return back->ceilh < front->ceilh;
+	}
+}
+
+
+#if 0
+static void PickAdjoinerPart(Obj3d_t& adj, const Obj3d_t& cur, int align_flags)
+{
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *SD = SD_ptr(cur);
+
+	const LineDef *adj_L  = LD_ptr(adj);
+	const SideDef *adj_SD = SD_ptr(adj);
+
+	if (! adj_L->TwoSided())
+	{
+		adj.type = OB3D_Lower;
+		return;
+	}
+
+	if (cur.type == OB3D_Rail && ! is_null_tex(adj_SD->MidTex()))
+	{
+		adj.type = OB3D_Rail;
+		return;
+	}
+
+	// the adjoiner part (upper or lower) should be visible
+
+	bool lower_vis = PartIsVisible(adj, 'l');
+	bool upper_vis = PartIsVisible(adj, 'u');
+
+	if (lower_vis != upper_vis)
+		return upper_vis ? 'u' : 'l';
+	else if (! lower_vis)
+		return 'l';
+
+	// check for a matching texture
+
+	if (L->TwoSided())
+	{
+		// TODO: this logic would mean sometimes aligning an upper with
+		//       a lower (or vice versa).  This should only be done when
+		//       those parts are actually adjacent (on the Y axis).
+#if 0
+		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
+		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
+
+		if (lower_match != upper_match)
+			return upper_match ? 'u' : 'l';
+#endif
+
+		return part;
+	}
+	else
+	{
+		bool lower_match = (PartialTexCmp(SD->MidTex(), adj_SD->LowerTex()) == 0);
+		bool upper_match = (PartialTexCmp(SD->MidTex(), adj_SD->UpperTex()) == 0);
+
+		if (lower_match != upper_match)
+			return upper_match ? 'u' : 'l';
+	}
+
+	return part;
+}
+#endif
+
+
+//
+// Evaluate whether the given adjacent surface is a good (or even
+// possible) candidate to align with.
+//
+// Returns < 0 for surfaces that cannot be used.
+//
+static int ScoreAdjoiner(const Obj3d_t& adj,
+						 const Obj3d_t& cur, int align_flags)
+{
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *LS = SD_ptr(cur);
+
+	const LineDef *N  = LD_ptr(adj);
+	const SideDef *NS = SD_ptr(adj);
+
+	// major fail by caller of Line_AlignOffsets
+	if (! LS)
+		return -3;
 
 	// no sidedef on adjoining line?
 	if (! NS)
 		return -2;
 
 	// wrong side?
-	if (soal_side(zz) == soal_side(adj))
+	if (cur.side == adj.side)
 	{
 		if (N->start == L->start) return -1;
 		if (N->end   == L->end)   return -1;
@@ -186,7 +271,7 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 	// require adjoiner is "to the left" of this sidedef
 	// [or "to the right" if the 'r' flag is present]
 
-	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
+	bool on_left = N->TouchesVertex(cur.side < 0 ? L->end : L->start);
 
 	if (align_flags & LINALIGN_Right)
 	{
@@ -255,15 +340,17 @@ static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
 }
 
 
-static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
-                                          int align_flags)
+//
+// Determine the adjoining surface to align with.
+//
+// Returns -1 for none.
+//
+static void DetermineAdjoiner(Obj3d_t& result,
+							  const Obj3d_t& cur, int align_flags)
 {
-	// returns -1 for none
+	int best_score = 0;
 
-	int best_adj   = -1;
-	int best_score = -1;
-
-	const LineDef *L = soal_LD_ptr(cur);
+	const LineDef *L = LD_ptr(cur);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -276,208 +363,121 @@ static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
 			continue;
 
 		for (int pass = 0 ; pass < 2 ; pass++)
+		for (int what = 0 ; what < 2 ; what++)
 		{
-			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
-			int adjoiner = soal_make(n, adj_side);
+			Obj3d_t adjoiner;
 
-			int score = ScoreAdjoiner(cur, adjoiner, part, align_flags);
+			adjoiner.type = (obj3d_type_e)(OB3D_Lower + what);
+			adjoiner.num  = n;
+			adjoiner.side = pass ? SIDE_LEFT : SIDE_RIGHT;
+
+			int score = ScoreAdjoiner(adjoiner, cur, align_flags);
 
 // fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
 
-			if (score > 0 && score > best_score)
+			if (score > best_score)
 			{
-				best_adj   = adjoiner;
+				result     = adjoiner;
 				best_score = score;
 			}
 		}
 	}
-
-	return best_adj;
 }
 
 
-static int GetTextureHeight(const char *name)
+static int CalcReferenceH(const Obj3d_t& obj)
 {
-	Img_c *img = W_GetTexture(name);
-
-	if (! img)
-		return 128;
-
-	return img->height();
-}
-
-
-static bool PartIsVisible(side_on_a_line_t zz, char part)
-{
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
-
-	if (! L->TwoSided())
-		return (part == 'l');
-
-	const Sector *front = L->Right()->SecRef();
-	const Sector *back  = L->Left ()->SecRef();
-
-	if (soal_side(zz) == SIDE_LEFT)
-		std::swap(front, back);
-
-	// ignore sky walls
-	if (part == 'u' && is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
-		return false;
-
-	if (part == 'l')
-	{
-		if (is_null_tex(SD->LowerTex()))
-			return false;
-
-		return back->floorh > front->floorh;
-	}
-	else
-	{
-		if (is_null_tex(SD->UpperTex()))
-			return false;
-
-		return back->ceilh < front->ceilh;
-	}
-}
-
-
-static char PickAdjoinerPart(side_on_a_line_t cur, char part,
-							 side_on_a_line_t adj, int align_flags)
-{
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
-
-	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
-
-	if (! adj_L->TwoSided())
-		return 'l';
-
-	// the adjoiner part (upper or lower) should be visible
-
-	bool lower_vis = PartIsVisible(adj, 'l');
-	bool upper_vis = PartIsVisible(adj, 'u');
-
-	if (lower_vis != upper_vis)
-		return upper_vis ? 'u' : 'l';
-	else if (! lower_vis)
-		return 'l';
-
-	// check for a matching texture
-
-	if (L->TwoSided())
-	{
-		// TODO: this logic would mean sometimes aligning an upper with
-		//       a lower (or vice versa).  This should only be done when
-		//       those parts are actually adjacent (on the Y axis).
-#if 0
-		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-#endif
-
-		return part;
-	}
-	else
-	{
-		bool lower_match = (PartialTexCmp(SD->MidTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->MidTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-	}
-
-	return part;
-}
-
-
-static int CalcReferenceH(side_on_a_line_t zz, char part)
-{
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
 
 	if (! L->TwoSided())
 	{
-		if (! L->Right())
+		if (! SD)
 			return 256;
 
-		const Sector *front = L->Right()->SecRef();
+		const Sector *front = SD->SecRef();
 
 		if (L->flags & MLF_LowerUnpegged)
-			return front->floorh + GetTextureHeight(SD->MidTex());
+			return front->floorh + W_GetTextureHeight(SD->MidTex());
 
 		return front->ceilh;
 	}
+
 
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (soal_side(zz) == SIDE_LEFT)
+	if (obj.side == SIDE_LEFT)
 		std::swap(front, back);
 
-	if (part == 'l')
-	{
-		if (! (L->flags & MLF_LowerUnpegged))
-			return back->floorh;
+	SYS_ASSERT(front);
+	SYS_ASSERT(back);
 
-		return front->ceilh;
-	}
-	else
+	switch (obj.type)
 	{
-		if (! (L->flags & MLF_UpperUnpegged))
-			return back->ceilh + GetTextureHeight(SD->UpperTex());
+		// TODO : verify if this correct for RAIL
 
-		return front->ceilh;
+		case OB3D_Lower:
+		case OB3D_Rail:
+			if (! (L->flags & MLF_LowerUnpegged))
+				return back->floorh;
+
+			return front->ceilh;
+
+		case OB3D_Upper:
+			if (! (L->flags & MLF_UpperUnpegged))
+				return back->ceilh + W_GetTextureHeight(SD->UpperTex());
+
+			return front->ceilh;
+
+		default:
+			// should not happen
+			return 256;
 	}
 }
 
 
-static void DoAlignX(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, int align_flags)
+static void DoAlignX(const Obj3d_t& cur,
+					 const Obj3d_t& adj, int align_flags)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
+	const LineDef *cur_L  = LD_ptr(cur);
 
-	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
+	const LineDef *adj_L  = LD_ptr(adj);
+	const SideDef *adj_SD = SD_ptr(adj);
 
-	bool on_left = adj_L->TouchesVertex(soal_side(cur) < 0 ? L->end : L->start);
+	bool on_left = adj_L->TouchesVertex(cur.side < 0 ? cur_L->end : cur_L->start);
 
-	int new_offset;
+	int new_offset = adj_SD->x_offset;
 
 	if (on_left)
 	{
-		int adj_length = I_ROUND(adj_L->CalcLength());
-
-		new_offset = adj_SD->x_offset + adj_length;
+		new_offset += I_ROUND(adj_L->CalcLength());
 
 		if (new_offset > 0)
 			new_offset &= 1023;
 	}
 	else
 	{
-		int length = I_ROUND(L->CalcLength());
-
-		new_offset = adj_SD->x_offset - length;
+		new_offset -= I_ROUND(cur_L->CalcLength());
 
 		if (new_offset < 0)
 			new_offset = - (-new_offset & 1023);
 	}
 
-	BA_ChangeSD(soal_sd(cur), SideDef::F_X_OFFSET, new_offset);
+	int sd = cur_L->WhatSideDef(cur.side);
+
+	BA_ChangeSD(sd, SideDef::F_X_OFFSET, new_offset);
 }
 
 
-static void DoAlignY(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, int align_flags)
+static void DoAlignY(const Obj3d_t& cur,
+					 const Obj3d_t& adj, int align_flags)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *SD = SD_ptr(cur);
 
-//	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
+//	const LineDef *adj_L  = LD_ptr(adj);
+	const SideDef *adj_SD = SD_ptr(adj);
 
 	bool lower_vis = PartIsVisible(cur, 'l');
 	bool upper_vis = PartIsVisible(cur, 'u');
@@ -486,7 +486,9 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	bool upper_unpeg = (L->flags & MLF_UpperUnpegged) ? true : false;
 
 
-	// handle unpeg flags : check for windows
+	// check for windows (set the unpeg flags)
+
+	int new_flags = L->flags;
 
 	if ((align_flags & LINALIGN_Unpeg) &&
 		L->TwoSided() &&
@@ -495,25 +497,17 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	    (PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0) &&
 	    is_null_tex(SD->MidTex()) /* no rail */)
 	{
-		int new_flags = L->flags;
-
-		if (lower_vis) new_flags |= MLF_LowerUnpegged;
-		if (upper_vis) new_flags |= MLF_UpperUnpegged;
-
-		BA_ChangeLD(soal_ld(cur), LineDef::F_FLAGS, new_flags);
+		new_flags |= MLF_LowerUnpegged;
+		new_flags |= MLF_UpperUnpegged;
 	}
-
-	// determine which parts (upper or lower) we will use for alignment
-
-	char cur_part = part;
-	char adj_part = PickAdjoinerPart(cur, part, adj, align_flags);
 
 	// requirement: adj_tex_h + adj_y_off = cur_tex_h + cur_y_off
 
-	int cur_texh = CalcReferenceH(cur, cur_part);
-	int adj_texh = CalcReferenceH(adj, adj_part);
+	int cur_texh = CalcReferenceH(cur);
+	int adj_texh = CalcReferenceH(adj);
 
 	int new_offset = adj_texh + adj_SD->y_offset - cur_texh;
+
 
 	// normalize value  [TODO: handle BOOM non-power-of-two heights]
 
@@ -522,29 +516,40 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	else
 		new_offset &= 255;
 
-	BA_ChangeSD(soal_sd(cur), SideDef::F_Y_OFFSET, new_offset);
+
+	int sd = L->WhatSideDef(cur.side);
+
+	BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_offset);
+
+	if (new_flags != L->flags)
+	{
+		BA_ChangeLD(cur.num, LineDef::F_FLAGS, new_flags);
+	}
 }
 
 
-void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
+//
+// Align the X and/or Y offets on the given surface.
+//
+// The given flags control which stuff to change, and where
+// to look for the surface to align with.
+//
+bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
 {
-	// part can be: 'l' for LOWER, 'u' for UPPER.
+	Obj3d_t adj;
 
-	side_on_a_line_t cur = soal_make(ld, side);
+	DetermineAdjoiner(adj, obj, align_flags);
 
-	side_on_a_line_t adj = DetermineAdjoiner(cur, part, align_flags);
-
-	if (adj < 0)
-	{
-//????	Beep("No nearby wall to align with");
-		return;
-	}
+	if (! adj.valid())
+		return false;
 
 	if (align_flags & LINALIGN_X)
-		DoAlignX(cur, part, adj, align_flags);
+		DoAlignX(obj, adj, align_flags);
 
 	if (align_flags & LINALIGN_Y)
-		DoAlignY(cur, part, adj, align_flags);
+		DoAlignY(obj, adj, align_flags);
+
+	return true;
 }
 
 
