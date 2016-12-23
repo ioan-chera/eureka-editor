@@ -3419,23 +3419,26 @@ void R3D_Toggle()
 
 // returns true if the surface at 'k' MUST be aligned before the
 // surface at 'j'.
-static int Align_CheckBetter(int j, int k, bool do_right)
+static bool Align_CheckAdjacent(int j, int k, bool do_right)
 {
 	const Obj3d_t& ob_j = r_edit.sel[j];
 	const Obj3d_t& ob_k = r_edit.sel[k];
 
-	// pick we vertex of the 'j' line we need to look at
-	int v = 0;
+	int vj = 0;
 
 	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
-		v = LineDefs[ob_j.num]->end;
+		vj = LineDefs[ob_j.num]->end;
 	else
-		v = LineDefs[ob_j.num]->start;
+		vj = LineDefs[ob_j.num]->start;
 
-	// see if the 'k' line adjoins 'j' at that vertex
-	bool res = LineDefs[ob_k.num]->TouchesVertex(v);
+	int vk = 0;
 
-	return res;
+	if (((ob_k.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		vk = LineDefs[ob_k.num]->start;
+	else
+		vk = LineDefs[ob_k.num]->end;
+
+	return (vj == vk);
 }
 
 
@@ -3464,7 +3467,7 @@ static int Align_PickNextSurface(const std::vector<byte>& seen, bool do_right)
 			if (seen[k]) continue;
 			if (! r_edit.sel[k].valid()) continue;
 
-			if (Align_CheckBetter(j, k, do_right))
+			if (Align_CheckAdjacent(j, k, do_right))
 			{
 				has_better = true;
 				break;
