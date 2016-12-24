@@ -170,6 +170,65 @@ static bool PartIsVisible(const Obj3d_t& obj, char part)
 }
 
 
+//
+// calculate vertical range that the given surface occupies.
+// when part is zero, we use obj.type instead.
+//
+static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
+{
+
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
+
+	if (! L->TwoSided())
+	{
+		if (SD)
+		{
+			*z1 = SD->SecRef()->floorh;
+			*z2 = SD->SecRef()->ceilh;
+		}
+		else
+		{
+			*z1 = *z2 = 0;
+		}
+
+		return;
+	}
+
+	if (! part)
+	{
+		if (obj.type == OB3D_Upper)
+			part = 'u';
+		else if (obj.type == OB3D_Rail)
+			part = 'r';
+		else
+			part = 'l';
+	}
+
+	const Sector *front = L->Right()->SecRef();
+	const Sector *back  = L->Left ()->SecRef();
+
+	if (obj.side == SIDE_LEFT)
+		std::swap(front, back);
+
+	if (part == 'r')
+	{
+		*z1 = MAX(front->floorh, back->floorh);
+		*z2 = MIN(front->ceilh,  back->ceilh);
+	}
+	else if (part == 'u')
+	{
+		*z2 = front->ceilh;
+		*z1 = MIN(*z2, back->ceilh);
+	}
+	else  // part == 'l'
+	{
+		*z1 = front->floorh;
+		*z2 = MAX(*z1, back->floorh);
+	}
+}
+
+
 #if 0
 static void PickAdjoinerPart(Obj3d_t& adj, const Obj3d_t& cur, int align_flags)
 {
@@ -234,7 +293,7 @@ static void PickAdjoinerPart(Obj3d_t& adj, const Obj3d_t& cur, int align_flags)
 
 static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 {
-	// result is in the range 1..99
+	// result is in the range 1..999
 
 	const LineDef *L  = LD_ptr(cur);
 	const SideDef *LS = SD_ptr(cur);
@@ -242,9 +301,57 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 	const LineDef *N  = LD_ptr(adj);
 	const SideDef *NS = SD_ptr(adj);
 
-	// FIXME
+	int adj_z1, adj_z2;
+	int cur_z1, cur_z2;
 
-	return 1;
+	PartCalcExtent(adj, 0, &adj_z1, &adj_z2);
+	PartCalcExtent(cur, 0, &cur_z1, &cur_z2);
+
+	// adjacent surface is not visible?
+	if (adj_z1 <= adj_z2)
+		return 1;
+
+	// no overlap?
+	int overlap = MIN(adj_z2, cur_z2) - MAX(adj_z1, cur_z1);
+
+	if (overlap <= 0)
+		return 2;
+
+
+	const char *adj_tex = NS->MidTex();
+
+	if (N->TwoSided())
+	{
+		if (adj.type == OB3D_Lower)
+			adj_tex = NS->LowerTex();
+		else if (adj.type == OB3D_Upper)
+			adj_tex = NS->UpperTex();
+	}
+
+	if (is_null_tex(adj_tex))
+		return 3;
+
+	const char *cur_tex = LS->MidTex();
+
+	if (L->TwoSided())
+	{
+		if (adj.type == OB3D_Lower)
+			adj_tex = LS->LowerTex();
+		else if (adj.type == OB3D_Upper)
+			adj_tex = LS->UpperTex();
+	}
+
+	if (PartialTexCmp(cur_tex, adj_tex) == 0)
+		return 4;
+
+	// return a score based on length of line shared between the
+	// two surfaces
+
+	overlap = overlap / 8;
+
+	if (overlap > 900) overlap = 900;
+
+	return 10 + overlap;
 }
 
 
