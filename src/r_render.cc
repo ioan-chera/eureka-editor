@@ -2952,6 +2952,12 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
+	if (strcmp(tokens[0], "r_gravity") == 0 && num_tok >= 2)
+	{
+		view.gravity = atoi(tokens[1]) ? true : false;
+		return true;
+	}
+
 	if (strcmp(tokens[0], "low_detail") == 0 && num_tok >= 2)
 	{
 		// ignored for compatibility
@@ -2982,6 +2988,9 @@ void Render3D_WriteUser(FILE *fp)
 	        view.texturing  ? 1 : 0,
 			view.sprites    ? 1 : 0,
 			view.lighting   ? 1 : 0);
+
+	fprintf(fp, "r_gravity %d\n",
+	        view.gravity ? 1 : 0);
 
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
