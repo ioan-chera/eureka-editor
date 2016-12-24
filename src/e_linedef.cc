@@ -229,68 +229,6 @@ static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
 }
 
 
-#if 0
-static void PickAdjoinerPart(Obj3d_t& adj, const Obj3d_t& cur, int align_flags)
-{
-	const LineDef *L  = LD_ptr(cur);
-	const SideDef *SD = SD_ptr(cur);
-
-	const LineDef *adj_L  = LD_ptr(adj);
-	const SideDef *adj_SD = SD_ptr(adj);
-
-	if (! adj_L->TwoSided())
-	{
-		adj.type = OB3D_Lower;
-		return;
-	}
-
-	if (cur.type == OB3D_Rail && ! is_null_tex(adj_SD->MidTex()))
-	{
-		adj.type = OB3D_Rail;
-		return;
-	}
-
-	// the adjoiner part (upper or lower) should be visible
-
-	bool lower_vis = PartIsVisible(adj, 'l');
-	bool upper_vis = PartIsVisible(adj, 'u');
-
-	if (lower_vis != upper_vis)
-		return upper_vis ? 'u' : 'l';
-	else if (! lower_vis)
-		return 'l';
-
-	// check for a matching texture
-
-	if (L->TwoSided())
-	{
-		// TODO: this logic would mean sometimes aligning an upper with
-		//       a lower (or vice versa).  This should only be done when
-		//       those parts are actually adjacent (on the Y axis).
-#if 0
-		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-#endif
-
-		return part;
-	}
-	else
-	{
-		bool lower_match = (PartialTexCmp(SD->MidTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->MidTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-	}
-
-	return part;
-}
-#endif
-
-
 static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 {
 	// result is in the range 1..999
@@ -395,7 +333,6 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 	if (v1 != v2)
 		return -1;
 
-
 	/* Ok, we have a potential candidate */
 
 	int v0 = (v1 == L->end) ? L->start : L->end;
@@ -408,59 +345,6 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 	score = score * 1000 + 500 - (int)fabs(ang - 180.0);
 
 	return score;
-
-
-#if 0
-	// Main requirement is a matching texture.
-	// There are three cases depending on number of sides:
-	//
-	// (a) single <-> single : easy
-	//
-	// (b) double <-> double : compare lower/lower and upper/upper
-	//                         [only need one to match]
-	//
-	// (c) single <-> double : compare mid/lower and mid/upper
-	//
-	bool matched = false;
-
-	for (int what = 0 ; what < 2 ; what++)
-	{
-//???		if (what == 0 && only_U) continue;
-//???		if (what == 1 && only_L) continue;
-
-		const char *L_tex = (! L->TwoSided()) ? LS->MidTex() :
-							(what & 1)        ? LS->UpperTex() :
-							                    LS->LowerTex();
-
-		const char *N_tex = (! N->TwoSided()) ? NS->MidTex() :
-							(what & 1)        ? NS->UpperTex() :
-							                    NS->LowerTex();
-
-		if (is_null_tex(L_tex)) continue;
-		if (is_null_tex(N_tex)) continue;
-
-		if (PartialTexCmp(L_tex, N_tex) == 0)
-			matched = true;
-	}
-
-///---	// require a texture match?
-///---	if (/* strchr(flags, 't') && */  ! matched)
-///---		return -1;
-
-	if (matched)
-		score = score + 20;
-
-
-	// preference for same sector
-	if (LS->sector == NS->sector)
-		score = score + 1;
-
-	// prefer both lines to have same sided-ness
-	if (L->OneSided() == N->OneSided())
-		score = score + 5;
-
-	return score;
-#endif
 }
 
 
