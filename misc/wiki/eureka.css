@@ -147,6 +147,8 @@ h6 { font-size:1.0em; }
     padding: 3px 6px 3px 6px;
 }
 
+.kw { color: #d00; font-family: monospace; }
+
 /* These affect the printed appearance of the web view (not the separate
 ** print view) of pages.  The sidebar and action links aren't printed. */
 @media print {
