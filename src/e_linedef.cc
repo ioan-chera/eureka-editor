@@ -308,7 +308,7 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 	PartCalcExtent(cur, 0, &cur_z1, &cur_z2);
 
 	// adjacent surface is not visible?
-	if (adj_z1 <= adj_z2)
+	if (adj_z2 <= adj_z1)
 		return 1;
 
 	// no overlap?
@@ -341,7 +341,7 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 			adj_tex = LS->UpperTex();
 	}
 
-	if (PartialTexCmp(cur_tex, adj_tex) == 0)
+	if (PartialTexCmp(cur_tex, adj_tex) != 0)
 		return 4;
 
 	// return a score based on length of line shared between the
@@ -490,7 +490,7 @@ static void DetermineAdjoiner(Obj3d_t& result,
 			continue;
 
 		for (int side = 0 ; side < 2 ; side++)
-		for (int what = 0 ; what < 2 ; what++)
+		for (int what = 0 ; what < 3 ; what++)
 		{
 			Obj3d_t adj;
 
@@ -499,8 +499,6 @@ static void DetermineAdjoiner(Obj3d_t& result,
 			adj.side = side ? SIDE_LEFT : SIDE_RIGHT;
 
 			int score = ScoreAdjoiner(adj, cur, align_flags);
-
-// fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
 
 			if (score > best_score)
 			{
