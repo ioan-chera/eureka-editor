@@ -1540,6 +1540,11 @@ static editor_command_t  command_table[] =
 
 	/* ------ LineDef mode ------ */
 
+	{	"LIN_Align", NULL,
+		&CMD_LIN_Align,
+		/* flags */ "/x /y /right /clear"
+	},
+
 	{	"LIN_Flip", NULL,
 		&CMD_LIN_Flip,
 		/* flags */ "/force"

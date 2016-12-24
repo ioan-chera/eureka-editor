@@ -69,6 +69,7 @@ void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags);
 
 void CMD_LIN_Flip();
 void CMD_LIN_SwapSides();
+void CMD_LIN_Align();
 void CMD_LIN_MergeTwo();
 void CMD_LIN_SplitHalf();
 

@@ -54,6 +54,8 @@ General:
 
 -  improved insertion of sectors, less "area not closed" errors
 
+-  linedef align command for the 2D view, bound to 'A' key
+
 -  3D view : show info about current highlight in the info bar
 
 

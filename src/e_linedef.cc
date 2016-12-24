@@ -694,6 +694,96 @@ void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags)
 }
 
 
+void CMD_LIN_Align()
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("no lines to align");
+		return;
+	}
+
+
+	// parse the flags
+	bool do_X = Exec_HasFlag("/x");
+	bool do_Y = Exec_HasFlag("/y");
+
+	if (! (do_X || do_Y))
+	{
+		Beep("LIN_Align: need x or y flag");
+		return;
+	}
+
+	bool do_clear = Exec_HasFlag("/clear");
+	bool do_right = Exec_HasFlag("/right");
+	bool do_unpeg = true;
+
+	int align_flags = 0;
+
+	if (do_X) align_flags = align_flags | LINALIGN_X;
+	if (do_Y) align_flags = align_flags | LINALIGN_Y;
+
+	if (do_right) align_flags |= LINALIGN_Right;
+	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
+	if (do_clear) align_flags |= LINALIGN_Clear;
+
+
+	// convert selection to group of surfaces
+
+	std::vector< Obj3d_t > group;
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		Obj3d_t obj;
+
+		obj.num = *it;
+
+		const LineDef *L = LineDefs[obj.num];
+
+		for (int pass = 0 ; pass < 2 ; pass++)
+		{
+			obj.side = pass ? SIDE_LEFT : SIDE_RIGHT;
+
+			if (L->WhatSideDef(obj.side) < 0)
+				continue;
+
+			// decide whether to use upper or lower
+			// TODO : this could be smarter....
+
+			bool lower_vis = PartIsVisible(obj, 'l');
+			bool upper_vis = PartIsVisible(obj, 'u');
+
+			if (! (lower_vis || upper_vis))
+				continue;
+
+			obj.type = lower_vis ? OB3D_Lower : OB3D_Upper;
+
+			group.push_back(obj);
+		}
+	}
+
+	if (group.empty())
+	{
+		Beep("no visible surfaces");
+		return;
+	}
+
+	BA_Begin();
+
+	Line_AlignGroup(group, align_flags);
+
+	if (do_clear)
+		BA_Message("cleared offsets");
+	else
+		BA_Message("aligned offsets");
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 
