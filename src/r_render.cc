@@ -3437,11 +3437,17 @@ void R3D_Align()
 		return;
 	}
 
-	// parse parameter
-	const char *param = EXEC_Param[0];
+	// parse the flags
+	bool do_X = Exec_HasFlag("/x");
+	bool do_Y = Exec_HasFlag("/y");
 
-	bool do_X = strchr(param, 'x') ? true : false;
-	bool do_Y = strchr(param, 'y') ? true : false;
+	// TODO : this is for backwards compatibility, remove it later
+	{
+		const char *param = EXEC_Param[0];
+
+		if (strchr(param, 'x')) do_X = true;
+		if (strchr(param, 'y')) do_Y = true;
+	}
 
 	if (! (do_X || do_Y))
 	{
@@ -3561,7 +3567,7 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_Align", NULL,
 		&R3D_Align,
-		/* flags */ "/right /clear"
+		/* flags */ "/x /y /right /clear"
 	},
 
 	{	"3D_Forward", NULL,
