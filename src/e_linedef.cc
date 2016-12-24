@@ -548,6 +548,21 @@ static void DoAlignY(const Obj3d_t& cur,
 }
 
 
+static void DoClearOfs(const Obj3d_t& cur, int align_flags)
+{
+	int sd = LD_ptr(cur)->WhatSideDef(cur.side);
+
+	if (sd < 0)  // should not happen
+		return;
+
+	if (align_flags & LINALIGN_X)
+		BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+
+	if (align_flags & LINALIGN_Y)
+		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+}
+
+
 //
 // Align the X and/or Y offets on the given surface.
 //
@@ -556,6 +571,12 @@ static void DoAlignY(const Obj3d_t& cur,
 //
 bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
 {
+	if (align_flags & LINALIGN_Clear)
+	{
+		DoClearOfs(obj, align_flags);
+		return true;
+	}
+
 	Obj3d_t adj;
 
 	DetermineAdjoiner(adj, obj, align_flags);
@@ -570,6 +591,106 @@ bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
 		DoAlignY(obj, adj, align_flags);
 
 	return true;
+}
+
+
+// returns true if the surface at 'k' MUST be aligned before the
+// surface at 'j'.
+static bool Align_CheckAdjacent(std::vector<Obj3d_t> & group,
+								int j, int k, bool do_right)
+{
+	const Obj3d_t& ob_j = group[j];
+	const Obj3d_t& ob_k = group[k];
+
+	int vj = 0;
+
+	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		vj = LineDefs[ob_j.num]->end;
+	else
+		vj = LineDefs[ob_j.num]->start;
+
+	int vk = 0;
+
+	if (((ob_k.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		vk = LineDefs[ob_k.num]->start;
+	else
+		vk = LineDefs[ob_k.num]->end;
+
+	return (vj == vk);
+}
+
+
+//
+// find an unvisited surface that has no possible dependency on
+// any other unvisited surface.  In the case of loops, we pick
+// an arbitrary surface.
+//
+static int Align_PickNextSurface(std::vector<Obj3d_t> & group,
+								 const std::vector<byte>& seen, bool do_right)
+{
+	int fallback = -1;
+
+	for (int j = 0 ; j < (int)group.size() ; j++)
+	{
+		if (seen[j]) continue;
+		if (! group[j].valid()) continue;
+
+		if (fallback < 0)
+			fallback = j;
+
+		bool has_better = false;
+
+		for (int k = 0 ; k < (int)group.size() ; k++)
+		{
+			if (k == j)  continue;
+			if (seen[k]) continue;
+			if (! group[k].valid()) continue;
+
+			if (Align_CheckAdjacent(group, j, k, do_right))
+			{
+				has_better = true;
+				break;
+			}
+		}
+
+		if (! has_better)
+			return j;
+	}
+
+	// this will be -1 when there is no more surfaces left
+	return fallback;
+}
+
+
+void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags)
+{
+	// we will do each surface in the selection one-by-one,
+	// and the order is significant when doing X offsets, so
+	// mark them off via this array.
+	std::vector<byte> seen;
+
+	seen.resize(group.size());
+
+	unsigned int k;
+
+	for (k = 0 ; k < group.size() ; k++)
+		seen[k] = 0;
+
+	bool do_right = (align_flags & LINALIGN_Right) ? true : false;
+
+	for (;;)
+	{
+		// get next unvisited surface
+		int n = Align_PickNextSurface(group, seen, do_right);
+
+		if (n < 0)
+			break;
+
+		// mark it seen
+		seen[n] = 1;
+
+		Line_AlignOffsets(group[n], align_flags);
+	}
 }
 
 

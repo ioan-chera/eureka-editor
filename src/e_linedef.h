@@ -54,12 +54,15 @@ typedef enum
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset
 	LINALIGN_Y		= (1 << 1),		// align the Y offset
-	LINALIGN_Unpeg	= (1 << 2),		// change the unpegging flags
+	LINALIGN_Clear	= (1 << 2),		// clear the offset(s), instead of aligning
+	LINALIGN_Unpeg	= (1 << 3),		// change the unpegging flags
 	LINALIGN_Right	= (1 << 4)		// align with sidedef on RIGHT of this one [ otherwise do LEFT ]
 }
 linedef_align_flag_e;
 
 bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags);
+
+void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags);
 
 
 /* commands */

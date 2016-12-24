@@ -3417,72 +3417,6 @@ void R3D_Toggle()
 }
 
 
-// returns true if the surface at 'k' MUST be aligned before the
-// surface at 'j'.
-static bool Align_CheckAdjacent(int j, int k, bool do_right)
-{
-	const Obj3d_t& ob_j = r_edit.sel[j];
-	const Obj3d_t& ob_k = r_edit.sel[k];
-
-	int vj = 0;
-
-	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
-		vj = LineDefs[ob_j.num]->end;
-	else
-		vj = LineDefs[ob_j.num]->start;
-
-	int vk = 0;
-
-	if (((ob_k.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
-		vk = LineDefs[ob_k.num]->start;
-	else
-		vk = LineDefs[ob_k.num]->end;
-
-	return (vj == vk);
-}
-
-
-//
-// find an unvisited surface that has no possible dependency on
-// any other unvisited surface.  In the case of loops, we pick
-// an arbitrary surface.
-//
-static int Align_PickNextSurface(const std::vector<byte>& seen, bool do_right)
-{
-	int fallback = -1;
-
-	for (int j = 0 ; j < (int)r_edit.sel.size() ; j++)
-	{
-		if (seen[j]) continue;
-		if (! r_edit.sel[j].valid()) continue;
-
-		if (fallback < 0)
-			fallback = j;
-
-		bool has_better = false;
-
-		for (int k = 0 ; k < (int)r_edit.sel.size() ; k++)
-		{
-			if (k == j)  continue;
-			if (seen[k]) continue;
-			if (! r_edit.sel[k].valid()) continue;
-
-			if (Align_CheckAdjacent(j, k, do_right))
-			{
-				has_better = true;
-				break;
-			}
-		}
-
-		if (! has_better)
-			return j;
-	}
-
-	// this will be -1 when there is no more surfaces left
-	return fallback;
-}
-
-
 //
 // Align texture on sidedef(s)
 //
@@ -3526,6 +3460,7 @@ void R3D_Align()
 
 	if (do_right) align_flags |= LINALIGN_Right;
 	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
+	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
 	// if selection is empty, add the highlight to it
@@ -3558,51 +3493,9 @@ void R3D_Align()
 	}
 
 
-	// we will do each surface in the selection one-by-one,
-	// and the order is significant when doing X offsets, so
-	// mark them off via this array.
-	std::vector<byte> seen;
-
-	seen.resize(r_edit.sel.size());
-
-	unsigned int k;
-
-	for (k = 0 ; k < r_edit.sel.size() ; k++)
-		seen[k] = 0;
-
-
 	BA_Begin();
 
-	for (;;)
-	{
-		// get next unvisited surface
-		int n = Align_PickNextSurface(seen, do_right);
-
-		if (n < 0)
-			break;
-
-		// mark it seen
-		seen[n] = 1;
-
-		const Obj3d_t& obj = r_edit.sel[n];
-
-		const LineDef *L = LineDefs[obj.num];
-
-		int sd = L->WhatSideDef(obj.side);
-
-		if (sd < 0)  // should not happen
-			continue;
-
-		if (do_clear)
-		{
-			if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
-			if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
-		}
-		else
-		{
-			Line_AlignOffsets(obj, align_flags);
-		}
-	}
+	Line_AlignGroup(r_edit.sel, align_flags);
 
 	if (do_clear)
 		BA_Message("cleared offsets");
@@ -3610,7 +3503,6 @@ void R3D_Align()
 		BA_Message("aligned offsets");
 
 	BA_End();
-
 
 	if (did_select)
 		r_edit.sel.clear();
