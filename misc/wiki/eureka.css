@@ -139,6 +139,14 @@ h6 { font-size:1.0em; }
 
 .cheatbold { color: black; font-weight: bold; }
 
+.key {
+    background-color: white;
+    font-family: monospace;
+    font-size: 90%;
+    border: 1px #aaa solid;
+    padding: 3px 6px 3px 6px;
+}
+
 /* These affect the printed appearance of the web view (not the separate
 ** print view) of pages.  The sidebar and action links aren't printed. */
 @media print {
