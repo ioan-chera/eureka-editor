@@ -545,7 +545,14 @@ static void DoClearOfs(const Obj3d_t& cur, int align_flags)
 		return;
 
 	if (align_flags & LINALIGN_X)
-		BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+	{
+		// when the /right flag is used, make the texture end at the right side
+		// (whereas zero makes it begin at the left side)
+		if (align_flags & LINALIGN_Right)
+			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength()));
+		else
+			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+	}
 
 	if (align_flags & LINALIGN_Y)
 		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
