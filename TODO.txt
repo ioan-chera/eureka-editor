@@ -13,7 +13,7 @@ ______________________________________________________________________
 Documentation
 -------------
 
-+  information on each binding command, parameters etc..
+-  command line arguments page
 
 +  a tutorial for the basics
 
@@ -31,9 +31,7 @@ Documentation
 
 -  using the browser
 
--  common pitfalls (vertices sitting on a linedef or another vertex)
-
--  command line arguments page
+-  mention common pitfalls (vertices sitting on a linedef or another vertex)
 
 
 ______________________________________________________________________
