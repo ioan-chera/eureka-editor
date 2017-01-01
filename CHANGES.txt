@@ -15,7 +15,7 @@ Editing:
 
 +  an operation menu, bound to F1 key or CTRL-RMB
 
--  undo/redo: show what was undone in the status area
++  undo/redo: show what was undone in the status area
 
 -  improved ability to highlight/select very short linedefs
 -  improved insertion of sectors, less "area not closed" errors

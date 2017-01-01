@@ -9,11 +9,10 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 
-
 Documentation
 -------------
 
--  command line arguments page
+>>  describe the four modes V/L/S/T, and their panels
 
 +  a tutorial for the basics
 
@@ -22,8 +21,6 @@ Documentation
    different games and source ports
 
 -  describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
-
--  describe the four modes V/L/S/T, and their panels
 
 -  hilighting stuff, selecting stuff, dragging stuff
 
@@ -60,8 +57,9 @@ General
 Editing
 -------
 
-+  improve X texture alignment
-   [ e.g. picking "wrong" or not-optimal line ]
+
+3D View
+-------
 
 
 ______________________________________________________________________
@@ -204,9 +202,14 @@ IDEA:  popup menu for right-click on flats/textures in the panel
 3D View
 -------
 
-+  support selecting things in 3D view, and Copy/Paste as per textures
-
 +  slopes
+
++  extrafloors
+   -  create a DrawWall for their floor/ceil and sides
+   -  distance is slightly closer than normal wall segment
+
+-  support selecting things in 3D view, use browser to change
+   their type, and Copy/Paste too
 
 -  able to drag stuff around?
    - raise/lower floors
@@ -216,10 +219,6 @@ IDEA:  popup menu for right-click on flats/textures in the panel
 -  BOOM colormaps
 
 -  BOOM deep water
-
-+  extrafloors
-   -  create a DrawWall for their floor/ceil and sides
-   -  distance is slightly closer than normal wall segment
 
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
