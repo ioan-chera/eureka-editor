@@ -45,7 +45,12 @@ private:
 	{
 		static char filename[FL_PATH_MAX];
 
+		// FIXME : use this location for all platforms
+#ifdef WIN32
+		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", install_dir);
+#else
 		snprintf(filename, sizeof(filename), "%s/about_logo.png", install_dir);
+#endif
 		filename[FL_PATH_MAX-1] = 0;
 
 		if (FileExists(filename))
