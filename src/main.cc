@@ -94,9 +94,6 @@ bool map_scroll_bars  = true;
 
 const char *default_port = DEFAULT_PORT_NAME;
 
-int scroll_less   = 10;
-int scroll_more   = 90;
-
 int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
 

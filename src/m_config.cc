@@ -692,24 +692,6 @@ static const opt_desc_t options[] =
 		&same_mode_clears_selection
 	},
 
-	{	"scroll_less",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Amplitude of scrolling (% of screen size)",
-		NULL,
-		&scroll_less
-	},
-
-	{	"scroll_more",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Amplitude of scrolling (% of screen size)",
-		NULL,
-		&scroll_more
-	},
-
 	{	"sector_render_default",
 		0,
 		OPT_INTEGER,

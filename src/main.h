@@ -149,9 +149,6 @@ extern const char * default_ceil_tex;
 extern int   show_help;		// Print usage message and exit.
 extern int   show_version;	// Print version info and exit.
 
-extern int   scroll_less;	// %s of screenful to scroll by
-extern int   scroll_more;	// %s of screenful to scroll by
-
 
 extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size
