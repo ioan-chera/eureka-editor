@@ -83,25 +83,24 @@ All Modes
 
 LMB
 * select an object, drag to move the object(s)
-* begin line drawing (in vertex mode) from selected vertex
-* click in an empty area to clear the selection
-* click in an empty area and drag to select a group of objects
+* click in empty area to clear the selection
+* click + drag in empty area to select a group of objects
 
 RMB
-* scroll the map around (by dragging)
+* begin/continue line drawing (in vertex mode)
+* merge sectors (in sectors mode)
+* with CTRL pressed: bring up operation menu
 
 MMB
-* scale the selected objects
-* with SHIFT key: allow changing aspect (stretching)
-* with CTRL key: rotate objects
+* scroll the map around (by dragging)
 
 wheel : zoom in or out
 
-1..9 : select the grid size (smallest to largest)
+cursor keys : scroll the map
+
+F1 : operation menu
 
 TAB : toggle the 3D preview on or off
-
-; : make the next key pressed META
 
 t : enter Thing mode 
 l : enter Linedef mode 
@@ -109,6 +108,8 @@ s : enter Sector mode
 v : enter Vertex mode 
 
 b : toggle the Browser on or off
+
+1..9 : select the grid size (smallest to largest)
 
 CTRL-Z : undo (can be used multiple times) 
 CTRL-Y : redo (i.e. undo the previous undo)
@@ -118,34 +119,40 @@ CTRL-I : invert the selection
 CTRL-U : unselect all
 ` (backquote) : unselect all
 
-HOME : move/zoom 2D viewport to show the whole map 
+HOME : zoom 2D viewport to show the whole map 
 END  : move 2D viewport to camera location 
 ' (quote) : move 3D camera to position of mouse pointer
 
-META-N : load next file in given list
-META-P : load previous file in given list
+f : toggle free mode vs grid snapping
+g : toggle grid on / off
 
 N : open next map in the current wad
 P : open previous map in the current wad
 
-g : grid size adjustment : smaller 
-G : grid size adjustment : larger 
-h : grid mode toggle : on, simple, off 
-
-f : toggle grid snapping on or off
+j : jump to object (by its numeric id)
 J : toggle object number display
-j : jump to object (by its numberic id)
 
 o : copy and paste the selected objects
-c : copy properties from the selection to the highlighted object
-p : prune unused sectors, sidedefs and vertices
+c : copy properties from selected --> highlighted object
+C : copy properties from highlighted --> selected objects
 
 H : mirror objects horizontally 
 V : mirror objects vertically
 R : rotate objects 90 degrees clockwise 
 W : rotate objects 90 degrees anti-clockwise
 
+a : scroll map with the mouse
+r : scale selected objects with the mouse
+R : scale selected objects, allow stretching
+CTRL-R : rotate the selected objects (with the mouse)
+K : skew (shear) the selected objects
+
 \ : toggle the RECENT category in the Browser
+
+; : make the next key pressed META
+
+META-N : load next file in given list
+META-P : load previous file in given list
 
 META-F : apply a fresh tag to the current objects
 META-L : apply the last (highest) tag to the current objects
@@ -167,9 +174,8 @@ Vertex Mode
 -----------
 
 SPACE
-* add a new vertex (begin drawing mode)
-* if a vertex is already selected, adds a new linedef too
-* with SHIFT key: continue in drawing mode
+* begin/continue line drawing
+* with SHIFT key: always continue line drawing
 * with CTRL key: inhibit creation of sectors
 
 d : disconnect all linedefs at the selected vertices
@@ -190,6 +196,7 @@ E : select a chain of linedefs with same textures
 
 w : flip linedefs 
 k : split linedefs in two
+A : auto-align offsets on all selected linedefs
 
 d : disconnect selected linedefs from the rest
 m : merge two one-sided linedefs into a two-sided linedef
@@ -200,7 +207,6 @@ Sector Mode
 
 SPACE
 * add a new sector to area around the mouse pointer
-* fix broken sectoring in an area (use CTRL key to force a new sector)
 * if a sector is selected, copy that sector instead of using defaults
 
 d : disconnect sector(s) from their neighbors
@@ -210,6 +216,7 @@ w : swap floor and ceiling textures
 
 e : select sectors with same floor height 
 E : select sectors with same floor texture
+D : select sectors with same ceiling texture
 
 , and < : lower floor heights 
 . and > : raise floor heights
@@ -220,18 +227,18 @@ E : select sectors with same floor texture
 3D Preview
 ----------
 
-(Cursor keys will move forward and back, turn left and right)
+(cursor keys will move forward and back, turn left and right)
 (the WASD keys can also be used to move the camera)
 
-LMB : not implemented yet 
-RMB : turn or move the camera (by dragging the mouse)
-MMB : adjust sidedef offsets (drag the mouse)
+LMB : select walls, floors or ceilings
+MMB : turn or move the camera (by dragging the mouse)
 
 wheel : move camera forwards or backwards
 
 PGUP and PGDN : move camera up and down
 
 g : toggle gravity (i.e. as if the player was on the ground)
+v : drop to the ground
 
 l : toggle lighting on or off
 t : toggle texturing on or off
@@ -239,7 +246,9 @@ o : toggle objects on or off
 
 F11 : increase brightness (gamma)
 
-c : clear offsets on highlighted sidedef
+r : adjust offsets on highlighted wall (with the mouse)
+c : clear offsets on highlighted wall
+
 x : align X offset with wall to the left
 y : align Y offset with wall to the left
 z : align both X + Y offsets
@@ -255,7 +264,7 @@ COPYRIGHT and LICENSE
   Eureka DOOM Editor
 
   Copyright (C) 2001-2017 Andrew Apted, et al
-  Copyright (C) 2014-2015 Ioan Chera
+  Copyright (C) 2014-2017 Ioan Chera
   Copyright (C) 1997-2003 Andre Majorel et al
 
   Eureka is free software; you can redistribute it and/or modify
