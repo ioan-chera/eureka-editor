@@ -2,35 +2,6 @@
 Eureka TODO / WISHLIST
 ======================
 
-
-______________________________________________________________________
-
-  WORK IN PROGRESS
-______________________________________________________________________
-
-
-Documentation
--------------
-
->>  describe the four modes V/L/S/T, and their panels
-
-+  a tutorial for the basics
-
--  describe what a wad file is, PWAD vs IWAD, how to play it,
-   what nodes are, how wad files can contain more than maps,
-   different games and source ports
-
--  describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
-
--  hilighting stuff, selecting stuff, dragging stuff
-
--  drawing lines in VERTEX mode
-
--  using the browser
-
--  mention common pitfalls (vertices sitting on a linedef or another vertex)
-
-
 ______________________________________________________________________
 
   HIGH PRIORITY
@@ -50,16 +21,49 @@ General
    -->  feature png ??
    [ need to analyse PNG data for "grAB" chunk, or not?? ]
 
-+  ability to highlight railings in the 3D view
+
+
+Documentation
+-------------
+
++  describe the four modes V/L/S/T, and their panels
+
++  a tutorial for the basics
+   -  drawing lines in VERTEX mode
+   -  hilighting stuff, selecting stuff, dragging stuff
+   -  using the browser
+
+-  describe what a wad file is, PWAD vs IWAD, how to play it,
+   what nodes are, how wad files can contain more than maps,
+   different games and source ports
+
+-  describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
 
 
 
 Editing
 -------
 
++  a proper "curve" tool for making a circle arc or bezier curve,
+   and new vertices would be constrained to that curve, and you can
+   move existing vertices onto the curve.
+
++  when dragging a shape next to existing geometry, highlight
+   vertices and linedefs which would get merged, and implement
+   that merging.
+
+
 
 3D View
 -------
+
++  ability to highlight/select railings
+
++  slopes
+
++  extrafloors
+   -  create a DrawWall for their floor/ceil and sides
+   -  distance is slightly closer than normal wall segment
 
 
 ______________________________________________________________________
@@ -153,15 +157,7 @@ WISH: support Windows 95/98/ME
 Editing
 -------
 
-+  a proper "curve" tool for making a circle arc or bezier curve,
-   and new vertices would be constrained to that curve, and you can
-   move existing vertices onto the curve.
-
-+  when dragging a shape next to existing geometry, highlight
-   vertices and linedefs which would get merged, and implement
-   that merging.
-
-+  a way to see angle of lines
+-  a way to see angle of lines
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
@@ -202,12 +198,6 @@ IDEA:  popup menu for right-click on flats/textures in the panel
 3D View
 -------
 
-+  slopes
-
-+  extrafloors
-   -  create a DrawWall for their floor/ceil and sides
-   -  distance is slightly closer than normal wall segment
-
 -  support selecting things in 3D view, use browser to change
    their type, and Copy/Paste too
 
@@ -235,10 +225,10 @@ WISH: bound flats by 1S lines facing away from the camera
 Browser
 -------
 
-+  when opened by a click, jump to the texture/thing/etc clicked on
-
 -  search box: ',' for OR
    --> split match into N pieces, perform normal match on each
+
+IDEA: when opened by a click, jump to the texture/thing/etc clicked on
 
 IDEA: a way to clear the recent lists
 
