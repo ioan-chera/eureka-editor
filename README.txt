@@ -1,10 +1,10 @@
 
-Eureka 1.12 README
+Eureka 1.21 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>
 
-February 2016
+January 2017
 
 
 INTRODUCTION
@@ -254,7 +254,7 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright (C) 2001-2016 Andrew Apted, et al
+  Copyright (C) 2001-2017 Andrew Apted, et al
   Copyright (C) 2014-2015 Ioan Chera
   Copyright (C) 1997-2003 Andre Majorel et al
 
