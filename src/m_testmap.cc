@@ -243,7 +243,7 @@ static const char *CalcEXEName(const port_path_info_t *info)
 
 	// make the executable name relative, since we chdir() to its folder
 
-	snprintf(exe_name, sizeof(exe_name), "./%s", FindBaseName(info->exe_filename));
+	snprintf(exe_name, sizeof(exe_name), ".%c%s", DIR_SEP_CH, FindBaseName(info->exe_filename));
 
 	return exe_name;
 }
