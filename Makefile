@@ -11,7 +11,7 @@ PREFIX=/usr/local
 
 OBJ_DIR=obj_linux
 
-OPTIMISE=-O0 -g3 -fno-strict-aliasing
+OPTIMISE=-O2 -fno-strict-aliasing
 
 STRIP_FLAGS=--strip-unneeded
 
