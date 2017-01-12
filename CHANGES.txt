@@ -25,7 +25,7 @@ Editing:
 
 -  linedef/sector/thing descriptions update as the user types
 -  arrow buttons in Vertex panel for fine adjustments
--  auto-align linedefs on the 2D map, bound to 'A' key
+-  auto-align linedefs on the 2D map, bound to 'a' key
 -  entering a negative "Length" in Linedef panel moves the start
    vertex of the line instead of the end vertex
 
@@ -33,7 +33,7 @@ Editing:
 General:
 
 +  improved BSP code, can build nodes for a map on each save,
-   building nodes no longer resets the undo/redo history,
+   building all nodes no longer resets the undo/redo history,
    more preference settings, ability to disable GL nodes,
    and support for ZDoom uncompressed node format (XNOD)
 
