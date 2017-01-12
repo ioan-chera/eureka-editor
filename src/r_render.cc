@@ -2128,7 +2128,7 @@ void UI_Render3D::DrawInfoBar()
 	if (r_edit.SelectEmpty())
 		fl_color(FL_BLACK);
 	else
-		fl_color(fl_rgb_color(160,0,0));
+		fl_color(fl_rgb_color(104,0,0));
 
 	fl_rectf(x(), cy, w(), INFO_BAR_H);
 
