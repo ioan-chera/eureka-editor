@@ -4,3 +4,6 @@ CHANGES IN Eureka 1.22
 
 (Since version 1.21)
 
+
+- fixed sector merge to keep properties of first selected sector
+

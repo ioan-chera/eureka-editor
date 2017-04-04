@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -264,6 +264,8 @@ void CMD_SEC_Merge(void)
 		return;
 	}
 
+	int first = edit.Selected->find_first();
+
 	bool keep_common_lines = Exec_HasFlag("/keep");
 
 	// we require the *lowest* numbered sector, otherwise we can
@@ -283,6 +285,21 @@ void CMD_SEC_Merge(void)
 	BA_Begin();
 
 	BA_MessageForSel("merged", edit.Selected);
+
+	// keep the properties of the first selected sector
+	if (new_sec != first)
+	{
+		const Sector *ref = Sectors[first];
+
+		BA_ChangeSEC(new_sec, Sector::F_FLOORH,    ref->floorh);
+		BA_ChangeSEC(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+		BA_ChangeSEC(new_sec, Sector::F_CEILH,     ref->ceilh);
+		BA_ChangeSEC(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+
+		BA_ChangeSEC(new_sec, Sector::F_LIGHT, ref->light);
+		BA_ChangeSEC(new_sec, Sector::F_TYPE,  ref->type);
+		BA_ChangeSEC(new_sec, Sector::F_TAG,   ref->tag);
+	}
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
