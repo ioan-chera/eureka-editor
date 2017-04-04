@@ -11,6 +11,8 @@ ______________________________________________________________________
 General
 -------
 
++  look into optimizing the sector rendering
+
 +  a dialog to restore map from a backup, and maybe other
    functions like pruning backups
 
@@ -109,8 +111,6 @@ General
    become NEW sector, prefer the loop which DOES NOT include any
    self-referencing linedefs
 
-
-IDEA: a sector-rendering mode for sound propagation
 
 IDEA: would a "low-res" sector-rendering mode be faster?
 
@@ -245,6 +245,8 @@ IDEA: ability to shrink categories, i.e. say that for things the
 
 Game / Port Definitions
 -----------------------
+
++  STRIFE: some flags are missing
 
 WISH: conversion between Hexen <--> DOOM formats
       [ perhaps as a script ]
