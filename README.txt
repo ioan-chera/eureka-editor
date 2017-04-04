@@ -1,10 +1,10 @@
 
-Eureka 1.21 README
+Eureka 1.22 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>
 
-January 2017
+April 2017
 
 
 INTRODUCTION
