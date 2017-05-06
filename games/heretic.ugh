@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012-2016 Andrew Apted
+#  Copyright (C) 2012-2017 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -209,6 +209,8 @@ line  27 k "DR Open yellow door"
 line  33 k "D1 Open green door (stays open)"
 line  28 k "DR Open green door"
 
+# the "S1" and "W1" are lowercase here to inhibit the map checking
+# functions complaining about missing tag numbers.
 line  11 e "s1 Exit level"
 line  51 e "s1 Secret exit"
 line  52 e "w1 Exit level"
