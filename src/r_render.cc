@@ -1910,7 +1910,6 @@ public:
 		// check whether one side of the partition is empty
 		if (s > e1 || e < s1)
 		{
-			// FIXME : see how often this occurs....
 			return;
 		}
 
