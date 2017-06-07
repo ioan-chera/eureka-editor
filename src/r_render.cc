@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -621,61 +621,67 @@ public:
 
 #define IZ_EPSILON  1e-6
 
-   /* PREDICATES */
+	// this is NOT a predicate, because it does not guarantee
+	// that swapping A and B will produce the opposite result
+	// (or transitivity i.e. if A < B and B < C then A < C).
+
+	inline bool IsCloser(const DrawWall *const B) const
+	{
+		const DrawWall *const A = this;
+
+		if (A == B)
+			return false;
+
+		if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
+		{
+			// this is the normal case
+			return A->cur_iz > B->cur_iz;
+		}
+
+		// this case usually occurs at a column where two walls share a vertex.
+		//
+		// hence we check if they actually share a vertex, and if so then
+		// we test whether A is behind B or not -- by checking which side
+		// of B the camera and the other vertex of A are on.
+
+		if (A->ld && B->ld)
+		{
+			// find the vertex of A _not_ shared with B
+			int A_other = -1;
+
+			if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
+			if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
+
+			if (A_other >= 0)
+			{
+				int ax = Vertices[A_other]->x;
+				int ay = Vertices[A_other]->y;
+
+				int bx1 = B->ld->Start()->x;
+				int by1 = B->ld->Start()->y;
+				int bx2 = B->ld->End()->x;
+				int by2 = B->ld->End()->y;
+
+				int cx = (int)view.x;  // camera
+				int cy = (int)view.y;
+
+				int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
+				int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
+
+				return (A_side * C_side >= 0);
+			}
+		}
+
+		// a pretty good fallback:
+		return A->mid_iz > B->mid_iz;
+	}
+
+	/* PREDICATES */
 
 	struct MidDistCmp
 	{
 		inline bool operator() (const DrawWall * A, const DrawWall * B) const
 		{
-			return A->mid_iz > B->mid_iz;
-		}
-	};
-
-	struct DistCmp
-	{
-		inline bool operator() (const DrawWall * A, const DrawWall * B) const
-		{
-			if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
-			{
-				// this is the normal case
-				return A->cur_iz > B->cur_iz;
-			}
-
-			// this case usually occurs at a column where two walls share a vertex.
-			//
-			// hence we check if they actually share a vertex, and if so then
-			// we test whether A is behind B or not -- by checking which side
-			// of B the camera and the other vertex of A are on.
-
-			if (A->ld && B->ld)
-			{
-				// find the vertex of A _not_ shared with B
-				int A_other = -1;
-
-				if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
-				if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
-
-				if (A_other >= 0)
-				{
-					int ax = Vertices[A_other]->x;
-					int ay = Vertices[A_other]->y;
-
-					int bx1 = B->ld->Start()->x;
-					int by1 = B->ld->Start()->y;
-					int bx2 = B->ld->End()->x;
-					int by2 = B->ld->End()->y;
-
-					int cx = (int)view.x;  // camera
-					int cy = (int)view.y;
-
-					int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
-					int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
-
-					return (A_side * C_side >= 0);
-				}
-			}
-
-			// a pretty good fallback:
 			return A->mid_iz > B->mid_iz;
 		}
 	};
@@ -1792,6 +1798,147 @@ public:
 		RenderTexColumn(dw, surf, x, y1, y2);
 	}
 
+	inline void Sort_Swap(int i, int k)
+	{
+		DrawWall *A = active[i];
+		DrawWall *B = active[k];
+
+		active[k] = A;
+		active[i] = B;
+	}
+
+	const DrawWall * Sort_ChoosePivot(int s, int e)
+	{
+		// use the median of start point, middle point and end point
+
+		const DrawWall *A = active[s];
+		const DrawWall *B = active[(s + e) >> 1];
+		const DrawWall *C = active[e];
+
+		if (B->IsCloser(A))
+			std::swap(A, B);
+
+		if (C->IsCloser(B))
+		{
+			std::swap(B, C);
+
+			if (B->IsCloser(A))
+				std::swap(A, B);
+		}
+
+		return B;
+	}
+
+	void Sort_Bubble(int s, int e)
+	{
+		while (s < e)
+		{
+			bool changed = false;
+
+			for (int i = s ; i < e ; i++)
+			{
+				DrawWall *A = active[i];
+				DrawWall *B = active[i+1];
+
+				if (B->IsCloser(A))
+				{
+					// swap!
+					active[i]   = B;
+					active[i+1] = A;
+
+					changed = true;
+				}
+			}
+
+			// stop when everything is in the right order
+			if (! changed)
+				return;
+
+			// highest value will have bubbled to the top, so we can
+			// ignore it in future passes
+			e = e - 1;
+		}
+	}
+
+	void Sort_Range(int s, int e)
+	{
+		SYS_ASSERT(e >= s);
+
+		if (e == s)
+			return;
+
+		if (e - s < 8)
+		{
+			Sort_Bubble(s, e);
+			return;
+		}
+
+		const DrawWall *pivot = Sort_ChoosePivot(s, e);
+
+		// perform the Quicksort partition step  [ Hoare's algorithm ]
+
+		int s1 = s;
+		int e1 = e;
+
+		while (true)
+		{
+			// s can go past e, or vice versa (that's when we stop)
+
+			while (s <= e && active[s]->IsCloser(pivot))
+				s++;
+
+			while (e >= s && ! active[e]->IsCloser(pivot))
+				e--;
+
+			if (s > e)
+				break;
+
+			// this could would normally not occur, but our comparison
+			// function is rather "wonky"...
+			if (s == e)
+			{
+				e--;
+				break;
+			}
+
+			Sort_Swap(s, e);
+
+			s++;
+			e--;
+		}
+
+		// check whether one side of the partition is empty
+		if (s > e1 || e < s1)
+		{
+			// FIXME : see how often this occurs....
+			return;
+		}
+
+		s--;
+		e++;
+
+		// recursively sort the two partitions
+		if (s > s1)
+			Sort_Range(s1, s);
+
+		if (e < e1)
+			Sort_Range(e, e1);
+	}
+
+	void SortActiveList()
+	{
+		// this uses the Quicksort algorithm to sort the active list.
+		//
+		// Note that this sorting code has been written assuming some
+		// limitations of the DrawWall::IsCloser() method -- see the
+		// description of that method for more details.
+
+		if (active.size() < 2)
+			return;
+
+		Sort_Range(0, (int)active.size() - 1);
+	}
+
 	void UpdateActiveList(int x)
 	{
 		DrawWall::vec_t::iterator S, E, P;
@@ -1844,9 +1991,9 @@ public:
 
 		// if there are changes, re-sort the active list...
 
-		if (changes)
+		if (changes && active.size() > 0)
 		{
-			std::sort(active.begin(), active.end(), DrawWall::DistCmp());
+			SortActiveList();
 		}
 	}
 
