@@ -136,7 +136,7 @@ thing 52 d nl 20 TGLTF0 "Teleport Glitter (exit)"
 thing 28 l nlc 20 CHDL "Chandelier"
 thing 76 l -l 20 KFR1 "Fire Brazier"
 thing 27 l -l 20 SRTC "Serpent Torch"
-thing 50 l nl 20 WRTH "Wall Torch"
+thing 50 l nl 20 WTRH "Wall Torch"
 
 thing 2035 - - 16 PPOD "Pod"
 thing 43   - n 20 NULL "Pod Generator"
