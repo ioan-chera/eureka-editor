@@ -778,7 +778,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 	if (! num_grp)
 	{
 		char *endptr;
-		type_num = strtol(inp_text, &endptr, 0 /* allow hex */);
+		type_num = static_cast<int>(strtol(inp_text, &endptr, 0 /* allow hex */));
 
 		// just check the number is valid
 		if (*endptr != 0)

@@ -693,8 +693,8 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		def->key = argv[1][0];
 
 		// use strtol() to support "0x" notation
-		def->base   = strtol(argv[2], NULL, 0);
-		def->length = strtol(argv[3], NULL, 0);
+		def->base   = static_cast<int>(strtol(argv[2], NULL, 0));
+		def->length = static_cast<int>(strtol(argv[3], NULL, 0));
 
 		def->name = StringDup(argv[4]);
 		def->num_fields = 0;

@@ -1069,7 +1069,7 @@ void CMD_VT_ShapeLine(void)
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
 
-	if (true /* don't move first and last vertices */)
+	if ((true) /* don't move first and last vertices */)
 	{
 		ax = V1->x;
 		ay = V1->y;
@@ -1095,7 +1095,7 @@ void CMD_VT_ShapeLine(void)
 	{
 		double frac;
 
-		if (true /* regular spacing */)
+		if ((true) /* regular spacing */)
 			frac = i / (double)(along_list.size() - 1);
 		else
 			frac = (along_list[i].along - along1) / (along2 - along1);
@@ -1289,7 +1289,7 @@ void CMD_VT_ShapeArc(void)
 	if (start_idx > 0)
 		end_idx = start_idx - 1;
 	else
-		end_idx = along_list.size() - 1;
+		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
 	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
 	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];

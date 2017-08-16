@@ -220,7 +220,7 @@ public:
 
 	void SaveOffsets()
 	{
-		unsigned int total = adjust_sides.size();
+		unsigned int total = static_cast<unsigned>(adjust_sides.size());
 
 		if (total == 0)
 			return;
@@ -246,7 +246,7 @@ public:
 
 	void RestoreOffsets()
 	{
-		unsigned int total = adjust_sides.size();
+		unsigned int total = static_cast<unsigned>(adjust_sides.size());
 
 		for (unsigned int k = 0 ; k < total ; k++)
 		{
