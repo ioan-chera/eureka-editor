@@ -65,7 +65,7 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 //
 // default constructor, creating a null image
 //
-Img_c::Img_c() : pixels(NULL), w(0), h(0)
+Img_c::Img_c() : pixels(NULL), w(0), h(0), refcount(1)
 { }
 
 
@@ -73,7 +73,7 @@ Img_c::Img_c() : pixels(NULL), w(0), h(0)
 // a constructor with dimensions
 //
 Img_c::Img_c(int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0)
+	pixels(NULL), w(0), h(0), refcount(1)
 {
 	resize(width, height);
 }
@@ -391,7 +391,7 @@ Img_c * IM_MissingTex()
 		missing_tex_color = game_info.missing_color;
 
 		if (missing_tex_image)
-			delete missing_tex_image;
+			missing_tex_image->release();
 
 		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
 	}
@@ -407,7 +407,7 @@ Img_c * IM_UnknownTex()
 		unknown_tex_color = game_info.unknown_tex;
 
 		if (unknown_tex_image)
-			delete unknown_tex_image;
+			unknown_tex_image->release();
 
 		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
 	}
@@ -423,7 +423,7 @@ Img_c * IM_UnknownFlat()
 		unknown_flat_color = game_info.unknown_flat;
 
 		if (unknown_flat_image)
-			delete unknown_flat_image;
+			unknown_flat_image->release();
 
 		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
@@ -439,7 +439,7 @@ Img_c * IM_UnknownSprite()
 		unknown_sprite_color = game_info.unknown_tex;
 
 		if (unknown_sprite_image)
-			delete unknown_sprite_image;
+			unknown_sprite_image->release();
 
 		unknown_sprite_image = new Img_c(64, 64, true);
 

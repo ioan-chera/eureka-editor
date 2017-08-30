@@ -56,10 +56,20 @@ private:
 	int  w;  // Width
 	int  h;  // Height
 
-public:
-	 Img_c();
-	 Img_c(int width, int height, bool _dummy = false);
 	~Img_c();
+public:
+	Img_c();
+	Img_c(int width, int height, bool _dummy = false);
+	void release()
+	{
+		if(!--refcount)
+			delete this;
+	}
+	Img_c *retain()
+	{
+		++refcount;
+		return this;
+	}
 
 	bool is_null() const
 	{
@@ -102,6 +112,7 @@ public:
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
+	int refcount;
 };
 
 

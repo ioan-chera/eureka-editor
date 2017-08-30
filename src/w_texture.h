@@ -54,6 +54,10 @@ bool W_FlatIsKnown(const char *name);
 Img_c * W_GetFlat(const char *name, bool try_uppercase = false);
 
 
+/* ---- PORT STUFF ---- */
+
+void W_MixTexturesAndFlats();
+
 /* ---- SPRITES ---- */
 
 void W_ClearSprites();

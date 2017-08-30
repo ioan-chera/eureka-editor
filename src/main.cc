@@ -803,6 +803,8 @@ void Main_LoadResources()
 
 	W_LoadFlats();
 	W_LoadTextures();
+	if(game_info.mix_textures_flats)
+		W_MixTexturesAndFlats();
 	W_ClearSprites();
 
 	LogPrintf("--- DONE ---\n");

@@ -51,7 +51,7 @@ static std::map<std::string, int> medusa_textures;
 
 static void DeleteTex(const std::map<std::string, Img_c *>::value_type& P)
 {
-	delete P.second;
+	P.second->release();
 }
 
 static void W_ClearTextures()
@@ -74,7 +74,7 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 
 	if (P != textures.end())
 	{
-		delete P->second;
+		P->second->release();
 
 		P->second = img;
 	}
@@ -316,7 +316,7 @@ static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
 
 	if (! LoadPicture(*img, lump, name, 0, 0))
 	{
-		delete img;
+		img->release();
 
 		return;
 	}
@@ -577,7 +577,7 @@ std::map<std::string, Img_c *> flats;
 
 static void DeleteFlat(const std::map<std::string, Img_c *>::value_type& P)
 {
-	delete P.second;
+	P.second->release();
 }
 
 
@@ -599,7 +599,7 @@ static void W_AddFlat(const char *name, Img_c *img)
 
 	if (P != flats.end())
 	{
-		delete P->second;
+		P->second->release();
 
 		P->second = img;
 	}
@@ -698,6 +698,34 @@ bool W_FlatIsKnown(const char *name)
 	return (P != flats.end());
 }
 
+//----------------------------------------------------------------------
+//    MIX TEXTURES AND FLATS (in advanced ports)
+//----------------------------------------------------------------------
+
+//
+// Does the mixing of all resources
+//
+void W_MixTexturesAndFlats()
+{
+	class Copier
+	{
+		typedef std::map<std::string, Img_c *> Map;
+		Map &target;
+	public:
+		Copier(Map &m) : target(m) {}
+		void operator()(const Map::value_type& P)
+		{
+			if(target.find(P.first) == target.end())
+				target[P.first] = P.second->retain();
+		}
+	};
+
+	Copier flatter(textures);
+	Copier texer(flats);
+
+	std::for_each(flats.begin(), flats.end(), flatter);
+	std::for_each(textures.begin(), textures.end(), texer);
+}
 
 //----------------------------------------------------------------------
 //    SPRITE HANDLING
@@ -712,7 +740,7 @@ static sprite_map_t sprites;
 
 static void DeleteSprite(const sprite_map_t::value_type& P)
 {
-	delete P.second;
+	P.second->release();
 }
 
 void W_ClearSprites()
@@ -820,7 +848,7 @@ Img_c * W_GetSprite(int type)
 
 			if (! LoadPicture(*result, lump, info->sprite, 0, 0))
 			{
-				delete result;
+				result->release();
 				result = NULL;
 			}
 		}
@@ -862,7 +890,7 @@ Img_c * W_GetSprite(int type)
 		if (new_img)
 		{
 			std::swap(result, new_img);
-			delete new_img;
+			new_img->release();
 		}
 	}
 
