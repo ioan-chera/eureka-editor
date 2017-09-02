@@ -224,7 +224,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	UploadRGB(buf, 3);
 
 	if (new_img)
-		delete img;
+		img->release();
 }
 
 

@@ -152,6 +152,8 @@ typedef struct
 
 	int no_need_players;	// having no players is OK (Things checker)
 
+	int mix_textures_flats;	// Allow mixing textures and flats (adv. ports)
+
 } game_info_t;
 
 extern game_info_t  game_info;

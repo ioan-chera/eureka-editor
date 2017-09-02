@@ -235,6 +235,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.no_need_players = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "mix_textures_flats") == 0)
+	{
+		game_info.mix_textures_flats = atoi(argv[1]);
+	}
 	else
 	{
 		LogPrintf("unknown feature keyword: '%s'\n", argv[0]);
