@@ -2,6 +2,17 @@
 Eureka TODO / WISHLIST
 ======================
 
+
+FATAL ERROR: Assertion (is_lineobj()) failed
+In function SolidMask (src/ui_linedef.cc:926)
+
+FATAL ERROR: Assertion (blk_num < (int)blocks.size()) failed
+In function get (src/m_strings.cc:129)
+
+
+Hexen : map checker shows "unknown line type" when type is 0
+
+
 ______________________________________________________________________
 
   HIGH PRIORITY
