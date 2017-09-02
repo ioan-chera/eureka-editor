@@ -1291,7 +1291,7 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 	// grab number of points now, since we will adding split points
 	// (and we assume those new points get added at the end).
-	unsigned int num_verts = cross.points.size();
+	unsigned int num_verts = static_cast<unsigned>(cross.points.size());
 
 	for (unsigned int k = 0 ; k < num_verts ; k++)
 	{

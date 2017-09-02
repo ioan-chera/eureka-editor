@@ -975,7 +975,7 @@ void SideDefs_Unpack(bool is_after_load)
 	if (sides.empty())
 		return;
 
-	if (false /* confirm_it */)
+	if ((false) /* confirm_it */)
 	{
 		if (DLG_Confirm("&No Change|&Unpack", unpack_confirm_message) <= 0)
 			return;

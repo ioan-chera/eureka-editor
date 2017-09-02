@@ -1995,7 +1995,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	param.scale_y = mul;
 
 	// TODO: CONFIG ITEM (or FLAG)
-	if (true)
+	if ((true))
 	{
 		Objs_CalcMiddle(&list, &param.mid_x, &param.mid_y);
 	}

@@ -676,7 +676,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 
 		Img_c *image = TI->second;
 
-		if (false) /* NO PICS */
+		if ((false)) /* NO PICS */
 			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name,
 					 image->width(), image->height());
 		else

@@ -84,7 +84,7 @@ Img_c::Img_c(int width, int height, bool _dummy) :
 //
 Img_c::~Img_c()
 {
-	delete pixels;
+	delete []pixels;
 }
 
 

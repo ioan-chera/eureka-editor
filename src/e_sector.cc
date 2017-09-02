@@ -866,7 +866,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 								 std::vector<int>& lower_texs,
 								 std::vector<int>& upper_texs)
 {
-	unsigned int total = loop.lines.size();
+	unsigned int total = static_cast<unsigned>(loop.lines.size());
 
 	SYS_ASSERT(lower_texs.size() == total);
 
