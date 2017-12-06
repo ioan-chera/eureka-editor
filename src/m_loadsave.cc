@@ -865,7 +865,7 @@ static void RemoveUnusedVerticesAtEnd()
 	// normally kosher, but level loading is a special case).
 	if (new_count < NumVertices)
 	{
-		LogPrintf("Removing %d unused vertices at end\n", new_count);
+		LogPrintf("Removing %d unused vertices at end\n", NumVertices - new_count);
 
 		for (int i = new_count ; i < NumVertices ; i++)
 			delete Vertices[i];
