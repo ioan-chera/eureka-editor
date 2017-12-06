@@ -758,7 +758,7 @@ static void LoadLineDefs()
 		    ld->start == ld->end)
 		{
 			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-			          ld->start, ld->end);
+			          i, ld->start, ld->end);
 
 			bad_linedef_count++;
 
@@ -815,7 +815,7 @@ static void LoadLineDefs_Hexen()
 			ld->start == ld->end)
 		{
 			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-					  ld->start, ld->end);
+					  i, ld->start, ld->end);
 
 			bad_linedef_count++;
 
