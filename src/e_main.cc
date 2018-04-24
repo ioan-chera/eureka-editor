@@ -64,7 +64,7 @@ int default_edit_mode = 3;  // Vertices
 
 bool same_mode_clears_selection = false;
 
-int sector_render_default = (int)SREND_Floor;
+int sector_render_default = (int)SREND_Nothing;
 int  thing_render_default = 1;
 
 
