@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2015 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -19,7 +19,10 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "e_main.h"
 #include "m_config.h"
+#include "r_render.h"
 #include "ui_window.h"
 #include "w_wad.h"
 
@@ -35,23 +38,21 @@
 
 
 
-UI_MainWin *main_win;
-
 #define MAIN_WINDOW_W  (800 - 32)
 #define MAIN_WINDOW_H  (600 - 40)
 
+UI_MainWindow *main_win;
 
-static void main_win_close_CB(Fl_Widget *w, void *data)
-{
-	CMD_Quit();
-}
+// Kromulent Factor crud
+int KF;
+int KF_fonth;
 
 
 //
 // MainWin Constructor
 //
-UI_MainWin::UI_MainWin() :
-	Fl_Double_Window(MAIN_WINDOW_W, MAIN_WINDOW_H, EUREKA_TITLE),
+UI_MainWindow::UI_MainWindow() :
+	Fl_Double_Window(MAIN_WINDOW_W + 64, MAIN_WINDOW_H, EUREKA_TITLE),
 	cursor_shape(FL_CURSOR_DEFAULT),
 	last_x(0), last_y(0), last_w(0), last_h(0)
 {
@@ -59,7 +60,7 @@ UI_MainWin::UI_MainWin() :
 
 	size_range(MAIN_WINDOW_W, MAIN_WINDOW_H);
 
-	callback((Fl_Callback *) main_win_close_CB);
+	callback((Fl_Callback *) quit_callback);
 
 	color(WINDOW_BG, WINDOW_BG);
 
@@ -107,6 +108,7 @@ UI_MainWin::UI_MainWin() :
 	int BH = ey-4;  // ey-BY-2
 
 	thing_box = new UI_ThingBox(w() - panel_W, BY, panel_W, BH);
+	thing_box->hide();
 	add(thing_box);
 
 	line_box = new UI_LineBox(w() - panel_W, BY, panel_W, BH);
@@ -118,7 +120,6 @@ UI_MainWin::UI_MainWin() :
 	add(sec_box);
 
 	vert_box = new UI_VertexBox(w() - panel_W, BY, panel_W, BH);
-	vert_box->hide();
 	add(vert_box);
 
 	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
@@ -128,16 +129,44 @@ UI_MainWin::UI_MainWin() :
 	find_box = new UI_FindAndReplace(w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
+
+
+	// create bare-bone operation menu widgets
+	// [ they are fleshed out by M_LoadOperationMenus ]
+	op_thing  = new Fl_Menu_Button(0, 0, 99, 99, "Thing Operations");
+	op_line   = new Fl_Menu_Button(0, 0, 99, 99, "Line Operations");
+	op_sector = new Fl_Menu_Button(0, 0, 99, 99, "Sector Operations");
+	op_vertex = new Fl_Menu_Button(0, 0, 99, 99, "Vertex Operations");
+	op_render = new Fl_Menu_Button(0, 0, 99, 99, "3D Operations");
+
+	op_thing ->hide();
+	op_line  ->hide();
+	op_sector->hide();
+	op_vertex->hide();
+	op_render->hide();
+
+	add(op_thing);
+	add(op_line);
+	add(op_sector);
+	add(op_vertex);
+	add(op_render);
 }
+
 
 //
 // MainWin Destructor
 //
-UI_MainWin::~UI_MainWin()
+UI_MainWindow::~UI_MainWindow()
 { }
 
 
-void UI_MainWin::NewEditMode(obj_type_e mode)
+void UI_MainWindow::quit_callback(Fl_Widget *w, void *data)
+{
+	Main_Quit();
+}
+
+
+void UI_MainWindow::NewEditMode(obj_type_e mode)
 {
 	UnselectPics();
 
@@ -165,7 +194,7 @@ void UI_MainWin::NewEditMode(obj_type_e mode)
 }
 
 
-void UI_MainWin::SetCursor(Fl_Cursor shape)
+void UI_MainWindow::SetCursor(Fl_Cursor shape)
 {
 	if (shape == cursor_shape)
 		return;
@@ -176,7 +205,7 @@ void UI_MainWin::SetCursor(Fl_Cursor shape)
 }
 
 
-void UI_MainWin::ShowBrowser(char kind)
+void UI_MainWindow::BrowserMode(char kind)
 {
 	bool is_visible = browser->visible() ? true : false;
 
@@ -204,7 +233,7 @@ void UI_MainWin::ShowBrowser(char kind)
 }
 
 
-void UI_MainWin::HideSpecialPanel()
+void UI_MainWindow::HideSpecialPanel()
 {
 	props_box->hide();
 	 find_box->hide();
@@ -223,7 +252,7 @@ void UI_MainWin::HideSpecialPanel()
 }
 
 
-void UI_MainWin::ShowDefaultProps()
+void UI_MainWindow::ShowDefaultProps()
 {
 	// already shown?
 	if (props_box->visible())
@@ -244,7 +273,7 @@ void UI_MainWin::ShowDefaultProps()
 }
 
 
-void UI_MainWin::ShowFindAndReplace()
+void UI_MainWindow::ShowFindAndReplace()
 {
 	// already shown?
 	if (find_box->visible())
@@ -265,7 +294,7 @@ void UI_MainWin::ShowFindAndReplace()
 }
 
 
-void UI_MainWin::UpdateTotals()
+void UI_MainWindow::UpdateTotals()
 {
 	thing_box->UpdateTotal();
 	 line_box->UpdateTotal();
@@ -274,7 +303,7 @@ void UI_MainWin::UpdateTotals()
 }
 
 
-int UI_MainWin::GetPanelObjNum() const
+int UI_MainWindow::GetPanelObjNum() const
 {
 	// FIXME: using 'edit' here feels like a hack or mis-design
 	switch (edit.mode)
@@ -289,9 +318,9 @@ int UI_MainWin::GetPanelObjNum() const
 	}
 }
 
-void UI_MainWin::InvalidatePanelObj()
+void UI_MainWindow::InvalidatePanelObj()
 {
-	if (thing_box->visible()) 
+	if (thing_box->visible())
 		thing_box->SetObj(-1, 0);
 
 	if (line_box->visible())
@@ -304,9 +333,9 @@ void UI_MainWin::InvalidatePanelObj()
 		vert_box->SetObj(-1, 0);
 }
 
-void UI_MainWin::UpdatePanelObj()
+void UI_MainWindow::UpdatePanelObj()
 {
-	if (thing_box->visible()) 
+	if (thing_box->visible())
 		thing_box->UpdateField();
 
 	if (line_box->visible())
@@ -323,7 +352,7 @@ void UI_MainWin::UpdatePanelObj()
 }
 
 
-void UI_MainWin::UnselectPics()
+void UI_MainWindow::UnselectPics()
 {
 	 line_box->UnselectPics();
 	  sec_box->UnselectPics();
@@ -331,7 +360,7 @@ void UI_MainWin::UnselectPics()
 }
 
 
-void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
+void UI_MainWindow::SetTitle(const char *wad_name, const char *map_name,
 						  bool read_only)
 {
 	static char title_buf[FL_PATH_MAX];
@@ -356,7 +385,7 @@ void UI_MainWin::SetTitle(const char *wad_name, const char *map_name,
 }
 
 
-void UI_MainWin::UpdateTitle(char want_prefix)
+void UI_MainWindow::UpdateTitle(char want_prefix)
 {
 	if (! label())
 		return;
@@ -388,7 +417,7 @@ void UI_MainWin::UpdateTitle(char want_prefix)
 
 /* DISABLED, since it fails miserably on every platform
 
-void UI_MainWin::ToggleFullscreen()
+void UI_MainWindow::ToggleFullscreen()
 {
 	if (last_w)
 	{
@@ -407,72 +436,74 @@ void UI_MainWin::ToggleFullscreen()
 */
 
 
-void UI_MainWin::BrowsedItem(char kind, int number, const char *name, int e_state)
+bool UI_MainWindow::ClipboardOp(char what)
+{
+	// Note : this is for the panels, we don't handle the 3D view here
+
+	if (props_box->visible())
+	{
+		return props_box->ClipboardOp(what);
+	}
+	else if (find_box->visible())
+	{
+		return find_box->ClipboardOp(what);
+	}
+	else if (line_box->visible())
+	{
+		return line_box->ClipboardOp(what);
+	}
+	else if (sec_box->visible())
+	{
+		return sec_box->ClipboardOp(what);
+	}
+	else if (thing_box->visible())
+	{
+		return thing_box->ClipboardOp(what);
+	}
+
+	// no panel wanted it
+	return false;
+}
+
+
+void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
+
+	if (edit.render3d)
+	{
+		if (Render3D_BrowsedItem(kind, number, name, e_state))
+			return;	 // ate it
+	}
 
 	if (props_box->visible())
 	{
 		props_box->BrowsedItem(kind, number, name, e_state);
-		return;
 	}
-
-	if (find_box->visible())
+	else if (find_box->visible())
 	{
 		find_box->BrowsedItem(kind, number, name, e_state);
-		return;
 	}
-
-	switch (edit.mode)
+	else if (line_box->visible())
 	{
-		case OBJ_LINEDEFS:
-			if (kind == 'T')
-			{
-				line_box->SetTexture(name, e_state);
-				return;
-			}
-			if (kind == 'L')
-			{
-				line_box->SetLineType(number);
-				return;
-			}
-			break;
-
-		case OBJ_SECTORS:
-			if (kind == 'F')
-			{
-				sec_box->SetFlat(name, e_state);
-				return;
-			}
-			if (kind == 'S')
-			{
-				sec_box->SetSectorType(number);
-				return;
-			}
-			break;
-
-		case OBJ_THINGS:
-			if (kind == 'O')
-			{
-				thing_box->SetThingType(number);
-				return;
-			}
-			if (kind == 'L' && Level_format == MAPF_Hexen)
-			{
-				thing_box->SetSpecialType(number);
-				return;
-			}
-			break;
-
-		default:
-			break;
+		line_box->BrowsedItem(kind, number, name, e_state);
 	}
-
-	fl_beep();
+	else if (sec_box->visible())
+	{
+		sec_box->BrowsedItem(kind, number, name, e_state);
+	}
+	else if (thing_box->visible())
+	{
+		thing_box->BrowsedItem(kind, number, name, e_state);
+	}
+	else
+	{
+		fl_beep();
+	}
 }
 
 
-void UI_MainWin::Maximize()
+void UI_MainWindow::Maximize()
 {
 #if defined(WIN32)
 	HWND hWnd = fl_xid(this);
@@ -514,7 +545,7 @@ void UI_MainWin::Maximize()
 }
 
 
-void UI_MainWin::Delay(int steps)
+void UI_MainWindow::Delay(int steps)
 {
 	for (; steps > 0 ; steps--)
 	{
@@ -525,7 +556,7 @@ void UI_MainWin::Delay(int steps)
 }
 
 
-void UI_MainWin::UpdateGameInfo()
+void UI_MainWindow::UpdateGameInfo()
 {
 	thing_box->UpdateGameInfo();
 	 line_box->UpdateGameInfo();
@@ -588,7 +619,7 @@ UI_LogViewer::UI_LogViewer() :
 			o->color(fl_gray_ramp(4));
 		else
 			o->color(WINDOW_BG);
-		
+
 		int bx  = w() - 110;
 		int bx2 = bx;
 		{
@@ -773,6 +804,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	chooser.title("Pick file to save to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Text files\t*.txt");
+	chooser.directory(Main_FileOpFolder());
 
 	switch (chooser.show())
 	{

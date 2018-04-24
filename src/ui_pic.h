@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -39,6 +39,9 @@ private:
 
 	int special;
 
+	bool allow_hl;
+
+	bool highlighted;
 	bool selected;
 
 	const char *what_text;
@@ -48,7 +51,7 @@ public:
 	UI_Pic(int X, int Y, int W, int H, const char *L = "");
 	virtual ~UI_Pic();
 
-	// FLTK virtual method for drawing.
+	// FLTK method for event handling
 	int handle(int event);
 
 public:
@@ -61,20 +64,53 @@ public:
 	void GetTex (const char * tname);
 	void GetSprite(int type, Fl_Color back_color);
 
-	bool Selected() { return selected; }
-	void Selected(bool _val) { selected = _val; }
+	void AllowHighlight(bool enable) { allow_hl = enable; redraw(); }
+
+	bool Highlighted() const { return allow_hl && highlighted; }
+
+	bool Selected() const { return selected; }
+	void Selected(bool _val);
 
 private:
 	// FLTK virtual method for drawing.
 	void draw();
 
+	void draw_highlighted();
 	void draw_selected();
 
 	void UploadRGB(const byte *buf, int depth);
 
-	void TiledImg(Img_c *img, bool has_trans);
+	void TiledImg(Img_c *img);
 };
 
+
+//------------------------------------------------------------------------
+
+
+class UI_DynInput : public Fl_Input
+{
+	/* this widget provides a secondary callback which can be
+	 * used to dynamically update a picture or description.
+	 */
+
+private:
+	Fl_Callback *callback2_;
+	void *data2_;
+
+public:
+	UI_DynInput(int X, int Y, int W, int H, const char *L = NULL);
+	virtual ~UI_DynInput();
+
+	// FLTK method for event handling
+	int handle(int event);
+
+	// main callback is done on ENTER or RELEASE, but this
+	// secondary callback is done on each change by the user.
+	void callback2(Fl_Callback *cb, void *data)
+	{
+		callback2_ = cb; data2_ = data;
+	}
+};
 
 #endif  /* __EUREKA_UI_PIC_H__ */
 

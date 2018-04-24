@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ ! -d glbsp_src ]; then
+if [ ! -d ports ]; then
   echo "Run this script from the top level."
   exit 1
 fi
@@ -23,9 +23,10 @@ cp -av Eureka.exe $dest
 cp -av common $dest/common
 cp -av games  $dest/games
 cp -av ports  $dest/ports
-mkdir         $dest/mods
 
 cp -av bindings.cfg $dest
+cp -av defaults.cfg $dest
+cp -av operations.cfg $dest
 
 cp -av misc/about_logo.png $dest/common
 
@@ -38,6 +39,6 @@ rm $dest/INSTALL.txt
 #
 # all done
 #
-echo "------------------------------------"
+echo "----------------------------------------"
 echo "zip -l -r eureka-XXX-win.zip Eureka-X.XX"
 echo ""

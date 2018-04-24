@@ -24,6 +24,8 @@
 
 class Grid_State_c
 {
+friend bool Grid_ParseUser(const char ** tokens, int num_tok);
+
 public:
 	// the actual grid step (64, 128, etc)
 	int step;
@@ -34,14 +36,12 @@ public:
 	// whether the grid is being displayed or not.
 	bool shown;
 
-	// the mode / style of grid : 0 is dotty, 1 is normal.
-	int mode;
-
 	// map coordinates for centre of canvas
 	double orig_x;
 	double orig_y;
 
 	// scale for drawing map
+	// (multiply a map coordinate by this to get a screen coord)
 	float Scale;
 
 public:
@@ -56,12 +56,39 @@ public:
 		return shown;
 	}
 
-	void MoveTo(double new_x, double new_y);
-	void Scroll(double delta_x, double delta_y);
+	void SetShown(bool enable);
+	void SetSnap (bool enable);
+
+	void ToggleShown();
+	void ToggleSnap();
 
 	// change the view so that the map coordinates (x, y)
 	// appear at the centre of the window
-	void CenterMapAt(int x, int y) { MoveTo(x, y); }
+	void MoveTo(double new_x, double new_y);
+
+	void Scroll(double delta_x, double delta_y);
+
+	// move the origin so that the focus point of the last zoom
+	// operation (scale change) is map_x/y.
+	void RefocusZoom(int map_x, int map_y, float before_Scale);
+
+	// choose the scale nearest to (and less than) the wanted one
+	void NearestScale(double want_scale);
+
+	void ScaleFromWidget(int i);
+
+	// set grid stepping size
+	void SetStep(int new_step);
+
+	void StepFromWidget(int i);
+
+	// compute new grid step from current scale
+	void StepFromScale();
+
+	// increase or decrease the grid size.  The 'delta' parameter
+	// is positive to increase it, negative to decrease it.
+	void AdjustStep (int delta);
+	void AdjustScale(int delta);
 
 	// return X/Y coordinate snapped to grid
 	// (or unchanged is the 'snap' flag is off)
@@ -84,40 +111,11 @@ public:
 
 	// interface with UI_Infobar widget...
 	static const char *scale_options();
-	static const char *grid_options();
+	static const char * grid_options();
 
-	void ScaleFromWidget(int i);
-	void  StepFromWidget(int i);
-
-	// compute new grid step from current scale
-	void StepFromScale();
-
-	// increase or decrease the grid size.  The 'delta' parameter
-	// is positive to increase it, negative to decrease it.
-	void AdjustStep(int delta);
-	void AdjustScale(int delta);
-
-	void SetShown(bool enable);
-	void SetSnap (bool enable);
-	void SetMode (int new_mode);
-
-	void ToggleShown();
-	void ToggleMode();
-	void ToggleSnap();
-
-	// choose the scale nearest to (and less than) the wanted one
-	void NearestScale(double want_scale);
-
-	void ScaleFromDigit(int digit);
-	void  StepFromDigit(int digit);
-
-	// move the origin so that the focus point of the last zoom
-	// operation (scale change) is map_x/y.
-	void RefocusZoom(int map_x, int map_y, float before_Scale);
-
-	// these are really private, but needed by Grid_ParseUser()
-	void DoSetGrid();
-	void DoSetScale();
+private:
+	void DoSetShown(bool   new_shown);
+	void DoSetScale(double new_scale);
 
 private:
 	static const double scale_values[];

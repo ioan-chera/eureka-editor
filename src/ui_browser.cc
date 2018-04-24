@@ -30,11 +30,10 @@
 #include "im_color.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "e_main.h"		// recent_xxx
 #include "e_things.h"
 #include "w_rawdef.h"
-#include "w_flats.h"
 #include "w_texture.h"
-#include "levels.h"
 
 
 extern std::map<std::string, Img_c *> flats;
@@ -66,6 +65,72 @@ typedef enum
 } sort_method_e;
 
 
+bool Texture_MatchPattern(const char *tex, const char *pattern)
+{
+	// Note: an empty pattern matches NOTHING
+
+	char local_pat[256];
+	local_pat[0] = 0;
+
+
+	// add '*' to the start and end of the pattern
+	// (unless it uses the ^ or $ anchors)
+
+	bool negated = false;
+	if (pattern[0] == '!')
+	{
+		pattern++;
+		negated = true;
+	}
+
+	if (pattern[0] == '^')
+		pattern++;
+	else
+		strcpy(local_pat, "*");
+
+	strcat(local_pat, pattern);
+
+	size_t len = strlen(local_pat);
+
+	if (len == 0)
+		return false;
+
+	if (local_pat[len-1] == '$')
+		local_pat[len-1] = 0;
+	else
+		strcat(local_pat, "*");
+
+	bool result = fl_filename_match(tex, local_pat) ? true : false;
+
+	return negated ? !result : result;
+}
+
+
+//
+// this sub-class of button prevents grabbing the keyboard focus,
+// which is mainly useful for the Find/Replace panel, as it needs
+// to know which input box (Find or Replace) was last active.
+//
+class Browser_Button : public Fl_Button
+{
+public:
+	Browser_Button(int X, int Y, int W, int H, const char *L) :
+		Fl_Button(X, Y, W, H, L)
+	{ }
+
+	virtual ~Browser_Button()
+	{ }
+
+	int handle(int event)
+	{
+		if (event == FL_FOCUS)
+			return 0;
+
+		return Fl_Button::handle(event);
+	}
+};
+
+
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
@@ -79,7 +144,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 {
 	end();
 
-	button = new Fl_Repeat_Button(X + 4, Y + 1, W - 8, H - 2, desc.c_str());
+	button = new Browser_Button(X + 4, Y + 1, W - 8, H - 2, desc.c_str());
 
 	button->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   	button->labelfont(FL_COURIER);
@@ -120,6 +185,12 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 Browser_Item::~Browser_Item()
 {
 	// TODO
+}
+
+
+bool Browser_Item::MatchName(const char *name) const
+{
+	return (y_stricmp(real_name.c_str(), name) == 0);
 }
 
 
@@ -203,7 +274,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	category->value(0);
 	category->labelsize(KF_fonth);
 	category->textsize(KF_fonth);
-	category->callback(filter_callback, this);
+	category->callback(category_callback, this);
 
 	add(category);
 
@@ -212,7 +283,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	search = new Fl_Input(cx, cy, 120, 22, "Match:");
 	search->align(FL_ALIGN_LEFT);
-	search->callback(filter_callback, this);
+	search->callback(search_callback, this);
 	search->when(FL_WHEN_CHANGED);
 
 	add(search);
@@ -231,7 +302,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 			alpha->callback(repop_callback, this);
 		else
 			alpha->callback(sort_callback, this);
- 
+
 		// things usually show pics (with sprite name), so want alpha
 		if (kind == 'O')
 			alpha->value(1);
@@ -297,7 +368,17 @@ void UI_Browser_Box::resize(int X, int Y, int W, int H)
 }
 
 
-void UI_Browser_Box::filter_callback(Fl_Widget *w, void *data)
+void UI_Browser_Box::category_callback(Fl_Widget *w, void *data)
+{
+	UI_Browser_Box *that = (UI_Browser_Box *)data;
+
+	that->ClearSearchBox();
+
+	that->Filter();
+}
+
+
+void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 {
 	UI_Browser_Box *that = (UI_Browser_Box *)data;
 
@@ -307,7 +388,7 @@ void UI_Browser_Box::filter_callback(Fl_Widget *w, void *data)
 
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->ShowBrowser(0);
+	main_win->BrowserMode(0);
 }
 
 
@@ -549,7 +630,7 @@ const char * TidyLineDesc(const char *name)
 
 	if (! strchr(name, '&'))
 		return name;
-	
+
 	static char buffer[FL_PATH_MAX];
 
 	char *dest = buffer;
@@ -595,7 +676,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 
 		Img_c *image = TI->second;
 
-		if (false) /* NO PICS */
+		if ((false)) /* NO PICS */
 			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name,
 					 image->width(), image->height());
 		else
@@ -901,6 +982,50 @@ void UI_Browser_Box::ClearSearchBox()
 }
 
 
+void UI_Browser_Box::JumpToTex(const char *tex_name)
+{
+	if (! (kind == 'T' || kind == 'F'))
+		return;
+
+	for (int i = 0 ; i < scroll->Children() ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		// REVIEW THIS
+		if (! item->visible())
+			continue;
+
+		if (item->MatchName(tex_name))
+		{
+			scroll->JumpToChild(i);
+			break;
+		}
+	}
+}
+
+
+void UI_Browser_Box::JumpToValue(int value)
+{
+	if (! (kind == 'O' || kind == 'S' || kind == 'L'))
+		return;
+
+	for (int i = 0 ; i < scroll->Children() ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		// REVIEW THIS
+		if (! item->visible())
+			continue;
+
+		if (item->number == value)
+		{
+			scroll->JumpToChild(i);
+			break;
+		}
+	}
+}
+
+
 void UI_Browser_Box::Scroll(int delta)
 {
 	scroll->Scroll(delta);
@@ -1092,7 +1217,7 @@ public:
 	int ComputeType() const
 	{
 		int value = 0;
-		
+
 		for (int i = 0 ; i < num_items ; i++)
 		{
 			if (items[i]->active())
@@ -1308,7 +1433,7 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->ShowBrowser(0);
+	main_win->BrowserMode(0);
 }
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
@@ -1363,7 +1488,7 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 		"Textures",
 		"Flats",
 		"Things",
-		"Line Types",
+		"Line Specials",
 		"Sector Types"
 	};
 
@@ -1447,6 +1572,20 @@ void UI_Browser::SetActive(int new_active)
 }
 
 
+char UI_Browser::GetMode() const
+{
+	switch (active)
+	{
+		case 0:  return 'T';
+		case 1:  return 'F';
+		case 2:  return 'O';
+		case 3:  return 'L';
+		case 4:  return 'S';
+		default: return 'G';
+	}
+}
+
+
 void UI_Browser::ChangeMode(char new_mode)
 {
 	switch (new_mode)
@@ -1489,6 +1628,24 @@ void UI_Browser::NewEditMode(obj_type_e edit_mode)
 		default:
 			/* no change */
 			break;
+	}
+}
+
+
+void UI_Browser::JumpToTex(const char *tex_name)
+{
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->JumpToTex(tex_name);
+	}
+}
+
+
+void UI_Browser::JumpToValue(int value)
+{
+	if (active < ACTIVE_GENERALIZED)
+	{
+		browsers[active]->JumpToValue(value);
 	}
 }
 
@@ -1538,7 +1695,7 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
-		main_win->ShowBrowser('/');
+		main_win->BrowserMode('/');
 
 		force_recent = true;
 	}
@@ -1565,7 +1722,7 @@ bool UI_Browser_Box::ParseUser(const char ** tokens, int num_tok)
 
 	if (num_tok < 3)
 		return false;
-	
+
 	if (strcmp(tokens[0], "browser") != 0)
 		return false;
 
@@ -1627,7 +1784,7 @@ bool UI_Browser::ParseUser(const char ** tokens, int num_tok)
 {
 	if (strcmp(tokens[0], "open_browser") == 0 && num_tok >= 2)
 	{
-		main_win->ShowBrowser(tokens[1][0]);
+		main_win->BrowserMode(tokens[1][0]);
 		return true;
 	}
 

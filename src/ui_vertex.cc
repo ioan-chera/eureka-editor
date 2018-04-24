@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,15 +21,24 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
+#include "e_main.h"
 #include "m_game.h"
 #include "w_rawdef.h"
+
+
+// config items  [ TODO ]
+int vertex_bump_small  = 1;
+int vertex_bump_medium = 4;
+int vertex_bump_large  = 16;
+
+
+extern const char ** arrow_pixmaps[8];
 
 
 //
 // UI_VertexBox Constructor
 //
-UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) : 
+UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -42,16 +51,14 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	W -= 12;
 	H -= 10;
 
-	int MX = X + W/2;
-
 
 	which = new UI_Nombre(X+6, Y, W-12, 28, "Vertex");
 
-	Y += which->h() + 4;
+	Y += which->h() + 8;
 
 
-	pos_x = new Fl_Int_Input(X  + 44, Y, 75, 24, "x: ");
-	pos_y = new Fl_Int_Input(MX + 14, Y, 75, 24, "y: ");
+	pos_x = new Fl_Int_Input(X + 64, Y,      75, 24, "x: ");
+	pos_y = new Fl_Int_Input(X + 64, Y + 28, 75, 24, "y: ");
 
 	pos_x->align(FL_ALIGN_LEFT);
 	pos_y->align(FL_ALIGN_LEFT);
@@ -59,12 +66,32 @@ UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
 	pos_x->callback(x_callback, this);
 	pos_y->callback(y_callback, this);
 
-	Y += pos_y->h() + 4;
 
+	int MX = X + W*2/3;
 
-	resizable(NULL);
+	move_left = new Fl_Button(MX - 30, Y + 14, 24, 24);
+	move_left->image(new Fl_Pixmap(arrow_pixmaps[4]));
+	move_left->align(FL_ALIGN_CENTER);
+	move_left->callback(button_callback, this);
+
+	move_up = new Fl_Button(MX, Y, 24, 24);
+	move_up->image(new Fl_Pixmap(arrow_pixmaps[2]));
+	move_up->align(FL_ALIGN_CENTER);
+	move_up->callback(button_callback, this);
+
+	move_down = new Fl_Button(MX, Y + 28, 24, 24);
+	move_down->image(new Fl_Pixmap(arrow_pixmaps[6]));
+	move_down->align(FL_ALIGN_CENTER);
+	move_down->callback(button_callback, this);
+
+	move_right = new Fl_Button(MX + 30, Y + 14, 24, 24);
+	move_right->image(new Fl_Pixmap(arrow_pixmaps[0]));
+	move_right->align(FL_ALIGN_CENTER);
+	move_right->callback(button_callback, this);
 
 	end();
+
+	resizable(NULL);
 }
 
 
@@ -94,10 +121,11 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeVT(*it, Vertex::F_X, new_x);
 
+		BA_Message("edited X of", &list);
 		BA_End();
 	}
 }
@@ -114,10 +142,53 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeVT(*it, Vertex::F_Y, new_y);
 
+		BA_Message("edited Y of", &list);
+		BA_End();
+	}
+}
+
+
+void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
+{
+	UI_VertexBox *box = (UI_VertexBox *)data;
+
+	int dx = 0;
+	int dy = 0;
+
+	if (w == box->move_left)  dx = -1;
+	if (w == box->move_right) dx = +1;
+	if (w == box->move_up)    dy = +1;
+	if (w == box->move_down)  dy = -1;
+
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+	int step = vertex_bump_medium;
+
+	if (mod & MOD_SHIFT)
+		step = vertex_bump_small;
+	else if (mod & MOD_COMMAND)
+		step = vertex_bump_large;
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (GetCurrentObjects(&list))
+	{
+		BA_Begin();
+
+		for (list.begin(&it); !it.at_end(); ++it)
+		{
+			const Vertex *V = Vertices[*it];
+
+			BA_ChangeVT(*it, Vertex::F_X, V->x + dx * step);
+			BA_ChangeVT(*it, Vertex::F_Y, V->y + dy * step);
+		}
+
+		BA_Message("adjusted", &list);
 		BA_End();
 	}
 }

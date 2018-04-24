@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -66,7 +66,14 @@ public:
 	//   4 : scroll to end
 	void Scroll(int delta);
 
+	// scroll so that a certain child widget can be seen.
+	// currently it is placed at top of scroll area, or as close
+	// as possible.
+	void JumpToChild(int i);
+
 private:
+	void ScrollByPixels(int pixels);
+
 	void do_scroll();
 	void calc_extents();
 	void reposition_all(int start_y);

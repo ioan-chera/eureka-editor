@@ -45,7 +45,12 @@ private:
 	{
 		static char filename[FL_PATH_MAX];
 
+		// FIXME : use this location for all platforms
+#ifdef WIN32
+		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", install_dir);
+#else
 		snprintf(filename, sizeof(filename), "%s/about_logo.png", install_dir);
+#endif
 		filename[FL_PATH_MAX-1] = 0;
 
 		if (FileExists(filename))
@@ -95,8 +100,8 @@ const char *UI_About::Text1 =
 
 
 const char *UI_About::Text2 =
-	"Copyright (C) 2001-2016 Andrew Apted, et al\n"
-	"Copyright (C) 2014-2015 Ioan Chera                \n"
+	"Copyright (C) 2001-2017 Andrew Apted, et al\n"
+	"Copyright (C) 2014-2017 Ioan Chera                \n"
 	"Copyright (C) 1997-2003 André Majorel, et al\n"
 	"\n"
 	"This program is free software, and may be\n"
@@ -188,7 +193,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	cy += (H - cy - bh) / 2 - 6;
 
-	Fl_Color but_color = fl_rgb_color(128, 128, 255);
+	Fl_Color but_color = fl_rgb_color(128, 208, 255);
 
 	Fl_Button *button = new Fl_Button((W-10-bw)/2, cy, bw, bh, "OK!");
 	button->color(but_color, but_color);
@@ -204,6 +209,21 @@ void DLG_AboutText(void)
 	UI_About::Open();
 }
 
+
+#ifdef __APPLE__
+static void about_callback_macosx(Fl_Widget *, void *)
+{
+	UI_About::Open();
+}
+#endif
+
+
+void InitAboutDialog()
+{
+#ifdef __APPLE__
+	fl_mac_set_about(about_callback_macosx, NULL);
+#endif
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

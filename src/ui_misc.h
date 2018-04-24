@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -39,8 +39,6 @@ public:
 
 	void Run();
 
-	bool WantClose() { return want_close; }
-
 private:
 	static void    ok_callback(Fl_Widget *, void *);
 	static void close_callback(Fl_Widget *, void *);
@@ -71,8 +69,6 @@ public:
 
 	void Run();
 
-	bool WantClose() { return want_close; }
-
 private:
 	static void    ok_callback(Fl_Widget *, void *);
 	static void close_callback(Fl_Widget *, void *);
@@ -100,11 +96,38 @@ public:
 
 	void Run();
 
-	bool WantClose() { return want_close; }
+private:
+	static void    ok_callback(Fl_Widget *, void *);
+	static void close_callback(Fl_Widget *, void *);
+};
+
+
+//------------------------------------------------------------------------
+
+class UI_JumpToDialog : public UI_Escapable_Window
+{
+private:
+	Fl_Int_Input *input;
+
+	Fl_Button *ok_but;
+	Fl_Button *cancel_but;
+
+	bool want_close;
+
+	int limit;
+	int result;
+
+public:
+	UI_JumpToDialog(const char *_objname, int _limit);
+	virtual ~UI_JumpToDialog();
+
+	// returns the typed number, or -1 if cancelled
+	int Run();
 
 private:
 	static void    ok_callback(Fl_Widget *, void *);
 	static void close_callback(Fl_Widget *, void *);
+	static void input_callback(Fl_Widget *, void *);
 };
 
 

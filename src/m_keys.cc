@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013-2015 Andrew Apted
+//  Copyright (C) 2013-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -29,6 +29,13 @@ const char * EXEC_Flags[MAX_EXEC_PARAM];
 
 int EXEC_Errno;
 
+keycode_t EXEC_CurKey;
+
+
+// this fake mod represents the "LAX-" prefix and is NOT used
+// anywhere except in the key_binding_t structure.
+#define MOD_LAX_SHIFTCTRL	FL_SCROLL_LOCK
+
 
 static std::vector< editor_command_t * > all_commands;
 
@@ -47,8 +54,29 @@ static key_context_e ContextFromName(const char *name)
 }
 
 
-/* this should only be called during startup */
-void M_RegisterCommand(const char *name, command_func_t func)
+static const char * CalcGroupName(const char *given, key_context_e ctx)
+{
+	if (given)
+		return given;
+
+	switch (ctx)
+	{
+		case KCTX_Line:    return "Line";
+		case KCTX_Sector:  return "Sector";
+		case KCTX_Thing:   return "Thing";
+		case KCTX_Vertex:  return "Vertex";
+		case KCTX_Render:  return "3D View";
+		case KCTX_Browser: return "Browser";
+
+		default: return "General";
+	}
+}
+
+
+//
+// this should only be called during startup
+//
+void M_RegisterCommand(const char *name, command_func_t func, const char *group_name)
 {
 	editor_command_t *cmd = new editor_command_t;
 
@@ -56,13 +84,17 @@ void M_RegisterCommand(const char *name, command_func_t func)
 	cmd->func = func;
 	cmd->flag_list = NULL;
 	cmd->keyword_list = NULL;
+
 	cmd->req_context = ContextFromName(name);
+	cmd->group_name  = CalcGroupName(group_name, cmd->req_context);
 
 	all_commands.push_back(cmd);
 }
 
 
-/* this should only be called during startup */
+//
+// this should only be called during startup
+//
 void M_RegisterCommandList(editor_command_t * list)
 {
 	// the structures are used directly
@@ -70,6 +102,7 @@ void M_RegisterCommandList(editor_command_t * list)
 	for ( ; list->name ; list++)
 	{
 		list->req_context = ContextFromName(list->name);
+		list->group_name  = CalcGroupName(list->group_name, list->req_context);
 
 		all_commands.push_back(list);
 	}
@@ -90,7 +123,7 @@ const editor_command_t * LookupEditorCommand(int idx)
 {
 	if (idx >= (int)all_commands.size())
 		return NULL;
-	
+
 	return all_commands[idx];
 }
 
@@ -106,7 +139,7 @@ typedef struct
 } key_mapping_t;
 
 
-static key_mapping_t key_map[] =
+static const key_mapping_t key_map[] =
 {
 	{ ' ',			"SPACE" },
 	{ FL_BackSpace,	"BS" },
@@ -149,8 +182,10 @@ static key_mapping_t key_map[] =
 	{ FL_Favorites,	"FAVORITES" },
 
 	// special stuff (not in FLTK)
-	{ FL_WheelUp,   "WHEEL_UP" },
-	{ FL_WheelDn,   "WHEEL_DN" },
+	{ FL_WheelUp,    "WHEEL_UP" },
+	{ FL_WheelDown,  "WHEEL_DOWN" },
+	{ FL_WheelLeft,  "WHEEL_LEFT" },
+	{ FL_WheelRight, "WHEEL_RIGHT" },
 
 	// some synonyms for user input
 	{ ' ',			"SPC" },
@@ -166,14 +201,37 @@ static key_mapping_t key_map[] =
 };
 
 
-/* returns zero (an invalid key) if parsing fails */
+bool is_mouse_wheel(keycode_t key)
+{
+	key &= FL_KEY_MASK;
+
+	return (FL_WheelUp <= key && key <= FL_WheelRight);
+}
+
+bool is_mouse_button(keycode_t key)
+{
+	key &= FL_KEY_MASK;
+
+	return (FL_Button < key && key <= FL_Button + 8);
+}
+
+
+//
+// returns zero (an invalid key) if parsing fails
+//
 keycode_t M_ParseKeyString(const char *str)
 {
 	int key = 0;
 
+	// for MOD_COMMAND, accept both CMD and CTRL prefixes
+
 	if (y_strnicmp(str, "CMD-", 4) == 0)
 	{
 		key |= MOD_COMMAND;  str += 4;
+	}
+	else if (y_strnicmp(str, "CTRL-", 5) == 0)
+	{
+		key |= MOD_COMMAND;  str += 5;
 	}
 	else if (y_strnicmp(str, "META-", 5) == 0)
 	{
@@ -187,6 +245,14 @@ keycode_t M_ParseKeyString(const char *str)
 	{
 		key |= MOD_SHIFT;  str += 6;
 	}
+	else if (y_strnicmp(str, "LAX-", 4) == 0)
+	{
+		key |= MOD_LAX_SHIFTCTRL;  str += 4;
+	}
+
+	// convert uppercase letter --> lowercase + MOD_SHIFT
+	if (strlen(str) == 1 && str[0] >= 'A' && str[0] <= 'Z')
+		return MOD_SHIFT | (unsigned char) tolower(str[0]);
 
 	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
@@ -230,7 +296,7 @@ static const char * BareKeyName(keycode_t key)
 		return buffer;
 	}
 
-	if (FL_Button < key && key <= FL_Button + 20)
+	if (is_mouse_button(key))
 	{
 		sprintf(buffer, "MOUSE%d", key - FL_Button);
 		return buffer;
@@ -255,12 +321,35 @@ static const char * BareKeyName(keycode_t key)
 }
 
 
-static const char *ModName(keycode_t mod)
+static const char *ModName_Dash(keycode_t mod)
 {
+#ifdef __APPLE__
 	if (mod & MOD_COMMAND) return "CMD-";
+#else
+	if (mod & MOD_COMMAND) return "CTRL-";
+#endif
 	if (mod & MOD_META)    return "META-";
 	if (mod & MOD_ALT)     return "ALT-";
 	if (mod & MOD_SHIFT)   return "SHIFT-";
+
+	if (mod & MOD_LAX_SHIFTCTRL) return "LAX-";
+
+	return "";
+}
+
+
+static const char *ModName_Space(keycode_t mod)
+{
+#ifdef __APPLE__
+	if (mod & MOD_COMMAND) return "CMD ";
+#else
+	if (mod & MOD_COMMAND) return "CTRL ";
+#endif
+	if (mod & MOD_META)    return "META ";
+	if (mod & MOD_ALT)     return "ALT ";
+	if (mod & MOD_SHIFT)   return "SHIFT ";
+
+	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
 
 	return "";
 }
@@ -270,7 +359,16 @@ const char * M_KeyToString(keycode_t key)
 {
 	static char buffer[200];
 
-	strcpy(buffer, ModName(key));
+	// convert SHIFT + letter --> uppercase letter
+	if ((key & MOD_ALL_MASK) == MOD_SHIFT &&
+		(key & FL_KEY_MASK)  <  127 &&
+		isalpha(key & FL_KEY_MASK))
+	{
+		sprintf(buffer, "%c", toupper(key & FL_KEY_MASK));
+		return buffer;
+	}
+
+	strcpy(buffer, ModName_Dash(key));
 
 	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
 
@@ -288,23 +386,11 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 
 	// make mouse buttons separate from everything else
 
-	if ((A >= FL_Button && A <= FL_Button + 20) || A == FL_WheelUp || A == FL_WheelDn)
+	if (is_mouse_button(A) || is_mouse_wheel(A))
 		A += 0x10000;
 
-	if ((B >= FL_Button && B <= FL_Button + 20) || B == FL_WheelUp || B == FL_WheelDn)
+	if (is_mouse_button(B) || is_mouse_wheel(B))
 		B += 0x10000;
-
-	// we want lower- and uppercase of a key together (e.g. a + A)
-
-	if (A < 256 && isupper(A))
-	{
-		A = tolower(A); A_mod |= MOD_SHIFT;
-	}
-
-	if (B < 256 && isupper(B))
-	{
-		B = tolower(B); B_mod |= MOD_SHIFT;
-	}
 
 	// base key is most important
 
@@ -331,9 +417,6 @@ key_context_e M_ParseKeyContext(const char *str)
 	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
 	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
 
-// TEMPORARY for compatibility
-	if (y_stricmp(str, "global")  == 0) return KCTX_General;
-
 	return KCTX_NONE;
 }
 
@@ -350,8 +433,7 @@ const char * M_KeyContextString(key_context_e context)
 		case KCTX_Thing:   return "thing";
 		case KCTX_Vertex:  return "vertex";
 
-		default:
-			break;
+		default: break;
 	}
 
 	return "INVALID";
@@ -359,8 +441,6 @@ const char * M_KeyContextString(key_context_e context)
 
 
 //------------------------------------------------------------------------
-
-#define MAX_BIND_LENGTH  32
 
 typedef struct
 {
@@ -380,6 +460,20 @@ typedef struct
 
 static std::vector<key_binding_t> all_bindings;
 static std::vector<key_binding_t> install_binds;
+
+
+bool M_IsKeyBound(keycode_t key, key_context_e context)
+{
+	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	{
+		key_binding_t& bind = all_bindings[i];
+
+		if (bind.key == key && bind.context == context)
+			return true;
+	}
+
+	return false;
+}
 
 
 void M_RemoveBinding(keycode_t key, key_context_e context)
@@ -437,6 +531,15 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 
 
 	temp.cmd = FindEditorCommand(tokens[2]);
+
+	// backwards compatibility
+	if (! temp.cmd)
+	{
+		if (y_stricmp(tokens[2], "GRID_Step") == 0)
+			temp.cmd = FindEditorCommand("GRID_Bump");
+		else if (y_stricmp(tokens[2], "Check") == 0)
+			temp.cmd = FindEditorCommand("MapCheck");
+	}
 
 	if (! temp.cmd)
 	{
@@ -496,7 +599,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		if (! line)
 			break;
-		
+
 		StringRemoveCRLF(line);
 
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, false /* do_strings */);
@@ -712,13 +815,13 @@ public:
 	{
 		if (column == 'c' && k1.context != k2.context)
 			return k1.context > k2.context;
-			
+
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
 
 ///		if (column == 'k' && k1.context != k2.context)
 ///			return k1.context > k2.context;
-			
+
 		if (k1.cmd != k2.cmd)
 			return y_stricmp(k1.cmd->name, k2.cmd->name) < 0;
 
@@ -825,11 +928,25 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	static char buffer[600];
 
-	sprintf(buffer, "%s%6.6s%-9.9s %-10.10s %.30s",
+	// we prefer the UI to say "3D view" instead of "render"
+	const char *ctx_name = M_KeyContextString(bind.context);
+	if (y_stricmp(ctx_name, "render") == 0)
+		ctx_name = "3D view";
+
+	// display SHIFT + letter as an uppercase letter
+	keycode_t tempk = bind.key;
+	if ((tempk & MOD_ALL_MASK) == MOD_SHIFT &&
+		(tempk & FL_KEY_MASK)  <  127 &&
+		isalpha(tempk & FL_KEY_MASK))
+	{
+		tempk = toupper(tempk & FL_KEY_MASK);
+	}
+
+	sprintf(buffer, "%s%6.6s%-10.10s %-9.9s %.32s",
 			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName(bind.key),
-			changing_key ? "\077?>" : BareKeyName(bind.key & FL_KEY_MASK),
-			M_KeyContextString(bind.context),
+			changing_key ? "<?"     : ModName_Space(tempk),
+			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
+			ctx_name,
 			M_StringForFunc(index) );
 
 	return buffer;
@@ -873,7 +990,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
 
-	if (num_tok == 0)
+	if (num_tok <= 0)
 		return "Missing function name";
 
 	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
@@ -893,7 +1010,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 		sprintf(error_msg, "%s can only be used in %s mode",
 		        tokens[0], mode);
-		
+
 		StringFree(mode);
 
 		return error_msg;
@@ -995,22 +1112,12 @@ keycode_t M_TranslateKey(int key, int state)
 	if (key == '\t') key = FL_Tab;
 	if (key == '\b') key = FL_BackSpace;
 
-	// modifier logic -- only allow a single one 
+	// modifier logic -- only allow a single one
 
 	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
 	else if (state & MOD_META)    key |= MOD_META;
 	else if (state & MOD_ALT)     key |= MOD_ALT;
-	else if (state & MOD_SHIFT)
-	{
-		// Note: SHIFT + digit is kept that way (rather than get '!', '@' etc)
-
-		if (key < 127 && isalpha(key))
-			key = toupper(key);
-		else if (key < 127 && ispunct(key) && strlen(Fl::event_text()) == 1)
-			key = Fl::event_text()[0];
-		else
-			key |= MOD_SHIFT;
-	}
+	else if (state & MOD_SHIFT)   key |= MOD_SHIFT;
 
 	return key;
 }
@@ -1049,9 +1156,14 @@ bool Exec_HasFlag(const char *flag)
 }
 
 
+extern void Debug_CheckUnusedStuff();
+
+
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
 	(* cmd->func)();
+
+//	Debug_CheckUnusedStuff();
 }
 
 
@@ -1071,41 +1183,64 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	{
 		key_binding_t& bind = all_bindings[i];
 
-		if (bind.key == key && bind.context == context)
+		SYS_ASSERT(bind.cmd);
+
+		if (bind.context != context)
+			continue;
+
+		// match modifiers "loosely" for certain commands (esp. NAV_xxx)
+		bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
+
+		keycode_t key1 = key;
+		keycode_t key2 = bind.key;
+
+		if (is_lax)
 		{
-			int p_idx = 0;
-			int f_idx = 0;
-
-			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-			{
-				if (! bind.param[p][0])
-					break;
-
-				// separate flags from normal parameters
-				if (bind.param[p][0] == '/')
-					EXEC_Flags[f_idx++] = bind.param[p];
-				else
-					EXEC_Param[p_idx++] = bind.param[p];
-			}
-
-			DoExecuteCommand(bind.cmd);
-
-			return true;
+			key1 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
+			key2 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
 		}
+
+		if (key1 != key2)
+			continue;
+
+		// found a match!
+
+		int p_idx = 0;
+		int f_idx = 0;
+
+		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+		{
+			if (! bind.param[p][0])
+				break;
+
+			// separate flags from normal parameters
+			if (bind.param[p][0] == '/')
+				EXEC_Flags[f_idx++] = bind.param[p];
+			else
+				EXEC_Param[p_idx++] = bind.param[p];
+		}
+
+		EXEC_CurKey = key;
+
+		// commands can test for LAX mode via a special flag
+		if (is_lax && f_idx < MAX_EXEC_PARAM)
+		{
+			EXEC_Flags[f_idx++] = "/LAX";
+		}
+
+		DoExecuteCommand(bind.cmd);
+
+		return true;
 	}
 
 	return false;
 }
 
 
-bool ExecuteCommand(const char *name, const char *param1,
-                    const char *param2, const char *param3)
+bool ExecuteCommand(const editor_command_t *cmd,
+					const char *param1, const char *param2,
+                    const char *param3, const char *param4)
 {
-	const editor_command_t * cmd = FindEditorCommand(name);
-
-	if (! cmd)
-		return false;
-	
 	Status_Clear();
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
@@ -1114,11 +1249,24 @@ bool ExecuteCommand(const char *name, const char *param1,
 		EXEC_Flags[p] = "";
 	}
 
-	EXEC_Param[0] = param1;
-	EXEC_Param[1] = param2;
-	EXEC_Param[2] = param3;
+	// separate flags from normal parameters
+	int p_idx = 0;
+	int f_idx = 0;
 
-	EXEC_Errno = 0;
+	if (param1[0] == '/') EXEC_Flags[f_idx++] = param1;
+	else if (param1[0])   EXEC_Param[p_idx++] = param1;
+
+	if (param2[0] == '/') EXEC_Flags[f_idx++] = param2;
+	else if (param2[0])   EXEC_Param[p_idx++] = param2;
+
+	if (param3[0] == '/') EXEC_Flags[f_idx++] = param3;
+	else if (param3[0])   EXEC_Param[p_idx++] = param3;
+
+	if (param4[0] == '/') EXEC_Flags[f_idx++] = param4;
+	else if (param4[0])   EXEC_Param[p_idx++] = param4;
+
+	EXEC_Errno  = 0;
+	EXEC_CurKey = 0;
 
 	DoExecuteCommand(cmd);
 
@@ -1126,9 +1274,22 @@ bool ExecuteCommand(const char *name, const char *param1,
 }
 
 
-/*
- *  play a fascinating tune
- */
+bool ExecuteCommand(const char *name,
+					const char *param1, const char *param2,
+					const char *param3, const char *param4)
+{
+	const editor_command_t * cmd = FindEditorCommand(name);
+
+	if (! cmd)
+		return false;
+
+	return ExecuteCommand(cmd, param1, param2, param3, param4);
+}
+
+
+//
+//  play a fascinating tune
+//
 void Beep(const char *fmt, ...)
 {
 	va_list arg_ptr;

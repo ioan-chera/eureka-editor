@@ -31,7 +31,7 @@ private:
 public:
 	UI_Nombre *which;
 
-	Fl_Int_Input *type;
+	UI_DynInput   *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
@@ -46,11 +46,11 @@ public:
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
 
-	Fl_Input *c_tex;
-	UI_Pic   *c_pic;
+	UI_DynInput *c_tex;
+	UI_Pic      *c_pic;
 
-	Fl_Input *f_tex;
-	UI_Pic   *f_pic;
+	UI_DynInput *f_tex;
+	UI_Pic      *f_pic;
 
 	Fl_Int_Input *headroom;
 
@@ -87,29 +87,35 @@ public:
 
 	void UpdateGameInfo();
 
-	void SetFlat(const char *name, int e_state);
-	void SetSectorType(int new_type);
+	// see ui_window.h for description of these two methods
+	bool ClipboardOp(char what);
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	// returns a bitmask: 1 for floor, 2 for ceiling
 	int GetSelectedPics() const;
+	int GetHighlightedPics() const;
 
 	void UnselectPics();
 
-	// this truncates the name and makes it uppercase, then returns
-	// the internalised string.
-	static int FlatFromWidget(Fl_Input *w);
-
 private:
-	void AdjustHeight(s16_t *h, int delta);
-	void AdjustLight (s16_t *L, int delta);
+	void CB_Copy();
+	void CB_Paste(int new_tex);
+	void CB_Cut();
 
-	static void height_callback(Fl_Widget *, void *);
-	static void   room_callback(Fl_Widget *, void *);
-	static void    tex_callback(Fl_Widget *, void *);
-	static void   type_callback(Fl_Widget *, void *);
-	static void  light_callback(Fl_Widget *, void *);
-	static void    tag_callback(Fl_Widget *, void *);
-	static void button_callback(Fl_Widget *, void *);
+	void SetFlat(const char *name, int e_state);
+	void SetSectorType(int new_type);
+
+	static void   height_callback(Fl_Widget *, void *);
+	static void headroom_callback(Fl_Widget *, void *);
+
+	static void     tex_callback(Fl_Widget *, void *);
+	static void  dyntex_callback(Fl_Widget *, void *);
+	static void    type_callback(Fl_Widget *, void *);
+	static void dyntype_callback(Fl_Widget *, void *);
+
+	static void   light_callback(Fl_Widget *, void *);
+	static void     tag_callback(Fl_Widget *, void *);
+	static void  button_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_SECTOR_H__ */

@@ -1,0 +1,117 @@
+
+CHANGES IN Eureka 1.21
+======================
+
+(Since version 1.11)
+
+
+Editing:
+
++  line drawing now done using RMB (MOUSE3) button
+
++  improved drag behavior, never modify the current selection
+
++  select/copy/paste textures in the 3D view
+
++  an operation menu, bound to F1 key or CTRL-RMB
+
++  undo/redo: show what was undone in the status area
+
+-  improved ability to highlight/select very short linedefs
+-  improved insertion of sectors, less "area not closed" errors
+-  skew (shear) objects with the mouse, bound to 'K' key
+-  "dotty" grid is a preference, rather than three-way toggle
+-  default edit mode is now Vertices, and grid-snapping OFF
+
+-  linedef/sector/thing descriptions update as the user types
+-  arrow buttons in Vertex panel for fine adjustments
+-  auto-align linedefs on the 2D map, bound to 'a' key
+-  entering a negative "Length" in Linedef panel moves the start
+   vertex of the line instead of the end vertex
+
+
+General:
+
++  improved BSP code, can build nodes for a map on each save,
+   building all nodes no longer resets the undo/redo history,
+   more preference settings, ability to disable GL nodes,
+   and support for ZDoom uncompressed node format (XNOD)
+
++  "Test Map" command for testing your map in the game
+
++  sprite rendering on the 2D canvas (in Things mode)
+
++  a mode to show sound propagation
+
+-  a new "File/Copy Map" command
+-  a better dialog for "File / Open Map" command
+-  a better dialog for "JumpToObject" command
+-  a "Reset All Settings" button in the preferences dialog
+
+-  find/replace: added a "Restrict to Selection" filter
+-  find/replace: better way to choose textures/things
+-  changing categories in the browser clears the search box
+-  increased number of remembered recent files
+-  better default directory for file chooser dialogs
+-  more useful info bar in the 3D view
+
+
+Games and Ports:
+
++  properly limit which ports can be used with each game
+
++  ZDoom definition file (thanks to Slade3)
+
++  STRIFE support (based on the Slade3 config)
+
++  support TX_START/TX_END textures, including PNG and TGA format
+
+-  find sprites outside of S_START/S_END (except in vanilla)
+
+-  support for the Harmony TC
+-  support for Doom-in-Hexen mapping
+-  added "MBF" as a separate port
+
+
+Key System:
+
++  mouse buttons (and wheel) use the key binding system
+
++  smooth navigation for the 2D and 3D views
+
+-  allow key bindings to override hard-coded menu shortcuts
+-  bindable commands for all the functions in the menus
+-  use F1..F10 function keys for various menu shortcuts
+-  improved key binding dialog in the preferences
+
+-  changed scaling and rotation to the 'r' key (was MOUSE2)
+-  changed map panning to use MMB (MOUSE2) or the 'a' key
+-  changed browse-textures back to 'T' key (was 'X')
+-  changed grid toggle to the 'g' key
+
+-  Zoom command supports a "/center" flag
+-  LIN_Flip command was simplified with a "/force" flag
+-  Enlarge and Shrink commands support fractional values
+-  Gamma command removed, using "Toggle gamma" instead
+
+
+Bugs Fixed:
+
++  fixed problem of unable to split lines close to an end-point
+
+-  fixed problem of deleting a loop of linedefs inside another
+   sector could sometimes delete that outer sector too
+
+-  fixed unwanted rail texture when splitting a sector and the
+   texture name began with '_' or '#' (such as "_WALL").
+
+-  fixed inaccurate criss-cross linedef detection
+-  fixed rendering of unpegged lowers under sky ceilings
+-  fixed textures in Linedef panel not updating after undo or redo
+-  fixed exporting to keep the iwad/port/resources of target wad
+
+-  fixed panel stuck on a highlighted object when going to 3D view
+-  fixed unknown texture "FIX" button to not change "-" textures
+-  fixed bad sidedef fallback when loading a map with no sectors
+-  fixed default pixel-aspect to be 0.83, matching original DOOM
+

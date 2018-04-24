@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2012 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -220,9 +220,10 @@ void FilenameStripBase(char *buffer)
 }
 
 
-/* takes the basename in 'filename' and prepends the path from 'othername'.
- * returns a newly allocated string.
- */
+//
+// takes the basename in 'filename' and prepends the path from 'othername'.
+// returns a newly allocated string.
+//
 const char *FilenameReposition(const char *filename, const char *othername)
 {
 	filename = fl_filename_name(filename);
@@ -246,6 +247,32 @@ const char *FilenameReposition(const char *filename, const char *othername)
 }
 
 
+void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
+{
+	size_t len = (size_t)(FindBaseName(filename) - filename);
+
+	// remove trailing slash (except when following "C:" or similar)
+	if (len >= 1 &&
+		(filename[len-1] == '/' || filename[len-1] == '\\') &&
+		! (len >= 2 && filename[len-2] == ':'))
+	{
+		len--;
+	}
+
+	if (len == 0)
+	{
+		strcpy(dest, ".");
+		return;
+	}
+
+	if (len >= maxsize)
+		len =  maxsize - 1;
+
+	strncpy(dest, filename, len);
+	dest[len] = 0;
+}
+
+
 bool FileCopy(const char *src_name, const char *dest_name)
 {
 	char buffer[1024];
@@ -264,7 +291,7 @@ bool FileCopy(const char *src_name, const char *dest_name)
 	while (true)
 	{
 		size_t rlen = fread(buffer, 1, sizeof(buffer), src);
-		if (rlen <= 0)
+		if (rlen == 0)
 			break;
 
 		size_t wlen = fwrite(buffer, 1, rlen, dest);
@@ -306,7 +333,7 @@ bool FileDelete(const char *filename)
 
 
 bool FileChangeDir(const char *dir_name)
-{ 
+{
 #ifdef WIN32
 	return (::SetCurrentDirectory(dir_name) != 0);
 
@@ -446,7 +473,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 #ifdef WIN32
 
 	// this is a bit clunky.  We set the current directory to the
-	// target and use FindFirstFile with "*.*" as the pattern. 
+	// target and use FindFirstFile with "*.*" as the pattern.
 	// Afterwards we restore the current directory.
 
 	char old_dir[MAX_PATH+1];
@@ -487,7 +514,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		if (strcmp(fdata.cFileName, ".")  == 0 ||
 				strcmp(fdata.cFileName, "..") == 0)
 		{
-			// skip the funky "." and ".." dirs 
+			// skip the funky "." and ".." dirs
 		}
 		else
 		{
@@ -518,7 +545,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		if (strlen(fdata->d_name) == 0)
 			continue;
 
-		// skip the funky "." and ".." dirs 
+		// skip the funky "." and ".." dirs
 		if (strcmp(fdata->d_name, ".")  == 0 ||
 				strcmp(fdata->d_name, "..") == 0)
 			continue;

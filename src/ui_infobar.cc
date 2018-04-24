@@ -21,18 +21,19 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "editloop.h"
+#include "e_main.h"
+#include "m_config.h"
 #include "r_grid.h"
 
 
-#define SNAP_COLOR  fl_rgb_color(255, 128, 128)
-#define FREE_COLOR  fl_rgb_color(128, 255, 128)
+#define SNAP_COLOR  (gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
+#define FREE_COLOR  (gui_scheme == 2 ? fl_rgb_color(0,192,0) : fl_rgb_color(128, 255, 128))
 
 
 //
 // UI_InfoBar Constructor
 //
-UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) : 
+UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
@@ -113,7 +114,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 
 	// ---- resizable ----
- 
+
  	resizable(status);
 
 	end();
@@ -301,10 +302,10 @@ void UI_InfoBar::UpdateModeColor()
 {
 	switch (mode->value())
 	{
-		case 0: /* Things   */ mode->color(FL_MAGENTA); break;
-		case 1: /* Linedefs */ mode->color(fl_rgb_color(0,128,255)); break;
-		case 2: /* Sectors  */ mode->color(FL_YELLOW); break;
-		case 3: /* Vertices */ mode->color(fl_rgb_color(0,192,96));  break;
+		case 0: /* Things   */ mode->color(THING_MODE_COL);  break;
+		case 1: /* Linedefs */ mode->color(LINE_MODE_COL);   break;
+		case 2: /* Sectors  */ mode->color(SECTOR_MODE_COL); break;
+		case 3: /* Vertices */ mode->color(VERTEX_MODE_COL); break;
 	}
 }
 

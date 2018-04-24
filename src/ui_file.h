@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -68,14 +68,18 @@ private:
 class UI_OpenMap : public UI_Escapable_Window
 {
 private:
-	Fl_Round_Button *look_iwad;
-	Fl_Round_Button *look_res;
-	Fl_Round_Button *look_pwad;
+	enum
+	{
+		LOOK_PWad = 0,
+		LOOK_IWad,
+		LOOK_Resource
+	};
 
 	Fl_Output *pwad_name;
-	Fl_Input  *map_name;
+	Fl_Choice *look_where;
 
-	Fl_Group *button_grp;
+	Fl_Input  *map_name;
+	Fl_Group  *button_grp;
 
 	Fl_Return_Button *ok_but;
 
@@ -88,23 +92,36 @@ private:
 
 	int action;
 
-	Wad_file * result_wad;
-	Wad_file * new_pwad;
+	// the WAD file opened by the "Load" button (initially NULL)
+	Wad_file * loaded_wad;
 
-	void Populate();
-	void PopulateButtons(Wad_file *wad);
-
-	void LoadFile();
-	void SetPWAD(const char *name);
-	void CheckMapName();
+	// the WAD file which we are showing map buttons for.
+	// can be the "game_wad" or "edit_wad" globals, the "loaded_wad"
+	// field above, or NULL.
+	Wad_file * using_wad;
 
 public:
 	UI_OpenMap();
 	virtual ~UI_OpenMap();
 
-	// the 'wad' result will be NULL when cancelled.
-	// when OK and 'is_new_pwad' is set, the wad should become the edit_wad
-	void Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v);
+	// Run the dialog and return an opened wad (from Wad_file::Open)
+	// or edit_wad/game_wad, or NULL if the user cancelled.
+	//
+	// "map_v" parameter must be non-NULL, it receives the chosen map
+	// name, or set to NULL when cancelled.
+	//
+	// "did_load" is true when the user loaded a new pwad and this
+	// method returned it.  It should become the next edit_wad.
+	//
+	Wad_file * Run(const char ** map_v, bool * did_load);
+
+private:
+	void Populate();
+	void PopulateButtons();
+
+	void LoadFile();
+	void SetPWAD(const char *name);
+	void CheckMapName();
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);
@@ -127,13 +144,16 @@ public:
 	};
 
 private:
-	Fl_Choice *iwad_choice;
+	Fl_Choice *game_choice;
 	Fl_Choice *port_choice;
+	Fl_Choice *format_choice;
 
 	Fl_Output *res_name[RES_NUM];
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel;
+
+	map_format_bitset_t usable_formats;
 
 	enum
 	{
@@ -146,9 +166,11 @@ private:
 
 	static UI_ProjectSetup * _instance;  // meh!
 
-	static void   iwad_callback(Fl_Choice*, void*);
+	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
-	static void browse_callback(Fl_Button*, void*);
+	static void format_callback(Fl_Choice*, void*);
+	static void   find_callback(Fl_Button*, void*);
+	static void  setup_callback(Fl_Button*, void*);
 
 	static void  kill_callback(Fl_Button*, void*);
 	static void  load_callback(Fl_Button*, void*);
@@ -156,15 +178,20 @@ private:
 	static void close_callback(Fl_Widget*, void*);
 	static void   use_callback(Fl_Button*, void*);
 
-	void Populate();
-	void PopulateIWADs(const char *curr_iwad);
+	void PopulateIWADs();
+	void PopulatePort();
+	void PopulateMapFormat();
+	void PopulateResources();
 
 public:
 	/*
 	 * current state
 	 */
-	const char * iwad;
+	const char * game;
 	const char * port;
+
+	map_format_e map_format;
+
 	const char * res[RES_NUM];
 
 public:

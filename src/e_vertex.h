@@ -27,23 +27,23 @@
 #ifndef __EUREKA_E_VERTEX_H__
 #define __EUREKA_E_VERTEX_H__
 
-void MergeVertex(int v1, int v2, bool v1_will_be_deleted);
-
-void InsertPolygonVertices (int, int, int, int);
-
 int Vertex_FindExact(int x, int y);
-int VertexHowManyLineDefs(int v_num);
+int Vertex_HowManyLineDefs(int v_num);
+
 void Vertex_MergeList(selection_c *list);
 bool Vertex_TryFixDangler(int v_num);
 
-void VT_Merge(void);
-void VT_Disconnect(void);
+/* commands */
 
-void LIN_Disconnect(void);
-void SEC_Disconnect(void);
+void CMD_VT_Merge(void);
 
-void VT_ShapeLine(void);
-void VT_ShapeArc (void);
+void CMD_VT_Disconnect(void);
+
+void CMD_LIN_Disconnect(void);
+void CMD_SEC_Disconnect(void);
+
+void CMD_VT_ShapeLine(void);
+void CMD_VT_ShapeArc (void);
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 

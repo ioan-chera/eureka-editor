@@ -28,11 +28,10 @@
 
 #include "e_cutpaste.h"
 #include "e_linedef.h"
-#include "editloop.h"
+#include "e_main.h"
 #include "im_img.h"
-#include "levels.h"
 #include "m_game.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -55,10 +54,11 @@ bool LineDefAlreadyExists(int v1, int v2)
 }
 
 
-/* return true if adding a line between v1 and v2 would overlap an
-   existing line.  By "overlap" I mean parallel and sitting on top
-   (this does NOT test for lines crossing each other).
-*/
+//
+// return true if adding a line between v1 and v2 would overlap an
+// existing line.  By "overlap" I mean parallel and sitting on top
+// (this does NOT test for lines crossing each other).
+//
 bool LineDefWouldOverlap(int v1, int x2, int y2)
 {
 	int x1 = Vertices[v1]->x;
@@ -73,7 +73,7 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 			continue;
 
 		double a, b;
-		
+
 		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 		b = PerpDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
 
@@ -98,107 +98,26 @@ bool LineDefWouldOverlap(int v1, int x2, int y2)
 }
 
 
-/*
-  deletes all the linedefs AND unused vertices AND unused sidedefs
-*/
-void DeleteLineDefs(selection_c *lines)
+//------------------------------------------------------------------------
+
+static inline const LineDef * LD_ptr(const Obj3d_t& obj)
 {
-	selection_c  verts(OBJ_VERTICES);
-	selection_c  sides(OBJ_SIDEDEFS);
-
-	UnusedVertices(lines, &verts);
-	UnusedSideDefs(lines, &sides);
-
-	DeleteObjects(lines);
-	DeleteObjects(&verts);
-	DeleteObjects(&sides);
+	return LineDefs[obj.num];
 }
 
-
-/*
-   get the absolute height from which the textures are drawn
-*/
-
-int GetTextureRefHeight (int sidedef)
+static inline const SideDef * SD_ptr(const Obj3d_t& obj)
 {
-	int l, sector;
-	int otherside = NIL_OBJ;
+	int sd = LD_ptr(obj)->WhatSideDef(obj.side);
 
-	/* find the sidedef on the other side of the LineDef, if any */
-
-	for (l = 0 ; l < NumLineDefs ; l++)
-	{
-		if (LineDefs[l]->right == sidedef)
-		{
-			otherside = LineDefs[l]->left;
-			break;
-		}
-		if (LineDefs[l]->left == sidedef)
-		{
-			otherside = LineDefs[l]->right;
-			break;
-		}
-	}
-	/* get the Sector number */
-
-	sector = SideDefs[sidedef]->sector;
-	/* if the upper texture is displayed,
-	   then the reference is taken from the other Sector */
-	if (otherside >= 0)
-	{
-		l = SideDefs[otherside]->sector;
-		if (l > 0)
-		{
-
-			if (Sectors[l]->ceilh < Sectors[sector]->ceilh
-					&& Sectors[l]->ceilh > Sectors[sector]->floorh)
-				sector = l;
-		}
-	}
-	/* return the altitude of the ceiling */
-
-	if (sector >= 0)
-		return Sectors[sector]->ceilh; /* textures are drawn from the ceiling down */
-	else
-		return 0; /* yuck! */
-}
-
-
-// this type represents one side of a linedef
-typedef int side_on_a_line_t;
-
-static inline side_on_a_line_t soal_make(int ld, int side)
-{
-	return (ld << 1) | (side < 0 ? 1 : 0);
-}
-
-static inline int soal_ld(side_on_a_line_t zz)
-{
-	return (zz >> 1);
-}
-
-static inline const LineDef * soal_LD_ptr(side_on_a_line_t zz)
-{
-	return LineDefs[soal_ld(zz)];
-}
-
-static inline int soal_side(side_on_a_line_t zz)
-{
-	return (zz & 1) ? SIDE_LEFT : SIDE_RIGHT;
-}
-
-static inline int soal_sd(side_on_a_line_t zz)
-{
-	return soal_LD_ptr(zz)->WhatSideDef(soal_side(zz));
-}
-
-static inline const SideDef * soal_SD_ptr(side_on_a_line_t zz)
-{
-	int sd = soal_sd(zz);
 	return (sd >= 0) ? SideDefs[sd] : NULL;
 }
 
 
+// disabled this partial texture comparison, as it can lead to
+// unexpected results.  [ perhaps have an option for it? ]
+#if 1
+#define  PartialTexCmp  y_stricmp
+#else
 static int PartialTexCmp(const char *A, const char *B)
 {
 	// only compare the first 6 characters
@@ -213,177 +132,23 @@ static int PartialTexCmp(const char *A, const char *B)
 
 	return y_stricmp(A2, B2);
 }
+#endif
 
 
-static int ScoreAdjoiner(side_on_a_line_t zz, side_on_a_line_t adj,
-						 char part, int align_flags)
+static bool PartIsVisible(const Obj3d_t& obj, char part)
 {
-	const LineDef *L = soal_LD_ptr(zz);
-	const LineDef *N = soal_LD_ptr(adj);
-
-	const SideDef *LS = soal_SD_ptr(zz);
-	const SideDef *NS = soal_SD_ptr(adj);
-
-	SYS_ASSERT(LS);
-
-	// no sidedef on adjoining line?
-	if (! NS)
-		return -2;
-
-	// wrong side?
-	if (soal_side(zz) == soal_side(adj))
-	{
-		if (N->start == L->start) return -1;
-		if (N->end   == L->end)   return -1;
-	}
-	else
-	{
-		if (N->start == L->end)   return -1;
-		if (N->end   == L->start) return -1;
-	}
-
-
-	// require adjoiner is "to the left" of this sidedef
-	// [or "to the right" if the 'r' flag is present]
-
-	bool on_left = N->TouchesVertex(soal_side(zz) < 0 ? L->end : L->start);
-
-	if (align_flags & LINALIGN_Right)
-	{
-		if (on_left)
-			return -2;
-	}
-	else
-	{
-		if (! on_left)
-			return -2;
-	}
-
-	int score = 1;
-
-	// FIXME : take 'part' into account !!
-
-	// Main requirement is a matching texture.
-	// There are three cases depending on number of sides:
-	//
-	// (a) single <-> single : easy
-	//
-	// (b) double <-> double : compare lower/lower and upper/upper
-	//                         [only need one to match]
-	//
-	// (c) single <-> double : compare mid/lower and mid/upper
-	//
-	bool matched = false;
-
-	for (int what = 0 ; what < 2 ; what++)
-	{
-//???		if (what == 0 && only_U) continue;
-//???		if (what == 1 && only_L) continue;
-
-		const char *L_tex = (! L->TwoSided()) ? LS->MidTex() :
-							(what & 1)        ? LS->UpperTex() :
-							                    LS->LowerTex();
-
-		const char *N_tex = (! N->TwoSided()) ? NS->MidTex() :
-							(what & 1)        ? NS->UpperTex() :
-							                    NS->LowerTex();
-
-		if (is_null_tex(L_tex)) continue;
-		if (is_null_tex(N_tex)) continue;
-
-		if (PartialTexCmp(L_tex, N_tex) == 0)
-			matched = true;
-	}
-
-///---	// require a texture match?
-///---	if (/* strchr(flags, 't') && */  ! matched)
-///---		return -1;
-
-	if (matched)
-		score = score + 20;
-
-
-	// preference for same sector
-	if (LS->sector == NS->sector)
-		score = score + 1;
-
-	// prefer both lines to have same sided-ness
-	if (L->OneSided() == N->OneSided())
-		score = score + 5;
-
-	return score;
-}
-
-
-static side_on_a_line_t DetermineAdjoiner(side_on_a_line_t cur, char part,
-                                          int align_flags)
-{
-	// returns -1 for none
-
-	int best_adj   = -1;
-	int best_score = -1;
-
-	const LineDef *L = soal_LD_ptr(cur);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		const LineDef *N = LineDefs[n];
-
-		if (N == L)
-			continue;
-
-		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
-			continue;
-
-		for (int pass = 0 ; pass < 2 ; pass++)
-		{
-			int adj_side = pass ? SIDE_LEFT : SIDE_RIGHT;
-			int adjoiner = soal_make(n, adj_side);
-
-			int score = ScoreAdjoiner(cur, adjoiner, part, align_flags);
-
-// fprintf(stderr, "Score for %d:%d --> %d\n", n, adj_side, score);
-
-			if (score > 0 && score > best_score)
-			{
-				best_adj   = adjoiner;
-				best_score = score;
-			}
-		}
-	}
-
-	return best_adj;
-}
-
-
-static int GetTextureHeight(const char *name)
-{
-	if (is_missing_tex(name))
-		return 128;
-
-	Img_c *img = W_GetTexture(name);
-
-	if (! img)
-		return 128;
-
-	return img->height();
-}
-
-
-static bool PartIsVisible(side_on_a_line_t zz, char part)
-{
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
 
 	if (! L->TwoSided())
 		return (part == 'l');
-	
+
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (soal_side(zz) == SIDE_LEFT)
+	if (obj.side == SIDE_LEFT)
 		std::swap(front, back);
-	
+
 	// ignore sky walls
 	if (part == 'u' && is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 		return false;
@@ -405,175 +170,353 @@ static bool PartIsVisible(side_on_a_line_t zz, char part)
 }
 
 
-static char PickAdjoinerPart(side_on_a_line_t cur, char part,
-							 side_on_a_line_t adj, int align_flags)
+//
+// calculate vertical range that the given surface occupies.
+// when part is zero, we use obj.type instead.
+//
+static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
 
-	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
-
-	if (! adj_L->TwoSided())
-		return 'l';
-
-	// the adjoiner part (upper or lower) should be visible
-
-	bool lower_vis = PartIsVisible(adj, 'l');
-	bool upper_vis = PartIsVisible(adj, 'u');
-
-	if (lower_vis != upper_vis)
-		return upper_vis ? 'u' : 'l';
-	else if (! lower_vis)
-		return 'l';
-
-	// check for a matching texture
-
-	if (L->TwoSided())
-	{
-		// TODO: this logic would mean sometimes aligning an upper with
-		//       a lower (or vice versa).  This should only be done when
-		//       those parts are actually adjacent (on the Y axis).
-#if 0
-		bool lower_match = (PartialTexCmp(SD->LowerTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->UpperTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-#endif
-
-		return part;
-	}
-	else
-	{
-		bool lower_match = (PartialTexCmp(SD->MidTex(), adj_SD->LowerTex()) == 0);
-		bool upper_match = (PartialTexCmp(SD->MidTex(), adj_SD->UpperTex()) == 0);
-
-		if (lower_match != upper_match)
-			return upper_match ? 'u' : 'l';
-	}
-
-	return part;
-}
-
-
-static int CalcReferenceH(side_on_a_line_t zz, char part)
-{
-	const LineDef *L  = soal_LD_ptr(zz);
-	const SideDef *SD = soal_SD_ptr(zz);
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
 
 	if (! L->TwoSided())
 	{
-		if (! L->Right())
-			return 256;
+		if (SD)
+		{
+			*z1 = SD->SecRef()->floorh;
+			*z2 = SD->SecRef()->ceilh;
+		}
+		else
+		{
+			*z1 = *z2 = 0;
+		}
 
-		const Sector *front = L->Right()->SecRef();
+		return;
+	}
 
-		if (L->flags & MLF_LowerUnpegged)
-			return front->floorh + GetTextureHeight(SD->MidTex());
-
-		return front->ceilh;
+	if (! part)
+	{
+		if (obj.type == OB3D_Upper)
+			part = 'u';
+		else if (obj.type == OB3D_Rail)
+			part = 'r';
+		else
+			part = 'l';
 	}
 
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (soal_side(zz) == SIDE_LEFT)
+	if (obj.side == SIDE_LEFT)
 		std::swap(front, back);
 
-	if (part == 'l')
+	if (part == 'r')
 	{
-		if (! (L->flags & MLF_LowerUnpegged))
-			return back->floorh;
-
-		return front->ceilh;
+		*z1 = MAX(front->floorh, back->floorh);
+		*z2 = MIN(front->ceilh,  back->ceilh);
 	}
-	else
+	else if (part == 'u')
 	{
-		if (! (L->flags & MLF_UpperUnpegged))
-			return back->ceilh + GetTextureHeight(SD->UpperTex());
-
-		return front->ceilh;
+		*z2 = front->ceilh;
+		*z1 = MIN(*z2, back->ceilh);
+	}
+	else  // part == 'l'
+	{
+		*z1 = front->floorh;
+		*z2 = MAX(*z1, back->floorh);
 	}
 }
 
 
-static void DoAlignX(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, int align_flags)
+static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
+	// result is in the range 1..999
 
-	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *LS = SD_ptr(cur);
 
-	bool on_left = adj_L->TouchesVertex(soal_side(cur) < 0 ? L->end : L->start);
+	const LineDef *N  = LD_ptr(adj);
+	const SideDef *NS = SD_ptr(adj);
 
-	int new_offset;
+	int adj_z1, adj_z2;
+	int cur_z1, cur_z2;
+
+	PartCalcExtent(adj, 0, &adj_z1, &adj_z2);
+	PartCalcExtent(cur, 0, &cur_z1, &cur_z2);
+
+	// adjacent surface is not visible?
+	if (adj_z2 <= adj_z1)
+		return 1;
+
+	// no overlap?
+	int overlap = MIN(adj_z2, cur_z2) - MAX(adj_z1, cur_z1);
+
+	if (overlap <= 0)
+		return 2;
+
+
+	const char *adj_tex = NS->MidTex();
+
+	if (N->TwoSided())
+	{
+		if (adj.type == OB3D_Lower)
+			adj_tex = NS->LowerTex();
+		else if (adj.type == OB3D_Upper)
+			adj_tex = NS->UpperTex();
+	}
+
+	if (is_null_tex(adj_tex))
+		return 3;
+
+	const char *cur_tex = LS->MidTex();
+
+	if (L->TwoSided())
+	{
+		if (adj.type == OB3D_Lower)
+			adj_tex = LS->LowerTex();
+		else if (adj.type == OB3D_Upper)
+			adj_tex = LS->UpperTex();
+	}
+
+	if (PartialTexCmp(cur_tex, adj_tex) != 0)
+		return 4;
+
+	// return a score based on length of line shared between the
+	// two surfaces
+
+	overlap = overlap / 8;
+
+	if (overlap > 900) overlap = 900;
+
+	return 10 + overlap;
+}
+
+
+//
+// Evaluate whether the given adjacent surface is a good (or even
+// possible) candidate to align with.
+//
+// Having a matching texture is the primary component of the score.
+// The secondary component is the angle between the lines (we prefer
+// this angle to be close to 180 degrees).
+//
+// TODO : have a preference for the same sector ??
+//
+// Returns < 0 for surfaces that cannot be used.
+//
+static int ScoreAdjoiner(const Obj3d_t& adj,
+						 const Obj3d_t& cur, int align_flags)
+{
+	bool do_right = (align_flags & LINALIGN_Right) ? true : false;
+
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *LS = SD_ptr(cur);
+
+	const LineDef *N  = LD_ptr(adj);
+	const SideDef *NS = SD_ptr(adj);
+
+	// major fail by caller of Line_AlignOffsets()
+	if (! LS)
+		return -3;
+
+	// no sidedef on adjoining line?
+	if (! NS)
+		return -2;
+
+	// does the adjoiner sidedef actually mate up with the sidedef
+	// we are aligning (and is on the wanted side) ?
+
+	int v1 = (((cur.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? L->end : L->start;
+	int v2 = (((adj.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? N->start : N->end;
+
+	if (v1 != v2)
+		return -1;
+
+	/* Ok, we have a potential candidate */
+
+	int v0 = (v1 == L->end) ? L->start : L->end;
+	int v3 = (v2 == N->end) ? N->start : N->end;
+
+	double ang = LD_AngleBetweenLines(v0, v1, v3);
+
+	int score = ScoreTextureMatch(adj, cur);
+
+	score = score * 1000 + 500 - (int)fabs(ang - 180.0);
+
+	return score;
+}
+
+
+//
+// Determine the adjoining surface to align with.
+//
+// Returns -1 for none.
+//
+static void DetermineAdjoiner(Obj3d_t& result,
+							  const Obj3d_t& cur, int align_flags)
+{
+	int best_score = 0;
+
+	const LineDef *L = LD_ptr(cur);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *N = LineDefs[n];
+
+		if (N == L)
+			continue;
+
+		if (N->isZeroLength())
+			continue;
+
+		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
+			continue;
+
+		for (int side = 0 ; side < 2 ; side++)
+		for (int what = 0 ; what < 3 ; what++)
+		{
+			Obj3d_t adj;
+
+			adj.type = (obj3d_type_e)(OB3D_Lower + what);
+			adj.num  = n;
+			adj.side = side ? SIDE_LEFT : SIDE_RIGHT;
+
+			int score = ScoreAdjoiner(adj, cur, align_flags);
+
+			if (score > best_score)
+			{
+				result     = adj;
+				best_score = score;
+			}
+		}
+	}
+}
+
+
+static int CalcReferenceH(const Obj3d_t& obj)
+{
+	const LineDef *L  = LD_ptr(obj);
+	const SideDef *SD = SD_ptr(obj);
+
+	if (! L->TwoSided())
+	{
+		if (! SD)
+			return 256;
+
+		const Sector *front = SD->SecRef();
+
+		if (L->flags & MLF_LowerUnpegged)
+			return front->floorh + W_GetTextureHeight(SD->MidTex());
+
+		return front->ceilh;
+	}
+
+
+	const Sector *front = L->Right()->SecRef();
+	const Sector *back  = L->Left ()->SecRef();
+
+	if (obj.side == SIDE_LEFT)
+		std::swap(front, back);
+
+	SYS_ASSERT(front);
+	SYS_ASSERT(back);
+
+	switch (obj.type)
+	{
+		// TODO : verify if this correct for RAIL
+
+		case OB3D_Lower:
+		case OB3D_Rail:
+			if (! (L->flags & MLF_LowerUnpegged))
+				return back->floorh;
+
+			return front->ceilh;
+
+		case OB3D_Upper:
+			if (! (L->flags & MLF_UpperUnpegged))
+				return back->ceilh + W_GetTextureHeight(SD->UpperTex());
+
+			return front->ceilh;
+
+		default:
+			// should not happen
+			return 256;
+	}
+}
+
+
+static void DoAlignX(const Obj3d_t& cur,
+					 const Obj3d_t& adj, int align_flags)
+{
+	const LineDef *cur_L  = LD_ptr(cur);
+
+	const LineDef *adj_L  = LD_ptr(adj);
+	const SideDef *adj_SD = SD_ptr(adj);
+
+	bool on_left = adj_L->TouchesVertex(cur.side < 0 ? cur_L->end : cur_L->start);
+
+	int new_offset = adj_SD->x_offset;
 
 	if (on_left)
 	{
-		int adj_length = I_ROUND(adj_L->CalcLength());
-
-		new_offset = adj_SD->x_offset + adj_length;
+		new_offset += I_ROUND(adj_L->CalcLength());
 
 		if (new_offset > 0)
 			new_offset &= 1023;
 	}
 	else
 	{
-		int length = I_ROUND(L->CalcLength());
-
-		new_offset = adj_SD->x_offset - length;
+		new_offset -= I_ROUND(cur_L->CalcLength());
 
 		if (new_offset < 0)
 			new_offset = - (-new_offset & 1023);
 	}
 
-	BA_ChangeSD(soal_sd(cur), SideDef::F_X_OFFSET, new_offset);
+	int sd = cur_L->WhatSideDef(cur.side);
+
+	BA_ChangeSD(sd, SideDef::F_X_OFFSET, new_offset);
 }
 
 
-static void DoAlignY(side_on_a_line_t cur, char part,
-					 side_on_a_line_t adj, int align_flags)
+static void DoAlignY(const Obj3d_t& cur,
+					 const Obj3d_t& adj, int align_flags)
 {
-	const LineDef *L  = soal_LD_ptr(cur);
-	const SideDef *SD = soal_SD_ptr(cur);
+	const LineDef *L  = LD_ptr(cur);
+	const SideDef *SD = SD_ptr(cur);
 
-//	const LineDef *adj_L  = soal_LD_ptr(adj);
-	const SideDef *adj_SD = soal_SD_ptr(adj);
+//	const LineDef *adj_L  = LD_ptr(adj);
+	const SideDef *adj_SD = SD_ptr(adj);
 
 	bool lower_vis = PartIsVisible(cur, 'l');
 	bool upper_vis = PartIsVisible(cur, 'u');
 
+	bool lower_unpeg = (L->flags & MLF_LowerUnpegged) ? true : false;
+	bool upper_unpeg = (L->flags & MLF_UpperUnpegged) ? true : false;
 
-	// handle unpeg flags : check for windows
 
-	if (L->TwoSided() &&
-	    (lower_vis && upper_vis) &&
-	    ((L->flags & MLF_LowerUnpegged) == 0) &&
-	    ((L->flags & MLF_UpperUnpegged) == 0) &&
-	    PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0 &&
+	// check for windows (set the unpeg flags)
+
+	int new_flags = L->flags;
+
+	if ((align_flags & LINALIGN_Unpeg) &&
+		L->TwoSided() &&
+		lower_vis && upper_vis &&
+		(! lower_unpeg || ! upper_unpeg) &&
+	    (PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0) &&
 	    is_null_tex(SD->MidTex()) /* no rail */)
 	{
-		int new_flags = L->flags;
-
-		if (lower_vis) new_flags |= MLF_LowerUnpegged;
-		if (upper_vis) new_flags |= MLF_UpperUnpegged;
-
-		BA_ChangeLD(soal_ld(cur), LineDef::F_FLAGS, new_flags);
+		new_flags |= MLF_LowerUnpegged;
+		new_flags |= MLF_UpperUnpegged;
 	}
-
-	// determine which parts (upper or lower) we will use for alignment
-
-	char cur_part = part;
-	char adj_part = PickAdjoinerPart(cur, part, adj, align_flags);
 
 	// requirement: adj_tex_h + adj_y_off = cur_tex_h + cur_y_off
 
-	int cur_texh = CalcReferenceH(cur, cur_part);
-	int adj_texh = CalcReferenceH(adj, adj_part);
+	int cur_texh = CalcReferenceH(cur);
+	int adj_texh = CalcReferenceH(adj);
 
 	int new_offset = adj_texh + adj_SD->y_offset - cur_texh;
+
 
 	// normalize value  [TODO: handle BOOM non-power-of-two heights]
 
@@ -582,29 +525,256 @@ static void DoAlignY(side_on_a_line_t cur, char part,
 	else
 		new_offset &= 255;
 
-	BA_ChangeSD(soal_sd(cur), SideDef::F_Y_OFFSET, new_offset);
+
+	int sd = L->WhatSideDef(cur.side);
+
+	BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_offset);
+
+	if (new_flags != L->flags)
+	{
+		BA_ChangeLD(cur.num, LineDef::F_FLAGS, new_flags);
+	}
 }
 
 
-void LineDefs_Align(int ld, int side, int sd, char part, int align_flags)
+static void DoClearOfs(const Obj3d_t& cur, int align_flags)
 {
-	side_on_a_line_t cur = soal_make(ld, side);
+	int sd = LD_ptr(cur)->WhatSideDef(cur.side);
 
-	side_on_a_line_t adj = DetermineAdjoiner(cur, part, align_flags);
+	if (sd < 0)  // should not happen
+		return;
 
-	if (adj < 0)
+	if (align_flags & LINALIGN_X)
 	{
-		Beep("No nearby wall to align with");
+		// when the /right flag is used, make the texture end at the right side
+		// (whereas zero makes it begin at the left side)
+		if (align_flags & LINALIGN_Right)
+			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength()));
+		else
+			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+	}
+
+	if (align_flags & LINALIGN_Y)
+		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+}
+
+
+//
+// Align the X and/or Y offets on the given surface.
+//
+// The given flags control which stuff to change, and where
+// to look for the surface to align with.
+//
+bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
+{
+	if (align_flags & LINALIGN_Clear)
+	{
+		DoClearOfs(obj, align_flags);
+		return true;
+	}
+
+	Obj3d_t adj;
+
+	DetermineAdjoiner(adj, obj, align_flags);
+
+	if (! adj.valid())
+		return false;
+
+	if (align_flags & LINALIGN_X)
+		DoAlignX(obj, adj, align_flags);
+
+	if (align_flags & LINALIGN_Y)
+		DoAlignY(obj, adj, align_flags);
+
+	return true;
+}
+
+
+// returns true if the surface at 'k' MUST be aligned before the
+// surface at 'j'.
+static bool Align_CheckAdjacent(std::vector<Obj3d_t> & group,
+								int j, int k, bool do_right)
+{
+	const Obj3d_t& ob_j = group[j];
+	const Obj3d_t& ob_k = group[k];
+
+	int vj = 0;
+
+	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		vj = LineDefs[ob_j.num]->end;
+	else
+		vj = LineDefs[ob_j.num]->start;
+
+	int vk = 0;
+
+	if (((ob_k.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+		vk = LineDefs[ob_k.num]->start;
+	else
+		vk = LineDefs[ob_k.num]->end;
+
+	return (vj == vk);
+}
+
+
+//
+// find an unvisited surface that has no possible dependency on
+// any other unvisited surface.  In the case of loops, we pick
+// an arbitrary surface.
+//
+static int Align_PickNextSurface(std::vector<Obj3d_t> & group,
+								 const std::vector<byte>& seen, bool do_right)
+{
+	int fallback = -1;
+
+	for (int j = 0 ; j < (int)group.size() ; j++)
+	{
+		if (seen[j]) continue;
+		if (! group[j].valid()) continue;
+
+		if (fallback < 0)
+			fallback = j;
+
+		bool has_better = false;
+
+		for (int k = 0 ; k < (int)group.size() ; k++)
+		{
+			if (k == j)  continue;
+			if (seen[k]) continue;
+			if (! group[k].valid()) continue;
+
+			if (Align_CheckAdjacent(group, j, k, do_right))
+			{
+				has_better = true;
+				break;
+			}
+		}
+
+		if (! has_better)
+			return j;
+	}
+
+	// this will be -1 when there is no more surfaces left
+	return fallback;
+}
+
+
+void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags)
+{
+	// we will do each surface in the selection one-by-one,
+	// and the order is significant when doing X offsets, so
+	// mark them off via this array.
+	std::vector<byte> seen;
+
+	seen.resize(group.size());
+
+	unsigned int k;
+
+	for (k = 0 ; k < group.size() ; k++)
+		seen[k] = 0;
+
+	bool do_right = (align_flags & LINALIGN_Right) ? true : false;
+
+	for (;;)
+	{
+		// get next unvisited surface
+		int n = Align_PickNextSurface(group, seen, do_right);
+
+		if (n < 0)
+			break;
+
+		// mark it seen
+		seen[n] = 1;
+
+		Line_AlignOffsets(group[n], align_flags);
+	}
+}
+
+
+void CMD_LIN_Align()
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("no lines to align");
+		return;
+	}
+
+
+	// parse the flags
+	bool do_X = Exec_HasFlag("/x");
+	bool do_Y = Exec_HasFlag("/y");
+
+	if (! (do_X || do_Y))
+	{
+		Beep("LIN_Align: need x or y flag");
+		return;
+	}
+
+	bool do_clear = Exec_HasFlag("/clear");
+	bool do_right = Exec_HasFlag("/right");
+	bool do_unpeg = true;
+
+	int align_flags = 0;
+
+	if (do_X) align_flags = align_flags | LINALIGN_X;
+	if (do_Y) align_flags = align_flags | LINALIGN_Y;
+
+	if (do_right) align_flags |= LINALIGN_Right;
+	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
+	if (do_clear) align_flags |= LINALIGN_Clear;
+
+
+	// convert selection to group of surfaces
+
+	std::vector< Obj3d_t > group;
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		Obj3d_t obj;
+
+		obj.num = *it;
+
+		const LineDef *L = LineDefs[obj.num];
+
+		for (int pass = 0 ; pass < 2 ; pass++)
+		{
+			obj.side = pass ? SIDE_LEFT : SIDE_RIGHT;
+
+			if (L->WhatSideDef(obj.side) < 0)
+				continue;
+
+			// decide whether to use upper or lower
+			// TODO : this could be smarter....
+
+			bool lower_vis = PartIsVisible(obj, 'l');
+			bool upper_vis = PartIsVisible(obj, 'u');
+
+			if (! (lower_vis || upper_vis))
+				continue;
+
+			obj.type = lower_vis ? OB3D_Lower : OB3D_Upper;
+
+			group.push_back(obj);
+		}
+	}
+
+	if (group.empty())
+	{
+		Beep("no visible surfaces");
 		return;
 	}
 
 	BA_Begin();
 
-	if (align_flags & LINALIGN_X)
-		DoAlignX(cur, part, adj, align_flags);
+	Line_AlignGroup(group, align_flags);
 
-	if (align_flags & LINALIGN_Y)
-		DoAlignY(cur, part, adj, align_flags);
+	if (do_clear)
+		BA_Message("cleared offsets");
+	else
+		BA_Message("aligned offsets");
 
 	BA_End();
 }
@@ -662,10 +832,10 @@ void FlipLineDefGroup(selection_c& flip)
 }
 
 
-/*
-   flip one or several LineDefs
-*/
-void LIN_Flip(void)
+//
+// flip the orientation of some LineDefs
+//
+void CMD_LIN_Flip()
 {
 	selection_c list;
 
@@ -675,25 +845,46 @@ void LIN_Flip(void)
 		return;
 	}
 
-	BA_Begin();
+	bool force_it = Exec_HasFlag("/force");
 
-	bool do_verts = Exec_HasFlag("/verts");
-	bool do_sides = Exec_HasFlag("/sides");
+	BA_Begin();
 
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		if (! do_verts && ! do_sides)
-		{
-			FlipLineDef_safe(*it);
-		}
+		if (force_it)
+			FlipLineDef(*it);
 		else
-		{
-			if (do_verts) FlipLine_verts(*it);
-			if (do_sides) FlipLine_sides(*it);
-		}
+			FlipLineDef_safe(*it);
 	}
+
+	BA_MessageForSel("flipped", &list);
+
+	BA_End();
+}
+
+
+void CMD_LIN_SwapSides()
+{
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("No lines to swap sides");
+		return;
+	}
+
+	BA_Begin();
+
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		FlipLine_sides(*it);
+	}
+
+	BA_MessageForSel("swapped sides on", &list);
 
 	BA_End();
 }
@@ -706,7 +897,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	// create new linedef
 	int new_l = BA_New(OBJ_LINEDEFS);
-	
+
 	LineDef * L2 = LineDefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
@@ -780,10 +971,10 @@ static bool DoSplitLineDef(int ld)
 }
 
 
-/*
-   split one or more LineDefs in two, adding new Vertices in the middle
-*/
-void LIN_SplitHalf(void)
+//
+// split one or more LineDefs in two, adding new Vertices in the middle
+//
+void CMD_LIN_SplitHalf(void)
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -810,6 +1001,8 @@ void LIN_SplitHalf(void)
 		if (DoSplitLineDef(*it))
 			new_count++;
 	}
+
+	BA_MessageForSel("halved", &list);
 
 	BA_End();
 
@@ -890,14 +1083,14 @@ void LD_MergedSecondSideDef(int ld)
 
 	if (! is_null_tex(L->Right()->MidTex()))
 		right_tex = L->Right()->mid_tex;
-	
+
 	if (! left_tex)  left_tex = right_tex;
 	if (! right_tex) right_tex = left_tex;
 
 	// use default texture if both sides are empty
 	if (! left_tex)
 	{
-		 left_tex = BA_InternaliseString(default_mid_tex);
+		 left_tex = BA_InternaliseString(default_wall_tex);
 		right_tex = left_tex;
 	}
 
@@ -945,7 +1138,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 
 	const SideDef *SD = SideDefs[other_sd];
 
-	int new_tex = BA_InternaliseString(default_mid_tex);
+	int new_tex = BA_InternaliseString(default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -966,7 +1159,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 }
 
 
-void LIN_MergeTwo(void)
+void CMD_LIN_MergeTwo(void)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -1031,7 +1224,9 @@ void LIN_MergeTwo(void)
 
 	del_line.set(ld1);
 
-	DeleteLineDefs(&del_line);
+	DeleteObjects_WithUnused(&del_line);
+
+	BA_Message("merged two linedefs");
 
 	BA_End();
 }
@@ -1065,20 +1260,15 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 }
 
 
-static bool LineDefStartWillBeMoved(int ld, selection_c& list)
+static bool LD_StartWillBeMoved(int ld, selection_c& list)
 {
-	int start = LineDefs[ld]->start;
-
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		if (*it == ld)
-			continue;
-
 		const LineDef *L = LineDefs[*it];
 
-		if (L->end == start)
+		if (*it != ld && L->end == LineDefs[ld]->start)
 			return true;
 	}
 
@@ -1086,17 +1276,42 @@ static bool LineDefStartWillBeMoved(int ld, selection_c& list)
 }
 
 
-static int PickLineDefToExtend(selection_c& list)
+static bool LD_EndWillBeMoved(int ld, selection_c& list)
 {
-	// we want a line whose start is not going to be moved in the future
-	// (otherwise the length will be wrecked by the later change).
-	// however there could be loops, so need to always pick something.
+	selection_iterator_c it;
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+
+		if (*it != ld && L->start == LineDefs[ld]->end)
+			return true;
+	}
+
+	return false;
+}
+
+
+static int PickLineDefToExtend(selection_c& list, bool moving_start)
+{
+	// We want a line whose new length is not going to be wrecked
+	// by a change to a later linedef.  However we must handle loops!
 
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
-		if (! LineDefStartWillBeMoved(*it, list))
-			return *it;
+	{
+		if (moving_start)
+		{
+			if (! LD_EndWillBeMoved(*it, list))
+				return *it;
+		}
+		else
+		{
+			if (! LD_StartWillBeMoved(*it, list))
+				return *it;
+		}
+	}
 
 	return list.find_first();
 }
@@ -1104,10 +1319,13 @@ static int PickLineDefToExtend(selection_c& list)
 
 static void LD_SetLength(int ld, int new_len, int angle)
 {
+	// the 'new_len' parameter can be negative, which means move
+	// the start vertex instead of the end vertex.
+
 	const LineDef *L = LineDefs[ld];
 
-	double dx = new_len * cos(angle * M_PI / 32768.0);
-	double dy = new_len * sin(angle * M_PI / 32768.0);
+	double dx = abs(new_len) * cos(angle * M_PI / 32768.0);
+	double dy = abs(new_len) * sin(angle * M_PI / 32768.0);
 
 	int idx = I_ROUND(dx);
 	int idy = I_ROUND(dy);
@@ -1121,8 +1339,16 @@ static void LD_SetLength(int ld, int new_len, int angle)
 	if (idx == 0 && idy == 0)
 		idx = 1;
 
-	BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
-	BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+	if (new_len < 0)
+	{
+		BA_ChangeVT(L->start, Vertex::F_X, L->End()->x - idx);
+		BA_ChangeVT(L->start, Vertex::F_Y, L->End()->y - idy);
+	}
+	else
+	{
+		BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
+		BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+	}
 }
 
 
@@ -1149,9 +1375,11 @@ void LineDefs_SetLength(int new_len)
 
 	BA_Begin();
 
+	BA_MessageForSel("set length of", &list);
+
 	while (! list.empty())
 	{
-		int ld = PickLineDefToExtend(list);
+		int ld = PickLineDefToExtend(list, new_len < 0 /* moving_start */);
 
 		list.clear(ld);
 
@@ -1175,10 +1403,217 @@ void LD_FixForLostSide(int ld)
 	else if (! is_null_tex(L->Right()->UpperTex()))
 		tex = L->Right()->upper_tex;
 	else
-		tex = BA_InternaliseString(default_mid_tex);
+		tex = BA_InternaliseString(default_wall_tex);
 
 	BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
 }
+
+
+//
+// Compute the angle between lines AB and BC, going anticlockwise.
+// result is in degrees in the range [0, 360).
+//
+// A, B and C are VERTEX indices.
+//
+// -AJA- 2001-05-09
+//
+double LD_AngleBetweenLines(int A, int B, int C)
+{
+	int a_dx = Vertices[B]->x - Vertices[A]->x;
+	int a_dy = Vertices[B]->y - Vertices[A]->y;
+
+	int c_dx = Vertices[B]->x - Vertices[C]->x;
+	int c_dy = Vertices[B]->y - Vertices[C]->y;
+
+	double AB_angle = (a_dx == 0) ? (a_dy >= 0 ? 90 : -90) : atan2(a_dy, a_dx) * 180 / M_PI;
+	double CB_angle = (c_dx == 0) ? (c_dy >= 0 ? 90 : -90) : atan2(c_dy, c_dx) * 180 / M_PI;
+
+	double result = CB_angle - AB_angle;
+
+	while (result >= 360.0)
+		result -= 360.0;
+
+	while (result < 0)
+		result += 360.0;
+
+#if 0  // DEBUGGING
+	DebugPrintf("ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
+			Vertices[A].x, Vertices[A].y,
+			Vertices[B].x, Vertices[B].y,
+			Vertices[C].x, Vertices[C].y);
+#endif
+
+	return result;
+}
+
+
+bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
+						int *ld1, int *side1,
+						int *ld2, int *side2)
+{
+	// find the two linedefs that are neighbors to the new line at
+	// the second vertex (v2).  The first one (ld1) is on new_ld's
+	// right side, and the second one (ld2) is on new_ld's left side.
+
+	*ld1 = -1;
+	*ld2 = -1;
+
+	double best_angle1 =  9999;
+	double best_angle2 = -9999;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		if (n == new_ld)
+			continue;
+
+		const LineDef *L = LineDefs[n];
+
+		int other_v;
+
+		if (L->start == v2)
+			other_v = L->end;
+		else if (L->end == v2)
+			other_v = L->start;
+		else
+			continue;
+
+		double angle = LD_AngleBetweenLines(v1, v2, other_v);
+
+		// overlapping lines
+		if (fabs(angle) < 0.0001)
+			return false;
+
+		if (angle < best_angle1)
+		{
+			*ld1 = n;
+			*side1 = (other_v == L->start) ? SIDE_LEFT : SIDE_RIGHT;
+			best_angle1 = angle;
+		}
+
+		if (angle > best_angle2)
+		{
+			*ld2 = n;
+			*side2 = (other_v == L->start) ? SIDE_RIGHT : SIDE_LEFT;
+			best_angle2 = angle;
+		}
+	}
+
+#if 0
+	DebugPrintf("best right: line:#%d side:%d angle:%1.2f\n",
+	        *ld1, *side1, best_angle1);
+	DebugPrintf("best left: line:#%d side:%d angle:%1.2f\n",
+	        *ld2, *side2, best_angle2);
+#endif
+
+	if (*ld1 < 0 || *ld2 < 0 || *ld1 == *ld2)
+		return false;
+
+	return true;
+}
+
+
+
+
+//  SideDef packing logic -- raw from glBSP
+#if 0
+
+static int SidedefCompare(const void *p1, const void *p2)
+{
+	int comp;
+
+	int side1 = ((const u16_t *) p1)[0];
+	int side2 = ((const u16_t *) p2)[0];
+
+	sidedef_t *A = lev_sidedefs[side1];
+	sidedef_t *B = lev_sidedefs[side2];
+
+	if (side1 == side2)
+		return 0;
+
+	// don't merge sidedefs on special lines
+	if (A->on_special || B->on_special)
+		return side1 - side2;
+
+	if (A->sector != B->sector)
+	{
+		if (A->sector == NULL) return -1;
+		if (B->sector == NULL) return +1;
+
+		return (A->sector->index - B->sector->index);
+	}
+
+	if ((int)A->x_offset != (int)B->x_offset)
+		return A->x_offset - (int)B->x_offset;
+
+	if ((int)A->y_offset != B->y_offset)
+		return (int)A->y_offset - (int)B->y_offset;
+
+	// compare textures
+
+	comp = memcmp(A->upper_tex, B->upper_tex, sizeof(A->upper_tex));
+	if (comp) return comp;
+
+	comp = memcmp(A->lower_tex, B->lower_tex, sizeof(A->lower_tex));
+	if (comp) return comp;
+
+	comp = memcmp(A->mid_tex, B->mid_tex, sizeof(A->mid_tex));
+	if (comp) return comp;
+
+	// sidedefs must be the same
+	return 0;
+}
+
+void DetectDuplicateSidedefs(void)
+{
+	int i;
+	u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
+
+	GB_DisplayTicker();
+
+	// sort array of indices
+	for (i=0; i < num_sidedefs; i++)
+		array[i] = i;
+
+	qsort(array, num_sidedefs, sizeof(u16_t), SidedefCompare);
+
+	// now mark them off
+	for (i=0; i < num_sidedefs - 1; i++)
+	{
+		// duplicate ?
+		if (SidedefCompare(array + i, array + i+1) == 0)
+		{
+			sidedef_t *A = lev_sidedefs[array[i]];
+			sidedef_t *B = lev_sidedefs[array[i+1]];
+
+			// found a duplicate !
+			B->equiv = A->equiv ? A->equiv : A;
+		}
+	}
+
+	UtilFree(array);
+
+	// update all linedefs
+	for (i=0, new_num=0; i < num_linedefs; i++)
+	{
+		linedef_t *L = lev_linedefs[i];
+
+		// handle duplicated sidedefs
+		while (L->right && L->right->equiv)
+		{
+			L->right->ref_count--;
+			L->right = L->right->equiv;
+			L->right->ref_count++;
+		}
+
+		while (L->left && L->left->equiv)
+		{
+			L->left->ref_count--;
+			L->left = L->left->equiv;
+			L->left->ref_count++;
+		}
+	}
+}
+#endif
 
 
 //--- editor settings ---

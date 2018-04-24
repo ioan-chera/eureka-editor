@@ -26,11 +26,14 @@
 
 sky_flat  F_SKY1
 
-default_textures  STARTAN3  FLOOR4_8  CEIL3_5
+default_textures  GRAY1  FLAT1  FLAT1
 default_thing  2014
+
+set $ALLOW_BOOM 1
 
 include "doom_colors"
 include "doom_things"
+include "doom_groups"
 include "doom_specials"
 include "doom_tex"
 

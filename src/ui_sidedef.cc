@@ -21,11 +21,13 @@
 #include "main.h"
 #include "ui_window.h"
 
+#include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
-#include "levels.h"
+#include "e_main.h"
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
+#include "w_texture.h"
 
 
 // config item
@@ -36,7 +38,7 @@ bool sidedef_add_del_buttons = false;
 //
 // Constructor
 //
-UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) : 
+UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
     Fl_Group(X, Y, W, H),
     obj(SETOBJ_NO_LINE), is_front(_side == 0),
 	on_2S_line(false)
@@ -50,7 +52,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	else
 		labelcolor(fl_rgb_color(224,64,0));
 
-	
+
 	add_button = new Fl_Button(X + W - 120, Y, 50, 20, "ADD");
 	add_button->labelcolor(labelcolor());
 	add_button->callback(add_callback, this);
@@ -91,7 +93,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	int LX = X+16;
 	int UX = X+W-64-16;
 	    MX = MX-32;
-	
+
 	if (swap_sidedefs)
 	{
 		std::swap(UX, LX);
@@ -109,9 +111,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	Y += 65;
 
 
-	l_tex = new Fl_Input(LX-8, Y, 80, 20);
-	u_tex = new Fl_Input(UX-8, Y, 80, 20);
-	r_tex = new Fl_Input(MX-8, Y, 80, 20);
+	l_tex = new UI_DynInput(LX-8, Y, 80, 20);
+	u_tex = new UI_DynInput(UX-8, Y, 80, 20);
+	r_tex = new UI_DynInput(MX-8, Y, 80, 20);
 
 	l_tex->textsize(12);
 	u_tex->textsize(12);
@@ -120,6 +122,10 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	l_tex->callback(tex_callback, this);
 	u_tex->callback(tex_callback, this);
 	r_tex->callback(tex_callback, this);
+
+	l_tex->callback2(dyntex_callback, this);
+	u_tex->callback2(dyntex_callback, this);
+	r_tex->callback2(dyntex_callback, this);
 
 	l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -139,8 +145,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 // Destructor
 //
 UI_SideBox::~UI_SideBox()
-{
-}
+{ }
 
 
 void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
@@ -156,10 +161,11 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *)w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
-			main_win->ShowBrowser('T');
+			main_win->BrowserMode('T');
 		return;
 	}
 
@@ -171,16 +177,16 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		if (w == box->r_pic)
 			new_tex = BA_InternaliseString("-");
 		else
-			new_tex = BA_InternaliseString(default_lower_tex);
+			new_tex = BA_InternaliseString(default_wall_tex);
 	}
 	else
 	{
 		if (w == box->l_tex)
-			new_tex = TexFromWidget(box->l_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->l_tex->value()));
 		else if (w == box->u_tex)
-			new_tex = TexFromWidget(box->u_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->u_tex->value()));
 		else
-			new_tex = TexFromWidget(box->r_tex);
+			new_tex = BA_InternaliseString(NormalizeTex(box->r_tex->value()));
 	}
 
 	// iterate over selected linedefs
@@ -210,22 +216,45 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 				{
 					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
 				}
-
-				if (upper)
+				else if (upper)
 				{
 					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
 				}
-
-				if (rail)
+				else if (rail)
 				{
 					BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
 				}
 			}
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 
 		box->UpdateField();
+	}
+}
+
+
+void UI_SideBox::dyntex_callback(Fl_Widget *w, void *data)
+{
+	// change picture to match the input, BUT does not change the map
+
+	UI_SideBox *box = (UI_SideBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	if (w == box->l_tex)
+	{
+		box->l_pic->GetTex(box->l_tex->value());
+	}
+	else if (w == box->u_tex)
+	{
+		box->u_pic->GetTex(box->u_tex->value());
+	}
+	else if (w == box->r_tex)
+	{
+		box->r_pic->GetTex(box->r_tex->value());
 	}
 }
 
@@ -304,6 +333,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			LD_AddSecondSideDef(*it, sd, other);
 	}
 
+	BA_MessageForSel("added sidedef to", edit.Selected);
 	BA_End();
 
 	main_win->line_box->UpdateField();
@@ -340,6 +370,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		LD_RemoveSideDef(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
 	}
 
+	BA_MessageForSel("deleted sidedef from", edit.Selected);
 	BA_End();
 
 	main_win->line_box->UpdateField();
@@ -377,6 +408,11 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 			}
 		}
 
+		if (w == box->x_ofs)
+			BA_MessageForSel("edited X offset on", &list);
+		else
+			BA_MessageForSel("edited Y offset on", &list);
+
 		BA_End();
 	}
 }
@@ -408,6 +444,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 				BA_ChangeSD(sd, SideDef::F_SECTOR, new_sec);
 		}
 
+		BA_MessageForSel("edited sector-ref on", &list);
 		BA_End();
 	}
 }
@@ -471,6 +508,10 @@ void UI_SideBox::UpdateField()
 
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
 			u_pic->MarkMissing();
+
+		l_pic->AllowHighlight(true);
+		u_pic->AllowHighlight(true);
+		r_pic->AllowHighlight(true);
 	}
 	else
 	{
@@ -485,6 +526,10 @@ void UI_SideBox::UpdateField()
 		l_pic->Clear();
 		u_pic->Clear();
 		r_pic->Clear();
+
+		l_pic->AllowHighlight(false);
+		u_pic->AllowHighlight(false);
+		r_pic->AllowHighlight(false);
 	}
 }
 
@@ -573,9 +618,20 @@ void UI_SideBox::UpdateHiding()
 
 int UI_SideBox::GetSelectedPics() const
 {
+	if (obj < 0) return 0;
+
 	return	(l_pic->Selected() ? 1 : 0) |
 			(u_pic->Selected() ? 2 : 0) |
 			(r_pic->Selected() ? 4 : 0);
+}
+
+int UI_SideBox::GetHighlightedPics() const
+{
+	if (obj < 0) return 0;
+
+	return	(l_pic->Highlighted() ? 1 : 0) |
+			(u_pic->Highlighted() ? 2 : 0) |
+			(r_pic->Highlighted() ? 4 : 0);
 }
 
 
@@ -584,21 +640,6 @@ void UI_SideBox::UnselectPics()
 	l_pic->Selected(false);
 	u_pic->Selected(false);
 	r_pic->Selected(false);
-}
-
-
-int UI_SideBox::TexFromWidget(Fl_Input *w)
-{
-	char name[WAD_TEX_NAME+1];
-
-	memset(name, 0, sizeof(name));
-
-	strncpy(name, w->value(), WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	return BA_InternaliseString(name);
 }
 
 

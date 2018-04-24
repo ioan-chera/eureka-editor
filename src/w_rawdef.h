@@ -63,7 +63,7 @@ typedef enum
 	LL_SSECTORS,  // SubSectors, list of LineSegs
 	LL_NODES,     // BSP nodes
 	LL_SECTORS,   // Sectors, from editing
-	LL_REJECT,    // LUT, sector-sector visibility 
+	LL_REJECT,    // LUT, sector-sector visibility
 	LL_BLOCKMAP,  // LUT, motion clipping, walls/grid element
 	LL_BEHAVIOR   // Hexen scripting stuff
 }
@@ -165,6 +165,118 @@ typedef struct raw_hexen_thing_s
 } PACKEDATTR raw_hexen_thing_t;
 
 
+/* ----- The BSP tree structures ----------------------- */
+
+typedef struct raw_seg_s
+{
+	u16_t start;     // from this vertex...
+	u16_t end;       // ... to this vertex
+	u16_t angle;     // angle (0 = east, 16384 = north, ...)
+	u16_t linedef;   // linedef that this seg goes along
+	u16_t flip;      // true if not the same direction as linedef
+	u16_t dist;      // distance from starting point
+
+} PACKEDATTR raw_seg_t;
+
+
+typedef struct raw_gl_seg_s
+{
+	u16_t start;      // from this vertex...
+	u16_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u16_t partner;    // partner seg number, or -1
+
+} PACKEDATTR raw_gl_seg_t;
+
+
+typedef struct raw_v5_seg_s
+{
+	u32_t start;      // from this vertex...
+	u32_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	u16_t side;       // 0 if on right of linedef, 1 if on left
+	u32_t partner;    // partner seg number, or -1
+
+} PACKEDATTR raw_v5_seg_t;
+
+
+typedef struct raw_zdoom_seg_s
+{
+	u32_t start;      // from this vertex...
+	u32_t end;        // ... to this vertex
+	u16_t linedef;    // linedef that this seg goes along, or -1
+	 u8_t side;       // 0 if on right of linedef, 1 if on left
+
+} PACKEDATTR raw_zdoom_seg_t;
+
+
+typedef struct raw_bbox_s
+{
+	s16_t maxy, miny;
+	s16_t minx, maxx;
+
+} PACKEDATTR raw_bbox_t;
+
+
+typedef struct raw_node_s
+{
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;  // bounding rectangles
+	u16_t right, left;  // children: Node or SSector (if high bit is set)
+
+} PACKEDATTR raw_node_t;
+
+
+typedef struct raw_subsec_s
+{
+	u16_t num;     // number of Segs in this Sub-Sector
+	u16_t first;   // first Seg
+
+} PACKEDATTR raw_subsec_t;
+
+
+typedef struct raw_v5_subsec_s
+{
+	u32_t num;     // number of Segs in this Sub-Sector
+	u32_t first;   // first Seg
+
+} PACKEDATTR raw_v5_subsec_t;
+
+
+typedef struct raw_zdoom_subsec_s
+{
+	u32_t segnum;
+
+	// NOTE : no "first" value, segs must be contiguous and appear
+	//        in an order dictated by the subsector list, e.g. all
+	//        segs of the second subsector must appear directly after
+	//        all segs of the first subsector.
+
+} PACKEDATTR raw_zdoom_subsec_t;
+
+
+typedef struct raw_v5_node_s
+{
+	// this structure used by ZDoom nodes too
+
+	s16_t x, y;         // starting point
+	s16_t dx, dy;       // offset to ending point
+	raw_bbox_t b1, b2;  // bounding rectangles
+	u32_t right, left;  // children: Node or SSector (if high bit is set)
+
+} PACKEDATTR raw_v5_node_t;
+
+
+typedef struct raw_blockmap_header_s
+{
+	s16_t x_origin, y_origin;
+	s16_t x_blocks, y_blocks;
+
+} PACKEDATTR raw_blockmap_header_t;
+
+
 /* ----- Graphical structures ---------------------- */
 
 typedef struct
@@ -179,6 +291,15 @@ typedef struct
 } PACKEDATTR raw_patchdef_t;
 
 
+typedef struct
+{
+	s16_t x_origin;
+	s16_t y_origin;
+	u16_t pname;    // index into PNAMES
+
+} PACKEDATTR raw_strife_patchdef_t;
+
+
 // Texture definition.
 //
 // Each texture is composed of one or more patches,
@@ -191,12 +312,26 @@ typedef struct
 	u32_t masked;      // NOT USED
 	u16_t width;
 	u16_t height;
-	u32_t column_dir;  // NOT USED
+	u16_t column_dir[2];  // NOT USED
 	u16_t patch_count;
 
 	raw_patchdef_t patches[1];
 
 } PACKEDATTR raw_texture_t;
+
+
+typedef struct
+{
+	char name[8];
+
+	u32_t masked;      // NOT USED
+	u16_t width;
+	u16_t height;
+	u16_t patch_count;
+
+	raw_strife_patchdef_t patches[1];
+
+} PACKEDATTR raw_strife_texture_t;
 
 
 // Patches.
@@ -208,14 +343,14 @@ typedef struct
 //
 typedef struct patch_s
 {
-	// bounding box size 
+	// bounding box size
 	s16_t width;
 	s16_t height;
 
-	// pixels to the left of origin 
+	// pixels to the left of origin
 	s16_t leftoffset;
 
-	// pixels below the origin 
+	// pixels below the origin
 	s16_t topoffset;
 
 	u32_t columnofs[1];  // only [width] used
@@ -385,6 +520,23 @@ typedef enum
 	MTF_Hexen_DM		= 1024,
 }
 hexen_option_e;
+
+
+//
+// Polyobject stuff
+//
+#define HEXTYPE_POLY_START     1
+#define HEXTYPE_POLY_EXPLICIT  5
+
+// -JL- Hexen polyobj thing types
+#define PO_ANCHOR_TYPE      3000
+#define PO_SPAWN_TYPE       3001
+#define PO_SPAWNCRUSH_TYPE  3002
+
+// -JL- ZDoom polyobj thing types
+#define ZDOOM_PO_ANCHOR_TYPE      9300
+#define ZDOOM_PO_SPAWN_TYPE       9301
+#define ZDOOM_PO_SPAWNCRUSH_TYPE  9302
 
 #endif  /* __EUREKA_W_RAWDEF_H__ */
 

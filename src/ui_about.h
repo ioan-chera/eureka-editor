@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2011 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,6 +20,8 @@
 
 #ifndef __EUREKA_UI_ABOUT_H__
 #define __EUREKA_UI_ABOUT_H__
+
+void InitAboutDialog();
 
 void DLG_AboutText(void);
 

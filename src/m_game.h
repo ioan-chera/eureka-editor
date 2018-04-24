@@ -73,15 +73,18 @@ typedef struct
 thinggroup_t;
 
 
-// thing <number> <group> <flags> <radius> <description> [<sprite>]
+// thing <number> <group> <flags> <radius> <description> [<sprite>]  [ arg1..arg5 ]
 typedef struct
 {
-	char group;      // Thing group
-	short flags;     // Flags
-	short radius;    // Radius of thing
-	const char *desc;  // Short description of thing
-	const char *sprite;  // Root of name of sprite for thing
+	char group;      // group letter
+	short flags;     // flags (THINGDEF_XXX)
+	short radius;    // radius of thing
+	float scale;	 // scaling (1.0 is normal)
+
+	const char *desc;    // short description of the thing
+	const char *sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
+	const char *args[5]; // args used when spawned (Hexen)
 }
 thingtype_t;
 
@@ -113,26 +116,30 @@ texturegroup_t;
 
 typedef struct
 {
-	int sky_color;
+	int  sky_color;
 	char sky_flat[16];
 
-	int wall_colors[2];
+	int  wall_colors[2];
 	int floor_colors[2];
+	int invis_colors[2];
 
 	int missing_color;
 	int unknown_tex;
 	int unknown_flat;
 
+	int player_r;
 	int player_h;
+	int view_height;
+
 	int min_dm_starts;
 	int max_dm_starts;
 
 	/* port features */
 
-	int gen_types;	// BOOM generalized linedefs and sectors
+	int gen_types;		// BOOM generalized linedefs and sectors
 
-	int img_png;	// PNG format for various graphics
-	int tx_start;	// textures in TX_START .. TX_END
+	int tx_start;		// textures in TX_START .. TX_END
+	int img_png;		// PNG format for various graphics
 
 	int coop_dm_flags;	// MTF_NOT_COOP and MTF_NOT_DM for things
 	int friend_flag;	// MTF_FRIEND thing flag from MBF
@@ -140,7 +147,10 @@ typedef struct
 	int pass_through;	// Boom's MTF_PASSTHRU line flag
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
 
-	int medusa_bug;		// used for Vanilla, prone to the Medusa Effect
+	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
+	int lax_sprites;	// sprites can be found outside of S_START..S_END
+
+	int no_need_players;	// having no players is OK (Things checker)
 
 } game_info_t;
 
@@ -192,25 +202,56 @@ extern int num_gen_linetypes;
 
 //------------------------------------------------------------------------
 
-void M_InitDefinitions();
-void M_LoadDefinitions(const char *folder, const char *name,
-                       int include_level = 0);
+void M_ClearAllDefinitions();
+
+void M_LoadDefinitions(const char *folder, const char *name);
+
 bool M_CanLoadDefinitions(const char *folder, const char *name);
-void M_ParseDefinitionFile(const char *filename, const char *folder = NULL,
-						   const char *basename = NULL,
+
+typedef enum
+{
+	PURPOSE_Normal = 0,		// normal loading
+	PURPOSE_Resource,		// as a resource file
+	PURPOSE_GameCheck,		// check game's variant name and map formats
+	PURPOSE_PortCheck,		// check if port supports game
+
+} parse_purpose_e;
+
+typedef struct
+{
+	// set when "map_formats" is found, otherwise left unchanged
+	map_format_bitset_t formats;
+
+	// set when "variant_of" is found, otherwise left unchanged
+	char variant_name[256];
+
+	// when "supported_games" is found, check if variant_name is in
+	// the list and set this to 0 or 1, otherwise left unchanged
+	int supports_game;
+
+} parse_check_info_t;
+
+void M_ParseDefinitionFile(parse_purpose_e purpose,
+						   const char *filename,
+						   const char *folder = NULL,
+						   const char *prettyname = NULL,
+						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
-void M_FreeDefinitions();
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
-const char * M_CollectDefsForMenu(const char *folder, int *exist_val, const char *exist_name);
+const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
+
+const char * M_VariantForGame(const char *game);
+
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 
 // is this flat a sky?
 bool is_sky(const char *flat);
 
-bool is_null_tex(const char *tex);
-bool is_missing_tex(const char *tex);
+bool is_null_tex(const char *tex);		// the "-" texture
+bool is_special_tex(const char *tex);	// begins with "#"
 
 
 const sectortype_t * M_GetSectorType(int type);

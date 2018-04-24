@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -48,13 +48,13 @@ public:
 	Fl_Int_Input *y_ofs;
 	Fl_Int_Input *sec;
 
-	UI_Pic   *l_pic;
-	UI_Pic   *u_pic;
-	UI_Pic   *r_pic;
+	UI_Pic *l_pic;
+	UI_Pic *u_pic;
+	UI_Pic *r_pic;
 
-	Fl_Input *l_tex;
-	Fl_Input *u_tex;
-	Fl_Input *r_tex;
+	UI_DynInput *l_tex;
+	UI_DynInput *u_tex;
+	UI_DynInput *r_tex;
 
 	Fl_Button *add_button;
 	Fl_Button *del_button;
@@ -74,10 +74,9 @@ public:
 
 	// returns a bitmask: 1 for lower, 2 for upper, 4 for rail
 	int GetSelectedPics() const;
+	int GetHighlightedPics() const;
 
 	void UnselectPics();
-
-	static int TexFromWidget(Fl_Input *w);
 
 private:
 	void UpdateLabel();
@@ -85,6 +84,7 @@ private:
 	void UpdateAddDel();
 
 	static void    tex_callback(Fl_Widget *, void *);
+	static void dyntex_callback(Fl_Widget *, void *);
 	static void offset_callback(Fl_Widget *, void *);
 	static void sector_callback(Fl_Widget *, void *);
 	static void    add_callback(Fl_Widget *, void *);

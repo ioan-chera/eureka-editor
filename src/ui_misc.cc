@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -19,9 +19,11 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+
+#include "e_main.h"
+#include "e_objects.h"
 #include "ui_window.h"
 #include "ui_misc.h"
-#include "x_mirror.h"
 
 
 UI_MoveDialog::UI_MoveDialog() :
@@ -46,7 +48,7 @@ UI_MoveDialog::UI_MoveDialog() :
 	{
 		cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
-	
+
 		ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Move");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
@@ -78,7 +80,7 @@ void UI_MoveDialog::Run()
 
 	show();
 
-	while (! WantClose())
+	while (! want_close)
 	{
 		Fl::wait(0.2);
 	}
@@ -101,7 +103,7 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 	int delta_y = atoi(that->delta_y->value());
 	int delta_z = atoi(that->delta_z->value());
 
-	CMD_MoveObjects(delta_x, delta_y, delta_z);
+	MoveObjects(edit.Selected, delta_x, delta_y, delta_z);
 
 	that->want_close = true;
 }
@@ -125,7 +127,7 @@ UI_ScaleDialog::UI_ScaleDialog() :
 	scale_x->value("1");
 	scale_y->value("1");
 	scale_z->value("1");
-	
+
 	origin_x = new Fl_Choice(234,  55, 100, 25, "from:");
 	origin_y = new Fl_Choice(234,  85, 100, 25, "from:");
 	origin_z = new Fl_Choice(234, 115, 100, 25, "from:");
@@ -152,7 +154,7 @@ UI_ScaleDialog::UI_ScaleDialog() :
 
 		cancel_but = new Fl_Button(245, 180, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
-	
+
 		ok_but = new Fl_Button(245, 225, 95, 30, "Scale");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
@@ -185,7 +187,7 @@ void UI_ScaleDialog::Run()
 
 	show();
 
-	while (! WantClose())
+	while (! want_close)
 	{
 		Fl::wait(0.2);
 	}
@@ -215,7 +217,7 @@ static double ParseScaleStr(const char * s)
 
 		if (denom <= 0)
 			return -1;
-		
+
 		return num / denom;
 	}
 
@@ -250,9 +252,9 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_z = that->origin_z->value() - 1;
 
 	if (edit.mode == OBJ_SECTORS)
-		CMD_ScaleObjects3(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
+		ScaleObjects4(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
 	else
-		CMD_ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
+		ScaleObjects3(scale_x, scale_y, pos_x, pos_y);
 
 	that->want_close = true;
 }
@@ -288,7 +290,7 @@ UI_RotateDialog::UI_RotateDialog() :
 	{
 		cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
 		cancel_but->callback(close_callback, this);
-	
+
 		ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Rotate");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
@@ -315,7 +317,7 @@ void UI_RotateDialog::Run()
 
 	show();
 
-	while (! WantClose())
+	while (! want_close)
 	{
 		Fl::wait(0.2);
 	}
@@ -342,10 +344,119 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_x = (that->origin->value() % 3) - 1;
 	int pos_y = (that->origin->value() / 3) - 1;
 
-	CMD_RotateObjects3(angle, pos_x, pos_y);
+	RotateObjects3(angle, pos_x, pos_y);
 
 	that->want_close = true;
 }
+
+
+//------------------------------------------------------------------------
+
+
+UI_JumpToDialog::UI_JumpToDialog(const char *_objname, int _limit) :
+	UI_Escapable_Window(360, 175, "Jump To Object"),
+	want_close(false),
+	limit(_limit),
+	result(-1)
+{
+	SYS_ASSERT(limit >= 0);
+
+	char descript[300];
+	snprintf(descript, sizeof(descript), "Enter the %s number (0 - %d)\n", _objname, limit);
+
+    Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, NULL);
+	title->copy_label(descript);
+	title->labelsize(KF_fonth);
+	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	input = new Fl_Int_Input(145, 55, 90, 25,  "index: ");
+	input->when(FL_WHEN_CHANGED | FL_WHEN_ENTER_KEY_ALWAYS);
+	input->callback(input_callback, this);
+
+	Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
+	grp->box(FL_FLAT_BOX);
+	grp->color(WINDOW_BG, WINDOW_BG);
+	{
+		cancel_but = new Fl_Button(30, grp->y() + 20, 95, 30, "Cancel");
+		cancel_but->callback(close_callback, this);
+
+		ok_but = new Fl_Button(245, grp->y() + 20, 95, 30, "Jump");
+		ok_but->labelfont(FL_HELVETICA_BOLD);
+		ok_but->callback(ok_callback, this);
+		ok_but->deactivate();
+
+		grp->end();
+	}
+
+	end();
+
+	resizable(NULL);
+
+	callback(close_callback, this);
+}
+
+
+UI_JumpToDialog::~UI_JumpToDialog()
+{ }
+
+
+int UI_JumpToDialog::Run()
+{
+	set_modal();
+	show();
+
+	Fl::focus(input);
+
+	while (! want_close)
+		Fl::wait(0.2);
+
+	return result;
+}
+
+
+void UI_JumpToDialog::close_callback(Fl_Widget *w, void *data)
+{
+	UI_JumpToDialog * that = (UI_JumpToDialog *)data;
+
+	that->want_close = true;
+}
+
+
+void UI_JumpToDialog::ok_callback(Fl_Widget *w, void *data)
+{
+	UI_JumpToDialog * that = (UI_JumpToDialog *)data;
+
+	that->result = atoi(that->input->value());
+	that->want_close = true;
+}
+
+
+void UI_JumpToDialog::input_callback(Fl_Widget *w, void *data)
+{
+	UI_JumpToDialog * that = (UI_JumpToDialog *)data;
+
+	// this is slightly hacky
+	bool was_enter = (Fl::event_key() == FL_Enter ||
+					  Fl::event_key() == FL_KP_Enter);
+
+	int value = atoi(that->input->value());
+
+	if (value < 0 || value > that->limit || strlen(that->input->value()) == 0)
+	{
+		that->input->textcolor(FL_RED);
+		that->input->redraw();
+		that->ok_but->deactivate();
+		return;
+	}
+
+	that->input->textcolor(FL_FOREGROUND_COLOR);
+	that->input->redraw();
+	that->ok_but->activate();
+
+	if (was_enter)
+		that->ok_callback(w, data);
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

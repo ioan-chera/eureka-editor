@@ -26,17 +26,17 @@
 
 #include "main.h"
 
-#include "editloop.h"
+#include "e_cutpaste.h"
+#include "e_hover.h"
 #include "e_linedef.h"
+#include "e_main.h"
+#include "e_objects.h"
 #include "e_vertex.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
-#include "levels.h"
 #include "m_game.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
-#include "x_mirror.h"
 
 #include <algorithm>
 
@@ -53,27 +53,28 @@ int Vertex_FindExact(int x, int y)
 }
 
 
-// TODO: InsertPolygonVertices
-#if 0
-
-/*
-   insert the vertices of a new polygon
-*/
-void InsertPolygonVertices (int centerx, int centery, int sides, int radius)
+int Vertex_HowManyLineDefs(int v_num)
 {
-	for (int n = 0 ; n < sides ; n++)
+	int count = 0;
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		DoInsertObject (OBJ_VERTICES, -1,
-				centerx + (int) ((double)radius * cos (2*M_PI * (double)n / (double)sides)),
-				centery + (int) ((double)radius * sin (2*M_PI * (double)n / (double)sides)));
+		LineDef *L = LineDefs[n];
+
+		if (L->start == v_num || L->end == v_num)
+			count++;
 	}
+
+	return count;
 }
-#endif
 
 
-/* we merge ld1 into ld2 -- v is the common vertex
- */
-static void MergeConnectedLines(int ld1, int ld2, int v)
+//
+// two linedefs are being sandwiched together.
+// vertex 'v' is the shared vertex (the "hinge").
+// to prevent an overlap, we merge ld1 into ld2.
+//
+static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 {
 	LineDef *L1 = LineDefs[ld1];
 	LineDef *L2 = LineDefs[ld2];
@@ -84,8 +85,8 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 	int new_mid_tex = (ld1_onesided) ? L1->Right()->mid_tex :
 					  (ld2_onesided) ? L2->Right()->mid_tex : 0;
 
-	// flip ld1 so it would be parallel (after merging the other endpoints)
-	// with ld2 but going the opposite direction.
+	// flip L1 so it would be parallel with L2 (after merging the other
+	// endpoint) but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
 	{
 		FlipLineDef(ld1);
@@ -96,13 +97,11 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 
 	if (same_left && same_right)
 	{
-		// delete other line too
-		// [ MUST do the highest numbered first ]
-		if (ld2 < ld1)
-			std::swap(ld1, ld2);
+		// the merged line would have the same thing on both sides
+		// (possibly VOID space), so the linedefs both "vanish".
 
-		BA_Delete(OBJ_LINEDEFS, ld2);
-		BA_Delete(OBJ_LINEDEFS, ld1);
+		del_lines.set(ld1);
+		del_lines.set(ld2);
 		return;
 	}
 
@@ -119,6 +118,9 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 		// geometry was broken / unclosed sector(s)
 	}
 
+	del_lines.set(ld1);
+
+
 	// fix orientation of remaining linedef if needed
 	if (L2->Left() && ! L2->Right())
 	{
@@ -130,31 +132,50 @@ static void MergeConnectedLines(int ld1, int ld2, int v)
 		BA_ChangeSD(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
+	// fix flags of remaining linedef
+	int new_flags = L2->flags;
 
-	BA_Delete(OBJ_LINEDEFS, ld1);
+	if (L2->TwoSided())
+	{
+		new_flags |=  MLF_TwoSided;
+		new_flags &= ~MLF_Blocking;
+	}
+	else
+	{
+		new_flags &= ~MLF_TwoSided;
+		new_flags |=  MLF_Blocking;
+	}
+
+	BA_ChangeLD(ld2, LineDef::F_FLAGS, new_flags);
 }
 
 
-void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
+//
+// merge v1 into v2
+//
+static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 {
-	/* merge v1 into v2 */
-
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
 
-	// first check if two linedefs would overlap after the merge
-	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
+	// check if two linedefs would overlap after the merge
+	// [ but ignore lines already marked for deletion ]
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (! (L->start == v1 || L->end == v1))
+		if (! L->TouchesVertex(v1))
+			continue;
+
+		if (del_lines.get(n))
 			continue;
 
 		int v3 = (L->start == v1) ? L->end : L->start;
 
 		int found = -1;
 
-		for (int k = NumLineDefs - 1 ; k >= 0 ; k--)
+		for (int k = 0 ; k < NumLineDefs ; k++)
 		{
 			if (k == n)
 				continue;
@@ -169,58 +190,206 @@ void MergeVertex(int v1, int v2, bool v1_will_be_deleted)
 			}
 		}
 
-		if (found >= 0)
+		if (found >= 0 && ! del_lines.get(found))
 		{
-			// this deletes linedef [n], and maybe the other too
-			MergeConnectedLines(n, found, v3);
+			MergeSandwichLines(n, found, v3, del_lines);
 			break;
 		}
 	}
 
-	// update any linedefs which use V1 to use V2 instead
-	for (int n = NumLineDefs - 1 ; n >= 0 ; n--)
+	// update all linedefs which use V1 to use V2 instead, and
+	// delete any line that exists between the two vertices.
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
-		// handle a line that exists between the two vertices
-		if ((L->start == v1 && L->end == v2) ||
-			(L->start == v2 && L->end == v1))
-		{
-			if (v1_will_be_deleted)
-			{
-				// we simply skip it, hence when V1 is deleted this line
-				// will automatically be deleted too (as it refers to V1).
-				// Clever huh?
-			}
-			else
-			{
-				BA_Delete(OBJ_LINEDEFS, n);
-			}
-			continue;
-		}
+		// change *ALL* references, this is critical
+		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
 			BA_ChangeLD(n, LineDef::F_START, v2);
 
 		if (L->end == v1)
 			BA_ChangeLD(n, LineDef::F_END, v2);
+
+		if (L->start == v2 && L->end == v2)
+			del_lines.set(n);
 	}
 }
 
 
-int VertexHowManyLineDefs(int v_num)
+//
+// the first vertex is kept, all the other vertices are deleted
+// (after fixing the attached linedefs).
+//
+void Vertex_MergeList(selection_c *verts)
 {
-	int count = 0;
+	if (verts->count_obj() < 2)
+		return;
+
+	int v = verts->find_first();
+
+	int new_x, new_y;
+
+#if 0
+	Objs_CalcMiddle(verts, &new_x, &new_y);
+#else
+	new_x = Vertices[v]->x;
+	new_y = Vertices[v]->y;
+#endif
+
+	BA_ChangeVT(v, Vertex::F_X, new_x);
+	BA_ChangeVT(v, Vertex::F_Y, new_y);
+
+	verts->clear(v);
+
+	selection_c del_lines(OBJ_LINEDEFS);
+	selection_iterator_c it;
+
+	// this prevents unnecessary sandwich mergers
+	ConvertSelection(verts, &del_lines);
+
+	for (verts->begin(&it) ; !it.at_end() ; ++it)
+	{
+		DoMergeVertex(*it, v, del_lines);
+	}
+
+	// all these vertices will be unused now, hence this call
+	// shouldn't kill any other objects.
+	DeleteObjects(verts);
+
+	// we NEED to keep unused vertices here, otherwise we can merge
+	// all vertices of an isolated sector and end up with NOTHING!
+	DeleteObjects_WithUnused(&del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
+
+	verts->clear_all();
+}
+
+
+void CMD_VT_Merge()
+{
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
+	{
+		edit.Selected->set(edit.highlight.num);
+	}
+
+	if (edit.Selected->count_obj() < 2)
+	{
+		Beep("Need 2 or more vertices to merge");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("merged", edit.Selected);
+
+	Vertex_MergeList(edit.Selected);
+
+	BA_End();
+
+	Selection_Clear(true /* no_save */);
+}
+
+
+bool Vertex_TryFixDangler(int v_num)
+{
+	// see if this vertex is sitting on another one (or very close to it)
+	int v_other  = -1;
+	int max_dist = 2;
+
+	for (int i = 0 ; i < NumVertices ; i++)
+	{
+		if (i == v_num)
+			continue;
+
+		int dx = Vertices[v_num]->x - Vertices[i]->x;
+		int dy = Vertices[v_num]->y - Vertices[i]->y;
+
+		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
+			! LineDefAlreadyExists(v_num, v_other))
+		{
+			v_other = i;
+			break;
+		}
+	}
+
+
+	// check for a dangling vertex
+	if (Vertex_HowManyLineDefs(v_num) != 1)
+	{
+		if (v_other >= 0 && Vertex_HowManyLineDefs(v_other) == 1)
+			std::swap(v_num, v_other);
+		else
+			return false;
+	}
+
+
+	if (v_other >= 0)
+	{
+		Selection_Clear(true /* no_save */);
+
+		// delete highest numbered one  [ so the other index remains valid ]
+		if (v_num < v_other)
+			std::swap(v_num, v_other);
+
+fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
+
+		BA_Begin();
+		BA_Message("merged dangling vertex #%d\n", v_num);
+
+		selection_c list(OBJ_VERTICES);
+
+		list.set(v_other);	// first one is the one kept
+		list.set(v_num);
+
+		Vertex_MergeList(&list);
+
+		BA_End();
+
+		edit.Selected->set(v_other);
+
+		Beep("Merged a dangling vertex");
+		return true;
+	}
+
+
+#if 0
+	// find the line joined to this vertex
+	int joined_ld = -1;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
-
-		if (L->start == v_num || L->end == v_num)
-			count++;
+		if (LineDefs[n]->TouchesVertex(v_num))
+		{
+			joined_ld = n;
+			break;
+		}
 	}
 
-	return count;
+	SYS_ASSERT(joined_ld >= 0);
+#endif
+
+
+	// see if vertex is sitting on a line
+
+	Objid line_ob;
+
+	GetSplitLineForDangler(line_ob, v_num);
+
+	if (! line_ob.valid())
+		return false;
+
+fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+	BA_Begin();
+
+	SplitLineDefAtVertex(line_ob.num, v_num);
+
+	BA_Message("split linedef #%d\n", line_ob.num);
+
+	BA_End();
+
+	// no vertices were added or removed, hence can continue Insert_Vertex
+	return false;
 }
 
 
@@ -276,7 +445,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			int new_x, new_y;
 
 			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
-			
+
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
 			if (which != num_lines-1)
@@ -303,66 +472,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 }
 
 
-void Vertex_MergeList(selection_c *list)
-{
-	if (list->count_obj() < 2)
-		return;
-
-	// the first vertex is kept, all the other vertices are removed.
-
-	int v = list->find_first();
-
-	int new_x, new_y;
-
-#if 0
-	Objs_CalcMiddle(list, &new_x, &new_y);
-#else
-	new_x = Vertices[v]->x;
-	new_y = Vertices[v]->y;
-#endif
-
-	list->clear(v);
-
-	BA_Begin();
-
-	BA_ChangeVT(v, Vertex::F_X, new_x);
-	BA_ChangeVT(v, Vertex::F_Y, new_y);
-
-	selection_iterator_c it;
-
-	for (list->begin(&it) ; !it.at_end() ; ++it)
-	{
-		MergeVertex(*it, v, true /* v1_will_be_deleted */);
-	}
-
-	DeleteObjects(list);
-
-	BA_End();
-
-	list->clear_all();
-}
-
-
-void VT_Merge()
-{
-	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
-	{
-		edit.Selected->set(edit.highlight.num);
-	}
-
-	if (edit.Selected->count_obj() < 2)
-	{
-		Beep("Need 2 or more vertices to merge");
-		return;
-	}
-
-	Vertex_MergeList(edit.Selected);
-
-	Editor_ClearAction();
-}
-
-
-void VT_Disconnect(void)
+void CMD_VT_Disconnect(void)
 {
 	if (edit.Selected->empty())
 	{
@@ -379,6 +489,8 @@ void VT_Disconnect(void)
 
 	BA_Begin();
 
+	BA_MessageForSel("disconnected", edit.Selected);
+
 	selection_iterator_c it;
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
@@ -386,8 +498,8 @@ void VT_Disconnect(void)
 		int v_num = *it;
 
 		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = VertexHowManyLineDefs(*it);
-		
+		int num_lines = Vertex_HowManyLineDefs(*it);
+
 		if (num_lines < 2)
 			continue;
 
@@ -402,104 +514,6 @@ void VT_Disconnect(void)
 	BA_End();
 
 	Selection_Clear(true);
-}
-
-
-bool Vertex_TryFixDangler(int v_num)
-{
-	// see if this vertex is sitting on another one (or very close to it)
-	int v_other  = -1;
-	int max_dist = 2;
-
-	for (int i = 0 ; i < NumVertices ; i++)
-	{
-		if (i == v_num)
-			continue;
-
-		int dx = Vertices[v_num]->x - Vertices[i]->x;
-		int dy = Vertices[v_num]->y - Vertices[i]->y;
-
-		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
-			! LineDefAlreadyExists(v_num, v_other))
-		{
-			v_other = i;
-			break;
-		}
-	}
-
-
-	// check for a dangling vertex
-	if (VertexHowManyLineDefs(v_num) != 1)
-	{
-		if (v_other >= 0 && VertexHowManyLineDefs(v_other) == 1)
-			std::swap(v_num, v_other);
-		else
-			return false;
-	}
-
-
-	if (v_other >= 0)
-	{
-		Selection_Clear(true /* no_save */);
-
-		// delete highest numbered one  [ so the other index remains valid ]
-		if (v_num < v_other)
-			std::swap(v_num, v_other);
-
-fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
-		BA_Begin();
-
-		MergeVertex(v_num, v_other, true /* v1_will_be_deleted */);
-
-		selection_c list(OBJ_VERTICES);
-		list.set(v_num);
-
-		DeleteObjects(&list);
-
-		BA_End();
-
-		edit.Selected->set(v_other);
-
-		Beep("Merged a dangling vertex");
-		return true;
-	}
-
-
-#if 0
-	// find the line joined to this vertex
-	int joined_ld = -1;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		if (LineDefs[n]->TouchesVertex(v_num))
-		{
-			joined_ld = n;
-			break;
-		}
-	}
-
-	SYS_ASSERT(joined_ld >= 0);
-#endif
-
-
-	// see if vertex is sitting on a line
-
-	Objid line_ob;
-
-	GetSplitLineForDangler(line_ob, v_num);
-
-	if (! line_ob.valid())
-		return false;
-
-fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
-	BA_Begin();
-
-	SplitLineDefAtVertex(line_ob.num, v_num);
-
-	BA_End();
-
-	// no vertices were added or removed, hence can continue Insert_Vertex
-	return false;
 }
 
 
@@ -559,7 +573,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 }
 
 
-void LIN_Disconnect(void)
+void CMD_LIN_Disconnect(void)
 {
 	// Note: the logic here is significantly different than the logic
 	//       in VT_Disconnect, since we want to keep linedefs in the
@@ -594,6 +608,8 @@ void LIN_Disconnect(void)
 		DoDisconnectLineDef(*it, 1, &seen_one);
 	}
 
+	BA_MessageForSel("disconnected", edit.Selected);
+
 	BA_End();
 
 	if (! seen_one)
@@ -615,14 +631,19 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 	{
 		const LineDef * L = LineDefs[n];
 
+		// only process lines which touch a selected sector
+		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
+		bool right_in = L->Right() && edit.Selected->get(L->Right()->sector);
+
+		if (! (left_in || right_in))
+			continue;
+
 		bool innie = false;
 		bool outie = false;
 
-		// TODO: what about no-sided lines??
-
 		if (L->Right())
 		{
-			if (edit.Selected->get(L->Right()->sector))
+			if (right_in)
 				innie = true;
 			else
 				outie = true;
@@ -630,7 +651,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 
 		if (L->Left())
 		{
-			if (edit.Selected->get(L->Left()->sector))
+			if (left_in)
 				innie = true;
 			else
 				outie = true;
@@ -702,7 +723,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 
 	// fix the first line's textures
 
-	int tex = BA_InternaliseString(default_mid_tex);
+	int tex = BA_InternaliseString(default_wall_tex);
 
 	const SideDef * SD = SideDefs[L1->right];
 
@@ -762,7 +783,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 }
 
 
-void SEC_Disconnect(void)
+void CMD_SEC_Disconnect(void)
 {
 	if (NumVertices == 0)
 	{
@@ -806,6 +827,8 @@ void SEC_Disconnect(void)
 
 
 	BA_Begin();
+
+	BA_MessageForSel("disconnected", edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
@@ -858,6 +881,8 @@ void SEC_Disconnect(void)
 		}
 	}
 
+	delete[] mapping;
+
 	// finally move all vertices of selected sectors
 
 	selection_c all_verts(OBJ_VERTICES);
@@ -906,7 +931,7 @@ static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x
 
 	if (dist > extent * 0.33)
 		return 0.25;
-	
+
 	return 1.0;
 }
 
@@ -931,7 +956,7 @@ public:
 };
 
 
-void VT_ShapeLine(void)
+void CMD_VT_ShapeLine(void)
 {
 	if (edit.Selected->count_obj() < 3)
 	{
@@ -1044,7 +1069,7 @@ void VT_ShapeLine(void)
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
 
-	if (true /* don't move first and last vertices */)
+	if ((true) /* don't move first and last vertices */)
 	{
 		ax = V1->x;
 		ay = V1->y;
@@ -1064,11 +1089,13 @@ void VT_ShapeLine(void)
 
 	BA_Begin();
 
+	BA_Message("shaped %d vertices", (int)along_list.size());
+
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
 		double frac;
-		
-		if (true /* regular spacing */)
+
+		if ((true) /* regular spacing */)
 			frac = i / (double)(along_list.size() - 1);
 		else
 			frac = (along_list[i].along - along1) / (along2 - along1);
@@ -1164,7 +1191,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void VT_ShapeArc(void)
+void CMD_VT_ShapeArc(void)
 {
 	if (! EXEC_Param[0][0])
 	{
@@ -1181,6 +1208,13 @@ void VT_ShapeArc(void)
 	}
 
 	double arc_rad = arc_deg * M_PI / 180.0;
+
+
+	if (edit.Selected->count_obj() < 3)
+	{
+		Beep("Need 3 or more vertices to shape");
+		return;
+	}
 
 
 	// determine middle point for circle
@@ -1255,7 +1289,7 @@ void VT_ShapeArc(void)
 	if (start_idx > 0)
 		end_idx = start_idx - 1;
 	else
-		end_idx = along_list.size() - 1;
+		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
 	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
 	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];
@@ -1320,6 +1354,8 @@ void VT_ShapeArc(void)
 	// actually move stuff now
 
 	BA_Begin();
+
+	BA_Message("shaped %d vertices", (int)along_list.size());
 
 	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);

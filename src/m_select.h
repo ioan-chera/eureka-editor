@@ -123,6 +123,8 @@ private:
 	int pos;
 
 public:
+	selection_iterator_c();
+
 	bool at_end() const;
 
 	int operator* () const;

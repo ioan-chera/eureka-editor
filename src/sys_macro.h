@@ -62,7 +62,7 @@
 #endif
 
 //
-// The packed attribute forces structures to be packed into the minimum 
+// The packed attribute forces structures to be packed into the minimum
 // space necessary.  If this is not done, the compiler may align structure
 // fields differently to optimize memory access, inflating the overall
 // structure size.  It is important to use the packed attribute on certain

@@ -1,0 +1,40 @@
+#------------------------------------------------------------------------
+#  DOOM LINE CATEGORIES
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2016 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+linegroup a "Animated"
+linegroup c "Ceiling"
+linegroup d "Door"
+linegroup e "Exit level"
+linegroup f "Floor (lower)"
+linegroup g "Floor (raise)"
+linegroup h "Crusher"
+linegroup k "Keyed Door"
+
+linegroup l "Light"
+linegroup m "Moving floor"
+linegroup n "Scripting"
+linegroup p "Lift"
+linegroup r "Renderer"
+linegroup s "Stairs"
+linegroup t "Teleport"
+linegroup v "Elevator"
+linegroup y "3D Floor"
+linegroup - "OTHER"
+

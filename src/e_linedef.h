@@ -36,8 +36,6 @@ void LineDefs_SetLength(int new_len);
 bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, int x2, int y2);
 
-void DeleteLineDefs(selection_c *lines);
-
 int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, int *x, int *y);
@@ -46,26 +44,34 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
 void LD_RemoveSideDef(int ld, int ld_side);
 void LD_FixForLostSide(int ld);
 
+double LD_AngleBetweenLines(int A, int B, int C);
+
+bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
+						int *ld1, int *side1,
+						int *ld2, int *side2);
 
 typedef enum
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset
 	LINALIGN_Y		= (1 << 1),		// align the Y offset
-
-	LINALIGN_Left	= 0,			// align with line to the left of this one
-	LINALIGN_Right	= (1 << 4)		// align with line to the right of this one
+	LINALIGN_Clear	= (1 << 2),		// clear the offset(s), instead of aligning
+	LINALIGN_Unpeg	= (1 << 3),		// change the unpegging flags
+	LINALIGN_Right	= (1 << 4)		// align with sidedef on RIGHT of this one [ otherwise do LEFT ]
 }
 linedef_align_flag_e;
 
-void LineDefs_Align(int ld, int side, int sd, char part, int align_flags);
+bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags);
+
+void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags);
 
 
 /* commands */
 
-void LIN_Flip(void);
-void LIN_Align(void);
-void LIN_MergeTwo(void);
-void LIN_SplitHalf(void);
+void CMD_LIN_Flip();
+void CMD_LIN_SwapSides();
+void CMD_LIN_Align();
+void CMD_LIN_MergeTwo();
+void CMD_LIN_SplitHalf();
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 

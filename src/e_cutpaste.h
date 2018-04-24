@@ -24,8 +24,6 @@
 void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
-bool Clipboard_HasStuff();
-
 void Clipboard_NotifyBegin();
 void Clipboard_NotifyInsert(obj_type_e type, int objnum);
 void Clipboard_NotifyDelete(obj_type_e type, int objnum);
@@ -33,12 +31,19 @@ void Clipboard_NotifyChange(obj_type_e type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
 void UnusedVertices(selection_c *lines, selection_c *result);
-void UnusedSideDefs(selection_c *lines, selection_c *result);
+void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
 
-void CMD_Delete(void);
+void DeleteObjects_WithUnused(selection_c *list,
+			bool keep_things = false,
+			bool keep_verts  = false,
+			bool keep_lines  = false);
 
-bool CMD_Copy();
-bool CMD_Paste();
+void CMD_Delete();
+void CMD_CopyAndPaste();
+
+void CMD_Clipboard_Cut();
+void CMD_Clipboard_Copy();
+void CMD_Clipboard_Paste();
 
 #endif  /* __EUREKA_E_CUTPASTE_H__ */
 

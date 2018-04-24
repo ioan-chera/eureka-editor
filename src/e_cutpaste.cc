@@ -24,16 +24,18 @@
 
 #include "e_basis.h"
 #include "e_cutpaste.h"
+#include "e_hover.h"
 #include "e_linedef.h"
+#include "e_main.h"
+#include "e_sector.h"
 #include "e_vertex.h"
-#include "editloop.h"
-#include "levels.h"
 #include "m_game.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "r_grid.h"
+#include "r_render.h"
 #include "w_rawdef.h"
-#include "x_hover.h"
-#include "x_loop.h"
+
+#include "ui_window.h"
 
 
 #define INVALID_SECTOR  (-999999)
@@ -86,6 +88,13 @@ public:
 		for (i = 0 ; i < sectors.size()  ; i++) delete sectors[i];
 		for (i = 0 ; i < sides.size()    ; i++) delete sides[i];
 		for (i = 0 ; i < lines.size()    ; i++) delete lines[i];
+	}
+
+	int TotalSize() const
+	{
+		size_t num = things.size() + verts.size() + sectors.size() + sides.size() + lines.size();
+
+		return (int)num;
 	}
 
 	void CentreOfThings(int *cx, int *cy)
@@ -245,9 +254,10 @@ void Clipboard_Clear()
 }
 
 
-/* this remove sidedefs which refer to local sectors, allowing the
-   clipboard geometry to persist when changing maps.
- */
+//
+// this remove sidedefs which refer to local sectors, allowing the
+// clipboard geometry to persist when changing maps.
+//
 void Clipboard_ClearLocals()
 {
 	if (clip_board)
@@ -255,7 +265,7 @@ void Clipboard_ClearLocals()
 }
 
 
-bool Clipboard_HasStuff()
+static bool Clipboard_HasStuff()
 {
 	return clip_board ? true : false;
 }
@@ -298,7 +308,7 @@ void Clipboard_NotifyInsert(obj_type_e type, int objnum)
 
 void Clipboard_NotifyDelete(obj_type_e type, int objnum)
 {
-	// this function notifies us that a sector is about to be deleted 
+	// this function notifies us that a sector is about to be deleted
 	// (causing other sectors to be moved).
 
 	if (type != OBJ_SECTORS)
@@ -434,7 +444,7 @@ static void CopyGroupOfObjects(selection_c *list)
 }
 
 
-bool CMD_Copy()
+static bool Clipboard_DoCopy()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -445,7 +455,7 @@ bool CMD_Copy()
 	// create storage for the copied objects
 	if (clip_board)
 		delete clip_board;
-	
+
 	clip_board = new clipboard_data_c(edit.mode);
 
 	switch (edit.mode)
@@ -654,7 +664,7 @@ static void ReselectGroup()
 }
 
 
-bool CMD_Paste()
+static bool Clipboard_DoPaste()
 {
 	bool reselect = true;  // CONFIG TODO
 
@@ -679,6 +689,8 @@ bool CMD_Paste()
 
 	BA_Begin();
 
+	BA_Message("pasted %d objects", clip_board->TotalSize());
+
 	clip_doing_paste = true;
 
 	switch (clip_board->mode)
@@ -702,7 +714,7 @@ bool CMD_Paste()
 			}
 			break;
 		}
-		
+
 		case OBJ_VERTICES:
 		{
 			int cx, cy;
@@ -712,7 +724,7 @@ bool CMD_Paste()
 			{
 				int new_v = BA_New(OBJ_VERTICES);
 				Vertex * V = Vertices[new_v];
-				
+
 				V->RawCopy(clip_board->verts[i]);
 
 				V->x += pos_x - cx;
@@ -747,6 +759,82 @@ bool CMD_Paste()
 
 //------------------------------------------------------------------------
 
+void CMD_CopyAndPaste()
+{
+	if (edit.Selected->empty() && edit.highlight.is_nil())
+	{
+		Beep("Nothing to copy and paste");
+		return;
+	}
+
+	if (Clipboard_DoCopy())
+	{
+		Clipboard_DoPaste();
+	}
+}
+
+
+void CMD_Clipboard_Cut()
+{
+	if (main_win->ClipboardOp('x'))
+		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('x');
+		return;
+	}
+
+	if (! Clipboard_DoCopy())
+	{
+		Beep("Nothing to cut");
+		return;
+	}
+
+	ExecuteCommand("Delete");
+}
+
+
+void CMD_Clipboard_Copy()
+{
+	if (main_win->ClipboardOp('c'))
+		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('c');
+		return;
+	}
+
+	if (! Clipboard_DoCopy())
+	{
+		Beep("Nothing to copy");
+		return;
+	}
+}
+
+
+void CMD_Clipboard_Paste()
+{
+	if (main_win->ClipboardOp('v'))
+		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('v');
+		return;
+	}
+
+	if (! Clipboard_DoPaste())
+	{
+		Beep("Clipboard is empty");
+		return;
+	}
+}
+
+
+//------------------------------------------------------------------------
+
 void UnusedVertices(selection_c *lines, selection_c *result)
 {
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
@@ -766,7 +854,8 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 	}
 }
 
-void UnusedSideDefs(selection_c *lines, selection_c *result)
+
+void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 {
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
 
@@ -783,7 +872,16 @@ void UnusedSideDefs(selection_c *lines, selection_c *result)
 		if (L->Right()) result->clear(L->right);
 		if (L->Left())  result->clear(L->left);
 	}
+
+	for (int i = 0 ; i < NumSideDefs ; i++)
+	{
+		const SideDef *SD = SideDefs[i];
+
+		if (secs && secs->get(SD->sector))
+			result->set(i);
+	}
 }
+
 
 void UnusedLineDefs(selection_c *sectors, selection_c *result)
 {
@@ -807,10 +905,15 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 	}
 }
 
-void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
+
+void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 {
 	SYS_ASSERT(verts->what_type() == OBJ_VERTICES);
 	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
+
+	// collect all the sectors that touch a linedef being removed.
+
+	bitvec_c del_lines(NumLineDefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -818,10 +921,15 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 
 		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
 		{
+			del_lines.set(n);
+
 			if (L->WhatSector(SIDE_LEFT ) >= 0) result->set(L->WhatSector(SIDE_LEFT ));
 			if (L->WhatSector(SIDE_RIGHT) >= 0) result->set(L->WhatSector(SIDE_RIGHT));
 		}
 	}
+
+	// visit all linedefs NOT being removed, and see if the sector(s)
+	// on it will actually be OK after the delete.
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -833,35 +941,31 @@ void UnusedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
 			int what_side = pass ? SIDE_LEFT : SIDE_RIGHT;
-			
+
 			int sec_num = L->WhatSector(what_side);
 
 			if (sec_num < 0)
 				continue;
 
-			// if already clear, skip it (prevent expensive tests below)
+			// skip sectors that are not potentials for removal,
+			// and prevent the expensive tests below...
 			if (! result->get(sec_num))
 				continue;
 
-			// check if the linedef opposite this is being deleted, which
-			// means this linedef will get mucked up.  When all remaining
-			// lines are like this, we should consider the sector "unused"
-			// and let it be removed.
+			// check if the linedef opposite faces this sector (BUT
+			// IGNORING any lines being deleted).  when found, we
+			// know that this sector should be kept.
 
 			int opp_side;
-			int opp_ld = OppositeLineDef(n, what_side, &opp_side);
+			int opp_ld = OppositeLineDef(n, what_side, &opp_side, &del_lines);
 
-			if (opp_ld >= 0)
-			{
-				const LineDef *L2 = LineDefs[opp_ld];
-
-				if ((L2->WhatSector(opp_side) == sec_num) &&
-					(L2->WhatSector(SIDE_LEFT) != L2->WhatSector(SIDE_RIGHT)) &&
-					(lines->get(opp_ld) || verts->get(L2->start) || verts->get(L2->end)))
+			if (opp_ld < 0)
 				continue;
-			}
 
-			result->clear(sec_num);
+			const LineDef *L2 = LineDefs[opp_ld];
+
+			if (L2->WhatSector(opp_side) == sec_num)
+				result->clear(sec_num);
 		}
 	}
 }
@@ -947,7 +1051,18 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	if (LineDefAlreadyExists(v1, v2))
 		return false;
 
+	// see what sidedefs would become unused
+	selection_c line_sel(OBJ_LINEDEFS);
+	selection_c side_sel(OBJ_SIDEDEFS);
+
+	line_sel.set(ld2);
+
+	UnusedSideDefs(&line_sel, NULL /* sec_sel */, &side_sel);
+
+
 	BA_Begin();
+
+	BA_Message("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
 		BA_ChangeLD(ld1, LineDef::F_START, v2);
@@ -959,91 +1074,77 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	BA_Delete(OBJ_LINEDEFS, ld2);
 	BA_Delete(OBJ_VERTICES, v_num);
 
+	DeleteObjects(&side_sel);
+
 	BA_End();
 
 	return true;
 }
 
 
-void CMD_Delete(void)
+void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
+							  bool keep_verts, bool keep_lines)
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("Nothing to delete");
-		return;
-	}
-
-	bool keep_things = Exec_HasFlag("/keep_things");
-	bool keep_unused = Exec_HasFlag("/keep_unused");
-
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
 	selection_c line_sel(OBJ_LINEDEFS);
 	selection_c  sec_sel(OBJ_SECTORS);
 
-	switch (edit.mode)
+	switch (list->what_type())
 	{
 		case OBJ_VERTICES:
-			vert_sel.merge(list);
+			vert_sel.merge(*list);
 			break;
 
 		case OBJ_LINEDEFS:
-			line_sel.merge(list);
+			line_sel.merge(*list);
 			break;
 
 		case OBJ_SECTORS:
-			sec_sel.merge(list);
+			sec_sel.merge(*list);
 			break;
 
-		default: /* OBJ_THINGS */
-			BA_Begin();
-			DeleteObjects(&list);
-			BA_End();
-
-			goto success;
+		default: /* OBJ_THINGS or OBJ_SIDEDEFS */
+			DeleteObjects(list);
+			return;
 	}
 
-	// special case for a single vertex connected to two linedef,
-	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == OBJ_VERTICES && vert_sel.count_obj() == 1)
+	if (list->what_type() == OBJ_VERTICES)
 	{
-		int v_num = vert_sel.find_first();
-		SYS_ASSERT(v_num >= 0);
-
-		if (VertexHowManyLineDefs(v_num) == 2)
+		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			if (DeleteVertex_MergeLineDefs(v_num))
-				goto success;
+			const LineDef *L = LineDefs[n];
 
-			// delete vertex normally
+			if (list->get(L->start) || list->get(L->end))
+				line_sel.set(n);
 		}
 	}
 
-	if (!keep_unused && edit.mode == OBJ_SECTORS)
+	if (!keep_lines && list->what_type() == OBJ_SECTORS)
 	{
 		UnusedLineDefs(&sec_sel, &line_sel);
 
 		if (line_sel.notempty())
 		{
-			UnusedVertices(&line_sel, &vert_sel);
-			UnusedSideDefs(&line_sel, &side_sel);
+			UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
+
+			if (!keep_verts)
+				UnusedVertices(&line_sel, &vert_sel);
 		}
 	}
 
-	if (!keep_unused && edit.mode == OBJ_LINEDEFS)
+	if (!keep_verts && list->what_type() == OBJ_LINEDEFS)
 	{
 		UnusedVertices(&line_sel, &vert_sel);
 	}
 
-	if (edit.mode == OBJ_VERTICES || edit.mode == OBJ_LINEDEFS)
+	// try to detect sectors that become "dudded", where all the
+	// remaining linedefs of the sector face into the void.
+	if (list->what_type() == OBJ_VERTICES || list->what_type() == OBJ_LINEDEFS)
 	{
-		UnusedSideDefs(&line_sel, &side_sel);
-		UnusedSectors(&vert_sel, &line_sel, &sec_sel);
+		DuddedSectors(&vert_sel, &line_sel, &sec_sel);
+		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 	}
-
-	BA_Begin();
 
 	// delete things from each deleted sector
 	if (!keep_things && sec_sel.notempty())
@@ -1072,6 +1173,50 @@ void CMD_Delete(void)
 	DeleteObjects(&side_sel);
 	DeleteObjects(&vert_sel);
 	DeleteObjects( &sec_sel);
+}
+
+
+void CMD_Delete()
+{
+	if (main_win->ClipboardOp('d'))
+		return;
+
+	if (edit.render3d)
+	{
+		Render3D_ClipboardOp('d');
+		return;
+	}
+
+	selection_c list;
+
+	if (! GetCurrentObjects(&list))
+	{
+		Beep("Nothing to delete");
+		return;
+	}
+
+	bool keep = Exec_HasFlag("/keep");
+
+	// special case for a single vertex connected to two linedefs,
+	// we delete the vertex but merge the two linedefs.
+	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
+	{
+		int v_num = list.find_first();
+		SYS_ASSERT(v_num >= 0);
+
+		if (Vertex_HowManyLineDefs(v_num) == 2)
+		{
+			if (DeleteVertex_MergeLineDefs(v_num))
+				goto success;
+		}
+
+		// delete vertex normally
+	}
+
+	BA_Begin();
+	BA_MessageForSel("deleted", &list);
+
+	DeleteObjects_WithUnused(&list, keep, false /* keep_verts */, keep);
 
 	BA_End();
 
@@ -1083,7 +1228,7 @@ success:
 	edit.highlight.clear();
 	edit.split_line.clear();
 
-	UpdateHighlight();
+	RedrawMap();
 }
 
 

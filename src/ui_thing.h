@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@ private:
 
 	UI_Nombre *which;
 
-	Fl_Int_Input *type;
+	UI_DynInput  *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
@@ -72,7 +72,7 @@ private:
 	UI_Pic *sprite;
 
 	// more Hexen stuff
-	Fl_Int_Input *spec_type;
+	UI_DynInput  *spec_type;
 	Fl_Button    *spec_choose;
 	Fl_Output    *spec_desc;
 	Fl_Int_Input *args[5];
@@ -92,28 +92,36 @@ public:
 
 	void UpdateTotal();
 
-	void SetThingType(int new_type);
-	void SetSpecialType(int new_type);
+	// see ui_window.h for description of these two methods
+	bool ClipboardOp(char what);
+	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UpdateGameInfo();
 
 private:
-	static void      x_callback(Fl_Widget *w, void *data);
-	static void      y_callback(Fl_Widget *w, void *data);
-	static void      z_callback(Fl_Widget *w, void *data);
-	static void   type_callback(Fl_Widget *w, void *data);
-	static void  angle_callback(Fl_Widget *w, void *data);
-	static void    tid_callback(Fl_Widget *w, void *data);
-	static void option_callback(Fl_Widget *w, void *data);
-	static void button_callback(Fl_Widget *w, void *data);
-	static void   spec_callback(Fl_Widget *w, void *data);
-	static void   args_callback(Fl_Widget *w, void *data);
+	void SetThingType(int new_type);
+	void SetSpecialType(int new_type);
 
 	void AdjustExtraFloor(int dir);
 
 	int  CalcOptions() const;
 	void OptionsFromInt(int options);
 
+private:
+	static void       x_callback(Fl_Widget *w, void *data);
+	static void       y_callback(Fl_Widget *w, void *data);
+	static void       z_callback(Fl_Widget *w, void *data);
+	static void    type_callback(Fl_Widget *w, void *data);
+	static void dyntype_callback(Fl_Widget *, void *);
+
+	static void  angle_callback(Fl_Widget *w, void *data);
+	static void    tid_callback(Fl_Widget *w, void *data);
+	static void option_callback(Fl_Widget *w, void *data);
+	static void button_callback(Fl_Widget *w, void *data);
+
+	static void    spec_callback(Fl_Widget *w, void *data);
+	static void dynspec_callback(Fl_Widget *w, void *data);
+	static void    args_callback(Fl_Widget *w, void *data);
 };
 
 #endif  /* __EUREKA_UI_THING_H__ */

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2015 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -145,7 +145,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		but->copy_label(name_buf);
 		but->callback(button_callback, this);
 
-		if (test_wad && test_wad->FindLevel(name_buf) >= 0)
+		if (test_wad && test_wad->LevelFind(name_buf) >= 0)
 		{
 			if (rename_wad)
 				but->deactivate();
@@ -222,7 +222,7 @@ void UI_ChooseMap::CheckMapName()
 
 	if (rename_wad && is_valid)
 	{
-		if (rename_wad->FindLevel(map_name->value()) >= 0)
+		if (rename_wad->LevelFind(map_name->value()) >= 0)
 			is_valid = false;
 	}
 
@@ -248,87 +248,68 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap() :
-	UI_Escapable_Window(420, 530, "Open Map"),
+	UI_Escapable_Window(420, 470, "Open Map"),
 	action(ACT_none),
-	result_wad(NULL), new_pwad(NULL)
+	loaded_wad(NULL),
+	 using_wad(NULL)
 {
 	resizable(NULL);
 
 	callback(close_callback, this);
 
 	{
-		Fl_Box *o = new Fl_Box(10, 10, 300, 37, "Look for the map in which file:");
+		look_where = new Fl_Choice(130, 80, 190, 25, "Find map in:  ");
+		look_where->labelfont(FL_HELVETICA_BOLD);
+		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
+		look_where->callback(look_callback, this);
+
+		look_where->value(edit_wad ? LOOK_PWad : LOOK_IWad);
+	}
+
+	{
+		Fl_Box* o = new Fl_Box(15, 15, 270, 20, "PWAD file:");
 		o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
-	{
-		Fl_Group *o = new Fl_Group(50, 50, 235, 85);
+	pwad_name = new Fl_Output(20, 40, 295, 26);
 
-		look_iwad = new Fl_Round_Button(50, 50, 215, 25, " the Game (IWAD) file");
-		look_iwad->down_box(FL_ROUND_DOWN_BOX);
-		look_iwad->type(FL_RADIO_BUTTON);
-		look_iwad->callback(look_callback, this);
-
-		look_res = new Fl_Round_Button(50, 75, 215, 25, " the Resource wads");
-		look_res->down_box(FL_ROUND_DOWN_BOX);
-		look_res->type(FL_RADIO_BUTTON);
-		look_res->callback(look_callback, this);
-
-		look_pwad = new Fl_Round_Button(50, 100, 235, 25, " the currently edited PWAD");
-		look_pwad->down_box(FL_ROUND_DOWN_BOX);
-		look_pwad->type(FL_RADIO_BUTTON);
-		look_pwad->callback(look_callback, this);
-
-		if (edit_wad)
-			look_pwad->value(1);
-		else
-			look_iwad->value(1);
-
-		o->end();
-	}
-
-	{
-		Fl_Box* o = new Fl_Box(10, 140, 300, 20, "Current PWAD file:");
-		o->labelfont(FL_HELVETICA_BOLD);
-		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-	}
-
-	pwad_name = new Fl_Output(25, 165, 265, 26);
-
-	Fl_Button *load_but = new Fl_Button(305, 164, 70, 28, "Load");
+	Fl_Button *load_but = new Fl_Button(330, 39, 65, 28, "Load");
 	load_but->callback(load_callback, this);
 
-	map_name = new Fl_Input(94, 205, 100, 26, "Map slot: ");
+
+	map_name = new Fl_Input(99, 125, 100, 26, "Map slot: ");
 	map_name->labelfont(FL_HELVETICA_BOLD);
 	map_name->when(FL_WHEN_CHANGED);
 	map_name->callback(input_callback, this);
 
 	{
-		Fl_Box *o = new Fl_Box(205, 205, 180, 26, "Available maps:");
+		Fl_Box *o = new Fl_Box(230, 125, 180, 26, "Available maps:");
 		// o->labelfont(FL_HELVETICA_BOLD);
 		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
 
 	// all the map buttons go into this group
-	
-	button_grp = new Fl_Group(0, 235, w(), 230, "\n\nNone Found");
+
+	button_grp = new Fl_Group(0, 165, w(), 230, "");
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	button_grp->end();
 
-	{
-		int bottom_y = 470;
+	/* bottom buttons */
 
-		Fl_Group* o = new Fl_Group(0, bottom_y, w(), 60);
+	{
+		int bottom_y = h() - 70;
+
+		Fl_Group* o = new Fl_Group(0, bottom_y, w(), 70);
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(280, bottom_y + 15, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(280, bottom_y + 20, 89, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(140, bottom_y + 15, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(100, bottom_y + 20, 95, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -341,15 +322,13 @@ UI_OpenMap::UI_OpenMap() :
 
 
 UI_OpenMap::~UI_OpenMap()
-{
-}
+{ }
 
 
-void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
+Wad_file * UI_OpenMap::Run(const char ** map_v, bool * did_load)
 {
-	*wad_v = NULL;
 	*map_v = NULL;
-	*is_new_pwad = false;
+	*did_load = false;
 
 	if (edit_wad)
 		SetPWAD(edit_wad->PathName());
@@ -357,7 +336,6 @@ void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
 	Populate();
 
 	set_modal();
-
 	show();
 
 	while (action == ACT_none)
@@ -365,24 +343,26 @@ void UI_OpenMap::Run(Wad_file ** wad_v, bool * is_new_pwad, const char ** map_v)
 		Fl::wait(0.2);
 	}
 
-	if (action == ACT_ACCEPT)
-	{
-		SYS_ASSERT(result_wad);
+	if (action != ACT_ACCEPT)
+		using_wad = NULL;
 
-		*wad_v = result_wad;
+	if (using_wad)
+	{
 		*map_v = StringUpper(map_name->value());
 
-		if (result_wad == new_pwad)
+		if (using_wad == loaded_wad)
 		{
-			*is_new_pwad = true;
-			new_pwad = NULL;
+			*did_load  = true;
+			loaded_wad = NULL;
 		}
 	}
 
-	if (new_pwad)
-	{
-		delete new_pwad;
-	}
+	// if we are not returning a pwad which got loaded, e.g. because
+	// the user cancelled or chose the game IWAD, then close it now.
+	if (loaded_wad)
+		delete loaded_wad;
+
+	return using_wad;
 }
 
 
@@ -390,9 +370,9 @@ void UI_OpenMap::CheckMapName()
 {
 	bool was_valid = ok_but->active();
 
-	bool  is_valid = (result_wad != NULL) &&
+	bool  is_valid = (using_wad != NULL) &&
 	                 ValidateMapName(map_name->value()) &&
-					 (result_wad->FindLevel(map_name->value()) >= 0);
+					 (using_wad->LevelFind(map_name->value()) >= 0);
 
 	if (was_valid == is_valid)
 		return;
@@ -414,16 +394,17 @@ void UI_OpenMap::CheckMapName()
 
 void UI_OpenMap::Populate()
 {
-	button_grp->label("\n\nNone Found");
+	button_grp->label("\n\n\n\n\nNO   MAPS   FOUND");
 	button_grp->clear();
 
-	result_wad = NULL;
+	using_wad = NULL;
 
-	if (look_iwad->value())
+	if (look_where->value() == LOOK_IWad)
 	{
-		PopulateButtons(game_wad);
+		using_wad = game_wad;
+		PopulateButtons();
 	}
-	else if (look_res->value())
+	else if (look_where->value() >= LOOK_Resource)
 	{
 		int first = 1;
 		int last  = (int)master_dir.size() - 1;
@@ -432,23 +413,28 @@ void UI_OpenMap::Populate()
 			last--;
 
 		// we simply use the last resource which contains levels
-		// TODO: should grab list from each of them and merge into one big list
+
+		// TODO: probably should collect ones with a map, add to look_where choices
 
 		for (int r = last ; r >= first ; r--)
 		{
-			if (master_dir[r]->FindFirstLevel() >= 0)
+			if (master_dir[r]->LevelCount() >= 0)
 			{
-				PopulateButtons(master_dir[r]);
+				using_wad = master_dir[r];
+				PopulateButtons();
 				break;
 			}
 		}
 	}
-	else
+	else if (loaded_wad)
 	{
-		if (new_pwad)
-			PopulateButtons(new_pwad);
-		else if (edit_wad)
-			PopulateButtons(edit_wad);
+		using_wad = loaded_wad;
+		PopulateButtons();
+	}
+	else if (edit_wad)
+	{
+		using_wad = edit_wad;
+		PopulateButtons();
 	}
 }
 
@@ -457,7 +443,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 {
 	if (A[0] != B[0])
 		return true;
-	
+
 	// handle ExMx
 	if (toupper(A[0]) == 'E')
 	{
@@ -467,16 +453,17 @@ static bool DifferentEpisode(const char *A, const char *B)
 	// handle MAPxx
 	if (strlen(A) < 4 && strlen(B) < 4)
 		return false;
-	
+
 	return A[3] != B[3];
 }
 
 
-void UI_OpenMap::PopulateButtons(Wad_file *wad)
+void UI_OpenMap::PopulateButtons()
 {
-	result_wad = wad;
+	Wad_file *wad = using_wad;
+	SYS_ASSERT(wad);
 
-	int num_levels = wad->NumLevels();
+	int num_levels = wad->LevelCount();
 
 	if (num_levels == 0)
 		return;
@@ -495,7 +482,7 @@ void UI_OpenMap::PopulateButtons(Wad_file *wad)
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
-		Lump_c *lump = wad->GetLump(wad->GetLevel(lev));
+		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
 		level_names[std::string(lump->Name())] = 1;
 	}
@@ -587,7 +574,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	// santify check
-	if (that->result_wad && ValidateMapName(that->map_name->value()))
+	if (that->using_wad && ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
 		fl_beep();
@@ -599,7 +586,7 @@ void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
 	// sanity check
-	if (! that->result_wad)
+	if (! that->using_wad)
 		return;
 
 	that->map_name->value(w->label());
@@ -640,8 +627,7 @@ void UI_OpenMap::LoadFile()
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -674,7 +660,7 @@ void UI_OpenMap::LoadFile()
 		return;
 	}
 
-	if (wad->FindFirstLevel() < 0)
+	if (wad->LevelCount() < 0)
 	{
 		DLG_Notify("The chosen WAD contains no levels.\n\n"
 				   "Please try again.");
@@ -682,21 +668,20 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	if (new_pwad)
-	{
-		delete new_pwad;
-	}
+	// replace existing one
+	if (loaded_wad)
+		delete loaded_wad;
 
-	new_pwad = wad;
+	loaded_wad = wad;
 
-	SetPWAD(new_pwad->PathName());
+	SetPWAD(loaded_wad->PathName());
+
+	if (using_wad == loaded_wad)
+		using_wad = wad;
 
 
-	// change the "Look in ..." setting to be the current pwad
-
-	look_iwad->value(0);
-	look_res ->value(0);
-	look_pwad->value(1);
+	// change the "Find map in ..." setting
+	look_where->value(LOOK_PWad);
 
 	Populate();
 }
@@ -712,9 +697,9 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 412 : 372, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	iwad(NULL), port(NULL)
+	game(NULL), port(NULL), map_format(MAPF_INVALID)
 {
 	callback(close_callback, this);
 
@@ -726,41 +711,63 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	if (is_startup)
 	{
-		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 10, 370, 46, STARTUP_MSG);
+		Fl_Box * message = new Fl_Box(FL_FLAT_BOX, 15, 15, 370, 46, STARTUP_MSG);
 		message->align(FL_ALIGN_INSIDE);
 		message->color(FL_RED, FL_RED);
 		message->labelcolor(FL_YELLOW);
 		message->labelsize(18);
 
-		by += 40;
+		by += 60;
 	}
-	
-	iwad_choice = new Fl_Choice(120, by+25, 170, 29, "Game IWAD: ");
-	iwad_choice->labelfont(FL_HELVETICA_BOLD);
-	iwad_choice->down_box(FL_BORDER_BOX);
-	iwad_choice->callback((Fl_Callback*)iwad_callback, this);
 
-	port_choice = new Fl_Choice(120, by+60, 170, 29, "Port: ");
+	game_choice = new Fl_Choice(140, by+25, 150, 29, "Game IWAD: ");
+	game_choice->labelfont(FL_HELVETICA_BOLD);
+	game_choice->down_box(FL_BORDER_BOX);
+	game_choice->callback((Fl_Callback*)game_callback, this);
+
+	{
+		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
+		o->callback((Fl_Callback*)find_callback, this);
+	}
+
+	port_choice = new Fl_Choice(140, by+60, 150, 29, "Source Port: ");
 	port_choice->labelfont(FL_HELVETICA_BOLD);
 	port_choice->down_box(FL_BORDER_BOX);
 	port_choice->callback((Fl_Callback*)port_callback, this);
 
 	{
-		Fl_Button* o = new Fl_Button(305, by+27, 75, 25, "Find");
-		o->callback((Fl_Callback*)browse_callback, this);
+		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
+		o->callback((Fl_Callback*)setup_callback, this);
+	}
+
+	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
+	format_choice->labelfont(FL_HELVETICA_BOLD);
+	format_choice->down_box(FL_BORDER_BOX);
+	format_choice->callback((Fl_Callback*)format_callback, this);
+
+	if (is_startup)
+	{
+		  port_choice->hide();
+		format_choice->hide();
 	}
 
 	// Resource section
 
-	Fl_Box *res_title = new Fl_Box(15, by+110, 185, 35, "Resource Files:");
-	res_title->labelfont(FL_HELVETICA_BOLD);
-	res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	if (! is_startup)
+	{
+		Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
+		res_title->labelfont(FL_HELVETICA_BOLD);
+		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	}
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
 		res[r] = NULL;
 
-		int cy = by + 145 + r * 35;
+		if (is_startup)
+			continue;
+
+		int cy = by + 172 + r * 35;
 
 		char res_label[64];
 		sprintf(res_label, "%d. ", 1 + r);
@@ -778,18 +785,24 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	// bottom buttons
 	{
-		Fl_Group *o = new Fl_Group(0, by+312, 400, 60);
-		o->box(FL_FLAT_BOX);
-		o->color(WINDOW_BG, WINDOW_BG);
+		by += is_startup ? 80 : 340;
 
-		cancel = new Fl_Button(165, o->y() + 14, 80, 35, is_startup ? "Quit" : "Cancel");
+		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
+		g->box(FL_FLAT_BOX);
+		g->color(WINDOW_BG, WINDOW_BG);
+
+		const char *cancel_text = is_startup ? "Quit" : "Cancel";
+
+		cancel = new Fl_Button(90, g->y() + 14, 80, 35, cancel_text);
 		cancel->callback((Fl_Callback*)close_callback, this);
 
-		ok_but = new Fl_Button(290, o->y() + 14, 80, 35, "Use");
+		const char *ok_text = (is_startup | new_project) ? "OK" : "Use";
+
+		ok_but = new Fl_Button(240, g->y() + 14, 80, 35, ok_text);
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
-		o->end();
+		g->end();
 	}
 
 	end();
@@ -804,7 +817,10 @@ UI_ProjectSetup::~UI_ProjectSetup()
 
 bool UI_ProjectSetup::Run()
 {
-	Populate();
+	PopulateIWADs();
+	PopulatePort();
+	PopulateMapFormat();
+	PopulateResources();
 
 	set_modal();
 
@@ -819,56 +835,177 @@ bool UI_ProjectSetup::Run()
 }
 
 
-void UI_ProjectSetup::PopulateIWADs(const char *curr_iwad)
+void UI_ProjectSetup::PopulateIWADs()
 {
-	const char *iwad_string;
-	int iwad_val = 0;
+	// This is called (a) when dialog is first opened, or (b) when
+	// the user has found a new iwad.  For the latter case, we want
+	// to show the newly found game.
 
-	iwad_string = M_KnownIWADsForMenu(&iwad_val, curr_iwad ? curr_iwad : "xxx");
+	const char *prev_game = game;
 
-	iwad_choice->clear();
+	if (! prev_game) prev_game = Game_name;
+	if (! prev_game) prev_game = "doom2";
 
-	if (iwad_string[0])
+
+	game = NULL;
+
+	game_choice->clear();
+
+
+	const char *menu_string;
+	int menu_value = 0;
+
+	menu_string = M_CollectGamesForMenu(&menu_value, prev_game);
+
+	if (menu_string[0])
 	{
-		iwad_choice->add(iwad_string);
-		iwad_choice->value(iwad_val);
+		game_choice->add(menu_string);
+		game_choice->value(menu_value);
 
-		iwad = M_QueryKnownIWAD(iwad_choice->mvalue()->text);
+		game = StringDup(game_choice->mvalue()->text);
+	}
+
+	if (game)
+		ok_but->activate();
+	else
+		ok_but->deactivate();
+}
+
+
+void UI_ProjectSetup::PopulatePort()
+{
+	const char *prev_port = NULL;
+
+	if (port_choice->mvalue())
+		prev_port = StringDup(port_choice->mvalue()->text);
+
+	if (! prev_port) prev_port = Port_name;
+	if (! prev_port) prev_port = "vanilla";
+
+
+	port = "vanilla";
+
+	port_choice->clear();
+
+	// if no game, port doesn't matter
+	if (! game)
+		return;
+
+
+	const char *var_game = NULL;
+
+	if (game_choice->mvalue())
+		var_game = M_VariantForGame(game_choice->mvalue()->text);
+	else if (Game_name)
+		var_game = M_VariantForGame(Game_name);
+
+	if (! var_game)
+		var_game = "doom2";
+
+
+	const char *menu_string;
+	int menu_value = 0;
+
+	menu_string = M_CollectPortsForMenu(var_game, &menu_value, prev_port);
+
+	if (menu_string[0])
+	{
+		port_choice->add  (menu_string);
+		port_choice->value(menu_value);
+
+		port = StringDup(port_choice->mvalue()->text);
 	}
 }
 
 
-void UI_ProjectSetup::Populate()
+void UI_ProjectSetup::PopulateMapFormat()
 {
-	iwad = NULL;
+	map_format_e prev_fmt = Level_format;
 
-	PopulateIWADs(Iwad_name);
-
-	if (! iwad)
-		ok_but->deactivate();
-
-
-	port = NULL;
-
-	const char *port_string;
-	int port_val = 0;
-
-	port_string = M_CollectDefsForMenu("ports", &port_val, Port_name ? Port_name : "xxx");
-
-	if (port_string[0])
+	if (format_choice->mvalue())
 	{
-		port_choice->add  (port_string);
-		port_choice->value(port_val);
-
-		port = port_choice->mvalue()->text;
+		if (strstr(format_choice->mvalue()->text, "Hexen"))
+			prev_fmt = MAPF_Hexen;
+		else
+			prev_fmt = MAPF_Doom;
 	}
 
 
+	map_format = MAPF_Doom;
+
+	format_choice->clear();
+
+	// if no game, format doesn't matter
+	if (! game)
+		return;
+
+
+	// determine the usable formats, from current game and port
+	const char *c_game = "doom2";
+	const char *c_port = "vanilla";
+
+	if (game_choice->mvalue())
+		c_game = game_choice->mvalue()->text;
+
+	if (port_choice->mvalue())
+		c_port = port_choice->mvalue()->text;
+
+	usable_formats = M_DetermineMapFormats(c_game, c_port);
+
+	SYS_ASSERT(usable_formats != 0);
+
+
+	// reconstruct the menu
+	char menu_string[256];
+	int  menu_value = 0;
+
+	menu_string[0] = 0;
+
+	int entry_id = 0;
+
+	if (usable_formats & (1 << MAPF_Doom))
+	{
+		strcat(menu_string, "Doom Format");
+		entry_id++;
+	}
+
+	if (usable_formats & (1 << MAPF_Hexen))
+	{
+		if (prev_fmt == MAPF_Hexen)
+			menu_value = entry_id;
+
+		if (menu_string[0])
+			strcat(menu_string, "|");
+
+		strcat(menu_string, "Hexen Format");
+		entry_id++;
+	}
+
+	format_choice->add  (menu_string);
+	format_choice->value(menu_value);
+
+	if (usable_formats & (1 << MAPF_Hexen))
+	{
+		if (prev_fmt == MAPF_Hexen ||
+			(usable_formats & (1 << MAPF_Doom)) == 0)
+		{
+			map_format = MAPF_Hexen;
+		}
+	}
+}
+
+
+void UI_ProjectSetup::PopulateResources()
+{
 	// Note: these resource wads may be invalid (not exist) during startup.
 	//       This is probably NOT the place to validate them...
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
+		// the resource widgets are not created for the missing-iwad dialog
+		if (! res_name[r])
+			continue;
+
 		if (r < (int)Resource_list.size())
 		{
 			res[r] = StringDup(Resource_list[r]);
@@ -895,22 +1032,27 @@ void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_ProjectSetup::iwad_callback(Fl_Choice *w, void *data)
+void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	const char * name = w->mvalue()->text;
 
-	that->iwad = StringDup(M_QueryKnownIWAD(name));
-
-	if (that->iwad)
+	if (M_QueryKnownIWAD(name))
+	{
+		that->game = StringDup(name);
 		that->ok_but->activate();
+	}
 	else
 	{
+		that->game = NULL;
 		that->ok_but->deactivate();
 
 		fl_beep();
 	}
+
+	that->PopulatePort();
+	that->PopulateMapFormat();
 }
 
 
@@ -921,10 +1063,25 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 	const char * name = w->mvalue()->text;
 
 	that->port = StringDup(name);
+
+	that->PopulateMapFormat();
 }
 
 
-void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
+void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	const char * fmt_str = w->mvalue()->text;
+
+	if (strstr(fmt_str, "Hexen"))
+		that->map_format = MAPF_Hexen;
+	else
+		that->map_format = MAPF_Doom;
+}
+
+
+void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
@@ -933,8 +1090,7 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	switch (chooser.show())
 	{
@@ -964,11 +1120,30 @@ void UI_ProjectSetup::browse_callback(Fl_Button *w, void *data)
 	M_AddKnownIWAD(chooser.filename());
 	M_SaveRecent();
 
-	that->iwad = StringDup(chooser.filename());
+	that->game = StringDup(game);
 
-	that->PopulateIWADs(that->iwad);
+	that->PopulateIWADs();
+	that->PopulatePort();
+	that->PopulateMapFormat();
+}
 
-	that->ok_but->activate();
+
+// m_testmap.cc
+extern bool M_PortSetupDialog(const char *port, const char *game);
+
+
+void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// FIXME : deactivate button when this is true
+	if (that->game == NULL || that->port == NULL)
+	{
+		fl_beep();
+		return;
+	}
+
+	M_PortSetupDialog(that->port, that->game);
 }
 
 
@@ -985,8 +1160,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-
-	//??  chooser.directory("xxx");
+	chooser.directory(Main_FileOpFolder());
 
 	switch (chooser.show())
 	{

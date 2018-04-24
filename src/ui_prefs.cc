@@ -30,7 +30,7 @@
 
 
 #define PREF_WINDOW_W  600
-#define PREF_WINDOW_H  500
+#define PREF_WINDOW_H  520
 
 #define PREF_WINDOW_TITLE  "Eureka Preferences"
 
@@ -44,14 +44,17 @@ private:
 	bool want_close;
 	bool cancelled;
 
-	bool grab_active;
+	bool awaiting_key;
 
 	keycode_t key;
 
 	Fl_Input  *key_name;
+	Fl_Button *grab_but;
+
+	Fl_Output *func_name;
+	Fl_Menu_Button *func_choose;
 
 	Fl_Choice *context;
-	Fl_Choice *func;
 	Fl_Input  *params;
 
 	const editor_command_t *cur_cmd;
@@ -63,6 +66,71 @@ private:
 	Fl_Button *ok_but;
 
 private:
+	void BeginGrab()
+	{
+		SYS_ASSERT(! awaiting_key);
+
+		awaiting_key = true;
+
+		key_name->color(FL_YELLOW, FL_YELLOW);
+		key_name->value("<\077\077\077>");
+		grab_but->deactivate();
+
+		Fl::focus(this);
+
+		redraw();
+	}
+
+	void FinishGrab()
+	{
+		if (! awaiting_key)
+			return;
+
+		awaiting_key = false;
+
+		key_name->color(FL_BACKGROUND2_COLOR, FL_SELECTION_COLOR);
+		grab_but->activate();
+
+		redraw();
+	}
+
+	int handle(int event)
+	{
+		if (awaiting_key)
+		{
+			// escape key cancels
+			if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
+			{
+				FinishGrab();
+
+				if (key)
+					key_name->value(M_KeyToString(key));
+
+				return 1;
+			}
+
+			if (event == FL_KEYDOWN ||
+				event == FL_PUSH    ||
+				event == FL_MOUSEWHEEL)
+			{
+				keycode_t new_key = M_CookedKeyForEvent(event);
+
+				if (new_key)
+				{
+					FinishGrab();
+
+					key = new_key;
+					key_name->value(M_KeyToString(key));
+
+					return 1;
+				}
+			}
+		}
+
+		return UI_Escapable_Window::handle(event);
+	}
+
+private:
 	struct name_CMP_pred
 	{
 		inline bool operator() (const char * A, const char * B) const
@@ -71,15 +139,65 @@ private:
 		}
 	};
 
-	int PopulateFuncMenu(key_context_e ctx, const char *find_name = NULL)
+	// need this because menu is in reverse order
+	key_context_e ContextFromMenu()
 	{
-		if (ctx == KCTX_Browser || ctx == KCTX_General)
-			ctx = KCTX_NONE;
+		int i = context->value();
+		SYS_ASSERT(i >= 0 && i <= 6);
+		return (key_context_e)((int)KCTX_General - i);
+	}
 
-		func->clear();
+	void SetContext(key_context_e ctx)
+	{
+		int i = (int)KCTX_General - (int)ctx;
+		SYS_ASSERT(i >= 0 && i <= 6);
+		context->value(i);
+	}
 
-		// collect all names so we can sort them alphabetically
-		std::vector< const char * > name_list;
+	void AddContextToMenu(const char *lab, key_context_e ctx, key_context_e limit_ctx)
+	{
+		int flags = 0;
+
+		if (limit_ctx != KCTX_NONE && ctx != limit_ctx)
+		{
+			flags = FL_MENU_INACTIVE;
+		}
+
+		context->add(lab, 0, 0, 0, flags);
+	}
+
+	void PopulateContextMenu(key_context_e want_ctx)
+	{
+		key_context_e limit_ctx = KCTX_NONE;
+
+		if (cur_cmd && cur_cmd->req_context != KCTX_NONE)
+			limit_ctx = cur_cmd->req_context;
+
+		context->clear();
+
+		AddContextToMenu("General (Any)",  KCTX_General, limit_ctx);
+
+		AddContextToMenu("Linedefs",  KCTX_Line,    limit_ctx);
+		AddContextToMenu("Sectors",   KCTX_Sector,  limit_ctx);
+		AddContextToMenu("Things",    KCTX_Thing,   limit_ctx);
+		AddContextToMenu("Vertices",  KCTX_Vertex,  limit_ctx);
+		AddContextToMenu("3D View",   KCTX_Render,  limit_ctx);
+		AddContextToMenu("Browser",   KCTX_Browser, limit_ctx);
+
+		if (want_ctx != KCTX_NONE)
+			SetContext(want_ctx);
+	}
+
+	void PopulateFuncMenu(const char *find_name = NULL)
+	{
+		func_choose->clear();
+
+		cur_cmd = NULL;
+
+		// add names to menu, and find the current function
+		char buffer[512];
+
+		bool did_separator = false;
 
 		for (int i = 0 ; ; i++)
 		{
@@ -88,30 +206,26 @@ private:
 			if (! cmd)
 				break;
 
-			if (cmd->req_context == ctx)
-				name_list.push_back(cmd->name);
-		}
-
-		std::sort(name_list.begin(), name_list.end(), name_CMP_pred());
-
-		// add sorted names to menu, and find the current function
-		int result = 0;
-
-		cur_cmd = NULL;
-
-		for (unsigned int k = 0 ; k < name_list.size() ; k++)
-		{
-			func->add(name_list[k]);
-
-			if (find_name && strcmp(name_list[k], find_name) == 0)
+			if (! did_separator && y_stricmp(cmd->group_name, "General") == 0)
 			{
-				result = (int)k;
+				func_choose->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
+				did_separator = true;
+			}
 
-				cur_cmd = FindEditorCommand(find_name);
+			snprintf(buffer, sizeof(buffer), "%s/%s", cmd->group_name, cmd->name);
+
+			func_choose->add(buffer, 0, 0, (void *)(long)i, 0 /* flags */);
+
+			if (find_name && strcmp(cmd->name, find_name) == 0)
+			{
+				cur_cmd = cmd;
 			}
 		}
 
-		return result;
+		if (cur_cmd)
+			func_name->value(cur_cmd->name);
+		else
+			func_name->value("");
 	}
 
 	void Decode(key_context_e ctx, const char *str)
@@ -130,9 +244,11 @@ private:
 
 		func_buf[pos] = 0;
 
-		func->value(PopulateFuncMenu(ctx, func_buf));
+		// this sets the 'cur_cmd' variable
+		PopulateFuncMenu(func_buf);
 
-		PopulateMenus();
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
 
 		if (*str == ':')
 			str++;
@@ -190,12 +306,6 @@ private:
 		menu->activate();
 	}
 
-	void PopulateMenus()
-	{
-		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
-		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
-	}
-
 	bool ValidateKey()
 	{
 		keycode_t new_key = M_ParseKeyString(key_name->value());
@@ -228,7 +338,9 @@ private:
 
 	static void grab_key_callback(Fl_Button *w, void *data)
 	{
-		// FIXME
+		UI_EditKey *dialog = (UI_EditKey *)data;
+
+		dialog->BeginGrab();
 	}
 
 	static void close_callback(Fl_Widget *w, void *data)
@@ -246,28 +358,42 @@ private:
 		dialog->want_close = true;
 	}
 
-	static void context_callback(Fl_Choice *w, void *data)
+	void SetNewFunction(int cmd_index)
 	{
-		UI_EditKey *dialog = (UI_EditKey *)data;
+		const editor_command_t *old_cmd = cur_cmd;
 
-		key_context_e ctx = (key_context_e)(1 + w->value());
+		cur_cmd = LookupEditorCommand(cmd_index);
 
-		const char *cur_func = dialog->cur_cmd ? dialog->cur_cmd->name : NULL;
+		if (! cur_cmd)  // shouldn't happen
+			return;
 
-		dialog->func->value(dialog->PopulateFuncMenu(ctx, cur_func));
-		dialog->func->do_callback();
+		func_name->value(cur_cmd->name);
+
+		key_context_e want_ctx = ContextFromMenu();
+
+		if (cur_cmd->req_context)
+			want_ctx = cur_cmd->req_context;
+		else if (y_strnicmp(cur_cmd->name, "BR_", 3) == 0)
+			want_ctx = KCTX_Browser;
+		else if (old_cmd && old_cmd->req_context)
+			want_ctx = KCTX_General;
+
+		PopulateContextMenu(want_ctx);
+
+		PopulateMenuList(keyword_menu, cur_cmd ? cur_cmd->keyword_list : NULL);
+		PopulateMenuList(   flag_menu, cur_cmd ? cur_cmd->   flag_list : NULL);
+
+		redraw();
 	}
 
-	static void func_callback(Fl_Choice *w, void *data)
+	static void func_callback(Fl_Menu_Button *w, void *data)
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
-		const char * name = w->mvalue()->text;
-		SYS_ASSERT(name);
+		int cmd_index = (int)(long)w->mvalue()->user_data_;
+		SYS_ASSERT(cmd_index >= 0);
 
-		dialog->cur_cmd = FindEditorCommand(name);
-
-		dialog->PopulateMenus();
+		dialog->SetNewFunction(cmd_index);
 	}
 
 	void ReplaceKeyword(const char *new_word)
@@ -341,71 +467,73 @@ private:
 	}
 
 public:
-	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_func) :
+	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_funcname) :
 		UI_Escapable_Window(400, 306, "Edit Key Binding"),
-		want_close(false), cancelled(false), grab_active(false),
+		want_close(false), cancelled(false),
+		awaiting_key(false),
 		key(_key)
 	{
+		// _key may be zero (when "Add" button is used)
+
 		if (ctx == KCTX_NONE)
 			ctx = KCTX_General;
 
 		callback(close_callback, this);
 
-		{ key_name = new Fl_Input(85, 25, 150, 25, "Key:");
-		  if (key)
-			  key_name->value(M_KeyToString(key));
-		  key_name->when(FL_WHEN_CHANGED);
-		  key_name->callback((Fl_Callback*)validate_callback, this);
-		}
-		{ Fl_Button *o = new Fl_Button(250, 25, 85, 25, "Grab");
-		  o->callback((Fl_Callback*)grab_key_callback, this);
-		  o->hide();  // TODO: IMPLEMENT THIS
-		}
+		key_name = new Fl_Input(85, 25, 150, 25, "Key:");
+		key_name->when(FL_WHEN_CHANGED);
+		key_name->callback((Fl_Callback*)validate_callback, this);
 
-		{ context = new Fl_Choice(85, 65, 150, 25, "Mode:");
-		  context->add("Browser|Render|Vertex|Thing|Sector|Linedef|General");
-		  context->value((int)ctx - 1);
-		  context->callback((Fl_Callback*)context_callback, this);
-		}
+		if (key)
+			key_name->value(M_KeyToString(key));
 
-		{ func = new Fl_Choice(85, 105, 150, 25, "Function:");
-		  func->callback((Fl_Callback*) func_callback, this);
-		}
-		{ params = new Fl_Input(85, 145, 300, 25, "Params:");
-		  params->value("");
-		  params->when(FL_WHEN_CHANGED);
-//		  params->callback((Fl_Callback*)validate_callback, this);
-		}
-		{ keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
-		  keyword_menu->callback((Fl_Callback*) keyword_callback, this);
-		}
-		{ flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
-		  flag_menu->callback((Fl_Callback*) flag_callback, this);
-		}
+		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
+		grab_but->callback((Fl_Callback*)grab_key_callback, this);
+
+		func_name = new Fl_Output(85,  65, 150, 25, "Function:");
+
+		func_choose = new Fl_Menu_Button(255,  65, 90, 25, "Choose");
+		func_choose->callback((Fl_Callback*) func_callback, this);
+
+		context = new Fl_Choice(85, 105, 150, 25, "Mode:");
+
+		params = new Fl_Input(85, 145, 300, 25, "Params:");
+		params->value("");
+		params->when(FL_WHEN_CHANGED);
+
+		keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
+		keyword_menu->callback((Fl_Callback*) keyword_callback, this);
+
+		flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
+		flag_menu->callback((Fl_Callback*) flag_callback, this);
 
 		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
 
-		  o->box(FL_FLAT_BOX);
-		  o->color(WINDOW_BG, WINDOW_BG);
+			o->box(FL_FLAT_BOX);
+			o->color(WINDOW_BG, WINDOW_BG);
 
-		  { cancel = new Fl_Button(170, 254, 80, 35, "Cancel");
+			cancel = new Fl_Button(170, 254, 80, 35, "Cancel");
 			cancel->callback((Fl_Callback*)close_callback, this);
-		  }
-		  { ok_but = new Fl_Button(295, 254, 80, 35, "OK");
-			ok_but->labelfont(1);
+
+			ok_but = new Fl_Button(295, 254, 80, 35, "OK");
+			ok_but->labelfont(FL_BOLD);
 			ok_but->callback((Fl_Callback*)ok_callback, this);
 			ok_but->deactivate();
-		  }
-		  o->end();
+
+			o->end();
 		}
 
 		end();
 
 		// parse line into function name and parameters
-		Decode(ctx, _func);
+		Decode(ctx, _funcname);
+
+		PopulateContextMenu(ctx == KCTX_NONE ? KCTX_General : ctx);
 	}
 
-	bool Run(keycode_t *key_v, key_context_e *ctx_v, const char **func_v)
+
+	bool Run(keycode_t *key_v, key_context_e *ctx_v,
+			 const char **func_v, bool start_grabbed)
 	{
 		*key_v  = 0;
 		*ctx_v  = KCTX_NONE;
@@ -415,19 +543,28 @@ public:
 		validate_callback(this, this);
 
 		set_modal();
-
 		show();
 
-		Fl::focus(params);
+		// need this for the 'start_grabbed' feature, get FLTK to
+		// actually put (map) the window onto the screen.
+		Fl::wait(0.1);
+		Fl::wait(0.1);
+
+		if (start_grabbed)
+			BeginGrab();
+		else
+			Fl::focus(params);
 
 		while (! want_close)
+		{
 			Fl::wait(0.2);
+		}
 
 		if (cancelled)
 			return false;
 
 		*key_v  = key;
-		*ctx_v  = (key_context_e)(1 + context->value());
+		*ctx_v  = ContextFromMenu();
 		*func_v = Encode();
 
 		return true;
@@ -456,9 +593,9 @@ private:
 	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
-	static void copy_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
-	static void    reset_callback(Fl_Button *w, void *data);
+
+	static void reset_callback(Fl_Button *w, void *data);
 
 public:
 	UI_Preferences();
@@ -489,12 +626,12 @@ public:
 
 	/* General Tab */
 
-	Fl_Round_Button *theme_FLTK;
-	Fl_Round_Button *theme_GTK;
 	Fl_Round_Button *theme_plastic;
+	Fl_Round_Button *theme_GTK;
+	Fl_Round_Button *theme_FLTK;
 
-	Fl_Round_Button *cols_default;
 	Fl_Round_Button *cols_bright;
+	Fl_Round_Button *cols_default;
 	Fl_Round_Button *cols_custom;
 
 	Fl_Button *bg_colorbox;
@@ -505,6 +642,20 @@ public:
 	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
 
+	/* Keys Tab */
+
+	Fl_Hold_Browser *key_list;
+
+	Fl_Button *key_group;
+	Fl_Button *key_key;
+	Fl_Button *key_func;
+
+	Fl_Button *key_add;
+	Fl_Button *key_copy;
+	Fl_Button *key_edit;
+	Fl_Button *key_delete;
+	Fl_Button *key_rebind;
+
 	/* Edit Tab */
 
 	Fl_Input  *edit_def_port;
@@ -513,10 +664,7 @@ public:
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
-	Fl_Check_Button *edit_multiselect;
-	Fl_Choice       *edit_modkey;
 	Fl_Int_Input    *edit_sectorsize;
-	Fl_Check_Button *edit_drawingmode;
 
 	Fl_Check_Button *brow_smalltex;
 
@@ -524,16 +672,11 @@ public:
 
 	Fl_Check_Button *gen_scrollbars;
 
+	Fl_Choice *grid_cur_style;
 	Fl_Check_Button *grid_snap;
-	Fl_Choice *grid_mode;
-	Fl_Choice *grid_toggle;
+	Fl_Check_Button *grid_enabled;
 	Fl_Choice *grid_size;
 
-	Fl_Check_Button *gen_digitzoom;
-	Fl_Choice *gen_smallscroll;
-	Fl_Choice *gen_largescroll;
-
-	Fl_Check_Button *gen_wheelscroll;
 	Fl_Check_Button *grid_hide_free;
 
 	Fl_Button *dotty_axis;
@@ -546,41 +689,40 @@ public:
 	Fl_Button *normal_flat;
 	Fl_Button *normal_small;
 
-	/* Keys Tab */
-
-	Fl_Hold_Browser *key_list;
-	Fl_Button *key_group;
-	Fl_Button *key_key;
-	Fl_Button *key_func;
-
-	Fl_Button *key_bind;
-	Fl_Button *key_copy;
-	Fl_Button *key_edit;
-	Fl_Button *key_delete;
-	Fl_Button *key_reset;
-
-	/* Mouse Tab */
-
-	/* Other Tab */
+	/* 3D Tab */
 
 	Fl_Float_Input  *rend_aspect;;
 
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
 
-	Fl_Check_Button *bsp_warn;
-	Fl_Check_Button *bsp_verbose;
-	Fl_Check_Button *bsp_fast;
+	/* Nodes Tab */
+
+	Fl_Check_Button *nod_on_save;
+	Fl_Check_Button *nod_fast;
+	Fl_Check_Button *nod_warn;
+
+	Fl_Choice *nod_factor;
+
+	Fl_Check_Button *nod_gl_nodes;
+	Fl_Check_Button *nod_force_v5;
+	Fl_Check_Button *nod_force_zdoom;
+	Fl_Check_Button *nod_compress;
+
+	/* Other Tab */
+
+	Fl_Button * reset_conf;
+	Fl_Button * reset_keys;
 };
 
 
-#define R_SPACES  "   "
+#define R_SPACES  "  "
 
 
 UI_Preferences::UI_Preferences() :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
-	  key_sort_mode('c'), key_sort_rev(false),
+	  key_sort_mode('k'), key_sort_rev(false),
 	  awaiting_line(0)
 {
 	if (gui_color_set == 2)
@@ -590,41 +732,43 @@ UI_Preferences::UI_Preferences() :
 
 	callback(close_callback, this);
 
-	{ tabs = new Fl_Tabs(0, 0, 585, 435);
+	{ tabs = new Fl_Tabs(0, 0, PREF_WINDOW_W-15, PREF_WINDOW_H-70);
+	  // tabs->selection_color(FL_WHITE);
 
 	  /* ---- General Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 405, " General" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		// o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 145, 30, "GUI Appearance");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ Fl_Group* o = new Fl_Group(45, 90, 250, 115);
-		  { theme_FLTK = new Fl_Round_Button(50, 90, 150, 25, " FLTK theme");
-			theme_FLTK->type(102);
-			theme_FLTK->down_box(FL_ROUND_DOWN_BOX);
+		  { theme_plastic = new Fl_Round_Button(50, 120, 165, 25, " Plastic theme ");
+			theme_plastic->type(102);
+			theme_plastic->down_box(FL_ROUND_DOWN_BOX);
 		  }
-		  { theme_GTK = new Fl_Round_Button(50, 120, 150, 25, " GTK+ theme ");
+		  { theme_GTK = new Fl_Round_Button(50, 90, 150, 25, " GTK+ theme ");
 			theme_GTK->type(102);
 			theme_GTK->down_box(FL_ROUND_DOWN_BOX);
 		  }
-		  { theme_plastic = new Fl_Round_Button(50, 150, 165, 25, " plastic theme ");
-			theme_plastic->type(102);
-			theme_plastic->down_box(FL_ROUND_DOWN_BOX);
+		  { theme_FLTK = new Fl_Round_Button(50, 150, 150, 25, " FLTK theme");
+			theme_FLTK->type(102);
+			theme_FLTK->down_box(FL_ROUND_DOWN_BOX);
 		  }
 		  o->end();
 		}
 		{ Fl_Group* o = new Fl_Group(220, 90, 190, 90);
-		  { cols_default = new Fl_Round_Button(245, 90, 135, 25, "default colors");
-			cols_default->type(102);
-			cols_default->down_box(FL_ROUND_DOWN_BOX);
-		  }
-		  { cols_bright = new Fl_Round_Button(245, 120, 140, 25, "bright colors");
+		  { cols_bright = new Fl_Round_Button(245, 90, 140, 25, "bright colors");
 			cols_bright->type(102);
 			cols_bright->down_box(FL_ROUND_DOWN_BOX);
+		  }
+		  { cols_default = new Fl_Round_Button(245, 120, 135, 25, "default colors");
+			cols_default->type(102);
+			cols_default->down_box(FL_ROUND_DOWN_BOX);
 		  }
 		  { cols_custom = new Fl_Round_Button(245, 150, 165, 25, "custom colors   ---->");
 			cols_custom->type(102);
@@ -655,17 +799,14 @@ UI_Preferences::UI_Preferences() :
 		  o->end();
 		}
 		{ Fl_Box* o = new Fl_Box(30, 240, 280, 35, "Miscellaneous");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
-		  gen_autoload->down_box(FL_DOWN_BOX);
 		}
 		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
-		  gen_swapsides->down_box(FL_DOWN_BOX);
 		}
 		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
-		  gen_maximized->down_box(FL_DOWN_BOX);
 		  // not supported on MacOS X
 		  // (on that platform we should restore last window position, but I don't
 		  //  know how to code that)
@@ -676,14 +817,66 @@ UI_Preferences::UI_Preferences() :
 		o->end();
 	  }
 
+	  /* ---- Key bindings Tab ---- */
+
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
+		o->labelsize(16);
+		o->selection_color(FL_DARK2);
+		o->hide();
+
+		{ Fl_Box* o = new Fl_Box(20, 45, 355, 30, "Key Bindings");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+
+		{ key_key = new Fl_Button(25, 87, 125, 25, "KEY");
+		  key_key->color((Fl_Color)231);
+		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
+		  key_key->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_group = new Fl_Button(155, 87, 75, 25, "MODE");
+		  key_group->color((Fl_Color)231);
+		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
+		  key_group->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_func = new Fl_Button(235, 87, 205, 25, "FUNCTION");
+		  key_func->color((Fl_Color)231);
+		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
+		  key_func->callback((Fl_Callback*)sort_key_callback, this);
+		}
+		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
+		  key_list->textfont(FL_COURIER);
+		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
+		}
+		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
+		  key_add->callback((Fl_Callback*)edit_key_callback, this);
+		}
+		{ key_copy = new Fl_Button(480, 195, 85, 30, "&Copy");
+		  key_copy->callback((Fl_Callback*)edit_key_callback, this);
+		}
+		{ key_edit = new Fl_Button(480, 235, 85, 30, "&Edit");
+		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
+		}
+		{ key_delete = new Fl_Button(480, 275, 85, 30, "Delete");
+		  key_delete->callback((Fl_Callback*)del_key_callback, this);
+		  key_delete->shortcut(FL_Delete);
+		}
+		{ key_rebind = new Fl_Button(480, 370, 85, 30, "&Re-bind");
+		  key_rebind->callback((Fl_Callback*)bind_key_callback, this);
+		  // key_rebind->shortcut(FL_Enter);
+		}
+		o->end();
+	  }
+
 	  /* ---- Editing Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Editing" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Editing Options");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ edit_def_port = new Fl_Input(150, 85, 95, 25, "default port: ");
@@ -694,34 +887,19 @@ UI_Preferences::UI_Preferences() :
 		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
 		}
 		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
-		  edit_newislands->down_box(FL_DOWN_BOX);
 		}
 		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
-		  edit_autoadjustX->down_box(FL_DOWN_BOX);
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
-		  edit_samemode->down_box(FL_DOWN_BOX);
-		}
-		{ edit_multiselect = new Fl_Check_Button(50, 210, 275, 30, " multi-select requires a modifier key");
-		  edit_multiselect->down_box(FL_DOWN_BOX);
-		}
-		{ edit_modkey = new Fl_Choice(370, 210, 95, 30, "---->   ");
-		  edit_modkey->down_box(FL_BORDER_BOX);
-		  edit_modkey->add("CTRL");
-		  edit_modkey->value(0);
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
-		{ edit_drawingmode = new Fl_Check_Button(50, 240, 270, 30, " easier line drawing using the LMB");
-		  edit_drawingmode->down_box(FL_DOWN_BOX);
-		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
-		  brow_smalltex->down_box(FL_DOWN_BOX);
 		}
 		o->end();
 	  }
@@ -730,50 +908,30 @@ UI_Preferences::UI_Preferences() :
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Grid" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
 		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Map Grid and Scrolling");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ gen_scrollbars = new Fl_Check_Button(50, 80, 245, 25, " enable scroll-bars for map view");
-		  gen_scrollbars->down_box(FL_DOWN_BOX);
+		{ grid_cur_style = new Fl_Choice(125, 90, 95, 25, "grid style ");
+		  grid_cur_style->add("Squares|Dotty");
 		}
-		{ grid_snap = new Fl_Check_Button(50, 110, 235, 25, " default SNAP mode");
-		  grid_snap->down_box(FL_DOWN_BOX);
+		{ grid_enabled = new Fl_Check_Button(50, 125, 95, 25, " default grid to ON");
 		}
-		{ grid_size = new Fl_Choice(435, 110, 95, 25, "default grid size ");
-		  grid_size->down_box(FL_BORDER_BOX);
+		{ grid_snap = new Fl_Check_Button(50, 160, 235, 25, " default SNAP mode");
+		}
+		{ grid_size = new Fl_Choice(400, 90, 95, 25, "default grid size ");
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
-		{ grid_mode = new Fl_Choice(435, 145, 95, 25, "default grid type ");
-		  grid_mode->down_box(FL_BORDER_BOX);
-		  grid_mode->add("OFF|Dotty|Normal");
+		{ gen_scrollbars = new Fl_Check_Button(277, 125, 245, 25, " enable scroll-bars for map view");
 		}
-		{ grid_toggle = new Fl_Choice(435, 180, 95, 25, "grid toggle types ");
-		  grid_toggle->down_box(FL_BORDER_BOX);
-		  grid_toggle->add("BOTH|Dotty|Normal");
-		}
-		{ gen_digitzoom = new Fl_Check_Button(50, 140, 240, 25, " digit keys zoom the map");
-		  gen_digitzoom->down_box(FL_DOWN_BOX);
-		}
-		{ gen_smallscroll = new Fl_Choice(435, 140, 95, 25, "small scroll step ");
-		  gen_smallscroll->down_box(FL_BORDER_BOX);
-		  gen_smallscroll->hide();
-		}
-		{ gen_largescroll = new Fl_Choice(435, 170, 95, 25, "large scroll step ");
-		  gen_largescroll->down_box(FL_BORDER_BOX);
-		  gen_largescroll->hide();
-		}
-		{ gen_wheelscroll = new Fl_Check_Button(50, 170, 245, 25, " mouse wheel scrolls the map");
-		  gen_wheelscroll->down_box(FL_DOWN_BOX);
-		}
-		{ grid_hide_free = new Fl_Check_Button(50, 200, 245, 25, " hide grid in FREE mode");
-		  grid_hide_free->down_box(FL_DOWN_BOX);
+		{ grid_hide_free = new Fl_Check_Button(277, 160, 245, 25, " hide grid in FREE mode");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
-		  o->labelfont(1);
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
@@ -781,153 +939,147 @@ UI_Preferences::UI_Preferences() :
 		  normal_axis->box(FL_BORDER_BOX);
 		  normal_axis->align(FL_ALIGN_LEFT);
 		  normal_axis->callback((Fl_Callback*)color_callback, this);
+		  normal_axis->tooltip("X/Y axis color");
 		}
 		{ normal_main = new Fl_Button(150 + 1*55, 300, 45, 25, "");
 		  normal_main->box(FL_BORDER_BOX);
 		  normal_main->align(FL_ALIGN_RIGHT);
 		  normal_main->callback((Fl_Callback*)color_callback, this);
+		  normal_main->tooltip("large square color");
 		}
 		{ normal_flat = new Fl_Button(150 + 2*55, 300, 45, 25, "");
 		  normal_flat->box(FL_BORDER_BOX);
 		  normal_flat->align(FL_ALIGN_RIGHT);
 		  normal_flat->callback((Fl_Callback*)color_callback, this);
+		  normal_flat->tooltip("64x64 square color");
 		}
 		{ normal_small = new Fl_Button(150 + 3*55, 300, 45, 25, "");
 		  normal_small->box(FL_BORDER_BOX);
 		  normal_small->align(FL_ALIGN_RIGHT);
 		  normal_small->callback((Fl_Callback*)color_callback, this);
+		  normal_small->tooltip("small square color");
 		}
 
 		{ dotty_axis = new Fl_Button(150 + 0*55, 340, 45, 25, "Dotty Grid : ");
 		  dotty_axis->box(FL_BORDER_BOX);
 		  dotty_axis->align(FL_ALIGN_LEFT);
 		  dotty_axis->callback((Fl_Callback*)color_callback, this);
+		  dotty_axis->tooltip("X/Y axis color");
 		}
 		{ dotty_major = new Fl_Button(150 + 1*55, 340, 45, 25, "");
 		  dotty_major->box(FL_BORDER_BOX);
 		  dotty_major->align(FL_ALIGN_RIGHT);
 		  dotty_major->callback((Fl_Callback*)color_callback, this);
+		  dotty_major->tooltip("large square color");
 		}
 		{ dotty_minor = new Fl_Button(150 + 2*55, 340, 45, 25, "");
 		  dotty_minor->box(FL_BORDER_BOX);
 		  dotty_minor->align(FL_ALIGN_RIGHT);
 		  dotty_minor->callback((Fl_Callback*)color_callback, this);
+		  dotty_minor->tooltip("small square color");
 		}
 		{ dotty_point = new Fl_Button(150 + 3*55, 340, 45, 25, "");
 		  dotty_point->box(FL_BORDER_BOX);
 		  dotty_point->align(FL_ALIGN_RIGHT);
 		  dotty_point->callback((Fl_Callback*)color_callback, this);
+		  dotty_point->tooltip("dot color");
 		}
 
 		o->end();
 	  }
 
-	  /* ---- Key bindings Tab ---- */
+	  /* ---- 3D Tab ---- */
 
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Keys" R_SPACES);
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " 3D View" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 45, 355, 30, "Key Bindings");
-		  o->labelfont(1);
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D View Settings");
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
+		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
 
-		{ key_key = new Fl_Button(30, 90, 120, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
+		  Fl_Box* o = new Fl_Box(300, 90, 150, 25, "(higher is wider, default is 0.83)");
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ key_group = new Fl_Button(155, 90, 90, 25, "MODE");
-		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  key_group->callback((Fl_Callback*)sort_key_callback, this);
+		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
 		}
-		{ key_func = new Fl_Button(250, 90, 190, 25, "FUNCTION");
-		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		  key_func->callback((Fl_Callback*)sort_key_callback, this);
+		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
 		}
-		{ key_list = new Fl_Hold_Browser(30, 115, 430, 295);
-		  key_list->textfont(FL_COURIER);
-		}
-		{ key_bind = new Fl_Button(470, 140, 90, 30, "Bind");
-		  key_bind->callback((Fl_Callback*)bind_key_callback, this);
-		  key_bind->shortcut(FL_Enter);
-		}
-		{ key_copy = new Fl_Button(470, 185, 90, 30, "&Copy");
-		  key_copy->callback((Fl_Callback*)copy_key_callback, this);
-		}
-		{ key_edit = new Fl_Button(470, 230, 90, 30, "&Edit");
-		  key_edit->callback((Fl_Callback*)edit_key_callback, this);
-		}
-		{ key_delete = new Fl_Button(470, 275, 90, 30, "Delete");
-		  key_delete->callback((Fl_Callback*)del_key_callback, this);
-		  key_delete->shortcut(FL_Delete);
-		}
-		{ key_reset = new Fl_Button(470, 335, 90, 50, "Reset\nDefaults");
-		  key_reset->callback((Fl_Callback*)reset_callback, this);
-		}
+
 		o->end();
 	  }
 
-	  /* ---- Mouse Tab ---- */
+	  /* ---- Nodes Tab ---- */
 
-#if 0
-	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Mouse" R_SPACES);
+	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Nodes" R_SPACES);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
-	    
+
+		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "Node Building");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ nod_on_save = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving   (recommended)");
+		}
+		{ nod_fast = new Fl_Check_Button(50, 110, 440, 30, " Fast mode   (the nodes may not be as good)");
+		}
+		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
+		}
+
+		{ Fl_Box* o = new Fl_Box(25, 205, 250, 30, "Advanced BSP Settings");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ nod_gl_nodes = new Fl_Check_Button(50, 245, 150, 30, " Build GL-Nodes");
+		}
+		{ nod_force_v5 = new Fl_Check_Button(50, 275, 250, 30, " Force V5 of GL-Nodes");
+		}
+		{ nod_force_zdoom = new Fl_Check_Button(50, 305, 250, 30, " Force ZDoom format of normal nodes");
+		}
+		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
+		{ nod_compress = new Fl_Check_Button(50, 335, 250, 30, " Force zlib compression");
+		  nod_compress->hide();
+		}
+		{ nod_factor = new Fl_Choice(160, 345, 180, 30, "Seg split logic: ");
+		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
+		}
 		o->end();
 	  }
-#endif
 
 	  /* ---- Other Tab ---- */
 
 	  { Fl_Group* o = new Fl_Group(0, 25, 585, 410, " Other" R_SPACES);
-		o->selection_color(FL_LIGHT1);
 		o->labelsize(16);
+		o->selection_color(FL_DARK2);
 		o->hide();
 
-		{ Fl_Box* o = new Fl_Box(25, 45, 280, 30, "3D Preview Options");
-		  o->labelfont(1);
+		{ Fl_Box* o = new Fl_Box(25, 255, 280, 30, "Configuration Reset");
+		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ rend_aspect = new Fl_Float_Input(190, 90, 95, 25, "Pixel aspect ratio: ");
+		{ reset_conf = new Fl_Button(100, 290, 200, 30, "Reset Config Settings");
+		  reset_conf->callback((Fl_Callback*)reset_callback, this);
 		}
-		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
-		  rend_high_detail->down_box(FL_DOWN_BOX);
-		}
-		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
-		  rend_lock_grav->down_box(FL_DOWN_BOX);
-		}
-
-		{ Fl_Box* o = new Fl_Box(25, 250, 280, 30, "glBSP Node Building");
-		  o->labelfont(1);
-		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-		}
-		{ bsp_warn = new Fl_Check_Button(50, 290, 220, 30, " Show all warning messages");
-		  bsp_warn->down_box(FL_DOWN_BOX);
-		}
-		{ bsp_verbose = new Fl_Check_Button(50, 320, 350, 30, " Verbose -- show information about each level");
-		  bsp_verbose->down_box(FL_DOWN_BOX);
-		}
-		{ bsp_fast = new Fl_Check_Button(50, 350, 440, 30, " Fast -- build the fastest way, but nodes may not be as good");
-		  bsp_fast->down_box(FL_DOWN_BOX);
+		{ reset_keys = new Fl_Button(100, 330, 200, 30, "Reset Key Bindings");
+		  reset_keys->callback((Fl_Callback*)reset_callback, this);
 		}
 		o->end();
 	  }
 	  tabs->end();
 	}
-	{ apply_but = new Fl_Button(480, 450, 95, 35, "Apply");
-	  apply_but->labelfont(1);
+	{ apply_but = new Fl_Button(PREF_WINDOW_W-150, PREF_WINDOW_H-50, 95, 35, "Apply");
+	  apply_but->labelfont(FL_BOLD);
 	  apply_but->callback(close_callback, this);
 	}
-	{ discard_but = new Fl_Button(350, 450, 95, 35, "Discard");
+	{ discard_but = new Fl_Button(PREF_WINDOW_W-290, PREF_WINDOW_H-50, 95, 35, "Discard");
 	  discard_but->callback(close_callback, this);
 	}
 
-end();
+	end();
 }
 
 
@@ -983,7 +1135,6 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	SYS_ASSERT(str);
 
 	prefs->key_list->text(line, str);
-
 	prefs->key_list->selection_color(FL_YELLOW);
 
 	Fl::focus(prefs);
@@ -1031,75 +1182,86 @@ void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::copy_key_callback(Fl_Button *w, void *data)
-{
-	UI_Preferences *prefs = (UI_Preferences *)data;
-
-	int line = prefs->key_list->value();
-	if (line < 1)
-	{
-		fl_beep();
-		return;
-	}
-
-	int bind_idx = line - 1;
-
-	keycode_t     new_key;
-	key_context_e new_context;
-
-	M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
-	const char *new_func = M_StringForFunc(bind_idx);
-
-	
-	M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
-
-	// we will reload the lines, so use a dummy one here
-
-	prefs->key_list->insert(line + 1, "");
-	prefs->key_list->select(line + 1);
-
-	prefs->ReloadKeys();
-
-	bind_key_callback(w, data);
-}
-
-
 void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	bool is_add  = (w == prefs->key_add);
+	bool is_copy = (w == prefs->key_copy);
+
+
+	keycode_t     new_key  = 0;
+	key_context_e new_context = KCTX_General;
+	const char *  new_func = "Nothing";
+
+
+	int bind_idx = -1;
+
+
+	if (! is_add)
 	{
-		fl_beep();
-		return;
+		int line = prefs->key_list->value();
+		if (line < 1)
+		{
+			fl_beep();
+			return;
+		}
+
+		prefs->EnsureKeyVisible(line);
+
+		bind_idx = line - 1;
+		SYS_ASSERT(bind_idx >= 0);
+
+		M_GetBindingInfo(bind_idx, &new_key, &new_context);
+		new_func = M_StringForFunc(bind_idx);
 	}
 
-	prefs->EnsureKeyVisible(line);
 
-
-	int bind_idx = line - 1;
-
-	keycode_t     new_key;
-	key_context_e new_context;
-
-	M_GetBindingInfo(bind_idx, &new_key, &new_context);
-
-	const char *new_func = M_StringForFunc(bind_idx);
-
+	bool start_grabbed = false;  //???  is_add || is_copy;
 
 	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
 
-	if (dialog->Run(&new_key, &new_context, &new_func))
+	bool was_ok = dialog->Run(&new_key, &new_context, &new_func, start_grabbed);
+
+	if (was_ok)
 	{
-		// assume it works (since we validated it)
-		M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
+		// assume we can set it, since the dialog validated it
+
+		if (is_add || is_copy)
+		{
+			M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+
+			if (is_copy)
+				bind_idx++;
+			else
+				bind_idx = M_NumBindings() - 1;
+		}
+		else
+		{
+			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
+		}
 	}
 
 	delete dialog;
 
+
+	// for a new binding, make sure it is visible and selected
+
+	if ((is_add || is_copy) && was_ok && bind_idx >= 0)
+	{
+		// expand the browser size with a dummy line
+		// [ the ReloadKeys() below will grab the correct text ]
+		prefs->key_list->add("");
+
+		SYS_ASSERT(bind_idx >= 0);
+		int line = 1 + bind_idx;
+
+		prefs->key_list->select(line);
+		prefs->EnsureKeyVisible(line);
+	}
+
 	prefs->ReloadKeys();
+	prefs->redraw();
 
 	Fl::focus(prefs->key_list);
 }
@@ -1134,22 +1296,38 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	if (true)
+	bool is_keys = (w == prefs->reset_keys);
+
+	int res = DLG_Confirm("Cancel|&Reset",
+		"This will reset all %s to their default values, "
+		"removing any changes you may have made."
+		"\n\n"
+		"If you continue, you can still back out by "
+		"using the \"Discard\" button at the bottom of "
+		"the Preferences window."
+		"\n  ",
+		is_keys ? "key bindings" : "preferences");
+
+	if (res <= 0)
+		return;
+
+	if (is_keys)
 	{
-		int res = DLG_Confirm("Cancel|Reset",
-		                      "You are about to reset all key bindings to their default "
-							  "values.  Pressing the preference window's \"Apply\" button "
-							  "will cause any changes you have made to be lost."
-							  "\n\n"
-							  "Are you sure you want to continue?");
+		M_CopyBindings(true /* from_defaults */);
 
-		if (res <= 0)
-			return;
+		prefs->LoadKeys();
 	}
-
-	M_CopyBindings(true /* from_defaults */);
-
-	prefs->LoadKeys();
+	else
+	{
+		if (M_ParseDefaultConfigFile() != 0)
+		{
+			DLG_Notify("Installation problem: failed to find the \"defaults.cfg\" file!");
+		}
+		else
+		{
+			prefs->LoadValues();
+		}
+	}
 }
 
 
@@ -1207,7 +1385,7 @@ int UI_Preferences::GridSizeToChoice(int size)
 void UI_Preferences::LoadValues()
 {
 	/* Theme stuff */
-	
+
 	switch (gui_scheme)
 	{
 		case 0: theme_FLTK->value(1); break;
@@ -1241,27 +1419,23 @@ void UI_Preferences::LoadValues()
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
-	edit_multiselect->value(multi_select_modifier ? 2 : 0);
-	edit_drawingmode->value(easier_drawing_mode ? 1 : 0);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
 
 	/* Grid Tab */
 
-	if (default_grid_mode < 0 || default_grid_mode > 2)
-		default_grid_mode = 2;
+	if (grid_style < 0 || grid_style > 1)
+		grid_style = 1;
 
-	if (grid_toggle_type < 0 || grid_toggle_type > 2)
-		grid_toggle_type = 0;
+	if (grid_default_mode < 0 || grid_default_mode > 1)
+		grid_default_mode = 1;
 
-	grid_snap->value(default_grid_snap ? 1 : 0);
-	grid_size->value(GridSizeToChoice(default_grid_size));
-	grid_mode->value(default_grid_mode);
-	grid_toggle->value(grid_toggle_type);
-
-	gen_digitzoom  ->value(digits_set_zoom ? 1 : 0);
+	grid_cur_style->value(grid_style);
+	grid_enabled->value(grid_default_mode);
+	grid_snap->value(grid_default_snap ? 1 : 0);
+	grid_size->value(GridSizeToChoice(grid_default_size));
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
-	gen_wheelscroll->value(mouse_wheel_scrolls_map ? 1 : 0);
+
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
 	dotty_axis ->color(dotty_axis_col);
@@ -1274,9 +1448,7 @@ void UI_Preferences::LoadValues()
 	normal_flat ->color(normal_flat_col);
 	normal_small->color(normal_small_col);
 
-	// TODO: smallscroll, largescroll
-
-	/* Other Tab */
+	/* 3D Tab */
 
 	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
 
@@ -1287,9 +1459,26 @@ void UI_Preferences::LoadValues()
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
-	bsp_fast->value(glbsp_fast ? 1 : 0);
-	bsp_verbose->value(glbsp_verbose ? 1 : 0);
-	bsp_warn->value(glbsp_warn ? 1 : 0);
+	/* Nodes Tab */
+
+	nod_on_save->value(bsp_on_save ? 1 : 0);
+	nod_fast->value(bsp_fast ? 1 : 0);
+	nod_warn->value(bsp_warnings ? 1 : 0);
+
+	if (bsp_split_factor < 7)
+		nod_factor->value(2);	// Balanced BSP tree
+	else if (bsp_split_factor > 15)
+		nod_factor->value(1);	// Minimize Splits
+	else
+		nod_factor->value(0);	// NORMAL
+
+	nod_gl_nodes->value(bsp_gl_nodes ? 1 : 0);
+	nod_force_v5->value(bsp_force_v5 ? 1 : 0);
+	nod_force_zdoom->value(bsp_force_zdoom ? 1 : 0);
+	nod_compress->value(bsp_compressed ? 1 : 0);
+
+	/* Other Tab */
+
 }
 
 
@@ -1351,8 +1540,6 @@ void UI_Preferences::SaveValues()
 	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
-	multi_select_modifier = edit_multiselect->value() ? 2 : 0;
-	easier_drawing_mode = edit_drawingmode->value() ? true : false;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
@@ -1364,15 +1551,13 @@ void UI_Preferences::SaveValues()
 
 	/* Grid Tab */
 
-	default_grid_snap = grid_snap->value() ? true : false;
-	default_grid_size = atoi(grid_size->mvalue()->text);
-	default_grid_mode = grid_mode->value();
-	grid_toggle_type  = grid_toggle->value();
-
-	digits_set_zoom         = gen_digitzoom  ->value() ? true : false;
+	grid_style        = grid_cur_style->value();
+	grid_default_mode = grid_enabled->value();
+	grid_default_snap = grid_snap->value() ? true : false;
+	grid_default_size = atoi(grid_size->mvalue()->text);
 	grid_hide_in_free_mode  = grid_hide_free ->value() ? true : false;
-	mouse_wheel_scrolls_map = gen_wheelscroll->value() ? true : false;
-	map_scroll_bars         = gen_scrollbars ->value() ? true : false;
+
+	map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
 	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
 	dotty_major_col = (rgb_color_t) dotty_major->color();
@@ -1384,7 +1569,23 @@ void UI_Preferences::SaveValues()
 	normal_flat_col  = (rgb_color_t) normal_flat ->color();
 	normal_small_col = (rgb_color_t) normal_small->color();
 
-	// TODO: smallscroll, largescroll
+	/* Nodes Tab */
+
+	bsp_on_save = nod_on_save->value() ? true : false;
+	bsp_fast = nod_fast->value() ? true : false;
+	bsp_warnings = nod_warn->value() ? true : false;
+
+	if (nod_factor->value() == 1)			// Minimize Splits
+		bsp_split_factor = 29;
+	else if (nod_factor->value() == 2)		// Balanced BSP tree
+		bsp_split_factor = 2;
+	else
+		bsp_split_factor = 11;
+
+	bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
+	bsp_force_v5 = nod_force_v5->value() ? true : false;
+	bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
+	bsp_compressed = nod_compress->value() ? true : false;
 
 	/* Other Tab */
 
@@ -1394,9 +1595,6 @@ void UI_Preferences::SaveValues()
 	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
 
-	glbsp_fast = bsp_fast->value() ? true : false;
-	glbsp_verbose = bsp_verbose->value() ? true : false;
-	glbsp_warn = bsp_warn->value() ? true : false;
 }
 
 
@@ -1471,25 +1669,25 @@ int UI_Preferences::handle(int event)
 {
 	if (awaiting_line > 0)
 	{
-		if (event == FL_KEYDOWN)
+		// escape key cancels
+		if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
 		{
-			if (Fl::event_key() == FL_Escape)
-			{
-				ClearWaiting();
-				return 1;
-			}
+			ClearWaiting();
+			return 1;
+		}
 
-			keycode_t key = M_TranslateKey(Fl::event_key(), Fl::event_state());
+		if (event == FL_KEYDOWN ||
+			event == FL_PUSH    ||
+			event == FL_MOUSEWHEEL)
+		{
+			keycode_t new_key = M_CookedKeyForEvent(event);
 
-			if (key != 0)
+			if (new_key)
 			{
-				SetBinding(key);
+				SetBinding(new_key);
 				return 1;
 			}
 		}
-
-		if (event == FL_PUSH)
-			ClearWaiting();
 	}
 
 	return Fl_Double_Window::handle(event);

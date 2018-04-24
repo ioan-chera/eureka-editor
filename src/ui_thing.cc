@@ -22,8 +22,8 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "editloop.h"
-#include "levels.h"
+#include "e_main.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 
@@ -54,7 +54,8 @@ extern const char * arrow_225_xpm[];
 extern const char * arrow_270_xpm[];
 extern const char * arrow_315_xpm[];
 
-static const char ** arrow_pixmaps[8] =
+
+const char ** arrow_pixmaps[8] =
 {
 	arrow_0_xpm,   arrow_45_xpm,
 	arrow_90_xpm,  arrow_135_xpm,
@@ -66,7 +67,7 @@ static const char ** arrow_pixmaps[8] =
 //
 // UI_ThingBox Constructor
 //
-UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) : 
+UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -84,12 +85,14 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	Y = Y + which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+70, Y, 64, 24, "Type: ");
+	type = new UI_DynInput(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	type->type(FL_INT_INPUT);
 
-	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	Y = Y + type->h() + 4;
@@ -142,19 +145,21 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 
 	int ang_mx = X + W - 75;
-	int ang_my = Y + 15;
+	int ang_my = Y + 17;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
-		int x = ang_mx + 30 * cos(i * 45 * M_PI / 180.0);
-		int y = ang_my - 30 * sin(i * 45 * M_PI / 180.0);
+		int dist = (i == 2 || i == 6) ? 32 : 35;
+
+		int x = ang_mx + dist * cos(i * 45 * M_PI / 180.0);
+		int y = ang_my - dist * sin(i * 45 * M_PI / 180.0);
 
 		ang_buts[i] = new Fl_Button(x - 9, y - 9, 24, 24, 0);
 
 		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
 		ang_buts[i]->align(FL_ALIGN_CENTER);
 		ang_buts[i]->clear_visible_focus();
-     	ang_buts[i]->callback(button_callback, this);
+		ang_buts[i]->callback(button_callback, this);
 	}
 
 	Y = Y + 50;
@@ -260,10 +265,12 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 
 	// Hexen thing specials
 
-	spec_type = new Fl_Int_Input(X+74, Y, 64, 24, "Special: ");
+	spec_type = new UI_DynInput(X+74, Y, 64, 24, "Special: ");
 	spec_type->align(FL_ALIGN_LEFT);
 	spec_type->callback(spec_callback, this);
+	spec_type->callback2(dynspec_callback, this);
 	spec_type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	spec_type->type(FL_INT_INPUT);
 	spec_type->hide();
 
 	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
@@ -336,14 +343,31 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
+}
+
+
+void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	int value = atoi(box->type->value());
+
+	const thingtype_t *info = M_GetThingType(value);
+
+	box->desc->value(info->desc);
+	box->sprite->GetSprite(value, FL_DARK2);
 }
 
 
@@ -366,13 +390,35 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
 		}
 
+		BA_MessageForSel("edited special of", &list);
 		BA_End();
+	}
+}
+
+
+void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	if (box->obj < 0 || Level_format != MAPF_Hexen)
+		return;
+
+	int value = atoi(box->spec_type->value());
+
+	if (value)
+	{
+		const linetype_t *info = M_GetLineType(value);
+		box->spec_desc->value(info->desc);
+	}
+	else
+	{
+		box->spec_desc->value("");
 	}
 }
 
@@ -405,6 +451,25 @@ void UI_ThingBox::SetSpecialType(int new_type)
 }
 
 
+bool UI_ThingBox::ClipboardOp(char what)
+{
+	return false;
+}
+
+
+void UI_ThingBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'O')
+	{
+		SetThingType(number);
+	}
+	else if (kind == 'L' && Level_format == MAPF_Hexen)
+	{
+		SetSpecialType(number);
+	}
+}
+
+
 void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
@@ -417,12 +482,13 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
 		}
 
+		BA_MessageForSel("edited angle of", &list);
 		BA_End();
 	}
 }
@@ -447,6 +513,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_TID, new_tid);
 		}
 
+		BA_MessageForSel("edited TID of", &list);
 		BA_End();
 	}
 }
@@ -464,10 +531,11 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_X, new_x);
 
+		BA_MessageForSel("edited X of", &list);
 		BA_End();
 	}
 }
@@ -484,10 +552,11 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Y, new_y);
 
+		BA_MessageForSel("edited Y of", &list);
 		BA_End();
 	}
 }
@@ -508,6 +577,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		for (list.begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Z, new_z);
 
+		BA_MessageForSel("edited Z of", &list);
 		BA_End();
 	}
 }
@@ -528,7 +598,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			const Thing *T = Things[*it];
@@ -538,6 +608,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 
+		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -554,10 +625,10 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 		box->AdjustExtraFloor(+1);
 
 	if (w == box->choose || w == box->sprite)
-		main_win->ShowBrowser('O');
+		main_win->BrowserMode('O');
 
 	if (w == box->spec_choose)
-		main_win->ShowBrowser('L');
+		main_win->BrowserMode('L');
 
 	// check for the angle buttons
 	for (int i = 0 ; i < 8 ; i++)
@@ -593,12 +664,13 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}
 
+		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }
@@ -636,7 +708,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
 		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
 		o_dm  ->value((options & MTF_Hexen_DM)   ? 1 : 0);
-		
+
 		o_fight ->value((options & MTF_Hexen_Fighter) ? 1 : 0);
 		o_cleric->value((options & MTF_Hexen_Cleric)  ? 1 : 0);
 		o_mage  ->value((options & MTF_Hexen_Mage)    ? 1 : 0);
@@ -810,18 +882,30 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = Things[obj];
 
-			const linetype_t *info = M_GetLineType(T->special);
+			const thingtype_t *info = M_GetThingType(T->type);
+			const linetype_t  *spec = M_GetLineType (T->special);
 
-			if (T->arg1 || info->args[0]) args[0]->value(Int_TmpStr(T->arg1));
-			if (T->arg2 || info->args[1]) args[1]->value(Int_TmpStr(T->arg2));
-			if (T->arg3 || info->args[2]) args[2]->value(Int_TmpStr(T->arg3));
-			if (T->arg4 || info->args[3]) args[3]->value(Int_TmpStr(T->arg4));
-			if (T->arg5 || info->args[4]) args[4]->value(Int_TmpStr(T->arg5));
-
-			// set tooltips
+			// set values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
-				if (info->args[a])
+			{
+				int arg_val = T->Arg(1 + a);
+
+				if (T->special)
+				{
+					if (arg_val || spec->args[a])
+						args[a]->value(Int_TmpStr(arg_val));
+
+					args[a]->copy_tooltip(spec->args[a]);
+				}
+				else
+				{
+					// spawn arguments
+					if (arg_val || info->args[a])
+						args[a]->value(Int_TmpStr(arg_val));
+
 					args[a]->copy_tooltip(info->args[a]);
+				}
+			}
 		}
 	}
 }

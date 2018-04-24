@@ -27,35 +27,34 @@
 #include "main.h"
 
 #include "r_grid.h"
+#include "e_main.h"
 #include "ui_window.h"
 
 
 Grid_State_c  grid;
 
 // config items
-int  default_grid_size = 64;
-bool default_grid_snap = true;
-int  default_grid_mode = 2;  // normal
+int  grid_default_size = 64;
+bool grid_default_snap = false;
+int  grid_default_mode = 0;  // off
 
-int  grid_toggle_type = 0;  // both
+int  grid_style;  // 0 = squares, 1 = dotty
 bool grid_hide_in_free_mode = false;
 
 
 Grid_State_c::Grid_State_c() :
 	 step(16 /* dummy */),
-	 snap(true), shown(true), mode(0),
+	 snap(true), shown(true),
      orig_x(0.0), orig_y(0.0), Scale(1.0)
-{
-}
+{ }
 
 Grid_State_c::~Grid_State_c()
-{
-}
+{ }
 
 
 void Grid_State_c::Init()
 {
-	step = default_grid_size - 1;
+	step = grid_default_size - 1;
 
 	if (step < 1)
 		step = 1;
@@ -67,7 +66,7 @@ void Grid_State_c::Init()
 
 	AdjustStep(+1);
 
-	if (default_grid_mode == 0)
+	if (grid_default_mode == 0)
 	{
 		shown = false;
 
@@ -77,10 +76,9 @@ void Grid_State_c::Init()
 	else
 	{
 		shown = true;
-		mode  = default_grid_mode - 1;
 	}
 
-	snap = default_grid_snap;
+	snap = grid_default_snap;
 
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
@@ -99,8 +97,10 @@ void Grid_State_c::MoveTo(double x, double y)
 
 	if (main_win)
 	{
-		main_win->canvas->redraw();
 		main_win->scroll->AdjustPos();
+		main_win->canvas->PointerPos();
+
+		RedrawMap();
 	}
 }
 
@@ -185,7 +185,7 @@ bool Grid_State_c::OnGridX(int map_x) const
 {
 	if (map_x < 0)
 		map_x = -map_x;
-	
+
 	return (map_x % step) == 0;
 }
 
@@ -193,7 +193,7 @@ bool Grid_State_c::OnGridY(int map_y) const
 {
 	if (map_y < 0)
 		map_y = -map_y;
-	
+
 	return (map_y % step) == 0;
 }
 
@@ -211,13 +211,16 @@ void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
 	orig_y += (map_y - orig_y) * dist_factor;
 
 	if (main_win)
-		main_win->canvas->redraw();
+	{
+		main_win->canvas->PointerPos();
+		RedrawMap();
+	}
 }
 
 
 const double Grid_State_c::scale_values[] =
 {
-	16.0, 8.0, 6.0, 4.0,  3.0, 2.0, 1.5, 1.0,
+	32.0, 16.0, 8.0, 6.0, 4.0,  3.0, 2.0, 1.5, 1.0,
 
 	1.0 / 1.5, 1.0 / 2.0, 1.0 / 3.0,  1.0 / 4.0,
 	1.0 / 6.0, 1.0 / 8.0, 1.0 / 16.0, 1.0 / 32.0,
@@ -237,15 +240,15 @@ const int Grid_State_c::grid_values[] =
 	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2
 };
 
-#define NUM_SCALE_VALUES  17
+#define NUM_SCALE_VALUES  18
 #define NUM_GRID_VALUES   12
 
 
 const char *Grid_State_c::scale_options()
 {
-	return  "x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
+	return  "x 32|x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
 			" 100% |"
-			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64"; 
+			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64";
 }
 
 const char *Grid_State_c::grid_options()
@@ -260,8 +263,37 @@ void Grid_State_c::ScaleFromWidget(int i)
 
 	Scale = scale_values[i];
 
+	if (! main_win)
+		return;
+
+	main_win->scroll->AdjustPos();
+	main_win->canvas->PointerPos();
+
+	RedrawMap();
+}
+
+
+void Grid_State_c::SetStep(int new_step)
+{
+	step = new_step;
+
+	// find closest value in info bar
+	int best = 0;
+	int best_dist = 999999;
+
+	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+	{
+		int dist = abs(grid_values[i] - new_step);
+
+		if (dist < best_dist)
+		{
+			best = i;
+			best_dist = dist;
+		}
+	}
+
 	if (main_win)
-		main_win->scroll->AdjustPos();
+		main_win->info_bar->SetGrid(best);
 
 	RedrawMap();
 }
@@ -282,7 +314,7 @@ void Grid_State_c::StepFromWidget(int i)
 		step = grid_values[i];
 	}
 
-	if (grid_hide_in_free_mode && snap != shown)
+	if (grid_hide_in_free_mode)
 		SetSnap(shown);
 
 	RedrawMap();
@@ -308,10 +340,7 @@ void Grid_State_c::StepFromScale()
 
 	step = grid_values[result];
 
-	if (main_win)
-	{
-		main_win->canvas->redraw();
-	}
+	RedrawMap();
 }
 
 
@@ -390,138 +419,89 @@ void Grid_State_c::AdjustScale(int delta)
 	if (result < 0)
 		return;
 
-	ScaleFromWidget(result);
-
 	if (main_win)
-	{
 		main_win->info_bar->SetScale(result);
-		main_win->scroll->AdjustPos();
-	}
+
+	ScaleFromWidget(result);
 }
 
 
-void Grid_State_c::DoSetScale()
+void Grid_State_c::DoSetScale(double new_scale)
 {
-	if (! main_win)
-		return;
+	int index = 10;  // meh
 
 	for (int i = NUM_SCALE_VALUES-1 ; i >= 0 ; i--)
 	{
-		float ratio = scale_values[i] / Scale;
+		float ratio = scale_values[i] / new_scale;
 
 		if (ratio > 0.99 && ratio < 1.01)
 		{
-			main_win->info_bar->SetScale(i);
-			main_win->scroll->AdjustPos();
-
-			return;
+			index = i;
+			break;
 		}
 	}
 
-	int index = 10;  //meh
-
 	Scale = scale_values[index];
 
-	main_win->info_bar->SetScale(index);
-	main_win->scroll->AdjustPos();
+	if (main_win)
+	{
+		main_win->info_bar->SetScale(index);
+
+		main_win->scroll->AdjustPos();
+		main_win->canvas->PointerPos();
+
+		RedrawMap();
+	}
 }
 
 
-void Grid_State_c::DoSetGrid()
+void Grid_State_c::DoSetShown(bool new_value)
 {
+	shown = new_value;
+
 	if (! main_win)
 		return;
 
 	if (! shown)
 	{
 		main_win->info_bar->SetGrid(0);
+		RedrawMap();
 		return;
 	}
 
-	// find the step
+	// update the info-bar
 	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
 	{
 		if (grid_values[i] == step)
 		{
 			main_win->info_bar->SetGrid(i);
-			return;
+			break;
 		}
 	}
 
-	// bad step?
-	Init();
+	RedrawMap();
 }
 
 
 void Grid_State_c::SetShown(bool enable)
 {
-	if (grid_toggle_type > 0)
-		mode = grid_toggle_type - 1;
+	DoSetShown(enable);
 
-	shown = enable;
-
-	if (grid_hide_in_free_mode && shown != snap)
-		SetSnap(shown);
-
-	DoSetGrid();
-
-	RedrawMap();
+	if (grid_hide_in_free_mode)
+		SetSnap(enable);
 }
 
 void Grid_State_c::ToggleShown()
 {
-	if (grid_toggle_type > 0)
-		mode = grid_toggle_type - 1;
-
-	if (! shown)
-	{
-		shown = true;
-	}
-	else if (grid_toggle_type > 0)
-	{
-		shown = false;
-	}
-	else if (mode == 1)
-	{
-		shown = false;
-		mode  = 0;
-	}
-	else
-	{
-		mode = 1;
-	}
-
-	if (grid_hide_in_free_mode && shown != snap)
-		SetSnap(shown);
-
-	DoSetGrid();
-
-	RedrawMap();
-}
-
-
-void Grid_State_c::SetMode(int new_mode)
-{
-	mode = new_mode;
-
-	DoSetGrid();
-
-	RedrawMap();
-}
-
-void Grid_State_c::ToggleMode()
-{
-	if (! shown)
-	{
-		shown = true;
-	}
-
-	SetMode(1 - mode);
+	SetShown(!shown);
 }
 
 
 void Grid_State_c::SetSnap(bool enable)
 {
+	if (snap == enable)
+		return;
+
 	snap = enable;
 
 	if (grid_hide_in_free_mode && snap != shown)
@@ -530,7 +510,7 @@ void Grid_State_c::SetSnap(bool enable)
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
 
-	UpdateHighlight();
+	RedrawMap();
 }
 
 void Grid_State_c::ToggleSnap()
@@ -541,54 +521,20 @@ void Grid_State_c::ToggleSnap()
 
 void Grid_State_c::NearestScale(double want_scale)
 {
-	int result = 0;
+	int best = 0;
 
 	for (int i = 0 ; i < NUM_SCALE_VALUES ; i++)
 	{
-		result = i;
+		best = i;
 
-		if (scale_values[i] < want_scale)
+		if (scale_values[i] < want_scale * 1.1)
 			break;
 	}
 
-	ScaleFromWidget(result);
-
 	if (main_win)
-	{
-		main_win->info_bar->SetScale(result);
-		main_win->scroll->AdjustPos();
-	}
-}
+		main_win->info_bar->SetScale(best);
 
-
-void Grid_State_c::ScaleFromDigit(int digit)
-{
-	// digit must be 1 to 9
-	SYS_ASSERT(1 <= digit && digit <= 9);
-
-	int result = digit_scales[digit - 1];
-
-	ScaleFromWidget(result);
-
-	if (main_win)
-	{
-		main_win->info_bar->SetScale(result);
-		main_win->scroll->AdjustPos();
-	}
-}
-
-
-void Grid_State_c::StepFromDigit(int digit)
-{
-	// digit must be 1 to 9
-	SYS_ASSERT(1 <= digit && digit <= 9);
-
-	int result = NUM_GRID_VALUES - digit;
-
-	StepFromWidget(result);
-
-	if (main_win)
-		main_win->info_bar->SetGrid(result);
+	ScaleFromWidget(best);
 }
 
 
@@ -601,25 +547,23 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		grid.MoveTo(x, y);
 
-		grid.Scale = atof(tokens[3]);
+		double new_scale = atof(tokens[3]);
 
-		grid.DoSetScale();
+		grid.DoSetScale(new_scale);
 
 		RedrawMap();
-
 		return true;
 	}
 
 	if (strcmp(tokens[0], "grid") == 0 && num_tok >= 4)
 	{
-		grid.shown = atoi(tokens[1]) ? true : false;
-		grid.mode  = atoi(tokens[2]);
-		grid.step  = atoi(tokens[3]);
+		bool t_shown = atoi(tokens[1]) ? true : false;
 
-		if (grid.mode < 0 || grid.mode > 1)
-			grid.mode = 1;
+		grid.step = atoi(tokens[3]);
 
-		grid.DoSetGrid();
+		// tokens[2] was grid.mode, currently unused
+
+		grid.DoSetShown(t_shown);
 
 		RedrawMap();
 
@@ -649,7 +593,7 @@ void Grid_WriteUser(FILE *fp)
 
 	fprintf(fp, "grid %d %d %d\n",
 			grid.shown ? 1 : 0,
-			grid.mode,
+			grid_style ? 0 : 1,  /* was grid.mode, now unused */
 			grid.step);
 
 	fprintf(fp, "snap %d\n",

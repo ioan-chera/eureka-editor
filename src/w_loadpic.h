@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -38,6 +38,23 @@ bool LoadPicture(Img_c& img,
 	int pic_y_offset,    /* relative to top left corner of buffer. */
 	int *pic_width = NULL,    /* To return the size of the picture */
 	int *pic_height = NULL);  /* (can be NULL) */
+
+
+// Determine the image format of the given wad lump.
+//
+// Return values are:
+//    'p'  : PNG format
+//    't'  : TGA (Targa) format
+//    'd'  : Doom patch
+//
+//    'j'  : JPEG
+//    'g'  : GIF
+//    'b'  : BMP
+//    's'  : DDS
+//
+//    NUL  : unrecognized
+//
+char W_DetectImageFormat(Lump_c *lump);
 
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */

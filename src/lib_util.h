@@ -37,25 +37,28 @@ void y_strlowr (char *str);
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 char *StringUpper(const char *name);
-char *StringPrintf(const char *str, ...); // GCCATTR((format (printf, 1, 2)));
+char *StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 
 void StringRemoveCRLF(char *str);
 char *StringTidy(const char *str, const char *bad_chars = "");
 
-void check_types ();
+void CheckTypeSizes();
 
 void TimeDelay(unsigned int millies);
 unsigned int TimeGetMillies();
 
-unsigned ComputeAngle (int, int);
-unsigned ComputeDist (int, int);
+unsigned int ComputeAngle (int, int);
+unsigned int ComputeDist  (int, int);
 
 double PerpDist(double x, double y,  /* coord to test */
                 double x1, double y1, double x2, double y2 /* line */);
 
 double AlongDist(double x, double y, /* coord to test */
                  double x1, double y1, double x2, double y2 /* line */);
+
+// round a positive value up to the nearest power of two
+int RoundPOW2(int x);
 
 
 const char * Int_TmpStr(int value);

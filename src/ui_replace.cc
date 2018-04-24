@@ -22,10 +22,12 @@
 #include "ui_window.h"
 
 #include "e_path.h"  // GoToObject
-#include "levels.h"  // Selection_Clear
+#include "e_main.h"  // Selection_Clear
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 class number_group_c
@@ -278,7 +280,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 	color(WINDOW_BG, WINDOW_BG);
 
-	
+
 	/* ---- FIND AREA ---- */
 
 	Fl_Group *grp1 = new Fl_Group(X, Y, W, 210);
@@ -304,20 +306,21 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		UpdateWhatColor();
 
 
-		find_match = new Fl_Input(X+70, Y+95, 125, 25, "Match: ");
+		find_match = new Fl_Input(X+75, Y+95, 135, 25, "Match: ");
 		find_match->when(FL_WHEN_CHANGED);
 		find_match->callback(find_match_callback, this);
 
-		find_choose = new Fl_Button(X+210, Y+95, 70, 25, "Choose");
-		find_choose->callback(find_choose_callback, this);
+		find_desc = new Fl_Output(X+75, Y+125, 135, 25, "Desc: ");
 
-		find_desc = new Fl_Output(X+70, Y+125, 210, 25, "Desc: ");
+		find_pic = new UI_Pic(X+225, Y+95, 64, 64, "Choose");
+		find_pic->callback((Fl_Callback *)choose_callback, this);
+///		find_pic->AllowHighlight(true);
 
-		find_but = new Fl_Button(X+50, Y+165, 80, 30, "Find");
+		find_but = new Fl_Button(X+50, Y+165, 90, 30, "Find");
 		find_but->labelfont(FL_HELVETICA_BOLD);
 		find_but->callback(find_but_callback, this);
 
-		select_all_but = new Fl_Button(X+165, Y+165, 93, 30, "Select All");
+		select_all_but = new Fl_Button(X+160, Y+165, 105, 30, "Select All");
 		select_all_but->callback(select_all_callback, this);
 	}
 	grp1->end();
@@ -328,14 +331,15 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group *grp2 = new Fl_Group(X, Y + 214, W, 132);
 	grp2->box(FL_UP_BOX);
 	{
-		rep_value = new Fl_Input(X+80, Y+230, 115, 25, "New val: ");
+		rep_value = new Fl_Input(X+75, Y+230, 135, 25, "New: ");
 		rep_value->when(FL_WHEN_CHANGED);
 		rep_value->callback(rep_value_callback, this);
 
-		rep_choose = new Fl_Button(X+210, Y+230, 70, 25, "Choose");
-		rep_choose->callback(rep_choose_callback, this);
+		rep_desc = new Fl_Output(X+75, Y+260, 135, 25, "Desc: ");
 
-		rep_desc = new Fl_Output(X+80, Y+260, 200, 25, "Desc: ");
+		rep_pic = new UI_Pic(X+225, Y+230, 64, 64, "Choose");
+		rep_pic->callback((Fl_Callback *)choose_callback, this);
+///		rep_pic->AllowHighlight(true);
 
 		apply_but = new Fl_Button(X+45, Y+300, 90, 30, "Replace");
 		apply_but->labelfont(FL_HELVETICA_BOLD);
@@ -365,31 +369,35 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 		filter_group = new Fl_Group(X, Y+391, W, H-391);
 		{
 			// common stuff
-			tag_input = new Fl_Input(X+105, Y+390, 130, 24, "Tag match:");
+			restrict_to_sel = new Fl_Check_Button(X+10, Y+390, 80, 22, " Restrict to Selection");
+
+			previous_sel = new selection_c();
+
+			tag_input = new Fl_Input(X+117, Y+417, 130, 24, "Tag match:");
 			tag_input->when(FL_WHEN_CHANGED);
 			tag_input->callback(tag_input_callback, this);
 
 			// thing stuff
-			o_easy   = new UI_TripleCheckButton(X+105, Y+414, 28, 26, "easy: ");
-			o_medium = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "medium: ");
-			o_hard   = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "hard: ");
+			o_easy   = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "easy: ");
+			o_medium = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "medium: ");
+			o_hard   = new UI_TripleCheckButton(X+105, Y+504, 28, 26, "hard: ");
 
-			o_sp     = new UI_TripleCheckButton(X+220, Y+414, 28, 26, "sp: ");
-			o_coop   = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "coop: ");
-			o_dm     = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "dm: ");
+			o_sp     = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "sp: ");
+			o_coop   = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "coop: ");
+			o_dm     = new UI_TripleCheckButton(X+220, Y+504, 28, 26, "dm: ");
 
 			// sector stuff
-			o_floors   = new Fl_Check_Button(X+45, Y+418, 80, 22, " floors");
-			o_ceilings = new Fl_Check_Button(X+45, Y+440, 80, 22, " ceilings");
-			o_skies    = new Fl_Check_Button(X+45, Y+462, 80, 22, " skies");
+			o_floors   = new Fl_Check_Button(X+45, Y+448, 80, 22, " floors");
+			o_ceilings = new Fl_Check_Button(X+45, Y+470, 80, 22, " ceilings");
+			o_skies    = new Fl_Check_Button(X+45, Y+492, 80, 22, " skies");
 
 			// linedef stuff
-			o_lowers  = new Fl_Check_Button(X+45, Y+418, 80, 22, " lowers");
-			o_uppers  = new Fl_Check_Button(X+45, Y+440, 80, 22, " uppers");
-			o_rails   = new Fl_Check_Button(X+45, Y+462, 80, 22, " rail");
+			o_lowers  = new Fl_Check_Button(X+45, Y+448, 80, 22, " lowers");
+			o_uppers  = new Fl_Check_Button(X+45, Y+470, 80, 22, " uppers");
+			o_rails   = new Fl_Check_Button(X+45, Y+492, 80, 22, " rail");
 
-			o_one_sided = new Fl_Check_Button(X+155, Y+418, 80, 22, " one-sided");
-			o_two_sided = new Fl_Check_Button(X+155, Y+440, 80, 22, " two-sided");
+			o_one_sided = new Fl_Check_Button(X+155, Y+448, 80, 22, " one-sided");
+			o_two_sided = new Fl_Check_Button(X+155, Y+470, 80, 22, " two-sided");
 		}
 		filter_group->end();
 		filter_group->hide();
@@ -423,11 +431,11 @@ void UI_FindAndReplace::UpdateWhatColor()
 {
 	switch (what->value())
 	{
-		case 0: /* Things      */ what->color(FL_MAGENTA); break;
-		case 1: /* Line Tex    */ what->color(fl_rgb_color(0,128,255)); break;
-		case 2: /* Sector Flat */ what->color(FL_YELLOW); break;
+		case 0: /* Things      */ what->color(THING_MODE_COL); break;
+		case 1: /* Line Tex    */ what->color(LINE_MODE_COL); break;
+		case 2: /* Sector Flat */ what->color(SECTOR_MODE_COL); break;
 		case 3: /* Line Type   */ what->color(FL_GREEN); break;
-		case 4: /* Sector Type */ what->color(fl_rgb_color(255,144,0)); break;
+		case 4: /* Sector Type */ what->color(fl_rgb_color(255,160,0)); break;
 	}
 }
 
@@ -502,7 +510,7 @@ void UI_FindAndReplace::rawShowFilter(int value)
 void UI_FindAndReplace::filter_toggle_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
-		
+
 	Fl_Toggle_Button *toggle = (Fl_Toggle_Button *)w;
 
 	box->rawShowFilter(toggle->value());
@@ -560,6 +568,8 @@ void UI_FindAndReplace::Open()
 	what->do_callback();
 
 	Fl::focus(find_match);
+
+	UnselectPics();
 }
 
 
@@ -570,9 +580,13 @@ void UI_FindAndReplace::Clear()
 	find_match->value("");
 	find_desc->value("");
 	find_but->label("Find");
+	find_pic->Clear();
 
 	rep_value->value("");
 	rep_desc->value("");
+	rep_pic->Clear();
+
+	UnselectPics();
 
 	find_but->deactivate();
 	select_all_but->deactivate();
@@ -591,6 +605,8 @@ void UI_FindAndReplace::ResetFilters()
 {
 	tag_input->value("");
 	tag_numbers->clear();
+
+	restrict_to_sel->value(0);
 
 	// thing filters
 	o_easy  ->value(0);
@@ -667,7 +683,8 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool is_valid = box->CheckInput(box->find_match, box->find_desc, box->find_numbers);
+	bool is_valid = box->CheckInput(box->find_match, box->find_desc,
+									box->find_pic, box->find_numbers);
 
 	if (is_valid)
 	{
@@ -690,11 +707,12 @@ void UI_FindAndReplace::find_match_callback(Fl_Widget *w, void *data)
 	box->rep_value->do_callback();
 }
 
+
 void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc);
+	bool is_valid = box->CheckInput(box->rep_value, box->rep_desc, box->rep_pic);
 
 	if (is_valid)
 	{
@@ -726,29 +744,43 @@ void UI_FindAndReplace::rep_value_callback(Fl_Widget *w, void *data)
 }
 
 
-bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c *num_grp)
+bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, number_group_c *num_grp)
 {
-	if (strlen(w->value()) == 0)
+	const char *inp_text = w->value();
+
+	if (strlen(inp_text) == 0)
 	{
 		desc->value("");
+		 pic->Clear();
 		return false;
 	}
 
-	if (what->value() == 1 || what->value() == 2)
+
+	// Line Textures
+	if (what->value() == 1)
+	{
+		pic->GetTex(inp_text);
 		return true;
+	}
+
+	// Sector Flats
+	if (what->value() == 2)
+	{
+		pic->GetFlat(inp_text);
+		return true;
+	}
 
 
 	// for numeric types, parse the number(s) and/or ranges
 
-	int type_num;
+	int type_num = 0;
 
 	if (! num_grp)
 	{
-		// just check the number is valid
 		char *endptr;
+		type_num = static_cast<int>(strtol(inp_text, &endptr, 0 /* allow hex */));
 
-		type_num = strtol(w->value(), &endptr, 0 /* allow hex */);
-
+		// just check the number is valid
 		if (*endptr != 0)
 		{
 			desc->value("(parse error)");
@@ -759,7 +791,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 	{
 		num_grp->clear();
 
-		if (! num_grp->ParseString(w->value()))
+		if (! num_grp->ParseString(inp_text))
 		{
 			desc->value("(parse error)");
 			return false;
@@ -786,6 +818,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, number_group_c 
 		{
 			const thingtype_t *info = M_GetThingType(type_num);
 			desc->value(info->desc);
+			 pic->GetSprite(type_num, FL_DARK2);
 			break;
 		}
 
@@ -865,6 +898,14 @@ char UI_FindAndReplace::GetKind()
 }
 
 
+bool UI_FindAndReplace::ClipboardOp(char what)
+{
+	// hmmm, review this
+	fl_beep();
+	return true;
+}
+
+
 void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 	if (kind != GetKind())
@@ -873,16 +914,29 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 		return;
 	}
 
-	bool is_replace = false;
+	// determine which box the user intended
+	int sel_pics =	find_pic->Selected() ? 1 :
+					 rep_pic->Selected() ? 2 : 0;
 
-	if (Fl::focus() == rep_value || Fl::focus() == rep_desc)
-		is_replace = true;
+	if (sel_pics == 0)
+	{
+		sel_pics =	(Fl::focus() == find_match || Fl::focus() == find_desc) ? 1 :
+					(Fl::focus() ==  rep_value || Fl::focus() ==  rep_desc) ? 2 : 0;
+	}
+
+	if (sel_pics == 0)
+	{
+		fl_beep();
+		return;
+	}
+
+	bool is_replace = (sel_pics == 2);
+
 
 	char append = 0;
 
-	// never append if user has selected some/all of the input
-	if (! is_replace &&
-		find_match->position() == find_match->mark())
+	// only append when SHIFT key was pressed
+	if ((e_state & FL_SHIFT) && !is_replace)
 	{
 		append = ',';
 	}
@@ -892,7 +946,9 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
 	if (kind == 'T' || kind == 'F')
+	{
 		InsertName(inp, append, name);
+	}
 	else
 	{
 		// already present?
@@ -974,26 +1030,49 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 }
 
 
-void UI_FindAndReplace::find_choose_callback(Fl_Widget *w, void *data)
+void UI_FindAndReplace::UnselectPics()
 {
-	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
-
-	main_win->ShowBrowser(box->GetKind());
-
-	// ensure Match input widget has the focus
-	Fl::focus(box->find_match);
-	box->find_match->redraw();
+	find_pic->Selected(false);
+	 rep_pic->Selected(false);
 }
 
-void UI_FindAndReplace::rep_choose_callback(Fl_Widget *w, void *data)
+
+void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	main_win->ShowBrowser(box->GetKind());
+	// ensure corresponding input widget has the focus
 
-	// ensure 'New val' input widget has the focus
-	Fl::focus(box->rep_value);
-	box->rep_value->redraw();
+	if (w == box->find_pic)
+	{
+		box->find_pic->Selected(! box->find_pic->Selected());
+
+		if (box->find_pic->Selected())
+		{
+			main_win->BrowserMode(box->GetKind());
+
+			Fl::focus(box->find_match);
+			box->find_match->redraw();
+
+			box->rep_pic->Selected(false);
+		}
+	}
+	else
+	{
+		box->rep_pic->Selected(! box->rep_pic->Selected());
+
+		if (box->rep_pic->Selected())
+		{
+			main_win->BrowserMode(box->GetKind());
+
+			Fl::focus(box->rep_value);
+			box->rep_value->redraw();
+
+			box->find_pic->Selected(false);
+		}
+	}
+
+	Render3D_ClearSelection();
 }
 
 
@@ -1016,17 +1095,39 @@ bool UI_FindAndReplace::FindNext()
 		Editor_ChangeMode_Raw(cur_obj.type);
 	}
 
-	Selection_Clear();
-
 
 	bool is_first = cur_obj.is_nil();
+
+	// grab the selection *once*, on the first find
+	if (is_first)
+	{
+		previous_sel->change_type(edit.mode);
+		previous_sel->merge(*edit.Selected);
+
+		// catch a common user mistake
+		if (filter_toggle->value() && restrict_to_sel->value() &&
+			edit.Selected->empty())
+		{
+			Beep("EMPTY SELECTION!");
+			return false;
+		}
+	}
+
+	Selection_Clear();
+
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
 	int total    = NumObjects(cur_obj.type);
 
 	for (int idx = start_at ; idx < total ; idx++)
 	{
-		if (MatchesObject(idx))
+		if (! MatchesObject(idx))
+			continue;
+
+		if (! Filter_PrevSel(idx))
+			continue;
+
+		// found!
 		{
 			cur_obj.num = idx;
 
@@ -1072,15 +1173,17 @@ void UI_FindAndReplace::DoReplace()
 	// this generally can't happen either
 	if (cur_obj.is_nil())
 	{
-		Beep("No object to replace");
+		Beep("No object to replace!");
 		return;
 	}
 
-	int replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 	BA_Begin();
 
 	ApplyReplace(cur_obj.num, replace_tex_id);
+
+	BA_Message("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
 	BA_End();
 
@@ -1152,6 +1255,14 @@ void UI_FindAndReplace::DoAll(bool replace)
 		return;
 	}
 
+	// catch a common user mistake
+	if (filter_toggle->value() && restrict_to_sel->value() &&
+		edit.Selected->empty())
+	{
+		Beep("EMPTY SELECTION!");
+		return;
+	}
+
 	ComputeFlagMask();
 
 	if (cur_obj.type != edit.mode)
@@ -1161,13 +1272,16 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		replace_tex_id = UI_SideBox::TexFromWidget(rep_value);
+		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 		BA_Begin();
 	}
 
 	// we select objects even in REPLACE mode
 	// (gives the user a visual indication that stuff was done)
+
+	previous_sel->change_type(edit.mode);
+	previous_sel->merge(*edit.Selected);
 
 	// this clears the selection
 	edit.Selected->change_type(edit.mode);
@@ -1178,6 +1292,9 @@ void UI_FindAndReplace::DoAll(bool replace)
 	for (int idx = 0 ; idx < total ; idx++)
 	{
 		if (! MatchesObject(idx))
+			continue;
+
+		if (! Filter_PrevSel(idx))
 			continue;
 
 		count++;
@@ -1195,6 +1312,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
+		BA_MessageForSel("replacement in", edit.Selected);
+
 		BA_End();
 	}
 
@@ -1331,11 +1450,23 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 }
 
 
+bool UI_FindAndReplace::Filter_PrevSel(int idx)
+{
+	if (! filter_toggle->value())
+		return true;
+
+	if (! restrict_to_sel->value())
+		return true;
+
+	return previous_sel->get(idx);
+}
+
+
 bool UI_FindAndReplace::Filter_Tag(int tag)
 {
 	if (! filter_toggle->value())
 		return true;
-	
+
 	// an empty string means everything (same as '*')
 	if (tag_input->size() == 0)
 		return true;

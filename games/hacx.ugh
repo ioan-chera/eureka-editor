@@ -1,10 +1,10 @@
 #------------------------------------------------------------------------
-#  HACX definitions
+#  HACX 1.2 definitions
 #------------------------------------------------------------------------
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012-2013 Andrew Apted
+#  Copyright (C) 2012-2016 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -18,12 +18,17 @@
 #
 #------------------------------------------------------------------------
 
+variant_of doom2
+
+player_size 16 56 41
+
 sky_flat  F_SKY1
 
 default_textures  MODWALL3  FLAT14  FLAT5_1
 default_thing  2014
 
 include "doom_colors"
+include "doom_groups"
 include "doom_specials"
 
 #---- THINGS ----------------

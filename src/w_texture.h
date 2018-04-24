@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  TEXTURE LOADING
+//  TEXTURES / FLATS / SPRITES
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -31,11 +31,35 @@
 
 void W_LoadTextures();
 
-bool W_TextureExists(const char *name);
+// accepts "-", "#xxxx" or an existing texture name
+bool W_TextureIsKnown(const char *name);
 
-Img_c * W_GetTexture(const char *name);
+Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
 
+int  W_GetTextureHeight(const char *name);
 bool W_TextureCausesMedusa(const char *name);
+
+// this truncates the name to 8 chars, and makes it uppercase.
+// [ result is a static buffer, copy if necessary! ]
+const char *NormalizeTex(const char *name);
+
+
+/* ---- FLATS ---- */
+
+void W_LoadFlats();
+
+// checks if the flat exists
+bool W_FlatIsKnown(const char *name);
+
+Img_c * W_GetFlat(const char *name, bool try_uppercase = false);
+
+
+/* ---- SPRITES ---- */
+
+void W_ClearSprites();
+
+Img_c * W_GetSprite(int type);
+
 
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -45,7 +45,7 @@ class crc32_c;
 // the LineDef vertex numbers are OK, the SideDef sector number is
 // valid, etc.  For LineDefs, the left and right fields can contain
 // -1 to mean "no sidedef", but note that a missing right sidedef
-// can cause problems when playing the map in DOOM.
+// can cause problems or crashes when playing the map in DOOM.
 //
 
 
@@ -102,6 +102,17 @@ public:
 		arg3 = other->arg3;
 		arg4 = other->arg4;
 		arg5 = other->arg5;
+	}
+
+	int Arg(int which /* 1..5 */) const
+	{
+		if (which == 1) return arg1;
+		if (which == 2) return arg2;
+		if (which == 3) return arg3;
+		if (which == 4) return arg4;
+		if (which == 5) return arg5;
+
+		return 0;
 	}
 };
 
@@ -210,7 +221,8 @@ public:
 
 	Sector *SecRef() const;
 
-	void SetDefaults(bool two_sided);
+	// use new_tex when >= 0, otherwise use default_wall_tex
+	void SetDefaults(bool two_sided, int new_tex = -1);
 };
 
 
@@ -270,6 +282,11 @@ public:
 		return (start == v_num) || (end == v_num);
 	}
 
+	bool TouchesCoord(int tx, int ty) const
+	{
+		return Start()->Matches(tx, ty) || End()->Matches(tx, ty);
+	}
+
 	bool TouchesSector(int sec_num) const;
 
 	bool OneSided() const
@@ -318,7 +335,7 @@ extern std::vector<byte>  BehaviorData;
 #define NumSideDefs   ((int)SideDefs.size())
 #define NumLineDefs   ((int)LineDefs.size())
 
-extern int NumObjects(obj_type_e type);
+int NumObjects(obj_type_e type);
 
 #define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
 #define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
@@ -326,13 +343,15 @@ extern int NumObjects(obj_type_e type);
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
 
+const char * NameForObjectType(obj_type_e type, bool plural = false);
+
 
 /* BASIS API */
 
 // begin a group of operations that will become a single undo/redo
-// step.  All stored _redo_ steps will be removed.  The BA_New,
-// BA_Delete and BA_Change calls must only be called between
-// BA_Begin() and BA_End() pairs.
+// step.  Any stored _redo_ steps will be forgotten.  The BA_New,
+// BA_Delete, BA_Change and BA_Message functions must only be called
+// between BA_Begin() and BA_End() pairs.
 void BA_Begin();
 
 // finish a group of operations.
@@ -342,6 +361,12 @@ void BA_End();
 // modified and any changes since BA_Begin() are undone except
 // when 'keep_changes' is true.
 void BA_Abort(bool keep_changes = false);
+
+// assign a message to the current operation.
+// this can be called multiple times.
+void BA_Message(const char *msg = NULL, ...);
+
+void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix = "");
 
 // create a new object, returning its objnum.  It is safe to
 // directly set the new object's fields after calling BA_New().

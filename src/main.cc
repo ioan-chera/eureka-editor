@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,23 +28,23 @@
 
 #include <time.h>
 
-#include "e_loadsave.h"
 #include "im_color.h"
 #include "m_config.h"
-#include "editloop.h"
 #include "m_game.h"
 #include "m_files.h"
-#include "levels.h"    /* Because of "viewtex" */
+#include "m_loadsave.h"
 
-#include "w_flats.h"
+#include "e_main.h"
+#include "m_events.h"
+#include "r_render.h"
+
 #include "w_rawdef.h"
-#include "w_sprite.h"
 #include "w_texture.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
+#include "ui_about.h"
 #include "ui_file.h"
-#include "r_render.h"
 
 #ifndef WIN32
 #include <time.h>
@@ -55,16 +55,10 @@
 #include "OSXCalls.h"
 #endif
 
-/*
- *  Global variables
- */
 
-// progress during initialisation:
-//   0 = nothing yet
-//   1 = read early options, set up logging
-//   2 = read all options, and possibly a config file
-//   3 = inited FLTK, opened main window
-int  init_progress;
+//
+//  global variables
+//
 
 bool want_quit = false;
 
@@ -89,14 +83,9 @@ const char *Level_name;
 map_format_e Level_format;
 
 
-int show_help     = 0;
-int show_version  = 0;
-
-int KF;
-int KF_fonth;
-
-
+//
 // config items
+//
 bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
@@ -105,10 +94,7 @@ bool map_scroll_bars  = true;
 
 const char *default_port = DEFAULT_PORT_NAME;
 
-int scroll_less   = 10;
-int scroll_more   = 90;
-
-int gui_scheme    = 2;  // plastic
+int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
 
 rgb_color_t gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
@@ -116,10 +102,15 @@ rgb_color_t gui_custom_ig = RGB_MAKE(255, 255, 255);
 rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 
 
-/*
- *  Prototypes of private functions
- */
-static void TermFLTK();
+// Progress during initialisation:
+//    0 = nothing yet
+//    1 = read early options, set up logging
+//    2 = parsed all options, inited FLTK
+//    3 = opened the main window
+int  init_progress;
+
+int show_help     = 0;
+int show_version  = 0;
 
 
 static void RemoveSingleNewlines(char *buffer)
@@ -136,9 +127,9 @@ static void RemoveSingleNewlines(char *buffer)
 }
 
 
-/*
- *  Show an error message and terminate the program
- */
+//
+//  show an error message and terminate the program
+//
 void FatalError(const char *fmt, ...)
 {
 	va_list arg_ptr;
@@ -161,15 +152,13 @@ void FatalError(const char *fmt, ...)
 		LogPrintf("\nFATAL ERROR: %s", buffer);
 	}
 
-	if (init_progress >= 3)
+	if (init_progress >= 2)
 	{
 		RemoveSingleNewlines(buffer);
 
 		DLG_ShowError("%s", buffer);
 
-		init_progress = 2;
-
-		TermFLTK();
+		init_progress = 1;
 	}
 #ifdef WIN32
 	else
@@ -217,9 +206,9 @@ static void CreateHomeDirs()
 		"cache", "backups",
 
 		// these under $home_dir
-		"iwads", "games", "ports", "mods",
+		"iwads", "games", "ports",
 
-		NULL
+		NULL	// end of list
 	};
 
 	for (int i = 0 ; subdirs[i] ; i++)
@@ -267,7 +256,7 @@ static void Determine_HomeDir(const char *argv0)
 
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
-      
+
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
    home_dir = StringDup(path);
 
@@ -286,12 +275,12 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (! home_dir)
 		FatalError("Unable to find home directory!\n");
-	
+
 	if (! cache_dir)
 		cache_dir = home_dir;
 
-    LogPrintf("Home  dir: %s\n", home_dir);
-    LogPrintf("Cache dir: %s\n", cache_dir);
+	LogPrintf("Home  dir: %s\n", home_dir);
+	LogPrintf("Cache dir: %s\n", cache_dir);
 
 	// create cache directory (etc)
 	CreateHomeDirs();
@@ -410,10 +399,14 @@ static bool DetermineIWAD()
 		Iwad_name = M_PickDefaultIWAD();
 
 		if (Iwad_name)
+		{
 			Iwad_name = StringDup(Iwad_name);
+		}
 		else
 		{
-			if (! ProjectSetup(false /* new_project */, true /* is_startup */))
+			// show the "Missing IWAD!" dialog.
+			// if user cancels it, we have no choice but to quit.
+			if (! MissingIWAD_Dialog())
 				return false;
 		}
 	}
@@ -448,20 +441,6 @@ static void DeterminePort()
 }
 
 
-static const char * DetermineMod(const char *res_name)
-{
-	static char mod_name[FL_PATH_MAX];
-		
-	strcpy(mod_name, fl_filename_name(res_name));
-
-	fl_filename_setext(mod_name, "");
-
-	y_strlowr(mod_name);
-
-	return StringDup(mod_name);
-}
-
-
 static const char * DetermineLevel()
 {
 	// most of the logic here is to handle a numeric level number
@@ -487,22 +466,25 @@ static const char * DetermineLevel()
 		if (! wad)
 			continue;
 
-		short lev_idx;
+		short lev_num;
 
 		if (level_number > 0)
 		{
-			lev_idx = wad->FindLevelByNumber(level_number);
-			if (lev_idx < 0)
+			lev_num = wad->LevelFindByNumber(level_number);
+			if (lev_num < 0)
 				FatalError("Level '%d' not found (no matches)\n", level_number);
+
 		}
 		else
 		{
-			lev_idx = wad->FindFirstLevel();
-			if (lev_idx < 0)
+			lev_num = wad->LevelFindFirst();
+			if (lev_num < 0)
 				FatalError("No levels found in the %s!\n", (pass == 0) ? "PWAD" : "IWAD");
 		}
 
-		Lump_c *lump = wad->GetLump(lev_idx);
+		short idx = wad->LevelHeader(lev_num);
+
+		Lump_c *lump = wad->GetLump(idx);
 		SYS_ASSERT(lump);
 
 		return StringDup(lump->Name());
@@ -513,7 +495,7 @@ static const char * DetermineLevel()
 }
 
 
-/* this is only to prevent ESCAPE key from quitting */
+// this is only to prevent ESCAPE key from quitting
 int Main_key_handler(int event)
 {
 	if (event != FL_SHORTCUT)
@@ -529,12 +511,13 @@ int Main_key_handler(int event)
 }
 
 
-static void Main_OpenWindow()
+static void Main_SetupFLTK()
 {
-	/*
-	 *  Create the window
-	 */
 	Fl::visual(FL_DOUBLE | FL_RGB);
+
+	// disable keyboard navigation, as it often interferes with our
+	// user interface, especially TAB key for toggling the 3D view.
+	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
 
 
 	if (gui_color_set == 0)
@@ -587,9 +570,15 @@ static void Main_OpenWindow()
 #endif
 
 	KF_fonth = (14 + KF * 2);
+}
 
 
-	main_win = new UI_MainWin();
+//
+// Creates the main window
+//
+static void Main_OpenWindow()
+{
+	main_win = new UI_MainWindow();
 
 	main_win->label("Eureka v" EUREKA_VERSION);
 
@@ -615,6 +604,8 @@ static void Main_OpenWindow()
 
 	Fl::check();
 
+	InitAboutDialog();
+
 	if (begin_maximized)
 		main_win->Maximize();
 
@@ -622,18 +613,22 @@ static void Main_OpenWindow()
 
 	LogOpenWindow();
 
-    Fl::add_handler(Main_key_handler);
+	Fl::add_handler(Main_key_handler);
 
-	main_win->ShowBrowser(0);
-
+	main_win->BrowserMode(0);
 	main_win->NewEditMode(edit.mode);
+
+	// allow processing keyboard events, even before the mouse
+	// pointer has entered our window.
+	Fl::focus(main_win->canvas);
 
 	Fl::check();
 }
 
 
-static void TermFLTK()
+void Main_Quit()
 {
+	want_quit = true;
 }
 
 
@@ -656,7 +651,7 @@ bool Main_ConfirmQuit(const char *action)
 	if (p)
 		*p = 0;
 
-	if (DLG_Confirm(buttons, 
+	if (DLG_Confirm(buttons,
 	                "You have unsaved changes.  "
 	                "Do you really want to %s?", action) == 1)
 	{
@@ -667,13 +662,45 @@ bool Main_ConfirmQuit(const char *action)
 }
 
 
+//
+// the directory we should use for a file open/save operation.
+// returns NULL when not sure.
+//
+const char * Main_FileOpFolder()
+{
+	static char folder[FL_PATH_MAX];
+
+	if (Pwad_name)
+	{
+		FilenameGetPath(folder, sizeof(folder), Pwad_name);
+
+		if (folder[0])
+			return folder;
+	}
+
+	return NULL;
+}
+
+
 void Main_Loop()
 {
-	UpdateHighlight();
+	RedrawMap();
 
-    for (;;)
-    {
-        Fl::wait(0.2);
+	for (;;)
+	{
+		if (edit.is_navigating)
+		{
+			Nav_Navigate();
+
+			Fl::wait(0);
+
+			if (want_quit)
+				break;
+		}
+		else
+		{
+			Fl::wait(0.2);
+		}
 
 		if (want_quit)
 		{
@@ -691,16 +718,16 @@ void Main_Loop()
 
 		if (edit.Selected->empty())
 			edit.error_mode = false;
-    }
+	}
 }
 
 
 static void LoadResourceFile(const char *filename)
 {
-	// support loading "ugh" definitions
+	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(filename);
+		M_ParseDefinitionFile(PURPOSE_Resource, filename);
 		return;
 	}
 
@@ -713,29 +740,34 @@ static void LoadResourceFile(const char *filename)
 		FatalError("Cannot load resource: %s\n", filename);
 
 	MasterDir_Add(wad);
-
-	// load corresponding mod file (if it exists)
-	const char *mod_name = DetermineMod(filename);
-	
-	if (M_CanLoadDefinitions("mods", mod_name))
-	{
-		M_LoadDefinitions("mods", mod_name);
-	}
 }
 
 
+static void Main_LoadIWAD()
+{
+	// Load the IWAD (read only)
+	game_wad = Wad_file::Open(Iwad_name, 'r');
+	if (! game_wad)
+		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
+
+	MasterDir_Add(game_wad);
+}
+
+
+//
+// load all game/port definitions (*.ugh)
+//
 void Main_LoadResources()
 {
 	LogPrintf("\n");
 	LogPrintf("----- Loading Resources -----\n");
 
-	// Load game definitions (*.ugh)
-	M_InitDefinitions();
+	M_ClearAllDefinitions();
 
 	Game_name = DetermineGame(Iwad_name);
 
-	LogPrintf("IWAD name: '%s'\n", Iwad_name);
 	LogPrintf("Game name: '%s'\n", Game_name);
+	LogPrintf("IWAD file: '%s'\n", Iwad_name);
 
 	M_LoadDefinitions("games", Game_name);
 
@@ -749,24 +781,16 @@ void Main_LoadResources()
 	// reset the master directory
 	if (edit_wad)
 		MasterDir_Remove(edit_wad);
-	
+
 	MasterDir_CloseAll();
 
-
-	// Load the IWAD (read only)
-	game_wad = Wad_file::Open(Iwad_name, 'r');
-	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
-
-	MasterDir_Add(game_wad);
-
+	Main_LoadIWAD();
 
 	// Load all resource wads
 	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
 		LoadResourceFile(Resource_list[i]);
 	}
-
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);
@@ -801,7 +825,7 @@ void Main_LoadResources()
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2016 Andrew Apted, et al ***\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2017 Andrew Apted, et al ***\n"
 			"\n");
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
@@ -813,7 +837,7 @@ static void ShowHelp()
 			"\n"
 			"Available options are:\n");
 
-	dump_command_line_options(stdout);
+	M_PrintCommandLineOptions(stdout);
 
 	fflush(stdout);
 }
@@ -854,25 +878,21 @@ static void ShowTime()
 			  calend_time->tm_hour, calend_time->tm_min,
 			  calend_time->tm_year + 1900, calend_time->tm_mon + 1,
 			  calend_time->tm_mday);
-#endif  
+#endif
 }
 
 
-/*
- *  the driving program
- */
+//
+//  the program starts here
+//
 int main(int argc, char *argv[])
 {
 	init_progress = 0;
 
-	int r;
 
 	// a quick pass through the command line arguments
 	// to handle special options, like --help, --install, --config
-	r = M_ParseCommandLine(argc - 1, argv + 1, 1);
-
-	if (r)
-		exit(3);
+	M_ParseCommandLine(argc - 1, argv + 1, 1);
 
 	if (show_help)
 	{
@@ -885,17 +905,15 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	//printf ("%s\n", what ());
-
-
 	init_progress = 1;
 
+
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2016 Andrew Apted, et al ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2017 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
 
-	// Sanity checks (useful when porting).
-	check_types();
+	// sanity checks type sizes (useful when porting)
+	CheckTypeSizes();
 
 	ShowTime();
 
@@ -903,46 +921,36 @@ int main(int argc, char *argv[])
 	Determine_InstallPath(argv[0]);
 	Determine_HomeDir(argv[0]);
 
-
 	LogOpenFile(log_file);
 
 
-	// a config file can provides some values
+	// load all the config settings
 	M_ParseConfigFile();
 
-	if (r == 0)
-	{
-		// environment variables can override them
-		r = M_ParseEnvironmentVars();
-	}
+	// environment variables can override them
+	M_ParseEnvironmentVars();
 
-	if (r == 0)
-	{
-		// and command line arguments will override both
-		r = M_ParseCommandLine(argc - 1, argv + 1, 2);
-	}
+	// and command line arguments will override both
+	M_ParseCommandLine(argc - 1, argv + 1, 2);
 
-	if (r != 0)
-	{
-		// FIXME
-		fprintf(stderr, "Error parsing config or cmd-line options.\n");
-		exit(1);
-	}
-
-
-	init_progress = 2;
-
-	M_LoadRecent();
-	M_LookForIWADs();
 
 	Editor_Init();
 
-	Main_OpenWindow();
+	Main_SetupFLTK();
 
+	init_progress = 2;
+
+
+	M_LoadRecent();
+	M_LoadBindings();
+
+	M_LookForIWADs();
+
+	Main_OpenWindow();
 
 	init_progress = 3;
 
-	M_LoadBindings();
+	M_LoadOperationMenus();
 
 
 	// open a specified PWAD now
@@ -950,12 +958,13 @@ int main(int argc, char *argv[])
 
 	if (Pwad_list.size() > 0)
 	{
+		// this fatal errors on any missing file
+		// [ hence the Open() below is very unlikely to fail ]
 		M_ValidateGivenFiles();
 
 		Pwad_name = Pwad_list[0];
 
 		edit_wad = Wad_file::Open(Pwad_name, 'a');
-
 		if (! edit_wad)
 			FatalError("Cannot load pwad: %s\n", Pwad_name);
 
@@ -963,10 +972,13 @@ int main(int argc, char *argv[])
 		//       placed at the correct spot (at the end)
 		MasterDir_Add(edit_wad);
 	}
-	else if (auto_load_recent &&
-	         ! (Iwad_name || Level_name))
+	// don't auto-load when --iwad or --warp was used on the command line
+	else if (auto_load_recent && ! (Iwad_name || Level_name))
 	{
-		M_TryOpenMostRecent();
+		if (M_TryOpenMostRecent())
+		{
+			MasterDir_Add(edit_wad);
+		}
 	}
 
 
@@ -994,13 +1006,18 @@ int main(int argc, char *argv[])
 		goto quit;
 
 
+	// load *just* the iwad, the following few functions need it
+	Main_LoadIWAD();
+
+	Level_name = DetermineLevel();
+
+	// config file parsing can depend on the map format, so get it now
+	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
+
 	Main_LoadResources();
 
 
 	// load the initial level
-
-	Level_name = DetermineLevel();
-
 	LogPrintf("Loading initial map : %s\n", Level_name);
 
 	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
@@ -1013,12 +1030,6 @@ quit:
 	/* that's all folks! */
 
 	LogPrintf("Quit\n");
-
-
-	init_progress = 2;
-
-	TermFLTK();
-
 
 	init_progress = 0;
 

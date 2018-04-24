@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@
 
 #define EUREKA_TITLE  "Eureka DOOM Editor"
 
-#define EUREKA_VERSION  "1.12"
+#define EUREKA_VERSION  "1.22"
 
 #define EUREKA_LUMP  "__EUREKA"
 
@@ -85,7 +85,7 @@
 
 #include "e_basis.h"
 #include "m_keys.h"
-#include "objects.h"
+#include "e_objects.h"
 
 
 /*
@@ -105,6 +105,10 @@ typedef enum
 } map_format_e;
 
 
+// for this, set/clear/test bits using (1 << MAPF_xxx)
+typedef int map_format_bitset_t;
+
+
 /*
  *  Interfile global variables
  */
@@ -112,20 +116,21 @@ typedef enum
 extern int  init_progress;
 extern bool want_quit;
 
-extern const char *install_dir;  // install dir (e.g. /usr/share/eureka) 
+extern const char *install_dir;  // install dir (e.g. /usr/share/eureka)
 extern const char *home_dir;     // home dir (e.g. $HOME/.eureka)
 extern const char *cache_dir;    // for caches and backups, can be same as home_dir
 
 extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
+
 extern map_format_e Level_format; // format of current map
 
 extern const char *config_file; // Name of the configuration file, or NULL
 extern const char *log_file;    // Name of log file, or NULL
 
-extern const char *Iwad_name; // Name of the iwad
-extern const char *Pwad_name;
+extern const char *Iwad_name;   // Filename of the iwad
+extern const char *Pwad_name;   // Filename of current wad, or NULL
 
 extern std::vector< const char * > Pwad_list;
 extern std::vector< const char * > Resource_list;
@@ -136,22 +141,20 @@ extern int	default_ceil_h;
 extern int	default_light_level;
 extern int	default_thing;
 
+extern const char * default_wall_tex;
 extern const char * default_floor_tex;
 extern const char * default_ceil_tex;
-extern const char * default_lower_tex;
-extern const char * default_mid_tex;
-extern const char * default_upper_tex;
 
 
-extern int   show_help;     // Print usage message and exit.
-extern int   show_version;  // Print version info and exit.
-
-extern int   scroll_less;// %s of screenful to scroll by
-extern int   scroll_more;// %s of screenful to scroll by
+extern int   show_help;		// Print usage message and exit.
+extern int   show_version;	// Print version info and exit.
 
 
 extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size
+
+
+extern int MadeChanges;
 
 
 /*
@@ -160,6 +163,7 @@ extern int KF_fonth;  // default font size
 
 bool Main_ConfirmQuit(const char *action);
 void Main_LoadResources();
+void Main_Quit();
 
 #ifdef __GNUC__
 __attribute__((noreturn))
@@ -174,6 +178,8 @@ void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 const char * DetermineGame(const char *iwad_name);
+
+const char * Main_FileOpFolder();
 
 
 void Beep(const char *msg, ...);

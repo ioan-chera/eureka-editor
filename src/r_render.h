@@ -27,16 +27,6 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
-typedef enum
-{
-	QRP_Floor = -2,
-	QRP_Lower = -1,  // used for middle of 1S lines too
-	QRP_Rail  =  0,
-	QRP_Upper = +1,
-	QRP_Ceil  = +2,
-
-} query_part_e;
-
 
 class UI_Render3D : public Fl_Widget
 {
@@ -51,27 +41,40 @@ public:
 	int handle(int event);
 
 	// perform a query to see what the mouse pointer is over.
-	// returns the linedef hit, or -1 if none found.
-	// side will be either SIDE_LEFT or SIDE_RIGHT.
-	// part will distinguish between floor, lower, upper, ceiling.
-	int query(int *side, query_part_e *part);
+	// returns true if something was hit, false otherwise.
+	// [ see the struct definition for more details... ]
+	bool query(Obj3d_t& hl, int sx, int sy);
 
 private:
 	void BlitLores(int ox, int oy, int ow, int oh);
 	void BlitHires(int ox, int oy, int ow, int oh);
-	
+
 	void DrawInfoBar();
-	void DrawNumber(int& cx, int& cy, const char *label, int value, int size);
-	void DrawFlag  (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
+
+	void IB_Number   (int& cx, int& cy, const char *label, int value, int size);
+	void IB_Flag     (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
+	void IB_Highlight(int& cx, int& cy);
 };
+
 
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod);
-void Render3D_Wheel(int dx, int dy, keycode_t mod);
-void Render3D_RBScroll(int dx, int dy, keycode_t mod);
+void Render3D_Enable(bool _enable);
+
+void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
+
+void Render3D_Navigate();
+void Render3D_ClearNav();
+void Render3D_ClearSelection();
+
+void Render3D_UpdateHighlight();
+void Render3D_SaveHighlight();
+void Render3D_RestoreHighlight();
+
+bool Render3D_ClipboardOp(char what);
+bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 
 void Render3D_SetCameraPos(int new_x, int new_y);
 void Render3D_GetCameraPos(int *x, int *y, float *angle);

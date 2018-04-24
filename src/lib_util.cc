@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -32,79 +32,74 @@
 #include "w_rawdef.h"
 
 
-/*
- *  y_stricmp
- *  A case-insensitive strcmp()
- *  (same thing as DOS stricmp() or GNU strcasecmp())
- */
-int y_stricmp (const char *s1, const char *s2)
+//
+// a case-insensitive strcmp()
+//
+int y_stricmp(const char *s1, const char *s2)
 {
 	for (;;)
 	{
-		if (tolower (*s1) != tolower (*s2))
-			return (unsigned char) *s1 - (unsigned char) *s2;
-		if (! *s1)
+		if (tolower(*s1) != tolower(*s2))
+			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+
+		if (*s1 && *s2)
 		{
-			if (! *s2)
-				return 0;
-			else
-				return -1;
+			s1++;
+			s2++;
+			continue;
 		}
-		if (! *s2)
-			return 1;
-		s1++;
-		s2++;
+
+		// both *s1 and *s2 must be zero
+		return 0;
 	}
 }
 
 
-/*
- *  y_strnicmp
- *  A case-insensitive strncmp()
- *  (same thing as DOS strnicmp() or GNU strncasecmp())
- */
-int y_strnicmp (const char *s1, const char *s2, size_t len)
+//
+// a case-insensitive strncmp()
+//
+int y_strnicmp(const char *s1, const char *s2, size_t len)
 {
+	SYS_ASSERT(len != 0);
+
 	while (len-- > 0)
 	{
-		if (tolower (*s1) != tolower (*s2))
-			return (unsigned char) *s1 - (unsigned char) *s2;
-		if (! *s1)
+		if (tolower(*s1) != tolower(*s2))
+			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+
+		if (*s1 && *s2)
 		{
-			if (! *s2)
-				return 0;
-			else
-				return -1;
+			s1++;
+			s2++;
+			continue;
 		}
-		if (! *s2)
-			return 1;
-		s1++;
-		s2++;
+
+		// both *s1 and *s2 must be zero
+		return 0;
 	}
+
 	return 0;
 }
 
 
-/*
- *  y_strupr
- *  Upper-case a string
- */
-void y_strupr (char *str)
+//
+// upper-case a string (in situ)
+//
+void y_strupr(char *str)
 {
-	for (; *str; str++)
+	for ( ; *str ; str++)
 	{
 		*str = toupper(*str);
 	}
 }
 
 
-/*
- *  y_strlowr
- *  Lower-case a string
- */
-void y_strlowr (char *str)
+//
+// lower-case a string (in situ)
+//
+void y_strlowr(char *str)
 {
-	for (; *str; str++)
+	for ( ; *str ; str++)
 	{
 		*str = tolower(*str);
 	}
@@ -113,86 +108,90 @@ void y_strlowr (char *str)
 
 char *StringNew(int length)
 {
-  // length does not include the trailing NUL.
-  
-  char *s = (char *) calloc(length + 1, 1);
+	// length does not include the trailing NUL.
 
-  if (! s)
-    FatalError("Out of memory (%d bytes for string)\n", length);
+	char *s = (char *) calloc(length + 1, 1);
 
-  return s;
+	if (! s)
+		FatalError("Out of memory (%d bytes for string)\n", length);
+
+	return s;
 }
+
 
 char *StringDup(const char *orig, int limit)
 {
-  if (! orig)
-  	return NULL;
+	if (! orig)
+		return NULL;
 
-  if (limit < 0)
-  {
-    char *s = strdup(orig);
+	if (limit < 0)
+	{
+		char *s = strdup(orig);
 
-    if (! s)
-      FatalError("Out of memory (copy string)\n");
+		if (! s)
+			FatalError("Out of memory (copy string)\n");
 
-    return s;
-  }
+		return s;
+	}
 
-  char * s = StringNew(limit+1);
-  strncpy(s, orig, limit);
-  s[limit] = 0;
+	char * s = StringNew(limit+1);
+	strncpy(s, orig, limit);
+	s[limit] = 0;
 
-  return s;
+	return s;
 }
+
 
 char *StringUpper(const char *name)
 {
-  char *copy = StringDup(name);
+	char *copy = StringDup(name);
 
-  for (char *p = copy; *p; p++)
-    *p = toupper(*p);
+	for (char *p = copy; *p; p++)
+		*p = toupper(*p);
 
-  return copy;
+	return copy;
 }
+
 
 char *StringPrintf(const char *str, ...)
 {
-  /* Algorithm: keep doubling the allocated buffer size
-   * until the output fits. Based on code by Darren Salt.
-   */
-  char *buf = NULL;
-  int buf_size = 128;
-  
-  for (;;)
-  {
-    va_list args;
-    int out_len;
+	// Algorithm: keep doubling the allocated buffer size
+	// until the output fits. Based on code by Darren Salt.
 
-    buf_size *= 2;
+	char *buf = NULL;
+	int buf_size = 128;
 
-    buf = (char*)realloc(buf, buf_size);
-    if (!buf)
-      FatalError("Out of memory (formatting string)\n");
+	for (;;)
+	{
+		va_list args;
+		int out_len;
 
-    va_start(args, str);
-    out_len = vsnprintf(buf, buf_size, str, args);
-    va_end(args);
+		buf_size *= 2;
 
-    // old versions of vsnprintf() simply return -1 when
-    // the output doesn't fit.
-    if (out_len < 0 || out_len >= buf_size)
-      continue;
+		buf = (char*)realloc(buf, buf_size);
+		if (!buf)
+			FatalError("Out of memory (formatting string)\n");
 
-    return buf;
-  }
+		va_start(args, str);
+		out_len = vsnprintf(buf, buf_size, str, args);
+		va_end(args);
+
+		// old versions of vsnprintf() simply return -1 when
+		// the output doesn't fit.
+		if (out_len < 0 || out_len >= buf_size)
+			continue;
+
+		return buf;
+	}
 }
+
 
 void StringFree(const char *str)
 {
-  if (str)
-  {
-    free((void*) str);
-  }
+	if (str)
+	{
+		free((void*) str);
+	}
 }
 
 
@@ -257,12 +256,10 @@ unsigned int TimeGetMillies()
 }
 
 
-/*
- *  check_types
- *
- *  Sanity checks about the sizes and properties of certain types.
- *  Useful when porting.
- */
+//
+// sanity checks for the sizes and properties of certain types.
+// useful when porting.
+//
 
 #define assert_size(type,size)            \
   do                  \
@@ -272,7 +269,7 @@ unsigned int TimeGetMillies()
   (int) sizeof (type));           \
   }                 \
   while (0)
-   
+
 #define assert_wrap(type,high,low)          \
   do                  \
   {                 \
@@ -283,41 +280,40 @@ unsigned int TimeGetMillies()
   }                 \
   while (0)
 
-void check_types ()
-{
-	assert_size (u8_t,  1);
-	assert_size (s8_t,  1);
-	assert_size (u16_t, 2);
-	assert_size (s16_t, 2);
-	assert_size (u32_t, 4);
-	assert_size (s32_t, 4);
 
-	assert_size (raw_linedef_t, 14);
-	assert_size (raw_sector_s,  26);
-	assert_size (raw_sidedef_t, 30);
-	assert_size (raw_thing_t,   10);
-	assert_size (raw_vertex_t,   4);
+void CheckTypeSizes()
+{
+	assert_size(u8_t,  1);
+	assert_size(s8_t,  1);
+	assert_size(u16_t, 2);
+	assert_size(s16_t, 2);
+	assert_size(u32_t, 4);
+	assert_size(s32_t, 4);
+
+	assert_size(raw_linedef_t, 14);
+	assert_size(raw_sector_s,  26);
+	assert_size(raw_sidedef_t, 30);
+	assert_size(raw_thing_t,   10);
+	assert_size(raw_vertex_t,   4);
 }
 
 
-/*
-   translate (dx, dy) into an integer angle value (0-65535)
-*/
-
-unsigned ComputeAngle(int dx, int dy)
+//
+// translate (dx, dy) into an integer angle value (0-65535)
+//
+unsigned int ComputeAngle(int dx, int dy)
 {
-	return (unsigned) (atan2 ((double) dy, (double) dx) * 10430.37835 + 0.5);
+	return (unsigned int) (atan2 ((double) dy, (double) dx) * 10430.37835 + 0.5);
 }
 
 
 
-/*
-   compute the distance from (0, 0) to (dx, dy)
-*/
-
-unsigned ComputeDist(int dx, int dy)
+//
+// compute the distance from (0, 0) to (dx, dy)
+//
+unsigned int ComputeDist(int dx, int dy)
 {
-	return (unsigned) (hypot ((double) dx, (double) dy) + 0.5);
+	return (unsigned int) (hypot ((double) dx, (double) dy) + 0.5);
 }
 
 
@@ -356,6 +352,23 @@ const char *Int_TmpStr(int value)
 	sprintf(buffer, "%d", value);
 
 	return buffer;
+}
+
+
+//
+// rounds the value _up_ to the nearest power of two.
+//
+int RoundPOW2(int x)
+{
+	if (x <= 2)
+		return x;
+
+	x--;
+
+	for (int tmp = x >> 1 ; tmp ; tmp >>= 1)
+		x |= tmp;
+
+	return x + 1;
 }
 
 

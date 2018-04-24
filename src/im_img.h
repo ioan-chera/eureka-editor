@@ -29,7 +29,19 @@
 
 #include "im_color.h"
 
-typedef byte  img_pixel_t;
+// this is a 16-bit value:
+//   - when high bit is clear, it is a palette index 0-255
+//     (value 255 is used to represent fully transparent).
+//   - when high bit is set, the remainder is 5:5:5 RGB
+typedef unsigned short  img_pixel_t;
+
+const img_pixel_t IS_RGB_PIXEL = 0x8000;
+
+#define IMG_PIXEL_RED(col)    (((col) >> 10) & 31)
+#define IMG_PIXEL_GREEN(col)  (((col) >>  5) & 31)
+#define IMG_PIXEL_BLUE(col)   (((col)      ) & 31)
+
+#define IMG_PIXEL_MAKE_RGB(r, g, b)  (IS_RGB_PIXEL | ((r) << 10) | ((g) << 5) | (b))
 
 
 // the color number used to represent transparent pixels in an Img_c.
@@ -53,7 +65,7 @@ public:
 	{
 		return (! pixels);
 	}
-	
+
 	int width() const
 	{
 		return w;
@@ -84,9 +96,12 @@ public:
 
 	bool has_transparent() const;
 
+	// convert pixels to RGB mode, for testing other code
+	void test_make_RGB();
+
 private:
-	Img_c            (const Img_c&);  // Too lazy to implement it
-	Img_c& operator= (const Img_c&);  // Too lazy to implement it
+	Img_c            (const Img_c&);  // No need to implement it
+	Img_c& operator= (const Img_c&);  // No need to implement it
 };
 
 
@@ -95,9 +110,73 @@ void IM_ResetDummyTextures();
 Img_c * IM_MissingTex();
 Img_c * IM_UnknownTex();
 Img_c * IM_UnknownFlat();
+Img_c * IM_UnknownSprite();
 
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
+Img_c * IM_CreateDogSprite();
 
+Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
+Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
+
+
+//------------------------------------------------------------------------
+
+
+inline void IM_DecodePixel_raw(img_pixel_t p, byte& r, byte& g, byte& b)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		r = IMG_PIXEL_RED(p)   << 3;
+		g = IMG_PIXEL_GREEN(p) << 3;
+		b = IMG_PIXEL_BLUE(p)  << 3;
+	}
+	else
+	{
+		r = raw_palette[p][0];
+		g = raw_palette[p][1];
+		b = raw_palette[p][2];
+	}
+}
+
+// this one applies the current gamma.
+// for rendering the 3D view or the 2D sectors and sprites.
+inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		r = rgb555_gamma[IMG_PIXEL_RED(p)];
+		g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
+		b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = palette[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
+
+// this applies a constant gamma.
+// for textures/flats/things in the browser and panels.
+inline void IM_DecodePixel_medium(img_pixel_t p, byte& r, byte& g, byte& b)
+{
+	if (p & IS_RGB_PIXEL)
+	{
+		r = rgb555_medium[IMG_PIXEL_RED(p)];
+		g = rgb555_medium[IMG_PIXEL_GREEN(p)];
+		b = rgb555_medium[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = palette_medium[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

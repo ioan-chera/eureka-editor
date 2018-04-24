@@ -20,98 +20,75 @@
 
 #include "main.h"
 #include "ui_window.h"
-#include "ui_about.h"
-#include "ui_misc.h"
-#include "ui_prefs.h"
 
-#include "editloop.h"
-#include "e_basis.h"
-#include "e_loadsave.h"
-#include "e_nodes.h"
-#include "e_cutpaste.h"
-#include "e_path.h"
-#include "levels.h"
+#include "e_main.h"
 #include "m_files.h"
-#include "r_grid.h"
-#include "x_mirror.h"
+#include "m_loadsave.h"
 
 
 //------------------------------------------------------------------------
 //  FILE MENU
 //------------------------------------------------------------------------
 
-static void file_do_quit(Fl_Widget *w, void * data)
-{
-	CMD_Quit();
-}
-
-static void file_do_new(Fl_Widget *w, void * data)
-{
-	CMD_NewMap();
-}
-
-static void file_do_open(Fl_Widget *w, void * data)
-{
-	CMD_OpenMap();
-}
-
-static void file_do_save(Fl_Widget *w, void * data)
-{
-	CMD_SaveMap();
-}
-
-static void file_do_export(Fl_Widget *w, void * data)
-{
-	CMD_ExportMap();
-}
-
-static void file_do_copy_map(Fl_Widget *w, void * data)
-{
-	CMD_CopyMap();
-}
-
-static void file_do_rename(Fl_Widget *w, void * data)
-{
-	CMD_RenameMap();
-}
-
-static void file_do_delete(Fl_Widget *w, void * data)
-{
-	CMD_DeleteMap();
-}
-
 static void file_do_new_project(Fl_Widget *w, void * data)
 {
-	ProjectSetup(true /* new_project */);
+	ExecuteCommand("NewProject");
 }
 
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	ProjectSetup();
+	ExecuteCommand("ManageProject");
 }
 
-static void file_do_default_props(Fl_Widget *w, void * data)
+static void file_do_open(Fl_Widget *w, void * data)
 {
-	main_win->ShowDefaultProps();
+	ExecuteCommand("OpenMap");
+}
+
+static void file_do_save(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("SaveMap");
+}
+
+static void file_do_export(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("ExportMap");
+}
+
+static void file_do_fresh_map(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("FreshMap");
+}
+
+static void file_do_copy_map(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("CopyMap");
+}
+
+static void file_do_rename(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("RenameMap");
+}
+
+static void file_do_delete(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("DeleteMap");
 }
 
 static void file_do_prefs(Fl_Widget *w, void * data)
 {
-	CMD_Preferences();
+	ExecuteCommand("PreferenceDialog");
 }
 
 static void file_do_build_nodes(Fl_Widget *w, void * data)
 {
-	CMD_BuildNodes();
+	ExecuteCommand("BuildAllNodes");
 }
 
-#if 0
 static void file_do_test_map(Fl_Widget *w, void * data)
 {
-	CMD_TestMap();
+	ExecuteCommand("TestMap");
 }
-#endif
-
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
@@ -122,13 +99,17 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	if (given_idx >= 0)
 		last_given_file = given_idx;
 
-	CMD_OpenFileMap(filename);
+	OpenFileMap(filename);
 }
-
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
 {
 	M_OpenRecentFromMenu(data);
+}
+
+static void file_do_quit(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Quit");
 }
 
 
@@ -138,47 +119,27 @@ static void file_do_load_recent(Fl_Widget *w, void *data)
 
 static void edit_do_undo(Fl_Widget *w, void * data)
 {
-	if (BA_Undo())
-		RedrawMap();
-	else
-		Beep("No operation to undo");
+	ExecuteCommand("Undo");
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
 {
-	if (BA_Redo())
-		RedrawMap();
-	else
-		Beep("No operation to redo");
+	ExecuteCommand("Redo");
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	if (! CMD_Copy())
-	{
-		Beep("Nothing to cut");
-		return;
-	}
-
-	ExecuteCommand("Delete");
+	ExecuteCommand("Clipboard_Cut");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	if (! CMD_Copy())
-	{
-		Beep("Nothing to copy");
-		return;
-	}
+	ExecuteCommand("Clipboard_Copy");
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	if (! CMD_Paste())
-	{
-		Beep("Clipboard is empty");
-		return;
-	}
+	ExecuteCommand("Clipboard_Paste");
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)
@@ -186,76 +147,44 @@ static void edit_do_delete(Fl_Widget *w, void * data)
 	ExecuteCommand("Delete");
 }
 
-
 static void edit_do_select_all(Fl_Widget *w, void * data)
 {
-	CMD_SelectAll();
+	ExecuteCommand("SelectAll");
 }
 
 static void edit_do_unselect_all(Fl_Widget *w, void * data)
 {
-	CMD_UnselectAll();
+	ExecuteCommand("UnselectAll");
 }
 
 static void edit_do_invert_sel(Fl_Widget *w, void * data)
 {
-	CMD_InvertSelection();
+	ExecuteCommand("InvertSelection");
 }
 
 static void edit_do_last_sel(Fl_Widget *w, void * data)
 {
-	CMD_LastSelection();
+	ExecuteCommand("LastSelection");
 }
 
+static void edit_do_op_menu(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("OperationMenu");
+}
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to move");
-		return;
-	}
-
-	UI_MoveDialog * dialog = new UI_MoveDialog();
-
-	dialog->Run();
-
-	delete dialog;
+	ExecuteCommand("MoveObjectsDialog");
 }
 
 static void edit_do_scale(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to scale");
-		return;
-	}
-
-	UI_ScaleDialog * dialog = new UI_ScaleDialog();
-
-	dialog->Run();
-
-	delete dialog;
+	ExecuteCommand("ScaleObjectsDialog");
 }
 
 static void edit_do_rotate(Fl_Widget *w, void * data)
 {
-	if (edit.Selected->empty())
-	{
-		Beep("Nothing to rotate");
-		return;
-	}
-
-	UI_RotateDialog * dialog = new UI_RotateDialog();
-
-	dialog->Run();
-
-	delete dialog;
-}
-
-static void edit_do_prune_unused(Fl_Widget *w, void * data)
-{
-	CMD_PruneUnused();
+	ExecuteCommand("RotateObjectsDialog");
 }
 
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
@@ -273,42 +202,34 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 //  VIEW MENU
 //------------------------------------------------------------------------
 
-static void view_do_logs(Fl_Widget *w, void * data)
-{
-	LogViewer_Open();
-}
-
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
-	Editor_Zoom(+1, I_ROUND(grid.orig_x), I_ROUND(grid.orig_y));
+	ExecuteCommand("Zoom", "+1", "/center");
 }
 
 static void view_do_zoom_out(Fl_Widget *w, void * data)
 {
-	Editor_Zoom(-1, I_ROUND(grid.orig_x), I_ROUND(grid.orig_y));
+	ExecuteCommand("Zoom", "-1", "/center");
 }
 
 static void view_do_whole_map(Fl_Widget *w, void * data)
 {
-	CMD_ZoomWholeMap();
+	ExecuteCommand("ZoomWholeMap");
 }
 
 static void view_do_whole_selection(Fl_Widget *w, void * data)
 {
-	CMD_ZoomSelection();
+	ExecuteCommand("ZoomSelection");
 }
 
 static void view_do_camera_pos(Fl_Widget *w, void * data)
 {
-	CMD_GoToCamera();
+	ExecuteCommand("GoToCamera");
 }
 
 static void view_do_toggle_3d(Fl_Widget *w, void * data)
 {
-	Editor_ClearAction();
-
-	edit.render3d = ! edit.render3d;
-	main_win->redraw();
+	ExecuteCommand("Toggle", "3d");
 }
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
@@ -316,9 +237,14 @@ static void view_do_object_nums(Fl_Widget *w, void * data)
 	ExecuteCommand("Toggle", "obj_nums");
 }
 
-static void view_do_grid_type(Fl_Widget *w, void * data)
+static void view_do_sprites(Fl_Widget *w, void * data)
 {
-	grid.ToggleMode();
+	ExecuteCommand("Toggle", "sprites");
+}
+
+static void view_do_gamma(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("Toggle", "gamma");
 }
 
 static void view_do_sector_render(Fl_Widget *w, void * data)
@@ -331,25 +257,32 @@ static void view_do_sector_render(Fl_Widget *w, void * data)
 		edit.sector_render_mode = SREND_Ceiling;
 	else if (strcmp(item->text, "Lighting") == 0)
 		edit.sector_render_mode = SREND_Lighting;
+	else if (strcmp(item->text, "Sound") == 0)
+		edit.sector_render_mode = SREND_SoundProp;
 	else
 		edit.sector_render_mode = SREND_Nothing;
 
 	main_win->redraw();
 }
 
+static void view_do_default_props(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("DefaultProps");
+}
+
 static void view_do_find(Fl_Widget *w, void * data)
 {
-	main_win->ShowFindAndReplace();
+	ExecuteCommand("FindDialog");
 }
 
 static void view_do_next(Fl_Widget *w, void * data)
 {
-	main_win->find_box->FindNext();
+	ExecuteCommand("FindNext");
 }
 
 static void view_do_jump(Fl_Widget *w, void * data)
 {
-	CMD_JumpToObject();
+	ExecuteCommand("JumpToObject");
 }
 
 
@@ -359,69 +292,52 @@ static void view_do_jump(Fl_Widget *w, void * data)
 
 static void browser_do_textures(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('T');
+	ExecuteCommand("BrowserMode", "T");
 }
 
 static void browser_do_flats(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('F');
+	ExecuteCommand("BrowserMode", "F");
 }
 
 static void browser_do_things(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('O');
+	ExecuteCommand("BrowserMode", "O");
 }
 
 static void browser_do_lines(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('L');
+	ExecuteCommand("BrowserMode", "L");
 }
 
 static void browser_do_sectors(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('S');
+	ExecuteCommand("BrowserMode", "S");
 }
 
 static void browser_do_gen_types(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('G');
-}
-
-
-static void browser_do_recent_things(Fl_Widget *w, void * data)
-{
-	main_win->ShowBrowser('O');
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "G");
 }
 
 static void browser_do_recent_tex(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('T');
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "T", "/recent");
 }
 
 static void browser_do_recent_flats(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser('F');
-	main_win->browser->ToggleRecent(true /* force */);
+	ExecuteCommand("BrowserMode", "F", "/recent");
 }
 
-
-#if 0
-static void browser_go_wide(Fl_Widget *w, void * data)
+static void browser_do_recent_things(Fl_Widget *w, void * data)
 {
-	// TODO
+	ExecuteCommand("BrowserMode", "O", "/recent");
 }
-
-static void browser_go_narrow(Fl_Widget *w, void * data)
-{
-	// TODO
-}
-#endif
 
 static void browser_hide(Fl_Widget *w, void * data)
 {
-	main_win->ShowBrowser(0);
+	ExecuteCommand("Set", "browser", "0");
 }
 
 
@@ -431,42 +347,42 @@ static void browser_hide(Fl_Widget *w, void * data)
 
 static void checks_do_all(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "all");
+	ExecuteCommand("MapCheck", "all");
 }
 
 static void checks_do_major(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "major");
+	ExecuteCommand("MapCheck", "major");
 }
 
 static void checks_do_vertices(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "vertices");
+	ExecuteCommand("MapCheck", "vertices");
 }
 
 static void checks_do_sectors(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "sectors");
+	ExecuteCommand("MapCheck", "sectors");
 }
 
 static void checks_do_linedefs(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "linedefs");
+	ExecuteCommand("MapCheck", "linedefs");
 }
 
 static void checks_do_things(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "things");
+	ExecuteCommand("MapCheck", "things");
 }
 
 static void checks_do_textures(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "textures");
+	ExecuteCommand("MapCheck", "textures");
 }
 
 static void checks_do_tags(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Check", "tags");
+	ExecuteCommand("MapCheck", "tags");
 }
 
 
@@ -474,14 +390,19 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 //  HELP MENU
 //------------------------------------------------------------------------
 
-void help_do_online_docs(Fl_Widget *w, void * data)
+static void help_do_logs(Fl_Widget *w, void * data)
 {
-	fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+	ExecuteCommand("LogViewer");
 }
 
-void help_do_about(Fl_Widget *w, void * data)
+static void help_do_online_docs(Fl_Widget *w, void * data)
 {
-	DLG_AboutText();
+	ExecuteCommand("Documentation");
+}
+
+static void help_do_about(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("AboutDialog");
 }
 
 
@@ -498,16 +419,14 @@ static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
-		{ "&New Project   ",  FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "New Map",   FL_COMMAND + FL_SHIFT + 'n', FCAL file_do_new },
-		{ "&Manage Project  ",  FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
+		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
+
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
-
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
-
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
@@ -515,17 +434,20 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
-		{ "&Copy Map",    0,  FCAL file_do_copy_map },
+
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Fresh Map",    0, FCAL file_do_fresh_map },
+		{ "&Copy Map",    0,  FCAL file_do_copy_map },
 		{ "Rename Map",   0,  FCAL file_do_rename },
 		{ "Delete Map",   0,  FCAL file_do_delete },
 
-		{ "&Build Nodes  ",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-#if 0
-		{ "&Test Map",       FL_COMMAND + 't', FCAL file_do_test_map },
-#endif
+
+		{ "&Test in Game",     FL_COMMAND + 't', FCAL file_do_test_map },
+		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
@@ -542,7 +464,6 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
 		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
 		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
-		{ "Prune Unused", 0,            FCAL edit_do_prune_unused },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -553,27 +474,26 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Move Objects...",      0, FCAL edit_do_move },
-		{ "&Scale Objects...",     0, FCAL edit_do_scale },
-		{ "Rotate Objects...",     0, FCAL edit_do_rotate },
+		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
+		{ "&Move Objects...",  FL_F+2, FCAL edit_do_move },
+		{ "&Scale Objects...", FL_F+3, FCAL edit_do_scale },
+		{ "Rotate Objects...", FL_F+4, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "Mirror &Horizontally",  0, FCAL edit_do_mirror_horiz },
 		{ "Mirror &Vertically",    0, FCAL edit_do_mirror_vert },
-
-//??   "~Exchange object numbers", 24,     0,
 		{ 0 },
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Logs....",   0, FCAL view_do_logs },
+		// Note: FL_Tab cannot be used as a shortcut here, as it
+		//       invokes FLTK's hard-coded navigation stuff.
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "Toggle &3D View",      0, FCAL view_do_toggle_3d },
-		{ "Toggle Object &Nums",  0, FCAL view_do_object_nums },
-		{ "&Toggle Grid Type",    0, FCAL view_do_grid_type },
+		{ "Toggle &3D View",           0, FCAL view_do_toggle_3d },
+		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
+		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
+		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -582,6 +502,7 @@ static Fl_Menu_Item menu_items[] =
 			{ "Floors",    0, FCAL view_do_sector_render },
 			{ "Ceilings",  0, FCAL view_do_sector_render },
 			{ "Lighting",  0, FCAL view_do_sector_render },
+			{ "Sound",     0, FCAL view_do_sector_render },
 			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -593,26 +514,26 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL file_do_default_props },
+		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
-		{ "&Go to next",       FL_COMMAND + 'g', FCAL view_do_next },
+		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
 		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
 		{ "&Jump to Object",   0, FCAL view_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Things",       0, FCAL browser_do_things },
-		{ "Te&xtures",     0, FCAL browser_do_textures },
-		{ "&Flats",        0, FCAL browser_do_flats },
-		{ "&Line Types",   0, FCAL browser_do_lines },
-		{ "&Sector Types", 0, FCAL browser_do_sectors },
+		{ "&Textures",     FL_F+5, FCAL browser_do_textures },
+		{ "&Flats",        FL_F+6, FCAL browser_do_flats },
+		{ "Thin&gs",       FL_F+7, FCAL browser_do_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
+		{ "&Line Specials",     0, FCAL browser_do_lines },
+		{ "&Sector Types",      0, FCAL browser_do_sectors },
 		{ "&Generalized Types", 0, FCAL browser_do_gen_types },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -623,13 +544,13 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Hide",         0, FCAL browser_hide },
+		{ "&Hide",            0, FCAL browser_hide },
 		{ 0 },
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
-		{ "&ALL",          0, FCAL checks_do_all },
-		{ "&Major stuff",  0, FCAL checks_do_major },
+		{ "&ALL",           FL_F+9, FCAL checks_do_all },
+		{ "&Major stuff  ",      0, FCAL checks_do_major },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -642,15 +563,12 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "Te&xtures",     0, FCAL checks_do_textures },
 		{ "Ta&gs",         0, FCAL checks_do_tags },
-
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
-		{ "&Online Docs...",    0,  FCAL help_do_online_docs },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&About Eureka...",   0,  FCAL help_do_about },
+		{ "&Online Docs...",    0, FCAL help_do_online_docs },
+		{ "&View Logs....",     0, FCAL help_do_logs },
+		{ "&About Eureka...",   0, FCAL help_do_about },
 		{ 0 },
 
 	{ 0 }
@@ -661,6 +579,35 @@ static Fl_Menu_Item menu_items[] =
 
 
 #define MAX_PWAD_LIST  20
+
+//
+// allow the hard-coded menu shortcuts to be bind to other functions
+// by the user, hence we remove those shortcuts when this happens. 
+//
+static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
+{
+	int total = items[0].size();  // includes {0} at end
+
+	for (int i = 0 ; i < total ; i++)
+	{
+		if (! items[i].text)
+			continue;
+
+		int shortcut = items[i].shortcut_;
+		if (! shortcut)
+			continue;
+
+		// convert to a Eureka key code
+		keycode_t key = shortcut & FL_KEY_MASK;
+
+			 if (shortcut & FL_COMMAND) key |= MOD_COMMAND;
+		else if (shortcut & FL_META)    key |= MOD_META;
+		else if (shortcut & FL_ALT)     key |= MOD_ALT;
+
+		if (M_IsKeyBound(key, KCTX_General))
+			items[i].shortcut_ = 0;
+	}
+}
 
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
@@ -733,7 +680,8 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 	{
 		const char *short_name = fl_filename_name(Pwad_list[k]);
 
-		short_name = StringPrintf("%s%d. %s", (k < 9) ? "&" : "", 1+k, short_name);
+		short_name = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
+								  (k < 9) ? "&" : "", 1+k, short_name);
 
 		Menu_AddItem(pos, short_name,
 					 FCAL file_do_load_given,
@@ -800,6 +748,8 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 #endif
 
 	Fl_Menu_Item *items = menu_items;
+
+	Menu_RemovedBoundKeys(items);
 
 	items = Menu_PopulateGivenFiles(items);
 	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);

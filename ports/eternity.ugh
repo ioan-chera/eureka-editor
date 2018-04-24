@@ -25,10 +25,13 @@
 #
 #------------------------------------------------------------------------
 
-
-include "boom"
+if $ALLOW_BOOM is 1
+include "mbf"
+endif
 
 feature 3d_midtex 1
+
+feature tx_start 1
 
 #TODO:  thing flag 512 "Dormant" - like in Hexen
 
@@ -328,9 +331,7 @@ thing 14065 s nv 16 NULL "EE: Ambience Ex"
 
 #---- LINETYPES ----------
 
-linegroup i "Slopes"
 linegroup o "Portals"
-linegroup r "Scripting"
 
 line 283 o "-- EE: Plane portal /c"
 line 284 o "-- EE: Plane portal /f"
@@ -361,28 +362,29 @@ line 376 o "-- EE: Link prt to tag lines"
 line 377 o "-- EE: Link prt anch for 376"
 line 385 o "-- EE: Link prt to front sec"
 
-line 386 i "-- EE: Slope front floor"
-line 387 i "-- EE: Slope front ceil"
-line 388 i "-- EE: Slope front f & c"
-line 389 i "-- EE: Slope back floor"
-line 390 i "-- EE: Slope back ceil"
-line 391 i "-- EE: Slope back f & c"
-line 392 i "-- EE: Slope back f & front c"
-line 393 i "-- EE: Slope back c & front f"
-line 394 i "-- EE: Front f to tag slope"
-line 395 i "-- EE: Front c to tag slope"
-line 396 i "-- EE: Front f, c to tag slp"
+line 386 - "-- EE: Slope front floor"
+line 387 - "-- EE: Slope front ceil"
+line 388 - "-- EE: Slope front f & c"
+line 389 - "-- EE: Slope back floor"
+line 390 - "-- EE: Slope back ceil"
+line 391 - "-- EE: Slope back f & c"
+line 392 - "-- EE: Slope back f & front c"
+line 393 - "-- EE: Slope back c & front f"
+line 394 - "-- EE: Front f to tag slope"
+line 395 - "-- EE: Front c to tag slope"
+line 396 - "-- EE: Front f, c to tag slp"
 
-line 280 r "WR EE: Exec Script"
-line 273 r "WR EE: Exec Script /1way"
-line 274 r "W1 EE: Exec Script"
-line 275 r "W1 EE: Exec Script /1way"
-line 276 r "SR EE: Exec Script"
-line 277 r "S1 EE: Exec Script"
-line 278 r "GR EE: Exec Script"
-line 279 r "G1 EE: Exec Script"
+line 280 n "WR EE: Exec Script"
+line 273 n "WR EE: Exec Script /1way"
+line 274 n "W1 EE: Exec Script"
+line 275 n "W1 EE: Exec Script /1way"
+line 276 n "SR EE: Exec Script"
+line 277 n "S1 EE: Exec Script"
+line 278 n "GR EE: Exec Script"
+line 279 n "G1 EE: Exec Script"
 
-line 270 - "-- EE: ExtraData"
+line 270 - "-- EE: ExtraData linedef"
+line 401 - "-- EE: ExtraData sector"
 
 line 281 - "-- EE: 3D Midtex /f"
 line 282 - "-- EE: 3D Midtex /c"

@@ -21,11 +21,13 @@
 #ifndef __EUREKA_UI_CANVAS_H__
 #define __EUREKA_UI_CANVAS_H__
 
-#include "editloop.h"
+#include "m_events.h"
 #include "m_select.h"
-#include "objects.h"
+#include "e_objects.h"
 #include "r_grid.h"
-#include "x_mirror.h"
+
+
+class Img_c;
 
 
 class UI_Canvas : public Fl_Widget
@@ -48,10 +50,11 @@ private:
 	int  drag_cur_x,   drag_cur_y;
 	selection_c drag_lines;
 
-	// scaling state
-	int   scale_start_x,  scale_start_y;
-	scale_param_t scale_param;
-	selection_c scale_lines;
+	// scaling/rotating state
+	int   trans_start_x,  trans_start_y;
+	transform_keyword_e trans_mode;
+	transform_t trans_param;
+	selection_c trans_lines;
 
 	// drawing state only
 	int map_lx, map_ly;
@@ -82,7 +85,7 @@ public:
 	void DrawSelection(selection_c *list);
 	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true,
 	                   bool skip_lines = false, int dx=0, int dy=0);
-	void DrawHighlightScaled(int objtype, int objnum, Fl_Color col);
+	void DrawHighlightTransform(int objtype, int objnum, Fl_Color col);
 
 	void SelboxBegin(int map_x, int map_y);
 	void SelboxUpdate(int map_x, int map_y);
@@ -92,11 +95,11 @@ public:
 	void DragUpdate(int map_x, int map_y);
 	void DragFinish(int *dx, int *dy);
 
-	void ScaleBegin(int map_x, int map_y, int middle_x, int middle_y);
-	void ScaleUpdate(int map_x, int map_y, keycode_t mod);
-	void ScaleFinish(scale_param_t& param);
+	void TransformBegin(int map_x, int map_y, int middle_x, int middle_y, transform_keyword_e mode);
+	void TransformUpdate(int map_x, int map_y);
+	void TransformFinish(transform_t& param);
 
-	void PointerPos(int *map_x, int *map_y);
+	void PointerPos(bool in_event = false);
 
 	// return -1 if too small, 0 is OK, 1 is too big to fit
 	int ApproxBoxSize(int mx1, int my1, int mx2, int my2);
@@ -116,6 +119,7 @@ private:
 	void DrawLinedefs();
 	void DrawThings();
 	void DrawThingBodies();
+	void DrawThingSprites();
 
 	void DrawMapPoint(int map_x, int map_y);
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
@@ -124,8 +128,10 @@ private:
 
 	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2, bool reverse = false);
 	void DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawSplitPoint(int map_x, int map_y);
 	void DrawVertex(int map_x, int map_y, int r);
 	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
+	void DrawSprite(int map_x, int map_y, Img_c *img, float scale);
 	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
@@ -140,8 +146,8 @@ private:
 	void DragDelta(int *dx, int *dy);
 
 	// convert screen coordinates to map coordinates
-	inline int MAPX(int sx) const { return I_ROUND(grid.orig_x + (sx - w()/2 - x()) / grid.Scale); }
-	inline int MAPY(int sy) const { return I_ROUND(grid.orig_y + (h()/2 - sy + y()) / grid.Scale); }
+	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
+	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
 
 	// convert map coordinates to screen coordinates
 	inline int SCREENX(int mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }

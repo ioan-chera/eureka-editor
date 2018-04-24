@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -34,11 +34,23 @@ void GoToSelection();
 void GoToErrors();
 
 
+typedef enum
+{
+	PGL_Never = 0,	// can never be heared
+	PGL_Maybe,		// a possibility of being heared
+	PGL_Level_1,	// reduced by a single level
+	PGL_Level_2		// no blocking at all
+
+} propagate_level_e;
+
+const byte * SoundPropagation(int start_sec);
+
+
 /* commands */
 
-void LIN_SelectPath(void);
+void CMD_LIN_SelectPath(void);
 
-void SEC_SelectGroup(void);
+void CMD_SEC_SelectGroup(void);
 
 void CMD_JumpToObject(void);
 void CMD_NextObject();

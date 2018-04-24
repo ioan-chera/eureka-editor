@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@ typedef struct
 
     // length data bytes follows
 	byte length;
-	
+
 	/* byte pixels[length+2] */
 }
 post_t;
@@ -67,7 +67,8 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 		int count = column->length;
 
 		byte *src = (byte *) column + 3;
-		byte *dest = img.wbuf() + x;
+
+		img_pixel_t *dest = img.wbuf() + x;
 
 		if (top < 0)
 		{
@@ -94,28 +95,28 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 }
 
 
-/*
- *  LoadPicture - read a picture from a wad file into an Img_c object
- *
- *  If img->is_null() is false, LoadPicture() does not allocate the
- *  buffer itself. The buffer and the picture don't have to have the
- *  same dimensions. Thanks to this, it can also be used to compose
- *  textures : you allocate a single buffer for the whole texture
- *  and then you call LoadPicture() on it once for each patch.
- *  LoadPicture() takes care of all the necessary clipping.
- *
- *  If img->is_null() is true, LoadPicture() sets the size of img
- *  to match that of the picture. This is useful in display_pic().
- *
- *  Return true on success, false on failure.
- *
- *  If pic_x_offset == INT_MIN, the picture is centred horizontally.
- *  If pic_y_offset == INT_MIN, the picture is centred vertically.
- */
+//
+//  LoadPicture - read a picture from a wad file into an Img_c object
+//
+//  If img->is_null() is false, LoadPicture() does not allocate the
+//  buffer itself. The buffer and the picture don't have to have the
+//  same dimensions. Thanks to this, it can also be used to compose
+//  textures : you allocate a single buffer for the whole texture
+//  and then you call LoadPicture() on it once for each patch.
+//  LoadPicture() takes care of all the necessary clipping.
+//
+//  If img->is_null() is true, LoadPicture() sets the size of img
+//  to match that of the picture. This is useful in display_pic().
+//
+//  Return true on success, false on failure.
+//
+//  If pic_x_offset == INT_MIN, the picture is centred horizontally.
+//  If pic_y_offset == INT_MIN, the picture is centred vertically.
+//
 bool LoadPicture(Img_c& img,      // image to load picture into
 	Lump_c *lump,
-	const char *pic_name,   // Picture name (for messages)
-	int pic_x_offset,    // Coordinates of top left corner of picture
+	const char *pic_name,   // picture name (for messages)
+	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
 	int *pic_height)   // (can be NULL)
@@ -124,7 +125,7 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 	W_LoadLumpData(lump, &raw_data);
 
 	const patch_t *pat = (patch_t *) raw_data;
-  
+
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);
 //	int offset_x = LE_S16(pat->leftoffset);
@@ -165,6 +166,99 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 
 	W_FreeLumpData(&raw_data);
 	return true;
+}
+
+
+char W_DetectImageFormat(Lump_c *lump)
+{
+	byte header[20];
+
+	int length = lump->Length();
+
+	if (length < (int)sizeof(header))
+		return 0;
+
+	if (! lump->Seek())
+		return 0;
+
+	if (! lump->Read(header, (int)sizeof(header)))
+		return 0;
+
+	// PNG is clearly marked in the header, so check it first.
+
+	if (header[0] == 0x89 &&
+		header[1] == 'P'  &&
+		header[2] == 'N'  &&
+		header[3] == 'G')
+	{
+		return 'p'; /* PNG */
+	}
+
+	// check some other common image formats....
+
+	if (header[0] == 0xFF &&
+		header[1] == 0xD8)
+	{
+		return 'j'; /* JPEG */
+	}
+
+	if (header[0] == 'G' &&
+		header[1] == 'I' &&
+		header[2] == 'F' &&
+		header[3] == '8')
+	{
+		return 'g'; /* GIF */
+	}
+
+	if (header[0] == 'B' &&
+		header[1] == 'M')
+	{
+		return 'b'; /* BMP */
+	}
+
+	if (header[0] == 'D' &&
+		header[1] == 'D' &&
+		header[2] == 'S' &&
+		header[3] == 0x20)
+	{
+		return 's'; /* DDS (DirectDraw Surface) */
+	}
+
+	// TGA (Targa) is not clearly marked, but better than Doom patches,
+	// so check it next.
+
+	int  width = (int)header[12] + (int)(header[13] << 8);
+	int height = (int)header[14] + (int)(header[15] << 8);
+
+	byte cmap_type = header[1];
+	byte img_type  = header[2];
+	byte depth     = header[16];
+
+	if (width  > 0 && width  <= 2048 &&
+		height > 0 && height <= 2048 &&
+		(cmap_type == 0 || cmap_type == 1) &&
+		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
+		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
+	{
+		return 't'; /* TGA */
+	}
+
+	// check for raw patches last
+
+	 width = (int)header[0] + (int)(header[1] << 8);
+	height = (int)header[2] + (int)(header[3] << 8);
+
+	int ofs_x = (int)header[4] + (int)(header[5] << 8);
+	int ofs_y = (int)header[6] + (int)(header[7] << 8);
+
+	if (width  > 0 && width  <= 2048 && abs(ofs_x) <= 2048 &&
+		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+		length > width * 4 /* columnofs */)
+	{
+		return 'd'; /* Doom patch */
+	}
+
+	return 0;	// unknown!
 }
 
 

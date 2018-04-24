@@ -37,16 +37,29 @@ typedef u32_t rgb_color_t;
 #define RGB_MAKE(r, g, b)  (((r) << 24) | ((g) << 16) | ((b) << 8))
 
 
+// this is a version of rgb_color_t with an alpha channel
+// [ currently only used by the TGA loading code ]
+typedef u32_t rgba_color_t;
+#define RGBA_ALPHA(col)   ((col) & 255)
+#define RGBA_MAKE(r, g, b, a)  (((r) << 24) | ((g) << 16) | ((b) << 8) | (a))
+
+
 extern int usegamma;
 
-extern rgb_color_t palette[256];
-
-// palette color closest to palette[TRANS_PIXEL]
+// the palette color closest to what TRANS_PIXEL really is
 extern int trans_replace;
+
+
+// this palette has the gamma setting applied
+extern rgb_color_t palette[256];
+extern rgb_color_t palette_medium[256];
+
+extern byte raw_palette[256][3];
 
 extern byte raw_colormap[32][256];
 
-extern byte bright_map[256];
+extern byte rgb555_gamma [32];
+extern byte rgb555_medium[32];
 
 
 void W_UpdateGamma();
@@ -99,7 +112,10 @@ rgb_color_t SectorLightColor(int light);
 #define HI_COL          fl_rgb_color(255,255,0)
 #define HI_AND_SEL_COL  fl_rgb_color(255,192,128)
 
-#define WINTITLE        fl_rgb_color(0xff, 0xff, 0x00)
+#define THING_MODE_COL  fl_rgb_color(255,64,255)
+#define LINE_MODE_COL   fl_rgb_color(0,160,255)
+#define SECTOR_MODE_COL fl_rgb_color(255,255,0)
+#define VERTEX_MODE_COL fl_rgb_color(0,255,128)
 
 
 #endif  /* __EUREKA_IM_COLOR_H__ */

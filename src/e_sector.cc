@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -26,18 +26,22 @@
 
 #include "main.h"
 
-#include "levels.h"
-#include "e_linedef.h"
-#include "e_sector.h"
-#include "editloop.h"
+#include <map>
+
 #include "m_bitvec.h"
-#include "objects.h"
-#include "x_loop.h"
+#include "w_rawdef.h"
+#include "e_cutpaste.h"
+#include "e_hover.h"
+#include "e_linedef.h"
+#include "e_main.h"
+#include "e_objects.h"
+#include "e_sector.h"
+#include "e_vertex.h"
 
 #include "ui_window.h"
 
 
-void SEC_Floor(void)
+void CMD_SEC_Floor(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -59,7 +63,7 @@ void SEC_Floor(void)
 
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -69,13 +73,15 @@ void SEC_Floor(void)
 		BA_ChangeSEC(*it, Sector::F_FLOORH, new_h);
 	}
 
+	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", &list);
+
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 }
 
 
-void SEC_Ceil(void)
+void CMD_SEC_Ceil(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -96,7 +102,7 @@ void SEC_Ceil(void)
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -105,6 +111,8 @@ void SEC_Ceil(void)
 
 		BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
 	}
+
+	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", &list);
 
 	BA_End();
 
@@ -133,7 +141,7 @@ static int light_add_delta(int level, int delta)
 }
 
 
-void CMD_AdjustLight(int delta)
+void SectorsAdjustLight(int delta)
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -145,7 +153,7 @@ void CMD_AdjustLight(int delta)
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -155,13 +163,15 @@ void CMD_AdjustLight(int delta)
 		BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 	}
 
+	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", &list);
+
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
 
 
-void SEC_Light(void)
+void CMD_SEC_Light(void)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -171,11 +181,11 @@ void SEC_Light(void)
 		return;
 	}
 
-	CMD_AdjustLight(diff);
+	SectorsAdjustLight(diff);
 }
 
 
-void SEC_SwapFlats()
+void CMD_SEC_SwapFlats()
 {
 	selection_c list;
 	selection_iterator_c it;
@@ -187,7 +197,7 @@ void SEC_SwapFlats()
 	}
 
 	BA_Begin();
-		
+
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
@@ -198,6 +208,8 @@ void SEC_SwapFlats()
 		BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, ceil_tex);
 		BA_ChangeSEC(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
+
+	BA_MessageForSel("swapped flats in", &list);
 
 	BA_End();
 
@@ -238,7 +250,7 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 }
 
 
-void SEC_Merge(void)
+void CMD_SEC_Merge(void)
 {
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
@@ -252,41 +264,951 @@ void SEC_Merge(void)
 		return;
 	}
 
+	int first = edit.Selected->find_first();
+
 	bool keep_common_lines = Exec_HasFlag("/keep");
 
-	int source = edit.Selected->find_first();
+	// we require the *lowest* numbered sector, otherwise we can
+	// select the wrong sector afterwards (due to renumbering).
+	int new_sec = edit.Selected->max_obj();
 
-	selection_c common_lines(OBJ_LINEDEFS);
 	selection_iterator_c it;
-
-	BA_Begin();
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		int target = *it;
+		new_sec = MIN(new_sec, *it);
+	}
 
-		if (target == source)
+	selection_c common_lines(OBJ_LINEDEFS);
+	selection_c unused_secs (OBJ_SECTORS);
+
+	BA_Begin();
+
+	BA_MessageForSel("merged", edit.Selected);
+
+	// keep the properties of the first selected sector
+	if (new_sec != first)
+	{
+		const Sector *ref = Sectors[first];
+
+		BA_ChangeSEC(new_sec, Sector::F_FLOORH,    ref->floorh);
+		BA_ChangeSEC(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+		BA_ChangeSEC(new_sec, Sector::F_CEILH,     ref->ceilh);
+		BA_ChangeSEC(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+
+		BA_ChangeSEC(new_sec, Sector::F_LIGHT, ref->light);
+		BA_ChangeSEC(new_sec, Sector::F_TYPE,  ref->type);
+		BA_ChangeSEC(new_sec, Sector::F_TAG,   ref->tag);
+	}
+
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		int old_sec = *it;
+
+		if (old_sec == new_sec)
 			continue;
 
-		LineDefsBetweenSectors(&common_lines, target, source);
+		LineDefsBetweenSectors(&common_lines, old_sec, new_sec);
 
-		ReplaceSectorRefs(target, source);
+		ReplaceSectorRefs(old_sec, new_sec);
+
+		unused_secs.set(old_sec);
 	}
+
+	DeleteObjects(&unused_secs);
 
 	if (! keep_common_lines)
 	{
-		// this deletes any unused vertices/sidedefs too
-		DeleteLineDefs(&common_lines);
+		DeleteObjects_WithUnused(&common_lines);
 	}
 
 	BA_End();
 
 	// re-select the final sector
-	Selection_Clear(true);
+	Selection_Clear(true /* no_save */);
 
-	edit.Selected->set(source);
+	edit.Selected->set(new_sec);
 }
 
+
+//------------------------------------------------------------------------
+
+
+// #define DEBUG_LINELOOP  1
+
+
+lineloop_c::lineloop_c() :
+	lines(), sides(),
+	faces_outward(false),
+	islands()
+{ }
+
+
+lineloop_c::~lineloop_c()
+{
+	clear();
+}
+
+
+void lineloop_c::clear()
+{
+	lines.clear();
+	sides.clear();
+
+	faces_outward = false;
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+		delete islands[i];
+
+	islands.clear();
+}
+
+
+void lineloop_c::push_back(int ld, int side)
+{
+	lines.push_back(ld);
+	sides.push_back(side);
+}
+
+
+bool lineloop_c::get(int ld, int side) const
+{
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+		if (lines[k] == ld && sides[k] == side)
+			return true;
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+		if (islands[i]->get(ld, side))
+			return true;
+
+	return false;
+}
+
+
+bool lineloop_c::get_just_line(int ld) const
+{
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+		if (lines[k] == ld)
+			return true;
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+		if (islands[i]->get_just_line(ld))
+			return true;
+
+	return false;
+}
+
+
+double lineloop_c::TotalLength() const
+{
+	// NOTE: does NOT include islands
+
+	double result = 0;
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		const LineDef *L = LineDefs[lines[k]];
+
+		result += L->CalcLength();
+	}
+
+	return result;
+}
+
+
+bool lineloop_c::SameSector(int *sec_num) const
+{
+	// NOTE: does NOT include islands
+
+	SYS_ASSERT(lines.size() > 0);
+
+	int sec = LineDefs[lines[0]]->WhatSector(sides[0]);
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		if (sec != LineDefs[lines[k]]->WhatSector(sides[k]))
+			return false;
+	}
+
+	if (sec_num)
+		*sec_num = sec;
+
+	return true;
+}
+
+
+bool lineloop_c::AllBare() const
+{
+	int sec_num;
+
+	if (! SameSector(&sec_num))
+		return false;
+
+	return (sec_num < 0);
+}
+
+
+int lineloop_c::NeighboringSector() const
+{
+	// pick the longest linedef with a sector on the other side
+
+	// NOTE: it does not make sense to handle islands here.
+
+	int best = -1;
+	int best_len = -1;
+
+	for (unsigned int i = 0 ; i < lines.size() ; i++)
+	{
+		const LineDef *L = LineDefs[lines[i]];
+
+		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
+		int sec = LineDefs[lines[i]]->WhatSector(- sides[i]);
+
+		if (sec < 0)
+			continue;
+
+		int dx = L->Start()->x - L->End()->x;
+		int dy = L->Start()->y - L->End()->y;
+		int len = ComputeDist(dx, dy);
+
+		if (len > best_len)
+		{
+			best = sec;
+			best_len = len;
+		}
+	}
+
+	return best;
+}
+
+
+int lineloop_c::IslandSector() const
+{
+	// test is only valid for islands
+	if (! faces_outward)
+		return -1;
+
+	// we might need to check multiple lines, as the first line could
+	// be facing a linedef which is ALSO part of the island.
+
+	for (unsigned int i = 0 ; i < lines.size() ; i++)
+	{
+		int opp_side;
+		int opp_ld = OppositeLineDef(lines[i], sides[i], &opp_side);
+
+		// can see "the void" ?
+		// this means the geometry around here is broken, but for
+		// the usages of this method we can ignore it.
+		if (opp_ld < 0)
+			continue;
+
+		// part of the island itself?
+		if (get_just_line(opp_ld))
+			continue;
+
+		return LineDefs[opp_ld]->WhatSector(opp_side);
+	}
+
+	return -1;
+}
+
+
+int lineloop_c::DetermineSector() const
+{
+	if (faces_outward)
+		return IslandSector();
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+
+		if (sec >= 0)
+			return sec;
+	}
+
+	return -1;  // VOID
+}
+
+
+void lineloop_c::CalcBounds(int *x1, int *y1, int *x2, int *y2) const
+{
+	SYS_ASSERT(lines.size() > 0);
+
+	*x1 = +99999; *y1 = +99999;
+	*x2 = -99999; *y2 = -99999;
+
+	for (unsigned int i = 0 ; i < lines.size() ; i++)
+	{
+		const LineDef *L = LineDefs[lines[i]];
+
+		*x1 = MIN(*x1, MIN(L->Start()->x, L->End()->x));
+		*y1 = MIN(*y1, MIN(L->Start()->y, L->End()->y));
+
+		*x2 = MAX(*x2, MAX(L->Start()->x, L->End()->x));
+		*y2 = MAX(*y2, MAX(L->Start()->y, L->End()->y));
+	}
+}
+
+
+void lineloop_c::GetAllSectors(selection_c *list) const
+{
+	// assumes the given selection is empty (this adds to it)
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+
+		if (sec >= 0)
+			list->set(sec);
+	}
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+	{
+		islands[i]->GetAllSectors(list);
+	}
+}
+
+
+//
+// Follows the path clockwise from the given start line, adding each
+// line into the appropriate set.  Returns true if the path was closed,
+// or false for failure (in which case the lineloop_c object will not
+// be in a valid state).
+//
+// side is either SIDE_LEFT or SIDE_RIGHT.
+//
+// -AJA- 2001-05-09
+//
+bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
+{
+	int start_ld   = ld;
+	int start_side = side;
+
+	loop.clear();
+
+	int   cur_vert;
+	int  prev_vert;
+
+	if (side == SIDE_RIGHT)
+	{
+		cur_vert  = LineDefs[ld]->end;
+		prev_vert = LineDefs[ld]->start;
+	}
+	else
+	{
+		cur_vert  = LineDefs[ld]->start;
+		prev_vert = LineDefs[ld]->end;
+	}
+
+#ifdef DEBUG_LINELOOP
+	DebugPrintf("TRACE PATH: line:%d  side:%d  cur_vert:%d\n", ld, side, cur_vert);
+#endif
+
+	// check for an isolated line
+	if (Vertex_HowManyLineDefs( cur_vert) == 1 &&
+		Vertex_HowManyLineDefs(prev_vert) == 1)
+		return false;
+
+	// compute the average angle over all the lines
+	double average_angle = 0;
+
+	for (;;)
+	{
+		loop.push_back(ld, side);
+
+		int next_line = -1;
+		int next_vert = -1;
+		int next_side =  0;
+
+		double best_angle = 9999;
+
+		// look for the next linedef in the path, one using the
+		// current vertex and having the smallest interior angle.
+		// it *can* be the exact same linedef (when hitting a dangling
+		// vertex).
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef * N = LineDefs[n];
+
+			if (! N->TouchesVertex(cur_vert))
+				continue;
+
+			if (ignore_bare && !N->Left() && !N->Right())
+				continue;
+
+			int other_vert;
+			int which_side;
+
+			if (N->start == cur_vert)
+			{
+				other_vert = N->end;
+				which_side = SIDE_RIGHT;
+			}
+			else  /* (N->end == cur_vert) */
+			{
+				other_vert = N->start;
+				which_side = SIDE_LEFT;
+			}
+
+			double angle;
+
+			if (n == ld)
+				angle = 361.0;
+			else
+				angle = LD_AngleBetweenLines(prev_vert, cur_vert, other_vert);
+
+			if (next_line < 0 || angle < best_angle)
+			{
+				next_line = n;
+				next_vert = other_vert;
+				next_side = which_side;
+
+				best_angle = angle;
+			}
+		}
+
+#ifdef DEBUG_LINELOOP
+		DebugPrintf("PATH NEXT: line:%d  side:%d  vert:%d  angle:%1.6f\n",
+				next_line, next_side, next_vert, best_angle);
+#endif
+
+		// no next line?  path cannot be closed
+		if (next_line < 0)
+			return false;
+
+		// we have come back to the start, so terminate
+		if (next_line == start_ld && next_side == start_side)
+			break;
+
+		// this won't happen under normal circumstances, but it *can*
+		// happen and indicates a non-closed structure.
+		if (loop.get(next_line, next_side))
+			return false;
+
+		// OK
+
+		ld   = next_line;
+		side = next_side;
+
+		prev_vert = cur_vert;
+		cur_vert  = next_vert;
+
+		average_angle += best_angle;
+	}
+
+	// this might happen if there are overlapping linedefs
+	if (loop.lines.size() < 3)
+		return false;
+
+	average_angle = average_angle / (double)loop.lines.size();
+
+	loop.faces_outward = (average_angle >= 180.0);
+
+#ifdef DEBUG_LINELOOP
+	DebugPrintf("PATH CLOSED!  average_angle:%1.2f\n", average_angle);
+#endif
+
+	return true;
+}
+
+
+bool lineloop_c::LookForIsland()
+{
+	// ALGORITHM:
+	//    Iterate over all lines within the bounding box of the
+	//    current path (but not *on* the current path).
+	//
+	//    Use OppositeLineDef() to find starting lines, and trace them.
+	//    Tracing is necessary because in certain shapes the opposite
+	//    lines will be part of the island too.
+	//
+	// Returns: true if found one, false otherwise.
+	//
+
+	// calc bounding box
+	int bbox_x1, bbox_y1, bbox_x2, bbox_y2;
+
+	CalcBounds(&bbox_x1, &bbox_y1, &bbox_x2, &bbox_y2);
+
+	int count = 0;
+
+	for (int ld = 0 ; ld < NumLineDefs ; ld++)
+	{
+		const LineDef * L = LineDefs[ld];
+
+		int x1 = L->Start()->x;
+		int y1 = L->Start()->y;
+		int x2 = L->End()->x;
+		int y2 = L->End()->y;
+
+		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
+		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
+			continue;
+
+		// ouch, this is gonna be SLOW
+
+		for (int where = 0 ; where < 2 ; where++)
+		{
+			int ld_side = where ? SIDE_RIGHT : SIDE_LEFT;
+
+			int opp_side;
+			int opp = OppositeLineDef(ld, ld_side, &opp_side);
+
+			if (opp < 0)
+				continue;
+
+			bool  ld_in_path = get(ld,   ld_side);
+			bool opp_in_path = get(opp, opp_side);
+
+			// need one in the current loop, and the other NOT in it
+			if (ld_in_path == opp_in_path)
+				continue;
+
+#ifdef DEBUG_LINELOOP
+DebugPrintf("Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
+ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
+#endif
+
+			lineloop_c *island = new lineloop_c;
+
+			// treat isolated linedefs like islands
+			if (! ld_in_path &&
+				Vertex_HowManyLineDefs(LineDefs[ld]->start) == 1 &&
+				Vertex_HowManyLineDefs(LineDefs[ld]->end)   == 1)
+			{
+				island->push_back(ld, SIDE_RIGHT);
+				island->push_back(ld, SIDE_LEFT);
+
+				islands.push_back(island);
+				count++;
+
+				continue;
+			}
+
+			bool ok;
+
+			if (ld_in_path)
+				ok = TraceLineLoop(opp, opp_side, *island);
+			else
+				ok = TraceLineLoop(ld, ld_side, *island);
+
+			if (ok && island->faces_outward)
+			{
+				islands.push_back(island);
+				count++;
+			}
+			else
+			{
+				delete island;
+			}
+		}
+	}
+
+	return (count > 0);
+}
+
+
+void lineloop_c::FindIslands()
+{
+	// Look for "islands", closed linedef paths that lie completely
+	// inside the area, i.e. not connected to the main path.
+	//
+	// Repeat these steps until no more islands are found.
+	// (This is needed to handle e.g. a big room full of pillars,
+	// since the pillars in the middle won't "see" the outer sector
+	// until the neighboring pillars are added).
+	//
+	// Example: the two pillars at the start of MAP01 of DOOM 2.
+	//
+
+	// use a counter for safety
+	for (int loop = 0 ; loop < 200 ; loop++)
+	{
+		if (! LookForIsland())
+			break;
+	}
+}
+
+
+void lineloop_c::Dump() const
+{
+	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
+	            this, lines.size(), islands.size());
+
+	for (unsigned int i = 0 ; i < lines.size() ; i++)
+	{
+		const LineDef *L = LineDefs[lines[i]];
+
+		DebugPrintf("  %s of line #%d : (%d %d) --> (%d %d)\n",
+		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
+					lines[i],
+					L->Start()->x, L->Start()->y,
+					L->End  ()->x, L->End  ()->y);
+	}
+}
+
+
+static inline bool WillBeTwoSided(int ld, int side)
+{
+	const LineDef *L = LineDefs[ld];
+
+	if (L->WhatSideDef(side) < 0)
+	{
+		return (L->right >= 0) || (L->left >= 0);
+	}
+
+	return L->TwoSided();
+}
+
+
+static void DetermineNewTextures(lineloop_c& loop,
+								 std::vector<int>& lower_texs,
+								 std::vector<int>& upper_texs)
+{
+	unsigned int total = static_cast<unsigned>(loop.lines.size());
+
+	SYS_ASSERT(lower_texs.size() == total);
+
+	int null_tex  = BA_InternaliseString("-");
+
+	int def_lower = BA_InternaliseString(default_wall_tex);
+	int def_upper = def_lower;
+
+	unsigned int k;
+	unsigned int pass;
+
+	// look for emergency fallback texture
+	for (pass = 0 ; pass < 2 ; pass++)
+	{
+		for (k = 0 ; k < total ; k++)
+		{
+			int ld   = loop.lines[k];
+			int side = loop.sides[k];
+
+			// check back sides in *first* pass
+			// (to allow second pass to override)
+			if (pass == 0)
+				side = -side;
+
+			int sd = LineDefs[ld]->WhatSideDef(side);
+			if (sd < 0)
+				continue;
+
+			const SideDef *SD = SideDefs[sd];
+
+			if (LineDefs[ld]->TwoSided())
+			{
+				if (SD->lower_tex == null_tex) continue;
+				if (SD->upper_tex == null_tex) continue;
+
+				def_lower = SD->lower_tex;
+				def_upper = SD->upper_tex;
+			}
+			else
+			{
+				if (SD->mid_tex == null_tex) continue;
+
+				def_lower = SD->mid_tex;
+				def_upper = SD->mid_tex;
+			}
+
+			// stop once we found something
+			break;
+		}
+	}
+
+	// reset "bare" lines to -1,
+	// and grab the textures of other lines
+
+	for (k = 0 ; k < total ; k++)
+	{
+		int ld = loop.lines[k];
+		int sd = LineDefs[ld]->WhatSideDef(loop.sides[k]);
+
+		if (sd < 0)
+		{
+			lower_texs[k] = upper_texs[k] = -1;
+			continue;
+		}
+
+		const SideDef *SD = SideDefs[sd];
+
+		if (LineDefs[ld]->TwoSided())
+		{
+			lower_texs[k] = SD->lower_tex;
+			upper_texs[k] = SD->upper_tex;
+		}
+		else
+		{
+			lower_texs[k] = upper_texs[k] = SD->mid_tex;
+		}
+
+		// prevent the "-" null texture
+		if (lower_texs[k] == null_tex) lower_texs[k] = def_lower;
+		if (upper_texs[k] == null_tex) upper_texs[k] = def_upper;
+	}
+
+	// transfer nearby textures to blank spots
+
+	for (pass = 0 ; pass < total*2 ; pass++)
+	{
+		for (k = 0 ; k < total ; k++)
+		{
+			if (lower_texs[k] >= 0)
+				continue;
+
+			// next and previous line indices
+			unsigned int p = (k > 0) ? (k - 1) : total - 1;
+			unsigned int n = (k < total - 1) ? (k + 1) : 0;
+
+			bool two_k = WillBeTwoSided(loop.lines[k], loop.sides[k]);
+
+			bool two_p = WillBeTwoSided(loop.lines[p], loop.sides[p]);
+			bool two_n = WillBeTwoSided(loop.lines[n], loop.sides[n]);
+
+			// prefer same sided-ness of lines
+			if (pass < total)
+			{
+				if (two_p != two_k) p = total;
+				if (two_n != two_k) n = total;
+			}
+
+			// disable p or n if there is no texture there yet
+			if (p < total && lower_texs[p] < 0) p = total;
+			if (n < total && lower_texs[n] < 0) n = total;
+
+			if (p == total && n == total)
+				continue;
+
+			// if p and n both usable, p trumps n
+			if (p == total)
+				p = n;
+
+			lower_texs[k] = lower_texs[p];
+			upper_texs[k] = upper_texs[p];
+		}
+	}
+
+	// lastly, ensure all textures are valid
+	for (k = 0 ; k < total ; k++)
+	{
+		if (lower_texs[k] < 0) lower_texs[k] = def_lower;
+		if (upper_texs[k] < 0) upper_texs[k] = def_upper;
+	}
+}
+
+
+//
+// update the side on a single linedef, using the given sector
+// reference, and creating a new sidedef if necessary.
+//
+void DoAssignSector(int ld, int side, int new_sec,
+					int new_lower, int new_upper,
+					selection_c& flip)
+{
+// DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
+	const LineDef * L = LineDefs[ld];
+
+	int sd_num   = (side > 0) ? L->right : L->left;
+	int other_sd = (side > 0) ? L->left  : L->right;
+
+	if (sd_num >= 0)
+	{
+		BA_ChangeSD(sd_num, SideDef::F_SECTOR, new_sec);
+		return;
+	}
+
+	// if we're adding a sidedef to a line that has no sides, and
+	// the sidedef would be the 2nd one, then flip the linedef.
+	// Thus we don't end up with invalid lines -- i.e. ones with a
+	// left side but no right side.
+
+	if (side < 0 && other_sd < 0)
+	{
+		flip.set(ld);
+	}
+
+	SYS_ASSERT(new_lower >= 0);
+	SYS_ASSERT(new_upper >= 0);
+
+	// create new sidedef
+	int new_sd = BA_New(OBJ_SIDEDEFS);
+
+	SideDef * SD = SideDefs[new_sd];
+
+	if (other_sd >= 0)
+	{
+		// linedef will be two-sided
+		SD->lower_tex = new_lower;
+		SD->upper_tex = new_upper;
+		SD->  mid_tex = BA_InternaliseString("-");
+	}
+	else
+	{
+		// linedef will be one-sided
+		SD->lower_tex = new_lower;
+		SD->upper_tex = new_lower;
+		SD->  mid_tex = new_lower;
+	}
+
+	SD->sector = new_sec;
+
+	if (side > 0)
+		BA_ChangeLD(ld, LineDef::F_RIGHT, new_sd);
+	else
+		BA_ChangeLD(ld, LineDef::F_LEFT, new_sd);
+
+	// if we're adding a second side to the linedef, clear out some
+	// of the properties that aren't needed anymore: middle texture,
+	// two-sided flag, and impassible flag.
+
+	if (other_sd >= 0)
+		LD_AddSecondSideDef(ld, new_sd, other_sd);
+}
+
+
+void lineloop_c::AssignSector(int new_sec, selection_c& flip)
+{
+	std::vector<int> lower_texs(lines.size());
+	std::vector<int> upper_texs(lines.size());
+
+	DetermineNewTextures(*this, lower_texs, upper_texs);
+
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+	{
+		DoAssignSector(lines[k], sides[k], new_sec,
+					   lower_texs[k], upper_texs[k], flip);
+	}
+
+	for (unsigned int i = 0 ; i < islands.size() ; i++)
+	{
+		islands[i]->AssignSector(new_sec, flip);
+	}
+}
+
+
+static bool GetLoopForSpace(int map_x, int map_y, lineloop_c& loop)
+{
+	selection_c seen_lines(OBJ_LINEDEFS);
+
+	int ld, side;
+
+	ld = ClosestLine_CastingHoriz(map_x, map_y, &side);
+
+	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, side);
+
+	while (ld >= 0)
+	{
+		// never try this line again
+		seen_lines.set(ld);
+
+		if (! TraceLineLoop(ld, side, loop))
+		{
+			DebugPrintf("Area is not closed (tracing a loop failed)\n");
+			return false;
+		}
+
+		// not an island?  GOOD!
+		if (! loop.faces_outward)
+		{
+			return true;
+		}
+
+		DebugPrintf("  hit island\n");
+
+		// ensure we don't try any lines of this island
+		unsigned int k;
+
+		for (k = 0 ; k < loop.lines.size() ; k++)
+			seen_lines.set(loop.lines[k]);
+
+		// look for the surrounding line loop...
+		ld = -1;
+
+		for (k = 0 ; k < loop.lines.size() ; k++)
+		{
+			int new_ld;
+			int new_side;
+
+			new_ld = OppositeLineDef(loop.lines[k], loop.sides[k], &new_side);
+
+			if (new_ld < 0)
+				continue;
+
+			if (seen_lines.get(new_ld))
+				continue;
+
+			// try again...
+			ld   = new_ld;
+			side = new_side;
+
+			DebugPrintf("  trying again with line #%d, side %d\n", ld, side);
+			break;
+		}
+	}
+
+	DebugPrintf("Area is not closed (can see infinity)\n");
+	return false;
+}
+
+
+//
+// the "space" here really means a bunch of sidedefs that all face
+// inward to the current area under the mouse cursor.
+//
+// the 'new_sec' can be < 0 to create a new sector.
+//
+// the 'model' is what properties to use for a new sector, < 0 means
+// look for a neighboring sector to copy.
+//
+bool AssignSectorToSpace(int map_x, int map_y, int new_sec, int model)
+{
+	lineloop_c loop;
+
+	if (! GetLoopForSpace(map_x, map_y, loop))
+	{
+		Beep("Area is not closed");
+		return false;
+	}
+
+	loop.FindIslands();
+
+	if (new_sec < 0)
+	{
+		new_sec = BA_New(OBJ_SECTORS);
+
+		if (model < 0)
+			model = loop.NeighboringSector();
+
+		if (model < 0)
+			Sectors[new_sec]->SetDefaults();
+		else
+			Sectors[new_sec]->RawCopy(Sectors[model]);
+	}
+
+	selection_c   flip(OBJ_LINEDEFS);
+	selection_c unused(OBJ_SECTORS);
+
+	loop.GetAllSectors(&unused);
+
+	loop.AssignSector(new_sec, flip);
+
+	FlipLineDefGroup(flip);
+
+	// detect any sectors which have become unused, and delete them
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		if (L->WhatSector(SIDE_LEFT ) >= 0) unused.clear(L->WhatSector(SIDE_LEFT ));
+		if (L->WhatSector(SIDE_RIGHT) >= 0) unused.clear(L->WhatSector(SIDE_RIGHT));
+	}
+
+	DeleteObjects(&unused);
+
+	return true;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

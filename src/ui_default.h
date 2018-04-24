@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2015 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -25,8 +25,8 @@
 class UI_DefaultProps : public Fl_Group
 {
 private:
-	UI_Pic   *w_pic;
-	Fl_Input *w_tex;
+	UI_Pic      *w_pic;
+	UI_DynInput *w_tex;
 
 	Fl_Int_Input *ceil_h;
 	Fl_Int_Input *light;
@@ -35,13 +35,13 @@ private:
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
 
-	Fl_Input *c_tex;
-	UI_Pic   *c_pic;
+	UI_Pic      *c_pic;
+	UI_DynInput *c_tex;
 
-	Fl_Input *f_tex;
-	UI_Pic   *f_pic;
+	UI_Pic      *f_pic;
+	UI_DynInput *f_tex;
 
-	Fl_Int_Input *thing;
+	UI_DynInput  *thing;
 	Fl_Output    *th_desc;
 	UI_Pic		 *th_sprite;
 
@@ -49,6 +49,8 @@ public:
 	UI_DefaultProps(int X, int Y, int W, int H);
 	virtual ~UI_DefaultProps();
 
+	// see ui_window.h for description of these two methods
+	bool ClipboardOp(char what);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();
@@ -64,14 +66,22 @@ private:
 	void SetThing(int number);
 	void UnselectPicSet(char what /* 'f' or 't' */);
 
-	static const char * NormalizeTex_and_Dup(Fl_Input *w);
+	void CB_Copy  (int sel_pics);
+	void CB_Paste (int sel_pics);
+	void CB_Delete(int sel_pics);
 
+	static const char * Normalize_and_Dup(UI_DynInput *w);
+
+private:
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void    tex_callback(Fl_Widget *w, void *data);
+	static void dyntex_callback(Fl_Widget *w, void *data);
 	static void   flat_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);
 	static void height_callback(Fl_Widget *w, void *data);
-	static void  thing_callback(Fl_Widget *w, void *data);
+
+	static void    thing_callback(Fl_Widget *w, void *data);
+	static void dynthing_callback(Fl_Widget *w, void *data);
 };
 
 

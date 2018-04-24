@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2013 Andrew Apted
+//  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,9 +28,6 @@
 #include "m_game.h"
 #include "e_things.h"
 #include "w_rawdef.h"
-
-#include "w_flats.h"
-#include "w_sprite.h"
 #include "w_texture.h"
 
 
@@ -38,8 +35,11 @@
 // UI_Pic Constructor
 //
 UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
-    Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-    rgb(NULL), special(SP_None), selected(false)
+	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
+	rgb(NULL), special(SP_None),
+	allow_hl(false),
+	highlighted(false),
+	selected(false)
 {
 	color(FL_DARK2);
 
@@ -116,8 +116,11 @@ void UI_Pic::MarkMissing()
 
 void UI_Pic::GetFlat(const char * fname)
 {
-	TiledImg(W_GetFlat(fname), false /* has_trans */);
+	Img_c *img = W_GetFlat(fname, true /* try_uppercase */);
+
+	TiledImg(img);
 }
+
 
 void UI_Pic::GetTex(const char * tname)
 {
@@ -127,7 +130,9 @@ void UI_Pic::GetTex(const char * tname)
 		return;
 	}
 
-	TiledImg(W_GetTexture(tname), true /* has_trans */);
+	Img_c *img = W_GetTexture(tname, true /* try_uppercase */);
+
+	TiledImg(img);
 }
 
 
@@ -164,10 +169,18 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	int nw = w();
 	int nh = h();
 
-	int scale = 1;
+	float scale = info->scale;
 
-	if (iw*3 < nw && ih*3 < nh)
-		scale = 2;
+	float fit_x = iw * scale / (float)nw;
+	float fit_y = ih * scale / (float)nh;
+
+	// shrink if too big
+	if (fit_x > 1.00 || fit_x > 1.00)
+		scale = scale / MAX(fit_x, fit_y);
+
+	// enlarge if too small
+	if (fit_x < 0.4 && fit_y < 0.4)
+		scale = scale / (2.5 * MAX(fit_x, fit_y));
 
 
 	uchar *buf = new uchar[nw * nh * 3];
@@ -175,29 +188,37 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
 	{
+		byte *dest = buf + ((y * nw + x) * 3);
+
+		// black border
+		if (x == 0 || x == nw-1 || y == 0 || y == nh-1)
+		{
+			dest[0] = 0;
+			dest[1] = 0;
+			dest[2] = 0;
+			continue;
+		}
+
 		int ix = x / scale - (nw / scale - iw) / 2;
-		//  int iy = (ih-1) - (nh-4 - y);
 		int iy = y / scale - (nh / scale - ih) / 2;
 
-		u32_t col = back;
+		img_pixel_t pix = TRANS_PIXEL;
 
 		if (ix >= 0 && ix < iw && iy >= 0 && iy < ih)
 		{
-			img_pixel_t pix = img->buf() [iy*iw+ix];
-
-			if (pix != TRANS_PIXEL)
-				col = palette[pix];
+			pix = img->buf() [iy * iw + ix];
 		}
 
-		// Black border
-		if (x == 0 || x == nw-1 || y == 0 || y == nh-1)
-			col = 0;
-
-		byte *dest = buf + ((y*nw+x) * 3);
-
-		dest[0] = RGB_RED(col);
-		dest[1] = RGB_GREEN(col);
-		dest[2] = RGB_BLUE(col);
+		if (pix == TRANS_PIXEL)
+		{
+			dest[0] = RGB_RED(back);
+			dest[1] = RGB_GREEN(back);
+			dest[2] = RGB_BLUE(back);
+		}
+		else
+		{
+			IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
+		}
 	}
 
 	UploadRGB(buf, 3);
@@ -207,7 +228,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 }
 
 
-void UI_Pic::TiledImg(Img_c *img, bool has_trans)
+void UI_Pic::TiledImg(Img_c *img)
 {
 	color(FL_DARK2);
 
@@ -232,7 +253,8 @@ void UI_Pic::TiledImg(Img_c *img, bool has_trans)
 		scale = scale * 2;
 
 
-	const u32_t back_col = 0x00FFFF00; // CYAN
+	const u32_t back = transparent_col;
+
 
 	uchar *buf = new uchar[nw * nh * 3];
 
@@ -244,16 +266,18 @@ void UI_Pic::TiledImg(Img_c *img, bool has_trans)
 
 		img_pixel_t pix = img->buf() [iy*iw+ix];
 
-		u32_t col = back_col;
+		byte *dest = buf + ((y * nw + x) * 3);
 
-		if (! (has_trans && pix == TRANS_PIXEL))
-			col = palette[pix];
-
-		byte *dest = buf + ((y*nw+x) * 3);
-
-		dest[0] = RGB_RED(col);
-		dest[1] = RGB_GREEN(col);
-		dest[2] = RGB_BLUE(col);
+		if (pix == TRANS_PIXEL)
+		{
+			dest[0] = RGB_RED(back);
+			dest[1] = RGB_GREEN(back);
+			dest[2] = RGB_BLUE(back);
+		}
+		else
+		{
+			IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
+		}
 	}
 
 	UploadRGB(buf, 3);
@@ -287,10 +311,14 @@ int UI_Pic::handle(int event)
 	{
 		case FL_ENTER:
 			main_win->SetCursor(FL_CURSOR_HAND);
+			highlighted = true;
+			redraw();
 			return 1;
 
 		case FL_LEAVE:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
+			highlighted = false;
+			redraw();
 			return 1;
 
 		case FL_PUSH:
@@ -314,6 +342,21 @@ void UI_Pic::draw()
 
 	if (selected)
 		draw_selected();
+	else if (Highlighted())
+		draw_highlighted();
+}
+
+
+void UI_Pic::draw_highlighted()
+{
+	int X = x();
+	int Y = y();
+	int W = w();
+	int H = h();
+
+	fl_rect(X+0, Y+0, W-0, H-0, FL_YELLOW);
+	fl_rect(X+1, Y+1, W-2, H-2, FL_YELLOW);
+	fl_rect(X+2, Y+2, W-4, H-4, FL_BLACK);
 }
 
 
@@ -327,6 +370,41 @@ void UI_Pic::draw_selected()
 	fl_rect(X+0, Y+0, W-0, H-0, FL_RED);
 	fl_rect(X+1, Y+1, W-2, H-2, FL_RED);
 	fl_rect(X+2, Y+2, W-4, H-4, FL_BLACK);
+}
+
+
+void UI_Pic::Selected(bool _val)
+{
+	if (selected != _val)
+		redraw();
+
+	selected = _val;
+}
+
+
+//------------------------------------------------------------------------
+
+
+UI_DynInput::UI_DynInput(int X, int Y, int W, int H, const char *L) :
+	Fl_Input(X, Y, W, H, L),
+	callback2_(NULL), data2_(NULL)
+{ }
+
+
+UI_DynInput::~UI_DynInput()
+{ }
+
+
+int UI_DynInput::handle(int event)
+{
+	int res = Fl_Input::handle(event);
+
+	if ((event == FL_KEYBOARD || event == FL_PASTE) && callback2_)
+	{
+		callback2_(this, data2_);
+	}
+
+	return res;
 }
 
 

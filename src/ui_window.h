@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2015 Andrew Apted
+//  Copyright (C) 2006-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -50,7 +50,7 @@ class Wad_file;
 class UI_Render3D;
 
 
-class UI_MainWin : public Fl_Double_Window
+class UI_MainWindow : public Fl_Double_Window
 {
 public:
 	// main child widgets
@@ -78,7 +78,15 @@ public:
 	UI_DefaultProps   *props_box;
 	UI_FindAndReplace *find_box;
 
+	// pop-up Operation menus
+	Fl_Menu_Button	*op_thing;
+	Fl_Menu_Button	*op_line;
+	Fl_Menu_Button	*op_sector;
+	Fl_Menu_Button	*op_vertex;
+	Fl_Menu_Button	*op_render;
+
 private:
+	// active cursor
 	Fl_Cursor cursor_shape;
 
 	// remember window size/position after going fullscreen.
@@ -86,8 +94,8 @@ private:
 	int last_x, last_y, last_w, last_h;
 
 public:
-	UI_MainWin();
-	virtual ~UI_MainWin();
+	UI_MainWindow();
+	virtual ~UI_MainWindow();
 
 public:
 	void SetTitle(const char *wad_name, const char *map_name, bool read_only);
@@ -107,7 +115,7 @@ public:
 	// show or hide the Browser panel.
 	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
 	//         'O' for thing types, 'L' line types, 'S' sector types.
-	void ShowBrowser(char kind);
+	void BrowserMode(char kind);
 
 	void ShowDefaultProps();
 	void ShowFindAndReplace();
@@ -130,6 +138,11 @@ public:
 
 	void Delay(int steps);  // each step is 1/10th second
 
+	// see if one of the panels wants to perform a clipboard op,
+	// because a texture is highlighted or selected (for example).
+	// what == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
+	bool ClipboardOp(char what);
+
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
@@ -137,10 +150,13 @@ public:
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.
 	void UpdateGameInfo();
+
+private:
+	static void quit_callback(Fl_Widget *w, void *data);
 };
 
 
-extern UI_MainWin * main_win;
+extern UI_MainWindow * main_win;
 
 
 //------------------------------------------------------------------------

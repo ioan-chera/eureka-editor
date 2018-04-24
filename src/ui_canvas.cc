@@ -20,27 +20,27 @@
 
 #include "main.h"
 
+#include <algorithm>
+
 #include "ui_window.h"
 
-#include "editloop.h"
+#include "m_events.h"
+#include "e_main.h"
+#include "e_hover.h"
 #include "e_sector.h"
 #include "e_things.h"
+#include "e_path.h"	  // SoundPropagation
+#include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "im_color.h"
 #include "im_img.h"
-#include "levels.h"
 #include "r_render.h"
-#include "w_flats.h"
-
-#include <algorithm>
+#include "w_rawdef.h"	// MLF_xxx
+#include "w_texture.h"
 
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
-
-
-extern int active_when;
-extern int active_wmask;
 
 
 // config items
@@ -51,7 +51,7 @@ rgb_color_t dotty_point_col = RGB_MAKE(0, 0, 255);
 
 rgb_color_t normal_axis_col  = RGB_MAKE(0, 128, 255);
 rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t normal_flat_col  = RGB_MAKE(84, 96, 48);
+rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
@@ -61,11 +61,11 @@ int vertex_radius(double scale);
 //
 // UI_Canvas Constructor
 //
-UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) : 
+UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label),
 	highlight(), split_ld(-1),
 	drag_lines(),
-	scale_lines(),
+	trans_lines(),
 	seen_sectors()
 { }
 
@@ -101,53 +101,39 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
-
-	switch (event)
-	{
-		case FL_FOCUS:
-			return 1;
-
-		case FL_ENTER:
-			// we greedily grab the focus
-			if (Fl::focus() != this)
-				take_focus(); 
-
-			return 1;
-
-		case FL_LEAVE:
-			Editor_LeaveWindow();
-			redraw();
-			return 1;
-
-		case FL_KEYDOWN:
-		case FL_KEYUP:
-		case FL_SHORTCUT:
-			return Editor_RawKey(event);
-
-		case FL_PUSH:
-		case FL_RELEASE:
-			return Editor_RawButton(event);
-
-		case FL_MOUSEWHEEL:
-			return Editor_RawWheel(event);
-
-		case FL_DRAG:
-		case FL_MOVE:
-			return Editor_RawMouse(event);
-
-		default:
-			break;
-	}
+	if (EV_HandleEvent(event))
+		return 1;
 
 	return Fl_Widget::handle(event);
 }
 
 
-void UI_Canvas::PointerPos(int *map_x, int *map_y)
+void UI_Canvas::PointerPos(bool in_event)
 {
-	*map_x = MAPX(Fl::event_x());
-	*map_y = MAPY(Fl::event_y());
+	// NOTE: this fast method is disabled until behavior of the
+	//       other method can be verified on all platforms....
+#if 0
+	if (in_event)
+	{
+		edit.map_x = MAPX(Fl::event_x());
+		edit.map_y = MAPY(Fl::event_y());
+
+		return;
+	}
+#endif
+
+	// read current position outside of FLTK's event propagation.
+	// this is a bit harder, and a bit slower in X-windows
+
+	int raw_x, raw_y;
+
+	Fl::get_mouse(raw_x, raw_y);
+
+	raw_x -= main_win->x_root();
+	raw_y -= main_win->y_root();
+
+	edit.map_x = MAPX(raw_x);
+	edit.map_y = MAPY(raw_y);
 }
 
 
@@ -165,13 +151,13 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 	if (x1 < 8 || x2 > w() - 8 ||
 		y1 < 8 || y2 > h() - 8)
 		return 1; // too big
-	
+
 	float x_ratio = MAX(4, x2 - x1) / (float) MAX(4, w());
 	float y_ratio = MAX(4, y2 - y1) / (float) MAX(4, h());
 
 	if (MAX(x_ratio, y_ratio) < 0.25)
 		return -1;  // too small
-	
+
 	return 0;
 }
 
@@ -181,10 +167,11 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = MAPX(x());
-	map_ly = MAPY(y()+h());
-	map_hx = MAPX(x()+w());
-	map_hy = MAPY(y());
+	map_lx = floor(MAPX(x()));
+	map_ly = floor(MAPY(y() + h()));
+
+	map_hx = ceil(MAPX(x() + w()));
+	map_hy = ceil(MAPY(y()));
 
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
@@ -192,16 +179,30 @@ void UI_Canvas::DrawEverything()
 		seen_sectors.clear_all();
 	}
 
-	DrawMap(); 
+	DrawMap();
 
 	DrawSelection(edit.Selected);
 
-	if (edit.action == ACT_DRAG && ! drag_lines.empty())
+	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0 && ! drag_lines.empty())
 		DrawSelection(&drag_lines);
-	else if (edit.action == ACT_SCALE && ! scale_lines.empty())
-		DrawSelection(&scale_lines);
+	else if (edit.action == ACT_TRANSFORM && ! trans_lines.empty())
+		DrawSelection(&trans_lines);
 
-	if (highlight.valid())
+	if (edit.action == ACT_DRAG && edit.drag_single_obj >= 0)
+	{
+		int dx = 0;
+		int dy = 0;
+		DragDelta(&dx, &dy);
+
+		DrawHighlight(edit.mode, edit.drag_single_obj,
+					  (edit.mode == OBJ_VERTICES) ? HI_AND_SEL_COL : HI_COL,
+		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
+					  dx, dy);
+
+		if (edit.mode == OBJ_VERTICES && highlight.valid())
+			DrawHighlight(highlight.type, highlight.num, HI_COL, false);
+	}
+	else if (highlight.valid())
 	{
 		Fl_Color hi_color = HI_COL;
 
@@ -220,15 +221,15 @@ void UI_Canvas::DrawEverything()
 }
 
 
-/*
-  draw the actual game map
-*/
+//
+// draw the whole map, except for hilight/selection/selbox
+//
 void UI_Canvas::DrawMap()
 {
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-	if (edit.sector_render_mode && (! grid.shown || grid.mode == 0))
+	if (edit.sector_render_mode)
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 			RenderSector(n);
@@ -237,10 +238,10 @@ void UI_Canvas::DrawMap()
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
-		if (grid.mode == 0)
-			DrawGrid_Dotty();
-		else
+		if (grid_style == 0)
 			DrawGrid_Normal();
+		else
+			DrawGrid_Dotty();
 	}
 
 	if (Debugging)
@@ -258,15 +259,23 @@ void UI_Canvas::DrawMap()
 
 	if (edit.mode == OBJ_THINGS)
 	{
-		DrawThingBodies();
-		DrawThings();
+		if (edit.thing_render_mode > 0)
+		{
+			DrawThings();
+			DrawThingSprites();
+		}
+		else
+		{
+			DrawThingBodies();
+			DrawThings();
+		}
 	}
 }
 
 
-/*
- *  draw_grid - draw the grid in the background of the edit window
- */
+//
+//  draw the grid in the background of the edit window
+//
 void UI_Canvas::DrawGrid_Normal()
 {
 	float pixels_1 = grid.step * grid.Scale;
@@ -442,9 +451,9 @@ void UI_Canvas::DrawMapBounds()
 }
 
 
-/*
- *  vertex_radius - apparent radius of a vertex, in pixels
- */
+//
+//  the apparent radius of a vertex, in pixels
+//
 int vertex_radius(double scale)
 {
 	int r = 6 * (0.26 + scale / 2);
@@ -456,9 +465,9 @@ int vertex_radius(double scale)
 
 
 
-/*
- *  draw_vertices - draw the vertices, and possibly their numbers
- */
+//
+//  draw the vertices, and possibly their numbers
+//
 void UI_Canvas::DrawVertex(int map_x, int map_y, int r)
 {
 	int scrx = SCREENX(map_x);
@@ -517,9 +526,9 @@ void UI_Canvas::DrawVertices()
 }
 
 
-/*
- *  draw_linedefs - draw the linedefs
- */
+//
+//  draw all the linedefs
+//
 void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
@@ -556,7 +565,7 @@ void UI_Canvas::DrawLinedefs()
 				else
 					DrawKnobbyLine(x1, y1, x2, y2);
 
-				if (n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
+				if (n != split_ld && n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
 				{
 					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
 				}
@@ -579,7 +588,7 @@ void UI_Canvas::DrawLinedefs()
 				}
 				else if (one_sided)
 					fl_color(WHITE);
-				else if (L->flags & 1)
+				else if (L->flags & MLF_Blocking)
 					fl_color(FL_CYAN);
 				else
 					fl_color(LIGHTGREY);
@@ -592,7 +601,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				int sd1 = L->right;
 				int sd2 = L->left;
-				
+
 				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
 
@@ -600,6 +609,15 @@ void UI_Canvas::DrawLinedefs()
 					fl_color(LIGHTGREY);
 				else if (sd1 < 0)
 					fl_color(RED);
+				else if (edit.sector_render_mode == SREND_SoundProp)
+				{
+					if (L->flags & MLF_SoundBlock)
+						fl_color(FL_MAGENTA);
+					else if (one_sided)
+						fl_color(WHITE);
+					else
+						fl_color(LIGHTGREY);
+				}
 				else
 				{
 					bool have_tag  = false;
@@ -703,9 +721,9 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 }
 
 
-/*
- *  draw_things_squares - the obvious
- */
+//
+//  draw things as squares (outlines)
+//
 void UI_Canvas::DrawThings()
 {
 	fl_color(DARKGREY);
@@ -726,7 +744,8 @@ void UI_Canvas::DrawThings()
 			{
 				fl_color(LIGHTGREY);
 			}
-			else if (active_wmask)
+#if 0  // THIS DESIGNED TO SHOW SKILLS VIA COLOR, BUT DOESN'T WORK VERY WELL
+			else if (true)
 			{
 				if (Things[n]->options & 1)
 					fl_color (YELLOW);
@@ -737,6 +756,7 @@ void UI_Canvas::DrawThings()
 				else
 					fl_color (DARKGREY);
 			}
+#endif
 			else
 				fl_color((Fl_Color) info->color);
 		}
@@ -768,6 +788,9 @@ void UI_Canvas::DrawThings()
 }
 
 
+//
+//  draw bodies of things (solid boxes, darker than the outline)
+//
 void UI_Canvas::DrawThingBodies()
 {
 	if (edit.error_mode)
@@ -797,12 +820,120 @@ void UI_Canvas::DrawThingBodies()
 }
 
 
+void UI_Canvas::DrawThingSprites()
+{
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		int x = Things[n]->x;
+		int y = Things[n]->y;
+
+		if (! Vis(x, y, MAX_RADIUS))
+			continue;
+
+		const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+		Img_c *sprite = W_GetSprite(Things[n]->type);
+
+		if (! sprite)
+			sprite = IM_UnknownSprite();
+
+		DrawSprite(x, y, sprite, info->scale);
+	}
+}
+
+
+void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
+{
+	int W = img->width();
+	int H = img->height();
+
+	scale = scale * 0.5;
+
+	int bx1 = SCREENX(map_x - W * scale);
+	int bx2 = SCREENX(map_x + W * scale);
+
+	int by1 = SCREENY(map_y + H * scale);
+	int by2 = SCREENY(map_y - H * scale);
+
+	// prevent division by zero
+	if (bx2 <= bx1) bx2 = bx1 + 1;
+	if (by2 <= by1) by2 = by1 + 1;
+
+	// clip to screen
+	int sx1 = MAX(bx1, x());
+	int sy1 = MAX(by1, y());
+
+	int sx2 = MIN(bx2, x() + w());
+	int sy2 = MIN(by2, y() + h());
+
+	if (sy2 <= sy1 || sx2 <= sx1)
+		return;
+
+	// collect batches of pixels, it can greatly speed up rendering
+	const int BATCH_MAX_LEN = 128;
+
+	u8_t batch_rgb[BATCH_MAX_LEN * 3];
+	u8_t *batch_dest = NULL;
+
+	int  batch_len = 0;
+	int  batch_sx  = 0;
+
+	for (int sy = sy1 ; sy <= sy2 ; sy++)
+	{
+		batch_len = 0;
+
+		for (int sx = sx1 ; sx <= sx2 ; sx++)
+		{
+			int ix = W * (sx - bx1) / (bx2 - bx1);
+			int iy = H * (sy - by1) / (by2 - by1);
+
+			ix = CLAMP(0, ix, W - 1);
+			iy = CLAMP(0, iy, H - 1);
+
+			img_pixel_t pix = img->buf()[iy * W + ix];
+
+			if (pix == TRANS_PIXEL)
+			{
+				if (batch_len > 0)
+				{
+					fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+					batch_len = 0;
+				}
+				continue;
+			}
+
+			if (batch_len >= BATCH_MAX_LEN)
+			{
+				fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+				batch_len = 0;
+			}
+
+			if (batch_len == 0)
+			{
+				batch_sx = sx;
+				batch_dest = batch_rgb;
+			}
+
+			IM_DecodePixel(pix, batch_dest[0], batch_dest[1], batch_dest[2]);
+
+			batch_len++;
+			batch_dest += 3;
+		}
+
+		if (batch_len > 0)
+		{
+			fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
+		}
+	}
+}
+
+
 void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n)
 {
 	// only draw a number for the first linedef actually visible
 	if (seen_sectors.get(n))
 		return;
-	
+
 	seen_sectors.set(n);
 
 	DrawLineNumber(mx1, my1, mx2, my2, side, n);
@@ -851,9 +982,9 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 }
 
 
-/*
- *  draw_obj_no - draw a number at screen coordinates (x, y)
- */
+//
+//  draw a number at screen coordinates (x, y)
+//
 void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 {
 	char buffer[64];
@@ -889,7 +1020,7 @@ void UI_Canvas::HighlightSet(Objid& obj)
 {
 	if (highlight == obj)
 		return;
-	
+
 	highlight = obj;
 	redraw();
 }
@@ -899,7 +1030,7 @@ void UI_Canvas::HighlightForget()
 {
 	if (highlight.is_nil())
 		return;
-	
+
 	highlight.clear();
 	redraw();
 }
@@ -909,7 +1040,7 @@ void UI_Canvas::SplitLineSet(int ld, int new_x, int new_y)
 {
 	if (split_ld == ld && split_x == new_x && split_y == new_y)
 		return;
-	
+
 	split_ld = ld;
 	split_x  = new_x;
 	split_y  = new_y;
@@ -922,16 +1053,16 @@ void UI_Canvas::SplitLineForget()
 {
 	if (split_ld < 0)
 		return;
-	
+
 	split_ld = -1;
 	redraw();
 }
 
 
 
-/*
-   highlight the selected object
-*/
+//
+//  draw the given object in highlight color
+//
 void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
                               bool do_tagged, bool skip_lines, int dx, int dy)
 {
@@ -984,16 +1115,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				return;
 
-			int mx = (x1 + x2) / 2;
-			int my = (y1 + y2) / 2;
-
-			DrawMapLine(mx, my, mx + (y2 - y1) / 5, my + (x1 - x2) / 5);
-
-			fl_line_style(FL_SOLID, 2);
-
 			DrawMapVector(x1, y1, x2, y2);
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 
@@ -1079,7 +1201,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 }
 
 
-void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
+void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 {
 	fl_color(col);
 
@@ -1092,7 +1214,7 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x = Things[objnum]->x;
 			int y = Things[objnum]->y;
 
-			scale_param.Apply(&x, &y);
+			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				return;
@@ -1110,7 +1232,7 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x = Vertices[objnum]->x;
 			int y = Vertices[objnum]->y;
 
-			scale_param.Apply(&x, &y);
+			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
 				return;
@@ -1138,22 +1260,13 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 			int x2 = LineDefs[objnum]->End  ()->x;
 			int y2 = LineDefs[objnum]->End  ()->y;
 
-			scale_param.Apply(&x1, &y1);
-			scale_param.Apply(&x2, &y2);
+			trans_param.Apply(&x1, &y1);
+			trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				return;
 
-			int mx = (x1 + x2) / 2;
-			int my = (y1 + y2) / 2;
-
-			DrawMapLine(mx, my, mx + (y2 - y1) / 5, my + (x1 - x2) / 5);
-
-			fl_line_style(FL_SOLID, 2);
-
 			DrawMapVector(x1, y1, x2, y2);
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 
@@ -1171,8 +1284,8 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 				int x2 = LineDefs[n]->End  ()->x;
 				int y2 = LineDefs[n]->End  ()->y;
 
-				scale_param.Apply(&x1, &y1);
-				scale_param.Apply(&x2, &y2);
+				trans_param.Apply(&x1, &y1);
+				trans_param.Apply(&x2, &y2);
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1187,9 +1300,9 @@ void UI_Canvas::DrawHighlightScaled(int objtype, int objnum, Fl_Color col)
 }
 
 
-/*
-   highlight the selected objects
-*/
+//
+//  draw selected objects in light blue
+//
 void UI_Canvas::DrawSelection(selection_c * list)
 {
 	if (! list || list->empty())
@@ -1197,11 +1310,11 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	selection_iterator_c it;
 
-	if (edit.action == ACT_SCALE)
+	if (edit.action == ACT_TRANSFORM)
 	{
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
-			DrawHighlightScaled(list->what_type(), *it, SEL_COL);
+			DrawHighlightTransform(list->what_type(), *it, SEL_COL);
 		}
 
 		return;
@@ -1210,7 +1323,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	int dx = 0;
 	int dy = 0;
 
-	if (edit.action == ACT_DRAG)
+	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
 	{
 		DragDelta(&dx, &dy);
 	}
@@ -1224,20 +1337,18 @@ void UI_Canvas::DrawSelection(selection_c * list)
 }
 
 
-/*
- *  draw_map_point - draw a point at map coordinates
- *
- *  The point is drawn at map coordinates (<map_x>, <map_y>)
- */
+//
+//  draw a dot at map coordinates   [ NOT USED ATM ]
+//
 void UI_Canvas::DrawMapPoint(int map_x, int map_y)
 {
     fl_point(SCREENX(map_x), SCREENY(map_y));
 }
 
 
-/*
- *  DrawMapLine - draw a line on the screen from map coords
- */
+//
+//  draw a plain line at the given map coords
+//
 void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 {
     fl_line(SCREENX(map_x1), SCREENY(map_y1),
@@ -1245,6 +1356,9 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 }
 
 
+//
+//  draw a line with a "knob" showing the right (front) side
+//
 void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
                                bool reverse)
 {
@@ -1282,9 +1396,24 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
 }
 
 
+void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
+{
+	int sx = SCREENX(map_x);
+	int sy = SCREENY(map_y);
+
+	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+
+	fl_color(HI_AND_SEL_COL);
+
+	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
+}
+
+
 void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	// show how and where the line will be split
+
+	// fl_color() has been done by caller
 
 	int scr_x1 = SCREENX(map_x1);
 	int scr_y1 = SCREENY(map_y1);
@@ -1297,45 +1426,62 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 	fl_line(scr_x1, scr_y1, scr_mx, scr_my);
 	fl_line(scr_x2, scr_y2, scr_mx, scr_my);
 
-	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+	if (! edit.show_object_numbers)
+	{
+		int len1 = ComputeDist(map_x1 - split_x, map_y1 - split_y);
+		int len2 = ComputeDist(map_x2 - split_x, map_y2 - split_y);
 
-	fl_pie(scr_mx - size/2, scr_my - size/2, size, size, 0, 360);
+		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, len1);
+		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
+	}
+
+	DrawSplitPoint(split_x, split_y);
 }
 
 
-/*
- *  DrawMapVector - draw an arrow on the screen from map coords
- */
-void UI_Canvas::DrawMapVector (int map_x1, int map_y1, int map_x2, int map_y2)
+//
+// draw a bolder linedef with an arrow on the end
+// (used for highlighted / selected lines)
+//
+void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
+	int mx = (x1 + x2) / 2;
+	int my = (y1 + y2) / 2;
+
+	// knob
+	fl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
+
+	fl_line_style(FL_SOLID, 2);
 	fl_line(x1, y1, x2, y2);
 
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
 	if (r2 < 1.0)
-		return;
+		r2 = 1.0;
 
-	double scale = (grid.Scale > 1.0) ? sqrt(grid.Scale) : grid.Scale;
+	double len = CLAMP(6.0, r2 / 10.0, 24.0);
 
-	int dx = (int) ((x1 - x2) * 8.0 / r2 * scale);
-	int dy = (int) ((y1 - y2) * 8.0 / r2 * scale);
+	int dx = (int) (len * (x1 - x2) / r2);
+	int dy = (int) (len * (y1 - y2) / r2);
 
 	x1 = x2 + 2 * dx;
 	y1 = y2 + 2 * dy;
 
 	fl_line(x1 - dy, y1 + dx, x2, y2);
 	fl_line(x1 + dy, y1 - dx, x2, y2);
+
+	fl_line_style(FL_SOLID);
 }
 
 
-/*
- *  DrawMapArrow - draw an arrow on the screen from map coords and angle (0 - 65535)
- */
+//
+//  draw an arrow
+//
 void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
 	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);
@@ -1425,7 +1571,12 @@ void UI_Canvas::DrawCurrentLine()
 		new_x = Vertices[highlight.num]->x;
 		new_y = Vertices[highlight.num]->y;
 	}
-	else if (split_ld < 0)
+	else if (split_ld >= 0)
+	{
+		new_x = split_x;
+		new_y = split_y;
+	}
+	else
 	{
 		fl_color(FL_GREEN);
 
@@ -1437,6 +1588,33 @@ void UI_Canvas::DrawCurrentLine()
 	const Vertex * v = Vertices[edit.drawing_from];
 
 	DrawKnobbyLine(v->x, v->y, new_x, new_y);
+
+	int dx = v->x - new_x;
+	int dy = v->y - new_y;
+
+	if (dx || dy)
+	{
+		float length = sqrt(dx * dx + dy * dy);
+
+		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
+	}
+
+	// draw all the crossing points
+	crossing_state_c cross;
+
+	FindCrossingPoints(cross,
+					   v->x, v->y, edit.drawing_from,
+					   new_x, new_y, highlight.valid() ? highlight.num : -1);
+
+	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
+	{
+		cross_point_t& point = cross.points[k];
+
+		if (point.ld >= 0 && point.ld == split_ld)
+			return;
+
+		DrawSplitPoint(point.x, point.y);
+	}
 }
 
 
@@ -1540,71 +1718,90 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 }
 
 
-void UI_Canvas::ScaleBegin(int map_x, int map_y, int middle_x, int middle_y)
+void UI_Canvas::TransformBegin(int map_x, int map_y, int middle_x, int middle_y,
+							   transform_keyword_e mode)
 {
-	scale_start_x = map_x;
-	scale_start_y = map_y;
+	trans_start_x = map_x;
+	trans_start_y = map_y;
 
-	scale_param.Clear();
+	trans_mode = mode;
 
-	scale_param.mid_x = middle_x;
-	scale_param.mid_y = middle_y;
+	trans_param.Clear();
+
+	trans_param.mid_x = middle_x;
+	trans_param.mid_y = middle_y;
 
 	if (edit.mode == OBJ_VERTICES)
 	{
-		scale_lines.change_type(OBJ_LINEDEFS);
+		trans_lines.change_type(OBJ_LINEDEFS);
 
-		ConvertSelection(edit.Selected, &scale_lines);
+		ConvertSelection(edit.Selected, &trans_lines);
 	}
 }
 
-void UI_Canvas::ScaleFinish(scale_param_t& param)
+void UI_Canvas::TransformFinish(transform_t& param)
 {
-	scale_lines.clear_all();
+	trans_lines.clear_all();
 
-	param = scale_param;
+	param = trans_param;
 }
 
-void UI_Canvas::ScaleUpdate(int map_x, int map_y, keycode_t mod)
+void UI_Canvas::TransformUpdate(int map_x, int map_y)
 {
-	int dx1 = map_x - scale_param.mid_x;
-	int dy1 = map_y - scale_param.mid_y;
+	int dx1 = map_x - trans_param.mid_x;
+	int dy1 = map_y - trans_param.mid_y;
 
-	int dx2 = scale_start_x - scale_param.mid_x;
-	int dy2 = scale_start_y - scale_param.mid_y;
+	int dx0 = trans_start_x - trans_param.mid_x;
+	int dy0 = trans_start_y - trans_param.mid_y;
 
-	bool any_aspect = (mod & MOD_SHIFT)   ? true : false;
-	bool rotate     = (mod & MOD_COMMAND) ? true : false;
+	trans_param.scale_x = trans_param.scale_y = 1;
+	trans_param.skew_x  = trans_param.skew_y  = 0;
+	trans_param.rotate  = 0;
 
-	scale_param.rotate = 0;
-
-	if (rotate)
+	if (trans_mode == TRANS_K_Rotate || trans_mode == TRANS_K_RotScale)
 	{
 		int angle1 = (int)ComputeAngle(dx1, dy1);
-		int angle2 = (int)ComputeAngle(dx2, dy2);
+		int angle0 = (int)ComputeAngle(dx0, dy0);
 
-		scale_param.rotate = angle1 - angle2;
+		trans_param.rotate = angle1 - angle0;
 
-//		fprintf(stderr, "angle diff : %1.2f\n", scale_rotate * 360.0 / 65536.0);
+//		fprintf(stderr, "angle diff : %1.2f\n", trans_rotate * 360.0 / 65536.0);
 	}
 
-	if (rotate)  // TODO: CONFIG ITEM: rotate_with_scale
+	switch (trans_mode)
 	{
-		// no scaling
-		dx1 = dx2 = 10;
-		dy1 = dy2 = 10;
-	}
-	else if (rotate || !any_aspect)
-	{
-		dx1 = MAX(abs(dx1), abs(dy1));
-		dx2 = MAX(abs(dx2), abs(dy2));
+		case TRANS_K_Scale:
+		case TRANS_K_RotScale:
+			dx1 = MAX(abs(dx1), abs(dy1));
+			dx0 = MAX(abs(dx0), abs(dy0));
 
-		dy1 = dx1;
-		dy2 = dx2;
-	}
+			if (dx0)
+			{
+				trans_param.scale_x = dx1 / (float)dx0;
+				trans_param.scale_y = trans_param.scale_x;
+			}
+			break;
 
-	scale_param.scale_x = dx2 ? (dx1 / (float)dx2) : 1.0;
-	scale_param.scale_y = dy2 ? (dy1 / (float)dy2) : 1.0;
+		case TRANS_K_Stretch:
+			if (dx0) trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) trans_param.scale_y = dy1 / (float)dy0;
+			break;
+
+		case TRANS_K_Rotate:
+			// already done
+			break;
+
+		case TRANS_K_Skew:
+			if (abs(dx0) >= abs(dy0))
+			{
+				if (dx0) trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+			}
+			else
+			{
+				if (dy0) trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+			}
+			break;
+	}
 
 	redraw();
 }
@@ -1677,7 +1874,22 @@ void UI_Canvas::RenderSector(int num)
 
 	if (edit.sector_render_mode == SREND_Lighting)
 	{
-		fl_color(light_col); 
+		fl_color(light_col);
+	}
+	else if (edit.sector_render_mode == SREND_SoundProp)
+	{
+		if (edit.mode != OBJ_SECTORS || !edit.highlight.valid())
+			return;
+
+		const byte * prop = SoundPropagation(edit.highlight.num);
+
+		switch ((propagate_level_e) prop[num])
+		{
+			case PGL_Never:   return;
+			case PGL_Maybe:   fl_color(fl_rgb_color(64,64,192)); break;
+			case PGL_Level_1: fl_color(fl_rgb_color(192,32,32)); break;
+			case PGL_Level_2: fl_color(fl_rgb_color(192,96,32)); break;
+		}
 	}
 	else
 	{
@@ -1701,7 +1913,7 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
-	img_pixel_t *wbuf = img ? img->wbuf() : NULL;
+	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
@@ -1748,7 +1960,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
 			continue;
-				
+
 		// skip horizontal lines
 		if (edge.scr_y1 == edge.scr_y2)
 			continue;
@@ -1848,14 +2060,14 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			active_edges.pop_back();
 
 		// compute spans
-		
+
 		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
 		{
 			const sector_edge_t * E1 = active_edges[i - 1];
 			const sector_edge_t * E2 = active_edges[i];
 #if 1
 			if (E1 == NULL || E2 == NULL)
-				BugError("RenderSector: did not delete NULLs properly!");
+				BugError("RenderSector: did not delete NULLs properly!\n");
 #endif
 
 ///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
@@ -1897,18 +2109,16 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
-			int ty = (0 - MAPY(y)) & 63;
+			int ty = (0 - (int)MAPY(y)) & 63;
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
 				// TODO : be nice to optimize the next line
-				int tx = MAPX(x) & 63;
+				int tx = (int)MAPX(x) & 63;
 
-				rgb_color_t col = palette[wbuf[ty * tw + tx]];
+				img_pixel_t pix = src_pix[ty * tw + tx];
 
-				dest[0] = RGB_RED(col);
-				dest[1] = RGB_GREEN(col);
-				dest[2] = RGB_BLUE(col);
+				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 
 			fl_draw_image(line_rgb, x1, y, span_w, 1);

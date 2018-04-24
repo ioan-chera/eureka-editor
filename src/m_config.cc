@@ -30,23 +30,22 @@
 #include <sys/stat.h>
 
 #include "lib_adler.h"
-#include "editloop.h"
-#include "e_loadsave.h"
 #include "im_color.h"
 #include "m_config.h"
+#include "m_loadsave.h"
 #include "r_grid.h"
 #include "r_render.h"
-#include "levels.h"
+#include "e_main.h"	  // RecUsed_xxx
 
-#include "ui_window.h"  // meh!
+#include "ui_window.h"  // Browser_xxx, Props_xxx
 
 
 
 //------------------------------------------------------------------------
 
-/*
- *  Description of the command line arguments and config file keywords
- */
+//
+//  Structures for command line arguments and config settings
+//
 typedef enum
 {
 	// End of the options description
@@ -261,15 +260,6 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
-	{	"easier_drawing_mode",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Easier line drawing using the LMB",
-		NULL,
-		&easier_drawing_mode
-	},
-
 	{	"browser_small_tex",
 		0,
 		OPT_BOOLEAN,
@@ -279,6 +269,78 @@ static const opt_desc_t options[] =
 		&browser_small_tex
 	},
 
+	{	"bsp_on_save",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: always build the nodes after saving",
+		NULL,
+		&bsp_on_save
+	},
+
+	{	"bsp_fast",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: enable fast mode (may be lower quality)",
+		NULL,
+		&bsp_fast
+	},
+
+	{	"bsp_warnings",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: show all warning messages",
+		NULL,
+		&bsp_warnings
+	},
+
+	{	"bsp_split_factor",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Node building: seg splitting factor",
+		NULL,
+		&bsp_split_factor
+	},
+
+	{	"bsp_gl_nodes",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: build GL-Nodes",
+		NULL,
+		&bsp_gl_nodes
+	},
+
+	{	"bsp_force_v5",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force V5 of GL-Nodes",
+		NULL,
+		&bsp_force_v5
+	},
+
+	{	"bsp_force_zdoom",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force ZDoom format for normal nodes",
+		NULL,
+		&bsp_force_zdoom
+	},
+
+	{	"bsp_compressed",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Node building: force zlib compression of ZDoom nodes",
+		NULL,
+		&bsp_compressed
+	},
+
 	{	"default_gamma",
 		0,
 		OPT_INTEGER,
@@ -286,33 +348,6 @@ static const opt_desc_t options[] =
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
 		&usegamma
-	},
-
-	{	"default_grid_mode",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
-		NULL,
-		&default_grid_mode
-	},
-
-	{	"default_grid_size",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Default grid size",
-		NULL,
-		&default_grid_size
-	},
-
-	{	"default_grid_snap",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Default grid snapping",
-		NULL,
-		&default_grid_snap
 	},
 
 	{	"default_edit_mode",
@@ -331,15 +366,6 @@ static const opt_desc_t options[] =
 		"Default port (engine) name",
 		NULL,
 		&default_port
-	},
-
-	{	"digits_set_zoom",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Digit keys set zoom factor (rather than grid size)",
-		NULL,
-		&digits_set_zoom
 	},
 
 	{	"dotty_axis_col",
@@ -405,31 +431,31 @@ static const opt_desc_t options[] =
 		&floor_bump_large
 	},
 
-	{	"glbsp_fast",
+	{	"grid_default_mode",
 		0,
-		OPT_BOOLEAN,
+		OPT_INTEGER,
 		"v",
-		"Node building: enable fast mode (may be lower quality)",
+		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
-		&glbsp_fast
+		&grid_default_mode
 	},
 
-	{	"glbsp_verbose",
+	{	"grid_default_size",
 		0,
-		OPT_BOOLEAN,
+		OPT_INTEGER,
 		"v",
-		"Node building: be verbose, show level information",
+		"Default grid size",
 		NULL,
-		&glbsp_verbose
+		&grid_default_size
 	},
 
-	{	"glbsp_warn",
+	{	"grid_default_snap",
 		0,
 		OPT_BOOLEAN,
 		"v",
-		"Node building: show all warning messages",
+		"Default grid snapping",
 		NULL,
-		&glbsp_warn
+		&grid_default_snap
 	},
 
 	{	"grid_hide_in_free_mode",
@@ -441,16 +467,16 @@ static const opt_desc_t options[] =
 		&grid_hide_in_free_mode
 	},
 
-	{	"grid_toggle_type",
+	{	"grid_style",
 		0,
 		OPT_INTEGER,
 		"v",
-		"grid toggle type : 0 = BOTH, 1 = dotty, 2 = normal",
+		"grid style : 0 = squares, 1 = dotty",
 		NULL,
-		&grid_toggle_type
+		&grid_style
 	},
 
-	{	"gui_scheme",
+	{	"gui_theme",
 		0,
 		OPT_INTEGER,
 		"v",
@@ -549,24 +575,6 @@ static const opt_desc_t options[] =
 		&minimum_drag_pixels
 	},
 
-	{	"mouse_wheel_scrolls_map",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Use the mouse wheel events for scrolling, not zooming",
-		NULL,
-		&mouse_wheel_scrolls_map
-	},
-
-	{	"multi_select_modifier",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Require a modifier key for multi-select (0 = none, 1 = SHIFT, 2 = CTRL)",
-		NULL,
-		&multi_select_modifier
-	},
-
 	{	"new_islands_are_void",
 		0,
 		OPT_BOOLEAN,
@@ -621,11 +629,20 @@ static const opt_desc_t options[] =
 		&normal_small_col
 	},
 
-	{	"render_pixel_aspect",
+	{	"panel_gamma",
 		0,
 		OPT_INTEGER,
 		"v",
-		"Pixel aspect ratio for 3D view (100 * width / height)",
+		"Gamma for images in the panels and the browser (0..4)",
+		NULL,
+		&panel_gamma
+	},
+
+	{	"render_pix_aspect",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
 		&render_pixel_aspect
 	},
@@ -675,24 +692,6 @@ static const opt_desc_t options[] =
 		&same_mode_clears_selection
 	},
 
-	{	"scroll_less",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Amplitude of scrolling (% of screen size)",
-		NULL,
-		&scroll_less
-	},
-
-	{	"scroll_more",
-		0,
-		OPT_INTEGER,
-		"v",
-		"Amplitude of scrolling (% of screen size)",
-		NULL,
-		&scroll_more
-	},
-
 	{	"sector_render_default",
 		0,
 		OPT_INTEGER,
@@ -718,6 +717,24 @@ static const opt_desc_t options[] =
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
 		&sidedef_add_del_buttons
+	},
+
+	{	"thing_render_default",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Default thing rendering mode: 0 = boxes, 1 = sprites",
+		NULL,
+		&thing_render_default
+	},
+
+	{	"transparent_col",
+		0,
+		OPT_COLOR,
+		"v",
+		"color used to represent transparent pixels in textures",
+		NULL,
+		&transparent_col
 	},
 
 	{	"swap_sidedefs",
@@ -876,7 +893,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		default:
-			BugError("INTERNAL ERROR: unknown option type %d", (int) opt->opt_type);
+			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
 			return -1;
 	}
 
@@ -884,11 +901,11 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 }
 
 
-/*
- *  try to parse a config file by pathname.
- *
- *  Return 0 on success, negative value on failure.
- */
+//
+//  try to parse a config file by pathname.
+//
+//  Return 0 on success, negative value on failure.
+//
 static int parse_a_config_file(FILE *fp, const char *filename)
 {
 	static char line[1024];
@@ -920,11 +937,11 @@ static const char * default_config_file()
 }
 
 
-/*
- *  parses the config file (either a user-specific one or the default one).
- *
- *  return 0 on success, negative value on error.
- */
+//
+//  parses the config file (either a user-specific one or the default one).
+//
+//  return 0 on success, negative value on error.
+//
 int M_ParseConfigFile()
 {
 	if (! config_file)
@@ -950,12 +967,34 @@ int M_ParseConfigFile()
 }
 
 
-/*
- *  parse_environment_vars
- *  Check certain environment variables.
- *  Returns 0 on success, <>0 on error.
- */
-int M_ParseEnvironmentVars()
+int M_ParseDefaultConfigFile()
+{
+	static char filename[FL_PATH_MAX];
+
+	sprintf(filename, "%s/defaults.cfg", install_dir);
+
+	FILE * fp = fopen(filename, "r");
+
+	LogPrintf("Reading config file: %s\n", filename);
+
+	if (fp == NULL)
+	{
+		LogPrintf("--> %s\n", strerror(errno));
+		return -1;
+	}
+
+	int rc = parse_a_config_file(fp, filename);
+
+	fclose(fp);
+
+	return rc;
+}
+
+
+//
+// check certain environment variables...
+//
+void M_ParseEnvironmentVars()
 {
 #if 0
 	char *value;
@@ -964,8 +1003,6 @@ int M_ParseEnvironmentVars()
 	if (value != NULL)
 		Game = value;
 #endif
-
-	return 0;
 }
 
 
@@ -975,16 +1012,15 @@ void M_AddPwadName(const char *filename)
 }
 
 
-/*
- *  parses the command line options
- *
- *  If <pass> is set to 1, ignores all options except those
- *  that have the "1" flag.
- *  Else, ignores all options that have the "1" flag.
- *  If an error occurs, report it with LogPrintf().
- *  and returns non-zero. Else, returns 0.
- */
-int M_ParseCommandLine(int argc, const char *const *argv, int pass)
+//
+// parses the command line options
+//
+// If <pass> is set to 1, ignores all options except those
+// that have the "1" flag (the "early" options).
+//
+// Otherwise, ignores all options that have the "1" flag.
+//
+void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 {
 	const opt_desc_t *o;
 
@@ -1010,7 +1046,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			if (o->opt_type == OPT_END)
 			{
 				FatalError("unknown option: '%s'\n", argv[0]);
-				return 1;
+				/* NOT REACHED */
 			}
 
 			if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
@@ -1056,7 +1092,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1072,7 +1108,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1088,7 +1124,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 
 				argv++;
@@ -1118,7 +1154,7 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if (argc < 2)
 				{
 					FatalError("missing argument after '%s'\n", argv[0]);
-					return 1;
+					/* NOT REACHED */
 				}
 				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
 				{
@@ -1134,75 +1170,20 @@ int M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				break;
 
 			default:
-				{
-					BugError("INTERNAL ERROR: unknown option type (%d)", (int) o->opt_type);
-					return 1;
-				}
+				BugError("INTERNAL ERROR: unknown option type (%d)\n", (int) o->opt_type);
+				/* NOT REACHED */
 		}
 
 		argv++;
 		argc--;
 	}
-	return 0;
 }
 
 
-/*
- *  Print a list of the parameters with their current value.
- */
-void dump_parameters(FILE *fp)
-{
-	const opt_desc_t *o;
-	int desc_maxlen = 0;
-	int name_maxlen = 0;
-
-	for (o = options; o->opt_type != OPT_END; o++)
-	{
-		int len = (int)strlen (o->desc);
-		desc_maxlen = MAX(desc_maxlen, len);
-		if (o->long_name)
-		{
-			len = (int)strlen (o->long_name);
-			name_maxlen = MAX(name_maxlen, len);
-		}
-	}
-
-	for (o = options; o->opt_type != OPT_END; o++)
-	{
-		if (! o->long_name)
-			continue;
-		
-		fprintf (fp, "%-*s  %-*s  ", name_maxlen, o->long_name, desc_maxlen, o->desc);
-
-		if (o->opt_type == OPT_BOOLEAN)
-			fprintf (fp, "%s", *((bool *) o->data_ptr) ? "true" : "false");
-		else if (o->opt_type == OPT_INTEGER)
-			fprintf (fp, "%d", *((int *) o->data_ptr));
-		else if (o->opt_type == OPT_COLOR)
-			fprintf (fp, "%06x", *((rgb_color_t *) o->data_ptr) >> 8);
-		else if (o->opt_type == OPT_STRING)
-		{
-			const char *str = *((const char **) o->data_ptr);
-			fprintf(fp, "'%s'", str ? str : "--none--");
-		}
-		else if (o->opt_type == OPT_STRING_LIST)
-		{
-			string_list_t *list = (string_list_t *)o->data_ptr;
-
-			if (list->empty())
-				fprintf(fp, "--none--");
-			else for (unsigned int i = 0 ; i < list->size() ; i++)
-				fprintf(fp, "'%s' ", list->at(i));
-		}
-		fputc ('\n', fp);
-	}
-}
-
-
-/*
- *  Print a list of all command line options (usage message).
- */
-void dump_command_line_options(FILE *fp)
+//
+// print a list of all command line options (usage message).
+//
+void M_PrintCommandLineOptions(FILE *fp)
 {
 	const opt_desc_t *o;
 	int name_maxlen = 0;
@@ -1282,6 +1263,8 @@ int M_WriteConfigFile()
 		return -1;
 	}
 
+	fprintf(fp, "# Eureka configuration (local)\n");
+
 	const opt_desc_t *o;
 
 	for (o = options; o->opt_type != OPT_END; o++)
@@ -1356,7 +1339,7 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 	// skip leading whitespace
 	while (isspace(*line))
 		line++;
-	
+
 	// blank line or comment line?
 	if (*line == 0 || *line == '\n' || *line == '#')
 		return 0;
@@ -1393,12 +1376,16 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 			continue;
 		}
 
-		if (ch == '"' && in_string)
+		if (in_string && ch == '"')
 		{
 			// end of string
 			in_string = false;
 		}
-		else if (ch == 0 || ch == '\n' || isspace(ch))
+		else if (ch == 0 || ch == '\n')
+		{
+			// end of line
+		}
+		else if (! in_string && isspace(ch))
 		{
 			// end of token
 		}
@@ -1417,9 +1404,9 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 		tokenbuf[tokenlen] = 0;
 		tokenlen = -1;
 
-		tokens[num_tok++] = strdup(tokenbuf);
+		tokens[num_tok++] = StringDup(tokenbuf);
 
-		// end of line?  if yes, break out of for loop
+		// end of line?  if yes, we are done
 		if (ch == 0 || ch == '\n')
 			break;
 	}
@@ -1432,7 +1419,7 @@ void M_FreeLine(const char ** tokens, int num_tok)
 {
 	for (int i = 0 ; i < num_tok ; i++)
 	{
-		free((void *) tokens[i]);
+		StringFree(tokens[i]);
 
 		tokens[i] = NULL;
 	}
@@ -1460,18 +1447,15 @@ bool M_LoadUserState()
 
 	BA_LevelChecksum(crc);
 
-
 	char *filename = PersistFilename(crc);
-
-	LogPrintf("Load user state from: %s\n", filename);
 
 	FILE *fp = fopen(filename, "r");
 
 	if (! fp)
-	{
-		LogPrintf("--> %s\n", strerror(errno));
 		return false;
-	}
+
+	LogPrintf("Loading user state from: %s\n", filename);
+
 
 	static char line_buf[FL_PATH_MAX];
 
@@ -1556,7 +1540,7 @@ void M_DefaultUserState()
 {
 	grid.Init();
 
-	CMD_ZoomWholeMap();
+	ZoomWholeMap();
 
 	Render3D_Setup();
 }

@@ -30,115 +30,48 @@
 #include "m_game.h"
 
 
-// Now where did these came from?
-int gammatable[5][256] =
+static int missing_tex_color;
+static int unknown_tex_color;
+static int unknown_flat_color;
+static int unknown_sprite_color;
+
+static Img_c * missing_tex_image;
+static Img_c * unknown_tex_image;
+static Img_c * unknown_flat_image;
+static Img_c * unknown_sprite_image;
+
+
+inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 {
+	if (p & IS_RGB_PIXEL)
 	{
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-		17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-		33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-		49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
-		65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-		81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96,
-		97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
-		113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128,
-		128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
-		144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
-		160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-		176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-		192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-		208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-		224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-		240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
-	},
-	{
-		2, 4, 5, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25, 26, 27, 29, 30, 31,
-		32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 54, 55,
-		56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 69, 70, 71, 72, 73, 74, 75, 76, 77,
-		78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,
-		99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
-		115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 129,
-		130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145,
-		146, 147, 148, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
-		161, 162, 163, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-		175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 186, 187, 188, 189,
-		190, 191, 192, 193, 194, 195, 196, 196, 197, 198, 199, 200, 201, 202, 203, 204,
-		205, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 214, 215, 216, 217, 218,
-		219, 220, 221, 222, 222, 223, 224, 225, 226, 227, 228, 229, 230, 230, 231, 232,
-		233, 234, 235, 236, 237, 237, 238, 239, 240, 241, 242, 243, 244, 245, 245, 246,
-		247, 248, 249, 250, 251, 252, 252, 253, 254, 255
-	},
-	{
-		4, 7, 9, 11, 13, 15, 17, 19, 21, 22, 24, 26, 27, 29, 30, 32, 33, 35, 36, 38, 39, 40, 42,
-		43, 45, 46, 47, 48, 50, 51, 52, 54, 55, 56, 57, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69,
-		70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
-		94, 95, 96, 97, 98, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
-		113, 114, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128,
-		129, 130, 131, 132, 133, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144,
-		144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 153, 154, 155, 156, 157, 158, 159,
-		160, 160, 161, 162, 163, 164, 165, 166, 166, 167, 168, 169, 170, 171, 172, 172, 173,
-		174, 175, 176, 177, 178, 178, 179, 180, 181, 182, 183, 183, 184, 185, 186, 187, 188,
-		188, 189, 190, 191, 192, 193, 193, 194, 195, 196, 197, 197, 198, 199, 200, 201, 201,
-		202, 203, 204, 205, 206, 206, 207, 208, 209, 210, 210, 211, 212, 213, 213, 214, 215,
-		216, 217, 217, 218, 219, 220, 221, 221, 222, 223, 224, 224, 225, 226, 227, 228, 228,
-		229, 230, 231, 231, 232, 233, 234, 235, 235, 236, 237, 238, 238, 239, 240, 241, 241,
-		242, 243, 244, 244, 245, 246, 247, 247, 248, 249, 250, 251, 251, 252, 253, 254, 254,
-		255
-	},
-	{
-		8, 12, 16, 19, 22, 24, 27, 29, 31, 34, 36, 38, 40, 41, 43, 45, 47, 49, 50, 52, 53, 55,
-		57, 58, 60, 61, 63, 64, 65, 67, 68, 70, 71, 72, 74, 75, 76, 77, 79, 80, 81, 82, 84, 85,
-		86, 87, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107,
-		108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124,
-		125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 135, 136, 137, 138, 139, 140,
-		141, 142, 143, 143, 144, 145, 146, 147, 148, 149, 150, 150, 151, 152, 153, 154, 155,
-		155, 156, 157, 158, 159, 160, 160, 161, 162, 163, 164, 165, 165, 166, 167, 168, 169,
-		169, 170, 171, 172, 173, 173, 174, 175, 176, 176, 177, 178, 179, 180, 180, 181, 182,
-		183, 183, 184, 185, 186, 186, 187, 188, 189, 189, 190, 191, 192, 192, 193, 194, 195,
-		195, 196, 197, 197, 198, 199, 200, 200, 201, 202, 202, 203, 204, 205, 205, 206, 207,
-		207, 208, 209, 210, 210, 211, 212, 212, 213, 214, 214, 215, 216, 216, 217, 218, 219,
-		219, 220, 221, 221, 222, 223, 223, 224, 225, 225, 226, 227, 227, 228, 229, 229, 230,
-		231, 231, 232, 233, 233, 234, 235, 235, 236, 237, 237, 238, 238, 239, 240, 240, 241,
-		242, 242, 243, 244, 244, 245, 246, 246, 247, 247, 248, 249, 249, 250, 251, 251, 252,
-		253, 253, 254, 254, 255
-	},
-	{
-		16, 23, 28, 32, 36, 39, 42, 45, 48, 50, 53, 55, 57, 60, 62, 64, 66, 68, 69, 71, 73, 75, 76,
-		78, 80, 81, 83, 84, 86, 87, 89, 90, 92, 93, 94, 96, 97, 98, 100, 101, 102, 103, 105, 106,
-		107, 108, 109, 110, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124,
-		125, 126, 128, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141,
-		142, 143, 143, 144, 145, 146, 147, 148, 149, 150, 150, 151, 152, 153, 154, 155, 155,
-		156, 157, 158, 159, 159, 160, 161, 162, 163, 163, 164, 165, 166, 166, 167, 168, 169,
-		169, 170, 171, 172, 172, 173, 174, 175, 175, 176, 177, 177, 178, 179, 180, 180, 181,
-		182, 182, 183, 184, 184, 185, 186, 187, 187, 188, 189, 189, 190, 191, 191, 192, 193,
-		193, 194, 195, 195, 196, 196, 197, 198, 198, 199, 200, 200, 201, 202, 202, 203, 203,
-		204, 205, 205, 206, 207, 207, 208, 208, 209, 210, 210, 211, 211, 212, 213, 213, 214,
-		214, 215, 216, 216, 217, 217, 218, 219, 219, 220, 220, 221, 221, 222, 223, 223, 224,
-		224, 225, 225, 226, 227, 227, 228, 228, 229, 229, 230, 230, 231, 232, 232, 233, 233,
-		234, 234, 235, 235, 236, 236, 237, 237, 238, 239, 239, 240, 240, 241, 241, 242, 242,
-		243, 243, 244, 244, 245, 245, 246, 246, 247, 247, 248, 248, 249, 249, 250, 250, 251,
-		251, 252, 252, 253, 254, 254, 255, 255
+		byte r = IMG_PIXEL_RED(p)   << 3;
+		byte g = IMG_PIXEL_GREEN(p) << 3;
+		byte b = IMG_PIXEL_BLUE(p)  << 3;
+
+		return RGB_MAKE(r, g, b);
 	}
-};
+	else
+	{
+		byte r = raw_palette[p][0];
+		byte g = raw_palette[p][1];
+		byte b = raw_palette[p][2];
+
+		return RGB_MAKE(r, g, b);
+	}
+}
 
 
-//------------------------------------------------------------------------
-
-
-/*
- *  Img_c::Img_c - default constructor
- *
- *  The new image is a null image.
- */
+//
+// default constructor, creating a null image
+//
 Img_c::Img_c() : pixels(NULL), w(0), h(0)
 { }
 
 
-/*
- *  Img_c::Img_c - constructor with dimensions
- *
- *  The new image is set to the specified dimensions.
- */
+//
+// a constructor with dimensions
+//
 Img_c::Img_c(int width, int height, bool _dummy) :
 	pixels(NULL), w(0), h(0)
 {
@@ -146,61 +79,61 @@ Img_c::Img_c(int width, int height, bool _dummy) :
 }
 
 
-/*
- *  Img_c::~Img_c - destructor
- */
+//
+// destructor
+//
 Img_c::~Img_c()
 {
-	delete pixels;
+	delete []pixels;
 }
 
 
-/*
- *  Img_c::buf - return a const pointer on the buffer
- *
- *  If the image is null, return a null pointer.
- */
+//
+//  return a const pointer on the buffer.
+//  if the image is null, return a NULL pointer.
+//
 const img_pixel_t *Img_c::buf() const
 {
 	return pixels;
 }
 
 
-/*
- *  Img_c::wbuf - return a writable pointer on the buffer
- *
- *  If the image is null, return a null pointer.
- */
+//
+// return a writable pointer on the buffer.
+// if the image is null, return a NULL pointer.
+//
 img_pixel_t *Img_c::wbuf()
 {
 	return pixels;
 }
 
 
-/*
- *  Img_c::clear - clear the image
- */
+//
+// clear the image to fully transparent
+//
 void Img_c::clear()
 {
 	if (pixels)
 	{
-		memset(pixels, TRANS_PIXEL, w * h);
+		img_pixel_t *dest = pixels;
+		img_pixel_t *dest_end = dest + (w * h);
+
+		for ( ; dest < dest_end ; dest++)
+			*dest = TRANS_PIXEL;
 	}
 }
 
 
-/*
- *  Img_c::resize - resize the image
- *
- *  If either dimension is zero, the image becomes a null
- *  image.
- */
+//
+// resize the image.  if either dimension is zero,
+// the image becomes a null image.
+//
 void Img_c::resize(int new_width, int new_height)
 {
 	if (new_width == w && new_height == h)
 		return;
 
-	// Unallocate old buffer
+	// unallocate old buffer
 	if (pixels)
 	{
 		delete[] pixels;
@@ -217,25 +150,25 @@ void Img_c::resize(int new_width, int new_height)
 	// Allocate new buffer
 	w = new_width;
 	h = new_height;
-	
+
 	pixels = new img_pixel_t[w * h + 10];  // Some slack
 
 	clear();
 }
 
 
-/*
- *  spectrify_img - make a game image look vaguely like a spectre
- */
+//
+// make a game image look vaguely like a spectre
+//
 Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(width(), height());
 
-	byte grey = 104;
+	int invis_start = game_info.invis_colors[0];
+	int invis_len   = game_info.invis_colors[1] - invis_start + 1;
 
-	// FIXME GAME CONFIG ITEM
-	if (strcmp(Game_name, "heretic") == 0)
-		grey = 8;
+	if (invis_len < 1)
+		invis_len = 1;
 
 	int W = width();
 	int H = height();
@@ -250,7 +183,7 @@ Img_c * Img_c::spectrify() const
 		img_pixel_t pix = src[y * W + x];
 
 		if (pix != TRANS_PIXEL)
-			pix = grey + (rand () >> 6) % 7;  // FIXME more kludgery
+			pix = invis_start + (rand() >> 4) % invis_len;
 
 		dest[y * W + x] = pix;
 	}
@@ -259,32 +192,13 @@ Img_c * Img_c::spectrify() const
 }
 
 
-/*
- *  scale_img - scale a game image
- *
- *  <img> is the source image, <omg> is the destination
- *  image. <scale> is the scaling factor (> 1.0 to magnify).
- *  A scaled copy of <img> is put in <omg>. <img> is not
- *  modified. Any previous data in <omg> is lost.
- *
- *  Example:
- *
- *    Img_c raw;
- *    Img_c scaled;
- *    LoadPicture (raw, ...);
- *    scale_img (raw, 2, scaled);
- *    display_img (scaled, ...);
- *
- *  The implementation is mediocre in the case of scale
- *  factors < 1 because it uses only one source pixel per
- *  destination pixel. On certain patterns, it's likely to
- *  cause a visible loss of quality.
- *
- *  In the case of scale factors > 1, the algorithm is
- *  suboptimal.
- *
- *  andrewj: turned into a method, but untested...
- */
+//
+//  scale a game image, returning a new one.
+//
+//  the implementation is very simplistic and not optimized.
+//
+//  andrewj: turned into a method, but untested...
+//
 Img_c * Img_c::scale_img(double scale) const
 {
 	int iwidth  = width();
@@ -317,10 +231,12 @@ Img_c * Img_c::scale_img(double scale) const
 }
 
 
-/*
- *  Copy the image, but remap pixels in the range 'src1..src2' to the
- *  range 'targ1..targ2'.
- */
+//
+// copy the image, remapping pixels in the range 'src1..src2' to the
+// range 'targ1..targ2'.
+//
+// TODO : make it work with RGB pixels (find nearest in palette).
+//
 Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
@@ -372,16 +288,33 @@ bool Img_c::has_transparent() const
 }
 
 
+void Img_c::test_make_RGB()
+{
+	int W = width();
+	int H = height();
+
+	img_pixel_t *src = wbuf();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		img_pixel_t pix = src[y * W + x];
+
+		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
+		{
+			const rgb_color_t col = IM_PixelToRGB(pix);
+
+			byte r = RGB_RED(col)   >> 3;
+			byte g = RGB_GREEN(col) >> 3;
+			byte b = RGB_BLUE(col)  >> 3;
+
+			src[y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+	}
+}
+
+
 //------------------------------------------------------------------------
-
-
-static int missing_tex_color;
-static int unknown_tex_color;
-static int unknown_flat_color;
-
-static Img_c * missing_tex_image;
-static Img_c * unknown_tex_image;
-static Img_c * unknown_flat_image;
 
 
 void IM_ResetDummyTextures()
@@ -389,6 +322,7 @@ void IM_ResetDummyTextures()
 	missing_tex_color  = -1;
 	unknown_tex_color  = -1;
 	unknown_flat_color = -1;
+	unknown_sprite_color = -1;
 }
 
 
@@ -498,6 +432,30 @@ Img_c * IM_UnknownFlat()
 }
 
 
+Img_c * IM_UnknownSprite()
+{
+	if (! unknown_sprite_image || unknown_sprite_color != game_info.unknown_tex)
+	{
+		unknown_sprite_color = game_info.unknown_tex;
+
+		if (unknown_sprite_image)
+			delete unknown_sprite_image;
+
+		unknown_sprite_image = new Img_c(64, 64, true);
+
+		img_pixel_t *obuf = unknown_sprite_image->wbuf();
+
+		for (int y = 0 ; y < 64 ; y++)
+		for (int x = 0 ; x < 64 ; x++)
+		{
+			obuf[y * 64 + x] = unknown_graphic[(y/4) * 16 + (x/4)] ? unknown_sprite_color : TRANS_PIXEL;
+		}
+	}
+
+	return unknown_sprite_image;
+}
+
+
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size)
 {
 	Img_c *result = new Img_c(W, H);
@@ -527,6 +485,302 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 	delete[] conv_palette;
 
 	return result;
+}
+
+
+Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src)
+{
+	int W  = src->w();
+	int H  = src->h();
+	int D  = src->d();
+	int LD = src->ld();
+
+	LD += W;
+
+	const byte * data = (const byte *) src->array;
+
+	if (! data)
+		return NULL;
+
+	if (! (D == 3 || D == 4))
+		return NULL;
+
+	Img_c *img = new Img_c(W, H);
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		const byte *src_pix = data + (y * LD + x) * D;
+
+		int r = src_pix[0];
+		int g = src_pix[1];
+		int b = src_pix[2];
+		int a = (D == 3) ? 255 : src_pix[3];
+
+		img_pixel_t dest_pix = TRANS_PIXEL;
+
+		if (a & 128)
+		{
+			// TODO : a preference to palettize it
+			// dest_pix = W_FindPaletteColor(r, g, b);
+
+			dest_pix = IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3);
+		}
+
+		img->wbuf() [ y * W + x ] = dest_pix;
+	}
+
+	return img;
+}
+
+
+Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+{
+	Img_c *img = new Img_c(W, H);
+
+	img_pixel_t *dest = img->wbuf();
+
+	for (int i = W * H ; i > 0 ; i--, data++, dest++)
+	{
+		if (RGBA_ALPHA(*data) & 128)
+		{
+			byte r = RGB_RED(  *data) >> 3;
+			byte g = RGB_GREEN(*data) >> 3;
+			byte b = RGB_BLUE( *data) >> 3;
+
+			*dest = IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+		else
+		{
+			*dest = TRANS_PIXEL;
+		}
+	}
+
+	return img;
+}
+
+
+//------------------------------------------------------------------------
+
+//
+// eight basic arrow sprites, made by Andrew Apted, public domain.
+//
+
+/* XPM */
+const char * arrow_0_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"      1     ",
+	"      11    ",
+	"      111   ",
+	"      1111  ",
+	"      11111 ",
+	"111111111111",
+	"111111111111",
+	"      11111 ",
+	"      1111  ",
+	"      111   ",
+	"      11    ",
+	"      1     "
+};
+
+/* XPM */
+const char * arrow_45_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"            ",
+	"   11111111 ",
+	"    1111111 ",
+	"     111111 ",
+	"      11111 ",
+	"     111111 ",
+	"    111 111 ",
+	"   111   11 ",
+	"  111     1 ",
+	" 111        ",
+	" 11         ",
+	"            "
+};
+
+/* XPM */
+const char * arrow_90_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"     11     ",
+	"    1111    ",
+	"   111111   ",
+	"  11111111  ",
+	" 1111111111 ",
+	"111111111111",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     "
+};
+
+/* XPM */
+const char * arrow_135_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"            ",
+	" 11111111   ",
+	" 1111111    ",
+	" 111111     ",
+	" 11111      ",
+	" 111111     ",
+	" 111 111    ",
+	" 11   111   ",
+	" 1     111  ",
+	"        111 ",
+	"         11 ",
+	"            "
+};
+
+/* XPM */
+const char * arrow_180_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"     1      ",
+	"    11      ",
+	"   111      ",
+	"  1111      ",
+	" 11111      ",
+	"111111111111",
+	"111111111111",
+	" 11111      ",
+	"  1111      ",
+	"   111      ",
+	"    11      ",
+	"     1      "
+};
+
+/* XPM */
+const char * arrow_225_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"            ",
+	"         11 ",
+	"        111 ",
+	" 1     111  ",
+	" 11   111   ",
+	" 111 111    ",
+	" 111111     ",
+	" 11111      ",
+	" 111111     ",
+	" 1111111    ",
+	" 11111111   ",
+	"            "
+};
+
+/* XPM */
+const char * arrow_270_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"     11     ",
+	"111111111111",
+	" 1111111111 ",
+	"  11111111  ",
+	"   111111   ",
+	"    1111    ",
+	"     11     "
+};
+
+/* XPM */
+const char * arrow_315_xpm[] =
+{
+	"12 12 2 1",
+	" 	c None",
+	"1	c #000000",
+	"            ",
+	" 11         ",
+	" 111        ",
+	"  111     1 ",
+	"   111   11 ",
+	"    111 111 ",
+	"     111111 ",
+	"      11111 ",
+	"     111111 ",
+	"    1111111 ",
+	"   11111111 ",
+	"            "
+};
+
+
+//------------------------------------------------------------------------
+
+//
+// This dog sprite was sourced from OpenGameArt.org
+// Authors are 'Benalene' and 'qudobup' (users on the OGA site).
+// License is CC-BY 3.0 (Creative Commons Attribution license).
+//
+
+static const rgb_color_t dog_palette[] =
+{
+	0x302020ff,
+	0x944921ff,
+	0x000000ff,
+	0x844119ff,
+	0x311800ff,
+	0x4A2400ff,
+	0x633119ff,
+};
+
+
+static const char *dog_image_text[] =
+{
+	"       aaaa                                 ",
+	"      abbbba                                ",
+	"     abbbbbba                               ",
+	" aaaabcbbbbbda                              ",
+	"aeedbbbfbbbbda                              ",
+	"aegdddbbdbbdbbaaaaaaaaaaaaaaaaa           a ",
+	"affggddbgddgbccceeeeeeeeeeeeeeeaa        aba",
+	" affgggdfggfccceeeeeeeeeeeeeefffgaaa   aaba ",
+	"  afffaafgecccefffffffffffffffggggddaaabbba ",
+	"   aaa  aeeccggggffffffffffffggddddbbbbbaa  ",
+	"         accbdddggfffffffffffggdbbbbbbba    ",
+	"          aabbdbddgfffffffffggddbaaaaaa     ",
+	"            abbbbdddfffffffggdbbba          ",
+	"            abbbbbbdddddddddddbbba          ",
+	"           aeebbbbbbbbaaaabbbbbbbba         ",
+	"           aeebbbbbaaa    aeebbbbbba        ",
+	"          afebbbbaa       affeebbbba        ",
+	"         agfbbbaa         aggffabbbba       ",
+	"        agfebba           aggggaabbba       ",
+	"      aadgfabba            addda abba       ",
+	"     abbddaabbbaa           adddaabba       ",
+	"    abbbba  abbbba          adbbaabba       ",
+	"     aaaa    abbba         abbba  abba      ",
+	"              aaa         abbba   abba      ",
+	"                         abbba   abbba      ",
+	"                          aaa     aaa       "
+};
+
+
+Img_c * IM_CreateDogSprite()
+{
+	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
 }
 
 //--- editor settings ---

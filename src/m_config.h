@@ -38,9 +38,7 @@ extern bool auto_load_recent;
 extern bool begin_maximized;
 extern bool map_scroll_bars;
 
-extern bool digits_set_zoom;
 extern bool leave_offsets_alone;
-extern bool mouse_wheel_scrolls_map;
 extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
@@ -54,17 +52,18 @@ extern rgb_color_t gui_custom_bg;
 extern rgb_color_t gui_custom_ig;
 extern rgb_color_t gui_custom_fg;
 
-extern int  multi_select_modifier;
+extern int panel_gamma;
+
 extern int  minimum_drag_pixels;
 extern int  new_sector_size;
-extern bool easier_drawing_mode;
 extern int  sector_render_default;
+extern int   thing_render_default;
 
-extern int  default_grid_size;
-extern bool default_grid_snap;
-extern int  default_grid_mode;
+extern int  grid_style;
+extern int  grid_default_mode;
+extern bool grid_default_snap;
+extern int  grid_default_size;
 extern bool grid_hide_in_free_mode;
-extern int  grid_toggle_type;
 
 extern rgb_color_t dotty_axis_col;
 extern rgb_color_t dotty_major_col;
@@ -95,9 +94,17 @@ extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
-extern bool glbsp_fast;
-extern bool glbsp_verbose;
-extern bool glbsp_warn;
+extern rgb_color_t transparent_col;
+
+extern bool bsp_on_save;
+extern bool bsp_fast;
+extern bool bsp_warnings;
+extern int  bsp_split_factor;
+
+extern bool bsp_gl_nodes;
+extern bool bsp_force_v5;
+extern bool bsp_force_zdoom;
+extern bool bsp_compressed;
 
 
 /* ==== FUNCTIONS ==================== */
@@ -105,11 +112,12 @@ extern bool glbsp_warn;
 int M_ParseConfigFile();
 int M_WriteConfigFile();
 
-int M_ParseEnvironmentVars();
-int M_ParseCommandLine(int argc, const char *const *argv, int pass);
+int M_ParseDefaultConfigFile();
 
-void dump_parameters (FILE *fp);
-void dump_command_line_options (FILE *fp);
+void M_ParseEnvironmentVars();
+void M_ParseCommandLine(int argc, const char *const *argv, int pass);
+
+void M_PrintCommandLineOptions(FILE *fp);
 
 
 // returns number of tokens, zero for comment, negative on error

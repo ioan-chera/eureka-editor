@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -30,16 +30,17 @@
 #include <list>
 #include <string>
 
-#include "e_basis.h"
-#include "levels.h"
 #include "lib_adler.h"
+
+#include "e_basis.h"
+#include "e_main.h"
 #include "m_strings.h"
 
 #include "m_game.h"  // g_default_xxx
 
 // need these for the XXX_Notify() prototypes
 #include "e_cutpaste.h"
-#include "objects.h"
+#include "e_objects.h"
 
 
 std::vector<Thing *>   Things;
@@ -57,11 +58,9 @@ int default_ceil_h		= 128;
 int default_light_level	= 176;
 int default_thing		= 2001;
 
+const char * default_wall_tex	= "GRAY1";
 const char * default_floor_tex	= "FLAT1";
 const char * default_ceil_tex	= "FLAT1";
-const char * default_lower_tex	= "STARTAN3";
-const char * default_mid_tex	= "STARTAN3";
-const char * default_upper_tex	= "STARTAN3";
 
 
 static bool did_make_changes;
@@ -87,6 +86,23 @@ int NumObjects(obj_type_e type)
 }
 
 
+const char * NameForObjectType(obj_type_e type, bool plural)
+{
+	switch (type)
+	{
+		case OBJ_THINGS:   return plural ? "things"   : "thing";
+		case OBJ_LINEDEFS: return plural ? "linedefs" : "linedef";
+		case OBJ_SIDEDEFS: return plural ? "sidedefs" : "sidedef";
+		case OBJ_VERTICES: return plural ? "vertices" : "vertex";
+		case OBJ_SECTORS:  return plural ? "sectors"  : "sector";
+
+		default:
+			BugError("NameForObjectType: bad type: %d\n", (int)type);
+			return "XXX"; /* NOT REACHED */
+	}
+}
+
+
 static void DoClearChangeStatus()
 {
 	did_make_changes = false;
@@ -100,7 +116,10 @@ static void DoClearChangeStatus()
 static void DoProcessChangeStatus()
 {
 	if (did_make_changes)
-		MarkChanges();
+	{
+		MadeChanges = 1;
+		RedrawMap();
+	}
 
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
@@ -166,15 +185,18 @@ const char * SideDef::LowerTex() const
 	return basis_strtab.get(lower_tex);
 }
 
-void SideDef::SetDefaults(bool two_sided)
+void SideDef::SetDefaults(bool two_sided, int new_tex)
 {
-	lower_tex = BA_InternaliseString(default_lower_tex);
-	upper_tex = BA_InternaliseString(default_upper_tex);
+	if (new_tex < 0)
+		new_tex = BA_InternaliseString(default_wall_tex);
+
+	lower_tex = new_tex;
+	upper_tex = new_tex;
 
 	if (two_sided)
 		mid_tex = BA_InternaliseString("-");
 	else
-		mid_tex = BA_InternaliseString(default_mid_tex);
+		mid_tex = new_tex;
 }
 
 
@@ -410,7 +432,7 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 			break;
 
 		default:
-			BugError("RawInsert: bad objtype %d", (int) objtype);
+			BugError("RawInsert: bad objtype %d\n", (int)objtype);
 	}
 }
 
@@ -423,7 +445,7 @@ static int * RawDeleteLineDef(int objnum)
 
 	for (int n = objnum ; n < NumLineDefs-1 ; n++)
 		LineDefs[n] = LineDefs[n + 1];
-	
+
 	LineDefs.pop_back();
 
 	return result;
@@ -538,12 +560,12 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 
 		case OBJ_SIDEDEFS:
 			return RawDeleteSideDef(objnum);
-		
+
 		case OBJ_LINEDEFS:
 			return RawDeleteLineDef(objnum);
 
 		default:
-			BugError("RawDelete: bad objtype %d", (int) objtype);
+			BugError("RawDelete: bad objtype %d\n", (int)objtype);
 			return NULL; /* NOT REACHED */
 	}
 }
@@ -561,7 +583,7 @@ static void DeleteFinally(obj_type_e objtype, int *ptr)
 		case OBJ_LINEDEFS: delete (LineDef *) ptr; break;
 
 		default:
-			BugError("DeleteFinally: bad objtype %d", (int) objtype);
+			BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
 	}
 }
 
@@ -587,13 +609,13 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 		case OBJ_SIDEDEFS:
 			pos = (int*) SideDefs[objnum];
 			break;
-		
+
 		case OBJ_LINEDEFS:
 			pos = (int*) LineDefs[objnum];
 			break;
 
 		default:
-			BugError("RawGetBase: bad objtype %d", (int) objtype);
+			BugError("RawGetBase: bad objtype %d\n", (int)objtype);
 			return; /* NOT REACHED */
 	}
 
@@ -636,7 +658,7 @@ public:
 	int value;
 
 public:
-	edit_op_c() : action(0), objtype(0), field(0), objnum(0), ptr(NULL), value(0)
+	edit_op_c() : action(0), objtype(0), field(0), _pad(0), objnum(0), ptr(NULL), value(0)
 	{ }
 
 	~edit_op_c()
@@ -662,7 +684,7 @@ public:
 				return;
 
 			default:
-				BugError("edit_op_c::Apply");
+				BugError("edit_op_c::Apply\n");
 		}
 	}
 
@@ -682,6 +704,8 @@ public:
 };
 
 
+#define MAX_UNDO_MESSAGE  200
+
 class undo_group_c
 {
 private:
@@ -689,9 +713,13 @@ private:
 
 	int dir;
 
+	char message[MAX_UNDO_MESSAGE];
+
 public:
 	undo_group_c() : ops(), dir(+1)
-	{ }
+	{
+		strcpy(message, "[something]");
+	}
 
 	~undo_group_c()
 	{
@@ -731,6 +759,17 @@ public:
 
 		// reverse the order for next time
 		dir = -dir;
+	}
+
+	void SetMsg(const char *buf)
+	{
+		strncpy(message, buf, sizeof(message));
+		message[sizeof(message) - 1] = 0;
+	}
+
+	const char *GetMsg() const
+	{
+		return message;
 	}
 };
 
@@ -774,6 +813,7 @@ void BA_Begin()
 	DoClearChangeStatus();
 }
 
+
 void BA_End()
 {
 	if (! cur_group)
@@ -781,10 +821,10 @@ void BA_End()
 
 	cur_group->End();
 
-	if (! cur_group->Empty())
-	{
+	if (cur_group->Empty())
+		delete cur_group;
+	else
 		undo_history.push_front(cur_group);
-	}
 
 	cur_group = NULL;
 
@@ -810,6 +850,45 @@ void BA_Abort(bool keep_changes)
 	did_make_changes  = false;
 
 	DoProcessChangeStatus();
+}
+
+
+void BA_Message(const char *msg, ...)
+{
+	SYS_ASSERT(msg);
+	SYS_ASSERT(cur_group);
+
+	va_list arg_ptr;
+
+	char buffer[MAX_UNDO_MESSAGE];
+
+	va_start(arg_ptr, msg);
+	vsnprintf(buffer, MAX_UNDO_MESSAGE, msg, arg_ptr);
+	va_end(arg_ptr);
+
+	buffer[MAX_UNDO_MESSAGE-1] = 0;
+
+	cur_group->SetMsg(buffer);
+}
+
+
+void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix)
+{
+	// utility for creating messages like "moved 3 things"
+
+	int total = list->count_obj();
+
+	if (total < 1)  // oops
+		return;
+
+	if (total == 1)
+	{
+		BA_Message("%s %s #%d%s", verb, NameForObjectType(list->what_type()), list->find_first(), suffix);
+	}
+	else
+	{
+		BA_Message("%s %d %s%s", verb, total, NameForObjectType(list->what_type(), true /* plural */), suffix);
+	}
 }
 
 
@@ -849,7 +928,8 @@ int BA_New(obj_type_e type)
 			op.ptr = (int*) new Sector;
 			break;
 
-		default: BugError("BA_New");
+		default:
+			BugError("BA_New: unknown type\n");
 	}
 
 	SYS_ASSERT(cur_group);
@@ -946,6 +1026,8 @@ bool BA_Undo()
 	undo_group_c * grp = undo_history.front();
 	undo_history.pop_front();
 
+	Status_Set("Undo: %s", grp->GetMsg());
+
 	grp->ReApply();
 
 	redo_future.push_front(grp);
@@ -958,11 +1040,13 @@ bool BA_Redo()
 {
 	if (redo_future.empty())
 		return false;
-	
+
 	DoClearChangeStatus();
 
 	undo_group_c * grp = redo_future.front();
 	redo_future.pop_front();
+
+	Status_Set("Redo: %s", grp->GetMsg());
 
 	grp->ReApply();
 

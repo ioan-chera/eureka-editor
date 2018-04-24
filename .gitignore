@@ -9,6 +9,7 @@ obj_win32/*.o
 obj_win32/glbsp/*.o
 
 _work
+WIP.txt
 
 # OS X stuff
 .DS_Store
@@ -18,3 +19,6 @@ _work
 .Trashes
 ehthumbs.db
 Thumbs.db
+osx/Eureka Doom Editor.xcodeproj/project.xcworkspace/xcuserdata
+osx/Eureka Doom Editor.xcodeproj/xcuserdata
+osx/staticlib

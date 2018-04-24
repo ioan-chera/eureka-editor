@@ -21,9 +21,9 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
 #include "e_checks.h"
 #include "e_linedef.h"
+#include "e_main.h"
 #include "e_things.h"
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -54,7 +54,7 @@ public:
 //
 // UI_LineBox Constructor
 //
-UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) : 
+UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -73,12 +73,14 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+58, Y, 65, 24, "Type: ");
+	type = new UI_DynInput(X+58, Y, 75, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	type->type(FL_INT_INPUT);
 
-	choose = new Fl_Button(X+W/2+15, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2-5, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	gen = new Fl_Button(X+W-60, Y, 50, 24, "Gen");
@@ -150,7 +152,7 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
 
-	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block walk");
+	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "impassible");
 	f_walk->labelsize(12);
 	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
 
@@ -214,15 +216,15 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 // UI_LineBox Destructor
 //
 UI_LineBox::~UI_LineBox()
-{
-}
+{ }
 
 
 void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 {
 	UI_LineBox *box = (UI_LineBox *)data;
 
-	int new_type = atoi(box->type->value());
+	// support hexadecimal
+	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
 	selection_c list;
 	selection_iterator_c it;
@@ -236,11 +238,38 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_TYPE, new_type);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 
 	// update description
 	box->UpdateField(LineDef::F_TYPE);
+}
+
+
+void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	// support hexadecimal
+	int new_type = (int)strtol(box->type->value(), NULL, 0);
+
+	const char *gen_desc = box->GeneralizedDesc(new_type);
+
+	if (gen_desc)
+	{
+		box->desc->value(gen_desc);
+	}
+	else
+	{
+		const linetype_t *info = M_GetLineType(new_type);
+		box->desc->value(info->desc);
+	}
+
+	main_win->browser->UpdateGenType(new_type);
 }
 
 
@@ -374,6 +403,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 	}
 
@@ -398,6 +428,149 @@ void UI_LineBox::SetLineType(int new_type)
 
 	type->value(buffer);
 	type->do_callback();
+}
+
+
+void UI_LineBox::CB_Copy()
+{
+	// determine which sidedef texture to grab from
+	const char *name = NULL;
+
+	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
+
+	for (int pass = 0 ; pass < 2 ; pass++)
+	{
+		UI_SideBox *SD = (pass == 0) ? front : back;
+
+		int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
+
+		for (int b = 0 ; b < 3 ; b++)
+		{
+			if ((sel_pics & (1 << b)) == 0)
+				continue;
+
+			const char *b_name = (b == 0) ? SD->l_tex->value() :
+								 (b == 1) ? SD->u_tex->value() :
+											SD->r_tex->value();
+			SYS_ASSERT(b_name);
+
+			if (name && y_stricmp(name, b_name) != 0)
+			{
+				Beep("multiple textures");
+				return;
+			}
+
+			name = b_name;
+		}
+	}
+
+	r_clipboard.SetTex(name);
+
+	Status_Set("Copied %s", name);
+}
+
+
+void UI_LineBox::CB_Paste(int new_tex)
+{
+	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
+
+	// iterate over selected linedefs
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+
+		for (int pass = 0 ; pass < 2 ; pass++)
+		{
+			int sd = (pass == 0) ? L->right : L->left;
+
+			if (sd < 0)
+				continue;
+
+			UI_SideBox *SD = (pass == 0) ? front : back;
+
+			int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
+
+			if (L->TwoSided())
+			{
+				if (sel_pics & 1)
+					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+
+				if (sel_pics & 2)
+					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+
+				if (sel_pics & 4)
+					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+			}
+			else  // one-sided line
+			{
+				if (sel_pics & 1)
+					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+			}
+		}
+	}
+
+	BA_Message("Pasted %s", BA_GetString(new_tex));
+	BA_End();
+
+	UpdateField();
+	UpdateSides();
+
+	redraw();
+}
+
+
+bool UI_LineBox::ClipboardOp(char what)
+{
+	if (obj < 0)
+		return false;
+
+	if (front->GetSelectedPics() == 0 && front->GetHighlightedPics() == 0 &&
+		 back->GetSelectedPics() == 0 &&  back->GetHighlightedPics() == 0)
+	{
+		return false;
+	}
+
+	switch (what)
+	{
+		case 'c':
+			CB_Copy();
+			break;
+
+		case 'v':
+			CB_Paste(r_clipboard.GetTexNum());
+			break;
+
+		case 'x':	// Cut
+			CB_Paste(BA_InternaliseString(default_wall_tex));
+			break;
+
+		case 'd': // Delete
+			CB_Paste(BA_InternaliseString("-"));
+			break;
+	}
+
+	return true;
+}
+
+
+void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'T')
+	{
+		SetTexture(name, e_state);
+	}
+	else if (kind == 'L')
+	{
+		SetLineType(number);
+	}
 }
 
 
@@ -426,7 +599,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			const LineDef *L = LineDefs[*it];
@@ -436,6 +609,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
 
+		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -458,12 +632,13 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-	
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
+		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }
@@ -475,7 +650,8 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 
 	int new_len = atoi(box->length->value());
 
-	new_len = CLAMP(1, new_len, 32768);
+	// negative values are allowed, it moves the start vertex
+	new_len = CLAMP(-32768, new_len, 32768);
 
 	LineDefs_SetLength(new_len);
 }
@@ -487,22 +663,13 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		int cur_type = atoi(box->type->value());
-
-		if ((game_info.gen_types && is_genline(cur_type)) ||
-			Fl::event_button() == 3)
-		{
-			main_win->ShowBrowser('G');
-			return;
-		}
-
-		main_win->ShowBrowser('L');
+		main_win->BrowserMode('L');
 		return;
 	}
 
 	if (w == box->gen)
 	{
-		main_win->ShowBrowser('G');
+		main_win->BrowserMode('G');
 		return;
 	}
 }
@@ -606,13 +773,11 @@ void UI_LineBox::UpdateField(int field)
 			if (gen_desc)
 			{
 				desc->value(gen_desc);
-				choose->label("Edit");
 			}
 			else
 			{
 				const linetype_t *info = M_GetLineType(type_num);
 				desc->value(info->desc);
-				choose->label("Choose");
 			}
 
 			main_win->browser->UpdateGenType(type_num);
@@ -670,12 +835,7 @@ void UI_LineBox::CalcLength()
 
 	char buffer[300];
 
-	if (int(len_f) >= 10000)
-		sprintf(buffer, "%1.0f", len_f);
-	else if (int(len_f) >= 100)
-		sprintf(buffer, "%1.1f", len_f);
-	else
-		sprintf(buffer, "%1.2f", len_f);
+	sprintf(buffer, "%1.0f", len_f);
 
 	length->value(buffer);
 }
@@ -769,7 +929,7 @@ int UI_LineBox::SolidMask(int side)
 
 	if (L->left < 0 && L->right < 0)
 		return 0;
-	
+
 	if (L->left < 0 || L->right < 0)
 		return SOLID_MID;
 
@@ -784,7 +944,7 @@ int UI_LineBox::SolidMask(int side)
 	if (right->floorh < left->floorh)
 		mask |= SOLID_LOWER;
 
-	// upper texture of '-' is OK between two skies
+	// upper texture of "-" is OK between two skies
 	bool two_skies = is_sky(right->CeilTex()) && is_sky(left->CeilTex());
 
 	if (right-> ceilh > left-> ceilh && !two_skies)
@@ -827,11 +987,10 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
-#if 0
+
 		if (game_info.gen_types)
 			gen->show();
 		else
-#endif
 			gen->hide();
 	}
 

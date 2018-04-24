@@ -27,7 +27,7 @@
 #include "main.h"
 
 #include "m_select.h"
-#include "objects.h"
+#include "e_objects.h"
 
 
 //#define NEED_SLOW_CLEAR
@@ -60,7 +60,7 @@ bool selection_c::empty() const
 {
 	if (bv)
 		return b_count == 0;
-	
+
 	return count == 0;
 }
 
@@ -69,7 +69,7 @@ int selection_c::count_obj() const
 {
 	if (! bv)
 		return count;
-	
+
 	return b_count;  // hmmm, not so slow after all
 }
 
@@ -131,7 +131,7 @@ void selection_c::clear(int n)
 		for (i = 0 ; i < count ; i++)
 			if (objs[i] == n)
 				break;
-		
+
 		if (i >= count)
 			return;  // not present
 
@@ -363,7 +363,7 @@ void selection_c::begin(selection_iterator_c *it) const
 {
 	it->sel = this;
 	it->pos = 0;
-	
+
 	if (bv)
 	{
 		// for bit vector, need to find the first one bit
@@ -375,8 +375,18 @@ void selection_c::begin(selection_iterator_c *it) const
 }
 
 
+selection_iterator_c::selection_iterator_c()
+{
+	// dummy values -- cannot use the iterator without begin() above
+	sel = NULL;
+	pos = -777777;
+}
+
+
 bool selection_iterator_c::at_end() const
 {
+	SYS_ASSERT(sel);
+
 	if (sel->bv)
 		return (pos >= sel->bv->size());
 	else
@@ -386,6 +396,8 @@ bool selection_iterator_c::at_end() const
 
 int selection_iterator_c::operator* () const
 {
+	SYS_ASSERT(sel);
+
 	if (sel->bv)
 		return pos;
 	else
@@ -395,6 +407,8 @@ int selection_iterator_c::operator* () const
 
 selection_iterator_c& selection_iterator_c::operator++ ()
 {
+	SYS_ASSERT(sel);
+
 	pos++;
 
 	if (sel->bv)

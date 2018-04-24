@@ -25,6 +25,9 @@
 #include <string>
 
 
+class Browser_Button;
+
+
 class Browser_Item : public Fl_Group
 {
 private:
@@ -39,7 +42,7 @@ public:
 
 	int recent_idx;
 
-	Fl_Repeat_Button * button;
+	Browser_Button * button;
 
 	UI_Pic *pic;
 
@@ -56,6 +59,8 @@ public:
 	             int pic_w, int pic_h, UI_Pic *_pic);
 
 	virtual ~Browser_Item();
+
+	bool MatchName(const char *name) const;
 
 public:
 	static void texture_callback(Fl_Widget *w, void *data);
@@ -104,6 +109,10 @@ public:
 
 	char GetKind() const { return kind; }
 
+	// ensure the given texture or type/special is visible
+	void JumpToTex(const char *tex_name);
+	void JumpToValue(int value);
+
 	void RecentUpdate();
 
 	bool ParseUser(const char ** tokens, int num_tok);
@@ -129,7 +138,9 @@ private:
 
 	bool CategoryByLetter(char letter);
 
-	static void filter_callback(Fl_Widget *w, void *data);
+	static void category_callback(Fl_Widget *w, void *data);
+	static void   search_callback(Fl_Widget *w, void *data);
+
 	static void   hide_callback(Fl_Widget *w, void *data);
 	static void  repop_callback(Fl_Widget *w, void *data);
 	static void   sort_callback(Fl_Widget *w, void *data);
@@ -193,7 +204,7 @@ private:
 	{
 		ACTIVE_GENERALIZED = 5
 	};
- 
+
  	// currently active browser box (may be hidden though)
 	int active;
 
@@ -206,8 +217,13 @@ public:
 
 	void SetActive(int new_active);
 
+	char GetMode() const;
 	void ChangeMode(char new_mode);
 	void NewEditMode(obj_type_e edit_mode);
+
+	// ensure the given texture or type/special is visible
+	void JumpToTex(const char *tex_name);
+	void JumpToValue(int value);
 
 	// dir is +1 or -1, or 0 to set the category to "ALL"
 	void CycleCategory(int dir);

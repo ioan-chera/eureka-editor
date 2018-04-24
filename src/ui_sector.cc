@@ -21,12 +21,14 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
 #include "e_checks.h"
+#include "e_main.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 // config items
@@ -42,14 +44,14 @@ int light_bump_large  = 64;
 //TODO make these configurable
 int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 {
-	0, 72, 96, 128, 192, 256
+	0, 64, 96, 128, 192, 256
 };
 
 
 //
 // UI_SectorBox Constructor
 //
-UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) : 
+UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
     obj(-1), count(0)
 {
@@ -68,12 +70,14 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += which->h() + 4;
 
 
-	type = new Fl_Int_Input(X+70, Y, 64, 24, "Type: ");
+	type = new UI_DynInput(X+70, Y, 70, 24, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
+	type->callback2(dyntype_callback, this);
+	type->type(FL_INT_INPUT);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
 	choose->callback(button_callback, this);
 
 	Y += type->h() + 4;
@@ -121,9 +125,10 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += 10;
 
 
-	c_tex = new Fl_Input(X+70, Y, 108, 24, "Ceiling: ");
+	c_tex = new UI_DynInput(X+70, Y-5, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(tex_callback, this);
+	c_tex->callback2(dyntex_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += c_tex->h() + 3;
@@ -167,17 +172,18 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new Fl_Input(X+70, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_DynInput(X+70, Y+5, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(tex_callback, this);
+	f_tex->callback2(dyntex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y += f_tex->h() + 28;
+	Y += f_tex->h() + 33;
 
 
 	headroom = new Fl_Int_Input(X+100, Y, 56, 24, "Headroom: ");
 	headroom->align(FL_ALIGN_LEFT);
-	headroom->callback(room_callback, this);
+	headroom->callback(headroom_callback, this);
 	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
@@ -187,7 +193,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 
 		hd_buttons[i] = new Fl_Button(hx, hy+1, 45, 22);
 		hd_buttons[i]->copy_label(Int_TmpStr(headroom_presets[i]));
-		hd_buttons[i]->callback(room_callback, this);
+		hd_buttons[i]->callback(headroom_callback, this);
 	}
 
 	Y += headroom->h() + 50;
@@ -250,7 +256,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			if (w == box->floor_h)
@@ -258,6 +264,11 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 			else
 				BA_ChangeSEC(*it, Sector::F_CEILH, c_h);
 		}
+
+		if (w == box->floor_h)
+			BA_MessageForSel("edited floor of", &list);
+		else
+			BA_MessageForSel("edited ceiling of", &list);
 
 		BA_End();
 
@@ -267,7 +278,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	}
 }
 
-void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
+void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
@@ -288,7 +299,7 @@ void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
 	if (GetCurrentObjects(&list))
 	{
 		BA_Begin();
-		
+
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			int new_h = Sectors[*it]->floorh + room;
@@ -298,6 +309,7 @@ void UI_SectorBox::room_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
 		}
 
+		BA_MessageForSel("edited headroom of", &list);
 		BA_End();
 
 		box->UpdateField();
@@ -331,10 +343,11 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
-			main_win->ShowBrowser('F');
+			main_win->BrowserMode('F');
 		return;
 	}
 
@@ -344,9 +357,13 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	{
 		new_tex = BA_InternaliseString(is_floor ? default_floor_tex : default_ceil_tex);
 	}
+	else if (is_floor)
+	{
+		new_tex = BA_InternaliseString(NormalizeTex(box->f_tex->value()));
+	}
 	else
 	{
-		new_tex = FlatFromWidget(is_floor ? box->f_tex : box->c_tex);
+		new_tex = BA_InternaliseString(NormalizeTex(box->c_tex->value()));
 	}
 
 change_it:
@@ -365,9 +382,30 @@ change_it:
 				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
 		}
 
+		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 
 		box->UpdateField();
+	}
+}
+
+
+void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
+{
+	// change picture to match the input, BUT does not change the map
+
+	UI_SectorBox *box = (UI_SectorBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	if (w == box->f_tex)
+	{
+		box->f_pic->GetFlat(box->f_tex->value());
+	}
+	else if (w == box->c_tex)
+	{
+		box->c_pic->GetFlat(box->c_tex->value());
 	}
 }
 
@@ -452,11 +490,32 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
 
+		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 
 	// update the description
 	box->UpdateField(Sector::F_TYPE);
+}
+
+
+void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
+{
+	UI_SectorBox *box = (UI_SectorBox *)data;
+
+	if (box->obj < 0)
+		return;
+
+	int value = atoi(box->type->value());
+
+	if (game_info.gen_types)
+	{
+		value &= BoomSF_TypeMask;
+	}
+
+	const sectortype_t *info = M_GetSectorType(value);
+
+	box->desc->value(info->desc);
 }
 
 
@@ -499,6 +558,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 			BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 		}
 
+		BA_MessageForSel("edited light of", &list);
 		BA_End();
 	}
 }
@@ -522,62 +582,56 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		main_win->ShowBrowser('S');
+		main_win->BrowserMode('S');
 		return;
 	}
 
-	int lt_step;
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	if (Fl::event_shift())
+	int lt_step = light_bump_medium;
+
+	if (mod & MOD_SHIFT)
 		lt_step = light_bump_small;
-	else if (Fl::event_ctrl())
+	else if (mod & MOD_COMMAND)
 		lt_step = light_bump_large;
-	else
-		lt_step = light_bump_medium;
 
 	if (w == box->lt_up)
 	{
-		CMD_AdjustLight(+lt_step);
+		SectorsAdjustLight(+lt_step);
 		return;
 	}
 	else if (w == box->lt_down)
 	{
-		CMD_AdjustLight(-lt_step);
+		SectorsAdjustLight(-lt_step);
 		return;
 	}
 
-	int mv_step;
+	int mv_step = floor_bump_medium;
 
-	if (Fl::event_shift())
+	if (mod & MOD_SHIFT)
 		mv_step = floor_bump_small;
-	else if (Fl::event_ctrl())
+	else if (mod & MOD_COMMAND)
 		mv_step = floor_bump_large;
-	else
-		mv_step = floor_bump_medium;
 
 	if (w == box->ce_up)
 	{
-		EXEC_Param[0] = Int_TmpStr(+mv_step);
-		SEC_Ceil();
+		ExecuteCommand("SEC_Ceil", Int_TmpStr(+mv_step));
 		return;
 	}
 	else if (w == box->ce_down)
 	{
-		EXEC_Param[0] = Int_TmpStr(-mv_step);
-		SEC_Ceil();
+		ExecuteCommand("SEC_Ceil", Int_TmpStr(-mv_step));
 		return;
 	}
 
 	if (w == box->fl_up)
 	{
-		EXEC_Param[0] = Int_TmpStr(+mv_step);
-		SEC_Floor();
+		ExecuteCommand("SEC_Floor", Int_TmpStr(+mv_step));
 		return;
 	}
 	else if (w == box->fl_down)
 	{
-		EXEC_Param[0] = Int_TmpStr(-mv_step);
-		SEC_Floor();
+		ExecuteCommand("SEC_Floor", Int_TmpStr(-mv_step));
 		return;
 	}
 }
@@ -631,6 +685,9 @@ void UI_SectorBox::UpdateField(int field)
 
 			f_pic->GetFlat(Sectors[obj]->FloorTex());
 			c_pic->GetFlat(Sectors[obj]->CeilTex());
+
+			f_pic->AllowHighlight(true);
+			c_pic->AllowHighlight(true);
 		}
 		else
 		{
@@ -639,6 +696,9 @@ void UI_SectorBox::UpdateField(int field)
 
 			f_pic->Clear();
 			c_pic->Clear();
+
+			f_pic->AllowHighlight(false);
+			c_pic->AllowHighlight(false);
 		}
 	}
 
@@ -697,6 +757,145 @@ int UI_SectorBox::GetSelectedPics() const
 			(c_pic->Selected() ? 2 : 0);
 }
 
+int UI_SectorBox::GetHighlightedPics() const
+{
+	return	(f_pic->Highlighted() ? 1 : 0) |
+			(c_pic->Highlighted() ? 2 : 0);
+}
+
+
+void UI_SectorBox::CB_Copy()
+{
+	if (GetSelectedPics() == 3)
+	{
+		Beep("multiple textures");
+		return;
+	}
+
+	const char *name = NULL;
+
+	if (GetSelectedPics() == 2 ||
+		(GetSelectedPics() == 0 && c_pic->Highlighted()))
+	{
+		name = c_tex->value();
+	}
+	else
+	{
+		name = f_tex->value();
+	}
+
+	r_clipboard.SetFlat(name);
+
+	Status_Set("Copied %s", name);
+}
+
+
+void UI_SectorBox::CB_Paste(int new_tex)
+{
+	int sel_pics = GetSelectedPics();
+
+	if (sel_pics == 0)
+		sel_pics = GetHighlightedPics();
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+		if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
+	}
+
+	BA_Message("Pasted %s", BA_GetString(new_tex));
+	BA_End();
+
+	UpdateField();
+}
+
+
+void UI_SectorBox::CB_Cut()
+{
+	int sel_pics = GetSelectedPics();
+
+	if (sel_pics == 0)
+		sel_pics = GetHighlightedPics();
+
+	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+
+	selection_c list;
+	selection_iterator_c it;
+
+	if (! GetCurrentObjects(&list))
+		return;
+
+	BA_Begin();
+
+	for (list.begin(&it) ; !it.at_end() ; ++it)
+	{
+		if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
+		if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
+	}
+
+	BA_MessageForSel("cut texture on", &list);
+	BA_End();
+
+	UpdateField();
+}
+
+
+bool UI_SectorBox::ClipboardOp(char what)
+{
+	if (obj < 0)
+		return false;
+
+	if (!  (f_pic->Selected() || f_pic->Highlighted() ||
+			c_pic->Selected() || c_pic->Highlighted()))
+	{
+		return false;
+	}
+
+	switch (what)
+	{
+		case 'c':
+			CB_Copy();
+			break;
+
+		case 'v':
+			CB_Paste(r_clipboard.GetFlatNum());
+			break;
+
+		case 'x':
+			CB_Cut();
+			break;
+
+		case 'd':
+			// we abuse the delete function to turn sector ceilings into sky
+			CB_Paste(BA_InternaliseString(game_info.sky_flat));
+			break;
+	}
+
+	return true;
+}
+
+
+void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	if (kind == 'F')
+	{
+		SetFlat(name, e_state);
+	}
+	else if (kind == 'S')
+	{
+		SetSectorType(number);
+	}
+}
+
 
 void UI_SectorBox::UnselectPics()
 {
@@ -706,63 +905,6 @@ void UI_SectorBox::UnselectPics()
 
 
 // FIXME: make a method of Sector class
-void UI_SectorBox::AdjustHeight(s16_t *h, int delta)
-{
-	// prevent overflow
-	if (delta > 0 && (int(*h) + delta) > 32767)
-	{
-		*h = 32767; return;
-	}
-	else if (delta < 0 && (int(*h) + delta) < -32767)
-	{
-		*h = -32767; return;
-	}
-
-	*h = *h + delta;
-}
-
-
-// FIXME: make a method of Sector class
-void UI_SectorBox::AdjustLight(s16_t *L, int delta)
-{
-	if (abs(delta) > 16)
-	{
-		*L = (delta > 0) ? 255 : 0;
-		return;
-	}
-
-	if (abs(delta) < 4)
-		*L += delta;
-	else
-	{
-		if (delta > 0)
-			*L = (*L | 15) + 1;
-		else
-			*L = (*L - 1) & ~15;
-	}
-
-	if (*L < 0)
-		*L = 0;
-	else if (*L > 255)
-		*L = 255;
-}
-
-
-int UI_SectorBox::FlatFromWidget(Fl_Input *w)
-{
-	char name[WAD_FLAT_NAME+1];
-
-	memset(name, 0, sizeof(name));
-
-	strncpy(name, w->value(), WAD_FLAT_NAME);
-
-	for (int i = 0 ; i < WAD_FLAT_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	return BA_InternaliseString(name);
-}
-
-
 void UI_SectorBox::UpdateTotal()
 {
 	which->SetTotal(NumSectors);

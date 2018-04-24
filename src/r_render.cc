@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  3D RENDERING 
+//  3D RENDERING
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -26,22 +26,19 @@
 
 #include "im_color.h"
 #include "im_img.h"
+#include "e_hover.h"
 #include "e_linedef.h"
+#include "e_main.h"
 #include "e_things.h"
-#include "editloop.h"
+#include "e_objects.h"
 #include "m_game.h"
-#include "objects.h"
-#include "x_hover.h"
-#include "w_loadpic.h"
 #include "w_rawdef.h"
-
-#include "r_render.h"
-
-#include "w_flats.h"
-#include "w_sprite.h"
+#include "w_loadpic.h"
 #include "w_texture.h"
 
-#include "editloop.h"
+#include "m_events.h"
+#include "r_render.h"
+
 #include "ui_window.h"
 
 
@@ -52,59 +49,227 @@
 
 
 // config items
-int  render_pixel_aspect = 100;   // 100 * width / height
-
 bool render_high_detail    = false;
 bool render_lock_gravity   = false;
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
 
+// in original DOOM pixels were 20% taller than wide, giving 0.83
+// as the pixel aspect ratio.
+int  render_pixel_aspect = 83;  //  100 * width / height
 
-struct highlight_3D_info_t
+rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
+
+
+struct r_editing_info_t
 {
 public:
-	int line;    // -1 for none
-	int sector;  // -1 for none
-	int side;    // SIDE_XXX, or -1=floor +1=ceiling
-	query_part_e part;
+	// current highlighted wotsit
+	Obj3d_t hl;
+
+	// current selection
+	std::vector< Obj3d_t > sel;
+
+	obj3d_type_e sel_type;  // valid when sel.size() > 0
+
+	// a remembered highlight (for operation menu)
+	Obj3d_t saved_hl;
+
+	// state for adjusting offsets via the mouse
+	std::vector<int> adjust_sides;
+	std::vector<int> adjust_lines;
+
+	float adjust_dx, adjust_dx_factor;
+	float adjust_dy, adjust_dy_factor;
+
+	std::vector<int> saved_x_offsets;
+	std::vector<int> saved_y_offsets;
 
 public:
-	highlight_3D_info_t() : line(-1), sector(-1), side(0), part(QRP_Lower)
+	r_editing_info_t() :
+		hl(),
+		sel(),
+		sel_type(OB3D_Thing),
+		adjust_sides(), adjust_lines(),
+		saved_x_offsets(), saved_y_offsets()
 	{ }
 
-	highlight_3D_info_t(const highlight_3D_info_t& other) :
-		line(other.line), sector(other.sector),
-		side(other.side),   part(other.part)
+	~r_editing_info_t()
 	{ }
 
-	void Clear()
+public:
+	bool SelectIsCompat(obj3d_type_e new_type) const
 	{
-		line = sector = -1;
-		side = 0;
-		part = QRP_Lower;
+		return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
+			   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
+			   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
 	}
 
-	bool isSame(const highlight_3D_info_t& other) const
+	// this needed since we allow invalid objects in sel
+	bool SelectEmpty() const
 	{
-		return	(line == other.line) && (sector == other.sector) &&
-				(side == other.side) && (part == other.part);
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k].valid())
+				return false;
+
+		return true;
+	}
+
+	bool SelectGet(const Obj3d_t& obj) const
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+			if (sel[k] == obj)
+				return true;
+
+		return false;
+	}
+
+	void SelectToggle(const Obj3d_t& obj)
+	{
+		// when type of surface is radically different, clear selection
+		if (! sel.empty() && ! SelectIsCompat(obj.type))
+			sel.clear();
+
+		if (sel.empty())
+		{
+			sel_type = obj.type;
+			sel.push_back(obj);
+			return;
+		}
+
+		// if object already selected, unselect it
+		// [ we are lazy and leave a NIL object in the vector ]
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+		{
+			if (sel[k] == obj)
+			{
+				sel[k].num = NIL_OBJ;
+				return;
+			}
+		}
+
+		sel.push_back(obj);
+	}
+
+	int GrabClipboard()
+	{
+		obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
+
+		if (type == OB3D_Thing)
+			return r_clipboard.GetThing();
+
+		if (type == OB3D_Floor || type == OB3D_Ceil)
+			return r_clipboard.GetFlatNum();
+
+		return r_clipboard.GetTexNum();
+	}
+
+	void StoreClipboard(int new_val)
+	{
+		obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
+
+		if (type == OB3D_Thing)
+		{
+			r_clipboard.SetThing(new_val);
+			return;
+		}
+
+		const char *name = BA_GetString(new_val);
+
+		if (type == OB3D_Floor || type == OB3D_Ceil)
+			r_clipboard.SetFlat(name);
+		else
+			r_clipboard.SetTex(name);
+	}
+
+	void AddAdjustSide(const Obj3d_t& obj)
+	{
+		const LineDef *L = LineDefs[obj.num];
+
+		int sd = (obj.side < 0) ? L->left : L->right;
+
+		// this should not happen
+		if (sd < 0)
+			return;
+
+		// ensure it is not already there
+		// (e.g. when a line's upper and lower are both selected)
+		for (unsigned int k = 0 ; k < adjust_sides.size() ; k++)
+			if (adjust_sides[k] == sd)
+				return;
+
+		adjust_sides.push_back(sd);
+		adjust_lines.push_back(obj.num);
+	}
+
+	float AdjustDistFactor(float view_x, float view_y)
+	{
+		if (adjust_lines.empty())
+			return 128.0;
+
+		double total = 0;
+
+		for (unsigned int k = 0 ; k < adjust_lines.size() ; k++)
+		{
+			const LineDef *L = LineDefs[adjust_lines[k]];
+			total += ApproxDistToLineDef(L, view_x, view_y);
+		}
+
+		return total / (double)adjust_lines.size();
+	}
+
+	void SaveOffsets()
+	{
+		unsigned int total = static_cast<unsigned>(adjust_sides.size());
+
+		if (total == 0)
+			return;
+
+		if (saved_x_offsets.size() != total)
+		{
+			saved_x_offsets.resize(total);
+			saved_y_offsets.resize(total);
+		}
+
+		for (unsigned int k = 0 ; k < total ; k++)
+		{
+			SideDef *SD = SideDefs[adjust_sides[k]];
+
+			saved_x_offsets[k] = SD->x_offset;
+			saved_y_offsets[k] = SD->y_offset;
+
+			// change it temporarily (just for the render)
+			SD->x_offset += (int)adjust_dx;
+			SD->y_offset += (int)adjust_dy;
+		}
+	}
+
+	void RestoreOffsets()
+	{
+		unsigned int total = static_cast<unsigned>(adjust_sides.size());
+
+		for (unsigned int k = 0 ; k < total ; k++)
+		{
+			SideDef *SD = SideDefs[adjust_sides[k]];
+
+			SD->x_offset = saved_x_offsets[k];
+			SD->y_offset = saved_y_offsets[k];
+		}
 	}
 
 };
 
+static r_editing_info_t  r_edit;
 
-struct Y_View
+
+struct R_View
 {
 public:
 	// player type and position.
 	int p_type, px, py;
 
 	// view position.
-	float x, y; 
-	int z;
-
-	// standard height above the floor.
-#define EYE_HEIGHT  41
+	float x, y, z;
 
 	// view direction.  angle is in radians
 	float angle;
@@ -112,7 +277,7 @@ public:
 
 	// screen image.
 	int sw, sh;
-	byte *screen;
+	img_pixel_t *screen;
 
 	float aspect_sh;
 	float aspect_sw;  // sw * aspect_ratio
@@ -127,25 +292,33 @@ public:
 	int thsec_sector_num;
 	bool thsec_invalidated;
 
-	// state for adjusting offsets via the mouse
-	int   adjust_ld;
-	int   adjust_sd;
+	// navigation loop info
+	bool is_scrolling;
+	float scroll_speed;
 
-	float adjust_dx, adjust_dx_factor;
-	float adjust_dy, adjust_dy_factor;
+	unsigned int nav_time;
 
-	// current highlighted wotsit
-	highlight_3D_info_t hl;
+	float nav_fwd, nav_back;
+	float nav_left, nav_right;
+	float nav_up, nav_down;
+	float nav_turn_L, nav_turn_R;
 
 public:
-	Y_View() : p_type(0), screen(NULL),
-			   texturing(false), sprites(false), lighting(false),
-			   gravity(true),
-	           thing_sectors(),
-			   thsec_sector_num(0),
-			   thsec_invalidated(false),
-			   adjust_ld(-1), adjust_sd(-1),
-			   hl()
+	R_View() :
+		p_type(0), px(), py(),
+		x(), y(), z(),
+		angle(), Sin(), Cos(),
+		sw(), sh(), screen(NULL),
+		texturing(false), sprites(false), lighting(false),
+		gravity(true),
+	    thing_sectors(),
+		thsec_sector_num(0),
+		thsec_invalidated(false),
+		is_scrolling(false),
+		nav_time(0)
+	{ }
+
+	~R_View()
 	{ }
 
 	void SetAngle(float new_ang)
@@ -161,24 +334,33 @@ public:
 		Cos = cos(angle);
 	}
 
-	void CalcViewZ()
+	void FindGroundZ()
 	{
-		Objid o;
-		GetNearObject(o, OBJ_SECTORS, int(x), int(y));
+		// test a grid of points on the player's bounding box, and
+		// use the maximum floor of all contacted sectors.
 
-		int secnum = o.num;
+		int max_floor = INT_MIN;
 
-		if (secnum >= 0)
-			z = Sectors[secnum]->floorh + EYE_HEIGHT;
+		for (int dx = -2 ; dx <= 2 ; dx++)
+		for (int dy = -2 ; dy <= 2 ; dy++)
+		{
+			Objid o;
+
+			GetNearObject(o, OBJ_SECTORS, int(x + dx*8), int(y + dy*8));
+
+			if (o.num >= 0)
+				max_floor = MAX(max_floor, Sectors[o.num]->floorh);
+		}
+
+		if (max_floor != INT_MIN)
+			z = max_floor + game_info.view_height;
 	}
 
 	void CalcAspect()
 	{
-		float window_aspect = float(sw) / float(sh);
-
-		aspect_sh = sh * window_aspect * (render_pixel_aspect / 133.0);
-
 		aspect_sw = sw;	 // things break if these are different
+
+		aspect_sh = sw / (render_pixel_aspect / 100.0);
 	}
 
 	void UpdateScreen(int ow, int oh)
@@ -197,7 +379,7 @@ public:
 			if (screen)
 				delete[] screen;
 
-			screen = new byte [sw * sh];
+			screen = new img_pixel_t [sw * sh];
 		}
 
 		CalcAspect();
@@ -206,7 +388,7 @@ public:
 	void ClearScreen()
 	{
 		// color #0 is black (DOOM, Heretic, Hexen)
-		memset(screen, 0, sw * sh);
+		memset(screen, 0, sw * sh * sizeof(screen[0]));
 	}
 
 	void FindThingSectors()
@@ -236,12 +418,29 @@ public:
 		/* result is colormap index (0 bright .. 31 dark) */
 		return CLAMP(min_L, index, 31);
 	}
-	
-	byte DoomLightRemap(int light, float dist, byte pixel)
+
+	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
 	{
 		int map = R_DoomLightingEquation(light >> 2, dist);
 
-		return raw_colormap[map][pixel];
+		if (pixel & IS_RGB_PIXEL)
+		{
+			map = (map ^ 31) + 1;
+
+			int r = IMG_PIXEL_RED(pixel);
+			int g = IMG_PIXEL_GREEN(pixel);
+			int b = IMG_PIXEL_BLUE(pixel);
+
+			r = (r * map) >> 5;
+			g = (g * map) >> 5;
+			b = (b * map) >> 5;
+
+			return IMG_PIXEL_MAKE_RGB(r, g, b);
+		}
+		else
+		{
+			return raw_colormap[map][pixel];
+		}
 	}
 
 	void PrepareToRender(int ow, int oh)
@@ -256,30 +455,11 @@ public:
 		UpdateScreen(ow, oh);
 
 		if (gravity)
-			CalcViewZ();
-	}
-
-	void ClearHighlight()
-	{
-		hl.Clear();
-	}
-
-	void FindHighlight()
-	{
-		hl.sector = -1;
-
-		hl.line = main_win->render->query(&hl.side, &hl.part);
-
-		if (hl.part == QRP_Floor || hl.part == QRP_Ceil)
-		{
-			// FIXME: get sector
-			hl.line = -1;
-		}
+			FindGroundZ();
 	}
 };
 
-
-static Y_View view;
+static R_View view;
 
 
 struct DrawSurf
@@ -291,7 +471,7 @@ public:
 		K_FLAT,
 		K_TEXTURE
 	};
-	int kind;  
+	int kind;
 
 	// heights for the surface (h1 is below h2)
 	int h1, h2, tex_h;
@@ -309,7 +489,9 @@ public:
 	bool fullbright;
 
 public:
-	DrawSurf() : kind(K_INVIS), img(NULL), fullbright(false)
+	DrawSurf() : kind(K_INVIS), h1(), h2(), tex_h(),
+				 img(NULL), col(), y_clip(),
+				 fullbright(false)
 	{ }
 
 	~DrawSurf()
@@ -410,17 +592,14 @@ public:
 	// lighting for wall, adjusted for N/S and E/W walls
 	int wall_light;
 
-	// clipped angles
-	float ang1;
-	float delta_ang;
-
 	// line constants
+	float delta_ang;
 	float dist, t_dist;
-	float normal;
+	float normal;	// scale for things
 
 	// distance values (inverted, so they can be lerped)
 	double iz1, iz2;
-	double diz, cur_iz; 
+	double diz, cur_iz;
 	double mid_iz;
 
 	// translate coord, for sprite
@@ -442,61 +621,67 @@ public:
 
 #define IZ_EPSILON  1e-6
 
-   /* PREDICATES */
+	// this is NOT a predicate, because it does not guarantee
+	// that swapping A and B will produce the opposite result
+	// (or transitivity i.e. if A < B and B < C then A < C).
+
+	inline bool IsCloser(const DrawWall *const B) const
+	{
+		const DrawWall *const A = this;
+
+		if (A == B)
+			return false;
+
+		if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
+		{
+			// this is the normal case
+			return A->cur_iz > B->cur_iz;
+		}
+
+		// this case usually occurs at a column where two walls share a vertex.
+		//
+		// hence we check if they actually share a vertex, and if so then
+		// we test whether A is behind B or not -- by checking which side
+		// of B the camera and the other vertex of A are on.
+
+		if (A->ld && B->ld)
+		{
+			// find the vertex of A _not_ shared with B
+			int A_other = -1;
+
+			if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
+			if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
+
+			if (A_other >= 0)
+			{
+				int ax = Vertices[A_other]->x;
+				int ay = Vertices[A_other]->y;
+
+				int bx1 = B->ld->Start()->x;
+				int by1 = B->ld->Start()->y;
+				int bx2 = B->ld->End()->x;
+				int by2 = B->ld->End()->y;
+
+				int cx = (int)view.x;  // camera
+				int cy = (int)view.y;
+
+				int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
+				int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
+
+				return (A_side * C_side >= 0);
+			}
+		}
+
+		// a pretty good fallback:
+		return A->mid_iz > B->mid_iz;
+	}
+
+	/* PREDICATES */
 
 	struct MidDistCmp
 	{
 		inline bool operator() (const DrawWall * A, const DrawWall * B) const
 		{
-			return A->mid_iz > B->mid_iz;
-		}
-	};
-
-	struct DistCmp
-	{
-		inline bool operator() (const DrawWall * A, const DrawWall * B) const
-		{
-			if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
-			{
-				// this is the normal case
-				return A->cur_iz > B->cur_iz;
-			}
-
-			// this case usually occurs at a column where two walls share a vertex.
-			// 
-			// hence we check if they actually share a vertex, and if so then
-			// we test whether A is behind B or not -- by checking which side
-			// of B the camera and the other vertex of A are on.
-
-			if (A->ld && B->ld)
-			{
-				// find the vertex of A _not_ shared with B
-				int A_other = -1;
-
-				if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
-				if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
-
-				if (A_other >= 0)
-				{
-					int ax = Vertices[A_other]->x;
-					int ay = Vertices[A_other]->y;
-
-					int bx1 = B->ld->Start()->x;
-					int by1 = B->ld->Start()->y;
-					int bx2 = B->ld->End()->x;
-					int by2 = B->ld->End()->y;
-
-					int cx = (int)view.x;  // camera
-					int cy = (int)view.y;
-
-					int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
-					int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
-
-					return (A_side * C_side >= 0);
-				}
-			}
-
-			// a pretty good fallback:
 			return A->mid_iz > B->mid_iz;
 		}
 	};
@@ -546,7 +731,7 @@ public:
 		bool self_ref  = (front == back) ? true : false;
 
 		if ((front->ceilh > view.z || is_sky(front->CeilTex()))
-		    && ! sky_upper && ! self_ref) 
+		    && ! sky_upper && ! self_ref)
 		{
 			ceil.kind = DrawSurf::K_FLAT;
 			ceil.h1 = front->ceilh;
@@ -616,8 +801,9 @@ public:
 
 			lower.FindTex(sd->LowerTex(), ld);
 
+			// note "sky_upper" here, needed to match original DOOM behavior
 			if (ld->flags & MLF_LowerUnpegged)
-				lower.tex_h = front->ceilh;
+				lower.tex_h = sky_upper ? back->ceilh : front->ceilh;
 			else
 				lower.tex_h = lower.h2;
 
@@ -679,14 +865,6 @@ public:
 };
 
 
-struct RenderLine
-{
-	short sx1, sy1, sx2, sy2;
-
-	Fl_Color color;
-};
-
-
 struct RendInfo
 {
 public:
@@ -703,22 +881,16 @@ public:
 	int query_sy;
 
 	DrawWall     *query_wall;  // the hit wall
-	query_part_e  query_part;  // the part of the hit wall
+	obj3d_type_e  query_part;  // the part of the hit wall
 
 	// inverse distances over X range, 0 when empty.
-	std::vector<double> depth_x;  
+	std::vector<double> depth_x;
 
 	int open_y1;
 	int open_y2;
 
-#define Y_SLOPE  1.70
-
-	// remembered lines for drawing highlight (etc)
-	std::vector<RenderLine> hl_lines;
-
-	// saved offsets for mouse adjustment mode
-	int saved_x_offset;
-	int saved_y_offset;
+	// these used by HighlightGeometry()
+	int hl_ox, hl_oy;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -727,8 +899,10 @@ private:
 	}
 
 public:
-	RendInfo() : walls(), active(), query_mode(0), depth_x(),
-				 hl_lines()
+	RendInfo() :
+		walls(), active(),
+		query_mode(0), query_sx(), query_sy(),
+		depth_x(), open_y1(), open_y2()
 	{ }
 
 	~RendInfo()
@@ -746,7 +920,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, Fl_Color color)
+	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
 	{
 		if (! render_high_detail)
 		{
@@ -754,39 +928,22 @@ public:
 			sx2 *= 2;  sy2 *= 2;
 		}
 
-		RenderLine new_line;
+		fl_color(color);
 
-		new_line.sx1 = sx1; new_line.sy1 = sy1;
-		new_line.sx2 = sx2; new_line.sy2 = sy2;
-		new_line.color = color;
+		if (thick)
+			fl_line_style(FL_SOLID, 2);
 
-		hl_lines.push_back(new_line);
+		fl_line(hl_ox + sx1, hl_oy + sy1, hl_ox + sx2, hl_oy + sy2);
+
+		if (thick)
+			fl_line_style(0);
 	}
 
-	void SaveOffsets()
+	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
 	{
-		if (view.adjust_ld < 0)
-			return;
-
-		SideDef *SD = SideDefs[view.adjust_sd];
-
-		saved_x_offset = SD->x_offset;
-		saved_y_offset = SD->y_offset;
-
-		// change it temporarily (just for the render)
-		SD->x_offset += (int)view.adjust_dx;
-		SD->y_offset += (int)view.adjust_dy;
-	}
-
-	void RestoreOffsets()
-	{
-		if (view.adjust_ld < 0)
-			return;
-
-		SideDef *SD = SideDefs[view.adjust_sd];
-
-		SD->x_offset = saved_x_offset;
-		SD->y_offset = saved_y_offset;
+		AddRenderLine(sx1, sy1, sx2, sy2,
+				is_selected ? 2 : 0,
+				is_selected ? FL_RED : HI_COL);
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -858,32 +1015,26 @@ public:
 		if (sec_h < -32770)
 			return +9999;
 
-		sec_h -= view.z;
+		int y = int(view.aspect_sh * (sec_h - view.z) * iz);
 
-		int y = int(view.aspect_sh * sec_h * iz * Y_SLOPE);
-
-		y = (view.sh - y) / 2;
-
-		return y;
+		return (view.sh - y) / 2;
 	}
 
 	static inline float YToDist(int y, int sec_h)
 	{
-		sec_h -= view.z;
-
 		y = view.sh - y * 2;
 
 		if (y == 0)
 			return 999999;
 
-		return view.aspect_sh * sec_h * Y_SLOPE / y;
+		return view.aspect_sh * (sec_h - view.z) / y;
 	}
 
 	static inline float YToSecH(int y, double iz)
 	{
 		y = y * 2 - view.sh;
 
-		return view.z - (float(y) / view.aspect_sh / iz / Y_SLOPE);
+		return view.z - (float(y) / view.aspect_sh / iz);
 	}
 
 	void AddLine(int ld_index)
@@ -1019,7 +1170,6 @@ public:
 		else if (ld->Start()->y == ld->End()->y)
 			dw->wall_light -= 16;
 
-		dw->ang1 = angle1;
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
 
 		dw->dist = dist;
@@ -1053,12 +1203,19 @@ public:
 		if (ty < 4)
 			return;
 
-		Img_c *sprite = W_GetSprite(th->type);
-		if (! sprite)  // TODO: show a question mark (same color as on 2D map)
-			return;
+		bool is_unknown = false;
 
-		float tx1 = tx - sprite->width() / 2.0;
-		float tx2 = tx + sprite->width() / 2.0;
+		float scale = info->scale;
+
+		Img_c *sprite = W_GetSprite(th->type);
+		if (! sprite)
+		{
+			sprite = IM_UnknownSprite();
+			is_unknown = true;
+		}
+
+		float tx1 = tx - sprite->width() * scale / 2.0;
+		float tx2 = tx + sprite->width() * scale / 2.0;
 
 		double iz = 1 / ty;
 
@@ -1075,19 +1232,19 @@ public:
 			return;
 
 		int thsec = view.thing_sectors[th_index];
-		
+
 		int h1, h2;
 
 		if (info && (info->flags & THINGDEF_CEIL))
 		{
 			// IOANCH 9/2015: also add z
 			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
-			h1 = h2 - sprite->height();
+			h1 = h2 - sprite->height() * scale;
 		}
 		else
 		{
 			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
-			h2 = h1 + sprite->height();
+			h2 = h1 + sprite->height() * scale;
 		}
 
 		// create drawwall structure
@@ -1101,9 +1258,14 @@ public:
 
 		dw->side = info ? info->flags : 0;
 
+		if (is_unknown && render_unknown_bright)
+			dw->side |= THINGDEF_LIT;
+		else if (r_edit.hl.isThing() && th_index == r_edit.hl.num)
+			dw->side |= THINGDEF_LIT;
+
 		dw->spr_tx1 = tx1;
 
-		dw->ang1 = 0;
+		dw->normal = scale;
 
 		dw->iz1 = dw->mid_iz = iz;
 		dw->diz = 0;
@@ -1118,11 +1280,20 @@ public:
 		walls.push_back(dw);
 	}
 
-	void HighlightWall(DrawWall *dw)
+	void ComputeSurfaces()
 	{
-		if (dw->side != view.hl.side)
-			return;
+		DrawWall::vec_t::iterator S;
 
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			if ((*S)->ld)
+				(*S)->ComputeWallSurface();
+		}
+	}
+
+	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw,
+							bool is_selected)
+	{
 		int h1, h2;
 
 		if (! dw->ld->TwoSided())
@@ -1135,12 +1306,12 @@ public:
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (view.hl.part == QRP_Lower)
+			if (part == OB3D_Lower)
 			{
 				h1 = MIN(front->floorh, back->floorh);
 				h2 = MAX(front->floorh, back->floorh);
 			}
-			else /* part == QRP_Upper */
+			else  /* part == OB3D_Upper */
 			{
 				h1 = MIN(front->ceilh, back->ceilh);
 				h2 = MAX(front->ceilh, back->ceilh);
@@ -1156,29 +1327,141 @@ public:
 		int ry1 = DistToY(dw->iz2, h2);
 		int ry2 = DistToY(dw->iz2, h1);
 
-		AddRenderLine(x1, ly1, x1, ly2, HI_COL); 
-		AddRenderLine(x2, ry1, x2, ry2, HI_COL); 
-		AddRenderLine(x1, ly1, x2, ry1, HI_COL);
-		AddRenderLine(x1, ly2, x2, ry2, HI_COL);
+		// workaround for crappy line clipping in X windows
+		if (ly1 < -5000 || ly2 < -5000 || ly1 >  5000 || ly2 >  5000 ||
+			ry1 < -5000 || ry2 < -5000 || ry1 >  5000 || ry2 >  5000)
+			return;
+
+		// keep the lines thin, makes aligning textures easier
+		AddRenderLine(x1, ly1, x1, ly2, is_selected);
+		AddRenderLine(x2, ry1, x2, ry2, is_selected);
+		AddRenderLine(x1, ly1, x2, ry1, is_selected);
+		AddRenderLine(x1, ly2, x2, ry2, is_selected);
 	}
 
-	void ComputeSurfaces()
+	void Highlight_Line(obj3d_type_e part, int ld, int side, bool is_selected)
 	{
-		const LineDef *hl_linedef = is_linedef(view.hl.line) ?
-			LineDefs[view.hl.line] : NULL;
+		const LineDef *L = LineDefs[ld];
 
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
-			if ((*S)->ld)
-			{
-				(*S)->ComputeWallSurface();
+			const DrawWall *dw = (*S);
 
-				if ((*S)->ld == hl_linedef)
-					HighlightWall(*S);
+			if (dw->ld == L && dw->side == side)
+				Highlight_WallPart(part, dw, is_selected);
+		}
+	}
+
+	void Highlight_Sector(obj3d_type_e part, int sec_num, bool is_selected)
+	{
+		int sec_h;
+
+		if (part == OB3D_Floor)
+		{
+			sec_h = Sectors[sec_num]->floorh;
+
+			if (sec_h >= view.z)
+				return;
+		}
+		else  /* OB3D_Ceil */
+		{
+			sec_h = Sectors[sec_num]->ceilh;
+
+			if (sec_h <= view.z)
+				return;
+		}
+
+		DrawWall::vec_t::iterator S;
+
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			const DrawWall *dw = (*S);
+
+			if (dw->ld && dw->ld->TouchesSector(sec_num))
+			{
+				int sy1 = DistToY(dw->iz1, sec_h);
+				int sy2 = DistToY(dw->iz2, sec_h);
+
+				// workaround for crappy line clipping in X windows
+				if (sy1 < -5000 || sy2 < -5000 ||
+					sy1 >  5000 || sy2 >  5000)
+					continue;
+
+				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
 			}
 		}
+	}
+
+	void Highlight_Thing(int th, bool is_selected)
+	{
+		DrawWall::vec_t::iterator S;
+
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			const DrawWall *dw = (*S);
+
+			if (! (dw->th >= 0 && dw->th == th))
+				continue;
+
+			int h1 = dw->ceil.h1 - 1;
+			int h2 = dw->ceil.h2 + 1;
+
+			int x1 = dw->sx1 - 1;
+			int x2 = dw->sx2 + 1;
+
+			int y1 = DistToY(dw->iz1, h2);
+			int y2 = DistToY(dw->iz1, h1);
+
+			AddRenderLine(x1, y1, x1, y2, is_selected);
+			AddRenderLine(x2, y1, x2, y2, is_selected);
+			AddRenderLine(x1, y1, x2, y1, is_selected);
+			AddRenderLine(x1, y2, x2, y2, is_selected);
+			break;
+		}
+	}
+
+	inline void Highlight_Object(Obj3d_t& obj, bool is_selected)
+	{
+		if (obj.isThing())
+		{
+			Highlight_Thing(obj.num, is_selected);
+		}
+		else if (obj.isSector())
+		{
+			Highlight_Sector(obj.type, obj.num, is_selected);
+		}
+		else if (obj.isLine())
+		{
+			Highlight_Line(obj.type, obj.num, obj.side, is_selected);
+		}
+	}
+
+	void HighlightGeometry(int ox, int oy)
+	{
+		hl_ox = ox;
+		hl_oy = oy;
+
+		/* do the selection */
+
+		bool saw_hl = false;
+
+		for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
+		{
+			if (! r_edit.sel[k].valid())
+				continue;
+
+			if (r_edit.hl.valid() && r_edit.hl == r_edit.sel[k])
+				saw_hl = true;
+
+			Highlight_Object(r_edit.sel[k], true);
+		}
+
+		/* do the highlight */
+
+		if (! saw_hl)
+			Highlight_Object(r_edit.hl, false);
 	}
 
 	void ClipSolids()
@@ -1228,8 +1511,9 @@ public:
 	void RenderFlatColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
-		img_pixel_t *wbuf = surf.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = surf.img->buf();
 
 		int tw = surf.img->width();
 		int th = surf.img->height();
@@ -1240,29 +1524,30 @@ public:
 		float t_cos = cos(M_PI + -view.angle + ang) / modv;
 		float t_sin = sin(M_PI + -view.angle + ang) / modv;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
 			int tx = int( view.x - t_sin * dist) & (tw - 1);
 			int ty = int(-view.y + t_cos * dist) & (th - 1);
 
-			*buf = wbuf[ty * tw + tx];
-			
+			*dest = src[ty * tw + tx];
+
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, *buf);
+				*dest = view.DoomLightRemap(light, dist, *dest);
 		}
 	}
 
 	void RenderTexColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
-		img_pixel_t *wbuf = surf.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = surf.img->buf();
 
 		int tw = surf.img->width();
 		int th = surf.img->height();
@@ -1286,44 +1571,44 @@ public:
 		dh = (dh - hh) / MAX(1, y2 - y1);
 		hh += 0.2;
 
-		buf  += x + y1 * view.sw;
-		wbuf += tx;
+		src  += tx;
+		dest += x + y1 * view.sw;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
 		{
 			int ty = int(floor(hh)) % th;
 
 			// handle negative values (use % twice)
 			ty = (ty + th) % th;
 
-			img_pixel_t pix = wbuf[ty * tw];
+			img_pixel_t pix = src[ty * tw];
 
 			if (pix == TRANS_PIXEL)
 				continue;
 
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, pix);
+				*dest = view.DoomLightRemap(light, dist, pix);
 			else
-				*buf = pix;
+				*dest = pix;
 		}
 	}
 
 	void SolidFlatColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *dest = view.screen;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
+				*dest = view.DoomLightRemap(light, dist, game_info.floor_colors[1]);
 			else
-				*buf = surf.col;
+				*dest = surf.col;
 		}
 	}
 
@@ -1332,32 +1617,21 @@ public:
 		int  light = dw->wall_light;
 		float dist = 1.0 / dw->cur_iz;
 
-		img_pixel_t *buf = view.screen;
+		img_pixel_t *dest = view.screen;
 
-		buf += x + y1 * view.sw;
+		dest += x + y1 * view.sw;
 
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += view.sw)
 		{
 			if (view.lighting && ! surf.fullbright)
-				*buf = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
+				*dest = view.DoomLightRemap(light, dist, game_info.wall_colors[1]);
 			else
-				*buf = surf.col;
+				*dest = surf.col;
 		}
 	}
 
-	void HighlightColumn(int x, int y1, int y2, byte col)
-	{
-		img_pixel_t *buf = view.screen;
-
-		buf += x + y1 * view.sw;
-
-		for ( ; y1 <= y2 ; y1++, buf += view.sw)
-			*buf = col;
-	}
-
-
 	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
-								  query_part_e part)
+								  obj3d_type_e part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1386,7 +1660,7 @@ public:
 
 		/* query mode : is mouse over this wall part? */
 
-		if (query_mode)
+		if (query_mode & 1)
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
@@ -1434,13 +1708,16 @@ public:
 
 		/* fill pixels */
 
-		img_pixel_t *buf = view.screen;
-		img_pixel_t *wbuf = dw->ceil.img->wbuf ();
+		img_pixel_t *dest = view.screen;
+
+		const img_pixel_t *src = dw->ceil.img->buf();
 
 		int tw = dw->ceil.img->width();
 		int th = dw->ceil.img->height();
 
-		int tx = int(XToDelta(x, dw->cur_iz) - dw->spr_tx1);
+		float scale = dw->normal;
+
+		int tx = int((XToDelta(x, dw->cur_iz) - dw->spr_tx1) / scale);
 
 		if (tx < 0 || tx >= tw)
 			return;
@@ -1450,35 +1727,49 @@ public:
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
-		buf  += x + y1 * view.sw;
-		wbuf += tx;
+		src  += tx;
+		dest += x + y1 * view.sw;
 
 		int thsec = view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
 		float dist = 1.0 / dw->cur_iz;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, buf += view.sw)
+		if (query_mode & 2)
 		{
-			int ty = int(hh);
+			if (y1 <= query_sy && query_sy <= y2)
+			{
+				query_wall = dw;
+				query_part = OB3D_Thing;
+			}
+
+			return;
+		}
+
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += view.sw)
+		{
+			int ty = int(hh / scale);
 
 			if (ty < 0 || ty >= th)
 				continue;
 
-			img_pixel_t pix = wbuf[ty * tw];
+			img_pixel_t pix = src[ty * tw];
 
 			if (pix == TRANS_PIXEL)
 				continue;
 
 			if (dw->side & THINGDEF_INVIS)
 			{
-				*buf = raw_colormap[14][*buf];
+				if (*dest & IS_RGB_PIXEL)
+					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
+				else
+					*dest = raw_colormap[14][*dest];
 				continue;
 			}
-			
-			*buf = pix;
+
+			*dest = pix;
 
 			if (view.lighting && ! (dw->side & THINGDEF_LIT))
-				*buf = view.DoomLightRemap(light, dist, *buf);
+				*dest = view.DoomLightRemap(light, dist, *dest);
 		}
 	}
 
@@ -1505,6 +1796,146 @@ public:
 		/* fill pixels */
 
 		RenderTexColumn(dw, surf, x, y1, y2);
+	}
+
+	inline void Sort_Swap(int i, int k)
+	{
+		DrawWall *A = active[i];
+		DrawWall *B = active[k];
+
+		active[k] = A;
+		active[i] = B;
+	}
+
+	const DrawWall * Sort_ChoosePivot(int s, int e)
+	{
+		// use the median of start point, middle point and end point
+
+		const DrawWall *A = active[s];
+		const DrawWall *B = active[(s + e) >> 1];
+		const DrawWall *C = active[e];
+
+		if (B->IsCloser(A))
+			std::swap(A, B);
+
+		if (C->IsCloser(B))
+		{
+			std::swap(B, C);
+
+			if (B->IsCloser(A))
+				std::swap(A, B);
+		}
+
+		return B;
+	}
+
+	void Sort_Bubble(int s, int e)
+	{
+		while (s < e)
+		{
+			bool changed = false;
+
+			for (int i = s ; i < e ; i++)
+			{
+				DrawWall *A = active[i];
+				DrawWall *B = active[i+1];
+
+				if (B->IsCloser(A))
+				{
+					// swap!
+					active[i]   = B;
+					active[i+1] = A;
+
+					changed = true;
+				}
+			}
+
+			// stop when everything is in the right order
+			if (! changed)
+				return;
+
+			// highest value will have bubbled to the top, so we can
+			// ignore it in future passes
+			e = e - 1;
+		}
+	}
+
+	void Sort_Range(int s, int e)
+	{
+		SYS_ASSERT(e >= s);
+
+		if (e == s)
+			return;
+
+		if (e - s < 8)
+		{
+			Sort_Bubble(s, e);
+			return;
+		}
+
+		const DrawWall *pivot = Sort_ChoosePivot(s, e);
+
+		// perform the Quicksort partition step  [ Hoare's algorithm ]
+
+		int s1 = s;
+		int e1 = e;
+
+		while (true)
+		{
+			// s can go past e, or vice versa (that's when we stop)
+
+			while (s <= e && active[s]->IsCloser(pivot))
+				s++;
+
+			while (e >= s && ! active[e]->IsCloser(pivot))
+				e--;
+
+			if (s > e)
+				break;
+
+			// this could would normally not occur, but our comparison
+			// function is rather "wonky"...
+			if (s == e)
+			{
+				e--;
+				break;
+			}
+
+			Sort_Swap(s, e);
+
+			s++;
+			e--;
+		}
+
+		// check whether one side of the partition is empty
+		if (s > e1 || e < s1)
+		{
+			return;
+		}
+
+		s--;
+		e++;
+
+		// recursively sort the two partitions
+		if (s > s1)
+			Sort_Range(s1, s);
+
+		if (e < e1)
+			Sort_Range(e, e1);
+	}
+
+	void SortActiveList()
+	{
+		// this uses the Quicksort algorithm to sort the active list.
+		//
+		// Note that this sorting code has been written assuming some
+		// limitations of the DrawWall::IsCloser() method -- see the
+		// description of that method for more details.
+
+		if (active.size() < 2)
+			return;
+
+		Sort_Range(0, (int)active.size() - 1);
 	}
 
 	void UpdateActiveList(int x)
@@ -1559,9 +1990,9 @@ public:
 
 		// if there are changes, re-sort the active list...
 
-		if (changes)
+		if (changes && active.size() > 0)
 		{
-			std::sort(active.begin(), active.end(), DrawWall::DistCmp());
+			SortActiveList();
 		}
 	}
 
@@ -1571,7 +2002,7 @@ public:
 
 		std::sort(walls.begin(), walls.end(), DrawWall::SX1Cmp());
 
-		active.clear ();
+		active.clear();
 
 		for (int x=0 ; x < view.sw ; x++)
 		{
@@ -1605,10 +2036,10 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, QRP_Ceil);
-				RenderWallSurface(dw, dw->floor, x, QRP_Floor);
-				RenderWallSurface(dw, dw->upper, x, QRP_Upper);
-				RenderWallSurface(dw, dw->lower, x, QRP_Lower);
+				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
+				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
+				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
 
 				if (open_y1 >= open_y2)
 					break;
@@ -1638,12 +2069,12 @@ public:
 
 		InitDepthBuf(view.sw);
 
-		SaveOffsets();
+		r_edit.SaveOffsets();
 
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
-		if (view.sprites && ! query_mode)
+		if (view.sprites)
 			for (int k=0 ; k < NumThings ; k++)
 				AddThing(k);
 
@@ -1653,14 +2084,15 @@ public:
 
 		RenderWalls();
 
-		RestoreOffsets();
+		r_edit.RestoreOffsets();
 	}
 
-	void DoQuery(int sx, int sy)
+	void DoQuery(int qx, int qy)
 	{
-		query_mode = 1;
-		query_sx   = sx;
-		query_sy   = sy;
+		query_mode = 3;
+
+		query_sx   = qx;
+		query_sy   = qy;
 
 		query_wall = NULL;
 
@@ -1714,53 +2146,72 @@ void UI_Render3D::draw()
 		BlitHires(ox, oy, ow, oh);
 	else
 		BlitLores(ox, oy, ow, oh);
-	
-	// draw the highlight (etc)
-	for (unsigned int k = 0 ; k < rend.hl_lines.size() ; k++)
-	{
-		RenderLine& line = rend.hl_lines[k];
 
-		fl_color(line.color);
-		fl_line(ox + line.sx1, oy + line.sy1, ox + line.sx2, oy + line.sy2);
-	}
+	fl_push_clip(ox, oy, ow, oh);
+
+	rend.HighlightGeometry(ox, oy);
+
+	fl_pop_clip();
 
 	DrawInfoBar();
 }
 
 
-int UI_Render3D::query(int *side, query_part_e *part)
+bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 {
+	hl.clear();
+
+	if (! edit.pointer_in_window)
+		return false;
+
 	int ow = w();
 	int oh = h();
 
 	view.PrepareToRender(ow, oh);
 
-	int sx = Fl::event_x() - x();
-	int sy = Fl::event_y() - y();
+	int qx = sx - x();
+	int qy = sy - y() - INFO_BAR_H / 2;
 
 	if (! render_high_detail)
 	{
-		sx = sx / 2;
-		sy = sy / 2;
+		qx = qx / 2;
+		qy = qy / 2;
 	}
 
 	RendInfo rend;
 
-	rend.DoQuery(sx, sy);
+	rend.DoQuery(qx, qy);
 
-	if (rend.query_wall)
+	if (! rend.query_wall)
 	{
-		*side = rend.query_wall->side;
-		*part = rend.query_part;
+		// nothing was hit
+		return false;
+	}
+
+	hl.type = rend.query_part;
+
+	if (hl.type == OB3D_Thing)
+	{
+		hl.num = rend.query_wall->th;
+	}
+	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
+	{
+		// ouch -- fix?
+		for (int n = 0 ; n < NumSectors ; n++)
+			if (rend.query_wall->sec == Sectors[n])
+				hl.num = n;
+	}
+	else
+	{
+		hl.side = rend.query_wall->side;
 
 		// ouch -- fix?
 		for (int n = 0 ; n < NumLineDefs ; n++)
 			if (rend.query_wall->ld == LineDefs[n])
-				return n;
+				hl.num = n;
 	}
 
-	// nothing was hit
-	return -1;
+	return hl.valid();
 }
 
 
@@ -1773,15 +2224,11 @@ void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
 		u8_t *dest = line_rgb;
 		u8_t *dest_end = line_rgb + view.sw * 3;
 
-		const byte *src = view.screen + ry * view.sw;
+		const img_pixel_t *src = view.screen + ry * view.sw;
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, view.sw, 1);
@@ -1793,7 +2240,7 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 {
 	for (int ry = 0 ; ry < view.sh ; ry++)
 	{
-		const byte *src = view.screen + ry * view.sw;
+		const img_pixel_t *src = view.screen + ry * view.sw;
 
 		// if destination width is odd, we store an extra pixel here
 		u8_t line_rgb[(ow + 1) * 3];
@@ -1803,15 +2250,8 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			u32_t col = palette[*src];
-
-			dest[0] = RGB_RED(col);
-			dest[1] = RGB_GREEN(col);
-			dest[2] = RGB_BLUE(col);
-
-			dest[3] = dest[0];
-			dest[4] = dest[1];
-			dest[5] = dest[2];
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
@@ -1828,47 +2268,43 @@ void UI_Render3D::DrawInfoBar()
 {
 	int cx = x();
 	int cy = y();
-	
+
 	fl_push_clip(x(), cy, w(), INFO_BAR_H);
 
-	fl_color(FL_BLACK);
-	fl_rectf(x(), cy, w(), INFO_BAR_H);
+	if (r_edit.SelectEmpty())
+		fl_color(FL_BLACK);
+	else
+		fl_color(fl_rgb_color(104,0,0));
 
-	fl_color(INFO_TEXT_COL);
+	fl_rectf(x(), cy, w(), INFO_BAR_H);
 
 	cx += 10;
 	cy += 20;
 
 	fl_font(FL_COURIER, 16);
 
-	DrawNumber(cx, cy, "x", I_ROUND(view.x), -5);
-	DrawNumber(cx, cy, "y", I_ROUND(view.y), -5);
-	DrawNumber(cx, cy, "z",         view.z,  -4);
-
 	int ang = I_ROUND(view.angle * 180 / M_PI);
 	if (ang < 0) ang += 360;
 
-	DrawNumber(cx, cy, "ang", ang, 3);
+	IB_Number(cx, cy, "angle", ang, 3);
+	cx += 8;
 
-	cx += 12;
+	IB_Number(cx, cy, "z", I_ROUND(view.z) - game_info.view_height, 4);
 
-	DrawFlag(cx, cy, view.gravity, "GRAVITY", "gravity");
-
-	fl_color(INFO_TEXT_COL);
-
-	DrawNumber(cx, cy, "gam", usegamma, 1);
-
+	IB_Number(cx, cy, "gamma", usegamma, 1);
 	cx += 10;
 
-	DrawFlag(cx, cy, !view.texturing, "!Tx", "tex");
-	DrawFlag(cx, cy, !view.lighting,  "!Lt", "lit");
-	DrawFlag(cx, cy, !view.sprites,   "!Ob", "obj");
+	IB_Flag(cx, cy, view.gravity, "GRAVITY", "gravity");
+
+	IB_Flag(cx, cy, true, "|", "|");
+
+	IB_Highlight(cx, cy);
 
 	fl_pop_clip();
 }
 
 
-void UI_Render3D::DrawNumber(int& cx, int& cy, const char *label, int value, int size)
+void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int size)
 {
 	char buffer[256];
 
@@ -1878,12 +2314,14 @@ void UI_Render3D::DrawNumber(int& cx, int& cy, const char *label, int value, int
 	else
 		sprintf(buffer, "%s:%-*d ", label, size, value);
 
+	fl_color(INFO_TEXT_COL);
+
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
 }
 
-void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
 {
 	const char *label = value ? label_on : label_off;
 
@@ -1895,39 +2333,59 @@ void UI_Render3D::DrawFlag(int& cx, int& cy, bool value, const char *label_on, c
 }
 
 
+static int GrabTextureFromObject(const Obj3d_t& obj);
+
+void UI_Render3D::IB_Highlight(int& cx, int& cy)
+{
+	char buffer[256];
+
+	if (! r_edit.hl.valid())
+	{
+		fl_color(INFO_DIM_COL);
+
+		strcpy(buffer, "no highlight");
+	}
+	else
+	{
+		fl_color(INFO_TEXT_COL);
+
+		if (r_edit.hl.isThing())
+		{
+			const Thing *th = Things[r_edit.hl.num];
+			const thingtype_t *info = M_GetThingType(th->type);
+
+			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
+					 r_edit.hl.num, info->desc);
+
+		}
+		else if (r_edit.hl.isSector())
+		{
+			int tex = GrabTextureFromObject(r_edit.hl);
+
+			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
+					 r_edit.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+		else
+		{
+			int tex = GrabTextureFromObject(r_edit.hl);
+
+			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
+					 r_edit.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+	}
+
+	fl_draw(buffer, cx, cy);
+
+	cx = cx + fl_width(buffer);
+}
+
+
 int UI_Render3D::handle(int event)
 {
-	switch (event)
-	{
-		case FL_FOCUS:
-			return 1;
-
-		case FL_ENTER:
-			// we greedily grab the focus
-			if (Fl::focus() != this)
-				take_focus(); 
-
-			return 1;
-
-		case FL_KEYDOWN:
-		case FL_KEYUP:
-		case FL_SHORTCUT:
-			return Editor_RawKey(event);
-
-		case FL_PUSH:
-		case FL_RELEASE:
-			return Editor_RawButton(event);
-
-		case FL_MOUSEWHEEL:
-			return Editor_RawWheel(event);
-
-		case FL_DRAG:
-		case FL_MOVE:
-			return Editor_RawMouse(event);
-
-		default:
-			break;  // pass it on
-	}
+	if (EV_HandleEvent(event))
+		return 1;
 
 	return Fl_Widget::handle(event);
 }
@@ -1958,7 +2416,8 @@ void Render3D_Setup()
 		view.x = view.px = player->x;
 		view.y = view.py = player->y;
 
-		view.CalcViewZ();
+		view.FindGroundZ();
+
 		view.SetAngle(player->angle * M_PI / 180.0);
 	}
 	else
@@ -1981,37 +2440,53 @@ void Render3D_Setup()
 }
 
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod)
+void Render3D_Enable(bool _enable)
 {
-	highlight_3D_info_t old(view.hl);
+	Editor_ClearAction();
+	Render3D_ClearSelection();
 
-	view.FindHighlight();
+	edit.render3d = _enable;
 
-	if (old.isSame(view.hl))
-		return;
+	// give keyboard focus to the appropriate large widget
+	if (edit.render3d)
+	{
+		Fl::focus(main_win->render);
 
-	main_win->render->redraw();
-}
+		main_win->info_bar->SetMouse(view.x, view.y);
+	}
+	else
+	{
+		Fl::focus(main_win->canvas);
 
-
-void Render3D_Wheel(int dx, int dy, keycode_t mod)
-{
-	float speed = 48;  // TODO: CONFIG ITEM
-
-	if (mod == MOD_SHIFT)
-		speed = MAX(1, speed / 8);
-	else if (mod == MOD_COMMAND)
-		speed *= 4;
-
-	view.x += speed * (view.Cos * dy + view.Sin * dx);
-	view.y += speed * (view.Sin * dy - view.Cos * dx);
+		main_win->canvas->PointerPos();
+		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+	}
 
 	RedrawMap();
 }
 
 
-void Render3D_RBScroll(int dx, int dy, keycode_t mod)
+void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 {
+	// started?
+	if (mode < 0)
+	{
+		view.is_scrolling = true;
+		main_win->SetCursor(FL_CURSOR_HAND);
+		return;
+	}
+
+	// finished?
+	if (mode > 0)
+	{
+		view.is_scrolling = false;
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
+		return;
+	}
+
+	if (dx == 0 && dy == 0)
+		return;
+
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
 
@@ -2025,56 +2500,41 @@ void Render3D_RBScroll(int dx, int dy, keycode_t mod)
 			dx = 0;
 	}
 
-	if (mod == MOD_ALT)  // strafing
+	bool is_strafe = (mod & MOD_ALT) ? true : false;
+
+	float mod_factor = 1.0;
+	if (mod & MOD_SHIFT)   mod_factor = 0.4;
+	if (mod & MOD_COMMAND) mod_factor = 2.5;
+
+	float speed = view.scroll_speed * mod_factor;
+
+	if (is_strafe)
 	{
-		if (dx)
-		{
-			view.x += view.Sin * dx * 2;
-			view.y -= view.Cos * dx * 2;
-
-			dx = 0;
-		}
-/*
-		dy = -dy;  // CONFIG OPT
-
-		if (dy)
-		{
-			view.x += view.Cos * dy * 2;
-			view.y += view.Sin * dy * 2;
-
-			dy = 0;
-		}
-*/
+		view.x += view.Sin * dx * mod_factor;
+		view.y -= view.Cos * dx * mod_factor;
 	}
-
-	if (dx)
+	else  // turn camera
 	{
-		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 4);
-		else if (mod == MOD_COMMAND)
-			speed *= 3;
-
-		double d_ang = dx * M_PI * speed / (1440.0*4.0);
+		double d_ang = dx * speed * M_PI / 480.0;
 
 		view.SetAngle(view.angle - d_ang);
 	}
 
-	if (dy && ! (render_lock_gravity && view.gravity))
+	dy = -dy;  //TODO CONFIG ITEM
+
+	if (is_strafe)
 	{
-		int speed = 12;  // TODO: CONFIG ITEM  [also: reverse]
-
-		if (mod == MOD_SHIFT)
-			speed = MAX(1, speed / 4);
-		else if (mod == MOD_COMMAND)
-			speed *= 3;
-
-		view.z -= dy * speed / 16;
+		view.x += view.Cos * dy * mod_factor;
+		view.y += view.Sin * dy * mod_factor;
+	}
+	else if (! (render_lock_gravity && view.gravity))
+	{
+		view.z += dy * speed * 0.75;
 
 		view.gravity = false;
 	}
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
@@ -2084,34 +2544,53 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	// started?
 	if (mode < 0)
 	{
-		// find the line / side to adjust
-		if (! is_linedef(view.hl.line))
+		r_edit.adjust_sides.clear();
+		r_edit.adjust_lines.clear();
+
+		r_edit.adjust_dx = 0;
+		r_edit.adjust_dy = 0;
+
+		// find the sidedefs to adjust
+		if (! r_edit.SelectEmpty())
+		{
+			if (r_edit.sel_type < OB3D_Lower)
+			{
+				Beep("cannot adjust that");
+				return;
+			}
+
+			for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
+			{
+				const Obj3d_t& obj = r_edit.sel[k];
+
+				if (obj.isLine())
+					r_edit.AddAdjustSide(obj);
+			}
+		}
+		else  // no selection, use the highlight
+		{
+			if (! r_edit.hl.valid())
+			{
+				Beep("nothing to adjust");
+				return;
+			}
+			else if (! r_edit.hl.isLine())
+			{
+				Beep("cannot adjust that");
+				return;
+			}
+
+			r_edit.AddAdjustSide(r_edit.hl);
+		}
+
+		if (r_edit.adjust_sides.empty())  // WTF?
 			return;
 
-		if (view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
-			return;
+		float dist = r_edit.AdjustDistFactor(view.x, view.y);
+		dist = CLAMP(20, dist, 1000);
 
-		const LineDef *L = LineDefs[view.hl.line];
-
-		int sd = (view.hl.side < 0) ? L->left : L->right;
-
-		if (sd < 0)  // WTF?
-			return;
-
-		// OK
-		view.adjust_ld = view.hl.line;
-		view.adjust_sd = sd;
-
-		// reset offset deltas to 0
-		view.adjust_dx = 0;
-		view.adjust_dy = 0;
-
-		float dist = ApproxDistToLineDef(L, view.x, view.y);
-		if (dist < 20) dist = 20;
-
-		// TODO: take perspective into account (angled wall --> reduce dx_factor)
-		view.adjust_dx_factor = dist / view.aspect_sw;
-		view.adjust_dy_factor = dist / view.aspect_sh / Y_SLOPE;
+		r_edit.adjust_dx_factor = dist / view.aspect_sw;
+		r_edit.adjust_dy_factor = dist / view.aspect_sh;
 
 		Editor_SetAction(ACT_ADJUST_OFS);
 		return;
@@ -2121,28 +2600,34 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	SYS_ASSERT(view.adjust_ld >= 0);
-
 
 	// finished?
 	if (mode > 0)
 	{
 		// apply the offset deltas now
-		dx = (int)view.adjust_dx;
-		dy = (int)view.adjust_dy;
+		dx = (int)r_edit.adjust_dx;
+		dy = (int)r_edit.adjust_dy;
 
 		if (dx || dy)
 		{
-			const SideDef * SD = SideDefs[view.adjust_sd];
-
 			BA_Begin();
-			BA_ChangeSD(view.adjust_sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
-			BA_ChangeSD(view.adjust_sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+
+			for (unsigned int k = 0 ; k < r_edit.adjust_sides.size() ; k++)
+			{
+				int sd = r_edit.adjust_sides[k];
+
+				const SideDef * SD = SideDefs[sd];
+
+				BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
+				BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+			}
+
+			BA_Message("adjusted offsets");
 			BA_End();
 		}
 
-		view.adjust_ld = -1;
-		view.adjust_sd = -1;
+		r_edit.adjust_sides.clear();
+		r_edit.adjust_lines.clear();
 
 		Editor_ClearAction();
 		return;
@@ -2164,26 +2649,412 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 	}
 
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = M_ReadLaxModifiers();
 
-	float factor = (mod == MOD_SHIFT) ? 0.25 : 1.0;
+	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
 
 	if (render_high_detail)
 		factor = factor * 2.0;
 
-	view.adjust_dx -= dx * factor * view.adjust_dx_factor;
-	view.adjust_dy -= dy * factor * view.adjust_dy_factor;
+	r_edit.adjust_dx -= dx * factor * r_edit.adjust_dx_factor;
+	r_edit.adjust_dy -= dy * factor * r_edit.adjust_dy_factor;
 
 	RedrawMap();
 }
 
 
-void Render3D_Term()
+void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
-	/* all done */
+	if (view.is_scrolling)
+	{
+		Render3D_RBScroll(0, dx, dy, mod);
+		return;
+	}
+	else if (edit.action == ACT_ADJUST_OFS)
+	{
+		Render3D_AdjustOffsets(0, dx, dy);
+		return;
+	}
 
-	delete view.screen;
-	view.screen = NULL;
+	Obj3d_t old(r_edit.hl);
+
+	main_win->render->query(r_edit.hl, x, y);
+
+	if (old == r_edit.hl)
+		return;
+
+	main_win->render->redraw();
+}
+
+
+void Render3D_UpdateHighlight()
+{
+	// this is mainly to clear the highlight when mouse pointer
+	// leaves the 3D viewport.
+
+	if (r_edit.hl.valid() && ! edit.pointer_in_window)
+	{
+		r_edit.hl.clear();
+		main_win->render->redraw();
+	}
+}
+
+
+void Render3D_ClearNav()
+{
+	view.nav_fwd  = view.nav_back  = 0;
+	view.nav_left = view.nav_right = 0;
+	view.nav_up   = view.nav_down  = 0;
+
+	view.nav_turn_L = view.nav_turn_R = 0;
+}
+
+
+void Render3D_Navigate()
+{
+	float delay_ms = Nav_TimeDiff();
+
+	delay_ms = delay_ms / 1000.0;
+
+	keycode_t mod = M_ReadLaxModifiers();
+
+	float mod_factor = 1.0;
+	if (mod & MOD_SHIFT)   mod_factor = 0.5;
+	if (mod & MOD_COMMAND) mod_factor = 2.0;
+
+	if (view.nav_fwd || view.nav_back || view.nav_right || view.nav_left)
+	{
+		float fwd   = view.nav_fwd   - view.nav_back;
+		float right = view.nav_right - view.nav_left;
+
+		float dx = view.Cos * fwd + view.Sin * right;
+		float dy = view.Sin * fwd - view.Cos * right;
+
+		dx = dx * mod_factor * mod_factor;
+		dy = dy * mod_factor * mod_factor;
+
+		view.x += dx * delay_ms;
+		view.y += dy * delay_ms;
+	}
+
+	if (view.nav_up || view.nav_down)
+	{
+		float dz = (view.nav_up - view.nav_down);
+
+		view.z += dz * mod_factor * delay_ms;
+	}
+
+	if (view.nav_turn_L || view.nav_turn_R)
+	{
+		float dang = (view.nav_turn_L - view.nav_turn_R);
+
+		dang = dang * mod_factor * delay_ms;
+		dang = CLAMP(-90, dang, 90);
+
+		view.SetAngle(view.angle + dang);
+	}
+
+	main_win->info_bar->SetMouse(view.x, view.y);
+	RedrawMap();
+}
+
+
+static int GrabTextureFromObject(const Obj3d_t& obj)
+{
+	if (obj.type == OB3D_Floor)
+		return Sectors[obj.num]->floor_tex;
+
+	if (obj.type == OB3D_Ceil)
+		return Sectors[obj.num]->ceil_tex;
+
+	if (! obj.isLine())
+		return -1;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	if (LD->OneSided())
+	{
+		return LD->Right()->mid_tex;
+	}
+
+	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
+
+	if (! SD)
+		return -1;
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			return SD->lower_tex;
+
+		case OB3D_Upper:
+			return SD->upper_tex;
+
+		case OB3D_Rail:
+			return SD->mid_tex;
+
+		default:
+			return -1;
+	}
+}
+
+
+//
+// grab the texture or flat (as offset into string table) from the
+// current 3D selection.  returns -1 if selection is empty, -2 if
+// there multiple selected and some were different.
+//
+static int GrabTextureFrom3DSel()
+{
+	if (r_edit.SelectEmpty())
+	{
+		return GrabTextureFromObject(r_edit.hl);
+	}
+
+	int result = -1;
+
+	for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
+	{
+		const Obj3d_t& obj = r_edit.sel[k];
+
+		if (! obj.valid())
+			continue;
+
+		int cur_tex = GrabTextureFromObject(obj);
+		if (cur_tex < 0)
+			continue;
+
+		// more than one distinct texture?
+		if (result >= 0 && result != cur_tex)
+			return -2;
+
+		result = cur_tex;
+	}
+
+	return result;
+}
+
+
+static void StoreTextureToObject(const Obj3d_t& obj, int new_tex)
+{
+	if (obj.type == OB3D_Floor)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
+		return;
+	}
+	else if (obj.type == OB3D_Ceil)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
+		return;
+	}
+
+	if (! obj.isLine())
+		return;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	int sd = LD->WhatSideDef(obj.side);
+
+	if (sd < 0)
+		return;
+
+	if (LD->OneSided())
+	{
+		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+		return;
+	}
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+			break;
+
+		case OB3D_Upper:
+			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+			break;
+
+		case OB3D_Rail:
+			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+			break;
+
+		// shut the compiler up
+		default: break;
+	}
+}
+
+
+static void StoreTextureTo3DSel(int new_tex)
+{
+	BA_Begin();
+
+	if (r_edit.SelectEmpty())
+	{
+		StoreTextureToObject(r_edit.hl, new_tex);
+	}
+	else
+	{
+		for (unsigned int k = 0 ; k < r_edit.sel.size() ; k++)
+		{
+			const Obj3d_t& obj = r_edit.sel[k];
+
+			if (! obj.valid())
+				continue;
+
+			StoreTextureToObject(obj, new_tex);
+		}
+	}
+
+	BA_Message("pasted texture: %s", BA_GetString(new_tex));
+	BA_End();
+}
+
+
+static void Render3D_Cut()
+{
+	// this is equivalent to setting the default texture
+
+	obj3d_type_e type = r_edit.SelectEmpty() ? r_edit.hl.type : r_edit.sel_type;
+
+	if (type == OB3D_Thing)
+		return;
+
+	const char *name = default_wall_tex;
+
+	if (type == OB3D_Floor)
+		name = default_floor_tex;
+	else if (type == OB3D_Ceil)
+		name = default_ceil_tex;
+
+	StoreTextureTo3DSel(BA_InternaliseString(name));
+
+	Status_Set("Cut texture to default");
+}
+
+
+static void Render3D_Copy()
+{
+	int new_tex = GrabTextureFrom3DSel();
+	if (new_tex < 0)
+	{
+		Beep("multiple textures present");
+		return;
+	}
+
+	r_edit.StoreClipboard(new_tex);
+
+	Status_Set("Copied %s", BA_GetString(new_tex));
+}
+
+
+static void Render3D_Paste()
+{
+	int new_tex = r_edit.GrabClipboard();
+
+	StoreTextureTo3DSel(new_tex);
+
+	Status_Set("Pasted %s", BA_GetString(new_tex));
+}
+
+
+static void Render3D_Delete()
+{
+	obj3d_type_e type = r_edit.SelectEmpty() ? r_edit.hl.type : r_edit.sel_type;
+
+	if (type == OB3D_Thing)
+		return;
+
+	if (type == OB3D_Floor || type == OB3D_Ceil)
+	{
+		StoreTextureTo3DSel(BA_InternaliseString(game_info.sky_flat));
+		return;
+	}
+
+	StoreTextureTo3DSel(BA_InternaliseString("-"));
+
+	Status_Set("Removed textures");
+}
+
+
+bool Render3D_ClipboardOp(char what)
+{
+	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
+		return false;
+
+	switch (what)
+	{
+		case 'c':
+			Render3D_Copy();
+			break;
+
+		case 'v':
+			Render3D_Paste();
+			break;
+
+		case 'x':
+			Render3D_Cut();
+			break;
+
+		case 'd':
+			Render3D_Delete();
+			break;
+	}
+
+	return true;
+}
+
+
+void Render3D_ClearSelection()
+{
+	if (! r_edit.SelectEmpty())
+		RedrawMap();
+
+	r_edit.sel.clear();
+}
+
+
+void Render3D_SaveHighlight()
+{
+	r_edit.saved_hl = r_edit.hl;
+}
+
+void Render3D_RestoreHighlight()
+{
+	r_edit.hl = r_edit.saved_hl;
+}
+
+
+bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
+{
+	// do not check the highlight here, as mouse pointer will be
+	// over an item in the browser.
+
+	if (r_edit.SelectEmpty())
+		return false;
+
+	if (kind == 'O' && r_edit.sel_type == OB3D_Thing)
+	{
+		StoreTextureTo3DSel(number);
+		return true;
+	}
+	else if (kind == 'F' && r_edit.sel_type <= OB3D_Floor)
+	{
+		int new_flat = BA_InternaliseString(name);
+		StoreTextureTo3DSel(new_flat);
+		return true;
+	}
+	else if (kind == 'T' && r_edit.sel_type >= OB3D_Lower)
+	{
+		int new_tex = BA_InternaliseString(name);
+		StoreTextureTo3DSel(new_tex);
+		return true;
+	}
+
+	// mismatched usage
+	fl_beep();
+
+	// we still eat it
+	return true;
 }
 
 
@@ -2192,7 +3063,7 @@ void Render3D_SetCameraPos(int new_x, int new_y)
 	view.x = new_x;
 	view.y = new_y;
 
-	view.CalcViewZ();
+	view.FindGroundZ();
 }
 
 
@@ -2212,10 +3083,9 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 	{
 		view.x = atof(tokens[1]);
 		view.y = atof(tokens[2]);
-		view.z = atoi(tokens[3]);
+		view.z = atof(tokens[3]);
 
 		view.SetAngle(atof(tokens[4]));
-
 		return true;
 	}
 
@@ -2225,6 +3095,12 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		view.sprites   = atoi(tokens[2]) ? true : false;
 		view.lighting  = atoi(tokens[3]) ? true : false;
 
+		return true;
+	}
+
+	if (strcmp(tokens[0], "r_gravity") == 0 && num_tok >= 2)
+	{
+		view.gravity = atoi(tokens[1]) ? true : false;
 		return true;
 	}
 
@@ -2239,9 +3115,11 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		usegamma = MAX(0, atoi(tokens[1])) % 5;
 
 		W_UpdateGamma();
-
 		return true;
 	}
+
+	if (r_clipboard.ParseUser(tokens, num_tok))
+		return true;
 
 	return false;
 }
@@ -2249,19 +3127,21 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 
 void Render3D_WriteUser(FILE *fp)
 {
-	fprintf(fp, "camera %1.2f %1.2f %d %1.2f\n",
-	        view.x,
-			view.y,
-			view.z,
-			view.angle);
+	fprintf(fp, "camera %1.2f %1.2f %1.2f %1.2f\n",
+	        view.x, view.y, view.z, view.angle);
 
 	fprintf(fp, "r_modes %d %d %d\n",
 	        view.texturing  ? 1 : 0,
 			view.sprites    ? 1 : 0,
 			view.lighting   ? 1 : 0);
 
+	fprintf(fp, "r_gravity %d\n",
+	        view.gravity ? 1 : 0);
+
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
+
+	r_clipboard.WriteUser(fp);
 }
 
 
@@ -2269,47 +3149,71 @@ void Render3D_WriteUser(FILE *fp)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-void R3D_Forward(void)
+void R3D_Click()
 {
-	int dist = atoi(EXEC_Param[0]);
+	if (! r_edit.hl.valid())
+	{
+		Beep("nothing there");
+		return;
+	}
+
+	if (r_edit.hl.type == OB3D_Thing)
+		return;
+
+	r_edit.SelectToggle(r_edit.hl);
+
+	// unselect any texture boxes in the panel
+	main_win->UnselectPics();
+
+	RedrawMap();
+}
+
+
+void R3D_Forward()
+{
+	float dist = atof(EXEC_Param[0]);
 
 	view.x += view.Cos * dist;
 	view.y += view.Sin * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
-void R3D_Backward(void)
+void R3D_Backward()
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
 	view.x -= view.Cos * dist;
 	view.y -= view.Sin * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
-void R3D_Left(void)
+void R3D_Left()
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
 	view.x -= view.Sin * dist;
 	view.y += view.Cos * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
-void R3D_Right(void)
+void R3D_Right()
 {
-	int dist = atoi(EXEC_Param[0]);
+	float dist = atof(EXEC_Param[0]);
 
 	view.x += view.Sin * dist;
 	view.y -= view.Cos * dist;
 
+	main_win->info_bar->SetMouse(view.x, view.y);
 	RedrawMap();
 }
 
-void R3D_Up(void)
+void R3D_Up()
 {
 	if (view.gravity && render_lock_gravity)
 	{
@@ -2317,15 +3221,16 @@ void R3D_Up(void)
 		return;
 	}
 
-	int dist = atoi(EXEC_Param[0]);
+	view.gravity = false;
+
+	float dist = atof(EXEC_Param[0]);
 
 	view.z += dist;
-	view.gravity = false;
 
 	RedrawMap();
 }
 
-void R3D_Down(void)
+void R3D_Down()
 {
 	if (view.gravity && render_lock_gravity)
 	{
@@ -2333,16 +3238,17 @@ void R3D_Down(void)
 		return;
 	}
 
-	int dist = atoi(EXEC_Param[0]);
+	view.gravity = false;
+
+	float dist = atof(EXEC_Param[0]);
 
 	view.z -= dist;
-	view.gravity = false;
 
 	RedrawMap();
 }
 
 
-void R3D_Turn(void)
+void R3D_Turn()
 {
 	float angle = atof(EXEC_Param[0]);
 
@@ -2354,15 +3260,234 @@ void R3D_Turn(void)
 	RedrawMap();
 }
 
-void R3D_DropToFloor(void)
+
+void R3D_DropToFloor()
 {
-	view.CalcViewZ();
+	view.FindGroundZ();
 
 	RedrawMap();
 }
 
 
-void R3D_Set(void)
+static void R3D_NAV_Forward_release()
+{
+	view.nav_fwd = 0;
+}
+
+void R3D_NAV_Forward()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_fwd = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
+}
+
+
+static void R3D_NAV_Back_release(void)
+{
+	view.nav_back = 0;
+}
+
+void R3D_NAV_Back()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_back = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
+}
+
+
+static void R3D_NAV_Right_release(void)
+{
+	view.nav_right = 0;
+}
+
+void R3D_NAV_Right()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_right = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
+}
+
+
+static void R3D_NAV_Left_release(void)
+{
+	view.nav_left = 0;
+}
+
+void R3D_NAV_Left()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_left = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
+}
+
+
+static void R3D_NAV_Up_release(void)
+{
+	view.nav_up = 0;
+}
+
+void R3D_NAV_Up()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
+	view.gravity = false;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_up = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
+}
+
+
+static void R3D_NAV_Down_release(void)
+{
+	view.nav_down = 0;
+}
+
+void R3D_NAV_Down()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (view.gravity && render_lock_gravity)
+	{
+		Beep("Gravity is on");
+		return;
+	}
+
+	view.gravity = false;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	view.nav_down = atof(EXEC_Param[0]);
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
+}
+
+
+static void R3D_NAV_TurnLeft_release(void)
+{
+	view.nav_turn_L = 0;
+}
+
+void R3D_NAV_TurnLeft()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	float turn = atof(EXEC_Param[0]);
+
+	// convert to radians
+	view.nav_turn_L = turn * M_PI / 180.0;
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
+}
+
+
+static void R3D_NAV_TurnRight_release(void)
+{
+	view.nav_turn_R = 0;
+}
+
+void R3D_NAV_TurnRight()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (! edit.is_navigating)
+		Render3D_ClearNav();
+
+	float turn = atof(EXEC_Param[0]);
+
+	// convert to radians
+	view.nav_turn_R = turn * M_PI / 180.0;
+
+	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
+}
+
+
+static void R3D_NAV_MouseMove_release(void)
+{
+	Render3D_RBScroll(+1);
+}
+
+void R3D_NAV_MouseMove()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	view.scroll_speed = atof(EXEC_Param[0]);
+
+	if (! edit.is_navigating)
+		Editor_ClearNav();
+
+	if (Nav_SetKey(EXEC_CurKey, &R3D_NAV_MouseMove_release))
+	{
+		Render3D_RBScroll(-1);
+	}
+}
+
+
+
+static void ACT_AdjustOfs_release(void)
+{
+	// check if cancelled or overridden
+	if (edit.action != ACT_ADJUST_OFS)
+		return;
+
+	Render3D_AdjustOffsets(+1);
+}
+
+void R3D_ACT_AdjustOfs()
+{
+	if (! EXEC_CurKey)
+		return;
+
+	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+	{
+		Render3D_AdjustOffsets(-1);
+	}
+}
+
+
+void R3D_Set()
 {
 	const char *var_name = EXEC_Param[0];
 	const char *value    = EXEC_Param[1];
@@ -2383,14 +3508,7 @@ void R3D_Set(void)
 	bool bool_val = (int_val > 0);
 
 
-	if (y_stricmp(var_name, "gamma") == 0)
-	{
-		usegamma = int_val % 5;
-		if (usegamma < 0) usegamma = 0;
-		W_UpdateGamma();
-		Status_Set("Gamma level %d", usegamma);
-	}
-	else if (y_stricmp(var_name, "tex") == 0)
+	if (y_stricmp(var_name, "tex") == 0)
 	{
 		view.texturing = bool_val;
 	}
@@ -2417,7 +3535,7 @@ void R3D_Set(void)
 }
 
 
-void R3D_Toggle(void)
+void R3D_Toggle()
 {
 	const char *var_name = EXEC_Param[0];
 
@@ -2454,18 +3572,19 @@ void R3D_Toggle(void)
 }
 
 
-/* Align texture on a sidedef
- *
- * Parameter:
- *     x : align X offset
- *     y : align Y offset
- *    xy : align both X and Y
- *
- * Flags:
- *    /clear : clear offset(s) instead of aligning
- *    /right : align to line on the right of this one (instead of left)
- */
-void R3D_Align(void)
+//
+// Align texture on sidedef(s)
+//
+// Parameter:
+//     x : align X offset
+//     y : align Y offset
+//    xy : align both X and Y
+//
+// Flags:
+//    /clear : clear offset(s) instead of aligning
+//    /right : align to line on the right of this one (instead of left)
+//
+void R3D_Align()
 {
 	if (! edit.render3d)
 	{
@@ -2473,11 +3592,17 @@ void R3D_Align(void)
 		return;
 	}
 
-	// parse parameter
-	const char *param = EXEC_Param[0];
+	// parse the flags
+	bool do_X = Exec_HasFlag("/x");
+	bool do_Y = Exec_HasFlag("/y");
 
-	bool do_X = strchr(param, 'x') ? true : false;
-	bool do_Y = strchr(param, 'y') ? true : false;
+	// TODO : this is for backwards compatibility, remove it later
+	{
+		const char *param = EXEC_Param[0];
+
+		if (strchr(param, 'x')) do_X = true;
+		if (strchr(param, 'y')) do_Y = true;
+	}
 
 	if (! (do_X || do_Y))
 	{
@@ -2486,48 +3611,91 @@ void R3D_Align(void)
 	}
 
 	bool do_clear = Exec_HasFlag("/clear");
-
-	// find the line / side to align
-	if (! is_linedef(view.hl.line) ||
-		view.hl.part == QRP_Floor || view.hl.part == QRP_Ceil)
-	{
-		Beep("No sidedef there!");
-		return;
-	}
-
-	const LineDef *L = LineDefs[view.hl.line];
-
-	int sd = (view.hl.side < 0) ? L->left : L->right;
-
-	if (sd < 0)  // should NOT happen
-	{
-		Beep("No sidedef there!");
-		return;
-	}
-
-	if (do_clear)
-	{
-		BA_Begin();
-		
-		if (do_X) BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
-		if (do_Y) BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
-
-		BA_End();
-
-		return;
-	}
-
-	char part_c = (view.hl.part == QRP_Upper) ? 'u' : 'l';
+	bool do_right = Exec_HasFlag("/right");
+	bool do_unpeg = true;
 
 	int align_flags = 0;
 
 	if (do_X) align_flags = align_flags | LINALIGN_X;
 	if (do_Y) align_flags = align_flags | LINALIGN_Y;
 
-	if (Exec_HasFlag("/right"))
-		align_flags |= LINALIGN_Right;
+	if (do_right) align_flags |= LINALIGN_Right;
+	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
+	if (do_clear) align_flags |= LINALIGN_Clear;
 
-	LineDefs_Align(view.hl.line, view.hl.side, sd, part_c, align_flags);
+
+	// if selection is empty, add the highlight to it
+	// (and clear it when we are done).
+	bool did_select = false;
+
+	if (r_edit.SelectEmpty())
+	{
+		if (! r_edit.hl.valid())
+		{
+			Beep("nothing to align");
+			return;
+		}
+		else if (! r_edit.hl.isLine())
+		{
+			Beep("cannot align that");
+			return;
+		}
+
+		r_edit.SelectToggle(r_edit.hl);
+		did_select = true;
+	}
+	else
+	{
+		if (r_edit.sel_type < OB3D_Lower)
+		{
+			Beep("cannot align that");
+			return;
+		}
+	}
+
+
+	BA_Begin();
+
+	Line_AlignGroup(r_edit.sel, align_flags);
+
+	if (do_clear)
+		BA_Message("cleared offsets");
+	else
+		BA_Message("aligned offsets");
+
+	BA_End();
+
+	if (did_select)
+		r_edit.sel.clear();
+
+	RedrawMap();
+}
+
+
+void R3D_WHEEL_Move()
+{
+	float dx = Fl::event_dx();
+	float dy = Fl::event_dy();
+
+	dy = 0 - dy;
+
+	float speed = atof(EXEC_Param[0]);
+
+	if (Exec_HasFlag("/LAX"))
+	{
+		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
+		if (mod == MOD_SHIFT)
+			speed /= 4.0;
+		else if (mod == MOD_COMMAND)
+			speed *= 4.0;
+	}
+
+	view.x += speed * (view.Cos * dy + view.Sin * dx);
+	view.y += speed * (view.Sin * dy - view.Cos * dx);
+
+	main_win->info_bar->SetMouse(view.x, view.y);
+	RedrawMap();
 }
 
 
@@ -2536,57 +3704,105 @@ void R3D_Align(void)
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Forward",
-		&R3D_Forward
+	{	"3D_Click", NULL,
+		&R3D_Click
 	},
 
-	{	"3D_Backward",
-		&R3D_Backward
-	},
-
-	{	"3D_Left",
-		&R3D_Left
-	},
-
-	{	"3D_Right",
-		&R3D_Right
-	},
-
-	{	"3D_Up",
-		&R3D_Up
-	},
-
-	{	"3D_Down",
-		&R3D_Down
-	},
-
-	{	"3D_Turn",
-		&R3D_Turn
-	},
-
-	{	"3D_DropToFloor",
-		&R3D_DropToFloor
-	},
-
-	{	"3D_Set",
+	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
-		/* keywords */ "gamma tex obj light grav"
+		/* keywords */ "tex obj light grav"
 	},
 
-	{	"3D_Toggle",
+	{	"3D_Toggle", NULL,
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
-	{	"3D_Align",
+	{	"3D_Align", NULL,
 		&R3D_Align,
-		/* flags */ "/right /clear"
+		/* flags */ "/x /y /right /clear"
+	},
+
+	{	"3D_Forward", NULL,
+		&R3D_Forward
+	},
+
+	{	"3D_Backward", NULL,
+		&R3D_Backward
+	},
+
+	{	"3D_Left", NULL,
+		&R3D_Left
+	},
+
+	{	"3D_Right", NULL,
+		&R3D_Right
+	},
+
+	{	"3D_Up", NULL,
+		&R3D_Up
+	},
+
+	{	"3D_Down", NULL,
+		&R3D_Down
+	},
+
+	{	"3D_Turn", NULL,
+		&R3D_Turn
+	},
+
+	{	"3D_DropToFloor", NULL,
+		&R3D_DropToFloor
+	},
+
+	{	"3D_ACT_AdjustOfs", NULL,
+		&R3D_ACT_AdjustOfs
+	},
+
+	{	"3D_WHEEL_Move", NULL,
+		&R3D_WHEEL_Move
+	},
+
+	{	"3D_NAV_Forward", NULL,
+		&R3D_NAV_Forward
+	},
+
+	{	"3D_NAV_Back", NULL,
+		&R3D_NAV_Back
+	},
+
+	{	"3D_NAV_Right", NULL,
+		&R3D_NAV_Right
+	},
+
+	{	"3D_NAV_Left", NULL,
+		&R3D_NAV_Left
+	},
+
+	{	"3D_NAV_Up", NULL,
+		&R3D_NAV_Up
+	},
+
+	{	"3D_NAV_Down", NULL,
+		&R3D_NAV_Down
+	},
+
+	{	"3D_NAV_TurnLeft", NULL,
+		&R3D_NAV_TurnLeft
+	},
+
+	{	"3D_NAV_TurnRight", NULL,
+		&R3D_NAV_TurnRight
+	},
+
+	{	"3D_NAV_MouseMove", NULL,
+		&R3D_NAV_MouseMove
 	},
 
 	// end of command list
-	{	NULL, NULL	}
+	{	NULL, NULL, 0, NULL  }
 };
 
 

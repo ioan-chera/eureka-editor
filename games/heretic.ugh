@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012-2016 Andrew Apted
+#  Copyright (C) 2012-2017 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -26,9 +26,11 @@
 #
 #------------------------------------------------------------------------
 
+player_size 16 56 41
+
 sky_flat  F_SKY1
 
-default_textures  SANDSQ2  FLOOR00  FLAT508
+default_textures  SANDSQ2  FLOOR00  FLOOR30
 
 # 10 = wand crystal
 default_thing  10
@@ -40,6 +42,7 @@ color sky  199
 
 color wall   6   35
 color floor  68  94
+color invis  2   12
 
 color missing  244
 
@@ -133,7 +136,7 @@ thing 52 d nl 20 TGLTF0 "Teleport Glitter (exit)"
 thing 28 l nlc 20 CHDL "Chandelier"
 thing 76 l -l 20 KFR1 "Fire Brazier"
 thing 27 l -l 20 SRTC "Serpent Torch"
-thing 50 l nl 20 WRTH "Wall Torch"
+thing 50 l nl 20 WTRH "Wall Torch"
 
 thing 2035 - - 16 PPOD "Pod"
 thing 43   - n 20 NULL "Pod Generator"
@@ -172,24 +175,13 @@ thing 41 s nv 20 NULL "Env: Waterfall"
 
 #---- LINE TYPES ----------------
 
-linegroup d "Door"
-linegroup k "Keyed Door"
-linegroup p "Lift"
-linegroup f "Floor (lower)"
-linegroup g "Floor (raise)"
-linegroup c "Ceiling"
-linegroup h "Crusher"
-linegroup l "Light"
-linegroup e "Exit level"
-linegroup m "Moving floor"
-linegroup u "Stairs"
-linegroup s "Sounds"
-linegroup - "OTHER"
+include "doom_groups"
+
 
 line 0 - "-- NOTHING"
 
-line 48 - "-- Scroll Left"
-line 99 - "-- Scroll Right"
+line 48 a "-- Scroll Left"
+line 99 a "-- Scroll Right"
 
 line  31 d "D1 Open door (stays open)"
 line   1 d "DR Open door"
@@ -217,6 +209,8 @@ line  27 k "DR Open yellow door"
 line  33 k "D1 Open green door (stays open)"
 line  28 k "DR Open green door"
 
+# the "S1" and "W1" are lowercase here to inhibit the map checking
+# functions complaining about missing tag numbers.
 line  11 e "s1 Exit level"
 line  51 e "s1 Secret exit"
 line  52 e "w1 Exit level"
@@ -242,46 +236,46 @@ line  62 p "SR Lower lift"
 line  10 p "W1 Lower lift"
 line  88 p "WR Lower lift"
 
-line  53 m "W1 Start moving floor"
-line  54 m "W1 Stop  moving floor"
-line  87 m "WR& Start moving floor"
-line  89 m "WR& Stop  moving floor"
+line  53 m "W1 Start Moving Floor"
+line  54 m "W1 Stop  Moving Floor"
+line  87 m "WR Start Moving Floor"
+line  89 m "WR Stop  Moving Floor"
 
-line   7 u "S1 Raise stairs by 8"
-line 107 u "S1 Raise stairs by 16"
-line   8 u "W1 Raise stairs by 8"
-line 106 u "W1 Raise stairs by 16"
+line   7 s "S1 Raise stairs by 8"
+line 107 s "S1 Raise stairs by 16"
+line   8 s "W1 Raise stairs by 8"
+line 106 s "W1 Raise stairs by 16"
 
 line  39 - "W1 Teleport"
 line  97 - "WR Teleport"
 
-line   6 h "W1 Start fast crushing, fast hurt"
-line  25 h "W1 Start fast crushing, slow hurt"
-line  57 h "W1& Stop  crushing"
-line  77 h "WR& Start fast crushing, fast hurt"
-line  73 h "WR& Start slow crushing, slow hurt"
-line  74 h "WR& Stop  crushing"
+line   6 h "W1 Crusher"
+line  77 h "WR Crusher"
+line  25 h "W1 Crusher /slow"
+line  73 h "WR Crusher /slow"
+line  57 h "W1 Stop Crusher"
+line  74 h "WR Stop Crusher"
 
 line  47 g "G1 Raise floor to nhEF (TX)"
 line  24 g "G1 Raise floor to LIC"
 line  55 g "S1 Raise floor to LIC - 8, crush"
 line 101 g "S1 Raise floor to LIC"
 line  18 g "S1 Raise floor to nhEF"
-line  20 g "S1& Raise floor to nhEF (TX)"
-line  15 g "S1& Raise floor by 24 (TX)"
-line  14 g "S1& Raise floor by 32 (TX)"
+line  20 g "S1 Raise floor to nhEF (TX)"
+line  15 g "S1 Raise floor by 24 (TX)"
+line  14 g "S1 Raise floor by 32 (TX)"
 line  65 g "SR Raise floor to LIC - 8, crush"
 line  69 g "SR Raise floor to nhEF"
 line  64 g "SR Raise floor to LIC"
-line  66 g "SR& Raise floor by 24 (TX)"
-line  67 g "SR& Raise floor by 32 (TX)"
-line  68 g "SR& Raise floor to nhEF (TX)"
+line  66 g "SR Raise floor by 24 (TX)"
+line  67 g "SR Raise floor by 32 (TX)"
+line  68 g "SR Raise floor to nhEF (TX)"
 line  59 g "W1 Raise floor by 24 (TXP)"
 line  58 g "W1 Raise floor by 24"
 line   5 g "W1 Raise floor to LIC"
 line  30 g "W1 Raise floor by ShortestLowerTexture"
-line  22 g "W1& Raise floor to nhEF (TX)"
-line  56 g "W1& Raise floor to LIC - 8, crush"
+line  22 g "W1 Raise floor to nhEF (TX)"
+line  56 g "W1 Raise floor to LIC - 8, crush"
 line  93 g "WR Raise floor by 24 (TXP)"
 line  94 g "WR Raise floor to LIC - 8, crush"
 line  95 g "WR Raise floor to nhEF (TX)"
@@ -293,10 +287,10 @@ line  13 l "W1 Light level goes to 255"
 line  35 l "W1 Light level goes to 35"
 line  12 l "W1 Light level goes to HE"
 line 104 l "W1 Light level goes to LE"
-line  17 l "W1 Start blinking lights"
 line  81 l "WR Light level goes to 255"
 line  79 l "WR Light level goes to 35"
 line  80 l "WR Light level goes to HE"
+line  17 l "W1 Lignt blinking 1 Hz"
 
 line  49 c "S1 Lower ceiling to floor + 8"
 line  41 c "S1 Lower ceiling to floor"

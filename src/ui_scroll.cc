@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2013 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 
 #include "main.h"
 #include "m_config.h"
-#include "levels.h"
+#include "e_main.h"		// Map_bound_xxx
 
 #include "ui_scroll.h"
 #include "ui_canvas.h"
@@ -183,7 +183,12 @@ void UI_Scroll::Scroll(int delta)
 	if (delta < 0)
 		pixels = -pixels;
 
+	ScrollByPixels(pixels);
+}
 
+
+void UI_Scroll::ScrollByPixels(int pixels)
+{
 	int pos = scrollbar->value() + pixels;
 
 	int total_h = bottom_y - top_y;
@@ -199,6 +204,16 @@ void UI_Scroll::Scroll(int delta)
 	reposition_all(y() - pos);
 
 	redraw();
+}
+
+
+void UI_Scroll::JumpToChild(int i)
+{
+	const Fl_Widget * w = Child(i);
+
+	int diff = w->y() - top_y - scrollbar->value();
+
+	ScrollByPixels(diff);
 }
 
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2015 Andrew Apted
+//  Copyright (C) 2012-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -19,9 +19,9 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
-#include "levels.h"
-#include "e_loadsave.h"
+#include "m_files.h"
 #include "m_game.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -56,10 +56,11 @@ const char * M_QueryKnownIWAD(const char *game)
 }
 
 
-const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
+// returns a string, with each name separated by a '|' character,
+// hence directly usable with the FL_Choice::add() method.
+//
+const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 {
-	exist_name = fl_filename_name(exist_name);
-
 	std::map<std::string, std::string>::iterator KI;
 
 	static char result[2000];
@@ -70,16 +71,28 @@ const char * M_KnownIWADsForMenu(int *exist_val, const char *exist_name)
 	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
 	{
 		const char *name = KI->first.c_str();
-		
-		strcat(result, "|");
-		strcat(result, name);
-///		strcat(result, ".wad");
 
-		if (y_stricmp(fl_filename_name(KI->second.c_str()), exist_name) == 0)
+		if (result[0])
+			strcat(result, "|");
+
+		strcat(result, name);
+
+		if (y_stricmp(name, exist_name) == 0)
 			*exist_val = index;
 	}
 
-	return StringDup(result + 1);
+	return StringDup(result);
+}
+
+
+void M_WriteKnownIWADs(FILE *fp)
+{
+	std::map<std::string, std::string>::iterator KI;
+
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
+	{
+		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
+	}
 }
 
 
@@ -99,8 +112,96 @@ int M_FindGivenFile(const char *filename)
 	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
 		if (strcmp(Pwad_list[i], filename) == 0)
 			return i;
-	
+
 	return -1;  // Not Found
+}
+
+
+//------------------------------------------------------------------------
+//  PORT PATH HANDLING
+//------------------------------------------------------------------------
+
+// the set of all known source port paths
+
+static std::map<std::string, port_path_info_t> port_paths;
+
+
+port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
+{
+	std::map<std::string, port_path_info_t>::iterator IT;
+
+	IT = port_paths.find(name);
+
+	if (IT != port_paths.end())
+		return &IT->second;
+
+	if (create_it)
+	{
+		port_path_info_t info;
+
+		memset(&info, 0, sizeof(port_path_info_t));
+
+		port_paths[name] = info;
+
+		return M_QueryPortPath(name);
+	}
+
+	return NULL;
+}
+
+
+bool M_IsPortPathValid(const port_path_info_t *info)
+{
+	if (strlen(info->exe_filename) < 2)
+		return false;
+
+	if (! FileExists(info->exe_filename))
+		return false;
+
+	return true;
+}
+
+
+void M_ParsePortPath(const char *name, char *line)
+{
+	while (isspace(*line))
+		line++;
+
+	char *arg_pos = line;
+
+	(void) arg_pos;	 // shut up a warning
+
+	line = strchr(line, '|');
+	if (! line)
+	{
+		// TODO : Warn
+		return;
+	}
+
+	// terminate arguments
+	*line++ = 0;
+
+	port_path_info_t *info = M_QueryPortPath(name, true);
+	if (! info)	// should not fail!
+		return;
+
+	snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", line);
+
+	// parse any other arguments
+	// [ none needed atm.... ]
+}
+
+
+void M_WritePortPaths(FILE *fp)
+{
+	std::map<std::string, port_path_info_t>::iterator IT;
+
+	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
+	{
+		port_path_info_t& info = IT->second;
+
+		fprintf(fp, "port_path %s |%s\n", IT->first.c_str(), info.exe_filename);
+	}
 }
 
 
@@ -108,10 +209,10 @@ int M_FindGivenFile(const char *filename)
 //  RECENT FILE HANDLING
 //------------------------------------------------------------------------
 
-#define MAX_RECENT  12
+#define MAX_RECENT  24
 
 
-// this is for the 'File/Recent' menu
+// this is for the "File/Recent" menu callbacks
 class recent_file_data_c
 {
 public:
@@ -146,7 +247,7 @@ public:
 	RecentFiles_c() : size(0)
 	{
 		memset(filenames, 0, sizeof(filenames));
-		memset(filenames, 0, sizeof(map_names));
+		memset(map_names, 0, sizeof(map_names));
 	}
 
 	~RecentFiles_c()
@@ -168,7 +269,7 @@ public:
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-#ifdef FREE_RECENT_FILES 
+#ifdef FREE_RECENT_FILES
 			StringFree(filenames[k]);
 			StringFree(map_names[k]);
 #endif
@@ -203,7 +304,7 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < MAX_RECENT);
 
-#ifdef FREE_RECENT_FILES 
+#ifdef FREE_RECENT_FILES
 		StringFree(filenames[index]);
 		StringFree(map_names[index]);
 #endif
@@ -272,7 +373,8 @@ public:
 		const char *name = fl_filename_name(filenames[index]);
 		// const char *map  = map_names[index];
 
-		sprintf(buffer, "%s%d. %-.42s", (index < 9) ? "&" : "", 1+index, name);
+		sprintf(buffer, "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
+				(index < 9) ? "&" : "", 1+index, name);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
@@ -339,6 +441,10 @@ static void ParseMiscConfig(FILE * fp)
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
 		}
+		else if (strcmp(line, "port_path") == 0)
+		{
+			M_ParsePortPath(map, pos);
+		}
 		else
 		{
 			// FIXME: warning
@@ -366,6 +472,7 @@ void M_LoadRecent()
 
 	recent_files.clear();
 	 known_iwads.clear();
+	  port_paths.clear();
 
 	ParseMiscConfig(fp);
 
@@ -393,14 +500,10 @@ void M_SaveRecent()
 
 	recent_files.WriteFile(fp);
 
-	// known iwad files
+	M_WriteKnownIWADs(fp);
 
-	std::map<std::string, std::string>::iterator KI;
+	M_WritePortPaths(fp);
 
-	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
-	{
-		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
-	}
 
 	fclose(fp);
 }
@@ -428,7 +531,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	recent_file_data_c *data = (recent_file_data_c *)priv_data;
 
-	CMD_OpenFileMap(data->file, data->map);
+	OpenFileMap(data->file, data->map);
 }
 
 
@@ -465,7 +568,7 @@ bool M_TryOpenMostRecent()
 	}
 
 	// make sure at least one level can be loaded
-	if (wad->NumLevels() == 0)
+	if (wad->LevelCount() == 0)
 	{
 		LogPrintf("No levels in most recent pwad: %s\n", filename);
 
@@ -473,9 +576,9 @@ bool M_TryOpenMostRecent()
 		return false;
 	}
 
-	// -- OK --
+	/* -- OK -- */
 
-	if (wad->FindLevel(map_name) >= 0)
+	if (wad->LevelFind(map_name) >= 0)
 		Level_name = map_name;
 	else
 		Level_name = NULL;
@@ -483,8 +586,6 @@ bool M_TryOpenMostRecent()
 	Pwad_name = filename;
 
 	edit_wad = wad;
-
-	MasterDir_Add(edit_wad);
 
 	return true;
 }
@@ -646,9 +747,9 @@ static const char * SearchForIWAD(const char *game)
 }
 
 
-/*
- * search for iwads in various places
- */
+//
+// search for iwads in various places
+//
 void M_LookForIWADs()
 {
 	LogPrintf("Looking for IWADs....\n");
@@ -690,14 +791,14 @@ const char * M_PickDefaultIWAD()
 	}
 	else if (edit_wad)
 	{
-		int lev = edit_wad->FindFirstLevel();
-		const char *lev_name = "";
+		short idx = edit_wad->LevelFindFirst();
 
-		if (lev >= 0)
+		if (idx >= 0)
 		{
-			lev_name = edit_wad->GetLump(lev)->Name();
+			idx = edit_wad->LevelHeader(idx);
+			const char *name = edit_wad->GetLump(idx)->Name();
 
-			if (toupper(lev_name[0]) == 'E')
+			if (toupper(name[0]) == 'E')
 				default_game = "doom";
 		}
 	}
@@ -705,7 +806,7 @@ const char * M_PickDefaultIWAD()
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
 	const char *result;
-	
+
 	result = StringDup(M_QueryKnownIWAD(default_game));
 	if (result)
 		return result;
@@ -757,8 +858,9 @@ static void M_AddResource_Unique(const char * filename)
 }
 
 
-/* returns false if user wanted to cancel the load */
-
+//
+// returns false if user wants to cancel the load
+//
 bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
@@ -770,7 +872,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		LogPrintf("--> does not exist.\n");
 		return true;
 	}
-	
+
 	if (! lump->Seek())
 	{
 		LogPrintf("--> error seeking.\n");
@@ -839,7 +941,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
-			
+
 				res = FilenameReposition(pos, wad->PathName());
 				LogPrintf("  trying: %s\n", res);
 			}
@@ -890,7 +992,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		if (! (keep_cmd_line_args && Iwad_name))
 			Iwad_name = new_iwad;
 	}
-	
+
 	if (new_port)
 	{
 		if (! (keep_cmd_line_args && Port_name))

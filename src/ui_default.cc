@@ -21,10 +21,12 @@
 #include "main.h"
 #include "ui_window.h"
 
-#include "levels.h"
+#include "e_main.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
+#include "r_render.h"
 #include "w_rawdef.h"
+#include "w_texture.h"
 
 
 #define HIDE_BG  (gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
@@ -59,11 +61,13 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	w_pic = new UI_Pic(X+W-76,   Y, 64, 64);
 	w_pic->callback(tex_callback, this);
+	w_pic->AllowHighlight(true);
 
 	Y += 20;
 
-	w_tex = new Fl_Input(X+68,   Y, 108, 24, "Wall: ");
+	w_tex = new UI_DynInput(X+68,   Y, 108, 24, "Wall: ");
 	w_tex->callback(tex_callback, this);
+	w_tex->callback2(dyntex_callback, this);
 	w_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += w_tex->h() + 50;
@@ -77,10 +81,14 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	c_pic->callback(flat_callback, this);
 	f_pic->callback(flat_callback, this);
 
+	f_pic->AllowHighlight(true);
+	c_pic->AllowHighlight(true);
 
-	c_tex = new Fl_Input(X+68, Y, 108, 24, "Ceiling: ");
+
+	c_tex = new UI_DynInput(X+68, Y, 108, 24, "Ceiling: ");
 	c_tex->align(FL_ALIGN_LEFT);
 	c_tex->callback(flat_callback, this);
+	c_tex->callback2(dyntex_callback, this);
 	c_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += c_tex->h() + 3;
@@ -127,9 +135,10 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 	Y += floor_h->h() + 3;
 
 
-	f_tex = new Fl_Input(X+68, Y, 108, 24, "Floor:   ");
+	f_tex = new UI_DynInput(X+68, Y, 108, 24, "Floor:   ");
 	f_tex->align(FL_ALIGN_LEFT);
 	f_tex->callback(flat_callback, this);
+	f_tex->callback2(dyntex_callback, this);
 	f_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	Y += f_tex->h() + 8;
@@ -145,10 +154,12 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- THING PROPS --------------
 
-	thing = new Fl_Int_Input(X+60, Y+20, 64, 24, "Thing: ");
+	thing = new UI_DynInput(X+60, Y+20, 64, 24, "Thing: ");
 	thing->align(FL_ALIGN_LEFT);
 	thing->callback(thing_callback, this);
+	thing->callback2(dynthing_callback, this);
 	thing->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	thing->type(FL_INT_INPUT);
 
 	th_desc = new Fl_Output(X+60, Y+80-26, 122, 24);
 
@@ -179,6 +190,7 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 	w->value(buffer);
 }
 
+
 void UI_DefaultProps::UpdateThingDesc()
 {
 	const thingtype_t *info = M_GetThingType(default_thing);
@@ -187,11 +199,13 @@ void UI_DefaultProps::UpdateThingDesc()
 	th_sprite->GetSprite(default_thing, FL_DARK2);
 }
 
+
 void UI_DefaultProps::SetTexture(const char *name, int e_state)
 {
 	w_tex->value(name);
 	w_tex->do_callback();
 }
+
 
 void UI_DefaultProps::SetFlat(const char *name, int e_state)
 {
@@ -215,14 +229,16 @@ void UI_DefaultProps::SetFlat(const char *name, int e_state)
 	}
 }
 
+
 void UI_DefaultProps::SetThing(int number)
 {
 	default_thing = number;
 
-	SetIntVal(thing, default_thing);
+	thing->value(Int_TmpStr(default_thing));
 
 	UpdateThingDesc();
 }
+
 
 void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 {
@@ -239,20 +255,13 @@ void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 }
 
 
-const char * UI_DefaultProps::NormalizeTex_and_Dup(Fl_Input *w)
+const char * UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
-	char name[WAD_TEX_NAME + 1];
+	const char *normalized = StringDup(NormalizeTex(w->value()));
 
-	memset(name, 0, sizeof(name));
+	w->value(normalized);
 
-	strncpy(name, w->value(), WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		name[i] = toupper(name[i]);
-
-	w->value(name);
-
-	return StringDup(name);
+	return normalized;
 }
 
 
@@ -265,25 +274,25 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
 		{
 			box->UnselectPicSet('f');
-			main_win->ShowBrowser('T');
+			main_win->BrowserMode('T');
 		}
 		return;
 	}
 
 	if (w == box->w_tex)
 	{
-		default_lower_tex = NormalizeTex_and_Dup(box->w_tex);
-		default_mid_tex   = default_lower_tex;
-		default_upper_tex = default_lower_tex;
+		default_wall_tex = Normalize_and_Dup(box->w_tex);
 	}
 
 	box->w_pic->GetTex(box->w_tex->value());
 }
+
 
 void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 {
@@ -295,34 +304,58 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-		pic->redraw();
+
+		Render3D_ClearSelection();
 
 		if (pic->Selected())
 		{
 			box->UnselectPicSet('t');
-			main_win->ShowBrowser('F');
+			main_win->BrowserMode('F');
 		}
 		return;
 	}
 
 	if (w == box->f_tex)
-		default_floor_tex = NormalizeTex_and_Dup(box->f_tex);
+		default_floor_tex = Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
-		default_ceil_tex = NormalizeTex_and_Dup(box->c_tex);
+		default_ceil_tex = Normalize_and_Dup(box->c_tex);
 
 	box->f_pic->GetFlat(box->f_tex->value());
 	box->c_pic->GetFlat(box->c_tex->value());
 }
 
+
+void UI_DefaultProps::dyntex_callback(Fl_Widget *w, void *data)
+{
+	UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+	if (w == box->w_tex)
+	{
+		box->w_pic->GetTex(box->w_tex->value());
+	}
+	else if (w == box->f_tex)
+	{
+		box->f_pic->GetFlat(box->f_tex->value());
+	}
+	else if (w == box->c_tex)
+	{
+		box->c_pic->GetFlat(box->c_tex->value());
+	}
+}
+
+
 void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
 
+	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+
 	int diff = 8;
-	if (Fl::event_shift())
+
+	if (mod & MOD_SHIFT)
 		diff = 1;
-	else if (Fl::event_ctrl())
+	else if (mod & MOD_COMMAND)
 		diff = 64;
 
 	if (w == box->fl_up)
@@ -341,6 +374,7 @@ void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 	box->SetIntVal(box-> ceil_h, default_ceil_h);
 }
 
+
 void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
@@ -350,13 +384,14 @@ void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 	default_light_level = atoi(box->light->value());
 }
 
+
 void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
 
 	if (w == box->th_sprite)
 	{
-		main_win->ShowBrowser('O');
+		main_win->BrowserMode('O');
 		return;
 	}
 
@@ -365,9 +400,23 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 	box->UpdateThingDesc();
 }
 
+
+void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
+{
+	UI_DefaultProps *box = (UI_DefaultProps *)data;
+
+	int value = atoi(box->thing->value());
+
+	const thingtype_t *info = M_GetThingType(value);
+
+	box->th_desc->value(info->desc);
+	box->th_sprite->GetSprite(value, FL_DARK2);
+}
+
+
 void UI_DefaultProps::LoadValues()
 {
-	w_tex->value(default_lower_tex);
+	w_tex->value(default_wall_tex);
 	f_tex->value(default_floor_tex);
 	c_tex->value(default_ceil_tex);
 
@@ -378,20 +427,116 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal(floor_h, default_floor_h);
 	SetIntVal( ceil_h, default_ceil_h);
 	SetIntVal(  light, default_light_level);
-	SetIntVal(  thing, default_thing);
+
+	thing->value(Int_TmpStr(default_thing));
 
 	UpdateThingDesc();
 }
 
 
-void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_DefaultProps::CB_Copy(int sel_pics)
 {
-	if (! visible())
+	const char *name = NULL;
+
+	switch (sel_pics)
 	{
-		fl_beep();
-		return;
+		case 1: name = f_tex->value(); break;
+		case 2: name = c_tex->value(); break;
+		case 4: name = w_tex->value(); break;
+
+		default:
+			Beep("multiple textures");
+			return;
 	}
 
+	if (sel_pics & 4)
+		r_clipboard.SetTex(name);
+	else
+		r_clipboard.SetFlat(name);
+}
+
+
+void UI_DefaultProps::CB_Paste(int sel_pics)
+{
+	if (sel_pics & 1)
+	{
+		f_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		f_tex->do_callback();
+	}
+
+	if (sel_pics & 2)
+	{
+		c_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		c_tex->do_callback();
+	}
+
+	if (sel_pics & 4)
+	{
+		w_tex->value(BA_GetString(r_clipboard.GetTexNum()));
+		w_tex->do_callback();
+	}
+}
+
+
+void UI_DefaultProps::CB_Delete(int sel_pics)
+{
+	// we abuse the delete function to turn sector ceilings into sky
+
+	if (sel_pics & 1)
+	{
+		f_tex->value(game_info.sky_flat);
+		f_tex->do_callback();
+	}
+
+	if (sel_pics & 2)
+	{
+		c_tex->value(game_info.sky_flat);
+		c_tex->do_callback();
+	}
+}
+
+
+bool UI_DefaultProps::ClipboardOp(char what)
+{
+	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
+					(c_pic->Selected() ? 2 : 0) |
+					(w_pic->Selected() ? 4 : 0);
+
+	if (sel_pics == 0)
+	{
+		sel_pics =	(f_pic->Highlighted() ? 1 : 0) |
+					(c_pic->Highlighted() ? 2 : 0) |
+					(w_pic->Highlighted() ? 4 : 0);
+	}
+
+	if (sel_pics == 0)
+		return false;
+
+	switch (what)
+	{
+		case 'c':
+			CB_Copy(sel_pics);
+			break;
+
+		case 'v':
+			CB_Paste(sel_pics);
+			break;
+
+		case 'x':
+			Beep("cannot cut that");
+			break;
+
+		case 'd':
+			CB_Delete(sel_pics);
+			break;
+	}
+
+	return true;
+}
+
+
+void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
+{
 	switch (kind)
 	{
 		case 'T': SetTexture(name, e_state); break;
@@ -424,9 +569,6 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "default") != 0)
 		return false;
 
-	if (strcmp(tokens[1], "is_shown") == 0)
-	{ /* ignored for backwards compat */ }
-
 	if (strcmp(tokens[1], "floor_h") == 0)
 		default_floor_h = atoi(tokens[2]);
 
@@ -445,14 +587,8 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[1], "ceil_tex") == 0)
 		default_ceil_tex = StringDup(tokens[2]);
 
-	if (strcmp(tokens[1], "lower_tex") == 0)
-		default_lower_tex = StringDup(tokens[2]);
-
 	if (strcmp(tokens[1], "mid_tex") == 0)
-		default_mid_tex = StringDup(tokens[2]);
-
-	if (strcmp(tokens[1], "upper_tex") == 0)
-		default_upper_tex = StringDup(tokens[2]);
+		default_wall_tex = StringDup(tokens[2]);
 
 	return true;
 }
@@ -467,11 +603,9 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default light_level %d\n",  default_light_level);
 	fprintf(fp, "default thing %d\n",  default_thing);
 
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\""));
 	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
 	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
-	fprintf(fp, "default lower_tex \"%s\"\n", StringTidy(default_lower_tex, "\""));
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_mid_tex,   "\""));
-	fprintf(fp, "default upper_tex \"%s\"\n", StringTidy(default_upper_tex, "\""));
 }
 
 

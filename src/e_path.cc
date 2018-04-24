@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2013 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -27,15 +27,15 @@
 #include "main.h"
 
 #include "m_bitvec.h"
-#include "editloop.h"
+#include "e_main.h"
+#include "e_objects.h"
 #include "e_path.h"
-#include "levels.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
-#include "x_mirror.h"
 
 #include "ui_window.h"
+#include "ui_misc.h"
 
 
 typedef enum
@@ -129,7 +129,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 
 			if (*L_other >= 0)  // There is a fork in the path. Stop here.
 				return false;
-			
+
 			*L_other = n;
 			*V_other = v2;
 		}
@@ -139,12 +139,13 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 }
 
 
+//
 // This routine looks for all linedefs other than 'L' which use
 // the vertex 'V'.  If there are none or more than one, the search
 // stops there and nothing else happens.  If there is exactly one,
 // then it is added to the selection and we continue from the new
 // linedef and vertex.
-
+//
 static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 {
 	int start_L = L;
@@ -169,9 +170,10 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 }
 
 
-/* Select/unselect all linedefs in non-forked path.
- */
-void LIN_SelectPath(void)
+//
+// select/unselect all linedefs in a non-forked path.
+//
+void CMD_LIN_SelectPath(void)
 {
 	// determine starting linedef
 	if (edit.highlight.is_nil())
@@ -180,19 +182,12 @@ void LIN_SelectPath(void)
 		return;
 	}
 
-	bool additive = Exec_HasFlag("/add");
+	bool fresh_sel = Exec_HasFlag("/fresh");
 
 	int match = 0;
 
 	if (Exec_HasFlag("/onesided")) match |= SLP_OneSided;
 	if (Exec_HasFlag("/sametex"))  match |= SLP_SameTex;
-
-	if (edit.did_a_move)
-	{
-		edit.did_a_move = false;
-		additive = false;
-	}
-
 
 	int start_L = edit.highlight.num;
 
@@ -201,7 +196,7 @@ void LIN_SelectPath(void)
 
 	bool unset_them = false;
 
-	if (additive && edit.Selected->get(start_L))
+	if (!fresh_sel && edit.Selected->get(start_L))
 		unset_them = true;
 
 	selection_c seen(OBJ_LINEDEFS);
@@ -213,7 +208,7 @@ void LIN_SelectPath(void)
 
 	Editor_ClearErrorMode();
 
-	if (! additive)
+	if (fresh_sel)
 		Selection_Clear();
 
 	if (unset_them)
@@ -229,7 +224,7 @@ void LIN_SelectPath(void)
 
 #define PLAYER_STEP_H	24
 
-static bool GrowContiguousSectors(selection_c &seen, bool additive)
+static bool GrowContiguousSectors(selection_c &seen)
 {
 	// returns TRUE when some new sectors got added
 
@@ -317,9 +312,10 @@ static bool GrowContiguousSectors(selection_c &seen, bool additive)
 }
 
 
-/* Select/unselect a contiguous group of sectors.
- */
-void SEC_SelectGroup(void)
+//
+// select/unselect a contiguous group of sectors.
+//
+void CMD_SEC_SelectGroup(void)
 {
 	// determine starting sector
 	if (edit.highlight.is_nil())
@@ -328,33 +324,26 @@ void SEC_SelectGroup(void)
 		return;
 	}
 
-	bool additive = Exec_HasFlag("/add");
-
-	if (edit.did_a_move)
-	{
-		edit.did_a_move = false;
-		additive = false;
-	}
-
+	bool fresh_sel = Exec_HasFlag("/fresh");
 
 	int start_sec = edit.highlight.num;
 
 	bool unset_them = false;
 
-	if (additive && edit.Selected->get(start_sec))
+	if (!fresh_sel && edit.Selected->get(start_sec))
 		unset_them = true;
 
 	selection_c seen(OBJ_SECTORS);
 
 	seen.set(start_sec);
 
-	while (GrowContiguousSectors(seen, additive))
+	while (GrowContiguousSectors(seen))
 	{ }
 
 
 	Editor_ClearErrorMode();
 
-	if (! additive)
+	if (fresh_sel)
 		Selection_Clear();
 
 	if (unset_them)
@@ -378,7 +367,7 @@ void GoToSelection()
 	int mid_x = (x1 + x2) / 2;
 	int mid_y = (y1 + y2) / 2;
 
-	grid.CenterMapAt(mid_x, mid_y);
+	grid.MoveTo(mid_x, mid_y);
 
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
@@ -405,11 +394,6 @@ void GoToSelection()
 		grid.AdjustScale(+1);
 	}
 
-	// FIXME: this is not completely right, we should check where mouse pointer is
-	//        and use the following as the fallback (when not pointer_in_window).
-	edit.map_x = mid_x;
-	edit.map_y = mid_y;
-
 	RedrawMap();
 }
 
@@ -422,9 +406,9 @@ void GoToErrors()
 }
 
 
-/*
-  centre the map around the object and zoom in if necessary
-*/
+//
+// centre the map around the object and zoom in if necessary
+//
 void GoToObject(const Objid& objid)
 {
 	Selection_Clear();
@@ -437,20 +421,25 @@ void GoToObject(const Objid& objid)
 
 void CMD_JumpToObject(void)
 {
-	const char *buf = fl_input("Enter index number", "");
+	int total = NumObjects(edit.mode);
 
-	if (! buf)   // cancelled
-		return;
-
-	// TODO: validate it is a number
-
-	int num = atoi(buf);
-
-	if (num < 0 || num >= NumObjects(edit.mode))
+	if (total <= 0)
 	{
-		Beep("No such object: #%d", num);
+		Beep("No objects!");
 		return;
 	}
+
+	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(edit.mode), total - 1);
+
+	int num = dialog->Run();
+
+	delete dialog;
+
+	if (num < 0)	// cancelled
+		return;
+
+	// this is guaranteed by the dialog
+	SYS_ASSERT(num < total);
 
 	GoToObject(Objid(edit.mode, num));
 }
@@ -546,11 +535,135 @@ void CMD_PruneUnused(void)
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
 
+	BA_Message("pruned %d objects", num_secs + num_sides + num_verts);
+
 	Status_Set("Pruned %d SEC - %d Side - %d Vert", num_secs, num_sides, num_verts);
 
 	BA_End();
 }
 
+
+//------------------------------------------------------------------------
+
+bool sound_propagation_invalid;
+
+static std::vector<byte> sound_prop_vec;
+static std::vector<byte> sound_temp1_vec;
+static std::vector<byte> sound_temp2_vec;
+
+static int sound_start_sec;
+
+
+static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
+{
+	bool changes;
+
+	for (int k = 0 ; k < NumSectors ; k++)
+		vec[k] = 0;
+
+	vec[sound_start_sec] = 2;
+
+	do
+	{
+		changes = false;
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			if (! L->TwoSided())
+				continue;
+
+			int sec1 = L->WhatSector(SIDE_RIGHT);
+			int sec2 = L->WhatSector(SIDE_LEFT);
+
+			SYS_ASSERT(sec1 >= 0);
+			SYS_ASSERT(sec2 >= 0);
+
+			// check for doors
+			if (!ignore_doors &&
+				(MIN(Sectors[sec1]->ceilh,  Sectors[sec2]->ceilh) <=
+				 MAX(Sectors[sec1]->floorh, Sectors[sec2]->floorh)))
+			{
+				continue;
+			}
+
+			int val1 = vec[sec1];
+			int val2 = vec[sec2];
+
+			int new_val = MAX(val1, val2);
+
+			if (L->flags & MLF_SoundBlock)
+				new_val -= 1;
+
+			if (new_val > val1 || new_val > val2)
+			{
+				if (new_val > val1) vec[sec1] = new_val;
+				if (new_val > val2) vec[sec2] = new_val;
+
+				changes = true;
+			}
+		}
+
+	} while (changes);
+}
+
+
+static void CalcFinalPropagation()
+{
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		int t1 = sound_temp1_vec[s];
+		int t2 = sound_temp2_vec[s];
+
+		if (t1 != t2)
+		{
+			if (t1 == 0 || t2 == 0)
+			{
+				sound_prop_vec[s] = PGL_Maybe;
+				continue;
+			}
+
+			t1 = MIN(t1, t2);
+		}
+
+		switch (t1)
+		{
+			case 0: sound_prop_vec[s] = PGL_Never;   break;
+			case 1: sound_prop_vec[s] = PGL_Level_1; break;
+			case 2: sound_prop_vec[s] = PGL_Level_2; break;
+		}
+	}
+}
+
+
+const byte * SoundPropagation(int start_sec)
+{
+	if ((int)sound_prop_vec.size() != NumSectors)
+	{
+		sound_prop_vec .resize(NumSectors);
+		sound_temp1_vec.resize(NumSectors);
+		sound_temp2_vec.resize(NumSectors);
+
+		sound_propagation_invalid = true;
+	}
+
+	if (sound_propagation_invalid ||
+		sound_start_sec != start_sec)
+	{
+		// cannot used cached data, recompute it
+
+		sound_start_sec = start_sec;
+		sound_propagation_invalid = false;
+
+		CalcPropagation(sound_temp1_vec, false);
+		CalcPropagation(sound_temp2_vec, true);
+
+		CalcFinalPropagation();
+	}
+
+	return &sound_prop_vec[0];
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

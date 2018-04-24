@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2015 Andrew Apted
+//  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@
 #define __EUREKA_W_WAD_H__
 
 class Wad_file;
-class Texture_info;
 
 
 class Lump_c
@@ -69,13 +68,14 @@ public:
 	bool GetLine(char *buffer, size_t buf_size);
 
 	// write some data to the lump.  Only the lump which had just
-	// been created with Wad_file::AddLump() can be written to.
-	bool Write(void *data, int len);
+	// been created with Wad_file::AddLump() or RecreateLump() can be
+	// written to.
+	bool Write(const void *data, int len);
 
 	// write some text to the lump
 	void Printf(const char *msg, ...);
 
-	// mark the lump as finished (after writing it).
+	// mark the lump as finished (after writing data to it).
 	bool Finish();
 
 	// predicate for std::sort()
@@ -101,6 +101,7 @@ class Wad_file
 {
 friend class Lump_c;
 friend void W_LoadFlats();
+friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
 	const char *filename;
@@ -127,8 +128,7 @@ private:
 	std::vector<short> patches;
 	std::vector<short> sprites;
 	std::vector<short> flats;
-
-	Texture_info *tex_info;
+	std::vector<short> tx_tex;
 
 	bool begun_write;
 	int  begun_max_size;
@@ -163,29 +163,32 @@ public:
 	int TotalSize() const { return total_size; }
 
 	short NumLumps() const { return (short)directory.size(); }
-
 	Lump_c * GetLump(short index);
 	Lump_c * FindLump(const char *name);
-	Lump_c * FindLumpInLevel(const char *name, short level);
-
 	short FindLumpNum(const char *name);
-
-	// these all return a lump index
-	short FindLevel(const char *name);
-	short FindLevelByNumber(int number);
-	short FindFirstLevel();
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
-	short NumLevels() const { return (short)levels.size(); }
-	short GetLevel(short index);
-	short FindLevel_Raw(const char *name);  // returns level index
+	short LevelCount() const { return (short)levels.size(); }
+	short LevelHeader(short lev_num);
+	short LevelLastLump(short lev_num);
 
-	map_format_e LevelFormat(short lump_index);
+	// these return a level number (0 .. count-1)
+	short LevelFind(const char *name);
+	short LevelFindByNumber(int number);
+	short LevelFindFirst();
+
+	// returns a lump index, -1 if not found
+	short LevelLookupLump(short lev_num, const char *name);
+
+	map_format_e LevelFormat(short lev_num);
+
+	void  SortLevels();
 
 	// check whether another program has modified this WAD, and return
 	// either true or false.  We test for change in file size, change
 	// in directory size or location, and directory contents (CRC).
+	// [ NOT USED YET.... ]
 	bool WasExternallyModified();
 
 	// backup the current wad into the given filename.
@@ -193,7 +196,8 @@ public:
 	bool Backup(const char *filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
-	// and EndWrite() methods.
+	// and EndWrite() methods.  the on-disk wad directory may be trashed
+	// during this period, it will be re-written by EndWrite().
 	void BeginWrite();
 	void EndWrite();
 
@@ -202,12 +206,16 @@ public:
 
 	// remove the given lump(s)
 	// this will change index numbers on existing lumps
-	// (previous results of FindLumpNum or GetLevel are invalidated).
+	// (previous results of FindLumpNum or LevelHeader are invalidated).
 	void RemoveLumps(short index, short count = 1);
 
 	// this removes the level marker PLUS all associated level lumps
-	// which follow it.  'index' is a lump number (e.g. from FindLevel)
-	void RemoveLevel(short index);
+	// which follow it.
+	void RemoveLevel(short lev_num);
+
+	// removes any GL-Nodes lumps that are associated with the given
+	// level.
+	void RemoveGLNodes(short lev_num);
 
 	// insert a new lump.
 	// The second form is for a level marker.
@@ -215,7 +223,11 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
-	Lump_c * AddLevel(const char *name, int max_size = -1);
+	Lump_c * AddLevel(const char *name, int max_size = -1, short *lev_num = NULL);
+
+	// setup lump to write new data to it.
+	// the old contents are lost.
+	void RecreateLump(Lump_c *lump, int max_size = -1);
 
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of
@@ -312,9 +324,13 @@ int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
 
+int W_FilenameAbsCompare(const char *A, const char *B);
+
+
 void MasterDir_Add   (Wad_file *wad);
 void MasterDir_Remove(Wad_file *wad);
 
+bool MasterDir_HaveFilename(const char *chk_path);
 void MasterDir_CloseAll();
 
 

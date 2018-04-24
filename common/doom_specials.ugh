@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2012 Andrew Apted
+#  Copyright (C) 2001-2017 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -25,28 +25,8 @@
 #------------------------------------------------------------------------
 
 #
-#	Definition of linedef groups
-#	Format is : linegroup <letter> <description>
-#
-
-linegroup a "Animated"
-linegroup c "Ceiling"
-linegroup d "Door"
-linegroup e "Exit level"
-linegroup f "Floor (lower)"
-linegroup g "Floor (raise)"
-linegroup h "Crusher"
-linegroup k "Keyed Door"
-linegroup l "Light"
-linegroup m "Moving floor"
-linegroup p "Lift"
-linegroup s "Stairs"
-linegroup t "Teleport"
-linegroup v "Elevator"
-linegroup - "OTHER"
-
-#
 #	Definition of linedef types
+#
 #	Format is : line <number> <group> <description>
 #
 
@@ -55,34 +35,34 @@ line   9 - "S1 Donut (raise outer, lower inner)"
 line  78 - "SR Floor Transfer /NXP"
 line  48 a "-- Scroll Wall Left"
 
+line  77 h "WR Crusher"
 line   6 h "W1 Crusher /fast"
 line  25 h "W1 Crusher /slow"
-line  57 h "W1& Stop crusher"
-line  73 h "WR& Crusher /slow"
-line  77 h "WR& Crusher"
-line  74 h "WR& Stop crusher"
-line 141 h "W1& Crusher /silent"
+line  73 h "WR Crusher /slow"
+line 141 h "W1 Crusher /silent"
+line  57 h "W1 Stop crusher"
+line  74 h "WR Stop crusher"
 
 line  24 g "G1 Floor up LIC"
 line  47 g "G1 Floor up nhEF /TX"
 line 101 g "S1 Floor up LIC"
 line  55 g "S1 Floor up LIC-8 /cr"
 line  18 g "S1 Floor up nhEF"
-line  15 g "S1& Floor up 24 /TX"
-line  14 g "S1& Floor up 32 /TX"
-line  20 g "S1& Floor up nhEF /TX"
+line  15 g "S1 Floor up 24 /TX"
+line  14 g "S1 Floor up 32 /TX"
+line  20 g "S1 Floor up nhEF /TX"
 line  64 g "SR Floor up LIC"
 line  65 g "SR Floor up LIC-8 /cr"
 line  69 g "SR Floor up nhEF"
-line  66 g "SR& Floor up 24 /TX"
-line  67 g "SR& Floor up 32 /TX"
-line  68 g "SR& Floor up nhEF /TX"
+line  66 g "SR Floor up 24 /TX"
+line  67 g "SR Floor up 32 /TX"
+line  68 g "SR Floor up nhEF /TX"
 line  59 g "W1 Floor up 24 /TXP"
 line  58 g "W1 Floor up 24"
 line   5 g "W1 Floor up LIC"
 line  30 g "W1 Floor up lowest tex"
-line  56 g "W1& Floor up LIC-8 /cr"
-line  22 g "W1& Floor up nhEF /TX"
+line  56 g "W1 Floor up LIC-8 /cr"
+line  22 g "W1 Floor up nhEF /TX"
 line  93 g "WR Floor up 24 /TXP"
 line  92 g "WR Floor up 24"
 line  91 g "WR Floor up LIC"
@@ -98,22 +78,22 @@ line 132 g "SR Floor UP nhEF /fast"
 line 140 g "S1 Floor up 512"
 
 line  13 l "W1 Light to 255"
-line  35 l "W1 Light to 35"
-line  12 l "W1 Light to highest nb"
-line 104 l "W1 Light to lowest nb"
-line  17 l "W1 Start Blinking"
 line  81 l "WR Light to 255"
-line  79 l "WR Light to 35"
-line  80 l "WR Light to highest nb"
 line 138 l "SR Light to 255"
-line 139 l "SR Light to 0"
+line  35 l "W1 Light to 35"
+line  79 l "WR Light to 35"
+line 139 l "SR Light to 35"
+line  12 l "W1 Light to highest nb"
+line  80 l "WR Light to highest nb"
+line 104 l "W1 Light to lowest nb"
+line  17 l "W1 Light blink 1 Hz"
 
 line  49 c "S1 Ceiling close flr+8"
 line  41 c "S1 Ceiling close"
 line  43 c "SR Ceiling close"
 line  44 c "W1 Ceiling close flr+8"
-line  40 c "W1 Ceiling up HEC"
 line  72 c "WR Ceiling close flr+8"
+line  40 c "W1 Ceiling up HEC"
 
 line  31 d "D1 Open and stay open"
 line   1 d "DR Open door"
@@ -161,6 +141,8 @@ line 135 k "S1 Open red door /fast"
 line 136 k "SR Open yellow door /fast"
 line 137 k "S1 Open yellow door /fast"
 
+# the "S1" and "W1" are lowercase here to inhibit the map checking
+# functions complaining about missing tag numbers.
 line  11 e "s1 Exit level"
 line  51 e "s1 Secret exit"
 line  52 e "w1 Exit level"
@@ -181,19 +163,19 @@ line  83 f "WR Floor down HEF"
 line  84 f "WR Floor down LEF /NXP"
 line  82 f "WR Floor down LEF"
 
-line  21 p "S1 Lower Lift"
-line  62 p "SR Lower Lift"
-line  10 p "W1 Lower Lift"
-line  88 p "WR Lower Lift"
-line 120 p "WR Lower Lift /fast"
-line 121 p "W1 Lower Lift /fast"
-line 122 p "S1 Lower Lift /fast"
-line 123 p "SR Lower Lift /fast"
+line  21 p "S1 Lift Lower"
+line  62 p "SR Lift Lower"
+line  10 p "W1 Lift Lower"
+line  88 p "WR Lift Lower"
+line 120 p "WR Lift Lower /fast"
+line 121 p "W1 Lift Lower /fast"
+line 122 p "S1 Lift Lower /fast"
+line 123 p "SR Lift Lower /fast"
 
-line  53 m "W1 Start moving floor"
-line  54 m "W1 Stop moving floor"
-line  87 m "WR& Start moving floor"
-line  89 m "WR& Stop moving floor"
+line  53 m "W1 Start Moving Floor"
+line  87 m "WR Start Moving Floor"
+line  54 m "W1 Stop Moving Floor"
+line  89 m "WR Stop Moving Floor"
 
 line   7 s "S1 Stair Raise 8"
 line 100 s "W1 Stair Raise 16"
@@ -209,9 +191,9 @@ line 127 s "S1 Stair Raise 16"
 
 #------------------------------------------------------------------------
 
-
 #
 #	Definition of sector types
+#
 #	Format is : sector <number> <description>
 #
 
