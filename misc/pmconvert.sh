@@ -4,7 +4,7 @@ set -e
 function process() {
     INFILE="${2}"
     OUTFILE="${1}.pm"
-    set PM_BASE "${1}"
+    export PM_BASE="${1}"
     echo ==== ${OUTFILE} ====
     cat ${INFILE} |
         awk '{ gsub(/:kbd:/, ":sub:") } { print }' |
