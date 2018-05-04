@@ -9,33 +9,21 @@ local function escape(s, in_attribute)
     return s
 end
 
--- Helper function to convert an attributes table into
--- a string that can be put into HTML tags.
-local function attributes(attr)
-  local attr_table = {}
-  for x,y in pairs(attr) do
-    if y and y ~= "" then
-      table.insert(attr_table, ' ' .. x .. '="' .. escape(y,true) .. '"')
-    end
-  end
-    return table.concat(attr_table)
-end
-
 -- Blocksep is used to separate block elements.
 function Blocksep()
     return "\n"
 end
 
--- This function is called once for the whole document.
--- body is a single string.
+-- This function is called once for the whole document
+-- (at the very end).  body is a single string.
 function Doc(body, metadata, variables)
     return body .. '\n'
 end
 
 -- The functions that follow render corresponding pandoc elements.
 -- s is always a string, attr is always a table of attributes, and
--- items is always an array of strings (the items in a list).
--- Comments indicate the types of other variables.
+-- items is always an array of strings (the items in a list) except
+-- for DefinitionList.
 
 function Str(s)
     return escape(s)
@@ -82,13 +70,20 @@ function Strikeout(s)
 end
 
 function Link(s, src, tit, attr)
-    -- FIXME
-    return "LINK:<" .. src .. "><" .. s .. ">"
+    -- currently only external links are handled properly.
+    -- internal links (to other wiki pages) are not supported
+    -- (and probably not needed).
+
+    -- handle :target: weirdness in cookbook/traps
+    if string.match(src, "_images/") then
+        return s
+    end
+
+    return "[[" .. src .. " | " .. s .. "]]"
 end
 
 function Image(s, src, tit, attr)
-    -- FIXME
-    return "IMG:<" .. src .. "><" .. s .. ">"
+    return CaptionedImage(src, tit, s, attr)
 end
 
 function CaptionedImage(src, tit, caption, attr)
@@ -100,8 +95,19 @@ function CaptionedImage(src, tit, caption, attr)
         end
     end
 
-    -- FIXME
-    return "CAPIMG:<" .. src .. "><" .. caption .. ">"
+    if string.match(src, "http:/") or string.match(src, "https:/") then
+        -- Ok, we have an absolute URL
+    else
+        src = "http://eureka-editor.sourceforge.net/" .. "user/" .. src
+    end
+
+    if caption == "" or caption == "image" then
+        -- ignore it
+    else
+        src = src .. '"' .. caption .. '"'
+    end
+
+    return src
 end
 
 function Code(s, attr)
@@ -147,7 +153,7 @@ function Para(s)
     return s .. "\n"
 end
 
--- lev is an integer, the header level.
+-- lev is an integer >= 1
 function Header(lev, s, attr)
     if lev <= 1 then
         return "(:notitle:)\n" .. "!" .. s
@@ -167,7 +173,7 @@ function HorizontalRule()
 end
 
 function CodeBlock(s, attr)
-    return "@@[@" .. escape(s) .. "@]@@"
+    return "[@" .. escape(s) .. "\n@]"
 end
 
 function BulletList(items)
@@ -190,31 +196,17 @@ function DefinitionList(items)
     local buffer = {}
     for _,item in pairs(items) do
         for k, v in pairs(item) do
-        table.insert(buffer, ":" .. k .. ":" ..  table.concat(v, "\n"))
+        table.insert(buffer, "\n:" .. k .. ": " ..  table.concat(v, "\n"))
         end
     end
     return table.concat(buffer, "\n") .. "\n"
-end
-
--- Convert pandoc alignment to something HTML can use.
--- align is AlignLeft, AlignRight, AlignCenter, or AlignDefault.
-function html_align(align)
-  if align == 'AlignLeft' then
-    return 'left'
-  elseif align == 'AlignRight' then
-    return 'right'
-  elseif align == 'AlignCenter' then
-    return 'center'
-  else
-    return 'left'
-  end
 end
 
 -- Caption is a string, aligns is an array of strings,
 -- widths is an array of floats, headers is an array of
 -- strings, rows is an array of arrays of strings.
 function Table(caption, aligns, widths, headers, rows)
-    -- not needed
+    -- not needed (thankfully!)
     return ""
 end
 
