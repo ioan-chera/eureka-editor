@@ -49,7 +49,7 @@ local function add_index_link(tit)
     local anchor = "anchor" .. ANCHOR
     ANCHOR = ANCHOR + 1
 
-    fp:write(string.format("    * [[%s#%s | %s]]\n", pm_page, anchor, tit))
+    fp:write(string.format("** [[%s#%s | %s]]\n", pm_page, anchor, tit))
     fp:close()
 
     return anchor
