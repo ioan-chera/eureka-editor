@@ -31,7 +31,15 @@ end
 -- This function is called once for the whole document
 -- (at the very end).  body is a single string.
 function Doc(body, metadata, variables)
-    return body .. '\n'
+    -- convert to a raw pmWiki page file.
+    -- several characters need to be escaped...
+    body = string.gsub(body, "%%", "%%25")
+    body = string.gsub(body, "<",  "%%3c")
+    body = string.gsub(body, "\n", "%%0a")
+
+    return "version=pmwiki-2.2.43 urlencoded=1\n" ..
+           "charset=UTF-8\n" ..
+           "text=" .. body .. "\n"
 end
 
 -- The functions that follow render corresponding pandoc elements.
