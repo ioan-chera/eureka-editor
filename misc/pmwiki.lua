@@ -49,9 +49,68 @@ function Strong(s)
     return "'''" .. s .. "'''"
 end
 
+-- this represents the :kbd: elements
 function Subscript(s)
-    -- TODO : this represents the :kbd: elements
-    return "KBD:" .. s
+    if s == nil or s == "" then
+        return ""
+    end
+
+    -- handle menu references like "File -> Open Map"
+    if string.match(s, "->") then
+        return Strong(s)
+    end
+
+    local result = ""
+
+    -- check for shift/control/alt
+    local low = string.lower(s)
+
+    if string.match(low, "^shift[ -_]") then
+        s = string.sub(s, 7)
+        return Subscript("shift") .. "-" .. Subscript(s)
+    end
+
+    if string.match(low, "^control[ -_]") then
+        s = string.sub(s, 9)
+        return Subscript("ctrl") .. "-" .. Subscript(s)
+    end
+
+    if string.match(low, "^ctrl[ -_]") then
+        s = string.sub(s, 6)
+        return Subscript("ctrl") .. "-" .. Subscript(s)
+    end
+
+    if string.match(low, "^alt[ -_]") then
+        s = string.sub(s, 5)
+        return Subscript("alt") .. "-" .. Subscript(s)
+    end
+
+    -- check for ranges
+    if #s == 3 and string.sub(s, 2, 2) == "-" then
+        local s1 = string.sub(s, 1, 1)
+        local s2 = string.sub(s, 3, 3)
+        return Subscript(s1) .. ".." .. Subscript(s2)
+    end
+
+    -- handle some other oddities
+    if s == ",." then
+        return Subscript(",") .. " " .. Subscript(".")
+    end
+
+    if s == "[]" then
+        return Subscript("[") .. " " .. Subscript("]")
+    end
+
+    if low == "spacebar" then
+        s = "space"
+    end
+
+    -- keys like "shift", "tab" (etc) should be uppercase
+    if #s >= 2 then
+        s = string.upper(s)
+    end
+
+    return "%key%" .. s .. "%%"
 end
 
 function Superscript(s)
