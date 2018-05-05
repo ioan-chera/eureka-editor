@@ -5,6 +5,7 @@
 
 WEBSITE = "http://eureka-editor.sourceforge.net/"
 VERBOSE = false
+ANCHOR  = 1
 
 -- Character escaping
 local function escape(s, in_attribute)
@@ -21,6 +22,37 @@ local function copy_file(src, dest)
     end
 
     os.execute(cmd)
+end
+
+-- stores a link into the "pm/Index" file.
+-- returns the anchor name, or nil if nothing happened.
+local function add_index_link(tit)
+    -- skip it for the cookbook pages
+    local pm_file = os.getenv("PM_FILE")
+    if pm_file and string.match(pm_file, "cookbook/") then
+        return
+    end
+
+    local pm_page = os.getenv("PM_PAGE")
+    if not pm_page then
+        return
+    end
+
+    local fp = io.open("pm/Index", "a")
+    if not fp then
+        if true then
+            io.stderr:write("Failure appending to pm/Index\n")
+        end
+        return
+    end
+
+    local anchor = "anchor" .. ANCHOR
+    ANCHOR = ANCHOR + 1
+
+    fp:write(string.format("    * [[%s#%s | %s]]\n", pm_page, anchor, tit))
+    fp:close()
+
+    return anchor
 end
 
 -- Blocksep is used to separate block elements.
@@ -273,6 +305,10 @@ function Header(lev, s, attr)
     if lev <= 1 then
         return "(:notitle:)\n" .. "!" .. s
     elseif lev <= 2 then
+        local anchor = add_index_link(s)
+        if anchor then
+            return "[[#" .. anchor .. "]]\n" .. "!!" .. s
+        end
         return "!!" .. s
     else
         return "!!!" .. s
