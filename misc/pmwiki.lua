@@ -3,6 +3,8 @@
 --
 -- Invoke with: pandoc -t pmwiki.lua
 
+WEBSITE = "http://eureka-editor.sourceforge.net/"
+
 -- Character escaping
 local function escape(s, in_attribute)
     -- FIXME
@@ -113,9 +115,11 @@ function Subscript(s)
     return "%key%" .. s .. "%%"
 end
 
+-- this represents the :download: elements
 function Superscript(s)
-    -- TODO : this represents the :download: elements
-    return "FILE:" .. s
+    local url = WEBSITE .. "user/" .. s
+
+    return "[[" .. url .. " | " .. s .. "]]"
 end
 
 function SmallCaps(s)
@@ -157,7 +161,7 @@ function CaptionedImage(src, tit, caption, attr)
     if string.match(src, "http:/") or string.match(src, "https:/") then
         -- Ok, we have an absolute URL
     else
-        src = "http://eureka-editor.sourceforge.net/" .. "user/" .. src
+        src = WEBSITE .. "user/" .. src
     end
 
     if caption == "" or caption == "image" then
