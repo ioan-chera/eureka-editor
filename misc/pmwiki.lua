@@ -159,6 +159,12 @@ function Subscript(s)
         s = "space"
     end
 
+    -- an awk scripts provide this
+    -- (because it seems pandoc has an issue with `\`` in RST)
+    if s == "backquote" then
+        s = "`"
+    end
+
     -- keys like "shift", "tab" (etc) should be uppercase
     if #s >= 2 then
         s = string.upper(s)

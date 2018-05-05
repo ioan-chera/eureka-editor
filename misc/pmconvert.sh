@@ -12,6 +12,7 @@ function process() {
     echo ==== ${OUTFILE} ====
     echo "${PM_INDENT}* [[${2}]]" >> pm/Index
     cat ${INFILE} |
+        awk '{ gsub(/`\\``/, "`backquote`") } { print }' |
         awk '{ gsub(/:kbd:/, ":sub:") } { print }' |
         awk '{ gsub(/:download:/, ":sup:") } { print }' |
         pandoc -f RST -t pmwiki.lua > ${OUTFILE}
