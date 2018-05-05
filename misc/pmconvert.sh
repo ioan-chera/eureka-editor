@@ -20,7 +20,9 @@ function process() {
 
 echo "" > pm/Index
 
-process "index"          "User.Index"        "source/index.rst"
+# NOTE: disabled this (to not clobber the hand-edited version on the website)
+# process "index"  "User.Index"  "source/index.rst"
+
 process "intro"          "User.Intro"        "source/introduction.rst"
 process "installation"   "User.Installation" "source/installation.rst"
 process "user_interface" "User.UI"           "source/user-interface/index.rst"
