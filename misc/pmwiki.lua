@@ -322,7 +322,17 @@ function Header(lev, s, attr)
 end
 
 function BlockQuote(s)
-    return "(:table border=1 bgcolor=#eeeeee:)\n" .. "(:cell:)\n" .. s .. "(:tableend:)"
+    local class = "noticebox"
+
+    local s2 = s
+    if #s2 > 100 then
+        s2 = string.sub(s, 1, 100)
+    end
+    if string.match(string.lower(s2), "warning") then
+        class = "warningbox"
+    end
+
+    return "(:table id=" .. class .. ":)\n" .. "(:cell:)\n" .. s .. "(:tableend:)"
 end
 
 function HorizontalRule()
