@@ -4,6 +4,7 @@
 -- Invoke with: pandoc -t pmwiki.lua
 
 WEBSITE = "http://eureka-editor.sourceforge.net/"
+VERBOSE = false
 
 -- Character escaping
 local function escape(s, in_attribute)
@@ -173,27 +174,43 @@ function Image(s, src, tit, attr)
 end
 
 function CaptionedImage(src, tit, caption, attr)
+    local url = src
+
     -- fix up some image filenames...
-    if string.match(src, "capture_") then
+    if string.match(url, "capture_") then
         local base = os.getenv("PM_BASE")
         if base then
-            src = string.gsub(src, "capture_", base .. "_")
+            url = string.gsub(url, "capture_", base .. "_")
         end
     end
 
-    if string.match(src, "http:/") or string.match(src, "https:/") then
+    if string.match(url, "http:/") or string.match(url, "https:/") then
         -- Ok, we have an absolute URL
     else
-        src = WEBSITE .. "user/" .. src
+        -- copy the image file too
+        local dir = os.getenv("PM_FILE")
+        if dir then
+            dir = string.match(dir, "^(.*/)[^/]*$")
+        end
+        if dir then
+            -- source must be original name, dest must be modified name
+            local src_name = dir .. src
+            local dest_name = "pm/user/" .. url
+
+            copy_file(src_name, dest_name)
+        end
+
+        -- make an absolute URL
+        url = WEBSITE .. "user/" .. url
     end
 
     if caption == "" or caption == "image" then
         -- ignore it
     else
-        src = src .. '"' .. caption .. '"'
+        url = url .. '"' .. caption .. '"'
     end
 
-    return src
+    return url
 end
 
 function Code(s, attr)
