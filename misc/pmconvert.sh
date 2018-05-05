@@ -5,7 +5,7 @@ function process() {
     INFILE="${2}"
     OUTFILE="pm/${1}.txt"
     export PM_BASE="${1}"
-    export PM_FILE="${OUTFILE}"
+    export PM_FILE="${INFILE}"
     echo ==== ${OUTFILE} ====
     cat ${INFILE} |
         awk '{ gsub(/:kbd:/, ":sub:") } { print }' |

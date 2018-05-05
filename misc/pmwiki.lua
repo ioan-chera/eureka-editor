@@ -11,6 +11,17 @@ local function escape(s, in_attribute)
     return s
 end
 
+local function copy_file(src, dest)
+    -- NOTE: this will only work on Unix
+    local cmd = string.format("cp -n '%s' '%s'", src, dest)
+
+    if VERBOSE then
+        io.stderr:write(cmd .. "\n")
+    end
+
+    os.execute(cmd)
+end
+
 -- Blocksep is used to separate block elements.
 function Blocksep()
     return "\n"
@@ -119,6 +130,18 @@ end
 function Superscript(s)
     local url = WEBSITE .. "user/" .. s
 
+    -- copy the file too
+    local dir = os.getenv("PM_FILE")
+    if dir then
+        dir = string.match(dir, "^(.*/)[^/]*$")
+    end
+    if dir then
+        local src = dir .. s
+        local dest = "pm/user/" .. s
+
+        copy_file(src, dest)
+    end
+
     return "[[" .. url .. " | " .. s .. "]]"
 end
 
@@ -177,6 +200,10 @@ function Code(s, attr)
     return "@@" .. escape(s) .. "@@"
 end
 
+function CodeBlock(s, attr)
+    return "[@" .. escape(s) .. "\n@]"
+end
+
 function InlineMath(s)
     -- not needed
     return escape(s)
@@ -233,10 +260,6 @@ end
 
 function HorizontalRule()
     return "----"
-end
-
-function CodeBlock(s, attr)
-    return "[@" .. escape(s) .. "\n@]"
 end
 
 function BulletList(items)
