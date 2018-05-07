@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -80,7 +80,7 @@ public:
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Thing() : x(0), y(0), angle(0), type(0), options(7),
+	Thing() : x(0), y(0), angle(0), type(0), options(0),
 			  z(0), tid(0), special(0),
 			  arg1(0), arg2(0), arg3(0), arg4(0), arg5(0)
 	{ }

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -137,10 +137,19 @@ static void Insert_Thing()
 
 	Thing *T = Things[new_t];
 
-	T->type = default_thing;
-
 	if (model >= 0)
 		T->RawCopy(Things[model]);
+	else
+	{
+		T->type = default_thing;
+		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
+
+		if (Level_format == MAPF_Hexen)
+		{
+			T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+			T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+		}
+	}
 
 	T->x = grid.SnapX(edit.map_x);
 	T->y = grid.SnapY(edit.map_y);
