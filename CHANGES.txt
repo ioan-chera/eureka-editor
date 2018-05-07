@@ -6,8 +6,8 @@ CHANGES IN Eureka 1.22
 
 
 - fixed sector merge to keep properties of first selected sector
-
 - fixed wall-sorting issue in 3D View which could cause a crash
-
-- small fix for the Heretic game config
+- fixed a sprite in the Heretic game config
+- fixed malformed warnings when linedefs contain an invalid vertex
+- fixed "Removed unused vertices" message to show correct number
 
