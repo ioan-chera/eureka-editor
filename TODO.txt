@@ -13,10 +13,14 @@ In function get (src/m_strings.cc:129)
 Hexen : map checker shows "unknown line type" when type is 0
 
 
-______________________________________________________________________
 
-  HIGH PRIORITY
-______________________________________________________________________
+Documentation
+-------------
+
+-  describe what a wad file is, PWAD vs IWAD, how to play it,
+   what nodes are, how wad files can contain more than maps,
+   different games and source ports
+
 
 
 General
@@ -32,61 +36,7 @@ General
 
 +  support PNG/JPEG/TGA for patches, flats, sprites
    -->  feature png ??
-   [ need to analyse PNG data for "grAB" chunk, or not?? ]
-
-
-
-Documentation
--------------
-
-+  describe the four modes V/L/S/T, and their panels
-
-+  a tutorial for the basics
-   -  drawing lines in VERTEX mode
-   -  hilighting stuff, selecting stuff, dragging stuff
-   -  using the browser
-
--  describe what a wad file is, PWAD vs IWAD, how to play it,
-   what nodes are, how wad files can contain more than maps,
-   different games and source ports
-
--  describe basic elements of a map: Lines, Vertices, Sectors, Things, SideDefs
-
-
-
-Editing
--------
-
-+  a proper "curve" tool for making a circle arc or bezier curve,
-   and new vertices would be constrained to that curve, and you can
-   move existing vertices onto the curve.
-
-+  when dragging a shape next to existing geometry, highlight
-   vertices and linedefs which would get merged, and implement
-   that merging.
-
-
-
-3D View
--------
-
-+  ability to highlight/select railings
-
-+  slopes
-
-+  extrafloors
-   -  create a DrawWall for their floor/ceil and sides
-   -  distance is slightly closer than normal wall segment
-
-
-______________________________________________________________________
-
-  LOWER PRIORITY
-______________________________________________________________________
-
-
-General
--------
+   [ may need to analyse PNG data for "grAB" chunk ]
 
 -  Preferences window:
    -  backup_max_files / backup_max_space
@@ -168,6 +118,14 @@ WISH: support Windows 95/98/ME
 Editing
 -------
 
++  a proper "curve" tool for making a circle arc or bezier curve,
+   and new vertices would be constrained to that curve, and you can
+   move existing vertices onto the curve.
+
++  when dragging a shape next to existing geometry, highlight
+   vertices and linedefs which would get merged, and implement
+   that merging.
+
 -  a way to see angle of lines
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
@@ -208,6 +166,14 @@ IDEA:  popup menu for right-click on flats/textures in the panel
 
 3D View
 -------
+
++  ability to highlight/select railings
+
++  slopes
+
++  extrafloors
+   -  create a DrawWall for their floor/ceil and sides
+   -  distance is slightly closer than normal wall segment
 
 -  support selecting things in 3D view, use browser to change
    their type, and Copy/Paste too
