@@ -1,7 +1,7 @@
 -- This is a custom writer for pandoc producing pmWiki format.
 -- Created by Andrew Apted, May 2018, based on sample.lua.
---
--- Invoke with: pandoc -t pmwiki.lua
+-- This script only works on the Eureka user manual
+-- (in conjunction with the pmconvert.sh script).
 
 WEBSITE = "http://eureka-editor.sourceforge.net/"
 DL_BASE = "http://sourceforge.net/projects/eureka-editor/files/Misc/Samples/"
@@ -330,8 +330,13 @@ function BlockQuote(s)
     if #s2 > 100 then
         s2 = string.sub(s, 1, 100)
     end
-    if string.match(string.lower(s2), "warning") then
+    s2 = string.lower(s2)
+
+    if string.match(s2, "warning") then
         class = "warningbox"
+        s = string.gsub(s, "warning", "Warning:", 1)
+    elseif string.match(s2, "note") then
+        s = string.gsub(s, "note", "Note:", 1)
     end
 
     return "(:table id=" .. class .. ":)\n" .. "(:cell:)\n" .. s .. "(:tableend:)"
