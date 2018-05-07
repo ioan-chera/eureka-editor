@@ -4,6 +4,8 @@
 -- Invoke with: pandoc -t pmwiki.lua
 
 WEBSITE = "http://eureka-editor.sourceforge.net/"
+DL_BASE = "http://sourceforge.net/projects/eureka-editor/files/Misc/Samples/"
+
 VERBOSE = false
 ANCHOR  = 1
 
@@ -175,7 +177,7 @@ end
 
 -- this represents the :download: elements
 function Superscript(s)
-    local url = WEBSITE .. "user/" .. s
+    local url = DL_BASE .. s .. "/download"
 
     -- copy the file too
     local dir = os.getenv("PM_FILE")
@@ -184,7 +186,7 @@ function Superscript(s)
     end
     if dir then
         local src = dir .. s
-        local dest = "pm/user/" .. s
+        local dest = "pm/download/" .. s
 
         copy_file(src, dest)
     end
