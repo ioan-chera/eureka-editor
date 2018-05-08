@@ -12,4 +12,5 @@ CHANGES IN Eureka 1.22
 - fixed a sprite in the Heretic game config
 - fixed malformed warnings when linedefs contain an invalid vertex
 - fixed "Removed unused vertices" message to show correct number
+- handle some very rare assertion failures more gracefully
 

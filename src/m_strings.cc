@@ -116,7 +116,10 @@ const char * string_table_c::get(int offset)
 	{
 		offset = -(offset + 1);
 
-		SYS_ASSERT(offset < (int)huge_ones.size());
+		// this should never happen
+		// [ but handle it gracefully, for the sake of robustness ]
+		if (offset >= (int)huge_ones.size())
+			return "???ERROR";
 
 		return huge_ones[offset];
 	}
@@ -126,7 +129,10 @@ const char * string_table_c::get(int offset)
 	int blk_num = offset / CHARS_PER_BLOCK;
 	offset      = offset % CHARS_PER_BLOCK;
 
-	SYS_ASSERT(blk_num < (int)blocks.size());
+	// this should never happen
+	// [ but it did once, so handle it gracefully for robustness ]
+	if (blk_num >= (int)blocks.size())
+		return "???ERROR";
 
 	return & blocks[blk_num]->data[offset];
 }
