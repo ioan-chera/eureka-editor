@@ -98,7 +98,7 @@ private:
 	void SetTexOnLine(int ld, int new_tex, int e_state,
 	                  int front_pics, int back_pics);
 
-	int SolidMask(int side);
+	int SolidMask(const LineDef *L, int side) const;
 
 	const char *GeneralizedDesc(int type_num);
 
