@@ -266,7 +266,7 @@ function Code(s, attr)
 end
 
 function CodeBlock(s, attr)
-    return "[@" .. escape(s) .. "\n@]"
+    return "(:table id=codebox:)\n" .. "(:cell:)\n" .. escape(s) .. "\n(:tableend:)"
 end
 
 function InlineMath(s)
