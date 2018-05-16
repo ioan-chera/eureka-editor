@@ -9,6 +9,8 @@ DL_BASE = "http://sourceforge.net/projects/eureka-editor/files/Misc/Samples/"
 VERBOSE = false
 ANCHOR  = 1
 
+BACK_LINK = "[-[[User.Index | back to the Index]]-]\n"
+
 -- Character escaping
 local function escape(s, in_attribute)
     -- FIXME
@@ -65,6 +67,12 @@ end
 -- This function is called once for the whole document
 -- (at the very end).  body is a single string.
 function Doc(body, metadata, variables)
+    -- add links back to the index page (the TOC)
+    body = BACK_LINK .. "\n" .. body .. "\n\n" .. BACK_LINK
+
+	-- disable the usual pmWiki title
+    body = "(:notitle:)\n" .. body
+
     -- convert to a raw pmWiki page file.
     -- several characters need to be escaped...
     body = string.gsub(body, "%%", "%%25")
@@ -311,7 +319,7 @@ end
 -- lev is an integer >= 1
 function Header(lev, s, attr)
     if lev <= 1 then
-        return "(:notitle:)\n" .. "!" .. s
+        return "!" .. s
     elseif lev <= 2 then
         local anchor = add_index_link(s)
         if anchor then
