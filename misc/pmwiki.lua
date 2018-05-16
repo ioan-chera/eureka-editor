@@ -9,8 +9,6 @@ DL_BASE = "http://sourceforge.net/projects/eureka-editor/files/Misc/Samples/"
 VERBOSE = false
 ANCHOR  = 1
 
-BACK_LINK = "[-[[User.Index | back to the Index]]-]\n"
-
 -- Character escaping
 local function escape(s, in_attribute)
     -- FIXME
@@ -67,10 +65,19 @@ end
 -- This function is called once for the whole document
 -- (at the very end).  body is a single string.
 function Doc(body, metadata, variables)
-    -- add links back to the index page (the TOC)
-    body = BACK_LINK .. "\n" .. body .. "\n\n" .. BACK_LINK
+    local BACK_LINK = "[-[[User.Index | back to the Index]]-]"
 
-	-- disable the usual pmWiki title
+    -- add link to the "next" page (when there is one)
+    local next_page = os.getenv("PM_NEXT")
+    if next_page and next_page ~= "" then
+        BACK_LINK = BACK_LINK .. " &nbsp; | &nbsp; " ..
+            "[-[[" .. next_page .. " | go to next page]]-]"
+    end
+
+    -- add links back to the index page (the TOC)
+    body = BACK_LINK .. "\n\n" .. body .. "\n\n" .. BACK_LINK .. "\n"
+
+    -- disable the usual pmWiki title
     body = "(:notitle:)\n" .. body
 
     -- convert to a raw pmWiki page file.
