@@ -830,7 +830,7 @@ bool lev_force_xnod;
 
 bool lev_long_name;
 
-int lev_hard_failures;
+int lev_overflows;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -1399,11 +1399,11 @@ static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 
-void MarkHardFailure(int flags)
+void MarkOverflow(int flags)
 {
 	// flags are ignored
 
-	lev_hard_failures++;
+	lev_overflows++;
 }
 
 
@@ -1442,7 +1442,7 @@ void PutVertices(const char *name, int do_gl)
 	if (! do_gl && count > 65534)
 	{
 		Warning("Number of vertices has overflowed.\n");
-		MarkHardFailure(LIMIT_VERTEXES);
+		MarkOverflow(LIMIT_VERTEXES);
 	}
 }
 
@@ -1556,7 +1556,7 @@ void PutSegs(void)
 	if (count > 65534)
 	{
 		Warning("Number of segs has overflowed.\n");
-		MarkHardFailure(LIMIT_SEGS);
+		MarkOverflow(LIMIT_SEGS);
 	}
 }
 
@@ -1695,7 +1695,7 @@ void PutSubsecs(const char *name, int do_gl)
 	if (num_subsecs > 32767)
 	{
 		Warning("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
-		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
+		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
 
@@ -1859,7 +1859,7 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 	if (!do_v5 && node_cur_index > 32767)
 	{
 		Warning("Number of nodes has overflowed.\n");
-		MarkHardFailure(LIMIT_NODES);
+		MarkOverflow(LIMIT_NODES);
 	}
 }
 
@@ -1869,19 +1869,19 @@ void CheckLimits()
 	if (num_sectors > 65534)
 	{
 		Warning("Map has too many sectors.\n");
-		MarkHardFailure(LIMIT_SECTORS);
+		MarkOverflow(LIMIT_SECTORS);
 	}
 
 	if (num_sidedefs > 65534)
 	{
 		Warning("Map has too many sidedefs.\n");
-		MarkHardFailure(LIMIT_SIDEDEFS);
+		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
 	if (num_linedefs > 65534)
 	{
 		Warning("Map has too many linedefs.\n");
-		MarkHardFailure(LIMIT_LINEDEFS);
+		MarkOverflow(LIMIT_LINEDEFS);
 	}
 
 	if (cur_info->gl_nodes && !cur_info->force_v5)
@@ -2178,8 +2178,8 @@ void LoadLevel()
 {
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
-	lev_current_name  = LEV->Name();
-	lev_hard_failures = 0;
+	lev_current_name = LEV->Name();
+	lev_overflows = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
@@ -2439,10 +2439,10 @@ void SaveLevel(node_t *root_node)
 
 	edit_wad->EndWrite();
 
-	if (lev_hard_failures > 0)
+	if (lev_overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		GB_PrintMsg("FAILED with %d hard failures\n", lev_hard_failures);
+		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
 	}
 }
 
