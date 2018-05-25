@@ -281,10 +281,6 @@ static const char *build_ErrorString(build_result_e ret)
 		// the WAD file was corrupt / empty / bad filename
 		case BUILD_BadFile: return "Bad File";
 
-		// file errors
-		case BUILD_ReadError:  return "Read Error";
-		case BUILD_WriteError: return "Write Error";
-
 		default: return "Unknown Error";
 	}
 }

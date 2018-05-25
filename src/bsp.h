@@ -109,11 +109,7 @@ typedef enum
 	BUILD_Cancelled,
 
 	// the WAD file was corrupt / empty / bad filename
-	BUILD_BadFile,
-
-	// file errors
-	BUILD_ReadError,
-	BUILD_WriteError
+	BUILD_BadFile
 }
 build_result_e;
 
