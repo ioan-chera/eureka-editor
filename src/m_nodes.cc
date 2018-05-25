@@ -366,7 +366,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Total filed maps: %d\n", info->total_failed_maps);
+		GB_PrintMsg("Total failed maps: %d\n", info->total_failed_maps);
 		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
 					info->total_minor_warnings);
 	}
