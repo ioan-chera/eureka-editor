@@ -2,11 +2,8 @@ eureka
 Eureka.exe
 
 lib_win32
-
-obj_linux/*.o
-obj_linux/glbsp/*.o
-obj_win32/*.o
-obj_win32/glbsp/*.o
+obj_win32
+obj_linux
 
 _work
 WIP.txt

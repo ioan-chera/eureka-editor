@@ -33,6 +33,8 @@ LIBS= \
      -lX11 -lXext -lXft -lfontconfig -lXinerama  \
      -lpng -ljpeg -lGL -lz -lm
 
+DUMMY=$(OBJ_DIR)/zzdummy
+
 
 # support for a non-standard install of FLTK
 ifneq ($(FLTK_PREFIX),)
@@ -122,7 +124,7 @@ $(OBJ_DIR)/%.o: src/%.cc
 
 #----- Targets -----------------------------------------------
 
-all: $(PROGRAM)
+all: $(DUMMY) $(PROGRAM)
 
 clean:
 	rm -f $(PROGRAM) $(OBJ_DIR)/*.* core core.*
@@ -130,6 +132,11 @@ clean:
 
 $(PROGRAM): $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
+
+# this is used to create the OBJ_DIR directory
+$(DUMMY):
+	mkdir -p $(OBJ_DIR)
+	@touch $@
 
 stripped: $(PROGRAM)
 	strip $(STRIP_FLAGS) $(PROGRAM)

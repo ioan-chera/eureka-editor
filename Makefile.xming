@@ -44,10 +44,12 @@ LIBS=-lm $(FLTK_LIBS) $(ZLIB_LIBS) \
      -lcomdlg32 -lole32 -luuid -lgdi32 \
      -lcomctl32 -lwsock32 -lsupc++
 
+DUMMY=$(OBJ_DIR)/zzdummy
+
 
 #--- main target ---
 
-all: stripped
+all: $(DUMMY) stripped
 
 
 #----- Object files ----------------------------------------------
@@ -130,6 +132,11 @@ $(OBJ_DIR)/%.o: src/%.cc
 clean:
 	rm -f $(PROGRAM) $(OBJ_DIR)/*.*
 	rm -f ERRS LOG.txt update.log
+
+# this is used to create the OBJ_DIR directory
+$(DUMMY):
+	mkdir -p $(OBJ_DIR)
+	@touch $@
 
 $(PROGRAM): $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
