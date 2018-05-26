@@ -3,24 +3,15 @@ Eureka TODO / WISHLIST
 ======================
 
 
-FATAL ERROR: Assertion (is_lineobj()) failed
-In function SolidMask (src/ui_linedef.cc:926)
-
-FATAL ERROR: Assertion (blk_num < (int)blocks.size()) failed
-In function get (src/m_strings.cc:129)
+wall sorting : check performance of just blindly picking
+the middle wall as the pivot (over the three-way check)
 
 
-Hexen : map checker shows "unknown line type" when type is 0
+does disabling focusing of canvas cause any issues?
+--> have a config option which can enable current behavior
 
 
-
-Documentation
--------------
-
--  describe what a wad file is, PWAD vs IWAD, how to play it,
-   what nodes are, how wad files can contain more than maps,
-   different games and source ports
-
+#24 : preference for the ADD/DEL sidedef buttons
 
 
 General
@@ -240,23 +231,8 @@ IDEA: add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
 
 
 
-Possible User Config
---------------------
-
--  headroom button_1..6
-
--  number of RECENT items in browser
-
--  browser scroll speed (i.e. linesize)
-
--  paste_reselects  (true)
-
-
-______________________________________________________________________
-
-  NOT-TO-DO
-______________________________________________________________________
-
+Rejected Ideas
+--------------
 
 NO:  UDMF support
 
