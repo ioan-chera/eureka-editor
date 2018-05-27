@@ -22,12 +22,20 @@
 #define __EUREKA_UI_EDITOR_H__
 
 class Wad_file;
+class UI_TedStatusBar;
 
 class UI_TextEditor : public Fl_Double_Window
 {
 private:
 	bool want_close;
 	bool read_only;
+
+	Fl_Menu_Bar *menu_bar;
+
+	UI_TedStatusBar *status;
+
+	Fl_Text_Editor *ted;
+	Fl_Text_Buffer *tbuf;
 
 public:
 	UI_TextEditor();

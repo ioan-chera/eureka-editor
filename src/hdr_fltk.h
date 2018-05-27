@@ -55,6 +55,8 @@
 #include <FL/Fl_Slider.H>
 #include <FL/Fl_Sys_Menu_Bar.H>
 #include <FL/Fl_Tabs.H>
+#include <FL/Fl_Text_Buffer.H>
+#include <FL/Fl_Text_Editor.H>
 #include <FL/Fl_Tile.H>
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Value_Input.H>
