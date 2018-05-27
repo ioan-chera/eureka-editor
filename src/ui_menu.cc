@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -38,6 +38,11 @@ static void file_do_new_project(Fl_Widget *w, void * data)
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("ManageProject");
+}
+
+static void file_do_lump_editor(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("EditLump");
 }
 
 static void file_do_open(Fl_Widget *w, void * data)
@@ -421,6 +426,7 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
 		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "&Lump Editor",      0,                FCAL file_do_lump_editor },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

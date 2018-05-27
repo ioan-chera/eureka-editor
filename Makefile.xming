@@ -76,6 +76,7 @@ OBJS = \
 	$(OBJ_DIR)/main.o  \
 	$(OBJ_DIR)/m_bitvec.o  \
 	$(OBJ_DIR)/m_config.o  \
+	$(OBJ_DIR)/m_editlump.o  \
 	$(OBJ_DIR)/m_events.o  \
 	$(OBJ_DIR)/m_files.o  \
 	$(OBJ_DIR)/m_game.o  \

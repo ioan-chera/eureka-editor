@@ -37,6 +37,7 @@
 #include "e_path.h"
 #include "e_vertex.h"
 #include "m_config.h"
+#include "m_editlump.h"
 #include "m_events.h"
 #include "m_loadsave.h"
 #include "m_nodes.h"
@@ -1288,6 +1289,10 @@ static editor_command_t  command_table[] =
 
 	{	"ManageProject",  "File",
 		&CMD_ManageProject
+	},
+
+	{	"EditLump",  "File",
+		&CMD_EditLump
 	},
 
 	{	"OpenMap",  "File",
