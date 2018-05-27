@@ -25,6 +25,62 @@
 #include "ui_window.h"
 
 
+class UI_TextEditor : public Fl_Double_Window
+{
+private:
+	bool want_close;
+
+public:
+	UI_TextEditor(const char *title);
+	virtual ~UI_TextEditor();
+
+	int Run();
+
+private:
+	static void  close_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
+};
+
+
+UI_TextEditor::UI_TextEditor(const char *title) :
+	Fl_Double_Window(580, 400, title),
+	want_close(false)
+{
+	// TODO
+
+	callback((Fl_Callback *) close_callback, this);
+}
+
+
+UI_TextEditor::~UI_TextEditor()
+{ }
+
+
+int UI_TextEditor::Run()
+{
+	set_modal();
+
+	show();
+
+	while (! want_close)
+	{
+		Fl::wait(0.2);
+	}
+
+	return 0;
+}
+
+
+void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
+{
+	UI_TextEditor * that = (UI_TextEditor *)data;
+
+	that->want_close = true;
+}
+
+
+//------------------------------------------------------------------------
+
 void CMD_EditLump()
 {
 	const char *lump_name = EXEC_Param[0];
@@ -43,6 +99,11 @@ void CMD_EditLump()
 
 	// FIXME
 
+	UI_TextEditor *editor = new UI_TextEditor(lump_name);
+
+	editor->Run();
+
+	delete editor;
 }
 
 
