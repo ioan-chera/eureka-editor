@@ -32,7 +32,7 @@ private:
 	bool read_only;
 
 public:
-	UI_TextEditor(const char *title);
+	UI_TextEditor();
 	virtual ~UI_TextEditor();
 
 	void SetReadOnly()
@@ -51,8 +51,8 @@ private:
 };
 
 
-UI_TextEditor::UI_TextEditor(const char *title) :
-	Fl_Double_Window(580, 400, title),
+UI_TextEditor::UI_TextEditor() :
+	Fl_Double_Window(580, 400, ""),
 	want_close(false),
 	read_only(false)
 {
@@ -89,13 +89,27 @@ void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 }
 
 
+// this sets the window's title too
 bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 {
+	static char title_buf[FL_PATH_MAX];
+
 	Lump_c * lump = wad->FindLump(lump_name);
 
-	// does not matter if it doesn't exist, we will create it
+	// if the lump does not exist, we will create it
 	if (! lump)
+	{
+		if (read_only)
+		{
+			// FIXME DLG_Notify
+			return false;
+		}
+
+		sprintf(title_buf, "%s lump (new)", lump_name);
+		copy_label(title_buf);
+
 		return true;
+	}
 
 	LogPrintf("Reading '%s' text lump\n", lump_name);
 
@@ -106,6 +120,13 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 	}
 
 	// FIXME: LoadLump
+
+	if (read_only)
+		sprintf(title_buf, "%s lump (read-only)", lump_name);
+	else
+		sprintf(title_buf, "%s lump", lump_name);
+
+	copy_label(title_buf);
 
 	return true;
 }
@@ -164,9 +185,9 @@ void CMD_EditLump()
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// create the editor window
-	UI_TextEditor *editor = new UI_TextEditor(lump_name);
+	UI_TextEditor *editor = new UI_TextEditor();
 
-	if (! edit_wad)
+	if (! edit_wad || edit_wad->IsReadOnly())
 		editor->SetReadOnly();
 
 	// if lump exists, load the contents
