@@ -32,6 +32,7 @@
 #include "ui_tile.h"
 #include "ui_browser.h"
 #include "ui_default.h"
+#include "ui_editor.h"
 #include "ui_replace.h"
 
 #include "ui_thing.h"

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  TEXT LUMP EDITOR
+//  TEXT EDITOR WINDOW
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -18,12 +18,37 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_M_EDITLUMP_H__
-#define __EUREKA_M_EDITLUMP_H__
+#ifndef __EUREKA_UI_EDITOR_H__
+#define __EUREKA_UI_EDITOR_H__
 
-void CMD_EditLump();
+class Wad_file;
 
-#endif  /* __EUREKA_M_EDITLUMP_H__ */
+class UI_TextEditor : public Fl_Double_Window
+{
+private:
+	bool want_close;
+	bool read_only;
+
+public:
+	UI_TextEditor();
+	virtual ~UI_TextEditor();
+
+	void SetReadOnly()
+	{
+		read_only = true;
+	}
+
+	bool LoadLump(Wad_file *wad, const char *lump_name);
+	bool SaveLump(Wad_file *wad, const char *lump_name);
+
+	int Run();
+
+private:
+	static void  close_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
+};
+
+#endif  /* __EUREKA_UI_EDITOR_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
