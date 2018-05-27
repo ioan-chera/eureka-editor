@@ -36,6 +36,9 @@ public:
 
 	int Run();
 
+	bool LoadLump(const char *lump_name);
+	bool SaveLump(const char *lump_name);
+
 private:
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
@@ -79,7 +82,54 @@ void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 }
 
 
+bool UI_TextEditor::LoadLump(const char *lump_name)
+{
+	// FIXME: LoadLump
+
+/*
+	Lump_c * lump = wad->FindLump(lump_name);
+
+	// does not matter if it doesn't exist, we will create it
+	if (! lump)
+		return true;
+
+	{
+		if (! lump->Seek())
+		{
+			// FIXME: DLG_Notify
+			delete lump;
+			delete editor;
+
+			return;
+		}
+
+		// FIXME
+
+		delete lump; lump = NULL;
+	}
+*/
+
+	return true;
+}
+
+
+bool UI_TextEditor::SaveLump(const char *lump_name)
+{
+	// FIXME: SaveLump
+
+	return true;
+}
+
+
 //------------------------------------------------------------------------
+
+static bool ValidLumpToEdit(const char *name)
+{
+	// FIXME : ValidLumpToEdit
+
+	return true;
+}
+
 
 void CMD_EditLump()
 {
@@ -88,7 +138,8 @@ void CMD_EditLump()
 	if (lump_name[0] == 0 || lump_name[0] == '/')
 	{
 		// ask for the lump name
-		// FIXME: custom dialog
+
+		// FIXME: custom dialog, which validates the name (among other things)
 
 		lump_name = fl_input("Lump name?");
 
@@ -96,12 +147,31 @@ void CMD_EditLump()
 			return;
 	}
 
+	if (! ValidLumpToEdit(lump_name))
+	{
+		Beep("Invalid lump: '%s'", lump_name);
+		return;
+	}
 
-	// FIXME
-
+	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor(lump_name);
 
-	editor->Run();
+	// if lump exists, load the contents
+	if (! editor->LoadLump(lump_name))
+	{
+		// something went wrong
+		delete editor;
+		return;
+	}
+
+	// run the editor
+	int res = editor->Run();
+
+	// save the contents?
+	if (res == 123)
+	{
+		editor->SaveLump(lump_name);
+	}
 
 	delete editor;
 }
