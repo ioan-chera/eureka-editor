@@ -29,15 +29,21 @@ class UI_TextEditor : public Fl_Double_Window
 {
 private:
 	bool want_close;
+	bool read_only;
 
 public:
 	UI_TextEditor(const char *title);
 	virtual ~UI_TextEditor();
 
-	int Run();
+	void SetReadOnly()
+	{
+		read_only = true;
+	}
 
-	bool LoadLump(const char *lump_name);
-	bool SaveLump(const char *lump_name);
+	bool LoadLump(Wad_file *wad, const char *lump_name);
+	bool SaveLump(Wad_file *wad, const char *lump_name);
+
+	int Run();
 
 private:
 	static void  close_callback(Fl_Widget *, void *);
@@ -47,7 +53,8 @@ private:
 
 UI_TextEditor::UI_TextEditor(const char *title) :
 	Fl_Double_Window(580, 400, title),
-	want_close(false)
+	want_close(false),
+	read_only(false)
 {
 	// TODO
 
@@ -82,39 +89,40 @@ void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 }
 
 
-bool UI_TextEditor::LoadLump(const char *lump_name)
+bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 {
-	// FIXME: LoadLump
-
-/*
 	Lump_c * lump = wad->FindLump(lump_name);
 
 	// does not matter if it doesn't exist, we will create it
 	if (! lump)
 		return true;
 
+	LogPrintf("Reading '%s' text lump\n", lump_name);
+
+	if (! lump->Seek())
 	{
-		if (! lump->Seek())
-		{
-			// FIXME: DLG_Notify
-			delete lump;
-			delete editor;
-
-			return;
-		}
-
-		// FIXME
-
-		delete lump; lump = NULL;
+		// FIXME: DLG_Notify
+		return false;
 	}
-*/
+
+	// FIXME: LoadLump
 
 	return true;
 }
 
 
-bool UI_TextEditor::SaveLump(const char *lump_name)
+bool UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 {
+	LogPrintf("Writing '%s' text lump\n", lump_name);
+
+	wad->BeginWrite();
+
+	int oldie = wad->FindLumpNum(lump_name);
+	if (oldie >= 0)
+		wad->RemoveLumps(oldie, 1);
+
+	Lump_c *lump = wad->AddLump(lump_name);
+
 	// FIXME: SaveLump
 
 	return true;
@@ -153,11 +161,16 @@ void CMD_EditLump()
 		return;
 	}
 
+	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor(lump_name);
 
+	if (! edit_wad)
+		editor->SetReadOnly();
+
 	// if lump exists, load the contents
-	if (! editor->LoadLump(lump_name))
+	if (! editor->LoadLump(wad, lump_name))
 	{
 		// something went wrong
 		delete editor;
@@ -168,9 +181,9 @@ void CMD_EditLump()
 	int res = editor->Run();
 
 	// save the contents?
-	if (res == 123)
+	if (res == 123 && wad == edit_wad)
 	{
-		editor->SaveLump(lump_name);
+		editor->SaveLump(wad, lump_name);
 	}
 
 	delete editor;
