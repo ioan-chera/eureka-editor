@@ -312,13 +312,6 @@ public:
 };
 
 
-typedef struct Vertex  *VPtr;
-typedef struct Thing   *TPtr;
-typedef struct LineDef *LDPtr;
-typedef struct SideDef *SDPtr;
-typedef struct Sector  *SPtr;
-
-
 extern std::vector<Thing *>   Things;
 extern std::vector<Vertex *>  Vertices;
 extern std::vector<Sector *>  Sectors;
