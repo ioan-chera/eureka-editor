@@ -91,18 +91,41 @@ static void ted_do_find(Fl_Widget *w, void *data)
 static Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
-		{ "&Save",    FL_COMMAND + 's', FCAL ted_do_save },
+		{ "&Insert File...",       FL_COMMAND + 'i', FCAL ted_do_save },
+		{ "&Export to File...  ",   FL_COMMAND + 'e', FCAL ted_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Quit",    FL_COMMAND + 'q', FCAL ted_do_quit },
+		{ "&Save Lump",   FL_COMMAND + 's', FCAL ted_do_save },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Close",       FL_COMMAND + 'q', FCAL ted_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
-		{ "&Undo",   FL_COMMAND + 'z',  FCAL ted_do_undo },
-		{ "&Redo",   FL_COMMAND + 'y',  FCAL ted_do_redo },
+		{ "&Undo",    FL_COMMAND + 'z',  FCAL ted_do_undo },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Cu&t",     FL_COMMAND + 'x',  FCAL ted_do_redo },
+		{ "&Copy",    FL_COMMAND + 'c',  FCAL ted_do_redo },
+		{ "&Paste",   FL_COMMAND + 'v',  FCAL ted_do_redo },
+		{ "&Delete",  0,                 FCAL ted_do_redo },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Select &All",  FL_COMMAND + 'a',  FCAL ted_do_redo },
+		{ "Unselect All  ", FL_COMMAND + 'u',  FCAL ted_do_redo },
 		{ 0 },
 
 	{ "&Search", 0, 0, 0, FL_SUBMENU },
-		{ "&Find",   FL_COMMAND + 'f',  FCAL ted_do_find },
+		{ "&Find",     FL_COMMAND + 'f',  FCAL ted_do_find },
+		{ "Find Next", FL_COMMAND + 'g',  FCAL ted_do_find },
+		{ "&Replace",  FL_COMMAND + 'r',  FCAL ted_do_find },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Next Wotsit  ",  FL_COMMAND + 'n',  FCAL ted_do_find },
+		{ "Go to &Top",     FL_COMMAND + 't',  FCAL ted_do_find },
+		{ "Go to &Bottom  ",  FL_COMMAND + 'b',  FCAL ted_do_find },
+		{ 0 },
+
+	{ "&View", 0, 0, 0, FL_SUBMENU },
+		// TODO : flesh these out   [ will need config-file vars too ]
+		{ "Colors",   0,                 FCAL ted_do_find },
+		{ "Font",     0,                 FCAL ted_do_find },
+		{ "Line Numbers", 0,                 FCAL ted_do_find },
 		{ 0 },
 
 	{ 0 }
