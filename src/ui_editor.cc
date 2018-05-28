@@ -79,7 +79,7 @@ UI_TextEditor::UI_TextEditor() :
 	ted->color(FL_BLACK, FL_BLACK);
 	ted->textfont(FL_COURIER);
 	ted->textsize(18);
-	ted->textcolor(FL_WHITE);
+	ted->textcolor(fl_rgb_color(192,192,192));
 
 	ted->cursor_color(FL_RED);
 	ted->cursor_style(Fl_Text_Display::HEAVY_CURSOR);
