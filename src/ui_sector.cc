@@ -849,7 +849,7 @@ void UI_SectorBox::CB_Cut()
 }
 
 
-bool UI_SectorBox::ClipboardOp(char what)
+bool UI_SectorBox::ClipboardOp(char op)
 {
 	if (obj < 0)
 		return false;
@@ -860,7 +860,7 @@ bool UI_SectorBox::ClipboardOp(char what)
 		return false;
 	}
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			CB_Copy();

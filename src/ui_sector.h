@@ -88,7 +88,7 @@ public:
 	void UpdateGameInfo();
 
 	// see ui_window.h for description of these two methods
-	bool ClipboardOp(char what);
+	bool ClipboardOp(char op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	// returns a bitmask: 1 for floor, 2 for ceiling

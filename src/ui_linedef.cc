@@ -527,7 +527,7 @@ void UI_LineBox::CB_Paste(int new_tex)
 }
 
 
-bool UI_LineBox::ClipboardOp(char what)
+bool UI_LineBox::ClipboardOp(char op)
 {
 	if (obj < 0)
 		return false;
@@ -538,7 +538,7 @@ bool UI_LineBox::ClipboardOp(char what)
 		return false;
 	}
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			CB_Copy();

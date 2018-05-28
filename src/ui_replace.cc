@@ -898,7 +898,7 @@ char UI_FindAndReplace::GetKind()
 }
 
 
-bool UI_FindAndReplace::ClipboardOp(char what)
+bool UI_FindAndReplace::ClipboardOp(char op)
 {
 	// hmmm, review this
 	fl_beep();

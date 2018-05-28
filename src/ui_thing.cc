@@ -451,7 +451,7 @@ void UI_ThingBox::SetSpecialType(int new_type)
 }
 
 
-bool UI_ThingBox::ClipboardOp(char what)
+bool UI_ThingBox::ClipboardOp(char op)
 {
 	return false;
 }

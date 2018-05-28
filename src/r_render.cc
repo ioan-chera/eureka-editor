@@ -2976,12 +2976,12 @@ static void Render3D_Delete()
 }
 
 
-bool Render3D_ClipboardOp(char what)
+bool Render3D_ClipboardOp(char op)
 {
 	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 		return false;
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			Render3D_Copy();

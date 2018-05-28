@@ -76,7 +76,7 @@ public:
 	void UpdateTotal();
 
 	// see ui_window.h for description of these two methods
-	bool ClipboardOp(char what);
+	bool ClipboardOp(char op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();
