@@ -58,6 +58,7 @@
 #include <unistd.h>
 #endif
 
+#include <algorithm>
 #include <vector>
 
 
