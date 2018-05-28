@@ -47,7 +47,7 @@ typedef enum
 //
 // this holds some important editor state
 //
-typedef struct
+struct Editor_State_t
 {
 	obj_type_e  mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
@@ -96,8 +96,7 @@ typedef struct
 	float nav_scroll_down;
 
 	float scroll_speed;
-
-} Editor_State_t;
+};
 
 
 extern Editor_State_t  edit;
