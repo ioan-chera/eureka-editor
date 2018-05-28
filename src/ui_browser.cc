@@ -700,7 +700,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 		int item_w = 8 + MAX(pic_w, 64) + 2;
 		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
 
-		char category = 0;
+		char item_cat = 0;
 
 		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
 
@@ -709,19 +709,19 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 			pic->GetFlat(name);
 			pic->callback(Browser_Item::flat_callback, (void *)name);
 
-			category = M_GetFlatType(name);
+			item_cat = M_GetFlatType(name);
 		}
 		else if (kind == 'T')
 		{
 			pic->GetTex(name);
 			pic->callback(Browser_Item::texture_callback, (void *)name);
 
-			category = M_GetTextureType(name);
+			item_cat = M_GetTextureType(name);
 		}
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
 		                                      full_desc, name,
-											  0 /* num */, category,
+											  0 /* num */, item_cat,
 		                                      pic_w, pic_h, pic);
 		scroll->Add(item);
 	}
