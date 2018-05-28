@@ -11,8 +11,8 @@ PREFIX=/usr/local
 
 OBJ_DIR=obj_linux
 
+WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
 OPTIMISE=-O2 -fno-strict-aliasing
-
 STRIP_FLAGS=--strip-unneeded
 
 # operating system choices: UNIX WIN32
@@ -23,7 +23,7 @@ OS=UNIX
 
 INSTALL_DIR=$(PREFIX)/share/eureka
 
-CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
+CXXFLAGS=$(OPTIMISE) $(WARNINGS) -D$(OS)  \
          -D_THREAD_SAFE -D_REENTRANT
 
 LDFLAGS=-L/usr/X11R6/lib
