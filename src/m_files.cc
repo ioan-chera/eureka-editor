@@ -615,7 +615,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 
 	// handle a trailing separator
 	if (! paths[0])
-		return NULL;
+		return false;
 
 
 	int len;
