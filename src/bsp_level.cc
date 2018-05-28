@@ -1833,7 +1833,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 }
 
 
-void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
+void PutNodes(const char *name, int do_v5, node_t *root)
 {
 	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
 
@@ -2396,7 +2396,7 @@ void SaveLevel(node_t *root_node)
 		else
 			PutSubsecs("GL_SSECT", true);
 
-		PutNodes("GL_NODES", true, lev_force_v5, root_node);
+		PutNodes("GL_NODES", lev_force_v5, root_node);
 
 		// -JL- Add empty PVS lump
 		CreateLevelLump("GL_PVS")->Finish();
@@ -2424,7 +2424,7 @@ void SaveLevel(node_t *root_node)
 
 		PutSegs();
 		PutSubsecs("SSECTORS", false);
-		PutNodes("NODES", false, false, root_node);
+		PutNodes("NODES", false, root_node);
 	}
 
 	PutBlockmap();
