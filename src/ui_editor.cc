@@ -59,6 +59,58 @@ public:
 
 //------------------------------------------------------------------------
 
+static void ted_do_save(Fl_Widget *w, void *data)
+{
+	// FIXME
+}
+
+static void ted_do_quit(Fl_Widget *w, void *data)
+{
+	// FIXME
+}
+
+static void ted_do_undo(Fl_Widget *w, void *data)
+{
+	// FIXME
+}
+
+static void ted_do_redo(Fl_Widget *w, void *data)
+{
+	// FIXME
+}
+
+static void ted_do_find(Fl_Widget *w, void *data)
+{
+	// FIXME
+}
+
+
+#undef FCAL
+#define FCAL  (Fl_Callback *)
+
+static Fl_Menu_Item ted_menu_items[] =
+{
+	{ "&File", 0, 0, 0, FL_SUBMENU },
+		{ "&Save",    FL_COMMAND + 's', FCAL ted_do_save },
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Quit",    FL_COMMAND + 'q', FCAL ted_do_quit },
+		{ 0 },
+
+	{ "&Edit", 0, 0, 0, FL_SUBMENU },
+		{ "&Undo",   FL_COMMAND + 'z',  FCAL ted_do_undo },
+		{ "&Redo",   FL_COMMAND + 'y',  FCAL ted_do_redo },
+		{ 0 },
+
+	{ "&Search", 0, 0, 0, FL_SUBMENU },
+		{ "&Find",   FL_COMMAND + 'f',  FCAL ted_do_find },
+		{ 0 },
+
+	{ 0 }
+};
+
+
+//------------------------------------------------------------------------
+
 UI_TextEditor::UI_TextEditor() :
 	Fl_Double_Window(580, 400, ""),
 	want_close(false),
@@ -71,6 +123,7 @@ UI_TextEditor::UI_TextEditor() :
 	int MW = w() / 2;
 
 	menu_bar = new Fl_Menu_Bar(0, 0, MW, 28);
+	menu_bar->copy(ted_menu_items, this /* userdata for every menu item */);
 
 	status = new UI_TedStatusBar(MW, 0, w() - MW, 28);
 
