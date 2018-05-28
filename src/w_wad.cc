@@ -1261,11 +1261,11 @@ void Wad_file::WriteDirectory()
 }
 
 
-bool Wad_file::Backup(const char *filename)
+bool Wad_file::Backup(const char *new_filename)
 {
 	fflush(fp);
 
-	return FileCopy(PathName(), filename);
+	return FileCopy(PathName(), new_filename);
 }
 
 
