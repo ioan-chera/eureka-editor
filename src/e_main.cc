@@ -1100,7 +1100,7 @@ Recently_used::Recently_used() :
 	size(0),
 	keep_num(RECENTLY_USED_MAX - 2)
 {
-	memset(&name_set, 0, sizeof(name_set));
+	memset(name_set, 0, sizeof(name_set));
 }
 
 
@@ -1210,7 +1210,7 @@ void Recently_used::clear()
 {
 	size = 0;
 
-	memset(&name_set, 0, sizeof(name_set));
+	memset(name_set, 0, sizeof(name_set));
 }
 
 

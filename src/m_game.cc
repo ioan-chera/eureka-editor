@@ -97,7 +97,7 @@ void M_ClearAllDefinitions()
 	game_info.max_dm_starts = 10;
 
 	// reset generalized types
-	memset(&gen_linetypes, 0, sizeof(gen_linetypes));
+	memset(gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
 
 	// clear the parse variables, pre-set a few vars
