@@ -27,32 +27,78 @@
 class UI_TedStatusBar : public Fl_Group
 {
 private:
-	Fl_Output *column;
-	Fl_Output *row;
+	Fl_Box *row_col;
+	Fl_Box *mod_box;
+
+	int cur_row;
+	int cur_column;
+
+	bool cur_modified;
 
 public:
 	UI_TedStatusBar(int X, int Y, int W, int H, const char *label = NULL) :
-		Fl_Group(X, Y, W, H, label)
+		Fl_Group(X, Y, W, H, label),
+		cur_row(1), cur_column(1), cur_modified(false)
 	{
 		box(FL_UP_BOX);
 
-		// TODO
+		row_col = new Fl_Box(FL_FLAT_BOX, X, Y+1, W*2/3, H-2, "");
+		row_col->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+
+		mod_box = new Fl_Box(FL_FLAT_BOX, X+W*2/3, Y+1, W/3, H-2, "");
+		mod_box->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
 
 		end();
+
+		Update();
 	}
 
 	virtual ~UI_TedStatusBar()
 	{ }
 
 public:
-	void SetColumn(int col)
+	void SetRow(int row)
 	{
-		// TODO
+		if (row != cur_row)
+		{
+			cur_row = row;
+			Update();
+		}
 	}
 
-	void SetRow(int col)
+	void SetColumn(int column)
 	{
-		// TODO
+		if (column != cur_column)
+		{
+			cur_column = column;
+			Update();
+		}
+	}
+
+	void SetModified(bool modified)
+	{
+		if (modified != cur_modified)
+		{
+			cur_modified = modified;
+			Update();
+		}
+	}
+
+	void Update()
+	{
+		static char buffer[256];
+
+		snprintf(buffer, sizeof(buffer), " Line: %-6d Col: %d", cur_row, cur_column);
+
+		row_col->copy_label(buffer);
+
+		if (cur_modified)
+			mod_box->label("MODIFIED ");
+		else
+			mod_box->label("");
+
+		// ensure background gets redrawn
+		redraw();
 	}
 };
 
