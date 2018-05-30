@@ -105,6 +105,27 @@ public:
 
 //------------------------------------------------------------------------
 
+// andrewj: this class only exists because a very useful method of
+//          Fl_Text_Display is not public.  FFS.
+class UI_TedWrapper : public Fl_Text_Editor
+{
+public:
+	UI_TedWrapper(int X, int Y, int W, int H, const char *l=0) :
+		Fl_Text_Editor(X, Y, W, H, l)
+	{ }
+
+	virtual ~UI_TedWrapper()
+	{ }
+
+	bool GetLineAndColumn(int *line, int *col)
+	{
+		return position_to_linecol(insert_position(), line, col) != 0;
+	}
+};
+
+
+//------------------------------------------------------------------------
+
 static void ted_do_save(Fl_Widget *w, void *data)
 {
 	// FIXME
@@ -196,7 +217,7 @@ UI_TextEditor::UI_TextEditor() :
 
 	status = new UI_TedStatusBar(MW, 0, w() - MW, 28);
 
-	ted = new Fl_Text_Editor(0, 28, w(), h() - 28);
+	ted = new UI_TedWrapper(0, 28, w(), h() - 28);
 
 	ted->color(FL_BLACK, FL_BLACK);
 	ted->textfont(FL_COURIER);

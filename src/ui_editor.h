@@ -23,6 +23,7 @@
 
 class Wad_file;
 class UI_TedStatusBar;
+class UI_TedWrapper;
 
 class UI_TextEditor : public Fl_Double_Window
 {
@@ -34,7 +35,7 @@ private:
 
 	UI_TedStatusBar *status;
 
-	Fl_Text_Editor *ted;
+	UI_TedWrapper  *ted;
 	Fl_Text_Buffer *tbuf;
 
 public:
