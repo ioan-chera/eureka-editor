@@ -53,6 +53,8 @@ public:
 	int Run();
 
 private:
+	void UpdatePosition();
+
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 };

@@ -30,9 +30,8 @@ private:
 	Fl_Box *row_col;
 	Fl_Box *mod_box;
 
-	int cur_row;
-	int cur_column;
-
+	int  cur_row;
+	int  cur_column;
 	bool cur_modified;
 
 public:
@@ -57,20 +56,13 @@ public:
 	{ }
 
 public:
-	void SetRow(int row)
+	void SetPosition(int row, int column)
 	{
-		if (row != cur_row)
+		if (row != cur_row || column != cur_column)
 		{
 			cur_row = row;
-			Update();
-		}
-	}
-
-	void SetColumn(int column)
-	{
-		if (column != cur_column)
-		{
 			cur_column = column;
+
 			Update();
 		}
 	}
@@ -84,6 +76,7 @@ public:
 		}
 	}
 
+private:
 	void Update()
 	{
 		static char buffer[256];
@@ -119,7 +112,12 @@ public:
 
 	bool GetLineAndColumn(int *line, int *col)
 	{
-		return position_to_linecol(insert_position(), line, col) != 0;
+		if (position_to_linecol(insert_position(), line, col) == 0)
+			return false;
+
+		*col += 1;
+
+		return true;
 	}
 };
 
@@ -255,6 +253,8 @@ int UI_TextEditor::Run()
 	while (! want_close)
 	{
 		Fl::wait(0.2);
+
+		UpdatePosition();
 	}
 
 	return 0;
@@ -329,6 +329,14 @@ bool UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 	return true;
 }
 
+
+void UI_TextEditor::UpdatePosition()
+{
+	int row, column;
+
+	if (ted->GetLineAndColumn(&row, &column))
+		status->SetPosition(row, column);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
