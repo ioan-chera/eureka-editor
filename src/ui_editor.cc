@@ -131,7 +131,10 @@ static void ted_do_save(Fl_Widget *w, void *data)
 
 static void ted_do_quit(Fl_Widget *w, void *data)
 {
-	// FIXME
+	UI_TextEditor *ted = (UI_TextEditor *)data;
+	SYS_ASSERT(ted);
+
+	ted->Cmd_Quit();
 }
 
 static void ted_do_undo(Fl_Widget *w, void *data)
@@ -261,9 +264,17 @@ int UI_TextEditor::Run()
 }
 
 
+void UI_TextEditor::Cmd_Quit()
+{
+	close_callback(this, this);
+}
+
+
 void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 {
 	UI_TextEditor * that = (UI_TextEditor *)data;
+
+	// FIXME : if modified...
 
 	that->want_close = true;
 }

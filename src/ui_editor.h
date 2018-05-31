@@ -31,6 +31,7 @@ private:
 	bool want_close;
 	bool read_only;
 
+private:
 	Fl_Menu_Bar *menu_bar;
 
 	UI_TedStatusBar *status;
@@ -51,6 +52,8 @@ public:
 	bool SaveLump(Wad_file *wad, const char *lump_name);
 
 	int Run();
+
+	void Cmd_Quit();
 
 private:
 	void UpdatePosition();
