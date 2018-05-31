@@ -103,7 +103,10 @@ typedef enum
 	BUILD_Cancelled,
 
 	// the WAD file was corrupt / empty / bad filename
-	BUILD_BadFile
+	BUILD_BadFile,
+
+	// when saving the map, one or more lumps overflowed
+	BUILD_LumpOverflow
 }
 build_result_e;
 

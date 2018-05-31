@@ -346,6 +346,11 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	{
 		ret = AJBSP_BuildLevel(info, n);
 
+		// don't fail on maps with overflows
+		// [ Note that 'total_failed_maps' keeps a tally of these ]
+		if (ret == BUILD_LumpOverflow)
+			ret = BUILD_OK;
+
 		if (ret != BUILD_OK)
 			break;
 

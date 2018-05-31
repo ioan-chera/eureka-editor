@@ -2283,7 +2283,7 @@ static const char *CalcOptionsString()
 {
 	static char buffer[256];
 
-	sprintf(buffer, "--factor %d", cur_info->factor);
+	sprintf(buffer, "--cost %d", cur_info->factor);
 
 	if (cur_info->fast)
 		strcat(buffer, " --fast");
@@ -2347,7 +2347,7 @@ static void AddMissingLump(const char *name, const char *after)
 }
 
 
-void SaveLevel(node_t *root_node)
+build_result_e SaveLevel(node_t *root_node)
 {
 	// Note: root_node may be NULL
 
@@ -2443,7 +2443,11 @@ void SaveLevel(node_t *root_node)
 	{
 		cur_info->total_failed_maps++;
 		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+
+		return BUILD_LumpOverflow;
 	}
+
+	return BUILD_OK;
 }
 
 
@@ -2674,7 +2678,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 		ClockwiseBspTree();
 
-		SaveLevel(root_node);
+		ret = SaveLevel(root_node);
 	}
 	else
 	{
