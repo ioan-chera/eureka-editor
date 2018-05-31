@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -37,7 +37,7 @@ namespace ajbsp
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-void PrintVerbose(const char *str, ...)
+void PrintDetail(const char *str, ...)
 {
 	(void) str;
 }
@@ -578,7 +578,7 @@ void PruneVerticesAtEnd(void)
 	{
 		int unused = num_vertices - new_num;
 
-		PrintVerbose("Pruned %d unused vertices at end\n", unused);
+		PrintDetail("Pruned %d unused vertices at end\n", unused);
 
 		num_vertices = new_num;
 	}
@@ -688,7 +688,7 @@ void DetectOverlappingLines(void)
 
 	if (count > 0)
 	{
-		PrintVerbose("Detected %d overlapped linedefs\n", count);
+		PrintDetail("Detected %d overlapped linedefs\n", count);
 	}
 
 	UtilFree(array);

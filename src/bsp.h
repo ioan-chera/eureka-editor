@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -142,8 +142,7 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-// send normal messages & warnings to the log file
-void PrintVerbose(const char *str, ...);
+void PrintDetail(const char *str, ...);
 
 void Warning(const char *str, ...);
 void MinorWarning(const char *str, ...);
