@@ -1441,7 +1441,7 @@ void PutVertices(const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 	{
-		Warning("Number of vertices has overflowed.\n");
+		Failure("Number of vertices has overflowed.\n");
 		MarkOverflow(LIMIT_VERTEXES);
 	}
 }
@@ -1555,7 +1555,7 @@ void PutSegs(void)
 
 	if (count > 65534)
 	{
-		Warning("Number of segs has overflowed.\n");
+		Failure("Number of segs has overflowed.\n");
 		MarkOverflow(LIMIT_SEGS);
 	}
 }
@@ -1694,7 +1694,7 @@ void PutSubsecs(const char *name, int do_gl)
 
 	if (num_subsecs > 32767)
 	{
-		Warning("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
@@ -1858,7 +1858,7 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
-		Warning("Number of nodes has overflowed.\n");
+		Failure("Number of nodes has overflowed.\n");
 		MarkOverflow(LIMIT_NODES);
 	}
 }
@@ -1868,19 +1868,19 @@ void CheckLimits()
 {
 	if (num_sectors > 65534)
 	{
-		Warning("Map has too many sectors.\n");
+		Failure("Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
 	if (num_sidedefs > 65534)
 	{
-		Warning("Map has too many sidedefs.\n");
+		Failure("Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
 	if (num_linedefs > 65534)
 	{
-		Warning("Map has too many linedefs.\n");
+		Failure("Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
 	}
 

@@ -37,18 +37,37 @@ namespace ajbsp
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-void PrintDetail(const char *str, ...)
+void PrintDetail(const char *fmt, ...)
 {
-	(void) str;
+	(void) fmt;
 }
 
 
-void Warning(const char *str, ...)
+void Failure(const char *fmt, ...)
 {
 	va_list args;
 
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
+	va_end(args);
+
+	if (cur_info->warnings)
+		GB_PrintMsg("Failure: %s", message_buf);
+
+	cur_info->total_warnings++;
+
+#if DEBUG_ENABLED
+	DebugPrintf("Failure: %s", message_buf);
+#endif
+}
+
+
+void Warning(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
@@ -62,15 +81,15 @@ void Warning(const char *str, ...)
 }
 
 
-void MinorWarning(const char *str, ...)
+void MinorWarning(const char *fmt, ...)
 {
-	(void) str;
+	(void) fmt;
 
 #if DEBUG_ENABLED
 	va_list args;
 
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
 	DebugPrintf("MinorWarn: %s", message_buf);
@@ -80,12 +99,12 @@ void MinorWarning(const char *str, ...)
 }
 
 
-void SetErrorMsg(const char *str, ...)
+void SetErrorMsg(const char *fmt, ...)
 {
 	va_list args;
 
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
 	SYS_ASSERT(cur_info);

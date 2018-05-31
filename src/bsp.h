@@ -142,10 +142,11 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-void PrintDetail(const char *str, ...);
+void PrintDetail(const char *fmt, ...);
 
-void Warning(const char *str, ...);
-void MinorWarning(const char *str, ...);
+void Failure(const char *fmt, ...);
+void Warning(const char *fmt, ...);
+void MinorWarning(const char *fmt, ...);
 
 // set message for certain errors
 void SetErrorMsg(const char *str, ...);
