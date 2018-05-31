@@ -205,7 +205,8 @@ static Fl_Menu_Item ted_menu_items[] =
 UI_TextEditor::UI_TextEditor() :
 	Fl_Double_Window(580, 400, ""),
 	want_close(false),
-	read_only(false)
+	read_only(false),
+	has_changes(false)
 {
 	callback((Fl_Callback *) close_callback, this);
 
@@ -229,9 +230,9 @@ UI_TextEditor::UI_TextEditor() :
 	ted->cursor_style(Fl_Text_Display::HEAVY_CURSOR);
 
 	tbuf = new Fl_Text_Buffer();
-	ted->buffer(tbuf);
+	tbuf->add_modify_callback(text_modified_callback, this);
 
-	// TODO : set color and font
+	ted->buffer(tbuf);
 
 	resizable(ted);
 
@@ -257,7 +258,7 @@ int UI_TextEditor::Run()
 	{
 		Fl::wait(0.2);
 
-		UpdatePosition();
+		UpdateStatus();
 	}
 
 	return 0;
@@ -277,6 +278,15 @@ void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 	// FIXME : if modified...
 
 	that->want_close = true;
+}
+
+
+void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int, const char*, void *data)
+{
+	UI_TextEditor * that = (UI_TextEditor *)data;
+
+	if (nInserted + nDeleted > 0)
+		that->has_changes = true;
 }
 
 
@@ -341,12 +351,14 @@ bool UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 }
 
 
-void UI_TextEditor::UpdatePosition()
+void UI_TextEditor::UpdateStatus()
 {
 	int row, column;
 
 	if (ted->GetLineAndColumn(&row, &column))
 		status->SetPosition(row, column);
+
+	status->SetModified(has_changes);
 }
 
 //--- editor settings ---

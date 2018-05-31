@@ -30,6 +30,7 @@ class UI_TextEditor : public Fl_Double_Window
 private:
 	bool want_close;
 	bool read_only;
+	bool has_changes;
 
 private:
 	Fl_Menu_Bar *menu_bar;
@@ -56,10 +57,13 @@ public:
 	void Cmd_Quit();
 
 private:
-	void UpdatePosition();
+	void UpdateStatus();
 
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+
+	static void text_modified_callback(int, int nInserted, int nDeleted, int, const char*, void *);
+
 };
 
 #endif  /* __EUREKA_UI_EDITOR_H__ */
