@@ -376,7 +376,6 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 		// build nodes failed
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
 	}
 
 	return ret;

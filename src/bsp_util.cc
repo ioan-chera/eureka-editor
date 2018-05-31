@@ -99,22 +99,6 @@ void MinorWarning(const char *fmt, ...)
 }
 
 
-void SetErrorMsg(const char *fmt, ...)
-{
-	va_list args;
-
-	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-	va_end(args);
-
-	SYS_ASSERT(cur_info);
-
-	StringFree(cur_info->message);
-
-	cur_info->message = StringDup(message_buf);
-}
-
-
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
