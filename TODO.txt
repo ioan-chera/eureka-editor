@@ -147,7 +147,7 @@ IDEA: for quantizing a group of objects, try about 9 delta
       positions (x+0, x+step/4, x-step/4 etc...) and choose the
       "best" quantization.
 
-IDEA:  popup menu for right-click on flats/textures in the panel
+IDEA: popup menu for right-click on flats/textures in the panel
        -->  Copy
             Paste
             Use Default
@@ -221,9 +221,9 @@ WISH: conversion between Hexen <--> DOOM formats
 
 WISH: conversion from Boom --> vanilla DOOM
 
-WISH:  FreeDOOM : categorize all the new textures
+WISH: FreeDOOM : categorize all the new textures
 
-WISH:  HacX and Harmony : categorize the textures
+WISH: HacX and Harmony : categorize the textures
 
 IDEA: for DOOM have "Switch", "Grating", "Door" categories
 
