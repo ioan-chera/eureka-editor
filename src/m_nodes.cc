@@ -315,9 +315,9 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	info->force_xnod		= bsp_force_zdoom;
 	info->force_compress	= bsp_compressed;
 
-	info->total_failed_maps    = 0;
-	info->total_warnings       = 0;
-	info->total_minor_warnings = 0;
+	info->total_failed_maps		= 0;
+	info->total_warnings		= 0;
+	info->total_minor_issues	= 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
@@ -369,7 +369,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Total failed maps: %d\n", info->total_failed_maps);
 		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
-					info->total_minor_warnings);
+					info->total_minor_issues);
 	}
 	else if (ret == BUILD_Cancelled)
 	{

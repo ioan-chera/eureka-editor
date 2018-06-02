@@ -81,7 +81,7 @@ void Warning(const char *fmt, ...)
 }
 
 
-void MinorWarning(const char *fmt, ...)
+void MinorIssue(const char *fmt, ...)
 {
 	(void) fmt;
 
@@ -92,10 +92,10 @@ void MinorWarning(const char *fmt, ...)
 	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
-	DebugPrintf("MinorWarn: %s", message_buf);
+	DebugPrintf("Minor Issue: %s", message_buf);
 #endif
 
-	cur_info->total_minor_warnings++;
+	cur_info->total_minor_issues++;
 }
 
 
