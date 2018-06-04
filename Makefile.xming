@@ -20,9 +20,6 @@ WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
 OPTIMISE=-O2 -fno-strict-aliasing
 STRIP_FLAGS=--strip-unneeded
 
-# operating system choices: UNIX WIN32
-OS=WIN32
-
 
 #--- Internal stuff from here -----------------------------------
 
@@ -35,7 +32,7 @@ FLTK_LIBS=$(FLTK_DIR)/mingw/lib/libfltk_images.a \
 ZLIB_FLAGS=-I$(ZLIB_DIR)
 ZLIB_LIBS=$(ZLIB_DIR)/libz.a
 
-CXXFLAGS=$(OPTIMISE) $(WARNINGS) -D$(OS) $(FLTK_FLAGS) $(ZLIB_FLAGS)
+CXXFLAGS=$(OPTIMISE) $(WARNINGS) $(FLTK_FLAGS) $(ZLIB_FLAGS)
 
 LDFLAGS=-static-libgcc -static-libstdc++
 

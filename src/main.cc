@@ -552,7 +552,7 @@ static void Main_SetupFLTK()
 	}
 
 
-#ifdef UNIX
+#ifndef WIN32
 	Fl_File_Icon::load_system_icons();
 #endif
 

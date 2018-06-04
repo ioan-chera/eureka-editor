@@ -22,9 +22,7 @@
 
 #ifdef WIN32
 #include <io.h>
-#endif
-
-#ifdef UNIX
+#else // UNIX or MACOSX
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -610,9 +608,8 @@ const char *GetExecutablePath(const char *argv0)
 
 	// didn't work, free the memory
 	StringFree(path);
-#endif
 
-#ifdef UNIX
+#elif !defined(__APPLE__) // UNIX
 	path = StringNew(PATH_MAX+2);
 
 	int length = readlink("/proc/self/exe", path, PATH_MAX);
@@ -630,9 +627,8 @@ const char *GetExecutablePath(const char *argv0)
 
 	// didn't work, free the memory
 	StringFree(path);
-#endif
 
-#ifdef __APPLE__
+#else
 	/*
 	   from http://www.hmug.org/man/3/NSModule.html
 

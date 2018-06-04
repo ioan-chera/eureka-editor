@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2017 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -36,13 +36,21 @@
 
 
 /*
- *  Standard headers
+ *  Windows support
  */
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+  #ifndef WIN32
+  #define WIN32
+  #endif
 #endif
+
+
+/*
+ *  Standard headers
+ */
 
 #include <stddef.h>
 #include <stdio.h>
