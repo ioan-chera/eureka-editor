@@ -146,6 +146,8 @@ thing 9999 - n  16 NULL "ZD: SecActHitFloor"
 
 include "hexen_groups"
 
+special 0 - "NOTHING"
+
 # Floors
 special 200 f "Generic_Floor"              tag  speed  dist  target_type  flags
 special  22 f "Floor_LowerToNearest"       tag  speed
