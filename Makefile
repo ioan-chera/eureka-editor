@@ -20,8 +20,6 @@ STRIP_FLAGS=--strip-unneeded
 
 #--- Internal stuff from here -----------------------------------
 
-INSTALL_DIR=$(PREFIX)/share/eureka
-
 CXXFLAGS=$(OPTIMISE) $(WARNINGS) -D_THREAD_SAFE -D_REENTRANT
 
 LDFLAGS=-L/usr/X11R6/lib
@@ -136,11 +134,16 @@ $(DUMMY):
 	mkdir -p $(OBJ_DIR)
 	@touch $@
 
-stripped: $(PROGRAM)
+stripped: all
 	strip $(STRIP_FLAGS) $(PROGRAM)
 
+# note that DESTDIR is usually left undefined, and is mainly
+# useful when making packages for Debian/RedHat/etc...
+
+INSTALL_DIR=$(DESTDIR)$(PREFIX)/share/eureka
+
 install: stripped
-	install -o root -m 755 $(PROGRAM) $(PREFIX)/bin/
+	install -o root -m 755 $(PROGRAM) $(DESTDIR)$(PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
 	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
@@ -156,7 +159,7 @@ install: stripped
 	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 
 uninstall:
-	rm -v $(PREFIX)/bin/$(PROGRAM)
+	rm -v $(DESTDIR)$(PREFIX)/bin/$(PROGRAM)
 	rm -Rv $(INSTALL_DIR)
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
