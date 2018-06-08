@@ -203,11 +203,13 @@ static Fl_Menu_Item ted_menu_items[] =
 //------------------------------------------------------------------------
 
 UI_TextEditor::UI_TextEditor() :
-	Fl_Double_Window(580, 400, ""),
+	Fl_Double_Window(600, 400, ""),
 	want_close(false),
 	read_only(false),
 	has_changes(false)
 {
+	size_range(520, 200);
+
 	callback((Fl_Callback *) close_callback, this);
 
 	color(WINDOW_BG, WINDOW_BG);
