@@ -143,7 +143,14 @@ void UI_TextEditor::menu_do_insert(Fl_Widget *w, void *data)
 	win->InsertFile();
 }
 
-// TODO menu_do_export
+void UI_TextEditor::menu_do_export(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->ExportToFile();
+}
+
 
 void UI_TextEditor::menu_do_quit(Fl_Widget *w, void *data)
 {
@@ -241,7 +248,7 @@ static Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 		{ "&Insert File...",      FL_COMMAND + 'i', FCAL UI_TextEditor::menu_do_insert },
-		{ "&Export to File...  ", FL_COMMAND + 'e', FCAL menu_PLACEHOLDER },
+		{ "&Export to File...  ", FL_COMMAND + 'e', FCAL UI_TextEditor::menu_do_export },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "&Save Lump",   FL_COMMAND + 's', FCAL UI_TextEditor::menu_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -451,8 +458,7 @@ void UI_TextEditor::InsertFile()
 	switch (chooser.show())
 	{
 		case -1:
-			DLG_Notify("Unable to open the file:\n\n%s",
-					   chooser.errmsg());
+			DLG_Notify("Unable to open the file:\n\n%s", chooser.errmsg());
 			return;
 
 		case 1:
@@ -474,6 +480,41 @@ void UI_TextEditor::InsertFile()
 	if (res > 0)
 	{
 		DLG_Notify("A read error occurred on that file.");
+	}
+}
+
+
+void UI_TextEditor::ExportToFile()
+{
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to export to");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
+	chooser.directory(Main_FileOpFolder());
+
+	switch (chooser.show())
+	{
+		case -1:
+			DLG_Notify("Unable to export the file:\n\n%s", chooser.errmsg());
+			return;
+
+		case 1:
+			// cancelled
+			return;
+
+		default:
+			// Ok
+			break;
+	}
+
+	const char *filename = chooser.filename();
+
+	int res = tbuf->savefile(filename);
+
+	if (res > 0)
+	{
+		DLG_Notify("A write error occurred on that file.");
 	}
 }
 
