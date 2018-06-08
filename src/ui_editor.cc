@@ -387,8 +387,10 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 	{
 		if (read_only)
 		{
-			// FIXME DLG_Notify
-//!!!!			return false;
+			DLG_Notify("The %s lump does not exist, and it cannot be "
+						"created since the current wad is read-only.",
+						lump_name);
+			return false;
 		}
 
 		sprintf(title_buf, "%s lump (new)", lump_name);
