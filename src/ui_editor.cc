@@ -403,11 +403,19 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 
 	if (! lump->Seek())
 	{
-		// FIXME: DLG_Notify
+		DLG_Notify("Read error while loading %s lump.", lump_name);
 		return false;
 	}
 
-	// FIXME: LoadLump
+	static char line_buf[FL_PATH_MAX];
+
+	while (lump->GetLine(line_buf, sizeof(line_buf)))
+	{
+		StringRemoveCRLF(line_buf);
+
+		tbuf->append(line_buf);
+		tbuf->append("\n");
+	}
 
 	if (read_only)
 		sprintf(title_buf, "%s lump (read-only)", lump_name);
