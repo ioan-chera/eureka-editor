@@ -183,6 +183,22 @@ void UI_TextEditor::menu_do_delete(Fl_Widget *w, void *data)
 	win->tbuf->remove_selection();
 }
 
+void UI_TextEditor::menu_do_select_all(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	Fl_Text_Editor::kf_select_all(0, win->ted);
+}
+
+void UI_TextEditor::menu_do_unselect_all(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->tbuf->unselect();
+}
+
 // TODO menu_do_find
 // TODO menu_do_find_next
 // TODO menu_do_replace
@@ -230,8 +246,8 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ "&Paste",   FL_COMMAND + 'v',  FCAL UI_TextEditor::menu_do_paste },
 		{ "&Delete",  0,                 FCAL UI_TextEditor::menu_do_delete },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "Select &All",    FL_COMMAND + 'a',  FCAL menu_PLACEHOLDER },
-		{ "Unselect All  ", FL_COMMAND + 'u',  FCAL menu_PLACEHOLDER },
+		{ "Select &All",    FL_COMMAND + 'a', FCAL UI_TextEditor::menu_do_select_all },
+		{ "Unselect All  ", FL_COMMAND + 'u', FCAL UI_TextEditor::menu_do_unselect_all },
 		{ 0 },
 
 	{ "&Search", 0, 0, 0, FL_SUBMENU },

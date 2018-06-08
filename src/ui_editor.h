@@ -75,6 +75,8 @@ public:
 	static void menu_do_copy(Fl_Widget *w, void *data);
 	static void menu_do_paste(Fl_Widget *w, void *data);
 	static void menu_do_delete(Fl_Widget *w, void *data);
+	static void menu_do_select_all(Fl_Widget *w, void *data);
+	static void menu_do_unselect_all(Fl_Widget *w, void *data);
 
 	// Search menu
 	static void menu_do_find(Fl_Widget *w, void *data);
