@@ -2,6 +2,9 @@
 COMPILING Eureka
 ================
 
+Note: this document only deals with Linux.
+
+
 Dependencies:
 
 1. C++ compiler (GNU's G++) and associated tools
@@ -52,10 +55,13 @@ First make sure the Eureka binary was compiled successfully.
 Then become root (via the 'sudo' or 'su' command) and enter the
 following shell command:
 
-   > make install
+   > make full-install
 
 That will install the eureka binary, definition files for various
 games and source ports, and the desktop and icon files.
+
+There is also a plain "install" target which does not run the
+XDG utilities (used to install the desktop and icon files).
 
 
 

@@ -155,16 +155,22 @@ install: stripped
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
 	install -o root -m 644 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 644 ports/*.* $(INSTALL_DIR)/ports
+
+full-install: install
 	xdg-desktop-menu  install --novendor misc/eureka.desktop
 	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 
 uninstall:
 	rm -v $(DESTDIR)$(PREFIX)/bin/$(PROGRAM)
 	rm -Rv $(INSTALL_DIR)
+
+full-uninstall: uninstall
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
 
-.PHONY: all clean stripped install uninstall
+.PHONY: all clean stripped
+
+.PHONY: install uninstall full-install full-uninstall
 
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab
