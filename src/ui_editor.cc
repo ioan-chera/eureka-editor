@@ -129,10 +129,20 @@ static void menu_PLACEHOLDER(Fl_Widget *w, void *data)
 
 void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 {
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
 	// FIXME
 }
 
-// TODO menu_do_include
+void UI_TextEditor::menu_do_insert(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->InsertFile();
+}
+
 // TODO menu_do_export
 
 void UI_TextEditor::menu_do_quit(Fl_Widget *w, void *data)
@@ -230,8 +240,8 @@ void UI_TextEditor::menu_do_goto_bottom(Fl_Widget *w, void *data)
 static Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
-		{ "&Insert File...",       FL_COMMAND + 'i', FCAL menu_PLACEHOLDER },
-		{ "&Export to File...  ",   FL_COMMAND + 'e', FCAL menu_PLACEHOLDER },
+		{ "&Insert File...",      FL_COMMAND + 'i', FCAL UI_TextEditor::menu_do_insert },
+		{ "&Export to File...  ", FL_COMMAND + 'e', FCAL menu_PLACEHOLDER },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "&Save Lump",   FL_COMMAND + 's', FCAL UI_TextEditor::menu_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -259,12 +269,14 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ "Go to &Bottom  ", FL_COMMAND + 'b',  FCAL UI_TextEditor::menu_do_goto_bottom },
 		{ 0 },
 
+#if 0
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 		// TODO : flesh these out   [ will need config-file vars too ]
 		{ "Colors",   0,          FCAL menu_PLACEHOLDER },
 		{ "Font",     0,          FCAL menu_PLACEHOLDER },
 		{ "Line Numbers", 0,      FCAL menu_PLACEHOLDER },
 		{ 0 },
+#endif
 
 	{ 0 }
 };
@@ -425,6 +437,44 @@ void UI_TextEditor::UpdateStatus()
 		status->SetPosition(row, column);
 
 	status->SetModified(has_changes);
+}
+
+
+void UI_TextEditor::InsertFile()
+{
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to insert");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.directory(Main_FileOpFolder());
+
+	switch (chooser.show())
+	{
+		case -1:
+			DLG_Notify("Unable to open the file:\n\n%s",
+					   chooser.errmsg());
+			return;
+
+		case 1:
+			// cancelled
+			return;
+
+		default:
+			// Ok
+			break;
+	}
+
+	// if a selection is active, delete that text
+	tbuf->remove_selection();
+
+	const char *filename = chooser.filename();
+
+	int res = tbuf->insertfile(filename, ted->insert_position());
+
+	if (res > 0)
+	{
+		DLG_Notify("A read error occurred on that file.");
+	}
 }
 
 //--- editor settings ---

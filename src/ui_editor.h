@@ -54,6 +54,9 @@ public:
 
 	int Run();
 
+	void InsertFile();
+	void ExportToFile();
+
 private:
 	void UpdateStatus();
 
@@ -65,7 +68,7 @@ private:
 public:
 	// File menu
 	static void menu_do_save(Fl_Widget *w, void *data);
-	static void menu_do_include(Fl_Widget *w, void *data);
+	static void menu_do_insert(Fl_Widget *w, void *data);
 	static void menu_do_export(Fl_Widget *w, void *data);
 	static void menu_do_quit(Fl_Widget *w, void *data);
 
