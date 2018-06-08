@@ -64,6 +64,12 @@ private:
 
 	static void text_modified_callback(int, int nInserted, int nDeleted, int, const char*, void *);
 
+public:
+	static void menu_do_undo(Fl_Widget *w, void *data);
+	static void menu_do_cut(Fl_Widget *w, void *data);
+	static void menu_do_copy(Fl_Widget *w, void *data);
+	static void menu_do_paste(Fl_Widget *w, void *data);
+	static void menu_do_delete(Fl_Widget *w, void *data);
 };
 
 #endif  /* __EUREKA_UI_EDITOR_H__ */

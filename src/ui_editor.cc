@@ -137,14 +137,49 @@ static void ted_do_quit(Fl_Widget *w, void *data)
 	ted->Cmd_Quit();
 }
 
-static void ted_do_undo(Fl_Widget *w, void *data)
+void UI_TextEditor::menu_do_undo(Fl_Widget *w, void *data)
 {
-	// FIXME
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	Fl_Text_Editor::kf_undo(0, win->ted);
 }
 
 static void ted_do_redo(Fl_Widget *w, void *data)
 {
 	// FIXME
+}
+
+void UI_TextEditor::menu_do_cut(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	Fl_Text_Editor::kf_cut(0, win->ted);
+}
+
+void UI_TextEditor::menu_do_copy(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	Fl_Text_Editor::kf_copy(0, win->ted);
+}
+
+void UI_TextEditor::menu_do_paste(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	Fl_Text_Editor::kf_paste(0, win->ted);
+}
+
+void UI_TextEditor::menu_do_delete(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->tbuf->remove_selection();
 }
 
 static void ted_do_find(Fl_Widget *w, void *data)
@@ -168,12 +203,12 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
-		{ "&Undo",    FL_COMMAND + 'z',  FCAL ted_do_undo },
+		{ "&Undo",    FL_COMMAND + 'z',  FCAL UI_TextEditor::menu_do_undo },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "Cu&t",     FL_COMMAND + 'x',  FCAL ted_do_redo },
-		{ "&Copy",    FL_COMMAND + 'c',  FCAL ted_do_redo },
-		{ "&Paste",   FL_COMMAND + 'v',  FCAL ted_do_redo },
-		{ "&Delete",  0,                 FCAL ted_do_redo },
+		{ "Cu&t",     FL_COMMAND + 'x',  FCAL UI_TextEditor::menu_do_cut },
+		{ "&Copy",    FL_COMMAND + 'c',  FCAL UI_TextEditor::menu_do_copy },
+		{ "&Paste",   FL_COMMAND + 'v',  FCAL UI_TextEditor::menu_do_paste },
+		{ "&Delete",  0,                 FCAL UI_TextEditor::menu_do_delete },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "Select &All",  FL_COMMAND + 'a',  FCAL ted_do_redo },
 		{ "Unselect All  ", FL_COMMAND + 'u',  FCAL ted_do_redo },
