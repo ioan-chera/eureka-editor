@@ -54,8 +54,6 @@ public:
 
 	int Run();
 
-	void Cmd_Quit();
-
 private:
 	void UpdateStatus();
 
@@ -65,11 +63,24 @@ private:
 	static void text_modified_callback(int, int nInserted, int nDeleted, int, const char*, void *);
 
 public:
+	// File menu
+	static void menu_do_save(Fl_Widget *w, void *data);
+	static void menu_do_include(Fl_Widget *w, void *data);
+	static void menu_do_export(Fl_Widget *w, void *data);
+	static void menu_do_quit(Fl_Widget *w, void *data);
+
+	// Edit menu
 	static void menu_do_undo(Fl_Widget *w, void *data);
 	static void menu_do_cut(Fl_Widget *w, void *data);
 	static void menu_do_copy(Fl_Widget *w, void *data);
 	static void menu_do_paste(Fl_Widget *w, void *data);
 	static void menu_do_delete(Fl_Widget *w, void *data);
+
+	// Search menu
+	static void menu_do_find(Fl_Widget *w, void *data);
+	static void menu_do_replace(Fl_Widget *w, void *data);
+	static void menu_do_goto_top(Fl_Widget *w, void *data);
+	static void menu_do_goto_bottom(Fl_Widget *w, void *data);
 };
 
 #endif  /* __EUREKA_UI_EDITOR_H__ */

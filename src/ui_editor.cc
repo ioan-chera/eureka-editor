@@ -124,17 +124,23 @@ public:
 
 //------------------------------------------------------------------------
 
-static void ted_do_save(Fl_Widget *w, void *data)
+static void menu_PLACEHOLDER(Fl_Widget *w, void *data)
+{ }
+
+void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 {
 	// FIXME
 }
 
-static void ted_do_quit(Fl_Widget *w, void *data)
-{
-	UI_TextEditor *ted = (UI_TextEditor *)data;
-	SYS_ASSERT(ted);
+// TODO menu_do_include
+// TODO menu_do_export
 
-	ted->Cmd_Quit();
+void UI_TextEditor::menu_do_quit(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->close_callback(win, win);
 }
 
 void UI_TextEditor::menu_do_undo(Fl_Widget *w, void *data)
@@ -143,11 +149,6 @@ void UI_TextEditor::menu_do_undo(Fl_Widget *w, void *data)
 	SYS_ASSERT(win);
 
 	Fl_Text_Editor::kf_undo(0, win->ted);
-}
-
-static void ted_do_redo(Fl_Widget *w, void *data)
-{
-	// FIXME
 }
 
 void UI_TextEditor::menu_do_cut(Fl_Widget *w, void *data)
@@ -182,9 +183,28 @@ void UI_TextEditor::menu_do_delete(Fl_Widget *w, void *data)
 	win->tbuf->remove_selection();
 }
 
-static void ted_do_find(Fl_Widget *w, void *data)
+// TODO menu_do_find
+// TODO menu_do_find_next
+// TODO menu_do_replace
+
+void UI_TextEditor::menu_do_goto_top(Fl_Widget *w, void *data)
 {
-	// FIXME
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	win->ted->insert_position(0);
+	win->ted->show_insert_position();
+}
+
+void UI_TextEditor::menu_do_goto_bottom(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	int len = win->tbuf->length();
+
+	win->ted->insert_position(len);
+	win->ted->show_insert_position();
 }
 
 
@@ -194,12 +214,12 @@ static void ted_do_find(Fl_Widget *w, void *data)
 static Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
-		{ "&Insert File...",       FL_COMMAND + 'i', FCAL ted_do_save },
-		{ "&Export to File...  ",   FL_COMMAND + 'e', FCAL ted_do_save },
+		{ "&Insert File...",       FL_COMMAND + 'i', FCAL menu_PLACEHOLDER },
+		{ "&Export to File...  ",   FL_COMMAND + 'e', FCAL menu_PLACEHOLDER },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Save Lump",   FL_COMMAND + 's', FCAL ted_do_save },
+		{ "&Save Lump",   FL_COMMAND + 's', FCAL UI_TextEditor::menu_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Close",       FL_COMMAND + 'q', FCAL ted_do_quit },
+		{ "&Close",       FL_COMMAND + 'q', FCAL UI_TextEditor::menu_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
@@ -210,25 +230,24 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ "&Paste",   FL_COMMAND + 'v',  FCAL UI_TextEditor::menu_do_paste },
 		{ "&Delete",  0,                 FCAL UI_TextEditor::menu_do_delete },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "Select &All",  FL_COMMAND + 'a',  FCAL ted_do_redo },
-		{ "Unselect All  ", FL_COMMAND + 'u',  FCAL ted_do_redo },
+		{ "Select &All",    FL_COMMAND + 'a',  FCAL menu_PLACEHOLDER },
+		{ "Unselect All  ", FL_COMMAND + 'u',  FCAL menu_PLACEHOLDER },
 		{ 0 },
 
 	{ "&Search", 0, 0, 0, FL_SUBMENU },
-		{ "&Find",     FL_COMMAND + 'f',  FCAL ted_do_find },
-		{ "Find Next", FL_COMMAND + 'g',  FCAL ted_do_find },
-		{ "&Replace",  FL_COMMAND + 'r',  FCAL ted_do_find },
+		{ "&Find",     FL_COMMAND + 'f',  FCAL menu_PLACEHOLDER },
+		{ "Find Next", FL_COMMAND + 'g',  FCAL menu_PLACEHOLDER },
+		{ "&Replace",  FL_COMMAND + 'r',  FCAL menu_PLACEHOLDER },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Next Wotsit  ",  FL_COMMAND + 'n',  FCAL ted_do_find },
-		{ "Go to &Top",     FL_COMMAND + 't',  FCAL ted_do_find },
-		{ "Go to &Bottom  ",  FL_COMMAND + 'b',  FCAL ted_do_find },
+		{ "Go to &Top",      FL_COMMAND + 't',  FCAL UI_TextEditor::menu_do_goto_top },
+		{ "Go to &Bottom  ", FL_COMMAND + 'b',  FCAL UI_TextEditor::menu_do_goto_bottom },
 		{ 0 },
 
 	{ "&View", 0, 0, 0, FL_SUBMENU },
 		// TODO : flesh these out   [ will need config-file vars too ]
-		{ "Colors",   0,                 FCAL ted_do_find },
-		{ "Font",     0,                 FCAL ted_do_find },
-		{ "Line Numbers", 0,                 FCAL ted_do_find },
+		{ "Colors",   0,          FCAL menu_PLACEHOLDER },
+		{ "Font",     0,          FCAL menu_PLACEHOLDER },
+		{ "Line Numbers", 0,      FCAL menu_PLACEHOLDER },
 		{ 0 },
 
 	{ 0 }
@@ -299,12 +318,6 @@ int UI_TextEditor::Run()
 	}
 
 	return 0;
-}
-
-
-void UI_TextEditor::Cmd_Quit()
-{
-	close_callback(this, this);
 }
 
 
