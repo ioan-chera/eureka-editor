@@ -258,7 +258,7 @@ UI_TextEditor::UI_TextEditor() :
 
 	ted = new UI_TedWrapper(0, 28, w(), h() - 28);
 
-	ted->color(FL_BLACK, FL_BLACK);
+	ted->color(FL_BLACK, FL_BLUE);
 	ted->textfont(FL_COURIER);
 	ted->textsize(18);
 	ted->textcolor(fl_rgb_color(192,192,192));
