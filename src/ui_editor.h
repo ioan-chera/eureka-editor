@@ -105,7 +105,6 @@ public:
 	static void menu_do_find(Fl_Widget *w, void *data);
 	static void menu_do_find_next(Fl_Widget *w, void *data);
 	static void menu_do_find_prev(Fl_Widget *w, void *data);
-	static void menu_do_replace(Fl_Widget *w, void *data);
 	static void menu_do_goto_top(Fl_Widget *w, void *data);
 	static void menu_do_goto_bottom(Fl_Widget *w, void *data);
 };

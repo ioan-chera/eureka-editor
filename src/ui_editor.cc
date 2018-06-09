@@ -124,9 +124,6 @@ public:
 
 //------------------------------------------------------------------------
 
-static void menu_PLACEHOLDER(Fl_Widget *w, void *data)
-{ }
-
 void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 {
 	UI_TextEditor *win = (UI_TextEditor *)data;
@@ -268,12 +265,12 @@ void UI_TextEditor::menu_do_find_prev(Fl_Widget *w, void *data)
 	win->FindNext(-1);
 }
 
-// TODO menu_do_replace
-
 void UI_TextEditor::menu_do_goto_top(Fl_Widget *w, void *data)
 {
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
+
+	win->tbuf->unselect();
 
 	win->ted->insert_position(0);
 	win->ted->show_insert_position();
@@ -283,6 +280,8 @@ void UI_TextEditor::menu_do_goto_bottom(Fl_Widget *w, void *data)
 {
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
+
+	win->tbuf->unselect();
 
 	int len = win->tbuf->length();
 
@@ -321,7 +320,7 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ "&Find",      FL_COMMAND + 'f',  FCAL UI_TextEditor::menu_do_find },
 		{ "Find &Next", FL_COMMAND + 'g',  FCAL UI_TextEditor::menu_do_find_next },
 		{ "Find &Prev", FL_COMMAND + 'p',  FCAL UI_TextEditor::menu_do_find_prev },
-		{ "&Replace",   FL_COMMAND + 'r',  FCAL menu_PLACEHOLDER },
+	//	{ "&Replace",   FL_COMMAND + 'r',  FCAL menu_PLACEHOLDER },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "Go to &Top",      FL_COMMAND + 't',  FCAL UI_TextEditor::menu_do_goto_top },
 		{ "Go to &Bottom  ", FL_COMMAND + 'b',  FCAL UI_TextEditor::menu_do_goto_bottom },
@@ -329,7 +328,7 @@ static Fl_Menu_Item ted_menu_items[] =
 
 #if 0
 	{ "&View", 0, 0, 0, FL_SUBMENU },
-		// TODO : flesh these out   [ will need config-file vars too ]
+		// Todo: flesh these out   [ will need config-file vars too ]
 		{ "Colors",   0,          FCAL menu_PLACEHOLDER },
 		{ "Font",     0,          FCAL menu_PLACEHOLDER },
 		{ "Line Numbers", 0,      FCAL menu_PLACEHOLDER },
