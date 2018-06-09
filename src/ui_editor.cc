@@ -623,6 +623,8 @@ void UI_TextEditor::ExportToFile()
 // returns false if the user cancelled
 bool UI_TextEditor::AskFindString()
 {
+	// we don't pre-seed with the last search string, because FLTK does
+	// not select the text and it is a pain to delete it first.
 	const char *str = fl_input("Find what:", find_string);
 
 	if (str == NULL || str[0] == 0)
@@ -658,13 +660,37 @@ bool UI_TextEditor::FindNext(int dir)
 	else
 		found = tbuf->search_backward(pos, find_string, &new_pos);
 
+	if (! found && dir > 0 && pos > 0)
+	{
+		fl_beep();
+
+		if (DLG_Confirm("&Close|&Search",
+						"No more results.\n\n"
+						"Search again from the top?") <= 0)
+		{
+			return false;
+		}
+
+		pos = 0;
+
+		found = tbuf->search_forward(pos, find_string, &new_pos);
+	}
+
 	if (! found)
 	{
-		// FIXME
+		fl_beep();
+		DLG_Notify("No %sresults.", (dir > 0 && pos == 0) ? "" : "more ");
 		return false;
 	}
 
-	// FIXME
+	// found it, so select the text
+	int end_pos = new_pos + strlen(find_string);
+
+	tbuf->select(new_pos, end_pos);
+
+	ted->insert_position(end_pos);
+	ted->show_insert_position();
+
 	return true;
 }
 
