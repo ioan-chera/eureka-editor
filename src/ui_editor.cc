@@ -237,7 +237,7 @@ void UI_TextEditor::menu_do_find(Fl_Widget *w, void *data)
 	if (! win->AskFindString())
 		return;
 
-	win->FindNext(+1);
+	win->FindNext(+2);
 }
 
 void UI_TextEditor::menu_do_find_next(Fl_Widget *w, void *data)
@@ -652,19 +652,24 @@ bool UI_TextEditor::FindNext(int dir)
 	SYS_ASSERT(find_string[0]);
 
 	int pos = ted->insert_position();
+//	int len = tbuf->length();
+
 	int new_pos;
 	int found;
 
-	if (dir > 0)
+	if (dir >= 2 && !tbuf->selected())
+		// a normal "Find" can match at exactly the starting spot
 		found = tbuf->search_forward(pos, find_string, &new_pos);
+	else if (dir > 0)
+		found = tbuf->search_forward(pos+1, find_string, &new_pos);
 	else
-		found = tbuf->search_backward(pos, find_string, &new_pos);
+		found = tbuf->search_backward(pos-1, find_string, &new_pos);
 
 	if (! found && dir > 0 && pos > 0)
 	{
 		fl_beep();
 
-		if (DLG_Confirm("&Close|&Search",
+		if (DLG_Confirm("Cancel|&Search",
 						"No more results.\n\n"
 						"Search again from the top?") <= 0)
 		{
@@ -688,7 +693,7 @@ bool UI_TextEditor::FindNext(int dir)
 
 	tbuf->select(new_pos, end_pos);
 
-	ted->insert_position(end_pos);
+	ted->insert_position(new_pos);
 	ted->show_insert_position();
 
 	return true;
