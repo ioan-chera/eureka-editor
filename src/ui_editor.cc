@@ -158,11 +158,12 @@ void UI_TextEditor::menu_do_export(Fl_Widget *w, void *data)
 }
 
 
-void UI_TextEditor::menu_do_quit(Fl_Widget *w, void *data)
+void UI_TextEditor::menu_do_close(Fl_Widget *w, void *data)
 {
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
 
+	// this asks for confirmation if changes have been made
 	win->close_callback(win, win);
 }
 
@@ -258,7 +259,7 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "&Save Lump",   FL_COMMAND + 's', FCAL UI_TextEditor::menu_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-		{ "&Close",       FL_COMMAND + 'q', FCAL UI_TextEditor::menu_do_quit },
+		{ "&Close",       FL_COMMAND + 'q', FCAL UI_TextEditor::menu_do_close },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
@@ -379,20 +380,28 @@ int UI_TextEditor::Run()
 
 void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 {
-	UI_TextEditor * that = (UI_TextEditor *)data;
+	UI_TextEditor * win = (UI_TextEditor *)data;
 
-	// FIXME : if modified...
+	if (win->has_changes)
+	{
+		if (DLG_Confirm("Cancel|&Discard",
+						"You have unsaved changes to this lump.  "
+						"Are you sure you want to discard them?") <= 0)
+		{
+			return;
+		}
+	}
 
-	that->want_close = true;
+	win->want_close = true;
 }
 
 
 void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int, const char*, void *data)
 {
-	UI_TextEditor * that = (UI_TextEditor *)data;
+	UI_TextEditor * win = (UI_TextEditor *)data;
 
 	if (nInserted + nDeleted > 0)
-		that->has_changes = true;
+		win->has_changes = true;
 }
 
 
