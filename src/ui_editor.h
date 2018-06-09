@@ -42,6 +42,9 @@ private:
 	UI_TedWrapper  *ted;
 	Fl_Text_Buffer *tbuf;
 
+	// use SetFindString() to set this
+	const char *find_string;
+
 public:
 	UI_TextEditor();
 	virtual ~UI_TextEditor();
@@ -69,6 +72,12 @@ public:
 	void ExportToFile();
 
 private:
+	bool AskFindString();
+	void SetFindString(const char *str);
+
+	// dir should be +1 for forward, -1 for backward
+	bool FindNext(int dir);
+
 	void UpdateStatus();
 
 	static void  close_callback(Fl_Widget *, void *);
@@ -94,6 +103,8 @@ public:
 
 	// Search menu
 	static void menu_do_find(Fl_Widget *w, void *data);
+	static void menu_do_find_next(Fl_Widget *w, void *data);
+	static void menu_do_find_prev(Fl_Widget *w, void *data);
 	static void menu_do_replace(Fl_Widget *w, void *data);
 	static void menu_do_goto_top(Fl_Widget *w, void *data);
 	static void menu_do_goto_bottom(Fl_Widget *w, void *data);

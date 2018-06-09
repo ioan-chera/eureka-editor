@@ -229,8 +229,45 @@ void UI_TextEditor::menu_do_unselect_all(Fl_Widget *w, void *data)
 	win->tbuf->unselect();
 }
 
-// TODO menu_do_find
-// TODO menu_do_find_next
+void UI_TextEditor::menu_do_find(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	if (! win->AskFindString())
+		return;
+
+	win->FindNext(+1);
+}
+
+void UI_TextEditor::menu_do_find_next(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	if (win->find_string == NULL)
+	{
+		if (! win->AskFindString())
+			return;
+	}
+
+	win->FindNext(+1);
+}
+
+void UI_TextEditor::menu_do_find_prev(Fl_Widget *w, void *data)
+{
+	UI_TextEditor *win = (UI_TextEditor *)data;
+	SYS_ASSERT(win);
+
+	if (win->find_string == NULL)
+	{
+		if (! win->AskFindString())
+			return;
+	}
+
+	win->FindNext(-1);
+}
+
 // TODO menu_do_replace
 
 void UI_TextEditor::menu_do_goto_top(Fl_Widget *w, void *data)
@@ -281,9 +318,10 @@ static Fl_Menu_Item ted_menu_items[] =
 		{ 0 },
 
 	{ "&Search", 0, 0, 0, FL_SUBMENU },
-		{ "&Find",     FL_COMMAND + 'f',  FCAL menu_PLACEHOLDER },
-		{ "Find Next", FL_COMMAND + 'g',  FCAL menu_PLACEHOLDER },
-		{ "&Replace",  FL_COMMAND + 'r',  FCAL menu_PLACEHOLDER },
+		{ "&Find",      FL_COMMAND + 'f',  FCAL UI_TextEditor::menu_do_find },
+		{ "Find &Next", FL_COMMAND + 'g',  FCAL UI_TextEditor::menu_do_find_next },
+		{ "Find &Prev", FL_COMMAND + 'p',  FCAL UI_TextEditor::menu_do_find_prev },
+		{ "&Replace",   FL_COMMAND + 'r',  FCAL menu_PLACEHOLDER },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "Go to &Top",      FL_COMMAND + 't',  FCAL UI_TextEditor::menu_do_goto_top },
 		{ "Go to &Bottom  ", FL_COMMAND + 'b',  FCAL UI_TextEditor::menu_do_goto_bottom },
@@ -309,7 +347,8 @@ UI_TextEditor::UI_TextEditor() :
 	want_close(false),
 	want_save(false),
 	read_only(false),
-	has_changes(false)
+	has_changes(false),
+	find_string(NULL)
 {
 	size_range(520, 200);
 
@@ -350,6 +389,8 @@ UI_TextEditor::~UI_TextEditor()
 	ted->buffer(NULL);
 
 	delete tbuf; tbuf = NULL;
+
+	StringFree(find_string);
 }
 
 
@@ -577,6 +618,56 @@ void UI_TextEditor::ExportToFile()
 		has_changes = false;
 	}
 }
+
+
+// returns false if the user cancelled
+bool UI_TextEditor::AskFindString()
+{
+	const char *str = fl_input("Find what:", find_string);
+
+	if (str == NULL || str[0] == 0)
+		return false;
+
+	SetFindString(str);
+	return true;
+}
+
+
+void UI_TextEditor::SetFindString(const char *str)
+{
+	StringFree(find_string);
+
+	if (str)
+		find_string = StringDup(str);
+	else
+		find_string = NULL;
+}
+
+
+bool UI_TextEditor::FindNext(int dir)
+{
+	SYS_ASSERT(find_string);
+	SYS_ASSERT(find_string[0]);
+
+	int pos = ted->insert_position();
+	int new_pos;
+	int found;
+
+	if (dir > 0)
+		found = tbuf->search_forward(pos, find_string, &new_pos);
+	else
+		found = tbuf->search_backward(pos, find_string, &new_pos);
+
+	if (! found)
+	{
+		// FIXME
+		return false;
+	}
+
+	// FIXME
+	return true;
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
