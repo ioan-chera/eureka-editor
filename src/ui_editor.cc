@@ -428,7 +428,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 }
 
 
-bool UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
+void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 {
 	LogPrintf("Writing '%s' text lump\n", lump_name);
 
@@ -440,9 +440,19 @@ bool UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 
 	Lump_c *lump = wad->AddLump(lump_name);
 
-	// FIXME: SaveLump
+	int len = tbuf->length();
 
-	return true;
+	for (int i = 0 ; i < len ; i++)
+	{
+		// this is not optimal (one byte at a time), but is adequate
+		byte ch = tbuf->byte_at(i);
+
+		lump->Write(&ch, 1);
+	}
+
+	lump->Finish();
+
+	wad->EndWrite();
 }
 
 

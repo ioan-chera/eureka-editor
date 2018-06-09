@@ -50,7 +50,7 @@ public:
 	}
 
 	bool LoadLump(Wad_file *wad, const char *lump_name);
-	bool SaveLump(Wad_file *wad, const char *lump_name);
+	void SaveLump(Wad_file *wad, const char *lump_name);
 
 	int Run();
 
