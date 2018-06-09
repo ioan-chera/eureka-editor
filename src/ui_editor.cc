@@ -352,12 +352,15 @@ int UI_TextEditor::Run()
 	set_modal();
 	show();
 
+	// reset this here, as LoadLump() sets it to true, and we
+	// want to reset it after a RUN_Save as well.
+	has_changes = false;
+
 	for (;;)
 	{
 		if (want_save)
 		{
 			want_save = false;
-			has_changes = false;
 			return RUN_Save;
 		}
 
