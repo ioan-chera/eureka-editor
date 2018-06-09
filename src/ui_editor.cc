@@ -134,7 +134,13 @@ void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 
 	if (win->read_only)
 	{
-		DLG_Notify("Cannot save to a read-only wad.");
+		if (DLG_Confirm("Cancel|&Export",
+						"The current wad is READ-ONLY.  "
+						"Do you want to export the text into a new file?") == 1)
+		{
+			menu_do_export(w, data);
+		}
+
 		return;
 	}
 
@@ -418,7 +424,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 		if (read_only)
 		{
 			DLG_Notify("The %s lump does not exist, and it cannot be "
-						"created since the current wad is read-only.",
+						"created since the current wad is READ-ONLY.",
 						lump_name);
 			return false;
 		}
@@ -565,6 +571,10 @@ void UI_TextEditor::ExportToFile()
 	if (res > 0)
 	{
 		DLG_Notify("A write error occurred on that file.");
+	}
+	else
+	{
+		has_changes = false;
 	}
 }
 
