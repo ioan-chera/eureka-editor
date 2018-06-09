@@ -132,7 +132,13 @@ void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
 
-	// FIXME
+	if (win->read_only)
+	{
+		DLG_Notify("Cannot save to a read-only wad.");
+		return;
+	}
+
+	win->want_save = true;
 }
 
 void UI_TextEditor::menu_do_insert(Fl_Widget *w, void *data)
@@ -294,6 +300,7 @@ static Fl_Menu_Item ted_menu_items[] =
 UI_TextEditor::UI_TextEditor() :
 	Fl_Double_Window(600, 400, ""),
 	want_close(false),
+	want_save(false),
 	read_only(false),
 	has_changes(false)
 {
@@ -341,18 +348,29 @@ UI_TextEditor::~UI_TextEditor()
 
 int UI_TextEditor::Run()
 {
+	// it is safe to call these a second/third/etc time.
 	set_modal();
-
 	show();
 
-	while (! want_close)
+	for (;;)
 	{
+		if (want_save)
+		{
+			want_save = false;
+			has_changes = false;
+			return RUN_Save;
+		}
+
+		if (want_close)
+			return RUN_Quit;
+
 		Fl::wait(0.2);
 
 		UpdateStatus();
 	}
 
-	return 0;
+	/* NOT REACHED */
+	return RUN_Error;
 }
 
 

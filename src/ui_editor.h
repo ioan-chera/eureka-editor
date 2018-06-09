@@ -29,6 +29,8 @@ class UI_TextEditor : public Fl_Double_Window
 {
 private:
 	bool want_close;
+	bool want_save;
+
 	bool read_only;
 	bool has_changes;
 
@@ -52,6 +54,15 @@ public:
 	bool LoadLump(Wad_file *wad, const char *lump_name);
 	void SaveLump(Wad_file *wad, const char *lump_name);
 
+	enum
+	{
+		RUN_Quit = 0,
+		RUN_Save = 1,
+		RUN_Error = 2
+	};
+
+	// returns a RUN_XXX value.
+	// when RUN_Save is returned, Run() should be re-entered.
 	int Run();
 
 	void InsertFile();

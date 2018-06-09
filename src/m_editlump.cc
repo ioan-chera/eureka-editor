@@ -77,11 +77,15 @@ void CMD_EditLump()
 	}
 
 	// run the editor
-	int res = editor->Run();
-
-	// save the contents?
-	if (res == 123 && wad == edit_wad)
+	for (;;)
 	{
+		int res = editor->Run();
+
+		if (res != UI_TextEditor::RUN_Save)
+			break;
+
+		SYS_ASSERT(wad == edit_wad);
+
 		editor->SaveLump(wad, lump_name);
 	}
 
