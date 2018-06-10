@@ -25,9 +25,52 @@
 #include "ui_window.h"
 
 
-static bool ValidLumpToEdit(const char *name)
+static const char * invalid_text_lumps[] =
 {
-	// FIXME : ValidLumpToEdit
+	// map lumps
+	"THINGS", "VERTEXES", "LINEDEFS", "SECTORS",
+	"SIDEDEFS", "SEGS", "SSECTORS", "NODES",
+	"REJECT", "BLOCKMAP", "BEHAVIOR",
+
+	// various binary lumps
+	"PLAYPAL", "COLORMAP", "ENDOOM",
+	"PNAMES", "TEXTURE1", "TEXTURE2",
+	"GENMIDI", "DMXGUS", "DMXGUSC",
+	"HELP", "HELP1", "CREDIT", "STBAR",
+	"VICTORY", "VICTORY2", "BOSSBACK",
+	"TITLEPIC", "TITLEMAP", "INTERPIC", "ENDPIC",
+	"DEMO1", "DEMO2", "DEMO3", "DEMO4",
+	"M_DOOM", "M_EPI1", "M_EPI2", "M_EPI3", "M_EPI4",
+
+	// editor stuff
+	EUREKA_LUMP,
+
+	// source port stuff
+	"ANIMATED", "SWITCHES", "SWANTBLS",
+
+	// that's your bloomin' lot!
+	NULL
+};
+
+
+static bool ValidLumpToEdit(const char *p)
+{
+	size_t len = strlen(p);
+
+	if (len == 0 || len > 8)
+		return false;
+
+	for ( ; *p ; p++)
+		if (! (isalnum(*p) || *p == '_'))
+			return false;
+
+	// check if ends with "_START" or "_END"
+	// FIXME
+
+	// check known binary lumps
+	for (int i = 0 ; invalid_text_lumps[i] ; i++)
+		if (y_stricmp(p, invalid_text_lumps[i]) == 0)
+			return false;
 
 	return true;
 }
