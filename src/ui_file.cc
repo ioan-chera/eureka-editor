@@ -82,11 +82,11 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(270, bottom_y + 17, 95, 35, "OK");
+		ok_but = new Fl_Return_Button(260, bottom_y + 17, 100, 35, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button *cancel = new Fl_Button(130, bottom_y + 17, 95, 35, "Cancel");
+		Fl_Button *cancel = new Fl_Button(75, bottom_y + 17, 100, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -305,11 +305,11 @@ UI_OpenMap::UI_OpenMap() :
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(280, bottom_y + 20, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(260, bottom_y + 20, 100, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(100, bottom_y + 20, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(75, bottom_y + 20, 100, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();

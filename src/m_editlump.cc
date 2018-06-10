@@ -85,6 +85,24 @@ UI_ChooseTextLump::UI_ChooseTextLump() :
 
 	Fl::focus(lump_name);
 
+	{
+		int bottom_y = 320;
+
+		Fl_Group* o = new Fl_Group(0, bottom_y, 420, 65);
+		o->box(FL_FLAT_BOX);
+		o->color(WINDOW_BG, WINDOW_BG);
+
+		ok_but = new Fl_Return_Button(260, bottom_y + 17, 100, 35, "OK");
+		ok_but->labelfont(FL_HELVETICA_BOLD);
+		ok_but->callback(ok_callback, this);
+		ok_but->deactivate();
+
+		Fl_Button *cancel = new Fl_Button(75, bottom_y + 17, 100, 35, "Cancel");
+		cancel->callback(close_callback, this);
+
+		o->end();
+	}
+
 	end();
 }
 
@@ -94,6 +112,18 @@ void UI_ChooseTextLump::close_callback(Fl_Widget *w, void *data)
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
 	win->action = ACT_CLOSE;
+}
+
+
+void UI_ChooseTextLump::ok_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseTextLump * win = (UI_ChooseTextLump *)data;
+
+	// santify check
+	if (ValidLumpToEdit(win->lump_name->value()))
+		win->action = ACT_ACCEPT;
+	else
+		fl_beep();
 }
 
 
