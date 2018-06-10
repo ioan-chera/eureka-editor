@@ -3,10 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
-wall sorting : check performance of just blindly picking
-the middle wall as the pivot (over the three-way check)
-
-
 does disabling focusing of canvas cause any issues?
 --> have a config option which can enable current behavior
 
