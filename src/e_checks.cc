@@ -705,6 +705,10 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 	{
 		int type_num = Sectors[n]->type;
 
+		// always ignore type #0
+		if (type_num == 0)
+			continue;
+
 		if (type_num < 0 || type_num >= 2048)
 		{
 			bump_unknown_type(types, type_num);
@@ -2086,6 +2090,10 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		int type_num = LineDefs[n]->type;
+
+		// always ignore type #0
+		if (type_num == 0)
+			continue;
 
 		const linetype_t *info = M_GetLineType(type_num);
 
