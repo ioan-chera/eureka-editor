@@ -33,7 +33,90 @@ static bool ValidLumpToEdit(const char *name)
 }
 
 
-// TODO : Lump choice dialog
+//------------------------------------------------------------------------
+
+class UI_ChooseTextLump : public UI_Escapable_Window
+{
+private:
+	Fl_Input *lump_name;
+	Fl_Group *lump_buttons;
+
+	Fl_Return_Button *ok_but;
+
+	enum
+	{
+		ACT_none = 0,
+		ACT_CLOSE,
+		ACT_ACCEPT
+	};
+
+	int action;
+
+public:
+	UI_ChooseTextLump();
+
+	virtual ~UI_ChooseTextLump()
+	{ }
+
+	// returns lump name on success, NULL on cancel
+	const char * Run();
+
+private:
+	static void     ok_callback(Fl_Widget *, void *);
+	static void  close_callback(Fl_Widget *, void *);
+	static void button_callback(Fl_Widget *, void *);
+	static void  input_callback(Fl_Widget *, void *);
+	static void    new_callback(Fl_Widget *, void *);
+};
+
+
+UI_ChooseTextLump::UI_ChooseTextLump() :
+	UI_Escapable_Window(420, 385, "Choose Text Lump"),
+	action(ACT_none)
+{
+	resizable(NULL);
+
+	callback(close_callback, this);
+
+	lump_name = new Fl_Input(120, 35, 120, 25, "Lump name: ");
+	lump_name->labelfont(FL_HELVETICA_BOLD);
+	lump_name->when(FL_WHEN_CHANGED);
+//	lump_name->callback(input_callback, this);
+
+	Fl::focus(lump_name);
+
+	end();
+}
+
+
+void UI_ChooseTextLump::close_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
+
+	win->action = ACT_CLOSE;
+}
+
+
+const char * UI_ChooseTextLump::Run()
+{
+	set_modal();
+	show();
+
+	while (action == ACT_none)
+	{
+		Fl::wait(0.2);
+	}
+
+	if (action == ACT_CLOSE)
+		return NULL;
+
+	const char *name = lump_name->value();
+
+	if (name[0] == 0)
+		return NULL;
+
+	return StringUpper(name);
+}
 
 
 //------------------------------------------------------------------------
@@ -45,10 +128,11 @@ void CMD_EditLump()
 	if (lump_name[0] == 0 || lump_name[0] == '/')
 	{
 		// ask for the lump name
+		UI_ChooseTextLump *dialog = new UI_ChooseTextLump();
 
-		// FIXME: custom dialog, which validates the name (among other things)
+		lump_name = dialog->Run();
 
-		lump_name = fl_input("Lump name?");
+		delete dialog;
 
 		if (lump_name == NULL)
 			return;
