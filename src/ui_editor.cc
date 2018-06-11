@@ -503,6 +503,11 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 	return true;
 }
 
+void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
+{
+	// FIXME
+}
+
 
 void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 {
@@ -529,6 +534,12 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 	lump->Finish();
 
 	wad->EndWrite();
+}
+
+
+void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
+{
+	// FIXME
 }
 
 

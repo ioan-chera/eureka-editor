@@ -276,6 +276,11 @@ void CMD_EditLump()
 {
 	const char *lump_name = EXEC_Param[0];
 
+	if (Exec_HasFlag("/header"))
+	{
+		lump_name = Level_name;
+	}
+
 	if (lump_name[0] == 0 || lump_name[0] == '/')
 	{
 		// ask for the lump name
@@ -287,6 +292,16 @@ void CMD_EditLump()
 
 		if (lump_name == NULL)
 			return;
+	}
+
+	// NOTE: there are two special cases for lump_name:
+	//       (1) same as Level_name --> edit HeaderData
+	//       (2) same as "SCRIPTS"  --> edit ScriptsData
+
+	// can only create SCRIPTS lump in a Hexen map
+	if (y_stricmp(lump_name, "SCRIPTS") == 0 && Level_format != MAPF_Hexen)
+	{
+		// FIXME
 	}
 
 	if (! ValidLumpToEdit(lump_name))
@@ -303,15 +318,28 @@ void CMD_EditLump()
 	if (! edit_wad || edit_wad->IsReadOnly())
 		editor->SetReadOnly();
 
+	// FIXME : do window-title stuff here
+
 	// if lump exists, load the contents
-	if (! editor->LoadLump(wad, lump_name))
+	if (y_stricmp(lump_name, Level_name) == 0)
 	{
-		// something went wrong
-		delete editor;
-		return;
+		editor->LoadMemory(HeaderData);
+	}
+	else if (y_stricmp(lump_name, "SCRIPTS") == 0)
+	{
+		editor->LoadMemory(ScriptsData);
+	}
+	else
+	{
+		if (! editor->LoadLump(wad, lump_name))
+		{
+			// something went wrong
+			delete editor;
+			return;
+		}
 	}
 
-	// run the editor
+	// run the text editor
 	for (;;)
 	{
 		int res = editor->Run();
@@ -321,7 +349,20 @@ void CMD_EditLump()
 
 		SYS_ASSERT(wad == edit_wad);
 
-		editor->SaveLump(wad, lump_name);
+		if (y_stricmp(lump_name, Level_name) == 0)
+		{
+			editor->SaveMemory(HeaderData);
+			MadeChanges = 1;
+		}
+		else if (y_stricmp(lump_name, "SCRIPTS") == 0)
+		{
+			editor->SaveMemory(ScriptsData);
+			MadeChanges = 1;
+		}
+		else
+		{
+			editor->SaveLump(wad, lump_name);
+		}
 	}
 
 	delete editor;
