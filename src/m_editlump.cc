@@ -62,6 +62,34 @@ static const char * invalid_text_lumps[] =
 };
 
 
+// TODO : ideally put these in an external file
+static const char * common_text_lumps[] =
+{
+	// Hexen (plus source-port variants)
+	"MAPINFO", "ZMAPINFO", "EMAPINFO",
+
+	// Boom / MBF
+	"DEHACKED", "OPTIONS",
+
+	// Eternity
+	"MUSINFO",
+
+	// EDGE
+	"RSCRIPT",
+
+	// Legacy
+	"S_SKIN", "",
+
+	// ZDoom and derivatives
+	"DECORATE", "LANGUAGE", "SNDINFO",
+	"ANIMDEFS", "GLDEFS", "SBARINFO",
+	"DECALDEFS", "FONTDEFS", "MODELDEF",
+
+	// the end
+	NULL
+};
+
+
 static bool ValidLumpToEdit(const char *p)
 {
 	size_t len = strlen(p);
