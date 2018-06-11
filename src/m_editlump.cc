@@ -27,28 +27,35 @@
 
 static const char * invalid_text_lumps[] =
 {
+	// editor stuff
+	EUREKA_LUMP,
+
 	// map lumps
 	"THINGS", "VERTEXES", "LINEDEFS", "SECTORS",
 	"SIDEDEFS", "SEGS", "SSECTORS", "NODES",
 	"REJECT", "BLOCKMAP", "BEHAVIOR",
+	"TEXTMAP", "ENDMAP", "ZNODES",
 
 	// various binary lumps
-	"PLAYPAL", "COLORMAP", "ENDOOM",
+	"PLAYPAL", "COLORMAP", "TINTTAB",
 	"PNAMES", "TEXTURE1", "TEXTURE2",
 	"GENMIDI", "DMXGUS", "DMXGUSC",
-	"HELP", "HELP1", "CREDIT", "STBAR",
-	"VICTORY", "VICTORY2", "BOSSBACK",
-	"TITLEPIC", "TITLEMAP", "INTERPIC", "ENDPIC",
 	"DEMO1", "DEMO2", "DEMO3", "DEMO4",
+	"ENDOOM", "ENDBOOM",
+
+	// various graphics
+	"HELP", "HELP1", "CREDIT", "CONBACK",
+	"VICTORY", "VICTORY2", "BOSSBACK",
+	"TITLEPIC", "INTERPIC", "ENDPIC", "STBAR",
 	"M_DOOM", "M_EPI1", "M_EPI2", "M_EPI3", "M_EPI4",
 
-	// editor stuff
-	EUREKA_LUMP,
-
 	// source port stuff
-	"ANIMATED", "SWITCHES", "SWANTBLS",
+	"TRANMAP", "WATERMAP", "FOGMAP",
+	"ANIMATED", "SWITCHES",
+	"DIALOGUE", "SNDCURVE", "TITLEMAP",
+	"AUTOPAGE", "STARTUP",
 
-	// that's your bloomin' lot!
+	// the end
 	NULL
 };
 
@@ -64,13 +71,20 @@ static bool ValidLumpToEdit(const char *p)
 		if (! (isalnum(*p) || *p == '_'))
 			return false;
 
-	// check if ends with "_START" or "_END"
-	// FIXME
-
 	// check known binary lumps
 	for (int i = 0 ; invalid_text_lumps[i] ; i++)
 		if (y_stricmp(p, invalid_text_lumps[i]) == 0)
 			return false;
+
+	// markers like S_START and FF_END are not allowed
+	if (len >= 4)
+	{
+		if (y_stricmp(p+1, "_START") == 0 || y_stricmp(p+1, "_END") == 0 ||
+			y_stricmp(p+2, "_START") == 0 || y_stricmp(p+2, "_END") == 0)
+		{
+			return false;
+		}
+	}
 
 	return true;
 }
