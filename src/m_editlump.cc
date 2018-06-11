@@ -25,6 +25,8 @@
 #include "ui_window.h"
 
 
+// Various lumps that definitely should not be edited as text.
+// Note: this list is not meant to be exhaustive.
 static const char * invalid_text_lumps[] =
 {
 	// editor stuff
@@ -67,10 +69,6 @@ static bool ValidLumpToEdit(const char *p)
 	if (len == 0 || len > 8)
 		return false;
 
-	for ( ; *p ; p++)
-		if (! (isalnum(*p) || *p == '_'))
-			return false;
-
 	// check known binary lumps
 	for (int i = 0 ; invalid_text_lumps[i] ; i++)
 		if (y_stricmp(p, invalid_text_lumps[i]) == 0)
@@ -85,6 +83,11 @@ static bool ValidLumpToEdit(const char *p)
 			return false;
 		}
 	}
+
+	// check for bad characters [ p is *invalid* afterwards ]
+	for ( ; *p ; p++)
+		if (! (isalnum(*p) || *p == '_'))
+			return false;
 
 	return true;
 }
@@ -119,6 +122,8 @@ public:
 	const char * Run();
 
 private:
+	void CheckInput();
+
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
@@ -138,7 +143,7 @@ UI_ChooseTextLump::UI_ChooseTextLump() :
 	lump_name = new Fl_Input(120, 35, 120, 25, "Lump name: ");
 	lump_name->labelfont(FL_HELVETICA_BOLD);
 	lump_name->when(FL_WHEN_CHANGED);
-//	lump_name->callback(input_callback, this);
+	lump_name->callback(input_callback, this);
 
 	Fl::focus(lump_name);
 
@@ -181,6 +186,37 @@ void UI_ChooseTextLump::ok_callback(Fl_Widget *w, void *data)
 		win->action = ACT_ACCEPT;
 	else
 		fl_beep();
+}
+
+
+void UI_ChooseTextLump::input_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
+
+	win->CheckInput();
+}
+
+
+void UI_ChooseTextLump::CheckInput()
+{
+	bool was_valid = ok_but->active();
+	bool  is_valid = ValidLumpToEdit(lump_name->value());
+
+	if (was_valid == is_valid)
+		return;
+
+	if (is_valid)
+	{
+		ok_but->activate();
+		lump_name->textcolor(FL_FOREGROUND_COLOR);
+	}
+	else
+	{
+		ok_but->deactivate();
+		lump_name->textcolor(FL_RED);
+	}
+
+	lump_name->redraw();
 }
 
 
