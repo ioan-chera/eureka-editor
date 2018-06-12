@@ -160,7 +160,8 @@ private:
 	static void  close_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 	static void  input_callback(Fl_Widget *, void *);
-	static void    new_callback(Fl_Widget *, void *);
+	static void header_callback(Fl_Widget *, void *);
+	static void script_callback(Fl_Widget *, void *);
 };
 
 
@@ -187,16 +188,22 @@ UI_ChooseTextLump::UI_ChooseTextLump() :
 
 	// all the map buttons go into this group
 
-	lump_buttons = new Fl_Group(0, 90, w(), 200, "");
+	lump_buttons = new Fl_Group(0, 90, w(), 205, "");
 	lump_buttons->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
 	{
-		int mhy = lump_buttons->y() + lump_buttons->h() - 20;
+		int mhy = lump_buttons->y() + lump_buttons->h() - 25;
 
-		Fl_Button *b1 = new Fl_Button(60, mhy, 120, 20, "Map Header");
+		Fl_Button *b1 = new Fl_Button(60, mhy, 120, 25, "Map Header");
+		b1->callback(header_callback, this);
 		b1->color(BUTTON_COL);
 
-		Fl_Button *b2 = new Fl_Button(230, mhy, 120, 20, "Map Scripts");
-		b2->color(BUTTON_COL);
+		Fl_Button *b2 = new Fl_Button(230, mhy, 120, 25, "Map Scripts");
+		b2->callback(script_callback, this);
+
+		if (Level_format == MAPF_Hexen)
+			b2->color(BUTTON_COL);
+		else
+			b2->deactivate();
 
 		PopulateButtons();
 	}
@@ -245,6 +252,7 @@ void UI_ChooseTextLump::PopulateButtons()
 			Fl_Button *but = new Fl_Button(bx, by, but_W, 20, name);
 
 			but->color(BUTTON_COL);
+			but->callback(button_callback, this);
 
 			// NOTE: no need to add() it
 		}
@@ -307,6 +315,35 @@ void UI_ChooseTextLump::CheckInput()
 	}
 
 	lump_name->redraw();
+}
+
+
+void UI_ChooseTextLump::header_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
+
+	win->lump_name->value(Level_name);
+	win->action = ACT_ACCEPT;
+}
+
+
+void UI_ChooseTextLump::script_callback(Fl_Widget *w, void *data)
+{
+	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
+
+	win->lump_name->value("SCRIPTS");
+	win->action = ACT_ACCEPT;
+}
+
+
+void UI_ChooseTextLump::button_callback(Fl_Widget *w, void *data)
+{
+	Fl_Button *but = (Fl_Button *)w;
+	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
+
+	// the button's label is the lump name
+	win->lump_name->value(but->label());
+	win->action = ACT_ACCEPT;
 }
 
 
