@@ -25,6 +25,9 @@
 #include "ui_window.h"
 
 
+#define BUTTON_COL  FL_YELLOW
+
+
 // Various lumps that definitely should not be edited as text.
 // Note: this list is not meant to be exhaustive.
 static const char * invalid_text_lumps[] =
@@ -151,6 +154,7 @@ public:
 
 private:
 	void CheckInput();
+	void PopulateButtons();
 
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  close_callback(Fl_Widget *, void *);
@@ -168,12 +172,35 @@ UI_ChooseTextLump::UI_ChooseTextLump() :
 
 	callback(close_callback, this);
 
-	lump_name = new Fl_Input(120, 35, 120, 25, "Lump name: ");
+	lump_name = new Fl_Input(170, 20, 120, 25, "Enter lump name: ");
 	lump_name->labelfont(FL_HELVETICA_BOLD);
 	lump_name->when(FL_WHEN_CHANGED);
 	lump_name->callback(input_callback, this);
 
 	Fl::focus(lump_name);
+
+	{
+		Fl_Box* o = new Fl_Box(15, 55, 270, 25, "Or select one of these lumps:");
+		o->labelfont(FL_HELVETICA_BOLD);
+		o->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	}
+
+	// all the map buttons go into this group
+
+	lump_buttons = new Fl_Group(0, 90, w(), 200, "");
+	lump_buttons->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
+	{
+		int mhy = lump_buttons->y() + lump_buttons->h() - 20;
+
+		Fl_Button *b1 = new Fl_Button(60, mhy, 120, 20, "Map Header");
+		b1->color(BUTTON_COL);
+
+		Fl_Button *b2 = new Fl_Button(230, mhy, 120, 20, "Map Scripts");
+		b2->color(BUTTON_COL);
+
+		PopulateButtons();
+	}
+	lump_buttons->end();
 
 	{
 		int bottom_y = 320;
@@ -194,6 +221,41 @@ UI_ChooseTextLump::UI_ChooseTextLump() :
 	}
 
 	end();
+}
+
+
+void UI_ChooseTextLump::PopulateButtons()
+{
+	int col = 0;
+	int row = 0;
+	int but_W = 100;
+
+	for (int i = 0 ; common_text_lumps[i] ; i++)
+	{
+		const char *name = common_text_lumps[i];
+
+		if (name[0] != 0)
+		{
+			int bx = 40 + col * (but_W + 20);
+			int by = lump_buttons->y() + row * 25;
+
+			if (row >= 3)
+				by += 15;
+
+			Fl_Button *but = new Fl_Button(bx, by, but_W, 20, name);
+
+			but->color(BUTTON_COL);
+
+			// NOTE: no need to add() it
+		}
+
+		col++;
+		if (col >= 3)
+		{
+			col = 0;
+			row += 1;
+		}
+	}
 }
 
 
