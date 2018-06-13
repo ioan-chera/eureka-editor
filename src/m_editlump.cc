@@ -42,7 +42,7 @@ static const char * invalid_text_lumps[] =
 	// map lumps
 	"THINGS", "VERTEXES", "LINEDEFS", "SECTORS",
 	"SIDEDEFS", "SEGS", "SSECTORS", "NODES",
-	"REJECT", "BLOCKMAP", "BEHAVIOR",
+	"REJECT", "BLOCKMAP", "BEHAVIOR", "SCRIPTS",
 	"TEXTMAP", "ENDMAP", "ZNODES",
 
 	// various binary lumps
