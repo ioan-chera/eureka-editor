@@ -10,6 +10,10 @@ does disabling focusing of canvas cause any issues?
 #24 : preference for the ADD/DEL sidedef buttons
 
 
+-  linedef mode: '[' and ']' to adjust length of current line
+
+
+
 General
 -------
 
@@ -31,8 +35,6 @@ General
    -  scrolling sizes??
    -  add more stuff (see Possible User Config, below)
 
--  BSP: make read errors more tolerant (DON'T call FatalError)
-
 -  treat sprite UI_Pic in THING panel and DEFAULTS panel as a
    highlightable thing, and possible Copy/Paste target
 
@@ -45,8 +47,6 @@ General
 -  Operation menu:
         for "ACT_XXX" commands, turn pointer into a '+' and
         wait for user to begin action (with MOUSE1..3 or SPACE key)
-
--  linedef mode: '[' and ']' to adjust length of current line
 
 -  tag checking: check for valid usage of special 666 / 667 tags.
 
@@ -72,30 +72,14 @@ IDEA: MMB on sidedef/sector tex : open RECENT browser
 
 IDEA: for generalized lines, show more info in tooltip of desc
 
-IDEA: when building REJECT, support a simple distance check
-      [ i.e. if distance between two sectors >= N, mark as cannot see ]
-
 
 WISH: a scripting language
 
 WISH: PRINT key makes a screenshot of 2D or 3D view
 
-WISH: edit-key dialog has a button which opens a web browser to
-      the documentation about the current command
-
-WISH: ability to view (perhaps edit) a map header lump
-      (for FraggleScript etc...)
-
 WISH: can import DWD (DoomEd) format maps
 
 WISH: can import UDMF format maps
-
-WISH: support ZDoom PK3 for textures (etc)
-
-WISH: support DECORATE as (or in) a resource file
-
-WISH: support Windows 95/98/ME
-      [running on Windows 98SE requires KernelEx]
 
 
 
@@ -124,15 +108,7 @@ Editing
 
 -  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
 
-WISH : autocomplete flat/texture names in Linedef and Sector panels
-
-IDEA: when get "Area not closed" error, a way to show the place
-      where it fails
-
 IDEA: a command to split-line-in-half-and-move-to-curve
-
-IDEA: a mode to show skill levels via color of drawn things
-      [ draw sprites in 2D/3D view differently too ]
 
 IDEA: in Find/Replace panel, can filter things by CATEGORY
 
@@ -199,28 +175,16 @@ IDEA: using "Browser / Things" (etc) to open the browser will reset
 
 IDEA: can change the [max] size of the texture/flat previews
 
-IDEA: ability to shrink categories, i.e. say that for things the
-      'b' (bonus) and 'k' categories should become a single one
-
 
 
 Game / Port Definitions
 -----------------------
 
-+  STRIFE: some flags are missing
-
-WISH: conversion between Hexen <--> DOOM formats
-      [ perhaps as a script ]
-
-WISH: conversion from Boom --> vanilla DOOM
++  STRIFE: some flags are missing [ especially jumpable railings ]
 
 WISH: FreeDOOM : categorize all the new textures
 
 WISH: HacX and Harmony : categorize the textures
-
-IDEA: for DOOM have "Switch", "Grating", "Door" categories
-
-IDEA: add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
 
 
 
@@ -305,4 +269,36 @@ NO:  ability to hide the right-side panel
 NO:  disconnect sectors : automatically include islands
 
 NO:  quantization should prevent linedefs from overlapping / crossing
+
+
+NO:  autocomplete flat/texture names in Linedef and Sector panels
+
+NO:  when building REJECT, support a simple distance check
+     [ i.e. if distance between two sectors >= N, mark as cannot see ]
+
+NO:  make read errors in BSP code more tolerant (DON'T call FatalError)
+
+NO:  edit-key dialog has a button which opens a web browser to
+     the documentation about the current command
+
+NO:  a mode to show skill levels via color of drawn things
+     [ draw sprites in 2D/3D view differently too ]
+
+NO:  when get "Area not closed" error, show the place where it fails
+
+NO:  support ZDoom PK3 for textures (etc)
+
+NO:  support DECORATE as (or in) a resource file
+
+NO:  support Windows 95/98/ME
+     [running on Windows 98SE requires KernelEx]
+
+NO:  conversion between Hexen <--> DOOM formats
+     [ perhaps as a script ]
+
+NO:  conversion from Boom --> vanilla DOOM
+
+NO:  for DOOM have "Switch", "Grating", "Door" categories
+
+NO:  add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
 
