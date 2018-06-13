@@ -4,6 +4,7 @@ CHANGES IN Eureka 1.22
 
 (Since version 1.21)
 
++ new 'File/Lump Editor' command for editing text lumps
 
 - fixed wall-sorting issue in 3D View which could cause a crash
 - fixed inserting things in Hexen getting no SP/COOP/DM/class flags
