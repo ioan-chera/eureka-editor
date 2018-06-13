@@ -505,7 +505,22 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 
 void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 {
-	// FIXME
+	// this code is slow, but simple
+
+	char charbuf[2];
+	charbuf[1] = 0;
+
+	unsigned int len = buf.size();
+
+	for (unsigned int k = 0 ; k < len ; k++)
+	{
+		// ignore NULs and CRs
+		if (buf[k] == 0 || buf[k] == '\r')
+			continue;
+
+		charbuf[0] = buf[k];
+		tbuf->append(charbuf);
+	}
 }
 
 
@@ -528,6 +543,10 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 		// this is not optimal (one byte at a time), but is adequate
 		byte ch = tbuf->byte_at(i);
 
+		// ignore NULs and CRs
+		if (ch == 0 || ch == '\r')
+			continue;
+
 		lump->Write(&ch, 1);
 	}
 
@@ -539,7 +558,20 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
 {
-	// FIXME
+	buf.clear();
+
+	int len = tbuf->length();
+
+	for (int i = 0 ; i < len ; i++)
+	{
+		byte ch = tbuf->byte_at(i);
+
+		// ignore NULs and CRs
+		if (ch == 0 || ch == '\r')
+			continue;
+
+		buf.push_back(ch);
+	}
 }
 
 
