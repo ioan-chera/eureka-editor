@@ -86,9 +86,6 @@ WISH: edit-key dialog has a button which opens a web browser to
 WISH: ability to view (perhaps edit) a map header lump
       (for FraggleScript etc...)
 
-WISH: ability to create / view / edit / import arbitrary lumps
-      (e.g. MAPINFO, DECORATE, etc...)
-
 WISH: can import DWD (DoomEd) format maps
 
 WISH: can import UDMF format maps
