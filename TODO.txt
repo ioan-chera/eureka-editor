@@ -3,37 +3,73 @@ Eureka TODO / WISHLIST
 ======================
 
 
+In Progress
+-----------
+
 does disabling focusing of canvas cause any issues?
 --> have a config option which can enable current behavior
 
-
 #24 : preference for the ADD/DEL sidedef buttons
 
+-  improve INSTALL doc with section about cross-compiling the
+   Windows binary.
 
--  linedef mode: '[' and ']' to adjust length of current line
+BUG: closed sectors in 3D view have a see-through gap
+     (gets bigger further away)
 
 
 
-General
--------
+Most Likely
+-----------
 
-+  look into optimizing the sector rendering
+-  look into optimizing the sector rendering
 
-+  a dialog to restore map from a backup, and maybe other
-   functions like pruning backups
+-  a dialog to restore a map from a backup
 
-+  allow Game/Port definitions to specify the linedef/thing flags
+-  a way to see angle of lines
+
+-  support PNG/JPEG/TGA for patches, flats, sprites
+   -->  feature png ??
+
+-  assume texture names beginning with '#' are special
+   (The texture checker ignores them -- what else is needed ??)
+   (perhaps have a special purple '?' for the UI_PIC)
+
+-  slopes in 3D view
+
+-  BOOM colormaps in 3D view
+
+-  BOOM deep water in 3D view
+
+-  a scripting language
+
+-  can import DWD (DoomEd) format maps
+
+-  can import UDMF format maps
+
+
+
+Slightly Possible
+-----------------
+
+-  allow Game/Port definitions to specify the linedef/thing flags
    which can be used  (rather than hard-coding them)
 
-+  support PNG/JPEG/TGA for patches, flats, sprites
-   -->  feature png ??
-   [ may need to analyse PNG data for "grAB" chunk ]
+-  STRIFE: some flags are missing [ especially jumpable railings ]
+
+-  when dragging a shape next to existing geometry, highlight
+   vertices and linedefs which would get merged, and implement
+   that merging.
 
 -  Preferences window:
    -  backup_max_files / backup_max_space
    -  floor_bump_xxx values
-   -  scrolling sizes??
-   -  add more stuff (see Possible User Config, below)
+
+-  a proper "curve" tool for making a circle arc or bezier curve,
+   and new vertices would be constrained to that curve, and you can
+   move existing vertices onto the curve.
+
+-  linedef mode: '[' and ']' to adjust length of current line
 
 -  treat sprite UI_Pic in THING panel and DEFAULTS panel as a
    highlightable thing, and possible Copy/Paste target
@@ -41,7 +77,7 @@ General
 -  Resource Dialog : when add a ".wad", check for same file with ".ugh"
    extension and automatically add it too when it exists
 
--  View/Place Camera command, cursor turns into +
+-  View/Place Camera command, cursor turns into '+'
    [ need an ACT_ASK_SPOT action, plus a /ask flag for command ]
 
 -  Operation menu:
@@ -59,42 +95,15 @@ General
    become NEW sector, prefer the loop which DOES NOT include any
    self-referencing linedefs
 
+-  in Find/Replace panel, can filter things by CATEGORY
 
-IDEA: would a "low-res" sector-rendering mode be faster?
+-  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
 
-IDEA: a toolbar
+-  extrafloors in 3D view
+   -  create a DrawWall for their floor/ceil and sides
+   -  distance is slightly closer than normal wall segment
 
-IDEA: large font mode, more readable on 1920x1080 monitors
-
-IDEA: a key to copy properties TO defaults (e.g. 'y' for yank)
-
-IDEA: MMB on sidedef/sector tex : open RECENT browser
-
-IDEA: for generalized lines, show more info in tooltip of desc
-
-
-WISH: a scripting language
-
-WISH: PRINT key makes a screenshot of 2D or 3D view
-
-WISH: can import DWD (DoomEd) format maps
-
-WISH: can import UDMF format maps
-
-
-
-Editing
--------
-
-+  a proper "curve" tool for making a circle arc or bezier curve,
-   and new vertices would be constrained to that curve, and you can
-   move existing vertices onto the curve.
-
-+  when dragging a shape next to existing geometry, highlight
-   vertices and linedefs which would get merged, and implement
-   that merging.
-
--  a way to see angle of lines
+-  PRINT key makes a screenshot of 2D or 3D view
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to.
@@ -102,89 +111,28 @@ Editing
    OR: show the objects as the mouse move arounds, similar to
        dragging stuff but less intense
 
--  assume texture names beginning with '#' are special
-   (The texture checker ignores them -- what else is needed ??)
-   (perhaps have a special purple '?' for the UI_PIC)
+-  a key to copy properties TO defaults (e.g. 'y' for yank)
 
--  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
-
-IDEA: a command to split-line-in-half-and-move-to-curve
-
-IDEA: in Find/Replace panel, can filter things by CATEGORY
-
-IDEA: for quantizing a group of objects, try about 9 delta
-      positions (x+0, x+step/4, x-step/4 etc...) and choose the
-      "best" quantization.
-
-IDEA: popup menu for right-click on flats/textures in the panel
-       -->  Copy
-            Paste
-            Use Default
-            Clear to '-'    (textures only)
-            Make Sky        (flats only)
-
-
-3D View
--------
-
-+  ability to highlight/select railings
-
-+  slopes
-
-+  extrafloors
-   -  create a DrawWall for their floor/ceil and sides
-   -  distance is slightly closer than normal wall segment
+-  ability to highlight/select railings in 3D view
 
 -  support selecting things in 3D view, use browser to change
    their type, and Copy/Paste too
 
--  able to drag stuff around?
    - raise/lower floors
    - move things on a 2D plane
    - move things vertically (for Hexen format)
 
--  BOOM colormaps
-
--  BOOM deep water
-
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
-BUG: closed sectors have a see-through gap (gets bigger further away)
+-  draw the sky texture in 3D view
 
-WISH: draw the sky texture
+-  rotated sprites in 3D view
 
-WISH: rotated sprites
+-  when browser opened by a click, jump to the texture/etc clicked on
 
-WISH: bound flats by 1S lines facing away from the camera
+-  a way to clear the Browser recent lists
 
-
-
-Browser
--------
-
--  search box: ',' for OR
-   --> split match into N pieces, perform normal match on each
-
-IDEA: when opened by a click, jump to the texture/thing/etc clicked on
-
-IDEA: a way to clear the recent lists
-
-IDEA: using "Browser / Things" (etc) to open the browser will reset
-      the category to ALL and clear the match string
-      --->  a "/clear" flag to BrowserMode  [ or two flags ]
-
-IDEA: can change the [max] size of the texture/flat previews
-
-
-
-Game / Port Definitions
------------------------
-
-+  STRIFE: some flags are missing [ especially jumpable railings ]
-
-WISH: FreeDOOM : categorize all the new textures
-
-WISH: HacX and Harmony : categorize the textures
+-  MMB on sidedef/sector tex : open RECENT browser
 
 
 
@@ -192,6 +140,8 @@ Rejected Ideas
 --------------
 
 NO:  UDMF support
+
+NO:  a toolbar
 
 NO:  use OpenGL for rendering 2D and/or 3D views
 
@@ -270,6 +220,9 @@ NO:  disconnect sectors : automatically include islands
 
 NO:  quantization should prevent linedefs from overlapping / crossing
 
+NO:  for quantizing a group of objects, try about 9 delta positions
+     (x+0, x+step/4, x-step/4 etc...) and choose "best" quantization.
+
 
 NO:  autocomplete flat/texture names in Linedef and Sector panels
 
@@ -285,6 +238,16 @@ NO:  a mode to show skill levels via color of drawn things
      [ draw sprites in 2D/3D view differently too ]
 
 NO:  when get "Area not closed" error, show the place where it fails
+
+NO:  Browser search box: allow ',' for OR
+     --> split match into N pieces, perform normal match on each
+
+NO:  a command to split-line-in-half-and-move-to-curve
+
+NO:  able to drag stuff around in 3D view, raise/lower floors
+
+NO:  large font mode, more readable on 1920x1080 monitors
+
 
 NO:  support ZDoom PK3 for textures (etc)
 
