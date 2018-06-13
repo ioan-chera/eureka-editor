@@ -1292,7 +1292,8 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"EditLump",  "File",
-		&CMD_EditLump
+		&CMD_EditLump,
+		/* flags */ "/header /scripts"
 	},
 
 	{	"OpenMap",  "File",
