@@ -343,10 +343,8 @@ static Fl_Menu_Item ted_menu_items[] =
 
 UI_TextEditor::UI_TextEditor() :
 	Fl_Double_Window(600, 400, ""),
-	want_close(false),
-	want_save(false),
-	read_only(false),
-	has_changes(false),
+	want_close(false), want_save(false),
+	is_new(true), read_only(false), has_changes(false),
 	find_string(NULL)
 {
 	size_range(520, 200);
@@ -451,11 +449,8 @@ void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int
 }
 
 
-// this sets the window's title too
 bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 {
-	static char title_buf[FL_PATH_MAX];
-
 	Lump_c * lump = wad->FindLump(lump_name);
 
 	// if the lump does not exist, we will create it
@@ -468,9 +463,6 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 						lump_name);
 			return false;
 		}
-
-		sprintf(title_buf, "%s lump (new)", lump_name);
-		copy_label(title_buf);
 
 		return true;
 	}
@@ -493,12 +485,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 		tbuf->append("\n");
 	}
 
-	if (read_only)
-		sprintf(title_buf, "%s lump (read-only)", lump_name);
-	else
-		sprintf(title_buf, "%s lump", lump_name);
-
-	copy_label(title_buf);
+	is_new = false;
 
 	return true;
 }
@@ -521,6 +508,8 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 		charbuf[0] = buf[k];
 		tbuf->append(charbuf);
 	}
+
+	is_new = false;
 }
 
 
@@ -572,6 +561,23 @@ void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
 
 		buf.push_back(ch);
 	}
+}
+
+
+void UI_TextEditor::SetTitle(const char *lump_name)
+{
+	static char title_buf[FL_PATH_MAX];
+
+	const char *suffix = "";
+
+	if (is_new)
+		suffix = " [NEW]";
+	else if (read_only)
+		suffix = " [Read-Only]";
+
+	sprintf(title_buf, "Editing '%s' lump%s", lump_name, suffix);
+
+	copy_label(title_buf);
 }
 
 

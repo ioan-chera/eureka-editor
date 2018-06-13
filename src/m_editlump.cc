@@ -369,8 +369,8 @@ const char * UI_ChooseTextLump::Run()
 	if (name[0] == 0)
 		return NULL;
 
-	// return a copy of the name, and uppercase it
-	return StringUpper(name);
+	// return a copy of the name
+	return StringDup(name);
 }
 
 
@@ -410,6 +410,14 @@ void CMD_EditLump()
 	//       (1) EDLUMP_HEADER  --> edit the HeaderData buffer
 	//       (2) EDLUMP_SCRIPTS --> edit the ScriptsData buffer
 
+	bool special =	(strcmp(lump_name, EDLUMP_HEADER) == 0) ||
+					(strcmp(lump_name, EDLUMP_SCRIPTS) == 0);
+
+	// uppercase the lump name
+	// [ another small memory leak ]
+	if (!special)
+		lump_name = StringUpper(lump_name);
+
 	// only create a per-level SCRIPTS lump in a Hexen map
 	// [ the UI_ChooseTextLump already prevents this, but we need to
 	//   handle the /scripts option of the EditLump command ]
@@ -420,7 +428,7 @@ void CMD_EditLump()
 		return;
 	}
 
-	if (! ValidLumpToEdit(lump_name))
+	if (!special && ! ValidLumpToEdit(lump_name))
 	{
 		Beep("Invalid lump: '%s'", lump_name);
 		return;
@@ -434,16 +442,16 @@ void CMD_EditLump()
 	if (! edit_wad || edit_wad->IsReadOnly())
 		editor->SetReadOnly();
 
-	// FIXME : do window-title stuff here
-
 	// if lump exists, load the contents
 	if (strcmp(lump_name, EDLUMP_HEADER) == 0)
 	{
 		editor->LoadMemory(HeaderData);
+		editor->SetTitle(Level_name);
 	}
 	else if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0)
 	{
 		editor->LoadMemory(ScriptsData);
+		editor->SetTitle("SCRIPTS");
 	}
 	else
 	{
@@ -453,6 +461,7 @@ void CMD_EditLump()
 			delete editor;
 			return;
 		}
+		editor->SetTitle(lump_name);
 	}
 
 	// run the text editor

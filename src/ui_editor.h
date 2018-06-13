@@ -31,6 +31,7 @@ private:
 	bool want_close;
 	bool want_save;
 
+	bool is_new;
 	bool read_only;
 	bool has_changes;
 
@@ -53,6 +54,8 @@ public:
 	{
 		read_only = true;
 	}
+
+	void SetTitle(const char *lump_name);
 
 	bool LoadLump(Wad_file *wad, const char *lump_name);
 	void SaveLump(Wad_file *wad, const char *lump_name);
