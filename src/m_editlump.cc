@@ -410,10 +410,14 @@ void CMD_EditLump()
 	//       (1) EDLUMP_HEADER  --> edit the HeaderData buffer
 	//       (2) EDLUMP_SCRIPTS --> edit the ScriptsData buffer
 
-	// can only create SCRIPTS lump in a Hexen map
+	// only create a per-level SCRIPTS lump in a Hexen map
+	// [ the UI_ChooseTextLump already prevents this, but we need to
+	//   handle the /scripts option of the EditLump command ]
 	if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0 && Level_format != MAPF_Hexen)
 	{
-		// FIXME
+		DLG_Notify("A per-level SCRIPTS lump can only be created "
+					"on a Hexen format map.");
+		return;
 	}
 
 	if (! ValidLumpToEdit(lump_name))
