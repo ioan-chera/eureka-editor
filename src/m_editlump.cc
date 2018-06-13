@@ -27,6 +27,10 @@
 
 #define BUTTON_COL  FL_YELLOW
 
+// special (not real) lump names
+#define EDLUMP_HEADER	"MapHeader"
+#define EDLUMP_SCRIPTS	"MapScripts"
+
 
 // Various lumps that definitely should not be edited as text.
 // Note: this list is not meant to be exhaustive.
@@ -322,7 +326,7 @@ void UI_ChooseTextLump::header_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
-	win->lump_name->value(Level_name);
+	win->lump_name->value(EDLUMP_HEADER);
 	win->action = ACT_ACCEPT;
 }
 
@@ -331,7 +335,7 @@ void UI_ChooseTextLump::script_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
-	win->lump_name->value("SCRIPTS");
+	win->lump_name->value(EDLUMP_SCRIPTS);
 	win->action = ACT_ACCEPT;
 }
 
@@ -365,6 +369,7 @@ const char * UI_ChooseTextLump::Run()
 	if (name[0] == 0)
 		return NULL;
 
+	// return a copy of the name, and uppercase it
 	return StringUpper(name);
 }
 
@@ -377,7 +382,11 @@ void CMD_EditLump()
 
 	if (Exec_HasFlag("/header"))
 	{
-		lump_name = Level_name;
+		lump_name = EDLUMP_HEADER;
+	}
+	else if (Exec_HasFlag("/scripts"))
+	{
+		lump_name = EDLUMP_SCRIPTS;
 	}
 
 	if (lump_name[0] == 0 || lump_name[0] == '/')
@@ -391,14 +400,18 @@ void CMD_EditLump()
 
 		if (lump_name == NULL)
 			return;
+
+		// check if user typed name of current level
+		if (y_stricmp(lump_name, Level_name) == 0)
+			lump_name = EDLUMP_HEADER;
 	}
 
 	// NOTE: there are two special cases for lump_name:
-	//       (1) same as Level_name --> edit HeaderData
-	//       (2) same as "SCRIPTS"  --> edit ScriptsData
+	//       (1) EDLUMP_HEADER  --> edit the HeaderData buffer
+	//       (2) EDLUMP_SCRIPTS --> edit the ScriptsData buffer
 
 	// can only create SCRIPTS lump in a Hexen map
-	if (y_stricmp(lump_name, "SCRIPTS") == 0 && Level_format != MAPF_Hexen)
+	if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0 && Level_format != MAPF_Hexen)
 	{
 		// FIXME
 	}
@@ -420,11 +433,11 @@ void CMD_EditLump()
 	// FIXME : do window-title stuff here
 
 	// if lump exists, load the contents
-	if (y_stricmp(lump_name, Level_name) == 0)
+	if (strcmp(lump_name, EDLUMP_HEADER) == 0)
 	{
 		editor->LoadMemory(HeaderData);
 	}
-	else if (y_stricmp(lump_name, "SCRIPTS") == 0)
+	else if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0)
 	{
 		editor->LoadMemory(ScriptsData);
 	}
@@ -448,12 +461,12 @@ void CMD_EditLump()
 
 		SYS_ASSERT(wad == edit_wad);
 
-		if (y_stricmp(lump_name, Level_name) == 0)
+		if (strcmp(lump_name, EDLUMP_HEADER) == 0)
 		{
 			editor->SaveMemory(HeaderData);
 			MadeChanges = 1;
 		}
-		else if (y_stricmp(lump_name, "SCRIPTS") == 0)
+		else if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0)
 		{
 			editor->SaveMemory(ScriptsData);
 			MadeChanges = 1;
