@@ -73,6 +73,7 @@ OBJS = \
 	$(OBJ_DIR)/main.o  \
 	$(OBJ_DIR)/m_bitvec.o  \
 	$(OBJ_DIR)/m_config.o  \
+	$(OBJ_DIR)/m_editlump.o  \
 	$(OBJ_DIR)/m_events.o  \
 	$(OBJ_DIR)/m_files.o  \
 	$(OBJ_DIR)/m_game.o  \
@@ -90,6 +91,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_canvas.o  \
 	$(OBJ_DIR)/ui_default.o  \
 	$(OBJ_DIR)/ui_dialog.o  \
+	$(OBJ_DIR)/ui_editor.o  \
 	$(OBJ_DIR)/ui_file.o  \
 	$(OBJ_DIR)/ui_hyper.o  \
 	$(OBJ_DIR)/ui_infobar.o  \
