@@ -1505,7 +1505,10 @@ void Things_FindDuds(selection_c& list)
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		// TODO hexen class flags
+		if (Level_format == MAPF_Hexen)
+		{
+			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+		}
 
 		if (skills == 0 || modes == 0 || classes == 0)
 		{
@@ -1537,7 +1540,7 @@ void Things_FixDuds()
 		const Thing *T = Things[n];
 
 		// NOTE: we also "fix" things that are always spawned
-		//     if (TH_always_spawned(T->type)) continue;
+		////   if (TH_always_spawned(T->type)) continue;
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1566,7 +1569,13 @@ void Things_FixDuds()
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		// FIXME : hexen classes
+		if (Level_format == MAPF_Hexen)
+		{
+			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+
+			if (classes == 0)
+				new_options |= MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage;
+		}
 
 		if (new_options != T->options)
 		{
