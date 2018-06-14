@@ -433,7 +433,6 @@ typedef struct seg_s
 	double pdx, pdy;
 
 	double p_length;
-	double p_angle;
 	double p_para;
 	double p_perp;
 

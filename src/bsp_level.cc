@@ -1358,22 +1358,30 @@ void GetLinedefsHexen(void)
 }
 
 
-static inline int TransformSegDist(const seg_t *seg)
+static inline int VanillaSegDist(const seg_t *seg)
 {
-	double sx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
-	double sy = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
+	double lx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
+	double ly = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
 
-	return (int) ceil(UtilComputeDist(seg->start->x - sx, seg->start->y - sy));
+	// use the "true" starting coord (as stored in the wad)
+	double sx = I_ROUND(seg->start->x);
+	double sy = I_ROUND(seg->start->y);
+
+	return (int) floor(UtilComputeDist(sx - lx, sy - ly) + 0.5);
 }
 
-static inline int TransformAngle(angle_g angle)
+static inline int VanillaSegAngle(const seg_t *seg)
 {
-	int result;
+	// compute the "true" delta
+	double dx = I_ROUND(seg->end->x) - I_ROUND(seg->start->x);
+	double dy = I_ROUND(seg->end->y) - I_ROUND(seg->start->y);
 
-	result = (int)(angle * 65536.0 / 360.0);
+	double angle = UtilComputeAngle(dx, dy);
 
-	if (result < 0)
-		result += 65536;
+	if (angle < 0)
+		angle += 360.0;
+
+	int result = (int) floor(angle * 65536.0 / 360.0 + 0.5);
 
 	return (result & 0xFFFF);
 }
@@ -1531,10 +1539,10 @@ void PutSegs(void)
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
-		raw.angle   = LE_U16(TransformAngle(seg->p_angle));
+		raw.angle   = LE_U16(VanillaSegAngle(seg));
 		raw.linedef = LE_U16(seg->linedef->index);
 		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(TransformSegDist(seg));
+		raw.dist    = LE_U16(VanillaSegDist(seg));
 
 		lump->Write(&raw, sizeof(raw));
 

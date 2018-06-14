@@ -115,7 +115,6 @@ void RecomputeSeg(seg_t *seg)
 	seg->pdy = seg->pey - seg->psy;
 
 	seg->p_length = UtilComputeDist(seg->pdx, seg->pdy);
-	seg->p_angle  = UtilComputeAngle(seg->pdx, seg->pdy);
 
 	if (seg->p_length <= 0)
 		BugError("Seg %p has zero p_length.\n", seg);
