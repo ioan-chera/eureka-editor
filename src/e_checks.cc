@@ -1490,7 +1490,14 @@ void Things_FindDuds(selection_c& list)
 		int modes   = 1;
 		int classes = 1;
 
-		// TODO mode flags
+		if (Level_format == MAPF_Hexen)
+		{
+			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+		}
+		else if (game_info.coop_dm_flags)
+		{
+			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+		}
 
 		// TODO hexen class flags
 
@@ -1523,17 +1530,39 @@ void Things_FixDuds()
 	{
 		const Thing *T = Things[n];
 
-		int skills = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		// NOTE: we also "fix" things that are always spawned
+		//     if (TH_always_spawned(T->type)) continue;
+
+		int new_options = T->options;
+
+		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int modes   = 1;
+		int classes = 1;
 
 		if (skills == 0)
+			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
+
+		if (Level_format == MAPF_Hexen)
 		{
-			skills = T->options | MTF_Easy | MTF_Medium | MTF_Hard;
-			BA_ChangeTH(n, Thing::F_OPTIONS, skills);
+			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+
+			if (modes == 0)
+				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+		}
+		else if (game_info.coop_dm_flags)
+		{
+			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+
+			if (modes == 0)
+				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		// FIXME : mode bits
-
 		// FIXME : hexen classes
+
+		if (new_options != T->options)
+		{
+			BA_ChangeTH(n, Thing::F_OPTIONS, new_options);
+		}
 	}
 
 	BA_End();
