@@ -1454,7 +1454,26 @@ void Things_RemoveInVoid()
 // (i.e. the skill-flags and mode-flags are ignored).
 static bool TH_always_spawned(int type)
 {
-	// FIXME
+	const thingtype_t *info = M_GetThingType(type);
+
+	// a player?
+	if (1 <= type && type <= 4)
+		return true;
+
+	// a deathmatch start?
+	if (type == 11)
+		return true;
+
+	// Polyobject things
+	if (strstr(info->desc, "Polyobj") != NULL ||
+		strstr(info->desc, "PolyObj") != NULL)
+		return true;
+
+	// ambient sounds in Heretic and Hexen
+	if (strstr(info->desc, "Snd") != NULL ||
+		strstr(info->desc, "Sound") != NULL)
+		return true;
+
 	return false;
 }
 
