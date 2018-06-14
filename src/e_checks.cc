@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1450,6 +1450,77 @@ void Things_RemoveInVoid()
 }
 
 
+// returns true if the game engine ALWAYS spawns this thing
+// (i.e. the skill-flags and mode-flags are ignored).
+static bool TH_always_spawned(int type)
+{
+	// FIXME
+	return false;
+}
+
+
+void Things_FindDuds(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int modes   = 1;
+		int classes = 1;
+
+		// TODO mode flags
+
+		// TODO hexen class flags
+
+		if (skills == 0 || modes == 0 || classes == 0)
+		{
+			if (! TH_always_spawned(T->type))
+				list.set(n);
+		}
+	}
+}
+
+
+void Things_ShowDuds()
+{
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
+
+	Things_FindDuds(*edit.Selected);
+
+	GoToErrors();
+}
+
+
+void Things_FixDuds()
+{
+	BA_Begin();
+	BA_Message("fixed unspawnable things");
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		int skills = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+
+		if (skills == 0)
+		{
+			skills = T->options | MTF_Easy | MTF_Medium | MTF_Hard;
+			BA_ChangeTH(n, Thing::F_OPTIONS, skills);
+		}
+
+		// FIXME : mode bits
+
+		// FIXME : hexen classes
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 static void CollectBlockingThings(std::vector<int>& list,
@@ -1664,7 +1735,7 @@ class UI_Check_Things : public UI_Check_base
 {
 public:
 	UI_Check_Things(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Things",
+		UI_Check_base(520, 316, all_mode, "Check : Things",
 				      "Thing test results")
 	{ }
 
@@ -1710,6 +1781,21 @@ public:
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 		Things_ShowStuckies();
 		dialog->user_action = CKR_Highlight;
+	}
+
+
+	static void action_show_duds(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_ShowDuds();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_duds(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_FixDuds();
+		dialog->user_action = CKR_TookAction;
 	}
 };
 
@@ -1763,6 +1849,19 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Things::action_show_void,
 			                "Remove", &UI_Check_Things::action_remove_void);
+		}
+
+
+		Things_FindDuds(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unspawnable things -- skill flags are OK");
+		else
+		{
+			sprintf(check_message, "%d unspawnable things", sel.count_obj());
+			dialog->AddLine(check_message, 1, 200,
+			                "Show", &UI_Check_Things::action_show_duds,
+			                "Fix",  &UI_Check_Things::action_fix_duds);
 		}
 
 
