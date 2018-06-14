@@ -6,12 +6,16 @@ CHANGES IN Eureka 1.22
 
 + new 'File/Lump Editor' command for editing text lumps
 
+- map checker can find unspawnable things
+
 - fixed wall-sorting issue in 3D View which could cause a crash
-- fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 - fixed sector merge to keep properties of first selected sector
+- fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 
 - fixed a sprite in the Heretic game config
 - fixed malformed warnings when linedefs contain an invalid vertex
 - fixed "Removed unused vertices" message to show correct number
+
 - handle some very rare assertion failures more gracefully
+- various improvements to the Makefile, e.g. create the OBJ_DIR
 

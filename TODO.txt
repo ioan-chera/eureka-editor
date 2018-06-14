@@ -17,6 +17,10 @@ does disabling focusing of canvas cause any issues?
 BUG: closed sectors in 3D view have a see-through gap
      (gets bigger further away)
 
+BUG ??  overlapping vertex merging : can remove lines or sectors?
+
+-  tag checking: check for valid usage of special 666 / 667 tags.
+
 
 
 Most Likely
@@ -83,8 +87,6 @@ Slightly Possible
 -  Operation menu:
         for "ACT_XXX" commands, turn pointer into a '+' and
         wait for user to begin action (with MOUSE1..3 or SPACE key)
-
--  tag checking: check for valid usage of special 666 / 667 tags.
 
 -  replace "Toggle XXX" in View menu with checkboxes
 
