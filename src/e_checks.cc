@@ -45,6 +45,9 @@
 #define WARNING_MSG_COLOR	FL_BLUE
 
 
+#define CAMERA_PEST  32000
+
+
 static char check_message[MSG_BUF_LEN];
 static char check_buffer [MSG_BUF_LEN];
 
@@ -1486,6 +1489,9 @@ void Things_FindDuds(selection_c& list)
 	{
 		const Thing *T = Things[n];
 
+		if (T->type == CAMERA_PEST)
+			continue;
+
 		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
 		int modes   = 1;
 		int classes = 1;
@@ -1532,6 +1538,9 @@ void Things_FixDuds()
 
 		// NOTE: we also "fix" things that are always spawned
 		//     if (TH_always_spawned(T->type)) continue;
+
+		if (T->type == CAMERA_PEST)
+			continue;
 
 		int new_options = T->options;
 
