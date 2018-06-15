@@ -6,6 +6,10 @@ Eureka TODO / WISHLIST
 In Progress
 -----------
 
+"Bug detected (creation of zero-length line)" in e_objects.cc
+
+-  handle bugs/asserts more gracefully when possible
+
 does disabling focusing of canvas cause any issues?
 --> have a config option which can enable current behavior
 
@@ -13,9 +17,6 @@ does disabling focusing of canvas cause any issues?
 
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary.
-
-BUG: closed sectors in 3D view have a see-through gap
-     (gets bigger further away)
 
 BUG ??  overlapping vertex merging : can remove lines or sectors?
 

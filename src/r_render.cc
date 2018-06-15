@@ -886,6 +886,7 @@ public:
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
 
+	// vertical clip window, an inclusive range
 	int open_y1;
 	int open_y2;
 
@@ -1639,24 +1640,22 @@ public:
 		int y1 = DistToY(dw->cur_iz, surf.h2);
 		int y2 = DistToY(dw->cur_iz, surf.h1) - 1;
 
+		// clip to the open region
 		if (y1 < open_y1)
 			y1 = open_y1;
 
 		if (y2 > open_y2)
 			y2 = open_y2;
 
-		if (y1 > y2)
-			return;
-
-		/* clip the open region */
-
+		// update open region based on ends which are "solid"
 		if (surf.y_clip & DrawSurf::SOLID_ABOVE)
-			if (open_y1 < y2)
-				open_y1 = y2;
+			open_y1 = MAX(open_y1, y2 + 1);
 
 		if (surf.y_clip & DrawSurf::SOLID_BELOW)
-			if (open_y2 > y1)
-				open_y2 = y1;
+			open_y2 = MIN(open_y2, y1 - 1);
+
+		if (y1 > y2)
+			return;
 
 		/* query mode : is mouse over this wall part? */
 
@@ -1893,7 +1892,7 @@ public:
 			if (s > e)
 				break;
 
-			// this could would normally not occur, but our comparison
+			// this would normally not occur, but our comparison
 			// function is rather "wonky"...
 			if (s == e)
 			{
@@ -2038,10 +2037,11 @@ public:
 
 				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
 				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+
 				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
 				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
 
-				if (open_y1 >= open_y2)
+				if (open_y1 > open_y2)
 					break;
 			}
 

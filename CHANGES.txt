@@ -14,6 +14,7 @@ CHANGES IN Eureka 1.22
 - fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 
 - fixed a sprite in the Heretic game config
+- fixed closed sectors in 3D view having a see-through gap
 - fixed malformed warnings when linedefs contain an invalid vertex
 - fixed "Removed unused vertices" message to show correct number
 
