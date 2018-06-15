@@ -1166,7 +1166,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			sprintf(check_message, "%d unclosed sectors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 210,
+			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_unclosed,
 			                "Verts", &UI_Check_Sectors::action_show_un_verts);
 		}
@@ -1180,7 +1180,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			sprintf(check_message, "%d mismatched sectors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 210,
+			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_mismatch,
 			                "Lines", &UI_Check_Sectors::action_show_mis_lines);
 		}
@@ -2943,6 +2943,10 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 	{
 		int tag = Sectors[i]->tag;
 
+		// ignore special tags
+		if (game_info.tag_666 && (tag == 666 || tag == 667))
+			continue;
+
 		if (tag > 0)
 		{
 			*min_tag = MIN(*min_tag, tag);
@@ -3079,6 +3083,11 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 		if (tag <= 0)
 			continue;
 
+		// DOOM and Heretic use tag #666 to open doors (etc) on the
+		// death of boss monsters.
+		if (game_info.tag_666 && (tag == 666 || tag == 667))
+			continue;
+
 		if (! LD_tag_exists(tag))
 			secs.set(s);
 	}
@@ -3179,7 +3188,7 @@ public:
 
 public:
 	UI_Check_Tags(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Tags", "Tag test results"),
+		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"),
 		fresh_tag(0)
 	{ }
 
@@ -3263,6 +3272,8 @@ check_result_e CHECK_Tags(int min_severity)
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
 		}
 
+		dialog->AddGap(10);
+
 
 		int min_tag, max_tag;
 
@@ -3281,8 +3292,12 @@ check_result_e CHECK_Tags(int min_severity)
 		{
 			dialog->fresh_tag = max_tag + 1;
 
+			// skip two special tag numbers
+			if (dialog->fresh_tag == 666)
+				dialog->fresh_tag = 670;
+
 			dialog->AddGap(10);
-			dialog->AddLine("Apply fresh tag to selection :", 0, 215, "Apply",
+			dialog->AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
 			                &UI_Check_Tags::action_fresh_tag);
 		}
 
