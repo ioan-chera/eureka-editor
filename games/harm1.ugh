@@ -25,8 +25,8 @@ sky_flat  F_SKY1
 default_textures  PANEL2  FLAT10  FLAT20
 default_thing  2011
 
+feature tag_666 1
 feature lax_sprites 1
-
 
 include "doom_groups"
 include "doom_specials"

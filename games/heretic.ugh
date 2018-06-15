@@ -35,6 +35,8 @@ default_textures  SANDSQ2  FLOOR00  FLOOR30
 # 10 = wand crystal
 default_thing  10
 
+feature tag_666 1
+
 
 #---- COLORS --------------------
 

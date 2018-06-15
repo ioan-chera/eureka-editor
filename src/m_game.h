@@ -151,6 +151,7 @@ typedef struct
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
 
 	int no_need_players;	// having no players is OK (Things checker)
+	int tag_666;			// game uses tag 666 and 667 for special FX
 
 } game_info_t;
 
