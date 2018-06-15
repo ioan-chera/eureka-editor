@@ -3179,6 +3179,78 @@ void Tags_ShowMissingTags()
 }
 
 
+static bool SEC_check_beast_mark(int tag)
+{
+	if (! game_info.tag_666)
+		return true;
+
+	if (tag == 667)
+	{
+		// tag #667 can only be used on MAP07
+		return (y_stricmp(Level_name, "MAP07") == 0);
+	}
+
+	if (tag == 666)
+	{
+		// for Heretic, the map must be an end-of-episode map: ExM8
+		if (strcmp(Game_name, "heretic") == 0)
+		{
+			if (strlen(Level_name) != 4)
+				return false;
+
+			return (Level_name[3] == '8');
+		}
+
+		// for Doom, either need a particular map, or the presence
+		// of a KEEN thing.
+		if (y_stricmp(Level_name, "E1M8")  == 0 ||
+			y_stricmp(Level_name, "E4M6")  == 0 ||
+			y_stricmp(Level_name, "E4M8")  == 0 ||
+			y_stricmp(Level_name, "MAP07") == 0)
+		{
+			return true;
+		}
+
+		for (int n = 0 ; n < NumThings ; n++)
+		{
+			const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+			if (y_stricmp(info->desc, "Commander Keen") == 0)
+				return true;
+		}
+
+		return false;
+	}
+
+	return true; // Ok
+}
+
+
+void Tags_FindBeastMarks(selection_c& secs)
+{
+	secs.change_type(OBJ_SECTORS);
+
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		int tag = Sectors[s]->tag;
+
+		if (! SEC_check_beast_mark(tag))
+			secs.set(s);
+	}
+}
+
+
+void Tags_ShowBeastMarks()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	Tags_FindBeastMarks(*edit.Selected);
+
+	GoToErrors();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Tags : public UI_Check_base
@@ -3221,6 +3293,13 @@ public:
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
 		Tags_ShowMissingTags();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_beast_marks(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+		Tags_ShowBeastMarks();
 		dialog->user_action = CKR_Highlight;
 	}
 };
@@ -3270,6 +3349,19 @@ check_result_e CHECK_Tags(int min_severity)
 
 			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
+		}
+
+
+		Tags_FindBeastMarks(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
+		else
+		{
+			sprintf(check_buffer, "%d sectors have an invalid 666/667 tag", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 350,
+			                "Show", &UI_Check_Tags::action_show_beast_marks);
 		}
 
 		dialog->AddGap(10);

@@ -19,8 +19,6 @@ BUG: closed sectors in 3D view have a see-through gap
 
 BUG ??  overlapping vertex merging : can remove lines or sectors?
 
--  tag checking: check for valid usage of special 666 / 667 tags.
-
 
 
 Most Likely
