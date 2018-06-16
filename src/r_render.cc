@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2017 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -632,7 +632,8 @@ public:
 		if (A == B)
 			return false;
 
-		if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
+		// FIXME !!!
+		if (true)  ///!!!  fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
 		{
 			// this is the normal case
 			return A->cur_iz > B->cur_iz;
@@ -1841,10 +1842,7 @@ public:
 
 				if (B->IsCloser(A))
 				{
-					// swap!
-					active[i]   = B;
-					active[i+1] = A;
-
+					Sort_Swap(i, i+1);
 					changed = true;
 				}
 			}
@@ -1859,68 +1857,97 @@ public:
 		}
 	}
 
-	void Sort_Range(int s, int e)
+	int Sort_Partition(int lo, int hi, int pivot_idx)
 	{
-		SYS_ASSERT(e >= s);
+		/* this is Hoare's algorithm */
 
-		if (e == s)
-			return;
+		const DrawWall *pivot = active[pivot_idx];
 
-		if (e - s < 8)
+		int s = lo;
+		int e = hi;
+
+		for (;;)
 		{
-			Sort_Bubble(s, e);
-			return;
-		}
-
-		const DrawWall *pivot = Sort_ChoosePivot(s, e);
-
-		// perform the Quicksort partition step  [ Hoare's algorithm ]
-
-		int s1 = s;
-		int e1 = e;
-
-		while (true)
-		{
-			// s can go past e, or vice versa (that's when we stop)
-
 			while (s <= e && active[s]->IsCloser(pivot))
 				s++;
+
+			if (s > hi)
+			{
+				// all values were < pivot, including the pivot itself!
+
+				if (pivot_idx != hi)
+					Sort_Swap(pivot_idx, hi);
+
+				return hi - 1;
+			}
 
 			while (e >= s && ! active[e]->IsCloser(pivot))
 				e--;
 
-			if (s > e)
-				break;
-
-			// this would normally not occur, but our comparison
-			// function is rather "wonky"...
-			if (s == e)
+			if (e < lo)
 			{
-				e--;
-				break;
+				// all values were >= pivot
+
+				if (pivot_idx != lo)
+					Sort_Swap(pivot_idx, lo);
+
+				return lo;
 			}
 
-			Sort_Swap(s, e);
+			if (s < e)
+			{
+				Sort_Swap(s, e);
 
-			s++;
-			e--;
+				s++;
+				e--;
+
+				continue;
+			}
+
+			/* NOT NEEDED (it seems)
+			if (s == e && active[s]->IsCloser(pivot))
+				s++;
+			*/
+
+			return s - 1;
 		}
+	}
 
-		// check whether one side of the partition is empty
-		if (s > e1 || e < s1)
+	void Sort_Range(int s, int e)
+	{
+		SYS_ASSERT(s <= e);
+
+		while (s < e)
 		{
+			if (e - s <= 2)  // FIXME
+			{
+				Sort_Bubble(s, e);
+				return;
+			}
+
+			int pivot_idx = (s + e) >> 1;
+
+			int mid = Sort_Partition(s, e, pivot_idx);
+
+			// FIXME : TESTING
+			if (mid > s)
+				Sort_Range(s, mid);
+			if (mid+1 < e)
+				Sort_Range(mid+1, e);
 			return;
+
+			// only use recursion on the smallest group
+			if ((mid - s) < (e - mid))
+			{
+				Sort_Range(s, mid-1);
+				s = mid;
+			}
+			else
+			{
+				Sort_Range(mid, e);
+				e = mid - 1;
+			}
 		}
-
-		s--;
-		e++;
-
-		// recursively sort the two partitions
-		if (s > s1)
-			Sort_Range(s1, s);
-
-		if (e < e1)
-			Sort_Range(e, e1);
 	}
 
 	void SortActiveList()
