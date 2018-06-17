@@ -309,6 +309,17 @@ public:
 	{
 		return (Start()->x == End()->x) && (Start()->y == End()->y);
 	}
+
+	int Arg(int which /* 1..5 */) const
+	{
+		if (which == 1) return tag;
+		if (which == 2) return arg2;
+		if (which == 3) return arg3;
+		if (which == 4) return arg4;
+		if (which == 5) return arg5;
+
+		return 0;
+	}
 };
 
 

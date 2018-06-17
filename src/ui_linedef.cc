@@ -713,6 +713,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			args[a]->value("");
 			args[a]->tooltip(NULL);
+			args[a]->textcolor(FL_BLACK);
 		}
 
 		if (is_linedef(obj))
@@ -725,16 +726,19 @@ void UI_LineBox::UpdateField(int field)
 
 			if (Level_format == MAPF_Hexen)
 			{
-				if (L->tag  || info->args[0]) args[0]->value(Int_TmpStr(L->tag));
-				if (L->arg2 || info->args[1]) args[1]->value(Int_TmpStr(L->arg2));
-				if (L->arg3 || info->args[2]) args[2]->value(Int_TmpStr(L->arg3));
-				if (L->arg4 || info->args[3]) args[3]->value(Int_TmpStr(L->arg4));
-				if (L->arg5 || info->args[4]) args[4]->value(Int_TmpStr(L->arg5));
-
-				// set tooltips
 				for (int a = 0 ; a < 5 ; a++)
+				{
+					int arg_val = L->Arg(1 + a);
+
+					if (arg_val || L->type)
+						args[a]->value(Int_TmpStr(arg_val));
+
+					// set the tooltip
 					if (info->args[a])
 						args[a]->copy_tooltip(info->args[a]);
+					else
+						args[a]->textcolor(fl_rgb_color(160,160,160));
+				}
 			}
 		}
 		else

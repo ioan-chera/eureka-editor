@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
@@ -876,6 +876,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			args[a]->value("");
 			args[a]->tooltip(NULL);
+			args[a]->textcolor(FL_BLACK);
 		}
 
 		if (is_thing(obj))
@@ -885,17 +886,19 @@ void UI_ThingBox::UpdateField(int field)
 			const thingtype_t *info = M_GetThingType(T->type);
 			const linetype_t  *spec = M_GetLineType (T->special);
 
-			// set values and tooltips
+			// set argument values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
 			{
 				int arg_val = T->Arg(1 + a);
 
 				if (T->special)
 				{
-					if (arg_val || spec->args[a])
-						args[a]->value(Int_TmpStr(arg_val));
+					args[a]->value(Int_TmpStr(arg_val));
 
-					args[a]->copy_tooltip(spec->args[a]);
+					if (spec->args[a])
+						args[a]->copy_tooltip(spec->args[a]);
+					else
+						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}
 				else
 				{
@@ -903,7 +906,10 @@ void UI_ThingBox::UpdateField(int field)
 					if (arg_val || info->args[a])
 						args[a]->value(Int_TmpStr(arg_val));
 
-					args[a]->copy_tooltip(info->args[a]);
+					if (info->args[a])
+						args[a]->copy_tooltip(info->args[a]);
+					else
+						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}
 			}
 		}
