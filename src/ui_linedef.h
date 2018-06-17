@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -51,11 +51,14 @@ public:
 	Fl_Check_Button *f_upper;
 	Fl_Check_Button *f_lower;
 	Fl_Check_Button *f_passthru;
-	Fl_Check_Button *f_3dmidtex;
+	Fl_Check_Button *f_3dmidtex;  // Eternity
+	Fl_Check_Button *f_jumpover;  // Strife
+	Fl_Check_Button *f_trans;     // Strife
 
 	Fl_Check_Button *f_walk;
 	Fl_Check_Button *f_mons;
 	Fl_Check_Button *f_sound;
+	Fl_Check_Button *f_flyers;    // Strife
 
 public:
 	UI_LineBox(int X, int Y, int W, int H, const char *label = NULL);

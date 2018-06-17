@@ -9,7 +9,8 @@ CHANGES IN Eureka 1.22
 -  map checker now finds unspawnable things
 -  map checker now checks the usage of special 666 / 667 tags
 
--  in hexen format, show every arg value when special is not 0
+-  in Hexen format, show every arg value when special is not 0
+-  support Strife linedef flags (Jump-Over, Translucent, etc)
 
 -  fixed wall-sorting issue in 3D View which could cause a crash
 -  fixed sector merge to keep properties of first selected sector

@@ -796,6 +796,11 @@ void Main_LoadResources()
 		MasterDir_Add(edit_wad);
 
 
+	// hack for Strife (in case port is BOOM or MBF)
+	if (game_info.strife_flags)
+		game_info.pass_through = 0;
+
+
 	// finally, load textures and stuff...
 
 	W_LoadPalette();

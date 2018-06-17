@@ -151,11 +151,9 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_upper->labelsize(12);
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
-
 	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "impassible");
 	f_walk->labelsize(12);
 	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
-
 
 	Y += 19;
 
@@ -164,11 +162,9 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_lower->labelsize(12);
 	f_lower->callback(flags_callback, new line_flag_CB_data_c(this, MLF_LowerUnpegged));
 
-
 	f_mons = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block mons");
 	f_mons->labelsize(12);
 	f_mons->callback(flags_callback, new line_flag_CB_data_c(this, MLF_BlockMonsters));
-
 
 	Y += 19;
 
@@ -178,11 +174,14 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
 	f_passthru->hide();
 
+	f_jumpover = new Fl_Check_Button(X+28, Y+2, FW, 20, "jump over");
+	f_jumpover->labelsize(12);
+	f_jumpover->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_JumpOver));
+	f_jumpover->hide();
 
 	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "sound block");
 	f_sound->labelsize(12);
 	f_sound->callback(flags_callback, new line_flag_CB_data_c(this, MLF_SoundBlock));
-
 
 	Y += 19;
 
@@ -193,12 +192,23 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_3dmidtex->hide();
 
 
-	Y += 24;
+	f_trans = new Fl_Check_Button(X+28, Y+2, FW, 20, "translucent");
+	f_trans->labelsize(12);
+	f_trans->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent1));
+	f_trans->hide();
+
+
+	f_flyers = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block flyers");
+	f_flyers->labelsize(12);
+	f_flyers->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_BlockFloaters));
+	f_flyers->hide();
+
+	Y += 29;
 
 
 	front = new UI_SideBox(x(), Y, w(), 140, 0);
 
-	Y += front->h() + 16;
+	Y += front->h() + 14;
 
 
 	back = new UI_SideBox(x(), Y, w(), 140, 1);
@@ -876,10 +886,13 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
 	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
 	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
+	f_jumpover->value((lineflags & MLF_Strife_JumpOver)   ? 1 : 0);
+	f_trans   ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
 
-	f_walk ->value((lineflags & MLF_Blocking)      ? 1 : 0);
-	f_mons ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
-	f_sound->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
+	f_walk  ->value((lineflags & MLF_Blocking)      ? 1 : 0);
+	f_mons  ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
+	f_sound ->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
+	f_flyers->value((lineflags & MLF_Strife_BlockFloaters) ? 1 : 0);
 }
 
 
@@ -916,6 +929,18 @@ int UI_LineBox::CalcFlags() const
 
 		if (game_info.midtex_3d && f_3dmidtex->value())
 			lineflags |= MLF_Eternity_3DMidTex;
+
+		if (game_info.strife_flags)
+		{
+			if (f_jumpover->value())
+				lineflags |= MLF_Strife_JumpOver;
+
+			if (f_flyers->value())
+				lineflags |= MLF_Strife_BlockFloaters;
+
+			if (f_trans->value())
+				lineflags |= MLF_Strife_Translucent1;
+		}
 	}
 
 	return lineflags;
@@ -992,6 +1017,19 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
+
+		if (game_info.strife_flags)
+		{
+			f_jumpover->show();
+			f_flyers->show();
+			f_trans->show();
+		}
+		else
+		{
+			f_jumpover->hide();
+			f_flyers->hide();
+			f_trans->hide();
+		}
 
 		if (game_info.gen_types)
 			gen->show();

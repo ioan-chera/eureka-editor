@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -146,6 +146,7 @@ typedef struct
 
 	int pass_through;	// Boom's MTF_PASSTHRU line flag
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
+	int strife_flags;	// Strife flags
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END

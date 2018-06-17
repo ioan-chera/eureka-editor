@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -222,6 +222,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	else if (y_stricmp(argv[0], "3d_midtex") == 0)
 	{
 		game_info.midtex_3d = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "strife_flags") == 0)
+	{
+		game_info.strife_flags = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
 	{

@@ -31,6 +31,8 @@ default_textures BRKBRN02 F_TECH01 F_TECH01
 
 default_thing  84
 
+feature strife_flags 1
+
 
 #---- COLORS --------------------
 
