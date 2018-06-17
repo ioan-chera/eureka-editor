@@ -1813,28 +1813,6 @@ public:
 		active[i] = B;
 	}
 
-	const DrawWall * Sort_ChoosePivot(int s, int e)
-	{
-		// use the median of start point, middle point and end point
-
-		const DrawWall *A = active[s];
-		const DrawWall *B = active[(s + e) >> 1];
-		const DrawWall *C = active[e];
-
-		if (B->IsCloser(A))
-			std::swap(A, B);
-
-		if (C->IsCloser(B))
-		{
-			std::swap(B, C);
-
-			if (B->IsCloser(A))
-				std::swap(A, B);
-		}
-
-		return B;
-	}
-
 	void Sort_Bubble(int s, int e)
 	{
 		while (s < e)
@@ -1931,15 +1909,27 @@ public:
 				return;
 			}
 
+			// since we are usually sorting a mostly-sorted list, the
+			// wall in the middle is highly likely to be a good pivot.
 			int pivot_idx = (s + e) >> 1;
 
 			int mid = Sort_Partition(s, e, pivot_idx);
 
+			// handle degenerate cases
+			if (mid <= s)
+			{
+				s++;
+				continue;
+			}
+			else if (mid+1 >= e)
+			{
+				e--;
+				continue;
+			}
+
 			// FIXME : TESTING
-			if (mid > s)
-				Sort_Range(s, mid);
-			if (mid+1 < e)
-				Sort_Range(mid+1, e);
+			Sort_Range(s, mid);
+			Sort_Range(mid+1, e);
 			return;
 
 			// only use recursion on the smallest group
