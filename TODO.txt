@@ -58,8 +58,6 @@ Slightly Possible
 -  allow Game/Port definitions to specify the linedef/thing flags
    which can be used  (rather than hard-coding them)
 
--  STRIFE: some flags are missing [ especially jumpable railings ]
-
 -  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
    that merging
