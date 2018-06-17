@@ -1927,21 +1927,17 @@ public:
 				continue;
 			}
 
-			// FIXME : TESTING
-			Sort_Range(s, mid);
-			Sort_Range(mid+1, e);
-			return;
-
 			// only use recursion on the smallest group
+			// [ it helps to limit stack usage ]
 			if ((mid - s) < (e - mid))
 			{
-				Sort_Range(s, mid-1);
-				s = mid;
+				Sort_Range(s, mid);
+				s = mid+1;
 			}
 			else
 			{
-				Sort_Range(mid, e);
-				e = mid - 1;
+				Sort_Range(mid+1, e);
+				e = mid;
 			}
 		}
 	}
