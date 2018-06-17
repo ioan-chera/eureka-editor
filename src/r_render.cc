@@ -1813,34 +1813,6 @@ public:
 		active[i] = B;
 	}
 
-	void Sort_Bubble(int s, int e)
-	{
-		while (s < e)
-		{
-			bool changed = false;
-
-			for (int i = s ; i < e ; i++)
-			{
-				DrawWall *A = active[i];
-				DrawWall *B = active[i+1];
-
-				if (B->IsCloser(A))
-				{
-					Sort_Swap(i, i+1);
-					changed = true;
-				}
-			}
-
-			// stop when everything is in the right order
-			if (! changed)
-				return;
-
-			// highest value will have bubbled to the top, so we can
-			// ignore it in future passes
-			e = e - 1;
-		}
-	}
-
 	int Sort_Partition(int lo, int hi, int pivot_idx)
 	{
 		/* this is Hoare's algorithm */
@@ -1903,9 +1875,16 @@ public:
 
 		while (s < e)
 		{
-			if (e - s <= 2)  // FIXME
+			// previously there was a bubble sort here, but timing
+			// tests showed that it was overkill.  This is enough.
+			if (s == e-1)
 			{
-				Sort_Bubble(s, e);
+				const DrawWall *const A = active[s];
+				const DrawWall *const B = active[e];
+
+				if (B->IsCloser(A))
+					Sort_Swap(s, e);
+
 				return;
 			}
 
