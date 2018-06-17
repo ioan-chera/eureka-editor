@@ -16,7 +16,7 @@ does disabling focusing of canvas cause any issues?
 #24 : preference for the ADD/DEL sidedef buttons
 
 -  improve INSTALL doc with section about cross-compiling the
-   Windows binary.
+   Windows binary
 
 BUG ??  overlapping vertex merging : can remove lines or sectors?
 
@@ -73,6 +73,9 @@ Slightly Possible
    move existing vertices onto the curve
 
 -  linedef mode: '[' and ']' to adjust length of current line
+
+-  ability to autosave to a hidden file, and if Eureka crashes or
+   power fails, can detect it and allow user to restore from it
 
 -  treat sprite UI_Pic in THING panel and DEFAULTS panel as a
    highlightable thing, and possible Copy/Paste target
