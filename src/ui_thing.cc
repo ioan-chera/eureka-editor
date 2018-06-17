@@ -222,6 +222,17 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_mage  ->hide();
 
 
+	// Strife flags
+	o_sf_shadow  = new Fl_Check_Button(BX+28, AY, FW, 22, "shadow");
+	o_sf_altvis  = new Fl_Check_Button(BX+28, BY, FW, 22, "alt-vis");
+
+	o_sf_shadow->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Shadow));
+	o_sf_altvis->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_AltVis));
+
+	o_sf_shadow->hide();
+	o_sf_altvis->hide();
+
+
 	Y = BY + 35;
 
 
@@ -234,6 +245,18 @@ UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
 	o_dormant->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Dormant));
 
 	o_dormant->hide();
+
+	o_sf_ambush = new Fl_Check_Button( X+28, Y, FW, 22, "ambush");
+	o_sf_friend = new Fl_Check_Button(AX+28, Y, FW, 22, "friend");
+	o_sf_stand  = new Fl_Check_Button( X+28, Y+22, FW, 22, "stand");
+
+	o_sf_ambush->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Ambush));
+	o_sf_friend->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Friend));
+	o_sf_stand ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Stand));
+
+	o_sf_ambush->hide();
+	o_sf_friend->hide();
+	o_sf_stand ->hide();
 
 	Y = Y + 45;
 
@@ -733,6 +756,15 @@ void UI_ThingBox::OptionsFromInt(int options)
 		else
 			exfloor->value("");
 	}
+
+	if (game_info.strife_flags)
+	{
+		o_sf_ambush->value((options & MTF_Strife_Ambush) ? 1 : 0);
+		o_sf_friend->value((options & MTF_Strife_Friend) ? 1 : 0);
+		o_sf_shadow->value((options & MTF_Strife_Shadow) ? 1 : 0);
+		o_sf_altvis->value((options & MTF_Strife_AltVis) ? 1 : 0);
+		o_sf_stand ->value((options & MTF_Strife_Stand) ? 1 : 0);
+	}
 }
 
 
@@ -744,7 +776,18 @@ int UI_ThingBox::CalcOptions() const
 	if (o_medium->value()) options |= MTF_Medium;
 	if (o_hard  ->value()) options |= MTF_Hard;
 
-	if (o_ambush->value()) options |= MTF_Ambush;
+	if (game_info.strife_flags)
+	{
+		if (o_sf_ambush->value()) options |= MTF_Strife_Ambush;
+		if (o_sf_friend->value()) options |= MTF_Strife_Friend;
+		if (o_sf_shadow->value()) options |= MTF_Strife_Shadow;
+		if (o_sf_altvis->value()) options |= MTF_Strife_AltVis;
+		if (o_sf_stand ->value()) options |= MTF_Strife_Stand;
+	}
+	else
+	{
+		if (o_ambush->value()) options |= MTF_Ambush;
+	}
 
 	if (Level_format == MAPF_Hexen)
 	{
@@ -935,6 +978,8 @@ void UI_ThingBox::UpdateGameInfo()
 	}
 	else
 	{
+		// this is appropriate for Strife too
+
 		o_vanilla_dm->show();
 
 		o_sp  ->hide();
@@ -942,10 +987,32 @@ void UI_ThingBox::UpdateGameInfo()
 		o_dm  ->hide();
 	}
 
-	if (game_info.friend_flag)
+	if (game_info.friend_flag && !game_info.strife_flags)
 		o_friend->show();
 	else
 		o_friend->hide();
+
+
+	if (game_info.strife_flags)
+	{
+		o_ambush->hide();
+
+		o_sf_ambush->show();
+		o_sf_friend->show();
+		o_sf_shadow->show();
+		o_sf_altvis->show();
+		o_sf_stand ->show();
+	}
+	else
+	{
+		o_ambush->show();
+
+		o_sf_ambush->hide();
+		o_sf_friend->hide();
+		o_sf_shadow->hide();
+		o_sf_altvis->hide();
+		o_sf_stand ->hide();
+	}
 
 
 	/* map format stuff */

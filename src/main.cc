@@ -796,9 +796,13 @@ void Main_LoadResources()
 		MasterDir_Add(edit_wad);
 
 
-	// hack for Strife (in case port is BOOM or MBF)
+	// hack for Strife (when port is accidentally BOOM or MBF)
 	if (game_info.strife_flags)
+	{
 		game_info.pass_through = 0;
+		game_info.coop_dm_flags = 0;
+		game_info.friend_flag = 0;
+	}
 
 
 	// finally, load textures and stuff...
