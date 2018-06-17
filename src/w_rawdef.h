@@ -532,6 +532,18 @@ typedef enum
 hexen_option_e;
 
 
+typedef enum
+{
+	MTF_Strife_Stand	= 8,
+	MTF_Strife_Ambush	= 32,
+	MTF_Strife_Friend	= 64,
+
+	MTF_Strife_Shadow	= 256,
+	MTF_Strife_AltVis	= 512,
+}
+strife_option_e;
+
+
 //
 // Polyobject stuff
 //
