@@ -62,7 +62,7 @@ Slightly Possible
 
 -  when dragging a shape next to existing geometry, highlight
    vertices and linedefs which would get merged, and implement
-   that merging.
+   that merging
 
 -  Preferences window:
    -  backup_max_files / backup_max_space
@@ -70,7 +70,7 @@ Slightly Possible
 
 -  a proper "curve" tool for making a circle arc or bezier curve,
    and new vertices would be constrained to that curve, and you can
-   move existing vertices onto the curve.
+   move existing vertices onto the curve
 
 -  linedef mode: '[' and ']' to adjust length of current line
 
@@ -107,7 +107,7 @@ Slightly Possible
 -  PRINT key makes a screenshot of 2D or 3D view
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
-   and wait until the user selects a spot to paste to.
+   and wait until the user selects a spot to paste to
 
    OR: show the objects as the mouse move arounds, similar to
        dragging stuff but less intense
@@ -163,7 +163,7 @@ NO:  document the config file syntax
 
 NO:  when one vertex of a linedef is moved (and not the other)
      update the X offset on the appropriate side (right side for start,
-     left side for end vertex).
+     left side for end vertex)
 
 NO:  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
      split the line and put vertex where mouse is
@@ -172,7 +172,7 @@ NO:  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
 NO:  merge vertex and linedef modes
 
 NO:  nicer way to select map, render a small 2D version of each map
-     and present them in a scrolling list.
+     and present them in a scrolling list
 
 NO:  ability to drag the camera (on 2D viewport)
 
@@ -184,7 +184,7 @@ NO:  ability to edit Lua code for OBLIGE prefabs
 NO:  3D view: handle very tall/thin window, letter box with black
 
 NO:  an auto-save feature (e.g. save every N minutes unless no
-     changes occurred in the last N minutes).
+     changes occurred in the last N minutes)
 
 NO:  a name-only mode for texture and flat browsers
 
@@ -222,7 +222,7 @@ NO:  disconnect sectors : automatically include islands
 NO:  quantization should prevent linedefs from overlapping / crossing
 
 NO:  for quantizing a group of objects, try about 9 delta positions
-     (x+0, x+step/4, x-step/4 etc...) and choose "best" quantization.
+     (x+0, x+step/4, x-step/4 etc...) and choose "best" quantization
 
 
 NO:  autocomplete flat/texture names in Linedef and Sector panels
