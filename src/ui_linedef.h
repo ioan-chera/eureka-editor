@@ -52,8 +52,10 @@ public:
 	Fl_Check_Button *f_lower;
 	Fl_Check_Button *f_passthru;
 	Fl_Check_Button *f_3dmidtex;  // Eternity
-	Fl_Check_Button *f_jumpover;  // Strife
-	Fl_Check_Button *f_trans;     // Strife
+
+	Fl_Check_Button *f_jumpover;  //
+	Fl_Check_Button *f_trans1;    // Strife
+	Fl_Check_Button *f_trans2;    //
 
 	Fl_Check_Button *f_walk;
 	Fl_Check_Button *f_mons;

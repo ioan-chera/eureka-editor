@@ -192,10 +192,15 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_3dmidtex->hide();
 
 
-	f_trans = new Fl_Check_Button(X+28, Y+2, FW, 20, "translucent");
-	f_trans->labelsize(12);
-	f_trans->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent1));
-	f_trans->hide();
+	f_trans1 = new Fl_Check_Button(X+28, Y+2, FW, 20, "");
+	f_trans1->labelsize(12);
+	f_trans1->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent1));
+	f_trans1->hide();
+
+	f_trans2 = new Fl_Check_Button(X+44, Y+2, FW, 20, "translucency");
+	f_trans2->labelsize(12);
+	f_trans2->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent2));
+	f_trans2->hide();
 
 
 	f_flyers = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block flyers");
@@ -886,8 +891,10 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
 	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
 	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
+
 	f_jumpover->value((lineflags & MLF_Strife_JumpOver)   ? 1 : 0);
-	f_trans   ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
+	f_trans1  ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
+	f_trans2  ->value((lineflags & MLF_Strife_Translucent2) ? 1 : 0);
 
 	f_walk  ->value((lineflags & MLF_Blocking)      ? 1 : 0);
 	f_mons  ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
@@ -938,8 +945,11 @@ int UI_LineBox::CalcFlags() const
 			if (f_flyers->value())
 				lineflags |= MLF_Strife_BlockFloaters;
 
-			if (f_trans->value())
+			if (f_trans1->value())
 				lineflags |= MLF_Strife_Translucent1;
+
+			if (f_trans2->value())
+				lineflags |= MLF_Strife_Translucent2;
 		}
 	}
 
@@ -1022,13 +1032,15 @@ void UI_LineBox::UpdateGameInfo()
 		{
 			f_jumpover->show();
 			f_flyers->show();
-			f_trans->show();
+			f_trans1->show();
+			f_trans2->show();
 		}
 		else
 		{
 			f_jumpover->hide();
 			f_flyers->hide();
-			f_trans->hide();
+			f_trans1->hide();
+			f_trans2->hide();
 		}
 
 		if (game_info.gen_types)
