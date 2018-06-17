@@ -619,11 +619,12 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
-#define IZ_EPSILON  1e-6
-
-	// this is NOT a predicate, because it does not guarantee
-	// that swapping A and B will produce the opposite result
-	// (or transitivity i.e. if A < B and B < C then A < C).
+	// IsCloser tests if THIS wall (wall A) is closer to the camera
+	// than the given wall (wall B).
+	//
+	// Note that it is NOT suitable as a predicate for std::sort()
+	// since it does not guarantee a linear order (total order) of
+	// the elements.  Hence the need for our own sorting code.
 
 	inline bool IsCloser(const DrawWall *const B) const
 	{
@@ -632,29 +633,26 @@ public:
 		if (A == B)
 			return false;
 
-		// FIXME !!!
-		if (true)  ///!!!  fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
-		{
-			// this is the normal case
-			return A->cur_iz > B->cur_iz;
-		}
-
-		// this case usually occurs at a column where two walls share a vertex.
-		//
-		// hence we check if they actually share a vertex, and if so then
-		// we test whether A is behind B or not -- by checking which side
-		// of B the camera and the other vertex of A are on.
-
 		if (A->ld && B->ld)
 		{
-			// find the vertex of A _not_ shared with B
+			// handle cases where two linedefs share a vertex, since that
+			// is where slime-trails would otherwise occur.
+
+			// if they do share a vertex, we check if the other vertex of
+			// wall A and the camera position are both on the same side of
+			// wall B (extended to infinity).
+
 			int A_other = -1;
 
-			if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
-			if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
+			if (B->ld->TouchesVertex(A->ld->start))
+				A_other = A->ld->end;
+			else if (B->ld->TouchesVertex(A->ld->end))
+				A_other = A->ld->start;
 
 			if (A_other >= 0)
 			{
+				// TODO : optimize this (if possible)
+
 				int ax = Vertices[A_other]->x;
 				int ay = Vertices[A_other]->y;
 
@@ -672,9 +670,17 @@ public:
 				return (A_side * C_side >= 0);
 			}
 		}
+		else if (A->th >= 0 && B->th >= 0)
+		{
+			// prevent two things at same location from flickering
+			const Thing *const TA = Things[A->th];
+			const Thing *const TB = Things[B->th];
 
-		// a pretty good fallback:
-		return A->mid_iz > B->mid_iz;
+			if (TA->x == TB->x && TA->y == TB->y)
+				return A->th > B->th;
+		}
+
+		return A->cur_iz > B->cur_iz;
 	}
 
 	/* PREDICATES */
@@ -1963,6 +1969,8 @@ public:
 
 		Sort_Range(0, (int)active.size() - 1);
 	}
+
+#define IZ_EPSILON  1e-5
 
 	void UpdateActiveList(int x)
 	{
