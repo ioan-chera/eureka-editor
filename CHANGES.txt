@@ -11,6 +11,7 @@ CHANGES IN Eureka 1.22
 
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags
+-  a preference setting for raw sidedef manipulation buttons
 
 +  fixed wall-sorting issue in 3D View which could cause a crash
 -  fixed sector merge to keep properties of first selected sector

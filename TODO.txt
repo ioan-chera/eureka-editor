@@ -13,8 +13,6 @@ In Progress
 does disabling focusing of canvas cause any issues?
 --> have a config option which can enable current behavior
 
-#24 : preference for the ADD/DEL sidedef buttons
-
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
 

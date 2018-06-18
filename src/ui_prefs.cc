@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -664,6 +664,7 @@ public:
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
+	Fl_Check_Button *edit_add_del;
 	Fl_Int_Input    *edit_sectorsize;
 
 	Fl_Check_Button *brow_smalltex;
@@ -891,6 +892,8 @@ UI_Preferences::UI_Preferences() :
 		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
+		}
+		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " raw sidedef manipulation buttons");
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
@@ -1418,6 +1421,7 @@ void UI_Preferences::LoadValues()
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
+	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
@@ -1539,6 +1543,7 @@ void UI_Preferences::SaveValues()
 
 	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
+	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
 	// changing this requires re-populating the browser
