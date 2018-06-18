@@ -17,7 +17,7 @@ FLTK_DIR=$(LIB_LOC)/fltk-1.3.4
 ZLIB_DIR=$(LIB_LOC)/zlib-1.2.8
 
 WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
-OPTIMISE=-O2 -fno-strict-aliasing
+OPTIMISE=-O2 -fno-strict-aliasing -fwrapv
 STRIP_FLAGS=--strip-unneeded
 
 

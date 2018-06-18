@@ -14,7 +14,7 @@ OBJ_DIR=obj_linux
 # CXX=clang++-6.0
 
 WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
-OPTIMISE=-O2 -fno-strict-aliasing
+OPTIMISE=-O2 -fno-strict-aliasing -fwrapv
 STRIP_FLAGS=--strip-unneeded
 
 
