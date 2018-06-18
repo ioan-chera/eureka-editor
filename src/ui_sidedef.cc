@@ -276,26 +276,6 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	BA_Begin();
 
-	// iterate through all lines, if this sidedef exists on one of them
-	// then use the same sector.
-	// DISABLED -- NOT INTUITIVE
-#if 0
-	int new_sec = -1;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
-	{
-		const LineDef *L = LineDefs[*it];
-
-		int sd = box->is_front ? L->right : L->left;
-
-		if (sd >= 0)
-		{
-			new_sec = SideDefs[sd]->sector;
-			break;
-		}
-	}
-#endif
-
 	// make sure we have a fallback sector to use
 	if (NumSectors == 0)
 	{
@@ -312,6 +292,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		int sd    = box->is_front ? L->right : L->left;
 		int other = box->is_front ? L->left : L->right;
 
+		// skip lines which already have this sidedef
 		if (is_sidedef(sd))
 			continue;
 
