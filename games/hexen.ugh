@@ -5,7 +5,7 @@
 #  Eureka DOOM Editor
 #
 #  Copyright (C)      2015 Ioan Chera
-#  Copyright (C) 2015-2016 Andrew Apted
+#  Copyright (C) 2015-2018 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -341,7 +341,9 @@ thing 10503 - nl 20 FFLG "Flame Large"
 #---- SECTOR TYPES ---------------
 
 sector   0 "NOTHING"
-sector   9 "Secret Area"
+
+# NOTE: sector type #9 is allowed by the vanilla Hexen engine,
+#       but it is effectively inert.
 
 sector   1 "Phased Light"
 sector   2 "Light Seq Start"
