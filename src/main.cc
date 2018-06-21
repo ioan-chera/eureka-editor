@@ -370,12 +370,12 @@ static bool DetermineIWAD()
 		y_strlowr((char *)Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
 
 		const char * path = M_QueryKnownIWAD(Iwad_name);
 
 		if (! path)
-			FatalError("Cannot find IWAD for game: %s\n", Iwad_name);
+			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name);
 
 		Iwad_name = StringDup(path);
 	}
@@ -391,20 +391,16 @@ static bool DetermineIWAD()
 		const char *game = GameNameFromIWAD(Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game))
-			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
 
 		M_AddKnownIWAD(Iwad_name);
 		M_SaveRecent();
 	}
 	else
 	{
-		Iwad_name = M_PickDefaultIWAD();
+		Iwad_name = StringDup(M_PickDefaultIWAD());
 
-		if (Iwad_name)
-		{
-			Iwad_name = StringDup(Iwad_name);
-		}
-		else
+		if (! Iwad_name)
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -413,6 +409,8 @@ static bool DetermineIWAD()
 		}
 	}
 
+	Game_name = GameNameFromIWAD(Iwad_name);
+
 	return true;
 }
 
@@ -420,30 +418,31 @@ static bool DetermineIWAD()
 static void DeterminePort()
 {
 	// user supplied value?
-	// an unknown name will error out during Main_LoadResources.
-	if (Port_name)
-		return;
+	// NOTE: values from the EUREKA_LUMP are already verified.
+	if (Port_name && Port_name[0])
+	{
+		if (! M_CanLoadDefinitions("ports", Port_name))
+			FatalError("Unknown port '%s' (no definition file)\n", Port_name);
 
-	SYS_ASSERT(default_port);
+		return;
+	}
 
 	// ensure the 'default_port' value is OK
-	if (! default_port[0])
+	if (! (default_port && default_port[0]))
 	{
 		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
 		default_port = "vanilla";
 	}
-
-	if (! M_CanLoadDefinitions("ports", default_port))
+	else if (! M_CanLoadDefinitions("ports", default_port))
 	{
-		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n", default_port);
+		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
+				default_port);
 		default_port = "vanilla";
 	}
-
-	const char *game = GameNameFromIWAD(Iwad_name);
-
-	if (! M_CheckPortSupportsGame(game, default_port))
+	else if (! M_CheckPortSupportsGame(Game_name, default_port))
 	{
-		LogPrintf("WARNING: Default port '%s' does not support '%s'\n", default_port, game);
+		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
+				default_port, Game_name);
 		default_port = "vanilla";
 	}
 
@@ -765,8 +764,64 @@ static void Main_LoadIWAD()
 }
 
 
+static void ReadGameInfo()
+{
+	Game_name = GameNameFromIWAD(Iwad_name);
+
+	LogPrintf("Game name: '%s'\n", Game_name);
+	LogPrintf("IWAD file: '%s'\n", Iwad_name);
+
+	M_LoadDefinitions("games", Game_name);
+}
+
+
+static void ReadPortInfo()
+{
+	// we assume that the port name is valid, i.e. a config file
+	// exists for it.  That is checked by DeterminePort() and
+	// the EUREKA_LUMP parsing code.
+
+	SYS_ASSERT(Port_name);
+
+	// warn user if this port is incompatible with the game
+	if (! M_CheckPortSupportsGame(Game_name, Port_name))
+	{
+		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
+				Port_name, Game_name);
+
+		int res = DLG_Confirm("&vanilla|No Change",
+						"Warning: the given port '%s' is not compatible with "
+						"this game (%s)."
+						"\n\n"
+						"To prevent seeing invalid line and sector types, "
+						"it is recommended to reset the port to something valid.\n"
+						"Select a new port now?",
+						Port_name, Game_name);
+
+		if (res == 0)
+		{
+			Port_name = "vanilla";
+		}
+	}
+
+	LogPrintf("Port name: '%s'\n", Port_name);
+
+	M_LoadDefinitions("ports", Port_name);
+
+	// prevent UI weirdness if the port is forced to BOOM / MBF
+	if (game_info.strife_flags)
+	{
+		game_info.pass_through = 0;
+		game_info.coop_dm_flags = 0;
+		game_info.friend_flag = 0;
+	}
+}
+
+
 //
-// load all game/port definitions (*.ugh)
+// load all game/port definitions (*.ugh).
+// open all wads in the master directory.
+// read important content from the wads (palette, textures, etc).
 //
 void Main_LoadResources()
 {
@@ -775,19 +830,9 @@ void Main_LoadResources()
 
 	M_ClearAllDefinitions();
 
-	Game_name = GameNameFromIWAD(Iwad_name);
+	ReadGameInfo();
 
-	LogPrintf("Game name: '%s'\n", Game_name);
-	LogPrintf("IWAD file: '%s'\n", Iwad_name);
-
-	M_LoadDefinitions("games", Game_name);
-
-	SYS_ASSERT(Port_name);
-
-	LogPrintf("Port name: '%s'\n", Port_name);
-
-	M_LoadDefinitions("ports", Port_name);
-
+	ReadPortInfo();
 
 	// reset the master directory
 	if (edit_wad)
@@ -797,7 +842,7 @@ void Main_LoadResources()
 
 	Main_LoadIWAD();
 
-	// Load all resource wads
+	// load all resource wads
 	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
 		LoadResourceFile(Resource_list[i]);
@@ -806,18 +851,7 @@ void Main_LoadResources()
 	if (edit_wad)
 		MasterDir_Add(edit_wad);
 
-
-	// hack for Strife (when port is accidentally BOOM or MBF)
-	if (game_info.strife_flags)
-	{
-		game_info.pass_through = 0;
-		game_info.coop_dm_flags = 0;
-		game_info.friend_flag = 0;
-	}
-
-
 	// finally, load textures and stuff...
-
 	W_LoadPalette();
 	W_LoadColormap();
 
