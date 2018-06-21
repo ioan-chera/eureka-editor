@@ -36,7 +36,7 @@ default_thing 81  # healing vial
 
 
 include "hexen_groups"
-include "hexen_specials"
+include "hexen_lines"
 
 
 #---- COLORS --------------------
