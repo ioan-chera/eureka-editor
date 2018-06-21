@@ -3193,7 +3193,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (strcmp(Game_name, "heretic") == 0)
+		if (game_info.tag_666 == 2)
 		{
 			if (strlen(Level_name) != 4)
 				return false;
