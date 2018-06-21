@@ -13,11 +13,13 @@ CHANGES IN Eureka 1.22
 -  support Strife's new thing flags and linedef flags
 -  a preference setting for raw sidedef manipulation buttons
 
+-  warn user when port is not compatible with the current game
+
 +  fixed wall-sorting issue in 3D View which could cause a crash
 -  fixed sector merge to keep properties of first selected sector
 -  fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 
--  fixed a sprite in the Heretic game config
+-  fixed wall torch sprite in the Heretic game config
 -  fixed closed sectors in 3D view having a see-through gap
 -  fixed malformed warnings when linedefs contain an invalid vertex
 -  fixed "Removed unused vertices" message to show correct number
