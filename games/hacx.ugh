@@ -31,7 +31,8 @@ feature tag_666 1
 
 include "doom_colors"
 include "doom_groups"
-include "doom_specials"
+include "doom_lines"
+include "doom_sectors"
 
 #---- THINGS ----------------
 

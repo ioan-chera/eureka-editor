@@ -29,7 +29,8 @@ feature tag_666 1
 feature lax_sprites 1
 
 include "doom_groups"
-include "doom_specials"
+include "doom_lines"
+include "doom_sectors"
 
 
 #---- COLORS --------------------

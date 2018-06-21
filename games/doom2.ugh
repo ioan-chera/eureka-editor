@@ -36,7 +36,8 @@ set $ALLOW_BOOM 1
 include "doom_colors"
 include "doom_things"
 include "doom_groups"
-include "doom_specials"
+include "doom_lines"
+include "doom_sectors"
 include "doom_tex"
 
 #---- DOOM 2 THINGS ----------------
