@@ -343,7 +343,7 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-const char * DetermineGame(const char *iwad_name)
+const char * GameNameFromIWAD(const char *iwad_name)
 {
 	static char game_name[FL_PATH_MAX];
 
@@ -386,7 +386,7 @@ static bool DetermineIWAD()
 		if (! Wad_file::Validate(Iwad_name))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name);
 
-		const char *game = DetermineGame(Iwad_name);
+		const char *game = GameNameFromIWAD(Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game))
 			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
@@ -764,7 +764,7 @@ void Main_LoadResources()
 
 	M_ClearAllDefinitions();
 
-	Game_name = DetermineGame(Iwad_name);
+	Game_name = GameNameFromIWAD(Iwad_name);
 
 	LogPrintf("Game name: '%s'\n", Game_name);
 	LogPrintf("IWAD file: '%s'\n", Iwad_name);

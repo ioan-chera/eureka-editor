@@ -1107,7 +1107,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	const char *game = DetermineGame(chooser.filename());
+	const char *game = GameNameFromIWAD(chooser.filename());
 
 	if (! M_CanLoadDefinitions("games", game))
 	{

@@ -186,7 +186,7 @@ void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
-const char * DetermineGame(const char *iwad_name);
+const char * GameNameFromIWAD(const char *iwad_name);
 
 const char * Main_FileOpFolder();
 

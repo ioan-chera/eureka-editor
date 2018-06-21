@@ -37,7 +37,7 @@ void M_AddKnownIWAD(const char *path)
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
 
-	const char *game = DetermineGame(path);
+	const char *game = GameNameFromIWAD(path);
 
 	known_iwads[game] = std::string(absolute_name);
 }
