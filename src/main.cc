@@ -357,6 +357,10 @@ const char * GameNameFromIWAD(const char *iwad_name)
 
 static bool DetermineIWAD()
 {
+	// this mainly handles a value specified on the command-line,
+	// since values in a EUREKA_LUMP are already vetted.  Hence
+	// producing a fatal error here is OK.
+
 	if (Iwad_name && FilenameIsBare(Iwad_name))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
@@ -751,7 +755,8 @@ static void LoadResourceFile(const char *filename)
 
 static void Main_LoadIWAD()
 {
-	// Load the IWAD (read only)
+	// Load the IWAD (read only).
+	// The filename has been checked in DetermineIWAD().
 	game_wad = Wad_file::Open(Iwad_name, 'r');
 	if (! game_wad)
 		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
@@ -1021,7 +1026,8 @@ int main(int argc, char *argv[])
 	DeterminePort();
 
 
-	// load *just* the iwad, the following few functions need it
+	// temporarily load the iwad, the following few functions need it.
+	// it gets loaded again in Main_LoadResources().
 	Main_LoadIWAD();
 
 	Level_name = DetermineLevel();
