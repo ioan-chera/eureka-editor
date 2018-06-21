@@ -1114,7 +1114,7 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
+bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 {
 	if (strcmp(port, "vanilla") == 0)
 	{

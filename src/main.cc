@@ -90,9 +90,7 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
-#define DEFAULT_PORT_NAME  "vanilla"
-
-const char *default_port = DEFAULT_PORT_NAME;
+const char *default_port = "vanilla";
 
 int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
@@ -427,14 +425,22 @@ static void DeterminePort()
 	// ensure the 'default_port' value is OK
 	if (! default_port[0])
 	{
-		LogPrintf("WARNING: Default port is empty, resetting...\n");
-		default_port = DEFAULT_PORT_NAME;
+		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
+		default_port = "vanilla";
 	}
 
 	if (! M_CanLoadDefinitions("ports", default_port))
 	{
-		LogPrintf("WARNING: Default port '%s' is unknown, resetting...\n");
-		default_port = DEFAULT_PORT_NAME;
+		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n", default_port);
+		default_port = "vanilla";
+	}
+
+	const char *game = GameNameFromIWAD(Iwad_name);
+
+	if (! M_CheckPortSupportsGame(game, default_port))
+	{
+		LogPrintf("WARNING: Default port '%s' does not support '%s'\n", default_port, game);
+		default_port = "vanilla";
 	}
 
 	Port_name = default_port;
@@ -1008,11 +1014,11 @@ int main(int argc, char *argv[])
 	}
 
 
-	DeterminePort();
-
 	// determine which IWAD to use
 	if (! DetermineIWAD())
 		goto quit;
+
+	DeterminePort();
 
 
 	// load *just* the iwad, the following few functions need it
