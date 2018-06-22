@@ -29,8 +29,6 @@ does disabling focusing of canvas cause any issues?
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
 
-BUG ??  overlapping vertex merging : can remove lines or sectors?
-
 
 
 Most Likely
