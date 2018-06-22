@@ -40,9 +40,6 @@ bool LineTouchesBox(int, int, int, int, int);
 
 void GetDragFocus(int *x, int *y, int map_x, int map_y);
 
-void Insert_Vertex(bool force_continue, bool no_fill, bool is_button = false);
-void Insert_Vertex_split(int split_ld, int new_x, int new_y);
-
 
 struct transform_t
 {

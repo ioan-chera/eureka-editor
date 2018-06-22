@@ -390,13 +390,15 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 }
 
 
-void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
+static void Insert_Vertex(bool force_continue, bool no_fill)
 {
 	bool closed_a_loop = false;
 
+	// when these both >= 0, we will add a linedef between them
 	int old_vert = -1;
 	int new_vert = -1;
 
+	// the newly created vertex (if any)
 	Vertex *V = NULL;
 
 	int new_x = grid.SnapX(edit.map_x);
@@ -414,7 +416,19 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 
 
 	// only use the highlight when not splitting a line
-	if (split_ld < 0)
+	if (split_ld >= 0)
+	{
+		new_x = edit.split_x;
+		new_y = edit.split_y;
+
+		// prevent creating an overlapping line when splitting
+		if (old_vert >= 0 &&
+			LineDefs[split_ld]->TouchesVertex(old_vert))
+		{
+			old_vert = -1;
+		}
+	}
+	else
 	{
 		// the "nearby" vertex is usually the highlighted one.
 		int hi_vert = -1;
@@ -447,7 +461,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
-			if (!is_button && edit.action == ACT_NOTHING)
+			if (edit.action == ACT_NOTHING)
 			{
 				if (Vertex_TryFixDangler(hi_vert))
 				{
@@ -456,6 +470,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 				}
 			}
 
+			// FIXME: EXPLAIN THIS
 			if (old_vert < 0)
 			{
 				old_vert = hi_vert;
@@ -477,14 +492,6 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	}
 
 
-	// prevent creating an overlapping line when splitting
-	if (split_ld >= 0 && old_vert >= 0 &&
-		LineDefs[split_ld]->TouchesVertex(old_vert))
-	{
-		old_vert = -1;
-	}
-
-
 	BA_Begin();
 
 
@@ -492,7 +499,10 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	{
 		new_vert = BA_New(OBJ_VERTICES);
 
-		BA_Message("added vertex #%d", new_vert);
+		if (split_ld >= 0)
+			BA_Message("split linedef #%d", split_ld);
+		else
+			BA_Message("added vertex #%d", new_vert);
 
 		V = Vertices[new_vert];
 
@@ -502,25 +512,18 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		edit.Selected->set(new_vert);
 		edit.drawing_from = new_vert;
 
+		// splitting an existing line?
+		if (split_ld >= 0)
+		{
+			SplitLineDefAtVertex(split_ld, new_vert);
+		}
+
+		// FIXME : EXPLAIN THIS
 		if (old_vert < 0)
 		{
 			old_vert = new_vert;
 			new_vert = -1;
 		}
-	}
-
-
-	// splitting an existing line?
-	if (split_ld >= 0)
-	{
-		SYS_ASSERT(V);
-
-		V->x = edit.split_x;
-		V->y = edit.split_y;
-
-		BA_Message("split linedef #%d", split_ld);
-
-		SplitLineDefAtVertex(split_ld, new_vert >= 0 ? new_vert : old_vert);
 	}
 
 
