@@ -6,8 +6,6 @@ Eureka TODO / WISHLIST
 In Progress
 -----------
 
-+  support ZDoom sector-type bits: (like BOOM but shifted up)
-
 +  diffuse the BOM of text files: xEF,0xBB,0xBF
    (ideally check for UTF16: FF FE or FE FF)
 
