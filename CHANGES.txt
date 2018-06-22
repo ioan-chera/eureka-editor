@@ -1,5 +1,5 @@
 
-CHANGES IN Eureka 1.22
+CHANGES IN Eureka 1.23
 ======================
 
 (Since version 1.21)
@@ -16,6 +16,7 @@ CHANGES IN Eureka 1.22
 -  warn user when port is not compatible with the current game
 
 +  fixed wall-sorting issue in 3D View which could cause a crash
+-  fixed sector specials for "Doom in Hexen Format" maps
 -  fixed sector merge to keep properties of first selected sector
 -  fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 
