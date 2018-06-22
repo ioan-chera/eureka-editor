@@ -13,6 +13,9 @@ CHANGES IN Eureka 1.23
 
 -  fixed Find/Replace to handle generalized sectors
 
+-  fixed merging multiple groups of overlapping vertices
+
+
 
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags

@@ -281,10 +281,10 @@ struct vertex_X_CMP_pred
 };
 
 
-void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
+void Vertex_FindOverlaps(selection_c& sel)
 {
-	// the 'one_coord' parameter limits the selection to a single
-	// vertex coordinate.
+	// NOTE: when two or more vertices share the same coordinates,
+	//       only the second and subsequent ones are stored in 'sel'.
 
 	sel.change_type(OBJ_VERTICES);
 
@@ -301,9 +301,6 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
 
-	bool seen_one = false;
-	int last_y = 0;
-
 #define VERT_K  Vertices[sorted_list[k]]
 #define VERT_N  Vertices[sorted_list[n]]
 
@@ -313,13 +310,7 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 		{
 			if (VERT_N->y == VERT_K->y)
 			{
-				if (one_coord && seen_one && VERT_K->y != last_y)
-					continue;
-
 				sel.set(sorted_list[k]);
-				sel.set(sorted_list[n]);
-
-				seen_one = true; last_y = VERT_K->y;
 			}
 		}
 	}
@@ -329,28 +320,63 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 }
 
 
-static void Vertex_DoMergeOverlaps()
+static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 {
-	for (;;)
+	const Vertex *V = Vertices[idx];
+
+	// find the base vertex (the one V is sitting on)
+	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		selection_c sel;
+		if (n == idx)
+			continue;
 
-		Vertex_FindOverlaps(sel, true /* one_coord */);
+		// skip any in the merge list
+		if (merge_verts.get(n))
+			continue;
 
-		if (sel.empty())
-			break;
+		const Vertex *N = Vertices[n];
 
-		Vertex_MergeList(&sel);
+		if (! N->Matches(V))
+			continue;
+
+		// Ok, found it, so update linedefs
+
+		for (int ld = 0 ; ld < NumLineDefs ; ld++)
+		{
+			LineDef *L = LineDefs[ld];
+
+			if (L->start == idx)
+				BA_ChangeLD(ld, LineDef::F_START, n);
+
+			if (L->end == idx)
+				BA_ChangeLD(ld, LineDef::F_END, n);
+		}
+
+		return;
 	}
+
+	// SHOULD NOT GET HERE
+	LogPrintf("VERTEX MERGE FAILURE.\n");
 }
 
 
 void Vertex_MergeOverlaps()
 {
+	selection_c verts;
+	selection_iterator_c it;
+
+	Vertex_FindOverlaps(verts);
+
 	BA_Begin();
 	BA_Message("merged overlapping vertices");
 
-	Vertex_DoMergeOverlaps();
+	for (verts.begin(&it) ; !it.at_end() ; ++it)
+	{
+		Vertex_MergeOne(*it, verts);
+	}
+
+	// nothing should reference these vertices now
+	DeleteObjects(&verts);
 
 	BA_End();
 
@@ -475,9 +501,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine("No overlapping vertices");
 		else
 		{
-			int approx_num = sel.count_obj() / 2;
-
-			sprintf(check_message, "%d overlapping vertices", approx_num);
+			sprintf(check_message, "%d overlapping vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_highlight,
@@ -2032,15 +2056,11 @@ void LineDefs_RemoveZeroLen()
 	BA_Begin();
 	BA_Message("removed zero-len linedefs");
 
-	DeleteObjects_WithUnused(&lines);
+	// NOTE: the vertex overlapping test handles cases where the
+	//       vertices of other lines joining a zero-length one
+	//       need to be merged.
 
-	if (lines.notempty())
-	{
-		// technically, this is slightly wrong, as it should only merge
-		// vertices that belong to one of the deleted linedefs.
-		// pragmatically, I don't think it will hurt anybody.
-		Vertex_DoMergeOverlaps();
-	}
+	DeleteObjects_WithUnused(&lines);
 
 	BA_End();
 }
