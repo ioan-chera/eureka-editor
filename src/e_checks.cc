@@ -704,6 +704,8 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(OBJ_SECTORS);
 
+	int max_type = (game_info.gen_sectors == 2) ? 8191 : 2047;
+
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
 		int type_num = Sectors[n]->type;
@@ -712,15 +714,17 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 		if (type_num == 0)
 			continue;
 
-		if (type_num < 0 || type_num >= 2048)
+		if (type_num < 0 || type_num > max_type)
 		{
 			bump_unknown_type(types, type_num);
 			list.set(n);
 			continue;
 		}
 
-		// Boom generalized sectors
-		if (game_info.sector_flags)  // FIXME ZDoom
+		// Boom and ZDoom generalized sectors
+		if (game_info.gen_sectors == 2)
+			type_num &= 255;
+		else if (game_info.gen_sectors)
 			type_num &= 31;
 
 		const sectortype_t *info = M_GetSectorType(type_num);

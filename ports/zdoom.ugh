@@ -45,7 +45,7 @@ feature lax_sprites 1
 if $MAP_FORMAT is HEXEN
   feature tag_666 0
   feature strife_flags 0
-  feature sector_flags 2
+  feature gen_sectors 2
 endif
 
 

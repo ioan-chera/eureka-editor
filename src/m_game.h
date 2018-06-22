@@ -137,7 +137,7 @@ typedef struct
 	/* port features */
 
 	int gen_types;		// BOOM generalized linedef types
-	int sector_flags;   // BOOM and ZDoom sector bitflags (damage, friction, wind)
+	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
 
 	int tx_start;		// textures in TX_START .. TX_END
 	int img_png;		// PNG format for various graphics

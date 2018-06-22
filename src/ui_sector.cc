@@ -441,16 +441,24 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	if (w == box->type && value >= 32)
-	{
-		// when user enters a large value into type box, store it as-is
-		// in sectors.  The panel will show the Boom interpretation.
-	}
-	else if (game_info.sector_flags)
-	{
-		// Boom generalized sectors
+	int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
 
-		mask = BoomSF_TypeMask;
+	// when generalize sectors active, typing a low value (which does
+	// not touch any bitflags) should just update the TYPE part, and
+	// leave the existing bitflags alone.
+
+	if (w == box->type && value > gen_mask)
+	{
+		// the value is too large and can affect the bitflags, so we
+		// update the WHOLE sector type.  If generalized sectors are
+		// active, then the panel will reinterpret the typed value.
+	}
+	else if (game_info.gen_sectors)
+	{
+		// Boom and ZDoom generalized sectors
+
+		// we fix this shortly...
+		mask = 0;
 
 		if (w == box->bm_damage)
 		{
@@ -471,6 +479,17 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		{
 			mask  = BoomSF_Wind;
 			value = box->bm_wind->value() << 9;
+		}
+
+		if (mask == 0)
+		{
+			mask = gen_mask;
+		}
+		else if (game_info.gen_sectors == 2)
+		{
+			// for ZDoom in Hexen mode, shift up 3 bits
+			mask  <<= 3;
+			value <<= 3;
 		}
 	}
 
@@ -508,9 +527,14 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	if (game_info.sector_flags)
+	// when generalize sectors in effect, the name should just
+	// show the TYPE part of the sector type.
+
+	if (game_info.gen_sectors)
 	{
-		value &= BoomSF_TypeMask;
+		int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
+
+		value &= gen_mask;
 	}
 
 	const sectortype_t *info = M_GetSectorType(value);
@@ -712,15 +736,19 @@ void UI_SectorBox::UpdateField(int field)
 		if (is_sector(obj))
 		{
 			int value = Sectors[obj]->type;
-			int mask  = game_info.sector_flags ? 31 : 65535;
+			int mask  = (game_info.gen_sectors == 2) ? 255 :
+						(game_info.gen_sectors) ? 31 : 65535;
 
 			type->value(Int_TmpStr(value & mask));
 
 			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
 
-			if (game_info.sector_flags)
+			if (game_info.gen_sectors)
 			{
+				if (game_info.gen_sectors == 2)
+					value >>= 3;
+
 				bm_damage->value((value >> 5) & 3);
 				bm_secret->value((value >> 7) & 1);
 
@@ -913,8 +941,13 @@ void UI_SectorBox::UpdateTotal()
 
 void UI_SectorBox::UpdateGameInfo()
 {
-	if (game_info.sector_flags)
+	if (game_info.gen_sectors)
 	{
+		if (game_info.gen_sectors == 2)
+			bm_title->label("ZDoom flags:");
+		else
+			bm_title->label("Boom flags:");
+
 		bm_title->show();
 
 		bm_damage->show();

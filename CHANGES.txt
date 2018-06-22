@@ -9,6 +9,8 @@ CHANGES IN Eureka 1.23
 -  map checker now finds unspawnable things
 -  map checker now checks the usage of special 666 / 667 tags
 
+-  support ZDoom sector bit-flags in Hexen format maps
+
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags
 -  a preference setting for raw sidedef manipulation buttons

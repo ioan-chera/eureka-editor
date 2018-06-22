@@ -230,9 +230,9 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.gen_types = atoi(argv[1]);
 	}
-	else if (y_stricmp(argv[0], "sector_flags") == 0)
+	else if (y_stricmp(argv[0], "gen_sectors") == 0)
 	{
-		game_info.sector_flags = atoi(argv[1]);
+		game_info.gen_sectors = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "img_png") == 0)
 	{
