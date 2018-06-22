@@ -32,4 +32,5 @@ CHANGES IN Eureka 1.23
 
 -  handle some very rare assertion failures more gracefully
 -  various improvements to the Makefile, e.g. create the OBJ_DIR
+-  added VIM syntax file for editing definition (.ugh) files
 
