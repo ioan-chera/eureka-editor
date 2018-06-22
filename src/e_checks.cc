@@ -2872,7 +2872,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d linedefs without right side", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 250,
+			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
 		}
 
@@ -2885,7 +2885,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d manual doors on 1S linedefs", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 250,
+			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_manual_doors,
 			                "Fix",  &UI_Check_LineDefs::action_fix_manual_doors);
 		}
@@ -2913,7 +2913,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d linedefs with wrong 2S flag", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 285,
+			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
 			                "Fix",  &UI_Check_LineDefs::action_fix_bad_2s_flag);
 		}
