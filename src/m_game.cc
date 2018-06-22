@@ -193,6 +193,37 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 }
 
 
+static void ParseClearKeywords(char ** argv, int argc)
+{
+	for ( ; argc > 0 ; argv++, argc--)
+	{
+		if (y_stricmp(argv[0], "lines") == 0)
+		{
+			line_groups.clear();
+			line_types.clear();
+		}
+		else if (y_stricmp(argv[0], "sectors") == 0)
+		{
+			sector_types.clear();
+		}
+		else if (y_stricmp(argv[0], "things") == 0)
+		{
+			thing_groups.clear();
+			thing_types.clear();
+		}
+		else if (y_stricmp(argv[0], "textures") == 0)
+		{
+			texture_groups.clear();
+			texture_assigns.clear();
+
+			flat_assigns.clear();
+		}
+		else
+			FatalError("Unknown clear keyword '%s' in definition file.\n", argv[0]);
+	}
+}
+
+
 static void ParseFeatureDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "gen_types") == 0)
@@ -517,13 +548,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		// the "line" command is only used in DOOM format
-		// similarly the "special" command is only used in HEXEN format
-		if (y_strnicmp(argv[0], "line", 4) == 0 && Level_format == MAPF_Hexen)
-			return;
-		if (y_strnicmp(argv[0], "spec", 4) == 0 && Level_format != MAPF_Hexen)
-			return;
-
 		linegroup_t * lg = new linegroup_t;
 
 		lg->group = argv[1][0];
@@ -537,15 +561,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	{
 		if (nargs < 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
-
-		// the "line" command is only used in DOOM format
-		// similarly the "special" command is only used in HEXEN format
-		if (y_stricmp(argv[0], "line") == 0 && Level_format == MAPF_Hexen)
-			return;
-		if (y_stricmp(argv[0], "special") == 0 && Level_format != MAPF_Hexen)
-			return;
-
-		// only read "special" in HEXEN map format
 
 		linetype_t * info = new linetype_t;
 
@@ -747,6 +762,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			 y_stricmp(argv[0], "exclude_game") == 0)
 	{
 		return;
+	}
+
+	else if (y_stricmp(argv[0], "clear") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseClearKeywords(pst->argv + 1, nargs);
 	}
 
 	else

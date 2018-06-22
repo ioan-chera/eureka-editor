@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2015-2016 Andrew Apted
+#  Copyright (C) 2015-2018 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -25,12 +25,12 @@
 
 # disable all Boom defs for Hexen format maps
 if $MAP_FORMAT is HEXEN
-set $ALLOW_BOOM 0
+  set $ALLOW_BOOM 0
 endif
 
 # be Boom compatible, but only for the DOOM games
 if $ALLOW_BOOM is 1
-include "mbf"
+  include "mbf"
 endif
 
 
@@ -41,6 +41,11 @@ map_formats DOOM HEXEN
 feature tx_start 1
 feature medusa_fixed 1
 feature lax_sprites 1
+
+if $MAP_FORMAT is HEXEN
+  feature tag_666 0
+  feature strife_flags 0
+endif
 
 
 #---- THINGS ------------
@@ -144,7 +149,12 @@ thing 9999 - n  16 NULL "ZD: SecActHitFloor"
 #---- HEXEN FORMAT SPECIALS  ----------
 #
 
+if $MAP_FORMAT is HEXEN
+
+clear lines sectors
+
 include "hexen_groups"
+include "hexen_sectors"
 
 special 0 - "NOTHING"
 
@@ -408,12 +418,14 @@ special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
 special 173 - "NoiseAlert"              target_tid  emitter_tid
 special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
+else
 
 #
 #---- DOOM FORMAT SPECIALS  ----------
 #
 
-# most specials are loaded via "mbf.ugh"
+# most specials are from the game definition.
+# additional specials come from the MBF port.
 
 # Scripting
 line 273 n "WR FraggleScript Exec"
@@ -508,5 +520,6 @@ line 348 - "W1 ZD: Autosave"
 line 349 - "S1 ZD: Autosave"
 
 ## andrewj: omitted the EDGE "Floor up 2" (types 434-439), as they
-## have almost no practical use outside of EDGE's RTS scripting.
+## have no practical use outside of EDGE's RTS scripting.
 
+endif
