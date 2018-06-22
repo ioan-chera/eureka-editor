@@ -720,7 +720,7 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 		}
 
 		// Boom generalized sectors
-		if (game_info.gen_types)
+		if (game_info.sector_flags)  // FIXME ZDoom
 			type_num &= 31;
 
 		const sectortype_t *info = M_GetSectorType(type_num);

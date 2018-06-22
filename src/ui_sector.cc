@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -446,7 +446,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		// when user enters a large value into type box, store it as-is
 		// in sectors.  The panel will show the Boom interpretation.
 	}
-	else if (game_info.gen_types)
+	else if (game_info.sector_flags)
 	{
 		// Boom generalized sectors
 
@@ -508,7 +508,7 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	if (game_info.gen_types)
+	if (game_info.sector_flags)
 	{
 		value &= BoomSF_TypeMask;
 	}
@@ -712,14 +712,14 @@ void UI_SectorBox::UpdateField(int field)
 		if (is_sector(obj))
 		{
 			int value = Sectors[obj]->type;
-			int mask  = game_info.gen_types ? 31 : 65535;
+			int mask  = game_info.sector_flags ? 31 : 65535;
 
 			type->value(Int_TmpStr(value & mask));
 
 			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
 
-			if (game_info.gen_types)
+			if (game_info.sector_flags)
 			{
 				bm_damage->value((value >> 5) & 3);
 				bm_secret->value((value >> 7) & 1);
@@ -913,7 +913,7 @@ void UI_SectorBox::UpdateTotal()
 
 void UI_SectorBox::UpdateGameInfo()
 {
-	if (game_info.gen_types)
+	if (game_info.sector_flags)
 	{
 		bm_title->show();
 
