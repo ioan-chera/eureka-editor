@@ -206,8 +206,10 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 	 left.ok = TraceLineLoop(new_ld, SIDE_LEFT,   left.loop);
 	right.ok = TraceLineLoop(new_ld, SIDE_RIGHT, right.loop);
 
+#ifdef DEBUG_LOOP
 	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",
 			left.ok ? 1 : 0, right.ok ? 1 : 0);
+#endif
 
 	if (! (left.ok && right.ok))
 	{
@@ -215,7 +217,9 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 
 		// TODO : find some cases, see what is needed
 
-fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
+#ifdef DEBUG_LOOP
+	fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
+#endif
 		return false;
 	}
 
@@ -231,9 +235,11 @@ fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
 	}
 
 
-fprintf(stderr, "--> %s + %s\n",
-		 left.loop.faces_outward ? "OUTIE" : "innie",
-		right.loop.faces_outward ? "OUTIE" : "innie");
+#ifdef DEBUG_LOOP
+	fprintf(stderr, "--> %s + %s\n",
+			 left.loop.faces_outward ? "OUTIE" : "innie",
+			right.loop.faces_outward ? "OUTIE" : "innie");
+#endif
 
 	 left.sec =  left.loop.DetermineSector();
 	right.sec = right.loop.DetermineSector();
@@ -442,8 +448,9 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		//
 		if (new_vert >= 0)
 		{
-			// just ignore when same as drawing-from vert
-			if (new_vert == old_vert)
+			// just ignore when highlight is same as drawing-start
+			if (old_vert >= 0 &&
+				Vertices[old_vert]->Matches(Vertices[new_vert]))
 			{
 #if 1
 				edit.Selected->set(old_vert);
@@ -475,18 +482,19 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 				goto begin_drawing;
 			}
-		}
 
-		// handle case where a line already exists between the two vertices
-		if (old_vert >= 0 && new_vert >= 0 &&
-			LineDefAlreadyExists(old_vert, new_vert))
-		{
-			// just continue drawing from the second vertex
-			edit.drawing_from = new_vert;
-			edit.Selected->set(new_vert);
-			return;
+			// handle case where a line already exists between the two vertices
+			if (LineDefAlreadyExists(old_vert, new_vert))
+			{
+				// just continue drawing from the second vertex
+				edit.drawing_from = new_vert;
+				edit.Selected->set(new_vert);
+				return;
+			}
 		}
 	}
+
+	// at here: if new_vert >= 0, then old_vert >= 0 and split_ld < 0
 
 
 	BA_Begin();
@@ -501,11 +509,6 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		V->x = new_x;
 		V->y = new_y;
 
-		if (split_ld >= 0)
-			BA_Message("split linedef #%d", split_ld);
-		else
-			BA_Message("added vertex #%d", new_vert);
-
 		edit.Selected->set(new_vert);
 		edit.drawing_from = new_vert;
 
@@ -513,12 +516,16 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		if (split_ld >= 0)
 		{
 			SplitLineDefAtVertex(split_ld, new_vert);
+			BA_Message("split linedef #%d", split_ld);
+		}
+		else
+		{
+			BA_Message("added vertex #%d", new_vert);
 		}
 	}
 
-
-	// there is no starting vertex, so no linedef can be added,
-	// hence skip some of the following code.
+	// there is no starting vertex, therefore no linedef can be added,
+	// so skip some of the following code.
 	if (old_vert < 0)
 	{
 		old_vert = new_vert;
@@ -527,11 +534,19 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		goto finish_edit;
 	}
 
-
 	// closing a loop?
 	if (!force_continue && Vertex_HowManyLineDefs(new_vert) > 0)
 	{
 		closed_a_loop = true;
+	}
+
+	// FIXME : THIS CAN BE POSSIBLE
+	//         i.e. (new_x, new_y) == old_vert
+	//         BUT WHAT TO DO ABOUT IT?
+	if (Vertices[old_vert]->Matches(Vertices[new_vert]))
+	{
+		LogPrintf("Insert_Vertex FAILURE.\n");
+		goto finish_edit;
 	}
 
 
@@ -539,10 +554,6 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	// adding a linedef
 	//
 	SYS_ASSERT(old_vert != new_vert);
-
-	// sanity check  [ FIXME ]
-	if (Vertices[old_vert]->Matches(Vertices[new_vert]))
-		BugError("Bug detected (creation of zero-length line)\n");
 
 	// this can make new sectors too
 	Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
