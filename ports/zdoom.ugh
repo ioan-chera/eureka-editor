@@ -523,3 +523,19 @@ line 349 - "S1 ZD: Autosave"
 ## have no practical use outside of EDGE's RTS scripting.
 
 endif
+
+
+# --- ZDoom Sector types in DOOM format ---
+
+if $ALLOW_BOOM is 1
+  sector 15 "ZD: Friction Low"
+  sector 18 "ZD: Damage Lava (light)"
+  sector 19 "ZD: Damage Lava (heavy)"
+  sector 20 "ZD: Scroll East"
+
+  sector 21 "ZD: Light Phased"
+  sector 22 "ZD: Light Seq Start"
+  sector 23 "ZD: Light Seq Next 1"
+  sector 24 "ZD: Light Seq Next 2"
+endif
+
