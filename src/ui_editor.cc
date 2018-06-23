@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -618,21 +619,43 @@ void UI_TextEditor::InsertFile()
 	// if a selection is active, delete that text
 	tbuf->remove_selection();
 
+	static char line[FL_PATH_MAX];
+
 	const char *filename = chooser.filename();
 
-	int res = tbuf->insertfile(filename, ted->insert_position());
+	// TODO: for WIN32, ideally examine the file and determine
+	//       whether the charset is UTF-8 or CP-1252, based on
+	//       quantity of invalid UTF-8 sequences.
 
-	if (res > 0)
+	// open file in binary mode (we handle CR/LF ourselves)
+	FILE * fp = fopen(filename, "rb");
+
+	if (fp == NULL)
 	{
-		DLG_Notify("A read error occurred on that file.");
+		snprintf(line, sizeof(line), "%s", strerror(errno));
+		DLG_Notify("Unable to open text file:\n\n%s", line);
+		return;
 	}
+
+	LogPrintf("Reading text from file: %s\n", filename);
+
+	int pos = ted->insert_position();
+
+	while (M_ReadTextLine(line, sizeof(line), fp))
+	{
+		tbuf->insert(pos, line);
+		pos += strlen(line);
+
+		tbuf->insert(pos, "\n");
+		pos += 1;
+	}
+
+	fclose(fp);
 }
 
 
 void UI_TextEditor::ExportToFile()
 {
-	static char msgbuf[FL_PATH_MAX];
-
 	Fl_Native_File_Chooser chooser;
 
 	chooser.title("Pick file to export to");
@@ -655,6 +678,8 @@ void UI_TextEditor::ExportToFile()
 			break;
 	}
 
+	static char msgbuf[FL_PATH_MAX];
+
 	const char *filename = chooser.filename();
 
 	// open file in binary mode (we handle CR/LF ourselves)
@@ -666,6 +691,8 @@ void UI_TextEditor::ExportToFile()
 		DLG_Notify("Unable to create output file:\n\n%s", msgbuf);
 		return;
 	}
+
+	LogPrintf("Writing text to file: %s\n", filename);
 
 #ifdef WIN32
 	// in Windows, if the text contains unicode (UTF-8) then we
