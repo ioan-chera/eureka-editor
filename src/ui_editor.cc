@@ -631,6 +631,8 @@ void UI_TextEditor::InsertFile()
 
 void UI_TextEditor::ExportToFile()
 {
+	static char msgbuf[FL_PATH_MAX];
+
 	Fl_Native_File_Chooser chooser;
 
 	chooser.title("Pick file to export to");
@@ -655,16 +657,58 @@ void UI_TextEditor::ExportToFile()
 
 	const char *filename = chooser.filename();
 
-	int res = tbuf->savefile(filename);
+	// open file in binary mode (we handle CR/LF ourselves)
+	FILE * fp = fopen(filename, "wb");
 
-	if (res > 0)
+	if (fp == NULL)
 	{
-		DLG_Notify("A write error occurred on that file.");
+		snprintf(msgbuf, sizeof(msgbuf), "%s", strerror(errno));
+		DLG_Notify("Unable to create output file:\n\n%s", msgbuf);
+		return;
 	}
-	else
+
+#ifdef WIN32
+	// in Windows, if the text contains unicode (UTF-8) then we
+	// need to prefix the output file with a BOM (byte order mark).
+	if (ContainsUnicode())
 	{
-		has_changes = false;
+		fputc(0xEF, fp);
+		fputc(0xBB, fp);
+		fputc(0xBF, fp);
 	}
+#endif
+
+	int len = tbuf->length();
+
+	for (int p = 0 ; p < len ; p++)
+	{
+		byte ch = (byte) tbuf->byte_at(p);
+
+		// skip raw CR characters
+		if (ch == '\r')
+			continue;
+
+#ifdef WIN32
+		// under Windows, convert LF --> CR/LF
+		if (ch == '\n')
+		{
+			fputc('\r', fp);
+		}
+#endif
+
+		if (fputc(ch, fp) == EOF)
+		{
+			snprintf(msgbuf, sizeof(msgbuf), "%s", strerror(errno));
+			DLG_Notify("A write error occurred:\n\n%s", msgbuf);
+
+			fclose(fp);
+			return;
+		}
+	}
+
+	fclose(fp);
+
+	has_changes = false;
 }
 
 
@@ -745,6 +789,18 @@ bool UI_TextEditor::FindNext(int dir)
 	ted->show_insert_position();
 
 	return true;
+}
+
+
+bool UI_TextEditor::ContainsUnicode() const
+{
+	int len = tbuf->length();
+
+	for (int i = 0 ; i < len ; i++)
+		if (tbuf->byte_at(i) & 0x80)
+			return true;
+
+	return false;
 }
 
 

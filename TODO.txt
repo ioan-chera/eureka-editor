@@ -17,9 +17,6 @@ In Progress
    --> M_ParseOperationFile  : m_events
    --> M_ParseConfigFile *2  : m_config
 
-+  saving text on Windows SHOULD have a BOM if any unicode is present
-   --> the lump editor
-
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
 
