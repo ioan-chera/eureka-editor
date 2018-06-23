@@ -782,6 +782,18 @@ bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
 		return false;
 	}
 
+	// remove a Unicode BOM (byte-order mark)
+	if ((byte)buf[0] == 0xEF &&
+		(byte)buf[1] == 0xBB &&
+		(byte)buf[2] == 0xBF)
+	{
+		size_t len = strlen(buf) - 3;
+
+		memmove(buf, buf+3, len);
+
+		buf[len] = 0;
+	}
+
 	StringRemoveCRLF(buf);
 
 	return true;

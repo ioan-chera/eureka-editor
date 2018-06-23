@@ -824,7 +824,7 @@ bool UI_TextEditor::ContainsUnicode() const
 	int len = tbuf->length();
 
 	for (int i = 0 ; i < len ; i++)
-		if (tbuf->byte_at(i) & 0x80)
+		if ((byte)tbuf->byte_at(i) & 0x80)
 			return true;
 
 	return false;

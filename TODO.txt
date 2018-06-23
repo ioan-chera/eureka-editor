@@ -6,17 +6,6 @@ Eureka TODO / WISHLIST
 In Progress
 -----------
 
-+  diffuse the BOM of text files: xEF,0xBB,0xBF
-   (ideally check for UTF16: FF FE or FE FF)
-
-   --> the lump editor
-
-   --> M_ParseDefinitionFile : m_game
-   --> M_LoadRecent          : m_files
-   --> LoadBindingsFromPath  : m_keys
-   --> M_ParseOperationFile  : m_events
-   --> M_ParseConfigFile *2  : m_config
-
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
 

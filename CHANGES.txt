@@ -24,6 +24,8 @@ CHANGES IN Eureka 1.23
 -  new "require click to focus" preference setting
 
 
+-  handle text files containing a Unicode BOM (byte-order mark)
+
 
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags
