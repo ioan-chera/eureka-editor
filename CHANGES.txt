@@ -16,6 +16,8 @@ CHANGES IN Eureka 1.23
 -  fixed merging multiple groups of overlapping vertices
 
 
++  fixed "zero-length line" fatal error when drawing lines
+
 
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags

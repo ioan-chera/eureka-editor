@@ -452,15 +452,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			if (old_vert >= 0 &&
 				Vertices[old_vert]->Matches(Vertices[new_vert]))
 			{
-#if 1
 				edit.Selected->set(old_vert);
 				return;
-#else
-				// simply unselect it and stop drawing
-				edit.Selected->clear(old_vert);
-				Editor_ClearAction();
-				return;
-#endif
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
@@ -474,7 +467,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			}
 
 			// our insertion point is an existing vertex, and we are not
-			// in drawing mode, so no actual "edit" will take place.
+			// in drawing mode, so there is no edit operation to perform.
 			if (old_vert < 0)
 			{
 				old_vert = new_vert;
@@ -495,6 +488,16 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	}
 
 	// at here: if new_vert >= 0, then old_vert >= 0 and split_ld < 0
+
+
+	// would we create a new vertex on top of an existing one?
+	if (new_vert < 0 && old_vert >= 0 &&
+		new_x == Vertices[old_vert]->x &&
+		new_y == Vertices[old_vert]->y)
+	{
+		edit.Selected->set(old_vert);
+		return;
+	}
 
 
 	BA_Begin();
@@ -524,47 +527,36 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		}
 	}
 
-	// there is no starting vertex, therefore no linedef can be added,
-	// so skip some of the following code.
+
 	if (old_vert < 0)
 	{
+		// there is no starting vertex, therefore no linedef can be added
 		old_vert = new_vert;
 		new_vert = -1;
-
-		goto finish_edit;
 	}
-
-	// closing a loop?
-	if (!force_continue && Vertex_HowManyLineDefs(new_vert) > 0)
+	else
 	{
-		closed_a_loop = true;
+		// closing a loop?
+		if (!force_continue && Vertex_HowManyLineDefs(new_vert) > 0)
+		{
+			closed_a_loop = true;
+		}
+
+		//
+		// adding a linedef
+		//
+		SYS_ASSERT(old_vert != new_vert);
+
+		// this can make new sectors too
+		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
+
+		BA_Message("added linedef");
+
+		edit.Selected->set(new_vert);
+		edit.drawing_from = new_vert;
 	}
 
-	// FIXME : THIS CAN BE POSSIBLE
-	//         i.e. (new_x, new_y) == old_vert
-	//         BUT WHAT TO DO ABOUT IT?
-	if (Vertices[old_vert]->Matches(Vertices[new_vert]))
-	{
-		LogPrintf("Insert_Vertex FAILURE.\n");
-		goto finish_edit;
-	}
 
-
-	//
-	// adding a linedef
-	//
-	SYS_ASSERT(old_vert != new_vert);
-
-	// this can make new sectors too
-	Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
-
-	BA_Message("added linedef");
-
-	edit.Selected->set(new_vert);
-	edit.drawing_from = new_vert;
-
-
-finish_edit:
 	BA_End();
 
 

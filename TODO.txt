@@ -19,10 +19,6 @@ In Progress
 +  saving text on Windows SHOULD have a BOM if any unicode is present
    --> the lump editor
 
-"Bug detected (creation of zero-length line)" in e_objects.cc
-
--  handle bugs/asserts more gracefully when possible
-
 does disabling focusing of canvas cause any issues?
 --> have a config option which can enable current behavior
 
