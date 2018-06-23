@@ -18,6 +18,8 @@ CHANGES IN Eureka 1.23
 
 +  fixed "zero-length line" fatal error when drawing lines
 
+-  buttons for ALL maps in Open Map dialog (via scrollable area)
+
 
 -  in Hexen format, show every arg value when special is not 0
 -  support Strife's new thing flags and linedef flags

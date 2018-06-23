@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -79,7 +79,7 @@ private:
 	Fl_Choice *look_where;
 
 	Fl_Input  *map_name;
-	Fl_Group  *button_grp;
+	UI_Scroll *button_grp;
 
 	Fl_Return_Button *ok_but;
 
