@@ -36,6 +36,10 @@
 #include "ui_misc.h"
 
 
+// config items
+bool require_click_to_focus = false;
+
+
 void ClearStickyMod()
 {
 	if (edit.sticky_mod)
@@ -432,14 +436,17 @@ static void EV_EnterWindow()
 
 	main_win->canvas->PointerPos(true /* in_event */);
 
-	// we greedily grab the keyboard focus
-	Fl_Widget * foc = main_win->canvas;
+	if (! require_click_to_focus)
+	{
+		// we greedily grab the keyboard focus
+		Fl_Widget * foc = main_win->canvas;
 
-	if (edit.render3d)
-		foc = main_win->render;
+		if (edit.render3d)
+			foc = main_win->render;
 
-	if (Fl::focus() != foc)
-		foc->take_focus();
+		if (Fl::focus() != foc)
+			foc->take_focus();
+	}
 
 	RedrawMap();
 }

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -37,6 +37,7 @@ extern int default_edit_mode;
 extern bool auto_load_recent;
 extern bool begin_maximized;
 extern bool map_scroll_bars;
+extern bool require_click_to_focus;
 
 extern bool leave_offsets_alone;
 extern bool new_islands_are_void;

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -681,6 +681,15 @@ static const opt_desc_t options[] =
 		"Render the unknown texture as fullbright",
 		NULL,
 		&render_unknown_bright
+	},
+
+	{	"require_click_to_focus",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Window focus requires a click, do not steal the focus",
+		NULL,
+		&require_click_to_focus
 	},
 
 	{	"same_mode_clears_selection",
