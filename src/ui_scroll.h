@@ -30,12 +30,14 @@ class UI_Scroll : public Fl_Group
 private:
 	Fl_Scrollbar * scrollbar;
 
+	int bar_side;
+
 	bool resize_horiz_;
 
 	int top_y, bottom_y;
 
 public:
-	UI_Scroll(int X, int Y, int W, int H);
+	UI_Scroll(int X, int Y, int W, int H, int _bar_side = -1);
 
 	virtual ~UI_Scroll();
 

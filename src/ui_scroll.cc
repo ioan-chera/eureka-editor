@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -37,14 +37,18 @@
 //
 // UI_Scroll Constructor
 //
-UI_Scroll::UI_Scroll(int X, int Y, int W, int H) :
+UI_Scroll::UI_Scroll(int X, int Y, int W, int H, int _bar_side) :
 		Fl_Group(X, Y, W, H, NULL),
+		bar_side(_bar_side),
 		resize_horiz_(false),
 		top_y(0), bottom_y(0)
 {
 	end();
 
-	scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
+	if (_bar_side < 0)
+		scrollbar = new Fl_Scrollbar(X, Y, SBAR_W, H, NULL);
+	else
+		scrollbar = new Fl_Scrollbar(X + W - SBAR_W, Y, SBAR_W, H, NULL);
 
 	scrollbar->align(FL_ALIGN_LEFT);
 	scrollbar->color(SCRBAR_BACK, SCRBAR_BACK);
@@ -77,7 +81,10 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 
 	Fl_Group::resize(X, Y, W, H);
 
-	scrollbar->resize(X, Y, SBAR_W, H);
+	if (bar_side < 0)
+		scrollbar->resize(X, Y, SBAR_W, H);
+	else
+		scrollbar->resize(X+W-SBAR_W, Y, SBAR_W, H);
 
 
 	int total_h = bottom_y - top_y;
@@ -91,7 +98,7 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 		{
 			Fl_Widget * w = Child(i);
 
-			w->resize(X + SBAR_W, w->y(), W - SBAR_W, w->h());
+			w->resize(X + (bar_side < 0 ? SBAR_W : 0), w->y(), W - SBAR_W, w->h());
 		}
 	}
 }
