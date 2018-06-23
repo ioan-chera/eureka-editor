@@ -16,9 +16,13 @@ CHANGES IN Eureka 1.23
 -  fixed merging multiple groups of overlapping vertices
 
 
+
 +  fixed "zero-length line" fatal error when drawing lines
 
 -  buttons for ALL maps in Open Map dialog (via scrollable area)
+
+-  new "require click to focus" preference setting
+
 
 
 -  in Hexen format, show every arg value when special is not 0
@@ -37,7 +41,7 @@ CHANGES IN Eureka 1.23
 -  fixed malformed warnings when linedefs contain an invalid vertex
 -  fixed "Removed unused vertices" message to show correct number
 
--  handle some very rare assertion failures more gracefully
+-  handle some rare assertion failures more gracefully
 -  various improvements to the Makefile, e.g. create the OBJ_DIR
 -  added VIM syntax file for editing definition (.ugh) files
 

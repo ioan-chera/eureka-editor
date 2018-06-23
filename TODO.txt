@@ -10,6 +10,7 @@ In Progress
    (ideally check for UTF16: FF FE or FE FF)
 
    --> the lump editor
+
    --> M_ParseDefinitionFile : m_game
    --> M_LoadRecent          : m_files
    --> LoadBindingsFromPath  : m_keys
@@ -18,9 +19,6 @@ In Progress
 
 +  saving text on Windows SHOULD have a BOM if any unicode is present
    --> the lump editor
-
-does disabling focusing of canvas cause any issues?
---> have a config option which can enable current behavior
 
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
