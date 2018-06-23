@@ -30,6 +30,7 @@
 #include <algorithm>
 
 #include "im_color.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_things.h"
 
@@ -922,7 +923,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	if (! fp)
 		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
 
-	while (fgets(pst->readbuf, sizeof(pst->readbuf), fp))
+	while (M_ReadTextLine(pst->readbuf, sizeof(pst->readbuf), fp))
 	{
 		pst->lineno += 1;
 

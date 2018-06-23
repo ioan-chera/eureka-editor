@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -862,17 +862,11 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	// parse each line
 
-	static char line_buf[FL_PATH_MAX];
+	static char line[FL_PATH_MAX];
 	const  char * tokens[MAX_TOKENS];
 
-	while (! feof(fp))
+	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		char *line = fgets(line_buf, FL_PATH_MAX, fp);
-		if (! line)
-			break;
-
-		StringRemoveCRLF(line);
-
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
 		if (num_tok == 0)
 			continue;

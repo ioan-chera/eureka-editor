@@ -772,6 +772,22 @@ static const opt_desc_t options[] =
 
 //------------------------------------------------------------------------
 
+// this automatically strips CR/LF from the line.
+// returns true if ok, false on EOF or error.
+bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
+{
+	if (! fgets(buf, size, fp))
+	{
+		buf[0] = 0;
+		return false;
+	}
+
+	StringRemoveCRLF(buf);
+
+	return true;
+}
+
+
 static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 {
 	char *name  = NULL;
@@ -921,8 +937,8 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 
 	const char *basename = FindBaseName(filename);
 
-	// Execute one line on each iteration
-	for (int lnum = 1 ; fgets(line, sizeof(line), fp) != NULL ; lnum++)
+	// handle one line on each iteration
+	for (int lnum = 1 ; M_ReadTextLine(line, sizeof(line), fp) ; lnum++)
 	{
 		int ret = parse_config_line_from_file(line, basename, lnum);
 
@@ -1466,19 +1482,12 @@ bool M_LoadUserState()
 	LogPrintf("Loading user state from: %s\n", filename);
 
 
-	static char line_buf[FL_PATH_MAX];
+	static char line[FL_PATH_MAX];
 
 	const char * tokens[MAX_TOKENS];
 
-	while (! feof(fp))
+	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		char *line = fgets(line_buf, FL_PATH_MAX, fp);
-
-		if (! line)
-			break;
-
-		StringRemoveCRLF(line);
-
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
 
 		if (num_tok == 0)

@@ -121,6 +121,10 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 void M_PrintCommandLineOptions(FILE *fp);
 
 
+// returns true if ok, false on EOF or error
+bool M_ReadTextLine(char *buf, size_t size, FILE *fp);
+
+
 // returns number of tokens, zero for comment, negative on error
 int M_ParseLine(const char *line, const char ** tokens, int max_tok,
                 bool do_strings);
