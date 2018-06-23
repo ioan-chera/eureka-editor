@@ -332,7 +332,9 @@ bool Vertex_TryFixDangler(int v_num)
 		if (v_num < v_other)
 			std::swap(v_num, v_other);
 
-fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
+#if 0 // DEBUG
+		fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
+#endif
 
 		BA_Begin();
 		BA_Message("merged dangling vertex #%d\n", v_num);
@@ -379,7 +381,10 @@ fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other
 	if (! line_ob.valid())
 		return false;
 
-fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+#if 0 // DEBUG
+	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+#endif
+
 	BA_Begin();
 
 	SplitLineDefAtVertex(line_ob.num, v_num);
