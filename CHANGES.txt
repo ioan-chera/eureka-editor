@@ -6,38 +6,28 @@ CHANGES IN Eureka 1.23
 
 +  new 'File/Lump Editor' command for editing text lumps
 
--  map checker now finds unspawnable things
--  map checker now checks the usage of special 666 / 667 tags
++  fixed wall-sorting issue in 3D View which could cause a crash
++  fixed fatal "zero-length line" error when drawing lines
++  fixed sector merge to keep properties of first selected sector
++  fixed inserting things in Hexen getting no SP/COOP/DM/class flags
 
--  support ZDoom sector bit-flags in Hexen format maps
+-  show warning when port is not compatible with current game
+-  handle text files containing a Unicode BOM (byte-order mark)
+-  support Strife's new thing flags and linedef flags
+-  the OpenMap dialog has buttons for ALL maps (in a scrollable area)
+
+-  hexen format: fixed wrong sector specials when game is DOOM
+-  hexen format: show every arg value when special is not 0
+-  hexen format: support ZDoom generalized sectors
+
+-  preferences: a new "require click to focus" setting
+-  preferences: a setting for raw sidedef manipulation buttons
+
+-  map checker: look for unspawnable things
+-  map checker: check usage of special 666 / 667 tags
+-  map checker: fixed merging multiple sets of overlapping verts
 
 -  fixed Find/Replace to handle generalized sectors
-
--  fixed merging multiple groups of overlapping vertices
-
-
-
-+  fixed "zero-length line" fatal error when drawing lines
-
--  buttons for ALL maps in Open Map dialog (via scrollable area)
-
--  new "require click to focus" preference setting
-
-
--  handle text files containing a Unicode BOM (byte-order mark)
-
-
--  in Hexen format, show every arg value when special is not 0
--  support Strife's new thing flags and linedef flags
--  a preference setting for raw sidedef manipulation buttons
-
--  warn user when port is not compatible with the current game
-
-+  fixed wall-sorting issue in 3D View which could cause a crash
--  fixed sector specials for "Doom in Hexen Format" maps
--  fixed sector merge to keep properties of first selected sector
--  fixed inserting things in Hexen getting no SP/COOP/DM/class flags
-
 -  fixed wall torch sprite in the Heretic game config
 -  fixed closed sectors in 3D view having a see-through gap
 -  fixed malformed warnings when linedefs contain an invalid vertex
