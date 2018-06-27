@@ -3634,7 +3634,21 @@ void Textures_ShowTransparent()
 
 void Textures_FixTransparent()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	const char *new_tex = default_wall_tex;
+
+	if (is_transparent(new_tex))
+	{
+		if (W_TextureIsKnown("SANDSQ2"))
+			new_tex = "SANDSQ2";	// Heretic
+		else if (W_TextureIsKnown("CASTLE07"))
+			new_tex = "CASTLE07";	// Hexen
+		else if (W_TextureIsKnown("BRKBRN02"))
+			new_tex = "BRKBRN02";	// Strife
+		else
+			new_tex = "GRAY1";		// Doom
+	}
+
+	int new_wall = BA_InternaliseString(new_tex);
 
 	BA_Begin();
 	BA_Message("fixed transparent textures");
