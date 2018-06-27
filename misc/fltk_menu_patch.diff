@@ -1,0 +1,19 @@
+=== modified file 'src/Fl_Menu.cxx'
+--- src/Fl_Menu.cxx 2012-12-04 10:41:23 +0000
++++ src/Fl_Menu.cxx 2012-12-04 10:49:26 +0000
+@@ -467,10 +467,14 @@
+   }
+ 
+   if (m->flags & FL_MENU_DIVIDER) {
++    int ofs = hh;
++    // center the dividing line if inactive and text == ""
++    if ((m->flags & FL_MENU_INACTIVE) && m->text && !m->text[0])
++      ofs = hh/2;
+     fl_color(FL_DARK3);
+-    fl_xyline(BW-1, yy+hh+(LEADING-2)/2, W-2*BW+2);
++    fl_xyline(BW-1, yy+ofs+(LEADING-2)/2, W-2*BW+2);
+     fl_color(FL_LIGHT3);
+-    fl_xyline(BW-1, yy+hh+((LEADING-2)/2+1), W-2*BW+2);
++    fl_xyline(BW-1, yy+ofs+((LEADING-2)/2+1), W-2*BW+2);
+   }
+ }
