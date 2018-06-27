@@ -1,12 +1,12 @@
 
-CHANGES IN Eureka 1.23
+CHANGES IN Eureka 1.24
 ======================
 
 (Since version 1.21)
 
 +  new 'File/Lump Editor' command for editing text lumps
 
-+  fixed wall-sorting issue in 3D View which could cause a crash
++  fixed wall sorting issue in 3D View which could cause a crash
 +  fixed fatal "zero-length line" error when drawing lines
 +  fixed sector merge to keep properties of first selected sector
 +  fixed inserting things in Hexen getting no SP/COOP/DM/class flags
@@ -21,10 +21,11 @@ CHANGES IN Eureka 1.23
 -  hexen format: support ZDoom generalized sectors
 
 -  preferences: a new "require click to focus" setting
--  preferences: a setting for raw sidedef manipulation buttons
+-  preferences: a setting to show sidedef ADD / DEL buttons
 
 -  map checker: look for unspawnable things
 -  map checker: check usage of special 666 / 667 tags
+-  map checker: find non-animating switch textures (on usable lines)
 -  map checker: fixed merging multiple sets of overlapping verts
 
 -  fixed Find/Replace to handle generalized sectors

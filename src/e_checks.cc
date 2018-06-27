@@ -3636,6 +3636,7 @@ void Textures_FixTransparent()
 {
 	const char *new_tex = default_wall_tex;
 
+	// do something reasonable if default wall is transparent
 	if (is_transparent(new_tex))
 	{
 		if (W_TextureIsKnown("SANDSQ2"))
@@ -3984,13 +3985,139 @@ void Textures_FixUnknownFlat()
 }
 
 
+static bool is_switch_tex(const char *tex)
+{
+	// we only check if the name begins with "SW" and a digit or
+	// an underscore.  that is sufficient for DOOM and Heretic, and
+	// most Hexen switches, but misses a lot in Strife.
+
+	return (tex[0] == 'S') && (tex[1] == 'W') &&
+			(tex[2] == '_' || isdigit(tex[2]));
+}
+
+
+void Textures_FindDupSwitches(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		// only check lines with a special
+		if (! L->type)
+			continue;
+
+		if (L->right < 0)
+			continue;
+
+		// switch textures only work on the front side
+		// (no need to look at the back side)
+
+		bool lower = is_switch_tex(L->Right()->LowerTex());
+		bool upper = is_switch_tex(L->Right()->UpperTex());
+		bool mid   = is_switch_tex(L->Right()->MidTex());
+
+		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
+
+		if (count > 1)
+			lines.set(n);
+	}
+}
+
+
+void Textures_ShowDupSwitches()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Textures_FindDupSwitches(*edit.Selected);
+
+	GoToErrors();
+}
+
+
+void Textures_FixDupSwitches()
+{
+	int null_tex = BA_InternaliseString("-");
+
+	const char *new_tex = default_wall_tex;
+
+	// do something reasonable if default wall is a switch
+	if (is_switch_tex(new_tex))
+	{
+		if (W_TextureIsKnown("SANDSQ2"))
+			new_tex = "SANDSQ2";	// Heretic
+		else if (W_TextureIsKnown("CASTLE07"))
+			new_tex = "CASTLE07";	// Hexen
+		else if (W_TextureIsKnown("BRKBRN02"))
+			new_tex = "BRKBRN02";	// Strife
+		else
+			new_tex = "GRAY1";		// Doom
+	}
+
+	int new_wall = BA_InternaliseString(new_tex);
+
+	BA_Begin();
+	BA_Message("fixed non-animating switches");
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		// only check lines with a special
+		if (! L->type)
+			continue;
+
+		if (L->right < 0)
+			continue;
+
+		// switch textures only work on the front side
+		// (hence no need to look at the back side)
+
+		bool lower = is_switch_tex(L->Right()->LowerTex());
+		bool upper = is_switch_tex(L->Right()->UpperTex());
+		bool mid   = is_switch_tex(L->Right()->MidTex());
+
+		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
+
+		if (count < 2)
+			continue;
+
+		if (L->OneSided())
+		{
+			// we don't care if "mid" is not a switch
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			continue;
+		}
+
+		if (mid)
+		{
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+			mid = false;
+			count--;
+		}
+
+		if (count < 2)
+			continue;
+
+		// here we have a 2S linedef, both upper and lower look switchy
+
+		BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode) :
-		UI_Check_base(565, 286, all_mode, "Check : Textures",
+		UI_Check_base(580, 286, all_mode, "Check : Textures",
 		              "Texture test results")
 	{ }
 
@@ -4073,6 +4200,21 @@ public:
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
 		Textures_LogTransparent();
 		dialog->user_action = CKR_Highlight;
+	}
+
+
+	static void action_show_dup_switch(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_ShowDupSwitches();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_dup_switch(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_FixDupSwitches();
+		dialog->user_action = CKR_TookAction;
 	}
 
 
@@ -4167,7 +4309,7 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 270,
+			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_missing,
 			                "Fix",  &UI_Check_Textures::action_fix_missing);
 		}
@@ -4181,10 +4323,24 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d transparent textures on solids", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 270,
+			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_transparent,
 			                "Fix",  &UI_Check_Textures::action_fix_transparent,
 			                "Log",  &UI_Check_Textures::action_log_transparent);
+		}
+
+
+		Textures_FindDupSwitches(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No non-animating switch textures");
+		else
+		{
+			sprintf(check_buffer, "%d non-animating switch textures", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 275,
+			                "Show", &UI_Check_Textures::action_show_dup_switch,
+			                "Fix",  &UI_Check_Textures::action_fix_dup_switch);
 		}
 
 
