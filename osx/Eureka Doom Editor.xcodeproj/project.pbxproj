@@ -668,7 +668,7 @@
 				TargetAttributes = {
 					FA5E2C27165B8F860024D6A5 = {
 						DevelopmentTeam = 66L236F264;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -957,8 +957,9 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 66L236F264;
+				DEVELOPMENT_TEAM = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EurekaApp/Eureka Doom Editor-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -977,6 +978,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -985,9 +987,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 66L236F264;
+				DEVELOPMENT_TEAM = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EurekaApp/Eureka Doom Editor-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1004,6 +1007,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
