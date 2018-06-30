@@ -974,7 +974,7 @@
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/fltk-1.3.4-2/lib",
+					"$(PROJECT_DIR)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
@@ -1003,7 +1003,7 @@
 				INFOPLIST_FILE = "EurekaApp/Eureka Doom Editor-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/fltk-1.3.4-2/lib",
+					"$(PROJECT_DIR)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.eureka.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Eureka Doom Editor";
