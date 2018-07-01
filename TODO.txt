@@ -9,12 +9,39 @@ In Progress
 -  improve INSTALL doc with section about cross-compiling the
    Windows binary
 
+-  canvas drawing: see if something is slowing down PLAIN mode
+   e.g. the lookup of linedef types?
+
+REVIEW:  map checker : check for switch lines with multiple "SWxxx" textures
+   Q/ look at back sides of 2S lines?
+   Q/ behavior of clearing mid on 2D lines is right?
+   Q/ if 2D and both upper and lower, check which is visible?
+
++  no-click-to-focus : input widgets HOG the keyboard focus?
+
+-  NO IWADS message has a cut-off button (Setup), and that
+   button can be pressed even with nothing there
+
+-  WIN32 : use patched FLTK with nicer menu separator
+
+-  preferences : use "show sidedef ADD / DEL buttons" or similar
+
+-  preferences : default for sector rendering, make it OFF
+
+-  sector rendering : a preference for "low quality" mode
+
+IDEA: text editor can invoke an ACS compiler to build BEHAVIOR lump
+
+-  If the grid is turned off, then hitting the grid size hotkeys still leaves
+   it invisible; it only appears when you use the dropdown selector at the bottom.
+
+IDEA: a sector rendering mode that shows floors which are same texture as
+      the currently hilighted one.  [ also for ceilings ]
+
 
 
 Most Likely
 -----------
-
--  look into optimizing the sector rendering
 
 -  a dialog to restore a map from a backup
 
