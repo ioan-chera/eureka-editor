@@ -498,7 +498,7 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 	char charbuf[2];
 	charbuf[1] = 0;
 
-	unsigned int len = buf.size();
+	unsigned int len = static_cast<unsigned>(buf.size());
 
 	for (unsigned int k = 0 ; k < len ; k++)
 	{
@@ -808,7 +808,7 @@ bool UI_TextEditor::FindNext(int dir)
 	}
 
 	// found it, so select the text
-	int end_pos = new_pos + strlen(find_string);
+	int end_pos = static_cast<int>(new_pos + strlen(find_string));
 
 	tbuf->select(new_pos, end_pos);
 

@@ -776,7 +776,7 @@ static const opt_desc_t options[] =
 // returns true if ok, false on EOF or error.
 bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
 {
-	if (! fgets(buf, size, fp))
+	if (! fgets(buf, static_cast<int>(size), fp))
 	{
 		buf[0] = 0;
 		return false;

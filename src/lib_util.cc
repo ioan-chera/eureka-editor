@@ -209,7 +209,7 @@ void StringRemoveCRLF(char *str)
 
 char * StringTidy(const char *str, const char *bad_chars)
 {
-	char *buf  = StringNew(strlen(str) + 2);
+	char *buf  = StringNew(static_cast<int>(strlen(str) + 2));
 	char *dest = buf;
 
 	for ( ; *str ; str++)
