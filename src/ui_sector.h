@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -38,6 +38,7 @@ public:
 	Fl_Int_Input *light;
 	Fl_Int_Input *tag;
 
+	Fl_Button *fresh_tag;
 	Fl_Button *lt_down, *lt_up;
 
 	Fl_Int_Input *ceil_h;
@@ -104,6 +105,8 @@ private:
 
 	void SetFlat(const char *name, int e_state);
 	void SetSectorType(int new_type);
+
+	void FreshTag();
 
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);

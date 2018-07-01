@@ -94,6 +94,9 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
+	fresh_tag = new Fl_Button(tag->x() + tag->w() + 20, Y+1, 64, 22, "fresh");
+	fresh_tag->callback(button_callback, this);
+
 	Y += tag->h() + 4;
 
 
@@ -600,6 +603,27 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_SectorBox::FreshTag()
+{
+	int min_tag, max_tag;
+	Tags_UsedRange(&min_tag, &max_tag);
+
+	int new_tag = max_tag + 1;
+
+	// skip some special tag numbers
+	if (new_tag == 666)
+		new_tag = 670;
+
+	if (new_tag > 32767)
+	{
+		Beep("Out of tag numbers");
+		return;
+	}
+
+	Tags_ApplyNewValue(new_tag);
+}
+
+
 void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
@@ -607,6 +631,12 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 	if (w == box->choose)
 	{
 		main_win->BrowserMode('S');
+		return;
+	}
+
+	if (w == box->fresh_tag)
+	{
+		box->FreshTag();
 		return;
 	}
 
