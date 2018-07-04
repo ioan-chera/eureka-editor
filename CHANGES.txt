@@ -4,9 +4,10 @@ CHANGES IN Eureka 1.24
 
 (Since version 1.21)
 
->> "fresh" tag button in Sector panel
+>> moved some menu commands to new "Tools" menu
+>> a "fresh" tag button in Sector panel
 
-+  new 'File/Lump Editor' command for editing text lumps
++  new "Edit Text Lump" command for editing text lumps
 
 +  fixed wall sorting issue in 3D View which could cause a crash
 +  fixed fatal "zero-length line" error when drawing lines

@@ -40,11 +40,6 @@ static void file_do_manage_project(Fl_Widget *w, void * data)
 	ExecuteCommand("ManageProject");
 }
 
-static void file_do_lump_editor(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("EditLump");
-}
-
 static void file_do_open(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("OpenMap");
@@ -78,21 +73,6 @@ static void file_do_rename(Fl_Widget *w, void * data)
 static void file_do_delete(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("DeleteMap");
-}
-
-static void file_do_prefs(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("PreferenceDialog");
-}
-
-static void file_do_build_nodes(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("BuildAllNodes");
-}
-
-static void file_do_test_map(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("TestMap");
 }
 
 static void file_do_load_given(Fl_Widget *w, void *data)
@@ -392,13 +372,38 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 
 
 //------------------------------------------------------------------------
-//  HELP MENU
+//  TOOLS MENU
 //------------------------------------------------------------------------
 
-static void help_do_logs(Fl_Widget *w, void * data)
+static void tools_do_preferences(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("PreferenceDialog");
+}
+
+static void tools_do_build_nodes(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("BuildAllNodes");
+}
+
+static void tools_do_test_map(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("TestMap");
+}
+
+static void tools_do_lump_editor(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("EditLump");
+}
+
+static void tools_do_view_logs(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("LogViewer");
 }
+
+
+//------------------------------------------------------------------------
+//  HELP MENU
+//------------------------------------------------------------------------
 
 static void help_do_online_docs(Fl_Widget *w, void * data)
 {
@@ -426,7 +431,6 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
 		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
-		{ "&Lump Editor",      0,                FCAL file_do_lump_editor },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -450,12 +454,6 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Test in Game",     FL_COMMAND + 't', FCAL file_do_test_map },
-		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
@@ -571,10 +569,19 @@ static Fl_Menu_Item menu_items[] =
 		{ "Ta&gs",         0, FCAL checks_do_tags },
 		{ 0 },
 
+	{ "&Tools", 0, 0, 0, FL_SUBMENU },
+
+		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
+		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
+		{ "&Edit Text Lump  ",   0,  FCAL tools_do_lump_editor },
+		{ "&View Logs",          0,  FCAL tools_do_view_logs },
+		{ 0 },
+
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
-		{ "&Online Docs...",    0, FCAL help_do_online_docs },
-		{ "&View Logs....",     0, FCAL help_do_logs },
+
 		{ "&About Eureka...",   0, FCAL help_do_about },
+		{ "&Online Docs...",    0, FCAL help_do_online_docs },
 		{ 0 },
 
 	{ 0 }

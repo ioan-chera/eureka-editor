@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -1291,11 +1291,6 @@ static editor_command_t  command_table[] =
 		&CMD_ManageProject
 	},
 
-	{	"EditLump",  "File",
-		&CMD_EditLump,
-		/* flags */ "/header /scripts"
-	},
-
 	{	"OpenMap",  "File",
 		&CMD_OpenMap
 	},
@@ -1334,18 +1329,6 @@ static editor_command_t  command_table[] =
 
 	{	"DeleteMap",  "File",
 		&CMD_DeleteMap
-	},
-
-	{	"TestMap",  "File",
-		&CMD_TestMap
-	},
-
-	{	"BuildAllNodes",  "File",
-		&CMD_BuildAllNodes
-	},
-
-	{	"PreferenceDialog",  "File",
-		&CMD_Preferences
 	},
 
 	{	"Quit",  "File",
@@ -1472,11 +1455,31 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* ------ HELP menu ------ */
+	/* ------ TOOLS menu ------ */
 
-	{	"LogViewer",  "Help",
+	{	"PreferenceDialog",  "Tools",
+		&CMD_Preferences
+	},
+
+	{	"TestMap",  "Tools",
+		&CMD_TestMap
+	},
+
+	{	"BuildAllNodes",  "Tools",
+		&CMD_BuildAllNodes
+	},
+
+	{	"EditLump",  "Tools",
+		&CMD_EditLump,
+		/* flags */ "/header /scripts"
+	},
+
+	{	"LogViewer",  "Tools",
 		&CMD_LogViewer
 	},
+
+
+	/* ------ HELP menu ------ */
 
 	{	"OnlineDocs",  "Help",
 		&CMD_OnlineDocs
