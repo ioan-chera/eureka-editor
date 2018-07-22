@@ -665,6 +665,7 @@ public:
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
 	Fl_Check_Button *edit_add_del;
+	Fl_Check_Button *edit_flatrender;
 	Fl_Int_Input    *edit_sectorsize;
 
 	Fl_Check_Button *brow_smalltex;
@@ -894,6 +895,8 @@ UI_Preferences::UI_Preferences() :
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		}
 		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
+		}
+		{ edit_flatrender = new Fl_Check_Button(50, 240, 270, 30, " default sector rendering to ON");
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
@@ -1422,6 +1425,7 @@ void UI_Preferences::LoadValues()
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
+	edit_flatrender->value(sector_render_default ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
@@ -1545,6 +1549,7 @@ void UI_Preferences::SaveValues()
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
+	sector_render_default = edit_flatrender->value() ? 1 : 0;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
