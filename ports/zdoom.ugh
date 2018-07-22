@@ -419,6 +419,34 @@ special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
 special 173 - "NoiseAlert"              target_tid  emitter_tid
 special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
+# ZDoom sector specials
+
+sector 65 "ZD: Light Flicker"
+sector 66 "ZD: Light Strobe /fast"
+sector 67 "ZD: Light Strobe /slow"
+sector 68 "ZD: Light Strobe_/hurt"
+sector 72 "ZD: Light Glow"
+sector 76 "ZD: Light Strobe /slow /sync"
+sector 77 "ZD: Light Strobe /fast /sync"
+sector 81 "ZD: Light FireFlicker"
+
+sector 69 "ZD: Damage Hellslime"
+sector 80 "ZD: Damage Super Hellslime"
+sector 71 "ZD: Damage Nukage"
+sector 75 "ZD: Damage End"
+sector 82 "ZD: Damage Lava (Wimpy)"
+sector 83 "ZD: Damage Lava (Hefty)"
+sector 85 "ZD: Damage Sludge"
+
+sector 74 "ZD: Close after 30 sec"
+sector 78 "ZD: Open after 5 min"
+sector 84 "ZD: Scroll_E /damage"
+sector 87 "ZD: Outside"
+
+sector 195 "ZD: Hidden"
+sector 196 "ZD: Healing"
+sector 200 "ZD: Sky2"
+
 else
 
 #
