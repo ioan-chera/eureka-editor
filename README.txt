@@ -1,5 +1,5 @@
 
-Eureka 1.23 README
+Eureka 1.24 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>
