@@ -5,7 +5,15 @@ CHANGES IN Eureka 1.24
 (Since version 1.21)
 
 >> moved some menu commands to new "Tools" menu
+
 >> a "fresh" tag button in Sector panel
+
+>> more ZDoom sector types, GZDoom point-light things
+
+>> preferences: a setting for default sector rendering
+
+>> when changing grid size via keyboard, show grid if hidden
+
 
 +  new "Edit Text Lump" command for editing text lumps
 
@@ -23,7 +31,6 @@ CHANGES IN Eureka 1.24
 -  hexen format: show every arg value when special is not 0
 -  hexen format: support ZDoom generalized sectors
 
--  preferences: a new "require click to focus" setting
 -  preferences: a setting to show sidedef ADD / DEL buttons
 
 -  map checker: look for unspawnable things
