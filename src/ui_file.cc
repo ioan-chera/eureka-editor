@@ -713,6 +713,9 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	{
 		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
 		o->callback((Fl_Callback*)setup_callback, this);
+
+		if (is_startup)
+			o->hide();
 	}
 
 	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
