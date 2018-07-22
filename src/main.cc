@@ -429,6 +429,8 @@ static void DeterminePort()
 		return;
 	}
 
+	const char *var_game = M_VariantForGame(Game_name);
+
 	// ensure the 'default_port' value is OK
 	if (! (default_port && default_port[0]))
 	{
@@ -441,7 +443,7 @@ static void DeterminePort()
 				default_port);
 		default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(Game_name, default_port))
+	else if (! M_CheckPortSupportsGame(var_game, default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
 				default_port, Game_name);
@@ -827,8 +829,10 @@ static void ReadPortInfo()
 
 	SYS_ASSERT(Port_name);
 
+	const char *var_game = M_VariantForGame(Game_name);
+
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(Game_name, Port_name))
+	if (! M_CheckPortSupportsGame(var_game, Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 				Port_name, Game_name);
