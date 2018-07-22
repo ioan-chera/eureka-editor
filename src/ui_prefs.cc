@@ -896,7 +896,7 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		}
-		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " raw sidedef manipulation buttons");
+		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
