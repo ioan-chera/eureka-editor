@@ -61,6 +61,7 @@
 //
 
 bool want_quit = false;
+bool app_has_focus = false;
 
 const char *config_file = NULL;
 const char *log_file;
@@ -168,6 +169,7 @@ void FatalError(const char *fmt, ...)
 #endif
 
 	init_progress = 0;
+	app_has_focus = false;
 
 	MasterDir_CloseAll();
 	LogClose();
@@ -520,6 +522,42 @@ int Main_key_handler(int event)
 }
 
 
+// see comment in Main_SetupFLTK...
+#if !defined(WIN32) && !defined(__APPLE__)
+int x11_check_focus_change(void *xevent, void *data)
+{
+	if (main_win != NULL)
+	{
+		const XEvent *xev = (const XEvent *)xevent;
+
+		Window xid = xev->xany.window;
+
+		if (fl_find(xid) == main_win)
+		{
+			switch (xev->type)
+			{
+				case FocusIn:
+					app_has_focus = true;
+					// fprintf(stderr, "** app_has_focus: TRUE **\n");
+					break;
+
+				case FocusOut:
+					app_has_focus = false;
+					// fprintf(stderr, "** app_has_focus: false **\n");
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	// we never eat the event
+	return 0;
+}
+#endif
+
+
 static void Main_SetupFLTK()
 {
 	Fl::visual(FL_DOUBLE | FL_RGB);
@@ -527,7 +565,6 @@ static void Main_SetupFLTK()
 	// disable keyboard navigation, as it often interferes with our
 	// user interface, especially TAB key for toggling the 3D view.
 	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
-
 
 	if (gui_color_set == 0)
 	{
@@ -560,11 +597,16 @@ static void Main_SetupFLTK()
 		Fl::scheme("plastic");
 	}
 
+	// for Linux + X11, add a system event handler that detects
+	// when our main window gains or loses focus.  We need to do
+	// it this way since FLTK is so broken.
+#if !defined(WIN32) && !defined(__APPLE__)
+	Fl::add_system_handler(x11_check_focus_change, NULL);
+#endif
 
 #ifndef WIN32
 	Fl_File_Icon::load_system_icons();
 #endif
-
 
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
@@ -600,6 +642,8 @@ static void Main_OpenWindow()
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
+
+		app_has_focus = true;
 	}
 
 	// kill the stupid bright background of the "plastic" scheme
@@ -1087,6 +1131,7 @@ quit:
 	LogPrintf("Quit\n");
 
 	init_progress = 0;
+	app_has_focus = false;
 
 	MasterDir_CloseAll();
 	LogClose();

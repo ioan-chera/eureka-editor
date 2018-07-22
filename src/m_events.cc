@@ -432,21 +432,24 @@ extern void CheckBeginDrag();
 
 static void EV_EnterWindow()
 {
+	if (!app_has_focus)
+	{
+		edit.pointer_in_window = false;
+		return;
+	}
+
 	edit.pointer_in_window = true;
 
 	main_win->canvas->PointerPos(true /* in_event */);
 
-	if (! require_click_to_focus)
-	{
-		// we greedily grab the keyboard focus
-		Fl_Widget * foc = main_win->canvas;
+	// restore keyboard focus to the canvas
+	Fl_Widget * foc = main_win->canvas;
 
-		if (edit.render3d)
-			foc = main_win->render;
+	if (edit.render3d)
+		foc = main_win->render;
 
-		if (Fl::focus() != foc)
-			foc->take_focus();
-	}
+	if (Fl::focus() != foc)
+		foc->take_focus();
 
 	RedrawMap();
 }
@@ -474,7 +477,6 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
-
 
 	if (edit.is_scrolling)
 	{
@@ -690,6 +692,9 @@ int EV_RawButton(int event)
 
 int EV_RawMouse(int event)
 {
+	if (!app_has_focus)
+		return 1;
+
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
 	int dx = Fl::event_x() - mouse_last_x;
