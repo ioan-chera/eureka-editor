@@ -641,7 +641,6 @@ public:
 	Fl_Check_Button *gen_autoload;
 	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
-	Fl_Check_Button *gen_clickfocus;
 
 	/* Keys Tab */
 
@@ -806,11 +805,9 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
 		}
-		{ gen_clickfocus = new Fl_Check_Button(50, 340, 380, 25, " require a click to focus (never steal the keyboard focus)");
-		}
 		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
 		}
-		{ gen_maximized = new Fl_Check_Button(50, 370, 380, 25, " maximize the window when Eureka starts");
+		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
 		  // not supported on MacOS X
 		  // (on that platform we should restore last window position, but I don't
 		  //  know how to code that)
@@ -1415,7 +1412,6 @@ void UI_Preferences::LoadValues()
 	gen_autoload   ->value(auto_load_recent ? 1 : 0);
 	gen_maximized  ->value(begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(swap_sidedefs    ? 1 : 0);
-	gen_clickfocus ->value(require_click_to_focus ? 1 : 0);
 
 	/* Edit Tab */
 
@@ -1536,7 +1532,6 @@ void UI_Preferences::SaveValues()
 	auto_load_recent  = gen_autoload   ->value() ? true : false;
 	begin_maximized   = gen_maximized  ->value() ? true : false;
 	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
-	require_click_to_focus = gen_clickfocus->value() ? true : false;
 
 	/* Edit Tab */
 

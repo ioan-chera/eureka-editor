@@ -683,15 +683,6 @@ static const opt_desc_t options[] =
 		&render_unknown_bright
 	},
 
-	{	"require_click_to_focus",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Window focus requires a click, do not steal the focus",
-		NULL,
-		&require_click_to_focus
-	},
-
 	{	"same_mode_clears_selection",
 		0,
 		OPT_BOOLEAN,

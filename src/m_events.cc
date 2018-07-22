@@ -36,10 +36,6 @@
 #include "ui_misc.h"
 
 
-// config items
-bool require_click_to_focus = false;
-
-
 void ClearStickyMod()
 {
 	if (edit.sticky_mod)
