@@ -852,11 +852,9 @@ void LogViewer_Open()
 	if (! log_viewer)
 		return;
 
-	if (! log_viewer->shown())
-	{
-		log_viewer->show();
-		log_viewer->Deselect();
-	}
+	// always call show() -- to raise the window
+	log_viewer->show();
+	log_viewer->Deselect();
 
 	log_viewer->JumpEnd();
 }
