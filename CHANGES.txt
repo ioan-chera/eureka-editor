@@ -14,6 +14,8 @@ CHANGES IN Eureka 1.24
 
 >> when changing grid size via keyboard, show grid if hidden
 
+>> fixed raising Logs window when behind the main window
+
 
 +  new "Edit Text Lump" command for editing text lumps
 

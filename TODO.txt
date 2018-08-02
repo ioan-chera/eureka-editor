@@ -6,37 +6,23 @@ Eureka TODO / WISHLIST
 In Progress
 -----------
 
--  improve INSTALL doc with section about cross-compiling the
-   Windows binary
++  Assertion (want_pos < total_size + 8) failed
+   w_wad.cc:1141
 
 -  canvas drawing: see if something is slowing down PLAIN mode
    e.g. the lookup of linedef types?
 
-REVIEW:  map checker : check for switch lines with multiple "SWxxx" textures
-   Q/ look at back sides of 2S lines?
-   Q/ behavior of clearing mid on 2D lines is right?
-   Q/ if 2D and both upper and lower, check which is visible?
+-  sector rendering : a preference for "low quality" mode
+   [ make it the default too ]
 
-+  no-click-to-focus : input widgets HOG the keyboard focus?
+-  Tools menu : command to "add BEHAVIOR lump"
 
--  NO IWADS message has a cut-off button (Setup), and that
-   button can be pressed even with nothing there
+-  code to create a yellow ball sprite for point-lights
+
+-  improve INSTALL doc with section about cross-compiling the
+   Windows binary
 
 -  WIN32 : use patched FLTK with nicer menu separator
-
--  preferences : use "show sidedef ADD / DEL buttons" or similar
-
--  preferences : default for sector rendering, make it OFF
-
--  sector rendering : a preference for "low quality" mode
-
-IDEA: text editor can invoke an ACS compiler to build BEHAVIOR lump
-
--  If the grid is turned off, then hitting the grid size hotkeys still leaves
-   it invisible; it only appears when you use the dropdown selector at the bottom.
-
-IDEA: a sector rendering mode that shows floors which are same texture as
-      the currently hilighted one.  [ also for ceilings ]
 
 
 
@@ -122,6 +108,9 @@ Slightly Possible
    -  distance is slightly closer than normal wall segment
 
 -  PRINT key makes a screenshot of 2D or 3D view
+
+-  a sector rendering mode that shows floors which are same texture
+   as the currently hilighted one.  [ also for ceilings ]
 
 -  for the "Edit -> Paste" menu, turn the cursor into crosshairs
    and wait until the user selects a spot to paste to
