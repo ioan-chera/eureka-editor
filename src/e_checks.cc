@@ -4092,19 +4092,39 @@ void Textures_FixDupSwitches()
 			continue;
 		}
 
-		if (mid)
+		const Sector *front = L->Right()->SecRef();
+		const Sector *back  = L->Left() ->SecRef();
+
+		bool lower_vis = (front->floorh < back->floorh);
+		bool upper_vis = (front->ceilh > back->ceilh);
+
+		if (count >= 2 && upper && !upper_vis)
+		{
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			upper = false;
+			count--;
+		}
+
+		if (count >= 2 && lower && !lower_vis)
+		{
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
+			lower = false;
+			count--;
+		}
+
+		if (count >= 2 && mid)
 		{
 			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
-		if (count < 2)
-			continue;
-
-		// here we have a 2S linedef, both upper and lower look switchy
-
-		BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+		if (count >= 2)
+		{
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+			upper = false;
+			count--;
+		}
 	}
 
 	BA_End();
