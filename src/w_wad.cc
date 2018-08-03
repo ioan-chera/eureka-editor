@@ -1138,7 +1138,9 @@ int Wad_file::PositionForWrite(int max_size)
 
 	if (want_pos > total_size)
 	{
-		SYS_ASSERT(want_pos < total_size + 8);
+		if (want_pos >= total_size + 8)
+			FatalError("Internal Error: lump positions are beyond end of file\n(%d > %d)\n",
+				want_pos, total_size);
 
 		WritePadding(want_pos - total_size);
 	}
