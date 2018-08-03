@@ -19,9 +19,6 @@ In Progress
 
 -  code to create a yellow ball sprite for point-lights
 
--  improve INSTALL doc with section about cross-compiling the
-   Windows binary
-
 -  WIN32 : use patched FLTK with nicer menu separator
 
 
