@@ -17,8 +17,6 @@ In Progress
 
 -  Tools menu : command to "add BEHAVIOR lump"
 
--  code to create a yellow ball sprite for point-lights
-
 -  WIN32 : use patched FLTK with nicer menu separator
 
 

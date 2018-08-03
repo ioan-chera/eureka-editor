@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -781,6 +781,50 @@ static const char *dog_image_text[] =
 Img_c * IM_CreateDogSprite()
 {
 	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
+}
+
+
+//------------------------------------------------------------------------
+
+Img_c * IM_CreateLightSprite()
+{
+	int W = 11;
+	int H = 11;
+
+	Img_c *result = new Img_c(W, H);
+
+	result->clear();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		byte pix = TRANS_PIXEL;
+
+		if (true) // x > 0 && x < W-1 && y > 0 && y < H-1)
+		{
+			float dx = (W - 2*x) / (float)W;
+			float dy = (H - 2*y) / (float)H;
+
+			float dist = sqrt((dx) * (dx) + (dy) * (dy));
+
+			float ity = 1.0 / (dist + 0.5) / (dist + 0.5);
+
+			if (ity < 0.5)
+				continue;
+
+			ity = (ity - 0.4) / (1.0 - 0.4);
+
+			int r = 255 * ity;
+			int g = 235 * ity;
+			int b = 90  * ity;
+
+			pix = W_FindPaletteColor(r, g, b);
+		}
+
+		result->wbuf() [ y * W + x ] = pix;
+	}
+
+	return result;
 }
 
 //--- editor settings ---

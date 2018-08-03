@@ -9,12 +9,14 @@ CHANGES IN Eureka 1.24
 >> a "fresh" tag button in Sector panel
 
 >> more ZDoom sector types, GZDoom point-light things
+>> render point-lights as a yellow ball sprite
 
 >> preferences: a setting for default sector rendering
 
 >> when changing grid size via keyboard, show grid if hidden
 
 >> fixed raising Logs window when behind the main window
+
 
 
 +  new "Edit Text Lump" command for editing text lumps

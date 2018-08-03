@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -800,7 +800,11 @@ Img_c * W_GetSprite(int type)
 
 	Img_c *result = NULL;
 
-	if (y_stricmp(info->sprite, "NULL") != 0)
+	if (y_stricmp(info->sprite, "_LYT") == 0)
+	{
+		result = IM_CreateLightSprite();
+	}
+	else if (y_stricmp(info->sprite, "NULL") != 0)
 	{
 		Lump_c *lump = Sprite_loc_by_root(info->sprite);
 		if (! lump)
