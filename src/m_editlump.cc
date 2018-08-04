@@ -536,7 +536,18 @@ void CMD_AddBehaviorLump()
 		return;
 	}
 
-	// TODO perform basic validation of ACS
+	if (length < 24 || data[0] != 'A' || data[1] != 'C' || data[2] != 'S')
+	{
+		const char *reason = "bad header marker";
+
+		if (length == 0)
+			reason = "file is empty";
+		else if (length < 24)
+			reason = "file is too short / truncated";
+
+		DLG_Notify("This file is not valid ACS bytecode.\n(%s)", reason);
+		return;
+	}
 
 	BehaviorData.resize((size_t)length);
 
