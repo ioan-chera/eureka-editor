@@ -395,6 +395,11 @@ static void tools_do_lump_editor(Fl_Widget *w, void * data)
 	ExecuteCommand("EditLump");
 }
 
+static void tools_do_add_behavior(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("AddBehavior");
+}
+
 static void tools_do_view_logs(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("LogViewer");
@@ -572,16 +577,23 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Tools", 0, 0, 0, FL_SUBMENU },
 
 		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+		{ "&View Logs",          0,  FCAL tools_do_view_logs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
-		{ "&Edit Text Lump  ",   0,  FCAL tools_do_lump_editor },
-		{ "&View Logs",          0,  FCAL tools_do_view_logs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
+		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
 
-		{ "&About Eureka...",   0, FCAL help_do_about },
 		{ "&Online Docs...",    0, FCAL help_do_online_docs },
+		{ "&About Eureka...",   0, FCAL help_do_about },
 		{ 0 },
 
 	{ 0 }

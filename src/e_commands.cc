@@ -1474,6 +1474,10 @@ static editor_command_t  command_table[] =
 		/* flags */ "/header /scripts"
 	},
 
+	{	"AddBehavior",  "Tools",
+		&CMD_AddBehaviorLump
+	},
+
 	{	"LogViewer",  "Tools",
 		&CMD_LogViewer
 	},

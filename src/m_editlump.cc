@@ -493,5 +493,59 @@ void CMD_EditLump()
 	delete editor;
 }
 
+
+//------------------------------------------------------------------------
+
+void CMD_AddBehaviorLump()
+{
+	if (Level_format != MAPF_Hexen)
+	{
+		DLG_Notify("A BEHAVIOR lump can only be added to a Hexen format map.");
+		return;
+	}
+
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick bytecode file to insert");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.directory(Main_FileOpFolder());
+
+	switch (chooser.show())
+	{
+		case -1:
+			DLG_Notify("Unable to open the file:\n\n%s", chooser.errmsg());
+			return;
+
+		case 1:
+			// cancelled
+			return;
+
+		default:
+			// Ok
+			break;
+	}
+
+	const char *filename = chooser.filename();
+
+	int length = 0;
+	u8_t *data = FileLoad(filename, &length);
+
+	if (! data)
+	{
+		DLG_Notify("Read error while loading file.");
+		return;
+	}
+
+	// TODO perform basic validation of ACS
+
+	BehaviorData.resize((size_t)length);
+
+	memcpy(& BehaviorData[0], data, (size_t)length);
+
+	FileFree(data);
+
+	MadeChanges = 1;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
