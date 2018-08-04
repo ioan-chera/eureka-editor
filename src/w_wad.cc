@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -72,6 +72,9 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	l_length = LE_U32(entry->size);
 
 //	DebugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
+
+	if (l_length == 0)
+		l_start = 0;
 }
 
 
@@ -577,7 +580,24 @@ void Wad_file::ReadDirectory()
 
 		Lump_c *lump = new Lump_c(this, &entry);
 
-		// TODO: check if entry is valid
+		// check if entry is valid
+		// [ the total_size value was computed in parent function ]
+		if (lump->l_length != 0)
+		{
+			const int max_size = 99999999;
+
+			if (lump->l_length < 0 || lump->l_start < 0 ||
+				lump->l_length >= max_size ||
+				lump->l_start > total_size ||
+				lump->l_start + lump->l_length > total_size)
+			{
+				LogPrintf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
+						lump->name, lump->l_start, lump->l_length, total_size);
+
+				lump->l_start = 0;
+				lump->l_length = 0;
+			}
+		}
 
 		directory.push_back(lump);
 	}
