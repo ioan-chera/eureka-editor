@@ -384,7 +384,7 @@ u8_t * FileLoad(const char *filename, int *length)
 	// ensure buffer is NUL-terminated
 	data[*length] = 0;
 
-	if (1 != fread(data, *length, 1, fp))
+	if (*length > 0 && 1 != fread(data, *length, 1, fp))
 	{
 		FileFree(data);
 		fclose(fp);
