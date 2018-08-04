@@ -15,8 +15,6 @@ In Progress
 -  sector rendering : a preference for "low quality" mode
    [ make it the default too ]
 
--  Tools menu : command to "add BEHAVIOR lump"
-
 -  WIN32 : use patched FLTK with nicer menu separator
 
 

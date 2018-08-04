@@ -17,6 +17,7 @@ CHANGES IN Eureka 1.24
 
 >> fixed raising Logs window when behind the main window
 
+>> new "Add BEHAVIOR" command to support ACS scripting
 
 
 +  new "Edit Text Lump" command for editing text lumps
