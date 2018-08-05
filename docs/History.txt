@@ -27,6 +27,1619 @@ repository (still on SourceForge though).
 ====================================================
 
 ------------------------------------------------------------------------
+805f280c4502 | Andrew Apted | 2018-08-05 20:10:14 +1000
+
+CHANGELOG : added a missing item.
+
+------------------------------------------------------------------------
+ff3c215b9698 | Andrew Apted | 2018-08-05 19:44:21 +1000
+
+README : updated the date.
+
+------------------------------------------------------------------------
+a8dc678a77da | Andrew Apted | 2018-08-05 19:39:59 +1000
+
+CHANGELOG : tidied up for the release.
+
+------------------------------------------------------------------------
+20809fa092e6 | Andrew Apted | 2018-08-05 19:30:27 +1000
+
+honor defaults for sector/sprite rendering when opening new maps.
+
+------------------------------------------------------------------------
+e35bd815e310 | Andrew Apted | 2018-08-05 19:15:55 +1000
+
+preferences : a setting for default sprite rendering (on/off).
+
+------------------------------------------------------------------------
+181480403d86 | Andrew Apted | 2018-08-05 18:29:53 +1000
+
+canvas : disable sector rendering when in error mode.
+
+------------------------------------------------------------------------
+b3179498cbda | Andrew Apted | 2018-08-05 18:22:01 +1000
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+686cc40428f9 | Andrew Apted | 2018-08-05 18:19:43 +1000
+
+canvas : ensure the sector cache is invalidated when necessary.
+
+------------------------------------------------------------------------
+d23b8b0b8a63 | Andrew Apted | 2018-08-05 17:55:07 +1000
+
+canvas : quickly reject off-screen sectors in RenderSector().
+
+This uses the new sector_info cache.  This test and the
+reduced linedef range to iterate over has already massively
+improved the sector rendering performace on huge maps (when
+the whole map is not in view, at least).
+
+------------------------------------------------------------------------
+93c1f08fc392 | Andrew Apted | 2018-08-05 17:39:00 +1000
+
+canvas : added a sector_info cache which remembers some sector info.
+
+So far the cache stores the linedef range used by sectors, and
+also the bounding box of each sector.  RenderSector() will use
+the cache to help speed up sector rendering.
+
+------------------------------------------------------------------------
+6747daff609a | Andrew Apted | 2018-08-05 15:59:41 +1000
+
+CHANGELOG and TODO update.
+
+------------------------------------------------------------------------
+8cbd07da0449 | Andrew Apted | 2018-08-05 15:51:17 +1000
+
+canvas : speed up drawing selection when it has many sectors.
+
+This affected all OSes (not just X windows), especially in
+maps with a huge number of linedefs.  The slowdown was caused
+by iterating over the selected sectors one-by-one, and for
+each sector we iterated over ALL the linedefs.
+
+This commit uses a better method when the selection mode is
+OBJ_SECTORS and the number of sectors is large.  It performs
+just a single iteration over the linedefs.
+
+------------------------------------------------------------------------
+dd45516e3d87 | Andrew Apted | 2018-08-05 15:33:00 +1000
+
+canvas : speed up drawing the selection under X windows.
+
+------------------------------------------------------------------------
+7f2651e73f68 | Andrew Apted | 2018-08-05 15:19:43 +1000
+
+canvas : moved fl_line_style() calls out of DrawMapVector().
+
+This is preliminary work to speed up drawing of the selection,
+which is greatly slowed down under X windows by all the calls
+to fl_line_style().
+
+------------------------------------------------------------------------
+638b74924669 | Andrew Apted | 2018-08-05 14:44:47 +1000
+
+canvas : reworked DrawHighlight() to minimize color changes.
+
+Includes splitting off some code --> DrawTagged() method.
+
+------------------------------------------------------------------------
+0e9a99b631e0 | Andrew Apted | 2018-08-05 14:14:44 +1000
+
+canvas : small speed up of DrawThings() and DrawThingBodies().
+
+------------------------------------------------------------------------
+08ed828a2231 | Andrew Apted | 2018-08-05 13:15:40 +1000
+
+canvas : big speed up of DrawLinedefs() under X windows.
+
+It turned out that FLTK's fl_color() under X windows is very
+very slow.  This commit works around that issue by iterating
+over the lines multiple times, drawing e.g. all LIGHTGREY lines
+in a single pass.
+
+------------------------------------------------------------------------
+28117740dea9 | Andrew Apted | 2018-08-04 22:35:46 +1000
+
+preferences : moved sector rendering setting --> Grid tab.
+
+------------------------------------------------------------------------
+227054a4c2ff | Andrew Apted | 2018-08-04 22:22:00 +1000
+
+wad code : in ReadDirectory, detect invalid lumps.
+
+In other words, detect lumps with where the start or length
+are negative or beyond the end of the wad file.
+
+When found, we log a warning message and clear the lump
+(make it empty), since an invalid position would lead to an
+error or assertion failure later on (e.g. when saving).
+
+------------------------------------------------------------------------
+4f0f9d2746ae | Andrew Apted | 2018-08-04 16:06:39 +1000
+
+TODO update.
+
+------------------------------------------------------------------------
+7c8de6a554f9 | Andrew Apted | 2018-08-04 16:05:19 +1000
+
+basic validation of the ACS bytecode for "Add BEHAVIOR" command.
+
+------------------------------------------------------------------------
+74e3cb5ab9af | Andrew Apted | 2018-08-04 16:02:12 +1000
+
+lib_file : fixed FileLoad() to handle zero-length files.
+
+------------------------------------------------------------------------
+ad2e7f803848 | Andrew Apted | 2018-08-04 15:32:13 +1000
+
+implemented new "Add BEHAVIOR" command.
+
+This inserts a compiled ACS file as the BEHAVIOR lump of the
+current map.
+
+------------------------------------------------------------------------
+ab6fd9306e08 | Andrew Apted | 2018-08-03 14:51:29 +1000
+
+wad code : better error message for "want_pos < total_size" assertion.
+
+------------------------------------------------------------------------
+0cf8157eaad4 | Andrew Apted | 2018-08-03 13:36:08 +1000
+
+ZDoom : render point-light things as a yellow ball sprite.
+
+These things use a fake sprite name "_LYT", and the sprite is
+generated by some code.
+
+------------------------------------------------------------------------
+888ee2aba6ff | Andrew Apted | 2018-08-03 12:55:46 +1000
+
+INSTALL.txt : describe compilation of the Windows binary.
+
+There is also a small section for MacOS X, which merely
+refers the reader to the documents in the osx/ folder.
+
+------------------------------------------------------------------------
+bdc27218d3b9 | Andrew Apted | 2018-08-02 23:48:15 +1000
+
+TODO and CHANGELOG update.
+
+------------------------------------------------------------------------
+a9875d7be4e7 | Andrew Apted | 2018-08-02 23:43:54 +1000
+
+Checks : improved fixer for non-animating switch textures.
+
+The fixer now takes into account whether the lower and/or
+upper texture is visible or not (due to sector heights),
+and prefers to clear the one(s) which are not visible.
+
+------------------------------------------------------------------------
+5f1c21199f62 | Andrew Apted | 2018-07-22 20:35:17 +1000
+
+Version bumped after recent WIP test package.
+
+------------------------------------------------------------------------
+7b360b027f8b | Andrew Apted | 2018-07-22 20:30:38 +1000
+
+View Logs : always show/raise the log viewer window.
+
+------------------------------------------------------------------------
+26e85f719fd6 | Andrew Apted | 2018-07-22 19:06:07 +1000
+
+fixed clumsiness in missing IWAD dialog (hide the Setup button).
+
+------------------------------------------------------------------------
+6d743345bae2 | Andrew Apted | 2018-07-22 18:54:05 +1000
+
+fixed spurious warning dialog about incompatible ports.
+
+For example, specifying --wad as "tnt" and --port "boom" would
+trigger the incompatible port warning dialog.  The compatibility
+checking code was not handling game variants (e.g. "tnt" is marked
+as a variant of "doom2").
+
+------------------------------------------------------------------------
+d109b4628cd7 | Andrew Apted | 2018-07-22 18:07:56 +1000
+
+CHANGELOG : added recent changes (not yet prettified).
+
+------------------------------------------------------------------------
+d7484099f502 | Andrew Apted | 2018-07-22 18:07:00 +1000
+
+grid : when changing size via keyboard, ensure grid is shown.
+
+------------------------------------------------------------------------
+9178e56aa4ce | Andrew Apted | 2018-07-22 18:01:14 +1000
+
+preferences : a setting for default sector rendering (on/off).
+
+------------------------------------------------------------------------
+bd1cbc6eed76 | Andrew Apted | 2018-07-22 17:09:26 +1000
+
+removed config var "require_click_to_focus" + preference setting.
+
+This has been solved in a way not requiring an extra setting
+(see previous commit).
+
+------------------------------------------------------------------------
+7fe0f9e5edd6 | Andrew Apted | 2018-07-22 17:01:36 +1000
+
+Linux/X11 : detect when our main window has "true" focus.
+
+We do this by looking directly at the raw XEvents, because
+FLTK does not provide the functionality needed.
+
+When we don't have the true focus, then we never grab the
+focus when the mouse hovers over the canvas/render widget.
+
+This should fix ticket #22 once and for all.
+
+------------------------------------------------------------------------
+00a18a8c9127 | Andrew Apted | 2018-07-22 16:01:11 +1000
+
+Preferences : better name for add/del button setting.
+
+------------------------------------------------------------------------
+5459891116ea | Andrew Apted | 2018-07-22 15:55:59 +1000
+
+PORTS / ZDoom : added gzdoom PointLight things (9800-9824).
+
+------------------------------------------------------------------------
+798927a3d21c | Andrew Apted | 2018-07-22 15:44:48 +1000
+
+PORTS / ZDoom : added zdoom hexen-format sector specials.
+
+Specifically: the sector types 65-87, and 195-200.
+These are ZDoom-ism which don't exist in vanilla Hexen.
+
+------------------------------------------------------------------------
+82c7390f8367 | Andrew Apted | 2018-07-04 16:30:17 +1000
+
+moved several menu commands to a new "Tools" menu.
+
+The commands are: Preferences, Test Map, Build All Nodes,
+Edit Text Lump, and View Logs.
+
+------------------------------------------------------------------------
+34b25c12059f | Andrew Apted | 2018-07-02 00:25:56 +1000
+
+TODO update.
+
+------------------------------------------------------------------------
+66d3a8f88755 | Andrew Apted | 2018-07-02 00:21:00 +1000
+
+Merge branch 'master' of ssh://git.code.sf.net/p/eureka-editor/git
+
+------------------------------------------------------------------------
+28bead6e36f5 | Andrew Apted | 2018-07-02 00:20:10 +1000
+
+Sector panel : added a "fresh" button for getting the next free tag.
+
+------------------------------------------------------------------------
+4186af94e186 | Ioan Chera | 2018-06-30 22:03:29 +0300
+
+osx: fixed bad dependency on resolved symbolic link paths
+
+------------------------------------------------------------------------
+51ff0cd2abb7 | Ioan Chera | 2018-06-30 21:44:26 +0300
+
+Updated the osx app version and removed a year-dependend plist entry
+
+------------------------------------------------------------------------
+25c17aee1c5b | Ioan Chera | 2018-06-30 21:44:06 +0300
+
+Fixed Xcode developer ID settings
+
+------------------------------------------------------------------------
+4a1f991ab1b4 | Ioan Chera | 2018-06-30 21:40:24 +0300
+
+Cleared all warnings from Xcode project
+
+------------------------------------------------------------------------
+735669adf8b6 | Ioan Chera | 2018-06-30 21:32:34 +0300
+
+Ignore downloaded files in osx/
+
+------------------------------------------------------------------------
+511ff12a5526 | Ioan Chera | 2018-06-30 21:28:34 +0300
+
+osx Xcode project now automatically downloads FLTK so you don't need to prepare dependencies yourself.
+
+------------------------------------------------------------------------
+e59b6a49891c | Ioan Chera | 2018-04-24 19:58:56 +0300
+
+Updated debug settings for Xcode project
+
+------------------------------------------------------------------------
+a83bb431b7c8 | Andrew Apted | 2018-06-28 00:25:25 +1000
+
+Checks : find and fix non-animating switch textures.
+
+These are linedefs where a switch texture won't animate
+because there is another switch texture in an unseed part
+(e.g. in the upper of a 1S wall) and the DOOM engine finds
+and changes that texture (and not the visible one).
+
+------------------------------------------------------------------------
+f9d36bb29140 | Andrew Apted | 2018-06-27 23:23:49 +1000
+
+Checks : small fix for transparent-texture-on-solid-wall fixer.
+
+Previous we blindly used the default wall texture, assuming
+it was never transparent.  This commit checks it, and if so
+falls back to something reasonable.
+
+------------------------------------------------------------------------
+14f700f02326 | Andrew Apted | 2018-06-27 22:48:42 +1000
+
+Makefiles : added --std=c++03 compiler flag.
+
+This specifies that the C++ standard of the code is the
+original C++ plus the amendments from 2003.  I'm not sure
+this flag is truly needed, but it does serve as a reminder
+that the code may not live up to modern standards.
+
+------------------------------------------------------------------------
+a02df53871ae | Andrew Apted | 2018-06-27 19:12:00 +1000
+
+misc : checked in my FLTK 1.3 patch for nicer menu dividers.
+
+------------------------------------------------------------------------
+cd030fa98211 | Andrew Apted | 2018-06-24 14:10:29 +1000
+
+fixed version in Win32 RC file.
+
+------------------------------------------------------------------------
+15e463f06566 | Andrew Apted | 2018-06-23 23:21:34 +1000
+
+CHANGELOG : re-organized and made pretty.
+
+------------------------------------------------------------------------
+bac2d27a9f6d | Andrew Apted | 2018-06-23 22:54:29 +1000
+
+handle text files containing a Unicode BOM (byte-order mark).
+
+The Unicode BOM is common under Windows, but rare under Linux
+or MacOSX.  Previously the definition file parser (etc) would
+fatal error if a BOM was present.  Now it is simply ignored.
+
+------------------------------------------------------------------------
+5c4cacc4860d | Andrew Apted | 2018-06-23 22:40:31 +1000
+
+EditLump : wrote new file reading code (for "Insert" command).
+
+------------------------------------------------------------------------
+543c31b0032b | Andrew Apted | 2018-06-23 21:32:00 +1000
+
+added M_ReadTextLine() function, automatically strips CR/LF.
+
+------------------------------------------------------------------------
+5f69cc73b3ee | Andrew Apted | 2018-06-23 21:02:20 +1000
+
+EditLump : wrote new file saving code, add a BOM under Windows.
+
+The BOM is only added if the document contains Unicode (UTF-8).
+Linux and MacOSX never need a BOM, since UTF-8 is the norm.
+
+------------------------------------------------------------------------
+917a6984cf4d | Andrew Apted | 2018-06-23 18:46:00 +1000
+
+Preferences : added checkbox for "require_click_to_focus".
+
+------------------------------------------------------------------------
+bdd65ffda1c6 | Andrew Apted | 2018-06-23 18:38:03 +1000
+
+new config variable "require_click_to_focus".
+
+Default is false (off).  When true, the canvas never steals
+the focus when the mouse pointer passes over it.
+
+------------------------------------------------------------------------
+e8db16fb657c | Andrew Apted | 2018-06-23 17:22:47 +1000
+
+Open Map dialog : show buttons for ALL maps via scrollable area.
+
+------------------------------------------------------------------------
+c4bf26257480 | Andrew Apted | 2018-06-23 17:08:20 +1000
+
+UI_Scroll : support scrollbar on either side (left or right).
+
+------------------------------------------------------------------------
+b073d803cddf | Andrew Apted | 2018-06-23 15:29:42 +1000
+
+Insert_Vertex : final refactor, fixing the "zero-length line" error.
+
+------------------------------------------------------------------------
+8fc86f8b864b | Andrew Apted | 2018-06-23 14:47:30 +1000
+
+turn off more debugging noise (dangling vertices).
+
+------------------------------------------------------------------------
+24e2ae32628f | Andrew Apted | 2018-06-23 01:18:56 +1000
+
+Checks / Lines : fixed alignment of buttons.
+
+------------------------------------------------------------------------
+09a1013c20c6 | Andrew Apted | 2018-06-23 01:02:49 +1000
+
+Insert_Vertex : yet more refactoring.
+
+The solution to the "Bug detected ..." fatal error is getting
+closer.  Should be able to fix it tomorrow.
+
+This commit also turns off some debugging noise on stderr.
+
+------------------------------------------------------------------------
+7c0d2b3a7c3a | Andrew Apted | 2018-06-23 00:31:00 +1000
+
+Insert_Vertex : more refactoring (logic should be unchanged).
+
+------------------------------------------------------------------------
+1f0e16d26088 | Andrew Apted | 2018-06-22 23:37:40 +1000
+
+refactored the Insert_Vertex() code, no changes in the logic.
+
+------------------------------------------------------------------------
+73b3c5b45f44 | Andrew Apted | 2018-06-22 21:57:22 +1000
+
+TODO update.
+
+------------------------------------------------------------------------
+0a54dbdb7015 | Andrew Apted | 2018-06-22 21:56:32 +1000
+
+Checks : fixed merging multiple groups of overlapping vertices.
+
+------------------------------------------------------------------------
+ea60f52b6fa5 | Andrew Apted | 2018-06-22 20:44:31 +1000
+
+added VIM syntax file for editing definition (.ugh) files.
+
+------------------------------------------------------------------------
+5c922ee5c16f | Andrew Apted | 2018-06-22 18:54:27 +1000
+
+tidy up misc/ -- removed obsolete crud about the "up" language.
+
+------------------------------------------------------------------------
+bc725f701edb | Andrew Apted | 2018-06-22 18:46:15 +1000
+
+Find/Replace : fixed to handle generalized sectors.
+
+------------------------------------------------------------------------
+32d2531a029d | Andrew Apted | 2018-06-22 18:22:13 +1000
+
+TODO update.
+
+------------------------------------------------------------------------
+f3be703d26fd | Andrew Apted | 2018-06-22 18:19:33 +1000
+
+PORTS / ZDoom : support the sector bit-flags in Hexen maps.
+
+These flags are the same as the BOOM generalized sector flags,
+but they are shifted up 3 bits to accommodate more real types.
+
+This commit also renames the feature keyword --> "gen_sectors".
+
+------------------------------------------------------------------------
+3b1520f67405 | Andrew Apted | 2018-06-22 16:37:03 +1000
+
+Port defs : support new "sector_flags" feature keyword.
+
+Previously the "gen_types" feature enabled both generalized
+line types and sector type bitflags.  They are separate now.
+
+------------------------------------------------------------------------
+c21fef8b481f | Andrew Apted | 2018-06-22 16:12:17 +1000
+
+PORTS / ZDoom : added missing DOOM sector types (15,18-24).
+
+------------------------------------------------------------------------
+8add11be3216 | Andrew Apted | 2018-06-22 14:56:45 +1000
+
+Version bump to 1.23-WIP
+
+------------------------------------------------------------------------
+7b56119f35bb | Andrew Apted | 2018-06-22 14:52:01 +1000
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+9cd48cc24cd9 | Andrew Apted | 2018-06-22 14:45:36 +1000
+
+Port defs : indent stuff in an if..endif block.
+
+------------------------------------------------------------------------
+94e685c7f4a9 | Andrew Apted | 2018-06-22 14:42:56 +1000
+
+Game defs : prefer the "linegroup" command over "spec_group".
+
+(They are now synonymous).
+
+------------------------------------------------------------------------
+65f6ef4135fd | Andrew Apted | 2018-06-22 14:34:44 +1000
+
+Game def parser : support new "clear" command.
+
+This command takes one or more keywords, such as "lines" or
+"sectors", and clears the corresponding set of types.
+
+Use this keyword in the ZDoom port definitions to clear
+out the DOOM line and sector specials when the map format
+is HEXEN, to better support "Doom in Hexen Format" maps.
+
+------------------------------------------------------------------------
+d856b57a3d26 | Andrew Apted | 2018-06-21 23:58:51 +1000
+
+Checks : for tag 666 checking, support Heretic in a better way.
+
+Namely by using a valid of "2" for the tag_666 feature.
+This is (slightly) better than comparing the game name with
+the string "heretic".
+
+------------------------------------------------------------------------
+d0d46a39f3d4 | Andrew Apted | 2018-06-21 23:54:05 +1000
+
+CHANGELOG updated.
+
+------------------------------------------------------------------------
+052d2b7b2e78 | Andrew Apted | 2018-06-21 23:48:22 +1000
+
+warn user when port is not compatible with the current game.
+
+The dialog provides two options, one to reset the port to vanilla,
+and another to keep the current (invalid) port.
+
+This commit also tweaks other code related to handling the port,
+e.g. produce a fatal error in DeterminePort() for unknown ports
+specified on the command-line.  Plus factored out some of the
+Main_LoadResources() code to separate functions.  Tweaked some
+error messages too.
+
+------------------------------------------------------------------------
+746a6b35a376 | Andrew Apted | 2018-06-21 22:21:59 +1000
+
+code tidying : commented some of the IWAD handling logic.
+
+------------------------------------------------------------------------
+74c58324ea3f | Andrew Apted | 2018-06-21 21:25:27 +1000
+
+when no explicit port is given, check user's default makes sense.
+
+i.e. check that the default port is compatible with the IWAD.
+If not usable, then revert to "vanilla".
+
+------------------------------------------------------------------------
+9272e7c1ab57 | Andrew Apted | 2018-06-21 21:08:17 +1000
+
+minor rename : DetermineGame --> GameNameFromIWAD.
+
+------------------------------------------------------------------------
+5ced3d495972 | Andrew Apted | 2018-06-21 20:51:18 +1000
+
+Game defs : split off Hexen sectors --> "common/hexen_sectors.ugh"
+
+------------------------------------------------------------------------
+bae832b30acd | Andrew Apted | 2018-06-21 20:47:27 +1000
+
+Game defs : renamed "hexen_specials.ugh" --> "hexen_lines.ugh"
+
+------------------------------------------------------------------------
+acf329526377 | Andrew Apted | 2018-06-21 20:43:55 +1000
+
+Game defs : split "doom_specials.ugh" into two files.
+
+One file for line specials, other file for sector types.
+
+------------------------------------------------------------------------
+a2d6004d6b79 | Andrew Apted | 2018-06-21 20:39:48 +1000
+
+Game defs : renamed "doom_specials.ugh" --> "doom_lines.ugh"
+
+------------------------------------------------------------------------
+b2c5afb122d5 | Andrew Apted | 2018-06-20 14:46:22 +1000
+
+GAMES / Hexen : removed sector type #9 (it is basically inert).
+
+------------------------------------------------------------------------
+34d2d422a1c6 | Andrew Apted | 2018-06-20 14:36:33 +1000
+
+TODO : even more fun stuff to hack on....
+
+------------------------------------------------------------------------
+42163a47e50e | Andrew Apted | 2018-06-18 15:05:09 +1000
+
+code tidying : removed some commented-out crud.
+
+------------------------------------------------------------------------
+a381064e1fdb | Andrew Apted | 2018-06-18 15:01:38 +1000
+
+Makefiles : added the -fwrapv compiler flag.
+
+This ensures that integer addition overflows as expected, i.e.
+the value wraps around.
+
+------------------------------------------------------------------------
+328628897af5 | Andrew Apted | 2018-06-18 14:45:03 +1000
+
+A preference setting for raw sidedef manipulation buttons.
+
+i.e. for the existing "sidedef_add_del_buttons" config var.
+
+This closes ticket #24.
+
+------------------------------------------------------------------------
+9dd19874605e | Andrew Apted | 2018-06-18 00:08:56 +1000
+
+TODO update.
+
+------------------------------------------------------------------------
+92f4eeba7cbe | Andrew Apted | 2018-06-18 00:07:11 +1000
+
+Strife : updated Thing panel to support the new thing flags.
+
+This closes ticket #20 (for real this time).
+
+------------------------------------------------------------------------
+693cbbafcd25 | Andrew Apted | 2018-06-17 23:29:24 +1000
+
+Strife : define the new thing options (such as MTF_Shadow).
+
+------------------------------------------------------------------------
+800bfdaf576f | Andrew Apted | 2018-06-17 23:09:48 +1000
+
+Strife : support both translucency flags in the LineDef panel.
+
+------------------------------------------------------------------------
+1e9ee6e55da5 | Andrew Apted | 2018-06-17 22:46:05 +1000
+
+Strife : support the new linedef flags in LineDef panel.
+
+The flags are: JumpOver, BlockFloaters, Translucent1.
+
+The only new flag not supported is Translucent2, because
+there is not enough space in the LineDef panel.
+
+This closes ticket #20.
+
+------------------------------------------------------------------------
+fb548b78a015 | Andrew Apted | 2018-06-17 21:53:52 +1000
+
+Strife : define the new linedef flags (like MLF_Strife_JumpOver).
+
+------------------------------------------------------------------------
+17dd820d009b | Andrew Apted | 2018-06-17 20:58:10 +1000
+
+TODO : small update.
+
+------------------------------------------------------------------------
+bcd5506a3268 | Andrew Apted | 2018-06-17 20:52:57 +1000
+
+CHANGELOG update (and reformat).
+
+------------------------------------------------------------------------
+f20f24da9cfb | Andrew Apted | 2018-06-17 20:51:47 +1000
+
+Hexen : show every arg value when special is not 0.
+
+Arg values are also dimmed when the usage is unknown.
+
+------------------------------------------------------------------------
+83765bbb0f89 | Andrew Apted | 2018-06-17 20:17:50 +1000
+
+TODO : minor changes (remove trailing periods).
+
+------------------------------------------------------------------------
+5fff9c7952dc | Andrew Apted | 2018-06-17 14:15:16 +1000
+
+3D View : removed Sort_Bubble() -- it did not speed things up.
+
+------------------------------------------------------------------------
+61f3309c85de | Andrew Apted | 2018-06-17 13:44:45 +1000
+
+3D View : restored the recursion minimization in Sort_Range().
+
+------------------------------------------------------------------------
+c5f48dd65c30 | Andrew Apted | 2018-06-17 13:31:51 +1000
+
+3D View : removed Sort_ChoosePivot() code.
+
+Choosing the pivot in a simple way (just the middle element)
+has shown to be adequate, and in some cases faster than the
+3-way median logic which Sort_ChoosePivot() uses.
+
+------------------------------------------------------------------------
+8f24973a8b07 | Andrew Apted | 2018-06-17 13:18:01 +1000
+
+3D View : improved the IsCloser() code and its comments.
+
+In particular, we always test if two walls share a vertex
+(and perform the more complicated closer test).  Also added
+logic to prevent two things at same location from flickering.
+
+------------------------------------------------------------------------
+270cb9a0d12b | Andrew Apted | 2018-06-16 22:44:07 +1000
+
+3D View : worked on rewriting the wall sorting code.
+
+The previous code had some problems, especially when the wall
+list contained many DrawWalls at the same depth, i.e. sprites.
+
+This commit is a preliminary fix to the QuickSort algorithm,
+in particular the case when everything was >= pivot, the old
+code did not ensure the pivot was moved to the beginning.
+
+------------------------------------------------------------------------
+ed95a485bd97 | Andrew Apted | 2018-06-15 19:05:23 +1000
+
+3D View : fixed closed sectors having a see-through gap.
+
+------------------------------------------------------------------------
+580569767cfb | Andrew Apted | 2018-06-15 15:28:12 +1000
+
+Checks : detect when tag 666 or 667 are used on the wrong map.
+
+This closes ticket #12.
+
+------------------------------------------------------------------------
+6b692a486984 | Andrew Apted | 2018-06-15 14:41:53 +1000
+
+Checks / Tags : ignore 666 and 667 for unmatched sector tags.
+
+They normally never have a linedef, since those sectors are
+activated by the engine on the death of a boss monster.
+
+Also ignore 666/667 for the lowest/highest tag display.
+
+------------------------------------------------------------------------
+c5038af61710 | Andrew Apted | 2018-06-15 14:28:05 +1000
+
+Game defs : enable "tag_666" feature for DOOM and Heretic.
+
+------------------------------------------------------------------------
+99355dea395c | Andrew Apted | 2018-06-15 00:21:23 +1000
+
+CHANGELOG update.
+
+------------------------------------------------------------------------
+9ccfad0b7547 | Andrew Apted | 2018-06-15 00:04:57 +1000
+
+Checks : detect unspawnable things where all Hexen classes are unset.
+
+This finishes the feature, closing ticket #23.
+
+------------------------------------------------------------------------
+5b5a0ce37866 | Andrew Apted | 2018-06-15 00:00:28 +1000
+
+Checks : for unspawnable things, always ignore the CAMERA_PEST.
+
+------------------------------------------------------------------------
+afa3e0c670dd | Andrew Apted | 2018-06-14 23:55:18 +1000
+
+Checks : detect when a thing in unspawnable due to game modes.
+
+i.e. when the SP, COOP and DM flags are all clear.
+
+This does not apply to Vanilla DOOM, only to Boom compatible
+source ports and Hexen format maps.
+
+------------------------------------------------------------------------
+a47eacbf7813 | Andrew Apted | 2018-06-14 23:13:58 +1000
+
+Checks : skip things which the game engine always spawns.
+
+For some things, e.g. player starts, the game engine never
+checks the skill flags (etc).  Hence these can be safely
+skipped by the "unspawnable thing" detector.
+
+------------------------------------------------------------------------
+e52e47513bcf | Andrew Apted | 2018-06-14 23:01:11 +1000
+
+Checks : worked on detecting "unspawnable" things.
+
+i.e. things which will never spawn because the skill bits
+(easy, medium, hard) are all clear.
+
+This commit includes ability to "Show" these things, and
+also "Fix" them (which sets all three skill bits).
+
+------------------------------------------------------------------------
+512c21c3c835 | Andrew Apted | 2018-06-14 15:46:01 +1000
+
+BSP : compute 'angle' and 'dist' of vanilla segs more accurately.
+
+------------------------------------------------------------------------
+b4e02e9ad1f7 | Andrew Apted | 2018-06-13 22:57:23 +1000
+
+TODO : reorganized items based on likelihood of getting done.
+
+The new section headers are "In Progress", "Most Likely",
+"Slightly Possible" and "Rejected Ideas".
+
+Also moved a couple ideas to the rejection pile, and simply
+deleted a couple of the wackiest ideas.
+
+------------------------------------------------------------------------
+9098d2b55114 | Andrew Apted | 2018-06-13 22:25:22 +1000
+
+TODO : moved several items to the "NOT-TODO" section.
+
+------------------------------------------------------------------------
+b40e69c17028 | Andrew Apted | 2018-06-13 19:05:51 +1000
+
+EditLump : treat "SCRIPTS" as a invalid lump (prevent editing).
+
+Normally "SCRIPTS" is a level lump, appearing directly after
+the "BEHAVIOR" lump, and is completely optional.  There are some
+wad files which contain a global "SCRIPTS" lump (not attached to
+any particular level).
+
+Trying to support such a duality leads to problems, especially
+when the user creates a global "SCRIPTS" lump, but it ends up
+directly after a level inside the wad, and hence suddenly looks
+like a level lump (not global anymore).  So the user may find that
+their edited lump has "disappeared" when next trying to edit it,
+which is totally unacceptable.
+
+Investigations show that source ports (esp. ZDoom) never read a
+global "SCRIPTS" lump, it is just a way for modders to bundle
+the source of their ACS scripts (as a courtesy).  Hence I think
+it is better to err on the side of safety, and only allow the
+creation/editing of level-local "SCRIPTS" lumps.
+
+------------------------------------------------------------------------
+62ee6fc89ace | Andrew Apted | 2018-06-13 18:27:13 +1000
+
+TODO updated (a wish just came true).
+
+------------------------------------------------------------------------
+731fe3f30662 | Andrew Apted | 2018-06-13 18:23:00 +1000
+
+CHANGELOG : noted the new text lump editor.
+
+------------------------------------------------------------------------
+8671caa462ee | Andrew Apted | 2018-06-13 18:19:16 +1000
+
+Merge branch 'text-edit'
+
+------------------------------------------------------------------------
+347a63834105 | Andrew Apted | 2018-06-13 16:35:10 +1000
+
+EditLump : improved code to set the window title.
+
+Also fixed a bug or two.
+
+------------------------------------------------------------------------
+b40f52ee6775 | Andrew Apted | 2018-06-13 15:43:27 +1000
+
+EditLump : added the two flags to "EditLump" command entry.
+
+The two flags are: "/header" and "/scripts".
+
+------------------------------------------------------------------------
+79f2cd470760 | Andrew Apted | 2018-06-13 15:41:26 +1000
+
+EditLump : prevent using "/scripts" option on a non-Hexen map.
+
+------------------------------------------------------------------------
+408c837c2368 | Andrew Apted | 2018-06-13 15:31:18 +1000
+
+EditLump : added EDLUMP_XXX constants for the two special lumps.
+
+Those two lumps are the map header of current level, and "SCRIPTS"
+lump part of the current level.  Main reason for this is that some
+wads contain a global "SCRIPTS" lump, so we cannot use that name
+to represent the per-level lump.
+
+------------------------------------------------------------------------
+3439417107ac | Andrew Apted | 2018-06-13 15:13:12 +1000
+
+EditLump : implemented loading and saving from/to a memory buffer.
+
+------------------------------------------------------------------------
+6d65b435ee39 | Andrew Apted | 2018-06-12 23:12:37 +1000
+
+EditLump : implemented callbacks for the short-cut buttons.
+
+------------------------------------------------------------------------
+f5631b40a558 | Andrew Apted | 2018-06-12 22:44:06 +1000
+
+EditLump : added short-cut buttons to the UI -- currently inert.
+
+------------------------------------------------------------------------
+14beadc17658 | Andrew Apted | 2018-06-12 00:35:34 +1000
+
+EditLump : sorted out main logic for map header and "SCRIPTS" lumps.
+
+------------------------------------------------------------------------
+070f81c8ccee | Andrew Apted | 2018-06-12 00:01:07 +1000
+
+EditLump : collected a group of common text lumps.
+
+------------------------------------------------------------------------
+9cc0d69a2e2d | Andrew Apted | 2018-06-11 16:15:28 +1000
+
+EditLump : verify lump name as it is typed, and fixed a bug.
+
+------------------------------------------------------------------------
+fcbdfb20b0f8 | Andrew Apted | 2018-06-11 15:45:58 +1000
+
+EditLump : reject more lumps in ValidLumpToEdit().
+
+------------------------------------------------------------------------
+b6d4875b7fc2 | Andrew Apted | 2018-06-11 01:04:43 +1000
+
+EditLump : fleshed out ValidLumpToEdit() code.
+
+Includes a invalid_text_lump[], which lists numerous common lumps
+which are known to use a binary format (and hence cannot be edited
+as text).
+
+------------------------------------------------------------------------
+5a5237afa1bc | Andrew Apted | 2018-06-11 00:46:56 +1000
+
+EditLump : "OK" and "Cancel" buttons for UI_ChooseTextLump dialog.
+
+------------------------------------------------------------------------
+516f137adeb1 | Andrew Apted | 2018-06-11 00:30:58 +1000
+
+EditLump : began work on a UI_ChooseTextLump() dialog....
+
+------------------------------------------------------------------------
+8ef3519c225a | Andrew Apted | 2018-06-10 23:39:35 +1000
+
+Hexen : support loading and saving the "SCRIPTS" level lump.
+
+This is an optional (and usually absent) level lump which
+contains the texts of ACS scripts.  The plan is to be able to
+edit this lump with the Lump Editor being developed.
+
+------------------------------------------------------------------------
+dcfe8d1f39a6 | Andrew Apted | 2018-06-10 23:15:27 +1000
+
+TODO : minor update.
+
+I tested the render speed with a simpler Sort_ChoosePivot(),
+and the results were mixed: lo-res mode was faster but hi-res
+mode was slower.  Hence decided to keep the code as-is.
+
+------------------------------------------------------------------------
+ed15d59726cd | Andrew Apted | 2018-06-10 22:49:40 +1000
+
+Checks : never consider #0 to be an unknown line or sector type.
+
+------------------------------------------------------------------------
+e67850b96de9 | Andrew Apted | 2018-06-09 22:31:34 +1000
+
+EditLump : disabled unimplemented "Replace" menu command.
+
+------------------------------------------------------------------------
+2fe4e962934d | Andrew Apted | 2018-06-09 22:15:33 +1000
+
+EditLump : fixed backwards search getting "stuck" at same spot.
+
+------------------------------------------------------------------------
+198338600a64 | Andrew Apted | 2018-06-09 21:56:58 +1000
+
+EditLump : finished the Find commands.
+
+------------------------------------------------------------------------
+ea431cf7ef1f | Andrew Apted | 2018-06-09 21:22:05 +1000
+
+EditLump : partial work on the Find/Find-Next/Find-Prev commands...
+
+------------------------------------------------------------------------
+d813cc21ddda | Andrew Apted | 2018-06-09 16:04:09 +1000
+
+EditLump : if user tries to save a read-only lump, ask to export it.
+
+Also a successful export clears the MODIFIED status.
+
+------------------------------------------------------------------------
+31c4ccec0363 | Andrew Apted | 2018-06-09 15:35:56 +1000
+
+EditLump : confirmation dialog if closing with modifications.
+
+------------------------------------------------------------------------
+a7b30a3e4339 | Andrew Apted | 2018-06-09 15:06:51 +1000
+
+EditLump : fixed MODIFIED being shown directly after loading a lump.
+
+------------------------------------------------------------------------
+b46d65ab4b9d | Andrew Apted | 2018-06-09 15:01:59 +1000
+
+EditLump : implemented the "Save" menu command.
+
+------------------------------------------------------------------------
+2ea0dd60c0e8 | Andrew Apted | 2018-06-09 14:22:47 +1000
+
+EditLump : implemented SaveLump() method.
+
+------------------------------------------------------------------------
+5dd1f014cafd | Andrew Apted | 2018-06-09 02:23:07 +1000
+
+EditLump : implemented LoadLump().
+
+------------------------------------------------------------------------
+a4e9f83e3016 | Andrew Apted | 2018-06-09 01:54:08 +1000
+
+EditLump : proper dialog when lump is not found or wad is read-only.
+
+------------------------------------------------------------------------
+f6f748774343 | Andrew Apted | 2018-06-08 23:13:02 +1000
+
+EditLump : implemented the "Export to File" menu command.
+
+------------------------------------------------------------------------
+39ddbe96c571 | Andrew Apted | 2018-06-08 22:39:40 +1000
+
+EditLump : implemented the "Insert File" menu command.
+
+------------------------------------------------------------------------
+594deeeaaa37 | Andrew Apted | 2018-06-08 21:44:34 +1000
+
+EditLump : implemented Select-All and Unselect-All menu commands.
+
+------------------------------------------------------------------------
+3990914461fe | Andrew Apted | 2018-06-08 21:32:47 +1000
+
+EditLump : implemented the "Go to Top/Bottom" menu commands.
+
+Also tidied up some other menu callbacks.
+
+------------------------------------------------------------------------
+0bf89e06e3eb | Andrew Apted | 2018-06-08 20:48:51 +1000
+
+EditLump : fixed selection color to be visible (FL_BLUE).
+
+------------------------------------------------------------------------
+3a6c299d901b | Andrew Apted | 2018-06-08 20:45:48 +1000
+
+EditLump : implemented menu callbacks for Undo/Cut/Copy/Paste/Delete.
+
+------------------------------------------------------------------------
+ce9d6ea111bc | Andrew Apted | 2018-06-08 19:00:22 +1000
+
+EditLump : limit size of editor window to a sensible minimum.
+
+------------------------------------------------------------------------
+d4bc461289f4 | Andrew Apted | 2018-06-08 16:45:44 +1000
+
+Makefile : added "full-install" target which uses the XDG tools.
+
+This target installs the .desktop file and icon image, whereas
+the plain "install" target no longer does that.
+
+Also added a "full-uninstall" target.
+
+------------------------------------------------------------------------
+9d47f492ac93 | Andrew Apted | 2018-06-08 16:39:33 +1000
+
+Makefile : fixed "clean" target to remove ".o" files (not everything).
+
+This allows OBJ_DIR to be safely set to the src/ directory.
+
+------------------------------------------------------------------------
+e37d75b2b389 | Andrew Apted | 2018-06-08 16:27:45 +1000
+
+Makefile : support DESTDIR in install and uninstall targets.
+
+------------------------------------------------------------------------
+7e8758b20c4a | Andrew Apted | 2018-06-07 00:45:40 +1000
+
+Makefile : minor commenting.
+
+------------------------------------------------------------------------
+6e08fe7464eb | Andrew Apted | 2018-06-07 00:42:49 +1000
+
+PORTS / ZDoom : fixed missing line-special 0 (NOTHING).
+
+This caused spurious "unknown line special" warnings when
+invoking the level checking system.
+
+------------------------------------------------------------------------
+a3291abf0e2b | Andrew Apted | 2018-06-04 16:10:14 +1000
+
+rely on automatic detection of target OS (especially Windows).
+
+Removed the "OS" variable from the Makefiles, and updated
+some code that checked for "UNIX" (mostly in lib_util.cc),
+and updated the detection for Windows in main.h.
+
+------------------------------------------------------------------------
+cbdb95b5a15c | Andrew Apted | 2018-06-02 19:10:12 +1000
+
+BSP : renamed "minor warnings" --> "minor issues".
+
+------------------------------------------------------------------------
+2479cec3fc82 | Andrew Apted | 2018-06-01 01:14:29 +1000
+
+EditLump : added "has_changes" field, use a callback to update it.
+
+------------------------------------------------------------------------
+64b2fc0584e1 | Andrew Apted | 2018-06-01 01:02:14 +1000
+
+EditLump : implemented File/Quit in the menus.
+
+------------------------------------------------------------------------
+bcce70741e4d | Andrew Apted | 2018-06-01 00:53:20 +1000
+
+EditLump : got showing the line and column number working.
+
+------------------------------------------------------------------------
+b1832b487981 | Andrew Apted | 2018-06-01 00:21:32 +1000
+
+TODO : minor whitespace fixes.
+
+------------------------------------------------------------------------
+ee578ebaf7f5 | Andrew Apted | 2018-05-31 23:48:08 +1000
+
+BSP : added BUILD_LumpOverflow result code.
+
+------------------------------------------------------------------------
+8986107f5b14 | Andrew Apted | 2018-05-31 23:30:56 +1000
+
+BSP : removed unused 'message' field and SetErrorMsg() func.
+
+------------------------------------------------------------------------
+506fd12a9e86 | Andrew Apted | 2018-05-31 20:09:31 +1000
+
+BSP : added Failure() func, similar to Warning() but for overflows.
+
+------------------------------------------------------------------------
+74272345ce82 | Andrew Apted | 2018-05-31 19:52:12 +1000
+
+BSP : renamed function PrintVerbose() --> PrintDetail()
+
+------------------------------------------------------------------------
+c2acac4a3e8c | Andrew Apted | 2018-05-31 01:36:09 +1000
+
+EditLump : wrap Fl_Text_Editor class in order to get line/col info.
+
+------------------------------------------------------------------------
+14db0511ba3d | Andrew Apted | 2018-05-31 01:03:11 +1000
+
+EditLump : fully implemented the status bar widget.
+
+------------------------------------------------------------------------
+948817be3c34 | Andrew Apted | 2018-05-29 00:34:35 +1000
+
+EditLump : decided contents of each menu (awaiting impl...)
+
+------------------------------------------------------------------------
+0cbd823988b1 | Andrew Apted | 2018-05-29 00:06:37 +1000
+
+EditLump : added a minimal menu bar, though nothing works yet.
+
+------------------------------------------------------------------------
+dd70154e4c7a | Andrew Apted | 2018-05-28 19:18:50 +1000
+
+BSP : code tidying, removed unused parameter from PutNodes().
+
+------------------------------------------------------------------------
+686d2c77728c | Andrew Apted | 2018-05-28 19:10:02 +1000
+
+code correctness : made Editor_State_t not be a typedef.
+
+------------------------------------------------------------------------
+ee3b3af939b0 | Andrew Apted | 2018-05-28 19:07:48 +1000
+
+code correctness : removed spurious '&' before arrays in memset().
+
+------------------------------------------------------------------------
+714f90c2c970 | Andrew Apted | 2018-05-28 19:06:01 +1000
+
+code correctness : added #include <algorithm> to main.h
+
+That's because we use std::swap() a lot, and that function
+requires the <algorithm> header file.
+
+------------------------------------------------------------------------
+9fa124561491 | Andrew Apted | 2018-05-28 15:29:16 +1000
+
+fixed returning NULL from a function which returns bool.
+
+------------------------------------------------------------------------
+283e4b022565 | Andrew Apted | 2018-05-28 15:27:00 +1000
+
+Basis : removed unused typedefs: VPtr, TPtr, SPtr, LDPtr and SDPtr.
+
+------------------------------------------------------------------------
+765f38e3ae02 | Andrew Apted | 2018-05-28 15:21:17 +1000
+
+Makefiles : have a WARNINGS var, enable extra warnings.
+
+------------------------------------------------------------------------
+e802ae56bd9b | Andrew Apted | 2018-05-28 15:02:14 +1000
+
+minor rename of ClipboardOp() parameter: what --> op.
+
+------------------------------------------------------------------------
+f8f8dab7978d | Andrew Apted | 2018-05-28 14:57:00 +1000
+
+minor rename of a local variable (category --> item_cat).
+
+------------------------------------------------------------------------
+daca8454a3e7 | Andrew Apted | 2018-05-28 14:49:13 +1000
+
+wad code : renamed parameter of Backup() method.
+
+------------------------------------------------------------------------
+c91eb66acc6a | Andrew Apted | 2018-05-28 14:46:39 +1000
+
+EditLump : tweaked the text color.
+
+------------------------------------------------------------------------
+c48c308b9461 | Andrew Apted | 2018-05-28 00:18:07 +1000
+
+EditLump : add status bar, text editing widget to UI_TextEditor.
+
+The status bar is currently empty.  This commit also creates a
+menu, which is empty too.
+
+------------------------------------------------------------------------
+dc262a1ae03b | Andrew Apted | 2018-05-27 19:06:24 +1000
+
+EditLump : split UI_TextEditor code into its own file.
+
+That's because I expect the UI aspects of the code to grow
+to a considerable size, with the addition to several menus,
+a status bar, etc...
+
+More non-editor stuff is needed too, like a dialog for
+selecting what lump to edit.
+
+------------------------------------------------------------------------
+bb8ef9ebfc11 | Andrew Apted | 2018-05-27 18:31:21 +1000
+
+EditLump : set the window title, and check for read-only wads.
+
+------------------------------------------------------------------------
+f3b54cd92b0e | Andrew Apted | 2018-05-27 18:26:31 +1000
+
+EditLump : bit more fleshing out, determine Wad_file to use.
+
+------------------------------------------------------------------------
+d9da157135b7 | Andrew Apted | 2018-05-27 16:29:14 +1000
+
+EditLump : more fleshing out of the high-level logic.
+
+------------------------------------------------------------------------
+031c3382470d | Andrew Apted | 2018-05-27 15:49:13 +1000
+
+EditLump : the beginnings of a UI_TextEditor class....
+
+------------------------------------------------------------------------
+451a7895eb5a | Andrew Apted | 2018-05-27 13:57:10 +1000
+
+began work on a command to edit text lumps.
+
+This commit adds two new files: "m_editlump.cc/h", and a "Lump Editor"
+entry to the File menu, and adds "EditLump" to the command table.
+
+The implementation (in CMD_EditLump) has barely begun...
+
+------------------------------------------------------------------------
+30d0ce15853f | Andrew Apted | 2018-05-27 01:18:40 +1000
+
+Makefiles : added rule to create the OBJ_DIR directory.
+
+------------------------------------------------------------------------
+1280695b7336 | Andrew Apted | 2018-05-27 01:02:59 +1000
+
+TODO.txt updated.
+
+------------------------------------------------------------------------
+4cd4bf1ecfc2 | Andrew Apted | 2018-05-26 00:27:56 +1000
+
+BSP : removed BUILD_ReadError and BUILD_WriteError -- never used.
+
+------------------------------------------------------------------------
+274ba59ed21f | Andrew Apted | 2018-05-26 00:22:57 +1000
+
+BSP : better error messages when Seek() fails.
+
+------------------------------------------------------------------------
+61cb22e8fcac | Andrew Apted | 2018-05-25 23:44:56 +1000
+
+BSP : code tidying, use the term "overflow" instead of "hard failure".
+
+------------------------------------------------------------------------
+2614eb09c626 | Andrew Apted | 2018-05-25 15:50:01 +1000
+
+BSP : tweaked the message about forcing XNOD format.
+
+------------------------------------------------------------------------
+351a16fe07db | Andrew Apted | 2018-05-25 14:31:07 +1000
+
+lib_util : improved StringTidy() to not use a static buffer.
+
+------------------------------------------------------------------------
+c41fbafc1c47 | Andrew Apted | 2018-05-25 14:29:33 +1000
+
+fixed typo in a node building message ("filed" --> "failed").
+
+------------------------------------------------------------------------
+ae6efd559fd7 | Andrew Apted | 2018-05-25 14:27:41 +1000
+
+wad code : fixed a printf with wrong arguments.
+
+------------------------------------------------------------------------
+6bd3cdd51826 | Andrew Apted | 2018-05-16 23:43:13 +1000
+
+conversion scripts : add "next page" links to each page.
+
+------------------------------------------------------------------------
+dfa5b5d28cdd | Andrew Apted | 2018-05-16 23:10:40 +1000
+
+conversion scripts : add a link back to the index (TOC) on each page.
+
+------------------------------------------------------------------------
+785ab5241e36 | Andrew Apted | 2018-05-15 16:21:49 +1000
+
+conversion scripts : better handling of code blocks.
+
+------------------------------------------------------------------------
+98791cab97a6 | Andrew Apted | 2018-05-08 21:38:07 +1000
+
+handle a very rare assertion failure in m_strings.cc more gracefully.
+
+Note: I would normally look for the root cause, but internalised
+strings are used a lot throughout the code, so it is impossible to
+know where the real problem is unless you can trigger the issue
+while using a debugger.  Hence added a workaround here for the
+sake of robustness.
+
+------------------------------------------------------------------------
+40b244d85807 | Andrew Apted | 2018-05-08 20:28:59 +1000
+
+fix for a rare assertion failure in UI_LineDef::SolidMask().
+
+------------------------------------------------------------------------
+1597b376b98e | Andrew Apted | 2018-05-08 00:41:55 +1000
+
+fixed inserting things in Hexen getting no SP/COOP/DM/class flags.
+
+------------------------------------------------------------------------
+0a3b6483b923 | Andrew Apted | 2018-05-08 00:18:56 +1000
+
+Updated some copyright years (e.g. About box) for 2018.
+
+------------------------------------------------------------------------
+2ac07bfae448 | Andrew Apted | 2018-05-08 00:07:19 +1000
+
+conversion scripts : improved "note" and "warning" blocks.
+
+------------------------------------------------------------------------
+5c5ad8d47b97 | Andrew Apted | 2018-05-07 23:45:39 +1000
+
+CHANGELOG : another two fixes.
+
+------------------------------------------------------------------------
+b127974e4729 | Andrew Apted | 2018-05-07 23:34:31 +1000
+
+TODO.txt : merged the high/low priority sections (remove that distinction).
+
+------------------------------------------------------------------------
+bf22dbd2f3f7 | Andrew Apted | 2018-05-07 16:58:55 +1000
+
+conversion scripts : link :download: to the SF project files/ dir.
+
+------------------------------------------------------------------------
+1f2f1d31df3e | Andrew Apted | 2018-05-07 15:17:45 +1000
+
+AUTHORS.txt : added Wesley Werner as a contributor.
+
+------------------------------------------------------------------------
+0f7f503e725a | Andrew Apted | 2018-05-07 15:06:11 +1000
+
+Merge branch 'master' of ssh://git.code.sf.net/p/eureka-editor/git
+
+------------------------------------------------------------------------
+a28cb63abd90 | Andrew Apted | 2018-05-05 23:42:50 +1000
+
+conversion scripts : fixed wrong sub-list syntax (in Index).
+
+------------------------------------------------------------------------
+a755cccadd0f | Andrew Apted | 2018-05-05 23:31:01 +1000
+
+conversion scripts : added #notifybox and #warningbox CSS.
+
+------------------------------------------------------------------------
+3ecd689f507e | Andrew Apted | 2018-05-05 22:35:19 +1000
+
+conversion scripts : don't clobber our hand-edited User.Index
+
+------------------------------------------------------------------------
+dbf4feac7a6c | Andrew Apted | 2018-05-05 22:30:18 +1000
+
+conversion scripts : workaround for a pandoc issue with `\``
+
+------------------------------------------------------------------------
+66e85e5670c2 | Andrew Apted | 2018-05-05 19:04:40 +1000
+
+conversion scripts : fixed order of pages (for the Index).
+
+------------------------------------------------------------------------
+2975ecd6ede3 | Andrew Apted | 2018-05-05 18:41:14 +1000
+
+conversion scripts : generate links for the Index page.
+
+------------------------------------------------------------------------
+baba03eb19c3 | Andrew Apted | 2018-05-05 17:25:03 +1000
+
+conversion scripts : generate raw pmWiki page files.
+
+------------------------------------------------------------------------
+2fa5cec5e954 | Andrew Apted | 2018-05-05 16:18:01 +1000
+
+conversion scripts : put a copy of image files into pm/user/
+
+------------------------------------------------------------------------
+e379f79d047b | Andrew Apted | 2018-05-05 15:51:27 +1000
+
+conversion scripts : put a copy of :download: files into pm/user/
+
+------------------------------------------------------------------------
+cdfab4d638fd | Andrew Apted | 2018-05-05 15:32:13 +1000
+
+conversion scripts : handle the :download: elements.
+
+------------------------------------------------------------------------
+c4e4022c5f8a | Andrew Apted | 2018-05-05 15:23:37 +1000
+
+conversion scripts : store output files in a "pm" directory.
+
+------------------------------------------------------------------------
+d83a1b9930d2 | Andrew Apted | 2018-05-05 15:22:54 +1000
+
+conversion scripts : handle the :kbd: elements.
+
+------------------------------------------------------------------------
+25c484bd3290 | Andrew Apted | 2018-05-04 22:28:20 +1000
+
+conversion scripts : support links and images, removed dead code.
+
+------------------------------------------------------------------------
+e82cfdb8192d | Andrew Apted | 2018-05-04 21:05:06 +1000
+
+conversion scripts : more work on them....
+
+------------------------------------------------------------------------
+3986094e3020 | Andrew Apted | 2018-05-04 18:01:32 +1000
+
+conversion scripts : implemented Header and HorizontalRule.
+
+------------------------------------------------------------------------
+ac252e9092d7 | Andrew Apted | 2018-05-04 17:53:22 +1000
+
+preliminary work on conversion scripts for the user manual.
+
+------------------------------------------------------------------------
+e6d67765e121 | Andrew Apted | 2017-12-06 23:48:39 +1100
+
+fixed "Removed unused vertices" message to show the correct number.
+
+------------------------------------------------------------------------
+219d13379ec3 | Andrew Apted | 2017-12-06 23:48:01 +1100
+
+fixed warning messages when linedefs contain an invalid vertex.
+
+------------------------------------------------------------------------
+4faea9a19798 | Ioan Chera | 2018-04-24 19:53:05 +0300
+
+Updated Xcode project
+
+------------------------------------------------------------------------
+58bc948525c4 | Andrew Apted | 2017-09-02 14:12:09 +1000
+
+Merge branch 'master' of ssh://git.code.sf.net/p/eureka-editor/git
+
+------------------------------------------------------------------------
+4b4aca8110be | Andrew Apted | 2017-09-02 14:11:00 +1000
+
+updated CHANGELOG.txt and TODO.txt
+
+------------------------------------------------------------------------
+8ce114e9e7b5 | Ioan Chera | 2017-08-30 22:06:56 +0300
+
+Eternity config: moved the slope specials from "stairs" to "others"
+
+It made no sense to put them in stairs.
+
+------------------------------------------------------------------------
+b02133b9ed01 | Ioan Chera | 2017-08-30 21:38:17 +0300
+
+Fixed a memory deletion bug in Img_c
+
+------------------------------------------------------------------------
+d7ea96cbd36b | Ioan Chera | 2017-08-16 08:30:55 +0300
+
+Silenced some clang 64-bit warnings.
+
+------------------------------------------------------------------------
+a0943ebde940 | Ioan Chera | 2017-08-16 08:23:37 +0300
+
+macOS: updated the Eureka version in the plist.
+
+------------------------------------------------------------------------
+a7cd233dc235 | Andrew Apted | 2017-08-02 23:07:06 +1000
+
+HERETIC config : fixed sprite of the wall torch (WTRH).
+
+------------------------------------------------------------------------
+f8866bfd60d0 | Andrew Apted | 2017-06-07 19:31:25 +1000
+
+minor commenting.
+
+------------------------------------------------------------------------
+2c43e820d58f | Andrew Apted | 2017-06-07 19:13:34 +1000
+
+3D View : rewrote code to sort the active list of draw-walls,
+using custom sorting code (implementing QuickSort).
+
+It previously used std::sort(), but because our wall-distance
+comparison function is "wonky" (e.g. can be non-reversable or
+non-transitive), it was causing the local std::sort() function
+to access elements outside of the list (leading to a CRASH).
+
+------------------------------------------------------------------------
+6ae140bf273d | Andrew Apted | 2017-05-06 12:57:53 +1000
+
+GAME defs : added comment to explain why exit linetypes use
+lowercase "s1" and "w1".
+
+------------------------------------------------------------------------
+8129c104c7ab | Andrew Apted | 2017-04-04 12:54:53 +1000
+
+TODO.txt : small update.
+
+------------------------------------------------------------------------
+dbc69819bb58 | Andrew Apted | 2017-04-04 12:52:56 +1000
+
+Fixed regression with sector merging, it is supposed to keep the
+properties of the first selected sector, but this behavior broke
+when another issue with sector merging was fixed.
+
+------------------------------------------------------------------------
+f6f5256fa384 | Andrew Apted | 2017-04-04 12:48:37 +1000
+
+Version bump after the release.
+
+------------------------------------------------------------------------
+cc9b3c7441df | Andrew Apted | 2017-04-04 12:39:42 +1000
+
+CHANGELOG : began a fresh one...
+
+------------------------------------------------------------------------
+852053cf43e3 | Andrew Apted | 2017-04-04 12:37:37 +1000
+
+Version 1.21 was released.
+
+Hence moved CHANGELOG --> changelogs/ directory.
+
+------------------------------------------------------------------------
+15efcd30ab1f | Ioan Chera | 2017-01-18 22:19:49 +0200
+
+Updated Xcode project for distribution
+
+* Made sure that the static library files are ignored
+* Also ignore the userdata subfolders of Xcode
+* Updated project to recommended settings
+* Updated file references
+* Added the two new resource files
+* Updated code signing
+* Increased deployment target to 10.9 to satisfy all requirements
+* Updated the info plist
+* Updated the macOS version for the xib
+* Removed accidental static libraries
+
+------------------------------------------------------------------------
+6ac71b29bb7c | Andrew Apted | 2017-01-12 22:12:17 +1100
+
+docs/History.txt : updated with logs since last release.
+
+------------------------------------------------------------------------
 355d3d20049f | Andrew Apted | 2017-01-12 21:50:06 +1100
 
 Removed the file "docs/MiscNotes.txt" -- some parts are obsolete
