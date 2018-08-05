@@ -12,6 +12,7 @@ CHANGES IN Eureka 1.24
 >> render point-lights as a yellow ball sprite
 
 >> preferences: a setting for default sector rendering
+>> preferences: a setting for default sprite rendering
 
 >> when changing grid size via keyboard, show grid if hidden
 

@@ -3,13 +3,6 @@ Eureka TODO / WISHLIST
 ======================
 
 
-In Progress
------------
-
--  preference for default sprites (thing_render_mode)
-
-
-
 Most Likely
 -----------
 
