@@ -8,8 +8,6 @@ In Progress
 
 -  preference for default sprites (thing_render_mode)
 
--  sector rendering : optimise it?
-
 
 
 Most Likely

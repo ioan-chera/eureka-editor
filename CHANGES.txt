@@ -21,6 +21,8 @@ CHANGES IN Eureka 1.24
 
 >> faster drawing of plain map view under X windows
 
+>> faster sector rendering on huge maps
+
 
 +  new "Edit Text Lump" command for editing text lumps
 
