@@ -2019,8 +2019,116 @@ struct sector_edge_t
 };
 
 
+struct sector_extra_info_t
+{
+	// these are < 0 when the sector has no lines
+	int first_line;
+	int last_line;
+
+	// these are random junk when sector has no lines
+	int bound_x1, bound_x2;
+	int bound_y1, bound_y2;
+
+	void Clear()
+	{
+		first_line = last_line = -1;
+
+		bound_x1 = 32767;
+		bound_y1 = 32767;
+		bound_x2 = -32767;
+		bound_y2 = -32767;
+	}
+
+	void AddLine(int n)
+	{
+		if (first_line < 0 || first_line > n)
+			first_line = n;
+
+		if (last_line < n)
+			last_line = n;
+	}
+
+	void AddVertex(const Vertex *V)
+	{
+		bound_x1 = MIN(bound_x1, V->x);
+		bound_y1 = MIN(bound_y1, V->y);
+
+		bound_x2 = MAX(bound_x2, V->x);
+		bound_y2 = MAX(bound_y2, V->y);
+	}
+};
+
+class sector_info_cache_c
+{
+public:
+	int total;
+
+	std::vector<sector_extra_info_t> infos;
+
+public:
+	sector_info_cache_c() : total(-1), infos()
+	{ }
+
+	~sector_info_cache_c()
+	{ }
+
+public:
+	void Update()
+	{
+		if (total != NumSectors)
+		{
+			total = NumSectors;
+
+			infos.resize((size_t) total);
+
+			Rebuild();
+		}
+	}
+
+	void Rebuild()
+	{
+		int sec;
+
+		for (sec = 0 ; sec < total ; sec++)
+			infos[sec].Clear();
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			for (int side = 0 ; side < 2 ; side++)
+			{
+				int sd_num = side ? L->left : L->right;
+
+				if (sd_num < 0)
+					continue;
+
+				sec = SideDefs[sd_num]->sector;
+
+				sector_extra_info_t& info = infos[sec];
+
+				info.AddLine(n);
+
+				info.AddVertex(L->Start());
+				info.AddVertex(L->End());
+			}
+		}
+	}
+};
+
+static sector_info_cache_c sector_info_cache;
+
+
+
 void UI_Canvas::RenderSector(int num)
 {
+	sector_info_cache.Update();
+
+	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
+
+	if (exinfo.first_line < 0)
+		return;
+
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
@@ -2093,7 +2201,7 @@ void UI_Canvas::RenderSector(int num)
 	short max_y = 0;
 
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
