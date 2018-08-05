@@ -199,6 +199,9 @@ void UI_Canvas::DrawEverything()
 		else
 			fl_color(HI_COL);
 
+		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
 		DrawHighlight(edit.mode, edit.drag_single_obj,
 		              false /* skip_lines */, dx, dy);
 
@@ -207,6 +210,8 @@ void UI_Canvas::DrawEverything()
 			fl_color(HI_COL);
 			DrawHighlight(highlight.type, highlight.num);
 		}
+
+		fl_line_style(FL_SOLID);
 	}
 	else if (highlight.valid())
 	{
@@ -215,12 +220,17 @@ void UI_Canvas::DrawEverything()
 		else
 			fl_color(HI_COL);
 
+		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
 		DrawHighlight(highlight.type, highlight.num);
 
 		fl_color(LIGHTRED);
 
 		if (! edit.error_mode)
 			DrawTagged(highlight.type, highlight.num);
+
+		fl_line_style(FL_SOLID);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -1149,12 +1159,9 @@ void UI_Canvas::SplitLineForget()
 void UI_Canvas::DrawHighlight(int objtype, int objnum,
                               bool skip_lines, int dx, int dy)
 {
-	// fl_color() has been done by caller
+	// fl_color() and fl_line_style() has been done by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
-
-	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
-		fl_line_style(FL_SOLID, 2);
 
 	switch (objtype)
 	{
@@ -1260,18 +1267,12 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 		}
 		break;
 	}
-
-	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
-		fl_line_style(FL_SOLID);
 }
 
 
 void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
-	// fl_color() has been done by caller
-
-	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
-		fl_line_style(FL_SOLID, 2);
+	// fl_color() and fl_line_style() has been done by caller
 
 	switch (objtype)
 	{
@@ -1361,9 +1362,6 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 		}
 		break;
 	}
-
-	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
-		fl_line_style(FL_SOLID);
 }
 
 
@@ -1403,11 +1401,15 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	{
 		fl_color(SEL_COL);
 
+		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
 			DrawHighlightTransform(list->what_type(), *it);
 		}
 
+		fl_line_style(FL_SOLID);
 		return;
 	}
 
@@ -1420,6 +1422,9 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	}
 
 	fl_color(edit.error_mode ? FL_RED : SEL_COL);
+
+	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+		fl_line_style(FL_SOLID, 2);
 
 	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
@@ -1435,6 +1440,8 @@ void UI_Canvas::DrawSelection(selection_c * list)
 			DrawTagged(list->what_type(), *it);
 		}
 	}
+
+	fl_line_style(FL_SOLID);
 }
 
 
