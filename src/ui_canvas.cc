@@ -249,7 +249,7 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-	if (edit.sector_render_mode)
+	if (edit.sector_render_mode && ! edit.error_mode)
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 			RenderSector(n);
