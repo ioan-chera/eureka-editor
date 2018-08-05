@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2016 Andrew Apted
+//  Copyright (C) 2006-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -531,150 +531,210 @@ void UI_Canvas::DrawVertices()
 //
 void UI_Canvas::DrawLinedefs()
 {
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	// we perform 5 passes over the lines.  the first four use a single
+	// color specific to the pass (stored in colors[] array).  the 5th
+	// pass is for all other colors.
+	//
+	// the REASON for this complexity is because fl_color() under X windows
+	// is very very slow, and was causing a massive slow down of this code.
+	// even detecting the same color as last time and inhibiting the call
+	// did not help.
+
+	Fl_Color colors[4];
+
+	colors[0] = LIGHTGREY;
+	colors[1] = LIGHTMAGENTA;
+	colors[2] = LIGHTGREEN;
+	colors[3] = WHITE;
+
+	if (edit.mode == OBJ_SECTORS)
 	{
-		const LineDef *L = LineDefs[n];
+		colors[1] = SECTOR_TAG;
+		colors[2] = SECTOR_TYPE;
 
-		int x1 = L->Start()->x;
-		int y1 = L->Start()->y;
-		int x2 = L->End  ()->x;
-		int y2 = L->End  ()->y;
+		if (edit.sector_render_mode == SREND_SoundProp)
+			colors[1] = FL_MAGENTA;
+	}
 
-		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-			continue;
+	for (int pass = 0 ; pass < 5 ; pass++)
+	{
+		if (pass < 4)
+			fl_color(colors[pass]);
 
-		bool one_sided = (! L->Left());
-
-		switch (edit.mode)
+		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			case OBJ_VERTICES:
+			const LineDef *L = LineDefs[n];
+
+			int x1 = L->Start()->x;
+			int y1 = L->Start()->y;
+			int x2 = L->End  ()->x;
+			int y2 = L->End  ()->y;
+
+			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+				continue;
+
+			bool one_sided = (! L->Left());
+
+			Fl_Color col;
+
+			// 'p' for plain, 'k' for knobbly, 's' for split
+			char line_kind = 'p';
+
+			switch (edit.mode)
 			{
-				if (n == split_ld)
-					fl_color(HI_AND_SEL_COL);
-				else if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				else if (L->right < 0)
-					fl_color(RED);
-				else if (one_sided)
-					fl_color(WHITE);
-				else
-					fl_color(LIGHTGREY);
-
-				if (n == split_ld)
-					DrawSplitLine(x1, y1, x2, y2);
-				else
-					DrawKnobbyLine(x1, y1, x2, y2);
-
-				if (n != split_ld && n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
+				case OBJ_VERTICES:
 				{
-					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
-				}
-			}
-			break;
-
-			case OBJ_LINEDEFS:
-			{
-				if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				// no first sidedef?
-				else if (! L->Right())
-					fl_color(RED);
-				else if (L->type != 0)
-				{
-					if (L->tag != 0)
-						fl_color(LIGHTMAGENTA);
-					else
-						fl_color(LIGHTGREEN);
-				}
-				else if (one_sided)
-					fl_color(WHITE);
-				else if (L->flags & MLF_Blocking)
-					fl_color(FL_CYAN);
-				else
-					fl_color(LIGHTGREY);
-
-				DrawKnobbyLine(x1, y1, x2, y2);
-			}
-			break;
-
-			case OBJ_SECTORS:
-			{
-				int sd1 = L->right;
-				int sd2 = L->left;
-
-				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
-				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
-
-				if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				else if (sd1 < 0)
-					fl_color(RED);
-				else if (edit.sector_render_mode == SREND_SoundProp)
-				{
-					if (L->flags & MLF_SoundBlock)
-						fl_color(FL_MAGENTA);
+					if (n == split_ld)
+						col = HI_AND_SEL_COL;
+					else if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (L->right < 0)
+						col = RED;
 					else if (one_sided)
-						fl_color(WHITE);
+						col = WHITE;
 					else
-						fl_color(LIGHTGREY);
-				}
-				else
-				{
-					bool have_tag  = false;
-					bool have_type = false;
+						col = LIGHTGREY;
 
-					if (Sectors[s1]->tag != 0)
-						have_tag = true;
-					if (Sectors[s1]->type != 0)
-						have_type = true;
+					if (n == split_ld)
+						line_kind = 's';
+					else
+						line_kind = 'k';
 
-					if (s2 >= 0)
+					if (pass==4 && n != split_ld && n >= (NumLineDefs - 3) && !edit.show_object_numbers)
 					{
-						if (Sectors[s2]->tag != 0)
-							have_tag = true;
+						DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
+					}
+				}
+				break;
 
-						if (Sectors[s2]->type != 0)
+				case OBJ_LINEDEFS:
+				{
+					if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (! L->Right()) // no first sidedef?
+						col = RED;
+					else if (L->type != 0)
+					{
+						if (L->tag != 0)
+							col = LIGHTMAGENTA;
+						else
+							col = LIGHTGREEN;
+					}
+					else if (one_sided)
+						col = WHITE;
+					else if (L->flags & MLF_Blocking)
+						col = FL_CYAN;
+					else
+						col = LIGHTGREY;
+
+					line_kind = 'k';
+				}
+				break;
+
+				case OBJ_SECTORS:
+				{
+					int sd1 = L->right;
+					int sd2 = L->left;
+
+					int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
+					int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
+
+					if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (sd1 < 0)
+						col = RED;
+					else if (edit.sector_render_mode == SREND_SoundProp)
+					{
+						if (L->flags & MLF_SoundBlock)
+							col = FL_MAGENTA;
+						else if (one_sided)
+							col = WHITE;
+						else
+							col = LIGHTGREY;
+					}
+					else
+					{
+						bool have_tag  = false;
+						bool have_type = false;
+
+						if (Sectors[s1]->tag != 0)
+							have_tag = true;
+						if (Sectors[s1]->type != 0)
 							have_type = true;
+
+						if (s2 >= 0)
+						{
+							if (Sectors[s2]->tag != 0)
+								have_tag = true;
+
+							if (Sectors[s2]->type != 0)
+								have_type = true;
+						}
+
+						if (have_tag && have_type)
+							col = SECTOR_TAGTYPE;
+						else if (have_tag)
+							col = SECTOR_TAG;
+						else if (have_type)
+							col = SECTOR_TYPE;
+						else if (one_sided)
+							col = WHITE;
+						else
+							col = LIGHTGREY;
 					}
 
-					if (have_tag && have_type)
-						fl_color(SECTOR_TAGTYPE);
-					else if (have_tag)
-						fl_color(SECTOR_TAG);
-					else if (have_type)
-						fl_color(SECTOR_TYPE);
-					else if (one_sided)
-						fl_color(WHITE);
-					else
-						fl_color(LIGHTGREY);
+					if (pass==4 && edit.show_object_numbers)
+					{
+						if (s1 != NIL_OBJ)
+							DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
+
+						if (s2 != NIL_OBJ)
+							DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+					}
 				}
+				break;
 
-				DrawMapLine(x1, y1, x2, y2);
-
-				if (edit.show_object_numbers)
+				// OBJ_THINGS
+				default:
 				{
-					if (s1 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
-
-					if (s2 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+					if (one_sided && ! edit.error_mode)
+						col = WHITE;
+					else
+						col = LIGHTGREY;
 				}
+				break;
 			}
-			break;
 
-			// OBJ_THINGS
-			default:
+			if (pass < 4)
 			{
-				if (one_sided && ! edit.error_mode)
-					fl_color(WHITE);
-				else
-					fl_color(LIGHTGREY);
-
-				DrawMapLine(x1, y1, x2, y2);
+				if (col != colors[pass])
+					continue;
 			}
-			break;
-		}
-	}
+			else
+			{
+				if (col == colors[0] || col == colors[1] ||
+					col == colors[2] || col == colors[3])
+					continue;
+
+				fl_color(col);
+			}
+
+			switch (line_kind)
+			{
+				case 'p':
+					DrawMapLine(x1, y1, x2, y2);
+					break;
+
+				case 'k':
+					DrawKnobbyLine(x1, y1, x2, y2);
+					break;
+
+				case 's':
+					DrawSplitLine(x1, y1, x2, y2);
+					break;
+			}
+		} // n
+	} // pass
 
 	// draw the linedef numbers
 	if (edit.mode == OBJ_LINEDEFS && edit.show_object_numbers)
@@ -741,22 +801,7 @@ void UI_Canvas::DrawThings()
 		if (edit.mode == OBJ_THINGS)
 		{
 			if (edit.error_mode)
-			{
 				fl_color(LIGHTGREY);
-			}
-#if 0  // THIS DESIGNED TO SHOW SKILLS VIA COLOR, BUT DOESN'T WORK VERY WELL
-			else if (true)
-			{
-				if (Things[n]->options & 1)
-					fl_color (YELLOW);
-				else if (Things[n]->options & 2)
-					fl_color (LIGHTGREEN);
-				else if (Things[n]->options & 4)
-					fl_color (LIGHTRED);
-				else
-					fl_color (DARKGREY);
-			}
-#endif
 			else
 				fl_color((Fl_Color) info->color);
 		}
@@ -1362,6 +1407,8 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
                                bool reverse)
 {
+	// fl_color() has been done by caller
+
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
