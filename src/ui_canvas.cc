@@ -1153,7 +1153,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
 
-	int vert_r = vertex_radius(grid.Scale);
+	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
+		fl_line_style(FL_SOLID, 2);
 
 	switch (objtype)
 	{
@@ -1163,7 +1164,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 			int y = dy + Things[objnum]->y;
 
 			if (! Vis(x, y, MAX_RADIUS))
-				return;
+				break;
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
@@ -1186,7 +1187,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 			int y2 = dy + LineDefs[objnum]->End  ()->y;
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-				return;
+				break;
 
 			DrawMapVector(x1, y1, x2, y2);
 		}
@@ -1197,8 +1198,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 			int x = dx + Vertices[objnum]->x;
 			int y = dy + Vertices[objnum]->y;
 
+			int vert_r = vertex_radius(grid.Scale);
+
 			if (! Vis(x, y, vert_r))
-				return;
+				break;
 
 			DrawVertex(x, y, vert_r);
 
@@ -1218,8 +1221,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 		case OBJ_SECTORS:
 		{
-			fl_line_style(FL_SOLID, 2);
-
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				const LineDef *L = LineDefs[n];
@@ -1256,33 +1257,12 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 				else
 					DrawMapLine(x1, y1, x2, y2);
 			}
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 	}
-}
 
-
-void UI_Canvas::DrawTagged(int objtype, int objnum)
-{
-	// fl_color has been done by caller
-
-	// handle tagged linedefs : show matching sector(s)
-	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
-	{
-		for (int m = 0 ; m < NumSectors ; m++)
-			if (Sectors[m]->tag == LineDefs[objnum]->tag)
-				DrawHighlight(OBJ_SECTORS, m);
-	}
-
-	// handle tagged sectors : show matching line(s)
-	if (objtype == OBJ_SECTORS && Sectors[objnum]->tag > 0)
-	{
-		for (int m = 0 ; m < NumLineDefs ; m++)
-			if (LineDefs[m]->tag == Sectors[objnum]->tag)
-				DrawHighlight(OBJ_LINEDEFS, m);
-	}
+	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
+		fl_line_style(FL_SOLID);
 }
 
 
@@ -1290,7 +1270,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
 	// fl_color() has been done by caller
 
-	int vert_r = vertex_radius(grid.Scale);
+	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
+		fl_line_style(FL_SOLID, 2);
 
 	switch (objtype)
 	{
@@ -1302,7 +1283,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
-				return;
+				break;
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
@@ -1317,10 +1298,12 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			int x = Vertices[objnum]->x;
 			int y = Vertices[objnum]->y;
 
+			int vert_r = vertex_radius(grid.Scale);
+
 			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
-				return;
+				break;
 
 			DrawVertex(x, y, vert_r);
 
@@ -1349,7 +1332,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-				return;
+				break;
 
 			DrawMapVector(x1, y1, x2, y2);
 		}
@@ -1357,8 +1340,6 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 		case OBJ_SECTORS:
 		{
-			fl_line_style(FL_SOLID, 2);
-
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				if (! LineDefs[n]->TouchesSector(objnum))
@@ -1377,10 +1358,33 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 				DrawMapLine(x1, y1, x2, y2);
 			}
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
+	}
+
+	if (objtype == OBJ_LINEDEFS || objtype == OBJ_SECTORS)
+		fl_line_style(FL_SOLID);
+}
+
+
+void UI_Canvas::DrawTagged(int objtype, int objnum)
+{
+	// fl_color has been done by caller
+
+	// handle tagged linedefs : show matching sector(s)
+	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumSectors ; m++)
+			if (Sectors[m]->tag == LineDefs[objnum]->tag)
+				DrawHighlight(OBJ_SECTORS, m);
+	}
+
+	// handle tagged sectors : show matching line(s)
+	if (objtype == OBJ_SECTORS && Sectors[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumLineDefs ; m++)
+			if (LineDefs[m]->tag == Sectors[objnum]->tag)
+				DrawHighlight(OBJ_LINEDEFS, m);
 	}
 }
 
@@ -1549,15 +1553,15 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
+	fl_line(x1, y1, x2, y2);
+
+	// knob
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	// knob
 	fl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
 
-	fl_line_style(FL_SOLID, 2);
-	fl_line(x1, y1, x2, y2);
-
+	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
 	if (r2 < 1.0)
@@ -1573,8 +1577,6 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 
 	fl_line(x1 - dy, y1 + dx, x2, y2);
 	fl_line(x1 + dy, y1 - dx, x2, y2);
-
-	fl_line_style(FL_SOLID);
 }
 
 
