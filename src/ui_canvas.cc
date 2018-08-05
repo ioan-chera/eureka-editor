@@ -1387,6 +1387,47 @@ void UI_Canvas::DrawTagged(int objtype, int objnum)
 }
 
 
+void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
+{
+	// fl_color() and fl_line_style() has been done by caller
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		int x1 = dx + L->Start()->x;
+		int y1 = dy + L->Start()->y;
+		int x2 = dx + L->End  ()->x;
+		int y2 = dy + L->End  ()->y;
+
+		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			continue;
+
+		if (L->right < 0 && L->left < 0)
+			continue;
+
+		int sec1 = -1;
+		int sec2 = -1;
+
+		if (L->right >= 0) sec1 = L->Right()->sector;
+		if (L->left  >= 0) sec2 = L->Left() ->sector;
+
+		bool touches1 = (sec1 >= 0) && list->get(sec1);
+		bool touches2 = (sec2 >= 0) && list->get(sec2);
+
+		if (! (touches1 || touches2))
+			continue;
+
+		// skip lines if both sides are in the selection
+		if (touches1 && touches2)
+			continue;
+
+		bool reverse = !touches1;
+
+		DrawKnobbyLine(x1, y1, x2, y2, reverse);
+	}
+}
+
 //
 //  draw selected objects in light blue
 //
@@ -1426,9 +1467,17 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
 		fl_line_style(FL_SOLID, 2);
 
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	// special case when we have many sectors
+	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
 	{
-		DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
+		DrawSectorSelection(list, dx, dy);
+	}
+	else
+	{
+		for (list->begin(&it) ; !it.at_end() ; ++it)
+		{
+			DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
+		}
 	}
 
 	if (! edit.error_mode && dx == 0 && dy == 0)

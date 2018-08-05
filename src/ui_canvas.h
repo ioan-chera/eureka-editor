@@ -83,6 +83,7 @@ public:
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
+	void DrawSectorSelection(selection_c *list, int dx, int dy);
 	void DrawHighlight(int objtype, int objnum,
 	                   bool skip_lines = false, int dx=0, int dy=0);
 	void DrawHighlightTransform(int objtype, int objnum);
