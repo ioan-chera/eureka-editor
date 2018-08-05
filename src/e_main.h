@@ -103,6 +103,7 @@ extern Editor_State_t  edit;
 
 
 void Editor_Init();
+void Editor_DefaultState();
 bool Editor_ParseUser(const char ** tokens, int num_tok);
 void Editor_WriteUser(FILE *fp);
 

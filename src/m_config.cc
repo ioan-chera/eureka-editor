@@ -1564,6 +1564,8 @@ void M_DefaultUserState()
 	ZoomWholeMap();
 
 	Render3D_Setup();
+
+	Editor_DefaultState();
 }
 
 

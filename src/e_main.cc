@@ -1317,9 +1317,7 @@ void Editor_Init()
 
 	edit.render3d = false;
 
-	edit.action = ACT_NOTHING;
-	edit.sticky_mod = 0;
-	edit.is_scrolling = false;
+	Editor_DefaultState();
 
 	Nav_Clear();
 
@@ -1333,20 +1331,29 @@ void Editor_Init()
 	edit.split_line.clear();
 	edit.clicked.clear();
 
-	edit.drawing_from = -1;
-	edit.drag_single_obj = -1;
-
-	edit.error_mode = false;
-	edit.sector_render_mode = sector_render_default;
-	edit. thing_render_mode =  thing_render_default;
-	edit.show_object_numbers = false;
-
 	grid.Init();
 
 	MadeChanges = 0;
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();
+}
+
+
+void Editor_DefaultState()
+{
+	edit.action = ACT_NOTHING;
+	edit.sticky_mod = 0;
+	edit.is_scrolling = false;
+
+	edit.drawing_from = -1;
+	edit.drag_single_obj = -1;
+
+	edit.error_mode = false;
+	edit.show_object_numbers = false;
+
+	edit.sector_render_mode = sector_render_default;
+	edit. thing_render_mode =  thing_render_default;
 }
 
 

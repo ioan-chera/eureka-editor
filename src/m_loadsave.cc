@@ -131,6 +131,8 @@ static void FreshLevel()
 	CalculateLevelBounds();
 
 	ZoomWholeMap();
+
+	Editor_DefaultState();
 }
 
 
