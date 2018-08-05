@@ -194,23 +194,33 @@ void UI_Canvas::DrawEverything()
 		int dy = 0;
 		DragDelta(&dx, &dy);
 
+		if (edit.mode == OBJ_VERTICES)
+			fl_color(HI_AND_SEL_COL);
+		else
+			fl_color(HI_COL);
+
 		DrawHighlight(edit.mode, edit.drag_single_obj,
-					  (edit.mode == OBJ_VERTICES) ? HI_AND_SEL_COL : HI_COL,
-		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
-					  dx, dy);
+		              false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
-			DrawHighlight(highlight.type, highlight.num, HI_COL, false);
+		{
+			fl_color(HI_COL);
+			DrawHighlight(highlight.type, highlight.num);
+		}
 	}
 	else if (highlight.valid())
 	{
-		Fl_Color hi_color = HI_COL;
-
 		if (edit.Selected->get(highlight.num))
-			hi_color = HI_AND_SEL_COL;
+			fl_color(HI_AND_SEL_COL);
+		else
+			fl_color(HI_COL);
 
-		DrawHighlight(highlight.type, highlight.num, hi_color,
-		              ! edit.error_mode /* do_tagged */);
+		DrawHighlight(highlight.type, highlight.num);
+
+		fl_color(LIGHTRED);
+
+		if (! edit.error_mode)
+			DrawTagged(highlight.type, highlight.num);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -1136,10 +1146,10 @@ void UI_Canvas::SplitLineForget()
 //
 //  draw the given object in highlight color
 //
-void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
-                              bool do_tagged, bool skip_lines, int dx, int dy)
+void UI_Canvas::DrawHighlight(int objtype, int objnum,
+                              bool skip_lines, int dx, int dy)
 {
-	fl_color(col);
+	// fl_color() has been done by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
 
@@ -1170,16 +1180,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 
 		case OBJ_LINEDEFS:
 		{
-			// handle tagged linedefs : show matching sector(s)
-			if (do_tagged && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumSectors ; m++)
-					if (Sectors[m]->tag == LineDefs[objnum]->tag)
-						DrawHighlight(OBJ_SECTORS, m, LIGHTRED, false);
-
-				fl_color(col);
-			}
-
 			int x1 = dx + LineDefs[objnum]->Start()->x;
 			int y1 = dy + LineDefs[objnum]->Start()->y;
 			int x2 = dx + LineDefs[objnum]->End  ()->x;
@@ -1218,16 +1218,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 
 		case OBJ_SECTORS:
 		{
-			// handle tagged sectors : show matching line(s)
-			if (do_tagged && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumLineDefs ; m++)
-					if (LineDefs[m]->tag == Sectors[objnum]->tag)
-						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED, false);
-
-				fl_color(col);
-			}
-
 			fl_line_style(FL_SOLID, 2);
 
 			for (int n = 0 ; n < NumLineDefs ; n++)
@@ -1274,9 +1264,31 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 }
 
 
-void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
+void UI_Canvas::DrawTagged(int objtype, int objnum)
 {
-	fl_color(col);
+	// fl_color has been done by caller
+
+	// handle tagged linedefs : show matching sector(s)
+	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumSectors ; m++)
+			if (Sectors[m]->tag == LineDefs[objnum]->tag)
+				DrawHighlight(OBJ_SECTORS, m);
+	}
+
+	// handle tagged sectors : show matching line(s)
+	if (objtype == OBJ_SECTORS && Sectors[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumLineDefs ; m++)
+			if (LineDefs[m]->tag == Sectors[objnum]->tag)
+				DrawHighlight(OBJ_LINEDEFS, m);
+	}
+}
+
+
+void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
+{
+	// fl_color() has been done by caller
 
 	int vert_r = vertex_radius(grid.Scale);
 
@@ -1385,9 +1397,11 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
+		fl_color(SEL_COL);
+
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
-			DrawHighlightTransform(list->what_type(), *it, SEL_COL);
+			DrawHighlightTransform(list->what_type(), *it);
 		}
 
 		return;
@@ -1401,11 +1415,21 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		DragDelta(&dx, &dy);
 	}
 
+	fl_color(edit.error_mode ? FL_RED : SEL_COL);
+
 	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
-		DrawHighlight(list->what_type(), *it, edit.error_mode ? FL_RED : SEL_COL,
-		              ! edit.error_mode /* do_tagged */,
-					  true /* skip_lines */, dx, dy);
+		DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
+	}
+
+	if (! edit.error_mode && dx == 0 && dy == 0)
+	{
+		fl_color(LIGHTRED);
+
+		for (list->begin(&it) ; !it.at_end() ; ++it)
+		{
+			DrawTagged(list->what_type(), *it);
+		}
 	}
 }
 
