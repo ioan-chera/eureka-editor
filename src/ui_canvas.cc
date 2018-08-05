@@ -575,7 +575,7 @@ void UI_Canvas::DrawLinedefs()
 
 			bool one_sided = (! L->Left());
 
-			Fl_Color col;
+			Fl_Color col = LIGHTGREY;
 
 			// 'p' for plain, 'k' for knobbly, 's' for split
 			char line_kind = 'p';
@@ -592,8 +592,6 @@ void UI_Canvas::DrawLinedefs()
 						col = RED;
 					else if (one_sided)
 						col = WHITE;
-					else
-						col = LIGHTGREY;
 
 					if (n == split_ld)
 						line_kind = 's';
@@ -624,8 +622,6 @@ void UI_Canvas::DrawLinedefs()
 						col = WHITE;
 					else if (L->flags & MLF_Blocking)
 						col = FL_CYAN;
-					else
-						col = LIGHTGREY;
 
 					line_kind = 'k';
 				}
@@ -649,8 +645,6 @@ void UI_Canvas::DrawLinedefs()
 							col = FL_MAGENTA;
 						else if (one_sided)
 							col = WHITE;
-						else
-							col = LIGHTGREY;
 					}
 					else
 					{
@@ -679,8 +673,6 @@ void UI_Canvas::DrawLinedefs()
 							col = SECTOR_TYPE;
 						else if (one_sided)
 							col = WHITE;
-						else
-							col = LIGHTGREY;
 					}
 
 					if (pass==4 && edit.show_object_numbers)
@@ -699,8 +691,6 @@ void UI_Canvas::DrawLinedefs()
 				{
 					if (one_sided && ! edit.error_mode)
 						col = WHITE;
-					else
-						col = LIGHTGREY;
 				}
 				break;
 			}
@@ -786,8 +776,17 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 //
 void UI_Canvas::DrawThings()
 {
-	fl_color(DARKGREY);
+	if (edit.mode != OBJ_THINGS)
+		fl_color(DARKGREY);
+	else if (edit.error_mode)
+		fl_color(LIGHTGREY);
+	else
+		fl_color((Fl_Color)0xFF000000);
 
+	// see notes in DrawLinedefs() on why we perform multiple passes.
+	// here first pass is bright red, second pass is everything else.
+
+	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -798,12 +797,22 @@ void UI_Canvas::DrawThings()
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		if (edit.mode == OBJ_THINGS)
+		if (edit.mode == OBJ_THINGS && !edit.error_mode)
 		{
-			if (edit.error_mode)
-				fl_color(LIGHTGREY);
+			Fl_Color col = (Fl_Color)info->color;
+
+			if (pass == 0)
+			{
+				if (col != 0xFF000000)
+					continue;
+			}
 			else
-				fl_color((Fl_Color) info->color);
+			{
+				if (col == 0xFF000000)
+					continue;
+
+				fl_color(col);
+			}
 		}
 
 		int r = info->radius;
@@ -841,6 +850,12 @@ void UI_Canvas::DrawThingBodies()
 	if (edit.error_mode)
 		return;
 
+	// see notes in DrawLinedefs() on why we perform multiple passes.
+	// here first pass is dark red, second pass is everything else.
+
+	fl_color(DarkerColor(DarkerColor((Fl_Color)0xFF000000)));
+
+	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -853,7 +868,20 @@ void UI_Canvas::DrawThingBodies()
 
 		int r = info->radius;
 
-		fl_color(DarkerColor(DarkerColor(info->color)));
+		Fl_Color col = (Fl_Color)info->color;
+
+		if (pass == 0)
+		{
+			if (col != 0xFF000000)
+				continue;
+		}
+		else
+		{
+			if (col == 0xFF000000)
+				continue;
+
+			fl_color(DarkerColor(DarkerColor(col)));
+		}
 
 		int sx1 = SCREENX(x - r);
 		int sy1 = SCREENY(y + r);
