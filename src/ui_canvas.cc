@@ -2129,6 +2129,15 @@ void UI_Canvas::RenderSector(int num)
 	if (exinfo.first_line < 0)
 		return;
 
+	// bounding box test
+	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
+		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
+	{
+		// sector is off-screen
+		return;
+	}
+
+
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
