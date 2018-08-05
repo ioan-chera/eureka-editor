@@ -4,7 +4,7 @@ Eureka 1.24 README
 
 by Andrew Apted  <ajapted@users.sf.net>
 
-June 2018
+August 2018
 
 
 INTRODUCTION
