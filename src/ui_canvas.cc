@@ -2118,6 +2118,11 @@ public:
 
 static sector_info_cache_c sector_info_cache;
 
+void SectorCache_Invalidate()
+{
+	// invalidate everything
+	sector_info_cache.total = -1;
+}
 
 
 void UI_Canvas::RenderSector(int num)

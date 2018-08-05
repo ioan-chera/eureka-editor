@@ -315,6 +315,8 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 	edit.highlight.clear();
 	edit.split_line.clear();
+
+	SectorCache_Invalidate();
 }
 
 
@@ -444,7 +446,15 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
 		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+
+		SectorCache_Invalidate();
 	}
+
+	if (type == OBJ_SIDEDEFS && field == SideDef::F_SECTOR)
+		SectorCache_Invalidate();
+
+	if (type == OBJ_LINEDEFS && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
+		SectorCache_Invalidate();
 }
 
 void MapStuff_NotifyEnd()

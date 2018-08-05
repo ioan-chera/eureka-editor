@@ -29,6 +29,8 @@
 
 class Img_c;
 
+void SectorCache_Invalidate();
+
 
 class UI_Canvas : public Fl_Widget
 {
