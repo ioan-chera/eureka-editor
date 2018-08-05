@@ -19,6 +19,8 @@ CHANGES IN Eureka 1.24
 
 >> new "Add BEHAVIOR" command to support ACS scripting
 
+>> faster drawing of plain map view under X windows
+
 
 +  new "Edit Text Lump" command for editing text lumps
 

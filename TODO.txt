@@ -6,16 +6,9 @@ Eureka TODO / WISHLIST
 In Progress
 -----------
 
-+  Assertion (want_pos < total_size + 8) failed
-   w_wad.cc:1141
+-  preference for default sprites (thing_render_mode)
 
--  canvas drawing: see if something is slowing down PLAIN mode
-   e.g. the lookup of linedef types?
-
--  sector rendering : a preference for "low quality" mode
-   [ make it the default too ]
-
--  WIN32 : use patched FLTK with nicer menu separator
+-  sector rendering : optimise it?
 
 
 
