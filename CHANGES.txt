@@ -43,7 +43,9 @@ CHANGES IN Eureka 1.24
 -  fixed Find/Replace to handle generalized sectors
 -  fixed wall torch sprite in the Heretic game config
 -  fixed closed sectors in 3D view having a see-through gap
--  fixed "View Logs" command to raise the window
+
+-  fixed raising Eureka window when other windows have KB focus
+-  fixed "View Logs" command to raise the logs window
 -  fixed malformed warnings when linedefs contain an invalid vertex
 -  fixed "Removed unused vertices" message to show correct number
 
