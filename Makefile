@@ -1,7 +1,8 @@
 #
 #  --- Eureka Editor ---
 #
-#  Makefile for Unixy system-wide install
+#  Makefile for Unixy system-wide install.
+#  Requires GNU make.
 #
 
 PROGRAM=eureka
@@ -22,30 +23,17 @@ STRIP_FLAGS=--strip-unneeded
 
 CXXFLAGS=$(OPTIMISE) $(WARNINGS) -D_THREAD_SAFE -D_REENTRANT
 
-LDFLAGS=-L/usr/X11R6/lib
+LDFLAGS=
 
-LIBS= \
-     -lfltk_images -lfltk_gl -lfltk  \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama  \
-     -lpng -ljpeg -lGL -lz -lm
+LIBS=-lz -lm
+
+# this assumes a system-wide FLTK installation
+CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
+LDFLAGS += $(shell fltk-config --use-images --ldflags)
+LIBS += $(shell fltk-config --use-images --libs)
+
 
 DUMMY=$(OBJ_DIR)/zzdummy
-
-
-# support for a non-standard install of FLTK
-ifneq ($(FLTK_PREFIX),)
-CXXFLAGS += -I$(FLTK_PREFIX)/include
-LDFLAGS += -L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib
-endif
-
-# support for statically linking FLTK (no GL, local JPEG and PNG)
-ifneq ($(FLTK_STATIC),)
-LIBS= \
-     -lfltk_images -lfltk  \
-     -lfltk_png -lfltk_jpeg \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama \
-     -lz -lm
-endif
 
 
 #----- Object files ----------------------------------------------
