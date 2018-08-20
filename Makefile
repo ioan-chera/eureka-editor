@@ -21,11 +21,11 @@ STRIP_FLAGS=--strip-unneeded
 
 #--- Internal stuff from here -----------------------------------
 
-CXXFLAGS=$(OPTIMISE) $(WARNINGS) -D_THREAD_SAFE -D_REENTRANT
-
-LDFLAGS=
-
+CXXFLAGS=$(OPTIMISE) $(WARNINGS)
+CPPFLAGS=-D_THREAD_SAFE -D_REENTRANT
 LIBS=-lz -lm
+
+# LDFLAGS=
 
 # this assumes a system-wide FLTK installation
 CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
@@ -105,7 +105,7 @@ OBJS = \
 	$(OBJ_DIR)/bsp_util.o
 
 $(OBJ_DIR)/%.o: src/%.cc
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 
 #----- Targets -----------------------------------------------
