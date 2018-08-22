@@ -8,30 +8,29 @@
 PROGRAM=eureka
 
 # prefix choices: /usr  /usr/local  /opt
-PREFIX=/usr/local
-
-OBJ_DIR=obj_linux
+PREFIX ?= /usr/local
 
 # CXX=clang++-6.0
 
-WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
-OPTIMISE=-O2 -std=c++03 -fno-strict-aliasing -fwrapv
-STRIP_FLAGS=--strip-unneeded
+WARNINGS ?= -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
+OPTIMISE ?= -O2 -std=c++03 -fno-strict-aliasing -fwrapv
+STRIP_FLAGS ?= --strip-unneeded
 
 
 #--- Internal stuff from here -----------------------------------
 
-CXXFLAGS=$(OPTIMISE) $(WARNINGS)
-CPPFLAGS=-D_THREAD_SAFE -D_REENTRANT
-LIBS=-lz -lm
-
-# LDFLAGS=
+CXXFLAGS += $(OPTIMISE) $(WARNINGS)
+CPPFLAGS +=
+LDFLAGS +=
+LIBS += -lz -lm
 
 # this assumes a system-wide FLTK installation
 CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
 LDFLAGS += $(shell fltk-config --use-images --ldflags)
 LIBS += $(shell fltk-config --use-images --libs)
 
+
+OBJ_DIR=obj_linux
 
 DUMMY=$(OBJ_DIR)/zzdummy
 
