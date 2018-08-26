@@ -12,23 +12,32 @@ PREFIX ?= /usr/local
 
 # CXX=clang++-6.0
 
-WARNINGS ?= -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
-OPTIMISE ?= -O2 -std=c++03 -fno-strict-aliasing -fwrapv
-STRIP_FLAGS ?= --strip-unneeded
+# flags controlling the dialect of C++
+# [ the code is old-school C++ without modern features ]
+CXX_DIALECT=-std=c++03 -fno-strict-aliasing -fwrapv
 
+WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
+OPTIMISE=-O2 -g
+STRIP_FLAGS=--strip-unneeded
 
-#--- Internal stuff from here -----------------------------------
+# default flags for compiler, preprocessor and linker
+CXXFLAGS ?= $(OPTIMISE) $(WARNINGS)
+CPPFLAGS ?=
+LDFLAGS ?=
+LIBS ?=
 
-CXXFLAGS += $(OPTIMISE) $(WARNINGS)
-CPPFLAGS +=
-LDFLAGS +=
+# general things needed by Eureka
+CXXFLAGS += $(CXX_DIALECT)
 LIBS += -lz -lm
 
-# this assumes a system-wide FLTK installation
+# FLTK flags (this assumes a system-wide FLTK installation)
 CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
 LDFLAGS += $(shell fltk-config --use-images --ldflags)
-LIBS += $(shell fltk-config --use-images --libs)
 
+# NOTE: the following is commented out since it does not work as expected.
+#       the --libs option gives us static libraries, but --ldflags option
+#       gives us dynamic libraries (and we use --ldflags above).
+# LIBS += $(shell fltk-config --use-images --libs)
 
 OBJ_DIR=obj_linux
 
@@ -116,7 +125,7 @@ clean:
 	rm -f ERRS LOG.txt update.log core core.*
 
 $(PROGRAM): $(OBJS)
-	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
+	$(CXX) $^ -o $@ $(OPTIMISE) $(LDFLAGS) $(LIBS)
 
 # this is used to create the OBJ_DIR directory
 $(DUMMY):
