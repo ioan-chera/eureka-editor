@@ -23,7 +23,7 @@ STRIP_FLAGS=--strip-unneeded
 # default flags for compiler, preprocessor and linker
 CXXFLAGS ?= $(OPTIMISE) $(WARNINGS)
 CPPFLAGS ?=
-LDFLAGS ?=
+LDFLAGS ?= $(OPTIMISE)
 LIBS ?=
 
 # general things needed by Eureka
@@ -125,7 +125,7 @@ clean:
 	rm -f ERRS LOG.txt update.log core core.*
 
 $(PROGRAM): $(OBJS)
-	$(CXX) $^ -o $@ $(OPTIMISE) $(LDFLAGS) $(LIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 # this is used to create the OBJ_DIR directory
 $(DUMMY):
