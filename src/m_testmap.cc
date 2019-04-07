@@ -38,7 +38,7 @@ static const char * QueryName(const char *port = Port_name, const char *game = G
 		if (! game)
 			game = "doom2";
 
-		snprintf(buffer, sizeof(buffer), "vanilla_%s\n", game);
+		snprintf(buffer, sizeof(buffer), "vanilla_%s", game);
 		return buffer;
 	}
 

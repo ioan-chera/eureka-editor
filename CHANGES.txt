@@ -2,3 +2,4 @@
 RECENT CHANGES
 ==============
 
+- fixed not remembering test-in-game EXE when port is "vanilla"
