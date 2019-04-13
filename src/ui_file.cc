@@ -868,21 +868,21 @@ void UI_ProjectSetup::PopulatePort()
 		return;
 
 
-	const char *var_game = NULL;
+	std::string var_game = NULL;
 
 	if (game_choice->mvalue())
 		var_game = M_VariantForGame(game_choice->mvalue()->text);
 	else if (!Game_name.empty())
 		var_game = M_VariantForGame(Game_name.c_str());
 
-	if (! var_game)
+	if (var_game.empty())
 		var_game = "doom2";
 
 
 	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectPortsForMenu(var_game, &menu_value, prev_port);
+	menu_string = M_CollectPortsForMenu(var_game.c_str(), &menu_value, prev_port);
 
 	if (menu_string[0])
 	{

@@ -105,6 +105,14 @@ void y_strlowr(char *str)
 	}
 }
 
+//
+// Safe string copy
+//
+void StringCopy(char *target, size_t len, const char *source)
+{
+	strncpy(target, source, len);
+	target[len - 1] = 0;
+}
 
 char *StringNew(int length)
 {

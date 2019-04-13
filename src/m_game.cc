@@ -1094,13 +1094,13 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 }
 
 
-const char * M_VariantForGame(const char *game)
+std::string M_VariantForGame(const char *game)
 {
 	// static so we can return the char[] inside it
-	static parse_check_info_t info;
+	parse_check_info_t info;
 
 	// when no "variant_of" lines exist, result is just input name
-	strcpy(info.variant_name, game);
+	StringCopy(info.variant_name, sizeof(info.variant_name), game);
 
 	std::string filename = FindDefinitionFile("games", game);
 	SYS_ASSERT(!filename.empty());

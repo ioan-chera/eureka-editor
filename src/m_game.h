@@ -247,7 +247,7 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port);
 
 const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
 
-const char * M_VariantForGame(const char *game);
+std::string M_VariantForGame(const char *game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 

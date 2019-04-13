@@ -34,6 +34,8 @@ int y_strnicmp (const char *s1, const char *s2, size_t len);
 void y_strupr (char *str);
 void y_strlowr (char *str);
 
+void StringCopy(char *target, size_t len, const char *source);
+
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 char *StringUpper(const char *name);
