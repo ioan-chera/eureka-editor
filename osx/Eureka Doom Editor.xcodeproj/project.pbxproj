@@ -343,6 +343,7 @@
 				FA5E2C29165B8F860024D6A5 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
 		FA5E2C29165B8F860024D6A5 /* Products */ = {
 			isa = PBXGroup;
