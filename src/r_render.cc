@@ -2310,9 +2310,9 @@ void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int 
 
 	// negative size means we require a sign
 	if (size < 0)
-		sprintf(buffer, "%s:%-+*d ", label, -size + 1, value);
+		snprintf(buffer, sizeof(buffer), "%s:%-+*d ", label, -size + 1, value);
 	else
-		sprintf(buffer, "%s:%-*d ", label, size, value);
+		snprintf(buffer, sizeof(buffer), "%s:%-*d ", label, size, value);
 
 	fl_color(INFO_TEXT_COL);
 

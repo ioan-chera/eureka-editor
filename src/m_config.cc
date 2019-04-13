@@ -959,7 +959,7 @@ static const char * default_config_file()
 
 	SYS_ASSERT(home_dir);
 
-	sprintf(filename, "%s/config.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir);
 
 	return StringDup(filename);
 }
@@ -999,7 +999,7 @@ int M_ParseDefaultConfigFile()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/defaults.cfg", install_dir);
+	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir);
 
 	FILE * fp = fopen(filename, "r");
 
@@ -1459,7 +1459,7 @@ char * PersistFilename(const crc32_c& crc)
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/cache/%08X%08X.dat", cache_dir,
+	snprintf(filename, sizeof(filename), "%s/cache/%08X%08X.dat", cache_dir,
 	        crc.extra, crc.raw);
 
 	return filename;

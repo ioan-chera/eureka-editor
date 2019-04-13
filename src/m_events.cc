@@ -840,14 +840,14 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	static char filename[FL_PATH_MAX];
 
 	// look in user's $HOME directory first
-	sprintf(filename, "%s/operations.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "r");
 
 	// otherwise load it from the installation directory
 	if (! fp)
 	{
-		sprintf(filename, "%s/operations.cfg", install_dir);
+		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
 
 		fp = fopen(filename, "r");
 	}

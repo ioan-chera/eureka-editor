@@ -368,12 +368,12 @@ void UI_MainWindow::SetTitle(const char *wad_name, const char *map_name,
 	if (wad_name)
 	{
 		wad_name = fl_filename_name(wad_name);
-		sprintf(title_buf, "%s (%s)%s", wad_name, Level_name,
+		snprintf(title_buf, sizeof(title_buf), "%s (%s)%s", wad_name, Level_name,
 				read_only ? " [Read-Only]" : "");
 	}
 	else
 	{
-		sprintf(title_buf, "Unsaved %s", Level_name);
+		snprintf(title_buf, sizeof(title_buf), "Unsaved %s", Level_name);
 	}
 
 	// this just seems like visual noise, disabled for now
@@ -835,7 +835,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 
 	if (! fp)
 	{
-		sprintf(filename, "%s", strerror(errno));
+		snprintf(filename, sizeof(filename), "%s", strerror(errno));
 
 		DLG_Notify("Unable to save the log file:\n\n%s", filename);
 		return;

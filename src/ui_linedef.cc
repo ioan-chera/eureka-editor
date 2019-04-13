@@ -439,7 +439,7 @@ void UI_LineBox::SetLineType(int new_type)
 
 	char buffer[64];
 
-	sprintf(buffer, "%d", new_type);
+	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
 	type->value(buffer);
 	type->do_callback();
@@ -857,7 +857,7 @@ void UI_LineBox::CalcLength()
 
 	char buffer[300];
 
-	sprintf(buffer, "%1.0f", len_f);
+	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);
 
 	length->value(buffer);
 }
@@ -1080,7 +1080,7 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 
 			const char *trigger = info->fields[0].keywords[type_num & 7];
 
-			sprintf(desc_buffer, "%s GENTYPE: %s", trigger, info->name);
+			snprintf(desc_buffer, sizeof(desc_buffer), "%s GENTYPE: %s", trigger, info->name);
 			return desc_buffer;
 		}
 	}

@@ -501,7 +501,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine("No overlapping vertices");
 		else
 		{
-			sprintf(check_message, "%d overlapping vertices", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d overlapping vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_highlight,
@@ -515,7 +515,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine("No dangling vertices");
 		else
 		{
-			sprintf(check_message, "%d dangling vertices", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d dangling vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_show_danglers);
@@ -528,7 +528,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine("No unused vertices");
 		else
 		{
-			sprintf(check_message, "%d unused vertices", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d unused vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 210,
 			                "Show",   &UI_Check_Vertices::action_show_unused,
@@ -1192,7 +1192,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No unclosed sectors");
 		else
 		{
-			sprintf(check_message, "%d unclosed sectors", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d unclosed sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_unclosed,
@@ -1206,7 +1206,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No mismatched sectors");
 		else
 		{
-			sprintf(check_message, "%d mismatched sectors", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d mismatched sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_mismatch,
@@ -1220,7 +1220,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No sectors with ceil < floor");
 		else
 		{
-			sprintf(check_message, "%d sectors with ceil < floor", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d sectors with ceil < floor", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show", &UI_Check_Sectors::action_show_ceil,
@@ -1236,7 +1236,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No unknown sector types");
 		else
 		{
-			sprintf(check_message, "%d unknown sector types", (int)types.size());
+			snprintf(check_message, sizeof(check_message), "%d unknown sector types", (int)types.size());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",   &UI_Check_Sectors::action_show_unknown,
@@ -1253,7 +1253,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			int approx_num = sel.count_obj();
 
-			sprintf(check_message, "%d shared sidedefs", approx_num);
+			snprintf(check_message, sizeof(check_message), "%d shared sidedefs", approx_num);
 
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Sectors::action_show_packed,
@@ -1267,7 +1267,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No unused sectors");
 		else
 		{
-			sprintf(check_message, "%d unused sectors", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d unused sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Sectors::action_remove);
@@ -1280,7 +1280,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 			dialog->AddLine("No unused sidedefs");
 		else
 		{
-			sprintf(check_message, "%d unused sidedefs", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d unused sidedefs", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Sectors::action_remove_sidedefs);
@@ -1910,7 +1910,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine("No unknown thing types");
 		else
 		{
-			sprintf(check_message, "%d unknown things", (int)types.size());
+			snprintf(check_message, sizeof(check_message), "%d unknown things", (int)types.size());
 
 			dialog->AddLine(check_message, 2, 200,
 			                "Show",   &UI_Check_Things::action_show_unknown,
@@ -1925,7 +1925,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine("No stuck actors");
 		else
 		{
-			sprintf(check_message, "%d stuck actors", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d stuck actors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 200,
 			                "Show",  &UI_Check_Things::action_show_stuck);
@@ -1938,7 +1938,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine("No things in the void");
 		else
 		{
-			sprintf(check_message, "%d things in the void", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d things in the void", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Things::action_show_void,
@@ -1952,7 +1952,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine("No unspawnable things -- skill flags are OK");
 		else
 		{
-			sprintf(check_message, "%d unspawnable things", sel.count_obj());
+			snprintf(check_message, sizeof(check_message), "%d unspawnable things", sel.count_obj());
 			dialog->AddLine(check_message, 1, 200,
 			                "Show", &UI_Check_Things::action_show_duds,
 			                "Fix",  &UI_Check_Things::action_fix_duds);
@@ -1989,19 +1989,19 @@ check_result_e CHECK_Things(int min_severity = 0)
 		}
 		else if (dm_num < game_info.min_dm_starts)
 		{
-			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,
+			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- need at least %d", dm_num,
 			        game_info.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
 		else if (dm_num > game_info.max_dm_starts)
 		{
-			sprintf(check_message, "Found %d deathmatch starts -- maximum is %d", dm_num,
+			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- maximum is %d", dm_num,
 			        game_info.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
 		{
-			sprintf(check_message, "Found %d deathmatch starts -- OK", dm_num);
+			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- OK", dm_num);
 			dialog->AddLine(check_message);
 		}
 
@@ -2812,7 +2812,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No zero-length linedefs");
 		else
 		{
-			sprintf(check_buffer, "%d zero-length linedefs", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d zero-length linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show",   &UI_Check_LineDefs::action_show_zero,
@@ -2826,7 +2826,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No overlapping linedefs");
 		else
 		{
-			sprintf(check_buffer, "%d overlapping linedefs", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d overlapping linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show",   &UI_Check_LineDefs::action_show_overlap,
@@ -2840,7 +2840,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No criss-crossing linedefs");
 		else
 		{
-			sprintf(check_buffer, "%d criss-crossing linedefs", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d criss-crossing linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show", &UI_Check_LineDefs::action_show_crossing);
@@ -2855,7 +2855,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No unknown line types");
 		else
 		{
-			sprintf(check_buffer, "%d unknown line types", (int)types.size());
+			snprintf(check_buffer, sizeof(check_buffer), "%d unknown line types", (int)types.size());
 
 			dialog->AddLine(check_buffer, 1, 210,
 			                "Show",   &UI_Check_LineDefs::action_show_unknown,
@@ -2870,7 +2870,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No linedefs without a right side");
 		else
 		{
-			sprintf(check_buffer, "%d linedefs without right side", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs without right side", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
@@ -2883,7 +2883,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No manual doors on 1S linedefs");
 		else
 		{
-			sprintf(check_buffer, "%d manual doors on 1S linedefs", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d manual doors on 1S linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_manual_doors,
@@ -2897,7 +2897,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No non-blocking one-sided linedefs");
 		else
 		{
-			sprintf(check_buffer, "%d non-blocking one-sided linedefs", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d non-blocking one-sided linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_lack_impass,
@@ -2911,7 +2911,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 			dialog->AddLine("No linedefs with wrong 2S flag");
 		else
 		{
-			sprintf(check_buffer, "%d linedefs with wrong 2S flag", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs with wrong 2S flag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
@@ -3343,7 +3343,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No linedefs missing a needed tag");
 		else
 		{
-			sprintf(check_buffer, "%d linedefs missing a needed tag", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs missing a needed tag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 320,
 			                "Show", &UI_Check_Tags::action_show_missing_tag);
@@ -3356,7 +3356,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No tagged linedefs w/o a matching sector");
 		else
 		{
-			sprintf(check_buffer, "%d tagged linedefs w/o a matching sector", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d tagged linedefs w/o a matching sector", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_line);
@@ -3369,7 +3369,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No tagged sectors w/o a matching linedef");
 		else
 		{
-			sprintf(check_buffer, "%d tagged sectors w/o a matching linedef", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d tagged sectors w/o a matching linedef", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
@@ -3382,7 +3382,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
 		else
 		{
-			sprintf(check_buffer, "%d sectors have an invalid 666/667 tag", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d sectors have an invalid 666/667 tag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_beast_marks);
@@ -3399,7 +3399,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine("No tags are in use");
 		else
 		{
-			sprintf(check_buffer, "Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
+			snprintf(check_buffer, sizeof(check_buffer), "Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
 			dialog->AddLine(check_buffer);
 		}
 
@@ -4277,7 +4277,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No unknown textures");
 		else
 		{
-			sprintf(check_buffer, "%d unknown textures", (int)names.size());
+			snprintf(check_buffer, sizeof(check_buffer), "%d unknown textures", (int)names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_tex,
@@ -4292,7 +4292,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No unknown flats");
 		else
 		{
-			sprintf(check_buffer, "%d unknown flats", (int)names.size());
+			snprintf(check_buffer, sizeof(check_buffer), "%d unknown flats", (int)names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_flat,
@@ -4309,7 +4309,7 @@ check_result_e CHECK_Textures(int min_severity)
 				dialog->AddLine("No textures causing Medusa Effect");
 			else
 			{
-				sprintf(check_buffer, "%d Medusa textures", (int)names.size());
+				snprintf(check_buffer, sizeof(check_buffer), "%d Medusa textures", (int)names.size());
 
 				dialog->AddLine(check_buffer, 2, 200,
 								"Show", &UI_Check_Textures::action_show_medusa,
@@ -4327,7 +4327,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No missing textures on walls");
 		else
 		{
-			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d missing textures on walls", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_missing,
@@ -4341,7 +4341,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No transparent textures on solids");
 		else
 		{
-			sprintf(check_buffer, "%d transparent textures on solids", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d transparent textures on solids", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_transparent,
@@ -4356,7 +4356,7 @@ check_result_e CHECK_Textures(int min_severity)
 			dialog->AddLine("No non-animating switch textures");
 		else
 		{
-			sprintf(check_buffer, "%d non-animating switch textures", sel.count_obj());
+			snprintf(check_buffer, sizeof(check_buffer), "%d non-animating switch textures", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_dup_switch,

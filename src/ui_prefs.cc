@@ -1465,7 +1465,7 @@ void UI_Preferences::LoadValues()
 	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
 
 	char aspect_buf[64];
-	sprintf(aspect_buf, "%1.2f", render_pixel_aspect / 100.0);
+	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", render_pixel_aspect / 100.0);
 	rend_aspect->value(aspect_buf);
 
 	rend_high_detail->value(render_high_detail ? 1 : 0);

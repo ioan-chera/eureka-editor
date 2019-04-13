@@ -907,13 +907,13 @@ static void ShowLoadProblem()
 
 	if (bad_linedef_count > 0)
 	{
-		sprintf(message, "Found %d linedefs with bad vertex references.\n"
+		snprintf(message, sizeof(message), "Found %d linedefs with bad vertex references.\n"
 		                 "These linedefs have been removed.",
 		        bad_linedef_count);
 	}
 	else
 	{
-		sprintf(message, "Found %d bad sector refs, %d bad sidedef refs.\n"
+		snprintf(message, sizeof(message), "Found %d bad sector refs, %d bad sidedef refs.\n"
 		                 "These references have been replaced.",
 		        bad_sector_refs, bad_sidedef_refs);
 	}

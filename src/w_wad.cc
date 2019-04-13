@@ -460,14 +460,14 @@ short Wad_file::LevelFindByNumber(int number)
 	short index;
 
 	 // try MAP## first
-	sprintf(buffer, "MAP%02d", number);
+	snprintf(buffer, sizeof(buffer), "MAP%02d", number);
 
 	index = LevelFind(buffer);
 	if (index >= 0)
 		return index;
 
 	// otherwise try E#M#
-	sprintf(buffer, "E%dM%d", MAX(1, number / 10), number % 10);
+	snprintf(buffer, sizeof(buffer), "E%dM%d", MAX(1, number / 10), number % 10);
 
 	index = LevelFind(buffer);
 	if (index >= 0)

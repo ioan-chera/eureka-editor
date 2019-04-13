@@ -695,7 +695,7 @@ bool Main_ConfirmQuit(const char *action)
 
 	char buttons[200];
 
-	sprintf(buttons, "Cancel|&%s", action);
+	snprintf(buttons, sizeof(buttons), "Cancel|&%s", action);
 
 	// convert action string like "open a new map" to a simple "Open"
 	// string for the yes choice.

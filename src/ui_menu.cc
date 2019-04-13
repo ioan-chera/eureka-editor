@@ -750,7 +750,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 	{
 		char name_buf[256];
 
-		M_RecentShortName(k, name_buf);
+		M_RecentShortName(k, name_buf, sizeof(name_buf));
 
 		void *data = M_RecentData(k);
 

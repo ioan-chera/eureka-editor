@@ -367,14 +367,14 @@ public:
 		}
 	}
 
-	void Format(char *buffer, int index) const
+	void Format(char *buffer, int buffer_size, int index) const
 	{
 		SYS_ASSERT(index < size);
 
 		const char *name = fl_filename_name(filenames[index]);
 		// const char *map  = map_names[index];
 
-		sprintf(buffer, "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
+		snprintf(buffer, buffer_size, "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
 				(index < 9) ? "&" : "", 1+index, name);
 	}
 
@@ -457,7 +457,7 @@ void M_LoadRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/misc.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "r");
 
@@ -483,7 +483,7 @@ void M_SaveRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/misc.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "w");
 
@@ -513,9 +513,9 @@ int M_RecentCount()
 	return recent_files.getSize();
 }
 
-void M_RecentShortName(int index, char *name_buf)
+void M_RecentShortName(int index, char *name_buf, int name_size)
 {
-	recent_files.Format(name_buf, index);
+	recent_files.Format(name_buf, name_size, index);
 }
 
 void * M_RecentData(int index)
@@ -649,7 +649,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 {
 	char name_buf[FL_PATH_MAX];
 
-	sprintf(name_buf, "%s/%s.wad", dir_name, game);
+	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name, game);
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
@@ -1086,7 +1086,7 @@ static const char *Backup_Name(const char *dir_name, int slot)
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/%d.wad", dir_name, slot);
+	snprintf(filename, sizeof(filename), "%s/%d.wad", dir_name, slot);
 
 	return filename;
 }
@@ -1122,7 +1122,7 @@ void M_BackupWad(Wad_file *wad)
 
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/backups/%s", cache_dir, fl_filename_name(wad->PathName()));
+	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir, fl_filename_name(wad->PathName()));
 
 	char * dir_name = ReplaceExtension(filename, NULL);
 

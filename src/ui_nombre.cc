@@ -61,11 +61,11 @@ void UI_Nombre::Update()
 	char buffer[256];
 
 	if (index < 0)
-		sprintf(buffer, "No %s    / %d\n", type_name, total);
+		snprintf(buffer, sizeof(buffer), "No %s    / %d\n", type_name, total);
 	else if (selected > 1)
-		sprintf(buffer, "%s #%-4d + %d more\n", type_name, index, selected-1);
+		snprintf(buffer, sizeof(buffer), "%s #%-4d + %d more\n", type_name, index, selected-1);
 	else
-		sprintf(buffer, "%s #%-4d / %d\n", type_name, index, total);
+		snprintf(buffer, sizeof(buffer), "%s #%-4d / %d\n", type_name, index, total);
 
 	if (index < 0 || total == 0)
 		labelcolor(FL_DARK1);

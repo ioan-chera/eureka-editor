@@ -453,7 +453,7 @@ void UI_ThingBox::SetThingType(int new_type)
 
 	char buffer[64];
 
-	sprintf(buffer, "%d", new_type);
+	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
 	type->value(buffer);
 	type->do_callback();
@@ -467,7 +467,7 @@ void UI_ThingBox::SetSpecialType(int new_type)
 
 	char buffer[64];
 
-	sprintf(buffer, "%d", new_type);
+	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
 	spec_type->value(buffer);
 	spec_type->do_callback();
@@ -660,7 +660,7 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 		{
 			char buffer[20];
 
-			sprintf(buffer, "%d", i * 45);
+			snprintf(buffer, sizeof(buffer), "%d", i * 45);
 
 			box->angle->value(buffer);
 

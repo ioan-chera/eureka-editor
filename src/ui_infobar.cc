@@ -201,8 +201,8 @@ void UI_InfoBar::SetMouse(double mx, double my)
 	char x_buffer[60];
 	char y_buffer[60];
 
-	sprintf(x_buffer, "%d", I_ROUND(mx));
-	sprintf(y_buffer, "%d", I_ROUND(my));
+	snprintf(x_buffer, sizeof(x_buffer), "%d", I_ROUND(mx));
+	snprintf(y_buffer, sizeof(y_buffer), "%d", I_ROUND(my));
 
 	mouse_x->value(x_buffer);
 	mouse_y->value(y_buffer);
@@ -245,11 +245,11 @@ void UI_InfoBar::SetZoom(float zoom_mul)
 
 	if (zoom_mul < 0.99)
 	{
-		sprintf(buffer, "/ %1.3f", 1.0/zoom_mul);
+		snprintf(buffer, sizeof(buffer), "/ %1.3f", 1.0/zoom_mul);
 	}
 	else // zoom_mul > 1
 	{
-		sprintf(buffer, "x %1.3f", zoom_mul);
+		snprintf(buffer, sizeof(buffer), "x %1.3f", zoom_mul);
 	}
 
 	grid_size->value(buffer);
@@ -261,7 +261,7 @@ void UI_InfoBar::SetNodeIndex(int index)
 #if 0
 	char buffer[60];
 
-	sprintf(buffer, "%d", index);
+	snprintf(buffer, sizeof(buffer), "%d", index);
 
 	ns_index->label("Node #");
 	ns_index->value(buffer);
@@ -280,7 +280,7 @@ void UI_InfoBar::SetWhich(int index, int total)
 	else
 	{
 		char buffer[200];
-		sprintf(buffer, "Index: #%d of %d", index, total);
+		snprintf(buffer, sizeof(buffer), "Index: #%d of %d", index, total);
 
 		which->copy_label(buffer);
 	}

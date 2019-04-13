@@ -997,7 +997,7 @@ void UI_FindAndReplace::InsertNumber(Fl_Input *inp, char append, int number)
 {
 	char buf[256];
 
-	sprintf(buf, "%d", number);
+	snprintf(buf, sizeof(buf), "%d", number);
 
 	InsertName(inp, append, buf);
 }

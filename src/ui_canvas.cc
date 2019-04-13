@@ -1081,7 +1081,7 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 {
 	char buffer[64];
-	sprintf(buffer, "%d", num);
+	snprintf(buffer, sizeof(buffer), "%d", num);
 
 	if (center)
 	{

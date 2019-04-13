@@ -32,7 +32,7 @@ bool M_TryOpenMostRecent();
 
 // these three only for menu code
 int    M_RecentCount();
-void   M_RecentShortName(int index, char *name_buf);
+void   M_RecentShortName(int index, char *name_buf, int name_size);
 void * M_RecentData(int index);
 
 

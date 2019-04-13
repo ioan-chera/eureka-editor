@@ -2291,7 +2291,7 @@ static const char *CalcOptionsString()
 {
 	static char buffer[256];
 
-	sprintf(buffer, "--cost %d", cur_info->factor);
+	snprintf(buffer, sizeof(buffer), "--cost %d", cur_info->factor);
 
 	if (cur_info->fast)
 		strcat(buffer, " --fast");
@@ -2604,7 +2604,7 @@ Lump_c * CreateGLMarker()
 
 	if (strlen(lev_current_name) <= 5)
 	{
-		sprintf(name_buf, "GL_%s", lev_current_name);
+		snprintf(name_buf, sizeof(name_buf), "GL_%s", lev_current_name);
 
 		lev_long_name = false;
 	}
