@@ -63,7 +63,7 @@
 bool want_quit = false;
 bool app_has_focus = false;
 
-const char *config_file = NULL;
+std::string config_file;
 std::string log_file;
 
 std::string install_dir;
