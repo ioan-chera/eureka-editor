@@ -33,6 +33,7 @@ int y_strnicmp (const char *s1, const char *s2, size_t len);
 
 void y_strupr (char *str);
 void y_strlowr (char *str);
+void y_strlowr (std::string &str);
 
 void StringCopy(char *target, size_t len, const char *source);
 

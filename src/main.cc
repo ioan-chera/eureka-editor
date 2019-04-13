@@ -71,7 +71,7 @@ std::string home_dir;
 const char *cache_dir;
 
 
-const char *Iwad_name = NULL;
+std::string Iwad_name;
 const char *Pwad_name = NULL;
 
 std::vector< const char * > Pwad_list;
@@ -353,46 +353,45 @@ static bool DetermineIWAD()
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (Iwad_name && FilenameIsBare(Iwad_name))
+	if (!Iwad_name.empty() && FilenameIsBare(Iwad_name.c_str()))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		Iwad_name = StringDup(Iwad_name);
-		y_strlowr((char *)Iwad_name);
+		y_strlowr(Iwad_name);
 
-		if (! M_CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
+		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		const char * path = M_QueryKnownIWAD(Iwad_name);
+		const char * path = M_QueryKnownIWAD(Iwad_name.c_str());
 
 		if (! path)
-			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name);
+			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
 
-		Iwad_name = StringDup(path);
+		Iwad_name = path;
 	}
-	else if (Iwad_name)
+	else if (!Iwad_name.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name))
-			Iwad_name = ReplaceExtension(Iwad_name, "wad");
+		if (! HasExtension(Iwad_name.c_str()))
+			Iwad_name = ReplaceExtension(Iwad_name.c_str(), "wad");
 
-		if (! Wad_file::Validate(Iwad_name))
-			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name);
+		if (! Wad_file::Validate(Iwad_name.c_str()))
+			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
 
-		std::string game = GameNameFromIWAD(Iwad_name);
+		std::string game = GameNameFromIWAD(Iwad_name.c_str());
 
 		if (! M_CanLoadDefinitions("games", game.c_str()))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		M_AddKnownIWAD(Iwad_name);
+		M_AddKnownIWAD(Iwad_name.c_str());
 		M_SaveRecent();
 	}
 	else
 	{
-		Iwad_name = StringDup(M_PickDefaultIWAD());
+		Iwad_name = M_PickDefaultIWAD();
 
-		if (! Iwad_name)
+		if (Iwad_name.empty())
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -401,7 +400,7 @@ static bool DetermineIWAD()
 		}
 	}
 
-	Game_name = GameNameFromIWAD(Iwad_name);
+	Game_name = GameNameFromIWAD(Iwad_name.c_str());
 
 	return true;
 }
@@ -792,9 +791,9 @@ static void Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	game_wad = Wad_file::Open(Iwad_name, 'r');
+	game_wad = Wad_file::Open(Iwad_name.c_str(), 'r');
 	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
+		FatalError("Failed to open game IWAD: %s\n", Iwad_name.c_str());
 
 	MasterDir_Add(game_wad);
 }
@@ -802,10 +801,10 @@ static void Main_LoadIWAD()
 
 static void ReadGameInfo()
 {
-	Game_name = GameNameFromIWAD(Iwad_name);
+	Game_name = GameNameFromIWAD(Iwad_name.c_str());
 
 	LogPrintf("Game name: '%s'\n", Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", Iwad_name);
+	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
 
 	M_LoadDefinitions("games", Game_name.c_str());
 }
@@ -1065,7 +1064,7 @@ int main(int argc, char *argv[])
 		MasterDir_Add(edit_wad);
 	}
 	// don't auto-load when --iwad or --warp was used on the command line
-	else if (auto_load_recent && ! (Iwad_name || Level_name))
+	else if (auto_load_recent && Iwad_name.empty() && !Level_name)
 	{
 		if (M_TryOpenMostRecent())
 		{

@@ -104,6 +104,11 @@ void y_strlowr(char *str)
 		*str = tolower(*str);
 	}
 }
+void y_strlowr (std::string &str)
+{
+	for(char &c : str)
+		c = tolower(c);
+}
 
 //
 // Safe string copy
