@@ -220,19 +220,18 @@ typedef enum
 
 } parse_purpose_e;
 
-typedef struct
+struct parse_check_info_t
 {
 	// set when "map_formats" is found, otherwise left unchanged
 	map_format_bitset_t formats;
 
 	// set when "variant_of" is found, otherwise left unchanged
-	char variant_name[256];
+	std::string variant_name;
 
 	// when "supported_games" is found, check if variant_name is in
 	// the list and set this to 0 or 1, otherwise left unchanged
 	int supports_game;
-
-} parse_check_info_t;
+};
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,

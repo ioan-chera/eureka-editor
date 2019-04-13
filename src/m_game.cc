@@ -795,7 +795,7 @@ static void M_ParseGameCheckLine(parser_state_c *pst, parse_check_info_t *check_
 
 	else if (y_stricmp(argv[0], "variant_of") == 0)
 	{
-		snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", pst->argv[1]);
+		check_info->variant_name = pst->argv[1];
 	}
 
 	else if (y_stricmp(argv[0], "map_formats") == 0)
@@ -826,7 +826,7 @@ static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_
 
 		for ( ; nargs > 0 ; argv++, nargs--)
 		{
-			if (y_stricmp(check_info->variant_name, *argv) == 0)
+			if (y_stricmp(check_info->variant_name.c_str(), *argv) == 0)
 				check_info->supports_game = 1;
 		}
 	}
@@ -1100,7 +1100,7 @@ std::string M_VariantForGame(const char *game)
 	parse_check_info_t info;
 
 	// when no "variant_of" lines exist, result is just input name
-	StringCopy(info.variant_name, sizeof(info.variant_name), game);
+	info.variant_name = game;
 
 	std::string filename = FindDefinitionFile("games", game);
 	SYS_ASSERT(!filename.empty());
@@ -1151,7 +1151,7 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 
 	parse_check_info_t info;
 
-	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
+	info.variant_name = var_game;
 
 	// default is to support "doom" and "doom2"
 	info.supports_game = 0;
