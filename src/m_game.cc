@@ -292,7 +292,7 @@ static std::string FindDefinitionFile(const char *folder, const char *name)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const char *base_dir = (pass == 0) ? home_dir : install_dir;
+		const char *base_dir = (pass == 0) ? home_dir : install_dir.c_str();
 
 		if (! base_dir)
 			continue;
@@ -1069,7 +1069,7 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 
 //	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
 
-	snprintf(path, sizeof(path), "%s/%s", install_dir, folder);
+	snprintf(path, sizeof(path), "%s/%s", install_dir.c_str(), folder);
 	ScanDirectory(path, scanner_add_file, & temp_list);
 
 	snprintf(path, sizeof(path), "%s/%s", home_dir, folder);

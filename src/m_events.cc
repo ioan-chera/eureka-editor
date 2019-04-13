@@ -847,7 +847,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// otherwise load it from the installation directory
 	if (! fp)
 	{
-		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
+		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir.c_str());
 
 		fp = fopen(filename, "r");
 	}

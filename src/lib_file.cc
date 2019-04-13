@@ -584,29 +584,24 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 
 //------------------------------------------------------------------------
 
-const char *GetExecutablePath(const char *argv0)
+std::string GetExecutablePath(const char *argv0)
 {
-	char *path;
-
 #ifdef WIN32
-	path = StringNew(PATH_MAX+2);
+	char path[PATH_MAX + 2];
 
 	int length = GetModuleFileName(GetModuleHandle(NULL), path, PATH_MAX);
 
 	if (length > 0 && length < PATH_MAX)
 	{
-		if (access(path, 0) == 0)  // sanity check
+		if (_access(path, 0) == 0)  // sanity check
 		{
 			FilenameStripBase(path);
 			return path;
 		}
 	}
 
-	// didn't work, free the memory
-	StringFree(path);
-
 #elif !defined(__APPLE__) // UNIX
-	path = StringNew(PATH_MAX+2);
+	char path[PATH_MAX + 2];
 
 	int length = readlink("/proc/self/exe", path, PATH_MAX);
 
@@ -620,9 +615,6 @@ const char *GetExecutablePath(const char *argv0)
 			return path;
 		}
 	}
-
-	// didn't work, free the memory
-	StringFree(path);
 
 #else
 	/*
@@ -638,7 +630,7 @@ const char *GetExecutablePath(const char *argv0)
 	 */
 	uint32_t pathlen = PATH_MAX * 2;
 
-	path = StringNew(pathlen+2);
+	char path[PATH_MAX * 2 + 2];
 
 	if (0 == _NSGetExecutablePath(path, &pathlen))
 	{
@@ -647,12 +639,10 @@ const char *GetExecutablePath(const char *argv0)
 		return path;
 	}
 
-	// didn't work, free the memory
-	StringFree(path);
 #endif
 
 	// fallback method: use argv[0]
-	path = StringDup(argv0);
+	StringCopy(path, sizeof(path), argv0);
 
 #ifdef __APPLE__
 	// FIXME: check if _inside_ the .app folder

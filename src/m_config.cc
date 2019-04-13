@@ -999,7 +999,7 @@ int M_ParseDefaultConfigFile()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir);
+	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir.c_str());
 
 	FILE * fp = fopen(filename, "r");
 
