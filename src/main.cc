@@ -64,7 +64,7 @@ bool want_quit = false;
 bool app_has_focus = false;
 
 const char *config_file = NULL;
-const char *log_file;
+std::string log_file;
 
 std::string install_dir;
 std::string home_dir;
@@ -141,7 +141,7 @@ void FatalError(const char *fmt, ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	if (init_progress < 1 || Quiet || log_file)
+	if (init_progress < 1 || Quiet || !log_file.empty())
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer);
 	}
@@ -280,7 +280,7 @@ static void Determine_HomeDir(const char *argv0)
 	CreateHomeDirs();
 
 	// determine log filename
-	log_file = StringPrintf("%s/logs.txt", home_dir.c_str());
+	log_file = home_dir + "/logs.txt";
 }
 
 
@@ -1016,7 +1016,7 @@ int main(int argc, char *argv[])
 	Determine_InstallPath(argv[0]);
 	Determine_HomeDir(argv[0]);
 
-	LogOpenFile(log_file);
+	LogOpenFile(log_file.c_str());
 
 
 	// load all the config settings

@@ -137,7 +137,7 @@ extern const char *Level_name;  // Name of map lump we are editing
 extern map_format_e Level_format; // format of current map
 
 extern const char *config_file; // Name of the configuration file, or NULL
-extern const char *log_file;    // Name of log file, or NULL
+extern std::string log_file;    // Name of log file, or NULL
 
 extern const char *Iwad_name;   // Filename of the iwad
 extern const char *Pwad_name;   // Filename of current wad, or NULL
