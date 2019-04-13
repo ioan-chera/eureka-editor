@@ -161,7 +161,7 @@ char *StringUpper(const char *name)
 }
 
 
-char *StringPrintf(const char *str, ...)
+std::string StringPrintf(const char *str, ...)
 {
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.
@@ -189,7 +189,9 @@ char *StringPrintf(const char *str, ...)
 		if (out_len < 0 || out_len >= buf_size)
 			continue;
 
-		return buf;
+		std::string result = buf;
+		free(buf);
+		return result;
 	}
 }
 

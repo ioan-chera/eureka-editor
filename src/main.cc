@@ -303,18 +303,15 @@ static void Determine_InstallPath(const char *argv0)
 
 	for (int i = 0 ; prefixes[i] ; i++)
 	{
-		install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
+		install_dir = prefixes[i];
+		install_dir += "/share/eureka";
 
-		const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir.c_str());
+		std::string filename = install_dir + "/games/doom2.ugh";
 
 		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
-		DebugPrintf("   looking for file: %s\n", filename);
+		DebugPrintf("   looking for file: %s\n", filename.c_str());
 
-		bool exists = FileExists(filename);
-
-		StringFree(filename);
-
-		if (exists)
+		if (FileExists(filename.c_str()))
 			break;
 
 		install_dir.clear();

@@ -662,7 +662,7 @@ static void Menu_AddItem(Fl_Menu_Item* &pos, const char *text,
 
 	memset(&item, 0, sizeof(item));
 
-	item.text = text;
+	item.text = StringDup(text);
 	item.flags = flags;
 	item.callback_ = cb;
 	item.user_data_ = data;
@@ -705,10 +705,10 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 	{
 		const char *short_name = fl_filename_name(Pwad_list[k]);
 
-		short_name = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
-								  (k < 9) ? "&" : "", 1+k, short_name);
+		std::string short_name_pat = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
+												  (k < 9) ? "&" : "", 1+k, short_name);
 
-		Menu_AddItem(pos, short_name,
+		Menu_AddItem(pos, short_name_pat.c_str(),
 					 FCAL file_do_load_given,
 					 (void *) Pwad_list[k], 0);
 	}
@@ -754,7 +754,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 		void *data = M_RecentData(k);
 
-		Menu_AddItem(pos, StringDup(name_buf), cb, data, 0);
+		Menu_AddItem(pos, name_buf, cb, data, 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)

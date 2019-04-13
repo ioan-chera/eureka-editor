@@ -1169,7 +1169,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				{
 					if (! ignore)
 					{
-						*((const char **) o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
+						*((std::string *) o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
 					}
 
 					argv++;
