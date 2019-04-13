@@ -1014,7 +1014,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (M_QueryKnownIWAD(name))
+	if (!M_QueryKnownIWAD(name).empty())
 	{
 		that->game = name;
 		that->ok_but->activate();

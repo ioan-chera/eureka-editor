@@ -44,16 +44,16 @@ void M_AddKnownIWAD(const char *path)
 }
 
 
-const char * M_QueryKnownIWAD(const char *game)
+std::string M_QueryKnownIWAD(const char *game)
 {
 	std::map<std::string, std::string>::iterator KI;
 
 	KI = known_iwads.find(game);
 
 	if (KI != known_iwads.end())
-		return KI->second.c_str();
+		return KI->second;
 	else
-		return NULL;
+		return "";
 }
 
 
@@ -762,7 +762,7 @@ void M_LookForIWADs()
 		const char *game = game_list[i];
 
 		// already have it?
-		if (M_QueryKnownIWAD(game))
+		if (!M_QueryKnownIWAD(game).empty())
 			continue;
 
 		const char *path = SearchForIWAD(game);
@@ -804,10 +804,10 @@ std::string M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	const char *result;
+	std::string result;
 
-	result = StringDup(M_QueryKnownIWAD(default_game));
-	if (result)
+	result = M_QueryKnownIWAD(default_game);
+	if (!result.empty())
 		return result;
 
 	// try FreeDoom
@@ -819,8 +819,8 @@ std::string M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	result = StringDup(M_QueryKnownIWAD(default_game));
-	if (result)
+	result = M_QueryKnownIWAD(default_game);
+	if (!result.empty())
 		return result;
 
 	// try any known iwad
@@ -879,7 +879,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	}
 
 
-	const char * new_iwad = NULL;
+	std::string new_iwad;
 	const char * new_port = NULL;
 
 	std::vector< const char * > new_resources;
@@ -919,9 +919,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			}
 			else
 			{
-				new_iwad = StringDup(M_QueryKnownIWAD(pos));
+				new_iwad = M_QueryKnownIWAD(pos);
 
-				if (! new_iwad)
+				if (new_iwad.empty())
 				{
 					int res = DLG_Confirm("&Ignore|&Cancel Load",
 					                      "Warning: the pwad specifies an IWAD "
@@ -945,9 +945,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (! FileExists(res.c_str()) && new_iwad)
+			if (! FileExists(res.c_str()) && !new_iwad.empty())
 			{
-				res = FilenameReposition(pos, new_iwad);
+				res = FilenameReposition(pos, new_iwad.c_str());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
@@ -986,7 +986,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
 	// supplied on the command line, ensuring that we don't get any duplicates.
 
-	if (new_iwad)
+	if (!new_iwad.empty())
 	{
 		if (!keep_cmd_line_args || Iwad_name.empty())
 			Iwad_name = new_iwad;

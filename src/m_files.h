@@ -38,7 +38,7 @@ void * M_RecentData(int index);
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
-const char * M_QueryKnownIWAD(const char *game);
+std::string M_QueryKnownIWAD(const char *game);
 const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 std::string M_PickDefaultIWAD();
 
