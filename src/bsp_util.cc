@@ -167,7 +167,7 @@ angle_g UtilComputeAngle(double dx, double dy)
 }
 
 
-char *UtilTimeString(void)
+std::string UtilTimeString()
 {
 #ifdef WIN32
 
@@ -186,11 +186,11 @@ char *UtilTimeString(void)
 	struct tm *calend_time;
 
 	if (time(&epoch_time) == (time_t)-1)
-		return NULL;
+		return "";
 
 	calend_time = localtime(&epoch_time);
 	if (! calend_time)
-		return NULL;
+		return "";
 
 	return StringPrintf("%04d-%02d-%02d %02d:%02d:%02d.%04d",
 			calend_time->tm_year + 1900, calend_time->tm_mon + 1,

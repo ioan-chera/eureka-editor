@@ -156,7 +156,7 @@ void UtilFree(void *data);
 
 // return an allocated string for the current data and time,
 // or NULL if an error occurred.
-char *UtilTimeString(void);
+std::string UtilTimeString();
 
 // compute angle & distance from (0,0) to (dx,dy)
 angle_g UtilComputeAngle(double dx, double dy);
