@@ -724,7 +724,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FLTKVER1=1.3.4\nFLTKVER2=1.3.4-2\nFLTKDIR=fltk-$FLTKVER2\n\nif [[ ! -f libfltk.a || ! -f libfltk_images.a || ! -f libfltk_jpeg.a || ! -f libfltk_png.a || ! -d $FLTKDIR || ! -d FL ]]; then\n    curl -O -J \"http://fltk.org/pub/fltk/$FLTKVER1/fltk-$FLTKVER2-source.tar.gz\"\n    tar -xzf \"fltk-$FLTKVER2-source.tar.gz\"\n    pushd $FLTKDIR || exit\n    ./configure\n    make -j\"$(sysctl -n hw.ncpu)\"\n    popd\n    ln -sf $FLTKDIR/lib/libfltk*.a .\n    ln -sf $FLTKDIR/FL .\nfi";
+			shellScript = "FLTKVER1=1.3.5\nFLTKVER2=1.3.5\nFLTKDIR=fltk-$FLTKVER2\n\nif [[ ! -f libfltk.a || ! -f libfltk_images.a || ! -f libfltk_jpeg.a || ! -f libfltk_png.a || ! -d $FLTKDIR || ! -d FL ]]; then\n    curl -O -J \"https://www.fltk.org/pub/fltk/$FLTKVER1/fltk-$FLTKVER2-source.tar.gz\"\n    tar -xzf \"fltk-$FLTKVER2-source.tar.gz\"\n    pushd $FLTKDIR || exit\n    ./configure\n    make -j\"$(sysctl -n hw.ncpu)\"\n    popd\n    ln -sf $FLTKDIR/lib/libfltk*.a .\n    ln -sf $FLTKDIR/FL .\nfi\n";
 		};
 		FA5E2C47165B8F870024D6A5 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
