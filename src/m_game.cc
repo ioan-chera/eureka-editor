@@ -286,9 +286,9 @@ static void ParseFeatureDef(char ** argv, int argc)
 }
 
 
-static const char * FindDefinitionFile(const char *folder, const char *name)
+static std::string FindDefinitionFile(const char *folder, const char *name)
 {
-	static char filename[FL_PATH_MAX];
+	char filename[FL_PATH_MAX];
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
@@ -305,15 +305,13 @@ static const char * FindDefinitionFile(const char *folder, const char *name)
 			return filename;
 	}
 
-	return NULL;
+	return "";
 }
 
 
 bool M_CanLoadDefinitions(const char *folder, const char *name)
 {
-	const char * filename = FindDefinitionFile(folder, name);
-
-	return (filename != NULL);
+	return !FindDefinitionFile(folder, name).empty();
 }
 
 
@@ -333,14 +331,14 @@ void M_LoadDefinitions(const char *folder, const char *name)
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
-	const char * filename = FindDefinitionFile(folder, name);
+	std::string filename = FindDefinitionFile(folder, name);
 
-	if (! filename)
+	if (filename.empty())
 		FatalError("Cannot find definition file: %s\n", prettyname);
 
-	DebugPrintf("  found at: %s\n", filename);
+	DebugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(PURPOSE_Normal, filename, folder, prettyname);
+	M_ParseDefinitionFile(PURPOSE_Normal, filename.c_str(), folder, prettyname);
 }
 
 
@@ -1002,20 +1000,20 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 							pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
-			const char * new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+			std::string new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
-			if (! new_name && strcmp(folder, "common") != 0)
+			if (new_name.empty() && strcmp(folder, "common") != 0)
 			{
 				new_folder = "common";
 				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 			}
 
-			if (! new_name)
+			if (new_name.empty())
 				FatalError("%s(%d): Cannot find include file: %s.ugh\n",
 							pst->fname, pst->lineno, pst->argv[1]);
 
-			M_ParseDefinitionFile(purpose, new_name, new_folder,
+			M_ParseDefinitionFile(purpose, new_name.c_str(), new_folder,
 								  NULL /* prettyname */,
 								  check_info, include_level + 1);
 			continue;
@@ -1104,10 +1102,10 @@ const char * M_VariantForGame(const char *game)
 	// when no "variant_of" lines exist, result is just input name
 	strcpy(info.variant_name, game);
 
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
+	std::string filename = FindDefinitionFile("games", game);
+	SYS_ASSERT(!filename.empty());
 
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
+	M_ParseDefinitionFile(PURPOSE_GameCheck, filename.c_str(), "games",
 						  NULL /* prettyname */, &info);
 
 	SYS_ASSERT(info.variant_name[0]);
@@ -1122,19 +1120,19 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 
 	info.formats = (1 << MAPF_Doom);
 
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
+	std::string filename = FindDefinitionFile("games", game);
+	SYS_ASSERT(!filename.empty());
 
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
+	M_ParseDefinitionFile(PURPOSE_GameCheck, filename.c_str(), "games",
 						  NULL /* prettyname */, &info);
 
 	// for Vanilla, only the game itself is checked
 	if (strcmp(port, "vanilla") != 0)
 	{
 		filename = FindDefinitionFile("ports", port);
-		SYS_ASSERT(filename);
+		SYS_ASSERT(!filename.empty());
 
-		M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
+		M_ParseDefinitionFile(PURPOSE_PortCheck, filename.c_str(), "ports",
 							  NULL /* prettyname */, &info);
 	}
 
@@ -1164,12 +1162,12 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 		info.supports_game = 1;
 	}
 
-	const char *filename = FindDefinitionFile("ports", port);
+	std::string filename = FindDefinitionFile("ports", port);
 
-	if (! filename)
+	if (filename.empty())
 		return false;
 
-	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
+	M_ParseDefinitionFile(PURPOSE_PortCheck, filename.c_str(), "ports",
 						  NULL /* prettyname */, &info);
 
 	return (info.supports_game > 0);
