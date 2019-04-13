@@ -222,24 +222,20 @@ void FilenameStripBase(char *buffer)
 // takes the basename in 'filename' and prepends the path from 'othername'.
 // returns a newly allocated string.
 //
-const char *FilenameReposition(const char *filename, const char *othername)
+std::string FilenameReposition(const char *filename, const char *othername)
 {
 	filename = fl_filename_name(filename);
 
 	const char *op = fl_filename_name(othername);
 
 	if (op <= othername)
-		return StringDup(filename);
+		return filename;
 
 	size_t dir_len = op - othername;
-	size_t len = strlen(filename) + dir_len;
 
-	char *result = StringNew((int)len + 10);
-
-	memcpy(result, othername, dir_len);
-	result[dir_len] = 0;
-
-	strcat(result, filename);
+	std::string result;
+	result.assign(othername, dir_len);
+	result += filename;
 
 	return result;
 }

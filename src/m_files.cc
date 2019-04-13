@@ -933,26 +933,26 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (strcmp(line, "resource") == 0)
 		{
-			const char *res = pos;
+			std::string res = pos;
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (! FileExists(res))
+			if (! FileExists(res.c_str()))
 			{
 				LogPrintf("  file not found: %s\n", pos);
 
 				res = FilenameReposition(pos, wad->PathName());
-				LogPrintf("  trying: %s\n", res);
+				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (! FileExists(res) && new_iwad)
+			if (! FileExists(res.c_str()) && new_iwad)
 			{
 				res = FilenameReposition(pos, new_iwad);
-				LogPrintf("  trying: %s\n", res);
+				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (FileExists(res))
-				new_resources.push_back(StringDup(res));
+			if (FileExists(res.c_str()))
+				new_resources.push_back(StringDup(res.c_str()));
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "

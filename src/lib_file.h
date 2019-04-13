@@ -21,6 +21,8 @@
 #ifndef __LIB_FILE_H__
 #define __LIB_FILE_H__
 
+#include <string>
+
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'
 #define DIR_SEP_STR  "\\"
@@ -35,7 +37,7 @@ bool MatchExtension(const char *filename, const char *ext);
 char *ReplaceExtension(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);
 bool FilenameIsBare(const char *filename);
-const char *FilenameReposition(const char *filename, const char *othername);
+std::string FilenameReposition(const char *filename, const char *othername);
 void FilenameGetPath(char *dest, size_t maxsize, const char *filename);
 
 // file utilities
