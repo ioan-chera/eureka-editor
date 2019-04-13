@@ -957,9 +957,9 @@ static const char * default_config_file()
 {
 	static char filename[FL_PATH_MAX];
 
-	SYS_ASSERT(home_dir);
+	SYS_ASSERT(!home_dir.empty());
 
-	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir.c_str());
 
 	return StringDup(filename);
 }

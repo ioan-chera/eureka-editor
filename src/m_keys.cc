@@ -680,7 +680,7 @@ void M_LoadBindings()
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(home_dir, false);
+	LoadBindingsFromPath(home_dir.c_str(), false);
 }
 
 
@@ -688,7 +688,7 @@ void M_SaveBindings()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/bindings.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/bindings.cfg", home_dir.c_str());
 
 	FILE *fp = fopen(filename, "w");
 

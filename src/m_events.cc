@@ -840,7 +840,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	static char filename[FL_PATH_MAX];
 
 	// look in user's $HOME directory first
-	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir.c_str());
 
 	FILE *fp = fopen(filename, "r");
 
