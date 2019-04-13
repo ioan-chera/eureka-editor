@@ -38,7 +38,7 @@ void M_AddKnownIWAD(const char *path)
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
 
-	const char *game = GameNameFromIWAD(path);
+	std::string game = GameNameFromIWAD(path);
 
 	known_iwads[game] = std::string(absolute_name);
 }
@@ -1024,8 +1024,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	lump->Printf("# Eureka project info\n");
 
-	if (Game_name)
-		lump->Printf("game %s\n", Game_name);
+	if (!Game_name.empty())
+		lump->Printf("game %s\n", Game_name.c_str());
 
 	if (Port_name)
 		lump->Printf("port %s\n", Port_name);

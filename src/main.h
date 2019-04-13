@@ -130,7 +130,7 @@ extern const char *install_dir;  // install dir (e.g. /usr/share/eureka)
 extern const char *home_dir;     // home dir (e.g. $HOME/.eureka)
 extern const char *cache_dir;    // for caches and backups, can be same as home_dir
 
-extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
+extern std::string Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
 
@@ -187,7 +187,7 @@ void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
-const char * GameNameFromIWAD(const char *iwad_name);
+std::string GameNameFromIWAD(const char *iwad_name);
 
 const char * Main_FileOpFolder();
 

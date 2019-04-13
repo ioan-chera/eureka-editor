@@ -674,7 +674,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	game(NULL), port(NULL), map_format(MAPF_INVALID)
+	port(NULL), map_format(MAPF_INVALID)
 {
 	callback(close_callback, this);
 
@@ -819,31 +819,29 @@ void UI_ProjectSetup::PopulateIWADs()
 	// the user has found a new iwad.  For the latter case, we want
 	// to show the newly found game.
 
-	const char *prev_game = game;
+	std::string prev_game = game;
 
-	if (! prev_game) prev_game = Game_name;
-	if (! prev_game) prev_game = "doom2";
+	if (prev_game.empty()) prev_game = Game_name;
+	if (prev_game.empty()) prev_game = "doom2";
 
-
-	game = NULL;
+	game.clear();
 
 	game_choice->clear();
-
 
 	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectGamesForMenu(&menu_value, prev_game);
+	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str());
 
 	if (menu_string[0])
 	{
 		game_choice->add(menu_string);
 		game_choice->value(menu_value);
 
-		game = StringDup(game_choice->mvalue()->text);
+		game = game_choice->mvalue()->text;
 	}
 
-	if (game)
+	if (!game.empty())
 		ok_but->activate();
 	else
 		ok_but->deactivate();
@@ -866,7 +864,7 @@ void UI_ProjectSetup::PopulatePort()
 	port_choice->clear();
 
 	// if no game, port doesn't matter
-	if (! game)
+	if (game.empty())
 		return;
 
 
@@ -874,8 +872,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		var_game = M_VariantForGame(game_choice->mvalue()->text);
-	else if (Game_name)
-		var_game = M_VariantForGame(Game_name);
+	else if (!Game_name.empty())
+		var_game = M_VariantForGame(Game_name.c_str());
 
 	if (! var_game)
 		var_game = "doom2";
@@ -914,7 +912,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	format_choice->clear();
 
 	// if no game, format doesn't matter
-	if (! game)
+	if (game.empty())
 		return;
 
 
@@ -1018,12 +1016,12 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	if (M_QueryKnownIWAD(name))
 	{
-		that->game = StringDup(name);
+		that->game = name;
 		that->ok_but->activate();
 	}
 	else
 	{
-		that->game = NULL;
+		that->game.clear();
 		that->ok_but->deactivate();
 
 		fl_beep();
@@ -1085,9 +1083,9 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	const char *game = GameNameFromIWAD(chooser.filename());
+	std::string game = GameNameFromIWAD(chooser.filename());
 
-	if (! M_CanLoadDefinitions("games", game))
+	if (! M_CanLoadDefinitions("games", game.c_str()))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
@@ -1098,7 +1096,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	M_AddKnownIWAD(chooser.filename());
 	M_SaveRecent();
 
-	that->game = StringDup(game);
+	that->game = std::move(game);
 
 	that->PopulateIWADs();
 	that->PopulatePort();
@@ -1115,13 +1113,13 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	// FIXME : deactivate button when this is true
-	if (that->game == NULL || that->port == NULL)
+	if (that->game.empty()|| that->port == NULL)
 	{
 		fl_beep();
 		return;
 	}
 
-	M_PortSetupDialog(that->port, that->game);
+	M_PortSetupDialog(that->port, that->game.c_str());
 }
 
 
