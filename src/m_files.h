@@ -40,7 +40,7 @@ void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
 const char * M_QueryKnownIWAD(const char *game);
 const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name);
-const char * M_PickDefaultIWAD();
+std::string M_PickDefaultIWAD();
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const char *filename);

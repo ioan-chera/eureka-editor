@@ -779,7 +779,7 @@ void M_LookForIWADs()
 }
 
 
-const char * M_PickDefaultIWAD()
+std::string M_PickDefaultIWAD()
 {
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
@@ -832,12 +832,12 @@ const char * M_PickDefaultIWAD()
 	KI = known_iwads.begin();
 
 	if (KI != known_iwads.end())
-		return StringDup(KI->second.c_str());
+		return KI->second;
 
 	// nothing left to try
 	DebugPrintf("pick default iwad failed.\n");
 
-	return NULL;
+	return "";
 }
 
 
