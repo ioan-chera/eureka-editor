@@ -97,12 +97,11 @@ thingdef_flags_e;
 
 
 // texturegroup <letter> <description>
-typedef struct
+struct texturegroup_t
 {
 	char group;
-	const char *desc;
-}
-texturegroup_t;
+	std::string desc;
+};
 
 
 /*

@@ -650,7 +650,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		texturegroup_t & tg = texture_groups[argv[1][0]];
 		tg.group = argv[1][0];
-		tg.desc  = StringDup(argv[2]);
+		tg.desc = argv[2];
 	}
 
 	else if (y_stricmp(argv[0], "texture") == 0)
