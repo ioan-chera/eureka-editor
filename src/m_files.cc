@@ -1123,13 +1123,13 @@ void M_BackupWad(Wad_file *wad)
 
 	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir, fl_filename_name(wad->PathName()));
 
-	char * dir_name = ReplaceExtension(filename, NULL);
+	std::string dir_name = ReplaceExtension(filename, NULL);
 
-	DebugPrintf("dir_name for backup: '%s'\n", dir_name);
+	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
 
 	// create the directory if it doesn't already exist
 	// (this will fail if it DOES already exist, but that's OK)
-	FileMakeDir(dir_name);
+	FileMakeDir(dir_name.c_str());
 
 	// scan directory to determine lowest and highest numbers in use
 	backup_scan_data_t  scan_data;
@@ -1137,11 +1137,10 @@ void M_BackupWad(Wad_file *wad)
 	scan_data.low  = (1 << 30);
 	scan_data.high = 0;
 
-	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
+	if (ScanDirectory(dir_name.c_str(), backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot scan dir)\n");
-		StringFree(dir_name);
 		return;
 	}
 
@@ -1152,14 +1151,12 @@ void M_BackupWad(Wad_file *wad)
 	{
 		int wad_size = wad->TotalSize();
 
-		Backup_Prune(dir_name, b_low, b_high, wad_size);
+		Backup_Prune(dir_name.c_str(), b_low, b_high, wad_size);
 	}
 
 	// actually back-up the file
 
-	const char * dest_name = Backup_Name(dir_name, b_high + 1);
-
-	StringFree(dir_name);
+	const char * dest_name = Backup_Name(dir_name.c_str(), b_high + 1);
 
 	if (! wad->Backup(dest_name))
 	{

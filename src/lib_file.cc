@@ -110,19 +110,19 @@ bool MatchExtension(const char *filename, const char *ext)
 //
 // Returned string is a COPY.
 //
-char *ReplaceExtension(const char *filename, const char *ext)
+std::string ReplaceExtension(const char *filename, const char *ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
 	size_t total_len = strlen(filename) + (ext ? strlen(ext) : 0);
 
-	char *buffer = StringNew((int)total_len + 10);
+	std::string buffer;
+	buffer.reserve(total_len + 10);
+	buffer = filename;
 
-	strcpy(buffer, filename);
+	const char *dot_pos = buffer.c_str() + buffer.length() - 1;
 
-	char *dot_pos = buffer + strlen(buffer) - 1;
-
-	for (; dot_pos >= buffer && *dot_pos != '.' ; dot_pos--)
+	for (; dot_pos >= buffer.c_str() && *dot_pos != '.' ; dot_pos--)
 	{
 		if (*dot_pos == '/')
 			break;
@@ -133,23 +133,23 @@ char *ReplaceExtension(const char *filename, const char *ext)
 #endif
 	}
 
-	if (dot_pos < buffer || *dot_pos != '.')
+	if (dot_pos < buffer.c_str() || *dot_pos != '.')
 		dot_pos = NULL;
 
 	if (! ext)
 	{
 		if (dot_pos)
-			dot_pos[0] = 0;
+			buffer.resize(dot_pos - buffer.c_str());
 
 		return buffer;
 	}
 
 	if (dot_pos)
-		dot_pos[1] = 0;
+		buffer.resize(dot_pos + 1 - buffer.c_str());
 	else
-		strcat(buffer, ".");
+		buffer += '.';
 
-	strcat(buffer, ext);
+	buffer += ext;
 
 	return buffer;
 }
