@@ -183,7 +183,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 	// grab the new information
 
 	Game_name = dialog->game;
-	Port_name = StringDup(dialog->port);
+	Port_name = dialog->port;
 
 	SYS_ASSERT(!Game_name.empty());
 

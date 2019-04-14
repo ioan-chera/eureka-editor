@@ -850,13 +850,13 @@ void UI_ProjectSetup::PopulateIWADs()
 
 void UI_ProjectSetup::PopulatePort()
 {
-	const char *prev_port = NULL;
+	std::string prev_port;
 
 	if (port_choice->mvalue())
-		prev_port = StringDup(port_choice->mvalue()->text);
+		prev_port = port_choice->mvalue()->text;
 
-	if (! prev_port) prev_port = Port_name;
-	if (! prev_port) prev_port = "vanilla";
+	if (prev_port.empty()) prev_port = Port_name;
+	if (prev_port.empty()) prev_port = "vanilla";
 
 
 	port = "vanilla";
@@ -882,7 +882,7 @@ void UI_ProjectSetup::PopulatePort()
 	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectPortsForMenu(var_game.c_str(), &menu_value, prev_port);
+	menu_string = M_CollectPortsForMenu(var_game.c_str(), &menu_value, prev_port.c_str());
 
 	if (menu_string[0])
 	{

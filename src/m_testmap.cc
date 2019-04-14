@@ -27,7 +27,7 @@
 #include "ui_window.h"
 
 
-static const char * QueryName(const char *port = Port_name, const char *game = Game_name.c_str())
+static const char * QueryName(const char *port = Port_name.c_str(), const char *game = Game_name.c_str())
 {
 	SYS_ASSERT(port);
 
@@ -406,7 +406,7 @@ void CMD_TestMap()
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(Port_name, Game_name.c_str()))
+		if (! M_PortSetupDialog(Port_name.c_str(), Game_name.c_str()))
 			return;
 
 		info = M_QueryPortPath(QueryName());

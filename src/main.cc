@@ -78,7 +78,7 @@ std::vector<std::string> Pwad_list;
 std::vector< const char * > Resource_list;
 
 std::string Game_name;
-const char *Port_name;
+std::string Port_name;
 std::string Level_name;
 
 map_format_e Level_format;
@@ -410,10 +410,10 @@ static void DeterminePort()
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
-	if (Port_name && Port_name[0])
+	if (!Port_name.empty())
 	{
-		if (! M_CanLoadDefinitions("ports", Port_name))
-			FatalError("Unknown port '%s' (no definition file)\n", Port_name);
+		if (! M_CanLoadDefinitions("ports", Port_name.c_str()))
+			FatalError("Unknown port '%s' (no definition file)\n", Port_name.c_str());
 
 		return;
 	}
@@ -439,7 +439,7 @@ static void DeterminePort()
 		default_port = "vanilla";
 	}
 
-	Port_name = default_port.c_str();
+	Port_name = default_port;
 }
 
 
@@ -816,15 +816,15 @@ static void ReadPortInfo()
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(Port_name);
+	SYS_ASSERT(!Port_name.empty());
 
 	std::string var_game = M_VariantForGame(Game_name.c_str());
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(var_game.c_str(), Port_name))
+	if (! M_CheckPortSupportsGame(var_game.c_str(), Port_name.c_str()))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-				Port_name, Game_name.c_str());
+				Port_name.c_str(), Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -833,7 +833,7 @@ static void ReadPortInfo()
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-						Port_name, Game_name.c_str());
+						Port_name.c_str(), Game_name.c_str());
 
 		if (res == 0)
 		{
@@ -841,9 +841,9 @@ static void ReadPortInfo()
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", Port_name);
+	LogPrintf("Port name: '%s'\n", Port_name.c_str());
 
-	M_LoadDefinitions("ports", Port_name);
+	M_LoadDefinitions("ports", Port_name.c_str());
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (game_info.strife_flags)
