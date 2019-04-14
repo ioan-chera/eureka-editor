@@ -698,7 +698,7 @@ static std::string SearchForIWAD(const char *game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(StringDup(doomwaddir), game);
+		path = SearchDirForIWAD(std::string(doomwaddir).c_str(), game);
 		if (!path.empty())
 			return path;
 	}
