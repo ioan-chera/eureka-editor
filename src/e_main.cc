@@ -1110,19 +1110,7 @@ Recently_used::Recently_used() :
 	size(0),
 	keep_num(RECENTLY_USED_MAX - 2)
 {
-	memset(name_set, 0, sizeof(name_set));
 }
-
-
-Recently_used::~Recently_used()
-{
-	for (int i = 0 ; i < size ; i++)
-	{
-		StringFree(name_set[i]);
-		name_set[i] = NULL;
-	}
-}
-
 
 int Recently_used::find(const char *name)
 {
@@ -1184,8 +1172,6 @@ void Recently_used::erase(int index)
 {
 	SYS_ASSERT(0 <= index && index < size);
 
-	StringFree(name_set[index]);
-
 	size--;
 
 	for ( ; index < size ; index++)
@@ -1193,7 +1179,7 @@ void Recently_used::erase(int index)
 		name_set[index] = name_set[index + 1];
 	}
 
-	name_set[index] = NULL;
+	name_set[index].clear();
 }
 
 
@@ -1210,7 +1196,7 @@ void Recently_used::push_front(const char *name)
 		name_set[k + 1] = name_set[k];
 	}
 
-	name_set[0] = StringDup(name);
+	name_set[0] = name;
 
 	size++;
 }
@@ -1220,7 +1206,8 @@ void Recently_used::clear()
 {
 	size = 0;
 
-	memset(name_set, 0, sizeof(name_set));
+	for(std::string &name : name_set)
+		name.clear();
 }
 
 
@@ -1241,7 +1228,7 @@ void Recently_used::WriteUser(FILE *fp, char letter)
 {
 	for (int i = 0 ; i < size ; i++)
 	{
-		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i]).c_str());
+		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i].c_str()).c_str());
 	}
 }
 

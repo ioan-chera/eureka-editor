@@ -207,11 +207,10 @@ private:
 	int size;
 	int keep_num;
 
-	const char *name_set[RECENTLY_USED_MAX];
+	std::string name_set[RECENTLY_USED_MAX];
 
 public:
 	 Recently_used();
-	~Recently_used();
 
 	int find(const char *name);
 	int find_number(int val);
