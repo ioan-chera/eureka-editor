@@ -2118,10 +2118,10 @@ void LineDefs_FindManualDoors(selection_c& lines)
 		if (L->left >= 0)
 			continue;
 
-		const linetype_t *info = M_GetLineType(L->type);
+		const linetype_t &info = M_GetLineType(L->type);
 
-		if (info->desc[0] == 'D' &&
-			(info->desc[1] == '1' || info->desc[1] == 'R'))
+		if (info.desc[0] == 'D' &&
+			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
 			lines.set(n);
 		}
@@ -2152,10 +2152,10 @@ void LineDefs_FixManualDoors()
 		if (L->type <= 0 || L->left >= 0)
 			continue;
 
-		const linetype_t *info = M_GetLineType(L->type);
+		const linetype_t &info = M_GetLineType(L->type);
 
-		if (info->desc[0] == 'D' &&
-			(info->desc[1] == '1' || info->desc[1] == 'R'))
+		if (info.desc[0] == 'D' &&
+			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
 			BA_ChangeLD(n, LineDef::F_TYPE, 0);
 		}
@@ -2284,13 +2284,13 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 		if (type_num == 0)
 			continue;
 
-		const linetype_t *info = M_GetLineType(type_num);
+		const linetype_t &info = M_GetLineType(type_num);
 
 		// Boom generalized line type?
 		if (game_info.gen_types && is_genline(type_num))
 			continue;
 
-		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc, "UNKNOWN", 7) == 0)
 		{
 			bung_unknown_type(types, type_num);
 
@@ -3180,9 +3180,9 @@ void Tags_FindMissingTags(selection_c& lines)
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
 		// TODO: boom generalized manual doors (etc??)
-		const linetype_t *info = M_GetLineType(L->type);
+		const linetype_t &info = M_GetLineType(L->type);
 
-		char first = info->desc[0];
+		char first = info.desc[0];
 
 		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
 			continue;

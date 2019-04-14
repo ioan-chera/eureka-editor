@@ -400,12 +400,12 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->spec_type->value());
 
-	const linetype_t *info = M_GetLineType(new_type);
+	const linetype_t &info = M_GetLineType(new_type);
 
 	if (new_type == 0)
 		box->spec_desc->value("");
 	else
-		box->spec_desc->value(info->desc);
+		box->spec_desc->value(info.desc);
 
 	selection_c list;
 	selection_iterator_c it;
@@ -436,8 +436,8 @@ void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
 
 	if (value)
 	{
-		const linetype_t *info = M_GetLineType(value);
-		box->spec_desc->value(info->desc);
+		const linetype_t &info = M_GetLineType(value);
+		box->spec_desc->value(info.desc);
 	}
 	else
 	{
@@ -902,8 +902,8 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (is_thing(obj) && Things[obj]->special)
 		{
-			const linetype_t *info = M_GetLineType(Things[obj]->special);
-			spec_desc->value(info->desc);
+			const linetype_t &info = M_GetLineType(Things[obj]->special);
+			spec_desc->value(info.desc);
 			spec_type->value(std::to_string(Things[obj]->special).c_str());
 		}
 		else
@@ -927,7 +927,7 @@ void UI_ThingBox::UpdateField(int field)
 			const Thing *T = Things[obj];
 
 			const thingtype_t *info = M_GetThingType(T->type);
-			const linetype_t  *spec = M_GetLineType (T->special);
+			const linetype_t &spec = M_GetLineType (T->special);
 
 			// set argument values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
@@ -938,8 +938,8 @@ void UI_ThingBox::UpdateField(int field)
 				{
 					args[a]->value(std::to_string(arg_val).c_str());
 
-					if (spec->args[a])
-						args[a]->copy_tooltip(spec->args[a]);
+					if (spec.args[a])
+						args[a]->copy_tooltip(spec.args[a]);
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}

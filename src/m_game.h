@@ -258,7 +258,7 @@ bool is_special_tex(const char *tex);	// begins with "#"
 
 
 const sectortype_t * M_GetSectorType(int type);
-const linetype_t   * M_GetLineType(int type);
+const linetype_t &M_GetLineType(int type);
 const thingtype_t  * M_GetThingType(int type);
 
 char M_GetTextureType(const char *name);

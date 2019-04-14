@@ -1252,21 +1252,21 @@ const sectortype_t * M_GetSectorType(int type)
 }
 
 
-const linetype_t * M_GetLineType(int type)
+const linetype_t &M_GetLineType(int type)
 {
 	std::map<int, linetype_t *>::iterator LI;
 
 	LI = line_types.find(type);
 
 	if (LI != line_types.end())
-		return LI->second;
+		return *LI->second;
 
 	static linetype_t dummy_type =
 	{
 		0, "UNKNOWN TYPE"
 	};
 
-	return &dummy_type;
+	return dummy_type;
 }
 
 
