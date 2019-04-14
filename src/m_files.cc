@@ -644,7 +644,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static const char * SearchDirForIWAD(const char *dir_name, const char *game)
+static std::string SearchDirForIWAD(const char *dir_name, const char *game)
 {
 	char name_buf[FL_PATH_MAX];
 
@@ -653,7 +653,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 	DebugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return StringDup(name_buf);
+		return name_buf;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
 
@@ -662,13 +662,13 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 	DebugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return StringDup(name_buf);
+		return name_buf;
 
-	return NULL;
+	return "";
 }
 
 
-static const char * SearchForIWAD(const char *game)
+static std::string SearchForIWAD(const char *game)
 {
 	DebugPrintf("Searching for '%s' IWAD\n", game);
 
@@ -679,8 +679,8 @@ static const char * SearchForIWAD(const char *game)
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	const char * path = SearchDirForIWAD(dir_name, game);
-	if (path)
+	std::string path = SearchDirForIWAD(dir_name, game);
+	if (!path.empty())
 		return path;
 
 	// 2. look in $DOOMWADPATH
@@ -694,7 +694,7 @@ static const char * SearchForIWAD(const char *game)
 				break;
 
 			path = SearchDirForIWAD(dir_name, game);
-			if (path)
+			if (!path.empty())
 				return path;
 		}
 	}
@@ -705,7 +705,7 @@ static const char * SearchForIWAD(const char *game)
 	if (doomwaddir)
 	{
 		path = SearchDirForIWAD(StringDup(doomwaddir), game);
-		if (path)
+		if (!path.empty())
 			return path;
 	}
 
@@ -731,17 +731,17 @@ static const char * SearchForIWAD(const char *game)
 	for (int i = 0 ; standard_iwad_places[i] ; i++)
 	{
 		path = SearchDirForIWAD(standard_iwad_places[i], game);
-		if (path)
+		if (!path.empty())
 			return path;
 	}
 
 	// 5. last resort : the current directory
 
 	path = SearchDirForIWAD(".", game);
-	if (path)
+	if (!path.empty())
 		return path;
 
-	return NULL;  // not found
+	return "";  // not found
 }
 
 
@@ -764,13 +764,13 @@ void M_LookForIWADs()
 		if (!M_QueryKnownIWAD(game).empty())
 			continue;
 
-		const char *path = SearchForIWAD(game);
+		std::string path = SearchForIWAD(game);
 
-		if (path)
+		if (!path.empty())
 		{
-			LogPrintf("Found '%s' IWAD file: %s\n", game, path);
+			LogPrintf("Found '%s' IWAD file: %s\n", game, path.c_str());
 
-			M_AddKnownIWAD(path);
+			M_AddKnownIWAD(path.c_str());
 		}
 	}
 
