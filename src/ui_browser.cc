@@ -1359,7 +1359,7 @@ void UI_Generalized_Box::CreatePages()
 	{
 		const generalized_linetype_t *info = &gen_linetypes[i];
 
-		category->add(info->name);
+		category->add(info->name.c_str());
 
 		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
 		pages[i]->callback(edit_callback, this);

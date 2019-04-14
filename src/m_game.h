@@ -178,19 +178,18 @@ typedef struct
 generalized_field_t;
 
 
-typedef struct
+struct generalized_linetype_t
 {
 	char key;
 
 	int base;
 	int length;
 
-	const char *name;
+	std::string name;
 
 	generalized_field_t fields[MAX_GEN_NUM_FIELDS];
 	int num_fields;
-}
-generalized_linetype_t;
+};
 
 
 extern generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
