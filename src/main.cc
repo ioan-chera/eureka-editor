@@ -443,7 +443,7 @@ static void DeterminePort()
 }
 
 
-static const char * DetermineLevel()
+static std::string DetermineLevel()
 {
 	// most of the logic here is to handle a numeric level number
 	// e.g. -warp 15
@@ -453,7 +453,7 @@ static const char * DetermineLevel()
 
 	int level_number = 0;
 
-	if (!Level_name.empty() && Level_name[0])
+	if (!Level_name.empty())
 	{
 		if (! isdigit(Level_name[0]))
 			return StringUpper(Level_name.c_str());
@@ -489,7 +489,7 @@ static const char * DetermineLevel()
 		Lump_c *lump = wad->GetLump(idx);
 		SYS_ASSERT(lump);
 
-		return StringDup(lump->Name());
+		return lump->Name();
 	}
 
 	// cannot get here
