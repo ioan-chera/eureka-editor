@@ -241,13 +241,12 @@ private:
 	int size;
 
 	// newest is at index [0]
-	const char * filenames[MAX_RECENT];
+	std::string filenames[MAX_RECENT];
 	const char * map_names[MAX_RECENT];
 
 public:
 	RecentFiles_c() : size(0)
 	{
-		memset(filenames, 0, sizeof(filenames));
 		memset(map_names, 0, sizeof(map_names));
 	}
 
@@ -263,7 +262,7 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < size);
 
-		return new recent_file_data_c(filenames[index], map_names[index]);
+		return new recent_file_data_c(filenames[index].c_str(), map_names[index]);
 	}
 
 	void clear()
@@ -275,7 +274,7 @@ public:
 			StringFree(map_names[k]);
 #endif
 
-			filenames[k] = NULL;
+			filenames[k].clear();
 			map_names[k] = NULL;
 		}
 
@@ -289,7 +288,7 @@ public:
 
 		for (int k = 0 ; k < size ; k++)
 		{
-			const char *B = fl_filename_name(filenames[k]);
+			const char *B = fl_filename_name(filenames[k].c_str());
 
 			if (y_stricmp(A, B) != 0)
 				continue;
@@ -320,7 +319,7 @@ public:
 			map_names[index] = map_names[index + 1];
 		}
 
-		filenames[index] = NULL;
+		filenames[index].clear();
 		map_names[index] = NULL;
 	}
 
@@ -338,7 +337,7 @@ public:
 			map_names[k + 1] = map_names[k];
 		}
 
-		filenames[0] = StringDup(file);
+		filenames[0] = file;
 		map_names[0] = StringDup(map);
 
 		size++;
@@ -363,7 +362,7 @@ public:
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
-			fprintf(fp, "recent %s %s\n", map_names[k], filenames[k]);
+			fprintf(fp, "recent %s %s\n", map_names[k], filenames[k].c_str());
 		}
 	}
 
@@ -371,14 +370,14 @@ public:
 	{
 		SYS_ASSERT(index < size);
 
-		const char *name = fl_filename_name(filenames[index]);
+		const char *name = fl_filename_name(filenames[index].c_str());
 		// const char *map  = map_names[index];
 
 		snprintf(buffer, buffer_size, "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
 				(index < 9) ? "&" : "", 1+index, name);
 	}
 
-	void Lookup(int index, const char ** file_v, const char ** map_v)
+	void Lookup(int index, std::string *file_v, const char ** map_v)
 	{
 		SYS_ASSERT(index >= 0);
 		SYS_ASSERT(index < size);
@@ -550,7 +549,7 @@ bool M_TryOpenMostRecent()
 	if (recent_files.getSize() == 0)
 		return false;
 
-	const char *filename;
+	std::string filename;
 	const char *map_name;
 
 	recent_files.Lookup(0, &filename, &map_name);
@@ -558,18 +557,18 @@ bool M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad_file *wad = Wad_file::Open(filename, 'a');
+	Wad_file *wad = Wad_file::Open(filename.c_str(), 'a');
 
 	if (! wad)
 	{
-		LogPrintf("Failed to load most recent pwad: %s\n", filename);
+		LogPrintf("Failed to load most recent pwad: %s\n", filename.c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		LogPrintf("No levels in most recent pwad: %s\n", filename);
+		LogPrintf("No levels in most recent pwad: %s\n", filename.c_str());
 
 		delete wad;
 		return false;

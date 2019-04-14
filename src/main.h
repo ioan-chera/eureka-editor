@@ -140,7 +140,7 @@ extern std::string config_file; // Name of the configuration file, or NULL
 extern std::string log_file;    // Name of log file, or NULL
 
 extern std::string Iwad_name;   // Filename of the iwad
-extern const char *Pwad_name;   // Filename of current wad, or NULL
+extern std::string Pwad_name;   // Filename of current wad, or NULL
 
 extern std::vector< const char * > Pwad_list;
 extern std::vector< const char * > Resource_list;
