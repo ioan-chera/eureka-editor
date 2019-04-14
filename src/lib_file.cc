@@ -385,13 +385,6 @@ bool FileLoad(const char *filename, std::vector<u8_t> &result)
 	return true;
 }
 
-
-void FileFree(u8_t *mem)
-{
-	free((void*) mem);
-}
-
-
 //
 // Note: returns false when the path doesn't exist.
 //

@@ -49,7 +49,6 @@ bool FileChangeDir(const char *dir_name);
 bool FileMakeDir(const char *dir_name);
 
 bool FileLoad(const char *filename, std::vector<u8_t> &result);
-void FileFree(u8_t *mem);
 
 // miscellanous
 std::string GetExecutablePath(const char *argv0);
