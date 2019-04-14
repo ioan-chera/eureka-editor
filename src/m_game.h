@@ -162,7 +162,7 @@ extern game_info_t  game_info;
 #define MAX_GEN_NUM_FIELDS	16
 #define MAX_GEN_NUM_TYPES	16
 
-typedef struct
+struct generalized_field_t
 {
 	int bits;	//
 	int mask;	//	the bit-field info
@@ -170,12 +170,11 @@ typedef struct
 
 	int default_val;
 
-	const char *name;
+	std::string name;
 
 	const char *keywords[MAX_GEN_FIELD_KEYWORDS];
 	int num_keywords;
-}
-generalized_field_t;
+};
 
 
 struct generalized_linetype_t

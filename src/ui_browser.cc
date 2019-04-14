@@ -1086,7 +1086,7 @@ public:
 	{
 		char label_buf[256];
 
-		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name);
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name.c_str());
 
 		copy_label(label_buf);
 

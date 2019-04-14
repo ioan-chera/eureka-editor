@@ -733,7 +733,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		field->default_val = atoi(argv[3]);
 
-		field->name = StringDup(argv[4]);
+		field->name = argv[4];
 
 		// grab the keywords
 		field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
