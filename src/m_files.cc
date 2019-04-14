@@ -60,12 +60,12 @@ std::string M_QueryKnownIWAD(const char *game)
 // returns a string, with each name separated by a '|' character,
 // hence directly usable with the FL_Choice::add() method.
 //
-const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name)
+std::string M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 {
 	std::map<std::string, std::string>::iterator KI;
 
-	static char result[2000];
-	result[0] = 0;
+	std::string result;
+	result.reserve(2000);
 
 	int index = 0;
 
@@ -73,16 +73,16 @@ const char * M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 	{
 		const char *name = KI->first.c_str();
 
-		if (result[0])
-			strcat(result, "|");
+		if (!result.empty())
+			result += '|';
 
-		strcat(result, name);
+		result += name;
 
 		if (y_stricmp(name, exist_name) == 0)
 			*exist_val = index;
 	}
 
-	return StringDup(result);
+	return result;
 }
 
 
