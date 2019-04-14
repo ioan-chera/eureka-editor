@@ -1155,7 +1155,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 				if (! ignore)
 				{
-					*((const char **) o->data_ptr) = StringDup(argv[0]);
+					*((std::string *) o->data_ptr) = argv[0];
 				}
 
 				// support two numeric values after -warp
