@@ -2919,7 +2919,7 @@ static void Render3D_Cut()
 	if (type == OB3D_Thing)
 		return;
 
-	const char *name = default_wall_tex;
+	const char *name = default_wall_tex.c_str();
 
 	if (type == OB3D_Floor)
 		name = default_floor_tex;

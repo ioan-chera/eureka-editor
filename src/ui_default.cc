@@ -416,7 +416,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	w_tex->value(default_wall_tex);
+	w_tex->value(default_wall_tex.c_str());
 	f_tex->value(default_floor_tex);
 	c_tex->value(default_ceil_tex);
 
@@ -588,7 +588,7 @@ bool Props_ParseUser(const std::vector<std::string> &tokens)
 		default_ceil_tex = StringDup(tokens[2].c_str());
 
 	if (tokens[1] == "mid_tex")
-		default_wall_tex = StringDup(tokens[2].c_str());
+		default_wall_tex = tokens[2].c_str();
 
 	return true;
 }
@@ -603,7 +603,7 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default light_level %d\n",  default_light_level);
 	fprintf(fp, "default thing %d\n",  default_thing);
 
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\"").c_str());
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex.c_str(), "\"").c_str());
 	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\"").c_str());
 	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\"").c_str());
 }

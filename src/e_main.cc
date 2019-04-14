@@ -1032,7 +1032,7 @@ render_clipboard_c::~render_clipboard_c()
 int render_clipboard_c::GetTexNum()
 {
 	if (tex[0] == 0)
-		SetTex(default_wall_tex);
+		SetTex(default_wall_tex.c_str());
 
 	return BA_InternaliseString(tex);
 }
