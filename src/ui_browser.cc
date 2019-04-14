@@ -1533,9 +1533,7 @@ void UI_Browser::Populate()
 	const char *flat_cats = M_TextureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats, letters);
 
-	const char *thing_cats = M_ThingCategoryString(letters);
-	browsers[2]->SetCategories(thing_cats, letters);
-
+	browsers[2]->SetCategories(M_ThingCategoryString(letters).c_str(), letters);
 	browsers[3]->SetCategories(M_LineCategoryString(letters).c_str(), letters);
 
 	// TODO: sector_cats
