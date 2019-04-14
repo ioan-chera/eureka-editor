@@ -70,7 +70,7 @@ struct thinggroup_t
 
 
 // thing <number> <group> <flags> <radius> <description> [<sprite>]  [ arg1..arg5 ]
-typedef struct
+struct thingtype_t
 {
 	char group;      // group letter
 	short flags;     // flags (THINGDEF_XXX)
@@ -78,11 +78,10 @@ typedef struct
 	float scale;	 // scaling (1.0 is normal)
 
 	const char *desc;    // short description of the thing
-	const char *sprite;  // name of sprite (frame and rot are optional)
+	std::string sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
 	const char *args[5]; // args used when spawned (Hexen)
-}
-thingtype_t;
+};
 
 
 typedef enum

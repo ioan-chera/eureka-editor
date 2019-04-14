@@ -806,10 +806,10 @@ Img_c * W_GetSprite(int type)
 	}
 	else if (y_stricmp(info.sprite, "NULL") != 0)
 	{
-		Lump_c *lump = Sprite_loc_by_root(info.sprite);
+		Lump_c *lump = Sprite_loc_by_root(info.sprite.c_str());
 		if (! lump)
 		{
-			LogPrintf("Sprite not found: '%s'\n", info.sprite);
+			LogPrintf("Sprite not found: '%s'\n", info.sprite.c_str());
 
 			// for the MBF dog, create our own sprite for it, since
 			// it is defined in the Boom definition file and the
@@ -822,7 +822,7 @@ Img_c * W_GetSprite(int type)
 		{
 			result = new Img_c();
 
-			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(*result, lump, info.sprite.c_str(), 0, 0))
 			{
 				delete result;
 				result = NULL;

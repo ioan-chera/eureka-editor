@@ -752,7 +752,7 @@ void UI_Browser_Box::Populate_Sprites()
 		if (alpha->value() == 0)
 			snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
 		else
-			snprintf(full_desc, sizeof(full_desc), "%s", info.sprite);
+			snprintf(full_desc, sizeof(full_desc), "%s", info.sprite.c_str());
 
 		int pic_w = 64;
 		int pic_h = 72;
