@@ -113,7 +113,7 @@ public:
 	// "did_load" is true when the user loaded a new pwad and this
 	// method returned it.  It should become the next edit_wad.
 	//
-	Wad_file * Run(const char ** map_v, bool * did_load);
+	Wad_file * Run(std::string * map_v, bool * did_load);
 
 private:
 	void Populate();

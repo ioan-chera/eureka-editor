@@ -327,9 +327,9 @@ UI_OpenMap::~UI_OpenMap()
 { }
 
 
-Wad_file * UI_OpenMap::Run(const char ** map_v, bool * did_load)
+Wad_file * UI_OpenMap::Run(std::string * map_v, bool * did_load)
 {
-	*map_v = NULL;
+	*map_v = "";
 	*did_load = false;
 
 	if (edit_wad)

@@ -1123,7 +1123,7 @@ void CMD_OpenMap()
 
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	const char *map_name = NULL;
+	std::string map_name = NULL;
 	bool did_load = false;
 
 	Wad_file *wad = dialog->Run(&map_name, &did_load);
@@ -1135,7 +1135,7 @@ void CMD_OpenMap()
 
 
 	// this shouldn't happen -- but just in case...
-	if (wad->LevelFind(map_name) < 0)
+	if (wad->LevelFind(map_name.c_str()) < 0)
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
@@ -1174,9 +1174,9 @@ void CMD_OpenMap()
 		new_resources = true;
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name, wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName());
 
-	LoadLevel(wad, map_name);
+	LoadLevel(wad, map_name.c_str());
 
 	if (new_resources)
 	{
