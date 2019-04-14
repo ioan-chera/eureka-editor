@@ -57,7 +57,7 @@ void StringCopy(char *target, size_t len, const char *source);
 
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
-char *StringUpper(const char *name);
+std::string StringUpper(const char *name);
 std::string StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 
