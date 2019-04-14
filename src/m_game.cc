@@ -40,7 +40,7 @@
 
 
 std::map<char, linegroup_t> line_groups;
-std::map<char, thinggroup_t *>   thing_groups;
+std::map<char, thinggroup_t> thing_groups;
 std::map<char, texturegroup_t *> texture_groups;
 
 std::map<int, linetype_t *>   line_types;
@@ -606,13 +606,10 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		thinggroup_t * tg = new thinggroup_t;
-
-		tg->group = argv[1][0];
-		tg->color = ParseColor(argv[2]);
-		tg->desc  = StringDup(argv[3]);
-
-		thing_groups[tg->group] = tg;
+		thinggroup_t &tg = thing_groups[argv[1][0]];
+		tg.group = argv[1][0];
+		tg.color = ParseColor(argv[2]);
+		tg.desc  = StringDup(argv[3]);
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)
@@ -647,7 +644,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		}
 		else
 		{
-			info->color = thing_groups[info->group]->color;
+			info->color = thing_groups[info->group].color;
 
 			thing_types[number] = info;
 		}
@@ -1425,22 +1422,22 @@ const char *M_ThingCategoryString(char *letters)
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
-	std::map<char, thinggroup_t *>::iterator IT;
+	std::map<char, thinggroup_t>::iterator IT;
 
 	for (IT = thing_groups.begin() ; IT != thing_groups.end() ; IT++)
 	{
-		thinggroup_t *G = IT->second;
+		const thinggroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (! ThingCategory_IsUsed(G->group))
+		if (! ThingCategory_IsUsed(G.group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
 		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		strcat(buffer, G.desc);
 
 		letters[L_index++] = IT->first;
 	}
