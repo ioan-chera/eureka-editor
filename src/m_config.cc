@@ -900,7 +900,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			if (strcmp(value, "''") == 0)
 				*value = 0;
 
-			*((char **) opt->data_ptr) = StringDup(value);
+			*((std::string *) opt->data_ptr) = value;
 			break;
 
 		case OPT_STRING_LIST:
@@ -1308,8 +1308,8 @@ int M_WriteConfigFile()
 
 			case OPT_STRING:
 			{
-				const char *str = *((const char **) o->data_ptr);
-				fprintf(fp, "%s", (str && str[0]) ? str : "''");
+				const std::string *str = ((std::string *) o->data_ptr);
+				fprintf(fp, "%s", !str->empty() ? str->c_str() : "''");
 				break;
 			}
 
