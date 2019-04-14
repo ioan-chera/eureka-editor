@@ -68,7 +68,7 @@ std::string log_file;
 
 std::string install_dir;
 std::string home_dir;
-const char *cache_dir;
+std::string cache_dir;
 
 
 std::string Iwad_name;
@@ -198,7 +198,7 @@ static void CreateHomeDirs()
 
 	// try to create home_dir (doesn't matter if it already exists)
 	FileMakeDir(home_dir.c_str());
-	FileMakeDir(cache_dir);
+	FileMakeDir(cache_dir.c_str());
 
 	static const char *const subdirs[] =
 	{
@@ -213,7 +213,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir : home_dir.c_str(), subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir.c_str() : home_dir.c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -245,9 +245,8 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
 	{
-		strcat(path, "\\EurekaEditor");
-
-		cache_dir = StringDup(path);
+		cache_dir = path;
+		cache_dir += "\\EurekaEditor";
 	}
 
 #elif defined(__APPLE__)
@@ -257,7 +256,7 @@ static void Determine_HomeDir(const char *argv0)
    home_dir = path;
 
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
-   cache_dir = StringDup(path);
+   cache_dir = path;
 
 #else  // UNIX
 	char path[FL_PATH_MAX + 4];
@@ -270,11 +269,11 @@ static void Determine_HomeDir(const char *argv0)
 	if (home_dir.empty())
 		FatalError("Unable to find home directory!\n");
 
-	if (! cache_dir)
-		cache_dir = home_dir.c_str();
+	if (cache_dir.empty())
+		cache_dir = home_dir;
 
 	LogPrintf("Home  dir: %s\n", home_dir.c_str());
-	LogPrintf("Cache dir: %s\n", cache_dir);
+	LogPrintf("Cache dir: %s\n", cache_dir.c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();

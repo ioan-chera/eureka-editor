@@ -128,7 +128,7 @@ extern bool app_has_focus;
 
 extern std::string install_dir;  // install dir (e.g. /usr/share/eureka)
 extern std::string home_dir;     // home dir (e.g. $HOME/.eureka)
-extern const char *cache_dir;    // for caches and backups, can be same as home_dir
+extern std::string cache_dir;    // for caches and backups, can be same as home_dir
 
 extern std::string Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern std::string Port_name;   // Name of source port "vanilla", "boom", ...
