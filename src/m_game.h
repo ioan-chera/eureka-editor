@@ -80,7 +80,7 @@ struct thingtype_t
 	std::string desc;    // short description of the thing
 	std::string sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
-	const char *args[5]; // args used when spawned (Hexen)
+	std::string args[5]; // args used when spawned (Hexen)
 };
 
 

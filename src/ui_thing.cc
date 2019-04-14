@@ -946,11 +946,11 @@ void UI_ThingBox::UpdateField(int field)
 				else
 				{
 					// spawn arguments
-					if (arg_val || info.args[a])
+					if (arg_val || !info.args[a].empty())
 						args[a]->value(std::to_string(arg_val).c_str());
 
-					if (info.args[a])
-						args[a]->copy_tooltip(info.args[a]);
+					if (!info.args[a].empty())
+						args[a]->copy_tooltip(info.args[a].c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}
