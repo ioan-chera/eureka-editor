@@ -99,11 +99,11 @@ void M_WriteKnownIWADs(FILE *fp)
 
 void M_ValidateGivenFiles()
 {
-	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
+	for (const std::string &pwad : Pwad_list)
 	{
-		if (! Wad_file::Validate(Pwad_list[i]))
+		if (! Wad_file::Validate(pwad.c_str()))
 			FatalError("Given pwad does not exist or is invalid: %s\n",
-				Pwad_list[i]);
+				pwad.c_str());
 	}
 }
 
@@ -111,7 +111,7 @@ void M_ValidateGivenFiles()
 int M_FindGivenFile(const char *filename)
 {
 	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-		if (strcmp(Pwad_list[i], filename) == 0)
+		if (Pwad_list[i] == filename)
 			return i;
 
 	return -1;  // Not Found

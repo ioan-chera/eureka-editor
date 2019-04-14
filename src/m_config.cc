@@ -1031,7 +1031,7 @@ void M_ParseEnvironmentVars()
 
 void M_AddPwadName(const char *filename)
 {
-	Pwad_list.push_back(StringDup(filename));
+	Pwad_list.push_back(filename);
 }
 
 

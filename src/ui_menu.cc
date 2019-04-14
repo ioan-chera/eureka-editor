@@ -77,14 +77,14 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
-	const char *filename = (const char *) data;
+	std::string *filename = (std::string *) data;
 
-	int given_idx = M_FindGivenFile(filename);
+	int given_idx = M_FindGivenFile(filename->c_str());
 
 	if (given_idx >= 0)
 		last_given_file = given_idx;
 
-	OpenFileMap(filename);
+	OpenFileMap(filename->c_str());
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
@@ -703,14 +703,14 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		const char *short_name = fl_filename_name(Pwad_list[k]);
+		const char *short_name = fl_filename_name(Pwad_list[k].c_str());
 
 		std::string short_name_pat = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
 												  (k < 9) ? "&" : "", 1+k, short_name);
 
 		Menu_AddItem(pos, short_name_pat.c_str(),
 					 FCAL file_do_load_given,
-					 (void *) Pwad_list[k], 0);
+					 (void *) &Pwad_list[k], 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)
