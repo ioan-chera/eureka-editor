@@ -172,7 +172,7 @@ struct generalized_field_t
 
 	std::string name;
 
-	const char *keywords[MAX_GEN_FIELD_KEYWORDS];
+	std::string keywords[MAX_GEN_FIELD_KEYWORDS];
 	int num_keywords;
 };
 

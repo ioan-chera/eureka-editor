@@ -1092,7 +1092,7 @@ public:
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{
-			add(field->keywords[i]);
+			add(field->keywords[i].c_str());
 		}
 
 		Reset();

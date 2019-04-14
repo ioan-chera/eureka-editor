@@ -740,7 +740,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{
-			field->keywords[i] = StringDup(argv[5 + i]);
+			field->keywords[i] = argv[5 + i];
 		}
 	}
 
