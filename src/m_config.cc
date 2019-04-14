@@ -1350,7 +1350,7 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_strings)
+int M_ParseLine(const char *line, std::vector<std::string> &tokens, bool do_strings)
 {
 	int num_tok = 0;
 
@@ -1418,16 +1418,13 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 			continue;
 		}
 
-		if (num_tok >= max_tok)  // ERROR: too many tokens
-			return -2;
-
 		if (in_string)  // ERROR: non-terminated string
 			return -3;
 
 		tokenbuf[tokenlen] = 0;
 		tokenlen = -1;
 
-		tokens[num_tok++] = StringDup(tokenbuf);
+		tokens.push_back(tokenbuf);
 
 		// end of line?  if yes, we are done
 		if (ch == 0 || ch == '\n')
@@ -1436,19 +1433,6 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 
 	return num_tok;
 }
-
-
-void M_FreeLine(const char ** tokens, int num_tok)
-{
-	for (int i = 0 ; i < num_tok ; i++)
-	{
-		StringFree(tokens[i]);
-
-		tokens[i] = NULL;
-	}
-}
-
-
 
 char * PersistFilename(const crc32_c& crc)
 {
@@ -1482,11 +1466,13 @@ bool M_LoadUserState()
 
 	static char line[FL_PATH_MAX];
 
-	const char * tokens[MAX_TOKENS];
+	std::vector<std::string> tokens;
+	tokens.reserve(MAX_TOKENS);
 
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+		tokens.clear();
+		int num_tok = M_ParseLine(line, tokens, true /* do_strings */);
 
 		if (num_tok == 0)
 			continue;
@@ -1497,12 +1483,12 @@ bool M_LoadUserState()
 			continue;
 		}
 
-		if (  Editor_ParseUser(tokens, num_tok) ||
-		        Grid_ParseUser(tokens, num_tok) ||
-		    Render3D_ParseUser(tokens, num_tok) ||
-		     Browser_ParseUser(tokens, num_tok) ||
-		       Props_ParseUser(tokens, num_tok) ||
-		     RecUsed_ParseUser(tokens, num_tok))
+		if (  Editor_ParseUser(tokens) ||
+		        Grid_ParseUser(tokens) ||
+		    Render3D_ParseUser(tokens) ||
+		     Browser_ParseUser(tokens) ||
+		       Props_ParseUser(tokens) ||
+		     RecUsed_ParseUser(tokens))
 		{
 			// Ok
 		}

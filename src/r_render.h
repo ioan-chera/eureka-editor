@@ -79,7 +79,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 void Render3D_SetCameraPos(int new_x, int new_y);
 void Render3D_GetCameraPos(int *x, int *y, float *angle);
 
-bool Render3D_ParseUser(const char ** tokens, int num_tok);
+bool Render3D_ParseUser(const std::vector<std::string> &tokens);
 void Render3D_WriteUser(FILE *fp);
 
 #endif  /* __EUREKA_R_RENDER__ */

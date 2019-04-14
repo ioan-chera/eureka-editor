@@ -495,26 +495,26 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
 }
 
 
-static void ParseKeyBinding(const char ** tokens, int num_tok)
+static void ParseKeyBinding(const std::vector<std::string> &tokens)
 {
 	key_binding_t temp;
 
 	// this ensures all parameters are NUL terminated
 	memset(&temp, 0, sizeof(temp));
 
-	temp.key = M_ParseKeyString(tokens[1]);
+	temp.key = M_ParseKeyString(tokens[1].c_str());
 
 	if (! temp.key)
 	{
-		LogPrintf("bindings.cfg: cannot parse key name: %s\n", tokens[1]);
+		LogPrintf("bindings.cfg: cannot parse key name: %s\n", tokens[1].c_str());
 		return;
 	}
 
-	temp.context = M_ParseKeyContext(tokens[0]);
+	temp.context = M_ParseKeyContext(tokens[0].c_str());
 
 	if (temp.context == KCTX_NONE)
 	{
-		LogPrintf("bindings.cfg: unknown context: %s\n", tokens[0]);
+		LogPrintf("bindings.cfg: unknown context: %s\n", tokens[0].c_str());
 		return;
 	}
 
@@ -523,14 +523,14 @@ static void ParseKeyBinding(const char ** tokens, int num_tok)
 	if (y_stricmp(tokens[2], "UNBOUND") == 0)
 	{
 #if 0
-fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
+fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0].c_str());
 #endif
 		M_RemoveBinding(temp.key, temp.context);
 		return;
 	}
 
 
-	temp.cmd = FindEditorCommand(tokens[2]);
+	temp.cmd = FindEditorCommand(tokens[2].c_str());
 
 	// backwards compatibility
 	if (! temp.cmd)
@@ -543,7 +543,7 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 
 	if (! temp.cmd)
 	{
-		LogPrintf("bindings.cfg: unknown function: %s\n", tokens[2]);
+		LogPrintf("bindings.cfg: unknown function: %s\n", tokens[2].c_str());
 		return;
 	}
 
@@ -551,13 +551,13 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 	    temp.context != temp.cmd->req_context)
 	{
 		LogPrintf("bindings.cfg: function '%s' in wrong context '%s'\n",
-				  tokens[2], tokens[0]);
+				  tokens[2].c_str(), tokens[0].c_str());
 		return;
 	}
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if (num_tok >= 4 + p)
-			strncpy(temp.param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
+		if (tokens.size() >= 4 + p)
+			strncpy(temp.param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
 #if 0  // DEBUG
 fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2]);
@@ -589,9 +589,10 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 	LogPrintf("Reading key bindings from: %s\n", filename);
 
-	static char line_buf[FL_PATH_MAX];
+	char line_buf[FL_PATH_MAX];
 
-	const char * tokens[MAX_TOKENS];
+	std::vector<std::string> tokens;
+	tokens.reserve(MAX_TOKENS);
 
 	while (! feof(fp))
 	{
@@ -602,7 +603,8 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		StringRemoveCRLF(line);
 
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, false /* do_strings */);
+		tokens.clear();
+		int num_tok = M_ParseLine(line, tokens, false /* do_strings */);
 
 		if (num_tok == 0)
 			continue;
@@ -613,7 +615,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 			continue;
 		}
 
-		ParseKeyBinding(tokens, num_tok);
+		ParseKeyBinding(tokens);
 	}
 
 	fclose(fp);
@@ -986,18 +988,19 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 		if (buffer[k] == ',' || buffer[k] == ':')
 			buffer[k] = ' ';
 
-	const char * tokens[MAX_TOKENS];
+	std::vector<std::string> tokens;
+	tokens.reserve(MAX_TOKENS);
 
-	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
+	int num_tok = M_ParseLine(buffer, tokens, false /* do_strings */);
 
 	if (num_tok <= 0)
 		return "Missing function name";
 
-	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
+	const editor_command_t * cmd = FindEditorCommand(tokens[0].c_str());
 
 	if (! cmd)
 	{
-		snprintf(error_msg, sizeof(error_msg), "Unknown function name: %s", tokens[0]);
+		snprintf(error_msg, sizeof(error_msg), "Unknown function name: %s", tokens[0].c_str());
 		return error_msg;
 	}
 
@@ -1009,7 +1012,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 		std::string mode = StringUpper(M_KeyContextString(cmd->req_context));
 
 		snprintf(error_msg, sizeof(error_msg), "%s can only be used in %s mode",
-		        tokens[0], mode.c_str());
+		        tokens[0].c_str(), mode.c_str());
 
 		return error_msg;
 	}
@@ -1022,7 +1025,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		if (num_tok >= 2 + p)
-			strncpy(bind.param[p], tokens[1 + p], MAX_BIND_LENGTH-1);
+			strncpy(bind.param[p], tokens[1 + p].c_str(), MAX_BIND_LENGTH-1);
 
 	return NULL;
 }

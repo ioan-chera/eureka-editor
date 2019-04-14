@@ -85,7 +85,7 @@ private:
 };
 
 
-bool Props_ParseUser(const char ** tokens, int num_tok);
+bool Props_ParseUser(const std::vector<std::string> &tokens);
 void Props_WriteUser(FILE *fp);
 void Props_LoadValues();
 

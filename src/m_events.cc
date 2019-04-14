@@ -789,9 +789,10 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 }
 
 
-static void ParseOperationLine(const char ** tokens, int num_tok,
+static void ParseOperationLine(const std::vector<std::string> &tokens,
 							   Fl_Menu_Button *menu)
 {
+	size_t num_tok = tokens.size();
 	if (num_tok < 2)
 		FatalError("Bad operations menu : missing description.\n");
 
@@ -806,11 +807,11 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 		FatalError("Bad operations menu : missing command name.\n");
 
 	// parse the command and its parameters...
-	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
+	const editor_command_t *cmd = FindEditorCommand(tokens[2].c_str());
 
 	if (! cmd)
 	{
-		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2]);
+		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
 		return;
 	}
 
@@ -823,9 +824,9 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		if (num_tok >= 4 + p)
-			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
+			strncpy(info->param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1], 0 /* shortcut */, &operation_callback_func,
+	menu->add(tokens[1].c_str(), 0 /* shortcut */, &operation_callback_func,
 			  (void *)info, 0 /* flags */);
 }
 
@@ -863,12 +864,14 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	// parse each line
 
-	static char line[FL_PATH_MAX];
-	const  char * tokens[MAX_TOKENS];
+	char line[FL_PATH_MAX];
+	std::vector<std::string> tokens;
+	tokens.reserve(MAX_TOKENS);
 
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+		tokens.clear();
+		int num_tok = M_ParseLine(line, tokens, true /* do_strings */);
 		if (num_tok == 0)
 			continue;
 
@@ -882,7 +885,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 		if (y_stricmp(tokens[0], context) != 0)
 			continue;
 
-		ParseOperationLine(tokens, num_tok, menu);
+		ParseOperationLine(tokens, menu);
 	}
 
 	fclose(fp);

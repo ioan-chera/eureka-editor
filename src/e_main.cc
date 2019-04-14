@@ -1070,19 +1070,19 @@ void render_clipboard_c::SetThing(int new_id)
 }
 
 
-bool render_clipboard_c::ParseUser(const char ** tokens, int num_tok)
+bool render_clipboard_c::ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "r_clipboard") != 0)
+	if (tokens[0] != "r_clipboard" || tokens.size() <= 1)
 		return false;
 
-	if (strcmp(tokens[1], "tex") == 0)
-		SetTex(tokens[2]);
+	if (tokens[1] == "tex")
+		SetTex(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "flat") == 0)
-		SetFlat(tokens[2]);
+	if (tokens[1] == "flat")
+		SetFlat(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "thing") == 0)
-		thing = atoi(tokens[2]);
+	if (tokens[1] == "thing")
+		thing = atoi(tokens[2].c_str());
 
 	return true;
 }
@@ -1244,12 +1244,13 @@ void RecUsed_WriteUser(FILE *fp)
 }
 
 
-bool RecUsed_ParseUser(const char ** tokens, int num_tok)
+bool RecUsed_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "recent_used") != 0 || num_tok < 2)
+	size_t num_tok = tokens.size();
+	if (tokens[0] != "recent_used" || num_tok < 2)
 		return false;
 
-	if (strcmp(tokens[1], "clear") == 0)
+	if (tokens[1] == "clear")
 	{
 		RecUsed_ClearAll();
 		return true;
@@ -1262,15 +1263,15 @@ bool RecUsed_ParseUser(const char ** tokens, int num_tok)
 	switch (tokens[1][0])
 	{
 		case 'T':
-			recent_textures.insert(tokens[2]);
+			recent_textures.insert(tokens[2].c_str());
 			break;
 
 		case 'F':
-			recent_flats.insert(tokens[2]);
+			recent_flats.insert(tokens[2].c_str());
 			break;
 
 		case 'O':
-			recent_things.insert(tokens[2]);
+			recent_things.insert(tokens[2].c_str());
 			break;
 
 		default:
@@ -1344,38 +1345,39 @@ void Editor_DefaultState()
 }
 
 
-bool Editor_ParseUser(const char ** tokens, int num_tok)
+bool Editor_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "edit_mode") == 0 && num_tok >= 2)
+	size_t num_tok = tokens.size();
+	if (tokens[0] == "edit_mode" && num_tok >= 2)
 	{
 		Editor_ChangeMode(tokens[1][0]);
 		return true;
 	}
 
-	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "render_mode" && num_tok >= 2)
 	{
-		edit.render3d = atoi(tokens[1]);
+		edit.render3d = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "sector_render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "sector_render_mode" && num_tok >= 2)
 	{
-		edit.sector_render_mode = atoi(tokens[1]);
+		edit.sector_render_mode = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "thing_render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "thing_render_mode" && num_tok >= 2)
 	{
-		edit.thing_render_mode = atoi(tokens[1]);
+		edit.thing_render_mode = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
+	if (tokens[0] == "show_object_numbers" && num_tok >= 2)
 	{
-		edit.show_object_numbers = atoi(tokens[1]);
+		edit.show_object_numbers = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}

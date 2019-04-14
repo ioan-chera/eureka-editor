@@ -153,16 +153,16 @@ void UI_Tile::MaximiseRight()
 }
 
 
-bool UI_Tile::ParseUser(const char ** tokens, int num_tok)
+bool UI_Tile::ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "br_width") == 0 && num_tok >= 2)
+	if (tokens[0] == "br_width" && tokens.size() >= 2)
 	{
 		bool was_visible = right->visible();
 
 		if (was_visible)
 			HideRight();
 
-		right_W = atoi(tokens[1]);
+		right_W = atoi(tokens[1].c_str());
 
 		if (was_visible)
 			ShowRight();

@@ -104,7 +104,7 @@ extern Editor_State_t  edit;
 
 void Editor_Init();
 void Editor_DefaultState();
-bool Editor_ParseUser(const char ** tokens, int num_tok);
+bool Editor_ParseUser(const std::vector<std::string> &tokens);
 void Editor_WriteUser(FILE *fp);
 
 void Editor_ClearErrorMode();
@@ -188,7 +188,7 @@ public:
 	void SetFlat(const char *new_flat);
 	void SetThing(int new_id);
 
-	bool ParseUser(const char ** tokens, int num_tok);
+	bool ParseUser(const std::vector<std::string> &tokens);
 	void WriteUser(FILE *fp);
 };
 
@@ -233,7 +233,7 @@ extern Recently_used  recent_things;
 
 void RecUsed_ClearAll();
 void RecUsed_WriteUser(FILE *fp);
-bool RecUsed_ParseUser(const char ** tokens, int num_tok);
+bool RecUsed_ParseUser(const std::vector<std::string> &tokens);
 
 
 #endif  /* __EUREKA_LEVELS_H__ */
