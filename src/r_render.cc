@@ -2355,7 +2355,7 @@ void UI_Render3D::IB_Highlight(int& cx, int& cy)
 			const thingtype_t &info = M_GetThingType(th->type);
 
 			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
-					 r_edit.hl.num, info.desc);
+					 r_edit.hl.num, info.desc.c_str());
 
 		}
 		else if (r_edit.hl.isSector())

@@ -1323,7 +1323,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 	{
 		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		if (strncmp(info.desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 		{
 			bump_unknown_type(types, Things[n]->type);
 
@@ -1496,13 +1496,13 @@ static bool TH_always_spawned(int type)
 		return true;
 
 	// Polyobject things
-	if (strstr(info.desc, "Polyobj") != NULL ||
-		strstr(info.desc, "PolyObj") != NULL)
+	if (strstr(info.desc.c_str(), "Polyobj") != NULL ||
+		strstr(info.desc.c_str(), "PolyObj") != NULL)
 		return true;
 
 	// ambient sounds in Heretic and Hexen
-	if (strstr(info.desc, "Snd") != NULL ||
-		strstr(info.desc, "Sound") != NULL)
+	if (strstr(info.desc.c_str(), "Snd") != NULL ||
+		strstr(info.desc.c_str(), "Sound") != NULL)
 		return true;
 
 	return false;
@@ -1630,7 +1630,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 			continue;
 
 		// ignore unknown things
-		if (strncmp(info.desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 			continue;
 
 		// TODO: config option: treat ceiling things as non-blocking

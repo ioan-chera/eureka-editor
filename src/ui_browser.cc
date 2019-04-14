@@ -790,7 +790,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 	{
 		const thingtype_t &info = TI->second;
 
-		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info.desc);
+		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info.desc.c_str());
 
 		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info.group);
 

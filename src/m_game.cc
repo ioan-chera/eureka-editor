@@ -620,7 +620,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info.flags  = ParseThingdefFlags(argv[3]);
 		info.radius = atoi(argv[4]);
 		info.sprite = argv[5];
-		info.desc   = StringDup(argv[6]);
+		info.desc   = argv[6];
 		info.scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
 
 		int arg_count = MIN(nargs - 7, 5);

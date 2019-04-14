@@ -195,7 +195,7 @@ void UI_DefaultProps::UpdateThingDesc()
 {
 	const thingtype_t &info = M_GetThingType(default_thing);
 
-	th_desc->value(info.desc);
+	th_desc->value(info.desc.c_str());
 	th_sprite->GetSprite(default_thing, FL_DARK2);
 }
 
@@ -409,7 +409,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 	const thingtype_t &info = M_GetThingType(value);
 
-	box->th_desc->value(info.desc);
+	box->th_desc->value(info.desc.c_str());
 	box->th_sprite->GetSprite(value, FL_DARK2);
 }
 

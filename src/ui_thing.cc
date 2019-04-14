@@ -357,7 +357,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	const thingtype_t &info = M_GetThingType(new_type);
 
-	box->desc->value(info.desc);
+	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(new_type, FL_DARK2);
 
 	selection_c list;
@@ -389,7 +389,7 @@ void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	const thingtype_t &info = M_GetThingType(value);
 
-	box->desc->value(info.desc);
+	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(value, FL_DARK2);
 }
 
@@ -875,7 +875,7 @@ void UI_ThingBox::UpdateField(int field)
 		if (is_thing(obj))
 		{
 			const thingtype_t &info = M_GetThingType(Things[obj]->type);
-			desc->value(info.desc);
+			desc->value(info.desc.c_str());
 			type->value(std::to_string(Things[obj]->type).c_str());
 			sprite->GetSprite(Things[obj]->type, FL_DARK2);
 		}

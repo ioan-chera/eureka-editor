@@ -77,7 +77,7 @@ struct thingtype_t
 	short radius;    // radius of thing
 	float scale;	 // scaling (1.0 is normal)
 
-	const char *desc;    // short description of the thing
+	std::string desc;    // short description of the thing
 	std::string sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
 	const char *args[5]; // args used when spawned (Hexen)
