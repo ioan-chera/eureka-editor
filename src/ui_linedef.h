@@ -105,7 +105,7 @@ private:
 
 	int SolidMask(const LineDef *L, int side) const;
 
-	const char *GeneralizedDesc(int type_num);
+	std::string GeneralizedDesc(int type_num);
 
 private:
 	static void    type_callback(Fl_Widget *, void *);
