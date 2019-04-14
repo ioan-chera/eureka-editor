@@ -402,7 +402,7 @@ void CMD_EditLump()
 			return;
 
 		// check if user typed name of current level
-		if (y_stricmp(lump_name.c_str(), Level_name) == 0)
+		if (y_stricmp(lump_name, Level_name) == 0)
 			lump_name = EDLUMP_HEADER;
 	}
 
@@ -445,7 +445,7 @@ void CMD_EditLump()
 	if (lump_name == EDLUMP_HEADER)
 	{
 		editor->LoadMemory(HeaderData);
-		editor->SetTitle(Level_name);
+		editor->SetTitle(Level_name.c_str());
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{

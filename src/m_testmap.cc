@@ -251,7 +251,7 @@ static const char *CalcEXEName(const port_path_info_t *info)
 
 static const char * CalcWarpString()
 {
-	SYS_ASSERT(Level_name);
+	SYS_ASSERT(!Level_name.empty());
 
 	static char buffer[128];
 
@@ -259,11 +259,11 @@ static const char * CalcWarpString()
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (strlen(Level_name) >= 4 &&
+	if (Level_name.length() >= 4 &&
 		y_strnicmp(Level_name, "MAP", 3) == 0 &&
 		isdigit(Level_name[3]))
 	{
-		const char * p = Level_name + 3;
+		const char * p = Level_name.c_str() + 3;
 
 		while (*p == '0' && isdigit(p[1]))
 			p++;
@@ -274,18 +274,18 @@ static const char * CalcWarpString()
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (strlen(Level_name) >= 4 &&
+	if (Level_name.length() >= 4 &&
 		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
 		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
 	{
-		snprintf(buffer, sizeof(buffer), "-warp %c %s", Level_name[1], Level_name + 3);
+		snprintf(buffer, sizeof(buffer), "-warp %c %s", Level_name[1], Level_name.c_str() + 3);
 		return buffer;
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	const char *p = Level_name;
+	const char *p = Level_name.c_str();
 
 	while (*p && !isdigit(*p))
 		p++;

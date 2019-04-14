@@ -580,7 +580,7 @@ bool M_TryOpenMostRecent()
 	if (wad->LevelFind(map_name) >= 0)
 		Level_name = map_name;
 	else
-		Level_name = NULL;
+		Level_name.clear();
 
 	Pwad_name = filename;
 
@@ -784,7 +784,7 @@ std::string M_PickDefaultIWAD()
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (Level_name && toupper(Level_name[0]) == 'E')
+	if (!Level_name.empty() && toupper(Level_name[0]) == 'E')
 	{
 		default_game = "doom";
 	}

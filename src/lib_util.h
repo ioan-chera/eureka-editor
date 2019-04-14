@@ -27,9 +27,27 @@
 #ifndef __EUREKA_LIB_UTIL_H__
 #define __EUREKA_LIB_UTIL_H__
 
+#include <string>
 
 int y_stricmp (const char *s1, const char *s2);
+inline static int y_stricmp (const char *s1, const std::string &s2)
+{
+	return y_stricmp(s1, s2.c_str());
+}
+
+inline static int y_stricmp (const std::string &s1, const char *s2)
+{
+	return y_stricmp(s1.c_str(), s2);
+}
+inline static int y_stricmp (const std::string &s1, const std::string &s2)
+{
+	return y_stricmp(s1.c_str(), s2.c_str());
+}
 int y_strnicmp (const char *s1, const char *s2, size_t len);
+inline static int y_strnicmp (const std::string &s1, const char *s2, size_t len)
+{
+	return y_strnicmp(s1.c_str(), s2, len);
+}
 
 void y_strupr (char *str);
 void y_strlowr (char *str);

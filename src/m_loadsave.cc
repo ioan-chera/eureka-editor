@@ -354,7 +354,7 @@ void CMD_FreshMap()
 		return;
 
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
@@ -1012,7 +1012,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	Level_name = StringUpper(level);
 
-	Status_Set("Loaded %s", Level_name);
+	Status_Set("Loaded %s", Level_name.c_str());
 
 	if (main_win)
 	{
@@ -1252,7 +1252,7 @@ void CMD_FlipMap()
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
-	int lev_idx = wad->LevelFind(Level_name);
+	int lev_idx = wad->LevelFind(Level_name.c_str());
 	int max_idx = wad->LevelCount() - 1;
 
 	if (max_idx < 0)
@@ -1652,13 +1652,13 @@ static void SaveLevel(const char *level)
 
 	M_WriteEurekaLump(edit_wad);
 
-	M_AddRecent(edit_wad->PathName(), Level_name);
+	M_AddRecent(edit_wad->PathName(), Level_name.c_str());
 
-	Status_Set("Saved %s", Level_name);
+	Status_Set("Saved %s", Level_name.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+		main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1693,9 +1693,9 @@ bool M_SaveMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Saving Map : %s in %s\n", Level_name, edit_wad->PathName());
+	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName());
 
-	SaveLevel(Level_name);
+	SaveLevel(Level_name.c_str());
 
 	return true;
 }
@@ -1788,7 +1788,7 @@ bool M_ExportMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
 	dialog->PopulateButtons(toupper(Level_name[0]), wad);
 
@@ -1871,7 +1871,7 @@ void CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, edit_wad);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad);
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
@@ -1892,11 +1892,11 @@ void CMD_CopyMap()
 	}
 
 	// perform the copy (just a save)
-	LogPrintf("Copying Map : %s --> %s\n", Level_name, new_name);
+	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name);
 
 	SaveLevel(new_name);
 
-	Status_Set("Copied to %s", Level_name);
+	Status_Set("Copied to %s", Level_name.c_str());
 }
 
 
@@ -1917,7 +1917,7 @@ void CMD_RenameMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name, edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]
@@ -1953,7 +1953,7 @@ void CMD_RenameMap()
 
 
 	// perform the rename
-	short lev_num = edit_wad->LevelFind(Level_name);
+	short lev_num = edit_wad->LevelFind(Level_name.c_str());
 
 	if (lev_num >= 0)
 	{
@@ -1966,9 +1966,9 @@ void CMD_RenameMap()
 
 	Level_name = StringUpper(new_name);
 
-	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+	main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
 
-	Status_Set("Renamed to %s", Level_name);
+	Status_Set("Renamed to %s", Level_name.c_str());
 }
 
 
@@ -2001,9 +2001,9 @@ void CMD_DeleteMap()
 		return;
 	}
 
-	LogPrintf("Deleting Map : %s...\n", Level_name);
+	LogPrintf("Deleting Map : %s...\n", Level_name.c_str());
 
-	short lev_num = edit_wad->LevelFind(Level_name);
+	short lev_num = edit_wad->LevelFind(Level_name.c_str());
 
 	if (lev_num < 0)
 	{

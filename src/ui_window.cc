@@ -368,12 +368,12 @@ void UI_MainWindow::SetTitle(const char *wad_name, const char *map_name,
 	if (wad_name)
 	{
 		wad_name = fl_filename_name(wad_name);
-		snprintf(title_buf, sizeof(title_buf), "%s (%s)%s", wad_name, Level_name,
+		snprintf(title_buf, sizeof(title_buf), "%s (%s)%s", wad_name, Level_name.c_str(),
 				read_only ? " [Read-Only]" : "");
 	}
 	else
 	{
-		snprintf(title_buf, sizeof(title_buf), "Unsaved %s", Level_name);
+		snprintf(title_buf, sizeof(title_buf), "Unsaved %s", Level_name.c_str());
 	}
 
 	// this just seems like visual noise, disabled for now

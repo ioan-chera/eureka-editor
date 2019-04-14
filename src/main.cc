@@ -79,7 +79,7 @@ std::vector< const char * > Resource_list;
 
 std::string Game_name;
 const char *Port_name;
-const char *Level_name;
+std::string Level_name;
 
 map_format_e Level_format;
 
@@ -453,12 +453,12 @@ static const char * DetermineLevel()
 
 	int level_number = 0;
 
-	if (Level_name && Level_name[0])
+	if (!Level_name.empty() && Level_name[0])
 	{
 		if (! isdigit(Level_name[0]))
-			return StringUpper(Level_name);
+			return StringUpper(Level_name.c_str());
 
-		level_number = atoi(Level_name);
+		level_number = atoi(Level_name.c_str());
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -1064,7 +1064,7 @@ int main(int argc, char *argv[])
 		MasterDir_Add(edit_wad);
 	}
 	// don't auto-load when --iwad or --warp was used on the command line
-	else if (auto_load_recent && Iwad_name.empty() && !Level_name)
+	else if (auto_load_recent && Iwad_name.empty() && Level_name.empty())
 	{
 		if (M_TryOpenMostRecent())
 		{
@@ -1104,15 +1104,15 @@ int main(int argc, char *argv[])
 	Level_name = DetermineLevel();
 
 	// config file parsing can depend on the map format, so get it now
-	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
+	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name.c_str());
 
 	Main_LoadResources();
 
 
 	// load the initial level
-	LogPrintf("Loading initial map : %s\n", Level_name);
+	LogPrintf("Loading initial map : %s\n", Level_name.c_str());
 
-	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
+	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name.c_str());
 
 
 	Main_Loop();
