@@ -61,13 +61,12 @@ struct sectortype_t
 
 
 // thinggroup <letter> <colour> <description>
-typedef struct
+struct thinggroup_t
 {
 	char group;         // group letter
 	rgb_color_t color;  // RGB colour
-	const char *desc;   // Description of thing group
-}
-thinggroup_t;
+	std::string desc;   // Description of thing group
+};
 
 
 // thing <number> <group> <flags> <radius> <description> [<sprite>]  [ arg1..arg5 ]

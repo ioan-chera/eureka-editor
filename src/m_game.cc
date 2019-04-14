@@ -604,7 +604,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		thinggroup_t &tg = thing_groups[argv[1][0]];
 		tg.group = argv[1][0];
 		tg.color = ParseColor(argv[2]);
-		tg.desc  = StringDup(argv[3]);
+		tg.desc  = argv[3];
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)
