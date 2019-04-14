@@ -48,7 +48,7 @@ bool FileDelete(const char *filename);
 bool FileChangeDir(const char *dir_name);
 bool FileMakeDir(const char *dir_name);
 
-u8_t *FileLoad(const char *filename, int *length);
+bool FileLoad(const char *filename, std::vector<u8_t> &result);
 void FileFree(u8_t *mem);
 
 // miscellanous
