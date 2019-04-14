@@ -62,7 +62,7 @@ std::string StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 
 void StringRemoveCRLF(char *str);
-char *StringTidy(const char *str, const char *bad_chars = "");
+std::string StringTidy(const char *str, const char *bad_chars = "");
 
 void CheckTypeSizes();
 

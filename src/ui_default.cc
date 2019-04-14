@@ -603,9 +603,9 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default light_level %d\n",  default_light_level);
 	fprintf(fp, "default thing %d\n",  default_thing);
 
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\""));
-	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
-	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\"").c_str());
+	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\"").c_str());
+	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\"").c_str());
 }
 
 

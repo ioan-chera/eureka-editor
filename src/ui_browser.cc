@@ -1773,7 +1773,7 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 	if (alpha)
 		fprintf(fp, "browser %c sort %d\n", kind, 1 - alpha->value());
 
-	fprintf(fp, "browser %c search \"%s\"\n", kind, StringTidy(search->value(), "\""));
+	fprintf(fp, "browser %c search \"%s\"\n", kind, StringTidy(search->value(), "\"").c_str());
 
 	if (pics)
 		fprintf(fp, "browser %c pics %d\n", kind, pics->value());

@@ -221,16 +221,14 @@ void StringRemoveCRLF(char *str)
 }
 
 
-char * StringTidy(const char *str, const char *bad_chars)
+std::string StringTidy(const char *str, const char *bad_chars)
 {
-	char *buf  = StringNew(static_cast<int>(strlen(str) + 2));
-	char *dest = buf;
+	std::string buf;
+	buf.reserve(strlen(str) + 2);
 
 	for ( ; *str ; str++)
 		if (isprint(*str) && ! strchr(bad_chars, *str))
-			*dest++ = *str;
-
-	*dest = 0;
+			buf.push_back(*str);
 
 	return buf;
 }

@@ -1089,8 +1089,8 @@ bool render_clipboard_c::ParseUser(const char ** tokens, int num_tok)
 
 void render_clipboard_c::WriteUser(FILE *fp)
 {
-	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(tex,  "\""));
-	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(flat, "\""));
+	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(tex,  "\"").c_str());
+	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(flat, "\"").c_str());
 	fprintf(fp, "r_clipboard thing %d\n",    thing);
 }
 
@@ -1241,7 +1241,7 @@ void Recently_used::WriteUser(FILE *fp, char letter)
 {
 	for (int i = 0 ; i < size ; i++)
 	{
-		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i]));
+		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i]).c_str());
 	}
 }
 
