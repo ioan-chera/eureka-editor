@@ -1453,8 +1453,8 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 			{
 				const Thing *T = Things[*it];
 
-				const thingtype_t *info = M_GetThingType(T->type);
-				int r = info->radius;
+				const thingtype_t &info = M_GetThingType(T->type);
+				int r = info.radius;
 
 				if (T->x - r < *x1) *x1 = T->x - r;
 				if (T->y - r < *y1) *y1 = T->y - r;

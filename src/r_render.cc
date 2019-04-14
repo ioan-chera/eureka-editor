@@ -1199,7 +1199,7 @@ public:
 	{
 		Thing *th = Things[th_index];
 
-		const thingtype_t *info = M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(th->type);
 
 		float x = th->x - view.x;
 		float y = th->y - view.y;
@@ -1213,7 +1213,7 @@ public:
 
 		bool is_unknown = false;
 
-		float scale = info->scale;
+		float scale = info.scale;
 
 		Img_c *sprite = W_GetSprite(th->type);
 		if (! sprite)
@@ -1243,7 +1243,7 @@ public:
 
 		int h1, h2;
 
-		if (info && (info->flags & THINGDEF_CEIL))
+		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
 			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
@@ -1264,7 +1264,7 @@ public:
 		dw->sd  = NULL;
 		dw->sec = NULL;
 
-		dw->side = info ? info->flags : 0;
+		dw->side = info.flags;
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
@@ -2352,10 +2352,10 @@ void UI_Render3D::IB_Highlight(int& cx, int& cy)
 		if (r_edit.hl.isThing())
 		{
 			const Thing *th = Things[r_edit.hl.num];
-			const thingtype_t *info = M_GetThingType(th->type);
+			const thingtype_t &info = M_GetThingType(th->type);
 
 			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
-					 r_edit.hl.num, info->desc);
+					 r_edit.hl.num, info.desc);
 
 		}
 		else if (r_edit.hl.isSector())

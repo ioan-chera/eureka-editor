@@ -44,7 +44,7 @@ extern std::map<char, thinggroup_t> thing_groups;
 
 extern std::map<int, linetype_t> line_types;
 extern std::map<int, sectortype_t> sector_types;
-extern std::map<int, thingtype_t *>  thing_types;
+extern std::map<int, thingtype_t>  thing_types;
 
 
 #define  BROWBACK_COL  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
@@ -738,7 +738,7 @@ void UI_Browser_Box::Populate_Sprites()
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<int, thingtype_t *>::iterator TI;
+	std::map<int, thingtype_t>::iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -747,16 +747,16 @@ void UI_Browser_Box::Populate_Sprites()
 
 	for (TI = thing_types.begin() ; TI != thing_types.end() ; TI++)
 	{
-		thingtype_t *info = TI->second;
+		const thingtype_t &info = TI->second;
 
 		// ignore sprite-less things
-		if (y_stricmp(info->sprite, "NULL") == 0)
+		if (y_stricmp(info.sprite, "NULL") == 0)
 			continue;
 
 		if (alpha->value() == 0)
 			snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
 		else
-			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
+			snprintf(full_desc, sizeof(full_desc), "%s", info.sprite);
 
 		int pic_w = 64;
 		int pic_h = 72;
@@ -769,7 +769,7 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, "", TI->first, info->group,
+		                                      full_desc, "", TI->first, info.group,
 		                                      pic_w, pic_h, pic);
 
 		pic->callback(Browser_Item::thing_callback, item);
@@ -781,7 +781,7 @@ void UI_Browser_Box::Populate_Sprites()
 
 void UI_Browser_Box::Populate_ThingTypes()
 {
-	std::map<int, thingtype_t *>::iterator TI;
+	std::map<int, thingtype_t>::iterator TI;
 
 	int y = scroll->y();
 
@@ -792,11 +792,11 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 	for (TI = thing_types.begin() ; TI != thing_types.end() ; TI++)
 	{
-		thingtype_t *info = TI->second;
+		const thingtype_t &info = TI->second;
 
-		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info->desc);
+		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info.desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info.group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
 

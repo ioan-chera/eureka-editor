@@ -87,8 +87,8 @@ bool ThingsOverlap(int th1, int th2)
 	const Thing *T1 = Things[th1];
 	const Thing *T2 = Things[th2];
 
-	int r1 = M_GetThingType(T1->type)->radius;
-	int r2 = M_GetThingType(T2->type)->radius;
+	int r1 = M_GetThingType(T1->type).radius;
+	int r2 = M_GetThingType(T2->type).radius;
 
 	int dx = abs(T1->x - T2->x);
 	int dy = abs(T1->y - T2->y);

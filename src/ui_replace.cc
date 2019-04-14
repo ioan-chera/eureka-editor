@@ -816,8 +816,8 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 	{
 		case 0: // Things
 		{
-			const thingtype_t *info = M_GetThingType(type_num);
-			desc->value(info->desc);
+			const thingtype_t &info = M_GetThingType(type_num);
+			desc->value(info.desc);
 			 pic->GetSprite(type_num, FL_DARK2);
 			break;
 		}
