@@ -624,30 +624,26 @@ void UI_Browser_Box::Sort()
 }
 
 
-const char * TidyLineDesc(const char *name)
+std::string TidyLineDesc(const char *name)
 {
 	// escapes any '&' characters for FLTK
 
 	if (! strchr(name, '&'))
 		return name;
 
-	static char buffer[FL_PATH_MAX];
-
-	char *dest = buffer;
+	std::string buffer;
+	buffer.reserve(FL_PATH_MAX);
 
 	for (const char *src = name ; *src ; src++)
 	{
 		if (*src == '&')
 		{
-			*dest++ = '&';
-			*dest++ = '&';
+			buffer += "&&";
 			continue;
 		}
 
-		*dest++ = *src;
+		buffer.push_back(*src);
 	}
-
-	*dest = 0;
 
 	return buffer;
 }
@@ -821,7 +817,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		const linetype_t &info = TI->second;
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
-		         TidyLineDesc(info.desc.c_str()));
+		         TidyLineDesc(info.desc.c_str()).c_str());
 
 		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info.group);
 
