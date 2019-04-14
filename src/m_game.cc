@@ -44,7 +44,7 @@ std::map<char, thinggroup_t> thing_groups;
 std::map<char, texturegroup_t> texture_groups;
 
 std::map<int, linetype_t> line_types;
-std::map<int, sectortype_t *> sector_types;
+std::map<int, sectortype_t> sector_types;
 std::map<int, thingtype_t *>  thing_types;
 
 std::map<std::string, char> texture_assigns;
@@ -592,11 +592,8 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		int number = atoi(argv[1]);
 
-		sectortype_t *info = new sectortype_t;
-
-		info->desc = StringDup(argv[2]);
-
-		sector_types[number] = info;
+		sectortype_t &info = sector_types[number];
+		info.desc = StringDup(argv[2]);
 	}
 
 	else if (y_stricmp(argv[0], "thinggroup") == 0)
@@ -1232,9 +1229,9 @@ bool is_special_tex(const char *tex)
 }
 
 
-const sectortype_t * M_GetSectorType(int type)
+const sectortype_t &M_GetSectorType(int type)
 {
-	std::map<int, sectortype_t *>::iterator SI;
+	std::map<int, sectortype_t>::iterator SI;
 
 	SI = sector_types.find(type);
 
@@ -1246,7 +1243,7 @@ const sectortype_t * M_GetSectorType(int type)
 		"UNKNOWN TYPE"
 	};
 
-	return &dummy_type;
+	return dummy_type;
 }
 
 
