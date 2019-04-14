@@ -41,7 +41,7 @@
 
 std::map<char, linegroup_t> line_groups;
 std::map<char, thinggroup_t> thing_groups;
-std::map<char, texturegroup_t *> texture_groups;
+std::map<char, texturegroup_t> texture_groups;
 
 std::map<int, linetype_t *>   line_types;
 std::map<int, sectortype_t *> sector_types;
@@ -655,12 +655,9 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		texturegroup_t * tg = new texturegroup_t;
-
-		tg->group = argv[1][0];
-		tg->desc  = StringDup(argv[2]);
-
-		texture_groups[tg->group] = tg;
+		texturegroup_t & tg = texture_groups[argv[1][0]];
+		tg.group = argv[1][0];
+		tg.desc  = StringDup(argv[2]);
 	}
 
 	else if (y_stricmp(argv[0], "texture") == 0)
@@ -1459,25 +1456,25 @@ std::string M_TextureCategoryString(char *letters, bool do_flats)
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
-	std::map<char, texturegroup_t *>::iterator IT;
+	std::map<char, texturegroup_t>::iterator IT;
 
 	for (IT = texture_groups.begin() ; IT != texture_groups.end() ; IT++)
 	{
-		texturegroup_t *G = IT->second;
+		const texturegroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (do_flats && !FlatCategory_IsUsed(G->group))
+		if (do_flats && !FlatCategory_IsUsed(G.group))
 			continue;
 
-		if (!do_flats && !TextureCategory_IsUsed(G->group))
+		if (!do_flats && !TextureCategory_IsUsed(G.group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
 		buffer += '|';
-		buffer += G->desc;
+		buffer += G.desc;
 
 		letters[L_index++] = IT->first;
 	}
