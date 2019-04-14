@@ -154,7 +154,7 @@ public:
 	{ }
 
 	// returns lump name on success, NULL on cancel
-	const char * Run();
+	std::string Run();
 
 private:
 	void CheckInput();
@@ -351,7 +351,7 @@ void UI_ChooseTextLump::button_callback(Fl_Widget *w, void *data)
 }
 
 
-const char * UI_ChooseTextLump::Run()
+std::string UI_ChooseTextLump::Run()
 {
 	set_modal();
 	show();
@@ -362,15 +362,15 @@ const char * UI_ChooseTextLump::Run()
 	}
 
 	if (action == ACT_CLOSE)
-		return NULL;
+		return "";
 
 	const char *name = lump_name->value();
 
 	if (name[0] == 0)
-		return NULL;
+		return "";
 
 	// return a copy of the name
-	return StringDup(name);
+	return name;
 }
 
 
