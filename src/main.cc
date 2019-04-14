@@ -75,7 +75,7 @@ std::string Iwad_name;
 std::string Pwad_name;
 
 std::vector<std::string> Pwad_list;
-std::vector< const char * > Resource_list;
+std::vector<std::string> Resource_list;
 
 std::string Game_name;
 std::string Port_name;
@@ -880,9 +880,9 @@ void Main_LoadResources()
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
+	for (const auto &resource : Resource_list)
 	{
-		LoadResourceFile(Resource_list[i]);
+		LoadResourceFile(resource.c_str());
 	}
 
 	if (edit_wad)

@@ -143,7 +143,7 @@ extern std::string Iwad_name;   // Filename of the iwad
 extern std::string Pwad_name;   // Filename of current wad, or NULL
 
 extern std::vector<std::string> Pwad_list;
-extern std::vector< const char * > Resource_list;
+extern std::vector<std::string> Resource_list;
 
 
 extern int	default_floor_h;
