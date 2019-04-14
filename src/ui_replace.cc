@@ -835,7 +835,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 						(game_info.gen_sectors) ? 31 : 65535;
 
 			const sectortype_t &info = M_GetSectorType(type_num & mask);
-			desc->value(info.desc);
+			desc->value(info.desc.c_str());
 			break;
 		}
 

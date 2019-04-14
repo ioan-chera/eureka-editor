@@ -54,11 +54,10 @@ struct linetype_t
 
 
 // sector <number> <description>
-typedef struct
+struct sectortype_t
 {
-	const char *desc;
-}
-sectortype_t;
+	std::string desc;
+};
 
 
 // thinggroup <letter> <colour> <description>

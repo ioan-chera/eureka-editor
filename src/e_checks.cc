@@ -753,7 +753,7 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 		const sectortype_t &info = M_GetSectorType(type_num);
 
-		if (strncmp(info.desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 		{
 			bump_unknown_type(types, type_num);
 			list.set(n);

@@ -593,7 +593,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		int number = atoi(argv[1]);
 
 		sectortype_t &info = sector_types[number];
-		info.desc = StringDup(argv[2]);
+		info.desc = argv[2];
 	}
 
 	else if (y_stricmp(argv[0], "thinggroup") == 0)

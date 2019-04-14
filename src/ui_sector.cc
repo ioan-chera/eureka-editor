@@ -542,7 +542,7 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	const sectortype_t &info = M_GetSectorType(value);
 
-	box->desc->value(info.desc);
+	box->desc->value(info.desc.c_str());
 }
 
 
@@ -772,7 +772,7 @@ void UI_SectorBox::UpdateField(int field)
 			type->value(std::to_string(value & mask).c_str());
 
 			const sectortype_t &info = M_GetSectorType(value & mask);
-			desc->value(info.desc);
+			desc->value(info.desc.c_str());
 
 			if (game_info.gen_sectors)
 			{
