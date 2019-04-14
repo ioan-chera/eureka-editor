@@ -1379,14 +1379,13 @@ static bool FlatCategory_IsUsed(char group)
 }
 
 
-const char *M_LineCategoryString(char *letters)
+std::string M_LineCategoryString(char *letters)
 {
-	static char buffer[2000];
+	std::string buffer = "ALL";
 
 	int L_index = 0;
 
 	// the "ALL" category is always first
-	strcpy(buffer, "ALL");
 	letters[L_index++] = '*';
 
 	std::map<char, linegroup_t *>::iterator IT;
@@ -1403,13 +1402,13 @@ const char *M_LineCategoryString(char *letters)
 			continue;
 
 		// FIXME: potential for buffer overflow here
-		strcat(buffer, "|");
-		strcat(buffer, G->desc.c_str());
+		buffer += '|';
+		buffer += G->desc;
 
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|Other");
+	buffer += "|Other";
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
