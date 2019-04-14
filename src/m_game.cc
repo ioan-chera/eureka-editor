@@ -1449,14 +1449,13 @@ std::string M_ThingCategoryString(char *letters)
 }
 
 
-const char *M_TextureCategoryString(char *letters, bool do_flats)
+std::string M_TextureCategoryString(char *letters, bool do_flats)
 {
-	static char buffer[2000];
+	std::string buffer = "ALL|RECENT";
 
 	int L_index = 0;
 
 	// these common categories are always first
-	strcpy(buffer, "ALL|RECENT");
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
@@ -1477,13 +1476,13 @@ const char *M_TextureCategoryString(char *letters, bool do_flats)
 			continue;
 
 		// FIXME: potential for buffer overflow here
-		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		buffer += '|';
+		buffer += G->desc;
 
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|Other");
+	buffer += "|Other";
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;

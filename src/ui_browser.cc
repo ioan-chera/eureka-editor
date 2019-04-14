@@ -1527,12 +1527,8 @@ void UI_Browser::Populate()
 
 	char letters[64];
 
-	const char *tex_cats = M_TextureCategoryString(letters, false);
-	browsers[0]->SetCategories(tex_cats, letters);
-
-	const char *flat_cats = M_TextureCategoryString(letters, true);
-	browsers[1]->SetCategories(flat_cats, letters);
-
+	browsers[0]->SetCategories(M_TextureCategoryString(letters, false).c_str(), letters);
+	browsers[1]->SetCategories(M_TextureCategoryString(letters, true).c_str(), letters);
 	browsers[2]->SetCategories(M_ThingCategoryString(letters).c_str(), letters);
 	browsers[3]->SetCategories(M_LineCategoryString(letters).c_str(), letters);
 

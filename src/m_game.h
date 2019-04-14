@@ -266,7 +266,7 @@ char M_GetFlatType(const char *name);
 
 std::string M_LineCategoryString(char *letters);
 std::string M_ThingCategoryString(char *letters);
-const char *M_TextureCategoryString(char *letters, bool do_flats);
+std::string M_TextureCategoryString(char *letters, bool do_flats);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 
