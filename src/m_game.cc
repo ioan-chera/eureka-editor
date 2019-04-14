@@ -554,7 +554,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		linegroup_t * lg = new linegroup_t;
 
 		lg->group = argv[1][0];
-		lg->desc  = StringDup(argv[2]);
+		lg->desc = argv[2];
 
 		line_groups[lg->group] = lg;
 	}
@@ -1404,7 +1404,7 @@ const char *M_LineCategoryString(char *letters)
 
 		// FIXME: potential for buffer overflow here
 		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		strcat(buffer, G->desc.c_str());
 
 		letters[L_index++] = IT->first;
 	}

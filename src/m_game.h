@@ -37,12 +37,11 @@
  */
 
 // linegroup <letter> <description>
-typedef struct
+struct linegroup_t
 {
 	char group;
-	const char *desc;
-}
-linegroup_t;
+	std::string desc;
+};
 
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]
