@@ -43,7 +43,7 @@ std::map<char, linegroup_t> line_groups;
 std::map<char, thinggroup_t> thing_groups;
 std::map<char, texturegroup_t> texture_groups;
 
-std::map<int, linetype_t *>   line_types;
+std::map<int, linetype_t> line_types;
 std::map<int, sectortype_t *> sector_types;
 std::map<int, thingtype_t *>  thing_types;
 
@@ -562,26 +562,24 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs < 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		linetype_t * info = new linetype_t;
-
-		memset(info->args, 0, sizeof(info->args));
+		linetype_t info = {};
 
 		int number = atoi(argv[1]);
 
-		info->group = argv[2][0];
-		info->desc  = StringDup(argv[3]);
+		info.group = argv[2][0];
+		info.desc = StringDup(argv[3]);
 
 		int arg_count = MIN(nargs - 3, 5);
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
-				info->args[i] = StringDup(argv[4 + i]);
+				info.args[i] = StringDup(argv[4 + i]);
 		}
 
-		if (line_groups.find( info->group) == line_groups.end())
+		if (line_groups.find(info.group) == line_groups.end())
 		{
 			LogPrintf("%s(%d): unknown line group '%c'\n",
-					pst->fname, pst->lineno,  info->group);
+					pst->fname, pst->lineno, info.group);
 		}
 		else
 			line_types[number] = info;
@@ -1254,12 +1252,12 @@ const sectortype_t * M_GetSectorType(int type)
 
 const linetype_t &M_GetLineType(int type)
 {
-	std::map<int, linetype_t *>::iterator LI;
+	std::map<int, linetype_t>::iterator LI;
 
 	LI = line_types.find(type);
 
 	if (LI != line_types.end())
-		return *LI->second;
+		return LI->second;
 
 	static linetype_t dummy_type =
 	{
@@ -1318,12 +1316,12 @@ char M_GetFlatType(const char *name)
 
 static bool LineCategory_IsUsed(char group)
 {
-	std::map<int, linetype_t *>::iterator IT;
+	std::map<int, linetype_t>::iterator IT;
 
 	for (IT = line_types.begin() ; IT != line_types.end() ; IT++)
 	{
-		linetype_t *info = IT->second;
-		if (info->group == group)
+		const linetype_t &info = IT->second;
+		if (info.group == group)
 			return true;
 	}
 

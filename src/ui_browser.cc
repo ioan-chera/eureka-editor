@@ -42,7 +42,7 @@ extern std::map<std::string, Img_c *> textures;
 extern std::map<char, linegroup_t> line_groups;
 extern std::map<char, thinggroup_t> thing_groups;
 
-extern std::map<int, linetype_t *>   line_types;
+extern std::map<int, linetype_t> line_types;
 extern std::map<int, sectortype_t *> sector_types;
 extern std::map<int, thingtype_t *>  thing_types;
 
@@ -807,7 +807,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 void UI_Browser_Box::Populate_LineTypes()
 {
-	std::map<int, linetype_t *>::iterator TI;
+	std::map<int, linetype_t>::iterator TI;
 
 	int y = scroll->y();
 
@@ -818,12 +818,12 @@ void UI_Browser_Box::Populate_LineTypes()
 
 	for (TI = line_types.begin() ; TI != line_types.end() ; TI++)
 	{
-		linetype_t *info = TI->second;
+		const linetype_t &info = TI->second;
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
-		         TidyLineDesc(info->desc));
+		         TidyLineDesc(info.desc));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info.group);
 
 		item->button->callback(Browser_Item::line_callback, item);
 
