@@ -100,7 +100,7 @@ public:
 public:
 	void Populate();
 
-	void SetCategories(const char *cats, const char *letters);
+	void SetCategories(const char *cats, const std::string &letters);
 
 	void CycleCategory(int dir);
 	void ToggleRecent(bool force_recent);

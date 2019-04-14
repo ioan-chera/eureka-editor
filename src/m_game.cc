@@ -1363,14 +1363,12 @@ static bool FlatCategory_IsUsed(char group)
 }
 
 
-std::string M_LineCategoryString(char *letters)
+std::string M_LineCategoryString(std::string &letters)
 {
 	std::string buffer = "ALL";
 
-	int L_index = 0;
-
 	// the "ALL" category is always first
-	letters[L_index++] = '*';
+	letters = "*";
 
 	std::map<char, linegroup_t>::iterator IT;
 
@@ -1389,26 +1387,23 @@ std::string M_LineCategoryString(char *letters)
 		buffer += '|';
 		buffer += G.desc;
 
-		letters[L_index++] = IT->first;
+		letters.push_back(IT->first);
 	}
 
 	buffer += "|Other";
 
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
+	letters.push_back('-');
 
 	return buffer;
 }
 
 
-std::string M_ThingCategoryString(char *letters)
+std::string M_ThingCategoryString(std::string &letters)
 {
 	std::string buffer = "ALL|RECENT";
-	int L_index = 0;
 
 	// these common categories are always first
-	letters[L_index++] = '*';
-	letters[L_index++] = '^';
+	letters = "*^";
 
 	std::map<char, thinggroup_t>::iterator IT;
 
@@ -1427,27 +1422,24 @@ std::string M_ThingCategoryString(char *letters)
 		buffer += '|';
 		buffer += G.desc;
 
-		letters[L_index++] = IT->first;
+		letters.push_back(IT->first);
 	}
 
 	buffer += "|Other";
 
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
+	letters.push_back('-');
 
 	return buffer;
 }
 
 
-std::string M_TextureCategoryString(char *letters, bool do_flats)
+std::string M_TextureCategoryString(std::string &letters, bool do_flats)
 {
 	std::string buffer = "ALL|RECENT";
 
-	int L_index = 0;
+	letters = "*^";
 
 	// these common categories are always first
-	letters[L_index++] = '*';
-	letters[L_index++] = '^';
 
 	std::map<char, texturegroup_t>::iterator IT;
 
@@ -1469,13 +1461,12 @@ std::string M_TextureCategoryString(char *letters, bool do_flats)
 		buffer += '|';
 		buffer += G.desc;
 
-		letters[L_index++] = IT->first;
+		letters.push_back(IT->first);
 	}
 
 	buffer += "|Other";
 
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
+	letters.push_back('-');
 
 	return buffer;
 }

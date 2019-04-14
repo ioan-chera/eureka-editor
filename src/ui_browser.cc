@@ -902,9 +902,9 @@ void UI_Browser_Box::Populate()
 }
 
 
-void UI_Browser_Box::SetCategories(const char *cats, const char *letters)
+void UI_Browser_Box::SetCategories(const char *cats, const std::string &letters)
 {
-	strncpy(cat_letters, letters, sizeof(cat_letters));
+	strncpy(cat_letters, letters.c_str(), sizeof(cat_letters));
 	cat_letters[sizeof(cat_letters) - 1] = 0;
 
 	category->clear();
@@ -1521,7 +1521,8 @@ void UI_Browser::Populate()
 
 	// setup the categories
 
-	char letters[64];
+	std::string letters;
+	letters.reserve(64);
 
 	browsers[0]->SetCategories(M_TextureCategoryString(letters, false).c_str(), letters);
 	browsers[1]->SetCategories(M_TextureCategoryString(letters, true).c_str(), letters);
