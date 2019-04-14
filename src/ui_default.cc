@@ -417,7 +417,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 void UI_DefaultProps::LoadValues()
 {
 	w_tex->value(default_wall_tex.c_str());
-	f_tex->value(default_floor_tex);
+	f_tex->value(default_floor_tex.c_str());
 	c_tex->value(default_ceil_tex);
 
 	w_pic->GetTex (w_tex->value());
@@ -582,7 +582,7 @@ bool Props_ParseUser(const std::vector<std::string> &tokens)
 		default_thing = atoi(tokens[2].c_str());
 
 	if (tokens[1] == "floor_tex")
-		default_floor_tex = StringDup(tokens[2].c_str());
+		default_floor_tex = tokens[2].c_str();
 
 	if (tokens[1] == "ceil_tex")
 		default_ceil_tex = StringDup(tokens[2].c_str());
@@ -604,7 +604,7 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default thing %d\n",  default_thing);
 
 	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex.c_str(), "\"").c_str());
-	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\"").c_str());
+	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex.c_str(), "\"").c_str());
 	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\"").c_str());
 }
 

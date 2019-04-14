@@ -532,8 +532,8 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		default_wall_tex	= argv[1];
-		default_floor_tex	= StringDup(argv[2]);
+		default_wall_tex = argv[1];
+		default_floor_tex = argv[2];
 		default_ceil_tex	= StringDup(argv[3]);
 	}
 

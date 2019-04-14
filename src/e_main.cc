@@ -1040,7 +1040,7 @@ int render_clipboard_c::GetTexNum()
 int render_clipboard_c::GetFlatNum()
 {
 	if (flat[0] == 0)
-		SetFlat(default_floor_tex);
+		SetFlat(default_floor_tex.c_str());
 
 	return BA_InternaliseString(flat);
 }

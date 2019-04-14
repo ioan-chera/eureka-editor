@@ -358,7 +358,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
 	if (is_pic && Fl::event_button() == 3)
 	{
-		new_tex = BA_InternaliseString(is_floor ? default_floor_tex : default_ceil_tex);
+		new_tex = BA_InternaliseString(is_floor ? default_floor_tex.c_str() : default_ceil_tex);
 	}
 	else if (is_floor)
 	{
@@ -883,7 +883,7 @@ void UI_SectorBox::CB_Cut()
 	if (sel_pics == 0)
 		sel_pics = GetHighlightedPics();
 
-	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_floor = BA_InternaliseString(default_floor_tex.c_str());
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
 	selection_c list;

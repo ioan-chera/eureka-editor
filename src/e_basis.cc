@@ -59,8 +59,8 @@ int default_ceil_h		= 128;
 int default_light_level	= 176;
 int default_thing		= 2001;
 
-std::string default_wall_tex	= "GRAY1";
-const char * default_floor_tex	= "FLAT1";
+std::string default_wall_tex = "GRAY1";
+std::string default_floor_tex = "FLAT1";
 const char * default_ceil_tex	= "FLAT1";
 
 
@@ -164,7 +164,7 @@ void Sector::SetDefaults()
 	floorh = default_floor_h;
 	 ceilh = default_ceil_h;
 
-	floor_tex = BA_InternaliseString(default_floor_tex);
+	floor_tex = BA_InternaliseString(default_floor_tex.c_str());
 	 ceil_tex = BA_InternaliseString(default_ceil_tex);
 
 	light = default_light_level;
