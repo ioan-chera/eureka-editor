@@ -573,7 +573,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
-				info.args[i] = StringDup(argv[4 + i]);
+				info.args[i] = argv[4 + i];
 		}
 
 		if (line_groups.find(info.group) == line_groups.end())

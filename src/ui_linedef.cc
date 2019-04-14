@@ -749,8 +749,8 @@ void UI_LineBox::UpdateField(int field)
 						args[a]->value(std::to_string(arg_val).c_str());
 
 					// set the tooltip
-					if (info.args[a])
-						args[a]->copy_tooltip(info.args[a]);
+					if (!info.args[a].empty())
+						args[a]->copy_tooltip(info.args[a].c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}

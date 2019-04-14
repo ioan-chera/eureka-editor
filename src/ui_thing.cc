@@ -938,8 +938,8 @@ void UI_ThingBox::UpdateField(int field)
 				{
 					args[a]->value(std::to_string(arg_val).c_str());
 
-					if (spec.args[a])
-						args[a]->copy_tooltip(spec.args[a]);
+					if (!spec.args[a].empty())
+						args[a]->copy_tooltip(spec.args[a].c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}

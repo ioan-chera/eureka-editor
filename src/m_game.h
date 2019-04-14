@@ -49,7 +49,7 @@ struct linetype_t
 {
 	char group;
 	std::string desc;
-	const char *args[5];
+	std::string args[5];
 };
 
 
