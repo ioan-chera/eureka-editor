@@ -673,8 +673,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
-	action(ACT_none),
-	port(NULL), map_format(MAPF_INVALID)
+	action(ACT_none), map_format(MAPF_INVALID)
 {
 	callback(close_callback, this);
 
@@ -879,17 +878,17 @@ void UI_ProjectSetup::PopulatePort()
 		var_game = "doom2";
 
 
-	const char *menu_string;
+	std::string menu_string;
 	int menu_value = 0;
 
 	menu_string = M_CollectPortsForMenu(var_game.c_str(), &menu_value, prev_port.c_str());
 
-	if (menu_string[0])
+	if (!menu_string.empty())
 	{
-		port_choice->add  (menu_string);
+		port_choice->add  (menu_string.c_str());
 		port_choice->value(menu_value);
 
-		port = StringDup(port_choice->mvalue()->text);
+		port = port_choice->mvalue()->text;
 	}
 }
 
@@ -1036,9 +1035,7 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	const char * name = w->mvalue()->text;
-
-	that->port = StringDup(name);
+	that->port = w->mvalue()->text;
 
 	that->PopulateMapFormat();
 }
@@ -1113,13 +1110,13 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	// FIXME : deactivate button when this is true
-	if (that->game.empty()|| that->port == NULL)
+	if (that->game.empty() || that->port.empty())
 	{
 		fl_beep();
 		return;
 	}
 
-	M_PortSetupDialog(that->port, that->game.c_str());
+	M_PortSetupDialog(that->port.c_str(), that->game.c_str());
 }
 
 

@@ -912,7 +912,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 
 				string_list_t * list = (string_list_t *)opt->data_ptr;
 
-				list->push_back(StringDup(value, (int)(v - value)));
+				list->push_back(std::string(value, (int)(v - value)));
 
 				while (isspace (*v))
 					v++;
@@ -1187,7 +1187,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 					if (! ignore)
 					{
 						string_list_t * list = (string_list_t *) o->data_ptr;
-						list->push_back(StringDup(argv[0]));
+						list->push_back(argv[0]);
 					}
 				}
 				break;
@@ -1328,7 +1328,7 @@ int M_WriteConfigFile()
 				if (list->empty())
 					fprintf(fp, "{}");
 				else for (unsigned int i = 0 ; i < list->size() ; i++)
-					fprintf(fp, "%s ", list->at(i));
+					fprintf(fp, "%s ", list->at(i).c_str());
 			}
 
 			default:

@@ -101,7 +101,7 @@
  *  Miscellaneous
  */
 
-typedef std::vector< const char * > string_list_t;
+typedef std::vector<std::string> string_list_t;
 
 
 typedef enum

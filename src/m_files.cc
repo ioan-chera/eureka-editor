@@ -758,7 +758,7 @@ void M_LookForIWADs()
 
 	for (unsigned int i = 0 ; i < game_list.size() ; i++)
 	{
-		const char *game = game_list[i];
+		const char *game = game_list[i].c_str();
 
 		// already have it?
 		if (!M_QueryKnownIWAD(game).empty())

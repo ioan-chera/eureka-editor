@@ -240,11 +240,11 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
 
-void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
+void M_CollectKnownDefs(const char *folder, string_list_t & list);
 
 bool M_CheckPortSupportsGame(const char *var_game, const char *port);
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
+std::string M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
 
 std::string M_VariantForGame(const char *game);
 

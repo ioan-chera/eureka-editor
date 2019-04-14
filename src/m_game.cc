@@ -1039,7 +1039,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 static void scanner_add_file(const char *name, int flags, void *priv_dat)
 {
-	std::vector<const char*> * list = (std::vector<const char*> *) priv_dat;
+	string_list_t * list = (string_list_t *) priv_dat;
 
 //	DebugPrintf("  file [%s] flags:%d\n", name, flags);
 
@@ -1055,15 +1055,15 @@ static void scanner_add_file(const char *name, int flags, void *priv_dat)
 
 struct DefName_CMP_pred
 {
-	inline bool operator() (const char *A, const char *B) const
+	inline bool operator() (const std::string &A, const std::string &B) const
 	{
 		return y_stricmp(A, B) < 0;
 	}
 };
 
-void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
+void M_CollectKnownDefs(const char *folder, string_list_t & list)
 {
-	std::vector<const char *> temp_list;
+	string_list_t temp_list;
 
 	static char path[FL_PATH_MAX];
 
@@ -1085,7 +1085,6 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 		if (pos + 1 < temp_list.size() &&
 			y_stricmp(temp_list[pos], temp_list[pos + 1]) == 0)
 		{
-			StringFree(temp_list[pos]);
 			continue;
 		}
 
@@ -1183,36 +1182,35 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name)
+std::string M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name)
 {
-	std::vector<const char *> list;
+	string_list_t list;
 
 	M_CollectKnownDefs("ports", list);
 
 	if (list.empty())
-		return StringDup("");
+		return "";
 
 	// determine final length
 	int length = 2 + (int)list.size();
 	unsigned int i;
 
 	for (i = 0 ; i < list.size() ; i++)
-		length += strlen(list[i]);
+		length += list[i].length();
 
-	char * result = StringNew(length);
-	result[0] = 0;
+	std::string result;
 
 	int entry_id = 0;
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(var_game, list[i]))
+		if (! M_CheckPortSupportsGame(var_game, list[i].c_str()))
 			continue;
 
-		if (result[0])
-			strcat(result, "|");
+		if (!result.empty())
+			result += "|";
 
-		strcat(result, list[i]);
+		result += list[i];
 
 		if (y_stricmp(list[i], exist_name) == 0)
 			*exist_val = entry_id;
