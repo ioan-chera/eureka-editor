@@ -242,12 +242,11 @@ private:
 
 	// newest is at index [0]
 	std::string filenames[MAX_RECENT];
-	const char * map_names[MAX_RECENT];
+	std::string map_names[MAX_RECENT];
 
 public:
 	RecentFiles_c() : size(0)
 	{
-		memset(map_names, 0, sizeof(map_names));
 	}
 
 	~RecentFiles_c()
@@ -262,20 +261,15 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < size);
 
-		return new recent_file_data_c(filenames[index].c_str(), map_names[index]);
+		return new recent_file_data_c(filenames[index].c_str(), map_names[index].c_str());
 	}
 
 	void clear()
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-#ifdef FREE_RECENT_FILES
-			StringFree(filenames[k]);
-			StringFree(map_names[k]);
-#endif
-
 			filenames[k].clear();
-			map_names[k] = NULL;
+			map_names[k].clear();
 		}
 
 		size = 0;
@@ -320,7 +314,7 @@ public:
 		}
 
 		filenames[index].clear();
-		map_names[index] = NULL;
+		map_names[index].clear();
 	}
 
 	void push_front(const char *file, const char *map)
@@ -338,7 +332,7 @@ public:
 		}
 
 		filenames[0] = file;
-		map_names[0] = StringDup(map);
+		map_names[0] = map;
 
 		size++;
 	}
@@ -362,7 +356,7 @@ public:
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
-			fprintf(fp, "recent %s %s\n", map_names[k], filenames[k].c_str());
+			fprintf(fp, "recent %s %s\n", map_names[k].c_str(), filenames[k].c_str());
 		}
 	}
 
@@ -377,7 +371,7 @@ public:
 				(index < 9) ? "&" : "", 1+index, name);
 	}
 
-	void Lookup(int index, std::string *file_v, const char ** map_v)
+	void Lookup(int index, std::string *file_v, std::string *map_v)
 	{
 		SYS_ASSERT(index >= 0);
 		SYS_ASSERT(index < size);
@@ -550,7 +544,7 @@ bool M_TryOpenMostRecent()
 		return false;
 
 	std::string filename;
-	const char *map_name;
+	std::string map_name;
 
 	recent_files.Lookup(0, &filename, &map_name);
 
@@ -576,7 +570,7 @@ bool M_TryOpenMostRecent()
 
 	/* -- OK -- */
 
-	if (wad->LevelFind(map_name) >= 0)
+	if (wad->LevelFind(map_name.c_str()) >= 0)
 		Level_name = map_name;
 	else
 		Level_name.clear();
