@@ -465,9 +465,9 @@ void UI_SideBox::UpdateField()
 	{
 		const SideDef *sd = SideDefs[obj];
 
-		x_ofs->value(Int_TmpStr(sd->x_offset));
-		y_ofs->value(Int_TmpStr(sd->y_offset));
-		  sec->value(Int_TmpStr(sd->sector));
+		x_ofs->value(std::to_string(sd->x_offset).c_str());
+		y_ofs->value(std::to_string(sd->y_offset).c_str());
+		sec->value(std::to_string(sd->sector).c_str());
 
 		const char *lower = sd->LowerTex();
 		const char *rail  = sd->MidTex();

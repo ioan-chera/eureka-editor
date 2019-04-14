@@ -1424,7 +1424,7 @@ void UI_Preferences::LoadValues()
 	edit_def_port->value(default_port.c_str());
 	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
 
-	edit_sectorsize->value(Int_TmpStr(new_sector_size));
+	edit_sectorsize->value(std::to_string(new_sector_size).c_str());
 	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);

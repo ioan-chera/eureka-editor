@@ -82,9 +82,6 @@ double AlongDist(double x, double y, /* coord to test */
 int RoundPOW2(int x);
 
 
-const char * Int_TmpStr(int value);
-
-
 /*
  *  dectoi
  *  If <c> is a decimal digit ("[0-9]"), return its value.

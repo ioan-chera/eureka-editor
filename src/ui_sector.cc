@@ -195,7 +195,7 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 		int hy = Y + 28 * ((i < 2) ? 0 : 1);
 
 		hd_buttons[i] = new Fl_Button(hx, hy+1, 45, 22);
-		hd_buttons[i]->copy_label(Int_TmpStr(headroom_presets[i]));
+		hd_buttons[i]->copy_label(std::to_string(headroom_presets[i]).c_str());
 		hd_buttons[i]->callback(headroom_callback, this);
 	}
 
@@ -275,9 +275,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 
 		BA_End();
 
-		box-> floor_h->value(Int_TmpStr(f_h));
-		box->  ceil_h->value(Int_TmpStr(c_h));
-		box->headroom->value(Int_TmpStr(c_h - f_h));
+		box-> floor_h->value(std::to_string(f_h).c_str());
+		box->  ceil_h->value(std::to_string(c_h).c_str());
+		box->headroom->value(std::to_string(c_h - f_h).c_str());
 	}
 }
 
@@ -669,23 +669,23 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->ce_up)
 	{
-		ExecuteCommand("SEC_Ceil", Int_TmpStr(+mv_step));
+		ExecuteCommand("SEC_Ceil", std::to_string(+mv_step).c_str());
 		return;
 	}
 	else if (w == box->ce_down)
 	{
-		ExecuteCommand("SEC_Ceil", Int_TmpStr(-mv_step));
+		ExecuteCommand("SEC_Ceil", std::to_string(-mv_step).c_str());
 		return;
 	}
 
 	if (w == box->fl_up)
 	{
-		ExecuteCommand("SEC_Floor", Int_TmpStr(+mv_step));
+		ExecuteCommand("SEC_Floor", std::to_string(+mv_step).c_str());
 		return;
 	}
 	else if (w == box->fl_down)
 	{
-		ExecuteCommand("SEC_Floor", Int_TmpStr(-mv_step));
+		ExecuteCommand("SEC_Floor", std::to_string(-mv_step).c_str());
 		return;
 	}
 }
@@ -718,9 +718,9 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			floor_h->value(Int_TmpStr(Sectors[obj]->floorh));
-			ceil_h->value(Int_TmpStr(Sectors[obj]->ceilh));
-			headroom->value(Int_TmpStr(Sectors[obj]->HeadRoom()));
+			floor_h->value(std::to_string(Sectors[obj]->floorh).c_str());
+			ceil_h->value(std::to_string(Sectors[obj]->ceilh).c_str());
+			headroom->value(std::to_string(Sectors[obj]->HeadRoom()).c_str());
 		}
 		else
 		{
@@ -769,7 +769,7 @@ void UI_SectorBox::UpdateField(int field)
 			int mask  = (game_info.gen_sectors == 2) ? 255 :
 						(game_info.gen_sectors) ? 31 : 65535;
 
-			type->value(Int_TmpStr(value & mask));
+			type->value(std::to_string(value & mask).c_str());
 
 			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
@@ -797,8 +797,8 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			light->value(Int_TmpStr(Sectors[obj]->light));
-			tag->value(Int_TmpStr(Sectors[obj]->tag));
+			light->value(std::to_string(Sectors[obj]->light).c_str());
+			tag->value(std::to_string(Sectors[obj]->tag).c_str());
 		}
 		else
 		{

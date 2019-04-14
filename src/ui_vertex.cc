@@ -216,8 +216,8 @@ void UI_VertexBox::UpdateField()
 {
 	if (is_vertex(obj))
 	{
-		pos_x->value(Int_TmpStr(Vertices[obj]->x));
-		pos_y->value(Int_TmpStr(Vertices[obj]->y));
+		pos_x->value(std::to_string(Vertices[obj]->x).c_str());
+		pos_y->value(std::to_string(Vertices[obj]->y).c_str());
 	}
 	else
 	{

@@ -708,7 +708,7 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 	int new_fl = (old_fl + dir) & 15;
 
 	if (new_fl)
-		exfloor->value(Int_TmpStr(new_fl));
+		exfloor->value(std::to_string(new_fl).c_str());
 	else
 		exfloor->value("");
 
@@ -752,7 +752,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_friend->value((options & MTF_Friend) ? 1 : 0);
 
 		if (options & MTF_EXFLOOR_MASK)
-			exfloor->value(Int_TmpStr((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT));
+			exfloor->value(std::to_string((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
 		else
 			exfloor->value("");
 	}
@@ -840,9 +840,9 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = Things[obj];
 
-			pos_x->value(Int_TmpStr(T->x));
-			pos_y->value(Int_TmpStr(T->y));
-			pos_z->value(Int_TmpStr(T->z));
+			pos_x->value(std::to_string(T->x).c_str());
+			pos_y->value(std::to_string(T->y).c_str());
+			pos_z->value(std::to_string(T->z).c_str());
 
 		}
 		else
@@ -856,7 +856,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
 		if (is_thing(obj))
-			angle->value(Int_TmpStr(Things[obj]->angle));
+			angle->value(std::to_string(Things[obj]->angle).c_str());
 		else
 			angle->value("");
 	}
@@ -865,7 +865,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_TID)
 	{
 		if (is_thing(obj))
-			tid->value(Int_TmpStr(Things[obj]->tid));
+			tid->value(std::to_string(Things[obj]->tid).c_str());
 		else
 			tid->value("");
 	}
@@ -876,7 +876,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const thingtype_t *info = M_GetThingType(Things[obj]->type);
 			desc->value(info->desc);
-			type->value(Int_TmpStr(Things[obj]->type));
+			type->value(std::to_string(Things[obj]->type).c_str());
 			sprite->GetSprite(Things[obj]->type, FL_DARK2);
 		}
 		else
@@ -904,7 +904,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const linetype_t *info = M_GetLineType(Things[obj]->special);
 			spec_desc->value(info->desc);
-			spec_type->value(Int_TmpStr(Things[obj]->special));
+			spec_type->value(std::to_string(Things[obj]->special).c_str());
 		}
 		else
 		{
@@ -936,7 +936,7 @@ void UI_ThingBox::UpdateField(int field)
 
 				if (T->special)
 				{
-					args[a]->value(Int_TmpStr(arg_val));
+					args[a]->value(std::to_string(arg_val).c_str());
 
 					if (spec->args[a])
 						args[a]->copy_tooltip(spec->args[a]);
@@ -947,7 +947,7 @@ void UI_ThingBox::UpdateField(int field)
 				{
 					// spawn arguments
 					if (arg_val || info->args[a])
-						args[a]->value(Int_TmpStr(arg_val));
+						args[a]->value(std::to_string(arg_val).c_str());
 
 					if (info->args[a])
 						args[a]->copy_tooltip(info->args[a]);

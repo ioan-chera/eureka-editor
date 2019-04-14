@@ -735,7 +735,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const LineDef *L = LineDefs[obj];
 
-			tag->value(Int_TmpStr(LineDefs[obj]->tag));
+			tag->value(std::to_string(LineDefs[obj]->tag).c_str());
 
 			const linetype_t *info = M_GetLineType(L->type);
 
@@ -746,7 +746,7 @@ void UI_LineBox::UpdateField(int field)
 					int arg_val = L->Arg(1 + a);
 
 					if (arg_val || L->type)
-						args[a]->value(Int_TmpStr(arg_val));
+						args[a]->value(std::to_string(arg_val).c_str());
 
 					// set the tooltip
 					if (info->args[a])
@@ -788,7 +788,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			int type_num = LineDefs[obj]->type;
 
-			type->value(Int_TmpStr(type_num));
+			type->value(std::to_string(type_num).c_str());
 
 			const char *gen_desc = GeneralizedDesc(type_num);
 

@@ -353,17 +353,6 @@ double AlongDist(double x, double y,
 	return (x * x2 + y * y2) / len;
 }
 
-
-const char *Int_TmpStr(int value)
-{
-	static char buffer[200];
-
-	snprintf(buffer, sizeof(buffer), "%d", value);
-
-	return buffer;
-}
-
-
 //
 // rounds the value _up_ to the nearest power of two.
 //
