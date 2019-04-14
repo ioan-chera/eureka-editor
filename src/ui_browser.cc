@@ -39,7 +39,7 @@
 extern std::map<std::string, Img_c *> flats;
 extern std::map<std::string, Img_c *> textures;
 
-extern std::map<char, linegroup_t *>  line_groups;
+extern std::map<char, linegroup_t> line_groups;
 extern std::map<char, thinggroup_t *> thing_groups;
 
 extern std::map<int, linetype_t *>   line_types;

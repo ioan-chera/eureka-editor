@@ -39,7 +39,7 @@
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
 
-std::map<char, linegroup_t *>    line_groups;
+std::map<char, linegroup_t> line_groups;
 std::map<char, thinggroup_t *>   thing_groups;
 std::map<char, texturegroup_t *> texture_groups;
 
@@ -551,12 +551,9 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		linegroup_t * lg = new linegroup_t;
-
-		lg->group = argv[1][0];
-		lg->desc = argv[2];
-
-		line_groups[lg->group] = lg;
+		linegroup_t &lg = line_groups[argv[1][0]];
+		lg.group = argv[1][0];
+		lg.desc = argv[2];
 	}
 
 	else if (y_stricmp(argv[0], "line") == 0 ||
@@ -1388,22 +1385,22 @@ std::string M_LineCategoryString(char *letters)
 	// the "ALL" category is always first
 	letters[L_index++] = '*';
 
-	std::map<char, linegroup_t *>::iterator IT;
+	std::map<char, linegroup_t>::iterator IT;
 
 	for (IT = line_groups.begin() ; IT != line_groups.end() ; IT++)
 	{
-		linegroup_t *G = IT->second;
+		const linegroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (! LineCategory_IsUsed(G->group))
+		if (! LineCategory_IsUsed(G.group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
 		buffer += '|';
-		buffer += G->desc;
+		buffer += G.desc;
 
 		letters[L_index++] = IT->first;
 	}
