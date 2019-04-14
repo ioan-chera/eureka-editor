@@ -91,7 +91,7 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
-const char *default_port = "vanilla";
+std::string default_port = "vanilla";
 
 int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
@@ -421,25 +421,25 @@ static void DeterminePort()
 	std::string var_game = M_VariantForGame(Game_name.c_str());
 
 	// ensure the 'default_port' value is OK
-	if (! (default_port && default_port[0]))
+	if (default_port.empty())
 	{
 		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
 		default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions("ports", default_port))
+	else if (! M_CanLoadDefinitions("ports", default_port.c_str()))
 	{
 		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
-				default_port);
+				default_port.c_str());
 		default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(var_game.c_str(), default_port))
+	else if (! M_CheckPortSupportsGame(var_game.c_str(), default_port.c_str()))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
-				default_port, Game_name.c_str());
+				default_port.c_str(), Game_name.c_str());
 		default_port = "vanilla";
 	}
 
-	Port_name = default_port;
+	Port_name = default_port.c_str();
 }
 
 

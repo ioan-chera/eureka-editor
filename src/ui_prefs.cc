@@ -1421,7 +1421,7 @@ void UI_Preferences::LoadValues()
 
 	/* Edit Tab */
 
-	edit_def_port->value(default_port);
+	edit_def_port->value(default_port.c_str());
 	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
@@ -1543,7 +1543,7 @@ void UI_Preferences::SaveValues()
 
 	/* Edit Tab */
 
-	default_port = StringDup(edit_def_port->value());
+	default_port = edit_def_port->value();
 	default_edit_mode = edit_def_mode->value();
 
 	new_sector_size = atoi(edit_sectorsize->value());
