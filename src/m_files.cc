@@ -879,7 +879,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 
 	std::string new_iwad;
-	const char * new_port = NULL;
+	std::string new_port = NULL;
 
 	std::vector< const char * > new_resources;
 
@@ -961,7 +961,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		else if (strcmp(line, "port") == 0)
 		{
 			if (M_CanLoadDefinitions("ports", pos))
-				new_port = StringDup(pos);
+				new_port = pos;
 			else
 			{
 				LogPrintf("  unknown port: %s\n", pos);
@@ -991,7 +991,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			Iwad_name = new_iwad;
 	}
 
-	if (new_port)
+	if (!new_port.empty())
 	{
 		if (!keep_cmd_line_args || Port_name.empty())
 			Port_name = new_port;
