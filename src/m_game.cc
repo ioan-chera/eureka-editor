@@ -567,7 +567,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		int number = atoi(argv[1]);
 
 		info.group = argv[2][0];
-		info.desc = StringDup(argv[3]);
+		info.desc = argv[3];
 
 		int arg_count = MIN(nargs - 3, 5);
 		for (int i = 0 ; i < arg_count ; i++)

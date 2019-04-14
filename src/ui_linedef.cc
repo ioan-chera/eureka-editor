@@ -281,7 +281,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	else
 	{
 		const linetype_t &info = M_GetLineType(new_type);
-		box->desc->value(info.desc);
+		box->desc->value(info.desc.c_str());
 	}
 
 	main_win->browser->UpdateGenType(new_type);
@@ -799,7 +799,7 @@ void UI_LineBox::UpdateField(int field)
 			else
 			{
 				const linetype_t &info = M_GetLineType(type_num);
-				desc->value(info.desc);
+				desc->value(info.desc.c_str());
 			}
 
 			main_win->browser->UpdateGenType(type_num);

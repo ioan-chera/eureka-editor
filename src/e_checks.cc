@@ -2120,7 +2120,7 @@ void LineDefs_FindManualDoors(selection_c& lines)
 
 		const linetype_t &info = M_GetLineType(L->type);
 
-		if (info.desc[0] == 'D' &&
+		if (info.desc.length() >= 2 && info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
 			lines.set(n);
@@ -2154,7 +2154,7 @@ void LineDefs_FixManualDoors()
 
 		const linetype_t &info = M_GetLineType(L->type);
 
-		if (info.desc[0] == 'D' &&
+		if (info.desc.length() >= 2 && info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
 			BA_ChangeLD(n, LineDef::F_TYPE, 0);
@@ -2290,7 +2290,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 		if (game_info.gen_types && is_genline(type_num))
 			continue;
 
-		if (strncmp(info.desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 		{
 			bung_unknown_type(types, type_num);
 

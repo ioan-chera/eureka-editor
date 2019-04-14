@@ -45,13 +45,12 @@ struct linegroup_t
 
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]
-typedef struct
+struct linetype_t
 {
 	char group;
-	const char *desc;
+	std::string desc;
 	const char *args[5];
-}
-linetype_t;
+};
 
 
 // sector <number> <description>

@@ -821,7 +821,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		const linetype_t &info = TI->second;
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
-		         TidyLineDesc(info.desc));
+		         TidyLineDesc(info.desc.c_str()));
 
 		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info.group);
 
