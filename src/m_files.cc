@@ -881,7 +881,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	std::string new_iwad;
 	std::string new_port = NULL;
 
-	std::vector< const char * > new_resources;
+	std::vector<std::string> new_resources;
 
 
 	static char line[FL_PATH_MAX];
@@ -951,7 +951,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			}
 
 			if (FileExists(res.c_str()))
-				new_resources.push_back(StringDup(res.c_str()));
+				new_resources.push_back(res);
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
@@ -1000,9 +1000,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	if (! keep_cmd_line_args)
 		Resource_list.clear();
 
-	for (unsigned int i = 0 ; i < new_resources.size() ; i++)
+	for (const std::string &resource : new_resources)
 	{
-		M_AddResource_Unique(new_resources[i]);
+		M_AddResource_Unique(resource.c_str());
 	}
 
 	return true;
