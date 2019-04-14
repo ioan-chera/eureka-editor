@@ -2924,7 +2924,7 @@ static void Render3D_Cut()
 	if (type == OB3D_Floor)
 		name = default_floor_tex.c_str();
 	else if (type == OB3D_Ceil)
-		name = default_ceil_tex;
+		name = default_ceil_tex.c_str();
 
 	StoreTextureTo3DSel(BA_InternaliseString(name));
 

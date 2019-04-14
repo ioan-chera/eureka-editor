@@ -418,7 +418,7 @@ void UI_DefaultProps::LoadValues()
 {
 	w_tex->value(default_wall_tex.c_str());
 	f_tex->value(default_floor_tex.c_str());
-	c_tex->value(default_ceil_tex);
+	c_tex->value(default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
@@ -585,7 +585,7 @@ bool Props_ParseUser(const std::vector<std::string> &tokens)
 		default_floor_tex = tokens[2].c_str();
 
 	if (tokens[1] == "ceil_tex")
-		default_ceil_tex = StringDup(tokens[2].c_str());
+		default_ceil_tex = tokens[2].c_str();
 
 	if (tokens[1] == "mid_tex")
 		default_wall_tex = tokens[2].c_str();
@@ -605,7 +605,7 @@ void Props_WriteUser(FILE *fp)
 
 	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex.c_str(), "\"").c_str());
 	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex.c_str(), "\"").c_str());
-	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\"").c_str());
+	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex.c_str(), "\"").c_str());
 }
 
 

@@ -534,7 +534,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		default_wall_tex = argv[1];
 		default_floor_tex = argv[2];
-		default_ceil_tex	= StringDup(argv[3]);
+		default_ceil_tex = argv[3];
 	}
 
 	else if (y_stricmp(argv[0], "default_thing") == 0)

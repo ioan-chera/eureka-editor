@@ -3965,7 +3965,7 @@ void Textures_FixUnknownTex()
 void Textures_FixUnknownFlat()
 {
 	int new_floor = BA_InternaliseString(default_floor_tex.c_str());
-	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex.c_str());
 
 	BA_Begin();
 	BA_Message("fixed unknown flats");

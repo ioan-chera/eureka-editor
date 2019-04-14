@@ -153,7 +153,7 @@ extern int	default_thing;
 
 extern std::string default_wall_tex;
 extern std::string default_floor_tex;
-extern const char * default_ceil_tex;
+extern std::string default_ceil_tex;
 
 
 extern int   show_help;		// Print usage message and exit.
