@@ -255,11 +255,11 @@ void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
 }
 
 
-const char * UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
+std::string UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
-	const char *normalized = StringDup(NormalizeTex(w->value()));
+	std::string normalized = NormalizeTex(w->value());
 
-	w->value(normalized);
+	w->value(normalized.c_str());
 
 	return normalized;
 }

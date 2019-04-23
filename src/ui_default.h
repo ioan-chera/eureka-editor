@@ -70,7 +70,7 @@ private:
 	void CB_Paste (int sel_pics);
 	void CB_Delete(int sel_pics);
 
-	static const char * Normalize_and_Dup(UI_DynInput *w);
+	static std::string Normalize_and_Dup(UI_DynInput *w);
 
 private:
 	static void   hide_callback(Fl_Widget *w, void *data);
