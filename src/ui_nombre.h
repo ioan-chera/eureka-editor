@@ -29,13 +29,12 @@ private:
 	int total;
 	int selected;
 
-	const char *type_name;
+	std::string type_name;
 
 	void Update();
 
 public:
 	UI_Nombre(int X, int Y, int W, int H, const char *what = NULL);
-	virtual ~UI_Nombre();
 
 public:
 	void SetIndex(int _idx);  // _idx < 0 means "no index"
