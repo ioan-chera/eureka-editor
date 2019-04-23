@@ -49,12 +49,8 @@ std::vector<Wad_file *> master_dir;
 Lump_c::Lump_c(Wad_file *_par, const char *_nam, int _start, int _len) :
 	parent(_par), l_start(_start), l_length(_len)
 {
-	name = StringDup(_nam);
-
-	SYS_ASSERT(name);
-
 	// ensure lump name is uppercase
-	y_strupr((char *)name);
+	name = StringUpper(_nam);
 }
 
 
@@ -66,7 +62,7 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	strncpy(buffer, entry->name, 8);
 	buffer[8] = 0;
 
-	name = StringDup(buffer);
+	name = buffer;
 
 	l_start  = LE_U32(entry->pos);
 	l_length = LE_U32(entry->size);
@@ -78,15 +74,9 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 }
 
 
-Lump_c::~Lump_c()
-{
-	StringFree(name);
-}
-
-
 void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 {
-	strncpy(entry->name, name, 8);
+	strncpy(entry->name, name.c_str(), 8);
 
 	entry->pos  = LE_U32(l_start);
 	entry->size = LE_U32(l_length);
@@ -95,13 +85,8 @@ void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 
 void Lump_c::Rename(const char *new_name)
 {
-	StringFree(name);
-
-	name = StringDup(new_name);
-	SYS_ASSERT(name);
-
 	// ensure lump name is uppercase
-	y_strupr((char *)name);
+	name = StringUpper(new_name);
 }
 
 
@@ -403,8 +388,8 @@ short Wad_file::LevelLookupLump(short lev_num, const char *name)
 	{
 		SYS_ASSERT(0 <= k && k < NumLumps());
 
-		if (! IsLevelLump(directory[k]->name) &&
-			! IsGLNodeLump(directory[k]->name))
+		if (! IsLevelLump(directory[k]->name.c_str()) &&
+			! IsGLNodeLump(directory[k]->name.c_str()))
 			break;
 
 		if (y_stricmp(directory[k]->name, name) == 0)
@@ -440,8 +425,8 @@ short Wad_file::LevelLastLump(short lev_num)
 
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
 		   start+count < NumLumps() &&
-		   (IsLevelLump(directory[start+count]->name) ||
-		    IsGLNodeLump(directory[start+count]->name)) )
+		   (IsLevelLump(directory[start+count]->name.c_str()) ||
+		    IsGLNodeLump(directory[start+count]->name.c_str())) )
 	{
 		count++;
 	}
@@ -592,7 +577,7 @@ void Wad_file::ReadDirectory()
 				lump->l_start + lump->l_length > total_size)
 			{
 				LogPrintf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
-						lump->name, lump->l_start, lump->l_length, total_size);
+						lump->name.c_str(), lump->l_start, lump->l_length, total_size);
 
 				lump->l_start = 0;
 				lump->l_length = 0;
@@ -623,7 +608,7 @@ void Wad_file::DetectLevels()
 		// check whether the next four lumps are level lumps
 		for (short i = 1 ; i <= 4 ; i++)
 		{
-			int part = WhatLevelPart(directory[k+i]->name);
+			int part = WhatLevelPart(directory[k+i]->name.c_str());
 
 			if (part == 0)
 				break;
@@ -640,7 +625,7 @@ void Wad_file::DetectLevels()
 		{
 			levels.push_back(k);
 
-			DebugPrintf("Detected level : %s\n", directory[k]->name);
+			DebugPrintf("Detected level : %s\n", directory[k]->name.c_str());
 		}
 	}
 
@@ -684,10 +669,10 @@ void Wad_file::ProcessNamespaces()
 
 	for (short k = 0 ; k < NumLumps() ; k++)
 	{
-		const char *name = directory[k]->name;
+		std::string name = directory[k]->name;
 
 		// skip the sub-namespace markers
-		if (IsDummyMarker(name))
+		if (IsDummyMarker(name.c_str()))
 			continue;
 
 		if (y_stricmp(name, "P_START") == 0 || y_stricmp(name, "PP_START") == 0)
@@ -763,7 +748,7 @@ void Wad_file::ProcessNamespaces()
 			if (directory[k]->Length() == 0)
 			{
 				LogPrintf("WARNING: skipping empty lump %s in %c_START\n",
-						  name, active);
+						  name.c_str(), active);
 				continue;
 			}
 
@@ -914,8 +899,8 @@ void Wad_file::RemoveLevel(short lev_num)
 	// this will stop when it hits a non-level lump
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
 		   start + count < NumLumps() &&
-		   (IsLevelLump(directory[start+count]->name) ||
-		    IsGLNodeLump(directory[start+count]->name)) )
+		   (IsLevelLump(directory[start+count]->name.c_str()) ||
+		    IsGLNodeLump(directory[start+count]->name.c_str())) )
 	{
 		count++;
 	}
@@ -940,7 +925,7 @@ void Wad_file::RemoveGLNodes(short lev_num)
 	start++;
 
 	while (start <= finish &&
-		   IsLevelLump(directory[start]->name))
+		   IsLevelLump(directory[start]->name.c_str()))
 	{
 		start++;
 	}
@@ -948,7 +933,7 @@ void Wad_file::RemoveGLNodes(short lev_num)
 	short count = 0;
 
 	while (start+count <= finish &&
-		   IsGLNodeLump(directory[start+count]->name))
+		   IsGLNodeLump(directory[start+count]->name.c_str()))
 	{
 		count++;
 	}
