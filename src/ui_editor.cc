@@ -243,7 +243,7 @@ void UI_TextEditor::menu_do_find_next(Fl_Widget *w, void *data)
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
 
-	if (win->find_string == NULL)
+	if (win->find_string.empty())
 	{
 		if (! win->AskFindString())
 			return;
@@ -257,7 +257,7 @@ void UI_TextEditor::menu_do_find_prev(Fl_Widget *w, void *data)
 	UI_TextEditor *win = (UI_TextEditor *)data;
 	SYS_ASSERT(win);
 
-	if (win->find_string == NULL)
+	if (win->find_string.empty())
 	{
 		if (! win->AskFindString())
 			return;
@@ -345,8 +345,7 @@ static Fl_Menu_Item ted_menu_items[] =
 UI_TextEditor::UI_TextEditor() :
 	Fl_Double_Window(600, 400, ""),
 	want_close(false), want_save(false),
-	is_new(true), read_only(false), has_changes(false),
-	find_string(NULL)
+	is_new(true), read_only(false), has_changes(false)
 {
 	size_range(520, 200);
 
@@ -387,8 +386,6 @@ UI_TextEditor::~UI_TextEditor()
 	ted->buffer(NULL);
 
 	delete tbuf; tbuf = NULL;
-
-	StringFree(find_string);
 }
 
 
@@ -744,7 +741,7 @@ bool UI_TextEditor::AskFindString()
 {
 	// we don't pre-seed with the last search string, because FLTK does
 	// not select the text and it is a pain to delete it first.
-	const char *str = fl_input("Find what:", find_string);
+	const char *str = fl_input("Find what:", find_string.c_str());
 
 	if (str == NULL || str[0] == 0)
 		return false;
@@ -756,19 +753,16 @@ bool UI_TextEditor::AskFindString()
 
 void UI_TextEditor::SetFindString(const char *str)
 {
-	StringFree(find_string);
-
 	if (str)
-		find_string = StringDup(str);
+		find_string = str;
 	else
-		find_string = NULL;
+		find_string.clear();
 }
 
 
 bool UI_TextEditor::FindNext(int dir)
 {
-	SYS_ASSERT(find_string);
-	SYS_ASSERT(find_string[0]);
+	SYS_ASSERT(!find_string.empty());
 
 	int pos = ted->insert_position();
 //	int len = tbuf->length();
@@ -778,11 +772,11 @@ bool UI_TextEditor::FindNext(int dir)
 
 	if (dir >= 2 && !tbuf->selected())
 		// a normal "Find" can match at exactly the starting spot
-		found = tbuf->search_forward(pos, find_string, &new_pos);
+		found = tbuf->search_forward(pos, find_string.c_str(), &new_pos);
 	else if (dir > 0)
-		found = tbuf->search_forward(pos+1, find_string, &new_pos);
+		found = tbuf->search_forward(pos+1, find_string.c_str(), &new_pos);
 	else
-		found = tbuf->search_backward(pos-1, find_string, &new_pos);
+		found = tbuf->search_backward(pos-1, find_string.c_str(), &new_pos);
 
 	if (! found && dir > 0 && pos > 0)
 	{
@@ -797,7 +791,7 @@ bool UI_TextEditor::FindNext(int dir)
 
 		pos = 0;
 
-		found = tbuf->search_forward(pos, find_string, &new_pos);
+		found = tbuf->search_forward(pos, find_string.c_str(), &new_pos);
 	}
 
 	if (! found)
@@ -808,7 +802,7 @@ bool UI_TextEditor::FindNext(int dir)
 	}
 
 	// found it, so select the text
-	int end_pos = static_cast<int>(new_pos + strlen(find_string));
+	int end_pos = static_cast<int>(new_pos + find_string.length());
 
 	tbuf->select(new_pos, end_pos);
 
