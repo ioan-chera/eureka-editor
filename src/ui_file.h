@@ -192,7 +192,7 @@ public:
 
 	map_format_e map_format;
 
-	const char * res[RES_NUM];
+	std::string res[RES_NUM];
 
 public:
 	UI_ProjectSetup(bool new_project = false, bool is_startup = false);
