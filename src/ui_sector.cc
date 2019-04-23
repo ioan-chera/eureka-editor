@@ -362,11 +362,11 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	}
 	else if (is_floor)
 	{
-		new_tex = BA_InternaliseString(NormalizeTex(box->f_tex->value()));
+		new_tex = BA_InternaliseString(NormalizeTex(box->f_tex->value()).c_str());
 	}
 	else
 	{
-		new_tex = BA_InternaliseString(NormalizeTex(box->c_tex->value()));
+		new_tex = BA_InternaliseString(NormalizeTex(box->c_tex->value()).c_str());
 	}
 
 change_it:

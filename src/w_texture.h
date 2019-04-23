@@ -41,7 +41,7 @@ bool W_TextureCausesMedusa(const char *name);
 
 // this truncates the name to 8 chars, and makes it uppercase.
 // [ result is a static buffer, copy if necessary! ]
-const char *NormalizeTex(const char *name);
+std::string NormalizeTex(const char *name);
 
 
 /* ---- FLATS ---- */

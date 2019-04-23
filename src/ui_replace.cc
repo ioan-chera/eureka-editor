@@ -1180,7 +1180,7 @@ void UI_FindAndReplace::DoReplace()
 		return;
 	}
 
-	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
+	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()).c_str());
 
 	BA_Begin();
 
@@ -1275,7 +1275,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
+		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()).c_str());
 
 		BA_Begin();
 	}

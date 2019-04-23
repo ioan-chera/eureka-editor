@@ -182,11 +182,11 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	else
 	{
 		if (w == box->l_tex)
-			new_tex = BA_InternaliseString(NormalizeTex(box->l_tex->value()));
+			new_tex = BA_InternaliseString(NormalizeTex(box->l_tex->value()).c_str());
 		else if (w == box->u_tex)
-			new_tex = BA_InternaliseString(NormalizeTex(box->u_tex->value()));
+			new_tex = BA_InternaliseString(NormalizeTex(box->u_tex->value()).c_str());
 		else
-			new_tex = BA_InternaliseString(NormalizeTex(box->r_tex->value()));
+			new_tex = BA_InternaliseString(NormalizeTex(box->r_tex->value()).c_str());
 	}
 
 	// iterate over selected linedefs

@@ -505,7 +505,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 
 	if (try_uppercase)
 	{
-		return W_GetTexture(NormalizeTex(name), false);
+		return W_GetTexture(NormalizeTex(name).c_str(), false);
 	}
 
 	return NULL;
@@ -549,21 +549,15 @@ bool W_TextureCausesMedusa(const char *name)
 }
 
 
-const char *NormalizeTex(const char *name)
+std::string NormalizeTex(const char *name)
 {
 	if (name[0] == 0)
 		return "-";
 
-	static char buffer[WAD_TEX_NAME+1];
-
-	memset(buffer, 0, sizeof(buffer));
-
-	strncpy(buffer, name, WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		buffer[i] = toupper(buffer[i]);
-
-	return buffer;
+	std::string buffer = name;
+	if(buffer.length() > 8)
+		buffer.resize(8);
+	return StringUpper(buffer.c_str());
 }
 
 
@@ -675,7 +669,7 @@ Img_c * W_GetFlat(const char *name, bool try_uppercase)
 
 	if (try_uppercase)
 	{
-		return W_GetFlat(NormalizeTex(name), false);
+		return W_GetFlat(NormalizeTex(name).c_str(), false);
 	}
 
 	return NULL;
