@@ -102,7 +102,7 @@ friend void W_LoadFlats();
 friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
-	const char *filename;
+	std::string filename;
 
 	char mode;  // mode value passed to ::Open()
 
@@ -155,7 +155,7 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const char *filename);
 
-	const char *PathName() const { return filename; }
+	const char *PathName() const { return filename.c_str(); }
 	bool IsReadOnly() const { return mode == 'r'; }
 
 	int TotalSize() const { return total_size; }
