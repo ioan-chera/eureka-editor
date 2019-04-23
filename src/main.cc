@@ -709,9 +709,9 @@ bool Main_ConfirmQuit(const char *action)
 // the directory we should use for a file open/save operation.
 // returns NULL when not sure.
 //
-const char * Main_FileOpFolder()
+std::string Main_FileOpFolder()
 {
-	static char folder[FL_PATH_MAX];
+	char folder[FL_PATH_MAX];
 
 	if (!Pwad_name.empty())
 	{
@@ -721,7 +721,7 @@ const char * Main_FileOpFolder()
 			return folder;
 	}
 
-	return NULL;
+	return "";
 }
 
 

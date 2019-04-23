@@ -189,7 +189,7 @@ int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 std::string GameNameFromIWAD(const char *iwad_name);
 
-const char * Main_FileOpFolder();
+std::string Main_FileOpFolder();
 
 
 void Beep(const char *msg, ...);
