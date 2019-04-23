@@ -44,12 +44,11 @@ private:
 	bool highlighted;
 	bool selected;
 
-	const char *what_text;
+	std::string what_text;
 	Fl_Color    what_color;
 
 public:
 	UI_Pic(int X, int Y, int W, int H, const char *L = "");
-	virtual ~UI_Pic();
 
 	// FLTK method for event handling
 	int handle(int event);

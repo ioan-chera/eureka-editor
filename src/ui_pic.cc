@@ -43,24 +43,15 @@ UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
 {
 	color(FL_DARK2);
 
-	what_text = StringDup(L);
+	what_text = L;
 
 	what_color = (gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
 
-	label(what_text);
+	label(what_text.c_str());
 	labelcolor(what_color);
 	labelsize(16);
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
-}
-
-//
-// UI_Pic Destructor
-//
-UI_Pic::~UI_Pic()
-{
-	StringFree(what_text);
-	what_text = NULL;
 }
 
 
@@ -72,7 +63,7 @@ void UI_Pic::Clear()
 	labelcolor(what_color);
 	labelsize(16);
 
-	label(what_text);
+	label(what_text.c_str());
 
 	if (rgb)
 	{
