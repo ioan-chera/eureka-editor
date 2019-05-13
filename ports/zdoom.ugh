@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2015-2018 Andrew Apted
+#  Copyright (C) 2015-2019 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -356,6 +356,8 @@ special 229 t "Thing_SetGoal"           tid  goal_tid  delay  no_stray?
 # Lines
 special 121 - "Line_SetIdent"           line_id  flags  -  -  line_id_hi
 special  55 - "Line_SetBlocking"        line_id  set_flags  clear_flags
+special 156 - "Line_SetPortal"          target_id  this_id  type  anchor
+special 107 - "Line_SetPortalTarget"    source_id  target_id
 special  33 - "ForceField"
 special  34 - "ClearForceField"         tag
 special  48 - "Attach3dMidtex"          line_id  tag  ceiling?
