@@ -1,0 +1,101 @@
+#------------------------------------------------------------------------
+#  PLUTONIA EXPERIMENT (Final Doom) textures
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2016 Andrew Apted
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+texture h A-ASKIN1
+texture h A-ASKIN2
+texture h A-ASKIN3
+texture h A-ASKIN4
+texture h A-ASKIN5
+
+texture u A-BRBRK
+texture u A-BRBRK2
+texture u A-BRICK1
+texture u A-BRICK2
+texture u A-BRICK3
+texture u A-BROCK2
+texture u A-BROWN1
+texture u A-BROWN2
+texture u A-BROWN3
+texture u A-BROWN4
+texture u A-BROWN5
+texture u A-CONCTE
+texture u A-DBRI1
+texture u A-DBRI2
+texture u A-GRATE
+texture u A-MARBLE
+texture u A-MOSBRI
+texture u A-MYWOOD
+texture u A-TILE
+texture u A-VINE3
+texture u A-WOOD1
+texture u SLIME1
+texture u SLIME2
+texture u SLIME3
+texture u SLIME4
+texture u SLIME5
+texture u SLIME8
+
+texture n A-CAMO1
+texture n A-CAMO2
+texture n A-CAMO3
+texture n A-CAMO4
+texture n A-CAMO5
+texture n A-DROCK1
+texture n A-DROCK2
+texture n A-MOSRK2
+texture n A-MOSROK
+texture n A-MOULD
+texture n A-MUD
+texture n A-REDROK
+texture n A-ROCK
+texture n A-VINE1
+texture n A-VINE2
+texture n A-VINE4
+texture n A-VINES
+texture n AROCK2
+texture n AROCK3
+texture n AROCK4
+texture n AROCK5
+texture n MC2
+texture n MC3
+texture n MC4
+texture n MC5
+texture n MC6
+texture n MC7
+texture n MC8
+texture n MC10
+texture n MC11
+texture n MC12
+texture n MC13
+texture n MC14
+texture n MC15
+texture n MC16
+texture n MC17
+texture n MC18
+texture n MC19
+texture n WFALL1
+texture n WFALL2
+texture n WFALL3
+texture n WFALL4
+
+texture t A-POIS
+texture t A-RAIL1
+texture t A-YELLOW
+
