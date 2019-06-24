@@ -2,4 +2,17 @@
 RECENT CHANGES
 ==============
 
+(Since version 1.24)
+
 - fixed not remembering test-in-game EXE when port is "vanilla"
+
+- added portal specials 156 and 107 to the ZDOOM port
+
+- support the FreeDM iwad
+
+- support TNT and Plutonia textures in FreeDoom2 iwad
+
+- improvements to the Makefile
+
+- improvements to the MacOS build files
+
