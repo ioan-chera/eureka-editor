@@ -80,7 +80,7 @@ public:
 private:
 	void Update()
 	{
-		static char buffer[256];
+		char buffer[256];
 
 		snprintf(buffer, sizeof(buffer), " Line: %-6d Col: %d", cur_row, cur_column);
 

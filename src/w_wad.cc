@@ -153,7 +153,7 @@ bool Lump_c::Write(const void *data, int len)
 
 void Lump_c::Printf(const char *msg, ...)
 {
-	static char buffer[FL_PATH_MAX];
+	char buffer[FL_PATH_MAX];
 
 	va_list args;
 
@@ -1390,8 +1390,8 @@ void MasterDir_CloseAll()
 
 int W_FilenameAbsCompare(const char *A, const char *B)
 {
-	static char A_buffer[FL_PATH_MAX];
-	static char B_buffer[FL_PATH_MAX];
+	char A_buffer[FL_PATH_MAX];
+	char B_buffer[FL_PATH_MAX];
 
 	fl_filename_absolute(A_buffer, sizeof(A_buffer), A);
 	fl_filename_absolute(B_buffer, sizeof(B_buffer), B);

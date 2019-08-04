@@ -1352,8 +1352,6 @@ int M_WriteConfigFile()
 
 int M_ParseLine(const char *line, std::vector<std::string> &tokens, bool do_strings)
 {
-	int num_tok = 0;
-
 	char tokenbuf[256];
 	int  tokenlen = -1;
 
@@ -1431,7 +1429,7 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, bool do_stri
 			break;
 	}
 
-	return num_tok;
+	return static_cast<int>(tokens.size());
 }
 
 char * PersistFilename(const crc32_c& crc)

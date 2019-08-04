@@ -182,7 +182,7 @@ static void CreateHomeDirs()
 {
 	SYS_ASSERT(!home_dir.empty());
 
-	static char dir_name[FL_PATH_MAX];
+	char dir_name[FL_PATH_MAX];
 
 #ifdef __APPLE__
    // IOANCH 20130825: modified to use name-independent calls

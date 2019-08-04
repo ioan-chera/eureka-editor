@@ -43,7 +43,7 @@ private:
 
 	static void LoadImage()
 	{
-		static char filename[FL_PATH_MAX];
+		char filename[FL_PATH_MAX];
 
 		// FIXME : use this location for all platforms
 #ifdef WIN32
