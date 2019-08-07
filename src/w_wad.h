@@ -193,7 +193,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const char *filename);
+	bool Backup(const char *new_filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
 	// and EndWrite() methods.  the on-disk wad directory may be trashed

@@ -19,7 +19,7 @@
 #------------------------------------------------------------------------
 
 if $ALLOW_BOOM is 1
-include "mbf"
+  include "mbf"
 endif
 
 
@@ -77,8 +77,8 @@ line 347 s "-- ODAMEX: Slope C2 + F1"
 sector 21 "ODAMEX: Light Phased"
 
 sector 22 "ODAMEX: LightSeq Start"
-sector 23 "ODAMEX: LightSeq Spec 1"
-sector 24 "ODAMEX: LightSeq Spec 2"
+sector 23 "ODAMEX: LightSeq Next 1"
+sector 24 "ODAMEX: LightSeq Next 2"
 
 # hmmm, can Sky2 and Scroll types be used too ???
 

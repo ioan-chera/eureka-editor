@@ -281,10 +281,6 @@ static const char *build_ErrorString(build_result_e ret)
 		// the WAD file was corrupt / empty / bad filename
 		case BUILD_BadFile: return "Bad File";
 
-		// file errors
-		case BUILD_ReadError:  return "Read Error";
-		case BUILD_WriteError: return "Write Error";
-
 		default: return "Unknown Error";
 	}
 }
@@ -319,9 +315,9 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	info->force_xnod		= bsp_force_zdoom;
 	info->force_compress	= bsp_compressed;
 
-	info->total_failed_maps    = 0;
-	info->total_warnings       = 0;
-	info->total_minor_warnings = 0;
+	info->total_failed_maps		= 0;
+	info->total_warnings		= 0;
+	info->total_minor_issues	= 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
@@ -350,6 +346,11 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	{
 		ret = AJBSP_BuildLevel(info, n);
 
+		// don't fail on maps with overflows
+		// [ Note that 'total_failed_maps' keeps a tally of these ]
+		if (ret == BUILD_LumpOverflow)
+			ret = BUILD_OK;
+
 		if (ret != BUILD_OK)
 			break;
 
@@ -366,9 +367,9 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Total filed maps: %d\n", info->total_failed_maps);
+		GB_PrintMsg("Total failed maps: %d\n", info->total_failed_maps);
 		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
-					info->total_minor_warnings);
+					info->total_minor_issues);
 	}
 	else if (ret == BUILD_Cancelled)
 	{
@@ -380,7 +381,6 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 		// build nodes failed
 		GB_PrintMsg("\n");
 		GB_PrintMsg("Building FAILED: %s\n", build_ErrorString(ret));
-		GB_PrintMsg("Reason: %s\n\n", nb_info->message);
 	}
 
 	return ret;

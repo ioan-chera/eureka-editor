@@ -315,6 +315,8 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 	edit.highlight.clear();
 	edit.split_line.clear();
+
+	SectorCache_Invalidate();
 }
 
 
@@ -444,7 +446,15 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
 		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+
+		SectorCache_Invalidate();
 	}
+
+	if (type == OBJ_SIDEDEFS && field == SideDef::F_SECTOR)
+		SectorCache_Invalidate();
+
+	if (type == OBJ_LINEDEFS && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
+		SectorCache_Invalidate();
 }
 
 void MapStuff_NotifyEnd()
@@ -1100,7 +1110,7 @@ Recently_used::Recently_used() :
 	size(0),
 	keep_num(RECENTLY_USED_MAX - 2)
 {
-	memset(&name_set, 0, sizeof(name_set));
+	memset(name_set, 0, sizeof(name_set));
 }
 
 
@@ -1210,7 +1220,7 @@ void Recently_used::clear()
 {
 	size = 0;
 
-	memset(&name_set, 0, sizeof(name_set));
+	memset(name_set, 0, sizeof(name_set));
 }
 
 
@@ -1307,9 +1317,7 @@ void Editor_Init()
 
 	edit.render3d = false;
 
-	edit.action = ACT_NOTHING;
-	edit.sticky_mod = 0;
-	edit.is_scrolling = false;
+	Editor_DefaultState();
 
 	Nav_Clear();
 
@@ -1323,20 +1331,29 @@ void Editor_Init()
 	edit.split_line.clear();
 	edit.clicked.clear();
 
-	edit.drawing_from = -1;
-	edit.drag_single_obj = -1;
-
-	edit.error_mode = false;
-	edit.sector_render_mode = sector_render_default;
-	edit. thing_render_mode =  thing_render_default;
-	edit.show_object_numbers = false;
-
 	grid.Init();
 
 	MadeChanges = 0;
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();
+}
+
+
+void Editor_DefaultState()
+{
+	edit.action = ACT_NOTHING;
+	edit.sticky_mod = 0;
+	edit.is_scrolling = false;
+
+	edit.drawing_from = -1;
+	edit.drag_single_obj = -1;
+
+	edit.error_mode = false;
+	edit.show_object_numbers = false;
+
+	edit.sector_render_mode = sector_render_default;
+	edit. thing_render_mode =  thing_render_default;
 }
 
 

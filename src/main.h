@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2017 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -30,19 +30,27 @@
 
 #define EUREKA_TITLE  "Eureka DOOM Editor"
 
-#define EUREKA_VERSION  "1.22"
+#define EUREKA_VERSION  "1.24"
 
 #define EUREKA_LUMP  "__EUREKA"
 
 
 /*
- *  Standard headers
+ *  Windows support
  */
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+  #ifndef WIN32
+  #define WIN32
+  #endif
 #endif
+
+
+/*
+ *  Standard headers
+ */
 
 #include <stddef.h>
 #include <stdio.h>
@@ -58,6 +66,7 @@
 #include <unistd.h>
 #endif
 
+#include <algorithm>
 #include <vector>
 
 
@@ -115,6 +124,7 @@ typedef int map_format_bitset_t;
 
 extern int  init_progress;
 extern bool want_quit;
+extern bool app_has_focus;
 
 extern const char *install_dir;  // install dir (e.g. /usr/share/eureka)
 extern const char *home_dir;     // home dir (e.g. $HOME/.eureka)
@@ -177,7 +187,7 @@ void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
-const char * DetermineGame(const char *iwad_name);
+const char * GameNameFromIWAD(const char *iwad_name);
 
 const char * Main_FileOpFolder();
 

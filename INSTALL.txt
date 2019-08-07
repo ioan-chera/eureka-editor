@@ -1,6 +1,10 @@
 
-COMPILING Eureka
-================
+COMPILING (Linux)
+=================
+
+Note: this section deals with compiling the Linux binary.
+For information on compiling for Windows and MacOS X, see below.
+
 
 Dependencies:
 
@@ -10,7 +14,7 @@ Dependencies:
 2. GNU make
    package: make
 
-3. FLTK 1.3 
+3. FLTK 1.3
    website: http://www.fltk.org/
    package: libfltk1.3-dev
 
@@ -30,7 +34,7 @@ Dependencies:
 
 
 Assuming all those dependencies are met, then the following shell
-command will build the Eureka binary. (The '>' is just the prompt)
+command will build the Eureka binary. (the '>' is just the prompt)
 
    > make
 
@@ -44,18 +48,69 @@ the following is reported to work for Gentoo Linux:
 
 
 
-INSTALLING Eureka
-=================
+INSTALLING (Linux)
+==================
 
 First make sure the Eureka binary was compiled successfully.
 
 Then become root (via the 'sudo' or 'su' command) and enter the
 following shell command:
 
-   > make install
+   > make full-install
 
 That will install the eureka binary, definition files for various
 games and source ports, and the desktop and icon files.
+
+There is also a plain "install" target which does not run the
+XDG utilities (which install the desktop and icon files).
+
+
+
+COMPILING (Windows)
+===================
+
+The windows executable is built using a "cross compiler" under
+Linux (or another OS supported by the MingW-w64 tools).
+
+Sorry but compiling Eureka under Windows itself is not currently
+supported.  If you want to do this, you will have to figure it
+out on your own.
+
+
+Dependencies:
+
+1. C++ cross compiler and tools
+   package: mingw-w64
+
+2. GNU make
+   package: make
+
+3. FLTK 1.3.4
+   website: http://www.fltk.org/
+
+4. zlib
+   website: http://www.zlib.net/
+
+
+The FLTK and Zlib libraries must be in a directory called "lib_win32"
+with the names "fltk-1.3.4" and "zlib-1.2.8" (these can be symlinks
+to their actual location).  They both need to be cross-compiled with
+MingW-w64.  For FLTK, these is some information on cross-compiling
+in the "README.CMake.txt" document.
+
+Assuming all those dependencies are met, then the following shell
+command will build the Eureka binary. (the '>' is just the prompt)
+
+   > make -f Makefile.xming
+
+
+
+COMPILING (MacOS X)
+===================
+
+Compiling the MacOS X binary requires Xcode 4.
+
+See the documents in the osx/ folder for more information.
 
 
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -93,6 +93,9 @@ UI_SectorBox::UI_SectorBox(int X, int Y, int W, int H, const char *label) :
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	fresh_tag = new Fl_Button(tag->x() + tag->w() + 20, Y+1, 64, 22, "fresh");
+	fresh_tag->callback(button_callback, this);
 
 	Y += tag->h() + 4;
 
@@ -441,16 +444,24 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	if (w == box->type && value >= 32)
-	{
-		// when user enters a large value into type box, store it as-is
-		// in sectors.  The panel will show the Boom interpretation.
-	}
-	else if (game_info.gen_types)
-	{
-		// Boom generalized sectors
+	int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
 
-		mask = BoomSF_TypeMask;
+	// when generalize sectors active, typing a low value (which does
+	// not touch any bitflags) should just update the TYPE part, and
+	// leave the existing bitflags alone.
+
+	if (w == box->type && value > gen_mask)
+	{
+		// the value is too large and can affect the bitflags, so we
+		// update the WHOLE sector type.  If generalized sectors are
+		// active, then the panel will reinterpret the typed value.
+	}
+	else if (game_info.gen_sectors)
+	{
+		// Boom and ZDoom generalized sectors
+
+		// we fix this shortly...
+		mask = 0;
 
 		if (w == box->bm_damage)
 		{
@@ -471,6 +482,17 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		{
 			mask  = BoomSF_Wind;
 			value = box->bm_wind->value() << 9;
+		}
+
+		if (mask == 0)
+		{
+			mask = gen_mask;
+		}
+		else if (game_info.gen_sectors == 2)
+		{
+			// for ZDoom in Hexen mode, shift up 3 bits
+			mask  <<= 3;
+			value <<= 3;
 		}
 	}
 
@@ -508,9 +530,14 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	if (game_info.gen_types)
+	// when generalize sectors in effect, the name should just
+	// show the TYPE part of the sector type.
+
+	if (game_info.gen_sectors)
 	{
-		value &= BoomSF_TypeMask;
+		int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
+
+		value &= gen_mask;
 	}
 
 	const sectortype_t *info = M_GetSectorType(value);
@@ -576,6 +603,27 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_SectorBox::FreshTag()
+{
+	int min_tag, max_tag;
+	Tags_UsedRange(&min_tag, &max_tag);
+
+	int new_tag = max_tag + 1;
+
+	// skip some special tag numbers
+	if (new_tag == 666)
+		new_tag = 670;
+
+	if (new_tag > 32767)
+	{
+		Beep("Out of tag numbers");
+		return;
+	}
+
+	Tags_ApplyNewValue(new_tag);
+}
+
+
 void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
@@ -583,6 +631,12 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 	if (w == box->choose)
 	{
 		main_win->BrowserMode('S');
+		return;
+	}
+
+	if (w == box->fresh_tag)
+	{
+		box->FreshTag();
 		return;
 	}
 
@@ -712,15 +766,19 @@ void UI_SectorBox::UpdateField(int field)
 		if (is_sector(obj))
 		{
 			int value = Sectors[obj]->type;
-			int mask  = game_info.gen_types ? 31 : 65535;
+			int mask  = (game_info.gen_sectors == 2) ? 255 :
+						(game_info.gen_sectors) ? 31 : 65535;
 
 			type->value(Int_TmpStr(value & mask));
 
 			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
 
-			if (game_info.gen_types)
+			if (game_info.gen_sectors)
 			{
+				if (game_info.gen_sectors == 2)
+					value >>= 3;
+
 				bm_damage->value((value >> 5) & 3);
 				bm_secret->value((value >> 7) & 1);
 
@@ -849,7 +907,7 @@ void UI_SectorBox::CB_Cut()
 }
 
 
-bool UI_SectorBox::ClipboardOp(char what)
+bool UI_SectorBox::ClipboardOp(char op)
 {
 	if (obj < 0)
 		return false;
@@ -860,7 +918,7 @@ bool UI_SectorBox::ClipboardOp(char what)
 		return false;
 	}
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			CB_Copy();
@@ -913,8 +971,13 @@ void UI_SectorBox::UpdateTotal()
 
 void UI_SectorBox::UpdateGameInfo()
 {
-	if (game_info.gen_types)
+	if (game_info.gen_sectors)
 	{
+		if (game_info.gen_sectors == 2)
+			bm_title->label("ZDoom flags:");
+		else
+			bm_title->label("Boom flags:");
+
 		bm_title->show();
 
 		bm_damage->show();

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -43,6 +43,9 @@
 
 #define   ERROR_MSG_COLOR	FL_RED
 #define WARNING_MSG_COLOR	FL_BLUE
+
+
+#define CAMERA_PEST  32000
 
 
 static char check_message[MSG_BUF_LEN];
@@ -278,10 +281,10 @@ struct vertex_X_CMP_pred
 };
 
 
-void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
+void Vertex_FindOverlaps(selection_c& sel)
 {
-	// the 'one_coord' parameter limits the selection to a single
-	// vertex coordinate.
+	// NOTE: when two or more vertices share the same coordinates,
+	//       only the second and subsequent ones are stored in 'sel'.
 
 	sel.change_type(OBJ_VERTICES);
 
@@ -298,9 +301,6 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
 
-	bool seen_one = false;
-	int last_y = 0;
-
 #define VERT_K  Vertices[sorted_list[k]]
 #define VERT_N  Vertices[sorted_list[n]]
 
@@ -310,13 +310,7 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 		{
 			if (VERT_N->y == VERT_K->y)
 			{
-				if (one_coord && seen_one && VERT_K->y != last_y)
-					continue;
-
 				sel.set(sorted_list[k]);
-				sel.set(sorted_list[n]);
-
-				seen_one = true; last_y = VERT_K->y;
 			}
 		}
 	}
@@ -326,28 +320,63 @@ void Vertex_FindOverlaps(selection_c& sel, bool one_coord = false)
 }
 
 
-static void Vertex_DoMergeOverlaps()
+static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 {
-	for (;;)
+	const Vertex *V = Vertices[idx];
+
+	// find the base vertex (the one V is sitting on)
+	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		selection_c sel;
+		if (n == idx)
+			continue;
 
-		Vertex_FindOverlaps(sel, true /* one_coord */);
+		// skip any in the merge list
+		if (merge_verts.get(n))
+			continue;
 
-		if (sel.empty())
-			break;
+		const Vertex *N = Vertices[n];
 
-		Vertex_MergeList(&sel);
+		if (! N->Matches(V))
+			continue;
+
+		// Ok, found it, so update linedefs
+
+		for (int ld = 0 ; ld < NumLineDefs ; ld++)
+		{
+			LineDef *L = LineDefs[ld];
+
+			if (L->start == idx)
+				BA_ChangeLD(ld, LineDef::F_START, n);
+
+			if (L->end == idx)
+				BA_ChangeLD(ld, LineDef::F_END, n);
+		}
+
+		return;
 	}
+
+	// SHOULD NOT GET HERE
+	LogPrintf("VERTEX MERGE FAILURE.\n");
 }
 
 
 void Vertex_MergeOverlaps()
 {
+	selection_c verts;
+	selection_iterator_c it;
+
+	Vertex_FindOverlaps(verts);
+
 	BA_Begin();
 	BA_Message("merged overlapping vertices");
 
-	Vertex_DoMergeOverlaps();
+	for (verts.begin(&it) ; !it.at_end() ; ++it)
+	{
+		Vertex_MergeOne(*it, verts);
+	}
+
+	// nothing should reference these vertices now
+	DeleteObjects(&verts);
 
 	BA_End();
 
@@ -472,9 +501,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 			dialog->AddLine("No overlapping vertices");
 		else
 		{
-			int approx_num = sel.count_obj() / 2;
-
-			sprintf(check_message, "%d overlapping vertices", approx_num);
+			sprintf(check_message, "%d overlapping vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_highlight,
@@ -701,19 +728,27 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(OBJ_SECTORS);
 
+	int max_type = (game_info.gen_sectors == 2) ? 8191 : 2047;
+
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
 		int type_num = Sectors[n]->type;
 
-		if (type_num < 0 || type_num >= 2048)
+		// always ignore type #0
+		if (type_num == 0)
+			continue;
+
+		if (type_num < 0 || type_num > max_type)
 		{
 			bump_unknown_type(types, type_num);
 			list.set(n);
 			continue;
 		}
 
-		// Boom generalized sectors
-		if (game_info.gen_types)
+		// Boom and ZDoom generalized sectors
+		if (game_info.gen_sectors == 2)
+			type_num &= 255;
+		else if (game_info.gen_sectors)
 			type_num &= 31;
 
 		const sectortype_t *info = M_GetSectorType(type_num);
@@ -1159,7 +1194,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			sprintf(check_message, "%d unclosed sectors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 210,
+			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_unclosed,
 			                "Verts", &UI_Check_Sectors::action_show_un_verts);
 		}
@@ -1173,7 +1208,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			sprintf(check_message, "%d mismatched sectors", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 210,
+			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_mismatch,
 			                "Lines", &UI_Check_Sectors::action_show_mis_lines);
 		}
@@ -1446,6 +1481,140 @@ void Things_RemoveInVoid()
 }
 
 
+// returns true if the game engine ALWAYS spawns this thing
+// (i.e. the skill-flags and mode-flags are ignored).
+static bool TH_always_spawned(int type)
+{
+	const thingtype_t *info = M_GetThingType(type);
+
+	// a player?
+	if (1 <= type && type <= 4)
+		return true;
+
+	// a deathmatch start?
+	if (type == 11)
+		return true;
+
+	// Polyobject things
+	if (strstr(info->desc, "Polyobj") != NULL ||
+		strstr(info->desc, "PolyObj") != NULL)
+		return true;
+
+	// ambient sounds in Heretic and Hexen
+	if (strstr(info->desc, "Snd") != NULL ||
+		strstr(info->desc, "Sound") != NULL)
+		return true;
+
+	return false;
+}
+
+
+void Things_FindDuds(selection_c& list)
+{
+	list.change_type(OBJ_THINGS);
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		if (T->type == CAMERA_PEST)
+			continue;
+
+		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int modes   = 1;
+		int classes = 1;
+
+		if (Level_format == MAPF_Hexen)
+		{
+			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+		}
+		else if (game_info.coop_dm_flags)
+		{
+			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+		}
+
+		if (Level_format == MAPF_Hexen)
+		{
+			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+		}
+
+		if (skills == 0 || modes == 0 || classes == 0)
+		{
+			if (! TH_always_spawned(T->type))
+				list.set(n);
+		}
+	}
+}
+
+
+void Things_ShowDuds()
+{
+	if (edit.mode != OBJ_THINGS)
+		Editor_ChangeMode('t');
+
+	Things_FindDuds(*edit.Selected);
+
+	GoToErrors();
+}
+
+
+void Things_FixDuds()
+{
+	BA_Begin();
+	BA_Message("fixed unspawnable things");
+
+	for (int n = 0 ; n < NumThings ; n++)
+	{
+		const Thing *T = Things[n];
+
+		// NOTE: we also "fix" things that are always spawned
+		////   if (TH_always_spawned(T->type)) continue;
+
+		if (T->type == CAMERA_PEST)
+			continue;
+
+		int new_options = T->options;
+
+		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int modes   = 1;
+		int classes = 1;
+
+		if (skills == 0)
+			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
+
+		if (Level_format == MAPF_Hexen)
+		{
+			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+
+			if (modes == 0)
+				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+		}
+		else if (game_info.coop_dm_flags)
+		{
+			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+
+			if (modes == 0)
+				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+		}
+
+		if (Level_format == MAPF_Hexen)
+		{
+			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+
+			if (classes == 0)
+				new_options |= MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage;
+		}
+
+		if (new_options != T->options)
+		{
+			BA_ChangeTH(n, Thing::F_OPTIONS, new_options);
+		}
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 static void CollectBlockingThings(std::vector<int>& list,
@@ -1660,7 +1829,7 @@ class UI_Check_Things : public UI_Check_base
 {
 public:
 	UI_Check_Things(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Things",
+		UI_Check_base(520, 316, all_mode, "Check : Things",
 				      "Thing test results")
 	{ }
 
@@ -1706,6 +1875,21 @@ public:
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
 		Things_ShowStuckies();
 		dialog->user_action = CKR_Highlight;
+	}
+
+
+	static void action_show_duds(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_ShowDuds();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_duds(Fl_Widget *w, void *data)
+	{
+		UI_Check_Things *dialog = (UI_Check_Things *)data;
+		Things_FixDuds();
+		dialog->user_action = CKR_TookAction;
 	}
 };
 
@@ -1759,6 +1943,19 @@ check_result_e CHECK_Things(int min_severity = 0)
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Things::action_show_void,
 			                "Remove", &UI_Check_Things::action_remove_void);
+		}
+
+
+		Things_FindDuds(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No unspawnable things -- skill flags are OK");
+		else
+		{
+			sprintf(check_message, "%d unspawnable things", sel.count_obj());
+			dialog->AddLine(check_message, 1, 200,
+			                "Show", &UI_Check_Things::action_show_duds,
+			                "Fix",  &UI_Check_Things::action_fix_duds);
 		}
 
 
@@ -1859,15 +2056,11 @@ void LineDefs_RemoveZeroLen()
 	BA_Begin();
 	BA_Message("removed zero-len linedefs");
 
-	DeleteObjects_WithUnused(&lines);
+	// NOTE: the vertex overlapping test handles cases where the
+	//       vertices of other lines joining a zero-length one
+	//       need to be merged.
 
-	if (lines.notempty())
-	{
-		// technically, this is slightly wrong, as it should only merge
-		// vertices that belong to one of the deleted linedefs.
-		// pragmatically, I don't think it will hurt anybody.
-		Vertex_DoMergeOverlaps();
-	}
+	DeleteObjects_WithUnused(&lines);
 
 	BA_End();
 }
@@ -2086,6 +2279,10 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		int type_num = LineDefs[n]->type;
+
+		// always ignore type #0
+		if (type_num == 0)
+			continue;
 
 		const linetype_t *info = M_GetLineType(type_num);
 
@@ -2675,7 +2872,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d linedefs without right side", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 250,
+			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
 		}
 
@@ -2688,7 +2885,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d manual doors on 1S linedefs", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 250,
+			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_manual_doors,
 			                "Fix",  &UI_Check_LineDefs::action_fix_manual_doors);
 		}
@@ -2716,7 +2913,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			sprintf(check_buffer, "%d linedefs with wrong 2S flag", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 285,
+			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
 			                "Fix",  &UI_Check_LineDefs::action_fix_bad_2s_flag);
 		}
@@ -2769,6 +2966,10 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 	for (i = 0 ; i < NumSectors ; i++)
 	{
 		int tag = Sectors[i]->tag;
+
+		// ignore special tags
+		if (game_info.tag_666 && (tag == 666 || tag == 667))
+			continue;
 
 		if (tag > 0)
 		{
@@ -2906,6 +3107,11 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 		if (tag <= 0)
 			continue;
 
+		// DOOM and Heretic use tag #666 to open doors (etc) on the
+		// death of boss monsters.
+		if (game_info.tag_666 && (tag == 666 || tag == 667))
+			continue;
+
 		if (! LD_tag_exists(tag))
 			secs.set(s);
 	}
@@ -2997,6 +3203,78 @@ void Tags_ShowMissingTags()
 }
 
 
+static bool SEC_check_beast_mark(int tag)
+{
+	if (! game_info.tag_666)
+		return true;
+
+	if (tag == 667)
+	{
+		// tag #667 can only be used on MAP07
+		return (y_stricmp(Level_name, "MAP07") == 0);
+	}
+
+	if (tag == 666)
+	{
+		// for Heretic, the map must be an end-of-episode map: ExM8
+		if (game_info.tag_666 == 2)
+		{
+			if (strlen(Level_name) != 4)
+				return false;
+
+			return (Level_name[3] == '8');
+		}
+
+		// for Doom, either need a particular map, or the presence
+		// of a KEEN thing.
+		if (y_stricmp(Level_name, "E1M8")  == 0 ||
+			y_stricmp(Level_name, "E4M6")  == 0 ||
+			y_stricmp(Level_name, "E4M8")  == 0 ||
+			y_stricmp(Level_name, "MAP07") == 0)
+		{
+			return true;
+		}
+
+		for (int n = 0 ; n < NumThings ; n++)
+		{
+			const thingtype_t *info = M_GetThingType(Things[n]->type);
+
+			if (y_stricmp(info->desc, "Commander Keen") == 0)
+				return true;
+		}
+
+		return false;
+	}
+
+	return true; // Ok
+}
+
+
+void Tags_FindBeastMarks(selection_c& secs)
+{
+	secs.change_type(OBJ_SECTORS);
+
+	for (int s = 0 ; s < NumSectors ; s++)
+	{
+		int tag = Sectors[s]->tag;
+
+		if (! SEC_check_beast_mark(tag))
+			secs.set(s);
+	}
+}
+
+
+void Tags_ShowBeastMarks()
+{
+	if (edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	Tags_FindBeastMarks(*edit.Selected);
+
+	GoToErrors();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Tags : public UI_Check_base
@@ -3006,7 +3284,7 @@ public:
 
 public:
 	UI_Check_Tags(bool all_mode) :
-		UI_Check_base(520, 286, all_mode, "Check : Tags", "Tag test results"),
+		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"),
 		fresh_tag(0)
 	{ }
 
@@ -3039,6 +3317,13 @@ public:
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
 		Tags_ShowMissingTags();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_show_beast_marks(Fl_Widget *w, void *data)
+	{
+		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
+		Tags_ShowBeastMarks();
 		dialog->user_action = CKR_Highlight;
 	}
 };
@@ -3091,6 +3376,21 @@ check_result_e CHECK_Tags(int min_severity)
 		}
 
 
+		Tags_FindBeastMarks(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
+		else
+		{
+			sprintf(check_buffer, "%d sectors have an invalid 666/667 tag", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 350,
+			                "Show", &UI_Check_Tags::action_show_beast_marks);
+		}
+
+		dialog->AddGap(10);
+
+
 		int min_tag, max_tag;
 
 		Tags_UsedRange(&min_tag, &max_tag);
@@ -3108,8 +3408,12 @@ check_result_e CHECK_Tags(int min_severity)
 		{
 			dialog->fresh_tag = max_tag + 1;
 
+			// skip two special tag numbers
+			if (dialog->fresh_tag == 666)
+				dialog->fresh_tag = 670;
+
 			dialog->AddGap(10);
-			dialog->AddLine("Apply fresh tag to selection :", 0, 215, "Apply",
+			dialog->AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
 			                &UI_Check_Tags::action_fresh_tag);
 		}
 
@@ -3330,7 +3634,22 @@ void Textures_ShowTransparent()
 
 void Textures_FixTransparent()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	const char *new_tex = default_wall_tex;
+
+	// do something reasonable if default wall is transparent
+	if (is_transparent(new_tex))
+	{
+		if (W_TextureIsKnown("SANDSQ2"))
+			new_tex = "SANDSQ2";	// Heretic
+		else if (W_TextureIsKnown("CASTLE07"))
+			new_tex = "CASTLE07";	// Hexen
+		else if (W_TextureIsKnown("BRKBRN02"))
+			new_tex = "BRKBRN02";	// Strife
+		else
+			new_tex = "GRAY1";		// Doom
+	}
+
+	int new_wall = BA_InternaliseString(new_tex);
 
 	BA_Begin();
 	BA_Message("fixed transparent textures");
@@ -3666,13 +3985,159 @@ void Textures_FixUnknownFlat()
 }
 
 
+static bool is_switch_tex(const char *tex)
+{
+	// we only check if the name begins with "SW" and a digit or
+	// an underscore.  that is sufficient for DOOM and Heretic, and
+	// most Hexen switches, but misses a lot in Strife.
+
+	return (tex[0] == 'S') && (tex[1] == 'W') &&
+			(tex[2] == '_' || isdigit(tex[2]));
+}
+
+
+void Textures_FindDupSwitches(selection_c& lines)
+{
+	lines.change_type(OBJ_LINEDEFS);
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		// only check lines with a special
+		if (! L->type)
+			continue;
+
+		if (L->right < 0)
+			continue;
+
+		// switch textures only work on the front side
+		// (no need to look at the back side)
+
+		bool lower = is_switch_tex(L->Right()->LowerTex());
+		bool upper = is_switch_tex(L->Right()->UpperTex());
+		bool mid   = is_switch_tex(L->Right()->MidTex());
+
+		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
+
+		if (count > 1)
+			lines.set(n);
+	}
+}
+
+
+void Textures_ShowDupSwitches()
+{
+	if (edit.mode != OBJ_LINEDEFS)
+		Editor_ChangeMode('l');
+
+	Textures_FindDupSwitches(*edit.Selected);
+
+	GoToErrors();
+}
+
+
+void Textures_FixDupSwitches()
+{
+	int null_tex = BA_InternaliseString("-");
+
+	const char *new_tex = default_wall_tex;
+
+	// do something reasonable if default wall is a switch
+	if (is_switch_tex(new_tex))
+	{
+		if (W_TextureIsKnown("SANDSQ2"))
+			new_tex = "SANDSQ2";	// Heretic
+		else if (W_TextureIsKnown("CASTLE07"))
+			new_tex = "CASTLE07";	// Hexen
+		else if (W_TextureIsKnown("BRKBRN02"))
+			new_tex = "BRKBRN02";	// Strife
+		else
+			new_tex = "GRAY1";		// Doom
+	}
+
+	int new_wall = BA_InternaliseString(new_tex);
+
+	BA_Begin();
+	BA_Message("fixed non-animating switches");
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		// only check lines with a special
+		if (! L->type)
+			continue;
+
+		if (L->right < 0)
+			continue;
+
+		// switch textures only work on the front side
+		// (hence no need to look at the back side)
+
+		bool lower = is_switch_tex(L->Right()->LowerTex());
+		bool upper = is_switch_tex(L->Right()->UpperTex());
+		bool mid   = is_switch_tex(L->Right()->MidTex());
+
+		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
+
+		if (count < 2)
+			continue;
+
+		if (L->OneSided())
+		{
+			// we don't care if "mid" is not a switch
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			continue;
+		}
+
+		const Sector *front = L->Right()->SecRef();
+		const Sector *back  = L->Left() ->SecRef();
+
+		bool lower_vis = (front->floorh < back->floorh);
+		bool upper_vis = (front->ceilh > back->ceilh);
+
+		if (count >= 2 && upper && !upper_vis)
+		{
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			upper = false;
+			count--;
+		}
+
+		if (count >= 2 && lower && !lower_vis)
+		{
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
+			lower = false;
+			count--;
+		}
+
+		if (count >= 2 && mid)
+		{
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+			mid = false;
+			count--;
+		}
+
+		if (count >= 2)
+		{
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+			upper = false;
+			count--;
+		}
+	}
+
+	BA_End();
+}
+
+
 //------------------------------------------------------------------------
 
 class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode) :
-		UI_Check_base(565, 286, all_mode, "Check : Textures",
+		UI_Check_base(580, 286, all_mode, "Check : Textures",
 		              "Texture test results")
 	{ }
 
@@ -3755,6 +4220,21 @@ public:
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
 		Textures_LogTransparent();
 		dialog->user_action = CKR_Highlight;
+	}
+
+
+	static void action_show_dup_switch(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_ShowDupSwitches();
+		dialog->user_action = CKR_Highlight;
+	}
+
+	static void action_fix_dup_switch(Fl_Widget *w, void *data)
+	{
+		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
+		Textures_FixDupSwitches();
+		dialog->user_action = CKR_TookAction;
 	}
 
 
@@ -3849,7 +4329,7 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d missing textures on walls", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 270,
+			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_missing,
 			                "Fix",  &UI_Check_Textures::action_fix_missing);
 		}
@@ -3863,10 +4343,24 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			sprintf(check_buffer, "%d transparent textures on solids", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 270,
+			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_transparent,
 			                "Fix",  &UI_Check_Textures::action_fix_transparent,
 			                "Log",  &UI_Check_Textures::action_log_transparent);
+		}
+
+
+		Textures_FindDupSwitches(sel);
+
+		if (sel.empty())
+			dialog->AddLine("No non-animating switch textures");
+		else
+		{
+			sprintf(check_buffer, "%d non-animating switch textures", sel.count_obj());
+
+			dialog->AddLine(check_buffer, 1, 275,
+			                "Show", &UI_Check_Textures::action_show_dup_switch,
+			                "Fix",  &UI_Check_Textures::action_fix_dup_switch);
 		}
 
 

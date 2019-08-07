@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -151,11 +151,9 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_upper->labelsize(12);
 	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
 
-
 	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "impassible");
 	f_walk->labelsize(12);
 	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
-
 
 	Y += 19;
 
@@ -164,11 +162,9 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_lower->labelsize(12);
 	f_lower->callback(flags_callback, new line_flag_CB_data_c(this, MLF_LowerUnpegged));
 
-
 	f_mons = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block mons");
 	f_mons->labelsize(12);
 	f_mons->callback(flags_callback, new line_flag_CB_data_c(this, MLF_BlockMonsters));
-
 
 	Y += 19;
 
@@ -178,11 +174,14 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
 	f_passthru->hide();
 
+	f_jumpover = new Fl_Check_Button(X+28, Y+2, FW, 20, "jump over");
+	f_jumpover->labelsize(12);
+	f_jumpover->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_JumpOver));
+	f_jumpover->hide();
 
 	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "sound block");
 	f_sound->labelsize(12);
 	f_sound->callback(flags_callback, new line_flag_CB_data_c(this, MLF_SoundBlock));
-
 
 	Y += 19;
 
@@ -193,12 +192,28 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	f_3dmidtex->hide();
 
 
-	Y += 24;
+	f_trans1 = new Fl_Check_Button(X+28, Y+2, FW, 20, "");
+	f_trans1->labelsize(12);
+	f_trans1->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent1));
+	f_trans1->hide();
+
+	f_trans2 = new Fl_Check_Button(X+44, Y+2, FW, 20, "translucency");
+	f_trans2->labelsize(12);
+	f_trans2->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent2));
+	f_trans2->hide();
+
+
+	f_flyers = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block flyers");
+	f_flyers->labelsize(12);
+	f_flyers->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_BlockFloaters));
+	f_flyers->hide();
+
+	Y += 29;
 
 
 	front = new UI_SideBox(x(), Y, w(), 140, 0);
 
-	Y += front->h() + 16;
+	Y += front->h() + 14;
 
 
 	back = new UI_SideBox(x(), Y, w(), 140, 1);
@@ -527,7 +542,7 @@ void UI_LineBox::CB_Paste(int new_tex)
 }
 
 
-bool UI_LineBox::ClipboardOp(char what)
+bool UI_LineBox::ClipboardOp(char op)
 {
 	if (obj < 0)
 		return false;
@@ -538,7 +553,7 @@ bool UI_LineBox::ClipboardOp(char what)
 		return false;
 	}
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			CB_Copy();
@@ -713,6 +728,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			args[a]->value("");
 			args[a]->tooltip(NULL);
+			args[a]->textcolor(FL_BLACK);
 		}
 
 		if (is_linedef(obj))
@@ -725,16 +741,19 @@ void UI_LineBox::UpdateField(int field)
 
 			if (Level_format == MAPF_Hexen)
 			{
-				if (L->tag  || info->args[0]) args[0]->value(Int_TmpStr(L->tag));
-				if (L->arg2 || info->args[1]) args[1]->value(Int_TmpStr(L->arg2));
-				if (L->arg3 || info->args[2]) args[2]->value(Int_TmpStr(L->arg3));
-				if (L->arg4 || info->args[3]) args[3]->value(Int_TmpStr(L->arg4));
-				if (L->arg5 || info->args[4]) args[4]->value(Int_TmpStr(L->arg5));
-
-				// set tooltips
 				for (int a = 0 ; a < 5 ; a++)
+				{
+					int arg_val = L->Arg(1 + a);
+
+					if (arg_val || L->type)
+						args[a]->value(Int_TmpStr(arg_val));
+
+					// set the tooltip
 					if (info->args[a])
 						args[a]->copy_tooltip(info->args[a]);
+					else
+						args[a]->textcolor(fl_rgb_color(160,160,160));
+				}
 			}
 		}
 		else
@@ -750,8 +769,11 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const LineDef *L = LineDefs[obj];
 
-			front->SetObj(L->right, SolidMask(SIDE_RIGHT), L->TwoSided());
-			 back->SetObj(L->left,  SolidMask(SIDE_LEFT),  L->TwoSided());
+			int right_mask = SolidMask(L, SIDE_RIGHT);
+			int  left_mask = SolidMask(L, SIDE_LEFT);
+
+			front->SetObj(L->right, right_mask, L->TwoSided());
+			 back->SetObj(L->left,   left_mask, L->TwoSided());
 		}
 		else
 		{
@@ -870,9 +892,14 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
 	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
 
-	f_walk ->value((lineflags & MLF_Blocking)      ? 1 : 0);
-	f_mons ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
-	f_sound->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
+	f_jumpover->value((lineflags & MLF_Strife_JumpOver)   ? 1 : 0);
+	f_trans1  ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
+	f_trans2  ->value((lineflags & MLF_Strife_Translucent2) ? 1 : 0);
+
+	f_walk  ->value((lineflags & MLF_Blocking)      ? 1 : 0);
+	f_mons  ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
+	f_sound ->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
+	f_flyers->value((lineflags & MLF_Strife_BlockFloaters) ? 1 : 0);
 }
 
 
@@ -909,6 +936,21 @@ int UI_LineBox::CalcFlags() const
 
 		if (game_info.midtex_3d && f_3dmidtex->value())
 			lineflags |= MLF_Eternity_3DMidTex;
+
+		if (game_info.strife_flags)
+		{
+			if (f_jumpover->value())
+				lineflags |= MLF_Strife_JumpOver;
+
+			if (f_flyers->value())
+				lineflags |= MLF_Strife_BlockFloaters;
+
+			if (f_trans1->value())
+				lineflags |= MLF_Strife_Translucent1;
+
+			if (f_trans2->value())
+				lineflags |= MLF_Strife_Translucent2;
+		}
 	}
 
 	return lineflags;
@@ -921,11 +963,9 @@ void UI_LineBox::UpdateTotal()
 }
 
 
-int UI_LineBox::SolidMask(int side)
+int UI_LineBox::SolidMask(const LineDef *L, int side) const
 {
-	SYS_ASSERT(is_linedef(obj));
-
-	const LineDef *L = LineDefs[obj];
+	SYS_ASSERT(L);
 
 	if (L->left < 0 && L->right < 0)
 		return 0;
@@ -987,6 +1027,21 @@ void UI_LineBox::UpdateGameInfo()
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
+
+		if (game_info.strife_flags)
+		{
+			f_jumpover->show();
+			f_flyers->show();
+			f_trans1->show();
+			f_trans2->show();
+		}
+		else
+		{
+			f_jumpover->hide();
+			f_flyers->hide();
+			f_trans1->hide();
+			f_trans2->hide();
+		}
 
 		if (game_info.gen_types)
 			gen->show();

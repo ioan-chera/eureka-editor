@@ -277,6 +277,8 @@ void Grid_State_c::SetStep(int new_step)
 {
 	step = new_step;
 
+	shown = true;
+
 	// find closest value in info bar
 	int best = 0;
 	int best_dist = 999999;

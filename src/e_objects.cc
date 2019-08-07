@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -137,10 +137,19 @@ static void Insert_Thing()
 
 	Thing *T = Things[new_t];
 
-	T->type = default_thing;
-
 	if (model >= 0)
 		T->RawCopy(Things[model]);
+	else
+	{
+		T->type = default_thing;
+		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
+
+		if (Level_format == MAPF_Hexen)
+		{
+			T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+			T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+		}
+	}
 
 	T->x = grid.SnapX(edit.map_x);
 	T->y = grid.SnapY(edit.map_y);
@@ -179,7 +188,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 {
 	// returns true if we assigned a sector (so drawing should stop)
 
-	struct
+	struct check_closed_data_t
 	{
 		lineloop_c loop;
 
@@ -197,8 +206,10 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 	 left.ok = TraceLineLoop(new_ld, SIDE_LEFT,   left.loop);
 	right.ok = TraceLineLoop(new_ld, SIDE_RIGHT, right.loop);
 
+#ifdef DEBUG_LOOP
 	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",
 			left.ok ? 1 : 0, right.ok ? 1 : 0);
+#endif
 
 	if (! (left.ok && right.ok))
 	{
@@ -206,7 +217,9 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 
 		// TODO : find some cases, see what is needed
 
-fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
+#ifdef DEBUG_LOOP
+	fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
+#endif
 		return false;
 	}
 
@@ -222,9 +235,11 @@ fprintf(stderr, "--> bad  bad  bad  bad  bad <--\n");
 	}
 
 
-fprintf(stderr, "--> %s + %s\n",
-		 left.loop.faces_outward ? "OUTIE" : "innie",
-		right.loop.faces_outward ? "OUTIE" : "innie");
+#ifdef DEBUG_LOOP
+	fprintf(stderr, "--> %s + %s\n",
+			 left.loop.faces_outward ? "OUTIE" : "innie",
+			right.loop.faces_outward ? "OUTIE" : "innie");
+#endif
 
 	 left.sec =  left.loop.DetermineSector();
 	right.sec = right.loop.DetermineSector();
@@ -381,14 +396,13 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 }
 
 
-void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
+static void Insert_Vertex(bool force_continue, bool no_fill)
 {
 	bool closed_a_loop = false;
 
+	// when these both >= 0, we will add a linedef between them
 	int old_vert = -1;
 	int new_vert = -1;
-
-	Vertex *V = NULL;
 
 	int new_x = grid.SnapX(edit.map_x);
 	int new_y = grid.SnapY(edit.map_y);
@@ -404,75 +418,85 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
 
-	// only use the highlight when not splitting a line
-	if (split_ld < 0)
+	if (split_ld >= 0)
 	{
-		// the "nearby" vertex is usually the highlighted one.
-		int hi_vert = -1;
+		new_x = edit.split_x;
+		new_y = edit.split_y;
+
+		// prevent creating an overlapping line when splitting
+		if (old_vert >= 0 &&
+			LineDefs[split_ld]->TouchesVertex(old_vert))
+		{
+			old_vert = -1;
+		}
+	}
+	else
+	{
+		// not splitting a line.
+		// check if there is a "nearby" vertex (e.g. the highlighted one)
 
 		if (edit.highlight.valid())
-			hi_vert = edit.highlight.num;
+			new_vert = edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (hi_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
-			hi_vert = Vertex_FindExact(new_x, new_y);
+		if (new_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
+			new_vert = Vertex_FindExact(new_x, new_y);
 
 		//
-		// handle a highlighted vertex:
+		// handle a highlighted/snapped vertex.
 		// either start drawing from it, or finish a loop at it.
 		//
-		if (hi_vert >= 0)
+		if (new_vert >= 0)
 		{
-			// just ignore when same as drawing_from vert
-			if (hi_vert == old_vert)
+			// just ignore when highlight is same as drawing-start
+			if (old_vert >= 0 &&
+				Vertices[old_vert]->Matches(Vertices[new_vert]))
 			{
-#if 1
 				edit.Selected->set(old_vert);
 				return;
-#else
-				// simply unselect it and stop drawing
-				edit.Selected->clear(old_vert);
-				Editor_ClearAction();
-				return;
-#endif
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
-			if (!is_button && edit.action == ACT_NOTHING)
+			if (edit.action == ACT_NOTHING)
 			{
-				if (Vertex_TryFixDangler(hi_vert))
+				if (Vertex_TryFixDangler(new_vert))
 				{
 					// a vertex was deleted, selection/highlight is now invalid
 					return;
 				}
 			}
 
+			// our insertion point is an existing vertex, and we are not
+			// in drawing mode, so there is no edit operation to perform.
 			if (old_vert < 0)
 			{
-				old_vert = hi_vert;
+				old_vert = new_vert;
+				new_vert = -1;
+
 				goto begin_drawing;
 			}
 
-			new_vert = hi_vert;
-		}
-
-		// handle case where a line already exists between the two vertices
-		if (old_vert >= 0 && new_vert >= 0 &&
-			LineDefAlreadyExists(old_vert, new_vert))
-		{
-			// just continue drawing from the second vertex
-			edit.drawing_from = new_vert;
-			edit.Selected->set(new_vert);
-			return;
+			// handle case where a line already exists between the two vertices
+			if (LineDefAlreadyExists(old_vert, new_vert))
+			{
+				// just continue drawing from the second vertex
+				edit.drawing_from = new_vert;
+				edit.Selected->set(new_vert);
+				return;
+			}
 		}
 	}
 
+	// at here: if new_vert >= 0, then old_vert >= 0 and split_ld < 0
 
-	// prevent creating an overlapping line when splitting
-	if (split_ld >= 0 && old_vert >= 0 &&
-		LineDefs[split_ld]->TouchesVertex(old_vert))
+
+	// would we create a new vertex on top of an existing one?
+	if (new_vert < 0 && old_vert >= 0 &&
+		new_x == Vertices[old_vert]->x &&
+		new_y == Vertices[old_vert]->y)
 	{
-		old_vert = -1;
+		edit.Selected->set(old_vert);
+		return;
 	}
 
 
@@ -483,9 +507,7 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 	{
 		new_vert = BA_New(OBJ_VERTICES);
 
-		BA_Message("added vertex #%d", new_vert);
-
-		V = Vertices[new_vert];
+		Vertex *V = Vertices[new_vert];
 
 		V->x = new_x;
 		V->y = new_y;
@@ -493,43 +515,37 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		edit.Selected->set(new_vert);
 		edit.drawing_from = new_vert;
 
-		if (old_vert < 0)
+		// splitting an existing line?
+		if (split_ld >= 0)
 		{
-			old_vert = new_vert;
-			new_vert = -1;
+			SplitLineDefAtVertex(split_ld, new_vert);
+			BA_Message("split linedef #%d", split_ld);
+		}
+		else
+		{
+			BA_Message("added vertex #%d", new_vert);
 		}
 	}
 
 
-	// splitting an existing line?
-	if (split_ld >= 0)
+	if (old_vert < 0)
 	{
-		SYS_ASSERT(V);
-
-		V->x = edit.split_x;
-		V->y = edit.split_y;
-
-		BA_Message("split linedef #%d", split_ld);
-
-		SplitLineDefAtVertex(split_ld, new_vert >= 0 ? new_vert : old_vert);
+		// there is no starting vertex, therefore no linedef can be added
+		old_vert = new_vert;
+		new_vert = -1;
 	}
-
-
-	// closing a loop?
-	if (!force_continue && new_vert >= 0 && Vertex_HowManyLineDefs(new_vert) > 0)
+	else
 	{
-		closed_a_loop = true;
-	}
+		// closing a loop?
+		if (!force_continue && Vertex_HowManyLineDefs(new_vert) > 0)
+		{
+			closed_a_loop = true;
+		}
 
-
-	// adding a linedef?
-	if (old_vert >= 0 && new_vert >= 0)
-	{
+		//
+		// adding a linedef
+		//
 		SYS_ASSERT(old_vert != new_vert);
-
-		// sanity check
-		if (Vertices[old_vert]->Matches(Vertices[new_vert]))
-			BugError("Bug detected (creation of zero-length line)\n");
 
 		// this can make new sectors too
 		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
@@ -540,11 +556,12 @@ void Insert_Vertex(bool force_continue, bool no_fill, bool is_button)
 		edit.drawing_from = new_vert;
 	}
 
+
 	BA_End();
 
 
-	// begin drawing mode?
 begin_drawing:
+	// begin drawing mode?
 	if (edit.action == ACT_NOTHING && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{

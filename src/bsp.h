@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -61,13 +61,10 @@ public:
 	// the GUI can set this to tell the node builder to stop
 	bool cancelled;
 
-	// if the node builder failed, this will contain the error
-	const char *message;
-
 	// from here on, various bits of internal state
 	int total_failed_maps;
 	int total_warnings;
-	int total_minor_warnings;
+	int total_minor_issues;
 
 public:
 	nodebuildinfo_t() :
@@ -86,17 +83,14 @@ public:
 		force_compress(false),
 
 		cancelled(false),
-		message(NULL),
 
 		total_failed_maps(0),
 		total_warnings(0),
-		total_minor_warnings(0)
+		total_minor_issues(0)
 	{ }
 
 	~nodebuildinfo_t()
-	{
-		StringFree(message);
-	}
+	{ }
 };
 
 
@@ -111,9 +105,8 @@ typedef enum
 	// the WAD file was corrupt / empty / bad filename
 	BUILD_BadFile,
 
-	// file errors
-	BUILD_ReadError,
-	BUILD_WriteError
+	// when saving the map, one or more lumps overflowed
+	BUILD_LumpOverflow
 }
 build_result_e;
 
@@ -146,14 +139,11 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-// send normal messages & warnings to the log file
-void PrintVerbose(const char *str, ...);
+void PrintDetail(const char *fmt, ...);
 
-void Warning(const char *str, ...);
-void MinorWarning(const char *str, ...);
-
-// set message for certain errors
-void SetErrorMsg(const char *str, ...);
+void Failure(const char *fmt, ...);
+void Warning(const char *fmt, ...);
+void MinorIssue(const char *fmt, ...);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -443,7 +433,6 @@ typedef struct seg_s
 	double pdx, pdy;
 
 	double p_length;
-	double p_angle;
 	double p_para;
 	double p_perp;
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -118,6 +118,10 @@ void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
 void M_PrintCommandLineOptions(FILE *fp);
+
+
+// returns true if ok, false on EOF or error
+bool M_ReadTextLine(char *buf, size_t size, FILE *fp);
 
 
 // returns number of tokens, zero for comment, negative on error

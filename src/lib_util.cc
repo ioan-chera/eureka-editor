@@ -209,20 +209,17 @@ void StringRemoveCRLF(char *str)
 
 char * StringTidy(const char *str, const char *bad_chars)
 {
-	static char buffer[FL_PATH_MAX];
+	char *buf  = StringNew(static_cast<int>(strlen(str) + 2));
+	char *dest = buf;
 
-	char *dest = buffer;
-	char *d_end = &buffer[FL_PATH_MAX-2];
-
-	for ( ; *str && dest < d_end ; str++)
+	for ( ; *str ; str++)
 		if (isprint(*str) && ! strchr(bad_chars, *str))
 			*dest++ = *str;
 
 	*dest = 0;
 
-	return buffer;
+	return buf;
 }
-
 
 
 void TimeDelay(unsigned int millies)

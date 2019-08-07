@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -37,6 +37,7 @@
 #include "e_path.h"
 #include "e_vertex.h"
 #include "m_config.h"
+#include "m_editlump.h"
 #include "m_events.h"
 #include "m_loadsave.h"
 #include "m_nodes.h"
@@ -1330,18 +1331,6 @@ static editor_command_t  command_table[] =
 		&CMD_DeleteMap
 	},
 
-	{	"TestMap",  "File",
-		&CMD_TestMap
-	},
-
-	{	"BuildAllNodes",  "File",
-		&CMD_BuildAllNodes
-	},
-
-	{	"PreferenceDialog",  "File",
-		&CMD_Preferences
-	},
-
 	{	"Quit",  "File",
 		&CMD_Quit
 	},
@@ -1466,11 +1455,35 @@ static editor_command_t  command_table[] =
 	},
 
 
-	/* ------ HELP menu ------ */
+	/* ------ TOOLS menu ------ */
 
-	{	"LogViewer",  "Help",
+	{	"PreferenceDialog",  "Tools",
+		&CMD_Preferences
+	},
+
+	{	"TestMap",  "Tools",
+		&CMD_TestMap
+	},
+
+	{	"BuildAllNodes",  "Tools",
+		&CMD_BuildAllNodes
+	},
+
+	{	"EditLump",  "Tools",
+		&CMD_EditLump,
+		/* flags */ "/header /scripts"
+	},
+
+	{	"AddBehavior",  "Tools",
+		&CMD_AddBehaviorLump
+	},
+
+	{	"LogViewer",  "Tools",
 		&CMD_LogViewer
 	},
+
+
+	/* ------ HELP menu ------ */
 
 	{	"OnlineDocs",  "Help",
 		&CMD_OnlineDocs

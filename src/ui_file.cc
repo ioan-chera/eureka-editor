@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -82,11 +82,11 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(270, bottom_y + 17, 95, 35, "OK");
+		ok_but = new Fl_Return_Button(260, bottom_y + 17, 100, 35, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button *cancel = new Fl_Button(130, bottom_y + 17, 95, 35, "Cancel");
+		Fl_Button *cancel = new Fl_Button(75, bottom_y + 17, 100, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -248,7 +248,7 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap() :
-	UI_Escapable_Window(420, 470, "Open Map"),
+	UI_Escapable_Window(420, 475, "Open Map"),
 	action(ACT_none),
 	loaded_wad(NULL),
 	 using_wad(NULL)
@@ -292,9 +292,11 @@ UI_OpenMap::UI_OpenMap() :
 
 	// all the map buttons go into this group
 
-	button_grp = new Fl_Group(0, 165, w(), 230, "");
+	button_grp = new UI_Scroll(5, 165, w()-10, 230, +1 /* bar_side */);
 	button_grp->align(FL_ALIGN_TOP | FL_ALIGN_INSIDE);
-	button_grp->end();
+	button_grp->resize_horiz(false);
+	button_grp->Line_size(24);
+	button_grp->box(FL_FLAT_BOX);
 
 	/* bottom buttons */
 
@@ -305,11 +307,11 @@ UI_OpenMap::UI_OpenMap() :
 		o->box(FL_FLAT_BOX);
 		o->color(WINDOW_BG, WINDOW_BG);
 
-		ok_but = new Fl_Return_Button(280, bottom_y + 20, 89, 34, "OK");
+		ok_but = new Fl_Return_Button(260, bottom_y + 20, 100, 34, "OK");
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback(ok_callback, this);
 
-		Fl_Button * cancel = new Fl_Button(100, bottom_y + 20, 95, 35, "Cancel");
+		Fl_Button * cancel = new Fl_Button(75, bottom_y + 20, 100, 35, "Cancel");
 		cancel->callback(close_callback, this);
 
 		o->end();
@@ -395,7 +397,7 @@ void UI_OpenMap::CheckMapName()
 void UI_OpenMap::Populate()
 {
 	button_grp->label("\n\n\n\n\nNO   MAPS   FOUND");
-	button_grp->clear();
+	button_grp->Remove_all();
 
 	using_wad = NULL;
 
@@ -436,6 +438,9 @@ void UI_OpenMap::Populate()
 		using_wad = edit_wad;
 		PopulateButtons();
 	}
+
+	button_grp->Init_sizes();
+	button_grp->redraw();
 }
 
 
@@ -470,13 +475,6 @@ void UI_OpenMap::PopulateButtons()
 
 	button_grp->label("");
 
-	// limit the number based on available space
-/*
-	int max_rows = 8;
-	int max_cols = 5;
-
-	num_levels = MIN(num_levels, max_rows * max_cols);
-*/
 	std::map<std::string, int> level_names;
 	std::map<std::string, int>::iterator IT;
 
@@ -487,26 +485,9 @@ void UI_OpenMap::PopulateButtons()
 		level_names[std::string(lump->Name())] = 1;
 	}
 
-	// determine how many rows and columns, and adjust layout
-
-#if 0
-	if (num_levels <= 24) max_rows = 6;
-/*
-	if (num_levels <=  9) max_rows = 3;
-	if (num_levels <=  4) max_rows = 2;
-	if (num_levels <=  2) max_rows = 1;
-*/
-	max_cols = (num_levels + (max_rows - 1)) / max_rows;
-#endif
-
-	int cx_base = button_grp->x() + 30;
+	int cx_base = button_grp->x() + 25;
 	int cy_base = button_grp->y() + 5;
 	int but_W   = 60;
-/*
-	if (max_cols <= 4) { cx_base += 20; but_W += 12; }
-	if (max_cols <= 2) { cx_base += 40; but_W += 12; }
-	if (max_cols <= 1) { cx_base += 40; but_W += 12; }
-*/
 
 	// create them buttons!!
 
@@ -523,9 +504,6 @@ void UI_OpenMap::PopulateButtons()
 		{
 			col = 0;
 			row++;
-
-			if (row >= 8)
-				break;
 		}
 
 		int cx = cx_base + col * (but_W + but_W / 5);
@@ -536,16 +514,13 @@ void UI_OpenMap::PopulateButtons()
 		but->color(FREE_COL);
 		but->callback(button_callback, this);
 
-		button_grp->add(but);
+		button_grp->Add(but);
 
 		col++;
 		if (col >= 5)
 		{
 			col = 0;
 			row++;
-
-			if (row >= 8)
-				break;
 		}
 
 		last_name = name;
@@ -738,6 +713,9 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	{
 		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
 		o->callback((Fl_Callback*)setup_callback, this);
+
+		if (is_startup)
+			o->hide();
 	}
 
 	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
@@ -1107,7 +1085,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	const char *game = DetermineGame(chooser.filename());
+	const char *game = GameNameFromIWAD(chooser.filename());
 
 	if (! M_CanLoadDefinitions("games", game))
 	{

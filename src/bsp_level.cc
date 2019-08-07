@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -545,7 +545,7 @@ void InitBlockmap()
 	// find limits of linedefs, and store as map limits
 	FindBlockmapLimits(&map_bbox);
 
-	PrintVerbose("Map goes from (%d,%d) to (%d,%d)\n",
+	PrintDetail("Map goes from (%d,%d) to (%d,%d)\n",
 			map_bbox.minx, map_bbox.miny, map_bbox.maxx, map_bbox.maxy);
 
 	block_x = map_bbox.minx - (map_bbox.minx & 0x7);
@@ -593,7 +593,7 @@ void PutBlockmap()
 	{
 		WriteBlockmap();
 
-		PrintVerbose("Completed blockmap, size %dx%d (compression: %d%%)\n",
+		PrintDetail("Completed blockmap, size %dx%d (compression: %d%%)\n",
 				block_w, block_h, block_compression);
 	}
 
@@ -798,7 +798,7 @@ void PutReject()
 	Reject_WriteLump();
 	Reject_Free();
 
-	PrintVerbose("Added simple reject lump\n");
+	PrintDetail("Added simple reject lump\n");
 }
 
 
@@ -830,7 +830,7 @@ bool lev_force_xnod;
 
 bool lev_long_name;
 
-int lev_hard_failures;
+int lev_overflows;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
@@ -994,7 +994,7 @@ void GetVertices(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to vertices.\n");
 
 	for (i = 0 ; i < count ; i++)
 	{
@@ -1028,7 +1028,7 @@ void GetSectors(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to sectors.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSectors: num = %d\n", count);
@@ -1078,7 +1078,7 @@ void GetThings(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to things.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThings: num = %d\n", count);
@@ -1117,7 +1117,7 @@ void GetThingsHexen(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to things.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThingsHexen: num = %d\n", count);
@@ -1156,7 +1156,7 @@ void GetSidedefs(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to sidedefs.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSidedefs: num = %d\n", count);
@@ -1214,7 +1214,7 @@ void GetLinedefs(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to linedefs.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefs: num = %d\n", count);
@@ -1290,7 +1290,7 @@ void GetLinedefsHexen(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to a lump\n");
+		FatalError("Error seeking to linedefs.\n");
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
@@ -1358,22 +1358,30 @@ void GetLinedefsHexen(void)
 }
 
 
-static inline int TransformSegDist(const seg_t *seg)
+static inline int VanillaSegDist(const seg_t *seg)
 {
-	double sx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
-	double sy = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
+	double lx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
+	double ly = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
 
-	return (int) ceil(UtilComputeDist(seg->start->x - sx, seg->start->y - sy));
+	// use the "true" starting coord (as stored in the wad)
+	double sx = I_ROUND(seg->start->x);
+	double sy = I_ROUND(seg->start->y);
+
+	return (int) floor(UtilComputeDist(sx - lx, sy - ly) + 0.5);
 }
 
-static inline int TransformAngle(angle_g angle)
+static inline int VanillaSegAngle(const seg_t *seg)
 {
-	int result;
+	// compute the "true" delta
+	double dx = I_ROUND(seg->end->x) - I_ROUND(seg->start->x);
+	double dy = I_ROUND(seg->end->y) - I_ROUND(seg->start->y);
 
-	result = (int)(angle * 65536.0 / 360.0);
+	double angle = UtilComputeAngle(dx, dy);
 
-	if (result < 0)
-		result += 65536;
+	if (angle < 0)
+		angle += 360.0;
+
+	int result = (int) floor(angle * 65536.0 / 360.0 + 0.5);
 
 	return (result & 0xFFFF);
 }
@@ -1399,11 +1407,11 @@ static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 
-void MarkHardFailure(int flags)
+void MarkOverflow(int flags)
 {
 	// flags are ignored
 
-	lev_hard_failures++;
+	lev_overflows++;
 }
 
 
@@ -1441,8 +1449,8 @@ void PutVertices(const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 	{
-		Warning("Number of vertices has overflowed.\n");
-		MarkHardFailure(LIMIT_VERTEXES);
+		Failure("Number of vertices has overflowed.\n");
+		MarkOverflow(LIMIT_VERTEXES);
 	}
 }
 
@@ -1531,10 +1539,10 @@ void PutSegs(void)
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
-		raw.angle   = LE_U16(TransformAngle(seg->p_angle));
+		raw.angle   = LE_U16(VanillaSegAngle(seg));
 		raw.linedef = LE_U16(seg->linedef->index);
 		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(TransformSegDist(seg));
+		raw.dist    = LE_U16(VanillaSegDist(seg));
 
 		lump->Write(&raw, sizeof(raw));
 
@@ -1555,8 +1563,8 @@ void PutSegs(void)
 
 	if (count > 65534)
 	{
-		Warning("Number of segs has overflowed.\n");
-		MarkHardFailure(LIMIT_SEGS);
+		Failure("Number of segs has overflowed.\n");
+		MarkOverflow(LIMIT_SEGS);
 	}
 }
 
@@ -1694,8 +1702,8 @@ void PutSubsecs(const char *name, int do_gl)
 
 	if (num_subsecs > 32767)
 	{
-		Warning("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
-		MarkHardFailure(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
+		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
 
@@ -1833,7 +1841,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 }
 
 
-void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
+void PutNodes(const char *name, int do_v5, node_t *root)
 {
 	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
 
@@ -1858,8 +1866,8 @@ void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
-		Warning("Number of nodes has overflowed.\n");
-		MarkHardFailure(LIMIT_NODES);
+		Failure("Number of nodes has overflowed.\n");
+		MarkOverflow(LIMIT_NODES);
 	}
 }
 
@@ -1868,20 +1876,20 @@ void CheckLimits()
 {
 	if (num_sectors > 65534)
 	{
-		Warning("Map has too many sectors.\n");
-		MarkHardFailure(LIMIT_SECTORS);
+		Failure("Map has too many sectors.\n");
+		MarkOverflow(LIMIT_SECTORS);
 	}
 
 	if (num_sidedefs > 65534)
 	{
-		Warning("Map has too many sidedefs.\n");
-		MarkHardFailure(LIMIT_SIDEDEFS);
+		Failure("Map has too many sidedefs.\n");
+		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
 	if (num_linedefs > 65534)
 	{
-		Warning("Map has too many linedefs.\n");
-		MarkHardFailure(LIMIT_LINEDEFS);
+		Failure("Map has too many linedefs.\n");
+		MarkOverflow(LIMIT_LINEDEFS);
 	}
 
 	if (cur_info->gl_nodes && !cur_info->force_v5)
@@ -1903,7 +1911,7 @@ void CheckLimits()
 			num_segs > 32767 ||
 			num_nodes > 32767)
 		{
-			Warning("Forcing ZDoom format nodes due to overflows.\n");
+			Warning("Forcing XNOD format nodes due to overflows.\n");
 			lev_force_xnod = true;
 		}
 	}
@@ -2178,8 +2186,8 @@ void LoadLevel()
 {
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
-	lev_current_name  = LEV->Name();
-	lev_hard_failures = 0;
+	lev_current_name = LEV->Name();
+	lev_overflows = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
@@ -2205,7 +2213,7 @@ void LoadLevel()
 		GetThings();
 	}
 
-	PrintVerbose("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
+	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
 			num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
 
 	// always prune vertices at end of lump, otherwise all the
@@ -2283,7 +2291,7 @@ static const char *CalcOptionsString()
 {
 	static char buffer[256];
 
-	sprintf(buffer, "--factor %d", cur_info->factor);
+	sprintf(buffer, "--cost %d", cur_info->factor);
 
 	if (cur_info->fast)
 		strcat(buffer, " --fast");
@@ -2347,7 +2355,7 @@ static void AddMissingLump(const char *name, const char *after)
 }
 
 
-void SaveLevel(node_t *root_node)
+build_result_e SaveLevel(node_t *root_node)
 {
 	// Note: root_node may be NULL
 
@@ -2396,7 +2404,7 @@ void SaveLevel(node_t *root_node)
 		else
 			PutSubsecs("GL_SSECT", true);
 
-		PutNodes("GL_NODES", true, lev_force_v5, root_node);
+		PutNodes("GL_NODES", lev_force_v5, root_node);
 
 		// -JL- Add empty PVS lump
 		CreateLevelLump("GL_PVS")->Finish();
@@ -2424,7 +2432,7 @@ void SaveLevel(node_t *root_node)
 
 		PutSegs();
 		PutSubsecs("SSECTORS", false);
-		PutNodes("NODES", false, false, root_node);
+		PutNodes("NODES", false, root_node);
 	}
 
 	PutBlockmap();
@@ -2439,11 +2447,15 @@ void SaveLevel(node_t *root_node)
 
 	edit_wad->EndWrite();
 
-	if (lev_hard_failures > 0)
+	if (lev_overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		GB_PrintMsg("FAILED with %d hard failures\n", lev_hard_failures);
+		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+
+		return BUILD_LumpOverflow;
 	}
+
+	return BUILD_OK;
 }
 
 
@@ -2662,19 +2674,19 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	if (ret == BUILD_OK)
 	{
-		PrintVerbose("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
+		PrintDetail("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
 					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
 
 		if (root_node)
 		{
-			PrintVerbose("Heights of left and right subtrees = (%d,%d)\n",
+			PrintDetail("Heights of left and right subtrees = (%d,%d)\n",
 					ComputeBspHeight(root_node->r.node),
 					ComputeBspHeight(root_node->l.node));
 		}
 
 		ClockwiseBspTree();
 
-		SaveLevel(root_node);
+		ret = SaveLevel(root_node);
 	}
 	else
 	{

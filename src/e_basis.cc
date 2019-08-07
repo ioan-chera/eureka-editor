@@ -51,6 +51,7 @@ std::vector<LineDef *> LineDefs;
 
 std::vector<byte>  HeaderData;
 std::vector<byte>  BehaviorData;
+std::vector<byte>  ScriptsData;
 
 
 int default_floor_h		=   0;
@@ -1075,6 +1076,7 @@ void BA_ClearAll()
 
 	HeaderData.clear();
 	BehaviorData.clear();
+	ScriptsData.clear();
 
 	ClearUndoHistory();
 	ClearRedoFuture();

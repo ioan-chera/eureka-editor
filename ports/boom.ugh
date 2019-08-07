@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2016 Andrew Apted
+#  Copyright (C) 2001-2018 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@ supported_games doom doom2
 #---- BOOM FEATURES -------------
 
 feature gen_types 1
+feature gen_sectors 1
 
 feature coop_dm_flags 1
 feature pass_through  1

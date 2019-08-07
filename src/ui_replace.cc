@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2015-2016 Andrew Apted
+//  Copyright (C) 2015-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -829,9 +829,12 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 			break;
 		}
 
-		case 4: // Lines by Type
+		case 4: // Sectors by Type
 		{
-			const sectortype_t * info = M_GetSectorType(type_num);
+			int mask = (game_info.gen_sectors == 2) ? 255 :
+						(game_info.gen_sectors) ? 31 : 65535;
+
+			const sectortype_t * info = M_GetSectorType(type_num & mask);
 			desc->value(info->desc);
 			break;
 		}
@@ -898,7 +901,7 @@ char UI_FindAndReplace::GetKind()
 }
 
 
-bool UI_FindAndReplace::ClipboardOp(char what)
+bool UI_FindAndReplace::ClipboardOp(char op)
 {
 	// hmmm, review this
 	fl_beep();
@@ -1440,7 +1443,10 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const Sector *SEC = Sectors[idx];
 
-	if (! find_numbers->get(SEC->type))
+	int mask = (game_info.gen_sectors == 2) ? 255 :
+				(game_info.gen_sectors) ? 31 : 65535;
+
+	if (! find_numbers->get(SEC->type & mask))
 		return false;
 
 	if (! Filter_Tag(SEC->tag))
@@ -1656,9 +1662,13 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 
 void UI_FindAndReplace::Replace_SectorType(int idx)
 {
+	int mask = (game_info.gen_sectors == 2) ? 255 :
+				(game_info.gen_sectors) ? 31 : 65535;
+
+	int old_type = Sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
-	BA_ChangeSEC(idx, Sector::F_TYPE, new_type);
+	BA_ChangeSEC(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
 }
 
 //--- editor settings ---

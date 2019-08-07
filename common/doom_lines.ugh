@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------
-#  DOOM 1/2 line and sector specials
+#  DOOM 1/2 line specials
 #------------------------------------------------------------------------
 #
 #  Eureka DOOM Editor
@@ -187,30 +187,4 @@ line  97 t "WR Teleport"
 line 125 t "W1 Teleport /mon"
 line 126 t "WR Teleport /mon"
 line 127 s "S1 Stair Raise 16"
-
-
-#------------------------------------------------------------------------
-
-#
-#	Definition of sector types
-#
-#	Format is : sector <number> <description>
-#
-
-sector  0 "NOTHING"
-sector  1 "Light Blinks Randomly"
-sector  2 "Light Flashes 2 Hz"
-sector  3 "Light Flashes 1 Hz"
-sector  4 "Flashes / 20% Damage"
-sector  5 "Damage 10%"
-sector  7 "Damage 5%"
-sector  8 "Light Oscillates"
-sector  9 "Secret Area"
-sector 10 "Close after 30 sec"
-sector 11 "End level / damage"
-sector 12 "Flashes 1 Hz sync"
-sector 13 "Flashes 2 Hz sync"
-sector 14 "Open after 5 minute"
-sector 16 "Damage 20%"
-sector 17 "Light Flickering"
 

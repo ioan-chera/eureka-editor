@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "m_files.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "m_loadsave.h"
 #include "w_wad.h"
@@ -37,7 +38,7 @@ void M_AddKnownIWAD(const char *path)
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
 
-	const char *game = DetermineGame(path);
+	const char *game = GameNameFromIWAD(path);
 
 	known_iwads[game] = std::string(absolute_name);
 }
@@ -396,13 +397,11 @@ static void ParseMiscConfig(FILE * fp)
 	static char line[FL_PATH_MAX];
 	static char * map;
 
-	while (fgets(line, sizeof(line), fp) != NULL)
+	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
 		// comment?
 		if (line[0] == '#')
 			continue;
-
-		StringRemoveCRLF(line);
 
 		char *pos = strchr(line, ' ');
 		if (! pos)
@@ -615,7 +614,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 
 	// handle a trailing separator
 	if (! paths[0])
-		return NULL;
+		return false;
 
 
 	int len;

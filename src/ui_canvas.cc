@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2016 Andrew Apted
+//  Copyright (C) 2006-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -194,23 +194,43 @@ void UI_Canvas::DrawEverything()
 		int dy = 0;
 		DragDelta(&dx, &dy);
 
+		if (edit.mode == OBJ_VERTICES)
+			fl_color(HI_AND_SEL_COL);
+		else
+			fl_color(HI_COL);
+
+		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
 		DrawHighlight(edit.mode, edit.drag_single_obj,
-					  (edit.mode == OBJ_VERTICES) ? HI_AND_SEL_COL : HI_COL,
-		              ! edit.error_mode /* do_tagged */, false /* skip_lines */,
-					  dx, dy);
+		              false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
-			DrawHighlight(highlight.type, highlight.num, HI_COL, false);
+		{
+			fl_color(HI_COL);
+			DrawHighlight(highlight.type, highlight.num);
+		}
+
+		fl_line_style(FL_SOLID);
 	}
 	else if (highlight.valid())
 	{
-		Fl_Color hi_color = HI_COL;
-
 		if (edit.Selected->get(highlight.num))
-			hi_color = HI_AND_SEL_COL;
+			fl_color(HI_AND_SEL_COL);
+		else
+			fl_color(HI_COL);
 
-		DrawHighlight(highlight.type, highlight.num, hi_color,
-		              ! edit.error_mode /* do_tagged */);
+		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
+		DrawHighlight(highlight.type, highlight.num);
+
+		fl_color(LIGHTRED);
+
+		if (! edit.error_mode)
+			DrawTagged(highlight.type, highlight.num);
+
+		fl_line_style(FL_SOLID);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -229,7 +249,7 @@ void UI_Canvas::DrawMap()
 	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
-	if (edit.sector_render_mode)
+	if (edit.sector_render_mode && ! edit.error_mode)
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 			RenderSector(n);
@@ -531,150 +551,200 @@ void UI_Canvas::DrawVertices()
 //
 void UI_Canvas::DrawLinedefs()
 {
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	// we perform 5 passes over the lines.  the first four use a single
+	// color specific to the pass (stored in colors[] array).  the 5th
+	// pass is for all other colors.
+	//
+	// the REASON for this complexity is because fl_color() under X windows
+	// is very very slow, and was causing a massive slow down of this code.
+	// even detecting the same color as last time and inhibiting the call
+	// did not help.
+
+	Fl_Color colors[4];
+
+	colors[0] = LIGHTGREY;
+	colors[1] = LIGHTMAGENTA;
+	colors[2] = LIGHTGREEN;
+	colors[3] = WHITE;
+
+	if (edit.mode == OBJ_SECTORS)
 	{
-		const LineDef *L = LineDefs[n];
+		colors[1] = SECTOR_TAG;
+		colors[2] = SECTOR_TYPE;
 
-		int x1 = L->Start()->x;
-		int y1 = L->Start()->y;
-		int x2 = L->End  ()->x;
-		int y2 = L->End  ()->y;
+		if (edit.sector_render_mode == SREND_SoundProp)
+			colors[1] = FL_MAGENTA;
+	}
 
-		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-			continue;
+	for (int pass = 0 ; pass < 5 ; pass++)
+	{
+		if (pass < 4)
+			fl_color(colors[pass]);
 
-		bool one_sided = (! L->Left());
-
-		switch (edit.mode)
+		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			case OBJ_VERTICES:
+			const LineDef *L = LineDefs[n];
+
+			int x1 = L->Start()->x;
+			int y1 = L->Start()->y;
+			int x2 = L->End  ()->x;
+			int y2 = L->End  ()->y;
+
+			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+				continue;
+
+			bool one_sided = (! L->Left());
+
+			Fl_Color col = LIGHTGREY;
+
+			// 'p' for plain, 'k' for knobbly, 's' for split
+			char line_kind = 'p';
+
+			switch (edit.mode)
 			{
-				if (n == split_ld)
-					fl_color(HI_AND_SEL_COL);
-				else if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				else if (L->right < 0)
-					fl_color(RED);
-				else if (one_sided)
-					fl_color(WHITE);
-				else
-					fl_color(LIGHTGREY);
-
-				if (n == split_ld)
-					DrawSplitLine(x1, y1, x2, y2);
-				else
-					DrawKnobbyLine(x1, y1, x2, y2);
-
-				if (n != split_ld && n >= (NumLineDefs - 3) && ! edit.show_object_numbers)
+				case OBJ_VERTICES:
 				{
-					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
-				}
-			}
-			break;
-
-			case OBJ_LINEDEFS:
-			{
-				if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				// no first sidedef?
-				else if (! L->Right())
-					fl_color(RED);
-				else if (L->type != 0)
-				{
-					if (L->tag != 0)
-						fl_color(LIGHTMAGENTA);
-					else
-						fl_color(LIGHTGREEN);
-				}
-				else if (one_sided)
-					fl_color(WHITE);
-				else if (L->flags & MLF_Blocking)
-					fl_color(FL_CYAN);
-				else
-					fl_color(LIGHTGREY);
-
-				DrawKnobbyLine(x1, y1, x2, y2);
-			}
-			break;
-
-			case OBJ_SECTORS:
-			{
-				int sd1 = L->right;
-				int sd2 = L->left;
-
-				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
-				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
-
-				if (edit.error_mode)
-					fl_color(LIGHTGREY);
-				else if (sd1 < 0)
-					fl_color(RED);
-				else if (edit.sector_render_mode == SREND_SoundProp)
-				{
-					if (L->flags & MLF_SoundBlock)
-						fl_color(FL_MAGENTA);
+					if (n == split_ld)
+						col = HI_AND_SEL_COL;
+					else if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (L->right < 0)
+						col = RED;
 					else if (one_sided)
-						fl_color(WHITE);
+						col = WHITE;
+
+					if (n == split_ld)
+						line_kind = 's';
 					else
-						fl_color(LIGHTGREY);
-				}
-				else
-				{
-					bool have_tag  = false;
-					bool have_type = false;
+						line_kind = 'k';
 
-					if (Sectors[s1]->tag != 0)
-						have_tag = true;
-					if (Sectors[s1]->type != 0)
-						have_type = true;
-
-					if (s2 >= 0)
+					if (pass==4 && n != split_ld && n >= (NumLineDefs - 3) && !edit.show_object_numbers)
 					{
-						if (Sectors[s2]->tag != 0)
-							have_tag = true;
+						DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
+					}
+				}
+				break;
 
-						if (Sectors[s2]->type != 0)
+				case OBJ_LINEDEFS:
+				{
+					if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (! L->Right()) // no first sidedef?
+						col = RED;
+					else if (L->type != 0)
+					{
+						if (L->tag != 0)
+							col = LIGHTMAGENTA;
+						else
+							col = LIGHTGREEN;
+					}
+					else if (one_sided)
+						col = WHITE;
+					else if (L->flags & MLF_Blocking)
+						col = FL_CYAN;
+
+					line_kind = 'k';
+				}
+				break;
+
+				case OBJ_SECTORS:
+				{
+					int sd1 = L->right;
+					int sd2 = L->left;
+
+					int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
+					int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
+
+					if (edit.error_mode)
+						col = LIGHTGREY;
+					else if (sd1 < 0)
+						col = RED;
+					else if (edit.sector_render_mode == SREND_SoundProp)
+					{
+						if (L->flags & MLF_SoundBlock)
+							col = FL_MAGENTA;
+						else if (one_sided)
+							col = WHITE;
+					}
+					else
+					{
+						bool have_tag  = false;
+						bool have_type = false;
+
+						if (Sectors[s1]->tag != 0)
+							have_tag = true;
+						if (Sectors[s1]->type != 0)
 							have_type = true;
+
+						if (s2 >= 0)
+						{
+							if (Sectors[s2]->tag != 0)
+								have_tag = true;
+
+							if (Sectors[s2]->type != 0)
+								have_type = true;
+						}
+
+						if (have_tag && have_type)
+							col = SECTOR_TAGTYPE;
+						else if (have_tag)
+							col = SECTOR_TAG;
+						else if (have_type)
+							col = SECTOR_TYPE;
+						else if (one_sided)
+							col = WHITE;
 					}
 
-					if (have_tag && have_type)
-						fl_color(SECTOR_TAGTYPE);
-					else if (have_tag)
-						fl_color(SECTOR_TAG);
-					else if (have_type)
-						fl_color(SECTOR_TYPE);
-					else if (one_sided)
-						fl_color(WHITE);
-					else
-						fl_color(LIGHTGREY);
+					if (pass==4 && edit.show_object_numbers)
+					{
+						if (s1 != NIL_OBJ)
+							DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
+
+						if (s2 != NIL_OBJ)
+							DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+					}
 				}
+				break;
 
-				DrawMapLine(x1, y1, x2, y2);
-
-				if (edit.show_object_numbers)
+				// OBJ_THINGS
+				default:
 				{
-					if (s1 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
-
-					if (s2 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+					if (one_sided && ! edit.error_mode)
+						col = WHITE;
 				}
+				break;
 			}
-			break;
 
-			// OBJ_THINGS
-			default:
+			if (pass < 4)
 			{
-				if (one_sided && ! edit.error_mode)
-					fl_color(WHITE);
-				else
-					fl_color(LIGHTGREY);
-
-				DrawMapLine(x1, y1, x2, y2);
+				if (col != colors[pass])
+					continue;
 			}
-			break;
-		}
-	}
+			else
+			{
+				if (col == colors[0] || col == colors[1] ||
+					col == colors[2] || col == colors[3])
+					continue;
+
+				fl_color(col);
+			}
+
+			switch (line_kind)
+			{
+				case 'p':
+					DrawMapLine(x1, y1, x2, y2);
+					break;
+
+				case 'k':
+					DrawKnobbyLine(x1, y1, x2, y2);
+					break;
+
+				case 's':
+					DrawSplitLine(x1, y1, x2, y2);
+					break;
+			}
+		} // n
+	} // pass
 
 	// draw the linedef numbers
 	if (edit.mode == OBJ_LINEDEFS && edit.show_object_numbers)
@@ -726,8 +796,17 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 //
 void UI_Canvas::DrawThings()
 {
-	fl_color(DARKGREY);
+	if (edit.mode != OBJ_THINGS)
+		fl_color(DARKGREY);
+	else if (edit.error_mode)
+		fl_color(LIGHTGREY);
+	else
+		fl_color((Fl_Color)0xFF000000);
 
+	// see notes in DrawLinedefs() on why we perform multiple passes.
+	// here first pass is bright red, second pass is everything else.
+
+	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -738,27 +817,22 @@ void UI_Canvas::DrawThings()
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		if (edit.mode == OBJ_THINGS)
+		if (edit.mode == OBJ_THINGS && !edit.error_mode)
 		{
-			if (edit.error_mode)
+			Fl_Color col = (Fl_Color)info->color;
+
+			if (pass == 0)
 			{
-				fl_color(LIGHTGREY);
+				if (col != 0xFF000000)
+					continue;
 			}
-#if 0  // THIS DESIGNED TO SHOW SKILLS VIA COLOR, BUT DOESN'T WORK VERY WELL
-			else if (true)
-			{
-				if (Things[n]->options & 1)
-					fl_color (YELLOW);
-				else if (Things[n]->options & 2)
-					fl_color (LIGHTGREEN);
-				else if (Things[n]->options & 4)
-					fl_color (LIGHTRED);
-				else
-					fl_color (DARKGREY);
-			}
-#endif
 			else
-				fl_color((Fl_Color) info->color);
+			{
+				if (col == 0xFF000000)
+					continue;
+
+				fl_color(col);
+			}
 		}
 
 		int r = info->radius;
@@ -796,6 +870,12 @@ void UI_Canvas::DrawThingBodies()
 	if (edit.error_mode)
 		return;
 
+	// see notes in DrawLinedefs() on why we perform multiple passes.
+	// here first pass is dark red, second pass is everything else.
+
+	fl_color(DarkerColor(DarkerColor((Fl_Color)0xFF000000)));
+
+	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -808,7 +888,20 @@ void UI_Canvas::DrawThingBodies()
 
 		int r = info->radius;
 
-		fl_color(DarkerColor(DarkerColor(info->color)));
+		Fl_Color col = (Fl_Color)info->color;
+
+		if (pass == 0)
+		{
+			if (col != 0xFF000000)
+				continue;
+		}
+		else
+		{
+			if (col == 0xFF000000)
+				continue;
+
+			fl_color(DarkerColor(DarkerColor(col)));
+		}
 
 		int sx1 = SCREENX(x - r);
 		int sy1 = SCREENY(y + r);
@@ -1063,14 +1156,12 @@ void UI_Canvas::SplitLineForget()
 //
 //  draw the given object in highlight color
 //
-void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
-                              bool do_tagged, bool skip_lines, int dx, int dy)
+void UI_Canvas::DrawHighlight(int objtype, int objnum,
+                              bool skip_lines, int dx, int dy)
 {
-	fl_color(col);
+	// fl_color() and fl_line_style() has been done by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
-
-	int vert_r = vertex_radius(grid.Scale);
 
 	switch (objtype)
 	{
@@ -1080,7 +1171,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 			int y = dy + Things[objnum]->y;
 
 			if (! Vis(x, y, MAX_RADIUS))
-				return;
+				break;
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
@@ -1097,23 +1188,13 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 
 		case OBJ_LINEDEFS:
 		{
-			// handle tagged linedefs : show matching sector(s)
-			if (do_tagged && (dx==0 && dy==0) && LineDefs[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumSectors ; m++)
-					if (Sectors[m]->tag == LineDefs[objnum]->tag)
-						DrawHighlight(OBJ_SECTORS, m, LIGHTRED, false);
-
-				fl_color(col);
-			}
-
 			int x1 = dx + LineDefs[objnum]->Start()->x;
 			int y1 = dy + LineDefs[objnum]->Start()->y;
 			int x2 = dx + LineDefs[objnum]->End  ()->x;
 			int y2 = dy + LineDefs[objnum]->End  ()->y;
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-				return;
+				break;
 
 			DrawMapVector(x1, y1, x2, y2);
 		}
@@ -1124,8 +1205,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 			int x = dx + Vertices[objnum]->x;
 			int y = dy + Vertices[objnum]->y;
 
+			int vert_r = vertex_radius(grid.Scale);
+
 			if (! Vis(x, y, vert_r))
-				return;
+				break;
 
 			DrawVertex(x, y, vert_r);
 
@@ -1145,18 +1228,6 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 
 		case OBJ_SECTORS:
 		{
-			// handle tagged sectors : show matching line(s)
-			if (do_tagged && (dx==0 && dy==0) && Sectors[objnum]->tag > 0)
-			{
-				for (int m = 0 ; m < NumLineDefs ; m++)
-					if (LineDefs[m]->tag == Sectors[objnum]->tag)
-						DrawHighlight(OBJ_LINEDEFS, m, LIGHTRED, false);
-
-				fl_color(col);
-			}
-
-			fl_line_style(FL_SOLID, 2);
-
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				const LineDef *L = LineDefs[n];
@@ -1193,19 +1264,15 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, Fl_Color col,
 				else
 					DrawMapLine(x1, y1, x2, y2);
 			}
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 	}
 }
 
 
-void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
+void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
-	fl_color(col);
-
-	int vert_r = vertex_radius(grid.Scale);
+	// fl_color() and fl_line_style() has been done by caller
 
 	switch (objtype)
 	{
@@ -1217,7 +1284,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
-				return;
+				break;
 
 			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
 
@@ -1232,10 +1299,12 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 			int x = Vertices[objnum]->x;
 			int y = Vertices[objnum]->y;
 
+			int vert_r = vertex_radius(grid.Scale);
+
 			trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
-				return;
+				break;
 
 			DrawVertex(x, y, vert_r);
 
@@ -1264,7 +1333,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 			trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-				return;
+				break;
 
 			DrawMapVector(x1, y1, x2, y2);
 		}
@@ -1272,8 +1341,6 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 
 		case OBJ_SECTORS:
 		{
-			fl_line_style(FL_SOLID, 2);
-
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				if (! LineDefs[n]->TouchesSector(objnum))
@@ -1292,13 +1359,74 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum, Fl_Color col)
 
 				DrawMapLine(x1, y1, x2, y2);
 			}
-
-			fl_line_style(FL_SOLID);
 		}
 		break;
 	}
 }
 
+
+void UI_Canvas::DrawTagged(int objtype, int objnum)
+{
+	// fl_color has been done by caller
+
+	// handle tagged linedefs : show matching sector(s)
+	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumSectors ; m++)
+			if (Sectors[m]->tag == LineDefs[objnum]->tag)
+				DrawHighlight(OBJ_SECTORS, m);
+	}
+
+	// handle tagged sectors : show matching line(s)
+	if (objtype == OBJ_SECTORS && Sectors[objnum]->tag > 0)
+	{
+		for (int m = 0 ; m < NumLineDefs ; m++)
+			if (LineDefs[m]->tag == Sectors[objnum]->tag)
+				DrawHighlight(OBJ_LINEDEFS, m);
+	}
+}
+
+
+void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
+{
+	// fl_color() and fl_line_style() has been done by caller
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		const LineDef *L = LineDefs[n];
+
+		int x1 = dx + L->Start()->x;
+		int y1 = dy + L->Start()->y;
+		int x2 = dx + L->End  ()->x;
+		int y2 = dy + L->End  ()->y;
+
+		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			continue;
+
+		if (L->right < 0 && L->left < 0)
+			continue;
+
+		int sec1 = -1;
+		int sec2 = -1;
+
+		if (L->right >= 0) sec1 = L->Right()->sector;
+		if (L->left  >= 0) sec2 = L->Left() ->sector;
+
+		bool touches1 = (sec1 >= 0) && list->get(sec1);
+		bool touches2 = (sec2 >= 0) && list->get(sec2);
+
+		if (! (touches1 || touches2))
+			continue;
+
+		// skip lines if both sides are in the selection
+		if (touches1 && touches2)
+			continue;
+
+		bool reverse = !touches1;
+
+		DrawKnobbyLine(x1, y1, x2, y2, reverse);
+	}
+}
 
 //
 //  draw selected objects in light blue
@@ -1312,11 +1440,17 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
+		fl_color(SEL_COL);
+
+		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+			fl_line_style(FL_SOLID, 2);
+
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
-			DrawHighlightTransform(list->what_type(), *it, SEL_COL);
+			DrawHighlightTransform(list->what_type(), *it);
 		}
 
+		fl_line_style(FL_SOLID);
 		return;
 	}
 
@@ -1328,12 +1462,35 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		DragDelta(&dx, &dy);
 	}
 
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	fl_color(edit.error_mode ? FL_RED : SEL_COL);
+
+	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+		fl_line_style(FL_SOLID, 2);
+
+	// special case when we have many sectors
+	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
 	{
-		DrawHighlight(list->what_type(), *it, edit.error_mode ? FL_RED : SEL_COL,
-		              ! edit.error_mode /* do_tagged */,
-					  true /* skip_lines */, dx, dy);
+		DrawSectorSelection(list, dx, dy);
 	}
+	else
+	{
+		for (list->begin(&it) ; !it.at_end() ; ++it)
+		{
+			DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
+		}
+	}
+
+	if (! edit.error_mode && dx == 0 && dy == 0)
+	{
+		fl_color(LIGHTRED);
+
+		for (list->begin(&it) ; !it.at_end() ; ++it)
+		{
+			DrawTagged(list->what_type(), *it);
+		}
+	}
+
+	fl_line_style(FL_SOLID);
 }
 
 
@@ -1362,6 +1519,8 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
                                bool reverse)
 {
+	// fl_color() has been done by caller
+
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
@@ -1450,15 +1609,15 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
+	fl_line(x1, y1, x2, y2);
+
+	// knob
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	// knob
 	fl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
 
-	fl_line_style(FL_SOLID, 2);
-	fl_line(x1, y1, x2, y2);
-
+	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
 
 	if (r2 < 1.0)
@@ -1474,8 +1633,6 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 
 	fl_line(x1 - dy, y1 + dx, x2, y2);
 	fl_line(x1 + dy, y1 - dx, x2, y2);
-
-	fl_line_style(FL_SOLID);
 }
 
 
@@ -1862,8 +2019,130 @@ struct sector_edge_t
 };
 
 
+struct sector_extra_info_t
+{
+	// these are < 0 when the sector has no lines
+	int first_line;
+	int last_line;
+
+	// these are random junk when sector has no lines
+	int bound_x1, bound_x2;
+	int bound_y1, bound_y2;
+
+	void Clear()
+	{
+		first_line = last_line = -1;
+
+		bound_x1 = 32767;
+		bound_y1 = 32767;
+		bound_x2 = -32767;
+		bound_y2 = -32767;
+	}
+
+	void AddLine(int n)
+	{
+		if (first_line < 0 || first_line > n)
+			first_line = n;
+
+		if (last_line < n)
+			last_line = n;
+	}
+
+	void AddVertex(const Vertex *V)
+	{
+		bound_x1 = MIN(bound_x1, V->x);
+		bound_y1 = MIN(bound_y1, V->y);
+
+		bound_x2 = MAX(bound_x2, V->x);
+		bound_y2 = MAX(bound_y2, V->y);
+	}
+};
+
+class sector_info_cache_c
+{
+public:
+	int total;
+
+	std::vector<sector_extra_info_t> infos;
+
+public:
+	sector_info_cache_c() : total(-1), infos()
+	{ }
+
+	~sector_info_cache_c()
+	{ }
+
+public:
+	void Update()
+	{
+		if (total != NumSectors)
+		{
+			total = NumSectors;
+
+			infos.resize((size_t) total);
+
+			Rebuild();
+		}
+	}
+
+	void Rebuild()
+	{
+		int sec;
+
+		for (sec = 0 ; sec < total ; sec++)
+			infos[sec].Clear();
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			for (int side = 0 ; side < 2 ; side++)
+			{
+				int sd_num = side ? L->left : L->right;
+
+				if (sd_num < 0)
+					continue;
+
+				sec = SideDefs[sd_num]->sector;
+
+				sector_extra_info_t& info = infos[sec];
+
+				info.AddLine(n);
+
+				info.AddVertex(L->Start());
+				info.AddVertex(L->End());
+			}
+		}
+	}
+};
+
+static sector_info_cache_c sector_info_cache;
+
+void SectorCache_Invalidate()
+{
+	// invalidate everything
+	sector_info_cache.total = -1;
+}
+
+
 void UI_Canvas::RenderSector(int num)
 {
+	sector_info_cache.Update();
+
+	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
+
+	if (exinfo.first_line < 0)
+		return;
+
+	// bounding box test
+	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
+		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
+	{
+		// sector is off-screen
+		return;
+	}
+
+
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
@@ -1936,7 +2215,7 @@ void UI_Canvas::RenderSector(int num)
 	short max_y = 0;
 
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 

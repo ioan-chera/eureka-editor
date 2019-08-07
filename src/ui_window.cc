@@ -436,29 +436,29 @@ void UI_MainWindow::ToggleFullscreen()
 */
 
 
-bool UI_MainWindow::ClipboardOp(char what)
+bool UI_MainWindow::ClipboardOp(char op)
 {
 	// Note : this is for the panels, we don't handle the 3D view here
 
 	if (props_box->visible())
 	{
-		return props_box->ClipboardOp(what);
+		return props_box->ClipboardOp(op);
 	}
 	else if (find_box->visible())
 	{
-		return find_box->ClipboardOp(what);
+		return find_box->ClipboardOp(op);
 	}
 	else if (line_box->visible())
 	{
-		return line_box->ClipboardOp(what);
+		return line_box->ClipboardOp(op);
 	}
 	else if (sec_box->visible())
 	{
-		return sec_box->ClipboardOp(what);
+		return sec_box->ClipboardOp(op);
 	}
 	else if (thing_box->visible())
 	{
-		return thing_box->ClipboardOp(what);
+		return thing_box->ClipboardOp(op);
 	}
 
 	// no panel wanted it
@@ -852,11 +852,9 @@ void LogViewer_Open()
 	if (! log_viewer)
 		return;
 
-	if (! log_viewer->shown())
-	{
-		log_viewer->show();
-		log_viewer->Deselect();
-	}
+	// always call show() -- to raise the window
+	log_viewer->show();
+	log_viewer->Deselect();
 
 	log_viewer->JumpEnd();
 }

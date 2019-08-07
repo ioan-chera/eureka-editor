@@ -1,53 +1,47 @@
 #
 #  --- Eureka Editor ---
 #
-#  Makefile for Unixy system-wide install
+#  Makefile for Unixy system-wide install.
+#  Requires GNU make.
 #
 
 PROGRAM=eureka
 
 # prefix choices: /usr  /usr/local  /opt
-PREFIX=/usr/local
+PREFIX ?= /usr/local
+
+# CXX=clang++-6.0
+
+# flags controlling the dialect of C++
+# [ the code is old-school C++ without modern features ]
+CXX_DIALECT=-std=c++03 -fno-strict-aliasing -fwrapv
+
+WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
+OPTIMISE=-O2 -g
+STRIP_FLAGS=--strip-unneeded
+
+# default flags for compiler, preprocessor and linker
+CXXFLAGS ?= $(OPTIMISE) $(WARNINGS)
+CPPFLAGS ?=
+LDFLAGS ?= $(OPTIMISE)
+LIBS ?=
+
+# general things needed by Eureka
+CXXFLAGS += $(CXX_DIALECT)
+LIBS += -lz -lm
+
+# FLTK flags (this assumes a system-wide FLTK installation)
+CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
+LDFLAGS += $(shell fltk-config --use-images --ldflags)
+
+# NOTE: the following is commented out since it does not work as expected.
+#       the --libs option gives us static libraries, but --ldflags option
+#       gives us dynamic libraries (and we use --ldflags above).
+# LIBS += $(shell fltk-config --use-images --libs)
 
 OBJ_DIR=obj_linux
 
-OPTIMISE=-O2 -fno-strict-aliasing
-
-STRIP_FLAGS=--strip-unneeded
-
-# operating system choices: UNIX WIN32
-OS=UNIX
-
-
-#--- Internal stuff from here -----------------------------------
-
-INSTALL_DIR=$(PREFIX)/share/eureka
-
-CXXFLAGS=$(OPTIMISE) -Wall -D$(OS)  \
-         -D_THREAD_SAFE -D_REENTRANT
-
-LDFLAGS=-L/usr/X11R6/lib
-
-LIBS= \
-     -lfltk_images -lfltk_gl -lfltk  \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama  \
-     -lpng -ljpeg -lGL -lz -lm
-
-
-# support for a non-standard install of FLTK
-ifneq ($(FLTK_PREFIX),)
-CXXFLAGS += -I$(FLTK_PREFIX)/include
-LDFLAGS += -L$(FLTK_PREFIX)/lib -Wl,-rpath,$(FLTK_PREFIX)/lib
-endif
-
-# support for statically linking FLTK (no GL, local JPEG and PNG)
-ifneq ($(FLTK_STATIC),)
-LIBS= \
-     -lfltk_images -lfltk  \
-     -lfltk_png -lfltk_jpeg \
-     -lX11 -lXext -lXft -lfontconfig -lXinerama \
-     -lz -lm
-endif
+DUMMY=$(OBJ_DIR)/zzdummy
 
 
 #----- Object files ----------------------------------------------
@@ -74,6 +68,7 @@ OBJS = \
 	$(OBJ_DIR)/main.o  \
 	$(OBJ_DIR)/m_bitvec.o  \
 	$(OBJ_DIR)/m_config.o  \
+	$(OBJ_DIR)/m_editlump.o  \
 	$(OBJ_DIR)/m_events.o  \
 	$(OBJ_DIR)/m_files.o  \
 	$(OBJ_DIR)/m_game.o  \
@@ -91,6 +86,7 @@ OBJS = \
 	$(OBJ_DIR)/ui_canvas.o  \
 	$(OBJ_DIR)/ui_default.o  \
 	$(OBJ_DIR)/ui_dialog.o  \
+	$(OBJ_DIR)/ui_editor.o  \
 	$(OBJ_DIR)/ui_file.o  \
 	$(OBJ_DIR)/ui_hyper.o  \
 	$(OBJ_DIR)/ui_infobar.o  \
@@ -117,25 +113,35 @@ OBJS = \
 	$(OBJ_DIR)/bsp_util.o
 
 $(OBJ_DIR)/%.o: src/%.cc
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 
 #----- Targets -----------------------------------------------
 
-all: $(PROGRAM)
+all: $(DUMMY) $(PROGRAM)
 
 clean:
-	rm -f $(PROGRAM) $(OBJ_DIR)/*.* core core.*
-	rm -f ERRS LOG.txt update.log
+	rm -f $(PROGRAM) $(OBJ_DIR)/*.[oa]
+	rm -f ERRS LOG.txt update.log core core.*
 
 $(PROGRAM): $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
-stripped: $(PROGRAM)
+# this is used to create the OBJ_DIR directory
+$(DUMMY):
+	mkdir -p $(OBJ_DIR)
+	@touch $@
+
+stripped: all
 	strip $(STRIP_FLAGS) $(PROGRAM)
 
-install: stripped
-	install -o root -m 755 $(PROGRAM) $(PREFIX)/bin/
+# note that DESTDIR is usually left undefined, and is mainly
+# useful when making packages for Debian/RedHat/etc...
+
+INSTALL_DIR=$(DESTDIR)$(PREFIX)/share/eureka
+
+install: all
+	install -o root -m 755 $(PROGRAM) $(DESTDIR)$(PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
 	install -d $(INSTALL_DIR)/common
 	install -d $(INSTALL_DIR)/ports
@@ -147,16 +153,22 @@ install: stripped
 	install -o root -m 644 games/*.* $(INSTALL_DIR)/games
 	install -o root -m 644 common/*.* $(INSTALL_DIR)/common
 	install -o root -m 644 ports/*.* $(INSTALL_DIR)/ports
+
+full-install: install
 	xdg-desktop-menu  install --novendor misc/eureka.desktop
 	xdg-icon-resource install --novendor --size 32 misc/eureka.xpm
 
 uninstall:
-	rm -v $(PREFIX)/bin/$(PROGRAM)
+	rm -v $(DESTDIR)$(PREFIX)/bin/$(PROGRAM)
 	rm -Rv $(INSTALL_DIR)
+
+full-uninstall: uninstall
 	xdg-desktop-menu  uninstall --novendor misc/eureka.desktop
 	xdg-icon-resource uninstall --novendor --size 32 eureka
 
-.PHONY: all clean stripped install uninstall
+.PHONY: all clean stripped
+
+.PHONY: install uninstall full-install full-uninstall
 
 #--- editor settings ------------
 # vi:ts=8:sw=8:noexpandtab

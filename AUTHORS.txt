@@ -17,6 +17,9 @@ Ioan Chera
 Fabian Greffrath
   * Debian packager
 
+Wesley Werner
+  * User Manual
+
 Jason R. Johnston (fiftyoars.com)
   * Eureka Logo
 

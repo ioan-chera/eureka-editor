@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2017 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -619,11 +619,12 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
-#define IZ_EPSILON  1e-6
-
-	// this is NOT a predicate, because it does not guarantee
-	// that swapping A and B will produce the opposite result
-	// (or transitivity i.e. if A < B and B < C then A < C).
+	// IsCloser tests if THIS wall (wall A) is closer to the camera
+	// than the given wall (wall B).
+	//
+	// Note that it is NOT suitable as a predicate for std::sort()
+	// since it does not guarantee a linear order (total order) of
+	// the elements.  Hence the need for our own sorting code.
 
 	inline bool IsCloser(const DrawWall *const B) const
 	{
@@ -632,28 +633,26 @@ public:
 		if (A == B)
 			return false;
 
-		if (fabs(A->cur_iz - B->cur_iz) >= IZ_EPSILON)
-		{
-			// this is the normal case
-			return A->cur_iz > B->cur_iz;
-		}
-
-		// this case usually occurs at a column where two walls share a vertex.
-		//
-		// hence we check if they actually share a vertex, and if so then
-		// we test whether A is behind B or not -- by checking which side
-		// of B the camera and the other vertex of A are on.
-
 		if (A->ld && B->ld)
 		{
-			// find the vertex of A _not_ shared with B
+			// handle cases where two linedefs share a vertex, since that
+			// is where slime-trails would otherwise occur.
+
+			// if they do share a vertex, we check if the other vertex of
+			// wall A and the camera position are both on the same side of
+			// wall B (extended to infinity).
+
 			int A_other = -1;
 
-			if (B->ld->TouchesVertex(A->ld->start)) A_other = A->ld->end;
-			if (B->ld->TouchesVertex(A->ld->end))   A_other = A->ld->start;
+			if (B->ld->TouchesVertex(A->ld->start))
+				A_other = A->ld->end;
+			else if (B->ld->TouchesVertex(A->ld->end))
+				A_other = A->ld->start;
 
 			if (A_other >= 0)
 			{
+				// TODO : optimize this (if possible)
+
 				int ax = Vertices[A_other]->x;
 				int ay = Vertices[A_other]->y;
 
@@ -671,9 +670,17 @@ public:
 				return (A_side * C_side >= 0);
 			}
 		}
+		else if (A->th >= 0 && B->th >= 0)
+		{
+			// prevent two things at same location from flickering
+			const Thing *const TA = Things[A->th];
+			const Thing *const TB = Things[B->th];
 
-		// a pretty good fallback:
-		return A->mid_iz > B->mid_iz;
+			if (TA->x == TB->x && TA->y == TB->y)
+				return A->th > B->th;
+		}
+
+		return A->cur_iz > B->cur_iz;
 	}
 
 	/* PREDICATES */
@@ -886,6 +893,7 @@ public:
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
 
+	// vertical clip window, an inclusive range
 	int open_y1;
 	int open_y2;
 
@@ -1639,24 +1647,22 @@ public:
 		int y1 = DistToY(dw->cur_iz, surf.h2);
 		int y2 = DistToY(dw->cur_iz, surf.h1) - 1;
 
+		// clip to the open region
 		if (y1 < open_y1)
 			y1 = open_y1;
 
 		if (y2 > open_y2)
 			y2 = open_y2;
 
-		if (y1 > y2)
-			return;
-
-		/* clip the open region */
-
+		// update open region based on ends which are "solid"
 		if (surf.y_clip & DrawSurf::SOLID_ABOVE)
-			if (open_y1 < y2)
-				open_y1 = y2;
+			open_y1 = MAX(open_y1, y2 + 1);
 
 		if (surf.y_clip & DrawSurf::SOLID_BELOW)
-			if (open_y2 > y1)
-				open_y2 = y1;
+			open_y2 = MIN(open_y2, y1 - 1);
+
+		if (y1 > y2)
+			return;
 
 		/* query mode : is mouse over this wall part? */
 
@@ -1807,121 +1813,112 @@ public:
 		active[i] = B;
 	}
 
-	const DrawWall * Sort_ChoosePivot(int s, int e)
+	int Sort_Partition(int lo, int hi, int pivot_idx)
 	{
-		// use the median of start point, middle point and end point
+		/* this is Hoare's algorithm */
 
-		const DrawWall *A = active[s];
-		const DrawWall *B = active[(s + e) >> 1];
-		const DrawWall *C = active[e];
+		const DrawWall *pivot = active[pivot_idx];
 
-		if (B->IsCloser(A))
-			std::swap(A, B);
+		int s = lo;
+		int e = hi;
 
-		if (C->IsCloser(B))
+		for (;;)
 		{
-			std::swap(B, C);
+			while (s <= e && active[s]->IsCloser(pivot))
+				s++;
 
-			if (B->IsCloser(A))
-				std::swap(A, B);
-		}
-
-		return B;
-	}
-
-	void Sort_Bubble(int s, int e)
-	{
-		while (s < e)
-		{
-			bool changed = false;
-
-			for (int i = s ; i < e ; i++)
+			if (s > hi)
 			{
-				DrawWall *A = active[i];
-				DrawWall *B = active[i+1];
+				// all values were < pivot, including the pivot itself!
 
-				if (B->IsCloser(A))
-				{
-					// swap!
-					active[i]   = B;
-					active[i+1] = A;
+				if (pivot_idx != hi)
+					Sort_Swap(pivot_idx, hi);
 
-					changed = true;
-				}
+				return hi - 1;
 			}
 
-			// stop when everything is in the right order
-			if (! changed)
-				return;
+			while (e >= s && ! active[e]->IsCloser(pivot))
+				e--;
 
-			// highest value will have bubbled to the top, so we can
-			// ignore it in future passes
-			e = e - 1;
+			if (e < lo)
+			{
+				// all values were >= pivot
+
+				if (pivot_idx != lo)
+					Sort_Swap(pivot_idx, lo);
+
+				return lo;
+			}
+
+			if (s < e)
+			{
+				Sort_Swap(s, e);
+
+				s++;
+				e--;
+
+				continue;
+			}
+
+			/* NOT NEEDED (it seems)
+			if (s == e && active[s]->IsCloser(pivot))
+				s++;
+			*/
+
+			return s - 1;
 		}
 	}
 
 	void Sort_Range(int s, int e)
 	{
-		SYS_ASSERT(e >= s);
+		SYS_ASSERT(s <= e);
 
-		if (e == s)
-			return;
-
-		if (e - s < 8)
+		while (s < e)
 		{
-			Sort_Bubble(s, e);
-			return;
-		}
-
-		const DrawWall *pivot = Sort_ChoosePivot(s, e);
-
-		// perform the Quicksort partition step  [ Hoare's algorithm ]
-
-		int s1 = s;
-		int e1 = e;
-
-		while (true)
-		{
-			// s can go past e, or vice versa (that's when we stop)
-
-			while (s <= e && active[s]->IsCloser(pivot))
-				s++;
-
-			while (e >= s && ! active[e]->IsCloser(pivot))
-				e--;
-
-			if (s > e)
-				break;
-
-			// this could would normally not occur, but our comparison
-			// function is rather "wonky"...
-			if (s == e)
+			// previously there was a bubble sort here, but timing
+			// tests showed that it was overkill.  This is enough.
+			if (s == e-1)
 			{
-				e--;
-				break;
+				const DrawWall *const A = active[s];
+				const DrawWall *const B = active[e];
+
+				if (B->IsCloser(A))
+					Sort_Swap(s, e);
+
+				return;
 			}
 
-			Sort_Swap(s, e);
+			// since we are usually sorting a mostly-sorted list, the
+			// wall in the middle is highly likely to be a good pivot.
+			int pivot_idx = (s + e) >> 1;
 
-			s++;
-			e--;
+			int mid = Sort_Partition(s, e, pivot_idx);
+
+			// handle degenerate cases
+			if (mid <= s)
+			{
+				s++;
+				continue;
+			}
+			else if (mid+1 >= e)
+			{
+				e--;
+				continue;
+			}
+
+			// only use recursion on the smallest group
+			// [ it helps to limit stack usage ]
+			if ((mid - s) < (e - mid))
+			{
+				Sort_Range(s, mid);
+				s = mid+1;
+			}
+			else
+			{
+				Sort_Range(mid+1, e);
+				e = mid;
+			}
 		}
-
-		// check whether one side of the partition is empty
-		if (s > e1 || e < s1)
-		{
-			return;
-		}
-
-		s--;
-		e++;
-
-		// recursively sort the two partitions
-		if (s > s1)
-			Sort_Range(s1, s);
-
-		if (e < e1)
-			Sort_Range(e, e1);
 	}
 
 	void SortActiveList()
@@ -1937,6 +1934,8 @@ public:
 
 		Sort_Range(0, (int)active.size() - 1);
 	}
+
+#define IZ_EPSILON  1e-5
 
 	void UpdateActiveList(int x)
 	{
@@ -2038,10 +2037,11 @@ public:
 
 				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
 				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+
 				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
 				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
 
-				if (open_y1 >= open_y2)
+				if (open_y1 > open_y2)
 					break;
 			}
 
@@ -2976,12 +2976,12 @@ static void Render3D_Delete()
 }
 
 
-bool Render3D_ClipboardOp(char what)
+bool Render3D_ClipboardOp(char op)
 {
 	if (r_edit.SelectEmpty() && ! r_edit.hl.valid())
 		return false;
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			Render3D_Copy();

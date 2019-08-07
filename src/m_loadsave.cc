@@ -131,6 +131,8 @@ static void FreshLevel()
 	CalculateLevelBounds();
 
 	ZoomWholeMap();
+
+	Editor_DefaultState();
 }
 
 
@@ -566,6 +568,25 @@ static void LoadBehavior()
 }
 
 
+static void LoadScripts()
+{
+	// the SCRIPTS lump is usually absent
+	Lump_c *lump = Load_LookupAndSeek("SCRIPTS");
+	if (! lump)
+		return;
+
+	int length = lump->Length();
+
+	ScriptsData.resize(length);
+
+	if (length == 0)
+		return;
+
+	if (! lump->Read(& ScriptsData[0], length))
+		FatalError("Error reading SCRIPTS.\n");
+}
+
+
 static void LoadThings()
 {
 	Lump_c *lump = Load_LookupAndSeek("THINGS");
@@ -758,7 +779,7 @@ static void LoadLineDefs()
 		    ld->start == ld->end)
 		{
 			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-			          ld->start, ld->end);
+			          i, ld->start, ld->end);
 
 			bad_linedef_count++;
 
@@ -815,7 +836,7 @@ static void LoadLineDefs_Hexen()
 			ld->start == ld->end)
 		{
 			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-					  ld->start, ld->end);
+					  i, ld->start, ld->end);
 
 			bad_linedef_count++;
 
@@ -865,7 +886,7 @@ static void RemoveUnusedVerticesAtEnd()
 	// normally kosher, but level loading is a special case).
 	if (new_count < NumVertices)
 	{
-		LogPrintf("Removing %d unused vertices at end\n", new_count);
+		LogPrintf("Removing %d unused vertices at end\n", NumVertices - new_count);
 
 		for (int i = new_count ; i < NumVertices ; i++)
 			delete Vertices[i];
@@ -947,7 +968,9 @@ void LoadLevel(Wad_file *wad, const char *level)
 	if (Level_format == MAPF_Hexen)
 	{
 		LoadLineDefs_Hexen();
+
 		LoadBehavior();
+		LoadScripts();
 	}
 	else
 	{
@@ -1330,6 +1353,20 @@ static void SaveBehavior()
 }
 
 
+static void SaveScripts()
+{
+	int size = (int)ScriptsData.size();
+
+	if (size > 0)
+	{
+		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
+
+		lump->Write(& ScriptsData[0], size);
+		lump->Finish();
+	}
+}
+
+
 static void SaveVertices()
 {
 	int size = NumVertices * (int)sizeof(raw_vertex_t);
@@ -1593,7 +1630,10 @@ static void SaveLevel(const char *level)
 	EmptyLump("BLOCKMAP");
 
 	if (Level_format == MAPF_Hexen)
+	{
 		SaveBehavior();
+		SaveScripts();
+	}
 
 	// write out the new directory
 	edit_wad->EndWrite();

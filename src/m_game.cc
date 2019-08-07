@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@
 #include <algorithm>
 
 #include "im_color.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_things.h"
 
@@ -97,7 +98,7 @@ void M_ClearAllDefinitions()
 	game_info.max_dm_starts = 10;
 
 	// reset generalized types
-	memset(&gen_linetypes, 0, sizeof(gen_linetypes));
+	memset(gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
 
 	// clear the parse variables, pre-set a few vars
@@ -193,11 +194,46 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 }
 
 
+static void ParseClearKeywords(char ** argv, int argc)
+{
+	for ( ; argc > 0 ; argv++, argc--)
+	{
+		if (y_stricmp(argv[0], "lines") == 0)
+		{
+			line_groups.clear();
+			line_types.clear();
+		}
+		else if (y_stricmp(argv[0], "sectors") == 0)
+		{
+			sector_types.clear();
+		}
+		else if (y_stricmp(argv[0], "things") == 0)
+		{
+			thing_groups.clear();
+			thing_types.clear();
+		}
+		else if (y_stricmp(argv[0], "textures") == 0)
+		{
+			texture_groups.clear();
+			texture_assigns.clear();
+
+			flat_assigns.clear();
+		}
+		else
+			FatalError("Unknown clear keyword '%s' in definition file.\n", argv[0]);
+	}
+}
+
+
 static void ParseFeatureDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "gen_types") == 0)
 	{
 		game_info.gen_types = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "gen_sectors") == 0)
+	{
+		game_info.gen_sectors = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "img_png") == 0)
 	{
@@ -223,6 +259,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		game_info.midtex_3d = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "strife_flags") == 0)
+	{
+		game_info.strife_flags = atoi(argv[1]);
+	}
 	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
 	{
 		game_info.medusa_fixed = atoi(argv[1]);
@@ -234,6 +274,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	else if (y_stricmp(argv[0], "no_need_players") == 0)
 	{
 		game_info.no_need_players = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "tag_666") == 0)
+	{
+		game_info.tag_666 = atoi(argv[1]);
 	}
 	else
 	{
@@ -509,13 +553,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		// the "line" command is only used in DOOM format
-		// similarly the "special" command is only used in HEXEN format
-		if (y_strnicmp(argv[0], "line", 4) == 0 && Level_format == MAPF_Hexen)
-			return;
-		if (y_strnicmp(argv[0], "spec", 4) == 0 && Level_format != MAPF_Hexen)
-			return;
-
 		linegroup_t * lg = new linegroup_t;
 
 		lg->group = argv[1][0];
@@ -529,15 +566,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	{
 		if (nargs < 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
-
-		// the "line" command is only used in DOOM format
-		// similarly the "special" command is only used in HEXEN format
-		if (y_stricmp(argv[0], "line") == 0 && Level_format == MAPF_Hexen)
-			return;
-		if (y_stricmp(argv[0], "special") == 0 && Level_format != MAPF_Hexen)
-			return;
-
-		// only read "special" in HEXEN map format
 
 		linetype_t * info = new linetype_t;
 
@@ -741,6 +769,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		return;
 	}
 
+	else if (y_stricmp(argv[0], "clear") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseClearKeywords(pst->argv + 1, nargs);
+	}
+
 	else
 	{
 		FatalError("%s(%d): unknown directive: %.32s\n",
@@ -887,7 +923,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	if (! fp)
 		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
 
-	while (fgets(pst->readbuf, sizeof(pst->readbuf), fp))
+	while (M_ReadTextLine(pst->readbuf, sizeof(pst->readbuf), fp))
 	{
 		pst->lineno += 1;
 
@@ -1106,7 +1142,7 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-static bool M_CheckPortSupportsGame(const char *var_game, const char *port)
+bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 {
 	if (strcmp(port, "vanilla") == 0)
 	{

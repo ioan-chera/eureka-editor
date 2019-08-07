@@ -22,9 +22,7 @@
 
 #ifdef WIN32
 #include <io.h>
-#endif
-
-#ifdef UNIX
+#else // UNIX or MACOSX
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -386,7 +384,7 @@ u8_t * FileLoad(const char *filename, int *length)
 	// ensure buffer is NUL-terminated
 	data[*length] = 0;
 
-	if (1 != fread(data, *length, 1, fp))
+	if (*length > 0 && 1 != fread(data, *length, 1, fp))
 	{
 		FileFree(data);
 		fclose(fp);
@@ -610,9 +608,8 @@ const char *GetExecutablePath(const char *argv0)
 
 	// didn't work, free the memory
 	StringFree(path);
-#endif
 
-#ifdef UNIX
+#elif !defined(__APPLE__) // UNIX
 	path = StringNew(PATH_MAX+2);
 
 	int length = readlink("/proc/self/exe", path, PATH_MAX);
@@ -630,9 +627,8 @@ const char *GetExecutablePath(const char *argv0)
 
 	// didn't work, free the memory
 	StringFree(path);
-#endif
 
-#ifdef __APPLE__
+#else
 	/*
 	   from http://www.hmug.org/man/3/NSModule.html
 

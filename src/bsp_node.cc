@@ -115,7 +115,6 @@ void RecomputeSeg(seg_t *seg)
 	seg->pdy = seg->pey - seg->psy;
 
 	seg->p_length = UtilComputeDist(seg->pdx, seg->pdy);
-	seg->p_angle  = UtilComputeAngle(seg->pdx, seg->pdy);
 
 	if (seg->p_length <= 0)
 		BugError("Seg %p has zero p_length.\n", seg);
@@ -997,7 +996,7 @@ void AddMinisegs(seg_t *part,
 
 		if (len > DIST_EPSILON)
 		{
-			MinorWarning("Skipping very short seg (len=%1.3f) near (%1.1f,%1.1f)\n",
+			MinorIssue("Skipping very short seg (len=%1.3f) near (%1.1f,%1.1f)\n",
 					len, cur->vertex->x, cur->vertex->y);
 		}
 
@@ -1063,7 +1062,7 @@ void AddMinisegs(seg_t *part,
 		{
 			if (!cur->self_ref && !cur->after->warned_unclosed)
 			{
-				MinorWarning("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
+				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
 						cur->after->index,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
@@ -1075,7 +1074,7 @@ void AddMinisegs(seg_t *part,
 		{
 			if (!next->self_ref && !next->before->warned_unclosed)
 			{
-				MinorWarning("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
+				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
 						next->before->index,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
@@ -1090,7 +1089,7 @@ void AddMinisegs(seg_t *part,
 		if (cur->after != next->before)
 		{
 			if (!cur->self_ref && !next->self_ref)
-				MinorWarning("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
+				MinorIssue("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
 						cur->after->index, cur->vertex->x, cur->vertex->y,
 						next->before->index, next->vertex->x, next->vertex->y);
 
@@ -1706,7 +1705,7 @@ static void SanityCheckClosed(subsec_t *sub)
 
 	if (gaps > 0)
 	{
-		MinorWarning("Subsector #%d near (%1.1f,%1.1f) is not closed "
+		MinorIssue("Subsector #%d near (%1.1f,%1.1f) is not closed "
 				"(%d gaps, %d segs)\n", sub->index,
 				sub->mid_x, sub->mid_y, gaps, total);
 
@@ -1761,12 +1760,12 @@ static void SanityCheckSameSector(subsec_t *sub)
 		compare->sector->warned_facing = seg->sector->index;
 
 		if (seg->linedef)
-			MinorWarning("Sector #%d has sidedef facing #%d (line #%d) "
+			MinorIssue("Sector #%d has sidedef facing #%d (line #%d) "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
 					seg->sector->index, seg->linedef->index,
 					sub->mid_x, sub->mid_y);
 		else
-			MinorWarning("Sector #%d has sidedef facing #%d "
+			MinorIssue("Sector #%d has sidedef facing #%d "
 					"near (%1.0f,%1.0f).\n", compare->sector->index,
 					seg->sector->index, sub->mid_x, sub->mid_y);
 	}
@@ -2008,7 +2007,7 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	{
 		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
 		{
-			MinorWarning("Loss of accuracy on VERY long node: "
+			MinorIssue("Loss of accuracy on VERY long node: "
 					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
 					node->x + node->dx, node->y + node->dy);
 		}

@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2015-2016 Andrew Apted
+#  Copyright (C) 2015-2019 Andrew Apted
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -25,12 +25,12 @@
 
 # disable all Boom defs for Hexen format maps
 if $MAP_FORMAT is HEXEN
-set $ALLOW_BOOM 0
+  set $ALLOW_BOOM 0
 endif
 
 # be Boom compatible, but only for the DOOM games
 if $ALLOW_BOOM is 1
-include "mbf"
+  include "mbf"
 endif
 
 
@@ -41,6 +41,12 @@ map_formats DOOM HEXEN
 feature tx_start 1
 feature medusa_fixed 1
 feature lax_sprites 1
+
+if $MAP_FORMAT is HEXEN
+  feature tag_666 0
+  feature strife_flags 0
+  feature gen_sectors 2
+endif
 
 
 #---- THINGS ------------
@@ -139,12 +145,35 @@ thing 9997 - n  16 NULL "ZD: SecActExit"
 thing 9998 - n  16 NULL "ZD: SecActEnter"
 thing 9999 - n  16 NULL "ZD: SecActHitFloor"
 
+# GZDoom dynamic lights
+thing 9800 - ln  16 _LYT "ZD: PointLight"
+thing 9810 - ln  16 _LYT "ZD: PointLight /add"
+thing 9820 - ln  16 _LYT "ZD: PointLight /sub"
+thing 9802 - ln  16 _LYT "ZD: PointLight /flick"
+thing 9812 - ln  16 _LYT "ZD: PointLight /flick /add"
+thing 9804 - ln  16 _LYT "ZD: PointLight /flick /rand"
+thing 9814 - ln  16 _LYT "ZD: PointLight /flick /rand /add"
+thing 9824 - ln  16 _LYT "ZD: PointLight /flick /rand /sub"
+thing 9822 - ln  16 _LYT "ZD: PointLight /flick /sub"
+thing 9801 - ln  16 _LYT "ZD: PointLight /pulse"
+thing 9811 - ln  16 _LYT "ZD: PointLight /pulse /add"
+thing 9821 - ln  16 _LYT "ZD: PointLight /pulse /sub"
+thing 9803 - ln  16 _LYT "ZD: PointLight /sec"
+thing 9813 - ln  16 _LYT "ZD: PointLight /sec /add"
+thing 9823 - ln  16 _LYT "ZD: PointLight /sec /sub"
 
 #
 #---- HEXEN FORMAT SPECIALS  ----------
 #
 
+if $MAP_FORMAT is HEXEN
+
+clear lines sectors
+
 include "hexen_groups"
+include "hexen_sectors"
+
+special 0 - "NOTHING"
 
 # Floors
 special 200 f "Generic_Floor"              tag  speed  dist  target_type  flags
@@ -327,6 +356,8 @@ special 229 t "Thing_SetGoal"           tid  goal_tid  delay  no_stray?
 # Lines
 special 121 - "Line_SetIdent"           line_id  flags  -  -  line_id_hi
 special  55 - "Line_SetBlocking"        line_id  set_flags  clear_flags
+special 156 - "Line_SetPortal"          target_id  this_id  type  anchor
+special 107 - "Line_SetPortalTarget"    source_id  target_id
 special  33 - "ForceField"
 special  34 - "ClearForceField"         tag
 special  48 - "Attach3dMidtex"          line_id  tag  ceiling?
@@ -406,12 +437,42 @@ special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
 special 173 - "NoiseAlert"              target_tid  emitter_tid
 special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
+# ZDoom sector specials
+
+sector 65 "ZD: Light Flicker"
+sector 66 "ZD: Light Strobe /fast"
+sector 67 "ZD: Light Strobe /slow"
+sector 68 "ZD: Light Strobe_/hurt"
+sector 72 "ZD: Light Glow"
+sector 76 "ZD: Light Strobe /slow /sync"
+sector 77 "ZD: Light Strobe /fast /sync"
+sector 81 "ZD: Light FireFlicker"
+
+sector 69 "ZD: Damage Hellslime"
+sector 80 "ZD: Damage Super Hellslime"
+sector 71 "ZD: Damage Nukage"
+sector 75 "ZD: Damage End"
+sector 82 "ZD: Damage Lava (Wimpy)"
+sector 83 "ZD: Damage Lava (Hefty)"
+sector 85 "ZD: Damage Sludge"
+
+sector 74 "ZD: Close after 30 sec"
+sector 78 "ZD: Open after 5 min"
+sector 84 "ZD: Scroll_E /damage"
+sector 87 "ZD: Outside"
+
+sector 195 "ZD: Hidden"
+sector 196 "ZD: Healing"
+sector 200 "ZD: Sky2"
+
+else
 
 #
 #---- DOOM FORMAT SPECIALS  ----------
 #
 
-# most specials are loaded via "mbf.ugh"
+# most specials are from the game definition.
+# additional specials come from the MBF port.
 
 # Scripting
 line 273 n "WR FraggleScript Exec"
@@ -506,5 +567,22 @@ line 348 - "W1 ZD: Autosave"
 line 349 - "S1 ZD: Autosave"
 
 ## andrewj: omitted the EDGE "Floor up 2" (types 434-439), as they
-## have almost no practical use outside of EDGE's RTS scripting.
+## have no practical use outside of EDGE's RTS scripting.
+
+endif
+
+
+# --- ZDoom Sector types in DOOM format ---
+
+if $ALLOW_BOOM is 1
+  sector 15 "ZD: Friction Low"
+  sector 18 "ZD: Damage Lava (light)"
+  sector 19 "ZD: Damage Lava (heavy)"
+  sector 20 "ZD: Scroll East"
+
+  sector 21 "ZD: Light Phased"
+  sector 22 "ZD: Light Seq Start"
+  sector 23 "ZD: Light Seq Next 1"
+  sector 24 "ZD: Light Seq Next 2"
+endif
 

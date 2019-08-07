@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -80,7 +80,7 @@ public:
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Thing() : x(0), y(0), angle(0), type(0), options(7),
+	Thing() : x(0), y(0), angle(0), type(0), options(0),
 			  z(0), tid(0), special(0),
 			  arg1(0), arg2(0), arg3(0), arg4(0), arg5(0)
 	{ }
@@ -309,14 +309,18 @@ public:
 	{
 		return (Start()->x == End()->x) && (Start()->y == End()->y);
 	}
+
+	int Arg(int which /* 1..5 */) const
+	{
+		if (which == 1) return tag;
+		if (which == 2) return arg2;
+		if (which == 3) return arg3;
+		if (which == 4) return arg4;
+		if (which == 5) return arg5;
+
+		return 0;
+	}
 };
-
-
-typedef struct Vertex  *VPtr;
-typedef struct Thing   *TPtr;
-typedef struct LineDef *LDPtr;
-typedef struct SideDef *SDPtr;
-typedef struct Sector  *SPtr;
 
 
 extern std::vector<Thing *>   Things;
@@ -327,6 +331,7 @@ extern std::vector<LineDef *> LineDefs;
 
 extern std::vector<byte>  HeaderData;
 extern std::vector<byte>  BehaviorData;
+extern std::vector<byte>  ScriptsData;
 
 
 #define NumThings     ((int)Things.size())

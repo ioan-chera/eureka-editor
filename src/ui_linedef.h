@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -51,11 +51,16 @@ public:
 	Fl_Check_Button *f_upper;
 	Fl_Check_Button *f_lower;
 	Fl_Check_Button *f_passthru;
-	Fl_Check_Button *f_3dmidtex;
+	Fl_Check_Button *f_3dmidtex;  // Eternity
+
+	Fl_Check_Button *f_jumpover;  //
+	Fl_Check_Button *f_trans1;    // Strife
+	Fl_Check_Button *f_trans2;    //
 
 	Fl_Check_Button *f_walk;
 	Fl_Check_Button *f_mons;
 	Fl_Check_Button *f_sound;
+	Fl_Check_Button *f_flyers;    // Strife
 
 public:
 	UI_LineBox(int X, int Y, int W, int H, const char *label = NULL);
@@ -76,7 +81,7 @@ public:
 	void UpdateTotal();
 
 	// see ui_window.h for description of these two methods
-	bool ClipboardOp(char what);
+	bool ClipboardOp(char op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();
@@ -98,7 +103,7 @@ private:
 	void SetTexOnLine(int ld, int new_tex, int e_state,
 	                  int front_pics, int back_pics);
 
-	int SolidMask(int side);
+	int SolidMask(const LineDef *L, int side) const;
 
 	const char *GeneralizedDesc(int type_num);
 

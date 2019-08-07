@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2017 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -61,6 +61,7 @@
 //
 
 bool want_quit = false;
+bool app_has_focus = false;
 
 const char *config_file = NULL;
 const char *log_file;
@@ -90,9 +91,7 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
-#define DEFAULT_PORT_NAME  "vanilla"
-
-const char *default_port = DEFAULT_PORT_NAME;
+const char *default_port = "vanilla";
 
 int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
@@ -170,6 +169,7 @@ void FatalError(const char *fmt, ...)
 #endif
 
 	init_progress = 0;
+	app_has_focus = false;
 
 	MasterDir_CloseAll();
 	LogClose();
@@ -343,7 +343,7 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-const char * DetermineGame(const char *iwad_name)
+const char * GameNameFromIWAD(const char *iwad_name)
 {
 	static char game_name[FL_PATH_MAX];
 
@@ -359,6 +359,10 @@ const char * DetermineGame(const char *iwad_name)
 
 static bool DetermineIWAD()
 {
+	// this mainly handles a value specified on the command-line,
+	// since values in a EUREKA_LUMP are already vetted.  Hence
+	// producing a fatal error here is OK.
+
 	if (Iwad_name && FilenameIsBare(Iwad_name))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
@@ -368,12 +372,12 @@ static bool DetermineIWAD()
 		y_strlowr((char *)Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
 
 		const char * path = M_QueryKnownIWAD(Iwad_name);
 
 		if (! path)
-			FatalError("Cannot find IWAD for game: %s\n", Iwad_name);
+			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name);
 
 		Iwad_name = StringDup(path);
 	}
@@ -386,23 +390,19 @@ static bool DetermineIWAD()
 		if (! Wad_file::Validate(Iwad_name))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name);
 
-		const char *game = DetermineGame(Iwad_name);
+		const char *game = GameNameFromIWAD(Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game))
-			FatalError("Unsupported game: %s (no definition file)\n", Iwad_name);
+			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name);
 
 		M_AddKnownIWAD(Iwad_name);
 		M_SaveRecent();
 	}
 	else
 	{
-		Iwad_name = M_PickDefaultIWAD();
+		Iwad_name = StringDup(M_PickDefaultIWAD());
 
-		if (Iwad_name)
-		{
-			Iwad_name = StringDup(Iwad_name);
-		}
-		else
+		if (! Iwad_name)
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -411,6 +411,8 @@ static bool DetermineIWAD()
 		}
 	}
 
+	Game_name = GameNameFromIWAD(Iwad_name);
+
 	return true;
 }
 
@@ -418,23 +420,34 @@ static bool DetermineIWAD()
 static void DeterminePort()
 {
 	// user supplied value?
-	// an unknown name will error out during Main_LoadResources.
-	if (Port_name)
-		return;
-
-	SYS_ASSERT(default_port);
-
-	// ensure the 'default_port' value is OK
-	if (! default_port[0])
+	// NOTE: values from the EUREKA_LUMP are already verified.
+	if (Port_name && Port_name[0])
 	{
-		LogPrintf("WARNING: Default port is empty, resetting...\n");
-		default_port = DEFAULT_PORT_NAME;
+		if (! M_CanLoadDefinitions("ports", Port_name))
+			FatalError("Unknown port '%s' (no definition file)\n", Port_name);
+
+		return;
 	}
 
-	if (! M_CanLoadDefinitions("ports", default_port))
+	const char *var_game = M_VariantForGame(Game_name);
+
+	// ensure the 'default_port' value is OK
+	if (! (default_port && default_port[0]))
 	{
-		LogPrintf("WARNING: Default port '%s' is unknown, resetting...\n");
-		default_port = DEFAULT_PORT_NAME;
+		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
+		default_port = "vanilla";
+	}
+	else if (! M_CanLoadDefinitions("ports", default_port))
+	{
+		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
+				default_port);
+		default_port = "vanilla";
+	}
+	else if (! M_CheckPortSupportsGame(var_game, default_port))
+	{
+		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
+				default_port, Game_name);
+		default_port = "vanilla";
 	}
 
 	Port_name = default_port;
@@ -511,6 +524,42 @@ int Main_key_handler(int event)
 }
 
 
+// see comment in Main_SetupFLTK...
+#if !defined(WIN32) && !defined(__APPLE__)
+int x11_check_focus_change(void *xevent, void *data)
+{
+	if (main_win != NULL)
+	{
+		const XEvent *xev = (const XEvent *)xevent;
+
+		Window xid = xev->xany.window;
+
+		if (fl_find(xid) == main_win)
+		{
+			switch (xev->type)
+			{
+				case FocusIn:
+					app_has_focus = true;
+					// fprintf(stderr, "** app_has_focus: TRUE **\n");
+					break;
+
+				case FocusOut:
+					app_has_focus = false;
+					// fprintf(stderr, "** app_has_focus: false **\n");
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	// we never eat the event
+	return 0;
+}
+#endif
+
+
 static void Main_SetupFLTK()
 {
 	Fl::visual(FL_DOUBLE | FL_RGB);
@@ -518,7 +567,6 @@ static void Main_SetupFLTK()
 	// disable keyboard navigation, as it often interferes with our
 	// user interface, especially TAB key for toggling the 3D view.
 	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
-
 
 	if (gui_color_set == 0)
 	{
@@ -551,11 +599,16 @@ static void Main_SetupFLTK()
 		Fl::scheme("plastic");
 	}
 
-
-#ifdef UNIX
-	Fl_File_Icon::load_system_icons();
+	// for Linux + X11, add a system event handler that detects
+	// when our main window gains or loses focus.  We need to do
+	// it this way since FLTK is so broken.
+#if !defined(WIN32) && !defined(__APPLE__)
+	Fl::add_system_handler(x11_check_focus_change, NULL);
 #endif
 
+#ifndef WIN32
+	Fl_File_Icon::load_system_icons();
+#endif
 
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
@@ -591,6 +644,8 @@ static void Main_OpenWindow()
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
+
+		app_has_focus = true;
 	}
 
 	// kill the stupid bright background of the "plastic" scheme
@@ -745,7 +800,8 @@ static void LoadResourceFile(const char *filename)
 
 static void Main_LoadIWAD()
 {
-	// Load the IWAD (read only)
+	// Load the IWAD (read only).
+	// The filename has been checked in DetermineIWAD().
 	game_wad = Wad_file::Open(Iwad_name, 'r');
 	if (! game_wad)
 		FatalError("Failed to open game IWAD: %s\n", Iwad_name);
@@ -754,8 +810,66 @@ static void Main_LoadIWAD()
 }
 
 
+static void ReadGameInfo()
+{
+	Game_name = GameNameFromIWAD(Iwad_name);
+
+	LogPrintf("Game name: '%s'\n", Game_name);
+	LogPrintf("IWAD file: '%s'\n", Iwad_name);
+
+	M_LoadDefinitions("games", Game_name);
+}
+
+
+static void ReadPortInfo()
+{
+	// we assume that the port name is valid, i.e. a config file
+	// exists for it.  That is checked by DeterminePort() and
+	// the EUREKA_LUMP parsing code.
+
+	SYS_ASSERT(Port_name);
+
+	const char *var_game = M_VariantForGame(Game_name);
+
+	// warn user if this port is incompatible with the game
+	if (! M_CheckPortSupportsGame(var_game, Port_name))
+	{
+		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
+				Port_name, Game_name);
+
+		int res = DLG_Confirm("&vanilla|No Change",
+						"Warning: the given port '%s' is not compatible with "
+						"this game (%s)."
+						"\n\n"
+						"To prevent seeing invalid line and sector types, "
+						"it is recommended to reset the port to something valid.\n"
+						"Select a new port now?",
+						Port_name, Game_name);
+
+		if (res == 0)
+		{
+			Port_name = "vanilla";
+		}
+	}
+
+	LogPrintf("Port name: '%s'\n", Port_name);
+
+	M_LoadDefinitions("ports", Port_name);
+
+	// prevent UI weirdness if the port is forced to BOOM / MBF
+	if (game_info.strife_flags)
+	{
+		game_info.pass_through = 0;
+		game_info.coop_dm_flags = 0;
+		game_info.friend_flag = 0;
+	}
+}
+
+
 //
-// load all game/port definitions (*.ugh)
+// load all game/port definitions (*.ugh).
+// open all wads in the master directory.
+// read important content from the wads (palette, textures, etc).
 //
 void Main_LoadResources()
 {
@@ -764,19 +878,9 @@ void Main_LoadResources()
 
 	M_ClearAllDefinitions();
 
-	Game_name = DetermineGame(Iwad_name);
+	ReadGameInfo();
 
-	LogPrintf("Game name: '%s'\n", Game_name);
-	LogPrintf("IWAD file: '%s'\n", Iwad_name);
-
-	M_LoadDefinitions("games", Game_name);
-
-	SYS_ASSERT(Port_name);
-
-	LogPrintf("Port name: '%s'\n", Port_name);
-
-	M_LoadDefinitions("ports", Port_name);
-
+	ReadPortInfo();
 
 	// reset the master directory
 	if (edit_wad)
@@ -786,7 +890,7 @@ void Main_LoadResources()
 
 	Main_LoadIWAD();
 
-	// Load all resource wads
+	// load all resource wads
 	for (int i = 0 ; i < (int)Resource_list.size() ; i++)
 	{
 		LoadResourceFile(Resource_list[i]);
@@ -795,9 +899,7 @@ void Main_LoadResources()
 	if (edit_wad)
 		MasterDir_Add(edit_wad);
 
-
 	// finally, load textures and stuff...
-
 	W_LoadPalette();
 	W_LoadColormap();
 
@@ -825,7 +927,7 @@ void Main_LoadResources()
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2017 Andrew Apted, et al ***\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2018 Andrew Apted, et al ***\n"
 			"\n");
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
@@ -909,7 +1011,7 @@ int main(int argc, char *argv[])
 
 
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2017 Andrew Apted, et al ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2018 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
 
 	// sanity checks type sizes (useful when porting)
@@ -999,14 +1101,15 @@ int main(int argc, char *argv[])
 	}
 
 
-	DeterminePort();
-
 	// determine which IWAD to use
 	if (! DetermineIWAD())
 		goto quit;
 
+	DeterminePort();
 
-	// load *just* the iwad, the following few functions need it
+
+	// temporarily load the iwad, the following few functions need it.
+	// it gets loaded again in Main_LoadResources().
 	Main_LoadIWAD();
 
 	Level_name = DetermineLevel();
@@ -1032,6 +1135,7 @@ quit:
 	LogPrintf("Quit\n");
 
 	init_progress = 0;
+	app_has_focus = false;
 
 	MasterDir_CloseAll();
 	LogClose();

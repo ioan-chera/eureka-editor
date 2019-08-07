@@ -4,7 +4,7 @@
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2012-2017 Andrew Apted
+#  Copyright (C) 2012-2018 Andrew Apted
 #  Copyright (C) 1997-2003 André Majorel et al
 #
 #  This program is free software; you can redistribute it and/or
@@ -34,6 +34,9 @@ default_textures  SANDSQ2  FLOOR00  FLOOR30
 
 # 10 = wand crystal
 default_thing  10
+
+# value 2 enables Heretic-specific checks
+feature tag_666 2
 
 
 #---- COLORS --------------------

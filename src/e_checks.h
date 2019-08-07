@@ -33,6 +33,7 @@
 void SideDefs_Unpack(bool is_after_load = false);
 
 void Tags_ApplyNewValue(int new_tag);
+void Tags_UsedRange(int *min_tag, int *max_tag);
 
 
 void CMD_MapCheck();

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2008-2016 Andrew Apted
+//  Copyright (C) 2008-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,6 +28,8 @@
 
 
 class Img_c;
+
+void SectorCache_Invalidate();
 
 
 class UI_Canvas : public Fl_Widget
@@ -83,9 +85,11 @@ public:
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
-	void DrawHighlight(int objtype, int objnum, Fl_Color col, bool do_tagged=true,
+	void DrawSectorSelection(selection_c *list, int dx, int dy);
+	void DrawHighlight(int objtype, int objnum,
 	                   bool skip_lines = false, int dx=0, int dy=0);
-	void DrawHighlightTransform(int objtype, int objnum, Fl_Color col);
+	void DrawHighlightTransform(int objtype, int objnum);
+	void DrawTagged(int objtype, int objnum);
 
 	void SelboxBegin(int map_x, int map_y);
 	void SelboxUpdate(int map_x, int map_y);

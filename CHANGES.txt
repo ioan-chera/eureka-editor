@@ -1,13 +1,18 @@
 
-CHANGES IN Eureka 1.22
-======================
+RECENT CHANGES
+==============
 
-(Since version 1.21)
+(Since version 1.24)
 
+- fixed not remembering test-in-game EXE when port is "vanilla"
 
-- fixed sector merge to keep properties of first selected sector
+- added portal specials 156 and 107 to the ZDOOM port
 
-- fixed wall-sorting issue in 3D View which could cause a crash
+- support the FreeDM iwad
 
-- small fix for the Heretic game config
+- support TNT and Plutonia textures in FreeDoom2 iwad
+
+- improvements to the Makefile
+
+- improvements to the MacOS build files
 

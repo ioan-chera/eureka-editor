@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
@@ -66,8 +66,14 @@ private:
 	Fl_Check_Button *o_mage;    //
 
 	Fl_Check_Button *o_ambush;
-	Fl_Check_Button *o_friend;   // Boom / MBF
+	Fl_Check_Button *o_friend;   // Boom / MBF / Strife
 	Fl_Check_Button *o_dormant;  // Hexen
+
+	Fl_Check_Button *o_sf_shadow;  //
+	Fl_Check_Button *o_sf_altvis;  //
+	Fl_Check_Button *o_sf_stand;   // Strife
+	Fl_Check_Button *o_sf_ambush;  //
+	Fl_Check_Button *o_sf_friend;  //
 
 	UI_Pic *sprite;
 
@@ -93,7 +99,7 @@ public:
 	void UpdateTotal();
 
 	// see ui_window.h for description of these two methods
-	bool ClipboardOp(char what);
+	bool ClipboardOp(char op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UpdateGameInfo();

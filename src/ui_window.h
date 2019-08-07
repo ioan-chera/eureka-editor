@@ -32,6 +32,7 @@
 #include "ui_tile.h"
 #include "ui_browser.h"
 #include "ui_default.h"
+#include "ui_editor.h"
 #include "ui_replace.h"
 
 #include "ui_thing.h"
@@ -140,8 +141,8 @@ public:
 
 	// see if one of the panels wants to perform a clipboard op,
 	// because a texture is highlighted or selected (for example).
-	// what == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
-	bool ClipboardOp(char what);
+	// op == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
+	bool ClipboardOp(char op);
 
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)

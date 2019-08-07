@@ -496,7 +496,7 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 }
 
 
-bool UI_DefaultProps::ClipboardOp(char what)
+bool UI_DefaultProps::ClipboardOp(char op)
 {
 	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
 					(c_pic->Selected() ? 2 : 0) |
@@ -512,7 +512,7 @@ bool UI_DefaultProps::ClipboardOp(char what)
 	if (sel_pics == 0)
 		return false;
 
-	switch (what)
+	switch (op)
 	{
 		case 'c':
 			CB_Copy(sel_pics);

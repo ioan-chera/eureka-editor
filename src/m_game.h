@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -136,7 +136,8 @@ typedef struct
 
 	/* port features */
 
-	int gen_types;		// BOOM generalized linedefs and sectors
+	int gen_types;		// BOOM generalized linedef types
+	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
 
 	int tx_start;		// textures in TX_START .. TX_END
 	int img_png;		// PNG format for various graphics
@@ -146,11 +147,13 @@ typedef struct
 
 	int pass_through;	// Boom's MTF_PASSTHRU line flag
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
+	int strife_flags;	// Strife flags
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
 
 	int no_need_players;	// having no players is OK (Things checker)
+	int tag_666;			// game uses tag 666 and 667 for special FX
 
 } game_info_t;
 
@@ -239,6 +242,8 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
                            int include_level = 0);
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
+
+bool M_CheckPortSupportsGame(const char *var_game, const char *port);
 
 const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
 

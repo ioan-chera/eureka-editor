@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -74,21 +74,6 @@ static void file_do_rename(Fl_Widget *w, void * data)
 static void file_do_delete(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("DeleteMap");
-}
-
-static void file_do_prefs(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("PreferenceDialog");
-}
-
-static void file_do_build_nodes(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("BuildAllNodes");
-}
-
-static void file_do_test_map(Fl_Widget *w, void * data)
-{
-	ExecuteCommand("TestMap");
 }
 
 static void file_do_load_given(Fl_Widget *w, void *data)
@@ -391,13 +376,43 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 
 
 //------------------------------------------------------------------------
-//  HELP MENU
+//  TOOLS MENU
 //------------------------------------------------------------------------
 
-static void help_do_logs(Fl_Widget *w, void * data)
+static void tools_do_preferences(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("PreferenceDialog");
+}
+
+static void tools_do_build_nodes(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("BuildAllNodes");
+}
+
+static void tools_do_test_map(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("TestMap");
+}
+
+static void tools_do_lump_editor(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("EditLump");
+}
+
+static void tools_do_add_behavior(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("AddBehavior");
+}
+
+static void tools_do_view_logs(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("LogViewer");
 }
+
+
+//------------------------------------------------------------------------
+//  HELP MENU
+//------------------------------------------------------------------------
 
 static void help_do_online_docs(Fl_Widget *w, void * data)
 {
@@ -448,12 +463,6 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Test in Game",     FL_COMMAND + 't', FCAL file_do_test_map },
-		{ "&Build All Nodes",  FL_COMMAND + 'b', FCAL file_do_build_nodes },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Preferences",      FL_COMMAND + 'p', FCAL file_do_prefs },
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
 
@@ -569,9 +578,25 @@ static Fl_Menu_Item menu_items[] =
 		{ "Ta&gs",         0, FCAL checks_do_tags },
 		{ 0 },
 
+	{ "&Tools", 0, 0, 0, FL_SUBMENU },
+
+		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+		{ "&View Logs",          0,  FCAL tools_do_view_logs },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
+		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+
+		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
+		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
+		{ 0 },
+
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
+
 		{ "&Online Docs...",    0, FCAL help_do_online_docs },
-		{ "&View Logs....",     0, FCAL help_do_logs },
 		{ "&About Eureka...",   0, FCAL help_do_about },
 		{ 0 },
 

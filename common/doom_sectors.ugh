@@ -1,0 +1,49 @@
+#------------------------------------------------------------------------
+#  DOOM 1/2 sector types
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2017 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+#
+#	Definition of sector types
+#
+#	Format is : sector <number> <description>
+#
+
+sector  0 "NOTHING"
+sector  1 "Light Blinks Randomly"
+sector  2 "Light Flashes 2 Hz"
+sector  3 "Light Flashes 1 Hz"
+sector  4 "Flashes / 20% Damage"
+sector  5 "Damage 10%"
+sector  7 "Damage 5%"
+sector  8 "Light Oscillates"
+sector  9 "Secret Area"
+sector 10 "Close after 30 sec"
+sector 11 "End level / damage"
+sector 12 "Flashes 1 Hz sync"
+sector 13 "Flashes 2 Hz sync"
+sector 14 "Open after 5 minute"
+sector 16 "Damage 20%"
+sector 17 "Light Flickering"
+

@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -37,18 +37,37 @@ namespace ajbsp
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-void PrintVerbose(const char *str, ...)
+void PrintDetail(const char *fmt, ...)
 {
-	(void) str;
+	(void) fmt;
 }
 
 
-void Warning(const char *str, ...)
+void Failure(const char *fmt, ...)
 {
 	va_list args;
 
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
+	va_end(args);
+
+	if (cur_info->warnings)
+		GB_PrintMsg("Failure: %s", message_buf);
+
+	cur_info->total_warnings++;
+
+#if DEBUG_ENABLED
+	DebugPrintf("Failure: %s", message_buf);
+#endif
+}
+
+
+void Warning(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
@@ -62,37 +81,21 @@ void Warning(const char *str, ...)
 }
 
 
-void MinorWarning(const char *str, ...)
+void MinorIssue(const char *fmt, ...)
 {
-	(void) str;
+	(void) fmt;
 
 #if DEBUG_ENABLED
 	va_list args;
 
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
+	va_start(args, fmt);
+	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
 	va_end(args);
 
-	DebugPrintf("MinorWarn: %s", message_buf);
+	DebugPrintf("Minor Issue: %s", message_buf);
 #endif
 
-	cur_info->total_minor_warnings++;
-}
-
-
-void SetErrorMsg(const char *str, ...)
-{
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(message_buf, sizeof(message_buf), str, args);
-	va_end(args);
-
-	SYS_ASSERT(cur_info);
-
-	StringFree(cur_info->message);
-
-	cur_info->message = StringDup(message_buf);
+	cur_info->total_minor_issues++;
 }
 
 
@@ -578,7 +581,7 @@ void PruneVerticesAtEnd(void)
 	{
 		int unused = num_vertices - new_num;
 
-		PrintVerbose("Pruned %d unused vertices at end\n", unused);
+		PrintDetail("Pruned %d unused vertices at end\n", unused);
 
 		num_vertices = new_num;
 	}
@@ -688,7 +691,7 @@ void DetectOverlappingLines(void)
 
 	if (count > 0)
 	{
-		PrintVerbose("Detected %d overlapped linedefs\n", count);
+		PrintDetail("Detected %d overlapped linedefs\n", count);
 	}
 
 	UtilFree(array);

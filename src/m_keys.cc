@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013-2016 Andrew Apted
+//  Copyright (C) 2013-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1020,7 +1020,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	bind.cmd = cmd;
 
-	memset(&bind.param, 0, sizeof(bind.param));
+	memset(bind.param, 0, sizeof(bind.param));
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		if (num_tok >= 2 + p)

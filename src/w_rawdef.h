@@ -437,6 +437,16 @@ hexen_lineflag_e;
 
 typedef enum
 {
+	MLF_Strife_JumpOver      = 0x0200,
+	MLF_Strife_BlockFloaters = 0x0400,
+	MLF_Strife_Translucent1  = 0x0800,
+	MLF_Strife_Translucent2  = 0x1000,
+}
+strife_lineflag_e;
+
+
+typedef enum
+{
 	// these are supported by ZDoom (and derived ports)
 	MLF_ZDoom_MonCanActivate  = 0x2000,
 	MLF_ZDoom_BlockPlayers    = 0x4000,
@@ -520,6 +530,18 @@ typedef enum
 	MTF_Hexen_DM		= 1024,
 }
 hexen_option_e;
+
+
+typedef enum
+{
+	MTF_Strife_Stand	= 8,
+	MTF_Strife_Ambush	= 32,
+	MTF_Strife_Friend	= 64,
+
+	MTF_Strife_Shadow	= 256,
+	MTF_Strife_AltVis	= 512,
+}
+strife_option_e;
 
 
 //

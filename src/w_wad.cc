@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -72,6 +72,9 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	l_length = LE_U32(entry->size);
 
 //	DebugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
+
+	if (l_length == 0)
+		l_start = 0;
 }
 
 
@@ -247,7 +250,7 @@ retry:
 		}
 
 		int what = errno;
-		LogPrintf("Open failed: %s\n", what, strerror(what));
+		LogPrintf("Open failed: %s\n", strerror(what));
 		return NULL;
 	}
 
@@ -577,7 +580,24 @@ void Wad_file::ReadDirectory()
 
 		Lump_c *lump = new Lump_c(this, &entry);
 
-		// TODO: check if entry is valid
+		// check if entry is valid
+		// [ the total_size value was computed in parent function ]
+		if (lump->l_length != 0)
+		{
+			const int max_size = 99999999;
+
+			if (lump->l_length < 0 || lump->l_start < 0 ||
+				lump->l_length >= max_size ||
+				lump->l_start > total_size ||
+				lump->l_start + lump->l_length > total_size)
+			{
+				LogPrintf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
+						lump->name, lump->l_start, lump->l_length, total_size);
+
+				lump->l_start = 0;
+				lump->l_length = 0;
+			}
+		}
 
 		directory.push_back(lump);
 	}
@@ -1138,7 +1158,9 @@ int Wad_file::PositionForWrite(int max_size)
 
 	if (want_pos > total_size)
 	{
-		SYS_ASSERT(want_pos < total_size + 8);
+		if (want_pos >= total_size + 8)
+			FatalError("Internal Error: lump positions are beyond end of file\n(%d > %d)\n",
+				want_pos, total_size);
 
 		WritePadding(want_pos - total_size);
 	}
@@ -1261,11 +1283,11 @@ void Wad_file::WriteDirectory()
 }
 
 
-bool Wad_file::Backup(const char *filename)
+bool Wad_file::Backup(const char *new_filename)
 {
 	fflush(fp);
 
-	return FileCopy(PathName(), filename);
+	return FileCopy(PathName(), new_filename);
 }
 
 

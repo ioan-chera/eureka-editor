@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2018 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -428,11 +428,17 @@ extern void CheckBeginDrag();
 
 static void EV_EnterWindow()
 {
+	if (!app_has_focus)
+	{
+		edit.pointer_in_window = false;
+		return;
+	}
+
 	edit.pointer_in_window = true;
 
 	main_win->canvas->PointerPos(true /* in_event */);
 
-	// we greedily grab the keyboard focus
+	// restore keyboard focus to the canvas
 	Fl_Widget * foc = main_win->canvas;
 
 	if (edit.render3d)
@@ -467,7 +473,6 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
-
 
 	if (edit.is_scrolling)
 	{
@@ -683,6 +688,9 @@ int EV_RawButton(int event)
 
 int EV_RawMouse(int event)
 {
+	if (!app_has_focus)
+		return 1;
+
 	int mod = Fl::event_state() & MOD_ALL_MASK;
 
 	int dx = Fl::event_x() - mouse_last_x;
@@ -855,17 +863,11 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	// parse each line
 
-	static char line_buf[FL_PATH_MAX];
+	static char line[FL_PATH_MAX];
 	const  char * tokens[MAX_TOKENS];
 
-	while (! feof(fp))
+	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		char *line = fgets(line_buf, FL_PATH_MAX, fp);
-		if (! line)
-			break;
-
-		StringRemoveCRLF(line);
-
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
 		if (num_tok == 0)
 			continue;
