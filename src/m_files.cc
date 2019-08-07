@@ -99,7 +99,7 @@ void M_WriteKnownIWADs(FILE *fp)
 
 void M_ValidateGivenFiles()
 {
-	for (const std::string &pwad : Pwad_list)
+	for (const std::string &pwad : config::Pwad_list)
 	{
 		if (! Wad_file::Validate(pwad.c_str()))
 			FatalError("Given pwad does not exist or is invalid: %s\n",
@@ -110,8 +110,8 @@ void M_ValidateGivenFiles()
 
 int M_FindGivenFile(const char *filename)
 {
-	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-		if (Pwad_list[i] == filename)
+	for (int i = 0 ; i < (int)config::Pwad_list.size() ; i++)
+		if (config::Pwad_list[i] == filename)
 			return i;
 
 	return -1;  // Not Found
@@ -450,7 +450,7 @@ void M_LoadRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", config::home_dir.c_str());
 
 	FILE *fp = fopen(filename, "r");
 
@@ -476,7 +476,7 @@ void M_SaveRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", config::home_dir.c_str());
 
 	FILE *fp = fopen(filename, "w");
 
@@ -571,9 +571,9 @@ bool M_TryOpenMostRecent()
 	/* -- OK -- */
 
 	if (wad->LevelFind(map_name.c_str()) >= 0)
-		Level_name = map_name;
+		config::Level_name = map_name;
 	else
-		Level_name.clear();
+		config::Level_name.clear();
 
 	Pwad_name = filename;
 
@@ -670,7 +670,7 @@ static std::string SearchForIWAD(const char *game)
 
 	// 1. look in ~/.eureka/iwads first
 
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", config::home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
 	std::string path = SearchDirForIWAD(dir_name, game);
@@ -777,7 +777,7 @@ std::string M_PickDefaultIWAD()
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (!Level_name.empty() && toupper(Level_name[0]) == 'E')
+	if (!config::Level_name.empty() && toupper(config::Level_name[0]) == 'E')
 	{
 		default_game = "doom";
 	}
@@ -837,7 +837,7 @@ std::string M_PickDefaultIWAD()
 static void M_AddResource_Unique(const char * filename)
 {
 	// check if base filename (without path) already exists
-	for (const std::string &resource : Resource_list)
+	for (const std::string &resource : config::Resource_list)
 	{
 		const char *A = fl_filename_name(filename);
 		const char *B = fl_filename_name(resource.c_str());
@@ -846,7 +846,7 @@ static void M_AddResource_Unique(const char * filename)
 			return;		// found it
 	}
 
-	Resource_list.push_back(filename);
+	config::Resource_list.push_back(filename);
 }
 
 
@@ -981,18 +981,18 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_iwad.empty())
 	{
-		if (!keep_cmd_line_args || Iwad_name.empty())
-			Iwad_name = new_iwad;
+		if (!keep_cmd_line_args || config::Iwad_name.empty())
+			config::Iwad_name = new_iwad;
 	}
 
 	if (!new_port.empty())
 	{
-		if (!keep_cmd_line_args || Port_name.empty())
-			Port_name = new_port;
+		if (!keep_cmd_line_args || config::Port_name.empty())
+			config::Port_name = new_port;
 	}
 
 	if (! keep_cmd_line_args)
-		Resource_list.clear();
+		config::Resource_list.clear();
 
 	for (const std::string &resource : new_resources)
 	{
@@ -1020,10 +1020,10 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!Game_name.empty())
 		lump->Printf("game %s\n", Game_name.c_str());
 
-	if (!Port_name.empty())
-		lump->Printf("port %s\n", Port_name.c_str());
+	if (!config::Port_name.empty())
+		lump->Printf("port %s\n", config::Port_name.c_str());
 
-	for (const std::string &resource : Resource_list)
+	for (const std::string &resource : config::Resource_list)
 	{
 		char absolute_name[FL_PATH_MAX];
 		fl_filename_absolute(absolute_name, resource.c_str());
@@ -1043,8 +1043,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 
 // config variables
-int backup_max_files = 30;
-int backup_max_space = 60;  // MB
+int config::backup_max_files = 30;
+int config::backup_max_space = 60;  // MB
 
 
 typedef struct
@@ -1093,10 +1093,10 @@ static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_si
 	// do calculations in KB units
 	wad_size = wad_size / 1024 + 1;
 
-	int backup_num = 2 + backup_max_space * 1024 / wad_size;
+	int backup_num = 2 + config::backup_max_space * 1024 / wad_size;
 
-	if (backup_num > backup_max_files)
-		backup_num = backup_max_files;
+	if (backup_num > config::backup_max_files)
+		backup_num = config::backup_max_files;
 
 	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
@@ -1108,7 +1108,7 @@ static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_si
 void M_BackupWad(Wad_file *wad)
 {
 	// disabled ?
-	if (backup_max_files <= 0 || backup_max_space <= 0)
+	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
 		return;
 
 	// convert wad filename to a directory name in $cache_dir/backups

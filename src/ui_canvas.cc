@@ -264,7 +264,7 @@ void UI_Canvas::DrawMap()
 			DrawGrid_Dotty();
 	}
 
-	if (Debugging)
+	if (config::Debugging)
 		DrawMapBounds();
 
 	DrawCamera();

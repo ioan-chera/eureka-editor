@@ -1414,8 +1414,8 @@ void UI_Preferences::LoadValues()
 
 	/* General Tab */
 
-	gen_autoload   ->value(auto_load_recent ? 1 : 0);
-	gen_maximized  ->value(begin_maximized  ? 1 : 0);
+	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
+	gen_maximized  ->value(config::begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(swap_sidedefs    ? 1 : 0);
 
 	/* Edit Tab */
@@ -1429,7 +1429,7 @@ void UI_Preferences::LoadValues()
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
-	brow_smalltex->value(browser_small_tex ? 1 : 0);
+	brow_smalltex->value(config::browser_small_tex ? 1 : 0);
 
 	/* Grid Tab */
 
@@ -1472,21 +1472,21 @@ void UI_Preferences::LoadValues()
 
 	/* Nodes Tab */
 
-	nod_on_save->value(bsp_on_save ? 1 : 0);
-	nod_fast->value(bsp_fast ? 1 : 0);
-	nod_warn->value(bsp_warnings ? 1 : 0);
+	nod_on_save->value(config::bsp_on_save ? 1 : 0);
+	nod_fast->value(config::bsp_fast ? 1 : 0);
+	nod_warn->value(config::bsp_warnings ? 1 : 0);
 
-	if (bsp_split_factor < 7)
+	if (config::bsp_split_factor < 7)
 		nod_factor->value(2);	// Balanced BSP tree
-	else if (bsp_split_factor > 15)
+	else if (config::bsp_split_factor > 15)
 		nod_factor->value(1);	// Minimize Splits
 	else
 		nod_factor->value(0);	// NORMAL
 
-	nod_gl_nodes->value(bsp_gl_nodes ? 1 : 0);
-	nod_force_v5->value(bsp_force_v5 ? 1 : 0);
-	nod_force_zdoom->value(bsp_force_zdoom ? 1 : 0);
-	nod_compress->value(bsp_compressed ? 1 : 0);
+	nod_gl_nodes->value(config::bsp_gl_nodes ? 1 : 0);
+	nod_force_v5->value(config::bsp_force_v5 ? 1 : 0);
+	nod_force_zdoom->value(config::bsp_force_zdoom ? 1 : 0);
+	nod_compress->value(config::bsp_compressed ? 1 : 0);
 
 	/* Other Tab */
 
@@ -1536,8 +1536,8 @@ void UI_Preferences::SaveValues()
 
 	/* General Tab */
 
-	auto_load_recent  = gen_autoload   ->value() ? true : false;
-	begin_maximized   = gen_maximized  ->value() ? true : false;
+	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
+	config::begin_maximized   = gen_maximized  ->value() ? true : false;
 	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
@@ -1555,9 +1555,9 @@ void UI_Preferences::SaveValues()
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
-	if (new_small_tex != browser_small_tex)
+	if (new_small_tex != config::browser_small_tex)
 	{
-		browser_small_tex = new_small_tex;
+		config::browser_small_tex = new_small_tex;
 		main_win->browser->Populate();
 	}
 
@@ -1585,21 +1585,21 @@ void UI_Preferences::SaveValues()
 
 	/* Nodes Tab */
 
-	bsp_on_save = nod_on_save->value() ? true : false;
-	bsp_fast = nod_fast->value() ? true : false;
-	bsp_warnings = nod_warn->value() ? true : false;
+	config::bsp_on_save = nod_on_save->value() ? true : false;
+	config::bsp_fast = nod_fast->value() ? true : false;
+	config::bsp_warnings = nod_warn->value() ? true : false;
 
 	if (nod_factor->value() == 1)			// Minimize Splits
-		bsp_split_factor = 29;
+		config::bsp_split_factor = 29;
 	else if (nod_factor->value() == 2)		// Balanced BSP tree
-		bsp_split_factor = 2;
+		config::bsp_split_factor = 2;
 	else
-		bsp_split_factor = 11;
+		config::bsp_split_factor = 11;
 
-	bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
-	bsp_force_v5 = nod_force_v5->value() ? true : false;
-	bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
-	bsp_compressed = nod_compress->value() ? true : false;
+	config::bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
+	config::bsp_force_v5 = nod_force_v5->value() ? true : false;
+	config::bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
+	config::bsp_compressed = nod_compress->value() ? true : false;
 
 	/* Other Tab */
 

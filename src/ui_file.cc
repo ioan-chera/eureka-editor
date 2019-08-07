@@ -854,7 +854,7 @@ void UI_ProjectSetup::PopulatePort()
 	if (port_choice->mvalue())
 		prev_port = port_choice->mvalue()->text;
 
-	if (prev_port.empty()) prev_port = Port_name;
+	if (prev_port.empty()) prev_port = config::Port_name;
 	if (prev_port.empty()) prev_port = "vanilla";
 
 
@@ -981,9 +981,9 @@ void UI_ProjectSetup::PopulateResources()
 		if (! res_name[r])
 			continue;
 
-		if (r < (int)Resource_list.size())
+		if (r < (int)config::Resource_list.size())
 		{
-			res[r] = Resource_list[r];
+			res[r] = config::Resource_list[r];
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}

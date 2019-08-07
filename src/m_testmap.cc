@@ -27,7 +27,7 @@
 #include "ui_window.h"
 
 
-static const char * QueryName(const char *port = Port_name.c_str(), const char *game = Game_name.c_str())
+static const char * QueryName(const char *port = config::Port_name.c_str(), const char *game = Game_name.c_str())
 {
 	SYS_ASSERT(port);
 
@@ -248,7 +248,7 @@ static const char *CalcEXEName(const port_path_info_t *info)
 
 static const char * CalcWarpString()
 {
-	SYS_ASSERT(!Level_name.empty());
+	SYS_ASSERT(!config::Level_name.empty());
 
 	static char buffer[128];
 
@@ -256,11 +256,11 @@ static const char * CalcWarpString()
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (Level_name.length() >= 4 &&
-		y_strnicmp(Level_name, "MAP", 3) == 0 &&
-		isdigit(Level_name[3]))
+	if (config::Level_name.length() >= 4 &&
+		y_strnicmp(config::Level_name, "MAP", 3) == 0 &&
+		isdigit(config::Level_name[3]))
 	{
-		const char * p = Level_name.c_str() + 3;
+		const char * p = config::Level_name.c_str() + 3;
 
 		while (*p == '0' && isdigit(p[1]))
 			p++;
@@ -271,18 +271,18 @@ static const char * CalcWarpString()
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (Level_name.length() >= 4 &&
-		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
-		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
+	if (config::Level_name.length() >= 4 &&
+		! isdigit(config::Level_name[0]) && isdigit(config::Level_name[1]) &&
+		! isdigit(config::Level_name[2]) && isdigit(config::Level_name[3]))
 	{
-		snprintf(buffer, sizeof(buffer), "-warp %c %s", Level_name[1], Level_name.c_str() + 3);
+		snprintf(buffer, sizeof(buffer), "-warp %c %s", config::Level_name[1], config::Level_name.c_str() + 3);
 		return buffer;
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	const char *p = Level_name.c_str();
+	const char *p = config::Level_name.c_str();
 
 	while (*p && !isdigit(*p))
 		p++;
@@ -342,7 +342,7 @@ static const char * GrabWadNames(const port_path_info_t *info)
 	// see if we should use the "-merge" parameter, which is
 	// required for Chocolate-Doom and derivates like Crispy Doom.
 	// TODO : is there a better way to do this?
-	if (y_stricmp(Port_name, "vanilla") == 0)
+	if (y_stricmp(config::Port_name, "vanilla") == 0)
 	{
 		use_merge = 1;
 	}
@@ -403,7 +403,7 @@ void CMD_TestMap()
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(Port_name.c_str(), Game_name.c_str()))
+		if (! M_PortSetupDialog(config::Port_name.c_str(), Game_name.c_str()))
 			return;
 
 		info = M_QueryPortPath(QueryName());

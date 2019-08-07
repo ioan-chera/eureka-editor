@@ -21,8 +21,8 @@
 #include "main.h"
 
 
-bool Quiet = false;
-bool Debugging = false;
+bool config::Quiet = false;
+bool config::Debugging = false;
 
 
 static FILE * log_fp;
@@ -102,7 +102,7 @@ void LogPrintf(const char *str, ...)
 	else
 		kept_messages.push_back(buffer);
 
-	if (! Quiet)
+	if (! config::Quiet)
 	{
 		fputs(buffer, stdout);
 		fflush(stdout);
@@ -112,7 +112,7 @@ void LogPrintf(const char *str, ...)
 
 void DebugPrintf(const char *str, ...)
 {
-	if (Debugging && log_fp)
+	if (config::Debugging && log_fp)
 	{
 		static char buffer[MSG_BUF_LEN];
 
@@ -138,7 +138,7 @@ void DebugPrintf(const char *str, ...)
 			fprintf(log_fp, "# %s\n", pos);
 			fflush(log_fp);
 
-			if (! Quiet)
+			if (! config::Quiet)
 			{
 				fprintf(stderr, "# %s\n", pos);
 			}

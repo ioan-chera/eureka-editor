@@ -23,8 +23,11 @@
 
 #define MSG_BUF_LEN  1024
 
-extern bool Quiet;
-extern bool Debugging;
+namespace config
+{
+	extern bool Debugging;
+	extern bool Quiet;
+}
 
 void LogOpenFile(const char *filename);
 void LogOpenWindow(void);

@@ -63,23 +63,23 @@
 bool want_quit = false;
 bool app_has_focus = false;
 
-std::string config_file;
-std::string log_file;
+std::string config::config_file;
+std::string config::log_file;
 
-std::string install_dir;
-std::string home_dir;
+std::string config::install_dir;
+std::string config::home_dir;
 std::string cache_dir;
 
 
-std::string Iwad_name;
+std::string config::Iwad_name;
 std::string Pwad_name;
 
-std::vector<std::string> Pwad_list;
-std::vector<std::string> Resource_list;
+std::vector<std::string> config::Pwad_list;
+std::vector<std::string> config::Resource_list;
 
 std::string Game_name;
-std::string Port_name;
-std::string Level_name;
+std::string config::Port_name;
+std::string config::Level_name;
 
 map_format_e Level_format;
 
@@ -87,8 +87,8 @@ map_format_e Level_format;
 //
 // config items
 //
-bool auto_load_recent = false;
-bool begin_maximized  = false;
+bool config::auto_load_recent = false;
+bool config::begin_maximized  = false;
 bool map_scroll_bars  = true;
 
 std::string default_port = "vanilla";
@@ -108,8 +108,8 @@ rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 //    3 = opened the main window
 int  init_progress;
 
-int show_help     = 0;
-int show_version  = 0;
+int config::show_help     = 0;
+int config::show_version  = 0;
 
 
 static void RemoveSingleNewlines(char *buffer)
@@ -141,7 +141,7 @@ void FatalError(const char *fmt, ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	if (init_progress < 1 || Quiet || !log_file.empty())
+	if (init_progress < 1 || config::Quiet || !config::log_file.empty())
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer);
 	}
@@ -180,7 +180,7 @@ void FatalError(const char *fmt, ...)
 
 static void CreateHomeDirs()
 {
-	SYS_ASSERT(!home_dir.empty());
+	SYS_ASSERT(!config::home_dir.empty());
 
 	char dir_name[FL_PATH_MAX];
 
@@ -197,7 +197,7 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(home_dir.c_str());
+	FileMakeDir(config::home_dir.c_str());
 	FileMakeDir(cache_dir.c_str());
 
 	static const char *const subdirs[] =
@@ -213,7 +213,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir.c_str() : home_dir.c_str(), subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir.c_str() : config::home_dir.c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -224,7 +224,7 @@ static void CreateHomeDirs()
 static void Determine_HomeDir(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (home_dir.empty())
+	if (config::home_dir.empty())
 	{
 #if defined(WIN32)
 	// get the %APPDATA% location
@@ -253,7 +253,7 @@ static void Determine_HomeDir(const char *argv0)
 	char path[FL_PATH_MAX + 4];
 
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
-   home_dir = path;
+   config::home_dir = path;
 
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
    cache_dir = path;
@@ -266,27 +266,27 @@ static void Determine_HomeDir(const char *argv0)
 #endif
 	}
 
-	if (home_dir.empty())
+	if (config::home_dir.empty())
 		FatalError("Unable to find home directory!\n");
 
 	if (cache_dir.empty())
-		cache_dir = home_dir;
+		cache_dir = config::home_dir;
 
-	LogPrintf("Home  dir: %s\n", home_dir.c_str());
+	LogPrintf("Home  dir: %s\n", config::home_dir.c_str());
 	LogPrintf("Cache dir: %s\n", cache_dir.c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();
 
 	// determine log filename
-	log_file = home_dir + "/logs.txt";
+	config::log_file = config::home_dir + "/logs.txt";
 }
 
 
 static void Determine_InstallPath(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (install_dir.empty())
+	if (config::install_dir.empty())
 	{
 #ifdef WIN32
 	install_dir = GetExecutablePath(argv0);
@@ -302,33 +302,33 @@ static void Determine_InstallPath(const char *argv0)
 
 	for (int i = 0 ; prefixes[i] ; i++)
 	{
-		install_dir = prefixes[i];
-		install_dir += "/share/eureka";
+		config::install_dir = prefixes[i];
+		config::install_dir += "/share/eureka";
 
-		std::string filename = install_dir + "/games/doom2.ugh";
+		std::string filename = config::install_dir + "/games/doom2.ugh";
 
-		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
+		DebugPrintf("Trying install path: %s\n", config::install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename.c_str());
 
 		if (FileExists(filename.c_str()))
 			break;
 
-		install_dir.clear();
+		config::install_dir.clear();
 	}
 #endif
 	}
 
 	// fallback : look in current directory
-	if (install_dir.empty())
+	if (config::install_dir.empty())
 	{
 		if (FileExists("./games/doom2.ugh"))
-			install_dir = ".";
+			config::install_dir = ".";
 	}
 
-	if (install_dir.empty())
+	if (config::install_dir.empty())
 		FatalError("Unable to find install directory!\n");
 
-	LogPrintf("Install dir: %s\n", install_dir.c_str());
+	LogPrintf("Install dir: %s\n", config::install_dir.c_str());
 }
 
 
@@ -352,45 +352,45 @@ static bool DetermineIWAD()
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!Iwad_name.empty() && FilenameIsBare(Iwad_name.c_str()))
+	if (!config::Iwad_name.empty() && FilenameIsBare(config::Iwad_name.c_str()))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		y_strlowr(Iwad_name);
+		y_strlowr(config::Iwad_name);
 
-		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
+		if (! M_CanLoadDefinitions("games", config::Iwad_name.c_str()))
+			FatalError("Unknown game '%s' (no definition file)\n", config::Iwad_name.c_str());
 
-		std::string path = M_QueryKnownIWAD(Iwad_name.c_str());
+		std::string path = M_QueryKnownIWAD(config::Iwad_name.c_str());
 
 		if (path.empty())
-			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
+			FatalError("Cannot find IWAD for game '%s'\n", config::Iwad_name.c_str());
 
-		Iwad_name = path;
+		config::Iwad_name = path;
 	}
-	else if (!Iwad_name.empty())
+	else if (!config::Iwad_name.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name.c_str()))
-			Iwad_name = ReplaceExtension(Iwad_name.c_str(), "wad");
+		if (! HasExtension(config::Iwad_name.c_str()))
+			config::Iwad_name = ReplaceExtension(config::Iwad_name.c_str(), "wad");
 
-		if (! Wad_file::Validate(Iwad_name.c_str()))
-			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
+		if (! Wad_file::Validate(config::Iwad_name.c_str()))
+			FatalError("IWAD does not exist or is invalid: %s\n", config::Iwad_name.c_str());
 
-		std::string game = GameNameFromIWAD(Iwad_name.c_str());
+		std::string game = GameNameFromIWAD(config::Iwad_name.c_str());
 
 		if (! M_CanLoadDefinitions("games", game.c_str()))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
+			FatalError("Unknown game '%s' (no definition file)\n", config::Iwad_name.c_str());
 
-		M_AddKnownIWAD(Iwad_name.c_str());
+		M_AddKnownIWAD(config::Iwad_name.c_str());
 		M_SaveRecent();
 	}
 	else
 	{
-		Iwad_name = M_PickDefaultIWAD();
+		config::Iwad_name = M_PickDefaultIWAD();
 
-		if (Iwad_name.empty())
+		if (config::Iwad_name.empty())
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -399,7 +399,7 @@ static bool DetermineIWAD()
 		}
 	}
 
-	Game_name = GameNameFromIWAD(Iwad_name.c_str());
+	Game_name = GameNameFromIWAD(config::Iwad_name.c_str());
 
 	return true;
 }
@@ -409,10 +409,10 @@ static void DeterminePort()
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
-	if (!Port_name.empty())
+	if (!config::Port_name.empty())
 	{
-		if (! M_CanLoadDefinitions("ports", Port_name.c_str()))
-			FatalError("Unknown port '%s' (no definition file)\n", Port_name.c_str());
+		if (! M_CanLoadDefinitions("ports", config::Port_name.c_str()))
+			FatalError("Unknown port '%s' (no definition file)\n", config::Port_name.c_str());
 
 		return;
 	}
@@ -438,7 +438,7 @@ static void DeterminePort()
 		default_port = "vanilla";
 	}
 
-	Port_name = default_port;
+	config::Port_name = default_port;
 }
 
 
@@ -452,12 +452,12 @@ static std::string DetermineLevel()
 
 	int level_number = 0;
 
-	if (!Level_name.empty())
+	if (!config::Level_name.empty())
 	{
-		if (! isdigit(Level_name[0]))
-			return StringUpper(Level_name.c_str());
+		if (! isdigit(config::Level_name[0]))
+			return StringUpper(config::Level_name.c_str());
 
-		level_number = atoi(Level_name.c_str());
+		level_number = atoi(config::Level_name.c_str());
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -649,7 +649,7 @@ static void Main_OpenWindow()
 
 	InitAboutDialog();
 
-	if (begin_maximized)
+	if (config::begin_maximized)
 		main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
@@ -790,9 +790,9 @@ static void Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	game_wad = Wad_file::Open(Iwad_name.c_str(), 'r');
+	game_wad = Wad_file::Open(config::Iwad_name.c_str(), 'r');
 	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name.c_str());
+		FatalError("Failed to open game IWAD: %s\n", config::Iwad_name.c_str());
 
 	MasterDir_Add(game_wad);
 }
@@ -800,10 +800,10 @@ static void Main_LoadIWAD()
 
 static void ReadGameInfo()
 {
-	Game_name = GameNameFromIWAD(Iwad_name.c_str());
+	Game_name = GameNameFromIWAD(config::Iwad_name.c_str());
 
 	LogPrintf("Game name: '%s'\n", Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
+	LogPrintf("IWAD file: '%s'\n", config::Iwad_name.c_str());
 
 	M_LoadDefinitions("games", Game_name.c_str());
 }
@@ -815,15 +815,15 @@ static void ReadPortInfo()
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!Port_name.empty());
+	SYS_ASSERT(!config::Port_name.empty());
 
 	std::string var_game = M_VariantForGame(Game_name.c_str());
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(var_game.c_str(), Port_name.c_str()))
+	if (! M_CheckPortSupportsGame(var_game.c_str(), config::Port_name.c_str()))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-				Port_name.c_str(), Game_name.c_str());
+				config::Port_name.c_str(), Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -832,17 +832,17 @@ static void ReadPortInfo()
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-						Port_name.c_str(), Game_name.c_str());
+						config::Port_name.c_str(), Game_name.c_str());
 
 		if (res == 0)
 		{
-			Port_name = "vanilla";
+			config::Port_name = "vanilla";
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", Port_name.c_str());
+	LogPrintf("Port name: '%s'\n", config::Port_name.c_str());
 
-	M_LoadDefinitions("ports", Port_name.c_str());
+	M_LoadDefinitions("ports", config::Port_name.c_str());
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (game_info.strife_flags)
@@ -879,7 +879,7 @@ void Main_LoadResources()
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const auto &resource : Resource_list)
+	for (const auto &resource : config::Resource_list)
 	{
 		LoadResourceFile(resource.c_str());
 	}
@@ -984,12 +984,12 @@ int main(int argc, char *argv[])
 	// to handle special options, like --help, --install, --config
 	M_ParseCommandLine(argc - 1, argv + 1, 1);
 
-	if (show_help)
+	if (config::show_help)
 	{
 		ShowHelp();
 		return 0;
 	}
-	else if (show_version)
+	else if (config::show_version)
 	{
 		ShowVersion();
 		return 0;
@@ -1011,7 +1011,7 @@ int main(int argc, char *argv[])
 	Determine_InstallPath(argv[0]);
 	Determine_HomeDir(argv[0]);
 
-	LogOpenFile(log_file.c_str());
+	LogOpenFile(config::log_file.c_str());
 
 
 	// load all the config settings
@@ -1046,13 +1046,13 @@ int main(int argc, char *argv[])
 	// open a specified PWAD now
 	// [ the map is loaded later.... ]
 
-	if (!Pwad_list.empty())
+	if (!config::Pwad_list.empty())
 	{
 		// this fatal errors on any missing file
 		// [ hence the Open() below is very unlikely to fail ]
 		M_ValidateGivenFiles();
 
-		Pwad_name = Pwad_list[0];
+		Pwad_name = config::Pwad_list[0];
 
 		edit_wad = Wad_file::Open(Pwad_name.c_str(), 'a');
 		if (! edit_wad)
@@ -1063,7 +1063,7 @@ int main(int argc, char *argv[])
 		MasterDir_Add(edit_wad);
 	}
 	// don't auto-load when --iwad or --warp was used on the command line
-	else if (auto_load_recent && Iwad_name.empty() && Level_name.empty())
+	else if (config::auto_load_recent && config::Iwad_name.empty() && config::Level_name.empty())
 	{
 		if (M_TryOpenMostRecent())
 		{
@@ -1100,18 +1100,18 @@ int main(int argc, char *argv[])
 	// it gets loaded again in Main_LoadResources().
 	Main_LoadIWAD();
 
-	Level_name = DetermineLevel();
+	config::Level_name = DetermineLevel();
 
 	// config file parsing can depend on the map format, so get it now
-	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name.c_str());
+	GetLevelFormat(edit_wad ? edit_wad : game_wad, config::Level_name.c_str());
 
 	Main_LoadResources();
 
 
 	// load the initial level
-	LogPrintf("Loading initial map : %s\n", Level_name.c_str());
+	LogPrintf("Loading initial map : %s\n", config::Level_name.c_str());
 
-	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name.c_str());
+	LoadLevel(edit_wad ? edit_wad : game_wad, config::Level_name.c_str());
 
 
 	Main_Loop();

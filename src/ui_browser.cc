@@ -51,7 +51,7 @@ extern std::map<int, thingtype_t>  thing_types;
 
 
 // config items
-bool browser_small_tex = false;
+bool config::browser_small_tex = false;
 
 
 // sort methods
@@ -681,7 +681,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
 		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
 
-		if (browser_small_tex && kind == 'T')
+		if (config::browser_small_tex && kind == 'T')
 		{
 			pic_w = 64;
 			pic_h = MIN(64, MAX(4, image->height()));

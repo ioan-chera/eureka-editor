@@ -677,7 +677,7 @@ static void Menu_AddItem(Fl_Menu_Item* &pos, const char *text,
 
 static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 {
-	int count = (int)Pwad_list.size();
+	int count = (int)config::Pwad_list.size();
 
 	if (count < 2)
 		return items;
@@ -707,14 +707,14 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		const char *short_name = fl_filename_name(Pwad_list[k].c_str());
+		const char *short_name = fl_filename_name(config::Pwad_list[k].c_str());
 
 		std::string short_name_pat = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
 												  (k < 9) ? "&" : "", 1+k, short_name);
 
 		Menu_AddItem(pos, short_name_pat.c_str(),
 					 FCAL file_do_load_given,
-					 (void *) &Pwad_list[k], 0);
+					 (void *) &config::Pwad_list[k], 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)

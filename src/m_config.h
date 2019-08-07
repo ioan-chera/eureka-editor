@@ -34,8 +34,22 @@
 extern std::string default_port;
 extern int default_edit_mode;
 
-extern bool auto_load_recent;
-extern bool begin_maximized;
+namespace config
+{
+	extern bool auto_load_recent;
+	extern bool begin_maximized;
+	extern int backup_max_files;
+	extern int backup_max_space;
+	extern bool browser_small_tex;
+	extern bool bsp_on_save;
+	extern bool bsp_fast;
+	extern bool bsp_warnings;
+	extern int  bsp_split_factor;
+	extern bool bsp_gl_nodes;
+	extern bool bsp_force_v5;
+	extern bool bsp_force_zdoom;
+	extern bool bsp_compressed;
+}
 extern bool map_scroll_bars;
 
 extern bool leave_offsets_alone;
@@ -75,11 +89,6 @@ extern rgb_color_t normal_main_col;
 extern rgb_color_t normal_flat_col;
 extern rgb_color_t normal_small_col;
 
-extern int backup_max_files;
-extern int backup_max_space;
-
-extern bool browser_small_tex;
-
 extern int floor_bump_small;
 extern int floor_bump_medium;
 extern int floor_bump_large;
@@ -95,17 +104,6 @@ extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
 extern rgb_color_t transparent_col;
-
-extern bool bsp_on_save;
-extern bool bsp_fast;
-extern bool bsp_warnings;
-extern int  bsp_split_factor;
-
-extern bool bsp_gl_nodes;
-extern bool bsp_force_v5;
-extern bool bsp_force_zdoom;
-extern bool bsp_compressed;
-
 
 /* ==== FUNCTIONS ==================== */
 

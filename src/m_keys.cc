@@ -677,12 +677,12 @@ void M_LoadBindings()
 {
 	all_bindings.clear();
 
-	LoadBindingsFromPath(install_dir.c_str(), true /* required */);
+	LoadBindingsFromPath(config::install_dir.c_str(), true /* required */);
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(home_dir.c_str(), false);
+	LoadBindingsFromPath(config::home_dir.c_str(), false);
 }
 
 
@@ -690,7 +690,7 @@ void M_SaveBindings()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/bindings.cfg", home_dir.c_str());
+	snprintf(filename, sizeof(filename), "%s/bindings.cfg", config::home_dir.c_str());
 
 	FILE *fp = fopen(filename, "w");
 

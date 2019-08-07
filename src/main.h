@@ -126,25 +126,28 @@ extern int  init_progress;
 extern bool want_quit;
 extern bool app_has_focus;
 
-extern std::string install_dir;  // install dir (e.g. /usr/share/eureka)
-extern std::string home_dir;     // home dir (e.g. $HOME/.eureka)
+namespace config
+{
+	extern std::string home_dir;     // home dir (e.g. $HOME/.eureka)
+	extern std::string install_dir;  // install dir (e.g. /usr/share/eureka)
+	extern std::string log_file;    // Name of log file, or NULL
+	extern std::string config_file; // Name of the configuration file, or NULL
+	extern int   show_help;		// Print usage message and exit.
+	extern int   show_version;	// Print version info and exit.
+	extern std::vector<std::string> Pwad_list;
+	extern std::vector<std::string> Resource_list;
+	extern std::string Iwad_name;   // Filename of the iwad
+	extern std::string Port_name;   // Name of source port "vanilla", "boom", ...
+	extern std::string Level_name;  // Name of map lump we are editing
+}
+
 extern std::string cache_dir;    // for caches and backups, can be same as home_dir
 
 extern std::string Game_name;   // Name of game "doom", "doom2", "heretic", ...
-extern std::string Port_name;   // Name of source port "vanilla", "boom", ...
-extern std::string Level_name;  // Name of map lump we are editing
 
 extern map_format_e Level_format; // format of current map
 
-extern std::string config_file; // Name of the configuration file, or NULL
-extern std::string log_file;    // Name of log file, or NULL
-
-extern std::string Iwad_name;   // Filename of the iwad
 extern std::string Pwad_name;   // Filename of current wad, or NULL
-
-extern std::vector<std::string> Pwad_list;
-extern std::vector<std::string> Resource_list;
-
 
 extern int	default_floor_h;
 extern int	default_ceil_h;
@@ -154,11 +157,6 @@ extern int	default_thing;
 extern std::string default_wall_tex;
 extern std::string default_floor_tex;
 extern std::string default_ceil_tex;
-
-
-extern int   show_help;		// Print usage message and exit.
-extern int   show_version;	// Print version info and exit.
-
 
 extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size

@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "main.h"
+#include "m_config.h"
 #include "m_loadsave.h"
 #include "w_wad.h"
 
@@ -28,16 +29,16 @@
 
 
 // config items
-bool bsp_on_save	= true;
-bool bsp_fast		= false;
-bool bsp_warnings	= false;
+bool config::bsp_on_save	= true;
+bool config::bsp_fast		= false;
+bool config::bsp_warnings	= false;
 
-int  bsp_split_factor	= DEFAULT_FACTOR;
+int  config::bsp_split_factor	= DEFAULT_FACTOR;
 
-bool bsp_gl_nodes		= true;
-bool bsp_force_v5		= false;
-bool bsp_force_zdoom	= false;
-bool bsp_compressed		= false;
+bool config::bsp_gl_nodes		= true;
+bool config::bsp_force_v5		= false;
+bool config::bsp_force_zdoom	= false;
+bool config::bsp_compressed		= false;
 
 
 extern bool inhibit_node_build;
@@ -305,15 +306,15 @@ void GB_PrintMsg(const char *str, ...)
 
 static void PrepareInfo(nodebuildinfo_t *info)
 {
-	info->factor	= CLAMP(1, bsp_split_factor, 31);
+	info->factor	= CLAMP(1, config::bsp_split_factor, 31);
 
-	info->gl_nodes	= bsp_gl_nodes;
-	info->fast		= bsp_fast;
-	info->warnings	= bsp_warnings;
+	info->gl_nodes	= config::bsp_gl_nodes;
+	info->fast		= config::bsp_fast;
+	info->warnings	= config::bsp_warnings;
 
-	info->force_v5			= bsp_force_v5;
-	info->force_xnod		= bsp_force_zdoom;
-	info->force_compress	= bsp_compressed;
+	info->force_v5			= config::bsp_force_v5;
+	info->force_xnod		= config::bsp_force_zdoom;
+	info->force_compress	= config::bsp_compressed;
 
 	info->total_failed_maps		= 0;
 	info->total_warnings		= 0;

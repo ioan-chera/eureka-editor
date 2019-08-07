@@ -107,7 +107,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Home directory",
 		"<dir>",
-		&home_dir
+		&config::home_dir
 	},
 
 	{	"install",
@@ -116,7 +116,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Installation directory",
 		"<dir>",
-		&install_dir
+		&config::install_dir
 	},
 
 	{	"log",
@@ -125,7 +125,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Log messages to specified file",
 		"<file>",
-		&log_file
+		&config::log_file
 	},
 
 	{	"config",
@@ -134,7 +134,7 @@ static const opt_desc_t options[] =
 		"1<",
 		"Config file to load / save",
 		"<file>",
-		&config_file
+		&config::config_file
 	},
 
 	{	"help",
@@ -143,7 +143,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Show usage summary",
 		NULL,
-		&show_help
+		&config::show_help
 	},
 
 	{	"version",
@@ -152,7 +152,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Show the version",
 		NULL,
-		&show_version
+		&config::show_version
 	},
 
 	{	"debug",
@@ -161,7 +161,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Enable debugging messages",
 		NULL,
-		&Debugging
+		&config::Debugging
 	},
 
 	{	"quiet",
@@ -170,7 +170,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Quiet mode (no messages on stdout)",
 		NULL,
-		&Quiet
+		&config::Quiet
 	},
 
 	//
@@ -183,7 +183,7 @@ static const opt_desc_t options[] =
 		"",
 		"Wad file(s) to edit",
 		"<file>...",
-		&Pwad_list
+		&config::Pwad_list
 	},
 
 	{	"merge",
@@ -192,7 +192,7 @@ static const opt_desc_t options[] =
 		"",
 		"Resource file(s) to load",
 		"<file>...",
-		&Resource_list
+		&config::Resource_list
 	},
 
 	{	"iwad",
@@ -201,7 +201,7 @@ static const opt_desc_t options[] =
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
-		&Iwad_name
+		&config::Iwad_name
 	},
 
 	{	"port",
@@ -210,7 +210,7 @@ static const opt_desc_t options[] =
 		"",
 		"Port (engine) name",
 		"<name>",
-		&Port_name
+		&config::Port_name
 	},
 
 	{	"warp",
@@ -219,7 +219,7 @@ static const opt_desc_t options[] =
 		"w<",
 		"Select level to edit",
 		"<map>",
-		&Level_name
+		&config::Level_name
 	},
 
 	/* ------------ Preferences ------------ */
@@ -230,7 +230,7 @@ static const opt_desc_t options[] =
 		"v",
 		"When no given files, load the most recent one saved",
 		NULL,
-		&auto_load_recent
+		&config::auto_load_recent
 	},
 
 	{	"begin_maximized",
@@ -239,7 +239,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximize the window when Eureka starts",
 		NULL,
-		&begin_maximized
+		&config::begin_maximized
 	},
 
 	{	"backup_max_files",
@@ -248,7 +248,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximum copies to make when backing up a wad",
 		NULL,
-		&backup_max_files
+		&config::backup_max_files
 	},
 
 	{	"backup_max_space",
@@ -257,7 +257,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximum space to use (in MB) when backing up a wad",
 		NULL,
-		&backup_max_space
+		&config::backup_max_space
 	},
 
 	{	"browser_small_tex",
@@ -266,7 +266,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show smaller (more compact) textures in the browser",
 		NULL,
-		&browser_small_tex
+		&config::browser_small_tex
 	},
 
 	{	"bsp_on_save",
@@ -275,7 +275,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: always build the nodes after saving",
 		NULL,
-		&bsp_on_save
+		&config::bsp_on_save
 	},
 
 	{	"bsp_fast",
@@ -284,7 +284,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
-		&bsp_fast
+		&config::bsp_fast
 	},
 
 	{	"bsp_warnings",
@@ -293,7 +293,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: show all warning messages",
 		NULL,
-		&bsp_warnings
+		&config::bsp_warnings
 	},
 
 	{	"bsp_split_factor",
@@ -302,7 +302,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: seg splitting factor",
 		NULL,
-		&bsp_split_factor
+		&config::bsp_split_factor
 	},
 
 	{	"bsp_gl_nodes",
@@ -311,7 +311,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: build GL-Nodes",
 		NULL,
-		&bsp_gl_nodes
+		&config::bsp_gl_nodes
 	},
 
 	{	"bsp_force_v5",
@@ -320,7 +320,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force V5 of GL-Nodes",
 		NULL,
-		&bsp_force_v5
+		&config::bsp_force_v5
 	},
 
 	{	"bsp_force_zdoom",
@@ -329,7 +329,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force ZDoom format for normal nodes",
 		NULL,
-		&bsp_force_zdoom
+		&config::bsp_force_zdoom
 	},
 
 	{	"bsp_compressed",
@@ -338,7 +338,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force zlib compression of ZDoom nodes",
 		NULL,
-		&bsp_compressed
+		&config::bsp_compressed
 	},
 
 	{	"default_gamma",
@@ -955,8 +955,8 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 
 inline static std::string default_config_file()
 {
-	SYS_ASSERT(!home_dir.empty());
-	return home_dir + "/config.cfg";
+	SYS_ASSERT(!config::home_dir.empty());
+	return config::home_dir + "/config.cfg";
 }
 
 
@@ -967,14 +967,14 @@ inline static std::string default_config_file()
 //
 int M_ParseConfigFile()
 {
-	if (config_file.empty())
+	if (config::config_file.empty())
 	{
-		config_file = default_config_file();
+		config::config_file = default_config_file();
 	}
 
-	FILE * fp = fopen(config_file.c_str(), "r");
+	FILE * fp = fopen(config::config_file.c_str(), "r");
 
-	LogPrintf("Reading config file: %s\n", config_file.c_str());
+	LogPrintf("Reading config file: %s\n", config::config_file.c_str());
 
 	if (fp == NULL)
 	{
@@ -982,7 +982,7 @@ int M_ParseConfigFile()
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, config_file.c_str());
+	int rc = parse_a_config_file(fp, config::config_file.c_str());
 
 	fclose(fp);
 
@@ -994,7 +994,7 @@ int M_ParseDefaultConfigFile()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir.c_str());
+	snprintf(filename, sizeof(filename), "%s/defaults.cfg", config::install_dir.c_str());
 
 	FILE * fp = fopen(filename, "r");
 
@@ -1031,7 +1031,7 @@ void M_ParseEnvironmentVars()
 
 void M_AddPwadName(const char *filename)
 {
-	Pwad_list.push_back(filename);
+	config::Pwad_list.push_back(filename);
 }
 
 
@@ -1274,11 +1274,11 @@ void M_PrintCommandLineOptions(FILE *fp)
 
 int M_WriteConfigFile()
 {
-	SYS_ASSERT(!config_file.empty());
+	SYS_ASSERT(!config::config_file.empty());
 
-	LogPrintf("Writing config file: %s\n", config_file.c_str());
+	LogPrintf("Writing config file: %s\n", config::config_file.c_str());
 
-	FILE * fp = fopen(config_file.c_str(), "w");
+	FILE * fp = fopen(config::config_file.c_str(), "w");
 
 	if (! fp)
 	{
