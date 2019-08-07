@@ -1,10 +1,10 @@
 #------------------------------------------------------------------------
-#  PLUTONIA EXPERIMENT (Final Doom)
+#  FREEDM
 #------------------------------------------------------------------------
 #
 #  Eureka DOOM Editor
 #
-#  Copyright (C) 2001-2019 Andrew Apted
+#  Copyright (C) 2019 Pascal de Bruijn
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -22,5 +22,8 @@ include "doom2"
 
 variant_of doom2
 
+include "tnt_tex"
 include "plutonia_tex"
+
+# TODO : new FreeDoom textures
 

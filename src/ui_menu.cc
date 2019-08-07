@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_main.h"
+#include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
 
@@ -246,6 +247,9 @@ static void view_do_sector_render(Fl_Widget *w, void * data)
 		edit.sector_render_mode = SREND_SoundProp;
 	else
 		edit.sector_render_mode = SREND_Nothing;
+
+	sector_render_default = edit.sector_render_mode;
+	M_WriteConfigFile();
 
 	main_win->redraw();
 }
