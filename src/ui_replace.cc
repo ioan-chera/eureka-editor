@@ -267,7 +267,7 @@ public:
 //------------------------------------------------------------------------
 
 
-#define HIDE_BG  (gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
+#define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :

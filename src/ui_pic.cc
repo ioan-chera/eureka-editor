@@ -45,7 +45,7 @@ UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
 
 	what_text = L;
 
-	what_color = (gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
+	what_color = (config::gui_color_set == 1) ? (FL_GRAY0 + 4) : FL_BACKGROUND_COLOR;
 
 	label(what_text.c_str());
 	labelcolor(what_color);

@@ -25,7 +25,7 @@
 #include "ui_nombre.h"
 
 
-#define NOMBRBACK_COL  (gui_scheme == 2 ? FL_GRAY0+1 : FL_GRAY0+3)
+#define NOMBRBACK_COL  (config::gui_scheme == 2 ? FL_GRAY0+1 : FL_GRAY0+3)
 
 
 //

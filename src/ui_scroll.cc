@@ -30,8 +30,8 @@
 #define HUGE_DIST  (1 << 24)
 
 
-#define SCRBAR_BACK  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
-#define SCRBAR_COL   (gui_scheme == 2 ? FL_DARK1 : FL_BACKGROUND_COLOR)
+#define SCRBAR_BACK  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
+#define SCRBAR_COL   (config::gui_scheme == 2 ? FL_DARK1 : FL_BACKGROUND_COLOR)
 
 
 //
@@ -343,7 +343,7 @@ void UI_CanvasScroll::UpdateRenderMode()
 	int new_3d = edit.render3d     ? 1 : 0;
 
 	int old_bars = enable_bars     ? 1 : 0;
-	int new_bars = map_scroll_bars ? 1 : 0;
+	int new_bars = config::map_scroll_bars ? 1 : 0;
 
 	// nothing changed?
 	if (old_3d == new_3d && old_bars == new_bars)
@@ -357,7 +357,7 @@ void UI_CanvasScroll::UpdateRenderMode()
 
 		init_sizes();
 
-		enable_bars = map_scroll_bars;
+		enable_bars = config::map_scroll_bars;
 	}
 
 	if (edit.render3d)

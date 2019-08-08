@@ -34,6 +34,7 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_vertex.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"
@@ -43,8 +44,8 @@
 
 
 // config items
-bool new_islands_are_void = false;
-int  new_sector_size = 128;
+bool config::new_islands_are_void = false;
+int  config::new_sector_size = 128;
 
 bool select_verts_of_new_sectors = true;
 
@@ -91,8 +92,8 @@ static void CreateSquare(int model)
 	int x1 = grid.QuantSnapX(edit.map_x, false);
 	int y1 = grid.QuantSnapX(edit.map_y, false);
 
-	int x2 = x1 + new_sector_size;
-	int y2 = y1 + new_sector_size;
+	int x2 = x1 + config::new_sector_size;
+	int y2 = y1 + config::new_sector_size;
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
@@ -276,7 +277,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
 		// always fill a loop created out in the void.
 		// also fill a created island, unless the option is disabled AND
 		// the new island does not surround other islands.
-		if (filled_outie && new_islands_are_void &&
+		if (filled_outie && config::new_islands_are_void &&
 			innie.AllBare() && innie.islands.empty())
 		{
 			return true;

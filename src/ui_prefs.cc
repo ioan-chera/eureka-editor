@@ -727,7 +727,7 @@ UI_Preferences::UI_Preferences() :
 	  key_sort_mode('k'), key_sort_rev(false),
 	  awaiting_line(0)
 {
-	if (gui_color_set == 2)
+	if (config::gui_color_set == 2)
 		color(fl_gray_ramp(4));
 	else
 		color(WINDOW_BG);
@@ -1394,23 +1394,23 @@ void UI_Preferences::LoadValues()
 {
 	/* Theme stuff */
 
-	switch (gui_scheme)
+	switch (config::gui_scheme)
 	{
 		case 0: theme_FLTK->value(1); break;
 		case 1: theme_GTK->value(1); break;
 		case 2: theme_plastic->value(1); break;
 	}
 
-	switch (gui_color_set)
+	switch (config::gui_color_set)
 	{
 		case 0: cols_default->value(1); break;
 		case 1: cols_bright->value(1); break;
 		case 2: cols_custom->value(1); break;
 	}
 
-	bg_colorbox->color(gui_custom_bg);
-	ig_colorbox->color(gui_custom_ig);
-	fg_colorbox->color(gui_custom_fg);
+	bg_colorbox->color(config::gui_custom_bg);
+	ig_colorbox->color(config::gui_custom_ig);
+	fg_colorbox->color(config::gui_custom_fg);
 
 	/* General Tab */
 
@@ -1420,44 +1420,44 @@ void UI_Preferences::LoadValues()
 
 	/* Edit Tab */
 
-	edit_def_port->value(default_port.c_str());
-	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
+	edit_def_port->value(config::default_port.c_str());
+	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
 
-	edit_sectorsize->value(std::to_string(new_sector_size).c_str());
-	edit_newislands->value(new_islands_are_void ? 1 : 0);
+	edit_sectorsize->value(std::to_string(config::new_sector_size).c_str());
+	edit_newislands->value(config::new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
-	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
+	edit_autoadjustX->value(config::leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(config::browser_small_tex ? 1 : 0);
 
 	/* Grid Tab */
 
-	if (grid_style < 0 || grid_style > 1)
-		grid_style = 1;
+	if (config::grid_style < 0 || config::grid_style > 1)
+		config::grid_style = 1;
 
-	if (grid_default_mode < 0 || grid_default_mode > 1)
-		grid_default_mode = 1;
+	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
+		config::grid_default_mode = 1;
 
-	grid_cur_style->value(grid_style);
-	grid_enabled->value(grid_default_mode);
-	grid_snap->value(grid_default_snap ? 1 : 0);
-	grid_size->value(GridSizeToChoice(grid_default_size));
-	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
+	grid_cur_style->value(config::grid_style);
+	grid_enabled->value(config::grid_default_mode);
+	grid_snap->value(config::grid_default_snap ? 1 : 0);
+	grid_size->value(GridSizeToChoice(config::grid_default_size));
+	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
 	grid_flatrender->value(sector_render_default ? 1 : 0);
 	grid_spriterend->value(thing_render_default ? 1 : 0);
 
-	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
+	gen_scrollbars ->value(config::map_scroll_bars ? 1 : 0);
 
-	dotty_axis ->color(dotty_axis_col);
-	dotty_major->color(dotty_major_col);
-	dotty_minor->color(dotty_minor_col);
-	dotty_point->color(dotty_point_col);
+	dotty_axis ->color(config::dotty_axis_col);
+	dotty_major->color(config::dotty_major_col);
+	dotty_minor->color(config::dotty_minor_col);
+	dotty_point->color(config::dotty_point_col);
 
-	normal_axis ->color(normal_axis_col);
-	normal_main ->color(normal_main_col);
-	normal_flat ->color(normal_flat_col);
-	normal_small->color(normal_small_col);
+	normal_axis ->color(config::normal_axis_col);
+	normal_main ->color(config::normal_main_col);
+	normal_flat ->color(config::normal_flat_col);
+	normal_small->color(config::normal_small_col);
 
 	/* 3D Tab */
 
@@ -1498,26 +1498,26 @@ void UI_Preferences::SaveValues()
 	/* Theme stuff */
 
 	if (theme_FLTK->value())
-		gui_scheme = 0;
+		config::gui_scheme = 0;
 	else if (theme_GTK->value())
-		gui_scheme = 1;
+		config::gui_scheme = 1;
 	else
-		gui_scheme = 2;
+		config::gui_scheme = 2;
 
 	if (cols_default->value())
-		gui_color_set = 0;
+		config::gui_color_set = 0;
 	else if (cols_bright->value())
-		gui_color_set = 1;
+		config::gui_color_set = 1;
 	else
-		gui_color_set = 2;
+		config::gui_color_set = 2;
 
-	gui_custom_bg = (rgb_color_t) bg_colorbox->color();
-	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
-	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
+	config::gui_custom_bg = (rgb_color_t) bg_colorbox->color();
+	config::gui_custom_ig = (rgb_color_t) ig_colorbox->color();
+	config::gui_custom_fg = (rgb_color_t) fg_colorbox->color();
 
 	// update the colors
 	// FIXME: how to reset the "default" colors??
-	if (gui_color_set == 1)
+	if (config::gui_color_set == 1)
 	{
 		Fl::background(236, 232, 228);
 		Fl::background2(255, 255, 255);
@@ -1525,11 +1525,11 @@ void UI_Preferences::SaveValues()
 
 		main_win->redraw();
 	}
-	else if (gui_color_set == 2)
+	else if (config::gui_color_set == 2)
 	{
-		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
-		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
-		Fl::foreground (RGB_RED(gui_custom_fg), RGB_GREEN(gui_custom_fg), RGB_BLUE(gui_custom_fg));
+		Fl::background (RGB_RED(config::gui_custom_bg), RGB_GREEN(config::gui_custom_bg), RGB_BLUE(config::gui_custom_bg));
+		Fl::background2(RGB_RED(config::gui_custom_ig), RGB_GREEN(config::gui_custom_ig), RGB_BLUE(config::gui_custom_ig));
+		Fl::foreground (RGB_RED(config::gui_custom_fg), RGB_GREEN(config::gui_custom_fg), RGB_BLUE(config::gui_custom_fg));
 
 		main_win->redraw();
 	}
@@ -1542,16 +1542,16 @@ void UI_Preferences::SaveValues()
 
 	/* Edit Tab */
 
-	default_port = edit_def_port->value();
-	default_edit_mode = edit_def_mode->value();
+	config::default_port = edit_def_port->value();
+	config::default_edit_mode = edit_def_mode->value();
 
-	new_sector_size = atoi(edit_sectorsize->value());
-	new_sector_size = CLAMP(4, new_sector_size, 8192);
+	config::new_sector_size = atoi(edit_sectorsize->value());
+	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
 
-	new_islands_are_void = edit_newislands->value() ? true : false;
+	config::new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
-	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
+	config::leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
@@ -1563,25 +1563,25 @@ void UI_Preferences::SaveValues()
 
 	/* Grid Tab */
 
-	grid_style        = grid_cur_style->value();
-	grid_default_mode = grid_enabled->value();
-	grid_default_snap = grid_snap->value() ? true : false;
-	grid_default_size = atoi(grid_size->mvalue()->text);
-	grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
+	config::grid_style        = grid_cur_style->value();
+	config::grid_default_mode = grid_enabled->value();
+	config::grid_default_snap = grid_snap->value() ? true : false;
+	config::grid_default_size = atoi(grid_size->mvalue()->text);
+	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
 	sector_render_default  = grid_flatrender->value() ? 1 : 0;
 	thing_render_default   = grid_spriterend->value() ? 1 : 0;
 
-	map_scroll_bars = gen_scrollbars ->value() ? true : false;
+	config::map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
-	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
-	dotty_major_col = (rgb_color_t) dotty_major->color();
-	dotty_minor_col = (rgb_color_t) dotty_minor->color();
-	dotty_point_col = (rgb_color_t) dotty_point->color();
+	config::dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
+	config::dotty_major_col = (rgb_color_t) dotty_major->color();
+	config::dotty_minor_col = (rgb_color_t) dotty_minor->color();
+	config::dotty_point_col = (rgb_color_t) dotty_point->color();
 
-	normal_axis_col  = (rgb_color_t) normal_axis ->color();
-	normal_main_col  = (rgb_color_t) normal_main ->color();
-	normal_flat_col  = (rgb_color_t) normal_flat ->color();
-	normal_small_col = (rgb_color_t) normal_small->color();
+	config::normal_axis_col  = (rgb_color_t) normal_axis ->color();
+	config::normal_main_col  = (rgb_color_t) normal_main ->color();
+	config::normal_flat_col  = (rgb_color_t) normal_flat ->color();
+	config::normal_small_col = (rgb_color_t) normal_small->color();
 
 	/* Nodes Tab */
 

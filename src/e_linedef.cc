@@ -30,6 +30,7 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "im_img.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "w_rawdef.h"
@@ -37,7 +38,7 @@
 
 
 // config items
-bool leave_offsets_alone = true;
+bool config::leave_offsets_alone = true;
 
 
 bool LineDefAlreadyExists(int v1, int v2)
@@ -925,7 +926,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 		L2->right = BA_New(OBJ_SIDEDEFS);
 		L2->Right()->RawCopy(L->Right());
 
-		if (! leave_offsets_alone)
+		if (! config::leave_offsets_alone)
 			L2->Right()->x_offset += new_length;
 	}
 
@@ -934,7 +935,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 		L2->left = BA_New(OBJ_SIDEDEFS);
 		L2->Left()->RawCopy(L->Left());
 
-		if (! leave_offsets_alone)
+		if (! config::leave_offsets_alone)
 		{
 			int new_x_ofs = L->Left()->x_offset + orig_length - new_length;
 

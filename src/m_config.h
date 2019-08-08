@@ -31,9 +31,6 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
-extern std::string default_port;
-extern int default_edit_mode;
-
 namespace config
 {
 	extern bool auto_load_recent;
@@ -49,53 +46,48 @@ namespace config
 	extern bool bsp_force_v5;
 	extern bool bsp_force_zdoom;
 	extern bool bsp_compressed;
+	extern int default_edit_mode;
+	extern std::string default_port;
+	extern rgb_color_t dotty_axis_col;
+	extern rgb_color_t dotty_major_col;
+	extern rgb_color_t dotty_minor_col;
+	extern rgb_color_t dotty_point_col;
+	extern int floor_bump_small;
+	extern int floor_bump_medium;
+	extern int floor_bump_large;
+	extern int  grid_default_mode;
+	extern int  grid_default_size;
+	extern bool grid_default_snap;
+	extern bool grid_hide_in_free_mode;
+	extern int  grid_style;
+	extern int gui_scheme;
+	extern int gui_color_set;
+	extern rgb_color_t gui_custom_bg;
+	extern rgb_color_t gui_custom_ig;
+	extern rgb_color_t gui_custom_fg;
+	extern bool leave_offsets_alone;
+	extern int light_bump_small;
+	extern int light_bump_medium;
+	extern int light_bump_large;
+	extern bool map_scroll_bars;
+	extern int  minimum_drag_pixels;
+	extern bool new_islands_are_void;
+	extern int  new_sector_size;
+	extern rgb_color_t normal_axis_col;
+	extern rgb_color_t normal_main_col;
+	extern rgb_color_t normal_flat_col;
+	extern rgb_color_t normal_small_col;
+	extern int panel_gamma;
 }
-extern bool map_scroll_bars;
 
-extern bool leave_offsets_alone;
-extern bool new_islands_are_void;
 extern bool same_mode_clears_selection;
 
 extern bool swap_sidedefs;
 extern bool show_full_one_sided;
 extern bool sidedef_add_del_buttons;
 
-extern int gui_scheme;
-extern int gui_color_set;
-extern rgb_color_t gui_custom_bg;
-extern rgb_color_t gui_custom_ig;
-extern rgb_color_t gui_custom_fg;
-
-extern int panel_gamma;
-
-extern int  minimum_drag_pixels;
-extern int  new_sector_size;
 extern int  sector_render_default;
 extern int   thing_render_default;
-
-extern int  grid_style;
-extern int  grid_default_mode;
-extern bool grid_default_snap;
-extern int  grid_default_size;
-extern bool grid_hide_in_free_mode;
-
-extern rgb_color_t dotty_axis_col;
-extern rgb_color_t dotty_major_col;
-extern rgb_color_t dotty_minor_col;
-extern rgb_color_t dotty_point_col;
-
-extern rgb_color_t normal_axis_col;
-extern rgb_color_t normal_main_col;
-extern rgb_color_t normal_flat_col;
-extern rgb_color_t normal_small_col;
-
-extern int floor_bump_small;
-extern int floor_bump_medium;
-extern int floor_bump_large;
-
-extern int light_bump_small;
-extern int light_bump_medium;
-extern int light_bump_large;
 
 extern int  render_pixel_aspect;
 extern bool render_high_detail;

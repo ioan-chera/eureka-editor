@@ -2291,7 +2291,7 @@ void UI_Render3D::DrawInfoBar()
 
 	IB_Number(cx, cy, "z", I_ROUND(view.z) - game_info.view_height, 4);
 
-	IB_Number(cx, cy, "gamma", usegamma, 1);
+	IB_Number(cx, cy, "gamma", config::usegamma, 1);
 	cx += 10;
 
 	IB_Flag(cx, cy, view.gravity, "GRAVITY", "gravity");
@@ -3113,7 +3113,7 @@ bool Render3D_ParseUser(const std::vector<std::string> &tokens)
 
 	if (tokens[0] == "gamma" && num_tok >= 2)
 	{
-		usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
+		config::usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
 
 		W_UpdateGamma();
 		return true;
@@ -3140,7 +3140,7 @@ void Render3D_WriteUser(FILE *fp)
 	        view.gravity ? 1 : 0);
 
 	fprintf(fp, "gamma %d\n",
-	        usegamma);
+	        config::usegamma);
 
 	r_clipboard.WriteUser(fp);
 }

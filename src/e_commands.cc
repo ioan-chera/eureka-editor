@@ -49,7 +49,7 @@
 
 
 // config items
-int minimum_drag_pixels = 5;
+int config::minimum_drag_pixels = 5;
 
 
 void CMD_Nothing()
@@ -197,11 +197,11 @@ void CMD_Redo()
 
 static void SetGamma(int new_val)
 {
-	usegamma = CLAMP(0, new_val, 4);
+	config::usegamma = CLAMP(0, new_val, 4);
 
 	W_UpdateGamma();
 
-	Status_Set("Gamma level %d", usegamma);
+	Status_Set("Gamma level %d", config::usegamma);
 
 	RedrawMap();
 }
@@ -321,7 +321,7 @@ void CMD_ToggleVar()
 	}
 	else if (y_stricmp(var_name, "gamma") == 0)
 	{
-		SetGamma((usegamma >= 4) ? 0 : usegamma + 1);
+		SetGamma((config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
@@ -526,7 +526,7 @@ void CheckBeginDrag()
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
 	if (edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
+		MAX(abs(pixel_dx), abs(pixel_dy)) >= config::minimum_drag_pixels)
 	{
 		Editor_SetAction(ACT_DRAG);
 

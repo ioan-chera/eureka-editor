@@ -44,15 +44,15 @@
 
 
 // config items
-rgb_color_t dotty_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 238);
-rgb_color_t dotty_minor_col = RGB_MAKE(0, 0, 187);
-rgb_color_t dotty_point_col = RGB_MAKE(0, 0, 255);
+rgb_color_t config::dotty_axis_col  = RGB_MAKE(0, 128, 255);
+rgb_color_t config::dotty_major_col = RGB_MAKE(0, 0, 238);
+rgb_color_t config::dotty_minor_col = RGB_MAKE(0, 0, 187);
+rgb_color_t config::dotty_point_col = RGB_MAKE(0, 0, 255);
 
-rgb_color_t normal_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
-rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_axis_col  = RGB_MAKE(0, 128, 255);
+rgb_color_t config::normal_main_col  = RGB_MAKE(0, 0, 238);
+rgb_color_t config::normal_flat_col  = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_small_col = RGB_MAKE(60, 60, 120);
 
 
 int vertex_radius(double scale);
@@ -258,7 +258,7 @@ void UI_Canvas::DrawMap()
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
-		if (grid_style == 0)
+		if (config::grid_style == 0)
 			DrawGrid_Normal();
 		else
 			DrawGrid_Dotty();
@@ -303,10 +303,10 @@ void UI_Canvas::DrawGrid_Normal()
 
 	if (pixels_1 < 1.6)
 	{
-		fl_color(DarkerColor(DarkerColor(normal_main_col)));
+		fl_color(DarkerColor(DarkerColor(config::normal_main_col)));
 		fl_rectf(x(), y(), w(), h());
 
-		DrawAxes(normal_axis_col);
+		DrawAxes(config::normal_axis_col);
 		return;
 	}
 
@@ -315,7 +315,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	float pixels_2 = flat_step * grid.Scale;
 
-	Fl_Color flat_col = (grid.step < 64) ? normal_main_col : normal_flat_col;
+	Fl_Color flat_col = (grid.step < 64) ? config::normal_main_col : config::normal_flat_col;
 
 	if (pixels_2 < 2.2)
 		flat_col = DarkerColor(flat_col);
@@ -340,7 +340,7 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 
 
-	Fl_Color main_col = (grid.step < 64) ? normal_small_col : normal_main_col;
+	Fl_Color main_col = (grid.step < 64) ? config::normal_small_col : config::normal_main_col;
 
 	float pixels_3 = grid.step * grid.Scale;
 
@@ -364,7 +364,7 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 
 
-	DrawAxes(normal_axis_col);
+	DrawAxes(config::normal_axis_col);
 }
 
 
@@ -379,15 +379,15 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	if (pixels_1 < 1.6)
 	{
-		fl_color(DarkerColor(DarkerColor(dotty_point_col)));
+		fl_color(DarkerColor(DarkerColor(config::dotty_point_col)));
 		fl_rectf(x(), y(), w(), h());
 
-		DrawAxes(dotty_axis_col);
+		DrawAxes(config::dotty_axis_col);
 		return;
 	}
 
 
-	fl_color(dotty_major_col);
+	fl_color(config::dotty_major_col);
 	{
 		int gx = (map_lx / grid_step_3) * grid_step_3;
 
@@ -401,10 +401,10 @@ void UI_Canvas::DrawGrid_Dotty()
 	}
 
 
-	DrawAxes(dotty_axis_col);
+	DrawAxes(config::dotty_axis_col);
 
 
-	fl_color(dotty_minor_col);
+	fl_color(config::dotty_minor_col);
 	{
 		int gx = (map_lx / grid_step_2) * grid_step_2;
 
@@ -421,9 +421,9 @@ void UI_Canvas::DrawGrid_Dotty()
 
 
 	if (pixels_1 < 4.02)
-		fl_color(DarkerColor(dotty_point_col));
+		fl_color(DarkerColor(config::dotty_point_col));
 	else
-		fl_color(dotty_point_col);
+		fl_color(config::dotty_point_col);
 
 	{
 		int gx = (map_lx / grid_step_1) * grid_step_1;

@@ -28,13 +28,14 @@
 
 #include "im_color.h"
 #include "im_img.h"  // TRANS_PIXEL
+#include "m_config.h"
 #include "w_wad.h"
 
 
 // config item
-int usegamma = 2;
+int config::usegamma = 2;
 
-int panel_gamma = 2;
+int config::panel_gamma = 2;
 
 
 rgb_color_t palette[256];
@@ -62,15 +63,15 @@ void W_UpdateGamma()
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		byte r2 = gammatable[usegamma][r];
-		byte g2 = gammatable[usegamma][g];
-		byte b2 = gammatable[usegamma][b];
+		byte r2 = gammatable[config::usegamma][r];
+		byte g2 = gammatable[config::usegamma][g];
+		byte b2 = gammatable[config::usegamma][b];
 
 		palette[c] = fl_rgb_color(r2, g2, b2);
 
-		r2 = gammatable[panel_gamma][r];
-		g2 = gammatable[panel_gamma][g];
-		b2 = gammatable[panel_gamma][b];
+		r2 = gammatable[config::panel_gamma][r];
+		g2 = gammatable[config::panel_gamma][g];
+		b2 = gammatable[config::panel_gamma][b];
 
 		palette_medium[c] = fl_rgb_color(r2, g2, b2);
 	}
@@ -79,8 +80,8 @@ void W_UpdateGamma()
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma [d] = gammatable[usegamma][i];
-		rgb555_medium[d] = gammatable[panel_gamma][i];
+		rgb555_gamma [d] = gammatable[config::usegamma][i];
+		rgb555_medium[d] = gammatable[config::panel_gamma][i];
 	}
 }
 

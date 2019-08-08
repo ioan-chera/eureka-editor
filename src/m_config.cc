@@ -347,7 +347,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
-		&usegamma
+		&config::usegamma
 	},
 
 	{	"default_edit_mode",
@@ -356,7 +356,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
 		NULL,
-		&default_edit_mode
+		&config::default_edit_mode
 	},
 
 	{	"default_port",
@@ -365,7 +365,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default port (engine) name",
 		NULL,
-		&default_port
+		&config::default_port
 	},
 
 	{	"dotty_axis_col",
@@ -374,7 +374,7 @@ static const opt_desc_t options[] =
 		"v",
 		"axis color for the dotty style grid",
 		NULL,
-		&dotty_axis_col
+		&config::dotty_axis_col
 	},
 
 	{	"dotty_major_col",
@@ -383,7 +383,7 @@ static const opt_desc_t options[] =
 		"v",
 		"major color for the dotty style grid",
 		NULL,
-		&dotty_major_col
+		&config::dotty_major_col
 	},
 
 	{	"dotty_minor_col",
@@ -392,7 +392,7 @@ static const opt_desc_t options[] =
 		"v",
 		"minor color for the dotty style grid",
 		NULL,
-		&dotty_minor_col
+		&config::dotty_minor_col
 	},
 
 	{	"dotty_point_col",
@@ -401,7 +401,7 @@ static const opt_desc_t options[] =
 		"v",
 		"point color for the dotty style grid",
 		NULL,
-		&dotty_point_col
+		&config::dotty_point_col
 	},
 
 	{	"floor_bump_small",
@@ -410,7 +410,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
-		&floor_bump_small
+		&config::floor_bump_small
 	},
 
 	{	"floor_bump_medium",
@@ -419,7 +419,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
-		&floor_bump_medium
+		&config::floor_bump_medium
 	},
 
 	{	"floor_bump_large",
@@ -428,7 +428,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
-		&floor_bump_large
+		&config::floor_bump_large
 	},
 
 	{	"grid_default_mode",
@@ -437,7 +437,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
-		&grid_default_mode
+		&config::grid_default_mode
 	},
 
 	{	"grid_default_size",
@@ -446,7 +446,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid size",
 		NULL,
-		&grid_default_size
+		&config::grid_default_size
 	},
 
 	{	"grid_default_snap",
@@ -455,7 +455,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid snapping",
 		NULL,
-		&grid_default_snap
+		&config::grid_default_snap
 	},
 
 	{	"grid_hide_in_free_mode",
@@ -464,7 +464,7 @@ static const opt_desc_t options[] =
 		"v",
 		"hide the grid in FREE mode",
 		NULL,
-		&grid_hide_in_free_mode
+		&config::grid_hide_in_free_mode
 	},
 
 	{	"grid_style",
@@ -473,7 +473,7 @@ static const opt_desc_t options[] =
 		"v",
 		"grid style : 0 = squares, 1 = dotty",
 		NULL,
-		&grid_style
+		&config::grid_style
 	},
 
 	{	"gui_theme",
@@ -482,7 +482,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
-		&gui_scheme
+		&config::gui_scheme
 	},
 
 	{	"gui_color_set",
@@ -491,7 +491,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
-		&gui_color_set
+		&config::gui_color_set
 	},
 
 	{	"gui_custom_bg",
@@ -500,7 +500,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom background color",
 		NULL,
-		&gui_custom_bg
+		&config::gui_custom_bg
 	},
 
 	{	"gui_custom_ig",
@@ -509,7 +509,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom input color",
 		NULL,
-		&gui_custom_ig
+		&config::gui_custom_ig
 	},
 
 	{	"gui_custom_fg",
@@ -518,7 +518,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom foreground (text) color",
 		NULL,
-		&gui_custom_fg
+		&config::gui_custom_fg
 	},
 
 	{	"leave_offsets_alone",
@@ -527,7 +527,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
-		&leave_offsets_alone
+		&config::leave_offsets_alone
 	},
 
 	{	"light_bump_small",
@@ -536,7 +536,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
-		&light_bump_small
+		&config::light_bump_small
 	},
 
 	{	"light_bump_medium",
@@ -545,7 +545,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
-		&light_bump_medium
+		&config::light_bump_medium
 	},
 
 	{	"light_bump_large",
@@ -554,7 +554,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
-		&light_bump_large
+		&config::light_bump_large
 	},
 
 	{	"map_scroll_bars",
@@ -563,7 +563,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Enable scroll-bars for the map view",
 		NULL,
-		&map_scroll_bars
+		&config::map_scroll_bars
 	},
 
 	{	"minimum_drag_pixels",
@@ -572,7 +572,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Minimum distance to move mouse to drag an object (in pixels)",
 		NULL,
-		&minimum_drag_pixels
+		&config::minimum_drag_pixels
 	},
 
 	{	"new_islands_are_void",
@@ -581,7 +581,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Islands created inside a sector will get a void interior",
 		NULL,
-		&new_islands_are_void
+		&config::new_islands_are_void
 	},
 
 	{	"new_sector_size",
@@ -590,7 +590,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Size of sector rectangles created outside of the map",
 		NULL,
-		&new_sector_size
+		&config::new_sector_size
 	},
 
 	{	"normal_axis_col",
@@ -599,7 +599,7 @@ static const opt_desc_t options[] =
 		"v",
 		"axis color for the normal grid",
 		NULL,
-		&normal_axis_col
+		&config::normal_axis_col
 	},
 
 	{	"normal_main_col",
@@ -608,7 +608,7 @@ static const opt_desc_t options[] =
 		"v",
 		"main color for the normal grid",
 		NULL,
-		&normal_main_col
+		&config::normal_main_col
 	},
 
 	{	"normal_flat_col",
@@ -617,7 +617,7 @@ static const opt_desc_t options[] =
 		"v",
 		"flat color for the normal grid",
 		NULL,
-		&normal_flat_col
+		&config::normal_flat_col
 	},
 
 	{	"normal_small_col",
@@ -626,7 +626,7 @@ static const opt_desc_t options[] =
 		"v",
 		"small color for the normal grid",
 		NULL,
-		&normal_small_col
+		&config::normal_small_col
 	},
 
 	{	"panel_gamma",
@@ -635,7 +635,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Gamma for images in the panels and the browser (0..4)",
 		NULL,
-		&panel_gamma
+		&config::panel_gamma
 	},
 
 	{	"render_pix_aspect",
