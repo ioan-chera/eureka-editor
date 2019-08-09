@@ -644,7 +644,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
-		&render_pixel_aspect
+		&config::render_pixel_aspect
 	},
 
 	{	"render_high_detail",
@@ -653,7 +653,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Use highest detail when rendering the 3D view",
 		NULL,
-		&render_high_detail
+		&config::render_high_detail
 	},
 
 	{	"render_lock_gravity",
@@ -662,7 +662,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Locked gravity in 3D view -- cannot move up or down",
 		NULL,
-		&render_lock_gravity
+		&config::render_lock_gravity
 	},
 
 	{	"render_missing_bright",
@@ -671,7 +671,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Render the missing texture as fullbright",
 		NULL,
-		&render_missing_bright
+		&config::render_missing_bright
 	},
 
 	{	"render_unknown_bright",
@@ -680,7 +680,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Render the unknown texture as fullbright",
 		NULL,
-		&render_unknown_bright
+		&config::render_unknown_bright
 	},
 
 	{	"same_mode_clears_selection",
@@ -689,7 +689,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Clear the selection when entering the same mode",
 		NULL,
-		&same_mode_clears_selection
+		&config::same_mode_clears_selection
 	},
 
 	{	"sector_render_default",
@@ -698,7 +698,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
 		NULL,
-		&sector_render_default
+		&config::sector_render_default
 	},
 
 	{	"show_full_one_sided",
@@ -707,7 +707,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show all textures on one-sided lines in the Linedef panel",
 		NULL,
-		&show_full_one_sided
+		&config::show_full_one_sided
 	},
 
 	{	"sidedef_add_del_buttons",
@@ -716,7 +716,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
-		&sidedef_add_del_buttons
+		&config::sidedef_add_del_buttons
 	},
 
 	{	"thing_render_default",
@@ -725,7 +725,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default thing rendering mode: 0 = boxes, 1 = sprites",
 		NULL,
-		&thing_render_default
+		&config::thing_render_default
 	},
 
 	{	"transparent_col",
@@ -734,7 +734,7 @@ static const opt_desc_t options[] =
 		"v",
 		"color used to represent transparent pixels in textures",
 		NULL,
-		&transparent_col
+		&config::transparent_col
 	},
 
 	{	"swap_sidedefs",
@@ -743,7 +743,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Swap upper and lower sidedefs in the Linedef panel",
 		NULL,
-		&swap_sidedefs
+		&config::swap_sidedefs
 	},
 
 	//

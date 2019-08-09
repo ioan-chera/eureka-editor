@@ -24,6 +24,7 @@
 #include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
 #include "e_main.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "r_render.h"
 #include "w_rawdef.h"
@@ -31,9 +32,9 @@
 
 
 // config item
-bool swap_sidedefs = false;
-bool show_full_one_sided = false;
-bool sidedef_add_del_buttons = false;
+bool config::swap_sidedefs = false;
+bool config::show_full_one_sided = false;
+bool config::sidedef_add_del_buttons = false;
 
 //
 // Constructor
@@ -94,7 +95,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 	int UX = X+W-64-16;
 	    MX = MX-32;
 
-	if (swap_sidedefs)
+	if (config::swap_sidedefs)
 	{
 		std::swap(UX, LX);
 	}
@@ -534,7 +535,7 @@ void UI_SideBox::UpdateLabel()
 
 void UI_SideBox::UpdateAddDel()
 {
-	if (obj == SETOBJ_NO_LINE || ! sidedef_add_del_buttons)
+	if (obj == SETOBJ_NO_LINE || ! config::sidedef_add_del_buttons)
 	{
 		add_button->hide();
 		del_button->hide();
@@ -577,7 +578,7 @@ void UI_SideBox::UpdateHiding()
 		l_tex->show();
 		l_pic->show();
 
-		if (on_2S_line || show_full_one_sided)
+		if (on_2S_line || config::show_full_one_sided)
 		{
 			u_tex->show();
 			r_tex->show();

@@ -248,7 +248,7 @@ static void view_do_sector_render(Fl_Widget *w, void * data)
 	else
 		edit.sector_render_mode = SREND_Nothing;
 
-	sector_render_default = edit.sector_render_mode;
+	config::sector_render_default = edit.sector_render_mode;
 	M_WriteConfigFile();
 
 	main_win->redraw();

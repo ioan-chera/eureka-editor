@@ -78,24 +78,19 @@ namespace config
 	extern rgb_color_t normal_flat_col;
 	extern rgb_color_t normal_small_col;
 	extern int panel_gamma;
+	extern int  render_pixel_aspect;
+	extern bool render_high_detail;
+	extern bool render_lock_gravity;
+	extern bool render_missing_bright;
+	extern bool render_unknown_bright;
+	extern bool same_mode_clears_selection;
+	extern int  sector_render_default;
+	extern bool show_full_one_sided;
+	extern bool sidedef_add_del_buttons;
+	extern int   thing_render_default;
+	extern rgb_color_t transparent_col;
+	extern bool swap_sidedefs;
 }
-
-extern bool same_mode_clears_selection;
-
-extern bool swap_sidedefs;
-extern bool show_full_one_sided;
-extern bool sidedef_add_del_buttons;
-
-extern int  sector_render_default;
-extern int   thing_render_default;
-
-extern int  render_pixel_aspect;
-extern bool render_high_detail;
-extern bool render_lock_gravity;
-extern bool render_missing_bright;
-extern bool render_unknown_bright;
-
-extern rgb_color_t transparent_col;
 
 /* ==== FUNCTIONS ==================== */
 

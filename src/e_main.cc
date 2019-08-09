@@ -63,10 +63,10 @@ extern bool sound_propagation_invalid;
 // config items
 int config::default_edit_mode = 3;  // Vertices
 
-bool same_mode_clears_selection = false;
+bool config::same_mode_clears_selection = false;
 
-int sector_render_default = (int)SREND_Nothing;
-int  thing_render_default = 1;
+int config::sector_render_default = (int)SREND_Nothing;
+int  config::thing_render_default = 1;
 
 
 //
@@ -358,7 +358,7 @@ void Editor_ChangeMode(char mode_char)
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.
-	else if (same_mode_clears_selection)
+	else if (config::same_mode_clears_selection)
 	{
 		Selection_Clear();
 	}
@@ -1341,8 +1341,8 @@ void Editor_DefaultState()
 	edit.error_mode = false;
 	edit.show_object_numbers = false;
 
-	edit.sector_render_mode = sector_render_default;
-	edit. thing_render_mode =  thing_render_default;
+	edit.sector_render_mode = config::sector_render_default;
+	edit. thing_render_mode =  config::thing_render_default;
 }
 
 

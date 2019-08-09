@@ -1416,7 +1416,7 @@ void UI_Preferences::LoadValues()
 
 	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
 	gen_maximized  ->value(config::begin_maximized  ? 1 : 0);
-	gen_swapsides  ->value(swap_sidedefs    ? 1 : 0);
+	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
 
 	/* Edit Tab */
 
@@ -1425,8 +1425,8 @@ void UI_Preferences::LoadValues()
 
 	edit_sectorsize->value(std::to_string(config::new_sector_size).c_str());
 	edit_newislands->value(config::new_islands_are_void ? 1 : 0);
-	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
-	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
+	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
+	edit_add_del->value(config::sidedef_add_del_buttons ? 1 : 0);
 	edit_autoadjustX->value(config::leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(config::browser_small_tex ? 1 : 0);
@@ -1444,8 +1444,8 @@ void UI_Preferences::LoadValues()
 	grid_snap->value(config::grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(config::grid_default_size));
 	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
-	grid_flatrender->value(sector_render_default ? 1 : 0);
-	grid_spriterend->value(thing_render_default ? 1 : 0);
+	grid_flatrender->value(config::sector_render_default ? 1 : 0);
+	grid_spriterend->value(config::thing_render_default ? 1 : 0);
 
 	gen_scrollbars ->value(config::map_scroll_bars ? 1 : 0);
 
@@ -1461,14 +1461,14 @@ void UI_Preferences::LoadValues()
 
 	/* 3D Tab */
 
-	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
+	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
 
 	char aspect_buf[64];
-	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", render_pixel_aspect / 100.0);
+	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", config::render_pixel_aspect / 100.0);
 	rend_aspect->value(aspect_buf);
 
-	rend_high_detail->value(render_high_detail ? 1 : 0);
-	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
+	rend_high_detail->value(config::render_high_detail ? 1 : 0);
+	rend_lock_grav->value(config::render_lock_gravity ? 1 : 0);
 
 	/* Nodes Tab */
 
@@ -1538,7 +1538,7 @@ void UI_Preferences::SaveValues()
 
 	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
 	config::begin_maximized   = gen_maximized  ->value() ? true : false;
-	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
+	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
 
@@ -1549,8 +1549,8 @@ void UI_Preferences::SaveValues()
 	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
 
 	config::new_islands_are_void = edit_newislands->value() ? true : false;
-	same_mode_clears_selection = edit_samemode->value() ? true : false;
-	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
+	config::same_mode_clears_selection = edit_samemode->value() ? true : false;
+	config::sidedef_add_del_buttons = edit_add_del->value() ? true : false;
 	config::leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
 	// changing this requires re-populating the browser
@@ -1568,8 +1568,8 @@ void UI_Preferences::SaveValues()
 	config::grid_default_snap = grid_snap->value() ? true : false;
 	config::grid_default_size = atoi(grid_size->mvalue()->text);
 	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
-	sector_render_default  = grid_flatrender->value() ? 1 : 0;
-	thing_render_default   = grid_spriterend->value() ? 1 : 0;
+	config::sector_render_default  = grid_flatrender->value() ? 1 : 0;
+	config::thing_render_default   = grid_spriterend->value() ? 1 : 0;
 
 	config::map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
@@ -1603,11 +1603,11 @@ void UI_Preferences::SaveValues()
 
 	/* Other Tab */
 
-	render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
-	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
+	config::render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
+	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
 
-	render_high_detail  = rend_high_detail->value() ? true : false;
-	render_lock_gravity = rend_lock_grav->value() ? true : false;
+	config::render_high_detail  = rend_high_detail->value() ? true : false;
+	config::render_lock_gravity = rend_lock_grav->value() ? true : false;
 
 }
 

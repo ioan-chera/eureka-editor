@@ -31,6 +31,7 @@
 #include "e_main.h"
 #include "e_things.h"
 #include "e_objects.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_loadpic.h"
@@ -49,16 +50,16 @@
 
 
 // config items
-bool render_high_detail    = false;
-bool render_lock_gravity   = false;
-bool render_missing_bright = true;
-bool render_unknown_bright = true;
+bool config::render_high_detail    = false;
+bool config::render_lock_gravity   = false;
+bool config::render_missing_bright = true;
+bool config::render_unknown_bright = true;
 
 // in original DOOM pixels were 20% taller than wide, giving 0.83
 // as the pixel aspect ratio.
-int  render_pixel_aspect = 83;  //  100 * width / height
+int  config::render_pixel_aspect = 83;  //  100 * width / height
 
-rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
+rgb_color_t config::transparent_col = RGB_MAKE(0, 255, 255);
 
 
 struct r_editing_info_t
@@ -360,7 +361,7 @@ public:
 	{
 		aspect_sw = sw;	 // things break if these are different
 
-		aspect_sh = sw / (render_pixel_aspect / 100.0);
+		aspect_sh = sw / (config::render_pixel_aspect / 100.0);
 	}
 
 	void UpdateScreen(int ow, int oh)
@@ -368,8 +369,8 @@ public:
 		// in low detail mode, setup size so that expansion always covers
 		// our window (i.e. we draw a bit more than we need).
 
-		int new_sw = render_high_detail ? ow : (ow + 1) / 2;
-		int new_sh = render_high_detail ? oh : (oh + 1) / 2;
+		int new_sw = config::render_high_detail ? ow : (ow + 1) / 2;
+		int new_sh = config::render_high_detail ? oh : (oh + 1) / 2;
 
 		if (!screen || sw != new_sw || sh != new_sh)
 		{
@@ -534,7 +535,7 @@ public:
 			if (! img)
 			{
 				img = IM_UnknownFlat();
-				fullbright = render_unknown_bright;
+				fullbright = config::render_unknown_bright;
 			}
 
 			return;
@@ -552,7 +553,7 @@ public:
 			if (is_null_tex(tname))
 			{
 				img = IM_MissingTex();
-				fullbright = render_missing_bright;
+				fullbright = config::render_missing_bright;
 				return;
 			}
 
@@ -561,7 +562,7 @@ public:
 			if (! img)
 			{
 				img = IM_UnknownTex();
-				fullbright = render_unknown_bright;
+				fullbright = config::render_unknown_bright;
 			}
 
 			return;
@@ -930,7 +931,7 @@ public:
 
 	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
 	{
-		if (! render_high_detail)
+		if (! config::render_high_detail)
 		{
 			sx1 *= 2;  sy1 *= 2;
 			sx2 *= 2;  sy2 *= 2;
@@ -1266,7 +1267,7 @@ public:
 
 		dw->side = info.flags;
 
-		if (is_unknown && render_unknown_bright)
+		if (is_unknown && config::render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
 		else if (r_edit.hl.isThing() && th_index == r_edit.hl.num)
 			dw->side |= THINGDEF_LIT;
@@ -2142,7 +2143,7 @@ void UI_Render3D::draw()
 
 	rend.DoRender3D();
 
-	if (render_high_detail)
+	if (config::render_high_detail)
 		BlitHires(ox, oy, ow, oh);
 	else
 		BlitLores(ox, oy, ow, oh);
@@ -2172,7 +2173,7 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 	int qx = sx - x();
 	int qy = sy - y() - INFO_BAR_H / 2;
 
-	if (! render_high_detail)
+	if (! config::render_high_detail)
 	{
 		qx = qx / 2;
 		qy = qy / 2;
@@ -2527,7 +2528,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 		view.x += view.Cos * dy * mod_factor;
 		view.y += view.Sin * dy * mod_factor;
 	}
-	else if (! (render_lock_gravity && view.gravity))
+	else if (! (config::render_lock_gravity && view.gravity))
 	{
 		view.z += dy * speed * 0.75;
 
@@ -2653,7 +2654,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
 
-	if (render_high_detail)
+	if (config::render_high_detail)
 		factor = factor * 2.0;
 
 	r_edit.adjust_dx -= dx * factor * r_edit.adjust_dx_factor;
@@ -3216,7 +3217,7 @@ void R3D_Right()
 
 void R3D_Up()
 {
-	if (view.gravity && render_lock_gravity)
+	if (view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -3233,7 +3234,7 @@ void R3D_Up()
 
 void R3D_Down()
 {
-	if (view.gravity && render_lock_gravity)
+	if (view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -3356,7 +3357,7 @@ void R3D_NAV_Up()
 	if (! EXEC_CurKey)
 		return;
 
-	if (view.gravity && render_lock_gravity)
+	if (view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -3383,7 +3384,7 @@ void R3D_NAV_Down()
 	if (! EXEC_CurKey)
 		return;
 
-	if (view.gravity && render_lock_gravity)
+	if (view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
