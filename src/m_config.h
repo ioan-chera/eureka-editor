@@ -34,7 +34,6 @@
 namespace config
 {
 	extern bool auto_load_recent;
-	extern bool begin_maximized;
 	extern int backup_max_files;
 	extern int backup_max_space;
 	extern bool browser_small_tex;

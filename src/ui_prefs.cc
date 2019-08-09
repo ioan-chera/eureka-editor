@@ -638,7 +638,6 @@ public:
 	Fl_Button *fg_colorbox;
 
 	Fl_Check_Button *gen_autoload;
-	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
 
 	/* Keys Tab */
@@ -807,14 +806,6 @@ UI_Preferences::UI_Preferences() :
 		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
 		}
 		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
-		}
-		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
-		  // not supported on MacOS X
-		  // (on that platform we should restore last window position, but I don't
-		  //  know how to code that)
-#ifdef __APPLE__
-		  gen_maximized->hide();
-#endif
 		}
 		o->end();
 	  }
@@ -1415,7 +1406,6 @@ void UI_Preferences::LoadValues()
 	/* General Tab */
 
 	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
-	gen_maximized  ->value(config::begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
 
 	/* Edit Tab */
@@ -1537,7 +1527,6 @@ void UI_Preferences::SaveValues()
 	/* General Tab */
 
 	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
-	config::begin_maximized   = gen_maximized  ->value() ? true : false;
 	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */

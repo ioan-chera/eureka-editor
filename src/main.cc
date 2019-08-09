@@ -88,7 +88,6 @@ map_format_e Level_format;
 // config items
 //
 bool config::auto_load_recent = false;
-bool config::begin_maximized  = false;
 bool config::map_scroll_bars  = true;
 
 std::string config::default_port = "vanilla";
@@ -648,9 +647,6 @@ static void Main_OpenWindow()
 	Fl::check();
 
 	InitAboutDialog();
-
-	if (config::begin_maximized)
-		main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
 
