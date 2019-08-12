@@ -2352,7 +2352,7 @@ static void AddMissingLump(const char *name, const char *after)
 }
 
 
-build_result_e SaveLevel(node_t *root_node)
+static build_result_e SaveLevel(node_t *root_node)
 {
 	// Note: root_node may be NULL
 

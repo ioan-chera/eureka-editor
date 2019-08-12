@@ -42,7 +42,7 @@ void OpenFileMap(const char *filename, const char *map_name = NULL);
 extern int last_given_file;
 
 // these return false if user cancelled
-bool M_SaveMap();
+bool M_SaveMap(bool inhibitNodeBuild);
 bool M_ExportMap();
 
 /* commands */

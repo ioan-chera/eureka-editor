@@ -41,9 +41,6 @@ bool config::bsp_force_zdoom	= false;
 bool config::bsp_compressed		= false;
 
 
-extern bool inhibit_node_build;
-
-
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
@@ -430,14 +427,8 @@ void CMD_BuildAllNodes()
 			return;
 		}
 
-		inhibit_node_build = true;
-
-		bool save_result = M_SaveMap();
-
-		inhibit_node_build = false;
-
 		// user cancelled the save?
-		if (! save_result)
+		if (! M_SaveMap(true))
 			return;
 	}
 

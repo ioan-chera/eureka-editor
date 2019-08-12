@@ -46,13 +46,7 @@
 
 int last_given_file;
 
-
-// this is only used to prevent a M_SaveMap which happens inside
-// CMD_BuildAllNodes from building that saved level twice.
-bool inhibit_node_build;
-
-
-static void SaveLevel(const char *level);
+static void SaveLevel(const char *level, bool inhibitNodeBuild);
 
 static const char * overwrite_message =
 	"The %s PWAD already contains this map.  "
@@ -311,7 +305,7 @@ void CMD_NewProject()
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name);
+	SaveLevel(map_name, false);
 }
 
 
@@ -384,7 +378,7 @@ void CMD_FreshMap()
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name.c_str());
+	SaveLevel(map_name.c_str(), false);
 }
 
 
@@ -1320,12 +1314,10 @@ void CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-static short saving_level;
-
-
-static void SaveHeader(const char *level)
+static short SaveHeader(const char *level)
 {
 	int size = (int)HeaderData.size();
+	short saving_level = -1;
 
 	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
 
@@ -1335,6 +1327,7 @@ static void SaveHeader(const char *level)
 	}
 
 	lump->Finish();
+	return saving_level;
 }
 
 
@@ -1583,7 +1576,7 @@ static void EmptyLump(const char *name)
 // Write out the level data
 //
 
-static void SaveLevel(const char *level)
+static void SaveLevel(const char *level, bool inhibitNodeBuild)
 {
 	// set global level name now (for debugging code)
 	config::Level_name = StringUpper(level);
@@ -1603,7 +1596,7 @@ static void SaveLevel(const char *level)
 
 	edit_wad->InsertPoint(level_lump);
 
-	SaveHeader(level);
+	short saving_level = SaveHeader(level);
 
 	// IOANCH 9/2015: save Hexen format maps
 	if (Level_format == MAPF_Hexen)
@@ -1640,7 +1633,7 @@ static void SaveLevel(const char *level)
 
 
 	// build the nodes
-	if (config::bsp_on_save && ! inhibit_node_build)
+	if (config::bsp_on_save && ! inhibitNodeBuild)
 	{
 		BuildNodesAfterSave(saving_level);
 	}
@@ -1668,7 +1661,7 @@ static void SaveLevel(const char *level)
 }
 
 
-bool M_SaveMap()
+bool M_SaveMap(bool inhibitNodeBuild)
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
@@ -1695,7 +1688,7 @@ bool M_SaveMap()
 
 	LogPrintf("Saving Map : %s in %s\n", config::Level_name.c_str(), edit_wad->PathName());
 
-	SaveLevel(config::Level_name.c_str());
+	SaveLevel(config::Level_name.c_str(), inhibitNodeBuild);
 
 	return true;
 }
@@ -1830,7 +1823,7 @@ bool M_ExportMap()
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
-	SaveLevel(map_name.c_str());
+	SaveLevel(map_name.c_str(), false);
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources();
@@ -1841,7 +1834,7 @@ bool M_ExportMap()
 
 void CMD_SaveMap()
 {
-	M_SaveMap();
+	M_SaveMap(false);
 }
 
 
@@ -1894,7 +1887,7 @@ void CMD_CopyMap()
 	// perform the copy (just a save)
 	LogPrintf("Copying Map : %s --> %s\n", config::Level_name.c_str(), new_name.c_str());
 
-	SaveLevel(new_name.c_str());
+	SaveLevel(new_name.c_str(), false);
 
 	Status_Set("Copied to %s", config::Level_name.c_str());
 }

@@ -393,7 +393,7 @@ void CMD_TestMap()
 			return;
 		}
 
-		if (! M_SaveMap())
+		if (! M_SaveMap(false))
 			return;
 	}
 
