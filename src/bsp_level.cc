@@ -818,19 +818,19 @@ void PutReject()
 
 // per-level variables
 
-const char *lev_current_name;
+static const char *lev_current_name;
 
-short lev_current_idx;
-short lev_current_start;
+static short lev_current_idx;
+static short lev_current_start;
 
-bool lev_doing_hexen;
+static bool lev_doing_hexen;
 
-bool lev_force_v5;
-bool lev_force_xnod;
+static bool lev_force_v5;
+static bool lev_force_xnod;
 
-bool lev_long_name;
+static bool lev_long_name;
 
-int lev_overflows;
+static int lev_overflows;
 
 
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
