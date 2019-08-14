@@ -253,7 +253,7 @@ static void CreateBlockmap(void)
 
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	for (i=0 ; i < bsp::num_linedefs ; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = LookupLinedef(i);
 
@@ -499,7 +499,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
-	for (i=0 ; i < bsp::num_linedefs ; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = LookupLinedef(i);
 
@@ -526,10 +526,10 @@ static void FindBlockmapLimits(bbox_t *bbox)
 		}
 	}
 
-	if (bsp::num_linedefs > 0)
+	if (num_linedefs > 0)
 	{
-		block_mid_x = (mid_x / bsp::num_linedefs) * 16;
-		block_mid_y = (mid_y / bsp::num_linedefs) * 16;
+		block_mid_x = (mid_x / num_linedefs) * 16;
+		block_mid_y = (mid_y / num_linedefs) * 16;
 	}
 
 # if DEBUG_BLOCKMAP
@@ -560,7 +560,7 @@ void InitBlockmap()
 
 void PutBlockmap()
 {
-	if (! cur_info->do_blockmap || bsp::num_linedefs == 0)
+	if (! cur_info->do_blockmap || num_linedefs == 0)
 	{
 		// just create an empty blockmap lump
 		CreateLevelLump("BLOCKMAP")->Finish();
@@ -617,14 +617,14 @@ static int   rej_total_size;	// in bytes
 //
 static void Reject_Init()
 {
-	rej_total_size = (bsp::num_sectors * bsp::num_sectors + 7) / 8;
+	rej_total_size = (num_sectors * num_sectors + 7) / 8;
 
 	rej_matrix = new u8_t[rej_total_size];
 
 	memset(rej_matrix, 0, rej_total_size);
 
 
-	for (int i=0 ; i < bsp::num_sectors ; i++)
+	for (int i=0 ; i < num_sectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 
@@ -650,7 +650,7 @@ static void Reject_GroupSectors()
 {
 	int i;
 
-	for (i=0 ; i < bsp::num_linedefs ; i++)
+	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
 		sector_t *sec1, *sec2, *tmp;
@@ -739,7 +739,7 @@ static void Reject_DebugGroups()
 
 static void Reject_ProcessSectors()
 {
-	for (int view=0 ; view < bsp::num_sectors ; view++)
+	for (int view=0 ; view < num_sectors ; view++)
 	{
 		for (int target=0 ; target < view ; target++)
 		{
@@ -753,8 +753,8 @@ static void Reject_ProcessSectors()
 
 			// for symmetry, do both sides at same time
 
-			p1 = view * bsp::num_sectors + target;
-			p2 = target * bsp::num_sectors + view;
+			p1 = view * num_sectors + target;
+			p2 = target * num_sectors + view;
 
 			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
 			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
@@ -780,7 +780,7 @@ static void Reject_WriteLump()
 //
 void PutReject()
 {
-	if (! cur_info->do_reject || bsp::num_sectors == 0)
+	if (! cur_info->do_reject || num_sectors == 0)
 	{
 		// just create an empty reject lump
 		CreateLevelLump("REJECT")->Finish();
@@ -838,15 +838,15 @@ static int lev_overflows;
     int NUMVAR = 0;
 
 
-LEVELARRAY(vertex_t,  lev_vertices,   bsp::num_vertices)
-LEVELARRAY(linedef_t, lev_linedefs,   bsp::num_linedefs)
-LEVELARRAY(sidedef_t, lev_sidedefs,   bsp::num_sidedefs)
-LEVELARRAY(sector_t,  lev_sectors,    bsp::num_sectors)
-LEVELARRAY(thing_t,   lev_things,     bsp::num_things)
+LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
+LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
+LEVELARRAY(sidedef_t, lev_sidedefs,   num_sidedefs)
+LEVELARRAY(sector_t,  lev_sectors,    num_sectors)
+LEVELARRAY(thing_t,   lev_things,     num_things)
 
-static LEVELARRAY(seg_t,     segs,       bsp::num_segs)
-static LEVELARRAY(subsec_t,  subsecs,    bsp::num_subsecs)
-static LEVELARRAY(node_t,    nodes,      bsp::num_nodes)
+static LEVELARRAY(seg_t,     segs,       num_segs)
+static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
+static LEVELARRAY(node_t,    nodes,      num_nodes)
 static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
 
 
@@ -871,28 +871,28 @@ int num_real_lines = 0;
 
 
 vertex_t *NewVertex(void)
-	ALLIGATOR(vertex_t, lev_vertices, bsp::num_vertices)
+	ALLIGATOR(vertex_t, lev_vertices, num_vertices)
 
 linedef_t *NewLinedef(void)
-	ALLIGATOR(linedef_t, lev_linedefs, bsp::num_linedefs)
+	ALLIGATOR(linedef_t, lev_linedefs, num_linedefs)
 
 sidedef_t *NewSidedef(void)
-	ALLIGATOR(sidedef_t, lev_sidedefs, bsp::num_sidedefs)
+	ALLIGATOR(sidedef_t, lev_sidedefs, num_sidedefs)
 
 sector_t *NewSector(void)
-	ALLIGATOR(sector_t, lev_sectors, bsp::num_sectors)
+	ALLIGATOR(sector_t, lev_sectors, num_sectors)
 
 thing_t *NewThing(void)
-	ALLIGATOR(thing_t, lev_things, bsp::num_things)
+	ALLIGATOR(thing_t, lev_things, num_things)
 
 seg_t *NewSeg(void)
-	ALLIGATOR(seg_t, segs, bsp::num_segs)
+	ALLIGATOR(seg_t, segs, num_segs)
 
 subsec_t *NewSubsec(void)
-	ALLIGATOR(subsec_t, subsecs, bsp::num_subsecs)
+	ALLIGATOR(subsec_t, subsecs, num_subsecs)
 
 node_t *NewNode(void)
-	ALLIGATOR(node_t, nodes, bsp::num_nodes)
+	ALLIGATOR(node_t, nodes, num_nodes)
 
 wall_tip_t *NewWallTip(void)
 	ALLIGATOR(wall_tip_t, wall_tips, num_wall_tips)
@@ -912,28 +912,28 @@ wall_tip_t *NewWallTip(void)
 
 
 void FreeVertices(void)
-	FREEMASON(vertex_t, lev_vertices, bsp::num_vertices)
+	FREEMASON(vertex_t, lev_vertices, num_vertices)
 
 void FreeLinedefs(void)
-	FREEMASON(linedef_t, lev_linedefs, bsp::num_linedefs)
+	FREEMASON(linedef_t, lev_linedefs, num_linedefs)
 
 void FreeSidedefs(void)
-	FREEMASON(sidedef_t, lev_sidedefs, bsp::num_sidedefs)
+	FREEMASON(sidedef_t, lev_sidedefs, num_sidedefs)
 
 void FreeSectors(void)
-	FREEMASON(sector_t, lev_sectors, bsp::num_sectors)
+	FREEMASON(sector_t, lev_sectors, num_sectors)
 
 void FreeThings(void)
-	FREEMASON(thing_t, lev_things, bsp::num_things)
+	FREEMASON(thing_t, lev_things, num_things)
 
 void FreeSegs(void)
-	FREEMASON(seg_t, segs, bsp::num_segs)
+	FREEMASON(seg_t, segs, num_segs)
 
 void FreeSubsecs(void)
-	FREEMASON(subsec_t, subsecs, bsp::num_subsecs)
+	FREEMASON(subsec_t, subsecs, num_subsecs)
 
 void FreeNodes(void)
-	FREEMASON(node_t, nodes, bsp::num_nodes)
+	FREEMASON(node_t, nodes, num_nodes)
 
 void FreeWallTips(void)
 	FREEMASON(wall_tip_t, wall_tips, num_wall_tips)
@@ -950,28 +950,28 @@ void FreeWallTips(void)
 }
 
 vertex_t *LookupVertex(int index)
-	LOOKERUPPER(lev_vertices, bsp::num_vertices, "vertex")
+	LOOKERUPPER(lev_vertices, num_vertices, "vertex")
 
 linedef_t *LookupLinedef(int index)
-	LOOKERUPPER(lev_linedefs, bsp::num_linedefs, "linedef")
+	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
 
 sidedef_t *LookupSidedef(int index)
-	LOOKERUPPER(lev_sidedefs, bsp::num_sidedefs, "sidedef")
+	LOOKERUPPER(lev_sidedefs, num_sidedefs, "sidedef")
 
 sector_t *LookupSector(int index)
-	LOOKERUPPER(lev_sectors, bsp::num_sectors, "sector")
+	LOOKERUPPER(lev_sectors, num_sectors, "sector")
 
 thing_t *LookupThing(int index)
-	LOOKERUPPER(lev_things, bsp::num_things, "thing")
+	LOOKERUPPER(lev_things, num_things, "thing")
 
 seg_t *LookupSeg(int index)
-	LOOKERUPPER(segs, bsp::num_segs, "seg")
+	LOOKERUPPER(segs, num_segs, "seg")
 
 subsec_t *LookupSubsec(int index)
-	LOOKERUPPER(subsecs, bsp::num_subsecs, "subsector")
+	LOOKERUPPER(subsecs, num_subsecs, "subsector")
 
 node_t *LookupNode(int index)
-	LOOKERUPPER(nodes, bsp::num_nodes, "node")
+	LOOKERUPPER(nodes, num_nodes, "node")
 
 
 /* ----- reading routines ------------------------------ */
@@ -1011,7 +1011,7 @@ void GetVertices(void)
 		vert->index = i;
 	}
 
-	num_old_vert = bsp::num_vertices;
+	num_old_vert = num_vertices;
 }
 
 
@@ -1194,7 +1194,7 @@ static inline sidedef_t *SafeLookupSidedef(u16_t num)
 	if (num == 0xFFFF)
 		return NULL;
 
-	if ((int)num >= bsp::num_sidedefs && (s16_t)(num) < 0)
+	if ((int)num >= num_sidedefs && (s16_t)(num) < 0)
 		return NULL;
 
 	return LookupSidedef(num);
@@ -1420,11 +1420,11 @@ void PutVertices(const char *name, int do_gl)
 	int count, i;
 
 	// this size is worst-case scenario
-	int size = bsp::num_vertices * (int)sizeof(raw_vertex_t);
+	int size = num_vertices * (int)sizeof(raw_vertex_t);
 
 	Lump_c *lump = CreateLevelLump(name, size);
 
-	for (i=0, count=0 ; i < bsp::num_vertices ; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_vertex_t raw;
 
@@ -1460,7 +1460,7 @@ void PutGLVertices(int do_v5)
 	int count, i;
 
 	// this size is worst-case scenario
-	int size = 4 + bsp::num_vertices * (int)sizeof(raw_v2_vertex_t);
+	int size = 4 + num_vertices * (int)sizeof(raw_v2_vertex_t);
 
 	Lump_c *lump = CreateLevelLump("GL_VERT", size);
 
@@ -1469,7 +1469,7 @@ void PutGLVertices(int do_v5)
 	else
 		lump->Write(lev_v2_magic, 4);
 
-	for (i=0, count=0 ; i < bsp::num_vertices ; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
 
@@ -1523,11 +1523,11 @@ void PutSegs(void)
 	int i, count;
 
 	// this size is worst-case scenario
-	int size = bsp::num_segs * (int)sizeof(raw_seg_t);
+	int size = num_segs * (int)sizeof(raw_seg_t);
 
 	Lump_c *lump = CreateLevelLump("SEGS", size);
 
-	for (i=0, count=0 ; i < bsp::num_segs ; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_seg_t raw;
 
@@ -1574,11 +1574,11 @@ void PutGLSegs(void)
 	int i, count;
 
 	// this size is worst-case scenario
-	int size = bsp::num_segs * (int)sizeof(raw_gl_seg_t);
+	int size = num_segs * (int)sizeof(raw_gl_seg_t);
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
 
-	for (i=0, count=0 ; i < bsp::num_segs ; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_gl_seg_t raw;
 
@@ -1628,11 +1628,11 @@ void PutGLSegs_V5()
 	int i, count;
 
 	// this size is worst-case scenario
-	int size = bsp::num_segs * (int)sizeof(raw_v5_seg_t);
+	int size = num_segs * (int)sizeof(raw_v5_seg_t);
 
 	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
 
-	for (i=0, count=0 ; i < bsp::num_segs ; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		raw_v5_seg_t raw;
 
@@ -1679,11 +1679,11 @@ void PutSubsecs(const char *name, int do_gl)
 {
 	int i;
 
-	int size = bsp::num_subsecs * (int)sizeof(raw_subsec_t);
+	int size = num_subsecs * (int)sizeof(raw_subsec_t);
 
 	Lump_c * lump = CreateLevelLump(name, size);
 
-	for (i=0 ; i < bsp::num_subsecs ; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		raw_subsec_t raw;
 
@@ -1700,7 +1700,7 @@ void PutSubsecs(const char *name, int do_gl)
 #   endif
 	}
 
-	if (bsp::num_subsecs > 32767)
+	if (num_subsecs > 32767)
 	{
 		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
@@ -1712,11 +1712,11 @@ void PutGLSubsecs_V5()
 {
 	int i;
 
-	int size = bsp::num_subsecs * (int)sizeof(raw_v5_subsec_t);
+	int size = num_subsecs * (int)sizeof(raw_v5_subsec_t);
 
 	Lump_c *lump = CreateLevelLump("GL_SSECT", size);
 
-	for (i=0 ; i < bsp::num_subsecs ; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		raw_v5_subsec_t raw;
 
@@ -1846,7 +1846,7 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
 
 	// this can be bigger than the actual size, but never smaller
-	int max_size = (bsp::num_nodes + 1) * struct_size;
+	int max_size = (num_nodes + 1) * struct_size;
 
 	Lump_c *lump = CreateLevelLump(name, max_size);
 
@@ -1860,9 +1860,9 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 			PutOneNode(root, lump);
 	}
 
-	if (node_cur_index != bsp::num_nodes)
+	if (node_cur_index != num_nodes)
 		BugError("PutNodes miscounted (%d != %d)\n",
-				node_cur_index, bsp::num_nodes);
+				node_cur_index, num_nodes);
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
@@ -1874,19 +1874,19 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 
 void CheckLimits()
 {
-	if (bsp::num_sectors > 65534)
+	if (num_sectors > 65534)
 	{
 		Failure("Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (bsp::num_sidedefs > 65534)
+	if (num_sidedefs > 65534)
 	{
 		Failure("Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (bsp::num_linedefs > 65534)
+	if (num_linedefs > 65534)
 	{
 		Failure("Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
@@ -1896,8 +1896,8 @@ void CheckLimits()
 	{
 		if (num_old_vert > 32767 ||
 			num_new_vert > 32767 ||
-			bsp::num_segs > 65534 ||
-			bsp::num_nodes > 32767)
+			num_segs > 65534 ||
+			num_nodes > 32767)
 		{
 			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
 			lev_force_v5 = true;
@@ -1908,8 +1908,8 @@ void CheckLimits()
 	{
 		if (num_old_vert > 32767 ||
 			num_new_vert > 32767 ||
-			bsp::num_segs > 32767 ||
-			bsp::num_nodes > 32767)
+			num_segs > 32767 ||
+			num_nodes > 32767)
 		{
 			Warning("Forcing XNOD format nodes due to overflows.\n");
 			lev_force_xnod = true;
@@ -1921,7 +1921,7 @@ void CheckLimits()
 void SortSegs()
 {
 	// sort segs into ascending index
-	qsort(segs, bsp::num_segs, sizeof(seg_t *), SegCompare);
+	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 }
 
 
@@ -1940,7 +1940,7 @@ void PutZVertices(void)
 	ZLibAppendLump(&orgverts, 4);
 	ZLibAppendLump(&newverts, 4);
 
-	for (i=0, count=0 ; i < bsp::num_vertices ; i++)
+	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
 
@@ -1967,13 +1967,13 @@ void PutZSubsecs(void)
 {
 	int i;
 	int count;
-	u32_t raw_num = LE_U32(bsp::num_subsecs);
+	u32_t raw_num = LE_U32(num_subsecs);
 
 	int cur_seg_index = 0;
 
 	ZLibAppendLump(&raw_num, 4);
 
-	for (i=0 ; i < bsp::num_subsecs ; i++)
+	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = subsecs[i];
 		seg_t *seg;
@@ -2015,7 +2015,7 @@ void PutZSegs(void)
 
 	ZLibAppendLump(&raw_num, 4);
 
-	for (i=0, count=0 ; i < bsp::num_segs ; i++)
+	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = segs[i];
 
@@ -2112,7 +2112,7 @@ static void PutOneZNode(node_t *node)
 
 void PutZNodes(node_t *root)
 {
-	u32_t raw_num = LE_U32(bsp::num_nodes);
+	u32_t raw_num = LE_U32(num_nodes);
 
 	ZLibAppendLump(&raw_num, 4);
 
@@ -2121,9 +2121,9 @@ void PutZNodes(node_t *root)
 	if (root)
 		PutOneZNode(root);
 
-	if (node_cur_index != bsp::num_nodes)
+	if (node_cur_index != num_nodes)
 		BugError("PutZNodes miscounted (%d != %d)\n",
-				node_cur_index, bsp::num_nodes);
+				node_cur_index, num_nodes);
 }
 
 
@@ -2135,10 +2135,10 @@ static int CalcZDoomNodesSize()
 
 	int size = 32;  // header + a bit extra
 
-	size += 8 + bsp::num_vertices * 8;
-	size += 4 + bsp::num_subsecs  * 4;
+	size += 8 + num_vertices * 8;
+	size += 4 + num_subsecs  * 4;
 	size += 4 + num_complete_seg * 11;
-	size += 4 + bsp::num_nodes    * sizeof(raw_v5_node_t);
+	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
 
 	if (cur_info->force_compress)
 	{
@@ -2214,7 +2214,7 @@ void LoadLevel()
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			bsp::num_vertices, bsp::num_sectors, bsp::num_sidedefs, bsp::num_linedefs, bsp::num_things);
+			num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
@@ -2672,7 +2672,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	if (ret == BUILD_OK)
 	{
 		PrintDetail("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
-					bsp::num_nodes, bsp::num_subsecs, bsp::num_segs, num_old_vert + num_new_vert);
+					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
 
 		if (root_node)
 		{
