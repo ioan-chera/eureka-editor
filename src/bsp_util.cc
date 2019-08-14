@@ -269,7 +269,7 @@ static void MarkPolyobjSector(sector_t *sector)
 	// from being split.
 	sector->has_polyobj = 1;
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -302,7 +302,7 @@ static void MarkPolyobjPoint(double x, double y)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -333,7 +333,7 @@ static void MarkPolyobjPoint(double x, double y)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -424,7 +424,7 @@ void DetectPolyobjSectors(void)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -432,7 +432,7 @@ void DetectPolyobjSectors(void)
 			break;
 	}
 
-	if (i == num_linedefs)
+	if (i == bsp::num_linedefs)
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -441,7 +441,7 @@ void DetectPolyobjSectors(void)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	bool hexen_style = true;
 
-	for (i = 0 ; i < num_things ; i++)
+	for (i = 0 ; i < bsp::num_things ; i++)
 	{
 		thing_t *T = LookupThing(i);
 
@@ -458,7 +458,7 @@ void DetectPolyobjSectors(void)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0 ; i < num_things ; i++)
+	for (i = 0 ; i < bsp::num_things ; i++)
 	{
 		thing_t *T = LookupThing(i);
 
@@ -511,16 +511,16 @@ static int VertexCompare(const void *p1, const void *p2)
 void DetectOverlappingVertices(void)
 {
 	int i;
-	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
+	u16_t *array = (u16_t *)UtilCalloc(bsp::num_vertices * sizeof(u16_t));
 
 	// sort array of indices
-	for (i=0 ; i < num_vertices ; i++)
+	for (i=0 ; i < bsp::num_vertices ; i++)
 		array[i] = i;
 
-	qsort(array, num_vertices, sizeof(u16_t), VertexCompare);
+	qsort(array, bsp::num_vertices, sizeof(u16_t), VertexCompare);
 
 	// now mark them off
-	for (i=0 ; i < num_vertices - 1 ; i++)
+	for (i=0 ; i < bsp::num_vertices - 1 ; i++)
 	{
 		// duplicate ?
 		if (VertexCompare(array + i, array + i+1) == 0)
@@ -541,7 +541,7 @@ void DetectOverlappingVertices(void)
 	// DOES NOT affect the on-disk linedefs.
 	// this is mainly to help the miniseg creation code.
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
@@ -560,12 +560,12 @@ void DetectOverlappingVertices(void)
 
 void PruneVerticesAtEnd(void)
 {
-	int new_num = num_vertices;
+	int new_num = bsp::num_vertices;
 
 	// scan all vertices.
 	// only remove from the end, so stop when hit a used one.
 
-	for (int i = num_vertices - 1 ; i >= 0 ; i--)
+	for (int i = bsp::num_vertices - 1 ; i >= 0 ; i--)
 	{
 		vertex_t *V = lev_vertices[i];
 
@@ -577,16 +577,16 @@ void PruneVerticesAtEnd(void)
 		new_num -= 1;
 	}
 
-	if (new_num < num_vertices)
+	if (new_num < bsp::num_vertices)
 	{
-		int unused = num_vertices - new_num;
+		int unused = bsp::num_vertices - new_num;
 
 		PrintDetail("Pruned %d unused vertices at end\n", unused);
 
-		num_vertices = new_num;
+		bsp::num_vertices = new_num;
 	}
 
-	num_old_vert = num_vertices;
+	num_old_vert = bsp::num_vertices;
 }
 
 
@@ -657,20 +657,20 @@ void DetectOverlappingLines(void)
 	//   Note: does not detect partially overlapping lines.
 
 	int i;
-	int *array = (int *)UtilCalloc(num_linedefs * sizeof(int));
+	int *array = (int *)UtilCalloc(bsp::num_linedefs * sizeof(int));
 	int count = 0;
 
 	// sort array of indices
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < bsp::num_linedefs ; i++)
 		array[i] = i;
 
-	qsort(array, num_linedefs, sizeof(int), LineStartCompare);
+	qsort(array, bsp::num_linedefs, sizeof(int), LineStartCompare);
 
-	for (i=0 ; i < num_linedefs - 1 ; i++)
+	for (i=0 ; i < bsp::num_linedefs - 1 ; i++)
 	{
 		int j;
 
-		for (j = i+1 ; j < num_linedefs ; j++)
+		for (j = i+1 ; j < bsp::num_linedefs ; j++)
 		{
 			if (LineStartCompare(array + i, array + j) != 0)
 				break;
@@ -742,7 +742,7 @@ void CalculateWallTips(void)
 {
 	int i;
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 

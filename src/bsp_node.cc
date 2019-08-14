@@ -1489,7 +1489,7 @@ superblock_t *CreateSegs(void)
 
 	// step through linedefs and get side numbers
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < bsp::num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
 
@@ -1859,7 +1859,7 @@ static subsec_t *CreateSubsec(superblock_t *seg_list)
 	subsec_t *sub = NewSubsec();
 
 	// compute subsector's index
-	sub->index = num_subsecs - 1;
+	sub->index = bsp::num_subsecs - 1;
 
 	// copy segs into subsector
 	CreateSubsecWorker(sub, seg_list);
@@ -2053,7 +2053,7 @@ void ClockwiseBspTree()
 {
 	num_complete_seg = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < bsp::num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
@@ -2122,7 +2122,7 @@ void NormaliseBspTree()
 
 	num_complete_seg = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < bsp::num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 
@@ -2134,7 +2134,7 @@ void NormaliseBspTree()
 
 static void RoundOffVertices()
 {
-	for (int i = 0 ; i < num_vertices ; i++)
+	for (int i = 0 ; i < bsp::num_vertices ; i++)
 	{
 		vertex_t *vert = LookupVertex(i);
 
@@ -2263,7 +2263,7 @@ void RoundOffBspTree()
 
 	RoundOffVertices();
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < bsp::num_subsecs ; i++)
 	{
 		subsec_t *sub = LookupSubsec(i);
 

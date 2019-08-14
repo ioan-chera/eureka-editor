@@ -535,19 +535,22 @@ superblock_t;
 
 /* ----- Level data arrays ----------------------- */
 
-extern int num_vertices;
-extern int num_linedefs;
-extern int num_sidedefs;
-extern int num_sectors;
-extern int num_things;
-extern int num_segs;
-extern int num_subsecs;
-extern int num_nodes;
+namespace bsp
+	{
+		extern int num_vertices;
+		extern int num_linedefs;
+		extern int num_sidedefs;
+		extern int num_sectors;
+		extern int num_things;
+		extern int num_segs;
+		extern int num_subsecs;
+		extern int num_nodes;
+	}
+
 
 extern int num_old_vert;
 extern int num_new_vert;
 extern int num_complete_seg;
-
 
 /* ----- function prototypes ----------------------- */
 
