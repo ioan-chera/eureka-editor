@@ -1117,7 +1117,7 @@ void CMD_OpenMap()
 
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	std::string map_name = NULL;
+	std::string map_name;
 	bool did_load = false;
 
 	Wad_file *wad = dialog->Run(&map_name, &did_load);

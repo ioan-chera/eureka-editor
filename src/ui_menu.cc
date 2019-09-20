@@ -78,7 +78,7 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
-	std::string *filename = (std::string *) data;
+	const std::string *filename = static_cast<std::string *>(data);
 
 	int given_idx = M_FindGivenFile(filename->c_str());
 

@@ -482,7 +482,7 @@ void UI_OpenMap::PopulateButtons()
 	{
 		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
-		level_names[std::string(lump->Name())] = 1;
+		level_names[lump->Name()] = 1;
 	}
 
 	int cx_base = button_grp->x() + 25;
@@ -867,7 +867,7 @@ void UI_ProjectSetup::PopulatePort()
 		return;
 
 
-	std::string var_game = NULL;
+	std::string var_game;
 
 	if (game_choice->mvalue())
 		var_game = M_VariantForGame(game_choice->mvalue()->text);

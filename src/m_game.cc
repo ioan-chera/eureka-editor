@@ -107,11 +107,11 @@ void M_ClearAllDefinitions()
 	switch (Level_format)
 	{
 		case MAPF_Doom:
-			parse_vars[std::string("$MAP_FORMAT")] = std::string("DOOM");
+			parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
 		case MAPF_Hexen:
-			parse_vars[std::string("$MAP_FORMAT")] = std::string("HEXEN");
+			parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
 		default: break;
@@ -866,7 +866,7 @@ void M_ParseSetVar(parser_state_c *pst)
 	// tokens are stored in pst->tokenbuf, so this is OK
 	y_strupr(argv[0]);
 
-	parse_vars[std::string(argv[0])] = std::string(argv[1]);
+	parse_vars[argv[0]] = argv[1];
 }
 
 

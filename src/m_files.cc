@@ -38,9 +38,7 @@ void M_AddKnownIWAD(const char *path)
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
 
-	std::string game = GameNameFromIWAD(path);
-
-	known_iwads[game] = std::string(absolute_name);
+	known_iwads[GameNameFromIWAD(path)] = absolute_name;
 }
 
 
@@ -873,7 +871,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 
 	std::string new_iwad;
-	std::string new_port = NULL;
+	std::string new_port;
 
 	std::vector<std::string> new_resources;
 

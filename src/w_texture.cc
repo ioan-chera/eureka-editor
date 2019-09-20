@@ -68,9 +68,7 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
-	std::string tex_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = textures.find(tex_str);
+	auto P = textures.find(name);
 
 	if (P != textures.end())
 	{
@@ -80,10 +78,10 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 	}
 	else
 	{
-		textures[tex_str] = img;
+		textures[name] = img;
 	}
 
-	medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	medusa_textures[name] = is_medusa ? 1 : 0;
 }
 
 
@@ -496,9 +494,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 	if (strlen(name) == 0)
 		return NULL;
 
-	std::string t_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
+	auto P = textures.find(name);
 
 	if (P != textures.end())
 		return P->second;
@@ -531,21 +527,15 @@ bool W_TextureIsKnown(const char *name)
 	if (strlen(name) == 0)
 		return false;
 
-	std::string t_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
-
-	return (P != textures.end());
+	return !!textures.count(name);
 }
 
 
 bool W_TextureCausesMedusa(const char *name)
 {
-	std::string t_str = name;
+	auto P = medusa_textures.find(name);
 
-	std::map<std::string, int>::iterator P = medusa_textures.find(t_str);
-
-	return (P != medusa_textures.end() && P->second > 0);
+	return P != medusa_textures.end() && P->second > 0;
 }
 
 
@@ -587,9 +577,7 @@ static void W_AddFlat(const char *name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
-	std::string flat_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = flats.find(flat_str);
+	auto P = flats.find(name);
 
 	if (P != flats.end())
 	{
@@ -599,7 +587,7 @@ static void W_AddFlat(const char *name, Img_c *img)
 	}
 	else
 	{
-		flats[flat_str] = img;
+		flats[name] = img;
 	}
 }
 
@@ -660,9 +648,7 @@ void W_LoadFlats()
 
 Img_c * W_GetFlat(const char *name, bool try_uppercase)
 {
-	std::string f_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
+	auto P = flats.find(name);
 
 	if (P != flats.end())
 		return P->second;
@@ -685,11 +671,7 @@ bool W_FlatIsKnown(const char *name)
 	if (strlen(name) == 0)
 		return false;
 
-	std::string f_str = name;
-
-	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
-
-	return (P != flats.end());
+	return !!flats.count(name);
 }
 
 

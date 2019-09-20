@@ -891,7 +891,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			if (strcmp(value, "''") == 0)
 				*value = 0;
 
-			*((std::string *) opt->data_ptr) = value;
+			*static_cast<std::string *>(opt->data_ptr) = value;
 			break;
 
 		case OPT_STRING_LIST:
@@ -1146,7 +1146,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 				if (! ignore)
 				{
-					*((std::string *) o->data_ptr) = argv[0];
+					*static_cast<std::string *>(o->data_ptr) = argv[0];
 				}
 
 				// support two numeric values after -warp
@@ -1155,7 +1155,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				{
 					if (! ignore)
 					{
-						*((std::string *) o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
+						*static_cast<std::string *>(o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
 					}
 
 					argv++;
@@ -1299,7 +1299,7 @@ int M_WriteConfigFile()
 
 			case OPT_STRING:
 			{
-				const std::string *str = ((std::string *) o->data_ptr);
+				const std::string *str = static_cast<std::string *>(o->data_ptr);
 				fprintf(fp, "%s", !str->empty() ? str->c_str() : "''");
 				break;
 			}

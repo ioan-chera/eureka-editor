@@ -667,7 +667,7 @@ void Wad_file::ProcessNamespaces()
 
 	for (short k = 0 ; k < NumLumps() ; k++)
 	{
-		std::string name = directory[k]->name;
+		const std::string &name = directory[k]->name;
 
 		// skip the sub-namespace markers
 		if (IsDummyMarker(name.c_str()))
