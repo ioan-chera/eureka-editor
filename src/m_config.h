@@ -83,7 +83,6 @@ namespace config
 	extern bool render_unknown_bright;
 	extern bool same_mode_clears_selection;
 	extern int  sector_render_default;
-	extern bool show_full_one_sided;
 	extern bool sidedef_add_del_buttons;
 	extern int   thing_render_default;
 	extern rgb_color_t transparent_col;

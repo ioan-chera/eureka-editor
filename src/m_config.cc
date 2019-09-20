@@ -683,15 +683,6 @@ static const opt_desc_t options[] =
 		&config::sector_render_default
 	},
 
-	{	"show_full_one_sided",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Show all textures on one-sided lines in the Linedef panel",
-		NULL,
-		&config::show_full_one_sided
-	},
-
 	{	"sidedef_add_del_buttons",
 		0,
 		OPT_BOOLEAN,

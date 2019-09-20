@@ -32,7 +32,6 @@
 
 
 // config item
-bool config::show_full_one_sided = false;
 bool config::sidedef_add_del_buttons = false;
 
 //
@@ -571,22 +570,11 @@ void UI_SideBox::UpdateHiding()
 		l_tex->show();
 		l_pic->show();
 
-		if (on_2S_line || config::show_full_one_sided)
-		{
-			u_tex->show();
-			r_tex->show();
+		u_tex->show();
+		r_tex->show();
 
-			u_pic->show();
-			r_pic->show();
-		}
-		else
-		{
-			u_tex->hide();
-			r_tex->hide();
-
-			u_pic->hide();
-			r_pic->hide();
-		}
+		u_pic->show();
+		r_pic->show();
 	}
 }
 
