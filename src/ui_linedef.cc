@@ -1064,7 +1064,7 @@ void UI_LineBox::UpdateGameInfo()
 std::string UI_LineBox::GeneralizedDesc(int type_num)
 {
 	if (! game_info.gen_types)
-		return NULL;
+		return "";
 
 	for (int i = 0 ; i < num_gen_linetypes ; i++)
 	{
@@ -1074,7 +1074,7 @@ std::string UI_LineBox::GeneralizedDesc(int type_num)
 		{
 			// grab trigger name (we assume it is first field)
 			if (info->num_fields < 1 || info->fields[0].num_keywords < 8)
-				return NULL;
+				return "";
 
 			const char *trigger = info->fields[0].keywords[type_num & 7].c_str();
 
@@ -1082,7 +1082,7 @@ std::string UI_LineBox::GeneralizedDesc(int type_num)
 		}
 	}
 
-	return NULL;  // not a generalized linetype
+	return "";  // not a generalized linetype
 }
 
 //--- editor settings ---
