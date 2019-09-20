@@ -202,9 +202,6 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 				bool upper = (w == box->u_tex || w == box->u_pic);
 				bool rail  = (w == box->r_tex || w == box->r_pic);
 
-				if (L->OneSided())
-					std::swap(lower, rail);
-
 				if (lower)
 				{
 					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
@@ -466,9 +463,6 @@ void UI_SideBox::UpdateField()
 		const char *rail  = sd->MidTex();
 		const char *upper = sd->UpperTex();
 
-		if (what_is_solid & SOLID_MID)
-			std::swap(lower, rail);
-
 		l_tex->value(lower);
 		u_tex->value(upper);
 		r_tex->value(rail);
@@ -477,7 +471,10 @@ void UI_SideBox::UpdateField()
 		u_pic->GetTex(upper);
 		r_pic->GetTex(rail);
 
-		if ((what_is_solid & (SOLID_LOWER | SOLID_MID)) && is_null_tex(lower))
+		if ((what_is_solid & SOLID_MID) && is_null_tex(rail))
+			r_pic->MarkMissing();
+
+		if ((what_is_solid & SOLID_LOWER) && is_null_tex(lower))
 			l_pic->MarkMissing();
 
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
