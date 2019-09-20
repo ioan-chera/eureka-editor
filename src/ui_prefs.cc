@@ -1584,10 +1584,6 @@ void UI_Preferences::SaveValues()
 		}
 	}
 
-	/* General Tab */
-
-	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
-
 	/* Edit Tab */
 
 	config::default_port = edit_def_port->value();
