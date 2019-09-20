@@ -22,6 +22,7 @@
 #include "m_config.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "ui_window.h"
 #include "ui_prefs.h"
@@ -577,6 +578,31 @@ public:
 class UI_Preferences : public Fl_Double_Window
 {
 private:
+	//
+	// A boolean variable binding for a checkbox
+	//
+	struct BoolBinding
+	{
+		enum class Invert : int
+		{
+			normal,
+			invert
+		};
+
+		bool *target;
+		Invert invert;
+		std::function<void()> changeAction;
+
+		BoolBinding() = default;
+		BoolBinding(bool &target, Invert invert = Invert::normal,
+					const std::function<void()> &action = nullptr) :
+		target(&target),
+		invert(invert),
+		changeAction(action)
+		{
+		}
+	};
+
 	bool want_quit;
 	bool want_discard;
 
@@ -585,6 +611,9 @@ private:
 
 	// normally zero (not waiting for a key)
 	int awaiting_line;
+
+	// Bindings for checkbox/boolean variable
+	std::unordered_map<Fl_Check_Button *, BoolBinding> mBoolBindings;
 
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
@@ -802,9 +831,13 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
+		{
+			gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
+			mBoolBindings[gen_autoload] = config::auto_load_recent;
 		}
-		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
+		{
+			gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
+			mBoolBindings[gen_swapsides] = config::swap_sidedefs;
 		}
 		o->end();
 	  }
@@ -878,13 +911,22 @@ UI_Preferences::UI_Preferences() :
 		  edit_def_mode->align(FL_ALIGN_LEFT);
 		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
 		}
-		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
+		{
+			edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
+			mBoolBindings[edit_newislands] = config::new_islands_are_void;
 		}
-		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
+		{
+			edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
+			mBoolBindings[edit_autoadjustX] = { config::leave_offsets_alone,
+				BoolBinding::Invert::invert };
 		}
-		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
+		{
+			edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
+			mBoolBindings[edit_samemode] = config::same_mode_clears_selection;
 		}
-		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
+		{
+			edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
+			mBoolBindings[edit_add_del] = config::sidedef_add_del_buttons;
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
@@ -893,7 +935,12 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
+		{
+			brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
+			mBoolBindings[brow_smalltex] = { config::browser_small_tex, BoolBinding::Invert::normal, []() {
+				// changing this requires re-populating the browser
+				main_win->browser->Populate();
+			} };
 		}
 		o->end();
 	  }
@@ -912,9 +959,13 @@ UI_Preferences::UI_Preferences() :
 		{ grid_cur_style = new Fl_Choice(125, 90, 95, 25, "grid style ");
 		  grid_cur_style->add("Squares|Dotty");
 		}
-		{ grid_enabled = new Fl_Check_Button(50, 125, 95, 25, " default grid to ON");
+		{
+			grid_enabled = new Fl_Check_Button(50, 125, 95, 25, " default grid to ON");
+			mBoolBindings[grid_enabled] = config::grid_default_mode;
 		}
-		{ grid_snap = new Fl_Check_Button(50, 155, 235, 25, " default SNAP mode");
+		{
+			grid_snap = new Fl_Check_Button(50, 155, 235, 25, " default SNAP mode");
+			mBoolBindings[grid_snap] = config::grid_default_snap;
 		}
 		{ grid_flatrender = new Fl_Check_Button(50, 185, 270, 25, " default sector rendering to ON");
 		}
@@ -923,9 +974,13 @@ UI_Preferences::UI_Preferences() :
 		{ grid_size = new Fl_Choice(400, 90, 95, 25, "default grid size ");
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
-		{ gen_scrollbars = new Fl_Check_Button(277, 125, 245, 25, " enable scroll-bars for map view");
+		{
+			gen_scrollbars = new Fl_Check_Button(277, 125, 245, 25, " enable scroll-bars for map view");
+			mBoolBindings[gen_scrollbars] = config::map_scroll_bars;
 		}
-		{ grid_hide_free = new Fl_Check_Button(277, 155, 245, 25, " hide grid in FREE mode");
+		{
+			grid_hide_free = new Fl_Check_Button(277, 155, 245, 25, " hide grid in FREE mode");
+			mBoolBindings[grid_hide_free] = config::grid_hide_in_free_mode;
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
@@ -1002,9 +1057,13 @@ UI_Preferences::UI_Preferences() :
 		  Fl_Box* o = new Fl_Box(300, 90, 150, 25, "(higher is wider, default is 0.83)");
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
+		{
+			rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
+			mBoolBindings[rend_high_detail] = config::render_high_detail;
 		}
-		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
+		{
+			rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
+			mBoolBindings[rend_lock_grav] = config::render_lock_gravity;
 		}
 
 		o->end();
@@ -1021,24 +1080,36 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_fast = new Fl_Check_Button(50, 80, 440, 30, " Fast mode   (the nodes may not be as good)");
+		{
+			nod_fast = new Fl_Check_Button(50, 80, 440, 30, " Fast mode   (the nodes may not be as good)");
+			mBoolBindings[nod_fast] = config::bsp_fast;
 		}
-		{ nod_warn = new Fl_Check_Button(50, 110, 220, 30, " Warning messages in the logs");
+		{
+			nod_warn = new Fl_Check_Button(50, 110, 220, 30, " Warning messages in the logs");
+			mBoolBindings[nod_warn] = config::bsp_warnings;
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 175, 250, 30, "Advanced BSP Settings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_gl_nodes = new Fl_Check_Button(50, 215, 150, 30, " Build GL-Nodes");
+		{
+			nod_gl_nodes = new Fl_Check_Button(50, 215, 150, 30, " Build GL-Nodes");
+			mBoolBindings[nod_gl_nodes] = config::bsp_gl_nodes;
 		}
-		{ nod_force_v5 = new Fl_Check_Button(50, 245, 250, 30, " Force V5 of GL-Nodes");
+		{
+			nod_force_v5 = new Fl_Check_Button(50, 245, 250, 30, " Force V5 of GL-Nodes");
+			mBoolBindings[nod_force_v5] = config::bsp_force_v5;
 		}
-		{ nod_force_zdoom = new Fl_Check_Button(50, 275, 250, 30, " Force ZDoom format of normal nodes");
+		{
+			nod_force_zdoom = new Fl_Check_Button(50, 275, 250, 30, " Force ZDoom format of normal nodes");
+			mBoolBindings[nod_force_zdoom] = config::bsp_force_zdoom;
 		}
 		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
-		{ nod_compress = new Fl_Check_Button(50, 305, 250, 30, " Force zlib compression");
-		  nod_compress->hide();
+		{
+			nod_compress = new Fl_Check_Button(50, 305, 250, 30, " Force zlib compression");
+		  	nod_compress->hide();
+			mBoolBindings[nod_compress] = config::bsp_compressed;
 		}
 		{ nod_factor = new Fl_Choice(160, 315, 180, 30, "Seg split logic: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
@@ -1400,10 +1471,15 @@ void UI_Preferences::LoadValues()
 	ig_colorbox->color(config::gui_custom_ig);
 	fg_colorbox->color(config::gui_custom_fg);
 
-	/* General Tab */
-
-	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
-	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
+	// Handle all bindings here
+	for(const auto &entry : mBoolBindings)
+	{
+		const auto &binding = entry.second;
+		if(binding.invert == BoolBinding::Invert::invert)
+			entry.first->value(*binding.target ? 0 : 1);
+		else
+			entry.first->value(*binding.target ? 1 : 0);
+	}
 
 	/* Edit Tab */
 
@@ -1411,30 +1487,16 @@ void UI_Preferences::LoadValues()
 	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
 
 	edit_sectorsize->value(std::to_string(config::new_sector_size).c_str());
-	edit_newislands->value(config::new_islands_are_void ? 1 : 0);
-	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
-	edit_add_del->value(config::sidedef_add_del_buttons ? 1 : 0);
-	edit_autoadjustX->value(config::leave_offsets_alone ? 0 : 1);
-
-	brow_smalltex->value(config::browser_small_tex ? 1 : 0);
 
 	/* Grid Tab */
 
 	if (config::grid_style < 0 || config::grid_style > 1)
 		config::grid_style = 1;
 
-	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
-		config::grid_default_mode = 1;
-
 	grid_cur_style->value(config::grid_style);
-	grid_enabled->value(config::grid_default_mode);
-	grid_snap->value(config::grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(config::grid_default_size));
-	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
 	grid_flatrender->value(config::sector_render_default ? 1 : 0);
 	grid_spriterend->value(config::thing_render_default ? 1 : 0);
-
-	gen_scrollbars ->value(config::map_scroll_bars ? 1 : 0);
 
 	dotty_axis ->color(config::dotty_axis_col);
 	dotty_major->color(config::dotty_major_col);
@@ -1454,13 +1516,7 @@ void UI_Preferences::LoadValues()
 	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", config::render_pixel_aspect / 100.0);
 	rend_aspect->value(aspect_buf);
 
-	rend_high_detail->value(config::render_high_detail ? 1 : 0);
-	rend_lock_grav->value(config::render_lock_gravity ? 1 : 0);
-
 	/* Nodes Tab */
-
-	nod_fast->value(config::bsp_fast ? 1 : 0);
-	nod_warn->value(config::bsp_warnings ? 1 : 0);
 
 	if (config::bsp_split_factor < 7)
 		nod_factor->value(2);	// Balanced BSP tree
@@ -1468,11 +1524,6 @@ void UI_Preferences::LoadValues()
 		nod_factor->value(1);	// Minimize Splits
 	else
 		nod_factor->value(0);	// NORMAL
-
-	nod_gl_nodes->value(config::bsp_gl_nodes ? 1 : 0);
-	nod_force_v5->value(config::bsp_force_v5 ? 1 : 0);
-	nod_force_zdoom->value(config::bsp_force_zdoom ? 1 : 0);
-	nod_compress->value(config::bsp_compressed ? 1 : 0);
 
 	/* Other Tab */
 
@@ -1519,10 +1570,22 @@ void UI_Preferences::SaveValues()
 
 		main_win->redraw();
 	}
+	for(const auto &entry : mBoolBindings)
+	{
+		const auto &binding = entry.second;
+		bool value = !entry.first->value();
+		if(binding.invert == BoolBinding::Invert::normal)
+			value = !value;
+		if(value != *binding.target)
+		{
+			*binding.target = value;
+			if(binding.changeAction)
+				binding.changeAction();
+		}
+	}
 
 	/* General Tab */
 
-	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
 	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
@@ -1533,30 +1596,12 @@ void UI_Preferences::SaveValues()
 	config::new_sector_size = atoi(edit_sectorsize->value());
 	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
 
-	config::new_islands_are_void = edit_newislands->value() ? true : false;
-	config::same_mode_clears_selection = edit_samemode->value() ? true : false;
-	config::sidedef_add_del_buttons = edit_add_del->value() ? true : false;
-	config::leave_offsets_alone = edit_autoadjustX->value() ? false : true;
-
-	// changing this requires re-populating the browser
-	bool new_small_tex = brow_smalltex->value() ? true : false;
-	if (new_small_tex != config::browser_small_tex)
-	{
-		config::browser_small_tex = new_small_tex;
-		main_win->browser->Populate();
-	}
-
 	/* Grid Tab */
 
 	config::grid_style        = grid_cur_style->value();
-	config::grid_default_mode = grid_enabled->value();
-	config::grid_default_snap = grid_snap->value() ? true : false;
 	config::grid_default_size = atoi(grid_size->mvalue()->text);
-	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
 	config::sector_render_default  = grid_flatrender->value() ? 1 : 0;
 	config::thing_render_default   = grid_spriterend->value() ? 1 : 0;
-
-	config::map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
 	config::dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
 	config::dotty_major_col = (rgb_color_t) dotty_major->color();
@@ -1570,9 +1615,6 @@ void UI_Preferences::SaveValues()
 
 	/* Nodes Tab */
 
-	config::bsp_fast = nod_fast->value() ? true : false;
-	config::bsp_warnings = nod_warn->value() ? true : false;
-
 	if (nod_factor->value() == 1)			// Minimize Splits
 		config::bsp_split_factor = 29;
 	else if (nod_factor->value() == 2)		// Balanced BSP tree
@@ -1580,18 +1622,10 @@ void UI_Preferences::SaveValues()
 	else
 		config::bsp_split_factor = 11;
 
-	config::bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
-	config::bsp_force_v5 = nod_force_v5->value() ? true : false;
-	config::bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
-	config::bsp_compressed = nod_compress->value() ? true : false;
-
 	/* Other Tab */
 
 	config::render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
 	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
-
-	config::render_high_detail  = rend_high_detail->value() ? true : false;
-	config::render_lock_gravity = rend_lock_grav->value() ? true : false;
 
 }
 

@@ -53,7 +53,7 @@ namespace config
 	extern int floor_bump_small;
 	extern int floor_bump_medium;
 	extern int floor_bump_large;
-	extern int  grid_default_mode;
+	extern bool grid_default_mode;
 	extern int  grid_default_size;
 	extern bool grid_default_snap;
 	extern bool grid_hide_in_free_mode;

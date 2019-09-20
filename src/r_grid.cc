@@ -37,7 +37,7 @@ Grid_State_c  grid;
 // config items
 int  config::grid_default_size = 64;
 bool config::grid_default_snap = false;
-int  config::grid_default_mode = 0;  // off
+bool config::grid_default_mode;  // off
 
 int  config::grid_style;  // 0 = squares, 1 = dotty
 bool config::grid_hide_in_free_mode = false;
@@ -67,7 +67,7 @@ void Grid_State_c::Init()
 
 	AdjustStep(+1);
 
-	if (config::grid_default_mode == 0)
+	if (!config::grid_default_mode)
 	{
 		shown = false;
 
