@@ -29,7 +29,6 @@
 
 
 // config items
-bool config::bsp_on_save	= true;
 bool config::bsp_fast		= false;
 bool config::bsp_warnings	= false;
 

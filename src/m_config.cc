@@ -260,15 +260,6 @@ static const opt_desc_t options[] =
 		&config::browser_small_tex
 	},
 
-	{	"bsp_on_save",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Node building: always build the nodes after saving",
-		NULL,
-		&config::bsp_on_save
-	},
-
 	{	"bsp_fast",
 		0,
 		OPT_BOOLEAN,

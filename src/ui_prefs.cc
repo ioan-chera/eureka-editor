@@ -699,7 +699,6 @@ public:
 
 	/* Nodes Tab */
 
-	Fl_Check_Button *nod_on_save;
 	Fl_Check_Button *nod_fast;
 	Fl_Check_Button *nod_warn;
 
@@ -1022,28 +1021,26 @@ UI_Preferences::UI_Preferences() :
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_on_save = new Fl_Check_Button(50, 80, 220, 30, " Always build nodes after saving   (recommended)");
+		{ nod_fast = new Fl_Check_Button(50, 80, 440, 30, " Fast mode   (the nodes may not be as good)");
 		}
-		{ nod_fast = new Fl_Check_Button(50, 110, 440, 30, " Fast mode   (the nodes may not be as good)");
-		}
-		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
+		{ nod_warn = new Fl_Check_Button(50, 110, 220, 30, " Warning messages in the logs");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 205, 250, 30, "Advanced BSP Settings");
+		{ Fl_Box* o = new Fl_Box(25, 175, 250, 30, "Advanced BSP Settings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_gl_nodes = new Fl_Check_Button(50, 245, 150, 30, " Build GL-Nodes");
+		{ nod_gl_nodes = new Fl_Check_Button(50, 215, 150, 30, " Build GL-Nodes");
 		}
-		{ nod_force_v5 = new Fl_Check_Button(50, 275, 250, 30, " Force V5 of GL-Nodes");
+		{ nod_force_v5 = new Fl_Check_Button(50, 245, 250, 30, " Force V5 of GL-Nodes");
 		}
-		{ nod_force_zdoom = new Fl_Check_Button(50, 305, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_force_zdoom = new Fl_Check_Button(50, 275, 250, 30, " Force ZDoom format of normal nodes");
 		}
 		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
-		{ nod_compress = new Fl_Check_Button(50, 335, 250, 30, " Force zlib compression");
+		{ nod_compress = new Fl_Check_Button(50, 305, 250, 30, " Force zlib compression");
 		  nod_compress->hide();
 		}
-		{ nod_factor = new Fl_Choice(160, 345, 180, 30, "Seg split logic: ");
+		{ nod_factor = new Fl_Choice(160, 315, 180, 30, "Seg split logic: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
 		}
 		o->end();
@@ -1462,7 +1459,6 @@ void UI_Preferences::LoadValues()
 
 	/* Nodes Tab */
 
-	nod_on_save->value(config::bsp_on_save ? 1 : 0);
 	nod_fast->value(config::bsp_fast ? 1 : 0);
 	nod_warn->value(config::bsp_warnings ? 1 : 0);
 
@@ -1574,7 +1570,6 @@ void UI_Preferences::SaveValues()
 
 	/* Nodes Tab */
 
-	config::bsp_on_save = nod_on_save->value() ? true : false;
 	config::bsp_fast = nod_fast->value() ? true : false;
 	config::bsp_warnings = nod_warn->value() ? true : false;
 

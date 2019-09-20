@@ -1633,7 +1633,7 @@ static void SaveLevel(const char *level, bool inhibitNodeBuild)
 
 
 	// build the nodes
-	if (config::bsp_on_save && ! inhibitNodeBuild)
+	if (!inhibitNodeBuild)
 	{
 		BuildNodesAfterSave(saving_level);
 	}

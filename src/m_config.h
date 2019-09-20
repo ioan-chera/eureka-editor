@@ -37,7 +37,6 @@ namespace config
 	extern int backup_max_files;
 	extern int backup_max_space;
 	extern bool browser_small_tex;
-	extern bool bsp_on_save;
 	extern bool bsp_fast;
 	extern bool bsp_warnings;
 	extern int  bsp_split_factor;
