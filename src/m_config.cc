@@ -683,15 +683,6 @@ static const opt_desc_t options[] =
 		&config::sector_render_default
 	},
 
-	{	"sidedef_add_del_buttons",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Show the ADD and DEL buttons in Sidedef panels",
-		NULL,
-		&config::sidedef_add_del_buttons
-	},
-
 	{	"thing_render_default",
 		0,
 		OPT_INTEGER,

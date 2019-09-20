@@ -30,10 +30,6 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
-
-// config item
-bool config::sidedef_add_del_buttons = false;
-
 //
 // Constructor
 //
@@ -524,7 +520,7 @@ void UI_SideBox::UpdateLabel()
 
 void UI_SideBox::UpdateAddDel()
 {
-	if (obj == SETOBJ_NO_LINE || ! config::sidedef_add_del_buttons)
+	if (obj == SETOBJ_NO_LINE)
 	{
 		add_button->hide();
 		del_button->hide();

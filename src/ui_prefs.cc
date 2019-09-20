@@ -690,7 +690,6 @@ public:
 	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
-	Fl_Check_Button *edit_add_del;
 	Fl_Int_Input    *edit_sectorsize;
 
 	Fl_Check_Button *brow_smalltex;
@@ -919,19 +918,15 @@ UI_Preferences::UI_Preferences() :
 			edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 			mBoolBindings[edit_samemode] = config::same_mode_clears_selection;
 		}
-		{
-			edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
-			mBoolBindings[edit_add_del] = config::sidedef_add_del_buttons;
-		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
+		{ Fl_Box* o = new Fl_Box(25, 265, 355, 30, "Browser Options");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{
-			brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
+			brow_smalltex = new Fl_Check_Button(50, 300, 265, 30, " smaller textures");
 			mBoolBindings[brow_smalltex] = { config::browser_small_tex, BoolBinding::Invert::normal, []() {
 				// changing this requires re-populating the browser
 				main_win->browser->Populate();
