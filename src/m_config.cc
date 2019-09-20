@@ -719,15 +719,6 @@ static const opt_desc_t options[] =
 		&config::transparent_col
 	},
 
-	{	"swap_sidedefs",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Swap upper and lower sidedefs in the Linedef panel",
-		NULL,
-		&config::swap_sidedefs
-	},
-
 	//
 	// That's all there is
 	//

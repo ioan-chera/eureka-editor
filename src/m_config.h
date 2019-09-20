@@ -87,7 +87,6 @@ namespace config
 	extern bool sidedef_add_del_buttons;
 	extern int   thing_render_default;
 	extern rgb_color_t transparent_col;
-	extern bool swap_sidedefs;
 }
 
 /* ==== FUNCTIONS ==================== */

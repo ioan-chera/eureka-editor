@@ -667,7 +667,6 @@ public:
 	Fl_Button *fg_colorbox;
 
 	Fl_Check_Button *gen_autoload;
-	Fl_Check_Button *gen_swapsides;
 
 	/* Keys Tab */
 
@@ -834,10 +833,6 @@ UI_Preferences::UI_Preferences() :
 		{
 			gen_autoload = new Fl_Check_Button(50, 280, 380, 25, " automatically open the most recent pwad");
 			mBoolBindings[gen_autoload] = config::auto_load_recent;
-		}
-		{
-			gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
-			mBoolBindings[gen_swapsides] = config::swap_sidedefs;
 		}
 		o->end();
 	  }

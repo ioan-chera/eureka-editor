@@ -32,7 +32,6 @@
 
 
 // config item
-bool config::swap_sidedefs = false;
 bool config::show_full_one_sided = false;
 bool config::sidedef_add_del_buttons = false;
 
@@ -91,15 +90,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 	Y += x_ofs->h() + 6;
 
-	int LX = X+16;
-	int UX = X+W-64-16;
+	int UX = X+16;
+	int LX = X+W-64-16;
 	    MX = MX-32;
-
-	if (config::swap_sidedefs)
-	{
-		std::swap(UX, LX);
-	}
-
 
 	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
 	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
