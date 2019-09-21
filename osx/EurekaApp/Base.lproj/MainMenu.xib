@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="AMainMenu" systemMenu="main" id="29">
             <items>
                 <menuItem title="Eureka" id="56">
@@ -114,7 +114,7 @@
                             <menuItem isSeparatorItem="YES" id="74">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Page Setup..." keyEquivalent="P" id="77">
+                            <menuItem title="Page Setup…" keyEquivalent="P" id="77">
                                 <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                 <connections>
                                     <action selector="runPageLayout:" target="-1" id="87"/>
@@ -618,11 +618,12 @@
                     <menu key="submenu" title="Window" systemMenu="window" id="24">
                         <items>
                             <menuItem title="Minimize" keyEquivalent="m" id="23">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="performMiniaturize:" target="-1" id="37"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Zoom" id="239">
+                            <menuItem title="Zoom" keyEquivalent="m" id="239">
                                 <connections>
                                     <action selector="performZoom:" target="-1" id="240"/>
                                 </connections>

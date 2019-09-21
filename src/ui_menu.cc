@@ -488,9 +488,9 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
-		{ "&Move Objects...",  FL_F+2, FCAL edit_do_move },
-		{ "&Scale Objects...", FL_F+3, FCAL edit_do_scale },
-		{ "Rotate Objects...", FL_F+4, FCAL edit_do_rotate },
+		{ "&Move Objects\u2026",  FL_F+2, FCAL edit_do_move },
+		{ "&Scale Objects\u2026", FL_F+3, FCAL edit_do_scale },
+		{ "Rotate Objects\u2026", FL_F+4, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -598,8 +598,10 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Online Docs...",    0, FCAL help_do_online_docs },
-		{ "&About Eureka...",   0, FCAL help_do_about },
+		{ "&Online Docs\u2026",    0, FCAL help_do_online_docs },
+#ifndef __APPLE__	// again in the app menu
+		{ "&About Eureka\u2026",   0, FCAL help_do_about },
+#endif
 		{ 0 },
 
 	{ 0 }

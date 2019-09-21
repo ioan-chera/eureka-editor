@@ -297,8 +297,8 @@ void UI_TextEditor::menu_do_goto_bottom(Fl_Widget *w, void *data)
 static Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
-		{ "&Insert File...",      FL_COMMAND + 'i', FCAL UI_TextEditor::menu_do_insert },
-		{ "&Export to File...  ", FL_COMMAND + 'e', FCAL UI_TextEditor::menu_do_export },
+		{ "&Insert File\u2026",      FL_COMMAND + 'i', FCAL UI_TextEditor::menu_do_insert },
+		{ "&Export to File\u2026  ", FL_COMMAND + 'e', FCAL UI_TextEditor::menu_do_export },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 		{ "&Save Lump",   FL_COMMAND + 's', FCAL UI_TextEditor::menu_do_save },
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },

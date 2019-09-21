@@ -630,7 +630,7 @@ UI_LogViewer::UI_LogViewer() :
 
 		bx = 30;
 		{
-			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Save...");
+			Fl_Button * but = new Fl_Button(bx, ey + 15, 80, 35, "Save\u2026");
 			but->callback(save_callback, this);
 		}
 

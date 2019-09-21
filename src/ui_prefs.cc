@@ -501,10 +501,10 @@ public:
 		params->value("");
 		params->when(FL_WHEN_CHANGED);
 
-		keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords...");
+		keyword_menu = new Fl_Menu_Button( 85, 180, 135, 25, "Keywords\u2026");
 		keyword_menu->callback((Fl_Callback*) keyword_callback, this);
 
-		flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags...");
+		flag_menu = new Fl_Menu_Button(250, 180, 135, 25, "Flags\u2026");
 		flag_menu->callback((Fl_Callback*) flag_callback, this);
 
 		{ Fl_Group *o = new Fl_Group(0, 240, 400, 66);
