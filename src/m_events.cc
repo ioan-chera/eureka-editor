@@ -788,9 +788,55 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 				   info->param[2], info->param[3]);
 }
 
+//
+// Holds a menu button and added stuff
+//
+class MenuAdding
+{
+public:
+	MenuAdding(Fl_Menu_ &menu) : menu(menu)
+	{
+	}
 
-static void ParseOperationLine(const std::vector<std::string> &tokens,
-							   Fl_Menu_Button *menu)
+	~MenuAdding()
+	{
+		flush(false);
+	}
+
+	void flush(bool separator);
+	void load(const char *text, Fl_Callback *callback, void *info);
+
+private:
+	Fl_Menu_ &menu;
+	bool armed = false;
+
+	std::string text;
+	Fl_Callback* callback = nullptr;
+	void *info = nullptr;
+};
+
+//
+// Add to a menu
+//
+void MenuAdding::flush(bool separator)
+{
+	if(armed)
+		menu.add(text.c_str(), 0, callback, info, separator ? FL_MENU_DIVIDER : 0);
+	armed = false;
+}
+
+//
+// Load menu item data
+//
+void MenuAdding::load(const char *text, Fl_Callback *callback, void *info)
+{
+	this->text = text;
+	this->callback = callback;
+	this->info = info;
+	armed = true;
+}
+
+static void ParseOperationLine(const std::vector<std::string> &tokens, MenuAdding &adding)
 {
 	size_t num_tok = tokens.size();
 	if (num_tok < 2)
@@ -799,7 +845,7 @@ static void ParseOperationLine(const std::vector<std::string> &tokens,
 	// just a spacer?
 	if (tokens[1][0] == '_')
 	{
-		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
+		adding.flush(true);
 		return;
 	}
 
@@ -826,8 +872,8 @@ static void ParseOperationLine(const std::vector<std::string> &tokens,
 		if (num_tok >= 4 + p)
 			strncpy(info->param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1].c_str(), 0 /* shortcut */, &operation_callback_func,
-			  (void *)info, 0 /* flags */);
+	adding.flush(false);
+	adding.load(tokens[1].c_str(), operation_callback_func, info);
 }
 
 
@@ -868,6 +914,8 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	std::vector<std::string> tokens;
 	tokens.reserve(MAX_TOKENS);
 
+	MenuAdding adding(*menu);
+
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
 		tokens.clear();
@@ -885,8 +933,10 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 		if (y_stricmp(tokens[0], context) != 0)
 			continue;
 
-		ParseOperationLine(tokens, menu);
+		ParseOperationLine(tokens, adding);
 	}
+
+	adding.flush(false);	// make sure to clear it
 
 	fclose(fp);
 
