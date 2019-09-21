@@ -419,10 +419,12 @@ static void help_do_online_docs(Fl_Widget *w, void * data)
 	ExecuteCommand("OnlineDocs");
 }
 
+#ifndef __APPLE__
 static void help_do_about(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("AboutDialog");
 }
+#endif
 
 
 //------------------------------------------------------------------------
