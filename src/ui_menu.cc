@@ -416,7 +416,7 @@ static void tools_do_view_logs(Fl_Widget *w, void * data)
 
 static void help_do_online_docs(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("Documentation");
+	ExecuteCommand("OnlineDocs");
 }
 
 static void help_do_about(Fl_Widget *w, void * data)
