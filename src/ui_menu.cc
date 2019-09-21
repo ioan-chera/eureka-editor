@@ -580,7 +580,9 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Tools", 0, 0, 0, FL_SUBMENU },
 
+#ifndef __APPLE__	// for macOS it will be in the app menu
 		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+#endif
 		{ "&View Logs",          0,  FCAL tools_do_view_logs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -784,6 +786,12 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);
 
 	bar->menu(items);
+
+	// For macOS, the preferences shall be in the app menu
+	static const Fl_Menu_Item macPreferencesItem = {
+		"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+	};
+	Fl_Mac_App_Menu::custom_application_menu_items(&macPreferencesItem);
 
 	return bar;
 }
