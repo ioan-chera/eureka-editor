@@ -66,6 +66,8 @@ private:
 	Fl_Button *cancel;
 	Fl_Button *ok_but;
 
+	std::vector<Fl_Menu_Item> mFuncItems;
+
 private:
 	void BeginGrab()
 	{
@@ -196,32 +198,44 @@ private:
 		cur_cmd = NULL;
 
 		// add names to menu, and find the current function
-		char buffer[512];
-
 		bool did_separator = false;
+
+		const char *currentGroup = "";
+
+		std::vector<Fl_Menu_Item> items;
 
 		for (int i = 0 ; ; i++)
 		{
 			const editor_command_t *cmd = LookupEditorCommand(i);
+			const editor_command_t *nextcmd = LookupEditorCommand(i + 1);
 
 			if (! cmd)
 				break;
 
-			if (! did_separator && y_stricmp(cmd->group_name, "General") == 0)
+			if(y_stricmp(currentGroup, cmd->group_name))
 			{
-				func_choose->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
-				did_separator = true;
+				currentGroup = cmd->group_name;
+				int flags = FL_SUBMENU;
+				if(!did_separator && !y_stricmp(currentGroup, "Help"))
+				{
+					flags |= FL_MENU_DIVIDER;
+					did_separator = true;
+				}
+				items.push_back({ currentGroup, 0, 0, 0, flags });
 			}
 
-			snprintf(buffer, sizeof(buffer), "%s/%s", cmd->group_name, cmd->name);
-
-			func_choose->add(buffer, 0, 0, (void *)(long)i, 0 /* flags */);
+			items.push_back({ cmd->name, 0, 0, (void *)(long)i, 0 });
+			if(!nextcmd || y_stricmp(nextcmd->group_name, currentGroup))
+				items.push_back({ 0 });
 
 			if (find_name && strcmp(cmd->name, find_name) == 0)
 			{
 				cur_cmd = cmd;
 			}
 		}
+		items.push_back({ 0 });
+		mFuncItems = items;
+		func_choose->menu(mFuncItems.data());
 
 		if (cur_cmd)
 			func_name->value(cur_cmd->name);
