@@ -441,29 +441,21 @@ static Fl_Menu_Item menu_items[] =
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
 		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project, 0, FL_MENU_DIVIDER },
 
 		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
-		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
+		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE|FL_MENU_DIVIDER },
 			{ 0 },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export, 0, FL_MENU_DIVIDER },
 
 		{ "&Fresh Map",    0, FCAL file_do_fresh_map },
 		{ "&Copy Map",    0,  FCAL file_do_copy_map },
 		{ "Rename Map",   0,  FCAL file_do_rename },
-		{ "Delete Map",   0,  FCAL file_do_delete },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Delete Map",   0,  FCAL file_do_delete, 0, FL_MENU_DIVIDER },
 
 		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
 		{ 0 },
@@ -471,30 +463,22 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
 
 		{ "&Undo",   FL_COMMAND + 'z',  FCAL edit_do_undo },
-		{ "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo, 0, FL_MENU_DIVIDER },
 
 		{ "Cu&t",     FL_COMMAND + 'x', FCAL edit_do_cut },
 		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
 		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
-		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Delete",  FL_Delete,        FCAL edit_do_delete, 0, FL_MENU_DIVIDER },
 
 		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
 		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
 		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
-		{ "&Last Selection",   FL_COMMAND + 'l', FCAL edit_do_last_sel },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Last Selection",   FL_COMMAND + 'l', FCAL edit_do_last_sel, 0, FL_MENU_DIVIDER },
 
 		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
 		{ "&Move Objects\u2026",  FL_F+2, FCAL edit_do_move },
 		{ "&Scale Objects\u2026", FL_F+3, FCAL edit_do_scale },
-		{ "Rotate Objects\u2026", FL_F+4, FCAL edit_do_rotate },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Rotate Objects\u2026", FL_F+4, FCAL edit_do_rotate, 0, FL_MENU_DIVIDER },
 
 		{ "Mirror &Horizontally",  0, FCAL edit_do_mirror_horiz },
 		{ "Mirror &Vertically",    0, FCAL edit_do_mirror_vert },
@@ -508,11 +492,9 @@ static Fl_Menu_Item menu_items[] =
 		{ "Toggle &3D View",           0, FCAL view_do_toggle_3d },
 		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
 		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
-		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
+		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums, 0, FL_MENU_DIVIDER },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "Sector Rendering", 0, 0, 0, FL_SUBMENU },
+		{ "Sector Rendering", 0, 0, 0, FL_SUBMENU|FL_MENU_DIVIDER },
 			{ "Nothing",   0, FCAL view_do_sector_render },
 			{ "Floors",    0, FCAL view_do_sector_render },
 			{ "Ceilings",  0, FCAL view_do_sector_render },
@@ -520,18 +502,12 @@ static Fl_Menu_Item menu_items[] =
 			{ "Sound",     0, FCAL view_do_sector_render },
 			{ 0 },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
 		{ "Zoom &In",      0, FCAL view_do_zoom_in },
 		{ "Zoom &Out",     0, FCAL view_do_zoom_out },
 		{ "&Whole Map",    0, FCAL view_do_whole_map },
-		{ "Whole &Selection", 0, FCAL view_do_whole_selection },
+		{ "Whole &Selection", 0, FCAL view_do_whole_selection, 0, FL_MENU_DIVIDER },
 
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props, 0, FL_MENU_DIVIDER },
 
 		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
 		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
@@ -543,21 +519,15 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "&Textures",     FL_F+5, FCAL browser_do_textures },
 		{ "&Flats",        FL_F+6, FCAL browser_do_flats },
-		{ "Thin&gs",       FL_F+7, FCAL browser_do_things },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Thin&gs",       FL_F+7, FCAL browser_do_things, 0, FL_MENU_DIVIDER },
 
 		{ "&Line Specials",     0, FCAL browser_do_lines },
 		{ "&Sector Types",      0, FCAL browser_do_sectors },
-		{ "&Generalized Types", 0, FCAL browser_do_gen_types },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Generalized Types", 0, FCAL browser_do_gen_types, 0, FL_MENU_DIVIDER },
 
 		{ "&Recent Textures", 0, FCAL browser_do_recent_tex },
 		{ "Recent Flats",     0, FCAL browser_do_recent_flats },
-		{ "Recent Things",    0, FCAL browser_do_recent_things },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "Recent Things",    0, FCAL browser_do_recent_things, 0, FL_MENU_DIVIDER },
 
 		{ "&Hide",            0, FCAL browser_hide },
 		{ 0 },
@@ -565,16 +535,12 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
 		{ "&ALL",           FL_F+9, FCAL checks_do_all },
-		{ "&Major stuff  ",      0, FCAL checks_do_major },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Major stuff  ",      0, FCAL checks_do_major, 0, FL_MENU_DIVIDER },
 
 		{ "&Vertices",     0, FCAL checks_do_vertices },
 		{ "&Sectors",      0, FCAL checks_do_sectors },
 		{ "&LineDefs",     0, FCAL checks_do_linedefs },
-		{ "&Things",       0, FCAL checks_do_things },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Things",       0, FCAL checks_do_things, 0, FL_MENU_DIVIDER },
 
 		{ "Te&xtures",     0, FCAL checks_do_textures },
 		{ "Ta&gs",         0, FCAL checks_do_tags },
@@ -585,14 +551,10 @@ static Fl_Menu_Item menu_items[] =
 #ifndef __APPLE__	// for macOS it will be in the app menu
 		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
 #endif
-		{ "&View Logs",          0,  FCAL tools_do_view_logs },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&View Logs",          0,  FCAL tools_do_view_logs, 0, FL_MENU_DIVIDER },
 
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
-		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
+		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes, 0, FL_MENU_DIVIDER },
 
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
