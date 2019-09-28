@@ -123,17 +123,17 @@ static void CollectOverlapGroup(selection_c& list)
 
 static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 {
-	float angle = n * 360 / total;
+	float angle = static_cast<float>(n * 360 / total);
 
-	float vec_x = cos(angle * M_PI / 180.0);
-	float vec_y = sin(angle * M_PI / 180.0);
+	float vec_x = static_cast<float>(cos(angle * M_PI / 180.0));
+	float vec_y = static_cast<float>(sin(angle * M_PI / 180.0));
 
-	float dist = 8 + 6 * MIN(100, total);
+	float dist = static_cast<float>(8 + 6 * MIN(100, total));
 
 	const Thing *T = Things[th];
 
-	BA_ChangeTH(th, Thing::F_X, T->x + vec_x * dist);
-	BA_ChangeTH(th, Thing::F_Y, T->y + vec_y * dist);
+	BA_ChangeTH(th, Thing::F_X, static_cast<int>(T->x + vec_x * dist));
+	BA_ChangeTH(th, Thing::F_Y, static_cast<int>(T->y + vec_y * dist));
 }
 
 

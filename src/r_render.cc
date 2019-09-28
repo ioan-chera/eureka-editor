@@ -216,7 +216,7 @@ public:
 			total += ApproxDistToLineDef(L, view_x, view_y);
 		}
 
-		return total / (double)adjust_lines.size();
+		return static_cast<float>(total / (double)adjust_lines.size());
 	}
 
 	void SaveOffsets()
@@ -327,12 +327,12 @@ public:
 		angle = new_ang;
 
 		if (angle >= 2*M_PI)
-			angle -= 2*M_PI;
+			angle -= static_cast<float>(2*M_PI);
 		else if (angle < 0)
-			angle += 2*M_PI;
+			angle += static_cast<float>(2*M_PI);
 
-		Sin = sin(angle);
-		Cos = cos(angle);
+		Sin = sinf(angle);
+		Cos = cosf(angle);
 	}
 
 	void FindGroundZ()
@@ -347,21 +347,21 @@ public:
 		{
 			Objid o;
 
-			GetNearObject(o, OBJ_SECTORS, int(x + dx*8), int(y + dy*8));
+			GetNearObject(o, OBJ_SECTORS, x + dx*8.0f, y + dy*8.0f);
 
 			if (o.num >= 0)
 				max_floor = MAX(max_floor, Sectors[o.num]->floorh);
 		}
 
 		if (max_floor != INT_MIN)
-			z = max_floor + game_info.view_height;
+			z = static_cast<float>(max_floor + game_info.view_height);
 	}
 
 	void CalcAspect()
 	{
-		aspect_sw = sw;	 // things break if these are different
+		aspect_sw = static_cast<float>(sw);	 // things break if these are different
 
-		aspect_sh = sw / (config::render_pixel_aspect / 100.0);
+		aspect_sh = static_cast<float>(sw / (config::render_pixel_aspect / 100.0));
 	}
 
 	void UpdateScreen(int ow, int oh)
@@ -400,7 +400,7 @@ public:
 		{
 			Objid obj;
 
-			GetNearObject(obj, OBJ_SECTORS, Things[i]->x, Things[i]->y);
+			GetNearObject(obj, OBJ_SECTORS, static_cast<float>(Things[i]->x), static_cast<float>(Things[i]->y));
 
 			thing_sectors[i] = obj.num;
 		}
@@ -958,19 +958,19 @@ public:
 	static inline float PointToAngle(float x, float y)
 	{
 		if (-0.01 < x && x < 0.01)
-			return (y > 0) ? M_PI/2 : (3 * M_PI/2);
+			return static_cast<float>((y > 0) ? M_PI/2 : (3 * M_PI/2));
 
-		float angle = atan2(y, x);
+		float angle = atan2f(y, x);
 
 		if (angle < 0)
-			angle += 2*M_PI;
+			angle += static_cast<float>(2*M_PI);
 
 		return angle;
 	}
 
 	static inline int AngleToX(float ang)
 	{
-		float t = tan(M_PI/2 - ang);
+		float t = static_cast<float>(tan(M_PI/2 - ang));
 
 		int x = int(view.aspect_sw * t);
 
@@ -988,12 +988,12 @@ public:
 	{
 		x = x * 2 - view.sw;
 
-		float ang = M_PI/2 + atan(x / view.aspect_sw);
+		float ang = static_cast<float>(M_PI/2 + atan(x / view.aspect_sw));
 
 		if (ang < 0)
 			ang = 0;
 		else if (ang > M_PI)
-			ang = M_PI;
+			ang = static_cast<float>(M_PI);
 
 		return ang;
 	}
@@ -1011,7 +1011,7 @@ public:
 	{
 		x = x * 2 - view.sw;
 
-		float tx = x / iz / view.aspect_sw;
+		float tx = static_cast<float>(x / iz / view.aspect_sw);
 
 		return tx;
 	}
@@ -1043,7 +1043,7 @@ public:
 	{
 		y = y * 2 - view.sh;
 
-		return view.z - (float(y) / view.aspect_sh / iz);
+		return static_cast<float>(view.z - (float(y) / view.aspect_sh / iz));
 	}
 
 	void AddLine(int ld_index)
@@ -1075,7 +1075,7 @@ public:
 		float span = angle1 - angle2;
 
 		if (span < 0)
-			span += 2*M_PI;
+			span += static_cast<float>(2*M_PI);
 
 		int side = SIDE_RIGHT;
 
@@ -1099,14 +1099,14 @@ public:
 
 		float base_ang = angle1;
 
-		float leftclip  = (3 * M_PI / 4);
-		float rightclip = M_PI / 4;
+		float leftclip  = static_cast<float>(3 * M_PI / 4);
+		float rightclip = static_cast<float>(M_PI / 4);
 
 		float tspan1 = angle1 - rightclip;
 		float tspan2 = leftclip - angle2;
 
-		if (tspan1 < 0) tspan1 += 2*M_PI;
-		if (tspan2 < 0) tspan2 += 2*M_PI;
+		if (tspan1 < 0) tspan1 += static_cast<float>(2*M_PI);
+		if (tspan2 < 0) tspan2 += static_cast<float>(2*M_PI);
 
 		if (tspan1 > M_PI/2)
 		{
@@ -1141,8 +1141,8 @@ public:
 		float wdx = x2 - x1;
 		float wdy = y2 - y1;
 
-		float wlen = sqrt(wdx * wdx + wdy * wdy);
-		float dist = fabs((y1 * wdx / wlen) - (x1 * wdy / wlen));
+		float wlen = sqrtf(wdx * wdx + wdy * wdy);
+		float dist = fabsf((y1 * wdx / wlen) - (x1 * wdy / wlen));
 
 		if (dist < 0.01)
 			return;
@@ -1183,7 +1183,7 @@ public:
 
 		dw->dist = dist;
 		dw->normal = normal;
-		dw->t_dist = tan(base_ang - normal) * dist;
+		dw->t_dist = tanf(base_ang - normal) * dist;
 
 		dw->iz1 = iz1;
 		dw->iz2 = iz2;
@@ -1223,8 +1223,8 @@ public:
 			is_unknown = true;
 		}
 
-		float tx1 = tx - sprite->width() * scale / 2.0;
-		float tx2 = tx + sprite->width() * scale / 2.0;
+		float tx1 = tx - sprite->width() * scale / 2.0f;
+		float tx2 = tx + sprite->width() * scale / 2.0f;
 
 		double iz = 1 / ty;
 
@@ -1248,12 +1248,12 @@ public:
 		{
 			// IOANCH 9/2015: also add z
 			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
-			h1 = h2 - sprite->height() * scale;
+			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
 			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
-			h2 = h1 + sprite->height() * scale;
+			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
 		// create drawwall structure
@@ -1528,10 +1528,10 @@ public:
 		int th = surf.img->height();
 
 		float ang = XToAngle(x);
-		float modv = cos(ang - M_PI/2);
+		float modv = static_cast<float>(cos(ang - M_PI/2));
 
-		float t_cos = cos(M_PI + -view.angle + ang) / modv;
-		float t_sin = sin(M_PI + -view.angle + ang) / modv;
+		float t_cos = static_cast<float>(cos(M_PI + -view.angle + ang) / modv);
+		float t_sin = static_cast<float>(sin(M_PI + -view.angle + ang) / modv);
 
 		dest += x + y1 * view.sw;
 
@@ -1562,7 +1562,7 @@ public:
 		int th = surf.img->height();
 
 		int  light = dw->wall_light;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* compute texture X coord */
 
@@ -1578,7 +1578,7 @@ public:
 		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
-		hh += 0.2;
+		hh += 0.2f;
 
 		src  += tx;
 		dest += x + y1 * view.sw;
@@ -1624,7 +1624,7 @@ public:
 	void SolidTexColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
 		int  light = dw->wall_light;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		img_pixel_t *dest = view.screen;
 
@@ -1739,7 +1739,7 @@ public:
 
 		int thsec = view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		if (query_mode & 2)
 		{
@@ -2319,7 +2319,7 @@ void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int 
 
 	fl_draw(buffer, cx, cy);
 
-	cx = cx + fl_width(buffer);
+	cx = static_cast<int>(cx + fl_width(buffer));
 }
 
 void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
@@ -2330,7 +2330,7 @@ void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, co
 
 	fl_draw(label, cx, cy);
 
-	cx = cx + fl_width(label) + 20;
+	cx = static_cast<int>(cx + fl_width(label) + 20);
 }
 
 
@@ -2379,7 +2379,7 @@ void UI_Render3D::IB_Highlight(int& cx, int& cy)
 
 	fl_draw(buffer, cx, cy);
 
-	cx = cx + fl_width(buffer);
+	cx = static_cast<int>(cx + fl_width(buffer));
 }
 
 
@@ -2414,12 +2414,12 @@ void Render3D_Setup()
 	{
 		// if player moved, re-create view parameters
 
-		view.x = view.px = player->x;
-		view.y = view.py = player->y;
+		view.x = static_cast<float>(view.px = player->x);
+		view.y = static_cast<float>(view.py = player->y);
 
 		view.FindGroundZ();
 
-		view.SetAngle(player->angle * M_PI / 180.0);
+		view.SetAngle(static_cast<float>(player->angle * M_PI / 180.0));
 	}
 	else
 	{
@@ -2504,8 +2504,8 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	bool is_strafe = (mod & MOD_ALT) ? true : false;
 
 	float mod_factor = 1.0;
-	if (mod & MOD_SHIFT)   mod_factor = 0.4;
-	if (mod & MOD_COMMAND) mod_factor = 2.5;
+	if (mod & MOD_SHIFT)   mod_factor = 0.4f;
+	if (mod & MOD_COMMAND) mod_factor = 2.5f;
 
 	float speed = view.scroll_speed * mod_factor;
 
@@ -2518,7 +2518,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	{
 		double d_ang = dx * speed * M_PI / 480.0;
 
-		view.SetAngle(view.angle - d_ang);
+		view.SetAngle(static_cast<float>(view.angle - d_ang));
 	}
 
 	dy = -dy;  //TODO CONFIG ITEM
@@ -2530,7 +2530,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	}
 	else if (! (config::render_lock_gravity && view.gravity))
 	{
-		view.z += dy * speed * 0.75;
+		view.z += dy * speed * 0.75f;
 
 		view.gravity = false;
 	}
@@ -2652,10 +2652,10 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	keycode_t mod = M_ReadLaxModifiers();
 
-	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
+	float factor = (mod & MOD_SHIFT) ? 0.25f : 1.0f;
 
 	if (config::render_high_detail)
-		factor = factor * 2.0;
+		factor = factor * 2.0f;
 
 	r_edit.adjust_dx -= dx * factor * r_edit.adjust_dx_factor;
 	r_edit.adjust_dy -= dy * factor * r_edit.adjust_dy_factor;
@@ -2713,9 +2713,9 @@ void Render3D_ClearNav()
 
 void Render3D_Navigate()
 {
-	float delay_ms = Nav_TimeDiff();
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
-	delay_ms = delay_ms / 1000.0;
+	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = M_ReadLaxModifiers();
 
@@ -3061,8 +3061,8 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 
 void Render3D_SetCameraPos(int new_x, int new_y)
 {
-	view.x = new_x;
-	view.y = new_y;
+	view.x = static_cast<float>(new_x);
+	view.y = static_cast<float>(new_y);
 
 	view.FindGroundZ();
 }
@@ -3070,11 +3070,11 @@ void Render3D_SetCameraPos(int new_x, int new_y)
 
 void Render3D_GetCameraPos(int *x, int *y, float *angle)
 {
-	*x = view.x;
-	*y = view.y;
+	*x = static_cast<int>(view.x);
+	*y = static_cast<int>(view.y);
 
 	// convert angle from radians to degrees
-	*angle = view.angle * 180.0 / M_PI;
+	*angle = static_cast<float>(view.angle * 180.0 / M_PI);
 }
 
 
@@ -3083,11 +3083,11 @@ bool Render3D_ParseUser(const std::vector<std::string> &tokens)
 	size_t num_tok = tokens.size();
 	if (tokens[0] == "camera" && num_tok >= 5)
 	{
-		view.x = atof(tokens[1].c_str());
-		view.y = atof(tokens[2].c_str());
-		view.z = atof(tokens[3].c_str());
+		view.x = static_cast<float>(atof(tokens[1].c_str()));
+		view.y = static_cast<float>(atof(tokens[2].c_str()));
+		view.z = static_cast<float>(atof(tokens[3].c_str()));
 
-		view.SetAngle(atof(tokens[4].c_str()));
+		view.SetAngle(static_cast<float>(atof(tokens[4].c_str())));
 		return true;
 	}
 
@@ -3173,7 +3173,7 @@ void R3D_Click()
 
 void R3D_Forward()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.x += view.Cos * dist;
 	view.y += view.Sin * dist;
@@ -3184,7 +3184,7 @@ void R3D_Forward()
 
 void R3D_Backward()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.x -= view.Cos * dist;
 	view.y -= view.Sin * dist;
@@ -3195,7 +3195,7 @@ void R3D_Backward()
 
 void R3D_Left()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.x -= view.Sin * dist;
 	view.y += view.Cos * dist;
@@ -3206,7 +3206,7 @@ void R3D_Left()
 
 void R3D_Right()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.x += view.Sin * dist;
 	view.y -= view.Cos * dist;
@@ -3225,7 +3225,7 @@ void R3D_Up()
 
 	view.gravity = false;
 
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.z += dist;
 
@@ -3242,7 +3242,7 @@ void R3D_Down()
 
 	view.gravity = false;
 
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	view.z -= dist;
 
@@ -3252,10 +3252,10 @@ void R3D_Down()
 
 void R3D_Turn()
 {
-	float angle = atof(EXEC_Param[0]);
+	float angle = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	angle = angle * M_PI / 180.0;
+	angle = static_cast<float>(angle * M_PI / 180.0);
 
 	view.SetAngle(view.angle + angle);
 
@@ -3284,7 +3284,7 @@ void R3D_NAV_Forward()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_fwd = atof(EXEC_Param[0]);
+	view.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 }
@@ -3303,7 +3303,7 @@ void R3D_NAV_Back()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_back = atof(EXEC_Param[0]);
+	view.nav_back = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
@@ -3322,7 +3322,7 @@ void R3D_NAV_Right()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_right = atof(EXEC_Param[0]);
+	view.nav_right = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 }
@@ -3341,7 +3341,7 @@ void R3D_NAV_Left()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_left = atof(EXEC_Param[0]);
+	view.nav_left = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
@@ -3368,7 +3368,7 @@ void R3D_NAV_Up()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_up = atof(EXEC_Param[0]);
+	view.nav_up = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 }
@@ -3395,7 +3395,7 @@ void R3D_NAV_Down()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	view.nav_down = atof(EXEC_Param[0]);
+	view.nav_down = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
 }
@@ -3414,10 +3414,10 @@ void R3D_NAV_TurnLeft()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float turn = atof(EXEC_Param[0]);
+	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	view.nav_turn_L = turn * M_PI / 180.0;
+	view.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
@@ -3436,10 +3436,10 @@ void R3D_NAV_TurnRight()
 	if (! edit.is_navigating)
 		Render3D_ClearNav();
 
-	float turn = atof(EXEC_Param[0]);
+	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	view.nav_turn_R = turn * M_PI / 180.0;
+	view.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
@@ -3455,7 +3455,7 @@ void R3D_NAV_MouseMove()
 	if (! EXEC_CurKey)
 		return;
 
-	view.scroll_speed = atof(EXEC_Param[0]);
+	view.scroll_speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
@@ -3676,12 +3676,12 @@ void R3D_Align()
 
 void R3D_WHEEL_Move()
 {
-	float dx = Fl::event_dx();
-	float dy = Fl::event_dy();
+	float dx = static_cast<float>(Fl::event_dx());
+	float dy = static_cast<float>(Fl::event_dy());
 
 	dy = 0 - dy;
 
-	float speed = atof(EXEC_Param[0]);
+	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (Exec_HasFlag("/LAX"))
 	{

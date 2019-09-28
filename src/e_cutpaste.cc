@@ -674,8 +674,8 @@ static bool Clipboard_DoPaste()
 		return false;
 
 	// figure out where to put stuff
-	int pos_x = edit.map_x;
-	int pos_y = edit.map_y;
+	int pos_x = static_cast<int>(edit.map_x);
+	int pos_y = static_cast<int>(edit.map_y);
 
 	if (! edit.pointer_in_window)
 	{

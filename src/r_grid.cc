@@ -206,7 +206,7 @@ bool Grid_State_c::OnGrid(int map_x, int map_y) const
 
 void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
 {
-	float dist_factor = (1.0 - before_Scale / Scale);
+	float dist_factor = (1.0f - before_Scale / Scale);
 
 	orig_x += (map_x - orig_x) * dist_factor;
 	orig_y += (map_y - orig_y) * dist_factor;
@@ -262,7 +262,7 @@ void Grid_State_c::ScaleFromWidget(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_SCALE_VALUES);
 
-	Scale = scale_values[i];
+	Scale = static_cast<float>(scale_values[i]);
 
 	if (! main_win)
 		return;
@@ -435,7 +435,7 @@ void Grid_State_c::DoSetScale(double new_scale)
 
 	for (int i = NUM_SCALE_VALUES-1 ; i >= 0 ; i--)
 	{
-		float ratio = scale_values[i] / new_scale;
+		float ratio = static_cast<float>(scale_values[i] / new_scale);
 
 		if (ratio > 0.99 && ratio < 1.01)
 		{
@@ -444,7 +444,7 @@ void Grid_State_c::DoSetScale(double new_scale)
 		}
 	}
 
-	Scale = scale_values[index];
+	Scale = static_cast<float>(scale_values[index]);
 
 	if (main_win)
 	{

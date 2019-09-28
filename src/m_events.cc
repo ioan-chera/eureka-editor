@@ -161,9 +161,9 @@ void Editor_ClearNav()
 
 static void Editor_Navigate()
 {
-	float delay_ms = Nav_TimeDiff();
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
-	delay_ms = delay_ms / 1000.0;
+	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = M_ReadLaxModifiers();
 
@@ -484,7 +484,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y);
+		main_win->canvas->TransformUpdate(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 		return;
 	}
 
@@ -496,13 +496,13 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_SELBOX)
 	{
-		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
+		main_win->canvas->SelboxUpdate(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 		return;
 	}
 
 	if (edit.action == ACT_DRAG)
 	{
-		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+		main_win->canvas->DragUpdate(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 
 		// if dragging a single vertex, update the possible split_line
 		UpdateHighlight();
@@ -869,7 +869,7 @@ static void ParseOperationLine(const std::vector<std::string> &tokens, MenuAddin
 	info->cmd = cmd;
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if (num_tok >= 4 + p)
+		if (static_cast<int>(num_tok) >= 4 + p)
 			strncpy(info->param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
 	adding.flush(false);

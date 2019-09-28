@@ -254,9 +254,9 @@ rgb_color_t ParseColor(const char *str)
 
 rgb_color_t SectorLightColor(int light)
 {
-	float lt = CLAMP(0, (light | 15), 256) / 256.0;
+	float lt = CLAMP(0, (light | 15), 256) / 256.0f;
 
-	lt = pow(lt, 1.5);
+	lt = static_cast<float>(pow(lt, 1.5));
 
 	light = CLAMP(48, (int)(lt * 256), 255);
 

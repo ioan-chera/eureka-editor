@@ -336,7 +336,7 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_RotateDialog * that = (UI_RotateDialog *)data;
 
-	float angle = atof(that->angle->value());
+	float angle = static_cast<float>(atof(that->angle->value()));
 
 	if (that->dir->value() == 0)
 		angle = -angle;

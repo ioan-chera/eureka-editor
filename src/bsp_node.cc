@@ -1989,17 +1989,17 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 	if (best->side == 0)
 	{
-		node->x  = best->linedef->start->x;
-		node->y  = best->linedef->start->y;
-		node->dx = best->linedef->end->x - node->x;
-		node->dy = best->linedef->end->y - node->y;
+		node->x  = static_cast<int>(best->linedef->start->x);
+		node->y  = static_cast<int>(best->linedef->start->y);
+		node->dx = static_cast<int>(best->linedef->end->x - node->x);
+		node->dy = static_cast<int>(best->linedef->end->y - node->y);
 	}
 	else  /* left side */
 	{
-		node->x  = best->linedef->end->x;
-		node->y  = best->linedef->end->y;
-		node->dx = best->linedef->start->x - node->x;
-		node->dy = best->linedef->start->y - node->y;
+		node->x  = static_cast<int>(best->linedef->end->x);
+		node->y  = static_cast<int>(best->linedef->end->y);
+		node->dx = static_cast<int>(best->linedef->start->x - node->x);
+		node->dy = static_cast<int>(best->linedef->start->y - node->y);
 	}
 
 	/* check for really long partition (overflows dx,dy in NODES) */

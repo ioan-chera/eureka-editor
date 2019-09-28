@@ -377,8 +377,8 @@ void CMD_BrowserMode()
 void CMD_Scroll()
 {
 	// these are percentages
-	float delta_x = atof(EXEC_Param[0]);
-	float delta_y = atof(EXEC_Param[1]);
+	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
+	float delta_y = static_cast<float>(atof(EXEC_Param[1]));
 
 	if (delta_x == 0 && delta_y == 0)
 	{
@@ -388,8 +388,8 @@ void CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta_x = delta_x * base_size / 100.0 / grid.Scale;
-	delta_y = delta_y * base_size / 100.0 / grid.Scale;
+	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
+	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
 
 	grid.Scroll(delta_x, delta_y);
 }
@@ -408,9 +408,9 @@ void CMD_NAV_Scroll_Left()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_left = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_scroll_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
 }
@@ -429,9 +429,9 @@ void CMD_NAV_Scroll_Right()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_right = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_scroll_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
 }
@@ -450,9 +450,9 @@ void CMD_NAV_Scroll_Up()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_up = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_scroll_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
 }
@@ -471,9 +471,9 @@ void CMD_NAV_Scroll_Down()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_down = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_scroll_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
 }
@@ -492,7 +492,7 @@ void CMD_NAV_MouseScroll()
 	if (! EXEC_CurKey)
 		return;
 
-	edit.scroll_speed = atof(EXEC_Param[0]);
+	edit.scroll_speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
@@ -660,8 +660,8 @@ void CMD_ACT_Click()
 		mouse_button1_x = Fl::event_x();
 		mouse_button1_y = Fl::event_y();
 
-		button1_map_x = edit.map_x;
-		button1_map_y = edit.map_y;
+		button1_map_x = static_cast<int>(edit.map_x);
+		button1_map_y = static_cast<int>(edit.map_y);
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
@@ -714,7 +714,7 @@ void CMD_ACT_Click()
 	{
 		Editor_SetAction(ACT_SELBOX);
 
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		main_win->canvas->SelboxBegin(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 		return;
 	}
 
@@ -736,7 +736,7 @@ void CMD_ACT_SelectBox()
 
 	Editor_SetAction(ACT_SELBOX);
 
-	main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+	main_win->canvas->SelboxBegin(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 }
 
 
@@ -759,10 +759,10 @@ void CMD_ACT_Drag()
 
 	int focus_x, focus_y;
 
-	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+	GetDragFocus(&focus_x, &focus_y, static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 
 	Editor_SetAction(ACT_DRAG);
-	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
+	main_win->canvas->DragBegin(focus_x, focus_y, static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 
 	edit.drag_single_obj = -1;
 
@@ -844,7 +844,7 @@ void CMD_ACT_Transform()
 
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y, mode);
+	main_win->canvas->TransformBegin(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y), middle_x, middle_y, mode);
 
 	Editor_SetAction(ACT_TRANSFORM);
 }
@@ -852,7 +852,7 @@ void CMD_ACT_Transform()
 
 void CMD_WHEEL_Scroll()
 {
-	float speed = atof(EXEC_Param[0]);
+	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (Exec_HasFlag("/LAX"))
 	{
@@ -864,12 +864,12 @@ void CMD_WHEEL_Scroll()
 			speed *= 3.0;
 	}
 
-	float delta_x =     wheel_dx;
-	float delta_y = 0 - wheel_dy;
+	float delta_x = static_cast<float>(wheel_dx);
+	float delta_y = static_cast<float>(0 - wheel_dy);
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = speed * base_size / 100.0 / grid.Scale;
+	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
 	grid.Scroll(delta_x * speed, delta_y * speed);
 }
@@ -939,8 +939,8 @@ void CMD_Zoom()
 		return;
 	}
 
-	int mid_x = edit.map_x;
-	int mid_y = edit.map_y;
+	int mid_x = static_cast<int>(edit.map_x);
+	int mid_y = static_cast<int>(edit.map_y);
 
 	if (Exec_HasFlag("/center"))
 	{
@@ -999,8 +999,8 @@ void CMD_PlaceCamera()
 		return;
 	}
 
-	int x = edit.map_x;
-	int y = edit.map_y;
+	int x = static_cast<int>(edit.map_x);
+	int y = static_cast<int>(edit.map_y);
 
 	Render3D_SetCameraPos(x, y);
 
@@ -1104,7 +1104,7 @@ void CMD_GRID_Zoom()
 
 	grid.NearestScale(scale);
 
-	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+	grid.RefocusZoom(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y), S1);
 }
 
 

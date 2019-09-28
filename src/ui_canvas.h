@@ -150,8 +150,8 @@ private:
 	void DragDelta(int *dx, int *dy);
 
 	// convert screen coordinates to map coordinates
-	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
-	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
+	inline float MAPX(int sx) const { return static_cast<float>(grid.orig_x + (sx - w()/2 - x()) / grid.Scale); }
+	inline float MAPY(int sy) const { return static_cast<float>(grid.orig_y + (h()/2 - sy + y()) / grid.Scale); }
 
 	// convert map coordinates to screen coordinates
 	inline int SCREENX(int mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }

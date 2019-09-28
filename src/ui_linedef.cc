@@ -853,7 +853,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = LineDefs[n]->CalcLength();
+	float len_f = static_cast<float>(LineDefs[n]->CalcLength());
 
 	char buffer[300];
 

@@ -236,7 +236,7 @@ void UpdateHighlight()
 	}
 
 
-	UpdateSplitLine(edit.map_x, edit.map_y);
+	UpdateSplitLine(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y));
 
 
 	// in drawing mode, highlight extends to a vertex at the snap position
@@ -244,8 +244,8 @@ void UpdateHighlight()
 		edit.action == ACT_DRAW_LINE &&
 		edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int new_x = grid.SnapX(edit.map_x);
-		int new_y = grid.SnapY(edit.map_y);
+		int new_x = grid.SnapX(static_cast<int>(edit.map_x));
+		int new_y = grid.SnapY(static_cast<int>(edit.map_y));
 
 		int near_vert = Vertex_FindExact(new_x, new_y);
 
@@ -663,7 +663,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
 			//    continue;
 
-			Objid obj;  GetNearObject(obj, OBJ_SECTORS, T->x, T->y);
+			Objid obj;  GetNearObject(obj, OBJ_SECTORS, static_cast<float>(T->x), static_cast<float>(T->y));
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{

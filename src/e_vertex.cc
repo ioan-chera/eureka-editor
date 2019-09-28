@@ -781,7 +781,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	int mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
+	int mul = static_cast<int>(1.0 / CLAMP(0.25, grid.Scale, 1.0));
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;

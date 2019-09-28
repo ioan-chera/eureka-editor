@@ -89,8 +89,8 @@ static void CreateSquare(int model)
 	else
 		Sectors[new_sec]->SetDefaults();
 
-	int x1 = grid.QuantSnapX(edit.map_x, false);
-	int y1 = grid.QuantSnapX(edit.map_y, false);
+	int x1 = grid.QuantSnapX(static_cast<int>(edit.map_x), false);
+	int y1 = grid.QuantSnapX(static_cast<int>(edit.map_y), false);
 
 	int x2 = x1 + config::new_sector_size;
 	int y2 = y1 + config::new_sector_size;
@@ -152,8 +152,8 @@ static void Insert_Thing()
 		}
 	}
 
-	T->x = grid.SnapX(edit.map_x);
-	T->y = grid.SnapY(edit.map_y);
+	T->x = grid.SnapX(static_cast<int>(edit.map_x));
+	T->y = grid.SnapY(static_cast<int>(edit.map_y));
 
 	recent_things.insert_number(T->type);
 
@@ -405,8 +405,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	int old_vert = -1;
 	int new_vert = -1;
 
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
+	int new_x = grid.SnapX(static_cast<int>(edit.map_x));
+	int new_y = grid.SnapY(static_cast<int>(edit.map_y));
 
 	int orig_num_sectors = NumSectors;
 
@@ -607,7 +607,7 @@ static void Insert_Sector()
 	}
 
 	// if outside of the map, create a square
-	if (PointOutsideOfMap(edit.map_x, edit.map_y))
+	if (PointOutsideOfMap(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y)))
 	{
 		BA_Begin();
 
@@ -640,7 +640,7 @@ static void Insert_Sector()
 	BA_Begin();
 	BA_Message("added new sector");
 
-	bool ok = AssignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
+	bool ok = AssignSectorToSpace(static_cast<int>(edit.map_x), static_cast<int>(edit.map_y), -1 /* create */, model);
 
 	BA_End();
 
@@ -1334,13 +1334,13 @@ void transform_t::Clear()
 
 void transform_t::Apply(int *x, int *y) const
 {
-	float x0 = *x - mid_x;
-	float y0 = *y - mid_y;
+	float x0 = static_cast<float>(*x - mid_x);
+	float y0 = static_cast<float>(*y - mid_y);
 
 	if (rotate)
 	{
-		float s = sin(rotate * M_PI / 32768.0);
-		float c = cos(rotate * M_PI / 32768.0);
+		float s = static_cast<float>(sin(rotate * M_PI / 32768.0));
+		float c = static_cast<float>(cos(rotate * M_PI / 32768.0));
 
 		float x1 = x0;
 		float y1 = y0;
@@ -1730,9 +1730,9 @@ static void DoScaleTwoThings(selection_c& list, transform_t& param)
 		BA_ChangeTH(*it, Thing::F_X, new_x);
 		BA_ChangeTH(*it, Thing::F_Y, new_y);
 
-		float rot1 = param.rotate / 8192.0;
+		float rot1 = static_cast<float>(param.rotate / 8192.0);
 
-		int ang_diff = I_ROUND(rot1) * 45.0;
+		int ang_diff = static_cast<int>(I_ROUND(rot1) * 45.0);
 
 		if (ang_diff)
 		{
@@ -1856,8 +1856,8 @@ void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
 
 	param.Clear();
 
-	param.scale_x = scale_x;
-	param.scale_y = scale_y;
+	param.scale_x = static_cast<float>(scale_x);
+	param.scale_y = static_cast<float>(scale_y);
 
 	DetermineOrigin(param, pos_x, pos_y);
 
@@ -1920,8 +1920,8 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 
 	param.Clear();
 
-	param.scale_x = scale_x;
-	param.scale_y = scale_y;
+	param.scale_x = static_cast<float>(scale_x);
+	param.scale_y = static_cast<float>(scale_y);
 
 	DetermineOrigin(param, pos_x, pos_y);
 
@@ -1992,7 +1992,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 
 	if (EXEC_Param[0][0])
 	{
-		mul = atof(EXEC_Param[0]);
+		mul = static_cast<float>(atof(EXEC_Param[0]));
 
 		if (mul < 0.02 || mul > 50)
 		{
@@ -2002,7 +2002,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	}
 
 	if (do_shrink)
-		mul = 1.0 / mul;
+		mul = 1.0f / mul;
 
 
 	transform_t param;

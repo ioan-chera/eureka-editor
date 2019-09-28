@@ -186,7 +186,7 @@ void UI_NodeDialog::SetProg(int perc)
 
 	snprintf(prog_label, sizeof(prog_label), "%d%%", perc);
 
-	progress->value(perc);
+	progress->value(static_cast<float>(perc));
 	progress->label(prog_label);
 
 	Fl::check();

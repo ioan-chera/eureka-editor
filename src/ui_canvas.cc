@@ -167,11 +167,11 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = floor(MAPX(x()));
-	map_ly = floor(MAPY(y() + h()));
+	map_lx = static_cast<int>(floor(MAPX(x())));
+	map_ly = static_cast<int>(floor(MAPY(y() + h())));
 
-	map_hx = ceil(MAPX(x() + w()));
-	map_hy = ceil(MAPY(y()));
+	map_hx = static_cast<int>(ceil(MAPX(x() + w())));
+	map_hy = static_cast<int>(ceil(MAPY(y())));
 
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
@@ -476,7 +476,7 @@ void UI_Canvas::DrawMapBounds()
 //
 int vertex_radius(double scale)
 {
-	int r = 6 * (0.26 + scale / 2);
+	int r = static_cast<int>(6 * (0.26 + scale / 2));
 
 	if (r > 12) r = 12;
 
@@ -940,13 +940,13 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 	int W = img->width();
 	int H = img->height();
 
-	scale = scale * 0.5;
+	scale = scale * 0.5f;
 
-	int bx1 = SCREENX(map_x - W * scale);
-	int bx2 = SCREENX(map_x + W * scale);
+	int bx1 = SCREENX(static_cast<int>(map_x - W * scale));
+	int bx2 = SCREENX(static_cast<int>(map_x + W * scale));
 
-	int by1 = SCREENY(map_y + H * scale);
-	int by2 = SCREENY(map_y - H * scale);
+	int by1 = SCREENY(static_cast<int>(map_y + H * scale));
+	int by2 = SCREENY(static_cast<int>(map_y - H * scale));
 
 	// prevent division by zero
 	if (bx2 <= bx1) bx2 = bx1 + 1;
@@ -1055,7 +1055,7 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	if (side)
 	{
 		int len = MAX(4, MAX(abs(dx), abs(dy)));
-		int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 1.0);
+		int want_len = static_cast<int>(4 + 10 * CLAMP(0.25, grid.Scale, 1.0));
 
 		mx += dx * want_len / len;
 		my += dy * want_len / len;
@@ -1090,7 +1090,7 @@ void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 		fl_rectf(x - 1, y - 1, 3, 3);
 		return;
 #endif
-		x -= fl_width(buffer) / 2;
+		x -= static_cast<int>(fl_width(buffer) / 2);
 		y += fl_descent();
 	}
 
@@ -1641,8 +1641,8 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 //
 void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
-	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);
-	int map_y2 = map_y1 + r * sin(angle * M_PI / 180.0);
+	int map_x2 = static_cast<int>(map_x1 + r * cos(angle * M_PI / 180.0));
+	int map_y2 = static_cast<int>(map_y1 + r * sin(angle * M_PI / 180.0));
 
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
@@ -1677,12 +1677,12 @@ void UI_Canvas::DrawCamera()
 	int scr_x = SCREENX(map_x);
 	int scr_y = SCREENY(map_y);
 
-	float size = sqrt(grid.Scale) * 40;
+	float size = sqrtf(grid.Scale) * 40;
 
 	if (size < 8) size = 8;
 
-	int dx = size *  cos(angle * M_PI / 180.0);
-	int dy = size * -sin(angle * M_PI / 180.0);
+	int dx = static_cast<int>(size *  cos(angle * M_PI / 180.0));
+	int dy = static_cast<int>(size * -sin(angle * M_PI / 180.0));
 
 	fl_color(CAMERA_COLOR);
 
@@ -1717,8 +1717,8 @@ void UI_Canvas::DrawCurrentLine()
 	if (edit.drawing_from < 0)
 		return;
 
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
+	int new_x = grid.SnapX(static_cast<int>(edit.map_x));
+	int new_y = grid.SnapY(static_cast<int>(edit.map_y));
 
 	// should draw a vertex?
 	if (highlight.valid())
@@ -1751,7 +1751,7 @@ void UI_Canvas::DrawCurrentLine()
 
 	if (dx || dy)
 	{
-		float length = sqrt(dx * dx + dy * dy);
+		float length = static_cast<float>(sqrt(dx * dx + dy * dy));
 
 		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
 	}
@@ -2359,8 +2359,8 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
-			int x1 = floor(E1->x);
-			int x2 = floor(E2->x);
+			int x1 = static_cast<int>(floor(E1->x));
+			int x2 = static_cast<int>(floor(E2->x));
 
 			// completely off the screen?
 			if (x2 < x() || x1 >= x() + w())

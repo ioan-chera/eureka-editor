@@ -151,7 +151,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 		const char *text = labels ? (*labels)[b].c_str() :
 		                   (icon_type == '?') ? "OK" : "Close";
 
-		int b_width = fl_width(text) + 20;
+		int b_width = static_cast<int>(fl_width(text) + 20);
 
 		Fl_Button *button = new Fl_Button(but_x - b_width, but_y, b_width, BUT_H, text);
 

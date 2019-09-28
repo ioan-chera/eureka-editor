@@ -55,36 +55,36 @@ float ApproxDistToLineDef(const LineDef * L, float x, float y)
 		// case 1: x is to the left of the linedef
 		//         hence return distance to the left-most vertex
 		if (x < (dx > 0 ? x1 : x2))
-			return hypot(x - (dx > 0 ? x1 : x2),
-						 y - (dx > 0 ? y1 : y2));
+			return static_cast<float>(hypot(x - (dx > 0 ? x1 : x2),
+						 y - (dx > 0 ? y1 : y2)));
 
 		// case 2: x is to the right of the linedef
 		//         hence return distance to the right-most vertex
 		if (x > (dx > 0 ? x2 : x1))
-			return hypot(x - (dx > 0 ? x2 : x1),
-						 y - (dx > 0 ? y2 : y1));
+			return static_cast<float>(hypot(x - (dx > 0 ? x2 : x1),
+						 y - (dx > 0 ? y2 : y1)));
 
 		// case 3: x is in-between (and not equal to) both vertices
 		//         hence use slope formula to get intersection point
 		float y3 = y1 + (x - x1) * (float)dy / (float)dx;
 
-		return fabs(y3 - y);
+		return static_cast<float>(fabs(y3 - y));
 	}
 	else
 	{
 		// The linedef is rather vertical
 
 		if (y < (dy > 0 ? y1 : y2))
-			return hypot(x - (dy > 0 ? x1 : x2),
-						 y - (dy > 0 ? y1 : y2));
+			return static_cast<float>(hypot(x - (dy > 0 ? x1 : x2),
+						 y - (dy > 0 ? y1 : y2)));
 
 		if (y > (dy > 0 ? y2 : y1))
-			return hypot(x - (dy > 0 ? x2 : x1),
-						 y - (dy > 0 ? y2 : y1));
+			return static_cast<float>(hypot(x - (dy > 0 ? x2 : x1),
+						 y - (dy > 0 ? y2 : y1)));
 
 		float x3 = x1 + (y - y1) * (float)dx / (float)dy;
 
-		return fabs(x3 - x);
+		return static_cast<float>(fabs(x3 - x));
 	}
 }
 
@@ -92,7 +92,7 @@ float ApproxDistToLineDef(const LineDef * L, float x, float y)
 int ClosestLine_CastingHoriz(int x, int y, int *side)
 {
 	int   best_match = -1;
-	float best_dist  = 9e9;
+	float best_dist  = 9e9f;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -110,12 +110,12 @@ int ClosestLine_CastingHoriz(int x, int y, int *side)
 		int lx1 = LineDefs[n]->Start()->x;
 		int lx2 = LineDefs[n]->End()->x;
 
-		float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
+		float dist = static_cast<float>(lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1));
 
 		if (fabs(dist) < best_dist)
 		{
 			best_match = n;
-			best_dist  = fabs(dist);
+			best_dist  = static_cast<float>(fabs(dist));
 
 			if (side)
 			{
@@ -136,7 +136,7 @@ int ClosestLine_CastingHoriz(int x, int y, int *side)
 int ClosestLine_CastingVert(int x, int y, int *side)
 {
 	int   best_match = -1;
-	float best_dist  = 9e9;
+	float best_dist  = 9e9f;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -154,12 +154,12 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 		int ly1 = LineDefs[n]->Start()->y;
 		int ly2 = LineDefs[n]->End()->y;
 
-		float dist = ly1 - (y + 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
+		float dist = static_cast<float>(ly1 - (y + 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1));
 
 		if (fabs(dist) < best_dist)
 		{
 			best_match = n;
-			best_dist  = fabs(dist);
+			best_dist  = static_cast<float>(fabs(dist));
 
 			if (side)
 			{
@@ -180,7 +180,7 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 int ClosestLine_CastAtAngle(int x, int y, float radians)
 {
 	int   best_match = -1;
-	float best_dist  = 9e9;
+	float best_dist  = 9e9f;
 
 	double x2 = x + 256 * cos(radians);
 	double y2 = y + 256 * sin(radians);
@@ -189,15 +189,15 @@ int ClosestLine_CastAtAngle(int x, int y, float radians)
 	{
 		const LineDef *L = LineDefs[n];
 
-		float a = PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		float b = PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		float a = static_cast<float>(PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2));
+		float b = static_cast<float>(PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2));
 
 		// completely on one side of the vector?
 		if (a > 0 && b > 0) continue;
 		if (a < 0 && b < 0) continue;
 
-		float c = AlongDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		float d = AlongDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		float c = static_cast<float>(AlongDist(L->Start()->x, L->Start()->y,  x, y, x2, y2));
+		float d = static_cast<float>(AlongDist(L->  End()->x, L->  End()->y,  x, y, x2, y2));
 
 		float dist;
 
@@ -242,7 +242,7 @@ bool PointOutsideOfMap(int x, int y)
 		// does the linedef cross the horizontal ray?
 		if (MIN(ly1, ly2) <= y && MAX(ly1, ly2) >= y + 1)
 		{
-			float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
+			float dist = static_cast<float>(lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1));
 
 			dirs |= (dist < 0) ? 1 : 2;
 
@@ -252,7 +252,7 @@ bool PointOutsideOfMap(int x, int y)
 		// does the linedef cross the vertical ray?
 		if (MIN(lx1, lx2) <= x && MAX(lx1, lx2) >= x + 1)
 		{
-			float dist = ly1 - (y - 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
+			float dist = static_cast<float>(ly1 - (y - 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1));
 
 			dirs |= (dist < 0) ? 4 : 8;
 
@@ -300,19 +300,19 @@ public:
 
 		is_horizontal = abs(dy) >= abs(dx);
 
-		x = L->Start()->x + dx * 0.5;
-		y = L->Start()->y + dy * 0.5;
+		x = static_cast<float>(L->Start()->x + dx * 0.5);
+		y = static_cast<float>(L->Start()->y + dy * 0.5);
 
 		if (is_horizontal && (dy & 1) == 0 && abs(dy) > 0)
 		{
-			y = y + 0.5;
-			x = x + 0.5 * dx / (float)dy;
+			y = y + 0.5f;
+			x = static_cast<float>(x + 0.5 * dx / (float)dy);
 		}
 
 		if (!is_horizontal && (dx & 1) == 0 && abs(dx) > 0)
 		{
-			x = x + 0.5;
-			y = y + 0.5 * dy / (float)dx;
+			x = x + 0.5f;
+			y = static_cast<float>(y + 0.5 * dy / (float)dx);
 		}
 	}
 
@@ -557,7 +557,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_line
 		return -1;
 
 	test.best_match = -1;
-	test.best_dist  = 9e9;
+	test.best_dist  = 9e9f;
 
 	if (fastopp_X_tree)
 	{
@@ -653,10 +653,10 @@ static Objid NearestLineDef(float x, float y)
 	// slack in map units
 	float mapslack = 2 + 16.0f / grid.Scale;
 
-	int lx = floor(x - mapslack);
-	int ly = floor(y - mapslack);
-	int hx =  ceil(x + mapslack);
-	int hy =  ceil(y + mapslack);
+	int lx = static_cast<int>(floor(x - mapslack));
+	int ly = static_cast<int>(floor(y - mapslack));
+	int hx = static_cast<int>(ceil(x + mapslack));
+	int hy = static_cast<int>(ceil(y + mapslack));
 
 	int    best = -1;
 	double best_dist = 9e9;
@@ -739,7 +739,7 @@ static Objid NearestSplitLine(int x, int y, int ignore_vert)
 			abs(L->Start()->y - L->End()->y) < 4)
 			continue;
 
-		double dist = ApproxDistToLineDef(L, x, y);
+		double dist = ApproxDistToLineDef(L, static_cast<float>(x), static_cast<float>(y));
 
 		if (dist > mapslack)
 			continue;
@@ -781,8 +781,8 @@ static Objid NearestSector(int x, int y)
 		/* nothing needed */
 	}
 	else if (line1 < 0 ||
-	         ApproxDistToLineDef(LineDefs[line2], x, y) <
-	         ApproxDistToLineDef(LineDefs[line1], x, y))
+	         ApproxDistToLineDef(LineDefs[line2], static_cast<float>(x), static_cast<float>(y)) <
+	         ApproxDistToLineDef(LineDefs[line1], static_cast<float>(x), static_cast<float>(y)))
 	{
 		line1 = line2;
 		side1 = side2;
@@ -810,12 +810,12 @@ static Objid NearestThing(float x, float y)
 {
 	float mapslack = 1 + 16.0f / grid.Scale;
 
-	int max_radius = MAX_RADIUS + ceil(mapslack);
+	int max_radius = static_cast<int>(MAX_RADIUS + ceil(mapslack));
 
-	int lx = x - max_radius;
-	int ly = y - max_radius;
-	int hx = x + max_radius;
-	int hy = y + max_radius;
+	int lx = static_cast<int>(x - max_radius);
+	int ly = static_cast<int>(y - max_radius);
+	int hx = static_cast<int>(x + max_radius);
+	int hy = static_cast<int>(y + max_radius);
 
 	int best = -1;
 	thing_comparer_t best_comp;
@@ -833,7 +833,7 @@ static Objid NearestThing(float x, float y)
 		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
 		// more accurate bbox test using the real radius
-		int r = info.radius + mapslack;
+		int r = static_cast<int>(info.radius + mapslack);
 
 		if (x < tx - r - mapslack || x > tx + r + mapslack ||
 			y < ty - r - mapslack || y > ty + r + mapslack)
@@ -870,13 +870,13 @@ static Objid NearestVertex(float x, float y)
 	float mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if (grid.Scale >= 15.0) mapslack *= 0.7;
-	if (grid.Scale >= 31.0) mapslack *= 0.5;
+	if (grid.Scale >= 15.0) mapslack *= 0.7f;
+	if (grid.Scale >= 31.0) mapslack *= 0.5f;
 
-	int lx = floor(x - mapslack);
-	int ly = floor(y - mapslack);
-	int hx =  ceil(x + mapslack);
-	int hy =  ceil(y + mapslack);
+	int lx = static_cast<int>(floor(x - mapslack));
+	int ly = static_cast<int>(floor(y - mapslack));
+	int hx = static_cast<int>(ceil(x + mapslack));
+	int hy = static_cast<int>(ceil(y + mapslack));
 
 	int    best = -1;
 	double best_dist = 9e9;
@@ -941,7 +941,7 @@ void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
 
 		case OBJ_SECTORS:
 		{
-			o = NearestSector(x, y);
+			o = NearestSector(static_cast<int>(x), static_cast<int>(y));
 			break;
 		}
 
