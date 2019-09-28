@@ -69,12 +69,30 @@ XDG utilities (which install the desktop and icon files).
 COMPILING (Windows)
 ===================
 
+Compiling from Windows via Visual Studio
+----------------------------------------
+
+You have a Visual Studio solution under the vstudio/ folder. But in order to
+build Eureka, you also need to download FLTK.
+
+After downloading the last FLTK source, you need to build it using Visual Stu-
+dio. After it builds successfully, create for Eureka inside vstudio/ these fol-
+ders:
+
+vstudio/fltk/lib/x86: store here the FLTK .lib files produced when you built 
+                      FLTK.
+vstudio/fltk/include: copy here the entire FL folder (including the folder it-
+                      self) from FLTK's source package (it should contain .h
+					  files).
+					  
+Now you should be ready to build Eureka from Visual Studio.
+
+
+Cross-compiling from Linux
+--------------------------
+
 The windows executable is built using a "cross compiler" under
 Linux (or another OS supported by the MingW-w64 tools).
-
-Sorry but compiling Eureka under Windows itself is not currently
-supported.  If you want to do this, you will have to figure it
-out on your own.
 
 
 Dependencies:
