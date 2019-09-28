@@ -556,7 +556,7 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0].c_str());
 	}
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if (tokens.size() >= 4 + p)
+		if (static_cast<int>(tokens.size()) >= 4 + p)
 			strncpy(temp.param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
 #if 0  // DEBUG
