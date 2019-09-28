@@ -22,6 +22,7 @@
 #include "m_config.h"
 
 #include <algorithm>
+#include <functional>
 #include <unordered_map>
 
 #include "ui_window.h"
