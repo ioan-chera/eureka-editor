@@ -73,19 +73,18 @@ Compiling from Windows via Visual Studio
 ----------------------------------------
 
 You have a Visual Studio solution under the vstudio/ folder. But in order to
-build Eureka, you also need to download FLTK and ZLIB.
+build Eureka, you also need to download FLTK.
 
-After downloading the last FLTK and ZLIB sources, you need to build them using 
-Visual Studio. After they build successfully, create for Eureka inside 
-vstudio/ these folders:
+After downloading the last FLTK source, you need to build it using Visual Stu-
+dio. After it builds successfully, create for Eureka inside vstudio/ these fold-
+ers:
 
 vstudio/fltk/lib/x86: copy here the FLTK .lib files produced when you built 
                       FLTK.
 vstudio/fltk/include: copy here the entire FL folder (including the folder it-
                       self) from FLTK's source package (it should contain .h
-					  files).
-vstudio/zlib/lib/x86: copy here zlibstat.lib.
-vstudio/zlib/include: copy here zlib.h and zconf.h.
+					  files). Also copy here zlib.h and zconf.h also from FLTK's
+					  source package.
 					  
 Now you should be ready to build Eureka from Visual Studio.
 
