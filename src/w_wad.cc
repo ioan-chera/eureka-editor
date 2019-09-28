@@ -1281,7 +1281,7 @@ bool Wad_file::Backup(const char *new_filename)
 
 Lump_c * W_FindLump(const char *name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (short i = (short)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLump(name);
 		if (L)
@@ -1294,7 +1294,7 @@ Lump_c * W_FindLump(const char *name)
 
 Lump_c * W_FindSpriteLump(const char *name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (short i = (short)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, 'S');
 		if (L)
@@ -1307,7 +1307,7 @@ Lump_c * W_FindSpriteLump(const char *name)
 
 Lump_c * W_FindPatchLump(const char *name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (short i = (short)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, 'P');
 		if (L)

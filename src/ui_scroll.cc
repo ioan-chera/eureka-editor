@@ -443,7 +443,7 @@ void UI_CanvasScroll::Adjust_X()
 	int cw = canvas->w();
 
 	int map_w = I_ROUND(cw / grid.Scale);
-	int map_x = grid.orig_x - map_w / 2;
+	int map_x = static_cast<int>(grid.orig_x - map_w / 2);
 
 	if (map_x > bound_x2 - map_w) map_x = bound_x2 - map_w;
 	if (map_x < bound_x1) map_x = bound_x1;
@@ -457,7 +457,7 @@ void UI_CanvasScroll::Adjust_Y()
 	int ch = canvas->h();
 
 	int map_h = I_ROUND(ch / grid.Scale);
-	int map_y = grid.orig_y - map_h / 2;
+	int map_y = static_cast<int>(grid.orig_y - map_h / 2);
 
 	// invert, since screen coords are the reverse of map coords
 	map_y = bound_y2 - map_h - (map_y - bound_y1);
