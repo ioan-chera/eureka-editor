@@ -757,8 +757,9 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	static const Fl_Menu_Item macPreferencesItem = {
 		"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
 	};
+#ifdef __APPLE__
 	Fl_Mac_App_Menu::custom_application_menu_items(&macPreferencesItem);
-
+#endif
 	return bar;
 }
 
