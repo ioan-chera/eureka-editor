@@ -57,6 +57,7 @@ std::string GetExecutablePath(const char *argv0);
 
 // directory functions
 bool PathIsDirectory(const char *path);
+bool getCurrentDirectory(char* buffer, size_t size);
 
 typedef enum
 {

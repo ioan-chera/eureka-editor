@@ -420,7 +420,7 @@ void CMD_TestMap()
 	// remember the previous working directory
 	static char old_dir[FL_PATH_MAX];
 
-	if (getcwd(old_dir, sizeof(old_dir)) == NULL)
+	if (!getCurrentDirectory(old_dir, sizeof(old_dir)))
 	{
 		old_dir[0] = 0;
 	}

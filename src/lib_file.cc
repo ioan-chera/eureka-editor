@@ -413,6 +413,18 @@ bool PathIsDirectory(const char *path)
 #endif
 }
 
+//
+// Gets the current dir
+//
+bool getCurrentDirectory(char* buffer, size_t size)
+{
+#ifdef WIN32
+	return !!GetCurrentDirectoryA(size, buffer);
+#else
+	return !!getcwd(buffer, size);
+#endif
+}
+
 //------------------------------------------------------------------------
 
 int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
