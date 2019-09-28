@@ -927,7 +927,7 @@ int M_ParseConfigFile()
 		config::config_file = default_config_file();
 	}
 
-	FILE * fp = fopen(config::config_file.c_str(), "r");
+	FILE * fp = FileOpen(config::config_file.c_str(), "r");
 
 	LogPrintf("Reading config file: %s\n", config::config_file.c_str());
 
@@ -951,7 +951,7 @@ int M_ParseDefaultConfigFile()
 
 	snprintf(filename, sizeof(filename), "%s/defaults.cfg", config::install_dir.c_str());
 
-	FILE * fp = fopen(filename, "r");
+	FILE * fp = FileOpen(filename, "r");
 
 	LogPrintf("Reading config file: %s\n", filename);
 
@@ -1233,7 +1233,7 @@ int M_WriteConfigFile()
 
 	LogPrintf("Writing config file: %s\n", config::config_file.c_str());
 
-	FILE * fp = fopen(config::config_file.c_str(), "w");
+	FILE * fp = FileOpen(config::config_file.c_str(), "w");
 
 	if (! fp)
 	{
@@ -1409,7 +1409,7 @@ bool M_LoadUserState()
 
 	char *filename = PersistFilename(crc);
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = FileOpen(filename, "r");
 
 	if (! fp)
 		return false;
@@ -1470,7 +1470,7 @@ bool M_SaveUserState()
 
 	LogPrintf("Save user state to: %s\n", filename);
 
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = FileOpen(filename, "w");
 
 	if (! fp)
 	{

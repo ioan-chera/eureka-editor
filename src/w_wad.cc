@@ -216,7 +216,7 @@ Wad_file * Wad_file::Open(const char *filename, char mode)
 	FILE *fp = NULL;
 
 retry:
-	fp = fopen(filename, (mode == 'r' ? "rb" : "r+b"));
+	fp = FileOpen(filename, (mode == 'r' ? "rb" : "r+b"));
 
 	if (! fp)
 	{
@@ -262,7 +262,7 @@ Wad_file * Wad_file::Create(const char *filename, char mode)
 {
 	LogPrintf("Creating new WAD file: %s\n", filename);
 
-	FILE *fp = fopen(filename, "w+b");
+	FILE *fp = FileOpen(filename, "w+b");
 	if (! fp)
 		return NULL;
 
@@ -285,7 +285,7 @@ Wad_file * Wad_file::Create(const char *filename, char mode)
 
 bool Wad_file::Validate(const char *filename)
 {
-	FILE *fp = fopen(filename, "rb");
+	FILE *fp = FileOpen(filename, "rb");
 
 	if (! fp)
 		return false;

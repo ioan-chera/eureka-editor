@@ -450,7 +450,7 @@ void M_LoadRecent()
 
 	snprintf(filename, sizeof(filename), "%s/misc.cfg", config::home_dir.c_str());
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = FileOpen(filename, "r");
 
 	if (! fp)
 	{
@@ -476,7 +476,7 @@ void M_SaveRecent()
 
 	snprintf(filename, sizeof(filename), "%s/misc.cfg", config::home_dir.c_str());
 
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = FileOpen(filename, "w");
 
 	if (! fp)
 	{

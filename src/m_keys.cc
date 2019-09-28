@@ -577,7 +577,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 	snprintf(filename, sizeof(filename), "%s/bindings.cfg", path);
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = FileOpen(filename, "r");
 
 	if (! fp)
 	{
@@ -692,7 +692,7 @@ void M_SaveBindings()
 
 	snprintf(filename, sizeof(filename), "%s/bindings.cfg", config::home_dir.c_str());
 
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = FileOpen(filename, "w");
 
 	if (! fp)
 	{

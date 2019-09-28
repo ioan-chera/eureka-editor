@@ -889,14 +889,14 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// look in user's $HOME directory first
 	snprintf(filename, sizeof(filename), "%s/operations.cfg", config::home_dir.c_str());
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = FileOpen(filename, "r");
 
 	// otherwise load it from the installation directory
 	if (! fp)
 	{
 		snprintf(filename, sizeof(filename), "%s/operations.cfg", config::install_dir.c_str());
 
-		fp = fopen(filename, "r");
+		fp = FileOpen(filename, "r");
 	}
 
 	if (! fp)

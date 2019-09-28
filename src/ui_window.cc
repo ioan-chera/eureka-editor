@@ -820,7 +820,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 		strcat(filename, ".txt");
 
 
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = FileOpen(filename, "w");
 
 	if (! fp)
 	{

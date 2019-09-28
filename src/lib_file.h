@@ -47,6 +47,7 @@ bool FileRename(const char *old_name, const char *new_name);
 bool FileDelete(const char *filename);
 bool FileChangeDir(const char *dir_name);
 bool FileMakeDir(const char *dir_name);
+FILE* FileOpen(const char* path, const char* mode);
 
 bool FileLoad(const char *filename, std::vector<u8_t> &result);
 

@@ -620,7 +620,7 @@ void UI_TextEditor::InsertFile()
 	//       quantity of invalid UTF-8 sequences.
 
 	// open file in binary mode (we handle CR/LF ourselves)
-	FILE * fp = fopen(filename, "rb");
+	FILE * fp = FileOpen(filename, "rb");
 
 	if (fp == NULL)
 	{
@@ -675,7 +675,7 @@ void UI_TextEditor::ExportToFile()
 	const char *filename = chooser.filename();
 
 	// open file in binary mode (we handle CR/LF ourselves)
-	FILE * fp = fopen(filename, "wb");
+	FILE * fp = FileOpen(filename, "wb");
 
 	if (fp == NULL)
 	{

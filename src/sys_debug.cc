@@ -39,7 +39,7 @@ extern void LogViewer_AddLine(const char *str);
 
 void LogOpenFile(const char *filename)
 {
-	log_fp = fopen(filename, "w+");
+	log_fp = FileOpen(filename, "w+");
 
 	if (! log_fp)
 		FatalError("Cannot open log file: %s\n", filename);

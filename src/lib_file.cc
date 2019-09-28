@@ -41,7 +41,7 @@
 
 bool FileExists(const char *filename)
 {
-	FILE *fp = fopen(filename, "rb");
+	FILE *fp = FileOpen(filename, "rb");
 
 	if (fp)
 	{
@@ -271,11 +271,11 @@ bool FileCopy(const char *src_name, const char *dest_name)
 {
 	char buffer[1024];
 
-	FILE *src = fopen(src_name, "rb");
+	FILE *src = FileOpen(src_name, "rb");
 	if (! src)
 		return false;
 
-	FILE *dest = fopen(dest_name, "wb");
+	FILE *dest = FileOpen(dest_name, "wb");
 	if (! dest)
 	{
 		fclose(src);
@@ -349,12 +349,53 @@ bool FileMakeDir(const char *dir_name)
 #endif
 }
 
+//
+// Converts to wide
+//
+static std::wstring utf8ToWide(const char* text)
+{
+	//
+	// Fallback in case the below Windows function fails. Should not really be called
+	//
+	auto asciiFallback = [](const char *text) {
+		std::wstring r;
+		for (const char* c = text; *c; ++c)
+		{
+			r.push_back(*c);
+		}
+		return r;
+	};
+
+	int c = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
+	if (!c)
+		return asciiFallback(text);
+	std::wstring r;
+	r.resize(c);
+	c = MultiByteToWideChar(CP_UTF8, 0, text, -1, const_cast<wchar_t*>(r.data()), c);
+	if (!c)
+		return asciiFallback(text);
+	r.pop_back();
+	return r;
+}
+
+//
+// Wrap fopen with correct char type
+//
+FILE* FileOpen(const char* path, const char* mode)
+{
+#ifdef WIN32
+	return _wfopen(utf8ToWide(path).c_str(), utf8ToWide(mode).c_str());
+#else
+	return fopen(path, mode);
+#endif
+}
+
 
 bool FileLoad(const char *filename, std::vector<u8_t> &result)
 {
 	int length = 0;
 
-	FILE *fp = fopen(filename, "rb");
+	FILE *fp = FileOpen(filename, "rb");
 
 	if (! fp)
 		return false;

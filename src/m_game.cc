@@ -901,7 +901,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 	// read the definition file, line by line
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = FileOpen(filename, "r");
 	if (! fp)
 		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
 
