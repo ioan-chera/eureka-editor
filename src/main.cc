@@ -233,13 +233,13 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
 	{
-		home_dir = path;
-		home_dir += "\\EurekaEditor";
+		config::home_dir = path;
+		config::home_dir += "\\EurekaEditor";
 	}
 	else
 	{
-		SYS_ASSERT(!install_dir.empty());
-		home_dir = install_dir + "\\app_data";
+		SYS_ASSERT(!config::install_dir.empty());
+		config::home_dir = config::install_dir + "\\app_data";
 	}
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
@@ -288,7 +288,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (config::install_dir.empty())
 	{
 #ifdef WIN32
-	install_dir = GetExecutablePath(argv0);
+	config::install_dir = GetExecutablePath(argv0);
 
 #else
 	static const char *prefixes[] =
