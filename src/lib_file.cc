@@ -377,6 +377,31 @@ static std::wstring utf8ToWide(const char* text)
 	r.pop_back();
 	return r;
 }
+static std::string wideToUtf8(const wchar_t* text)
+{
+	//
+	// Fallback in case the below Windows function fails. Should not really be called
+	//
+	auto asciiFallback = [](const wchar_t* text) {
+		std::string r;
+		for (const wchar_t* c = text; *c; ++c)
+		{
+			r.push_back(*c & 0xff);
+		}
+		return r;
+	};
+
+	int c = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+	if (!c)
+		return asciiFallback(text);
+	std::string r;
+	r.resize(c);
+	c = WideCharToMultiByte(CP_UTF8, 0, text, -1, const_cast<char*>(r.data()), c, nullptr, nullptr);
+	if (!c)
+		return asciiFallback(text);
+	r.pop_back();
+	return r;
+}
 
 //
 // Wrap fopen with correct char type
@@ -432,16 +457,8 @@ bool FileLoad(const char *filename, std::vector<u8_t> &result)
 bool PathIsDirectory(const char *path)
 {
 #ifdef WIN32
-	char old_dir[MAX_PATH+1];
-
-	if (GetCurrentDirectory(MAX_PATH, (LPSTR)old_dir) == FALSE)
-		return false;
-
-	bool result = SetCurrentDirectory(path);
-
-	SetCurrentDirectory(old_dir);
-
-	return result;
+	DWORD attrib = GetFileAttributesW(utf8ToWide(path).c_str());
+	return attrib != INVALID_FILE_ATTRIBUTES && attrib & FILE_ATTRIBUTE_DIRECTORY;
 
 #else // UNIX or MACOSX
 
@@ -460,7 +477,15 @@ bool PathIsDirectory(const char *path)
 bool getCurrentDirectory(char* buffer, size_t size)
 {
 #ifdef WIN32
-	return !!GetCurrentDirectoryA(size, buffer);
+	if (!size || !buffer)
+		return false;
+	wchar_t path[MAX_PATH];
+	if (!GetCurrentDirectoryW(_countof(path), path))
+		return false;
+	auto apath = wideToUtf8(path);
+	apath.resize(size - 1);
+	strcpy(buffer, apath.c_str());
+	return true;
 #else
 	return !!getcwd(buffer, size);
 #endif
@@ -478,20 +503,20 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 	// target and use FindFirstFile with "*.*" as the pattern.
 	// Afterwards we restore the current directory.
 
-	char old_dir[MAX_PATH+1];
+	wchar_t old_dir[MAX_PATH+1];
 
-	if (GetCurrentDirectory(MAX_PATH, (LPSTR)old_dir) == FALSE)
+	if (GetCurrentDirectoryW(MAX_PATH, old_dir) == FALSE)
 		return SCAN_ERROR;
 
-	if (SetCurrentDirectory(path) == FALSE)
+	if (SetCurrentDirectoryW(utf8ToWide(path).c_str()) == FALSE)
 		return SCAN_ERR_NoExist;
 
-	WIN32_FIND_DATA fdata;
+	WIN32_FIND_DATAW fdata;
 
-	HANDLE handle = FindFirstFile("*.*", &fdata);
+	HANDLE handle = FindFirstFileW(L"*.*", &fdata);
 	if (handle == INVALID_HANDLE_VALUE)
 	{
-		SetCurrentDirectory(old_dir);
+		SetCurrentDirectoryW(old_dir);
 
 		return 0;  //??? (GetLastError() == ERROR_FILE_NOT_FOUND) ? 0 : SCAN_ERROR;
 	}
@@ -510,26 +535,26 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 			flags |= SCAN_F_Hidden;
 
 		// minor kludge for consistency with Unix
-		if (fdata.cFileName[0] == '.' && isalpha(fdata.cFileName[1]))
+		if (fdata.cFileName[0] == L'.' && iswalpha(fdata.cFileName[1]))
 			flags |= SCAN_F_Hidden;
 
-		if (strcmp(fdata.cFileName, ".")  == 0 ||
-				strcmp(fdata.cFileName, "..") == 0)
+		if (wcscmp(fdata.cFileName, L".")  == 0 ||
+				wcscmp(fdata.cFileName, L"..") == 0)
 		{
 			// skip the funky "." and ".." dirs
 		}
 		else
 		{
-			(* func)(fdata.cFileName, flags, priv_dat);
+			(* func)(wideToUtf8(fdata.cFileName).c_str(), flags, priv_dat);
 
 			count++;
 		}
 	}
-	while (FindNextFile(handle, &fdata) != FALSE);
+	while (FindNextFileW(handle, &fdata) != FALSE);
 
 	FindClose(handle);
 
-	SetCurrentDirectory(old_dir);
+	SetCurrentDirectoryW(old_dir);
 
 
 #else // ---- UNIX ------------------------------------------------
