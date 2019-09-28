@@ -26,7 +26,6 @@
 
 #include "main.h"
 
-#include <sys/time.h>
 #include <time.h>
 
 #include "w_rawdef.h"
