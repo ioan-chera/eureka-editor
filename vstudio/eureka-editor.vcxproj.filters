@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4de0ce4c-a0f6-4b4a-ab66-4fc31237c70f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\e">
+      <UniqueIdentifier>{cbf1e4ed-dc63-45cd-8ee1-49a6db3b401d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\im">
+      <UniqueIdentifier>{7d35f83e-ad2b-41d4-bf65-606ff415dc68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\lib">
+      <UniqueIdentifier>{0348a32f-7490-4894-a0cf-18165eae1437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\m">
+      <UniqueIdentifier>{b4603d15-7bc2-4646-b494-e86ffe39181e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\r">
+      <UniqueIdentifier>{ea164f91-d59a-47fc-8dcf-4f4ec7e635c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\sys">
+      <UniqueIdentifier>{6b694b3d-7bf5-4c5f-a3b9-b5ea3076983b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ui">
+      <UniqueIdentifier>{cc6b9305-97ec-4850-aa42-7816cc105fa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\w">
+      <UniqueIdentifier>{692b882a-7a96-4869-b5c5-0a39590b1ccb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\bsp">
+      <UniqueIdentifier>{ac5033d5-bda2-45b8-bbba-1715d358b7fe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\e_basis.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_checks.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_commands.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_cutpaste.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_hover.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_linedef.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_main.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_objects.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_path.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_sector.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_things.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\e_vertex.cc">
+      <Filter>Source\e</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\im_color.cc">
+      <Filter>Source\im</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\im_img.cc">
+      <Filter>Source\im</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib_adler.cc">
+      <Filter>Source\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib_file.cc">
+      <Filter>Source\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib_tga.cc">
+      <Filter>Source\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib_util.cc">
+      <Filter>Source\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.cc">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_bitvec.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_config.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_editlump.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_events.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_files.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_game.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_keys.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_loadsave.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_nodes.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_select.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_strings.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\m_testmap.cc">
+      <Filter>Source\m</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\r_grid.cc">
+      <Filter>Source\r</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\r_render.cc">
+      <Filter>Source\r</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sys_debug.cc">
+      <Filter>Source\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_about.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_browser.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_canvas.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_default.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_dialog.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_editor.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_file.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_hyper.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_infobar.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_linedef.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_menu.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_misc.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_nombre.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_pic.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_prefs.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_replace.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_scroll.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_sector.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_sidedef.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_thing.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_tile.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_vertex.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui_window.cc">
+      <Filter>Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\w_loadpic.cc">
+      <Filter>Source\w</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\w_texture.cc">
+      <Filter>Source\w</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\w_wad.cc">
+      <Filter>Source\w</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bsp_level.cc">
+      <Filter>Source\bsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bsp_node.cc">
+      <Filter>Source\bsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bsp_util.cc">
+      <Filter>Source\bsp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\e_basis.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_checks.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_cutpaste.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_hover.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_linedef.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_main.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_objects.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_path.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_sector.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_things.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\e_vertex.h">
+      <Filter>Source\e</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\im_color.h">
+      <Filter>Source\im</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\im_img.h">
+      <Filter>Source\im</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib_adler.h">
+      <Filter>Source\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib_file.h">
+      <Filter>Source\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib_tga.h">
+      <Filter>Source\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib_util.h">
+      <Filter>Source\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\main.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_bitvec.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_config.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_editlump.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_events.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_files.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_game.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_keys.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_loadsave.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_nodes.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_select.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\m_strings.h">
+      <Filter>Source\m</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\r_grid.h">
+      <Filter>Source\r</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\r_render.h">
+      <Filter>Source\r</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sys_debug.h">
+      <Filter>Source\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sys_endian.h">
+      <Filter>Source\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sys_macro.h">
+      <Filter>Source\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sys_type.h">
+      <Filter>Source\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_about.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_browser.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_canvas.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_default.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_editor.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_file.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_hyper.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_infobar.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_linedef.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_menu.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_misc.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_nombre.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_pic.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_prefs.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_replace.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_scroll.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_sector.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_sidedef.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_thing.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_tile.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_vertex.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui_window.h">
+      <Filter>Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\w_loadpic.h">
+      <Filter>Source\w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\w_rawdef.h">
+      <Filter>Source\w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\w_texture.h">
+      <Filter>Source\w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\w_wad.h">
+      <Filter>Source\w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\bsp.h">
+      <Filter>Source\bsp</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\main.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
