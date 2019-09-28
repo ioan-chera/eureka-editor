@@ -2220,10 +2220,11 @@ void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
 {
 	for (int ry = 0 ; ry < view.sh ; ry++)
 	{
-		u8_t line_rgb[view.sw * 3];
+		std::vector<u8_t> line_rgb;
+		line_rgb.resize(view.sw * 3);
 
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + view.sw * 3;
+		u8_t *dest = line_rgb.data();
+		u8_t *dest_end = line_rgb.data() + view.sw * 3;
 
 		const img_pixel_t *src = view.screen + ry * view.sw;
 
@@ -2232,7 +2233,7 @@ void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
 			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
-		fl_draw_image(line_rgb, ox, oy+ry, view.sw, 1);
+		fl_draw_image(line_rgb.data(), ox, oy+ry, view.sw, 1);
 	}
 }
 
@@ -2244,10 +2245,11 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 		const img_pixel_t *src = view.screen + ry * view.sw;
 
 		// if destination width is odd, we store an extra pixel here
-		u8_t line_rgb[(ow + 1) * 3];
+		std::vector<u8_t> line_rgb;
+		line_rgb.resize((ow + 1) * 3);
 
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + ow * 3;
+		u8_t *dest = line_rgb.data();
+		u8_t *dest_end = line_rgb.data() + ow * 3;
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
@@ -2255,11 +2257,11 @@ void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
 			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
-		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
+		fl_draw_image(line_rgb.data(), ox, oy + ry*2, ow, 1);
 
 		if (ry * 2 + 1 < oh)
 		{
-			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
+			fl_draw_image(line_rgb.data(), ox, oy + ry*2 + 1, ow, 1);
 		}
 	}
 }
