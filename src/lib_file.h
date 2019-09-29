@@ -43,7 +43,6 @@ void FilenameGetPath(char *dest, size_t maxsize, const char *filename);
 // file utilities
 bool FileExists(const char *filename);
 bool FileCopy(const char *src_name, const char *dest_name);
-bool FileRename(const char *old_name, const char *new_name);
 bool FileDelete(const char *filename);
 bool FileChangeDir(const char *dir_name);
 bool FileMakeDir(const char *dir_name);
