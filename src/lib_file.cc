@@ -226,6 +226,7 @@ static void FilenameStripBase(char *buffer)
 	else
 		strcpy(buffer, ".");
 }
+#ifdef WIN32
 static void FilenameStripBase(std::string& text)
 {
 #ifdef WIN32
@@ -246,6 +247,7 @@ static void FilenameStripBase(std::string& text)
 		text = ".";
 	return;
 }
+#endif
 
 //
 // takes the basename in 'filename' and prepends the path from 'othername'.
@@ -330,6 +332,7 @@ bool FileCopy(const char *src_name, const char *dest_name)
 	return was_OK;
 }
 
+#ifdef WIN32
 //
 // Converts to wide
 //
@@ -358,6 +361,7 @@ static std::wstring utf8ToWide(const char* text)
 	r.pop_back();
 	return r;
 }
+#endif
 
 bool FileDelete(const char *filename)
 {
@@ -394,6 +398,10 @@ bool FileMakeDir(const char *dir_name)
 #endif
 }
 
+#ifdef WIN32
+//
+// Converts wide char string to utf-8
+//
 static std::string wideToUtf8(const wchar_t* text)
 {
 	//
@@ -419,6 +427,7 @@ static std::string wideToUtf8(const wchar_t* text)
 	r.pop_back();
 	return r;
 }
+#endif
 
 //
 // Wrap fopen with correct char type
