@@ -161,9 +161,10 @@ extern std::string default_ceil_tex;
 extern int KF;  // Kromulent Factor
 extern int KF_fonth;  // default font size
 
-
-extern int MadeChanges;
-
+namespace state
+{
+	extern int MadeChanges;
+}
 
 /*
  *  Various global functions

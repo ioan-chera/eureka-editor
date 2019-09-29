@@ -417,7 +417,7 @@ void CMD_BuildAllNodes()
 		return;
 	}
 
-	if (MadeChanges)
+	if (state::MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "

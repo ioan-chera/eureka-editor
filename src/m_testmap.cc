@@ -384,7 +384,7 @@ static const char * GrabWadNames(const port_path_info_t *info)
 
 void CMD_TestMap()
 {
-	if (MadeChanges)
+	if (state::MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "

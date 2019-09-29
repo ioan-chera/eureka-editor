@@ -329,9 +329,12 @@ extern std::vector<Sector *>  Sectors;
 extern std::vector<SideDef *> SideDefs;
 extern std::vector<LineDef *> LineDefs;
 
-extern std::vector<byte>  HeaderData;
-extern std::vector<byte>  BehaviorData;
-extern std::vector<byte>  ScriptsData;
+namespace state
+{
+	extern std::vector<byte>  HeaderData;
+	extern std::vector<byte>  BehaviorData;
+	extern std::vector<byte>  ScriptsData;
+}
 
 
 #define NumThings     ((int)Things.size())

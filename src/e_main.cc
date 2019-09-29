@@ -49,7 +49,7 @@ int Map_bound_y1 =  32767;   /* minimum Y value of map */
 int Map_bound_x2 = -32767;   /* maximum X value of map */
 int Map_bound_y2 = -32767;   /* maximum Y value of map */
 
-int MadeChanges;
+int state::MadeChanges;
 
 static bool recalc_map_bounds;
 static int  new_vertex_minimum;
@@ -97,7 +97,7 @@ static void zoom_fit()
 
 void ZoomWholeMap()
 {
-	if (MadeChanges)
+	if (state::MadeChanges)
 		CalculateLevelBounds();
 
 	zoom_fit();
@@ -1322,7 +1322,7 @@ void Editor_Init()
 
 	grid.Init();
 
-	MadeChanges = 0;
+	state::MadeChanges = 0;
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();

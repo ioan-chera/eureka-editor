@@ -49,9 +49,9 @@ std::vector<Sector *>  Sectors;
 std::vector<SideDef *> SideDefs;
 std::vector<LineDef *> LineDefs;
 
-std::vector<byte>  HeaderData;
-std::vector<byte>  BehaviorData;
-std::vector<byte>  ScriptsData;
+std::vector<byte>  state::HeaderData;
+std::vector<byte>  state::BehaviorData;
+std::vector<byte>  state::ScriptsData;
 
 
 int default_floor_h		=   0;
@@ -118,7 +118,7 @@ static void DoProcessChangeStatus()
 {
 	if (did_make_changes)
 	{
-		MadeChanges = 1;
+		state::MadeChanges = 1;
 		RedrawMap();
 	}
 
@@ -1074,9 +1074,9 @@ void BA_ClearAll()
 	SideDefs.clear();
 	LineDefs.clear();
 
-	HeaderData.clear();
-	BehaviorData.clear();
-	ScriptsData.clear();
+	state::HeaderData.clear();
+	state::BehaviorData.clear();
+	state::ScriptsData.clear();
 
 	ClearUndoHistory();
 	ClearRedoFuture();

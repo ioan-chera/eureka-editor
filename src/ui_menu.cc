@@ -557,7 +557,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes, 0, FL_MENU_DIVIDER },
 
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
-		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
+		{ "&Add BEHAVIOR Lump\u2026", 0, FCAL tools_do_add_behavior },
 		{ 0 },
 
 	{ "&Help", 0, 0, 0, FL_SUBMENU },

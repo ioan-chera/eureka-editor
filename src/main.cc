@@ -674,7 +674,7 @@ void Main_Quit()
 // used for 'New Map' / 'Open Map' functions too
 bool Main_ConfirmQuit(const char *action)
 {
-	if (! MadeChanges)
+	if (! state::MadeChanges)
 		return true;
 
 	char buttons[200];
@@ -750,7 +750,7 @@ void Main_Loop()
 		}
 
 		// TODO: handle these in a better way
-		main_win->UpdateTitle(MadeChanges ? '*' : 0);
+		main_win->UpdateTitle(state::MadeChanges ? '*' : 0);
 
 		main_win->scroll->UpdateRenderMode();
 		main_win->scroll->UpdateBounds();

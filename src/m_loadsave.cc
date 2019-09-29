@@ -533,12 +533,12 @@ static void LoadHeader()
 	if (length == 0)
 		return;
 
-	HeaderData.resize(length);
+	state::HeaderData.resize(length);
 
 	if (! lump->Seek())
 		FatalError("Error seeking to header lump!\n");
 
-	if (! lump->Read(& HeaderData[0], length))
+	if (! lump->Read(& state::HeaderData[0], length))
 		FatalError("Error reading header lump.\n");
 }
 
@@ -552,12 +552,12 @@ static void LoadBehavior()
 
 	int length = lump->Length();
 
-	BehaviorData.resize(length);
+	state::BehaviorData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(& BehaviorData[0], length))
+	if (! lump->Read(& state::BehaviorData[0], length))
 		FatalError("Error reading BEHAVIOR.\n");
 }
 
@@ -571,12 +571,12 @@ static void LoadScripts()
 
 	int length = lump->Length();
 
-	ScriptsData.resize(length);
+	state::ScriptsData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(& ScriptsData[0], length))
+	if (! lump->Read(& state::ScriptsData[0], length))
 		FatalError("Error reading SCRIPTS.\n");
 }
 
@@ -1001,7 +1001,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 	main_win->InvalidatePanelObj();
 	main_win->redraw();
 
-	MadeChanges = 0;
+	state::MadeChanges = 0;
 
 
 	config::Level_name = StringUpper(level);
@@ -1316,14 +1316,14 @@ void CMD_FlipMap()
 
 static short SaveHeader(const char *level)
 {
-	int size = (int)HeaderData.size();
+	int size = (int)state::HeaderData.size();
 	short saving_level = -1;
 
 	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(& HeaderData[0], size);
+		lump->Write(& state::HeaderData[0], size);
 	}
 
 	lump->Finish();
@@ -1333,13 +1333,13 @@ static short SaveHeader(const char *level)
 
 static void SaveBehavior()
 {
-	int size = (int)BehaviorData.size();
+	int size = (int)state::BehaviorData.size();
 
 	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
 
 	if (size > 0)
 	{
-		lump->Write(& BehaviorData[0], size);
+		lump->Write(& state::BehaviorData[0], size);
 	}
 
 	lump->Finish();
@@ -1348,13 +1348,13 @@ static void SaveBehavior()
 
 static void SaveScripts()
 {
-	int size = (int)ScriptsData.size();
+	int size = (int)state::ScriptsData.size();
 
 	if (size > 0)
 	{
 		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
 
-		lump->Write(& ScriptsData[0], size);
+		lump->Write(& state::ScriptsData[0], size);
 		lump->Finish();
 	}
 }
@@ -1657,7 +1657,7 @@ static void SaveLevel(const char *level, bool inhibitNodeBuild)
 		M_SaveUserState();
 	}
 
-	MadeChanges = 0;
+	state::MadeChanges = 0;
 }
 
 
