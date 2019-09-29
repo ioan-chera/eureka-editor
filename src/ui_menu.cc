@@ -556,7 +556,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes, 0, FL_MENU_DIVIDER },
 
-		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
+		{ "&Edit Text Lump\u2026",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump\u2026", 0, FCAL tools_do_add_behavior },
 		{ 0 },
 
