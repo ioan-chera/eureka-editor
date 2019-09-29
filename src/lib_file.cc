@@ -189,9 +189,13 @@ bool FilenameIsBare(const char *filename)
 	return true;
 }
 
-
-void FilenameStripBase(char *buffer)
+//
+// Strips the base part of the path
+//
+static void FilenameStripBase(char *buffer)
 {
+	if (!*buffer)
+		return;
 	char *pos = buffer + strlen(buffer) - 1;
 
 	for (; pos > buffer ; pos--)
@@ -213,10 +217,35 @@ void FilenameStripBase(char *buffer)
 
 	if (pos > buffer)
 		*pos = 0;
+	else if (buffer[0] == '/')
+		buffer[1] = 0;
+#ifdef WIN32
+	else if (buffer[0] == '\\')
+		buffer[1] = 0;
+#endif
 	else
 		strcpy(buffer, ".");
 }
-
+static void FilenameStripBase(std::string& text)
+{
+#ifdef WIN32
+	size_t pos = text.find_last_of("/\\:");
+	if (pos != std::string::npos && text[pos] == ':')
+	{
+		text.resize(pos + 1);
+		return;
+	}
+#else
+	size_t pos = text.rfind('/');
+#endif
+	if (pos != std::string::npos && pos > 0)
+		text.resize(pos);
+	else if (!pos)
+		text.resize(1);
+	else
+		text = ".";
+	return;
+}
 
 //
 // takes the basename in 'filename' and prepends the path from 'othername'.
@@ -301,6 +330,34 @@ bool FileCopy(const char *src_name, const char *dest_name)
 	return was_OK;
 }
 
+//
+// Converts to wide
+//
+static std::wstring utf8ToWide(const char* text)
+{
+	//
+	// Fallback in case the below Windows function fails. Should not really be called
+	//
+	auto asciiFallback = [](const char* text) {
+		std::wstring r;
+		for (const char* c = text; *c; ++c)
+		{
+			r.push_back(*c);
+		}
+		return r;
+	};
+
+	int c = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
+	if (!c)
+		return asciiFallback(text);
+	std::wstring r;
+	r.resize(c);
+	c = MultiByteToWideChar(CP_UTF8, 0, text, -1, const_cast<wchar_t*>(r.data()), c);
+	if (!c)
+		return asciiFallback(text);
+	r.pop_back();
+	return r;
+}
 
 bool FileDelete(const char *filename)
 {
@@ -337,34 +394,6 @@ bool FileMakeDir(const char *dir_name)
 #endif
 }
 
-//
-// Converts to wide
-//
-static std::wstring utf8ToWide(const char* text)
-{
-	//
-	// Fallback in case the below Windows function fails. Should not really be called
-	//
-	auto asciiFallback = [](const char *text) {
-		std::wstring r;
-		for (const char* c = text; *c; ++c)
-		{
-			r.push_back(*c);
-		}
-		return r;
-	};
-
-	int c = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
-	if (!c)
-		return asciiFallback(text);
-	std::wstring r;
-	r.resize(c);
-	c = MultiByteToWideChar(CP_UTF8, 0, text, -1, const_cast<wchar_t*>(r.data()), c);
-	if (!c)
-		return asciiFallback(text);
-	r.pop_back();
-	return r;
-}
 static std::string wideToUtf8(const wchar_t* text)
 {
 	//
@@ -604,15 +633,17 @@ std::string GetExecutablePath(const char *argv0)
 {
 #ifdef WIN32
 	char path[PATH_MAX + 2];
+	wchar_t wpath[PATH_MAX + 2];
 
-	int length = GetModuleFileName(GetModuleHandle(NULL), path, PATH_MAX);
+	int length = GetModuleFileNameW(GetModuleHandleW(NULL), wpath, PATH_MAX);
 
 	if (length > 0 && length < PATH_MAX)
 	{
-		if (_access(path, 0) == 0)  // sanity check
-		{
-			FilenameStripBase(path);
-			return path;
+		if (_waccess(wpath, 0) == 0)  // sanity check
+		{ 
+			auto p = wideToUtf8(wpath);
+			FilenameStripBase(p);
+			return p;
 		}
 	}
 
