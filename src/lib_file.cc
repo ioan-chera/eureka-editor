@@ -305,7 +305,7 @@ bool FileCopy(const char *src_name, const char *dest_name)
 bool FileDelete(const char *filename)
 {
 #ifdef WIN32
-	return (::DeleteFile(filename) != 0);
+	return _wremove(utf8ToWide(filename).c_str()) == 0;
 
 #else // UNIX or MACOSX
 
@@ -317,7 +317,7 @@ bool FileDelete(const char *filename)
 bool FileChangeDir(const char *dir_name)
 {
 #ifdef WIN32
-	return (::SetCurrentDirectory(dir_name) != 0);
+	return (::SetCurrentDirectoryW(utf8ToWide(dir_name).c_str()) != 0);
 
 #else // UNIX or MACOSX
 
@@ -329,7 +329,7 @@ bool FileChangeDir(const char *dir_name)
 bool FileMakeDir(const char *dir_name)
 {
 #ifdef WIN32
-	return (::CreateDirectory(dir_name, NULL) != 0);
+	return (::CreateDirectoryW(utf8ToWide(dir_name).c_str(), NULL) != 0);
 
 #else // UNIX or MACOSX
 
