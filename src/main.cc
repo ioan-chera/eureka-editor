@@ -563,6 +563,7 @@ int x11_check_focus_change(void *xevent, void *data)
 static void Main_SetupFLTK()
 {
 	Fl::visual(FL_DOUBLE | FL_RGB);
+	Fl::gl_visual(FL_RGB);
 
 	// disable keyboard navigation, as it often interferes with our
 	// user interface, especially TAB key for toggling the 3D view.
