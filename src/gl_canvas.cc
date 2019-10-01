@@ -80,7 +80,7 @@ UI_Canvas::~UI_Canvas()
 
 void UI_Canvas::resize(int X, int Y, int W, int H)
 {
-	Fl_Widget::resize(X, Y, W, H);
+	Fl_Gl_Window::resize(X, Y, W, H);
 }
 
 
