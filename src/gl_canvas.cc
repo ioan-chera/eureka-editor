@@ -112,7 +112,7 @@ int UI_Canvas::handle(int event)
 
 void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 {
-	glBegin(GL_LINE);
+	glBegin(GL_LINE_STRIP);
 	glVertex2i(x1, y1);
 	glVertex2i(x2, y2);
 	glEnd();
@@ -259,7 +259,7 @@ void UI_Canvas::DrawEverything()
 void UI_Canvas::DrawMap()
 {
 	gl_color(FL_BLACK);
-	gl_rectf(x(), y(), w(), h());
+	gl_rectf(0, 0, w(), h());
 
 	if (edit.sector_render_mode && ! edit.error_mode)
 	{
