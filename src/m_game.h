@@ -151,6 +151,7 @@ typedef struct
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
+	int mix_textures_flats;	// allow mixing textures and flats (adv. ports)
 
 	int no_need_players;	// having no players is OK (Things checker)
 	int tag_666;			// game uses tag 666 and 667 for special FX
