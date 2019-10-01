@@ -23,7 +23,7 @@
 #include "e_main.h"		// Map_bound_xxx
 
 #include "ui_scroll.h"
-#include "ui_canvas.h"
+#include "gl_canvas.h"
 #include "r_render.h"
 
 

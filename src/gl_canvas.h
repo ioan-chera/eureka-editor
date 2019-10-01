@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2008-2018 Andrew Apted
+//  Copyright (C) 2008-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_CANVAS_H__
 #define __EUREKA_UI_CANVAS_H__
 
+#include <FL/Fl_Gl_Window.H>
+
 #include "m_events.h"
 #include "m_select.h"
 #include "e_objects.h"
@@ -32,7 +34,7 @@ class Img_c;
 void SectorCache_Invalidate();
 
 
-class UI_Canvas : public Fl_Widget
+class UI_Canvas : public Fl_Gl_Window
 {
 private:
 	Objid highlight;
@@ -150,12 +152,12 @@ private:
 	void DragDelta(int *dx, int *dy);
 
 	// convert screen coordinates to map coordinates
-	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
-	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
+	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
+	inline float MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
 
 	// convert map coordinates to screen coordinates
-	inline int SCREENX(int mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(int my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+	inline int SCREENX(int mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
+	inline int SCREENY(int my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
 
 	inline bool Vis(int x, int y, int r) const
 	{
