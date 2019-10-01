@@ -1060,8 +1060,8 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2 - 1;
 
-	int dx = (y1 - y2);
-	int dy = (x2 - x1);
+	int dx = (y2 - y1);
+	int dy = (x1 - x2);
 
 	if (side == SIDE_LEFT)
 	{
@@ -1088,7 +1088,7 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 		}
 	}
 
-	DrawObjNum(mx, my + gl_descent(), n, true /* center */);
+	DrawObjNum(mx, my, n, true /* center */);
 }
 
 
@@ -1108,7 +1108,7 @@ void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
 		return;
 #endif
 		x -= gl_width(buffer) / 2;
-		y += gl_descent();
+		y -= gl_descent();
 	}
 
 	gl_color(FL_BLACK);
