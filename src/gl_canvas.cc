@@ -90,8 +90,6 @@ void UI_Canvas::draw()
 		ortho();
 	}
 
-	gl_color(FL_WHITE);
-
 	// default font (for showing object numbers)
 	int font_size = (grid.Scale < 0.4) ? 10 :
 	                (grid.Scale < 1.9) ? 14 : 18;
@@ -140,11 +138,11 @@ void UI_Canvas::PointerPos(bool in_event)
 
 	Fl::get_mouse(raw_x, raw_y);
 
-	raw_x -= main_win->x_root();
-	raw_y -= main_win->y_root();
+	raw_x -= x_root();
+	raw_y -= y_root();
 
 	edit.map_x = MAPX(raw_x);
-	edit.map_y = MAPY(raw_y);
+	edit.map_y = MAPY(h() - raw_y);
 }
 
 
@@ -178,11 +176,11 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = floor(MAPX(x()));
-	map_ly = floor(MAPY(y() + h()));
+	map_lx = floor(MAPX(0));
+	map_ly = floor(MAPY(0));
 
-	map_hx = ceil(MAPX(x() + w()));
-	map_hy = ceil(MAPY(y()));
+	map_hx = ceil(MAPX(w()));
+	map_hy = ceil(MAPY(h()));
 
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)

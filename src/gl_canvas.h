@@ -151,11 +151,11 @@ private:
 
 	void DragDelta(int *dx, int *dy);
 
-	// convert screen coordinates to map coordinates
+	// convert GL coordinates to map coordinates
 	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
 	inline float MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
 
-	// convert map coordinates to screen coordinates
+	// convert map coordinates to GL coordinates
 	inline int SCREENX(int mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
 	inline int SCREENY(int my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
 
