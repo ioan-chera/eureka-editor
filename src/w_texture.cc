@@ -540,10 +540,20 @@ bool W_TextureIsKnown(const char *name)
 		return false;
 
 	std::string t_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
-	return (P != textures.end());
+	if (P != textures.end())
+		return true;
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
+
+		if (P != flats.end())
+			return true;
+	}
+
+	return false;
 }
 
 
@@ -703,10 +713,20 @@ bool W_FlatIsKnown(const char *name)
 		return false;
 
 	std::string f_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
 
-	return (P != flats.end());
+	if (P != flats.end())
+		return true;
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
+
+		if (P != textures.end())
+			return true;
+	}
+
+	return false;
 }
 
 
