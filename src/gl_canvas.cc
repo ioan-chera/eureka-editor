@@ -1698,8 +1698,8 @@ void UI_Canvas::DrawCamera()
 
 	if (size < 8) size = 8;
 
-	int dx = size *  cos(angle * M_PI / 180.0);
-	int dy = size * -sin(angle * M_PI / 180.0);
+	int dx = size * cos(angle * M_PI / 180.0);
+	int dy = size * sin(angle * M_PI / 180.0);
 
 	gl_color(CAMERA_COLOR);
 
