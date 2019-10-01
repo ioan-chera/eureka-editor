@@ -321,7 +321,7 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(normal_main_col)));
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(0, 0, w(), h());
 
 		DrawAxes(normal_axis_col);
 		return;
@@ -341,7 +341,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	if (pixels_2 < 1.6)
 	{
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(0, 0, w(), h());
 	}
 	else
 	{
@@ -397,7 +397,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(dotty_point_col)));
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(0, 0, w(), h());
 
 		DrawAxes(dotty_axis_col);
 		return;
@@ -962,19 +962,19 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 	int bx1 = SCREENX(map_x - W * scale);
 	int bx2 = SCREENX(map_x + W * scale);
 
-	int by1 = SCREENY(map_y + H * scale);
-	int by2 = SCREENY(map_y - H * scale);
+	int by1 = SCREENY(map_y - H * scale);
+	int by2 = SCREENY(map_y + H * scale);
 
 	// prevent division by zero
 	if (bx2 <= bx1) bx2 = bx1 + 1;
 	if (by2 <= by1) by2 = by1 + 1;
 
 	// clip to screen
-	int sx1 = MAX(bx1, x());
-	int sy1 = MAX(by1, y());
+	int sx1 = MAX(bx1, 0);
+	int sy1 = MAX(by1, 0);
 
-	int sx2 = MIN(bx2, x() + w());
-	int sy2 = MIN(by2, y() + h());
+	int sx2 = MIN(bx2, w());
+	int sy2 = MIN(by2, h());
 
 	if (sy2 <= sy1 || sx2 <= sx1)
 		return;
@@ -2255,10 +2255,10 @@ void UI_Canvas::RenderSector(int num)
 		edge.scr_y2 = SCREENY(L->End()->y);
 
 		// completely above or below the screen?
-		if (MAX(edge.scr_y1, edge.scr_y2) < y())
+		if (MAX(edge.scr_y1, edge.scr_y2) < 0)
 			continue;
 
-		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
+		if (MIN(edge.scr_y1, edge.scr_y2) >= h())
 			continue;
 
 		// skip horizontal lines
@@ -2276,8 +2276,8 @@ void UI_Canvas::RenderSector(int num)
 		}
 
 		// compute usable range, clipping to screen
-		edge.y1 = MAX(edge.scr_y1, y());
-		edge.y2 = MIN(edge.scr_y2, y() + h() - 1);
+		edge.y1 = MAX(edge.scr_y1, 0);
+		edge.y2 = MIN(edge.scr_y2, h() - 1);
 
 		// this probably cannot happen....
 		if (edge.y2 < edge.y1)
@@ -2384,7 +2384,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			int x2 = floor(E2->x);
 
 			// completely off the screen?
-			if (x2 < x() || x1 >= x() + w())
+			if (x2 < 0 || x1 >= w())
 				continue;
 
 			// clip span to screen
