@@ -30,8 +30,8 @@ if $ALLOW_BOOM is 1
 endif
 
 feature 3d_midtex 1
-
 feature tx_start 1
+feature mix_textures_flats 1
 
 #TODO:  thing flag 512 "Dormant" - like in Hexen
 
