@@ -355,7 +355,22 @@ void Img_c::upload_gl()
 			if (sx >= w)
 				sx = x - w;
 
-			// TODO convert pixel to RGBA
+			// convert pixel to RGBA
+			const img_pixel_t pix = buf()[sy*w + sx];
+
+			if (pix != TRANS_PIXEL)
+			{
+				byte r, g, b;
+
+				IM_DecodePixel(pix, r, g, b);
+
+				byte *dest = rgba + (y*tw + x) * 4;
+
+				dest[0] = r;
+				dest[1] = g;
+				dest[2] = b;
+				dest[3] = 255;
+			}
 		}
 	}
 
