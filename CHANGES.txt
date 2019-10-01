@@ -4,6 +4,8 @@ RECENT CHANGES
 
 (Since version 1.24)
 
+- support mixing textures and flats for ports that allow it
+
 - fixed not remembering test-in-game EXE when port is "vanilla"
 
 - fixed the 'Online Docs' command in the Help menu
