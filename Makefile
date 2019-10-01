@@ -28,11 +28,12 @@ LIBS ?=
 
 # general things needed by Eureka
 CXXFLAGS += $(CXX_DIALECT)
+LIBS += -lGLU -lGL
 LIBS += -lz -lm
 
 # FLTK flags (this assumes a system-wide FLTK installation)
-CXXFLAGS += $(shell fltk-config --use-images --cxxflags)
-LDFLAGS += $(shell fltk-config --use-images --ldflags)
+CXXFLAGS += $(shell fltk-config --use-images --use-gl --cxxflags)
+LDFLAGS  += $(shell fltk-config --use-images --use-gl  --ldflags)
 
 # NOTE: the following is commented out since it does not work as expected.
 #       the --libs option gives us static libraries, but --ldflags option
@@ -83,7 +84,7 @@ OBJS = \
 	$(OBJ_DIR)/sys_debug.o \
 	$(OBJ_DIR)/ui_about.o  \
 	$(OBJ_DIR)/ui_browser.o  \
-	$(OBJ_DIR)/ui_canvas.o  \
+	$(OBJ_DIR)/gl_canvas.o  \
 	$(OBJ_DIR)/ui_default.o  \
 	$(OBJ_DIR)/ui_dialog.o  \
 	$(OBJ_DIR)/ui_editor.o  \

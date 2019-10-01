@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_CANVAS_H__
 #define __EUREKA_UI_CANVAS_H__
 
+#include <FL/Fl_Gl_Window.H>
+
 #include "m_events.h"
 #include "m_select.h"
 #include "e_objects.h"
@@ -32,7 +34,7 @@ class Img_c;
 void SectorCache_Invalidate();
 
 
-class UI_Canvas : public Fl_Widget
+class UI_Canvas : public Fl_Gl_Window
 {
 private:
 	Objid highlight;

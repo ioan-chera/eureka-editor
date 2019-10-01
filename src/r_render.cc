@@ -24,6 +24,8 @@
 #include <map>
 #include <algorithm>
 
+#include "FL/gl.h"
+
 #include "im_color.h"
 #include "im_img.h"
 #include "e_hover.h"
