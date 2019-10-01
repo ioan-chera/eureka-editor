@@ -644,6 +644,7 @@ static void Main_OpenWindow()
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
+		main_win->canvas->show();  // needed for OpenGL
 
 		app_has_focus = true;
 	}
