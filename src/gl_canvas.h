@@ -173,6 +173,7 @@ private:
 	/* OpenGL-only stuff */
 
 	void gl_line(int x1, int y1, int x2, int y2);
+	void gl_line_width(int w);
 };
 
 

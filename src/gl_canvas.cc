@@ -95,6 +95,8 @@ void UI_Canvas::draw()
 	                (grid.Scale < 1.9) ? 14 : 18;
 	gl_font(FL_COURIER, font_size);
 
+	gl_line_width(1);
+
 	DrawEverything();
 }
 
@@ -114,6 +116,12 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 	glVertex2i(x1, y1);
 	glVertex2i(x2, y2);
 	glEnd();
+}
+
+
+void UI_Canvas::gl_line_width(int w)
+{
+	glLineWidth(w);
 }
 
 
@@ -208,9 +216,8 @@ void UI_Canvas::DrawEverything()
 		else
 			gl_color(HI_COL);
 
-/// FIXME thick lines for OpenGL
-///		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
-///			gl_line_style(FL_SOLID, 2);
+		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
+			gl_line_width(2);
 
 		DrawHighlight(edit.mode, edit.drag_single_obj,
 		              false /* skip_lines */, dx, dy);
@@ -221,7 +228,7 @@ void UI_Canvas::DrawEverything()
 			DrawHighlight(highlight.type, highlight.num);
 		}
 
-///		gl_line_style(FL_SOLID);
+		gl_line_width(1);
 	}
 	else if (highlight.valid())
 	{
@@ -230,8 +237,8 @@ void UI_Canvas::DrawEverything()
 		else
 			gl_color(HI_COL);
 
-///		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
-///			gl_line_style(FL_SOLID, 2);
+		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
+			gl_line_width(2);
 
 		DrawHighlight(highlight.type, highlight.num);
 
@@ -240,7 +247,7 @@ void UI_Canvas::DrawEverything()
 		if (! edit.error_mode)
 			DrawTagged(highlight.type, highlight.num);
 
-///		gl_line_style(FL_SOLID);
+		gl_line_width(1);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -1169,7 +1176,7 @@ void UI_Canvas::SplitLineForget()
 void UI_Canvas::DrawHighlight(int objtype, int objnum,
                               bool skip_lines, int dx, int dy)
 {
-	// gl_color() and gl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
 
@@ -1282,7 +1289,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
-	// gl_color() and gl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	switch (objtype)
 	{
@@ -1399,7 +1406,7 @@ void UI_Canvas::DrawTagged(int objtype, int objnum)
 
 void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
 {
-	// gl_color() and gl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1452,15 +1459,15 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	{
 		gl_color(SEL_COL);
 
-///		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-///			gl_line_style(FL_SOLID, 2);
+		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+			gl_line_width(2);
 
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
 			DrawHighlightTransform(list->what_type(), *it);
 		}
 
-///		gl_line_style(FL_SOLID);
+		gl_line_width(1);
 		return;
 	}
 
@@ -1474,8 +1481,8 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	gl_color(edit.error_mode ? FL_RED : SEL_COL);
 
-///	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-///		gl_line_style(FL_SOLID, 2);
+	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+		gl_line_width(2);
 
 	// special case when we have many sectors
 	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
@@ -1500,7 +1507,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		}
 	}
 
-///	gl_line_style(FL_SOLID);
+	gl_line_width(1);
 }
 
 
