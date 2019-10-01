@@ -169,6 +169,10 @@ private:
 		return (x2 >= map_lx) && (x1 <= map_hx) &&
 		       (y2 >= map_ly) && (y1 <= map_hy);
 	}
+
+	/* OpenGL-only stuff */
+
+	void gl_line(int x1, int y1, int x2, int y2);
 };
 
 
