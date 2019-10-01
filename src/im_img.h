@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,6 +28,8 @@
 #define __EUREKA_IM_IMG_H__
 
 #include "im_color.h"
+
+#include "FL/gl.h"
 
 // this is a 16-bit value:
 //   - when high bit is clear, it is a palette index 0-255
@@ -55,6 +57,9 @@ private:
 
 	int  w;  // Width
 	int  h;  // Height
+
+	// texture identifier for OpenGL, 0 if not uploaded yet
+	GLuint gl_tex;
 
 public:
 	 Img_c();
@@ -95,6 +100,9 @@ public:
 	Img_c * color_remap(int src1, int src2, int targ1, int targ2) const;
 
 	bool has_transparent() const;
+
+	// upload to OpenGL, overwriting 'gl_tex' field.
+	void upload_gl();
 
 	// convert pixels to RGB mode, for testing other code
 	void test_make_RGB();

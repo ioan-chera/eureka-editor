@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -65,7 +65,7 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 //
 // default constructor, creating a null image
 //
-Img_c::Img_c() : pixels(NULL), w(0), h(0)
+Img_c::Img_c() : pixels(NULL), w(0), h(0), gl_tex(0)
 { }
 
 
@@ -73,7 +73,7 @@ Img_c::Img_c() : pixels(NULL), w(0), h(0)
 // a constructor with dimensions
 //
 Img_c::Img_c(int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0)
+	pixels(NULL), w(0), h(0), gl_tex(0)
 {
 	resize(width, height);
 }
@@ -311,6 +311,58 @@ void Img_c::test_make_RGB()
 			src[y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
 		}
 	}
+}
+
+
+void Img_c::upload_gl()
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// original texture ID is overwritten.
+
+	// NOTE: we cannot use glDeleteTextures() since the context
+	//       has very likely changed and we would end up deleting
+	//       the wrong images.
+
+	glGenTextures(1, &gl_tex);
+	glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+	// construct a power-of-two sized bottom-up RGBA image
+	int tw = RoundPOW2(w);
+	int th = RoundPOW2(h);
+
+	byte *rgba = new byte[tw * th * 4];
+
+	memset(rgba, 0, (size_t)(tw * th * 4));
+
+	bool has_trans = has_transparent();
+
+	int ex = (has_trans ? w : tw) - 1;
+	int ey = (has_trans ? h : th) - 1;
+
+	int x, y;
+
+	for (y = 0; y < ey ; y++)
+	{
+		// invert source Y for OpenGL
+		int sy = h - 1 - y;
+		if (sy < 0)
+			sy += h;
+
+		for (x = 0 ; x < ex ; x++)
+		{
+			int sx = x;
+			if (sx >= w)
+				sx = x - w;
+
+			// TODO convert pixel to RGBA
+		}
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0 /* border */,
+		GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+
+	delete[] rgba;
 }
 
 
