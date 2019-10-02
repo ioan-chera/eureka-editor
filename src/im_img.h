@@ -81,6 +81,11 @@ public:
 		return h;
 	}
 
+	GLuint gl_texture() const
+	{
+		return gl_tex;
+	}
+
 	// read access
 	const img_pixel_t *buf() const;
 
@@ -106,6 +111,8 @@ public:
 
 	// invalidate the 'gl_tex' field, deleting old texture if possible.
 	void unload_gl(bool can_delete);
+
+	void bind_gl();
 
 	// convert pixels to RGB mode, for testing other code
 	void test_make_RGB();

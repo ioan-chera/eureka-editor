@@ -946,6 +946,11 @@ void UI_Canvas::DrawThingBodies()
 
 void UI_Canvas::DrawThingSprites()
 {
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_ALPHA_TEST);
+
+	glAlphaFunc(GL_GREATER, 0.5);
+
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -963,6 +968,9 @@ void UI_Canvas::DrawThingSprites()
 
 		DrawSprite(x, y, sprite, info->scale);
 	}
+
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -979,76 +987,28 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 	int by1 = SCREENY(map_y - H * scale);
 	int by2 = SCREENY(map_y + H * scale);
 
-	// prevent division by zero
+	// don't make too small
 	if (bx2 <= bx1) bx2 = bx1 + 1;
 	if (by2 <= by1) by2 = by1 + 1;
 
-	// clip to screen
-	int sx1 = MAX(bx1, 0);
-	int sy1 = MAX(by1, 0);
+	// bind the sprite image (upload it to OpenGL if needed)
+	img->bind_gl();
 
-	int sx2 = MIN(bx2, w());
-	int sy2 = MIN(by2, h());
+	float tx1 = 0.0;
+	float tx2 = 1.0;
+	float ty1 = 0.0;
+	float ty2 = 1.0;
 
-	if (sy2 <= sy1 || sx2 <= sx1)
-		return;
+	glColor3f(1, 1, 1);
 
-	// collect batches of pixels, it can greatly speed up rendering
-	const int BATCH_MAX_LEN = 128;
+	glBegin(GL_QUADS);
 
-	u8_t batch_rgb[BATCH_MAX_LEN * 3];
-	u8_t *batch_dest = NULL;
+	glTexCoord2f(tx1, ty1); glVertex2i(bx1, by1);
+	glTexCoord2f(tx1, ty2); glVertex2i(bx1, by2);
+	glTexCoord2f(tx2, ty2); glVertex2i(bx2, by2);
+	glTexCoord2f(tx2, ty1); glVertex2i(bx2, by1);
 
-	int  batch_len = 0;
-	int  batch_sx  = 0;
-
-	for (int sy = sy1 ; sy <= sy2 ; sy++)
-	{
-		batch_len = 0;
-
-		for (int sx = sx1 ; sx <= sx2 ; sx++)
-		{
-			int ix = W * (sx - bx1) / (bx2 - bx1);
-			int iy = H * (sy - by1) / (by2 - by1);
-
-			ix = CLAMP(0, ix, W - 1);
-			iy = CLAMP(0, iy, H - 1);
-
-			img_pixel_t pix = img->buf()[iy * W + ix];
-
-			if (pix == TRANS_PIXEL)
-			{
-				if (batch_len > 0)
-				{
-					gl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
-					batch_len = 0;
-				}
-				continue;
-			}
-
-			if (batch_len >= BATCH_MAX_LEN)
-			{
-				gl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
-				batch_len = 0;
-			}
-
-			if (batch_len == 0)
-			{
-				batch_sx = sx;
-				batch_dest = batch_rgb;
-			}
-
-			IM_DecodePixel(pix, batch_dest[0], batch_dest[1], batch_dest[2]);
-
-			batch_len++;
-			batch_dest += 3;
-		}
-
-		if (batch_len > 0)
-		{
-			gl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
-		}
-	}
+	glEnd();
 }
 
 

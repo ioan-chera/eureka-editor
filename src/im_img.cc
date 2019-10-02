@@ -316,8 +316,6 @@ void Img_c::test_make_RGB()
 
 void Img_c::load_gl()
 {
-	// original texture ID is overwritten.
-
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &gl_tex);
@@ -333,12 +331,12 @@ void Img_c::load_gl()
 
 	bool has_trans = has_transparent();
 
-	int ex = (has_trans ? w : tw) - 1;
-	int ey = (has_trans ? h : th) - 1;
+	int ex = has_trans ? w : tw;
+	int ey = has_trans ? h : th;
 
 	int x, y;
 
-	for (y = 0; y < ey ; y++)
+	for (y = 0 ; y < ey ; y++)
 	{
 		// invert source Y for OpenGL
 		int sy = h - 1 - y;
@@ -385,6 +383,20 @@ void Img_c::unload_gl(bool can_delete)
 	}
 
 	gl_tex = 0;
+}
+
+
+void Img_c::bind_gl()
+{
+	// create the GL texture if we haven't already
+	if (gl_tex == 0)
+	{
+		// this will do a glBindTexture
+		load_gl();
+		return;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, gl_tex);
 }
 
 
