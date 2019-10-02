@@ -994,10 +994,11 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 	// bind the sprite image (upload it to OpenGL if needed)
 	img->bind_gl();
 
+	// choose texture coords based on image size
 	float tx1 = 0.0;
-	float tx2 = 1.0;
 	float ty1 = 0.0;
-	float ty2 = 1.0;
+	float tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
+	float ty2 = (float)img->height() / (float)RoundPOW2(img->height());
 
 	glColor3f(1, 1, 1);
 
