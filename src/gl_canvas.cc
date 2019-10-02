@@ -1964,7 +1964,8 @@ struct sector_edge_t
 {
 	const LineDef * line;
 
-	// coordinates mapped to screen space, not clipped
+	// coordinates mapped to screen space, not clipped.
+	// we always have scr_y1 <= scr_y2.
 	int scr_x1, scr_y1;
 	int scr_x2, scr_y2;
 
@@ -1980,9 +1981,9 @@ struct sector_edge_t
 	// computed X value
 	float x;
 
-	void CalcX(short y)
+	float CalcX(float y) const
 	{
-		x = scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
+		return scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
 	}
 
 	struct CMP_Y
@@ -2119,10 +2120,6 @@ void SectorCache_Invalidate()
 
 void UI_Canvas::RenderSector(int num)
 {
-	// FIXME RenderSector for OpenGL
-	return;
-
-
 	sector_info_cache.Update();
 
 	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
@@ -2188,18 +2185,8 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
-	const img_pixel_t *src_pix = img ? img->buf() : NULL;
-
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
-
-	// verify size is at least 64x64
-	if (img && (tw < 64 || th < 64))
-	{
-		gl_color(palette[game_info.missing_color]);
-
-		img = NULL;
-	}
 
 
 	/*** Part 1 : visit linedefs and create edges ***/
@@ -2236,7 +2223,7 @@ void UI_Canvas::RenderSector(int num)
 		if (MIN(edge.scr_y1, edge.scr_y2) >= h())
 			continue;
 
-		// skip horizontal lines
+		// skip horizontal lines   [ TODO REVIEW THIS ]
 		if (edge.scr_y1 == edge.scr_y2)
 			continue;
 
@@ -2262,7 +2249,7 @@ void UI_Canvas::RenderSector(int num)
 		max_y = MAX(max_y, edge.y2);
 
 		// compute side
-		bool is_right = (L->WhatSector(SIDE_LEFT) == num);
+		bool is_right = !(L->WhatSector(SIDE_LEFT) == num);
 
 		if (edge.flipped) is_right = !is_right;
 
@@ -2288,51 +2275,65 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
 
 
-	/*** Part 2 : traverse edge list and render spans ***/
+	/*** Part 2 : traverse edge list and render trapezoids ***/
 
 
 	unsigned int next_edge = 0;
-
-	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
 
 	std::vector<sector_edge_t *> active_edges;
 
 	unsigned int i;
 
-	// visit each screen row
-	for (short y = min_y ; y <= max_y ; y++)
+	short next_y;
+
+	// visit each row of trapezoids
+	for (short y = min_y ; y <= max_y ; y = next_y)
 	{
 		// remove old edges from active list
 		for (i = 0 ; i < active_edges.size() ; i++)
 		{
-			if (y > active_edges[i]->y2)
+			if (active_edges[i]->y2 < y)
 				active_edges[i] = NULL;
 		}
 
-		// add new edges from active list
-		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].y1 ; next_edge++)
+		// add new edges to active list
+		for ( ; next_edge < edgelist.size() && y >= edgelist[next_edge].y1 ; next_edge++)
 		{
 			active_edges.push_back(&edgelist[next_edge]);
 		}
 
-///  fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
-
-		if (active_edges.empty())
-			continue;
+/// fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
 
 		// sort active edges by X value
 		// [ also puts NULL entries at end, making easy to remove them ]
 
+		next_y = h();
+
 		for (i = 0 ; i < active_edges.size() ; i++)
 		{
 			if (active_edges[i])
-				active_edges[i]->CalcX(y);
+				next_y = MIN(next_y, active_edges[i]->y2);
 		}
+
+		for (i = 0 ; i < active_edges.size() ; i++)
+		{
+			if (active_edges[i])
+				active_edges[i]->x = active_edges[i]->CalcX(y + 0.5);
+		}
+
+/// fprintf(stderr, "      next_y=%d\n", next_y);
 
 		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
 
 		while (active_edges.size() > 0 && active_edges.back() == NULL)
 			active_edges.pop_back();
+
+		if (active_edges.empty())
+		{
+			// FIXME
+			next_y = y + 1;
+			continue;
+		}
 
 		// compute spans
 
@@ -2345,8 +2346,8 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				BugError("RenderSector: did not delete NULLs properly!\n");
 #endif
 
-///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-///  E1->x, E1->side, E2->x, E2->side);
+///     fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
+///			 E1->x, E1->side, E2->x, E2->side);
 
 			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
 				continue;
@@ -2355,52 +2356,39 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
-			int x1 = floor(E1->x);
-			int x2 = floor(E2->x);
+			int lx1 = floor(E1->x);
+			int lx2 = floor(E2->x);
+
+			int hx1 = floor(E1->CalcX(next_y));
+			int hx2 = floor(E2->CalcX(next_y));
 
 			// completely off the screen?
-			if (x2 < 0 || x1 >= w())
+/* REVIEW
+			if (lx2 < 0 && hx2 < 0)
 				continue;
-
-			// clip span to screen
-			x1 = MAX(x1, x());
-			x2 = MIN(x2, x() + w() - 1);
-
-			// this probably cannot happen....
-			if (x2 < x1) continue;
-
-///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
-
-			// solid color?
-			if (! img)
-			{
-				gl_rectf(x1, y, x2 - x1 + 1, 1);
+			if (lx1 >= w() && hx1 >= w())
 				continue;
-			}
+*/
+			// FIXME TEST-ONLY COLORING
+			int r1 = rand() & 255;
+			int r2 = rand() & 255;
+			int r3 = rand() & 255;
+			glColor3f(r1 / 255.0, r2 / 255.0, r3 / 255.0);
 
-			int x = x1;
-			int span_w = x2 - x1 + 1;
+			// draw polygon
+			glBegin(GL_POLYGON);
 
-			u8_t *dest = line_rgb;
-			u8_t *dest_end = line_rgb + span_w * 3;
+			glVertex2i(lx1, y);
+			glVertex2i(hx1, next_y+1);
+			glVertex2i(hx2, next_y+1);
+			glVertex2i(lx2, y);
 
-			int ty = (0 - (int)MAPY(y)) & 63;
-
-			for (; dest < dest_end ; dest += 3, x++)
-			{
-				// TODO : be nice to optimize the next line
-				int tx = (int)MAPX(x) & 63;
-
-				img_pixel_t pix = src_pix[ty * tw + tx];
-
-				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
-			}
-
-			gl_draw_image(line_rgb, x1, y, span_w, 1);
+			glEnd();
 		}
-	}
 
-	delete[] line_rgb;
+		if (next_y == y)
+			next_y++;
+	}
 }
 
 //--- editor settings ---

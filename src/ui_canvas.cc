@@ -2313,7 +2313,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				active_edges[i] = NULL;
 		}
 
-		// add new edges from active list
+		// add new edges to active list
 		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].y1 ; next_edge++)
 		{
 			active_edges.push_back(&edgelist[next_edge]);
