@@ -77,6 +77,9 @@ public:
 	// FLTK virtual method for resizing.
 	void resize(int X, int Y, int W, int H);
 
+	// delete any OpenGL context which is assigned to the window.
+	// call this whenever OpenGL textures need to be reloaded.
+	void DeleteContext();
 
 	void DrawEverything();
 

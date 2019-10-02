@@ -61,6 +61,11 @@ void W_ClearSprites();
 Img_c * W_GetSprite(int type);
 
 
+/* ---- ALL ---- */
+
+void W_UnloadAllTextures();
+
+
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 
 //--- editor settings ---

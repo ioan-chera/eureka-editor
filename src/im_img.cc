@@ -400,6 +400,24 @@ void IM_ResetDummyTextures()
 }
 
 
+void IM_UnloadDummyTextures()
+{
+	bool can_delete = false;
+
+	if (missing_tex_image)
+		missing_tex_image->unload_gl(can_delete);
+
+	if (unknown_tex_image)
+		unknown_tex_image->unload_gl(can_delete);
+
+	if (unknown_flat_image)
+		unknown_flat_image->unload_gl(can_delete);
+
+	if (unknown_sprite_image)
+		unknown_sprite_image->unload_gl(can_delete);
+}
+
+
 static const byte unknown_graphic[16 * 16] =
 {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

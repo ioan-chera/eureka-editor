@@ -117,6 +117,7 @@ private:
 
 
 void IM_ResetDummyTextures();
+void IM_UnloadDummyTextures();
 
 Img_c * IM_MissingTex();
 Img_c * IM_UnknownTex();

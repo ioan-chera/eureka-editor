@@ -78,6 +78,15 @@ UI_Canvas::~UI_Canvas()
 { }
 
 
+void UI_Canvas::DeleteContext()
+{
+	context(NULL, 0);
+
+	// ensure W_UnloadAllTextures() gets called on next draw()
+	invalidate();
+}
+
+
 void UI_Canvas::resize(int X, int Y, int W, int H)
 {
 	Fl_Gl_Window::resize(X, Y, W, H);
@@ -88,6 +97,11 @@ void UI_Canvas::draw()
 {
 	if (! valid()) {
 		ortho();
+
+		// reset the 'gl_tex' field of all loaded images, as the value
+		// belongs to a context which was (probably) just deleted and
+		// hence refer to textures which no longer exist.
+		W_UnloadAllTextures();
 	}
 
 	// default font (for showing object numbers)

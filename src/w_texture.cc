@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -877,6 +877,32 @@ Img_c * W_GetSprite(int type)
 	return result;
 }
 
+
+//----------------------------------------------------------------------
+
+static void UnloadTex(const std::map<std::string, Img_c *>::value_type& P)
+{
+	P.second->unload_gl(false);
+}
+
+static void UnloadFlat(const std::map<std::string, Img_c *>::value_type& P)
+{
+	P.second->unload_gl(false);
+}
+
+static void UnloadSprite(const sprite_map_t::value_type& P)
+{
+	P.second->unload_gl(false);
+}
+
+void W_UnloadAllTextures()
+{
+	std::for_each(textures.begin(), textures.end(), UnloadTex);
+	std::for_each(   flats.begin(),    flats.end(), UnloadFlat);
+	std::for_each( sprites.begin(),  sprites.end(), UnloadSprite);
+
+	IM_UnloadDummyTextures();
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
