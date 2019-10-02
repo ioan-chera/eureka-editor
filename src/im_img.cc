@@ -360,16 +360,19 @@ void Img_c::load_gl()
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
-				dest[0] = r;
+				dest[0] = b;
 				dest[1] = g;
-				dest[2] = b;
+				dest[2] = r;
 				dest[3] = 255;
 			}
 		}
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0 /* border */,
-		GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0 /* mip */,
+		GL_RGBA8, tw, th, 0 /* border */,
+		GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV, rgba);
 
 	delete[] rgba;
 }
