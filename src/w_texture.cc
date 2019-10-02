@@ -712,6 +712,7 @@ static sprite_map_t sprites;
 
 static void DeleteSprite(const sprite_map_t::value_type& P)
 {
+	// Note that P.second can be NULL here
 	delete P.second;
 }
 
@@ -882,17 +883,20 @@ Img_c * W_GetSprite(int type)
 
 static void UnloadTex(const std::map<std::string, Img_c *>::value_type& P)
 {
-	P.second->unload_gl(false);
+	if (P.second != NULL)
+		P.second->unload_gl(false);
 }
 
 static void UnloadFlat(const std::map<std::string, Img_c *>::value_type& P)
 {
-	P.second->unload_gl(false);
+	if (P.second != NULL)
+		P.second->unload_gl(false);
 }
 
 static void UnloadSprite(const sprite_map_t::value_type& P)
 {
-	P.second->unload_gl(false);
+	if (P.second != NULL)
+		P.second->unload_gl(false);
 }
 
 void W_UnloadAllTextures()
