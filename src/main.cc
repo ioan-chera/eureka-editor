@@ -914,6 +914,10 @@ void Main_LoadResources()
 
 	if (main_win)
 	{
+		// kill all loaded OpenGL images
+		if (main_win->canvas)
+			main_win->canvas->DeleteContext();
+
 		main_win->UpdateGameInfo();
 
 		main_win->browser->Populate();

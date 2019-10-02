@@ -201,6 +201,10 @@ static void SetGamma(int new_val)
 
 	W_UpdateGamma();
 
+	// for OpenGL, need to reload all images
+	if (main_win && main_win->canvas)
+		main_win->canvas->DeleteContext();
+
 	Status_Set("Gamma level %d", usegamma);
 
 	RedrawMap();
