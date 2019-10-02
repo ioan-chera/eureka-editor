@@ -314,15 +314,11 @@ void Img_c::test_make_RGB()
 }
 
 
-void Img_c::upload_gl()
+void Img_c::load_gl()
 {
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 	// original texture ID is overwritten.
 
-	// NOTE: we cannot use glDeleteTextures() since the context
-	//       has very likely changed and we would end up deleting
-	//       the wrong images.
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &gl_tex);
 	glBindTexture(GL_TEXTURE_2D, gl_tex);
@@ -378,6 +374,17 @@ void Img_c::upload_gl()
 		GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 
 	delete[] rgba;
+}
+
+
+void Img_c::unload_gl(bool can_delete)
+{
+	if (can_delete && gl_tex != 0)
+	{
+		glDeleteTextures(1, &gl_tex);
+	}
+
+	gl_tex = 0;
 }
 
 

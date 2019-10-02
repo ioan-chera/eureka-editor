@@ -102,7 +102,10 @@ public:
 	bool has_transparent() const;
 
 	// upload to OpenGL, overwriting 'gl_tex' field.
-	void upload_gl();
+	void load_gl();
+
+	// invalidate the 'gl_tex' field, deleting old texture if possible.
+	void unload_gl(bool can_delete);
 
 	// convert pixels to RGB mode, for testing other code
 	void test_make_RGB();
