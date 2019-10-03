@@ -25,19 +25,6 @@
 #include "e_basis.h"
 #include "r_subdiv.h"
 
-//#include "m_events.h"
-//#include "e_main.h"
-//#include "e_hover.h"
-//#include "e_sector.h"
-//#include "e_things.h"
-//#include "m_config.h"
-//#include "m_game.h"
-//#include "r_grid.h"
-//#include "im_color.h"
-//#include "im_img.h"
-//#include "r_render.h"
-//#include "w_rawdef.h"	// MLF_xxx
-//#include "w_texture.h"
 
 /* This file contains code for subdividing map sectors into a set
    of polygons, and also the logic for caching these subdivisions
@@ -63,10 +50,10 @@ struct sector_edge_t
 {
 	const LineDef * line;
 
-	// coordinates mapped to screen space, not clipped.
-	// we always have scr_y1 <= scr_y2.
-	int scr_x1, scr_y1;
-	int scr_x2, scr_y2;
+	// coordinates of line, possibly flipped.
+	// we always have: y1 <= y2.
+	int x1, y1;
+	int x2, y2;
 
 	// has the line been flipped (coordinates were swapped) ?
 	short flipped;
@@ -74,22 +61,21 @@ struct sector_edge_t
 	// what side this edge faces (SIDE_LEFT or SIDE_RIGHT)
 	short side;
 
-	// clipped vertical range, inclusive
-	short y1, y2;
-
-	// computed X value
-	float x;
+	// comparison for CMP_X
+	float cmp_x;
 
 	float CalcX(float y) const
 	{
-		return scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
+		return x1 + (x2 - x1) * (float)(y - y1) / (float)(y2 - y1);
 	}
 
 	struct CMP_Y
 	{
 		inline bool operator() (const sector_edge_t &A, const sector_edge_t& B) const
 		{
-			return A.scr_y1 < B.scr_y1;
+			// NULL not allowed here
+
+			return A.y1 < B.y1;
 		}
 	};
 
@@ -105,7 +91,7 @@ struct sector_edge_t
 			if (B == NULL)
 				return true;
 
-			return A->x < B->x;
+			return A->cmp_x < B->cmp_x;
 		}
 	};
 };
@@ -226,70 +212,12 @@ static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
 	if (exinfo.first_line < 0)
 		return;
 
-#if 0 // FIXME R_SubdivideSector
-
-
-///  fprintf(stderr, "RenderSector %d\n", num);
-
-	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
-
-	const char * tex_name = NULL;
-
-	Img_c * img = NULL;
-
-	if (edit.sector_render_mode == SREND_Lighting)
-	{
-		gl_color(light_col);
-	}
-	else if (edit.sector_render_mode == SREND_SoundProp)
-	{
-		if (edit.mode != OBJ_SECTORS || !edit.highlight.valid())
-			return;
-
-		const byte * prop = SoundPropagation(edit.highlight.num);
-
-		switch ((propagate_level_e) prop[num])
-		{
-			case PGL_Never:   return;
-			case PGL_Maybe:   gl_color(fl_rgb_color(64,64,192)); break;
-			case PGL_Level_1: gl_color(fl_rgb_color(192,32,32)); break;
-			case PGL_Level_2: gl_color(fl_rgb_color(192,96,32)); break;
-		}
-	}
-	else
-	{
-		if (edit.sector_render_mode == SREND_Ceiling)
-			tex_name = Sectors[num]->CeilTex();
-		else
-			tex_name = Sectors[num]->FloorTex();
-
-		if (is_sky(tex_name))
-		{
-			gl_color(palette[game_info.sky_color]);
-		}
-		else
-		{
-			img = W_GetFlat(tex_name);
-
-			if (! img)
-			{
-				img = IM_UnknownTex();
-			}
-		}
-	}
-
-	int tw = img ? img->width()  : 1;
-	int th = img ? img->height() : 1;
+///  fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 
 	/*** Part 1 : visit linedefs and create edges ***/
 
-
 	std::vector<sector_edge_t> edgelist;
-
-	short min_y = 32767;
-	short max_y = 0;
-
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
@@ -304,72 +232,55 @@ static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
 
 		sector_edge_t edge;
 
-		edge.scr_x1 = SCREENX(L->Start()->x);
-		edge.scr_y1 = SCREENY(L->Start()->y);
-		edge.scr_x2 = SCREENX(L->End()->x);
-		edge.scr_y2 = SCREENY(L->End()->y);
+		edge.x1 = L->Start()->x;
+		edge.y1 = L->Start()->y;
+		edge.x2 = L->End()->x;
+		edge.y2 = L->End()->y;
 
-		// completely above or below the screen?
-		if (MAX(edge.scr_y1, edge.scr_y2) < 0)
+		// skip purely horizontal lines
+		if (edge.y1 == edge.y2)
 			continue;
 
-		if (MIN(edge.scr_y1, edge.scr_y2) >= h())
-			continue;
-
-		// skip horizontal lines   [ TODO REVIEW THIS ]
-		if (edge.scr_y1 == edge.scr_y2)
-			continue;
-
+		edge.line = L;
 		edge.flipped = 0;
 
-		if (edge.scr_y1 > edge.scr_y2)
+		if (edge.y1 > edge.y2)
 		{
-			std::swap(edge.scr_x1, edge.scr_x2);
-			std::swap(edge.scr_y1, edge.scr_y2);
+			std::swap(edge.x1, edge.x2);
+			std::swap(edge.y1, edge.y2);
 
 			edge.flipped = 1;
 		}
 
-		// compute usable range, clipping to screen
-		edge.y1 = MAX(edge.scr_y1, 0);
-		edge.y2 = MIN(edge.scr_y2, h() - 1);
-
-		// this probably cannot happen....
-		if (edge.y2 < edge.y1)
-			continue;
-
-		min_y = MIN(min_y, edge.y1);
-		max_y = MAX(max_y, edge.y2);
-
 		// compute side
-		bool is_right = !(L->WhatSector(SIDE_LEFT) == num);
+		bool is_right = (L->WhatSector(SIDE_RIGHT) == num);
 
-		if (edge.flipped) is_right = !is_right;
+		if (edge.flipped)
+			is_right = !is_right;
 
 		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
 
-/*
+// DEBUG
 fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
-n, edge.scr_x1, edge.scr_y1, edge.scr_x2, edge.scr_y2, edge.flipped,
+n, edge.x1, edge.y1, edge.x2, edge.y2, edge.flipped,
 L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
-*/
+//
 
 		// add the edge
-		edge.line = L;
-
 		edgelist.push_back(edge);
 	}
 
 	if (edgelist.empty())
 		return;
 
-	// sort edges into vertical order (i.e. by scr_y1)
+	// sort edges into vertical order (using 'y1' field)
 
 	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
 
 
 	/*** Part 2 : traverse edge list and render trapezoids ***/
 
+#if 0
 
 	unsigned int next_edge = 0;
 
