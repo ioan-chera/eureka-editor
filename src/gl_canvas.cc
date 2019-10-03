@@ -2023,15 +2023,22 @@ void UI_Canvas::RenderSector(int num)
 	int th = img ? img->height() : 1;
 
 
+	if (img)
+	{
+		glColor3f(1, 1, 1);
+
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_ALPHA_TEST);
+
+		glAlphaFunc(GL_GREATER, 0.5);
+
+		img->bind_gl();
+	}
+
+
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
 		sector_polygon_t *poly = &subdiv->polygons[i];
-
-		// FIXME TEST-ONLY COLORING
-		int r1 = rand() & 255;
-		int r2 = rand() & 255;
-		int r3 = rand() & 255;
-		glColor3f(r1 / 255.0, r2 / 255.0, r3 / 255.0);
 
 		// draw polygon
 		glBegin(GL_POLYGON);
@@ -2043,10 +2050,21 @@ void UI_Canvas::RenderSector(int num)
 			int sx = SCREENX(poly->mx[p]);
 			int sy = SCREENY(poly->my[p]);
 
+			if (img)
+			{
+				glTexCoord2f(poly->mx[p] / 64.0, poly->my[p] / 64.0);
+			}
+
 			glVertex2i(sx, sy);
 		}
 
 		glEnd();
+	}
+
+	if (img)
+	{
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
 	}
 }
 
