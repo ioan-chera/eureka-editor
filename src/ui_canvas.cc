@@ -18,6 +18,8 @@
 //
 //------------------------------------------------------------------------
 
+#ifdef NO_OPENGL
+
 #include "main.h"
 
 #include <algorithm>
@@ -2406,6 +2408,8 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 	delete[] line_rgb;
 }
+
+#endif /* NO_OPENGL */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

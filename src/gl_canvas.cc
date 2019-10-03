@@ -18,6 +18,8 @@
 //
 //------------------------------------------------------------------------
 
+#ifndef NO_OPENGL
+
 #include "main.h"
 
 #include <algorithm>
@@ -2067,6 +2069,8 @@ void UI_Canvas::RenderSector(int num)
 		glDisable(GL_ALPHA_TEST);
 	}
 }
+
+#endif /* NO_OPENGL */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

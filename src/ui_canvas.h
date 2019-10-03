@@ -75,6 +75,7 @@ public:
 	// FLTK virtual method for resizing.
 	void resize(int X, int Y, int W, int H);
 
+	void DeleteContext() {}
 
 	void DrawEverything();
 

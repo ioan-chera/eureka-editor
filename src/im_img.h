@@ -29,7 +29,11 @@
 
 #include "im_color.h"
 
+#ifdef NO_OPENGL
+typedef unsigned int GLuint;
+#else
 #include "FL/gl.h"
+#endif
 
 // this is a 16-bit value:
 //   - when high bit is clear, it is a palette index 0-255

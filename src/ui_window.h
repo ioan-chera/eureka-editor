@@ -22,7 +22,11 @@
 #define __EUREKA_UI_WINDOW_H__
 
 #include "ui_menu.h"
+#ifdef NO_OPENGL
+#include "ui_canvas.h"
+#else
 #include "gl_canvas.h"
+#endif
 #include "ui_infobar.h"
 #include "ui_hyper.h"
 #include "ui_nombre.h"

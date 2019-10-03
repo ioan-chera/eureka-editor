@@ -31,6 +31,9 @@ CXXFLAGS += $(CXX_DIALECT)
 LIBS += -lGLU -lGL
 LIBS += -lz -lm
 
+# add this for software rendering, remove '--use-gl' below, remove -lGL from LIBS
+# CXXFLAGS += -DNO_OPENGL
+
 # FLTK flags (this assumes a system-wide FLTK installation)
 CXXFLAGS += $(shell fltk-config --use-images --use-gl --cxxflags)
 LDFLAGS  += $(shell fltk-config --use-images --use-gl  --ldflags)

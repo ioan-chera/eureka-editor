@@ -314,6 +314,14 @@ void Img_c::test_make_RGB()
 }
 
 
+#ifdef NO_OPENGL
+
+void Img_c::load_gl() {}
+void Img_c::unload_gl(bool can_delete) {}
+void Img_c::bind_gl() {}
+
+#else
+
 void Img_c::load_gl()
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -403,6 +411,7 @@ void Img_c::bind_gl()
 	glBindTexture(GL_TEXTURE_2D, gl_tex);
 }
 
+#endif
 
 //------------------------------------------------------------------------
 

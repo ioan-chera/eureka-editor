@@ -24,7 +24,9 @@
 #include <map>
 #include <algorithm>
 
+#ifndef NO_OPENGL
 #include "FL/gl.h"
+#endif
 
 #include "im_color.h"
 #include "im_img.h"

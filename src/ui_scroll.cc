@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,7 +23,13 @@
 #include "e_main.h"		// Map_bound_xxx
 
 #include "ui_scroll.h"
+
+#ifdef NO_OPENGL
+#include "ui_canvas.h"
+#else
 #include "gl_canvas.h"
+#endif
+
 #include "r_render.h"
 
 
