@@ -47,6 +47,9 @@ public:
 	~sector_subdivision_c();
 
 	void Clear();
+
+	void AddPolygon(float lx1, float lx2, float low_y,
+					float hx1, float hx2, float high_y);
 };
 
 

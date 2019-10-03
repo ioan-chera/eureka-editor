@@ -45,6 +45,13 @@ void sector_subdivision_c::Clear()
 }
 
 
+void sector_subdivision_c::AddPolygon(float lx1, float lx2, float low_y,
+	float hx1, float hx2, float high_y)
+{
+	// FIXME AddPolygon
+}
+
+
 // this represents a segment of a linedef bounding a sector.
 struct sector_edge_t
 {
@@ -284,14 +291,10 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 
 	unsigned int pos = 0;
 
-	for (;;)
+	while (pos < edgelist.size())
 	{
-		if (pos >= edgelist.size())
-			break;
-
 		// this Y is minimal (guaranteed by sorting the edgelist)
-		int min_y  = edgelist[pos].y1;
-		int next_y = edgelist[pos].y2;
+		int min_y = edgelist[pos].y1;
 
 		// remove old edges from active list
 		for (unsigned int i = 0 ; i < active_edges.size() ; i++)
@@ -308,75 +311,43 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			active_edges.push_back(&edgelist[next]);
 		}
 
-		if (! active_edges.empty())
+		// find next highest Y
+		int next_y = edgelist[pos].y2;
+
+		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{
-			// find next highest Y
-			for (unsigned int k = 0 ; k < active_edges.size() ; k++)
+			sector_edge_t *A = active_edges[k];
+
+			if (A != NULL)
 			{
-				if (active_edges[k]->y1 > min_y)
-					next_y = MIN(next_y, active_edges[k]->y1);
-
-				if (active_edges[k]->y2 > min_y)
-					next_y = MIN(next_y, active_edges[k]->y2);
+				if (A->y1 > min_y) next_y = MIN(next_y, A->y1);
+				if (A->y2 > min_y) next_y = MIN(next_y, A->y2);
 			}
-
-			// TODO
 		}
 
-		// ok, repeat process for next row
-		pos++;
+/* DEBUG
+	fprintf(stderr, "  min_y:%d  next_y:%d\n", min_y, next_y);
+*/
 
-		while (pos < edgelist.size() && edgelist[pos].y1 < next_y)
-			pos++;
-	}
+		// compute a comparison X coordinate for each active edge
+		float mid_y = min_y + (next_y - min_y) * 0.5;
 
-#if 0
-
-	unsigned int next_edge = 0;
-
-	unsigned int i;
-
-	short next_y;
-
-	// visit each row of trapezoids
-	for (short y = min_y ; y <= max_y ; y = next_y)
-	{
-
-/// fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
-
-		// sort active edges by X value
-		// [ also puts NULL entries at end, making easy to remove them ]
-
-		next_y = h();
-
-		for (i = 0 ; i < active_edges.size() ; i++)
+		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{
-			if (active_edges[i])
-				next_y = MIN(next_y, active_edges[i]->y2);
+			sector_edge_t *A = active_edges[k];
+
+			if (A != NULL)
+				A->cmp_x = A->CalcX(mid_y);
 		}
 
-		for (i = 0 ; i < active_edges.size() ; i++)
-		{
-			if (active_edges[i])
-				active_edges[i]->x = active_edges[i]->CalcX(y + 0.5);
-		}
-
-/// fprintf(stderr, "      next_y=%d\n", next_y);
-
+		// sort edges horizontally
 		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
 
+		// remove NULLs
 		while (active_edges.size() > 0 && active_edges.back() == NULL)
 			active_edges.pop_back();
 
-		if (active_edges.empty())
-		{
-			// FIXME
-			next_y = y + 1;
-			continue;
-		}
-
-		// compute spans
-
+		// visit pairs of edges
 		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
 		{
 			const sector_edge_t * E1 = active_edges[i - 1];
@@ -386,8 +357,10 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				BugError("RenderSector: did not delete NULLs properly!\n");
 #endif
 
-///     fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-///			 E1->x, E1->side, E2->x, E2->side);
+/* DEBUG
+	fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
+		E1->x, E1->side, E2->x, E2->side);
+*/
 
 			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
 				continue;
@@ -396,40 +369,21 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
-			int lx1 = floor(E1->x);
-			int lx2 = floor(E2->x);
+			float lx1 = E1->CalcX(min_y);
+			float hx1 = E1->CalcX(next_y);
 
-			int hx1 = floor(E1->CalcX(next_y));
-			int hx2 = floor(E2->CalcX(next_y));
+			float lx2 = E2->CalcX(min_y);
+			float hx2 = E2->CalcX(next_y);
 
-			// completely off the screen?
-/* REVIEW
-			if (lx2 < 0 && hx2 < 0)
-				continue;
-			if (lx1 >= w() && hx1 >= w())
-				continue;
-*/
-			// FIXME TEST-ONLY COLORING
-			int r1 = rand() & 255;
-			int r2 = rand() & 255;
-			int r3 = rand() & 255;
-			glColor3f(r1 / 255.0, r2 / 255.0, r3 / 255.0);
-
-			// draw polygon
-			glBegin(GL_POLYGON);
-
-			glVertex2i(lx1, y);
-			glVertex2i(hx1, next_y+1);
-			glVertex2i(hx2, next_y+1);
-			glVertex2i(lx2, y);
-
-			glEnd();
+			exinfo.sub.AddPolygon(lx1, lx2, min_y, hx1, hx2, next_y);
 		}
 
-		if (next_y == y)
-			next_y++;
+		// ok, repeat process for next row
+		pos++;
+
+		while (pos < edgelist.size() && edgelist[pos].y1 < next_y)
+			pos++;
 	}
-#endif
 }
 
 
