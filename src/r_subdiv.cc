@@ -48,7 +48,44 @@ void sector_subdivision_c::Clear()
 void sector_subdivision_c::AddPolygon(float lx1, float lx2, float low_y,
 	float hx1, float hx2, float high_y)
 {
-	// FIXME AddPolygon
+	// determine if low or high are a single vertex
+	bool l_single = fabs(lx2 - lx1) < 0.2;
+	bool h_single = fabs(hx2 - hx1) < 0.2;
+
+	// skip a degenerate polygon
+	if (l_single && h_single)
+		return;
+
+	sector_polygon_t poly;
+
+	poly.count = (l_single || h_single) ? 3 : 4;
+
+	// add vertices in clockwise order
+	int pos = 0;
+
+	poly.mx[pos] = lx1;
+	poly.my[pos] = low_y;
+	pos++;
+
+	poly.mx[pos] = hx1;
+	poly.my[pos] = high_y;
+	pos++;
+
+	if (! h_single)
+	{
+		poly.mx[pos] = hx2;
+		poly.my[pos] = high_y;
+		pos++;
+	}
+
+	if (! l_single)
+	{
+		poly.mx[pos] = lx2;
+		poly.my[pos] = low_y;
+		pos++;
+	}
+
+	polygons.push_back(poly);
 }
 
 
@@ -219,8 +256,9 @@ static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
 	if (exinfo.first_line < 0)
 		return;
 
-///  fprintf(stderr, "R_SubdivideSector %d\n", num);
-
+/* DEBUG
+fprintf(stderr, "R_SubdivideSector %d\n", num);
+*/
 
 	/*** Part 1 : visit linedefs and create edges ***/
 
@@ -267,11 +305,11 @@ static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
 
 		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
 
-// DEBUG
+/* DEBUG
 fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
-n, edge.x1, edge.y1, edge.x2, edge.y2, edge.flipped,
-L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
-//
+	n, edge.x1, edge.y1, edge.x2, edge.y2, edge.flipped,
+	L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
+*/
 
 		// add the edge
 		edgelist.push_back(edge);
@@ -326,7 +364,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 		}
 
 /* DEBUG
-	fprintf(stderr, "  min_y:%d  next_y:%d\n", min_y, next_y);
+fprintf(stderr, "  min_y:%d  next_y:%d\n", min_y, next_y);
 */
 
 		// compute a comparison X coordinate for each active edge
@@ -358,14 +396,15 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 #endif
 
 /* DEBUG
-	fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-		E1->x, E1->side, E2->x, E2->side);
+fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
+	E1->cmp_x, E1->side, E2->cmp_x, E2->side);
 */
 
 			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
 				continue;
 
 			// treat lines without a right side as dead
+			// [ NOTE that we don't ignore them ]
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
