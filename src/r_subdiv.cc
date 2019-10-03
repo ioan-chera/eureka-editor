@@ -278,13 +278,61 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
 
 
-	/*** Part 2 : traverse edge list and render trapezoids ***/
+	/*** Part 2 : traverse edge list and create trapezoids ***/
+
+	std::vector<sector_edge_t *> active_edges;
+
+	unsigned int pos = 0;
+
+	for (;;)
+	{
+		if (pos >= edgelist.size())
+			break;
+
+		// this Y is minimal (guaranteed by sorting the edgelist)
+		int min_y  = edgelist[pos].y1;
+		int next_y = edgelist[pos].y2;
+
+		// remove old edges from active list
+		for (unsigned int i = 0 ; i < active_edges.size() ; i++)
+		{
+			if (active_edges[i]->y2 <= min_y)
+				active_edges[i] = NULL;
+		}
+
+		// add new edges to active list
+		unsigned int next = pos;
+
+		for ( ; next < edgelist.size() && edgelist[next].y1 == min_y ; next++)
+		{
+			active_edges.push_back(&edgelist[next]);
+		}
+
+		if (! active_edges.empty())
+		{
+			// find next highest Y
+			for (unsigned int k = 0 ; k < active_edges.size() ; k++)
+			{
+				if (active_edges[k]->y1 > min_y)
+					next_y = MIN(next_y, active_edges[k]->y1);
+
+				if (active_edges[k]->y2 > min_y)
+					next_y = MIN(next_y, active_edges[k]->y2);
+			}
+
+			// TODO
+		}
+
+		// ok, repeat process for next row
+		pos++;
+
+		while (pos < edgelist.size() && edgelist[pos].y1 < next_y)
+			pos++;
+	}
 
 #if 0
 
 	unsigned int next_edge = 0;
-
-	std::vector<sector_edge_t *> active_edges;
 
 	unsigned int i;
 
@@ -293,18 +341,6 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 	// visit each row of trapezoids
 	for (short y = min_y ; y <= max_y ; y = next_y)
 	{
-		// remove old edges from active list
-		for (i = 0 ; i < active_edges.size() ; i++)
-		{
-			if (active_edges[i]->y2 < y)
-				active_edges[i] = NULL;
-		}
-
-		// add new edges to active list
-		for ( ; next_edge < edgelist.size() && y >= edgelist[next_edge].y1 ; next_edge++)
-		{
-			active_edges.push_back(&edgelist[next_edge]);
-		}
 
 /// fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
 
