@@ -1961,21 +1961,14 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 
 void UI_Canvas::RenderSector(int num)
 {
+	if (! Subdiv_SectorOnScreen(num, map_lx, map_ly, map_hx, map_hy))
+		return;
+
 	sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(num);
 
 	if (! subdiv)
 		return;
 
-/* FIXME DO THIS SOMEHOW
-
-	// bounding box test
-	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
-		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
-	{
-		// sector is off-screen
-		return;
-	}
-*/
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
@@ -2045,6 +2038,8 @@ void UI_Canvas::RenderSector(int num)
 
 		for (int p = 0 ; p < poly->count ; p++)
 		{
+			// FIXME : more accurate SCREENX macros which take floats
+			//         [ and maybe return floats? ]
 			int sx = SCREENX(poly->mx[p]);
 			int sy = SCREENY(poly->my[p]);
 

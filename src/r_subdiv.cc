@@ -470,9 +470,31 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 }
 
 
+bool Subdiv_SectorOnScreen(int num, int map_lx, int map_ly, int map_hx, int map_hy)
+{
+	sector_info_cache.Update();
+
+	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
+
+	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
+		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
+	{
+		// sector is off-screen
+		return false;
+	}
+
+	return true;
+}
+
+
 sector_subdivision_c *Subdiv_PolygonsForSector(int num)
 {
-	// TODO
+	sector_info_cache.Update();
+
+	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
+
+	// FIXME Subdiv_PolygonsForSector
+	return NULL;
 }
 
 //--- editor settings ---
