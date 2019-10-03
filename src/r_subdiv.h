@@ -45,6 +45,8 @@ public:
 public:
 	sector_subdivision_c();
 	~sector_subdivision_c();
+
+	void Clear();
 };
 
 

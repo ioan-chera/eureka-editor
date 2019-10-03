@@ -45,6 +45,19 @@
 */
 
 
+sector_subdivision_c::sector_subdivision_c() :
+	polygons()
+{ }
+
+sector_subdivision_c::~sector_subdivision_c()
+{ }
+
+void sector_subdivision_c::Clear()
+{
+	polygons.clear();
+}
+
+
 // this represents a segment of a linedef bounding a sector.
 struct sector_edge_t
 {
@@ -108,6 +121,11 @@ struct sector_extra_info_t
 	int bound_x1, bound_x2;
 	int bound_y1, bound_y2;
 
+	sector_subdivision_c sub;
+
+	// true when polygons have been built for this sector.
+	bool built;
+
 	void Clear()
 	{
 		first_line = last_line = -1;
@@ -116,6 +134,10 @@ struct sector_extra_info_t
 		bound_y1 = 32767;
 		bound_x2 = -32767;
 		bound_y2 = -32767;
+
+		sub.Clear();
+
+		built = false;
 	}
 
 	void AddLine(int n)
@@ -199,14 +221,12 @@ public:
 static sector_info_cache_c sector_info_cache;
 
 
-static void R_SubdivideSector(int num)
+static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
 {
-	sector_info_cache.Update();
-
-	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
-
 	if (exinfo.first_line < 0)
 		return;
+
+#if 0 // FIXME R_SubdivideSector
 
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
@@ -462,6 +482,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 		if (next_y == y)
 			next_y++;
 	}
+#endif
 }
 
 
@@ -497,8 +518,13 @@ sector_subdivision_c *Subdiv_PolygonsForSector(int num)
 
 	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
 
-	// FIXME Subdiv_PolygonsForSector
-	return NULL;
+	if (! exinfo.built)
+	{
+		R_SubdivideSector(num, exinfo);
+		exinfo.built = true;
+	}
+
+	return &exinfo.sub;
 }
 
 //--- editor settings ---

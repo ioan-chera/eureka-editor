@@ -81,6 +81,7 @@ OBJS = \
 	$(OBJ_DIR)/m_testmap.o  \
 	$(OBJ_DIR)/r_grid.o  \
 	$(OBJ_DIR)/r_render.o  \
+	$(OBJ_DIR)/r_subdiv.o  \
 	$(OBJ_DIR)/sys_debug.o \
 	$(OBJ_DIR)/ui_about.o  \
 	$(OBJ_DIR)/ui_browser.o  \
