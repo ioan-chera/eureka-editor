@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_CANVAS_H__
-#define __EUREKA_UI_CANVAS_H__
+#ifndef __EUREKA_GL_CANVAS_H__
+#define __EUREKA_GL_CANVAS_H__
 
 #include <FL/Fl_Gl_Window.H>
 
@@ -180,7 +180,7 @@ private:
 };
 
 
-#endif  /* __EUREKA_UI_CANVAS_H__ */
+#endif  /* __EUREKA_GL_CANVAS_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

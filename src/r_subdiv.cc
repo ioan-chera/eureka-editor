@@ -39,6 +39,11 @@
 //#include "w_rawdef.h"	// MLF_xxx
 //#include "w_texture.h"
 
+/* This file contains code for subdividing map sectors into a set
+   of polygons, and also the logic for caching these subdivisions
+   and rebuilding them whenever necessary.
+*/
+
 
 // this represents a segment of a linedef bounding a sector.
 struct sector_edge_t

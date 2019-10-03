@@ -27,7 +27,11 @@ struct sector_polygon_t
 	// number of sides, either 3 or 4
 	int count;
 
-	// these are map coordinates
+	// the map coordinates.
+	//
+	// NOTE: this shape is actually a trapezoid where the top and
+	//       bottom are always purely horizontal, only the sides
+	//       can be sloped.  the software renderer relies on this.
 	float mx[4];
 	float my[4];
 };
