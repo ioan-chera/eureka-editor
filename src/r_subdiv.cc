@@ -137,6 +137,7 @@ struct sector_extra_info_t
 	}
 };
 
+
 class sector_info_cache_c
 {
 public:
@@ -197,14 +198,8 @@ public:
 
 static sector_info_cache_c sector_info_cache;
 
-void SectorCache_Invalidate()
-{
-	// invalidate everything
-	sector_info_cache.total = -1;
-}
 
-
-void R_SubdivideSector(int num)
+static void R_SubdivideSector(int num)
 {
 	sector_info_cache.Update();
 
@@ -467,6 +462,15 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 		if (next_y == y)
 			next_y++;
 	}
+}
+
+
+void Subdiv_InvalidateAll()
+{
+	// FIXME Subdiv_InvalidateAll
+
+	// invalidate everything
+	sector_info_cache.total = -1;
 }
 
 
