@@ -1608,7 +1608,7 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	gl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
+	gl_line(mx, my, mx + (y2 - y1) / 5, my + (x1 - x2) / 5);
 
 	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
