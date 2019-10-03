@@ -327,30 +327,37 @@ fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%
 
 	std::vector<sector_edge_t *> active_edges;
 
+	if (edgelist.empty())
+		return;
+
 	unsigned int pos = 0;
 
-	while (pos < edgelist.size())
-	{
-		// this Y is minimal (guaranteed by sorting the edgelist)
-		int min_y = edgelist[pos].y1;
+	// this Y is minimal (guaranteed by sorting the edgelist)
+	int low_y = edgelist[pos].y1;
 
+	for (;;)
+	{
 		// remove old edges from active list
 		for (unsigned int i = 0 ; i < active_edges.size() ; i++)
 		{
-			if (active_edges[i]->y2 <= min_y)
+			sector_edge_t *A = active_edges[i];
+
+			if (A != NULL && A->y2 <= low_y)
 				active_edges[i] = NULL;
 		}
 
 		// add new edges to active list
-		unsigned int next = pos;
-
-		for ( ; next < edgelist.size() && edgelist[next].y1 == min_y ; next++)
+		for ( ; pos < edgelist.size() && edgelist[pos].y1 == low_y ; pos++)
 		{
-			active_edges.push_back(&edgelist[next]);
+			active_edges.push_back(&edgelist[pos]);
 		}
 
 		// find next highest Y
-		int next_y = edgelist[pos].y2;
+		int high_y = (1 << 30);
+		int active_num = 0;
+
+		if (pos < edgelist.size())
+			high_y = edgelist[pos].y1;
 
 		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{
@@ -358,17 +365,31 @@ fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%
 
 			if (A != NULL)
 			{
-				if (A->y1 > min_y) next_y = MIN(next_y, A->y1);
-				if (A->y2 > min_y) next_y = MIN(next_y, A->y2);
+				active_num++;
+
+				if (A->y1 > low_y) high_y = MIN(high_y, A->y1);
+				if (A->y2 > low_y) high_y = MIN(high_y, A->y2);
 			}
 		}
 
 /* DEBUG
-fprintf(stderr, "  min_y:%d  next_y:%d\n", min_y, next_y);
+fprintf(stderr, "  active_num:%d  low_y:%d  high_y:%d\n", active_num, low_y, high_y);
 */
+		if (active_num == 0)
+		{
+			while (pos < edgelist.size() && edgelist[pos].y1 <= low_y)
+				pos++;
+
+			// terminating condition : no more rows
+			if (pos >= edgelist.size())
+				break;
+
+			low_y = edgelist[pos].y1;
+			continue;
+		}
 
 		// compute a comparison X coordinate for each active edge
-		float mid_y = min_y + (next_y - min_y) * 0.5;
+		float mid_y = low_y + (high_y - low_y) * 0.5;
 
 		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{
@@ -408,20 +429,17 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
-			float lx1 = E1->CalcX(min_y);
-			float hx1 = E1->CalcX(next_y);
+			float lx1 = E1->CalcX(low_y);
+			float hx1 = E1->CalcX(high_y);
 
-			float lx2 = E2->CalcX(min_y);
-			float hx2 = E2->CalcX(next_y);
+			float lx2 = E2->CalcX(low_y);
+			float hx2 = E2->CalcX(high_y);
 
-			exinfo.sub.AddPolygon(lx1, lx2, min_y, hx1, hx2, next_y);
+			exinfo.sub.AddPolygon(lx1, lx2, low_y, hx1, hx2, high_y);
 		}
 
 		// ok, repeat process for next row
-		pos++;
-
-		while (pos < edgelist.size() && edgelist[pos].y1 < next_y)
-			pos++;
+		low_y = high_y;
 	}
 }
 
