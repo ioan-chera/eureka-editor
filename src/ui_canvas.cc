@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2018 Andrew Apted
+//  Copyright (C) 2006-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -35,6 +35,7 @@
 #include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
+#include "r_subdiv.h"
 #include "im_color.h"
 #include "im_img.h"
 #include "r_render.h"
@@ -1968,181 +1969,15 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 
 //------------------------------------------------------------------------
 
-
-// this represents a segment of a linedef bounding a sector.
-struct sector_edge_t
-{
-	const LineDef * line;
-
-	// coordinates mapped to screen space, not clipped
-	int scr_x1, scr_y1;
-	int scr_x2, scr_y2;
-
-	// has the line been flipped (coordinates were swapped) ?
-	short flipped;
-
-	// what side this edge faces (SIDE_LEFT or SIDE_RIGHT)
-	short side;
-
-	// clipped vertical range, inclusive
-	short y1, y2;
-
-	// computed X value
-	float x;
-
-	void CalcX(short y)
-	{
-		x = scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
-	}
-
-	struct CMP_Y
-	{
-		inline bool operator() (const sector_edge_t &A, const sector_edge_t& B) const
-		{
-			return A.scr_y1 < B.scr_y1;
-		}
-	};
-
-	struct CMP_X
-	{
-		inline bool operator() (const sector_edge_t *A, const sector_edge_t *B) const
-		{
-			// NULL is always > than a valid pointer
-
-			if (A == NULL)
-				return false;
-
-			if (B == NULL)
-				return true;
-
-			return A->x < B->x;
-		}
-	};
-};
-
-
-struct sector_extra_info_t
-{
-	// these are < 0 when the sector has no lines
-	int first_line;
-	int last_line;
-
-	// these are random junk when sector has no lines
-	int bound_x1, bound_x2;
-	int bound_y1, bound_y2;
-
-	void Clear()
-	{
-		first_line = last_line = -1;
-
-		bound_x1 = 32767;
-		bound_y1 = 32767;
-		bound_x2 = -32767;
-		bound_y2 = -32767;
-	}
-
-	void AddLine(int n)
-	{
-		if (first_line < 0 || first_line > n)
-			first_line = n;
-
-		if (last_line < n)
-			last_line = n;
-	}
-
-	void AddVertex(const Vertex *V)
-	{
-		bound_x1 = MIN(bound_x1, V->x);
-		bound_y1 = MIN(bound_y1, V->y);
-
-		bound_x2 = MAX(bound_x2, V->x);
-		bound_y2 = MAX(bound_y2, V->y);
-	}
-};
-
-class sector_info_cache_c
-{
-public:
-	int total;
-
-	std::vector<sector_extra_info_t> infos;
-
-public:
-	sector_info_cache_c() : total(-1), infos()
-	{ }
-
-	~sector_info_cache_c()
-	{ }
-
-public:
-	void Update()
-	{
-		if (total != NumSectors)
-		{
-			total = NumSectors;
-
-			infos.resize((size_t) total);
-
-			Rebuild();
-		}
-	}
-
-	void Rebuild()
-	{
-		int sec;
-
-		for (sec = 0 ; sec < total ; sec++)
-			infos[sec].Clear();
-
-		for (int n = 0 ; n < NumLineDefs ; n++)
-		{
-			const LineDef *L = LineDefs[n];
-
-			for (int side = 0 ; side < 2 ; side++)
-			{
-				int sd_num = side ? L->left : L->right;
-
-				if (sd_num < 0)
-					continue;
-
-				sec = SideDefs[sd_num]->sector;
-
-				sector_extra_info_t& info = infos[sec];
-
-				info.AddLine(n);
-
-				info.AddVertex(L->Start());
-				info.AddVertex(L->End());
-			}
-		}
-	}
-};
-
-static sector_info_cache_c sector_info_cache;
-
-void SectorCache_Invalidate()
-{
-	// invalidate everything
-	sector_info_cache.total = -1;
-}
-
-
 void UI_Canvas::RenderSector(int num)
 {
-	sector_info_cache.Update();
-
-	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
-
-	if (exinfo.first_line < 0)
+	if (! Subdiv_SectorOnScreen(num, map_lx, map_ly, map_hx, map_hy))
 		return;
 
-	// bounding box test
-	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
-		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
-	{
-		// sector is off-screen
+	sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(num);
+
+	if (! subdiv)
 		return;
-	}
 
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
@@ -2200,6 +2035,7 @@ void UI_Canvas::RenderSector(int num)
 	int th = img ? img->height() : 1;
 
 	// verify size is at least 64x64
+	// FIXME : support for textures of arbitrary size
 	if (img && (tw < 64 || th < 64))
 	{
 		fl_color(palette[game_info.missing_color]);
@@ -2208,188 +2044,82 @@ void UI_Canvas::RenderSector(int num)
 	}
 
 
-	/*** Part 1 : visit linedefs and create edges ***/
-
-
-	std::vector<sector_edge_t> edgelist;
-
-	short min_y = 32767;
-	short max_y = 0;
-
-
-	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
-	{
-		const LineDef *L = LineDefs[n];
-
-		if (! L->TouchesSector(num))
-			continue;
-
-		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT))
-			continue;
-
-		sector_edge_t edge;
-
-		edge.scr_x1 = SCREENX(L->Start()->x);
-		edge.scr_y1 = SCREENY(L->Start()->y);
-		edge.scr_x2 = SCREENX(L->End()->x);
-		edge.scr_y2 = SCREENY(L->End()->y);
-
-		// completely above or below the screen?
-		if (MAX(edge.scr_y1, edge.scr_y2) < y())
-			continue;
-
-		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
-			continue;
-
-		// skip horizontal lines
-		if (edge.scr_y1 == edge.scr_y2)
-			continue;
-
-		edge.flipped = 0;
-
-		if (edge.scr_y1 > edge.scr_y2)
-		{
-			std::swap(edge.scr_x1, edge.scr_x2);
-			std::swap(edge.scr_y1, edge.scr_y2);
-
-			edge.flipped = 1;
-		}
-
-		// compute usable range, clipping to screen
-		edge.y1 = MAX(edge.scr_y1, y());
-		edge.y2 = MIN(edge.scr_y2, y() + h() - 1);
-
-		// this probably cannot happen....
-		if (edge.y2 < edge.y1)
-			continue;
-
-		min_y = MIN(min_y, edge.y1);
-		max_y = MAX(max_y, edge.y2);
-
-		// compute side
-		bool is_right = (L->WhatSector(SIDE_LEFT) == num);
-
-		if (edge.flipped) is_right = !is_right;
-
-		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
-
-/*
-fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
-n, edge.scr_x1, edge.scr_y1, edge.scr_x2, edge.scr_y2, edge.flipped,
-L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
-*/
-
-		// add the edge
-		edge.line = L;
-
-		edgelist.push_back(edge);
-	}
-
-	if (edgelist.empty())
-		return;
-
-	// sort edges into vertical order (i.e. by scr_y1)
-
-	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
-
-
-	/*** Part 2 : traverse edge list and render spans ***/
-
-
-	unsigned int next_edge = 0;
-
 	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
 
-	std::vector<sector_edge_t *> active_edges;
-
-	unsigned int i;
-
-	// visit each screen row
-	for (short y = min_y ; y <= max_y ; y++)
+	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
-		// remove old edges from active list
-		for (i = 0 ; i < active_edges.size() ; i++)
-		{
-			if (y > active_edges[i]->y2)
-				active_edges[i] = NULL;
-		}
+		sector_polygon_t *poly = &subdiv->polygons[i];
 
-		// add new edges to active list
-		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].y1 ; next_edge++)
-		{
-			active_edges.push_back(&edgelist[next_edge]);
-		}
+		float py1 = poly->my[1];  // north most
+		float py2 = poly->my[0];
 
-///  fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
+		int sy1 = SCREENY(py1);
+		int sy2 = SCREENY(py2);
 
-		if (active_edges.empty())
+		// clip range to screen
+		sy1 = MAX(sy1, y());
+		sy2 = MIN(sy2, y() + h() - 1);
+
+		// reject polygons vertically off the screen
+		if (sy1 > sy2)
 			continue;
 
-		// sort active edges by X value
-		// [ also puts NULL entries at end, making easy to remove them ]
+		// get left and right edges, unpacking a triangle if necessary
+		float lx1 = poly->mx[1];
+		float lx2 = poly->mx[0];
 
-		for (i = 0 ; i < active_edges.size() ; i++)
+		float rx1 = poly->mx[2];
+		float rx2 = poly->mx[3];
+
+		if (poly->count == 3)
 		{
-			if (active_edges[i])
-				active_edges[i]->CalcX(y);
+			if (poly->my[2] == poly->my[0])
+			{
+				rx1 = poly->mx[1];
+				rx2 = poly->mx[2];
+			}
+			else // my[2] == my[1]
+			{
+				rx2 = poly->mx[0];
+			}
 		}
 
-		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
-
-		while (active_edges.size() > 0 && active_edges.back() == NULL)
-			active_edges.pop_back();
-
-		// compute spans
-
-		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
+		// visit each screen row
+		for (short y = (short)sy1 ; y <= (short)sy2 ; y++)
 		{
-			const sector_edge_t * E1 = active_edges[i - 1];
-			const sector_edge_t * E2 = active_edges[i];
-#if 1
-			if (E1 == NULL || E2 == NULL)
-				BugError("RenderSector: did not delete NULLs properly!\n");
-#endif
+			// compute horizontal span
+			float map_y = MAPY(y);
 
-///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-///  E1->x, E1->side, E2->x, E2->side);
+			float lx = lx1 + (lx2 - lx1) * (map_y - py1) / (py2 - py1);
+			float rx = rx1 + (rx2 - rx1) * (map_y - py1) / (py2 - py1);
 
-			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
-				continue;
-
-			// treat lines without a right side as dead
-			if (E1->line->right < 0) continue;
-			if (E2->line->right < 0) continue;
-
-			int x1 = floor(E1->x);
-			int x2 = floor(E2->x);
-
-			// completely off the screen?
-			if (x2 < x() || x1 >= x() + w())
-				continue;
+			int sx1 = SCREENX(floor(lx));
+			int sx2 = SCREENX(ceil(rx));
 
 			// clip span to screen
-			x1 = MAX(x1, x());
-			x2 = MIN(x2, x() + w() - 1);
+			sx1 = MAX(sx1, x());
+			sx2 = MIN(sx2, x() + w() - 1);
 
-			// this probably cannot happen....
-			if (x2 < x1) continue;
+			// reject spans completely off the screen
+			if (sx2 < sx1)
+				continue;
 
 ///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
 
 			// solid color?
 			if (! img)
 			{
-				fl_rectf(x1, y, x2 - x1 + 1, 1);
+				fl_rectf(sx1, y, sx2 - sx1 + 1, 1);
 				continue;
 			}
 
-			int x = x1;
-			int span_w = x2 - x1 + 1;
+			int x = sx1;
+			int span_w = sx2 - sx1 + 1;
 
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
+			// FIXME support textures of arbitrary size [ see 3D code... ]
 			int ty = (0 - (int)MAPY(y)) & 63;
 
 			for (; dest < dest_end ; dest += 3, x++)
@@ -2402,7 +2132,7 @@ L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
 				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 
-			fl_draw_image(line_rgb, x1, y, span_w, 1);
+			fl_draw_image(line_rgb, sx1, y, span_w, 1);
 		}
 	}
 
