@@ -180,6 +180,13 @@ void Render3D_GetCameraPos(int *x, int *y, float *angle);
 bool Render3D_ParseUser(const char ** tokens, int num_tok);
 void Render3D_WriteUser(FILE *fp);
 
+
+/* API for rendering a scene (etc) */
+
+void RendAPI_Render3D();
+void RendAPI_HighlightGeometry(int ox, int oy);
+// TODO : query stuff
+
 #endif  /* __EUREKA_R_RENDER__ */
 
 //--- editor settings ---
