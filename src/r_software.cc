@@ -1803,5 +1803,50 @@ void RendAPI_Render3D(int ox, int oy, int ow, int oh)
 }
 
 
+bool RendAPI_Query(Obj3d_t& hl, int qx, int qy)
+{
+	if (! render_high_detail)
+	{
+		qx = qx / 2;
+		qy = qy / 2;
+	}
+
+	RendInfo rend;
+
+	// this runs the renderer, but *no* drawing is done
+	rend.DoQuery(qx, qy);
+
+	if (! rend.query_wall)
+	{
+		// nothing was hit
+		return false;
+	}
+
+	hl.type = rend.query_part;
+
+	if (hl.type == OB3D_Thing)
+	{
+		hl.num = rend.query_wall->th;
+	}
+	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
+	{
+		// ouch -- fix?
+		for (int n = 0 ; n < NumSectors ; n++)
+			if (rend.query_wall->sec == Sectors[n])
+				hl.num = n;
+	}
+	else
+	{
+		hl.side = rend.query_wall->side;
+
+		// ouch -- fix?
+		for (int n = 0 ; n < NumLineDefs ; n++)
+			if (rend.query_wall->ld == LineDefs[n])
+				hl.num = n;
+	}
+
+	return hl.valid();
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

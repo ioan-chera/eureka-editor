@@ -407,48 +407,7 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 	int qx = sx - x();
 	int qy = sy - y() - INFO_BAR_H / 2;
 
-	if (! render_high_detail)
-	{
-		qx = qx / 2;
-		qy = qy / 2;
-	}
-
-/* FIXME query stuff
-
-	RendAPI_Query(qx, qy);
-
-	if (! rend.query_wall)
-	{
-		// nothing was hit
-		return false;
-	}
-
-	hl.type = rend.query_part;
-
-	if (hl.type == OB3D_Thing)
-	{
-		hl.num = rend.query_wall->th;
-	}
-	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
-	{
-		// ouch -- fix?
-		for (int n = 0 ; n < NumSectors ; n++)
-			if (rend.query_wall->sec == Sectors[n])
-				hl.num = n;
-	}
-	else
-	{
-		hl.side = rend.query_wall->side;
-
-		// ouch -- fix?
-		for (int n = 0 ; n < NumLineDefs ; n++)
-			if (rend.query_wall->ld == LineDefs[n])
-				hl.num = n;
-	}
-
-	return hl.valid();
-
-*/  return false;
+	return RendAPI_Query(hl, qx, qy);
 }
 
 

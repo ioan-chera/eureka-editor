@@ -184,7 +184,7 @@ void Render3D_WriteUser(FILE *fp);
 /* API for rendering a scene (etc) */
 
 void RendAPI_Render3D(int ox, int oy, int ow, int oh);
-// TODO : query stuff
+bool RendAPI_Query(Obj3d_t& hl, int qx, int qy);
 
 #endif  /* __EUREKA_R_RENDER__ */
 
