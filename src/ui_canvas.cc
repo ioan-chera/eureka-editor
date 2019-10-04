@@ -1650,7 +1650,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 //
 //  draw a plain line at the given map coords
 //
-void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
+void UI_Canvas::DrawMapLine(float map_x1, float map_y1, float map_x2, float map_y2)
 {
     gl_line(SCREENX(map_x1), SCREENY(map_y1),
             SCREENX(map_x2), SCREENY(map_y2));
@@ -1828,41 +1828,45 @@ void UI_Canvas::DrawCamera()
 
 	Render3D_GetCameraPos(&map_x, &map_y, &angle);
 
-	int scr_x = SCREENX(map_x);
-	int scr_y = SCREENY(map_y);
+	float mx = map_x;
+	float my = map_y;
 
-	float size = sqrt(grid.Scale) * 40;
+	float r = 40.0 / sqrt(grid.Scale);
 
-	if (size < 8) size = 8;
+	float dx = r * cos(angle * M_PI / 180.0);
+	float dy = r * sin(angle * M_PI / 180.0);
 
-	int dx = size *  cos(angle * M_PI / 180.0);
-	int dy = size * -sin(angle * M_PI / 180.0);
+	// arrow body
+	float x1 = mx - dx;
+	float y1 = my - dy;
+
+	float x2 = mx + dx;
+	float y2 = my + dy;
 
 	gl_color(CAMERA_COLOR);
 
-	// arrow body
-
-	gl_line(scr_x - dx, scr_y - dy, scr_x + dx, scr_y + dy);
-
-	int ex =  dy/3;
-	int ey = -dx/3;
-
-	gl_line(scr_x + dx/8 + ex, scr_y + dy/8 + ey,
-	        scr_x + dx/8 - ex, scr_y + dy/8 - ey);
-
-	gl_line(scr_x - dx/8 + ex, scr_y - dy/8 + ey,
-	        scr_x - dx/8 - ex, scr_y - dy/8 - ey);
+	DrawMapLine(x1, y1, x2, y2);
 
 	// arrow head
+	float x3 = x2 - dx * 0.6 + dy * 0.4;
+	float y3 = y2 - dy * 0.6 - dx * 0.4;
 
-	scr_x += dx;
-	scr_y += dy;
+	DrawMapLine(x2, y2, x3, y3);
 
-	int hx = dx/2;
-	int hy = dy/2;
+	x3 = x2 - dx * 0.6 - dy * 0.4;
+	y3 = y2 - dy * 0.6 + dx * 0.4;
 
-	gl_line(scr_x, scr_y, scr_x + hy - hx, scr_y - hx - hy);
-	gl_line(scr_x, scr_y, scr_x - hy - hx, scr_y + hx - hy);
+	DrawMapLine(x2, y2, x3, y3);
+
+	// notches on body
+	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
+				mx + dy * 0.4, my - dx * 0.4);
+
+	mx = mx - dx * 0.2;
+	my = my - dy * 0.2;
+
+	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
+				mx + dy * 0.4, my - dx * 0.4);
 }
 
 

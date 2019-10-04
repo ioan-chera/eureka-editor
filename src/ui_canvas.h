@@ -137,7 +137,7 @@ private:
 	void DrawThingBodies();
 	void DrawThingSprites();
 
-	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
+	void DrawMapLine(float map_x1, float map_y1, float map_x2, float map_y2);
 	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
 
