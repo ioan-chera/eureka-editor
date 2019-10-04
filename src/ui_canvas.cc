@@ -2190,15 +2190,6 @@ void UI_Canvas::RenderSector(int num)
 #ifdef NO_OPENGL
 	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
-	// verify size is at least 64x64
-	// FIXME : support for textures of arbitrary size
-	if (img && (tw < 64 || th < 64))
-	{
-		gl_color(palette[game_info.missing_color]);
-
-		img = NULL;
-	}
-
 	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
 
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
@@ -2274,13 +2265,13 @@ void UI_Canvas::RenderSector(int num)
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
-			// FIXME support textures of arbitrary size [ see 3D code... ]
-			int ty = (0 - (int)MAPY(y)) & 63;
+			// the logic here for non-64x64 textures matches the software
+			// 3D renderer, but is different than ZDoom (which scales them).
+			int ty = (0 - (int)MAPY(y)) & (th - 1);
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
-				// TODO : be nice to optimize the next line
-				int tx = (int)MAPX(x) & 63;
+				int tx = (int)MAPX(x) & (tw - 1);
 
 				img_pixel_t pix = src_pix[ty * tw + tx];
 
@@ -2315,13 +2306,14 @@ void UI_Canvas::RenderSector(int num)
 
 		for (int p = 0 ; p < poly->count ; p++)
 		{
-			// FIXME : more accurate SCREENX macros which take floats
-			//         [ and maybe return floats? ]
 			int sx = SCREENX(poly->mx[p]);
 			int sy = SCREENY(poly->my[p]);
 
 			if (img)
 			{
+				// this logic follows ZDoom, which scales large flats to
+				// occupy a 64x64 unit area.  I presume wall textures are
+				// handled similarily....
 				glTexCoord2f(poly->mx[p] / 64.0, poly->my[p] / 64.0);
 			}
 
