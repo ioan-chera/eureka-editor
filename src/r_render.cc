@@ -386,18 +386,7 @@ void UI_Render3D::draw()
 
 	r_view.PrepareToRender(ow, oh);
 
-	RendAPI_Render3D();
-
-	if (render_high_detail)
-		BlitHires(ox, oy, ow, oh);
-	else
-		BlitLores(ox, oy, ow, oh);
-
-	fl_push_clip(ox, oy, ow, oh);
-
-	RendAPI_HighlightGeometry(ox, oy);
-
-	fl_pop_clip();
+	RendAPI_Render3D(ox, oy, ow, oh);
 
 	DrawInfoBar();
 }
@@ -460,55 +449,6 @@ bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
 	return hl.valid();
 
 */  return false;
-}
-
-
-void UI_Render3D::BlitHires(int ox, int oy, int ow, int oh)
-{
-	for (int ry = 0 ; ry < r_view.sh ; ry++)
-	{
-		u8_t line_rgb[r_view.sw * 3];
-
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + r_view.sw * 3;
-
-		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
-
-		for ( ; dest < dest_end  ; dest += 3, src++)
-		{
-			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
-		}
-
-		fl_draw_image(line_rgb, ox, oy+ry, r_view.sw, 1);
-	}
-}
-
-
-void UI_Render3D::BlitLores(int ox, int oy, int ow, int oh)
-{
-	for (int ry = 0 ; ry < r_view.sh ; ry++)
-	{
-		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
-
-		// if destination width is odd, we store an extra pixel here
-		u8_t line_rgb[(ow + 1) * 3];
-
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + ow * 3;
-
-		for (; dest < dest_end ; dest += 6, src++)
-		{
-			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
-			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
-		}
-
-		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
-
-		if (ry * 2 + 1 < oh)
-		{
-			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
-		}
-	}
 }
 
 

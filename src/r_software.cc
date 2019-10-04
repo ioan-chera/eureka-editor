@@ -867,6 +867,10 @@ public:
 		if (sx1 > sx2)
 			return;
 
+		// optimisation for query mode
+		if (query_mode && (sx2 < query_sx || sx1 > query_sx))
+			return;
+
 		int thsec = r_view.thing_sectors[th_index];
 
 		int h1, h2;
@@ -1731,22 +1735,73 @@ public:
 };
 
 
-void RendAPI_Render3D()
+static void BlitHires(int ox, int oy, int ow, int oh)
+{
+	u8_t line_rgb[r_view.sw * 3];
+
+	for (int ry = 0 ; ry < r_view.sh ; ry++)
+	{
+		u8_t *dest = line_rgb;
+		u8_t *dest_end = line_rgb + r_view.sw * 3;
+
+		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
+
+		for ( ; dest < dest_end  ; dest += 3, src++)
+		{
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+		}
+
+		fl_draw_image(line_rgb, ox, oy+ry, r_view.sw, 1);
+	}
+}
+
+
+static void BlitLores(int ox, int oy, int ow, int oh)
+{
+	// if destination width is odd, we store an extra pixel here
+	u8_t line_rgb[(ow + 1) * 3];
+
+	for (int ry = 0 ; ry < r_view.sh ; ry++)
+	{
+		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
+
+		u8_t *dest = line_rgb;
+		u8_t *dest_end = line_rgb + ow * 3;
+
+		for (; dest < dest_end ; dest += 6, src++)
+		{
+			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
+		}
+
+		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
+
+		if (ry * 2 + 1 < oh)
+		{
+			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
+		}
+	}
+}
+
+
+void RendAPI_Render3D(int ox, int oy, int ow, int oh)
 {
 	RendInfo rend;
 
+	fl_push_clip(ox, oy, ow, oh);
+
 	rend.DoRender3D();
+
+	if (render_high_detail)
+		BlitHires(ox, oy, ow, oh);
+	else
+		BlitLores(ox, oy, ow, oh);
+
+	rend.HighlightGeometry(ox, oy);
+
+	fl_pop_clip();
 }
 
-
-void RendAPI_HighlightGeometry(int ox, int oy)
-{
-	// FIXME requires 'rend' which doesn't exist here
-
-	/*
-		rend.HighlightGeometry(ox, oy);
-	*/
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -183,8 +183,7 @@ void Render3D_WriteUser(FILE *fp);
 
 /* API for rendering a scene (etc) */
 
-void RendAPI_Render3D();
-void RendAPI_HighlightGeometry(int ox, int oy);
+void RendAPI_Render3D(int ox, int oy, int ow, int oh);
 // TODO : query stuff
 
 #endif  /* __EUREKA_R_RENDER__ */
