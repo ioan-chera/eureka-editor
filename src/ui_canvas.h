@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2008-2018 Andrew Apted
+//  Copyright (C) 2008-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,6 +21,10 @@
 #ifndef __EUREKA_UI_CANVAS_H__
 #define __EUREKA_UI_CANVAS_H__
 
+#ifndef NO_OPENGL
+#include <FL/Fl_Gl_Window.H>
+#endif
+
 #include "m_events.h"
 #include "m_select.h"
 #include "e_objects.h"
@@ -30,7 +34,11 @@
 class Img_c;
 
 
+#ifdef NO_OPENGL
 class UI_Canvas : public Fl_Widget
+#else
+class UI_Canvas : public Fl_Gl_Window
+#endif
 {
 private:
 	Objid highlight;
@@ -73,7 +81,9 @@ public:
 	// FLTK virtual method for resizing.
 	void resize(int X, int Y, int W, int H);
 
-	void DeleteContext() {}
+	// delete any OpenGL context which is assigned to the window.
+	// call this whenever OpenGL textures need to be reloaded.
+	void DeleteContext();
 
 	void DrawEverything();
 
@@ -124,7 +134,6 @@ private:
 	void DrawThingBodies();
 	void DrawThingSprites();
 
-	void DrawMapPoint(int map_x, int map_y);
 	void DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
 	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
@@ -148,13 +157,23 @@ private:
 
 	void DragDelta(int *dx, int *dy);
 
+#ifdef NO_OPENGL
 	// convert screen coordinates to map coordinates
 	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
 	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
 
 	// convert map coordinates to screen coordinates
-	inline int SCREENX(int mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(int my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+	inline int SCREENX(float mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
+	inline int SCREENY(float my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+#else
+	// convert GL coordinates to map coordinates
+	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
+	inline float MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
+
+	// convert map coordinates to GL coordinates
+	inline int SCREENX(float mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
+	inline int SCREENY(float my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
+#endif
 
 	inline bool Vis(int x, int y, int r) const
 	{
@@ -166,6 +185,13 @@ private:
 		return (x2 >= map_lx) && (x1 <= map_hx) &&
 		       (y2 >= map_ly) && (y1 <= map_hy);
 	}
+
+	void gl_line_width(int w);
+	void gl_draw_string(const char *s, int x, int y);
+
+#ifndef NO_OPENGL
+	void gl_line(int x1, int y1, int x2, int y2);
+#endif
 };
 
 
