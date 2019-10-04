@@ -115,9 +115,35 @@ void UI_Canvas::resize(int X, int Y, int W, int H)
 void UI_Canvas::draw()
 {
 #ifdef NO_OPENGL
+	xx = x();
+	yy = y();
+
 	fl_push_clip(x(), y(), w(), h());
+
+	map_lx = floor(MAPX(xx));
+	map_ly = floor(MAPY(yy + h()));
+
+	map_hx = ceil(MAPX(xx + w()));
+	map_hy = ceil(MAPY(yy));
 #else
-...
+	xx = yy = 0;
+
+	map_lx = floor(MAPX(0));
+	map_ly = floor(MAPY(0));
+
+	map_hx = ceil(MAPX(w()));
+	map_hy = ceil(MAPY(h()));
+
+	if (! valid())
+	{
+		// setup projection matrix for 2D drawing
+		ortho();
+
+		// reset the 'gl_tex' field of all loaded images, as the value
+		// belongs to a context which was (probably) just deleted and
+		// hence refer to textures which no longer exist.
+		W_UnloadAllTextures();
+	}
 #endif
 
 	gl_color(FL_WHITE);
@@ -185,18 +211,6 @@ void UI_Canvas::gl_draw_string(const char *s, int x, int y)
 
 void UI_Canvas::PointerPos(bool in_event)
 {
-	// NOTE: this fast method is disabled until behavior of the
-	//       other method can be verified on all platforms....
-#if 0
-	if (in_event)
-	{
-		edit.map_x = MAPX(Fl::event_x());
-		edit.map_y = MAPY(Fl::event_y());
-
-		return;
-	}
-#endif
-
 	// read current position outside of FLTK's event propagation.
 	// this is a bit harder, and a bit slower in X-windows
 
@@ -204,11 +218,20 @@ void UI_Canvas::PointerPos(bool in_event)
 
 	Fl::get_mouse(raw_x, raw_y);
 
+#ifdef NO_OPENGL
 	raw_x -= main_win->x_root();
 	raw_y -= main_win->y_root();
 
 	edit.map_x = MAPX(raw_x);
 	edit.map_y = MAPY(raw_y);
+
+#else // OpenGL
+	raw_x -= x_root();
+	raw_y -= y_root();
+
+	edit.map_x = MAPX(raw_x);
+	edit.map_y = MAPY(h() - raw_y);
+#endif
 }
 
 
@@ -242,12 +265,6 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = floor(MAPX(x()));
-	map_ly = floor(MAPY(y() + h()));
-
-	map_hx = ceil(MAPX(x() + w()));
-	map_hy = ceil(MAPY(y()));
-
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
 	{
@@ -322,7 +339,7 @@ void UI_Canvas::DrawEverything()
 void UI_Canvas::DrawMap()
 {
 	gl_color(FL_BLACK);
-	gl_rectf(x(), y(), w(), h());
+	gl_rectf(xx, yy, w(), h());
 
 	if (edit.sector_render_mode && ! edit.error_mode)
 	{
@@ -379,7 +396,7 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(normal_main_col)));
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(xx, yy, w(), h());
 
 		DrawAxes(normal_axis_col);
 		return;
@@ -399,7 +416,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	if (pixels_2 < 1.6)
 	{
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(xx, yy, w(), h());
 	}
 	else
 	{
@@ -455,7 +472,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(dotty_point_col)));
-		gl_rectf(x(), y(), w(), h());
+		gl_rectf(xx, yy, w(), h());
 
 		DrawAxes(dotty_axis_col);
 		return;
@@ -985,6 +1002,13 @@ void UI_Canvas::DrawThingBodies()
 
 void UI_Canvas::DrawThingSprites()
 {
+#ifndef NO_OPENGL
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_ALPHA_TEST);
+
+	glAlphaFunc(GL_GREATER, 0.5);
+#endif
+
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -1002,6 +1026,11 @@ void UI_Canvas::DrawThingSprites()
 
 		DrawSprite(x, y, sprite, info->scale);
 	}
+
+#ifndef NO_OPENGL
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+#endif
 }
 
 
@@ -1654,14 +1683,20 @@ void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
 	int sx = SCREENX(map_x);
 	int sy = SCREENY(map_y);
 
-	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+	int size = (grid.Scale >= 5.0) ? 9 : (grid.Scale >= 1.0) ? 7 : 5;
 
 	gl_color(HI_AND_SEL_COL);
 
 #ifdef NO_OPENGL
 	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
 #else
-...
+	glPointSize(size);
+
+	glBegin(GL_POINTS);
+	glVertex2i(sx, sy);
+	glEnd();
+
+	glPointSize(1.0);
 #endif
 }
 

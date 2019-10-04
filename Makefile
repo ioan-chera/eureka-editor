@@ -88,7 +88,7 @@ OBJS = \
 	$(OBJ_DIR)/sys_debug.o \
 	$(OBJ_DIR)/ui_about.o  \
 	$(OBJ_DIR)/ui_browser.o  \
-	$(OBJ_DIR)/gl_canvas.o  \
+	$(OBJ_DIR)/ui_canvas.o  \
 	$(OBJ_DIR)/ui_default.o  \
 	$(OBJ_DIR)/ui_dialog.o  \
 	$(OBJ_DIR)/ui_editor.o  \

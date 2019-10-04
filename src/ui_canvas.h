@@ -70,6 +70,9 @@ private:
 
 	bitvec_c seen_sectors;
 
+	// a copy of x() and y() for software renderer, 0 for OpenGL
+	int xx, yy;
+
 public:
 	UI_Canvas(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_Canvas();

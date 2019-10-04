@@ -23,13 +23,7 @@
 #include "e_main.h"		// Map_bound_xxx
 
 #include "ui_scroll.h"
-
-#ifdef NO_OPENGL
 #include "ui_canvas.h"
-#else
-#include "gl_canvas.h"
-#endif
-
 #include "r_render.h"
 
 
