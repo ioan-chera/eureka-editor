@@ -1682,15 +1682,11 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
    	int mx = (x1 + x2) / 2;
    	int my = (y1 + y2) / 2;
 
-	int dx = (y1 - y2);
-	int dy = (x2 - x1);
-
-	int len = MAX(4, MAX(abs(dx), abs(dy)));
-
+	int len = MAX(abs(x2 - x1), abs(y2 - y1));
 	int want_len = MIN(12, len / 5);
 
-	dx = dx * want_len / len;
-	dy = dy * want_len / len;
+	int dx = NORMALX(want_len, x2 - x1, y2 - y1);
+	int dy = NORMALY(want_len, x2 - x1, y2 - y1);
 
 	if (! (dx == 0 && dy == 0))
 	{
@@ -1769,7 +1765,13 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	gl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
+	int klen = MAX(abs(x2 - x1), abs(y2 - y1));
+	int want_len = CLAMP(12, klen / 4, 40);
+
+	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
+	int ky = NORMALY(want_len, x2 - x1, y2 - y1);
+
+	gl_line(mx, my, mx + kx, my + ky);
 
 	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
@@ -1795,29 +1797,24 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 //
 void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
-	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);
-	int map_y2 = map_y1 + r * sin(angle * M_PI / 180.0);
+	float dx = r * cos(angle * M_PI / 180.0);
+	float dy = r * sin(angle * M_PI / 180.0);
 
-	int x1 = SCREENX(map_x1);
-	int y1 = SCREENY(map_y1);
-	int x2 = SCREENX(map_x2);
-	int y2 = SCREENY(map_y2);
+	float map_x2 = map_x1 + dx;
+	float map_y2 = map_y1 + dy;
 
-	gl_line(x1, y1, x2, y2);
+	DrawMapLine(map_x1, map_y1, map_x2, map_y2);
 
-	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
+	// arrow head
+	float x3 = map_x2 - dx * 0.3 + dy * 0.3;
+	float y3 = map_y2 - dy * 0.3 - dx * 0.3;
 
-	if (r2 < 1.0)
-		return;
+	DrawMapLine(map_x2, map_y2, x3, y3);
 
-	int dx = (int) ((x1 - x2) * 12.0 / (double)r2 * (grid.Scale / 2));
-	int dy = (int) ((y1 - y2) * 12.0 / (double)r2 * (grid.Scale / 2));
+	x3 = map_x2 - dx * 0.3 - dy * 0.3;
+	y3 = map_y2 - dy * 0.3 + dx * 0.3;
 
-	x1 = x2 + 2 * dx;
-	y1 = y2 + 2 * dy;
-
-	gl_line(x1 - dy, y1 + dx, x2, y2);
-	gl_line(x1 + dy, y1 - dx, x2, y2);
+	DrawMapLine(map_x2, map_y2, x3, y3);
 }
 
 
@@ -1844,6 +1841,7 @@ void UI_Canvas::DrawCamera()
 	float y2 = my + dy;
 
 	gl_color(CAMERA_COLOR);
+	gl_line_width(1);
 
 	DrawMapLine(x1, y1, x2, y2);
 
@@ -1867,6 +1865,8 @@ void UI_Canvas::DrawCamera()
 
 	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
 				mx + dy * 0.4, my - dx * 0.4);
+
+	gl_line_width(1);
 }
 
 
