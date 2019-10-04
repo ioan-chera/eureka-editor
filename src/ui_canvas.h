@@ -151,7 +151,7 @@ private:
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
-	void DrawObjNum(int x, int y, int num, bool center = false);
+	void DrawObjNum(int x, int y, int num);
 	void DrawCurrentLine();
 
 	void RenderSector(int num);
@@ -159,6 +159,10 @@ private:
 	void SelboxDraw();
 
 	void DragDelta(int *dx, int *dy);
+
+	// calc screen-space normal of a line
+	int NORMALX(int len, int dx, int dy);
+	int NORMALY(int len, int dx, int dy);
 
 #ifdef NO_OPENGL
 	// convert screen coordinates to map coordinates

@@ -67,6 +67,7 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 #define gl_line     fl_line
 #define gl_font     fl_font
 #define gl_width    fl_width
+#define gl_height   fl_height
 #define gl_descent  fl_descent
 #endif
 
@@ -206,6 +207,37 @@ void UI_Canvas::gl_draw_string(const char *s, int x, int y)
 #else
 	gl_draw(s, x, y);
 #endif
+}
+
+
+int UI_Canvas::NORMALX(int len, int dx, int dy)
+{
+#ifdef NO_OPENGL
+	float res = -dy;
+#else
+	float res = dy;
+#endif
+
+	float got_len = hypotf(dx, dy);
+	if (got_len < 0.01)
+		return 0;
+
+	return I_ROUND(res * len / got_len);
+}
+
+int UI_Canvas::NORMALY(int len, int dx, int dy)
+{
+#ifdef NO_OPENGL
+	float res = dx;
+#else
+	float res = -dx;
+#endif
+
+	float got_len = hypotf(dx, dy);
+	if (got_len < 0.01)
+		return 0;
+
+	return I_ROUND(res * len / got_len);
 }
 
 
@@ -624,8 +656,8 @@ void UI_Canvas::DrawVertices()
 			if (! Vis(x, y, r))
 				continue;
 
-			int sx = SCREENX(x) + r;
-			int sy = SCREENY(y) - r - 2;
+			int sx = SCREENX(x) + r * 3;
+			int sy = SCREENY(y) + r * 3;
 
 			DrawObjNum(sx, sy, n);
 		}
@@ -940,10 +972,10 @@ void UI_Canvas::DrawThings()
 
 			const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-			x += info->radius;
-			y += info->radius;
+			x += info->radius + 8;
+			y += info->radius + 8;
 
-			DrawObjNum(SCREENX(x), SCREENY(y) - 2, n);
+			DrawObjNum(SCREENX(x), SCREENY(y), n);
 		}
 	}
 }
@@ -1172,59 +1204,48 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	int x2 = SCREENX(mx2);
 	int y2 = SCREENY(my2);
 
-	int mx = (x1 + x2) / 2;
-	int my = (y1 + y2) / 2 - 1;
+	int sx = (x1 + x2) / 2;
+	int sy = (y1 + y2) / 2;
 
-	int dx = (y1 - y2);
-	int dy = (x2 - x1);
+	// normally draw line numbers on back of line
+	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
 
-	if (side == SIDE_LEFT)
+	// for sectors, draw closer and on sector side
+	if (side != 0)
 	{
-		dx = -dx;
-		dy = -dy;
+		want_len = 2 + 12 * CLAMP(0.25, grid.Scale, 1.0);
+
+		if (side == SIDE_LEFT)
+			want_len = -want_len;
 	}
 
-	if (side)
-	{
-		int len = MAX(4, MAX(abs(dx), abs(dy)));
-		int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 1.0);
+	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
+	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
-		mx += dx * want_len / len;
-		my += dy * want_len / len;
-
-		if (abs(dx) > abs(dy))
-		{
-			want_len = 2 + want_len / 2;
-
-			if (dx > 0)
-				mx += want_len;
-			else
-				mx -= want_len;
-		}
-	}
-
-	DrawObjNum(mx, my + gl_descent(), n, true /* center */);
+	DrawObjNum(sx, sy, n);
 }
 
 
 //
-//  draw a number at screen coordinates (x, y)
+//  draw a number centered at screen coordinate (x, y)
 //
-void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
+void UI_Canvas::DrawObjNum(int x, int y, int num)
 {
 	char buffer[64];
 	sprintf(buffer, "%d", num);
 
-	if (center)
-	{
 #if 0 /* DEBUG */
-		gl_color(FL_RED);
-		gl_rectf(x - 1, y - 1, 3, 3);
-		return;
+	gl_color(FL_RED);
+	gl_rectf(x - 1, y - 1, 3, 3);
+	return;
 #endif
-		x -= gl_width(buffer) / 2;
-		y += gl_descent();
-	}
+	x -= gl_width(buffer) / 2;
+
+#ifdef NO_OPENGL
+	y += gl_height() / 2;
+#else
+	y -= gl_height() / 2;
+#endif
 
 	gl_color(FL_BLACK);
 
