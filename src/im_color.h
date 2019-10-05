@@ -78,6 +78,8 @@ rgb_color_t ParseColor(const char *str);
 
 rgb_color_t SectorLightColor(int light);
 
+int HashedPalColor(const char *name, const int *cols);
+
 
 //------------------------------------------------------------//
 

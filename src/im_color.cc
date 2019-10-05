@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -260,6 +260,36 @@ rgb_color_t SectorLightColor(int light)
 	light = CLAMP(48, (int)(lt * 256), 255);
 
 	return RGB_MAKE(light, light, light);
+}
+
+
+int HashedPalColor(const char *name, const int *cols)
+{
+	// cols is array of two elements: start and end color.
+	// this returns a palette color somewhere between start
+	// and end, depending on the texture name.
+
+	int len = (int)strlen(name);
+
+	int hash = name[0]*41;
+
+	if (len >= 2) hash += name[2]*13;
+	if (len >= 4) hash += name[4]*17;
+	if (len >= 5) hash += name[5]*7;
+	if (len >= 7) hash += name[7]*3;
+
+	hash ^= (hash >> 5);
+
+	int c1 = cols[0];
+	int c2 = cols[1];
+
+	if (c1 > c2)
+		std::swap(c1, c2);
+
+	if (c1 == c2)
+		return c1;
+
+	return c1 + hash % (c2 - c1 + 1);
 }
 
 

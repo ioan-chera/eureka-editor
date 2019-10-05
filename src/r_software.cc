@@ -118,25 +118,6 @@ public:
 	~DrawSurf()
 	{ }
 
-	int hashed_color(const char *name, const int *cols)
-	{
-		int hash = name[0]*17 + name[2]*7  + name[4]*3 +
-		           name[5]*13 + name[6]*47 + name[7];
-
-		hash ^= (hash >> 5);
-
-		int c1 = cols[0];
-		int c2 = cols[1];
-
-		if (c1 > c2)
-			std::swap(c1, c2);
-
-		if (c1 == c2)
-			return c1;
-
-		return c1 + hash % (c2 - c1 + 1);
-	}
-
 	void FindFlat(const char * fname, Sector *sec)
 	{
 		fullbright = false;
@@ -161,7 +142,7 @@ public:
 			return;
 		}
 
-		col = hashed_color(fname, game_info.floor_colors);
+		col = HashedPalColor(fname, game_info.floor_colors);
 	}
 
 	void FindTex(const char * tname, LineDef *ld)
@@ -188,7 +169,7 @@ public:
 			return;
 		}
 
-		col = hashed_color(tname, game_info.wall_colors);
+		col = HashedPalColor(tname, game_info.wall_colors);
 	}
 };
 
