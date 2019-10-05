@@ -326,10 +326,6 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
 
 	resizable(canvas);
-
-
-	render = new UI_Render3D(X, Y, W, H);
-	render->hide();
 }
 
 
@@ -339,47 +335,31 @@ UI_CanvasScroll::~UI_CanvasScroll()
 
 void UI_CanvasScroll::UpdateRenderMode()
 {
-	int old_3d = render->visible() ? 1 : 0;
-	int new_3d = edit.render3d     ? 1 : 0;
-
-	int old_bars = enable_bars     ? 1 : 0;
-	int new_bars = map_scroll_bars ? 1 : 0;
+	int old_bars = enable_bars ? 1 : 0;
+	int new_bars = map_scroll_bars && !edit.render3d ? 1 : 0;
 
 	// nothing changed?
-	if (old_3d == new_3d && old_bars == new_bars)
+	if (old_bars == new_bars)
 		return;
 
-	if (old_bars != new_bars)
-	{
-		int b = new_bars ? SBAR_W : 0;
 
-		canvas->resize(x() + b, y(), w() - b, h() - b);
+	int b = new_bars ? SBAR_W : 0;
 
-		init_sizes();
+	canvas->resize(x() + b, y(), w() - b, h() - b);
 
-		enable_bars = map_scroll_bars;
-	}
+	init_sizes();
 
-	if (edit.render3d)
-	{
-		render->show();
-		canvas->hide();
-	}
-	else
-	{
-		canvas->show();
-		render->hide();
-	}
+	enable_bars = new_bars;
 
-	if (edit.render3d || ! enable_bars)
-	{
-		  vert->hide();
-		 horiz->hide();
-	}
-	else
+	if (enable_bars)
 	{
 		  vert->show();
 		 horiz->show();
+	}
+	else
+	{
+		  vert->hide();
+		 horiz->hide();
 	}
 }
 

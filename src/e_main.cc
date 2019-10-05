@@ -113,10 +113,7 @@ void RedrawMap()
 
 	UpdateHighlight();
 
-	if (edit.render3d)
-		main_win->render->redraw();
-	else
-		main_win->canvas->redraw();
+	main_win->canvas->redraw();
 }
 
 

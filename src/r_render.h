@@ -27,34 +27,8 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
-
-class UI_Render3D : public Fl_Widget
-{
-public:
-	UI_Render3D(int X, int Y, int W, int H);
-
-	virtual ~UI_Render3D();
-
-	// FLTK virtual methods for drawing / event handling
-	void draw();
-
-	int handle(int event);
-
-	// perform a query to see what the mouse pointer is over.
-	// returns true if something was hit, false otherwise.
-	// [ see the struct definition for more details... ]
-	bool query(Obj3d_t& hl, int sx, int sy);
-
-private:
-	void BlitLores(int ox, int oy, int ow, int oh);
-	void BlitHires(int ox, int oy, int ow, int oh);
-
-	void DrawInfoBar();
-
-	void IB_Number   (int& cx, int& cy, const char *label, int value, int size);
-	void IB_Flag     (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
-	void IB_Highlight(int& cx, int& cy);
-};
+// FIXME : won't need this once 'screen' is private in r_software.cc
+#include "im_img.h"
 
 
 struct Render_View_t
@@ -159,6 +133,14 @@ void Render3D_Setup();
 void Render3D_RegisterCommands();
 
 void Render3D_Enable(bool _enable);
+
+// this is basically the FLTK draw() method
+void Render3D_Draw(int ox, int oy, int ow, int oh);
+
+// perform a query to see what the mouse pointer is over.
+// returns true if something was hit, false otherwise.
+// [ see the struct definition for more details... ]
+bool Render3D_Query(Obj3d_t& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);

@@ -367,63 +367,54 @@ static Thing *FindPlayer(int typenum)
 
 static Thing *player;
 
-
-UI_Render3D::UI_Render3D(int X, int Y, int W, int H) :
-	Fl_Widget(X, Y, W, H)
-{ }
-
-
-UI_Render3D::~UI_Render3D()
-{ }
+static void DrawInfoBar(int ox, int oy, int ow, int oh);
+static void IB_Number(int& cx, int& cy, const char *label, int value, int size);
+static void IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off);
+static void IB_Highlight(int& cx, int& cy);
 
 
-void UI_Render3D::draw()
+void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
-	int ox = x();
-	int oy = y() + INFO_BAR_H;
-	int ow = w();
-	int oh = h() - INFO_BAR_H;
+	oy += INFO_BAR_H;
+	oh -= INFO_BAR_H;
 
 	r_view.PrepareToRender(ow, oh);
 
 	RendAPI_Render3D(ox, oy, ow, oh);
 
-	DrawInfoBar();
+	DrawInfoBar(ox, oy, ow, oh);
 }
 
 
-bool UI_Render3D::query(Obj3d_t& hl, int sx, int sy)
+bool Render3D_Query(Obj3d_t& hl, int sx, int sy,  int ox, int oy, int ow, int oh)
 {
 	hl.clear();
 
 	if (! edit.pointer_in_window)
 		return false;
 
-	int ow = w();
-	int oh = h();
-
 	r_view.PrepareToRender(ow, oh);
 
-	int qx = sx - x();
-	int qy = sy - y() - INFO_BAR_H / 2;
+	int qx = sx - ox;
+	int qy = sy - oy - INFO_BAR_H / 2;
 
 	return RendAPI_Query(hl, qx, qy);
 }
 
 
-void UI_Render3D::DrawInfoBar()
+static void DrawInfoBar(int ox, int oy, int ow, int oh)
 {
-	int cx = x();
-	int cy = y();
+	int cx = ox;
+	int cy = oy;
 
-	fl_push_clip(x(), cy, w(), INFO_BAR_H);
+	fl_push_clip(ox, cy, ow, INFO_BAR_H);
 
 	if (r_view.SelectEmpty())
 		fl_color(FL_BLACK);
 	else
 		fl_color(fl_rgb_color(104,0,0));
 
-	fl_rectf(x(), cy, w(), INFO_BAR_H);
+	fl_rectf(ox, cy, ow, INFO_BAR_H);
 
 	cx += 10;
 	cy += 20;
@@ -451,7 +442,7 @@ void UI_Render3D::DrawInfoBar()
 }
 
 
-void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int size)
+static void IB_Number(int& cx, int& cy, const char *label, int value, int size)
 {
 	char buffer[256];
 
@@ -468,7 +459,7 @@ void UI_Render3D::IB_Number(int& cx, int& cy, const char *label, int value, int 
 	cx = cx + fl_width(buffer);
 }
 
-void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+static void IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
 {
 	const char *label = value ? label_on : label_off;
 
@@ -482,7 +473,7 @@ void UI_Render3D::IB_Flag(int& cx, int& cy, bool value, const char *label_on, co
 
 static int GrabTextureFromObject(const Obj3d_t& obj);
 
-void UI_Render3D::IB_Highlight(int& cx, int& cy)
+static void IB_Highlight(int& cx, int& cy)
 {
 	char buffer[256];
 
@@ -526,15 +517,6 @@ void UI_Render3D::IB_Highlight(int& cx, int& cy)
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
-}
-
-
-int UI_Render3D::handle(int event)
-{
-	if (EV_HandleEvent(event))
-		return 1;
-
-	return Fl_Widget::handle(event);
 }
 
 
@@ -593,16 +575,14 @@ void Render3D_Enable(bool _enable)
 	edit.render3d = _enable;
 
 	// give keyboard focus to the appropriate large widget
+	Fl::focus(main_win->canvas);
+
 	if (edit.render3d)
 	{
-		Fl::focus(main_win->render);
-
 		main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	}
 	else
 	{
-		Fl::focus(main_win->canvas);
-
 		main_win->canvas->PointerPos();
 		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 	}
@@ -823,12 +803,17 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	Obj3d_t old(r_view.hl);
 
-	main_win->render->query(r_view.hl, x, y);
+	int ox = main_win->canvas->x();
+	int oy = main_win->canvas->y();
+	int ow = main_win->canvas->w();
+	int oh = main_win->canvas->h();
+
+	Render3D_Query(r_view.hl, x, y, ox, oy, ow, oh);
 
 	if (old == r_view.hl)
 		return;
 
-	main_win->render->redraw();
+	main_win->canvas->redraw();
 }
 
 
@@ -840,7 +825,7 @@ void Render3D_UpdateHighlight()
 	if (r_view.hl.valid() && ! edit.pointer_in_window)
 	{
 		r_view.hl.clear();
-		main_win->render->redraw();
+		main_win->canvas->redraw();
 	}
 }
 

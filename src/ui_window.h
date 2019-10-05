@@ -48,7 +48,6 @@
 
 
 class Wad_file;
-class UI_Render3D;
 
 
 class UI_MainWindow : public Fl_Double_Window
@@ -63,9 +62,7 @@ public:
 	UI_Tile * tile;
 
 	UI_CanvasScroll *scroll;
-
-	UI_Canvas   *canvas;
-	UI_Render3D *render;
+	UI_Canvas *canvas;
 
 	UI_Browser *browser;
 

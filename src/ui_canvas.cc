@@ -115,6 +115,12 @@ void UI_Canvas::resize(int X, int Y, int W, int H)
 
 void UI_Canvas::draw()
 {
+	if (edit.render3d)
+	{
+		Render3D_Draw(x(), y(), w(), h());
+		return;
+	}
+
 #ifdef NO_OPENGL
 	xx = x();
 	yy = y();
