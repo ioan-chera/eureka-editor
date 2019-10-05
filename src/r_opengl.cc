@@ -34,6 +34,7 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 
 
 extern rgb_color_t transparent_col;
@@ -103,6 +104,35 @@ public:
 		x = (x + r_view.screen_w) / 2;
 
 		return x;
+	}
+
+	void DrawSectorPolygons(sector_subdivision_c *subdiv, float z, Img_c *img)
+	{
+		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
+		{
+			sector_polygon_t *poly = &subdiv->polygons[i];
+
+			// draw polygon
+			glBegin(GL_POLYGON);
+
+			for (int p = 0 ; p < poly->count ; p++)
+			{
+				float px = poly->mx[p];
+				float py = poly->my[p];
+
+				if (img)
+				{
+					// this logic follows ZDoom, which scales large flats to
+					// occupy a 64x64 unit area.  I presume wall textures are
+					// handled similarily....
+					glTexCoord2f(px / 64.0, py / 64.0);
+				}
+
+				glVertex3f(px, py, z);
+			}
+
+			glEnd();
+		}
 	}
 
 	void DrawLine(int ld_index)
@@ -212,6 +242,22 @@ public:
 	void DrawSector(int sec_index)
 	{
 		// FIXME DrawSector
+
+		sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(sec_index);
+
+		if (! subdiv)
+			return;
+
+		const Sector *sec = Sectors[sec_index];
+
+		glColor3f(1, 1, 1);
+
+		// TODO get textures
+		Img_c *f_tex = NULL;
+		Img_c *c_tex = NULL;
+
+		DrawSectorPolygons(subdiv, sec->floorh, f_tex);
+		DrawSectorPolygons(subdiv, sec->ceilh,  c_tex);
 	}
 
 	void DrawThing(int th_index)
@@ -292,31 +338,56 @@ public:
 				DrawThing(t);
 	}
 
-	void Clear()
+	void Begin(int ow, int oh)
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
 
-	void SetupProjection()
-	{
-		GLdouble angle = -r_view.angle * 180.0 / M_PI;
+//!!		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_ALPHA_TEST);
 
-		// the model-view matrix does several things:
+		glAlphaFunc(GL_GREATER, 0.5);
+
+		// setup projection
+
+		glViewport(0, 0, ow, oh);
+
+		GLdouble angle = r_view.angle * 180.0 / M_PI;
+
+		// the model-view matrix does three things:
 		//   1. translates X/Y/Z by view position
 		//   2. rotates around Y axis by view angle
 		//   3. flips coordinates so camera looks down -Z
+		//
+		// due to how matrix multiplication works, these things
+		// must be specified in the reverse order as above.
 		glMatrixMode(GL_MODELVIEW);
 
 		glLoadMatrixd(flip_matrix);
-		glRotated(angle, 0, +1, 0);
+		glRotated(-angle, 0, 0, +1);
 		glTranslated(-r_view.x, -r_view.y, -r_view.z);
 
 		// the projection matrix creates the 3D perspective
 		// FIXME proper values...
 		glMatrixMode(GL_PROJECTION);
 
-		glFrustum(-1, -1, +1, +1, 1.0, 32768.0);
+		glLoadIdentity();
+		glFrustum(-1, +1, -1, +1, 1.0, 32768.0);
+	}
+
+	void Finish()
+	{
+		// reset state
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
+		glDisable(GL_DEPTH_TEST);
+
+		// reset matrices
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
 };
 
@@ -325,13 +396,9 @@ void RGL_RenderWorld(int ox, int oy, int ow, int oh)
 {
 	RendInfo rend;
 
-	glEnable(GL_DEPTH_TEST);
-
-	rend.Clear();
-	rend.SetupProjection();
+	rend.Begin(ow, oh);
 	rend.Render();
-
-	glDisable(GL_DEPTH_TEST);
+	rend.Finish();
 }
 
 #endif /* NO_OPENGL */
