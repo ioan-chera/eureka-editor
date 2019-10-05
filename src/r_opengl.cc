@@ -43,6 +43,7 @@ extern bool render_high_detail;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
+extern int  render_pixel_aspect;
 
 
 // convert from our coordinate system (looking along +X)
@@ -368,11 +369,19 @@ public:
 		glTranslated(-r_view.x, -r_view.y, -r_view.z);
 
 		// the projection matrix creates the 3D perspective
-		// FIXME proper values...
 		glMatrixMode(GL_PROJECTION);
 
+		float x_slope = 100.0 / render_pixel_aspect;
+		float y_slope = (float)oh / (float)ow;
+
+		// this matches behavior of S/W renderer.
+		// [ currently it is important since we use the S/W path
+		//   for querying what the mouse is pointing at ]
+		float near = x_slope;
+		float far  = 32767.0;
+
 		glLoadIdentity();
-		glFrustum(-1, +1, -1, +1, 1.0, 32768.0);
+		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, near, far);
 	}
 
 	void Finish()
