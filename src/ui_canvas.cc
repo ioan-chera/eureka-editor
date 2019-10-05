@@ -115,6 +115,16 @@ void UI_Canvas::resize(int X, int Y, int W, int H)
 
 void UI_Canvas::draw()
 {
+#ifndef NO_OPENGL
+	if (! valid())
+	{
+		// reset the 'gl_tex' field of all loaded images, as the value
+		// belongs to a context which was (probably) just deleted and
+		// hence refer to textures which no longer exist.
+		W_UnloadAllTextures();
+	}
+#endif
+
 	if (edit.render3d)
 	{
 		Render3D_Draw(x(), y(), w(), h());
@@ -141,14 +151,6 @@ void UI_Canvas::draw()
 
 	map_hx = ceil(MAPX(w()));
 	map_hy = ceil(MAPY(h()));
-
-	if (! valid())
-	{
-		// reset the 'gl_tex' field of all loaded images, as the value
-		// belongs to a context which was (probably) just deleted and
-		// hence refer to textures which no longer exist.
-		W_UnloadAllTextures();
-	}
 
 	// setup projection matrix for 2D drawing
 	ortho();
