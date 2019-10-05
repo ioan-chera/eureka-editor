@@ -107,8 +107,48 @@ public:
 		return x;
 	}
 
-	void DrawSectorPolygons(sector_subdivision_c *subdiv, float z, Img_c *img)
+	Img_c *FindFlat(const char *fname, byte& r, byte& g, byte& b)
 	{
+		bool fullbright = false;  // TODO no lighting yet...
+
+		if (is_sky(fname))
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			IM_DecodePixel(game_info.sky_color, r, g, b);
+			return NULL;
+		}
+
+		if (! r_view.texturing)
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			int col = HashedPalColor(fname, game_info.floor_colors);
+			IM_DecodePixel(col, r, g, b);
+			return NULL;
+		}
+
+		Img_c *img = W_GetFlat(fname);
+		if (! img)
+		{
+			img = IM_UnknownFlat();
+			fullbright = render_unknown_bright;
+		}
+
+		img->bind_gl();
+
+		r = g = b = 255;
+		return img;
+	}
+
+	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
+		float z, const char *fname)
+	{
+		byte r, g, b;
+		Img_c *img = FindFlat(fname, r, g, b);
+
+		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+
 		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 		{
 			sector_polygon_t *poly = &subdiv->polygons[i];
@@ -253,12 +293,15 @@ public:
 
 		glColor3f(1, 1, 1);
 
-		// TODO get textures
-		Img_c *f_tex = NULL;
-		Img_c *c_tex = NULL;
+		if (r_view.z > sec->floorh)
+		{
+			DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
+		}
 
-		DrawSectorPolygons(subdiv, sec->floorh, f_tex);
-		DrawSectorPolygons(subdiv, sec->ceilh,  c_tex);
+		if (r_view.z < sec->ceilh)
+		{
+			DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
+		}
 	}
 
 	void DrawThing(int th_index)
@@ -344,8 +387,12 @@ public:
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//!!		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_ALPHA_TEST);
+		glEnable(GL_ALPHA_TEST);
+
+		glDisable(GL_CULL_FACE);
 
 		glAlphaFunc(GL_GREATER, 0.5);
 
@@ -388,8 +435,8 @@ public:
 	{
 		// reset state
 		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_ALPHA_TEST);
 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_ALPHA_TEST);
 
 		// reset matrices
 		glMatrixMode(GL_PROJECTION);
