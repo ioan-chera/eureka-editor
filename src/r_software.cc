@@ -601,19 +601,19 @@ public:
 
 		int x = int(r_view.aspect_sw * t);
 
-		x = (r_view.sw + x) / 2;
+		x = (r_view.screen_w + x) / 2;
 
 		if (x < 0)
 			x = 0;
-		else if (x > r_view.sw)
-			x = r_view.sw;
+		else if (x > r_view.screen_w)
+			x = r_view.screen_w;
 
 		return x;
 	}
 
 	static inline float XToAngle(int x)
 	{
-		x = x * 2 - r_view.sw;
+		x = x * 2 - r_view.screen_w;
 
 		float ang = M_PI/2 + atan(x / r_view.aspect_sw);
 
@@ -629,14 +629,14 @@ public:
 	{
 		int x = int(r_view.aspect_sw * tx * iz);
 
-		x = (x + r_view.sw) / 2;
+		x = (x + r_view.screen_w) / 2;
 
 		return x;
 	}
 
 	static inline float XToDelta(int x, double iz)
 	{
-		x = x * 2 - r_view.sw;
+		x = x * 2 - r_view.screen_w;
 
 		float tx = x / iz / r_view.aspect_sw;
 
@@ -653,12 +653,12 @@ public:
 
 		int y = int(r_view.aspect_sh * (sec_h - r_view.z) * iz);
 
-		return (r_view.sh - y) / 2;
+		return (r_view.screen_h - y) / 2;
 	}
 
 	static inline float YToDist(int y, int sec_h)
 	{
-		y = r_view.sh - y * 2;
+		y = r_view.screen_h - y * 2;
 
 		if (y == 0)
 			return 999999;
@@ -668,7 +668,7 @@ public:
 
 	static inline float YToSecH(int y, double iz)
 	{
-		y = y * 2 - r_view.sh;
+		y = y * 2 - r_view.screen_h;
 
 		return r_view.z - (float(y) / r_view.aspect_sh / iz);
 	}
@@ -861,8 +861,8 @@ public:
 		if (sx1 < 0)
 			sx1 = 0;
 
-		if (sx2 >= r_view.sw)
-			sx2 = r_view.sw - 1;
+		if (sx2 >= r_view.screen_w)
+			sx2 = r_view.screen_w - 1;
 
 		if (sx1 > sx2)
 			return;
@@ -1164,11 +1164,11 @@ public:
 		float t_cos = cos(M_PI + -r_view.angle + ang) / modv;
 		float t_sin = sin(M_PI + -r_view.angle + ang) / modv;
 
-		dest += x + y1 * r_view.sw;
+		dest += x + y1 * r_view.screen_w;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
@@ -1212,9 +1212,9 @@ public:
 		hh += 0.2;
 
 		src  += tx;
-		dest += x + y1 * r_view.sw;
+		dest += x + y1 * r_view.screen_w;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.sw)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.screen_w)
 		{
 			int ty = int(floor(hh)) % th;
 
@@ -1237,11 +1237,11 @@ public:
 	{
 		img_pixel_t *dest = r_view.screen;
 
-		dest += x + y1 * r_view.sw;
+		dest += x + y1 * r_view.screen_w;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
@@ -1259,9 +1259,9 @@ public:
 
 		img_pixel_t *dest = r_view.screen;
 
-		dest += x + y1 * r_view.sw;
+		dest += x + y1 * r_view.screen_w;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.sw)
+		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
 		{
 			if (r_view.lighting && ! surf.fullbright)
 				*dest = DoomLightRemap(light, dist, game_info.wall_colors[1]);
@@ -1298,14 +1298,13 @@ public:
 
 		/* query mode : is mouse over this wall part? */
 
-		if (query_mode & 1)
+		if (query_mode)
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
 				query_wall = dw;
 				query_part = part;
 			}
-
 			return;
 		}
 
@@ -1344,11 +1343,15 @@ public:
 		if (y1 > y2)
 			return;
 
-		/* fill pixels */
-
-		img_pixel_t *dest = r_view.screen;
-
-		const img_pixel_t *src = dw->ceil.img->buf();
+		if (query_mode)
+		{
+			if (y1 <= query_sy && query_sy <= y2)
+			{
+				query_wall = dw;
+				query_part = OB3D_Thing;
+			}
+			return;
+		}
 
 		int tw = dw->ceil.img->width();
 		int th = dw->ceil.img->height();
@@ -1365,25 +1368,19 @@ public:
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
-		src  += tx;
-		dest += x + y1 * r_view.sw;
-
 		int thsec = r_view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
 		float dist = 1.0 / dw->cur_iz;
 
-		if (query_mode & 2)
-		{
-			if (y1 <= query_sy && query_sy <= y2)
-			{
-				query_wall = dw;
-				query_part = OB3D_Thing;
-			}
+		/* fill pixels */
 
-			return;
-		}
+		img_pixel_t *dest = r_view.screen;
+		dest += x + y1 * r_view.screen_w;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.sw)
+		const img_pixel_t *src = dw->ceil.img->buf();
+		src += tx;
+
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.screen_w)
 		{
 			int ty = int(hh / scale);
 
@@ -1417,6 +1414,9 @@ public:
 			return;
 
 		if (! surf.img)
+			return;
+
+		if (query_mode)
 			return;
 
 		int y1 = DistToY(dw->cur_iz, surf.h2);
@@ -1635,12 +1635,12 @@ public:
 
 		active.clear();
 
-		for (int x=0 ; x < r_view.sw ; x++)
+		for (int x=0 ; x < r_view.screen_w ; x++)
 		{
 			// clear vertical depth buffer
 
 			open_y1 = 0;
-			open_y2 = r_view.sh - 1;
+			open_y2 = r_view.screen_h - 1;
 
 			UpdateActiveList(x);
 
@@ -1695,11 +1695,23 @@ public:
 		}
 	}
 
+	void ClearScreen()
+	{
+		// color #0 is black (DOOM, Heretic, Hexen)
+		// [ other colors won't work here, since img_pixel_t is 16 bits ]
+		byte COLOR = 0;
+
+		size_t total = r_view.screen_w * r_view.screen_h;
+
+		memset(r_view.screen, COLOR, total * sizeof(r_view.screen[0]));
+	}
+
 	void DoRender3D()
 	{
-		r_view.ClearScreen();
+		if (! query_mode)
+			ClearScreen();
 
-		InitDepthBuf(r_view.sw);
+		InitDepthBuf(r_view.screen_w);
 
 		r_view.SaveOffsets();
 
@@ -1721,7 +1733,7 @@ public:
 
 	void DoQuery(int qx, int qy)
 	{
-		query_mode = 3;
+		query_mode = 1;
 
 		query_sx   = qx;
 		query_sy   = qy;
@@ -1737,21 +1749,21 @@ public:
 
 static void BlitHires(int ox, int oy, int ow, int oh)
 {
-	u8_t line_rgb[r_view.sw * 3];
+	u8_t line_rgb[r_view.screen_w * 3];
 
-	for (int ry = 0 ; ry < r_view.sh ; ry++)
+	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
 	{
 		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + r_view.sw * 3;
+		u8_t *dest_end = line_rgb + r_view.screen_w * 3;
 
-		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
+		const img_pixel_t *src = r_view.screen + ry * r_view.screen_w;
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
 			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
-		fl_draw_image(line_rgb, ox, oy+ry, r_view.sw, 1);
+		fl_draw_image(line_rgb, ox, oy+ry, r_view.screen_w, 1);
 	}
 }
 
@@ -1761,9 +1773,9 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 	// if destination width is odd, we store an extra pixel here
 	u8_t line_rgb[(ow + 1) * 3];
 
-	for (int ry = 0 ; ry < r_view.sh ; ry++)
+	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
 	{
-		const img_pixel_t *src = r_view.screen + ry * r_view.sw;
+		const img_pixel_t *src = r_view.screen + ry * r_view.screen_w;
 
 		u8_t *dest = line_rgb;
 		u8_t *dest_end = line_rgb + ow * 3;

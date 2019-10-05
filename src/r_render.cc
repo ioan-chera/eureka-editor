@@ -67,7 +67,7 @@ Render_View_t::Render_View_t() :
 	p_type(0), px(), py(),
 	x(), y(), z(),
 	angle(), Sin(), Cos(),
-	sw(), sh(), screen(NULL),
+	screen_w(), screen_h(), screen(NULL),
 	texturing(false), sprites(false), lighting(false),
 	gravity(true),
 	thing_sectors(),
@@ -121,9 +121,9 @@ void Render_View_t::FindGroundZ()
 
 void Render_View_t::CalcAspect()
 {
-	aspect_sw = sw;	 // things break if these are different
+	aspect_sw = screen_w;	 // things break if these are different
 
-	aspect_sh = sw / (render_pixel_aspect / 100.0);
+	aspect_sh = screen_w / (render_pixel_aspect / 100.0);
 }
 
 void Render_View_t::UpdateScreen(int ow, int oh)
@@ -134,24 +134,18 @@ void Render_View_t::UpdateScreen(int ow, int oh)
 	int new_sw = render_high_detail ? ow : (ow + 1) / 2;
 	int new_sh = render_high_detail ? oh : (oh + 1) / 2;
 
-	if (!screen || sw != new_sw || sh != new_sh)
+	if (!screen || screen_w != new_sw || screen_h != new_sh)
 	{
-		sw = new_sw;
-		sh = new_sh;
+		screen_w = new_sw;
+		screen_h = new_sh;
 
 		if (screen)
 			delete[] screen;
 
-		screen = new img_pixel_t [sw * sh];
+		screen = new img_pixel_t [screen_w * screen_h];
 	}
 
 	CalcAspect();
-}
-
-void Render_View_t::ClearScreen()
-{
-	// color #0 is black (DOOM, Heretic, Hexen)
-	memset(screen, 0, sw * sh * sizeof(screen[0]));
 }
 
 void Render_View_t::FindThingSectors()
@@ -173,7 +167,7 @@ void Render_View_t::FindThingSectors()
 
 void Render_View_t::PrepareToRender(int ow, int oh)
 {
-	if (thsec_invalidated || !screen ||
+	if (thsec_invalidated || screen_w == 0 ||
 		NumThings  != (int)thing_sectors.size() ||
 		NumSectors != thsec_sector_num)
 	{
@@ -558,8 +552,8 @@ void Render3D_Setup()
 		r_view.SetAngle(0);
 	}
 
-	r_view.sw = -1;
-	r_view.sh = -1;
+	r_view.screen_w = -1;
+	r_view.screen_h = -1;
 
 	r_view.texturing  = true;
 	r_view.sprites    = true;

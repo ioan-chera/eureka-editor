@@ -27,7 +27,6 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
-// FIXME : won't need this once 'screen' is private in r_software.cc
 #include "im_img.h"
 
 
@@ -44,12 +43,12 @@ public:
 	float angle;
 	float Sin, Cos;
 
-	// screen image.
-	int sw, sh;
+	// screen buffer.
+	int screen_w, screen_h;
 	img_pixel_t *screen;
 
 	float aspect_sh;
-	float aspect_sw;  // sw * aspect_ratio
+	float aspect_sw;  // screen_w * aspect_ratio
 
 	bool texturing;
 	bool sprites;
@@ -107,7 +106,6 @@ public:
 	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel);
 
 	void UpdateScreen(int ow, int oh);
-	void ClearScreen();
 	void PrepareToRender(int ow, int oh);
 
 	/* r_editing_info_t stuff */
