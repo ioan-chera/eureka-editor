@@ -132,7 +132,8 @@ void UI_Canvas::draw()
 
 	map_hx = ceil(MAPX(xx + w()));
 	map_hy = ceil(MAPY(yy));
-#else
+
+#else // OpenGL
 	xx = yy = 0;
 
 	map_lx = floor(MAPX(0));
@@ -143,14 +144,14 @@ void UI_Canvas::draw()
 
 	if (! valid())
 	{
-		// setup projection matrix for 2D drawing
-		ortho();
-
 		// reset the 'gl_tex' field of all loaded images, as the value
 		// belongs to a context which was (probably) just deleted and
 		// hence refer to textures which no longer exist.
 		W_UnloadAllTextures();
 	}
+
+	// setup projection matrix for 2D drawing
+	ortho();
 #endif
 
 	gl_color(FL_WHITE);

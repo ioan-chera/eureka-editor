@@ -44,6 +44,17 @@ extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
 
+// convert from our coordinate system (looking along +X)
+// to OpenGL's coordinate system (looking down -Z).
+static GLdouble flip_matrix[16] =
+{
+	 0,  0, -1,  0,
+	-1,  0,  0,  0,
+	 0, +1,  0,  0,
+	 0,  0,  0, +1
+};
+
+
 struct RendInfo
 {
 public:
@@ -280,6 +291,33 @@ public:
 			for (int t=0 ; t < NumThings ; t++)
 				DrawThing(t);
 	}
+
+	void Clear()
+	{
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void SetupProjection()
+	{
+		GLdouble angle = -r_view.angle * 180.0 / M_PI;
+
+		// the model-view matrix does several things:
+		//   1. translates X/Y/Z by view position
+		//   2. rotates around Y axis by view angle
+		//   3. flips coordinates so camera looks down -Z
+		glMatrixMode(GL_MODELVIEW);
+
+		glLoadMatrixd(flip_matrix);
+		glRotated(angle, 0, +1, 0);
+		glTranslated(-r_view.x, -r_view.y, -r_view.z);
+
+		// the projection matrix creates the 3D perspective
+		// FIXME proper values...
+		glMatrixMode(GL_PROJECTION);
+
+		glFrustum(-1, -1, +1, +1, 1.0, 32768.0);
+	}
 };
 
 
@@ -287,7 +325,13 @@ void RGL_RenderWorld(int ox, int oy, int ow, int oh)
 {
 	RendInfo rend;
 
+	glEnable(GL_DEPTH_TEST);
+
+	rend.Clear();
+	rend.SetupProjection();
 	rend.Render();
+
+	glDisable(GL_DEPTH_TEST);
 }
 
 #endif /* NO_OPENGL */
