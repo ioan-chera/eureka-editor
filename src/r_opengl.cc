@@ -310,13 +310,15 @@ public:
 
 		const thingtype_t *info = M_GetThingType(th->type);
 
+		// project sprite to check if it is off-screen
+
 		float x = th->x - r_view.x;
 		float y = th->y - r_view.y;
 
 		float tx = x * r_view.Sin - y * r_view.Cos;
 		float ty = x * r_view.Cos + y * r_view.Sin;
 
-		// reject sprite if complete behind viewplane
+		// sprite is complete behind viewplane?
 		if (ty < 4)
 			return;
 
@@ -324,49 +326,72 @@ public:
 
 		float scale = info->scale;
 
-		Img_c *sprite = W_GetSprite(th->type);
-		if (! sprite)
+		Img_c *img = W_GetSprite(th->type);
+		if (! img)
 		{
-			sprite = IM_UnknownSprite();
+			img = IM_UnknownSprite();
 			is_unknown = true;
 		}
 
-		float tx1 = tx - sprite->width() * scale / 2.0;
-		float tx2 = tx + sprite->width() * scale / 2.0;
+		float scale_w = img->width() * scale;
+		float scale_h = img->height() * scale;
+
+		float tx1 = tx - scale_w * 0.5;
+		float tx2 = tx + scale_w * 0.5;
+		float ty1, ty2;
 
 		double iz = 1 / ty;
 
 		int sx1 = DeltaToX(iz, tx1);
-		int sx2 = DeltaToX(iz, tx2) - 1;
+		int sx2 = DeltaToX(iz, tx2);
 
-		if (sx1 < 0)
-			sx1 = 0;
-
-		if (sx2 >= r_view.screen_w)
-			sx2 = r_view.screen_w - 1;
-
-		if (sx1 > sx2)
+		if (sx2 < 0 || sx1 > r_view.screen_w)
 			return;
 
-		int thsec = r_view.thing_sectors[th_index];
+		// sprite is potentially visible, so draw it
 
-		int h1, h2;
+		// choose X/Y coordinates so quad faces the camera
+		float x1 = th->x - r_view.Sin * scale_w * 0.5;
+		float y1 = th->y + r_view.Cos * scale_w * 0.5;
+
+		float x2 = th->x + r_view.Sin * scale_w * 0.5;
+		float y2 = th->y - r_view.Cos * scale_w * 0.5;
+
+		int sec_num = r_view.thing_sectors[th_index];
+
+		float h1, h2;
 
 		if (info && (info->flags & THINGDEF_CEIL))
 		{
-			// IOANCH 9/2015: also add z
-			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
-			h1 = h2 - sprite->height() * scale;
+			// IOANCH 9/2015: add thing z (for Hexen format)
+			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
+			h1 = h2 - scale_h;
 		}
 		else
 		{
-			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
-			h2 = h1 + sprite->height() * scale;
+			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
+			h2 = h1 + scale_h;
 		}
 
-		/* actually draw it... */
+		// bind the sprite image (upload it to OpenGL if needed)
+		img->bind_gl();
 
-		// FIXME DrawThing
+		// choose texture coords based on image size
+		tx1 = 0.0;
+		ty1 = 0.0;
+		tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
+		ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+
+		glColor3f(1, 1, 1);
+
+		glBegin(GL_QUADS);
+
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, h1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, h2);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, h2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, h1);
+
+		glEnd();
 	}
 
 	void Render()
