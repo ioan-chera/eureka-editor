@@ -273,7 +273,20 @@ public:
 		if (dist < 0.01)
 			return;
 
-		/* TODO : mark sectors to draw */
+		bool self_ref = false;
+		if (ld->Left() && ld->Right() && ld->Left()->sector == ld->Right()->sector)
+			self_ref = true;
+
+		// mark sectors to be drawn
+		// [ this method means we don't need to check visibility of sectors ]
+		if (! self_ref)
+		{
+			if (ld->Left() && is_sector(ld->Left()->sector))
+				seen_sectors.set(ld->Left()->sector);
+
+			if (ld->Right() && is_sector(ld->Right()->sector))
+				seen_sectors.set(ld->Right()->sector);
+		}
 
 		/* actually draw it... */
 
@@ -282,8 +295,6 @@ public:
 
 	void DrawSector(int sec_index)
 	{
-		// FIXME DrawSector
-
 		sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(sec_index);
 
 		if (! subdiv)
@@ -400,7 +411,8 @@ public:
 			DrawLine(i);
 
 		for (int s=0 ; s < NumSectors ; s++)
-			DrawSector(s);
+			if (seen_sectors.get(s))
+				DrawSector(s);
 
 		if (r_view.sprites)
 			for (int t=0 ; t < NumThings ; t++)
