@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-//  3D RENDERING
+//  3D RENDERING : SOFTWARE MODE
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
@@ -31,21 +31,14 @@
 #include "im_color.h"
 #include "im_img.h"
 #include "e_hover.h"
-#include "e_linedef.h"
 #include "e_main.h"
-#include "e_things.h"
-#include "e_objects.h"
 #include "m_game.h"
 #include "w_rawdef.h"
-#include "w_loadpic.h"
 #include "w_texture.h"
-
 #include "r_render.h"
-#include "ui_window.h"
 
 
-// config items
-rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
+extern rgb_color_t transparent_col;
 
 extern bool render_high_detail;
 extern bool render_lock_gravity;
@@ -1796,7 +1789,7 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 }
 
 
-void RendAPI_Render3D(int ox, int oy, int ow, int oh)
+void SW_RenderWorld(int ox, int oy, int ow, int oh)
 {
 	RendInfo rend;
 
@@ -1815,7 +1808,7 @@ void RendAPI_Render3D(int ox, int oy, int ow, int oh)
 }
 
 
-bool RendAPI_Query(Obj3d_t& hl, int qx, int qy)
+bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
 {
 	if (! render_high_detail)
 	{

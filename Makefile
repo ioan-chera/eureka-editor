@@ -84,6 +84,7 @@ OBJS = \
 	$(OBJ_DIR)/m_testmap.o  \
 	$(OBJ_DIR)/r_grid.o  \
 	$(OBJ_DIR)/r_render.o  \
+	$(OBJ_DIR)/r_opengl.o  \
 	$(OBJ_DIR)/r_software.o  \
 	$(OBJ_DIR)/r_subdiv.o  \
 	$(OBJ_DIR)/sys_debug.o \

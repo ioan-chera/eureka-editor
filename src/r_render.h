@@ -163,8 +163,10 @@ void Render3D_WriteUser(FILE *fp);
 
 /* API for rendering a scene (etc) */
 
-void RendAPI_Render3D(int ox, int oy, int ow, int oh);
-bool RendAPI_Query(Obj3d_t& hl, int qx, int qy);
+void SW_RenderWorld(int ox, int oy, int ow, int oh);
+bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy);
+
+void RGL_RenderWorld(int ox, int oy, int ow, int oh);
 
 #endif  /* __EUREKA_R_RENDER__ */
 

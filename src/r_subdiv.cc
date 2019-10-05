@@ -446,8 +446,6 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 
 void Subdiv_InvalidateAll()
 {
-	// FIXME Subdiv_InvalidateAll
-
 	// invalidate everything
 	sector_info_cache.total = -1;
 }

@@ -28,21 +28,12 @@
 #include "FL/gl.h"
 #endif
 
-#include "im_color.h"
-#include "im_img.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
-#include "e_things.h"
-#include "e_objects.h"
 #include "m_game.h"
-#include "w_rawdef.h"
-#include "w_loadpic.h"
-#include "w_texture.h"
-
 #include "m_events.h"
 #include "r_render.h"
-
 #include "ui_window.h"
 
 
@@ -53,6 +44,8 @@
 
 
 // config items
+rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
+
 bool render_high_detail    = false;
 bool render_lock_gravity   = false;
 bool render_missing_bright = true;
@@ -140,10 +133,17 @@ void Render_View_t::UpdateScreen(int ow, int oh)
 		screen_h = new_sh;
 
 		if (screen)
+		{
 			delete[] screen;
-
-		screen = new img_pixel_t [screen_w * screen_h];
+			screen = NULL;
+		}
 	}
+
+	// we don't need a screen buffer when using OpenGL
+#ifdef NO_OPENGL
+	if (!screen)
+		screen = new img_pixel_t [screen_w * screen_h];
+#endif
 
 	CalcAspect();
 }
@@ -374,9 +374,13 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 
 	r_view.PrepareToRender(ow, oh);
 
-	RendAPI_Render3D(ox, oy, ow, oh);
+#ifdef NO_OPENGL
+	SW_RenderWorld(ox, oy, ow, oh);
 
 	DrawInfoBar(ox, oy, ow, oh);
+#else
+	RGL_RenderWorld(ox, oy, ow, oh);
+#endif
 }
 
 
@@ -392,7 +396,7 @@ bool Render3D_Query(Obj3d_t& hl, int sx, int sy,  int ox, int oy, int ow, int oh
 	int qx = sx - ox;
 	int qy = sy - oy - INFO_BAR_H / 2;
 
-	return RendAPI_Query(hl, qx, qy);
+	return SW_QueryPoint(hl, qx, qy);
 }
 
 
