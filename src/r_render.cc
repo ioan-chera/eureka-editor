@@ -377,6 +377,8 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 #ifdef NO_OPENGL
 	SW_RenderWorld(ox, oy, ow, oh);
 
+	oy -= INFO_BAR_H;
+
 	DrawInfoBar(ox, oy, ow, oh);
 #else
 	RGL_RenderWorld(ox, oy, ow, oh);
@@ -384,13 +386,30 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 }
 
 
-bool Render3D_Query(Obj3d_t& hl, int sx, int sy,  int ox, int oy, int ow, int oh)
+bool Render3D_Query(Obj3d_t& hl, int sx, int sy)
 {
+	int ow = main_win->canvas->w();
+	int oh = main_win->canvas->h();
+
+#ifdef NO_OPENGL
+	// in OpenGL mode, UI_Canvas is a window and that means the
+	// event X/Y values are relative to *it* and not the main window.
+	// hence the following is only needed in software mode.
+	int ox = main_win->canvas->x();
+	int oy = main_win->canvas->y();
+
+	sx -= ox;
+	sy -= oy;
+#endif
+
 	// force high detail mode for OpenGL, so we don't lose
 	// precision when performing the query.
 #ifndef NO_OPENGL
 	render_high_detail = true;
 #endif
+
+	oh -= INFO_BAR_H;
+	sy -= INFO_BAR_H;
 
 	hl.clear();
 
@@ -399,10 +418,7 @@ bool Render3D_Query(Obj3d_t& hl, int sx, int sy,  int ox, int oy, int ow, int oh
 
 	r_view.PrepareToRender(ow, oh);
 
-	int qx = sx - ox;
-	int qy = sy - oy - INFO_BAR_H / 2;
-
-	return SW_QueryPoint(hl, qx, qy);
+	return SW_QueryPoint(hl, sx, sy);
 }
 
 
@@ -805,16 +821,11 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	Obj3d_t old(r_view.hl);
+	Obj3d_t old_hl(r_view.hl);
 
-	int ox = main_win->canvas->x();
-	int oy = main_win->canvas->y();
-	int ow = main_win->canvas->w();
-	int oh = main_win->canvas->h();
+	Render3D_Query(r_view.hl, x, y);
 
-	Render3D_Query(r_view.hl, x, y, ox, oy, ow, oh);
-
-	if (old == r_view.hl)
+	if (old_hl == r_view.hl)
 		return;
 
 	main_win->canvas->redraw();

@@ -499,7 +499,7 @@ public:
 	int open_y1;
 	int open_y2;
 
-	// these used by HighlightGeometry()
+	// these used by Highlight()
 	int hl_ox, hl_oy;
 
 private:
@@ -1052,7 +1052,7 @@ public:
 		}
 	}
 
-	void HighlightGeometry(int ox, int oy)
+	void Highlight(int ox, int oy)
 	{
 		hl_ox = ox;
 		hl_oy = oy;
@@ -1680,7 +1680,7 @@ public:
 		memset(r_view.screen, COLOR, total * sizeof(r_view.screen[0]));
 	}
 
-	void DoRender3D()
+	void Render()
 	{
 		if (! query_mode)
 			ClearScreen();
@@ -1705,16 +1705,14 @@ public:
 		r_view.RestoreOffsets();
 	}
 
-	void DoQuery(int qx, int qy)
+	void Query(int qx, int qy)
 	{
 		query_mode = 1;
-
-		query_sx   = qx;
-		query_sy   = qy;
-
 		query_wall = NULL;
+		query_sx = qx;
+		query_sy = qy;
 
-		DoRender3D();
+		Render();
 
 		query_mode = 0;
 	}
@@ -1776,14 +1774,14 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 
 	fl_push_clip(ox, oy, ow, oh);
 
-	rend.DoRender3D();
+	rend.Render();
 
 	if (render_high_detail)
 		BlitHires(ox, oy, ow, oh);
 	else
 		BlitLores(ox, oy, ow, oh);
 
-	rend.HighlightGeometry(ox, oy);
+	rend.Highlight(ox, oy);
 
 	fl_pop_clip();
 }
@@ -1800,7 +1798,7 @@ bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
 	RendInfo rend;
 
 	// this runs the renderer, but *no* drawing is done
-	rend.DoQuery(qx, qy);
+	rend.Query(qx, qy);
 
 	if (! rend.query_wall)
 	{
