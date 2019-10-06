@@ -217,9 +217,20 @@ public:
 		}
 	}
 
+	// the "where" parameter can be:
+	//   - 'W' for one-sided wall
+	//   - 'L' for lower
+	//   - 'U' for upper
+	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
+		const char *texname, const Sector *front, bool sky_upper,
+		float x1, float y1, float z1, float x2, float y2, float z2)
+	{
+		// TODO
+	}
+
 	void DrawLine(int ld_index)
 	{
-		LineDef *ld = LineDefs[ld_index];
+		const LineDef *ld = LineDefs[ld_index];
 
 		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
@@ -254,7 +265,7 @@ public:
 			side = SIDE_LEFT;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == SIDE_LEFT) ? ld->Left() : ld->Right();
+		const SideDef *sd = (side == SIDE_LEFT) ? ld->Left() : ld->Right();
 
 		if (! sd)
 			return;
@@ -331,7 +342,44 @@ public:
 
 		/* actually draw it... */
 
-		// FIXME DrawLine
+		x1 = ld->Start()->x;
+		y1 = ld->Start()->y;
+		x2 = ld->End()->x;
+		y2 = ld->End()->y;
+
+		if (side == SIDE_LEFT)
+		{
+			std::swap(x1, x2);
+			std::swap(y1, y2);
+		}
+
+		const Sector *front = sd ? sd->SecRef() : NULL;
+
+		if (ld->OneSided())
+		{
+			DrawSide('W', ld, sd, sd->MidTex(), front, false,
+				x1, y1, front->floorh, x2, y2, front->ceilh);
+		}
+		else
+		{
+			const SideDef *sd_back = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
+			const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+
+			bool sky_upper = is_sky(front->CeilTex()) && is_sky(back->CeilTex());
+
+			if (back->floorh > front->floorh && !self_ref)
+				DrawSide('L', ld, sd, sd->LowerTex(), front, sky_upper,
+					x1, y1, front->floorh, x2, y2, back->floorh);
+
+			if (back->ceilh < front->ceilh && !self_ref)
+				DrawSide('U', ld, sd, sd->UpperTex(), front, sky_upper,
+					x1, y1, back->ceilh, x2, y2, front->ceilh);
+
+			/* TODO mid-masked textures
+			if (!is_null_tex(sd->MidTex() && r_view.texturing)
+				DrawMidMasker(ld, ...)
+			*/
+		}
 	}
 
 	void DrawSector(int sec_index)
