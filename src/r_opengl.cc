@@ -144,7 +144,7 @@ public:
 		return img;
 	}
 
-	Img_c *FindTex(const char *tname, byte& r, byte& g, byte& b, bool& fullbright)
+	Img_c *FindTexture(const char *tname, byte& r, byte& g, byte& b, bool& fullbright)
 	{
 		fullbright = false;
 
@@ -225,7 +225,36 @@ public:
 		const char *texname, const Sector *front, bool sky_upper,
 		float x1, float y1, float z1, float x2, float y2, float z2)
 	{
-		// TODO
+		byte r, g, b;
+		bool fullbright;
+		Img_c *img;
+
+		if (sky_upper && where == 'U')
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+			IM_DecodePixel(game_info.sky_color, r, g, b);
+		}
+		else
+		{
+			img = FindTexture(texname, r, g, b, fullbright);
+		}
+
+		// FIXME tex coords
+		float tx1 = 0.0;
+		float ty1 = 0.0;
+		float tx2 = 1.0;
+		float ty2 = 1.0;
+
+		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+
+		glBegin(GL_QUADS);
+
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+
+		glEnd();
 	}
 
 	void DrawLine(int ld_index)
