@@ -60,6 +60,9 @@ static GLdouble flip_matrix[16] =
 struct RendInfo
 {
 public:
+	// we don't test the visibility of sectors directly, instead we
+	// mark sectors as visible when any linedef that touches the
+	// sector is on-screen.
 	bitvec_c seen_sectors;
 
 public:
@@ -107,9 +110,9 @@ public:
 		return x;
 	}
 
-	Img_c *FindFlat(const char *fname, byte& r, byte& g, byte& b)
+	Img_c *FindFlat(const char *fname, byte& r, byte& g, byte& b, bool& fullbright)
 	{
-		bool fullbright = false;  // TODO no lighting yet...
+		fullbright = false;
 
 		if (is_sky(fname))
 		{
@@ -141,11 +144,49 @@ public:
 		return img;
 	}
 
+	Img_c *FindTex(const char *tname, byte& r, byte& g, byte& b, bool& fullbright)
+	{
+		fullbright = false;
+
+		if (! r_view.texturing)
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			int col = HashedPalColor(tname, game_info.wall_colors);
+			IM_DecodePixel(col, r, g, b);
+			return NULL;
+		}
+
+		Img_c *img;
+
+		if (is_null_tex(tname))
+		{
+			img = IM_MissingTex();
+			fullbright = render_missing_bright;
+		}
+		else
+		{
+			img = W_GetTexture(tname);
+
+			if (! img)
+			{
+				img = IM_UnknownTex();
+				fullbright = render_unknown_bright;
+			}
+		}
+
+		img->bind_gl();
+
+		r = g = b = 255;
+		return img;
+	}
+
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
 		float z, const char *fname)
 	{
 		byte r, g, b;
-		Img_c *img = FindFlat(fname, r, g, b);
+		bool fullbright;
+		Img_c *img = FindFlat(fname, r, g, b, fullbright);
 
 		glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
