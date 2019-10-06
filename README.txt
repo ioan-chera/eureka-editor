@@ -18,7 +18,6 @@ FEATURES
 
 -  Undo/Redo (multiple levels)
 -  3D preview
--  Low system requirements, no 3D card needed
 -  Editable panels for things, linedefs, sectors (etc)
 -  Browser for textures, flats, things (etc)
 -  Key binding system
