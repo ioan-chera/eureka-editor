@@ -361,8 +361,6 @@ public:
 
 		// clip angles to view volume
 
-		float base_ang = angle1;
-
 		float leftclip  = (3 * M_PI / 4);
 		float rightclip = M_PI / 4;
 
@@ -578,6 +576,181 @@ public:
 		glEnd();
 	}
 
+	void HighlightLine(obj3d_type_e part, int ld, int side, bool is_selected)
+	{
+		const LineDef *L = LineDefs[ld];
+
+		const SideDef *sd_front = L->Right();
+		const SideDef *sd_back  = L->Left();
+
+		if (side == SIDE_LEFT)
+		{
+			std::swap(sd_front, sd_back);
+		}
+
+		if (sd_front == NULL)
+			return;
+
+		const Sector *front = sd_front->SecRef();
+		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+
+		float x1 = L->Start()->x;
+		float y1 = L->Start()->y;
+		float x2 = L->End()->x;
+		float y2 = L->End()->y;
+
+		float z1 = front->floorh;
+		float z2 = front->ceilh;
+
+		if (L->TwoSided())
+		{
+			if (part == OB3D_Lower)
+			{
+				z1 = MIN(front->floorh, back->floorh);
+				z2 = MAX(front->floorh, back->floorh);
+			}
+			else  /* part == OB3D_Upper */
+			{
+				z1 = MIN(front->ceilh, back->ceilh);
+				z2 = MAX(front->ceilh, back->ceilh);
+			}
+		}
+
+		glBegin(GL_LINE_LOOP);
+
+		glVertex3f(x1, y1, z1);
+		glVertex3f(x1, y1, z2);
+		glVertex3f(x2, y2, z2);
+		glVertex3f(x2, y2, z1);
+
+		glEnd();
+	}
+
+	void HighlightSector(obj3d_type_e part, int sec_num, bool is_selected)
+	{
+		const Sector *sec = Sectors[sec_num];
+
+		float z = (part == OB3D_Floor) ? sec->floorh : sec->ceilh;
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L = LineDefs[n];
+
+			if (L->TouchesSector(sec_num))
+			{
+				float x1 = L->Start()->x;
+				float y1 = L->Start()->y;
+				float x2 = L->End()->x;
+				float y2 = L->End()->y;
+
+				glBegin(GL_LINE_STRIP);
+				glVertex3f(x1, y1, z);
+				glVertex3f(x2, y2, z);
+				glEnd();
+			}
+		}
+	}
+
+	void HighlightThing(int th_index, bool is_selected)
+	{
+		Thing *th = Things[th_index];
+
+		const thingtype_t *info = M_GetThingType(th->type);
+
+		float scale = info->scale;
+
+		Img_c *img = W_GetSprite(th->type);
+		if (! img)
+			img = IM_UnknownSprite();
+
+		float scale_w = img->width() * scale;
+		float scale_h = img->height() * scale;
+
+		// choose X/Y coordinates so quad faces the camera
+		float x1 = th->x - r_view.Sin * scale_w * 0.5;
+		float y1 = th->y + r_view.Cos * scale_w * 0.5;
+		float x2 = th->x + r_view.Sin * scale_w * 0.5;
+		float y2 = th->y - r_view.Cos * scale_w * 0.5;
+
+		int sec_num = r_view.thing_sectors[th_index];
+
+		float h1, h2;
+
+		if (info && (info->flags & THINGDEF_CEIL))
+		{
+			// IOANCH 9/2015: add thing z (for Hexen format)
+			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
+			h1 = h2 - scale_h;
+		}
+		else
+		{
+			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
+			h2 = h1 + scale_h;
+		}
+
+		glBegin(GL_LINE_LOOP);
+
+		glVertex3f(x1, y1, h1);
+		glVertex3f(x1, y1, h2);
+		glVertex3f(x2, y2, h2);
+		glVertex3f(x2, y2, h1);
+
+		glEnd();
+	}
+
+	inline void HighlightObject(Obj3d_t& obj, bool is_selected)
+	{
+		if (obj.isThing())
+		{
+			HighlightThing(obj.num, is_selected);
+		}
+		else if (obj.isSector())
+		{
+			HighlightSector(obj.type, obj.num, is_selected);
+		}
+		else if (obj.isLine())
+		{
+			HighlightLine(obj.type, obj.num, obj.side, is_selected);
+		}
+	}
+
+	void Highlight()
+	{
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_ALPHA_TEST);
+
+		glLineWidth(2);
+
+		/* do the selection */
+
+		glColor3f(1, 0, 0);
+
+		bool saw_hl = false;
+
+		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		{
+			if (! r_view.sel[k].valid())
+				continue;
+
+			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+				saw_hl = true;
+
+			HighlightObject(r_view.sel[k], true);
+		}
+
+		/* do the highlight */
+
+		if (! saw_hl)
+		{
+			glColor3f(1, 1, 0);
+
+			HighlightObject(r_view.hl, false);
+		}
+
+		glLineWidth(1);
+	}
+
 	void Render()
 	{
 		for (int i=0 ; i < NumLineDefs ; i++)
@@ -664,6 +837,7 @@ void RGL_RenderWorld(int ox, int oy, int ow, int oh)
 
 	rend.Begin(ow, oh);
 	rend.Render();
+	rend.Highlight();
 	rend.Finish();
 }
 

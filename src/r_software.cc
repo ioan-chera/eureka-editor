@@ -530,7 +530,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
+	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
 	{
 		if (! render_high_detail)
 		{
@@ -549,9 +549,9 @@ public:
 			fl_line_style(0);
 	}
 
-	void AddRenderLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
+	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
 	{
-		AddRenderLine(sx1, sy1, sx2, sy2,
+		AddHighlightLine(sx1, sy1, sx2, sy2,
 				is_selected ? 2 : 0,
 				is_selected ? FL_RED : HI_COL);
 	}
@@ -947,10 +947,10 @@ public:
 			return;
 
 		// keep the lines thin, makes aligning textures easier
-		AddRenderLine(x1, ly1, x1, ly2, is_selected);
-		AddRenderLine(x2, ry1, x2, ry2, is_selected);
-		AddRenderLine(x1, ly1, x2, ry1, is_selected);
-		AddRenderLine(x1, ly2, x2, ry2, is_selected);
+		AddHighlightLine(x1, ly1, x1, ly2, is_selected);
+		AddHighlightLine(x2, ry1, x2, ry2, is_selected);
+		AddHighlightLine(x1, ly1, x2, ry1, is_selected);
+		AddHighlightLine(x1, ly2, x2, ry2, is_selected);
 	}
 
 	void Highlight_Line(obj3d_type_e part, int ld, int side, bool is_selected)
@@ -1003,7 +1003,7 @@ public:
 					sy1 >  5000 || sy2 >  5000)
 					continue;
 
-				AddRenderLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
+				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
 			}
 		}
 	}
@@ -1028,10 +1028,10 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			AddRenderLine(x1, y1, x1, y2, is_selected);
-			AddRenderLine(x2, y1, x2, y2, is_selected);
-			AddRenderLine(x1, y1, x2, y1, is_selected);
-			AddRenderLine(x1, y2, x2, y2, is_selected);
+			AddHighlightLine(x1, y1, x1, y2, is_selected);
+			AddHighlightLine(x2, y1, x2, y2, is_selected);
+			AddHighlightLine(x1, y1, x2, y1, is_selected);
+			AddHighlightLine(x1, y2, x2, y2, is_selected);
 			break;
 		}
 	}
