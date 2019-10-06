@@ -223,7 +223,7 @@ public:
 	//   - 'U' for upper
 	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
 		const char *texname, const Sector *front, const Sector *back,
-		bool sky_upper,
+		bool sky_upper, float ld_length,
 		float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		byte r, g, b;
@@ -249,8 +249,14 @@ public:
 
 		if (img)
 		{
-			float img_h = img->height();
+			float img_w  = img->width();
+			float img_tw = RoundPOW2(img_w);
+
+			float img_h  = img->height();
 			float img_th = RoundPOW2(img_h);
+
+			tx1 = 0;
+			tx2 = tx1 + ld_length;
 
 			// the common case: top of texture is at z2
 			ty2 = img_h;
@@ -284,6 +290,9 @@ public:
 				ty1 = 0;
 				ty2 = ty1 + (z2 - z1);
 			}
+
+			tx1 = (tx1 + sd->x_offset) / img_tw;
+			tx2 = (tx2 + sd->x_offset) / img_tw;
 
 			ty1 = (ty1 - sd->y_offset) / img_th;
 			ty2 = (ty2 - sd->y_offset) / img_th;
@@ -426,12 +435,14 @@ public:
 			std::swap(y1, y2);
 		}
 
+		float ld_len = hypotf(x2 - x1, y2 - y1);
+
 		const Sector *front = sd ? sd->SecRef() : NULL;
 
 		if (ld->OneSided())
 		{
 			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
-				x1, y1, front->floorh, x2, y2, front->ceilh);
+				ld_len, x1, y1, front->floorh, x2, y2, front->ceilh);
 		}
 		else
 		{
@@ -442,11 +453,11 @@ public:
 
 			if (back->floorh > front->floorh && !self_ref)
 				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
-					x1, y1, front->floorh, x2, y2, back->floorh);
+					ld_len, x1, y1, front->floorh, x2, y2, back->floorh);
 
 			if (back->ceilh < front->ceilh && !self_ref)
 				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
-					x1, y1, back->ceilh, x2, y2, front->ceilh);
+					ld_len, x1, y1, back->ceilh, x2, y2, front->ceilh);
 
 			/* TODO mid-masked textures
 			if (!is_null_tex(sd->MidTex() && r_view.texturing)
