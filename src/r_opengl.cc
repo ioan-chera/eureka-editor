@@ -298,6 +298,11 @@ public:
 			ty2 = (ty2 - sd->y_offset) / img_th;
 		}
 
+		if (where == 'M')
+			glEnable(GL_ALPHA_TEST);
+		else
+			glDisable(GL_ALPHA_TEST);
+
 		glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
 		glBegin(GL_QUADS);
@@ -756,9 +761,13 @@ public:
 		for (int i=0 ; i < NumLineDefs ; i++)
 			DrawLine(i);
 
+		glDisable(GL_ALPHA_TEST);
+
 		for (int s=0 ; s < NumSectors ; s++)
 			if (seen_sectors.get(s))
 				DrawSector(s);
+
+		glEnable(GL_ALPHA_TEST);
 
 		if (r_view.sprites)
 			for (int t=0 ; t < NumThings ; t++)
