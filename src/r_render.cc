@@ -37,12 +37,6 @@
 #include "ui_window.h"
 
 
-#define INFO_BAR_H	30
-
-#define INFO_TEXT_COL	fl_rgb_color(192, 192, 192)
-#define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
-
-
 // config items
 rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
 
@@ -361,25 +355,13 @@ static Thing *FindPlayer(int typenum)
 
 static Thing *player;
 
-static void DrawInfoBar(int ox, int oy, int ow, int oh);
-static void IB_Number(int& cx, int& cy, const char *label, int value, int size);
-static void IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off);
-static void IB_Highlight(int& cx, int& cy);
-
 
 void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
-	oy += INFO_BAR_H;
-	oh -= INFO_BAR_H;
-
 	r_view.PrepareToRender(ow, oh);
 
 #ifdef NO_OPENGL
 	SW_RenderWorld(ox, oy, ow, oh);
-
-	oy -= INFO_BAR_H;
-
-	DrawInfoBar(ox, oy, ow, oh);
 #else
 	RGL_RenderWorld(ox, oy, ow, oh);
 #endif
@@ -408,9 +390,6 @@ bool Render3D_Query(Obj3d_t& hl, int sx, int sy)
 	render_high_detail = true;
 #endif
 
-	oh -= INFO_BAR_H;
-	sy -= INFO_BAR_H;
-
 	hl.clear();
 
 	if (! edit.pointer_in_window)
@@ -419,124 +398,6 @@ bool Render3D_Query(Obj3d_t& hl, int sx, int sy)
 	r_view.PrepareToRender(ow, oh);
 
 	return SW_QueryPoint(hl, sx, sy);
-}
-
-
-static void DrawInfoBar(int ox, int oy, int ow, int oh)
-{
-	int cx = ox;
-	int cy = oy;
-
-	fl_push_clip(ox, cy, ow, INFO_BAR_H);
-
-	if (r_view.SelectEmpty())
-		fl_color(FL_BLACK);
-	else
-		fl_color(fl_rgb_color(104,0,0));
-
-	fl_rectf(ox, cy, ow, INFO_BAR_H);
-
-	cx += 10;
-	cy += 20;
-
-	fl_font(FL_COURIER, 16);
-
-	int ang = I_ROUND(r_view.angle * 180 / M_PI);
-	if (ang < 0) ang += 360;
-
-	IB_Number(cx, cy, "angle", ang, 3);
-	cx += 8;
-
-	IB_Number(cx, cy, "z", I_ROUND(r_view.z) - game_info.view_height, 4);
-
-	IB_Number(cx, cy, "gamma", usegamma, 1);
-	cx += 10;
-
-	IB_Flag(cx, cy, r_view.gravity, "GRAVITY", "gravity");
-
-	IB_Flag(cx, cy, true, "|", "|");
-
-	IB_Highlight(cx, cy);
-
-	fl_pop_clip();
-}
-
-
-static void IB_Number(int& cx, int& cy, const char *label, int value, int size)
-{
-	char buffer[256];
-
-	// negative size means we require a sign
-	if (size < 0)
-		sprintf(buffer, "%s:%-+*d ", label, -size + 1, value);
-	else
-		sprintf(buffer, "%s:%-*d ", label, size, value);
-
-	fl_color(INFO_TEXT_COL);
-
-	fl_draw(buffer, cx, cy);
-
-	cx = cx + fl_width(buffer);
-}
-
-static void IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
-{
-	const char *label = value ? label_on : label_off;
-
-	fl_color(value ? INFO_TEXT_COL : INFO_DIM_COL);
-
-	fl_draw(label, cx, cy);
-
-	cx = cx + fl_width(label) + 20;
-}
-
-
-static int GrabTextureFromObject(const Obj3d_t& obj);
-
-static void IB_Highlight(int& cx, int& cy)
-{
-	char buffer[256];
-
-	if (! r_view.hl.valid())
-	{
-		fl_color(INFO_DIM_COL);
-
-		strcpy(buffer, "no highlight");
-	}
-	else
-	{
-		fl_color(INFO_TEXT_COL);
-
-		if (r_view.hl.isThing())
-		{
-			const Thing *th = Things[r_view.hl.num];
-			const thingtype_t *info = M_GetThingType(th->type);
-
-			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
-					 r_view.hl.num, info->desc);
-
-		}
-		else if (r_view.hl.isSector())
-		{
-			int tex = GrabTextureFromObject(r_view.hl);
-
-			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
-					 r_view.hl.num,
-					 (tex < 0) ? "??????" : BA_GetString(tex));
-		}
-		else
-		{
-			int tex = GrabTextureFromObject(r_view.hl);
-
-			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
-					 r_view.hl.num,
-					 (tex < 0) ? "??????" : BA_GetString(tex));
-		}
-	}
-
-	fl_draw(buffer, cx, cy);
-
-	cx = cx + fl_width(buffer);
 }
 
 
@@ -829,6 +690,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 
 	main_win->canvas->redraw();
+	main_win->scroll->info3d->redraw();
 }
 
 
@@ -840,7 +702,9 @@ void Render3D_UpdateHighlight()
 	if (r_view.hl.valid() && ! edit.pointer_in_window)
 	{
 		r_view.hl.clear();
+
 		main_win->canvas->redraw();
+		main_win->scroll->info3d->redraw();
 	}
 }
 
@@ -904,7 +768,7 @@ void Render3D_Navigate()
 }
 
 
-static int GrabTextureFromObject(const Obj3d_t& obj)
+int GrabTextureFromObject(const Obj3d_t& obj)
 {
 	if (obj.type == OB3D_Floor)
 		return Sectors[obj.num]->floor_tex;

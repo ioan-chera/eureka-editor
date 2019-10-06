@@ -114,6 +114,9 @@ void RedrawMap()
 	UpdateHighlight();
 
 	main_win->canvas->redraw();
+
+	if (edit.render3d)
+		main_win->scroll->info3d->redraw();
 }
 
 

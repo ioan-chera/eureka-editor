@@ -159,7 +159,6 @@ extern UI_MainWindow * main_win;
 
 //------------------------------------------------------------------------
 
-
 class UI_Escapable_Window : public Fl_Double_Window
 {
 public:
@@ -173,7 +172,6 @@ public:
 
 
 //------------------------------------------------------------------------
-
 
 class UI_LogViewer : public UI_Escapable_Window
 {

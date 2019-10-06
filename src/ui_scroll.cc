@@ -22,13 +22,11 @@
 #include "m_config.h"
 #include "e_main.h"		// Map_bound_xxx
 
-#include "ui_scroll.h"
-#include "ui_canvas.h"
 #include "r_render.h"
+#include "ui_window.h"
 
 
 #define HUGE_DIST  (1 << 24)
-
 
 #define SCRBAR_BACK  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 #define SCRBAR_COL   (gui_scheme == 2 ? FL_DARK1 : FL_BACKGROUND_COLOR)
@@ -291,6 +289,7 @@ void UI_Scroll::Line_size(int pixels)
 
 //------------------------------------------------------------------------
 
+#define INFO_BAR_H	30
 
 UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H),
@@ -326,6 +325,12 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
 
 	resizable(canvas);
+
+
+	info3d = new UI_3DInfoBar(X, Y, W, INFO_BAR_H);
+	info3d->hide();
+
+	end();
 }
 
 
@@ -338,16 +343,17 @@ void UI_CanvasScroll::UpdateRenderMode()
 	int old_bars = enable_bars ? 1 : 0;
 	int new_bars = map_scroll_bars && !edit.render3d ? 1 : 0;
 
+	int old_rend = info3d->visible() ? 1 : 0;
+	int new_rend = edit.render3d ? 1 : 0;
+
 	// nothing changed?
-	if (old_bars == new_bars)
+	if (old_bars == new_bars && old_rend == new_rend)
 		return;
 
+	int I = edit.render3d ? INFO_BAR_H : 0;
+	int B = new_bars ? SBAR_W : 0;
 
-	int b = new_bars ? SBAR_W : 0;
-
-	canvas->resize(x() + b, y(), w() - b, h() - b);
-
-	init_sizes();
+	canvas->resize(x() + B, y() + I, w() - B, h() - B - I);
 
 	enable_bars = new_bars;
 
@@ -361,6 +367,13 @@ void UI_CanvasScroll::UpdateRenderMode()
 		  vert->hide();
 		 horiz->hide();
 	}
+
+	if (edit.render3d)
+		info3d->show();
+	else
+		info3d->hide();
+
+	init_sizes();
 }
 
 
