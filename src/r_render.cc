@@ -386,6 +386,12 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 
 bool Render3D_Query(Obj3d_t& hl, int sx, int sy,  int ox, int oy, int ow, int oh)
 {
+	// force high detail mode for OpenGL, so we don't lose
+	// precision when performing the query.
+#ifndef NO_OPENGL
+	render_high_detail = true;
+#endif
+
 	hl.clear();
 
 	if (! edit.pointer_in_window)

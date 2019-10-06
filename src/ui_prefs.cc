@@ -1013,9 +1013,12 @@ UI_Preferences::UI_Preferences() :
 		  Fl_Box* o = new Fl_Box(300, 90, 150, 25, "(higher is wider, default is 0.83)");
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ rend_high_detail = new Fl_Check_Button(50, 125, 360, 30, " High detail -- slower but looks better");
+		{ rend_lock_grav = new Fl_Check_Button(50, 125, 360, 30, " Locked gravity -- cannot move up or down");
 		}
-		{ rend_lock_grav = new Fl_Check_Button(50, 155, 360, 30, " Locked gravity -- cannot move up or down");
+		{ rend_high_detail = new Fl_Check_Button(50, 155, 360, 30, " High detail -- slower but looks better");
+#ifndef NO_OPENGL
+		  rend_high_detail->hide();
+#endif
 		}
 
 		o->end();
