@@ -222,7 +222,8 @@ public:
 	//   - 'L' for lower
 	//   - 'U' for upper
 	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
-		const char *texname, const Sector *front, bool sky_upper,
+		const char *texname, const Sector *front, const Sector *back,
+		bool sky_upper,
 		float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		byte r, g, b;
@@ -231,6 +232,7 @@ public:
 
 		if (sky_upper && where == 'U')
 		{
+			img = NULL;
 			glBindTexture(GL_TEXTURE_2D, 0);
 			IM_DecodePixel(game_info.sky_color, r, g, b);
 		}
@@ -239,11 +241,53 @@ public:
 			img = FindTexture(texname, r, g, b, fullbright);
 		}
 
-		// FIXME tex coords
+		// compute texture coords
 		float tx1 = 0.0;
 		float ty1 = 0.0;
 		float tx2 = 1.0;
 		float ty2 = 1.0;
+
+		if (img)
+		{
+			float img_h = img->height();
+			float img_th = RoundPOW2(img_h);
+
+			// the common case: top of texture is at z2
+			ty2 = img_h;
+			ty1 = ty2 - (z2 - z1);
+
+			if (where == 'W' && (ld->flags & MLF_LowerUnpegged))
+			{
+				ty1 = 0;
+				ty2 = ty1 + (z2 - z1);
+			}
+
+			if (where == 'L' && (ld->flags & MLF_LowerUnpegged))
+			{
+				// note "sky_upper" here, this matches original DOOM behavior
+				if (sky_upper)
+				{
+					ty2 = img_h - (back->ceilh - z2);
+					ty1 = ty2 - (z2 - z1);
+				}
+				else
+				{
+					// this makes an unpegged lower align with a normal 1S wall
+					ty2 = img_h - (front->ceilh - z2);
+					ty1 = ty2 - (z2 - z1);
+				}
+			}
+
+			if (where == 'U' && (! (ld->flags & MLF_UpperUnpegged)))
+			{
+				// when unpegged, ty1 is at bottom of texture
+				ty1 = 0;
+				ty2 = ty1 + (z2 - z1);
+			}
+
+			ty1 = (ty1 - sd->y_offset) / img_th;
+			ty2 = (ty2 - sd->y_offset) / img_th;
+		}
 
 		glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
@@ -386,7 +430,7 @@ public:
 
 		if (ld->OneSided())
 		{
-			DrawSide('W', ld, sd, sd->MidTex(), front, false,
+			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
 				x1, y1, front->floorh, x2, y2, front->ceilh);
 		}
 		else
@@ -397,11 +441,11 @@ public:
 			bool sky_upper = is_sky(front->CeilTex()) && is_sky(back->CeilTex());
 
 			if (back->floorh > front->floorh && !self_ref)
-				DrawSide('L', ld, sd, sd->LowerTex(), front, sky_upper,
+				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
 					x1, y1, front->floorh, x2, y2, back->floorh);
 
 			if (back->ceilh < front->ceilh && !self_ref)
-				DrawSide('U', ld, sd, sd->UpperTex(), front, sky_upper,
+				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
 					x1, y1, back->ceilh, x2, y2, front->ceilh);
 
 			/* TODO mid-masked textures
