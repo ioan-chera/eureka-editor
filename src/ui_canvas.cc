@@ -271,7 +271,7 @@ void UI_Canvas::PointerPos(bool in_event)
 	raw_y -= y_root();
 
 	edit.map_x = MAPX(raw_x);
-	edit.map_y = MAPY(h() - raw_y);
+	edit.map_y = MAPY(h() - 1 - raw_y);
 #endif
 }
 
