@@ -2305,6 +2305,11 @@ void UI_Canvas::RenderSector(int num)
 
 		img->bind_gl();
 	}
+	else
+	{
+		// color was set above, set texture to solid white
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
