@@ -298,10 +298,67 @@ public:
 			ty2 = (ty2 - sd->y_offset) / img_th;
 		}
 
-		if (where == 'M')
-			glEnable(GL_ALPHA_TEST);
+		glDisable(GL_ALPHA_TEST);
+
+		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+
+		glBegin(GL_QUADS);
+
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+
+		glEnd();
+	}
+
+	void DrawMidMasker(const LineDef *ld, const SideDef *sd,
+		const Sector *front, const Sector *back,
+		bool sky_upper, float ld_length,
+		float x1, float y1, float x2, float y2)
+	{
+		byte r, g, b;
+		bool fullbright;
+		Img_c *img;
+
+		img = FindTexture(sd->MidTex(), r, g, b, fullbright);
+		if (img == NULL)
+			return;
+
+		float img_w  = img->width();
+		float img_tw = RoundPOW2(img_w);
+
+		float img_h  = img->height();
+		float img_th = RoundPOW2(img_h);
+
+		// compute Z coords and texture coords
+		float z1 = MAX(front->floorh, back->floorh);
+		float z2 = MIN(front->ceilh,  back->ceilh);
+
+		if (z2 <= z1)
+			return;
+
+		float tx1 = 0.0;
+		float tx2 = tx1 + ld_length;
+
+		tx1 = (tx1 + sd->x_offset) / img_tw;
+		tx2 = (tx2 + sd->x_offset) / img_tw;
+
+		float ty1 = 0.0;
+		float ty2 = img_h / img_th;
+
+		if (ld->flags & MLF_LowerUnpegged)
+		{
+			z1 = z1 + sd->y_offset;
+			z2 = z1 + img_h;
+		}
 		else
-			glDisable(GL_ALPHA_TEST);
+		{
+			z2 = z2 + sd->y_offset;
+			z1 = z2 - img_h;
+		}
+
+		glEnable(GL_ALPHA_TEST);
 
 		glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
@@ -462,10 +519,9 @@ public:
 				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
 					ld_len, x1, y1, back->ceilh, x2, y2, front->ceilh);
 
-			/* TODO mid-masked textures
-			if (!is_null_tex(sd->MidTex() && r_view.texturing)
-				DrawMidMasker(ld, ...)
-			*/
+			if (!is_null_tex(sd->MidTex()) && r_view.texturing)
+				DrawMidMasker(ld, sd, front, back, sky_upper,
+					ld_len, x1, y1, x2, y2);
 		}
 	}
 
