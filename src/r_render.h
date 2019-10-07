@@ -121,6 +121,11 @@ public:
 	float AdjustDistFactor(float view_x, float view_y);
 	void SaveOffsets();
 	void RestoreOffsets();
+
+	int GrabTextureFromObject(const Obj3d_t& obj);
+	int GrabTextureFrom3DSel();
+	void StoreTextureToObject(const Obj3d_t& obj, int new_tex);
+	void StoreTextureTo3DSel(int new_tex);
 };
 
 

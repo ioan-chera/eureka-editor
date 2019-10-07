@@ -362,10 +362,6 @@ void Status_Clear()
 #define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
 
 
-// TODO REVIEW THIS
-extern int GrabTextureFromObject(const Obj3d_t& obj);
-
-
 UI_3DInfoBar::UI_3DInfoBar(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label)
 {
@@ -475,7 +471,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 		}
 		else if (r_view.hl.isSector())
 		{
-			int tex = GrabTextureFromObject(r_view.hl);
+			int tex = r_view.GrabTextureFromObject(r_view.hl);
 
 			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
 					 r_view.hl.num,
@@ -483,7 +479,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 		}
 		else
 		{
-			int tex = GrabTextureFromObject(r_view.hl);
+			int tex = r_view.GrabTextureFromObject(r_view.hl);
 
 			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
 					 r_view.hl.num,

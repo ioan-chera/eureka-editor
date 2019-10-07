@@ -336,6 +336,157 @@ void Render_View_t::RestoreOffsets()
 }
 
 
+int Render_View_t::GrabTextureFromObject(const Obj3d_t& obj)
+{
+	if (obj.type == OB3D_Floor)
+		return Sectors[obj.num]->floor_tex;
+
+	if (obj.type == OB3D_Ceil)
+		return Sectors[obj.num]->ceil_tex;
+
+	if (! obj.isLine())
+		return -1;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	if (LD->OneSided())
+	{
+		return LD->Right()->mid_tex;
+	}
+
+	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
+
+	if (! SD)
+		return -1;
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			return SD->lower_tex;
+
+		case OB3D_Upper:
+			return SD->upper_tex;
+
+		case OB3D_Rail:
+			return SD->mid_tex;
+
+		default:
+			return -1;
+	}
+}
+
+
+//
+// grab the texture or flat (as offset into string table) from the
+// current 3D selection.  returns -1 if selection is empty, -2 if
+// there multiple selected and some were different.
+//
+int Render_View_t::GrabTextureFrom3DSel()
+{
+	if (SelectEmpty())
+	{
+		return GrabTextureFromObject(hl);
+	}
+
+	int result = -1;
+
+	for (unsigned int k = 0 ; k < sel.size() ; k++)
+	{
+		const Obj3d_t& obj = sel[k];
+
+		if (! obj.valid())
+			continue;
+
+		int cur_tex = GrabTextureFromObject(obj);
+		if (cur_tex < 0)
+			continue;
+
+		// more than one distinct texture?
+		if (result >= 0 && result != cur_tex)
+			return -2;
+
+		result = cur_tex;
+	}
+
+	return result;
+}
+
+
+void Render_View_t::StoreTextureToObject(const Obj3d_t& obj, int new_tex)
+{
+	if (obj.type == OB3D_Floor)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
+		return;
+	}
+	else if (obj.type == OB3D_Ceil)
+	{
+		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
+		return;
+	}
+
+	if (! obj.isLine())
+		return;
+
+	const LineDef *LD = LineDefs[obj.num];
+
+	int sd = LD->WhatSideDef(obj.side);
+
+	if (sd < 0)
+		return;
+
+	if (LD->OneSided())
+	{
+		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+		return;
+	}
+
+	switch (obj.type)
+	{
+		case OB3D_Lower:
+			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+			break;
+
+		case OB3D_Upper:
+			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+			break;
+
+		case OB3D_Rail:
+			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+			break;
+
+		// shut the compiler up
+		default: break;
+	}
+}
+
+
+void Render_View_t::StoreTextureTo3DSel(int new_tex)
+{
+	BA_Begin();
+
+	if (SelectEmpty())
+	{
+		StoreTextureToObject(hl, new_tex);
+	}
+	else
+	{
+		for (unsigned int k = 0 ; k < sel.size() ; k++)
+		{
+			const Obj3d_t& obj = sel[k];
+
+			if (! obj.valid())
+				continue;
+
+			StoreTextureToObject(obj, new_tex);
+		}
+	}
+
+	BA_Message("pasted texture: %s", BA_GetString(new_tex));
+	BA_End();
+}
+
+
 Render_View_t r_view;
 
 
@@ -768,157 +919,6 @@ void Render3D_Navigate()
 }
 
 
-int GrabTextureFromObject(const Obj3d_t& obj)
-{
-	if (obj.type == OB3D_Floor)
-		return Sectors[obj.num]->floor_tex;
-
-	if (obj.type == OB3D_Ceil)
-		return Sectors[obj.num]->ceil_tex;
-
-	if (! obj.isLine())
-		return -1;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	if (LD->OneSided())
-	{
-		return LD->Right()->mid_tex;
-	}
-
-	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
-
-	if (! SD)
-		return -1;
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			return SD->lower_tex;
-
-		case OB3D_Upper:
-			return SD->upper_tex;
-
-		case OB3D_Rail:
-			return SD->mid_tex;
-
-		default:
-			return -1;
-	}
-}
-
-
-//
-// grab the texture or flat (as offset into string table) from the
-// current 3D selection.  returns -1 if selection is empty, -2 if
-// there multiple selected and some were different.
-//
-static int GrabTextureFrom3DSel()
-{
-	if (r_view.SelectEmpty())
-	{
-		return GrabTextureFromObject(r_view.hl);
-	}
-
-	int result = -1;
-
-	for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
-	{
-		const Obj3d_t& obj = r_view.sel[k];
-
-		if (! obj.valid())
-			continue;
-
-		int cur_tex = GrabTextureFromObject(obj);
-		if (cur_tex < 0)
-			continue;
-
-		// more than one distinct texture?
-		if (result >= 0 && result != cur_tex)
-			return -2;
-
-		result = cur_tex;
-	}
-
-	return result;
-}
-
-
-static void StoreTextureToObject(const Obj3d_t& obj, int new_tex)
-{
-	if (obj.type == OB3D_Floor)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
-		return;
-	}
-	else if (obj.type == OB3D_Ceil)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
-		return;
-	}
-
-	if (! obj.isLine())
-		return;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	int sd = LD->WhatSideDef(obj.side);
-
-	if (sd < 0)
-		return;
-
-	if (LD->OneSided())
-	{
-		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
-		return;
-	}
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
-			break;
-
-		case OB3D_Upper:
-			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
-			break;
-
-		case OB3D_Rail:
-			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
-			break;
-
-		// shut the compiler up
-		default: break;
-	}
-}
-
-
-static void StoreTextureTo3DSel(int new_tex)
-{
-	BA_Begin();
-
-	if (r_view.SelectEmpty())
-	{
-		StoreTextureToObject(r_view.hl, new_tex);
-	}
-	else
-	{
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
-		{
-			const Obj3d_t& obj = r_view.sel[k];
-
-			if (! obj.valid())
-				continue;
-
-			StoreTextureToObject(obj, new_tex);
-		}
-	}
-
-	BA_Message("pasted texture: %s", BA_GetString(new_tex));
-	BA_End();
-}
-
-
 static void Render3D_Cut()
 {
 	// this is equivalent to setting the default texture
@@ -935,7 +935,7 @@ static void Render3D_Cut()
 	else if (type == OB3D_Ceil)
 		name = default_ceil_tex;
 
-	StoreTextureTo3DSel(BA_InternaliseString(name));
+	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
 
 	Status_Set("Cut texture to default");
 }
@@ -943,7 +943,7 @@ static void Render3D_Cut()
 
 static void Render3D_Copy()
 {
-	int new_tex = GrabTextureFrom3DSel();
+	int new_tex = r_view.GrabTextureFrom3DSel();
 	if (new_tex < 0)
 	{
 		Beep("multiple textures present");
@@ -960,7 +960,7 @@ static void Render3D_Paste()
 {
 	int new_tex = r_view.GrabClipboard();
 
-	StoreTextureTo3DSel(new_tex);
+	r_view.StoreTextureTo3DSel(new_tex);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
 }
@@ -975,11 +975,11 @@ static void Render3D_Delete()
 
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		StoreTextureTo3DSel(BA_InternaliseString(game_info.sky_flat));
+		r_view.StoreTextureTo3DSel(BA_InternaliseString(game_info.sky_flat));
 		return;
 	}
 
-	StoreTextureTo3DSel(BA_InternaliseString("-"));
+	r_view.StoreTextureTo3DSel(BA_InternaliseString("-"));
 
 	Status_Set("Removed textures");
 }
@@ -1043,19 +1043,19 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 
 	if (kind == 'O' && r_view.sel_type == OB3D_Thing)
 	{
-		StoreTextureTo3DSel(number);
+		r_view.StoreTextureTo3DSel(number);
 		return true;
 	}
 	else if (kind == 'F' && r_view.sel_type <= OB3D_Floor)
 	{
 		int new_flat = BA_InternaliseString(name);
-		StoreTextureTo3DSel(new_flat);
+		r_view.StoreTextureTo3DSel(new_flat);
 		return true;
 	}
 	else if (kind == 'T' && r_view.sel_type >= OB3D_Lower)
 	{
 		int new_tex = BA_InternaliseString(name);
-		StoreTextureTo3DSel(new_tex);
+		r_view.StoreTextureTo3DSel(new_tex);
 		return true;
 	}
 
