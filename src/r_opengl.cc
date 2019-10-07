@@ -262,10 +262,184 @@ public:
 	void LightClippedTriangle(double ax, double ay, float atx, float aty,
 							  double bx, double by, float btx, float bty,
 							  double cx, double cy, float ctx, float cty,
-							  float z, float r, float g, float b, int light)
+							  int clip, float z,
+							  float r, float g, float b, int light)
 	{
-		// FIXME LightClippedTriangle
-		RawClippedTriangle(ax,ay,atx,aty, bx,by,btx,bty, cx,cy,ctx,cty, z,r,g,b,light);
+		for ( ; clip < LCLIP_NUM ; clip += 100) // FIXME
+		{
+			// coordinates of an infinite clipping line
+			float c_x = r_view.x + r_view.Cos * light_clip_dists[clip];
+			float c_y = r_view.y + r_view.Sin * light_clip_dists[clip];
+
+			// vector of clipping line (if camera is north, this is east)
+			float c_dx = r_view.Sin;
+			float c_dy = - r_view.Cos;
+
+			// check which side the triangle points are on
+			double p1 = (ay - c_y) * c_dx - (ax - c_x) * c_dy;
+			double p2 = (by - c_y) * c_dx - (bx - c_x) * c_dy;
+			double p3 = (cy - c_y) * c_dx - (cx - c_x) * c_dy;
+
+			int cat1 = (p1 < -0.1) ? -1 : (p1 > 0.1) ? +1 : 0;
+			int cat2 = (p2 < -0.1) ? -1 : (p2 > 0.1) ? +1 : 0;
+			int cat3 = (p3 < -0.1) ? -1 : (p3 > 0.1) ? +1 : 0;
+
+			// completely on far side?
+			if (cat1 >= 0 && cat2 >= 0 && cat3 >= 0)
+				break;
+
+			// completely on near side?
+			if (cat1 <= 0 && cat2 <= 0 && cat3 <= 0)
+				continue;
+
+			// handle cases where partition goes through a vertex AND
+			// cuts the opposite edge.
+			if (cat1 == 0 || cat2 == 0 || cat3 == 0)
+			{
+				// rotate triangle so that C is on the partition,
+				// and the edge AB is crossing the partition.
+				if (cat1 == 0)
+				{
+					float _x = cx;
+					float _y = cy;
+					float _tx = ctx;
+					float _ty = cty;
+
+					cx = ax; cy = ay; ctx = atx; cty = aty;
+					ax = bx; ay = by; atx = btx; aty = bty;
+					bx = _x; by = _y; btx = _tx; bty = _ty;
+
+					p1 = p2; p2 = p3; cat1 = cat2;
+				}
+				else if (cat2 == 0)
+				{
+					float _x = cx;
+					float _y = cy;
+					float _tx = ctx;
+					float _ty = cty;
+
+					cx = bx; cy = by; ctx = btx; cty = bty;
+					bx = ax; by = ay; btx = atx; bty = aty;
+					ax = _x; ay = _y; atx = _tx; aty = _ty;
+
+					p2 = p1; p1 = p3; cat1 = cat3;
+				}
+
+				// compute intersection point
+				double along = p1 / (p1 - p2);
+
+				double ix = ax + (bx - ax) * along;
+				double iy = ay + (by - ay) * along;
+				float itx = atx + (btx - atx) * along;
+				float ity = aty + (bty - aty) * along;
+
+				// draw the piece on FAR side of the clipping line,
+				// and keep going with the piece on the NEAR side.
+				if (cat1 > 0)
+				{
+					RawClippedTriangle(ix, iy, itx, ity,
+									   cx, cy, ctx, cty,
+									   ax, ay, aty, aty,
+									   z, r, g, b, light);
+
+					ax = ix; ay = iy; atx = itx; aty = ity;
+				}
+				else
+				{
+					RawClippedTriangle(ix, iy, itx, ity,
+									   cx, cy, ctx, cty,
+									   bx, by, bty, bty,
+									   z, r, g, b, light);
+
+					bx = ix; by = iy; btx = itx; bty = ity;
+				}
+
+				continue;
+			}
+
+			// AT HERE, the partition definitely cuts two edges.
+			// The cut produces a triangle piece and a quadrilateral
+			// piece.
+
+			int combo = ((cat3>0)?4:0) | ((cat2>0)?2:0) | ((cat1>0)?1:0);
+
+			// rotate triangle so that C is the tip of the triangle piece.
+			if (combo == 1 || combo == 6)
+			{
+				float _x = cx;
+				float _y = cy;
+				float _tx = ctx;
+				float _ty = cty;
+				double _p = p3;
+
+				cx = ax; cy = ay; ctx = atx; cty = aty; p3 = p1;
+				ax = bx; ay = by; atx = btx; aty = bty; p1 = p2;
+				bx = _x; by = _y; btx = _tx; bty = _ty; p2 = _p;
+			}
+			else if (combo == 2 || combo == 5)
+			{
+				float _x = cx;
+				float _y = cy;
+				float _tx = ctx;
+				float _ty = cty;
+				double _p = p3;
+
+				cx = bx; cy = by; ctx = btx; cty = bty; p3 = p2;
+				bx = ax; by = ay; btx = atx; bty = aty; p2 = p1;
+				ax = _x; ay = _y; atx = _tx; aty = _ty; p1 = _p;
+			}
+
+			// compute intersection points
+			double ac_along = p1 / (p1 - p3);
+			double bc_along = p2 / (p2 - p3);
+
+			double ac_x = ax + (cx - ax) * ac_along;
+			double ac_y = ay + (cy - ay) * ac_along;
+			double bc_x = bx + (cx - bx) * bc_along;
+			double bc_y = by + (cy - by) * bc_along;
+
+			float ac_tx = atx + (ctx - atx) * ac_along;
+			float ac_ty = aty + (cty - aty) * ac_along;
+			float bc_tx = btx + (ctx - btx) * bc_along;
+			float bc_ty = bty + (cty - bty) * bc_along;
+
+			// handle cases where triangle piece is on NEAR side.
+			if (combo == 3 || combo == 5 || combo == 6)
+			{
+				RawClippedTriangle(ax, ay, atx, aty,
+								   bx, by, btx, bty,
+								   ac_x, ac_y, ac_tx, ac_ty,
+								   z, r, g, b, light);
+
+				RawClippedTriangle(bx, by, btx, bty,
+								   bc_x, bc_y, bc_tx, bc_ty,
+								   ac_x, ac_y, ac_tx, ac_ty,
+								   z, r, g, b, light);
+
+				ax = ac_x; ay = ac_y; atx = ac_tx; aty = ac_ty;
+				bx = bc_x; by = bc_y; btx = bc_tx; bty = bc_ty;
+
+				continue;
+			}
+
+			// handle cases where triangle piece is on FAR side.
+			// these cases require recursion to deal with the
+			// quadrilateral on the near side.
+			{
+				RawClippedTriangle(cx, cy, ctx, cty,
+								   ac_x, ac_y, ac_tx, ac_ty,
+								   bc_x, bc_y, bc_tx, bc_ty,
+								   z, r, g, b, light);
+
+				// TODO
+			}
+		}
+
+		/* FIXME */ return;
+		RawClippedTriangle(ax, ay, atx, aty,
+						   bx, by, btx, bty,
+						   cx, cy, ctx, cty,
+						   z, r, g, b, light);
 	}
 
 	void RawClippedQuad(float x1, float y1, float z1,
@@ -343,17 +517,15 @@ public:
 				{
 					RawClippedQuad(ix, iy, z1, x2, y2, z2,
 								   itx, ty1, tx2, ty2, r, g, b, light);
-					x2 = ix;
-					y2 = iy;
-					tx2 = itx;
+
+					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
 					RawClippedQuad(x1, y1, z1, ix, iy, z2,
 								   tx1, ty1, itx, ty2, r, g, b, light);
-					x1 = ix;
-					y1 = iy;
-					tx1 = itx;
+
+					x1 = ix; y1 = iy; tx1 = itx;
 				}
 			}
 		}
@@ -397,7 +569,7 @@ public:
 				LightClippedTriangle(ax, ay, atx, aty,
 									 bx, by, btx, bty,
 									 cx, cy, ctx, cty,
-									 z, r, g, b, sec->light);
+									 /* FIXME */2, z, r, g, b, sec->light);
 
 				if (poly->count == 4)
 				{
@@ -409,7 +581,7 @@ public:
 					LightClippedTriangle(ax, ay, atx, aty,
 										 cx, cy, ctx, cty,
 										 dx, dy, dtx, dty,
-										 z, r, g, b, sec->light);
+										 /* FIXME */2, z, r, g, b, sec->light);
 				}
 			}
 			else
