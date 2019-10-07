@@ -46,9 +46,9 @@ extern bool render_missing_bright;
 extern bool render_unknown_bright;
 
 
-img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
+static img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
 {
-	int map = R_DoomLightingEquation(light >> 2, dist);
+	int map = R_DoomLightingEquation(light, dist);
 
 	if (pixel & IS_RGB_PIXEL)
 	{

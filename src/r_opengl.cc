@@ -57,6 +57,20 @@ static GLdouble flip_matrix[16] =
 };
 
 
+static float DoomLightToFloat(int light, float dist)
+{
+	int map = R_DoomLightingEquation(light, dist);
+
+	int level = (31 - map) * 8 + 7;
+
+	// need to gamma-correct the light level
+	if (usegamma > 0)
+		level = gammatable[usegamma][level];
+
+	return level / 255.0;
+}
+
+
 struct RendInfo
 {
 public:
@@ -565,7 +579,9 @@ public:
 		if (ty < 4)
 			return;
 
-		bool is_unknown = false;
+		bool fullbright = false;
+		if (info->flags & THINGDEF_LIT)
+			fullbright = true;
 
 		float scale = info->scale;
 
@@ -573,7 +589,7 @@ public:
 		if (! img)
 		{
 			img = IM_UnknownSprite();
-			is_unknown = true;
+			fullbright = true;
 		}
 
 		float scale_w = img->width() * scale;
@@ -602,18 +618,18 @@ public:
 
 		int sec_num = r_view.thing_sectors[th_index];
 
-		float h1, h2;
+		float z1, z2;
 
-		if (info && (info->flags & THINGDEF_CEIL))
+		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
-			h1 = h2 - scale_h;
+			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
+			z1 = z2 - scale_h;
 		}
 		else
 		{
-			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
-			h2 = h1 + scale_h;
+			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
+			z2 = z1 + scale_h;
 		}
 
 		// bind the sprite image (upload it to OpenGL if needed)
@@ -625,14 +641,24 @@ public:
 		tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
 		ty2 = (float)img->height() / (float)RoundPOW2(img->height());
 
-		glColor3f(1, 1, 1);
+		// lighting
+		float L = 1.0;
+
+		if (r_view.lighting && !fullbright)
+		{
+			int light = is_sector(sec_num) ? Sectors[sec_num]->light : 255;
+
+			L = DoomLightToFloat(light, ty /* dist */);
+		}
+
+		glColor3f(L, L, L);
 
 		glBegin(GL_QUADS);
 
-		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, h1);
-		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, h2);
-		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, h2);
-		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, h1);
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
 
 		glEnd();
 	}
@@ -737,7 +763,7 @@ public:
 
 		float h1, h2;
 
-		if (info && (info->flags & THINGDEF_CEIL))
+		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
 			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;

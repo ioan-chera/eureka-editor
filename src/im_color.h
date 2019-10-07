@@ -61,6 +61,8 @@ extern byte raw_colormap[32][256];
 extern byte rgb555_gamma [32];
 extern byte rgb555_medium[32];
 
+extern int gammatable[5][256];
+
 
 void W_UpdateGamma();
 
@@ -83,7 +85,9 @@ int HashedPalColor(const char *name, const int *cols);
 
 inline int R_DoomLightingEquation(int L, float dist)
 {
-	/* L in the range 0 to 63 */
+	/* L in the range 0 to 256 */
+	L >>= 2;
+
 	int min_L = CLAMP(0, 36 - L, 31);
 
 	int index = (59 - L) - int(1280 / MAX(1, dist));
