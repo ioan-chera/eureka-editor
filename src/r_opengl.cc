@@ -265,7 +265,7 @@ public:
 							  int clip, float z,
 							  float r, float g, float b, int light)
 	{
-		for ( ; clip < LCLIP_NUM ; clip += 100) // FIXME
+		for ( ; clip < LCLIP_NUM ; clip++)
 		{
 			// coordinates of an infinite clipping line
 			float c_x = r_view.x + r_view.Cos * light_clip_dists[clip];
@@ -431,11 +431,16 @@ public:
 								   bc_x, bc_y, bc_tx, bc_ty,
 								   z, r, g, b, light);
 
-				// TODO
+				// recurse!
+				LightClippedTriangle(ax, ay, atx, aty,
+									 ac_x, ac_y, ac_tx, ac_ty,
+									 bc_x, bc_y, bc_tx, bc_ty,
+									 (clip + 1), z, r, g, b, light);
+
+				cx = bc_x; cy = bc_y; ctx = bc_tx; cty = bc_ty;
 			}
 		}
 
-		/* FIXME */ return;
 		RawClippedTriangle(ax, ay, atx, aty,
 						   bx, by, btx, bty,
 						   cx, cy, ctx, cty,
@@ -569,7 +574,7 @@ public:
 				LightClippedTriangle(ax, ay, atx, aty,
 									 bx, by, btx, bty,
 									 cx, cy, ctx, cty,
-									 /* FIXME */2, z, r, g, b, sec->light);
+									 0, z, r, g, b, sec->light);
 
 				if (poly->count == 4)
 				{
@@ -581,7 +586,7 @@ public:
 					LightClippedTriangle(ax, ay, atx, aty,
 										 cx, cy, ctx, cty,
 										 dx, dy, dtx, dty,
-										 /* FIXME */2, z, r, g, b, sec->light);
+										 0, z, r, g, b, sec->light);
 				}
 			}
 			else
