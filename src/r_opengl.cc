@@ -149,6 +149,7 @@ public:
 
 		if (is_sky(fname))
 		{
+			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			IM_DecodePixel(game_info.sky_color, r, g, b);
@@ -214,10 +215,63 @@ public:
 		return img;
 	}
 
-	void DrawClippedQuad(double x1, double y1, float z1,
-						 double x2, double y2, float z2,
-						 float tx1, float ty1, float tx2, float ty2,
-						 float r, float g, float b, int light)
+	void RawClippedTriangle(float ax, float ay, float atx, float aty,
+							float bx, float by, float btx, float bty,
+							float cx, float cy, float ctx, float cty,
+							float z, float r, float g, float b, int light)
+	{
+		// compute distances from camera plane
+		float v_dx = r_view.Sin;
+		float v_dy = - r_view.Cos;
+
+		float a_dist = (ay - r_view.y) * v_dx - (ax - r_view.x) * v_dy;
+		float b_dist = (by - r_view.y) * v_dx - (bx - r_view.x) * v_dy;
+		float c_dist = (cy - r_view.y) * v_dx - (cx - r_view.x) * v_dy;
+
+		// clamp distances to the light clip extremes
+		a_dist = CLAMP(0, a_dist, light_clip_dists[0]);
+		b_dist = CLAMP(0, b_dist, light_clip_dists[0]);
+		c_dist = CLAMP(0, c_dist, light_clip_dists[0]);
+
+		float LA = DoomLightToFloat(light, a_dist);
+		float LB = DoomLightToFloat(light, b_dist);
+		float LC = DoomLightToFloat(light, c_dist);
+
+		// TEST CRUD
+		// LA = ((rand() & 255) | 64) / 255.0;
+		// LB = ((rand() & 255) | 64) / 255.0;
+		// LC = ((rand() & 255) | 64) / 255.0;
+
+		glBegin(GL_POLYGON);
+
+		glColor3f(LA * r, LA * g, LA * b);
+		glTexCoord2f(atx, aty);
+		glVertex3f(ax, ay, z);
+
+		glColor3f(LB * r, LB * g, LB * b);
+		glTexCoord2f(btx, bty);
+		glVertex3f(bx, by, z);
+
+		glColor3f(LC * r, LC * g, LC * b);
+		glTexCoord2f(ctx, cty);
+		glVertex3f(cx, cy, z);
+
+		glEnd();
+	}
+
+	void LightClippedTriangle(double ax, double ay, float atx, float aty,
+							  double bx, double by, float btx, float bty,
+							  double cx, double cy, float ctx, float cty,
+							  float z, float r, float g, float b, int light)
+	{
+		// FIXME LightClippedTriangle
+		RawClippedTriangle(ax,ay,atx,aty, bx,by,btx,bty, cx,cy,ctx,cty, z,r,g,b,light);
+	}
+
+	void RawClippedQuad(float x1, float y1, float z1,
+						float x2, float y2, float z2,
+						float tx1, float ty1, float tx2, float ty2,
+						float r, float g, float b, int light)
 	{
 		// compute distances from camera plane
 		float v_dx = r_view.Sin;
@@ -287,16 +341,16 @@ public:
 				// and keep going with the piece on the NEAR side.
 				if (cat2 > 0)
 				{
-					DrawClippedQuad(ix, iy, z1, x2, y2, z2,
-									itx, ty1, tx2, ty2, r, g, b, light);
+					RawClippedQuad(ix, iy, z1, x2, y2, z2,
+								   itx, ty1, tx2, ty2, r, g, b, light);
 					x2 = ix;
 					y2 = iy;
 					tx2 = itx;
 				}
 				else
 				{
-					DrawClippedQuad(x1, y1, z1, ix, iy, z2,
-									tx1, ty1, itx, ty2, r, g, b, light);
+					RawClippedQuad(x1, y1, z1, ix, iy, z2,
+								   tx1, ty1, itx, ty2, r, g, b, light);
 					x1 = ix;
 					y1 = iy;
 					tx1 = itx;
@@ -304,43 +358,83 @@ public:
 			}
 		}
 
-		DrawClippedQuad(x1, y1, z1, x2, y2, z2,
-						tx1, ty1, tx2, ty2, r, g, b, light);
+		RawClippedQuad(x1, y1, z1, x2, y2, z2,
+					   tx1, ty1, tx2, ty2, r, g, b, light);
 	}
 
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
 		float z, const char *fname)
 	{
-		byte r, g, b;
+		byte r0, g0, b0;
 		bool fullbright;
-		Img_c *img = FindFlat(fname, r, g, b, fullbright);
+		Img_c *img = FindFlat(fname, r0, g0, b0, fullbright);
 
-		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+		float r = r0 / 255.0;
+		float g = g0 / 255.0;
+		float b = b0 / 255.0;
 
 		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 		{
 			sector_polygon_t *poly = &subdiv->polygons[i];
 
-			// draw polygon
-			glBegin(GL_POLYGON);
-
-			for (int p = 0 ; p < poly->count ; p++)
+			if (r_view.lighting && !fullbright)
 			{
-				float px = poly->mx[p];
-				float py = poly->my[p];
+				float ax = poly->mx[0];
+				float ay = poly->my[0];
+				float atx = ax / 64.0;  // see note below
+				float aty = ay / 64.0;
 
-				if (img)
+				float bx = poly->mx[1];
+				float by = poly->my[1];
+				float btx = bx / 64.0;  // see note below
+				float bty = by / 64.0;
+
+				float cx = poly->mx[2];
+				float cy = poly->my[2];
+				float ctx = cx / 64.0;
+				float cty = cy / 64.0;
+
+				LightClippedTriangle(ax, ay, atx, aty,
+									 bx, by, btx, bty,
+									 cx, cy, ctx, cty,
+									 z, r, g, b, sec->light);
+
+				if (poly->count == 4)
 				{
-					// this logic follows ZDoom, which scales large flats to
-					// occupy a 64x64 unit area.  I presume wall textures are
-					// handled similarily....
-					glTexCoord2f(px / 64.0, py / 64.0);
+					float dx = poly->mx[3];
+					float dy = poly->my[3];
+					float dtx = dx / 64.0;
+					float dty = dy / 64.0;
+
+					LightClippedTriangle(ax, ay, atx, aty,
+										 cx, cy, ctx, cty,
+										 dx, dy, dtx, dty,
+										 z, r, g, b, sec->light);
+				}
+			}
+			else
+			{
+				glColor3f(r, g, b);
+				glBegin(GL_POLYGON);
+
+				for (int p = 0 ; p < poly->count ; p++)
+				{
+					float px = poly->mx[p];
+					float py = poly->my[p];
+
+					if (img)
+					{
+						// this logic follows ZDoom, which scales large flats to
+						// occupy a 64x64 unit area.  I presume wall textures
+						// used on floors or ceilings is the same....
+						glTexCoord2f(px / 64.0, py / 64.0);
+					}
+
+					glVertex3f(px, py, z);
 				}
 
-				glVertex3f(px, py, z);
+				glEnd();
 			}
-
-			glEnd();
 		}
 	}
 
