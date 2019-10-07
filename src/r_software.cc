@@ -763,6 +763,7 @@ public:
 
 		dw->wall_light = dw->sec->light;
 
+		// add "fake constrast" for axis-aligned walls
 		if (ld->Start()->x == ld->End()->x)
 			dw->wall_light += 16;
 		else if (ld->Start()->y == ld->End()->y)

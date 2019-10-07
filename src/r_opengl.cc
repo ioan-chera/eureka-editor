@@ -428,9 +428,16 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
+			int light = sd->SecRef()->light;
+
+			// add "fake constrast" for axis-aligned walls
+			if (ld->Start()->x == ld->End()->x)
+				light += 16;
+			else if (ld->Start()->y == ld->End()->y)
+				light -= 16;
+
 			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
-							 r / 255.0, g / 255.0, b / 255.0,
-							 sd->SecRef()->light);
+							 r / 255.0, g / 255.0, b / 255.0, light);
 		}
 		else
 		{
