@@ -57,6 +57,25 @@ static GLdouble flip_matrix[16] =
 };
 
 
+// The emulation of DOOM lighting here targets a very basic
+// version of OpenGL: 1.2.  It works by clipping wall quads
+// and sector triangles against a small set of infinite lines
+// at specific distances from the camera.  Once clipped, we
+// rely on OpenGL to interpolate the light over the primitive.
+//
+// Vertices beyond the furthest clip line get a light level
+// based on that line's distance, and vertices in front of
+// the nearest clip line use that line's distance.  All other
+// vertices use the actual distance from the camera plane.
+
+#define LCLIP_NUM  5
+
+static const float light_clip_dists[LCLIP_NUM] =
+{
+	1152, 384, 192, 96, 48
+};
+
+
 static float DoomLightToFloat(int light, float dist)
 {
 	int map = R_DoomLightingEquation(light, dist);
@@ -195,6 +214,100 @@ public:
 		return img;
 	}
 
+	void DrawClippedQuad(double x1, double y1, float z1,
+						 double x2, double y2, float z2,
+						 float tx1, float ty1, float tx2, float ty2,
+						 float r, float g, float b, int light)
+	{
+		// compute distances from camera plane
+		float v_dx = r_view.Sin;
+		float v_dy = - r_view.Cos;
+
+		float dist1 = (y1 - r_view.y) * v_dx - (x1 - r_view.x) * v_dy;
+		float dist2 = (y2 - r_view.y) * v_dx - (x2 - r_view.x) * v_dy;
+
+		// clamp distances to the light clip extremes
+		dist1 = CLAMP(0, dist1, light_clip_dists[0]);
+		dist2 = CLAMP(0, dist2, light_clip_dists[0]);
+
+		float L1 = DoomLightToFloat(light, dist1);
+		float L2 = DoomLightToFloat(light, dist2);
+
+		glBegin(GL_QUADS);
+
+		glColor3f(L1 * r, L1 * g, L1 * b);
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+
+		glColor3f(L2 * r, L2 * g, L2 * b);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+
+		glEnd();
+	}
+
+	void LightClippedQuad(double x1, double y1, float z1,
+						  double x2, double y2, float z2,
+						  float tx1, float ty1, float tx2, float ty2,
+						  float r, float g, float b, int light)
+	{
+		for (int clip = 0 ; clip < LCLIP_NUM ; clip++)
+		{
+			// coordinates of an infinite clipping line
+			float c_x = r_view.x + r_view.Cos * light_clip_dists[clip];
+			float c_y = r_view.y + r_view.Sin * light_clip_dists[clip];
+
+			// vector of clipping line (if camera is north, this is east)
+			float c_dx = r_view.Sin;
+			float c_dy = - r_view.Cos;
+
+			// check which side the start/end point is on
+			double p1 = (y1 - c_y) * c_dx - (x1 - c_x) * c_dy;
+			double p2 = (y2 - c_y) * c_dx - (x2 - c_x) * c_dy;
+
+			int cat1 = (p1 < -0.1) ? -1 : (p1 > 0.1) ? +1 : 0;
+			int cat2 = (p2 < -0.1) ? -1 : (p2 > 0.1) ? +1 : 0;
+
+			// completely on far side?
+			if (cat1 >= 0 && cat2 >= 0)
+				break;
+
+			// does it cross the partition?
+			if ((cat1 < 0 && cat2 > 0) || (cat1 > 0 && cat2 < 0))
+			{
+				// compute intersection point
+				double along = p1 / (p1 - p2);
+
+				double ix = x1 + (x2 - x1) * along;
+				double iy = y1 + (y2 - y1) * along;
+
+				float itx = tx1 + (tx2 - tx1) * along;
+
+				// draw the piece on FAR side of the clipping line,
+				// and keep going with the piece on the NEAR side.
+				if (cat2 > 0)
+				{
+					DrawClippedQuad(ix, iy, z1, x2, y2, z2,
+									itx, ty1, tx2, ty2, r, g, b, light);
+					x2 = ix;
+					y2 = iy;
+					tx2 = itx;
+				}
+				else
+				{
+					DrawClippedQuad(x1, y1, z1, ix, iy, z2,
+									tx1, ty1, itx, ty2, r, g, b, light);
+					x1 = ix;
+					y1 = iy;
+					tx1 = itx;
+				}
+			}
+		}
+
+		DrawClippedQuad(x1, y1, z1, x2, y2, z2,
+						tx1, ty1, tx2, ty2, r, g, b, light);
+	}
+
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
 		float z, const char *fname)
 	{
@@ -241,12 +354,11 @@ public:
 		float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		byte r, g, b;
-		bool fullbright;
-		Img_c *img;
+		bool fullbright = true;
+		Img_c *img = NULL;
 
 		if (sky_upper && where == 'U')
 		{
-			img = NULL;
 			glBindTexture(GL_TEXTURE_2D, 0);
 			IM_DecodePixel(game_info.sky_color, r, g, b);
 		}
@@ -314,16 +426,25 @@ public:
 
 		glDisable(GL_ALPHA_TEST);
 
-		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+		if (r_view.lighting && !fullbright)
+		{
+			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
+							 r / 255.0, g / 255.0, b / 255.0,
+							 sd->SecRef()->light);
+		}
+		else
+		{
+			glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
-		glBegin(GL_QUADS);
+			glBegin(GL_QUADS);
 
-		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
-		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
-		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+			glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+			glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+			glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+			glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
 
-		glEnd();
+			glEnd();
+		}
 	}
 
 	void DrawMidMasker(const LineDef *ld, const SideDef *sd,
