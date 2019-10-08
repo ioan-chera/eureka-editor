@@ -1605,7 +1605,7 @@ void R3D_Align()
 	bool do_X = Exec_HasFlag("/x");
 	bool do_Y = Exec_HasFlag("/y");
 
-	// TODO : this is for backwards compatibility, remove it later
+	// this is for backwards compatibility
 	{
 		const char *param = EXEC_Param[0];
 

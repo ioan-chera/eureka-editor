@@ -249,8 +249,6 @@ public:
 
 			if (A_other >= 0)
 			{
-				// TODO : optimize this (if possible)
-
 				int ax = Vertices[A_other]->x;
 				int ay = Vertices[A_other]->y;
 
