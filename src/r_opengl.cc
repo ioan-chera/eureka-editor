@@ -58,21 +58,19 @@ static GLdouble flip_matrix[16] =
 
 
 // The emulation of DOOM lighting here targets a very basic
-// version of OpenGL: 1.2.  It works by clipping wall quads
+// version of OpenGL: 1.2 or so.  It works by clipping walls
 // and sector triangles against a small set of infinite lines
-// at specific distances from the camera.  Once clipped, we
-// rely on OpenGL to interpolate the light over the primitive.
-//
-// Vertices beyond the furthest clip line get a light level
-// based on that line's distance, and vertices in front of
-// the nearest clip line use that line's distance.  All other
-// vertices use the actual distance from the camera plane.
+// at specific distances from the camera.  Once clipped, the
+// light level of a primitive is constant, determined from
+// the pair of clipping lines it ends up in.
 
-#define LCLIP_NUM  5
+#define LCLIP_NUM  14
 
 static const float light_clip_dists[LCLIP_NUM] =
 {
-	1152, 384, 192, 96, 48
+	1280, 640, 428, 320, 256,
+	216, 176, 144, 120, 104,
+	88, 72, 60, 40
 };
 
 
@@ -160,7 +158,14 @@ public:
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			int col = HashedPalColor(fname, game_info.floor_colors);
+			int col;
+
+			// when lighting and no texturing, use a single color
+			if (r_view.lighting)
+				col = game_info.floor_colors[1];
+			else
+				col = HashedPalColor(fname, game_info.floor_colors);
+
 			IM_DecodePixel(col, r, g, b);
 			return NULL;
 		}
@@ -186,7 +191,14 @@ public:
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			int col = HashedPalColor(tname, game_info.wall_colors);
+			int col;
+
+			// when lighting and no texturing, use a single color
+			if (r_view.lighting)
+				col = game_info.wall_colors[1];
+			else
+				col = HashedPalColor(tname, game_info.wall_colors);
+
 			IM_DecodePixel(col, r, g, b);
 			return NULL;
 		}
@@ -218,43 +230,15 @@ public:
 	void RawClippedTriangle(float ax, float ay, float atx, float aty,
 							float bx, float by, float btx, float bty,
 							float cx, float cy, float ctx, float cty,
-							float z, float r, float g, float b, int light)
+							float z, float r, float g, float b, float level)
 	{
-		// compute distances from camera plane
-		float v_dx = r_view.Sin;
-		float v_dy = - r_view.Cos;
-
-		float a_dist = (ay - r_view.y) * v_dx - (ax - r_view.x) * v_dy;
-		float b_dist = (by - r_view.y) * v_dx - (bx - r_view.x) * v_dy;
-		float c_dist = (cy - r_view.y) * v_dx - (cx - r_view.x) * v_dy;
-
-		// clamp distances to the light clip extremes
-		a_dist = CLAMP(0, a_dist, light_clip_dists[0]);
-		b_dist = CLAMP(0, b_dist, light_clip_dists[0]);
-		c_dist = CLAMP(0, c_dist, light_clip_dists[0]);
-
-		float LA = DoomLightToFloat(light, a_dist);
-		float LB = DoomLightToFloat(light, b_dist);
-		float LC = DoomLightToFloat(light, c_dist);
-
-		// TEST CRUD
-		// LA = ((rand() & 255) | 64) / 255.0;
-		// LB = ((rand() & 255) | 64) / 255.0;
-		// LC = ((rand() & 255) | 64) / 255.0;
+		glColor3f(level * r, level * g, level * b);
 
 		glBegin(GL_POLYGON);
 
-		glColor3f(LA * r, LA * g, LA * b);
-		glTexCoord2f(atx, aty);
-		glVertex3f(ax, ay, z);
-
-		glColor3f(LB * r, LB * g, LB * b);
-		glTexCoord2f(btx, bty);
-		glVertex3f(bx, by, z);
-
-		glColor3f(LC * r, LC * g, LC * b);
-		glTexCoord2f(ctx, cty);
-		glVertex3f(cx, cy, z);
+		glTexCoord2f(atx, aty); glVertex3f(ax, ay, z);
+		glTexCoord2f(btx, bty); glVertex3f(bx, by, z);
+		glTexCoord2f(ctx, cty); glVertex3f(cx, cy, z);
 
 		glEnd();
 	}
@@ -265,11 +249,17 @@ public:
 							  int clip, float z,
 							  float r, float g, float b, int light)
 	{
+		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
+
 		for ( ; clip < LCLIP_NUM ; clip++)
 		{
+			float cdist = light_clip_dists[clip];
+
+			level = DoomLightToFloat(light, cdist + 2.0);
+
 			// coordinates of an infinite clipping line
-			float c_x = r_view.x + r_view.Cos * light_clip_dists[clip];
-			float c_y = r_view.y + r_view.Sin * light_clip_dists[clip];
+			float c_x = r_view.x + r_view.Cos * cdist;
+			float c_y = r_view.y + r_view.Sin * cdist;
 
 			// vector of clipping line (if camera is north, this is east)
 			float c_dx = r_view.Sin;
@@ -340,7 +330,7 @@ public:
 					RawClippedTriangle(ix, iy, itx, ity,
 									   cx, cy, ctx, cty,
 									   ax, ay, aty, aty,
-									   z, r, g, b, light);
+									   z, r, g, b, level);
 
 					ax = ix; ay = iy; atx = itx; aty = ity;
 				}
@@ -349,7 +339,7 @@ public:
 					RawClippedTriangle(ix, iy, itx, ity,
 									   cx, cy, ctx, cty,
 									   bx, by, bty, bty,
-									   z, r, g, b, light);
+									   z, r, g, b, level);
 
 					bx = ix; by = iy; btx = itx; bty = ity;
 				}
@@ -409,12 +399,12 @@ public:
 				RawClippedTriangle(ax, ay, atx, aty,
 								   bx, by, btx, bty,
 								   ac_x, ac_y, ac_tx, ac_ty,
-								   z, r, g, b, light);
+								   z, r, g, b, level);
 
 				RawClippedTriangle(bx, by, btx, bty,
 								   bc_x, bc_y, bc_tx, bc_ty,
 								   ac_x, ac_y, ac_tx, ac_ty,
-								   z, r, g, b, light);
+								   z, r, g, b, level);
 
 				ax = ac_x; ay = ac_y; atx = ac_tx; aty = ac_ty;
 				bx = bc_x; by = bc_y; btx = bc_tx; bty = bc_ty;
@@ -429,7 +419,7 @@ public:
 				RawClippedTriangle(cx, cy, ctx, cty,
 								   ac_x, ac_y, ac_tx, ac_ty,
 								   bc_x, bc_y, bc_tx, bc_ty,
-								   z, r, g, b, light);
+								   z, r, g, b, level);
 
 				// recurse!
 				LightClippedTriangle(ax, ay, atx, aty,
@@ -444,35 +434,20 @@ public:
 		RawClippedTriangle(ax, ay, atx, aty,
 						   bx, by, btx, bty,
 						   cx, cy, ctx, cty,
-						   z, r, g, b, light);
+						   z, r, g, b, level);
 	}
 
 	void RawClippedQuad(float x1, float y1, float z1,
 						float x2, float y2, float z2,
 						float tx1, float ty1, float tx2, float ty2,
-						float r, float g, float b, int light)
+						float r, float g, float b, float level)
 	{
-		// compute distances from camera plane
-		float v_dx = r_view.Sin;
-		float v_dy = - r_view.Cos;
-
-		float dist1 = (y1 - r_view.y) * v_dx - (x1 - r_view.x) * v_dy;
-		float dist2 = (y2 - r_view.y) * v_dx - (x2 - r_view.x) * v_dy;
-
-		// clamp distances to the light clip extremes
-		dist1 = CLAMP(0, dist1, light_clip_dists[0]);
-		dist2 = CLAMP(0, dist2, light_clip_dists[0]);
-
-		float L1 = DoomLightToFloat(light, dist1);
-		float L2 = DoomLightToFloat(light, dist2);
+		glColor3f(level * r, level * g, level * b);
 
 		glBegin(GL_QUADS);
 
-		glColor3f(L1 * r, L1 * g, L1 * b);
 		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
 		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-
-		glColor3f(L2 * r, L2 * g, L2 * b);
 		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
 		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
 
@@ -484,11 +459,17 @@ public:
 						  float tx1, float ty1, float tx2, float ty2,
 						  float r, float g, float b, int light)
 	{
+		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
+
 		for (int clip = 0 ; clip < LCLIP_NUM ; clip++)
 		{
+			float cdist = light_clip_dists[clip];
+
+			level = DoomLightToFloat(light, cdist + 2.0);
+
 			// coordinates of an infinite clipping line
-			float c_x = r_view.x + r_view.Cos * light_clip_dists[clip];
-			float c_y = r_view.y + r_view.Sin * light_clip_dists[clip];
+			float c_x = r_view.x + r_view.Cos * cdist;
+			float c_y = r_view.y + r_view.Sin * cdist;
 
 			// vector of clipping line (if camera is north, this is east)
 			float c_dx = r_view.Sin;
@@ -521,14 +502,14 @@ public:
 				if (cat2 > 0)
 				{
 					RawClippedQuad(ix, iy, z1, x2, y2, z2,
-								   itx, ty1, tx2, ty2, r, g, b, light);
+								   itx, ty1, tx2, ty2, r, g, b, level);
 
 					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
 					RawClippedQuad(x1, y1, z1, ix, iy, z2,
-								   tx1, ty1, itx, ty2, r, g, b, light);
+								   tx1, ty1, itx, ty2, r, g, b, level);
 
 					x1 = ix; y1 = iy; tx1 = itx;
 				}
@@ -536,7 +517,7 @@ public:
 		}
 
 		RawClippedQuad(x1, y1, z1, x2, y2, z2,
-					   tx1, ty1, tx2, ty2, r, g, b, light);
+					   tx1, ty1, tx2, ty2, r, g, b, level);
 	}
 
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,

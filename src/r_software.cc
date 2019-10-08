@@ -130,7 +130,11 @@ public:
 			return;
 		}
 
-		col = HashedPalColor(fname, game_info.floor_colors);
+		// when lighting and no texturing, use a single color
+		if (r_view.lighting)
+			col = game_info.floor_colors[1];
+		else
+			col = HashedPalColor(fname, game_info.floor_colors);
 	}
 
 	void FindTex(const char * tname, LineDef *ld)
@@ -157,7 +161,11 @@ public:
 			return;
 		}
 
-		col = HashedPalColor(tname, game_info.wall_colors);
+		// when lighting and no texturing, use a single color
+		if (r_view.lighting)
+			col = game_info.wall_colors[1];
+		else
+			col = HashedPalColor(tname, game_info.wall_colors);
 	}
 };
 
@@ -1209,7 +1217,7 @@ public:
 			float dist = YToDist(y1, surf.tex_h);
 
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, game_info.floor_colors[1]);
+				*dest = DoomLightRemap(light, dist, surf.col);
 			else
 				*dest = surf.col;
 		}
@@ -1227,7 +1235,7 @@ public:
 		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
 		{
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, game_info.wall_colors[1]);
+				*dest = DoomLightRemap(light, dist, surf.col);
 			else
 				*dest = surf.col;
 		}
