@@ -1297,11 +1297,11 @@ public:
 		// this matches behavior of S/W renderer.
 		// [ currently it is important since we use the S/W path
 		//   for querying what the mouse is pointing at ]
-		float near = x_slope;
-		float far  = 32767.0;
+		float z_near = x_slope;
+		float z_far  = 32767.0;
 
 		glLoadIdentity();
-		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, near, far);
+		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, z_near, z_far);
 	}
 
 	void Finish()
