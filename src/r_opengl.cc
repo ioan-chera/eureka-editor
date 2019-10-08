@@ -329,7 +329,7 @@ public:
 				{
 					RawClippedTriangle(ix, iy, itx, ity,
 									   cx, cy, ctx, cty,
-									   ax, ay, aty, aty,
+									   ax, ay, atx, aty,
 									   z, r, g, b, level);
 
 					ax = ix; ay = iy; atx = itx; aty = ity;
@@ -338,7 +338,7 @@ public:
 				{
 					RawClippedTriangle(ix, iy, itx, ity,
 									   cx, cy, ctx, cty,
-									   bx, by, bty, bty,
+									   bx, by, btx, bty,
 									   z, r, g, b, level);
 
 					bx = ix; by = iy; btx = itx; bty = ity;
