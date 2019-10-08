@@ -29,6 +29,13 @@
 #include "im_img.h"
 #include "m_game.h"
 
+#ifdef WIN32
+#ifndef NO_OPENGL
+// need this for GL_UNSIGNED_INT_8_8_8_8_REV
+#include "GL/glext.h"
+#endif
+#endif
+
 
 static int missing_tex_color;
 static int unknown_tex_color;
