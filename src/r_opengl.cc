@@ -846,7 +846,7 @@ public:
 
 		// convert angles to on-screen X positions
 		int sx1 = AngleToX(angle1);
-		int sx2 = AngleToX(angle2) - 1;
+		int sx2 = AngleToX(angle2);
 
 		if (sx1 > sx2)
 			return;
