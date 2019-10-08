@@ -543,11 +543,12 @@ public:
 			fl_line_style(0);
 	}
 
-	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, bool is_selected)
+	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, int sel_mode)
 	{
 		AddHighlightLine(sx1, sy1, sx2, sy2,
-				is_selected ? 2 : 0,
-				is_selected ? FL_RED : HI_COL);
+				(sel_mode & 1) ? 2 : 0,
+				(sel_mode == 3) ? HI_AND_SEL_COL :
+				(sel_mode == 2) ? HI_COL : SEL_COL);
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -901,7 +902,7 @@ public:
 	}
 
 	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw,
-							bool is_selected)
+							int sel_mode)
 	{
 		int h1, h2;
 
@@ -942,13 +943,13 @@ public:
 			return;
 
 		// keep the lines thin, makes aligning textures easier
-		AddHighlightLine(x1, ly1, x1, ly2, is_selected);
-		AddHighlightLine(x2, ry1, x2, ry2, is_selected);
-		AddHighlightLine(x1, ly1, x2, ry1, is_selected);
-		AddHighlightLine(x1, ly2, x2, ry2, is_selected);
+		AddHighlightLine(x1, ly1, x1, ly2, sel_mode);
+		AddHighlightLine(x2, ry1, x2, ry2, sel_mode);
+		AddHighlightLine(x1, ly1, x2, ry1, sel_mode);
+		AddHighlightLine(x1, ly2, x2, ry2, sel_mode);
 	}
 
-	void Highlight_Line(obj3d_type_e part, int ld, int side, bool is_selected)
+	void Highlight_Line(obj3d_type_e part, int ld, int side, int sel_mode)
 	{
 		const LineDef *L = LineDefs[ld];
 
@@ -959,11 +960,11 @@ public:
 			const DrawWall *dw = (*S);
 
 			if (dw->ld == L && dw->side == side)
-				Highlight_WallPart(part, dw, is_selected);
+				Highlight_WallPart(part, dw, sel_mode);
 		}
 	}
 
-	void Highlight_Sector(obj3d_type_e part, int sec_num, bool is_selected)
+	void Highlight_Sector(obj3d_type_e part, int sec_num, int sel_mode)
 	{
 		int sec_h;
 
@@ -998,12 +999,12 @@ public:
 					sy1 >  5000 || sy2 >  5000)
 					continue;
 
-				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, is_selected);
+				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, sel_mode);
 			}
 		}
 	}
 
-	void Highlight_Thing(int th, bool is_selected)
+	void Highlight_Thing(int th, int sel_mode)
 	{
 		DrawWall::vec_t::iterator S;
 
@@ -1023,27 +1024,27 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			AddHighlightLine(x1, y1, x1, y2, is_selected);
-			AddHighlightLine(x2, y1, x2, y2, is_selected);
-			AddHighlightLine(x1, y1, x2, y1, is_selected);
-			AddHighlightLine(x1, y2, x2, y2, is_selected);
+			AddHighlightLine(x1, y1, x1, y2, sel_mode);
+			AddHighlightLine(x2, y1, x2, y2, sel_mode);
+			AddHighlightLine(x1, y1, x2, y1, sel_mode);
+			AddHighlightLine(x1, y2, x2, y2, sel_mode);
 			break;
 		}
 	}
 
-	inline void Highlight_Object(Obj3d_t& obj, bool is_selected)
+	inline void Highlight_Object(Obj3d_t& obj, int sel_mode)
 	{
 		if (obj.isThing())
 		{
-			Highlight_Thing(obj.num, is_selected);
+			Highlight_Thing(obj.num, sel_mode);
 		}
 		else if (obj.isSector())
 		{
-			Highlight_Sector(obj.type, obj.num, is_selected);
+			Highlight_Sector(obj.type, obj.num, sel_mode);
 		}
 		else if (obj.isLine())
 		{
-			Highlight_Line(obj.type, obj.num, obj.side, is_selected);
+			Highlight_Line(obj.type, obj.num, obj.side, sel_mode);
 		}
 	}
 
@@ -1061,16 +1062,21 @@ public:
 			if (! r_view.sel[k].valid())
 				continue;
 
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
-				saw_hl = true;
+			int sel_mode = 1;
 
-			Highlight_Object(r_view.sel[k], true);
+			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			{
+				sel_mode |= 2;
+				saw_hl = true;
+			}
+
+			Highlight_Object(r_view.sel[k], sel_mode);
 		}
 
 		/* do the highlight */
 
 		if (! saw_hl)
-			Highlight_Object(r_view.hl, false);
+			Highlight_Object(r_view.hl, 2);
 	}
 
 	void ClipSolids()

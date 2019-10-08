@@ -381,11 +381,7 @@ int UI_3DInfoBar::handle(int event)
 
 void UI_3DInfoBar::draw()
 {
-	if (r_view.SelectEmpty())
-		fl_color(FL_BLACK);
-	else
-		fl_color(fl_rgb_color(96,48,0));
-
+	fl_color(FL_BLACK);
 	fl_rectf(x(), y(), w(), h());
 
 	fl_push_clip(x(), y(), w(), h());

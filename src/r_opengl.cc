@@ -1059,7 +1059,7 @@ public:
 		glEnd();
 	}
 
-	void HighlightLine(obj3d_type_e part, int ld, int side, bool is_selected)
+	void HighlightLine(obj3d_type_e part, int ld, int side)
 	{
 		const LineDef *L = LineDefs[ld];
 
@@ -1109,7 +1109,7 @@ public:
 		glEnd();
 	}
 
-	void HighlightSector(obj3d_type_e part, int sec_num, bool is_selected)
+	void HighlightSector(obj3d_type_e part, int sec_num)
 	{
 		const Sector *sec = Sectors[sec_num];
 
@@ -1134,7 +1134,7 @@ public:
 		}
 	}
 
-	void HighlightThing(int th_index, bool is_selected)
+	void HighlightThing(int th_index)
 	{
 		Thing *th = Things[th_index];
 
@@ -1181,19 +1181,19 @@ public:
 		glEnd();
 	}
 
-	inline void HighlightObject(Obj3d_t& obj, bool is_selected)
+	inline void HighlightObject(Obj3d_t& obj)
 	{
 		if (obj.isThing())
 		{
-			HighlightThing(obj.num, is_selected);
+			HighlightThing(obj.num);
 		}
 		else if (obj.isSector())
 		{
-			HighlightSector(obj.type, obj.num, is_selected);
+			HighlightSector(obj.type, obj.num);
 		}
 		else if (obj.isLine())
 		{
-			HighlightLine(obj.type, obj.num, obj.side, is_selected);
+			HighlightLine(obj.type, obj.num, obj.side);
 		}
 	}
 
@@ -1207,8 +1207,6 @@ public:
 
 		/* do the selection */
 
-		glColor3f(1, 0, 0);
-
 		bool saw_hl = false;
 
 		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
@@ -1216,19 +1214,24 @@ public:
 			if (! r_view.sel[k].valid())
 				continue;
 
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
-				saw_hl = true;
+			gl_color(SEL_COL);
 
-			HighlightObject(r_view.sel[k], true);
+			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			{
+				gl_color(HI_AND_SEL_COL);
+				saw_hl = true;
+			}
+
+			HighlightObject(r_view.sel[k]);
 		}
 
 		/* do the highlight */
 
 		if (! saw_hl)
 		{
-			glColor3f(1, 1, 0);
+			gl_color(HI_COL);
 
-			HighlightObject(r_view.hl, false);
+			HighlightObject(r_view.hl);
 		}
 
 		glLineWidth(1);
