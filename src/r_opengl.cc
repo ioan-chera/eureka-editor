@@ -754,16 +754,32 @@ public:
 
 		glEnable(GL_ALPHA_TEST);
 
-		glColor3f(r / 255.0, g / 255.0, b / 255.0);
+		if (r_view.lighting && !fullbright)
+		{
+			int light = sd->SecRef()->light;
 
-		glBegin(GL_QUADS);
+			// add "fake constrast" for axis-aligned walls
+			if (ld->Start()->x == ld->End()->x)
+				light += 16;
+			else if (ld->Start()->y == ld->End()->y)
+				light -= 16;
 
-		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
-		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
-		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
+							 r / 255.0, g / 255.0, b / 255.0, light);
+		}
+		else
+		{
+			glColor3f(r / 255.0, g / 255.0, b / 255.0);
 
-		glEnd();
+			glBegin(GL_QUADS);
+
+			glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+			glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+			glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+			glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+
+			glEnd();
+		}
 	}
 
 	void DrawLine(int ld_index)
