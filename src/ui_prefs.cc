@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -668,6 +668,7 @@ public:
 	Fl_Int_Input    *edit_sectorsize;
 
 	Fl_Check_Button *brow_smalltex;
+	Fl_Check_Button *brow_combo;
 
 	/* Grid Tab */
 
@@ -905,6 +906,8 @@ UI_Preferences::UI_Preferences() :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 		{ brow_smalltex = new Fl_Check_Button(50, 330, 265, 30, " smaller textures");
+		}
+		{ brow_combo = new Fl_Check_Button(50, 360, 265, 30, " combine flats and textures in a single browser");
 		}
 		o->end();
 	  }
@@ -1431,6 +1434,7 @@ void UI_Preferences::LoadValues()
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
+	brow_combo->value(browser_combine_tex ? 1 : 0);
 
 	/* Grid Tab */
 
@@ -1556,9 +1560,13 @@ void UI_Preferences::SaveValues()
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
-	if (new_small_tex != browser_small_tex)
+	bool new_combo = brow_combo->value() ? true : false;
+
+	if (new_small_tex != browser_small_tex || new_combo != browser_combine_tex)
 	{
 		browser_small_tex = new_small_tex;
+		browser_combine_tex = new_combo;
+
 		main_win->browser->Populate();
 	}
 

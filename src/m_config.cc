@@ -260,6 +260,15 @@ static const opt_desc_t options[] =
 		&backup_max_space
 	},
 
+	{	"browser_combine_tex",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"Combine flats and textures in a single browser",
+		NULL,
+		&browser_combine_tex
+	},
+
 	{	"browser_small_tex",
 		0,
 		OPT_BOOLEAN,

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -52,6 +52,7 @@ extern std::map<int, thingtype_t *>  thing_types;
 
 // config items
 bool browser_small_tex = false;
+bool browser_combine_tex = true;  // FIXME false
 
 
 // sort methods
@@ -135,10 +136,10 @@ public:
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	                       const char *_desc, const char *_realname,
-						   int _num, char _category) :
+						   int _num, char _kind, char _category) :
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
-	number(_num), category(_category),
+	number(_num), kind(_kind), category(_category),
 	recent_idx(-2),
 	button(NULL), pic(NULL)
 {
@@ -159,11 +160,11 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	                       const char *_desc, const char *_realname,
-						   int _num, char _category,
+						   int _num, char _kind, char _category,
 						   int pic_w, int pic_h, UI_Pic *_pic) :
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
-	number(_num), category(_category),
+	number(_num), kind(_kind), category(_category),
 	recent_idx(-2),
 	button(NULL), pic(_pic)
 {
@@ -313,7 +314,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	pics = NULL;
 
-	if (strchr("O", kind))
+	if (kind == 'O')
 	{
 		pics = new Fl_Check_Button(X+172, cy, 64, 22, " Pics");
 		pics->value(1);
@@ -323,10 +324,30 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	}
 
 
-	if (strchr("OSL", kind))
+	do_flats = NULL;
+	do_tex   = NULL;
+
+	if (kind == 'T')
 	{
-		cy += 30;
+		do_tex = new Fl_Check_Button(X+86, cy, 64, 22, " Tex");
+		do_tex->value(1);
+		do_tex->callback(repop_callback, this);
+
+		do_flats = new Fl_Check_Button(X+162, cy, 64, 22, " Flats");
+		do_flats->value(1);
+		do_flats->callback(repop_callback, this);
+
+		add(do_tex);
+		add(do_flats);
+
+		if (! browser_combine_tex)
+		{
+			do_tex->hide();
+			do_flats->hide();
+		}
 	}
+
+	cy += 30;
 
 
 	int top_H = cy - Y;
@@ -478,6 +499,15 @@ bool UI_Browser_Box::Filter(bool force_update)
 
 bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 {
+	if (browser_combine_tex && kind == 'T')
+	{
+		if (item->kind == 'T' && !do_tex->value())
+			return false;
+
+		if (item->kind == 'F' && !do_flats->value())
+			return false;
+	}
+
 	if (category->value() > 0)
 	{
 		char cat = cat_letters[category->value()];
@@ -653,7 +683,7 @@ const char * TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
+void UI_Browser_Box::Populate_Images(char imkind, std::map<std::string, Img_c *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -685,7 +715,7 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
 		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
 
-		if (browser_small_tex && kind == 'T')
+		if (browser_small_tex && imkind == 'T')
 		{
 			pic_w = 64;
 			pic_h = MIN(64, MAX(4, image->height()));
@@ -704,14 +734,14 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 
 		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
 
-		if (kind == 'F')
+		if (imkind == 'F')
 		{
 			pic->GetFlat(name);
 			pic->callback(Browser_Item::flat_callback, (void *)name);
 
 			item_cat = M_GetFlatType(name);
 		}
-		else if (kind == 'T')
+		else if (imkind == 'T')
 		{
 			pic->GetTex(name);
 			pic->callback(Browser_Item::texture_callback, (void *)name);
@@ -720,8 +750,8 @@ void UI_Browser_Box::Populate_Images(std::map<std::string, Img_c *> & img_list)
 		}
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, name,
-											  0 /* num */, item_cat,
+		                                      full_desc, name, 0 /* num */,
+											  imkind, item_cat,
 		                                      pic_w, pic_h, pic);
 		scroll->Add(item);
 	}
@@ -769,7 +799,8 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
-		                                      full_desc, "", TI->first, info->group,
+		                                      full_desc, "", TI->first,
+											  kind, info->group,
 		                                      pic_w, pic_h, pic);
 
 		pic->callback(Browser_Item::thing_callback, item);
@@ -796,7 +827,8 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+											  TI->first, kind, info->group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
 
@@ -823,7 +855,8 @@ void UI_Browser_Box::Populate_LineTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
 		         TidyLineDesc(info->desc));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, info->group);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+											  TI->first, kind, info->group);
 
 		item->button->callback(Browser_Item::line_callback, item);
 
@@ -849,7 +882,8 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info->desc);
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "", TI->first, 0 /* cat */);
+		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+											  TI->first, kind, 0 /* cat */);
 
 		item->button->callback(Browser_Item::sector_callback, item);
 
@@ -868,16 +902,36 @@ void UI_Browser_Box::Populate()
 	scroll->resize_horiz(true);
 	scroll->Line_size(24 * 2);
 
+	// handle changes to combine-tex preference
+	if (kind == 'T')
+	{
+		if (browser_combine_tex)
+		{
+			do_tex->show();
+			do_flats->show();
+		}
+		else
+		{
+			do_tex->hide();
+			do_flats->hide();
+		}
+	}
+
 	pic_mode = false;
 
 	switch (kind)
 	{
 		case 'T':
-			Populate_Images(textures);
+			if (browser_combine_tex)
+				Populate_Images('F', flats);
+
+			Populate_Images('T', textures);
 			break;
 
 		case 'F':
-			Populate_Images(flats);
+			// the flat browser is never used when combine-tex is enabled
+			if (! browser_combine_tex)
+				Populate_Images('F', flats);
 			break;
 
 		case 'O':
@@ -1588,6 +1642,9 @@ char UI_Browser::GetMode() const
 
 void UI_Browser::ChangeMode(char new_mode)
 {
+	if (browser_combine_tex && new_mode == 'F')
+		new_mode = 'T';
+
 	switch (new_mode)
 	{
 		case 'T': SetActive(0); break;  // TEXTURES
@@ -1618,7 +1675,7 @@ void UI_Browser::NewEditMode(obj_type_e edit_mode)
 			// if on SECTOR TYPES, stay there
 			// otherwise go to FLATS
 			if (active != 4)
-				SetActive(1);
+				SetActive(browser_combine_tex ? 0 : 1);
 			break;
 
 		case OBJ_THINGS:
