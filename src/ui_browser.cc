@@ -541,7 +541,7 @@ bool UI_Browser_Box::Recent_UpdateItem(Browser_Item *item)
 
 	int new_idx = -1;
 
-	switch (kind)
+	switch (item->kind)
 	{
 		case 'T':
 			new_idx = recent_textures.find(item->real_name.c_str());
