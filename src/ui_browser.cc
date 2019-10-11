@@ -52,7 +52,7 @@ extern std::map<int, thingtype_t *>  thing_types;
 
 // config items
 bool browser_small_tex = false;
-bool browser_combine_tex = true;  // FIXME false
+bool browser_combine_tex = false;
 
 
 // sort methods
