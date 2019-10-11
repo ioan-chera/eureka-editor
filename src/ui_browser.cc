@@ -1812,7 +1812,19 @@ bool UI_Browser_Box::ParseUser(const char ** tokens, int num_tok)
 	if (strcmp(tokens[0], "pics") == 0 && num_tok >= 2 && pics)
 	{
 		pics->value(atoi(tokens[1]) ? 1 : 0);
-		// pics_callback();
+		return true;
+	}
+
+	if (strcmp(tokens[0], "do_flats") == 0 && num_tok >= 2 && do_flats)
+	{
+		do_flats->value(atoi(tokens[1]) ? 1 : 0);
+		return true;
+	}
+
+	if (strcmp(tokens[0], "do_tex") == 0 && num_tok >= 2 && do_tex)
+	{
+		do_tex->value(atoi(tokens[1]) ? 1 : 0);
+		Filter();
 		return true;
 	}
 
@@ -1834,6 +1846,12 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 
 	if (pics)
 		fprintf(fp, "browser %c pics %d\n", kind, pics->value());
+
+	if (do_flats)
+	{
+		fprintf(fp, "browser %c do_flats %d\n", kind, do_flats->value());
+		fprintf(fp, "browser %c do_tex %d\n", kind, do_tex->value());
+	}
 }
 
 
