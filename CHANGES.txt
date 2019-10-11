@@ -4,7 +4,11 @@ RECENT CHANGES
 
 (Since version 1.24)
 
-- support mixing textures and flats for ports that allow it
++ use OpenGL for faster rendering of 2D and 3D views
+
++ support mixing textures and flats for ports that allow it
+
++ preference to combine flats and textures in a single browser
 
 - fixed not remembering test-in-game EXE when port is "vanilla"
 
