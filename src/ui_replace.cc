@@ -911,10 +911,20 @@ bool UI_FindAndReplace::ClipboardOp(char op)
 
 void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
+	if (kind == 'F')
+		kind = 'T';
+
 	if (kind != GetKind())
 	{
-		fl_beep();
-		return;
+		if (kind == 'T' && GetKind() == 'F')
+		{
+			/* ok */
+		}
+		else
+		{
+			fl_beep();
+			return;
+		}
 	}
 
 	// determine which box the user intended
@@ -928,10 +938,7 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 	}
 
 	if (sel_pics == 0)
-	{
-		fl_beep();
-		return;
-	}
+		sel_pics = 1;
 
 	bool is_replace = (sel_pics == 2);
 
