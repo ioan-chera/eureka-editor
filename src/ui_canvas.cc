@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2006-2018 Andrew Apted
+//  Copyright (C) 2006-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,6 +22,10 @@
 
 #include <algorithm>
 
+#ifndef NO_OPENGL
+#include "FL/gl.h"
+#endif
+
 #include "ui_window.h"
 
 #include "m_events.h"
@@ -33,6 +37,7 @@
 #include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
+#include "r_subdiv.h"
 #include "im_color.h"
 #include "im_img.h"
 #include "r_render.h"
@@ -55,47 +60,118 @@ rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
+// compatibility defines for software rendering
+#ifdef NO_OPENGL
+#define gl_color    fl_color
+#define gl_rectf    fl_rectf
+#define gl_line     fl_line
+#define gl_font     fl_font
+#define gl_width    fl_width
+#define gl_height   fl_height
+#define gl_descent  fl_descent
+#endif
+
+
 int vertex_radius(double scale);
 
 
-//
-// UI_Canvas Constructor
-//
 UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
-    Fl_Widget(X, Y, W, H, label),
+#ifdef NO_OPENGL
+	Fl_Widget(X, Y, W, H, label),
+#else
+	Fl_Gl_Window(X, Y, W, H),
+#endif
 	highlight(), split_ld(-1),
 	drag_lines(),
 	trans_lines(),
 	seen_sectors()
 { }
 
-//
-// UI_Canvas Destructor
-//
+
 UI_Canvas::~UI_Canvas()
 { }
 
 
+void UI_Canvas::DeleteContext()
+{
+#ifndef NO_OPENGL
+	context(NULL, 0);
+
+	// ensure W_UnloadAllTextures() gets called on next draw()
+	invalidate();
+#endif
+}
+
+
 void UI_Canvas::resize(int X, int Y, int W, int H)
 {
+#ifdef NO_OPENGL
 	Fl_Widget::resize(X, Y, W, H);
+#else
+	Fl_Gl_Window::resize(X, Y, W, H);
+#endif
 }
 
 
 void UI_Canvas::draw()
 {
+#ifndef NO_OPENGL
+	if (! valid())
+	{
+		// reset the 'gl_tex' field of all loaded images, as the value
+		// belongs to a context which was (probably) just deleted and
+		// hence refer to textures which no longer exist.
+		W_UnloadAllTextures();
+	}
+#endif
+
+	if (edit.render3d)
+	{
+		Render3D_Draw(x(), y(), w(), h());
+		return;
+	}
+
+#ifdef NO_OPENGL
+	xx = x();
+	yy = y();
+
 	fl_push_clip(x(), y(), w(), h());
 
-	fl_color(FL_WHITE);
+	map_lx = floor(MAPX(xx));
+	map_ly = floor(MAPY(yy + h()));
+
+	map_hx = ceil(MAPX(xx + w()));
+	map_hy = ceil(MAPY(yy));
+
+#else // OpenGL
+	xx = yy = 0;
+
+	map_lx = floor(MAPX(0));
+	map_ly = floor(MAPY(0));
+
+	map_hx = ceil(MAPX(w()));
+	map_hy = ceil(MAPY(h()));
+
+	// setup projection matrix for 2D drawing
+	ortho();
+#endif
+
+	gl_color(FL_WHITE);
+
+	// must always set the line style *after* the color.
+	// [ see FLTK docs for details ]
+	gl_line_width(1);
 
 	// default font (for showing object numbers)
 	int font_size = (grid.Scale < 0.4) ? 10 :
 	                (grid.Scale < 1.9) ? 14 : 18;
-	fl_font(FL_COURIER, font_size);
+	gl_font(FL_COURIER, font_size);
 
 	DrawEverything();
 
+#ifdef NO_OPENGL
 	fl_pop_clip();
+#endif
 }
 
 
@@ -108,20 +184,74 @@ int UI_Canvas::handle(int event)
 }
 
 
-void UI_Canvas::PointerPos(bool in_event)
+#ifndef NO_OPENGL
+void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 {
-	// NOTE: this fast method is disabled until behavior of the
-	//       other method can be verified on all platforms....
-#if 0
-	if (in_event)
-	{
-		edit.map_x = MAPX(Fl::event_x());
-		edit.map_y = MAPY(Fl::event_y());
-
-		return;
-	}
+	glBegin(GL_LINE_STRIP);
+	glVertex2i(x1, y1);
+	glVertex2i(x2, y2);
+	glEnd();
+}
 #endif
 
+
+void UI_Canvas::gl_line_width(int w)
+{
+#ifdef NO_OPENGL
+	// apparently 0 produces nicer results than 1
+	if (w == 1)
+		w = 0;
+
+	fl_line_style(FL_SOLID, w);
+#else
+	glLineWidth(w);
+#endif
+}
+
+
+void UI_Canvas::gl_draw_string(const char *s, int x, int y)
+{
+#ifdef NO_OPENGL
+	fl_draw(s, x, y);
+#else
+	gl_draw(s, x, y);
+#endif
+}
+
+
+int UI_Canvas::NORMALX(int len, int dx, int dy)
+{
+#ifdef NO_OPENGL
+	float res = -dy;
+#else
+	float res = dy;
+#endif
+
+	float got_len = hypotf(dx, dy);
+	if (got_len < 0.01)
+		return 0;
+
+	return I_ROUND(res * len / got_len);
+}
+
+int UI_Canvas::NORMALY(int len, int dx, int dy)
+{
+#ifdef NO_OPENGL
+	float res = dx;
+#else
+	float res = -dx;
+#endif
+
+	float got_len = hypotf(dx, dy);
+	if (got_len < 0.01)
+		return 0;
+
+	return I_ROUND(res * len / got_len);
+}
+
+
+void UI_Canvas::PointerPos(bool in_event)
+{
 	// read current position outside of FLTK's event propagation.
 	// this is a bit harder, and a bit slower in X-windows
 
@@ -129,11 +259,20 @@ void UI_Canvas::PointerPos(bool in_event)
 
 	Fl::get_mouse(raw_x, raw_y);
 
+#ifdef NO_OPENGL
 	raw_x -= main_win->x_root();
 	raw_y -= main_win->y_root();
 
 	edit.map_x = MAPX(raw_x);
 	edit.map_y = MAPY(raw_y);
+
+#else // OpenGL
+	raw_x -= x_root();
+	raw_y -= y_root();
+
+	edit.map_x = MAPX(raw_x);
+	edit.map_y = MAPY(h() - 1 - raw_y);
+#endif
 }
 
 
@@ -167,12 +306,6 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 
 void UI_Canvas::DrawEverything()
 {
-	map_lx = floor(MAPX(x()));
-	map_ly = floor(MAPY(y() + h()));
-
-	map_hx = ceil(MAPX(x() + w()));
-	map_hy = ceil(MAPY(y()));
-
 	// setup for drawing sector numbers
 	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
 	{
@@ -195,42 +328,42 @@ void UI_Canvas::DrawEverything()
 		DragDelta(&dx, &dy);
 
 		if (edit.mode == OBJ_VERTICES)
-			fl_color(HI_AND_SEL_COL);
+			gl_color(HI_AND_SEL_COL);
 		else
-			fl_color(HI_COL);
+			gl_color(HI_COL);
 
 		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
-			fl_line_style(FL_SOLID, 2);
+			gl_line_width(2);
 
 		DrawHighlight(edit.mode, edit.drag_single_obj,
 		              false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
 		{
-			fl_color(HI_COL);
+			gl_color(HI_COL);
 			DrawHighlight(highlight.type, highlight.num);
 		}
 
-		fl_line_style(FL_SOLID);
+		gl_line_width(1);
 	}
 	else if (highlight.valid())
 	{
 		if (edit.Selected->get(highlight.num))
-			fl_color(HI_AND_SEL_COL);
+			gl_color(HI_AND_SEL_COL);
 		else
-			fl_color(HI_COL);
+			gl_color(HI_COL);
 
 		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
-			fl_line_style(FL_SOLID, 2);
+			gl_line_width(2);
 
 		DrawHighlight(highlight.type, highlight.num);
 
-		fl_color(LIGHTRED);
+		gl_color(LIGHTRED);
 
 		if (! edit.error_mode)
 			DrawTagged(highlight.type, highlight.num);
 
-		fl_line_style(FL_SOLID);
+		gl_line_width(1);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -246,8 +379,8 @@ void UI_Canvas::DrawEverything()
 //
 void UI_Canvas::DrawMap()
 {
-	fl_color(FL_BLACK);
-	fl_rectf(x(), y(), w(), h());
+	gl_color(FL_BLACK);
+	gl_rectf(xx, yy, w(), h());
 
 	if (edit.sector_render_mode && ! edit.error_mode)
 	{
@@ -303,8 +436,8 @@ void UI_Canvas::DrawGrid_Normal()
 
 	if (pixels_1 < 1.6)
 	{
-		fl_color(DarkerColor(DarkerColor(normal_main_col)));
-		fl_rectf(x(), y(), w(), h());
+		gl_color(DarkerColor(DarkerColor(normal_main_col)));
+		gl_rectf(xx, yy, w(), h());
 
 		DrawAxes(normal_axis_col);
 		return;
@@ -320,11 +453,11 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_2 < 2.2)
 		flat_col = DarkerColor(flat_col);
 
-	fl_color(flat_col);
+	gl_color(flat_col);
 
 	if (pixels_2 < 1.6)
 	{
-		fl_rectf(x(), y(), w(), h());
+		gl_rectf(xx, yy, w(), h());
 	}
 	else
 	{
@@ -347,7 +480,7 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
 
-	fl_color(main_col);
+	gl_color(main_col);
 
 	{
 		int gx = (map_lx / grid.step) * grid.step;
@@ -379,15 +512,15 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	if (pixels_1 < 1.6)
 	{
-		fl_color(DarkerColor(DarkerColor(dotty_point_col)));
-		fl_rectf(x(), y(), w(), h());
+		gl_color(DarkerColor(DarkerColor(dotty_point_col)));
+		gl_rectf(xx, yy, w(), h());
 
 		DrawAxes(dotty_axis_col);
 		return;
 	}
 
 
-	fl_color(dotty_major_col);
+	gl_color(dotty_major_col);
 	{
 		int gx = (map_lx / grid_step_3) * grid_step_3;
 
@@ -404,7 +537,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	DrawAxes(dotty_axis_col);
 
 
-	fl_color(dotty_minor_col);
+	gl_color(dotty_minor_col);
 	{
 		int gx = (map_lx / grid_step_2) * grid_step_2;
 
@@ -421,9 +554,9 @@ void UI_Canvas::DrawGrid_Dotty()
 
 
 	if (pixels_1 < 4.02)
-		fl_color(DarkerColor(dotty_point_col));
+		gl_color(DarkerColor(dotty_point_col));
 	else
-		fl_color(dotty_point_col);
+		gl_color(dotty_point_col);
 
 	{
 		int gx = (map_lx / grid_step_1) * grid_step_1;
@@ -436,14 +569,9 @@ void UI_Canvas::DrawGrid_Dotty()
 			int sy = SCREENY(ny);
 
 			if (pixels_1 < 24.1)
-				fl_point(sx, sy);
+				gl_rectf(sx, sy, 1, 1);
 			else
-			{
-				fl_rectf(sx, sy, 2, 2);
-
-				// fl_line(sx-0, sy, sx+1, sy);
-				// fl_line(sx, sy-0, sx, sy+1);
-			}
+				gl_rectf(sx, sy, 2, 2);
 		}
 	}
 }
@@ -451,7 +579,7 @@ void UI_Canvas::DrawGrid_Dotty()
 
 void UI_Canvas::DrawAxes(Fl_Color col)
 {
-	fl_color(col);
+	gl_color(col);
 
 	DrawMapLine(0, map_ly, 0, map_hy);
 
@@ -461,7 +589,7 @@ void UI_Canvas::DrawAxes(Fl_Color col)
 
 void UI_Canvas::DrawMapBounds()
 {
-	fl_color(FL_RED);
+	gl_color(FL_RED);
 
 	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x2, Map_bound_y1);
 	DrawMapLine(Map_bound_x1, Map_bound_y2, Map_bound_x2, Map_bound_y2);
@@ -495,17 +623,17 @@ void UI_Canvas::DrawVertex(int map_x, int map_y, int r)
 
 // BLOBBY TEST
 #if 0
-	fl_line(scrx - 1, scry - 2, scrx + 1, scry - 2);
-	fl_line(scrx - 2, scry - 1, scrx + 2, scry - 1);
-	fl_line(scrx - 2, scry + 0, scrx + 2, scry + 0);
-	fl_line(scrx - 2, scry + 1, scrx + 2, scry + 1);
-	fl_line(scrx - 1, scry + 2, scrx + 1, scry + 2);
+	gl_line(scrx - 1, scry - 2, scrx + 1, scry - 2);
+	gl_line(scrx - 2, scry - 1, scrx + 2, scry - 1);
+	gl_line(scrx - 2, scry + 0, scrx + 2, scry + 0);
+	gl_line(scrx - 2, scry + 1, scrx + 2, scry + 1);
+	gl_line(scrx - 1, scry + 2, scrx + 1, scry + 2);
 #else
-	fl_line(scrx - r, scry - r, scrx + r, scry + r);
-	fl_line(scrx + r, scry - r, scrx - r, scry + r);
+	gl_line(scrx - r, scry - r, scrx + r, scry + r);
+	gl_line(scrx + r, scry - r, scrx - r, scry + r);
 
-	fl_line(scrx - 1, scry, scrx + 1, scry);
-	fl_line(scrx, scry - 1, scrx, scry + 1);
+	gl_line(scrx - 1, scry, scrx + 1, scry);
+	gl_line(scrx, scry - 1, scrx, scry + 1);
 #endif
 }
 
@@ -514,7 +642,7 @@ void UI_Canvas::DrawVertices()
 {
 	const int r = vertex_radius(grid.Scale);
 
-	fl_color(FL_GREEN);
+	gl_color(FL_GREEN);
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
@@ -537,8 +665,8 @@ void UI_Canvas::DrawVertices()
 			if (! Vis(x, y, r))
 				continue;
 
-			int sx = SCREENX(x) + r;
-			int sy = SCREENY(y) - r - 2;
+			int sx = SCREENX(x) + r * 3;
+			int sy = SCREENY(y) + r * 3;
 
 			DrawObjNum(sx, sy, n);
 		}
@@ -579,7 +707,7 @@ void UI_Canvas::DrawLinedefs()
 	for (int pass = 0 ; pass < 5 ; pass++)
 	{
 		if (pass < 4)
-			fl_color(colors[pass]);
+			gl_color(colors[pass]);
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -726,7 +854,7 @@ void UI_Canvas::DrawLinedefs()
 					col == colors[2] || col == colors[3])
 					continue;
 
-				fl_color(col);
+				gl_color(col);
 			}
 
 			switch (line_kind)
@@ -797,11 +925,11 @@ void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
 void UI_Canvas::DrawThings()
 {
 	if (edit.mode != OBJ_THINGS)
-		fl_color(DARKGREY);
+		gl_color(DARKGREY);
 	else if (edit.error_mode)
-		fl_color(LIGHTGREY);
+		gl_color(LIGHTGREY);
 	else
-		fl_color((Fl_Color)0xFF000000);
+		gl_color((Fl_Color)0xFF000000);
 
 	// see notes in DrawLinedefs() on why we perform multiple passes.
 	// here first pass is bright red, second pass is everything else.
@@ -831,7 +959,7 @@ void UI_Canvas::DrawThings()
 				if (col == 0xFF000000)
 					continue;
 
-				fl_color(col);
+				gl_color(col);
 			}
 		}
 
@@ -853,10 +981,10 @@ void UI_Canvas::DrawThings()
 
 			const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-			x += info->radius;
-			y += info->radius;
+			x += info->radius + 8;
+			y += info->radius + 8;
 
-			DrawObjNum(SCREENX(x), SCREENY(y) - 2, n);
+			DrawObjNum(SCREENX(x), SCREENY(y), n);
 		}
 	}
 }
@@ -873,7 +1001,7 @@ void UI_Canvas::DrawThingBodies()
 	// see notes in DrawLinedefs() on why we perform multiple passes.
 	// here first pass is dark red, second pass is everything else.
 
-	fl_color(DarkerColor(DarkerColor((Fl_Color)0xFF000000)));
+	gl_color(DarkerColor(DarkerColor((Fl_Color)0xFF000000)));
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
@@ -900,7 +1028,7 @@ void UI_Canvas::DrawThingBodies()
 			if (col == 0xFF000000)
 				continue;
 
-			fl_color(DarkerColor(DarkerColor(col)));
+			gl_color(DarkerColor(DarkerColor(col)));
 		}
 
 		int sx1 = SCREENX(x - r);
@@ -908,13 +1036,20 @@ void UI_Canvas::DrawThingBodies()
 		int sx2 = SCREENX(x + r);
 		int sy2 = SCREENY(y - r);
 
-		fl_rectf(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
+		gl_rectf(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
 	}
 }
 
 
 void UI_Canvas::DrawThingSprites()
 {
+#ifndef NO_OPENGL
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_ALPHA_TEST);
+
+	glAlphaFunc(GL_GREATER, 0.5);
+#endif
+
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		int x = Things[n]->x;
@@ -932,6 +1067,11 @@ void UI_Canvas::DrawThingSprites()
 
 		DrawSprite(x, y, sprite, info->scale);
 	}
+
+#ifndef NO_OPENGL
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+#endif
 }
 
 
@@ -942,6 +1082,7 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 
 	scale = scale * 0.5;
 
+#ifdef NO_OPENGL
 	int bx1 = SCREENX(map_x - W * scale);
 	int bx2 = SCREENX(map_x + W * scale);
 
@@ -1018,6 +1159,38 @@ void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
 			fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
 		}
 	}
+
+#else // OpenGL
+	int bx1 = SCREENX(map_x - W * scale);
+	int bx2 = SCREENX(map_x + W * scale);
+
+	int by1 = SCREENY(map_y - H * scale);
+	int by2 = SCREENY(map_y + H * scale);
+
+	// don't make too small
+	if (bx2 <= bx1) bx2 = bx1 + 1;
+	if (by2 <= by1) by2 = by1 + 1;
+
+	// bind the sprite image (upload it to OpenGL if needed)
+	img->bind_gl();
+
+	// choose texture coords based on image size
+	float tx1 = 0.0;
+	float ty1 = 0.0;
+	float tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
+	float ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+
+	glColor3f(1, 1, 1);
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(tx1, ty1); glVertex2i(bx1, by1);
+	glTexCoord2f(tx1, ty2); glVertex2i(bx1, by2);
+	glTexCoord2f(tx2, ty2); glVertex2i(bx2, by2);
+	glTexCoord2f(tx2, ty1); glVertex2i(bx2, by1);
+
+	glEnd();
+#endif
 }
 
 
@@ -1040,72 +1213,61 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	int x2 = SCREENX(mx2);
 	int y2 = SCREENY(my2);
 
-	int mx = (x1 + x2) / 2;
-	int my = (y1 + y2) / 2 - 1;
+	int sx = (x1 + x2) / 2;
+	int sy = (y1 + y2) / 2;
 
-	int dx = (y1 - y2);
-	int dy = (x2 - x1);
+	// normally draw line numbers on back of line
+	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
 
-	if (side == SIDE_LEFT)
+	// for sectors, draw closer and on sector side
+	if (side != 0)
 	{
-		dx = -dx;
-		dy = -dy;
+		want_len = 2 + 12 * CLAMP(0.25, grid.Scale, 1.0);
+
+		if (side == SIDE_LEFT)
+			want_len = -want_len;
 	}
 
-	if (side)
-	{
-		int len = MAX(4, MAX(abs(dx), abs(dy)));
-		int want_len = 4 + 10 * CLAMP(0.25, grid.Scale, 1.0);
+	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
+	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
-		mx += dx * want_len / len;
-		my += dy * want_len / len;
-
-		if (abs(dx) > abs(dy))
-		{
-			want_len = 2 + want_len / 2;
-
-			if (dx > 0)
-				mx += want_len;
-			else
-				mx -= want_len;
-		}
-	}
-
-	DrawObjNum(mx, my + fl_descent(), n, true /* center */);
+	DrawObjNum(sx, sy, n);
 }
 
 
 //
-//  draw a number at screen coordinates (x, y)
+//  draw a number centered at screen coordinate (x, y)
 //
-void UI_Canvas::DrawObjNum(int x, int y, int num, bool center)
+void UI_Canvas::DrawObjNum(int x, int y, int num)
 {
 	char buffer[64];
 	sprintf(buffer, "%d", num);
 
-	if (center)
-	{
 #if 0 /* DEBUG */
-		fl_color(FL_RED);
-		fl_rectf(x - 1, y - 1, 3, 3);
-		return;
+	gl_color(FL_RED);
+	gl_rectf(x - 1, y - 1, 3, 3);
+	return;
 #endif
-		x -= fl_width(buffer) / 2;
-		y += fl_descent();
-	}
+	x -= gl_width(buffer) / 2;
 
-	fl_color(FL_BLACK);
+#ifdef NO_OPENGL
+	y += gl_height() / 2;
+#else
+	y -= gl_height() / 2;
+#endif
 
-	fl_draw(buffer, x - 2, y);
-	fl_draw(buffer, x - 1, y);
-	fl_draw(buffer, x + 1, y);
-	fl_draw(buffer, x + 2, y);
-	fl_draw(buffer, x,     y + 1);
-	fl_draw(buffer, x,     y - 1);
+	gl_color(FL_BLACK);
 
-	fl_color(OBJECT_NUM_COL);
+	gl_draw_string(buffer, x - 2, y);
+	gl_draw_string(buffer, x - 1, y);
+	gl_draw_string(buffer, x + 1, y);
+	gl_draw_string(buffer, x + 2, y);
+	gl_draw_string(buffer, x,     y + 1);
+	gl_draw_string(buffer, x,     y - 1);
 
-	fl_draw(buffer, x, y);
+	gl_color(OBJECT_NUM_COL);
+
+	gl_draw_string(buffer, x, y);
 }
 
 
@@ -1159,7 +1321,7 @@ void UI_Canvas::SplitLineForget()
 void UI_Canvas::DrawHighlight(int objtype, int objnum,
                               bool skip_lines, int dx, int dy)
 {
-	// fl_color() and fl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
 
@@ -1219,10 +1381,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 			int sx2 = SCREENX(x) + r;
 			int sy2 = SCREENY(y) + r;
 
-			fl_line(sx1, sy1, sx2, sy1);
-			fl_line(sx2, sy1, sx2, sy2);
-			fl_line(sx2, sy2, sx1, sy2);
-			fl_line(sx1, sy2, sx1, sy1);
+			gl_line(sx1, sy1, sx2, sy1);
+			gl_line(sx2, sy1, sx2, sy2);
+			gl_line(sx2, sy2, sx1, sy2);
+			gl_line(sx1, sy2, sx1, sy1);
 		}
 		break;
 
@@ -1272,7 +1434,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
-	// fl_color() and fl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	switch (objtype)
 	{
@@ -1315,10 +1477,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			int sx2 = SCREENX(x) + r;
 			int sy2 = SCREENY(y) + r;
 
-			fl_line(sx1, sy1, sx2, sy1);
-			fl_line(sx2, sy1, sx2, sy2);
-			fl_line(sx2, sy2, sx1, sy2);
-			fl_line(sx1, sy2, sx1, sy1);
+			gl_line(sx1, sy1, sx2, sy1);
+			gl_line(sx2, sy1, sx2, sy2);
+			gl_line(sx2, sy2, sx1, sy2);
+			gl_line(sx1, sy2, sx1, sy1);
 		}
 		break;
 
@@ -1367,7 +1529,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 void UI_Canvas::DrawTagged(int objtype, int objnum)
 {
-	// fl_color has been done by caller
+	// gl_color has been done by caller
 
 	// handle tagged linedefs : show matching sector(s)
 	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
@@ -1389,7 +1551,7 @@ void UI_Canvas::DrawTagged(int objtype, int objnum)
 
 void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
 {
-	// fl_color() and fl_line_style() has been done by caller
+	// gl_color() and gl_line_width() has been done by caller
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1440,17 +1602,17 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		fl_color(SEL_COL);
+		gl_color(SEL_COL);
 
 		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-			fl_line_style(FL_SOLID, 2);
+			gl_line_width(2);
 
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
 			DrawHighlightTransform(list->what_type(), *it);
 		}
 
-		fl_line_style(FL_SOLID);
+		gl_line_width(1);
 		return;
 	}
 
@@ -1462,10 +1624,10 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		DragDelta(&dx, &dy);
 	}
 
-	fl_color(edit.error_mode ? FL_RED : SEL_COL);
+	gl_color(edit.error_mode ? FL_RED : SEL_COL);
 
 	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-		fl_line_style(FL_SOLID, 2);
+		gl_line_width(2);
 
 	// special case when we have many sectors
 	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
@@ -1482,7 +1644,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (! edit.error_mode && dx == 0 && dy == 0)
 	{
-		fl_color(LIGHTRED);
+		gl_color(LIGHTRED);
 
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
@@ -1490,25 +1652,16 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		}
 	}
 
-	fl_line_style(FL_SOLID);
-}
-
-
-//
-//  draw a dot at map coordinates   [ NOT USED ATM ]
-//
-void UI_Canvas::DrawMapPoint(int map_x, int map_y)
-{
-    fl_point(SCREENX(map_x), SCREENY(map_y));
+	gl_line_width(1);
 }
 
 
 //
 //  draw a plain line at the given map coords
 //
-void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
+void UI_Canvas::DrawMapLine(float map_x1, float map_y1, float map_x2, float map_y2)
 {
-    fl_line(SCREENX(map_x1), SCREENY(map_y1),
+    gl_line(SCREENX(map_x1), SCREENY(map_y1),
             SCREENX(map_x2), SCREENY(map_y2));
 }
 
@@ -1519,7 +1672,7 @@ void UI_Canvas::DrawMapLine(int map_x1, int map_y1, int map_x2, int map_y2)
 void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
                                bool reverse)
 {
-	// fl_color() has been done by caller
+	// gl_color() has been done by caller
 
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
@@ -1532,25 +1685,21 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
 		std::swap(y1, y2);
 	}
 
-    fl_line(x1, y1, x2, y2);
+    gl_line(x1, y1, x2, y2);
 
 	// indicate direction of line
    	int mx = (x1 + x2) / 2;
    	int my = (y1 + y2) / 2;
 
-	int dx = (y1 - y2);
-	int dy = (x2 - x1);
-
-	int len = MAX(4, MAX(abs(dx), abs(dy)));
-
+	int len = MAX(abs(x2 - x1), abs(y2 - y1));
 	int want_len = MIN(12, len / 5);
 
-	dx = dx * want_len / len;
-	dy = dy * want_len / len;
+	int dx = NORMALX(want_len, x2 - x1, y2 - y1);
+	int dy = NORMALY(want_len, x2 - x1, y2 - y1);
 
 	if (! (dx == 0 && dy == 0))
 	{
-		fl_line(mx, my, mx + dx, my + dy);
+		gl_line(mx, my, mx + dx, my + dy);
 	}
 }
 
@@ -1560,11 +1709,21 @@ void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
 	int sx = SCREENX(map_x);
 	int sy = SCREENY(map_y);
 
-	int size = (grid.Scale >= 5.0) ? 11 : (grid.Scale >= 1.0) ? 9 : 7;
+	int size = (grid.Scale >= 5.0) ? 9 : (grid.Scale >= 1.0) ? 7 : 5;
 
-	fl_color(HI_AND_SEL_COL);
+	gl_color(HI_AND_SEL_COL);
 
+#ifdef NO_OPENGL
 	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
+#else
+	glPointSize(size);
+
+	glBegin(GL_POINTS);
+	glVertex2i(sx, sy);
+	glEnd();
+
+	glPointSize(1.0);
+#endif
 }
 
 
@@ -1572,7 +1731,7 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 {
 	// show how and where the line will be split
 
-	// fl_color() has been done by caller
+	// gl_color() has been done by caller
 
 	int scr_x1 = SCREENX(map_x1);
 	int scr_y1 = SCREENY(map_y1);
@@ -1582,8 +1741,8 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 	int scr_mx = SCREENX(split_x);
 	int scr_my = SCREENY(split_y);
 
-	fl_line(scr_x1, scr_y1, scr_mx, scr_my);
-	fl_line(scr_x2, scr_y2, scr_mx, scr_my);
+	gl_line(scr_x1, scr_y1, scr_mx, scr_my);
+	gl_line(scr_x2, scr_y2, scr_mx, scr_my);
 
 	if (! edit.show_object_numbers)
 	{
@@ -1609,13 +1768,19 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
-	fl_line(x1, y1, x2, y2);
+	gl_line(x1, y1, x2, y2);
 
 	// knob
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	fl_line(mx, my, mx + (y1 - y2) / 5, my + (x2 - x1) / 5);
+	int klen = MAX(abs(x2 - x1), abs(y2 - y1));
+	int want_len = CLAMP(12, klen / 4, 40);
+
+	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
+	int ky = NORMALY(want_len, x2 - x1, y2 - y1);
+
+	gl_line(mx, my, mx + kx, my + ky);
 
 	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
@@ -1631,8 +1796,8 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 	x1 = x2 + 2 * dx;
 	y1 = y2 + 2 * dy;
 
-	fl_line(x1 - dy, y1 + dx, x2, y2);
-	fl_line(x1 + dy, y1 - dx, x2, y2);
+	gl_line(x1 - dy, y1 + dx, x2, y2);
+	gl_line(x1 + dy, y1 - dx, x2, y2);
 }
 
 
@@ -1641,29 +1806,24 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 //
 void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 {
-	int map_x2 = map_x1 + r * cos(angle * M_PI / 180.0);
-	int map_y2 = map_y1 + r * sin(angle * M_PI / 180.0);
+	float dx = r * cos(angle * M_PI / 180.0);
+	float dy = r * sin(angle * M_PI / 180.0);
 
-	int x1 = SCREENX(map_x1);
-	int y1 = SCREENY(map_y1);
-	int x2 = SCREENX(map_x2);
-	int y2 = SCREENY(map_y2);
+	float map_x2 = map_x1 + dx;
+	float map_y2 = map_y1 + dy;
 
-	fl_line(x1, y1, x2, y2);
+	DrawMapLine(map_x1, map_y1, map_x2, map_y2);
 
-	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
+	// arrow head
+	float x3 = map_x2 - dx * 0.3 + dy * 0.3;
+	float y3 = map_y2 - dy * 0.3 - dx * 0.3;
 
-	if (r2 < 1.0)
-		return;
+	DrawMapLine(map_x2, map_y2, x3, y3);
 
-	int dx = (int) ((x1 - x2) * 12.0 / (double)r2 * (grid.Scale / 2));
-	int dy = (int) ((y1 - y2) * 12.0 / (double)r2 * (grid.Scale / 2));
+	x3 = map_x2 - dx * 0.3 - dy * 0.3;
+	y3 = map_y2 - dy * 0.3 + dx * 0.3;
 
-	x1 = x2 + 2 * dx;
-	y1 = y2 + 2 * dy;
-
-	fl_line(x1 - dy, y1 + dx, x2, y2);
-	fl_line(x1 + dy, y1 - dx, x2, y2);
+	DrawMapLine(map_x2, map_y2, x3, y3);
 }
 
 
@@ -1674,41 +1834,48 @@ void UI_Canvas::DrawCamera()
 
 	Render3D_GetCameraPos(&map_x, &map_y, &angle);
 
-	int scr_x = SCREENX(map_x);
-	int scr_y = SCREENY(map_y);
+	float mx = map_x;
+	float my = map_y;
 
-	float size = sqrt(grid.Scale) * 40;
+	float r = 40.0 / sqrt(grid.Scale);
 
-	if (size < 8) size = 8;
-
-	int dx = size *  cos(angle * M_PI / 180.0);
-	int dy = size * -sin(angle * M_PI / 180.0);
-
-	fl_color(CAMERA_COLOR);
+	float dx = r * cos(angle * M_PI / 180.0);
+	float dy = r * sin(angle * M_PI / 180.0);
 
 	// arrow body
+	float x1 = mx - dx;
+	float y1 = my - dy;
 
-	fl_line(scr_x - dx, scr_y - dy, scr_x + dx, scr_y + dy);
+	float x2 = mx + dx;
+	float y2 = my + dy;
 
-	int ex =  dy/3;
-	int ey = -dx/3;
+	gl_color(CAMERA_COLOR);
+	gl_line_width(1);
 
-	fl_line(scr_x + dx/8 + ex, scr_y + dy/8 + ey,
-	        scr_x + dx/8 - ex, scr_y + dy/8 - ey);
-
-	fl_line(scr_x - dx/8 + ex, scr_y - dy/8 + ey,
-	        scr_x - dx/8 - ex, scr_y - dy/8 - ey);
+	DrawMapLine(x1, y1, x2, y2);
 
 	// arrow head
+	float x3 = x2 - dx * 0.6 + dy * 0.4;
+	float y3 = y2 - dy * 0.6 - dx * 0.4;
 
-	scr_x += dx;
-	scr_y += dy;
+	DrawMapLine(x2, y2, x3, y3);
 
-	int hx = dx/2;
-	int hy = dy/2;
+	x3 = x2 - dx * 0.6 - dy * 0.4;
+	y3 = y2 - dy * 0.6 + dx * 0.4;
 
-	fl_line(scr_x, scr_y, scr_x + hy - hx, scr_y - hx - hy);
-	fl_line(scr_x, scr_y, scr_x - hy - hx, scr_y + hx - hy);
+	DrawMapLine(x2, y2, x3, y3);
+
+	// notches on body
+	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
+				mx + dy * 0.4, my - dx * 0.4);
+
+	mx = mx - dx * 0.2;
+	my = my - dy * 0.2;
+
+	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
+				mx + dy * 0.4, my - dx * 0.4);
+
+	gl_line_width(1);
 }
 
 
@@ -1735,12 +1902,12 @@ void UI_Canvas::DrawCurrentLine()
 	}
 	else
 	{
-		fl_color(FL_GREEN);
+		gl_color(FL_GREEN);
 
 		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
 	}
 
-	fl_color(RED);
+	gl_color(RED);
 
 	const Vertex * v = Vertices[edit.drawing_from];
 
@@ -1816,7 +1983,7 @@ void UI_Canvas::SelboxDraw()
 	int y1 = MIN(selbox_y1, selbox_y2);
 	int y2 = MAX(selbox_y1, selbox_y2);
 
-	fl_color(FL_CYAN);
+	gl_color(FL_CYAN);
 
 	DrawMapLine(x1, y1, x2, y1);
 	DrawMapLine(x2, y1, x2, y2);
@@ -1966,181 +2133,15 @@ void UI_Canvas::TransformUpdate(int map_x, int map_y)
 
 //------------------------------------------------------------------------
 
-
-// this represents a segment of a linedef bounding a sector.
-struct sector_edge_t
-{
-	const LineDef * line;
-
-	// coordinates mapped to screen space, not clipped
-	int scr_x1, scr_y1;
-	int scr_x2, scr_y2;
-
-	// has the line been flipped (coordinates were swapped) ?
-	short flipped;
-
-	// what side this edge faces (SIDE_LEFT or SIDE_RIGHT)
-	short side;
-
-	// clipped vertical range, inclusive
-	short y1, y2;
-
-	// computed X value
-	float x;
-
-	void CalcX(short y)
-	{
-		x = scr_x1 + (scr_x2 - scr_x1) * (float)(y - scr_y1) / (float)(scr_y2 - scr_y1);
-	}
-
-	struct CMP_Y
-	{
-		inline bool operator() (const sector_edge_t &A, const sector_edge_t& B) const
-		{
-			return A.scr_y1 < B.scr_y1;
-		}
-	};
-
-	struct CMP_X
-	{
-		inline bool operator() (const sector_edge_t *A, const sector_edge_t *B) const
-		{
-			// NULL is always > than a valid pointer
-
-			if (A == NULL)
-				return false;
-
-			if (B == NULL)
-				return true;
-
-			return A->x < B->x;
-		}
-	};
-};
-
-
-struct sector_extra_info_t
-{
-	// these are < 0 when the sector has no lines
-	int first_line;
-	int last_line;
-
-	// these are random junk when sector has no lines
-	int bound_x1, bound_x2;
-	int bound_y1, bound_y2;
-
-	void Clear()
-	{
-		first_line = last_line = -1;
-
-		bound_x1 = 32767;
-		bound_y1 = 32767;
-		bound_x2 = -32767;
-		bound_y2 = -32767;
-	}
-
-	void AddLine(int n)
-	{
-		if (first_line < 0 || first_line > n)
-			first_line = n;
-
-		if (last_line < n)
-			last_line = n;
-	}
-
-	void AddVertex(const Vertex *V)
-	{
-		bound_x1 = MIN(bound_x1, V->x);
-		bound_y1 = MIN(bound_y1, V->y);
-
-		bound_x2 = MAX(bound_x2, V->x);
-		bound_y2 = MAX(bound_y2, V->y);
-	}
-};
-
-class sector_info_cache_c
-{
-public:
-	int total;
-
-	std::vector<sector_extra_info_t> infos;
-
-public:
-	sector_info_cache_c() : total(-1), infos()
-	{ }
-
-	~sector_info_cache_c()
-	{ }
-
-public:
-	void Update()
-	{
-		if (total != NumSectors)
-		{
-			total = NumSectors;
-
-			infos.resize((size_t) total);
-
-			Rebuild();
-		}
-	}
-
-	void Rebuild()
-	{
-		int sec;
-
-		for (sec = 0 ; sec < total ; sec++)
-			infos[sec].Clear();
-
-		for (int n = 0 ; n < NumLineDefs ; n++)
-		{
-			const LineDef *L = LineDefs[n];
-
-			for (int side = 0 ; side < 2 ; side++)
-			{
-				int sd_num = side ? L->left : L->right;
-
-				if (sd_num < 0)
-					continue;
-
-				sec = SideDefs[sd_num]->sector;
-
-				sector_extra_info_t& info = infos[sec];
-
-				info.AddLine(n);
-
-				info.AddVertex(L->Start());
-				info.AddVertex(L->End());
-			}
-		}
-	}
-};
-
-static sector_info_cache_c sector_info_cache;
-
-void SectorCache_Invalidate()
-{
-	// invalidate everything
-	sector_info_cache.total = -1;
-}
-
-
 void UI_Canvas::RenderSector(int num)
 {
-	sector_info_cache.Update();
-
-	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
-
-	if (exinfo.first_line < 0)
+	if (! Subdiv_SectorOnScreen(num, map_lx, map_ly, map_hx, map_hy))
 		return;
 
-	// bounding box test
-	if (exinfo.bound_x1 > map_hx || exinfo.bound_x2 < map_lx ||
-		exinfo.bound_y1 > map_hy || exinfo.bound_y2 < map_ly)
-	{
-		// sector is off-screen
+	sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(num);
+
+	if (! subdiv)
 		return;
-	}
 
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
@@ -2153,7 +2154,7 @@ void UI_Canvas::RenderSector(int num)
 
 	if (edit.sector_render_mode == SREND_Lighting)
 	{
-		fl_color(light_col);
+		gl_color(light_col);
 	}
 	else if (edit.sector_render_mode == SREND_SoundProp)
 	{
@@ -2165,9 +2166,9 @@ void UI_Canvas::RenderSector(int num)
 		switch ((propagate_level_e) prop[num])
 		{
 			case PGL_Never:   return;
-			case PGL_Maybe:   fl_color(fl_rgb_color(64,64,192)); break;
-			case PGL_Level_1: fl_color(fl_rgb_color(192,32,32)); break;
-			case PGL_Level_2: fl_color(fl_rgb_color(192,96,32)); break;
+			case PGL_Maybe:   gl_color(fl_rgb_color(64,64,192)); break;
+			case PGL_Level_1: gl_color(fl_rgb_color(192,32,32)); break;
+			case PGL_Level_2: gl_color(fl_rgb_color(192,96,32)); break;
 		}
 	}
 	else
@@ -2179,7 +2180,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (is_sky(tex_name))
 		{
-			fl_color(palette[game_info.sky_color]);
+			gl_color(palette[game_info.sky_color]);
 		}
 		else
 		{
@@ -2192,219 +2193,156 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
-	const img_pixel_t *src_pix = img ? img->buf() : NULL;
-
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
 
-	// verify size is at least 64x64
-	if (img && (tw < 64 || th < 64))
-	{
-		fl_color(palette[game_info.missing_color]);
-
-		img = NULL;
-	}
-
-
-	/*** Part 1 : visit linedefs and create edges ***/
-
-
-	std::vector<sector_edge_t> edgelist;
-
-	short min_y = 32767;
-	short max_y = 0;
-
-
-	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
-	{
-		const LineDef *L = LineDefs[n];
-
-		if (! L->TouchesSector(num))
-			continue;
-
-		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT))
-			continue;
-
-		sector_edge_t edge;
-
-		edge.scr_x1 = SCREENX(L->Start()->x);
-		edge.scr_y1 = SCREENY(L->Start()->y);
-		edge.scr_x2 = SCREENX(L->End()->x);
-		edge.scr_y2 = SCREENY(L->End()->y);
-
-		// completely above or below the screen?
-		if (MAX(edge.scr_y1, edge.scr_y2) < y())
-			continue;
-
-		if (MIN(edge.scr_y1, edge.scr_y2) >= y() + h())
-			continue;
-
-		// skip horizontal lines
-		if (edge.scr_y1 == edge.scr_y2)
-			continue;
-
-		edge.flipped = 0;
-
-		if (edge.scr_y1 > edge.scr_y2)
-		{
-			std::swap(edge.scr_x1, edge.scr_x2);
-			std::swap(edge.scr_y1, edge.scr_y2);
-
-			edge.flipped = 1;
-		}
-
-		// compute usable range, clipping to screen
-		edge.y1 = MAX(edge.scr_y1, y());
-		edge.y2 = MIN(edge.scr_y2, y() + h() - 1);
-
-		// this probably cannot happen....
-		if (edge.y2 < edge.y1)
-			continue;
-
-		min_y = MIN(min_y, edge.y1);
-		max_y = MAX(max_y, edge.y2);
-
-		// compute side
-		bool is_right = (L->WhatSector(SIDE_LEFT) == num);
-
-		if (edge.flipped) is_right = !is_right;
-
-		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
-
-/*
-fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
-n, edge.scr_x1, edge.scr_y1, edge.scr_x2, edge.scr_y2, edge.flipped,
-L->WhatSector(SIDE_RIGHT), L->WhatSector(SIDE_LEFT));
-*/
-
-		// add the edge
-		edge.line = L;
-
-		edgelist.push_back(edge);
-	}
-
-	if (edgelist.empty())
-		return;
-
-	// sort edges into vertical order (i.e. by scr_y1)
-
-	std::sort(edgelist.begin(), edgelist.end(), sector_edge_t::CMP_Y());
-
-
-	/*** Part 2 : traverse edge list and render spans ***/
-
-
-	unsigned int next_edge = 0;
+#ifdef NO_OPENGL
+	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
 	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
 
-	std::vector<sector_edge_t *> active_edges;
-
-	unsigned int i;
-
-	// visit each screen row
-	for (short y = min_y ; y <= max_y ; y++)
+	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
-		// remove old edges from active list
-		for (i = 0 ; i < active_edges.size() ; i++)
-		{
-			if (y > active_edges[i]->y2)
-				active_edges[i] = NULL;
-		}
+		sector_polygon_t *poly = &subdiv->polygons[i];
 
-		// add new edges from active list
-		for ( ; next_edge < edgelist.size() && y == edgelist[next_edge].y1 ; next_edge++)
-		{
-			active_edges.push_back(&edgelist[next_edge]);
-		}
+		float py1 = poly->my[1];  // north most
+		float py2 = poly->my[0];
 
-///  fprintf(stderr, "  active @ y=%d --> %d\n", y, (int)active_edges.size());
+		int sy1 = SCREENY(py1);
+		int sy2 = SCREENY(py2);
 
-		if (active_edges.empty())
+		// clip range to screen
+		sy1 = MAX(sy1, y());
+		sy2 = MIN(sy2, y() + h() - 1);
+
+		// reject polygons vertically off the screen
+		if (sy1 > sy2)
 			continue;
 
-		// sort active edges by X value
-		// [ also puts NULL entries at end, making easy to remove them ]
+		// get left and right edges, unpacking a triangle if necessary
+		float lx1 = poly->mx[1];
+		float lx2 = poly->mx[0];
 
-		for (i = 0 ; i < active_edges.size() ; i++)
+		float rx1 = poly->mx[2];
+		float rx2 = poly->mx[3];
+
+		if (poly->count == 3)
 		{
-			if (active_edges[i])
-				active_edges[i]->CalcX(y);
+			if (poly->my[2] == poly->my[0])
+			{
+				rx1 = poly->mx[1];
+				rx2 = poly->mx[2];
+			}
+			else // my[2] == my[1]
+			{
+				rx2 = poly->mx[0];
+			}
 		}
 
-		std::sort(active_edges.begin(), active_edges.end(), sector_edge_t::CMP_X());
-
-		while (active_edges.size() > 0 && active_edges.back() == NULL)
-			active_edges.pop_back();
-
-		// compute spans
-
-		for (unsigned int i = 1 ; i < active_edges.size() ; i++)
+		// visit each screen row
+		for (short y = (short)sy1 ; y <= (short)sy2 ; y++)
 		{
-			const sector_edge_t * E1 = active_edges[i - 1];
-			const sector_edge_t * E2 = active_edges[i];
-#if 1
-			if (E1 == NULL || E2 == NULL)
-				BugError("RenderSector: did not delete NULLs properly!\n");
-#endif
+			// compute horizontal span
+			float map_y = MAPY(y);
 
-///  fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
-///  E1->x, E1->side, E2->x, E2->side);
+			float lx = lx1 + (lx2 - lx1) * (map_y - py1) / (py2 - py1);
+			float rx = rx1 + (rx2 - rx1) * (map_y - py1) / (py2 - py1);
 
-			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
-				continue;
-
-			// treat lines without a right side as dead
-			if (E1->line->right < 0) continue;
-			if (E2->line->right < 0) continue;
-
-			int x1 = floor(E1->x);
-			int x2 = floor(E2->x);
-
-			// completely off the screen?
-			if (x2 < x() || x1 >= x() + w())
-				continue;
+			int sx1 = SCREENX(floor(lx));
+			int sx2 = SCREENX(ceil(rx));
 
 			// clip span to screen
-			x1 = MAX(x1, x());
-			x2 = MIN(x2, x() + w() - 1);
+			sx1 = MAX(sx1, x());
+			sx2 = MIN(sx2, x() + w() - 1);
 
-			// this probably cannot happen....
-			if (x2 < x1) continue;
+			// reject spans completely off the screen
+			if (sx2 < sx1)
+				continue;
 
 ///  fprintf(stderr, "  span : y=%d  x=%d..%d\n", y, x1, x2);
 
 			// solid color?
 			if (! img)
 			{
-				fl_rectf(x1, y, x2 - x1 + 1, 1);
+				gl_rectf(sx1, y, sx2 - sx1 + 1, 1);
 				continue;
 			}
 
-			int x = x1;
-			int span_w = x2 - x1 + 1;
+			int x = sx1;
+			int span_w = sx2 - sx1 + 1;
 
 			u8_t *dest = line_rgb;
 			u8_t *dest_end = line_rgb + span_w * 3;
 
-			int ty = (0 - (int)MAPY(y)) & 63;
+			// the logic here for non-64x64 textures matches the software
+			// 3D renderer, but is different than ZDoom (which scales them).
+			int ty = (0 - (int)MAPY(y)) & (th - 1);
 
 			for (; dest < dest_end ; dest += 3, x++)
 			{
-				// TODO : be nice to optimize the next line
-				int tx = (int)MAPX(x) & 63;
+				int tx = (int)MAPX(x) & (tw - 1);
 
 				img_pixel_t pix = src_pix[ty * tw + tx];
 
 				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 
-			fl_draw_image(line_rgb, x1, y, span_w, 1);
+			fl_draw_image(line_rgb, sx1, y, span_w, 1);
 		}
 	}
 
 	delete[] line_rgb;
+
+#else // OpenGL
+	if (img)
+	{
+		glColor3f(1, 1, 1);
+
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_ALPHA_TEST);
+
+		glAlphaFunc(GL_GREATER, 0.5);
+
+		img->bind_gl();
+	}
+	else
+	{
+		// color was set above, set texture to solid white
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
+	{
+		sector_polygon_t *poly = &subdiv->polygons[i];
+
+		// draw polygon
+		glBegin(GL_POLYGON);
+
+		for (int p = 0 ; p < poly->count ; p++)
+		{
+			int sx = SCREENX(poly->mx[p]);
+			int sy = SCREENY(poly->my[p]);
+
+			if (img)
+			{
+				// this logic follows ZDoom, which scales large flats to
+				// occupy a 64x64 unit area.  I presume wall textures are
+				// handled similarily....
+				glTexCoord2f(poly->mx[p] / 64.0, poly->my[p] / 64.0);
+			}
+
+			glVertex2i(sx, sy);
+		}
+
+		glEnd();
+	}
+
+	if (img)
+	{
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
+	}
+#endif
 }
 
 //--- editor settings ---

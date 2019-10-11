@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,13 +22,11 @@
 #include "m_config.h"
 #include "e_main.h"		// Map_bound_xxx
 
-#include "ui_scroll.h"
-#include "ui_canvas.h"
 #include "r_render.h"
+#include "ui_window.h"
 
 
 #define HUGE_DIST  (1 << 24)
-
 
 #define SCRBAR_BACK  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 #define SCRBAR_COL   (gui_scheme == 2 ? FL_DARK1 : FL_BACKGROUND_COLOR)
@@ -291,6 +289,7 @@ void UI_Scroll::Line_size(int pixels)
 
 //------------------------------------------------------------------------
 
+#define INFO_BAR_H	30
 
 UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H),
@@ -328,8 +327,10 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	resizable(canvas);
 
 
-	render = new UI_Render3D(X, Y, W, H);
-	render->hide();
+	info3d = new UI_3DInfoBar(X, Y, W, INFO_BAR_H);
+	info3d->hide();
+
+	end();
 }
 
 
@@ -339,48 +340,40 @@ UI_CanvasScroll::~UI_CanvasScroll()
 
 void UI_CanvasScroll::UpdateRenderMode()
 {
-	int old_3d = render->visible() ? 1 : 0;
-	int new_3d = edit.render3d     ? 1 : 0;
+	int old_bars = enable_bars ? 1 : 0;
+	int new_bars = map_scroll_bars && !edit.render3d ? 1 : 0;
 
-	int old_bars = enable_bars     ? 1 : 0;
-	int new_bars = map_scroll_bars ? 1 : 0;
+	int old_rend = info3d->visible() ? 1 : 0;
+	int new_rend = edit.render3d ? 1 : 0;
 
 	// nothing changed?
-	if (old_3d == new_3d && old_bars == new_bars)
+	if (old_bars == new_bars && old_rend == new_rend)
 		return;
 
-	if (old_bars != new_bars)
-	{
-		int b = new_bars ? SBAR_W : 0;
+	int I = edit.render3d ? INFO_BAR_H : 0;
+	int B = new_bars ? SBAR_W : 0;
 
-		canvas->resize(x() + b, y(), w() - b, h() - b);
+	canvas->resize(x() + B, y() + I, w() - B, h() - B - I);
 
-		init_sizes();
+	enable_bars = new_bars;
 
-		enable_bars = map_scroll_bars;
-	}
-
-	if (edit.render3d)
-	{
-		render->show();
-		canvas->hide();
-	}
-	else
-	{
-		canvas->show();
-		render->hide();
-	}
-
-	if (edit.render3d || ! enable_bars)
-	{
-		  vert->hide();
-		 horiz->hide();
-	}
-	else
+	if (enable_bars)
 	{
 		  vert->show();
 		 horiz->show();
 	}
+	else
+	{
+		  vert->hide();
+		 horiz->hide();
+	}
+
+	if (edit.render3d)
+		info3d->show();
+	else
+		info3d->hide();
+
+	init_sizes();
 }
 
 

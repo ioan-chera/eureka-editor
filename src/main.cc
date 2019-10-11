@@ -564,6 +564,10 @@ static void Main_SetupFLTK()
 {
 	Fl::visual(FL_DOUBLE | FL_RGB);
 
+#ifndef NO_OPENGL
+	Fl::gl_visual(FL_RGB);
+#endif
+
 	// disable keyboard navigation, as it often interferes with our
 	// user interface, especially TAB key for toggling the 3D view.
 	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
@@ -644,7 +648,9 @@ static void Main_OpenWindow()
 		argv[1] = NULL;
 
 		main_win->show(argc, argv);
-
+#ifndef NO_OPENGL
+		main_win->canvas->show();  // needed for OpenGL
+#endif
 		app_has_focus = true;
 	}
 
@@ -912,6 +918,10 @@ void Main_LoadResources()
 
 	if (main_win)
 	{
+		// kill all loaded OpenGL images
+		if (main_win->canvas)
+			main_win->canvas->DeleteContext();
+
 		main_win->UpdateGameInfo();
 
 		main_win->browser->Populate();

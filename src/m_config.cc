@@ -651,7 +651,7 @@ static const opt_desc_t options[] =
 		0,
 		OPT_BOOLEAN,
 		"v",
-		"Use highest detail when rendering the 3D view",
+		"Use highest detail when rendering 3D view (software mode)",
 		NULL,
 		&render_high_detail
 	},

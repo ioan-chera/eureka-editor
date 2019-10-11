@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -27,40 +27,123 @@
 #ifndef __EUREKA_R_RENDER__
 #define __EUREKA_R_RENDER__
 
+#include "im_img.h"
 
-class UI_Render3D : public Fl_Widget
+
+struct Render_View_t
 {
 public:
-	UI_Render3D(int X, int Y, int W, int H);
+	// player type and position.
+	int p_type, px, py;
 
-	virtual ~UI_Render3D();
+	// view position.
+	float x, y, z;
 
-	// FLTK virtual methods for drawing / event handling
-	void draw();
+	// view direction.  angle is in radians
+	float angle;
+	float Sin, Cos;
 
-	int handle(int event);
+	// screen buffer.
+	int screen_w, screen_h;
+	img_pixel_t *screen;
 
-	// perform a query to see what the mouse pointer is over.
-	// returns true if something was hit, false otherwise.
-	// [ see the struct definition for more details... ]
-	bool query(Obj3d_t& hl, int sx, int sy);
+	float aspect_sh;
+	float aspect_sw;  // screen_w * aspect_ratio
 
-private:
-	void BlitLores(int ox, int oy, int ow, int oh);
-	void BlitHires(int ox, int oy, int ow, int oh);
+	bool texturing;
+	bool sprites;
+	bool lighting;
 
-	void DrawInfoBar();
+	bool gravity;  // when true, walk on ground
 
-	void IB_Number   (int& cx, int& cy, const char *label, int value, int size);
-	void IB_Flag     (int& cx, int& cy, bool value, const char *label_on, const char *label_off);
-	void IB_Highlight(int& cx, int& cy);
+	std::vector<int> thing_sectors;
+	int thsec_sector_num;
+	bool thsec_invalidated;
+
+	// navigation loop info
+	bool is_scrolling;
+	float scroll_speed;
+
+	unsigned int nav_time;
+
+	float nav_fwd, nav_back;
+	float nav_left, nav_right;
+	float nav_up, nav_down;
+	float nav_turn_L, nav_turn_R;
+
+	/* r_editing_info_t stuff */
+
+	// current highlighted wotsit
+	Obj3d_t hl;
+
+	// current selection
+	std::vector< Obj3d_t > sel;
+
+	obj3d_type_e sel_type;  // valid when sel.size() > 0
+
+	// a remembered highlight (for operation menu)
+	Obj3d_t saved_hl;
+
+	// state for adjusting offsets via the mouse
+	std::vector<int> adjust_sides;
+	std::vector<int> adjust_lines;
+
+	float adjust_dx, adjust_dx_factor;
+	float adjust_dy, adjust_dy_factor;
+
+	std::vector<int> saved_x_offsets;
+	std::vector<int> saved_y_offsets;
+
+public:
+	Render_View_t();
+	~Render_View_t();
+
+	void SetAngle(float new_ang);
+	void FindGroundZ();
+	void CalcAspect();
+	void FindThingSectors();
+
+	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel);
+
+	void UpdateScreen(int ow, int oh);
+	void PrepareToRender(int ow, int oh);
+
+	/* r_editing_info_t stuff */
+
+	bool SelectIsCompat(obj3d_type_e new_type) const;
+	bool SelectEmpty() const;
+	bool SelectGet(const Obj3d_t& obj) const;
+	void SelectToggle(const Obj3d_t& obj);
+
+	int GrabClipboard();
+	void StoreClipboard(int new_val);
+	void AddAdjustSide(const Obj3d_t& obj);
+	float AdjustDistFactor(float view_x, float view_y);
+	void SaveOffsets();
+	void RestoreOffsets();
+
+	int GrabTextureFromObject(const Obj3d_t& obj);
+	int GrabTextureFrom3DSel();
+	void StoreTextureToObject(const Obj3d_t& obj, int new_tex);
+	void StoreTextureTo3DSel(int new_tex);
 };
+
+
+extern Render_View_t r_view;
 
 
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 
 void Render3D_Enable(bool _enable);
+
+// this is basically the FLTK draw() method
+void Render3D_Draw(int ox, int oy, int ow, int oh);
+
+// perform a query to see what the mouse pointer is over.
+// returns true if something was hit, false otherwise.
+// [ see the struct definition for more details... ]
+bool Render3D_Query(Obj3d_t& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
@@ -81,6 +164,14 @@ void Render3D_GetCameraPos(int *x, int *y, float *angle);
 
 bool Render3D_ParseUser(const char ** tokens, int num_tok);
 void Render3D_WriteUser(FILE *fp);
+
+
+/* API for rendering a scene (etc) */
+
+void SW_RenderWorld(int ox, int oy, int ow, int oh);
+bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy);
+
+void RGL_RenderWorld(int ox, int oy, int ow, int oh);
 
 #endif  /* __EUREKA_R_RENDER__ */
 

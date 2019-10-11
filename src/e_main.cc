@@ -35,6 +35,7 @@
 #include "e_things.h"
 #include "e_vertex.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -112,10 +113,10 @@ void RedrawMap()
 
 	UpdateHighlight();
 
+	main_win->canvas->redraw();
+
 	if (edit.render3d)
-		main_win->render->redraw();
-	else
-		main_win->canvas->redraw();
+		main_win->scroll->info3d->redraw();
 }
 
 
@@ -316,7 +317,9 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 	edit.highlight.clear();
 	edit.split_line.clear();
 
-	SectorCache_Invalidate();
+	// this is not strictly necessary, but provides a way for the
+	// user to "re-sync" the sector subdivision cache.
+	Subdiv_InvalidateAll();
 }
 
 
@@ -447,14 +450,15 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
 		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
 
-		SectorCache_Invalidate();
+		// TODO: only invalidate sectors touching vertex
+		Subdiv_InvalidateAll();
 	}
 
 	if (type == OBJ_SIDEDEFS && field == SideDef::F_SECTOR)
-		SectorCache_Invalidate();
+		Subdiv_InvalidateAll();
 
 	if (type == OBJ_LINEDEFS && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
-		SectorCache_Invalidate();
+		Subdiv_InvalidateAll();
 }
 
 void MapStuff_NotifyEnd()

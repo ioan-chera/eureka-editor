@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,6 +28,13 @@
 
 #include "im_img.h"
 #include "m_game.h"
+
+#ifdef WIN32
+#ifndef NO_OPENGL
+// need this for GL_UNSIGNED_INT_8_8_8_8_REV
+#include "GL/glext.h"
+#endif
+#endif
 
 
 static int missing_tex_color;
@@ -65,7 +72,7 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 //
 // default constructor, creating a null image
 //
-Img_c::Img_c() : pixels(NULL), w(0), h(0)
+Img_c::Img_c() : pixels(NULL), w(0), h(0), gl_tex(0)
 { }
 
 
@@ -73,7 +80,7 @@ Img_c::Img_c() : pixels(NULL), w(0), h(0)
 // a constructor with dimensions
 //
 Img_c::Img_c(int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0)
+	pixels(NULL), w(0), h(0), gl_tex(0)
 {
 	resize(width, height);
 }
@@ -314,6 +321,105 @@ void Img_c::test_make_RGB()
 }
 
 
+#ifdef NO_OPENGL
+
+void Img_c::load_gl() {}
+void Img_c::unload_gl(bool can_delete) {}
+void Img_c::bind_gl() {}
+
+#else
+
+void Img_c::load_gl()
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glGenTextures(1, &gl_tex);
+	glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+	// construct a power-of-two sized bottom-up RGBA image
+	int tw = RoundPOW2(w);
+	int th = RoundPOW2(h);
+
+	byte *rgba = new byte[tw * th * 4];
+
+	memset(rgba, 0, (size_t)(tw * th * 4));
+
+	bool has_trans = has_transparent();
+
+	int ex = has_trans ? w : tw;
+	int ey = has_trans ? h : th;
+
+	int x, y;
+
+	for (y = 0 ; y < ey ; y++)
+	{
+		// invert source Y for OpenGL
+		int sy = h - 1 - y;
+		if (sy < 0)
+			sy += h;
+
+		for (x = 0 ; x < ex ; x++)
+		{
+			int sx = x;
+			if (sx >= w)
+				sx = x - w;
+
+			// convert pixel to RGBA
+			const img_pixel_t pix = buf()[sy*w + sx];
+
+			if (pix != TRANS_PIXEL)
+			{
+				byte r, g, b;
+
+				IM_DecodePixel(pix, r, g, b);
+
+				byte *dest = rgba + (y*tw + x) * 4;
+
+				dest[0] = b;
+				dest[1] = g;
+				dest[2] = r;
+				dest[3] = 255;
+			}
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexImage2D(GL_TEXTURE_2D, 0 /* mip */,
+		GL_RGBA8, tw, th, 0 /* border */,
+		GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV, rgba);
+
+	delete[] rgba;
+}
+
+
+void Img_c::unload_gl(bool can_delete)
+{
+	if (can_delete && gl_tex != 0)
+	{
+		glDeleteTextures(1, &gl_tex);
+	}
+
+	gl_tex = 0;
+}
+
+
+void Img_c::bind_gl()
+{
+	// create the GL texture if we haven't already
+	if (gl_tex == 0)
+	{
+		// this will do a glBindTexture
+		load_gl();
+		return;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, gl_tex);
+}
+
+#endif
+
 //------------------------------------------------------------------------
 
 
@@ -323,6 +429,24 @@ void IM_ResetDummyTextures()
 	unknown_tex_color  = -1;
 	unknown_flat_color = -1;
 	unknown_sprite_color = -1;
+}
+
+
+void IM_UnloadDummyTextures()
+{
+	bool can_delete = false;
+
+	if (missing_tex_image)
+		missing_tex_image->unload_gl(can_delete);
+
+	if (unknown_tex_image)
+		unknown_tex_image->unload_gl(can_delete);
+
+	if (unknown_flat_image)
+		unknown_flat_image->unload_gl(can_delete);
+
+	if (unknown_sprite_image)
+		unknown_sprite_image->unload_gl(can_delete);
 }
 
 

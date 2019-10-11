@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,7 +23,9 @@
 
 #include "e_main.h"
 #include "m_config.h"
+#include "m_game.h"
 #include "r_grid.h"
+#include "r_render.h"
 
 
 #define SNAP_COLOR  (gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
@@ -350,6 +352,140 @@ void Status_Clear()
 		return;
 
 	main_win->info_bar->SetStatus("");
+}
+
+
+//------------------------------------------------------------------------
+
+
+#define INFO_TEXT_COL	fl_rgb_color(192, 192, 192)
+#define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
+
+
+UI_3DInfoBar::UI_3DInfoBar(int X, int Y, int W, int H, const char *label) :
+    Fl_Widget(X, Y, W, H, label)
+{
+	box(FL_NO_BOX);
+}
+
+UI_3DInfoBar::~UI_3DInfoBar()
+{
+}
+
+
+int UI_3DInfoBar::handle(int event)
+{
+	// this never handles any events
+	return 0;
+}
+
+void UI_3DInfoBar::draw()
+{
+	fl_color(FL_BLACK);
+	fl_rectf(x(), y(), w(), h());
+
+	fl_push_clip(x(), y(), w(), h());
+
+	fl_font(FL_COURIER, 16);
+
+	int cx = x() + 10;
+	int cy = y() + 20;
+
+	int ang = I_ROUND(r_view.angle * 180 / M_PI);
+	if (ang < 0) ang += 360;
+
+	IB_Number(cx, cy, "angle", ang, 3);
+	cx += 8;
+
+	IB_Number(cx, cy, "z", I_ROUND(r_view.z) - game_info.view_height, 4);
+
+	IB_Number(cx, cy, "gamma", usegamma, 1);
+	cx += 10;
+
+	IB_Flag(cx, cy, r_view.gravity, "GRAVITY", "gravity");
+
+	IB_Flag(cx, cy, true, "|", "|");
+
+	IB_Highlight(cx, cy);
+
+	fl_pop_clip();
+}
+
+
+void UI_3DInfoBar::IB_Number(int& cx, int& cy, const char *label, int value, int size)
+{
+	char buffer[256];
+
+	// negative size means we require a sign
+	if (size < 0)
+		sprintf(buffer, "%s:%-+*d ", label, -size + 1, value);
+	else
+		sprintf(buffer, "%s:%-*d ", label, size, value);
+
+	fl_color(INFO_TEXT_COL);
+
+	fl_draw(buffer, cx, cy);
+
+	cx = cx + fl_width(buffer);
+}
+
+
+void UI_3DInfoBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+{
+	const char *label = value ? label_on : label_off;
+
+	fl_color(value ? INFO_TEXT_COL : INFO_DIM_COL);
+
+	fl_draw(label, cx, cy);
+
+	cx = cx + fl_width(label) + 20;
+}
+
+
+void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
+{
+	char buffer[256];
+
+	if (! r_view.hl.valid())
+	{
+		fl_color(INFO_DIM_COL);
+
+		strcpy(buffer, "no highlight");
+	}
+	else
+	{
+		fl_color(INFO_TEXT_COL);
+
+		if (r_view.hl.isThing())
+		{
+			const Thing *th = Things[r_view.hl.num];
+			const thingtype_t *info = M_GetThingType(th->type);
+
+			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
+					 r_view.hl.num, info->desc);
+
+		}
+		else if (r_view.hl.isSector())
+		{
+			int tex = r_view.GrabTextureFromObject(r_view.hl);
+
+			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
+					 r_view.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+		else
+		{
+			int tex = r_view.GrabTextureFromObject(r_view.hl);
+
+			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
+					 r_view.hl.num,
+					 (tex < 0) ? "??????" : BA_GetString(tex));
+		}
+	}
+
+	fl_draw(buffer, cx, cy);
+
+	cx = cx + fl_width(buffer);
 }
 
 //--- editor settings ---

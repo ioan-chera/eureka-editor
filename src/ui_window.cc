@@ -92,7 +92,6 @@ UI_MainWindow::UI_MainWindow() :
 	scroll = new UI_CanvasScroll(0, cy, cw, ch);
 
 	canvas = scroll->canvas;
-	render = scroll->render;
 
 	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
 

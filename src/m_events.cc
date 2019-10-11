@@ -441,9 +441,6 @@ static void EV_EnterWindow()
 	// restore keyboard focus to the canvas
 	Fl_Widget * foc = main_win->canvas;
 
-	if (edit.render3d)
-		foc = main_win->render;
-
 	if (Fl::focus() != foc)
 		foc->take_focus();
 

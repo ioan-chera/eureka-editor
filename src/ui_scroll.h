@@ -88,14 +88,13 @@ private:
 
 
 class UI_Canvas;
-class UI_Render3D;
 
 class UI_CanvasScroll : public Fl_Group
 {
 public:
 	UI_Canvas * canvas;
 
-	UI_Render3D * render;
+	UI_3DInfoBar * info3d;
 
 private:
 	Fl_Scrollbar * horiz;
