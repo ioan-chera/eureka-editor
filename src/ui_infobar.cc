@@ -46,33 +46,41 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	H -= 4;
 
 
-	mode = new Fl_Choice(X+58, Y, 88, H, "Mode:");
-	mode->align(FL_ALIGN_LEFT);
+	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 56, H, "Mode:");
+	mode_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	mode_lab->labelsize(KF_fonth);
+
+
+	mode = new Fl_Menu_Button(X+58, Y, 96, H, "Things");
+	mode->align(FL_ALIGN_INSIDE);
 	mode->add("Things|Linedefs|Sectors|Vertices");
-	mode->value(0);
 	mode->callback(mode_callback, this);
 	mode->labelsize(KF_fonth);
-	mode->textsize(KF_fonth - 2);
 
 	X = mode->x() + mode->w() + 10;
 
 
-	scale = new Fl_Choice(X+52, Y, 78, H, "Scale:");
-	scale->align(FL_ALIGN_LEFT);
+	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 50, H, "Scale:");
+	scale_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	scale_lab->labelsize(KF_fonth);
+
+	scale = new Fl_Menu_Button(X+52, Y, 78, H, "100%");
+	scale->align(FL_ALIGN_INSIDE);
 	scale->add(Grid_State_c::scale_options());
-	scale->value(8);
 	scale->callback(scale_callback, this);
 	scale->labelsize(KF_fonth);
-	scale->textsize(KF_fonth);
 
 	X = scale->x() + scale->w() + 10;
 
 
-	grid_size = new Fl_Choice(X+44, Y, 72, H, "Grid:");
+	Fl_Box *gs_lab = new Fl_Box(FL_NO_BOX, X, Y, 42, H, "Grid:");
+	gs_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	gs_lab->labelsize(KF_fonth);
 
-	grid_size->align(FL_ALIGN_LEFT);
+	grid_size = new Fl_Menu_Button(X+44, Y, 72, H, "OFF");
+
+	grid_size->align(FL_ALIGN_INSIDE);
 	grid_size->add(Grid_State_c::grid_options());
-	grid_size->value(1);
 	grid_size->callback(grid_callback, this);
 	grid_size->labelsize(KF_fonth);
 	grid_size->textsize(KF_fonth);
@@ -137,7 +145,7 @@ int UI_InfoBar::handle(int event)
 
 void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 {
-	Fl_Choice *mode = (Fl_Choice *)w;
+	Fl_Menu_Button *mode = (Fl_Menu_Button *)w;
 
 	static const char *mode_keys = "tlsvr";
 
@@ -147,17 +155,17 @@ void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 
 void UI_InfoBar::scale_callback(Fl_Widget *w, void *data)
 {
-	Fl_Choice *choice = (Fl_Choice *)w;
+	Fl_Menu_Button *scale = (Fl_Menu_Button *)w;
 
-	grid.ScaleFromWidget(choice->value());
+	grid.ScaleFromWidget(scale->value());
 }
 
 
 void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 {
-	Fl_Choice *choice = (Fl_Choice *)w;
+	Fl_Menu_Button *size = (Fl_Menu_Button *)w;
 
-	grid.StepFromWidget(choice->value());
+	grid.StepFromWidget(size->value());
 }
 
 
@@ -224,72 +232,24 @@ void UI_InfoBar::SetStatus(const char *str)
 
 void UI_InfoBar::SetScale(int i)
 {
-	scale->value(i);
+	const Fl_Menu_Item *items = scale->menu();
+
+	scale->label(items[i].text);
 }
 
 void UI_InfoBar::SetGrid(int i)
 {
-	grid_size->value(i);
-}
-
-
-#if 0
-
-void UI_InfoBar::SetZoom(float zoom_mul)
-{
-	char buffer[60];
-
-	///  if (0.99 < zoom_mul && zoom_mul < 1.01)
-	///  {
-	///    grid_size->value("1:1");
-	///    return;
-	///  }
-
-	if (zoom_mul < 0.99)
+	if (i < 0)
 	{
-		sprintf(buffer, "/ %1.3f", 1.0/zoom_mul);
-	}
-	else // zoom_mul > 1
-	{
-		sprintf(buffer, "x %1.3f", zoom_mul);
-	}
-
-	grid_size->value(buffer);
-}
-
-
-void UI_InfoBar::SetNodeIndex(int index)
-{
-#if 0
-	char buffer[60];
-
-	sprintf(buffer, "%d", index);
-
-	ns_index->label("Node #");
-	ns_index->value(buffer);
-
-	redraw();
-#endif
-}
-
-
-void UI_InfoBar::SetWhich(int index, int total)
-{
-	if (index < 0)
-	{
-		which->label(INDEX_NONE_STR);
+		grid_size->label("OFF");
 	}
 	else
 	{
-		char buffer[200];
-		sprintf(buffer, "Index: #%d of %d", index, total);
+		const Fl_Menu_Item *items = grid_size->menu();
 
-		which->copy_label(buffer);
+		grid_size->label(items[i].text);
 	}
-
-	redraw();
 }
-#endif
 
 
 void UI_InfoBar::UpdateSnap()
@@ -304,10 +264,10 @@ void UI_InfoBar::UpdateModeColor()
 {
 	switch (mode->value())
 	{
-		case 0: /* Things   */ mode->color(THING_MODE_COL);  break;
-		case 1: /* Linedefs */ mode->color(LINE_MODE_COL);   break;
-		case 2: /* Sectors  */ mode->color(SECTOR_MODE_COL); break;
-		case 3: /* Vertices */ mode->color(VERTEX_MODE_COL); break;
+		case 0: mode->label("Things");   mode->color(THING_MODE_COL);  break;
+		case 1: mode->label("Linedefs"); mode->color(LINE_MODE_COL);   break;
+		case 2: mode->label("Sectors");  mode->color(SECTOR_MODE_COL); break;
+		case 3: mode->label("Vertices"); mode->color(VERTEX_MODE_COL); break;
 	}
 }
 

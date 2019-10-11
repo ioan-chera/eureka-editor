@@ -28,18 +28,17 @@ public:
 	UI_InfoBar(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_InfoBar();
 
-public:
-	Fl_Choice *mode;
-	Fl_Choice *scale;
+private:
+	Fl_Menu_Button *mode;
+	Fl_Menu_Button *scale;
+	Fl_Menu_Button *grid_size;
 
-	Fl_Choice *grid_size;
 	Fl_Toggle_Button *grid_snap;
 
 	Fl_Output *mouse_x;
 	Fl_Output *mouse_y;
 
 	Fl_Box *status;
-
 
 public:
 	// FLTK virtual method for handling input events.

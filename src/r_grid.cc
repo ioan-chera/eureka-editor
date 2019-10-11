@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -54,13 +54,13 @@ Grid_State_c::~Grid_State_c()
 
 void Grid_State_c::Init()
 {
-	step = grid_default_size - 1;
+	step = grid_default_size;
 
 	if (step < 1)
 		step = 1;
 
-	if (step >= grid_values[1])
-		step =  grid_values[1] - 1;
+	if (step > grid_values[0])
+		step = grid_values[0];
 
 	shown = true;  // prevent a beep in AdjustStep
 
@@ -71,7 +71,7 @@ void Grid_State_c::Init()
 		shown = false;
 
 		if (main_win)
-			main_win->info_bar->SetGrid(0);
+			main_win->info_bar->SetGrid(-1);
 	}
 	else
 	{
@@ -235,9 +235,9 @@ const int Grid_State_c::digit_scales[] =
 
 const int Grid_State_c::grid_values[] =
 {
-	-1 /* OFF */,
+	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
 
-	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2
+	-1 /* OFF */,
 };
 
 #define NUM_SCALE_VALUES  18
@@ -253,7 +253,7 @@ const char *Grid_State_c::scale_options()
 
 const char *Grid_State_c::grid_options()
 {
-	return "OFF|1024|512|256|192|128| 64| 32| 16|  8|  4|  2";
+	return "1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
 }
 
 
@@ -268,6 +268,7 @@ void Grid_State_c::ScaleFromWidget(int i)
 
 	main_win->scroll->AdjustPos();
 	main_win->canvas->PointerPos();
+	main_win->info_bar->SetScale(i);
 
 	RedrawMap();
 }
@@ -283,7 +284,7 @@ void Grid_State_c::SetStep(int new_step)
 	int best = 0;
 	int best_dist = 999999;
 
-	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+	for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
 	{
 		int dist = abs(grid_values[i] - new_step);
 
@@ -305,15 +306,20 @@ void Grid_State_c::StepFromWidget(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_GRID_VALUES);
 
-	if (i == 0)  /* OFF */
+	if (i == NUM_GRID_VALUES-1)  /* OFF */
 	{
 		shown = false;
+
+		if (main_win)
+			main_win->info_bar->SetGrid(-1);
 	}
 	else
 	{
 		shown = true;
+		step  = grid_values[i];
 
-		step = grid_values[i];
+		if (main_win)
+			main_win->info_bar->SetGrid(i);
 	}
 
 	if (grid_hide_in_free_mode)
@@ -327,9 +333,9 @@ void Grid_State_c::StepFromScale()
 {
 	int pixels_min = 16;
 
-	int result = 1;
+	int result = 0;
 
-	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+	for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
 	{
 		result = i;
 
@@ -358,7 +364,7 @@ void Grid_State_c::AdjustStep(int delta)
 
 	if (delta > 0)
 	{
-		for (int i = NUM_GRID_VALUES-1 ; i >= 1 ; i--)
+		for (int i = NUM_GRID_VALUES-2 ; i >= 0 ; i--)
 		{
 			if (grid_values[i] > step)
 			{
@@ -369,7 +375,7 @@ void Grid_State_c::AdjustStep(int delta)
 	}
 	else // (delta < 0)
 	{
-		for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+		for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
 		{
 			if (grid_values[i] < step)
 			{
@@ -384,9 +390,6 @@ void Grid_State_c::AdjustStep(int delta)
 		return;
 
 	StepFromWidget(result);
-
-	if (main_win)
-		main_win->info_bar->SetGrid(result);
 }
 
 
@@ -420,9 +423,6 @@ void Grid_State_c::AdjustScale(int delta)
 	// already at the extreme end?
 	if (result < 0)
 		return;
-
-	if (main_win)
-		main_win->info_bar->SetScale(result);
 
 	ScaleFromWidget(result);
 }
@@ -466,13 +466,13 @@ void Grid_State_c::DoSetShown(bool new_value)
 
 	if (! shown)
 	{
-		main_win->info_bar->SetGrid(0);
+		main_win->info_bar->SetGrid(-1);
 		RedrawMap();
 		return;
 	}
 
 	// update the info-bar
-	for (int i = 1 ; i < NUM_GRID_VALUES ; i++)
+	for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
 	{
 		if (grid_values[i] == step)
 		{
@@ -532,9 +532,6 @@ void Grid_State_c::NearestScale(double want_scale)
 		if (scale_values[i] < want_scale * 1.1)
 			break;
 	}
-
-	if (main_win)
-		main_win->info_bar->SetScale(best);
 
 	ScaleFromWidget(best);
 }
