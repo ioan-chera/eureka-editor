@@ -578,7 +578,7 @@ bool UI_LineBox::ClipboardOp(char op)
 
 void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
-	if (kind == 'T')
+	if (kind == 'T' || kind == 'F')
 	{
 		SetTexture(name, e_state);
 	}

@@ -60,11 +60,7 @@ public:
 private:
 	void SetIntVal(Fl_Int_Input *w, int value);
 	void UpdateThingDesc();
-
-	void SetTexture(const char *name, int e_state);
-	void SetFlat(const char *name, int e_state);
 	void SetThing(int number);
-	void UnselectPicSet(char what /* 'f' or 't' */);
 
 	void CB_Copy  (int sel_pics);
 	void CB_Paste (int sel_pics);

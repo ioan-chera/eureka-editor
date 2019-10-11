@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -38,6 +38,7 @@ public:
 
 	int number;
 
+	char kind;  // generally matches browser kind: T/F/O/S/L
 	char category;
 
 	int recent_idx;
@@ -50,12 +51,12 @@ public:
 	// this constructor makes a simple text button
 	Browser_Item(int X, int Y, int W, int H,
 	             const char *_desc, const char *_realname,
-				 int _num, char _category);
+				 int _num, char _kind, char _category);
 
 	// this constructor makes a picture with a text label below it
 	Browser_Item(int X, int Y, int W, int H,
 	             const char * _desc, const char *_realname,
-				 int _num, char _category,
+				 int _num, char _kind, char _category,
 	             int pic_w, int pic_h, UI_Pic *_pic);
 
 	virtual ~Browser_Item();
@@ -83,6 +84,9 @@ private:
 
 	Fl_Check_Button *alpha;
 	Fl_Check_Button *pics;
+
+	Fl_Check_Button *do_tex;
+	Fl_Check_Button *do_flats;
 
 	UI_Scroll *scroll;
 
@@ -127,7 +131,7 @@ private:
 
 	bool SearchMatch(Browser_Item *item) const;
 
-	void Populate_Images(std::map<std::string, Img_c *> & img_list);
+	void Populate_Images(char imkind, std::map<std::string, Img_c *> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();

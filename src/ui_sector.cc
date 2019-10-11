@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2018 Andrew Apted
+//  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -944,7 +944,7 @@ bool UI_SectorBox::ClipboardOp(char op)
 
 void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
-	if (kind == 'F')
+	if (kind == 'F' || kind == 'T')
 	{
 		SetFlat(name, e_state);
 	}

@@ -79,6 +79,7 @@ extern int backup_max_files;
 extern int backup_max_space;
 
 extern bool browser_small_tex;
+extern bool browser_combine_tex;
 
 extern int floor_bump_small;
 extern int floor_bump_medium;

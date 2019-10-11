@@ -44,6 +44,7 @@
 
 
 std::map<std::string, Img_c *> textures;
+std::map<std::string, Img_c *> flats;
 
 // textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 static std::map<std::string, int> medusa_textures;
@@ -497,7 +498,6 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 		return NULL;
 
 	std::string t_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
 	if (P != textures.end())
@@ -506,6 +506,14 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 	if (try_uppercase)
 	{
 		return W_GetTexture(NormalizeTex(name), false);
+	}
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
+
+		if (P != flats.end())
+			return P->second;
 	}
 
 	return NULL;
@@ -532,10 +540,20 @@ bool W_TextureIsKnown(const char *name)
 		return false;
 
 	std::string t_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
 
-	return (P != textures.end());
+	if (P != textures.end())
+		return true;
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
+
+		if (P != flats.end())
+			return true;
+	}
+
+	return false;
 }
 
 
@@ -570,10 +588,6 @@ const char *NormalizeTex(const char *name)
 //----------------------------------------------------------------------
 //    FLAT HANDLING
 //----------------------------------------------------------------------
-
-
-std::map<std::string, Img_c *> flats;
-
 
 static void DeleteFlat(const std::map<std::string, Img_c *>::value_type& P)
 {
@@ -667,11 +681,18 @@ void W_LoadFlats()
 Img_c * W_GetFlat(const char *name, bool try_uppercase)
 {
 	std::string f_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
 
 	if (P != flats.end())
 		return P->second;
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
+
+		if (P != textures.end())
+			return P->second;
+	}
 
 	if (try_uppercase)
 	{
@@ -692,10 +713,20 @@ bool W_FlatIsKnown(const char *name)
 		return false;
 
 	std::string f_str = name;
-
 	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
 
-	return (P != flats.end());
+	if (P != flats.end())
+		return true;
+
+	if (game_info.mix_textures_flats)
+	{
+		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
+
+		if (P != textures.end())
+			return true;
+	}
+
+	return false;
 }
 
 

@@ -1041,12 +1041,15 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 	if (r_view.SelectEmpty())
 		return false;
 
-	if (kind == 'O' && r_view.sel_type == OB3D_Thing)
+	if (kind == 'F')
+		kind = 'T';
+
+	if (kind == 'O' && r_edit.sel_type == OB3D_Thing)
 	{
 		r_view.StoreTextureTo3DSel(number);
 		return true;
 	}
-	else if (kind == 'F' && r_view.sel_type <= OB3D_Floor)
+	else if (kind == 'T' && r_edit.sel_type <= OB3D_Floor)
 	{
 		int new_flat = BA_InternaliseString(name);
 		r_view.StoreTextureTo3DSel(new_flat);

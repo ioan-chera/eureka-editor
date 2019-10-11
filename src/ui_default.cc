@@ -200,36 +200,6 @@ void UI_DefaultProps::UpdateThingDesc()
 }
 
 
-void UI_DefaultProps::SetTexture(const char *name, int e_state)
-{
-	w_tex->value(name);
-	w_tex->do_callback();
-}
-
-
-void UI_DefaultProps::SetFlat(const char *name, int e_state)
-{
-	// same logic as in UI_SectorBox::SetFlat()
-
-	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
-					(c_pic->Selected() ? 2 : 0);
-
-	if (sel_pics == 0)
-		sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;
-
-	if (sel_pics & 1)
-	{
-		f_tex->value(name);
-		f_tex->do_callback();
-	}
-	if (sel_pics & 2)
-	{
-		c_tex->value(name);
-		c_tex->do_callback();
-	}
-}
-
-
 void UI_DefaultProps::SetThing(int number)
 {
 	default_thing = number;
@@ -237,21 +207,6 @@ void UI_DefaultProps::SetThing(int number)
 	thing->value(Int_TmpStr(default_thing));
 
 	UpdateThingDesc();
-}
-
-
-void UI_DefaultProps::UnselectPicSet(char what /* 'f' or 't' */)
-{
-	if (what == 'f')
-	{
-		f_pic->Selected(false);
-		c_pic->Selected(false);
-	}
-
-	if (what == 't')
-	{
-		w_pic->Selected(false);
-	}
 }
 
 
@@ -278,10 +233,8 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		Render3D_ClearSelection();
 
 		if (pic->Selected())
-		{
-			box->UnselectPicSet('f');
 			main_win->BrowserMode('T');
-		}
+
 		return;
 	}
 
@@ -308,10 +261,8 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		Render3D_ClearSelection();
 
 		if (pic->Selected())
-		{
-			box->UnselectPicSet('t');
 			main_win->BrowserMode('F');
-		}
+
 		return;
 	}
 
@@ -537,23 +488,54 @@ bool UI_DefaultProps::ClipboardOp(char op)
 
 void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
-	switch (kind)
+	if (kind == 'O')
 	{
-		case 'T': SetTexture(name, e_state); break;
-		case 'F': SetFlat   (name, e_state); break;
-		case 'O': SetThing(number); break;
+		SetThing(number);
+		return;
+	}
 
-		default:
-			fl_beep();
-			break;
+	if (! (kind == 'T' || kind == 'F'))
+	{
+		fl_beep();
+		return;
+	}
+
+	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
+					(c_pic->Selected() ? 2 : 0) |
+					(w_pic->Selected() ? 4 : 0);
+
+	if (sel_pics == 0)
+	{
+		if (kind == 'T')
+			sel_pics = 4;
+		else
+			sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;
+	}
+
+
+	if (sel_pics & 1)
+	{
+		f_tex->value(name);
+		f_tex->do_callback();
+	}
+	if (sel_pics & 2)
+	{
+		c_tex->value(name);
+		c_tex->do_callback();
+	}
+	if (sel_pics & 4)
+	{
+		w_tex->value(name);
+		w_tex->do_callback();
 	}
 }
 
 
 void UI_DefaultProps::UnselectPics()
 {
-	UnselectPicSet('f');
-	UnselectPicSet('t');
+	w_pic->Selected(false);
+	f_pic->Selected(false);
+	c_pic->Selected(false);
 }
 
 
