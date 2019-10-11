@@ -545,10 +545,14 @@ bool UI_Browser_Box::Recent_UpdateItem(Browser_Item *item)
 	{
 		case 'T':
 			new_idx = recent_textures.find(item->real_name.c_str());
+			if (new_idx < 0)
+				new_idx = recent_flats.find(item->real_name.c_str());
 			break;
 
 		case 'F':
 			new_idx = recent_flats.find(item->real_name.c_str());
+			if (new_idx < 0)
+				new_idx = recent_textures.find(item->real_name.c_str());
 			break;
 
 		case 'O':
