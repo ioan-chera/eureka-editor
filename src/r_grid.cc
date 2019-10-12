@@ -244,20 +244,7 @@ const int Grid_State_c::grid_values[] =
 #define NUM_GRID_VALUES   12
 
 
-const char *Grid_State_c::scale_options()
-{
-	return  "x 32|x 16|x 8|x 6|x 4|x 3|x 2|x 1.5|"
-			" 100% |"
-			"/ 1.5|/ 2|/ 3|/ 4|/ 6|/ 8|/ 16|/ 32|/ 64";
-}
-
-const char *Grid_State_c::grid_options()
-{
-	return "1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
-}
-
-
-void Grid_State_c::ScaleFromWidget(int i)
+void Grid_State_c::RawSetScale(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_SCALE_VALUES);
 
@@ -268,41 +255,13 @@ void Grid_State_c::ScaleFromWidget(int i)
 
 	main_win->scroll->AdjustPos();
 	main_win->canvas->PointerPos();
-	main_win->info_bar->SetScale(i);
+	main_win->info_bar->SetScale(Scale);
 
 	RedrawMap();
 }
 
 
-void Grid_State_c::SetStep(int new_step)
-{
-	step = new_step;
-
-	shown = true;
-
-	// find closest value in info bar
-	int best = 0;
-	int best_dist = 999999;
-
-	for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
-	{
-		int dist = abs(grid_values[i] - new_step);
-
-		if (dist < best_dist)
-		{
-			best = i;
-			best_dist = dist;
-		}
-	}
-
-	if (main_win)
-		main_win->info_bar->SetGrid(best);
-
-	RedrawMap();
-}
-
-
-void Grid_State_c::StepFromWidget(int i)
+void Grid_State_c::RawSetStep(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_GRID_VALUES);
 
@@ -319,11 +278,23 @@ void Grid_State_c::StepFromWidget(int i)
 		step  = grid_values[i];
 
 		if (main_win)
-			main_win->info_bar->SetGrid(i);
+			main_win->info_bar->SetGrid(step);
 	}
 
 	if (grid_hide_in_free_mode)
 		SetSnap(shown);
+
+	RedrawMap();
+}
+
+
+void Grid_State_c::ForceStep(int new_step)
+{
+	step  = new_step;
+	shown = true;
+
+	if (main_win)
+		main_win->info_bar->SetGrid(step);
 
 	RedrawMap();
 }
@@ -389,7 +360,7 @@ void Grid_State_c::AdjustStep(int delta)
 	if (result < 0)
 		return;
 
-	StepFromWidget(result);
+	RawSetStep(result);
 }
 
 
@@ -424,40 +395,11 @@ void Grid_State_c::AdjustScale(int delta)
 	if (result < 0)
 		return;
 
-	ScaleFromWidget(result);
+	RawSetScale(result);
 }
 
 
-void Grid_State_c::DoSetScale(double new_scale)
-{
-	int index = 10;  // meh
-
-	for (int i = NUM_SCALE_VALUES-1 ; i >= 0 ; i--)
-	{
-		float ratio = scale_values[i] / new_scale;
-
-		if (ratio > 0.99 && ratio < 1.01)
-		{
-			index = i;
-			break;
-		}
-	}
-
-	Scale = scale_values[index];
-
-	if (main_win)
-	{
-		main_win->info_bar->SetScale(index);
-
-		main_win->scroll->AdjustPos();
-		main_win->canvas->PointerPos();
-
-		RedrawMap();
-	}
-}
-
-
-void Grid_State_c::DoSetShown(bool new_value)
+void Grid_State_c::RawSetShown(bool new_value)
 {
 	shown = new_value;
 
@@ -487,7 +429,7 @@ void Grid_State_c::DoSetShown(bool new_value)
 
 void Grid_State_c::SetShown(bool enable)
 {
-	DoSetShown(enable);
+	RawSetShown(enable);
 
 	if (grid_hide_in_free_mode)
 		SetSnap(enable);
@@ -533,7 +475,7 @@ void Grid_State_c::NearestScale(double want_scale)
 			break;
 	}
 
-	ScaleFromWidget(best);
+	RawSetScale(best);
 }
 
 
@@ -548,7 +490,7 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		double new_scale = atof(tokens[3]);
 
-		grid.DoSetScale(new_scale);
+		grid.NearestScale(new_scale);
 
 		RedrawMap();
 		return true;
@@ -562,7 +504,7 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 
 		// tokens[2] was grid.mode, currently unused
 
-		grid.DoSetShown(t_shown);
+		grid.RawSetShown(t_shown);
 
 		RedrawMap();
 

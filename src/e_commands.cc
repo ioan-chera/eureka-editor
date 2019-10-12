@@ -1085,7 +1085,7 @@ void CMD_GRID_Set()
 		return;
 	}
 
-	grid.SetStep(step);
+	grid.ForceStep(step);
 }
 
 

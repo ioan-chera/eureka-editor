@@ -51,19 +51,27 @@ public:
 
 	void SetMouse(double mx, double my);
 
-	void SetScale(int i);  // called from Grid_State_c ONLY!
-	void SetGrid(int i);   // called from Grid_State_c
+	void SetScale(double new_scale);
+	void SetGrid(int new_grid);
 
 	void UpdateSnap();
 
 private:
+	static const char  *scale_options_str;
+	static const double scale_amounts[8];
+
+	static const char *grid_options_str;
+	static const int   grid_amounts[12];
+
 	void UpdateModeColor();
 	void UpdateSnapText();
 
-	static void  mode_callback(Fl_Widget *, void *);
+	static void mode_callback(Fl_Widget *, void *);
 	static void scale_callback(Fl_Widget *, void *);
-	static void  grid_callback(Fl_Widget *, void *);
-	static void  snap_callback(Fl_Widget *, void *);
+	static void sc_minus_callback(Fl_Widget *, void *);
+	static void sc_plus_callback(Fl_Widget *, void *);
+	static void grid_callback(Fl_Widget *, void *);
+	static void snap_callback(Fl_Widget *, void *);
 };
 
 

@@ -32,6 +32,24 @@
 #define FREE_COLOR  (gui_scheme == 2 ? fl_rgb_color(0,192,0) : fl_rgb_color(128, 255, 128))
 
 
+const char *UI_InfoBar::scale_options_str =
+	"400%|200%|100%| 50%| 33%| 25%| 12%|  6%";
+
+const double UI_InfoBar::scale_amounts[8] =
+{
+	4.0, 2.0, 1.0, 0.5, 0.33333, 0.25, 0.125, 0.0625
+};
+
+const char *UI_InfoBar::grid_options_str =
+	"1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
+
+const int UI_InfoBar::grid_amounts[12] =
+{
+	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
+	-1 /* OFF */
+};
+
+
 //
 // UI_InfoBar Constructor
 //
@@ -57,20 +75,32 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	mode->callback(mode_callback, this);
 	mode->labelsize(KF_fonth);
 
-	X = mode->x() + mode->w() + 10;
+	X = mode->x() + mode->w() + 12;
 
 
 	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 50, H, "Scale:");
 	scale_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
 	scale_lab->labelsize(KF_fonth);
 
-	scale = new Fl_Menu_Button(X+52, Y, 78, H, "100%");
+	scale = new Fl_Menu_Button(X+52+26, Y, 78, H, "100%");
 	scale->align(FL_ALIGN_INSIDE);
-	scale->add(Grid_State_c::scale_options());
+	scale->add(scale_options_str);
 	scale->callback(scale_callback, this);
 	scale->labelsize(KF_fonth);
 
-	X = scale->x() + scale->w() + 10;
+	Fl_Button *sc_minus, *sc_plus;
+
+	sc_minus = new Fl_Button(X+52, Y+1, 24, H-2, "-");
+	sc_minus->callback(sc_minus_callback, this);
+	sc_minus->labelfont(FL_HELVETICA_BOLD);
+	sc_minus->labelsize(16);
+
+	sc_plus = new Fl_Button(X+52+26+80, Y+1, 24, H-2, "+");
+	sc_plus->callback(sc_plus_callback, this);
+	sc_plus->labelfont(FL_HELVETICA_BOLD);
+	sc_plus->labelsize(16);
+
+	X = sc_plus->x() + sc_plus->w() + 12;
 
 
 	Fl_Box *gs_lab = new Fl_Box(FL_NO_BOX, X, Y, 42, H, "Grid:");
@@ -80,12 +110,12 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	grid_size = new Fl_Menu_Button(X+44, Y, 72, H, "OFF");
 
 	grid_size->align(FL_ALIGN_INSIDE);
-	grid_size->add(Grid_State_c::grid_options());
+	grid_size->add(grid_options_str);
 	grid_size->callback(grid_callback, this);
 	grid_size->labelsize(KF_fonth);
 	grid_size->textsize(KF_fonth);
 
-	X = grid_size->x() + grid_size->w() + 10;
+	X = grid_size->x() + grid_size->w() + 12;
 
 
 	grid_snap = new Fl_Toggle_Button(X+4, Y, 72, H);
@@ -157,15 +187,33 @@ void UI_InfoBar::scale_callback(Fl_Widget *w, void *data)
 {
 	Fl_Menu_Button *scale = (Fl_Menu_Button *)w;
 
-	grid.ScaleFromWidget(scale->value());
+	double new_scale = scale_amounts[scale->value()];
+
+	grid.NearestScale(new_scale);
+}
+
+
+void UI_InfoBar::sc_minus_callback(Fl_Widget *w, void *data)
+{
+	ExecuteCommand("Zoom", "-1", "/center");
+}
+
+void UI_InfoBar::sc_plus_callback(Fl_Widget *w, void *data)
+{
+	ExecuteCommand("Zoom", "+1", "/center");
 }
 
 
 void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 {
-	Fl_Menu_Button *size = (Fl_Menu_Button *)w;
+	Fl_Menu_Button *gsize = (Fl_Menu_Button *)w;
 
-	grid.StepFromWidget(size->value());
+	int new_grid = grid_amounts[gsize->value()];
+
+	if (new_grid < 0)
+		grid.SetShown(false);
+	else
+		grid.ForceStep(new_grid);
 }
 
 
@@ -176,7 +224,6 @@ void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 	// update editor state
 	grid.SetSnap(grid_snap->value() ? true : false);
 }
-
 
 
 //------------------------------------------------------------------------
@@ -230,24 +277,31 @@ void UI_InfoBar::SetStatus(const char *str)
 }
 
 
-void UI_InfoBar::SetScale(int i)
+void UI_InfoBar::SetScale(double new_scale)
 {
-	const Fl_Menu_Item *items = scale->menu();
+	double perc = new_scale * 100.0;
 
-	scale->label(items[i].text);
+	char buffer[64];
+
+	if (perc < 10.0)
+		sprintf(buffer, "%1.1f%%", perc);
+	else
+		sprintf(buffer, "%3d%%", (int)perc);
+
+	scale->copy_label(buffer);
 }
 
-void UI_InfoBar::SetGrid(int i)
+void UI_InfoBar::SetGrid(int new_grid)
 {
-	if (i < 0)
+	if (new_grid < 0)
 	{
 		grid_size->label("OFF");
 	}
 	else
 	{
-		const Fl_Menu_Item *items = grid_size->menu();
-
-		grid_size->label(items[i].text);
+		char buffer[64];
+		sprintf(buffer, "%d", new_grid);
+		grid_size->copy_label(buffer);
 	}
 }
 

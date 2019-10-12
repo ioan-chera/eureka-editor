@@ -75,12 +75,8 @@ public:
 	// choose the scale nearest to (and less than) the wanted one
 	void NearestScale(double want_scale);
 
-	void ScaleFromWidget(int i);
-
-	// set grid stepping size
-	void SetStep(int new_step);
-
-	void StepFromWidget(int i);
+	// force grid stepping size to arbitrary value
+	void ForceStep(int new_step);
 
 	// compute new grid step from current scale
 	void StepFromScale();
@@ -109,13 +105,12 @@ public:
 
 	bool OnGrid(int map_x, int map_y) const;
 
-	// interface with UI_Infobar widget...
-	static const char *scale_options();
-	static const char * grid_options();
-
 private:
-	void DoSetShown(bool   new_shown);
 	void DoSetScale(double new_scale);
+
+	void RawSetStep(int i);
+	void RawSetScale(int i);
+	void RawSetShown(bool new_shown);
 
 private:
 	static const double scale_values[];

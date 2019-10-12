@@ -10,6 +10,10 @@ RECENT CHANGES
 
 + preference to combine flats and textures in a single browser
 
+- added scale '-' and '+' buttons, show scale as percentage
+
+- fixed mode menu disappearing into Window's task bar when maximized
+
 - fixed not remembering test-in-game EXE when port is "vanilla"
 
 - fixed the 'Online Docs' command in the Help menu
