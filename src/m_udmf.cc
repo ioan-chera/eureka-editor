@@ -21,6 +21,7 @@
 #include "main.h"
 
 #include "m_udmf.h"
+#include "w_texture.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -121,14 +122,14 @@ static void WriteUDMF_SideDefs(Lump_c *lump)
 		if (side->y_offset != 0)
 			lump->Printf("offsety = %d;\n", side->y_offset);
 
-		// FIXME handle textures with quote in them
+		// use NormalizeTex to ensure no double quote
 
 		if (strcmp(side->UpperTex(), "-") != 0)
-			lump->Printf("texturetop = \"%s\";\n", side->UpperTex());
+			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()));
 		if (strcmp(side->LowerTex(), "-") != 0)
-			lump->Printf("texturebottom = \"%s\";\n", side->LowerTex());
+			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()));
 		if (strcmp(side->MidTex(), "-") != 0)
-			lump->Printf("texturemiddle = \"%s\";\n", side->MidTex());
+			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()));
 
 		lump->Printf("}\n\n");
 	}
@@ -146,10 +147,10 @@ static void WriteUDMF_Sectors(Lump_c *lump)
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);
 
-		// FIXME handle names with quote in them
+		// use NormalizeTex to ensure no double quote
 
-		lump->Printf("texturefloor = \"%s\";\n", sec->FloorTex());
-		lump->Printf("textureceiling = \"%s\";\n", sec->CeilTex());
+		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()));
+		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()));
 
 		lump->Printf("lightlevel = %d;\n", sec->light);
 		if (sec->type != 0)

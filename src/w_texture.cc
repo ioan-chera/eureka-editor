@@ -579,7 +579,13 @@ const char *NormalizeTex(const char *name)
 	strncpy(buffer, name, WAD_TEX_NAME);
 
 	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
-		buffer[i] = toupper(buffer[i]);
+	{
+		// remove double quotes
+		if (buffer[i] == '"')
+			buffer[i] = '_';
+		else
+			buffer[i] = toupper(buffer[i]);
+	}
 
 	return buffer;
 }
