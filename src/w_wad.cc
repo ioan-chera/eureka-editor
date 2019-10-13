@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -394,18 +394,11 @@ short Wad_file::LevelLookupLump(short lev_num, const char *name)
 	short start = LevelHeader(lev_num);
 
 	// determine how far past the level marker (MAP01 etc) to search
-	short last = start + MAX_LUMPS_IN_A_LEVEL;
+	short finish = LevelLastLump(lev_num);
 
-	if (last >= NumLumps())
-		last = NumLumps() - 1;
-
-	for (short k = start+1 ; k <= last ; k++)
+	for (short k = start+1 ; k <= finish ; k++)
 	{
 		SYS_ASSERT(0 <= k && k < NumLumps());
-
-		if (! IsLevelLump(directory[k]->name) &&
-			! IsGLNodeLump(directory[k]->name))
-			break;
 
 		if (y_stricmp(directory[k]->name, name) == 0)
 			return k;
@@ -438,6 +431,24 @@ short Wad_file::LevelLastLump(short lev_num)
 
 	int count = 1;
 
+	// UDMF level?
+	if (y_stricmp(directory[start+1]->name, "TEXTMAP") == 0)
+	{
+		while (count < MAX_LUMPS_IN_A_LEVEL && start+count < NumLumps())
+		{
+			if (y_stricmp(directory[start+count]->name, "ENDMAP") == 0)
+			{
+				count++;
+				break;
+			}
+
+			count++;
+		}
+
+		return start + count - 1;
+	}
+
+	// standard DOOM or HEXEN format
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
 		   start+count < NumLumps() &&
 		   (IsLevelLump(directory[start+count]->name) ||
@@ -497,6 +508,9 @@ short Wad_file::LevelHeader(short lev_num)
 map_format_e Wad_file::LevelFormat(short lev_num)
 {
 	int start = LevelHeader(lev_num);
+
+	if (y_stricmp(directory[start+1]->name, "TEXTMAP") == 0)
+		return MAPF_UDMF;
 
 	if (start + LL_BEHAVIOR < (int)NumLumps())
 	{
@@ -619,6 +633,15 @@ void Wad_file::DetectLevels()
 	{
 		int part_mask  = 0;
 		int part_count = 0;
+
+		// check for UDMF levels
+		if (y_stricmp(directory[k+1]->name, "TEXTMAP") == 0)
+		{
+			levels.push_back(k);
+
+			DebugPrintf("Detected level : %s (UDMF)\n", directory[k]->name);
+			continue;
+		}
 
 		// check whether the next four lumps are level lumps
 		for (short i = 1 ; i <= 4 ; i++)
@@ -907,22 +930,12 @@ void Wad_file::RemoveLevel(short lev_num)
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	short start = LevelHeader(lev_num);
-	short count = 1;
-
-	// collect associated lumps (THINGS, VERTEXES etc)
-	// this will stop when it hits a non-level lump
-	while (count < MAX_LUMPS_IN_A_LEVEL &&
-		   start + count < NumLumps() &&
-		   (IsLevelLump(directory[start+count]->name) ||
-		    IsGLNodeLump(directory[start+count]->name)) )
-	{
-		count++;
-	}
+	short start  = LevelHeader(lev_num);
+	short finish = LevelLastLump(lev_num);
 
 	// NOTE: FixGroup() will remove the entry in levels[]
 
-	RemoveLumps(start, count);
+	RemoveLumps(start, finish - start + 1);
 }
 
 
@@ -932,10 +945,9 @@ void Wad_file::RemoveGLNodes(short lev_num)
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
 	short start  = LevelHeader(lev_num);
-	short finish = start + MAX_LUMPS_IN_A_LEVEL - 1;
+	short finish = LevelLastLump(lev_num);
 
-	if (finish >= NumLumps())
-		finish = NumLumps() - 1;
+	// FIXME for UDMF -- just remove ZNODES lump
 
 	start++;
 
