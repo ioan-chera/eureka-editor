@@ -117,7 +117,7 @@ public:
 
 // since UDMF lumps can be very large, we read chunks of it
 // as-needed instead of loading the whole thing into memory.
-// this size must be at least 3x the maximum token length.
+// the buffer size should be over 2x maximum token length.
 #define U_BUF_SIZE  16384
 
 class Udmf_Parser
@@ -284,7 +284,7 @@ public:
 				return Udmf_Token(buffer+start, b_pos - start);
 			}
 
-			// it must be a symbol
+			// it must be a symbol, such as '{' or '}'
 			b_pos++;
 
 			return Udmf_Token(buffer+start, 1);
@@ -337,7 +337,13 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 
 static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 {
-	// TODO ParseUDMF_ThingField
+	// simply ignore the "false" keyword
+	if (value.Match("false"))
+		return;
+
+	// TODO hexen options
+
+	// TODO strife options
 
 	if (field.Match("x"))
 		T->x = value.DecodeFloat();
@@ -349,6 +355,39 @@ static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 		T->type = value.DecodeInt();
 	else if (field.Match("angle"))
 		T->angle = value.DecodeInt();
+
+	else if (field.Match("id"))
+		T->tid = value.DecodeInt();
+	else if (field.Match("special"))
+		T->special = value.DecodeInt();
+	else if (field.Match("arg0"))
+		T->arg1 = value.DecodeInt();
+	else if (field.Match("arg1"))
+		T->arg2 = value.DecodeInt();
+	else if (field.Match("arg2"))
+		T->arg3 = value.DecodeInt();
+	else if (field.Match("arg3"))
+		T->arg4 = value.DecodeInt();
+	else if (field.Match("arg4"))
+		T->arg5 = value.DecodeInt();
+
+	else if (field.Match("skill2"))
+		T->options |= MTF_Easy;
+	else if (field.Match("skill3"))
+		T->options |= MTF_Medium;
+	else if (field.Match("skill4"))
+		T->options |= MTF_Hard;
+	else if (field.Match("ambush"))
+		T->options |= MTF_Ambush;
+	else if (field.Match("friend"))
+		T->options |= MTF_Friend;
+	else if (field.Match("single"))
+		T->options &= ~MTF_Not_SP;
+	else if (field.Match("coop"))
+		T->options &= ~MTF_Not_COOP;
+	else if (field.Match("dm"))
+		T->options &= ~MTF_Not_DM;
+
 	else
 	{
 		DebugPrintf("thing #%d: unknown field '%s'\n", NumThings-1, field.c_str());
@@ -369,7 +408,11 @@ static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& valu
 
 static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
 {
-	// TODO ParseUDMF_LinedefField
+	// simply ignore the "false" keyword
+	if (value.Match("false"))
+		return;
+
+	// TODO ParseUDMF_LinedefField : FLAGS
 
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -402,9 +445,9 @@ static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& v
 
 static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
 {
-	// TODO ParseUDMF_SidedefField
-
 	// Note: sector numbers are validated later on
+
+	// TODO: consider how to handle "offsetx_top" (etc), if at all
 
 	if (field.Match("sector"))
 		SD->sector = value.DecodeInt();
@@ -426,8 +469,6 @@ static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& v
 
 static void ParseUDMF_SectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
 {
-	// TODO ParseUDMF_SectorField
-
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
 	else if (field.Match("heightceiling"))
@@ -463,6 +504,7 @@ static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 	{
 		kind = Objid(OBJ_THINGS, 1);
 		new_T = new Thing;
+		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
 		Things.push_back(new_T);
 	}
 	else if (name.Match("vertex"))
@@ -586,6 +628,8 @@ void LoadLevel_UDMF()
 		// TODO mark the error somehow, show dialog later
 		parser.SkipToEOLN();
 	}
+
+	// TODO TODO validate fields  [ esp. verts/sides in linedef, sector in sidedef ]
 }
 
 
