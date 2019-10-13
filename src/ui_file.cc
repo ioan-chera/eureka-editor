@@ -902,7 +902,9 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 	if (format_choice->mvalue())
 	{
-		if (strstr(format_choice->mvalue()->text, "Hexen"))
+		if (strstr(format_choice->mvalue()->text, "UDMF"))
+			prev_fmt = MAPF_UDMF;
+		else if (strstr(format_choice->mvalue()->text, "Hexen"))
 			prev_fmt = MAPF_Hexen;
 		else
 			prev_fmt = MAPF_Doom;
@@ -959,9 +961,22 @@ void UI_ProjectSetup::PopulateMapFormat()
 		entry_id++;
 	}
 
+	if (true)  // FIXME??  usable_formats & (1 << MAPF_UDMF))
+	{
+		if (prev_fmt == MAPF_UDMF)
+			menu_value = entry_id;
+
+		if (menu_string[0])
+			strcat(menu_string, "|");
+
+		strcat(menu_string, "UDMF");
+		entry_id++;
+	}
+
 	format_choice->add  (menu_string);
 	format_choice->value(menu_value);
 
+	// FIXME explain this
 	if (usable_formats & (1 << MAPF_Hexen))
 	{
 		if (prev_fmt == MAPF_Hexen ||
@@ -1052,7 +1067,9 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 
 	const char * fmt_str = w->mvalue()->text;
 
-	if (strstr(fmt_str, "Hexen"))
+	if (strstr(fmt_str, "UDMF"))
+		that->map_format = MAPF_UDMF;
+	else if (strstr(fmt_str, "Hexen"))
 		that->map_format = MAPF_Hexen;
 	else
 		that->map_format = MAPF_Doom;
