@@ -337,7 +337,7 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 
 static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 {
-	// simply ignore the "false" keyword
+	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
 		return;
 
@@ -408,13 +408,15 @@ static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& valu
 
 static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
 {
-	// simply ignore the "false" keyword
+	// Note: vertex and sidedef numbers are validated later on
+
+	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
 		return;
 
-	// TODO ParseUDMF_LinedefField : FLAGS
+	// TODO hexen flags
 
-	// Note: vertex and sidedef numbers are validated later on
+	// TODO strife flags
 
 	if (field.Match("v1"))
 		LD->start = value.DecodeInt();
@@ -437,6 +439,29 @@ static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& v
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
+
+	else if (field.Match("blocking"))
+		LD->flags |= MLF_Blocking;
+	else if (field.Match("blockmonsters"))
+		LD->flags |= MLF_BlockMonsters;
+	else if (field.Match("twosided"))
+		LD->flags |= MLF_TwoSided;
+	else if (field.Match("dontpegtop"))
+		LD->flags |= MLF_UpperUnpegged;
+	else if (field.Match("dontpegbottom"))
+		LD->flags |= MLF_LowerUnpegged;
+	else if (field.Match("secret"))
+		LD->flags |= MLF_Secret;
+	else if (field.Match("blocksound"))
+		LD->flags |= MLF_SoundBlock;
+	else if (field.Match("dontdraw"))
+		LD->flags |= MLF_DontDraw;
+	else if (field.Match("mapped"))
+		LD->flags |= MLF_Mapped;
+
+	else if (field.Match("passuse"))
+		LD->flags |= MLF_Boom_PassThru;
+
 	else
 	{
 		DebugPrintf("linedef #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
