@@ -46,6 +46,11 @@ public:
 	Udmf_Token(const char *str, int len) : text(str, 0, len)
 	{ }
 
+	const char *c_str()
+	{
+		return text.c_str();
+	}
+
 	bool IsEOF() const
 	{
 		return text.empty();
@@ -180,9 +185,7 @@ public:
 				buffer[b_pos] == '/' &&
 				buffer[b_pos+1] == '/')
 			{
-				while (b_pos < b_size && buffer[b_pos] != '\n')
-					b_pos++;
-
+				SkipToEOLN();
 				continue;
 			}
 
@@ -259,7 +262,8 @@ public:
 
 	void SkipToEOLN()
 	{
-		// TODO SkipToEOLN
+		while (b_pos < b_size && buffer[b_pos] != '\n')
+			b_pos++;
 	}
 };
 
@@ -275,15 +279,140 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 	if (!parser.Expect(";"))
 	{
 		// TODO mark error
+		parser.SkipToEOLN();
 		return;
 	}
 
-	// TODO ParseUDMF_GlobalVar
+	if (name.Match("namespace"))
+	{
+		// TODO : do something with the namespace value
+	}
+	else if (name.Match("ee_compat"))
+	{
+		// odd Eternity thing, ignore it
+	}
+	else
+	{
+		LogPrintf("skipping unknown global '%s' in UDMF\n", name.c_str());
+	}
+}
+
+
+static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
+{
+	// TODO ParseUDMF_ThingField
+}
+
+static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
+{
+	// TODO ParseUDMF_VertexField
+}
+
+static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
+{
+	// TODO ParseUDMF_LinedefField
+}
+
+static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
+{
+	// TODO ParseUDMF_SidedefField
+}
+
+static void ParseUDMF_SectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
+{
+	// TODO ParseUDMF_SectorField
 }
 
 static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 {
-	// TODO ParseUDMF_Object
+	// create a new object of the specified type
+	Objid kind;
+
+	Thing   *new_T  = NULL;
+	Vertex  *new_V  = NULL;
+	LineDef *new_LD = NULL;
+	SideDef *new_SD = NULL;
+	Sector  *new_S  = NULL;
+
+	if (name.Match("thing"))
+	{
+		kind = Objid(OBJ_THINGS, 1);
+		new_T = new Thing;
+		Things.push_back(new_T);
+	}
+	else if (name.Match("vertex"))
+	{
+		kind = Objid(OBJ_VERTICES, 1);
+		new_V = new Vertex;
+		Vertices.push_back(new_V);
+	}
+	else if (name.Match("linedef"))
+	{
+		kind = Objid(OBJ_LINEDEFS, 1);
+		new_LD = new LineDef;
+		LineDefs.push_back(new_LD);
+	}
+	else if (name.Match("sidedef"))
+	{
+		kind = Objid(OBJ_SIDEDEFS, 1);
+		new_SD = new SideDef;
+		SideDefs.push_back(new_SD);
+	}
+	else if (name.Match("sector"))
+	{
+		kind = Objid(OBJ_SECTORS, 1);
+		new_S = new Sector;
+		Sectors.push_back(new_S);
+	}
+
+	if (!kind.valid())
+	{
+		// unknown object kind
+		LogPrintf("skipping unknown block '%s' in UDMF\n", name.c_str());
+	}
+
+	for (;;)
+	{
+		Udmf_Token tok = parser.Next();
+		if (tok.IsEOF())
+			break;
+
+		if (tok.Match("}"))
+			break;
+
+		if (! parser.Expect("="))
+		{
+			// TODO mark error
+			parser.SkipToEOLN();
+			continue;
+		}
+
+		Udmf_Token value = parser.Next();
+		if (value.IsEOF())
+			break;
+
+		if (! parser.Expect(";"))
+		{
+			// TODO mark error
+			parser.SkipToEOLN();
+			continue;
+		}
+
+		if (new_T)
+			ParseUDMF_ThingField(new_T, tok, value);
+
+		if (new_V)
+			ParseUDMF_VertexField(new_V, tok, value);
+
+		if (new_LD)
+			ParseUDMF_LinedefField(new_LD, tok, value);
+
+		if (new_SD)
+			ParseUDMF_SidedefField(new_SD, tok, value);
+
+		if (new_S)
+			ParseUDMF_SectorField(new_S, tok, value);
+	}
 }
 
 void LoadLevel_UDMF()
@@ -305,6 +434,7 @@ void LoadLevel_UDMF()
 		{
 			// something has gone wrong
 			// TODO mark the error somehow, pop-up dialog later
+			parser.SkipToEOLN();
 			continue;
 		}
 
@@ -325,6 +455,7 @@ void LoadLevel_UDMF()
 
 		// unexpected symbol
 		// TODO mark the error somehow, show dialog later
+		parser.SkipToEOLN();
 	}
 }
 
@@ -343,7 +474,7 @@ static void WriteUDMF_Info(Lump_c *lump)
 {
 	// TODO other namespaces
 
-	lump->Printf("namespace = \"doom\";\n\n");
+	lump->Printf("namespace = \"Doom\";\n\n");
 }
 
 static void WriteUDMF_Things(Lump_c *lump)
