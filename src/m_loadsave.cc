@@ -36,6 +36,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_nodes.h"
+#include "m_udmf.h"
 #include "r_render.h"	// Render3D_ClearSelection
 #include "w_rawdef.h"
 #include "w_wad.h"
@@ -956,25 +957,32 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	LoadHeader();
 
-	if (Level_format == MAPF_Hexen)
-		LoadThings_Hexen();
-	else
-		LoadThings();
-
-	LoadVertices();
-	LoadSectors();
-	LoadSideDefs();
-
-	if (Level_format == MAPF_Hexen)
+	if (Level_format == MAPF_UDMF)
 	{
-		LoadLineDefs_Hexen();
-
-		LoadBehavior();
-		LoadScripts();
+		LoadLevel_UDMF();
 	}
 	else
 	{
-		LoadLineDefs();
+		if (Level_format == MAPF_Hexen)
+			LoadThings_Hexen();
+		else
+			LoadThings();
+
+		LoadVertices();
+		LoadSectors();
+		LoadSideDefs();
+
+		if (Level_format == MAPF_Hexen)
+		{
+			LoadLineDefs_Hexen();
+
+			LoadBehavior();
+			LoadScripts();
+		}
+		else
+		{
+			LoadLineDefs();
+		}
 	}
 
 	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
@@ -1605,34 +1613,44 @@ static void SaveLevel(const char *level)
 
 	SaveHeader(level);
 
-	// IOANCH 9/2015: save Hexen format maps
-	if (Level_format == MAPF_Hexen)
+	if (Level_format == MAPF_UDMF)
 	{
-		SaveThings_Hexen();
-		SaveLineDefs_Hexen();
+		// TODO our built-in nodes builder cannot handle UDMF yet
+		inhibit_node_build = true;
+
+		SaveLevel_UDMF();
 	}
 	else
 	{
-		SaveThings();
-		SaveLineDefs();
-	}
+		// IOANCH 9/2015: save Hexen format maps
+		if (Level_format == MAPF_Hexen)
+		{
+			SaveThings_Hexen();
+			SaveLineDefs_Hexen();
+		}
+		else
+		{
+			SaveThings();
+			SaveLineDefs();
+		}
 
-	SaveSideDefs();
-	SaveVertices();
+		SaveSideDefs();
+		SaveVertices();
 
-	EmptyLump("SEGS");
-	EmptyLump("SSECTORS");
-	EmptyLump("NODES");
+		EmptyLump("SEGS");
+		EmptyLump("SSECTORS");
+		EmptyLump("NODES");
 
-	SaveSectors();
+		SaveSectors();
 
-	EmptyLump("REJECT");
-	EmptyLump("BLOCKMAP");
+		EmptyLump("REJECT");
+		EmptyLump("BLOCKMAP");
 
-	if (Level_format == MAPF_Hexen)
-	{
-		SaveBehavior();
-		SaveScripts();
+		if (Level_format == MAPF_Hexen)
+		{
+			SaveBehavior();
+			SaveScripts();
+		}
 	}
 
 	// write out the new directory

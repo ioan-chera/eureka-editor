@@ -21,7 +21,8 @@
 #ifndef __EUREKA_M_UDMF_H__
 #define __EUREKA_M_UDMF_H__
 
-
+void LoadLevel_UDMF();
+void SaveLevel_UDMF();
 
 #endif  /* __EUREKA_M_UDMF_H__ */
 

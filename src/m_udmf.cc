@@ -26,6 +26,18 @@
 #include "ui_window.h"
 
 
+void LoadLevel_UDMF()
+{
+	// FIXME LoadLevel_UDMF
+}
+
+
+//----------------------------------------------------------------------
+
+void SaveLevel_UDMF()
+{
+	// FIXME SaveLevel_UDMF
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
