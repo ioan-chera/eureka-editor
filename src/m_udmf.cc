@@ -75,6 +75,43 @@ public:
 	{
 		return y_stricmp(text.c_str(), name) == 0;
 	}
+
+	int DecodeInt() const
+	{
+		return atoi(text.c_str());
+	}
+
+	int DecodeFloat() const
+	{
+		double f = atof(text.c_str());
+
+		// TODO multiply by PRECISION
+
+		return I_ROUND(f);
+	}
+
+	int DecodeTexture() const
+	{
+		char buffer[16];
+
+		if (! IsString())
+		{
+			// TODO warning
+			strcpy(buffer, "-");
+		}
+		else
+		{
+			int use_len = 8;
+
+			if (text.size() < 10)
+				use_len = (int)text.size() - 2;
+
+			strncpy(buffer, text.c_str() + 1, use_len);
+			buffer[use_len] = 0;
+		}
+
+		return BA_InternaliseString(NormalizeTex(buffer));
+	}
 };
 
 
@@ -301,26 +338,114 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 {
 	// TODO ParseUDMF_ThingField
+
+	if (field.Match("x"))
+		T->x = value.DecodeFloat();
+	else if (field.Match("y"))
+		T->y = value.DecodeFloat();
+	else if (field.Match("height"))
+		T->z = value.DecodeFloat();
+	else if (field.Match("type"))
+		T->type = value.DecodeInt();
+	else if (field.Match("angle"))
+		T->angle = value.DecodeInt();
+	else
+	{
+		DebugPrintf("thing #%d: unknown field '%s'\n", NumThings-1, field.c_str());
+	}
 }
 
 static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
 {
-	// TODO ParseUDMF_VertexField
+	if (field.Match("x"))
+		V->x = value.DecodeFloat();
+	else if (field.Match("y"))
+		V->y = value.DecodeFloat();
+	else
+	{
+		DebugPrintf("vertex #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+	}
 }
 
 static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
 {
 	// TODO ParseUDMF_LinedefField
+
+	// Note: vertex and sidedef numbers are validated later on
+
+	if (field.Match("v1"))
+		LD->start = value.DecodeInt();
+	else if (field.Match("v2"))
+		LD->end = value.DecodeInt();
+	else if (field.Match("sidefront"))
+		LD->right = value.DecodeInt();
+	else if (field.Match("sideback"))
+		LD->left = value.DecodeInt();
+	else if (field.Match("special"))
+		LD->type = value.DecodeInt();
+
+	else if (field.Match("arg0"))
+		LD->tag = value.DecodeInt();
+	else if (field.Match("arg1"))
+		LD->arg2 = value.DecodeInt();
+	else if (field.Match("arg2"))
+		LD->arg3 = value.DecodeInt();
+	else if (field.Match("arg3"))
+		LD->arg4 = value.DecodeInt();
+	else if (field.Match("arg4"))
+		LD->arg5 = value.DecodeInt();
+	else
+	{
+		DebugPrintf("linedef #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+	}
 }
 
 static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
 {
 	// TODO ParseUDMF_SidedefField
+
+	// Note: sector numbers are validated later on
+
+	if (field.Match("sector"))
+		SD->sector = value.DecodeInt();
+	else if (field.Match("texturetop"))
+		SD->upper_tex = value.DecodeTexture();
+	else if (field.Match("texturebottom"))
+		SD->lower_tex = value.DecodeTexture();
+	else if (field.Match("texturemiddle"))
+		SD->mid_tex = value.DecodeTexture();
+	else if (field.Match("offsetx"))
+		SD->x_offset = value.DecodeInt();
+	else if (field.Match("offsety"))
+		SD->y_offset = value.DecodeInt();
+	else
+	{
+		DebugPrintf("sidedef #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+	}
 }
 
 static void ParseUDMF_SectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
 {
 	// TODO ParseUDMF_SectorField
+
+	if (field.Match("heightfloor"))
+		S->floorh = value.DecodeInt();
+	else if (field.Match("heightceiling"))
+		S->ceilh = value.DecodeInt();
+	else if (field.Match("texturefloor"))
+		S->floor_tex = value.DecodeTexture();
+	else if (field.Match("textureceiling"))
+		S->ceil_tex = value.DecodeTexture();
+	else if (field.Match("lightlevel"))
+		S->light = value.DecodeInt();
+	else if (field.Match("special"))
+		S->type = value.DecodeInt();
+	else if (field.Match("id"))
+		S->tag = value.DecodeInt();
+	else
+	{
+		DebugPrintf("sector #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+	}
 }
 
 static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
@@ -356,12 +481,16 @@ static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 	{
 		kind = Objid(OBJ_SIDEDEFS, 1);
 		new_SD = new SideDef;
+		new_SD->mid_tex = BA_InternaliseString("-");
+		new_SD->lower_tex = new_SD->mid_tex;
+		new_SD->upper_tex = new_SD->upper_tex;
 		SideDefs.push_back(new_SD);
 	}
 	else if (name.Match("sector"))
 	{
 		kind = Objid(OBJ_SECTORS, 1);
 		new_S = new Sector;
+		new_S->light = 160;
 		Sectors.push_back(new_S);
 	}
 
