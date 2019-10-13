@@ -21,6 +21,8 @@
 #include "main.h"
 
 #include "m_udmf.h"
+#include "m_game.h"
+#include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
 
@@ -38,9 +40,19 @@ void LoadLevel_UDMF()
 
 //----------------------------------------------------------------------
 
+static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
+{
+	if ((flags & mask) != 0)
+	{
+		lump->Printf("%s = true;\n", name);
+	}
+}
+
 static void WriteUDMF_Info(Lump_c *lump)
 {
-	lump->Printf("namespace = \"DOOM\";\n\n");
+	// TODO other namespaces
+
+	lump->Printf("namespace = \"doom\";\n\n");
 }
 
 static void WriteUDMF_Things(Lump_c *lump)
@@ -54,12 +66,34 @@ static void WriteUDMF_Things(Lump_c *lump)
 
 		lump->Printf("x = %d.000;\n", th->x);
 		lump->Printf("y = %d.000;\n", th->y);
-		lump->Printf("height = %d.000;\n", th->z);
+
+		if (th->z != 0)
+			lump->Printf("height = %d.000;\n", th->z);
 
 		lump->Printf("angle = %d;\n", th->angle);
 		lump->Printf("type = %d;\n", th->type);
 
-		// FIXME thing options
+		// thing options
+		WrFlag(lump, th->options, "skill1", MTF_Easy);
+		WrFlag(lump, th->options, "skill2", MTF_Easy);
+		WrFlag(lump, th->options, "skill3", MTF_Medium);
+		WrFlag(lump, th->options, "skill4", MTF_Hard);
+		WrFlag(lump, th->options, "skill5", MTF_Hard);
+
+		WrFlag(lump, 0 ^ th->options, "single", MTF_Not_SP);
+		WrFlag(lump, 0 ^ th->options, "coop",   MTF_Not_COOP);
+		WrFlag(lump, 0 ^ th->options, "dm",     MTF_Not_DM);
+
+		WrFlag(lump, th->options, "ambush", MTF_Ambush);
+
+		if (game_info.friend_flag)
+			WrFlag(lump, th->options, "friend", MTF_Friend);
+
+		// TODO Hexen flags
+
+		// TODO Strife flags
+
+		// TODO Hexen special and args
 
 		lump->Printf("}\n\n");
 	}
@@ -98,9 +132,42 @@ static void WriteUDMF_LineDefs(Lump_c *lump)
 		if (ld->left >= 0)
 			lump->Printf("sideback = %d;\n", ld->left);
 
-		// FIXME linedef flags
+		if (ld->type != 0)
+			lump->Printf("special = %d;\n", ld->type);
 
-		// FIXME args / tag
+		if (ld->tag != 0)
+			lump->Printf("arg0 = %d;\n", ld->tag);
+		if (ld->arg2 != 0)
+			lump->Printf("arg1 = %d;\n", ld->arg2);
+		if (ld->arg3 != 0)
+			lump->Printf("arg2 = %d;\n", ld->arg3);
+		if (ld->arg4 != 0)
+			lump->Printf("arg3 = %d;\n", ld->arg4);
+		if (ld->arg5 != 0)
+			lump->Printf("arg4 = %d;\n", ld->arg5);
+
+		// linedef flags
+		WrFlag(lump, ld->flags, "blocking",      MLF_Blocking);
+		WrFlag(lump, ld->flags, "blockmonsters", MLF_BlockMonsters);
+		WrFlag(lump, ld->flags, "twosided",      MLF_TwoSided);
+		WrFlag(lump, ld->flags, "dontpegtop",    MLF_UpperUnpegged);
+		WrFlag(lump, ld->flags, "dontpegbottom", MLF_LowerUnpegged);
+		WrFlag(lump, ld->flags, "secret",        MLF_Secret);
+		WrFlag(lump, ld->flags, "blocksound",    MLF_SoundBlock);
+		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
+		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
+
+		if (game_info.pass_through)
+			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
+
+		if (game_info.midtex_3d)
+			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
+
+		// TODO : hexen stuff (SPAC flags, etc)
+
+		// TODO : strife stuff
+
+		// TODO : zdoom stuff
 
 		lump->Printf("}\n\n");
 	}
