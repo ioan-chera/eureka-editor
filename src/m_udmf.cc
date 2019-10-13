@@ -43,6 +43,9 @@ public:
 	Udmf_Token(const char *str) : text(str)
 	{ }
 
+	Udmf_Token(const char *str, int len) : text(str, 0, len)
+	{ }
+
 	bool IsEOF() const
 	{
 		return text.empty();
@@ -97,7 +100,10 @@ private:
 	int b_size;
 
 public:
-	Udmf_Parser(Lump_c *_lump) : lump(_lump), done(false), b_pos(0), b_size(0)
+	Udmf_Parser(Lump_c *_lump) :
+		lump(_lump),
+		done(false), in_comment(false),
+		b_pos(0), b_size(0)
 	{
 		remaining = lump->Length();
 	}
@@ -174,25 +180,74 @@ public:
 				buffer[b_pos] == '/' &&
 				buffer[b_pos+1] == '/')
 			{
-				b_pos += 2;
-
 				while (b_pos < b_size && buffer[b_pos] != '\n')
 					b_pos++;
 
 				continue;
 			}
 
-			// skip whitespace
-			char ch = buffer[b_pos];
+			// skip whitespace (assumes ASCII)
+			int start = b_pos;
+			unsigned char ch = buffer[b_pos];
 
-			if (isspace(ch) || (ch >= 0 && ch < 32))
+			if ((ch <= 32) || (ch >= 127 && ch <= 160))
 			{
 				b_pos++;
 				continue;
 			}
 
 			// an actual token, yay!
-			// FIXME
+
+			// is it a string?
+			if (ch == '"')
+			{
+				b_pos++;
+
+				while (b_pos < b_size)
+				{
+					// skip escapes
+					if (buffer[b_pos] == '\\' && b_pos+1 < b_size)
+					{
+						b_pos += 2;
+						continue;
+					}
+
+					if (buffer[b_pos] == '"')
+					{
+						// include trailing double quote
+						b_pos++;
+						break;
+					}
+
+					b_pos++;
+				}
+
+				return Udmf_Token(buffer+start, b_pos - start);
+			}
+
+			// is it a identifier or number?
+			if (isalnum(ch) || ch == '_' || ch == '-' || ch == '+')
+			{
+				b_pos++;
+
+				while (b_pos < b_size)
+				{
+					char ch = buffer[b_pos];
+					if (isalnum(ch) || ch == '_' || ch == '-' || ch == '+' || ch == '.')
+					{
+						b_pos++;
+						continue;
+					}
+					break;
+				}
+
+				return Udmf_Token(buffer+start, b_pos - start);
+			}
+
+			// it must be a symbol
+			b_pos++;
+
+			return Udmf_Token(buffer+start, 1);
 		}
 	}
 
