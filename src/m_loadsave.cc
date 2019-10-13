@@ -414,7 +414,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-static Lump_c * Load_LookupAndSeek(const char *name)
+Lump_c * Load_LookupAndSeek(const char *name)
 {
 	short idx = load_wad->LevelLookupLump(loading_level, name);
 

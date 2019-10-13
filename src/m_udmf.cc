@@ -30,11 +30,144 @@
 
 
 extern short loading_level;
+extern Lump_c * Load_LookupAndSeek(const char *name);
 
+
+class Udmf_Token
+{
+private:
+	//... TODO
+
+public:
+	bool IsEOF() const
+	{
+		// TODO IsEOF
+		return false;
+	}
+
+	bool IsIdentifier() const
+	{
+		// TODO IsIdentifier
+		return false;
+	}
+
+	bool IsString() const
+	{
+		// TODO IsString
+		return false;
+	}
+
+	bool Match(const char *name) const
+	{
+		// TODO Match
+		return false;
+	}
+};
+
+
+class Udmf_Parser
+{
+private:
+	Lump_c *lump;
+
+	//... TODO
+
+	// the full text, need to free when finished
+	const char *buffer;
+
+	// current position
+	const char *pos;
+
+public:
+	Udmf_Parser(Lump_c *_lump) : lump(_lump)
+	{
+		// TODO constructor
+	}
+
+	~Udmf_Parser()
+	{
+	}
+
+	Udmf_Token Next()
+	{
+		// TODO Next() method
+	}
+
+	bool Expect(const char *name)
+	{
+		Udmf_Token tok = Next();
+		return tok.Match(name);
+	}
+
+	void SkipToEOLN()
+	{
+		// TODO SkipToEOLN
+	}
+};
+
+
+static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
+{
+	Udmf_Token value = parser.Next();
+	if (value.IsEOF())
+	{
+		// mark error
+		return;
+	}
+	if (!parser.Expect(";"))
+	{
+		// mark error
+		return;
+	}
+
+	// TODO ParseUDMF_GlobalVar
+}
+
+static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
+{
+	// TODO ParseUDMF_Object
+}
 
 void LoadLevel_UDMF()
 {
-	// FIXME LoadLevel_UDMF
+	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
+	// we assume this cannot happen
+	if (! lump)
+		return;
+
+	Udmf_Parser parser(lump);
+
+	for (;;)
+	{
+		Udmf_Token tok = parser.Next();
+		if (tok.IsEOF())
+			break;
+
+		if (! tok.IsIdentifier())
+		{
+			// something has gone wrong
+			// TODO mark the error somehow, pop-up dialog later
+			continue;
+		}
+
+		Udmf_Token tok2 = parser.Next();
+		if (tok2.IsEOF())
+			break;
+
+		if (tok2.Match("="))
+		{
+			ParseUDMF_GlobalVar(parser, tok);
+			continue;
+		}
+		if (tok2.Match("{"))
+		{
+			ParseUDMF_Object(parser, tok);
+			continue;
+		}
+
+		// unexpected symbol
+		// TODO mark the error somehow, show dialog later
+	}
 }
 
 
