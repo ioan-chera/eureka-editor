@@ -36,61 +36,164 @@ extern Lump_c * Load_LookupAndSeek(const char *name);
 class Udmf_Token
 {
 private:
-	//... TODO
+	// empty means EOF
+	std::string text;
 
 public:
+	Udmf_Token(const char *str) : text(str)
+	{ }
+
 	bool IsEOF() const
 	{
-		// TODO IsEOF
-		return false;
+		return text.empty();
 	}
 
 	bool IsIdentifier() const
 	{
-		// TODO IsIdentifier
-		return false;
+		if (text.size() == 0)
+			return false;
+
+		char ch = text[0];
+
+		return isalpha(ch) || ch == '_';
 	}
 
 	bool IsString() const
 	{
-		// TODO IsString
-		return false;
+		return text.size() > 0 && text[0] == '"';
 	}
 
 	bool Match(const char *name) const
 	{
-		// TODO Match
-		return false;
+		return y_stricmp(text.c_str(), name) == 0;
 	}
 };
 
+
+// since UDMF lumps can be very large, we read chunks of it
+// as-needed instead of loading the whole thing into memory.
+// this size must be at least 3x the maximum token length.
+#define U_BUF_SIZE  16384
 
 class Udmf_Parser
 {
 private:
 	Lump_c *lump;
 
-	//... TODO
+	// reached EOF or a file read error
+	bool done;
 
-	// the full text, need to free when finished
-	const char *buffer;
+	// we have seen a "/*" but not the closing "*/"
+	bool in_comment;
 
-	// current position
-	const char *pos;
+	// number of remaining bytes
+	int remaining;
+
+	// read buffer
+	char buffer[U_BUF_SIZE];
+
+	// position in buffer and used size of buffer
+	int b_pos;
+	int b_size;
 
 public:
-	Udmf_Parser(Lump_c *_lump) : lump(_lump)
+	Udmf_Parser(Lump_c *_lump) : lump(_lump), done(false), b_pos(0), b_size(0)
 	{
-		// TODO constructor
-	}
-
-	~Udmf_Parser()
-	{
+		remaining = lump->Length();
 	}
 
 	Udmf_Token Next()
 	{
-		// TODO Next() method
+		for (;;)
+		{
+			if (done)
+				return Udmf_Token("");
+
+			// when position reaches half-way point, shift buffer down
+			if (b_pos >= U_BUF_SIZE/2)
+			{
+				memmove(buffer, buffer + U_BUF_SIZE/2, U_BUF_SIZE/2);
+
+				b_pos  -= U_BUF_SIZE/2;
+				b_size -= U_BUF_SIZE/2;
+			}
+
+			// top up the buffer
+			if (remaining > 0 && b_size < U_BUF_SIZE)
+			{
+				int want = U_BUF_SIZE - b_size;
+				if (want > remaining)
+					want = remaining;
+
+				if (! lump->Read(buffer + b_size, want))
+				{
+					// TODO mark error somewhere, show dialog later
+					done = true;
+					continue;
+				}
+
+				remaining -= want;
+				b_size    += want;
+			}
+
+			// end of file?
+			if (remaining <= 0 && b_pos >= b_size)
+			{
+				done = true;
+				continue;
+			}
+
+			if (in_comment)
+			{
+				// end of multi-line comment?
+				if (b_pos+2 <= b_size &&
+					buffer[b_pos] == '*' &&
+					buffer[b_pos+1] == '/')
+				{
+					in_comment = false;
+					b_pos += 2;
+					continue;
+				}
+
+				b_pos++;
+				continue;
+			}
+
+			// check for multi-line comment
+			if (b_pos+2 <= b_size &&
+				buffer[b_pos] == '/' &&
+				buffer[b_pos+1] == '*')
+			{
+				in_comment = true;
+				b_pos += 2;
+				continue;
+			}
+
+			// check for single-line comment
+			if (b_pos+2 <= b_size &&
+				buffer[b_pos] == '/' &&
+				buffer[b_pos+1] == '/')
+			{
+				b_pos += 2;
+
+				while (b_pos < b_size && buffer[b_pos] != '\n')
+					b_pos++;
+
+				continue;
+			}
+
+			// skip whitespace
+			char ch = buffer[b_pos];
+
+			if (isspace(ch) || (ch >= 0 && ch < 32))
+			{
+				b_pos++;
+				continue;
+			}
+
+			// an actual token, yay!
+			// FIXME
+		}
 	}
 
 	bool Expect(const char *name)
@@ -111,12 +214,12 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
 	{
-		// mark error
+		// TODO mark error
 		return;
 	}
 	if (!parser.Expect(";"))
 	{
-		// mark error
+		// TODO mark error
 		return;
 	}
 
