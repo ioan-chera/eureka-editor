@@ -550,7 +550,7 @@ static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 		new_SD = new SideDef;
 		new_SD->mid_tex = BA_InternaliseString("-");
 		new_SD->lower_tex = new_SD->mid_tex;
-		new_SD->upper_tex = new_SD->upper_tex;
+		new_SD->upper_tex = new_SD->mid_tex;
 		SideDefs.push_back(new_SD);
 	}
 	else if (name.Match("sector"))
@@ -700,9 +700,9 @@ static void WriteUDMF_Things(Lump_c *lump)
 		WrFlag(lump, th->options, "skill4", MTF_Hard);
 		WrFlag(lump, th->options, "skill5", MTF_Hard);
 
-		WrFlag(lump, 0 ^ th->options, "single", MTF_Not_SP);
-		WrFlag(lump, 0 ^ th->options, "coop",   MTF_Not_COOP);
-		WrFlag(lump, 0 ^ th->options, "dm",     MTF_Not_DM);
+		WrFlag(lump, ~ th->options, "single", MTF_Not_SP);
+		WrFlag(lump, ~ th->options, "coop",   MTF_Not_COOP);
+		WrFlag(lump, ~ th->options, "dm",     MTF_Not_DM);
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
