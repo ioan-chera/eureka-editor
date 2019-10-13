@@ -395,7 +395,8 @@ void CMD_FreshMap()
 
 static Wad_file * load_wad;
 
-static short loading_level;
+// TODO ideally static, but needed by m_udmf.cc too
+short loading_level;
 
 static int bad_linedef_count;
 
@@ -1383,7 +1384,7 @@ static void SaveVertices()
 
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		Vertex *vert = Vertices[i];
+		const Vertex *vert = Vertices[i];
 
 		raw_vertex_t raw;
 
@@ -1405,7 +1406,7 @@ static void SaveSectors()
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
-		Sector *sec = Sectors[i];
+		const Sector *sec = Sectors[i];
 
 		raw_sector_t raw;
 
@@ -1434,7 +1435,7 @@ static void SaveThings()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		Thing *th = Things[i];
+		const Thing *th = Things[i];
 
 		raw_thing_t raw;
 
@@ -1461,7 +1462,7 @@ static void SaveThings_Hexen()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		Thing *th = Things[i];
+		const Thing *th = Things[i];
 
 		raw_hexen_thing_t raw;
 
@@ -1497,7 +1498,7 @@ static void SaveSideDefs()
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
-		SideDef *side = SideDefs[i];
+		const SideDef *side = SideDefs[i];
 
 		raw_sidedef_t raw;
 
@@ -1525,7 +1526,7 @@ static void SaveLineDefs()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		LineDef *ld = LineDefs[i];
+		const LineDef *ld = LineDefs[i];
 
 		raw_linedef_t raw;
 
@@ -1555,7 +1556,7 @@ static void SaveLineDefs_Hexen()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		LineDef *ld = LineDefs[i];
+		const LineDef *ld = LineDefs[i];
 
 		raw_hexen_linedef_t raw;
 
