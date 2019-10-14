@@ -433,7 +433,6 @@ void UI_Canvas::DrawGrid_Normal()
 {
 	float pixels_1 = grid.step * grid.Scale;
 
-
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(normal_main_col)));
@@ -461,12 +460,12 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 	else
 	{
-		int gx = (map_lx / flat_step) * flat_step;
+		int gx = floor(map_lx / flat_step) * flat_step;
 
 		for (; gx <= map_hx; gx += flat_step)
 			DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / flat_step) * flat_step;
+		int gy = floor(map_ly / flat_step) * flat_step;
 
 		for (; gy <= map_hy; gy += flat_step)
 			DrawMapLine(map_lx, gy, map_hx, gy);
@@ -483,13 +482,13 @@ void UI_Canvas::DrawGrid_Normal()
 	gl_color(main_col);
 
 	{
-		int gx = (map_lx / grid.step) * grid.step;
+		int gx = floor(map_lx / grid.step) * grid.step;
 
 		for (; gx <= map_hx; gx += grid.step)
 			if ((grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / grid.step) * grid.step;
+		int gy = floor(map_ly / grid.step) * grid.step;
 
 		for (; gy <= map_hy; gy += grid.step)
 			if ((grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
@@ -522,14 +521,14 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	gl_color(dotty_major_col);
 	{
-		int gx = (map_lx / grid_step_3) * grid_step_3;
+		int gx = floor(map_lx / grid_step_3) * grid_step_3;
 
 		for (; gx <= map_hx; gx += grid_step_3)
 			DrawMapLine(gx, map_ly-2, gx, map_hy+2);
 
-		int gy = (map_ly / grid_step_3) * grid_step_3;
+		int gy = floor(map_ly / grid_step_3) * grid_step_3;
 
-		for (; gy <=  map_hy; gy += grid_step_3)
+		for (; gy <= map_hy; gy += grid_step_3)
 			DrawMapLine(map_lx, gy, map_hx, gy);
 	}
 
@@ -539,13 +538,13 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	gl_color(dotty_minor_col);
 	{
-		int gx = (map_lx / grid_step_2) * grid_step_2;
+		int gx = floor(map_lx / grid_step_2) * grid_step_2;
 
 		for (; gx <= map_hx; gx += grid_step_2)
 			if (gx % grid_step_3 != 0)
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / grid_step_2) * grid_step_2;
+		int gy = floor(map_ly / grid_step_2) * grid_step_2;
 
 		for (; gy <= map_hy; gy += grid_step_2)
 			if (gy % grid_step_3 != 0)
@@ -559,8 +558,8 @@ void UI_Canvas::DrawGrid_Dotty()
 		gl_color(dotty_point_col);
 
 	{
-		int gx = (map_lx / grid_step_1) * grid_step_1;
-		int gy = (map_ly / grid_step_1) * grid_step_1;
+		int gx = floor(map_lx / grid_step_1) * grid_step_1;
+		int gy = floor(map_ly / grid_step_1) * grid_step_1;
 
 		for (int ny = gy; ny <= map_hy; ny += grid_step_1)
 		for (int nx = gx; nx <= map_hx; nx += grid_step_1)
