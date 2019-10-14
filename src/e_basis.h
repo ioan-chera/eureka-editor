@@ -144,7 +144,7 @@ public:
 		y = other->y;
 	}
 
-	bool Matches(int ox, int oy) const
+	bool Matches(fixcoord_t ox, fixcoord_t oy) const
 	{
 		return (x == ox) && (y == oy);
 	}
@@ -291,7 +291,7 @@ public:
 		return (start == v_num) || (end == v_num);
 	}
 
-	bool TouchesCoord(int tx, int ty) const
+	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty) const
 	{
 		return Start()->Matches(tx, ty) || End()->Matches(tx, ty);
 	}

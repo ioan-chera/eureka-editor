@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -32,16 +32,16 @@ class Objid;
 class bitvec_c;
 
 
-void GetNearObject(Objid& o, obj_type_e objtype, float x, float y);
+void GetNearObject(Objid& o, obj_type_e objtype, double x, double y);
 
-void GetSplitLineDef(Objid& o, int x, int y, int drag_vert = -1);
+void GetSplitLineDef(Objid& o, double x, double y, int drag_vert = -1);
 void GetSplitLineForDangler(Objid& o, int v_num);
 
-float ApproxDistToLineDef(const LineDef * L, float x, float y);
+double ApproxDistToLineDef(const LineDef * L, double x, double y);
 
-int ClosestLine_CastingHoriz(int x, int y, int *side);
-int ClosestLine_CastingVert (int x, int y, int *side);
-int ClosestLine_CastAtAngle (int x, int y, float radians);
+int ClosestLine_CastingHoriz(double x, double y, int *side);
+int ClosestLine_CastingVert (double x, double y, int *side);
+int ClosestLine_CastAtAngle (double x, double y, float radians);
 
 int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_lines = NULL);
 int OppositeSector(int ld, int ld_side);
@@ -49,10 +49,10 @@ int OppositeSector(int ld, int ld_side);
 void FastOpposite_Begin();
 void FastOpposite_Finish();
 
-bool PointOutsideOfMap(int x, int y);
+bool PointOutsideOfMap(double x, double y);
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
-int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2);
+int PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2);
 
 
 typedef struct
@@ -60,8 +60,7 @@ typedef struct
 	int vert;	// >= 0 when we hit a vertex
 	int ld;     // >= 0 when we hit a linedef instead
 
-	int x, y;	// coordinate of line split point
-
+	double x, y;	// coordinate of line split point
 	double dist;
 }
 cross_point_t;
@@ -73,8 +72,8 @@ public:
 	std::vector< cross_point_t > points;
 
 	// the start/end coordinates of the whole tested line
-	int start_x, start_y;
-	int   end_x,   end_y;
+	double start_x, start_y;
+	double   end_x,   end_y;
 
 public:
 	 crossing_state_c();
@@ -83,7 +82,7 @@ public:
 	void clear();
 
 	void add_vert(int v, double dist);
-	void add_line(int ld, int new_x, int new_y, double dist);
+	void add_line(int ld, double new_x, double new_y, double dist);
 
 	bool HasVertex(int v) const;
 	bool HasLine(int ld)  const;
@@ -103,8 +102,8 @@ private:
 };
 
 void FindCrossingPoints(crossing_state_c& cross,
-						int x1, int y1, int possible_v1,
-						int x2, int y2, int possible_v2);
+						double x1, double y1, int possible_v1,
+						double x2, double y2, int possible_v2);
 
 #endif  /* __EUREKA_X_HOVER_H__ */
 
