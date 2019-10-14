@@ -32,6 +32,10 @@
 extern short loading_level;
 extern Lump_c * Load_LookupAndSeek(const char *name);
 
+extern void ValidateSidedefRefs(LineDef * ld, int num);
+extern bool ValidateVertexRefs(LineDef *ld, int num);
+extern void ValidateSectorRef(SideDef *sd, int num);
+
 
 class Udmf_Token
 {
@@ -612,6 +616,24 @@ static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 	}
 }
 
+
+static void ValidateLevel_UDMF()
+{
+	for (int n = 0 ; n < NumSideDefs ; n++)
+	{
+		ValidateSectorRef(SideDefs[n], n);
+	}
+
+	for (int n = 0 ; n < NumLineDefs ; n++)
+	{
+		LineDef *L = LineDefs[n];
+
+		ValidateVertexRefs(L, n);
+		ValidateSidedefRefs(L, n);
+	}
+}
+
+
 void LoadLevel_UDMF()
 {
 	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
@@ -655,7 +677,7 @@ void LoadLevel_UDMF()
 		parser.SkipToEOLN();
 	}
 
-	// TODO TODO validate fields  [ esp. verts/sides in linedef, sector in sidedef ]
+	ValidateLevel_UDMF();
 }
 
 

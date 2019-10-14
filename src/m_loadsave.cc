@@ -516,7 +516,6 @@ static void CreateFallbackSector()
 	Sectors.push_back(sec);
 }
 
-
 static void CreateFallbackSideDef()
 {
 	// we need a valid sector too!
@@ -530,6 +529,81 @@ static void CreateFallbackSideDef()
 	sd->SetDefaults(false);
 
 	SideDefs.push_back(sd);
+}
+
+static void CreateFallbackVertices()
+{
+	LogPrintf("Creating two fallback vertices.\n");
+
+	Vertex *v1 = new Vertex;
+	Vertex *v2 = new Vertex;
+
+	v1->raw_x = INT_TO_COORD(-777);
+	v1->raw_y = INT_TO_COORD(-777);
+
+	v2->raw_x = INT_TO_COORD(555);
+	v2->raw_y = INT_TO_COORD(555);
+
+	Vertices.push_back(v1);
+	Vertices.push_back(v2);
+}
+
+
+void ValidateSidedefRefs(LineDef * ld, int num)
+{
+	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+	{
+		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
+				  num, ld->right, ld->left);
+
+		bad_sidedef_refs++;
+
+		// ensure we have a usable sidedef
+		if (NumSideDefs == 0)
+			CreateFallbackSideDef();
+
+		if (ld->right >= NumSideDefs)
+			ld->right = 0;
+
+		if (ld->left >= NumSideDefs)
+			ld->left = 0;
+	}
+}
+
+void ValidateVertexRefs(LineDef *ld, int num)
+{
+	if (ld->start >= NumVertices || ld->end >= NumVertices ||
+	    ld->start == ld->end)
+	{
+		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
+		          num, ld->start, ld->end);
+
+		bad_linedef_count++;
+
+		// ensure we have a valid vertex
+		if (NumVertices < 2)
+			CreateFallbackVertices();
+
+		ld->start = 0;
+		ld->end   = NumVertices - 1;
+	}
+}
+
+void ValidateSectorRef(SideDef *sd, int num)
+{
+	if (sd->sector >= NumSectors)
+	{
+		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
+		          num, sd->sector);
+
+		bad_sector_refs++;
+
+		// ensure we have a valid sector
+		if (NumSectors == 0)
+			CreateFallbackSector();
+
+		sd->sector = 0;
+	}
 }
 
 
@@ -705,47 +779,9 @@ static void LoadSideDefs()
 
 		sd->sector = LE_U16(raw.sector);
 
-		if (sd->sector >= NumSectors)
-		{
-			LogPrintf("WARNING: sidedef #%d has bad sector ref (%d)\n",
-			          i, sd->sector);
-
-			bad_sector_refs++;
-
-			// ensure we have a valid sector
-			if (NumSectors == 0)
-				CreateFallbackSector();
-
-			sd->sector = 0;
-		}
+		ValidateSectorRef(sd, i);
 
 		SideDefs.push_back(sd);
-	}
-}
-
-
-static void ValidateSidedefs(LineDef * ld)
-{
-	if (ld->right == 0xFFFF) ld->right = -1;
-	if (ld-> left == 0xFFFF) ld-> left = -1;
-
-	// validate sidedefs
-	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
-	{
-		LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
-				  ld->right, ld->left);
-
-		bad_sidedef_refs++;
-
-		// ensure we have a usable sidedef
-		if (NumSideDefs == 0)
-			CreateFallbackSideDef();
-
-		if (ld->right >= NumSideDefs)
-			ld->right = 0;
-
-		if (ld->left >= NumSideDefs)
-			ld->left = 0;
 	}
 }
 
@@ -777,21 +813,6 @@ static void LoadLineDefs()
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
 
-		// validate vertices
-		if (ld->start >= NumVertices || ld->end >= NumVertices ||
-		    ld->start == ld->end)
-		{
-			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-			          i, ld->start, ld->end);
-
-			bad_linedef_count++;
-
-			// forget it
-			delete ld;
-
-			continue;
-		}
-
 		ld->flags = LE_U16(raw.flags);
 		ld->type  = LE_U16(raw.type);
 		ld->tag   = LE_S16(raw.tag);
@@ -799,7 +820,11 @@ static void LoadLineDefs()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		ValidateSidedefs(ld);
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
+
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
 		LineDefs.push_back(ld);
 	}
@@ -834,21 +859,6 @@ static void LoadLineDefs_Hexen()
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
 
-		// validate vertices
-		if (ld->start >= NumVertices || ld->end >= NumVertices ||
-			ld->start == ld->end)
-		{
-			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-					  i, ld->start, ld->end);
-
-			bad_linedef_count++;
-
-			// forget it
-			delete ld;
-
-			continue;
-		}
-
 		ld->flags = LE_U16(raw.flags);
 		ld->type = raw.type;
 		ld->tag  = raw.args[0];
@@ -860,7 +870,11 @@ static void LoadLineDefs_Hexen()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		ValidateSidedefs(ld);
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
+
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
 		LineDefs.push_back(ld);
 	}
@@ -902,7 +916,7 @@ static void RemoveUnusedVerticesAtEnd()
 static void ShowLoadProblem()
 {
 	LogPrintf("Map load problems:\n");
-	LogPrintf("   %d linedefs with bad vertex refs (removed)\n", bad_linedef_count);
+	LogPrintf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
 	LogPrintf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
 	LogPrintf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
 
@@ -911,7 +925,7 @@ static void ShowLoadProblem()
 	if (bad_linedef_count > 0)
 	{
 		sprintf(message, "Found %d linedefs with bad vertex references.\n"
-		                 "These linedefs have been removed.",
+		                 "These references have been replaced.",
 		        bad_linedef_count);
 	}
 	else
