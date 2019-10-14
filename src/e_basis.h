@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -49,6 +49,13 @@ class crc32_c;
 //
 
 
+// a fixed-point coordinate with 12 bits of fractional part.
+typedef int fixcoord_t;
+
+#define FROM_COORD(fx)  ((fx) / 4096.0)
+#define   TO_COORD(db)  I_ROUND((db) * 4096.0)
+
+
 typedef enum
 {
 	SIDE_RIGHT = +1,
@@ -63,14 +70,16 @@ side_ref_e;
 class Thing
 {
 public:
-	int x;
-	int y;
+	fixcoord_t x;
+	fixcoord_t y;
+
 	int angle;
 	int type;
 	int options;
 
 	// Hexen stuff
-	int z;
+	fixcoord_t z;
+
 	int tid;
 	int special;
 	int arg1, arg2, arg3, arg4, arg5;
@@ -120,8 +129,8 @@ public:
 class Vertex
 {
 public:
-	int x;
-	int y;
+	fixcoord_t x;
+	fixcoord_t y;
 
 	enum { F_X, F_Y };
 
