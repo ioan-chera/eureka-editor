@@ -360,12 +360,11 @@ void CMD_SEC_SelectGroup(void)
 
 void GoToSelection()
 {
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int mid_x = (x1 + x2) / 2;
-	int mid_y = (y1 + y2) / 2;
+	double mid_x = (x1 + x2) / 2;
+	double mid_y = (y1 + y2) / 2;
 
 	grid.MoveTo(mid_x, mid_y);
 

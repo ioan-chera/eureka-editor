@@ -1419,8 +1419,8 @@ void Things_FindInVoid(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int x = Things[n]->x;
-		int y = Things[n]->y;
+		double x = Things[n]->x;
+		double y = Things[n]->y;
 
 		Objid obj;
 
@@ -1440,8 +1440,8 @@ void Things_FindInVoid(selection_c& list)
 
 		for (int corner = 0 ; corner < 4 ; corner++)
 		{
-			int x2 = x + ((corner & 1) ? -4 : +4);
-			int y2 = y + ((corner & 2) ? -4 : +4);
+			double x2 = x + ((corner & 1) ? -4 : +4);
+			double y2 = y + ((corner & 2) ? -4 : +4);
 
 			GetNearObject(obj, OBJ_SECTORS, x2, y2);
 
@@ -1761,10 +1761,10 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 	// bounding box, not just touch it.
 	r = r - 1;
 
-	int x1 = T->x - r;
-	int y1 = T->y - r;
-	int x2 = T->x + r;
-	int y2 = T->y + r;
+	double x1 = T->x - r;
+	double y1 = T->y - r;
+	double x2 = T->x + r;
+	double y2 = T->y + r;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{

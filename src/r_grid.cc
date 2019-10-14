@@ -111,7 +111,7 @@ void Grid_State_c::Scroll(double delta_x, double delta_y)
 }
 
 
-int Grid_State_c::ForceSnapX(int map_x) const
+int Grid_State_c::ForceSnapX(double map_x) const
 {
 	if (map_x >= 0)
 		return grid.step * ((map_x + grid.step / 2) / grid.step);
@@ -119,7 +119,7 @@ int Grid_State_c::ForceSnapX(int map_x) const
 		return grid.step * ((map_x - grid.step / 2) / grid.step);
 }
 
-int Grid_State_c::ForceSnapY(int map_y) const
+int Grid_State_c::ForceSnapY(double map_y) const
 {
 	if (map_y >= 0)
 		return grid.step * ((map_y + grid.step / 2) / grid.step);
@@ -128,7 +128,7 @@ int Grid_State_c::ForceSnapY(int map_y) const
 }
 
 
-int Grid_State_c::SnapX(int map_x) const
+int Grid_State_c::SnapX(double map_x) const
 {
 	if (! snap || grid.step == 0)
 		return map_x;
@@ -136,7 +136,7 @@ int Grid_State_c::SnapX(int map_x) const
 	return ForceSnapX(map_x);
 }
 
-int Grid_State_c::SnapY(int map_y) const
+int Grid_State_c::SnapY(double map_y) const
 {
 	if (! snap || grid.step == 0)
 		return map_y;
@@ -145,7 +145,7 @@ int Grid_State_c::SnapY(int map_y) const
 }
 
 
-int Grid_State_c::QuantSnapX(int map_x, bool want_furthest, int *dir) const
+int Grid_State_c::QuantSnapX(double map_x, bool want_furthest, int *dir) const
 {
 	if (OnGridX(map_x))
 	{
@@ -173,7 +173,7 @@ int Grid_State_c::QuantSnapX(int map_x, bool want_furthest, int *dir) const
 		return ForceSnapX(map_x - (step - 1));
 }
 
-int Grid_State_c::QuantSnapY(int map_y, bool want_furthest, int *dir) const
+int Grid_State_c::QuantSnapY(double map_y, bool want_furthest, int *dir) const
 {
 	// this is sufficient since the grid is always square
 
@@ -181,31 +181,41 @@ int Grid_State_c::QuantSnapY(int map_y, bool want_furthest, int *dir) const
 }
 
 
-bool Grid_State_c::OnGridX(int map_x) const
+bool Grid_State_c::OnGridX(double map_x) const
 {
 	if (map_x < 0)
 		map_x = -map_x;
 
-	return (map_x % step) == 0;
+	int map_x2 = (int)map_x;
+
+	if (map_x != (double)map_x2)
+		return false;
+
+	return (map_x2 % step) == 0;
 }
 
-bool Grid_State_c::OnGridY(int map_y) const
+bool Grid_State_c::OnGridY(double map_y) const
 {
 	if (map_y < 0)
 		map_y = -map_y;
 
-	return (map_y % step) == 0;
+	int map_y2 = (int)map_y;
+
+	if (map_y != (double)map_y2)
+		return false;
+
+	return (map_y2 % step) == 0;
 }
 
-bool Grid_State_c::OnGrid(int map_x, int map_y) const
+bool Grid_State_c::OnGrid(double map_x, double map_y) const
 {
 	return OnGridX(map_x) && OnGridY(map_y);
 }
 
 
-void Grid_State_c::RefocusZoom(int map_x, int map_y, float before_Scale)
+void Grid_State_c::RefocusZoom(double map_x, double map_y, float before_Scale)
 {
-	float dist_factor = (1.0 - before_Scale / Scale);
+	double dist_factor = (1.0 - before_Scale / Scale);
 
 	orig_x += (map_x - orig_x) * dist_factor;
 	orig_y += (map_y - orig_y) * dist_factor;

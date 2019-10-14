@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -44,10 +44,10 @@
 Editor_State_t  edit;
 
 
-int Map_bound_x1 =  32767;   /* minimum X value of map */
-int Map_bound_y1 =  32767;   /* minimum Y value of map */
-int Map_bound_x2 = -32767;   /* maximum X value of map */
-int Map_bound_y2 = -32767;   /* maximum Y value of map */
+double Map_bound_x1 =  32767;   /* minimum X value of map */
+double Map_bound_y1 =  32767;   /* minimum Y value of map */
+double Map_bound_x2 = -32767;   /* maximum X value of map */
+double Map_bound_y2 = -32767;   /* maximum Y value of map */
 
 int MadeChanges;
 
@@ -84,10 +84,10 @@ static void zoom_fit()
 	int ScrMaxY = main_win->canvas->h();
 
 	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (double)(Map_bound_x2 - Map_bound_x1);
+		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
 
 	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (double)(Map_bound_y2 - Map_bound_y1);
+		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
@@ -177,7 +177,7 @@ static void UpdatePanel()
 }
 
 
-static void UpdateSplitLine(int map_x, int map_y)
+static void UpdateSplitLine(double map_x, double map_y)
 {
 	edit.split_line.clear();
 
@@ -244,8 +244,9 @@ void UpdateHighlight()
 		edit.action == ACT_DRAW_LINE &&
 		edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int new_x = grid.SnapX(edit.map_x);
-		int new_y = grid.SnapY(edit.map_y);
+		// @@ FIXME use fixcoord_t here?
+		double new_x = grid.SnapX(edit.map_x);
+		double new_y = grid.SnapY(edit.map_y);
 
 		int near_vert = Vertex_FindExact(new_x, new_y);
 
@@ -395,8 +396,8 @@ void CalculateLevelBounds()
 		return;
 	}
 
-	Map_bound_x1 = 999999; Map_bound_x2 = -999999;
-	Map_bound_y1 = 999999; Map_bound_y2 = -999999;
+	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
+	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
 
 	UpdateLevelBounds(0);
 }
@@ -837,17 +838,13 @@ int Selection_FirstLine(selection_c *list)
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, int y2)
+void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2)
 {
 	if (x2 < x1)
-	{
-		int tmp = x1; x1 = x2; x2 = tmp;
-	}
+		std::swap(x1, x2);
 
 	if (y2 < y1)
-	{
-		int tmp = y1; y1 = y2; y2 = tmp;
-	}
+		std::swap(y1, y2);
 
 	switch (objtype)
 	{

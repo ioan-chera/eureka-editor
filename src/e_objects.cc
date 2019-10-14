@@ -88,11 +88,11 @@ static void CreateSquare(int model)
 	else
 		Sectors[new_sec]->SetDefaults();
 
-	int x1 = grid.QuantSnapX(edit.map_x, false);
-	int y1 = grid.QuantSnapX(edit.map_y, false);
+	double x1 = grid.QuantSnapX(edit.map_x, false);
+	double y1 = grid.QuantSnapX(edit.map_y, false);
 
-	int x2 = x1 + new_sector_size;
-	int y2 = y1 + new_sector_size;
+	double x2 = x1 + new_sector_size;
+	double y2 = y1 + new_sector_size;
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
@@ -693,14 +693,14 @@ void CMD_Insert()
 //
 // check if any part of a LineDef is inside the given box
 //
-bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
+bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 {
-	int lx0 = LineDefs[ld]->Start()->x;
-	int ly0 = LineDefs[ld]->Start()->y;
-	int lx1 = LineDefs[ld]->End()->x;
-	int ly1 = LineDefs[ld]->End()->y;
+	double lx0 = LineDefs[ld]->Start()->x;
+	double ly0 = LineDefs[ld]->Start()->y;
+	double lx1 = LineDefs[ld]->End()->x;
+	double ly1 = LineDefs[ld]->End()->y;
 
-	int i;
+	double i;
 
 	// start is entirely inside the square?
 	if (lx0 >= x0 && lx0 <= x1 && ly0 >= y0 && ly0 <= y1)
@@ -713,25 +713,25 @@ bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 
 	if ((ly0 > y0) != (ly1 > y0))
 	{
-		i = lx0 + (int) ((double) (y0 - ly0) * (double) (lx1 - lx0) / (double) (ly1 - ly0));
+		i = lx0 + (y0 - ly0) * (lx1 - lx0) / (ly1 - ly0);
 		if (i >= x0 && i <= x1)
 			return true; /* the linedef crosses the left side */
 	}
 	if ((ly0 > y1) != (ly1 > y1))
 	{
-		i = lx0 + (int) ((double) (y1 - ly0) * (double) (lx1 - lx0) / (double) (ly1 - ly0));
+		i = lx0 + (y1 - ly0) * (lx1 - lx0) / (ly1 - ly0);
 		if (i >= x0 && i <= x1)
 			return true; /* the linedef crosses the right side */
 	}
 	if ((lx0 > x0) != (lx1 > x0))
 	{
-		i = ly0 + (int) ((double) (x0 - lx0) * (double) (ly1 - ly0) / (double) (lx1 - lx0));
+		i = ly0 + (x0 - lx0) * (ly1 - ly0) / (lx1 - lx0);
 		if (i >= y0 && i <= y1)
 			return true; /* the linedef crosses the bottom side */
 	}
 	if ((lx0 > x1) != (lx1 > x1))
 	{
-		i = ly0 + (int) ((double) (x1 - lx0) * (double) (ly1 - ly0) / (double) (lx1 - lx0));
+		i = ly0 + (x1 - lx0) * (ly1 - ly0) / (lx1 - lx0);
 		if (i >= y0 && i <= y1)
 			return true; /* the linedef crosses the top side */
 	}
@@ -741,7 +741,7 @@ bool LineTouchesBox (int ld, int x0, int y0, int x1, int y1)
 
 
 
-static void DoMoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
+static void DoMoveObjects(selection_c *list, fixcoord_t delta_x, fixcoord_t delta_y, fixcoord_t delta_z)
 {
 	selection_iterator_c it;
 
@@ -795,7 +795,7 @@ static void DoMoveObjects(selection_c *list, int delta_x, int delta_y, int delta
 }
 
 
-void MoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
+void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
 {
 	if (list->empty())
 		return;
@@ -822,7 +822,7 @@ void MoveObjects(selection_c *list, int delta_x, int delta_y, int delta_z)
 }
 
 
-void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z)
+void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_z)
 {
 	if (edit.mode != OBJ_VERTICES)
 	{
@@ -1215,11 +1215,11 @@ static void Drag_CountOnGrid(int *count, int *total)
 }
 
 
-static void Drag_UpdateObjectDist(int obj_type, int objnum, int *x, int *y,
-                                  int *best_dist, int map_x, int map_y,
+static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y,
+                                  double *best_dist, double map_x, double map_y,
 								  bool only_grid)
 {
-	int x2, y2;
+	double x2, y2;
 
 	switch (obj_type)
 	{
@@ -1271,19 +1271,18 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, int *x, int *y,
 	if (only_grid && ! grid.OnGrid(x2, y2))
 		return;
 
-	int dist = ComputeDist(x2 - map_x, y2 - map_y);
+	double dist = hypot(x2 - map_x, y2 - map_y);
 
 	if (dist < *best_dist)
 	{
 		*x = x2;
 		*y = y2;
-
 		*best_dist = dist;
 	}
 }
 
 
-void GetDragFocus(int *x, int *y, int map_x, int map_y)
+void GetDragFocus(double *x, double *y, double map_x, double map_y)
 {
 	*x = 0;
 	*y = 0;
@@ -1304,7 +1303,7 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y)
 			only_grid = true;
 	}
 
-	int best_dist = 99999;
+	double best_dist = 9e9;
 
 	selection_iterator_c it;
 
@@ -1322,27 +1321,24 @@ void GetDragFocus(int *x, int *y, int map_x, int map_y)
 void transform_t::Clear()
 {
 	mid_x = mid_y = 0;
-
 	scale_x = scale_y = 1;
-
 	skew_x = skew_y = 0;
-
 	rotate = 0;
 }
 
 
-void transform_t::Apply(int *x, int *y) const
+void transform_t::Apply(double *x, double *y) const
 {
-	float x0 = *x - mid_x;
-	float y0 = *y - mid_y;
+	double x0 = *x - mid_x;
+	double y0 = *y - mid_y;
 
 	if (rotate)
 	{
-		float s = sin(rotate * M_PI / 32768.0);
-		float c = cos(rotate * M_PI / 32768.0);
+		double s = sin(rotate * M_PI / 32768.0);
+		double c = cos(rotate * M_PI / 32768.0);
 
-		float x1 = x0;
-		float y1 = y0;
+		double x1 = x0;
+		double y1 = y0;
 
 		x0 = x1 * c - y1 * s;
 		y0 = y1 * c + x1 * s;
@@ -1350,18 +1346,15 @@ void transform_t::Apply(int *x, int *y) const
 
 	if (skew_x || skew_y)
 	{
-		float x1 = x0;
-		float y1 = y0;
+		double x1 = x0;
+		double y1 = y0;
 
 		x0 = x1 + y1 * skew_x;
 		y0 = y1 + x1 * skew_y;
 	}
 
-	x0 = x0 * scale_x;
-	y0 = y0 * scale_y;
-
-	*x = mid_x + I_ROUND(x0);
-	*y = mid_y + I_ROUND(y0);
+	*x = mid_x + x0 * scale_x;
+	*y = mid_y + y0 * scale_x;
 }
 
 
@@ -1372,7 +1365,7 @@ void transform_t::Apply(int *x, int *y) const
 // often give a different result than using the middle of the bounding
 // box.
 //
-void Objs_CalcMiddle(selection_c * list, int *x, int *y)
+void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 {
 	*x = *y = 0;
 
@@ -1422,8 +1415,8 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 
 	SYS_ASSERT(count > 0);
 
-	*x = I_ROUND(sum_x / count);
-	*y = I_ROUND(sum_y / count);
+	*x = sum_x / count;
+	*y = sum_y / count;
 }
 
 
@@ -1431,7 +1424,7 @@ void Objs_CalcMiddle(selection_c * list, int *x, int *y)
 // returns a bounding box that completely includes a list of objects.
 // when the list is empty, bottom-left coordinate is arbitrary.
 //
-void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
+void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2)
 {
 	if (list->empty())
 	{
@@ -1440,8 +1433,8 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 		return;
 	}
 
-	*x1 = *y1 = +777777;
-	*x2 = *y2 = -777777;
+	*x1 = *y1 = +9e9;
+	*x2 = *y2 = -9e9;
 
 	selection_iterator_c it;
 
@@ -1495,7 +1488,7 @@ void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2)
 }
 
 
-static void DoMirrorThings(selection_c& list, bool is_vert, int mid_x, int mid_y)
+static void DoMirrorThings(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
 {
 	selection_iterator_c it;
 
@@ -1523,7 +1516,7 @@ static void DoMirrorThings(selection_c& list, bool is_vert, int mid_x, int mid_y
 }
 
 
-static void DoMirrorVertices(selection_c& list, bool is_vert, int mid_x, int mid_y)
+static void DoMirrorVertices(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
 {
 	selection_c verts(OBJ_VERTICES);
 
@@ -1559,7 +1552,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, int mid_x, int mid
 }
 
 
-static void DoMirrorStuff(selection_c& list, bool is_vert, int mid_x, int mid_y)
+static void DoMirrorStuff(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
 {
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -1598,7 +1591,7 @@ void CMD_Mirror()
 	if (tolower(EXEC_Param[0][0]) == 'v')
 		is_vert = true;
 
-	int mid_x, mid_y;
+	double mid_x, mid_y;
 
 	Objs_CalcMiddle(&list, &mid_x, &mid_y);
 
@@ -1612,7 +1605,8 @@ void CMD_Mirror()
 }
 
 
-static void DoRotate90Things(selection_c& list, bool anti_clockwise, int mid_x, int mid_y)
+static void DoRotate90Things(selection_c& list, bool anti_clockwise,
+							 fixcoord_t mid_x, fixcoord_t mid_y)
 {
 	selection_iterator_c it;
 
@@ -1660,8 +1654,7 @@ void CMD_Rotate90()
 		return;
 	}
 
-	int mid_x, mid_y;
-
+	double mid_x, mid_y;
 	Objs_CalcMiddle(&list, &mid_x, &mid_y);
 
 	BA_Begin();
@@ -1721,8 +1714,8 @@ static void DoScaleTwoThings(selection_c& list, transform_t& param)
 	{
 		const Thing * T = Things[*it];
 
-		int new_x = T->x;
-		int new_y = T->y;
+		double new_x = T->x;
+		double new_y = T->y;
 
 		param.Apply(&new_x, &new_y);
 
@@ -1753,8 +1746,8 @@ static void DoScaleTwoVertices(selection_c& list, transform_t& param)
 	{
 		const Vertex * V = Vertices[*it];
 
-		int new_x = V->x;
-		int new_y = V->y;
+		double new_x = V->x;
+		double new_y = V->y;
 
 		param.Apply(&new_x, &new_y);
 
@@ -1818,7 +1811,7 @@ void TransformObjects(transform_t& param)
 }
 
 
-static void DetermineOrigin(transform_t& param, int pos_x, int pos_y)
+static void DetermineOrigin(transform_t& param, double pos_x, double pos_y)
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
@@ -1826,7 +1819,7 @@ static void DetermineOrigin(transform_t& param, int pos_x, int pos_y)
 		return;
 	}
 
-	int lx, ly, hx, hy;
+	double lx, ly, hx, hy;
 
 	Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
 
@@ -1846,7 +1839,7 @@ static void DetermineOrigin(transform_t& param, int pos_x, int pos_y)
 }
 
 
-void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y)
+void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y)
 {
 	SYS_ASSERT(scale_x > 0);
 	SYS_ASSERT(scale_y > 0);
@@ -1911,7 +1904,7 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 }
 
 void ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                   int pos_x, int pos_y, int pos_z)
+                   double pos_x, double pos_y, double pos_z)
 {
 	SYS_ASSERT(edit.mode == OBJ_SECTORS);
 
@@ -1934,7 +1927,7 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 }
 
 
-void RotateObjects3(double deg, int pos_x, int pos_y)
+void RotateObjects3(double deg, double pos_x, double pos_y)
 {
 	transform_t param;
 
@@ -1953,19 +1946,19 @@ void RotateObjects3(double deg, int pos_x, int pos_y)
 }
 
 
-static bool SpotInUse(obj_type_e obj_type, int map_x, int map_y)
+static bool SpotInUse(obj_type_e obj_type, fixcoord_t fx, fixcoord_t fy)
 {
 	switch (obj_type)
 	{
 		case OBJ_THINGS:
 			for (int n = 0 ; n < NumThings ; n++)
-				if (Things[n]->x == map_x && Things[n]->y == map_y)
+				if (Things[n]->x == fx && Things[n]->y == fy)
 					return true;
 			return false;
 
 		case OBJ_VERTICES:
 			for (int n = 0 ; n < NumVertices ; n++)
-				if (Vertices[n]->x == map_x && Vertices[n]->y == map_y)
+				if (Vertices[n]->x == fx && Vertices[n]->y == fy)
 					return true;
 			return false;
 
@@ -2018,7 +2011,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	}
 	else
 	{
-		int lx, ly, hx, hy;
+		double lx, ly, hx, hy;
 		Objs_CalcBBox(&list, &lx, &ly, &hx, &hy);
 
 		param.mid_x = lx + (hx - lx) / 2;
@@ -2113,10 +2106,10 @@ static void Quantize_Vertices(selection_c& list)
 			continue;
 
 		// IDEA: make this a method of LineDef
-		int x1 = L->Start()->x;
-		int y1 = L->Start()->y;
-		int x2 = L->End()->x;
-		int y2 = L->End()->y;
+		double x1 = L->Start()->x;
+		double y1 = L->Start()->y;
+		double x2 = L->End()->x;
+		double y2 = L->End()->y;
 
 		if (y1 == y2)
 		{
@@ -2162,8 +2155,8 @@ static void Quantize_Vertices(selection_c& list)
 		{
 			int x_dir, y_dir;
 
-			int new_x = grid.QuantSnapX(V->x, pass & 1, &x_dir);
-			int new_y = grid.QuantSnapY(V->y, pass & 2, &y_dir);
+			double new_x = grid.QuantSnapX(V->x, pass & 1, &x_dir);
+			double new_y = grid.QuantSnapY(V->y, pass & 2, &y_dir);
 
 			// keep horizontal lines horizontal
 			if ((mode & V_HORIZ) && (pass & 2))

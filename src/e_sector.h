@@ -100,13 +100,13 @@ public:
 private:
 	bool LookForIsland();
 
-	void CalcBounds(int *x1, int *y1, int *x2, int *y2) const;
+	void CalcBounds(double *x1, double *y1, double *x2, double *y2) const;
 };
 
 
 bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare = false);
 
-bool AssignSectorToSpace(int map_x, int map_y, int new_sec = -1, int model = -1);
+bool AssignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model = -1);
 
 void SectorsAdjustLight(int delta);
 

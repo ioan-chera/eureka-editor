@@ -42,7 +42,7 @@ public:
 
 	// scale for drawing map
 	// (multiply a map coordinate by this to get a screen coord)
-	float Scale;
+	double Scale;
 
 public:
 	Grid_State_c();
@@ -70,7 +70,7 @@ public:
 
 	// move the origin so that the focus point of the last zoom
 	// operation (scale change) is map_x/y.
-	void RefocusZoom(int map_x, int map_y, float before_Scale);
+	void RefocusZoom(double map_x, double map_y, float before_Scale);
 
 	// choose the scale nearest to (and less than) the wanted one
 	void NearestScale(double want_scale);
@@ -88,22 +88,22 @@ public:
 
 	// return X/Y coordinate snapped to grid
 	// (or unchanged is the 'snap' flag is off)
-	int SnapX(int map_x) const;
-	int SnapY(int map_y) const;
+	int SnapX(double map_x) const;
+	int SnapY(double map_y) const;
 
 	// return X/Y coordinate snapped to grid (always)
-	int ForceSnapX(int map_x) const;
-	int ForceSnapY(int map_y) const;
+	int ForceSnapX(double map_x) const;
+	int ForceSnapY(double map_y) const;
 
 	// quantization snap, can pick coordinate on other side
-	int QuantSnapX(int map_x, bool want_furthest, int *dir = NULL) const;
-	int QuantSnapY(int map_y, bool want_furthest, int *dir = NULL) const;
+	int QuantSnapX(double map_x, bool want_furthest, int *dir = NULL) const;
+	int QuantSnapY(double map_y, bool want_furthest, int *dir = NULL) const;
 
 	// check if the X/Y coordinate is on a grid point
-	bool OnGridX(int map_x) const;
-	bool OnGridY(int map_y) const;
+	bool OnGridX(double map_x) const;
+	bool OnGridY(double map_y) const;
 
-	bool OnGrid(int map_x, int map_y) const;
+	bool OnGrid(double map_x, double map_y) const;
 
 private:
 	void DoSetScale(double new_scale);

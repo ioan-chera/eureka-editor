@@ -37,11 +37,11 @@ public:
 	int p_type, px, py;
 
 	// view position.
-	float x, y, z;
+	double x, y, z;
 
 	// view direction.  angle is in radians
-	float angle;
-	float Sin, Cos;
+	double angle;
+	double Sin, Cos;
 
 	// screen buffer.
 	int screen_w, screen_h;
@@ -159,8 +159,8 @@ void Render3D_RestoreHighlight();
 bool Render3D_ClipboardOp(char op);
 bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 
-void Render3D_SetCameraPos(int new_x, int new_y);
-void Render3D_GetCameraPos(int *x, int *y, float *angle);
+void Render3D_SetCameraPos(double new_x, double new_y);
+void Render3D_GetCameraPos(double *x, double *y, float *angle);
 
 bool Render3D_ParseUser(const char ** tokens, int num_tok);
 void Render3D_WriteUser(FILE *fp);

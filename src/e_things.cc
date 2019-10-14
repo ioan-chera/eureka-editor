@@ -175,10 +175,8 @@ void CMD_TH_Disconnect(void)
 		if (total < 2)
 			continue;
 
- 		int mid_x, mid_y;
-
- 		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
-
+		double mid_x, mid_y;
+		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
 
 		selection_iterator_c it;
 
@@ -208,8 +206,7 @@ void CMD_TH_Merge(void)
 		return;
 	}
 
- 	int mid_x, mid_y;
-
+	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	BA_Begin();

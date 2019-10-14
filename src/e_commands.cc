@@ -542,8 +542,7 @@ void CheckBeginDrag()
 		else
 			edit.drag_single_obj = -1;
 
-		int focus_x, focus_y;
-
+		double focus_x, focus_y;
 		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
 
 		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
@@ -561,8 +560,7 @@ static void ACT_SelectBox_release(void)
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
 
 	// a mere click and release will unselect everything
@@ -583,7 +581,7 @@ static void ACT_Drag_release(void)
 
 	Editor_ClearAction();
 
-	int dx, dy;
+	double dx, dy;
 	main_win->canvas->DragFinish(&dx, &dy);
 
 	if (dx || dy)
@@ -761,8 +759,7 @@ void CMD_ACT_Drag()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
 		return;
 
-	int focus_x, focus_y;
-
+	double focus_x, focus_y;
 	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
 
 	Editor_SetAction(ACT_DRAG);
@@ -844,8 +841,7 @@ void CMD_ACT_Transform()
 		return;
 
 
-	int middle_x, middle_y;
-
+	double middle_x, middle_y;
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
 	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y, mode);
@@ -976,7 +972,7 @@ void CMD_ZoomSelection()
 
 void CMD_GoToCamera()
 {
-	int x, y;
+	double x, y;
 	float angle;
 
 	Render3D_GetCameraPos(&x, &y, &angle);
@@ -1003,8 +999,8 @@ void CMD_PlaceCamera()
 		return;
 	}
 
-	int x = edit.map_x;
-	int y = edit.map_y;
+	double x = edit.map_x;
+	double y = edit.map_y;
 
 	Render3D_SetCameraPos(x, y);
 

@@ -41,11 +41,11 @@
 #include <algorithm>
 
 
-int Vertex_FindExact(int x, int y)
+int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 {
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		if (Vertices[i]->x == x && Vertices[i]->y == y)
+		if (Vertices[i]->x == fx && Vertices[i]->y == fy)
 			return i;
 	}
 
@@ -230,7 +230,7 @@ void Vertex_MergeList(selection_c *verts)
 
 	int v = verts->find_first();
 
-	int new_x, new_y;
+	double new_x, new_y;
 
 #if 0
 	Objs_CalcMiddle(verts, &new_x, &new_y);
@@ -398,12 +398,12 @@ bool Vertex_TryFixDangler(int v_num)
 }
 
 
-static void CalcDisconnectCoord(const LineDef *L, int v_num, int *x, int *y)
+static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y)
 {
 	const Vertex * V = Vertices[v_num];
 
-	int dx = L->End()->x - L->Start()->x;
-	int dy = L->End()->y - L->Start()->y;
+	double dx = L->End()->x - L->Start()->x;
+	double dy = L->End()->y - L->Start()->y;
 
 	if (L->end == v_num)
 	{
@@ -447,8 +447,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 
 		if (L->start == v_num || L->end == v_num)
 		{
-			int new_x, new_y;
-
+			double new_x, new_y;
 			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
@@ -550,8 +549,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 	if (! touches_non_sel)
 		return;
 
-	int new_x, new_y;
-
+	double new_x, new_y;
 	CalcDisconnectCoord(LineDefs[ld], v_num, &new_x, &new_y);
 
 	int new_v = BA_New(OBJ_VERTICES);
@@ -753,10 +751,10 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 }
 
 
-static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy)
+static void DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, double * dy)
 {
-	int det_mid_x, sec_mid_x;
-	int det_mid_y, sec_mid_y;
+	double det_mid_x, sec_mid_x;
+	double det_mid_y, sec_mid_y;
 
 	Objs_CalcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
 	Objs_CalcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
@@ -781,7 +779,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	int mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
+	double mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;
@@ -826,8 +824,7 @@ void CMD_SEC_Disconnect(void)
 
 
 	// determine vector to move the detach coords
-	int move_dx, move_dy;
-
+	double move_dx, move_dy;
 	DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
@@ -914,8 +911,8 @@ void CMD_SEC_Disconnect(void)
 //------------------------------------------------------------------------
 
 
-static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x2, int y2,
-							  int width, int height, int side)
+static double WeightForVertex(const Vertex *V, /* bbox: */ double x1, double y1, double x2, double y2,
+							  double width, double height, int side)
 {
 	double dist;
 	double extent;
@@ -971,12 +968,11 @@ void CMD_VT_ShapeLine(void)
 
 	// determine orientation and position of the line
 
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int width  = x2 - x1;
-	int height = y2 - y1;
+	double width  = x2 - x1;
+	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{
@@ -1223,12 +1219,11 @@ void CMD_VT_ShapeArc(void)
 
 
 	// determine middle point for circle
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int width  = x2 - x1;
-	int height = y2 - y1;
+	double width  = x2 - x1;
+	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{

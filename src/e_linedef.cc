@@ -59,10 +59,10 @@ bool LineDefAlreadyExists(int v1, int v2)
 // existing line.  By "overlap" I mean parallel and sitting on top
 // (this does NOT test for lines crossing each other).
 //
-bool LineDefWouldOverlap(int v1, int x2, int y2)
+bool LineDefWouldOverlap(int v1, double x2, double y2)
 {
-	int x1 = Vertices[v1]->x;
-	int y1 = Vertices[v1]->y;
+	double x1 = Vertices[v1]->x;
+	double y1 = Vertices[v1]->y;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -950,8 +950,8 @@ static bool DoSplitLineDef(int ld)
 {
 	LineDef * L = LineDefs[ld];
 
-	int new_x = (L->Start()->x + L->End()->x) / 2;
-	int new_y = (L->Start()->y + L->End()->y) / 2;
+	double new_x = (L->Start()->x + L->End()->x) / 2;
+	double new_y = (L->Start()->y + L->End()->y) / 2;
 
 	// prevent creating tiny lines (especially zero-length)
 	if (abs(L->Start()->x - L->End()->x) < 4 &&
@@ -1232,7 +1232,7 @@ void CMD_LIN_MergeTwo(void)
 }
 
 
-void MoveCoordOntoLineDef(int ld, int *x, int *y)
+void MoveCoordOntoLineDef(int ld, double *x, double *y)
 {
 	const LineDef *L = LineDefs[ld];
 
@@ -1252,11 +1252,8 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 	double along = (*x - x1) * dx + (*y - y1) * dy;
 
 	// result = start + along * line unit vector
-	double new_x = x1 + along * dx / len_squared;
-	double new_y = y1 + along * dy / len_squared;
-
-	*x = I_ROUND(new_x);
-	*y = I_ROUND(new_y);
+	*x = x1 + along * dx / len_squared;
+	*y = y1 + along * dy / len_squared;
 }
 
 

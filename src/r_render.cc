@@ -1070,7 +1070,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 }
 
 
-void Render3D_SetCameraPos(int new_x, int new_y)
+void Render3D_SetCameraPos(double new_x, double new_y)
 {
 	r_view.x = new_x;
 	r_view.y = new_y;
@@ -1079,7 +1079,7 @@ void Render3D_SetCameraPos(int new_x, int new_y)
 }
 
 
-void Render3D_GetCameraPos(int *x, int *y, float *angle)
+void Render3D_GetCameraPos(double *x, double *y, float *angle)
 {
 	*x = r_view.x;
 	*y = r_view.y;

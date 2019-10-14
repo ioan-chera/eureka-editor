@@ -530,12 +530,12 @@ int lineloop_c::DetermineSector() const
 }
 
 
-void lineloop_c::CalcBounds(int *x1, int *y1, int *x2, int *y2) const
+void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) const
 {
 	SYS_ASSERT(lines.size() > 0);
 
-	*x1 = +99999; *y1 = +99999;
-	*x2 = -99999; *y2 = -99999;
+	*x1 = +9e9; *y1 = +9e9;
+	*x2 = -9e9; *y2 = -9e9;
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
@@ -727,8 +727,7 @@ bool lineloop_c::LookForIsland()
 	//
 
 	// calc bounding box
-	int bbox_x1, bbox_y1, bbox_x2, bbox_y2;
-
+	double bbox_x1, bbox_y1, bbox_x2, bbox_y2;
 	CalcBounds(&bbox_x1, &bbox_y1, &bbox_x2, &bbox_y2);
 
 	int count = 0;
@@ -737,10 +736,10 @@ bool lineloop_c::LookForIsland()
 	{
 		const LineDef * L = LineDefs[ld];
 
-		int x1 = L->Start()->x;
-		int y1 = L->Start()->y;
-		int x2 = L->End()->x;
-		int y2 = L->End()->y;
+		double x1 = L->Start()->x;
+		double y1 = L->Start()->y;
+		double x2 = L->End()->x;
+		double y2 = L->End()->y;
 
 		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
 		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
@@ -1088,7 +1087,7 @@ void lineloop_c::AssignSector(int new_sec, selection_c& flip)
 }
 
 
-static bool GetLoopForSpace(int map_x, int map_y, lineloop_c& loop)
+static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 {
 	selection_c seen_lines(OBJ_LINEDEFS);
 
@@ -1162,7 +1161,7 @@ static bool GetLoopForSpace(int map_x, int map_y, lineloop_c& loop)
 // the 'model' is what properties to use for a new sector, < 0 means
 // look for a neighboring sector to copy.
 //
-bool AssignSectorToSpace(int map_x, int map_y, int new_sec, int model)
+bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 {
 	lineloop_c loop;
 

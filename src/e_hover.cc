@@ -183,7 +183,7 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 }
 
 
-int ClosestLine_CastAtAngle(int x, int y, float radians)
+int ClosestLine_CastAtAngle(double x, double y, float radians)
 {
 	int    best_match = -1;
 	double best_dist  = 9e9;
