@@ -101,8 +101,8 @@ static void FreshLevel()
 		Vertex *v = new Vertex;
 		Vertices.push_back(v);
 
-		v->x = (i >= 2) ? 256 : -256;
-		v->y = (i==1 || i==2) ? 256 :-256;
+		v->SetRawX((i >= 2) ? 256 : -256);
+		v->SetRawY((i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
 		SideDefs.push_back(sd);
@@ -125,8 +125,9 @@ static void FreshLevel()
 
 		th->type  = pl;
 		th->angle = 90;
-		th->x = (pl == 1) ? 0 : (pl - 3) * 48;
-		th->y = (pl == 1) ? 48 : (pl == 3) ? -48 : 0;
+
+		th->SetRawX((pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY((pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
 	CalculateLevelBounds();
@@ -455,8 +456,8 @@ static void LoadVertices()
 
 		Vertex *vert = new Vertex;
 
-		vert->x = LE_S16(raw.x);
-		vert->y = LE_S16(raw.y);
+		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
 		Vertices.push_back(vert);
 	}
@@ -610,8 +611,8 @@ static void LoadThings()
 
 		Thing *th = new Thing;
 
-		th->x = LE_S16(raw.x);
-		th->y = LE_S16(raw.y);
+		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -645,9 +646,9 @@ static void LoadThings_Hexen()
 		Thing *th = new Thing;
 
 		th->tid = LE_S16(raw.tid);
-		th->x = LE_S16(raw.x);
-		th->y = LE_S16(raw.y);
-		th->z = LE_S16(raw.height);
+		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		th->raw_h = INT_TO_COORD(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);
@@ -1388,8 +1389,8 @@ static void SaveVertices()
 
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(vert->x);
-		raw.y = LE_S16(vert->y);
+		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(vert->raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1439,8 +1440,8 @@ static void SaveThings()
 
 		raw_thing_t raw;
 
-		raw.x = LE_S16(th->x);
-		raw.y = LE_S16(th->y);
+		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1468,9 +1469,9 @@ static void SaveThings_Hexen()
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(th->x);
-		raw.y = LE_S16(th->y);
-		raw.height = LE_S16(th->z);
+		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
+		raw.height = LE_S16(COORD_TO_INT(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);

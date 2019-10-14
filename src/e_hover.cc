@@ -40,10 +40,10 @@ extern int vertex_radius(double scale);
 
 double ApproxDistToLineDef(const LineDef * L, double x, double y)
 {
-	double x1 = L->Start()->x;
-	double y1 = L->Start()->y;
-	double x2 = L->End()->x;
-	double y2 = L->End()->y;
+	double x1 = L->Start()->x();
+	double y1 = L->Start()->y();
+	double x2 = L->End()->x();
+	double y2 = L->End()->y();
 
 	double dx = x2 - x1;
 	double dy = y2 - y1;
@@ -99,8 +99,8 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double ly1 = LineDefs[n]->Start()->y;
-		double ly2 = LineDefs[n]->End()->y;
+		double ly1 = LineDefs[n]->Start()->y();
+		double ly2 = LineDefs[n]->End()->y();
 
 		// ignore purely horizontal lines
 		if (ly1 == ly2)
@@ -110,8 +110,8 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 		if (MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
 			continue;
 
-		double lx1 = LineDefs[n]->Start()->x;
-		double lx2 = LineDefs[n]->End()->x;
+		double lx1 = LineDefs[n]->Start()->x();
+		double lx2 = LineDefs[n]->End()->x();
 
 		double dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (ly2 - ly1);
 
@@ -146,8 +146,8 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double lx1 = LineDefs[n]->Start()->x;
-		double lx2 = LineDefs[n]->End()->x;
+		double lx1 = LineDefs[n]->Start()->x();
+		double lx2 = LineDefs[n]->End()->x();
 
 		// ignore purely vertical lines
 		if (lx1 == lx2)
@@ -157,8 +157,8 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 		if (MIN(lx1, lx2) >= x || MAX(lx1, lx2) <= x)
 			continue;
 
-		double ly1 = LineDefs[n]->Start()->y;
-		double ly2 = LineDefs[n]->End()->y;
+		double ly1 = LineDefs[n]->Start()->y();
+		double ly2 = LineDefs[n]->End()->y();
 
 		double dist = ly1 - y + (ly2 - ly1) * (x - lx1) / (lx2 - lx1);
 
@@ -195,15 +195,15 @@ int ClosestLine_CastAtAngle(double x, double y, float radians)
 	{
 		const LineDef *L = LineDefs[n];
 
-		double a = PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		double b = PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		double a = PerpDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
+		double b = PerpDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
 
 		// completely on one side of the vector?
 		if (a > 0 && b > 0) continue;
 		if (a < 0 && b < 0) continue;
 
-		double c = AlongDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		double d = AlongDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		double c = AlongDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
+		double d = AlongDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
 
 		double dist;
 
@@ -244,10 +244,10 @@ bool PointOutsideOfMap(double x, double y)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double lx1 = LineDefs[n]->Start()->x;
-		double ly1 = LineDefs[n]->Start()->y;
-		double lx2 = LineDefs[n]->End()->x;
-		double ly2 = LineDefs[n]->End()->y;
+		double lx1 = LineDefs[n]->Start()->x();
+		double ly1 = LineDefs[n]->Start()->y();
+		double lx2 = LineDefs[n]->End()->x();
+		double ly2 = LineDefs[n]->End()->y();
 
 		// does the linedef cross the horizontal ray?
 		if (MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
@@ -306,13 +306,13 @@ public:
 
 		const LineDef * L = LineDefs[ld];
 
-		dx = L->End()->x - L->Start()->x;
-		dy = L->End()->y - L->Start()->y;
+		dx = L->End()->x() - L->Start()->x();
+		dy = L->End()->y() - L->Start()->y();
 
 		cast_horizontal = abs(dy) >= abs(dx);
 
-		x = L->Start()->x + dx * 0.5;
-		y = L->Start()->y + dy * 0.5;
+		x = L->Start()->x() + dx * 0.5;
+		y = L->Start()->y() + dy * 0.5;
 
 		if (cast_horizontal && abs(dy) > 0)
 		{
@@ -332,10 +332,10 @@ public:
 		if (ld == n)  // ignore input line
 			return;
 
-		double nx1 = LineDefs[n]->Start()->x;
-		double ny1 = LineDefs[n]->Start()->y;
-		double nx2 = LineDefs[n]->End()->x;
-		double ny2 = LineDefs[n]->End()->y;
+		double nx1 = LineDefs[n]->Start()->x();
+		double ny1 = LineDefs[n]->Start()->y();
+		double nx2 = LineDefs[n]->End()->x();
+		double ny2 = LineDefs[n]->End()->y();
 
 		if (cast_horizontal)
 		{
@@ -461,11 +461,11 @@ public:
 		const LineDef *L = LineDefs[ld];
 
 		// can ignore purely vertical lines
-		if (L->Start()->x == L->End()->x)
+		if (L->IsVertical())
 			return;
 
-		double x1 = MIN(L->Start()->x, L->End()->x);
-		double x2 = MAX(L->Start()->x, L->End()->x);
+		double x1 = MIN(L->Start()->x(), L->End()->x());
+		double x2 = MAX(L->Start()->x(), L->End()->x());
 
 		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
 	}
@@ -496,11 +496,11 @@ public:
 		const LineDef *L = LineDefs[ld];
 
 		// can ignore purely horizonal lines
-		if (L->Start()->y == L->End()->y)
+		if (L->IsHorizontal())
 			return;
 
-		double y1 = MIN(L->Start()->y, L->End()->y);
-		double y2 = MAX(L->Start()->y, L->End()->y);
+		double y1 = MIN(L->Start()->y(), L->End()->y());
+		double y2 = MAX(L->Start()->y(), L->End()->y());
 
 		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
@@ -677,10 +677,10 @@ static Objid NearestLineDef(double x, double y)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double x1 = LineDefs[n]->Start()->x;
-		double y1 = LineDefs[n]->Start()->y;
-		double x2 = LineDefs[n]->End()->x;
-		double y2 = LineDefs[n]->End()->y;
+		double x1 = LineDefs[n]->Start()->x();
+		double y1 = LineDefs[n]->Start()->y();
+		double x2 = LineDefs[n]->End()->x();
+		double y2 = LineDefs[n]->End()->y();
 
 		// Skip all lines of which all points are more than <mapslack>
 		// units away from (x,y).  In a typical level, this test will
@@ -735,10 +735,10 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 		if (L->start == ignore_vert || L->end == ignore_vert)
 			continue;
 
-		double x1 = L->Start()->x;
-		double y1 = L->Start()->y;
-		double x2 = L->End()->x;
-		double y2 = L->End()->y;
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
 
 		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
 		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
@@ -835,8 +835,8 @@ static Objid NearestThing(double x, double y)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double tx = Things[n]->x;
-		double ty = Things[n]->y;
+		double tx = Things[n]->x();
+		double ty = Things[n]->y();
 
 		// filter out things that are outside the search bbox.
 		// this search box is enlarged by MAX_RADIUS.
@@ -896,8 +896,8 @@ static Objid NearestVertex(double x, double y)
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		double vx = Vertices[n]->x;
-		double vy = Vertices[n]->y;
+		double vx = Vertices[n]->x();
+		double vy = Vertices[n]->y();
 
 		// filter out vertices that are outside the search bbox
 		if (vx < lx || vx > hx || vy < ly || vy > hy)
@@ -975,21 +975,21 @@ void GetSplitLineDef(Objid& o, double x, double y, int drag_vert)
 
 	if (o.valid() && grid.snap)
 	{
-		fixcoord_t snap_x = grid.SnapX(x);  //@@ REVIEW
-		fixcoord_t snap_y = grid.SnapY(y);
+		int snap_x = grid.ForceSnapX(x);
+		int snap_y = grid.ForceSnapY(y);
 
 		const LineDef * L = LineDefs[o.num];
 
-		if ( (L->Start()->x == snap_x && L->Start()->y == snap_y) ||
-			 (L->  End()->x == snap_x && L->  End()->y == snap_y) )
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
+
+		if ( (I_ROUND(x1) == snap_x && I_ROUND(y1) == snap_y) ||
+			 (I_ROUND(x2) == snap_x && I_ROUND(y2) == snap_y))
 		{
 			o.clear();
 		}
-
-		double x1 = L->Start()->x;
-		double y1 = L->Start()->y;
-		double x2 = L->End()->x;
-		double y2 = L->End()->y;
 
 		// also require snap coordinate be not TOO FAR from the line
 		double len = L->CalcLength();
@@ -1007,7 +1007,7 @@ void GetSplitLineDef(Objid& o, double x, double y, int drag_vert)
 
 void GetSplitLineForDangler(Objid& o, int v_num)
 {
-	o = NearestSplitLine(Vertices[v_num]->x, Vertices[v_num]->y, v_num);
+	o = NearestSplitLine(Vertices[v_num]->x(), Vertices[v_num]->y(), v_num);
 }
 
 
@@ -1036,8 +1036,8 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = Vertices[v]->x;
-	pt.y    = Vertices[v]->y;
+	pt.x    = Vertices[v]->x();
+	pt.y    = Vertices[v]->y();
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1092,8 +1092,7 @@ void crossing_state_c::SplitAllLines()
 
 			Vertex *V = Vertices[points[i].vert];
 
-			V->x = points[i].x;
-			V->y = points[i].y;
+			V->SetRawXY(points[i].x, points[i].y);
 
 			SplitLineDefAtVertex(points[i].ld, points[i].vert);
 		}
@@ -1178,10 +1177,10 @@ static void FindCrossingLines(crossing_state_c& cross,
 	{
 		const LineDef * L = LineDefs[ld];
 
-		double lx1 = L->Start()->x;
-		double ly1 = L->Start()->y;
-		double lx2 = L->End()->x;
-		double ly2 = L->End()->y;
+		double lx1 = L->Start()->x();
+		double ly1 = L->Start()->y();
+		double lx2 = L->End()->x();
+		double ly2 = L->End()->y();
 
 		// bbox test -- eliminate most lines from consideration
 		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
@@ -1190,7 +1189,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 			continue;
 		}
 
-		if (L->isZeroLength())
+		if (L->IsZeroLength())
 			continue;
 
 		// skip linedef if an end-point is one of the vertices already
@@ -1282,12 +1281,12 @@ void FindCrossingPoints(crossing_state_c& cross,
 			continue;
 
 		// is this vertex sitting on the line?
-		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+		double perp = PerpDist(VC->x(), VC->y(), x1,y1, x2,y2);
 
 		if (fabs(perp) > close_dist)
 			continue;
 
-		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
+		double along = AlongDist(VC->x(), VC->y(), x1,y1, x2,y2);
 
 		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
 		{

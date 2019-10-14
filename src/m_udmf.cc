@@ -81,13 +81,14 @@ public:
 		return atoi(text.c_str());
 	}
 
-	int DecodeFloat() const
+	double DecodeFloat() const
 	{
-		double f = atof(text.c_str());
+		return atof(text.c_str());
+	}
 
-		// TODO multiply by PRECISION
-
-		return I_ROUND(f);
+	fixcoord_t DecodeCoord() const
+	{
+		return MakeValidCoord(DecodeFloat());
 	}
 
 	int DecodeTexture() const
@@ -346,11 +347,11 @@ static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 	// TODO strife options
 
 	if (field.Match("x"))
-		T->x = value.DecodeFloat();
+		T->raw_x = value.DecodeCoord();
 	else if (field.Match("y"))
-		T->y = value.DecodeFloat();
+		T->raw_y = value.DecodeCoord();
 	else if (field.Match("height"))
-		T->z = value.DecodeFloat();
+		T->raw_h = value.DecodeCoord();
 	else if (field.Match("type"))
 		T->type = value.DecodeInt();
 	else if (field.Match("angle"))
@@ -397,9 +398,9 @@ static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("x"))
-		V->x = value.DecodeFloat();
+		V->raw_x = value.DecodeCoord();
 	else if (field.Match("y"))
-		V->y = value.DecodeFloat();
+		V->raw_y = value.DecodeCoord();
 	else
 	{
 		DebugPrintf("vertex #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
@@ -684,11 +685,11 @@ static void WriteUDMF_Things(Lump_c *lump)
 
 		const Thing *th = Things[i];
 
-		lump->Printf("x = %d.000;\n", th->x);
-		lump->Printf("y = %d.000;\n", th->y);
+		lump->Printf("x = %1.3f;\n", th->x());
+		lump->Printf("y = %1.3f;\n", th->y());
 
-		if (th->z != 0)
-			lump->Printf("height = %d.000;\n", th->z);
+		if (th->raw_h != 0)
+			lump->Printf("height = %1.3f;\n", th->h());
 
 		lump->Printf("angle = %d;\n", th->angle);
 		lump->Printf("type = %d;\n", th->type);
@@ -728,8 +729,8 @@ static void WriteUDMF_Vertices(Lump_c *lump)
 
 		const Vertex *vert = Vertices[i];
 
-		lump->Printf("x = %d.000;\n", vert->x);
-		lump->Printf("y = %d.000;\n", vert->y);
+		lump->Printf("x = %1.3f;\n", vert->x());
+		lump->Printf("y = %1.3f;\n", vert->y());
 
 		lump->Printf("}\n\n");
 	}

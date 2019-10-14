@@ -178,14 +178,17 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 	if (GetCurrentObjects(&list))
 	{
+		fixcoord_t fdx = MakeValidCoord(dx * step);
+		fixcoord_t fdy = MakeValidCoord(dy * step);
+
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
 		{
 			const Vertex *V = Vertices[*it];
 
-			BA_ChangeVT(*it, Vertex::F_X, V->x + dx * step);
-			BA_ChangeVT(*it, Vertex::F_Y, V->y + dy * step);
+			BA_ChangeVT(*it, Vertex::F_X, V->raw_x + fdx);
+			BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
 		}
 
 		BA_Message("adjusted", &list);
@@ -216,8 +219,9 @@ void UI_VertexBox::UpdateField()
 {
 	if (is_vertex(obj))
 	{
-		pos_x->value(Int_TmpStr(Vertices[obj]->x));
-		pos_y->value(Int_TmpStr(Vertices[obj]->y));
+		// @@ FIXME show decimals in UDMF
+		pos_x->value(Int_TmpStr(Vertices[obj]->x()));
+		pos_y->value(Int_TmpStr(Vertices[obj]->y()));
 	}
 	else
 	{

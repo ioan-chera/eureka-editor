@@ -88,8 +88,8 @@ public:
 
 	// return X/Y coordinate snapped to grid
 	// (or unchanged is the 'snap' flag is off)
-	int SnapX(double map_x) const;
-	int SnapY(double map_y) const;
+	double SnapX(double map_x) const;
+	double SnapY(double map_y) const;
 
 	// return X/Y coordinate snapped to grid (always)
 	int ForceSnapX(double map_x) const;

@@ -97,9 +97,10 @@ static void CreateSquare(int model)
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = BA_New(OBJ_VERTICES);
+		Vertex *V = Vertices[new_v];
 
-		Vertices[new_v]->x = (i >= 2) ? x2 : x1;
-		Vertices[new_v]->y = (i==1 || i==2) ? y2 : y1;
+		V->SetRawX((i >= 2) ? x2 : x1);
+		V->SetRawY((i==1 || i==2) ? y2 : y1);
 
 		int new_sd = BA_New(OBJ_SIDEDEFS);
 
@@ -134,7 +135,6 @@ static void Insert_Thing()
 	BA_Begin();
 
 	int new_t = BA_New(OBJ_THINGS);
-
 	Thing *T = Things[new_t];
 
 	if (model >= 0)
@@ -151,8 +151,8 @@ static void Insert_Thing()
 		}
 	}
 
-	T->x = grid.SnapX(edit.map_x);
-	T->y = grid.SnapY(edit.map_y);
+	T->SetRawX(grid.SnapX(edit.map_x));
+	T->SetRawY(grid.SnapY(edit.map_y));
 
 	recent_things.insert_number(T->type);
 
@@ -373,8 +373,8 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   Vertices[v1]->x, Vertices[v1]->y, v1,
-					   Vertices[v2]->x, Vertices[v2]->y, v2);
+					   Vertices[v1]->x(), Vertices[v1]->y(), v1,
+					   Vertices[v2]->x(), Vertices[v2]->y(), v2);
 
 	cross.SplitAllLines();
 
@@ -404,8 +404,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	int old_vert = -1;
 	int new_vert = -1;
 
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
+	double new_x = grid.SnapX(edit.map_x);
+	double new_y = grid.SnapY(edit.map_y);
 
 	int orig_num_sectors = NumSectors;
 
@@ -440,7 +440,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
-			new_vert = Vertex_FindExact(new_x, new_y);
+			new_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -491,9 +491,10 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 
 	// would we create a new vertex on top of an existing one?
+	// @@ FIXME REVIEW THIS
 	if (new_vert < 0 && old_vert >= 0 &&
-		new_x == Vertices[old_vert]->x &&
-		new_y == Vertices[old_vert]->y)
+		new_x == Vertices[old_vert]->x() &&
+		new_y == Vertices[old_vert]->y())
 	{
 		edit.Selected->set(old_vert);
 		return;
@@ -509,8 +510,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		Vertex *V = Vertices[new_vert];
 
-		V->x = new_x;
-		V->y = new_y;
+		V->SetRawXY(new_x, new_y);
 
 		edit.Selected->set(new_vert);
 		edit.drawing_from = new_vert;
@@ -695,10 +695,10 @@ void CMD_Insert()
 //
 bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 {
-	double lx0 = LineDefs[ld]->Start()->x;
-	double ly0 = LineDefs[ld]->Start()->y;
-	double lx1 = LineDefs[ld]->End()->x;
-	double ly1 = LineDefs[ld]->End()->y;
+	double lx0 = LineDefs[ld]->Start()->x();
+	double ly0 = LineDefs[ld]->Start()->y();
+	double lx1 = LineDefs[ld]->End()->x();
+	double ly1 = LineDefs[ld]->End()->y();
 
 	double i;
 
@@ -741,9 +741,12 @@ bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 
 
 
-static void DoMoveObjects(selection_c *list, fixcoord_t delta_x, fixcoord_t delta_y, fixcoord_t delta_z)
+static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
 {
 	selection_iterator_c it;
+
+	fixcoord_t fdx = MakeValidCoord(delta_x);
+	fixcoord_t fdy = MakeValidCoord(delta_y);
 
 	switch (list->what_type())
 	{
@@ -752,8 +755,8 @@ static void DoMoveObjects(selection_c *list, fixcoord_t delta_x, fixcoord_t delt
 			{
 				const Thing * T = Things[*it];
 
-				BA_ChangeTH(*it, Thing::F_X, T->x + delta_x);
-				BA_ChangeTH(*it, Thing::F_Y, T->y + delta_y);
+				BA_ChangeTH(*it, Thing::F_X, T->raw_x + fdx);
+				BA_ChangeTH(*it, Thing::F_Y, T->raw_y + fdy);
 			}
 			break;
 
@@ -762,8 +765,8 @@ static void DoMoveObjects(selection_c *list, fixcoord_t delta_x, fixcoord_t delt
 			{
 				const Vertex * V = Vertices[*it];
 
-				BA_ChangeVT(*it, Vertex::F_X, V->x + delta_x);
-				BA_ChangeVT(*it, Vertex::F_Y, V->y + delta_y);
+				BA_ChangeVT(*it, Vertex::F_X, V->raw_x + fdx);
+				BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
 			}
 			break;
 
@@ -773,8 +776,8 @@ static void DoMoveObjects(selection_c *list, fixcoord_t delta_x, fixcoord_t delt
 			{
 				const Sector * S = Sectors[*it];
 
-				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + delta_z);
-				BA_ChangeSEC(*it, Sector::F_CEILH,  S->ceilh  + delta_z);
+				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
+				BA_ChangeSEC(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -1168,13 +1171,13 @@ static void Drag_CountOnGrid_Worker(int obj_type, int objnum, int *count, int *t
 	{
 		case OBJ_THINGS:
 			*total += 1;
-			if (grid.OnGrid(Things[objnum]->x, Things[objnum]->y))
+			if (grid.OnGrid(Things[objnum]->x(), Things[objnum]->y()))
 				*count += 1;
 			break;
 
 		case OBJ_VERTICES:
 			*total += 1;
-			if (grid.OnGrid(Vertices[objnum]->x, Vertices[objnum]->y))
+			if (grid.OnGrid(Vertices[objnum]->x(), Vertices[objnum]->y()))
 				*count += 1;
 			break;
 
@@ -1224,13 +1227,13 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 	switch (obj_type)
 	{
 		case OBJ_THINGS:
-			x2 = Things[objnum]->x;
-			y2 = Things[objnum]->y;
+			x2 = Things[objnum]->x();
+			y2 = Things[objnum]->y();
 			break;
 
 		case OBJ_VERTICES:
-			x2 = Vertices[objnum]->x;
-			y2 = Vertices[objnum]->y;
+			x2 = Vertices[objnum]->x();
+			y2 = Vertices[objnum]->y();
 			break;
 
 		case OBJ_LINEDEFS:
@@ -1385,8 +1388,8 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		{
 			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
 			{
-				sum_x += Things[*it]->x;
-				sum_y += Things[*it]->y;
+				sum_x += Things[*it]->x();
+				sum_y += Things[*it]->y();
 			}
 			break;
 		}
@@ -1395,8 +1398,8 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		{
 			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
 			{
-				sum_x += Vertices[*it]->x;
-				sum_y += Vertices[*it]->y;
+				sum_x += Vertices[*it]->x();
+				sum_y += Vertices[*it]->y();
 			}
 			break;
 		}
@@ -1445,14 +1448,16 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
 				const Thing *T = Things[*it];
+				double Tx = T->x();
+				double Ty = T->y();
 
 				const thingtype_t *info = M_GetThingType(T->type);
 				int r = info->radius;
 
-				if (T->x - r < *x1) *x1 = T->x - r;
-				if (T->y - r < *y1) *y1 = T->y - r;
-				if (T->x + r > *x2) *x2 = T->x + r;
-				if (T->y + r > *y2) *y2 = T->y + r;
+				if (Tx - r < *x1) *x1 = Tx - r;
+				if (Ty - r < *y1) *y1 = Ty - r;
+				if (Tx + r > *x2) *x2 = Tx + r;
+				if (Ty + r > *y2) *y2 = Ty + r;
 			}
 			break;
 		}
@@ -1462,11 +1467,13 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 			for (list->begin(&it) ; !it.at_end() ; ++it)
 			{
 				const Vertex *V = Vertices[*it];
+				double Vx = V->x();
+				double Vy = V->y();
 
-				if (V->x < *x1) *x1 = V->x;
-				if (V->y < *y1) *y1 = V->y;
-				if (V->x > *x2) *x2 = V->x;
-				if (V->y > *y2) *y2 = V->y;
+				if (Vx < *x1) *x1 = Vx;
+				if (Vy < *y1) *y1 = Vy;
+				if (Vx > *x2) *x2 = Vx;
+				if (Vy > *y2) *y2 = Vy;
 			}
 			break;
 		}
@@ -1488,8 +1495,11 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 }
 
 
-static void DoMirrorThings(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
+static void DoMirrorThings(selection_c& list, bool is_vert, double mid_x, double mid_y)
 {
+	fixcoord_t fix_mx = MakeValidCoord(mid_x);
+	fixcoord_t fix_my = MakeValidCoord(mid_y);
+
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
@@ -1498,14 +1508,14 @@ static void DoMirrorThings(selection_c& list, bool is_vert, fixcoord_t mid_x, fi
 
 		if (is_vert)
 		{
-			BA_ChangeTH(*it, Thing::F_Y, 2*mid_y - T->y);
+			BA_ChangeTH(*it, Thing::F_Y, 2*fix_my - T->raw_y);
 
 			if (T->angle != 0)
 				BA_ChangeTH(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			BA_ChangeTH(*it, Thing::F_X, 2*mid_x - T->x);
+			BA_ChangeTH(*it, Thing::F_X, 2*fix_mx - T->raw_x);
 
 			if (T->angle > 180)
 				BA_ChangeTH(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1516,8 +1526,11 @@ static void DoMirrorThings(selection_c& list, bool is_vert, fixcoord_t mid_x, fi
 }
 
 
-static void DoMirrorVertices(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
+static void DoMirrorVertices(selection_c& list, bool is_vert, double mid_x, double mid_y)
 {
+	fixcoord_t fix_mx = MakeValidCoord(mid_x);
+	fixcoord_t fix_my = MakeValidCoord(mid_y);
+
 	selection_c verts(OBJ_VERTICES);
 
 	ConvertSelection(&list, &verts);
@@ -1529,9 +1542,9 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, fixcoord_t mid_x, 
 		const Vertex * V = Vertices[*it];
 
 		if (is_vert)
-			BA_ChangeVT(*it, Vertex::F_Y, 2*mid_y - V->y);
+			BA_ChangeVT(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
 		else
-			BA_ChangeVT(*it, Vertex::F_X, 2*mid_x - V->x);
+			BA_ChangeVT(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1552,7 +1565,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, fixcoord_t mid_x, 
 }
 
 
-static void DoMirrorStuff(selection_c& list, bool is_vert, fixcoord_t mid_x, fixcoord_t mid_y)
+static void DoMirrorStuff(selection_c& list, bool is_vert, double mid_x, double mid_y)
 {
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -1606,28 +1619,31 @@ void CMD_Mirror()
 
 
 static void DoRotate90Things(selection_c& list, bool anti_clockwise,
-							 fixcoord_t mid_x, fixcoord_t mid_y)
+							 double mid_x, double mid_y)
 {
+	fixcoord_t fix_mx = MakeValidCoord(mid_x);
+	fixcoord_t fix_my = MakeValidCoord(mid_y);
+
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
-		int old_x = T->x;
-		int old_y = T->y;
+		fixcoord_t old_x = T->raw_x;
+		fixcoord_t old_y = T->raw_y;
 
 		if (anti_clockwise)
 		{
-			BA_ChangeTH(*it, Thing::F_X, mid_x - old_y + mid_y);
-			BA_ChangeTH(*it, Thing::F_Y, mid_y + old_x - mid_x);
+			BA_ChangeTH(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			BA_ChangeTH(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
 			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			BA_ChangeTH(*it, Thing::F_X, mid_x + old_y - mid_y);
-			BA_ChangeTH(*it, Thing::F_Y, mid_y - old_x + mid_x);
+			BA_ChangeTH(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			BA_ChangeTH(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
 			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1682,22 +1698,25 @@ void CMD_Rotate90()
 
 		ConvertSelection(&list, &verts);
 
+		fixcoord_t fix_mx = MakeValidCoord(mid_x);
+		fixcoord_t fix_my = MakeValidCoord(mid_y);
+
 		for (verts.begin(&it) ; !it.at_end() ; ++it)
 		{
 			const Vertex * V = Vertices[*it];
 
-			int old_x = V->x;
-			int old_y = V->y;
+			fixcoord_t old_x = V->raw_x;
+			fixcoord_t old_y = V->raw_y;
 
 			if (anti_clockwise)
 			{
-				BA_ChangeVT(*it, Vertex::F_X, mid_x - old_y + mid_y);
-				BA_ChangeVT(*it, Vertex::F_Y, mid_y + old_x - mid_x);
+				BA_ChangeVT(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+				BA_ChangeVT(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 			}
 			else
 			{
-				BA_ChangeVT(*it, Vertex::F_X, mid_x + old_y - mid_y);
-				BA_ChangeVT(*it, Vertex::F_Y, mid_y - old_x + mid_x);
+				BA_ChangeVT(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+				BA_ChangeVT(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 			}
 		}
 	}
@@ -1714,8 +1733,8 @@ static void DoScaleTwoThings(selection_c& list, transform_t& param)
 	{
 		const Thing * T = Things[*it];
 
-		double new_x = T->x;
-		double new_y = T->y;
+		double new_x = T->x();
+		double new_y = T->y();
 
 		param.Apply(&new_x, &new_y);
 
@@ -1746,8 +1765,8 @@ static void DoScaleTwoVertices(selection_c& list, transform_t& param)
 	{
 		const Vertex * V = Vertices[*it];
 
-		double new_x = V->x;
-		double new_y = V->y;
+		double new_x = V->x();
+		double new_y = V->y();
 
 		param.Apply(&new_x, &new_y);
 
@@ -1946,19 +1965,19 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 }
 
 
-static bool SpotInUse(obj_type_e obj_type, fixcoord_t fx, fixcoord_t fy)
+static bool SpotInUse(obj_type_e obj_type, int x, int y)
 {
 	switch (obj_type)
 	{
 		case OBJ_THINGS:
 			for (int n = 0 ; n < NumThings ; n++)
-				if (Things[n]->x == fx && Things[n]->y == fy)
+				if (I_ROUND(Things[n]->x()) == x && I_ROUND(Things[n]->y()) == y)
 					return true;
 			return false;
 
 		case OBJ_VERTICES:
 			for (int n = 0 ; n < NumVertices ; n++)
-				if (Vertices[n]->x == fx && Vertices[n]->y == fy)
+				if (I_ROUND(Vertices[n]->x()) == x && I_ROUND(Vertices[n]->y()) == y)
 					return true;
 			return false;
 
@@ -2051,7 +2070,7 @@ static void Quantize_Things(selection_c& list)
 	{
 		const Thing * T = Things[*it];
 
-		if (grid.OnGrid(T->x, T->y))
+		if (grid.OnGrid(T->x(), T->y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2059,8 +2078,8 @@ static void Quantize_Things(selection_c& list)
 
 		for (int pass = 0 ; pass < 4 ; pass++)
 		{
-			int new_x = grid.QuantSnapX(T->x, pass & 1);
-			int new_y = grid.QuantSnapY(T->y, pass & 2);
+			int new_x = grid.QuantSnapX(T->x(), pass & 1);
+			int new_y = grid.QuantSnapY(T->y(), pass & 2);
 
 			if (! SpotInUse(OBJ_THINGS, new_x, new_y))
 			{
@@ -2106,17 +2125,17 @@ static void Quantize_Vertices(selection_c& list)
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = L->Start()->x;
-		double y1 = L->Start()->y;
-		double x2 = L->End()->x;
-		double y2 = L->End()->y;
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
 
-		if (y1 == y2)
+		if (L->IsHorizontal())
 		{
 			vert_modes[L->start] |= V_HORIZ;
 			vert_modes[L->end]   |= V_HORIZ;
 		}
-		else if (x1 == x2)
+		else if (L->IsVertical())
 		{
 			vert_modes[L->start] |= V_VERT;
 			vert_modes[L->end]   |= V_VERT;
@@ -2143,7 +2162,7 @@ static void Quantize_Vertices(selection_c& list)
 	{
 		const Vertex * V = Vertices[*it];
 
-		if (grid.OnGrid(V->x, V->y))
+		if (grid.OnGrid(V->x(), V->y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2155,8 +2174,8 @@ static void Quantize_Vertices(selection_c& list)
 		{
 			int x_dir, y_dir;
 
-			double new_x = grid.QuantSnapX(V->x, pass & 1, &x_dir);
-			double new_y = grid.QuantSnapY(V->y, pass & 2, &y_dir);
+			double new_x = grid.QuantSnapX(V->x(), pass & 1, &x_dir);
+			double new_y = grid.QuantSnapY(V->y(), pass & 2, &y_dir);
 
 			// keep horizontal lines horizontal
 			if ((mode & V_HORIZ) && (pass & 2))

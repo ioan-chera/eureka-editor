@@ -34,7 +34,8 @@ struct Render_View_t
 {
 public:
 	// player type and position.
-	int p_type, px, py;
+	int p_type;
+	double px, py;
 
 	// view position.
 	double x, y, z;

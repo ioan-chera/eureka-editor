@@ -128,7 +128,7 @@ int Grid_State_c::ForceSnapY(double map_y) const
 }
 
 
-int Grid_State_c::SnapX(double map_x) const
+double Grid_State_c::SnapX(double map_x) const
 {
 	if (! snap || grid.step == 0)
 		return map_x;
@@ -136,7 +136,7 @@ int Grid_State_c::SnapX(double map_x) const
 	return ForceSnapX(map_x);
 }
 
-int Grid_State_c::SnapY(double map_y) const
+double Grid_State_c::SnapY(double map_y) const
 {
 	if (! snap || grid.step == 0)
 		return map_y;

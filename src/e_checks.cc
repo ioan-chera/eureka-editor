@@ -276,7 +276,7 @@ struct vertex_X_CMP_pred
 		const Vertex *V1 = Vertices[A];
 		const Vertex *V2 = Vertices[B];
 
-		return V1->x < V2->x;
+		return V1->raw_x < V2->raw_x;
 	}
 };
 
@@ -306,9 +306,9 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 	for (int k = 0 ; k < NumVertices ; k++)
 	{
-		for (int n = k + 1 ; n < NumVertices && VERT_N->x == VERT_K->x ; n++)
+		for (int n = k + 1 ; n < NumVertices && VERT_N->raw_x == VERT_K->raw_x ; n++)
 		{
-			if (VERT_N->y == VERT_K->y)
+			if (VERT_N->raw_y == VERT_K->raw_y)
 			{
 				sel.set(sorted_list[k]);
 			}
@@ -1419,8 +1419,8 @@ void Things_FindInVoid(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x;
-		double y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		Objid obj;
 
@@ -1680,11 +1680,11 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 	else if (info2->group == 'm' && info1->group != 'p')
 		r2 = MAX(4, r2 - MONSTER_STEP_DIST);
 
-	if (T1->x - r1 >= T2->x + r2) return false;
-	if (T1->y - r1 >= T2->y + r2) return false;
+	if (T1->x() - r1 >= T2->x() + r2) return false;
+	if (T1->y() - r1 >= T2->y() + r2) return false;
 
-	if (T1->x + r1 <= T2->x - r2) return false;
-	if (T1->y + r1 <= T2->y - r2) return false;
+	if (T1->x() + r1 <= T2->x() - r2) return false;
+	if (T1->y() + r1 <= T2->y() - r2) return false;
 
 	// teleporters and DM starts can safely overlap moving actors
 	if ((info1->flags & THINGDEF_TELEPT) && is_actor2) return false;
@@ -1761,10 +1761,10 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 	// bounding box, not just touch it.
 	r = r - 1;
 
-	double x1 = T->x - r;
-	double y1 = T->y - r;
-	double x2 = T->x + r;
-	double y2 = T->y + r;
+	double x1 = T->x() - r;
+	double y1 = T->y() - r;
+	double x2 = T->x() + r;
+	double y2 = T->y() + r;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2038,7 +2038,7 @@ void LineDefs_FindZeroLen(selection_c& lines)
 	lines.change_type(OBJ_LINEDEFS);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->isZeroLength())
+		if (LineDefs[n]->IsZeroLength())
 			lines.set(n);
 }
 
@@ -2049,7 +2049,7 @@ void LineDefs_RemoveZeroLen()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		if (LineDefs[n]->isZeroLength())
+		if (LineDefs[n]->IsZeroLength())
 			lines.set(n);
 	}
 
@@ -2362,15 +2362,15 @@ static int linedef_pos_cmp(int A, int B)
 	const LineDef *AL = LineDefs[A];
 	const LineDef *BL = LineDefs[B];
 
-	int A_x1 = AL->Start()->x;
-	int A_y1 = AL->Start()->y;
-	int A_x2 = AL->End()->x;
-	int A_y2 = AL->End()->y;
+	int A_x1 = AL->Start()->x();
+	int A_y1 = AL->Start()->y();
+	int A_x2 = AL->End()->x();
+	int A_y2 = AL->End()->y();
 
-	int B_x1 = BL->Start()->x;
-	int B_y1 = BL->Start()->y;
-	int B_x2 = BL->End()->x;
-	int B_y2 = BL->End()->y;
+	int B_x1 = BL->Start()->x();
+	int B_y1 = BL->Start()->y();
+	int B_x2 = BL->End()->x();
+	int B_y2 = BL->End()->y();
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{
@@ -2413,10 +2413,10 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = LineDefs[A];
 		const LineDef *BL = LineDefs[B];
 
-		int A_x1 = MIN(AL->Start()->x, AL->End()->x);
-		int B_x1 = MIN(BL->Start()->x, BL->End()->x);
+		fixcoord_t A_x = MIN(AL->Start()->raw_x, AL->End()->raw_x);
+		fixcoord_t B_x = MIN(BL->Start()->raw_x, BL->End()->raw_x);
 
-		return A_x1 < B_x1;
+		return A_x < B_x;
 	}
 };
 
@@ -2447,7 +2447,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (LineDefs[ld2]->isZeroLength())
+		if (LineDefs[ld2]->IsZeroLength())
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2504,7 +2504,7 @@ static int CheckLinesCross(int A, int B)
 	const LineDef *BL = LineDefs[B];
 
 	// ignore zero-length lines
-	if (AL->isZeroLength() || BL->isZeroLength())
+	if (AL->IsZeroLength() || BL->IsZeroLength())
 		return 0;
 
 	// ignore directly overlapping here
@@ -2517,14 +2517,14 @@ static int CheckLinesCross(int A, int B)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (MIN(AL->Start()->y, AL->End()->y) >
-	    MAX(BL->Start()->y, BL->End()->y))
+	if (MIN(AL->Start()->raw_y, AL->End()->raw_y) >
+	    MAX(BL->Start()->raw_y, BL->End()->raw_y))
 	{
 		return 0;
 	}
 
-	if (MIN(BL->Start()->y, BL->End()->y) >
-	    MAX(AL->Start()->y, AL->End()->y))
+	if (MIN(BL->Start()->raw_y, BL->End()->raw_y) >
+	    MAX(AL->Start()->raw_y, AL->End()->raw_y))
 	{
 		return 0;
 	}
@@ -2532,15 +2532,15 @@ static int CheckLinesCross(int A, int B)
 
 	// precise (but slower) intersection test
 
-	int ax1 = AL->Start()->x;
-	int ay1 = AL->Start()->y;
-	int ax2 = AL->End()->x;
-	int ay2 = AL->End()->y;
+	double ax1 = AL->Start()->x();
+	double ay1 = AL->Start()->y();
+	double ax2 = AL->End()->x();
+	double ay2 = AL->End()->y();
 
-	int bx1 = BL->Start()->x;
-	int by1 = BL->Start()->y;
-	int bx2 = BL->End()->x;
-	int by2 = BL->End()->y;
+	double bx1 = BL->Start()->x();
+	double by1 = BL->Start()->y();
+	double bx2 = BL->End()->x();
+	double by2 = BL->End()->y();
 
 	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
 	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
@@ -2636,7 +2636,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 		const LineDef *L1 = LineDefs[n2];
 
-		int max_x = MAX(L1->Start()->x, L1->End()->x);
+		fixcoord_t max_x = MAX(L1->Start()->raw_x, L1->End()->raw_x);
 
 		for (int k = n + 1 ; k < NumLineDefs ; k++)
 		{
@@ -2644,7 +2644,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 			const LineDef *L2 = LineDefs[k2];
 
-			int min_x = MIN(L2->Start()->x, L2->End()->x);
+			fixcoord_t min_x = MIN(L2->Start()->raw_x, L2->End()->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)

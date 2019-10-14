@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -149,6 +149,16 @@ const char *BA_GetString(int offset)
 }
 
 
+fixcoord_t MakeValidCoord(double x)
+{
+	if (Level_format == MAPF_UDMF)
+		return TO_COORD(x);
+
+	// in standard format, coordinates must be integral
+	return TO_COORD(I_ROUND(x));
+}
+
+
 const char * Sector::FloorTex() const
 {
 	return basis_strtab.get(floor_tex);
@@ -272,10 +282,10 @@ int LineDef::WhatSideDef(int side) const
 
 double LineDef::CalcLength() const
 {
-	int dx = Start()->x - End()->x;
-	int dy = Start()->y - End()->y;
+	double dx = Start()->x() - End()->x();
+	double dy = Start()->y() - End()->y();
 
-	return sqrt(dx * dx + dy * dy);
+	return hypot(dx, dy);
 }
 
 
@@ -1153,8 +1163,8 @@ bool BA_ChangeLD(int line, byte field, int value)
 
 static void ChecksumThing(crc32_c& crc, const Thing * T)
 {
-	crc += T->x;
-	crc += T->y;
+	crc += T->raw_x;
+	crc += T->raw_y;
 	crc += T->angle;
 	crc += T->type;
 	crc += T->options;
@@ -1162,8 +1172,8 @@ static void ChecksumThing(crc32_c& crc, const Thing * T)
 
 static void ChecksumVertex(crc32_c& crc, const Vertex * V)
 {
-	crc += V->x;
-	crc += V->y;
+	crc += V->raw_x;
+	crc += V->raw_y;
 }
 
 static void ChecksumSector(crc32_c& crc, const Sector * SEC)

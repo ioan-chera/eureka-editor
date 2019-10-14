@@ -683,9 +683,9 @@ public:
 			int light = sd->SecRef()->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->Start()->x == ld->End()->x)
+			if (ld->IsVertical())
 				light += 16;
-			else if (ld->Start()->y == ld->End()->y)
+			else if (ld->IsHorizontal())
 				light -= 16;
 
 			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
@@ -759,9 +759,9 @@ public:
 			int light = sd->SecRef()->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->Start()->x == ld->End()->x)
+			if (ld->IsVertical())
 				light += 16;
-			else if (ld->Start()->y == ld->End()->y)
+			else if (ld->IsHorizontal())
 				light -= 16;
 
 			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
@@ -792,10 +792,10 @@ public:
 		if (! ld->Right())
 			return;
 
-		float x1 = ld->Start()->x - r_view.x;
-		float y1 = ld->Start()->y - r_view.y;
-		float x2 = ld->End()->x - r_view.x;
-		float y2 = ld->End()->y - r_view.y;
+		float x1 = ld->Start()->x() - r_view.x;
+		float y1 = ld->Start()->y() - r_view.y;
+		float x2 = ld->End()->x() - r_view.x;
+		float y2 = ld->End()->y() - r_view.y;
 
 		float tx1 = x1 * r_view.Sin - y1 * r_view.Cos;
 		float ty1 = x1 * r_view.Cos + y1 * r_view.Sin;
@@ -894,10 +894,10 @@ public:
 
 		/* actually draw it... */
 
-		x1 = ld->Start()->x;
-		y1 = ld->Start()->y;
-		x2 = ld->End()->x;
-		y2 = ld->End()->y;
+		x1 = ld->Start()->x();
+		y1 = ld->Start()->y();
+		x2 = ld->End()->x();
+		y2 = ld->End()->y();
 
 		if (side == SIDE_LEFT)
 		{
@@ -965,8 +965,8 @@ public:
 
 		// project sprite to check if it is off-screen
 
-		float x = th->x - r_view.x;
-		float y = th->y - r_view.y;
+		float x = th->x() - r_view.x;
+		float y = th->y() - r_view.y;
 
 		float tx = x * r_view.Sin - y * r_view.Cos;
 		float ty = x * r_view.Cos + y * r_view.Sin;
@@ -1006,11 +1006,11 @@ public:
 		// sprite is potentially visible, so draw it
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = th->x - r_view.Sin * scale_w * 0.5;
-		float y1 = th->y + r_view.Cos * scale_w * 0.5;
+		float x1 = th->x() - r_view.Sin * scale_w * 0.5;
+		float y1 = th->y() + r_view.Cos * scale_w * 0.5;
 
-		float x2 = th->x + r_view.Sin * scale_w * 0.5;
-		float y2 = th->y - r_view.Cos * scale_w * 0.5;
+		float x2 = th->x() + r_view.Sin * scale_w * 0.5;
+		float y2 = th->y() - r_view.Cos * scale_w * 0.5;
 
 		int sec_num = r_view.thing_sectors[th_index];
 
@@ -1019,12 +1019,12 @@ public:
 		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
+			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
+			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
 			z2 = z1 + scale_h;
 		}
 
@@ -1077,10 +1077,10 @@ public:
 		const Sector *front = sd_front->SecRef();
 		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
 
-		float x1 = L->Start()->x;
-		float y1 = L->Start()->y;
-		float x2 = L->End()->x;
-		float y2 = L->End()->y;
+		float x1 = L->Start()->x();
+		float y1 = L->Start()->y();
+		float x2 = L->End()->x();
+		float y2 = L->End()->y();
 
 		float z1 = front->floorh;
 		float z2 = front->ceilh;
@@ -1121,10 +1121,10 @@ public:
 
 			if (L->TouchesSector(sec_num))
 			{
-				float x1 = L->Start()->x;
-				float y1 = L->Start()->y;
-				float x2 = L->End()->x;
-				float y2 = L->End()->y;
+				float x1 = L->Start()->x();
+				float y1 = L->Start()->y();
+				float x2 = L->End()->x();
+				float y2 = L->End()->y();
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);
@@ -1150,10 +1150,10 @@ public:
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = th->x - r_view.Sin * scale_w * 0.5;
-		float y1 = th->y + r_view.Cos * scale_w * 0.5;
-		float x2 = th->x + r_view.Sin * scale_w * 0.5;
-		float y2 = th->y - r_view.Cos * scale_w * 0.5;
+		float x1 = th->x() - r_view.Sin * scale_w * 0.5;
+		float y1 = th->y() + r_view.Cos * scale_w * 0.5;
+		float x2 = th->x() + r_view.Sin * scale_w * 0.5;
+		float y2 = th->y() - r_view.Cos * scale_w * 0.5;
 
 		int sec_num = r_view.thing_sectors[th_index];
 
@@ -1162,12 +1162,12 @@ public:
 		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->z;
+			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
 			h1 = h2 - scale_h;
 		}
 		else
 		{
-			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->z;
+			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
 			h2 = h1 + scale_h;
 		}
 

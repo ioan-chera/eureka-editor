@@ -52,8 +52,13 @@ class crc32_c;
 // a fixed-point coordinate with 12 bits of fractional part.
 typedef int fixcoord_t;
 
-#define FROM_COORD(fx)  ((fx) / 4096.0)
-#define   TO_COORD(db)  I_ROUND((db) * 4096.0)
+#define  FROM_COORD(fx)  ((double)(fx) / 4096.0)
+#define    TO_COORD(db)  ((fixcoord_t) I_ROUND((db) * 4096.0))
+
+#define INT_TO_COORD(i)  ((fixcoord_t) ((i) << 12))
+#define COORD_TO_INT(i)  ((int) ((i) / 4096))
+
+fixcoord_t MakeValidCoord(double x);
 
 
 typedef enum
@@ -70,15 +75,15 @@ side_ref_e;
 class Thing
 {
 public:
-	fixcoord_t x;
-	fixcoord_t y;
+	fixcoord_t raw_x;
+	fixcoord_t raw_y;
 
 	int angle;
 	int type;
 	int options;
 
 	// Hexen stuff
-	fixcoord_t z;
+	fixcoord_t raw_h;
 
 	int tid;
 	int special;
@@ -89,20 +94,44 @@ public:
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Thing() : x(0), y(0), angle(0), type(0), options(0),
-			  z(0), tid(0), special(0),
+	Thing() : raw_x(0), raw_y(0), angle(0), type(0), options(0),
+			  raw_h(0), tid(0), special(0),
 			  arg1(0), arg2(0), arg3(0), arg4(0), arg5(0)
 	{ }
 
+	inline double x() const
+	{
+		return FROM_COORD(raw_x);
+	}
+	inline double y() const
+	{
+		return FROM_COORD(raw_y);
+	}
+	inline double h() const
+	{
+		return FROM_COORD(raw_h);
+	}
+
+	// these handle rounding to integer in non-UDMF mode
+	void SetRawX(double x) { raw_x = MakeValidCoord(x); }
+	void SetRawY(double y) { raw_y = MakeValidCoord(y); }
+	void SetRawH(double h) { raw_h = MakeValidCoord(h); }
+
+	void SetRawXY(double x, double y)
+	{
+		SetRawX(x);
+		SetRawY(y);
+	}
+
 	void RawCopy(const Thing *other)
 	{
-		x = other->x;
-		y = other->y;
+		raw_x = other->raw_x;
+		raw_y = other->raw_y;
+		raw_h = other->raw_h;
+
 		angle = other->angle;
 		type = other->type;
 		options = other->options;
-
-		z = other->z;
 		tid = other->tid;
 		special = other->special;
 
@@ -129,29 +158,48 @@ public:
 class Vertex
 {
 public:
-	fixcoord_t x;
-	fixcoord_t y;
+	fixcoord_t raw_x;
+	fixcoord_t raw_y;
 
 	enum { F_X, F_Y };
 
 public:
-	Vertex() : x(0), y(0)
+	Vertex() : raw_x(0), raw_y(0)
 	{ }
+
+	inline double x() const
+	{
+		return FROM_COORD(raw_x);
+	}
+	inline double y() const
+	{
+		return FROM_COORD(raw_y);
+	}
+
+	// these handle rounding to integer in non-UDMF mode
+	void SetRawX(double x) { raw_x = MakeValidCoord(x); }
+	void SetRawY(double y) { raw_y = MakeValidCoord(y); }
+
+	void SetRawXY(double x, double y)
+	{
+		SetRawX(x);
+		SetRawY(y);
+	}
 
 	void RawCopy(const Vertex *other)
 	{
-		x = other->x;
-		y = other->y;
+		raw_x = other->raw_x;
+		raw_y = other->raw_y;
 	}
 
 	bool Matches(fixcoord_t ox, fixcoord_t oy) const
 	{
-		return (x == ox) && (y == oy);
+		return (raw_x == ox) && (raw_y == oy);
 	}
 
 	bool Matches(const Vertex *other) const
 	{
-		return (x == other->x) && (y == other->y);
+		return (raw_x == other->raw_x) && (raw_y == other->raw_y);
 	}
 };
 
@@ -314,9 +362,19 @@ public:
 
 	double CalcLength() const;
 
-	bool isZeroLength() const
+	bool IsZeroLength() const
 	{
-		return (Start()->x == End()->x) && (Start()->y == End()->y);
+		return (Start()->raw_x == End()->raw_x) && (Start()->raw_y == End()->raw_y);
+	}
+
+	bool IsHorizontal() const
+	{
+		return (Start()->raw_y == End()->raw_y);
+	}
+
+	bool IsVertical() const
+	{
+		return (Start()->raw_x == End()->raw_x);
 	}
 
 	int Arg(int which /* 1..5 */) const

@@ -690,8 +690,7 @@ void CMD_ACT_Click()
 
 		Vertex *V = Vertices[new_vert];
 
-		V->x = edit.split_x;
-		V->y = edit.split_y;
+		V->SetRawXY(edit.split_x, edit.split_y);
 
 		SplitLineDefAtVertex(split_ld, new_vert);
 

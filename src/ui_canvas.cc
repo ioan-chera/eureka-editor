@@ -646,8 +646,8 @@ void UI_Canvas::DrawVertices()
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		double x = Vertices[n]->x;
-		double y = Vertices[n]->y;
+		double x = Vertices[n]->x();
+		double y = Vertices[n]->y();
 
 		if (Vis(x, y, r))
 		{
@@ -659,8 +659,8 @@ void UI_Canvas::DrawVertices()
 	{
 		for (int n = 0 ; n < NumVertices ; n++)
 		{
-			double x = Vertices[n]->x;
-			double y = Vertices[n]->y;
+			double x = Vertices[n]->x();
+			double y = Vertices[n]->y();
 
 			if (! Vis(x, y, r))
 				continue;
@@ -713,10 +713,10 @@ void UI_Canvas::DrawLinedefs()
 		{
 			const LineDef *L = LineDefs[n];
 
-			double x1 = L->Start()->x;
-			double y1 = L->Start()->y;
-			double x2 = L->End  ()->x;
-			double y2 = L->End  ()->y;
+			double x1 = L->Start()->x();
+			double y1 = L->Start()->y();
+			double x2 = L->End  ()->x();
+			double y2 = L->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -879,10 +879,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			double x1 = LineDefs[n]->Start()->x;
-			double y1 = LineDefs[n]->Start()->y;
-			double x2 = LineDefs[n]->End  ()->x;
-			double y2 = LineDefs[n]->End  ()->y;
+			double x1 = LineDefs[n]->Start()->x();
+			double y1 = LineDefs[n]->Start()->y();
+			double x2 = LineDefs[n]->End  ()->x();
+			double y2 = LineDefs[n]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -937,8 +937,8 @@ void UI_Canvas::DrawThings()
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x;
-		double y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -973,8 +973,8 @@ void UI_Canvas::DrawThings()
 	{
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			double x = Things[n]->x;
-			double y = Things[n]->y;
+			double x = Things[n]->x();
+			double y = Things[n]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
@@ -1006,8 +1006,8 @@ void UI_Canvas::DrawThingBodies()
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x;
-		double y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -1052,8 +1052,8 @@ void UI_Canvas::DrawThingSprites()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x;
-		double y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -1329,8 +1329,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 	{
 		case OBJ_THINGS:
 		{
-			double x = dx + Things[objnum]->x;
-			double y = dy + Things[objnum]->y;
+			double x = dx + Things[objnum]->x();
+			double y = dy + Things[objnum]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
@@ -1350,10 +1350,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 
 		case OBJ_LINEDEFS:
 		{
-			double x1 = dx + LineDefs[objnum]->Start()->x;
-			double y1 = dy + LineDefs[objnum]->Start()->y;
-			double x2 = dx + LineDefs[objnum]->End  ()->x;
-			double y2 = dy + LineDefs[objnum]->End  ()->y;
+			double x1 = dx + LineDefs[objnum]->Start()->x();
+			double y1 = dy + LineDefs[objnum]->Start()->y();
+			double x2 = dx + LineDefs[objnum]->End  ()->x();
+			double y2 = dy + LineDefs[objnum]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1364,8 +1364,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 
 		case OBJ_VERTICES:
 		{
-			double x = dx + Vertices[objnum]->x;
-			double y = dy + Vertices[objnum]->y;
+			double x = dx + Vertices[objnum]->x();
+			double y = dy + Vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1413,10 +1413,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + L->Start()->x;
-				double y1 = dy + L->Start()->y;
-				double x2 = dx + L->End  ()->x;
-				double y2 = dy + L->End  ()->y;
+				double x1 = dx + L->Start()->x();
+				double y1 = dy + L->Start()->y();
+				double x2 = dx + L->End  ()->x();
+				double y2 = dy + L->End  ()->y();
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1440,8 +1440,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 	{
 		case OBJ_THINGS:
 		{
-			double x = Things[objnum]->x;
-			double y = Things[objnum]->y;
+			double x = Things[objnum]->x();
+			double y = Things[objnum]->y();
 
 			trans_param.Apply(&x, &y);
 
@@ -1458,8 +1458,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 		case OBJ_VERTICES:
 		{
-			double x = Vertices[objnum]->x;
-			double y = Vertices[objnum]->y;
+			double x = Vertices[objnum]->x();
+			double y = Vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1486,10 +1486,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 		case OBJ_LINEDEFS:
 		{
-			double x1 = LineDefs[objnum]->Start()->x;
-			double y1 = LineDefs[objnum]->Start()->y;
-			double x2 = LineDefs[objnum]->End  ()->x;
-			double y2 = LineDefs[objnum]->End  ()->y;
+			double x1 = LineDefs[objnum]->Start()->x();
+			double y1 = LineDefs[objnum]->Start()->y();
+			double x2 = LineDefs[objnum]->End  ()->x();
+			double y2 = LineDefs[objnum]->End  ()->y();
 
 			trans_param.Apply(&x1, &y1);
 			trans_param.Apply(&x2, &y2);
@@ -1508,10 +1508,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 				if (! LineDefs[n]->TouchesSector(objnum))
 					continue;
 
-				double x1 = LineDefs[n]->Start()->x;
-				double y1 = LineDefs[n]->Start()->y;
-				double x2 = LineDefs[n]->End  ()->x;
-				double y2 = LineDefs[n]->End  ()->y;
+				double x1 = LineDefs[n]->Start()->x();
+				double y1 = LineDefs[n]->Start()->y();
+				double x2 = LineDefs[n]->End  ()->x();
+				double y2 = LineDefs[n]->End  ()->y();
 
 				trans_param.Apply(&x1, &y1);
 				trans_param.Apply(&x2, &y2);
@@ -1557,10 +1557,10 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 	{
 		const LineDef *L = LineDefs[n];
 
-		double x1 = dx + L->Start()->x;
-		double y1 = dy + L->Start()->y;
-		double x2 = dx + L->End  ()->x;
-		double y2 = dy + L->End  ()->y;
+		double x1 = dx + L->Start()->x();
+		double y1 = dy + L->Start()->y();
+		double x2 = dx + L->End  ()->x();
+		double y2 = dy + L->End  ()->y();
 
 		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 			continue;
@@ -1884,16 +1884,16 @@ void UI_Canvas::DrawCurrentLine()
 	if (edit.drawing_from < 0)
 		return;
 
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
+	double new_x = grid.SnapX(edit.map_x);
+	double new_y = grid.SnapY(edit.map_y);
 
 	// should draw a vertex?
 	if (highlight.valid())
 	{
 		SYS_ASSERT(highlight.type == OBJ_VERTICES);
 
-		new_x = Vertices[highlight.num]->x;
-		new_y = Vertices[highlight.num]->y;
+		new_x = Vertices[highlight.num]->x();
+		new_y = Vertices[highlight.num]->y();
 	}
 	else if (split_ld >= 0)
 	{
@@ -1911,23 +1911,23 @@ void UI_Canvas::DrawCurrentLine()
 
 	const Vertex * v = Vertices[edit.drawing_from];
 
-	DrawKnobbyLine(v->x, v->y, new_x, new_y);
+	DrawKnobbyLine(v->x(), v->y(), new_x, new_y);
 
-	int dx = v->x - new_x;
-	int dy = v->y - new_y;
+	double dx = v->x() - new_x;
+	double dy = v->y() - new_y;
 
 	if (dx || dy)
 	{
 		float length = sqrt(dx * dx + dy * dy);
 
-		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
+		DrawLineNumber(v->x(), v->y(), new_x, new_y, 0, I_ROUND(length));
 	}
 
 	// draw all the crossing points
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   v->x, v->y, edit.drawing_from,
+					   v->x(), v->y(), edit.drawing_from,
 					   new_x, new_y, highlight.valid() ? highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)

@@ -150,7 +150,7 @@ void Render_View_t::FindThingSectors()
 	{
 		Objid obj;
 
-		GetNearObject(obj, OBJ_SECTORS, Things[i]->x, Things[i]->y);
+		GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
 
 		thing_sectors[i] = obj.num;
 	}
@@ -570,12 +570,12 @@ void Render3D_Setup()
 		player = FindPlayer(r_view.p_type);
 	}
 
-	if (player && (r_view.px != player->x || r_view.py != player->y))
+	if (player && !(r_view.px == player->x() && r_view.py == player->y()))
 	{
 		// if player moved, re-create view parameters
 
-		r_view.x = r_view.px = player->x;
-		r_view.y = r_view.py = player->y;
+		r_view.x = r_view.px = player->x();
+		r_view.y = r_view.py = player->y();
 
 		r_view.FindGroundZ();
 

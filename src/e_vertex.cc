@@ -45,7 +45,7 @@ int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 {
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		if (Vertices[i]->x == fx && Vertices[i]->y == fy)
+		if (Vertices[i]->Matches(fx, fy))
 			return i;
 	}
 
@@ -235,8 +235,8 @@ void Vertex_MergeList(selection_c *verts)
 #if 0
 	Objs_CalcMiddle(verts, &new_x, &new_y);
 #else
-	new_x = Vertices[v]->x;
-	new_y = Vertices[v]->y;
+	new_x = Vertices[v]->x();
+	new_y = Vertices[v]->y();
 #endif
 
 	BA_ChangeVT(v, Vertex::F_X, new_x);
@@ -302,8 +302,8 @@ bool Vertex_TryFixDangler(int v_num)
 		if (i == v_num)
 			continue;
 
-		int dx = Vertices[v_num]->x - Vertices[i]->x;
-		int dy = Vertices[v_num]->y - Vertices[i]->y;
+		double dx = Vertices[v_num]->x() - Vertices[i]->x();
+		double dy = Vertices[v_num]->y() - Vertices[i]->y();
 
 		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
 			! LineDefAlreadyExists(v_num, v_other))
@@ -402,8 +402,8 @@ static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *
 {
 	const Vertex * V = Vertices[v_num];
 
-	double dx = L->End()->x - L->Start()->x;
-	double dy = L->End()->y - L->Start()->y;
+	double dx = L->End()->x() - L->Start()->x();
+	double dy = L->End()->y() - L->Start()->y();
 
 	if (L->end == v_num)
 	{
@@ -432,8 +432,8 @@ static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *
 		dy = (dy < 0) ? -8 : 8;
 	}
 
-	*x = V->x + dx;
-	*y = V->y + dy;
+	*x = V->x() + dx;
+	*y = V->y() + dy;
 }
 
 
@@ -456,8 +456,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			{
 				int new_v = BA_New(OBJ_VERTICES);
 
-				Vertices[new_v]->x = new_x;
-				Vertices[new_v]->y = new_y;
+				Vertices[new_v]->SetRawXY(new_x, new_y);
 
 				if (L->start == v_num)
 					BA_ChangeLD(n, LineDef::F_START, new_v);
@@ -554,8 +553,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 
 	int new_v = BA_New(OBJ_VERTICES);
 
-	Vertices[new_v]->x = new_x;
-	Vertices[new_v]->y = new_y;
+	Vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
 
@@ -895,8 +893,8 @@ void CMD_SEC_Disconnect(void)
 	{
 		const Vertex * V = Vertices[*it];
 
-		BA_ChangeVT(*it, Vertex::F_X, V->x + move_dx);
-		BA_ChangeVT(*it, Vertex::F_Y, V->y + move_dy);
+		BA_ChangeVT(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+		BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
 	BA_End();
@@ -919,12 +917,12 @@ static double WeightForVertex(const Vertex *V, /* bbox: */ double x1, double y1,
 
 	if (width >= height)
 	{
-		dist = (side < 0) ? (V->x - x1) : (x2 - V->x);
+		dist = (side < 0) ? (V->x() - x1) : (x2 - V->x());
 		extent = width;
 	}
 	else
 	{
-		dist = (side < 0) ? (V->y - y1) : (y2 - V->y);
+		dist = (side < 0) ? (V->y() - y1) : (y2 - V->y());
 		extent = height;
 	}
 
@@ -1003,8 +1001,8 @@ void CMD_VT_ShapeLine(void)
 
 		if (weight > 0)
 		{
-			ax += V->x * weight;
-			ay += V->y * weight;
+			ax += V->x() * weight;
+			ay += V->y() * weight;
 
 			a_total += weight;
 		}
@@ -1013,8 +1011,8 @@ void CMD_VT_ShapeLine(void)
 
 		if (weight > 0)
 		{
-			bx += V->x * weight;
-			by += V->y * weight;
+			bx += V->x() * weight;
+			by += V->y() * weight;
 
 			b_total += weight;
 		}
@@ -1055,7 +1053,7 @@ void CMD_VT_ShapeLine(void)
 	{
 		const Vertex *V = Vertices[*it];
 
-		vert_along_t ALONG(*it, AlongDist(V->x, V->y, ax,ay, bx,by));
+		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
 
 		along_list.push_back(ALONG);
 	}
@@ -1072,11 +1070,11 @@ void CMD_VT_ShapeLine(void)
 
 	if ((true) /* don't move first and last vertices */)
 	{
-		ax = V1->x;
-		ay = V1->y;
+		ax = V1->x();
+		ay = V1->y();
 
-		bx = V2->x;
-		by = V2->y;
+		bx = V2->x();
+		by = V2->y();
 	}
 	else
 	{
@@ -1181,8 +1179,8 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 		}
 		else
 		{
-			double dx = new_x - V->x;
-			double dy = new_y - V->y;
+			double dx = new_x - V->x();
+			double dy = new_y - V->y();
 
 			cost = cost + (dx*dx + dy*dy);
 		}
@@ -1251,8 +1249,8 @@ void CMD_VT_ShapeArc(void)
 	{
 		const Vertex *V = Vertices[*it];
 
-		double dx = V->x - mid_x;
-		double dy = V->y - mid_y;
+		double dx = V->x() - mid_x;
+		double dy = V->y() - mid_y;
 
 		double dist = hypot(dx, dy);
 
@@ -1294,7 +1292,7 @@ void CMD_VT_ShapeArc(void)
 	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
 	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];
 
-	double start_end_dist = hypot(end_V->x - start_V->x, end_V->y - start_V->y);
+	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 
 
 	// compute new mid-point and radius (except for a full circle)
@@ -1305,8 +1303,8 @@ void CMD_VT_ShapeArc(void)
 
 	if (arc_deg < 360)
 	{
-		mid_x = (start_V->x + end_V->x) * 0.5;
-		mid_y = (start_V->y + end_V->y) * 0.5;
+		mid_x = (start_V->x() + end_V->x()) * 0.5;
+		mid_y = (start_V->y() + end_V->y()) * 0.5;
 
 		r = start_end_dist * 0.5;
 
@@ -1328,7 +1326,7 @@ void CMD_VT_ShapeArc(void)
 
 		r = hypot(r, away);
 
-		best_offset = atan2(start_V->y - mid_y, start_V->x - mid_x);
+		best_offset = atan2(start_V->y() - mid_y, start_V->x() - mid_x);
 	}
 	else
 	{

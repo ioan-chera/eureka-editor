@@ -840,9 +840,10 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = Things[obj];
 
-			pos_x->value(Int_TmpStr(T->x));
-			pos_y->value(Int_TmpStr(T->y));
-			pos_z->value(Int_TmpStr(T->z));
+			// @@ FIXME show decimals in UDMF
+			pos_x->value(Int_TmpStr(T->x()));
+			pos_y->value(Int_TmpStr(T->y()));
+			pos_z->value(Int_TmpStr(T->h()));
 
 		}
 		else

@@ -90,8 +90,8 @@ bool ThingsOverlap(int th1, int th2)
 	int r1 = M_GetThingType(T1->type)->radius;
 	int r2 = M_GetThingType(T2->type)->radius;
 
-	int dx = abs(T1->x - T2->x);
-	int dy = abs(T1->y - T2->y);
+	double dx = abs(T1->x() - T2->x());
+	double dy = abs(T1->y() - T2->y());
 
 	return (MAX(dx, dy) < r1 + r2);
 }
@@ -102,8 +102,8 @@ bool ThingsAtSameLoc(int th1, int th2)
 	const Thing *T1 = Things[th1];
 	const Thing *T2 = Things[th2];
 
-	int dx = abs(T1->x - T2->x);
-	int dy = abs(T1->y - T2->y);
+	double dx = abs(T1->x() - T2->x());
+	double dy = abs(T1->y() - T2->y());
 
 	return (dx < 8 && dy < 8);
 }
@@ -130,10 +130,13 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 
 	float dist = 8 + 6 * MIN(100, total);
 
+	fixcoord_t fdx = MakeValidCoord(vec_x * dist);
+	fixcoord_t fdy = MakeValidCoord(vec_y * dist);
+
 	const Thing *T = Things[th];
 
-	BA_ChangeTH(th, Thing::F_X, T->x + vec_x * dist);
-	BA_ChangeTH(th, Thing::F_Y, T->y + vec_y * dist);
+	BA_ChangeTH(th, Thing::F_X, T->raw_x + fdx);
+	BA_ChangeTH(th, Thing::F_Y, T->raw_y + fdy);
 }
 
 

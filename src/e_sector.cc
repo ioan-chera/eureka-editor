@@ -455,7 +455,7 @@ int lineloop_c::NeighboringSector() const
 	// NOTE: it does not make sense to handle islands here.
 
 	int best = -1;
-	int best_len = -1;
+	double best_len = -1;
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
@@ -467,9 +467,7 @@ int lineloop_c::NeighboringSector() const
 		if (sec < 0)
 			continue;
 
-		int dx = L->Start()->x - L->End()->x;
-		int dy = L->Start()->y - L->End()->y;
-		int len = ComputeDist(dx, dy);
+		double len = L->CalcLength();
 
 		if (len > best_len)
 		{
@@ -541,11 +539,11 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 	{
 		const LineDef *L = LineDefs[lines[i]];
 
-		*x1 = MIN(*x1, MIN(L->Start()->x, L->End()->x));
-		*y1 = MIN(*y1, MIN(L->Start()->y, L->End()->y));
+		*x1 = MIN(*x1, MIN(L->Start()->x(), L->End()->x()));
+		*y1 = MIN(*y1, MIN(L->Start()->y(), L->End()->y()));
 
-		*x2 = MAX(*x2, MAX(L->Start()->x, L->End()->x));
-		*y2 = MAX(*y2, MAX(L->Start()->y, L->End()->y));
+		*x2 = MAX(*x2, MAX(L->Start()->x(), L->End()->x()));
+		*y2 = MAX(*y2, MAX(L->Start()->y(), L->End()->y()));
 	}
 }
 
@@ -736,10 +734,10 @@ bool lineloop_c::LookForIsland()
 	{
 		const LineDef * L = LineDefs[ld];
 
-		double x1 = L->Start()->x;
-		double y1 = L->Start()->y;
-		double x2 = L->End()->x;
-		double y2 = L->End()->y;
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
 
 		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
 		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
@@ -842,8 +840,8 @@ void lineloop_c::Dump() const
 		DebugPrintf("  %s of line #%d : (%d %d) --> (%d %d)\n",
 		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
 					lines[i],
-					L->Start()->x, L->Start()->y,
-					L->End  ()->x, L->End  ()->y);
+					L->Start()->x(), L->Start()->y(),
+					L->End  ()->x(), L->End  ()->y());
 	}
 }
 

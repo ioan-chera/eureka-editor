@@ -244,11 +244,10 @@ void UpdateHighlight()
 		edit.action == ACT_DRAW_LINE &&
 		edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		// @@ FIXME use fixcoord_t here?
 		double new_x = grid.SnapX(edit.map_x);
 		double new_y = grid.SnapY(edit.map_y);
 
-		int near_vert = Vertex_FindExact(new_x, new_y);
+		int near_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		if (near_vert >= 0)
 		{
@@ -379,11 +378,11 @@ void UpdateLevelBounds(int start_vert)
 	{
 		const Vertex * V = Vertices[i];
 
-		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
-		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
+		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
+		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
 
-		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
-		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
+		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
 	}
 }
 
@@ -445,11 +444,11 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 		const Vertex * V = Vertices[objnum];
 
-		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
-		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
+		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
+		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
 
-		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
-		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
+		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -667,7 +666,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
 			//    continue;
 
-			Objid obj;  GetNearObject(obj, OBJ_SECTORS, T->x, T->y);
+			Objid obj;
+			GetNearObject(obj, OBJ_SECTORS, T->x(), T->y());
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{
@@ -853,8 +853,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 			{
 				const Thing *T = Things[n];
 
-				if (x1 <= T->x && T->x <= x2 &&
-				    y1 <= T->y && T->y <= y2)
+				double tx = T->x();
+				double ty = T->y();
+
+				if (x1 <= tx && tx <= x2 && y1 <= ty && ty <= y2)
 				{
 					list->toggle(n);
 				}
@@ -866,8 +868,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 			{
 				const Vertex *V = Vertices[n];
 
-				if (x1 <= V->x && V->x <= x2 &&
-				    y1 <= V->y && V->y <= y2)
+				double vx = V->x();
+				double vy = V->y();
+
+				if (x1 <= vx && vx <= x2 && y1 <= vy && vy <= y2)
 				{
 					list->toggle(n);
 				}
@@ -880,10 +884,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 				const LineDef *L = LineDefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start()->x && L->Start()->x <= x2 &&
-				    y1 <= L->Start()->y && L->Start()->y <= y2 &&
-				    x1 <= L->End()->x   && L->End()->x <= x2 &&
-				    y1 <= L->End()->y   && L->End()->y <= y2)
+				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
+				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
+				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
+				    y1 <= L->End()->y()   && L->End()->y() <= y2)
 				{
 					list->toggle(n);
 				}
@@ -903,10 +907,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 				int s1 = L->Right() ? L->Right()->sector : -1;
 				int s2 = L->Left( ) ? L->Left() ->sector : -1;
 
-				if (x1 <= L->Start()->x && L->Start()->x <= x2 &&
-				    y1 <= L->Start()->y && L->Start()->y <= y2 &&
-				    x1 <= L->End()->x   && L->End()->x <= x2 &&
-				    y1 <= L->End()->y   && L->End()->y <= y2)
+				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
+				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
+				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
+				    y1 <= L->End()->y()   && L->End()->y() <= y2)
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
