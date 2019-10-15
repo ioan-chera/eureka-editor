@@ -220,8 +220,8 @@ void CMD_TH_Merge(void)
 
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		BA_ChangeTH(*it, Thing::F_X, mid_x);
-		BA_ChangeTH(*it, Thing::F_Y, mid_y);
+		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(mid_x));
+		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(mid_y));
 	}
 
 	BA_End();

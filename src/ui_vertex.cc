@@ -123,7 +123,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeVT(*it, Vertex::F_X, new_x);
+			BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
 
 		BA_Message("edited X of", &list);
 		BA_End();
@@ -144,7 +144,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeVT(*it, Vertex::F_Y, new_y);
+			BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
 
 		BA_Message("edited Y of", &list);
 		BA_End();

@@ -230,17 +230,13 @@ void Vertex_MergeList(selection_c *verts)
 
 	int v = verts->find_first();
 
-	double new_x, new_y;
-
 #if 0
+	double new_x, new_y;
 	Objs_CalcMiddle(verts, &new_x, &new_y);
-#else
-	new_x = Vertices[v]->x();
-	new_y = Vertices[v]->y();
-#endif
 
-	BA_ChangeVT(v, Vertex::F_X, new_x);
-	BA_ChangeVT(v, Vertex::F_Y, new_y);
+	BA_ChangeVT(v, Vertex::F_X, MakeValidCoord(new_x));
+	BA_ChangeVT(v, Vertex::F_Y, MakeValidCoord(new_y));
+#endif
 
 	verts->clear(v);
 
@@ -465,8 +461,8 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			}
 			else
 			{
-				BA_ChangeVT(v_num, Vertex::F_X, new_x);
-				BA_ChangeVT(v_num, Vertex::F_Y, new_y);
+				BA_ChangeVT(v_num, Vertex::F_X, MakeValidCoord(new_x));
+				BA_ChangeVT(v_num, Vertex::F_Y, MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -1104,8 +1100,8 @@ void CMD_VT_ShapeLine(void)
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, I_ROUND(nx));
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, I_ROUND(ny));
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 
 	BA_End();
@@ -1174,8 +1170,8 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, I_ROUND(new_x));
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, I_ROUND(new_y));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
 		}
 		else
 		{

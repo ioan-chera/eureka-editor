@@ -556,7 +556,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_X, new_x);
+			BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 
 		BA_MessageForSel("edited X of", &list);
 		BA_End();
@@ -577,7 +577,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_Y, new_y);
+			BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		BA_MessageForSel("edited Y of", &list);
 		BA_End();

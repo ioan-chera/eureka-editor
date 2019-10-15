@@ -1738,8 +1738,8 @@ static void DoScaleTwoThings(selection_c& list, transform_t& param)
 
 		param.Apply(&new_x, &new_y);
 
-		BA_ChangeTH(*it, Thing::F_X, new_x);
-		BA_ChangeTH(*it, Thing::F_Y, new_y);
+		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
+		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		float rot1 = param.rotate / 8192.0;
 
@@ -1770,8 +1770,8 @@ static void DoScaleTwoVertices(selection_c& list, transform_t& param)
 
 		param.Apply(&new_x, &new_y);
 
-		BA_ChangeVT(*it, Vertex::F_X, new_x);
-		BA_ChangeVT(*it, Vertex::F_Y, new_y);
+		BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
+		BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
 	}
 }
 
@@ -2083,8 +2083,8 @@ static void Quantize_Things(selection_c& list)
 
 			if (! SpotInUse(OBJ_THINGS, new_x, new_y))
 			{
-				BA_ChangeTH(*it, Thing::F_X, new_x);
-				BA_ChangeTH(*it, Thing::F_Y, new_y);
+				BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
+				BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2189,8 +2189,8 @@ static void Quantize_Vertices(selection_c& list)
 
 			if (! SpotInUse(OBJ_VERTICES, new_x, new_y))
 			{
-				BA_ChangeVT(*it, Vertex::F_X, new_x);
-				BA_ChangeVT(*it, Vertex::F_Y, new_y);
+				BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
+				BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
