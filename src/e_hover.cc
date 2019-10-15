@@ -1157,8 +1157,13 @@ static void FindCrossingLines(crossing_state_c& cross,
 						double x1, double y1, int possible_v1,
 						double x2, double y2, int possible_v2)
 {
+	fixcoord_t fx1 = TO_COORD(x1);
+	fixcoord_t fy1 = TO_COORD(y1);
+	fixcoord_t fx2 = TO_COORD(x2);
+	fixcoord_t fy2 = TO_COORD(y2);
+
 	// this could happen when two vertices are overlapping
-	if (x1 == x2 && y1 == y2)
+	if (fx1 == fx2 && fy1 == fy2)
 		return;
 
 	// distances along the WHOLE original line
@@ -1194,11 +1199,11 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 		// skip linedef if an end-point is one of the vertices already
 		// in the crossing state (including the very start or very end).
-		if (L->TouchesCoord(x1, y1) || L->TouchesCoord(x2, y2))
+		if (L->TouchesCoord(fx1, fy1) || L->TouchesCoord(fx2, fy2))
 			continue;
 
-		if (L->TouchesCoord(cross.start_x, cross.start_y) ||
-			L->TouchesCoord(cross.  end_x, cross.  end_y))
+		if (L->TouchesCoord(TO_COORD(cross.start_x), TO_COORD(cross.start_y)) ||
+			L->TouchesCoord(TO_COORD(cross.  end_x), TO_COORD(cross.  end_y)))
 			continue;
 
 		if (cross.HasLine(ld))
@@ -1277,7 +1282,8 @@ void FindCrossingPoints(crossing_state_c& cross,
 		const Vertex * VC = Vertices[v];
 
 		// ignore vertices ar same coordinates as v1 or v2
-		if (VC->Matches(x1, y1) || VC->Matches(x2, y2))
+		if (VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
+			VC->Matches(TO_COORD(x2), TO_COORD(y2)))
 			continue;
 
 		// is this vertex sitting on the line?
