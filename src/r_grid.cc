@@ -113,18 +113,12 @@ void Grid_State_c::Scroll(double delta_x, double delta_y)
 
 int Grid_State_c::ForceSnapX(double map_x) const
 {
-	if (map_x >= 0)
-		return grid.step * ((map_x + grid.step / 2) / grid.step);
-	else
-		return grid.step * ((map_x - grid.step / 2) / grid.step);
+	return grid.step * round(map_x / (double)grid.step);
 }
 
 int Grid_State_c::ForceSnapY(double map_y) const
 {
-	if (map_y >= 0)
-		return grid.step * ((map_y + grid.step / 2) / grid.step);
-	else
-		return grid.step * ((map_y - grid.step / 2) / grid.step);
+	return grid.step * round(map_y / (double)grid.step);
 }
 
 
