@@ -90,7 +90,7 @@ public:
 	int arg1, arg2, arg3, arg4, arg5;
 
 	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
-	       F_Z, F_TID, F_SPECIAL,
+	       F_H, F_TID, F_SPECIAL,
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:

@@ -588,7 +588,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	int new_z = atoi(box->pos_z->value());
+	int new_h = atoi(box->pos_z->value());
 
 	selection_c list;
 	selection_iterator_c it;
@@ -598,7 +598,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_Z, new_z);
+			BA_ChangeTH(*it, Thing::F_H, INT_TO_COORD(new_h));
 
 		BA_MessageForSel("edited Z of", &list);
 		BA_End();
@@ -833,8 +833,10 @@ int UI_ThingBox::CalcOptions() const
 
 void UI_ThingBox::UpdateField(int field)
 {
-	if (field < 0 || field == Thing::F_X || field == Thing::F_Y
-		|| field == Thing::F_Z)
+	if (field < 0 ||
+		field == Thing::F_X ||
+		field == Thing::F_Y ||
+		field == Thing::F_H)
 	{
 		if (is_thing(obj))
 		{
@@ -844,7 +846,6 @@ void UI_ThingBox::UpdateField(int field)
 			pos_x->value(Int_TmpStr(T->x()));
 			pos_y->value(Int_TmpStr(T->y()));
 			pos_z->value(Int_TmpStr(T->h()));
-
 		}
 		else
 		{
