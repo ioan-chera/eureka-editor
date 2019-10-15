@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -41,19 +41,27 @@ friend class selection_iterator_c;
 private:
 	obj_type_e type;
 
-	int objs[MAX_STORE_SEL];
+	// number of objects in the selection
 	int count;
 
-	bitvec_c * bv;  // NULL unless needed
-	int b_count;
+	int objs[MAX_STORE_SEL];
 
+	// use a bit vector when needed, NULL otherwise
+	bitvec_c * bv;
+
+	// an extended mode selection can access 8-bits per object
+	byte * extended;
+	int    ext_size;
+
+	// the highest object in the selection, or -1
 	int maxobj;
 
-	// the very first object selected, or -1
+	// the very first object selected, or -1.
+	// NOTE: this is only updated on a set() when selection is empty.
 	int first_obj;
 
 public:
-	 selection_c(obj_type_e _type = OBJ_THINGS);
+	 selection_c(obj_type_e _type = OBJ_THINGS, bool _extended = false);
 	~selection_c();
 
 	obj_type_e what_type() const { return type; }
@@ -81,6 +89,12 @@ public:
 	void clear(int n);
 	void toggle(int n);
 
+	// in extended mode, we can read and write 8-bits per object.
+	// using these on normal selections is not guaranteed to do
+	// anything useful.
+	byte get_ext(int n) const;
+	void set_ext(int n, byte value);
+
 	void frob(int n, sel_op_e op);
 	void frob_range(int n1, int n2, sel_op_e op);
 
@@ -107,6 +121,7 @@ public:
 private:
 	void ConvertToBitvec();
 	void RecomputeMaxObj();
+	void ResizeExtended(int new_size);
 };
 
 

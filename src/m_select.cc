@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -32,19 +32,32 @@
 
 //#define NEED_SLOW_CLEAR
 
-#define INITIAL_BITVEC_SIZE  1024
+#define INITIAL_BITVEC_SIZE    1024
+#define INITIAL_EXTENDED_SIZE  256
 
 
-selection_c::selection_c(obj_type_e _type) :
+selection_c::selection_c(obj_type_e _type, bool _extended) :
 	type(_type),
-	count(0), bv(NULL), b_count(0),
+	count(0), bv(NULL),
+	extended(NULL), ext_size(0),
 	maxobj(-1), first_obj(-1)
-{ }
+{
+	if (_extended)
+	{
+		ext_size = INITIAL_EXTENDED_SIZE;
+		extended  = new byte[ext_size];
+
+		memset(extended, 0, (size_t)ext_size);
+	}
+}
 
 selection_c::~selection_c()
 {
 	if (bv)
 		delete bv;
+
+	if (extended)
+		delete[] extended;
 }
 
 
@@ -58,24 +71,21 @@ void selection_c::change_type(obj_type_e new_type)
 
 bool selection_c::empty() const
 {
-	if (bv)
-		return b_count == 0;
-
 	return count == 0;
 }
 
 
 int selection_c::count_obj() const
 {
-	if (! bv)
-		return count;
-
-	return b_count;  // hmmm, not so slow after all
+	return count;
 }
 
 
 bool selection_c::get(int n) const
 {
+	if (extended)
+		return get_ext(n) != 0;
+
 	if (bv)
 		return bv->get(n);
 
@@ -89,6 +99,12 @@ bool selection_c::get(int n) const
 
 void selection_c::set(int n)
 {
+	if (extended)
+	{
+		set_ext(n, 1);
+		return;
+	}
+
 	if (get(n))
 		return;
 
@@ -106,7 +122,7 @@ void selection_c::set(int n)
 	if (bv)
 	{
 		bv->set(n);
-		b_count++;
+		count++;
 		return;
 	}
 
@@ -116,13 +132,22 @@ void selection_c::set(int n)
 
 void selection_c::clear(int n)
 {
-	if (bv)
+	if (extended)
+	{
+		if (get_ext(n) == 0)
+			return;
+
+		// n should be safe to access directly, due to above check
+		extended[n] = 0;
+		count--;
+	}
+	else if (bv)
 	{
 		if (! get(n))
 			return;
 
 		bv->clear(n);
-		b_count--;
+		count--;
 	}
 	else
 	{
@@ -169,13 +194,58 @@ void selection_c::clear_all()
 	maxobj = -1;
 	first_obj = -1;
 
-	if (bv)
+	if (extended)
+	{
+		memset(extended, 0, (size_t)ext_size);
+	}
+	else if (bv)
 	{
 		delete bv;
+		bv = NULL;
+	}
+}
+
+
+byte selection_c::get_ext(int n) const
+{
+	if (! extended)
+		return get(n) ? 255 : 0;
+
+	if (n >= ext_size)
+		return 0;
+
+	return extended[n];
+}
+
+
+void selection_c::set_ext(int n, byte value)
+{
+	// set_ext() should not be used with plain selections
+	if (! extended)
+		return;
+
+	if (value == 0)
+	{
+		clear(n);
+		return;
 	}
 
-	bv = NULL;
-	b_count = 0;
+	if (maxobj < n)
+		maxobj = n;
+
+	if (first_obj < 0 && empty())
+		first_obj = n;
+
+	// need to resize the array?
+	while (n > ext_size)
+	{
+		ResizeExtended(ext_size * 2);
+	}
+
+	if (extended[n] == 0)
+		count++;
+
+	extended[n] = value;
 }
 
 
@@ -201,47 +271,50 @@ void selection_c::frob_range(int n1, int n2, sel_op_e op)
 
 void selection_c::merge(const selection_c& other)
 {
-	if (! other.bv)
+	if (extended && other.extended)
+	{
+		for (int i = 0 ; i <= other.maxobj ; i++)
+		{
+			byte value = other.get_ext(i);
+
+			if (value != 0)
+				set_ext(i, value);
+		}
+	}
+	else if (other.bv || other.extended)
+	{
+		for (int i = 0 ; i <= other.maxobj ; i++)
+			if (other.get(i))
+				set(i);
+	}
+	else
 	{
 		for (int i = 0 ; i < other.count ; i++)
 			set(other.objs[i]);
-		return;
 	}
-
-	if (! bv)
-		ConvertToBitvec();
-
-	for (int i = 0 ; i < other.bv->size() ; i++)
-		if (other.bv->get(i))
-			set(i);
 }
 
 
 void selection_c::unmerge(const selection_c& other)
 {
-	if (! other.bv)
+	if (other.bv || other.extended)
 	{
-		for (int i = 0 ; i < other.count ; i++)
-			clear(other.objs[i]);
+		for (int i = 0 ; i <= other.maxobj ; i++)
+			if (other.get(i))
+				clear(i);
 	}
 	else
 	{
-		for (int i = 0 ; i < other.bv->size() ; i++)
-			if (other.bv->get(i))
-				clear(i);
+		for (int i = 0 ; i < other.count ; i++)
+			clear(other.objs[i]);
 	}
 }
 
 
 void selection_c::intersect(const selection_c& other)
 {
-	if (! bv)
-		ConvertToBitvec();
-
-	int cur_size = bv->size();
-
-	for (int i = 0 ; i < cur_size ; i++)
-		if (get(i) != other.get(i))
+	for (int i = 0 ; i <= maxobj ; i++)
+		if (get(i) && !other.get(i))
 			clear(i);
 }
 
@@ -284,9 +357,6 @@ void selection_c::ConvertToBitvec()
 	{
 		bv->set(objs[i]);
 	}
-
-	b_count = count;
-	count = 0;
 }
 
 
@@ -294,7 +364,19 @@ void selection_c::RecomputeMaxObj()
 {
 	maxobj = -1;
 
-	if (bv)
+	if (extended)
+	{
+		// search backwards so we can early out
+		for (int i = ext_size-1 ; i >= 0 ; i--)
+		{
+			if (get_ext(i))
+			{
+				maxobj = i;
+				break;
+			}
+		}
+	}
+	else if (bv)
 	{
 		// search backwards so we can early out
 		for (int i = bv->size()-1 ; i >= 0 ; i--)
@@ -314,6 +396,26 @@ void selection_c::RecomputeMaxObj()
 			maxobj = MAX(maxobj, objs[i]);
 		}
 	}
+}
+
+
+void selection_c::ResizeExtended(int new_size)
+{
+	SYS_ASSERT(new_size > 0);
+
+	byte *d = new byte[new_size];
+
+	// copy existing values
+	memcpy(d, extended, (size_t)MIN(ext_size, new_size));
+
+	// clear values at top end
+	if (new_size > ext_size)
+		memset(d+ext_size, 0, (size_t)(new_size - ext_size));
+
+	delete[] extended;
+
+	extended = d;
+	ext_size = new_size;
 }
 
 
@@ -364,7 +466,7 @@ void selection_c::begin(selection_iterator_c *it) const
 	it->sel = this;
 	it->pos = 0;
 
-	if (bv)
+	if (bv || extended)
 	{
 		// for bit vector, need to find the first one bit
 		// Note: this logic is rather hacky
@@ -387,7 +489,9 @@ bool selection_iterator_c::at_end() const
 {
 	SYS_ASSERT(sel);
 
-	if (sel->bv)
+	if (sel->extended)
+		return (pos >= sel->ext_size);
+	else if (sel->bv)
 		return (pos >= sel->bv->size());
 	else
 		return (pos >= sel->count);
@@ -398,7 +502,7 @@ int selection_iterator_c::operator* () const
 {
 	SYS_ASSERT(sel);
 
-	if (sel->bv)
+	if (sel->bv || sel->extended)
 		return pos;
 	else
 		return sel->objs[pos];
@@ -411,10 +515,15 @@ selection_iterator_c& selection_iterator_c::operator++ ()
 
 	pos++;
 
-	if (sel->bv)
+	if (sel->extended)
+	{
+		while (pos < sel->ext_size && sel->extended[pos] == 0)
+			pos++;
+	}
+	else if (sel->bv)
 	{
 		// this could be optimised....
-		while (pos < sel->bv->size() && ! sel->bv->get(pos))
+		while (pos < sel->bv->size() && !sel->bv->get(pos))
 			pos++;
 	}
 
