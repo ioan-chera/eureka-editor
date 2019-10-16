@@ -728,7 +728,7 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(OBJ_SECTORS);
 
-	int max_type = (game_info.gen_sectors == 2) ? 8191 : 2047;
+	int max_type = (Features.gen_sectors == 2) ? 8191 : 2047;
 
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
@@ -746,9 +746,9 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 		}
 
 		// Boom and ZDoom generalized sectors
-		if (game_info.gen_sectors == 2)
+		if (Features.gen_sectors == 2)
 			type_num &= 255;
-		else if (game_info.gen_sectors)
+		else if (Features.gen_sectors)
 			type_num &= 31;
 
 		const sectortype_t *info = M_GetSectorType(type_num);
@@ -1528,7 +1528,7 @@ void Things_FindDuds(selection_c& list)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
-		else if (game_info.coop_dm_flags)
+		else if (Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
@@ -1589,7 +1589,7 @@ void Things_FixDuds()
 			if (modes == 0)
 				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		}
-		else if (game_info.coop_dm_flags)
+		else if (Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 
@@ -1966,7 +1966,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 		mask = Things_FindStarts(&dm_num);
 
-		if (game_info.no_need_players)
+		if (Features.no_need_players)
 			dialog->AddLine("Player starts not needed, no check done");
 		else if (! (mask & 1))
 			dialog->AddLine("Player 1 start is missing!", 2);
@@ -1979,7 +1979,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		else
 			dialog->AddLine("Found all 4 player starts");
 
-		if (game_info.no_need_players)
+		if (Features.no_need_players)
 		{
 			// leave a blank space
 		}
@@ -1987,16 +1987,16 @@ check_result_e CHECK_Things(int min_severity = 0)
 		{
 			dialog->AddLine("Map is missing deathmatch starts", 1);
 		}
-		else if (dm_num < game_info.min_dm_starts)
+		else if (dm_num < Game_info->min_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,
-			        game_info.min_dm_starts);
+			        Game_info->min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
-		else if (dm_num > game_info.max_dm_starts)
+		else if (dm_num > Game_info->max_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- maximum is %d", dm_num,
-			        game_info.max_dm_starts);
+			        Game_info->max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
@@ -2287,7 +2287,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 		const linetype_t *info = M_GetLineType(type_num);
 
 		// Boom generalized line type?
-		if (game_info.gen_types && is_genline(type_num))
+		if (Features.gen_types && is_genline(type_num))
 			continue;
 
 		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
@@ -2968,7 +2968,7 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 		int tag = Sectors[i]->tag;
 
 		// ignore special tags
-		if (game_info.tag_666 && (tag == 666 || tag == 667))
+		if (Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
 		if (tag > 0)
@@ -3109,7 +3109,7 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 
 		// DOOM and Heretic use tag #666 to open doors (etc) on the
 		// death of boss monsters.
-		if (game_info.tag_666 && (tag == 666 || tag == 667))
+		if (Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
 		if (! LD_tag_exists(tag))
@@ -3205,7 +3205,7 @@ void Tags_ShowMissingTags()
 
 static bool SEC_check_beast_mark(int tag)
 {
-	if (! game_info.tag_666)
+	if (! Features.tag_666)
 		return true;
 
 	if (tag == 667)
@@ -3217,7 +3217,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (game_info.tag_666 == 2)
+		if (Features.tag_666 == 2)
 		{
 			if (strlen(Level_name) != 4)
 				return false;
@@ -4301,7 +4301,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		if (! game_info.medusa_fixed)
+		if (! Features.medusa_fixed)
 		{
 			Textures_FindMedusa(sel, names);
 

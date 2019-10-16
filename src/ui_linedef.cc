@@ -931,13 +931,13 @@ int UI_LineBox::CalcFlags() const
 	}
 	else
 	{
-		if (game_info.pass_through && f_passthru->value())
+		if (Features.pass_through && f_passthru->value())
 			lineflags |= MLF_Boom_PassThru;
 
-		if (game_info.midtex_3d && f_3dmidtex->value())
+		if (Features.midtex_3d && f_3dmidtex->value())
 			lineflags |= MLF_Eternity_3DMidTex;
 
-		if (game_info.strife_flags)
+		if (Features.strife_flags)
 		{
 			if (f_jumpover->value())
 				lineflags |= MLF_Strife_JumpOver;
@@ -1018,17 +1018,17 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (game_info.pass_through)
+		if (Features.pass_through)
 			f_passthru->show();
 		else
 			f_passthru->hide();
 
-		if (game_info.midtex_3d)
+		if (Features.midtex_3d)
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
 
-		if (game_info.strife_flags)
+		if (Features.strife_flags)
 		{
 			f_jumpover->show();
 			f_flyers->show();
@@ -1043,7 +1043,7 @@ void UI_LineBox::UpdateGameInfo()
 			f_trans2->hide();
 		}
 
-		if (game_info.gen_types)
+		if (Features.gen_types)
 			gen->show();
 		else
 			gen->hide();
@@ -1063,7 +1063,7 @@ void UI_LineBox::UpdateGameInfo()
 
 const char * UI_LineBox::GeneralizedDesc(int type_num)
 {
-	if (! game_info.gen_types)
+	if (! Features.gen_types)
 		return NULL;
 
 	static char desc_buffer[256];

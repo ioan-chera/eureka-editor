@@ -481,7 +481,7 @@ void W_LoadTextures()
 			W_FreeLumpData(&pname_data);
 		}
 
-		if (game_info.tx_start)
+		if (Features.tx_start)
 		{
 			W_LoadTextures_TX_START(master_dir[i]);
 		}
@@ -508,7 +508,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 		return W_GetTexture(NormalizeTex(name), false);
 	}
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 	{
 		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
 
@@ -545,7 +545,7 @@ bool W_TextureIsKnown(const char *name)
 	if (P != textures.end())
 		return true;
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 	{
 		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
 
@@ -692,7 +692,7 @@ Img_c * W_GetFlat(const char *name, bool try_uppercase)
 	if (P != flats.end())
 		return P->second;
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 	{
 		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
 
@@ -724,7 +724,7 @@ bool W_FlatIsKnown(const char *name)
 	if (P != flats.end())
 		return true;
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 	{
 		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
 
@@ -796,7 +796,7 @@ Lump_c * Sprite_loc_by_root (const char *name)
 
 	// check outside of the sprite namespace...
 
-	if (! game_info.lax_sprites)
+	if (! Features.lax_sprites)
 		return NULL;
 
 	strcpy(buffer, name);

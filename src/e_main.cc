@@ -1063,7 +1063,7 @@ void render_clipboard_c::SetTex(const char *new_tex)
 {
 	snprintf(tex, sizeof(tex), "%s", new_tex);
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 		snprintf(flat, sizeof(flat), "%s", new_tex);
 }
 
@@ -1071,7 +1071,7 @@ void render_clipboard_c::SetFlat(const char *new_flat)
 {
 	snprintf(flat, sizeof(flat), "%s", new_flat);
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 		snprintf(tex, sizeof(tex), "%s", new_flat);
 }
 

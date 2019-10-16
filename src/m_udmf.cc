@@ -730,7 +730,7 @@ static void WriteUDMF_Things(Lump_c *lump)
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
-		if (game_info.friend_flag)
+		if (Features.friend_flag)
 			WrFlag(lump, th->options, "friend", MTF_Friend);
 
 		// TODO Hexen flags
@@ -801,10 +801,10 @@ static void WriteUDMF_LineDefs(Lump_c *lump)
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
 
-		if (game_info.pass_through)
+		if (Features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
 
-		if (game_info.midtex_3d)
+		if (Features.midtex_3d)
 			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
 
 		// TODO : hexen stuff (SPAC flags, etc)

@@ -29,7 +29,7 @@
 
 #include "im_color.h"
 
-#include <string>
+#include <map>
 
 
 /*
@@ -116,26 +116,6 @@ texturegroup_t;
 
 typedef struct
 {
-	int  sky_color;
-	char sky_flat[16];
-
-	int  wall_colors[2];
-	int floor_colors[2];
-	int invis_colors[2];
-
-	int missing_color;
-	int unknown_tex;
-	int unknown_flat;
-
-	int player_r;
-	int player_h;
-	int view_height;
-
-	int min_dm_starts;
-	int max_dm_starts;
-
-	/* port features */
-
 	int gen_types;		// BOOM generalized linedef types
 	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
 
@@ -156,10 +136,63 @@ typedef struct
 	int no_need_players;	// having no players is OK (Things checker)
 	int tag_666;			// game uses tag 666 and 667 for special FX
 
-} game_info_t;
+} port_features_t;
 
-extern game_info_t  game_info;
+extern port_features_t  Features;
 
+
+class GameInfo_c
+{
+public:
+	std::string name;
+	std::string base_game;
+
+	int  sky_color;
+	char sky_flat[16];
+
+	int  wall_colors[2];
+	int floor_colors[2];
+	int invis_colors[2];
+
+	int missing_color;
+	int unknown_tex;
+	int unknown_flat;
+
+	int player_r;
+	int player_h;
+	int view_height;
+
+	int min_dm_starts;
+	int max_dm_starts;
+
+public:
+	GameInfo_c(std::string _name);
+	~GameInfo_c();
+};
+
+
+class PortInfo_c
+{
+public:
+	std::string name;
+
+	map_format_bitset_t formats;
+
+	std::vector<std::string> supported_games;
+	std::vector<std::string> namespaces;
+
+public:
+	PortInfo_c(std::string _name);
+	~PortInfo_c();
+
+};
+
+
+extern GameInfo_c *Game_info;
+extern PortInfo_c *Port_info;
+
+
+//------------------------------------------------------------------------
 
 /* Boom generalized types */
 

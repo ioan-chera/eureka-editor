@@ -864,11 +864,11 @@ static void ReadPortInfo()
 	M_LoadDefinitions("ports", Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
-	if (game_info.strife_flags)
+	if (Features.strife_flags)
 	{
-		game_info.pass_through = 0;
-		game_info.coop_dm_flags = 0;
-		game_info.friend_flag = 0;
+		Features.pass_through = 0;
+		Features.coop_dm_flags = 0;
+		Features.friend_flag = 0;
 	}
 }
 

@@ -112,7 +112,7 @@ public:
 
 		if (is_sky(fname))
 		{
-			col = game_info.sky_color;
+			col = Game_info->sky_color;
 			fullbright = true;
 			return;
 		}
@@ -132,9 +132,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = game_info.floor_colors[1];
+			col = Game_info->floor_colors[1];
 		else
-			col = HashedPalColor(fname, game_info.floor_colors);
+			col = HashedPalColor(fname, Game_info->floor_colors);
 	}
 
 	void FindTex(const char * tname, LineDef *ld)
@@ -163,9 +163,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = game_info.wall_colors[1];
+			col = Game_info->wall_colors[1];
 		else
-			col = HashedPalColor(tname, game_info.wall_colors);
+			col = HashedPalColor(tname, Game_info->wall_colors);
 	}
 };
 

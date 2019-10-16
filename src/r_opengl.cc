@@ -150,7 +150,7 @@ public:
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			IM_DecodePixel(game_info.sky_color, r, g, b);
+			IM_DecodePixel(Game_info->sky_color, r, g, b);
 			return NULL;
 		}
 
@@ -162,9 +162,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (r_view.lighting)
-				col = game_info.floor_colors[1];
+				col = Game_info->floor_colors[1];
 			else
-				col = HashedPalColor(fname, game_info.floor_colors);
+				col = HashedPalColor(fname, Game_info->floor_colors);
 
 			IM_DecodePixel(col, r, g, b);
 			return NULL;
@@ -195,9 +195,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (r_view.lighting)
-				col = game_info.wall_colors[1];
+				col = Game_info->wall_colors[1];
 			else
-				col = HashedPalColor(tname, game_info.wall_colors);
+				col = HashedPalColor(tname, Game_info->wall_colors);
 
 			IM_DecodePixel(col, r, g, b);
 			return NULL;
@@ -612,7 +612,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			IM_DecodePixel(game_info.sky_color, r, g, b);
+			IM_DecodePixel(Game_info->sky_color, r, g, b);
 		}
 		else
 		{

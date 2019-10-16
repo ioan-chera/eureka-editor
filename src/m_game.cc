@@ -39,6 +39,46 @@
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
 
+GameInfo_c::GameInfo_c(std::string _name) :
+	name(_name), base_game(),
+	sky_color(0),
+	missing_color(0),
+	unknown_tex(0),
+	unknown_flat(0),
+	player_r(16),
+	player_h(56),
+	view_height(41),
+	min_dm_starts(4),
+	max_dm_starts(10)
+{
+	strcpy(sky_flat, "F_SKY1");
+
+	 wall_colors[0] =  wall_colors[1] = 0;
+	floor_colors[0] = floor_colors[1] = 0;
+	invis_colors[0] = invis_colors[1] = 0;
+}
+
+GameInfo_c::~GameInfo_c()
+{ }
+
+
+PortInfo_c::PortInfo_c(std::string _name) :
+	name(_name),
+	formats(0),
+	supported_games(),
+	namespaces()
+{ }
+
+PortInfo_c::~PortInfo_c()
+{ }
+
+
+GameInfo_c *Game_info;
+PortInfo_c *Port_info;
+
+port_features_t  Features;
+
+
 std::map<char, linegroup_t *>    line_groups;
 std::map<char, thinggroup_t *>   thing_groups;
 std::map<char, texturegroup_t *> texture_groups;
@@ -49,9 +89,6 @@ std::map<int, thingtype_t *>  thing_types;
 
 std::map<std::string, char> texture_assigns;
 std::map<std::string, char> flat_assigns;
-
-
-game_info_t  game_info;  // contains sky_color (etc)
 
 
 generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
@@ -87,15 +124,9 @@ void M_ClearAllDefinitions()
 {
 	M_FreeAllDefinitions();
 
-	// reset game information
-	memset(&game_info, 0, sizeof(game_info));
-
-	game_info.player_r = 16;
-	game_info.player_h = 56;
-	game_info.view_height = 41;
-
-	game_info.min_dm_starts = 4;
-	game_info.max_dm_starts = 10;
+	// FIXME TEMP CRUD
+	Game_info = new GameInfo_c("GGG");
+	Port_info = new PortInfo_c("PPPP");
 
 	// reset generalized types
 	memset(gen_linetypes, 0, sizeof(gen_linetypes));
@@ -112,6 +143,10 @@ void M_ClearAllDefinitions()
 
 		case MAPF_Hexen:
 			parse_vars[std::string("$MAP_FORMAT")] = std::string("HEXEN");
+			break;
+
+		case MAPF_UDMF:
+			parse_vars[std::string("$MAP_FORMAT")] = std::string("UDMF");
 			break;
 
 		default: break;
@@ -134,38 +169,38 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(char ** argv, int argc)
+static void ParseColorDef(GameInfo_c *info, char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
-		game_info.sky_color = atoi(argv[1]);
+		info->sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
-		game_info.wall_colors[0] = atoi(argv[1]);
-		game_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		info->wall_colors[0] = atoi(argv[1]);
+		info->wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
-		game_info.floor_colors[0] = atoi(argv[1]);
-		game_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		info->floor_colors[0] = atoi(argv[1]);
+		info->floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "invis") == 0)
 	{
-		game_info.invis_colors[0] = atoi(argv[1]);
-		game_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		info->invis_colors[0] = atoi(argv[1]);
+		info->invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
-		game_info.missing_color = atoi(argv[1]);
+		info->missing_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_tex") == 0)
 	{
-		game_info.unknown_tex = atoi(argv[1]);
+		info->unknown_tex = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_flat") == 0)
 	{
-		game_info.unknown_flat = atoi(argv[1]);
+		info->unknown_flat = atoi(argv[1]);
 	}
 	else
 	{
@@ -232,59 +267,59 @@ static void ParseFeatureDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "gen_types") == 0)
 	{
-		game_info.gen_types = atoi(argv[1]);
+		Features.gen_types = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "gen_sectors") == 0)
 	{
-		game_info.gen_sectors = atoi(argv[1]);
+		Features.gen_sectors = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "img_png") == 0)
 	{
-		game_info.img_png = atoi(argv[1]);
+		Features.img_png = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "tx_start") == 0)
 	{
-		game_info.tx_start = atoi(argv[1]);
+		Features.tx_start = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "coop_dm_flags") == 0)
 	{
-		game_info.coop_dm_flags = atoi(argv[1]);
+		Features.coop_dm_flags = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "friend_flag") == 0)
 	{
-		game_info.friend_flag = atoi(argv[1]);
+		Features.friend_flag = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "pass_through") == 0)
 	{
-		game_info.pass_through = atoi(argv[1]);
+		Features.pass_through = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "3d_midtex") == 0)
 	{
-		game_info.midtex_3d = atoi(argv[1]);
+		Features.midtex_3d = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "strife_flags") == 0)
 	{
-		game_info.strife_flags = atoi(argv[1]);
+		Features.strife_flags = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
 	{
-		game_info.medusa_fixed = atoi(argv[1]);
+		Features.medusa_fixed = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "lax_sprites") == 0)
 	{
-		game_info.lax_sprites = atoi(argv[1]);
+		Features.lax_sprites = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "no_need_players") == 0)
 	{
-		game_info.no_need_players = atoi(argv[1]);
+		Features.no_need_players = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "tag_666") == 0)
 	{
-		game_info.tag_666 = atoi(argv[1]);
+		Features.tag_666 = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "mix_textures_flats") == 0)
 	{
-		game_info.mix_textures_flats = atoi(argv[1]);
+		Features.mix_textures_flats = atoi(argv[1]);
 	}
 	else
 	{
@@ -487,14 +522,18 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	}
 
 
+	// FIXME review
+	GameInfo_c *ginfo = Game_info;
+
+
 	if (y_stricmp(argv[0], "player_size") == 0)
 	{
 		if (nargs != 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		game_info.player_r    = atoi(argv[1]);
-		game_info.player_h    = atoi(argv[2]);
-		game_info.view_height = atoi(argv[3]);
+		ginfo->player_r    = atoi(argv[1]);
+		ginfo->player_h    = atoi(argv[2]);
+		ginfo->view_height = atoi(argv[3]);
 	}
 
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
@@ -502,7 +541,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		game_info.sky_color = atoi(argv[1]);
+		ginfo->sky_color = atoi(argv[1]);
 	}
 
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
@@ -510,10 +549,10 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		if (strlen(argv[1]) >= sizeof(game_info.sky_flat))
+		if (strlen(argv[1]) >= sizeof(ginfo->sky_flat))
 			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
 
-		strcpy(game_info.sky_flat, argv[1]);
+		strcpy(ginfo->sky_flat, argv[1]);
 	}
 
 	else if (y_stricmp(argv[0], "color") == 0)
@@ -521,7 +560,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs < 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		ParseColorDef(pst->argv + 1, nargs);
+		ParseColorDef(ginfo, pst->argv + 1, nargs);
 	}
 
 	else if (y_stricmp(argv[0], "feature") == 0)
@@ -1241,7 +1280,7 @@ const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const 
 
 bool is_sky(const char *flat)
 {
-	return (y_stricmp(game_info.sky_flat, flat) == 0);
+	return (y_stricmp(Game_info->sky_flat, flat) == 0);
 }
 
 bool is_null_tex(const char *tex)
