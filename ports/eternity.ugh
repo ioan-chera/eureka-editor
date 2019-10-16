@@ -25,12 +25,32 @@
 #
 #------------------------------------------------------------------------
 
+# Pull in the Boom/MBF definitions, but only when Hexen-style
+# specials are not being used.
+
+if $MAP_FORMAT is HEXEN
+  set $ALLOW_BOOM 0
+  set $HEXEN_SPECIALS 1
+endif
+
+if $MAP_FORMAT is UDMF
+if $UDMF_NAMESPACE not Doom
+  set $ALLOW_BOOM 0
+endif
+if $UDMF_NAMESPACE is Hexen Eternity
+  set $HEXEN_SPECIALS 1
+endif
+endif
+
 if $ALLOW_BOOM is 1
   include "mbf"
 endif
 
+
 map_formats DOOM HEXEN UDMF
+
 supported_games doom doom2 heretic hexen strife
+
 udmf_namespaces Eternity Doom Heretic Hexen Strife
 
 feature 3d_midtex 1
@@ -40,7 +60,7 @@ feature mix_textures_flats 1
 #TODO:  thing flag 512 "Dormant" - like in Hexen
 
 
-#---- THINGS ------------
+#---- ETERNITY THINGS ------------------
 
 thinggroup s DAD "Environment Sounds"
 
@@ -333,7 +353,24 @@ thing 14064 s nv 16 NULL "EE: Ambience 64"
 thing 14065 s nv 16 NULL "EE: Ambience Ex"
 
 
-#---- LINETYPES ----------
+#---- HEXEN-STYLE SPECIALS ----------
+
+if $HEXEN_SPECIALS is 1
+
+clear lines
+
+feature tag_666 0
+feature strife_flags 0
+feature gen_lines 0
+feature gen_sectors 2
+
+
+## FIXME!!
+
+
+else
+
+#---- DOOM-STYLE SPECIALS ----------
 
 linegroup o "Portals"
 
@@ -402,3 +439,4 @@ line 382 - "-- EE: Attach ceil to ctrl"
 line 383 - "-- EE: Mirror floor to ctrl"
 line 384 - "-- EE: Mirror ceil to ctrl"
 
+endif
