@@ -905,26 +905,20 @@ void UI_ProjectSetup::PopulatePort()
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	map_format_e prev_fmt = Level_format;
+	map_format_e prev_fmt = map_format;
 
-	if (format_choice->mvalue())
-	{
-		if (strstr(format_choice->mvalue()->text, "UDMF"))
-			prev_fmt = MAPF_UDMF;
-		else if (strstr(format_choice->mvalue()->text, "Hexen"))
-			prev_fmt = MAPF_Hexen;
-		else
-			prev_fmt = MAPF_Doom;
-	}
+	if (prev_fmt == MAPF_INVALID)
+		prev_fmt = Level_format;
 
-
-	map_format = MAPF_Doom;
 
 	format_choice->clear();
 
 	// if no game, format doesn't matter
 	if (! game)
+	{
+		map_format = MAPF_Doom;
 		return;
+	}
 
 
 	// determine the usable formats, from current game and port
@@ -943,16 +937,12 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 
 	// reconstruct the menu
-	char menu_string[256];
-	int  menu_value = 0;
-
-	menu_string[0] = 0;
-
+	int menu_value = 0;
 	int entry_id = 0;
 
 	if (usable_formats & (1 << MAPF_Doom))
 	{
-		strcat(menu_string, "Doom Format");
+		format_choice->add("Doom Format");
 		entry_id++;
 	}
 
@@ -961,10 +951,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		if (prev_fmt == MAPF_Hexen)
 			menu_value = entry_id;
 
-		if (menu_string[0])
-			strcat(menu_string, "|");
-
-		strcat(menu_string, "Hexen Format");
+		format_choice->add("Hexen Format");
 		entry_id++;
 	}
 
@@ -973,14 +960,10 @@ void UI_ProjectSetup::PopulateMapFormat()
 		if (prev_fmt == MAPF_UDMF)
 			menu_value = entry_id;
 
-		if (menu_string[0])
-			strcat(menu_string, "|");
-
-		strcat(menu_string, "UDMF");
+		format_choice->add("UDMF");
 		entry_id++;
 	}
 
-	format_choice->add  (menu_string);
 	format_choice->value(menu_value);
 
 	// set map_format field based on current menu entry.
@@ -999,7 +982,39 @@ void UI_ProjectSetup::PopulateNamespaces()
 
 	namespace_choice->show();
 
-	// TODO : PopulateNamespaces
+	// get previous value
+	const char *prev_ns = name_space.c_str();
+
+	if (prev_ns[0] == 0)
+		prev_ns = Udmf_namespace.c_str();
+
+
+	namespace_choice->clear();
+
+	if (! port_choice->mvalue())
+		return;
+
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	if (! pinfo)
+		return;
+
+	int menu_value = 0;
+
+	for (int i = 0 ; i < (int)pinfo->namespaces.size() ; i++)
+	{
+		const char * ns = pinfo->namespaces[i].c_str();
+
+		namespace_choice->add(ns);
+
+		// keep same entry as before, when possible
+		if (strcmp(prev_ns, ns) == 0)
+			menu_value = i;
+	}
+
+	namespace_choice->value(menu_value);
+
+	if (menu_value < (int)pinfo->namespaces.size())
+		name_space = pinfo->namespaces[menu_value];
 }
 
 
@@ -1097,7 +1112,7 @@ void UI_ProjectSetup::namespace_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	// TODO
+	that->name_space = w->mvalue()->text;
 }
 
 

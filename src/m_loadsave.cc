@@ -193,6 +193,8 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 	SYS_ASSERT(Iwad_name);
 
 	Level_format = dialog->map_format;
+	Udmf_namespace = dialog->name_space;
+
 	SYS_ASSERT(Level_format != MAPF_INVALID);
 
 	Resource_list.clear();
