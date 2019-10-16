@@ -852,7 +852,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	}
 	else if (y_stricmp(argv[0], "clear") == 0)
 	{
-		if (nargs < 2)
+		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseClearKeywords(pst->argv + 1, nargs);
