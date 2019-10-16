@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -961,7 +961,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		entry_id++;
 	}
 
-	if (true)  // FIXME??  usable_formats & (1 << MAPF_UDMF))
+	if (usable_formats & (1 << MAPF_UDMF))
 	{
 		if (prev_fmt == MAPF_UDMF)
 			menu_value = entry_id;

@@ -186,6 +186,9 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 		else if (y_stricmp(argv[0], "HEXEN") == 0)
 			result |= (1 << MAPF_Hexen);
 
+		else if (y_stricmp(argv[0], "UDMF") == 0)
+			result |= (1 << MAPF_UDMF);
+
 		else
 			FatalError("Unknown map format '%s' in definition file.\n", argv[0]);
 	}

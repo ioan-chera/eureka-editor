@@ -29,6 +29,8 @@ if $ALLOW_BOOM is 1
   include "mbf"
 endif
 
+map_formats DOOM HEXEN UDMF
+
 feature 3d_midtex 1
 feature tx_start 1
 feature mix_textures_flats 1
