@@ -896,7 +896,10 @@ static bool M_ParseConditional(parser_state_c *pst)
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
-	if (nargs == 3 && y_stricmp(argv[1], "is") == 0)
+	bool op_is  = (nargs >= 3 && y_stricmp(argv[1], "is")  == 0);
+	bool op_not = (nargs >= 3 && y_stricmp(argv[1], "not") == 0);
+
+	if (op_is || op_not)
 	{
 		if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 			FatalError("%s(%d): expected variable in if statement\n",
@@ -907,7 +910,12 @@ static bool M_ParseConditional(parser_state_c *pst)
 
 		std::string var_value = parse_vars[std::string(argv[0])];
 
-		return (y_stricmp(var_value.c_str(), argv[2]) == 0);
+		// test multiple values, only need one to succeed
+		for (int i = 2 ; i < nargs ; i++)
+			if (y_stricmp(var_value.c_str(), argv[i]) == 0)
+				return op_is;
+
+		return op_not;
 	}
 
 	FatalError("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
