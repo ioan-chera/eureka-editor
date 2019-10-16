@@ -23,21 +23,34 @@
 #
 #------------------------------------------------------------------------
 
-# disable all Boom defs for Hexen format maps
+# Pull in the Boom/MBF definitions, but only when Hexen-style
+# specials are not being used.
+
 if $MAP_FORMAT is HEXEN
   set $ALLOW_BOOM 0
+  set $HEXEN_SPECIALS 1
 endif
 
-# be Boom compatible, but only for the DOOM games
+if $MAP_FORMAT is UDMF
+if $UDMF_NAMESPACE not Doom
+  set $ALLOW_BOOM 0
+endif
+if $UDMF_NAMESPACE is Hexen ZDoom
+  set $HEXEN_SPECIALS 1
+endif
+endif
+
 if $ALLOW_BOOM is 1
   include "mbf"
+  feature friend_flag 0
 endif
+
 
 map_formats DOOM HEXEN UDMF
 
 supported_games doom doom2 heretic hexen strife
 
-# NOTE: ZDoomTranslated is not supported by Eureka
+# NOTE: ZDoomTranslated is not supported.
 udmf_namespaces ZDoom Doom Heretic Hexen Strife
 
 feature tx_start 1
@@ -45,14 +58,8 @@ feature medusa_fixed 1
 feature lax_sprites 1
 feature mix_textures_flats 1
 
-if $MAP_FORMAT is HEXEN
-  feature tag_666 0
-  feature strife_flags 0
-  feature gen_sectors 2
-endif
 
-
-#---- THINGS ------------
+#---- ZDOOM THINGS ------------
 
 thing 4001 p - 16 PLAYA1 "Player 5 start"
 thing 4002 p - 16 PLAYA1 "Player 6 start"
@@ -166,12 +173,17 @@ thing 9813 - ln  16 _LYT "ZD: PointLight /sec /add"
 thing 9823 - ln  16 _LYT "ZD: PointLight /sec /sub"
 
 #
-#---- HEXEN FORMAT SPECIALS  ----------
+#---- HEXEN STYLE SPECIALS --------------
 #
 
-if $MAP_FORMAT is HEXEN
+if $HEXEN_SPECIALS is 1
 
 clear lines sectors
+
+feature tag_666 0
+feature strife_flags 0
+feature gen_lines 0
+feature gen_sectors 2
 
 include "hexen_groups"
 include "hexen_sectors"
@@ -471,10 +483,10 @@ sector 200 "ZD: Sky2"
 else
 
 #
-#---- DOOM FORMAT SPECIALS  ----------
+#---- DOOM STYLE SPECIALS ----------
 #
 
-# most specials are from the game definition.
+# most specials come from the game definition.
 # additional specials come from the MBF port.
 
 # Scripting
@@ -572,12 +584,9 @@ line 349 - "S1 ZD: Autosave"
 ## andrewj: omitted the EDGE "Floor up 2" (types 434-439), as they
 ## have no practical use outside of EDGE's RTS scripting.
 
-endif
+# ZDoom DOOM sector specials
 
-
-# --- ZDoom Sector types in DOOM format ---
-
-if $ALLOW_BOOM is 1
+if $BASE_GAME is Doom Doom2
   sector 15 "ZD: Friction Low"
   sector 18 "ZD: Damage Lava (light)"
   sector 19 "ZD: Damage Lava (heavy)"
@@ -589,3 +598,4 @@ if $ALLOW_BOOM is 1
   sector 24 "ZD: Light Seq Next 2"
 endif
 
+endif
