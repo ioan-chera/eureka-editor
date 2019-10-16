@@ -72,6 +72,15 @@ PortInfo_c::PortInfo_c(std::string _name) :
 PortInfo_c::~PortInfo_c()
 { }
 
+bool PortInfo_c::SupportsGame(const char *game) const
+{
+	for (unsigned int i = 0 ; i < supported_games.size() ; i++)
+		if (y_stricmp(supported_games[i].c_str(), game) == 0)
+			return true;
+
+	return false;
+}
+
 
 GameInfo_c *Game_info;
 PortInfo_c *Port_info;
@@ -1181,6 +1190,12 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 	loading_Game = new GameInfo_c(game);
 
 	M_ParseDefinitionFile(PURPOSE_GameInfo, filename, "games", NULL);
+
+	if (loading_Game->base_game.empty())
+	{
+		FatalError("Game definition for '%s' does not set base_game\n", game);
+	}
+
 	return loading_Game;
 }
 
@@ -1200,6 +1215,14 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 	loading_Port = new PortInfo_c(port);
 
 	M_ParseDefinitionFile(PURPOSE_PortInfo, filename, "ports", NULL);
+
+	// default is to support "doom" and "doom2"
+	if (loading_Port->supported_games.empty())
+	{
+		loading_Port->supported_games.push_back(std::string("doom"));
+		loading_Port->supported_games.push_back(std::string("doom2"));
+	}
+
 	return loading_Port;
 }
 
@@ -1266,21 +1289,10 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 
 const char * M_GetBaseGame(const char *game)
 {
-	// static so we can return the char[] inside it
-	static parse_check_info_t info;
+	GameInfo_c *ginfo = M_LoadGameInfo(game);
+	SYS_ASSERT(ginfo);
 
-	// FIXME require a "base_game" to be specified
-	strcpy(info.base_game, game);
-
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
-
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
-						  NULL /* prettyname */, &info);
-
-	SYS_ASSERT(info.base_game[0]);
-
-	return info.base_game;
+	return ginfo->base_game.c_str();
 }
 
 
@@ -1307,28 +1319,12 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 		return true;
 	}
 
-	parse_check_info_t info;
-
-	snprintf(info.base_game, sizeof(info.base_game), "%s", base_game);
-
-	// default is to support "doom" and "doom2"
-	info.supports_game = 0;
-
-	if (y_stricmp(base_game, "doom")  == 0 ||
-	    y_stricmp(base_game, "doom2") == 0)
-	{
-		info.supports_game = 1;
-	}
-
-	const char *filename = FindDefinitionFile("ports", port);
-
-	if (! filename)
+	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	if (! pinfo)
 		return false;
 
-	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
-						  NULL /* prettyname */, &info);
 
-	return (info.supports_game > 0);
+	return pinfo->SupportsGame(base_game);
 }
 
 

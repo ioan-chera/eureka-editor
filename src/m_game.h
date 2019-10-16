@@ -176,7 +176,7 @@ class PortInfo_c
 public:
 	std::string name;
 
-	map_format_bitset_t formats;
+	map_format_bitset_t formats; // 0 if not specified
 
 	std::vector<std::string> supported_games;
 	std::vector<std::string> namespaces;
@@ -185,6 +185,7 @@ public:
 	PortInfo_c(std::string _name);
 	~PortInfo_c();
 
+	bool SupportsGame(const char *game) const;
 };
 
 
