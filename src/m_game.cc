@@ -1286,27 +1286,15 @@ const char * M_GetBaseGame(const char *game)
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 {
-	parse_check_info_t info;
+	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	if (pinfo && pinfo->formats != 0)
+		return pinfo->formats;
 
-	info.formats = (1 << MAPF_Doom);
+	// a bit hacky, maybe should do it a better way...
+	if (strcmp(game, "hexen") == 0)
+		return (1 << MAPF_Hexen);
 
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
-
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
-						  NULL /* prettyname */, &info);
-
-	// for Vanilla, only the game itself is checked
-	if (strcmp(port, "vanilla") != 0)
-	{
-		filename = FindDefinitionFile("ports", port);
-		SYS_ASSERT(filename);
-
-		M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
-							  NULL /* prettyname */, &info);
-	}
-
-	return info.formats;
+	return (1 << MAPF_Doom);
 }
 
 
