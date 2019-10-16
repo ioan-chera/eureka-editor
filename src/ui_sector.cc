@@ -335,7 +335,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == 2)
 	{
-		new_tex = BA_InternaliseString(Game_info->sky_flat);
+		new_tex = BA_InternaliseString(Misc_info.sky_flat);
 
 		goto change_it;
 	}
@@ -934,7 +934,7 @@ bool UI_SectorBox::ClipboardOp(char op)
 
 		case 'd':
 			// we abuse the delete function to turn sector ceilings into sky
-			CB_Paste(BA_InternaliseString(Game_info->sky_flat));
+			CB_Paste(BA_InternaliseString(Misc_info.sky_flat));
 			break;
 	}
 

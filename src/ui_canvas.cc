@@ -2179,7 +2179,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (is_sky(tex_name))
 		{
-			gl_color(palette[Game_info->sky_color]);
+			gl_color(palette[Misc_info.sky_color]);
 		}
 		else
 		{

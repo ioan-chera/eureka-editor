@@ -171,8 +171,8 @@ Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(width(), height());
 
-	int invis_start = Game_info->invis_colors[0];
-	int invis_len   = Game_info->invis_colors[1] - invis_start + 1;
+	int invis_start = Misc_info.invis_colors[0];
+	int invis_len   = Misc_info.invis_colors[1] - invis_start + 1;
 
 	if (invis_len < 1)
 		invis_len = 1;
@@ -510,9 +510,9 @@ static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 
 Img_c * IM_MissingTex()
 {
-	if (! missing_tex_image || missing_tex_color != Game_info->missing_color)
+	if (! missing_tex_image || missing_tex_color != Misc_info.missing_color)
 	{
-		missing_tex_color = Game_info->missing_color;
+		missing_tex_color = Misc_info.missing_color;
 
 		if (missing_tex_image)
 			delete missing_tex_image;
@@ -526,9 +526,9 @@ Img_c * IM_MissingTex()
 
 Img_c * IM_UnknownTex()
 {
-	if (! unknown_tex_image || unknown_tex_color != Game_info->unknown_tex)
+	if (! unknown_tex_image || unknown_tex_color != Misc_info.unknown_tex)
 	{
-		unknown_tex_color = Game_info->unknown_tex;
+		unknown_tex_color = Misc_info.unknown_tex;
 
 		if (unknown_tex_image)
 			delete unknown_tex_image;
@@ -542,9 +542,9 @@ Img_c * IM_UnknownTex()
 
 Img_c * IM_UnknownFlat()
 {
-	if (! unknown_flat_image || unknown_flat_color != Game_info->unknown_flat)
+	if (! unknown_flat_image || unknown_flat_color != Misc_info.unknown_flat)
 	{
-		unknown_flat_color = Game_info->unknown_flat;
+		unknown_flat_color = Misc_info.unknown_flat;
 
 		if (unknown_flat_image)
 			delete unknown_flat_image;
@@ -558,9 +558,9 @@ Img_c * IM_UnknownFlat()
 
 Img_c * IM_UnknownSprite()
 {
-	if (! unknown_sprite_image || unknown_sprite_color != Game_info->unknown_tex)
+	if (! unknown_sprite_image || unknown_sprite_color != Misc_info.unknown_tex)
 	{
-		unknown_sprite_color = Game_info->unknown_tex;
+		unknown_sprite_color = Misc_info.unknown_tex;
 
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;

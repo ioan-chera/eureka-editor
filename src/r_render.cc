@@ -103,7 +103,7 @@ void Render_View_t::FindGroundZ()
 	}
 
 	if (max_floor != INT_MIN)
-		z = max_floor + Game_info->view_height;
+		z = max_floor + Misc_info.view_height;
 }
 
 void Render_View_t::CalcAspect()
@@ -975,7 +975,7 @@ static void Render3D_Delete()
 
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		r_view.StoreTextureTo3DSel(BA_InternaliseString(Game_info->sky_flat));
+		r_view.StoreTextureTo3DSel(BA_InternaliseString(Misc_info.sky_flat));
 		return;
 	}
 

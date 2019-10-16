@@ -275,7 +275,7 @@ static bool GrowContiguousSectors(selection_c &seen)
 			int f_max = MAX(S1->floorh, S2->floorh);
 			int c_min = MIN(S1-> ceilh, S2-> ceilh);
 
-			if (c_min - f_max < Game_info->player_h)
+			if (c_min - f_max < Misc_info.player_h)
 			{
 				// ... but allow doors
 				if (! (allow_doors && (S1->floorh == S1->ceilh || S2->floorh == S2->ceilh)))

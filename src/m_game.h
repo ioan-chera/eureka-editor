@@ -116,6 +116,31 @@ texturegroup_t;
 
 typedef struct
 {
+	int  sky_color;
+	char sky_flat[16];
+
+	int  wall_colors[2];
+	int floor_colors[2];
+	int invis_colors[2];
+
+	int missing_color;
+	int unknown_tex;
+	int unknown_flat;
+
+	int player_r;
+	int player_h;
+	int view_height;
+
+	int min_dm_starts;
+	int max_dm_starts;
+
+} misc_info_t;
+
+
+typedef struct
+{
+	// NOTE: values here are generally 0 or 1, but some can be higher
+
 	int gen_types;		// BOOM generalized linedef types
 	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
 
@@ -138,6 +163,8 @@ typedef struct
 
 } port_features_t;
 
+
+extern misc_info_t      Misc_info;
 extern port_features_t  Features;
 
 
@@ -146,24 +173,6 @@ class GameInfo_c
 public:
 	std::string name;
 	std::string base_game;
-
-	int  sky_color;
-	char sky_flat[16];
-
-	int  wall_colors[2];
-	int floor_colors[2];
-	int invis_colors[2];
-
-	int missing_color;
-	int unknown_tex;
-	int unknown_flat;
-
-	int player_r;
-	int player_h;
-	int view_height;
-
-	int min_dm_starts;
-	int max_dm_starts;
 
 public:
 	GameInfo_c(std::string _name);
@@ -187,10 +196,6 @@ public:
 
 	bool SupportsGame(const char *game) const;
 };
-
-
-extern GameInfo_c *Game_info;
-extern PortInfo_c *Port_info;
 
 
 //------------------------------------------------------------------------

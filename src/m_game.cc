@@ -40,23 +40,8 @@
 
 
 GameInfo_c::GameInfo_c(std::string _name) :
-	name(_name), base_game(),
-	sky_color(0),
-	missing_color(0),
-	unknown_tex(0),
-	unknown_flat(0),
-	player_r(16),
-	player_h(56),
-	view_height(41),
-	min_dm_starts(4),
-	max_dm_starts(10)
-{
-	strcpy(sky_flat, "F_SKY1");
-
-	 wall_colors[0] =  wall_colors[1] = 0;
-	floor_colors[0] = floor_colors[1] = 0;
-	invis_colors[0] = invis_colors[1] = 0;
-}
+	name(_name), base_game()
+{ }
 
 GameInfo_c::~GameInfo_c()
 { }
@@ -82,9 +67,7 @@ bool PortInfo_c::SupportsGame(const char *game) const
 }
 
 
-GameInfo_c *Game_info;
-PortInfo_c *Port_info;
-
+misc_info_t      Misc_info;
 port_features_t  Features;
 
 
@@ -143,9 +126,14 @@ void M_ClearAllDefinitions()
 {
 	M_FreeAllDefinitions();
 
-	// FIXME TEMP CRUD
-	Game_info = new GameInfo_c("GGG");
-	Port_info = new PortInfo_c("PPPP");
+	memset(&Misc_info, 0, sizeof(Misc_info));
+	memset(&Features,  0, sizeof(Features));
+
+	Misc_info.player_r = 16;
+	Misc_info.player_h = 56;
+	Misc_info.view_height = 41;
+	Misc_info.min_dm_starts = 4;
+	Misc_info.max_dm_starts = 10;
 
 	// reset generalized types
 	memset(gen_linetypes, 0, sizeof(gen_linetypes));
@@ -188,38 +176,38 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(GameInfo_c *info, char ** argv, int argc)
+static void ParseColorDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
-		info->sky_color = atoi(argv[1]);
+		Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
-		info->wall_colors[0] = atoi(argv[1]);
-		info->wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.wall_colors[0] = atoi(argv[1]);
+		Misc_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
-		info->floor_colors[0] = atoi(argv[1]);
-		info->floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.floor_colors[0] = atoi(argv[1]);
+		Misc_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "invis") == 0)
 	{
-		info->invis_colors[0] = atoi(argv[1]);
-		info->invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.invis_colors[0] = atoi(argv[1]);
+		Misc_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
-		info->missing_color = atoi(argv[1]);
+		Misc_info.missing_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_tex") == 0)
 	{
-		info->unknown_tex = atoi(argv[1]);
+		Misc_info.unknown_tex = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_flat") == 0)
 	{
-		info->unknown_flat = atoi(argv[1]);
+		Misc_info.unknown_flat = atoi(argv[1]);
 	}
 	else
 	{
@@ -540,19 +528,46 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	}
 
 
-	if (y_stricmp(argv[0], "feature") == 0)
+	if (y_stricmp(argv[0], "player_size") == 0)
+	{
+		if (nargs != 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		Misc_info.player_r    = atoi(argv[1]);
+		Misc_info.player_h    = atoi(argv[2]);
+		Misc_info.view_height = atoi(argv[3]);
+	}
+	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		Misc_info.sky_color = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "sky_flat") == 0)
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		if (strlen(argv[1]) >= sizeof(Misc_info.sky_flat))
+			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
+
+		strcpy(Misc_info.sky_flat, argv[1]);
+	}
+	else if (y_stricmp(argv[0], "color") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseColorDef(pst->argv + 1, nargs);
+	}
+	else if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseFeatureDef(pst->argv + 1, nargs);
 	}
-
-	else if (y_stricmp(argv[0], "default_port") == 0)
-	{
-		/* ignored for backwards compability */
-	}
-
 	else if (y_stricmp(argv[0], "default_textures") == 0)
 	{
 		if (nargs != 3)
@@ -562,7 +577,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		default_floor_tex	= StringDup(argv[2]);
 		default_ceil_tex	= StringDup(argv[3]);
 	}
-
 	else if (y_stricmp(argv[0], "default_thing") == 0)
 	{
 		if (nargs != 1)
@@ -570,7 +584,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		default_thing = atoi(argv[1]);
 	}
-
 	else if (y_stricmp(argv[0], "linegroup") == 0 ||
 			 y_stricmp(argv[0], "spec_group") == 0)
 	{
@@ -785,14 +798,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			field->keywords[i] = StringDup(argv[5 + i]);
 		}
 	}
-
-	// these are ignored for backwards compability
-	else if (y_stricmp(argv[0], "level_name") == 0 ||
-			 y_stricmp(argv[0], "exclude_game") == 0)
-	{
-		return;
-	}
-
 	else if (y_stricmp(argv[0], "clear") == 0)
 	{
 		if (nargs < 2)
@@ -831,39 +836,6 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 
 		// TODO lowercase it
 		loading_Game->base_game = argv[1];
-	}
-	else if (y_stricmp(argv[0], "player_size") == 0)
-	{
-		if (nargs != 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		loading_Game->player_r    = atoi(argv[1]);
-		loading_Game->player_h    = atoi(argv[2]);
-		loading_Game->view_height = atoi(argv[3]);
-	}
-	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
-	{
-		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		loading_Game->sky_color = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "sky_flat") == 0)
-	{
-		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		if (strlen(argv[1]) >= sizeof(loading_Game->sky_flat))
-			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
-
-		strcpy(loading_Game->sky_flat, argv[1]);
-	}
-	else if (y_stricmp(argv[0], "color") == 0)
-	{
-		if (nargs < 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
-
-		ParseColorDef(loading_Game, pst->argv + 1, nargs);
 	}
 }
 
@@ -1315,7 +1287,7 @@ const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const 
 
 bool is_sky(const char *flat)
 {
-	return (y_stricmp(Game_info->sky_flat, flat) == 0);
+	return (y_stricmp(Misc_info.sky_flat, flat) == 0);
 }
 
 bool is_null_tex(const char *tex)

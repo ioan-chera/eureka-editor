@@ -411,7 +411,7 @@ void UI_3DInfoBar::draw()
 	IB_Number(cx, cy, "angle", ang, 3);
 	cx += 8;
 
-	IB_Number(cx, cy, "z", I_ROUND(r_view.z) - Game_info->view_height, 4);
+	IB_Number(cx, cy, "z", I_ROUND(r_view.z) - Misc_info.view_height, 4);
 
 	IB_Number(cx, cy, "gamma", usegamma, 1);
 	cx += 10;
