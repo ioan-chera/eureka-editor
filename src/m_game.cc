@@ -79,6 +79,16 @@ PortInfo_c *Port_info;
 port_features_t  Features;
 
 
+// all the game and port definitions and previously loaded
+static std::map<std::string, GameInfo_c *> loaded_game_defs;
+static std::map<std::string, PortInfo_c *> loaded_port_defs;
+
+// the information being loaded for PURPOSE_GameInfo / PortInfo
+// TODO : move into parser_state_c
+static GameInfo_c *loading_Game;
+static PortInfo_c *loading_Port;
+
+
 std::map<char, linegroup_t *>    line_groups;
 std::map<char, thinggroup_t *>   thing_groups;
 std::map<char, texturegroup_t *> texture_groups;
@@ -370,7 +380,6 @@ void M_LoadDefinitions(const char *folder, const char *name)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
-
 	sprintf(prettyname, "%s/%s.ugh", folder, name);
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
@@ -522,48 +531,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	}
 
 
-	// FIXME review
-	GameInfo_c *ginfo = Game_info;
-
-
-	if (y_stricmp(argv[0], "player_size") == 0)
-	{
-		if (nargs != 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		ginfo->player_r    = atoi(argv[1]);
-		ginfo->player_h    = atoi(argv[2]);
-		ginfo->view_height = atoi(argv[3]);
-	}
-
-	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
-	{
-		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		ginfo->sky_color = atoi(argv[1]);
-	}
-
-	else if (y_stricmp(argv[0], "sky_flat") == 0)
-	{
-		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		if (strlen(argv[1]) >= sizeof(ginfo->sky_flat))
-			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
-
-		strcpy(ginfo->sky_flat, argv[1]);
-	}
-
-	else if (y_stricmp(argv[0], "color") == 0)
-	{
-		if (nargs < 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
-
-		ParseColorDef(ginfo, pst->argv + 1, nargs);
-	}
-
-	else if (y_stricmp(argv[0], "feature") == 0)
+	if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
@@ -824,11 +792,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		ParseClearKeywords(pst->argv + 1, nargs);
 	}
 
+/*  FIXME
+
 	else
 	{
 		FatalError("%s(%d): unknown directive: %.32s\n",
 				   pst->fname, pst->lineno, argv[0]);
 	}
+*/
 }
 
 
@@ -890,6 +861,105 @@ static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_
 }
 
 
+static void M_ParseGameInfoLine(parser_state_c *pst)
+{
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+	if (y_stricmp(argv[0], "supported_games") == 0 ||
+		y_stricmp(argv[0], "map_formats") == 0)
+	{
+		FatalError("%s(%d): %s can only be used in port definitions\n",
+			pst->fname, pst->lineno, argv[0]);
+	}
+
+	if (y_stricmp(argv[0], "base_game") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		// TODO lowercase it
+		loading_Game->base_game = argv[1];
+	}
+	else if (y_stricmp(argv[0], "player_size") == 0)
+	{
+		if (nargs != 3)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		loading_Game->player_r    = atoi(argv[1]);
+		loading_Game->player_h    = atoi(argv[2]);
+		loading_Game->view_height = atoi(argv[3]);
+	}
+	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		loading_Game->sky_color = atoi(argv[1]);
+	}
+	else if (y_stricmp(argv[0], "sky_flat") == 0)
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		if (strlen(argv[1]) >= sizeof(loading_Game->sky_flat))
+			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
+
+		strcpy(loading_Game->sky_flat, argv[1]);
+	}
+	else if (y_stricmp(argv[0], "color") == 0)
+	{
+		if (nargs < 2)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+
+		ParseColorDef(loading_Game, pst->argv + 1, nargs);
+	}
+}
+
+
+static void M_ParsePortInfoLine(parser_state_c *pst)
+{
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+	if (y_stricmp(argv[0], "base_game") == 0)
+	{
+		FatalError("%s(%d): %s can only be used in game definitions\n",
+			pst->fname, pst->lineno, argv[0]);
+	}
+
+	if (y_stricmp(argv[0], "supported_games") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		for ( ; nargs > 0 ; argv++, nargs--)
+		{
+			// TODO lowercase them
+			loading_Port->supported_games.push_back(std::string(*argv));
+		}
+	}
+	else if (y_stricmp(argv[0], "map_formats") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		loading_Port->formats = ParseMapFormats(argv + 1, nargs);
+	}
+	else if (y_stricmp(argv[0], "udmf_namespaces") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		for (argv++ ; nargs > 0 ; argv++, nargs--)
+		{
+			// no need to modify the case here
+			loading_Port->namespaces.push_back(std::string(*argv));
+		}
+	}
+}
+
+
 static bool M_ParseConditional(parser_state_c *pst)
 {
 	// returns the result of the "IF" test, true or false.
@@ -938,7 +1008,7 @@ void M_ParseSetVar(parser_state_c *pst)
 //
 //  this is main function for parsing a definition file.
 //
-//  when purpose is PURPOSE_GameCheck or PURPOSE_PortCheck, then
+//  when purpose is PURPOSE_GameInfo or PURPOSE_PortInfo, then
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
@@ -1069,6 +1139,18 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		}
 
 
+		if (purpose == PURPOSE_GameInfo)
+		{
+			M_ParseGameInfoLine(pst);
+			continue;
+		}
+		else if (purpose == PURPOSE_PortInfo)
+		{
+			M_ParsePortInfoLine(pst);
+			continue;
+		}
+
+
 		// handle everything else
 		M_ParseNormalLine(pst);
 	}
@@ -1080,6 +1162,45 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	}
 
 	fclose(fp);
+}
+
+
+GameInfo_c * M_LoadGameInfo(const char *game)
+{
+	// already loaded?
+	std::map<std::string, GameInfo_c *>::iterator IT;
+	IT = loaded_game_defs.find(std::string(game));
+
+	if (IT != loaded_game_defs.end())
+		return IT->second;
+
+	const char * filename = FindDefinitionFile("games", game);
+	if (! filename)
+		return NULL;
+
+	loading_Game = new GameInfo_c(game);
+
+	M_ParseDefinitionFile(PURPOSE_GameInfo, filename, "games", NULL);
+	return loading_Game;
+}
+
+
+PortInfo_c * M_LoadPortInfo(const char *port)
+{
+	std::map<std::string, PortInfo_c *>::iterator IT;
+	IT = loaded_port_defs.find(std::string(port));
+
+	if (IT != loaded_port_defs.end())
+		return IT->second;
+
+	const char * filename = FindDefinitionFile("ports", port);
+	if (! filename)
+		return NULL;
+
+	loading_Port = new PortInfo_c(port);
+
+	M_ParseDefinitionFile(PURPOSE_PortInfo, filename, "ports", NULL);
+	return loading_Port;
 }
 
 

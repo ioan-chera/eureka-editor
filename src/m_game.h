@@ -247,7 +247,9 @@ bool M_CanLoadDefinitions(const char *folder, const char *name);
 
 typedef enum
 {
-	PURPOSE_Normal = 0,		// normal loading
+	PURPOSE_Normal = 0,		// normal loading, update everything
+	PURPOSE_GameInfo,		// load a GameInfo_c
+	PURPOSE_PortInfo,		// load a PortInfo_c
 	PURPOSE_Resource,		// as a resource file
 	PURPOSE_GameCheck,		// check game's base name and map formats
 	PURPOSE_PortCheck,		// check if port supports game
@@ -274,6 +276,9 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *prettyname = NULL,
 						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
+
+GameInfo_c * M_LoadGameInfo(const char *game);
+PortInfo_c * M_LoadPortInfo(const char *port);
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
