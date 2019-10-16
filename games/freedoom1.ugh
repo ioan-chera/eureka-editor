@@ -20,7 +20,5 @@
 
 include "doom"
 
-variant_of doom
-
 # TODO : new FreeDoom textures
 

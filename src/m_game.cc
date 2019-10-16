@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -478,7 +478,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 
 	// these are handled by other passes (like PURPOSE_GameCheck)
-	if (y_stricmp(argv[0], "variant_of") == 0 ||
+	if (y_stricmp(argv[0], "base_game") == 0 ||
 		y_stricmp(argv[0], "supported_games") == 0 ||
 		y_stricmp(argv[0], "map_formats") == 0 ||
 		y_stricmp(argv[0], "udmf_namespaces") == 0)
@@ -803,9 +803,9 @@ static void M_ParseGameCheckLine(parser_state_c *pst, parse_check_info_t *check_
 	if (y_stricmp(argv[0], "supported_games") == 0)
 		FatalError("%s(%d): supported_game can only be used in port definitions\n", pst->fname, pst->lineno);
 
-	else if (y_stricmp(argv[0], "variant_of") == 0)
+	else if (y_stricmp(argv[0], "base_game") == 0)
 	{
-		snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", pst->argv[1]);
+		snprintf(check_info->base_game, sizeof(check_info->base_game), "%s", pst->argv[1]);
 	}
 
 	else if (y_stricmp(argv[0], "map_formats") == 0)
@@ -825,8 +825,8 @@ static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_
 
 	SYS_ASSERT(check_info);
 
-	if (y_stricmp(argv[0], "variant_of") == 0)
-		FatalError("%s(%d): variant_of can only be used in game definitions\n", pst->fname, pst->lineno);
+	if (y_stricmp(argv[0], "base_game") == 0)
+		FatalError("%s(%d): base_game can only be used in game definitions\n", pst->fname, pst->lineno);
 
 	else if (y_stricmp(argv[0], "supported_games") == 0)
 	{
@@ -836,7 +836,7 @@ static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_
 
 		for ( ; nargs > 0 ; argv++, nargs--)
 		{
-			if (y_stricmp(check_info->variant_name, *argv) == 0)
+			if (y_stricmp(check_info->base_game, *argv) == 0)
 				check_info->supports_game = 1;
 		}
 	}
@@ -1104,13 +1104,13 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 }
 
 
-const char * M_VariantForGame(const char *game)
+const char * M_GetBaseGame(const char *game)
 {
 	// static so we can return the char[] inside it
 	static parse_check_info_t info;
 
-	// when no "variant_of" lines exist, result is just input name
-	strcpy(info.variant_name, game);
+	// FIXME require a "base_game" to be specified
+	strcpy(info.base_game, game);
 
 	const char * filename = FindDefinitionFile("games", game);
 	SYS_ASSERT(filename);
@@ -1118,9 +1118,9 @@ const char * M_VariantForGame(const char *game)
 	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
 						  NULL /* prettyname */, &info);
 
-	SYS_ASSERT(info.variant_name[0]);
+	SYS_ASSERT(info.base_game[0]);
 
-	return info.variant_name;
+	return info.base_game;
 }
 
 
@@ -1150,7 +1150,7 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-bool M_CheckPortSupportsGame(const char *var_game, const char *port)
+bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 {
 	if (strcmp(port, "vanilla") == 0)
 	{
@@ -1161,13 +1161,13 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 
 	parse_check_info_t info;
 
-	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
+	snprintf(info.base_game, sizeof(info.base_game), "%s", base_game);
 
 	// default is to support "doom" and "doom2"
 	info.supports_game = 0;
 
-	if (y_stricmp(var_game, "doom")  == 0 ||
-	    y_stricmp(var_game, "doom2") == 0)
+	if (y_stricmp(base_game, "doom")  == 0 ||
+	    y_stricmp(base_game, "doom2") == 0)
 	{
 		info.supports_game = 1;
 	}
@@ -1184,7 +1184,7 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 }
 
 
-// find all the ports which support the given game variant.
+// find all the ports which support the given base game..
 //
 // result will be '|' separated (ready for Fl_Choice::add)
 // returns the empty string when nothing found.
@@ -1193,7 +1193,7 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name)
+const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
 	std::vector<const char *> list;
 
@@ -1216,7 +1216,7 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(var_game, list[i]))
+		if (! M_CheckPortSupportsGame(base_game, list[i]))
 			continue;
 
 		if (result[0])

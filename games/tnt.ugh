@@ -20,7 +20,5 @@
 
 include "doom2"
 
-variant_of doom2
-
 include "tnt_tex"
 

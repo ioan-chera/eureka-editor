@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -216,7 +216,7 @@ typedef enum
 {
 	PURPOSE_Normal = 0,		// normal loading
 	PURPOSE_Resource,		// as a resource file
-	PURPOSE_GameCheck,		// check game's variant name and map formats
+	PURPOSE_GameCheck,		// check game's base name and map formats
 	PURPOSE_PortCheck,		// check if port supports game
 
 } parse_purpose_e;
@@ -226,10 +226,10 @@ typedef struct
 	// set when "map_formats" is found, otherwise left unchanged
 	map_format_bitset_t formats;
 
-	// set when "variant_of" is found, otherwise left unchanged
-	char variant_name[256];
+	// set when "base_game" is found, otherwise left unchanged
+	char base_game[256];
 
-	// when "supported_games" is found, check if variant_name is in
+	// when "supported_games" is found, check if base_game is in
 	// the list and set this to 0 or 1, otherwise left unchanged
 	int supports_game;
 
@@ -244,11 +244,11 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
-bool M_CheckPortSupportsGame(const char *var_game, const char *port);
+bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
+const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
-const char * M_VariantForGame(const char *game);
+const char * M_GetBaseGame(const char *game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
