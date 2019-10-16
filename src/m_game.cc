@@ -65,7 +65,7 @@ void PortInfo_c::AddSupportedGame(const char *game)
 
 bool PortInfo_c::SupportsGame(const char *game) const
 {
-	for (unsigned int i = 0 ; i < supported_games.size() ; i++)
+	for (size_t i = 0 ; i < supported_games.size() ; i++)
 		if (y_stricmp(supported_games[i].c_str(), game) == 0)
 			return true;
 
@@ -429,7 +429,20 @@ typedef enum
 	PCOND_Reading	= 1,
 	PCOND_Skipping	= 2
 
-} parsing_cond_state_e;
+} parsing_condition_e;
+
+typedef struct
+{
+	parsing_condition_e cond;
+	int start_line;
+
+public:
+	void Toggle()
+	{
+		cond = (cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
+	}
+
+} parsing_cond_state_t;
 
 
 #define MAX_TOKENS  30   /* tokens per line */
@@ -456,8 +469,7 @@ public:
 	char * argv[MAX_TOKENS];
 
 	// state for handling if/else/endif
-	parsing_cond_state_e cond;
-	int cond_lineno;
+	std::vector<parsing_cond_state_t> cond_stack;
 
 	// BOOM generalized linedef stuff
 	int current_gen_line;
@@ -465,11 +477,20 @@ public:
 public:
 	parser_state_c() :
 		lineno(0), fname(NULL), argc(0),
-		cond(PCOND_NONE), cond_lineno(),
+		cond_stack(),
 		current_gen_line(-1)
 	{
 		memset(readbuf, 0, sizeof(readbuf));
 		memset(argv,    0, sizeof(argv));
+	}
+
+	bool HaveAnySkipping() const
+	{
+		for (size_t i = 0 ; i < cond_stack.size() ; i++)
+			if (cond_stack[i].cond == PCOND_Skipping)
+				return true;
+
+		return false;
 	}
 };
 
@@ -1018,33 +1039,35 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 		if (y_stricmp(pst->argv[0], "if") == 0)
 		{
-			if (pst->cond != PCOND_NONE)
-				FatalError("%s(%d,%d): cannot nest if/endif\n", pst->fname, pst->cond_lineno, pst->lineno);
+			parsing_cond_state_t cst;
 
-			pst->cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
-			pst->cond_lineno = pst->lineno;
+			cst.cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
+			cst.start_line = pst->lineno;
+
+			pst->cond_stack.push_back(cst);
 			continue;
 		}
 		else if (y_stricmp(pst->argv[0], "else") == 0)
 		{
-			if (pst->cond == PCOND_NONE)
+			if (pst->cond_stack.empty())
 				FatalError("%s(%d): else without if\n", pst->fname, pst->lineno);
 
 			// toggle the mode
-			pst->cond = (pst->cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
+			pst->cond_stack.back().Toggle();
 			continue;
 		}
 		else if (y_stricmp(pst->argv[0], "endif") == 0)
 		{
-			if (pst->cond == PCOND_NONE)
+			if (pst->cond_stack.empty())
 				FatalError("%s(%d): endif without if\n", pst->fname, pst->lineno);
 
-			pst->cond = PCOND_NONE;
+			pst->cond_stack.pop_back();
 			continue;
 		}
 
 
-		if (pst->cond == PCOND_Skipping)
+		// skip lines when ANY if statement is in skip mode
+		if (pst->HaveAnySkipping())
 			continue;
 
 
@@ -1104,9 +1127,10 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	}
 
 	// check for an unterminated conditional
-	if (pst->cond != PCOND_NONE)
+	if (! pst->cond_stack.empty())
 	{
-		FatalError("%s(%d): Missing endif statement\n", pst->fname, pst->cond_lineno);
+		FatalError("%s(%d): Missing endif statement\n", pst->fname,
+			pst->cond_stack.back().start_line);
 	}
 
 	fclose(fp);
