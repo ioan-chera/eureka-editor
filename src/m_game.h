@@ -248,6 +248,7 @@ extern int num_gen_linetypes;
 //------------------------------------------------------------------------
 
 void M_ClearAllDefinitions();
+void M_PrepareConfigVariables();
 
 void M_LoadDefinitions(const char *folder, const char *name);
 

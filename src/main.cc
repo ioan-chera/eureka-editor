@@ -885,8 +885,10 @@ void Main_LoadResources()
 
 	M_ClearAllDefinitions();
 
-	ReadGameInfo();
+	// clear the parse variables, pre-set a few vars
+	M_PrepareConfigVariables();
 
+	ReadGameInfo();
 	ReadPortInfo();
 
 	// reset the master directory

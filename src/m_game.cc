@@ -144,8 +144,11 @@ void M_ClearAllDefinitions()
 	// reset generalized types
 	memset(gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
+}
 
-	// clear the parse variables, pre-set a few vars
+
+void M_PrepareConfigVariables()
+{
 	parse_vars.clear();
 
 	switch (Level_format)
@@ -164,7 +167,29 @@ void M_ClearAllDefinitions()
 
 		default: break;
 	}
+
+	if (! Udmf_namespace.empty())
+	{
+		parse_vars[std::string("$UDMF_NAMESPACE")] = Udmf_namespace;
+	}
+
+	if (Game_name)
+	{
+		parse_vars[std::string("$GAME_NAME")] = std::string(Game_name);
+
+		if (M_CanLoadDefinitions("games", Game_name))
+		{
+			const char *base_game = M_GetBaseGame(Game_name);
+			parse_vars[std::string("$BASE_GAME")] = std::string(base_game);
+		}
+	}
+
+	if (Port_name)
+	{
+		parse_vars[std::string("$PORT_NAME")] = std::string(Port_name);
+	}
 }
+
 
 
 static short ParseThingdefFlags(const char *s)
