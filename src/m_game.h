@@ -249,33 +249,16 @@ bool M_CanLoadDefinitions(const char *folder, const char *name);
 typedef enum
 {
 	PURPOSE_Normal = 0,		// normal loading, update everything
+	PURPOSE_Resource,		// as a resource file
 	PURPOSE_GameInfo,		// load a GameInfo_c
 	PURPOSE_PortInfo,		// load a PortInfo_c
-	PURPOSE_Resource,		// as a resource file
-	PURPOSE_GameCheck,		// check game's base name and map formats
-	PURPOSE_PortCheck,		// check if port supports game
 
 } parse_purpose_e;
-
-typedef struct
-{
-	// set when "map_formats" is found, otherwise left unchanged
-	map_format_bitset_t formats;
-
-	// set when "base_game" is found, otherwise left unchanged
-	char base_game[256];
-
-	// when "supported_games" is found, check if base_game is in
-	// the list and set this to 0 or 1, otherwise left unchanged
-	int supports_game;
-
-} parse_check_info_t;
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder = NULL,
 						   const char *prettyname = NULL,
-						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
 
 GameInfo_c * M_LoadGameInfo(const char *game);

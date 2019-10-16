@@ -530,7 +530,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	int    nargs = pst->argc - 1;
 
 
-	// these are handled by other passes (like PURPOSE_GameCheck)
+	// these are handled by other passes
 	if (y_stricmp(argv[0], "base_game") == 0 ||
 		y_stricmp(argv[0], "supported_games") == 0 ||
 		y_stricmp(argv[0], "map_formats") == 0 ||
@@ -812,64 +812,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 }
 
 
-static void M_ParseGameCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
-{
-	char **argv  = pst->argv;
-	int    nargs = pst->argc - 1;
-
-	SYS_ASSERT(check_info);
-
-	if (y_stricmp(argv[0], "supported_games") == 0)
-		FatalError("%s(%d): supported_game can only be used in port definitions\n", pst->fname, pst->lineno);
-
-	else if (y_stricmp(argv[0], "base_game") == 0)
-	{
-		snprintf(check_info->base_game, sizeof(check_info->base_game), "%s", pst->argv[1]);
-	}
-
-	else if (y_stricmp(argv[0], "map_formats") == 0)
-	{
-		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		check_info->formats = ParseMapFormats(argv + 1, nargs);
-	}
-}
-
-
-static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
-{
-	char **argv  = pst->argv;
-	int    nargs = pst->argc - 1;
-
-	SYS_ASSERT(check_info);
-
-	if (y_stricmp(argv[0], "base_game") == 0)
-		FatalError("%s(%d): base_game can only be used in game definitions\n", pst->fname, pst->lineno);
-
-	else if (y_stricmp(argv[0], "supported_games") == 0)
-	{
-		argv++;
-
-		check_info->supports_game = 0;
-
-		for ( ; nargs > 0 ; argv++, nargs--)
-		{
-			if (y_stricmp(check_info->base_game, *argv) == 0)
-				check_info->supports_game = 1;
-		}
-	}
-
-	else if (y_stricmp(argv[0], "map_formats") == 0)
-	{
-		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
-
-		check_info->formats = ParseMapFormats(argv + 1, nargs);
-	}
-}
-
-
 static void M_ParseGameInfoLine(parser_state_c *pst)
 {
 	char **argv  = pst->argv;
@@ -1025,7 +967,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
 						   const char *prettyname,
-						   parse_check_info_t * check_info,
 						   int include_level)
 {
 	if (! folder)
@@ -1060,19 +1001,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			continue;
 
 		int nargs = pst->argc - 1;
-
-
-		// handle the special game or port checks
-		if (purpose == PURPOSE_GameCheck)
-		{
-			M_ParseGameCheckLine(pst, check_info);
-			continue;
-		}
-		else if (purpose == PURPOSE_PortCheck)
-		{
-			M_ParsePortCheckLine(pst, check_info);
-			continue;
-		}
 
 
 		// handle conditionals: if...else...endif
@@ -1143,7 +1071,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 			M_ParseDefinitionFile(purpose, new_name, new_folder,
 								  NULL /* prettyname */,
-								  check_info, include_level + 1);
+								  include_level + 1);
 			continue;
 		}
 
@@ -1196,6 +1124,7 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 		FatalError("Game definition for '%s' does not set base_game\n", game);
 	}
 
+	loaded_game_defs[game] = loading_Game;
 	return loading_Game;
 }
 
@@ -1223,6 +1152,7 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 		loading_Port->supported_games.push_back(std::string("doom2"));
 	}
 
+	loaded_port_defs[port] = loading_Port;
 	return loading_Port;
 }
 
