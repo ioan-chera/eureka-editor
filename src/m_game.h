@@ -195,6 +195,8 @@ public:
 	~PortInfo_c();
 
 	bool SupportsGame(const char *game) const;
+
+	void AddSupportedGame(const char *game);
 };
 
 

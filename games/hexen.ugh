@@ -27,8 +27,6 @@
 
 base_game hexen
 
-map_formats HEXEN
-
 player_size 16 64 48
 
 sky_flat F_SKY

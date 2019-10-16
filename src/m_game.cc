@@ -57,6 +57,12 @@ PortInfo_c::PortInfo_c(std::string _name) :
 PortInfo_c::~PortInfo_c()
 { }
 
+void PortInfo_c::AddSupportedGame(const char *game)
+{
+	if (! SupportsGame(game))
+		supported_games.push_back(std::string(game));
+}
+
 bool PortInfo_c::SupportsGame(const char *game) const
 {
 	for (unsigned int i = 0 ; i < supported_games.size() ; i++)
@@ -856,10 +862,10 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		for ( ; nargs > 0 ; argv++, nargs--)
+		for (argv++ ; nargs > 0 ; argv++, nargs--)
 		{
 			// TODO lowercase them
-			loading_Port->supported_games.push_back(std::string(*argv));
+			loading_Port->AddSupportedGame(*argv);
 		}
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
@@ -1117,7 +1123,7 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 
 	M_ParseDefinitionFile(PURPOSE_PortInfo, filename, "ports", NULL);
 
-	// default is to support "doom" and "doom2"
+	// default is to support both Doom and Doom2
 	if (loading_Port->supported_games.empty())
 	{
 		loading_Port->supported_games.push_back(std::string("doom"));
