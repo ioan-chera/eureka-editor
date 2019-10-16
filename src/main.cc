@@ -82,6 +82,7 @@ const char *Port_name;
 const char *Level_name;
 
 map_format_e Level_format;
+std::string  Udmf_namespace;
 
 
 //
