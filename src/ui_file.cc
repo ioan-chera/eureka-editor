@@ -672,9 +672,10 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	game(NULL), port(NULL), map_format(MAPF_INVALID)
+	game(NULL), port(NULL),
+	map_format(MAPF_INVALID), name_space()
 {
 	callback(close_callback, this);
 
@@ -718,14 +719,20 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 			o->hide();
 	}
 
-	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
+	format_choice = new Fl_Choice(140, by+105, 150, 29, "Map Type: ");
 	format_choice->labelfont(FL_HELVETICA_BOLD);
 	format_choice->down_box(FL_BORDER_BOX);
 	format_choice->callback((Fl_Callback*)format_callback, this);
 
+	namespace_choice = new Fl_Choice(140, by+140, 150, 29, "Namespace: ");
+	namespace_choice->labelfont(FL_HELVETICA_BOLD);
+	namespace_choice->down_box(FL_BORDER_BOX);
+	namespace_choice->callback((Fl_Callback*)namespace_callback, this);
+	namespace_choice->hide();
+
 	if (is_startup)
 	{
-		  port_choice->hide();
+		port_choice->hide();
 		format_choice->hide();
 	}
 
@@ -733,7 +740,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	if (! is_startup)
 	{
-		Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
+		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files:");
 		res_title->labelfont(FL_HELVETICA_BOLD);
 		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
@@ -745,7 +752,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		if (is_startup)
 			continue;
 
-		int cy = by + 172 + r * 35;
+		int cy = by + 220 + r * 35;
 
 		char res_label[64];
 		sprintf(res_label, "%d. ", 1 + r);
@@ -763,7 +770,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	// bottom buttons
 	{
-		by += is_startup ? 80 : 340;
+		by += is_startup ? 80 : 375;
 
 		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
 		g->box(FL_FLAT_BOX);
@@ -976,15 +983,23 @@ void UI_ProjectSetup::PopulateMapFormat()
 	format_choice->add  (menu_string);
 	format_choice->value(menu_value);
 
-	// FIXME explain this
-	if (usable_formats & (1 << MAPF_Hexen))
+	// set map_format field based on current menu entry.
+	// this also calls PopulateNamespaces().
+	format_callback(format_choice, (void *)this);
+}
+
+
+void UI_ProjectSetup::PopulateNamespaces()
+{
+	if (map_format != MAPF_UDMF)
 	{
-		if (prev_fmt == MAPF_Hexen ||
-			(usable_formats & (1 << MAPF_Doom)) == 0)
-		{
-			map_format = MAPF_Hexen;
-		}
+		namespace_choice->hide();
+		return;
 	}
+
+	namespace_choice->show();
+
+	// TODO : PopulateNamespaces
 }
 
 
@@ -1073,6 +1088,16 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 		that->map_format = MAPF_Hexen;
 	else
 		that->map_format = MAPF_Doom;
+
+	that->PopulateNamespaces();
+}
+
+
+void UI_ProjectSetup::namespace_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	// TODO
 }
 
 

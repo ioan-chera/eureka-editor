@@ -480,7 +480,8 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	// these are handled by other passes (like PURPOSE_GameCheck)
 	if (y_stricmp(argv[0], "variant_of") == 0 ||
 		y_stricmp(argv[0], "supported_games") == 0 ||
-		y_stricmp(argv[0], "map_formats") == 0)
+		y_stricmp(argv[0], "map_formats") == 0 ||
+		y_stricmp(argv[0], "udmf_namespaces") == 0)
 	{
 		return;
 	}

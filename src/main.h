@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -68,6 +68,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <string>
 
 
 /*
@@ -135,7 +136,8 @@ extern const char *Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern const char *Port_name;   // Name of source port "vanilla", "boom", ...
 extern const char *Level_name;  // Name of map lump we are editing
 
-extern map_format_e Level_format; // format of current map
+extern map_format_e Level_format;   // format of current map
+extern std::string  Udmf_namespace; // for UDMF, the current namespace
 
 extern const char *config_file; // Name of the configuration file, or NULL
 extern const char *log_file;    // Name of log file, or NULL
