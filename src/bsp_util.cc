@@ -244,36 +244,27 @@ void Adler32_Finish(u32_t *crc)
 // stuff needed from level.c (this file closely related)
 extern vertex_t  ** lev_vertices;
 extern linedef_t ** lev_linedefs;
-extern sector_t  ** lev_sectors;
 
 
 /* ----- polyobj handling ----------------------------- */
 
-static void MarkPolyobjSector(sector_t *sector)
+static void MarkPolyobjSector(int sector)
 {
 	int i;
 
-	if (! sector)
+	if (! is_sector(sector))
 		return;
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("  Marking SECTOR %d\n", sector->index);
+	DebugPrintf("  Marking SECTOR %d\n", sector);
 # endif
-
-	/* already marked ? */
-	if (sector->has_polyobj)
-		return;
-
-	// mark all lines of this sector as precious, to prevent the sector
-	// from being split.
-	sector->has_polyobj = 1;
 
 	for (i = 0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *L = lev_linedefs[i];
 
-		if ((L->right && LookupSector(L->right->sector) == sector) ||
-				(L->left && LookupSector(L->left->sector) == sector))
+		if ((L->right && L->right->sector == sector) ||
+			(L->left  && L->left->sector  == sector))
 		{
 			L->is_precious = 1;
 		}
@@ -287,7 +278,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	double best_dist = 999999;
 	linedef_t *best_match = NULL;
-	sector_t *sector = NULL;
+	int sector = -1;
 
 	double x1, y1;
 	double x2, y2;
@@ -314,10 +305,10 @@ static void MarkPolyobjPoint(double x, double y)
 #     endif
 
 			if (L->left)
-				MarkPolyobjSector(LookupSector(L->left->sector));
+				MarkPolyobjSector(L->left->sector);
 
 			if (L->right)
-				MarkPolyobjSector(LookupSector(L->right->sector));
+				MarkPolyobjSector(L->right->sector);
 
 			inside_count++;
 		}
@@ -387,16 +378,15 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = best_match->right ? LookupSector(best_match->right->sector) : NULL;
+		sector = best_match->right ? best_match->right->sector : -1;
 	else
-		sector = best_match->left ? LookupSector(best_match->left->sector) : NULL;
+		sector = best_match->left ? best_match->left->sector : -1;
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("  Sector %d contains the polyobj.\n",
-			sector ? sector->index : -1);
+	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
 # endif
 
-	if (! sector)
+	if (sector < 0)
 	{
 		Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
@@ -557,38 +547,6 @@ void DetectOverlappingVertices(void)
 }
 
 
-void PruneVerticesAtEnd(void)
-{
-	int new_num = num_vertices;
-
-	// scan all vertices.
-	// only remove from the end, so stop when hit a used one.
-
-	for (int i = num_vertices - 1 ; i >= 0 ; i--)
-	{
-		vertex_t *V = lev_vertices[i];
-
-		if (V->is_used)
-			break;
-
-		UtilFree(V);
-
-		new_num -= 1;
-	}
-
-	if (new_num < num_vertices)
-	{
-		int unused = num_vertices - new_num;
-
-		PrintDetail("Pruned %d unused vertices at end\n", unused);
-
-		num_vertices = new_num;
-	}
-
-	num_old_vert = num_vertices;
-}
-
-
 static inline int LineVertexLowest(const linedef_t *L)
 {
 	// returns the "lowest" vertex (normally the left-most, but if the
@@ -700,14 +658,14 @@ void DetectOverlappingLines(void)
 /* ----- vertex routines ------------------------------- */
 
 static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
-		sector_t *left, sector_t *right)
+		int sec_left, int sec_right)
 {
 	wall_tip_t *tip = NewWallTip();
 	wall_tip_t *after;
 
 	tip->angle = UtilComputeAngle(dx, dy);
-	tip->left  = left;
-	tip->right = right;
+	tip->sec_left  = sec_left;
+	tip->sec_right = sec_right;
 
 	// find the correct place (order is increasing angle)
 	for (after=vert->tip_set ; after && after->next ; after=after->next)
@@ -753,8 +711,8 @@ void CalculateWallTips(void)
 		double x2 = L->end->x;
 		double y2 = L->end->y;
 
-		sector_t *left  = (L->left)  ? LookupSector(L->left->sector)  : NULL;
-		sector_t *right = (L->right) ? LookupSector(L->right->sector) : NULL;
+		int left  = (L->left)  ? L->left->sector  : -1;
+		int right = (L->right) ? L->right->sector : -1;
 
 		VertexAddWallTip(L->start, x2-x1, y2-y1, left, right);
 		VertexAddWallTip(L->end,   x1-x2, y1-y2, right, left);
@@ -770,8 +728,7 @@ void CalculateWallTips(void)
 		for (wall_tip_t *tip = V->tip_set ; tip ; tip = tip->next)
 		{
 			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
-					tip->left ? tip->left->index : -1,
-					tip->right ? tip->right->index : -1);
+					tip->sec_left, tip->sec_right);
 		}
 	}
 # endif
@@ -785,8 +742,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->x = x;
 	vert->y = y;
 
-	vert->is_new  = 1;
-	vert->is_used = 1;
+	vert->is_new = 1;
 
 	vert->index = num_new_vert;
 	num_new_vert++;
@@ -794,10 +750,10 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	// compute wall_tip info
 
 	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, seg->sector,
-			seg->partner ? seg->partner->sector : NULL);
+			seg->partner ? seg->partner->sector : -1);
 
 	VertexAddWallTip(vert, seg->pdx, seg->pdy,
-			seg->partner ? seg->partner->sector : NULL, seg->sector);
+			seg->partner ? seg->partner->sector : -1, seg->sector);
 
 	return vert;
 }
@@ -816,8 +772,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vertex_t *vert = NewVertex();
 
-	vert->is_new  = 0;
-	vert->is_used = 1;
+	vert->is_new = 0;
 
 	vert->index = num_old_vert;
 	num_old_vert++;
@@ -844,7 +799,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 }
 
 
-sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
+int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
 	wall_tip_t *tip;
 
@@ -857,10 +812,10 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 	for (tip=vert->tip_set ; tip ; tip=tip->next)
 	{
 		if (fabs(tip->angle - angle) < ANG_EPSILON ||
-				fabs(tip->angle - angle) > (360.0 - ANG_EPSILON))
+			fabs(tip->angle - angle) > (360.0 - ANG_EPSILON))
 		{
 			// yes, found one
-			return NULL;
+			return NIL_OBJ;
 		}
 	}
 
@@ -873,7 +828,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		if (angle + ANG_EPSILON < tip->angle)
 		{
 			// found it
-			return tip->right;
+			return tip->sec_right;
 		}
 
 		if (! tip->next)
@@ -881,12 +836,12 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 			// no more tips, thus we must be on the LEFT side of the tip
 			// with the largest angle.
 
-			return tip->left;
+			return tip->sec_left;
 		}
 	}
 
 	BugError("Vertex %d has no tips!\n", vert->index);
-	return NULL;
+	return NIL_OBJ;
 }
 
 

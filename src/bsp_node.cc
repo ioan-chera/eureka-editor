@@ -271,8 +271,8 @@ static void AddIntersection(intersection_t ** cut_list,
 	cut->along_dist = UtilParallelDist(part, vert->x, vert->y);
 	cut->self_ref = self_ref;
 
-	cut->before = VertexCheckOpen(vert, -part->pdx, -part->pdy);
-	cut->after  = VertexCheckOpen(vert,  part->pdx,  part->pdy);
+	cut->sec_before = VertexCheckOpen(vert, -part->pdx, -part->pdy);
+	cut->sec_after  = VertexCheckOpen(vert,  part->pdx,  part->pdy);
 
 	/* enqueue the new intersection into the list */
 
@@ -1015,26 +1015,25 @@ void AddMinisegs(seg_t *part,
 
 		if (cur->self_ref && !next->self_ref)
 		{
-			if (cur->before && next->before)
-				cur->before = next->before;
+			if (cur->sec_before >= 0 && next->sec_before >= 0)
+				cur->sec_before = next->sec_before;
 
-			if (cur->after && next->after)
-				cur->after = next->after;
+			if (cur->sec_after >= 0 && next->sec_after >= 0)
+				cur->sec_after = next->sec_after;
 
 			cur->self_ref = false;
 		}
 
-		if (!cur->before && next->before)
-			cur->before = next->before;
+		if (cur->sec_before < 0 && next->sec_before >= 0)
+			cur->sec_before = next->sec_before;
 
-		if (!cur->after && next->after)
-			cur->after = next->after;
+		if (cur->sec_after < 0 && next->sec_after >= 0)
+			cur->sec_after = next->sec_after;
 
 # if DEBUG_CUTLIST
 		DebugPrintf("---> merged (%1.0f,%1.0f) [%d/%d] %s\n",
 				cur->vertex->x, cur->vertex->y,
-				cur->before ? cur->before->index : -1,
-				cur->after ? cur->after->index : -1,
+				cur->sec_before, cur->sec_after,
 				cur->self_ref ? "SELFREF" : "");
 # endif
 
@@ -1054,31 +1053,31 @@ void AddMinisegs(seg_t *part,
 	{
 		next = cur->next;
 
-		if (!cur->after && !next->before)
+		if (cur->sec_after < 0 && next->sec_before < 0)
 			continue;
 
 		// check for some nasty OPEN/CLOSED or CLOSED/OPEN cases
-		if (cur->after && !next->before)
+		if (cur->sec_after >= 0 && next->sec_before < 0)
 		{
-			if (!cur->self_ref && !cur->after->warned_unclosed)
+			if (!cur->self_ref) //!!! && !cur->after->warned_unclosed)
 			{
 				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
-						cur->after->index,
+						cur->sec_after,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
-				cur->after->warned_unclosed = 1;
+//!!!				cur->after->warned_unclosed = 1;
 			}
 			continue;
 		}
-		else if (!cur->after && next->before)
+		else if (cur->sec_after < 0 && next->sec_before >= 0)
 		{
-			if (!next->self_ref && !next->before->warned_unclosed)
+			if (!next->self_ref) //!!! && !next->before->warned_unclosed)
 			{
 				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
-						next->before->index,
+						next->sec_before,
 						(cur->vertex->x + next->vertex->x) / 2.0,
 						(cur->vertex->y + next->vertex->y) / 2.0);
-				next->before->warned_unclosed = 1;
+//!!!				next->before->warned_unclosed = 1;
 			}
 			continue;
 		}
@@ -1086,17 +1085,17 @@ void AddMinisegs(seg_t *part,
 		// righteo, here we have definite open space.
 		// do a sanity check on the sectors (just for good measure).
 
-		if (cur->after != next->before)
+		if (cur->sec_after != next->sec_before)
 		{
 			if (!cur->self_ref && !next->self_ref)
 				MinorIssue("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
-						cur->after->index, cur->vertex->x, cur->vertex->y,
-						next->before->index, next->vertex->x, next->vertex->y);
+						cur->sec_after, cur->vertex->x, cur->vertex->y,
+						next->sec_before, next->vertex->x, next->vertex->y);
 
 			// choose the non-self-referencing sector when we can
 			if (cur->self_ref && !next->self_ref)
 			{
-				cur->after = next->before;
+				cur->sec_after = next->sec_before;
 			}
 		}
 
@@ -1116,7 +1115,7 @@ void AddMinisegs(seg_t *part,
 		// leave 'linedef' field as NULL.
 		// leave 'side' as zero too (not needed for minisegs).
 
-		seg->sector = buddy->sector = cur->after;
+		seg->sector = buddy->sector = cur->sec_after;
 
 		seg->index = buddy->index = -1;
 
@@ -1456,7 +1455,7 @@ static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
 	seg->end     = end;
 	seg->linedef = line;
 	seg->side    = side_num;
-	seg->sector  = LookupSector(side->sector);
+	seg->sector  = side->sector;
 	seg->partner = NULL;
 
 	seg->source_line = seg->linedef;
@@ -1728,10 +1727,10 @@ static void SanityCheckSameSector(subsec_t *sub)
 	// find a suitable seg for comparison
 	for (compare=sub->seg_list ; compare ; compare=compare->next)
 	{
-		if (! compare->sector)
+		if (compare->sector < 0)
 			continue;
 
-		if (compare->sector->coalesce)
+		if (coalesce_sec(Sectors[compare->sector]))
 			continue;
 
 		break;
@@ -1742,7 +1741,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 
 	for (seg=compare->next ; seg ; seg=seg->next)
 	{
-		if (! seg->sector)
+		if (seg->sector < 0)
 			continue;
 
 		if (seg->sector == compare->sector)
@@ -1750,24 +1749,24 @@ static void SanityCheckSameSector(subsec_t *sub)
 
 		// All subsectors must come from same sector unless it's marked
 		// "special" with sector tag >= 900. Original idea, Lee Killough
-		if (seg->sector->coalesce)
+		if (coalesce_sec(Sectors[seg->sector]))
 			continue;
 
 		// prevent excessive number of warnings
-		if (compare->sector->warned_facing == seg->sector->index)
-			continue;
+//!!!		if (compare->sector->warned_facing == seg->sector->index)
+//!!!			continue;
 
-		compare->sector->warned_facing = seg->sector->index;
+//!!!		compare->sector->warned_facing = seg->sector;
 
 		if (seg->linedef)
 			MinorIssue("Sector #%d has sidedef facing #%d (line #%d) "
-					"near (%1.0f,%1.0f).\n", compare->sector->index,
-					seg->sector->index, seg->linedef->index,
+					"near (%1.0f,%1.0f).\n", compare->sector,
+					seg->sector, seg->linedef->index,
 					sub->mid_x, sub->mid_y);
 		else
 			MinorIssue("Sector #%d has sidedef facing #%d "
-					"near (%1.0f,%1.0f).\n", compare->sector->index,
-					seg->sector->index, sub->mid_x, sub->mid_y);
+					"near (%1.0f,%1.0f).\n", compare->sector,
+					seg->sector, sub->mid_x, sub->mid_y);
 	}
 }
 

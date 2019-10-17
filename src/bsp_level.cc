@@ -617,20 +617,22 @@ static int   rej_total_size;	// in bytes
 //
 static void Reject_Init()
 {
-	rej_total_size = (num_sectors * num_sectors + 7) / 8;
+	rej_total_size = (NumSectors * NumSectors + 7) / 8;
 
 	rej_matrix = new u8_t[rej_total_size];
 
 	memset(rej_matrix, 0, rej_total_size);
 
 
-	for (int i=0 ; i < num_sectors ; i++)
+#if 0 // FIXME !!!
+	for (int i=0 ; i < NumSectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 
 		sec->rej_group = i;
 		sec->rej_next = sec->rej_prev = sec;
 	}
+#endif
 }
 
 
@@ -712,9 +714,10 @@ static void Reject_DebugGroups()
 {
 	// Note: this routine is destructive to the group numbers
 
+#if 0 // FIXME !!!
 	int i;
 
-	for (i=0 ; i < num_sectors ; i++)
+	for (i=0 ; i < NumSectors ; i++)
 	{
 		sector_t *sec = LookupSector(i);
 		sector_t *tmp;
@@ -736,13 +739,15 @@ static void Reject_DebugGroups()
 
 		DebugPrintf("Group %d  Sectors %d\n", group, num);
 	}
+#endif
 }
 #endif
 
 
 static void Reject_ProcessSectors()
 {
-	for (int view=0 ; view < num_sectors ; view++)
+#if 0 // FIXME !!!
+	for (int view=0 ; view < NumSectors ; view++)
 	{
 		for (int target=0 ; target < view ; target++)
 		{
@@ -756,13 +761,14 @@ static void Reject_ProcessSectors()
 
 			// for symmetry, do both sides at same time
 
-			p1 = view * num_sectors + target;
-			p2 = target * num_sectors + view;
+			p1 = view * NumSectors + target;
+			p2 = target * NumSectors + view;
 
 			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
 			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
 		}
 	}
+#endif
 }
 
 
@@ -783,7 +789,7 @@ static void Reject_WriteLump()
 //
 void PutReject()
 {
-	if (! cur_info->do_reject || num_sectors == 0)
+	if (! cur_info->do_reject || NumSectors == 0)
 	{
 		// just create an empty reject lump
 		CreateLevelLump("REJECT")->Finish();
@@ -843,7 +849,6 @@ int lev_overflows;
 
 LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
 LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
-LEVELARRAY(sector_t,  lev_sectors,    num_sectors)
 
 static LEVELARRAY(seg_t,     segs,       num_segs)
 static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
@@ -877,9 +882,6 @@ vertex_t *NewVertex(void)
 linedef_t *NewLinedef(void)
 	ALLIGATOR(linedef_t, lev_linedefs, num_linedefs)
 
-sector_t *NewSector(void)
-	ALLIGATOR(sector_t, lev_sectors, num_sectors)
-
 seg_t *NewSeg(void)
 	ALLIGATOR(seg_t, segs, num_segs)
 
@@ -912,9 +914,6 @@ void FreeVertices(void)
 void FreeLinedefs(void)
 	FREEMASON(linedef_t, lev_linedefs, num_linedefs)
 
-void FreeSectors(void)
-	FREEMASON(sector_t, lev_sectors, num_sectors)
-
 void FreeSegs(void)
 	FREEMASON(seg_t, segs, num_segs)
 
@@ -943,9 +942,6 @@ vertex_t *LookupVertex(int index)
 
 linedef_t *LookupLinedef(int index)
 	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
-
-sector_t *LookupSector(int index)
-	LOOKERUPPER(lev_sectors, num_sectors, "sector")
 
 seg_t *LookupSeg(int index)
 	LOOKERUPPER(segs, num_segs, "seg")
@@ -998,56 +994,6 @@ void GetVertices(void)
 }
 
 
-void GetSectors(void)
-{
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("SECTORS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_sector_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to sectors.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetSectors: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_sector_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sectors.\n");
-
-		sector_t *sector = NewSector();
-
-		sector->floor_h = LE_S16(raw.floorh);
-		sector->ceil_h  = LE_S16(raw.ceilh);
-
-		memcpy(sector->floor_tex, raw.floor_tex, sizeof(sector->floor_tex));
-		memcpy(sector->ceil_tex,  raw.ceil_tex,  sizeof(sector->ceil_tex));
-
-		sector->light = LE_U16(raw.light);
-		sector->special = LE_U16(raw.type);
-		sector->tag = LE_S16(raw.tag);
-
-		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ? 1 : 0;
-
-		// sector indices never change
-		sector->index = i;
-
-		sector->warned_facing = -1;
-
-		// Note: rej_* fields are handled completely in reject.c
-	}
-}
-
-
 static inline SideDef *SafeLookupSidedef(u16_t num)
 {
 	if (num == 0xFFFF)
@@ -1090,9 +1036,6 @@ void GetLinedefs(void)
 
 		vertex_t *start = LookupVertex(LE_U16(raw.start));
 		vertex_t *end   = LookupVertex(LE_U16(raw.end));
-
-		start->is_used = 1;
-		  end->is_used = 1;
 
 		line = NewLinedef();
 
@@ -1154,9 +1097,6 @@ void GetLinedefsHexen(void)
 
 		vertex_t *start = LookupVertex(LE_U16(raw.start));
 		vertex_t *end   = LookupVertex(LE_U16(raw.end));
-
-		start->is_used = 1;
-		  end->is_used = 1;
 
 		line = NewLinedef();
 
@@ -1708,7 +1648,7 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 
 void CheckLimits()
 {
-	if (num_sectors > 65534)
+	if (NumSectors > 65534)
 	{
 		Failure("Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
@@ -1720,7 +1660,7 @@ void CheckLimits()
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (num_linedefs > 65534)
+	if (NumLineDefs > 65534)
 	{
 		Failure("Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
@@ -2054,7 +1994,6 @@ void LoadLevel()
 	num_real_lines = 0;
 
 	GetVertices();
-	GetSectors();
 
 	if (lev_doing_hexen)
 	{
@@ -2067,10 +2006,6 @@ void LoadLevel()
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
 			NumVertices, NumSectors, NumSideDefs, NumLineDefs, NumThings);
-
-	// always prune vertices at end of lump, otherwise all the
-	// unused vertices from seg splits would keep accumulating.
-	PruneVerticesAtEnd();
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
@@ -2089,7 +2024,6 @@ void FreeLevel(void)
 {
 	FreeVertices();
 	FreeLinedefs();
-	FreeSectors();
 	FreeSegs();
 	FreeSubsecs();
 	FreeNodes();

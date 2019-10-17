@@ -227,9 +227,9 @@ typedef struct wall_tip_s
 
 	// sectors on each side of wall.  Left is the side of increasing
 	// angles, right is the side of decreasing angles.  Either can be
-	// NULL for one sided walls.
-	struct sector_s *left;
-	struct sector_s *right;
+	// -1 for one sided walls.
+	int sec_left;
+	int sec_right;
 }
 wall_tip_t;
 
@@ -246,9 +246,6 @@ typedef struct vertex_s
 	// vertex is newly created (from a seg split)
 	char is_new;
 
-	// when building normal nodes, unused vertices will be pruned.
-	char is_used;
-
 	// usually NULL, unless this vertex occupies the same location as a
 	// previous vertex.
 	struct vertex_s *overlap;
@@ -259,47 +256,14 @@ typedef struct vertex_s
 vertex_t;
 
 
-typedef struct sector_s
+inline bool coalesce_sec(Sector *sec)
 {
-	// sector index.  Always valid after loading & pruning.
-	int index;
-
-	// allow segs from other sectors to coexist in a subsector.
-	char coalesce;
-
-	// -JL- non-zero if this sector contains a polyobj.
-	char has_polyobj;
-
-	// when building normal nodes, unused sectors will be pruned.
-	char is_used;
-
-	// heights
-	int floor_h, ceil_h;
-
-	// textures
-	char floor_tex[8];
-	char ceil_tex[8];
-
-	// attributes
-	int light;
-	int special;
-	int tag;
-
-	// used when building REJECT table.  Each set of sectors that are
-	// isolated from other sectors will have a different group number.
-	// Thus: on every 2-sided linedef, the sectors on both sides will be
-	// in the same group.  The rej_next, rej_prev fields are a link in a
-	// RING, containing all sectors of the same group.
-	int rej_group;
-
-	struct sector_s *rej_next;
-	struct sector_s *rej_prev;
-
-	// suppress superfluous mini warnings
-	int warned_facing;
-	char warned_unclosed;
+	return (sec->tag >= 900 && sec->tag < 1000);
 }
-sector_t;
+
+//	// suppress superfluous mini warnings
+//	int warned_facing;
+//	boolr warned_unclosed;
 
 
 typedef struct linedef_s
@@ -355,8 +319,8 @@ typedef struct seg_s
 	// linedef that this seg goes along, or NULL if miniseg
 	linedef_t *linedef;
 
-	// adjacent sector, or NULL if invalid sidedef or miniseg
-	sector_t *sector;
+	// adjacent sector, or -1 if invalid sidedef or miniseg
+	int sector;
 
 	// 0 for right, 1 for left
 	int side;
@@ -491,7 +455,6 @@ superblock_t;
 
 extern int num_vertices;
 extern int num_linedefs;
-extern int num_sectors;
 extern int num_segs;
 extern int num_subsecs;
 extern int num_nodes;
@@ -506,7 +469,6 @@ extern int num_complete_seg;
 // allocation routines
 vertex_t *NewVertex(void);
 linedef_t *NewLinedef(void);
-sector_t *NewSector(void);
 seg_t *NewSeg(void);
 subsec_t *NewSubsec(void);
 node_t *NewNode(void);
@@ -515,7 +477,6 @@ wall_tip_t *NewWallTip(void);
 // lookup routines
 vertex_t *LookupVertex(int index);
 linedef_t *LookupLinedef(int index);
-sector_t *LookupSector(int index);
 seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);
@@ -555,9 +516,6 @@ void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
 void DetectPolyobjSectors(void);
 
-// pruning routines
-void PruneVerticesAtEnd(void);
-
 // computes the wall tips for all of the vertices
 void CalculateWallTips(void);
 
@@ -575,9 +533,9 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 
 // check whether a line with the given delta coordinates and beginning
 // at this vertex is open.  Returns a sector reference if it's open,
-// or NULL if closed (void space or directly along a linedef).
+// or -1 if closed (void space or directly along a linedef).
 //
-sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy);
+int VertexCheckOpen(vertex_t *vert, double dx, double dy);
 
 
 //------------------------------------------------------------------------
@@ -618,9 +576,9 @@ typedef struct intersection_s
 	bool self_ref;
 
 	// sector on each side of the vertex (along the partition),
-	// or NULL when that direction isn't OPEN.
-	sector_t *before;
-	sector_t *after;
+	// or -1 when that direction isn't OPEN.
+	int sec_before;
+	int sec_after;
 }
 intersection_t;
 
