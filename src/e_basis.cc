@@ -280,6 +280,13 @@ int LineDef::WhatSideDef(int side) const
 }
 
 
+bool LineDef::IsSelfRef() const
+{
+	return (left >= 0) && (right >= 0) &&
+			SideDefs[left]->sector == SideDefs[right]->sector;
+}
+
+
 double LineDef::CalcLength() const
 {
 	double dx = Start()->x() - End()->x();

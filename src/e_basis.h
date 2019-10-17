@@ -367,6 +367,8 @@ public:
 		return (Start()->raw_x == End()->raw_x) && (Start()->raw_y == End()->raw_y);
 	}
 
+	bool IsSelfRef() const;
+
 	bool IsHorizontal() const
 	{
 		return (Start()->raw_y == End()->raw_y);

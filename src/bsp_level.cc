@@ -664,7 +664,7 @@ static void Reject_GroupSectors()
 
 		// the standard DOOM engine will not allow sight past lines
 		// lacking the TWOSIDED flag, so we can skip them here too.
-		if (! line->two_sided)
+		if (! (line->flags & MLF_TwoSided))
 			continue;
 
 		sec1 = line->right->sector;
@@ -1050,8 +1050,8 @@ void GetLinedefs(void)
 		line->type = LE_U16(raw.type);
 		line->tag  = LE_S16(raw.tag);
 
-		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
-		line->is_precious = (line->tag >= 900 && line->tag < 1000) ? 1 : 0;
+		if (line->tag >= 900 && line->tag < 1000)
+			line->flags |= MLF_IS_PRECIOUS;
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
@@ -1116,8 +1116,6 @@ void GetLinedefsHexen(void)
 			line->specials[j] = (u8_t)(raw.args[j]);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
-		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
-
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
 
@@ -2512,6 +2510,10 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	FreeLevel();
 	FreeQuickAllocCuts();
 	FreeQuickAllocSupers();
+
+	// clear some fake line flags
+	for (int i = 0 ; i < NumLineDefs ; i++)
+		LineDefs[i]->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
 }

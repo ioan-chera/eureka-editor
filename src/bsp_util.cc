@@ -266,7 +266,7 @@ static void MarkPolyobjSector(int sector)
 		if ((L->right && L->right->sector == sector) ||
 			(L->left  && L->left->sector  == sector))
 		{
-			L->is_precious = 1;
+			L->flags |= MLF_IS_PRECIOUS;
 		}
 	}
 }
@@ -636,11 +636,8 @@ void DetectOverlappingLines(void)
 			{
 				// found an overlap !
 
-				linedef_t *A = lev_linedefs[array[i]];
 				linedef_t *B = lev_linedefs[array[j]];
-
-				B->overlap = A->overlap ? A->overlap : A;
-
+				B->flags |= MLF_IS_OVERLAP;
 				count++;
 			}
 		}
@@ -703,7 +700,7 @@ void CalculateWallTips(void)
 	{
 		linedef_t *L = lev_linedefs[i];
 
-		if (L->overlap || L->zero_len)
+		if ((L->flags & MLF_IS_OVERLAP) || L->zero_len)
 			continue;
 
 		double x1 = L->start->x;

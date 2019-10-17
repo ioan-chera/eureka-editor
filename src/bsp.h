@@ -135,6 +135,15 @@ extern nodebuildinfo_t * cur_info;
 typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 
+// prefer not to split
+#define MLF_IS_PRECIOUS  0x40000000
+
+// this is flag set when a linedef directly overlaps an earlier
+// one (a rarely-used trick to create higher mid-masked textures).
+// No segs should be created for these overlapping linedefs.
+#define MLF_IS_OVERLAP   0x20000000
+
+
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
@@ -268,20 +277,11 @@ inline bool coalesce_sec(Sector *sec)
 
 typedef struct linedef_s
 {
-	// link for list
-	struct linedef_s *next;
-
 	vertex_t *start;    // from this vertex...
 	vertex_t *end;      // ... to this vertex
 
 	SideDef *right;   // right sidedef
 	SideDef *left;    // left sidede, or NULL if none
-
-	// line is marked two-sided
-	char two_sided;
-
-	// prefer not to split
-	char is_precious;
 
 	// zero length (line should be totally ignored)
 	char zero_len;
@@ -295,11 +295,6 @@ typedef struct linedef_s
 
 	// Hexen support
 	int specials[5];
-
-	// normally NULL, except when this linedef directly overlaps an earlier
-	// one (a rarely-used trick to create higher mid-masked textures).
-	// No segs should be created for these overlapping linedefs.
-	struct linedef_s *overlap;
 
 	// linedef index.  Always valid after loading & pruning of zero
 	// length lines has occurred.

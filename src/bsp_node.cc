@@ -40,6 +40,8 @@
 #include "main.h"
 #include "bsp.h"
 
+#include "w_rawdef.h"
+
 
 namespace ajbsp
 {
@@ -405,7 +407,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef && check->linedef->is_precious)
+			if (check->linedef && (check->linedef->flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -473,7 +475,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 		// are exhausted. This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef && check->linedef->is_precious)
+		if (check->linedef && (check->linedef->flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -1499,7 +1501,7 @@ superblock_t *CreateSegs(void)
 			continue;
 
 		// ignore overlapping lines
-		if (line->overlap)
+		if (line->flags & MLF_IS_OVERLAP)
 			continue;
 
 		// check for Humungously long lines
@@ -1538,10 +1540,9 @@ superblock_t *CreateSegs(void)
 		}
 		else
 		{
-			if (line->two_sided)
+			if (line->flags & MLF_TwoSided)
 			{
 				Warning("Linedef #%d is 2s but has no left sidedef\n", line->index);
-				line->two_sided = 0;
 			}
 		}
 	}
