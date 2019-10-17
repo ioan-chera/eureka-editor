@@ -67,6 +67,23 @@ typedef struct eval_info_s
 	int real_right;
 	int mini_left;
 	int mini_right;
+
+public:
+	void BumpLeft(int linedef)
+	{
+		if (linedef >= 0)
+			real_left++;
+		else
+			mini_left++;
+	}
+
+	void BumpRight(int linedef)
+	{
+		if (linedef >= 0)
+			real_right++;
+		else
+			mini_right++;
+	}
 }
 eval_info_t;
 
@@ -308,8 +325,8 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	int num;
 	int factor = cur_info->factor;
 
-	// -AJA- this is the heart of my superblock idea, it tests the
-	//       _whole_ block against the partition line to quickly handle
+	// -AJA- this is the heart of the superblock idea, it tests the
+	//       *whole* quad against the partition line to quickly handle
 	//       all the segs within it at once.  Only when the partition
 	//       line intercepts the box do we need to go deeper into it.
 
@@ -333,18 +350,6 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 		return false;
 	}
-
-# define ADD_LEFT()  \
-	do {  \
-		if (check->linedef) info->real_left += 1;  \
-		else                info->mini_left += 1;  \
-	} while (0)
-
-# define ADD_RIGHT()  \
-	do {  \
-		if (check->linedef) info->real_right += 1;  \
-		else                info->mini_right += 1;  \
-	} while (0)
 
 	/* check partition against all Segs */
 
@@ -378,13 +383,12 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 			if (check->pdx*part->pdx + check->pdy*part->pdy < 0)
 			{
-				ADD_LEFT();
+				info->BumpLeft(check->linedef);
 			}
 			else
 			{
-				ADD_RIGHT();
+				info->BumpRight(check->linedef);
 			}
-
 			continue;
 		}
 
@@ -403,7 +407,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		/* check for right side */
 		if (a > -DIST_EPSILON && b > -DIST_EPSILON)
 		{
-			ADD_RIGHT();
+			info->BumpRight(check->linedef);
 
 			/* check for a near miss */
 			if ((a >= IFFY_LEN && b >= IFFY_LEN) ||
@@ -432,7 +436,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		/* check for left side */
 		if (a < DIST_EPSILON && b < DIST_EPSILON)
 		{
-			ADD_LEFT();
+			info->BumpLeft(check->linedef);
 
 			/* check for a near miss */
 			if ((a <= -IFFY_LEN && b <= -IFFY_LEN) ||
