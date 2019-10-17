@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2019  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -302,37 +302,6 @@ typedef struct sector_s
 sector_t;
 
 
-typedef struct sidedef_s
-{
-	// adjacent sector.  Can be NULL (invalid sidedef)
-	sector_t *sector;
-
-	// offset values
-	int x_offset, y_offset;
-
-	// texture names
-	char upper_tex[8];
-	char lower_tex[8];
-	char mid_tex[8];
-
-	// sidedef index.  Always valid after loading & pruning.
-	int index;
-
-	// when building normal nodes, unused sidedefs will be pruned.
-	char is_used;
-
-	// usually NULL, unless this sidedef is exactly the same as a
-	// previous one.  Only used during the pruning phase.
-	struct sidedef_s *equiv;
-
-	// this is true if the sidedef is on a special line.  We don't merge
-	// these sidedefs together, as they might scroll, or change texture
-	// when a switch is pressed.
-	int on_special;
-}
-sidedef_t;
-
-
 typedef struct linedef_s
 {
 	// link for list
@@ -341,8 +310,8 @@ typedef struct linedef_s
 	vertex_t *start;    // from this vertex...
 	vertex_t *end;      // ... to this vertex
 
-	sidedef_t *right;   // right sidedef
-	sidedef_t *left;    // left sidede, or NULL if none
+	SideDef *right;   // right sidedef
+	SideDef *left;    // left sidede, or NULL if none
 
 	// line is marked two-sided
 	char two_sided;
@@ -522,7 +491,6 @@ superblock_t;
 
 extern int num_vertices;
 extern int num_linedefs;
-extern int num_sidedefs;
 extern int num_sectors;
 extern int num_segs;
 extern int num_subsecs;
@@ -538,7 +506,6 @@ extern int num_complete_seg;
 // allocation routines
 vertex_t *NewVertex(void);
 linedef_t *NewLinedef(void);
-sidedef_t *NewSidedef(void);
 sector_t *NewSector(void);
 seg_t *NewSeg(void);
 subsec_t *NewSubsec(void);
@@ -548,7 +515,6 @@ wall_tip_t *NewWallTip(void);
 // lookup routines
 vertex_t *LookupVertex(int index);
 linedef_t *LookupLinedef(int index);
-sidedef_t *LookupSidedef(int index);
 sector_t *LookupSector(int index);
 seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);

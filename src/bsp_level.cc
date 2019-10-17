@@ -650,6 +650,8 @@ static void Reject_GroupSectors()
 {
 	int i;
 
+#if 0 // FIXME !!! Reject_GroupSectors
+
 	for (i=0 ; i < num_linedefs ; i++)
 	{
 		linedef_t *line = LookupLinedef(i);
@@ -701,6 +703,7 @@ static void Reject_GroupSectors()
 		sec1->rej_next = sec2->rej_next;
 		sec2->rej_next = tmp;
 	}
+#endif
 }
 
 
@@ -840,7 +843,6 @@ int lev_overflows;
 
 LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
 LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
-LEVELARRAY(sidedef_t, lev_sidedefs,   num_sidedefs)
 LEVELARRAY(sector_t,  lev_sectors,    num_sectors)
 
 static LEVELARRAY(seg_t,     segs,       num_segs)
@@ -874,9 +876,6 @@ vertex_t *NewVertex(void)
 
 linedef_t *NewLinedef(void)
 	ALLIGATOR(linedef_t, lev_linedefs, num_linedefs)
-
-sidedef_t *NewSidedef(void)
-	ALLIGATOR(sidedef_t, lev_sidedefs, num_sidedefs)
 
 sector_t *NewSector(void)
 	ALLIGATOR(sector_t, lev_sectors, num_sectors)
@@ -913,9 +912,6 @@ void FreeVertices(void)
 void FreeLinedefs(void)
 	FREEMASON(linedef_t, lev_linedefs, num_linedefs)
 
-void FreeSidedefs(void)
-	FREEMASON(sidedef_t, lev_sidedefs, num_sidedefs)
-
 void FreeSectors(void)
 	FREEMASON(sector_t, lev_sectors, num_sectors)
 
@@ -947,9 +943,6 @@ vertex_t *LookupVertex(int index)
 
 linedef_t *LookupLinedef(int index)
 	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
-
-sidedef_t *LookupSidedef(int index)
-	LOOKERUPPER(lev_sidedefs, num_sidedefs, "sidedef")
 
 sector_t *LookupSector(int index)
 	LOOKERUPPER(lev_sectors, num_sectors, "sector")
@@ -1055,61 +1048,15 @@ void GetSectors(void)
 }
 
 
-void GetSidedefs(void)
-{
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("SIDEDEFS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_sidedef_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to sidedefs.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetSidedefs: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_sidedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sidedefs.\n");
-
-		sidedef_t *side = NewSidedef();
-
-		side->sector = (LE_S16(raw.sector) == -1) ? NULL :
-			LookupSector(LE_U16(raw.sector));
-
-		if (side->sector)
-			side->sector->is_used = 1;
-
-		side->x_offset = LE_S16(raw.x_offset);
-		side->y_offset = LE_S16(raw.y_offset);
-
-		memcpy(side->upper_tex, raw.upper_tex, sizeof(side->upper_tex));
-		memcpy(side->lower_tex, raw.lower_tex, sizeof(side->lower_tex));
-		memcpy(side->mid_tex,   raw.mid_tex,   sizeof(side->mid_tex));
-
-		// sidedef indices never change
-		side->index = i;
-	}
-}
-
-static inline sidedef_t *SafeLookupSidedef(u16_t num)
+static inline SideDef *SafeLookupSidedef(u16_t num)
 {
 	if (num == 0xFFFF)
 		return NULL;
 
-	if ((int)num >= num_sidedefs && (s16_t)(num) < 0)
+	if ((int)num >= NumSideDefs && (s16_t)(num) < 0)
 		return NULL;
 
-	return LookupSidedef(num);
+	return SideDefs[num];
 }
 
 
@@ -1165,18 +1112,6 @@ void GetLinedefs(void)
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		if (line->right)
-		{
-			line->right->is_used = 1;
-			line->right->on_special |= (line->type > 0) ? 1 : 0;
-		}
-
-		if (line->left)
-		{
-			line->left->is_used = 1;
-			line->left->on_special |= (line->type > 0) ? 1 : 0;
-		}
 
 		if (line->right || line->left)
 			num_real_lines++;
@@ -1245,19 +1180,6 @@ void GetLinedefsHexen(void)
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
-		if (line->right)
-		{
-			line->right->is_used = 1;
-			line->right->on_special |= (line->type > 0) ? 1 : 0;
-		}
-
-		if (line->left)
-		{
-			line->left->is_used = 1;
-			line->left->on_special |= (line->type > 0) ? 1 : 0;
-		}
 
 		if (line->right || line->left)
 			num_real_lines++;
@@ -1792,7 +1714,7 @@ void CheckLimits()
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (num_sidedefs > 65534)
+	if (NumSideDefs > 65534)
 	{
 		Failure("Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
@@ -2133,7 +2055,6 @@ void LoadLevel()
 
 	GetVertices();
 	GetSectors();
-	GetSidedefs();
 
 	if (lev_doing_hexen)
 	{
@@ -2145,7 +2066,7 @@ void LoadLevel()
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			num_vertices, num_sectors, num_sidedefs, num_linedefs, NumThings);
+			NumVertices, NumSectors, NumSideDefs, NumLineDefs, NumThings);
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
@@ -2167,7 +2088,6 @@ void LoadLevel()
 void FreeLevel(void)
 {
 	FreeVertices();
-	FreeSidedefs();
 	FreeLinedefs();
 	FreeSectors();
 	FreeSegs();

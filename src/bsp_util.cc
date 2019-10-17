@@ -244,7 +244,6 @@ void Adler32_Finish(u32_t *crc)
 // stuff needed from level.c (this file closely related)
 extern vertex_t  ** lev_vertices;
 extern linedef_t ** lev_linedefs;
-extern sidedef_t ** lev_sidedefs;
 extern sector_t  ** lev_sectors;
 
 
@@ -273,8 +272,8 @@ static void MarkPolyobjSector(sector_t *sector)
 	{
 		linedef_t *L = lev_linedefs[i];
 
-		if ((L->right && L->right->sector == sector) ||
-				(L->left && L->left->sector == sector))
+		if ((L->right && LookupSector(L->right->sector) == sector) ||
+				(L->left && LookupSector(L->left->sector) == sector))
 		{
 			L->is_precious = 1;
 		}
@@ -315,10 +314,10 @@ static void MarkPolyobjPoint(double x, double y)
 #     endif
 
 			if (L->left)
-				MarkPolyobjSector(L->left->sector);
+				MarkPolyobjSector(LookupSector(L->left->sector));
 
 			if (L->right)
-				MarkPolyobjSector(L->right->sector);
+				MarkPolyobjSector(LookupSector(L->right->sector));
 
 			inside_count++;
 		}
@@ -388,9 +387,9 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = best_match->right ? best_match->right->sector : NULL;
+		sector = best_match->right ? LookupSector(best_match->right->sector) : NULL;
 	else
-		sector = best_match->left ? best_match->left->sector : NULL;
+		sector = best_match->left ? LookupSector(best_match->left->sector) : NULL;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n",
@@ -754,8 +753,8 @@ void CalculateWallTips(void)
 		double x2 = L->end->x;
 		double y2 = L->end->y;
 
-		sector_t *left  = (L->left)  ? L->left->sector  : NULL;
-		sector_t *right = (L->right) ? L->right->sector : NULL;
+		sector_t *left  = (L->left)  ? LookupSector(L->left->sector)  : NULL;
+		sector_t *right = (L->right) ? LookupSector(L->right->sector) : NULL;
 
 		VertexAddWallTip(L->start, x2-x1, y2-y1, left, right);
 		VertexAddWallTip(L->end,   x1-x2, y1-y2, right, left);
