@@ -375,21 +375,6 @@ typedef struct linedef_s
 linedef_t;
 
 
-typedef struct thing_s
-{
-	int x, y;
-	int type;
-	int options;
-
-	// other info (angle, and hexen stuff) omitted.  We don't need to
-	// write the THING lump, only read it.
-
-	// Always valid (thing indices never change).
-	int index;
-}
-thing_t;
-
-
 typedef struct seg_s
 {
 	// link for list
@@ -539,7 +524,6 @@ extern int num_vertices;
 extern int num_linedefs;
 extern int num_sidedefs;
 extern int num_sectors;
-extern int num_things;
 extern int num_segs;
 extern int num_subsecs;
 extern int num_nodes;
@@ -556,7 +540,6 @@ vertex_t *NewVertex(void);
 linedef_t *NewLinedef(void);
 sidedef_t *NewSidedef(void);
 sector_t *NewSector(void);
-thing_t *NewThing(void);
 seg_t *NewSeg(void);
 subsec_t *NewSubsec(void);
 node_t *NewNode(void);
@@ -567,7 +550,6 @@ vertex_t *LookupVertex(int index);
 linedef_t *LookupLinedef(int index);
 sidedef_t *LookupSidedef(int index);
 sector_t *LookupSector(int index);
-thing_t *LookupThing(int index);
 seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);

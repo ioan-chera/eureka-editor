@@ -842,7 +842,6 @@ LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
 LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
 LEVELARRAY(sidedef_t, lev_sidedefs,   num_sidedefs)
 LEVELARRAY(sector_t,  lev_sectors,    num_sectors)
-LEVELARRAY(thing_t,   lev_things,     num_things)
 
 static LEVELARRAY(seg_t,     segs,       num_segs)
 static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
@@ -882,9 +881,6 @@ sidedef_t *NewSidedef(void)
 sector_t *NewSector(void)
 	ALLIGATOR(sector_t, lev_sectors, num_sectors)
 
-thing_t *NewThing(void)
-	ALLIGATOR(thing_t, lev_things, num_things)
-
 seg_t *NewSeg(void)
 	ALLIGATOR(seg_t, segs, num_segs)
 
@@ -923,9 +919,6 @@ void FreeSidedefs(void)
 void FreeSectors(void)
 	FREEMASON(sector_t, lev_sectors, num_sectors)
 
-void FreeThings(void)
-	FREEMASON(thing_t, lev_things, num_things)
-
 void FreeSegs(void)
 	FREEMASON(seg_t, segs, num_segs)
 
@@ -960,9 +953,6 @@ sidedef_t *LookupSidedef(int index)
 
 sector_t *LookupSector(int index)
 	LOOKERUPPER(lev_sectors, num_sectors, "sector")
-
-thing_t *LookupThing(int index)
-	LOOKERUPPER(lev_things, num_things, "thing")
 
 seg_t *LookupSeg(int index)
 	LOOKERUPPER(segs, num_segs, "seg")
@@ -1061,84 +1051,6 @@ void GetSectors(void)
 		sector->warned_facing = -1;
 
 		// Note: rej_* fields are handled completely in reject.c
-	}
-}
-
-
-void GetThings(void)
-{
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("THINGS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_thing_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to things.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetThings: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_thing_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
-
-		thing_t *thing = NewThing();
-
-		thing->x = LE_S16(raw.x);
-		thing->y = LE_S16(raw.y);
-
-		thing->type = LE_U16(raw.type);
-		thing->options = LE_U16(raw.options);
-
-		thing->index = i;
-	}
-}
-
-
-void GetThingsHexen(void)
-{
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("THINGS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_hexen_thing_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to things.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetThingsHexen: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_hexen_thing_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
-
-		thing_t *thing = NewThing();
-
-		thing->x = LE_S16(raw.x);
-		thing->y = LE_S16(raw.y);
-
-		thing->type = LE_U16(raw.type);
-		thing->options = LE_U16(raw.options);
-
-		thing->index = i;
 	}
 }
 
@@ -2226,16 +2138,14 @@ void LoadLevel()
 	if (lev_doing_hexen)
 	{
 		GetLinedefsHexen();
-		GetThingsHexen();
 	}
 	else
 	{
 		GetLinedefs();
-		GetThings();
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
+			num_vertices, num_sectors, num_sidedefs, num_linedefs, NumThings);
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
@@ -2260,7 +2170,6 @@ void FreeLevel(void)
 	FreeSidedefs();
 	FreeLinedefs();
 	FreeSectors();
-	FreeThings();
 	FreeSegs();
 	FreeSubsecs();
 	FreeNodes();

@@ -441,9 +441,9 @@ void DetectPolyobjSectors(void)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	bool hexen_style = true;
 
-	for (i = 0 ; i < num_things ; i++)
+	for (i = 0 ; i < NumThings ; i++)
 	{
-		thing_t *T = LookupThing(i);
+		const Thing *T = Things[i];
 
 		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
 		{
@@ -458,12 +458,12 @@ void DetectPolyobjSectors(void)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0 ; i < num_things ; i++)
+	for (i = 0 ; i < NumThings ; i++)
 	{
-		thing_t *T = LookupThing(i);
+		const Thing *T = Things[i];
 
-		double x = (double) T->x;
-		double y = (double) T->y;
+		double x = T->x();
+		double y = T->y();
 
 		// ignore everything except polyobj start spots
 		if (hexen_style)
