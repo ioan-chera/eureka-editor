@@ -1865,11 +1865,6 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 		node->too_long = 1;
 	}
 
-	// FIXME DOING THIS TWICE, STOP IT RODNEY
-	/* find limits of vertices */
-	FindLimits2(lefts,  &node->l.bounds);
-	FindLimits2(rights, &node->r.bounds);
-
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going LEFT\n");
 # endif
