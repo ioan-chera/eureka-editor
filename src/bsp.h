@@ -220,8 +220,8 @@ void PutReject();
 //------------------------------------------------------------------------
 
 struct node_s;
-struct sector_s;
-struct superblock_s;
+
+class quadtree_c;
 
 
 // a wall_tip is where a wall meets a vertex
@@ -310,9 +310,9 @@ typedef struct seg_s
 	// won't be any of these when writing the V2 GL_SEGS lump].
 	char is_degenerate;
 
-	// the superblock that contains this seg, or NULL if the seg is no
-	// longer in any superblock (e.g. now in a subsector).
-	struct superblock_s *block;
+	// the quad-tree node that contains this seg, or NULL if the seg
+	// is now in a subsector.
+	quadtree_c *quad;
 
 	// precomputed data for faster calculations
 	double psx, psy;
@@ -390,34 +390,35 @@ typedef struct node_s
 node_t;
 
 
-typedef struct superblock_s
+class quadtree_c
 {
-	// parent of this block, or NULL for a top-level block
-	struct superblock_s *parent;
-
+public:
 	// coordinates on map for this block, from lower-left corner to
-	// upper-right corner.  Pseudo-inclusive, i.e (x,y) is inside block
-	// if and only if x1 <= x < x2 and y1 <= y < y2.
+	// upper-right corner.  Fully inclusive, i.e (x,y) is inside this
+	// block when x1 < x < x2 and y1 < y < y2.
 	int x1, y1;
 	int x2, y2;
 
-	// sub-blocks.  NULL when empty.  [0] has the lower coordinates, and
-	// [1] has the higher coordinates.  Division of a square always
-	// occurs horizontally (e.g. 512x512 -> 256x512 -> 256x256).
-	struct superblock_s *subs[2];
+	// sub-trees.  NULL for leaf nodes.
+	// [0] has the lower coordinates, and [1] has the higher coordinates.
+	// Division of a square always occurs horizontally (e.g. 512x512 -> 256x512).
+	quadtree_c *subs[2];
 
-	// number of real segs and minisegs contained by this block
-	// (including all sub-blocks below it).
+	// number of real segs and minisegs contained in this node and
+	// all children nodes.
 	int real_num;
 	int mini_num;
 
-	// list of segs completely contained by this block.
-	seg_t *segs;
-}
-superblock_t;
+	// list of segs completely contained in this node.
+	seg_t *list;
 
-#define SUPER_IS_LEAF(s)  \
-    ((s)->x2-(s)->x1 <= 256 && (s)->y2-(s)->y1 <= 256)
+public:
+	quadtree_c(int _x1, int _y1, int _x2, int _y2);
+	~quadtree_c();
+
+	void AddSeg(seg_t *seg);
+	void AddList(seg_t *list);
+};
 
 
 /* ----- Level data arrays ----------------------- */
@@ -556,10 +557,11 @@ intersection_t;
 // The 'depth' parameter is the current depth in the tree, used for
 // computing the current progress.
 //
-seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox);
+seg_t *PickNode(quadtree_c *tree, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
-void FindLimits(superblock_t *seg_list, bbox_t *bbox);
+void FindLimits(quadtree_c *tree, bbox_t *bbox);
+void FindLimits2(seg_t *list, bbox_t *bbox);
 
 // compute the seg private info (psx/y, pex/y, pdx/y, etc).
 void RecomputeSeg(seg_t *seg);
@@ -571,15 +573,15 @@ void RecomputeSeg(seg_t *seg);
 // the partition line.
 //
 void DivideOneSeg(seg_t *cur, seg_t *part,
-    superblock_t *left_list, superblock_t *right_list,
+    quadtree_c *left_quad, quadtree_c *right_quad,
     intersection_t ** cut_list);
 
 // remove all the segs from the list, partitioning them into the left
 // or right lists based on the given partition line.  Adds any
-// intersections onto the intersection list as it goes.
+// intersections into the intersection list as it goes.
 //
-void SeparateSegs(superblock_t *seg_list, seg_t *part,
-    superblock_t *left_list, superblock_t *right_list,
+void SeparateSegs(quadtree_c *tree, seg_t *part,
+    quadtree_c *left_quad, quadtree_c *right_quad,
     intersection_t ** cut_list);
 
 // analyse the intersection list, and add any needed minisegs to the
@@ -587,7 +589,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 // structures will be freed back into a quick-alloc list.
 //
 void AddMinisegs(seg_t *part,
-    superblock_t *left_list, superblock_t *right_list,
+    quadtree_c *left_quad, quadtree_c *right_list,
     intersection_t *cut_list);
 
 // free the quick allocation cut list
@@ -601,25 +603,21 @@ void FreeQuickAllocCuts(void);
 
 // check the relationship between the given box and the partition
 // line.  Returns -1 if box is on left side, +1 if box is on right
-// size, or 0 if the line intersects the box.
+// size, or 0 if the line intersects or touches the box.
 //
-int BoxOnLineSide(superblock_t *box, seg_t *part);
-
-// add the seg to the given list
-void AddSegToSuper(superblock_t *block, seg_t *seg);
+int BoxOnLineSide(quadtree_c *box, seg_t *part);
 
 // increase the counts within the superblock, to account for the given
 // seg being split.
 //
-void SplitSegInSuper(superblock_t *block, seg_t *seg);
+void SplitSegInSuper(quadtree_c *tree, seg_t *seg);
 
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
 //
-superblock_t *CreateSegs(void);
+seg_t *CreateSegs(void);
 
-// free a super block.
-void FreeSuper(superblock_t *block);
+quadtree_c *TreeFromSegList(seg_t *list);
 
 // takes the seg list and determines if it is convex.  When it is, the
 // segs are converted to a subsector, and '*S' is the new subsector
@@ -628,8 +626,8 @@ void FreeSuper(superblock_t *block);
 // and '*N' is the new node (and '*S' is set to NULL).  Normally
 // returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 //
-build_result_e BuildNodes(superblock_t *seg_list,
-    node_t ** N, subsec_t ** S, int depth, const bbox_t *bbox);
+build_result_e BuildNodes(quadtree_c *tree,
+    node_t ** N, subsec_t ** S, int depth);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);

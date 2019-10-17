@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2016  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2019  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -156,8 +156,8 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 # endif
 
 	// update superblock, if needed
-	if (old_seg->block)
-		SplitSegInSuper(old_seg->block, old_seg);
+	if (old_seg->quad)
+		SplitSegInSuper(old_seg->quad, old_seg);
 
 	new_vert = NewVertexFromSplitSeg(old_seg, x, y);
 	new_seg  = NewSeg();
@@ -186,8 +186,8 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 #   endif
 
 		// update superblock, if needed
-		if (old_seg->partner->block)
-			SplitSegInSuper(old_seg->partner->block, old_seg->partner);
+		if (old_seg->partner->quad)
+			SplitSegInSuper(old_seg->partner->quad, old_seg->partner);
 
 		new_seg->partner = NewSeg();
 
@@ -308,7 +308,7 @@ static void AddIntersection(intersection_t ** cut_list,
 //
 // Returns true if a "bad seg" was found early.
 //
-static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
+static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		int best_cost, eval_info_t *info)
 {
 	seg_t *check;
@@ -324,14 +324,14 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 	//       all the segs within it at once.  Only when the partition
 	//       line intercepts the box do we need to go deeper into it.
 
-	num = BoxOnLineSide(seg_list, part);
+	num = BoxOnLineSide(tree, part);
 
 	if (num < 0)
 	{
 		// LEFT
 
-		info->real_left += seg_list->real_num;
-		info->mini_left += seg_list->mini_num;
+		info->real_left += tree->real_num;
+		info->mini_left += tree->mini_num;
 
 		return false;
 	}
@@ -339,8 +339,8 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 	{
 		// RIGHT
 
-		info->real_right += seg_list->real_num;
-		info->mini_right += seg_list->mini_num;
+		info->real_right += tree->real_num;
+		info->mini_right += tree->mini_num;
 
 		return false;
 	}
@@ -359,7 +359,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 	/* check partition against all Segs */
 
-	for (check=seg_list->segs ; check ; check=check->next)
+	for (check=tree->list ; check ; check=check->next)
 	{
 		// This is the heart of my pruning idea - it catches
 		// bad segs early on. Killough
@@ -418,8 +418,8 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 			/* check for a near miss */
 			if ((a >= IFFY_LEN && b >= IFFY_LEN) ||
-					(a <= DIST_EPSILON && b >= IFFY_LEN) ||
-					(b <= DIST_EPSILON && a >= IFFY_LEN))
+				(a <= DIST_EPSILON && b >= IFFY_LEN) ||
+				(b <= DIST_EPSILON && a >= IFFY_LEN))
 			{
 				continue;
 			}
@@ -447,8 +447,8 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 			/* check for a near miss */
 			if ((a <= -IFFY_LEN && b <= -IFFY_LEN) ||
-					(a >= -DIST_EPSILON && b <= -IFFY_LEN) ||
-					(b >= -DIST_EPSILON && a <= -IFFY_LEN))
+				(a >= -DIST_EPSILON && b <= -IFFY_LEN) ||
+				(b >= -DIST_EPSILON && a <= -IFFY_LEN))
 			{
 				continue;
 			}
@@ -472,7 +472,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 		// If the linedef associated with this seg has a tag >= 900, treat
 		// it as precious; i.e. don't split it unless all other options
-		// are exhausted. This is used to protect deep water and invisible
+		// are exhausted.  This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
 		if (check->linedef >= 0 && (LineDefs[check->linedef]->flags & MLF_IS_PRECIOUS))
@@ -481,10 +481,9 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 			info->cost += 100 * factor;
 
 		// -AJA- check if the split point is very close to one end, which
-		//       is quite an undesirable situation (producing really short
-		//       segs).  This is perhaps _one_ source of those darn slime
-		//       trails.  Hence the name "IFFY segs", and a rather hefty
-		//       surcharge :->.
+		//       an undesirable situation (producing really short segs).
+		//       This is perhaps _one_ source of those darn slime trails.
+		//       Hence the name "IFFY segs", and a rather hefty surcharge.
 
 		if (fa < IFFY_LEN || fb < IFFY_LEN)
 		{
@@ -500,10 +499,13 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 	for (num=0 ; num < 2 ; num++)
 	{
-		if (! seg_list->subs[num])
+		if (! tree->subs[num])
 			continue;
 
-		if (EvalPartitionWorker(seg_list->subs[num], part, best_cost, info))
+		if (info->cost > best_cost)
+			return true;
+
+		if (EvalPartitionWorker(tree->subs[num], part, best_cost, info))
 			return true;
 	}
 
@@ -519,8 +521,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-static int EvalPartition(superblock_t *seg_list, seg_t *part,
-						 int best_cost)
+static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost)
 {
 	eval_info_t info;
 
@@ -535,7 +536,7 @@ static int EvalPartition(superblock_t *seg_list, seg_t *part,
 	info.mini_left  = 0;
 	info.mini_right = 0;
 
-	if (EvalPartitionWorker(seg_list, part, best_cost, &info))
+	if (EvalPartitionWorker(tree, part, best_cost, &info))
 		return -1;
 
 	/* make sure there is at least one real seg on each side */
@@ -553,7 +554,7 @@ static int EvalPartition(superblock_t *seg_list, seg_t *part,
 	/* increase cost by the difference between left & right */
 	info.cost += 100 * ABS(info.real_left - info.real_right);
 
-	// -AJA- allow miniseg counts to affect the outcome, but only to a
+	// -AJA- allow miniseg counts to affect the outcome, but to a
 	//       lesser degree than real segs.
 
 	info.cost += 50 * ABS(info.mini_left - info.mini_right);
@@ -576,13 +577,13 @@ static int EvalPartition(superblock_t *seg_list, seg_t *part,
 }
 
 
-static void EvaluateFastWorker(superblock_t *seg_list,
+static void EvaluateFastWorker(quadtree_c *tree,
 		seg_t **best_H, seg_t **best_V, int mid_x, int mid_y)
 {
 	seg_t *part;
 	int num;
 
-	for (part=seg_list->segs ; part ; part = part->next)
+	for (part=tree->list ; part ; part = part->next)
 	{
 		/* ignore minisegs as partition candidates */
 		if (! part->linedef)
@@ -592,7 +593,9 @@ static void EvaluateFastWorker(superblock_t *seg_list,
 		{
 			// horizontal seg
 			if (! *best_H)
+			{
 				*best_H = part;
+			}
 			else
 			{
 				int old_dist = abs((int)(*best_H)->psy - mid_y);
@@ -606,7 +609,9 @@ static void EvaluateFastWorker(superblock_t *seg_list,
 		{
 			// vertical seg
 			if (! *best_V)
+			{
 				*best_V = part;
+			}
 			else
 			{
 				int old_dist = abs((int)(*best_V)->psx - mid_x);
@@ -621,33 +626,29 @@ static void EvaluateFastWorker(superblock_t *seg_list,
 	/* handle sub-blocks recursively */
 
 	for (num=0 ; num < 2 ; num++)
-	{
-		if (! seg_list->subs[num])
-			continue;
-
-		EvaluateFastWorker(seg_list->subs[num], best_H, best_V, mid_x, mid_y);
-	}
+		if (tree->subs[num])
+			EvaluateFastWorker(tree->subs[num], best_H, best_V, mid_x, mid_y);
 }
 
 
-static seg_t *FindFastSeg(superblock_t *seg_list, const bbox_t *bbox)
+static seg_t *FindFastSeg(quadtree_c *tree)
 {
 	seg_t *best_H = NULL;
 	seg_t *best_V = NULL;
 
-	int mid_x = (bbox->minx + bbox->maxx) / 2;
-	int mid_y = (bbox->miny + bbox->maxy) / 2;
+	int mid_x = (tree->x1 + tree->x2) / 2;
+	int mid_y = (tree->y1 + tree->y2) / 2;
 
-	EvaluateFastWorker(seg_list, &best_H, &best_V, mid_x, mid_y);
+	EvaluateFastWorker(tree, &best_H, &best_V, mid_x, mid_y);
 
 	int H_cost = -1;
 	int V_cost = -1;
 
 	if (best_H)
-		H_cost = EvalPartition(seg_list, best_H, 99999999);
+		H_cost = EvalPartition(tree, best_H, 99999999);
 
 	if (best_V)
-		V_cost = EvalPartition(seg_list, best_V, 99999999);
+		V_cost = EvalPartition(tree, best_V, 99999999);
 
 # if DEBUG_PICKNODE
 	DebugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
@@ -665,24 +666,20 @@ static seg_t *FindFastSeg(superblock_t *seg_list, const bbox_t *bbox)
 
 
 /* returns false if cancelled */
-static bool PickNodeWorker(superblock_t *part_list,
-		superblock_t *seg_list, seg_t ** best, int *best_cost)
+static bool PickNodeWorker(quadtree_c *part_list,
+		quadtree_c *tree, seg_t ** best, int *best_cost)
 {
-	seg_t *part;
-
 	int num;
-	int cost;
 
-	/* use each Seg as partition */
-	for (part=part_list->segs ; part ; part = part->next)
+	/* try each Seg as partition */
+	for (seg_t *part=part_list->list ; part ; part = part->next)
 	{
 		if (cur_info->cancelled)
 			return false;
 
 #   if DEBUG_PICKNODE
 		DebugPrintf("PickNode:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				part->linedef ? "" : "MINI", part,
-				part->sector ? part->sector->index : -1,
+				part->linedef ? "" : "MINI", part, part->sector,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
 
@@ -690,7 +687,7 @@ static bool PickNodeWorker(superblock_t *part_list,
 		if (! part->linedef)
 			continue;
 
-		cost = EvalPartition(seg_list, part, *best_cost);
+		int cost = EvalPartition(tree, part, *best_cost);
 
 		/* seg unsuitable or too costly ? */
 		if (cost < 0 || cost >= *best_cost)
@@ -706,10 +703,8 @@ static bool PickNodeWorker(superblock_t *part_list,
 	/* recursively handle sub-blocks */
 
 	for (num=0 ; num < 2 ; num++)
-	{
 		if (part_list->subs[num])
-			PickNodeWorker(part_list->subs[num], seg_list, best, best_cost);
-	}
+			PickNodeWorker(part_list->subs[num], tree, best, best_cost);
 
 	return true;
 }
@@ -718,7 +713,7 @@ static bool PickNodeWorker(superblock_t *part_list,
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
+seg_t *PickNode(quadtree_c *tree, int depth)
 {
 	seg_t *best=NULL;
 
@@ -732,13 +727,13 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 	 *       are axis-aligned and roughly divide the current group into
 	 *       two halves.  This can save *heaps* of times on large levels.
 	 */
-	if (cur_info->fast && seg_list->real_num >= SEG_FAST_THRESHHOLD)
+	if (cur_info->fast && tree->real_num >= SEG_FAST_THRESHHOLD)
 	{
 #   if DEBUG_PICKNODE
 		DebugPrintf("PickNode: Looking for Fast node...\n");
 #   endif
 
-		best = FindFastSeg(seg_list, bbox);
+		best = FindFastSeg(tree);
 
 		if (best)
 		{
@@ -751,7 +746,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 		}
 	}
 
-	if (! PickNodeWorker(seg_list, seg_list, &best, &best_cost))
+	if (! PickNodeWorker(tree, tree, &best, &best_cost))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
 		return NULL;
@@ -770,7 +765,6 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 	}
 # endif
 
-	/* all finished, return best Seg */
 	return best;
 }
 
@@ -787,7 +781,7 @@ seg_t *PickNode(superblock_t *seg_list, int depth, const bbox_t *bbox)
 //       or be split.
 //
 void DivideOneSeg(seg_t *seg, seg_t *part,
-		superblock_t *left_list, superblock_t *right_list,
+		seg_t **left_list, seg_t **right_list,
 		intersection_t ** cut_list)
 {
 	seg_t *new_seg;
@@ -871,7 +865,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 
 
 void SeparateSegs(superblock_t *seg_list, seg_t *part,
-		superblock_t *lefts, superblock_t *rights,
+		seg_t **left_list, seg_t **right_list,
 		intersection_t ** cut_list)
 {
 	int num;
@@ -883,7 +877,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 
 		seg->block = NULL;
 
-		DivideOneSeg(seg, part, lefts, rights, cut_list);
+		DivideOneSeg(seg, part, left_list, rights, cut_list);
 	}
 
 	// recursively handle sub-blocks
@@ -893,7 +887,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 
 		if (A)
 		{
-			SeparateSegs(A, part, lefts, rights, cut_list);
+			SeparateSegs(A, part, left_list, rights, cut_list);
 
 			if (A->real_num + A->mini_num > 0)
 				BugError("SeparateSegs: child %d not empty!\n", num);
@@ -947,6 +941,41 @@ void FindLimits(superblock_t *seg_list, bbox_t *bbox)
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
 	FindLimitWorker(seg_list, bbox);
+}
+
+
+void FindLimits2(seg_t *list, bbox_t *bbox)
+{
+	// empty list?
+	if (list == NULL)
+	{
+		bbox->minx = 0;
+		bbox->miny = 0;
+		bbox->maxx = 2;
+		bbox->maxy = 2;
+		return;
+	}
+
+	bbox->minx = bbox->miny = SHRT_MAX;
+	bbox->maxx = bbox->maxy = SHRT_MIN;
+
+	for ( ; list != NULL ; list = list->next)
+	{
+		double x1 = seg->start->x;
+		double y1 = seg->start->y;
+		double x2 = seg->end->x;
+		double y2 = seg->end->y;
+
+		int lx = (int) floor(MIN(x1, x2) - 0.2);
+		int ly = (int) floor(MIN(y1, y2) - 0.2);
+		int hx = (int)  ceil(MAX(x1, x2) + 0.2);
+		int hy = (int)  ceil(MAX(y1, y2) + 0.2);
+
+		if (lx < bbox->minx) bbox->minx = lx;
+		if (ly < bbox->miny) bbox->miny = ly;
+		if (hx > bbox->maxx) bbox->maxx = hx;
+		if (hy > bbox->maxy) bbox->maxy = hy;
+	}
 }
 
 
@@ -1197,12 +1226,12 @@ static int PointOnLineSide(seg_t *part, double x, double y)
 }
 
 
-int BoxOnLineSide(superblock_t *box, seg_t *part)
+int BoxOnLineSide(quadtree_c *box, seg_t *part)
 {
-	double x1 = (double)box->x1 - IFFY_LEN * 1.5;
-	double y1 = (double)box->y1 - IFFY_LEN * 1.5;
-	double x2 = (double)box->x2 + IFFY_LEN * 1.5;
-	double y2 = (double)box->y2 + IFFY_LEN * 1.5;
+	double x1 = (double)box->x1 - IFFY_LEN;
+	double y1 = (double)box->y1 - IFFY_LEN;
+	double x2 = (double)box->x2 + IFFY_LEN;
+	double y2 = (double)box->y2 + IFFY_LEN;
 
 	int p1, p2;
 
@@ -1241,189 +1270,111 @@ int BoxOnLineSide(superblock_t *box, seg_t *part)
 		p2 = PointOnLineSide(part, x2, y2);
 	}
 
-	if (p1 == p2)
-		return p1;
+	// line goes through or touches the box?
+	if (p1 != p2)
+		return 0;
 
-	return 0;
+	return p1;
 }
 
 
-/* ----- super block routines ------------------------------------ */
+/* ----- quad-tree routines ------------------------------------ */
 
-static superblock_t *NewSuperBlock(void)
+quadtree_c::quadtree_c(int _x1, int _y1, int _x2, int _y2) :
+	x1(_x1), y1(_y1),
+	x2(_x2), y2(_y2),
+	real_num(0), mini_num(0),
+	segs(NULL)
 {
-	superblock_t *block;
+	int dx = x2 - x1;
+	int dy = y2 - y1;
 
-	if (quick_alloc_supers == NULL)
-		return (superblock_t *)UtilCalloc(sizeof(superblock_t));
-
-	block = quick_alloc_supers;
-	quick_alloc_supers = block->subs[0];
-
-	// clear out any old rubbish
-	memset(block, 0, sizeof(superblock_t));
-
-	return block;
-}
-
-
-void FreeQuickAllocSupers(void)
-{
-	while (quick_alloc_supers)
+	if (dx <= 256 && dy <= 256)
 	{
-		superblock_t *block = quick_alloc_supers;
-		quick_alloc_supers = block->subs[0];
-
-		UtilFree(block);
+		// leaf node
+		subs[0] = NULL;
+		subs[1] = NULL;
+	}
+	else if (dx >= dy)
+	{
+		subs[0] = new quadtree_c(x1, y1, x1 + dx/2, y2);
+		subs[1] = new quadtree_c(x1 + dx/2, y1, x2, y2);
+	}
+	else
+	{
+		subs[0] = new quadtree_c(x1, y1, x2, y1 + dy/2);
+		subs[1] = new quadtree_c(x1, y1 + dy/2, x2, y2);
 	}
 }
 
 
-void FreeSuper(superblock_t *block)
+quadtree_c::~quadtree_c()
 {
-	int num;
-
-	// this only happens when node-building was cancelled by the GUI
-	if (block->segs)
-		block->segs = NULL;
-
-	// recursively handle sub-blocks
-	for (num=0 ; num < 2 ; num++)
-	{
-		if (block->subs[num])
-			FreeSuper(block->subs[num]);
-	}
-
-	// add block to quick-alloc list.  Note that subs[0] is used for
-	// linking the blocks together.
-
-	block->subs[0] = quick_alloc_supers;
-	quick_alloc_supers = block;
+	if (subs[0] != NULL) delete subs[0];
+	if (subs[1] != NULL) delete subs[1];
 }
 
 
-#if 0 // DEBUGGING CODE
-static void TestSuperWorker(superblock_t *block, int *real, int *mini)
+quadtree_c::AddSeg(seg_t *seg)
 {
-	seg_t *seg;
-	int num;
+	// update seg counts
+	if (seg->linedef >= 0)
+		real_num++;
+	else
+		mini_num++;
 
-	for (seg=block->segs ; seg ; seg=seg->next)
+	if (sub[0] != NULL)
 	{
-		if (seg->linedef)
-			(*real) += 1;
-		else
-			(*mini) += 1;
-	}
+		double x_min = MIN(seg->start->x, seg->end->x);
+		double y_min = MIN(seg->start->y, seg->end->y);
 
-	for (num=0 ; num < 2 ; num++)
-	{
-		if (block->subs[num])
-			TestSuperWorker(block->subs[num], real, mini);
-	}
-}
+		double x_max = MAX(seg->start->x, seg->end->x);
+		double y_max = MAX(seg->start->y, seg->end->y);
 
-void TestSuper(superblock_t *block)
-{
-	int real_num = 0;
-	int mini_num = 0;
+		int dx = x2 - x1;
+		int dy = y2 - y1;
 
-	TestSuperWorker(block, &real_num, &mini_num);
-
-	if (real_num != block->real_num || mini_num != block->mini_num)
-		BugError("TestSuper FAILED: block=%p %d/%d != %d/%d\n",
-				block, block->real_num, block->mini_num, real_num, mini_num);
-}
-#endif
-
-
-void AddSegToSuper(superblock_t *block, seg_t *seg)
-{
-	for (;;)
-	{
-		int p1, p2;
-		int child;
-
-		int x_mid = (block->x1 + block->x2) / 2;
-		int y_mid = (block->y1 + block->y2) / 2;
-
-		superblock_t *sub;
-
-		// update seg counts
-		if (seg->linedef)
-			block->real_num++;
-		else
-			block->mini_num++;
-
-		if (SUPER_IS_LEAF(block))
+		if (dx >= dy)
 		{
-			// block is a leaf -- no subdivision possible
-
-			seg->next = block->segs;
-			seg->block = block;
-
-			block->segs = seg;
-			return;
-		}
-
-		if (block->x2 - block->x1 >= block->y2 - block->y1)
-		{
-			// block is wider than it is high, or square
-
-			p1 = seg->start->x >= x_mid;
-			p2 = seg->end->x   >= x_mid;
-		}
-		else
-		{
-			// block is higher than it is wide
-
-			p1 = seg->start->y >= y_mid;
-			p2 = seg->end->y   >= y_mid;
-		}
-
-		if (p1 && p2)
-			child = 1;
-		else if (!p1 && !p2)
-			child = 0;
-		else
-		{
-			// line crosses midpoint -- link it in and return
-
-			seg->next = block->segs;
-			seg->block = block;
-
-			block->segs = seg;
-			return;
-		}
-
-		// OK, the seg lies in one half of this block.  Create the block
-		// if it doesn't already exist, and loop back to add the seg.
-
-		if (! block->subs[child])
-		{
-			block->subs[child] = sub = NewSuperBlock();
-			sub->parent = block;
-
-			if (block->x2 - block->x1 >= block->y2 - block->y1)
+			if (x_min > x1 + dx)
 			{
-				sub->x1 = child ? x_mid : block->x1;
-				sub->y1 = block->y1;
-
-				sub->x2 = child ? block->x2 : x_mid;
-				sub->y2 = block->y2;
+				sub[1]->AddSeg(seg);
+				return;
 			}
-			else
+			else if (x_max < x1 + dx)
 			{
-				sub->x1 = block->x1;
-				sub->y1 = child ? y_mid : block->y1;
-
-				sub->x2 = block->x2;
-				sub->y2 = child ? block->y2 : y_mid;
+				sub[0]->AddSeg(seg);
+				return;
 			}
 		}
-
-		block = block->subs[child];
+		else
+		{
+			if (y_min > y1 + dy)
+			{
+				sub[1]->AddSeg(seg);
+				return;
+			}
+			else if (y_max < y1 + dy)
+			{
+				sub[0]->AddSeg(seg);
+				return;
+			}
+		}
 	}
+
+	// link into this node
+
+	seg->next = list;
+	list = seg;
+
+	seg->quad = this;
+}
+
+
+quadtree_c::AddList(seg_t *list)
+{
+	for ( ; list != NULL ; list = list->next)
+		AddSeg(list);
 }
 
 
@@ -1477,27 +1428,16 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-superblock_t *CreateSegs(void)
+seg_t *CreateSegs()
 {
-	int bw, bh;
-
-	seg_t *left, *right;
-	superblock_t *block;
-
-	block = NewSuperBlock();
-
-	GetBlockmapBounds(&block->x1, &block->y1, &bw, &bh);
-
-	block->x2 = block->x1 + 128 * RoundPOW2(bw);
-	block->y2 = block->y1 + 128 * RoundPOW2(bh);
-
-	// step through linedefs and get side numbers
+	seg_t *list = NULL;
 
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
 		const LineDef *line = LineDefs[i];
 
-		right = NULL;
+		seg_t *left  = NULL;
+		seg_t *right = NULL;
 
 		// ignore zero-length lines
 		if (line->IsZeroLength())
@@ -1514,7 +1454,8 @@ superblock_t *CreateSegs(void)
 		if (line->right)
 		{
 			right = CreateOneSeg(i, LookupVertex(line->start), LookupVertex(line->end), line->right, 0);
-			AddSegToSuper(block, right);
+			right->next = list;
+			list = right;
 		}
 		else
 		{
@@ -1524,7 +1465,8 @@ superblock_t *CreateSegs(void)
 		if (line->left)
 		{
 			left = CreateOneSeg(i, LookupVertex(line->end), LookupVertex(line->start), line->left, 1);
-			AddSegToSuper(block, left);
+			left->next = list;
+			list = left;
 
 			if (right)
 			{
@@ -1543,8 +1485,25 @@ superblock_t *CreateSegs(void)
 		}
 	}
 
-	return block;
+	return list;
 }
+
+
+quadtree_c *TreeFromSegList(seg_t *list)
+{
+	SYS_ASSERT(list != NULL);
+
+	bbox_t bounds;
+
+	FindLimits2(list, &bounds);
+
+	quadtree_c *tree = new quadtree_c(bounds.minx, bounds.miny, bounds.maxx, bounds.maxy);
+
+	tree->AddList(list);
+
+	return tree;
+}
+
 
 
 static void DetermineMiddle(subsec_t *sub)
@@ -1909,20 +1868,10 @@ static void DebugShowSegs(superblock_t *seg_list)
 #endif
 
 
-build_result_e BuildNodes(superblock_t *seg_list,
+build_result_e BuildNodes(seg_t *list,
 						  node_t ** N, subsec_t ** S,
-						  int depth, const bbox_t *bbox)
+						  int depth, bbox_t *out_box)
 {
-	node_t *node;
-	seg_t *best;
-
-	superblock_t *rights;
-	superblock_t *lefts;
-
-	intersection_t *cut_list;
-
-	build_result_e ret;
-
 	*N = NULL;
 	*S = NULL;
 
@@ -1931,14 +1880,25 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: BEGUN @ %d\n", depth);
-	DebugShowSegs(seg_list);
+	DebugShowSegs(list);
 # endif
 
+	quadtree_c *tree = TreeFromSegList(list);
+
+
+	node_t *node;
+	seg_t *best;
+
+	build_result_e ret;
+
+
 	/* pick best node to use.  None indicates convexicity */
-	best = PickNode(seg_list, depth, bbox);
+	best = PickNode(tree, depth, bbox);
 
 	if (best == NULL)
 	{
+		delete tree;
+
 		if (cur_info->cancelled)
 			return BUILD_Cancelled;
 
@@ -1956,28 +1916,24 @@ build_result_e BuildNodes(superblock_t *seg_list,
 			best, best->start->x, best->start->y, best->end->x, best->end->y);
 # endif
 
-	/* create left and right super blocks */
-	lefts  = (superblock_t *) NewSuperBlock();
-	rights = (superblock_t *) NewSuperBlock();
-
-	lefts->x1 = rights->x1 = seg_list->x1;
-	lefts->y1 = rights->y1 = seg_list->y1;
-	lefts->x2 = rights->x2 = seg_list->x2;
-	lefts->y2 = rights->y2 = seg_list->y2;
-
 	/* divide the segs into two lists: left & right */
-	cut_list = NULL;
+	seg_t *lefts  = NULL;
+	seg_t *rights = NULL;
+	intersection_t *cut_list = NULL;
 
-	SeparateSegs(seg_list, best, lefts, rights, &cut_list);
+	SeparateSegs(tree, best, &lefts, &rights, &cut_list);
+
+	delete tree;
+	tree = NULL;
 
 	/* sanity checks... */
-	if (rights->real_num + rights->mini_num == 0)
+	if (rights == NULL)
 		BugError("Separated seg-list has no RIGHT side\n");
 
-	if (lefts->real_num + lefts->mini_num == 0)
+	if (lefts == NULL)
 		BugError("Separated seg-list has no LEFT side\n");
 
-	AddMinisegs(best, lefts, rights, cut_list);
+	AddMinisegs(best, &lefts, &rights, cut_list);
 
 	*N = node = NewNode();
 
@@ -2014,31 +1970,25 @@ build_result_e BuildNodes(superblock_t *seg_list,
 		node->too_long = 1;
 	}
 
+	// FIXME DOING THIS TWICE, STOP IT RODNEY
 	/* find limits of vertices */
-	FindLimits(lefts,  &node->l.bounds);
-	FindLimits(rights, &node->r.bounds);
+	FindLimits2(lefts,  &node->l.bounds);
+	FindLimits2(rights, &node->r.bounds);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going LEFT\n");
 # endif
 
-	ret = BuildNodes(lefts,  &node->l.node, &node->l.subsec, depth+1,
-			&node->l.bounds);
-	FreeSuper(lefts);
+	ret = BuildNodes(lefts,  &node->l.node, &node->l.subsec, depth+1, &node->l.bounds);
 
 	if (ret != BUILD_OK)
-	{
-		FreeSuper(rights);
 		return ret;
-	}
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going RIGHT\n");
 # endif
 
-	ret = BuildNodes(rights, &node->r.node, &node->r.subsec, depth+1,
-			&node->r.bounds);
-	FreeSuper(rights);
+	ret = BuildNodes(rights, &node->r.node, &node->r.subsec, depth+1, &node->r.bounds);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: DONE\n");

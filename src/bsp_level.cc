@@ -645,9 +645,9 @@ static void Reject_Free()
 //
 static void Reject_GroupSectors()
 {
-	int i;
-
 #if 0 // FIXME !!! Reject_GroupSectors
+
+	int i;
 
 	for (i=0 ; i < num_linedefs ; i++)
 	{
@@ -2337,17 +2337,11 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	if (num_real_lines > 0)
 	{
-		bbox_t seg_bbox;
-
 		// create initial segs
-		superblock_t * seg_list = CreateSegs();
-
-		FindLimits(seg_list, &seg_bbox);
+		seg_t *list = CreateSegs();
 
 		// recursively create nodes
-		ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
-
-		FreeSuper(seg_list);
+		ret = BuildNodes(list, &root_node, &root_sub, 0);
 	}
 
 	if (ret == BUILD_OK)
