@@ -861,29 +861,21 @@ static void SeparateSegs(quadtree_c *tree, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
 		intersection_t ** cut_list)
 {
-	int num;
-
 	while (tree->list != NULL)
 	{
 		seg_t *seg = tree->list;
 		tree->list = seg->next;
 
 		seg->quad = NULL;
+
 		DivideOneSeg(seg, part, left_list, right_list, cut_list);
 	}
 
 	// recursively handle sub-blocks
-	for (num=0 ; num < 2 ; num++)
+	if (tree->subs[0])
 	{
-		quadtree_c *A = tree->subs[num];
-
-		if (A)
-		{
-			SeparateSegs(A, part, left_list, right_list, cut_list);
-
-			if (A->real_num + A->mini_num > 0)
-				BugError("SeparateSegs: child %d not empty!\n", num);
-		}
+		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list);
+		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list);
 	}
 
 	// this quadtree_c is empty now
@@ -1307,17 +1299,41 @@ void quadtree_c::AddSeg(seg_t *seg)
 
 	// link into this node
 
-	seg->next = list;
-	list = seg;
+	ListAddSeg(&list, seg);
 
 	seg->quad = this;
 }
 
 
-void quadtree_c::AddList(seg_t *list)
+void quadtree_c::AddList(seg_t *_list)
 {
-	for ( ; list != NULL ; list = list->next)
-		AddSeg(list);
+	while (_list != NULL)
+	{
+		seg_t *seg = _list;
+		_list = seg->next;
+
+		AddSeg(seg);
+   }
+}
+
+
+void quadtree_c::ConvertToList(seg_t **_list)
+{
+	while (list != NULL)
+	{
+		seg_t *seg = list;
+		list = seg->next;
+
+		ListAddSeg(_list, seg);
+	}
+
+	if (subs[0] != NULL)
+	{
+		subs[0]->ConvertToList(_list);
+		subs[1]->ConvertToList(_list);
+	}
+
+	// this quadtree is empty now
 }
 
 
@@ -1688,7 +1704,7 @@ static void RenumberSubsecSegs(subsec_t *sub)
 //
 // Create a subsector from a list of segs.
 //
-static subsec_t *CreateSubsector(seg_t *list)
+static subsec_t *CreateSubsector(quadtree_c *tree)
 {
 	subsec_t *sub = NewSubsec();
 
@@ -1696,7 +1712,8 @@ static subsec_t *CreateSubsector(seg_t *list)
 	sub->index = num_subsecs - 1;
 
 	// copy segs into subsector
-	sub->seg_list = list;
+	// [ assumes seg_list field is NULL ]
+	tree->ConvertToList(&sub->seg_list);
 
 	DetermineMiddle(sub);
 
@@ -1772,16 +1789,16 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	if (part == NULL)
 	{
-		delete tree;
-
-		if (cur_info->cancelled)
-			return BUILD_Cancelled;
-
 #   if DEBUG_BUILDER
 		DebugPrintf("Build: CONVEX\n");
 #   endif
 
-		*S = CreateSubsector(list);
+		*S = CreateSubsector(tree);
+
+		delete tree;
+
+		if (cur_info->cancelled)
+			return BUILD_Cancelled;
 
 		return BUILD_OK;
 	}
@@ -1791,7 +1808,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 			part, part->start->x, part->start->y, part->end->x, part->end->y);
 # endif
 
-	node_t *node = *N;
+	node_t *node = NewNode();
 	*N = node;
 
 	/* divide the segs into two lists: left & right */

@@ -943,7 +943,7 @@ static void GetVertices(void)
 		vertex_t *vert = NewVertex();
 
 		vert->x = Vertices[i]->x();
-		vert->y = Vertices[i]->x();
+		vert->y = Vertices[i]->y();
 
 		vert->index = i;
 	}

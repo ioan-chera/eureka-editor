@@ -486,16 +486,16 @@ static int VertexCompare(const void *p1, const void *p2)
 	int vert1 = ((const u16_t *) p1)[0];
 	int vert2 = ((const u16_t *) p2)[0];
 
-	vertex_t *A = lev_vertices[vert1];
-	vertex_t *B = lev_vertices[vert2];
-
 	if (vert1 == vert2)
 		return 0;
 
-	if ((int)A->x != (int)B->x)
-		return (int)A->x - (int)B->x;
+	const Vertex *A = Vertices[vert1];
+	const Vertex *B = Vertices[vert2];
 
-	return (int)A->y - (int)B->y;
+	if (A->raw_x != B->raw_x)
+		return A->raw_x - B->raw_x;
+
+	return A->raw_y - B->raw_y;
 }
 
 
@@ -503,6 +503,8 @@ void DetectOverlappingVertices(void)
 {
 	int i;
 	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
+
+	SYS_ASSERT(num_vertices == NumVertices);
 
 	// sort array of indices
 	for (i=0 ; i < num_vertices ; i++)
@@ -513,8 +515,7 @@ void DetectOverlappingVertices(void)
 	// now mark them off
 	for (i=0 ; i < num_vertices - 1 ; i++)
 	{
-		// duplicate ?
-		if (VertexCompare(array + i, array + i+1) == 0)
+		if (VertexCompare(array + i, array + i + 1) == 0)
 		{
 			vertex_t *A = lev_vertices[array[i]];
 			vertex_t *B = lev_vertices[array[i+1]];

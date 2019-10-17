@@ -418,6 +418,8 @@ public:
 
 	void AddSeg(seg_t *seg);
 	void AddList(seg_t *list);
+
+	void ConvertToList(seg_t **list);
 };
 
 
