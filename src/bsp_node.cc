@@ -1081,7 +1081,8 @@ void AddMinisegs(seg_t *part,
 		buddy->start = next->vertex;
 		buddy->end   = cur->vertex;
 
-		// leave 'linedef' field as NULL.
+		seg->linedef = buddy->linedef = -1;
+
 		// leave 'side' as zero too (not needed for minisegs).
 
 		seg->sector = buddy->sector = cur->sec_after;
@@ -1913,6 +1914,7 @@ void ClockwiseBspTree()
 
 static void NormaliseSubsector(subsec_t *sub)
 {
+	// use head + tail to maintain same order of segs
 	seg_t *new_head = NULL;
 	seg_t *new_tail = NULL;
 
