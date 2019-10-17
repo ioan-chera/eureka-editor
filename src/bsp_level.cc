@@ -176,12 +176,14 @@ static void BlockAdd(int blk_num, int line_index)
 }
 
 
-static void BlockAddLine(linedef_t *L)
+static void BlockAddLine(int line_index)
 {
-	int x1 = (int) L->start->x;
-	int y1 = (int) L->start->y;
-	int x2 = (int) L->end->x;
-	int y2 = (int) L->end->y;
+	const LineDef *L = LineDefs[line_index];
+
+	int x1 = (int) L->Start()->x();
+	int y1 = (int) L->Start()->y();
+	int x2 = (int) L->End()->x();
+	int y2 = (int) L->End()->y();
 
 	int bx1 = (MIN(x1,x2) - block_x) / 128;
 	int by1 = (MIN(y1,y2) - block_y) / 128;
@@ -189,7 +191,6 @@ static void BlockAddLine(linedef_t *L)
 	int by2 = (MAX(y1,y2) - block_y) / 128;
 
 	int bx, by;
-	int line_index = L->index;
 
 # if DEBUG_BLOCKMAP
 	DebugPrintf("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
@@ -247,21 +248,17 @@ static void BlockAddLine(linedef_t *L)
 }
 
 
-static void CreateBlockmap(void)
+static void CreateBlockmap()
 {
-	int i;
-
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = LookupLinedef(i);
-
 		// ignore zero-length lines
-		if (L->zero_len)
+		if (LineDefs[i]->IsZeroLength())
 			continue;
 
-		BlockAddLine(L);
+		BlockAddLine(i);
 	}
 }
 
@@ -491,24 +488,22 @@ static void FreeBlockmap(void)
 
 static void FindBlockmapLimits(bbox_t *bbox)
 {
-	int i;
-
 	int mid_x = 0;
 	int mid_y = 0;
 
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = LookupLinedef(i);
+		const LineDef *L = LineDefs[i];
 
-		if (! L->zero_len)
+		if (! L->IsZeroLength())
 		{
-			double x1 = L->start->x;
-			double y1 = L->start->y;
-			double x2 = L->end->x;
-			double y2 = L->end->y;
+			double x1 = L->Start()->x();
+			double y1 = L->Start()->y();
+			double x2 = L->End()->x();
+			double y2 = L->End()->y();
 
 			int lx = (int)floor(MIN(x1, x2));
 			int ly = (int)floor(MIN(y1, y2));
@@ -526,10 +521,10 @@ static void FindBlockmapLimits(bbox_t *bbox)
 		}
 	}
 
-	if (num_linedefs > 0)
+	if (NumLineDefs > 0)
 	{
-		block_mid_x = (mid_x / num_linedefs) * 16;
-		block_mid_y = (mid_y / num_linedefs) * 16;
+		block_mid_x = (mid_x / NumLineDefs) * 16;
+		block_mid_y = (mid_y / NumLineDefs) * 16;
 	}
 
 # if DEBUG_BLOCKMAP
@@ -560,7 +555,7 @@ void InitBlockmap()
 
 void PutBlockmap()
 {
-	if (! cur_info->do_blockmap || num_linedefs == 0)
+	if (! cur_info->do_blockmap || NumLineDefs == 0)
 	{
 		// just create an empty blockmap lump
 		CreateLevelLump("BLOCKMAP")->Finish();
@@ -848,7 +843,6 @@ int lev_overflows;
 
 
 LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
-LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
 
 static LEVELARRAY(seg_t,     segs,       num_segs)
 static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
@@ -879,9 +873,6 @@ int num_real_lines = 0;
 vertex_t *NewVertex(void)
 	ALLIGATOR(vertex_t, lev_vertices, num_vertices)
 
-linedef_t *NewLinedef(void)
-	ALLIGATOR(linedef_t, lev_linedefs, num_linedefs)
-
 seg_t *NewSeg(void)
 	ALLIGATOR(seg_t, segs, num_segs)
 
@@ -911,9 +902,6 @@ wall_tip_t *NewWallTip(void)
 void FreeVertices(void)
 	FREEMASON(vertex_t, lev_vertices, num_vertices)
 
-void FreeLinedefs(void)
-	FREEMASON(linedef_t, lev_linedefs, num_linedefs)
-
 void FreeSegs(void)
 	FREEMASON(seg_t, segs, num_segs)
 
@@ -939,9 +927,6 @@ void FreeWallTips(void)
 
 vertex_t *LookupVertex(int index)
 	LOOKERUPPER(lev_vertices, num_vertices, "vertex")
-
-linedef_t *LookupLinedef(int index)
-	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
 
 seg_t *LookupSeg(int index)
 	LOOKERUPPER(segs, num_segs, "seg")
@@ -1006,134 +991,12 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 }
 
 
-void GetLinedefs(void)
-{
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("LINEDEFS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_linedef_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to linedefs.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetLinedefs: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_linedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
-
-		linedef_t *line;
-
-		vertex_t *start = LookupVertex(LE_U16(raw.start));
-		vertex_t *end   = LookupVertex(LE_U16(raw.end));
-
-		line = NewLinedef();
-
-		line->start = start;
-		line->end   = end;
-
-		// check for zero-length line
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
-			(fabs(start->y - end->y) < DIST_EPSILON);
-
-		line->flags = LE_U16(raw.flags);
-		line->type = LE_U16(raw.type);
-		line->tag  = LE_S16(raw.tag);
-
-		if (line->tag >= 900 && line->tag < 1000)
-			line->flags |= MLF_IS_PRECIOUS;
-
-		line->right = SafeLookupSidedef(LE_U16(raw.right));
-		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		if (line->right || line->left)
-			num_real_lines++;
-
-		line->self_ref = (line->left && line->right &&
-				(line->left->sector == line->right->sector));
-
-		line->index = i;
-	}
-}
-
-
-void GetLinedefsHexen(void)
-{
-	int i, j, count=-1;
-
-	Lump_c *lump = FindLevelLump("LINEDEFS");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_hexen_linedef_t);
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to linedefs.\n");
-
-# if DEBUG_LOAD
-	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
-# endif
-
-	for (i = 0 ; i < count ; i++)
-	{
-		raw_hexen_linedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
-
-		linedef_t *line;
-
-		vertex_t *start = LookupVertex(LE_U16(raw.start));
-		vertex_t *end   = LookupVertex(LE_U16(raw.end));
-
-		line = NewLinedef();
-
-		line->start = start;
-		line->end   = end;
-
-		// check for zero-length line
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
-			(fabs(start->y - end->y) < DIST_EPSILON);
-
-		line->flags = LE_U16(raw.flags);
-		line->type = (u8_t)(raw.type);
-		line->tag  = 0;
-
-		// read specials
-		for (j=0 ; j < 5 ; j++)
-			line->specials[j] = (u8_t)(raw.args[j]);
-
-		// -JL- Added missing twosided flag handling that caused a broken reject
-		line->right = SafeLookupSidedef(LE_U16(raw.right));
-		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		if (line->right || line->left)
-			num_real_lines++;
-
-		line->self_ref = (line->left && line->right &&
-				(line->left->sector == line->right->sector));
-
-		line->index = i;
-	}
-}
-
-
 static inline int VanillaSegDist(const seg_t *seg)
 {
-	double lx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
-	double ly = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
+	const LineDef *L = LineDefs[seg->linedef];
+
+	double lx = seg->side ? L->End()->x() : L->Start()->x();
+	double ly = seg->side ? L->End()->y() : L->Start()->y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = I_ROUND(seg->start->x);
@@ -1312,7 +1175,7 @@ void PutSegs(void)
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
 		raw.angle   = LE_U16(VanillaSegAngle(seg));
-		raw.linedef = LE_U16(seg->linedef->index);
+		raw.linedef = LE_U16(seg->linedef);
 		raw.flip    = LE_U16(seg->side);
 		raw.dist    = LE_U16(VanillaSegDist(seg));
 
@@ -1364,8 +1227,8 @@ void PutGLSegs(void)
 		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
 		raw.side  = LE_U16(seg->side);
 
-		if (seg->linedef)
-			raw.linedef = LE_U16(seg->linedef->index);
+		if (seg->linedef >= 0)
+			raw.linedef = LE_U16(seg->linedef);
 		else
 			raw.linedef = LE_U16(0xFFFF);
 
@@ -1419,8 +1282,8 @@ void PutGLSegs_V5()
 
 		raw.side  = LE_U16(seg->side);
 
-		if (seg->linedef)
-			raw.linedef = LE_U16(seg->linedef->index);
+		if (seg->linedef >= 0)
+			raw.linedef = LE_U16(seg->linedef);
 		else
 			raw.linedef = LE_U16(0xFFFF);
 
@@ -1804,7 +1667,7 @@ void PutZSegs(void)
 			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
 			u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
 
-			u16_t line = LE_U16(seg->linedef->index);
+			u16_t line = LE_U16(seg->linedef);
 			u8_t  side = seg->side;
 
 			ZLibAppendLump(&v1,   4);
@@ -1993,13 +1856,15 @@ void LoadLevel()
 
 	GetVertices();
 
-	if (lev_doing_hexen)
+	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
-		GetLinedefsHexen();
-	}
-	else
-	{
-		GetLinedefs();
+		LineDef *L = LineDefs[ld];
+
+		if (L->right >= 0 || L->left >= 0)
+			num_real_lines++;
+
+		if (L->tag >= 900 && L->tag < 1000)
+			L->flags |= MLF_IS_PRECIOUS;
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
@@ -2021,7 +1886,6 @@ void LoadLevel()
 void FreeLevel(void)
 {
 	FreeVertices();
-	FreeLinedefs();
 	FreeSegs();
 	FreeSubsecs();
 	FreeNodes();

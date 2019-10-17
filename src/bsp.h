@@ -270,37 +270,11 @@ inline bool coalesce_sec(Sector *sec)
 	return (sec->tag >= 900 && sec->tag < 1000);
 }
 
+
+// TODO for sectors:
 //	// suppress superfluous mini warnings
 //	int warned_facing;
 //	boolr warned_unclosed;
-
-
-typedef struct linedef_s
-{
-	vertex_t *start;    // from this vertex...
-	vertex_t *end;      // ... to this vertex
-
-	SideDef *right;   // right sidedef
-	SideDef *left;    // left sidede, or NULL if none
-
-	// zero length (line should be totally ignored)
-	char zero_len;
-
-	// sector is the same on both sides
-	char self_ref;
-
-	int flags;
-	int type;
-	int tag;
-
-	// Hexen support
-	int specials[5];
-
-	// linedef index.  Always valid after loading & pruning of zero
-	// length lines has occurred.
-	int index;
-}
-linedef_t;
 
 
 typedef struct seg_s
@@ -311,8 +285,8 @@ typedef struct seg_s
 	vertex_t *start;   // from this vertex...
 	vertex_t *end;     // ... to this vertex
 
-	// linedef that this seg goes along, or NULL if miniseg
-	linedef_t *linedef;
+	// linedef that this seg goes along, or -1 if miniseg
+	int linedef;
 
 	// adjacent sector, or -1 if invalid sidedef or miniseg
 	int sector;
@@ -352,7 +326,7 @@ typedef struct seg_s
 	// linedef that this seg initially comes from.  For "real" segs,
 	// this is just the same as the 'linedef' field above.  For
 	// "minisegs", this is the linedef of the partition line.
-	linedef_t *source_line;
+	int source_line;
 }
 seg_t;
 
@@ -449,7 +423,6 @@ superblock_t;
 /* ----- Level data arrays ----------------------- */
 
 extern int num_vertices;
-extern int num_linedefs;
 extern int num_segs;
 extern int num_subsecs;
 extern int num_nodes;
@@ -463,7 +436,6 @@ extern int num_complete_seg;
 
 // allocation routines
 vertex_t *NewVertex(void);
-linedef_t *NewLinedef(void);
 seg_t *NewSeg(void);
 subsec_t *NewSubsec(void);
 node_t *NewNode(void);
@@ -471,7 +443,6 @@ wall_tip_t *NewWallTip(void);
 
 // lookup routines
 vertex_t *LookupVertex(int index);
-linedef_t *LookupLinedef(int index);
 seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);

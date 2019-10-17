@@ -243,7 +243,6 @@ void Adler32_Finish(u32_t *crc)
 
 // stuff needed from level.c (this file closely related)
 extern vertex_t  ** lev_vertices;
-extern linedef_t ** lev_linedefs;
 
 
 /* ----- polyobj handling ----------------------------- */
@@ -259,12 +258,12 @@ static void MarkPolyobjSector(int sector)
 	DebugPrintf("  Marking SECTOR %d\n", sector);
 # endif
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+		LineDef *L = LineDefs[i];
 
-		if ((L->right && L->right->sector == sector) ||
-			(L->left  && L->left->sector  == sector))
+		if ((L->right >= 0 && L->Right()->sector == sector) ||
+			(L->left  >= 0 && L->Left()->sector  == sector))
 		{
 			L->flags |= MLF_IS_PRECIOUS;
 		}
@@ -277,7 +276,7 @@ static void MarkPolyobjPoint(double x, double y)
 	int inside_count = 0;
 
 	double best_dist = 999999;
-	linedef_t *best_match = NULL;
+	int best_match = -1;
 	int sector = -1;
 
 	double x1, y1;
@@ -292,23 +291,23 @@ static void MarkPolyobjPoint(double x, double y)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+		const LineDef *L = LineDefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
-					(int) L->start->x, (int) L->start->y,
-					(int) L->end->x, (int) L->end->y))
+					(int) L->Start()->x(), (int) L->Start()->y(),
+					(int) L->End()->x(),   (int) L->End()->y()))
 		{
 #     if DEBUG_POLYOBJ
 			DebugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
-			if (L->left)
-				MarkPolyobjSector(L->left->sector);
+			if (L->left >= 0)
+				MarkPolyobjSector(L->Left()->sector);
 
-			if (L->right)
-				MarkPolyobjSector(L->right->sector);
+			if (L->right >= 0)
+				MarkPolyobjSector(L->Right()->sector);
 
 			inside_count++;
 		}
@@ -323,21 +322,23 @@ static void MarkPolyobjPoint(double x, double y)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+		LineDef *L = LineDefs[i];
 
 		double x_cut;
 
-		x1 = L->start->x;  y1 = L->start->y;
-		x2 = L->end->x;    y2 = L->end->y;
+		x1 = L->Start()->x();
+		y1 = L->Start()->y();
+		x2 = L->End()->x();
+		y2 = L->End()->y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < DIST_EPSILON)
 			continue;
 
 		if ((y > (y1 + DIST_EPSILON) && y > (y2 + DIST_EPSILON)) ||
-				(y < (y1 - DIST_EPSILON) && y < (y2 - DIST_EPSILON)))
+			(y < (y1 - DIST_EPSILON) && y < (y2 - DIST_EPSILON)))
 			continue;
 
 		x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
@@ -346,31 +347,32 @@ static void MarkPolyobjPoint(double x, double y)
 		{
 			/* found a closer linedef */
 
-			best_match = L;
+			best_match = i;
 			best_dist = x_cut;
 		}
 	}
 
-	if (! best_match)
+	if (best_match < 0)
 	{
 		Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
-	y1 = best_match->start->y;
-	y2 = best_match->end->y;
+	const LineDef *best_ld = LineDefs[best_match];
+
+	y1 = best_ld->Start()->y();
+	y2 = best_ld->End()->y();
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
-			best_match->index, y1, y2, best_dist);
+			best_match, y1, y2, best_dist);
 # endif
 
 	/* sanity check: shouldn't be directly on the line */
 # if DEBUG_POLYOBJ
 	if (fabs(best_dist) < DIST_EPSILON)
 	{
-		DebugPrintf("  Polyobj FAILURE: directly on the line (%d)\n",
-				best_match->index);
+		DebugPrintf("  Polyobj FAILURE: directly on the line (%d)\n", best_match);
 	}
 # endif
 
@@ -378,9 +380,9 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = best_match->right ? best_match->right->sector : -1;
+		sector = best_ld->right >= 0 ? best_ld->Right()->sector : -1;
 	else
-		sector = best_match->left ? best_match->left->sector : -1;
+		sector = best_ld->left >= 0 ? best_ld->Left()->sector : -1;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -413,15 +415,15 @@ void DetectPolyobjSectors(void)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < num_linedefs ; i++)
+	for (i = 0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+		const LineDef *L = LineDefs[i];
 
 		if (L->type == HEXTYPE_POLY_START || L->type == HEXTYPE_POLY_EXPLICIT)
 			break;
 	}
 
-	if (i == num_linedefs)
+	if (i == NumLineDefs)
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -530,9 +532,10 @@ void DetectOverlappingVertices(void)
 	// DOES NOT affect the on-disk linedefs.
 	// this is mainly to help the miniseg creation code.
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+/* FIXME !!!  DO THIS ANOTHER WAY
+		LineDef *L = LineDefs[i];
 
 		while (L->start->overlap)
 		{
@@ -543,18 +546,19 @@ void DetectOverlappingVertices(void)
 		{
 			L->end = L->end->overlap;
 		}
+*/
 	}
 }
 
 
-static inline int LineVertexLowest(const linedef_t *L)
+static inline int LineVertexLowest(const LineDef *L)
 {
 	// returns the "lowest" vertex (normally the left-most, but if the
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-	return ((int)L->start->x < (int)L->end->x ||
-			((int)L->start->x == (int)L->end->x &&
-			 (int)L->start->y <  (int)L->end->y)) ? 0 : 1;
+	return ( L->Start()->raw_x <  L->End()->raw_x ||
+			(L->Start()->raw_x == L->End()->raw_x &&
+			 L->Start()->raw_y <  L->End()->raw_y)) ? 0 : 1;
 }
 
 static int LineStartCompare(const void *p1, const void *p2)
@@ -562,23 +566,20 @@ static int LineStartCompare(const void *p1, const void *p2)
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
-	linedef_t *A = lev_linedefs[line1];
-	linedef_t *B = lev_linedefs[line2];
-
-	vertex_t *C;
-	vertex_t *D;
-
 	if (line1 == line2)
 		return 0;
 
+	const LineDef *A = LineDefs[line1];
+	const LineDef *B = LineDefs[line2];
+
 	// determine left-most vertex of each line
-	C = LineVertexLowest(A) ? A->end : A->start;
-	D = LineVertexLowest(B) ? B->end : B->start;
+	const Vertex *C = LineVertexLowest(A) ? A->End() : A->Start();
+	const Vertex *D = LineVertexLowest(B) ? B->End() : B->Start();
 
-	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x;
+	if (C->raw_x != D->raw_x)
+		return C->raw_x - D->raw_x;
 
-	return (int)C->y - (int)D->y;
+	return C->raw_y - D->raw_y;
 }
 
 static int LineEndCompare(const void *p1, const void *p2)
@@ -586,23 +587,20 @@ static int LineEndCompare(const void *p1, const void *p2)
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
-	linedef_t *A = lev_linedefs[line1];
-	linedef_t *B = lev_linedefs[line2];
-
-	vertex_t *C;
-	vertex_t *D;
-
 	if (line1 == line2)
 		return 0;
 
+	const LineDef *A = LineDefs[line1];
+	const LineDef *B = LineDefs[line2];
+
 	// determine right-most vertex of each line
-	C = LineVertexLowest(A) ? A->start : A->end;
-	D = LineVertexLowest(B) ? B->start : B->end;
+	const Vertex * C = LineVertexLowest(A) ? A->Start() : A->End();
+	const Vertex * D = LineVertexLowest(B) ? B->Start() : B->End();
 
-	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x;
+	if (C->raw_x != D->raw_x)
+		return C->raw_x - D->raw_x;
 
-	return (int)C->y - (int)D->y;
+	return C->raw_y - D->raw_y;
 }
 
 
@@ -614,20 +612,20 @@ void DetectOverlappingLines(void)
 	//   Note: does not detect partially overlapping lines.
 
 	int i;
-	int *array = (int *)UtilCalloc(num_linedefs * sizeof(int));
+	int *array = (int *)UtilCalloc(NumLineDefs * sizeof(int));
 	int count = 0;
 
 	// sort array of indices
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < NumLineDefs ; i++)
 		array[i] = i;
 
-	qsort(array, num_linedefs, sizeof(int), LineStartCompare);
+	qsort(array, NumLineDefs, sizeof(int), LineStartCompare);
 
-	for (i=0 ; i < num_linedefs - 1 ; i++)
+	for (i=0 ; i < NumLineDefs - 1 ; i++)
 	{
 		int j;
 
-		for (j = i+1 ; j < num_linedefs ; j++)
+		for (j = i+1 ; j < NumLineDefs ; j++)
 		{
 			if (LineStartCompare(array + i, array + j) != 0)
 				break;
@@ -636,8 +634,8 @@ void DetectOverlappingLines(void)
 			{
 				// found an overlap !
 
-				linedef_t *B = lev_linedefs[array[j]];
-				B->flags |= MLF_IS_OVERLAP;
+				LineDef *L = LineDefs[array[j]];
+				L->flags |= MLF_IS_OVERLAP;
 				count++;
 			}
 		}
@@ -696,23 +694,23 @@ void CalculateWallTips(void)
 {
 	int i;
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *L = lev_linedefs[i];
+		const LineDef *L = LineDefs[i];
 
-		if ((L->flags & MLF_IS_OVERLAP) || L->zero_len)
+		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength())
 			continue;
 
-		double x1 = L->start->x;
-		double y1 = L->start->y;
-		double x2 = L->end->x;
-		double y2 = L->end->y;
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
 
-		int left  = (L->left)  ? L->left->sector  : -1;
-		int right = (L->right) ? L->right->sector : -1;
+		int left  = (L->left)  ? L->Left()->sector  : -1;
+		int right = (L->right) ? L->Right()->sector : -1;
 
-		VertexAddWallTip(L->start, x2-x1, y2-y1, left, right);
-		VertexAddWallTip(L->end,   x1-x2, y1-y2, right, left);
+		VertexAddWallTip(LookupVertex(L->start), x2-x1, y2-y1, left, right);
+		VertexAddWallTip(LookupVertex(L->end),   x1-x2, y1-y2, right, left);
 	}
 
 # if DEBUG_WALLTIPS

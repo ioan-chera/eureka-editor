@@ -407,7 +407,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef && (check->linedef->flags & MLF_IS_PRECIOUS))
+			if (check->linedef >= 0 && (LineDefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -475,7 +475,7 @@ static int EvalPartitionWorker(superblock_t *seg_list, seg_t *part,
 		// are exhausted. This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef && (check->linedef->flags & MLF_IS_PRECIOUS))
+		if (check->linedef >= 0 && (LineDefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -798,7 +798,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = UtilPerpDist(part, seg->psx, seg->psy);
 	double b = UtilPerpDist(part, seg->pex, seg->pey);
 
-	bool self_ref = seg->linedef ? seg->linedef->self_ref : false;
+	bool self_ref = (seg->linedef >= 0) ? LineDefs[seg->linedef]->IsSelfRef() : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1442,15 +1442,19 @@ void SplitSegInSuper(superblock_t *block, seg_t *seg)
 	while (block != NULL);
 }
 
-static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
-		SideDef *side, int side_num)
+static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
+		int side_index, int side_num)
 {
+	SideDef *side = NULL;
+	if (side_index >= 0)
+		side = SideDefs[side_index];
+
 	seg_t *seg = NewSeg();
 
 	// check for bad sidedef
 	if (! side->sector)
 	{
-		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line->index);
+		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
 
 	seg->start   = start;
@@ -1475,7 +1479,6 @@ static seg_t *CreateOneSeg(linedef_t *line, vertex_t *start, vertex_t *end,
 //
 superblock_t *CreateSegs(void)
 {
-	int i;
 	int bw, bh;
 
 	seg_t *left, *right;
@@ -1490,42 +1493,37 @@ superblock_t *CreateSegs(void)
 
 	// step through linedefs and get side numbers
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *line = LookupLinedef(i);
+		const LineDef *line = LineDefs[i];
 
 		right = NULL;
 
 		// ignore zero-length lines
-		if (line->zero_len)
+		if (line->IsZeroLength())
 			continue;
 
 		// ignore overlapping lines
 		if (line->flags & MLF_IS_OVERLAP)
 			continue;
 
-		// check for Humungously long lines
-		if (ABS(line->start->x - line->end->x) >= 10000 ||
-			ABS(line->start->y - line->end->y) >= 10000)
-		{
-			if (UtilComputeDist(line->start->x - line->end->x,
-				line->start->y - line->end->y) >= 30000)
-			{
-				Warning("Linedef #%d is VERY long, it may cause problems\n", line->index);
-			}
-		}
+		// check for extremely long lines
+		if (line->CalcLength() >= 30000)
+			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right)
 		{
-			right = CreateOneSeg(line, line->start, line->end, line->right, 0);
+			right = CreateOneSeg(i, LookupVertex(line->start), LookupVertex(line->end), line->right, 0);
 			AddSegToSuper(block, right);
 		}
 		else
-			Warning("Linedef #%d has no right sidedef!\n", line->index);
+		{
+			Warning("Linedef #%d has no right sidedef!\n", i);
+		}
 
 		if (line->left)
 		{
-			left = CreateOneSeg(line, line->end, line->start, line->left, 1);
+			left = CreateOneSeg(i, LookupVertex(line->end), LookupVertex(line->start), line->left, 1);
 			AddSegToSuper(block, left);
 
 			if (right)
@@ -1541,9 +1539,7 @@ superblock_t *CreateSegs(void)
 		else
 		{
 			if (line->flags & MLF_TwoSided)
-			{
-				Warning("Linedef #%d is 2s but has no left sidedef\n", line->index);
-			}
+				Warning("Linedef #%d is 2s but has no left sidedef\n", i);
 		}
 	}
 
@@ -1647,9 +1643,9 @@ static void ClockwiseOrder(subsec_t *sub)
 	{
 		int cur_score = 3;
 
-		if (! array[i]->linedef)
+		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (array[i]->linedef->self_ref)
+		else if (LineDefs[array[i]->linedef]->IsSelfRef())
 			cur_score = 2;
 
 		if (cur_score > score)
@@ -1762,7 +1758,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 		if (seg->linedef)
 			MinorIssue("Sector #%d has sidedef facing #%d (line #%d) "
 					"near (%1.0f,%1.0f).\n", compare->sector,
-					seg->sector, seg->linedef->index,
+					seg->sector, seg->linedef,
 					sub->mid_x, sub->mid_y);
 		else
 			MinorIssue("Sector #%d has sidedef facing #%d "
@@ -1985,24 +1981,27 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 	*N = node = NewNode();
 
-	SYS_ASSERT(best->linedef);
+	SYS_ASSERT(best->linedef >= 0);
+
+	const LineDef *best_L = LineDefs[best->linedef];
 
 	if (best->side == 0)
 	{
-		node->x  = best->linedef->start->x;
-		node->y  = best->linedef->start->y;
-		node->dx = best->linedef->end->x - node->x;
-		node->dy = best->linedef->end->y - node->y;
+		node->x  = best_L->Start()->x();
+		node->y  = best_L->Start()->y();
+		node->dx = best_L->End()->x() - node->x;
+		node->dy = best_L->End()->y() - node->y;
 	}
 	else  /* left side */
 	{
-		node->x  = best->linedef->end->x;
-		node->y  = best->linedef->end->y;
-		node->dx = best->linedef->start->x - node->x;
-		node->dy = best->linedef->start->y - node->y;
+		node->x  = best_L->End()->x();
+		node->y  = best_L->End()->y();
+		node->dx = best_L->Start()->x() - node->x;
+		node->dy = best_L->Start()->y() - node->y;
 	}
 
 	/* check for really long partition (overflows dx,dy in NODES) */
+	// FIXME review for UDMF
 	if (best->p_length >= 30000)
 	{
 		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
