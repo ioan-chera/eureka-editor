@@ -520,6 +520,13 @@ int VertexCheckOpen(vertex_t *vert, double dx, double dy);
 #define ANG_EPSILON  (1.0 / 1024.0)
 
 
+inline void ListAddSeg(seg_t **list_ptr, seg_t *seg)
+{
+	seg->next = *list_ptr;
+	*list_ptr = seg;
+}
+
+
 // an "intersection" remembers the vertex that touches a BSP divider
 // line (especially a new vertex that is created at a seg split).
 
@@ -560,7 +567,6 @@ intersection_t;
 seg_t *PickNode(quadtree_c *tree, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
-void FindLimits(quadtree_c *tree, bbox_t *bbox);
 void FindLimits2(seg_t *list, bbox_t *bbox);
 
 // compute the seg private info (psx/y, pex/y, pdx/y, etc).
@@ -607,11 +613,6 @@ void FreeQuickAllocCuts(void);
 //
 int BoxOnLineSide(quadtree_c *box, seg_t *part);
 
-// increase the counts within the superblock, to account for the given
-// seg being split.
-//
-void SplitSegInSuper(quadtree_c *tree, seg_t *seg);
-
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
 //
@@ -626,7 +627,7 @@ quadtree_c *TreeFromSegList(seg_t *list);
 // and '*N' is the new node (and '*S' is set to NULL).  Normally
 // returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 //
-build_result_e BuildNodes(quadtree_c *tree,
+build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
     node_t ** N, subsec_t ** S, int depth);
 
 // compute the height of the bsp tree, starting at 'node'.

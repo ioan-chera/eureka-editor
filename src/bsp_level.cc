@@ -1863,6 +1863,9 @@ void LoadLevel()
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
 
+		// init some fake flags
+		L->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
+
 		if (L->tag >= 900 && L->tag < 1000)
 			L->flags |= MLF_IS_PRECIOUS;
 	}
@@ -2310,20 +2313,16 @@ Lump_c * CreateGLMarker()
 // MAIN STUFF
 //------------------------------------------------------------------------
 
-
 nodebuildinfo_t * cur_info = NULL;
 
 
-/* ----- build nodes for a single level --------------------------- */
-
-build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
+build_result_e BuildLevel(nodebuildinfo_t *info, short lev_idx)
 {
 	cur_info = info;
 
 	node_t *root_node  = NULL;
 	subsec_t *root_sub = NULL;
-
-	build_result_e ret = BUILD_OK;
+	bbox_t root_bbox;
 
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
@@ -2335,13 +2334,16 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	InitBlockmap();
 
+
+	build_result_e ret = BUILD_OK;
+
 	if (num_real_lines > 0)
 	{
 		// create initial segs
 		seg_t *list = CreateSegs();
 
 		// recursively create nodes
-		ret = BuildNodes(list, &root_node, &root_sub, 0);
+		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0);
 	}
 
 	if (ret == BUILD_OK)
@@ -2367,7 +2369,6 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	FreeLevel();
 	FreeQuickAllocCuts();
-	FreeQuickAllocSupers();
 
 	// clear some fake line flags
 	for (int i = 0 ; i < NumLineDefs ; i++)
@@ -2381,7 +2382,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx)
 {
-	return ajbsp::BuildNodesForLevel(info, lev_idx);
+	return ajbsp::BuildLevel(info, lev_idx);
 }
 
 //--- editor settings ---
