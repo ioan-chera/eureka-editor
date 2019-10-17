@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2019  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -1928,6 +1928,7 @@ void SortSegs()
 /* ----- ZDoom format writing --------------------------- */
 
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
+static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
 void PutZVertices(void)
@@ -2167,6 +2168,26 @@ void SaveZDFormat(node_t *root_node)
 		lump->Write(lev_ZNOD_magic, 4);
 	else
 		lump->Write(lev_XNOD_magic, 4);
+
+	// the ZLibXXX functions do no compression for XNOD format
+	ZLibBeginLump(lump);
+
+	PutZVertices();
+	PutZSubsecs();
+	PutZSegs();
+	PutZNodes(root_node);
+
+	ZLibFinishLump();
+}
+
+
+void SaveXGL3Format(node_t *root_node)
+{
+	// WISH : compute a max_size
+
+	Lump_c *lump = CreateLevelLump("ZNODES", -1);
+
+	lump->Write(lev_XGL3_magic, 4);
 
 	// the ZLibXXX functions do no compression for XNOD format
 	ZLibBeginLump(lump);
@@ -2444,6 +2465,38 @@ build_result_e SaveLevel(node_t *root_node)
 	{
 		UpdateGLMarker(gl_marker);
 	}
+
+	edit_wad->EndWrite();
+
+	if (lev_overflows > 0)
+	{
+		cur_info->total_failed_maps++;
+		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+
+		return BUILD_LumpOverflow;
+	}
+
+	return BUILD_OK;
+}
+
+
+build_result_e SaveLevel_UDMF(node_t *root_node)
+{
+	if (num_real_lines == 0)
+		return BUILD_OK;
+
+	edit_wad->BeginWrite();
+
+	// remove any existing ZNODES lump
+	// FIXME edit_wad->RemoveGLNodes(lev_current_idx);
+
+	// FIXME review these
+	lev_force_v5   = true;
+	lev_force_xnod = true;
+
+	SortSegs();
+
+	SaveXGL3Format(root_node);
 
 	edit_wad->EndWrite();
 
