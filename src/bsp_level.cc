@@ -941,36 +941,14 @@ node_t *LookupNode(int index)
 /* ----- reading routines ------------------------------ */
 
 
-void GetVertices(void)
+static void GetVertices(void)
 {
-	int i, count=-1;
-
-	Lump_c *lump = FindLevelLump("VERTEXES");
-
-	if (lump)
-		count = lump->Length() / sizeof(raw_vertex_t);
-
-# if DEBUG_LOAD
-	DebugPrintf("GetVertices: num = %d\n", count);
-# endif
-
-	if (!lump || count == 0)
-		return;
-
-	if (! lump->Seek())
-		FatalError("Error seeking to vertices.\n");
-
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		raw_vertex_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading vertices.\n");
-
 		vertex_t *vert = NewVertex();
 
-		vert->x = (double) LE_S16(raw.x);
-		vert->y = (double) LE_S16(raw.y);
+		vert->x = Vertices[i]->x();
+		vert->y = Vertices[i]->x();
 
 		vert->index = i;
 	}
@@ -1846,6 +1824,7 @@ void LoadLevel()
 	lev_overflows = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
+	// FIXME : review this for UDMF
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
 
 	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
