@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -959,13 +959,55 @@ void GetLevelFormat(Wad_file *wad, const char *level)
 
 void LoadLevel(Wad_file *wad, const char *level)
 {
-	GetLevelFormat(wad, level);
+	short lev_num = wad->LevelFind(level);
 
-	load_wad = wad;
-
-	loading_level = load_wad->LevelFind(level);
-	if (loading_level < 0)
+	if (lev_num < 0)
 		FatalError("No such map: %s\n", level);
+
+	LoadLevelNum(wad, lev_num);
+
+	// reset various editor state
+	Editor_ClearAction();
+	Selection_InvalidateLast();
+	Render3D_ClearSelection();
+
+	edit.Selected->clear_all();
+	edit.highlight.clear();
+
+	main_win->UpdateTotals();
+	main_win->UpdateGameInfo();
+	main_win->InvalidatePanelObj();
+	main_win->redraw();
+
+	if (main_win)
+	{
+		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+
+		// load the user state associated with this map
+		crc32_c adler_crc;
+
+		BA_LevelChecksum(adler_crc);
+
+		if (! M_LoadUserState())
+		{
+			M_DefaultUserState();
+		}
+	}
+
+	Level_name  = StringUpper(level);
+
+	Status_Set("Loaded %s", Level_name);
+
+	RedrawMap();
+}
+
+
+void LoadLevelNum(Wad_file *wad, short lev_num)
+{
+	load_wad = wad;
+	loading_level = lev_num;
+
+	Level_format = load_wad->LevelFormat(loading_level);
 
 	BA_ClearAll();
 
@@ -1008,7 +1050,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 		ShowLoadProblem();
 	}
 
-
 	// Node builders create a lot of new vertices for segs.
 	// However they just get in the way for editing, so remove them.
 	RemoveUnusedVerticesAtEnd();
@@ -1017,45 +1058,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 
 	CalculateLevelBounds();
 
-
-	// reset various editor state
-
-	Editor_ClearAction();
-
-	Selection_InvalidateLast();
-	Render3D_ClearSelection();
-
-	edit.Selected->clear_all();
-	edit.highlight.clear();
-
-	main_win->UpdateTotals();
-	main_win->UpdateGameInfo();
-	main_win->InvalidatePanelObj();
-	main_win->redraw();
-
 	MadeChanges = 0;
-
-
-	Level_name = StringUpper(level);
-
-	Status_Set("Loaded %s", Level_name);
-
-	if (main_win)
-	{
-		main_win->SetTitle(wad->PathName(), level, load_wad->IsReadOnly());
-
-		// load the user state associated with this map
-		crc32_c adler_crc;
-
-		BA_LevelChecksum(adler_crc);
-
-		if (! M_LoadUserState())
-		{
-			M_DefaultUserState();
-		}
-	}
-
-	RedrawMap();
 }
 
 
