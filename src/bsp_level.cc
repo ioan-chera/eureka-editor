@@ -1169,7 +1169,7 @@ void PutSegs(void)
 		seg_t *seg = segs[i];
 
 		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->is_degenerate)
+		if (seg->linedef < 0 || seg->is_degenerate)
 			continue;
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
@@ -1623,7 +1623,7 @@ void PutZSubsecs(void)
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			// ignore minisegs and degenerate segs
-			if (! seg->linedef || seg->is_degenerate)
+			if (seg->linedef < 0 || seg->is_degenerate)
 				continue;
 
 			if (cur_seg_index != seg->index)
@@ -1656,7 +1656,7 @@ void PutZSegs(void)
 		seg_t *seg = segs[i];
 
 		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->is_degenerate)
+		if (seg->linedef < 0 || seg->is_degenerate)
 			continue;
 
 		if (count != seg->index)

@@ -161,7 +161,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 	vertex_t *new_vert;
 
 # if DEBUG_SPLIT
-	if (old_seg->linedef)
+	if (old_seg->linedef >= 0)
 		DebugPrintf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
 				old_seg->linedef->index, old_seg, x, y);
 	else
@@ -579,7 +579,7 @@ static void EvaluateFastWorker(quadtree_c *tree,
 	for (part=tree->list ; part ; part = part->next)
 	{
 		/* ignore minisegs as partition candidates */
-		if (! part->linedef)
+		if (part->linedef < 0)
 			continue;
 
 		if (part->pdy == 0)
@@ -677,7 +677,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 #   endif
 
 		/* ignore minisegs as partition candidates */
-		if (! part->linedef)
+		if (part->linedef < 0)
 			continue;
 
 		int cost = EvalPartition(tree, part, *best_cost);
@@ -1634,7 +1634,7 @@ static void SanityCheckSameSector(subsec_t *sub)
 
 //!!!		compare->sector->warned_facing = seg->sector;
 
-		if (seg->linedef)
+		if (seg->linedef >= 0)
 			MinorIssue("Sector #%d has sidedef facing #%d (line #%d) "
 					"near (%1.0f,%1.0f).\n", compare->sector,
 					seg->sector, seg->linedef,
@@ -1652,10 +1652,8 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 	seg_t *seg;
 
 	for (seg=sub->seg_list ; seg ; seg=seg->next)
-	{
-		if (seg->linedef)
+		if (seg->linedef >= 0)
 			return;
-	}
 
 	BugError("Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
 			sub->index, sub->mid_x, sub->mid_y);
@@ -1912,7 +1910,7 @@ static void NormaliseSubsector(subsec_t *sub)
 		sub->seg_list = seg->next;
 
 		// only add non-minisegs to new list
-		if (seg->linedef)
+		if (seg->linedef >= 0)
 		{
 			seg->next = NULL;
 
@@ -2002,14 +2000,14 @@ static void RoundOffSubsector(subsec_t *sub)
 		{
 			seg->is_degenerate = 1;
 
-			if (seg->linedef)
+			if (seg->linedef >= 0)
 				last_real_degen = seg;
 
 			degen_total++;
 			continue;
 		}
 
-		if (seg->linedef)
+		if (seg->linedef >= 0)
 			real_total++;
 	}
 
