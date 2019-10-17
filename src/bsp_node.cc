@@ -672,7 +672,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 
 #   if DEBUG_PICKNODE
 		DebugPrintf("PickNode:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				part->linedef ? "" : "MINI", part, part->sector,
+				part->linedef >= 0 ? "" : "MINI", part, part->sector,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
 
@@ -1379,7 +1379,7 @@ seg_t *CreateSegs()
 		if (line->CalcLength() >= 30000)
 			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
-		if (line->right)
+		if (line->right >= 0)
 		{
 			right = CreateOneSeg(i, LookupVertex(line->start), LookupVertex(line->end), line->right, 0);
 
@@ -1390,7 +1390,7 @@ seg_t *CreateSegs()
 			Warning("Linedef #%d has no right sidedef!\n", i);
 		}
 
-		if (line->left)
+		if (line->left >= 0)
 		{
 			left = CreateOneSeg(i, LookupVertex(line->end), LookupVertex(line->start), line->left, 1);
 
@@ -1734,7 +1734,7 @@ static void DebugShowSegs(superblock_t *seg_list)
 	for (seg=seg_list->segs ; seg ; seg=seg->next)
 	{
 		DebugPrintf("Build:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				seg->linedef ? "" : "MINI", seg, seg->sector->index,
+				seg->linedef >= 0 ? "" : "MINI", seg, seg->sector,
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
 

@@ -654,12 +654,7 @@ static void Reject_GroupSectors()
 		linedef_t *line = LookupLinedef(i);
 		sector_t *sec1, *sec2, *tmp;
 
-		if (! line->right || ! line->left)
-			continue;
-
-		// the standard DOOM engine will not allow sight past lines
-		// lacking the TWOSIDED flag, so we can skip them here too.
-		if (! (line->flags & MLF_TwoSided))
+		if (line->right < 0 || line->left < 0)
 			continue;
 
 		sec1 = line->right->sector;

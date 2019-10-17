@@ -380,9 +380,9 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = best_ld->right >= 0 ? best_ld->Right()->sector : -1;
+		sector = (best_ld->right >= 0) ? best_ld->Right()->sector : -1;
 	else
-		sector = best_ld->left >= 0 ? best_ld->Left()->sector : -1;
+		sector = (best_ld->left >= 0) ? best_ld->Left()->sector : -1;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -706,8 +706,8 @@ void CalculateWallTips(void)
 		double x2 = L->End()->x();
 		double y2 = L->End()->y();
 
-		int left  = (L->left)  ? L->Left()->sector  : -1;
-		int right = (L->right) ? L->Right()->sector : -1;
+		int left  = (L->left  >= 0) ? L->Left()->sector  : -1;
+		int right = (L->right >= 0) ? L->Right()->sector : -1;
 
 		VertexAddWallTip(LookupVertex(L->start), x2-x1, y2-y1, left, right);
 		VertexAddWallTip(LookupVertex(L->end),   x1-x2, y1-y2, right, left);
