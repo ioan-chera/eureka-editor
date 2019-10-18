@@ -257,12 +257,6 @@ inline bool coalesce_sec(Sector *sec)
 }
 
 
-// TODO for sectors:
-//	// suppress superfluous mini warnings
-//	int warned_facing;
-//	boolr warned_unclosed;
-
-
 typedef struct seg_s
 {
 	// link for list
@@ -372,6 +366,7 @@ child_t;
 
 typedef struct node_s
 {
+	// FIXME higher precision node coords for UDMF
 	int x, y;     // starting point
 	int dx, dy;   // offset to ending point
 
@@ -386,6 +381,9 @@ typedef struct node_s
 	// the node is too long, and the (dx,dy) values should be halved
 	// when writing into the NODES lump.
 	int too_long;
+
+public:
+	void SetPartition(const seg_t *part);
 }
 node_t;
 

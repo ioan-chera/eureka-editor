@@ -1146,6 +1146,43 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
+void node_t::SetPartition(const seg_t *part)
+{
+	SYS_ASSERT(part->linedef >= 0);
+
+	const LineDef *part_L = LineDefs[part->linedef];
+
+	if (part->side == 0)  /* right side */
+	{
+		x  = part_L->Start()->x();
+		y  = part_L->Start()->y();
+		dx = part_L->End()->x() - x;
+		dy = part_L->End()->y() - y;
+	}
+	else  /* left side */
+	{
+		x  = part_L->End()->x();
+		y  = part_L->End()->y();
+		dx = part_L->Start()->x() - x;
+		dy = part_L->Start()->y() - y;
+	}
+
+	/* check for really long partition (overflows dx,dy in NODES) */
+	if (part->p_length >= 30000)
+	{
+/* FIXME REVIEW THIS
+		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
+		{
+			LogPrintf("Loss of accuracy on VERY long node: "
+					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
+					node->x + node->dx, node->y + node->dy);
+		}
+*/
+		too_long = 1;
+	}
+}
+
+
 /* ----- quad-tree routines ------------------------------------ */
 
 quadtree_c::quadtree_c(int _x1, int _y1, int _x2, int _y2) :
@@ -1699,39 +1736,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	SYS_ASSERT(part->linedef >= 0);
-
-	// FIXME a method for all this
-	const LineDef *part_L = LineDefs[part->linedef];
-
-	if (part->side == 0)
-	{
-		node->x  = part_L->Start()->x();
-		node->y  = part_L->Start()->y();
-		node->dx = part_L->End()->x() - node->x;
-		node->dy = part_L->End()->y() - node->y;
-	}
-	else  /* left side */
-	{
-		node->x  = part_L->End()->x();
-		node->y  = part_L->End()->y();
-		node->dx = part_L->Start()->x() - node->x;
-		node->dy = part_L->Start()->y() - node->y;
-	}
-
-	/* check for really long partition (overflows dx,dy in NODES) */
-	if (part->p_length >= 30000)
-	{
-/* FIXME REVIEW THIS
-		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
-		{
-			LogPrintf("Loss of accuracy on VERY long node: "
-					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
-					node->x + node->dx, node->y + node->dy);
-		}
-*/
-		node->too_long = 1;
-	}
+	node->SetPartition(part);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going LEFT\n");
@@ -1773,6 +1778,7 @@ void ClockwiseBspTree()
 		SanityCheckHasRealSeg(sub);
 	}
 }
+
 
 static void NormaliseSubsector(subsec_t *sub)
 {
