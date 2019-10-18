@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2000-2018  Andrew Apted, et al
+//  AJ-BSP  Copyright (C) 2000-2019  Andrew Apted, et al
 //          Copyright (C) 1994-1998  Colin Reed
 //          Copyright (C) 1997-1998  Lee Killough
 //
@@ -651,14 +651,14 @@ void DetectOverlappingLines(void)
 /* ----- vertex routines ------------------------------- */
 
 static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
-		int sec_left, int sec_right)
+		int open_left, int open_right)
 {
 	walltip_t *tip = NewWallTip();
 	walltip_t *after;
 
 	tip->angle = UtilComputeAngle(dx, dy);
-	tip->sec_left  = sec_left;
-	tip->sec_right = sec_right;
+	tip->open_left  = open_left;
+	tip->open_right = open_right;
 
 	// find the correct place (order is increasing angle)
 	for (after=vert->tip_set ; after && after->next ; after=after->next)
@@ -688,7 +688,7 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 }
 
 
-void CalculateWallTips(void)
+void CalculateWallTips()
 {
 	int i;
 
@@ -704,8 +704,8 @@ void CalculateWallTips(void)
 		double x2 = L->End()->x();
 		double y2 = L->End()->y();
 
-		int left  = (L->left  >= 0) ? L->Left()->sector  : -1;
-		int right = (L->right >= 0) ? L->Right()->sector : -1;
+		bool left  = (L->left  >= 0) && is_sector(L->Left()->sector);
+		bool right = (L->right >= 0) && is_sector(L->Right()->sector);
 
 		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
 		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);
@@ -721,7 +721,7 @@ void CalculateWallTips(void)
 		for (walltip_t *tip = V->tip_set ; tip ; tip = tip->next)
 		{
 			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
-					tip->sec_left, tip->sec_right);
+					tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
 		}
 	}
 # endif
@@ -740,12 +740,8 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	num_new_vert++;
 
 	// compute wall-tip info
-
-	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, seg->sector,
-			seg->partner ? seg->partner->sector : -1);
-
-	VertexAddWallTip(vert, seg->pdx, seg->pdy,
-			seg->partner ? seg->partner->sector : -1, seg->sector);
+	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, true, true);
+	VertexAddWallTip(vert,  seg->pdx,  seg->pdy, true, true);
 
 	return vert;
 }
@@ -791,7 +787,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 }
 
 
-int VertexCheckOpen(vertex_t *vert, double dx, double dy)
+bool VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
 	walltip_t *tip;
 
@@ -806,8 +802,8 @@ int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		if (fabs(tip->angle - angle) < ANG_EPSILON ||
 			fabs(tip->angle - angle) > (360.0 - ANG_EPSILON))
 		{
-			// yes, found one
-			return NIL_OBJ;
+			// found one, hence closed
+			return false;
 		}
 	}
 
@@ -820,7 +816,7 @@ int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		if (angle + ANG_EPSILON < tip->angle)
 		{
 			// found it
-			return tip->sec_right;
+			return tip->open_right;
 		}
 
 		if (! tip->next)
@@ -828,12 +824,12 @@ int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 			// no more tips, thus we must be on the LEFT side of the tip
 			// with the largest angle.
 
-			return tip->sec_left;
+			return tip->open_left;
 		}
 	}
 
-	BugError("Vertex %d has no tips!\n", vert->index);
-	return NIL_OBJ;
+	// usually won't get here
+	return true;
 }
 
 

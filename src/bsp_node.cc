@@ -262,27 +262,40 @@ static inline void ComputeIntersection(seg_t *seg, seg_t *part,
 static void AddIntersection(intersection_t ** cut_list,
 		vertex_t *vert, seg_t *part, bool self_ref)
 {
+	bool open_before = VertexCheckOpen(vert, -part->pdx, -part->pdy);
+	bool open_after  = VertexCheckOpen(vert,  part->pdx,  part->pdy);
+
+	double along_dist = part->ParallelDist(vert->x, vert->y);
+
 	intersection_t *cut;
 	intersection_t *after;
 
-	/* check if vertex already present */
+	/* merge with any existing vertex? */
 	for (cut=(*cut_list) ; cut ; cut=cut->next)
 	{
 		if (vert == cut->vertex)
 			return;
+
+		if (fabs(along_dist - cut->along_dist) < DIST_EPSILON)
+		{
+			// a CLOSED aspect always overrides an OPEN one
+			if (! open_before) cut->open_before = false;
+			if (! open_after)  cut->open_after  = false;
+
+			return;
+		}
 	}
 
 	/* create new intersection */
 	cut = NewIntersection();
 
 	cut->vertex = vert;
-	cut->along_dist = part->ParallelDist(vert->x, vert->y);
+	cut->along_dist = along_dist;
 	cut->self_ref = self_ref;
+	cut->open_before = open_before;
+	cut->open_after  = open_after;
 
-	cut->sec_before = VertexCheckOpen(vert, -part->pdx, -part->pdy);
-	cut->sec_after  = VertexCheckOpen(vert,  part->pdx,  part->pdy);
-
-	/* enqueue the new intersection into the list */
+	/* insert the new intersection into the list */
 
 	for (after=(*cut_list) ; after && after->next ; after=after->next)
 	{ }
@@ -671,8 +684,8 @@ static bool PickNodeWorker(quadtree_c *part_list,
 			return false;
 
 #   if DEBUG_PICKNODE
-		DebugPrintf("PickNode:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				part->linedef >= 0 ? "" : "MINI", part, part->sector,
+		DebugPrintf("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+				part->linedef >= 0 ? "" : "MINI", part,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
 
@@ -917,15 +930,14 @@ void FindLimits2(seg_t *list, bbox_t *bbox)
 }
 
 
-void AddMinisegs(seg_t *part,
-		seg_t **left_list, seg_t **right_list,
-		intersection_t *cut_list)
+void AddMinisegs(intersection_t *cut_list, seg_t *part,
+		seg_t **left_list, seg_t **right_list)
 {
-	intersection_t *cur, *next;
-	seg_t *seg, *buddy;
-
 	if (! cut_list)
 		return;
+
+	intersection_t *cur, *next;
+	seg_t *seg, *buddy;
 
 # if DEBUG_CUTLIST
 	DebugPrintf("CUT LIST:\n");
@@ -943,132 +955,35 @@ void AddMinisegs(seg_t *part,
 	}
 # endif
 
-	// STEP 1: fix problems the intersection list...
-
-	cur  = cut_list;
-	next = cur->next;
-
-	while (cur && next)
-	{
-		double len = next->along_dist - cur->along_dist;
-
-		if (len < -0.1)
-			BugError("Bad order in intersect list: %1.3f > %1.3f\n",
-					cur->along_dist, next->along_dist);
-
-		if (len > 0.2)
-		{
-			cur  = next;
-			next = cur->next;
-			continue;
-		}
-
-		if (len > DIST_EPSILON)
-		{
-			MinorIssue("Skipping very short seg (len=%1.3f) near (%1.1f,%1.1f)\n",
-					len, cur->vertex->x, cur->vertex->y);
-		}
-
-		// merge the two intersections into one
-
-# if DEBUG_CUTLIST
-		DebugPrintf("Merging cut (%1.0f,%1.0f) [%d/%d] with %p (%1.0f,%1.0f) [%d/%d]\n",
-				cur->vertex->x, cur->vertex->y,
-				cur->before ? cur->before->index : -1,
-				cur->after ? cur->after->index : -1,
-				next->vertex,
-				next->vertex->x, next->vertex->y,
-				next->before ? next->before->index : -1,
-				next->after ? next->after->index : -1);
-# endif
-
-		if (cur->self_ref && !next->self_ref)
-		{
-			if (cur->sec_before >= 0 && next->sec_before >= 0)
-				cur->sec_before = next->sec_before;
-
-			if (cur->sec_after >= 0 && next->sec_after >= 0)
-				cur->sec_after = next->sec_after;
-
-			cur->self_ref = false;
-		}
-
-		if (cur->sec_before < 0 && next->sec_before >= 0)
-			cur->sec_before = next->sec_before;
-
-		if (cur->sec_after < 0 && next->sec_after >= 0)
-			cur->sec_after = next->sec_after;
-
-# if DEBUG_CUTLIST
-		DebugPrintf("---> merged (%1.0f,%1.0f) [%d/%d] %s\n",
-				cur->vertex->x, cur->vertex->y,
-				cur->sec_before, cur->sec_after,
-				cur->self_ref ? "SELFREF" : "");
-# endif
-
-		// free the unused cut
-
-		cur->next = next->next;
-
-		next->next = quick_alloc_cuts;
-		quick_alloc_cuts = next;
-
-		next = cur->next;
-	}
-
-	// STEP 2: find connections in the intersection list...
+	// find open gaps in the intersection list, convert to minisegs
 
 	for (cur = cut_list ; cur && cur->next ; cur = cur->next)
 	{
 		next = cur->next;
 
-		if (cur->sec_after < 0 && next->sec_before < 0)
+		// sanity check
+		double len = next->along_dist - cur->along_dist;
+		if (len < -0.01)
+			BugError("Bad order in intersect list: %1.3f > %1.3f\n",
+					cur->along_dist, next->along_dist);
+
+		bool A = cur->open_after;
+		bool B = next->open_before;
+
+		// nothing possible is both ends are CLOSED
+		if (! (A || B))
 			continue;
 
-		// check for some nasty OPEN/CLOSED or CLOSED/OPEN cases
-		if (cur->sec_after >= 0 && next->sec_before < 0)
+		if (A != B)
 		{
-			if (!cur->self_ref) //!!! && !cur->after->warned_unclosed)
-			{
-				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
-						cur->sec_after,
-						(cur->vertex->x + next->vertex->x) / 2.0,
-						(cur->vertex->y + next->vertex->y) / 2.0);
-//!!!				cur->after->warned_unclosed = 1;
-			}
-			continue;
-		}
-		else if (cur->sec_after < 0 && next->sec_before >= 0)
-		{
-			if (!next->self_ref) //!!! && !next->before->warned_unclosed)
-			{
-				MinorIssue("Sector #%d is unclosed near (%1.1f,%1.1f)\n",
-						next->sec_before,
-						(cur->vertex->x + next->vertex->x) / 2.0,
-						(cur->vertex->y + next->vertex->y) / 2.0);
-//!!!				next->before->warned_unclosed = 1;
-			}
+			// a mismatch indicates something wrong with level geometry.
+			// warning about it is probably not worth it, so ignore it.
 			continue;
 		}
 
 		// righteo, here we have definite open space.
-		// do a sanity check on the sectors (just for good measure).
+		// create a miniseg pair...
 
-		if (cur->sec_after != next->sec_before)
-		{
-			if (!cur->self_ref && !next->self_ref)
-				MinorIssue("Sector mismatch: #%d (%1.1f,%1.1f) != #%d (%1.1f,%1.1f)\n",
-						cur->sec_after, cur->vertex->x, cur->vertex->y,
-						next->sec_before, next->vertex->x, next->vertex->y);
-
-			// choose the non-self-referencing sector when we can
-			if (cur->self_ref && !next->self_ref)
-			{
-				cur->sec_after = next->sec_before;
-			}
-		}
-
-		// create the miniseg pair
 		seg = NewSeg();
 		buddy = NewSeg();
 
@@ -1081,14 +996,10 @@ void AddMinisegs(seg_t *part,
 		buddy->start = next->vertex;
 		buddy->end   = cur->vertex;
 
-		seg->linedef = buddy->linedef = -1;
-
 		// leave 'side' as zero too (not needed for minisegs).
 
-		seg->sector = buddy->sector = cur->sec_after;
-
 		seg->index = buddy->index = -1;
-
+		seg->linedef = buddy->linedef = -1;
 		seg->source_line = buddy->source_line = part->linedef;
 
 		RecomputeSeg(seg);
@@ -1099,13 +1010,11 @@ void AddMinisegs(seg_t *part,
 		ListAddSeg(left_list, buddy);
 
 #   if DEBUG_CUTLIST
-		DebugPrintf("AddMiniseg: %p RIGHT  sector %d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				seg, seg->sector ? seg->sector->index : -1,
-				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+		DebugPrintf("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+				seg, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 
-		DebugPrintf("AddMiniseg: %p LEFT   sector %d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				buddy, buddy->sector ? buddy->sector->index : -1,
-				buddy->start->x, buddy->start->y, buddy->end->x, buddy->end->y);
+		DebugPrintf("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+				buddy, buddy->start->x, buddy->start->y, buddy->end->x, buddy->end->y);
 #   endif
 	}
 
@@ -1357,7 +1266,6 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 	seg->end     = end;
 	seg->linedef = line;
 	seg->side    = side_num;
-	seg->sector  = side->sector;
 	seg->partner = NULL;
 
 	seg->source_line = seg->linedef;
@@ -1612,58 +1520,6 @@ static void SanityCheckClosed(subsec_t *sub)
 }
 
 
-static void SanityCheckSameSector(subsec_t *sub)
-{
-	seg_t *seg;
-	seg_t *compare;
-
-	// find a suitable seg for comparison
-	for (compare=sub->seg_list ; compare ; compare=compare->next)
-	{
-		if (compare->sector < 0)
-			continue;
-
-		if (coalesce_sec(Sectors[compare->sector]))
-			continue;
-
-		break;
-	}
-
-	if (! compare)
-		return;
-
-	for (seg=compare->next ; seg ; seg=seg->next)
-	{
-		if (seg->sector < 0)
-			continue;
-
-		if (seg->sector == compare->sector)
-			continue;
-
-		// All subsectors must come from same sector unless it's marked
-		// "special" with sector tag >= 900. Original idea, Lee Killough
-		if (coalesce_sec(Sectors[seg->sector]))
-			continue;
-
-		// prevent excessive number of warnings
-//!!!		if (compare->sector->warned_facing == seg->sector->index)
-//!!!			continue;
-
-//!!!		compare->sector->warned_facing = seg->sector;
-
-		if (seg->linedef >= 0)
-			MinorIssue("Sector #%d has sidedef facing #%d (line #%d) "
-					"near (%1.0f,%1.0f).\n", compare->sector,
-					seg->sector, seg->linedef,
-					sub->mid_x, sub->mid_y);
-		else
-			MinorIssue("Sector #%d has sidedef facing #%d "
-					"near (%1.0f,%1.0f).\n", compare->sector,
-					seg->sector, sub->mid_x, sub->mid_y);
-	}
-}
-
-
 static void SanityCheckHasRealSeg(subsec_t *sub)
 {
 	seg_t *seg;
@@ -1829,7 +1685,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	if (lefts == NULL)
 		BugError("Separated seg-list has no LEFT side\n");
 
-	AddMinisegs(part, &lefts, &rights, cut_list);
+	AddMinisegs(cut_list, part, &lefts, &rights);
 
 	SYS_ASSERT(part->linedef >= 0);
 
@@ -1902,7 +1758,6 @@ void ClockwiseBspTree()
 
 		// do some sanity checks
 		SanityCheckClosed(sub);
-		SanityCheckSameSector(sub);
 		SanityCheckHasRealSeg(sub);
 	}
 }

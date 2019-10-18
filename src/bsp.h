@@ -222,11 +222,11 @@ typedef struct walltip_s
 	// angle that line makes at vertex (degrees).
 	angle_g angle;
 
-	// sectors on each side of wall.  Left is the side of increasing
-	// angles, right is the side of decreasing angles.  Either can be
-	// -1 for one sided walls.
-	int sec_left;
-	int sec_right;
+	// whether each side of wall is OPEN or CLOSED.
+	// left is the side of increasing angles, whereas
+	// right is the side of decreasing angles.
+	bool open_left;
+	bool open_right;
 }
 walltip_t;
 
@@ -275,9 +275,6 @@ typedef struct seg_s
 
 	// linedef that this seg goes along, or -1 if miniseg
 	int linedef;
-
-	// adjacent sector, or -1 if invalid sidedef or miniseg
-	int sector;
 
 	// 0 for right, 1 for left
 	int side;
@@ -491,7 +488,7 @@ void DetectOverlappingLines(void);
 void DetectPolyobjSectors(void);
 
 // computes the wall tips for all of the vertices
-void CalculateWallTips(void);
+void CalculateWallTips();
 
 // return a new vertex (with correct wall-tip info) for the split that
 // happens along the given seg at the given location.
@@ -505,11 +502,11 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
 //
 vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 
-// check whether a line with the given delta coordinates and beginning
-// at this vertex is open.  Returns a sector reference if it's open,
-// or -1 if closed (void space or directly along a linedef).
+// check whether a line with the given delta coordinates from this
+// vertex is open or closed.  If there exists a walltip at same
+// angle, it is closed, likewise if line is in void space.
 //
-int VertexCheckOpen(vertex_t *vert, double dx, double dy);
+bool VertexCheckOpen(vertex_t *vert, double dx, double dy);
 
 
 //------------------------------------------------------------------------
@@ -556,10 +553,10 @@ typedef struct intersection_s
 	// true if this intersection was on a self-referencing linedef
 	bool self_ref;
 
-	// sector on each side of the vertex (along the partition),
-	// or -1 when that direction isn't OPEN.
-	int sec_before;
-	int sec_after;
+	// status of each side of the vertex (along the partition),
+	// true if OPEN and false if CLOSED.
+	bool open_before;
+	bool open_after;
 }
 intersection_t;
 
