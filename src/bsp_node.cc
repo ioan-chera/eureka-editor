@@ -1398,7 +1398,7 @@ seg_t *CreateSegs()
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, LookupVertex(line->start), LookupVertex(line->end), line->right, 0);
+			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0);
 
 			ListAddSeg(&list, right);
 		}
@@ -1409,7 +1409,7 @@ seg_t *CreateSegs()
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, LookupVertex(line->end), LookupVertex(line->start), line->left, 1);
+			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1);
 
 			ListAddSeg(&list, left);
 
@@ -1977,7 +1977,7 @@ static void RoundOffVertices()
 {
 	for (int i = 0 ; i < num_vertices ; i++)
 	{
-		vertex_t *vert = LookupVertex(i);
+		vertex_t *vert = lev_vertices[i];
 
 		if (vert->is_new)
 		{

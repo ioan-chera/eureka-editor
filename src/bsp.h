@@ -430,7 +430,10 @@ public:
 
 /* ----- Level data arrays ----------------------- */
 
-extern int num_vertices;
+extern std::vector<vertex_t *> lev_vertices;
+
+#define num_vertices  ((int)lev_vertices.size())
+
 extern int num_segs;
 extern int num_subsecs;
 extern int num_nodes;
@@ -443,14 +446,14 @@ extern int num_complete_seg;
 /* ----- function prototypes ----------------------- */
 
 // allocation routines
-vertex_t *NewVertex(void);
+vertex_t *NewVertex();
 seg_t *NewSeg(void);
 subsec_t *NewSubsec(void);
 node_t *NewNode(void);
 wall_tip_t *NewWallTip(void);
 
-// lookup routines
-vertex_t *LookupVertex(int index);
+// lookup routines [ FIXME REMOVE ]
+
 seg_t *LookupSeg(int index);
 subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);

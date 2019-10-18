@@ -241,9 +241,6 @@ void Adler32_Finish(u32_t *crc)
 
 #define POLY_BOX_SZ  10
 
-// stuff needed from level.c (this file closely related)
-extern vertex_t  ** lev_vertices;
-
 
 /* ----- polyobj handling ----------------------------- */
 
@@ -710,14 +707,14 @@ void CalculateWallTips(void)
 		int left  = (L->left  >= 0) ? L->Left()->sector  : -1;
 		int right = (L->right >= 0) ? L->Right()->sector : -1;
 
-		VertexAddWallTip(LookupVertex(L->start), x2-x1, y2-y1, left, right);
-		VertexAddWallTip(LookupVertex(L->end),   x1-x2, y1-y2, right, left);
+		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
+		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);
 	}
 
 # if DEBUG_WALLTIPS
 	for (i=0 ; i < num_vertices ; i++)
 	{
-		vertex_t *V = LookupVertex(i);
+		vertex_t *V = lev_vertices[i];
 
 		DebugPrintf("WallTips for vertex %d:\n", i);
 

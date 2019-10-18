@@ -837,7 +837,7 @@ int lev_overflows;
     int NUMVAR = 0;
 
 
-LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
+std::vector<vertex_t *> lev_vertices;
 
 static LEVELARRAY(seg_t,     segs,       num_segs)
 static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
@@ -865,8 +865,13 @@ int num_real_lines = 0;
 }
 
 
-vertex_t *NewVertex(void)
-	ALLIGATOR(vertex_t, lev_vertices, num_vertices)
+vertex_t *NewVertex()
+{
+	vertex_t *V = (vertex_t *) UtilCalloc(sizeof(vertex_t));
+	lev_vertices.push_back(V);
+	return V;
+}
+
 
 seg_t *NewSeg(void)
 	ALLIGATOR(seg_t, segs, num_segs)
@@ -895,7 +900,12 @@ wall_tip_t *NewWallTip(void)
 
 
 void FreeVertices(void)
-	FREEMASON(vertex_t, lev_vertices, num_vertices)
+{
+	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
+		delete lev_vertices[i];
+
+	lev_vertices.clear();
+}
 
 void FreeSegs(void)
 	FREEMASON(seg_t, segs, num_segs)
@@ -919,9 +929,6 @@ void FreeWallTips(void)
     \
   return BASEVAR[index];  \
 }
-
-vertex_t *LookupVertex(int index)
-	LOOKERUPPER(lev_vertices, num_vertices, "vertex")
 
 seg_t *LookupSeg(int index)
 	LOOKERUPPER(segs, num_segs, "seg")
