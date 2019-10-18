@@ -1269,16 +1269,16 @@ void quadtree_c::ConvertToList(seg_t **_list)
 
 
 static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-		int side_index, int side_num)
+		int sidedef, int what_side /* 0 or 1 */)
 {
-	SideDef *side = NULL;
-	if (side_index >= 0)
-		side = SideDefs[side_index];
+	SideDef *sd = NULL;
+	if (sidedef >= 0)
+		sd = SideDefs[sidedef];
 
 	seg_t *seg = NewSeg();
 
 	// check for bad sidedef
-	if (! side->sector)
+	if (sd && !is_sector(sd->sector))
 	{
 		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
@@ -1286,7 +1286,7 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 	seg->start   = start;
 	seg->end     = end;
 	seg->linedef = line;
-	seg->side    = side_num;
+	seg->side    = what_side;
 	seg->partner = NULL;
 
 	seg->source_line = seg->linedef;
