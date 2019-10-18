@@ -64,7 +64,6 @@ public:
 	// from here on, various bits of internal state
 	int total_failed_maps;
 	int total_warnings;
-	int total_minor_issues;
 
 public:
 	nodebuildinfo_t() :
@@ -85,8 +84,7 @@ public:
 		cancelled(false),
 
 		total_failed_maps(0),
-		total_warnings(0),
-		total_minor_issues(0)
+		total_warnings(0)
 	{ }
 
 	~nodebuildinfo_t()

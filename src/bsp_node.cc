@@ -1516,7 +1516,7 @@ static void SanityCheckClosed(subsec_t *sub)
 
 	if (gaps > 0)
 	{
-		MinorIssue("Subsector #%d near (%1.1f,%1.1f) is not closed "
+		DebugPrintf("Subsector #%d near (%1.1f,%1.1f) is not closed "
 				"(%d gaps, %d segs)\n", sub->index,
 				sub->mid_x, sub->mid_y, gaps, total);
 
@@ -1724,7 +1724,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 /* FIXME REVIEW THIS
 		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
 		{
-			MinorIssue("Loss of accuracy on VERY long node: "
+			LogPrintf("Loss of accuracy on VERY long node: "
 					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
 					node->x + node->dx, node->y + node->dy);
 		}

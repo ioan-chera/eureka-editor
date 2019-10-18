@@ -81,24 +81,6 @@ void Warning(const char *fmt, ...)
 }
 
 
-void MinorIssue(const char *fmt, ...)
-{
-	(void) fmt;
-
-#if DEBUG_ENABLED
-	va_list args;
-
-	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-	va_end(args);
-
-	DebugPrintf("Minor Issue: %s", message_buf);
-#endif
-
-	cur_info->total_minor_issues++;
-}
-
-
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------

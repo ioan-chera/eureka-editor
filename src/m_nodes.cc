@@ -319,7 +319,6 @@ static void PrepareInfo(nodebuildinfo_t *info)
 
 	info->total_failed_maps		= 0;
 	info->total_warnings		= 0;
-	info->total_minor_issues	= 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
@@ -372,9 +371,14 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Total failed maps: %d\n", info->total_failed_maps);
-		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
-					info->total_minor_issues);
+
+		if (info->total_failed_maps == 0)
+			GB_PrintMsg("All maps built successfully, %d warnings\n",
+						info->total_warnings);
+		else
+			GB_PrintMsg("%d failed maps, %d warnings\n",
+						info->total_failed_maps,
+						info->total_warnings);
 	}
 	else if (ret == BUILD_Cancelled)
 	{
