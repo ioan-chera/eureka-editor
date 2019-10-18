@@ -609,6 +609,8 @@ void Render3D_Enable(bool _enable)
 	// give keyboard focus to the appropriate large widget
 	Fl::focus(main_win->canvas);
 
+	main_win->scroll->UpdateRenderMode();
+
 	if (edit.render3d)
 	{
 		main_win->info_bar->SetMouse(r_view.x, r_view.y);
