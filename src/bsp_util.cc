@@ -737,8 +737,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	vert->x = x;
 	vert->y = y;
-
-	vert->is_new = 1;
+	vert->is_new = true;
 
 	vert->index = num_new_vert;
 	num_new_vert++;
@@ -768,7 +767,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vertex_t *vert = NewVertex();
 
-	vert->is_new = 0;
+	vert->is_new = false;
 
 	vert->index = num_old_vert;
 	num_old_vert++;

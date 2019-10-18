@@ -253,7 +253,7 @@ typedef struct vertex_s
 	int index;
 
 	// vertex is newly created (from a seg split)
-	char is_new;
+	bool is_new;
 
 	// usually NULL, unless this vertex occupies the same location as a
 	// previous vertex.
@@ -308,7 +308,7 @@ typedef struct seg_s
 	// start and end vertices produces the same location).  It should be
 	// ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
 	// won't be any of these when writing the V2 GL_SEGS lump].
-	char is_degenerate;
+	bool is_degenerate;
 
 	// the quad-tree node that contains this seg, or NULL if the seg
 	// is now in a subsector.

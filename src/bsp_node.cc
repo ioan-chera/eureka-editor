@@ -1981,7 +1981,7 @@ static void RoundOffVertices()
 
 		if (vert->is_new)
 		{
-			vert->is_new = 0;
+			vert->is_new = false;
 
 			vert->index = num_old_vert;
 			num_old_vert++;
@@ -2012,7 +2012,7 @@ static void RoundOffSubsector(subsec_t *sub)
 		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
 			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
 		{
-			seg->is_degenerate = 1;
+			seg->is_degenerate = true;
 
 			if (seg->linedef >= 0)
 				last_real_degen = seg;
@@ -2055,7 +2055,7 @@ static void RoundOffSubsector(subsec_t *sub)
 				I_ROUND(last_real_degen->end->y));
 #   endif
 
-		last_real_degen->is_degenerate = 0;
+		last_real_degen->is_degenerate = false;
 	}
 
 	// second pass, remove the blighters...
