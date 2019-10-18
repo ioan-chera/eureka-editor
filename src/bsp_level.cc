@@ -832,18 +832,11 @@ bool lev_long_name;
 int lev_overflows;
 
 
-#define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
-    TYPE ** BASEVAR = NULL;  \
-    int NUMVAR = 0;
-
-
-std::vector<vertex_t *> lev_vertices;
-std::vector<seg_t *>    lev_segs;
-std::vector<subsec_t *> lev_subsecs;
-
-static LEVELARRAY(node_t,    nodes,      num_nodes)
-static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
-
+std::vector<vertex_t *>  lev_vertices;
+std::vector<seg_t *>     lev_segs;
+std::vector<subsec_t *>  lev_subsecs;
+std::vector<node_t *>    lev_nodes;
+std::vector<walltip_t *> lev_walltips;
 
 int num_old_vert = 0;
 int num_new_vert = 0;
@@ -852,18 +845,6 @@ int num_real_lines = 0;
 
 
 /* ----- allocation routines ---------------------------- */
-
-#define ALLIGATOR(TYPE, BASEVAR, NUMVAR)  \
-{  \
-  if ((NUMVAR % ALLOC_BLKNUM) == 0)  \
-  {  \
-    BASEVAR = (TYPE **) UtilRealloc(BASEVAR, (NUMVAR + ALLOC_BLKNUM) * sizeof(TYPE *));  \
-  }  \
-  BASEVAR[NUMVAR] = (TYPE *) UtilCalloc(sizeof(TYPE));  \
-  NUMVAR += 1;  \
-  return BASEVAR[NUMVAR - 1];  \
-}
-
 
 vertex_t *NewVertex()
 {
@@ -886,26 +867,22 @@ subsec_t *NewSubsec()
 	return S;
 }
 
-
 node_t *NewNode()
-	ALLIGATOR(node_t, nodes, num_nodes)
+{
+	node_t *N = (node_t *) UtilCalloc(sizeof(node_t));
+	lev_nodes.push_back(N);
+	return N;
+}
 
-wall_tip_t *NewWallTip()
-	ALLIGATOR(wall_tip_t, wall_tips, num_wall_tips)
+walltip_t *NewWallTip()
+{
+	walltip_t *WT = (walltip_t *) UtilCalloc(sizeof(walltip_t));
+	lev_walltips.push_back(WT);
+	return WT;
+}
 
 
 /* ----- free routines ---------------------------- */
-
-#define FREEMASON(TYPE, BASEVAR, NUMVAR)  \
-{  \
-  int i;  \
-  for (i=0 ; i < NUMVAR ; i++)  \
-    UtilFree(BASEVAR[i]);  \
-  if (BASEVAR)  \
-    UtilFree(BASEVAR);  \
-  BASEVAR = NULL; NUMVAR = 0;  \
-}
-
 
 void FreeVertices()
 {
@@ -932,28 +909,23 @@ void FreeSubsecs()
 }
 
 void FreeNodes()
-	FREEMASON(node_t, nodes, num_nodes)
+{
+	for (unsigned int i = 0 ; i < lev_nodes.size() ; i++)
+		delete lev_nodes[i];
 
-void FreeWallTips()
-	FREEMASON(wall_tip_t, wall_tips, num_wall_tips)
-
-
-/* ----- lookup routines ------------------------------ */
-
-#define LOOKERUPPER(BASEVAR, NUMVAR, NAMESTR)  \
-{  \
-  if (index < 0 || index >= NUMVAR)  \
-    FatalError("No such %s number #%d\n", NAMESTR, index);  \
-    \
-  return BASEVAR[index];  \
+	lev_nodes.clear();
 }
 
-node_t *LookupNode(int index)
-	LOOKERUPPER(nodes, num_nodes, "node")
+void FreeWallTips()
+{
+	for (unsigned int i = 0 ; i < lev_walltips.size() ; i++)
+		delete lev_walltips[i];
+
+	lev_walltips.clear();
+}
 
 
 /* ----- reading routines ------------------------------ */
-
 
 static void GetVertices(void)
 {

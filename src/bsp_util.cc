@@ -653,8 +653,8 @@ void DetectOverlappingLines(void)
 static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 		int sec_left, int sec_right)
 {
-	wall_tip_t *tip = NewWallTip();
-	wall_tip_t *after;
+	walltip_t *tip = NewWallTip();
+	walltip_t *after;
 
 	tip->angle = UtilComputeAngle(dx, dy);
 	tip->sec_left  = sec_left;
@@ -718,7 +718,7 @@ void CalculateWallTips(void)
 
 		DebugPrintf("WallTips for vertex %d:\n", i);
 
-		for (wall_tip_t *tip = V->tip_set ; tip ; tip = tip->next)
+		for (walltip_t *tip = V->tip_set ; tip ; tip = tip->next)
 		{
 			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
 					tip->sec_left, tip->sec_right);
@@ -739,7 +739,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	vert->index = num_new_vert;
 	num_new_vert++;
 
-	// compute wall_tip info
+	// compute wall-tip info
 
 	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, seg->sector,
 			seg->partner ? seg->partner->sector : -1);
@@ -793,11 +793,11 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
-	wall_tip_t *tip;
+	walltip_t *tip;
 
 	angle_g angle = UtilComputeAngle(dx, dy);
 
-	// first check whether there's a wall_tip that lies in the exact
+	// first check whether there's a wall-tip that lies in the exact
 	// direction of the given direction (which is relative to the
 	// vertex).
 
@@ -811,9 +811,9 @@ int VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		}
 	}
 
-	// OK, now just find the first wall_tip whose angle is greater than
+	// OK, now just find the first wall-tip whose angle is greater than
 	// the angle we're interested in.  Therefore we'll be on the RIGHT
-	// side of that wall_tip.
+	// side of that wall-tip.
 
 	for (tip=vert->tip_set ; tip ; tip=tip->next)
 	{
