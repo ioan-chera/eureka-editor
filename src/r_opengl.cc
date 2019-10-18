@@ -1239,6 +1239,8 @@ public:
 
 	void Render()
 	{
+		r_view.SaveOffsets();
+
 		for (int i=0 ; i < NumLineDefs ; i++)
 			DrawLine(i);
 
@@ -1253,6 +1255,8 @@ public:
 		if (r_view.sprites)
 			for (int t=0 ; t < NumThings ; t++)
 				DrawThing(t);
+
+		r_view.RestoreOffsets();
 	}
 
 	void Begin(int ow, int oh)
