@@ -31,6 +31,9 @@ namespace ajbsp
 {
 
 #define DEBUG_BLOCKMAP  0
+#define DEBUG_REJECT    0
+#define DEBUG_LOAD      0
+#define DEBUG_BSP       0
 
 
 static int block_x, block_y;
@@ -601,8 +604,6 @@ void PutBlockmap()
 //------------------------------------------------------------------------
 
 
-#define DEBUG_REJECT  0
-
 static u8_t *rej_matrix;
 static int   rej_total_size;	// in bytes
 
@@ -808,9 +809,6 @@ void PutReject()
 
 // Note: ZDoom format support based on code (C) 2002,2003 Randy Heit
 
-
-#define DEBUG_LOAD      0
-#define DEBUG_BSP       0
 
 #define ALLOC_BLKNUM  1024
 

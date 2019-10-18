@@ -163,7 +163,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 # if DEBUG_SPLIT
 	if (old_seg->linedef >= 0)
 		DebugPrintf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
-				old_seg->linedef->index, old_seg, x, y);
+				old_seg->linedef, old_seg, x, y);
 	else
 		DebugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 # endif
@@ -341,12 +341,9 @@ static void AddIntersection(intersection_t ** cut_list,
 static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		int best_cost, eval_info_t *info)
 {
-	seg_t *check;
-
 	double qnty;
 	double a, b, fa, fb;
 
-	int num;
 	int factor = cur_info->factor;
 
 	// -AJA- this is the heart of the superblock idea, it tests the
@@ -354,21 +351,15 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	//       all the segs within it at once.  Only when the partition
 	//       line intercepts the box do we need to go deeper into it.
 
-	num = BoxOnLineSide(tree, part);
-
-	if (num < 0)
+	switch (tree->OnLineSide(part))
 	{
-		// LEFT
-
+	case SIDE_LEFT:
 		info->real_left += tree->real_num;
 		info->mini_left += tree->mini_num;
 
 		return false;
-	}
-	else if (num > 0)
-	{
-		// RIGHT
 
+	case SIDE_RIGHT:
 		info->real_right += tree->real_num;
 		info->mini_right += tree->mini_num;
 
@@ -376,6 +367,8 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	}
 
 	/* check partition against all Segs */
+
+	seg_t *check;
 
 	for (check=tree->list ; check ; check=check->next)
 	{
@@ -514,16 +507,13 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 	/* handle sub-blocks recursively */
 
-	for (num=0 ; num < 2 ; num++)
+	for (int c=0 ; c < 2 ; c++)
 	{
-		if (! tree->subs[num])
-			continue;
-
-		if (info->cost > best_cost)
-			return true;
-
-		if (EvalPartitionWorker(tree->subs[num], part, best_cost, info))
-			return true;
+		if (tree->subs[c] && !tree->subs[c]->Empty())
+		{
+			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info))
+				return true;
+		}
 	}
 
 	/* no "bad seg" was found */
@@ -598,7 +588,6 @@ static void EvaluateFastWorker(quadtree_c *tree,
 		seg_t **best_H, seg_t **best_V, int mid_x, int mid_y)
 {
 	seg_t *part;
-	int num;
 
 	for (part=tree->list ; part ; part = part->next)
 	{
@@ -642,9 +631,13 @@ static void EvaluateFastWorker(quadtree_c *tree,
 
 	/* handle sub-blocks recursively */
 
-	for (num=0 ; num < 2 ; num++)
-		if (tree->subs[num])
-			EvaluateFastWorker(tree->subs[num], best_H, best_V, mid_x, mid_y);
+	for (int c=0 ; c < 2 ; c++)
+	{
+		if (tree->subs[c] && !tree->subs[c]->Empty())
+		{
+			EvaluateFastWorker(tree->subs[c], best_H, best_V, mid_x, mid_y);
+		}
+	}
 }
 
 
@@ -686,9 +679,7 @@ static seg_t *FindFastSeg(quadtree_c *tree)
 static bool PickNodeWorker(quadtree_c *part_list,
 		quadtree_c *tree, seg_t ** best, int *best_cost)
 {
-	int num;
-
-	/* try each Seg as partition */
+	// try each partition
 	for (seg_t *part=part_list->list ; part ; part = part->next)
 	{
 		if (cur_info->cancelled)
@@ -719,9 +710,13 @@ static bool PickNodeWorker(quadtree_c *part_list,
 
 	/* recursively handle sub-blocks */
 
-	for (num=0 ; num < 2 ; num++)
-		if (part_list->subs[num])
-			PickNodeWorker(part_list->subs[num], tree, best, best_cost);
+	for (int c=0 ; c < 2 ; c++)
+	{
+		if (part_list->subs[c] && !part_list->subs[c]->Empty())
+		{
+			PickNodeWorker(part_list->subs[c], tree, best, best_cost);
+		}
+	}
 
 	return true;
 }
@@ -960,8 +955,8 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 		DebugPrintf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
 				cur->vertex->index, cur->vertex->x, cur->vertex->y,
 				cur->along_dist,
-				cur->before ? cur->before->index : -1,
-				cur->after ? cur->after->index : -1,
+				cur->open_before ? 1 : 0,
+				cur->open_after  ? 1 : 0,
 				cur->self_ref ? "SELFREF" : "");
 	}
 # endif
@@ -1063,13 +1058,13 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 //
 
 
-#define DEBUG_BUILDER  0
-#define DEBUG_SORTER   0
-#define DEBUG_SUBSEC   0
+#define DEBUG_BUILDER  1
+#define DEBUG_SORTER   1
+#define DEBUG_SUBSEC   1
 
 
 //
-// Returns -1 for left, +1 for right, or 0 for intersect.
+// Returns SIDE_LEFT, SIDE_RIGHT, or 0 for intersect.
 //
 int seg_t::PointOnLineSide(double x, double y) const
 {
@@ -1078,24 +1073,24 @@ int seg_t::PointOnLineSide(double x, double y) const
 	if (fabs(perp) <= DIST_EPSILON)
 		return 0;
 
-	return (perp < 0) ? -1 : +1;
+	return (perp < 0) ? SIDE_LEFT : SIDE_RIGHT;
 }
 
 
-int BoxOnLineSide(quadtree_c *box, seg_t *part)
+int quadtree_c::OnLineSide(const seg_t *part) const
 {
-	double x1 = (double)box->x1 - IFFY_LEN;
-	double y1 = (double)box->y1 - IFFY_LEN;
-	double x2 = (double)box->x2 + IFFY_LEN;
-	double y2 = (double)box->y2 + IFFY_LEN;
+	double tx1 = (double)x1 - IFFY_LEN;
+	double ty1 = (double)y1 - IFFY_LEN;
+	double tx2 = (double)x2 + IFFY_LEN;
+	double ty2 = (double)y2 + IFFY_LEN;
 
 	int p1, p2;
 
 	// handle simple cases (vertical & horizontal lines)
 	if (part->pdx == 0)
 	{
-		p1 = (x1 > part->psx) ? +1 : -1;
-		p2 = (x2 > part->psx) ? +1 : -1;
+		p1 = (tx1 > part->psx) ? SIDE_RIGHT : SIDE_LEFT;
+		p2 = (tx2 > part->psx) ? SIDE_RIGHT : SIDE_LEFT;
 
 		if (part->pdy < 0)
 		{
@@ -1105,8 +1100,8 @@ int BoxOnLineSide(quadtree_c *box, seg_t *part)
 	}
 	else if (part->pdy == 0)
 	{
-		p1 = (y1 < part->psy) ? +1 : -1;
-		p2 = (y2 < part->psy) ? +1 : -1;
+		p1 = (ty1 < part->psy) ? SIDE_RIGHT : SIDE_LEFT;
+		p2 = (ty2 < part->psy) ? SIDE_RIGHT : SIDE_LEFT;
 
 		if (part->pdx < 0)
 		{
@@ -1117,13 +1112,13 @@ int BoxOnLineSide(quadtree_c *box, seg_t *part)
 	// now handle the cases of positive and negative slope
 	else if (part->pdx * part->pdy > 0)
 	{
-		p1 = part->PointOnLineSide(x1, y2);
-		p2 = part->PointOnLineSide(x2, y1);
+		p1 = part->PointOnLineSide(tx1, ty2);
+		p2 = part->PointOnLineSide(tx2, ty1);
 	}
 	else  // NEGATIVE
 	{
-		p1 = part->PointOnLineSide(x1, y1);
-		p2 = part->PointOnLineSide(x2, y2);
+		p1 = part->PointOnLineSide(tx1, ty1);
+		p2 = part->PointOnLineSide(tx2, ty2);
 	}
 
 	// line goes through or touches the box?
@@ -1132,6 +1127,24 @@ int BoxOnLineSide(quadtree_c *box, seg_t *part)
 
 	return p1;
 }
+
+
+#if 0  // DEBUG HELPER
+void quadtree_c::VerifySide(seg_t *part, int side)
+{
+	for (seg_t *seg = list ; seg != NULL ; seg = seg->next)
+	{
+		int p1 = part->PointOnLineSide(seg->psx, seg->psy);
+		if (p1 != side) BugError("VerifySide failed.\n");
+
+		int p2 = part->PointOnLineSide(seg->pex, seg->pey);
+		if (p2 != side) BugError("VerifySide failed.\n");
+	}
+
+	if (subs[0]) subs[0]->VerifySide(part, side);
+	if (subs[1]) subs[1]->VerifySide(part, side);
+}
+#endif
 
 
 /* ----- quad-tree routines ------------------------------------ */
@@ -1145,7 +1158,7 @@ quadtree_c::quadtree_c(int _x1, int _y1, int _x2, int _y2) :
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
-	if (dx <= 256 && dy <= 256)
+	if (dx <= 320 && dy <= 320)
 	{
 		// leaf node
 		subs[0] = NULL;
@@ -1187,17 +1200,14 @@ void quadtree_c::AddSeg(seg_t *seg)
 		double x_max = MAX(seg->start->x, seg->end->x);
 		double y_max = MAX(seg->start->y, seg->end->y);
 
-		int dx = x2 - x1;
-		int dy = y2 - y1;
-
-		if (dx >= dy)
+		if ((x2 - x1) >= (y2 - y1))
 		{
-			if (x_min > x1 + dx)
+			if (x_min > subs[1]->x1)
 			{
 				subs[1]->AddSeg(seg);
 				return;
 			}
-			else if (x_max < x1 + dx)
+			else if (x_max < subs[0]->x2)
 			{
 				subs[0]->AddSeg(seg);
 				return;
@@ -1205,12 +1215,12 @@ void quadtree_c::AddSeg(seg_t *seg)
 		}
 		else
 		{
-			if (y_min > y1 + dy)
+			if (y_min > subs[1]->y1)
 			{
 				subs[1]->AddSeg(seg);
 				return;
 			}
-			else if (y_max < y1 + dy)
+			else if (y_max < subs[0]->y2)
 			{
 				subs[0]->AddSeg(seg);
 				return;
@@ -1611,22 +1621,15 @@ int ComputeBspHeight(node_t *node)
 
 #if DEBUG_BUILDER
 
-static void DebugShowSegs(superblock_t *seg_list)
+static void DebugShowSegs(seg_t *list)
 {
-	seg_t *seg;
-	int num;
-
-	for (seg=seg_list->segs ; seg ; seg=seg->next)
+	for ( ; list != NULL ; list = list->next)
 	{
-		DebugPrintf("Build:   %sSEG %p  sector=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				seg->linedef >= 0 ? "" : "MINI", seg, seg->sector,
+		seg_t *seg = list;
+
+		DebugPrintf("Build:   %sSEG %p  linedef=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+				(seg->linedef >= 0) ? "" : "MINI", seg, seg->linedef,
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
-	}
-
-	for (num=0 ; num < 2 ; num++)
-	{
-		if (seg_list->subs[num])
-			DebugShowSegs(seg_list->subs[num]);
 	}
 }
 #endif
@@ -1691,10 +1694,10 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	/* sanity checks... */
 	if (rights == NULL)
-		BugError("Separated seg-list has no RIGHT side\n");
+		BugError("Separated seg-list has empty RIGHT side\n");
 
 	if (lefts == NULL)
-		BugError("Separated seg-list has no LEFT side\n");
+		BugError("Separated seg-list has empty LEFT side\n");
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 

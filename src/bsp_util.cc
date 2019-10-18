@@ -27,7 +27,10 @@
 namespace ajbsp
 {
 
-#define DEBUG_ENABLED   0
+#define DEBUG_ENABLED    0
+#define DEBUG_WALLTIPS   0
+#define DEBUG_POLYOBJ    0
+
 
 #define DEBUGGING_FILE  "gb_debug.txt"
 
@@ -216,10 +219,6 @@ void Adler32_Finish(u32_t *crc)
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
 
-
-#define DEBUG_WALLTIPS   0
-#define DEBUG_POLYOBJ    0
-#define DEBUG_WINDOW_FX  0
 
 #define POLY_BOX_SZ  10
 

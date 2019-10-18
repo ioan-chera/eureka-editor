@@ -312,6 +312,7 @@ typedef struct seg_s
 	int source_line;
 
 public:
+	// returns SIDE_LEFT, SIDE_RIGHT or 0 for being "on" the line.
 	int PointOnLineSide(double x, double y) const;
 
 	// compute the parallel and perpendicular distances from a partition
@@ -403,12 +404,11 @@ public:
 	// Division of a square always occurs horizontally (e.g. 512x512 -> 256x512).
 	quadtree_c *subs[2];
 
-	// number of real segs and minisegs contained in this node and
-	// all children nodes.
+	// count of real/mini segs contained in this node AND ALL CHILDREN.
 	int real_num;
 	int mini_num;
 
-	// list of segs completely contained in this node.
+	// list of segs contained in this node itself.
 	seg_t *list;
 
 public:
@@ -418,7 +418,18 @@ public:
 	void AddSeg(seg_t *seg);
 	void AddList(seg_t *list);
 
+	inline bool Empty() const
+	{
+		return (real_num + mini_num) == 0;
+	}
+
 	void ConvertToList(seg_t **list);
+
+	// check relationship between this box and the partition line.
+	// returns SIDE_LEFT or SIDE_RIGHT if box is definitively on a
+	// particular side, or 0 if the line intersects/touches the box.
+	//
+	int OnLineSide(const seg_t *part) const;
 };
 
 
@@ -609,11 +620,6 @@ void FreeQuickAllocCuts(void);
 //------------------------------------------------------------------------
 
 
-// check the relationship between the given box and the partition
-// line.  Returns -1 if box is on left side, +1 if box is on right
-// size, or 0 if the line intersects or touches the box.
-//
-int BoxOnLineSide(quadtree_c *box, seg_t *part);
 
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
