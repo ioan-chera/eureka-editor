@@ -966,7 +966,7 @@ static inline int VanillaSegDist(const seg_t *seg)
 	double sx = I_ROUND(seg->start->x);
 	double sy = I_ROUND(seg->start->y);
 
-	return (int) floor(UtilComputeDist(sx - lx, sy - ly) + 0.5);
+	return (int) floor(hypot(sx - lx, sy - ly) + 0.5);
 }
 
 static inline int VanillaSegAngle(const seg_t *seg)

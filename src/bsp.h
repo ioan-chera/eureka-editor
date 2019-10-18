@@ -167,9 +167,8 @@ void UtilFree(void *data);
 // or NULL if an error occurred.
 char *UtilTimeString(void);
 
-// compute angle & distance from (0,0) to (dx,dy)
+// compute angle of line from (0,0) to (dx,dy)
 angle_g UtilComputeAngle(double dx, double dy);
-#define UtilComputeDist(dx,dy)  sqrt((dx) * (dx) + (dy) * (dy))
 
 // checksum functions
 void Adler32_Begin(u32_t *crc);

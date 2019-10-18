@@ -760,7 +760,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	double dx = end->x - start->x;
 	double dy = end->y - start->y;
 
-	double dlen = UtilComputeDist(dx, dy);
+	double dlen = hypot(dx, dy);
 
 	vertex_t *vert = NewVertex();
 
