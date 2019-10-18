@@ -278,9 +278,10 @@ static void AddIntersection(intersection_t ** cut_list,
 
 		if (fabs(along_dist - cut->along_dist) < DIST_EPSILON)
 		{
-			// a CLOSED aspect always overrides an OPEN one
-			if (! open_before) cut->open_before = false;
-			if (! open_after)  cut->open_after  = false;
+			// an OPEN aspect always overrides a CLOSED one.
+			// [ though a mismatch should only occur with broken geometry ]
+			if (open_before) cut->open_before = true;
+			if (open_after)  cut->open_after  = true;
 
 			return;
 		}
