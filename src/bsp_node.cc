@@ -276,7 +276,7 @@ static void AddIntersection(intersection_t ** cut_list,
 	cut = NewIntersection();
 
 	cut->vertex = vert;
-	cut->along_dist = UtilParallelDist(part, vert->x, vert->y);
+	cut->along_dist = part->ParallelDist(vert->x, vert->y);
 	cut->self_ref = self_ref;
 
 	cut->sec_before = VertexCheckOpen(vert, -part->pdx, -part->pdy);
@@ -368,8 +368,8 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		}
 		else
 		{
-			a = UtilPerpDist(part, check->psx, check->psy);
-			b = UtilPerpDist(part, check->pex, check->pey);
+			a = part->PerpDist(check->psx, check->psy);
+			b = part->PerpDist(check->pex, check->pey);
 
 			fa = fabs(a);
 			fb = fabs(b);
@@ -782,8 +782,8 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 	double x, y;
 
 	/* get state of lines' relation to each other */
-	double a = UtilPerpDist(part, seg->psx, seg->psy);
-	double b = UtilPerpDist(part, seg->pex, seg->pey);
+	double a = part->PerpDist(seg->psx, seg->psy);
+	double b = part->PerpDist(seg->pex, seg->pey);
 
 	bool self_ref = (seg->linedef >= 0) ? LineDefs[seg->linedef]->IsSelfRef() : false;
 
@@ -1151,9 +1151,9 @@ void AddMinisegs(seg_t *part,
 //
 // Returns -1 for left, +1 for right, or 0 for intersect.
 //
-static int PointOnLineSide(seg_t *part, double x, double y)
+int seg_t::PointOnLineSide(double x, double y) const
 {
-	double perp = UtilPerpDist(part, x, y);
+	double perp = PerpDist(x, y);
 
 	if (fabs(perp) <= DIST_EPSILON)
 		return 0;
@@ -1197,13 +1197,13 @@ int BoxOnLineSide(quadtree_c *box, seg_t *part)
 	// now handle the cases of positive and negative slope
 	else if (part->pdx * part->pdy > 0)
 	{
-		p1 = PointOnLineSide(part, x1, y2);
-		p2 = PointOnLineSide(part, x2, y1);
+		p1 = part->PointOnLineSide(x1, y2);
+		p2 = part->PointOnLineSide(x2, y1);
 	}
 	else  // NEGATIVE
 	{
-		p1 = PointOnLineSide(part, x1, y1);
-		p2 = PointOnLineSide(part, x2, y2);
+		p1 = part->PointOnLineSide(x1, y1);
+		p2 = part->PointOnLineSide(x2, y2);
 	}
 
 	// line goes through or touches the box?

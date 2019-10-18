@@ -171,17 +171,6 @@ char *UtilTimeString(void);
 angle_g UtilComputeAngle(double dx, double dy);
 #define UtilComputeDist(dx,dy)  sqrt((dx) * (dx) + (dy) * (dy))
 
-// compute the parallel and perpendicular distances from a partition
-// line to a point.
-//
-#define UtilParallelDist(part,x,y)  \
-    (((x) * (part)->pdx + (y) * (part)->pdy + (part)->p_para)  \
-     / (part)->p_length)
-
-#define UtilPerpDist(part,x,y)  \
-    (((x) * (part)->pdy - (y) * (part)->pdx + (part)->p_perp)  \
-     / (part)->p_length)
-
 // checksum functions
 void Adler32_Begin(u32_t *crc);
 void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
@@ -327,6 +316,22 @@ typedef struct seg_s
 	// this is just the same as the 'linedef' field above.  For
 	// "minisegs", this is the linedef of the partition line.
 	int source_line;
+
+public:
+	int PointOnLineSide(double x, double y) const;
+
+	// compute the parallel and perpendicular distances from a partition
+	// line to a point.
+	//
+	inline double ParallelDist(double x, double y) const
+	{
+		return (x * pdx + y * pdy + p_para) / p_length;
+	}
+
+	inline double PerpDist(double x, double y) const
+	{
+		return (x * pdy - y * pdx + p_perp) / p_length;
+	}
 }
 seg_t;
 
