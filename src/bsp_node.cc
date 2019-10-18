@@ -51,6 +51,10 @@ namespace ajbsp
 #define SEG_FAST_THRESHHOLD  200
 
 
+#define DEBUG_BUILDER  0
+#define DEBUG_SORTER   0
+#define DEBUG_SUBSEC   0
+
 #define DEBUG_PICKNODE  0
 #define DEBUG_SPLIT     0
 #define DEBUG_CUTLIST   0
@@ -1058,11 +1062,6 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 //
 
 
-#define DEBUG_BUILDER  1
-#define DEBUG_SORTER   1
-#define DEBUG_SUBSEC   1
-
-
 //
 // Returns SIDE_LEFT, SIDE_RIGHT, or 0 for intersect.
 //
@@ -1620,7 +1619,6 @@ int ComputeBspHeight(node_t *node)
 
 
 #if DEBUG_BUILDER
-
 static void DebugShowSegs(seg_t *list)
 {
 	for ( ; list != NULL ; list = list->next)

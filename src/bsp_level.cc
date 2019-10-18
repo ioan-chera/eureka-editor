@@ -607,6 +607,8 @@ void PutBlockmap()
 static u8_t *rej_matrix;
 static int   rej_total_size;	// in bytes
 
+static std::vector<int> rej_sector_groups;
+
 
 //
 // Allocate the matrix, init sectors into individual groups.
@@ -616,19 +618,14 @@ static void Reject_Init()
 	rej_total_size = (NumSectors * NumSectors + 7) / 8;
 
 	rej_matrix = new u8_t[rej_total_size];
-
 	memset(rej_matrix, 0, rej_total_size);
 
+	rej_sector_groups.resize(NumSectors);
 
-#if 0 // FIXME !!!
 	for (int i=0 ; i < NumSectors ; i++)
 	{
-		sector_t *sec = LookupSector(i);
-
-		sec->rej_group = i;
-		sec->rej_next = sec->rej_prev = sec;
+		rej_sector_groups[i] = i;
 	}
-#endif
 }
 
 
@@ -636,67 +633,47 @@ static void Reject_Free()
 {
 	delete[] rej_matrix;
 	rej_matrix = NULL;
+
+	rej_sector_groups.clear();
 }
 
 
 //
-// Algorithm: Initially all sectors are in individual groups.  Now we
-// scan the linedef list.  For each 2-sectored line, merge the two
-// sector groups into one.  That's it !
+// Algorithm: Initially all sectors are in individual groups.
+// Now we scan the linedef list.  For each two-sectored line,
+// merge the two sector groups into one.  That's it!
 //
 static void Reject_GroupSectors()
 {
-#if 0 // FIXME !!! Reject_GroupSectors
-
-	int i;
-
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		linedef_t *line = LookupLinedef(i);
-		sector_t *sec1, *sec2, *tmp;
+		const LineDef *L = LineDefs[i];
 
-		if (line->right < 0 || line->left < 0)
+		if (L->right < 0 || L->left < 0)
 			continue;
 
-		sec1 = line->right->sector;
-		sec2 = line->left->sector;
+		int sec1 = L->Right()->sector;
+		int sec2 = L->Left() ->sector;
 
-		if (! sec1 || ! sec2 || sec1 == sec2)
+		if (sec1 < 0 || sec2 < 0 || sec1 == sec2)
 			continue;
 
 		// already in the same group ?
-		if (sec1->rej_group == sec2->rej_group)
+		int group1 = rej_sector_groups[sec1];
+		int group2 = rej_sector_groups[sec2];
+
+		if (group1 == group2)
 			continue;
 
-		// swap sectors so that the smallest group is added to the biggest
-		// group.  This is based on the assumption that sector numbers in
-		// wads will generally increase over the set of linedefs, and so
-		// (by swapping) we'll tend to add small groups into larger
-		// groups, thereby minimising the updates to 'rej_group' fields
-		// that is required when merging.
+		// prefer the group numbers to become lower
+		if (group1 > group2)
+			std::swap(group1, group2);
 
-		if (sec1->rej_group > sec2->rej_group)
-		{
-			tmp = sec1; sec1 = sec2; sec2 = tmp;
-		}
-
-		// update the group numbers in the second group
-
-		sec2->rej_group = sec1->rej_group;
-
-		for (tmp=sec2->rej_next ; tmp != sec2 ; tmp=tmp->rej_next)
-			tmp->rej_group = sec1->rej_group;
-
-		// merge 'em baby...
-
-		sec1->rej_next->rej_prev = sec2;
-		sec2->rej_next->rej_prev = sec1;
-
-		tmp = sec1->rej_next;
-		sec1->rej_next = sec2->rej_next;
-		sec2->rej_next = tmp;
+		// merge the groups
+		for (int s = 0 ; s < NumSectors ; s++)
+			if (rej_sector_groups[s] == group2)
+				rej_sector_groups[s] =  group1;
 	}
-#endif
 }
 
 
@@ -705,61 +682,46 @@ static void Reject_DebugGroups()
 {
 	// Note: this routine is destructive to the group numbers
 
-#if 0 // FIXME !!!
-	int i;
-
-	for (i=0 ; i < NumSectors ; i++)
+	for (int i=0 ; i < NumSectors ; i++)
 	{
-		sector_t *sec = LookupSector(i);
-		sector_t *tmp;
-
-		int group = sec->rej_group;
-		int num = 0;
+		int group = rej_sector_groups[i];
+		int count = 0;
 
 		if (group < 0)
 			continue;
 
-		sec->rej_group = -1;
-		num++;
-
-		for (tmp=sec->rej_next ; tmp != sec ; tmp=tmp->rej_next)
+		for (int k = i ; k < NumSectors ; k++)
 		{
-			tmp->rej_group = -1;
-			num++;
+			if (rej_sector_groups[k] == group)
+			{
+				rej_sector_groups[k] = -1;
+				count++;
+			}
 		}
 
-		DebugPrintf("Group %d  Sectors %d\n", group, num);
+		DebugPrintf("Group %4d : Sectors %d\n", group, count);
 	}
-#endif
 }
 #endif
 
 
 static void Reject_ProcessSectors()
 {
-#if 0 // FIXME !!!
 	for (int view=0 ; view < NumSectors ; view++)
 	{
 		for (int target=0 ; target < view ; target++)
 		{
-			sector_t *view_sec = LookupSector(view);
-			sector_t *targ_sec = LookupSector(target);
-
-			int p1, p2;
-
-			if (view_sec->rej_group == targ_sec->rej_group)
+			if (rej_sector_groups[view] == rej_sector_groups[target])
 				continue;
 
-			// for symmetry, do both sides at same time
+			int p1 = view * NumSectors + target;
+			int p2 = target * NumSectors + view;
 
-			p1 = view * NumSectors + target;
-			p2 = target * NumSectors + view;
-
+			// must do both directions at same time
 			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
 			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
 		}
 	}
-#endif
 }
 
 
