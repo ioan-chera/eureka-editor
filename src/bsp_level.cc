@@ -838,9 +838,9 @@ int lev_overflows;
 
 
 std::vector<vertex_t *> lev_vertices;
+std::vector<seg_t *>    lev_segs;
+std::vector<subsec_t *> lev_subsecs;
 
-static LEVELARRAY(seg_t,     segs,       num_segs)
-static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
 static LEVELARRAY(node_t,    nodes,      num_nodes)
 static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
 
@@ -872,17 +872,25 @@ vertex_t *NewVertex()
 	return V;
 }
 
+seg_t *NewSeg()
+{
+	seg_t *S = (seg_t *) UtilCalloc(sizeof(seg_t));
+	lev_segs.push_back(S);
+	return S;
+}
 
-seg_t *NewSeg(void)
-	ALLIGATOR(seg_t, segs, num_segs)
+subsec_t *NewSubsec()
+{
+	subsec_t *S = (subsec_t *) UtilCalloc(sizeof(subsec_t));
+	lev_subsecs.push_back(S);
+	return S;
+}
 
-subsec_t *NewSubsec(void)
-	ALLIGATOR(subsec_t, subsecs, num_subsecs)
 
-node_t *NewNode(void)
+node_t *NewNode()
 	ALLIGATOR(node_t, nodes, num_nodes)
 
-wall_tip_t *NewWallTip(void)
+wall_tip_t *NewWallTip()
 	ALLIGATOR(wall_tip_t, wall_tips, num_wall_tips)
 
 
@@ -899,7 +907,7 @@ wall_tip_t *NewWallTip(void)
 }
 
 
-void FreeVertices(void)
+void FreeVertices()
 {
 	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
 		delete lev_vertices[i];
@@ -907,16 +915,26 @@ void FreeVertices(void)
 	lev_vertices.clear();
 }
 
-void FreeSegs(void)
-	FREEMASON(seg_t, segs, num_segs)
+void FreeSegs()
+{
+	for (unsigned int i = 0 ; i < lev_segs.size() ; i++)
+		delete lev_segs[i];
 
-void FreeSubsecs(void)
-	FREEMASON(subsec_t, subsecs, num_subsecs)
+	lev_segs.clear();
+}
 
-void FreeNodes(void)
+void FreeSubsecs()
+{
+	for (unsigned int i = 0 ; i < lev_subsecs.size() ; i++)
+		delete lev_subsecs[i];
+
+	lev_subsecs.clear();
+}
+
+void FreeNodes()
 	FREEMASON(node_t, nodes, num_nodes)
 
-void FreeWallTips(void)
+void FreeWallTips()
 	FREEMASON(wall_tip_t, wall_tips, num_wall_tips)
 
 
@@ -929,12 +947,6 @@ void FreeWallTips(void)
     \
   return BASEVAR[index];  \
 }
-
-seg_t *LookupSeg(int index)
-	LOOKERUPPER(segs, num_segs, "seg")
-
-subsec_t *LookupSubsec(int index)
-	LOOKERUPPER(subsecs, num_subsecs, "subsector")
 
 node_t *LookupNode(int index)
 	LOOKERUPPER(nodes, num_nodes, "node")
@@ -999,20 +1011,6 @@ static inline int VanillaSegAngle(const seg_t *seg)
 	int result = (int) floor(angle * 65536.0 / 360.0 + 0.5);
 
 	return (result & 0xFFFF);
-}
-
-static int SegCompare(const void *p1, const void *p2)
-{
-	const seg_t *A = ((const seg_t **) p1)[0];
-	const seg_t *B = ((const seg_t **) p2)[0];
-
-	if (A->index < 0)
-		BugError("Seg %p never reached a subsector !\n", A);
-
-	if (B->index < 0)
-		BugError("Seg %p never reached a subsector !\n", B);
-
-	return (A->index - B->index);
 }
 
 
@@ -1146,7 +1144,7 @@ void PutSegs(void)
 	{
 		raw_seg_t raw;
 
-		seg_t *seg = segs[i];
+		seg_t *seg = lev_segs[i];
 
 		// ignore minisegs and degenerate segs
 		if (seg->linedef < 0 || seg->is_degenerate)
@@ -1197,7 +1195,7 @@ void PutGLSegs(void)
 	{
 		raw_gl_seg_t raw;
 
-		seg_t *seg = segs[i];
+		seg_t *seg = lev_segs[i];
 
 		// ignore degenerate segs
 		if (seg->is_degenerate)
@@ -1251,7 +1249,7 @@ void PutGLSegs_V5()
 	{
 		raw_v5_seg_t raw;
 
-		seg_t *seg = segs[i];
+		seg_t *seg = lev_segs[i];
 
 		// ignore degenerate segs
 		if (seg->is_degenerate)
@@ -1302,7 +1300,7 @@ void PutSubsecs(const char *name, int do_gl)
 	{
 		raw_subsec_t raw;
 
-		subsec_t *sub = subsecs[i];
+		subsec_t *sub = lev_subsecs[i];
 
 		raw.first = LE_U16(sub->seg_list->index);
 		raw.num   = LE_U16(sub->seg_count);
@@ -1335,7 +1333,7 @@ void PutGLSubsecs_V5()
 	{
 		raw_v5_subsec_t raw;
 
-		subsec_t *sub = subsecs[i];
+		subsec_t *sub = lev_subsecs[i];
 
 		raw.first = LE_U32(sub->seg_list->index);
 		raw.num   = LE_U32(sub->seg_count);
@@ -1533,10 +1531,25 @@ void CheckLimits()
 }
 
 
+struct seg_index_CMP_pred
+{
+	inline bool operator() (const seg_t *A, const seg_t *B) const
+	{
+		return A->index < B->index;
+	}
+};
+
 void SortSegs()
 {
+	// do a sanity check
+	for (int i = 0 ; i < num_segs ; i++)
+	{
+		if (lev_segs[i]->index < 0)
+			BugError("Seg %p never reached a subsector!\n", i);
+	}
+
 	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
+	std::sort(lev_segs.begin(), lev_segs.end(), seg_index_CMP_pred());
 }
 
 
@@ -1591,7 +1604,7 @@ void PutZSubsecs(void)
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = subsecs[i];
+		subsec_t *sub = lev_subsecs[i];
 		seg_t *seg;
 
 		raw_num = LE_U32(sub->seg_count);
@@ -1633,7 +1646,7 @@ void PutZSegs(void)
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
-		seg_t *seg = segs[i];
+		seg_t *seg = lev_segs[i];
 
 		// ignore minisegs and degenerate segs
 		if (seg->linedef < 0 || seg->is_degenerate)

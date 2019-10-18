@@ -431,11 +431,13 @@ public:
 /* ----- Level data arrays ----------------------- */
 
 extern std::vector<vertex_t *> lev_vertices;
+extern std::vector<seg_t *>    lev_segs;
+extern std::vector<subsec_t *> lev_subsecs;
 
 #define num_vertices  ((int)lev_vertices.size())
+#define num_segs      ((int)lev_segs.size())
+#define num_subsecs   ((int)lev_subsecs.size())
 
-extern int num_segs;
-extern int num_subsecs;
 extern int num_nodes;
 
 extern int num_old_vert;
@@ -447,15 +449,13 @@ extern int num_complete_seg;
 
 // allocation routines
 vertex_t *NewVertex();
-seg_t *NewSeg(void);
-subsec_t *NewSubsec(void);
-node_t *NewNode(void);
-wall_tip_t *NewWallTip(void);
+seg_t *NewSeg();
+subsec_t *NewSubsec();
+node_t *NewNode();
+wall_tip_t *NewWallTip();
 
 // lookup routines [ FIXME REMOVE ]
 
-seg_t *LookupSeg(int index);
-subsec_t *LookupSubsec(int index);
 node_t *LookupNode(int index);
 
 Lump_c * CreateGLMarker();

@@ -1895,7 +1895,7 @@ void ClockwiseBspTree()
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = LookupSubsec(i);
+		subsec_t *sub = lev_subsecs[i];
 
 		ClockwiseOrder(sub);
 		RenumberSubsecSegs(sub);
@@ -1965,7 +1965,7 @@ void NormaliseBspTree()
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = LookupSubsec(i);
+		subsec_t *sub = lev_subsecs[i];
 
 		NormaliseSubsector(sub);
 		RenumberSubsecSegs(sub);
@@ -2106,7 +2106,7 @@ void RoundOffBspTree()
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = LookupSubsec(i);
+		subsec_t *sub = lev_subsecs[i];
 
 		RoundOffSubsector(sub);
 		RenumberSubsecSegs(sub);
