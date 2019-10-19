@@ -37,6 +37,7 @@ void y_strlowr (char *str);
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 char *StringUpper(const char *name);
+char *StringLower(const char *name);
 char *StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 
