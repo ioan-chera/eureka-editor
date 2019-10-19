@@ -633,6 +633,9 @@ void DetectOverlappingLines(void)
 
 /* ----- vertex routines ------------------------------- */
 
+// smallest degrees between two angles before being considered equal
+#define ANG_EPSILON  (1.0 / 1024.0)
+
 static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 		int open_left, int open_right)
 {

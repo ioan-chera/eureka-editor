@@ -60,6 +60,10 @@ namespace ajbsp
 #define DEBUG_CUTLIST   0
 
 
+// smallest distance between two points before being considered equal
+#define DIST_EPSILON  (1.0 / 1024.0)
+
+
 typedef struct eval_info_s
 {
 	int cost;
@@ -287,7 +291,7 @@ static void AddIntersection(intersection_t ** cut_list,
 
 			return;
 		}
-		else if (fabs(along_dist - cut->along_dist) < DIST_EPSILON)
+		else if (fabs(along_dist - cut->along_dist) < DIST_EPSILON*2)
 		{
 			// an OPEN aspect always overrides a CLOSED one.
 			// [ though a mismatch should only occur with broken geometry ]

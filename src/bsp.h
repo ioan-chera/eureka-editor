@@ -527,13 +527,6 @@ bool VertexCheckOpen(vertex_t *vert, double dx, double dy);
 #define IFFY_LEN  4.0
 
 
-// smallest distance between two points before being considered equal
-#define DIST_EPSILON  (1.0 / 128.0)
-
-// smallest degrees between two angles before being considered equal
-#define ANG_EPSILON  (1.0 / 1024.0)
-
-
 inline void ListAddSeg(seg_t **list_ptr, seg_t *seg)
 {
 	seg->next = *list_ptr;
