@@ -260,6 +260,8 @@ static void MarkPolyobjPoint(double x, double y)
 	double x1, y1;
 	double x2, y2;
 
+	double EPSILON = 0.01;
+
 	// -AJA- First we handle the "awkward" cases where the polyobj sits
 	//       directly on a linedef or even a vertex.  We check all lines
 	//       that intersect a small box around the spawn point.
@@ -312,11 +314,11 @@ static void MarkPolyobjPoint(double x, double y)
 		y2 = L->End()->y();
 
 		/* check vertical range */
-		if (fabs(y2 - y1) < DIST_EPSILON)
+		if (fabs(y2 - y1) < EPSILON)
 			continue;
 
-		if ((y > (y1 + DIST_EPSILON) && y > (y2 + DIST_EPSILON)) ||
-			(y < (y1 - DIST_EPSILON) && y < (y2 - DIST_EPSILON)))
+		if ((y > (y1 + EPSILON) && y > (y2 + EPSILON)) ||
+			(y < (y1 - EPSILON) && y < (y2 - EPSILON)))
 			continue;
 
 		x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
@@ -348,7 +350,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	/* sanity check: shouldn't be directly on the line */
 # if DEBUG_POLYOBJ
-	if (fabs(best_dist) < DIST_EPSILON)
+	if (fabs(best_dist) < EPSILON)
 	{
 		DebugPrintf("  Polyobj FAILURE: directly on the line (%d)\n", best_match);
 	}
