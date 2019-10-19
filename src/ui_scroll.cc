@@ -304,7 +304,7 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	box(FL_NO_BOX);
 
 
-	vert = new Fl_Scrollbar(X, Y, SBAR_W, H - SBAR_W, NULL);
+	vert = new Fl_Scrollbar(X, Y + INFO_BAR_H, SBAR_W, H - SBAR_W - INFO_BAR_H, NULL);
 
 	vert->type(FL_VERTICAL);
 	vert->align(FL_ALIGN_LEFT);
@@ -328,7 +328,6 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 
 
 	info3d = new UI_3DInfoBar(X, Y, W, INFO_BAR_H);
-	info3d->hide();
 
 	end();
 }
@@ -350,7 +349,9 @@ void UI_CanvasScroll::UpdateRenderMode()
 	if (old_bars == new_bars && old_rend == new_rend)
 		return;
 
-	int I = edit.render3d ? INFO_BAR_H : 0;
+	bool show_info = true;
+
+	int I = show_info ? INFO_BAR_H : 0;
 	int B = new_bars ? SBAR_W : 0;
 
 	canvas->resize(x() + B, y() + I, w() - B, h() - B - I);
@@ -368,7 +369,7 @@ void UI_CanvasScroll::UpdateRenderMode()
 		 horiz->hide();
 	}
 
-	if (edit.render3d)
+	if (show_info)
 		info3d->show();
 	else
 		info3d->hide();

@@ -10,6 +10,8 @@ RECENT CHANGES
 
 + preference to combine flats and textures in a single browser
 
+- info bar for the 2D map view
+
 - added scale '-' and '+' buttons, show scale as percentage
 
 - fixed mode menu disappearing into Window's task bar when maximized

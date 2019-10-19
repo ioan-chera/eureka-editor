@@ -127,25 +127,13 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	UpdateSnapText();
 
-	X = grid_snap->x() + grid_snap->w() + 4;
-
-
-	mouse_x = new Fl_Output(X+28,       Y, 64, H, "x");
-	mouse_y = new Fl_Output(X+28+72+10, Y, 64, H, "y");
-
-	mouse_x->align(FL_ALIGN_LEFT);
-	mouse_y->align(FL_ALIGN_LEFT);
-
-	mouse_x->labelsize(KF_fonth); mouse_y->labelsize(KF_fonth);
-	mouse_x->textsize(KF_fonth);  mouse_y->textsize(KF_fonth);
-
-	X = mouse_y->x() + mouse_y->w() + 10;
+	X = grid_snap->x() + grid_snap->w() + 14;
 
 
 	Fl_Box *div = new Fl_Box(FL_FLAT_BOX, X, Y-4, 3, H+4, NULL);
 	div->color(WINDOW_BG, WINDOW_BG);
 
-	X += 6;
+	X += 10;
 
 
 	status = new Fl_Box(FL_FLAT_BOX, X, Y-4, W - 4 - X, H+4, "Ready");
@@ -246,23 +234,9 @@ void UI_InfoBar::NewEditMode(obj_type_e new_mode)
 
 void UI_InfoBar::SetMouse(double mx, double my)
 {
-	if (mx < -32767.0 || mx > 32767.0 ||
-		my < -32767.0 || my > 32767.0)
-	{
-		mouse_x->value("off map");
-		mouse_y->value("off map");
+	// TODO this method should go away
 
-		return;
-	}
-
-	char x_buffer[60];
-	char y_buffer[60];
-
-	sprintf(x_buffer, "%d", I_ROUND(mx));
-	sprintf(y_buffer, "%d", I_ROUND(my));
-
-	mouse_x->value(x_buffer);
-	mouse_y->value(y_buffer);
+	main_win->scroll->info3d->redraw();
 }
 
 
@@ -395,8 +369,11 @@ int UI_3DInfoBar::handle(int event)
 
 void UI_3DInfoBar::draw()
 {
-	fl_color(FL_BLACK);
+	fl_color(fl_rgb_color(64, 64, 64));
 	fl_rectf(x(), y(), w(), h());
+
+	fl_color(fl_rgb_color(96, 96, 96));
+	fl_rectf(x(), y() + h() - 1, w(), 1);
 
 	fl_push_clip(x(), y(), w(), h());
 
@@ -405,22 +382,42 @@ void UI_3DInfoBar::draw()
 	int cx = x() + 10;
 	int cy = y() + 20;
 
-	int ang = I_ROUND(r_view.angle * 180 / M_PI);
-	if (ang < 0) ang += 360;
+	if (edit.render3d)
+	{
+		IB_Number(cx, cy, "x", I_ROUND(r_view.x), 5);
+		IB_Number(cx, cy, "y", I_ROUND(r_view.y), 5);
+		IB_Number(cx, cy, "z", I_ROUND(r_view.z) - game_info.view_height, 4);
 
-	IB_Number(cx, cy, "angle", ang, 3);
-	cx += 8;
+		int ang = I_ROUND(r_view.angle * 180 / M_PI);
+		if (ang < 0) ang += 360;
 
-	IB_Number(cx, cy, "z", I_ROUND(r_view.z) - game_info.view_height, 4);
+		IB_Number(cx, cy, "angle", ang, 3);
+		cx += 8;
 
-	IB_Number(cx, cy, "gamma", usegamma, 1);
-	cx += 10;
+		IB_Flag(cx, cy, r_view.gravity, "GRAVITY", "gravity");
 
-	IB_Flag(cx, cy, r_view.gravity, "GRAVITY", "gravity");
+		IB_Number(cx, cy, "gamma", usegamma, 1);
+		cx += 10;
 
-	IB_Flag(cx, cy, true, "|", "|");
+		IB_Flag(cx, cy, true, "|", "|");
+		IB_Highlight(cx, cy);
+	}
+	else
+	{
+		int mx = I_ROUND(edit.map_x);
+		int my = I_ROUND(edit.map_y);
 
-	IB_Highlight(cx, cy);
+		mx = CLAMP(-32767, mx, 32767);
+		my = CLAMP(-32767, my, 32767);
+
+		IB_Number(cx, cy, "x", mx, 5);
+		IB_Number(cx, cy, "y", my, 5);
+
+		cx += 200;
+
+		IB_Number(cx, cy, "gamma", usegamma, 1);
+		cx += 10;
+	}
 
 	fl_pop_clip();
 }

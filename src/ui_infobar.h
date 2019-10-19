@@ -35,9 +35,6 @@ private:
 
 	Fl_Toggle_Button *grid_snap;
 
-	Fl_Output *mouse_x;
-	Fl_Output *mouse_y;
-
 	Fl_Box *status;
 
 public:
