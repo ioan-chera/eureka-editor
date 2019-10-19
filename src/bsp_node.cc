@@ -1430,44 +1430,42 @@ static void DetermineMiddle(subsec_t *sub)
 }
 
 
-//
-// -AJA- Put the list of segs into clockwise order.
-//       Uses the now famous "double bubble" sorter :).
-//
 static void ClockwiseOrder(subsec_t *sub)
 {
 	seg_t *seg;
-	seg_t ** array;
-	seg_t *seg_buffer[32];
-
-	int i;
-	int total = 0;
-
-	int first = 0;
-	int score = -1;
 
 # if DEBUG_SUBSEC
 	DebugPrintf("Subsec: Clockwising %d\n", sub->index);
 # endif
 
 	// count segs and create an array to manipulate them
+	int total = 0;
+
 	for (seg=sub->seg_list ; seg ; seg=seg->next)
 		total++;
 
-	// use local array if small enough
-	if (total <= 32)
-		array = seg_buffer;
-	else
-		array = (seg_t **) UtilCalloc(total * sizeof(seg_t *));
+	// use local array if large enough
+	seg_t *seg_buffer[32];
+	seg_t ** array = seg_buffer;
 
-	for (seg=sub->seg_list, i=0 ; seg ; seg=seg->next, i++)
-		array[i] = seg;
+	if (total > 32)
+		array = new seg_t* [total];
+
+	int i = 0;
+	for (seg=sub->seg_list ; seg ; seg=seg->next)
+	{
+		array[i++] = seg;
+
+		// compute angles now
+		seg->cmp_angle = UtilComputeAngle(seg->start->x - sub->mid_x, seg->start->y - sub->mid_y);
+	}
 
 	if (i != total)
 		BugError("ClockwiseOrder miscounted.\n");
 
 	// sort segs by angle (from the middle point to the start vertex).
-	// The desired order (clockwise) means descending angles.
+	// the desired order (clockwise) means descending angles.
+	// since # of segs is usually small, a bubble sort is fast enough.
 
 	i = 0;
 
@@ -1476,12 +1474,7 @@ static void ClockwiseOrder(subsec_t *sub)
 		seg_t *A = array[i];
 		seg_t *B = array[i+1];
 
-		angle_g angle1, angle2;
-
-		angle1 = UtilComputeAngle(A->start->x - sub->mid_x, A->start->y - sub->mid_y);
-		angle2 = UtilComputeAngle(B->start->x - sub->mid_x, B->start->y - sub->mid_y);
-
-		if (angle1 + ANG_EPSILON < angle2)
+		if (A->cmp_angle < B->cmp_angle)
 		{
 			// swap 'em
 			array[i] = B;
@@ -1499,47 +1492,50 @@ static void ClockwiseOrder(subsec_t *sub)
 	}
 
 	// choose the seg that will be first (the game engine will typically use
-	// that to determine the sector).  In particular, we don't like self
-	// referencing linedefs (they are often used for deep-water effects).
+	// that to determine the sector).  while we don't like self referencing
+	// linedefs (they are often used for deep-water effects), we definitely
+	// have to skip minisegs.
+	int first = 0;
+	int best_score = -1;
+
 	for (i=0 ; i < total ; i++)
 	{
 		int cur_score = 3;
 
+		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
 		else if (LineDefs[array[i]->linedef]->IsSelfRef())
 			cur_score = 2;
 
-		if (cur_score > score)
+		if (cur_score > best_score)
 		{
 			first = i;
-			score = cur_score;
+			best_score = cur_score;
 		}
 	}
 
-	// transfer sorted array back into sub
+	// transfer sorted array back into subsec_t
 	sub->seg_list = NULL;
 
 	for (i=total-1 ; i >= 0 ; i--)
 	{
-		int j = (i + first) % total;
+		int k = (i + first) % total;
 
-		ListAddSeg(&sub->seg_list, array[j]);
+		ListAddSeg(&sub->seg_list, array[k]);
 	}
 
+	// free seg array, unless local
 	if (total > 32)
-		UtilFree(array);
+		delete[] array;
 
 # if DEBUG_SORTER
 	DebugPrintf("Sorted SEGS around (%1.1f,%1.1f)\n", sub->mid_x, sub->mid_y);
 
 	for (seg=sub->seg_list ; seg ; seg=seg->next)
 	{
-		angle_g angle = UtilComputeAngle(seg->start->x - sub->mid_x,
-				seg->start->y - sub->mid_y);
-
 		DebugPrintf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-				seg, angle, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+				seg, seg->cmp_angle, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
 # endif
 }

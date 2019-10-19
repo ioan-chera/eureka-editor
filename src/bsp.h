@@ -305,6 +305,9 @@ typedef struct seg_s
 	// "minisegs", this is the linedef of the partition line.
 	int source_line;
 
+	// this only used by ClockwiseOrder()
+	angle_g cmp_angle;
+
 public:
 	// returns SIDE_LEFT, SIDE_RIGHT or 0 for being "on" the line.
 	int PointOnLineSide(double x, double y) const;
