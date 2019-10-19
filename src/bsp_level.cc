@@ -1294,10 +1294,11 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	// Note that x/y/dx/dy are always integral in non-UDMF maps
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1346,10 +1347,10 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1622,10 +1623,10 @@ static void PutOneZNode(node_t *node)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	ZLibAppendLump(&raw.x,  2);
 	ZLibAppendLump(&raw.y,  2);

@@ -1171,18 +1171,28 @@ void node_t::SetPartition(const seg_t *part)
 		dy = part_L->Start()->y() - y;
 	}
 
-	/* check for really long partition (overflows dx,dy in NODES) */
-	if (part->p_length >= 30000)
+	/* check for very long partition (overflow of dx,dy in NODES) */
+
+	if (fabs(dx) > 32000 || fabs(dy) > 32000)
 	{
-/* FIXME REVIEW THIS
-		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
+		if (Level_format == MAPF_UDMF)
 		{
-			LogPrintf("Loss of accuracy on VERY long node: "
-					"(%d,%d) -> (%d,%d)\n", node->x, node->y,
-					node->x + node->dx, node->y + node->dy);
+			// XGL3 nodes are 16.16 fixed point, hence we still need
+			// to reduce the delta.
+			dx *= 0.5;
+			dy *= 0.5;
 		}
-*/
-		too_long = 1;
+		else
+		{
+			if (((int)dx | (int)dy) & 1)
+			{
+				Warning("Loss of accuracy on VERY long node: "
+						"(%d,%d) -> (%d,%d)\n", x, y, x + dx, y+ dy);
+			}
+
+			dx = round(dx * 0.5);
+			dy = round(dy * 0.5);
+		}
 	}
 }
 
