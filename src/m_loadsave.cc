@@ -994,7 +994,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 		}
 	}
 
-	Level_name  = StringUpper(level);
+	Level_name = StringUpper(level);
 
 	Status_Set("Loaded %s", Level_name);
 
@@ -1019,7 +1019,7 @@ void LoadLevelNum(Wad_file *wad, short lev_num)
 
 	if (Level_format == MAPF_UDMF)
 	{
-		LoadLevel_UDMF();
+		UDMF_LoadLevel();
 	}
 	else
 	{
@@ -1639,7 +1639,7 @@ static void SaveLevel(const char *level)
 		// TODO our built-in nodes builder cannot handle UDMF yet
 		inhibit_node_build = true;
 
-		SaveLevel_UDMF();
+		UDMF_SaveLevel();
 	}
 	else
 	{

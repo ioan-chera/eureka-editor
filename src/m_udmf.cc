@@ -310,7 +310,7 @@ public:
 };
 
 
-static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
@@ -343,7 +343,7 @@ static void ParseUDMF_GlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 }
 
 
-static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -402,7 +402,7 @@ static void ParseUDMF_ThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 	}
 }
 
-static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseVertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("x"))
 		V->raw_x = value.DecodeCoord();
@@ -414,7 +414,7 @@ static void ParseUDMF_VertexField(Vertex *V, Udmf_Token& field, Udmf_Token& valu
 	}
 }
 
-static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseLinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -476,7 +476,7 @@ static void ParseUDMF_LinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& v
 	}
 }
 
-static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
 {
 	// Note: sector numbers are validated later on
 
@@ -500,7 +500,7 @@ static void ParseUDMF_SidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& v
 	}
 }
 
-static void ParseUDMF_SectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
@@ -522,7 +522,7 @@ static void ParseUDMF_SectorField(Sector *S, Udmf_Token& field, Udmf_Token& valu
 	}
 }
 
-static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -603,19 +603,19 @@ static void ParseUDMF_Object(Udmf_Parser& parser, Udmf_Token& name)
 		}
 
 		if (new_T)
-			ParseUDMF_ThingField(new_T, tok, value);
+			UDMF_ParseThingField(new_T, tok, value);
 
 		if (new_V)
-			ParseUDMF_VertexField(new_V, tok, value);
+			UDMF_ParseVertexField(new_V, tok, value);
 
 		if (new_LD)
-			ParseUDMF_LinedefField(new_LD, tok, value);
+			UDMF_ParseLinedefField(new_LD, tok, value);
 
 		if (new_SD)
-			ParseUDMF_SidedefField(new_SD, tok, value);
+			UDMF_ParseSidedefField(new_SD, tok, value);
 
 		if (new_S)
-			ParseUDMF_SectorField(new_S, tok, value);
+			UDMF_ParseSectorField(new_S, tok, value);
 	}
 }
 
@@ -637,7 +637,7 @@ static void ValidateLevel_UDMF()
 }
 
 
-void LoadLevel_UDMF()
+void UDMF_LoadLevel()
 {
 	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
 	// we assume this cannot happen
@@ -666,12 +666,12 @@ void LoadLevel_UDMF()
 
 		if (tok2.Match("="))
 		{
-			ParseUDMF_GlobalVar(parser, tok);
+			UDMF_ParseGlobalVar(parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
 		{
-			ParseUDMF_Object(parser, tok);
+			UDMF_ParseObject(parser, tok);
 			continue;
 		}
 
@@ -694,12 +694,12 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 	}
 }
 
-static void WriteUDMF_Info(Lump_c *lump)
+static void UDMF_WriteInfo(Lump_c *lump)
 {
 	lump->Printf("namespace = \"%s\";\n\n", Udmf_namespace.c_str());
 }
 
-static void WriteUDMF_Things(Lump_c *lump)
+static void UDMF_WriteThings(Lump_c *lump)
 {
 	for (int i = 0 ; i < NumThings ; i++)
 	{
@@ -743,7 +743,7 @@ static void WriteUDMF_Things(Lump_c *lump)
 	}
 }
 
-static void WriteUDMF_Vertices(Lump_c *lump)
+static void UDMF_WriteVertices(Lump_c *lump)
 {
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
@@ -759,7 +759,7 @@ static void WriteUDMF_Vertices(Lump_c *lump)
 	}
 }
 
-static void WriteUDMF_LineDefs(Lump_c *lump)
+static void UDMF_WriteLineDefs(Lump_c *lump)
 {
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
@@ -817,7 +817,7 @@ static void WriteUDMF_LineDefs(Lump_c *lump)
 	}
 }
 
-static void WriteUDMF_SideDefs(Lump_c *lump)
+static void UDMF_WriteSideDefs(Lump_c *lump)
 {
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
@@ -846,7 +846,7 @@ static void WriteUDMF_SideDefs(Lump_c *lump)
 	}
 }
 
-static void WriteUDMF_Sectors(Lump_c *lump)
+static void UDMF_WriteSectors(Lump_c *lump)
 {
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
@@ -873,21 +873,51 @@ static void WriteUDMF_Sectors(Lump_c *lump)
 	}
 }
 
-void SaveLevel_UDMF()
+void UDMF_SaveLevel()
 {
 	Lump_c *lump = edit_wad->AddLump("TEXTMAP");
 
-	WriteUDMF_Info(lump);
-	WriteUDMF_Things(lump);
-	WriteUDMF_Vertices(lump);
-	WriteUDMF_LineDefs(lump);
-	WriteUDMF_SideDefs(lump);
-	WriteUDMF_Sectors(lump);
+	UDMF_WriteInfo(lump);
+	UDMF_WriteThings(lump);
+	UDMF_WriteVertices(lump);
+	UDMF_WriteLineDefs(lump);
+	UDMF_WriteSideDefs(lump);
+	UDMF_WriteSectors(lump);
 
 	lump->Finish();
 
 	lump = edit_wad->AddLump("ENDMAP");
 	lump->Finish();
+}
+
+
+//----------------------------------------------------------------------
+
+void UDMF_SwitchEngine()
+{
+	if (Udmf_namespace.empty())
+		return;
+
+	// convert to lowercase
+	char *namespace_l = StringLower(Udmf_namespace.c_str());
+
+	// already set?
+	if (y_stricmp(Port_name, namespace_l) == 0)
+	{
+		StringFree(namespace_l);
+		return;
+	}
+
+	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l);
+
+	if (pinfo)
+	{
+		// TODO
+	}
+
+	// TODO
+
+	StringFree(namespace_l);
 }
 
 //--- editor settings ---
