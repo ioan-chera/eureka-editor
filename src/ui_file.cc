@@ -706,29 +706,31 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		o->callback((Fl_Callback*)find_callback, this);
 	}
 
-	port_choice = new Fl_Choice(140, by+60, 150, 29, "Source Port: ");
+	port_choice = new Fl_Choice(140, by+62, 150, 29, "Source Port: ");
 	port_choice->labelfont(FL_HELVETICA_BOLD);
 	port_choice->down_box(FL_BORDER_BOX);
 	port_choice->callback((Fl_Callback*)port_callback, this);
 
 	{
-		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
+		Fl_Button* o = new Fl_Button(305, by+64, 75, 25, "Setup");
 		o->callback((Fl_Callback*)setup_callback, this);
 
 		if (is_startup)
 			o->hide();
 	}
 
-	format_choice = new Fl_Choice(140, by+105, 150, 29, "Map Type: ");
+	format_choice = new Fl_Choice(140, by+99, 150, 29, "Map Type: ");
 	format_choice->labelfont(FL_HELVETICA_BOLD);
 	format_choice->down_box(FL_BORDER_BOX);
 	format_choice->callback((Fl_Callback*)format_callback, this);
 
+#if 0  // Disabled for now
 	namespace_choice = new Fl_Choice(140, by+140, 150, 29, "Namespace: ");
 	namespace_choice->labelfont(FL_HELVETICA_BOLD);
 	namespace_choice->down_box(FL_BORDER_BOX);
 	namespace_choice->callback((Fl_Callback*)namespace_callback, this);
 	namespace_choice->hide();
+#endif
 
 	if (is_startup)
 	{
@@ -967,13 +969,14 @@ void UI_ProjectSetup::PopulateMapFormat()
 	format_choice->value(menu_value);
 
 	// set map_format field based on current menu entry.
-	// this also calls PopulateNamespaces().
 	format_callback(format_choice, (void *)this);
 }
 
 
 void UI_ProjectSetup::PopulateNamespaces()
 {
+#if 0  // Disabled for now
+
 	if (map_format != MAPF_UDMF)
 	{
 		namespace_choice->hide();
@@ -1015,6 +1018,7 @@ void UI_ProjectSetup::PopulateNamespaces()
 
 	if (menu_value < (int)pinfo->namespaces.size())
 		name_space = pinfo->namespaces[menu_value];
+#endif
 }
 
 
