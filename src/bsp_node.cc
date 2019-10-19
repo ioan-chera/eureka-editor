@@ -132,22 +132,22 @@ void FreeQuickAllocCuts(void)
 //
 // Fill in the fields 'angle', 'len', 'pdx', 'pdy', etc...
 //
-void RecomputeSeg(seg_t *seg)
+void seg_t::Recompute()
 {
-	seg->psx = seg->start->x;
-	seg->psy = seg->start->y;
-	seg->pex = seg->end->x;
-	seg->pey = seg->end->y;
-	seg->pdx = seg->pex - seg->psx;
-	seg->pdy = seg->pey - seg->psy;
+	psx = start->x;
+	psy = start->y;
+	pex = end->x;
+	pey = end->y;
+	pdx = pex - psx;
+	pdy = pey - psy;
 
-	seg->p_length = hypot(seg->pdx, seg->pdy);
+	p_length = hypot(pdx, pdy);
 
-	if (seg->p_length <= 0)
-		BugError("Seg %p has zero p_length.\n", seg);
+	if (p_length <= 0)
+		BugError("Seg %p has zero p_length.\n", this);
 
-	seg->p_perp =  seg->psy * seg->pdx - seg->psx * seg->pdy;
-	seg->p_para = -seg->psx * seg->pdx - seg->psy * seg->pdy;
+	p_perp =  psy * pdx - psx * pdy;
+	p_para = -psx * pdx - psy * pdy;
 }
 
 
@@ -183,11 +183,11 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 	new_seg[0] = old_seg[0];
 	new_seg->next = NULL;
 
-	old_seg->end = new_vert;
-	RecomputeSeg(old_seg);
-
+	old_seg->end   = new_vert;
 	new_seg->start = new_vert;
-	RecomputeSeg(new_seg);
+
+	old_seg->Recompute();
+	new_seg->Recompute();
 
 # if DEBUG_SPLIT
 	DebugPrintf("Splitting Vertex is %04X at (%1.1f,%1.1f)\n",
@@ -212,10 +212,10 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 		new_seg->partner->partner = new_seg;
 
 		old_seg->partner->start = new_vert;
-		RecomputeSeg(old_seg->partner);
+		new_seg->partner->end   = new_vert;
 
-		new_seg->partner->end = new_vert;
-		RecomputeSeg(new_seg->partner);
+		old_seg->partner->Recompute();
+		new_seg->partner->Recompute();
 
 		// link it into list
 		old_seg->partner->next = new_seg->partner;
@@ -1016,10 +1016,10 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 		seg->linedef = buddy->linedef = -1;
 		seg->source_line = buddy->source_line = part->linedef;
 
-		RecomputeSeg(seg);
-		RecomputeSeg(buddy);
+		  seg->Recompute();
+		buddy->Recompute();
 
-		// add the new segs to the appropriate lists
+		// add the new segs to the appropriate list
 		ListAddSeg(right_list, seg);
 		ListAddSeg(left_list, buddy);
 
@@ -1325,13 +1325,17 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 	if (sidedef >= 0)
 		sd = SideDefs[sidedef];
 
-	seg_t *seg = NewSeg();
-
 	// check for bad sidedef
 	if (sd && !is_sector(sd->sector))
 	{
 		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
+
+	// handle overlapping vertices, pick a nominal one
+	if (start->overlap) start = start->overlap;
+	if (  end->overlap)   end =   end->overlap;
+
+	seg_t *seg = NewSeg();
 
 	seg->start   = start;
 	seg->end     = end;
@@ -1342,7 +1346,7 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 	seg->source_line = seg->linedef;
 	seg->index = -1;
 
-	RecomputeSeg(seg);
+	seg->Recompute();
 
 	return seg;
 }

@@ -481,12 +481,12 @@ static int VertexCompare(const void *p1, const void *p2)
 
 void DetectOverlappingVertices(void)
 {
-	int i;
-	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
-
 	SYS_ASSERT(num_vertices == NumVertices);
 
+	u16_t *array = new u16_t[num_vertices];
+
 	// sort array of indices
+	int i;
 	for (i=0 ; i < num_vertices ; i++)
 		array[i] = i;
 
@@ -497,38 +497,16 @@ void DetectOverlappingVertices(void)
 	{
 		if (VertexCompare(array + i, array + i + 1) == 0)
 		{
+			// found an overlap!
+
 			vertex_t *A = lev_vertices[array[i]];
 			vertex_t *B = lev_vertices[array[i+1]];
 
-			// found an overlap !
 			B->overlap = A->overlap ? A->overlap : A;
 		}
 	}
 
-	UtilFree(array);
-
-	// update the linedefs
-
-	// update all in-memory linedefs.
-	// DOES NOT affect the on-disk linedefs.
-	// this is mainly to help the miniseg creation code.
-
-	for (i=0 ; i < NumLineDefs ; i++)
-	{
-/* FIXME !!!  DO THIS ANOTHER WAY
-		LineDef *L = LineDefs[i];
-
-		while (L->start->overlap)
-		{
-			L->start = L->start->overlap;
-		}
-
-		while (L->end->overlap)
-		{
-			L->end = L->end->overlap;
-		}
-*/
-	}
+	delete[] array;
 }
 
 

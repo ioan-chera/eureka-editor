@@ -242,7 +242,8 @@ typedef struct vertex_s
 	bool is_new;
 
 	// usually NULL, unless this vertex occupies the same location as a
-	// previous vertex.
+	// previous vertex.  when there are multiple vertices at one spot,
+	// the second and third (etc) all refer to the first.
 	struct vertex_s *overlap;
 
 	// list of wall-tips
@@ -309,6 +310,9 @@ typedef struct seg_s
 	angle_g cmp_angle;
 
 public:
+	// compute the seg private info (psx/y, pex/y, pdx/y, etc).
+	void Recompute();
+
 	// returns SIDE_LEFT, SIDE_RIGHT or 0 for being "on" the line.
 	int PointOnLineSide(double x, double y) const;
 
@@ -574,9 +578,6 @@ seg_t *PickNode(quadtree_c *tree, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
 void FindLimits2(seg_t *list, bbox_t *bbox);
-
-// compute the seg private info (psx/y, pex/y, pdx/y, etc).
-void RecomputeSeg(seg_t *seg);
 
 // take the given seg 'cur', compare it with the partition line, and
 // determine it's fate: moving it into either the left or right lists
