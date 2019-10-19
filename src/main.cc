@@ -1120,27 +1120,24 @@ int main(int argc, char *argv[])
 
 	DeterminePort();
 
-
 	// temporarily load the iwad, the following few functions need it.
-	// it gets loaded again in Main_LoadResources().
+	// it will get loaded again in Main_LoadResources().
 	Main_LoadIWAD();
-
-	Level_name = DetermineLevel();
-
-	// config file parsing can depend on the map format, so get it now
-	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
-
-	Main_LoadResources();
 
 
 	// load the initial level
+	Level_name = DetermineLevel();
+
 	LogPrintf("Loading initial map : %s\n", Level_name);
 
 	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
+	// do this *after* loading the level, since config file parsing
+	// can depend on the map format and UDMF namespace.
+	Main_LoadResources();
+
 
 	Main_Loop();
-
 
 quit:
 	/* that's all folks! */
