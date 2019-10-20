@@ -950,8 +950,6 @@ void Wad_file::RemoveGLNodes(short lev_num)
 	short start  = LevelHeader(lev_num);
 	short finish = LevelLastLump(lev_num);
 
-	// FIXME for UDMF -- just remove ZNODES lump
-
 	start++;
 
 	while (start <= finish &&
@@ -970,6 +968,25 @@ void Wad_file::RemoveGLNodes(short lev_num)
 
 	if (count > 0)
 		RemoveLumps(start, count);
+}
+
+
+void Wad_file::RemoveZNodes(short lev_num)
+{
+	SYS_ASSERT(begun_write);
+	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
+
+	short start  = LevelHeader(lev_num);
+	short finish = LevelLastLump(lev_num);
+
+	for ( ; start <= finish ; start++)
+	{
+		if (y_stricmp(directory[start]->name, "ZNODES") == 0)
+		{
+			RemoveLumps(start, 1);
+			break;
+		}
+	}
 }
 
 

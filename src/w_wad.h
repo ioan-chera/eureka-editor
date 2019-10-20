@@ -217,6 +217,9 @@ public:
 	// level.
 	void RemoveGLNodes(short lev_num);
 
+	// removes any ZNODES lump from a UDMF level.
+	void RemoveZNodes(short lev_num);
+
 	// insert a new lump.
 	// The second form is for a level marker.
 	// The 'max_size' parameter (if >= 0) specifies the most data

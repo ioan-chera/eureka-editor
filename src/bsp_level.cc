@@ -2022,19 +2022,19 @@ build_result_e SaveLevel(node_t *root_node)
 }
 
 
-build_result_e SaveLevel_UDMF(node_t *root_node)
+build_result_e SaveUDMF(node_t *root_node)
 {
-	if (num_real_lines == 0)
-		return BUILD_OK;
-
 	edit_wad->BeginWrite();
 
 	// remove any existing ZNODES lump
-	// FIXME edit_wad->RemoveGLNodes(lev_current_idx);
+	edit_wad->RemoveZNodes(lev_current_idx);
 
 	SortSegs();
 
-	SaveXGL3Format(root_node);
+	if (num_real_lines >= 0)
+	{
+		SaveXGL3Format(root_node);
+	}
 
 	edit_wad->EndWrite();
 
@@ -2266,7 +2266,10 @@ build_result_e BuildLevel(nodebuildinfo_t *info, short lev_idx)
 
 		ClockwiseBspTree();
 
-		ret = SaveLevel(root_node);
+		if (Level_format == MAPF_UDMF)
+			ret = SaveUDMF(root_node);
+		else
+			ret = SaveLevel(root_node);
 	}
 	else
 	{
