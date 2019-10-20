@@ -782,11 +782,8 @@ const char *lev_current_name;
 short lev_current_idx;
 short lev_current_start;
 
-bool lev_doing_hexen;
-
 bool lev_force_v5;
 bool lev_force_xnod;
-
 bool lev_long_name;
 
 int lev_overflows;
@@ -1771,10 +1768,6 @@ void LoadLevel()
 	lev_current_name = LEV->Name();
 	lev_overflows = 0;
 
-	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
-	// FIXME : review this for UDMF
-	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
-
 	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
 
 	num_new_vert = 0;
@@ -1805,7 +1798,7 @@ void LoadLevel()
 
 	CalculateWallTips();
 
-	if (lev_doing_hexen)
+	if (Level_format != MAPF_Doom)
 	{
 		// -JL- Find sectors containing polyobjs
 		DetectPolyobjSectors();
@@ -2213,14 +2206,12 @@ Lump_c * CreateGLMarker()
 	if (strlen(lev_current_name) <= 5)
 	{
 		sprintf(name_buf, "GL_%s", lev_current_name);
-
 		lev_long_name = false;
 	}
 	else
 	{
 		// support for level names longer than 5 letters
 		strcpy(name_buf, "GL_LEVEL");
-
 		lev_long_name = true;
 	}
 
