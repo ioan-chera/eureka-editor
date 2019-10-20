@@ -90,6 +90,17 @@ public:
 		return atof(text.c_str());
 	}
 
+	std::string DecodeString() const
+	{
+		if (! IsString() || text.size() < 2)
+		{
+			// TODO warning
+			return std::string();
+		}
+
+		return std::string(text, 1, text.size() - 2);
+	}
+
 	fixcoord_t DecodeCoord() const
 	{
 		return MakeValidCoord(DecodeFloat());
@@ -330,7 +341,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		Udmf_namespace = value.c_str();
+		Udmf_namespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
