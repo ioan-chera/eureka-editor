@@ -782,10 +782,6 @@ const char *lev_current_name;
 short lev_current_idx;
 short lev_current_start;
 
-bool lev_force_v5;
-bool lev_force_xnod;
-bool lev_long_name;
-
 int lev_overflows;
 
 
@@ -1415,7 +1411,7 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 }
 
 
-void CheckLimits()
+void CheckLimits(bool& force_v5, bool& force_xnod)
 {
 	if (NumSectors > 65534)
 	{
@@ -1443,7 +1439,7 @@ void CheckLimits()
 			num_nodes > 32767)
 		{
 			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
-			lev_force_v5 = true;
+			force_v5 = true;
 		}
 	}
 
@@ -1455,7 +1451,7 @@ void CheckLimits()
 			num_nodes > 32767)
 		{
 			Warning("Forcing XNOD format nodes due to overflows.\n");
-			lev_force_xnod = true;
+			force_xnod = true;
 		}
 	}
 }
@@ -1880,13 +1876,13 @@ void UpdateGLMarker(Lump_c *marker)
 
 	edit_wad->RecreateLump(marker, max_size);
 
-	if (lev_long_name)
+	// when original name is long, need to specify it here
+	if (strlen(lev_current_name) > 5)
 	{
 		marker->Printf("LEVEL=%s\n", lev_current_name);
 	}
 
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
-
 	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
 
 	char *time_str = UtilTimeString();
@@ -1898,7 +1894,6 @@ void UpdateGLMarker(Lump_c *marker)
 	}
 
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
-
 	marker->Finish();
 }
 
@@ -1940,14 +1935,13 @@ build_result_e SaveLevel(node_t *root_node)
 	AddMissingLump("REJECT",   "SECTORS");
 	AddMissingLump("BLOCKMAP", "REJECT");
 
-
-	lev_force_v5   = cur_info->force_v5;
-	lev_force_xnod = cur_info->force_xnod;
-
+	// user preferences
+	bool force_v5   = cur_info->force_v5;
+	bool force_xnod = cur_info->force_xnod;
 
 	// check for overflows...
-
-	CheckLimits();
+	// this sets the force_xxx vars if certain limits are breached
+	CheckLimits(force_v5, force_xnod);
 
 
 	/* --- GL Nodes --- */
@@ -1961,19 +1955,19 @@ build_result_e SaveLevel(node_t *root_node)
 		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
 
-		PutGLVertices(lev_force_v5);
+		PutGLVertices(force_v5);
 
-		if (lev_force_v5)
+		if (force_v5)
 			PutGLSegs_V5();
 		else
 			PutGLSegs();
 
-		if (lev_force_v5)
+		if (force_v5)
 			PutGLSubsecs_V5();
 		else
 			PutSubsecs("GL_SSECT", true);
 
-		PutNodes("GL_NODES", lev_force_v5, root_node);
+		PutNodes("GL_NODES", force_v5, root_node);
 
 		// -JL- Add empty PVS lump
 		CreateLevelLump("GL_PVS")->Finish();
@@ -1985,7 +1979,7 @@ build_result_e SaveLevel(node_t *root_node)
 	// remove all the mini-segs
 	NormaliseBspTree();
 
-	if (lev_force_xnod && num_real_lines > 0)
+	if (force_xnod && num_real_lines > 0)
 	{
 		SortSegs();
 
@@ -2008,7 +2002,7 @@ build_result_e SaveLevel(node_t *root_node)
 	PutReject();
 
 	// keyword support (v5.0 of the specs).
-	// must be done *after* doing normal nodes, for proper checksum.
+	// must be done *after* doing normal nodes (for proper checksum).
 	if (gl_marker)
 	{
 		UpdateGLMarker(gl_marker);
@@ -2037,10 +2031,6 @@ build_result_e SaveLevel_UDMF(node_t *root_node)
 
 	// remove any existing ZNODES lump
 	// FIXME edit_wad->RemoveGLNodes(lev_current_idx);
-
-	// FIXME review these
-	lev_force_v5   = true;
-	lev_force_xnod = true;
 
 	SortSegs();
 
@@ -2206,13 +2196,11 @@ Lump_c * CreateGLMarker()
 	if (strlen(lev_current_name) <= 5)
 	{
 		sprintf(name_buf, "GL_%s", lev_current_name);
-		lev_long_name = false;
 	}
 	else
 	{
-		// support for level names longer than 5 letters
+		// names longer than 5 chars use "GL_LEVEL" as marker name
 		strcpy(name_buf, "GL_LEVEL");
-		lev_long_name = true;
 	}
 
 	short last_idx = edit_wad->LevelLastLump(lev_current_idx);
