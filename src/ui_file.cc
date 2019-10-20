@@ -919,6 +919,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	if (! game)
 	{
 		map_format = MAPF_Doom;
+		name_space = "";
 		return;
 	}
 
@@ -970,6 +971,19 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 	// set map_format field based on current menu entry.
 	format_callback(format_choice, (void *)this);
+
+
+	// determine the UDMF namespace
+	name_space = "";
+
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	if (pinfo)
+		name_space = pinfo->udmf_namespace;
+
+	// don't leave namespace as "" when chosen format is UDMF.
+	// [ this is to handle broken config files somewhat sanely ]
+	if (name_space.empty() && map_format == MAPF_UDMF)
+		name_space = "Hexen";
 }
 
 
