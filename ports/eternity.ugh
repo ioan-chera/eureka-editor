@@ -28,18 +28,9 @@
 # Pull in the Boom/MBF definitions, but only when Hexen-style
 # specials are not being used.
 
-if $MAP_FORMAT is HEXEN
+if $MAP_FORMAT not DOOM
   set $ALLOW_BOOM 0
   set $HEXEN_SPECIALS 1
-endif
-
-if $MAP_FORMAT is UDMF
-if $UDMF_NAMESPACE not Doom
-  set $ALLOW_BOOM 0
-endif
-if $UDMF_NAMESPACE is Hexen Eternity
-  set $HEXEN_SPECIALS 1
-endif
 endif
 
 if $ALLOW_BOOM is 1
@@ -51,7 +42,7 @@ map_formats DOOM HEXEN UDMF
 
 supported_games doom doom2 heretic hexen strife
 
-udmf_namespaces Eternity Doom Heretic Hexen Strife
+udmf_namespace Eternity
 
 feature 3d_midtex 1
 feature tx_start 1

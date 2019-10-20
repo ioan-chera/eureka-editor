@@ -39,40 +39,6 @@
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
 
-GameInfo_c::GameInfo_c(std::string _name) :
-	name(_name), base_game()
-{ }
-
-GameInfo_c::~GameInfo_c()
-{ }
-
-
-PortInfo_c::PortInfo_c(std::string _name) :
-	name(_name),
-	formats(0),
-	supported_games(),
-	namespaces()
-{ }
-
-PortInfo_c::~PortInfo_c()
-{ }
-
-void PortInfo_c::AddSupportedGame(const char *game)
-{
-	if (! SupportsGame(game))
-		supported_games.push_back(std::string(game));
-}
-
-bool PortInfo_c::SupportsGame(const char *game) const
-{
-	for (size_t i = 0 ; i < supported_games.size() ; i++)
-		if (y_stricmp(supported_games[i].c_str(), game) == 0)
-			return true;
-
-	return false;
-}
-
-
 misc_info_t      Misc_info;
 port_features_t  Features;
 
@@ -99,12 +65,49 @@ std::map<std::string, char> texture_assigns;
 std::map<std::string, char> flat_assigns;
 
 
+//
+// BOOM Generalized Lines
+//
 generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 
 int num_gen_linetypes;
 
 // variables which are "set" in def files
 static std::map< std::string, std::string > parse_vars;
+
+
+GameInfo_c::GameInfo_c(std::string _name) :
+	name(_name), base_game()
+{ }
+
+GameInfo_c::~GameInfo_c()
+{ }
+
+
+PortInfo_c::PortInfo_c(std::string _name) :
+	name(_name),
+	formats(0),
+	supported_games(),
+	udmf_namespace()
+{ }
+
+PortInfo_c::~PortInfo_c()
+{ }
+
+void PortInfo_c::AddSupportedGame(const char *game)
+{
+	if (! SupportsGame(game))
+		supported_games.push_back(std::string(game));
+}
+
+bool PortInfo_c::SupportsGame(const char *game) const
+{
+	for (size_t i = 0 ; i < supported_games.size() ; i++)
+		if (y_stricmp(supported_games[i].c_str(), game) == 0)
+			return true;
+
+	return false;
+}
 
 
 static void M_FreeAllDefinitions()
@@ -572,9 +575,9 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 	// these are handled by other passes
 	if (y_stricmp(argv[0], "base_game") == 0 ||
-		y_stricmp(argv[0], "supported_games") == 0 ||
 		y_stricmp(argv[0], "map_formats") == 0 ||
-		y_stricmp(argv[0], "udmf_namespaces") == 0)
+		y_stricmp(argv[0], "supported_games") == 0 ||
+		y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
 		return;
 	}
@@ -874,8 +877,9 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
-	if (y_stricmp(argv[0], "supported_games") == 0 ||
-		y_stricmp(argv[0], "map_formats") == 0)
+	if (y_stricmp(argv[0], "map_formats") == 0 ||
+		y_stricmp(argv[0], "supported_games") == 0 ||
+		y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
 		FatalError("%s(%d): %s can only be used in port definitions\n",
 			pst->fname, pst->lineno, argv[0]);
@@ -886,8 +890,8 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		// TODO lowercase it
-		loading_Game->base_game = argv[1];
+		// TODO memory leak
+		loading_Game->base_game = StringLower(argv[1]);
 	}
 }
 
@@ -910,8 +914,8 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
 		{
-			// TODO lowercase them
-			loading_Port->AddSupportedGame(*argv);
+			// TODO memory leak
+			loading_Port->AddSupportedGame(StringLower(*argv));
 		}
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
@@ -921,16 +925,13 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 
 		loading_Port->formats = ParseMapFormats(argv + 1, nargs);
 	}
-	else if (y_stricmp(argv[0], "udmf_namespaces") == 0)
+	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
-		if (nargs < 1)
+		if (nargs != 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		for (argv++ ; nargs > 0 ; argv++, nargs--)
-		{
-			// no need to modify the case here
-			loading_Port->namespaces.push_back(std::string(*argv));
-		}
+		// want to preserve the case here
+		loading_Port->udmf_namespace = *argv;
 	}
 }
 
@@ -1287,7 +1288,6 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 	PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (! pinfo)
 		return false;
-
 
 	return pinfo->SupportsGame(base_game);
 }

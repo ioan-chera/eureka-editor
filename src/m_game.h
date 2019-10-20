@@ -188,7 +188,7 @@ public:
 	map_format_bitset_t formats; // 0 if not specified
 
 	std::vector<std::string> supported_games;
-	std::vector<std::string> namespaces;
+	std::string udmf_namespace;
 
 public:
 	PortInfo_c(std::string _name);
