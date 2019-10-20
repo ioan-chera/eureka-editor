@@ -931,7 +931,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		// want to preserve the case here
-		loading_Port->udmf_namespace = *argv;
+		loading_Port->udmf_namespace = argv[1];
 	}
 }
 

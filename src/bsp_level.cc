@@ -1518,7 +1518,7 @@ void PutZVertices()
 }
 
 
-void PutZSubsecs()
+void PutZSubsecs(bool do_xgl3)
 {
 	int i;
 	int count;
@@ -1541,9 +1541,12 @@ void PutZSubsecs()
 		count = 0;
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
-			// ignore minisegs and degenerate segs
-			if (seg->linedef < 0 || seg->is_degenerate)
-				continue;
+			// ignore minisegs and degenerate segs in XNOD, keep in XGL3
+			if (! do_xgl3)
+			{
+				if (seg->linedef < 0 || seg->is_degenerate)
+					continue;
+			}
 
 			if (cur_seg_index != seg->index)
 				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
@@ -1615,18 +1618,14 @@ void PutXGL3Segs()
 	{
 		seg_t *seg = lev_segs[i];
 
-		// ignore minisegs and degenerate segs
-		if (seg->linedef < 0 || seg->is_degenerate)
-			continue;
-
 		if (count != seg->index)
 			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n",
 					count, seg->index);
 
 		{
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
-			u32_t line = LE_U32(seg->linedef);
 			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
+			u32_t line = LE_U32(seg->linedef);
 			u8_t  side = seg->side;
 
 			ZLibAppendLump(&v1,      4);
@@ -1782,7 +1781,7 @@ void SaveZDFormat(node_t *root_node)
 	ZLibBeginLump(lump);
 
 	PutZVertices();
-	PutZSubsecs();
+	PutZSubsecs(false /* do_xgl3 */);
 	PutZSegs();
 	PutZNodes(root_node, false /* do_xgl3 */);
 
@@ -1804,7 +1803,7 @@ void SaveXGL3Format(node_t *root_node)
 	ZLibBeginLump(lump);
 
 	PutZVertices();
-	PutZSubsecs();
+	PutZSubsecs(true /* do_xgl3 */);
 	PutXGL3Segs();
 	PutZNodes(root_node, true /* do_xgl3 */);
 

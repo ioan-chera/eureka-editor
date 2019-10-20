@@ -330,7 +330,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		Udmf_namespace = name.c_str();
+		Udmf_namespace = value.c_str();
 	}
 	else if (name.Match("ee_compat"))
 	{

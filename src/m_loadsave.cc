@@ -1636,9 +1636,6 @@ static void SaveLevel(const char *level)
 
 	if (Level_format == MAPF_UDMF)
 	{
-		// TODO our built-in nodes builder cannot handle UDMF yet
-		inhibit_node_build = true;
-
 		UDMF_SaveLevel();
 	}
 	else
