@@ -2036,7 +2036,7 @@ build_result_e SaveLevel(node_t *root_node)
 
 	/* --- Normal nodes --- */
 
-	// remove all the mini-segs
+	// remove all the mini-segs from subsectors
 	NormaliseBspTree();
 
 	if (force_xnod && num_real_lines > 0)
@@ -2047,6 +2047,9 @@ build_result_e SaveLevel(node_t *root_node)
 	}
 	else
 	{
+		// reduce vertex precision for classic DOOM nodes.
+		// some segs can become "degenerate" after this, and these
+		// are removed from subsectors.
 		RoundOffBspTree();
 
 		SortSegs();
