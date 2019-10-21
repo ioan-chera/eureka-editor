@@ -148,7 +148,7 @@ void CMD_InvertSelection()
 	{
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode);
+		edit.Selected = new selection_c(edit.mode);  // FIXME!!!! don't lose extended mode
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;

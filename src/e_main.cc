@@ -349,7 +349,7 @@ void Editor_ChangeMode(char mode_char)
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode);
+		edit.Selected = new selection_c(edit.mode);  // FIXME!!!!
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -982,9 +982,45 @@ void Selection_Add(Objid& obj)
 		return;
 
 	if (obj.parts == 0)
-		edit.Selected->set(obj.num);
-	else
-		edit.Selected->set_ext(obj.num, (byte)obj.parts);
+	{
+		// ignore the add if object is already set.
+		// [ since the selection may have parts, and we don't want to
+		//   forget those parts ]
+		if (! edit.Selected->get(obj.num))
+			edit.Selected->set(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+
+	cur = 1 | obj.parts;
+
+	edit.Selected->set_ext(obj.num, cur);
+}
+
+
+void Selection_Remove(Objid& obj)
+{
+	if (obj.type != edit.mode)
+		return;
+
+	if (obj.parts == 0)
+	{
+		edit.Selected->clear(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+	if (cur == 0)
+		return;
+
+	cur = 1 | (cur & ~obj.parts);
+
+	// if we unset all the parts, then unset the object itself
+	if (cur == 1)
+		cur = 0;
+
+	edit.Selected->set_ext(obj.num, cur);
 }
 
 
@@ -993,10 +1029,21 @@ void Selection_Toggle(Objid& obj)
 	if (obj.type != edit.mode)
 		return;
 
-	if (edit.Selected->get(obj.num))
-		edit.Selected->clear(obj.num);
-	else
-		Selection_Add(obj);
+	if (obj.parts == 0)
+	{
+		edit.Selected->toggle(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+
+	cur = 1 | (cur ^ obj.parts);
+
+	// if we toggled off all the parts, then unset the object itself
+	if (cur == 1)
+		cur = 0;
+
+	edit.Selected->set_ext(obj.num, cur);
 }
 
 
@@ -1362,7 +1409,7 @@ void Editor_Init()
 	edit.map_x = 0;
 	edit.map_y = 0;
 
-	edit.Selected = new selection_c(edit.mode);
+	edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
 	edit.split_line.clear();
