@@ -277,20 +277,20 @@ void selection_c::merge(const selection_c& other)
 		{
 			byte value = other.get_ext(i);
 
-			if (value != 0)
-				set_ext(i, value);
+			set_ext(i, get_ext(i) | value);
 		}
 	}
 	else if (other.bv || other.extended)
 	{
 		for (int i = 0 ; i <= other.maxobj ; i++)
-			if (other.get(i))
+			if (other.get(i) && !get(i))
 				set(i);
 	}
 	else
 	{
 		for (int i = 0 ; i < other.count ; i++)
-			set(other.objs[i]);
+			if (!get(other.objs[i]))
+				set(other.objs[i]);
 	}
 }
 

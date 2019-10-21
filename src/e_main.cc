@@ -349,7 +349,7 @@ void Editor_ChangeMode(char mode_char)
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode);  // FIXME!!!!
+		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -658,14 +658,9 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_THINGS)
 	{
-		// FIXME: get bbox of selection, skip things outside it
-
 		for (int t = 0 ; t < NumThings ; t++)
 		{
 			const Thing *T = Things[t];
-
-			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
-			//    continue;
 
 			Objid obj;
 			GetNearObject(obj, OBJ_SECTORS, T->x(), T->y());
@@ -936,7 +931,8 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 
 void Selection_InvalidateLast()
 {
-	delete last_Sel; last_Sel = NULL;
+	delete last_Sel;
+	last_Sel = NULL;
 }
 
 
@@ -953,7 +949,7 @@ void Selection_Push()
 	if (last_Sel)
 		delete last_Sel;
 
-	last_Sel = new selection_c(edit.Selected->what_type());
+	last_Sel = new selection_c(edit.Selected->what_type(), true);
 
 	last_Sel->merge(*edit.Selected);
 }
