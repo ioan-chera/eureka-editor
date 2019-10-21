@@ -483,8 +483,8 @@ public:
 	int query_sx;
 	int query_sy;
 
-	DrawWall     *query_wall;  // the hit wall
-	obj3d_type_e  query_part;  // the part of the hit wall
+	DrawWall *query_wall;  // the hit wall
+	int       query_part;  // the part of the hit wall (PART_RT_XXX)
 
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
@@ -870,7 +870,7 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
-		else if (r_view.hl.isThing() && th_index == r_view.hl.num)
+		else if (r_view.hl.type == OBJ_THINGS && th_index == r_view.hl.num)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -901,9 +901,9 @@ public:
 		}
 	}
 
-	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw,
-							int sel_mode)
+	void Highlight_WallPart(int part, const DrawWall *dw, int sel_mode)
 	{
+#if 0  // FIXME !!!
 		int h1, h2;
 
 		if (! dw->ld->TwoSided())
@@ -947,10 +947,12 @@ public:
 		AddHighlightLine(x2, ry1, x2, ry2, sel_mode);
 		AddHighlightLine(x1, ly1, x2, ry1, sel_mode);
 		AddHighlightLine(x1, ly2, x2, ry2, sel_mode);
+#endif
 	}
 
-	void Highlight_Line(obj3d_type_e part, int ld, int side, int sel_mode)
+	void Highlight_Line(int part, int ld, int side, int sel_mode)
 	{
+#if 0  // FIXME !!!
 		const LineDef *L = LineDefs[ld];
 
 		DrawWall::vec_t::iterator S;
@@ -962,10 +964,12 @@ public:
 			if (dw->ld == L && dw->side == side)
 				Highlight_WallPart(part, dw, sel_mode);
 		}
+#endif
 	}
 
-	void Highlight_Sector(obj3d_type_e part, int sec_num, int sel_mode)
+	void Highlight_Sector(int part, int sec_num, int sel_mode)
 	{
+#if 0  // FIXME !!!
 		int sec_h;
 
 		if (part == OB3D_Floor)
@@ -1002,6 +1006,7 @@ public:
 				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, sel_mode);
 			}
 		}
+#endif
 	}
 
 	void Highlight_Thing(int th, int sel_mode)
@@ -1032,8 +1037,9 @@ public:
 		}
 	}
 
-	inline void Highlight_Object(Obj3d_t& obj, int sel_mode)
+	inline void Highlight_Object(Objid& obj, int sel_mode)
 	{
+#if 0  // FIXME !!!
 		if (obj.isThing())
 		{
 			Highlight_Thing(obj.num, sel_mode);
@@ -1046,6 +1052,7 @@ public:
 		{
 			Highlight_Line(obj.type, obj.num, obj.side, sel_mode);
 		}
+#endif
 	}
 
 	void Highlight(int ox, int oy)
@@ -1245,8 +1252,7 @@ public:
 		}
 	}
 
-	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
-								  obj3d_type_e part)
+	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, int part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1320,11 +1326,13 @@ public:
 
 		if (query_mode)
 		{
+#if 0  // FIXME !!!
 			if (y1 <= query_sy && query_sy <= y2)
 			{
 				query_wall = dw;
 				query_part = OB3D_Thing;
 			}
+#endif
 			return;
 		}
 
@@ -1642,11 +1650,11 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
-				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+				RenderWallSurface(dw, dw->ceil,  x, PART_CEIL);
+				RenderWallSurface(dw, dw->floor, x, PART_FLOOR);
 
-				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
-				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
+				RenderWallSurface(dw, dw->upper, x, PART_RT_UPPER);
+				RenderWallSurface(dw, dw->lower, x, PART_RT_LOWER);
 
 				if (open_y1 > open_y2)
 					break;
@@ -1788,7 +1796,7 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 }
 
 
-bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
+bool SW_QueryPoint(Objid& hl, int qx, int qy)
 {
 	if (! render_high_detail)
 	{
@@ -1806,6 +1814,8 @@ bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
 		// nothing was hit
 		return false;
 	}
+
+#if 0  // FIXME !!!
 
 	hl.type = rend.query_part;
 
@@ -1831,6 +1841,10 @@ bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
 	}
 
 	return hl.valid();
+
+#else
+	return false;
+#endif
 }
 
 //--- editor settings ---

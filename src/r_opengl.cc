@@ -1059,7 +1059,7 @@ public:
 		glEnd();
 	}
 
-	void HighlightLine(obj3d_type_e part, int ld, int side)
+	void HighlightLine(int part, int ld, int side)
 	{
 		const LineDef *L = LineDefs[ld];
 
@@ -1087,12 +1087,12 @@ public:
 
 		if (L->TwoSided())
 		{
-			if (part == OB3D_Lower)
+			if (part == PART_RT_LOWER)
 			{
 				z1 = MIN(front->floorh, back->floorh);
 				z2 = MAX(front->floorh, back->floorh);
 			}
-			else  /* part == OB3D_Upper */
+			else  /* part == PART_RT_UPPER */
 			{
 				z1 = MIN(front->ceilh, back->ceilh);
 				z2 = MAX(front->ceilh, back->ceilh);
@@ -1109,11 +1109,11 @@ public:
 		glEnd();
 	}
 
-	void HighlightSector(obj3d_type_e part, int sec_num)
+	void HighlightSector(int part, int sec_num)
 	{
 		const Sector *sec = Sectors[sec_num];
 
-		float z = (part == OB3D_Floor) ? sec->floorh : sec->ceilh;
+		float z = (part == PART_CEIL) ? sec->ceilh : sec->floorh;
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -1181,19 +1181,24 @@ public:
 		glEnd();
 	}
 
-	inline void HighlightObject(Obj3d_t& obj)
+	inline void HighlightObject(Objid& obj)
 	{
-		if (obj.isThing())
+		if (!obj.valid())
+			return;
+
+		if (obj.type == OBJ_THINGS)
 		{
 			HighlightThing(obj.num);
 		}
-		else if (obj.isSector())
+		else if (obj.type == OBJ_SECTORS)
 		{
-			HighlightSector(obj.type, obj.num);
+			HighlightSector(PART_FLOOR, obj.num);
+			HighlightSector(PART_CEIL,  obj.num);
 		}
-		else if (obj.isLine())
+		else if (obj.type == OBJ_LINEDEFS)
 		{
-			HighlightLine(obj.type, obj.num, obj.side);
+			HighlightLine(PART_RT_LOWER, obj.num, 0 /* side */);
+			HighlightLine(PART_RT_LOWER, obj.num, 1 /* side */);
 		}
 	}
 

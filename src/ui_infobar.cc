@@ -467,7 +467,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 	{
 		fl_color(INFO_TEXT_COL);
 
-		if (r_view.hl.isThing())
+		if (r_view.hl.type == OBJ_THINGS)
 		{
 			const Thing *th = Things[r_view.hl.num];
 			const thingtype_t *info = M_GetThingType(th->type);
@@ -476,7 +476,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 					 r_view.hl.num, info->desc);
 
 		}
-		else if (r_view.hl.isSector())
+		else if (r_view.hl.type == OBJ_SECTORS)
 		{
 			int tex = r_view.GrabTextureFromObject(r_view.hl);
 
@@ -484,7 +484,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 					 r_view.hl.num,
 					 (tex < 0) ? "??????" : BA_GetString(tex));
 		}
-		else
+		else if (r_view.hl.type == OBJ_LINEDEFS)
 		{
 			int tex = r_view.GrabTextureFromObject(r_view.hl);
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2009 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -44,6 +44,22 @@ obj_type_e;
 #define NIL_OBJ		-1
 
 
+// bit flags for object parts (bit zero is reserved)
+#define PART_FLOOR		0x02
+#define PART_CEIL		0x04
+#define PART_SEC_ALL	(PART_FLOOR + PART_CEIL)
+
+#define PART_RT_LOWER		0x02
+#define PART_RT_UPPER		0x04
+#define PART_RT_RAIL		0x08
+#define PART_RT_ALL			(PART_RT_LOWER | PART_RT_UPPER | PART_RT_RAIL)
+
+#define PART_LF_LOWER		0x20
+#define PART_LF_UPPER		0x40
+#define PART_LF_RAIL		0x80
+#define PART_LF_ALL			(PART_LF_LOWER | PART_LF_UPPER | PART_LF_RAIL)
+
+
 class Objid
 {
 public:
@@ -51,12 +67,21 @@ public:
 
 	int num;
 
-public:
-	Objid() : type(OBJ_THINGS), num(NIL_OBJ) { }
-	Objid(obj_type_e t, int n) : type(t), num(n) { }
-	Objid(const Objid& other) : type(other.type), num(other.num) { }
+	// this is some combination of PART_XXX flags, or 0 which
+	// represents the object as a whole.
+	int parts;
 
-	void clear() { num = NIL_OBJ; }
+public:
+	Objid() : type(OBJ_THINGS), num(NIL_OBJ), parts(0) { }
+	Objid(obj_type_e t, int n) : type(t), num(n), parts(0) { }
+	Objid(obj_type_e t, int n, int p) : type(t), num(n), parts(p) { }
+	Objid(const Objid& other) : type(other.type), num(other.num), parts(other.parts) { }
+
+	void clear()
+	{
+		num = NIL_OBJ;
+		parts = 0;
+	}
 
 	bool operator== (const Objid& other) const
 	{
@@ -70,69 +95,6 @@ public:
 
 	bool valid()  const { return num >= 0; }
 	bool is_nil() const { return num <  0; }
-};
-
-
-//------------------------------------------------------------------------
-//   ITEMS IN THE 3D VIEW
-//------------------------------------------------------------------------
-
-
-typedef enum
-{
-	OB3D_Thing = 0,
-
-	OB3D_Floor = -1,
-	OB3D_Ceil  = -2,
-
-	OB3D_Lower = 1,  // used for middle of 1S lines too
-	OB3D_Rail  = 2,
-	OB3D_Upper = 3,
-
-} obj3d_type_e;
-
-
-class Obj3d_t
-{
-public:
-	obj3d_type_e type;
-
-	// the linedef, sector or thing number, or NIL_OBJ of none
-	int num;
-
-	// SIDE_XXX of the line  [ unused for sectors or things ]
-	int side;
-
-public:
-	Obj3d_t() : type(OB3D_Thing), num(NIL_OBJ), side()
-	{ }
-
-	Obj3d_t(const Obj3d_t& other) :
-		type(other.type),
-		num (other.num),
-		side(other.side)
-	{ }
-
-	void clear()
-	{
-		type  = OB3D_Thing;
-		num   = NIL_OBJ;
-		side  =  0;
-	}
-
-	bool valid()  const { return num >= 0; }
-	bool is_nil() const { return num <  0; }
-
-	bool isLine()   const { return valid() && (type >= OB3D_Lower); }
-	bool isSector() const { return valid() && (type <= OB3D_Floor); }
-	bool isThing()  const { return valid() && (type == OB3D_Thing); }
-
-	bool operator== (const Obj3d_t& other) const
-	{
-		return	(type == other.type) &&
-				(num  == other.num)  &&
-				(side == other.side);
-	}
 };
 
 

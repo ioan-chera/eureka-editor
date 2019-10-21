@@ -60,9 +60,9 @@ typedef enum
 }
 linedef_align_flag_e;
 
-bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags);
+bool Line_AlignOffsets(const Objid& obj, int align_flags);
 
-void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags);
+void Line_AlignGroup(std::vector<Objid> & group, int align_flags);
 
 
 /* commands */

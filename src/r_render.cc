@@ -63,7 +63,7 @@ Render_View_t::Render_View_t() :
 	is_scrolling(false),
 	nav_time(0),
 
-	hl(), sel(), sel_type(OB3D_Thing),
+	hl(), sel(),
 	adjust_sides(), adjust_lines(),
 	saved_x_offsets(), saved_y_offsets()
 { }
@@ -176,14 +176,16 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 
 /* r_editing_info_t stuff */
 
+#if 0
+
 bool Render_View_t::SelectIsCompat(obj3d_type_e new_type) const
 {
 	return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
 		   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
 		   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
 }
+#endif
 
-// this needed since we allow invalid objects in sel
 bool Render_View_t::SelectEmpty() const
 {
 	for (unsigned int k = 0 ; k < sel.size() ; k++)
@@ -193,24 +195,28 @@ bool Render_View_t::SelectEmpty() const
 	return true;
 }
 
-bool Render_View_t::SelectGet(const Obj3d_t& obj) const
+bool Render_View_t::SelectGet(const Objid& obj) const
 {
+#if 0  // FIXME
 	for (unsigned int k = 0 ; k < sel.size() ; k++)
 		if (sel[k] == obj)
 			return true;
+#endif
 
 	return false;
 }
 
-void Render_View_t::SelectToggle(const Obj3d_t& obj)
+void Render_View_t::SelectToggle(const Objid& obj)
 {
 	// when type of surface is radically different, clear selection
+#if 0
 	if (! sel.empty() && ! SelectIsCompat(obj.type))
 		sel.clear();
+#endif
 
 	if (sel.empty())
 	{
-		sel_type = obj.type;
+///--		sel_type = obj.type;
 		sel.push_back(obj);
 		return;
 	}
@@ -231,6 +237,7 @@ void Render_View_t::SelectToggle(const Obj3d_t& obj)
 
 int Render_View_t::GrabClipboard()
 {
+#if 0 // FIXME
 	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
 
 	if (type == OB3D_Thing)
@@ -239,11 +246,13 @@ int Render_View_t::GrabClipboard()
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 		return r_clipboard.GetFlatNum();
 
+#endif
 	return r_clipboard.GetTexNum();
 }
 
 void Render_View_t::StoreClipboard(int new_val)
 {
+#if 0 // FIXME
 	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
 
 	if (type == OB3D_Thing)
@@ -258,10 +267,12 @@ void Render_View_t::StoreClipboard(int new_val)
 		r_clipboard.SetFlat(name);
 	else
 		r_clipboard.SetTex(name);
+#endif
 }
 
-void Render_View_t::AddAdjustSide(const Obj3d_t& obj)
+void Render_View_t::AddAdjustSide(const Objid& obj)
 {
+#if 0 // FIXME
 	const LineDef *L = LineDefs[obj.num];
 
 	int sd = (obj.side < 0) ? L->left : L->right;
@@ -278,6 +289,7 @@ void Render_View_t::AddAdjustSide(const Obj3d_t& obj)
 
 	adjust_sides.push_back(sd);
 	adjust_lines.push_back(obj.num);
+#endif
 }
 
 float Render_View_t::AdjustDistFactor(float view_x, float view_y)
@@ -336,8 +348,9 @@ void Render_View_t::RestoreOffsets()
 }
 
 
-int Render_View_t::GrabTextureFromObject(const Obj3d_t& obj)
+int Render_View_t::GrabTextureFromObject(const Objid& obj)
 {
+#if 0  // FIXME !!
 	if (obj.type == OB3D_Floor)
 		return Sectors[obj.num]->floor_tex;
 
@@ -373,6 +386,8 @@ int Render_View_t::GrabTextureFromObject(const Obj3d_t& obj)
 		default:
 			return -1;
 	}
+#endif
+	return -1;
 }
 
 
@@ -383,6 +398,7 @@ int Render_View_t::GrabTextureFromObject(const Obj3d_t& obj)
 //
 int Render_View_t::GrabTextureFrom3DSel()
 {
+#if 0  // FIXME !!
 	if (SelectEmpty())
 	{
 		return GrabTextureFromObject(hl);
@@ -392,7 +408,7 @@ int Render_View_t::GrabTextureFrom3DSel()
 
 	for (unsigned int k = 0 ; k < sel.size() ; k++)
 	{
-		const Obj3d_t& obj = sel[k];
+		const Objid& obj = sel[k];
 
 		if (! obj.valid())
 			continue;
@@ -409,11 +425,14 @@ int Render_View_t::GrabTextureFrom3DSel()
 	}
 
 	return result;
+#endif
+	return -1;
 }
 
 
-void Render_View_t::StoreTextureToObject(const Obj3d_t& obj, int new_tex)
+void Render_View_t::StoreTextureToObject(const Objid& obj, int new_tex)
 {
+#if 0  // FIXME !!
 	if (obj.type == OB3D_Floor)
 	{
 		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
@@ -458,11 +477,13 @@ void Render_View_t::StoreTextureToObject(const Obj3d_t& obj, int new_tex)
 		// shut the compiler up
 		default: break;
 	}
+#endif
 }
 
 
 void Render_View_t::StoreTextureTo3DSel(int new_tex)
 {
+#if 0  // FIXME !!
 	BA_Begin();
 
 	if (SelectEmpty())
@@ -473,7 +494,7 @@ void Render_View_t::StoreTextureTo3DSel(int new_tex)
 	{
 		for (unsigned int k = 0 ; k < sel.size() ; k++)
 		{
-			const Obj3d_t& obj = sel[k];
+			const Objid& obj = sel[k];
 
 			if (! obj.valid())
 				continue;
@@ -484,6 +505,7 @@ void Render_View_t::StoreTextureTo3DSel(int new_tex)
 
 	BA_Message("pasted texture: %s", BA_GetString(new_tex));
 	BA_End();
+#endif
 }
 
 
@@ -519,7 +541,7 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 }
 
 
-bool Render3D_Query(Obj3d_t& hl, int sx, int sy)
+bool Render3D_Query(Objid& hl, int sx, int sy)
 {
 	int ow = main_win->canvas->w();
 	int oh = main_win->canvas->h();
@@ -712,17 +734,17 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 		// find the sidedefs to adjust
 		if (! r_view.SelectEmpty())
 		{
-			if (r_view.sel_type < OB3D_Lower)
-			{
-				Beep("cannot adjust that");
-				return;
-			}
+//??			if (r_view.sel_type < OB3D_Lower)
+//??			{
+//??				Beep("cannot adjust that");
+//??				return;
+//??			}
 
 			for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
 			{
-				const Obj3d_t& obj = r_view.sel[k];
+				const Objid& obj = r_view.sel[k];
 
-				if (obj.isLine())
+				if (obj.type == OBJ_LINEDEFS)
 					r_view.AddAdjustSide(obj);
 			}
 		}
@@ -733,7 +755,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 				Beep("nothing to adjust");
 				return;
 			}
-			else if (! r_view.hl.isLine())
+			else if (r_view.hl.type != OBJ_LINEDEFS)
 			{
 				Beep("cannot adjust that");
 				return;
@@ -835,7 +857,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	Obj3d_t old_hl(r_view.hl);
+	Objid old_hl(r_view.hl);
 
 	Render3D_Query(r_view.hl, x, y);
 
@@ -923,6 +945,7 @@ void Render3D_Navigate()
 
 static void Render3D_Cut()
 {
+#if 0  // FIXME!!!
 	// this is equivalent to setting the default texture
 
 	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
@@ -940,11 +963,13 @@ static void Render3D_Cut()
 	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
 
 	Status_Set("Cut texture to default");
+#endif
 }
 
 
 static void Render3D_Copy()
 {
+#if 0  // FIXME!!!
 	int new_tex = r_view.GrabTextureFrom3DSel();
 	if (new_tex < 0)
 	{
@@ -955,21 +980,25 @@ static void Render3D_Copy()
 	r_view.StoreClipboard(new_tex);
 
 	Status_Set("Copied %s", BA_GetString(new_tex));
+#endif
 }
 
 
 static void Render3D_Paste()
 {
+#if 0  // FIXME!!!
 	int new_tex = r_view.GrabClipboard();
 
 	r_view.StoreTextureTo3DSel(new_tex);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
+#endif
 }
 
 
 static void Render3D_Delete()
 {
+#if 0  // FIXME!!!
 	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
 
 	if (type == OB3D_Thing)
@@ -984,11 +1013,13 @@ static void Render3D_Delete()
 	r_view.StoreTextureTo3DSel(BA_InternaliseString("-"));
 
 	Status_Set("Removed textures");
+#endif
 }
 
 
 bool Render3D_ClipboardOp(char op)
 {
+#if 0  // FIXME!!!
 	if (r_view.SelectEmpty() && ! r_view.hl.valid())
 		return false;
 
@@ -1011,16 +1042,19 @@ bool Render3D_ClipboardOp(char op)
 			break;
 	}
 
+#endif
 	return true;
 }
 
 
 void Render3D_ClearSelection()
 {
+#if 0  // FIXME!!!
 	if (! r_view.SelectEmpty())
 		RedrawMap();
 
 	r_view.sel.clear();
+#endif
 }
 
 
@@ -1046,6 +1080,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 	if (kind == 'F')
 		kind = 'T';
 
+#if 0  // FIXME !!!
 	if (kind == 'O' && r_view.sel_type == OB3D_Thing)
 	{
 		r_view.StoreTextureTo3DSel(number);
@@ -1063,6 +1098,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 		r_view.StoreTextureTo3DSel(new_tex);
 		return true;
 	}
+#endif
 
 	// mismatched usage
 	fl_beep();
@@ -1171,7 +1207,7 @@ void R3D_Click()
 		return;
 	}
 
-	if (r_view.hl.type == OB3D_Thing)
+	if (r_view.hl.type == OBJ_THINGS)
 		return;
 
 	r_view.SelectToggle(r_view.hl);
@@ -1649,7 +1685,7 @@ void R3D_Align()
 			Beep("nothing to align");
 			return;
 		}
-		else if (! r_view.hl.isLine())
+		else if (r_view.hl.type != OBJ_LINEDEFS)
 		{
 			Beep("cannot align that");
 			return;
@@ -1660,11 +1696,11 @@ void R3D_Align()
 	}
 	else
 	{
-		if (r_view.sel_type < OB3D_Lower)
-		{
-			Beep("cannot align that");
-			return;
-		}
+//??		if (r_view.sel_type < OB3D_Lower)
+//??		{
+//??			Beep("cannot align that");
+//??			return;
+//??		}
 	}
 
 

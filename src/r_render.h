@@ -75,15 +75,13 @@ public:
 	/* r_editing_info_t stuff */
 
 	// current highlighted wotsit
-	Obj3d_t hl;
+	Objid hl;
 
 	// current selection
-	std::vector< Obj3d_t > sel;
-
-	obj3d_type_e sel_type;  // valid when sel.size() > 0
+	std::vector< Objid > sel;
 
 	// a remembered highlight (for operation menu)
-	Obj3d_t saved_hl;
+	Objid saved_hl;
 
 	// state for adjusting offsets via the mouse
 	std::vector<int> adjust_sides;
@@ -111,21 +109,21 @@ public:
 
 	/* r_editing_info_t stuff */
 
-	bool SelectIsCompat(obj3d_type_e new_type) const;
+//FIXME	bool SelectIsCompat(obj3d_type_e new_type) const;
 	bool SelectEmpty() const;
-	bool SelectGet(const Obj3d_t& obj) const;
-	void SelectToggle(const Obj3d_t& obj);
+	bool SelectGet(const Objid& obj) const;
+	void SelectToggle(const Objid& obj);
 
 	int GrabClipboard();
 	void StoreClipboard(int new_val);
-	void AddAdjustSide(const Obj3d_t& obj);
+	void AddAdjustSide(const Objid& obj);
 	float AdjustDistFactor(float view_x, float view_y);
 	void SaveOffsets();
 	void RestoreOffsets();
 
-	int GrabTextureFromObject(const Obj3d_t& obj);
+	int GrabTextureFromObject(const Objid& obj);
 	int GrabTextureFrom3DSel();
-	void StoreTextureToObject(const Obj3d_t& obj, int new_tex);
+	void StoreTextureToObject(const Objid& obj, int new_tex);
 	void StoreTextureTo3DSel(int new_tex);
 };
 
@@ -144,7 +142,7 @@ void Render3D_Draw(int ox, int oy, int ow, int oh);
 // perform a query to see what the mouse pointer is over.
 // returns true if something was hit, false otherwise.
 // [ see the struct definition for more details... ]
-bool Render3D_Query(Obj3d_t& hl, int sx, int sy, int ox, int oy, int ow, int oh);
+bool Render3D_Query(Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
@@ -170,7 +168,7 @@ void Render3D_WriteUser(FILE *fp);
 /* API for rendering a scene (etc) */
 
 void SW_RenderWorld(int ox, int oy, int ow, int oh);
-bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy);
+bool SW_QueryPoint(Objid& hl, int qx, int qy);
 
 void RGL_RenderWorld(int ox, int oy, int ow, int oh);
 

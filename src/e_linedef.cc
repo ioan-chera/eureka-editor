@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -105,14 +105,16 @@ bool LineDefWouldOverlap(int v1, double x2, double y2)
 
 //------------------------------------------------------------------------
 
-static inline const LineDef * LD_ptr(const Obj3d_t& obj)
+static inline const LineDef * LD_ptr(const Objid& obj)
 {
 	return LineDefs[obj.num];
 }
 
-static inline const SideDef * SD_ptr(const Obj3d_t& obj)
+static inline const SideDef * SD_ptr(const Objid& obj)
 {
-	int sd = LD_ptr(obj)->WhatSideDef(obj.side);
+	int where = (obj.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+
+	int sd = LD_ptr(obj)->WhatSideDef(where);
 
 	return (sd >= 0) ? SideDefs[sd] : NULL;
 }
@@ -140,7 +142,7 @@ static int PartialTexCmp(const char *A, const char *B)
 #endif
 
 
-static bool PartIsVisible(const Obj3d_t& obj, char part)
+static bool PartIsVisible(const Objid& obj, char part)
 {
 	const LineDef *L  = LD_ptr(obj);
 	const SideDef *SD = SD_ptr(obj);
@@ -151,7 +153,7 @@ static bool PartIsVisible(const Obj3d_t& obj, char part)
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (obj.side == SIDE_LEFT)
+	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
 
 	// ignore sky walls
@@ -179,9 +181,8 @@ static bool PartIsVisible(const Obj3d_t& obj, char part)
 // calculate vertical range that the given surface occupies.
 // when part is zero, we use obj.type instead.
 //
-static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
+static void PartCalcExtent(const Objid& obj, char part, int *z1, int *z2)
 {
-
 	const LineDef *L  = LD_ptr(obj);
 	const SideDef *SD = SD_ptr(obj);
 
@@ -202,9 +203,9 @@ static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
 
 	if (! part)
 	{
-		if (obj.type == OB3D_Upper)
+		if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
 			part = 'u';
-		else if (obj.type == OB3D_Rail)
+		else if (obj.parts & (PART_RT_RAIL | PART_LF_RAIL))
 			part = 'r';
 		else
 			part = 'l';
@@ -213,7 +214,7 @@ static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (obj.side == SIDE_LEFT)
+	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
 
 	if (part == 'r')
@@ -234,7 +235,7 @@ static void PartCalcExtent(const Obj3d_t& obj, char part, int *z1, int *z2)
 }
 
 
-static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
+static inline int ScoreTextureMatch(const Objid& adj, const Objid& cur)
 {
 	// result is in the range 1..999
 
@@ -265,9 +266,9 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 
 	if (N->TwoSided())
 	{
-		if (adj.type == OB3D_Lower)
+		if (adj.parts & (PART_RT_LOWER | PART_LF_LOWER))
 			adj_tex = NS->LowerTex();
-		else if (adj.type == OB3D_Upper)
+		else if (adj.parts & (PART_RT_UPPER | PART_LF_UPPER))
 			adj_tex = NS->UpperTex();
 	}
 
@@ -278,10 +279,10 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 
 	if (L->TwoSided())
 	{
-		if (adj.type == OB3D_Lower)
-			adj_tex = LS->LowerTex();
-		else if (adj.type == OB3D_Upper)
-			adj_tex = LS->UpperTex();
+		if (cur.parts & (PART_RT_LOWER | PART_LF_LOWER))
+			cur_tex = LS->LowerTex();
+		else if (cur.parts & (PART_RT_UPPER | PART_LF_UPPER))
+			cur_tex = LS->UpperTex();
 	}
 
 	if (PartialTexCmp(cur_tex, adj_tex) != 0)
@@ -310,8 +311,8 @@ static inline int ScoreTextureMatch(const Obj3d_t& adj, const Obj3d_t& cur)
 //
 // Returns < 0 for surfaces that cannot be used.
 //
-static int ScoreAdjoiner(const Obj3d_t& adj,
-						 const Obj3d_t& cur, int align_flags)
+static int ScoreAdjoiner(const Objid& adj,
+						 const Objid& cur, int align_flags)
 {
 	bool do_right = (align_flags & LINALIGN_Right) ? true : false;
 
@@ -332,8 +333,8 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 	// does the adjoiner sidedef actually mate up with the sidedef
 	// we are aligning (and is on the wanted side) ?
 
-	int v1 = (((cur.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? L->end : L->start;
-	int v2 = (((adj.side == SIDE_RIGHT) ? 1:0) == (do_right ? 1:0)) ? N->start : N->end;
+	int v1 = (((cur.parts & PART_LF_ALL) ? 0:1) == (do_right ? 1:0)) ? L->end : L->start;
+	int v2 = (((adj.parts & PART_LF_ALL) ? 0:1) == (do_right ? 1:0)) ? N->start : N->end;
 
 	if (v1 != v2)
 		return -1;
@@ -356,10 +357,10 @@ static int ScoreAdjoiner(const Obj3d_t& adj,
 //
 // Determine the adjoining surface to align with.
 //
-// Returns -1 for none.
+// Returns a nil Objid for none.
 //
-static void DetermineAdjoiner(Obj3d_t& result,
-							  const Obj3d_t& cur, int align_flags)
+static void DetermineAdjoiner(Objid& result,
+							  const Objid& cur, int align_flags)
 {
 	int best_score = 0;
 
@@ -381,11 +382,14 @@ static void DetermineAdjoiner(Obj3d_t& result,
 		for (int side = 0 ; side < 2 ; side++)
 		for (int what = 0 ; what < 3 ; what++)
 		{
-			Obj3d_t adj;
+			Objid adj;
 
-			adj.type = (obj3d_type_e)(OB3D_Lower + what);
-			adj.num  = n;
-			adj.side = side ? SIDE_LEFT : SIDE_RIGHT;
+			adj.type  = OBJ_LINEDEFS;
+			adj.num   = n;
+			adj.parts = (what == 0) ? PART_RT_LOWER : (what == 1) ? PART_RT_UPPER : PART_RT_RAIL;
+
+			if (side == 1)
+				adj.parts = adj.parts << 4;
 
 			int score = ScoreAdjoiner(adj, cur, align_flags);
 
@@ -399,7 +403,7 @@ static void DetermineAdjoiner(Obj3d_t& result,
 }
 
 
-static int CalcReferenceH(const Obj3d_t& obj)
+static int CalcReferenceH(const Objid& obj)
 {
 	const LineDef *L  = LD_ptr(obj);
 	const SideDef *SD = SD_ptr(obj);
@@ -421,45 +425,40 @@ static int CalcReferenceH(const Obj3d_t& obj)
 	const Sector *front = L->Right()->SecRef();
 	const Sector *back  = L->Left ()->SecRef();
 
-	if (obj.side == SIDE_LEFT)
+	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
 
 	SYS_ASSERT(front);
 	SYS_ASSERT(back);
 
-	switch (obj.type)
+	if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
+	{
+		if (! (L->flags & MLF_UpperUnpegged))
+			return back->ceilh + W_GetTextureHeight(SD->UpperTex());
+
+		return front->ceilh;
+	}
+	else
 	{
 		// TODO : verify if this correct for RAIL
 
-		case OB3D_Lower:
-		case OB3D_Rail:
-			if (! (L->flags & MLF_LowerUnpegged))
-				return back->floorh;
+		if (! (L->flags & MLF_LowerUnpegged))
+			return back->floorh;
 
-			return front->ceilh;
-
-		case OB3D_Upper:
-			if (! (L->flags & MLF_UpperUnpegged))
-				return back->ceilh + W_GetTextureHeight(SD->UpperTex());
-
-			return front->ceilh;
-
-		default:
-			// should not happen
-			return 256;
+		return front->ceilh;
 	}
 }
 
 
-static void DoAlignX(const Obj3d_t& cur,
-					 const Obj3d_t& adj, int align_flags)
+static void DoAlignX(const Objid& cur,
+					 const Objid& adj, int align_flags)
 {
 	const LineDef *cur_L  = LD_ptr(cur);
 
 	const LineDef *adj_L  = LD_ptr(adj);
 	const SideDef *adj_SD = SD_ptr(adj);
 
-	bool on_left = adj_L->TouchesVertex(cur.side < 0 ? cur_L->end : cur_L->start);
+	bool on_left = adj_L->TouchesVertex((cur.parts & PART_LF_ALL) ? cur_L->end : cur_L->start);
 
 	int new_offset = adj_SD->x_offset;
 
@@ -478,14 +477,16 @@ static void DoAlignX(const Obj3d_t& cur,
 			new_offset = - (-new_offset & 1023);
 	}
 
-	int sd = cur_L->WhatSideDef(cur.side);
+	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+
+	int sd = cur_L->WhatSideDef(where);
 
 	BA_ChangeSD(sd, SideDef::F_X_OFFSET, new_offset);
 }
 
 
-static void DoAlignY(const Obj3d_t& cur,
-					 const Obj3d_t& adj, int align_flags)
+static void DoAlignY(const Objid& cur,
+					 const Objid& adj, int align_flags)
 {
 	const LineDef *L  = LD_ptr(cur);
 	const SideDef *SD = SD_ptr(cur);
@@ -531,7 +532,9 @@ static void DoAlignY(const Obj3d_t& cur,
 		new_offset &= 255;
 
 
-	int sd = L->WhatSideDef(cur.side);
+	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+
+	int sd = L->WhatSideDef(where);
 
 	BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_offset);
 
@@ -542,9 +545,11 @@ static void DoAlignY(const Obj3d_t& cur,
 }
 
 
-static void DoClearOfs(const Obj3d_t& cur, int align_flags)
+static void DoClearOfs(const Objid& cur, int align_flags)
 {
-	int sd = LD_ptr(cur)->WhatSideDef(cur.side);
+	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+
+	int sd = LD_ptr(cur)->WhatSideDef(where);
 
 	if (sd < 0)  // should not happen
 		return;
@@ -570,7 +575,7 @@ static void DoClearOfs(const Obj3d_t& cur, int align_flags)
 // The given flags control which stuff to change, and where
 // to look for the surface to align with.
 //
-bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
+bool Line_AlignOffsets(const Objid& obj, int align_flags)
 {
 	if (align_flags & LINALIGN_Clear)
 	{
@@ -578,8 +583,7 @@ bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
 		return true;
 	}
 
-	Obj3d_t adj;
-
+	Objid adj;
 	DetermineAdjoiner(adj, obj, align_flags);
 
 	if (! adj.valid())
@@ -597,22 +601,22 @@ bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags)
 
 // returns true if the surface at 'k' MUST be aligned before the
 // surface at 'j'.
-static bool Align_CheckAdjacent(std::vector<Obj3d_t> & group,
+static bool Align_CheckAdjacent(std::vector<Objid> & group,
 								int j, int k, bool do_right)
 {
-	const Obj3d_t& ob_j = group[j];
-	const Obj3d_t& ob_k = group[k];
+	const Objid& ob_j = group[j];
+	const Objid& ob_k = group[k];
 
 	int vj = 0;
 
-	if (((ob_j.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+	if (((ob_j.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
 		vj = LineDefs[ob_j.num]->end;
 	else
 		vj = LineDefs[ob_j.num]->start;
 
 	int vk = 0;
 
-	if (((ob_k.side == SIDE_RIGHT) ? 1 : 0) == (do_right ? 1 : 0))
+	if (((ob_k.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
 		vk = LineDefs[ob_k.num]->start;
 	else
 		vk = LineDefs[ob_k.num]->end;
@@ -626,7 +630,7 @@ static bool Align_CheckAdjacent(std::vector<Obj3d_t> & group,
 // any other unvisited surface.  In the case of loops, we pick
 // an arbitrary surface.
 //
-static int Align_PickNextSurface(std::vector<Obj3d_t> & group,
+static int Align_PickNextSurface(std::vector<Objid> & group,
 								 const std::vector<byte>& seen, bool do_right)
 {
 	int fallback = -1;
@@ -663,7 +667,7 @@ static int Align_PickNextSurface(std::vector<Obj3d_t> & group,
 }
 
 
-void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags)
+void Line_AlignGroup(std::vector<Objid> & group, int align_flags)
 {
 	// we will do each surface in the selection one-by-one,
 	// and the order is significant when doing X offsets, so
@@ -732,23 +736,21 @@ void CMD_LIN_Align()
 
 	// convert selection to group of surfaces
 
-	std::vector< Obj3d_t > group;
+	std::vector< Objid > group;
 
 	selection_iterator_c it;
 
 	for (list.begin(&it) ; !it.at_end() ; ++it)
 	{
-		Obj3d_t obj;
-
-		obj.num = *it;
+		Objid obj(OBJ_LINEDEFS, *it);
 
 		const LineDef *L = LineDefs[obj.num];
 
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
-			obj.side = pass ? SIDE_LEFT : SIDE_RIGHT;
+			int where = pass ? SIDE_LEFT : SIDE_RIGHT;
 
-			if (L->WhatSideDef(obj.side) < 0)
+			if (L->WhatSideDef(where) < 0)
 				continue;
 
 			// decide whether to use upper or lower
@@ -760,7 +762,9 @@ void CMD_LIN_Align()
 			if (! (lower_vis || upper_vis))
 				continue;
 
-			obj.type = lower_vis ? OB3D_Lower : OB3D_Upper;
+			obj.parts = lower_vis ? PART_RT_LOWER : PART_RT_UPPER;
+			if (where < 0)
+				obj.parts = obj.parts << 4;
 
 			group.push_back(obj);
 		}
