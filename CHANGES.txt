@@ -6,6 +6,8 @@ RECENT CHANGES
 
 + use OpenGL for faster rendering of 2D and 3D views
 
++ rudimentary support for the UDMF map format
+
 + support mixing textures and flats for ports that allow it
 
 + preference to combine flats and textures in a single browser
