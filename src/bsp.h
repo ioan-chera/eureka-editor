@@ -332,6 +332,11 @@ public:
 seg_t;
 
 
+// a seg with this index is removed by SortSegs().
+// it must be a very high value.
+#define SEG_IS_GARBAGE  (1 << 29)
+
+
 typedef struct subsec_s
 {
 	// list of segs
@@ -464,7 +469,6 @@ extern std::vector<walltip_t *> lev_walltips;
 
 extern int num_old_vert;
 extern int num_new_vert;
-extern int num_complete_seg;
 
 
 /* ----- function prototypes ----------------------- */

@@ -793,7 +793,6 @@ std::vector<walltip_t *> lev_walltips;
 
 int num_old_vert = 0;
 int num_new_vert = 0;
-int num_complete_seg = 0;
 int num_real_lines = 0;
 
 
@@ -840,7 +839,7 @@ walltip_t *NewWallTip()
 void FreeVertices()
 {
 	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
-		delete lev_vertices[i];
+		UtilFree((void *) lev_vertices[i]);
 
 	lev_vertices.clear();
 }
@@ -848,7 +847,7 @@ void FreeVertices()
 void FreeSegs()
 {
 	for (unsigned int i = 0 ; i < lev_segs.size() ; i++)
-		delete lev_segs[i];
+		UtilFree((void *) lev_segs[i]);
 
 	lev_segs.clear();
 }
@@ -856,7 +855,7 @@ void FreeSegs()
 void FreeSubsecs()
 {
 	for (unsigned int i = 0 ; i < lev_subsecs.size() ; i++)
-		delete lev_subsecs[i];
+		UtilFree((void *) lev_subsecs[i]);
 
 	lev_subsecs.clear();
 }
@@ -864,7 +863,7 @@ void FreeSubsecs()
 void FreeNodes()
 {
 	for (unsigned int i = 0 ; i < lev_nodes.size() ; i++)
-		delete lev_nodes[i];
+		UtilFree((void *) lev_nodes[i]);
 
 	lev_nodes.clear();
 }
@@ -872,7 +871,7 @@ void FreeNodes()
 void FreeWallTips()
 {
 	for (unsigned int i = 0 ; i < lev_walltips.size() ; i++)
-		delete lev_walltips[i];
+		UtilFree((void *) lev_walltips[i]);
 
 	lev_walltips.clear();
 }
@@ -1071,10 +1070,6 @@ void PutSegs(void)
 
 		seg_t *seg = lev_segs[i];
 
-		// ignore minisegs and degenerate segs
-		if (seg->linedef < 0 || seg->is_degenerate)
-			continue;
-
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
 		raw.angle   = LE_U16(VanillaSegAngle(seg));
@@ -1095,9 +1090,8 @@ void PutSegs(void)
 #   endif
 	}
 
-	if (count != num_complete_seg)
-		BugError("PutSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+	if (count != num_segs)
+		BugError("PutSegs miscounted (%d != %d)\n", count, num_segs);
 
 	if (count > 65534)
 	{
@@ -1121,10 +1115,6 @@ void PutGLSegs(void)
 		raw_gl_seg_t raw;
 
 		seg_t *seg = lev_segs[i];
-
-		// ignore degenerate segs
-		if (seg->is_degenerate)
-			continue;
 
 		raw.start = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
@@ -1152,9 +1142,8 @@ void PutGLSegs(void)
 #   endif
 	}
 
-	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+	if (count != num_segs)
+		BugError("PutGLSegs miscounted (%d != %d)\n", count, num_segs);
 
 	if (count > 65534)
 		BugError("PutGLSegs with %d (> 65534) segs\n", count);
@@ -1175,10 +1164,6 @@ void PutGLSegs_V5()
 		raw_v5_seg_t raw;
 
 		seg_t *seg = lev_segs[i];
-
-		// ignore degenerate segs
-		if (seg->is_degenerate)
-			continue;
 
 		raw.start = LE_U32(VertexIndex_V5(seg->start));
 		raw.end   = LE_U32(VertexIndex_V5(seg->end));
@@ -1207,9 +1192,8 @@ void PutGLSegs_V5()
 #   endif
 	}
 
-	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+	if (count != num_segs)
+		BugError("PutGLSegs miscounted (%d != %d)\n", count, num_segs);
 }
 
 
@@ -1469,13 +1453,18 @@ void SortSegs()
 {
 	// do a sanity check
 	for (int i = 0 ; i < num_segs ; i++)
-	{
 		if (lev_segs[i]->index < 0)
 			BugError("Seg %p never reached a subsector!\n", i);
-	}
 
 	// sort segs into ascending index
 	std::sort(lev_segs.begin(), lev_segs.end(), seg_index_CMP_pred());
+
+	// remove unwanted segs
+	while (lev_segs.size() > 0 && lev_segs.back()->index == SEG_IS_GARBAGE)
+	{
+		UtilFree((void *) lev_segs.back());
+		lev_segs.pop_back();
+	}
 }
 
 
@@ -1513,12 +1502,11 @@ void PutZVertices()
 	}
 
 	if (count != num_new_vert)
-		BugError("PutZVertices miscounted (%d != %d)\n",
-				count, num_new_vert);
+		BugError("PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
 }
 
 
-void PutZSubsecs(bool do_xgl3)
+void PutZSubsecs()
 {
 	int i;
 	int count;
@@ -1541,13 +1529,6 @@ void PutZSubsecs(bool do_xgl3)
 		count = 0;
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
-			// ignore minisegs and degenerate segs in XNOD, keep in XGL3
-			if (! do_xgl3)
-			{
-				if (seg->linedef < 0 || seg->is_degenerate)
-					continue;
-			}
-
 			if (cur_seg_index != seg->index)
 				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
 						i, cur_seg_index, seg->index);
@@ -1560,26 +1541,22 @@ void PutZSubsecs(bool do_xgl3)
 					i, count, sub->seg_count);
 	}
 
-	if (cur_seg_index != num_complete_seg)
+	if (cur_seg_index != num_segs)
 		BugError("PutZSubsecs miscounted segs (%d != %d)\n",
-				cur_seg_index, num_complete_seg);
+				cur_seg_index, num_segs);
 }
 
 
 void PutZSegs()
 {
 	int i, count;
-	u32_t raw_num = LE_U32(num_complete_seg);
+	u32_t raw_num = LE_U32(num_segs);
 
 	ZLibAppendLump(&raw_num, 4);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = lev_segs[i];
-
-		// ignore minisegs and degenerate segs
-		if (seg->linedef < 0 || seg->is_degenerate)
-			continue;
 
 		if (count != seg->index)
 			BugError("PutZSegs: seg index mismatch (%d != %d)\n",
@@ -1601,16 +1578,15 @@ void PutZSegs()
 		count++;
 	}
 
-	if (count != num_complete_seg)
-		BugError("PutZSegs miscounted (%d != %d)\n",
-				count, num_complete_seg);
+	if (count != num_segs)
+		BugError("PutZSegs miscounted (%d != %d)\n", count, num_segs);
 }
 
 
 void PutXGL3Segs()
 {
 	int i, count;
-	u32_t raw_num = LE_U32(num_complete_seg);
+	u32_t raw_num = LE_U32(num_segs);
 
 	ZLibAppendLump(&raw_num, 4);
 
@@ -1641,9 +1617,8 @@ void PutXGL3Segs()
 		count++;
 	}
 
-	if (count != num_complete_seg)
-		BugError("PutXGL3Segs miscounted (%d != %d)\n",
-				count, num_complete_seg);
+	if (count != num_segs)
+		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs);
 }
 
 
@@ -1750,7 +1725,7 @@ static int CalcZDoomNodesSize()
 
 	size += 8 + num_vertices * 8;
 	size += 4 + num_subsecs  * 4;
-	size += 4 + num_complete_seg * 11;
+	size += 4 + num_segs     * 11;
 	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
 
 	if (cur_info->force_compress)
@@ -1785,7 +1760,7 @@ void SaveZDFormat(node_t *root_node)
 	ZLibBeginLump(lump);
 
 	PutZVertices();
-	PutZSubsecs(false /* do_xgl3 */);
+	PutZSubsecs();
 	PutZSegs();
 	PutZNodes(root_node, false /* do_xgl3 */);
 
@@ -1807,7 +1782,7 @@ void SaveXGL3Format(node_t *root_node)
 	ZLibBeginLump(lump);
 
 	PutZVertices();
-	PutZSubsecs(true /* do_xgl3 */);
+	PutZSubsecs();
 	PutXGL3Segs();
 	PutZNodes(root_node, true /* do_xgl3 */);
 
@@ -1827,7 +1802,6 @@ void LoadLevel()
 	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
 
 	num_new_vert = 0;
-	num_complete_seg = 0;
 	num_real_lines = 0;
 
 	GetVertices();
@@ -2052,6 +2026,7 @@ build_result_e SaveLevel(node_t *root_node)
 		// are removed from subsectors.
 		RoundOffBspTree();
 
+		// this also removes minisegs and degenerate segs
 		SortSegs();
 
 		PutVertices("VERTEXES", false);

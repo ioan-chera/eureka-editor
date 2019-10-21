@@ -64,6 +64,9 @@ namespace ajbsp
 #define DIST_EPSILON  (1.0 / 1024.0)
 
 
+static int current_seg_index;
+
+
 typedef struct eval_info_s
 {
 	int cost;
@@ -1610,8 +1613,8 @@ void subsec_t::RenumberSegs()
 
 	for (seg=seg_list ; seg ; seg=seg->next)
 	{
-		seg->index = num_complete_seg;
-		num_complete_seg++;
+		seg->index = current_seg_index;
+		current_seg_index++;
 
 		seg_count++;
 
@@ -1772,7 +1775,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 void ClockwiseBspTree()
 {
-	num_complete_seg = 0;
+	current_seg_index = 0;
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
@@ -1805,30 +1808,29 @@ void subsec_t::Normalise()
 		seg_list = seg->next;
 
 		// only add non-minisegs to new list
-		if (seg->linedef >= 0)
-		{
-			seg->next = NULL;
-
-			if (new_tail)
-				new_tail->next = seg;
-			else
-				new_head = seg;
-
-			new_tail = seg;
-
-			// this updated later
-			seg->index = -1;
-		}
-		else
+		if (seg->linedef < 0)
 		{
 #     if DEBUG_SUBSEC
 			DebugPrintf("Subsec: Removing miniseg %p\n", seg);
 #     endif
 
-			// set index to a really high value, so that SortSegs() will
-			// move all the minisegs to the top of the seg array.
-			seg->index = 1<<24;
+			// this causes SortSegs() to remove the seg
+			seg->index = SEG_IS_GARBAGE;
+			continue;
 		}
+
+		// add it to new list
+		seg->next = NULL;
+
+		if (new_tail)
+			new_tail->next = seg;
+		else
+			new_head = seg;
+
+		new_tail = seg;
+
+		// this updated later
+		seg->index = -1;
 	}
 
 	if (new_head == NULL)
@@ -1842,7 +1844,7 @@ void NormaliseBspTree()
 {
 	// unlinks all minisegs from each subsector
 
-	num_complete_seg = 0;
+	current_seg_index = 0;
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
@@ -1873,6 +1875,7 @@ static void RoundOffVertices()
 
 void subsec_t::RoundOff()
 {
+	// use head + tail to maintain same order of segs
 	seg_t *new_head = NULL;
 	seg_t *new_tail = NULL;
 
@@ -1946,30 +1949,29 @@ void subsec_t::RoundOff()
 		seg = seg_list;
 		seg_list = seg->next;
 
-		if (! seg->is_degenerate)
-		{
-			seg->next = NULL;
-
-			if (new_tail)
-				new_tail->next = seg;
-			else
-				new_head = seg;
-
-			new_tail = seg;
-
-			// this updated later
-			seg->index = -1;
-		}
-		else
+		if (seg->is_degenerate)
 		{
 #     if DEBUG_SUBSEC
 			DebugPrintf("Subsec: Removing degenerate %p\n", seg);
 #     endif
 
-			// set index to a really high value, so that SortSegs() will
-			// move all the minisegs to the top of the seg array.
-			seg->index = 1<<24;
+			// this causes SortSegs() to remove the seg
+			seg->index = SEG_IS_GARBAGE;
+			continue;
 		}
+
+		// add it to new list
+		seg->next = NULL;
+
+		if (new_tail)
+			new_tail->next = seg;
+		else
+			new_head = seg;
+
+		new_tail = seg;
+
+		// this updated later
+		seg->index = -1;
 	}
 
 	if (new_head == NULL)
@@ -1981,7 +1983,7 @@ void subsec_t::RoundOff()
 
 void RoundOffBspTree()
 {
-	num_complete_seg = 0;
+	current_seg_index = 0;
 
 	RoundOffVertices();
 
