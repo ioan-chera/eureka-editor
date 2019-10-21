@@ -2217,7 +2217,7 @@ void CMD_Quantize()
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	BA_Begin();

@@ -154,6 +154,8 @@ void ConvertSelection(selection_c * src, selection_c * dest);
 int Selection_FirstLine(selection_c *list);
 
 void Selection_Clear(bool no_save = false);
+void Selection_Add(Objid& obj);
+void Selection_Toggle(Objid& obj);
 void Selection_Push();
 void Selection_InvalidateLast();
 

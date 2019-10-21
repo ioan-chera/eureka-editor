@@ -255,7 +255,7 @@ void CMD_SEC_Merge(void)
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() < 2)

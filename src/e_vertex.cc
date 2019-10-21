@@ -267,7 +267,7 @@ void CMD_VT_Merge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() < 2)
@@ -481,7 +481,7 @@ void CMD_VT_Disconnect(void)
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	bool seen_one = false;
@@ -589,7 +589,7 @@ void CMD_LIN_Disconnect(void)
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 		unselect = true;
 	}
 
@@ -799,7 +799,7 @@ void CMD_SEC_Disconnect(void)
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 		unselect = true;
 	}
 

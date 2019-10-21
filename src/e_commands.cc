@@ -101,10 +101,7 @@ void CMD_Select()
 		return;
 	}
 
-	int obj_num = edit.highlight.num;
-
-	edit.Selected->toggle(obj_num);
-
+	Selection_Toggle(edit.highlight);
 	RedrawMap();
 }
 

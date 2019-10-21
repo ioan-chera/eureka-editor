@@ -3047,7 +3047,7 @@ void CMD_ApplyTag()
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 		unselect = true;
 	}
 

@@ -975,6 +975,31 @@ void Selection_Clear(bool no_save)
 }
 
 
+void Selection_Add(Objid& obj)
+{
+	// validate the mode is correct
+	if (obj.type != edit.mode)
+		return;
+
+	if (obj.parts == 0)
+		edit.Selected->set(obj.num);
+	else
+		edit.Selected->set_ext(obj.num, (byte)obj.parts);
+}
+
+
+void Selection_Toggle(Objid& obj)
+{
+	if (obj.type != edit.mode)
+		return;
+
+	if (edit.Selected->get(obj.num))
+		edit.Selected->clear(obj.num);
+	else
+		Selection_Add(obj);
+}
+
+
 void Selection_Validate()
 {
 	int num_obj = NumObjects(edit.mode);
