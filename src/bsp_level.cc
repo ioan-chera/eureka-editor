@@ -1628,6 +1628,10 @@ void PutXGL3Segs()
 			u32_t line = LE_U32(seg->linedef);
 			u8_t  side = seg->side;
 
+# if DEBUG_BSP
+			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
+# endif
+
 			ZLibAppendLump(&v1,      4);
 			ZLibAppendLump(&partner, 4);
 			ZLibAppendLump(&line,    4);
@@ -2085,10 +2089,10 @@ build_result_e SaveUDMF(node_t *root_node)
 	// remove any existing ZNODES lump
 	edit_wad->RemoveZNodes(lev_current_idx);
 
-	SortSegs();
-
 	if (num_real_lines >= 0)
 	{
+		SortSegs();
+
 		SaveXGL3Format(root_node);
 	}
 

@@ -32,9 +32,6 @@ namespace ajbsp
 #define DEBUG_POLYOBJ    0
 
 
-#define DEBUGGING_FILE  "gb_debug.txt"
-
-
 #define SYS_MSG_BUFLEN  4000
 
 static char message_buf[SYS_MSG_BUFLEN];
@@ -617,6 +614,9 @@ void DetectOverlappingLines(void)
 static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 		int open_left, int open_right)
 {
+	if (vert->overlap)
+		vert = vert->overlap;
+
 	walltip_t *tip = NewWallTip();
 	walltip_t *after;
 
@@ -704,8 +704,20 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	num_new_vert++;
 
 	// compute wall-tip info
-	VertexAddWallTip(vert, -seg->pdx, -seg->pdy, true, true);
-	VertexAddWallTip(vert,  seg->pdx,  seg->pdy, true, true);
+	if (seg->linedef < 0 || LineDefs[seg->linedef]->TwoSided())
+	{
+		VertexAddWallTip(vert, -seg->pdx, -seg->pdy, true, true);
+		VertexAddWallTip(vert,  seg->pdx,  seg->pdy, true, true);
+	}
+	else
+	{
+		const LineDef *L = LineDefs[seg->linedef];
+
+		bool front_open = ((seg->side ? L->left : L->right) >= 0);
+
+		VertexAddWallTip(vert, -seg->pdx, -seg->pdy, front_open, !front_open);
+		VertexAddWallTip(vert,  seg->pdx,  seg->pdy, !front_open, front_open);
+	}
 
 	return vert;
 }
@@ -753,6 +765,9 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 bool VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {
+	if (vert->overlap)
+		vert = vert->overlap;
+
 	walltip_t *tip;
 
 	angle_g angle = UtilComputeAngle(dx, dy);
