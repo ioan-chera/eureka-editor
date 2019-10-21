@@ -187,6 +187,9 @@ public:
 	// for sprites: a copy of the thinginfo flags
 	int side;
 
+	// the linedef index
+	int ld_index;
+
 	// lighting for wall, adjusted for N/S and E/W walls
 	int wall_light;
 
@@ -483,8 +486,7 @@ public:
 	int query_sx;
 	int query_sy;
 
-	DrawWall *query_wall;  // the hit wall
-	int       query_part;  // the part of the hit wall (PART_RT_XXX)
+	Objid query_result;
 
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
@@ -763,9 +765,10 @@ public:
 
 		dw->th = -1;
 		dw->ld = ld;
+		dw->ld_index = ld_index;
+
 		dw->sd = sd;
 		dw->sec = sd->SecRef();
-
 		dw->side = side;
 
 		dw->wall_light = dw->sec->light;
@@ -862,6 +865,7 @@ public:
 		DrawWall *dw = new DrawWall;
 
 		dw->th  = th_index;
+		dw->ld_index = -1;
 		dw->ld  = NULL;
 		dw->sd  = NULL;
 		dw->sec = NULL;
@@ -1252,7 +1256,7 @@ public:
 		}
 	}
 
-	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, int part)
+	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, obj_type_e what, int part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1283,8 +1287,10 @@ public:
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
-				query_wall = dw;
-				query_part = part;
+				if (what == OBJ_LINEDEFS)
+					query_result = Objid(what, dw->ld_index, part);
+				else if (dw->sd != NULL)
+					query_result = Objid(what, dw->sd->sector, part);
 			}
 			return;
 		}
@@ -1326,13 +1332,10 @@ public:
 
 		if (query_mode)
 		{
-#if 0  // FIXME !!!
 			if (y1 <= query_sy && query_sy <= y2)
 			{
-				query_wall = dw;
-				query_part = OB3D_Thing;
+				query_result = Objid(OBJ_THINGS, dw->th);
 			}
-#endif
 			return;
 		}
 
@@ -1650,11 +1653,11 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, PART_CEIL);
-				RenderWallSurface(dw, dw->floor, x, PART_FLOOR);
+				RenderWallSurface(dw, dw->ceil,  x, OBJ_SECTORS, PART_CEIL);
+				RenderWallSurface(dw, dw->floor, x, OBJ_SECTORS, PART_FLOOR);
 
-				RenderWallSurface(dw, dw->upper, x, PART_RT_UPPER);
-				RenderWallSurface(dw, dw->lower, x, PART_RT_LOWER);
+				RenderWallSurface(dw, dw->upper, x, OBJ_LINEDEFS, PART_RT_UPPER);
+				RenderWallSurface(dw, dw->lower, x, OBJ_LINEDEFS, PART_RT_LOWER);
 
 				if (open_y1 > open_y2)
 					break;
@@ -1717,9 +1720,9 @@ public:
 	void Query(int qx, int qy)
 	{
 		query_mode = 1;
-		query_wall = NULL;
 		query_sx = qx;
 		query_sy = qy;
+		query_result.clear();
 
 		Render();
 
@@ -1809,42 +1812,14 @@ bool SW_QueryPoint(Objid& hl, int qx, int qy)
 	// this runs the renderer, but *no* drawing is done
 	rend.Query(qx, qy);
 
-	if (! rend.query_wall)
+	if (! rend.query_result.valid())
 	{
 		// nothing was hit
 		return false;
 	}
 
-#if 0  // FIXME !!!
-
-	hl.type = rend.query_part;
-
-	if (hl.type == OB3D_Thing)
-	{
-		hl.num = rend.query_wall->th;
-	}
-	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
-	{
-		// ouch -- fix?
-		for (int n = 0 ; n < NumSectors ; n++)
-			if (rend.query_wall->sec == Sectors[n])
-				hl.num = n;
-	}
-	else
-	{
-		hl.side = rend.query_wall->side;
-
-		// ouch -- fix?
-		for (int n = 0 ; n < NumLineDefs ; n++)
-			if (rend.query_wall->ld == LineDefs[n])
-				hl.num = n;
-	}
-
-	return hl.valid();
-
-#else
-	return false;
-#endif
+	hl = rend.query_result;
+	return true;
 }
 
 //--- editor settings ---
